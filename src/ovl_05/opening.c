@@ -4645,7 +4645,7 @@ void LoadOpeningLogo(void) {
  * the letter loops GCC works out the texel offset before stepping the display
  * list pointer, where the original steps it first, and in the falling letters'
  * loop it derives f_LogoLetters' address from another table's instead of
- * loading it. 206 words differ.
+ * loading it. 198 words differ.
  */
 #ifdef NON_MATCHING
 void DrawOpeningLogo(Gfx** displayListHead, Boolean isDrawn) {
@@ -4657,6 +4657,7 @@ void DrawOpeningLogo(Gfx** displayListHead, Boolean isDrawn) {
   s32 clubStripIndex;
   s32 j;
   Radians angle;
+  Radians orbitAngle;
   f32 wobble;
 
   switch (f_LogoFadeStage) {
@@ -5088,15 +5089,15 @@ void DrawOpeningLogo(Gfx** displayListHead, Boolean isDrawn) {
   }
 
   if (f_LogoState == LOGO_CLUB_CIRCLING) {
-    angle = f_LogoClubOrbitAngle * DEGREES_TO_RADIANS;
+    orbitAngle = f_LogoClubOrbitAngle * DEGREES_TO_RADIANS;
     sinf(f_LogoClubUnusedAngle * DEGREES_TO_RADIANS);
     wobble =
         -sinf(f_LogoClubWobbleAngle * DEGREES_TO_RADIANS) * LOGO_CLUB_WOBBLE;
     f_LogoClubPosition[AXIS_X] =
-        (s32)(-cosf(angle) * (f_LogoClubOrbitRadius + wobble)) +
+        (s32)(-cosf(orbitAngle) * (f_LogoClubOrbitRadius + wobble)) +
         LOGO_CLUB_ORBIT_CENTER_X;
     f_LogoClubPosition[AXIS_Y] =
-        (s32)(-sinf(angle) * (f_LogoClubOrbitRadius + wobble)) +
+        (s32)(-sinf(orbitAngle) * (f_LogoClubOrbitRadius + wobble)) +
         LOGO_CLUB_ORBIT_CENTER_Y;
     f_LogoClubOrbitRadius -= LOGO_CLUB_ORBIT_RADIUS_STEP;
     f_LogoClubOrbitAngle += LOGO_CLUB_ORBIT_ANGLE_STEP;
