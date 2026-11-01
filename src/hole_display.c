@@ -1920,7 +1920,7 @@ void DrawSky(
  * Draws the sky and, below it, the course's backdrop in strips that follow the
  * camera's yaw and pitch
  *
- * Doesn't match: 147 words differ.
+ * Doesn't match: 143 words differ.
  */
 #ifdef NON_MATCHING
 void DrawBackdrop(Gfx** displayListHead, CameraView* view, s32 cameraIndex) {
@@ -2009,15 +2009,15 @@ void DrawBackdrop(Gfx** displayListHead, CameraView* view, s32 cameraIndex) {
 
       if (row < f_BackdropStripCount - 1) {
         imageRow = row;
-        texelByte = (f_BackdropImageWidth * row * f_BackdropStripHeight) +
-            (LARGE_PALETTE_COLOR_COUNT * PALETTE_COLOR_SIZE);
-        texelWord = texelByte / 2;
+        texelWord = ((f_BackdropImageWidth * row * f_BackdropStripHeight) +
+                        (LARGE_PALETTE_COLOR_COUNT * PALETTE_COLOR_SIZE)) /
+            2;
       } else {
-        texelByte = (f_BackdropImageWidth * (f_BackdropStripCount - 1) *
-                        f_BackdropStripHeight) +
-            (LARGE_PALETTE_COLOR_COUNT * PALETTE_COLOR_SIZE);
         imageRow = f_BackdropStripCount - 1;
-        texelWord = texelByte / 2;
+        texelWord = ((f_BackdropImageWidth * (f_BackdropStripCount - 1) *
+                         f_BackdropStripHeight) +
+                        (LARGE_PALETTE_COLOR_COUNT * PALETTE_COLOR_SIZE)) /
+            2;
       }
 
       if (!isNibbleImage) {
@@ -2101,6 +2101,7 @@ void DrawBackdrop(Gfx** displayListHead, CameraView* view, s32 cameraIndex) {
         continue;
       }
 
+      /* Kept in a byte local, unlike the first strip loop's, to match */
       if (row < f_BackdropStripCount - 1) {
         imageRow = row;
         texelByte = (f_BackdropImageWidth * row * f_BackdropStripHeight) +
