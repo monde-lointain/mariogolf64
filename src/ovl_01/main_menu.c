@@ -4623,6 +4623,14 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", DrawMenuTitleScreen);
  * rival as a spinning silhouette */
 #define NO_RIVAL (-1)
 #define RIVAL_SLOT 1
+/* A lone player and the rival they can win */
+#define PLAYER_AND_RIVAL_COUNT 2
+/* Whether a character to win was found, as NO_RIVAL is negative */
+#define IsRivalFound(rival) ((rival) >= 0)
+/* Whether SLOT holds the rival, standing beside a lone player */
+#define IsRivalSlot(characterCount, rival, slot) \
+  ((((characterCount) == PLAYER_AND_RIVAL_COUNT) & IsRivalFound(rival)) && \
+      ((slot) == RIVAL_SLOT))
 #define RIVAL_SPIN_STEP 10.0f
 
 /* DrawWavingToad draws a frame of the waving Toad (assets 0x710 onward), 48x51
@@ -5367,16 +5375,17 @@ void DrawMenuCharacters(Gfx** displayListHead) {
     }
   }
 
-  characterCount += (rival >= 0);
+  characterCount += IsRivalFound(rival);
   switch (characterCount) {
     case 1:
       f_MenuCharacterScales[0] = MENU_CHARACTER_SOLO_SCALE;
       break;
     case 2:
-      f_MenuCharacterScales[0] =
-          (rival >= 0) ? MENU_CHARACTER_SOLO_SCALE : MENU_CHARACTER_PAIR_SCALE;
+      f_MenuCharacterScales[0] = IsRivalFound(rival)
+          ? MENU_CHARACTER_SOLO_SCALE
+          : MENU_CHARACTER_PAIR_SCALE;
       f_MenuCharacterScales[1] =
-          (rival >= 0) ? MENU_RIVAL_SCALE : MENU_CHARACTER_PAIR_SCALE;
+          IsRivalFound(rival) ? MENU_RIVAL_SCALE : MENU_CHARACTER_PAIR_SCALE;
       break;
     case 3:
     case 4:
@@ -5416,7 +5425,7 @@ void DrawMenuCharacters(Gfx** displayListHead) {
       }
     }
 
-    if ((characterCount == 2) & (rival >= 0) && slot == RIVAL_SLOT) {
+    if (IsRivalSlot(characterCount, rival, slot)) {
       character = rival;
       palette = 1;
     } else {
@@ -5432,19 +5441,19 @@ void DrawMenuCharacters(Gfx** displayListHead) {
         g_IsMenuCharacterLoaded[slot] = TRUE;
         SetCharacterAnimation(slot, MENU_ANIMATION_STANDING);
         SetAnimationSpeed(slot, 1.0f);
-        if ((characterCount == 2) & (rival >= 0) && slot == RIVAL_SLOT) {
+        if (IsRivalSlot(characterCount, rival, slot)) {
           SetCharacterLighting(RIVAL_SLOT, CHARACTER_LIGHTING_BLACK);
         }
       }
     }
 
-    if (rival >= 0) {
+    if (IsRivalFound(rival)) {
       layout = 0;
     } else {
       layout = characterCount - 1;
     }
 
-    if ((characterCount == 2) & (rival >= 0) && slot == RIVAL_SLOT) {
+    if (IsRivalSlot(characterCount, rival, slot)) {
       f_RivalSpinYaw -= RIVAL_SPIN_STEP;
       f_CharacterYaw = f_RivalSpinYaw;
     } else {
