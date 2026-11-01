@@ -1881,7 +1881,7 @@ void SetResultsBanner(s32 state, s32 kind) {
  * Draws the banner of a round's result, and the trophy above a top three
  * tournament place
  *
- * Doesn't match: 49 words differ.
+ * Doesn't match: 36 words differ.
  */
 #ifdef NON_MATCHING
 void DrawResultsBanner(Gfx** displayListHead) {
@@ -2103,8 +2103,8 @@ void DrawResultsBanner(Gfx** displayListHead) {
             QuarterPixels(top + TROPHY_BOTTOM),
             QuarterPixels(TROPHY_CENTER_X + f_BannerX +
                 (f_TrophySizes[course][TROPHY_WIDTH] / 2)),
-            QuarterPixels(f_TrophySizes[course][TROPHY_PART_HEIGHTS + i] +
-                TROPHY_BOTTOM + top),
+            QuarterPixels(f_TrophySizes[course][TROPHY_PART_HEIGHTS + i] + top +
+                TROPHY_BOTTOM),
             G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
         top += f_TrophySizes[course][TROPHY_PART_HEIGHTS + i];
       }
