@@ -802,10 +802,9 @@ void UpdateBetSettings(void) {
  * by slide, and the banner and chosen bet's name moved down by slide (or up,
  * when isSlideReversed is set). Once the screen has settled it types the
  * chosen bet's explanation
- */
-/*
+ *
  * Doesn't match: the original keeps its g_BetSet loads in other registers
- * and schedules the stake marks' coordinates differently. 229 words differ.
+ * and schedules the stake marks' coordinates differently. 208 words differ.
  */
 #ifdef NON_MATCHING
 void DrawBetSettings(
@@ -819,7 +818,6 @@ void DrawBetSettings(
   s16 markGrowth;
   s32 markRaise;
   s16 bannerShift;
-  s32 columnX;
   u8* icon;
 
   gDPPipeSync(gfx++);
@@ -919,11 +917,13 @@ void DrawBetSettings(
 
       IN_OWN_BLOCK(gDPPipeSync(gfx++));
 
-      columnX = f_BetSetColumnXs[g_BetSet - 1][i] + slide + STAKE_MARK_OFFSET_X;
-      gSPScisTextureRectangle(gfx++, QuarterPixels(columnX - (markGrowth >> 1)),
+      gSPScisTextureRectangle(gfx++,
+          QuarterPixels(f_BetSetColumnXs[g_BetSet - 1][i] + slide +
+              STAKE_MARK_OFFSET_X - (markGrowth >> 1)),
           QuarterPixels((STAKE_MARK_BOTTOM - STAKE_MARK_SIZE) - markGrowth -
               markRaise - (stakeLevel * STAKE_MARK_SPACING)),
-          QuarterPixels(columnX + ((markGrowth >> 1) + STAKE_MARK_SIZE)),
+          QuarterPixels(f_BetSetColumnXs[g_BetSet - 1][i] + slide +
+              STAKE_MARK_OFFSET_X + ((markGrowth >> 1) + STAKE_MARK_SIZE)),
           QuarterPixels(STAKE_MARK_BOTTOM - markRaise -
               (stakeLevel * STAKE_MARK_SPACING)),
           G_TX_RENDERTILE, 0, 0,
