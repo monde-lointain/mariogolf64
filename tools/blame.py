@@ -212,7 +212,7 @@ def map_insn_lines(dump: str, noted_dump: str) -> dict[int, str]:
     the insns are paired by their order. Each takes the last line note
     before it.
     """
-    uids = [int(uid) for uid in INSN_HEADER_RE.findall(dump)]
+    uids = [int(match.group(1)) for match in INSN_HEADER_RE.finditer(dump)]
     noted = list(INSN_HEADER_RE.finditer(noted_dump))
     if len(uids) != len(noted):
         return {}
@@ -232,7 +232,7 @@ def map_insn_lines(dump: str, noted_dump: str) -> dict[int, str]:
 
 
 def read_insn_lines(
-    c_path: str, optflags: list[str], dumps: dict[str, str], work: Path, function: str
+    optflags: list[str], dumps: dict[str, str], work: Path, function: str
 ) -> dict[str, dict[int, str]]:
     """Return {pass: {insn UID: source line}} for the insns of DUMPS."""
     noted_work = work / "noted"
@@ -272,7 +272,7 @@ def compile_function(c_path: str, function: str, work: Path) -> Compilation:
         read_word_lines(lines, routine, start, ends),
         routine,
         dumps,
-        read_insn_lines(c_path, optflags, dumps, work, function),
+        read_insn_lines(optflags, dumps, work, function),
     )
 
 
