@@ -9,7 +9,7 @@ target-version = "py310"
 include = ["tools/*.py"]
 # progress_map.py is a copy of a tool kept elsewhere, changed only in its
 # settings
-extend-exclude = ["tools/asm-differ", "tools/progress_map.py"]
+extend-exclude = ["tools/progress_map.py"]
 
 [tool.ruff.lint]
 select = ["ALL"]
@@ -37,7 +37,7 @@ known-first-party = ["fncompare"]
 
 [tool.basedpyright]
 include = ["tools"]
-exclude = ["tools/asm-differ", "tools/progress_map.py", "**/__pycache__"]
+exclude = ["tools/progress_map.py", "**/__pycache__"]
 pythonVersion = "3.10"
 typeCheckingMode = "all"
 venvPath = "."
@@ -48,6 +48,6 @@ extraPaths = ["tools"]
 
 [tool.vulture]
 paths = ["tools"]
-exclude = ["tools/asm-differ/", "tools/progress_map.py"]
+exclude = ["tools/progress_map.py"]
 min_confidence = 60
 sort_by_size = true

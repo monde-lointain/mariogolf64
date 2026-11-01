@@ -3,12 +3,7 @@ spimdisasm>=1.42.4
 rabbitizer
 ipl3checksum
 mapfile-parser
-# m2c and diff.py dependencies
-pycparser
-colorama
-watchdog
-levenshtein
-cxxfilt
+# fncompare.py and progress_report.py
 pyelftools
 # decode_asset.py
 pillow
