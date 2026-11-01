@@ -457,9 +457,10 @@ void ResetGolfBalls(void) {
  * of the hole, places the current player's ball from the ball simulations,
  * and moves and fades the ball's afterimage.
  *
- * Doesn't match: 224 words differ. The original reads g_GameState's fields
- * through one base register, and its first loop steps its pointers with
- * other offsets and registers.
+ * Doesn't match: 98 words differ. In the first loop the original steps the
+ * ball pointer from the table's start rather than from the marker field and
+ * branches the other way on the marker test, and registers differ through the
+ * rest.
  */
 #ifdef NON_MATCHING
 void UpdateGolfBalls(void) {
@@ -484,8 +485,8 @@ void UpdateGolfBalls(void) {
     currentIndex = 0;
   }
 
-  for (i = 0, player = g_Players, ball = f_GolfBalls;
-      i < g_GameState.playerCount; i++, player++, ball++) {
+  for (i = 0, ball = f_GolfBalls; i < g_GameState.playerCount; i++, ball++) {
+    player = &g_Players[i];
     if (player->holeStatus != HOLE_STATUS_PLAYING || player->strokeCount == 0) {
       ball->alpha = BALL_HIDDEN;
     }
@@ -581,8 +582,8 @@ void UpdateGolfBalls(void) {
     if (g_IsCupViewShown == TRUE) {
       if (!f_IsBallAfterimageZoomed) {
         f_IsBallAfterimageZoomed = TRUE;
-        for (i = 0, afterimage = f_BallAfterimages; i != f_BallAfterimageLength;
-            i++, afterimage++) {
+        for (i = 0; i != f_BallAfterimageLength; i++) {
+          afterimage = &f_BallAfterimages[i];
           if (afterimage->alpha != AFTERIMAGE_UNUSED) {
             s32 coursePosition[3] UNUSED;
 
@@ -600,8 +601,8 @@ void UpdateGolfBalls(void) {
       }
     } else if (f_IsBallAfterimageZoomed == TRUE) {
       f_IsBallAfterimageZoomed = FALSE;
-      for (i = 0, afterimage = f_BallAfterimages; i != f_BallAfterimageLength;
-          i++, afterimage++) {
+      for (i = 0; i != f_BallAfterimageLength; i++) {
+        afterimage = &f_BallAfterimages[i];
         if (afterimage->alpha != AFTERIMAGE_UNUSED) {
           afterimage->position[AXIS_X] -=
               (afterimage->position[AXIS_X] -
@@ -655,10 +656,9 @@ void UpdateGolfBalls(void) {
         }
       }
 
-      for (i = 0, afterimage = f_BallAfterimages; i != f_BallAfterimageLength;
-          i++, afterimage++) {
-        if (afterimage->alpha > 0) {
-          afterimage->alpha -= AFTERIMAGE_FAST_FADE;
+      for (i = 0; i != f_BallAfterimageLength; i++) {
+        if (f_BallAfterimages[i].alpha > 0) {
+          f_BallAfterimages[i].alpha -= AFTERIMAGE_FAST_FADE;
         }
       }
     } else {
