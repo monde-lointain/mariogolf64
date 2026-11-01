@@ -4193,12 +4193,17 @@ void LoadOpeningBurst(void) {
 /*
  * Draws a yellow burst for a few frames, stretched over the burst's corners.
  *
- * The original divides for the texture's steps at run time, where this folds
- * them into constants. GCC keeps such a division when the size is set the
- * same way in both arms of an if, which CSE cannot see through but
- * cross-jumping later merges, so the original likely chose the size by some
- * condition. Placing such an if here keeps the divisions, but its arms spill
- * the size differently and are not merged.
+ * Doesn't match: the original divides for the texture's steps at run time,
+ * dividing 0x8000 by 28 and 26 loaded as constants, where this folds them
+ * into constants. Here cse doesn't yet know the corners when it meets the
+ * divisions, and cse2 folds them; the original's divisions survive cse2,
+ * though its corners are folded into the rectangle's words. The scheduler
+ * then starts the long divisions first and spills every command's address
+ * ahead of them, so almost every word moves. GCC keeps such a division when
+ * the size is set the same way in both arms of an if, which cse cannot see
+ * through but cross-jumping later merges, so the original likely chose the
+ * size by some condition. Placing such an if here keeps the divisions, but
+ * its arms spill the size differently and are not merged. 395 words differ.
  */
 #ifdef NON_MATCHING
 void DrawOpeningBurst(Gfx** displayListHead) {
