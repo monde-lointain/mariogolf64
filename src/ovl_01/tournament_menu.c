@@ -545,7 +545,7 @@ void GetSaveDataAndMenuMemory(void) {
 
 /*
  * Doesn't match: GCC gives the four halves other registers and spills one to
- * the stack, where the original keeps them all in saved registers. 89 words
+ * the stack, where the original keeps them all in saved registers. 81 words
  * differ.
  */
 #ifdef NON_MATCHING
@@ -625,8 +625,8 @@ void DrawYesNoWindow(Gfx** displayListHead, s32 width, s32 height, s32 centerX,
   halfHeight = windowHalfHeight;
   buttonHalfWidth = (s32)buttonWidth / 2;
   buttonHalfHeight = (s32)buttonHeight / 2;
-  buttonY = (buttonY <= 0) ? 1 : buttonY;
   halfHeight = (halfHeight <= 0) ? 1 : halfHeight;
+  buttonY = (buttonY <= 0) ? 1 : buttonY;
   IN_OWN_BLOCK(buttonHalfWidth = (buttonHalfWidth <= 0) ? 1 : buttonHalfWidth);
   buttonHalfHeight = (buttonHalfHeight <= 0) ? 1 : buttonHalfHeight;
   windowWidth = (windowWidth <= 0.0f) ? 1.0f : windowWidth;
