@@ -8,7 +8,8 @@ a branch or jump to its routine's own instructions must land on the paired
 instruction, and a relocated field (a %hi or %lo half, or a call's target)
 must take the value the matching build's linker gives it. A field's value is
 known when the matching build's ELF names its symbol once; one whose symbol
-it doesn't name, such as a compiler's anonymous constant, compares equal.
+it doesn't name, such as a compiler's anonymous constant, compares equal. A
+field whose value can't be an address is compared as the constant it is.
 
     fncompare.py [-v] ASM_FILE C_FILE [FUNCTION ...]
 
@@ -18,11 +19,13 @@ function: its name, its score (the fraction of equal instructions) and either
 OK for an exact match or the count of differing instructions, on either side,
 which still moves when a change is too small to show in the score. With -v,
 also prints the instructions that differ, with each branch's destination as
-@INDEX.
+@INDEX, and the calls one side makes more often than the other, which always
+mean the sources differ.
 """
 
 import atexit
 import bisect
+import collections
 import difflib
 import functools
 import itertools
@@ -827,6 +830,43 @@ def disassemble(routine: Routine, index: int) -> str:
     return f"{operands.rstrip(', ')} @{destination}"
 
 
+@functools.cache
+def read_symbol_names() -> dict[int, str]:
+    """Return {address: name} of the symbols the matching build names once."""
+    return {address: name for name, address in read_linked_symbols().items()}
+
+
+def count_calls(routine: Routine) -> collections.Counter[str]:
+    """Return how many times ROUTINE calls each function, by name.
+
+    A call whose callee the matching build doesn't name once isn't counted,
+    as an object's call to it can't be resolved.
+    """
+    calls: collections.Counter[str] = collections.Counter()
+    for word, reference in zip(routine.words, routine.references, strict=True):
+        if word >> OPCODE_SHIFT != JAL_OPCODE or reference is None:
+            continue
+        name = read_symbol_names().get(reference * WORD_SIZE | K0BASE)
+        if name is not None:
+            calls[name] += 1
+    return calls
+
+
+def print_call_differences(target: Routine, compiled: Routine) -> None:
+    """Print the calls one routine makes more often than the other.
+
+    A missing or extra call is always a difference in the source, where
+    differing words may only be the compiler's choices.
+    """
+    target_calls, compiled_calls = count_calls(target), count_calls(compiled)
+    for sign, calls in (
+        ("-", target_calls - compiled_calls),
+        ("+", compiled_calls - target_calls),
+    ):
+        for name, count in sorted(calls.items()):
+            print(f"  {sign}call {name} x{count}")
+
+
 def print_diff(target: Routine, compiled: Routine) -> None:
     """Print the first few runs of instructions that differ."""
     pairing = pair_words(target, compiled)
@@ -853,6 +893,7 @@ def print_diff(target: Routine, compiled: Routine) -> None:
         print("  --")
     if len(runs) > MAX_DIFF_HUNKS:
         print(f"  ({len(runs) - MAX_DIFF_HUNKS} more)")
+    print_call_differences(target, compiled)
 
 
 def main() -> None:
