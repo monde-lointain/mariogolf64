@@ -1191,7 +1191,8 @@ void DrawTargetPole(CameraMatrices* matrices, Gfx** displayListHead);
 /*
  * Returns the frame count, which the caller ignores
  *
- * Doesn't match: 53 words differ.
+ * Doesn't match: the original keeps the far plane's dead clamp to the
+ * short far plane, where GCC deletes it. 55 words differ.
  */
 #ifdef NON_MATCHING
 s32 DrawGame(void) {
@@ -1600,13 +1601,12 @@ s32 DrawGame(void) {
               nearZ = -CLOSE_UP_NEAR_CLIP;
             }
 
-            /* Only chooses between two fixed planes; the computed distance
-             * itself is dropped */
-            if (farClip >= SHORT_FAR_CLIP) {
-              farClip = COURSE_FAR_CLIP;
-            } else {
+            /* The clamp is dead: the far plane is always the course's */
+            if (farClip < SHORT_FAR_CLIP) {
               farClip = SHORT_FAR_CLIP;
             }
+
+            farClip = COURSE_FAR_CLIP;
 
             guPerspectiveF(matrices->perspectiveF, &perspNorm,
                 g_Cameras[viewIndex].view.fieldOfView, SCREEN_ASPECT_RATIO,
