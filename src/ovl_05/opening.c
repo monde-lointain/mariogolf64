@@ -4284,8 +4284,8 @@ void LoadOpeningShotBall(void) {
  * away, the ball is instead a dot that fades with distance.
  *
  * Doesn't match: some pairs of spilled display list pointers swap stack
- * slots, and the near branch works out its corners in another order, with
- * one more instruction. 89 words differ.
+ * slots, and each pointer is stored before it is stepped, where the
+ * original steps it first. 64 words differ.
  */
 #ifdef NON_MATCHING
 void DrawOpeningShotBall(Gfx** displayListHead) {
@@ -4297,6 +4297,7 @@ void DrawOpeningShotBall(Gfx** displayListHead) {
   s32 top;
   s32 right;
   s32 bottom;
+  s32 stripHeight;
 
   if (f_ShotBallScale != 0) {
     f_ShotBallPosition[AXIS_X] =
@@ -4409,10 +4410,10 @@ void DrawOpeningShotBall(Gfx** displayListHead) {
           f_ShotBallAlpha = SHOT_BALL_OPAQUE_ALPHA;
           left = ballPoint.x - ShotBallHalfWidth();
           right = ballPoint.x + ShotBallHalfWidth();
+          stripHeight = ShotBallHalfWidth();
           top = ballPoint.y -
-              ((SHOT_BALL_STRIP_COUNT - stripIndex) * ShotBallHalfWidth());
-          bottom = ballPoint.y + (stripIndex * ShotBallHalfWidth()) -
-              ShotBallHalfWidth();
+              ((SHOT_BALL_STRIP_COUNT - stripIndex) * stripHeight);
+          bottom = ballPoint.y + (stripIndex * stripHeight) - stripHeight;
         }
 
         gSPTextureRectangle(gfx++, QuarterPixels(left), QuarterPixels(top),
