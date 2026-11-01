@@ -2118,7 +2118,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard_drawing", DrawLeaderboardPage);
  * loops add the column's offset to x after adding the cells' left edge, where
  * this adds it first, and the target keeps the address of
  * g_GameState.holeSelection in a saved register while it draws the faces.
- * 1034 words differ.
+ * 938 words differ.
  */
 #ifdef NON_MATCHING
 void DrawScoresPage(Gfx** displayListHead) {
@@ -2145,6 +2145,7 @@ void DrawScoresPage(Gfx** displayListHead) {
   s32 colorIndex;
   s32 overPar;
   s32 extraTop;
+  s32 overTop;
   s32 secondRow;
   s32 i;
   s32 cellRowIndex;
@@ -2931,11 +2932,11 @@ void DrawScoresPage(Gfx** displayListHead) {
               g_PrintBuffer);
         }
 
-        extraTop = PUTTS_TOP;
+        overTop = PUTTS_TOP;
         if (isPuttsShown) {
           if (g_Players[i].holes[hole].putts == UNCOUNTED_PUTTS) {
             sprintf(g_PrintBuffer, "%c", NO_SCORE_CODE);
-            extraTop += PLAYER_ROW_SPACING;
+            overTop += PLAYER_ROW_SPACING;
             if (hole < HOLES_PER_NINE) {
               DrawShadowedText(&gfx,
                   g_Scorecard.x + (hole * CELL_WIDTH) + PUTTS_LEFT,
@@ -2952,13 +2953,13 @@ void DrawScoresPage(Gfx** displayListHead) {
             sprintf(g_PrintBuffer, f_TwoDigitFormat,
                 g_Players[i].holes[hole].putts);
             if (hole < HOLES_PER_NINE) {
-              extraTop += PLAYER_ROW_SPACING;
+              overTop += PLAYER_ROW_SPACING;
               DrawCenteredNarrowText(&gfx,
                   g_Scorecard.x + (hole * CELL_WIDTH) + PUTTS_LEFT,
                   frontTop + (i * rowSpacing) + PUTTS_TOP + g_Scorecard.y,
                   g_PrintBuffer);
             } else {
-              extraTop += PLAYER_ROW_SPACING;
+              overTop += PLAYER_ROW_SPACING;
               DrawCenteredNarrowText(&gfx,
                   g_Scorecard.x + ((hole - HOLES_PER_NINE) * CELL_WIDTH) +
                       PUTTS_LEFT,
@@ -2980,13 +2981,13 @@ void DrawScoresPage(Gfx** displayListHead) {
           if (hole < HOLES_PER_NINE) {
             DrawCenteredNarrowText(&gfx,
                 g_Scorecard.x + (hole * CELL_WIDTH) + OVER_LEFT,
-                frontTop + extraTop + (i * rowSpacing) + g_Scorecard.y,
+                frontTop + overTop + (i * rowSpacing) + g_Scorecard.y,
                 g_PrintBuffer);
           } else {
             DrawCenteredNarrowText(&gfx,
                 g_Scorecard.x + ((hole - HOLES_PER_NINE) * CELL_WIDTH) +
                     OVER_LEFT,
-                backTop + (i * rowSpacing) + extraTop + g_Scorecard.y,
+                backTop + (i * rowSpacing) + overTop + g_Scorecard.y,
                 g_PrintBuffer);
           }
         }
