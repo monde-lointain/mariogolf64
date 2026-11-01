@@ -1592,9 +1592,12 @@ void DrawOffLabel(Gfx** displayListHead, s32 x, s32 y) {
  * Draws the green left and right arrows either side of a width centered on a
  * point, switching their blink frame every SIDE_ARROW_BLINK_FRAME_COUNT calls
  *
- * Doesn't match: the original spills displayListHead to its argument slot,
- * keeps the arrow top in a register only for the lower edge, and needs one
- * stack slot fewer. 288 words differ.
+ * Doesn't match: the original reloads displayListHead from its stack slot
+ * at once, keeps blinkFrame in a temporary register and works out the
+ * arrows' top inside the loop, where this keeps both in saved registers, so
+ * most registers differ. Holding the top in a local brings 288 differing
+ * words down to 264; computing it in the loop gives 288 to 298. 264 words
+ * differ.
  */
 #ifdef NON_MATCHING
 void DrawBlinkingSideArrows(Gfx** displayListHead, void* image, s32* blinkFrame,
@@ -1603,6 +1606,7 @@ void DrawBlinkingSideArrows(Gfx** displayListHead, void* image, s32* blinkFrame,
   s32 left = 0;
   s32 arrowIndex;
   s32 frameOffset;
+  s32 top = centerY - (GREEN_ARROW_SIZE / 2);
 
   (*blinkTimer)++;
   if (*blinkTimer == SIDE_ARROW_BLINK_FRAME_COUNT) {
@@ -1631,8 +1635,7 @@ void DrawBlinkingSideArrows(Gfx** displayListHead, void* image, s32* blinkFrame,
       left = centerX - (width / 2) - GREEN_ARROW_SIZE;
     }
 
-    gSPScisTextureRectangle(gfx++, QuarterPixels(left),
-        QuarterPixels(centerY - (GREEN_ARROW_SIZE / 2)),
+    gSPScisTextureRectangle(gfx++, QuarterPixels(left), QuarterPixels(top),
         QuarterPixels(left + GREEN_ARROW_SIZE),
         QuarterPixels(centerY + (GREEN_ARROW_SIZE / 2)), G_TX_RENDERTILE, 0, 0,
         TEXEL_STEP_ONE, TEXEL_STEP_ONE);
