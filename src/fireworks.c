@@ -215,10 +215,7 @@ INCLUDE_ASM("asm/nonmatchings/fireworks", LaunchFirework);
 /*
  * Moves the active fireworks' particles and draws each as a triangle along its
  * path
- *
- * Doesn't match: 42 words differ.
  */
-#ifdef NON_MATCHING
 void UpdateAndDrawFireworks(Gfx** displayListHead) {
   Gfx* gfx;
   s32 unused[12] UNUSED; /* The original frame has room for this */
@@ -229,10 +226,10 @@ void UpdateAndDrawFireworks(Gfx** displayListHead) {
   s32 index;
   FireworkParticle* particle;
   FireworkParticle* drawnParticle;
-  f32 speed;
   f32 directionX;
   f32 directionY;
   f32 inverseSpeed;
+  /* The particle's speed, until it scales into its trail's length, to match */
   f32 length;
   f32 tailScale;
   s32 timer;
@@ -286,25 +283,25 @@ void UpdateAndDrawFireworks(Gfx** displayListHead) {
             particle->life -= 4;
           }
 
-          speed = sqrtf((particle->velocityX * particle->velocityX) +
+          length = sqrtf((particle->velocityX * particle->velocityX) +
               (particle->velocityY * particle->velocityY));
-          if (speed != 0.0f) {
-            inverseSpeed = 1.0f / speed;
+          if (length != 0.0f) {
+            inverseSpeed = 1.0f / length;
             directionX = particle->velocityX * inverseSpeed;
             directionY = particle->velocityY * inverseSpeed;
           } else {
             directionX = 0.0f;
             directionY = 0.1f;
-            speed = 0.5f;
+            length = 0.5f;
           }
 
           trailTimer = f_Fireworks[index].timer;
           if (trailTimer < 8) {
-            length = speed * 0.5f * trailTimer;
+            length *= 0.5f * trailTimer;
           } else if (trailTimer > 64) {
             length = ((trailTimer - 64) * 0.04f) + 1.0f;
           } else {
-            length = speed * (4.0f - ((trailTimer - 8) * 0.5f));
+            length *= 4.0f - ((trailTimer - 8) * 0.5f);
           }
 
           if (length < 1.0f) {
@@ -354,10 +351,10 @@ void UpdateAndDrawFireworks(Gfx** displayListHead) {
   for (index = 0; index != f_FireworkCount; index++) {
     if (f_Fireworks[index].isActive == TRUE) {
       fadeTimer = f_Fireworks[index].timer;
-      alpha = 0xFF;
-
       /* Fades out from frame 40, flickering on odd frames */
-      if (fadeTimer >= 40) {
+      if (fadeTimer < 40) {
+        alpha = 0xFF;
+      } else {
         alpha = 0xFF - ((fadeTimer - 40) * 8);
         if (fadeTimer & 1) {
           alpha += 0x18;
@@ -391,6 +388,3 @@ void UpdateAndDrawFireworks(Gfx** displayListHead) {
   *displayListHead = gfx;
 }
 
-#else
-INCLUDE_ASM("asm/nonmatchings/fireworks", UpdateAndDrawFireworks);
-#endif
