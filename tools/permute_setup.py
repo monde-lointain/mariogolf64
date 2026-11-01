@@ -24,7 +24,8 @@ import subprocess
 import sys
 from collections.abc import Callable
 from pathlib import Path
-from typing import cast
+from types import ModuleType
+from typing import Protocol, cast
 
 import fncompare
 
@@ -66,6 +67,17 @@ PreprocessWithMacros = Callable[
     [list[str], str, tuple[re.Pattern[str], Callable[[str], str]]],
     tuple[str, list[str]],
 ]
+
+# The importer's prune_source, given the source, whether to prune it, and the
+# function to keep. Returns the source and a compilable copy of it.
+PruneSource = Callable[[str, bool, str], tuple[str, str | None]]
+
+
+class Scorer(Protocol):
+    """The permuter's scorer: score gives an object's score and a hash."""
+
+    score: Callable[[str], tuple[int, str]]
+
 
 # The display-list macros, kept as calls so that the permuter changes their
 # arguments and not their expansions. Its changes within an expansion only
@@ -114,12 +126,8 @@ def preprocess(c_path: str, *options: str) -> str:
     ).stdout
 
 
-def preprocess_keeping_display_list_macros(c_path: str) -> str:
-    """Return C_PATH preprocessed, with the display-list macros kept as calls.
-
-    The permuter's importer does this, declaring each macro for its parser and
-    putting the definitions back in a latedefine block before compiling.
-    """
+def load_importer() -> ModuleType:
+    """Load the permuter's importer, putting the permuter's modules in reach."""
     # The importer is a script named import.py, which no import statement names
     sys.path.insert(0, str(PERMUTER_DIR))
     importer_path = PERMUTER_DIR / "import.py"
@@ -129,6 +137,16 @@ def preprocess_keeping_display_list_macros(c_path: str) -> str:
         raise ImportError(message)
     importer = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(importer)
+    return importer
+
+
+def preprocess_keeping_display_list_macros(c_path: str) -> str:
+    """Return C_PATH preprocessed, with the display-list macros kept as calls.
+
+    The permuter's importer does this, declaring each macro for its parser and
+    putting the definitions back in a latedefine block before compiling.
+    """
+    importer = load_importer()
     preprocess_with_macros = cast(
         PreprocessWithMacros,  # noqa: TC006 - unquoted, so vulture sees it used
         importer.preprocess_c_with_macros,
@@ -235,6 +253,68 @@ def write_base(c_path: str, function: str, base_path: Path) -> None:
     _ = base_path.write_text(base)
 
 
+def score_base(source: str, out_dir: Path, scorers: list[Scorer]) -> list[int] | None:
+    """Score SOURCE as base.c in OUT_DIR, or give None if it doesn't compile."""
+    ast_util = importlib.import_module("src.ast_util")
+    process_pragmas = cast("Callable[[str], str]", ast_util.process_pragmas)
+    source_path = out_dir / "prune_check.c"
+    object_path = out_dir / "prune_check.o"
+    _ = source_path.write_text(process_pragmas(source))
+    compiled = subprocess.run(
+        [str(out_dir / "compile.sh"), str(source_path), "-o", str(object_path)],
+        capture_output=True,
+        check=False,
+    )
+    source_path.unlink()
+    if compiled.returncode != 0:
+        return None
+    scores = [scorer.score(str(object_path))[0] for scorer in scorers]
+    object_path.unlink()
+    return scores
+
+
+def prune_base(out_dir: Path, function: str) -> None:
+    """Drop the declarations FUNCTION doesn't use from OUT_DIR/base.c.
+
+    The compiler takes 10-12 ms per candidate to read them. The pruned file
+    puts static data at other offsets in its sections, which the target names
+    by symbol instead, so it is kept only when it scores the same, with and
+    without stack differences.
+    """
+    importer = load_importer()
+    prune_source = cast(
+        PruneSource,  # noqa: TC006 - unquoted, so vulture sees it used
+        importer.prune_source,
+    )
+    new_scorer = cast(
+        Callable[..., Scorer],  # noqa: TC006 - as above
+        importlib.import_module("src.scorer").Scorer,
+    )
+    scorers = [
+        new_scorer(
+            str(out_dir / "target.o"),
+            stack_differences=stack_differences,
+            algorithm="levenshtein",
+            debug_mode=False,
+            ign_branch_targets=False,
+            objdump_command=str(out_dir / "objdump.sh"),
+        )
+        for stack_differences in (False, True)
+    ]
+    base_path = out_dir / "base.c"
+    source = base_path.read_text()
+    should_prune = True
+    with contextlib.redirect_stdout(sys.stderr):
+        pruned, _compilable = prune_source(source, should_prune, function)
+    if pruned == source:
+        return
+    pruned_scores = score_base(pruned, out_dir, scorers)
+    if pruned_scores is None or pruned_scores != score_base(source, out_dir, scorers):
+        print(f"{function}: pruning changes the score; base.c is kept whole")
+        return
+    _ = base_path.write_text(pruned)
+
+
 def find_nested_functions(base_path: Path, asm_path: str) -> list[str]:
     """List the nested functions in BASE_PATH that ASM_PATH's directory holds."""
     names = [
@@ -297,6 +377,7 @@ def main() -> None:
     objdump_sh = out_dir / "objdump.sh"
     _ = objdump_sh.write_text(OBJDUMP_SH.format(names=" ".join([*nested, function])))
     objdump_sh.chmod(SCRIPT_MODE)
+    prune_base(out_dir, function)
     objdump = str(objdump_sh.resolve())
     settings = (
         f'func_name = "{function}"\ncompiler_type = "gcc"\n'
