@@ -1669,7 +1669,7 @@ typedef struct GridScreenPoint {
     } \
   }
 
-/* Doesn't match: 411 words differ. */
+/* Doesn't match: 389 words differ. */
 void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
   f32 points[GREEN_GRID_POINT_COUNT][3];
   GridScreenPoint screenPoints[GREEN_GRID_POINT_COUNT];
@@ -1934,14 +1934,14 @@ void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
           continue;
         }
 
-        if (!(column & 1)) {
-          neighbor = point + 1;
-          dy = screenPoints[point].y - screenPoints[neighbor].y;
-          dx = screenPoints[point].x - screenPoints[neighbor].x;
-        } else {
+        if (column & 1) {
           neighbor = point - 1;
-          dy = screenPoints[point].y - screenPoints[neighbor].y;
           dx = screenPoints[point].x - screenPoints[neighbor].x;
+          dy = screenPoints[point].y - screenPoints[neighbor].y;
+        } else {
+          neighbor = point + 1;
+          dx = screenPoints[point].x - screenPoints[neighbor].x;
+          dy = screenPoints[point].y - screenPoints[neighbor].y;
         }
 
         if (dx == 0.0f && dy == 0.0f) {
