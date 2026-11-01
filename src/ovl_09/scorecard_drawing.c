@@ -2118,7 +2118,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard_drawing", DrawLeaderboardPage);
  * loops add the column's offset to x after adding the cells' left edge, where
  * this adds it first, and the target keeps the address of
  * g_GameState.holeSelection in a saved register while it draws the faces.
- * 1069 words differ.
+ * 1066 words differ.
  */
 #ifdef NON_MATCHING
 void DrawScoresPage(Gfx** displayListHead) {
@@ -2945,13 +2945,14 @@ void DrawScoresPage(Gfx** displayListHead) {
           } else {
             sprintf(g_PrintBuffer, f_TwoDigitFormat,
                 g_Players[i].holes[hole].putts);
-            extraTop += PLAYER_ROW_SPACING;
             if (hole < HOLES_PER_NINE) {
+              extraTop += PLAYER_ROW_SPACING;
               DrawCenteredNarrowText(&gfx,
                   g_Scorecard.x + (hole * CELL_WIDTH) + PUTTS_LEFT,
                   frontTop + (i * rowSpacing) + PUTTS_TOP + g_Scorecard.y,
                   g_PrintBuffer);
             } else {
+              extraTop += PLAYER_ROW_SPACING;
               DrawCenteredNarrowText(&gfx,
                   g_Scorecard.x + ((hole - HOLES_PER_NINE) * CELL_WIDTH) +
                       PUTTS_LEFT,
