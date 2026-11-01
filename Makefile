@@ -1,7 +1,6 @@
 # Mario Golf (North America) matching decompilation
 
 TARGET      := mariogolf64
-BASEROM     := baserom.us.z64
 SPLAT_YAML  := $(TARGET).yaml
 SPLAT_DIR   := build/splat
 SPLAT_LD    := $(SPLAT_DIR)/$(TARGET).ld
@@ -125,8 +124,6 @@ MAP         := $(BUILD_DIR)/$(TARGET).map
 AS          := $(CROSS)as
 LD          := $(CROSS)ld
 OBJCOPY     := $(CROSS)objcopy
-OBJDUMP     := $(CROSS)objdump
-CPP         := $(CROSS)cpp
 PYTHON      := .venv/bin/python3
 
 INCLUDES    := -Iinclude -Iinclude/libc -Ilib/ultralib/include -Ilib/ultralib/include/PR -Ilib/libmus/include -Isrc -I$(BUILD_DIR)
