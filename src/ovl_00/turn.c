@@ -2098,7 +2098,7 @@ void BuildShotPreview(ShotLaunch* swing, s32 playerState) {
  * Draws the shot preview that BuildShotPreview built. On the pause screen it is
  * instead a straight line on screen, from the ball to the preview's last point.
  *
- * Doesn't match: 73 words differ.
+ * Doesn't match: 52 words differ.
  */
 #ifdef NON_MATCHING
 void DrawShotPreview(CameraMatrices* matrices) {
@@ -2200,12 +2200,13 @@ void DrawShotPreview(CameraMatrices* matrices) {
   } else {
     s32 step;
 
-    gDPPipeSync(g_DisplayListHead++);
     if (g_LetterboxState == LETTERBOX_STATE_NONE ||
         g_LetterboxState == LETTERBOX_STATE_UNK5) {
+      gDPPipeSync(g_DisplayListHead++);
       gDPSetRenderMode(
           g_DisplayListHead++, G_RM_ZB_CLD_SURF, G_RM_ZB_CLD_SURF2);
     } else {
+      gDPPipeSync(g_DisplayListHead++);
       gDPSetRenderMode(
           g_DisplayListHead++, G_RM_AA_ZB_XLU_SURF, G_RM_AA_ZB_XLU_SURF2);
     }
