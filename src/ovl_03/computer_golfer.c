@@ -2226,7 +2226,7 @@ INCLUDE_RODATA("asm/nonmatchings/ovl_03/computer_golfer", f_SimFaultText);
  * Doesn't match: ours gives some values other saved registers than the
  * original does, and it keeps the address of f_Shot.ballPosition's z in a saved
  * register across the atan2 calls, where the original loads it again.
- * 203 words differ.
+ * 175 words differ.
  */
 #ifdef NON_MATCHING
 s32 StepTrialShot(void) {
@@ -2237,7 +2237,6 @@ s32 StepTrialShot(void) {
   s32 stepFlags;
   s32 velocityY;
   s32 bounceCount;
-  s32 targetMiss;
   s32 heightMiss;
   SurfaceInfo* surfaceInfo;
   s32 targetRating;
@@ -2324,11 +2323,13 @@ s32 StepTrialShot(void) {
       }
 
       if (f_IsPutting) {
-        targetMiss = IntLength2D(
+        s32 rollingMiss;
+
+        rollingMiss = IntLength2D(
             f_TrialSimulation.position[AXIS_X] - f_PlanTarget[AXIS_X],
             f_TrialSimulation.position[AXIS_Z] - f_PlanTarget[AXIS_Z]);
-        if (targetMiss < f_ClosestTargetDistance) {
-          f_ClosestTargetDistance = targetMiss;
+        if (rollingMiss < f_ClosestTargetDistance) {
+          f_ClosestTargetDistance = rollingMiss;
           f_TrialEndPoint[AXIS_X] = f_TrialSimulation.position[AXIS_X];
           f_TrialEndPoint[AXIS_Y] = f_TrialSimulation.position[AXIS_Y];
           f_TrialEndPoint[AXIS_Z] = f_TrialSimulation.position[AXIS_Z];
@@ -2362,6 +2363,8 @@ s32 StepTrialShot(void) {
   }
 
   if (!f_TrialSimulation.state) {
+    s32 targetMiss;
+
     IntLength2D(g_HoleSetup.cupPosition[AXIS_X] - f_TrialEndPoint[AXIS_X],
         g_HoleSetup.cupPosition[AXIS_Z] - f_TrialEndPoint[AXIS_Z]);
     targetMiss = IntLength2D(f_PlanTarget[AXIS_X] - f_TrialEndPoint[AXIS_X],
