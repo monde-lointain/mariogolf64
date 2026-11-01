@@ -5329,18 +5329,18 @@ void DrawScaledModeIcon(
 }
 
 /*
- * Doesn't match: the original keeps the layout of the positions in $a0, where
- * this uses $a1. 8 words differ.
+ * Draws the chosen characters on the menu, fidgeting now and then. A lone
+ * player who can win a character stands beside that rival, drawn as a
+ * spinning silhouette.
  */
-#ifdef NON_MATCHING
 void DrawMenuCharacters(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   s32 rival = NO_RIVAL;
   MenuMemory* memory;
   s32 characterCount;
   s32 row;
-  /* Also the layout of the positions, to match */
   s32 column;
+  s32 layout;
   CharacterId character;
   s32 palette;
   s32 raise;
@@ -5438,9 +5438,10 @@ void DrawMenuCharacters(Gfx** displayListHead) {
       }
     }
 
-    column = 0;
-    if (rival < 0) {
-      column = characterCount - 1;
+    if (rival >= 0) {
+      layout = 0;
+    } else {
+      layout = characterCount - 1;
     }
 
     if ((characterCount == 2) & (rival >= 0) && slot == RIVAL_SLOT) {
@@ -5453,10 +5454,10 @@ void DrawMenuCharacters(Gfx** displayListHead) {
     rotation[AXIS_X] = DegreesToRadians(f_CharacterPitch);
     rotation[AXIS_Y] = DegreesToRadians(f_CharacterYaw);
     rotation[AXIS_Z] = 0.0f;
-    translation[AXIS_X] = f_MenuCharacterPositions[column][slot][0];
+    translation[AXIS_X] = f_MenuCharacterPositions[layout][slot][0];
     raise = (character == CHARACTER_BABY_MARIO) ? BABY_MARIO_RAISE : 0;
-    translation[AXIS_Y] = f_MenuCharacterPositions[column][slot][1] + raise;
-    translation[AXIS_Z] = f_MenuCharacterPositions[column][slot][2];
+    translation[AXIS_Y] = f_MenuCharacterPositions[layout][slot][1] + raise;
+    translation[AXIS_Z] = f_MenuCharacterPositions[layout][slot][2];
     scale[AXIS_X] = f_MenuCharacterScales[slot];
     scale[AXIS_Y] = f_MenuCharacterScales[slot];
     scale[AXIS_Z] = f_MenuCharacterScales[slot];
@@ -5480,9 +5481,6 @@ void DrawMenuCharacters(Gfx** displayListHead) {
     AnimateCharacter(slot);
   }
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", DrawMenuCharacters);
-#endif
 
 /*
  * A debug character viewer. START hides the board and turns on the controls:
