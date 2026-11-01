@@ -2247,7 +2247,7 @@ INCLUDE_ASM("asm/nonmatchings/collision", FindHoleTriangleHit);
  * passes an end of it is moved back to where it reaches the end. A hit
  * near or below the ground counts whatever the edges say.
  *
- * Doesn't match: 688 words differ.
+ * Doesn't match: 682 words differ.
  */
 #ifdef NON_MATCHING
 s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
@@ -2265,9 +2265,6 @@ s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
   s32 highestZ;
   s32 hitIndex;
   s32 i;
-  s32 deltaX;
-  s32 deltaY;
-  s32 deltaZ;
   f32 nearestFraction;
   f32 startSide;
   f32 endSide;
@@ -2330,9 +2327,6 @@ s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
   }
 
   nearestFraction = NO_PLANE_HIT_FRACTION;
-  deltaX = endX - startX;
-  deltaZ = endZ - startZ;
-  deltaY = endY - startY;
   hitIndex = NO_HOLE_TRIANGLE;
   for (i = 0; i < HOLE_TRIANGLE_COUNT; i++) {
     HoleTriangle* candidate = &g_WorkArea.hole.triangles[i];
@@ -2404,8 +2398,8 @@ s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
 
     if (facing == TRIANGLE_FACING_Z) {
       /* The wall spans x and y */
-      hitPointU = (deltaX * hitFraction) + startX;
-      hitPointV = (deltaY * hitFraction) + startY;
+      hitPointU = ((endX - startX) * hitFraction) + startX;
+      hitPointV = ((endY - startY) * hitFraction) + startY;
       if (triangle.corners[AXIS_X][0] == triangle.corners[AXIS_X][1] &&
           triangle.corners[AXIS_X][0] != triangle.corners[AXIS_X][2]) {
         endFraction = 0.0f;
@@ -2439,13 +2433,15 @@ s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
         }
 
         if ((hitFraction >= 0.0f) & (hitFraction < endFraction)) {
-          if (fabsf(GetPlaneSide(plane, (deltaX * endFraction) + startX,
-                  (deltaY * endFraction) + startY,
-                  (deltaZ * endFraction) + startZ)) < WALL_END_DISTANCE) {
+          if (fabsf(
+                  GetPlaneSide(plane, ((endX - startX) * endFraction) + startX,
+                      ((endY - startY) * endFraction) + startY,
+                      ((endZ - startZ) * endFraction) + startZ)) <
+              WALL_END_DISTANCE) {
             osSyncPrintf("X Adjust Logic %f,%f\n", hitFraction, endFraction);
             hitFraction = endFraction;
-            hitPointU = (deltaX * endFraction) + startX;
-            hitPointV = (deltaY * endFraction) + startY;
+            hitPointU = ((endX - startX) * endFraction) + startX;
+            hitPointV = ((endY - startY) * endFraction) + startY;
             osSyncPrintf("x0[%f]x1[%f]x2[%f] y0[%f]y1[%f]y2[%f]\n",
                 cornersU[0] * WORLD_TO_COURSE_SCALE,
                 cornersU[1] * WORLD_TO_COURSE_SCALE,
@@ -2498,13 +2494,15 @@ s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
         }
 
         if ((hitFraction >= 0.0f) & (hitFraction < endFraction)) {
-          if (fabsf(GetPlaneSide(plane, (deltaX * endFraction) + startX,
-                  (deltaY * endFraction) + startY,
-                  (deltaZ * endFraction) + startZ)) < WALL_END_DISTANCE) {
+          if (fabsf(
+                  GetPlaneSide(plane, ((endX - startX) * endFraction) + startX,
+                      ((endY - startY) * endFraction) + startY,
+                      ((endZ - startZ) * endFraction) + startZ)) <
+              WALL_END_DISTANCE) {
             osSyncPrintf("X Adjust Logic %f,%f\n", hitFraction, endFraction);
             hitFraction = endFraction;
-            hitPointU = (deltaX * endFraction) + startX;
-            hitPointV = (deltaY * endFraction) + startY;
+            hitPointU = ((endX - startX) * endFraction) + startX;
+            hitPointV = ((endY - startY) * endFraction) + startY;
             osSyncPrintf("x0[%f]x1[%f]x2[%f] y0[%f]y1[%f]y2[%f]\n",
                 cornersU[0] * WORLD_TO_COURSE_SCALE,
                 cornersU[1] * WORLD_TO_COURSE_SCALE,
@@ -2567,8 +2565,8 @@ s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
       }
     } else if (facing == TRIANGLE_FACING_X) {
       /* The wall spans y and z */
-      hitPointU = (deltaY * hitFraction) + startY;
-      hitPointV = (deltaZ * hitFraction) + startZ;
+      hitPointU = ((endY - startY) * hitFraction) + startY;
+      hitPointV = ((endZ - startZ) * hitFraction) + startZ;
       if (triangle.corners[AXIS_Z][0] == triangle.corners[AXIS_Z][1] &&
           triangle.corners[AXIS_Z][0] != triangle.corners[AXIS_Z][2]) {
         endFraction = 0.0f;
@@ -2604,13 +2602,15 @@ s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
         }
 
         if ((hitFraction >= 0.0f) & (hitFraction < endFraction)) {
-          if (fabsf(GetPlaneSide(plane, (deltaX * endFraction) + startX,
-                  (deltaY * endFraction) + startY,
-                  (deltaZ * endFraction) + startZ)) < WALL_END_DISTANCE) {
+          if (fabsf(
+                  GetPlaneSide(plane, ((endX - startX) * endFraction) + startX,
+                      ((endY - startY) * endFraction) + startY,
+                      ((endZ - startZ) * endFraction) + startZ)) <
+              WALL_END_DISTANCE) {
             osSyncPrintf("Z Adjust Logic %f,%f\n", hitFraction, endFraction);
             hitFraction = endFraction;
-            hitPointU = (deltaY * endFraction) + startY;
-            hitPointV = (deltaZ * endFraction) + startZ;
+            hitPointU = ((endY - startY) * endFraction) + startY;
+            hitPointV = ((endZ - startZ) * endFraction) + startZ;
             if (nearestFraction < hitFraction) {
               continue;
             }
@@ -2655,13 +2655,15 @@ s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
         }
 
         if ((hitFraction >= 0.0f) & (hitFraction < endFraction)) {
-          if (fabsf(GetPlaneSide(plane, (deltaX * endFraction) + startX,
-                  (deltaY * endFraction) + startY,
-                  (deltaZ * endFraction) + startZ)) < WALL_END_DISTANCE) {
+          if (fabsf(
+                  GetPlaneSide(plane, ((endX - startX) * endFraction) + startX,
+                      ((endY - startY) * endFraction) + startY,
+                      ((endZ - startZ) * endFraction) + startZ)) <
+              WALL_END_DISTANCE) {
             osSyncPrintf("Z Adjust Logic %f,%f\n", hitFraction, endFraction);
             hitFraction = endFraction;
-            hitPointU = (deltaY * endFraction) + startY;
-            hitPointV = (deltaZ * endFraction) + startZ;
+            hitPointU = ((endY - startY) * endFraction) + startY;
+            hitPointV = ((endZ - startZ) * endFraction) + startZ;
             if (nearestFraction < hitFraction) {
               continue;
             }
@@ -2712,14 +2714,14 @@ s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
         continue;
       }
     } else {
-      hitPointU = (deltaX * hitFraction) + startX;
-      hitPointV = (deltaZ * hitFraction) + startZ;
+      hitPointU = ((endX - startX) * hitFraction) + startX;
+      hitPointV = ((endZ - startZ) * hitFraction) + startZ;
     }
 
     /* A hit near or below the ground is taken whatever the edges say */
-    if (GetGroundHeight(
-            (deltaX * hitFraction) + startX, (deltaZ * hitFraction) + startZ) <
-        (s32)((deltaY * hitFraction) + startY) + WALL_HEIGHT_SLACK) {
+    if (GetGroundHeight(((endX - startX) * hitFraction) + startX,
+            ((endZ - startZ) * hitFraction) + startZ) <
+        (s32)(((endY - startY) * hitFraction) + startY) + WALL_HEIGHT_SLACK) {
       nearestFraction = hitFraction;
       if (hitIndex != i) {
         osSyncPrintf("New Logic attemped!!!!! ratio %f\n", nearestFraction);
