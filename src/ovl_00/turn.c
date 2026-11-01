@@ -1690,20 +1690,12 @@ Boolean HasPlanTime(s32 timeBudget UNUSED) {
 
 s32 MarkUsableClubs(s32 unused, s16* clubs, s8* isUsable);
 
-void PickStartingClub(HoleSetup* hole);
-
 /*
  * Picks the club and the shot mode that the shot starts with. On a green, it is
  * the putter, in the shortest putt mode that reaches the cup. Elsewhere, it is
  * the club whose normal shot comes nearest the cup, out of those with a good
  * enough lie, and preferring those that reach.
- *
- * Doesn't match: GCC fills the green test's delay slot with bestGap's
- * S32_MAX, where the original clears a register, tests the slot loop's
- * entry with slt and beqz where the original uses blez, and makes a frame
- * 8 bytes smaller. 55 words differ.
  */
-#ifdef NON_MATCHING
 void PickStartingClub(HoleSetup* hole) {
   s8 isUsable[CLUB_SLOT_COUNT];
   s32 clubCount;
@@ -1711,7 +1703,6 @@ void PickStartingClub(HoleSetup* hole) {
   s32 slot;
   s32 rating;
   s32 lieRating;
-  s32 minRating = 0;
   Club* club;
 
   g_CurrentShot.clubSlot = 0;
@@ -1748,6 +1739,7 @@ void PickStartingClub(HoleSetup* hole) {
       break;
     }
   } else {
+    s32 minRating = 0;
     s32 bestGap = S32_MAX;
     s32 reaches = FALSE;
     s32 bestSlot = 0;
@@ -1801,9 +1793,6 @@ void PickStartingClub(HoleSetup* hole) {
     g_CurrentShot.clubSlot = bestSlot;
   }
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", PickStartingClub);
-#endif
 
 /* Puts the simulated ball at rest on the player's ball, and shows the player's
  * passed rings again */
