@@ -1833,7 +1833,7 @@ void DrawSavedMiniGolfImage(Gfx** displayListHead);
  *
  * Doesn't match: the original keeps the menu memory pointer on the stack
  * and the mode icons' texel step in a saved register, and doesn't keep
- * the degrees-to-radians factor in a register. 417 words differ.
+ * the degrees-to-radians factor in a register. 411 words differ.
  */
 #ifdef NON_MATCHING
 void DrawSavedGames(Gfx** displayListHead) {
@@ -1850,6 +1850,7 @@ void DrawSavedGames(Gfx** displayListHead) {
   MenuMemory* memory = GetMenuMemory();
   s16 playerCount = save->savedGames[memory->savedGameIndex].state.playerCount;
   s32 index;
+  s32 stripIndex;
   s32 key;
   Radians angle;
   f32 circleX;
@@ -2029,7 +2030,7 @@ void DrawSavedGames(Gfx** displayListHead) {
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
 
   gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_SavedGamesNamePlate)));
-  for (index = 0; index != SAVED_GAME_STRIP_COUNT; index++) {
+  for (stripIndex = 0; stripIndex != SAVED_GAME_STRIP_COUNT; stripIndex++) {
     if (playerCount == 1) {
       stripLeft = SAVED_GAME_STRIP_LEFT;
       stripShownWidth = SAVED_GAME_FEW_PLAYER_STRIP_SHOWN_WIDTH;
@@ -2043,17 +2044,18 @@ void DrawSavedGames(Gfx** displayListHead) {
 
     gDPLoadTextureBlock(gfx++,
         TextureAddress(LargeImageTexels(f_SavedGamesNamePlate) +
-            (index * SAVED_GAME_STRIP_WIDTH * SAVED_GAME_STRIP_HEIGHT)),
+            (stripIndex * SAVED_GAME_STRIP_WIDTH * SAVED_GAME_STRIP_HEIGHT)),
         G_IM_FMT_CI, G_IM_SIZ_8b, SAVED_GAME_STRIP_WIDTH,
         SAVED_GAME_STRIP_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
         G_TX_NOLOD);
     gDPPipeSync(gfx++);
     gSPScisTextureRectangle(gfx++, QuarterPixels(stripLeft),
-        QuarterPixels(SAVED_GAME_STRIP_TOP + (index * SAVED_GAME_STRIP_HEIGHT)),
+        QuarterPixels(
+            SAVED_GAME_STRIP_TOP + (stripIndex * SAVED_GAME_STRIP_HEIGHT)),
         QuarterPixels(stripLeft + stripShownWidth),
         QuarterPixels(SAVED_GAME_STRIP_TOP + SAVED_GAME_STRIP_HEIGHT +
-            (index * SAVED_GAME_STRIP_HEIGHT)),
+            (stripIndex * SAVED_GAME_STRIP_HEIGHT)),
         G_TX_RENDERTILE, 0, 0, (SAVED_GAME_STRIP_WIDTH << 10) / stripShownWidth,
         TEXEL_STEP_ONE);
     gDPPipeSync(gfx++);
