@@ -3878,7 +3878,7 @@ void WriteHexDumpFile(u32* words, s32 byteCount, char* fileName) {
  * GetMidpointVertex and SetEditorCombineMode are nested functions, a GNU C
  * extension.
  *
- * Doesn't match: 2396 words differ.
+ * Doesn't match: 2393 words differ.
  */
 #ifdef NON_MATCHING
 void DrawHoleEditorGround(CameraMatrices* matrices UNUSED, s32 terrainStyle) {
@@ -4656,8 +4656,8 @@ void DrawHoleEditorGround(CameraMatrices* matrices UNUSED, s32 terrainStyle) {
         }
 
         topSlot -= GROUND_TILE_GROUP_SIZE;
-        bottomSlot -= GROUND_TILE_GROUP_SIZE;
         middleSlot -= GROUND_TILE_GROUP_SIZE;
+        bottomSlot -= GROUND_TILE_GROUP_SIZE;
       } else if (groupDetail < GROUND_DETAIL_COARSE) {
         slopeIndex += GROUND_TILE_GROUP_SIZE * TILE_TRIANGLE_COUNT;
         tileIndex += GROUND_TILE_GROUP_SIZE;
