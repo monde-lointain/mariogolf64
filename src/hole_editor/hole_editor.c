@@ -3877,7 +3877,7 @@ void WriteHexDumpFile(u32* words, s32 byteCount, char* fileName) {
  * GetMidpointVertex and SetEditorCombineMode are nested functions, a GNU C
  * extension.
  *
- * Doesn't match: 2555 words differ.
+ * Doesn't match: 2551 words differ.
  */
 #ifdef NON_MATCHING
 void DrawHoleEditorGround(CameraMatrices* matrices UNUSED, s32 terrainStyle) {
@@ -4208,7 +4208,7 @@ void DrawHoleEditorGround(CameraMatrices* matrices UNUSED, s32 terrainStyle) {
   }
 
   slopeIndex = 0;
-  for (column = 0; column < ARRAY_COUNT(snapsEdge); column++) {
+  for (column = 0; column != ARRAY_COUNT(snapsEdge); column++) {
     for (j = 0; j < TILE_VERTEX_SEGMENT_COUNT; j++) {
       snapsEdge[column][j] = FALSE;
     }
@@ -4250,10 +4250,10 @@ void DrawHoleEditorGround(CameraMatrices* matrices UNUSED, s32 terrainStyle) {
       if (groupDetail >= GROUND_DETAIL_FINE) {
         for (k = 0; k < GROUND_TILE_GROUP_SIZE; k++) {
           tileColumn = (half * GROUND_TILE_GROUP_SIZE) + k;
-          midpoints = g_WorkArea.hole.midpoints[g_WorkArea.hole.tiles[tileIndex]
-                  .midpointBlockIndex];
           mirroredS = ((tileColumn * TILE_COORDINATE_SPAN) + MIRROR_S_OFFSET) *
               MIRROR_S_SCALE;
+          midpoints = g_WorkArea.hole.midpoints[g_WorkArea.hole.tiles[tileIndex]
+                  .midpointBlockIndex];
 
           /* The maps tell each tile from its neighbors by color */
           if (IsMapTerrainStyle(terrainStyle)) {
