@@ -1191,7 +1191,7 @@ void DrawTargetPole(CameraMatrices* matrices, Gfx** displayListHead);
 /*
  * Returns the frame count, which the caller ignores
  *
- * Doesn't match: 75 words differ.
+ * Doesn't match: 53 words differ.
  */
 #ifdef NON_MATCHING
 s32 DrawGame(void) {
@@ -1451,13 +1451,12 @@ s32 DrawGame(void) {
           FillScreen();
         }
 
-        lookAtY = g_MapCamera.view.eye[1];
-        lookAtY += 1000.0f;
-        lookAtX = g_MapCamera.view.eye[0] + 10.0f;
-        billboardRise = g_MapCamera.view.eye[2];
+        /* The look-at is set within the call, to match */
         guLookAt(&matrices->viewing, g_MapCamera.view.eye[0],
-            g_MapCamera.view.eye[1], g_MapCamera.view.eye[2], lookAtX, lookAtY,
-            billboardRise, 0.0f, -1.0f, 0.0f);
+            g_MapCamera.view.eye[1], g_MapCamera.view.eye[2],
+            lookAtX = g_MapCamera.view.eye[0] + 10.0f,
+            lookAtY = g_MapCamera.view.eye[1] + 1000.0f,
+            billboardRise = g_MapCamera.view.eye[2], 0.0f, -1.0f, 0.0f);
         guAlign(&matrices->billboard, 0.0f, lookAtX - g_MapCamera.view.eye[0],
             lookAtY - g_MapCamera.view.eye[1],
             billboardRise - g_MapCamera.view.eye[2]);
