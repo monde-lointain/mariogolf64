@@ -4,8 +4,9 @@
     try_variants.py ASM_FILE C_FILE FUNCTION VARIANTS_FILE
 
 VARIANTS_FILE holds blocks separated by lines of "====". Each block is the
-text to replace, a line of "----", and the replacement. Prints the score of
-each variant, so that several guesses cost one compile each.
+text to replace, a line of "----", and the replacement, which is made in
+FUNCTION's definition alone. Prints the score of each variant, so that
+several guesses cost one compile each.
 
 The target assembly is read once, and the variants compile in parallel,
 one process per CPU, since parsing the objects holds the interpreter lock.
@@ -13,6 +14,7 @@ Each compile cuts the file down to the function and its neighbour.
 """
 
 import os
+import re
 import sys
 import tempfile
 from concurrent.futures import Future, ProcessPoolExecutor
@@ -24,6 +26,26 @@ import fncompare
 DEFAULT_JOB_COUNT = "8"
 # How much of a compiler error to show for a variant
 ERROR_TAIL_LENGTH = 300
+# A function definition's closing brace, which alone starts its line
+DEFINITION_END = "\n}\n"
+
+
+def find_definition(source: str, function: str) -> tuple[int, int] | None:
+    """Return where FUNCTION's definition starts and ends in SOURCE.
+
+    Routines that share code, such as the two copies of a loop, can hold the
+    same text, so a variant's replacement is looked for in its function only.
+    """
+    header = re.compile(
+        rf"^[A-Za-z][\w* ]*[ *]{re.escape(function)}\([^;{{]*\) \{{\n", re.MULTILINE
+    )
+    match = header.search(source)
+    if match is None:
+        return None
+    end = source.find(DEFINITION_END, match.end())
+    if end < 0:
+        return None
+    return match.start(), end + len(DEFINITION_END)
 
 
 def score_variant(
@@ -51,6 +73,11 @@ def main() -> None:
     source = Path(c_path).read_text()
     blocks = Path(variants_path).read_text().split("\n====\n")
     target = fncompare.read_target_functions(asm_path)[function]
+    definition = find_definition(source, function)
+    if definition is None:
+        sys.exit(f"{c_path} has no definition of {function}")
+    start, end = definition
+    before, body, after = source[:start], source[start:end], source[end:]
     c_dir = Path(c_path).resolve().parent
     # The variants have their own names, so they take the flags of the file
     # they vary
@@ -61,13 +88,13 @@ def main() -> None:
         results: list[Future[str] | None] = []
         for block in blocks:
             old, new = block.split("\n----\n")
-            if old not in source:
+            if old not in body:
                 results.append(None)
             else:
                 results.append(
                     pool.submit(
                         score_variant,
-                        source.replace(old, new, 1),
+                        before + body.replace(old, new, 1) + after,
                         c_dir,
                         optflags,
                         target,
