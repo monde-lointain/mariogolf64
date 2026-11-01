@@ -2929,7 +2929,7 @@ void ShowHoleOutBanner(s32 playerIndex) {
  * inline: inlined, their buffers share one stack slot, as in the
  * original's frame.
  *
- * Doesn't match: 766 words differ, spread through the routine's states.
+ * Doesn't match: 728 words differ, spread through the routine's states.
  */
 #ifdef NON_MATCHING
 /* Debug flag 0x47: prints where the ball lies, and the second controller moves
@@ -4038,17 +4038,19 @@ void UpdateTurns(void) {
             }
 
             sound = SOUND_IMPACT_OFF_MARK;
+            PlaySound(sound, g_NextSoundChannel, IMPACT_SOUND_VOLUME);
           } else {
             nextState = PLAYER_STATE_SETTING_IMPACT;
             if (f_ShotLaunch.power == MAX_LAUNCH_POWER) {
               StartShotEffect(1);
               sound = SOUND_IMPACT_ON_MARK;
+              PlaySound(sound, g_NextSoundChannel, IMPACT_SOUND_VOLUME);
             } else {
               sound = SOUND_IMPACT_OFF_MARK;
+              PlaySound(sound, g_NextSoundChannel, IMPACT_SOUND_VOLUME);
             }
           }
 
-          PlaySound(sound, g_NextSoundChannel, IMPACT_SOUND_VOLUME);
         } else if (g_CurrentShot.gaugeFrame >= LAST_POWER_GAUGE_FRAME ||
             (f_ShotSource == SHOT_SOURCE_PLAYER &&
                 (g_TurnController.pressedButtons & B_BUTTON))) {
@@ -4665,14 +4667,14 @@ void UpdateTurns(void) {
         ClearShotEffects(CLEAR_KIND_EFFECTS);
         EndFlightCamera();
         if (IsGameFlagSet(GAME_FLAG_SHOW_REACTION_FRAME) && f_HasGutsTestRun) {
-          character = f_GutsTestCharacter;
           palette = 0;
+          LoadCharacter(0, f_GutsTestCharacter + CHARACTER_COUNT, palette);
         } else {
           character = g_Players[playerIndex].characterIndex;
           palette = g_Players[playerIndex].paletteIndex;
+          LoadCharacter(0, character + CHARACTER_COUNT, palette);
         }
 
-        LoadCharacter(0, character + CHARACTER_COUNT, palette);
         SetCharacterLighting(0, 1);
         memset(&g_RoundHud, 0, sizeof(g_RoundHud));
         if (!g_TurnBallSimulation.isHoledOut) {
