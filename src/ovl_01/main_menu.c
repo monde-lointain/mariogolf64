@@ -2236,7 +2236,7 @@ void UpdateAnimationViewer(void) {
  * g_GameState.gameMode in another order, the B button's path loads
  * g_ChosenCharacters and g_CharacterGrid in another order, and the spin's
  * slowing keeps the spin in a register where the original reads it again after
- * the step. 109 words differ.
+ * the step. 87 words differ.
  */
 #ifdef NON_MATCHING
 void UpdateModeSelect(void) {
@@ -2247,6 +2247,7 @@ void UpdateModeSelect(void) {
   s32 step;
   s16 slot;
   s32 mode;
+  s32 chosenIcon;
 
   if (isDone != TRUE || GetWipeKind() != WIPE_NONE) {
     return;
@@ -2560,14 +2561,16 @@ void UpdateModeSelect(void) {
     }
   }
 
-  mode = f_ModeChoiceIcons[g_ChosenPlayerCount - 1][g_MenuMemory.modeChoice];
+  chosenIcon =
+      f_ModeChoiceIcons[g_ChosenPlayerCount - 1][g_MenuMemory.modeChoice];
   for (direction = 0; direction != g_ChosenPlayerCount; direction++) {
     if (g_PlayerControllerIndices[direction] == NO_CONTROLLER_INDEX) {
       break;
     }
   }
 
-  if (((mode == MODE_ICON_CLUB_SLOTS) | (mode == MODE_ICON_MINI_GOLF)) &&
+  if (((chosenIcon == MODE_ICON_CLUB_SLOTS) |
+          (chosenIcon == MODE_ICON_MINI_GOLF)) &&
       direction < g_ChosenPlayerCount) {
     SetTextSlot(MODE_TEXT_X, MODE_TEXT_Y, MESSAGE_MODE_NEEDS_CONTROLLERS,
         TEXT_SLOT_LARGE_FONT, MODE_TEXT_SLOT, TEXT_FLAG_TYPED, 0xFF, 0xFF, 0xFF,
@@ -2578,7 +2581,7 @@ void UpdateModeSelect(void) {
         TEXT_SLOT_LARGE_FONT, MODE_TEXT_SLOT, TEXT_FLAG_TYPED, 0xFF, 0xFF, 0xFF,
         0xFF);
   } else {
-    SetTextSlot(MODE_TEXT_X, MODE_TEXT_Y, mode + MESSAGE_FIRST_MODE,
+    SetTextSlot(MODE_TEXT_X, MODE_TEXT_Y, chosenIcon + MESSAGE_FIRST_MODE,
         TEXT_SLOT_LARGE_FONT, MODE_TEXT_SLOT, TEXT_FLAG_TYPED, 0xFF, 0xFF, 0xFF,
         0xFF);
   }
