@@ -2335,7 +2335,7 @@ const CharacterModel g_OtherCharacterModels[OTHER_CHARACTER_MODEL_COUNT] = {
  *
  * Doesn't match: GCC keeps frame in a saved floating-point register, where
  * the original keeps it in a scratch one, which shifts the other
- * floating-point registers. 254 words differ.
+ * floating-point registers. 230 words differ.
  */
 #ifdef NON_MATCHING
 void AnimateCharacterJoints(u32 slotIndex) {
@@ -2347,7 +2347,6 @@ void AnimateCharacterJoints(u32 slotIndex) {
   f32(*rotationMatrix)[4];
   JointAnimation* joint;
   Mtx* matrix;
-  f32* key;
   f32 frame;
   f32 x;
   f32 y;
@@ -2391,10 +2390,9 @@ void AnimateCharacterJoints(u32 slotIndex) {
       keyIndex = 1;
       if (frame < joint->translationFrames[0]) {
         isInterpolated = FALSE;
-        key = joint->translations[0];
-        x = key[0];
-        y = key[1];
-        z = key[2];
+        x = joint->translations[0][0];
+        y = joint->translations[0][1];
+        z = joint->translations[0][2];
       } else {
         for (; keyIndex < joint->translationKeyCount; keyIndex++) {
           if (frame < joint->translationFrames[keyIndex]) {
@@ -2410,10 +2408,9 @@ void AnimateCharacterJoints(u32 slotIndex) {
         if (keyIndex == joint->translationKeyCount) {
           keyIndex--;
           isInterpolated = FALSE;
-          key = joint->translations[keyIndex];
-          x = key[0];
-          y = key[1];
-          z = key[2];
+          x = joint->translations[keyIndex][0];
+          y = joint->translations[keyIndex][1];
+          z = joint->translations[keyIndex][2];
         }
       }
     }
@@ -2575,10 +2572,9 @@ void AnimateCharacterJoints(u32 slotIndex) {
       keyIndex = 1;
       if (frame < joint->scaleFrames[0]) {
         isInterpolated = FALSE;
-        key = joint->scales[0];
-        x = key[0];
-        y = key[1];
-        z = key[2];
+        x = joint->scales[0][0];
+        y = joint->scales[0][1];
+        z = joint->scales[0][2];
       } else {
         for (; keyIndex < joint->scaleKeyCount; keyIndex++) {
           if (frame < joint->scaleFrames[keyIndex]) {
@@ -2592,10 +2588,9 @@ void AnimateCharacterJoints(u32 slotIndex) {
         if (keyIndex == joint->scaleKeyCount) {
           keyIndex--;
           isInterpolated = FALSE;
-          key = joint->scales[keyIndex];
-          x = key[0];
-          y = key[1];
-          z = key[2];
+          x = joint->scales[keyIndex][0];
+          y = joint->scales[keyIndex][1];
+          z = joint->scales[keyIndex][2];
         }
       }
     }

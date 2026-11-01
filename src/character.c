@@ -1421,7 +1421,7 @@ void AnimateCharacter(u32 slotIndex) {
  *
  * Doesn't match: GCC keeps other values in saved registers across the joint
  * loop. The original keeps the two words of a double constant, where GCC
- * keeps 1.0f and a stack address. 234 words differ.
+ * keeps 1.0f and a stack address. 210 words differ.
  */
 #ifdef NON_MATCHING
 void UpdateJointKeyframeSpans(u32 slotIndex) {
@@ -1432,7 +1432,6 @@ void UpdateJointKeyframeSpans(u32 slotIndex) {
   f32 rotation[4];
   f32(*rotationMatrix)[4];
   JointAnimation* joint;
-  f32* key;
   f32 frame;
   f32 x;
   f32 y;
@@ -1476,10 +1475,9 @@ void UpdateJointKeyframeSpans(u32 slotIndex) {
       keyIndex = 1;
       if (frame < joint->translationFrames[0]) {
         isInterpolated = FALSE;
-        key = joint->translations[0];
-        x = key[0];
-        y = key[1];
-        z = key[2];
+        x = joint->translations[0][0];
+        y = joint->translations[0][1];
+        z = joint->translations[0][2];
       } else {
         for (; keyIndex < joint->translationKeyCount; keyIndex++) {
           if (frame < joint->translationFrames[keyIndex]) {
@@ -1495,10 +1493,9 @@ void UpdateJointKeyframeSpans(u32 slotIndex) {
         if (keyIndex == joint->translationKeyCount) {
           keyIndex--;
           isInterpolated = FALSE;
-          key = joint->translations[keyIndex];
-          x = key[0];
-          y = key[1];
-          z = key[2];
+          x = joint->translations[keyIndex][0];
+          y = joint->translations[keyIndex][1];
+          z = joint->translations[keyIndex][2];
         }
       }
     }
@@ -1660,10 +1657,9 @@ void UpdateJointKeyframeSpans(u32 slotIndex) {
       keyIndex = 1;
       if (frame < joint->scaleFrames[0]) {
         isInterpolated = FALSE;
-        key = joint->scales[0];
-        x = key[0];
-        y = key[1];
-        z = key[2];
+        x = joint->scales[0][0];
+        y = joint->scales[0][1];
+        z = joint->scales[0][2];
       } else {
         for (; keyIndex < joint->scaleKeyCount; keyIndex++) {
           if (frame < joint->scaleFrames[keyIndex]) {
@@ -1677,10 +1673,9 @@ void UpdateJointKeyframeSpans(u32 slotIndex) {
         if (keyIndex == joint->scaleKeyCount) {
           keyIndex--;
           isInterpolated = FALSE;
-          key = joint->scales[keyIndex];
-          x = key[0];
-          y = key[1];
-          z = key[2];
+          x = joint->scales[keyIndex][0];
+          y = joint->scales[keyIndex][1];
+          z = joint->scales[keyIndex][2];
         }
       }
     }
