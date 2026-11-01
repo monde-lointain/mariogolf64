@@ -1361,7 +1361,7 @@ void UpdateCourseResultsNotice(void) {
  * The notice that a course has opened: its picture and title swing in, then a
  * shine sweeps the title
  *
- * Doesn't match: 67 words differ.
+ * Doesn't match: 63 words differ.
  */
 #ifdef NON_MATCHING
 void DrawCourseResultsNotice(Gfx** displayListHead) {
@@ -1373,6 +1373,7 @@ void DrawCourseResultsNotice(Gfx** displayListHead) {
   SoundPan pan;
   s32 centerX;
   s32 i;
+  s32 shineTexelX;
 
   gSPDisplayList(gfx++, g_DecalTextureSetup);
   gDPPipeSync(gfx++);
@@ -1501,16 +1502,15 @@ void DrawCourseResultsNotice(Gfx** displayListHead) {
   lift -= (s32)NOTICE_TITLE_LIFT;
   if (f_NoticeFrameCount >= NOTICE_SHINE_START) {
     if (f_NoticeFrameCount < NOTICE_SHINE_END) {
+      shineTexelX = TexelCoordinate(NOTICE_SHINE_SIZE -
+          ((f_NoticeFrameCount - NOTICE_SHINE_START) * NOTICE_SHINE_STEP));
       DrawTextureRect(&gfx, QuarterPixels(f_NoticeSwing + NOTICE_TITLE_LEFT),
           QuarterPixels(lift + f_NoticeUnk54 + NOTICE_TITLE_TOP),
           QuarterPixels(
               f_NoticeSwing + NOTICE_TITLE_LEFT + NOTICE_TITLE_STRIP_WIDTH),
           QuarterPixels(
               lift + f_NoticeUnk54 + NOTICE_TITLE_TOP + NOTICE_SHINE_SIZE),
-          G_TX_RENDERTILE,
-          TexelCoordinate(NOTICE_SHINE_SIZE -
-              ((f_NoticeFrameCount - NOTICE_SHINE_START) * NOTICE_SHINE_STEP)),
-          0, NOTICE_SHINE_DSDX, TEXEL_STEP_ONE);
+          G_TX_RENDERTILE, shineTexelX, 0, NOTICE_SHINE_DSDX, TEXEL_STEP_ONE);
     }
   }
 
@@ -1585,7 +1585,7 @@ void UpdateCharacterResultsNotice(void) {
  * The notice that a character has been beaten: their nameplate, face and title
  * pop open, then a shine sweeps the title
  *
- * Doesn't match: 58 words differ.
+ * Doesn't match: 44 words differ.
  */
 #ifdef NON_MATCHING
 void DrawCharacterResultsNotice(Gfx** displayListHead) {
@@ -1600,6 +1600,8 @@ void DrawCharacterResultsNotice(Gfx** displayListHead) {
   s32 centerX;
   s32 centerY;
   s32 i;
+  s32 liftFromCenter;
+  s32 shineTexelX;
 
   if (f_NoticeTime < NOTICE_POP_FRAMES) {
     angle = f_NoticeTime * NOTICE_POP_STEP * (M_PI / 2);
@@ -1657,13 +1659,12 @@ void DrawCharacterResultsNotice(Gfx** displayListHead) {
       top = NOTICE_CHARACTER_TITLE_TOP -
           (height * NOTICE_CHARACTER_TITLE_STRIP_COUNT / 2) + (i * height);
       /* This pass mirrors the slide, unlike the depth pass and the shine */
+      liftFromCenter = f_NoticeLift - NOTICE_CENTER_X;
       DrawTextureRect(&gfx,
           QuarterPixels(NOTICE_CENTER_X - (f_NoticeLift + width)),
           QuarterPixels(top + f_NoticeUnk6C),
-          QuarterPixels(width - (f_NoticeLift - NOTICE_CENTER_X)),
-          QuarterPixels(top + height + f_NoticeUnk6C),
-
-          G_TX_RENDERTILE, 0, 0,
+          QuarterPixels(width - liftFromCenter),
+          QuarterPixels(top + height + f_NoticeUnk6C), G_TX_RENDERTILE, 0, 0,
           ((NOTICE_CHARACTER_TITLE_WIDTH / 2) << 10) / width,
           (NOTICE_TITLE_STRIP_HEIGHT << 10) / height);
     }
@@ -1726,6 +1727,8 @@ void DrawCharacterResultsNotice(Gfx** displayListHead) {
 
     if (f_NoticeTime >= NOTICE_SHINE_START) {
       if (f_NoticeTime < NOTICE_SHINE_END) {
+        shineTexelX = TexelCoordinate(NOTICE_SHINE_SIZE -
+            ((f_NoticeTime - NOTICE_SHINE_START) * NOTICE_SHINE_STEP));
         DrawTextureRect(&gfx,
             QuarterPixels(f_NoticeLift + NOTICE_CHARACTER_SHINE_LEFT),
             QuarterPixels(f_NoticeUnk6C + NOTICE_CHARACTER_SHINE_TOP),
@@ -1733,10 +1736,8 @@ void DrawCharacterResultsNotice(Gfx** displayListHead) {
                 NOTICE_CHARACTER_TITLE_WIDTH),
             QuarterPixels(f_NoticeUnk6C + NOTICE_CHARACTER_SHINE_TOP +
                 NOTICE_CHARACTER_SHINE_HEIGHT),
-            G_TX_RENDERTILE,
-            TexelCoordinate(NOTICE_SHINE_SIZE -
-                ((f_NoticeTime - NOTICE_SHINE_START) * NOTICE_SHINE_STEP)),
-            0, NOTICE_CHARACTER_SHINE_DSDX, NOTICE_CHARACTER_SHINE_DTDY);
+            G_TX_RENDERTILE, shineTexelX, 0, NOTICE_CHARACTER_SHINE_DSDX,
+            NOTICE_CHARACTER_SHINE_DTDY);
       }
     }
 
