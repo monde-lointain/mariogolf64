@@ -799,6 +799,19 @@ void PrepareHoleDisplay(void) {
 }
 
 /*
+ * The vertices of the hole flag's grid at index grid of all its sides'
+ * buffers. The original indexes the first side's buffers past their end; the
+ * modern build splits the index into a side and a buffer.
+ */
+#ifdef AVOID_UB
+#define HoleFlagGridVertices(grid) \
+  (f_HoleFlagVertices[(grid) / MATRIX_BUFFER_COUNT] \
+                     [(grid) % MATRIX_BUFFER_COUNT])
+#else
+#define HoleFlagGridVertices(grid) (f_HoleFlagVertices[0][grid])
+#endif
+
+/*
  * Lays out the wind flag and builds the projections the HUD draws with
  *
  * Doesn't match: 64 words differ.
@@ -812,7 +825,7 @@ void InitRoundHud(void) {
 
   f_UnusedHudInitWord = 0;
   for (grid = 0; grid != HOLE_FLAG_SIDE_COUNT * MATRIX_BUFFER_COUNT; grid++) {
-    vertex = f_HoleFlagVertices[0][grid];
+    vertex = HoleFlagGridVertices(grid);
     for (row = 0; row != HOLE_FLAG_ROW_COUNT; row++) {
       for (column = 0; column != HOLE_FLAG_COLUMN_COUNT; column++) {
         vertex->v.ob[AXIS_X] = column * HOLE_FLAG_CELL_SIZE;
