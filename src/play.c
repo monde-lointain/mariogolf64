@@ -844,7 +844,6 @@ void EnterMenuAtBlankScreen(void);
 void EnterMenuAtRingShotRecords(void);
 void EnterMenuAtBestShots(void);
 
-#ifdef NON_MATCHING
 /* The choices that the Training and Ring Shot menus return */
 enum HoleMenuChoice {
   HOLE_MENU_NONE,
@@ -909,14 +908,13 @@ enum HoleMenuChoice {
  * Runs play for a frame: loads each hole, shows its intro and flyover, takes
  * the turns, and steps through the scorecard, notices and menus between
  * holes until the round ends and play returns to a menu or the staff roll.
- *
- * Doesn't match: 48 words differ.
  */
 void UpdatePlay(void) {
   s32 repeat;
   s32 again;
   s32 anyHuman;
   s32 i;
+  s32 playerIndex;
   s32 result;
   s32 clearHud;
   s32 nextStep;
@@ -939,16 +937,19 @@ void UpdatePlay(void) {
   g_MergedController.heldButtons = 0;
   g_MergedController.pressedButtons = 0;
   g_MergedController.repeatedButtons = 0;
-  for (i = 0; i != g_GameState.playerCount; i++) {
-    if (g_Players[i].controllerIndex < MAXCONTROLLERS) {
+  for (playerIndex = 0; playerIndex != g_GameState.playerCount; playerIndex++) {
+    if (g_Players[playerIndex].controllerIndex < MAXCONTROLLERS) {
       g_MergedController.buttons |=
-          g_ControllerStates[g_Players[i].controllerIndex].buttons;
+          g_ControllerStates[g_Players[playerIndex].controllerIndex].buttons;
       g_MergedController.heldButtons |=
-          g_ControllerStates[g_Players[i].controllerIndex].heldButtons;
+          g_ControllerStates[g_Players[playerIndex].controllerIndex]
+              .heldButtons;
       g_MergedController.pressedButtons |=
-          g_ControllerStates[g_Players[i].controllerIndex].pressedButtons;
+          g_ControllerStates[g_Players[playerIndex].controllerIndex]
+              .pressedButtons;
       g_MergedController.repeatedButtons |=
-          g_ControllerStates[g_Players[i].controllerIndex].repeatedButtons;
+          g_ControllerStates[g_Players[playerIndex].controllerIndex]
+              .repeatedButtons;
       anyHuman = TRUE;
     }
   }
@@ -1049,9 +1050,9 @@ void UpdatePlay(void) {
               case HOLE_MENU_RELOAD:
                 SetMenuBackdrop(MENU_BACKDROP_STILL);
                 StartWipe(WIPE_CLOSING);
-                repeat = TRUE;
                 LoadWipeShape(g_GameState.courseIndex);
                 g_GameState.step = result;
+                repeat = TRUE;
                 break;
               case HOLE_MENU_QUIT:
                 SetMenuBackdrop(MENU_BACKDROP_STILL);
@@ -1809,9 +1810,6 @@ DIM_BACKDROP:
     again = repeat;
   } while (again);
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/play", UpdatePlay);
-#endif
 
 /* Fills f_GroundNoiseTexels with random intensities from base up */
 void FillGroundNoise(s32 range, s32 base) {
