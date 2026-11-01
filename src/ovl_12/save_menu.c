@@ -370,7 +370,7 @@ s32 GetModeIconIndex(GameState* state) {
  * gives 44 differing words, and storing it plainly or reading it back 30.
  * Stepping a pointer to the second image gives the two pointers but swaps
  * their registers and copies one (19); pointers to the slot's row give 31
- * to 120. 18 words differ.
+ * to 120. 13 words differ.
  */
 #ifdef NON_MATCHING
 void OpenSaveMenu(s32 kind) {
@@ -428,16 +428,18 @@ void OpenSaveMenu(s32 kind) {
                 g_ModeIconAnimations[iconIndex][0], &encodedAsset)),
             &encodedAsset);
         frameId = g_ModeIconAnimations[iconIndex][1];
+        picture = AllocMemory(OpenEncodedAsset(frameId, &encodedAsset));
+        f_ModeIconImages[slot][1] = picture;
       } else {
         ReadEncodedAsset(
             f_ModeIconImages[slot][0] = AllocMemory(
                 OpenEncodedAsset(g_ModeIconAnimations[0][0], &encodedAsset)),
             &encodedAsset);
         frameId = g_ModeIconAnimations[0][1];
+        picture = AllocMemory(OpenEncodedAsset(frameId, &encodedAsset));
+        IN_OWN_BLOCK(f_ModeIconImages[slot][1] = picture);
       }
 
-      picture = AllocMemory(OpenEncodedAsset(frameId, &encodedAsset));
-      IN_OWN_BLOCK(f_ModeIconImages[slot][1] = picture);
       ReadEncodedAsset(picture, &encodedAsset);
     }
   } else {
