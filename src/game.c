@@ -22,7 +22,6 @@
 #include "game_flags.h"
 #include "heap.h"
 #include "hole_display.h"
-#include "hole_loader.h"
 #include "hole_objects.h"
 #include "hole_triangles.h"
 #include "libc.h"
@@ -51,6 +50,12 @@
 #include "title_screen.h"
 #include "transmit_menu.h"
 #include "work_area.h"
+
+/* Cleared while the loader thread loads a hole; set once it is done or
+ * stopped. Declared here with its definition's volatile qualifier, rather than
+ * through hole_loader.h, whose KMC declaration lacks it, as DrawGame's loads
+ * match the original better that way. */
+extern volatile Boolean g_HasLoaderFinished;
 
 #define INSET_VIEW_SOUND_VOLUME 0x3F
 #define INSET_VIEW_SOUND_REVERB 0x1E
@@ -1192,7 +1197,7 @@ void DrawTargetPole(CameraMatrices* matrices, Gfx** displayListHead);
  * Returns the frame count, which the caller ignores
  *
  * Doesn't match: the original keeps the far plane's dead clamp to the
- * short far plane, where GCC deletes it. 55 words differ.
+ * short far plane, where GCC deletes it. 47 words differ.
  */
 #ifdef NON_MATCHING
 s32 DrawGame(void) {

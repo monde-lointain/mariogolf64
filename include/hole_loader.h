@@ -28,7 +28,8 @@ extern HolePoints g_HolePoints;
  */
 #ifdef __IS_KMC__
 /* hole_loader.c defines the flag volatile, but the files that poll it saw it
- * without the qualifier, which their loops' code depends on */
+ * without the qualifier, which their loops' code depends on. game.c declares
+ * it itself, with the qualifier. */
 extern Boolean g_HasLoaderFinished;
 #else
 extern volatile Boolean g_HasLoaderFinished;
