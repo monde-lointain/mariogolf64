@@ -221,7 +221,7 @@ void ResetBallSimulations(void) {
  * Doesn't match: the register allocation and instruction scheduling differ in
  * many places, and where the original recomputes abs.s for each use of a
  * float's absolute value, this code shares one abs.s or compiles a compare and
- * branch. 925 words differ.
+ * branch. 916 words differ.
  */
 #ifdef NON_MATCHING
 s32 StepBallSimulation(BallSimulation* simulation) {
@@ -1518,7 +1518,6 @@ s32 StepBallSimulation(BallSimulation* simulation) {
         f32 tangent[3];
         s32 spinVelocityX;
         s32 spinVelocityZ;
-        f32 grip;
         s32 driftX;
         s32 driftZ;
         f32 driftLimit;
@@ -1549,11 +1548,12 @@ s32 StepBallSimulation(BallSimulation* simulation) {
         spinVelocityX = simulation->spinSpeed * cosf(simulation->spinHeading);
         IN_OWN_BLOCK(spinVelocityZ =
                          simulation->spinSpeed * sinf(simulation->spinHeading));
-        grip = 1.0f - restitution;
         driftX = (spinVelocityX - velocity[AXIS_X]) *
-            (grip * fabsf(plane.normal[AXIS_Y]) * GROUND_SPIN_GRIP);
+            ((1.0f - restitution) * fabsf(plane.normal[AXIS_Y]) *
+                GROUND_SPIN_GRIP);
         driftZ = (spinVelocityZ - velocity[AXIS_Z]) *
-            (grip * fabsf(plane.normal[AXIS_Y]) * GROUND_SPIN_GRIP);
+            ((1.0f - restitution) * fabsf(plane.normal[AXIS_Y]) *
+                GROUND_SPIN_GRIP);
         drift = (s32)IntLength2D(driftX, driftZ);
         driftLimit = impactSpeed * MAX_SPIN_DRIFT_SHARE;
         if (driftLimit < drift && impactSpeed > 1.0f) {
@@ -1604,10 +1604,9 @@ s32 StepBallSimulation(BallSimulation* simulation) {
       f32 friction;
       BallSpeed speed;
 
-      speed = sqrtf((velocity[AXIS_X] * velocity[AXIS_X]) +
-          (velocity[AXIS_Z] * velocity[AXIS_Z]));
       isSteep = FALSE;
-      rollSpeed = speed;
+      rollSpeed = sqrtf((velocity[AXIS_X] * velocity[AXIS_X]) +
+          (velocity[AXIS_Z] * velocity[AXIS_Z]));
       if (simulation->purpose == LAUNCH_PURPOSE_CLUB_TEST) {
         info = &f_SurfaceInfo[SURFACE_GREEN];
         triangle.corners[AXIS_X][0] = 0;
