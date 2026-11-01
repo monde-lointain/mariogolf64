@@ -173,7 +173,7 @@ extern char g_PrintBuffer[];
  * C extension.
  *
  * Doesn't match: the tag loop keeps its corner pointer and label offsets in
- * other registers. 215 words differ.
+ * other registers. 201 words differ.
  */
 #ifdef NON_MATCHING
 void DrawShotLabels(Gfx** displayListHead) {
@@ -390,8 +390,8 @@ NEXT:;
     }
 
     gDPPipeSync(gfx++);
-    gDPPipeSync(gfx++);
     if (players == SHOT_LABELS_OTHER_BALLS) {
+      gDPPipeSync(gfx++);
       gDPSetRenderMode(gfx++,
           AA_EN | Z_CMP | Z_UPD | IM_RD | CVG_DST_CLAMP | ZMODE_OPA |
               CVG_X_ALPHA | ALPHA_CVG_SEL |
@@ -400,6 +400,7 @@ NEXT:;
               CVG_X_ALPHA | ALPHA_CVG_SEL |
               GBL_c2(G_BL_CLR_IN, G_BL_A_IN, G_BL_CLR_MEM, G_BL_A_MEM));
     } else {
+      gDPPipeSync(gfx++);
       gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
     }
 
