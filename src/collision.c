@@ -92,6 +92,12 @@
 #define WALL_END_DISTANCE 307.2f
 /* Units that FindWallHit adds at each end of a wall facing x or z */
 #define WALL_WIDENING 0.15f
+/*
+ * How far to widen a wall along one axis, given that axis's corner
+ * coordinates, the corner across the edge from the first and the edge's length
+ */
+#define WallWidening(axisCorners, farCorner, edgeLength) \
+  (((axisCorners)[0] - (axisCorners)[farCorner]) * WALL_WIDENING / (edgeLength))
 /* Farther than any corner, in course units */
 #define FARTHEST_CORNER_DISTANCE 153600.0f
 #define CORNER_HIT_FRACTION (-0.1f)
@@ -2247,7 +2253,7 @@ INCLUDE_ASM("asm/nonmatchings/collision", FindHoleTriangleHit);
  * passes an end of it is moved back to where it reaches the end. A hit
  * near or below the ground counts whatever the edges say.
  *
- * Doesn't match: 756 words differ.
+ * Doesn't match: 688 words differ.
  */
 #ifdef NON_MATCHING
 s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
@@ -2275,7 +2281,6 @@ s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
   f32 hitFraction;
   f32 endFraction;
   f32 edgeLength;
-  f32 widening;
   f32 wallEnd;
   f32 farEnd;
   f32 nearestCorner;
@@ -2461,12 +2466,11 @@ s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
           }
         }
 
-        widening = (triangle.corners[AXIS_X][0] - triangle.corners[AXIS_X][2]) *
-            WALL_WIDENING / edgeLength;
-        cornersU[0] += widening;
-        cornersU[1] += widening;
-        cornersU[2] -= widening;
-        osSyncPrintf("X2To0 %f\n", widening);
+        cornersU[0] += WallWidening(triangle.corners[AXIS_X], 2, edgeLength);
+        cornersU[1] += WallWidening(triangle.corners[AXIS_X], 2, edgeLength);
+        cornersU[2] -= WallWidening(triangle.corners[AXIS_X], 2, edgeLength);
+        osSyncPrintf("X2To0 %f\n",
+            WallWidening(triangle.corners[AXIS_X], 2, edgeLength));
       } else if (triangle.corners[AXIS_X][0] == triangle.corners[AXIS_X][2] &&
           triangle.corners[AXIS_X][0] != triangle.corners[AXIS_X][1]) {
         endFraction = 0.0f;
@@ -2521,12 +2525,11 @@ s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
           }
         }
 
-        widening = (triangle.corners[AXIS_X][0] - triangle.corners[AXIS_X][1]) *
-            WALL_WIDENING / edgeLength;
-        cornersU[0] += widening;
-        cornersU[1] -= widening;
-        cornersU[2] += widening;
-        osSyncPrintf("X1To0 %f\n", widening);
+        cornersU[0] += WallWidening(triangle.corners[AXIS_X], 1, edgeLength);
+        cornersU[1] -= WallWidening(triangle.corners[AXIS_X], 1, edgeLength);
+        cornersU[2] += WallWidening(triangle.corners[AXIS_X], 1, edgeLength);
+        osSyncPrintf("X1To0 %f\n",
+            WallWidening(triangle.corners[AXIS_X], 1, edgeLength));
       } else {
         osSyncPrintf("Illegal Wall!!!!!!!!!\n");
       }
@@ -2620,12 +2623,11 @@ s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
           }
         }
 
-        widening = (triangle.corners[AXIS_Z][0] - triangle.corners[AXIS_Z][2]) *
-            WALL_WIDENING / edgeLength;
-        cornersV[0] += widening;
-        cornersV[1] += widening;
-        cornersV[2] -= widening;
-        osSyncPrintf("Z2To0 %f\n", widening);
+        cornersV[0] += WallWidening(triangle.corners[AXIS_Z], 2, edgeLength);
+        cornersV[1] += WallWidening(triangle.corners[AXIS_Z], 2, edgeLength);
+        cornersV[2] -= WallWidening(triangle.corners[AXIS_Z], 2, edgeLength);
+        osSyncPrintf("Z2To0 %f\n",
+            WallWidening(triangle.corners[AXIS_Z], 2, edgeLength));
       } else if (triangle.corners[AXIS_Z][0] == triangle.corners[AXIS_Z][2] &&
           triangle.corners[AXIS_Z][0] != triangle.corners[AXIS_Z][1]) {
         endFraction = 0.0f;
@@ -2672,12 +2674,11 @@ s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
           }
         }
 
-        widening = (triangle.corners[AXIS_Z][0] - triangle.corners[AXIS_Z][1]) *
-            WALL_WIDENING / edgeLength;
-        cornersV[0] += widening;
-        cornersV[1] -= widening;
-        cornersV[2] += widening;
-        osSyncPrintf("Z1To0 %f\n", widening);
+        cornersV[0] += WallWidening(triangle.corners[AXIS_Z], 1, edgeLength);
+        cornersV[1] -= WallWidening(triangle.corners[AXIS_Z], 1, edgeLength);
+        cornersV[2] += WallWidening(triangle.corners[AXIS_Z], 1, edgeLength);
+        osSyncPrintf("Z1To0 %f\n",
+            WallWidening(triangle.corners[AXIS_Z], 1, edgeLength));
       } else {
         osSyncPrintf("Illegal Wall!!!!!!!!!\n");
       }
