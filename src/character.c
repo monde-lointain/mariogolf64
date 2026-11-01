@@ -1908,14 +1908,13 @@ void SetCharacterLights(void) {
 /*
  * Draws the character in the slot with its lights, alpha and culling
  *
- * Doesn't match: 152 words differ.
+ * Doesn't match: 121 words differ.
  */
 #ifdef NON_MATCHING
 void DrawCharacter(u32 slotIndex) {
   CharacterSlot* slot = GetUsedCharacterSlot(slotIndex);
   Gfx* gfx = g_DisplayListHead;
   Lights2* lights;
-  Gfx* renderModes;
 
   f_DrawParity ^= 1;
   if (f_IsMatrixSetupPending) {
@@ -1997,14 +1996,15 @@ void DrawCharacter(u32 slotIndex) {
     if (slot->isTranslucent) {
       gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, slot->alpha);
       SetCharacterAlpha(slot->alpha);
-      renderModes = f_TranslucentRenderModes;
+      gSPSegment(gfx++, RENDER_MODES_SEGMENT,
+          osVirtualToPhysical(f_TranslucentRenderModes));
     } else {
       gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, BLEND_ALPHA);
       SetCharacterAlpha(OPAQUE_ALPHA);
-      renderModes = f_OpaqueRenderModes;
+      gSPSegment(gfx++, RENDER_MODES_SEGMENT,
+          osVirtualToPhysical(f_OpaqueRenderModes));
     }
 
-    gSPSegment(gfx++, RENDER_MODES_SEGMENT, osVirtualToPhysical(renderModes));
     gSPSegment(gfx++, CULLING_SEGMENT,
         osVirtualToPhysical(slot->unk188 ? f_FrontCulling : f_BackCulling));
     gSPDisplayList(gfx++, slot->displayList);
@@ -2015,7 +2015,6 @@ void DrawCharacter(u32 slotIndex) {
 
   g_DisplayListHead = gfx;
 }
-
 #else
 INCLUDE_ASM("asm/nonmatchings/character", DrawCharacter);
 #endif
