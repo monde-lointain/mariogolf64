@@ -2570,7 +2570,7 @@ void SetMenuBackdrop(s32 backdrop) {
  * Starts the plain menu backdrop by capturing the last frame for it.
  *
  * Doesn't match: GCC loads f_LastFrameBuffer and f_CapturedFrame in the other
- * order before the strip loop, and places the loop's stores differently. 48
+ * order before the strip loop, and places the loop's stores differently. 45
  * words differ.
  */
 #ifdef NON_MATCHING
@@ -2614,6 +2614,7 @@ void CaptureMenuBackdrop(Gfx** displayListHead, s32 unused UNUSED) {
           BACKDROP_RIGHT, BACKDROP_BORDER + height - 1, 0,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+      gDPPipeSync(gfx++);
       gSPScisTextureRectangle(gfx++, QuarterPixels(BACKDROP_BORDER),
           QuarterPixels(strip * BACKDROP_STRIP_STEP + BACKDROP_BORDER),
           QuarterPixels(BACKDROP_RIGHT),
