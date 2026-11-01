@@ -1698,9 +1698,9 @@ void PickStartingClub(HoleSetup* hole);
  * the club whose normal shot comes nearest the cup, out of those with a good
  * enough lie, and preferring those that reach.
  *
- * Doesn't match: 108 words differ. GCC fills the green test's delay slot with
- * bestGap's S32_MAX, where the original clears a register, and the slot index
- * and g_Players' address take other saved registers.
+ * Doesn't match: GCC fills the green test's delay slot with bestGap's
+ * S32_MAX, where the original clears a register, and the slot index and
+ * g_Players' address take other saved registers. 83 words differ.
  */
 #ifdef NON_MATCHING
 void PickStartingClub(HoleSetup* hole) {
@@ -1721,12 +1721,14 @@ void PickStartingClub(HoleSetup* hole) {
       g_CurrentShot.ballPosition[AXIS_Z] - hole->cupPosition[AXIS_Z]);
   if (g_GameState.isMiniGolf ||
       GetSurfaceInfo(g_CurrentShot.surface)->kind == SURFACE_KIND_GREEN) {
-    for (slot = 0; slot < clubCount; slot++) {
-      if (!isUsable[slot]) {
+    s32 putterSlot;
+
+    for (putterSlot = 0; putterSlot < clubCount; putterSlot++) {
+      if (!isUsable[putterSlot]) {
         continue;
       }
 
-      club = GetClub(g_Players[g_CurrentShot.playerIndex].clubs[slot]);
+      club = GetClub(g_Players[g_CurrentShot.playerIndex].clubs[putterSlot]);
       if (!(club->surfaceMask & CLUB_SURFACE_GREEN)) {
         continue;
       }
@@ -1740,7 +1742,7 @@ void PickStartingClub(HoleSetup* hole) {
         g_CurrentShot.shotMode = PUTT_MODE_LONG;
       }
 
-      g_CurrentShot.clubSlot = slot;
+      g_CurrentShot.clubSlot = putterSlot;
       break;
     }
   } else {
