@@ -1699,8 +1699,9 @@ void PickStartingClub(HoleSetup* hole);
  * enough lie, and preferring those that reach.
  *
  * Doesn't match: GCC fills the green test's delay slot with bestGap's
- * S32_MAX, where the original clears a register, and the slot index and
- * g_Players' address take other saved registers. 83 words differ.
+ * S32_MAX, where the original clears a register, tests the slot loop's
+ * entry with slt and beqz where the original uses blez, and makes a frame
+ * 8 bytes smaller. 55 words differ.
  */
 #ifdef NON_MATCHING
 void PickStartingClub(HoleSetup* hole) {
@@ -1709,6 +1710,7 @@ void PickStartingClub(HoleSetup* hole) {
   s32 cupDistance;
   s32 slot;
   s32 rating;
+  s32 lieRating;
   s32 minRating = 0;
   Club* club;
 
@@ -1779,9 +1781,9 @@ void PickStartingClub(HoleSetup* hole) {
         continue;
       }
 
-      rating = GetLieRating(club, g_CurrentShot.surface, SHOT_MODE_NORMAL);
+      lieRating = GetLieRating(club, g_CurrentShot.surface, SHOT_MODE_NORMAL);
       distance = GetShotDistance(club, SHOT_MODE_NORMAL) * UNITS_PER_YARD;
-      if (rating < minRating) {
+      if (lieRating < minRating) {
         continue;
       }
 
