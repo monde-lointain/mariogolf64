@@ -1,14 +1,16 @@
 #!/usr/bin/env python3
-"""Score variants of a C file, each made by one text replacement.
+"""Score variants of a C file, each made by text replacements.
 
     try_variants.py [--apply NUMBER] ASM_FILE C_FILE FUNCTION VARIANTS_FILE
     try_variants.py --batch JOBS_FILE
 
 VARIANTS_FILE holds blocks separated by lines of "====". Each block is the
 text to replace, a line of "----", and the replacement, which is made in
-FUNCTION's definition alone. Prints the score of each variant, so that
-several guesses cost one compile each. With --apply, writes variant NUMBER
-into C_FILE instead, made the same way as the one that was scored.
+FUNCTION's definition alone. A block can make several replacements, such
+as at a change's twin sites, joined by lines of "++++". Prints the score of
+each variant, so that several guesses cost one compile each. With --apply,
+writes variant NUMBER into C_FILE instead, made the same way as the one that
+was scored.
 
 With --batch, each line of JOBS_FILE names an ASM_FILE, C_FILE, FUNCTION
 and VARIANTS_FILE, and each score is printed after its function's name.
@@ -79,10 +81,23 @@ def score_variant(
     return f"{function} {fncompare.describe(target, compiled[function])}"
 
 
+def replace_all(body: str, block: str) -> str | None:
+    """Return BODY with each of BLOCK's replacements made, in turn.
+
+    Returns None when any of the texts to replace is absent.
+    """
+    for replacement in block.split("\n++++\n"):
+        old, new = replacement.split("\n----\n")
+        if old not in body:
+            return None
+        body = body.replace(old, new, 1)
+    return body
+
+
 def read_variants(c_path: str, function: str, variants_path: str) -> list[str | None]:
     """Return C_PATH's text as each variant makes it.
 
-    A variant whose text to replace is absent gives None. Raises
+    A variant any of whose texts to replace is absent gives None. Raises
     LookupError when C_PATH doesn't define FUNCTION.
     """
     source = Path(c_path).read_text()
@@ -96,11 +111,8 @@ def read_variants(c_path: str, function: str, variants_path: str) -> list[str | 
     text = Path(variants_path).read_text().removesuffix("\n")
     variants: list[str | None] = []
     for block in text.split("\n====\n"):
-        old, new = block.split("\n----\n")
-        if old in body:
-            variants.append(before + body.replace(old, new, 1) + after)
-        else:
-            variants.append(None)
+        variant = replace_all(body, block)
+        variants.append(None if variant is None else before + variant + after)
     return variants
 
 
