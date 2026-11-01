@@ -931,12 +931,7 @@ void InitSkyColors(void);
  * Sets the sky up for the hole's scene color index: its vertices' colors, the
  * blend between times of day that BlendSkyColors steps through, and
  * g_SkyImage and g_CourseSkyImage, recolored to match
- *
- * Doesn't match: the target keeps &g_HoleSetup.conditions.isRaining in a
- * register across the three GetCourseRecordIndex calls, and allocates other
- * registers. 73 words differ.
  */
-#ifdef NON_MATCHING
 void InitSkyColors(void) {
   EncodedAsset asset;
   u8 unused[0x10] UNUSED; /* Pads the frame to the target's size */
@@ -954,11 +949,6 @@ void InitSkyColors(void) {
   s32 alpha;
   s32 outerMix;
   s32 innerMix;
-
-  /* Unused */
-  UNUSED_FUNCTION s32 Lerp(s32 start, s32 end, f32 fraction) {
-    return start * (1.0f - fraction) + end * fraction;
-  }
 
   f_SkyColorTimeIndex =
       f_SceneSkyColorTimes[g_HoleSetup.conditions.sceneColorIndex];
@@ -984,6 +974,17 @@ void InitSkyColors(void) {
   to = &g_SkyColors[GetCourseRecordIndex()]
                    [(g_HoleSetup.conditions.isRaining * SKY_TIME_COUNT) +
                        f_SkyTimeIndex + 1];
+  /*
+   * Unused. Defined here, after the color lookups, since a nested function
+   * defined before them changes how GCC keeps the lookups' addresses, and only
+   * a block can hold a definition after statements.
+   */
+  {
+    UNUSED_FUNCTION s32 Lerp(s32 start, s32 end, f32 fraction) {
+      return start * (1.0f - fraction) + end * fraction;
+    }
+  }
+
   g_SkyState.scrollX = 0.0f;
   g_SkyState.scrollY = 0.0f;
   for (i = 0; i != SKY_VIEW_COUNT * MATRIX_BUFFER_COUNT; i++) {
@@ -994,7 +995,7 @@ void InitSkyColors(void) {
       f_SkyVertices[i][3].v.cn[channel] = colors->unk4[channel];
       f_SkyVertices[i][4].v.cn[channel] = colors->unk4[channel];
       outerMix = (colors->unk4[channel] + f_SkyHorizonColor[channel]) * 0.5f;
-      innerMix = (colors->unk4[channel] + colors->unk7[channel]) * 0.5f;
+      innerMix = (colors->unk7[channel] + colors->unk4[channel]) * 0.5f;
       innerMix = (innerMix + f_SkyHorizonColor[channel]) * 0.5f;
       f_SkyVertices[i][5].v.cn[channel] = outerMix;
       f_SkyVertices[i][6].v.cn[channel] = innerMix;
@@ -1090,11 +1091,6 @@ void InitSkyColors(void) {
 
   DeriveSceneColors();
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/hole_display", Lerp);
-
-INCLUDE_ASM("asm/nonmatchings/hole_display", InitSkyColors);
-#endif
 
 /* The sky editor's table, in debug text cells */
 #define SKY_EDITOR_CONTROLLER 1
