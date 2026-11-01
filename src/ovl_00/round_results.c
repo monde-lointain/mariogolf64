@@ -1367,7 +1367,7 @@ void UpdateCourseResultsNotice(void) {
  * product before taking away the size, where this takes the size from the
  * center first, and in the title's loops it keeps each strip's top in $s0
  * where this works it out in temporaries, so registers and order differ
- * through the loops. 55 words differ.
+ * through the loops. 37 words differ.
  */
 #ifdef NON_MATCHING
 void DrawCourseResultsNotice(Gfx** displayListHead) {
@@ -1375,6 +1375,8 @@ void DrawCourseResultsNotice(Gfx** displayListHead) {
   s32 size;
   s32 step;
   s32 lift;
+  s32 shineLift;
+  s32 depthLift;
   s32 top;
   SoundPan pan;
   s32 centerX;
@@ -1447,8 +1449,8 @@ void DrawCourseResultsNotice(Gfx** displayListHead) {
       G_RM_AA_ZB_TEX_EDGE2);
   LoadLargePalette(&gfx, ImageBody(f_NoticeTitleImage));
   for (i = 0; i != NOTICE_TITLE_STRIP_COUNT; i++) {
-    lift = -(s32)(cosf(f_NoticeAngle) * NOTICE_TITLE_LIFT);
-    lift -= (s32)NOTICE_TITLE_LIFT;
+    depthLift = -(s32)(cosf(f_NoticeAngle) * NOTICE_TITLE_LIFT);
+    depthLift -= (s32)NOTICE_TITLE_LIFT;
     LoadTextureBlock(&gfx,
         LargeImageTexels(f_NoticeTitleImage) +
             (i * NOTICE_TITLE_STRIP_WIDTH * NOTICE_TITLE_STRIP_HEIGHT),
@@ -1458,10 +1460,10 @@ void DrawCourseResultsNotice(Gfx** displayListHead) {
      * the colored title's, to match */
     stripBottomOffset = f_NoticeUnk54 + NOTICE_TITLE_STRIP_HEIGHT;
     DrawTextureRect(&gfx, QuarterPixels(f_NoticeSwing + NOTICE_TITLE_LEFT),
-        QuarterPixels(TitleStripTop(lift, i) + f_NoticeUnk54),
+        QuarterPixels(TitleStripTop(depthLift, i) + f_NoticeUnk54),
         QuarterPixels(
             f_NoticeSwing + NOTICE_TITLE_LEFT + NOTICE_TITLE_STRIP_WIDTH),
-        QuarterPixels(TitleStripTop(lift, i) + stripBottomOffset),
+        QuarterPixels(TitleStripTop(depthLift, i) + stripBottomOffset),
         G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   }
 
@@ -1507,18 +1509,18 @@ void DrawCourseResultsNotice(Gfx** displayListHead) {
     SetSoundPan(NOTICE_SWING_SOUND_CHANNEL, pan);
   }
 
-  lift = -(s32)(cosf(f_NoticeAngle) * NOTICE_TITLE_LIFT);
-  lift -= (s32)NOTICE_TITLE_LIFT;
+  shineLift = -(s32)(cosf(f_NoticeAngle) * NOTICE_TITLE_LIFT);
+  shineLift -= (s32)NOTICE_TITLE_LIFT;
   if (f_NoticeFrameCount >= NOTICE_SHINE_START) {
     if (f_NoticeFrameCount < NOTICE_SHINE_END) {
       shineTexelX = TexelCoordinate(NOTICE_SHINE_SIZE -
           ((f_NoticeFrameCount - NOTICE_SHINE_START) * NOTICE_SHINE_STEP));
       DrawTextureRect(&gfx, QuarterPixels(f_NoticeSwing + NOTICE_TITLE_LEFT),
-          QuarterPixels(lift + f_NoticeUnk54 + NOTICE_TITLE_TOP),
+          QuarterPixels(shineLift + f_NoticeUnk54 + NOTICE_TITLE_TOP),
           QuarterPixels(
               f_NoticeSwing + NOTICE_TITLE_LEFT + NOTICE_TITLE_STRIP_WIDTH),
           QuarterPixels(
-              lift + f_NoticeUnk54 + NOTICE_TITLE_TOP + NOTICE_SHINE_SIZE),
+              shineLift + f_NoticeUnk54 + NOTICE_TITLE_TOP + NOTICE_SHINE_SIZE),
           G_TX_RENDERTILE, shineTexelX, 0, NOTICE_SHINE_DSDX, TEXEL_STEP_ONE);
     }
   }
