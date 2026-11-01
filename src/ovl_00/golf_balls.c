@@ -457,7 +457,7 @@ void ResetGolfBalls(void) {
  * of the hole, places the current player's ball from the ball simulations,
  * and moves and fades the ball's afterimage.
  *
- * Doesn't match: 89 words differ. In the first loop the original steps the
+ * Doesn't match: 83 words differ. In the first loop the original steps the
  * ball pointer from the table's start rather than from the marker field and
  * branches the other way on the marker test, and registers differ through the
  * rest.
@@ -565,8 +565,8 @@ void UpdateGolfBalls(void) {
           markerPlayerIndex = BALL_NO_MARKER;
         }
 
-        ball->markerPlayerIndex = markerPlayerIndex;
         scale = g_PinVertexScale * BALL_MODEL_SCALE;
+        ball->markerPlayerIndex = markerPlayerIndex;
         guScaleF(scaling, scale, scale, scale);
         guMtxCatF(f_BallRotation, scaling, rotated);
         guTranslateF(translation, ball->position[AXIS_X],
