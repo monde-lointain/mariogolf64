@@ -754,10 +754,10 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/tournament_menu", DrawYesNoWindow);
  * open. The window grows and shrinks as DrawYesNoWindow's does.
  */
 /*
- * Doesn't match: as in DrawYesNoWindow, GCC hoists the window's edges out of
- * the strip loop where the original works them out in the loop from centerX on
- * the stack, and it schedules the course image's position differently.
- * 228 words differ.
+ * Doesn't match: GCC hoists the window's edges out of the strip loop where the
+ * original works them out in the loop from centerX on the stack, and it
+ * schedules the course image's position differently. Spelling the edges as
+ * DrawYesNoWindow does gives 378 to 442 differing words. 228 words differ.
  */
 #ifdef NON_MATCHING
 void DrawClubWindow(Gfx** displayListHead, s32 width, s32 height, s32 centerX,
