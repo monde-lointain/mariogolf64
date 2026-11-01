@@ -998,7 +998,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_11/course_select", DrawNamePlate);
  * Spins the chosen hole's star; the position is unused, the stars are always in
  * one place
  *
- * Doesn't match: 272 words differ.
+ * Doesn't match: 268 words differ.
  */
 #ifdef NON_MATCHING
 void DrawRingShotStars(
@@ -1057,12 +1057,13 @@ void DrawRingShotStars(
     if (hole == memory->holeIndex) {
       width = STAR_GROWTH;
       height = STAR_GROWTH;
+      left = (hole * STAR_SPACING) + STARS_LEFT;
     } else {
       width = 0;
       height = 0;
+      left = (hole * STAR_SPACING) + STARS_LEFT;
     }
 
-    left = (hole * STAR_SPACING) + STARS_LEFT;
     tile = (save->hasRingShotStar[memory->courseIndex][hole] == 0)
         ? TILE_STILL_EMPTY_STAR
         : TILE_STILL_STAR;
