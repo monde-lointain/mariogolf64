@@ -84,7 +84,7 @@ def splice(
 
 
 def count_differences(
-    source: str, target: list[int], permuter_dir: Path, work: Path
+    source: str, target: fncompare.Routine, permuter_dir: Path, work: Path
 ) -> int:
     """Return how many words of SOURCE's function differ from TARGET.
 

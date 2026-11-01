@@ -33,9 +33,12 @@ from elftools.elf.elffile import ELFFile
 from elftools.elf.sections import SymbolTableSection
 
 from fncompare import (
+    Pairing,
+    Routine,
+    pair_rows,
     read_entry_field,
     read_entry_int,
-    read_linked_functions,
+    read_linked_symbols,
     read_object_file,
 )
 
@@ -50,8 +53,8 @@ PENALTY_REGISTER = 5
 PENALTY_REPLACE = 60
 PENALTY_INSERT_DELETE = 100
 
-# An instruction's operands: registers, immediates and the parts of a branch's
-# destination
+# An instruction's operands: registers and immediates. A branch's offset is
+# masked, so the parts of its destination compare equal.
 OPERAND = re.compile(r"[^\s,()]+")
 
 
@@ -93,38 +96,37 @@ def get_pair_penalty(original: int, draft: int) -> tuple[int, bool]:
     return penalty, is_registers_only
 
 
-def compare_routine(original: list[int], draft: list[int]) -> Comparison:
+def compare_routine(original: Routine, draft: Routine) -> Comparison:
     """Compare DRAFT with ORIGINAL, as objdiff's diff_code does.
 
     objdiff pairs the instructions with a patience diff of their opcodes;
-    difflib's matcher pairs nearly all of them the same way.
+    difflib's matcher pairs nearly all of them the same way. A paired branch
+    that lands on another instruction, or a field that refers to another
+    place, costs what a register does, as objdiff's relocations do.
     """
     opcodes = [
-        [read_instruction(word)[0] for word in words] for words in (original, draft)
+        [read_instruction(word)[0] for word in routine.words]
+        for routine in (original, draft)
     ]
     matcher = difflib.SequenceMatcher(None, *opcodes, autojunk=False)
+    pairing = Pairing(original, draft, pair_rows(matcher.get_opcodes()))
     penalty = 0
     is_registers_only = True
-    for (
-        _,
-        original_start,
-        original_end,
-        draft_start,
-        draft_end,
-    ) in matcher.get_opcodes():
-        original_run = original[original_start:original_end]
-        draft_run = draft[draft_start:draft_end]
-        # A run of different opcodes pairs its instructions in order
-        for original_word, draft_word in zip(original_run, draft_run, strict=False):
-            pair_penalty, is_pair_registers_only = get_pair_penalty(
-                original_word, draft_word
-            )
-            penalty += pair_penalty
-            is_registers_only &= is_pair_registers_only
-        unpaired = abs(len(original_run) - len(draft_run))
-        penalty += unpaired * PENALTY_INSERT_DELETE
-        is_registers_only &= not unpaired
-    most = len(original) * PENALTY_INSERT_DELETE
+    for original_index, draft_index in pairing.rows:
+        if original_index is None or draft_index is None:
+            penalty += PENALTY_INSERT_DELETE
+            is_registers_only = False
+            continue
+        pair_penalty, is_pair_registers_only = get_pair_penalty(
+            original.words[original_index], draft.words[draft_index]
+        )
+        penalty += pair_penalty
+        is_registers_only &= is_pair_registers_only
+        is_same_opcode = opcodes[0][original_index] == opcodes[1][draft_index]
+        if is_same_opcode and not pairing.has_same_places(original_index, draft_index):
+            penalty += PENALTY_REGISTER
+            is_registers_only = False
+    most = len(original.words) * PENALTY_INSERT_DELETE
     if not most:
         return Comparison(PERCENT, is_registers_only)
     return Comparison(PERCENT * (1 - min(penalty, most) / most), is_registers_only)
@@ -248,7 +250,7 @@ def measure_unit(obj_path: Path, draft_path: Path) -> Unit:
     ]
     originals = read_object_file(obj_path) if unmatched else {}
     drafts = read_object_file(draft_path) if unmatched else {}
-    addresses = read_linked_functions()
+    addresses = read_linked_symbols()
     measures = unit.measures
     for symbol in functions:
         report: dict[str, object] = {"name": symbol.name, "size": symbol.size}

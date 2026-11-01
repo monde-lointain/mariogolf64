@@ -1,26 +1,31 @@
 #!/usr/bin/env python3
-"""Compare compiled functions with the original assembly, word by word.
+"""Compare compiled functions with the original assembly, by instruction.
 
-Relocated fields (the immediates of %hi/%lo pairs and the targets of j/jal)
-are masked out on both sides, so a function matches when it would produce
-the original bytes once linked. A jal keeps its target, though, so that
-calls made in another order still differ: the compiled call's target is
-looked up by name in the matching build's ELF. A call to a function the ELF
-doesn't name, or names more than once, is masked like the rest.
+The instructions are paired by their words with the relocated fields, branch
+offsets and jump targets masked out, and a pair is equal when its words are
+and, as objdiff compares them, it also goes to and refers to the same places:
+a branch or jump to its routine's own instructions must land on the paired
+instruction, and a relocated field (a %hi or %lo half, or a call's target)
+must take the value the matching build's linker gives it. A field's value is
+known when the matching build's ELF names its symbol once; one whose symbol
+it doesn't name, such as a compiler's anonymous constant, compares equal.
 
     fncompare.py [-v] ASM_FILE C_FILE [FUNCTION ...]
 
 ASM_FILE is a splat assembly file holding one or more functions and C_FILE
 the C to compile, or an object file already compiled. Prints one line per
-function: its name, its score (the fraction of equal words) and either OK
-for an exact match or the count of differing words, which still moves when
-a change is too small to show in the score. With -v, also prints the
-instructions that differ.
+function: its name, its score (the fraction of equal instructions) and either
+OK for an exact match or the count of differing instructions, on either side,
+which still moves when a change is too small to show in the score. With -v,
+also prints the instructions that differ, with each branch's destination as
+@INDEX.
 """
 
 import atexit
+import bisect
 import difflib
 import functools
+import itertools
 import os
 import re
 import shutil
@@ -28,13 +33,15 @@ import subprocess
 import sys
 import tempfile
 import threading
+from collections.abc import Sequence
+from dataclasses import dataclass, field
 from pathlib import Path
 
 import rabbitizer
 from elftools.construct.lib.container import Container
 from elftools.elf.elffile import ELFFile
 from elftools.elf.relocation import RelocationSection
-from elftools.elf.sections import SymbolTableSection
+from elftools.elf.sections import Symbol, SymbolTableSection
 
 ROOT = Path(__file__).resolve().parent.parent
 LINKED_ELF = ROOT / "build" / "mariogolf64.elf"
@@ -75,29 +82,29 @@ DEFINES = [
     "-DNON_MATCHING",
 ]
 
-INSN_RE = re.compile(r"^\s*/\* [0-9A-F]+ [0-9A-F]+ ([0-9A-F]{8}) \*/\s+(.*)$")
+# A splat listing's instruction: its address, its word and its text
+INSN_RE = re.compile(r"^\s*/\* [0-9A-F]+ ([0-9A-F]{8}) ([0-9A-F]{8}) \*/\s+(.*)$")
 GLABEL_RE = re.compile(r"^glabel (\w+)")
 ENDLABEL_RE = re.compile(r"^endlabel (\w+)")
+# The label number GCC appends to a nested function's or static local's name
+LABEL_NUMBER_RE = re.compile(r"\.\d+$")
 
 WORD_SIZE = 4
 OPCODE_SHIFT = 26
 J_OPCODE = 2
 JAL_OPCODE = 3
 JUMP_TARGET_MASK = 0x03FFFFFF
-# The 256 MB region that a jump's target field addresses words in, which
-# holds all of the game's code
-CODE_REGION = 0x80000000
+# The bits a jump's target keeps from the jump's own address, its 256 MB region
+JUMP_REGION_MASK = 0xF0000000
 IMMEDIATE_MASK = 0xFFFF
+HALF_SHIFT = 16
+# What %hi adds before it shifts, so that %lo's sign extension takes it away
+HIGH_HALF_ROUNDING = 0x8000
 R_MIPS_26 = 4
 R_MIPS_HI16 = 5
 R_MIPS_LO16 = 6
-RELOC_MASKS = {
-    R_MIPS_26: JUMP_TARGET_MASK,
-    R_MIPS_HI16: IMMEDIATE_MASK,
-    R_MIPS_LO16: IMMEDIATE_MASK,
-}
 
-# The offsets of the fields read_symbol_table and read_linked_functions read
+# The offsets of the fields read_symbol_table and read_linked_symbols read
 # in a big-endian ELF32 file's header, its section headers and its symbols
 HALF_SIZE = 2
 E_SHOFF = 0x20
@@ -113,21 +120,74 @@ ST_NAME = 0x0
 ST_VALUE = 0x4
 ST_INFO = 0xC
 SYMBOL_TYPE_MASK = 0xF
+STT_NOTYPE = 0
+STT_OBJECT = 1
 STT_FUNC = 2
+# The symbols a relocated field can refer to: assembly labels, data and code
+REFERENCED_TYPES = frozenset((STT_NOTYPE, STT_OBJECT, STT_FUNC))
+REFERENCED_TYPE_NAMES = frozenset(("STT_NOTYPE", "STT_OBJECT", "STT_FUNC"))
 
 MAX_DIFF_HUNKS = int(os.environ.get("MAX_DIFF_HUNKS", "4"))
 # How many matching instructions -v prints around each run, as diff -U does
 DIFF_CONTEXT = int(os.environ.get("DIFF_CONTEXT", "0"))
 
-Functions = dict[str, list[int]]
 StrPath = str | os.PathLike[str]
 
 
-def mask_jump(word: int) -> int:
-    """Mask the target of j and jal, which always carry a relocation."""
-    if word >> OPCODE_SHIFT in (J_OPCODE, JAL_OPCODE):
-        return word & ~JUMP_TARGET_MASK
-    return word
+@dataclass
+class Routine:
+    """A function's instructions, as compared with another build of it.
+
+    WORDS have their relocated fields, branch offsets and jump targets masked.
+    DESTINATIONS hold the index of the instruction each branch, or jump within
+    the routine, goes to, and REFERENCES the value the matching build's linker
+    gives each relocated field; both are None elsewhere, and a reference is
+    None too where the matching build doesn't name its symbol.
+    """
+
+    words: list[int]
+    destinations: list[int | None]
+    references: list[int | None]
+
+
+Functions = dict[str, Routine]
+
+
+def is_jump(word: int) -> bool:
+    """Whether WORD is a j or a jal, whose target is always relocated."""
+    return word >> OPCODE_SHIFT in (J_OPCODE, JAL_OPCODE)
+
+
+@functools.cache
+def get_branch_offset(word: int) -> int | None:
+    """Return how many instructions past a branch it goes to, or None."""
+    instruction = rabbitizer.Instruction(word)
+    if not instruction.isBranch():
+        return None
+    return instruction.getBranchOffset() // WORD_SIZE
+
+
+def build_routine(
+    words: list[int], jumps: dict[int, int], references: list[int | None]
+) -> Routine:
+    """Return the routine of WORDS, whose relocated halves are masked.
+
+    JUMPS gives {index: destination index} of the jumps within the routine.
+    """
+    masked: list[int] = []
+    destinations: list[int | None] = []
+    for index, word in enumerate(words):
+        offset = get_branch_offset(word)
+        if offset is not None:
+            masked.append(word & ~IMMEDIATE_MASK)
+            destinations.append(index + offset)
+        elif is_jump(word):
+            masked.append(word & ~JUMP_TARGET_MASK)
+            destinations.append(jumps.get(index))
+        else:
+            masked.append(word)
+            destinations.append(None)
+    return Routine(masked, destinations, references)
 
 
 def read_field(data: bytes, offset: int, size: int) -> int:
@@ -162,11 +222,12 @@ def read_symbol_table(elf: bytes) -> tuple[bytes, bytes]:
 
 
 @functools.cache
-def read_linked_functions() -> dict[str, int]:
-    """Return {name: address} of the functions the matching build names once.
+def read_linked_symbols() -> dict[str, int]:
+    """Return {name: address} of the symbols the matching build names once.
 
-    Reads the symbol table with struct, since pyelftools takes half a second
-    over the game's thousands of symbols.
+    The symbols are those of REFERENCED_TYPES. Reads the symbol table with
+    struct, since pyelftools takes half a second over the game's thousands of
+    symbols.
     """
     if not LINKED_ELF.exists():
         return {}
@@ -175,7 +236,7 @@ def read_linked_functions() -> dict[str, int]:
     repeated: set[str] = set()
     for start in range(0, len(symbols), SYMBOL_SIZE):
         symbol = symbols[start : start + SYMBOL_SIZE]
-        if symbol[ST_INFO] & SYMBOL_TYPE_MASK != STT_FUNC:
+        if symbol[ST_INFO] & SYMBOL_TYPE_MASK not in REFERENCED_TYPES:
             continue
         name_start = read_field(symbol, ST_NAME, WORD_SIZE)
         name = names[name_start : names.index(0, name_start)].decode()
@@ -187,50 +248,46 @@ def read_linked_functions() -> dict[str, int]:
     }
 
 
-@functools.cache
-def read_linked_addresses() -> frozenset[int]:
-    """Return the addresses of the functions read_linked_functions names."""
-    return frozenset(read_linked_functions().values())
-
-
-def get_call_field(address: int) -> int:
-    """Return a jal's target field for a call to ADDRESS."""
-    return (address >> 2) & JUMP_TARGET_MASK
-
-
-def mask_target_jump(word: int) -> int:
-    """Mask a jump's target, unless it calls a function the ELF names.
-
-    The functions are those read_linked_functions names.
-    """
-    if word >> OPCODE_SHIFT == JAL_OPCODE:
-        address = CODE_REGION | (word & JUMP_TARGET_MASK) << 2
-        if address in read_linked_addresses():
-            return word
-    return mask_jump(word)
+def read_listing(listing: list[tuple[int, int, str]]) -> Routine:
+    """Return the routine of a splat LISTING of (address, word, text)."""
+    start = listing[0][0] if listing else 0
+    words: list[int] = []
+    references: list[int | None] = []
+    jumps: dict[int, int] = {}
+    for index, (address, word, text) in enumerate(listing):
+        reference = None
+        relocated_mask = 0
+        if "%hi(" in text or "%lo(" in text:
+            reference = word & IMMEDIATE_MASK
+            relocated_mask = IMMEDIATE_MASK
+        elif word >> OPCODE_SHIFT == JAL_OPCODE:
+            reference = word & JUMP_TARGET_MASK
+        elif word >> OPCODE_SHIFT == J_OPCODE:
+            target = address & JUMP_REGION_MASK | (word & JUMP_TARGET_MASK) << 2
+            jumps[index] = (target - start) // WORD_SIZE
+        words.append(word & ~relocated_mask)
+        references.append(reference)
+    return build_routine(words, jumps, references)
 
 
 def read_target_functions(asm_path: StrPath) -> Functions:
-    """Return {name: [masked words]} for each function in a splat asm file."""
-    functions: Functions = {}
-    current: list[int] | None = None
+    """Return {name: routine} of each function in a splat asm file."""
+    listings: dict[str, list[tuple[int, int, str]]] = {}
+    current: list[tuple[int, int, str]] | None = None
     with Path(asm_path).open() as asm_file:
         for line in asm_file:
             match = GLABEL_RE.match(line)
             if match:
-                current = functions.setdefault(match.group(1), [])
+                current = listings.setdefault(match.group(1), [])
                 continue
             if ENDLABEL_RE.match(line):
                 current = None
                 continue
             match = INSN_RE.match(line)
             if match and current is not None:
-                word = int(match.group(1), 16)
-                text = match.group(2)
-                if "%hi(" in text or "%lo(" in text:
-                    word &= ~IMMEDIATE_MASK
-                current.append(mask_target_jump(word))
-    return functions
+                address, word, text = match.groups()
+                current.append((int(address, 16), int(word, 16), text))
+    return {name: read_listing(listing) for name, listing in listings.items()}
 
 
 # The one work directory, made on first use; a list so that it can be set
@@ -449,46 +506,135 @@ def read_function_spans(symbols: SymbolTableSection, text_index: int) -> Spans:
     """Return where each function in the .text at TEXT_INDEX starts and ends."""
     spans: Spans = {}
     for symbol in symbols.iter_symbols():
-        info = read_entry_field(symbol.entry, "st_info")
-        if not isinstance(info, Container):
+        if read_symbol_type(symbol) != "STT_FUNC":
             continue
-        is_function = read_entry_field(info, "type") == "STT_FUNC"
-        section_index = read_entry_field(symbol.entry, "st_shndx")
-        if is_function and section_index == text_index:
+        if read_entry_field(symbol.entry, "st_shndx") == text_index:
             start = read_entry_int(symbol.entry, "st_value") // WORD_SIZE
             size = read_entry_int(symbol.entry, "st_size") // WORD_SIZE
             spans[start] = (symbol.name, size)
     return spans
 
 
-def mask_relocations(
-    words: list[int], elf: ELFFile, symbols: SymbolTableSection, spans: Spans
-) -> None:
-    """Mask the relocated fields of WORDS.
+def read_symbol_type(symbol: Symbol) -> object:
+    """Return a symbol's type, such as "STT_FUNC"."""
+    info = read_entry_field(symbol.entry, "st_info")
+    return read_entry_field(info, "type") if isinstance(info, Container) else None
 
-    The calls to functions that read_linked_functions names keep their target.
+
+# {section index: ([start of each symbol], [(start, size, name)])}, in order
+Holders = dict[int, tuple[list[int], list[tuple[int, int, str]]]]
+
+
+def read_holders(symbols: SymbolTableSection) -> Holders:
+    """Return the named symbols an object defines, by section."""
+    found: dict[int, list[tuple[int, int, str]]] = {}
+    for symbol in symbols.iter_symbols():
+        section_index = read_entry_field(symbol.entry, "st_shndx")
+        if not symbol.name or not isinstance(section_index, int):
+            continue
+        if read_symbol_type(symbol) in REFERENCED_TYPE_NAMES:
+            start = read_entry_int(symbol.entry, "st_value")
+            size = read_entry_int(symbol.entry, "st_size")
+            found.setdefault(section_index, []).append((start, size, symbol.name))
+    holders: Holders = {}
+    for section_index, held in found.items():
+        held.sort()
+        holders[section_index] = ([start for start, _, _ in held], held)
+    return holders
+
+
+def get_linked_address(symbol: Symbol, addend: int, holders: Holders) -> int | None:
+    """Return the matching build's address of SYMBOL plus ADDEND, if it has one.
+
+    A relocation against a section, as one to a static variable is, takes the
+    address from the object's symbol that holds it.
     """
+    name, offset = symbol.name, addend
+    if read_symbol_type(symbol) == "STT_SECTION":
+        section_index = read_entry_field(symbol.entry, "st_shndx")
+        if not isinstance(section_index, int) or section_index not in holders:
+            return None
+        starts, held = holders[section_index]
+        position = bisect.bisect_right(starts, addend) - 1
+        if position < 0:
+            return None
+        start, size, name = held[position]
+        offset = addend - start
+        if offset >= max(size, 1):
+            return None
+    address = read_linked_symbols().get(LABEL_NUMBER_RE.sub("", name))
+    return None if address is None else address + offset
+
+
+def sign_extend_half(half: int) -> int:
+    """Return the 16-bit HALF as a signed number."""
+    return half - ((half & HIGH_HALF_ROUNDING) << 1)
+
+
+@dataclass
+class Relocated:
+    """What relocate finds in an object's .text."""
+
+    # The value each relocated field takes in the matching build, or None
+    references: list[int | None]
+    # {word: destination word} of the jumps within .text
+    jumps: dict[int, int]
+
+
+def relocate(words: list[int], elf: ELFFile, symbols: SymbolTableSection) -> Relocated:
+    """Mask the relocated halves of WORDS and find what their fields refer to.
+
+    A %lo half is paired with the %hi halves before it against the same
+    symbol, as the linker pairs them, to give the address they make.
+    """
+    relocated = Relocated([None] * len(words), {})
     relocations = elf.get_section_by_name(".rel.text")
     if not isinstance(relocations, RelocationSection):
-        return
-    linked = read_linked_functions()
+        return relocated
+    holders = read_holders(symbols)
+    text_index = elf.get_section_index(".text")
+    references = relocated.references
+    # {symbol index: the %hi halves that wait for their %lo}
+    waiting: dict[int, list[int]] = {}
+    # {symbol index: the latest %hi half's field}
+    high_fields: dict[int, int] = {}
     for reloc in relocations.iter_relocations():
         kind = read_entry_int(reloc.entry, "r_info_type")
         index = read_entry_int(reloc.entry, "r_offset") // WORD_SIZE
-        callee = ""
-        if kind == R_MIPS_26 and words[index] >> OPCODE_SHIFT == JAL_OPCODE:
-            # A call to a static function is made relative to .text, with the
-            # function's word in the field
-            symbol = symbols.get_symbol(read_entry_int(reloc.entry, "r_info_sym"))
-            local = spans.get(words[index] & JUMP_TARGET_MASK, ("", 0))
-            callee = (symbol.name or local[0]).split(".")[0]
-        words[index] = mask_jump(words[index] & ~RELOC_MASKS.get(kind, 0))
-        if callee in linked:
-            words[index] |= get_call_field(linked[callee])
+        symbol_index = read_entry_int(reloc.entry, "r_info_sym")
+        symbol = symbols.get_symbol(symbol_index)
+        word = words[index]
+        if kind == R_MIPS_HI16:
+            waiting.setdefault(symbol_index, []).append(index)
+            high_fields[symbol_index] = word & IMMEDIATE_MASK
+            words[index] = word & ~IMMEDIATE_MASK
+        elif kind == R_MIPS_LO16:
+            addend = (high_fields.get(symbol_index, 0) << HALF_SHIFT) + (
+                sign_extend_half(word & IMMEDIATE_MASK)
+            )
+            address = get_linked_address(symbol, addend, holders)
+            if address is not None:
+                references[index] = address & IMMEDIATE_MASK
+                high = (address + HIGH_HALF_ROUNDING) >> HALF_SHIFT & IMMEDIATE_MASK
+                for high_index in waiting.get(symbol_index, []):
+                    references[high_index] = high
+            _ = waiting.pop(symbol_index, None)
+            words[index] = word & ~IMMEDIATE_MASK
+        elif kind == R_MIPS_26:
+            addend = (word & JUMP_TARGET_MASK) * WORD_SIZE
+            is_local = read_entry_field(symbol.entry, "st_shndx") == text_index
+            if word >> OPCODE_SHIFT == J_OPCODE and is_local:
+                target = read_entry_int(symbol.entry, "st_value") + addend
+                relocated.jumps[index] = target // WORD_SIZE
+                continue
+            address = get_linked_address(symbol, addend, holders)
+            if address is not None:
+                references[index] = address // WORD_SIZE & JUMP_TARGET_MASK
+    return relocated
 
 
 def read_object_functions(elf: ELFFile) -> Functions:
-    """Return {name: [masked words]} for each function in an object's .text."""
+    """Return {name: routine} of each function in an object's .text."""
     text_index = elf.get_section_index(".text")
     symbols = elf.get_section_by_name(".symtab")
     if text_index is None or not isinstance(symbols, SymbolTableSection):
@@ -498,63 +644,152 @@ def read_object_functions(elf: ELFFile) -> Functions:
         int.from_bytes(text[i : i + WORD_SIZE], "big")
         for i in range(0, len(text), WORD_SIZE)
     ]
-    spans = read_function_spans(symbols, text_index)
-    mask_relocations(words, elf, symbols, spans)
-    # The jumps that carry no relocation, to local labels
-    words = [
-        word if word >> OPCODE_SHIFT == JAL_OPCODE else mask_jump(word)
-        for word in words
-    ]
-    return {
-        name.split(".")[0]: words[start : start + size]
-        for start, (name, size) in spans.items()
-    }
+    relocated = relocate(words, elf, symbols)
+    functions: Functions = {}
+    for start, (name, size) in read_function_spans(symbols, text_index).items():
+        end = start + size
+        jumps = {
+            index - start: target - start
+            for index, target in relocated.jumps.items()
+            if start <= index < end
+        }
+        functions[name.split(".")[0]] = build_routine(
+            words[start:end], jumps, relocated.references[start:end]
+        )
+    return functions
 
 
-def score(target: list[int], compiled: list[int]) -> float:
-    """Return the fraction of words the two functions share, in order."""
-    if target == compiled:
-        return 1.0
-    matcher = difflib.SequenceMatcher(None, target, compiled, autojunk=False)
-    return matcher.ratio()
+# A row of two routines' instructions, as pair_rows pairs them: the index of
+# each side's instruction, or None where the other side's has no pair
+Row = tuple[int | None, int | None]
 
 
-def count_differences(target: list[int], compiled: list[int]) -> int:
-    """Return how many words, on either side, fall outside the shared runs."""
-    matcher = difflib.SequenceMatcher(None, target, compiled, autojunk=False)
-    shared = sum(block.size for block in matcher.get_matching_blocks())
-    return len(target) + len(compiled) - 2 * shared
+def pair_rows(opcodes: Sequence[tuple[str, int, int, int, int]]) -> list[Row]:
+    """Return the rows of a matcher's OPCODES, pairing changed runs in order."""
+    rows: list[Row] = []
+    for _, start1, end1, start2, end2 in opcodes:
+        rows += itertools.zip_longest(range(start1, end1), range(start2, end2))
+    return rows
 
 
-def describe(target: list[int], compiled: list[int]) -> str:
+@dataclass
+class Pairing:
+    """How ROWS pair the instructions of two routines."""
+
+    target: Routine
+    compiled: Routine
+    rows: list[Row]
+    # {instruction index: row} of each side
+    target_rows: dict[int | None, int] = field(init=False)
+    compiled_rows: dict[int | None, int] = field(init=False)
+
+    def __post_init__(self) -> None:
+        """Index the rows by each side's instructions."""
+        self.target_rows = {pair[0]: row for row, pair in enumerate(self.rows)}
+        self.compiled_rows = {pair[1]: row for row, pair in enumerate(self.rows)}
+
+    def get_row(self, rows: dict[int | None, int], index: int, length: int) -> int:
+        """Return the row of instruction INDEX of a routine of LENGTH.
+
+        An index past the routine takes the rows past the last.
+        """
+        return rows.get(index, len(self.rows) + index - length)
+
+    def has_same_places(self, target_index: int, compiled_index: int) -> bool:
+        """Whether the paired instructions go to and refer to the same places."""
+        target_reference = self.target.references[target_index]
+        compiled_reference = self.compiled.references[compiled_index]
+        if None not in (target_reference, compiled_reference) and (
+            target_reference != compiled_reference
+        ):
+            return False
+        target_destination = self.target.destinations[target_index]
+        compiled_destination = self.compiled.destinations[compiled_index]
+        if target_destination is None or compiled_destination is None:
+            return True
+        return self.get_row(
+            self.target_rows, target_destination, len(self.target.words)
+        ) == self.get_row(
+            self.compiled_rows, compiled_destination, len(self.compiled.words)
+        )
+
+    def is_equal(self, row: Row) -> bool:
+        """Whether ROW pairs two equal instructions."""
+        target_index, compiled_index = row
+        if target_index is None or compiled_index is None:
+            return False
+        if self.target.words[target_index] != self.compiled.words[compiled_index]:
+            return False
+        return self.has_same_places(target_index, compiled_index)
+
+
+def pair_words(target: Routine, compiled: Routine) -> Pairing:
+    """Pair two routines' instructions by their masked words."""
+    matcher = difflib.SequenceMatcher(
+        None, target.words, compiled.words, autojunk=False
+    )
+    return Pairing(target, compiled, pair_rows(matcher.get_opcodes()))
+
+
+def count_differences(target: Routine, compiled: Routine) -> int:
+    """Return how many instructions, on either side, have no equal pair."""
+    pairing = pair_words(target, compiled)
+    shared = sum(map(pairing.is_equal, pairing.rows))
+    return len(target.words) + len(compiled.words) - 2 * shared
+
+
+def describe(target: Routine, compiled: Routine) -> str:
     """Return the score and, short of a match, the count of differing words."""
-    value = score(target, compiled)
-    if value == 1.0:
-        return f"{value:.3f} OK"
-    return f"{value:.3f} ({count_differences(target, compiled)} differ)"
+    differences = count_differences(target, compiled)
+    total = len(target.words) + len(compiled.words)
+    score = 1 - differences / total if total else 1.0
+    if not differences:
+        return f"{score:.3f} OK"
+    return f"{score:.3f} ({differences} differ)"
 
 
-def disassemble(word: int) -> str:
-    """Return the text of one instruction."""
-    return rabbitizer.Instruction(word).disassemble()
+def disassemble(routine: Routine, index: int) -> str:
+    """Return the text of one of ROUTINE's instructions.
+
+    A relocated field shows its value in the matching build, and a branch
+    or jump within the routine its destination as @INDEX.
+    """
+    word = routine.words[index]
+    reference = routine.references[index]
+    text = rabbitizer.Instruction(word | (reference or 0)).disassemble()
+    destination = routine.destinations[index]
+    if destination is None:
+        return text
+    operands = text.rsplit(maxsplit=1)[0] if is_jump(word) else text.split(". +")[0]
+    return f"{operands.rstrip(', ')} @{destination}"
 
 
-def print_diff(target: list[int], compiled: list[int]) -> None:
+def print_diff(target: Routine, compiled: Routine) -> None:
     """Print the first few runs of instructions that differ."""
-    matcher = difflib.SequenceMatcher(None, target, compiled, autojunk=False)
-    hunks = [opcode for opcode in matcher.get_opcodes() if opcode[0] != "equal"]
-    for _, t1, t2, c1, c2 in hunks[:MAX_DIFF_HUNKS]:
-        for index in range(max(0, t1 - DIFF_CONTEXT), t1):
-            print(f"   {index:4} {disassemble(target[index])}")
-        for index in range(t1, t2):
-            print(f"  -{index:4} {disassemble(target[index])}")
-        for index in range(c1, c2):
-            print(f"  +{index:4} {disassemble(compiled[index])}")
-        for index in range(t2, min(len(target), t2 + DIFF_CONTEXT)):
-            print(f"   {index:4} {disassemble(target[index])}")
+    pairing = pair_words(target, compiled)
+    runs = [
+        list(group)
+        for is_equal, group in itertools.groupby(pairing.rows, pairing.is_equal)
+        if not is_equal
+    ]
+    for run in runs[:MAX_DIFF_HUNKS]:
+        target_indices = [index for index, _ in run if index is not None]
+        compiled_indices = [index for _, index in run if index is not None]
+        first = target_indices[0] if target_indices else None
+        last = target_indices[-1] + 1 if target_indices else None
+        if first is not None:
+            for index in range(max(0, first - DIFF_CONTEXT), first):
+                print(f"   {index:4} {disassemble(target, index)}")
+        for index in target_indices:
+            print(f"  -{index:4} {disassemble(target, index)}")
+        for index in compiled_indices:
+            print(f"  +{index:4} {disassemble(compiled, index)}")
+        if last is not None:
+            for index in range(last, min(len(target.words), last + DIFF_CONTEXT)):
+                print(f"   {index:4} {disassemble(target, index)}")
         print("  --")
-    if len(hunks) > MAX_DIFF_HUNKS:
-        print(f"  ({len(hunks) - MAX_DIFF_HUNKS} more)")
+    if len(runs) > MAX_DIFF_HUNKS:
+        print(f"  ({len(runs) - MAX_DIFF_HUNKS} more)")
 
 
 def main() -> None:
@@ -577,7 +812,7 @@ def main() -> None:
             print(f"{name} missing")
             continue
         print(f"{name} {describe(targets[name], compiled[name])}")
-        if verbose and targets[name] != compiled[name]:
+        if verbose and count_differences(targets[name], compiled[name]):
             print_diff(targets[name], compiled[name])
 
 

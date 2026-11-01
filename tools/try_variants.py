@@ -49,7 +49,11 @@ def find_definition(source: str, function: str) -> tuple[int, int] | None:
 
 
 def score_variant(
-    source: str, c_dir: Path, optflags: list[str], target: list[int], function: str
+    source: str,
+    c_dir: Path,
+    optflags: list[str],
+    target: fncompare.Routine,
+    function: str,
 ) -> str:
     """Compile one variant and return its score, or why it has none."""
     with tempfile.NamedTemporaryFile(
