@@ -3633,7 +3633,7 @@ void DrawShotEffectsHud(Gfx** displayListHead);
  * and scores, the shot panel's labels, distances and club, and the debugging
  * aids that game flags turn on
  *
- * Doesn't match: 131 words differ.
+ * Doesn't match: 125 words differ.
  */
 #ifdef NON_MATCHING
 void DrawRoundHud(CameraView* view) {
@@ -3651,6 +3651,7 @@ void DrawRoundHud(CameraView* view) {
   f32 shotLength;
   s32 contestDistance;
   s32 totalSeconds;
+  s32 scoreboardLeft;
 
   club = GetClub(
       g_Players[g_CurrentShot.playerIndex].clubs[g_CurrentShot.clubSlot]);
@@ -3737,7 +3738,8 @@ void DrawRoundHud(CameraView* view) {
         gDPSetTextureFilter(g_DisplayListHead++, G_TF_BILERP);
         gDPSetPrimColor(g_DisplayListHead++, 0, 0, 127, 127, 127, 127);
         gDPPipeSync(g_DisplayListHead++);
-        gSPScisTextureRectangle(g_DisplayListHead++, QuarterPixels(scoreboardX),
+        scoreboardLeft = QuarterPixels(scoreboardX);
+        gSPScisTextureRectangle(g_DisplayListHead++, scoreboardLeft,
             QuarterPixels(SCOREBOARD_Y + i * SCOREBOARD_ROW_HEIGHT),
             QuarterPixels(scoreboardX + SMALL_FACE_WIDTH),
             QuarterPixels(
