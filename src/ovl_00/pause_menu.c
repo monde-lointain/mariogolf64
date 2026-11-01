@@ -1141,7 +1141,7 @@ s32 UpdateChoiceBox(ControllerState* controller) {
   return CHOICE_RESULT_NONE;
 }
 
-/* Doesn't match: 77 words differ. */
+/* Doesn't match: 73 words differ. */
 #ifdef NON_MATCHING
 void DrawChoiceBox(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
@@ -1157,6 +1157,7 @@ void DrawChoiceBox(Gfx** displayListHead) {
   s32 cursorY;
   s32 labelsTop;
   s16 labelY;
+  s32 boxRight;
 
   f_ChoiceGlowAngle += M_PI / 18;
   halfWidth = box->halfWidth + CHOICE_BOX_MARGIN;
@@ -1192,9 +1193,9 @@ void DrawChoiceBox(Gfx** displayListHead) {
           ImageBody(f_MenuCloudImage) + (i * CHOICE_BOX_CLOUD_PART_SIZE),
           G_IM_FMT_I, CHOICE_BOX_CLOUD_WIDTH, CHOICE_BOX_CLOUD_HEIGHT, 0, 0, 0,
           0, 0, 0, 0);
+      boxRight = QuarterPixels(CHOICE_BOX_CENTER_X + halfWidth);
       DrawTextureRect(&gfx, QuarterPixels(CHOICE_BOX_CENTER_X - halfWidth),
-          QuarterPixels(CHOICE_BOX_TOP),
-          QuarterPixels(CHOICE_BOX_CENTER_X + halfWidth),
+          QuarterPixels(CHOICE_BOX_TOP), boxRight,
           QuarterPixels(CHOICE_BOX_BOTTOM), G_TX_RENDERTILE, 0, 0,
           (CHOICE_BOX_CLOUD_WIDTH << 10) / 2 / halfWidth,
           CHOICE_BOX_CLOUD_DTDY);
