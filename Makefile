@@ -223,7 +223,8 @@ endif
 # Per-object compiler flags
 $(BUILD_DIR)/$(LIBNUSYS_DIR)/nusched.c.o: LIBNUSYS_DEFINES += -DNU_DEBUG
 
-.PHONY: all extract clean distclean setup tools format lint typecheck pycheck check-shiftable
+.PHONY: all extract clean distclean setup tools format lint typecheck pycheck check-shiftable \
+        progress
 
 all: $(ROM)
 ifneq ($(COMPARE),0)
@@ -249,6 +250,22 @@ pycheck:
 	.venv/bin/ruff check --quiet
 	.venv/bin/basedpyright --level warning
 	.venv/bin/vulture
+
+# Measures the matching build against the drafts' build and draws the
+# progress map in build/progress. Each run adds the measured commit to the
+# history kept there.
+PROGRESS_DIR := build/progress
+DRAFTS_DIR   := build/nonmatching
+PROGRESS_O_FILES := $(filter $(BUILD_DIR)/src/% $(BUILD_DIR)/lib/%,$(O_FILES))
+
+progress: $(ROM)
+	$(MAKE) NON_MATCHING=1
+	@mkdir -p $(PROGRESS_DIR)
+	$(PYTHON) tools/progress_report.py $(DRAFTS_DIR) $(PROGRESS_O_FILES) \
+	    > $(PROGRESS_DIR)/report.json
+	$(PYTHON) tools/progress_map.py $(PROGRESS_DIR)/report.json -o $(PROGRESS_DIR) \
+	    --config tools/progress_map.json --history $(PROGRESS_DIR)/history.json \
+	    --commit $$(git rev-parse HEAD) --date $$(git log -1 --format=%cI)
 
 # Links this build's objects in the shiftable layout, which fails on each
 # reference that holds only while the code and data keep their original
