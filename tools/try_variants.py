@@ -75,7 +75,8 @@ def score_variant(
     finally:
         Path(variant.name).unlink()
     if compiled is None:
-        return error.strip()[-ERROR_TAIL_LENGTH:]
+        # One line per variant, so that each score stays beside its number
+        return " | ".join(error.strip().splitlines())[-ERROR_TAIL_LENGTH:]
     if function not in compiled:
         return f"{function} missing"
     return f"{function} {fncompare.describe(target, compiled[function])}"
