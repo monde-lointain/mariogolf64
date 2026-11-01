@@ -4788,7 +4788,7 @@ void DrawUpDownArrows(Gfx** displayListHead, s32 centerY);
  *
  * Doesn't match: the boards' strips schedule their address loads differently,
  * and values take other registers through the boards' and the players' loops.
- * 189 words differ.
+ * 157 words differ.
  */
 #ifdef NON_MATCHING
 void DrawModeSelect(Gfx** displayListHead) {
@@ -4820,8 +4820,8 @@ void DrawModeSelect(Gfx** displayListHead) {
   s32 labelIndex;
   s32 labelX;
   void* image;
-  /* The board and strip index in the loops, then the won count's shift, to
-   * match */
+  /* The board and strip index in the loops, then the chosen mode, then the
+   * won count's shift, to match */
   s32 countShift;
   s32 courseIndex;
   s32 holeIndex;
@@ -5043,10 +5043,10 @@ void DrawModeSelect(Gfx** displayListHead) {
     }
   }
 
+  countShift = g_MenuMemory.modeChoice;
   gDPLoadTLUT_pal16(
       gfx++, 0, TextureAddress(ImageBody(g_ImageSlots[f_ImageSlotIndex])));
-  labelIndex =
-      f_ModeChoiceIcons[g_ChosenPlayerCount - 1][g_MenuMemory.modeChoice];
+  labelIndex = f_ModeChoiceIcons[g_ChosenPlayerCount - 1][countShift];
   gDPLoadTextureBlock_4b(gfx++,
       TextureAddress(ImageTexels(g_ImageSlots[f_ImageSlotIndex]) +
           (labelIndex * MODE_LABEL_IMAGE_SIZE)),
