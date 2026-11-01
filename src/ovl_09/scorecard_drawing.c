@@ -2118,7 +2118,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard_drawing", DrawLeaderboardPage);
  * loops add the column's offset to x after adding the cells' left edge, where
  * this adds it first, and the target keeps the address of
  * g_GameState.holeSelection in a saved register while it draws the faces.
- * 938 words differ.
+ * 894 words differ.
  */
 #ifdef NON_MATCHING
 void DrawScoresPage(Gfx** displayListHead) {
@@ -2138,9 +2138,6 @@ void DrawScoresPage(Gfx** displayListHead) {
   Boolean isOverShown;
   Boolean isBadgesShown;
   s32 backPar = 0;
-  s32 shownHoleCount;
-  s32 frontTotal;
-  s32 backTotal;
   s32 standing;
   s32 colorIndex;
   s32 overPar;
@@ -2769,6 +2766,10 @@ void DrawScoresPage(Gfx** displayListHead) {
 
   SetTextColor(&gfx, 0xFF, 0xFF, 0xFF);
   for (i = 0; i != g_GameState.playerCount; i++) {
+    s32 shownHoleCount;
+    s32 backTotal;
+    s32 frontTotal;
+
     standing = 0;
     colorIndex = PAR_COLOR;
     backTotal = 0;

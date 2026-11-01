@@ -562,7 +562,7 @@ void UpdateRingShotRecords(void) {
 
 /*
  * Doesn't match: the original gives several values other saved registers,
- * and keeps memory on the stack. 54 words differ.
+ * and keeps memory on the stack. 42 words differ.
  */
 #ifdef NON_MATCHING
 void DrawRingShotRecords(Gfx** displayListHead) {
@@ -586,9 +586,6 @@ void DrawRingShotRecords(Gfx** displayListHead) {
   s32 red;
   s32 green;
   s32 blue;
-  s32 redSwing;
-  s32 greenSwing;
-  s32 blueSwing;
   s16 replayCourse;
   s16 replayHole;
 
@@ -771,6 +768,10 @@ void DrawRingShotRecords(Gfx** displayListHead) {
   if (memory->ringShotRow == RING_SHOT_REPLAY_ROW) {
     for (index = 0; index != SAVE_MENU_SLOT_COUNT; index++) {
       if (f_RecordedReplaySlots[index] != -1) {
+        s32 redSwing;
+        s32 greenSwing;
+        s32 blueSwing;
+
         f_ReplayHuePhase += REPLAY_HUE_STEP;
 
         redSwing = sinf(f_ReplayHuePhase) * REPLAY_HUE_SWING;
