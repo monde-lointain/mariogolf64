@@ -2333,9 +2333,8 @@ const CharacterModel g_OtherCharacterModels[OTHER_CHARACTER_MODEL_COUNT] = {
  * interpolated between the keys around the frame, or held at the nearest key
  * outside them or past g_CurrentAnimationEndFrame.
  *
- * Doesn't match: GCC keeps frame in a saved floating-point register, where
- * the original keeps it in a scratch one, which shifts the other
- * floating-point registers. 230 words differ.
+ * Doesn't match: GCC keeps frame in $f6, where the original keeps it in $f2,
+ * which shifts the other floating-point registers. 220 words differ.
  */
 #ifdef NON_MATCHING
 void AnimateCharacterJoints(u32 slotIndex) {
@@ -2348,6 +2347,7 @@ void AnimateCharacterJoints(u32 slotIndex) {
   JointAnimation* joint;
   Mtx* matrix;
   f32 frame;
+  f32 rotationFrame;
   f32 x;
   f32 y;
   f32 z;
@@ -2443,12 +2443,12 @@ void AnimateCharacterJoints(u32 slotIndex) {
 
     guTranslateF(translationMatrix, x, y, z);
 
-    frame = g_CurrentAnimationFrame;
+    rotationFrame = g_CurrentAnimationFrame;
     isInterpolated = TRUE;
-    if (joint->rotationSpan.endFrame < frame ||
-        frame < joint->rotationSpan.startFrame) {
+    if (joint->rotationSpan.endFrame < rotationFrame ||
+        rotationFrame < joint->rotationSpan.startFrame) {
       keyIndex = 1;
-      if (frame < joint->rotationFrames[0]) {
+      if (rotationFrame < joint->rotationFrames[0]) {
         isInterpolated = FALSE;
         rotation[0] = joint->rotations[0][0] * QUATERNION_SCALE;
         rotation[1] = joint->rotations[0][1] * QUATERNION_SCALE;
@@ -2456,7 +2456,7 @@ void AnimateCharacterJoints(u32 slotIndex) {
         rotation[3] = joint->rotations[0][3] * QUATERNION_SCALE;
       } else {
         for (; keyIndex < joint->rotationKeyCount; keyIndex++) {
-          if (frame < joint->rotationFrames[keyIndex]) {
+          if (rotationFrame < joint->rotationFrames[keyIndex]) {
             joint->rotationSpan.index = keyIndex - 1;
             joint->rotationSpan.startFrame =
                 joint->rotationFrames[keyIndex - 1];
