@@ -1833,7 +1833,7 @@ void DrawSavedMiniGolfImage(Gfx** displayListHead);
  *
  * Doesn't match: the original keeps the menu memory pointer on the stack
  * and the mode icons' texel step in a saved register, and doesn't keep
- * the degrees-to-radians factor in a register. 483 words differ.
+ * the degrees-to-radians factor in a register. 463 words differ.
  */
 #ifdef NON_MATCHING
 void DrawSavedGames(Gfx** displayListHead) {
@@ -1869,6 +1869,8 @@ void DrawSavedGames(Gfx** displayListHead) {
   s32* chosenMode;
   s32* labelOffset;
   s32 boardDegrees;
+  u32 modeLabelTexels;
+  s32 slotOffset;
 
   DrawLargeBannerBackdropLayers(&gfx, SAVED_GAMES_BACKDROP_LAYERS);
   BuildDynamicTextures(&gfx);
@@ -1902,8 +1904,8 @@ void DrawSavedGames(Gfx** displayListHead) {
   for (index = 0; index != SAVED_GAME_COUNT; index++) {
     ScreenPoint point;
 
-    angle = -DegreesToRadians(
-        (((memory->savedGameIndex - index) % SAVED_GAME_COUNT) * boardDegrees) +
+    slotOffset = (memory->savedGameIndex - index) % SAVED_GAME_COUNT;
+    angle = -DegreesToRadians((slotOffset * boardDegrees) +
         (memory->savedGameTurn * BOARD_TURN_STEP_DEGREES));
     circleX = sinf(angle) * BOARD_RADIUS_X;
     if (ProjectPoint(circleX, 0.0f, cosf(angle) * BOARD_RADIUS_Z, &point) < 0) {
@@ -2062,10 +2064,10 @@ void DrawSavedGames(Gfx** displayListHead) {
   if (*chosenMode != NO_SAVE_MENU_MODE) {
     labelOffset = &f_GameModeLabelOffsets[f_SaveMenuModeIcons[*chosenMode]];
     gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(f_GameModeLabels)));
-    gDPLoadTextureBlock_4b(gfx++,
-        TextureAddress(ImageTexels(f_GameModeLabels) +
-            (f_SaveMenuModeIcons[*chosenMode] * GAME_MODE_LABEL_IMAGE_SIZE)),
-        G_IM_FMT_CI, GAME_MODE_LABEL_WIDTH, GAME_MODE_LABEL_HEIGHT, 0,
+    modeLabelTexels = TextureAddress(ImageTexels(f_GameModeLabels) +
+        (f_SaveMenuModeIcons[*chosenMode] * GAME_MODE_LABEL_IMAGE_SIZE));
+    gDPLoadTextureBlock_4b(gfx++, modeLabelTexels, G_IM_FMT_CI,
+        GAME_MODE_LABEL_WIDTH, GAME_MODE_LABEL_HEIGHT, 0,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(gfx++);
