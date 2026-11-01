@@ -3131,7 +3131,9 @@ INCLUDE_ASM("asm/nonmatchings/hole_display", CaptureHudAnimationFrame);
 
 /*
  *
- * Doesn't match: 96 words differ.
+ * Doesn't match: the strip loop schedules its display-list stores in
+ * another order, and the column and word index take other
+ * registers. 50 words differ.
  */
 #ifdef NON_MATCHING
 void DrawSliceAnimation(void) {
@@ -3168,18 +3170,20 @@ void DrawSliceAnimation(void) {
   for (slice = 0, sliceY = 0; slice != sliceCount; slice++) {
     y = sliceY;
     for (strip = 0; strip != SLICE_STRIP_COUNT; strip++) {
+      s32 left = column * SLICE_WIDTH;
+
       gDPLoadTextureBlock(g_DisplayListHead++,
           TextureAddress(&f_CapturedFrame[wordIndex]), G_IM_FMT_RGBA,
           G_IM_SIZ_16b, SLICE_WIDTH, SLICE_STRIP_HEIGHT, 0,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
       wordIndex += SLICE_STRIP_WORD_COUNT;
-      gSPTextureRectangle(g_DisplayListHead++, column * SLICE_WIDTH << 2,
-          QuarterPixels(y), QuarterPixels(column * SLICE_WIDTH + SLICE_WIDTH),
+      gSPTextureRectangle(g_DisplayListHead++, QuarterPixels(left),
+          QuarterPixels(y), QuarterPixels(left + SLICE_WIDTH),
           QuarterPixels(y + SLICE_STRIP_HEIGHT), G_TX_RENDERTILE, 0, 0,
           TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       gDPPipeSync(g_DisplayListHead++);
-      IN_OWN_BLOCK(y += SLICE_STRIP_HEIGHT);
+      y += SLICE_STRIP_HEIGHT;
     }
 
     column++;
