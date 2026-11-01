@@ -4645,12 +4645,13 @@ void LoadOpeningLogo(void) {
  * the letter loops GCC works out the texel offset before stepping the display
  * list pointer, where the original steps it first, and in the falling letters'
  * loop it derives f_LogoLetters' address from another table's instead of
- * loading it. 276 words differ.
+ * loading it. 268 words differ.
  */
 #ifdef NON_MATCHING
 void DrawOpeningLogo(Gfx** displayListHead, Boolean isDrawn) {
   Gfx* gfx = *displayListHead;
   s32 texelsOffset;
+  s32 letterTexelsOffset; /* Kept apart, unlike the shine pass's, to match */
   s32 i;
   s32 j;
   Radians angle;
@@ -4847,14 +4848,15 @@ void DrawOpeningLogo(Gfx** displayListHead, Boolean isDrawn) {
     gDPPipeSync(gfx++);
     for (i = 0; i < LOGO_LETTER_COUNT; i++) {
       for (j = 0; j < LOGO_LETTER_HALF_COUNT; j++) {
-        texelsOffset = ((j + (i * LOGO_LETTER_HALF_COUNT)) * LOGO_LETTER_WIDTH *
-                           LOGO_LETTER_HALF_HEIGHT) +
+        letterTexelsOffset = ((j + (i * LOGO_LETTER_HALF_COUNT)) *
+                                 LOGO_LETTER_WIDTH * LOGO_LETTER_HALF_HEIGHT) +
             LARGE_PALETTED_TEXELS_OFFSET;
         gDPLoadTextureBlock(gfx++,
-            TextureAddress(f_LogoLetterImages + texelsOffset), G_IM_FMT_CI,
-            G_IM_SIZ_8b, LOGO_LETTER_WIDTH, LOGO_LETTER_HALF_HEIGHT, 0,
-            G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
-            G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+            TextureAddress(f_LogoLetterImages + letterTexelsOffset),
+            G_IM_FMT_CI, G_IM_SIZ_8b, LOGO_LETTER_WIDTH,
+            LOGO_LETTER_HALF_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
+            G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
+            G_TX_NOLOD);
         gSPMatrix(gfx++, PhysicalAddress(&g_ScreenOrthoMatrix),
             G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
         gSPMatrix(gfx++,
