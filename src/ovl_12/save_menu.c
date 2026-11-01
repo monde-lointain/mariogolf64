@@ -564,8 +564,6 @@ void CloseSaveMenu(void) {
       4, 0, 0, 0, 0, 0);
 }
 
-void AnimateModeIcons(Boolean isImmediate);
-
 /* Steps slot's mode icon to its next frame */
 static inline s32 NextIconFrame(s32 slot) {
   return ++f_IconFrames[slot];
@@ -575,28 +573,22 @@ static inline s32 NextIconFrame(s32 slot) {
  * Every few frames, or at once when told to, shows the next frame of the
  * chosen saved game's mode icon and the first frame of the others. Each
  * icon has two images, read into in turn.
- *
- * Doesn't match: GCC loads the tables' addresses into other registers, and
- * tests whether a saved game is valid with beqz instead of beql, which would
- * step to the next slot's images in the delay slot. 19 words differ.
  */
-#ifdef NON_MATCHING
 void AnimateModeIcons(Boolean isImmediate) {
   EncodedAsset encodedAsset;
   SaveData* save;
   SavedGame* game;
   s32 slot;
-  void** images;
 
   save = GetSaveData();
   if ((++f_IconFrameTimer >= ICON_FRAME_PERIOD) | (isImmediate == TRUE)) {
     f_IconFrameTimer = 0;
-    for (slot = 0, images = f_ModeIconImages[0]; slot != SAVED_GAME_COUNT;
-        slot++, images += 2) {
-      game = &save->savedGames[slot];
+    for (slot = 0; slot != SAVED_GAME_COUNT; slot++) {
       if (!save->savedGames[slot].isValid) {
         continue;
       }
+
+      game = &save->savedGames[slot];
 
       if (game->state.isMiniGolf) {
         if (f_CursorIndex == slot) {
@@ -612,7 +604,8 @@ void AnimateModeIcons(Boolean isImmediate) {
           OpenEncodedAsset(
               g_ModeIconAnimations[MODE_ICON_MINI_GOLF][0], &encodedAsset);
         }
-        ReadEncodedAsset(images[f_IconImageIndex], &encodedAsset);
+        ReadEncodedAsset(
+            f_ModeIconImages[slot][f_IconImageIndex], &encodedAsset);
       } else if (f_CursorIndex == slot) {
         if (g_ModeIconAnimations[f_ModeIcons[game->state.gameMode]]
                                 [NextIconFrame(slot)] == END_OF_ICON_FRAMES) {
@@ -622,22 +615,20 @@ void AnimateModeIcons(Boolean isImmediate) {
         OpenEncodedAsset(g_ModeIconAnimations[f_ModeIcons[game->state.gameMode]]
                                              [f_IconFrames[slot]],
             &encodedAsset);
-        ReadEncodedAsset(images[f_IconImageIndex], &encodedAsset);
+        ReadEncodedAsset(
+            f_ModeIconImages[slot][f_IconImageIndex], &encodedAsset);
       } else {
         OpenEncodedAsset(
             g_ModeIconAnimations[f_ModeIcons[game->state.gameMode]][0],
             &encodedAsset);
-        ReadEncodedAsset(images[f_IconImageIndex], &encodedAsset);
+        ReadEncodedAsset(
+            f_ModeIconImages[slot][f_IconImageIndex], &encodedAsset);
       }
     }
 
     f_IconImageIndex ^= 1;
   }
 }
-
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_12/save_menu", AnimateModeIcons);
-#endif
 
 /*
  * Draws the saved games: each row's panel, mode icon, golfers, mode,
