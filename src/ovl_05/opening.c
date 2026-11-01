@@ -5206,12 +5206,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_05/opening", DrawOpeningLogo);
  * Draws sparks flying out from a point once f_OpeningSparksState is set to
  * SPARKS_STARTING. The point is projected to the screen, and the sparks
  * are scaled down the further away it is.
- *
- * Doesn't match: the display list pointers spilled after the first and second
- * commands swap stack slots. None of 40 orders of the locals' declarations
- * fixes it. 8 words differ.
  */
-#ifdef NON_MATCHING
 void DrawOpeningSparks(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   ScreenPoint origin;
@@ -5222,6 +5217,8 @@ void DrawOpeningSparks(Gfx** displayListHead) {
   s32 depth;
   s32 sparkIndex;
   f32 speed;
+  Gfx* syncCommand;
+  Gfx* cycleTypeCommand;
 
   if (f_OpeningSparksState == SPARKS_STARTING) {
     depth = ProjectPoint(f_OpeningSparksOrigin[0], f_OpeningSparksOrigin[1],
@@ -5255,9 +5252,15 @@ void DrawOpeningSparks(Gfx** displayListHead) {
   }
 
   if (f_OpeningSparksState == SPARKS_FLYING) {
+    /*
+     * The original takes these two commands' slots in locals of their own,
+     * which orders the spilled pointers' stack slots
+     */
+    syncCommand = gfx++;
+    gDPPipeSync(syncCommand);
     gDPPipeSync(gfx++);
-    gDPPipeSync(gfx++);
-    gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+    cycleTypeCommand = gfx++;
+    gDPSetCycleType(cycleTypeCommand, G_CYC_1CYCLE);
     gDPPipeSync(gfx++);
     gDPSetAlphaDither(gfx++, G_AD_DISABLE);
     gDPPipeSync(gfx++);
@@ -5311,6 +5314,3 @@ void DrawOpeningSparks(Gfx** displayListHead) {
 
   *displayListHead = gfx;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_05/opening", DrawOpeningSparks);
-#endif
