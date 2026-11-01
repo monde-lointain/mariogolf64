@@ -1833,7 +1833,7 @@ void DrawSavedMiniGolfImage(Gfx** displayListHead);
  *
  * Doesn't match: the original keeps the menu memory pointer on the stack
  * and the mode icons' texel step in a saved register, and doesn't keep
- * the degrees-to-radians factor in a register. 453 words differ.
+ * the degrees-to-radians factor in a register. 431 words differ.
  */
 #ifdef NON_MATCHING
 void DrawSavedGames(Gfx** displayListHead) {
@@ -2127,10 +2127,7 @@ void DrawSavedGames(Gfx** displayListHead) {
     SetTextSlot(SAVED_GAME_HOLE_X, SAVED_GAME_HOLE_Y, MESSAGE_SAVED_GAME_HOLE,
         TEXT_SLOT_LARGE_FONT, 1, 0, 0xFF, 0xFF, 0xFF, 0xFF);
   } else if (GetWipeKind() == 0) {
-    if (f_AreControllersAssigned) {
-      SetTextSlot(CONTINUE_PROMPT_X, PROMPT_Y, MESSAGE_CONTINUE_PROMPT,
-          TEXT_SLOT_LARGE_FONT, 0, TEXT_FLAG_TYPED, 0xFF, 0xFF, 0xFF, 0xFF);
-    } else {
+    if (!f_AreControllersAssigned) {
       SetTextSlotValue(f_HumanPlayerIndices[f_AssignedHumanCount] + 1, 0, 0);
 
       /* The prompt names the player in the player's own color */
@@ -2156,6 +2153,9 @@ void DrawSavedGames(Gfx** displayListHead) {
         SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, index, 0, 0xFF,
             0xFF, 0xFF, 0xFF);
       }
+    } else {
+      SetTextSlot(CONTINUE_PROMPT_X, PROMPT_Y, MESSAGE_CONTINUE_PROMPT,
+          TEXT_SLOT_LARGE_FONT, 0, TEXT_FLAG_TYPED, 0xFF, 0xFF, 0xFF, 0xFF);
     }
   }
 
