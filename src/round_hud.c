@@ -814,7 +814,7 @@ void PrepareHoleDisplay(void) {
 /*
  * Lays out the wind flag and builds the projections the HUD draws with
  *
- * Doesn't match: 64 words differ.
+ * Doesn't match: 58 words differ.
  */
 #ifdef NON_MATCHING
 void InitRoundHud(void) {
@@ -842,8 +842,9 @@ void InitRoundHud(void) {
     }
   }
 
-  for (grid = 0; grid != MATRIX_BUFFER_COUNT; grid++) {
-    vertex = f_HoleFlagVertices[1][grid];
+  for (grid = MATRIX_BUFFER_COUNT;
+      grid != HOLE_FLAG_SIDE_COUNT * MATRIX_BUFFER_COUNT; grid++) {
+    vertex = HoleFlagGridVertices(grid);
     for (row = 0; row != HOLE_FLAG_ROW_COUNT; row++) {
       for (column = 0; column != HOLE_FLAG_COLUMN_COUNT; column++) {
         vertex->v.tc[TEXTURE_AXIS_S] =
