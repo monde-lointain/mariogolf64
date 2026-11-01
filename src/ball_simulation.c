@@ -221,7 +221,7 @@ void ResetBallSimulations(void) {
  * Doesn't match: the register allocation and instruction scheduling differ in
  * many places, and where the original recomputes abs.s for each use of a
  * float's absolute value, this code shares one abs.s or compiles a compare and
- * branch. 838 words differ.
+ * branch. 831 words differ.
  */
 #ifdef NON_MATCHING
 s32 StepBallSimulation(BallSimulation* simulation) {
@@ -1001,7 +1001,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
         hitPosition[AXIS_Y] =
             startY + (along * (velocity[AXIS_Y] * WALL_HIT_STEP_SHARE));
         hitPosition[AXIS_Z] =
-            startZ + (along * (velocity[AXIS_Z] * WALL_HIT_STEP_SHARE));
+            startZ + ((velocity[AXIS_Z] * WALL_HIT_STEP_SHARE) * along);
         if (wallFraction < 0.0f && fabsf(inwardSpeed) < WALL_ESCAPE_SPEED) {
           BallSpeed speed = sqrtf(squareX + squareZ);
 
@@ -1068,7 +1068,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
       simulation->position[AXIS_Y] =
           startY + (fraction * (velocity[AXIS_Y] * TRIANGLE_HIT_STEP_SHARE));
       simulation->position[AXIS_Z] =
-          startZ + (fraction * (velocity[AXIS_Z] * TRIANGLE_HIT_STEP_SHARE));
+          startZ + ((velocity[AXIS_Z] * TRIANGLE_HIT_STEP_SHARE) * fraction);
       substepCount += (fraction < EARLY_HIT_FRACTION) & (substepCount == 1);
       if (simulation->purpose == LAUNCH_PURPOSE_CLUB_TEST) {
         simulation->surface = SURFACE_FAIRWAY;
@@ -1166,8 +1166,8 @@ s32 StepBallSimulation(BallSimulation* simulation) {
           (simulation->state == BALL_STATE_ROLLING ||
               fabsf(impactSpeed) >= MAX_SKIP_IMPACT_SPEED ||
               fabsf(impactSpeed) <= MIN_SKIP_IMPACT_SPEED ||
-              sqrtf((velocity[AXIS_X] * velocity[AXIS_X]) +
-                  (velocity[AXIS_Z] * velocity[AXIS_Z])) *
+              sqrtf((velocity[AXIS_Z] * velocity[AXIS_Z]) +
+                  (velocity[AXIS_X] * velocity[AXIS_X])) *
                       SKIP_SPEED_RATIO <=
                   fabsf(impactSpeed))) {
         simulation->state = BALL_STATE_IN_WATER;
@@ -1885,10 +1885,9 @@ ROLLED:
         horizontalSpeed = sqrtf((relative[AXIS_X] * relative[AXIS_X]) +
             (relative[AXIS_Z] * relative[AXIS_Z]));
         sideSpinMagnitude = fabsf(sideSpin * SIDE_SPIN_SPEED_SCALE);
+        ratio = 0.0f;
         if (sideSpinMagnitude != 0.0f) {
           ratio = horizontalSpeed / sideSpinMagnitude;
-        } else {
-          ratio = 0.0f;
         }
 
         weight = 1.0f - (fabsf(ratio - 1.0f) * SIDE_SPIN_MISMATCH_FALLOFF);
