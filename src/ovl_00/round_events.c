@@ -2986,7 +2986,7 @@ void ShowWindFlyGuy(s32 show) {
  * The Fly Guy that warns of a strong wind, flying across the screen and
  * trailing a streak of wind
  *
- * Doesn't match: 90 words differ.
+ * Doesn't match: 86 words differ.
  */
 #ifdef NON_MATCHING
 void DrawWindFlyGuy(Gfx** displayListHead) {
