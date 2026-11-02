@@ -221,7 +221,7 @@ void ResetBallSimulations(void) {
  * Doesn't match: the register allocation and instruction scheduling differ in
  * many places, and where the original recomputes abs.s for each use of a
  * float's absolute value, this code shares one abs.s or compiles a compare and
- * branch. 813 words differ, 241 in shape.
+ * branch. 807 words differ, 241 in shape.
  */
 #ifdef NON_MATCHING
 s32 StepBallSimulation(BallSimulation* simulation) {
@@ -1064,7 +1064,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
       simulation->bounceCount++;
       GetTrianglePlane(&triangle, &plane);
       simulation->position[AXIS_X] =
-          startX + (fraction * (velocity[AXIS_X] * TRIANGLE_HIT_STEP_SHARE));
+          (fraction * (velocity[AXIS_X] * TRIANGLE_HIT_STEP_SHARE)) + startX;
       simulation->position[AXIS_Y] =
           startY + (fraction * (velocity[AXIS_Y] * TRIANGLE_HIT_STEP_SHARE));
       simulation->position[AXIS_Z] =
