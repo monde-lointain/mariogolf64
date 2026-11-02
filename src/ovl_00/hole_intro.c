@@ -62,9 +62,9 @@ static f32 f_IntroCameraHeight = 0.0f;
  * Doesn't match: the original stores the look-at point's Z through its
  * pointer and its Y through the camera's address, where GCC stores both
  * through the camera's address. Storing Z before Y, or Y straight into
- * g_Cameras, doesn't help. The original also computes the heading in the
- * register it keeps it in; an f32 heading, or building it up in steps,
- * gives 39-47. 37 words differ.
+ * g_Cameras, doesn't help. The heading is built in two steps, as one
+ * expression gives 37 words and hoisting the shared first step above the
+ * test 101; an f32 heading gives 39-47. 33 words differ.
  */
 #ifdef NON_MATCHING
 void StartHoleIntroCamera(void) {
@@ -81,11 +81,11 @@ void StartHoleIntroCamera(void) {
       (g_CurrentShot.ballPosition[AXIS_Y] - INTRO_LOOK_AT_DROP) * scale;
   (*lookAt)[AXIS_Z] = g_CurrentShot.ballPosition[AXIS_Z] * scale;
   if (g_GameState.holeIndex == GetFirstHoleIndex()) {
-    heading =
-        ((u16)g_CurrentShot.heading * BINARY_ANGLE_TO_RADIANS) + (M_PI / 2);
+    heading = (u16)g_CurrentShot.heading * BINARY_ANGLE_TO_RADIANS;
+    heading = heading + (M_PI / 2);
   } else {
-    heading = ((u16)g_CurrentShot.heading * BINARY_ANGLE_TO_RADIANS) +
-        (M_PI / 2) - M_PI;
+    heading = (u16)g_CurrentShot.heading * BINARY_ANGLE_TO_RADIANS;
+    heading = heading + (M_PI / 2) - M_PI;
   }
 
   offsetX = -sinf(heading) * INTRO_CAMERA_FIRST_DISTANCE;
