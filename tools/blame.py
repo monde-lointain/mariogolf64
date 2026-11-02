@@ -584,21 +584,34 @@ def check_order(compilation: Compilation, target: fncompare.Routine) -> list[str
     if not flipped:
         return []
     lines = [f"no dependence breaks the target's order; {len(flipped)} pairs flip:"]
+    rtl_order = {
+        int(match.group(2)): position
+        for position, match in enumerate(
+            ELEMENT_HEADER_RE.finditer(compilation.dumps.get("greg", ""))
+        )
+    }
     lines += [
-        explain_flip(compilation, (first, second), priorities)
+        explain_flip(compilation, (first, second), priorities, rtl_order)
         for first, second in flipped
     ]
     return lines
 
 
 def explain_flip(
-    compilation: Compilation, pair: tuple[int, int], priorities: dict[int, int]
+    compilation: Compilation,
+    pair: tuple[int, int],
+    priorities: dict[int, int],
+    rtl_order: dict[int, int],
 ) -> str:
     """Return why sched2 put PAIR's insns in our order, not the target's.
 
     sched2 fills a block from its end: of the ready insns, it places the one
     with the highest priority, the longest chain of dependences after it,
     latest. An insn is ready once every insn that waits for it is placed.
+    rank_for_schedule breaks a tie of priority first by the last placed
+    insn, preferring an insn it doesn't wait for with a latency over one,
+    then by RTL_ORDER, the order sched2 was given them, placing the insn
+    that comes later there latest.
     """
     first, second = pair
     first_priority = priorities.get(first, 0)
@@ -610,8 +623,10 @@ def explain_flip(
         reason = "a dependence of ours held the first back; the original lacks it"
     elif first_priority < second_priority:
         reason = "the original gives the first a longer chain, or holds the second"
+    elif rtl_order.get(first, 0) < rtl_order.get(second, 0):
+        reason = "a tie, which their order in the RTL decides"
     else:
-        reason = "a tie, which the insns placed before or the source order decide"
+        reason = "a tie, which the latency of an insn placed after them decides"
     return f"{order}; {reason}"
 
 
