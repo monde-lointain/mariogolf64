@@ -2044,7 +2044,7 @@ s32 GetTrianglePlaneCopy(PlaneTriangle* triangle, TrianglePlane* plane) {
  * the plane together, adding their terms in turn, where this works out the
  * start's first, and so the tests on the sides and the fraction's terms take
  * other registers. The prologue and the triangle lookup are scheduled
- * differently too. 116 words differ.
+ * differently too. 107 words differ, 47 in shape.
  */
 #ifdef NON_MATCHING
 s32 FindHoleTriangleHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
@@ -2161,6 +2161,9 @@ s32 FindHoleTriangleHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
     endSide = (plane.normal[AXIS_X] * endX) + (plane.normal[AXIS_Y] * endY) +
         (plane.normal[AXIS_Z] * endZ) +
         (plane.distance * WORLD_TO_COURSE_SCALE);
+    /* The test starts a block of its own, to match; ordering the macro's
+     * tests otherwise, && for &, or fabs leave as many words or more */
+    END_BASIC_BLOCK();
     if (DoesPathMeetPlane(startSide, endSide)) {
       endSide = startSide - endSide;
       if ((s32)endSide != 0) {
