@@ -327,13 +327,15 @@ static inline s32 GetPackedCodeOffset(s32 column, s32 row, s32 block) {
  * or -1 where there is none.
  *
  * Doesn't match: the original scales the cell's column and row to bytes
- * separately and adds them, where this adds them and scales the sum; 8 words
- * differ. Indexing the cells by row and column gives 27, the other orders of
- * the flat index give 18, and keeping the packed offset in a local gives 24.
+ * separately and adds them, where this adds them and scales the sum; 6 words
+ * differ. Indexing the cells by row and column gives 17 to 31, the flat index
+ * written in the array access 8 to 18, a byte offset through AddressPast 16
+ * to 22, and keeping the packed offset in a local 24.
  */
 #ifdef NON_MATCHING
 s32 GetTerrainCode(s32 column, s32 row) {
   s32 block;
+  s32 cellIndex;
 
   if (column < 0) {
     column = 0;
@@ -347,8 +349,9 @@ s32 GetTerrainCode(s32 column, s32 row) {
     row = CODE_GRID_ROW_COUNT - 1;
   }
 
-  block = g_TerrainCodeCells[0][(column / TERRAIN_CODE_CELL_SPAN) +
-      ((row / TERRAIN_CODE_CELL_SPAN) * TERRAIN_CODE_CELL_COLUMN_COUNT)];
+  cellIndex = (column / TERRAIN_CODE_CELL_SPAN) +
+      ((row / TERRAIN_CODE_CELL_SPAN) * TERRAIN_CODE_CELL_COLUMN_COUNT);
+  block = g_TerrainCodeCells[0][cellIndex];
   if (block == NO_CELL_TERRAIN_CODE) {
     return NO_CELL_TERRAIN_CODE;
   }
