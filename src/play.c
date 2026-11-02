@@ -548,7 +548,11 @@ s32 IsHoleOver(void) {
   }
 
   if (g_GameState.replayKind == REPLAY_KIND_NONE) {
-    /* In its own block to match */
+    /*
+     * In its own block to match: without it 6 words differ, and moving the
+     * players' done-or-waiting loop into an inline helper, in 3 forms, leaves
+     * 63-86 lines of the diff differing
+     */
     IN_OWN_BLOCK(
         if (g_GameState.gameMode == GAME_MODE_SKINS_MATCH ||
             g_GameState.gameMode == GAME_MODE_CLUB_SLOTS) {
@@ -563,7 +567,13 @@ s32 IsHoleOver(void) {
             }
           }
 
-          /* Through isDone, returning in its own block, to match */
+          /*
+           * Through isDone, returning in its own block, to match. The block's
+           * loop labels part the store from the return, so jump's store-flag
+           * conversion (jump.c, "Try to use a conditional move") can't make
+           * the test a set-on-equal, which the original lacks. Returning TRUE
+           * gives 5 words; returning isDone outside a block, 16.
+           */
           if (i == g_GameState.playerCount) {
             isDone = TRUE;
             IN_OWN_BLOCK(return isDone);
@@ -584,8 +594,12 @@ s32 IsHoleOver(void) {
             }
           }
 
-          /* Clearing isDone, though it is clear already, returning it, unlike
-           * the FALSE above, and setting it in its own block, to match */
+          /*
+           * Clearing isDone, though it is clear already, returning it, unlike
+           * the FALSE above, and setting it in its own block, to match, as
+           * above: setting it outside a block gives 12 words, and returning
+           * TRUE or FALSE directly 11
+           */
           isDone = FALSE;
           if (i == g_GameState.playerCount) {
             IN_OWN_BLOCK(isDone = TRUE);
