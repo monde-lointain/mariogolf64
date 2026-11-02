@@ -814,18 +814,24 @@ void PrepareHoleDisplay(void) {
 /*
  * Lays out the wind flag and builds the projections the HUD draws with
  *
- * Doesn't match: 46 words differ.
+ * Doesn't match: the original gives the first loop's row counter the first
+ * free register, ahead of the column's texel offset and the vertex, where
+ * global allocation ranks the counter, with 11 uses over 29 insns, below
+ * them. The instructions are the same. Sharing the row or the vertex with
+ * the back loop gives 46 to 48 words, and indexing the vertex 79 to 134. 40
+ * words differ.
  */
 #ifdef NON_MATCHING
 void InitRoundHud(void) {
   s32 grid;
   s32 row;
+  s32 backRow;
   s32 column;
-  Vtx* vertex;
 
   f_UnusedHudInitWord = 0;
   for (grid = 0; grid != HOLE_FLAG_SIDE_COUNT * MATRIX_BUFFER_COUNT; grid++) {
-    vertex = HoleFlagGridVertices(grid);
+    Vtx* vertex = HoleFlagGridVertices(grid);
+
     for (row = 0; row != HOLE_FLAG_ROW_COUNT; row++) {
       for (column = 0; column != HOLE_FLAG_COLUMN_COUNT; column++, vertex++) {
         vertex->v.ob[AXIS_X] = column * HOLE_FLAG_CELL_SIZE;
@@ -843,8 +849,9 @@ void InitRoundHud(void) {
 
   for (grid = MATRIX_BUFFER_COUNT;
       grid != HOLE_FLAG_SIDE_COUNT * MATRIX_BUFFER_COUNT; grid++) {
-    vertex = HoleFlagGridVertices(grid);
-    for (row = 0; row != HOLE_FLAG_ROW_COUNT; row++) {
+    Vtx* vertex = HoleFlagGridVertices(grid);
+
+    for (backRow = 0; backRow != HOLE_FLAG_ROW_COUNT; backRow++) {
       for (column = 0; column != HOLE_FLAG_COLUMN_COUNT; column++, vertex++) {
         vertex->v.tc[TEXTURE_AXIS_S] =
             HOLE_FLAG_BACK_TEXEL_START - (column * HOLE_FLAG_TEXEL_COLUMN_STEP);
