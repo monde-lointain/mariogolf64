@@ -967,24 +967,27 @@ void TurnScorecardPage(u16 buttons);
  * Left and right on the control pad turn the pages, round from the last to the
  * first.
  *
- * Doesn't match: the target addresses the page through $a0 and reuses it for
- * the last read, where this uses $v1 and loads the address again.
- * 15 words differ.
+ * Doesn't match: the sound ID is loaded after the sound channel, rather than
+ * before it. blame.py identifies a sched2 priority tie, with no dependency
+ * preventing the original order. 2 words differ, both in scheduling.
  */
 #ifdef NON_MATCHING
 void TurnScorecardPage(u16 buttons) {
+  RoundHud* hud;
   s32 pageCount = g_Scorecard.pageCount;
 
   if (pageCount > 1) {
     if (buttons & L_JPAD) {
-      g_RoundHud.scorecardPage--;
-      if (g_RoundHud.scorecardPage < 0) {
-        g_RoundHud.scorecardPage = pageCount - 1;
+      hud = &g_RoundHud;
+      hud->scorecardPage--;
+      if (hud->scorecardPage < 0) {
+        hud->scorecardPage = pageCount - 1;
       }
     } else if (buttons & R_JPAD) {
-      g_RoundHud.scorecardPage++;
-      if (g_RoundHud.scorecardPage > pageCount - 1) {
-        g_RoundHud.scorecardPage = 0;
+      hud = &g_RoundHud;
+      hud->scorecardPage++;
+      if (hud->scorecardPage > pageCount - 1) {
+        hud->scorecardPage = 0;
       }
     } else {
       return;
@@ -993,8 +996,7 @@ void TurnScorecardPage(u16 buttons) {
     /* The sound pans further right on each later page */
     PlaySoundWithEffects(SOUND_MENU_MOVE, g_NextSoundChannel,
         SCORECARD_SOUND_VOLUME, 0,
-        (g_RoundHud.scorecardPage + 1) *
-            (SOUND_PAN_FULL_RIGHT / (pageCount + 1)));
+        (hud->scorecardPage + 1) * (SOUND_PAN_FULL_RIGHT / (pageCount + 1)));
   }
 }
 #else
