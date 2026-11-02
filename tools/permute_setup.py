@@ -86,12 +86,6 @@ END {{
 }}'
 """
 
-# A function defined inside another, indented as the formatter leaves it: its
-# name follows a return type and precedes a parameter list holding no ";" or
-# braces
-NESTED_DEFINITION = re.compile(
-    r"^[ \t]+[A-Za-z_][\w \t*]*?[ \t*](\w+)\s*\([^;{}]*\)\s*\{", re.MULTILINE
-)
 # The permuter's settings beyond the function. natural_only leaves out the
 # passes and forms that this project rejects as fakes: no-op blocks, dead
 # stores, identities, volatile locals and the like. Of the weights, each pass
@@ -106,7 +100,6 @@ perm_reorder_stmts = 30
 perm_cast_simple = 2
 perm_randomize_internal_type = 2
 """
-KEYWORDS = frozenset({"if", "for", "while", "switch", "return", "sizeof"})
 
 # The importer's preprocess_c_with_macros, given the cpp command, its working
 # directory, and the names of the macros to keep with the function naming the
@@ -367,8 +360,8 @@ def find_nested_functions(base_path: Path, asm_path: str) -> list[str]:
     """List the nested functions in BASE_PATH that ASM_PATH's directory holds."""
     names = [
         match.group(1)
-        for match in NESTED_DEFINITION.finditer(base_path.read_text())
-        if match.group(1) not in KEYWORDS
+        for match in fncompare.NESTED_DEFINITION_RE.finditer(base_path.read_text())
+        if match.group(1) not in fncompare.NESTED_DEFINITION_KEYWORDS
     ]
     # Inline ones that were never emitted on their own have no assembly
     return [name for name in names if (Path(asm_path).parent / f"{name}.s").exists()]

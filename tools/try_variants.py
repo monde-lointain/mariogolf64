@@ -79,7 +79,7 @@ def describe_compiled(
 
 
 def score_body(
-    bodies: fncompare.BodyVariants, preprocessed: str, target: fncompare.Routine
+    bodies: fncompare.BodyVariants, preprocessed: str, target: fncompare.Original
 ) -> str:
     """Compile one variant's preprocessed body and return its score."""
     compiled, error = bodies.compile(preprocessed)
@@ -87,7 +87,7 @@ def score_body(
     if failure or compiled is None:
         return failure
     function = bodies.function
-    return f"{function} {fncompare.describe(target, compiled[function])}"
+    return f"{function} {fncompare.describe_original(target, compiled, function)}"
 
 
 def get_variant_body(
@@ -134,7 +134,7 @@ def score_variant(
     source: str,
     c_dir: Path,
     optflags: list[str],
-    target: fncompare.Routine,
+    target: fncompare.Original,
     function: str,
 ) -> str:
     """Compile one variant and return its score, or why it has none."""
@@ -149,7 +149,7 @@ def score_variant(
     failure = describe_compiled(compiled, error, function)
     if failure or compiled is None:
         return failure
-    return f"{function} {fncompare.describe(target, compiled[function])}"
+    return f"{function} {fncompare.describe_original(target, compiled, function)}"
 
 
 def replace_all(before: str, body: str, block: str) -> tuple[str, str] | None:
@@ -206,9 +206,9 @@ def find_bodies(
     return [get_variant_body(variant, source, start, end) for variant in sources]
 
 
-def read_target(asm_path: str, function: str) -> fncompare.Routine:
-    """Return FUNCTION's routine in the target assembly at ASM_PATH."""
-    return fncompare.read_target_functions(asm_path)[function]
+def read_target(asm_path: str, c_path: str, function: str) -> fncompare.Original:
+    """Return FUNCTION's routines in the target assembly at ASM_PATH."""
+    return fncompare.read_original(asm_path, c_path, function)
 
 
 def score_jobs(jobs: list[list[str]], *, prefix_names: bool) -> None:
@@ -232,7 +232,12 @@ def score_jobs(jobs: list[list[str]], *, prefix_names: bool) -> None:
     job_count = int(os.environ.get("VARIANT_JOBS", DEFAULT_JOB_COUNT))
     with ProcessPoolExecutor(max_workers=job_count) as pool:
         targets = list(
-            pool.map(read_target, [job[0] for job in jobs], [job[2] for job in jobs])
+            pool.map(
+                read_target,
+                [job[0] for job in jobs],
+                [job[1] for job in jobs],
+                [job[2] for job in jobs],
+            )
         )
         # The variants have their own names, so they take the flags of the
         # file they vary

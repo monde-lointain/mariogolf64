@@ -346,6 +346,58 @@ def read_target_functions(asm_path: StrPath) -> Functions:
     return {name: read_listing(listing) for name, listing in listings.items()}
 
 
+@dataclass
+class Original:
+    """A function's routine in the original, and those of its nested functions.
+
+    NESTED maps each nested function's name to its routine.
+    """
+
+    routine: Routine
+    nested: Functions
+
+
+def read_nested_target(asm_dir: Path, name: str) -> Routine | None:
+    """Return the original routine of the nested function NAME, if found.
+
+    It is in its own file in ASM_DIR, named after it or, where splat had no
+    name for it, after its address in the matching build.
+    """
+    labels = [name]
+    address = read_linked_symbols().get(name)
+    if address is not None:
+        labels.append(f"func_{address:08X}")
+    for label in labels:
+        path = asm_dir / f"{label}.s"
+        if path.exists():
+            routine = read_target_functions(path).get(label)
+            if routine is not None:
+                return routine
+    return None
+
+
+def read_original(
+    asm_path: StrPath, c_path: StrPath, function: str, optflags: list[str] | None = None
+) -> Original:
+    """Return FUNCTION's original routine in ASM_PATH, with its nested ones.
+
+    The nested functions are those C_PATH defines in FUNCTION. One with no
+    original routine, as an inline one never emitted alone, is left out.
+    """
+    routine = read_target_functions(asm_path)[function]
+    if optflags is None:
+        optflags = get_optflags(c_path)
+    result = run_compiler(c_path, optflags, ["-E"])
+    nested: Functions = {}
+    if result.returncode != 0:
+        return Original(routine, nested)
+    for name in find_nested_functions(result.stdout, function):
+        found = read_nested_target(Path(asm_path).parent, name)
+        if found is not None:
+            nested[name] = found
+    return Original(routine, nested)
+
+
 # The one work directory, made on first use; a list so that it can be set
 # without a global statement
 _work_dirs: list[Path] = []
@@ -412,6 +464,16 @@ def get_optflags(c_path: StrPath) -> list[str]:
 
 # The text that a top-level function definition's body starts after
 DEFINITION_END_RE = re.compile(r"\)\s*$")
+# A function defined inside another, indented as the formatter leaves it: its
+# name follows a return type and precedes a parameter list holding no ";" or
+# braces
+NESTED_DEFINITION_RE = re.compile(
+    r"^[ \t]+[A-Za-z_][\w \t*]*?[ \t*](\w+)\s*\([^;{}]*\)\s*\{", re.MULTILINE
+)
+# The statements NESTED_DEFINITION_RE also takes for definitions
+NESTED_DEFINITION_KEYWORDS = frozenset(
+    {"if", "for", "while", "switch", "return", "sizeof"}
+)
 # A function definition's name, the first identifier its header calls
 DEFINITION_NAME_RE = re.compile(r"(\w+)\s*\(")
 # The functions that KMC GCC expands itself when it sees no definition of
@@ -464,6 +526,18 @@ def find_definitions(source: str) -> list[tuple[str, int, int, bool]]:
         elif depth == 0 and kind[0] in ";#":
             header_start = token.end()
     return definitions
+
+
+def find_nested_functions(source: str, function: str) -> list[str]:
+    """Return the functions nested in FUNCTION in the preprocessed SOURCE."""
+    for name, start, end, _ in find_definitions(source):
+        if name == function:
+            return [
+                match.group(1)
+                for match in NESTED_DEFINITION_RE.finditer(source, start + 1, end)
+                if match.group(1) not in NESTED_DEFINITION_KEYWORDS
+            ]
+    return []
 
 
 def isolate_functions(source: str, keep: set[str], *, prune: bool = True) -> str:
@@ -1294,21 +1368,49 @@ def count_operation_differences(
     return len(target_operations) + len(compiled_operations) - 2 * shared
 
 
-def describe(target: Routine, compiled: Routine) -> str:
+def describe(
+    target: Routine,
+    compiled: Routine,
+    nested_pairs: list[tuple[Routine, Routine]] | None = None,
+) -> str:
     """Return the score and, short of a match, the counts of differences.
 
     The count of differing words is followed by how many of them differ in
     shape, by operation. A change of registers alone moves every word that
     names them, which in a large routine hides how close its instruction
-    sequence has come. The shape count leaves those out.
+    sequence has come. The shape count leaves those out. NESTED_PAIRS, the
+    original and compiled routines of the function's nested functions,
+    count too.
     """
-    differences = count_differences(target, compiled)
-    total = len(target.words) + len(compiled.words)
+    pairs = [(target, compiled), *(nested_pairs or [])]
+    differences = sum(count_differences(*pair) for pair in pairs)
+    total = sum(len(original.words) + len(ours.words) for original, ours in pairs)
     score = 1 - differences / total if total else 1.0
     if not differences:
         return f"{score:.3f} OK"
-    shape_differences = count_shape_differences(target, compiled)
+    shape_differences = sum(count_shape_differences(*pair) for pair in pairs)
     return f"{score:.3f} ({differences} differ, {shape_differences} in shape)"
+
+
+# The routine of a nested function that was not compiled on its own, so that
+# every word of its original differs
+NOT_COMPILED = Routine([], [], [])
+
+
+def pair_nested(
+    original: Original, compiled: Functions
+) -> list[tuple[Routine, Routine]]:
+    """Pair ORIGINAL's nested routines with those COMPILED."""
+    return [
+        (routine, compiled.get(name, NOT_COMPILED))
+        for name, routine in original.nested.items()
+    ]
+
+
+def describe_original(original: Original, compiled: Functions, function: str) -> str:
+    """Return describe's score of FUNCTION in COMPILED and its nested ones."""
+    nested_pairs = pair_nested(original, compiled)
+    return describe(original.routine, compiled[function], nested_pairs)
 
 
 def disassemble(routine: Routine, index: int) -> str:
@@ -1409,6 +1511,23 @@ def print_diff(
     print_call_differences(target, compiled)
 
 
+def report(
+    function: str, original: Original, compiled: Functions, *, verbose: bool
+) -> None:
+    """Print FUNCTION's score and, if VERBOSE, its diff and its nested ones'."""
+    print(f"{function} {describe_original(original, compiled, function)}")
+    if not verbose:
+        return
+    pairs = {function: (original.routine, compiled[function])}
+    for name, routine in original.nested.items():
+        pairs[name] = (routine, compiled.get(name, NOT_COMPILED))
+    for name, (original_routine, ours) in pairs.items():
+        if count_differences(original_routine, ours):
+            if len(pairs) > 1:
+                print(f" {name}:")
+            print_diff(original_routine, ours)
+
+
 def main() -> None:
     """Score the functions named on the command line, or all of them."""
     verbose = "-v" in sys.argv
@@ -1428,9 +1547,10 @@ def main() -> None:
         if name not in compiled:
             print(f"{name} missing")
             continue
-        print(f"{name} {describe(targets[name], compiled[name])}")
-        if verbose and count_differences(targets[name], compiled[name]):
-            print_diff(targets[name], compiled[name])
+        nested: Functions = {}
+        if names and not c_path.endswith(".o"):
+            nested = read_original(asm_path, c_path, name).nested
+        report(name, Original(targets[name], nested), compiled, verbose=verbose)
 
 
 if __name__ == "__main__":
