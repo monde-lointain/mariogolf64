@@ -1890,15 +1890,23 @@ s32 PaintDrivingRange(
   return (color << 16) | paintedCode;
 }
 
-/* Returns the map texel at a column and row of the whole hole's map */
+/*
+ * Returns the map texel at a column and row of the whole hole's map. Adding
+ * the offsets in bytes, the texel's first, is closest to the original:
+ * indexing the tiles or texels, or adding the tile offset to the base first,
+ * lets GCC fold the base address in last or first.
+ */
 static inline u16* GetMapTexel(s32 column, s32 row) {
   /* tileRow is there to match */
   s32 tileRow = row >> MAP_TILE_SHIFT;
-  u16* texels = (u16*)&g_WorkArea.hole.tiles[(column / GROUND_TILE_TEXEL_SPAN) +
-      (tileRow * GROUND_TILE_COLUMN_COUNT)];
+  s32 tileOffset = ((column / GROUND_TILE_TEXEL_SPAN) +
+                       (tileRow * GROUND_TILE_COLUMN_COUNT)) *
+      sizeof(GroundTile);
+  s32 texelOffset = (((row & MAP_TILE_MASK) * GROUND_TILE_TEXEL_SPAN) +
+                        (column & MAP_TILE_MASK)) *
+      sizeof(u16);
 
-  return &texels[((row & MAP_TILE_MASK) * GROUND_TILE_TEXEL_SPAN) +
-      (column & MAP_TILE_MASK)];
+  return (u16*)((u8*)g_WorkArea.hole.tiles + (texelOffset + tileOffset));
 }
 
 /* Returns the map texel at a column and row, or 0 off the map */
@@ -1925,9 +1933,11 @@ static inline u16 ReadMapTexel(s32 column, s32 row) {
 
 /*
  * Encodes the map's texels as terrain codes, a byte each, in the hole file
- * buffer. Doesn't match: the original adds the work area's address to
- * the tile offset after it computes the texel offset, so it reads the texel
- * into $v0 rather than $v1. 19 words differ.
+ * buffer. Doesn't match: the original divides the column before
+ * shifting the row and adds the work area's address to the tile offset before
+ * the texel offset, where this adds the offsets first. Dividing the column
+ * into its own local first gives 25 differing words, and a local pointer to
+ * the tiles 31 to 47. 7 words differ.
  */
 #ifdef NON_MATCHING
 void EncodeCodeMap(void) {
@@ -1972,9 +1982,8 @@ static inline void WriteMapTexel(s32 column, s32 row, u16 color) {
 
 /*
  * Clears the map, reads a code map from the host and paints the map's texels
- * with the colors of its terrain codes. Doesn't match: like
- * EncodeCodeMap, the original adds the work area's address to the tile
- * offset after it computes the texel offset. 10 words differ.
+ * with the colors of its terrain codes. Doesn't match: for the same
+ * reason as EncodeCodeMap. 6 words differ.
  */
 #ifdef NON_MATCHING
 void LoadCodeMap(char* path) {
@@ -2602,7 +2611,7 @@ void BuildHole(s32 course, s32 hole) {
 /*
  * Writes a hole's files to the host, the attributes as the map's terrain
  * codes, a byte each. A cleaned code map is first restored from its backup.
- * Doesn't match: for the same reason as EncodeCodeMap. 19 words differ.
+ * Doesn't match: for the same reason as EncodeCodeMap. 7 words differ.
  */
 #ifdef NON_MATCHING
 void SaveHoleFiles(s32 course, s32 hole) {
