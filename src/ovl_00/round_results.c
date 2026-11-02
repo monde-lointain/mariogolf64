@@ -434,13 +434,20 @@ void OpenRoundResults(s32 request) {
     } \
   }
 
-/* Doesn't match: 213 words differ, 61 in shape. */
+/*
+ * Doesn't match: in the course points tally, the original keeps
+ * f_PointsEarned's address in a register and the counter in $s2, where ours
+ * addresses it through $at each time and counts in $a1, and the later loops'
+ * registers differ. 213 words differ, 47 in shape.
+ */
 void LoadRoundResults(void) {
   EncodedAsset asset;
   AssetFile file;
   SaveData* save;
   s32 i;
   s32 j;
+  s32 k;
+  void* palette;
   s32* rank;
   u32 size;
 
@@ -527,8 +534,9 @@ void LoadRoundResults(void) {
             (s8)g_Players[i].paletteIndex,
         &file);
     size = GetAssetFileSize(&file);
-    IN_OWN_BLOCK(f_PlayerPortraitPalettes[i] = AllocMemory(size));
-    ReadAssetFile(f_PlayerPortraitPalettes[i], size, &file);
+    palette = AllocMemory(size);
+    f_PlayerPortraitPalettes[i] = palette;
+    ReadAssetFile(palette, size, &file);
     if (g_Players[i].isComputer) {
       f_PlayerPoints[i] = -1;
     } else {
@@ -643,15 +651,15 @@ void LoadRoundResults(void) {
       case GAME_MODE_SKINS_MATCH:
       case GAME_MODE_CLUB_SLOTS:
         TallySkins(GetFirstHoleIndex() + GetRoundHoleCount());
-        for (i = 0; i != g_GameState.playerCount; i++) {
-          f_PlayerResults[i] = g_RoundHud.skinsTotals[i];
+        for (k = 0; k != g_GameState.playerCount; k++) {
+          f_PlayerResults[k] = g_RoundHud.skinsTotals[k];
         }
 
-        for (i = 0; i != g_GameState.playerCount; i++) {
-          rank = &f_PlayerRanks[i];
+        for (k = 0; k != g_GameState.playerCount; k++) {
+          rank = &f_PlayerRanks[k];
           *rank = 0;
           for (j = 0; j != g_GameState.playerCount; j++) {
-            if (i != j && f_PlayerResults[i] < f_PlayerResults[j]) {
+            if (k != j && f_PlayerResults[k] < f_PlayerResults[j]) {
               (*rank)++;
             }
           }
@@ -667,9 +675,9 @@ void LoadRoundResults(void) {
             GetNetScoreToPar(GetFirstHoleIndex() + GetRoundHoleCount(), 0);
         RankTournament(
             COURSE_HOLE_COUNT, 0, f_PlayerResults[0], g_GameState.unk2C);
-        for (i = 0; i != TOURNAMENT_CONTESTANT_COUNT; i++) {
-          if (g_TournamentStandings[i].contestantId == -1) {
-            f_PlayerRanks[0] = g_TournamentStandings[i].place & PLACE_MASK;
+        for (k = 0; k != TOURNAMENT_CONTESTANT_COUNT; k++) {
+          if (g_TournamentStandings[k].contestantId == -1) {
+            f_PlayerRanks[0] = g_TournamentStandings[k].place & PLACE_MASK;
             break;
           }
         }
@@ -722,11 +730,11 @@ void LoadRoundResults(void) {
     }
   }
 
-  for (i = 0; i != g_GameState.playerCount; i++) {
-    if ((s8)g_Players[i].characterIndex >= CHARACTER_KID &&
-        f_PlayerPoints[i] > 0) {
+  for (k = 0; k != g_GameState.playerCount; k++) {
+    if ((s8)g_Players[k].characterIndex >= CHARACTER_KID &&
+        f_PlayerPoints[k] > 0) {
       AddGameBoyExperience(
-          g_Players[i].gameBoyCharacterIndex, f_PlayerPoints[i]);
+          g_Players[k].gameBoyCharacterIndex, f_PlayerPoints[k]);
     }
   }
 
