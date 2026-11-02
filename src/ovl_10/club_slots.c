@@ -532,7 +532,7 @@ s32 GetClubSlotsState(void) {
   return f_ClubSlotsState;
 }
 
-/* Doesn't match: 147 words differ. */
+/* Doesn't match: 108 words differ, 56 in shape. */
 #ifdef NON_MATCHING
 void DrawClubSlots(Gfx** displayListHead) {
   Mat4 matrix;
@@ -544,7 +544,6 @@ void DrawClubSlots(Gfx** displayListHead) {
   Boolean isStripLoaded;
   s32 reelIndex;
   s32 quadIndex;
-  s32 symbolIndex;
   s32 top;
   s32 stripHeight;
   s32 loadedStripHeight;
@@ -571,6 +570,8 @@ void DrawClubSlots(Gfx** displayListHead) {
         if (f_Slots->reelAngles[reelIndex] < SYMBOL_ANGLE) {
           f_Slots->reelAngles[reelIndex] += STOPPING_REEL_SPEED;
           if (f_Slots->reelAngles[reelIndex] > SYMBOL_ANGLE) {
+            /* Its own in each loop, as the original allocates it there */
+            s32 symbolIndex;
             f_Slots->reelAngles[reelIndex] -= SYMBOL_ANGLE;
             f_Slots->reelPositions[reelIndex]++;
             if (f_Slots->reelPositions[reelIndex] >= REEL_SYMBOL_COUNT) {
@@ -700,6 +701,8 @@ void DrawClubSlots(Gfx** displayListHead) {
         G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
     gSPVertex(gfx++, f_Slots->reelVertices, REEL_VERTEX_COUNT, 0);
     for (quadIndex = 0; quadIndex != REEL_QUAD_COUNT; quadIndex++) {
+      /* Its own in each loop, as the original allocates it there */
+      s32 symbolIndex;
       symbolIndex = f_Slots->reelPositions[reelIndex] - quadIndex;
       if (symbolIndex >= REEL_SYMBOL_COUNT / 2) {
         symbolIndex -= REEL_SYMBOL_COUNT;
