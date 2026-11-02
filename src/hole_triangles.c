@@ -105,7 +105,12 @@ void DimNextTranslucentTriangles(void) {
 /*
  * Draws the hole's triangles other than the rings
  *
- * Doesn't match: 69 words differ.
+ * Doesn't match: reload gives the display list pointers that don't get
+ * registers stack slots in pseudo order, and after each gDPPipeSync followed
+ * by an othermode command the original has the pair's slots the other way
+ * round. The original also takes both absolute values of the shaded edge
+ * before adding them, and leaves for the next triangle with a branch-likely.
+ * 69 words differ.
  */
 #ifdef NON_MATCHING
 void DrawHoleTriangles(Gfx** displayListHead, CameraMatrices* matrices UNUSED,
