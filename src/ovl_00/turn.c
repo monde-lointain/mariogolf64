@@ -2931,7 +2931,7 @@ void ShowHoleOutBanner(s32 playerIndex) {
  * inline: inlined, their buffers share one stack slot, as in the
  * original's frame.
  *
- * Doesn't match: 550 words differ, spread through the routine's states.
+ * Doesn't match: 536 words differ, spread through the routine's states.
  */
 #ifdef NON_MATCHING
 /* Debug flag 0x47: prints where the ball lies, and the second controller moves
@@ -3088,6 +3088,8 @@ void UpdateTurns(void) {
   s32 nextState;
   Boolean areCallsAllowed;
   s32 i;
+  s32 checkedPlayer;
+  s32 outPlayer;
   s32 aimingPollIndex;
   s32 preparingPollIndex;
   s32 extraStepIndex;
@@ -4968,13 +4970,14 @@ void UpdateTurns(void) {
 
         break;
       case PLAYER_STATE_FINDING_OUT_PLAYER:
-        for (i = 0; i < g_GameState.playerCount; i++) {
-          if (g_Players[i].holeStatus == HOLE_STATUS_NEWLY_OUT) {
+        for (checkedPlayer = 0; checkedPlayer < g_GameState.playerCount;
+            checkedPlayer++) {
+          if (g_Players[checkedPlayer].holeStatus == HOLE_STATUS_NEWLY_OUT) {
             break;
           }
         }
 
-        if (i == g_GameState.playerCount) {
+        if (checkedPlayer == g_GameState.playerCount) {
           nextState = PLAYER_STATE_HOLE_DONE;
           break;
         }
@@ -4984,25 +4987,26 @@ void UpdateTurns(void) {
           break;
         }
 
-        for (i = 0; i < g_GameState.playerCount; i++) {
-          if (g_Players[i].holeStatus == HOLE_STATUS_NEWLY_OUT) {
-            g_Players[i].holeStatus = HOLE_STATUS_OUT;
+        for (outPlayer = 0; outPlayer < g_GameState.playerCount; outPlayer++) {
+          if (g_Players[outPlayer].holeStatus == HOLE_STATUS_NEWLY_OUT) {
+            g_Players[outPlayer].holeStatus = HOLE_STATUS_OUT;
             break;
           }
         }
 
         nextState = PLAYER_STATE_HOLE_DONE;
-        if (i != g_GameState.playerCount) {
+        if (outPlayer != g_GameState.playerCount) {
           ClearReactionSpot();
-          LoadCharacter(0, g_Players[i].characterIndex + CHARACTER_COUNT,
-              g_Players[i].paletteIndex);
-          ConsiderReactionSpot(g_Players[i].ballPosition);
+          LoadCharacter(0,
+              g_Players[outPlayer].characterIndex + CHARACTER_COUNT,
+              g_Players[outPlayer].paletteIndex);
+          ConsiderReactionSpot(g_Players[outPlayer].ballPosition);
           ConsiderReactionSpot(g_HoleSetup.cupPosition);
           ConsiderReactionSpot(g_HoleSetup.teePosition);
           SetCharacterLighting(0, 1);
           memset(&g_RoundHud, 0, sizeof(g_RoundHud));
           StartReaction(
-              0, g_Players[i].characterIndex, REACTION_ANIMATION_BOGEY);
+              0, g_Players[outPlayer].characterIndex, REACTION_ANIMATION_BOGEY);
           SetCharacterAnimation(0, REACTION_ANIMATION_BOGEY);
           PlaySong(SONG_HOLE_LOST, 0);
           PlaceAndViewCharacter(0);
