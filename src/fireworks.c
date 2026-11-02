@@ -166,9 +166,10 @@ static inline s32 RandomLaunchHeightJitter(void) {
 
 /*
  * Sends every particle of the firework out from one random point.
- * Doesn't match: GCC swaps the registers of width and height, and keeps the
- * halves of both on the stack, where the original keeps half the height in a
- * register. 50 words differ.
+ * Doesn't match: the original also keeps a copy of the row's first cell
+ * index, beside the register loop.c steps it in, and spills the copy, which
+ * moves width and height to other registers. A rowStart variable compiles the
+ * same as row * width. 108 words differ, 14 in shape.
  */
 #ifdef NON_MATCHING
 void LaunchFirework(Firework* firework, s32 fireworkIndex UNUSED) {
@@ -181,6 +182,7 @@ void LaunchFirework(Firework* firework, s32 fireworkIndex UNUSED) {
   s32 halfWidth;
   s32 row;
   s32 column;
+  s32 rowOffset;
 
   particleIndex = 0;
   originX = guRandom() % 32;
@@ -191,6 +193,7 @@ void LaunchFirework(Firework* firework, s32 fireworkIndex UNUSED) {
   originY = random + 64.0f;
   halfWidth = width / 2;
   for (row = 0; (u32)row != height; row++) {
+    rowOffset = (height / 2) - row;
     for (column = 0; (u32)column != width; column++) {
       if (firework->shape->cells[column + (row * width)] == 0) {
         firework->particles[particleIndex].x = originX;
@@ -199,8 +202,7 @@ void LaunchFirework(Firework* firework, s32 fireworkIndex UNUSED) {
             ((column - halfWidth) * 0.1f) +
             (((guRandom() % 64) - 32) * 0.0005f);
         firework->particles[particleIndex].velocityY =
-            ((s32)((height / 2) - row) * 0.1f) - 0.5 +
-            (((guRandom() % 64) - 32) * 0.0005f);
+            (rowOffset * 0.1f) - 0.5 + (((guRandom() % 64) - 32) * 0.0005f);
         firework->particles[particleIndex].life = (guRandom() % 128) + 192;
         particleIndex++;
       }
