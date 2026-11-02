@@ -1105,7 +1105,11 @@ void GenerateClub(s32 clubIndex) {
       error = distance - targetDistance;
       osSyncPrintf("Try %d: dist %fYd:  Error %f%\n", tryIndex + 1,
           distance * YARDS_PER_UNIT, error / targetDistance * 100.0f);
-      /* The tolerance test starts a block of its own, to match */
+      /* The tolerance test starts a block of its own, to match: without it,
+       * the abs.s is scheduled after the tolerance multiply. None of 18 other
+       * forms of the test and the print (IN_OWN_BLOCK, goto, locals for the
+       * magnitude, tolerance or result, fabs, Abs, a ternary, swapped or
+       * negated comparisons) does it */
       END_BASIC_BLOCK();
       if (fabsf(error) < targetDistance * GENERATION_TOLERANCE) {
         break;
@@ -1122,7 +1126,9 @@ void GenerateClub(s32 clubIndex) {
           club->power[shotMode] = longPower * 3 / 4;
         } else {
           /* error holds the fraction too, which keeps local-alloc from
-           * tying fabsf's operand to its result */
+           * tying fabsf's operand to its result; only a set in these arms
+           * does it. A fraction local at either scope, an initialized or
+           * zeroed error, a magnitude local or f32 casts leave the tie */
           error = (f32)(targetDistance - shortDistance) /
               (f32)(longDistance - shortDistance);
           club->power[shotMode] =
