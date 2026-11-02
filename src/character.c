@@ -789,7 +789,9 @@ s32 GetImpactEventFrame(u32 slotIndex) {
  * 137 words differed where 87 did without it. Making it an inline function
  * nested here keeps the slot on the stack and reloads it as the original
  * does, but leaves out the unused bytes and computes the slot's address for
- * the static chain: 133 words differ.
+ * the static chain: 133 words differ. Clearing triangleIndex before the
+ * slot lookup, as the original's delay slot does, puts both in saved
+ * registers: 87 words differ.
  */
 #ifdef NON_MATCHING
 void ResetTriangleTextures(u32 slotIndex) {
