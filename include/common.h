@@ -175,7 +175,9 @@ typedef f32 Mat4[4][4];
 
 /*
  * Ends a basic block between two statements, to match. Some boundaries in the
- * original's code need this empty block instead of IN_OWN_BLOCK.
+ * original's code need this empty block instead of IN_OWN_BLOCK. Two of them
+ * follow an osSyncPrintf call, but the original's print isn't a do-while (0)
+ * macro: wrapping every call in IN_OWN_BLOCK breaks 37 matched functions.
  */
 #define END_BASIC_BLOCK() \
   do { \
