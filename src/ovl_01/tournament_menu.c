@@ -1485,7 +1485,9 @@ void UpdateClubWindow(void) {
  * Writes the club tournament's number as an ordinal from the place glyphs.
  * Doesn't match: the left edge takes $t4 instead of the center's $s2, which
  * shifts the texel address and the rectangle's halves along a register.
- * 22 words differ.
+ * The register oracle matches when left is allocated after the rectangle's
+ * four halves, below their priority; one expression, an s32, a left taken
+ * from centerX itself, or an earlier start give 22-32. 22 words differ.
  */
 #ifdef NON_MATCHING
 void DrawClubNumber(Gfx** displayListHead, s32 centerX, s32 top, s32 number) {

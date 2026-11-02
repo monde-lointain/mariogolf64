@@ -6891,7 +6891,12 @@ void DrawYesNoWindow(Gfx** displayListHead, s32 width, s32 height, s32 centerX,
  * is up
  *
  * Doesn't match: the original adds each value banner strip's row in both
- * branches without masking it to a byte. 115 words differ.
+ * branches without masking it to a byte, and keeps VALUE_BANNER_ROW_TOP in
+ * the strip's induction value. A wider stripTop (s16, s32, u32), in any
+ * grouping, in two statements or from a second loop variable, moves the
+ * constant to the toggle's and gives 8-25 shape differences against 7.
+ * Splitting loopIndex per loop, which the register oracle hints at, doesn't
+ * help. 115 words differ.
  */
 #ifdef NON_MATCHING
 void DrawOptionsScreen(Gfx** displayListHead) {
