@@ -42,8 +42,13 @@ OUT_DIR_ARGUMENT_COUNT = 5
 # compile.sh has to be executable for the permuter to run it
 SCRIPT_MODE = 0o755
 
+# KMC's as writes a scratch file into the working directory and waits for the
+# filesystem journal to commit it. On disk, that serialises the permuter's
+# workers and leaves the CPUs idle, so compile.sh works in the temp directory
+# and takes absolute paths.
 COMPILE_SH = """#!/bin/bash
 # Invoked by the permuter as: compile.sh INPUT.c -o OUTPUT.o
+cd "${{TMPDIR:-/tmp}}" || exit
 COMPILER_PATH={kmc} exec {kmc}/gcc -c {flags} -x c "$@"
 """
 
@@ -279,8 +284,8 @@ def score_base(source: str, out_dir: Path, scorers: list[Scorer]) -> list[int] |
     """Score SOURCE as base.c in OUT_DIR, or give None if it doesn't compile."""
     ast_util = importlib.import_module("src.ast_util")
     process_pragmas = cast("Callable[[str], str]", ast_util.process_pragmas)
-    source_path = out_dir / "prune_check.c"
-    object_path = out_dir / "prune_check.o"
+    source_path = out_dir.resolve() / "prune_check.c"
+    object_path = out_dir.resolve() / "prune_check.o"
     _ = source_path.write_text(process_pragmas(source))
     compiled = subprocess.run(
         [str(out_dir / "compile.sh"), str(source_path), "-o", str(object_path)],
