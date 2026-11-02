@@ -2568,10 +2568,12 @@ void OnBallStepped(Player* player UNUSED) {}
  * copy bestDistance = distance that a combined test lets CSE drop, which
  * gives the original's instructions, and the oracle matches when 2 pseudos
  * are forced. Global allocation ranks bestDistance (11 refs, priority 5789)
- * ahead of bestPriority (9 refs, 4821), so they take $s4 and $s5 the other
- * way round. Setting either earlier, setting bestPriority again in the other
- * branches, or flattening the tests breaks the shape. 24 words differ, none
- * in shape; the combined test gives 3, 1 in shape.
+ * ahead of bestTeeOrder (9 refs, 4821), so they take $s4 and $s5 the other
+ * way round. Dropping the tie's redundant bestDistance copy ranks them as the
+ * original does but loses the copy (1 word differs), and setting bestDistance
+ * before the first loop does too but sets it earlier (2). Setting bestPriority
+ * again in the other branches or flattening the tests breaks the shape. 24
+ * words differ, none in shape; the combined test gives 3, 1 in shape.
  */
 #ifdef NON_MATCHING
 void PickNextPlayer(void) {
