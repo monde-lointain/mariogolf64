@@ -3837,7 +3837,8 @@ void ShadeGroundTiles(void) {
                                     SLOPE_LIGHT_WORD_COUNT) +
                         SLOPE_LIGHT_RED]) >>
               (LIGHT_SCALE_FRACTION_BITS + LIGHT_COLOR_FRACTION_BITS);
-          if ((shaded.red = red) > TEXEL_CHANNEL_MAX) {
+          shaded.red = red;
+          if (red > TEXEL_CHANNEL_MAX) {
             shaded.red = TEXEL_CHANNEL_MAX;
           }
 
@@ -3847,7 +3848,8 @@ void ShadeGroundTiles(void) {
                           SLOPE_LIGHT_GREEN]) >>
               (LIGHT_SCALE_FRACTION_BITS + LIGHT_COLOR_FRACTION_BITS +
                   TEXEL_GREEN_SHIFT);
-          if ((shaded.green = green) > TEXEL_CHANNEL_MAX) {
+          shaded.green = green;
+          if (green > TEXEL_CHANNEL_MAX) {
             shaded.green = TEXEL_CHANNEL_MAX;
           }
 
@@ -3857,7 +3859,8 @@ void ShadeGroundTiles(void) {
                          SLOPE_LIGHT_BLUE]) >>
               (LIGHT_SCALE_FRACTION_BITS + LIGHT_COLOR_FRACTION_BITS +
                   TEXEL_BLUE_SHIFT);
-          if ((shaded.blue = blue) > TEXEL_CHANNEL_MAX) {
+          shaded.blue = blue;
+          if (blue > TEXEL_CHANNEL_MAX) {
             shaded.blue = TEXEL_CHANNEL_MAX;
           }
 
