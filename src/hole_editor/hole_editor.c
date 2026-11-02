@@ -3880,7 +3880,7 @@ void WriteHexDumpFile(u32* words, s32 byteCount, char* fileName) {
  *
  * Doesn't match: the original also steps column + 1 alongside half, where
  * GCC computes it in each use; most of the rest follows from the registers
- * and spill slots that changes. 3923 words differ, 663 in shape.
+ * and spill slots that changes. 2413 words differ, 625 in shape.
  */
 #ifdef NON_MATCHING
 void DrawHoleEditorGround(CameraMatrices* matrices UNUSED, s32 terrainStyle) {
@@ -3905,6 +3905,8 @@ void DrawHoleEditorGround(CameraMatrices* matrices UNUSED, s32 terrainStyle) {
   s32 segmentIndex;
   s32 edge;
   s32 pass;
+  /* The fine tiles' own pass counter, to match */
+  s32 finePass;
   s32 tileIndex;
   /* Also the tile index in the first loop, to match */
   s32 column;
@@ -4415,9 +4417,10 @@ void DrawHoleEditorGround(CameraMatrices* matrices UNUSED, s32 terrainStyle) {
                   TILE_INNER_MIDPOINT_COUNT, 12);
               gSPVertex(gfx++, &vertices[12], 5, 20);
               vertices += FINE_TILE_BUILT_VERTEX_COUNT;
-              for (pass = 0; pass < GROUND_TILE_MAX_PASSES; pass++) {
+              for (finePass = 0; finePass < GROUND_TILE_MAX_PASSES;
+                  finePass++) {
                 LoadEditorTileTexture(
-                    tileIndex, tileColumn, row, pass, g_ShowsGroundWaves);
+                    tileIndex, tileColumn, row, finePass, g_ShowsGroundWaves);
 
                 /* Goes over the 4 by 4 cells in blocks of 2 by 2 */
                 for (blockColumn = 0; blockColumn < FINE_TILE_CELL_SPAN;
