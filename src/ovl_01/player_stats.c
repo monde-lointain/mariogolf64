@@ -1188,7 +1188,7 @@ void DrawTwoDigitMenuNumber(
  * Doesn't match: the original adds the label's offset to the slide, and the
  * columns' top to the vertical slide, once before their loops, and adds the
  * texel offset to the blink frame's offset before the arrow's.
- * 236 words differ.
+ * 197 words differ, 51 in shape.
  */
 #ifdef NON_MATCHING
 void DrawHandicaps(Gfx** displayListHead, s32 slide, u8 reverseVerticalSlide,
@@ -1418,10 +1418,9 @@ void DrawHandicaps(Gfx** displayListHead, s32 slide, u8 reverseVerticalSlide,
   for (arrowIndex = 0; arrowIndex != MENU_ARROW_COUNT; arrowIndex++) {
     if (arrowIndex == MENU_ARROW_LEFT) {
       gDPLoadTextureTile_4b(gfx++,
-          TextureAddress(((f_GreenArrowFrame * GREEN_ARROW_FRAME_SIZE) +
-                             PALETTED_TEXELS_OFFSET +
-                             (MENU_ARROW_RIGHT * GREEN_ARROW_IMAGE_SIZE)) +
-              (u32)f_StatsGreenArrows),
+          TextureAddress((MENU_ARROW_RIGHT * GREEN_ARROW_IMAGE_SIZE) +
+              ((u32)f_StatsGreenArrows + PALETTED_TEXELS_OFFSET +
+                  (f_GreenArrowFrame * GREEN_ARROW_FRAME_SIZE))),
           G_IM_FMT_CI, GREEN_ARROW_SIZE, GREEN_ARROW_SIZE, 0, 0,
           GREEN_ARROW_SIZE - 1, GREEN_ARROW_SIZE - 1, 0,
           G_TX_MIRROR | G_TX_WRAP, G_TX_MIRROR | G_TX_WRAP, HANDICAP_ARROW_MASK,
@@ -1429,9 +1428,8 @@ void DrawHandicaps(Gfx** displayListHead, s32 slide, u8 reverseVerticalSlide,
     } else {
       gDPLoadTextureTile_4b(gfx++,
           TextureAddress((u32)f_StatsGreenArrows +
-              ((f_GreenArrowFrame * GREEN_ARROW_FRAME_SIZE) +
-                  (arrowIndex * GREEN_ARROW_IMAGE_SIZE) +
-                  PALETTED_TEXELS_OFFSET)),
+              ((arrowIndex * GREEN_ARROW_IMAGE_SIZE) + PALETTED_TEXELS_OFFSET +
+                  (f_GreenArrowFrame * GREEN_ARROW_FRAME_SIZE))),
           G_IM_FMT_CI, GREEN_ARROW_SIZE, GREEN_ARROW_SIZE, 0, 0,
           GREEN_ARROW_SIZE - 1, GREEN_ARROW_SIZE - 1, 0,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,

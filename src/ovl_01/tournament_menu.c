@@ -547,7 +547,7 @@ void GetSaveDataAndMenuMemory(void) {
  * Doesn't match: GCC spills the button's half height to the stack, where the
  * original keeps it in a saved register like the other halves. The oracle
  * finds no allocation that avoids the spill, and clamping the half height
- * without its flag gives 65 words. 54 words differ, 20 in shape.
+ * without its flag gives 65 words. 54 words differ, 18 in shape.
  */
 #ifdef NON_MATCHING
 void DrawYesNoWindow(Gfx** displayListHead, s32 width, s32 height, s32 centerX,
@@ -660,7 +660,7 @@ void DrawYesNoWindow(Gfx** displayListHead, s32 width, s32 height, s32 centerX,
     DrawTextureRect(&gfx, QuarterPixels(windowLeft),
         QuarterPixels(windowTop + (index * halfHeight)),
         QuarterPixels(centerX + buttonY),
-        QuarterPixels(windowTop + ((index * halfHeight) + halfHeight)),
+        QuarterPixels((index * halfHeight) + (halfHeight + windowTop)),
         G_TX_RENDERTILE, 0, 0,
         (MENU_WINDOW_IMAGE_WIDTH << 10) / (s32)windowWidth,
         (MENU_WINDOW_STRIP_HEIGHT << 10) / (s32)windowHalfHeight);

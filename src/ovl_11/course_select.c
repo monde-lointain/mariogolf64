@@ -708,7 +708,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_11/course_select", DrawPlanks);
 /*
  * Doesn't match: the original sets each arrow coordinate's second choice in
  * the branch's delay slot and shifts it in each arm, where GCC picks the sum
- * first and shifts it once after the arms join. 53 words differ, 25 in shape.
+ * first and shifts it once after the arms join. 51 words differ, 23 in shape.
  */
 #ifdef NON_MATCHING
 void DrawRingShotSelect(Gfx** displayListHead) {
@@ -741,8 +741,8 @@ void DrawRingShotSelect(Gfx** displayListHead) {
               RING_SHOT_COURSE_IMAGE_TOP + f_SlideOffset),
           QuarterPixels(COURSE_IMAGE_LEFT + COURSE_IMAGE_WIDTH),
           QuarterPixels((stripIndex * COURSE_IMAGE_STRIP_HEIGHT) +
-              f_SlideOffset + RING_SHOT_COURSE_IMAGE_TOP +
-              COURSE_IMAGE_STRIP_HEIGHT),
+              (COURSE_IMAGE_STRIP_HEIGHT + RING_SHOT_COURSE_IMAGE_TOP) +
+              f_SlideOffset),
           G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       gDPPipeSync(gfx++);
     }
@@ -801,7 +801,7 @@ void DrawRingShotSelect(Gfx** displayListHead) {
 INCLUDE_ASM("asm/nonmatchings/ovl_11/course_select", DrawRingShotSelect);
 #endif
 
-/* Doesn't match: 134 words differ. */
+/* Doesn't match: 128 words differ, 94 in shape. */
 #ifdef NON_MATCHING
 void DrawHoleSelect(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
@@ -862,8 +862,8 @@ void DrawHoleSelect(Gfx** displayListHead) {
               HOLE_COURSE_IMAGE_TOP + f_SlideOffset),
           QuarterPixels(COURSE_IMAGE_LEFT + COURSE_IMAGE_WIDTH),
           QuarterPixels((stripIndex * COURSE_IMAGE_STRIP_HEIGHT) +
-              f_SlideOffset + HOLE_COURSE_IMAGE_TOP +
-              COURSE_IMAGE_STRIP_HEIGHT),
+              (COURSE_IMAGE_STRIP_HEIGHT + HOLE_COURSE_IMAGE_TOP) +
+              f_SlideOffset),
           G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       gDPPipeSync(gfx++);
     }
@@ -887,21 +887,21 @@ void DrawHoleSelect(Gfx** displayListHead) {
     DrawTextureRect(&gfx, QuarterPixels(ARROW_LEFT),
         QuarterPixels(f_PressedDirection != DIRECTION_UP
                 ? push + 140 + f_SlideOffset
-                : push + 140 + f_SlideOffset - ARROW_STEP),
+                : 140 + push + (f_SlideOffset - ARROW_STEP)),
         QuarterPixels(ARROW_LEFT + ARROW_SIZE),
         QuarterPixels(f_PressedDirection != DIRECTION_UP
-                ? push + 156 + f_SlideOffset
+                ? 156 + f_SlideOffset + push
                 : push + 156 + f_SlideOffset - ARROW_STEP),
         G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     push = (f_RepeatedButtons & D_JPAD) ? ARROW_PUSH_DOWN : 0;
     DrawTextureRect(&gfx, QuarterPixels(ARROW_LEFT),
         QuarterPixels(f_PressedDirection != DIRECTION_DOWN
-                ? push + 212 + f_SlideOffset
+                ? 212 + f_SlideOffset + push
                 : push + 212 + f_SlideOffset + ARROW_STEP),
         QuarterPixels(ARROW_LEFT + ARROW_SIZE),
         QuarterPixels(f_PressedDirection != DIRECTION_DOWN
-                ? push + 228 + f_SlideOffset
-                : push + 228 + f_SlideOffset + ARROW_STEP),
+                ? 228 + (f_SlideOffset + push)
+                : 228 + (ARROW_STEP + f_SlideOffset) + push),
         G_TX_RENDERTILE, 0, TexelCoordinate(ARROW_SIZE), TEXEL_STEP_ONE,
         TEXEL_STEP_ONE);
     gDPPipeSync(gfx++);
@@ -1001,7 +1001,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_11/course_select", DrawNamePlate);
  * Spins the chosen hole's star; the position is unused, the stars are always in
  * one place
  *
- * Doesn't match: 266 words differ.
+ * Doesn't match: 266 words differ, 152 in shape.
  */
 #ifdef NON_MATCHING
 void DrawRingShotStars(
@@ -1078,7 +1078,7 @@ void DrawRingShotStars(
 
     DrawTextureRect(&gfx, QuarterPixels(left - (width / 2)),
         QuarterPixels(STARS_TOP - (height / 2)),
-        QuarterPixels(left + (width / 2) + STAR_WIDTH),
+        QuarterPixels((width / 2) + (STAR_WIDTH + left)),
         QuarterPixels((height / 2) + STAR_HEIGHT + STARS_TOP), tile, 0, 0,
         (STAR_WIDTH * TEXEL_STEP_ONE) / (width + STAR_WIDTH),
         (STAR_HEIGHT * TEXEL_STEP_ONE) / (height + STAR_HEIGHT));

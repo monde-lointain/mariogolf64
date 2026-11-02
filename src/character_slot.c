@@ -2334,7 +2334,7 @@ const CharacterModel g_OtherCharacterModels[OTHER_CHARACTER_MODEL_COUNT] = {
  * outside them or past g_CurrentAnimationEndFrame.
  *
  * Doesn't match: GCC keeps frame in $f6, where the original keeps it in $f2,
- * which shifts the other floating-point registers. 210 words differ, 42 in
+ * which shifts the other floating-point registers. 206 words differ, 42 in
  * shape.
  */
 #ifdef NON_MATCHING
@@ -2531,8 +2531,8 @@ void AnimateCharacterJoints(u32 slotIndex) {
     }
 
     /* The rotation quaternion (x, y, z, w) as a matrix */
-    lengthSquared = (rotation[0] * rotation[0]) + (rotation[1] * rotation[1]) +
-        (rotation[2] * rotation[2]) + (rotation[3] * rotation[3]);
+    lengthSquared = (rotation[2] * rotation[2]) + (rotation[3] * rotation[3]) +
+        (rotation[0] * rotation[0]) + (rotation[1] * rotation[1]);
     /* dot holds the quaternion's scale from here, and progress holds the w
      * and x term, to match */
     if (lengthSquared > 0.0f) {

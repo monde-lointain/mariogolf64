@@ -434,7 +434,7 @@ void OpenRoundResults(s32 request) {
     } \
   }
 
-/* Doesn't match: 215 words differ. */
+/* Doesn't match: 213 words differ, 61 in shape. */
 void LoadRoundResults(void) {
   EncodedAsset asset;
   AssetFile file;
@@ -707,7 +707,7 @@ void LoadRoundResults(void) {
               save->coursePoints - f_PrizePoints - f_PointsEarned;
         }
 
-        if (save->coursePoints + f_PrizePoints + f_PointsEarned >
+        if (save->coursePoints + f_PointsEarned + f_PrizePoints >
             MAX_COURSE_POINTS) {
           save->coursePoints = MAX_COURSE_POINTS;
         } else {

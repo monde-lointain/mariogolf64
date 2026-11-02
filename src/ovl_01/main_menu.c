@@ -4783,7 +4783,7 @@ void DrawUpDownArrows(Gfx** displayListHead, s32 centerY);
  *
  * Doesn't match: the boards' strips schedule their address loads differently,
  * and values take other registers through the boards' and the players' loops.
- * 157 words differ.
+ * 153 words differ, 39 in shape.
  */
 #ifdef NON_MATCHING
 void DrawModeSelect(Gfx** displayListHead) {
@@ -4933,7 +4933,7 @@ void DrawModeSelect(Gfx** displayListHead) {
 
       gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
       DrawScaledModeIcon(&gfx, boardX[slot] - halfSize,
-          boardY[slot] + bob - halfSize, halfSize, step);
+          bob - halfSize + boardY[slot], halfSize, step);
     } else {
       if (g_MenuMemory.modeChoice == slot) {
         /* The characters go behind the chosen board, and change the state */
