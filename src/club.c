@@ -1046,9 +1046,11 @@ void WriteClubParameters(void) {
  *
  * Doesn't match: the original takes the error's absolute value into a
  * register of its own before scaling the tolerance, where local-alloc ties it
- * to error, which dies there. A local for the absolute value, in the function
- * or the try loop, either order of the comparison, and fabs or Abs don't
- * help. 4 words differ.
+ * to error, which dies there. Sched1 also puts the abs.s in the tolerance
+ * multiply's latency, just before the compare. Storing the interpolation
+ * fraction in error unties the registers but keeps that order. A local for
+ * the absolute value or the tolerance, either order of the comparison, a
+ * (f32) cast, and fabs or Abs don't help. 4 words differ, 2 in shape.
  */
 #ifdef NON_MATCHING
 void GenerateClub(s32 clubIndex) {
