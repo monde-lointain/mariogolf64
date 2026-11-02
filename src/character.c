@@ -1917,13 +1917,18 @@ void SetCharacterLights(void) {
 /*
  * Draws the character in the slot with its lights, alpha and culling
  *
- * Doesn't match: 113 words differ.
+ * Doesn't match: for the reaction light's fallback, the original addresses the
+ * lights' first light from the table plus 8, adding the index's offset to
+ * that, where ours adds the offset to the table first. Without IN_OWN_BLOCK
+ * it's 123 words. Near the end it also schedules the 0xDB06 segment command's
+ * setup into both arms of the next test. 95 words differ, 27 in shape.
  */
 #ifdef NON_MATCHING
 void DrawCharacter(u32 slotIndex) {
   CharacterSlot* slot = GetUsedCharacterSlot(slotIndex);
   Gfx* gfx = g_DisplayListHead;
   Lights2* lights;
+  Boolean isReactionLit;
 
   f_DrawParity ^= 1;
   if (f_IsMatrixSetupPending) {
@@ -1955,9 +1960,19 @@ void DrawCharacter(u32 slotIndex) {
 
           break;
         case CHARACTER_LIGHTING_SCENE_THIRD:
-          lights =
-              g_HoleSetup.conditions.isRaining ? f_RainLights : f_DryLights;
-          if (!AddReactionLight(&gfx, &lights[g_DrawBufferIndex])) {
+          /* With a call in each arm, whose tails jump2 merges, each arm
+           * loads the index, as the original does */
+          if (g_HoleSetup.conditions.isRaining) {
+            isReactionLit =
+                AddReactionLight(&gfx, &f_RainLights[g_DrawBufferIndex]);
+            lights = f_RainLights;
+          } else {
+            isReactionLit =
+                AddReactionLight(&gfx, &f_DryLights[g_DrawBufferIndex]);
+            lights = f_DryLights;
+          }
+
+          if (!isReactionLit) {
             IN_OWN_BLOCK(gSPSetLights2(gfx++, lights[g_DrawBufferIndex]));
             SaveLights(lights[g_DrawBufferIndex]);
           }
