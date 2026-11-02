@@ -993,7 +993,7 @@ const char g_PathDebugBlankText[] = "          ";
  * that starts on the plane, or, while the ball rolls, barely crosses
  * it, hits it at the path's end.
  *
- * Doesn't match: 80 words differ.
+ * Doesn't match: 32 words differ, 20 in shape.
  */
 #ifdef NON_MATCHING
 s32 FindMiniGolfGroundHit(BallSimulation* simulation, s32 startX, s32 startY,
@@ -1202,11 +1202,14 @@ s32 FindMiniGolfGroundHit(BallSimulation* simulation, s32 startX, s32 startY,
     }
 
     if (hitIndex >= 0) {
-      break;
+      *hit = triangles[hitIndex];
+      hit->unk0 = HOLE_TRIANGLE_KIND_FLAT;
+      *fraction = nearestFraction;
+      return TRUE;
     }
 
     if ((tileX == endTileX) & (tileZ == endTileZ)) {
-      return FALSE;
+      break;
     }
 
     /* Finds where the path enters a neighboring tile */
@@ -1243,10 +1246,7 @@ s32 FindMiniGolfGroundHit(BallSimulation* simulation, s32 startX, s32 startY,
     }
   }
 
-  *hit = triangles[hitIndex];
-  hit->unk0 = HOLE_TRIANGLE_KIND_FLAT;
-  *fraction = nearestFraction;
-  return TRUE;
+  return FALSE;
 }
 
 #else
