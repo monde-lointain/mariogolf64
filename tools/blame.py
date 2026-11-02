@@ -9,8 +9,12 @@ RTL dump holds that insn, and the passes before global-alloc that changed
 its pattern. Then, for each pseudo register those insns used before
 register allocation, prints what the allocators knew of it: its uses and
 live length from local-alloc, the hard register it was given, and its
-conflicts and preferences from global-alloc. --keep leaves the compiler's
-work files, such as the pass dumps unit.sched and unit.sched2, in DIR.
+conflicts and preferences from global-alloc. Last, it checks the target's
+order of our insns against the dependences sched2 kept, or failing that
+lists the pairs it orders the other way and their priorities. Words are
+paired by text, so a pair it reports may be a mispairing. --keep leaves
+the compiler's work files, such as the pass dumps unit.sched and
+unit.sched2, in DIR.
 """
 
 import re
@@ -67,13 +71,27 @@ INSN_NAME_RE = re.compile(r"#\s+(\d+)\s+(\S+)$")
 # What follows an insn's pattern: its recognized code and pattern name
 PATTERN_END_RE = re.compile(r"\) (?:-1|\d+ \{\S+\}) ")
 # The start of an insn's header in an RTL dump, before its UID
-INSN_HEADER_START = r"^ *\((?:insn|jump_insn|call_insn)(?:/\w+)? "
+INSN_HEADER_START = r"^ *\((?:insn|jump_insn|call_insn)(?:[/:]\w+)* "
 PSEUDO_RE = re.compile(r"\(reg(?:/\w+)?:\w+ (\d+)\)")
 # An insn's header in an RTL dump, with its UID
 INSN_HEADER_RE = re.compile(INSN_HEADER_START + r"(\d+) ", re.MULTILINE)
 # A line number note of a -g dump: its file and line
 LINE_NOTE_RE = re.compile(r'^\(note \d+ \d+ \d+ \("([^"]*)"\) (\d+)\)$', re.MULTILINE)
 DISPOSITION_RE = re.compile(r"(\d+) in (\d+)")
+# An insn, label or other element of an RTL dump: its kind and UID
+ELEMENT_HEADER_RE = re.compile(
+    r"^\((insn|jump_insn|call_insn|code_label|barrier|note)(?:[/:]\w+)* (\d+) ",
+    re.MULTILINE,
+)
+# A dependence in LOG_LINKS: its kind, absent for a true one, and the insn
+LINK_RE = re.compile(r"\(insn_list(?::(\w+))? (\d+)")
+# The priority sched gives an insn as it schedules the insn's block
+PRIORITY_RE = re.compile(r"^;; insn\[ *(\d+)\]: priority = +(\d+)", re.MULTILINE)
+DEPENDENCE_KINDS = {"REG_DEP_ANTI": "anti", "REG_DEP_OUTPUT": "output"}
+# What PATTERN_END_RE splits an insn with links into: its pattern and the rest
+PATTERN_AND_REST = 2
+# The most broken dependences or reordered pairs the order check lists
+MAX_ORDER_LINES = 12
 
 
 @dataclass
@@ -381,6 +399,222 @@ def describe_pseudo(compilation: Compilation, pseudo: int) -> str:
     return "\n    ".join(parts)
 
 
+def read_dependence_kind(note: str | None) -> str:
+    """Return the kind of dependence a link's NOTE, if any, names."""
+    if note is None:
+        return "true"
+    return DEPENDENCE_KINDS.get(note, note)
+
+
+def find_links(insn: str) -> list[tuple[str, int]]:
+    """Return the (kind, UID) of each insn that INSN's LOG_LINKS name.
+
+    The links are the first list after the pattern's code and name.
+    """
+    body = insn.split(" ", 4)[-1]
+    parts = PATTERN_END_RE.split(body, maxsplit=1)
+    if len(parts) < PATTERN_AND_REST or not parts[-1].startswith("(insn_list"):
+        return []
+    depth = 0
+    for end, character in enumerate(parts[-1]):
+        depth += {"(": 1, ")": -1}.get(character, 0)
+        if depth == 0:
+            return [
+                (read_dependence_kind(link.group(1)), int(link.group(2)))
+                for link in LINK_RE.finditer(parts[-1][: end + 1])
+            ]
+    return []
+
+
+def read_dependences(dump: str) -> dict[int, list[tuple[str, int]]]:
+    """Return {insn UID: the (kind, UID) of each insn it waits for} of DUMP."""
+    return {
+        int(match.group(2)): find_links(find_insn(dump, int(match.group(2))))
+        for match in ELEMENT_HEADER_RE.finditer(dump)
+        if match.group(1).endswith("insn")
+    }
+
+
+def read_blocks(dump: str) -> dict[int, int]:
+    """Return {insn UID: its basic block's number} of DUMP's insns.
+
+    A label begins a block and a jump ends one, as sched sees them.
+    """
+    blocks: dict[int, int] = {}
+    block = 0
+    for match in ELEMENT_HEADER_RE.finditer(dump):
+        kind, uid = match.group(1), int(match.group(2))
+        if kind == "code_label":
+            block += 1
+        elif kind.endswith("insn"):
+            blocks[uid] = block
+            if kind == "jump_insn":
+                block += 1
+    return blocks
+
+
+def get_position(routine: fncompare.Routine, index: int) -> float:
+    """Return where word INDEX goes in insn order: a delay slot's goes first."""
+    if index > 0 and has_delay_slot(routine, index - 1):
+        return index - 1.5
+    return index
+
+
+def get_word_text(routine: fncompare.Routine, index: int) -> str:
+    """Return word INDEX's text."""
+    return fncompare.disassemble(routine, index)
+
+
+def get_register_free_text(routine: fncompare.Routine, index: int) -> str:
+    """Return word INDEX's text with its registers left out."""
+    return re.sub(r"\$\w+", "$", fncompare.disassemble(routine, index))
+
+
+def pair_moved_words(
+    target: fncompare.Routine, compiled: fncompare.Routine
+) -> dict[int, int]:
+    """Return {our word index: its target word's index}.
+
+    Words the diff pairs as equal come first, then equal words that moved,
+    then words that differ only in registers, each nearest first.
+    """
+    pairing = fncompare.pair_words(target, compiled)
+    pairs = {
+        ours: theirs
+        for theirs, ours in pairing.rows
+        if theirs is not None and ours is not None and pairing.is_equal((theirs, ours))
+    }
+    for read_key in (get_word_text, get_register_free_text):
+        taken = set(pairs.values())
+        free = [index for index in range(len(target.words)) if index not in taken]
+        for ours in range(len(compiled.words)):
+            if ours in pairs:
+                continue
+            key = read_key(compiled, ours)
+            candidates = [theirs for theirs in free if read_key(target, theirs) == key]
+            if candidates:
+                theirs = min(candidates, key=lambda theirs: abs(theirs - ours))
+                pairs[ours] = theirs
+                free.remove(theirs)
+    return pairs
+
+
+def place_insns(
+    compilation: Compilation, target: fncompare.Routine
+) -> tuple[dict[int, float], dict[int, float]]:
+    """Return {insn UID: its place} in our order and in the target's.
+
+    An insn takes the place of its first word. One with a word the target
+    lacks has no place in the target's order.
+    """
+    compiled = compilation.routine
+    pairs = pair_moved_words(target, compiled)
+    ours: dict[int, float] = {}
+    theirs: dict[int, float] = {}
+    unpaired: set[int] = set()
+    for index in range(len(compiled.words)):
+        insn = get_insn(compilation, index)
+        if insn is None:
+            continue
+        uid = insn[0]
+        position = get_position(compiled, index)
+        ours[uid] = min(ours.get(uid, position), position)
+        if index not in pairs:
+            unpaired.add(uid)
+            continue
+        target_position = get_position(target, pairs[index])
+        theirs[uid] = min(theirs.get(uid, target_position), target_position)
+    for uid in unpaired:
+        _ = theirs.pop(uid, None)
+    return ours, theirs
+
+
+def describe_insn(compilation: Compilation, uid: int) -> str:
+    """Return insn UID's pattern name and source line, from sched2."""
+    insn = find_insn(compilation.dumps.get("sched2", ""), uid)
+    name = re.search(r"\{(\S+)\}", insn)
+    line = compilation.insn_lines.get("sched2", {}).get(uid)
+    return f"insn {uid} {name.group(1) if name else '?'}" + (
+        f" at {line}" if line else ""
+    )
+
+
+def check_order(compilation: Compilation, target: fncompare.Routine) -> list[str]:
+    """Return what keeps sched2 from placing our insns in the target's order.
+
+    Each dependence sched2 kept that the target's order breaks is listed,
+    noting whether sched, before register allocation, had it too: one it
+    had comes from the code itself, one it lacked from the hard registers.
+    With none broken, the pairs of a block the target orders the other way
+    are listed with their sched2 priorities, the first thing that decides
+    between two ready insns; source order breaks a tie.
+    """
+    sched2 = compilation.dumps.get("sched2", "")
+    if not sched2:
+        return []
+    dependences = read_dependences(sched2)
+    early = read_dependences(compilation.dumps.get("sched", ""))
+    ours, theirs = place_insns(compilation, target)
+    broken: list[str] = []
+    for uid, links in dependences.items():
+        for kind, before in links:
+            if uid in theirs and before in theirs and theirs[before] > theirs[uid]:
+                origin = (
+                    "sched too"
+                    if (kind, before) in early.get(uid, [])
+                    else "sched2 only"
+                )
+                waiting = describe_insn(compilation, uid)
+                awaited = describe_insn(compilation, before)
+                broken.append(f"{waiting} waits for {awaited}: {kind}, {origin}")
+    if broken:
+        return [f"{len(broken)} dependences break the target's order:", *broken]
+    blocks = read_blocks(sched2)
+    priorities = {
+        int(match.group(1)): int(match.group(2))
+        for match in PRIORITY_RE.finditer(sched2)
+    }
+    placed = sorted(theirs, key=lambda uid: ours[uid])
+    flipped = [
+        (first, second)
+        for position, first in enumerate(placed)
+        for second in placed[position + 1 :]
+        if blocks.get(first) == blocks.get(second) and theirs[first] > theirs[second]
+    ]
+    if not flipped:
+        return []
+    lines = [f"no dependence breaks the target's order; {len(flipped)} pairs flip:"]
+    lines += [
+        explain_flip(compilation, (first, second), priorities)
+        for first, second in flipped
+    ]
+    return lines
+
+
+def explain_flip(
+    compilation: Compilation, pair: tuple[int, int], priorities: dict[int, int]
+) -> str:
+    """Return why sched2 put PAIR's insns in our order, not the target's.
+
+    sched2 fills a block from its end: of the ready insns, it places the one
+    with the highest priority, the longest chain of dependences after it,
+    latest. An insn is ready once every insn that waits for it is placed.
+    """
+    first, second = pair
+    first_priority = priorities.get(first, 0)
+    second_priority = priorities.get(second, 0)
+    earlier = f"{describe_insn(compilation, first)} (priority {first_priority})"
+    later = f"{describe_insn(compilation, second)} (priority {second_priority})"
+    order = f"{earlier} goes before {later}"
+    if first_priority > second_priority:
+        reason = "a dependence of ours held the first back; the original lacks it"
+    elif first_priority < second_priority:
+        reason = "the original gives the first a longer chain, or holds the second"
+    else:
+        reason = "a tie, which the insns placed before or the source order decide"
+    return f"{order}; {reason}"
+
+
 def main() -> None:
     """Blame the differing instructions of the function named."""
     arguments = sys.argv[1:]
@@ -405,6 +639,11 @@ def main() -> None:
     indices = [index for run in runs for _, index in run if index is not None]
     for pseudo in find_pseudos(compilation, indices):
         print(f"  {describe_pseudo(compilation, pseudo)}")
+    order = check_order(compilation, target)
+    if order:
+        print(f"order: {order[0]}")
+        for line in order[1 : MAX_ORDER_LINES + 1]:
+            print(f"  {line}")
 
 
 if __name__ == "__main__":
