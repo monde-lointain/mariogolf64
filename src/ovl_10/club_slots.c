@@ -536,7 +536,7 @@ s32 GetClubSlotsState(void) {
  * Doesn't match: the reel loops' counters take $s3 and $s4 the other way
  * round, the original keeps &asset in $s2 for the face reads where ours
  * rebuilds it from $sp, and the face lookups schedule their argument loads
- * differently. 57 words differ, 37 in shape.
+ * differently. 55 words differ, 35 in shape.
  */
 #ifdef NON_MATCHING
 void DrawClubSlots(Gfx** displayListHead) {
@@ -916,8 +916,8 @@ void DrawClubSlots(Gfx** displayListHead) {
             row =
                 f_CharacterFaceRows[(s8)g_Players[playerIndex].characterIndex];
             if (f_StarCount == REEL_COUNT) {
-              IN_OWN_BLOCK(OpenEncodedAsset(
-                  g_FaceAnimationAssets[row][FACE_LAST_FRAME], &asset));
+              OpenEncodedAsset(
+                  g_FaceAnimationAssets[row][FACE_LAST_FRAME], &asset);
               ReadEncodedAsset(f_Slots->faceImages[playerIndex][0], &asset);
               OpenEncodedAsset(
                   g_FaceAnimationAssets[row][FACE_LAST_FRAME], &asset);
