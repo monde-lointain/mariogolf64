@@ -2751,10 +2751,7 @@ void DrawMenuBackdrop(Gfx** displayListHead) {
 
 /*
  * Draws HUD_ANIMATION_TILES, where the frame's tiles turn over and fly apart
- *
- * Doesn't match: 67 words differ.
  */
-#ifdef NON_MATCHING
 void DrawTileAnimation(void) {
   Vec3 rotation;
   Vec3 translation;
@@ -2765,7 +2762,7 @@ void DrawTileAnimation(void) {
   s32 progress;
   s32 tileRow;
   s32 tileColumn;
-  s32 wordIndex = 0;
+  s32 wordIndex;
 
   if (f_HudAnimationFramesLeft > 0) {
     angle = (f32)((M_PI / 2) -
@@ -2796,18 +2793,19 @@ void DrawTileAnimation(void) {
     rotation[AXIS_Y] = (M_PI / 2) -
         (f_HudAnimationFramesLeft * (M_PI / 2 / TILE_ANIMATION_FRAME_COUNT));
     rotation[AXIS_Z] = rotation[AXIS_Y];
+    wordIndex = 0;
     for (tileRow = 0; tileRow != FRAME_TILE_ROW_COUNT; tileRow++) {
       for (tileColumn = 0; tileColumn != FRAME_TILE_COLUMN_COUNT;
           tileColumn++) {
         progress = TILE_ANIMATION_FRAME_COUNT - f_HudAnimationFramesLeft;
-        translation[AXIS_Z] =
-            TILE_ANIMATION_DEPTH - (progress * TILE_ANIMATION_SPEED_Z);
         translation[AXIS_X] =
             ((progress + TILE_ANIMATION_GAP_X) *
                 (tileColumn - (FRAME_TILE_COLUMN_COUNT / 2))) +
             TILE_ANIMATION_OFFSET_X;
         translation[AXIS_Y] = -(progress + TILE_ANIMATION_GAP_Y) *
             (tileRow - (FRAME_TILE_ROW_COUNT / 2));
+        translation[AXIS_Z] =
+            TILE_ANIMATION_DEPTH - (progress * TILE_ANIMATION_SPEED_Z);
         BuildRotationMatrix(matrix, rotation, translation);
         ConvertMatrixToFixed(matrix,
             &f_TileMatrices[g_MatrixBufferIndex]
@@ -2829,6 +2827,7 @@ void DrawTileAnimation(void) {
             G_IM_SIZ_16b, FRAME_TILE_WIDTH, FRAME_TILE_ROWS, 0,
             G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
             G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+        gDPPipeSync(g_DisplayListHead++);
         wordIndex += FRAME_TILE_WORD_COUNT;
         gSP2Triangles(g_DisplayListHead++, 0, 1, 2, 0, 0, 2, 3, 0);
         gDPPipeSync(g_DisplayListHead++);
@@ -2839,9 +2838,6 @@ void DrawTileAnimation(void) {
     f_HudAnimationFramesLeft -= TILE_ANIMATION_STEP;
   }
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/hole_display", DrawTileAnimation);
-#endif
 
 /*
  * HUD_ANIMATION_TURN_AWAY turns the whole frame away about two axes as it
