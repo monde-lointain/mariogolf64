@@ -2334,7 +2334,8 @@ const CharacterModel g_OtherCharacterModels[OTHER_CHARACTER_MODEL_COUNT] = {
  * outside them or past g_CurrentAnimationEndFrame.
  *
  * Doesn't match: GCC keeps frame in $f6, where the original keeps it in $f2,
- * which shifts the other floating-point registers. 220 words differ.
+ * which shifts the other floating-point registers. 210 words differ, 42 in
+ * shape.
  */
 #ifdef NON_MATCHING
 void AnimateCharacterJoints(u32 slotIndex) {
@@ -2487,6 +2488,9 @@ void AnimateCharacterJoints(u32 slotIndex) {
         rotation[3] =
             joint->rotations[joint->rotationSpan.index][3] * QUATERNION_SCALE;
       } else {
+        /* Its own, as the original allocates it within the branch */
+        f32 rotationProgress;
+
         spanIndex = joint->rotationSpan.index;
         nextSpanIndex = spanIndex + 1;
         dot = ((joint->rotations[nextSpanIndex][0] * QUATERNION_PRODUCT_SCALE) *
@@ -2497,19 +2501,20 @@ void AnimateCharacterJoints(u32 slotIndex) {
                 joint->rotations[spanIndex][2]) +
             ((joint->rotations[nextSpanIndex][3] * QUATERNION_PRODUCT_SCALE) *
                 joint->rotations[spanIndex][3]);
-        progress = (g_CurrentAnimationFrame - joint->rotationSpan.startFrame) /
+        rotationProgress =
+            (g_CurrentAnimationFrame - joint->rotationSpan.startFrame) /
             (joint->rotationSpan.endFrame - joint->rotationSpan.startFrame);
         /* Nearly equal rotations are blended linearly, where the sines below
          * would be near zero */
         if (1.0 - dot < SLERP_THRESHOLD) {
-          nextWeight = progress;
+          nextWeight = rotationProgress;
           spanWeight = 1.0 - nextWeight;
         } else {
           angle = acosf(dot);
-          progress *= angle;
+          rotationProgress *= angle;
           sinAngle = sinf(angle);
-          nextWeight = sinf(progress) / sinAngle;
-          spanWeight = sinf(angle - progress) / sinAngle;
+          nextWeight = sinf(rotationProgress) / sinAngle;
+          spanWeight = sinf(angle - rotationProgress) / sinAngle;
         }
 
         spanWeight *= QUATERNION_SCALE;
