@@ -2017,7 +2017,12 @@ void DrawReadyGoMovie(Gfx** displayListHead) {
  * Unused: draws the movie image in f_MovieBuffer, shrinking it from double size
  * to its own size
  *
- * Doesn't match: 101 words differ, 31 in shape.
+ * Doesn't match: the original keeps stripCount in $fp where ours spills it,
+ * and it copies width to $s1 before the sound for the scale's (width >> 1).
+ * Its strip loop also leaves stripHeight * 4 and offset * 6 inside, where
+ * loop.c hoists the one and strength-reduces the other in ours. Making width's
+ * copy a variable, reordering the increments, a u32 offset and a for-clause
+ * increment change nothing. 115 words differ, 29 in shape.
  */
 #ifdef NON_MATCHING
 void DrawShrinkingMovieImage(Gfx** displayListHead) {
@@ -2062,7 +2067,7 @@ void DrawShrinkingMovieImage(Gfx** displayListHead) {
     if (halfWidth > 0 && stripHeight > 0) {
       bottom = SHRINKING_IMAGE_CENTER_Y;
       offset = 0;
-      for (i = 0; i < stripCount; i++) {
+      for (i = 0; i != stripCount; i++) {
         LoadTextureBlock(&gfx,
             f_MovieBuffer +
                 ((offset * MOVIE_IMAGE_STRIP_HEIGHT) +
