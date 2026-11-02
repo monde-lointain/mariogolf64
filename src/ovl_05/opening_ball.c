@@ -322,7 +322,9 @@ typedef s32 (*BillboardHitFinder)(s32 startX, s32 startY, s32 startZ, s32 endX,
  * Doesn't match: the nested helpers match, but the routine keeps 614.4f and
  * 1996.8f in saved registers where the original reloads them, so 0.5f loses
  * the register it had and the floating-point registers are allocated
- * differently. 676 words differ.
+ * differently. Reading the side spin before the drag, and adding the
+ * velocity to the spin's push rather than the other way round, take it from
+ * 676 words differing to 662.
  */
 #ifdef NON_MATCHING
 s32 StepOpeningBallSimulation(BallSimulation* simulation) {
@@ -1564,6 +1566,7 @@ ROLLED:
 
       relative[AXIS_X] =
           simulation->velocity[AXIS_X] - simulation->windVelocityX;
+      sideSpin = simulation->sideSpin;
       relative[AXIS_Y] = simulation->velocity[AXIS_Y];
       relative[AXIS_Z] =
           simulation->velocity[AXIS_Z] - simulation->windVelocityZ;
@@ -1572,7 +1575,6 @@ ROLLED:
       drag =
           (sqrtf(airSpeed * AIR_DRAG_SPEED_SCALE) * AIR_DRAG_PER_ROOT_SPEED) +
           MIN_AIR_DRAG;
-      sideSpin = simulation->sideSpin;
       sideSpinMagnitude = AbsFloat(sideSpin * SIDE_SPIN_SPEED_SCALE);
       horizontalSpeed = GetOpeningLength2D(relative[AXIS_X], relative[AXIS_Z]);
       ratio = 0.0f;
@@ -1597,7 +1599,7 @@ ROLLED:
         f32 scale = (1.0f / horizontalSpeed) * curve;
 
         simulation->velocity[AXIS_X] =
-            simulation->velocity[AXIS_X] + (-relative[AXIS_Z] * scale);
+            (-relative[AXIS_Z] * scale) + simulation->velocity[AXIS_X];
         simulation->velocity[AXIS_Z] =
             simulation->velocity[AXIS_Z] + (relative[AXIS_X] * scale);
       }
