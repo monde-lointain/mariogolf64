@@ -1691,7 +1691,9 @@ void DrawBrickWallRows(Gfx** displayListHead, u8 slide) {
  *
  * Doesn't match: the original computes the mirrored arrow's start without a
  * branch, and keeps the display list head in its argument slot.
- * 22 words differ.
+ * 22 words differ. Other conditions for the if, casts or shifts of the
+ * comparison all branch; working the start out into a variable before the
+ * rectangle avoids the branch but folds its two shifts into one (25 words).
  */
 #ifdef NON_MATCHING
 void DrawPageArrows(Gfx** displayListHead) {
