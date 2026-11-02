@@ -1654,7 +1654,7 @@ s32 PaintFirstMiniGolfCourse(
     s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32 z) {
   u32 color;
   s32 paintedCode;
-  Boolean isOtherNearest;
+
   s32 random;
 
   switch (code) {
@@ -1666,9 +1666,7 @@ s32 PaintFirstMiniGolfCourse(
           ((4 - ((random >> 5) & 3)) << RGBA16_GREEN_SHIFT);
       break;
     case TERRAIN_CODE_GREEN:
-      /* The assignment in the test is there to match */
-      if ((isOtherNearest = nearestCode != TERRAIN_CODE_GREEN) &&
-          nearestDistance < TERRAIN_BORDER_DISTANCE) {
+      if (IsGreenEdge(code, nearestCode, nearestDistance)) {
         color = 0x650B;
         paintedCode = TERRAIN_CODE_GREEN;
       } else if (nearestCode == TERRAIN_CODE_GREEN ||
@@ -1708,7 +1706,7 @@ s32 PaintSecondMiniGolfCourse(
     s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32 z) {
   u32 color;
   s32 paintedCode;
-  Boolean isOtherNearest;
+
   s32 random;
 
   switch (code) {
@@ -1720,9 +1718,7 @@ s32 PaintSecondMiniGolfCourse(
           ((4 - ((random >> 5) & 3)) << RGBA16_GREEN_SHIFT) | 1;
       break;
     case TERRAIN_CODE_GREEN:
-      /* The assignment in the test is there to match */
-      if ((isOtherNearest = nearestCode != TERRAIN_CODE_GREEN) &&
-          nearestDistance < TERRAIN_BORDER_DISTANCE) {
+      if (IsGreenEdge(code, nearestCode, nearestDistance)) {
         color = 0x4C73;
         paintedCode = TERRAIN_CODE_FAIRWAY;
       } else if (nearestCode == TERRAIN_CODE_GREEN ||
