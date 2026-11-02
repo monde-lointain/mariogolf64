@@ -882,8 +882,10 @@ void DrawPauseArrows(Gfx** displayListHead, s32 x, s32 y, s32 gap) {
  *
  * Doesn't match: the original sign-extends y for the grid color's value text
  * from y itself, and only the weather's from the shifted copy that loop.c keeps
- * in the label loop, where this uses the copy for both. The order of $s4 to $s6
- * also differs. 62 words differ, 16 in shape.
+ * in the label loop, where this uses the copy for both: loop.c records all
+ * four conversions as givs and combines them. Choosing the text into a local
+ * gives 62 words. The order of $s4 to $s6 also differs. 58 words differ, 10
+ * in shape.
  */
 #ifdef NON_MATCHING
 void DrawPauseMenu(Gfx** displayListHead) {
@@ -898,7 +900,6 @@ void DrawPauseMenu(Gfx** displayListHead) {
   s32 blue;
   s32 i;
   s32 y;
-  char* valueText;
   s32 message;
   u16 kind;
   u16 selectedKind;
@@ -987,22 +988,22 @@ void DrawPauseMenu(Gfx** displayListHead) {
     if (kind == PAUSE_OPTION_KIND_GRID_COLOR) {
       if ((s8)g_Players[g_CurrentShot.playerIndex].gridColor ==
           GRID_COLOR_BLACK) {
-        valueText = f_PauseValueTexts[PAUSE_VALUE_TEXT_BLACK];
+        DrawLargeText(
+            &gfx, PAUSE_VALUE_X, y, f_PauseValueTexts[PAUSE_VALUE_TEXT_BLACK]);
       } else {
-        valueText = f_PauseValueTexts[PAUSE_VALUE_TEXT_WHITE];
+        DrawLargeText(
+            &gfx, PAUSE_VALUE_X, y, f_PauseValueTexts[PAUSE_VALUE_TEXT_WHITE]);
       }
-
-      DrawLargeText(&gfx, PAUSE_VALUE_X, y, valueText);
     }
 
     if (kind == PAUSE_OPTION_KIND_WEATHER) {
       if (g_HoleSetup.conditions.isRaining == TRUE) {
-        valueText = f_PauseValueTexts[PAUSE_VALUE_TEXT_RAIN];
+        DrawLargeText(
+            &gfx, PAUSE_VALUE_X, y, f_PauseValueTexts[PAUSE_VALUE_TEXT_RAIN]);
       } else {
-        valueText = f_PauseValueTexts[PAUSE_VALUE_TEXT_CLEAR];
+        DrawLargeText(
+            &gfx, PAUSE_VALUE_X, y, f_PauseValueTexts[PAUSE_VALUE_TEXT_CLEAR]);
       }
-
-      DrawLargeText(&gfx, PAUSE_VALUE_X, y, valueText);
     }
   }
 
