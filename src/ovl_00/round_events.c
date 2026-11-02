@@ -1409,12 +1409,7 @@ void DrawMovie(Gfx** displayListHead) {
 
 /*
  * The caption of a longest drive or nearest pin contest, then its winner's face
- *
- * Doesn't match: GCC swaps the saved registers of the image's width and the
- * strips' right edge, and sets up the loop's texel offset and edge in the
- * other order. Writing halfWidth + centerX changes nothing. 16 words differ.
  */
-#ifdef NON_MATCHING
 void DrawContestWinnerMovie(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   EncodedAsset asset;
@@ -1514,18 +1509,18 @@ void DrawContestWinnerMovie(Gfx** displayListHead) {
       gfx++, TextureAddress(f_MovieBuffer + MOVIE_IMAGE_PALETTE_OFFSET));
   if (f_MovieDrawCount < CONTEST_DRAW_COUNT && halfWidth != 0) {
     for (i = 0; i != stripCount; i++) {
-      bottom = CONTEST_IMAGE_CENTER_Y + i * MOVIE_IMAGE_STRIP_HEIGHT;
       LoadTextureBlock(&gfx,
           f_MovieBuffer +
               ((i * width * MOVIE_IMAGE_STRIP_HEIGHT) +
                   MOVIE_IMAGE_PIXELS_OFFSET),
           G_IM_FMT_CI, G_IM_SIZ_8b, width, MOVIE_IMAGE_STRIP_HEIGHT, 0, 0, 0, 0,
           0, 0, 0);
+      bottom = CONTEST_IMAGE_CENTER_Y + i * MOVIE_IMAGE_STRIP_HEIGHT;
       centerX = CONTEST_IMAGE_CENTER_X + slide;
       DrawTextureRect(&gfx, QuarterPixels(centerX - halfWidth),
           QuarterPixels(
               bottom - (stripHeight * CONTEST_IMAGE_STRIPS_ABOVE_CENTER)),
-          QuarterPixels(centerX + halfWidth),
+          QuarterPixels(halfWidth + centerX),
           QuarterPixels(bottom -
               (stripHeight * CONTEST_IMAGE_STRIPS_ABOVE_CENTER) +
               MOVIE_IMAGE_STRIP_HEIGHT),
@@ -1599,8 +1594,13 @@ void DrawContestWinnerMovie(Gfx** displayListHead) {
     LoadTextureBlock(&gfx, f_MovieBuffer + WINNER_FACE_OFFSET, G_IM_FMT_CI,
         G_IM_SIZ_8b, WINNER_FACE_SIZE, WINNER_FACE_SIZE, 0, 0, 0, 0, 0, 0, 0);
     step = ((WINNER_FACE_SIZE / 2) << 10) / growth;
-    DrawTextureRect(&gfx, QuarterPixels(WINNER_CENTER_X - growth),
-        QuarterPixels(WINNER_CENTER_Y - growth),
+    /*
+     * Reuses width for the face's left edge, as the original seems to: the
+     * extra use raises width's global-alloc priority above the strips' right
+     * edge, so that width gets $s7 there as in the original.
+     */
+    width = QuarterPixels(WINNER_CENTER_X - growth);
+    DrawTextureRect(&gfx, width, QuarterPixels(WINNER_CENTER_Y - growth),
         QuarterPixels(WINNER_CENTER_X + growth),
         QuarterPixels(WINNER_CENTER_Y + growth), G_TX_RENDERTILE, 0, 0, step,
         step);
@@ -1609,9 +1609,6 @@ void DrawContestWinnerMovie(Gfx** displayListHead) {
   gDPPipeSync(gfx++);
   *displayListHead = gfx;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_00/round_events", DrawContestWinnerMovie);
-#endif
 
 /* The record distance shows under the caption once it has met at the center */
 #define DRIVE_RECORD_DISTANCE_DRAW 26
