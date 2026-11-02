@@ -148,7 +148,6 @@ enum PlanksState {
 
 /* Ring Shot hole descriptions are text images from this one */
 #define RING_SHOT_TEXT_FIRST_IMAGE 0x4B
-#define RING_SHOT_TEXT_SLOT 2
 
 void DrawNamePlate(Gfx** displayListHead, s32 centerX, s32 centerY);
 void DrawRingShotStars(Gfx** displayListHead, s32 centerX, s32 centerY);
@@ -706,11 +705,10 @@ INCLUDE_ASM("asm/nonmatchings/ovl_11/course_select", DrawPlanks);
 #endif
 
 /*
- * Doesn't match: the original sets each arrow coordinate's second choice in
- * the branch's delay slot and shifts it in each arm, where GCC picks the sum
- * first and shifts it once after the arms join. 51 words differ, 23 in shape.
+ * Draws the Ring Shot select: the planks, the name plate, the course image,
+ * the blinking arrows when more than one course is open outside a replay, the
+ * course's stars and its hole's description.
  */
-#ifdef NON_MATCHING
 void DrawRingShotSelect(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   MenuMemory* memory = GetMenuMemory();
@@ -764,20 +762,20 @@ void DrawRingShotSelect(Gfx** displayListHead) {
           G_IM_FMT_CI, ARROWS_WIDTH, ARROWS_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
       gDPPipeSync(gfx++);
       push = (f_RepeatedButtons & U_JPAD) ? ARROW_PUSH_UP : 0;
-      IN_OWN_BLOCK(DrawTextureRect(&gfx, QuarterPixels(ARROW_LEFT),
-          QuarterPixels(
-              f_PressedDirection == DIRECTION_UP ? push + 128 : push + 132),
+      DrawTextureRect(&gfx, QuarterPixels(ARROW_LEFT),
+          QuarterPixels(push + 132 -
+              (f_PressedDirection == DIRECTION_UP ? ARROW_STEP : 0)),
           QuarterPixels(ARROW_LEFT + ARROW_SIZE),
-          QuarterPixels(
-              f_PressedDirection == DIRECTION_UP ? push + 144 : push + 148),
-          G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE));
+          QuarterPixels(push + 148 -
+              (f_PressedDirection == DIRECTION_UP ? ARROW_STEP : 0)),
+          G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       push = (f_RepeatedButtons & D_JPAD) ? ARROW_PUSH_DOWN : 0;
       DrawTextureRect(&gfx, QuarterPixels(ARROW_LEFT),
-          QuarterPixels(
-              f_PressedDirection == DIRECTION_DOWN ? push + 208 : push + 204),
+          QuarterPixels(push + 204 +
+              (f_PressedDirection == DIRECTION_DOWN ? ARROW_STEP : 0)),
           QuarterPixels(ARROW_LEFT + ARROW_SIZE),
-          QuarterPixels(
-              f_PressedDirection == DIRECTION_DOWN ? push + 224 : push + 220),
+          QuarterPixels(push + 220 +
+              (f_PressedDirection == DIRECTION_DOWN ? ARROW_STEP : 0)),
           G_TX_RENDERTILE, 0, TexelCoordinate(ARROW_SIZE), TEXEL_STEP_ONE,
           TEXEL_STEP_ONE);
       gDPPipeSync(gfx++);
@@ -787,19 +785,20 @@ void DrawRingShotSelect(Gfx** displayListHead) {
     gDPPipeSync(gfx++);
     SetUpTextDrawing(&gfx);
     SetTextColor(&gfx, 255, 255, 255);
+    /*
+     * The text slot is stripIndex, which the strip loop leaves at
+     * COURSE_IMAGE_STRIP_COUNT (2): the original keeps that count in a saved
+     * register rather than loading a constant slot
+     */
     SetTextSlot(SCREEN_WIDTH / 2, 42,
         (memory->courseIndex * RING_SHOT_HOLE_COUNT) + memory->holeIndex +
             RING_SHOT_TEXT_FIRST_IMAGE,
-        TEXT_SLOT_LARGE_FONT, RING_SHOT_TEXT_SLOT,
-        TEXT_FLAG_CENTERED | TEXT_FLAG_UNK20, 255, 255, 255, 255);
-    DrawLargeTextSlot(&gfx, RING_SHOT_TEXT_SLOT);
+        TEXT_SLOT_LARGE_FONT, stripIndex, TEXT_FLAG_CENTERED | TEXT_FLAG_UNK20,
+        255, 255, 255, 255);
+    DrawLargeTextSlot(&gfx, stripIndex);
     *displayListHead = gfx;
   }
 }
-
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_11/course_select", DrawRingShotSelect);
-#endif
 
 /*
  * Draws the hole select screen as it slides in: the hole sign, the course
