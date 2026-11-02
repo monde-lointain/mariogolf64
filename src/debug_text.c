@@ -158,20 +158,13 @@ void PrintMessage(s8* text, u32 column, u32 row) {
 /*
  * Draws a character of the debug font straight into both framebuffers, at a
  * column and row of the message grid, and turns the screen back on.
- *
- * Doesn't match: GCC copies the glyph's font index into the loop's register
- * five instructions earlier. Setting it in the outer loop's initializer
- * changes nothing; setting it next to y or setting y in the loop gives 16
- * or 19 differing words, not 2. 2 words differ.
  */
-#ifdef NON_MATCHING
 void DrawMessageCharacter(s8 character, u32 column, u32 row) {
   u16* currentFramebuffer =
       (u16*)(osVirtualToPhysical(osViGetCurrentFramebuffer()) + K1BASE);
   u16* nextFramebuffer =
       (u16*)(osVirtualToPhysical(osViGetNextFramebuffer()) + K1BASE);
   s32 glyphStart;
-  s32 fontIndex;
   s32 y;
   s32 x;
   s32 pixelIndex;
@@ -196,10 +189,10 @@ void DrawMessageCharacter(s8 character, u32 column, u32 row) {
     return;
   }
 
-  fontIndex = glyphStart;
   for (; y < GLYPH_SIZE; y++) {
     for (x = 0; x < GLYPH_SIZE; x++) {
-      color = ((f_DebugFont[fontIndex + (x / PIXELS_PER_FONT_WORD)] >>
+      color = ((f_DebugFont[glyphStart + (y * FONT_ROW_WORD_COUNT) +
+                    (x / PIXELS_PER_FONT_WORD)] >>
                    ((3 - (x & 3)) * 4)) &
                   0xF) == FONT_INK
           ? MESSAGE_INK_COLOR
@@ -209,16 +202,10 @@ void DrawMessageCharacter(s8 character, u32 column, u32 row) {
       currentFramebuffer[pixelIndex] = color;
       nextFramebuffer[pixelIndex] = color;
     }
-
-    fontIndex += FONT_ROW_WORD_COUNT;
   }
 
   osViBlack(FALSE);
 }
-
-#else
-INCLUDE_ASM("asm/nonmatchings/debug_text", DrawMessageCharacter);
-#endif
 
 void ClearDebugText(void) {
   s32 index;
