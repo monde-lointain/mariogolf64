@@ -3223,14 +3223,7 @@ INCLUDE_RODATA("asm/nonmatchings/ovl_00/round_results", f_NoPointsText);
 /*
  * The match play results of two players: place, portrait, holes up or down,
  * any bets and Course Points.
- *
- * Doesn't match: the original keeps standingRow in $a1, where ours gives it
- * $v1, so the standing shift and the slide swap $v1 and $a3; forcing those 5
- * pseudos leaves 10 words differing. standingRow's declaration order doesn't
- * change it. Adding the slide to the standing X before the shift puts the
- * loads in the original's order. 28 words differ, none in shape.
  */
-#ifdef NON_MATCHING
 void DrawMatchResults(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   s32 unused[4] UNUSED;
@@ -3312,11 +3305,11 @@ void DrawMatchResults(Gfx** displayListHead) {
     if (f_HasBets) {
       DrawTextureRect(&gfx,
           QuarterPixels(
-              standingShift[i] + (f_ResultsSlide + BETTING_MATCH_STANDING_X)),
+              BETTING_MATCH_STANDING_X + f_ResultsSlide + standingShift[i]),
           QuarterPixels(
               f_ResultsTop + MATCH_STANDING_Y + (i * MATCH_ROW_HEIGHT)),
-          QuarterPixels(standingShift[i] + BETTING_MATCH_STANDING_X +
-              STANDING_WORD_WIDTH + f_ResultsSlide),
+          QuarterPixels(BETTING_MATCH_STANDING_X +
+              (f_ResultsSlide + STANDING_WORD_WIDTH) + standingShift[i]),
           QuarterPixels(f_ResultsTop + MATCH_STANDING_Y +
               (i * MATCH_ROW_HEIGHT) + STANDING_WORD_HEIGHT),
           G_TX_RENDERTILE, 0, TexelCoordinate(standingRow), TEXEL_STEP_ONE,
@@ -3324,11 +3317,11 @@ void DrawMatchResults(Gfx** displayListHead) {
     } else {
       DrawTextureRect(&gfx,
           QuarterPixels(
-              standingShift[i] + (f_ResultsSlide + PLAIN_MATCH_STANDING_X)),
+              PLAIN_MATCH_STANDING_X + f_ResultsSlide + standingShift[i]),
           QuarterPixels(
               f_ResultsTop + MATCH_STANDING_Y + (i * MATCH_ROW_HEIGHT)),
-          QuarterPixels(standingShift[i] + PLAIN_MATCH_STANDING_X +
-              STANDING_WORD_WIDTH + f_ResultsSlide),
+          QuarterPixels(PLAIN_MATCH_STANDING_X +
+              (f_ResultsSlide + STANDING_WORD_WIDTH) + standingShift[i]),
           QuarterPixels(f_ResultsTop + MATCH_STANDING_Y +
               (i * MATCH_ROW_HEIGHT) + STANDING_WORD_HEIGHT),
           G_TX_RENDERTILE, 0, TexelCoordinate(standingRow), TEXEL_STEP_ONE,
@@ -3411,9 +3404,6 @@ void DrawMatchResults(Gfx** displayListHead) {
 
   *displayListHead = gfx;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", DrawMatchResults);
-#endif
 
 INCLUDE_RODATA("asm/nonmatchings/ovl_00/round_results", f_UnusedModeNamesText);
 
