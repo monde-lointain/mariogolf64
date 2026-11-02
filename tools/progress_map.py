@@ -566,7 +566,8 @@ def history_svg(hist: List[dict], standalone: bool = False) -> str:
     t0, t1 = t(pts[0]), t(pts[-1])
     if t1 <= t0:
         t1 = t0 + 1
-    ymax = max(max(p["matched_code_percent"] + p.get("regs_only_percent", 0.0), p["fuzzy_match_percent"]) for p in pts)
+    ymax = max(max(p["matched_code_percent"] + p.get("regs_only_percent", 0.0), p.get("fuzzy_match_percent", 0.0))
+               for p in pts)
     steps = [0.5, 1, 2, 5, 10, 20, 25, 50, 100]
     step = next((s for s in steps if ymax / s <= 5), 100)
     ytop = max(step, step * (int(ymax / step) + 1))
