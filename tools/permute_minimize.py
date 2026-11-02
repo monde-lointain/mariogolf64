@@ -12,7 +12,7 @@ when the compiled function differs from the original in no more words
 than before. Prints the hunks that remain, and writes the reduced source
 to minimized.c in OUTPUT_DIR.
 
-decomp-permuter is expected at $PERMUTER_DIR (default ~/src/decomp-permuter).
+decomp-permuter is expected where permute_setup.py expects it.
 """
 
 import difflib

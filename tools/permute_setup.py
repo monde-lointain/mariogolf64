@@ -10,10 +10,12 @@ default), ready for:
 
     permuter.py OUT_DIR -j 16
 
-decomp-permuter is expected at $PERMUTER_DIR (default ~/src/decomp-permuter),
-on its nested-functions branch: pycparser rejects nested functions, and the
-display-list macros that base.c keeps as calls need the branch's importer,
-which keeps braced macro bodies and attributes.
+decomp-permuter is expected at $PERMUTER_DIR (default
+~/projects/tools/decomp-permuter-nested), on its nested-functions branch:
+pycparser rejects nested functions, and the display-list macros that base.c
+keeps as calls need the branch's importer, which keeps braced macro bodies
+and attributes. Any other branch is refused, since its importer writes a
+base.c that compiles to different code.
 """
 
 import contextlib
@@ -31,8 +33,11 @@ import fncompare
 
 ROOT = fncompare.ROOT
 PERMUTER_DIR = Path(
-    os.environ.get("PERMUTER_DIR", Path("~/src/decomp-permuter").expanduser())
+    os.environ.get(
+        "PERMUTER_DIR", Path("~/projects/tools/decomp-permuter-nested").expanduser()
+    )
 )
+PERMUTER_BRANCH = "nested-functions"
 OUT_DIR_ARGUMENT_COUNT = 5
 # compile.sh has to be executable for the permuter to run it
 SCRIPT_MODE = 0o755
@@ -369,9 +374,23 @@ def write_target(asm_paths: list[str], out_dir: Path) -> None:
     )
 
 
+def check_permuter_branch() -> None:
+    """Exit unless PERMUTER_DIR has the nested-functions branch checked out."""
+    branch = subprocess.run(
+        ["git", "-C", str(PERMUTER_DIR), "branch", "--show-current"],
+        check=False,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+    if branch != PERMUTER_BRANCH:
+        found = branch or "(none)"
+        sys.exit(f"{PERMUTER_DIR} is on {found}, not {PERMUTER_BRANCH}")
+
+
 def main() -> None:
     """Fill the permuter directory for the function named."""
     c_path, asm_path, function = sys.argv[1:4]
+    check_permuter_branch()
     out_dir = (
         Path(sys.argv[4])
         if len(sys.argv) >= OUT_DIR_ARGUMENT_COUNT
