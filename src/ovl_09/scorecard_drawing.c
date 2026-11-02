@@ -1585,6 +1585,8 @@ void FormatLeaderboardRow(char* row, TournamentStanding* standing) {
 #define FLAP_NAME_LEFT 96
 #define ROW_TEXT_LEFT 34
 #define ROW_TEXT_TOP 67
+#define RowTextTop(row) \
+  (ROW_TEXT_TOP + ((row) * LEADERBOARD_ROW_SPACING) + g_Scorecard.y)
 #define ROW_NAME_LEFT 98
 /* A flap turns its far side to the screen past a quarter turn */
 #define FLAP_EDGE_ON_ANGLE (M_PI / 2)
@@ -1617,7 +1619,8 @@ void FormatLeaderboardRow(char* row, TournamentStanding* standing) {
  * Doesn't match: the target keeps displayListHead in a saved register, where
  * this spills it, so its frame is 0xE0 bytes, not 0xD8. The bottom flaps'
  * loop also reads the flip angles through the stagger's index instead of a
- * pointer of their own. 140 words differ, 54 in shape.
+ * pointer of their own. Stepping the rows' tops beside the index gives 140
+ * words differing, 54 in shape. 124 words differ, 48 in shape.
  */
 #ifdef NON_MATCHING
 void DrawLeaderboardPage(Gfx** displayListHead) {
@@ -1704,13 +1707,12 @@ void DrawLeaderboardPage(Gfx** displayListHead) {
 
   SetUpTextDrawing(&gfx);
   SetTextColor(&gfx, 0xFF, 0xFF, 0xFF);
-  for (i = 0, top = 0; i != LEADERBOARD_ROW_COUNT;
-      i++, top += LEADERBOARD_ROW_SPACING) {
+  for (i = 0; i != LEADERBOARD_ROW_COUNT; i++) {
     if (i * ROW_FLIP_STAGGER < g_Scorecard.content.flipTime) {
       FormatLeaderboardRow(
           g_PrintBuffer, &g_TournamentStandings[g_Scorecard.topRow + i]);
-      DrawFixedWidthLargeText(&gfx, g_Scorecard.x + ROW_TEXT_LEFT,
-          ROW_TEXT_TOP + top + g_Scorecard.y, g_PrintBuffer);
+      DrawFixedWidthLargeText(
+          &gfx, g_Scorecard.x + ROW_TEXT_LEFT, RowTextTop(i), g_PrintBuffer);
       contestantId = g_TournamentStandings[g_Scorecard.topRow + i].contestantId;
       if (contestantId == PLAYER_CONTESTANT) {
         sprintf(g_PrintBuffer, "%-8s  ", g_Players[0].name);
@@ -1719,8 +1721,8 @@ void DrawLeaderboardPage(Gfx** displayListHead) {
             g_ContestantNames[g_ContestantNameIndices[contestantId]]);
       }
 
-      DrawLargeText(&gfx, g_Scorecard.x + ROW_NAME_LEFT,
-          ROW_TEXT_TOP + top + g_Scorecard.y, g_PrintBuffer);
+      DrawLargeText(
+          &gfx, g_Scorecard.x + ROW_NAME_LEFT, RowTextTop(i), g_PrintBuffer);
     }
   }
 
@@ -1917,15 +1919,14 @@ void DrawLeaderboardPage(Gfx** displayListHead) {
   gDPSetTexturePersp(gfx++, G_TP_NONE);
 
   if (g_Scorecard.content.flipTime > ROW_FLIP_TIME) {
-    for (i = 0, top = LEADERBOARD_FACE_TOP; i != LEADERBOARD_ROW_COUNT;
-        i++, top += LEADERBOARD_ROW_SPACING) {
+    for (i = 0; i != LEADERBOARD_ROW_COUNT; i++) {
       if (g_TournamentStandings[g_Scorecard.topRow + i].contestantId ==
           PLAYER_CONTESTANT) {
         gSPDisplayList(gfx++, g_DecalTextureSetup);
         IN_OWN_BLOCK(gDPPipeSync(gfx++));
         gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-        DrawSmallFace(
-            &gfx, g_Scorecard.x + LEADERBOARD_FACE_LEFT, top, 0, TRUE);
+        DrawSmallFace(&gfx, g_Scorecard.x + LEADERBOARD_FACE_LEFT,
+            LEADERBOARD_FACE_TOP + (i * LEADERBOARD_ROW_SPACING), 0, TRUE);
       }
     }
   }
