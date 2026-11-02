@@ -337,7 +337,15 @@ void DrawBillboard(Gfx** gfxPtr, Billboard* billboard,
  * that need to stay see-through. Here, the close ones are only drawn when
  * they stay opaque.
  *
- * Doesn't match: 121 words differ.
+ * Doesn't match: the original's frame is 16 bytes larger, with the space
+ * unused above the spill slots, which moves every register save. Between the
+ * loops it sets $s6 to 0 and never reads it, as a biv that loop.c eliminated
+ * would leave, and in the far loop it keeps ballDepth - BALL_CLEARANCE_DEPTH
+ * in $fp and rebuilds both tables' addresses, where ours keeps
+ * g_BillboardTransforms in $fp. Counting the far loop up and indexing
+ * f_DrawOrder from the end gives more words: loop.c doesn't reduce the index.
+ * Unused locals for the frame move the spill slots. 121 words differ, 39 in
+ * shape.
  */
 #ifdef NON_MATCHING
 void DrawBillboards(CameraMatrices* cameraMatrices, s32 cameraIndex) {
