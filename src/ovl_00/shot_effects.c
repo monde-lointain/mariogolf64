@@ -520,12 +520,11 @@ void DrawShotEffectsHud(Gfx** displayListHead UNUSED) {}
  * at once. Any other kind lets the trail fade out quickly.
  *
  * Doesn't match: the original reloads f_SwingTrailSampleCount to test the
- * sample loop on entry and to rewind the animation after it, where GCC knows
- * the count and uses the loop's index. It also sets the trail's state from
- * another register. Testing i < f_SwingTrailSampleCount gives 23 differing
- * words, not 16, and storing the count without IN_OWN_BLOCK gives 25. Only a
- * volatile count reproduces the reloads, and the count isn't hardware. 13 words
- * differ.
+ * sample loop on entry, where GCC knows the count. It also sets the trail's
+ * state from another register. Testing i < f_SwingTrailSampleCount gives 20
+ * differing words, storing the count without IN_OWN_BLOCK 23, storing it first
+ * 25 and swapping the alpha and state 10. Only a volatile count reproduces the
+ * reload, and the count isn't hardware. 9 words differ, 5 in shape.
  */
 #ifdef NON_MATCHING
 void StartSwingTrail(s32 kind) {
@@ -557,7 +556,10 @@ void StartSwingTrail(s32 kind) {
       AnimateCharacterInSameCopy(0);
     }
 
-    /* Rewinds the swing to where it was */
+    /* Rewinds the swing to where it was. Ending the block first reloads the
+     * count, as the original does, to match; negating it as a float, through
+     * a cast or by subtraction, IN_OWN_BLOCK or an empty block don't */
+    END_BASIC_BLOCK();
     SetAnimationSpeed(0, -f_SwingTrailSampleCount);
     AnimateCharacterInSameCopy(0);
     SetAnimationSpeed(0, 1.0f);
