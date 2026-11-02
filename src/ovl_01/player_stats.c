@@ -2078,7 +2078,7 @@ void UpdateBestShots(void) {
 /*
  * Doesn't match: the original works out the chosen cell's address again after
  * checking that it holds a record, before drawing its course's image and name,
- * where GCC reuses the address from the check. 103 words differ.
+ * where GCC reuses the address from the check. 101 words differ.
  */
 #ifdef NON_MATCHING
 void DrawBestShots(Gfx** displayListHead) {
@@ -2087,6 +2087,7 @@ void DrawBestShots(Gfx** displayListHead) {
   SaveData* save = GetSaveData();
   MenuMemory* memory = GetMenuMemory();
   s16 row;
+  s16 labelRow;
   s16 column;
   s16 character;
   s32 chosenRow;
@@ -2211,10 +2212,11 @@ void DrawBestShots(Gfx** displayListHead) {
 
   SetUpTextDrawing(&gfx);
   SetTextColor(&gfx, 255, 255, 255);
-  for (row = 0; row < STATS_GRID_ROW_COUNT; row++) {
-    sprintf(g_PrintBuffer, "%s", f_RecordLabels[row]);
+  for (labelRow = 0; labelRow < STATS_GRID_ROW_COUNT; labelRow++) {
+    sprintf(g_PrintBuffer, "%s", f_RecordLabels[labelRow]);
     DrawLargeText(&gfx, RECORD_LABEL_X,
-        (s16)(RECORD_PLACE_Y + (row * STATS_CURSOR_ROW_HEIGHT)), g_PrintBuffer);
+        (s16)(RECORD_PLACE_Y + (labelRow * STATS_CURSOR_ROW_HEIGHT)),
+        g_PrintBuffer);
   }
 
   chosenRow = memory->bestShotRow;
