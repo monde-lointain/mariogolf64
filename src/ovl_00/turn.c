@@ -2564,11 +2564,14 @@ void OnBallStepped(Player* player UNUSED) {}
  * the farthest from the cup goes first, and the earliest in the tee order
  * breaks ties.
  *
- * Doesn't match: GCC drops bestDistance = distance from the tee-order branch,
- * where the test has shown the two equal, but the original keeps the copy,
- * and the branch ahead of it compares the distances the other way round.
- * No order of the branches' assignments or of the test's operands helps.
- * 3 words differ.
+ * Doesn't match: testing the distances apart from the tee order keeps the
+ * copy bestDistance = distance that a combined test lets CSE drop, which
+ * gives the original's instructions, and the oracle matches when 2 pseudos
+ * are forced. Global allocation ranks bestDistance (11 refs, priority 5789)
+ * ahead of bestPriority (9 refs, 4821), so they take $s4 and $s5 the other
+ * way round. Setting either earlier, setting bestPriority again in the other
+ * branches, or flattening the tests breaks the shape. 24 words differ, none
+ * in shape; the combined test gives 3, 1 in shape.
  */
 #ifdef NON_MATCHING
 void PickNextPlayer(void) {
@@ -2631,11 +2634,12 @@ void PickNextPlayer(void) {
         nextPlayer = i;
         bestTeeOrder = g_Players[nextPlayer].teeOrder;
         bestDistance = distance;
-      } else if (bestDistance == distance &&
-          g_Players[i].teeOrder < bestTeeOrder) {
-        bestTeeOrder = g_Players[i].teeOrder;
-        bestDistance = distance;
-        nextPlayer = i;
+      } else if (distance == bestDistance) {
+        if (g_Players[i].teeOrder < bestTeeOrder) {
+          bestTeeOrder = g_Players[i].teeOrder;
+          bestDistance = distance;
+          nextPlayer = i;
+        }
       }
     }
   }
