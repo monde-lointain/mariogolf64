@@ -2570,19 +2570,7 @@ void OnBallStepped(Player* player UNUSED) {}
  * the tee go first, then those off the green, then those on it. Among those,
  * the farthest from the cup goes first, and the earliest in the tee order
  * breaks ties.
- *
- * Doesn't match: testing the distances apart from the tee order keeps the
- * copy bestDistance = distance that a combined test lets CSE drop, which
- * gives the original's instructions, and the oracle matches when 2 pseudos
- * are forced. Global allocation ranks bestDistance (11 refs, priority 5789)
- * ahead of bestTeeOrder (9 refs, 4821), so they take $s4 and $s5 the other
- * way round. Dropping the tie's redundant bestDistance copy ranks them as the
- * original does but loses the copy (1 word differs), and setting bestDistance
- * before the first loop does too but sets it earlier (2). Setting bestPriority
- * again in the other branches or flattening the tests breaks the shape. 24
- * words differ, none in shape; the combined test gives 3, 1 in shape.
  */
-#ifdef NON_MATCHING
 void PickNextPlayer(void) {
   s32 i;
   s32 finishedCount;
@@ -2636,13 +2624,13 @@ void PickNextPlayer(void) {
     if (priority > bestPriority) {
       bestPriority = priority;
       nextPlayer = i;
-      bestTeeOrder = g_Players[nextPlayer].teeOrder;
       bestDistance = distance;
+      bestTeeOrder = g_Players[nextPlayer].teeOrder;
     } else if (priority == bestPriority) {
       if (distance > bestDistance) {
         nextPlayer = i;
-        bestTeeOrder = g_Players[nextPlayer].teeOrder;
         bestDistance = distance;
+        bestTeeOrder = g_Players[nextPlayer].teeOrder;
       } else if (distance == bestDistance) {
         if (g_Players[i].teeOrder < bestTeeOrder) {
           bestTeeOrder = g_Players[i].teeOrder;
@@ -2660,9 +2648,6 @@ void PickNextPlayer(void) {
     g_IsHudTurnAwayRequested = FALSE;
   }
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", PickNextPlayer);
-#endif
 
 /* Hides the rings the ball passed, so that a new shot can pass them again */
 void ClearPassedRings(Player* player) {
