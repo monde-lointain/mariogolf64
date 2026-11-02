@@ -37,8 +37,6 @@ import fncompare
 DEFAULT_JOB_COUNT = "8"
 # How much of a compiler error to show for a variant
 ERROR_TAIL_LENGTH = 300
-# A function definition's closing brace, which alone starts its line
-DEFINITION_END = "\n}\n"
 
 
 def find_definition(source: str, function: str) -> tuple[int, int] | None:
@@ -46,17 +44,21 @@ def find_definition(source: str, function: str) -> tuple[int, int] | None:
 
     Routines that share code, such as the two copies of a loop, can hold the
     same text, so a variant's replacement is looked for in its function only.
+    A nested function's definition is indented, and its closing brace alone
+    starts a line at the same indent as its header.
     """
     header = re.compile(
-        rf"^[A-Za-z][\w* ]*[ *]{re.escape(function)}\([^;{{]*\) \{{\n", re.MULTILINE
+        rf"^([ \t]*)[A-Za-z][\w* ]*[ *]{re.escape(function)}\([^;{{]*\) \{{\n",
+        re.MULTILINE,
     )
     match = header.search(source)
     if match is None:
         return None
-    end = source.find(DEFINITION_END, match.end())
+    closing_brace = f"\n{match.group(1)}}}\n"
+    end = source.find(closing_brace, match.end())
     if end < 0:
         return None
-    return match.start(), end + len(DEFINITION_END)
+    return match.start(), end + len(closing_brace)
 
 
 def score_variant(
