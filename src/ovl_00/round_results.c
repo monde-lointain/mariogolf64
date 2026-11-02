@@ -1362,13 +1362,7 @@ void UpdateCourseResultsNotice(void) {
 /*
  * The notice that a course has opened: its picture and title swing in, then a
  * shine sweeps the title
- *
- * Doesn't match: in the title's second loop GCC adds a strip's height in $s0
- * where the original uses $v0, and for the shine the original adds its lift,
- * kept in $t0, to each edge last, where GCC adds the lift and f_NoticeUnk54
- * once for both edges. 7 words differ.
  */
-#ifdef NON_MATCHING
 void DrawCourseResultsNotice(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   s32 size;
@@ -1433,7 +1427,7 @@ void DrawCourseResultsNotice(Gfx** displayListHead) {
         QuarterPixels(top + f_NoticeUnk54),
         QuarterPixels(
             f_NoticeSwing + NOTICE_TITLE_LEFT + NOTICE_TITLE_STRIP_WIDTH),
-        QuarterPixels(top + (f_NoticeUnk54 + NOTICE_TITLE_STRIP_HEIGHT)),
+        QuarterPixels(top + NOTICE_TITLE_STRIP_HEIGHT + f_NoticeUnk54),
         G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   }
 
@@ -1516,11 +1510,11 @@ void DrawCourseResultsNotice(Gfx** displayListHead) {
       shineTexelX = TexelCoordinate(NOTICE_SHINE_SIZE -
           ((f_NoticeFrameCount - NOTICE_SHINE_START) * NOTICE_SHINE_STEP));
       DrawTextureRect(&gfx, QuarterPixels(f_NoticeSwing + NOTICE_TITLE_LEFT),
-          QuarterPixels(shineLift + f_NoticeUnk54 + NOTICE_TITLE_TOP),
+          QuarterPixels(NOTICE_TITLE_TOP + shineLift + f_NoticeUnk54),
           QuarterPixels(
               f_NoticeSwing + NOTICE_TITLE_LEFT + NOTICE_TITLE_STRIP_WIDTH),
           QuarterPixels(
-              shineLift + f_NoticeUnk54 + NOTICE_TITLE_TOP + NOTICE_SHINE_SIZE),
+              NOTICE_TITLE_TOP + shineLift + NOTICE_SHINE_SIZE + f_NoticeUnk54),
           G_TX_RENDERTILE, shineTexelX, 0, NOTICE_SHINE_DSDX, TEXEL_STEP_ONE);
     }
   }
@@ -1529,9 +1523,6 @@ void DrawCourseResultsNotice(Gfx** displayListHead) {
   gDPSetDepthSource(gfx++, G_ZS_PIXEL);
   *displayListHead = gfx;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", DrawCourseResultsNotice);
-#endif
 
 /* Changes the beaten character's face, then lifts the notice away */
 void UpdateCharacterResultsNotice(void) {
