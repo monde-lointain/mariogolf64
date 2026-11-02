@@ -350,6 +350,27 @@ def read_target_functions(asm_path: StrPath) -> Functions:
 # without a global statement
 _work_dirs: list[Path] = []
 _work_dir_lock = threading.Lock()
+WORK_DIR_PARENT = Path(tempfile.gettempdir())
+WORK_DIR_PREFIX = "fncompare-"
+
+
+def is_process_alive(pid: int) -> bool:
+    """Return whether a process with this ID exists."""
+    try:
+        os.kill(pid, 0)
+    except ProcessLookupError:
+        return False
+    except PermissionError:
+        return True
+    return True
+
+
+def remove_orphaned_work_dirs() -> None:
+    """Remove the work directories of processes that have ended."""
+    for work_dir in WORK_DIR_PARENT.glob(f"{WORK_DIR_PREFIX}*"):
+        pid = work_dir.name.removeprefix(WORK_DIR_PREFIX)
+        if not pid.isdigit() or not is_process_alive(int(pid)):
+            shutil.rmtree(work_dir, ignore_errors=True)
 
 
 def get_work_dir() -> Path:
@@ -359,10 +380,17 @@ def get_work_dir() -> Path:
     and fsyncs them. Concurrent fsyncs on the repo's disk wait on each
     other, which made parallel compiles slower than serial ones, so the
     compiler runs from here, where the files stay in memory.
+
+    The directory is named after the process that made it. Pool workers
+    exit without running atexit handlers, and sweeps get killed, so each
+    new directory's maker also removes those whose process has ended.
     """
     with _work_dir_lock:
         if not _work_dirs:
-            work_dir = Path(tempfile.mkdtemp(prefix="fncompare-"))
+            remove_orphaned_work_dirs()
+            work_dir = WORK_DIR_PARENT / f"{WORK_DIR_PREFIX}{os.getpid()}"
+            shutil.rmtree(work_dir, ignore_errors=True)
+            work_dir.mkdir()
             _ = atexit.register(shutil.rmtree, work_dir, ignore_errors=True)
             for entry in ROOT.iterdir():
                 (work_dir / entry.name).symlink_to(entry)
