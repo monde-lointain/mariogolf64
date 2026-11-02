@@ -1250,23 +1250,13 @@ void PlaceRivalCursor(void) {
 /*
  * Reads the drive shapes' names and the "L:" and "Drive:" labels into the
  * menu's image buffer, then each slot's first face frame and its palette.
- *
- * Doesn't match: the original reads the slot's palette pointer at the top of
- * each pass, indexing g_CharacterFacePalettes afresh, where this steps a
- * pointer through the table and reads it at the call; 17 words differ.
- * Reading the palette pointer into a variable at the top gives 36, as GCC
- * then steps a pointer for it. A permuter run matched only by testing
- * slotIndex around the alternate face's identical assignments, a branch with
- * no meaning, which keeps GCC from stepping the pointer.
  */
-#ifdef NON_MATCHING
 void LoadCharacterFaces(void) {
   EncodedAsset asset;
   AssetFile file;
   CharacterId character = 0;
   u8* images = GetMenuImageBuffer();
   s32 slotIndex;
-  void* faceImage;
   AssetId faceAsset;
 
   OpenEncodedAsset(0x979, &asset);
@@ -1274,7 +1264,10 @@ void LoadCharacterFaces(void) {
   OpenEncodedAsset(0x978, &asset);
   ReadEncodedAsset(images + CHARACTER_SELECT_FIRST_IMAGE_SIZE, &asset);
   for (slotIndex = 0; slotIndex != CHARACTER_COUNT; slotIndex++) {
-    faceImage = g_CharacterFaceImages[slotIndex];
+    void* faceImage = g_CharacterFaceImages[slotIndex];
+    AssetFile* paletteFile = &file;
+    void* palette = g_CharacterFacePalettes[slotIndex];
+
     if (slotIndex >= FIRST_IMPORTED_CHARACTER) {
       if (g_ImportedCharacters[slotIndex - FIRST_IMPORTED_CHARACTER]
               .character >= 0) {
@@ -1293,14 +1286,10 @@ void LoadCharacterFaces(void) {
 
     OpenEncodedAsset(faceAsset, &asset);
     ReadEncodedAsset(faceImage, &asset);
-    OpenAssetFile(g_CharacterFacePaletteFiles[character][0], &file);
-    ReadAssetFile(
-        g_CharacterFacePalettes[slotIndex], GetAssetFileSize(&file), &file);
+    OpenAssetFile(g_CharacterFacePaletteFiles[character][0], paletteFile);
+    ReadAssetFile(palette, GetAssetFileSize(paletteFile), paletteFile);
   }
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/character_select", LoadCharacterFaces);
-#endif
 
 /* A byte's address as an integer, for adding a player number to */
 static inline s32 ByteAddress(s8* byte) {
