@@ -17,7 +17,8 @@ ASM_FILE is a splat assembly file holding one or more functions and C_FILE
 the C to compile, or an object file already compiled. Prints one line per
 function: its name, its score (the fraction of equal instructions) and either
 OK for an exact match or the count of differing instructions, on either side,
-which still moves when a change is too small to show in the score. With -v,
+which still moves when a change is too small to show in the score, and how
+many of them differ in shape, with registers and constants ignored. With -v,
 also prints the instructions that differ, with each branch's destination as
 @INDEX, and the calls one side makes more often than the other, which always
 mean the sources differ.
@@ -917,14 +918,41 @@ def count_differences(target: Routine, compiled: Routine) -> int:
     return len(target.words) + len(compiled.words) - 2 * shared
 
 
+def read_operations(routine: Routine) -> list[object]:
+    """Return the operation of each of ROUTINE's instructions."""
+    return [rabbitizer.Instruction(word).uniqueId for word in routine.words]
+
+
+def count_shape_differences(target: Routine, compiled: Routine) -> int:
+    """Return how many instructions, on either side, have no pair by operation.
+
+    Registers, offsets and constants are ignored, so this counts only the
+    instructions that one side has and the other lacks or replaces.
+    """
+    target_operations = read_operations(target)
+    compiled_operations = read_operations(compiled)
+    matcher = difflib.SequenceMatcher(
+        None, target_operations, compiled_operations, autojunk=False
+    )
+    shared = sum(block.size for block in matcher.get_matching_blocks())
+    return len(target_operations) + len(compiled_operations) - 2 * shared
+
+
 def describe(target: Routine, compiled: Routine) -> str:
-    """Return the score and, short of a match, the count of differing words."""
+    """Return the score and, short of a match, the counts of differences.
+
+    The count of differing words is followed by how many of them differ in
+    shape, by operation. A change of registers alone moves every word that
+    names them, which in a large routine hides how close its instruction
+    sequence has come. The shape count leaves those out.
+    """
     differences = count_differences(target, compiled)
     total = len(target.words) + len(compiled.words)
     score = 1 - differences / total if total else 1.0
     if not differences:
         return f"{score:.3f} OK"
-    return f"{score:.3f} ({differences} differ)"
+    shape_differences = count_shape_differences(target, compiled)
+    return f"{score:.3f} ({differences} differ, {shape_differences} in shape)"
 
 
 def disassemble(routine: Routine, index: int) -> str:
