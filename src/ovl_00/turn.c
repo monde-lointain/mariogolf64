@@ -3229,8 +3229,8 @@ void UpdateTurns(void) {
     SkipUnmeasuredDistances(playerIndex);
     UpdateContest(FALSE);
     if (g_GameState.replayKind == REPLAY_KIND_NONE) {
-      opponentIndex = playerIndex ^ 1;
       if (IsOneOnOneMatchMode(g_GameState.gameMode)) {
+        opponentIndex = playerIndex ^ 1;
         g_Players[opponentIndex].holeStatus = HOLE_STATUS_HOLED_OUT;
         g_Players[opponentIndex]
             .holes[g_GameState.holeIndex % COURSE_HOLE_COUNT]
