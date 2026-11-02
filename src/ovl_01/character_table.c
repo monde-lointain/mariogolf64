@@ -598,8 +598,15 @@ void DrawTableLines(Gfx** displayListHead) {
  * Draws the popup with the faces of the cursor cell's two characters and their
  * wins against each other, first moving it to the opposite corner if it would
  * cover the cursor.
- * Doesn't match: the row and column characters and their wins swap
- * registers among $s0-$s3, 25 diff lines. 48 words differ.
+ *
+ * Doesn't match: the column character, the two counts of wins and the bases
+ * of the visibility and face image tables take other registers among
+ * $s0-$s3. The oracle matches when those 5 pseudos are forced, so the RTL is
+ * the original's up to allocation, but the original's choice puts rowWins
+ * first and the column character last, against the priorities of their uses
+ * and lives. A MatchupRecord pointer gives 63 words, a column index local or
+ * other declaration orders change nothing, and narrower types for the wins
+ * give 52 to 142. 48 words differ, 2 in shape.
  */
 #ifdef NON_MATCHING
 void DrawTablePopup(Gfx** displayListHead) {
