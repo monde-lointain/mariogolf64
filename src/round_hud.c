@@ -1679,7 +1679,7 @@ typedef struct GridScreenPoint {
 
 /*
  * Doesn't match: the club and the shot's distance take each other's saved
- * registers, and registers differ through the grid's loops. 349 words
+ * registers, and registers differ through the grid's loops. 345 words
  * differ, 55 in shape.
  */
 void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
@@ -1979,11 +1979,11 @@ void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
             gDPPipeSync(gfx++);
             if (screenPoints[point].depth < screenPoints[point - 1].depth) {
               gDPSetPrimDepth(gfx++, screenPoints[point].depth, 0);
+              gDPPipeSync(gfx++);
             } else {
               gDPSetPrimDepth(gfx++, screenPoints[point - 1].depth, 0);
+              gDPPipeSync(gfx++);
             }
-
-            gDPPipeSync(gfx++);
             gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
           }
         } else {

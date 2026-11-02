@@ -3881,7 +3881,7 @@ void WriteHexDumpFile(u32* words, s32 byteCount, char* fileName) {
  * Doesn't match: the original also steps column + 1 alongside half, where
  * GCC computes it in each use; most of the rest follows from the registers
  * and spill slots that changes. The frame is 0x20 bytes larger than the
- * original's, so the stack offsets differ. 2982 words differ, 598 in shape.
+ * original's, so the stack offsets differ. 2977 words differ, 595 in shape.
  */
 #ifdef NON_MATCHING
 void DrawHoleEditorGround(CameraMatrices* matrices UNUSED, s32 terrainStyle) {
@@ -4437,13 +4437,14 @@ void DrawHoleEditorGround(CameraMatrices* matrices UNUSED, s32 terrainStyle) {
                         if (IsGameFlagSet(GAME_FLAG_TEST_GROUND_TEXTURE)) {
                           isMirrored =
                               g_WorkArea.hole.tiles[tileIndex].mirroredCells;
+                          isMirrored &= 1
+                              << (cellColumn + (cellRow * FINE_TILE_CELL_SPAN));
                         } else {
                           isMirrored =
                               g_WorkArea.hole.tiles[tileIndex].mirroredCells;
+                          isMirrored &= 1
+                              << (cellColumn + (cellRow * FINE_TILE_CELL_SPAN));
                         }
-
-                        isMirrored &= 1
-                            << (cellColumn + (cellRow * FINE_TILE_CELL_SPAN));
                         if (isMirrored) {
                           for (pointRow = 0; pointRow < FINE_TILE_BLOCK_SPAN;
                               pointRow++) {
