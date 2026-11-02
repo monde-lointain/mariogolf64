@@ -458,8 +458,13 @@ void ResetGolfBalls(void) {
  * and moves and fades the ball's afterimage.
  *
  * Doesn't match: the original clears the simulation loop's index before
- * working out the current ball, and registers differ through the rest. 56
- * words differ, 8 in shape.
+ * working out the current ball, which only clearing it ahead of the loop
+ * reproduces (6 words differ, none in shape), and its afterimage fade loop
+ * steps the address of the first alpha where ours steps the array's with
+ * alpha's offset in each access; indexing the array or stepping an alpha
+ * pointer gives 17 to 26. Declaring the current ball in the simulation block,
+ * and storing its marker in each arm as the loop over the players does, took it
+ * from 56 words differing, 8 in shape. 8 words differ, 2 in shape.
  */
 #ifdef NON_MATCHING
 void UpdateGolfBalls(void) {
@@ -477,7 +482,6 @@ void UpdateGolfBalls(void) {
   Mat4 translation;
   f32 scale;
   f32 distance;
-  s8 markerPlayerIndex;
 
   if (g_GameState.step == GAME_STATE_UNK6) {
     currentIndex = g_GameState.currentPlayerIndex;
@@ -506,7 +510,8 @@ void UpdateGolfBalls(void) {
 
   if (g_GameState.step == GAME_STATE_UNK6 ||
       g_GameState.step == GAME_STATE_UNK11) {
-    ball = &f_GolfBalls[currentIndex];
+    GolfBall* ball = &f_GolfBalls[currentIndex];
+
     for (i = 0; i < BALL_SIMULATION_COUNT; i++) {
       simulation = &g_BallSimulations[i];
       ball->isInCup = FALSE;
@@ -557,16 +562,15 @@ void UpdateGolfBalls(void) {
         ball->state = simulation->state;
         ball->unk9E = simulation->hasEnteredWater;
         ball->purpose = simulation->purpose;
-        if (currentIndex != simulation->playerIndex &&
-            (GetSurfaceInfo(simulation->surface)->kind == SURFACE_KIND_GREEN ||
-                g_GameState.isMiniGolf)) {
-          markerPlayerIndex = simulation->playerIndex;
+        if (currentIndex == simulation->playerIndex ||
+            (GetSurfaceInfo(simulation->surface)->kind != SURFACE_KIND_GREEN &&
+                !g_GameState.isMiniGolf)) {
+          ball->markerPlayerIndex = BALL_NO_MARKER;
         } else {
-          markerPlayerIndex = BALL_NO_MARKER;
+          ball->markerPlayerIndex = simulation->playerIndex;
         }
 
         scale = g_PinVertexScale * BALL_MODEL_SCALE;
-        ball->markerPlayerIndex = markerPlayerIndex;
         guScaleF(scaling, scale, scale, scale);
         guMtxCatF(f_BallRotation, scaling, rotated);
         guTranslateF(translation, ball->position[AXIS_X],
@@ -621,7 +625,7 @@ void UpdateGolfBalls(void) {
       }
     }
 
-    IN_OWN_BLOCK(head = &f_BallAfterimages[f_BallAfterimageHead]);
+    head = &f_BallAfterimages[f_BallAfterimageHead];
     ball = &f_GolfBalls[currentIndex];
     if (f_BallAfterimageHead == 0) {
       previous = &f_BallAfterimages[f_BallAfterimageLength - 1];
