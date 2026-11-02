@@ -145,10 +145,10 @@ s32 f_ResultCharactersLoadStep = RESULT_CHARACTERS_IDLE;
  * and counts the pages. In a tournament it also ranks the player before and
  * after the hole to see which way their place moved.
  *
- * Doesn't match: the target copies the arguments to other registers before
- * it saves its own and stores them after it reads $sp, and the first
- * standings loop loads g_TournamentStandings after setting up its other
- * registers. 26 words differ.
+ * Doesn't match: the first standings loop loads g_TournamentStandings after
+ * setting up its other registers. Indexing the table as the second loop does
+ * gives that order but copies the address once more (9 words); reordering
+ * the loop's initializers gives 4. 4 words differ.
  */
 #ifdef NON_MATCHING
 void OpenScorecard(CourseIndex courseIndex, s32 holeIndex) {
@@ -163,8 +163,10 @@ void OpenScorecard(CourseIndex courseIndex, s32 holeIndex) {
   s32 imageIndex;
   s32 standingIndex;
   TournamentStanding* standing;
-  register void* stackPointer asm("$sp");
+  void* stackPointer;
 
+  /* Read before anything else, which keeps the arguments' stores after it */
+  asm volatile("move %0, $sp" : "=r"(stackPointer));
   g_Scorecard.content.courseIndex = courseIndex;
   g_Scorecard.content.holeIndex = holeIndex;
   g_Scorecard.content.isSuddenDeath = g_GameState.isSuddenDeath;
