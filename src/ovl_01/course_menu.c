@@ -805,26 +805,27 @@ void DrawPercentMark(Gfx** displayListHead, s16 x, s16 y) {
 /*
  * Draws the spinning badge and how many of the course's holes, or of every
  * course's on the totals, have a birdie badge.
- * Doesn't match: the original keeps the badge count in a1 and copies it to s1
- * after counting. 46 words differ.
  */
-#ifdef NON_MATCHING
 void DrawStatsBadgeCount(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   SaveData* save = GetSaveData();
   MenuMemory* memory = GetMenuMemory();
-  s16 badgeCount = 0;
+  s16 badgeCount;
   /* A hole, then a course, then where the count moves to, to match */
   s16 index;
   s16 holeIndex;
+  /* The stats page after the open courses' pages shows every course */
+  s32 totalsPage = GetOpenCourseCount();
 
-  if (GetOpenCourseCount() != memory->statsCourse) {
+  if (memory->statsCourse != totalsPage) {
+    badgeCount = 0;
     for (index = 0; index != COURSE_HOLE_COUNT; index++) {
       if (save->awards.birdieBadgeCounts[memory->statsCourse][index]) {
         badgeCount++;
       }
     }
   } else {
+    badgeCount = 0;
     for (index = 0; index != COURSE_COUNT; index++) {
       for (holeIndex = 0; holeIndex != COURSE_HOLE_COUNT; holeIndex++) {
         if (save->awards.birdieBadgeCounts[index][holeIndex]) {
@@ -864,9 +865,6 @@ void DrawStatsBadgeCount(Gfx** displayListHead) {
       badgeCount, MENU_NUMBER_TIMES);
   *displayListHead = gfx;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/course_menu", DrawStatsBadgeCount);
-#endif
 
 /*
  * Draws the arrows beside the panel that show there are more statistics above
