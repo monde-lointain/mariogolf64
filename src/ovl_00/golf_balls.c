@@ -770,7 +770,7 @@ enum BallSprite {
       TexelStep(width, xl, xh), TexelStep(height, yl, yh))
 
 /*
- * Doesn't match: 1320 words differ. The stack frame is 8 bytes smaller, so
+ * Doesn't match: 1288 words differ. The stack frame is 8 bytes smaller, so
  * the register saves move, and the display list pointers take other
  * registers.
  */
@@ -856,10 +856,10 @@ void DrawGolfBalls(CameraMatrices* matrices UNUSED) {
         G_TX_NOMIRROR | G_TX_CLAMP, 6, 6, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(gfx++);
     gDPSetTexturePersp(gfx++, G_TP_NONE);
+    isCurrentBallAboveGround = FALSE;
     gDPPipeSync(gfx++);
     gDPSetTextureFilter(gfx++, G_TF_AVERAGE);
     gDPPipeSync(gfx++);
-    isCurrentBallAboveGround = FALSE;
     for (i = 0; i < GOLF_BALL_COUNT; i++) {
       ball = &f_GolfBalls[i];
       if (ball->alpha > 0) {
@@ -905,13 +905,13 @@ void DrawGolfBalls(CameraMatrices* matrices UNUSED) {
               groundHeight = GetGroundOrWaterHeight(
                   ball->position[AXIS_X] * WORLD_TO_COURSE_SCALE,
                   ball->position[AXIS_Z] * WORLD_TO_COURSE_SCALE);
-              gDPPipeSync(gfx++);
-              gDPSetRenderMode(gfx++, RM_AA_ZB_XLU_SURF_UPDATE(1),
-                  RM_AA_ZB_XLU_SURF_UPDATE(2));
               shade = 100 -
                   (s32)(((ball->position[AXIS_Y] * WORLD_TO_COURSE_SCALE) -
                             groundHeight) *
                       0.0032552085f);
+              gDPPipeSync(gfx++);
+              gDPSetRenderMode(gfx++, RM_AA_ZB_XLU_SURF_UPDATE(1),
+                  RM_AA_ZB_XLU_SURF_UPDATE(2));
               if (shade < 0) {
                 shade = 0;
               }
@@ -1004,6 +1004,7 @@ void DrawGolfBalls(CameraMatrices* matrices UNUSED) {
               }
               gDPPipeSync(gfx++);
             } else if (ballDepth >= BALL_FULL_SPRITE_DEPTH) {
+              spriteKind = BALL_SPRITE_SMALL;
               gSPStretchedTextureRectangle(gfx++,
                   QuarterPixels(ballPoint.x - size),
                   QuarterPixels(ballPoint.y - size),
@@ -1012,7 +1013,6 @@ void DrawGolfBalls(CameraMatrices* matrices UNUSED) {
                   BALL_TILE_SMALL, 0, 0, SMALL_BALL_TEXTURE_SIZE,
                   (SMALL_BALL_TEXTURE_SIZE / 2) +
                       (exposure * (SMALL_BALL_TEXTURE_SIZE / 2)));
-              spriteKind = BALL_SPRITE_SMALL;
               gDPPipeSync(gfx++);
             } else if (ballDepth > BALL_DOT_DEPTH) {
               gDPSetCombineMode(gfx++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);

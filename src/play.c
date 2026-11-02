@@ -2015,7 +2015,7 @@ void DrawHoleEditorGround(CameraMatrices* matrices, s32 terrainStyle);
  * tiles go down two halves in rows of four, and a fine tile snaps the edge
  * vertices it shares with coarser neighbors so that no gaps open between them.
  *
- * Doesn't match: 1198 words differ, 354 in shape. The original's frame is 0x38
+ * Doesn't match: 1194 words differ, 352 in shape. The original's frame is 0x38
  * bytes larger, so every stack offset differs, and terrainStyle and the locals
  * take other saved registers.
  */
@@ -2424,8 +2424,8 @@ void DrawGround(CameraMatrices* matrices, s32 terrainStyle) {
           }
 
           topSlot++;
-          bottomSlot++;
           middleSlot++;
+          bottomSlot++;
           tileIndex++;
         }
 

@@ -221,7 +221,7 @@ void ResetBallSimulations(void) {
  * Doesn't match: the register allocation and instruction scheduling differ in
  * many places, and where the original recomputes abs.s for each use of a
  * float's absolute value, this code shares one abs.s or compiles a compare and
- * branch. 807 words differ, 241 in shape.
+ * branch. 791 words differ, 235 in shape.
  */
 #ifdef NON_MATCHING
 s32 StepBallSimulation(BallSimulation* simulation) {
@@ -803,9 +803,9 @@ s32 StepBallSimulation(BallSimulation* simulation) {
       BallSpeed speed;
       f32 cupDistance;
 
-      simulation->surface = SURFACE_GREEN;
       speed = sqrtf((velocity[AXIS_X] * velocity[AXIS_X]) +
           (velocity[AXIS_Z] * velocity[AXIS_Z]));
+      simulation->surface = SURFACE_GREEN;
       cupDistance = (s32)IntLength2D(
           simulation->position[AXIS_X] - g_HoleSetup.cupPosition[AXIS_X],
           simulation->position[AXIS_Z] - g_HoleSetup.cupPosition[AXIS_Z]);
@@ -1638,8 +1638,8 @@ s32 StepBallSimulation(BallSimulation* simulation) {
             f32 along[3];
             f32 damping;
 
-            osSyncPrintf("Jump\n");
             damping = 1.0f;
+            osSyncPrintf("Jump\n");
             if (!g_GameState.isMiniGolf) {
               damping = ROLL_JUMP_SPEED_KEPT;
             }
@@ -2012,10 +2012,10 @@ SETTLE:
                     (rimDistance * rimDistance);
 
                 if (rest > 0.0f) {
+                  simulation->unkB4 = 1;
                   floor = ((CUP_RIM_CURVE_RADIUS - sqrtf(rest)) *
                               CUP_RIM_SINK_SCALE) +
                       floor;
-                  simulation->unkB4 = 1;
                 }
               }
             }

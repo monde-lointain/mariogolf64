@@ -322,7 +322,7 @@ typedef s32 (*BillboardHitFinder)(s32 startX, s32 startY, s32 startZ, s32 endX,
  * Doesn't match: the nested helpers match, but the routine keeps 614.4f and
  * 1996.8f in saved registers where the original reloads them, so 0.5f loses
  * the register it had and the floating-point registers are allocated
- * differently. 698 words differ.
+ * differently. 676 words differ.
  */
 #ifdef NON_MATCHING
 s32 StepOpeningBallSimulation(BallSimulation* simulation) {
@@ -780,8 +780,8 @@ s32 StepOpeningBallSimulation(BallSimulation* simulation) {
                           simulation->velocity[AXIS_Z]) *
                       LIP_OUT_SPIN_SCALE;
                   flags |= STEP_FLAG_LIPPED_OUT;
-                  contact = 0;
                   BuildOpeningLiftRotation();
+                  contact = 0;
                 }
               }
             }
@@ -1319,8 +1319,8 @@ s32 StepOpeningBallSimulation(BallSimulation* simulation) {
             AbsFloat(plane.normal[AXIS_Y]) * OPENING_GROUND_SPIN_DRIFT_GRIP;
         driftZ = (spinVelocityZ - simulation->velocity[AXIS_Z]) * grip *
             AbsFloat(plane.normal[AXIS_Y]) * OPENING_GROUND_SPIN_DRIFT_GRIP;
-        driftLimit = impactSpeed * OPENING_MAX_SPIN_DRIFT_SHARE;
         drift = (s32)IntLength2D(driftX, driftZ);
+        driftLimit = impactSpeed * OPENING_MAX_SPIN_DRIFT_SHARE;
         if (driftLimit < drift && impactSpeed > 1.0f) {
           f32 scale = driftLimit / drift;
 

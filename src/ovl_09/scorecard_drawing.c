@@ -2117,7 +2117,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard_drawing", DrawLeaderboardPage);
  * loops add the column's offset to x after adding the cells' left edge, where
  * this adds it first, and the target keeps the address of
  * g_GameState.holeSelection in a saved register while it draws the faces.
- * 814 words differ, 254 in shape.
+ * 802 words differ, 246 in shape.
  */
 #ifdef NON_MATCHING
 void DrawScoresPage(Gfx** displayListHead) {
@@ -2170,12 +2170,12 @@ void DrawScoresPage(Gfx** displayListHead) {
   switch (f_ScoresStyle) {
     case SCORES_STYLE_YELLOW:
       gDPSetEnvColor(gfx++, 0xFF, 0xF0, 0x7F, 0xFF);
-      cellAlpha = 0xFF;
       gDPSetBlendColor(gfx++, 0, 0, 0, 0x80);
       gDPPipeSync(gfx++);
       gDPSetRenderMode(gfx++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
       gDPSetCombineLERP(gfx++, PRIMITIVE, 0, TEXEL0, 0, PRIMITIVE, 0, TEXEL0, 0,
           PRIMITIVE, 0, TEXEL0, 0, PRIMITIVE, 0, TEXEL0, 0);
+      cellAlpha = 0xFF;
       break;
     case SCORES_STYLE_FADED:
       cellAlpha = 0x9F;
@@ -2205,13 +2205,13 @@ void DrawScoresPage(Gfx** displayListHead) {
 #endif
     case SCORES_STYLE_TINTED:
       gDPSetEnvColor(gfx++, 0, 0x40, 0, 0xFF);
-      cellAlpha = 0xFF;
       gDPSetBlendColor(gfx++, 0, 0, 0, 0x1F);
       gDPPipeSync(gfx++);
       gDPSetRenderMode(gfx++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
       gDPSetCombineLERP(gfx++, PRIMITIVE, ENVIRONMENT, TEXEL0, ENVIRONMENT,
           PRIMITIVE, 0, TEXEL0, 0, PRIMITIVE, ENVIRONMENT, TEXEL0, ENVIRONMENT,
           PRIMITIVE, 0, TEXEL0, 0);
+      cellAlpha = 0xFF;
       break;
   }
 
@@ -2676,10 +2676,10 @@ void DrawScoresPage(Gfx** displayListHead) {
     if (!(g_GameState.holeSelection & HOLE_SELECTION_BACK_NINE)) {
       extraTop = EXTRA_ROW_TOP;
       if (isPuttsShown) {
+        extraTop += PLAYER_ROW_SPACING;
         DrawSmallText(&gfx, g_Scorecard.x + PUTTS_LABEL_LEFT,
             frontTop + (EXTRA_ROW_TOP + (i * rowSpacing)) + g_Scorecard.y,
             "Putts");
-        extraTop += PLAYER_ROW_SPACING;
       }
 
       if (isOverShown) {
@@ -2697,10 +2697,10 @@ void DrawScoresPage(Gfx** displayListHead) {
     if (!(g_GameState.holeSelection & HOLE_SELECTION_FRONT_NINE)) {
       extraTop = EXTRA_ROW_TOP;
       if (isPuttsShown) {
+        extraTop += PLAYER_ROW_SPACING;
         DrawSmallText(&gfx, g_Scorecard.x + PUTTS_LABEL_LEFT,
             backTop + (EXTRA_ROW_TOP + (i * rowSpacing)) + g_Scorecard.y,
             "Putts");
-        extraTop += PLAYER_ROW_SPACING;
       }
 
       if (isOverShown) {

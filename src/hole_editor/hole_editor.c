@@ -3881,7 +3881,7 @@ void WriteHexDumpFile(u32* words, s32 byteCount, char* fileName) {
  * Doesn't match: the original also steps column + 1 alongside half, where
  * GCC computes it in each use; most of the rest follows from the registers
  * and spill slots that changes. The frame is 0x20 bytes larger than the
- * original's, so the stack offsets differ. 2959 words differ, 595 in shape.
+ * original's, so the stack offsets differ. 2449 words differ, 581 in shape.
  */
 #ifdef NON_MATCHING
 void DrawHoleEditorGround(CameraMatrices* matrices UNUSED, s32 terrainStyle) {
@@ -3925,9 +3925,9 @@ void DrawHoleEditorGround(CameraMatrices* matrices UNUSED, s32 terrainStyle) {
   s32 mirroredS;
   s32 st;
   Vtx* midpoints;
+  s32 tileColumn;
   GroundTile* tile;
   s32 k;
-  s32 tileColumn;
 
   /* Sets a vertex halfway between two others */
   void GetMidpointVertex(Vtx_t * first, Vtx_t * second, Vtx_t * midpoint) {
@@ -4267,11 +4267,11 @@ void DrawHoleEditorGround(CameraMatrices* matrices UNUSED, s32 terrainStyle) {
 
       if (groupDetail >= GROUND_DETAIL_FINE) {
         for (k = 0; k < GROUND_TILE_GROUP_SIZE; k++) {
+          midpoints = g_WorkArea.hole.midpoints[g_WorkArea.hole.tiles[tileIndex]
+                  .midpointBlockIndex];
           tileColumn = (half * GROUND_TILE_GROUP_SIZE) + k;
           mirroredS = ((tileColumn * TILE_COORDINATE_SPAN) + MIRROR_S_OFFSET) *
               MIRROR_S_SCALE;
-          midpoints = g_WorkArea.hole.midpoints[g_WorkArea.hole.tiles[tileIndex]
-                  .midpointBlockIndex];
 
           /* The maps tell each tile from its neighbors by color */
           if (IsMapTerrainStyle(terrainStyle)) {
@@ -4661,10 +4661,10 @@ void DrawHoleEditorGround(CameraMatrices* matrices UNUSED, s32 terrainStyle) {
             }
           }
 
-          topSlot++;
-          bottomSlot++;
-          middleSlot++;
           tileIndex++;
+          bottomSlot++;
+          topSlot++;
+          middleSlot++;
           slopeIndex += TILE_TRIANGLE_COUNT;
         }
 
