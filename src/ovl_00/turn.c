@@ -2094,7 +2094,14 @@ void BuildShotPreview(ShotLaunch* swing, s32 playerState) {
  * Draws the shot preview that BuildShotPreview built. On the pause screen it is
  * instead a straight line on screen, from the ball to the preview's last point.
  *
- * Doesn't match: 52 words differ.
+ * Doesn't match: in the free-look line the original loads ball.x and end.x,
+ * scales them and converts dx into $f6 before it scales the y values, and
+ * converts dy into $f4; this loads them in the order of its statements and
+ * converts dx into $f8, so the float registers differ through the line's
+ * setup. Scaling and subtracting each axis in turn, either barrier-free, the
+ * sum's other order and the sweeps' moves give 49 to 67 words. The register
+ * oracle gets no closer than 32 with 13 pseudos forced. 52 words differ, 12
+ * in shape.
  */
 #ifdef NON_MATCHING
 void DrawShotPreview(CameraMatrices* matrices) {
