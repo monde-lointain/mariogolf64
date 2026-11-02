@@ -1688,17 +1688,19 @@ void DrawBrickWallRows(Gfx** displayListHead, u8 slide) {
 /*
  * Draws the animated page arrows either side of the course select screen
  *
- * Doesn't match: the original computes the mirrored arrow's start without a
- * branch, and keeps the display list head in its argument slot.
- * 22 words differ. Other conditions for the if, casts or shifts of the
- * comparison all branch; working the start out into a variable before the
- * rectangle avoids the branch but folds its two shifts into one (25 words).
+ * Doesn't match: the original keeps the display list head in its argument
+ * slot, and shifts the mirrored arrow's start into place in two steps where
+ * combine folds them into one here, which also merges two of the display list
+ * increments. Working the start out into a variable, as DrawCenteredPageArrows
+ * does, avoids the branch the inline comparison gives (22 words, 10 in shape);
+ * its other places and types change nothing. 25 words differ, 5 in shape.
  */
 #ifdef NON_MATCHING
 void DrawPageArrows(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   s32 arrowIndex;
   s32 left;
+  s32 textureColumn;
   s32 unused[4] UNUSED;
 
   f_PageArrowTimer++;
@@ -1736,12 +1738,13 @@ void DrawPageArrows(Gfx** displayListHead) {
       left = PAGE_ARROW_LEFT_X;
     }
 
+    /* Computed before the rectangle, as in DrawCenteredPageArrows */
+    textureColumn = MirroredArrowColumn(arrowIndex);
     gDPPipeSync(gfx++);
     gSPTextureRectangle(gfx++, QuarterPixels(left),
         QuarterPixels(PAGE_ARROW_TOP), QuarterPixels(left + PAGE_ARROW_SIZE),
         QuarterPixels(PAGE_ARROW_TOP + PAGE_ARROW_SIZE), G_TX_RENDERTILE,
-        TexelCoordinate(MirroredArrowColumn(arrowIndex)), 0, TEXEL_STEP_ONE,
-        TEXEL_STEP_ONE);
+        TexelCoordinate(textureColumn), 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     gDPPipeSync(gfx++);
   }
 
