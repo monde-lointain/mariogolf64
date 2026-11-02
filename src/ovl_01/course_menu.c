@@ -1599,10 +1599,9 @@ void DrawOffLabel(Gfx** displayListHead, s32 x, s32 y) {
  * Draws the green left and right arrows either side of a width centered on a
  * point, switching their blink frame every SIDE_ARROW_BLINK_FRAME_COUNT calls
  *
- * Doesn't match: the original reloads displayListHead from its stack slot
- * at once, keeps blinkFrame in a temporary register and works out the
- * arrows' top inside the loop, where this keeps both in saved registers, so
- * most registers differ. 264 words differ.
+ * Doesn't match: the original's frame is 8 bytes smaller, and most
+ * registers differ. Working out frameOffset before the palette load comes
+ * closest; after it, 264 words differ. 134 words differ, 38 in shape.
  */
 #ifdef NON_MATCHING
 void DrawBlinkingSideArrows(Gfx** displayListHead, void* image, s32* blinkFrame,
@@ -1619,9 +1618,9 @@ void DrawBlinkingSideArrows(Gfx** displayListHead, void* image, s32* blinkFrame,
     *blinkTimer = 0;
   }
 
+  frameOffset = (*blinkFrame * GREEN_ARROW_FRAME_SIZE) + PALETTED_TEXELS_OFFSET;
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
   gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(image)));
-  frameOffset = (*blinkFrame * GREEN_ARROW_FRAME_SIZE) + PALETTED_TEXELS_OFFSET;
   for (arrowIndex = 0; arrowIndex != SIDE_ARROW_COUNT; arrowIndex++) {
     gDPLoadTextureTile_4b(gfx++,
         TextureAddress((u32)image +

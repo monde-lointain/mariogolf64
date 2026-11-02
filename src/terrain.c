@@ -2172,7 +2172,7 @@ s32 GetTrianglePlane(PlaneTriangle* triangle, TrianglePlane* plane) {
  * Returns the ground's height at a point, clamped to the ground, or
  * NO_GROUND_HEIGHT where no ground triangle holds it
  *
- * Doesn't match: 64 words differ.
+ * Doesn't match: 34 words differ, 2 in shape.
  */
 #ifdef NON_MATCHING
 s32 GetTerrainHeight(s32 x, s32 z) {
@@ -2230,15 +2230,15 @@ s32 GetTerrainHeight(s32 x, s32 z) {
 
   firstY = triangle.corners[AXIS_Y][1] - triangle.corners[AXIS_Y][0];
   secondZ = triangle.corners[AXIS_Z][2] - triangle.corners[AXIS_Z][0];
-  secondY = triangle.corners[AXIS_Y][2] - triangle.corners[AXIS_Y][0];
   firstZ = triangle.corners[AXIS_Z][1] - triangle.corners[AXIS_Z][0];
   firstX = triangle.corners[AXIS_X][1] - triangle.corners[AXIS_X][0];
+  secondY = triangle.corners[AXIS_Y][2] - triangle.corners[AXIS_Y][0];
   secondX = triangle.corners[AXIS_X][2] - triangle.corners[AXIS_X][0];
   normalX = (firstY * secondZ) + (secondY * -firstZ);
+  offsetX = x - (triangle.corners[AXIS_X][0] << WORLD_TO_COURSE_SHIFT);
   normalY = (firstX * -secondZ) + (secondX * firstZ);
   normalZ = (firstY * -secondX) + (secondY * firstX);
   height = triangle.corners[AXIS_Y][0] << WORLD_TO_COURSE_SHIFT;
-  offsetX = x - (triangle.corners[AXIS_X][0] << WORLD_TO_COURSE_SHIFT);
   offsetZ = z - (triangle.corners[AXIS_Z][0] << WORLD_TO_COURSE_SHIFT);
   if ((s32)normalY != 0) {
     return height +

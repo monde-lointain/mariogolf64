@@ -2876,7 +2876,7 @@ void DrawTurnAwayAnimation(void);
  * inside the loops, and registers are allocated differently. GCC's loop
  * optimizer moves more out of the loops when its threshold is one higher.
  * Writing the corners' expressions differently in each loop gets closer, but
- * no single form matches. 120 words differ.
+ * no single form matches. 106 words differ, 30 in shape.
  */
 #ifdef NON_MATCHING
 void DrawTurnAwayAnimation(void) {
@@ -2920,9 +2920,9 @@ void DrawTurnAwayAnimation(void) {
         G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
     gSPVertex(g_DisplayListHead++, f_TileGridVertices[g_MatrixBufferIndex],
         (TURN_AWAY_UPPER_ROW_COUNT + 1) * TILE_GRID_COLUMN_COUNT, 0);
+    wordIndex = 0;
     gDPSetCombineMode(g_DisplayListHead++, G_CC_DECALRGB, G_CC_DECALRGB);
     gDPPipeSync(g_DisplayListHead++);
-    wordIndex = 0;
     for (row = 0; row != TURN_AWAY_UPPER_ROW_COUNT; row++) {
       for (column = 0; column != FRAME_TILE_COLUMN_COUNT; column++) {
         gDPLoadTextureBlock(g_DisplayListHead++,

@@ -1611,7 +1611,7 @@ void DrawContestWinnerMovie(Gfx** displayListHead) {
 /*
  * Doesn't match: before the strip loop the original sets the first strip's
  * bottom after the strip edges that GCC's loop pass hoists, where this sets it
- * before them, so the loop's registers differ. 31 words differ.
+ * before them, so the loop's registers differ. 26 words differ, 4 in shape.
  */
 #ifdef NON_MATCHING
 void DrawDriveRecord(Gfx** displayListHead) {
@@ -1639,11 +1639,11 @@ void DrawDriveRecord(Gfx** displayListHead) {
         CAPTION_SOUND_VOLUME, 0, SOUND_FULL_SCALE);
   }
 
-  halfWidth = width >> 1;
   gDPPipeSync(gfx++);
   gDPSetCombineLERP(gfx++, TEXEL0, ENVIRONMENT, PRIMITIVE_ALPHA, ENVIRONMENT,
       ENVIRONMENT, 0, TEXEL0, 0, TEXEL0, ENVIRONMENT, PRIMITIVE_ALPHA,
       ENVIRONMENT, ENVIRONMENT, 0, TEXEL0, 0);
+  halfWidth = width >> 1;
   stripHeight = MOVIE_IMAGE_STRIP_HEIGHT;
   stripCount = height / stripHeight;
   if (f_MovieDrawCount < CAPTION_MEET_DRAW) {
