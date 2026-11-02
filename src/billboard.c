@@ -344,7 +344,7 @@ void DrawBillboard(Gfx** gfxPtr, Billboard* billboard,
  * in $fp and rebuilds both tables' addresses, where ours keeps
  * g_BillboardTransforms in $fp. Counting the far loop up and indexing
  * f_DrawOrder from the end gives more words: loop.c doesn't reduce the index.
- * Unused locals for the frame move the spill slots. 121 words differ, 39 in
+ * Unused locals for the frame move the spill slots. 139 words differ, 17 in
  * shape.
  */
 #ifdef NON_MATCHING
@@ -470,7 +470,7 @@ void DrawBillboards(CameraMatrices* cameraMatrices, s32 cameraIndex) {
   gDPPipeSync(gfx++);
   gDPSetRenderMode(gfx++, G_RM_FOG_SHADE_A, G_RM_AA_ZB_TEX_EDGE2);
   gDPPipeSync(gfx++);
-  IN_OWN_BLOCK(gDPSetAlphaCompare(gfx++, G_AC_NONE));
+  gDPSetAlphaCompare(gfx++, G_AC_NONE);
   for (orderIndex = 0; orderIndex < BILLBOARD_COUNT; orderIndex++) {
     s32 textureIndex;
 
