@@ -925,12 +925,16 @@ void InitSkyColors(void);
  */
 void InitSkyColors(void) {
   EncodedAsset asset;
-  u8 unused[0x10] UNUSED; /* Pads the frame to the target's size */
+  /* Pads the frame to the target's size; without it 58 words differ */
+  u8 unused[0x10] UNUSED;
   s32 blended[RGB_CHANNEL_COUNT];
   SkyColors* colors;
   SkyColors* from;
   SkyColors* to;
-  /* One index for the vertex groups and the palette colors, to match */
+  /*
+   * One index for the vertex groups and the palette colors, to match: an
+   * index of its own for the palette gives 106 differing words
+   */
   s32 i;
   s32 channel;
   u16 color;
