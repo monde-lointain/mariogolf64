@@ -295,7 +295,14 @@ static u8 ReverseBits(u8 bits) {
   return reversed;
 }
 
-/* Doesn't match: 34 words differ. */
+/*
+ * Doesn't match: ours takes each register one earlier than the original, which
+ * keeps i in $t0, the symbol's address in $t1, the modulus's magic number in
+ * $t2 and the alphabet in $t3. Global-alloc gives the symbol's address (pseudo
+ * 107) $t0 first, by priority, where the original has it in $t1; forcing 6
+ * pseudos leaves 9 words differing. A u8, s32 or u32 symbol local and
+ * *password++ don't help. 34 words differ, 2 in shape.
+ */
 #ifdef NON_MATCHING
 s32 WritePasswordSymbols(
     u8* symbols, char* password, s32 symbolCount, s32 unused UNUSED) {
