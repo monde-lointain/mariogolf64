@@ -2456,9 +2456,16 @@ void ClearCartridgeCharacters(void) {
 /*
  * Adds the character's experience to its save on the Game Boy cartridge it came
  * from, looking through every controller's pak for it, and rewrites the save's
- * checksums. Doesn't match: the original copies the experience sum from a
- * scratch register into the one that holds the character data's experience.
- * 20 words differ.
+ * checksums.
+ *
+ * Doesn't match: the original copies the experience sum from a scratch
+ * register into the one that holds the stored experience, then clamps it
+ * there, where this keeps the stored experience in a register of its own.
+ * Clamping with an if statement gives that shape, but the record offset and
+ * the save index then swap $s1 and $s2 (49 words, 1 in shape); the register
+ * oracle leaves 3 words differing once it forces 6 pseudos of that form. A
+ * switch or an else-if chain for the record offset gives 25 to 51. 18 words
+ * differ, 4 in shape.
  */
 #ifdef NON_MATCHING
 s32 WriteExperienceToCartridge(s32 characterIndex) {
@@ -2582,9 +2589,10 @@ s32 WriteExperienceToCartridge(s32 characterIndex) {
         osSyncPrintf("PHASE 9\n");
         if (IsCharacterFromSave(character, characterData)) {
           osSyncPrintf("PHASE 9.5\n");
-          sum = character->experience +
+          experience =
               ((characterData[DATA_EXPERIENCE_OFFSET + 1] << BITS_PER_BYTE) |
                   characterData[DATA_EXPERIENCE_OFFSET]);
+          sum = character->experience + experience;
           experience = (sum > MAX_EXPERIENCE) ? MAX_EXPERIENCE : sum;
           osSyncPrintf("PHASE 10\n");
           characterData[DATA_EXPERIENCE_OFFSET + 1] =
