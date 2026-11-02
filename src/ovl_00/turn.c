@@ -2933,7 +2933,8 @@ void ShowHoleOutBanner(s32 playerIndex) {
  * inline: inlined, their buffers share one stack slot, as in the
  * original's frame.
  *
- * Doesn't match: 536 words differ, spread through the routine's states.
+ * Doesn't match: 517 words differ, 243 in shape, spread through the
+ * routine's states.
  */
 #ifdef NON_MATCHING
 /* Debug flag 0x47: prints where the ball lies, and the second controller moves
@@ -3756,8 +3757,11 @@ void UpdateTurns(void) {
             g_RoundHud.isLetterboxShown = TRUE;
             SetRoundHudPartsShown(1);
           } else {
-            SetRoundHudPartsShown(
-                (g_TurnController.buttons & START_BUTTON) ? 0 : 1);
+            if (g_TurnController.buttons & START_BUTTON) {
+              SetRoundHudPartsShown(0);
+            } else {
+              SetRoundHudPartsShown(1);
+            }
             HandleClubInput();
             HandleShotModeInput();
             PoseGolferForShot();
@@ -4572,10 +4576,11 @@ void UpdateTurns(void) {
               }
             } else if (g_GameState.gameMode == GAME_MODE_TRAINING) {
               nextState = PLAYER_STATE_CHOOSING;
-              OpenChoiceBox(
-                  g_GameState.courseIndex == DRIVING_RANGE_COURSE_INDEX
-                      ? CHOICE_BOX_ID_DRIVING_RANGE
-                      : CHOICE_BOX_ID_TRAINING_SHOT);
+              if (g_GameState.courseIndex == DRIVING_RANGE_COURSE_INDEX) {
+                OpenChoiceBox(CHOICE_BOX_ID_DRIVING_RANGE);
+              } else {
+                OpenChoiceBox(CHOICE_BOX_ID_TRAINING_SHOT);
+              }
             } else if (g_GameState.replayKind == REPLAY_KIND_NONE &&
                 IsOneOnOneMatchMode(g_GameState.gameMode)) {
               if (g_Players[playerIndex].strokeCount >=
