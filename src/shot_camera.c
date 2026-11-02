@@ -1868,7 +1868,7 @@ void PlaceAimCamera(void);
  * set, then clear it. Doesn't match: the original allocates some registers
  * differently, and orders two spots differently: the load of
  * CHASE_FIELD_OF_VIEW and the stores of point for FLIGHT_CAMERA_FACING_CUP.
- * 216 words differ, 8 in shape.
+ * 184 words differ, 8 in shape.
  */
 #ifdef NON_MATCHING
 void PlaceFlightCamera(s32 step) {
@@ -2080,8 +2080,10 @@ void PlaceFlightCamera(s32 step) {
       break;
     case FLIGHT_CAMERA_BEHIND_START:
       if (f_IsCameraKindNew == TRUE) {
-        /* Its own, as the original allocates it within the branch */
+        /* Its own, as the original allocates these within the branch */
+        Radians sideYaw;
         f32 sideDistance;
+
         f_IsCameraKindNew = FALSE;
         f_IsBehindViewFar ^= TRUE;
         yaw = f_ShotFlightYaw + M_PI;
@@ -2163,6 +2165,8 @@ void PlaceFlightCamera(s32 step) {
             point[AXIS_Y] = height;
           }
         } else {
+          f32 sideDistance;
+
           /* Off to the side of the flight, ahead of the start */
           sideDistance = f_ShotLength * SIDE_VIEW_LENGTH_FRACTION;
           distance = f_ShotLength * SIDE_VIEW_AHEAD_FRACTION;

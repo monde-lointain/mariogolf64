@@ -3021,7 +3021,7 @@ INCLUDE_ASM("asm/nonmatchings/hole_display", DrawTurnAwayAnimation);
 /*
  * Copies the frame that a HUD animation that has just started breaks apart
  *
- * Doesn't match: 170 words differ, 26 in shape.
+ * Doesn't match: 122 words differ, 26 in shape.
  */
 #ifdef NON_MATCHING
 void CaptureHudAnimationFrame(void) {
@@ -3030,7 +3030,9 @@ void CaptureHudAnimationFrame(void) {
   s32 tileRow;
   s32 tileColumn;
   s32 row;
+  s32 gridRow;
   s32 column;
+  s32 gridColumn;
   Vtx* vertex;
   Vtx* nextVertex;
   s32 y;
@@ -3062,10 +3064,11 @@ void CaptureHudAnimationFrame(void) {
 
     vertex = f_TileGridVertices[0];
     nextVertex = f_TileGridVertices[1];
-    for (row = 0, y = TILE_GRID_TOP; row != TILE_GRID_ROW_COUNT;
-        row++, y -= TILE_GRID_ROW_SPACING) {
-      for (column = 0, x = TILE_GRID_LEFT; column != TILE_GRID_COLUMN_COUNT - 1;
-          column++, x += TILE_GRID_SPACING) {
+    for (gridRow = 0, y = TILE_GRID_TOP; gridRow != TILE_GRID_ROW_COUNT;
+        gridRow++, y -= TILE_GRID_ROW_SPACING) {
+      for (gridColumn = 0, x = TILE_GRID_LEFT;
+          gridColumn != TILE_GRID_COLUMN_COUNT - 1;
+          gridColumn++, x += TILE_GRID_SPACING) {
         vertex->v.ob[AXIS_X] = x;
         vertex->v.ob[AXIS_Y] = y;
         vertex->v.ob[AXIS_Z] = 0;
@@ -3077,8 +3080,9 @@ void CaptureHudAnimationFrame(void) {
       }
 
       /* The last column is narrower, ending inside the HUD's margin */
-      for (column = TILE_GRID_COLUMN_COUNT - 1, x = TILE_GRID_RIGHT;
-          column != TILE_GRID_COLUMN_COUNT; column++, x += TILE_GRID_SPACING) {
+      for (gridColumn = TILE_GRID_COLUMN_COUNT - 1, x = TILE_GRID_RIGHT;
+          gridColumn != TILE_GRID_COLUMN_COUNT;
+          gridColumn++, x += TILE_GRID_SPACING) {
         vertex->v.ob[AXIS_X] = x;
         vertex->v.ob[AXIS_Y] = y;
         IN_OWN_BLOCK(vertex->v.ob[AXIS_Z] = 0);
