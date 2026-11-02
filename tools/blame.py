@@ -11,7 +11,9 @@ register allocation, prints what the allocators knew of it: its uses and
 live length from local-alloc, the hard register it was given, and its
 conflicts and preferences from global-alloc. For each such insn, it prints
 how sched and sched2 placed it: its priority, the stalls before it became
-ready and the insns it was placed ahead of. Last, it checks the target's
+ready and the insns it was placed ahead of, and whether local-alloc tied the
+pseudo it sets to one it uses, so that both take one register, or what kept
+it from doing so. Last, it checks the target's
 order of our insns against the dependences sched2 kept, or failing that
 lists the pairs it orders the other way and their priorities. Words are
 paired by text, so a pair it reports may be a mispairing. --keep leaves
@@ -80,6 +82,12 @@ INSN_HEADER_RE = re.compile(INSN_HEADER_START + r"(\d+) ", re.MULTILINE)
 # A line number note of a -g dump: its file and line
 LINE_NOTE_RE = re.compile(r'^\(note \d+ \d+ \d+ \("([^"]*)"\) (\d+)\)$', re.MULTILINE)
 DISPOSITION_RE = re.compile(r"(\d+) in (\d+)")
+# An insn's pattern that sets a register: the register's number and the source
+SET_RE = re.compile(r"^\(set \(reg(?:/\w+)?:\w+ (\d+)\) (.*)\)$")
+# A hard register in RTL: its number
+HARD_REGISTER_RE = re.compile(r"\(reg(?:/\w+)?:\w+ (\d+) \$\w+\)")
+# A note that a register dies in an insn: its number
+DEATH_RE = re.compile(r"REG_DEAD \(reg(?:/\w+)?:\w+ (\d+)\)")
 # An insn, label or other element of an RTL dump: its kind and UID
 ELEMENT_HEADER_RE = re.compile(
     r"^\((insn|jump_insn|call_insn|code_label|barrier|note)(?:[/:]\w+)* (\d+) ",
@@ -447,6 +455,68 @@ def describe_pseudo(compilation: Compilation, pseudo: int) -> str:
     return "\n    ".join(parts)
 
 
+def find_local_block(lreg: str, pseudo: int) -> str | None:
+    """Return the block that local-alloc gives PSEUDO, if it lives in one."""
+    match = re.search(
+        rf"^Register {pseudo} used .* in block (\d+);", lreg, re.MULTILINE
+    )
+    return match.group(1) if match else None
+
+
+def describe_tie(compilation: Compilation, uid: int) -> str:
+    """Return whether local-alloc tied the pseudo insn UID sets to one it uses.
+
+    block_alloc offers combine_regs the used pseudos in order and stops at
+    the first it ties. A tie needs both pseudos local to the block, the used
+    one to die in the insn and the set one to be born there; tied pseudos
+    share a quantity and so a register. A used hard register is only
+    suggested for the set pseudo.
+    """
+    lreg = compilation.dumps.get("lreg", "")
+    insn = find_insn(lreg, uid)
+    match = SET_RE.match(read_pattern(insn)) if insn else None
+    if not match or int(match.group(1)) < FIRST_PSEUDO_REGISTER:
+        return ""
+    set_pseudo = int(match.group(1))
+    used = dict.fromkeys(
+        number
+        for number in (
+            int(found.group(1)) for found in PSEUDO_RE.finditer(match.group(2))
+        )
+        if number >= FIRST_PSEUDO_REGISTER and number != set_pseudo
+    )
+    if not used:
+        hard = HARD_REGISTER_RE.search(match.group(2))
+        if not hard:
+            return ""
+        # combine_regs suggests a used hard register rather than tying it
+        name = register_name(int(hard.group(1)))
+        return f"suggests {name}, which it uses, for pseudo {set_pseudo}"
+    dying = {int(found.group(1)) for found in DEATH_RE.finditer(insn)}
+    is_set_born_earlier = bool(
+        re.search(rf":\w+ {set_pseudo}\)", lreg[: lreg.find(insn)])
+    )
+    refusals: list[str] = []
+    for pseudo in used:
+        reasons: list[str] = []
+        if find_local_block(lreg, pseudo) is None:
+            reasons.append(f"{pseudo} lives in more than one block")
+        if pseudo not in dying:
+            reasons.append(f"{pseudo} lives on after it")
+        if find_local_block(lreg, set_pseudo) is None:
+            reasons.append(f"{set_pseudo} lives in more than one block")
+        elif is_set_born_earlier:
+            reasons.append(f"{set_pseudo} is set before it")
+        if not reasons:
+            block = find_local_block(lreg, pseudo)
+            return (
+                f"ties pseudo {set_pseudo} to {pseudo}, which is local to "
+                f"block {block} and dies there"
+            )
+        refusals.append(f"to {pseudo}: {', '.join(reasons)}")
+    return f"can't tie pseudo {set_pseudo} {'; nor '.join(refusals)}"
+
+
 def read_dependence_kind(note: str | None) -> str:
     """Return the kind of dependence a link's NOTE, if any, names."""
     if note is None:
@@ -678,6 +748,18 @@ def explain_flip(
     return f"{order}; {reason}"
 
 
+def print_insn_reports(compilation: Compilation, uids: list[int]) -> None:
+    """Print how the schedulers placed each insn of UIDS and how it was tied."""
+    for uid in uids:
+        for name in SCHEDULE_PASSES:
+            placement = describe_schedule(compilation.dumps.get(name, ""), uid)
+            if placement:
+                print(f"  insn {uid} in {name}: {placement}")
+        tie = describe_tie(compilation, uid)
+        if tie:
+            print(f"  insn {uid} in lreg {tie}")
+
+
 def main() -> None:
     """Blame the differing instructions of the function named."""
     arguments = sys.argv[1:]
@@ -702,14 +784,12 @@ def main() -> None:
     indices = [index for run in runs for _, index in run if index is not None]
     for pseudo in find_pseudos(compilation, indices):
         print(f"  {describe_pseudo(compilation, pseudo)}")
-    uids = sorted(
-        {insn[0] for index in indices if (insn := get_insn(compilation, index))}
+    print_insn_reports(
+        compilation,
+        sorted(
+            {insn[0] for index in indices if (insn := get_insn(compilation, index))}
+        ),
     )
-    for uid in uids:
-        for name in SCHEDULE_PASSES:
-            placement = describe_schedule(compilation.dumps.get(name, ""), uid)
-            if placement:
-                print(f"  insn {uid} in {name}: {placement}")
     order = check_order(compilation, target)
     if order:
         print(f"order: {order[0]}")
