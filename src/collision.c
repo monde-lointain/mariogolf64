@@ -3028,7 +3028,12 @@ INCLUDE_RODATA("asm/nonmatchings/collision", f_WallInsideOutText);
  * hit ring's index, and the fraction of the way along the path. It returns
  * 1 for a hit, 0 for none and -1 for a start or end off the ground.
  *
- * Doesn't match: 32 words differ.
+ * Doesn't match: the original sets hitNumber after IsGameFlagSet's call, in
+ * its branch's delay slot, where ours sets it before the call; setting it
+ * before the debug block, after it or before the loop doesn't reproduce this.
+ * Its endSide also takes the partial sum's register, and it takes the start
+ * side's abs.s before testing sideChange's sign, which moving the fabsf up
+ * gives at the cost of 2 more words in shape. 32 words differ, 10 in shape.
  */
 #ifdef NON_MATCHING
 s32 FindRingHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
