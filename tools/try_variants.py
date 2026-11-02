@@ -173,6 +173,10 @@ def score_jobs(jobs: list[list[str]], *, prefix_names: bool) -> None:
 def main() -> None:
     """Print the score of each variant, in order, or apply one."""
     arguments = sys.argv[1:]
+    usage_lengths = {"--batch": 2, "--apply": 6}
+    expected_length = usage_lengths.get(arguments[0] if arguments else "", 4)
+    if len(arguments) != expected_length:
+        sys.exit(__doc__)
     if arguments[0] == "--batch":
         lines = Path(arguments[1]).read_text().splitlines()
         score_jobs([line.split() for line in lines if line.strip()], prefix_names=True)
