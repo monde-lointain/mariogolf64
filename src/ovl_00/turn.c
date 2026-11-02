@@ -533,7 +533,8 @@ void KeepAimCameraOnCourse(void) {
   }
 
   heading = (u16)g_CurrentShot.heading * BINARY_ANGLE_TO_RADIANS;
-  /* Clearing the overshoot here too is needed to match */
+  /* Clearing the overshoot here too is needed to match; without it, 48 words
+   * differ */
   overshoot = 0.0f;
   offset = cosf(heading) * g_CurrentShot.aimCameraDistance;
   eye[AXIS_X] = offset + g_CurrentShot.ballPosition[AXIS_X];
@@ -546,7 +547,10 @@ void KeepAimCameraOnCourse(void) {
   }
 
   if ((s32)offset != 0) {
-    /* The double fabs keeps the two absolute values apart, to match */
+    /* The double fabs keeps the two absolute values apart, to match: CSE
+     * merges two fabsf calls into one abs.s (6 words differ), and
+     * subtracting in double precision or multiplying by a reciprocal gives
+     * 62-64 */
     g_CurrentShot.aimCameraDistance *=
         (fabsf(offset) - overshoot) / (f32)fabs(offset);
   }
@@ -563,7 +567,7 @@ void KeepAimCameraOnCourse(void) {
   }
 
   if ((s32)offset != 0) {
-    /* The double fabs keeps the two absolute values apart, to match */
+    /* The double fabs keeps the two absolute values apart, as above */
     g_CurrentShot.aimCameraDistance *=
         (fabsf(offset) - overshoot) / (f32)fabs(offset);
   }
