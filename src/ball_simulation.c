@@ -221,7 +221,8 @@ void ResetBallSimulations(void) {
  * Doesn't match: the register allocation and instruction scheduling differ in
  * many places, and where the original recomputes abs.s for each use of a
  * float's absolute value, this code shares one abs.s or compiles a compare and
- * branch. 779 words differ, 235 in shape.
+ * branch. Adding the height to its slide step, rather than the step to the
+ * height, takes 779 words differing to 771, 235 in shape.
  */
 #ifdef NON_MATCHING
 s32 StepBallSimulation(BallSimulation* simulation) {
@@ -1034,7 +1035,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
         simulation->position[AXIS_X] =
             simulation->position[AXIS_X] + (velocity[AXIS_X] * slide);
         simulation->position[AXIS_Y] =
-            simulation->position[AXIS_Y] + (velocity[AXIS_Y] * slide);
+            (velocity[AXIS_Y] * slide) + simulation->position[AXIS_Y];
         simulation->spinSpeed = 0;
         simulation->position[AXIS_Z] =
             simulation->position[AXIS_Z] + (velocity[AXIS_Z] * slide);
