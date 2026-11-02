@@ -1730,7 +1730,14 @@ void DrawDriveRecord(Gfx** displayListHead) {
 INCLUDE_ASM("asm/nonmatchings/ovl_00/round_events", DrawDriveRecord);
 #endif
 
-/* Doesn't match: 12 words differ. */
+/*
+ * Doesn't match: the height's low byte and the combine mode's second word
+ * take each other's registers, $a3 and $t0. Both are used twice, and after
+ * sched1 the combine word's life is one insn shorter, so local-alloc gives it
+ * the first pick. Forcing the two leaves only where bottom's 0x68 is
+ * scheduled. Reordering the reads, the pipe sync and halfWidth, and other
+ * types for the sizes, don't help. 12 words differ, 2 in shape.
+ */
 #ifdef NON_MATCHING
 void DrawPuttCaption(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
