@@ -857,6 +857,7 @@ void DrawPauseArrows(Gfx** displayListHead, s32 x, s32 y, s32 gap) {
 #define PAUSE_LABEL_X 80
 #define PAUSE_LABELS_TOP 48
 #define PAUSE_LABEL_SPACING 18
+#define PauseLabelY(row) (PAUSE_LABELS_TOP + ((row) * PAUSE_LABEL_SPACING))
 #define PAUSE_LABEL_FLAGS TEXT_FLAG_UNK20
 #define PAUSE_VALUE_X 212
 #define PAUSE_RED_WAVE_MIDDLE 95
@@ -879,15 +880,7 @@ void DrawPauseArrows(Gfx** displayListHead, s32 x, s32 y, s32 gap) {
 /*
  * Loads or frees the pause menu as RequestPauseMenu asked, then draws the menu
  * while it is loaded
- *
- * Doesn't match: the original sign-extends y for the grid color's value text
- * from y itself, and only the weather's from the shifted copy that loop.c keeps
- * in the label loop, where this uses the copy for both: loop.c records all
- * four conversions as givs and combines them. Choosing the text into a local
- * gives 62 words. The order of $s4 to $s6 also differs. 58 words differ, 10
- * in shape.
  */
-#ifdef NON_MATCHING
 void DrawPauseMenu(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   s32 cloudMiddle;
@@ -899,7 +892,6 @@ void DrawPauseMenu(Gfx** displayListHead) {
   s32 green;
   s32 blue;
   s32 i;
-  s32 y;
   s32 message;
   u16 kind;
   u16 selectedKind;
@@ -959,9 +951,7 @@ void DrawPauseMenu(Gfx** displayListHead) {
   glowBlue = (s32)(sinf(f_PauseGlowAngle + (M_PI / 2)) * COLOR_WAVE_AMPLITUDE) +
       COLOR_WAVE_MIDDLE;
   SetUpTextDrawing(&gfx);
-  for (i = 0, y = PAUSE_LABELS_TOP;
-      i != f_PauseLayoutOptionCounts[f_PauseLayout];
-      i++, y += PAUSE_LABEL_SPACING) {
+  for (i = 0; i != f_PauseLayoutOptionCounts[f_PauseLayout]; i++) {
     message = f_PauseOptions[f_PauseLayoutOptions[f_PauseLayout][i]].message;
     kind = f_PauseOptions[f_PauseLayoutOptions[f_PauseLayout][i]].kind;
     if (f_PauseSelection == i) {
@@ -981,28 +971,29 @@ void DrawPauseMenu(Gfx** displayListHead) {
       }
     }
 
-    SetTextSlot(PAUSE_LABEL_X, y, message + PAUSE_OPTION_MESSAGE_BASE,
-        TEXT_SLOT_LARGE_FONT, i, PAUSE_LABEL_FLAGS, red, green, blue, 0xFF);
+    SetTextSlot(PAUSE_LABEL_X, PauseLabelY(i),
+        message + PAUSE_OPTION_MESSAGE_BASE, TEXT_SLOT_LARGE_FONT, i,
+        PAUSE_LABEL_FLAGS, red, green, blue, 0xFF);
     gDPSetPrimColor(gfx++, 0, 0, red, green, blue, 0xFF);
     DrawLargeTextSlot(&gfx, i);
     if (kind == PAUSE_OPTION_KIND_GRID_COLOR) {
       if ((s8)g_Players[g_CurrentShot.playerIndex].gridColor ==
           GRID_COLOR_BLACK) {
-        DrawLargeText(
-            &gfx, PAUSE_VALUE_X, y, f_PauseValueTexts[PAUSE_VALUE_TEXT_BLACK]);
+        DrawLargeText(&gfx, PAUSE_VALUE_X, PauseLabelY(i),
+            f_PauseValueTexts[PAUSE_VALUE_TEXT_BLACK]);
       } else {
-        DrawLargeText(
-            &gfx, PAUSE_VALUE_X, y, f_PauseValueTexts[PAUSE_VALUE_TEXT_WHITE]);
+        DrawLargeText(&gfx, PAUSE_VALUE_X, PauseLabelY(i),
+            f_PauseValueTexts[PAUSE_VALUE_TEXT_WHITE]);
       }
     }
 
     if (kind == PAUSE_OPTION_KIND_WEATHER) {
       if (g_HoleSetup.conditions.isRaining == TRUE) {
-        DrawLargeText(
-            &gfx, PAUSE_VALUE_X, y, f_PauseValueTexts[PAUSE_VALUE_TEXT_RAIN]);
+        DrawLargeText(&gfx, PAUSE_VALUE_X, PauseLabelY(i),
+            f_PauseValueTexts[PAUSE_VALUE_TEXT_RAIN]);
       } else {
-        DrawLargeText(
-            &gfx, PAUSE_VALUE_X, y, f_PauseValueTexts[PAUSE_VALUE_TEXT_CLEAR]);
+        DrawLargeText(&gfx, PAUSE_VALUE_X, PauseLabelY(i),
+            f_PauseValueTexts[PAUSE_VALUE_TEXT_CLEAR]);
       }
     }
   }
@@ -1058,9 +1049,6 @@ void DrawPauseMenu(Gfx** displayListHead) {
   f_PauseMenuDrawnMarker = 0xFFFFFF;
   *displayListHead = gfx;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_00/pause_menu", DrawPauseMenu);
-#endif
 
 void LoadChoiceBoxImages(void) {
   EncodedAsset asset;
