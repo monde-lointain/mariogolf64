@@ -7,8 +7,9 @@
 # without optimization and with debug information, so that gdb can read and
 # set the register allocators' state, and puts it beside the toolchain's
 # other programs. Its cc1 runs the debug build under tools/oracle_gdb.py when
-# ORACLE_FUNCTION is set, and alone otherwise. The debug build gives the same
-# code as the toolchain's cc1: the ROM builds with it unchanged.
+# ORACLE_FUNCTION is set, and the toolchain's optimized cc1 otherwise, since
+# gdb needs the debug build and nothing else does. The debug build gives the
+# same code as the toolchain's cc1: the ROM builds with it unchanged.
 set -eu
 
 root=$(cd "$(dirname "$0")/.." && pwd)
@@ -39,7 +40,7 @@ cat > "$out/cc1" <<SCRIPT
 if [ -n "\${ORACLE_FUNCTION:-}" ]; then
     exec gdb -batch -nx -q -x "$root/tools/oracle_gdb.py" --args "$out/cc1.debug" "\$@"
 fi
-exec "$out/cc1.debug" "\$@"
+exec "$root/tools/gcc_kmc/cc1" "\$@"
 SCRIPT
 chmod +x "$out/cc1"
 echo "built $out"
