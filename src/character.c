@@ -1425,7 +1425,7 @@ void AnimateCharacter(u32 slotIndex) {
  *
  * Doesn't match: GCC keeps other values in saved registers across the joint
  * loop. The original keeps the two words of a double constant, where GCC
- * keeps 1.0f and a stack address. 188 words differ.
+ * keeps 1.0f and a stack address. 184 words differ, 78 in shape.
  */
 #ifdef NON_MATCHING
 void UpdateJointKeyframeSpans(u32 slotIndex) {
@@ -1576,6 +1576,9 @@ void UpdateJointKeyframeSpans(u32 slotIndex) {
         rotation[3] =
             joint->rotations[joint->rotationSpan.index][3] * QUATERNION_SCALE;
       } else {
+        /* Its own, as the original allocates it within the branch */
+        f32 rotationProgress;
+
         spanIndex = joint->rotationSpan.index;
         nextSpanIndex = spanIndex + 1;
         dot = ((joint->rotations[nextSpanIndex][0] * QUATERNION_PRODUCT_SCALE) *
@@ -1586,19 +1589,20 @@ void UpdateJointKeyframeSpans(u32 slotIndex) {
                 joint->rotations[spanIndex][2]) +
             ((joint->rotations[nextSpanIndex][3] * QUATERNION_PRODUCT_SCALE) *
                 joint->rotations[spanIndex][3]);
-        progress = (g_CurrentAnimationFrame - joint->rotationSpan.startFrame) /
+        rotationProgress =
+            (g_CurrentAnimationFrame - joint->rotationSpan.startFrame) /
             (joint->rotationSpan.endFrame - joint->rotationSpan.startFrame);
         /* Nearly equal rotations are blended linearly, where the sines below
          * would be near zero */
         if (1.0 - dot < SLERP_THRESHOLD) {
-          nextWeight = progress;
+          nextWeight = rotationProgress;
           spanWeight = 1.0 - nextWeight;
         } else {
           angle = acosf(dot);
-          progress *= angle;
+          rotationProgress *= angle;
           sinAngle = sinf(angle);
-          nextWeight = sinf(progress) / sinAngle;
-          spanWeight = sinf(angle - progress) / sinAngle;
+          nextWeight = sinf(rotationProgress) / sinAngle;
+          spanWeight = sinf(angle - rotationProgress) / sinAngle;
         }
 
         spanWeight *= QUATERNION_SCALE;
