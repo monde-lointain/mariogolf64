@@ -551,9 +551,11 @@ INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard_drawing", f_CompactHoleFormat)
  * for each hole won. Once the hole's result is tallied, it animates the
  * winner's new mark.
  *
- * Doesn't match: the target keeps &g_Scorecard.x in $fp (set from the
- * matchPanelImage address plus 0x98) and reads x and y through it, where this
- * loads each from its address. 110 words differ, 104 in shape.
+ * Doesn't match: sched places $fp's setup from the matchPanelImage address
+ * later, after the panel's calls, and the tile loops take &gfx from $s1 where
+ * the original copies it to $s7, spilling zero rather than $s1 to 0x6C($sp).
+ * The allocation oracle finds no closer forcing. 110 words differ, 104 in
+ * shape.
  */
 #ifdef NON_MATCHING
 void DrawMatchPage(Gfx** displayListHead) {
