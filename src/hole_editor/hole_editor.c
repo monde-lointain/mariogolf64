@@ -3885,8 +3885,10 @@ void WriteHexDumpFile(u32* words, s32 byteCount, char* fileName) {
  * GCC computes it in each use; most of the rest follows from the registers
  * and spill slots that changes. The frame is 0x18 bytes larger than the
  * original's, so the stack offsets differ. Stepping the half's first column
- * beside half gives 2403 words differing, 581 in shape. 2258 words differ,
- * 518 in shape.
+ * beside half gives 2403 words differing, 581 in shape. Giving the fine
+ * tiles' loop its own counter and setting the middle slot after the wave's
+ * tile took it from 2258 words differing, 518 in shape. 2128 words differ,
+ * 488 in shape.
  */
 #ifdef NON_MATCHING
 void DrawHoleEditorGround(CameraMatrices* matrices UNUSED, s32 terrainStyle) {
@@ -3933,6 +3935,7 @@ void DrawHoleEditorGround(CameraMatrices* matrices UNUSED, s32 terrainStyle) {
   s32 tileColumn;
   GroundTile* tile;
   s32 k;
+  s32 groupTile;
 
   /* Sets a vertex halfway between two others */
   void GetMidpointVertex(Vtx_t * first, Vtx_t * second, Vtx_t * midpoint) {
@@ -4243,9 +4246,8 @@ void DrawHoleEditorGround(CameraMatrices* matrices UNUSED, s32 terrainStyle) {
     s32 topSlot;
 
     previousDetail = GROUND_DETAIL_HIDDEN;
-    topSlot = FIRST_TOP_SLOT;
     bottomSlot = FIRST_BOTTOM_SLOT;
-    middleSlot = FIRST_MIDDLE_SLOT;
+    topSlot = FIRST_TOP_SLOT;
     tileIndex = half * GROUND_TILE_GROUP_SIZE;
     gDPSetPrimColor(
         gfx++, 0, 0, 0xFF, 0xFF, 0, f_TriangleSlopes[slopeIndex].shade);
@@ -4256,6 +4258,7 @@ void DrawHoleEditorGround(CameraMatrices* matrices UNUSED, s32 terrainStyle) {
             WAVE_TILE_SPAN,
         (f_TriangleSlopes[slopeIndex].waveT / WAVE_SCROLL_DIVISOR) +
             WAVE_TILE_SPAN);
+    middleSlot = FIRST_MIDDLE_SLOT;
     gDPPipeSync(gfx++);
 
     for (row = 0; row < GROUND_TILE_ROW_COUNT; row++) {
@@ -4270,16 +4273,16 @@ void DrawHoleEditorGround(CameraMatrices* matrices UNUSED, s32 terrainStyle) {
       }
 
       if (groupDetail >= GROUND_DETAIL_FINE) {
-        for (k = 0; k < GROUND_TILE_GROUP_SIZE; k++) {
+        for (groupTile = 0; groupTile < GROUND_TILE_GROUP_SIZE; groupTile++) {
           midpoints = g_WorkArea.hole.midpoints[g_WorkArea.hole.tiles[tileIndex]
                   .midpointBlockIndex];
-          tileColumn = (half * GROUND_TILE_GROUP_SIZE) + k;
+          tileColumn = (half * GROUND_TILE_GROUP_SIZE) + groupTile;
           mirroredS = ((tileColumn * TILE_COORDINATE_SPAN) + MIRROR_S_OFFSET) *
               MIRROR_S_SCALE;
 
           /* The maps tell each tile from its neighbors by color */
           if (IsMapTerrainStyle(terrainStyle)) {
-            Boolean isOdd = (row + k) & 1;
+            Boolean isOdd = (row + groupTile) & 1;
 
             gDPSetEnvColor(gfx++, isOdd * 0xFF, 0, 0xFF - (isOdd * 0xFF), 0xFF);
           }
@@ -4344,7 +4347,7 @@ void DrawHoleEditorGround(CameraMatrices* matrices UNUSED, s32 terrainStyle) {
             } else {
               /* Builds the tile's 5 by 5 points: its grid vertices, then the
                * edge midpoints, which line up with a medium neighbor */
-              vertexColumn = HalfFirstColumn(half) + (k * 2);
+              vertexColumn = (groupTile * 2) + HalfFirstColumn(half);
               CopyDoublePair(
                   (f64*)GridVertex(vertexColumn, row * 2), (f64*)&vertices[0]);
               CopyDoublePair((f64*)GridVertex(vertexColumn, (row * 2) + 1),
@@ -4589,20 +4592,27 @@ void DrawHoleEditorGround(CameraMatrices* matrices UNUSED, s32 terrainStyle) {
           } else if (g_WorkArea.hole.tiles[tileIndex].detail >= 0) {
             /* A medium tile among fine ones loads only its own vertices */
             gSPVertex(gfx++,
-                GridVertex(HalfFirstColumn(half) + (k * 2), row * 2), 2, 0);
+                GridVertex((groupTile * 2) + HalfFirstColumn(half), row * 2), 2,
+                0);
             gSPVertex(gfx++,
-                GridVertex(HalfFirstColumn(half) + (k * 2) + 1, row * 2), 1, 2);
+                GridVertex(
+                    HalfFirstColumn(half) + (groupTile * 2) + 1, row * 2),
+                1, 2);
             gSPVertex(gfx++,
-                GridVertex(HalfFirstColumn(half) + (k * 2), (row * 2) + 1), 2,
-                3);
+                GridVertex(
+                    HalfFirstColumn(half) + (groupTile * 2), (row * 2) + 1),
+                2, 3);
             gSPVertex(gfx++,
-                GridVertex(HalfFirstColumn(half) + (k * 2) + 1, (row * 2) + 1),
+                GridVertex(
+                    HalfFirstColumn(half) + (groupTile * 2) + 1, (row * 2) + 1),
                 1, 5);
             gSPVertex(gfx++,
-                GridVertex(HalfFirstColumn(half) + (k * 2), (row * 2) + 2), 2,
-                6);
+                GridVertex(
+                    HalfFirstColumn(half) + (groupTile * 2), (row * 2) + 2),
+                2, 6);
             gSPVertex(gfx++,
-                GridVertex(HalfFirstColumn(half) + (k * 2) + 1, (row * 2) + 2),
+                GridVertex(
+                    HalfFirstColumn(half) + (groupTile * 2) + 1, (row * 2) + 2),
                 1, 8);
             for (pass = 0; pass < GROUND_TILE_MAX_PASSES; pass++) {
               LoadEditorTileTexture(
@@ -4675,10 +4685,10 @@ void DrawHoleEditorGround(CameraMatrices* matrices UNUSED, s32 terrainStyle) {
             }
           }
 
-          tileIndex++;
-          bottomSlot++;
-          topSlot++;
           middleSlot++;
+          bottomSlot++;
+          tileIndex++;
+          topSlot++;
           slopeIndex += TILE_TRIANGLE_COUNT;
         }
 
@@ -4718,8 +4728,8 @@ void DrawHoleEditorGround(CameraMatrices* matrices UNUSED, s32 terrainStyle) {
           }
         }
 
-        bottomSlot -= GROUND_TILE_GROUP_SIZE;
         topSlot -= GROUND_TILE_GROUP_SIZE;
+        bottomSlot -= GROUND_TILE_GROUP_SIZE;
       }
 
       previousDetail = groupDetail;
