@@ -1153,7 +1153,13 @@ s32 UpdateChoiceBox(ControllerState* controller) {
   return CHOICE_RESULT_NONE;
 }
 
-/* Doesn't match: 65 words differ, 17 in shape. */
+/*
+ * Doesn't match: the original keeps the clouds' top edge, which loop.c hoists
+ * out of the cloud loop, in $fp, where this gets no register for it and
+ * reloads the constant in the loop; textWidth and the label table also take
+ * other saved registers. Declaration orders, splits and moves don't change
+ * the priorities. 67 words differ, 15 in shape.
+ */
 #ifdef NON_MATCHING
 void DrawChoiceBox(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
@@ -1169,7 +1175,6 @@ void DrawChoiceBox(Gfx** displayListHead) {
   s32 cursorY;
   s32 labelsTop;
   s16 labelY;
-  s32 boxRight;
 
   halfWidth = box->halfWidth + CHOICE_BOX_MARGIN;
   f_ChoiceGlowAngle += M_PI / 18;
@@ -1205,9 +1210,9 @@ void DrawChoiceBox(Gfx** displayListHead) {
           ImageBody(f_MenuCloudImage) + (i * CHOICE_BOX_CLOUD_PART_SIZE),
           G_IM_FMT_I, CHOICE_BOX_CLOUD_WIDTH, CHOICE_BOX_CLOUD_HEIGHT, 0, 0, 0,
           0, 0, 0, 0);
-      boxRight = QuarterPixels(CHOICE_BOX_CENTER_X + halfWidth);
       DrawTextureRect(&gfx, QuarterPixels(CHOICE_BOX_CENTER_X - halfWidth),
-          QuarterPixels(CHOICE_BOX_TOP), boxRight,
+          QuarterPixels(CHOICE_BOX_TOP),
+          QuarterPixels(CHOICE_BOX_CENTER_X + halfWidth),
           QuarterPixels(CHOICE_BOX_BOTTOM), G_TX_RENDERTILE, 0, 0,
           (CHOICE_BOX_CLOUD_WIDTH << 10) / 2 / halfWidth,
           CHOICE_BOX_CLOUD_DTDY);
