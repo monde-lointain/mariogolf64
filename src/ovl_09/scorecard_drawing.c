@@ -2117,7 +2117,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard_drawing", DrawLeaderboardPage);
  * loops add the column's offset to x after adding the cells' left edge, where
  * this adds it first, and the target keeps the address of
  * g_GameState.holeSelection in a saved register while it draws the faces.
- * 822 words differ, 262 in shape.
+ * 814 words differ, 254 in shape.
  */
 #ifdef NON_MATCHING
 void DrawScoresPage(Gfx** displayListHead) {
@@ -2144,6 +2144,7 @@ void DrawScoresPage(Gfx** displayListHead) {
   s32 cellRowIndex;
   s32 facePlayerIndex;
   s32 j;
+  s32 cellColumn;
   s32 parHoleIndex;
   s32 hole;
   SaveData* saveData;
@@ -2459,15 +2460,16 @@ void DrawScoresPage(Gfx** displayListHead) {
       gDPSetPrimColor(gfx++, 0, 0, 0x7F, 0xFF, 0, cellAlpha);
     }
 
-    for (j = 0; j != HOLES_PER_NINE; j++) {
-      if (!(j & 1)) {
+    for (cellColumn = 0; cellColumn != HOLES_PER_NINE; cellColumn++) {
+      if (!(cellColumn & 1)) {
         if (!(g_GameState.holeSelection & HOLE_SELECTION_BACK_NINE)) {
           DrawTextureRect(&gfx,
-              QuarterPixels(g_Scorecard.x + (j * CELL_WIDTH) + CELL_LEFT),
+              QuarterPixels(
+                  g_Scorecard.x + (cellColumn * CELL_WIDTH) + CELL_LEFT),
               QuarterPixels(
                   g_Scorecard.y + (cellRowIndex * CELL_HEIGHT) + CELL_TOP),
-              QuarterPixels(
-                  g_Scorecard.x + (j * CELL_WIDTH) + CELL_LEFT + CELL_WIDTH),
+              QuarterPixels(g_Scorecard.x + (cellColumn * CELL_WIDTH) +
+                  CELL_LEFT + CELL_WIDTH),
               QuarterPixels(g_Scorecard.y + (cellRowIndex * CELL_HEIGHT) +
                   CELL_TOP + CELL_HEIGHT),
               G_TX_RENDERTILE, 0, TexelCoordinate(cellRowIndex * CELL_HEIGHT),
@@ -2476,11 +2478,12 @@ void DrawScoresPage(Gfx** displayListHead) {
 
         if (!(g_GameState.holeSelection & HOLE_SELECTION_FRONT_NINE)) {
           DrawTextureRect(&gfx,
-              QuarterPixels(((j * CELL_WIDTH) + CELL_LEFT) + g_Scorecard.x),
+              QuarterPixels(
+                  ((cellColumn * CELL_WIDTH) + CELL_LEFT) + g_Scorecard.x),
               QuarterPixels((cellRowIndex * CELL_HEIGHT) +
                   (CELL_TOP + NINE_SPACING) + g_Scorecard.y),
-              QuarterPixels(
-                  g_Scorecard.x + (j * CELL_WIDTH) + CELL_LEFT + CELL_WIDTH),
+              QuarterPixels(g_Scorecard.x + (cellColumn * CELL_WIDTH) +
+                  CELL_LEFT + CELL_WIDTH),
               QuarterPixels(g_Scorecard.y + (cellRowIndex * CELL_HEIGHT) +
                   CELL_TOP + NINE_SPACING + CELL_HEIGHT),
               G_TX_RENDERTILE, 0, TexelCoordinate(cellRowIndex * CELL_HEIGHT),
@@ -2580,8 +2583,8 @@ void DrawScoresPage(Gfx** displayListHead) {
         DrawSmallFace(&gfx,
             ((secondRow & 1) * SCORES_FACE_STAGGER) + SCORES_FACE_LEFT +
                 g_Scorecard.x,
-            frontTop + (secondRow * PLAYER_ROW_SPACING) + PLAYER_ROW_TOP -
-                SCORES_FACE_RISE + g_Scorecard.y,
+            PLAYER_ROW_TOP - SCORES_FACE_RISE +
+                (frontTop + (secondRow * PLAYER_ROW_SPACING) + g_Scorecard.y),
             1, TRUE);
       }
 
@@ -2592,8 +2595,8 @@ void DrawScoresPage(Gfx** displayListHead) {
         DrawSmallFace(&gfx,
             ((secondRow & 1) * SCORES_FACE_STAGGER) + SCORES_FACE_LEFT +
                 g_Scorecard.x,
-            backTop + (secondRow * PLAYER_ROW_SPACING) + PLAYER_ROW_TOP -
-                SCORES_FACE_RISE + g_Scorecard.y,
+            PLAYER_ROW_TOP - SCORES_FACE_RISE +
+                (backTop + (secondRow * PLAYER_ROW_SPACING) + g_Scorecard.y),
             1, TRUE);
       }
 

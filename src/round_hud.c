@@ -1679,7 +1679,8 @@ typedef struct GridScreenPoint {
 
 /*
  * Doesn't match: the club and the shot's distance take each other's saved
- * registers, and registers differ through the grid's loops. 373 words differ.
+ * registers, and registers differ through the grid's loops. 349 words
+ * differ, 55 in shape.
  */
 void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
   f32 points[GREEN_GRID_POINT_COUNT][3];
@@ -1696,7 +1697,9 @@ void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
   s32 columnCount = GREEN_GRID_COLUMN_COUNT;
   s32 maxPuttDistance;
   s32 row;
+  s32 acrossRow;
   s32 column;
+  s32 acrossColumn;
   s32 rowStart;
   s32 point;
   s32 rowPosition;
@@ -1936,14 +1939,14 @@ void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
   if (g_RoundHud.greenGridState != GREEN_GRID_HIDDEN) {
     /* The lines across the aim, one quad between each pair of points in a row
      */
-    for (row = 0, rowStart = 0; row != rowCount;) {
-      for (column = 0; column != columnCount; column++) {
-        point = rowStart + column;
+    for (acrossRow = 0, rowStart = 0; acrossRow != rowCount;) {
+      for (acrossColumn = 0; acrossColumn != columnCount; acrossColumn++) {
+        point = rowStart + acrossColumn;
         if (screenPoints[point].isVisible != TRUE) {
           continue;
         }
 
-        if (column & 1) {
+        if (acrossColumn & 1) {
           neighbor = point - 1;
           dx = screenPoints[point].x - screenPoints[neighbor].x;
           dy = screenPoints[point].y - screenPoints[neighbor].y;
@@ -1962,7 +1965,7 @@ void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
         dx *= scale;
         dy *= scale;
         SetGreenGridTint(slopes[point]);
-        if (column & 1) {
+        if (acrossColumn & 1) {
           gSPModifyVertex(gfx++, 2, G_MWO_POINT_XYSCREEN,
               ScreenPointWord(screenPoints[point].x, screenPoints[point].y));
           gSPModifyVertex(gfx++, 3, G_MWO_POINT_XYSCREEN,
@@ -1993,7 +1996,7 @@ void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
               RgbaColor(red, green, blue, f_GreenGridAlpha));
           gSPModifyVertex(gfx++, 1, G_MWO_POINT_RGBA,
               RgbaColor(red, green, blue, f_GreenGridAlpha));
-          if (column != 0 && screenPoints[point - 1].isVisible == TRUE) {
+          if (acrossColumn != 0 && screenPoints[point - 1].isVisible == TRUE) {
             gDPPipeSync(gfx++);
             if (screenPoints[point].depth < screenPoints[point - 1].depth) {
               gDPSetPrimDepth(gfx++, screenPoints[point].depth, 0);
@@ -2009,13 +2012,13 @@ void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
 
       if (rowCount != GREEN_GRID_MAX_ROW_COUNT) {
         rowStart += columnCount;
-        row++;
-      } else if (row >= GREEN_GRID_FIRST_FULL_ROW) {
+        acrossRow++;
+      } else if (acrossRow >= GREEN_GRID_FIRST_FULL_ROW) {
         rowStart += columnCount;
-        row++;
+        acrossRow++;
       } else {
         rowStart += columnCount * 2;
-        row += 2;
+        acrossRow += 2;
       }
     }
 
