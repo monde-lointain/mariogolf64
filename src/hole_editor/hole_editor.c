@@ -2997,8 +2997,8 @@ void ShapeGroundFromCodes(void) {
         continue;
       }
 
-      codeColumn = (point = GetGroundPoint(column, row))->v.ob[AXIS_X] /
-          VERTEX_UNITS_PER_CODE;
+      point = GetGroundPoint(column, row);
+      codeColumn = point->v.ob[AXIS_X] / VERTEX_UNITS_PER_CODE;
       codeRow = point->v.ob[AXIS_Z] / VERTEX_UNITS_PER_CODE;
       code = GetTerrainCode(codeColumn, codeRow);
       if (code == TERRAIN_CODE_GREEN) {
