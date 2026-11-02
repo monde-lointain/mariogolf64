@@ -2168,7 +2168,11 @@ s32 GetTrianglePlane(PlaneTriangle* triangle, TrianglePlane* plane) {
  * Returns the ground's height at a point, clamped to the ground, or
  * NO_GROUND_HEIGHT where no ground triangle holds it
  *
- * Doesn't match: 34 words differ, 2 in shape.
+ * Doesn't match: the first corner's y and z, which the edges, the offsets and
+ * the height share, take other registers; ours shifts y in place for the
+ * height where the original keeps it. Forcing 8 pseudos leaves 12 words
+ * differing. None of the 720 orders of the edges' statements does better.
+ * 34 words differ, 2 in shape.
  */
 #ifdef NON_MATCHING
 s32 GetTerrainHeight(s32 x, s32 z) {
