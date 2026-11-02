@@ -364,11 +364,7 @@ s32 MoveGridCursor(s32 playerNumber, u8 direction, u8 canChooseMarked) {
  * Moves the player's grid cursor a step in the STICK_DIAGONAL_* direction, then
  * sideways only if that slot can't be chosen, as MoveGridCursor does. Returns
  * -1 if it couldn't move, otherwise 0.
- * Doesn't match: GCC sign-extends oldColumn for the return value into $v0 and
- * works the comparison out in $v1, where the original swaps the two. So the
- * moved test branches to the return with beq rather than beql. 16 words differ.
  */
-#ifdef NON_MATCHING
 s32 MoveGridCursorDiagonal(s32 playerNumber, u8 diagonal, u8 canChooseMarked) {
   EncodedAsset asset;
   AssetFile file;
@@ -481,11 +477,12 @@ s32 MoveGridCursorDiagonal(s32 playerNumber, u8 diagonal, u8 canChooseMarked) {
         g_CharacterFacePalettes[(s16)slot], GetAssetFileSize(&file), &file);
   }
 
-  return -(column == oldColumn && row == oldRow);
+  if (column == oldColumn && row == oldRow) {
+    return -1;
+  }
+
+  return 0;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/character_select", MoveGridCursorDiagonal);
-#endif
 
 /*
  * Returns the STICK_DIAGONAL_* direction of the controllers' sticks combined,
