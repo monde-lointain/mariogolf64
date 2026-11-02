@@ -2717,60 +2717,55 @@ s32 CheckStatusCartridge(s32 cartridgeIndex) {
                                         .taggedControllers[cartridgeIndex]],
           &transfer->cartridgeHeader, &transfer->pakFile);
   transfer->transferResult = result;
-  if (result != PAK_RESULT_OK) {
-    /* Going to the shared power-off is there to match */
-    goto FAILED;
-  }
-
-  isSignatureWrong = FALSE;
-  readResult = nuContGBPakFread(
-      &transfer->pakFile, CARTRIDGE_RAM_ADDRESS, save, CARTRIDGE_SAVE_SIZE);
-  if (readResult != 0) {
-    osSyncPrintf("head error  2\n");
-    transfer->transferResult = readResult;
-    nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
-    return STATUS_CHECK_READ_FAILED;
-  }
-
-  for (index = 0; index != CARTRIDGE_TAG_SIZE; index++) {
-    if (save[SAVE_SIGNATURE_OFFSET + index] !=
-        f_CartridgeSaveSignature[index]) {
-      isSignatureWrong = TRUE;
+  if (result == PAK_RESULT_OK) {
+    isSignatureWrong = FALSE;
+    readResult = nuContGBPakFread(
+        &transfer->pakFile, CARTRIDGE_RAM_ADDRESS, save, CARTRIDGE_SAVE_SIZE);
+    if (readResult != 0) {
+      osSyncPrintf("head error  2\n");
+      transfer->transferResult = readResult;
+      nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
+      return STATUS_CHECK_READ_FAILED;
     }
-  }
 
-  for (index = 0; index != CARTRIDGE_TAG_SIZE; index++) {
-    if (save[index] !=
-        transfer->cartridgeTags[transfer->taggedControllers[cartridgeIndex]]
-                               [index]) {
-      osSyncPrintf("ライトマーク違反\n"); /* "Write mark violation"
-                                           */
-      transfer->transferResult = PAK_RESULT_REMOVED_RETRYING;
+    for (index = 0; index != CARTRIDGE_TAG_SIZE; index++) {
+      if (save[SAVE_SIGNATURE_OFFSET + index] !=
+          f_CartridgeSaveSignature[index]) {
+        isSignatureWrong = TRUE;
+      }
+    }
+
+    for (index = 0; index != CARTRIDGE_TAG_SIZE; index++) {
+      if (save[index] !=
+          transfer->cartridgeTags[transfer->taggedControllers[cartridgeIndex]]
+                                 [index]) {
+        osSyncPrintf("ライトマーク違反\n"); /* "Write mark violation"
+                                             */
+        transfer->transferResult = PAK_RESULT_REMOVED_RETRYING;
+        nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
+        return STATUS_CHECK_FAILED;
+      }
+    }
+
+    computedSum = ComputeSaveChecksum(save);
+    storedSum = GetStoredChecksum(save);
+    osSyncPrintf("sum1 %04x\n", computedSum);
+    osSyncPrintf("sum2 %04x\n", storedSum);
+    if (computedSum != storedSum || isSignatureWrong) {
+      osSyncPrintf("sum error  2\n");
+      transfer->transferResult = PAK_RESULT_CORRUPTED;
       nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
       return STATUS_CHECK_FAILED;
     }
-  }
 
-  computedSum = ComputeSaveChecksum(save);
-  storedSum = GetStoredChecksum(save);
-  osSyncPrintf("sum1 %04x\n", computedSum);
-  osSyncPrintf("sum2 %04x\n", storedSum);
-  if (computedSum != storedSum || isSignatureWrong) {
-    osSyncPrintf("sum error  2\n");
-    transfer->transferResult = PAK_RESULT_CORRUPTED;
+    if (save[SAVE_HAS_STATUS_OFFSET] == 0) {
+      nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
+      return STATUS_CHECK_NO_STATUS;
+    }
+
     nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
-    return STATUS_CHECK_FAILED;
+    return STATUS_CHECK_HAS_STATUS;
   }
-
-  if (save[SAVE_HAS_STATUS_OFFSET] == 0) {
-    nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
-    return STATUS_CHECK_NO_STATUS;
-  }
-
-  nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
-  return STATUS_CHECK_HAS_STATUS;
-
-FAILED:
 
   nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
   return STATUS_CHECK_FAILED;
@@ -2797,101 +2792,96 @@ s32 WriteStatusToCartridge(s32 cartridgeIndex) {
   transfer->transferResult = OpenGameBoyPakWithRetries(
       g_PlayerControllerPorts[transfer->taggedControllers[cartridgeIndex]],
       &transfer->cartridgeHeader, &transfer->pakFile);
-  if (transfer->transferResult != PAK_RESULT_OK) {
-    /* Going to the shared power-off is there to match */
-    goto FAILED;
-  }
-
-  result = nuContGBPakFread(
-      &transfer->pakFile, CARTRIDGE_RAM_ADDRESS, save, CARTRIDGE_SAVE_SIZE);
-  if (result != 0) {
-    nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
-    transfer->transferResult = result;
-    return STATUS_WRITE_PAK_ERROR;
-  }
-
-  for (index = 0; index != CARTRIDGE_TAG_SIZE; index++) {
-    if (save[index] !=
-        transfer->cartridgeTags[transfer->taggedControllers[cartridgeIndex]]
-                               [index]) {
-      /* "Write mark violation"; the original passes sum before setting it */
-#ifdef AVOID_UB
-      osSyncPrintf("ライトマーク違反\n");
-#else
-      osSyncPrintf("ライトマーク違反\n", sum);
-#endif
+  if (transfer->transferResult == PAK_RESULT_OK) {
+    result = nuContGBPakFread(
+        &transfer->pakFile, CARTRIDGE_RAM_ADDRESS, save, CARTRIDGE_SAVE_SIZE);
+    if (result != 0) {
       nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
-      transfer->transferResult = PAK_RESULT_CARTRIDGE_REPLACED;
+      transfer->transferResult = result;
+      return STATUS_WRITE_PAK_ERROR;
+    }
+
+    for (index = 0; index != CARTRIDGE_TAG_SIZE; index++) {
+      if (save[index] !=
+          transfer->cartridgeTags[transfer->taggedControllers[cartridgeIndex]]
+                                 [index]) {
+        /* "Write mark violation"; the original passes sum before setting it */
+#ifdef AVOID_UB
+        osSyncPrintf("ライトマーク違反\n");
+#else
+        osSyncPrintf("ライトマーク違反\n", sum);
+#endif
+        nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
+        transfer->transferResult = PAK_RESULT_CARTRIDGE_REPLACED;
+        return STATUS_WRITE_FAILED;
+      }
+    }
+
+    sum = ComputeSaveChecksum(save);
+    if (sum != GetStoredChecksum(save)) {
+      transfer->transferResult = PAK_RESULT_LOOSE_PAK;
+      nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
       return STATUS_WRITE_FAILED;
     }
-  }
 
-  sum = ComputeSaveChecksum(save);
-  if (sum != GetStoredChecksum(save)) {
-    transfer->transferResult = PAK_RESULT_LOOSE_PAK;
+    statusAddress = save[SAVE_STATUS_ADDRESS_OFFSET] +
+        (save[SAVE_STATUS_ADDRESS_OFFSET + 1] << BITS_PER_BYTE);
+    save[SAVE_HAS_STATUS_OFFSET] = TRUE;
+    statusSize = save[SAVE_STATUS_SIZE_OFFSET] +
+        (save[SAVE_STATUS_SIZE_OFFSET + 1] << BITS_PER_BYTE);
+    result = nuContGBPakFwrite(&transfer->pakFile,
+        CARTRIDGE_RAM_ADDRESS + SAVE_HAS_STATUS_OFFSET,
+        &save[SAVE_HAS_STATUS_OFFSET], SAVE_HALFWORD_SIZE);
+    if (result != 0) {
+      nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
+      transfer->transferResult = result;
+      return STATUS_WRITE_PAK_ERROR;
+    }
+
+    BuildStatusData(status);
+    result = nuContGBPakFwrite(&transfer->pakFile,
+        statusAddress - STATUS_ADDRESS_BIAS, status, statusSize);
+    if (result != 0) {
+      nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
+      transfer->transferResult = result;
+      return STATUS_WRITE_PAK_ERROR;
+    }
+
+    sum = 0;
+    for (index = 0; index != statusSize; index++) {
+      sum += status[index];
+    }
+
+    sum &= 0xFFFF;
+    osSyncPrintf(f_WriteSumFormat, sum);
+    save[SAVE_STATUS_SUM_OFFSET] = sum;
+    save[SAVE_STATUS_SUM_OFFSET + 1] = sum >> BITS_PER_BYTE;
+    result = nuContGBPakFwrite(&transfer->pakFile,
+        CARTRIDGE_RAM_ADDRESS + SAVE_STATUS_SUM_OFFSET,
+        &save[SAVE_STATUS_SUM_OFFSET], SAVE_HALFWORD_SIZE);
+    if (result != 0) {
+      nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
+      transfer->transferResult = result;
+      return STATUS_WRITE_PAK_ERROR;
+    }
+
+    sum = ComputeSaveChecksum(save) & 0xFFFF;
+    save[SAVE_CHECKSUM_OFFSET] = sum;
+    save[SAVE_CHECKSUM_OFFSET + 1] = sum >> BITS_PER_BYTE;
+    osSyncPrintf("write sum2 %04x\n", sum);
+    result = nuContGBPakFwrite(&transfer->pakFile,
+        CARTRIDGE_RAM_ADDRESS + SAVE_CHECKSUM_OFFSET,
+        &save[SAVE_CHECKSUM_OFFSET], SAVE_HALFWORD_SIZE);
+    if (result != 0) {
+      nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
+      transfer->transferResult = result;
+      return STATUS_WRITE_PAK_ERROR;
+    }
+
     nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
-    return STATUS_WRITE_FAILED;
+    transfer->transferResult = PAK_RESULT_OK;
+    return STATUS_WRITE_DONE;
   }
-
-  statusAddress = save[SAVE_STATUS_ADDRESS_OFFSET] +
-      (save[SAVE_STATUS_ADDRESS_OFFSET + 1] << BITS_PER_BYTE);
-  save[SAVE_HAS_STATUS_OFFSET] = TRUE;
-  statusSize = save[SAVE_STATUS_SIZE_OFFSET] +
-      (save[SAVE_STATUS_SIZE_OFFSET + 1] << BITS_PER_BYTE);
-  result = nuContGBPakFwrite(&transfer->pakFile,
-      CARTRIDGE_RAM_ADDRESS + SAVE_HAS_STATUS_OFFSET,
-      &save[SAVE_HAS_STATUS_OFFSET], SAVE_HALFWORD_SIZE);
-  if (result != 0) {
-    nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
-    transfer->transferResult = result;
-    return STATUS_WRITE_PAK_ERROR;
-  }
-
-  BuildStatusData(status);
-  result = nuContGBPakFwrite(&transfer->pakFile,
-      statusAddress - STATUS_ADDRESS_BIAS, status, statusSize);
-  if (result != 0) {
-    nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
-    transfer->transferResult = result;
-    return STATUS_WRITE_PAK_ERROR;
-  }
-
-  sum = 0;
-  for (index = 0; index != statusSize; index++) {
-    sum += status[index];
-  }
-
-  sum &= 0xFFFF;
-  osSyncPrintf(f_WriteSumFormat, sum);
-  save[SAVE_STATUS_SUM_OFFSET] = sum;
-  save[SAVE_STATUS_SUM_OFFSET + 1] = sum >> BITS_PER_BYTE;
-  result = nuContGBPakFwrite(&transfer->pakFile,
-      CARTRIDGE_RAM_ADDRESS + SAVE_STATUS_SUM_OFFSET,
-      &save[SAVE_STATUS_SUM_OFFSET], SAVE_HALFWORD_SIZE);
-  if (result != 0) {
-    nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
-    transfer->transferResult = result;
-    return STATUS_WRITE_PAK_ERROR;
-  }
-
-  sum = ComputeSaveChecksum(save) & 0xFFFF;
-  save[SAVE_CHECKSUM_OFFSET] = sum;
-  save[SAVE_CHECKSUM_OFFSET + 1] = sum >> BITS_PER_BYTE;
-  osSyncPrintf("write sum2 %04x\n", sum);
-  result = nuContGBPakFwrite(&transfer->pakFile,
-      CARTRIDGE_RAM_ADDRESS + SAVE_CHECKSUM_OFFSET, &save[SAVE_CHECKSUM_OFFSET],
-      SAVE_HALFWORD_SIZE);
-  if (result != 0) {
-    nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
-    transfer->transferResult = result;
-    return STATUS_WRITE_PAK_ERROR;
-  }
-
-  nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
-  transfer->transferResult = PAK_RESULT_OK;
-  return STATUS_WRITE_DONE;
-
-FAILED:
 
   nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
   return STATUS_WRITE_FAILED;
