@@ -14,6 +14,7 @@
 #include "current_shot.h"
 #include "effects.h"
 #include "game.h"
+#include "gbi_helpers.h"
 #include "golf_balls.h"
 #include "heap.h"
 #include "hole_objects.h"
@@ -394,31 +395,12 @@ void DrawSparks(Gfx** displayListHead) {
   }
 
   gDPPipeSync(gfx++);
-  /* Declare each state command before its sync to preserve spill order. */
-  {
-    Gfx* cycleTypeCommand;
-
-    gDPPipeSync(gfx++);
-    cycleTypeCommand = gfx++;
-    gDPSetCycleType(cycleTypeCommand, G_CYC_1CYCLE);
-  }
+  AppendSyncedRdpState(gfx, gDPSetCycleType, G_CYC_1CYCLE);
   gDPPipeSync(gfx++);
   gDPSetAlphaDither(gfx++, G_AD_DISABLE);
-  {
-    Gfx* textureLookupCommand;
-
-    gDPPipeSync(gfx++);
-    textureLookupCommand = gfx++;
-    gDPSetTextureLUT(textureLookupCommand, G_TT_NONE);
-  }
+  AppendSyncedRdpState(gfx, gDPSetTextureLUT, G_TT_NONE);
   gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
-  {
-    Gfx* texturePerspectiveCommand;
-
-    gDPPipeSync(gfx++);
-    texturePerspectiveCommand = gfx++;
-    gDPSetTexturePersp(texturePerspectiveCommand, G_TP_NONE);
-  }
+  AppendSyncedRdpState(gfx, gDPSetTexturePersp, G_TP_NONE);
   gDPSetPrimColor(gfx++, 0, 0, 255, 255, 0, 255);
   gDPSetCombineLERP(gfx++, 0, 0, 0, PRIMITIVE, 0, 0, 0, TEXEL0, 0, 0, 0,
       PRIMITIVE, 0, 0, 0, TEXEL0);

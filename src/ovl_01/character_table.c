@@ -6,6 +6,7 @@
 
 #include "asset.h"
 #include "character.h"
+#include "gbi_helpers.h"
 #include "hole_display.h"
 #include "main_menu.h"
 #include "menu.h"
@@ -539,16 +540,7 @@ void DrawTableCursor(Gfx** displayListHead, s32 x, s32 y) {
       G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
       G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
   gDPPipeSync(gfx++);
-  {
-    /* Declaration order preserves the original compiler's spill slots. */
-    Gfx* cycleType;
-    Gfx* pipeSync;
-
-    pipeSync = gfx++;
-    gDPPipeSync(pipeSync);
-    cycleType = gfx++;
-    gDPSetCycleType(cycleType, G_CYC_1CYCLE);
-  }
+  AppendSyncedRdpState(gfx, gDPSetCycleType, G_CYC_1CYCLE);
   gDPPipeSync(gfx++);
   gDPSetTexturePersp(gfx++, G_TP_PERSP);
   gDPPipeSync(gfx++);

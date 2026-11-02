@@ -22,6 +22,7 @@
 #include "effects.h"
 #include "game.h"
 #include "game_flags.h"
+#include "gbi_helpers.h"
 #include "heap.h"
 #include "hole_display.h"
 #include "libc.h"
@@ -4001,33 +4002,14 @@ void DrawLakitu(Gfx** displayListHead) {
 
   if (f_IsLakituFlying) {
     gDPPipeSync(gfx++);
-    /* Declare each state command before its sync to preserve spill order. */
-    {
-      Gfx* cycleTypeCommand;
-
-      gDPPipeSync(gfx++);
-      cycleTypeCommand = gfx++;
-      gDPSetCycleType(cycleTypeCommand, G_CYC_1CYCLE);
-    }
-    {
-      Gfx* renderModeCommand;
-
-      gDPPipeSync(gfx++);
-      renderModeCommand = gfx++;
-      gDPSetRenderMode(
-          renderModeCommand, G_RM_AA_ZB_TEX_EDGE, G_RM_AA_ZB_TEX_EDGE2);
-    }
+    AppendSyncedRdpState(gfx, gDPSetCycleType, G_CYC_1CYCLE);
+    AppendSyncedRdpState(
+        gfx, gDPSetRenderMode, G_RM_AA_ZB_TEX_EDGE, G_RM_AA_ZB_TEX_EDGE2);
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
     gDPPipeSync(gfx++);
     gDPSetColorDither(gfx++, G_CD_DISABLE);
     gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
-    {
-      Gfx* texturePerspectiveCommand;
-
-      gDPPipeSync(gfx++);
-      texturePerspectiveCommand = gfx++;
-      gDPSetTexturePersp(texturePerspectiveCommand, G_TP_NONE);
-    }
+    AppendSyncedRdpState(gfx, gDPSetTexturePersp, G_TP_NONE);
     gDPPipeSync(gfx++);
     gDPSetTextureFilter(gfx++, G_TF_BILERP);
     gDPPipeSync(gfx++);
@@ -4065,20 +4047,8 @@ void DrawLakitu(Gfx** displayListHead) {
     f_LakituTrailStart[1] = (SCREEN_HEIGHT / 2) - f_LakituScreenPoint[1];
     gSPLoadGeometryMode(gfx++, 0);
     gSPSetGeometryMode(gfx++, G_SHADE | G_SHADING_SMOOTH);
-    {
-      Gfx* renderModeCommand;
-
-      gDPPipeSync(gfx++);
-      renderModeCommand = gfx++;
-      gDPSetRenderMode(renderModeCommand, G_RM_CLD_SURF, G_RM_CLD_SURF2);
-    }
-    {
-      Gfx* textureLookupCommand;
-
-      gDPPipeSync(gfx++);
-      textureLookupCommand = gfx++;
-      gDPSetTextureLUT(textureLookupCommand, G_TT_NONE);
-    }
+    AppendSyncedRdpState(gfx, gDPSetRenderMode, G_RM_CLD_SURF, G_RM_CLD_SURF2);
+    AppendSyncedRdpState(gfx, gDPSetTextureLUT, G_TT_NONE);
     gDPPipeSync(gfx++);
     gDPSetTexturePersp(gfx++, G_TP_PERSP);
     gDPPipeSync(gfx++);
@@ -4361,35 +4331,10 @@ void DrawOpeningShotBall(Gfx** displayListHead) {
       gDPSetAlphaCompare(gfx++, G_AC_THRESHOLD);
       gDPSetBlendColor(gfx++, 255, 255, 255, 16);
       gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, 127);
-      /* Declare each state command before its sync to preserve spill order. */
-      {
-        Gfx* alphaDitherCommand;
-
-        gDPPipeSync(gfx++);
-        alphaDitherCommand = gfx++;
-        gDPSetAlphaDither(alphaDitherCommand, G_AD_PATTERN);
-      }
-      {
-        Gfx* colorDitherCommand;
-
-        gDPPipeSync(gfx++);
-        colorDitherCommand = gfx++;
-        gDPSetColorDither(colorDitherCommand, G_CD_MAGICSQ);
-      }
-      {
-        Gfx* texturePerspectiveCommand;
-
-        gDPPipeSync(gfx++);
-        texturePerspectiveCommand = gfx++;
-        gDPSetTexturePersp(texturePerspectiveCommand, G_TP_PERSP);
-      }
-      {
-        Gfx* textureLookupCommand;
-
-        gDPPipeSync(gfx++);
-        textureLookupCommand = gfx++;
-        gDPSetTextureLUT(textureLookupCommand, G_TT_NONE);
-      }
+      AppendSyncedRdpState(gfx, gDPSetAlphaDither, G_AD_PATTERN);
+      AppendSyncedRdpState(gfx, gDPSetColorDither, G_CD_MAGICSQ);
+      AppendSyncedRdpState(gfx, gDPSetTexturePersp, G_TP_PERSP);
+      AppendSyncedRdpState(gfx, gDPSetTextureLUT, G_TT_NONE);
       gDPPipeSync(gfx++);
       gDPSetTextureLOD(gfx++, G_TL_TILE);
       gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
@@ -4407,14 +4352,8 @@ void DrawOpeningShotBall(Gfx** displayListHead) {
       gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
       gDPPipeSync(gfx++);
       gDPPipeSync(gfx++);
-      {
-        Gfx* renderModeCommand;
-
-        gDPPipeSync(gfx++);
-        renderModeCommand = gfx++;
-        gDPSetRenderMode(
-            renderModeCommand, G_RM_AA_ZB_XLU_SURF, G_RM_AA_ZB_XLU_SURF2);
-      }
+      AppendSyncedRdpState(
+          gfx, gDPSetRenderMode, G_RM_AA_ZB_XLU_SURF, G_RM_AA_ZB_XLU_SURF2);
       gDPSetCombineLERP(gfx++, 0, 0, 0, TEXEL0, PRIMITIVE, 0, TEXEL0, 0, 0, 0,
           0, TEXEL0, PRIMITIVE, 0, TEXEL0, 0);
       gDPPipeSync(gfx++);
@@ -4427,20 +4366,8 @@ void DrawOpeningShotBall(Gfx** displayListHead) {
       gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
       gDPPipeSync(gfx++);
       gDPSetTexturePersp(gfx++, G_TP_NONE);
-      {
-        Gfx* textureFilterCommand;
-
-        gDPPipeSync(gfx++);
-        textureFilterCommand = gfx++;
-        gDPSetTextureFilter(textureFilterCommand, G_TF_BILERP);
-      }
-      {
-        Gfx* alphaCompareCommand;
-
-        gDPPipeSync(gfx++);
-        alphaCompareCommand = gfx++;
-        gDPSetAlphaCompare(alphaCompareCommand, G_AC_NONE);
-      }
+      AppendSyncedRdpState(gfx, gDPSetTextureFilter, G_TF_BILERP);
+      AppendSyncedRdpState(gfx, gDPSetAlphaCompare, G_AC_NONE);
       gDPPipeSync(gfx++);
       gDPSetTextureLUT(gfx++, G_TT_RGBA16);
       gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_ShotBallImage)));

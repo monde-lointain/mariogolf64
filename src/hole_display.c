@@ -18,6 +18,7 @@
 #include "framebuffer.h"
 #include "game.h"
 #include "game_flags.h"
+#include "gbi_helpers.h"
 #include "heap.h"
 #include "hole_loader.h"
 #include "libc.h"
@@ -812,21 +813,8 @@ void DrawLensFlare(Gfx** displayListHead) {
   }
 
   gDPPipeSync(gfx++);
-  /* Declare each state command before its sync to preserve spill order. */
-  {
-    Gfx* texturePerspectiveCommand;
-
-    gDPPipeSync(gfx++);
-    texturePerspectiveCommand = gfx++;
-    gDPSetTexturePersp(texturePerspectiveCommand, G_TP_NONE);
-  }
-  {
-    Gfx* textureLookupCommand;
-
-    gDPPipeSync(gfx++);
-    textureLookupCommand = gfx++;
-    gDPSetTextureLUT(textureLookupCommand, G_TT_NONE);
-  }
+  AppendSyncedRdpState(gfx, gDPSetTexturePersp, G_TP_NONE);
+  AppendSyncedRdpState(gfx, gDPSetTextureLUT, G_TT_NONE);
   gDPPipeSync(gfx++);
   gDPSetAlphaCompare(gfx++, G_AC_THRESHOLD);
   gDPSetBlendColor(gfx++, 255, 255, 255, LENS_FLARE_ALPHA_THRESHOLD);
