@@ -1044,11 +1044,11 @@ void WriteClubParameters(void) {
  * results, then sets the deflection from where the last test shot landed.
  * InterpolatePower is a nested function, a GNU C extension.
  *
- * Doesn't match: the original gives the mode's power slot address, which the
- * loop pass hoists out of the try loop, a higher allocation priority than
- * shortPower and longDistance, and takes the error's absolute value into a
- * register of its own before scaling the tolerance. Forcing four registers
- * leaves 6 words differing. A pointer to the slot gives 103. 30 words differ.
+ * Doesn't match: the original takes the error's absolute value into a
+ * register of its own before scaling the tolerance, where local-alloc ties it
+ * to error, which dies there. A local for the absolute value, in the function
+ * or the try loop, either order of the comparison, and fabs or Abs don't
+ * help. 4 words differ.
  */
 #ifdef NON_MATCHING
 void GenerateClub(s32 clubIndex) {
@@ -1081,8 +1081,8 @@ void GenerateClub(s32 clubIndex) {
         shotMode, targetDistance);
     club->power[shotMode] = targetDistance * 260.096f;
     shortDistance = 0;
-    longDistance = 0;
     shortPower = 0;
+    longDistance = 0;
     longPower = 0;
     if (club->surfaceMask & CLUB_SURFACE_GREEN) {
       targetDistance = targetDistance * 0x3C00;
