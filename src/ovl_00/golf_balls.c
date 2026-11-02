@@ -456,17 +456,7 @@ void ResetGolfBalls(void) {
  * Updates each player's ball for the frame: hides the balls of players out
  * of the hole, places the current player's ball from the ball simulations,
  * and moves and fades the ball's afterimage.
- *
- * Doesn't match: the original clears the simulation loop's index before
- * working out the current ball, which only clearing it ahead of the loop
- * reproduces (6 words differ, none in shape), and its afterimage fade loop
- * steps the address of the first alpha where ours steps the array's with
- * alpha's offset in each access; indexing the array or stepping an alpha
- * pointer gives 17 to 26. Declaring the current ball in the simulation block,
- * and storing its marker in each arm as the loop over the players does, took it
- * from 56 words differing, 8 in shape. 8 words differ, 2 in shape.
  */
-#ifdef NON_MATCHING
 void UpdateGolfBalls(void) {
   s32 currentIndex;
   s32 i;
@@ -510,9 +500,10 @@ void UpdateGolfBalls(void) {
 
   if (g_GameState.step == GAME_STATE_UNK6 ||
       g_GameState.step == GAME_STATE_UNK11) {
-    GolfBall* ball = &f_GolfBalls[currentIndex];
+    GolfBall* ball;
 
-    for (i = 0; i < BALL_SIMULATION_COUNT; i++) {
+    for (i = 0, ball = &f_GolfBalls[currentIndex]; i < BALL_SIMULATION_COUNT;
+        i++) {
       simulation = &g_BallSimulations[i];
       ball->isInCup = FALSE;
       if (simulation->playerIndex >= 0 &&
@@ -686,10 +677,9 @@ void UpdateGolfBalls(void) {
 
       if (f_BallAfterimageFrameCount % AFTERIMAGE_SLOW_FADE_PERIOD == 0) {
         for (i = 0; i != f_BallAfterimageLength; i++) {
-          BallAfterimage* afterimage = &f_BallAfterimages[i];
-
-          if (afterimage->alpha > 0) {
-            afterimage->alpha--;
+          /* -= rather than --, which loop.c reduces with another address */
+          if (f_BallAfterimages[i].alpha > 0) {
+            f_BallAfterimages[i].alpha -= 1;
           }
         }
       }
@@ -698,9 +688,6 @@ void UpdateGolfBalls(void) {
     f_BallAfterimageFrameCount++;
   }
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_00/golf_balls", UpdateGolfBalls);
-#endif
 
 Boolean IsAnyBallInCup(void) {
   Boolean isInCup = FALSE;
