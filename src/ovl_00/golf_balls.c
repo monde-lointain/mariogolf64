@@ -457,10 +457,9 @@ void ResetGolfBalls(void) {
  * of the hole, places the current player's ball from the ball simulations,
  * and moves and fades the ball's afterimage.
  *
- * Doesn't match: 83 words differ. In the first loop the original steps the
- * ball pointer from the table's start rather than from the marker field and
- * branches the other way on the marker test, and registers differ through the
- * rest.
+ * Doesn't match: the original clears the simulation loop's index before
+ * working out the current ball, and registers differ through the rest. 56
+ * words differ, 8 in shape.
  */
 #ifdef NON_MATCHING
 void UpdateGolfBalls(void) {
@@ -486,7 +485,9 @@ void UpdateGolfBalls(void) {
     currentIndex = 0;
   }
 
-  for (i = 0, ball = f_GolfBalls; i < g_GameState.playerCount; i++, ball++) {
+  for (i = 0; i < g_GameState.playerCount; i++) {
+    GolfBall* ball = &f_GolfBalls[i];
+
     player = &g_Players[i];
     if (player->holeStatus != HOLE_STATUS_PLAYING || player->strokeCount == 0) {
       ball->alpha = BALL_HIDDEN;
@@ -494,12 +495,11 @@ void UpdateGolfBalls(void) {
 
     if (currentIndex != i) {
       ball->state = BALL_STATE_STOPPED;
-      if (GetSurfaceInfo((s8)player->ballSurface)->kind == SURFACE_KIND_GREEN) {
-        ball->markerPlayerIndex = i;
-      } else if (g_GameState.isMiniGolf) {
-        ball->markerPlayerIndex = i;
-      } else {
+      if (GetSurfaceInfo((s8)player->ballSurface)->kind != SURFACE_KIND_GREEN &&
+          !g_GameState.isMiniGolf) {
         ball->markerPlayerIndex = BALL_NO_MARKER;
+      } else {
+        ball->markerPlayerIndex = i;
       }
     }
   }
@@ -681,8 +681,9 @@ void UpdateGolfBalls(void) {
       }
 
       if (f_BallAfterimageFrameCount % AFTERIMAGE_SLOW_FADE_PERIOD == 0) {
-        for (i = 0, afterimage = f_BallAfterimages; i != f_BallAfterimageLength;
-            i++, afterimage++) {
+        for (i = 0; i != f_BallAfterimageLength; i++) {
+          BallAfterimage* afterimage = &f_BallAfterimages[i];
+
           if (afterimage->alpha > 0) {
             afterimage->alpha--;
           }
