@@ -3968,7 +3968,6 @@ void LoadLakitu(void) {
   f_LakituTrailStart[1] = (SCREEN_HEIGHT / 2) - f_LakituScreenPoint[1];
 }
 
-#ifdef NON_MATCHING
 #define LAKITU_IMAGE_SIZE 32
 #define LAKITU_DRAWN_SIZE 48
 /* Texels a pixel when stretching Lakitu's image to its drawn size, in 5.10 */
@@ -3991,10 +3990,6 @@ void LoadLakitu(void) {
 
 /*
  * Draws Lakitu while he flies, with a fading trail of the places he has been.
- *
- * Doesn't match: only the stack slots differ. The pointers of some pairs
- * of a pipe sync and the command after it swap slots, as in the opening's
- * sparks.
  */
 void DrawLakitu(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
@@ -4006,16 +4001,33 @@ void DrawLakitu(Gfx** displayListHead) {
 
   if (f_IsLakituFlying) {
     gDPPipeSync(gfx++);
-    gDPPipeSync(gfx++);
-    gDPSetCycleType(gfx++, G_CYC_1CYCLE);
-    gDPPipeSync(gfx++);
-    gDPSetRenderMode(gfx++, G_RM_AA_ZB_TEX_EDGE, G_RM_AA_ZB_TEX_EDGE2);
+    /* Declare each state command before its sync to preserve spill order. */
+    {
+      Gfx* cycleTypeCommand;
+
+      gDPPipeSync(gfx++);
+      cycleTypeCommand = gfx++;
+      gDPSetCycleType(cycleTypeCommand, G_CYC_1CYCLE);
+    }
+    {
+      Gfx* renderModeCommand;
+
+      gDPPipeSync(gfx++);
+      renderModeCommand = gfx++;
+      gDPSetRenderMode(
+          renderModeCommand, G_RM_AA_ZB_TEX_EDGE, G_RM_AA_ZB_TEX_EDGE2);
+    }
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
     gDPPipeSync(gfx++);
     gDPSetColorDither(gfx++, G_CD_DISABLE);
     gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
-    gDPPipeSync(gfx++);
-    gDPSetTexturePersp(gfx++, G_TP_NONE);
+    {
+      Gfx* texturePerspectiveCommand;
+
+      gDPPipeSync(gfx++);
+      texturePerspectiveCommand = gfx++;
+      gDPSetTexturePersp(texturePerspectiveCommand, G_TP_NONE);
+    }
     gDPPipeSync(gfx++);
     gDPSetTextureFilter(gfx++, G_TF_BILERP);
     gDPPipeSync(gfx++);
@@ -4053,10 +4065,20 @@ void DrawLakitu(Gfx** displayListHead) {
     f_LakituTrailStart[1] = (SCREEN_HEIGHT / 2) - f_LakituScreenPoint[1];
     gSPLoadGeometryMode(gfx++, 0);
     gSPSetGeometryMode(gfx++, G_SHADE | G_SHADING_SMOOTH);
-    gDPPipeSync(gfx++);
-    gDPSetRenderMode(gfx++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
-    gDPPipeSync(gfx++);
-    gDPSetTextureLUT(gfx++, G_TT_NONE);
+    {
+      Gfx* renderModeCommand;
+
+      gDPPipeSync(gfx++);
+      renderModeCommand = gfx++;
+      gDPSetRenderMode(renderModeCommand, G_RM_CLD_SURF, G_RM_CLD_SURF2);
+    }
+    {
+      Gfx* textureLookupCommand;
+
+      gDPPipeSync(gfx++);
+      textureLookupCommand = gfx++;
+      gDPSetTextureLUT(textureLookupCommand, G_TT_NONE);
+    }
     gDPPipeSync(gfx++);
     gDPSetTexturePersp(gfx++, G_TP_PERSP);
     gDPPipeSync(gfx++);
@@ -4138,9 +4160,6 @@ void DrawLakitu(Gfx** displayListHead) {
     *displayListHead = gfx;
   }
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_05/opening", DrawLakitu);
-#endif
 
 /* Flies Lakitu across the screen in loops until it has turned through 540
  * degrees */
@@ -4287,12 +4306,7 @@ void LoadOpeningShotBall(void) {
  * ground below the look-at point, then the ball image above the point in
  * strips, at f_ShotBallScale times the image's size. When the camera is far
  * away, the ball is instead a dot that fades with distance.
- *
- * Doesn't match: some pairs of spilled display list pointers swap stack
- * slots, and each pointer is stored before it is stepped, where the
- * original steps it first. 56 words differ.
  */
-#ifdef NON_MATCHING
 void DrawOpeningShotBall(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   ScreenPoint ballPoint;
@@ -4347,14 +4361,35 @@ void DrawOpeningShotBall(Gfx** displayListHead) {
       gDPSetAlphaCompare(gfx++, G_AC_THRESHOLD);
       gDPSetBlendColor(gfx++, 255, 255, 255, 16);
       gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, 127);
-      gDPPipeSync(gfx++);
-      gDPSetAlphaDither(gfx++, G_AD_PATTERN);
-      gDPPipeSync(gfx++);
-      gDPSetColorDither(gfx++, G_CD_MAGICSQ);
-      gDPPipeSync(gfx++);
-      gDPSetTexturePersp(gfx++, G_TP_PERSP);
-      gDPPipeSync(gfx++);
-      gDPSetTextureLUT(gfx++, G_TT_NONE);
+      /* Declare each state command before its sync to preserve spill order. */
+      {
+        Gfx* alphaDitherCommand;
+
+        gDPPipeSync(gfx++);
+        alphaDitherCommand = gfx++;
+        gDPSetAlphaDither(alphaDitherCommand, G_AD_PATTERN);
+      }
+      {
+        Gfx* colorDitherCommand;
+
+        gDPPipeSync(gfx++);
+        colorDitherCommand = gfx++;
+        gDPSetColorDither(colorDitherCommand, G_CD_MAGICSQ);
+      }
+      {
+        Gfx* texturePerspectiveCommand;
+
+        gDPPipeSync(gfx++);
+        texturePerspectiveCommand = gfx++;
+        gDPSetTexturePersp(texturePerspectiveCommand, G_TP_PERSP);
+      }
+      {
+        Gfx* textureLookupCommand;
+
+        gDPPipeSync(gfx++);
+        textureLookupCommand = gfx++;
+        gDPSetTextureLUT(textureLookupCommand, G_TT_NONE);
+      }
       gDPPipeSync(gfx++);
       gDPSetTextureLOD(gfx++, G_TL_TILE);
       gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
@@ -4372,8 +4407,14 @@ void DrawOpeningShotBall(Gfx** displayListHead) {
       gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
       gDPPipeSync(gfx++);
       gDPPipeSync(gfx++);
-      gDPPipeSync(gfx++);
-      gDPSetRenderMode(gfx++, G_RM_AA_ZB_XLU_SURF, G_RM_AA_ZB_XLU_SURF2);
+      {
+        Gfx* renderModeCommand;
+
+        gDPPipeSync(gfx++);
+        renderModeCommand = gfx++;
+        gDPSetRenderMode(
+            renderModeCommand, G_RM_AA_ZB_XLU_SURF, G_RM_AA_ZB_XLU_SURF2);
+      }
       gDPSetCombineLERP(gfx++, 0, 0, 0, TEXEL0, PRIMITIVE, 0, TEXEL0, 0, 0, 0,
           0, TEXEL0, PRIMITIVE, 0, TEXEL0, 0);
       gDPPipeSync(gfx++);
@@ -4386,10 +4427,20 @@ void DrawOpeningShotBall(Gfx** displayListHead) {
       gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
       gDPPipeSync(gfx++);
       gDPSetTexturePersp(gfx++, G_TP_NONE);
-      gDPPipeSync(gfx++);
-      gDPSetTextureFilter(gfx++, G_TF_BILERP);
-      gDPPipeSync(gfx++);
-      gDPSetAlphaCompare(gfx++, G_AC_NONE);
+      {
+        Gfx* textureFilterCommand;
+
+        gDPPipeSync(gfx++);
+        textureFilterCommand = gfx++;
+        gDPSetTextureFilter(textureFilterCommand, G_TF_BILERP);
+      }
+      {
+        Gfx* alphaCompareCommand;
+
+        gDPPipeSync(gfx++);
+        alphaCompareCommand = gfx++;
+        gDPSetAlphaCompare(alphaCompareCommand, G_AC_NONE);
+      }
       gDPPipeSync(gfx++);
       gDPSetTextureLUT(gfx++, G_TT_RGBA16);
       gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_ShotBallImage)));
@@ -4440,9 +4491,6 @@ void DrawOpeningShotBall(Gfx** displayListHead) {
     *displayListHead = gfx;
   }
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_05/opening", DrawOpeningShotBall);
-#endif
 
 /* f_LookAtEaseMode values: how EaseOpeningLookAt moves the look-at point */
 /* To the shot ball, a tenth of the way a frame */

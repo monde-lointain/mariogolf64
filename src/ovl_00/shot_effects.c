@@ -317,12 +317,7 @@ void StartFlagstickSparks(CoursePoint point) {
  * Moves the sparks and draws them at their bursts' points on screen, the
  * flagstick's as sprites and the impact's as triangles, and steps the impact
  * flash that lights the golfer
- *
- * Doesn't match: only the stack slots differ. The pointers of four pairs of
- * a command and the one after it, saved for later, swap slots. 24 words
- * differ.
  */
-#ifdef NON_MATCHING
 void DrawSparks(Gfx** displayListHead) {
   Vec3 rotation;
   Vec3 translation;
@@ -399,15 +394,31 @@ void DrawSparks(Gfx** displayListHead) {
   }
 
   gDPPipeSync(gfx++);
-  gDPPipeSync(gfx++);
-  gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+  /* Declare each state command before its sync to preserve spill order. */
+  {
+    Gfx* cycleTypeCommand;
+
+    gDPPipeSync(gfx++);
+    cycleTypeCommand = gfx++;
+    gDPSetCycleType(cycleTypeCommand, G_CYC_1CYCLE);
+  }
   gDPPipeSync(gfx++);
   gDPSetAlphaDither(gfx++, G_AD_DISABLE);
-  gDPPipeSync(gfx++);
-  gDPSetTextureLUT(gfx++, G_TT_NONE);
+  {
+    Gfx* textureLookupCommand;
+
+    gDPPipeSync(gfx++);
+    textureLookupCommand = gfx++;
+    gDPSetTextureLUT(textureLookupCommand, G_TT_NONE);
+  }
   gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
-  gDPPipeSync(gfx++);
-  gDPSetTexturePersp(gfx++, G_TP_NONE);
+  {
+    Gfx* texturePerspectiveCommand;
+
+    gDPPipeSync(gfx++);
+    texturePerspectiveCommand = gfx++;
+    gDPSetTexturePersp(texturePerspectiveCommand, G_TP_NONE);
+  }
   gDPSetPrimColor(gfx++, 0, 0, 255, 255, 0, 255);
   gDPSetCombineLERP(gfx++, 0, 0, 0, PRIMITIVE, 0, 0, 0, TEXEL0, 0, 0, 0,
       PRIMITIVE, 0, 0, 0, TEXEL0);
@@ -512,9 +523,6 @@ void DrawSparks(Gfx** displayListHead) {
 
   *displayListHead = gfx;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_00/shot_effects", DrawSparks);
-#endif
 
 /* Left empty in the original, as are the two routines after it. Only the last
  * is called, by the round HUD while the shot effects module is loaded. */

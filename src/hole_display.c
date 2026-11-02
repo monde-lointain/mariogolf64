@@ -760,11 +760,7 @@ GROW:
 
 /*
  * Draws the sun's lens flare, as rings along a line through the sun.
- *
- * Doesn't match: four of the display list pointers kept on the stack are
- * given each other's slots. 16 words differ.
  */
-#ifdef NON_MATCHING
 void DrawLensFlare(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   SkyColors* colors =
@@ -816,10 +812,21 @@ void DrawLensFlare(Gfx** displayListHead) {
   }
 
   gDPPipeSync(gfx++);
-  gDPPipeSync(gfx++);
-  gDPSetTexturePersp(gfx++, G_TP_NONE);
-  gDPPipeSync(gfx++);
-  gDPSetTextureLUT(gfx++, G_TT_NONE);
+  /* Declare each state command before its sync to preserve spill order. */
+  {
+    Gfx* texturePerspectiveCommand;
+
+    gDPPipeSync(gfx++);
+    texturePerspectiveCommand = gfx++;
+    gDPSetTexturePersp(texturePerspectiveCommand, G_TP_NONE);
+  }
+  {
+    Gfx* textureLookupCommand;
+
+    gDPPipeSync(gfx++);
+    textureLookupCommand = gfx++;
+    gDPSetTextureLUT(textureLookupCommand, G_TT_NONE);
+  }
   gDPPipeSync(gfx++);
   gDPSetAlphaCompare(gfx++, G_AC_THRESHOLD);
   gDPSetBlendColor(gfx++, 255, 255, 255, LENS_FLARE_ALPHA_THRESHOLD);
@@ -868,9 +875,6 @@ void DrawLensFlare(Gfx** displayListHead) {
   gDPPipeSync(gfx++);
   *displayListHead = gfx;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/hole_display", DrawLensFlare);
-#endif
 
 /*
  * Moves the sky's and the fog's colors a step on from those of one time of
