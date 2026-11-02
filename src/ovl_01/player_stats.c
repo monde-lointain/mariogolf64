@@ -2588,8 +2588,12 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", DrawBestShotsCursor);
  * Reads every character's face, then the palette of each best shot's character
  * in the grid, clamped to the known ones
  *
- * Doesn't match: the original keeps the row and column counters in other saved
- * registers. 38 words differ.
+ * Doesn't match: the original keeps the cell as an index that it shifts each
+ * pass, where this steps a pointer through the palettes instead. Storing a
+ * face in each branch makes the address worth strength reduction; storing it
+ * once after the branches leaves the index but keeps the table's address in
+ * the loop, which is too long for a constant used once to be moved out of it
+ * (46 words). 19 words differ, 9 in shape.
  */
 #ifdef NON_MATCHING
 void LoadBestShotFaces(void) {
@@ -2602,6 +2606,7 @@ void LoadBestShotFaces(void) {
   CharacterId character;
   s32 palette;
   s32 cell;
+  s32 rowStart;
 
   for (index = 0; index != CHARACTER_COUNT; index++) {
     OpenEncodedAsset(g_CharacterFaceAssets[index], &asset);
@@ -2609,8 +2614,11 @@ void LoadBestShotFaces(void) {
   }
 
   for (row = 0; row != STATS_GRID_ROW_COUNT; row++) {
-    cell = row * STATS_GRID_COLUMN_COUNT;
-    for (column = 0; column != STATS_GRID_COLUMN_COUNT; column++, cell++) {
+    /* The row's first cell, which the original works out apart from the cell
+     * it steps */
+    rowStart = row * STATS_GRID_COLUMN_COUNT;
+    for (column = 0, cell = rowStart; column != STATS_GRID_COLUMN_COUNT;
+        column++, cell++) {
       if (f_BestShotRecords[row][column] != STATS_CELL_EMPTY) {
         character = (s8)save->rankedRecords[f_BestShotRecords[row][column]]
                         .characterIndex;
@@ -2638,8 +2646,7 @@ void LoadBestShotFaces(void) {
         f_BestShotFaces[row][column] = g_MenuCharacterPalettes[cell];
       }
 
-      IN_OWN_BLOCK(
-          OpenAssetFile(g_CharacterPaletteFiles[character][palette], &file));
+      OpenAssetFile(g_CharacterPaletteFiles[character][palette], &file);
       ReadAssetFile(
           f_BestShotFaces[row][column], GetAssetFileSize(&file), &file);
     }
