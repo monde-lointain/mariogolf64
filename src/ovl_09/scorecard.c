@@ -163,10 +163,9 @@ void OpenScorecard(CourseIndex courseIndex, s32 holeIndex) {
   s32 imageIndex;
   s32 standingIndex;
   TournamentStanding* standing;
-  void* stackPointer;
-
   /* Read before anything else, which keeps the arguments' stores after it */
-  asm volatile("move %0, $sp" : "=r"(stackPointer));
+  void* stackPointer = GetStackPointer();
+
   g_Scorecard.content.courseIndex = courseIndex;
   g_Scorecard.content.holeIndex = holeIndex;
   g_Scorecard.content.isSuddenDeath = g_GameState.isSuddenDeath;

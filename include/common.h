@@ -181,6 +181,18 @@ typedef f32 Mat4[4][4];
   do { \
   } while (0)
 
+/*
+ * The stack pointer's current value. The asm is volatile, as a read of the
+ * register has to be: GCC can't move memory accesses across it, and the
+ * original's code shows none that moved.
+ */
+#define GetStackPointer() \
+  ({ \
+    void* stackPointer; \
+    __asm__ volatile("move %0, $sp" : "=r"(stackPointer)); \
+    stackPointer; \
+  })
+
 /* Zero is false, and any other value true, as C tests it */
 typedef s32 Boolean;
 
