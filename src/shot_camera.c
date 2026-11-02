@@ -2442,9 +2442,9 @@ void PlaceFlightCamera(s32 step) {
 
         for (index = BESIDE_GOLFER_FIRST_STEP; index < BESIDE_GOLFER_STEP_LIMIT;
             index++) {
+          distance = index * BESIDE_GOLFER_STEP;
           f_CameraPosition[AXIS_X] =
-              (cosf(yaw) * (distance = index * BESIDE_GOLFER_STEP)) +
-              g_CurrentShot.ballPosition[AXIS_X];
+              (cosf(yaw) * distance) + g_CurrentShot.ballPosition[AXIS_X];
           f_CameraPosition[AXIS_Z] =
               (sinf(yaw) * distance) + g_CurrentShot.ballPosition[AXIS_Z];
           f_CameraPosition[AXIS_Y] = GetGroundHeight(f_CameraPosition[AXIS_X],
