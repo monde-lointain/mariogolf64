@@ -1308,19 +1308,15 @@ static inline s32 ByteAddress(s8* byte) {
 }
 
 /*
- * Doesn't match: the original schedules the shift of the choice index for
- * the character table lookup one instruction later. The menu memory fields
- * are read through ByteAddress because the original adds the player number
- * before the field offset. 2 words differ.
+ * The menu memory fields are read through ByteAddress because the original
+ * adds the player number before the field offset
  */
-#ifdef NON_MATCHING
 void DrawCharacterSelect(Gfx** displayListHead, u8 isSinglePlayer) {
   Gfx* gfx = *displayListHead;
   s32 playerNumber;
   s16 column;
   s16 slot;
   s16 choiceIndex;
-  s32* character;
   s16 clubSet;
 
   gDPPipeSync(gfx++);
@@ -1371,15 +1367,14 @@ void DrawCharacterSelect(Gfx** displayListHead, u8 isSinglePlayer) {
     choiceIndex = slot;
   }
 
-  character = &f_ChoiceCharacters[choiceIndex];
-  DrawCurveMeter(&gfx, *character);
+  DrawCurveMeter(&gfx, f_ChoiceCharacters[choiceIndex]);
   SetUpTextDrawing(&gfx);
   SetTextColor(&gfx, 255, 255, 255);
   SetTextName(g_CharacterNames[choiceIndex]);
   SetTextSlot(CHARACTER_NAME_X, CHARACTER_NAME_Y,
       MESSAGE_FIRST_CHARACTER_NAME + choiceIndex, TEXT_SLOT_LARGE_FONT, 1,
       TEXT_FLAG_CENTERED, 255, 255, 255, 255);
-  clubSet = *character;
+  clubSet = f_ChoiceCharacters[choiceIndex];
   BeginShadowedText(&gfx);
   SetTextColor(&gfx, 255, 255, 255);
   sprintf(g_PrintBuffer, "%dY",
@@ -1419,9 +1414,6 @@ void DrawCharacterSelect(Gfx** displayListHead, u8 isSinglePlayer) {
   gDPPipeSync(gfx++);
   *displayListHead = gfx;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/character_select", DrawCharacterSelect);
-#endif
 
 s32 GetUnusedPalette(s32 choiceIndex);
 
