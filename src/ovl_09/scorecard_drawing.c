@@ -551,10 +551,9 @@ INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard_drawing", f_CompactHoleFormat)
  * for each hole won. Once the hole's result is tallied, it animates the
  * winner's new mark.
  *
- * Doesn't match: the target reads the images through a pointer into
- * g_Scorecard that it keeps in a saved register, where this loads each from
- * its address, and it halves winsNeeded before it subtracts one.
- * 130 words differ, 112 in shape.
+ * Doesn't match: the target keeps &g_Scorecard.x in $fp (set from the
+ * matchPanelImage address plus 0x98) and reads x and y through it, where this
+ * loads each from its address. 110 words differ, 104 in shape.
  */
 #ifdef NON_MATCHING
 void DrawMatchPage(Gfx** displayListHead) {
@@ -568,6 +567,7 @@ void DrawMatchPage(Gfx** displayListHead) {
   s32 countEnd;
   s32 holeIndex;
   s32 i;
+  s32 shareCount;
   s32 j;
   s32 column;
   s32 imageRow;
@@ -617,11 +617,11 @@ void DrawMatchPage(Gfx** displayListHead) {
   }
 
   /* An even count of holes to share out can end level */
-  if ((winsNeeded - 1) / 2 != winsNeeded / 2) {
+  shareCount = winsNeeded;
+  winsNeeded = shareCount / 2;
+  if ((shareCount - 1) / 2 != winsNeeded) {
     canDraw = TRUE;
   }
-
-  winsNeeded /= 2;
 
   if (winsNeeded <= 0) {
     winsNeeded = 1;
