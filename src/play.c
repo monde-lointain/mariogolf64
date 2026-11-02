@@ -1896,7 +1896,7 @@ void ClearNearbyGroundTiles(void) {
   bzero(g_IsGroundTileNearby, sizeof(g_IsGroundTileNearby));
 }
 
-static inline s32 GetMirroredOffset(s32 coordinate) {
+static inline s32 GetMirroredOffset(s16 coordinate) {
   s32 tile = coordinate / 512;
   s32 offset;
 
@@ -1913,7 +1913,11 @@ static inline s32 GetMirroredOffset(s32 coordinate) {
  * every other tile so that the texture tiles seamlessly, under
  * GAME_FLAG_TEST_GROUND_TEXTURE
  *
- * Doesn't match: 44 words differ.
+ * Doesn't match: the original copies each tile number into a second register
+ * after the division, where this divides into the register it keeps it in.
+ * Taking the coordinate as an s32 copies the coordinate twice instead (44);
+ * other helper shapes, a separate tile helper and code written out in the
+ * loop give 40-52. 40 words differ.
  */
 #ifdef NON_MATCHING
 void RebuildGroundTextureCoordinates(void) {
