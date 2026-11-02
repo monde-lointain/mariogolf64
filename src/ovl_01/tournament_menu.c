@@ -544,9 +544,10 @@ void GetSaveDataAndMenuMemory(void) {
 #define NO_OK_TEXT (-1)
 
 /*
- * Doesn't match: GCC gives the four halves other registers and spills one to
- * the stack, where the original keeps them all in saved registers. 61 words
- * differ.
+ * Doesn't match: GCC spills the button's half height to the stack, where the
+ * original keeps it in a saved register like the other halves. The oracle
+ * finds no allocation that avoids the spill, and clamping the half height
+ * without its flag gives 65 words. 54 words differ, 20 in shape.
  */
 #ifdef NON_MATCHING
 void DrawYesNoWindow(Gfx** displayListHead, s32 width, s32 height, s32 centerX,
@@ -567,7 +568,7 @@ void DrawYesNoWindow(Gfx** displayListHead, s32 width, s32 height, s32 centerX,
   s32 buttonY;
   s32 pulse;
   s32 growth;
-  s32 isButtonWidthEmpty;
+
   s32 isButtonHeightEmpty;
 
   GetMenuMemory();
@@ -629,8 +630,7 @@ void DrawYesNoWindow(Gfx** displayListHead, s32 width, s32 height, s32 centerX,
   buttonHalfHeight = (s32)buttonHeight / 2;
   halfHeight = (halfHeight <= 0) ? 1 : halfHeight;
   buttonY = (buttonY <= 0) ? 1 : buttonY;
-  isButtonWidthEmpty = buttonHalfWidth <= 0;
-  buttonHalfWidth = isButtonWidthEmpty ? 1 : buttonHalfWidth;
+  buttonHalfWidth = (buttonHalfWidth <= 0) ? 1 : buttonHalfWidth;
   isButtonHeightEmpty = buttonHalfHeight <= 0;
   buttonHalfHeight = isButtonHeightEmpty ? 1 : buttonHalfHeight;
   windowWidth = (windowWidth <= 0.0f) ? 1.0f : windowWidth;
