@@ -966,15 +966,14 @@ void TurnScorecardPage(u16 buttons);
 /*
  * Left and right on the control pad turn the pages, round from the last to the
  * first.
- *
- * Doesn't match: the sound ID is loaded after the sound channel, rather than
- * before it. blame.py identifies a sched2 priority tie, with no dependency
- * preventing the original order. 2 words differ, both in scheduling.
  */
-#ifdef NON_MATCHING
 void TurnScorecardPage(u16 buttons) {
   RoundHud* hud;
   s32 pageCount = g_Scorecard.pageCount;
+  /* Read through a pointer, which the call loads after the sound ID; GCC
+   * copies a global argument into a register before the call's other
+   * arguments */
+  SoundChannel* channel = &g_NextSoundChannel;
 
   if (pageCount > 1) {
     if (buttons & L_JPAD) {
@@ -994,14 +993,10 @@ void TurnScorecardPage(u16 buttons) {
     }
 
     /* The sound pans further right on each later page */
-    PlaySoundWithEffects(SOUND_MENU_MOVE, g_NextSoundChannel,
-        SCORECARD_SOUND_VOLUME, 0,
+    PlaySoundWithEffects(SOUND_MENU_MOVE, *channel, SCORECARD_SOUND_VOLUME, 0,
         (hud->scorecardPage + 1) * (SOUND_PAN_FULL_RIGHT / (pageCount + 1)));
   }
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard", TurnScorecardPage);
-#endif
 
 /* Flips the leaderboard's rows over, and scrolls it with up and down on the
  * control pad */
