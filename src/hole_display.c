@@ -3015,8 +3015,9 @@ INCLUDE_ASM("asm/nonmatchings/hole_display", DrawTurnAwayAnimation);
  *
  * Doesn't match: the copy's loops allocate their counters and addresses to
  * other registers, and the grid's loops differ too. Forcing 20 pseudos to the
- * original's registers leaves 66 words differing, all in the grid. 144 words
- * differ, 18 in shape.
+ * original's registers leaves 66 words differing, all in the grid. Giving the
+ * slice copy its own row counter, and adding the tile start to the column
+ * before the row, take it from 144 words differing to 116, 18 in shape.
  */
 #ifdef NON_MATCHING
 void CaptureHudAnimationFrame(void) {
@@ -3026,6 +3027,7 @@ void CaptureHudAnimationFrame(void) {
   s32 tileRow;
   s32 tileColumn;
   s32 row;
+  s32 sliceRow;
   s32 gridRow;
   s32 column;
   s32 gridColumn;
@@ -3054,7 +3056,7 @@ void CaptureHudAnimationFrame(void) {
           for (column = FRAME_MARGIN_WORDS;
               column != FRAME_MARGIN_WORDS + FRAME_TILE_WORDS; column++) {
             f_CapturedFrame[wordIndex++] =
-                frame[(row * FRAME_WORDS_PER_ROW) + column + tileStart];
+                frame[(row * FRAME_WORDS_PER_ROW) + (tileStart + column)];
           }
         }
       }
@@ -3106,11 +3108,12 @@ void CaptureHudAnimationFrame(void) {
   } else if (f_HudAnimation == HUD_ANIMATION_SLICE_CAPTURE) {
     if (g_CapturedSliceCount < FRAME_SLICE_COUNT) {
       wordIndex = 0;
-      for (row = FRAME_SLICE_TOP; row != FRAME_SLICE_BOTTOM; row++) {
+      for (sliceRow = FRAME_SLICE_TOP; sliceRow != FRAME_SLICE_BOTTOM;
+          sliceRow++) {
         for (column = FRAME_SLICE_LEFT_WORD;
             column != FRAME_SLICE_RIGHT_WORD;) {
           f_CapturedFrame[(g_CapturedSliceCount * FRAME_SLICE_WORD_COUNT) +
-              wordIndex++] = frame[(row * FRAME_WORDS_PER_ROW) + column++];
+              wordIndex++] = frame[(sliceRow * FRAME_WORDS_PER_ROW) + column++];
         }
       }
 
