@@ -1961,7 +1961,7 @@ void DrawLeaderboardPage(Gfx** displayListHead) {
         }
 
         roundedHalfSize = halfSize + 0.5f;
-        top = g_Scorecard.y + ((i * LEADERBOARD_ROW_SPACING) + ROW_HINGE_TOP);
+        top = (i * LEADERBOARD_ROW_SPACING) + ROW_HINGE_TOP + g_Scorecard.y;
 
         /* Starts the texels part of a texel in, as far as the rect's rounding
          * moved its edge */
