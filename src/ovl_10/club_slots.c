@@ -532,7 +532,7 @@ s32 GetClubSlotsState(void) {
   return f_ClubSlotsState;
 }
 
-/* Doesn't match: 77 words differ, 41 in shape. */
+/* Doesn't match: 70 words differ, 38 in shape. */
 #ifdef NON_MATCHING
 void DrawClubSlots(Gfx** displayListHead) {
   Mat4 matrix;
@@ -940,8 +940,8 @@ void DrawClubSlots(Gfx** displayListHead) {
           row = f_CharacterFaceRows[(s8)g_Players[playerIndex].characterIndex];
           OpenEncodedAsset(
               ((f_StarCount == REEL_COUNT)
-                      ? g_FaceAnimationAssets
-                      : g_AlternateFaceAnimationAssets)[row][f_FaceFrameIndex],
+                      ? g_FaceAnimationAssets[row]
+                      : g_AlternateFaceAnimationAssets[row])[f_FaceFrameIndex],
               &asset);
           ReadEncodedAsset(
               f_Slots->faceImages[playerIndex][f_FaceBufferIndex ^ 1], &asset);
