@@ -1866,10 +1866,9 @@ void PlaceAimCamera(void);
  * step of the ball's flight, then keeps the eye above the ground and over the
  * course. The kinds that test f_IsCameraKindNew do their setup once when it is
  * set, then clear it. Doesn't match: the original allocates some registers
- * differently, and orders three spots differently: the load of
- * CHASE_FIELD_OF_VIEW, the move of cosf's argument for
- * FLIGHT_CAMERA_BEHIND_START, and the stores of point for
- * FLIGHT_CAMERA_FACING_CUP. 222 words differ.
+ * differently, and orders two spots differently: the load of
+ * CHASE_FIELD_OF_VIEW and the stores of point for FLIGHT_CAMERA_FACING_CUP.
+ * 216 words differ, 8 in shape.
  */
 #ifdef NON_MATCHING
 void PlaceFlightCamera(s32 step) {
@@ -2081,6 +2080,8 @@ void PlaceFlightCamera(s32 step) {
       break;
     case FLIGHT_CAMERA_BEHIND_START:
       if (f_IsCameraKindNew == TRUE) {
+        /* Its own, as the original allocates it within the branch */
+        f32 sideDistance;
         f_IsCameraKindNew = FALSE;
         f_IsBehindViewFar ^= TRUE;
         yaw = f_ShotFlightYaw + M_PI;
