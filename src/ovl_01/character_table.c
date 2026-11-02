@@ -606,7 +606,10 @@ void DrawTableLines(Gfx** displayListHead) {
  * first and the column character last, against the priorities of their uses
  * and lives. A MatchupRecord pointer gives 63 words, a column index local or
  * other declaration orders change nothing, and narrower types for the wins
- * give 52 to 142. 48 words differ, 2 in shape.
+ * give 52 to 142. Wrapping the last four statements in a do-while (0),
+ * whose loop notes weight the uses inside and stop sched1, gives 18 words
+ * with only the two counts of wins swapped, and a do-while (0) macro per
+ * count gives 26. 48 words differ, 2 in shape.
  */
 #ifdef NON_MATCHING
 void DrawTablePopup(Gfx** displayListHead) {
