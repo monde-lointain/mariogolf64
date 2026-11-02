@@ -52,17 +52,38 @@ cd "${{TMPDIR:-/tmp}}" || exit
 COMPILER_PATH={kmc} exec {kmc}/gcc -c {flags} -x c "$@"
 """
 
-# Disassembles the nested functions the function holds, which KMC GCC names
-# NAME.N and so are looked up, and then the function, in a fixed order. The
-# permuter runs this for every candidate, and the lookup's four extra programs
-# took longer than objdump itself.
+# Disassembles the function alone
 OBJDUMP_SH = """#!/bin/bash
 # Invoked by the permuter as: objdump.sh OBJECT.o
-for name in {nested}; do
-  symbol=$(mips-linux-gnu-nm "$1" | grep -m1 -E " $name(\\.[0-9]+)?$" | cut -d" " -f3)
-  mips-linux-gnu-objdump -drz -m mips:4300 --disassemble=$symbol "$1"
-done
 exec mips-linux-gnu-objdump -drz -m mips:4300 --disassemble={function} "$1"
+"""
+
+# Disassembles the nested functions the function holds, which KMC GCC names
+# NAME.N, and then the function, in a fixed order. The permuter runs this for
+# every candidate, so one objdump disassembles the whole object and awk keeps
+# the first block of each function: 10 ms for UpdateTurns' ten nested
+# functions, against 38 ms for an objdump and nm per function.
+NESTED_OBJDUMP_SH = """#!/bin/bash
+# Invoked by the permuter as: objdump.sh OBJECT.o
+mips-linux-gnu-objdump -drz -m mips:4300 "$1" |
+  awk -v nested="{nested}" -v main={function} '
+BEGIN {{
+  count = split(nested, order, " ")
+  for (i = 1; i <= count; i++) isNested[order[i]] = 1
+  order[++count] = main
+}}
+/^[0-9a-f]+ <.*>:$/ {{
+  name = substr($2, 2, length($2) - 3)
+  if (name != main) {{
+    sub(/\\.[0-9]+$/, "", name)
+    if (!(name in isNested) || (name in lineCount)) name = ""
+  }}
+}}
+name != "" {{ lines[name, ++lineCount[name]] = $0 }}
+END {{
+  for (i = 1; i <= count; i++)
+    for (j = 1; j <= lineCount[order[i]]; j++) print lines[order[i], j]
+}}'
 """
 
 # A function defined inside another, indented as the formatter leaves it: its
@@ -416,8 +437,9 @@ def main() -> None:
     # The score covers the function and its nested functions alone, leaving
     # out any inline helper emitted from base.c
     objdump_sh = out_dir / "objdump.sh"
+    template = NESTED_OBJDUMP_SH if nested else OBJDUMP_SH
     _ = objdump_sh.write_text(
-        OBJDUMP_SH.format(nested=" ".join(nested), function=function)
+        template.format(nested=" ".join(nested), function=function)
     )
     objdump_sh.chmod(SCRIPT_MODE)
     prune_base(out_dir, function)
