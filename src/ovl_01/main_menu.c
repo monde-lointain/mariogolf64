@@ -6422,13 +6422,6 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", DrawCourseSelect);
 #define HOLES_CHOICE_MESSAGE_BASE 0xC3
 #define HOLES_CHOICE_TEXT_SLOT 1
 
-/*
- * Doesn't match: the original ends the course name banner's strip loop with
- * stripIndex != MENU_BANNER_STRIP_COUNT, where this compiles the < test as
- * written. Writing != here gives 5, where the loop copies stripTop into
- * another register. 4 words differ.
- */
-#ifdef NON_MATCHING
 void DrawCourseSelectBanners(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   s32 slide = g_CourseBannersSlide;
@@ -6436,6 +6429,8 @@ void DrawCourseSelectBanners(Gfx** displayListHead) {
   /* Also the course's index into the name colors, to match the original's
    * registers */
   s32 stripIndex;
+  /* Also whether a full course is chosen; a variable of its own gets other
+   * registers in the strip loop above */
   s32 stripTop;
   s32 squeeze;
   s32 cameraModeTopByte;
@@ -6468,7 +6463,7 @@ void DrawCourseSelectBanners(Gfx** displayListHead) {
   }
 
   squeeze = MAP_CAMERA_MODE_TOP_BYTE != 0 ? COURSE_NAME_BANNER_SQUEEZE : 0;
-  for (stripIndex = 0; stripIndex < MENU_BANNER_STRIP_COUNT; stripIndex++) {
+  for (stripIndex = 0; stripIndex != MENU_BANNER_STRIP_COUNT; stripIndex++) {
     gDPLoadTextureBlock(gfx++,
         TextureAddress(LargeImageTexels(g_NamePlateImage) +
             stripIndex * MENU_BANNER_WIDTH * MENU_BANNER_STRIP_HEIGHT),
@@ -6491,7 +6486,8 @@ void DrawCourseSelectBanners(Gfx** displayListHead) {
 
   SetUpTextDrawing(&gfx);
   SetTextColor(&gfx, 255, 255, 255);
-  if (!g_GameState.isMiniGolf) {
+  stripTop = !g_GameState.isMiniGolf;
+  if (stripTop) {
     if (g_CourseSelectKind == COURSE_SELECT_KIND_COURSES) {
       sprintf(g_PrintBuffer, f_NumberedNameFormat,
           g_MenuMemory.courseChoice + 1,
@@ -6537,9 +6533,6 @@ void DrawCourseSelectBanners(Gfx** displayListHead) {
   gDPPipeSync(gfx++);
   *displayListHead = gfx;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", DrawCourseSelectBanners);
-#endif
 
 void DrawContinueLabel(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
