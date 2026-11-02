@@ -2017,7 +2017,7 @@ void DrawReadyGoMovie(Gfx** displayListHead) {
  * Unused: draws the movie image in f_MovieBuffer, shrinking it from double size
  * to its own size
  *
- * Doesn't match: 102 words differ, 32 in shape.
+ * Doesn't match: 101 words differ, 31 in shape.
  */
 #ifdef NON_MATCHING
 void DrawShrinkingMovieImage(Gfx** displayListHead) {
@@ -2069,7 +2069,6 @@ void DrawShrinkingMovieImage(Gfx** displayListHead) {
                     MOVIE_IMAGE_PIXELS_OFFSET),
             G_IM_FMT_CI, G_IM_SIZ_8b, width, MOVIE_IMAGE_STRIP_HEIGHT, 0, 0, 0,
             0, 0, 0, 0);
-        offset += width;
         top = bottom - (stripHeight * SHRINKING_IMAGE_STRIPS_ABOVE_CENTER);
         DrawTextureRect(&gfx,
             QuarterPixels(SHRINKING_IMAGE_CENTER_X - halfWidth),
@@ -2078,6 +2077,7 @@ void DrawShrinkingMovieImage(Gfx** displayListHead) {
             QuarterPixels(top + stripHeight), G_TX_RENDERTILE, 0, 0,
             ((width >> 1) << 10) / halfWidth,
             (MOVIE_IMAGE_STRIP_HEIGHT << 10) / stripHeight);
+        offset += width;
         bottom += stripHeight;
       }
     }
@@ -2195,7 +2195,7 @@ void DrawGoombaMovie(Gfx** displayListHead) {
  * Lakitu flies in, counts down to the start on its starting light, then flies
  * off
  *
- * Doesn't match: 91 words differ.
+ * Doesn't match: 89 words differ, 49 in shape.
  */
 #ifdef NON_MATCHING
 void DrawLakituMovie(Gfx** displayListHead) {
@@ -2273,9 +2273,9 @@ void DrawLakituMovie(Gfx** displayListHead) {
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
         G_TX_NOLOD);
     roundedHalfWidth = halfWidth + 0.5f;
+    y = f_Lakitu.y;
     roundedHalfHeight = halfHeight + 0.5f;
     x = f_Lakitu.x;
-    y = f_Lakitu.y;
 
     /* Start half a texel in, less the rounding, so that the image stays
      * centered as it scales */

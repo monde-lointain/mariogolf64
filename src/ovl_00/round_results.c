@@ -3662,7 +3662,7 @@ static inline s32 GetLastStripIndex(s32 stripCount) {
  *
  * Doesn't match: GCC merges the doubling of the title's texture coordinates
  * into the shift that packs them, where the original shifts twice. 8 words
- * differ.
+ * differ, 4 in shape.
  */
 #ifdef NON_MATCHING
 void DrawRoundResults(Gfx** displayListHead) {
@@ -3780,8 +3780,9 @@ void DrawRoundResults(Gfx** displayListHead) {
         TEXEL_UNITS;
     f_TitleBobAngle += FINAL_RESULTS_TITLE_BOB_STEP;
     LoadLargePalette(&gfx, ImageBody(f_FinalResultsTitleImage));
+    i = 0;
     right = left + FINAL_RESULTS_TITLE_WIDTH;
-    for (i = 0; i != FINAL_RESULTS_TITLE_STRIP_COUNT; i++) {
+    for (; i != FINAL_RESULTS_TITLE_STRIP_COUNT; i++) {
       stripHeight = FINAL_RESULTS_TITLE_STRIP_HEIGHT;
       /* The helper keeps the limit of 3 in a register, to match */
       if (i == GetLastStripIndex(FINAL_RESULTS_TITLE_STRIP_COUNT)) {
