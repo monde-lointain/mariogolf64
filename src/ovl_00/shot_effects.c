@@ -318,7 +318,9 @@ void StartFlagstickSparks(CoursePoint point) {
  * flagstick's as sprites and the impact's as triangles, and steps the impact
  * flash that lights the golfer
  *
- * Doesn't match: 24 words differ.
+ * Doesn't match: only the stack slots differ. The pointers of four pairs of
+ * a command and the one after it, saved for later, swap slots. 24 words
+ * differ.
  */
 #ifdef NON_MATCHING
 void DrawSparks(Gfx** displayListHead) {
