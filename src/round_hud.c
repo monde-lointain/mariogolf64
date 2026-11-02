@@ -2717,16 +2717,13 @@ void DrawShotPanelIcons(Gfx** displayListHead, CameraView* view UNUSED) {
  * Draws the flag grid with the hole image on it. With isBackDrawn, it then
  * draws the back too, by changing the grid's texture coordinates to the
  * back's and mirroring its shades around HOLE_FLAG_START_SHADE.
- *
- * Doesn't match: the loop that modifies the back's vertices allocates its
- * registers differently. 18 words differ.
  */
-#ifdef NON_MATCHING
 void DrawHoleFlag(Boolean isBackDrawn) {
   s32 row;
   s32 column;
   s32 index;
   Vtx* vertex;
+  s32 vertexIndex;
 
   gDPPipeSync(g_DisplayListHead++);
   gDPSetCombineMode(g_DisplayListHead++, G_CC_MODULATERGBA, G_CC_MODULATERGBA);
@@ -2765,18 +2762,18 @@ void DrawHoleFlag(Boolean isBackDrawn) {
   }
 
   if (isBackDrawn == TRUE) {
-    index = 0;
+    vertexIndex = 0;
     vertex = f_HoleFlagVertices[0][g_MatrixBufferIndex];
     for (row = 0; row != HOLE_FLAG_ROW_COUNT; row++) {
       for (column = 0; column != HOLE_FLAG_COLUMN_COUNT;
-          column++, index++, vertex++) {
+          column++, vertexIndex++, vertex++) {
         /* These texture coordinates are after the gSPTexture scale, which
          * halves them */
-        gSPModifyVertex(g_DisplayListHead++, index, G_MWO_POINT_ST,
+        gSPModifyVertex(g_DisplayListHead++, vertexIndex, G_MWO_POINT_ST,
             TexcoordWord((HOLE_FLAG_BACK_TEXEL_START / 2) -
                     (column * (HOLE_FLAG_TEXEL_COLUMN_STEP / 2)),
                 row * (HOLE_FLAG_TEXEL_ROW_STEP / 2)));
-        gSPModifyVertex(g_DisplayListHead++, index, G_MWO_POINT_RGBA,
+        gSPModifyVertex(g_DisplayListHead++, vertexIndex, G_MWO_POINT_RGBA,
             ((2 * HOLE_FLAG_START_SHADE - vertex->v.cn[0]) << 24) |
                 ((2 * HOLE_FLAG_START_SHADE - vertex->v.cn[1]) << 16) |
                 ((2 * HOLE_FLAG_START_SHADE - vertex->v.cn[2]) << 8) |
@@ -2794,9 +2791,6 @@ void DrawHoleFlag(Boolean isBackDrawn) {
     }
   }
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/round_hud", DrawHoleFlag);
-#endif
 
 /* Draws the hole image as a model in the perspective of the screen effects */
 void DrawHoleImageModel(void) {
