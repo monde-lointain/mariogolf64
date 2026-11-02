@@ -282,6 +282,7 @@ s32 MoveGridCursor(s32 playerNumber, u8 direction, u8 canChooseMarked) {
   u16 slot;
   u16 character;
   void* faceImage;
+  /* Pads the frame to match; without it 36 words differ */
   s32 unused[2] UNUSED;
 
   do {
@@ -377,6 +378,7 @@ s32 MoveGridCursorDiagonal(s32 playerNumber, u8 diagonal, u8 canChooseMarked) {
   u16 slot;
   u16 character;
   void* faceImage;
+  /* Pads the frame to match; without it 36 words differ */
   s32 unused[2] UNUSED;
 
   while (TRUE) {
@@ -1563,6 +1565,7 @@ s32 GetUnusedPalette(s32 choiceIndex) {
   s32 playerIndex = 0;
   s32 sameCount = 0;
   CharacterId character = f_ChoiceCharacters[choiceIndex];
+  /* Pads the frame to match; without it 8 words differ */
   s32 unused[4] UNUSED;
   s32 samePlayers[MAX_PLAYER_COUNT];
   s32 sameIndex;

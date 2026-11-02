@@ -4796,6 +4796,7 @@ void DrawModeSelect(Gfx** displayListHead) {
   f32 boardX[WHEEL_SLOT_LIMIT];
   f32 boardY[WHEEL_SLOT_LIMIT];
   f32 boardScale[WHEEL_SLOT_LIMIT];
+  /* Pads the frame to match; without it 773 words differ, against 175 */
   s32 unusedSlots[WHEEL_SLOT_LIMIT] UNUSED;
   s32 drawOrder[WHEEL_SLOT_LIMIT];
   s32 position[2];
@@ -5357,6 +5358,7 @@ void DrawMenuCharacters(Gfx** displayListHead) {
   Vec3 translation;
   Vec3 rotation;
   Vec3 scale;
+  /* Pads the frame to match; without it 72 words differ */
   s32 unused[12] UNUSED;
   Mat4 transform;
 
@@ -5795,10 +5797,12 @@ void DrawCourseSelect(Gfx** displayListHead) {
   Gfx* gfx;
   u16 perspNorm;
   u16 wheelPerspNorm;
+  /* Pads the frame to match; without it 783 words differ, against 49 */
   u8 unusedStack[0x10] UNUSED;
   f32 iconX[COURSE_COUNT];
   f32 iconY[COURSE_COUNT];
   f32 iconScale[COURSE_COUNT];
+  /* Pads the frame to match; without it 753 words differ, against 49 */
   u8 unusedStack2[0x18] UNUSED;
   s32 drawOrder[COURSE_COUNT];
   s16 places[TOURNAMENT_PLACE_COUNT];
@@ -7298,6 +7302,7 @@ void UnusedMenuStub(void) {}
  */
 void DrawSpinningBadge(Gfx** displayListHead, void* image, s32 x, s32 y) {
   Gfx* gfx = *displayListHead;
+  /* Pads the frame to match; without it 72 words differ */
   s32 unused[8] UNUSED;
 
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
@@ -7496,6 +7501,7 @@ void DrawWavingToad(Gfx** displayListHead, s32 left, s32 top) {
   Gfx* gfx = *displayListHead;
   s16 stripIndex;
   s32 rowCount;
+  /* Pads the frame to match; without it 70 words differ */
   s32 unused[8] UNUSED;
 
   gDPPipeSync(gfx++);

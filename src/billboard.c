@@ -354,6 +354,7 @@ void DrawBillboards(CameraMatrices* cameraMatrices, s32 cameraIndex) {
   BillboardColor envColor = g_BillboardEnvColor;
   Vec3 viewDir;
   Vec3 lightDir;
+  /* Pads the frame to match; without it 241 words differ, against 139 */
   Vec3 unusedVector UNUSED;
   Radians lightPitch;
   Radians lightYaw;

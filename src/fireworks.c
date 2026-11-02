@@ -222,9 +222,11 @@ INCLUDE_ASM("asm/nonmatchings/fireworks", LaunchFirework);
  */
 void UpdateAndDrawFireworks(Gfx** displayListHead) {
   Gfx* gfx;
-  s32 unused[12] UNUSED; /* The original frame has room for this */
+  /* The original frame has room for this; without it 136 words differ */
+  s32 unused[12] UNUSED;
   Mat4 transform;
-  s32 unusedAfter[6] UNUSED; /* The original frame has room for this too */
+  /* The original frame has room for this too; without it 100 words differ */
+  s32 unusedAfter[6] UNUSED;
   /* One index for the fireworks and the particles, to match */
   s32 i;
   s32 index;

@@ -846,7 +846,8 @@ void UpdateGroundPointEditor(void) {
   Vtx_t points[POINT_MOVE_COUNT +
       1]; /* Each move saves its point into the next move's slot */
   char text[DEBUG_TEXT_BUFFER_SIZE];
-  Vtx_t unusedPoint UNUSED; /* The game's frame has room for another point */
+  /* The game's frame has room for another point; without it 16 words differ */
+  Vtx_t unusedPoint UNUSED;
   s32 madeDeadTriangle;
 
   madeDeadTriangle = FALSE;
@@ -2296,7 +2297,10 @@ void UpdateWallEditor(void) {
  */
 void PutObjectsOnGround(void) {
   Mat4 translation;
-  Mat4 unusedMatrix UNUSED; /* The game's frame has room for a second matrix */
+  /*
+   * The game's frame has room for a second matrix; without it 28 words differ
+   */
+  Mat4 unusedMatrix UNUSED;
   s32 height;
   s32 i;
 
@@ -3393,7 +3397,10 @@ void UpdateHoleFileMenu(void) {
  */
 void UpdateTreeEditor(void) {
   Mat4 translation;
-  Mat4 unusedMatrix UNUSED; /* The game's frame has room for a second matrix */
+  /*
+   * The game's frame has room for a second matrix; without it 28 words differ
+   */
+  Mat4 unusedMatrix UNUSED;
   s32 editKind;
   s32 i;
   s32 height;

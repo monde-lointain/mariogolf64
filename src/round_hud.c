@@ -1096,7 +1096,8 @@ void FreeSceneryImages(void) {
 
 /* Sets up the billboard manager's heap, once per round */
 void InitScenery(void) {
-  EncodedAsset unusedAsset UNUSED; /* Left from code that loaded assets here */
+  /* Left from code that loaded assets here; without it 8 words differ */
+  EncodedAsset unusedAsset UNUSED;
 
   if (f_SceneryState == SCENERY_UNLOADED) {
     f_SceneryBillboardHeap = AllocMemory(BILLBOARD_HEAP_SIZE);
@@ -1123,6 +1124,7 @@ void FreeScenery(void) {
  * distance from it, the lie's image, and the scores that the game mode shows.
  */
 void StartShotPanel(void) {
+  /* Pads the frame to match; without it 25 words differ */
   u8 unusedStack[0x20] UNUSED;
   EncodedAsset asset;
   s32 height;
@@ -1693,6 +1695,7 @@ void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
   f32 points[GREEN_GRID_POINT_COUNT][3];
   GridScreenPoint screenPoints[GREEN_GRID_POINT_COUNT];
   s32 slopes[GREEN_GRID_POINT_COUNT];
+  /* Pads the frame to match; without it 541 words differ, against 345 */
   s32 unused[GREEN_GRID_POINT_COUNT * 3] UNUSED;
   CoursePoint center;
   ScreenPoint projected;
@@ -2441,6 +2444,7 @@ void DrawWindIndicator(Gfx** displayListHead, f32 x, f32 y) {
   Vec3 viewDirection;
   Vec3 rotation;
   Vec3 translation;
+  /* Pads the frame to match; without it 72 words differ */
   Vec3 unusedScale UNUSED;
   Mat4 matrix;
   Mat4 transform;
@@ -2556,8 +2560,10 @@ void AdjustHudOffset(void) {
 void DrawShotPanelIcons(Gfx** displayListHead, CameraView* view UNUSED) {
   Vec3 rotation;
   Vec3 translation;
+  /* Pads the frame to match; without it 222 words differ */
   Vec3 unusedScale UNUSED;
   Mat4 matrix;
+  /* Pads the frame to match; without it 218 words differ */
   s32 unused[18] UNUSED;
   Gfx* gfx;
   Club* club;

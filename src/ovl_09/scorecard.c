@@ -713,7 +713,8 @@ void SetScorecardLayout(s32 layout) {
   s32 scoresToPar[MAX_PLAYER_COUNT];
   s32 holesWon[MATCH_PLAYER_COUNT];
   s32 skinsRanks[MAX_PLAYER_COUNT];
-  s32 unused[4] UNUSED; /* The original frame has room for this */
+  /* The original frame has room for this; without it 16 words differ */
+  s32 unused[4] UNUSED;
   s32 i;
   s32 j;
 

@@ -493,7 +493,8 @@ static s32 f_UnusedWordsAfterSaveCopyLocations[4] UNUSED = {0};
 void LoadMenuResources(void) {
   EncodedAsset asset;
   AssetFile file;
-  s32 unused[4] UNUSED; /* The original frame has room for this */
+  /* The original frame has room for this; without it 44 words differ */
+  s32 unused[4] UNUSED;
   SaveData* save;
   s32 index;
   s32 size;
@@ -1653,7 +1654,8 @@ void InvalidateBrokenRingShotRecords(void) {
   s32 recordIndex;
   s32 kind;
   s32 scoreKind;
-  s32 unused[2] UNUSED; /* The original frame has room for this */
+  /* The original frame has room for this; without it 8 words differ */
+  s32 unused[2] UNUSED;
 
   save = GetSaveData();
   for (recordIndex = 0; recordIndex != RING_SHOT_RECORD_COUNT; recordIndex++) {
@@ -2262,7 +2264,8 @@ void TransferSaveData(SaveData* save, u8 isWrite) {
 
 /* Reads the first intact copy; if neither is, the save data starts over */
 s32 ReadSaveCopies(SaveData* save, u8 isInSram) {
-  u8 unusedBuffer[0x90] UNUSED; /* Only takes up stack */
+  /* Only takes up stack; without it 52 words differ */
+  u8 unusedBuffer[0x90] UNUSED;
   u8 checkBuffer[0x40];
   SaveCheck* check;
   u32 size;

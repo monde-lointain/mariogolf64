@@ -1702,6 +1702,7 @@ void DrawPageArrows(Gfx** displayListHead) {
   s32 arrowIndex;
   s32 left;
   s32 textureColumn;
+  /* Pads the frame to match; without it 61 words differ, against 25 */
   s32 unused[4] UNUSED;
 
   f_PageArrowTimer++;

@@ -1467,7 +1467,8 @@ void UpdateSky(CameraView* view, s32 viewIndex) {
   f32 pitchScale; /* Narrower fields of view move the horizon further for each
                      radian of pitch */
   Vec3 direction;
-  s32 unused[8] UNUSED; /* The original frame has room for this */
+  /* The original frame has room for this; without it 48 words differ */
+  s32 unused[8] UNUSED;
   Vtx* vertices;
   f32 slope;
   f32 scroll;

@@ -396,7 +396,8 @@ static inline f32 AbsoluteF32(f32 value) {
  */
 void PlaceGolferAtBall(Vec3 position, Vec3 rotation, Vec3 scale) {
   Vec3 groundPoint;
-  Mat4 unusedMatrices[2] UNUSED; /* Unused; it is there to match */
+  /* Pads the frame to match; without it 56 words differ */
+  Mat4 unusedMatrices[2] UNUSED;
   Player* player;
   SignedBinaryAngle aimYaw;
   f32 distance;
@@ -2580,7 +2581,8 @@ INCLUDE_ASM("asm/nonmatchings/shot_camera", PlaceFlightCamera);
  */
 #ifdef NON_MATCHING
 void ChooseFlightCameraKind(void) {
-  f32 unusedValues[14] UNUSED; /* Unused; it is there to match */
+  /* Pads the frame to match; without it 18 words differ, against 2 */
+  f32 unusedValues[14] UNUSED;
   s32 animation;
   s32 kind;
   s32 pick;

@@ -2423,6 +2423,7 @@ enum ScorePasswordStep {
  * TRUE then. */
 s32 ShowScorePassword(ControllerState* controller) {
   ScoreReport report;
+  /* Pads the frame to match; without it 16 words differ */
   s32 unused[2] UNUSED;
 
   GetSaveData();
@@ -3226,6 +3227,7 @@ INCLUDE_RODATA("asm/nonmatchings/ovl_00/round_results", f_NoPointsText);
  */
 void DrawMatchResults(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
+  /* Pads the frame to match; without it 110 words differ */
   s32 unused[4] UNUSED;
   s32 standingShift[MATCH_PLAYER_COUNT];
   s32 betShift = FOUR_DIGIT_BET_SHIFT;

@@ -2968,7 +2968,8 @@ void UpdateOpening(void) {
 /* Draws the camera editor's look-at marker, the characters and the opening's
  * overlays */
 void DrawOpening(CameraMatrices* matrices, Gfx** displayListHead) {
-  /* Unused; they give the stack frame the original's size */
+  /* Unused; they give the stack frame the original's size; without any one of
+   * them 80 words differ */
   Mat4 unusedMatrix UNUSED;
   Vec3 unusedPoints[4] UNUSED;
   Gfx* gfx = *displayListHead;

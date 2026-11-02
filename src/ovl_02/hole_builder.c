@@ -2323,7 +2323,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", PaintGroundTiles);
  * or, if that was done last, restores the code map from before
  */
 void ToggleCodeMapCleanup(void) {
-  /* Unused; it is there to match */
+  /* Unused; it is there to match; without it 8 words differ */
   u8 unused[0x640] UNUSED;
 
   if (!f_IsCodeMapCleaned) {
@@ -2966,7 +2966,7 @@ void ReadBillboards(void) {
 /* Reads the hole triangles' kinds and corner positions from the hole's triangle
  * file */
 void ReadHoleTriangles(void) {
-  /* Unused; it is there to match */
+  /* Unused; it is there to match; without it 18 words differ */
   u8 unused[0x10] UNUSED;
   u8 count;
   s8 kind;
@@ -3644,7 +3644,8 @@ void GetGroundLightColors(GroundLightColor* light, GroundLightColor* shade) {
  */
 #ifdef NON_MATCHING
 void ShadeGroundTiles(void) {
-  s32 unused[20] UNUSED; /* Unused; it is there to match */
+  /* Pads the frame to match; without it 257 words differ, against 109 */
+  s32 unused[20] UNUSED;
   GroundLightColor light = {24, 22, 16};
   GroundLightColor shade;
 

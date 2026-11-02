@@ -1430,9 +1430,11 @@ void AnimateCharacter(u32 slotIndex) {
  */
 #ifdef NON_MATCHING
 void UpdateJointKeyframeSpans(u32 slotIndex) {
+  /* Pads the frame to match; without it 292 words differ, against 184 */
   f32 unusedMatrices[3][4][4] UNUSED;
   f32 translationMatrix[4][4];
   f32 jointMatrix[4][4];
+  /* Pads the frame to match; without it 288 words differ, against 184 */
   f32 scaleMatrix[4][4] UNUSED;
   f32 rotation[4];
   f32(*rotationMatrix)[4];

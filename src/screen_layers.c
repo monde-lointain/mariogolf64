@@ -745,7 +745,8 @@ void DrawPrompt(Gfx** displayListHead) {
   } while (half != 2);
 
   if (f_PromptState == PROMPT_STATE_CHOOSING) {
-    s32 unused[2] UNUSED; /* Unused; it is there to match */
+    /* Pads the frame to match; without it 65 words differ, against 29 */
+    s32 unused[2] UNUSED;
 
     f_ChoiceBobAngle += DegreesToRadians(CHOICE_BOB_STEP_DEGREES);
     if (f_PromptChoice == PROMPT_CHOICE_YES) {

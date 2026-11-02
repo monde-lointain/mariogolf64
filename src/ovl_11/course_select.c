@@ -722,7 +722,8 @@ void DrawRingShotSelect(Gfx** displayListHead) {
   s32 stripIndex;
   s16 arrowFrame;
   s32 push;
-  u8 unusedBuffer[0x1C] UNUSED; /* Unused; it is there to match */
+  /* Pads the frame to match; without it 203 words differ */
+  u8 unusedBuffer[0x1C] UNUSED;
 
   if (f_LoadedScreen == COURSE_SELECT_RING_SHOT) {
     DrawPlanks(&gfx);

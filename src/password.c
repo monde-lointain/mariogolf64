@@ -410,7 +410,8 @@ s32 DecodeTournamentPassword(u8* code, char* password) {
 }
 
 void EncodeScorePassword(ScoreReport* source, char* password) {
-  u8 unusedBuffer[8] UNUSED; /* Unused; it is there to match */
+  /* Pads the frame to match; without it 80 words differ */
+  u8 unusedBuffer[8] UNUSED;
   u8 symbols[SCORE_PASSWORD_LENGTH];
   ScoreReport report;
   ScoreReport* clamped = &report;

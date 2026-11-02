@@ -966,6 +966,7 @@ void UpdateImpactPointMode(void) {
 }
 
 void ResetAimCamera(void) {
+  /* Pads the frame to match; without it 8 words differ */
   s32 unused[4] UNUSED;
 
   g_CurrentShot.aimCameraDistance = AIM_CAMERA_START_DISTANCE;

@@ -204,6 +204,7 @@ static u8 f_UnreadStatsBlock[0x188] UNUSED;
 /* Reads every course's icon into the course stats' buffers */
 void LoadCourseStatsIcons(void** buffers) {
   EncodedAsset asset;
+  /* Pads the frame to match; without it 24 words differ */
   s32 unused[4] UNUSED;
   s16 imageIndex;
 
@@ -432,8 +433,10 @@ void DrawCourseStats(Gfx** displayListHead) {
   f32 iconX[WHEEL_SLOT_LIMIT];
   f32 iconY[WHEEL_SLOT_LIMIT];
   f32 iconScale[WHEEL_SLOT_LIMIT];
+  /* Pads the frame to match; without it 180 words differ */
   s32 unusedSlots[WHEEL_SLOT_LIMIT] UNUSED;
   s32 drawOrder[WHEEL_SLOT_LIMIT];
+  /* Pads the frame to match; without it 170 words differ */
   s32 unused[2] UNUSED;
   MenuMemory* memory = GetMenuMemory();
   s32 courseCount;
@@ -885,6 +888,7 @@ void DrawStatsScrollArrows(Gfx** displayListHead) {
   s32 firstArrow;
   s16 arrowIndex;
   s32 top;
+  /* Pads the frame to match; without it 139 words differ, against 107 */
   s32 unused[4] UNUSED;
 
   if (hasRowsBelow) {
@@ -1413,6 +1417,7 @@ void DrawDecimalMenuNumber(Gfx** displayListHead, s32 x, s32 y, f32 value) {
   s32 fraction;
   s32 digitIndex;
   u8 digit;
+  /* Pads the frame to match; without it 112 words differ */
   s32 unused[4] UNUSED;
 
   if (whole > DECIMAL_WHOLE_LIMIT) {

@@ -235,8 +235,10 @@ void DrawBestTimes(Gfx** displayListHead) {
   f32 iconX[COURSE_COUNT];
   f32 iconY[COURSE_COUNT];
   f32 iconScale[COURSE_COUNT];
+  /* Pads the frame to match; without it 238 words differ */
   s32 unusedSlots[COURSE_COUNT] UNUSED;
   s32 drawOrder[COURSE_COUNT];
+  /* Pads the frame to match; without it 228 words differ */
   s32 unused[2] UNUSED;
   SaveData* save = GetSaveData();
   MenuMemory* memory = GetMenuMemory();

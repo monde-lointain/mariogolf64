@@ -1234,6 +1234,7 @@ s32 DrawGame(void) {
   void LoadProjection(void) {
     Mat4 projection;
     Mat4 translation;
+    /* Pads the frame to match; without it 57 words differ, against 41 */
     Mat4 unusedMatrix UNUSED;
 
     if (usesFloatMatrices) {

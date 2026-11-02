@@ -304,6 +304,7 @@ void DrawHoleCreatures(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   s32 i;
   HoleCreature* creature;
+  /* Pads the frame to match; without it 222 words differ */
   f32 unused[6] UNUSED;
   Vec3 translation;
   Vec3 rotation;

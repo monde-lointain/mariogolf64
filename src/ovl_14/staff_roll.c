@@ -902,7 +902,8 @@ void BisectFramingPitch(Radians pitch, Radians yaw, f32 depthOffset) {
   Vec3 eye;
   Vec3 lookAt;
   CoursePoint point;
-  u8 unusedBuffer[0x10] UNUSED; /* Unused; it is there to match */
+  /* Pads the frame to match; without it 40 words differ */
+  u8 unusedBuffer[0x10] UNUSED;
   Radians buriedPitch = -QUARTER_TURN_RADIANS;
   s32 step = 0;
   Radians clearPitch = pitch;

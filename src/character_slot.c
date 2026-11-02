@@ -2339,6 +2339,7 @@ const CharacterModel g_OtherCharacterModels[OTHER_CHARACTER_MODEL_COUNT] = {
  */
 #ifdef NON_MATCHING
 void AnimateCharacterJoints(u32 slotIndex) {
+  /* Pads the frame to match; without it 282 words differ, against 206 */
   f32 unused[46] UNUSED;
   f32 translationMatrix[4][4];
   f32 jointMatrix[4][4];

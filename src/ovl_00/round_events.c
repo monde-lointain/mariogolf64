@@ -565,6 +565,7 @@ void DrawLakituMovie(Gfx** displayListHead);
 void DrawToadMovie(Gfx** displayListHead);
 
 void AllocMovieBuffer(void) {
+  /* Pads the frame to match; without it 12 words differ */
   EncodedAsset unused UNUSED;
 
   f_CurrentBanner = BANNER_NONE;
@@ -2097,6 +2098,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_00/round_events", DrawShrinkingMovieImage);
 void DrawMontyMoleMovie(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   EncodedAsset asset;
+  /* Pads the frame to match; without it 84 words differ */
   s32 unused[4] UNUSED;
   s32 i;
 
@@ -2145,6 +2147,7 @@ void DrawMontyMoleMovie(Gfx** displayListHead) {
 void DrawGoombaMovie(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   EncodedAsset asset;
+  /* Pads the frame to match; without it 88 words differ */
   s32 unused[4] UNUSED;
   s32 i;
   s32 height;

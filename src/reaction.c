@@ -686,7 +686,8 @@ void FrameMarioReaction(u32 slotIndex, CameraView* view) {
   CharacterSlot* slot = GetUsedCharacterSlot(slotIndex);
   f32 distance;
   f32 focus[AXIS_COUNT];
-  u8 unusedBuffer[0x40] UNUSED; /* Unused; it is there to match */
+  /* Pads the frame to match; without it 66 words differ */
+  u8 unusedBuffer[0x40] UNUSED;
   f32 lightDirection[AXIS_COUNT];
   f32 lightOrigin[AXIS_COUNT];
   f32 length;
@@ -775,7 +776,8 @@ void FrameWarioReaction(u32 slotIndex, CameraView* view) {
   CharacterSlot* slot = GetUsedCharacterSlot(slotIndex);
   f32 distance;
   f32 focus[AXIS_COUNT];
-  u8 unusedBuffer[0x40] UNUSED; /* Unused; it is there to match */
+  /* Pads the frame to match; without it 32 words differ */
+  u8 unusedBuffer[0x40] UNUSED;
   f32 highestHeight;
 
   if (f_ReactionAnimation == REACTION_ANIMATION_EAGLE) {
@@ -848,7 +850,8 @@ void FrameBabyMarioReaction(u32 slotIndex, CameraView* view) {
   f32 distance = BlendClamped(BABY_MARIO_START_DISTANCE, REACTION_END_DISTANCE,
       f_ReactionFrame * BABY_MARIO_ZOOM_RATE);
   f32 focus[AXIS_COUNT];
-  u8 unusedBuffer[0x40] UNUSED; /* Unused; it is there to match */
+  /* Pads the frame to match; without it 32 words differ */
+  u8 unusedBuffer[0x40] UNUSED;
   f32 eastward;
   f32 southward;
   Radians heading;
@@ -906,7 +909,8 @@ void FrameYoshiReaction(u32 slotIndex, CameraView* view) {
   f32 distance = BlendClamped(FAR_REACTION_START_DISTANCE,
       REACTION_END_DISTANCE, f_ReactionFrame * REACTION_ZOOM_RATE);
   f32 focus[AXIS_COUNT];
-  u8 unusedBuffer[0x40] UNUSED; /* Unused; it is there to match */
+  /* Pads the frame to match; without it 28 words differ */
+  u8 unusedBuffer[0x40] UNUSED;
   f32 highestHeight;
 
   if (f_ReactionAnimation == REACTION_ANIMATION_EAGLE) {
@@ -962,7 +966,8 @@ void FrameBowserReaction(u32 slotIndex, CameraView* view) {
   f32 distance = BlendClamped(FAR_REACTION_START_DISTANCE,
       REACTION_END_DISTANCE, f_ReactionFrame * REACTION_ZOOM_RATE);
   f32 focus[AXIS_COUNT];
-  u8 unusedBuffer[0x40] UNUSED; /* Unused; it is there to match */
+  /* Pads the frame to match; without it 32 words differ */
+  u8 unusedBuffer[0x40] UNUSED;
   f32 highestHeight;
 
   if (f_ReactionAnimation == REACTION_ANIMATION_BOGEY) {
@@ -1029,7 +1034,8 @@ void FrameAzaleaReaction(u32 slotIndex, CameraView* view) {
   f32 distance = BlendClamped(FAR_REACTION_START_DISTANCE,
       REACTION_END_DISTANCE, f_ReactionFrame * REACTION_ZOOM_RATE);
   f32 focus[AXIS_COUNT];
-  u8 unusedBuffer[0x40] UNUSED; /* Unused; it is there to match */
+  /* Pads the frame to match; without it 32 words differ */
+  u8 unusedBuffer[0x40] UNUSED;
   f32 highestHeight;
 
   GetCharacterPointPosition(slotIndex, REACTION_FOCUS_POINT, focus);
@@ -1067,7 +1073,8 @@ void FrameDonkeyKongReaction(u32 slotIndex, CameraView* view) {
   f32 distance = BlendClamped(REACTION_START_DISTANCE, REACTION_END_DISTANCE,
       f_ReactionFrame * REACTION_ZOOM_RATE);
   f32 focus[AXIS_COUNT];
-  u8 unusedBuffer[0x40] UNUSED; /* Unused; it is there to match */
+  /* Pads the frame to match; without it 32 words differ */
+  u8 unusedBuffer[0x40] UNUSED;
   f32 highestHeight;
 
   GetCharacterPointPosition(slotIndex, REACTION_FOCUS_POINT, focus);
@@ -1104,7 +1111,8 @@ void FrameReaction(u32 slotIndex, CameraView* view) {
   f32 distance = BlendClamped(REACTION_START_DISTANCE, REACTION_END_DISTANCE,
       f_ReactionFrame * REACTION_ZOOM_RATE);
   f32 focus[AXIS_COUNT];
-  u8 unusedBuffer[0x40] UNUSED; /* Unused; it is there to match */
+  /* Pads the frame to match; without it 32 words differ */
+  u8 unusedBuffer[0x40] UNUSED;
   f32 highestHeight;
 
   GetCharacterPointPosition(slotIndex, REACTION_FOCUS_POINT, focus);
@@ -1141,7 +1149,8 @@ void FramePeachReaction(u32 slotIndex, CameraView* view) {
   f32 distance = BlendClamped(REACTION_START_DISTANCE, REACTION_END_DISTANCE,
       f_ReactionFrame * REACTION_ZOOM_RATE);
   f32 focus[AXIS_COUNT];
-  u8 unusedBuffer[0x40] UNUSED; /* Unused; it is there to match */
+  /* Pads the frame to match; without it 32 words differ */
+  u8 unusedBuffer[0x40] UNUSED;
   f32 highestHeight;
 
   GetCharacterPointPosition(slotIndex, REACTION_FOCUS_POINT, focus);
@@ -1182,7 +1191,8 @@ void FrameSherryReaction(u32 slotIndex, CameraView* view) {
   f32 distance = BlendClamped(REACTION_START_DISTANCE, SHERRY_END_DISTANCE,
       f_ReactionFrame * REACTION_ZOOM_RATE);
   f32 focus[AXIS_COUNT];
-  u8 unusedBuffer[0x40] UNUSED; /* Unused; it is there to match */
+  /* Pads the frame to match; without it 36 words differ */
+  u8 unusedBuffer[0x40] UNUSED;
   f32 highestHeight;
 
   if (f_ReactionAnimation == REACTION_ANIMATION_EAGLE &&
@@ -1230,7 +1240,8 @@ void FrameKidReaction(u32 slotIndex, CameraView* view) {
   f32 distance = BlendClamped(REACTION_START_DISTANCE, REACTION_END_DISTANCE,
       f_ReactionFrame * REACTION_ZOOM_RATE);
   f32 focus[AXIS_COUNT];
-  u8 unusedBuffer[0x40] UNUSED; /* Unused; it is there to match */
+  /* Pads the frame to match; without it 36 words differ */
+  u8 unusedBuffer[0x40] UNUSED;
   f32 turn = (f_ReactionFrame - f_ReactionFrameCount) * KID_TURN_STEP;
   f32 highestHeight;
 
@@ -1417,7 +1428,8 @@ void GetReactionSpot(CoursePoint point) {
 void PlaceAtReactionSpot(Vec3 position, Vec3 rotation, Vec3 scale) {
   f32 ahead[AXIS_COUNT];
   CoursePoint spot;
-  u8 unusedBuffer[0x80] UNUSED; /* Unused; it is there to match */
+  /* Pads the frame to match; without it 48 words differ */
+  u8 unusedBuffer[0x80] UNUSED;
   Radians heading;
   Radians pitch;
   f32 distance;

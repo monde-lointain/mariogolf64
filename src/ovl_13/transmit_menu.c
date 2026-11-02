@@ -3484,7 +3484,7 @@ void DrawNotice(Gfx** displayListHead) {
   }
 
   if (f_NoticeState == NOTICE_SHOWN) {
-    /* The unused array is there to match */
+    /* The unused array is there to match; without it 44 words differ */
     s32 unused[2] UNUSED;
 
     SetTextSlot(NOTICE_CENTER_X, NOTICE_TEXT_TOP, f_NoticeMessage,
