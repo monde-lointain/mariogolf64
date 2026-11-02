@@ -1420,12 +1420,7 @@ void GetReactionSpot(CoursePoint point) {
  * Stands a character on the ground SPOT_PLACE_DISTANCE from the reaction
  * spot, a quarter turn from the shot's aim, facing back along the aim. Its
  * pitch is refined twice so the slope matches the ground there.
- *
- * Doesn't match: the original loads the shot's heading unsigned and
- * sign-extends it, and its saved registers and float temporaries differ. 24
- * words differ.
  */
-#ifdef NON_MATCHING
 void PlaceAtReactionSpot(Vec3 position, Vec3 rotation, Vec3 scale) {
   f32 ahead[AXIS_COUNT];
   CoursePoint spot;
@@ -1437,12 +1432,14 @@ void PlaceAtReactionSpot(Vec3 position, Vec3 rotation, Vec3 scale) {
   f32 cosine;
   f32 absRadius;
   f32 radius = SPOT_PLACE_DISTANCE;
+  SignedBinaryAngle aim = g_CurrentShot.heading;
+  s32 sidewaysAim;
 
   spot[AXIS_X] = f_ReactionSpot[AXIS_X];
   spot[AXIS_Y] = f_ReactionSpot[AXIS_Y];
   spot[AXIS_Z] = f_ReactionSpot[AXIS_Z];
-  heading = (BinaryAngle)(g_CurrentShot.heading + QUARTER_BINARY_TURN) *
-      BINARY_ANGLE_TO_RADIANS;
+  sidewaysAim = aim + QUARTER_BINARY_TURN;
+  heading = (BinaryAngle)sidewaysAim * BINARY_ANGLE_TO_RADIANS;
   ahead[AXIS_X] = (cosf(heading) * radius) + spot[AXIS_X];
   ahead[AXIS_Z] = (sinf(heading) * radius) + spot[AXIS_Z];
   ahead[AXIS_Y] = GetGroundHeight(ahead[AXIS_X], ahead[AXIS_Z]);
@@ -1459,21 +1456,18 @@ void PlaceAtReactionSpot(Vec3 position, Vec3 rotation, Vec3 scale) {
     position[AXIS_Z] = (sinf(heading) * distance) + spot[AXIS_Z];
     position[AXIS_Y] = GetGroundHeight(position[AXIS_X], position[AXIS_Z]);
     rotation[AXIS_X] = atan2(position[AXIS_Y] - spot[AXIS_Y], distance);
-    pitch = (pitch + rotation[AXIS_X]) * 0.5f;
+    pitch += rotation[AXIS_X];
+    pitch *= 0.5f;
   }
 
-  scale[AXIS_X] = 1.0f;
-  scale[AXIS_Y] = scale[AXIS_X];
-  scale[AXIS_Z] = scale[AXIS_Y];
+  scale[AXIS_Z] = 1.0f;
+  scale[AXIS_Y] = scale[AXIS_Z];
+  scale[AXIS_X] = scale[AXIS_Y];
   rotation[AXIS_X] = 0.0f;
   rotation[AXIS_Z] = 0;
   rotation[AXIS_Y] =
       ((-g_CurrentShot.heading) & BINARY_ANGLE_MASK) * BINARY_ANGLE_TO_RADIANS;
 }
-
-#else
-INCLUDE_ASM("asm/nonmatchings/reaction", PlaceAtReactionSpot);
-#endif
 
 /*
  * Whether the eased eye sits at height zero.
