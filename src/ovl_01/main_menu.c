@@ -4783,7 +4783,7 @@ void DrawUpDownArrows(Gfx** displayListHead, s32 centerY);
  *
  * Doesn't match: the boards' strips schedule their address loads differently,
  * and values take other registers through the boards' and the players' loops.
- * 153 words differ, 39 in shape.
+ * 175 words differ, 25 in shape.
  */
 #ifdef NON_MATCHING
 void DrawModeSelect(Gfx** displayListHead) {
@@ -5132,7 +5132,7 @@ void DrawModeSelect(Gfx** displayListHead) {
         QuarterPixels(
             position[AXIS_Y] + PLAYER_LABEL_OFFSET_Y + PLAYER_LABEL_HEIGHT),
         G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
-    IN_OWN_BLOCK(gDPPipeSync(gfx++));
+    gDPPipeSync(gfx++);
   }
 
   DrawCenteredPageArrows(&gfx, MODE_ARROW_GAP, MODE_ARROW_Y);
