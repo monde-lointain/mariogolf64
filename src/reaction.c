@@ -1474,7 +1474,9 @@ void PlaceAtReactionSpot(Vec3 position, Vec3 rotation, Vec3 scale) {
  * as does the load in IN_OWN_BLOCK; fabs, __builtin_fabsf, a separate eyeY
  * local, an inline helper and an early return each give 9. In the ROM every
  * float load into abs.s, and some subtractions, use a register other than
- * abs.s's, as in UpdateCameraEditor and DrawBillboards. 4 words differ.
+ * abs.s's, as in UpdateCameraEditor and DrawBillboards. Taking the magnitude
+ * in the test, a >= ternary, or a magnitude local compared with a zeroed
+ * height also leave the tie or cost the delay slot. 4 words differ.
  */
 #ifdef NON_MATCHING
 Boolean IsEasedEyeHeightZero(void) {
