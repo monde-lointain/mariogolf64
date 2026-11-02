@@ -6,11 +6,12 @@
 
 VARIANTS_FILE holds blocks separated by lines of "====". Each block is the
 text to replace, a line of "----", and the replacement, which is made in
-FUNCTION's definition alone. A block can make several replacements, such
-as at a change's twin sites, joined by lines of "++++". Prints the score of
-each variant, so that several guesses cost one compile each. With --apply,
-writes variant NUMBER into C_FILE instead, made the same way as the one that
-was scored.
+FUNCTION's definition, or failing that in the text before it, which holds
+the inline helpers and prototypes it uses. A block can make several
+replacements, such as at a change's twin sites, joined by lines of "++++".
+Prints the score of each variant, so that several guesses cost one compile
+each. With --apply, writes variant NUMBER into C_FILE instead, made the same
+way as the one that was scored.
 
 With --batch, each line of JOBS_FILE names an ASM_FILE, C_FILE, FUNCTION
 and VARIANTS_FILE, and each score is printed after its function's name.
@@ -82,19 +83,24 @@ def score_variant(
     return f"{function} {fncompare.describe(target, compiled[function])}"
 
 
-def replace_all(body: str, block: str) -> str | None:
-    """Return BODY with each of BLOCK's replacements made, in turn.
+def replace_all(before: str, body: str, block: str) -> tuple[str, str] | None:
+    """Return BEFORE and BODY with each of BLOCK's replacements made, in turn.
 
-    Returns None when any of the texts to replace is absent. A replacement
-    can be empty, to delete its text, so the line of "----" can end it.
+    Each replacement is made in BODY, or in BEFORE when BODY lacks its text.
+    Returns None when any of the texts to replace is absent from both. A
+    replacement can be empty, to delete its text, so the line of "----" can
+    end it.
     """
     for replacement in block.split("\n++++\n"):
         old, _, new = replacement.partition("\n----")
         new = new.removeprefix("\n")
-        if old not in body:
+        if old in body:
+            body = body.replace(old, new, 1)
+        elif old in before:
+            before = before.replace(old, new, 1)
+        else:
             return None
-        body = body.replace(old, new, 1)
-    return body
+    return before, body
 
 
 def read_variants(c_path: str, function: str, variants_path: str) -> list[str | None]:
@@ -114,8 +120,8 @@ def read_variants(c_path: str, function: str, variants_path: str) -> list[str | 
     text = Path(variants_path).read_text().removesuffix("\n")
     variants: list[str | None] = []
     for block in text.split("\n====\n"):
-        variant = replace_all(body, block)
-        variants.append(None if variant is None else before + variant + after)
+        variant = replace_all(before, body, block)
+        variants.append(None if variant is None else "".join(variant) + after)
     return variants
 
 
