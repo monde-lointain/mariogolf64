@@ -420,9 +420,10 @@ void OpenSaveMenu(s32 kind) {
 
   if (kind == SAVE_MENU_GAMES) {
     for (slot = 0; slot != SAVED_GAME_COUNT; slot++) {
-      if (save->savedGames[slot].isValid &&
-          (iconIndex = GetModeIconIndex(&save->savedGames[slot].state)) !=
-              NO_MODE_ICON) {
+      iconIndex = save->savedGames[slot].isValid
+          ? GetModeIconIndex(&save->savedGames[slot].state)
+          : NO_MODE_ICON;
+      if (iconIndex != NO_MODE_ICON) {
         ReadEncodedAsset(
             f_ModeIconImages[slot][0] = AllocMemory(OpenEncodedAsset(
                 g_ModeIconAnimations[iconIndex][0], &encodedAsset)),
