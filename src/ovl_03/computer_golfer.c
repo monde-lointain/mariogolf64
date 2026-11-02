@@ -2187,7 +2187,8 @@ s32 GetPowerGaugeFrame(s32 amount) {
    * nested there, it compiles to the original's code, and StepTrialShot
    * passes a stack address in $v0 as the static chain, which this stores.
    * It stays separate here, as StepTrialShot does not match. The store of
-   * an uninitialized value is there to match.
+   * an uninitialized value is there to match: it stands in for the static
+   * chain's store, which no other C makes, and without it 7 words differ.
    */
   *(&unused) = uninitialized;
 #endif
