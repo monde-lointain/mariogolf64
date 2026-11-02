@@ -144,13 +144,7 @@ s32 f_ResultCharactersLoadStep = RESULT_CHARACTERS_IDLE;
  * mode shows, the players' faces and those that the game mode's pages show,
  * and counts the pages. In a tournament it also ranks the player before and
  * after the hole to see which way their place moved.
- *
- * Doesn't match: the first standings loop loads g_TournamentStandings after
- * setting up its other registers. Indexing the table as the second loop does
- * gives that order but copies the address once more (9 words); reordering
- * the loop's initializers gives 4. 4 words differ.
  */
-#ifdef NON_MATCHING
 void OpenScorecard(CourseIndex courseIndex, s32 holeIndex) {
   EncodedAsset asset;
   AssetFile file;
@@ -310,11 +304,13 @@ void OpenScorecard(CourseIndex courseIndex, s32 holeIndex) {
         }
 
         oldPlace = -1;
-        for (standingIndex = 0, standing = g_TournamentStandings;
-            standingIndex != TOURNAMENT_CONTESTANT_COUNT;
-            standingIndex++, standing++) {
-          if (standing->contestantId == PLAYER_CONTESTANT) {
-            oldPlace = standing->place & PLACE_MASK;
+        for (standingIndex = 0; standingIndex != TOURNAMENT_CONTESTANT_COUNT;
+            standingIndex++) {
+          TournamentStanding* oldStanding =
+              &g_TournamentStandings[standingIndex];
+
+          if (oldStanding->contestantId == PLAYER_CONTESTANT) {
+            oldPlace = oldStanding->place & PLACE_MASK;
             break;
           }
         }
@@ -377,9 +373,6 @@ void OpenScorecard(CourseIndex courseIndex, s32 holeIndex) {
   SetScorecardState(SCORECARD_OPENING);
   ForceStopRumble();
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard", OpenScorecard);
-#endif
 
 void FreeScorecard(void);
 
