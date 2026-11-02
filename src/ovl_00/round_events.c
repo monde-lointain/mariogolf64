@@ -2020,7 +2020,8 @@ void DrawReadyGoMovie(Gfx** displayListHead) {
  * copy a variable, reordering the increments, a u32 offset and a for-clause
  * increment change nothing. Taking offset and bottom from the strip index
  * gives 113 words differing, 25 in shape, but loop.c then reduces
- * offset * 6 too. 115 words differ, 29 in shape.
+ * offset * 6 too. Taking bottom alone from it takes 115 words differing,
+ * 29 in shape, to 107 and 27.
  */
 #ifdef NON_MATCHING
 void DrawShrinkingMovieImage(Gfx** displayListHead) {
@@ -2063,9 +2064,9 @@ void DrawShrinkingMovieImage(Gfx** displayListHead) {
     halfWidth = (cosf(angle) + 1.0f) * width * 0.5f;
     stripHeight = (cosf(angle) + 1.0f) * MOVIE_IMAGE_STRIP_HEIGHT;
     if (halfWidth > 0 && stripHeight > 0) {
-      bottom = SHRINKING_IMAGE_CENTER_Y;
       offset = 0;
       for (i = 0; i != stripCount; i++) {
+        bottom = SHRINKING_IMAGE_CENTER_Y + (i * stripHeight);
         LoadTextureBlock(&gfx,
             f_MovieBuffer +
                 ((offset * MOVIE_IMAGE_STRIP_HEIGHT) +
@@ -2081,7 +2082,6 @@ void DrawShrinkingMovieImage(Gfx** displayListHead) {
             ((width >> 1) << 10) / halfWidth,
             (MOVIE_IMAGE_STRIP_HEIGHT << 10) / stripHeight);
         offset += width;
-        bottom += stripHeight;
       }
     }
   }
@@ -2203,7 +2203,8 @@ void DrawGoombaMovie(Gfx** displayListHead) {
  * $s2 and $s3, where GCC gives them $s3, $s2 and $s4, and the strips' float
  * conversions are scheduled differently. Stepping offset in the loop's
  * header, or setting it before the palette load, gives 89 words differing,
- * 49 in shape. 87 words differ, 47 in shape.
+ * 49 in shape. Rounding the half width before the tile load takes 87 words
+ * differing, 47 in shape, to 87 and 45.
  */
 #ifdef NON_MATCHING
 void DrawLakituMovie(Gfx** displayListHead) {
@@ -2273,6 +2274,7 @@ void DrawLakituMovie(Gfx** displayListHead) {
     offset = MOVIE_IMAGE_PIXELS_OFFSET + (i * LAKITU_STRIP_SIZE);
     halfWidth = f_Lakitu.scale * (LAKITU_WIDTH / 2);
     halfHeight = f_Lakitu.scale * LAKITU_STRIP_HEIGHT;
+    roundedHalfWidth = halfWidth + 0.5f;
     gDPLoadTextureTile(gfx++,
         TextureAddress(
             f_MovieBuffer + ((f_MovieBackBuffer * LAKITU_FRAME_SIZE) + offset)),
@@ -2280,7 +2282,6 @@ void DrawLakituMovie(Gfx** displayListHead) {
         LAKITU_WIDTH - 1, LAKITU_STRIP_HEIGHT - 1, 0, G_TX_NOMIRROR | G_TX_WRAP,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
         G_TX_NOLOD);
-    roundedHalfWidth = halfWidth + 0.5f;
     y = f_Lakitu.y;
     roundedHalfHeight = halfHeight + 0.5f;
     x = f_Lakitu.x;
