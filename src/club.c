@@ -1044,7 +1044,11 @@ void WriteClubParameters(void) {
  * results, then sets the deflection from where the last test shot landed.
  * InterpolatePower is a nested function, a GNU C extension.
  *
- * Doesn't match: 30 words differ.
+ * Doesn't match: the original gives the mode's power slot address, which the
+ * loop pass hoists out of the try loop, a higher allocation priority than
+ * shortPower and longDistance, and takes the error's absolute value into a
+ * register of its own before scaling the tolerance. Forcing four registers
+ * leaves 6 words differing. A pointer to the slot gives 103. 30 words differ.
  */
 #ifdef NON_MATCHING
 void GenerateClub(s32 clubIndex) {
@@ -1060,7 +1064,6 @@ void GenerateClub(s32 clubIndex) {
   s32 tryIndex;
   s32 step;
   f32 error;
-  s32 power;
 
   s32 InterpolatePower(s32 from, s32 to, f32 fraction) {
     return from + (to - from) * (f64)fraction;
@@ -1121,13 +1124,12 @@ void GenerateClub(s32 clubIndex) {
         }
 
         if (shortPower == 0) {
-          power = longPower * 3 / 4;
+          club->power[shotMode] = longPower * 3 / 4;
         } else {
-          power = InterpolatePower(shortPower, longPower,
+          club->power[shotMode] = InterpolatePower(shortPower, longPower,
               (f32)(targetDistance - shortDistance) /
                   (f32)(longDistance - shortDistance));
         }
-        club->power[shotMode] = power;
       } else {
         shortDistance = distance;
         shortPower = club->power[shotMode];
@@ -1136,13 +1138,12 @@ void GenerateClub(s32 clubIndex) {
         }
 
         if (longPower == 0) {
-          IN_OWN_BLOCK(power = shortPower * 3 / 2);
+          club->power[shotMode] = shortPower * 3 / 2;
         } else {
-          power = InterpolatePower(shortPower, longPower,
+          club->power[shotMode] = InterpolatePower(shortPower, longPower,
               (f32)(targetDistance - shortDistance) /
                   (f32)(longDistance - shortDistance));
         }
-        club->power[shotMode] = power;
       }
     }
 
