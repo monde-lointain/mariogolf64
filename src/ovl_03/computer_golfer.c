@@ -2226,7 +2226,7 @@ INCLUDE_RODATA("asm/nonmatchings/ovl_03/computer_golfer", f_SimFaultText);
  * Doesn't match: ours gives some values other saved registers than the
  * original does, and it keeps the address of f_Shot.ballPosition's z in a saved
  * register across the atan2 calls, where the original loads it again.
- * 135 words differ, 51 in shape.
+ * 117 words differ, 43 in shape.
  */
 #ifdef NON_MATCHING
 s32 StepTrialShot(void) {
@@ -2553,9 +2553,8 @@ EVALUATE:
           return 1;
         } else if (f_HasUnk3Contact || ratio >= 10.0f) {
           f_AimChangeCount++;
-          f_Shot.heading = !(f_AimChangeCount & 1)
-              ? f_Shot.heading - (f_AimChangeCount * AIM_CHANGE_STEP)
-              : f_Shot.heading + (f_AimChangeCount * AIM_CHANGE_STEP);
+          f_Shot.heading += (!(f_AimChangeCount & 1) ? -1 : 1) *
+              (f_AimChangeCount * AIM_CHANGE_STEP);
           osSyncPrintf("Angle Change3\n");
           for (index = 0; index < EXCLUDED_SECTOR_COUNT; index++) {
             f_IsDirectionExcluded[(
