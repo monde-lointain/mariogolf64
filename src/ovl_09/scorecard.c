@@ -972,7 +972,8 @@ void TurnScorecardPage(u16 buttons) {
   s32 pageCount = g_Scorecard.pageCount;
   /* Read through a pointer, which the call loads after the sound ID; GCC
    * copies a global argument into a register before the call's other
-   * arguments */
+   * arguments. Casts, a local for the channel, sound or pan, a masked pan
+   * or its terms swapped all load the channel first */
   SoundChannel* channel = &g_NextSoundChannel;
 
   if (pageCount > 1) {
