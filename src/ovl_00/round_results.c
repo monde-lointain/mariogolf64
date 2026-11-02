@@ -464,11 +464,15 @@ void LoadRoundResults(void) {
     g_Players[0].points += LARGE_DEBUG_POINTS_BONUS;
   }
 
-  f_ResultsBackdropImage = AllocMemory(OpenEncodedAsset(
-      g_GameState.isClubTournament ? CLUB_TOURNAMENT_BACKDROP_ASSET
-                                   : RESULTS_BACKDROP_ASSET,
-      &asset));
-  ReadEncodedAsset(f_ResultsBackdropImage, &asset);
+  if (g_GameState.isClubTournament) {
+    f_ResultsBackdropImage =
+        AllocMemory(OpenEncodedAsset(CLUB_TOURNAMENT_BACKDROP_ASSET, &asset));
+    ReadEncodedAsset(f_ResultsBackdropImage, &asset);
+  } else {
+    f_ResultsBackdropImage =
+        AllocMemory(OpenEncodedAsset(RESULTS_BACKDROP_ASSET, &asset));
+    ReadEncodedAsset(f_ResultsBackdropImage, &asset);
+  }
   f_ResultsHandImage =
       AllocMemory(OpenEncodedAsset(ASSET_PRESSING_HAND, &asset));
   ReadEncodedAsset(f_ResultsHandImage, &asset);
