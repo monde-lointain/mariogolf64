@@ -1919,7 +1919,11 @@ void DrawSky(
  * Draws the sky and, below it, the course's backdrop in strips that follow the
  * camera's yaw and pitch
  *
- * Doesn't match: 143 words differ, 25 in shape.
+ * Doesn't match: the original loads the view's fields for centerShift among
+ * the first syncs' stores. GCC takes both to be structure accesses through
+ * pointers that may alias, so here it keeps them in the source's order;
+ * computing centerShift before the syncs comes closest, where after them
+ * gives 87 differing words. 46 words differ, 10 in shape.
  */
 #ifdef NON_MATCHING
 void DrawBackdrop(Gfx** displayListHead, CameraView* view, s32 cameraIndex) {
@@ -1941,11 +1945,11 @@ void DrawBackdrop(Gfx** displayListHead, CameraView* view, s32 cameraIndex) {
   f32 zoom;
 
   gfx = *displayListHead;
-  gDPPipeSync(gfx++);
-  gDPPipeSync(gfx++);
   centerShift = ((view->zoom * FULL_VIEW_HEIGHT) -
                     (view->viewportCenterY - (view->scissorY * 2))) *
       0.5f;
+  gDPPipeSync(gfx++);
+  gDPPipeSync(gfx++);
   gDPSetColorDither(gfx++, G_CD_BAYER);
   DrawSky(&gfx, view->eye[1], 1, cameraIndex);
   isNibbleImage = FALSE;
@@ -1984,6 +1988,9 @@ void DrawBackdrop(Gfx** displayListHead, CameraView* view, s32 cameraIndex) {
   f_BackdropWidthMask = BACKDROP_IMAGE_WIDTH_MASK;
   if (view->scissorWidth == FULL_VIEW_WIDTH &&
       view->scissorHeight == FULL_VIEW_HEIGHT) {
+    s32 imageRow;
+    s32 bottom;
+
     /* The full screen copies the strips unscaled */
     gDPPipeSync(gfx++);
     gDPSetCombineMode(gfx++, G_CC_DECALRGB, G_CC_DECALRGB);
