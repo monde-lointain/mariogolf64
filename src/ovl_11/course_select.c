@@ -801,16 +801,17 @@ void DrawRingShotSelect(Gfx** displayListHead) {
 INCLUDE_ASM("asm/nonmatchings/ovl_11/course_select", DrawRingShotSelect);
 #endif
 
-/* Doesn't match: 128 words differ, 94 in shape. */
-#ifdef NON_MATCHING
+/*
+ * Draws the hole select screen as it slides in: the hole sign, the course
+ * image, the blinking arrows, pushed while their button repeats, and the
+ * course name and hole number.
+ */
 void DrawHoleSelect(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   s32 stripIndex;
   s32 arrowFrame;
   s32 push;
   s32 colorIndex;
-  s32 topOffset;
-  s32 bottomOffset;
 
   GetMenuMemory();
   f_SlideOffset -= HOLE_SELECT_SLIDE_STEP;
@@ -832,19 +833,19 @@ void DrawHoleSelect(Gfx** displayListHead) {
     LoadLargePalette(&gfx, ImageBody(f_BoardImage));
     for (stripIndex = 0; stripIndex != HOLE_SIGN_STRIP_COUNT; stripIndex++) {
       gDPLoadTextureTile(gfx++,
-          LargeImageTexels(f_BoardImage) +
-              stripIndex * HOLE_SIGN_STRIP_HEIGHT * HOLE_SIGN_WIDTH,
+          TextureAddress(LargeImageTexels(f_BoardImage) +
+              stripIndex * HOLE_SIGN_STRIP_HEIGHT * HOLE_SIGN_WIDTH),
           G_IM_FMT_CI, G_IM_SIZ_8b, HOLE_SIGN_WIDTH, 0, 0, 0,
           HOLE_SIGN_WIDTH - 1, HOLE_SIGN_STRIP_HEIGHT - 1, 0,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
       gDPPipeSync(gfx++);
-      topOffset = f_SlideOffset - HOLE_SIGN_TOP;
-      bottomOffset = topOffset - HOLE_SIGN_STRIP_HEIGHT;
       DrawTextureRect(&gfx, QuarterPixels(HOLE_SIGN_LEFT),
-          QuarterPixels((stripIndex * HOLE_SIGN_STRIP_HEIGHT) - topOffset),
+          QuarterPixels((stripIndex * HOLE_SIGN_STRIP_HEIGHT) + HOLE_SIGN_TOP -
+              f_SlideOffset),
           QuarterPixels(HOLE_SIGN_LEFT + HOLE_SIGN_WIDTH),
-          QuarterPixels((stripIndex * HOLE_SIGN_STRIP_HEIGHT) - bottomOffset),
+          QuarterPixels((stripIndex * HOLE_SIGN_STRIP_HEIGHT) +
+              (HOLE_SIGN_TOP + HOLE_SIGN_STRIP_HEIGHT) - f_SlideOffset),
           G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       gDPPipeSync(gfx++);
     }
@@ -868,7 +869,9 @@ void DrawHoleSelect(Gfx** displayListHead) {
       gDPPipeSync(gfx++);
     }
 
-    arrowFrame = f_CourseArrowFrameTime++;
+    arrowFrame = (f_CourseArrowFrameTime++ % (2 * ARROW_FRAME_TIME) >=
+                     ARROW_FRAME_TIME) *
+        ARROWS_FRAME_SIZE;
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
     gDPPipeSync(gfx++);
     gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
@@ -877,31 +880,24 @@ void DrawHoleSelect(Gfx** displayListHead) {
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
     LoadSmallPalette(&gfx, 0, ImageBody(f_ArrowsImage));
-    LoadNibbleTextureBlock(&gfx,
-        ImageTexels(f_ArrowsImage) +
-            ((arrowFrame % (2 * ARROW_FRAME_TIME) >= ARROW_FRAME_TIME) *
-                ARROWS_FRAME_SIZE),
+    LoadNibbleTextureBlock(&gfx, ImageTexelsAt(f_ArrowsImage, arrowFrame),
         G_IM_FMT_CI, ARROWS_WIDTH, ARROWS_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
     gDPPipeSync(gfx++);
     push = (f_RepeatedButtons & U_JPAD) ? ARROW_PUSH_UP : 0;
     DrawTextureRect(&gfx, QuarterPixels(ARROW_LEFT),
-        QuarterPixels(f_PressedDirection != DIRECTION_UP
-                ? push + 140 + f_SlideOffset
-                : 140 + push + (f_SlideOffset - ARROW_STEP)),
+        QuarterPixels(push + 140 + f_SlideOffset -
+            (f_PressedDirection == DIRECTION_UP ? ARROW_STEP : 0)),
         QuarterPixels(ARROW_LEFT + ARROW_SIZE),
-        QuarterPixels(f_PressedDirection != DIRECTION_UP
-                ? 156 + f_SlideOffset + push
-                : push + 156 + f_SlideOffset - ARROW_STEP),
+        QuarterPixels(push + 156 + f_SlideOffset -
+            (f_PressedDirection == DIRECTION_UP ? ARROW_STEP : 0)),
         G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     push = (f_RepeatedButtons & D_JPAD) ? ARROW_PUSH_DOWN : 0;
     DrawTextureRect(&gfx, QuarterPixels(ARROW_LEFT),
-        QuarterPixels(f_PressedDirection != DIRECTION_DOWN
-                ? 212 + f_SlideOffset + push
-                : push + 212 + f_SlideOffset + ARROW_STEP),
+        QuarterPixels(push + 212 + f_SlideOffset +
+            (f_PressedDirection == DIRECTION_DOWN ? ARROW_STEP : 0)),
         QuarterPixels(ARROW_LEFT + ARROW_SIZE),
-        QuarterPixels(f_PressedDirection != DIRECTION_DOWN
-                ? 228 + (f_SlideOffset + push)
-                : 228 + (ARROW_STEP + f_SlideOffset) + push),
+        QuarterPixels(push + 228 + f_SlideOffset +
+            (f_PressedDirection == DIRECTION_DOWN ? ARROW_STEP : 0)),
         G_TX_RENDERTILE, 0, TexelCoordinate(ARROW_SIZE), TEXEL_STEP_ONE,
         TEXEL_STEP_ONE);
     gDPPipeSync(gfx++);
@@ -948,10 +944,6 @@ void DrawHoleSelect(Gfx** displayListHead) {
     *displayListHead = gfx;
   }
 }
-
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_11/course_select", DrawHoleSelect);
-#endif
 
 /*
  * Draws the course name plate in strips, centered on centerX and centerY.
