@@ -3881,7 +3881,7 @@ void WriteHexDumpFile(u32* words, s32 byteCount, char* fileName) {
  * Doesn't match: the original also steps column + 1 alongside half, where
  * GCC computes it in each use; most of the rest follows from the registers
  * and spill slots that changes. The frame is 0x20 bytes larger than the
- * original's, so the stack offsets differ. 2449 words differ, 581 in shape.
+ * original's, so the stack offsets differ. 2403 words differ, 581 in shape.
  */
 #ifdef NON_MATCHING
 void DrawHoleEditorGround(CameraMatrices* matrices UNUSED, s32 terrainStyle) {
@@ -4326,10 +4326,12 @@ void DrawHoleEditorGround(CameraMatrices* matrices UNUSED, s32 terrainStyle) {
                 if (snapsEdge[current][j] || snapsEdge[current ^ 1][j]) {
                   /* Indexing the tile's offsets as a pointer is closer to the
                    * original than indexing the array */
-                  gSPSegment(gfx++, j + 1,
-                      snapsEdge[current][j]
-                          ? ((s32*)g_CoarseVertexOffsets[tileIndex])[j]
-                          : 0);
+                  if (snapsEdge[current][j]) {
+                    gSPSegment(gfx++, j + 1,
+                        ((s32*)g_CoarseVertexOffsets[tileIndex])[j]);
+                  } else {
+                    gSPSegment(gfx++, j + 1, 0);
+                  }
                 }
               }
 
