@@ -3273,7 +3273,7 @@ static inline u16* GetShadowedTexel(u32 column, u32 row) {
  * texture in f_ShadowlessTextures cast no shadow.
  * Doesn't match: ours keeps heightScale in a float register and loads
  * SHADOW_LIGHT_DISTANCE again for each use, where the original keeps them in
- * $s2 and $f22, and the other registers differ from there. 273 words differ, 45
+ * $s2 and $f22, and the other registers differ from there. 271 words differ, 45
  * in shape.
  */
 #ifdef NON_MATCHING
@@ -3285,9 +3285,9 @@ void CastBillboardShadows(void) {
   Vec3 rowPoint;
   Radians lightYaw;
   Radians lightPitch;
-  s32 lastTextureIndex;
   s32 index;
   s32 listIndex;
+  s32 lastTextureIndex;
   Boolean hasShadowStarted;
   Boolean isRowInWidth;
   s32 row;

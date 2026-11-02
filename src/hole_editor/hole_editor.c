@@ -3881,7 +3881,7 @@ void WriteHexDumpFile(u32* words, s32 byteCount, char* fileName) {
  * Doesn't match: the original also steps column + 1 alongside half, where
  * GCC computes it in each use; most of the rest follows from the registers
  * and spill slots that changes. The frame is 0x20 bytes larger than the
- * original's, so the stack offsets differ. 2977 words differ, 595 in shape.
+ * original's, so the stack offsets differ. 2959 words differ, 595 in shape.
  */
 #ifdef NON_MATCHING
 void DrawHoleEditorGround(CameraMatrices* matrices UNUSED, s32 terrainStyle) {
@@ -3907,12 +3907,12 @@ void DrawHoleEditorGround(CameraMatrices* matrices UNUSED, s32 terrainStyle) {
   s32 edge;
   s32 pass;
   /* The fine tiles' own pass counter, to match */
-  s32 finePass;
   s32 tileIndex;
+  s32 finePass;
   /* Also the tile index in the first loop, to match */
-  s32 column;
   s32 middleSlot;
   s32 bottomSlot;
+  s32 column;
   s32 spareSlot;
   s32 blockColumn;
   s32 blockRow;
