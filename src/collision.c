@@ -2251,7 +2251,7 @@ INCLUDE_ASM("asm/nonmatchings/collision", FindHoleTriangleHit);
  * passes an end of it is moved back to where it reaches the end. A hit
  * near or below the ground counts whatever the edges say.
  *
- * Doesn't match: 612 words differ.
+ * Doesn't match: 563 words differ, 103 in shape.
  */
 #ifdef NON_MATCHING
 s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
@@ -2275,7 +2275,6 @@ s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
   f32 sideChange;
   f32 hitFraction;
   f32 endFraction;
-  f32 edgeLength;
   f32 wallEnd;
   f32 farEnd;
   f32 nearestCorner;
@@ -2406,6 +2405,7 @@ s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
       hitPointV = ((endY - startY) * hitFraction) + startY;
       if (triangle.corners[AXIS_X][0] == triangle.corners[AXIS_X][1] &&
           triangle.corners[AXIS_X][0] != triangle.corners[AXIS_X][2]) {
+        f32 edgeLength;
         endFraction = 0.0f;
         edgeLength =
             Length2D(triangle.corners[AXIS_X][0] - triangle.corners[AXIS_X][2],
@@ -2467,6 +2467,7 @@ s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
             WallWidening(triangle.corners[AXIS_X], 2, edgeLength));
       } else if (triangle.corners[AXIS_X][0] == triangle.corners[AXIS_X][2] &&
           triangle.corners[AXIS_X][0] != triangle.corners[AXIS_X][1]) {
+        f32 edgeLength;
         endFraction = 0.0f;
         edgeLength =
             Length2D(triangle.corners[AXIS_X][0] - triangle.corners[AXIS_X][1],
@@ -2573,6 +2574,7 @@ s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
       hitPointV = ((endZ - startZ) * hitFraction) + startZ;
       if (triangle.corners[AXIS_Z][0] == triangle.corners[AXIS_Z][1] &&
           triangle.corners[AXIS_Z][0] != triangle.corners[AXIS_Z][2]) {
+        f32 edgeLength;
         endFraction = 0.0f;
         edgeLength =
             Length2D(triangle.corners[AXIS_Z][0] - triangle.corners[AXIS_Z][2],
@@ -2628,6 +2630,7 @@ s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
             WallWidening(triangle.corners[AXIS_Z], 2, edgeLength));
       } else if (triangle.corners[AXIS_Z][0] == triangle.corners[AXIS_Z][2] &&
           triangle.corners[AXIS_Z][0] != triangle.corners[AXIS_Z][1]) {
+        f32 edgeLength;
         endFraction = 0.0f;
         edgeLength =
             Length2D(triangle.corners[AXIS_Z][0] - triangle.corners[AXIS_Z][1],
