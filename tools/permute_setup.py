@@ -71,19 +71,19 @@ exec mips-linux-gnu-objdump -drz -m mips:4300 --disassemble={function} "$1"
 NESTED_DEFINITION = re.compile(
     r"^[ \t]+[A-Za-z_][\w \t*]*?[ \t*](\w+)\s*\([^;{}]*\)\s*\{", re.MULTILINE
 )
-# Randomization weights replacing the permuter's gcc defaults. Each pass was
-# applied alone to 15 routines, 450 times each. Statement reordering gave the
-# most gain per trial in a form this project accepts. The passes set to 0 or 2
-# mostly gained by changing behaviour (wrapping statements in an if on a
-# global, truncating casts) or by forms the project rejects (dead stores,
-# volatile and long long locals), and a kept candidate seeds the next ones.
-WEIGHT_OVERRIDES = """[weight_overrides]
+# The permuter's settings beyond the function. natural_only leaves out the
+# passes and forms that this project rejects as fakes: no-op blocks, dead
+# stores, identities, volatile locals and the like. Of the weights, each pass
+# was applied alone to 15 routines, 450 times each. Statement reordering gave
+# the most gain per trial in a form this project accepts; the type and cast
+# passes mostly gained by truncating, which changes behaviour, and a kept
+# candidate seeds the next ones.
+NATURAL_SETTINGS = """natural_only = true
+
+[weight_overrides]
 perm_reorder_stmts = 30
 perm_cast_simple = 2
 perm_randomize_internal_type = 2
-perm_var_cond_block = 0
-perm_duplicate_assignment = 0
-perm_add_self_assignment = 0
 """
 KEYWORDS = frozenset({"if", "for", "while", "switch", "return", "sizeof"})
 
@@ -425,7 +425,7 @@ def main() -> None:
     settings = f"""func_name = "{function}"
 compiler_type = "gcc"
 objdump_command = "{objdump}"
-{WEIGHT_OVERRIDES}"""
+{NATURAL_SETTINGS}"""
     _ = (out_dir / "settings.toml").write_text(settings)
     print(out_dir)
 
