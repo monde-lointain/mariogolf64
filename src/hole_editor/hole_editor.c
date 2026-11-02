@@ -3880,7 +3880,8 @@ void WriteHexDumpFile(u32* words, s32 byteCount, char* fileName) {
  *
  * Doesn't match: the original also steps column + 1 alongside half, where
  * GCC computes it in each use; most of the rest follows from the registers
- * and spill slots that changes. 2413 words differ, 625 in shape.
+ * and spill slots that changes. The frame is 0x20 bytes larger than the
+ * original's, so the stack offsets differ. 2982 words differ, 598 in shape.
  */
 #ifdef NON_MATCHING
 void DrawHoleEditorGround(CameraMatrices* matrices UNUSED, s32 terrainStyle) {
@@ -3923,7 +3924,6 @@ void DrawHoleEditorGround(CameraMatrices* matrices UNUSED, s32 terrainStyle) {
   Boolean isMirrored;
   s32 mirroredS;
   s32 st;
-  s32* offsets;
   Vtx* midpoints;
   GroundTile* tile;
   s32 k;
@@ -4320,14 +4320,16 @@ void DrawHoleEditorGround(CameraMatrices* matrices UNUSED, s32 terrainStyle) {
                 snapsEdge[current][TILE_EDGE_COUNT + TILE_EDGE_RIGHT] = FALSE;
                 snapsEdge[current][TILE_EDGE_RIGHT] = FALSE;
               }
-
-              offsets = g_CoarseVertexOffsets[tileIndex];
               for (j = 0; j < TILE_VERTEX_SEGMENT_COUNT; j++) {
                 /* Moves a snapped edge's vertices, or moves back those snapped
                  * for the last tile */
                 if (snapsEdge[current][j] || snapsEdge[current ^ 1][j]) {
-                  gSPSegment(
-                      gfx++, j + 1, snapsEdge[current][j] ? offsets[j] : 0);
+                  /* Indexing the tile's offsets as a pointer is closer to the
+                   * original than indexing the array */
+                  gSPSegment(gfx++, j + 1,
+                      snapsEdge[current][j]
+                          ? ((s32*)g_CoarseVertexOffsets[tileIndex])[j]
+                          : 0);
                 }
               }
 
