@@ -2018,7 +2018,9 @@ void DrawReadyGoMovie(Gfx** displayListHead) {
  * Its strip loop also leaves stripHeight * 4 and offset * 6 inside, where
  * loop.c hoists the one and strength-reduces the other in ours. Making width's
  * copy a variable, reordering the increments, a u32 offset and a for-clause
- * increment change nothing. 115 words differ, 29 in shape.
+ * increment change nothing. Taking offset and bottom from the strip index
+ * gives 113 words differing, 25 in shape, but loop.c then reduces
+ * offset * 6 too. 115 words differ, 29 in shape.
  */
 #ifdef NON_MATCHING
 void DrawShrinkingMovieImage(Gfx** displayListHead) {
