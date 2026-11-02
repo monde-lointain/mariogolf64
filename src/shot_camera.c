@@ -2445,9 +2445,12 @@ void PlaceFlightCamera(s32 step) {
 
         for (index = BESIDE_GOLFER_FIRST_STEP; index < BESIDE_GOLFER_STEP_LIMIT;
             index++) {
-          distance = index * BESIDE_GOLFER_STEP;
+          /* Setting distance inside the x term comes closer to the original:
+           * a statement of its own before it gives 187 differing words, not
+           * 184, and 13 in shape, not 8 */
           f_CameraPosition[AXIS_X] =
-              (cosf(yaw) * distance) + g_CurrentShot.ballPosition[AXIS_X];
+              (cosf(yaw) * (distance = index * BESIDE_GOLFER_STEP)) +
+              g_CurrentShot.ballPosition[AXIS_X];
           f_CameraPosition[AXIS_Z] =
               (sinf(yaw) * distance) + g_CurrentShot.ballPosition[AXIS_Z];
           f_CameraPosition[AXIS_Y] = GetGroundHeight(f_CameraPosition[AXIS_X],
