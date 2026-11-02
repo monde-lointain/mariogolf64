@@ -1300,6 +1300,9 @@ void PlayFlightSounds(s32 step) {
     if (!*isStillPlayed && g_BallFlightStep > EARLY_STEP_COUNT &&
         HasHitGroundBefore(step, EARLY_STEP_COUNT) &&
         IsShotBeyond(FULL_SHOT_FRACTION) &&
+        /* The surface is looked up only when the tests before pass, and
+         * IsFairwayKind reads its kind three times; calling inside it
+         * differs */
         (info = GetSurfaceInfo(g_TurnBallSimulation.surface),
             IsFairwayKind(info->kind)) &&
         !g_GameState.isMiniGolf && f_StartCupDistance > f_LandingCupDistance &&
