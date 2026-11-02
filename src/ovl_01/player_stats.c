@@ -1878,13 +1878,7 @@ void DrawTurnedPageArrows(Gfx** displayListHead, s32 spacing, s32 y) {
   *displayListHead = gfx;
 }
 
-/*
- * Draws the blinking green up and down arrows about centerY
- *
- * Doesn't match: the original adds the texel offset to the blink frame's
- * offset before the arrow's. 2 words differ.
- */
-#ifdef NON_MATCHING
+/* Draws the blinking green up and down arrows about centerY */
 void DrawUpDownArrows(Gfx** displayListHead, s32 centerY) {
   Gfx* gfx = *displayListHead;
   s32 left = 0;
@@ -1901,8 +1895,8 @@ void DrawUpDownArrows(Gfx** displayListHead, s32 centerY) {
   gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(f_StatsGreenArrows)));
   for (arrowIndex = 0; arrowIndex != STATS_ARROW_COUNT; arrowIndex++) {
     gDPLoadTextureTile_4b(gfx++,
-        TextureAddress(ImageTexels(f_StatsGreenArrows) +
-            (arrowIndex * GREEN_ARROW_IMAGE_SIZE +
+        TextureAddress((u8*)f_StatsGreenArrows +
+            (PALETTED_TEXELS_OFFSET + arrowIndex * GREEN_ARROW_IMAGE_SIZE +
                 f_GreenArrowFrame * GREEN_ARROW_FRAME_SIZE)),
         G_IM_FMT_CI, GREEN_ARROW_SIZE, GREEN_ARROW_SIZE, 0, 0,
         GREEN_ARROW_SIZE - 1, GREEN_ARROW_SIZE - 1, 0,
@@ -1927,9 +1921,6 @@ void DrawUpDownArrows(Gfx** displayListHead, s32 centerY) {
 
   *displayListHead = gfx;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", DrawUpDownArrows);
-#endif
 
 /* Reads every course's icon into the Best Shots screen's buffers */
 void LoadBestShotsCourseIcons(void** buffers) {
