@@ -16,8 +16,8 @@ given by number or name, start the forcing off.
 For each forced pseudo, prints what the allocator knew of it: its quantity
 in local-alloc or its allocno in global-alloc, with its priority, and the
 pseudos that took the register it needed. A draft whose code differs
-otherwise gets the closest forcing found, which leaves only those other
-differences.
+otherwise gets the closest forcing found, and the instructions that still
+differ under it, which register allocation does not explain.
 """
 
 import collections
@@ -540,9 +540,13 @@ def main() -> None:
             print("MATCHES unforced")
             return
         else:
-            unforced = compile_function(c_path, function, {}, work)
             print(f"closest: {differences} differ when {len(force)} are forced")
-            compilation = unforced
+            fncompare.print_diff(
+                target,
+                compilation.routine,
+                lambda index: blame.blame(compilation.blamed, index),
+            )
+            compilation = compile_function(c_path, function, {}, work)
         noted_work = work / "noted"
         if noted_work.exists():
             shutil.rmtree(noted_work)
