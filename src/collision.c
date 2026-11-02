@@ -996,8 +996,10 @@ const char g_PathDebugBlankText[] = "          ";
  * Doesn't match: the original takes each absolute value into a register
  * of its own and ahead of the work around it: in the bare crossing test,
  * before loading the distance, and for the hit fraction, before working out
- * the side change. GCC ties the absolute value to its operand and schedules
- * it after. 16 words differ, 6 in shape.
+ * the side change. GCC ties the bare crossing test's absolute value to its
+ * operand and schedules it after. Dividing hitFraction in place, as in
+ * FindGroundHit, unties the hit fraction's (16 words differed).
+ * 14 words differ, 6 in shape.
  */
 #ifdef NON_MATCHING
 s32 FindMiniGolfGroundHit(BallSimulation* simulation, s32 startX, s32 startY,
@@ -1157,8 +1159,9 @@ s32 FindMiniGolfGroundHit(BallSimulation* simulation, s32 startX, s32 startY,
       if ((endSide >= 0) & (startSide <= 0)) {
         if (startSide < 0 && !IsBareCrossing(simulation, startSide, endSide) &&
             startSide != endSide) {
+          hitFraction = fabsf((f32)startSide);
           sideChange = startSide - endSide;
-          hitFraction = fabsf((f32)startSide) / fabsf((f32)sideChange);
+          hitFraction /= fabsf((f32)sideChange);
         } else {
           hitFraction = 1.0f;
         }
