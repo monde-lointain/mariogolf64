@@ -91,11 +91,7 @@ void SetUpDebugTextDrawing(Gfx** displayListHead) {
 /*
  * Draws the glyphs of text into a 4-bit texture one glyph tall and length
  * glyphs wide.
- * Doesn't match: the original zeroes each glyph's row counter after working
- * out its font index, and each row's column counter before its row index.
- * 8 words differ.
  */
-#ifdef NON_MATCHING
 void DrawTextIntoTexture(READ_ONLY char* text, s32 length, u16* texture) {
   s32 index;
   s32 rowFontIndex;
@@ -105,6 +101,8 @@ void DrawTextIntoTexture(READ_ONLY char* text, s32 length, u16* texture) {
   s32 fontIndex;
   s32 textureIndex;
   s32 character;
+  /* The glyph's first word in the font, copied to fontIndex to match */
+  s32 glyphFontIndex;
 
   for (index = 0; index < length; index++, text++) {
     /* Signed to match; either way a byte past 0x7F is drawn as FIRST_GLYPH */
@@ -122,16 +120,18 @@ void DrawTextIntoTexture(READ_ONLY char* text, s32 length, u16* texture) {
     }
 
     character -= FIRST_GLYPH;
-    y = 0;
-    fontIndex = ((character & (GLYPHS_PER_FONT_ROW - 1)) *
-                    (GLYPH_SIZE / PIXELS_PER_FONT_WORD)) |
+    glyphFontIndex = ((character & (GLYPHS_PER_FONT_ROW - 1)) *
+                         (GLYPH_SIZE / PIXELS_PER_FONT_WORD)) |
         ((character / GLYPHS_PER_FONT_ROW) *
             (GLYPH_SIZE * FONT_ROW_WORD_COUNT));
+    y = 0;
+    fontIndex = glyphFontIndex;
     textureIndex = index;
     for (; y < GLYPH_SIZE; y++) {
+      x = 0;
       rowIndex = textureIndex * 2;
       rowFontIndex = fontIndex;
-      for (x = 0; x < GLYPH_SIZE / PIXELS_PER_FONT_WORD; x++) {
+      for (; x < GLYPH_SIZE / PIXELS_PER_FONT_WORD; x++) {
         texture[rowIndex + x] = f_DebugFont[rowFontIndex + x];
       }
 
@@ -140,10 +140,6 @@ void DrawTextIntoTexture(READ_ONLY char* text, s32 length, u16* texture) {
     }
   }
 }
-
-#else
-INCLUDE_ASM("asm/nonmatchings/debug_text", DrawTextIntoTexture);
-#endif
 
 /* Puts text in the grid and draws it into the framebuffers at once */
 void PrintMessage(s8* text, u32 column, u32 row) {
