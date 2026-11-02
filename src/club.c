@@ -1293,7 +1293,11 @@ void InitClubs(void) {
  * set, it is found by test-firing the first set's putter instead.
  * InterpolatePuttPower is a nested function, a GNU C extension.
  *
- * Doesn't match: 94 words differ.
+ * Doesn't match: the original copies shotMode to $fp before the flag test
+ * and uses the copy only when test-firing, and it schedules the conversion of
+ * fraction later. Copying shotMode to a local at the start of the test path
+ * reproduces the copy (89 words differ, 19 in shape), and forcing 14 pseudos
+ * to the original's registers then leaves 19. 94 words differ, 22 in shape.
  */
 #ifdef NON_MATCHING
 s32 GetPuttPower(s32 fraction, ShotMode shotMode) {
