@@ -232,7 +232,8 @@ enum ModeName {
 /*
  * This overlay reads the characters and variants of saved players and
  * records as signed, though Player and RingShotRecord keep them unsigned; the
- * casts are there to match.
+ * casts are there to match. Without them SaveGameToSlot and SaveReplayToSlot
+ * differ in 6 words each, and OpenSaveMenu's draft in 23 against 11.
  */
 void SaveRingShotRecord(s32 recordIndex, RingShotRecord* record);
 void InvalidateBrokenRingShotRecords(void);
@@ -1505,7 +1506,7 @@ void DrawReplaySaveMenu(Gfx** displayListHead) {
             QuarterPixels(COURSE_TOP + (index * REPLAY_ROW_SPACING) +
                 COURSE_NUMBERS_HEIGHT),
             G_TX_RENDERTILE,
-            TexelCoordinate((s8)record->courseIndex * COURSE_DIGIT_WIDTH), 0,
+            TexelCoordinate(record->courseIndex * COURSE_DIGIT_WIDTH), 0,
             TEXEL_STEP_ONE, TEXEL_STEP_ONE);
         switch (record->scoreKind & SCORE_KIND_MASK) {
           case SCORE_KIND_ALBATROSS:
@@ -1698,8 +1699,7 @@ void DrawReplaySaveMenu(Gfx** displayListHead) {
         DrawCenteredLargeText(&gfx, rowOffsets[index] + (SCREEN_WIDTH / 2),
             EMPTY_TEXT_TOP + (index * REPLAY_ROW_SPACING), f_NoReplayText);
       } else {
-        text = ((s8)record->courseIndex * RING_SHOT_HOLE_COUNT) +
-            (s8)record->holeIndex;
+        text = (record->courseIndex * RING_SHOT_HOLE_COUNT) + record->holeIndex;
         SetUpTextDrawing(&gfx);
         SetTextSlot(rowOffsets[index] + HOLE_TEXT_LEFT,
             HOLE_TEXT_TOP + (index * REPLAY_ROW_SPACING),
