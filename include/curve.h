@@ -15,8 +15,15 @@
 #define PathPace(catchUp, stepsPerLine) \
   ((catchUp) * ((stepsPerLine) < 10 ? 10 : 100) + (stepsPerLine))
 
+/* A point of a path, or the position that StepAlongPath moves along one */
+typedef struct PathPoint {
+  /* 0x0 */ f32 x;
+  /* 0x4 */ f32 y;
+  /* 0x8 */ f32 z;
+} PathPoint;
+
 void DrawNothing(Gfx** displayListHead);
-s32 StepAlongPath(f32 points[][AXIS_COUNT], s32 pointCount, s32 pace,
-    f32 position[AXIS_COUNT]);
+s32 StepAlongPath(
+    PathPoint* points, s32 pointCount, s32 pace, PathPoint* position);
 
 #endif

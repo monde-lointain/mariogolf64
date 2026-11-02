@@ -43,28 +43,23 @@ void ResetPath(void) {
  * a fraction of its remaining distance each step, in whole units, as pace
  * sets them (see PathPace); other paces keep the last path's.
  *
- * Doesn't match: the original schedules the z distance's multiplication by
- * the catch-up fraction earlier, and loads f_PathProgressStep before
- * f_PathStepIndex, storing the step index before the y and z copies to
- * position. Swapping the step index and progress updates leaves 18
- * differing words, and moving them before the copies gives 61 to 114;
- * writing f_PathProgressStep + progress gives 24, and adding the step to
- * progress first 22. 20 words differ.
+ * The points are structures, as the original's must have been: GCC takes a
+ * store through a plain f32 pointer, at no offset, to alias any global, and
+ * would hold the loads after position's first copy back behind it.
  */
-#ifdef NON_MATCHING
-s32 StepAlongPath(f32 points[][AXIS_COUNT], s32 pointCount, s32 pace,
-    f32 position[AXIS_COUNT]) {
+s32 StepAlongPath(
+    PathPoint* points, s32 pointCount, s32 pace, PathPoint* position) {
   s32 nextPointIndex;
   f32 stepsPerSegment;
   f32 progress;
   f32 catchUpFraction;
 
   if (f_PathPointIndex >= pointCount - 1) {
-    position[AXIS_X] = points[pointCount - 1][AXIS_X];
-    position[AXIS_Y] = points[pointCount - 1][AXIS_Y];
+    position->x = points[pointCount - 1].x;
+    position->y = points[pointCount - 1].y;
     f_PathStepIndex = 0;
     f_PathPointIndex = 0;
-    position[AXIS_Z] = points[pointCount - 1][AXIS_Z];
+    position->z = points[pointCount - 1].z;
     return PATH_END_REACHED;
   }
 
@@ -108,21 +103,21 @@ s32 StepAlongPath(f32 points[][AXIS_COUNT], s32 pointCount, s32 pace,
         break;
     }
 
-    f_PathPosition[AXIS_X] = points[0][AXIS_X];
-    f_PathPosition[AXIS_Y] = points[0][AXIS_Y];
+    f_PathPosition[AXIS_X] = points[0].x;
+    f_PathPosition[AXIS_Y] = points[0].y;
     f_PathPointIndex = 1;
-    f_PathPosition[AXIS_Z] = points[0][AXIS_Z];
+    f_PathPosition[AXIS_Z] = points[0].z;
     f_PathProgressStep = 1.0f / f_PathStepsPerSegment;
   }
 
   if (f_PathStepIndex == 0) {
-    f_PathSegment.start[AXIS_X] = points[f_PathPointIndex][AXIS_X];
-    f_PathSegment.start[AXIS_Y] = points[f_PathPointIndex][AXIS_Y];
-    f_PathSegment.start[AXIS_Z] = points[f_PathPointIndex][AXIS_Z];
-    f_PathSegment.end[AXIS_X] = points[f_PathPointIndex + 1][AXIS_X];
-    f_PathSegment.end[AXIS_Y] = points[f_PathPointIndex + 1][AXIS_Y];
+    f_PathSegment.start[AXIS_X] = points[f_PathPointIndex].x;
+    f_PathSegment.start[AXIS_Y] = points[f_PathPointIndex].y;
+    f_PathSegment.start[AXIS_Z] = points[f_PathPointIndex].z;
+    f_PathSegment.end[AXIS_X] = points[f_PathPointIndex + 1].x;
+    f_PathSegment.end[AXIS_Y] = points[f_PathPointIndex + 1].y;
     f_PathProgress = 0.0f;
-    f_PathSegment.end[AXIS_Z] = points[f_PathPointIndex + 1][AXIS_Z];
+    f_PathSegment.end[AXIS_Z] = points[f_PathPointIndex + 1].z;
   }
 
   stepsPerSegment = f_PathStepsPerSegment;
@@ -146,19 +141,19 @@ s32 StepAlongPath(f32 points[][AXIS_COUNT], s32 pointCount, s32 pace,
                     progress) -
                 f_PathPosition[AXIS_Z]) *
           catchUpFraction);
-  position[AXIS_X] = f_PathPosition[AXIS_X];
-  position[AXIS_Y] = f_PathPosition[AXIS_Y];
-  position[AXIS_Z] = f_PathPosition[AXIS_Z];
-  f_PathStepIndex++;
+  position->x = f_PathPosition[AXIS_X];
   f_PathProgress = progress + f_PathProgressStep;
+  f_PathStepIndex++;
+  position->y = f_PathPosition[AXIS_Y];
+  position->z = f_PathPosition[AXIS_Z];
   if (stepsPerSegment <= f_PathStepIndex) {
     nextPointIndex = f_PathPointIndex + 1;
-    f_PathSegment.start[AXIS_X] = points[nextPointIndex][AXIS_X];
-    f_PathSegment.start[AXIS_Y] = points[nextPointIndex][AXIS_Y];
-    f_PathSegment.start[AXIS_Z] = points[nextPointIndex][AXIS_Z];
-    f_PathSegment.end[AXIS_X] = points[nextPointIndex + 1][AXIS_X];
-    f_PathSegment.end[AXIS_Y] = points[nextPointIndex + 1][AXIS_Y];
-    f_PathSegment.end[AXIS_Z] = points[nextPointIndex + 1][AXIS_Z];
+    f_PathSegment.start[AXIS_X] = points[nextPointIndex].x;
+    f_PathSegment.start[AXIS_Y] = points[nextPointIndex].y;
+    f_PathSegment.start[AXIS_Z] = points[nextPointIndex].z;
+    f_PathSegment.end[AXIS_X] = points[nextPointIndex + 1].x;
+    f_PathSegment.end[AXIS_Y] = points[nextPointIndex + 1].y;
+    f_PathSegment.end[AXIS_Z] = points[nextPointIndex + 1].z;
     f_PathStepIndex = 0;
     f_PathPointIndex = nextPointIndex;
   }
@@ -166,10 +161,6 @@ s32 StepAlongPath(f32 points[][AXIS_COUNT], s32 pointCount, s32 pace,
   /* At most 0 here, since f_PathPointIndex is at least 1 */
   return 1 - f_PathPointIndex;
 }
-
-#else
-INCLUDE_ASM("asm/nonmatchings/curve", StepAlongPath);
-#endif
 
 /*
  * Fills coefficients for EvaluatePeriodicSpline with the curve through

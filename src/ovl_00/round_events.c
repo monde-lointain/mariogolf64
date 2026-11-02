@@ -293,16 +293,6 @@ typedef struct LakituVelocity {
 
 /* The Fly Guy and its streak are drawn on screen; a point's x and y are in
  * screen pixels */
-typedef struct FlyGuyPoint {
-  /* 0x0 */ f32 x;
-  /* 0x4 */ f32 y;
-  /* 0x8 */ f32 z;
-} FlyGuyPoint;
-
-/* A point's coordinates, and a path of points, as StepAlongPath takes them */
-#define FlyGuyCoordinates(point) ((f32*)&(point))
-#define FlyGuyPathCoordinates(path) ((f32(*)[AXIS_COUNT])(path))
-
 /* Frames since the banner started, or BANNER_FRAME_NONE */
 static s32 f_BannerFrame = BANNER_FRAME_NONE;
 static s32 f_CurrentBanner = BANNER_NONE;
@@ -529,7 +519,7 @@ static Degrees f_ContactSpinAngle = 0.0f;
  * StepAlongPath flies the Fly Guy through the first
  * WIND_FLY_GUY_PATH_POINT_COUNT points; the last two are read by no routine
  */
-static FlyGuyPoint f_WindFlyGuyPath[] = {{-128.0f, 214.0f, 0.0f},
+static PathPoint f_WindFlyGuyPath[] = {{-128.0f, 214.0f, 0.0f},
     {1e+02f, 215.0f, 0.0f}, {1.6e+02f, 1.9e+02f, 0.0f},
     {1.8e+02f, 1.5e+02f, 0.0f}, {1.8e+02f, 1.2e+02f, 0.0f},
     {1.7e+02f, 1e+02f, 0.0f}, {1.5e+02f, 85.0f, 0.0f}, {1.3e+02f, 8e+01f, 0.0f},
@@ -539,7 +529,7 @@ static FlyGuyPoint f_WindFlyGuyPath[] = {{-128.0f, 214.0f, 0.0f},
     {3.3e+02f, 1.8e+02f, 0.0f}, {3.6e+02f, 175.0f, 0.0f},
     {3.8e+02f, 1.7e+02f, 0.0f}};
 /* Where the Fly Guy stays while its streak fades */
-static FlyGuyPoint f_WindFlyGuyExit = {3.8e+02f, 1.7e+02f, 0.0f};
+static PathPoint f_WindFlyGuyExit = {3.8e+02f, 1.7e+02f, 0.0f};
 static s32 f_WindFlyGuyFrame = FLY_GUY_HIDDEN;
 static s32 f_WindFlyGuyAsset = FLY_GUY_IMAGE_ASSET;
 /* Read by no routine */
@@ -552,7 +542,7 @@ static Mtx f_FlipMessageMatrices[MATRIX_BUFFER_COUNT];
 static Mtx f_ReadyGoMatrices[2];
 static Mtx f_ContactRibbonMatrices[DRAW_BUFFER_COUNT];
 static Mtx f_ContactSpinMatrices[MATRIX_BUFFER_COUNT];
-static FlyGuyPoint f_WindFlyGuyLastPosition;
+static PathPoint f_WindFlyGuyLastPosition;
 static Mtx f_BannerMatrices[MATRIX_BUFFER_COUNT];
 /* Read by no routine */
 static u8 f_UnusedBufferAfterBannerMatrices[0xD0] UNUSED;
@@ -2980,7 +2970,7 @@ void ShowWindFlyGuy(s32 show) {
  */
 void DrawWindFlyGuy(Gfx** displayListHead) {
   EncodedAsset asset;
-  FlyGuyPoint position;
+  PathPoint position;
   Vec3 translation;
   Vec3 rotation;
   Mat4 matrix;
@@ -3002,9 +2992,8 @@ void DrawWindFlyGuy(Gfx** displayListHead) {
   OpenEncodedAsset(f_WindFlyGuyAsset, &asset);
   ReadEncodedAsset(f_MovieBuffer, &asset);
   if (f_WindFlyGuyFrame < WIND_FLY_GUY_ARRIVED) {
-    if (StepAlongPath(FlyGuyPathCoordinates(f_WindFlyGuyPath),
-            WIND_FLY_GUY_PATH_POINT_COUNT, WIND_FLY_GUY_PATH_PACE,
-            FlyGuyCoordinates(position)) == PATH_END_REACHED) {
+    if (StepAlongPath(f_WindFlyGuyPath, WIND_FLY_GUY_PATH_POINT_COUNT,
+            WIND_FLY_GUY_PATH_PACE, &position) == PATH_END_REACHED) {
       f_WindFlyGuyFrame = WIND_FLY_GUY_ARRIVED;
     }
 
