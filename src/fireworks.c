@@ -158,7 +158,8 @@ s32 HaveFireworksStayedFreed(void) {
 
 /*
  * The random part of a firework's launch height, 0 to 3. A function rather
- * than inline code to match.
+ * than inline code to match: LaunchFirework's draft gives 50 differing words
+ * with it, 69 with guRandom() % 4 written in place, and 68 with & 3.
  */
 static inline s32 RandomLaunchHeightJitter(void) {
   return guRandom() % 4;
