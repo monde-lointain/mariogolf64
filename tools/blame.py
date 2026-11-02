@@ -9,7 +9,9 @@ RTL dump holds that insn, and the passes before global-alloc that changed
 its pattern. Then, for each pseudo register those insns used before
 register allocation, prints what the allocators knew of it: its uses and
 live length from local-alloc, the hard register it was given, and its
-conflicts and preferences from global-alloc. Last, it checks the target's
+conflicts and preferences from global-alloc. For each such insn, it prints
+how sched and sched2 placed it: its priority, the stalls before it became
+ready and the insns it was placed ahead of. Last, it checks the target's
 order of our insns against the dependences sched2 kept, or failing that
 lists the pairs it orders the other way and their priorities. Words are
 paired by text, so a pair it reports may be a mispairing. --keep leaves
@@ -87,6 +89,15 @@ ELEMENT_HEADER_RE = re.compile(
 LINK_RE = re.compile(r"\(insn_list(?::(\w+))? (\d+)")
 # The priority sched gives an insn as it schedules the insn's block
 PRIORITY_RE = re.compile(r"^;; insn\[ *(\d+)\]: priority = +(\d+)", re.MULTILINE)
+# sched's note that an insn became ready: it, the insn placed after it, the
+# stalls it cost and the clock, counted back from the block's end
+LAUNCH_RE = re.compile(
+    r"^;; launching (\d+) before (\d+) with (no|\d+) stalls? at T-(\d+)",
+    re.MULTILINE,
+)
+# sched's ready list at a clock: the clock, then what it placed first
+READY_RE = re.compile(r"^;; ready list at T-(\d+):.*, now (\d+)(.*)$", re.MULTILINE)
+SCHEDULE_PASSES = ("sched", "sched2")
 DEPENDENCE_KINDS = {"REG_DEP_ANTI": "anti", "REG_DEP_OUTPUT": "output"}
 # What PATTERN_END_RE splits an insn with links into: its pattern and the rest
 PATTERN_AND_REST = 2
@@ -376,6 +387,43 @@ def find_pseudos(compilation: Compilation, indices: list[int]) -> list[int]:
     return sorted(pseudos)
 
 
+def describe_schedule(dump: str, uid: int) -> str:
+    """Return how the scheduler that wrote DUMP placed insn UID.
+
+    The scheduler fills a block from its end, so an insn becomes ready once
+    every insn that waits for it is placed, after the stalls its latency
+    needs, and is placed at the clock of the ready list it heads, ahead of
+    the others still ready then.
+    """
+    priority = next(
+        (
+            match.group(2)
+            for match in PRIORITY_RE.finditer(dump)
+            if int(match.group(1)) == uid
+        ),
+        None,
+    )
+    if priority is None:
+        return ""
+    parts = [f"priority {priority}"]
+    launch = next(
+        (match for match in LAUNCH_RE.finditer(dump) if int(match.group(1)) == uid),
+        None,
+    )
+    if launch:
+        after, stalls, clock = launch.group(2, 3, 4)
+        parts.append(f"ready before insn {after} after {stalls} stalls at T-{clock}")
+    placed = next(
+        (match for match in READY_RE.finditer(dump) if int(match.group(2)) == uid),
+        None,
+    )
+    if placed:
+        others = placed.group(3).split()
+        rivals = f" ahead of {' '.join(others)}" if others else " alone"
+        parts.append(f"placed at T-{placed.group(1)}{rivals}")
+    return ", ".join(parts)
+
+
 def describe_pseudo(compilation: Compilation, pseudo: int) -> str:
     """Return what the register allocators knew of PSEUDO."""
     lreg = compilation.dumps.get("lreg", "")
@@ -654,6 +702,14 @@ def main() -> None:
     indices = [index for run in runs for _, index in run if index is not None]
     for pseudo in find_pseudos(compilation, indices):
         print(f"  {describe_pseudo(compilation, pseudo)}")
+    uids = sorted(
+        {insn[0] for index in indices if (insn := get_insn(compilation, index))}
+    )
+    for uid in uids:
+        for name in SCHEDULE_PASSES:
+            placement = describe_schedule(compilation.dumps.get(name, ""), uid)
+            if placement:
+                print(f"  insn {uid} in {name}: {placement}")
     order = check_order(compilation, target)
     if order:
         print(f"order: {order[0]}")
