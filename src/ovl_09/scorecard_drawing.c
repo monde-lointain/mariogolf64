@@ -2117,7 +2117,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard_drawing", DrawLeaderboardPage);
  * loops add the column's offset to x after adding the cells' left edge, where
  * this adds it first, and the target keeps the address of
  * g_GameState.holeSelection in a saved register while it draws the faces.
- * 802 words differ, 246 in shape.
+ * 800 words differ, 244 in shape.
  */
 #ifdef NON_MATCHING
 void DrawScoresPage(Gfx** displayListHead) {
@@ -2397,7 +2397,7 @@ void DrawScoresPage(Gfx** displayListHead) {
               QuarterPixels(((j * CELL_WIDTH) + CELL_LEFT) + g_Scorecard.x),
               QuarterPixels(g_Scorecard.y + (CELL_TOP + (i * CELL_HEIGHT))),
               QuarterPixels(
-                  g_Scorecard.x + (j * CELL_WIDTH) + CELL_LEFT + CELL_WIDTH),
+                  (j * CELL_WIDTH) + (CELL_LEFT + CELL_WIDTH) + g_Scorecard.x),
               QuarterPixels(
                   g_Scorecard.y + (i * CELL_HEIGHT) + CELL_TOP + CELL_HEIGHT),
               G_TX_RENDERTILE, 0, TexelCoordinate(i * CELL_HEIGHT),

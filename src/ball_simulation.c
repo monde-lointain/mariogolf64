@@ -221,7 +221,7 @@ void ResetBallSimulations(void) {
  * Doesn't match: the register allocation and instruction scheduling differ in
  * many places, and where the original recomputes abs.s for each use of a
  * float's absolute value, this code shares one abs.s or compiles a compare and
- * branch. 791 words differ, 235 in shape.
+ * branch. 779 words differ, 235 in shape.
  */
 #ifdef NON_MATCHING
 s32 StepBallSimulation(BallSimulation* simulation) {
@@ -2013,9 +2013,9 @@ SETTLE:
 
                 if (rest > 0.0f) {
                   simulation->unkB4 = 1;
-                  floor = ((CUP_RIM_CURVE_RADIUS - sqrtf(rest)) *
-                              CUP_RIM_SINK_SCALE) +
-                      floor;
+                  floor = floor +
+                      ((CUP_RIM_CURVE_RADIUS - sqrtf(rest)) *
+                          CUP_RIM_SINK_SCALE);
                 }
               }
             }
