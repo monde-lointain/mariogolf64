@@ -501,6 +501,12 @@ def functions_data(sections: List[Tuple[dict, List[dict]]]) -> str:
 
 # --- history ------------------------------------------------------------------------------------------------------
 
+def utc(date: str) -> str:
+    """An ISO 8601 date in UTC, so that the dates sort as text and the charts ignore daylight saving time."""
+    from datetime import datetime, timezone
+    return datetime.fromisoformat(date.replace("Z", "+00:00")).astimezone(timezone.utc).isoformat()
+
+
 def history_point(report: dict, commit: str, date: str) -> dict:
     m = report.get("measures", {})
     return {
@@ -531,7 +537,7 @@ def merge_history(files: Sequence[str], point: Optional[dict]) -> List[dict]:
             continue
         for p in data:
             if isinstance(p, dict) and p.get("commit") and p.get("date"):
-                by_commit[p["commit"]] = p
+                by_commit[p["commit"]] = {**p, "date": utc(p["date"])}
     if point and point.get("commit"):
         by_commit[point["commit"]] = point
     elif point:
@@ -1066,6 +1072,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     p.add_argument("--repo", default="", help="OWNER/NAME for links")
     p.add_argument("--regs", help="tools/regsonly.py's JSON: functions that match except for registers")
     a = p.parse_args(argv)
+    if a.date:
+        a.date = utc(a.date)
     with open(a.report, encoding="utf-8") as fh:
         report = json.load(fh)
     regs = None
