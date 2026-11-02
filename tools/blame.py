@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Show where KMC GCC made each instruction that differs from the target.
 
-    blame.py ASM_FILE C_FILE FUNCTION
+    blame.py [--keep DIR] ASM_FILE C_FILE FUNCTION
 
 Prints fncompare's diff of FUNCTION, noting after each of our differing
 instructions the insn that made it, as -dp names it, the first pass whose
@@ -9,7 +9,8 @@ RTL dump holds that insn, and the passes before global-alloc that changed
 its pattern. Then, for each pseudo register those insns used before
 register allocation, prints what the allocators knew of it: its uses and
 live length from local-alloc, the hard register it was given, and its
-conflicts and preferences from global-alloc.
+conflicts and preferences from global-alloc. --keep leaves the compiler's
+work files, such as the pass dumps unit.sched and unit.sched2, in DIR.
 """
 
 import re
@@ -24,6 +25,9 @@ from elftools.elf.sections import SymbolTableSection
 
 import fncompare
 from fncompare import StrPath
+
+# ASM_FILE, C_FILE and FUNCTION
+EXPECTED_ARGUMENT_COUNT = 3
 
 # The passes -da dumps, in the order they run
 PASSES = (
@@ -379,10 +383,21 @@ def describe_pseudo(compilation: Compilation, pseudo: int) -> str:
 
 def main() -> None:
     """Blame the differing instructions of the function named."""
-    asm_path, c_path, function = sys.argv[1:]
+    arguments = sys.argv[1:]
+    keep = None
+    if arguments[:1] == ["--keep"] and len(arguments) > 1:
+        keep = Path(arguments[1])
+        arguments = arguments[2:]
+    if len(arguments) != EXPECTED_ARGUMENT_COUNT:
+        sys.exit(__doc__)
+    asm_path, c_path, function = arguments
     target = fncompare.read_target_functions(asm_path)[function]
-    with tempfile.TemporaryDirectory() as work:
-        compilation = compile_function(c_path, function, Path(work))
+    if keep:
+        keep.mkdir(parents=True, exist_ok=True)
+        compilation = compile_function(c_path, function, keep)
+    else:
+        with tempfile.TemporaryDirectory() as work:
+            compilation = compile_function(c_path, function, Path(work))
     compiled = compilation.routine
     print(f"{function} {fncompare.describe(target, compiled)}")
     fncompare.print_diff(target, compiled, lambda index: blame(compilation, index))
