@@ -1108,6 +1108,9 @@ void SetGridVertex(s32 column, s32 row, Vtx_t* point) {
  * gives the original's order of instructions but 38 differing words: local
  * allocation ties tileIndex, its offset and midpoints into one quantity that
  * takes $v0 ahead of the slot's lookup, and the rest of the registers follow.
+ * The oracle matches that form when 13 pseudos are forced, so its RTL is the
+ * original's up to allocation; the slot's operand order there changes
+ * nothing.
  */
 #ifdef NON_MATCHING
 Vtx* GetGroundPoint(u32 column, u32 row) {
