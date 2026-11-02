@@ -2207,7 +2207,11 @@ void DrawGoombaMovie(Gfx** displayListHead) {
  * Lakitu flies in, counts down to the start on its starting light, then flies
  * off
  *
- * Doesn't match: 89 words differ, 49 in shape.
+ * Doesn't match: of the constants loop.c hoists out of the strip loop, the
+ * original keeps f_Lakitu's address in $s4 and the tile commands' words in
+ * $s2 and $s3, where GCC gives them $s3, $s2 and $s4, and the strips' float
+ * conversions are scheduled differently. Setting offset in the loop's header,
+ * or before the palette load, changes nothing. 89 words differ, 49 in shape.
  */
 #ifdef NON_MATCHING
 void DrawLakituMovie(Gfx** displayListHead) {
