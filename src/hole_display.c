@@ -3143,10 +3143,14 @@ INCLUDE_ASM("asm/nonmatchings/hole_display", CaptureHudAnimationFrame);
 #endif
 
 /*
+ * Draws the slice animation from the captured frame, a strip at a time; each
+ * strip syncs before its rectangle and after it, as the original's twelve
+ * commands a strip show.
  *
  * Doesn't match: the strip loop schedules its display-list stores in
- * another order, and the column and word index take other
- * registers. 44 words differ, 16 in shape.
+ * another order, and the column and word index take other registers. 61
+ * words differ, 7 in shape; without the sync before the rectangle, 44 and
+ * 16.
  */
 #ifdef NON_MATCHING
 void DrawSliceAnimation(void) {
@@ -3191,6 +3195,7 @@ void DrawSliceAnimation(void) {
           G_IM_SIZ_16b, SLICE_WIDTH, SLICE_STRIP_HEIGHT, 0,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+      gDPPipeSync(g_DisplayListHead++);
       gSPTextureRectangle(g_DisplayListHead++, QuarterPixels(left),
           QuarterPixels(y), QuarterPixels(left + SLICE_WIDTH),
           QuarterPixels(y + SLICE_STRIP_HEIGHT), G_TX_RENDERTILE, 0, 0,
