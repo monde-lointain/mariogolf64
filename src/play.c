@@ -2015,8 +2015,8 @@ void DrawHoleEditorGround(CameraMatrices* matrices, s32 terrainStyle);
  * tiles go down two halves in rows of four, and a fine tile snaps the edge
  * vertices it shares with coarser neighbors so that no gaps open between them.
  *
- * Doesn't match: 1231 words differ. The original's frame is 0x38 bytes
- * larger, so every stack offset differs, and terrainStyle and the locals
+ * Doesn't match: 1198 words differ, 354 in shape. The original's frame is 0x38
+ * bytes larger, so every stack offset differs, and terrainStyle and the locals
  * take other saved registers.
  */
 void DrawGround(CameraMatrices* matrices, s32 terrainStyle) {
@@ -2050,7 +2050,6 @@ void DrawGround(CameraMatrices* matrices, s32 terrainStyle) {
   s32 middleSlot;
   s32 bottomSlot;
   s32 spareSlot;
-  s32* offsets;
   GroundTile* tiles;
 
   /*
@@ -2339,13 +2338,16 @@ void DrawGround(CameraMatrices* matrices, s32 terrainStyle) {
                 snapsEdge[current][TILE_EDGE_RIGHT] = FALSE;
               }
 
-              offsets = g_CoarseVertexOffsets[tileIndex];
               for (j = 0; j < TILE_VERTEX_SEGMENT_COUNT; j++) {
                 /* Moves a snapped edge's vertices, or moves back those snapped
                  * for the last tile */
                 if (snapsEdge[current][j] || snapsEdge[current ^ 1][j]) {
-                  gSPSegment(
-                      gfx++, j + 1, snapsEdge[current][j] ? offsets[j] : 0);
+                  /* Indexing the tile's offsets as a pointer is closer to the
+                   * original than indexing the array */
+                  gSPSegment(gfx++, j + 1,
+                      snapsEdge[current][j]
+                          ? ((s32*)g_CoarseVertexOffsets[tileIndex])[j]
+                          : 0);
                 }
               }
 
