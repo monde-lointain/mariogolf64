@@ -1261,7 +1261,7 @@ INCLUDE_ASM("asm/nonmatchings/collision", FindMiniGolfGroundHit);
  * path that starts or ends off the ground hits a level triangle at its end
  * if it ends below the ground there, and nothing otherwise.
  *
- * Doesn't match: 73 words differ.
+ * Doesn't match: 25 words differ, 17 in shape.
  */
 #ifdef NON_MATCHING
 s32 FindGroundHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
@@ -1468,11 +1468,14 @@ s32 FindGroundHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
     }
 
     if (hitIndex >= 0) {
-      break;
+      *hit = triangles[hitIndex];
+      hit->unk0 = HOLE_TRIANGLE_KIND_FLAT;
+      *fraction = nearestFraction;
+      return TRUE;
     }
 
     if ((tileX == endTileX) & (tileZ == endTileZ)) {
-      return FALSE;
+      break;
     }
 
     /* Finds where the path enters a neighboring tile */
@@ -1508,10 +1511,7 @@ s32 FindGroundHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
     }
   }
 
-  *hit = triangles[hitIndex];
-  hit->unk0 = HOLE_TRIANGLE_KIND_FLAT;
-  *fraction = nearestFraction;
-  return TRUE;
+  return FALSE;
 }
 
 #else
