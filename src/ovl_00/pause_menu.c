@@ -1146,7 +1146,8 @@ s32 UpdateChoiceBox(ControllerState* controller) {
  * out of the cloud loop, in $fp, where this gets no register for it and
  * reloads the constant in the loop; textWidth and the label table also take
  * other saved registers. Declaration orders, splits and moves don't change
- * the priorities. 67 words differ, 15 in shape.
+ * the priorities. Stepping the label's y beside the index gives 67 words
+ * differing, 15 in shape. 65 words differ, 9 in shape.
  */
 #ifdef NON_MATCHING
 void DrawChoiceBox(Gfx** displayListHead) {
@@ -1162,7 +1163,6 @@ void DrawChoiceBox(Gfx** displayListHead) {
   s32 cursorX;
   s32 cursorY;
   s32 labelsTop;
-  s16 labelY;
 
   halfWidth = box->halfWidth + CHOICE_BOX_MARGIN;
   f_ChoiceGlowAngle += M_PI / 18;
@@ -1211,8 +1211,7 @@ void DrawChoiceBox(Gfx** displayListHead) {
     if (box->isVertical) {
       labelsTop = CHOICE_LABELS_MIDDLE_Y -
           ((box->optionCount - 1) * (CHOICE_LABEL_SPACING / 2));
-      for (i = 0, labelY = labelsTop; i != box->optionCount;
-          i++, labelY += CHOICE_LABEL_SPACING) {
+      for (i = 0; i != box->optionCount; i++) {
         if (i == f_ChoiceBoxSelection) {
           gDPPipeSync(gfx++);
           gDPSetPrimColor(gfx++, 0, 0, red, green, blue, 0xFF);
@@ -1223,7 +1222,8 @@ void DrawChoiceBox(Gfx** displayListHead) {
           gDPPipeSync(gfx++);
         }
 
-        DrawCenteredLargeText(&gfx, CHOICE_BOX_CENTER_X, labelY,
+        DrawCenteredLargeText(&gfx, CHOICE_BOX_CENTER_X,
+            labelsTop + (i * CHOICE_LABEL_SPACING),
             f_ChoiceBoxLabels[box->labels[i]]);
       }
 
