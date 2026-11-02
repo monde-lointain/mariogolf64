@@ -2404,7 +2404,7 @@ void DrawScoresPage(Gfx** displayListHead) {
 
         if (!(g_GameState.holeSelection & HOLE_SELECTION_FRONT_NINE)) {
           DrawTextureRect(&gfx,
-              QuarterPixels(g_Scorecard.x + (j * CELL_WIDTH) + CELL_LEFT),
+              QuarterPixels((j * CELL_WIDTH) + CELL_LEFT + g_Scorecard.x),
               QuarterPixels(
                   g_Scorecard.y + (i * CELL_HEIGHT) + CELL_TOP + NINE_SPACING),
               QuarterPixels(
@@ -2480,10 +2480,10 @@ void DrawScoresPage(Gfx** displayListHead) {
                   ((cellColumn * CELL_WIDTH) + CELL_LEFT) + g_Scorecard.x),
               QuarterPixels((cellRowIndex * CELL_HEIGHT) +
                   (CELL_TOP + NINE_SPACING) + g_Scorecard.y),
-              QuarterPixels(g_Scorecard.x + (cellColumn * CELL_WIDTH) +
-                  CELL_LEFT + CELL_WIDTH),
-              QuarterPixels(g_Scorecard.y + (cellRowIndex * CELL_HEIGHT) +
-                  CELL_TOP + NINE_SPACING + CELL_HEIGHT),
+              QuarterPixels((cellColumn * CELL_WIDTH) +
+                  (CELL_LEFT + CELL_WIDTH) + g_Scorecard.x),
+              QuarterPixels((cellRowIndex * CELL_HEIGHT) + CELL_HEIGHT +
+                  CELL_TOP + NINE_SPACING + g_Scorecard.y),
               G_TX_RENDERTILE, 0, TexelCoordinate(cellRowIndex * CELL_HEIGHT),
               TEXEL_STEP_ONE, TEXEL_STEP_ONE);
         }
@@ -2576,7 +2576,7 @@ void DrawScoresPage(Gfx** displayListHead) {
 
       if (!(g_GameState.holeSelection & HOLE_SELECTION_BACK_NINE)) {
         DrawSmallFace(&gfx, g_Scorecard.x + SCORES_FACE_LEFT,
-            frontTop + PLAYER_ROW_TOP - SCORES_FACE_RISE + g_Scorecard.y, 0,
+            PLAYER_ROW_TOP - SCORES_FACE_RISE + (frontTop + g_Scorecard.y), 0,
             TRUE);
         DrawSmallFace(&gfx,
             ((secondRow & 1) * SCORES_FACE_STAGGER) + SCORES_FACE_LEFT +
@@ -2588,7 +2588,7 @@ void DrawScoresPage(Gfx** displayListHead) {
 
       if (!(g_GameState.holeSelection & HOLE_SELECTION_FRONT_NINE)) {
         DrawSmallFace(&gfx, g_Scorecard.x + SCORES_FACE_LEFT,
-            backTop + PLAYER_ROW_TOP - SCORES_FACE_RISE + g_Scorecard.y, 0,
+            PLAYER_ROW_TOP - SCORES_FACE_RISE + (backTop + g_Scorecard.y), 0,
             TRUE);
         DrawSmallFace(&gfx,
             ((secondRow & 1) * SCORES_FACE_STAGGER) + SCORES_FACE_LEFT +
@@ -2720,14 +2720,14 @@ void DrawScoresPage(Gfx** displayListHead) {
     if (!(g_GameState.holeSelection & HOLE_SELECTION_BACK_NINE)) {
       sprintf(g_PrintBuffer, f_TwoDigitFormat, j + 1);
       DrawCondensedShadowedText(&gfx,
-          g_Scorecard.x + (j * CELL_WIDTH) + HOLE_NUMBERS_LEFT,
+          (j * CELL_WIDTH) + HOLE_NUMBERS_LEFT + g_Scorecard.x,
           frontTop + HOLE_NUMBERS_TOP + g_Scorecard.y, g_PrintBuffer);
     }
 
     if (!(g_GameState.holeSelection & HOLE_SELECTION_FRONT_NINE)) {
       sprintf(g_PrintBuffer, f_TwoDigitFormat, j + HOLES_PER_NINE + 1);
       DrawCondensedShadowedText(&gfx,
-          g_Scorecard.x + (j * CELL_WIDTH) + BACK_HOLE_NUMBERS_LEFT,
+          (j * CELL_WIDTH) + BACK_HOLE_NUMBERS_LEFT + g_Scorecard.x,
           backTop + HOLE_NUMBERS_TOP + g_Scorecard.y, g_PrintBuffer);
     }
   }
@@ -2739,7 +2739,7 @@ void DrawScoresPage(Gfx** displayListHead) {
       sprintf(
           g_PrintBuffer, f_DecimalFormat, (s8)course->holes[parHoleIndex].par);
       DrawCondensedShadowedText(&gfx,
-          g_Scorecard.x + (parHoleIndex * CELL_WIDTH) + PAR_LEFT,
+          (parHoleIndex * CELL_WIDTH) + PAR_LEFT + g_Scorecard.x,
           frontTop + PAR_TOP + g_Scorecard.y, g_PrintBuffer);
     }
 
@@ -2748,7 +2748,7 @@ void DrawScoresPage(Gfx** displayListHead) {
       sprintf(g_PrintBuffer, f_DecimalFormat,
           (s8)course->holes[parHoleIndex + HOLES_PER_NINE].par);
       DrawCondensedShadowedText(&gfx,
-          g_Scorecard.x + (parHoleIndex * CELL_WIDTH) + PAR_LEFT,
+          (parHoleIndex * CELL_WIDTH) + PAR_LEFT + g_Scorecard.x,
           backTop + PAR_TOP + g_Scorecard.y, g_PrintBuffer);
     }
   }
@@ -2799,7 +2799,7 @@ void DrawScoresPage(Gfx** displayListHead) {
         sprintf(g_PrintBuffer + 1, "");
         if (hole < HOLES_PER_NINE) {
           DrawShadowedText(&gfx,
-              g_Scorecard.x + MATCH_MARK_LEFT + (hole * CELL_WIDTH),
+              (hole * CELL_WIDTH) + MATCH_MARK_LEFT + g_Scorecard.x,
               frontTop + (i * rowSpacing) + PLAYER_ROW_TOP + g_Scorecard.y,
               g_PrintBuffer);
         } else {
@@ -2825,7 +2825,7 @@ void DrawScoresPage(Gfx** displayListHead) {
             g_PrintBuffer);
       } else {
         DrawShadowedText(&gfx, g_Scorecard.x + MATCH_STANDING_LEFT,
-            backTop + (i * rowSpacing) + PLAYER_ROW_TOP + g_Scorecard.y,
+            (i * rowSpacing) + backTop + (PLAYER_ROW_TOP + g_Scorecard.y),
             g_PrintBuffer);
       }
     } else if (g_GameState.gameMode == GAME_MODE_SKINS_MATCH ||
@@ -2870,7 +2870,7 @@ void DrawScoresPage(Gfx** displayListHead) {
       sprintf(g_PrintBuffer, "%2dP", standing);
       if (g_GameState.holeSelection & HOLE_SELECTION_FRONT_NINE) {
         DrawShadowedText(&gfx, g_Scorecard.x + SKINS_TOTAL_LEFT,
-            frontTop + (i * rowSpacing) + PLAYER_ROW_TOP + g_Scorecard.y,
+            (i * rowSpacing) + frontTop + (PLAYER_ROW_TOP + g_Scorecard.y),
             g_PrintBuffer);
       } else {
         DrawShadowedText(&gfx, g_Scorecard.x + SKINS_TOTAL_LEFT,
@@ -3092,12 +3092,12 @@ void DrawScoresPage(Gfx** displayListHead) {
         sprintf(g_PrintBuffer, "%c", BIRDIE_BADGE_CODE);
         if (hole < HOLES_PER_NINE) {
           DrawShadowedText(&gfx,
-              g_Scorecard.x + (hole * CELL_WIDTH) + BADGE_LEFT,
+              (hole * CELL_WIDTH) + BADGE_LEFT + g_Scorecard.x,
               frontTop + BADGE_TOP + g_Scorecard.y, g_PrintBuffer);
         } else {
           DrawShadowedText(&gfx,
-              g_Scorecard.x + ((hole - HOLES_PER_NINE) * CELL_WIDTH) +
-                  BADGE_LEFT,
+              ((hole - HOLES_PER_NINE) * CELL_WIDTH) + BADGE_LEFT +
+                  g_Scorecard.x,
               backTop + BADGE_TOP + g_Scorecard.y, g_PrintBuffer);
         }
       }
