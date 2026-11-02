@@ -1646,18 +1646,13 @@ void InvalidateBrokenSavedGames(void) {
 /*
  * Takes the recorded mark off Ring Shot records whose score, character,
  * palette, course or hole is out of range.
- *
- * Doesn't match: 5 words differ. The original copies the score kind into a
- * second register before testing its recorded bit, where combine folds the
- * copy into the mask. Reading the kind through an s8 or s32 local gives 7 to
- * 18 words; a u8 local gives the copy, but as an unsigned load.
  */
-#ifdef NON_MATCHING
 void InvalidateBrokenRingShotRecords(void) {
   SaveData* save;
   Boolean isInvalid[RING_SHOT_RECORD_COUNT];
   s32 recordIndex;
   s32 kind;
+  s32 scoreKind;
   s32 unused[2] UNUSED; /* The original frame has room for this */
 
   save = GetSaveData();
@@ -1668,8 +1663,12 @@ void InvalidateBrokenRingShotRecords(void) {
   for (recordIndex = 0; recordIndex != RING_SHOT_RECORD_COUNT; recordIndex++) {
     RingShotRecord* record = &save->ringShotRecords[recordIndex];
 
-    kind = record->scoreKind;
-    if (record->scoreKind & SCORE_KIND_RECORDED) {
+    scoreKind = record->scoreKind;
+    kind = scoreKind;
+    /* Masked in place, so that the test reads the loaded kind and the bounds
+     * read its copy, to match */
+    scoreKind &= SCORE_KIND_RECORDED;
+    if (scoreKind) {
       /*
        * Masking within the test keeps GCC from merging the two bounds into
        * one unsigned test, to match
@@ -1706,9 +1705,6 @@ void InvalidateBrokenRingShotRecords(void) {
     }
   }
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/menu", InvalidateBrokenRingShotRecords);
-#endif
 
 /* Keeps the hole and course being played in the menu memory */
 void RememberPlayedHole(void) {
