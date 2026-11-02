@@ -1043,16 +1043,7 @@ void WriteClubParameters(void) {
  * mode's reach, closing in by interpolating between the shortest and longest
  * results, then sets the deflection from where the last test shot landed.
  * InterpolatePower is a nested function, a GNU C extension.
- *
- * Doesn't match: the original takes the error's absolute value into a
- * register of its own before scaling the tolerance, where local-alloc ties it
- * to error, which dies there. Sched1 also puts the abs.s in the tolerance
- * multiply's latency, just before the compare. Storing the interpolation
- * fraction in error unties the registers but keeps that order. A local for
- * the absolute value or the tolerance, either order of the comparison, a
- * (f32) cast, and fabs or Abs don't help. 4 words differ, 2 in shape.
  */
-#ifdef NON_MATCHING
 void GenerateClub(s32 clubIndex) {
   BallSimulation simulation;
   Club* club;
@@ -1114,6 +1105,8 @@ void GenerateClub(s32 clubIndex) {
       error = distance - targetDistance;
       osSyncPrintf("Try %d: dist %fYd:  Error %f%\n", tryIndex + 1,
           distance * YARDS_PER_UNIT, error / targetDistance * 100.0f);
+      /* The tolerance test starts a block of its own, to match */
+      END_BASIC_BLOCK();
       if (fabsf(error) < targetDistance * GENERATION_TOLERANCE) {
         break;
       }
@@ -1128,9 +1121,12 @@ void GenerateClub(s32 clubIndex) {
         if (shortPower == 0) {
           club->power[shotMode] = longPower * 3 / 4;
         } else {
-          club->power[shotMode] = InterpolatePower(shortPower, longPower,
-              (f32)(targetDistance - shortDistance) /
-                  (f32)(longDistance - shortDistance));
+          /* error holds the fraction too, which keeps local-alloc from
+           * tying fabsf's operand to its result */
+          error = (f32)(targetDistance - shortDistance) /
+              (f32)(longDistance - shortDistance);
+          club->power[shotMode] =
+              InterpolatePower(shortPower, longPower, error);
         }
       } else {
         shortDistance = distance;
@@ -1142,9 +1138,10 @@ void GenerateClub(s32 clubIndex) {
         if (longPower == 0) {
           club->power[shotMode] = shortPower * 3 / 2;
         } else {
-          club->power[shotMode] = InterpolatePower(shortPower, longPower,
-              (f32)(targetDistance - shortDistance) /
-                  (f32)(longDistance - shortDistance));
+          error = (f32)(targetDistance - shortDistance) /
+              (f32)(longDistance - shortDistance);
+          club->power[shotMode] =
+              InterpolatePower(shortPower, longPower, error);
         }
       }
     }
@@ -1159,10 +1156,6 @@ void GenerateClub(s32 clubIndex) {
 
   g_ClubTestMode = CLUB_TEST_NONE;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/club", InterpolatePower);
-INCLUDE_ASM("asm/nonmatchings/club", GenerateClub);
-#endif
 
 /* GenerateClubSet's limits on a club's stats; distances are in yards */
 #define MAX_CLUB_DISTANCE 400
