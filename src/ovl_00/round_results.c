@@ -1583,6 +1583,12 @@ void UpdateCharacterResultsNotice(void) {
 #define NOTICE_CHARACTER_TITLE_POP_WIDTH 108.0f
 #define NOTICE_CHARACTER_TITLE_POP_HEIGHT 12.0f
 #define NOTICE_CHARACTER_TITLE_STRIP_COUNT 7
+/* The top of a title strip, while the strips are height tall. It isn't kept
+ * in a variable, which would change the loops' code. */
+#define CharacterTitleStripTop(strip, height) \
+  (NOTICE_CHARACTER_TITLE_TOP - \
+      ((height) * NOTICE_CHARACTER_TITLE_STRIP_COUNT / 2) + \
+      ((strip) * (height)))
 #define NOTICE_CHARACTER_SHINE_LEFT 88
 #define NOTICE_CHARACTER_SHINE_TOP 52
 #define NOTICE_CHARACTER_SHINE_HEIGHT 56
@@ -1595,12 +1601,7 @@ void UpdateCharacterResultsNotice(void) {
 /*
  * The notice that a character has been beaten: their nameplate, face and title
  * pop open, then a shine sweeps the title
- *
- * Doesn't match: in both title loops, GCC schedules the strip's top, which
- * the loop pass reduces to a subtraction of two saved registers, two
- * instructions before the original does. 4 words differ.
  */
-#ifdef NON_MATCHING
 void DrawCharacterResultsNotice(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   Radians angle;
@@ -1609,7 +1610,6 @@ void DrawCharacterResultsNotice(Gfx** displayListHead) {
   s32 step;
   s32 width;
   s32 height;
-  s32 top;
   s32 titleCenterX;
   s32 i;
   s32 liftFromCenter;
@@ -1674,15 +1674,15 @@ void DrawCharacterResultsNotice(Gfx** displayListHead) {
               (i * NOTICE_CHARACTER_TITLE_WIDTH * NOTICE_TITLE_STRIP_HEIGHT),
           G_IM_FMT_CI, G_IM_SIZ_8b, NOTICE_CHARACTER_TITLE_WIDTH,
           NOTICE_TITLE_STRIP_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
-      top = NOTICE_CHARACTER_TITLE_TOP -
-          (height * NOTICE_CHARACTER_TITLE_STRIP_COUNT / 2) + (i * height);
       /* This pass mirrors the slide, unlike the depth pass and the shine */
       liftFromCenter = f_NoticeLift - NOTICE_CENTER_X;
       DrawTextureRect(&gfx,
           QuarterPixels(NOTICE_CENTER_X - width - f_NoticeLift),
-          QuarterPixels(top + f_NoticeUnk6C),
+          QuarterPixels(CharacterTitleStripTop(i, height) + f_NoticeUnk6C),
           QuarterPixels(width - liftFromCenter),
-          QuarterPixels(top + height + f_NoticeUnk6C), G_TX_RENDERTILE, 0, 0,
+          QuarterPixels(
+              CharacterTitleStripTop(i, height) + height + f_NoticeUnk6C),
+          G_TX_RENDERTILE, 0, 0,
           ((NOTICE_CHARACTER_TITLE_WIDTH / 2) << 10) / width,
           (NOTICE_TITLE_STRIP_HEIGHT << 10) / height);
     }
@@ -1704,13 +1704,13 @@ void DrawCharacterResultsNotice(Gfx** displayListHead) {
               (i * NOTICE_CHARACTER_TITLE_WIDTH * NOTICE_TITLE_STRIP_HEIGHT),
           G_IM_FMT_CI, G_IM_SIZ_8b, NOTICE_CHARACTER_TITLE_WIDTH,
           NOTICE_TITLE_STRIP_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
-      top = NOTICE_CHARACTER_TITLE_TOP -
-          (height * NOTICE_CHARACTER_TITLE_STRIP_COUNT / 2) + (i * height);
       titleCenterX = f_NoticeLift + NOTICE_CENTER_X;
       DrawTextureRect(&gfx, QuarterPixels(titleCenterX - width),
-          QuarterPixels(top + f_NoticeUnk6C),
+          QuarterPixels(CharacterTitleStripTop(i, height) + f_NoticeUnk6C),
           QuarterPixels(width + titleCenterX),
-          QuarterPixels(top + height + f_NoticeUnk6C), G_TX_RENDERTILE, 0, 0,
+          QuarterPixels(
+              CharacterTitleStripTop(i, height) + height + f_NoticeUnk6C),
+          G_TX_RENDERTILE, 0, 0,
           ((NOTICE_CHARACTER_TITLE_WIDTH / 2) << 10) / width,
           (NOTICE_TITLE_STRIP_HEIGHT << 10) / height);
     }
@@ -1766,9 +1766,6 @@ void DrawCharacterResultsNotice(Gfx** displayListHead) {
 
   *displayListHead = gfx;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", DrawCharacterResultsNotice);
-#endif
 
 /* Returns TRUE once the results have been saved and freed */
 s32 UpdateRoundResults(ControllerState* controller) {
