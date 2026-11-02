@@ -498,11 +498,7 @@ void DrawCharacterTable(Gfx** displayListHead) {
 
 /*
  * Draws the color-cycling cursor at (x, y), on the chosen table cell
- *
- * Doesn't match: the stack slots of the pointers to the second pipe sync
- * after the image and the cycle type are swapped. 8 words differ.
  */
-#ifdef NON_MATCHING
 void DrawTableCursor(Gfx** displayListHead, s32 x, s32 y) {
   Gfx* gfx = *displayListHead;
   s32 vertexIndex;
@@ -543,8 +539,16 @@ void DrawTableCursor(Gfx** displayListHead, s32 x, s32 y) {
       G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
       G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
   gDPPipeSync(gfx++);
-  gDPPipeSync(gfx++);
-  gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+  {
+    /* Declaration order preserves the original compiler's spill slots. */
+    Gfx* cycleType;
+    Gfx* pipeSync;
+
+    pipeSync = gfx++;
+    gDPPipeSync(pipeSync);
+    cycleType = gfx++;
+    gDPSetCycleType(cycleType, G_CYC_1CYCLE);
+  }
   gDPPipeSync(gfx++);
   gDPSetTexturePersp(gfx++, G_TP_PERSP);
   gDPPipeSync(gfx++);
@@ -568,9 +572,6 @@ void DrawTableCursor(Gfx** displayListHead, s32 x, s32 y) {
   gDPPipeSync(gfx++);
   *displayListHead = gfx;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/character_table", DrawTableCursor);
-#endif
 
 /* Draws the white lines between the table's cells */
 void DrawTableLines(Gfx** displayListHead) {

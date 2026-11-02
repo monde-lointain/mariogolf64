@@ -2509,11 +2509,7 @@ void DrawScoreLabel(Gfx** displayListHead, s32 left, s32 top, s32 labelIndex) {
 
 /*
  * Draws the color-cycling cursor on the chosen Best Shots cell
- *
- * Doesn't match: the stack slots of the pointers to the second pipe sync
- * after the image and the cycle type are swapped. 8 words differ.
  */
-#ifdef NON_MATCHING
 void DrawBestShotsCursor(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   MenuMemory* memory = GetMenuMemory();
@@ -2557,8 +2553,16 @@ void DrawBestShotsCursor(Gfx** displayListHead) {
       G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
       G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
   gDPPipeSync(gfx++);
-  gDPPipeSync(gfx++);
-  gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+  {
+    /* Declaration order preserves the original compiler's spill slots. */
+    Gfx* cycleType;
+    Gfx* pipeSync;
+
+    pipeSync = gfx++;
+    gDPPipeSync(pipeSync);
+    cycleType = gfx++;
+    gDPSetCycleType(cycleType, G_CYC_1CYCLE);
+  }
   gDPPipeSync(gfx++);
   gDPSetTexturePersp(gfx++, G_TP_PERSP);
   gDPPipeSync(gfx++);
@@ -2582,9 +2586,6 @@ void DrawBestShotsCursor(Gfx** displayListHead) {
   gDPPipeSync(gfx++);
   *displayListHead = gfx;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", DrawBestShotsCursor);
-#endif
 
 /*
  * Reads every character's face, then the palette of each best shot's character
