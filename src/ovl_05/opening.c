@@ -3872,7 +3872,10 @@ void LoadOpeningImpactLines(void) {
  * The original keeps the bottom edge's 88 in one register for both of a
  * strip's edges, where this folds the top edge into a separate constant.
  *
- * Doesn't match: 229 words differ.
+ * Doesn't match: the registers and scheduling differ throughout. Working out
+ * each strip's texel offset from its index, with the row counted down in the
+ * strip loop's initializer, took it from 229 words differing, 27 in shape.
+ * 217 words differ, 23 in shape.
  */
 #ifdef NON_MATCHING
 void DrawOpeningImpactLines(Gfx** displayListHead) {
@@ -3912,13 +3915,13 @@ void DrawOpeningImpactLines(Gfx** displayListHead) {
           gfx++, TextureAddress(ImageBody(f_OpeningEffectImage)));
       gDPPipeSync(gfx++);
       gDPPipeSync(gfx++);
-      texelOffset = LARGE_PALETTED_TEXELS_OFFSET;
 
       /* The rows count up from the bottom, so the top strip is row 1 */
-      row = IMPACT_LINES_STRIP_COUNT - 1;
-      for (stripIndex = 0; stripIndex != IMPACT_LINES_STRIP_COUNT;
-          stripIndex++) {
+      for (stripIndex = 0, row = IMPACT_LINES_STRIP_COUNT - 1;
+          stripIndex != IMPACT_LINES_STRIP_COUNT; stripIndex++) {
         bottom = IMPACT_LINES_BOTTOM - (row * IMPACT_LINES_STRIP_HEIGHT);
+        texelOffset = LARGE_PALETTED_TEXELS_OFFSET +
+            (stripIndex * IMPACT_LINES_SIZE * IMPACT_LINES_STRIP_HEIGHT);
         gDPLoadTextureBlock(gfx++,
             TextureAddress(f_OpeningEffectImage + texelOffset), G_IM_FMT_I,
             G_IM_SIZ_8b, IMPACT_LINES_SIZE, IMPACT_LINES_STRIP_HEIGHT, 0,
@@ -3930,7 +3933,6 @@ void DrawOpeningImpactLines(Gfx** displayListHead) {
             QuarterPixels(IMPACT_LINES_LEFT + width), QuarterPixels(bottom),
             G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
         gDPPipeSync(gfx++);
-        texelOffset += IMPACT_LINES_SIZE * IMPACT_LINES_STRIP_HEIGHT;
         row--;
       }
 
