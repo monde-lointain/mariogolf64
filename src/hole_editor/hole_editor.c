@@ -3878,7 +3878,9 @@ void WriteHexDumpFile(u32* words, s32 byteCount, char* fileName) {
  * GetMidpointVertex and SetEditorCombineMode are nested functions, a GNU C
  * extension.
  *
- * Doesn't match: 2339 words differ.
+ * Doesn't match: the original also steps column + 1 alongside half, where
+ * GCC computes it in each use; most of the rest follows from the registers
+ * and spill slots that changes. 3923 words differ, 663 in shape.
  */
 #ifdef NON_MATCHING
 void DrawHoleEditorGround(CameraMatrices* matrices UNUSED, s32 terrainStyle) {
@@ -3901,9 +3903,10 @@ void DrawHoleEditorGround(CameraMatrices* matrices UNUSED, s32 terrainStyle) {
   s32 groupTileIndex;
   s32 j;
   s32 segmentIndex;
+  s32 edge;
   s32 pass;
   s32 tileIndex;
-  /* Also the tile, slope and edge index in the early loops, to match */
+  /* Also the tile index in the first loop, to match */
   s32 column;
   s32 middleSlot;
   s32 bottomSlot;
@@ -4204,17 +4207,20 @@ void DrawHoleEditorGround(CameraMatrices* matrices UNUSED, s32 terrainStyle) {
 
   /* The waves move down each triangle's slope */
   if (g_ShowsGroundWaves) {
-    for (column = 0; column < ARRAY_COUNT(f_TriangleSlopes); column++) {
-      f_TriangleSlopes[column].waveS -= f_TriangleSlopes[column].normalX;
-      f_TriangleSlopes[column].waveT -= f_TriangleSlopes[column].normalZ;
+    for (slopeIndex = 0; slopeIndex < ARRAY_COUNT(f_TriangleSlopes);
+        slopeIndex++) {
+      f_TriangleSlopes[slopeIndex].waveS -=
+          f_TriangleSlopes[slopeIndex].normalX;
+      f_TriangleSlopes[slopeIndex].waveT -=
+          f_TriangleSlopes[slopeIndex].normalZ;
     }
   }
 
   slopeIndex = 0;
-  for (column = 0; column != ARRAY_COUNT(snapsEdge); column++) {
+  for (edge = 0; edge < ARRAY_COUNT(snapsEdge); edge++) {
     for (segmentIndex = 0; segmentIndex < TILE_VERTEX_SEGMENT_COUNT;
         segmentIndex++) {
-      snapsEdge[column][segmentIndex] = FALSE;
+      snapsEdge[edge][segmentIndex] = FALSE;
     }
   }
 
@@ -4226,7 +4232,8 @@ void DrawHoleEditorGround(CameraMatrices* matrices UNUSED, s32 terrainStyle) {
   gSPSegment(gfx++, 6, 0);
   gSPSegment(gfx++, 7, 0);
   gSPSegment(gfx++, 8, 0);
-  for (half = 0; half < GROUND_HALF_COUNT; half++) {
+  for (half = 0, column = 0; half < GROUND_HALF_COUNT;
+      half++, column += GROUND_HALF_VERTEX_COLUMNS) {
     s32 topSlot;
 
     previousDetail = GROUND_DETAIL_HIDDEN;
@@ -4244,7 +4251,7 @@ void DrawHoleEditorGround(CameraMatrices* matrices UNUSED, s32 terrainStyle) {
         (f_TriangleSlopes[slopeIndex].waveT / WAVE_SCROLL_DIVISOR) +
             WAVE_TILE_SPAN);
     gDPPipeSync(gfx++);
-    column = half * GROUND_HALF_VERTEX_COLUMNS;
+
     for (row = 0; row < GROUND_TILE_ROW_COUNT; row++) {
       groupDetail = GROUND_DETAIL_COARSE;
       for (detailTileIndex = 0; detailTileIndex < GROUND_TILE_GROUP_SIZE;
