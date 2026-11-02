@@ -4324,14 +4324,12 @@ void DrawNamePlateBanner(Gfx** displayListHead) {
   *displayListHead = gfx;
 }
 
-/*
- * Doesn't match: the original tests the s32 top << 2 for the texture's row
- * offset, not the s16 top. 4 words differ.
- */
-#ifdef NON_MATCHING
-void DrawSmallNamePlate(Gfx** displayListHead, s16 left, s16 top) {
+/* Draws g_NamePlateImage squeezed to SMALL_BANNER_WIDTH, its top left at
+ * (left, top) */
+void DrawSmallNamePlate(Gfx** displayListHead, s32 left, s32 top) {
   Gfx* gfx = *displayListHead;
   s32 stripIndex;
+  s32 stripTop;
 
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
@@ -4344,19 +4342,16 @@ void DrawSmallNamePlate(Gfx** displayListHead, s16 left, s16 top) {
         0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(gfx++);
-    gSPScisTextureRectangle(gfx++, QuarterPixels(left), QuarterPixels(top),
+    stripTop = top + (stripIndex * MENU_BANNER_STRIP_HEIGHT);
+    gSPScisTextureRectangle(gfx++, QuarterPixels(left), QuarterPixels(stripTop),
         QuarterPixels(left + SMALL_BANNER_WIDTH),
-        QuarterPixels(top + MENU_BANNER_STRIP_HEIGHT), G_TX_RENDERTILE, 0, 0,
-        (MENU_BANNER_WIDTH << 10) / SMALL_BANNER_WIDTH, TEXEL_STEP_ONE);
+        QuarterPixels(stripTop + MENU_BANNER_STRIP_HEIGHT), G_TX_RENDERTILE, 0,
+        0, (MENU_BANNER_WIDTH << 10) / SMALL_BANNER_WIDTH, TEXEL_STEP_ONE);
     gDPPipeSync(gfx++);
-    top += MENU_BANNER_STRIP_HEIGHT;
   }
 
   *displayListHead = gfx;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", DrawSmallNamePlate);
-#endif
 
 /* Draws the large banner, for DrawLargeBannerBackdropLayers's
  * MENU_LAYER_LARGE_BANNER */
