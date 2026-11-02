@@ -956,13 +956,7 @@ void FrameYoshiReaction(u32 slotIndex, CameraView* view) {
 /*
  * Frames Bowser from farther away, with effects at three frames of the bogey
  * animation.
- *
- * Doesn't match: after the switch, GCC stores the eye's height before the
- * call that keeps it above the ground, where the original stores it in the
- * call's delay slot. Storing a height computed in each case once after the
- * switch gives 14 differing words, not 4. 6 words differ.
  */
-#ifdef NON_MATCHING
 void FrameBowserReaction(u32 slotIndex, CameraView* view) {
   CharacterSlot* slot = GetUsedCharacterSlot(slotIndex);
   f32 distance = BlendClamped(FAR_REACTION_START_DISTANCE,
@@ -1000,6 +994,9 @@ void FrameBowserReaction(u32 slotIndex, CameraView* view) {
   switch (f_ReactionAnimation) {
     case REACTION_ANIMATION_EAGLE:
       view->eye[AXIS_Y] = focus[AXIS_Y] + (-BOWSER_EAGLE_EYE_RISE);
+      KeepAboveGround(view->eye);
+      EaseReactionView(
+          view->eye, view->lookAt, REACTION_EASE_RATE, EASE_EYE | EASE_LOOK_AT);
       break;
     case REACTION_ANIMATION_BIRDIE:
       view->eye[AXIS_Y] = focus[AXIS_Y] + REACTION_EYE_DROP;
@@ -1009,12 +1006,12 @@ void FrameBowserReaction(u32 slotIndex, CameraView* view) {
       /* fallthrough */
     default:
       view->eye[AXIS_Y] = focus[AXIS_Y] + REACTION_EYE_DROP;
+      KeepAboveGround(view->eye);
+      EaseReactionView(
+          view->eye, view->lookAt, REACTION_EASE_RATE, EASE_EYE | EASE_LOOK_AT);
       break;
   }
 
-  KeepAboveGround(view->eye);
-  EaseReactionView(
-      view->eye, view->lookAt, REACTION_EASE_RATE, EASE_EYE | EASE_LOOK_AT);
   if (IsReactionViewLow()) {
     if (f_ReactionAnimation == REACTION_ANIMATION_EAGLE) {
       view->lookAt[AXIS_Y] -= BOWSER_EAGLE_LOW_VIEW_LOOK_AT_RISE;
@@ -1025,10 +1022,6 @@ void FrameBowserReaction(u32 slotIndex, CameraView* view) {
     }
   }
 }
-
-#else
-INCLUDE_ASM("asm/nonmatchings/reaction", FrameBowserReaction);
-#endif
 
 /* Frames Azalea from farther away and from above */
 void FrameAzaleaReaction(u32 slotIndex, CameraView* view) {
