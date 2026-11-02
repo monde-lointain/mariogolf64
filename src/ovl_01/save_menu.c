@@ -646,8 +646,12 @@ void DrawRingShotRecords(Gfx** displayListHead) {
     drop = (row == memory->ringShotRow) * RING_SHOT_CHOSEN_ICON_DROP;
     if ((row < openCourseCount) || (row == RING_SHOT_REPLAY_ROW)) {
       if (f_RingShotIconPositions[openCourseCount - 1][row] != 0) {
-        /* The icon loop in a block of its own, as a macro's do-while would
-         * make it, to match */
+        /*
+         * The icon loop in a block of its own, as a macro's do-while would
+         * make it, to match: without it the loop pass hoists the icon loop's
+         * constant 20 to another level, and it and row take other saved
+         * registers; 42 words differ, against 26
+         */
         IN_OWN_BLOCK(
             for (column = 0; column != RING_SHOT_ICON_DRAW_COUNT; column++) {
               if (row == 0) {
