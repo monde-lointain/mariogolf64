@@ -1107,11 +1107,13 @@ s32 PaintMainCourse(
 /*
  * A paint logic like PaintMainCourse with pale rough, out-of-bounds ground
  * painted 0xBEEF, and TERRAIN_CODE_UNK3 painted as cart way away from more of
- * it. Neither the paint-logic table nor any code refers to it. It does not
- * match: the original keeps the test between the two equal cart-way colors
- * and has no stack frame.
+ * it. Neither the paint-logic table nor any code refers to it.
  *
- * Doesn't match: 14 words differ.
+ * Doesn't match: the original zeroes $t0, which nothing reads, in the delay
+ * slot of the range test, and its two cart-way arms share one jump to the
+ * end. 12 words differ. Initializing color, paintedCode or fairwayRandom
+ * doesn't bring the zeroing back, and setting paintedCode after the arms
+ * lets GCC merge them and drop the test (18).
  */
 #ifdef NON_MATCHING
 s32 PaintPaleRoughCourse(
@@ -1170,10 +1172,11 @@ s32 PaintPaleRoughCourse(
         paintedCode = TERRAIN_CODE_UNK3;
         color = 0x3E;
       } else {
-        /* Both colors are the same in the original */
+        /* Both colors are the same in the original. The arms' differing
+         * order keeps GCC from merging them, which would drop the test */
         if (nearestDistance == 1) {
-          color = 0x94A5;
           paintedCode = TERRAIN_CODE_CART_WAY;
+          color = 0x94A5;
         } else {
           color = 0x94A5;
           paintedCode = TERRAIN_CODE_CART_WAY;
