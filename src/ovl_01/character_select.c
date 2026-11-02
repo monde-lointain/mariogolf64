@@ -577,7 +577,8 @@ s32 GetClubTournamentCourse(void);
 /*
  * Doesn't match: the original sign-extends the cursor's column and row as
  * soon as it loads them, and sets up the chosen character's sound with the
- * stack argument first. 52 words differ.
+ * stack argument first. Clearing the same-character count in the preview
+ * loop's initializer takes 52 words differing to 46.
  */
 #ifdef NON_MATCHING
 s32 UpdateCharacterSelect(
@@ -1105,8 +1106,7 @@ s32 UpdateCharacterSelect(
     }
 
     /* The preview gives way as the A button's palette does */
-    sameCharacterCount = 0;
-    for (index = 0; index != playerIndex; index++) {
+    for (index = 0, sameCharacterCount = 0; index != playerIndex; index++) {
       if ((s8)g_Players[index].characterIndex == character) {
         sameCharacterPlayers[sameCharacterCount] = index;
         sameCharacterCount++;

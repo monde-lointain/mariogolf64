@@ -5784,7 +5784,8 @@ void DrawAnimationViewer(Gfx** displayListHead) {
 /*
  * Doesn't match: GCC reloads the chosen course from the stack in the icon
  * loop, where the original keeps it in a register, and orders the
- * g_BetPagesWallSlide switch's branches differently. 51 words differ.
+ * g_BetPagesWallSlide switch's branches differently. Clearing the place count
+ * in the place loop's initializer takes 51 words differing to 49.
  */
 #ifdef NON_MATCHING
 void DrawCourseSelect(Gfx** displayListHead) {
@@ -6137,8 +6138,8 @@ void DrawCourseSelect(Gfx** displayListHead) {
 
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
     if ((MAP_CAMERA_MODE_TOP_BYTE == 0) && !g_GameState.isMiniGolf) {
-      placeCount = 0;
-      for (otherIndex = 0; otherIndex != TOURNAMENT_PLACE_COUNT; otherIndex++) {
+      for (otherIndex = 0, placeCount = 0; otherIndex != TOURNAMENT_PLACE_COUNT;
+          otherIndex++) {
         if (g_CourseStatFigures[g_MenuMemory.courseChoice]
                 .hasPlace[otherIndex]) {
           places[placeCount] = otherIndex;
