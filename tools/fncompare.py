@@ -1020,8 +1020,21 @@ def count_shape_differences(target: Routine, compiled: Routine) -> int:
     Registers, offsets and constants are ignored, so this counts only the
     instructions that one side has and the other lacks or replaces.
     """
-    target_operations = read_operations(target)
-    compiled_operations = read_operations(compiled)
+    return count_operation_differences(
+        tuple(read_operations(target)), tuple(read_operations(compiled))
+    )
+
+
+@functools.cache
+def count_operation_differences(
+    target_operations: tuple[object, ...], compiled_operations: tuple[object, ...]
+) -> int:
+    """Return how many of two operation sequences' entries have no pair.
+
+    Variants that differ only in registers share their operations, and
+    aligning these is the slowest part of a score, since a routine uses few
+    kinds of operation, so each count is kept.
+    """
     matcher = difflib.SequenceMatcher(
         None, target_operations, compiled_operations, autojunk=False
     )
