@@ -2268,7 +2268,13 @@ void PaintGroundTiles(void) {
           if (nearestDistance < 0) {
             painting = codePaintings[code];
 
-            /* The goto is there to match */
+            /*
+             * The goto is there to match: testing for a fixed painting first
+             * in an if-else, and searching and painting in its else, gives
+             * 140 words (12 in shape) against 134 (6); testing for no search
+             * first gives 241, as does keeping the nesting with the paint
+             * call in both arms
+             */
             goto PAINTED;
           }
 
