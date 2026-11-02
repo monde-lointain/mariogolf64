@@ -85,10 +85,12 @@ def score_variant(
 def replace_all(body: str, block: str) -> str | None:
     """Return BODY with each of BLOCK's replacements made, in turn.
 
-    Returns None when any of the texts to replace is absent.
+    Returns None when any of the texts to replace is absent. A replacement
+    can be empty, to delete its text, so the line of "----" can end it.
     """
     for replacement in block.split("\n++++\n"):
-        old, new = replacement.split("\n----\n")
+        old, _, new = replacement.partition("\n----")
+        new = new.removeprefix("\n")
         if old not in body:
             return None
         body = body.replace(old, new, 1)
