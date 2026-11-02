@@ -334,7 +334,7 @@ s32 GetClubTournamentCourseTitleMessage(void);
 s32 GetClubTournamentModeMessage(void);
 void DrawClubWindow(Gfx** displayListHead, s32 width, s32 height, s32 centerX,
     s32 centerY, s32 okTextShown, s32 chosenButton, s32 windowStyle);
-void DrawClubNumber(Gfx** displayListHead, s32 centerX, s32 top, s32 number);
+void DrawClubNumber(Gfx** displayListHead, s32 x, s32 top, s32 number);
 void DrawCodePanels(Gfx** displayListHead);
 void DrawCodeHand(Gfx** displayListHead);
 void DrawCodeKeys(Gfx** displayListHead);
@@ -1482,23 +1482,16 @@ void UpdateClubWindow(void) {
   }
 }
 
-/*
- * Writes the club tournament's number as an ordinal from the place glyphs.
- * Doesn't match: the left edge takes $t4 instead of the center's $s2, which
- * shifts the texel address and the rectangle's halves along a register.
- * The register oracle matches when left is allocated after the rectangle's
- * four halves, below their priority; one expression, an s32, a left taken
- * from centerX itself, or an earlier start give 22-32. 22 words differ.
- */
-#ifdef NON_MATCHING
-void DrawClubNumber(Gfx** displayListHead, s32 centerX, s32 top, s32 number) {
+/* Writes the club tournament's number as an ordinal, as in "21st", centered
+ * on x */
+void DrawClubNumber(Gfx** displayListHead, s32 x, s32 top, s32 number) {
   Gfx* gfx = *displayListHead;
   u8* image = GetMenuImageBuffer();
   char* digit;
   s32 width;
-  s16 left;
   s32 suffix;
   s32 glyph;
+  u8 character;
   s32 lastDigitSuffix;
 
   sprintf(g_PrintBuffer, "%d", number);
@@ -1510,25 +1503,26 @@ void DrawClubNumber(Gfx** displayListHead, s32 centerX, s32 top, s32 number) {
     width += PLACE_GLYPH_SPACING;
   }
 
-  left = centerX - (PLACE_GLYPH_SIZE / 2);
-  left -= width / 2;
+  x -= (PLACE_GLYPH_SIZE / 2) + (width / 2);
   width = 0;
   for (digit = g_PrintBuffer; *digit != '\0';
       digit++, width += PLACE_GLYPH_SPACING) {
-    glyph = *digit;
-    if (glyph != ' ') {
-      gDPLoadTextureTile(gfx++, TextureAddress(LargeImageTexels(image)),
-          G_IM_FMT_CI, G_IM_SIZ_8b, PLACE_GLYPH_SIZE, PLACE_GLYPHS_HEIGHT, 0,
-          (glyph - '0') * PLACE_GLYPH_SIZE, PLACE_GLYPH_SIZE - 1,
-          (glyph - '0') * PLACE_GLYPH_SIZE + PLACE_GLYPH_SIZE - 1, 0,
-          G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
-          G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-      gSPScisTextureRectangle(gfx++, QuarterPixels(left + width),
-          QuarterPixels(top), QuarterPixels(left + width + PLACE_GLYPH_SIZE),
-          QuarterPixels(top + PLACE_GLYPH_SIZE), G_TX_RENDERTILE, 0,
-          TexelCoordinate((glyph - '0') * PLACE_GLYPH_SIZE), TEXEL_STEP_ONE,
-          TEXEL_STEP_ONE);
+    character = *digit;
+    if (character == ' ') {
+      continue;
     }
+    glyph = character - '0';
+    gDPLoadTextureTile(gfx++, TextureAddress(LargeImageTexels(image)),
+        G_IM_FMT_CI, G_IM_SIZ_8b, PLACE_GLYPH_SIZE, PLACE_GLYPHS_HEIGHT, 0,
+        glyph * PLACE_GLYPH_SIZE, PLACE_GLYPH_SIZE - 1,
+        glyph * PLACE_GLYPH_SIZE + PLACE_GLYPH_SIZE - 1, 0,
+        G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+        G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+    gSPScisTextureRectangle(gfx++, QuarterPixels(x + width), QuarterPixels(top),
+        QuarterPixels(x + width + PLACE_GLYPH_SIZE),
+        QuarterPixels(top + PLACE_GLYPH_SIZE), G_TX_RENDERTILE, 0,
+        TexelCoordinate(glyph * PLACE_GLYPH_SIZE), TEXEL_STEP_ONE,
+        TEXEL_STEP_ONE);
   }
 
   suffix = number;
@@ -1557,16 +1551,13 @@ void DrawClubNumber(Gfx** displayListHead, s32 centerX, s32 top, s32 number) {
           PLACE_GLYPH_SIZE - 1,
       0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
       G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-  gSPScisTextureRectangle(gfx++, QuarterPixels(left + width),
-      QuarterPixels(top), QuarterPixels(left + width + PLACE_GLYPH_SIZE),
+  gSPScisTextureRectangle(gfx++, QuarterPixels(x + width), QuarterPixels(top),
+      QuarterPixels(x + width + PLACE_GLYPH_SIZE),
       QuarterPixels(top + PLACE_GLYPH_SIZE), G_TX_RENDERTILE, 0,
       TexelCoordinate((suffix + PLACE_SUFFIX_GLYPH_FIRST) * PLACE_GLYPH_SIZE),
       TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   *displayListHead = gfx;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/tournament_menu", DrawClubNumber);
-#endif
 
 void DrawCodeEntryBar(Gfx** displayListHead);
 
