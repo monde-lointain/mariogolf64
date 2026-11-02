@@ -406,6 +406,8 @@ s32 GetSideSlope(void) {
   for (sampleIndex = 1;
       sampleIndex < (s32)(distance * (1.0f / SIDE_SLOPE_SAMPLE_SPACING));
       sampleIndex++) {
+    /* Setting along inside the x term is there to match: setting it first,
+     * with z first or not, or writing its product out in both terms differs */
     sampleX = f_Shot.ballPosition[AXIS_X] +
         ((along = sampleIndex * SIDE_SLOPE_SAMPLE_SPACING) * direction[AXIS_X]);
     sampleZ = f_Shot.ballPosition[AXIS_Z] + (along * direction[AXIS_Z]);
