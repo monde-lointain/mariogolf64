@@ -1726,17 +1726,14 @@ void DrawDriveRecord(Gfx** displayListHead) {
 }
 
 /*
- * Doesn't match: the height's low byte and the combine mode's second word
- * take each other's registers, $a3 and $t0. Both are used twice, and after
- * sched1 the combine word's life is one insn shorter, so local-alloc gives it
- * the first pick. Forcing the two leaves only where bottom's 0x68 is
- * scheduled. Reordering the reads, the pipe sync and halfWidth, and other
- * types for the sizes, don't help. 12 words differ, 2 in shape.
+ * A putt's caption, such as a birdie or a sink to win, slides in from either
+ * side with a copy of it, then flashes and grows before it closes, as the
+ * drive record's does
  */
-#ifdef NON_MATCHING
 void DrawPuttCaption(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   u32 width;
+  s32 height;
   s32 stripCount;
   s32 halfWidth;
   s32 stripHeight;
@@ -1749,17 +1746,17 @@ void DrawPuttCaption(Gfx** displayListHead) {
   f32 fade;
   f32 alpha;
 
-  stripHeight = MOVIE_IMAGE_STRIP_HEIGHT;
   width = (f_MovieBuffer[MOVIE_IMAGE_WIDTH_OFFSET] << 8) |
       f_MovieBuffer[MOVIE_IMAGE_WIDTH_OFFSET + 1];
-  stripCount = ((f_MovieBuffer[MOVIE_IMAGE_HEIGHT_OFFSET] << 8) |
-                   f_MovieBuffer[MOVIE_IMAGE_HEIGHT_OFFSET + 1]) /
-      stripHeight;
-  halfWidth = width >> 1;
+  height = (f_MovieBuffer[MOVIE_IMAGE_HEIGHT_OFFSET] << 8) |
+      f_MovieBuffer[MOVIE_IMAGE_HEIGHT_OFFSET + 1];
   gDPPipeSync(gfx++);
   gDPSetCombineLERP(gfx++, TEXEL0, ENVIRONMENT, PRIMITIVE_ALPHA, ENVIRONMENT,
       ENVIRONMENT, 0, TEXEL0, 0, TEXEL0, ENVIRONMENT, PRIMITIVE_ALPHA,
       ENVIRONMENT, ENVIRONMENT, 0, TEXEL0, 0);
+  halfWidth = width >> 1;
+  stripHeight = MOVIE_IMAGE_STRIP_HEIGHT;
+  stripCount = height / stripHeight;
   if (f_MovieDrawCount == CAPTION_MEET_DRAW + 1) {
     PlaySoundWithEffects(SOUND_CAPTION_MEET, CAPTION_SOUND_CHANNEL,
         CAPTION_SOUND_VOLUME, 0, SOUND_FULL_SCALE);
@@ -1794,8 +1791,7 @@ void DrawPuttCaption(Gfx** displayListHead) {
   gDPLoadTLUT_pal256(
       gfx++, TextureAddress(f_MovieBuffer + MOVIE_IMAGE_PALETTE_OFFSET));
   if (f_MovieDrawCount < CAPTION_DRAW_COUNT && halfWidth > 0) {
-    IN_OWN_BLOCK(bottom = SHRINKING_IMAGE_CENTER_Y);
-    for (i = 0; i != stripCount; i++, bottom += stripHeight) {
+    for (i = 0; i != stripCount; i++) {
       slide =
           CAPTION_START_SLIDE - (f_MovieDrawCount * CAPTION_SLIDE_PER_FRAME);
       if (slide < 0) {
@@ -1809,6 +1805,7 @@ void DrawPuttCaption(Gfx** displayListHead) {
           G_IM_FMT_CI, G_IM_SIZ_8b, width, MOVIE_IMAGE_STRIP_HEIGHT, 0, 0, 0, 0,
           0, 0, 0);
       centerX = SHRINKING_IMAGE_CENTER_X + slide;
+      bottom = SHRINKING_IMAGE_CENTER_Y + (i * stripHeight);
       DrawTextureRect(&gfx, QuarterPixels(centerX - halfWidth),
           QuarterPixels(
               bottom - (stripHeight * SHRINKING_IMAGE_STRIPS_ABOVE_CENTER)),
@@ -1835,9 +1832,6 @@ void DrawPuttCaption(Gfx** displayListHead) {
   gDPPipeSync(gfx++);
   *displayListHead = gfx;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_00/round_events", DrawPuttCaption);
-#endif
 
 /*
  * "Ready" flips over to face the camera and away again, then "Go" flips in,
