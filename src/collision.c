@@ -2843,8 +2843,8 @@ INCLUDE_ASM("asm/nonmatchings/collision", FindWallHit);
  * a value only for a ball off the ground.
  *
  * Doesn't match: the push's two arms keep their products in other float
- * registers, and the start of the wall loop places the abs.s of the side and
- * the 0x7C($sp) store differently. 52 words differ, 8 in shape.
+ * registers, and the start of the wall loop places the 0x7C($sp) store a word
+ * earlier. 45 words differ, 5 in shape.
  */
 #ifdef NON_MATCHING
 s32 PushBallOutOfWalls(BallSimulation* simulation, s32 checksHeight) {
@@ -2931,6 +2931,10 @@ s32 PushBallOutOfWalls(BallSimulation* simulation, s32 checksHeight) {
       side = (plane.normal[AXIS_X] * x) + (plane.normal[AXIS_Y] * y) +
           (plane.normal[AXIS_Z] * z) + (plane.distance * WORLD_TO_COURSE_SCALE);
       osSyncPrintf("?");
+      /* The test starts a block of its own, to match: it places the abs.s as
+       * the original does. Testing >=, fabs, Abs, a ternary, the two bounds
+       * or a magnitude in side don't (54-115 words differ) */
+      END_BASIC_BLOCK();
       if (!(fabsf(side) < WALL_TOUCH_DISTANCE)) {
         continue;
       }
