@@ -1609,11 +1609,9 @@ void DrawContestWinnerMovie(Gfx** displayListHead) {
 #define DRIVE_RECORD_DISTANCE_PRIM_COLOR 0xFFFF0000
 
 /*
- * Doesn't match: before the strip loop the original sets the first strip's
- * bottom after the strip edges that GCC's loop pass hoists, where this sets it
- * before them, so the loop's registers differ. 26 words differ, 4 in shape.
+ * The drive record caption slides in from either side with a copy of it, then
+ * grows and flashes before it closes, with the record distance beneath it
  */
-#ifdef NON_MATCHING
 void DrawDriveRecord(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   u32 width;
@@ -1675,8 +1673,7 @@ void DrawDriveRecord(Gfx** displayListHead) {
   gDPLoadTLUT_pal256(
       gfx++, TextureAddress(f_MovieBuffer + MOVIE_IMAGE_PALETTE_OFFSET));
   if (f_MovieDrawCount < CAPTION_DRAW_COUNT && halfWidth > 0) {
-    for (i = 0, bottom = SHRINKING_IMAGE_CENTER_Y; i != stripCount;
-        i++, bottom += stripHeight) {
+    for (i = 0; i != stripCount; i++) {
       slide =
           CAPTION_START_SLIDE - (f_MovieDrawCount * CAPTION_SLIDE_PER_FRAME);
       if (slide < 0) {
@@ -1690,6 +1687,7 @@ void DrawDriveRecord(Gfx** displayListHead) {
           G_IM_FMT_CI, G_IM_SIZ_8b, width, MOVIE_IMAGE_STRIP_HEIGHT, 0, 0, 0, 0,
           0, 0, 0);
       centerX = SHRINKING_IMAGE_CENTER_X + slide;
+      bottom = SHRINKING_IMAGE_CENTER_Y + (i * stripHeight);
       DrawTextureRect(&gfx, QuarterPixels(centerX - halfWidth),
           QuarterPixels(
               bottom - (stripHeight * SHRINKING_IMAGE_STRIPS_ABOVE_CENTER)),
@@ -1726,9 +1724,6 @@ void DrawDriveRecord(Gfx** displayListHead) {
   gDPPipeSync(gfx++);
   *displayListHead = gfx;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_00/round_events", DrawDriveRecord);
-#endif
 
 /*
  * Doesn't match: the height's low byte and the combine mode's second word
