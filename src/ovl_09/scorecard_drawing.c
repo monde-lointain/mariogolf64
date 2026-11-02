@@ -2118,7 +2118,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard_drawing", DrawLeaderboardPage);
  * loops add the column's offset to x after adding the cells' left edge, where
  * this adds it first, and the target keeps the address of
  * g_GameState.holeSelection in a saved register while it draws the faces.
- * 864 words differ.
+ * 860 words differ, 282 in shape.
  */
 #ifdef NON_MATCHING
 void DrawScoresPage(Gfx** displayListHead) {
@@ -2169,8 +2169,8 @@ void DrawScoresPage(Gfx** displayListHead) {
   gDPSetAlphaCompare(gfx++, G_AC_THRESHOLD);
   switch (f_ScoresStyle) {
     case SCORES_STYLE_YELLOW:
-      cellAlpha = 0xFF;
       gDPSetEnvColor(gfx++, 0xFF, 0xF0, 0x7F, 0xFF);
+      cellAlpha = 0xFF;
       gDPSetBlendColor(gfx++, 0, 0, 0, 0x80);
       gDPPipeSync(gfx++);
       gDPSetRenderMode(gfx++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
@@ -2204,8 +2204,8 @@ void DrawScoresPage(Gfx** displayListHead) {
     default:
 #endif
     case SCORES_STYLE_TINTED:
-      cellAlpha = 0xFF;
       gDPSetEnvColor(gfx++, 0, 0x40, 0, 0xFF);
+      cellAlpha = 0xFF;
       gDPSetBlendColor(gfx++, 0, 0, 0, 0x1F);
       gDPPipeSync(gfx++);
       gDPSetRenderMode(gfx++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
