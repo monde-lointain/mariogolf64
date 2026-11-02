@@ -1920,8 +1920,7 @@ void SetCharacterLights(void) {
  * Doesn't match: for the reaction light's fallback, the original addresses the
  * lights' first light from the table plus 8, adding the index's offset to
  * that, where ours adds the offset to the table first. Without IN_OWN_BLOCK
- * it's 123 words. Near the end it also schedules the 0xDB06 segment command's
- * setup into both arms of the next test. 95 words differ, 27 in shape.
+ * it's 123 words. 71 words differ, 7 in shape.
  */
 #ifdef NON_MATCHING
 void DrawCharacter(u32 slotIndex) {
@@ -2029,8 +2028,11 @@ void DrawCharacter(u32 slotIndex) {
           osVirtualToPhysical(f_OpaqueRenderModes));
     }
 
-    gSPSegment(gfx++, CULLING_SEGMENT,
-        osVirtualToPhysical(slot->unk188 ? f_FrontCulling : f_BackCulling));
+    if (slot->unk188) {
+      gSPSegment(gfx++, CULLING_SEGMENT, osVirtualToPhysical(f_FrontCulling));
+    } else {
+      gSPSegment(gfx++, CULLING_SEGMENT, osVirtualToPhysical(f_BackCulling));
+    }
     gSPDisplayList(gfx++, slot->displayList);
     slot->lastDrawnFrame = g_FrameCount;
     gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
