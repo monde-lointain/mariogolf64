@@ -1919,7 +1919,7 @@ void DrawSky(
  * Draws the sky and, below it, the course's backdrop in strips that follow the
  * camera's yaw and pitch
  *
- * Doesn't match: 137 words differ.
+ * Doesn't match: 143 words differ, 25 in shape.
  */
 #ifdef NON_MATCHING
 void DrawBackdrop(Gfx** displayListHead, CameraView* view, s32 cameraIndex) {
@@ -1943,10 +1943,10 @@ void DrawBackdrop(Gfx** displayListHead, CameraView* view, s32 cameraIndex) {
   gfx = *displayListHead;
   gDPPipeSync(gfx++);
   gDPPipeSync(gfx++);
-  gDPSetColorDither(gfx++, G_CD_BAYER);
   centerShift = ((view->zoom * FULL_VIEW_HEIGHT) -
                     (view->viewportCenterY - (view->scissorY * 2))) *
       0.5f;
+  gDPSetColorDither(gfx++, G_CD_BAYER);
   DrawSky(&gfx, view->eye[1], 1, cameraIndex);
   isNibbleImage = FALSE;
   gDPPipeSync(gfx++);
@@ -3129,7 +3129,7 @@ INCLUDE_ASM("asm/nonmatchings/hole_display", CaptureHudAnimationFrame);
  *
  * Doesn't match: the strip loop schedules its display-list stores in
  * another order, and the column and word index take other
- * registers. 50 words differ.
+ * registers. 44 words differ, 16 in shape.
  */
 #ifdef NON_MATCHING
 void DrawSliceAnimation(void) {
@@ -3164,8 +3164,9 @@ void DrawSliceAnimation(void) {
   }
 
   for (slice = 0, sliceY = 0; slice != sliceCount; slice++) {
+    strip = 0;
     y = sliceY;
-    for (strip = 0; strip != SLICE_STRIP_COUNT; strip++) {
+    for (; strip != SLICE_STRIP_COUNT; strip++) {
       s32 left = column * SLICE_WIDTH;
 
       gDPLoadTextureBlock(g_DisplayListHead++,
@@ -3173,11 +3174,11 @@ void DrawSliceAnimation(void) {
           G_IM_SIZ_16b, SLICE_WIDTH, SLICE_STRIP_HEIGHT, 0,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-      wordIndex += SLICE_STRIP_WORD_COUNT;
       gSPTextureRectangle(g_DisplayListHead++, QuarterPixels(left),
           QuarterPixels(y), QuarterPixels(left + SLICE_WIDTH),
           QuarterPixels(y + SLICE_STRIP_HEIGHT), G_TX_RENDERTILE, 0, 0,
           TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+      wordIndex += SLICE_STRIP_WORD_COUNT;
       gDPPipeSync(g_DisplayListHead++);
       y += SLICE_STRIP_HEIGHT;
     }

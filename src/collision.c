@@ -1725,7 +1725,7 @@ void MoveBallToCupEdge(BallSimulation* simulation) {
  * flagstick or the flag. It sets the ball's new velocity and the fraction
  * of the way along the path, and returns which it hits as a PIN_HIT_*.
  *
- * Doesn't match: 151 words differ.
+ * Doesn't match: 203 words differ, 41 in shape.
  */
 #ifdef NON_MATCHING
 s32 FindPinHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY, s32 endZ,
@@ -1832,8 +1832,8 @@ s32 FindPinHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY, s32 endZ,
       continue;
     }
 
-    nearestFraction = hitFraction;
     speed = IntLength2D(deltaX, deltaZ);
+    nearestFraction = hitFraction;
     hitKind = PIN_HIT_FLAGSTICK;
     if (isFlagHit) {
       hitKind = PIN_HIT_FLAG;

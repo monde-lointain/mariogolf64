@@ -708,7 +708,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_11/course_select", DrawPlanks);
 /*
  * Doesn't match: the original sets each arrow coordinate's second choice in
  * the branch's delay slot and shifts it in each arm, where GCC picks the sum
- * first and shifts it once after the arms join. 74 words differ.
+ * first and shifts it once after the arms join. 53 words differ, 25 in shape.
  */
 #ifdef NON_MATCHING
 void DrawRingShotSelect(Gfx** displayListHead) {
@@ -728,8 +728,9 @@ void DrawRingShotSelect(Gfx** displayListHead) {
     gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
     gDPPipeSync(gfx++);
     gDPSetTextureFilter(gfx++, G_TF_POINT);
+    stripIndex = 0;
     LoadLargePalette(&gfx, f_CourseImagePalette);
-    for (stripIndex = 0; stripIndex != COURSE_IMAGE_STRIP_COUNT; stripIndex++) {
+    for (; stripIndex != COURSE_IMAGE_STRIP_COUNT; stripIndex++) {
       LoadTextureBlock(&gfx,
           f_CourseImage + (stripIndex * COURSE_IMAGE_STRIP_SIZE), G_IM_FMT_CI,
           G_IM_SIZ_8b, COURSE_IMAGE_WIDTH, COURSE_IMAGE_STRIP_HEIGHT, 0, 0, 0,

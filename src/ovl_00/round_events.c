@@ -2027,7 +2027,7 @@ void DrawReadyGoMovie(Gfx** displayListHead) {
  * Unused: draws the movie image in f_MovieBuffer, shrinking it from double size
  * to its own size
  *
- * Doesn't match: 102 words differ.
+ * Doesn't match: 102 words differ, 32 in shape.
  */
 #ifdef NON_MATCHING
 void DrawShrinkingMovieImage(Gfx** displayListHead) {
@@ -2081,7 +2081,6 @@ void DrawShrinkingMovieImage(Gfx** displayListHead) {
             0, 0, 0, 0);
         offset += width;
         top = bottom - (stripHeight * SHRINKING_IMAGE_STRIPS_ABOVE_CENTER);
-        bottom += stripHeight;
         DrawTextureRect(&gfx,
             QuarterPixels(SHRINKING_IMAGE_CENTER_X - halfWidth),
             QuarterPixels(top),
@@ -2089,6 +2088,7 @@ void DrawShrinkingMovieImage(Gfx** displayListHead) {
             QuarterPixels(top + stripHeight), G_TX_RENDERTILE, 0, 0,
             ((width >> 1) << 10) / halfWidth,
             (MOVIE_IMAGE_STRIP_HEIGHT << 10) / stripHeight);
+        bottom += stripHeight;
       }
     }
   }

@@ -1141,7 +1141,7 @@ s32 UpdateChoiceBox(ControllerState* controller) {
   return CHOICE_RESULT_NONE;
 }
 
-/* Doesn't match: 67 words differ. */
+/* Doesn't match: 65 words differ, 17 in shape. */
 #ifdef NON_MATCHING
 void DrawChoiceBox(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
@@ -1159,8 +1159,8 @@ void DrawChoiceBox(Gfx** displayListHead) {
   s16 labelY;
   s32 boxRight;
 
-  f_ChoiceGlowAngle += M_PI / 18;
   halfWidth = box->halfWidth + CHOICE_BOX_MARGIN;
+  f_ChoiceGlowAngle += M_PI / 18;
   red =
       (s32)(sinf(f_ChoiceGlowAngle) * COLOR_WAVE_AMPLITUDE) + COLOR_WAVE_MIDDLE;
   blue = (s32)(sinf(f_ChoiceGlowAngle + (M_PI / 2)) * COLOR_WAVE_AMPLITUDE) +

@@ -6896,7 +6896,7 @@ void DrawYesNoWindow(Gfx** displayListHead, s32 width, s32 height, s32 centerX,
  * grouping, in two statements or from a second loop variable, moves the
  * constant to the toggle's and gives 8-25 shape differences against 7.
  * Splitting loopIndex per loop, which the register oracle hints at, doesn't
- * help. 115 words differ.
+ * help. 112 words differ, 6 in shape.
  */
 #ifdef NON_MATCHING
 void DrawOptionsScreen(Gfx** displayListHead) {
@@ -6994,10 +6994,10 @@ void DrawOptionsScreen(Gfx** displayListHead) {
             (MENU_BANNER_WIDTH << 10) / VALUE_BANNER_WIDTH,
             (MENU_BANNER_STRIP_HEIGHT << 10) / VALUE_BANNER_STRIP_HEIGHT);
       } else {
-        stripTop = (toggleIndex * OPTION_ROW_SPACING) +
-            ((stripIndex * VALUE_BANNER_STRIP_HEIGHT) + VALUE_BANNER_ROW_TOP);
         gDPSetCombineLERP(gfx++, PRIMITIVE, 0, TEXEL0, 0, 0, 0, 0, TEXEL0,
             PRIMITIVE, 0, TEXEL0, 0, 0, 0, 0, TEXEL0);
+        stripTop = (toggleIndex * OPTION_ROW_SPACING) +
+            ((stripIndex * VALUE_BANNER_STRIP_HEIGHT) + VALUE_BANNER_ROW_TOP);
         gDPSetPrimColor(
             gfx++, 0, 0, DIMMED_COLOR, DIMMED_COLOR, DIMMED_COLOR, 255);
         DrawTextureRect(&gfx, QuarterPixels(VALUE_BANNER_LEFT),
