@@ -1093,7 +1093,7 @@ INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard_drawing", f_BlankBetName);
  *
  * Doesn't match: GCC's loop pass hoists a table address into $s2 before
  * the bet rates' loop, which the original doesn't, and the loop's
- * registers differ from there. 212 words differ, 48 in shape.
+ * registers differ from there. 210 words differ, 42 in shape.
  */
 #ifdef NON_MATCHING
 void DrawBetsPage(Gfx** displayListHead) {
@@ -1379,14 +1379,14 @@ void DrawBetsPage(Gfx** displayListHead) {
     column = 0;
     for (j = 0, left = 0; j != BET_COUNT; j++) {
       if (g_GameState.betRates[j] == 0) {
-        column++;
         DrawShadowedText(&gfx, NO_TALLY_LEFT + left + g_Scorecard.x,
             (i * GRID_ROW_HEIGHT) + BETS_PAGE_TALLY_TOP + g_Scorecard.y, "-");
         left += BET_COLUMN_SPACING;
-      } else if (g_GameState.betRates[j] != UNSET_BET_RATE) {
         column++;
+      } else if (g_GameState.betRates[j] != UNSET_BET_RATE) {
         total += g_BetTallies[i][j];
         sprintf(g_PrintBuffer, f_WideTotalFormat, g_BetTallies[i][j]);
+        column++;
         DrawCondensedShadowedText(&gfx,
             BETS_PAGE_TALLY_LEFT + left + g_Scorecard.x,
             (i * GRID_ROW_HEIGHT) + BETS_PAGE_TALLY_TOP + g_Scorecard.y,

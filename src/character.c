@@ -1425,7 +1425,7 @@ void AnimateCharacter(u32 slotIndex) {
  *
  * Doesn't match: GCC keeps other values in saved registers across the joint
  * loop. The original keeps the two words of a double constant, where GCC
- * keeps 1.0f and a stack address. 184 words differ, 78 in shape.
+ * keeps 1.0f and a stack address. 184 words differ, 66 in shape.
  */
 #ifdef NON_MATCHING
 void UpdateJointKeyframeSpans(u32 slotIndex) {
@@ -1633,9 +1633,9 @@ void UpdateJointKeyframeSpans(u32 slotIndex) {
     ys = rotation[1] * scale;
     zs = rotation[2] * scale;
     wx = rotation[3] * xs;
-    wy = rotation[3] * ys;
     wz = rotation[3] * zs;
     xx = rotation[0] * xs;
+    wy = rotation[3] * ys;
     yy = rotation[1] * ys;
     /* dot holds the z axis's square term from here, to match */
     dot = rotation[2] * zs;

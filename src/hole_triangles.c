@@ -272,7 +272,7 @@ INCLUDE_ASM("asm/nonmatchings/hole_triangles", DrawHoleTriangles);
  * Draws the current player's rings; one past RING_STATE_SHOWN fades out while
  * sparkles circle it
  *
- * Doesn't match: 93 words differ.
+ * Doesn't match: 91 words differ.
  */
 #ifdef NON_MATCHING
 void DrawRings(Gfx** displayListHead, CameraMatrices* matrices UNUSED,
@@ -355,9 +355,9 @@ void DrawRings(Gfx** displayListHead, CameraMatrices* matrices UNUSED,
       if (state > RING_STATE_NONE) {
         if (state != RING_STATE_SHOWN) {
           if (state < RING_STATE_FADED) {
-            section = state & (RING_SPARKLE_SPACING - 1);
             turn = state * RING_SPARKLE_TURN;
             guMtxL2F(transform, matrix);
+            section = state & (RING_SPARKLE_SPACING - 1);
             for (; section < RING_SECTION_COUNT;
                 section += RING_SPARKLE_SPACING) {
               angle = turn + (section * RING_SECTION_ANGLE);

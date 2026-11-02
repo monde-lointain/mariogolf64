@@ -532,7 +532,7 @@ s32 GetClubSlotsState(void) {
   return f_ClubSlotsState;
 }
 
-/* Doesn't match: 108 words differ, 56 in shape. */
+/* Doesn't match: 100 words differ, 54 in shape. */
 #ifdef NON_MATCHING
 void DrawClubSlots(Gfx** displayListHead) {
   Mat4 matrix;
@@ -775,9 +775,9 @@ void DrawClubSlots(Gfx** displayListHead) {
         ? MACHINE_STRIP_HEIGHT
         : MACHINE_LAST_STRIP_HEIGHT;
     if (!isStripLoaded) {
-      isStripLoaded = TRUE;
       LoadTextureBlock(&gfx, f_Slots->machineImage + texelOffset, G_IM_FMT_CI,
           G_IM_SIZ_8b, MACHINE_WIDTH, stripHeight, 0, 0, 0, 0, 0, 0, 0);
+      isStripLoaded = TRUE;
     } else {
       /* The tiles stay as the first strip set them */
       gDPSetTextureImage(gfx++, G_IM_FMT_CI, G_IM_SIZ_16b, 1,

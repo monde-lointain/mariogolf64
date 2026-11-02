@@ -3021,7 +3021,7 @@ INCLUDE_ASM("asm/nonmatchings/hole_display", DrawTurnAwayAnimation);
 /*
  * Copies the frame that a HUD animation that has just started breaks apart
  *
- * Doesn't match: 122 words differ, 26 in shape.
+ * Doesn't match: 122 words differ, 24 in shape.
  */
 #ifdef NON_MATCHING
 void CaptureHudAnimationFrame(void) {
@@ -3071,9 +3071,9 @@ void CaptureHudAnimationFrame(void) {
           gridColumn++, x += TILE_GRID_SPACING) {
         vertex->v.ob[AXIS_X] = x;
         vertex->v.ob[AXIS_Y] = y;
-        vertex->v.ob[AXIS_Z] = 0;
         nextVertex->v.ob[AXIS_X] = x;
         nextVertex->v.ob[AXIS_Y] = y;
+        vertex->v.ob[AXIS_Z] = 0;
         nextVertex->v.ob[AXIS_Z] = 0;
         vertex++;
         nextVertex++;

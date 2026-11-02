@@ -2236,7 +2236,7 @@ void UpdateAnimationViewer(void) {
  * g_GameState.gameMode in another order, the B button's path loads
  * g_ChosenCharacters and g_CharacterGrid in another order, and the spin's
  * slowing keeps the spin in a register where the original reads it again after
- * the step. 87 words differ.
+ * the step. 85 words differ.
  */
 #ifdef NON_MATCHING
 void UpdateModeSelect(void) {
@@ -2309,9 +2309,9 @@ void UpdateModeSelect(void) {
         PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
         StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
         g_MenuScreen = MENU_SCREEN_COURSE_SELECT;
-        g_MenuMemory.holesChoice = HOLES_CHOICE_ALL;
         g_GameState.gameMode = GAME_MODE_STROKE;
         g_CourseSelectKind = COURSE_SELECT_KIND_COURSES;
+        g_MenuMemory.holesChoice = HOLES_CHOICE_ALL;
         MAP_CAMERA_MODE_TOP_BYTE = 1;
         if (g_ChosenPlayerCount == MAX_PLAYER_COUNT) {
           g_BetSet = BET_SET_STROKE_FOUR_PLAYER;
@@ -2383,9 +2383,9 @@ void UpdateModeSelect(void) {
         PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
         StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
         g_MenuScreen = MENU_SCREEN_COURSE_SELECT;
-        g_MenuMemory.holesChoice = HOLES_CHOICE_ALL;
         g_GameState.gameMode = GAME_MODE_STROKE;
         g_GameState.isMiniGolf = TRUE;
+        g_MenuMemory.holesChoice = HOLES_CHOICE_ALL;
         g_CourseSelectKind = COURSE_SELECT_KIND_COURSES;
         if (g_ChosenPlayerCount == MAX_PLAYER_COUNT) {
           MAP_CAMERA_MODE_TOP_BYTE = 1;

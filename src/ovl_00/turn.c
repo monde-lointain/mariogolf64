@@ -4850,10 +4850,10 @@ void UpdateTurns(void) {
               nextState = PLAYER_STATE_WAITING;
               break;
             case CHOICE_RESULT_RING_SHOT_HOLE_OUT:
-              nextState = PLAYER_STATE_HOLE_DONE;
               EndFlightCamera();
               FreeCharacterAndReactionLight(0);
               ForceStopRumble();
+              nextState = PLAYER_STATE_HOLE_DONE;
               break;
             case CHOICE_RESULT_RETURN_TO_MENU:
               QuitPlayToTitle();

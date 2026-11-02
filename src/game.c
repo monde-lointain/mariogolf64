@@ -1197,7 +1197,7 @@ void DrawTargetPole(CameraMatrices* matrices, Gfx** displayListHead);
  * Returns the frame count, which the caller ignores
  *
  * Doesn't match: the original keeps the far plane's dead clamp to the
- * short far plane, where GCC deletes it. 47 words differ.
+ * short far plane, where GCC deletes it. 41 words differ.
  */
 #ifdef NON_MATCHING
 s32 DrawGame(void) {
@@ -1426,11 +1426,11 @@ s32 DrawGame(void) {
         }
 
         topDownEyeX = g_MapCamera.view.eye[0];
-        topDownEyeY = g_MapCamera.view.eye[1] - MAP_TOP_DOWN_HEIGHT;
-        topDownEyeZ = g_MapCamera.view.eye[2] - MAP_TOP_DOWN_TILT;
         terrainStyle = (g_Scene == SCENE_CELL_EDITOR)
             ? TERRAIN_STYLE_TOP_DOWN_MAP
             : TERRAIN_STYLE_MAP;
+        topDownEyeY = g_MapCamera.view.eye[1] - MAP_TOP_DOWN_HEIGHT;
+        topDownEyeZ = g_MapCamera.view.eye[2] - MAP_TOP_DOWN_TILT;
         guLookAt(&matrices->viewing, topDownEyeX, topDownEyeY, topDownEyeZ,
             topDownEyeX, g_MapCamera.view.eye[1], g_MapCamera.view.eye[2], 0.0f,
             -1.0f, 0.0f);
