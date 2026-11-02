@@ -77,17 +77,22 @@ void AddFramedSphere(Vec3 center, f32 radius) {
 /*
  * Sets the direction, in radians, from which FrameSpheres looks.
  *
- * Doesn't match: GCC loads STEEP_PITCH_COSINE before taking the cosine's
- * magnitude, where the original takes it first. Swapping the comparison or
- * taking the cosine or its magnitude into a local changes nothing, and
- * fabs or a double constant makes it worse. 7 words differ.
+ * Doesn't match: the original takes the cosine's magnitude into $f2, where
+ * local-alloc gives it the $f0 cosf returns it in. A cosine local with a block
+ * ending after it gives the original's order of instructions, where they
+ * took 7 words differing, 3 in shape. Taking the magnitude into the cosine
+ * local, before or after the block's end, or swapping the comparison doesn't
+ * help. 6 words differ.
  */
 #ifdef NON_MATCHING
 void SetFramingAngles(Radians pitch, Radians yaw) {
   Mat4 pitchRotation;
   Mat4 yawRotation;
+  f32 cosine;
 
-  if (fabsf(cosf(pitch)) < STEEP_PITCH_COSINE) {
+  cosine = cosf(pitch);
+  END_BASIC_BLOCK();
+  if (fabsf(cosine) < STEEP_PITCH_COSINE) {
     pitch += FramingDegreesToRadians(20);
   }
 
