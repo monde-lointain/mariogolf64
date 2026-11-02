@@ -2205,8 +2205,9 @@ void DrawGoombaMovie(Gfx** displayListHead) {
  * Doesn't match: of the constants loop.c hoists out of the strip loop, the
  * original keeps f_Lakitu's address in $s4 and the tile commands' words in
  * $s2 and $s3, where GCC gives them $s3, $s2 and $s4, and the strips' float
- * conversions are scheduled differently. Setting offset in the loop's header,
- * or before the palette load, changes nothing. 89 words differ, 49 in shape.
+ * conversions are scheduled differently. Stepping offset in the loop's
+ * header, or setting it before the palette load, gives 89 words differing,
+ * 49 in shape. 87 words differ, 47 in shape.
  */
 #ifdef NON_MATCHING
 void DrawLakituMovie(Gfx** displayListHead) {
@@ -2272,8 +2273,8 @@ void DrawLakituMovie(Gfx** displayListHead) {
       TextureAddress(f_MovieBuffer +
           ((f_MovieBackBuffer * LAKITU_FRAME_SIZE) +
               MOVIE_IMAGE_PALETTE_OFFSET)));
-  offset = MOVIE_IMAGE_PIXELS_OFFSET;
   for (i = 0; i != LAKITU_STRIP_COUNT; i++) {
+    offset = MOVIE_IMAGE_PIXELS_OFFSET + (i * LAKITU_STRIP_SIZE);
     halfWidth = f_Lakitu.scale * (LAKITU_WIDTH / 2);
     halfHeight = f_Lakitu.scale * LAKITU_STRIP_HEIGHT;
     gDPLoadTextureTile(gfx++,
@@ -2299,7 +2300,6 @@ void DrawLakituMovie(Gfx** displayListHead) {
         ((LAKITU_WIDTH / 2) << 10) / halfWidth,
         (LAKITU_STRIP_HEIGHT << 10) / halfHeight);
     gDPPipeSync(gfx++);
-    offset += LAKITU_STRIP_SIZE;
   }
 
   *displayListHead = gfx;
