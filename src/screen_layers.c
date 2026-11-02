@@ -660,7 +660,11 @@ s32 UpdatePrompt(ControllerState* controller) {
  * Draws the open prompt: a cloud that grows in and shrinks away, with Yes
  * and No under its message once it has opened. The chosen answer bobs.
  *
- * Doesn't match: 24 words differ.
+ * Doesn't match: the original works out each rectangle's middle, such as
+ * CHOICES_MIDDLE_Y plus a quarter of the cloud, once and takes halfHeight
+ * from it, where GCC folds the top into middle - (halfHeight - constant) and
+ * adds the constant to the bottom separately. A middleY temporary at the
+ * draws gives 10-38 shape differences. 31 words differ, 5 in shape.
  */
 #ifdef NON_MATCHING
 void DrawPrompt(Gfx** displayListHead) {
@@ -731,7 +735,7 @@ void DrawPrompt(Gfx** displayListHead) {
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     texelOffset += PROMPT_CLOUD_WIDTH * PROMPT_CLOUD_HALF_TEXELS / 2;
     DrawTextureRect(&gfx, QuarterPixels(PROMPT_CENTER_X - halfWidth),
-        QuarterPixels(PROMPT_CLOUD_MIDDLE_Y + ((half - 1) * halfHeight)),
+        QuarterPixels(PROMPT_CLOUD_MIDDLE_Y + (half * halfHeight) - halfHeight),
         QuarterPixels(PROMPT_CENTER_X + halfWidth),
         QuarterPixels(PROMPT_CLOUD_MIDDLE_Y + (half * halfHeight)),
         G_TX_RENDERTILE, 0, 0,
@@ -765,7 +769,7 @@ void DrawPrompt(Gfx** displayListHead) {
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     DrawTextureRect(&gfx, QuarterPixels(YES_CENTER_X - halfWidth),
-        QuarterPixels((cloudHeight / 4) - halfHeight + CHOICES_MIDDLE_Y),
+        QuarterPixels((cloudHeight / 4) + CHOICES_MIDDLE_Y - halfHeight),
         QuarterPixels(YES_CENTER_X + halfWidth),
         QuarterPixels(halfHeight + (cloudHeight / 4) + CHOICES_MIDDLE_Y),
         G_TX_RENDERTILE, 0, 0,
@@ -786,9 +790,9 @@ void DrawPrompt(Gfx** displayListHead) {
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     DrawTextureRect(&gfx, QuarterPixels(NO_CENTER_X - halfWidth),
-        QuarterPixels((cloudHeight / 4) - halfHeight + CHOICES_MIDDLE_Y),
+        QuarterPixels((cloudHeight / 4) + CHOICES_MIDDLE_Y - halfHeight),
         QuarterPixels(NO_CENTER_X + halfWidth),
-        QuarterPixels((cloudHeight / 4) + CHOICES_MIDDLE_Y + halfHeight),
+        QuarterPixels(halfHeight + ((cloudHeight / 4) + CHOICES_MIDDLE_Y)),
         G_TX_RENDERTILE, 0, 0,
         CHOICE_IMAGE_WIDTH / 2 * TEXEL_STEP_ONE / halfWidth,
         CHOICE_IMAGE_HEIGHT / 2 * TEXEL_STEP_ONE / halfHeight);
