@@ -600,7 +600,14 @@ void SetPlankMotion(s32 motion) {
   }
 }
 
-/* Doesn't match: 56 words differ. */
+/*
+ * Doesn't match: the original's loop.c hoists the plank group's division
+ * magic number into $s7 and a second 0x20 into $s3, where ours loads the magic
+ * number inside the loop, so the saved registers shift by one and the group
+ * takes $s0 rather than $v1. Naming the group, computing it before the if,
+ * an if/else strip height and a ternary clamp all do worse. 56 words differ,
+ * 10 in shape.
+ */
 #ifdef NON_MATCHING
 void DrawPlanks(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
