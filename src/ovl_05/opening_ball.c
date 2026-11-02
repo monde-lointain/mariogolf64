@@ -1785,9 +1785,12 @@ INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_ball", StepOpeningBallSimulation);
  * entry, picks a lie blend of 0, leaves out the slopes, rain and wind, and
  * prints the launch velocity to the debug output.
  *
- * Doesn't match: GCC schedules the block that sets the spin differently, which
- * moves the unk40 and sideSpin stores and swaps two float registers there. 46
- * words differ.
+ * Doesn't match: in the side spin's sum, local-alloc gives shot->offsetX and
+ * the club's doubled side spin the same priority, 1.0, and the tie goes to the
+ * club's, where the original gives it the other register. Forcing those four
+ * pseudos matches, so the RTL is the original's. Writing the doubling as
+ * "* 2" lets fold move the 2 onto sideSign: 4 words differ, but the wrong
+ * operand is shifted. 14 words differ.
  */
 #ifdef NON_MATCHING
 s32 LaunchOpeningBallSimulation(
@@ -1872,21 +1875,22 @@ s32 LaunchOpeningBallSimulation(
     pitch = 0.0f;
   }
 
-  simulation->sideSpin =
-      (((((sideSign * entry->sideSpinChange) + shot->offsetX) *
-            OPENING_OFFSET_SIDE_SPIN_SCALE) +
-           ((club->sideSpin * CLUB_SIDE_SPIN_SCALE) * sideSign)) *
-          speed) *
-      SIDE_SPIN_PER_SPEED;
   pitch += (f32)club->offsetPitch * shot->offsetY *
       (DEGREES_TO_RADIANS / OFFSET_Y_PER_PITCH_STEP);
   yawRadians = (u16)shot->heading * BINARY_ANGLE_TO_RADIANS;
+  /* A shift, as fold would move a "* 2" onto sideSign */
+  simulation->sideSpin =
+      (((((sideSign * entry->sideSpinChange) + shot->offsetX) *
+            OPENING_OFFSET_SIDE_SPIN_SCALE) +
+           (sideSign * (club->sideSpin << 1))) *
+          speed) *
+      SIDE_SPIN_PER_SPEED;
+  simulation->unk40 = 0.0f;
   spinBase = club->spin * CLUB_SPIN_BASE_SCALE;
   simulation->spinSpeed = (((spinBase + CLUB_TEST_SPIN_OFFSET) *
-                               (shot->offsetY * CLUB_TEST_SPIN_PER_OFFSET)) -
+                               CLUB_TEST_SPIN_PER_OFFSET * shot->offsetY) -
                               spinBase) *
       speed * SPIN_PER_SPEED;
-  simulation->unk40 = 0.0f;
   simulation->spinHeading = yawRadians;
   if (!(club->surfaceMask & CLUB_SURFACE_GREEN)) {
     spinLoss = simulation->spinSpeed * OPENING_LAUNCH_SPIN_SPEED_LOSS;
