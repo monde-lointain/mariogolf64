@@ -1901,9 +1901,12 @@ void SetResultsBanner(s32 state, s32 kind) {
  * Draws the banner of a round's result, and the trophy above a top three
  * tournament place
  *
- * Doesn't match: only the registers differ, 32 words. The original gives
- * course $s6, after the trophy loops' row values, which needs its global-alloc
- * priority between theirs (342 and 344); here it is 266, so course gets $fp.
+ * Doesn't match: only the registers differ, 32 words. The register oracle
+ * matches when course takes $s6 ahead of the trophy loops' row values, so its
+ * global-alloc priority must top theirs (342 and 340); here it is 266, so
+ * course gets $fp. Assigning course later or before the kind test, narrower
+ * or unsigned types, reading frameCount through g_GameState, and regrouping
+ * the trophy heights give 32-63 words.
  */
 #ifdef NON_MATCHING
 void DrawResultsBanner(Gfx** displayListHead) {
