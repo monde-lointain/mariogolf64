@@ -3871,22 +3871,25 @@ void ShadeGroundTiles(void) {
           /* The height test is always true here; the original has it */
           if (*heights >= 0 && isHighGroundFaded) {
             fade = *heights * HEIGHT_FADE_SCALE;
+            /*
+             * Each limited branch clamps the fade itself, to match: clamping
+             * once, after a test that leaves the disabled fade out, gives 135
+             * differing words against 109, and giving the disabled fade a
+             * zero limit 115
+             */
             if (isFadeUnlimited) {
               fadeLimit = HEIGHT_FADE_FULL;
+              if (fade >= fadeLimit) {
+                fade = fadeLimit;
+              }
             } else if (isFadeDisabled) {
               fade = 0.0f;
-
-              /* The goto is there to match */
-              goto FADED;
             } else {
               fadeLimit = HEIGHT_FADE_LIMIT;
+              if (fade >= fadeLimit) {
+                fade = fadeLimit;
+              }
             }
-
-            if (fade >= fadeLimit) {
-              fade = fadeLimit;
-            }
-
-FADED:
 
             fadeWeight = fade * LIGHT_SCALE_ONE;
             keptWeight = LIGHT_SCALE_ONE - fadeWeight;
