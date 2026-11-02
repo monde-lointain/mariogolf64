@@ -993,7 +993,11 @@ const char g_PathDebugBlankText[] = "          ";
  * that starts on the plane, or, while the ball rolls, barely crosses
  * it, hits it at the path's end.
  *
- * Doesn't match: 32 words differ, 20 in shape.
+ * Doesn't match: the original takes each absolute value into a register
+ * of its own and ahead of the work around it: in the bare crossing test,
+ * before loading the distance, and for the hit fraction, before working out
+ * the side change. GCC ties the absolute value to its operand and schedules
+ * it after. 16 words differ, 6 in shape.
  */
 #ifdef NON_MATCHING
 s32 FindMiniGolfGroundHit(BallSimulation* simulation, s32 startX, s32 startY,
@@ -1012,6 +1016,8 @@ s32 FindMiniGolfGroundHit(BallSimulation* simulation, s32 startX, s32 startY,
   s32 tileDistance;
   s32 pathBottomY;
   s32 row;
+  s32 firstColumn;
+  s32 firstRow;
   s32 column;
   s32 triangleCount;
   /* One index for the triangles and the search steps, to match */
@@ -1065,6 +1071,8 @@ s32 FindMiniGolfGroundHit(BallSimulation* simulation, s32 startX, s32 startY,
   tileFraction = 0.0f;
   while (TRUE) {
     hitIndex = NO_HOLE_TRIANGLE;
+    firstColumn = tileX * GROUND_TILE_POINT_SPAN;
+    firstRow = tileZ * GROUND_TILE_POINT_SPAN;
     if (endY < startY) {
       pathBottomY = (startY / WHOLE_UNIT_SIZE) + 1;
     } else {
@@ -1074,8 +1082,7 @@ s32 FindMiniGolfGroundHit(BallSimulation* simulation, s32 startX, s32 startY,
     for (row = 0; row < GROUND_TILE_POINT_SPAN + 1; row++) {
       for (column = 0; column < GROUND_TILE_POINT_SPAN + 1; column++) {
         points[row][column] =
-            GetGroundPoint((tileX * GROUND_TILE_POINT_SPAN) + column,
-                (tileZ * GROUND_TILE_POINT_SPAN) + row);
+            GetGroundPoint(firstColumn + column, firstRow + row);
         if (pathBottomY < points[row][column]->v.ob[AXIS_Y]) {
           isBelowPath[row][column] = TRUE;
         } else {
@@ -1261,7 +1268,10 @@ INCLUDE_ASM("asm/nonmatchings/collision", FindMiniGolfGroundHit);
  * path that starts or ends off the ground hits a level triangle at its end
  * if it ends below the ground there, and nothing otherwise.
  *
- * Doesn't match: 25 words differ, 17 in shape.
+ * Doesn't match: for the hit fraction, the original takes the start
+ * side's absolute value into a register of its own before working out the
+ * side change, where GCC ties it to its operand and subtracts first.
+ * 9 words differ, 3 in shape.
  */
 #ifdef NON_MATCHING
 s32 FindGroundHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
@@ -1279,6 +1289,8 @@ s32 FindGroundHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
   s32 tileDistance;
   s32 pathBottomY;
   s32 row;
+  s32 firstColumn;
+  s32 firstRow;
   s32 column;
   s32 triangleCount;
   /* One index for the triangles and the search steps, to match */
@@ -1332,6 +1344,8 @@ s32 FindGroundHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
   tileFraction = 0.0f;
   while (TRUE) {
     hitIndex = NO_HOLE_TRIANGLE;
+    firstColumn = tileX * GROUND_TILE_POINT_SPAN;
+    firstRow = tileZ * GROUND_TILE_POINT_SPAN;
     if (endY < startY) {
       pathBottomY = startY / WHOLE_UNIT_SIZE;
     } else {
@@ -1341,8 +1355,7 @@ s32 FindGroundHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
     for (row = 0; row < GROUND_TILE_POINT_SPAN + 1; row++) {
       for (column = 0; column < GROUND_TILE_POINT_SPAN + 1; column++) {
         points[row][column] =
-            GetGroundPoint((tileX * GROUND_TILE_POINT_SPAN) + column,
-                (tileZ * GROUND_TILE_POINT_SPAN) + row);
+            GetGroundPoint(firstColumn + column, firstRow + row);
         if (pathBottomY < points[row][column]->v.ob[AXIS_Y]) {
           isBelowPath[row][column] = TRUE;
         } else {
