@@ -3013,12 +3013,16 @@ INCLUDE_ASM("asm/nonmatchings/hole_display", DrawTurnAwayAnimation);
 /*
  * Copies the frame that a HUD animation that has just started breaks apart
  *
- * Doesn't match: 122 words differ, 24 in shape.
+ * Doesn't match: the copy's loops allocate their counters and addresses to
+ * other registers, and the grid's loops differ too. Forcing 20 pseudos to the
+ * original's registers leaves 66 words differing, all in the grid. 144 words
+ * differ, 18 in shape.
  */
 #ifdef NON_MATCHING
 void CaptureHudAnimationFrame(void) {
   u32* frame;
   s32 wordIndex;
+  s32 tileStart;
   s32 tileRow;
   s32 tileColumn;
   s32 row;
@@ -3042,13 +3046,15 @@ void CaptureHudAnimationFrame(void) {
     for (tileRow = 0; tileRow != FRAME_TILE_ROW_COUNT; tileRow++) {
       for (tileColumn = 0; tileColumn != FRAME_TILE_COLUMN_COUNT;
           tileColumn++) {
+        /* The word the tile's rows count from */
+        tileStart = (tileRow * FRAME_TILE_ROWS * FRAME_WORDS_PER_ROW) +
+            (tileColumn * FRAME_TILE_WORDS);
         for (row = FRAME_MARGIN_ROWS;
             row != FRAME_MARGIN_ROWS + FRAME_TILE_ROWS; row++) {
           for (column = FRAME_MARGIN_WORDS;
               column != FRAME_MARGIN_WORDS + FRAME_TILE_WORDS; column++) {
-            f_CapturedFrame[wordIndex++] = frame[(row * FRAME_WORDS_PER_ROW) +
-                (tileColumn * FRAME_TILE_WORDS) +
-                (tileRow * FRAME_TILE_ROWS * FRAME_WORDS_PER_ROW) + column];
+            f_CapturedFrame[wordIndex++] =
+                frame[(row * FRAME_WORDS_PER_ROW) + column + tileStart];
           }
         }
       }
