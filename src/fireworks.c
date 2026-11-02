@@ -29,6 +29,23 @@
 /* Below this life, a particle's life runs out five times as fast */
 #define PARTICLE_FADE_LIFE 128
 
+/* Launch positions and velocities are in the fireworks' local coordinates. */
+#define FIREWORK_LAUNCH_WIDTH 32
+#define FIREWORK_LAUNCH_HEIGHT 64.0f
+#define FIREWORK_LAUNCH_HEIGHT_JITTER 4
+#define PARTICLE_SPEED_PER_CELL 0.1f
+#define PARTICLE_VELOCITY_JITTER_STEPS 64
+#define PARTICLE_VELOCITY_JITTER_STEP 0.0005f
+#define PARTICLE_LAUNCH_DOWNWARD_SPEED 0.5
+#define PARTICLE_MIN_LIFE 192
+#define PARTICLE_LIFE_JITTER 128
+
+/* A random per-axis velocity offset. */
+#define RandomParticleVelocityJitter() \
+  (((guRandom() % PARTICLE_VELOCITY_JITTER_STEPS) - \
+       (PARTICLE_VELOCITY_JITTER_STEPS / 2)) * \
+      PARTICLE_VELOCITY_JITTER_STEP)
+
 /* An image whose zero cells each become a particle of a firework */
 struct FireworkShape {
   /* 0x0 */ u8 unk0[3];
@@ -162,7 +179,7 @@ s32 HaveFireworksStayedFreed(void) {
  * with it, 69 with guRandom() % 4 written in place, and 68 with & 3.
  */
 static inline s32 RandomLaunchHeightJitter(void) {
-  return guRandom() % 4;
+  return guRandom() % FIREWORK_LAUNCH_HEIGHT_JITTER;
 }
 
 /*
@@ -187,12 +204,12 @@ void LaunchFirework(Firework* firework, s32 fireworkIndex UNUSED) {
   s32 column;
 
   particleIndex = 0;
-  originX = guRandom() % 32;
+  originX = guRandom() % FIREWORK_LAUNCH_WIDTH;
   random = RandomLaunchHeightJitter();
   width = firework->shape->width;
   height = firework->shape->height;
   firework->unkC = 0xFF;
-  originY = random + 64.0f;
+  originY = random + FIREWORK_LAUNCH_HEIGHT;
   for (row = 0; (u32)row != height; row++) {
     halfWidth = width / 2;
     for (column = 0; (u32)column != width; column++) {
@@ -200,12 +217,13 @@ void LaunchFirework(Firework* firework, s32 fireworkIndex UNUSED) {
         firework->particles[particleIndex].x = originX;
         firework->particles[particleIndex].y = originY;
         firework->particles[particleIndex].velocityX =
-            ((column - halfWidth) * 0.1f) +
-            (((guRandom() % 64) - 32) * 0.0005f);
+            ((column - halfWidth) * PARTICLE_SPEED_PER_CELL) +
+            RandomParticleVelocityJitter();
         firework->particles[particleIndex].velocityY =
-            ((s32)((height / 2) - row) * 0.1f) - 0.5 +
-            (((guRandom() % 64) - 32) * 0.0005f);
-        firework->particles[particleIndex].life = (guRandom() % 128) + 192;
+            ((s32)((height / 2) - row) * PARTICLE_SPEED_PER_CELL) -
+            PARTICLE_LAUNCH_DOWNWARD_SPEED + RandomParticleVelocityJitter();
+        firework->particles[particleIndex].life =
+            (guRandom() % PARTICLE_LIFE_JITTER) + PARTICLE_MIN_LIFE;
         particleIndex++;
       }
     }
