@@ -1474,9 +1474,14 @@ void PlaceAtReactionSpot(Vec3 position, Vec3 rotation, Vec3 scale) {
  * Doesn't match: the original loads the height into one register and its
  * magnitude into another, where this reuses the first for both. Local-alloc
  * ties the loaded height to fabsf's result, since it dies there within its
- * block; it ties no value that lives past its block. An END_BASIC_BLOCK after
- * the load leaves the block whole, and the load in IN_OWN_BLOCK gives 8
- * differing words. 4 words differ.
+ * block; it ties no value that lives past its block. The oracle matches with
+ * the loaded height in $f4, which global-alloc would give it, as it conflicts
+ * with the zero in $f0 and the magnitude in $f2. An END_BASIC_BLOCK after the
+ * load leaves no label, so the block stays whole and gives 8 differing words,
+ * as does the load in IN_OWN_BLOCK; fabs, __builtin_fabsf, a separate eyeY
+ * local, an inline helper and an early return each give 9. In the ROM every
+ * float load into abs.s, and some subtractions, use a register other than
+ * abs.s's, as in UpdateCameraEditor and DrawBillboards. 4 words differ.
  */
 #ifdef NON_MATCHING
 Boolean IsEasedEyeHeightZero(void) {
