@@ -542,6 +542,97 @@ def compile_functions(
         return read_object_file(obj_path), ""
 
 
+# Fences a function's body while its file is preprocessed, and with a
+# number marks the start of each of the bodies preprocessed together
+BODY_MARK = "__fncompare_body__;"
+NUMBERED_BODY_MARK = "__fncompare_body_{}__;"
+NUMBERED_BODY_MARK_RE = re.compile(r"__fncompare_body_(\d+)__;")
+# The most bodies one run of cpp preprocesses
+BODY_BATCH_SIZE = 200
+
+
+@dataclass
+class BodyVariants:
+    """Compiles variants of one function's body without redoing the rest.
+
+    SOURCE is the C file at C_PATH, and START and END bound the body of
+    FUNCTION in it, from after the opening brace's line through the closing
+    brace's. The rest of the file is preprocessed and isolated once; each
+    variant's body is preprocessed in batches and put in the body's place,
+    so that a variant costs one compile.
+    """
+
+    c_path: StrPath
+    source: str
+    function: str
+    start: int
+    end: int
+    optflags: list[str]
+    # The preprocessed, isolated file before and after the body
+    before: str = field(init=False)
+    after: str = field(init=False)
+
+    def __post_init__(self) -> None:
+        """Preprocess and isolate the file around the fenced body."""
+        body = self.source[self.start : self.end]
+        fenced = "".join(
+            (self.source[: self.start], BODY_MARK, "\n", body, BODY_MARK, "\n")
+        )
+        preprocessed = self.preprocess(fenced + self.source[self.end :])
+        isolated = isolate_functions(preprocessed, {self.function})
+        self.before, _, self.after = isolated.partition(BODY_MARK)
+        self.after = self.after.partition(BODY_MARK)[2]
+
+    def preprocess(self, text: str) -> str:
+        """Return TEXT preprocessed as though it were the file at C_PATH.
+
+        It is written beside the file, so that its includes resolve alike.
+        """
+        directory = Path(self.c_path).resolve().parent
+        with tempfile.NamedTemporaryFile(
+            "w", suffix=".c", dir=directory, delete=False
+        ) as copy:
+            _ = copy.write(text)
+        try:
+            result = run_compiler(copy.name, self.optflags, ["-E"])
+        finally:
+            Path(copy.name).unlink()
+        if result.returncode != 0:
+            raise ValueError(result.stderr)
+        return result.stdout
+
+    def preprocess_bodies(self, bodies: list[str]) -> list[str]:
+        """Return each of BODIES preprocessed in the body's place.
+
+        Each follows the file up to the body, so it sees the same macros, and
+        the rest of the file follows the last, closing any conditional the
+        function is in.
+        """
+        preprocessed: list[str] = []
+        for first in range(0, len(bodies), BODY_BATCH_SIZE):
+            batch = bodies[first : first + BODY_BATCH_SIZE]
+            marked = [
+                NUMBERED_BODY_MARK.format(number) + "\n" + body
+                for number, body in enumerate([*batch, ""])
+            ]
+            text = self.source[: self.start] + "".join(marked)
+            pieces = NUMBERED_BODY_MARK_RE.split(
+                self.preprocess(text + self.source[self.end :])
+            )
+            if len(pieces) != 2 * len(batch) + 3:
+                msg = "a variant's body lost its mark in cpp"
+                raise ValueError(msg)
+            preprocessed += pieces[2:-2:2]
+        return preprocessed
+
+    def compile(self, preprocessed_body: str) -> tuple[Functions | None, str]:
+        """Compile the file with PREPROCESSED_BODY, as compile_functions does."""
+        with tempfile.TemporaryDirectory() as tmp:
+            unit = Path(tmp) / "variant.i"
+            _ = unit.write_text(self.before + preprocessed_body + self.after)
+            return compile_functions(unit, self.optflags)
+
+
 @dataclass(frozen=True)
 class ObjectSymbol:
     """A symbol in an object file's symbol table."""

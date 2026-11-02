@@ -21,7 +21,10 @@ its slowest variant and starts the interpreter again.
 
 Each target assembly is read once, and the variants compile in parallel,
 one process per CPU, since parsing the objects holds the interpreter lock.
-Each compile cuts the file down to the function and its neighbour.
+Each compile cuts the file down to the function and its neighbour. The
+variants that change only FUNCTION's body share one preprocessing of the
+file around it, and their bodies are preprocessed together, so that each
+costs only its compile; the others are preprocessed whole.
 """
 
 import os
@@ -39,8 +42,10 @@ DEFAULT_JOB_COUNT = "8"
 ERROR_TAIL_LENGTH = 300
 
 
-def find_definition(source: str, function: str) -> tuple[int, int] | None:
-    """Return where FUNCTION's definition starts and ends in SOURCE.
+def find_definition(source: str, function: str) -> tuple[int, int, int] | None:
+    """Return where FUNCTION's definition starts, its body starts and it ends.
+
+    The body starts after the line of the header's opening brace.
 
     Routines that share code, such as the two copies of a loop, can hold the
     same text, so a variant's replacement is looked for in its function only.
@@ -58,7 +63,71 @@ def find_definition(source: str, function: str) -> tuple[int, int] | None:
     end = source.find(closing_brace, match.end())
     if end < 0:
         return None
-    return match.start(), end + len(closing_brace)
+    return match.start(), match.end(), end + len(closing_brace)
+
+
+def describe_compiled(
+    compiled: fncompare.Functions | None, error: str, function: str
+) -> str:
+    """Return the score of FUNCTION as compiled, or why it has none."""
+    if compiled is None:
+        # One line per variant, so that each score stays beside its number
+        return " | ".join(error.strip().splitlines())[-ERROR_TAIL_LENGTH:]
+    if function not in compiled:
+        return f"{function} missing"
+    return ""
+
+
+def score_body(
+    bodies: fncompare.BodyVariants, preprocessed: str, target: fncompare.Routine
+) -> str:
+    """Compile one variant's preprocessed body and return its score."""
+    compiled, error = bodies.compile(preprocessed)
+    failure = describe_compiled(compiled, error, bodies.function)
+    if failure or compiled is None:
+        return failure
+    function = bodies.function
+    return f"{function} {fncompare.describe(target, compiled[function])}"
+
+
+def get_variant_body(
+    variant: str | None, source: str, start: int, end: int
+) -> str | None:
+    """Return VARIANT's text in place of SOURCE's body, from START to END.
+
+    None when VARIANT changes SOURCE elsewhere, or is None.
+    """
+    after_length = len(source) - end
+    if (
+        variant is None
+        or not variant.startswith(source[:start])
+        or not variant.endswith(source[end:])
+        or len(variant) < start + after_length
+    ):
+        return None
+    return variant[start : len(variant) - after_length]
+
+
+def prepare_bodies(
+    c_path: str, function: str, optflags: list[str], bodies: list[str]
+) -> tuple[fncompare.BodyVariants, list[str]] | None:
+    """Return C_PATH's file ready for FUNCTION's BODIES, and them preprocessed.
+
+    None when the bodies can't be preprocessed together, so that the
+    variants compile whole instead.
+    """
+    source = Path(c_path).read_text()
+    definition = find_definition(source, function)
+    if definition is None or not bodies:
+        return None
+    _, start, end = definition
+    try:
+        variants = fncompare.BodyVariants(
+            c_path, source, function, start, end, optflags
+        )
+        return variants, variants.preprocess_bodies(bodies)
+    except ValueError:
+        return None
 
 
 def score_variant(
@@ -77,11 +146,9 @@ def score_variant(
         compiled, error = fncompare.compile_isolated(variant.name, {function}, optflags)
     finally:
         Path(variant.name).unlink()
-    if compiled is None:
-        # One line per variant, so that each score stays beside its number
-        return " | ".join(error.strip().splitlines())[-ERROR_TAIL_LENGTH:]
-    if function not in compiled:
-        return f"{function} missing"
+    failure = describe_compiled(compiled, error, function)
+    if failure or compiled is None:
+        return failure
     return f"{function} {fncompare.describe(target, compiled[function])}"
 
 
@@ -116,7 +183,7 @@ def read_variants(c_path: str, function: str, variants_path: str) -> list[str | 
     if definition is None:
         msg = f"{c_path} has no definition of {function}"
         raise LookupError(msg)
-    start, end = definition
+    start, _, end = definition
     before, body, after = source[:start], source[start:end], source[end:]
     # The file's own last newline ends the last block, not its replacement
     text = Path(variants_path).read_text().removesuffix("\n")
@@ -125,6 +192,18 @@ def read_variants(c_path: str, function: str, variants_path: str) -> list[str | 
         variant = replace_all(before, body, block)
         variants.append(None if variant is None else "".join(variant) + after)
     return variants
+
+
+def find_bodies(
+    c_path: str, function: str, sources: list[str | None]
+) -> list[str | None]:
+    """Return the body each of SOURCES gives FUNCTION, or None where it changes more."""
+    source = Path(c_path).read_text()
+    definition = find_definition(source, function)
+    if definition is None:
+        return [None] * len(sources)
+    _, start, end = definition
+    return [get_variant_body(variant, source, start, end) for variant in sources]
 
 
 def read_target(asm_path: str, function: str) -> fncompare.Routine:
@@ -155,24 +234,44 @@ def score_jobs(jobs: list[list[str]], *, prefix_names: bool) -> None:
         targets = list(
             pool.map(read_target, [job[0] for job in jobs], [job[2] for job in jobs])
         )
-        results: list[list[Future[str] | None]] = []
-        for (_, c_path, function, _), target, sources in zip(
-            jobs, targets, variants, strict=True
-        ):
-            c_dir = Path(c_path).resolve().parent
-            # The variants have their own names, so they take the flags of
-            # the file they vary
-            optflags = fncompare.get_optflags(c_path)
-            results.append(
+        # The variants have their own names, so they take the flags of the
+        # file they vary
+        optflags = [fncompare.get_optflags(job[1]) for job in jobs]
+        bodies = [
+            find_bodies(job[1], job[2], sources)
+            for job, sources in zip(jobs, variants, strict=True)
+        ]
+        prepared = list(
+            pool.map(
+                prepare_bodies,
+                [job[1] for job in jobs],
+                [job[2] for job in jobs],
+                optflags,
                 [
-                    pool.submit(
-                        score_variant, source, c_dir, optflags, target, function
-                    )
-                    if source is not None
-                    else None
-                    for source in sources
-                ]
+                    [body for body in found_bodies if body is not None]
+                    for found_bodies in bodies
+                ],
             )
+        )
+        results: list[list[Future[str] | None]] = []
+        for number, job in enumerate(jobs):
+            target, sources, flags = targets[number], variants[number], optflags[number]
+            job_bodies, ready = bodies[number], prepared[number]
+            c_dir = Path(job[1]).resolve().parent
+            preprocessed = iter(ready[1]) if ready else iter(())
+            scores: list[Future[str] | None] = []
+            for source, body in zip(sources, job_bodies, strict=True):
+                if source is None:
+                    scores.append(None)
+                elif ready and body is not None:
+                    scores.append(
+                        pool.submit(score_body, ready[0], next(preprocessed), target)
+                    )
+                else:
+                    scores.append(
+                        pool.submit(score_variant, source, c_dir, flags, target, job[2])
+                    )
+            results.append(scores)
         for (_, _, function, _), scores in zip(jobs, results, strict=True):
             name = f"{function} " if prefix_names else ""
             for number, result in enumerate(scores):
