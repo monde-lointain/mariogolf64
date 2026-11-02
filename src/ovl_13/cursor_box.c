@@ -63,7 +63,10 @@ void LoadCursorBox(void* image) {
  * Each corner's red pulses with the sine of its own phase, which the four
  * corners start a quarter turn apart. Doesn't match: the original keeps the
  * green and blue in the loop rather than hoisting them, which leaves left in a
- * saved register and the frame 8 bytes smaller. 44 words differ.
+ * saved register and the frame 8 bytes smaller. It also keeps corner as a
+ * counter rather than turning it into an offset. Other types for corner, a
+ * < test, storing the alpha first or dropping the barrier give 46-176.
+ * 44 words differ.
  */
 #ifdef NON_MATCHING
 void DrawCursorBox(Gfx** displayListHead, s32 left, s32 top) {
