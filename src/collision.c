@@ -1268,10 +1268,12 @@ INCLUDE_ASM("asm/nonmatchings/collision", FindMiniGolfGroundHit);
  * path that starts or ends off the ground hits a level triangle at its end
  * if it ends below the ground there, and nothing otherwise.
  *
- * Doesn't match: for the hit fraction, the original takes the start
- * side's absolute value into a register of its own before working out the
- * side change, where GCC ties it to its operand and subtracts first.
- * 9 words differ, 3 in shape.
+ * Doesn't match: the original takes the start side's absolute value into a
+ * temporary register, where this keeps it in hitFraction's. Dividing
+ * hitFraction by the side change's magnitude after working the change out
+ * gives the original's order (9 words differed); a local for the magnitude or
+ * the converted side subtracts first again (13). The original also fills the
+ * side test's delay slot differently. 7 words differ, 3 in shape.
  */
 #ifdef NON_MATCHING
 s32 FindGroundHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
@@ -1429,8 +1431,9 @@ s32 FindGroundHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
             (plane.normal[AXIS_Y] * startY) + (plane.normal[AXIS_Z] * startZ) +
             planeOffset;
         if (startSide != endSide) {
+          hitFraction = fabsf((f32)startSide);
           sideChange = startSide - endSide;
-          hitFraction = fabsf((f32)startSide) / fabsf((f32)sideChange);
+          hitFraction /= fabsf((f32)sideChange);
         } else {
           hitFraction = 0.0f;
         }
