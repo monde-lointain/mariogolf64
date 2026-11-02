@@ -1451,11 +1451,7 @@ void StartLandingReaction(s32 reaction) {
  * The panel spins and grows into place over its first frames, while the text
  * is drawn as glyph groups in its perspective; after that the text is drawn
  * flat.
- *
- * Doesn't match: the hundredths of the distance go in a different register. 22
- * words differ.
  */
-#ifdef NON_MATCHING
 void DrawLandingReaction(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   Vec3 scale;
@@ -1465,7 +1461,7 @@ void DrawLandingReaction(Gfx** displayListHead) {
   Mat4 offset;
   SurfaceInfo* surface;
   s32 distance;
-  s32 hundredths;
+
   Radians angle;
   f32 size;
 
@@ -1483,13 +1479,16 @@ void DrawLandingReaction(Gfx** displayListHead) {
               g_HoleSetup.cupPosition[AXIS_Z]);
       /* Mini golf and the green measure in feet */
       if (g_GameState.isMiniGolf || surface->kind == SURFACE_KIND_GREEN) {
-        hundredths =
+        /* One per branch, so each is allocated within its block, to match */
+        s32 hundredths =
             distance * (FEET_PER_YARD * HUNDREDTHS_PER_UNIT) * YARDS_PER_UNIT;
+
         sprintf(g_PrintBuffer, "%2d.%02d%c REST",
             hundredths / HUNDREDTHS_PER_UNIT, hundredths % HUNDREDTHS_PER_UNIT,
             FEET_GLYPH);
       } else {
-        hundredths = distance * HUNDREDTHS_PER_UNIT * YARDS_PER_UNIT;
+        s32 hundredths = distance * HUNDREDTHS_PER_UNIT * YARDS_PER_UNIT;
+
         sprintf(g_PrintBuffer, "%3d.%02d%c REST",
             hundredths / HUNDREDTHS_PER_UNIT, hundredths % HUNDREDTHS_PER_UNIT,
             YARDS_GLYPH);
@@ -1572,9 +1571,6 @@ void DrawLandingReaction(Gfx** displayListHead) {
 
   *displayListHead = gfx;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/round_hud", DrawLandingReaction);
-#endif
 
 /*
  * Returns white tinted toward red by a positive warmth, or toward blue by a
