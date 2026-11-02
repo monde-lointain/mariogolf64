@@ -664,7 +664,7 @@ s32 UpdatePrompt(ControllerState* controller) {
  * CHOICES_MIDDLE_Y plus a quarter of the cloud, once and takes halfHeight
  * from it, where GCC folds the top into middle - (halfHeight - constant) and
  * adds the constant to the bottom separately. A middleY temporary at the
- * draws gives 10-38 shape differences. 31 words differ, 5 in shape.
+ * draws gives 10-38 shape differences. 29 words differ, 5 in shape.
  */
 #ifdef NON_MATCHING
 void DrawPrompt(Gfx** displayListHead) {
@@ -721,8 +721,8 @@ void DrawPrompt(Gfx** displayListHead) {
   texelOffset = IMAGE_HEADER_SIZE;
   do {
     if (f_PromptState == PROMPT_STATE_CHOOSING) {
-      halfHeight = cloudHeight;
       halfWidth = PROMPT_CLOUD_HALF_WIDTH;
+      halfHeight = cloudHeight;
     } else {
       halfWidth =
           f_PromptFrame * (PROMPT_CLOUD_HALF_WIDTH / PROMPT_GROWTH_FRAMES);
@@ -792,7 +792,7 @@ void DrawPrompt(Gfx** displayListHead) {
     DrawTextureRect(&gfx, QuarterPixels(NO_CENTER_X - halfWidth),
         QuarterPixels((cloudHeight / 4) + CHOICES_MIDDLE_Y - halfHeight),
         QuarterPixels(NO_CENTER_X + halfWidth),
-        QuarterPixels(halfHeight + ((cloudHeight / 4) + CHOICES_MIDDLE_Y)),
+        QuarterPixels(CHOICES_MIDDLE_Y + (halfHeight + (cloudHeight / 4))),
         G_TX_RENDERTILE, 0, 0,
         CHOICE_IMAGE_WIDTH / 2 * TEXEL_STEP_ONE / halfWidth,
         CHOICE_IMAGE_HEIGHT / 2 * TEXEL_STEP_ONE / halfHeight);
