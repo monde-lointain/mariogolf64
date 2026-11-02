@@ -2168,7 +2168,8 @@ void PlaceRainCenter(void) {
  * differently. The original reloads each head coordinate for the tail, as
  * ours does when the field resets come between them, but that order schedules
  * further from it; none of the 180 orders of these statements does better.
- * 35 words differ, 11 in shape.
+ * Adding the head's x to its drift, rather than the drift to it, takes 35
+ * words differing to 27, 11 in shape.
  */
 #ifdef NON_MATCHING
 void ResetRaindrop(Raindrop* drop) {
@@ -2192,7 +2193,7 @@ void ResetRaindrop(Raindrop* drop) {
   drop->head[AXIS_X] += f_RainVelocity[AXIS_X] * fallFrameCount;
   drop->head[AXIS_Z] += f_RainVelocity[AXIS_Z] * fallFrameCount;
   drop->tail[AXIS_Z] = drop->head[AXIS_Z] + (f_RainDriftZ * RAINDROP_LENGTH);
-  drop->tail[AXIS_X] = drop->head[AXIS_X] + (f_RainDriftX * RAINDROP_LENGTH);
+  drop->tail[AXIS_X] = (f_RainDriftX * RAINDROP_LENGTH) + drop->head[AXIS_X];
   drop->tail[AXIS_Y] = drop->head[AXIS_Y] + RAINDROP_LENGTH;
   drop->groundHeight = 0;
   drop->flags = 0;
