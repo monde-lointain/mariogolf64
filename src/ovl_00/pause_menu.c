@@ -880,7 +880,10 @@ void DrawPauseArrows(Gfx** displayListHead, s32 x, s32 y, s32 gap) {
  * Loads or frees the pause menu as RequestPauseMenu asked, then draws the menu
  * while it is loaded
  *
- * Doesn't match: 59 words differ.
+ * Doesn't match: the original sign-extends y for the grid color's value text
+ * from y itself, and only the weather's from the shifted copy that loop.c keeps
+ * in the label loop, where this uses the copy for both. The order of $s4 to $s6
+ * also differs. 62 words differ, 16 in shape.
  */
 #ifdef NON_MATCHING
 void DrawPauseMenu(Gfx** displayListHead) {
@@ -894,7 +897,8 @@ void DrawPauseMenu(Gfx** displayListHead) {
   s32 green;
   s32 blue;
   s32 i;
-  s16 y;
+  s32 y;
+  char* valueText;
   s32 message;
   u16 kind;
   u16 selectedKind;
@@ -981,17 +985,24 @@ void DrawPauseMenu(Gfx** displayListHead) {
     gDPSetPrimColor(gfx++, 0, 0, red, green, blue, 0xFF);
     DrawLargeTextSlot(&gfx, i);
     if (kind == PAUSE_OPTION_KIND_GRID_COLOR) {
-      DrawLargeText(&gfx, PAUSE_VALUE_X, y,
-          (s8)g_Players[g_CurrentShot.playerIndex].gridColor == GRID_COLOR_BLACK
-              ? f_PauseValueTexts[PAUSE_VALUE_TEXT_BLACK]
-              : f_PauseValueTexts[PAUSE_VALUE_TEXT_WHITE]);
+      if ((s8)g_Players[g_CurrentShot.playerIndex].gridColor ==
+          GRID_COLOR_BLACK) {
+        valueText = f_PauseValueTexts[PAUSE_VALUE_TEXT_BLACK];
+      } else {
+        valueText = f_PauseValueTexts[PAUSE_VALUE_TEXT_WHITE];
+      }
+
+      DrawLargeText(&gfx, PAUSE_VALUE_X, y, valueText);
     }
 
     if (kind == PAUSE_OPTION_KIND_WEATHER) {
-      DrawLargeText(&gfx, PAUSE_VALUE_X, y,
-          g_HoleSetup.conditions.isRaining == TRUE
-              ? f_PauseValueTexts[PAUSE_VALUE_TEXT_RAIN]
-              : f_PauseValueTexts[PAUSE_VALUE_TEXT_CLEAR]);
+      if (g_HoleSetup.conditions.isRaining == TRUE) {
+        valueText = f_PauseValueTexts[PAUSE_VALUE_TEXT_RAIN];
+      } else {
+        valueText = f_PauseValueTexts[PAUSE_VALUE_TEXT_CLEAR];
+      }
+
+      DrawLargeText(&gfx, PAUSE_VALUE_X, y, valueText);
     }
   }
 
