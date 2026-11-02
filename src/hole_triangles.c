@@ -43,6 +43,10 @@
 #define RING_NORMAL_SCALE 127.0f
 #define RING_VERTEX_ALPHA 0x80
 
+/* The index of the vertex on SIDE of SECTION, which wraps around the ring */
+#define RingVertex(section, side) \
+  ((((section) & (RING_SECTION_COUNT - 1)) * RING_SIDE_COUNT) + (side))
+
 /* A ring's corners give its center, its facing and, in the third's x, its scale
  */
 #define RING_SCALE_ONE 1024.0f
@@ -277,7 +281,11 @@ INCLUDE_ASM("asm/nonmatchings/hole_triangles", DrawHoleTriangles);
  * Draws the current player's rings; one past RING_STATE_SHOWN fades out while
  * sparkles circle it
  *
- * Doesn't match: 91 words differ.
+ * Doesn't match: the original also masks the side, as & 3, but doing so
+ * shortens the outer loop so that loop.c hoists one more display list command
+ * (0xDC08060A) out of it, which takes $t3 and shifts the other registers.
+ * Elsewhere the scheduling and delay slots differ. 79 words differ, 25 in
+ * shape.
  */
 #ifdef NON_MATCHING
 void DrawRings(Gfx** displayListHead, CameraMatrices* matrices UNUSED,
@@ -296,7 +304,6 @@ void DrawRings(Gfx** displayListHead, CameraMatrices* matrices UNUSED,
   s32 state;
   s32 section;
   s32 side;
-  s32 nextSection;
   s32 alpha;
   Radians angle;
   f32 turn;
@@ -404,14 +411,13 @@ void DrawRings(Gfx** displayListHead, CameraMatrices* matrices UNUSED,
             G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_NOPUSH);
         gSPVertex(gfx++, f_RingVertices, RING_VERTEX_COUNT, 0);
         for (section = 0; section < RING_SECTION_COUNT; section++) {
-          nextSection = (section + 1) % RING_SECTION_COUNT;
           for (side = 0; side < RING_SIDE_COUNT; side++) {
-            gSP2Triangles(gfx++, section * RING_SIDE_COUNT + side,
-                section * RING_SIDE_COUNT + (side + 1) % RING_SIDE_COUNT,
-                nextSection * RING_SIDE_COUNT + (side + 1) % RING_SIDE_COUNT, 0,
-                section * RING_SIDE_COUNT + side,
-                nextSection * RING_SIDE_COUNT + (side + 1) % RING_SIDE_COUNT,
-                nextSection * RING_SIDE_COUNT + side, 0);
+            gSP2Triangles(gfx++, RingVertex(section, side),
+                RingVertex(section, (side + 1) % RING_SIDE_COUNT),
+                RingVertex(section + 1, (side + 1) % RING_SIDE_COUNT), 0,
+                RingVertex(section, side),
+                RingVertex(section + 1, (side + 1) % RING_SIDE_COUNT),
+                RingVertex(section + 1, side), 0);
           }
         }
 
