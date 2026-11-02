@@ -37,7 +37,9 @@
  *
  * Doesn't match: the original never uses $a3 and keeps the index in $t0,
  * so each later value sits one register higher than here. It also
- * advances the password pointer before the index.
+ * advances the password pointer before the index. Giving the fourth
+ * parameter another type (f32, f64, s64, s16, u8, a pointer or a small
+ * struct) changes nothing, nor do pointer walks or a symbol local.
  */
 s32 WritePasswordSymbols(
     u8* symbols, char* password, s32 symbolCount, s32 unused);
