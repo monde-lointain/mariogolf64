@@ -393,28 +393,21 @@ u8 RankTournament(
  * Gives the computer contestants the course's names, skipping any that
  * matches the first player's record and taking the block's last name in
  * its place
- *
- * Doesn't match: the original computes the block's last name, lastName + 1,
- * from the course's product rather than from lastName, and the first name's
- * index address from the table's base rather than from nameIndex.
- * 25 words differ.
  */
-#ifdef NON_MATCHING
 void NameContestants(void) {
   s32 index;
   s32 nameOffset;
-  Boolean hasSkipped;
   s32 lastName;
-  s16* nameIndex;
+  Boolean hasSkipped;
   u32 isFirstName;
+  s32 blockEnd;
 
   index = TOURNAMENT_CONTESTANT_COUNT - 2;
   nameOffset = index;
   hasSkipped = FALSE;
-  nameIndex = &g_ContestantNameIndices[TOURNAMENT_CONTESTANT_COUNT - 2];
-  lastName = (g_GameState.courseIndex + 1) * NAMES_PER_COURSE;
-  lastName -= 2; /* In its own statement to match */
-  for (; index >= 0; index--, nameIndex--) {
+  blockEnd = (g_GameState.courseIndex + 1) * NAMES_PER_COURSE;
+  lastName = blockEnd - 2;
+  for (; index >= 0; index--) {
     if (!hasSkipped &&
         strcmp(g_Players[0].name, g_ContestantNames[lastName - nameOffset]) ==
             0) {
@@ -422,16 +415,12 @@ void NameContestants(void) {
       nameOffset--;
     }
 
-    isFirstName = &g_ContestantNameIndices[1] > nameIndex;
+    isFirstName = index == 0;
     if (hasSkipped & isFirstName) {
-      *nameIndex = lastName + 1;
+      g_ContestantNameIndices[index] = blockEnd - 1;
     } else {
-      *nameIndex = lastName - nameOffset;
+      g_ContestantNameIndices[index] = lastName - nameOffset;
       nameOffset--;
     }
   }
 }
-
-#else
-INCLUDE_ASM("asm/nonmatchings/tournament", NameContestants);
-#endif
