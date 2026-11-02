@@ -2103,7 +2103,13 @@ void PlaceCharacter(u32 slotIndex, CoursePoint point, Radians heading) {
  * The shadow lies on the ground plane under three points around the
  * character's shadow point.
  *
- * Doesn't match: 37 words differ.
+ * Doesn't match: the original loads the light's rotation into $f0 and picks
+ * it or its negation into $f12, which is jump.c's form of a general ?:
+ * expansion. Ours is expand_expr's single-operand form, which loads straight
+ * into $f12 and negates it in place. Reading the rotation into a local first,
+ * or writing the arms differently, keeps that form. The view direction's
+ * stores and the shadow scale's abs.s are also scheduled otherwise. 49 words
+ * differ, 19 in shape.
  */
 #ifdef NON_MATCHING
 void DrawCharacterAndShadow(
