@@ -2117,7 +2117,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard_drawing", DrawLeaderboardPage);
  * loops add the column's offset to x after adding the cells' left edge, where
  * this adds it first, and the target keeps the address of
  * g_GameState.holeSelection in a saved register while it draws the faces.
- * 860 words differ, 282 in shape.
+ * 822 words differ, 262 in shape.
  */
 #ifdef NON_MATCHING
 void DrawScoresPage(Gfx** displayListHead) {
@@ -2477,8 +2477,8 @@ void DrawScoresPage(Gfx** displayListHead) {
         if (!(g_GameState.holeSelection & HOLE_SELECTION_FRONT_NINE)) {
           DrawTextureRect(&gfx,
               QuarterPixels(((j * CELL_WIDTH) + CELL_LEFT) + g_Scorecard.x),
-              QuarterPixels(g_Scorecard.y + CELL_TOP +
-                  (cellRowIndex * CELL_HEIGHT) + NINE_SPACING),
+              QuarterPixels((cellRowIndex * CELL_HEIGHT) +
+                  (CELL_TOP + NINE_SPACING) + g_Scorecard.y),
               QuarterPixels(
                   g_Scorecard.x + (j * CELL_WIDTH) + CELL_LEFT + CELL_WIDTH),
               QuarterPixels(g_Scorecard.y + (cellRowIndex * CELL_HEIGHT) +
@@ -2578,8 +2578,8 @@ void DrawScoresPage(Gfx** displayListHead) {
             frontTop + PLAYER_ROW_TOP - SCORES_FACE_RISE + g_Scorecard.y, 0,
             TRUE);
         DrawSmallFace(&gfx,
-            g_Scorecard.x + SCORES_FACE_LEFT +
-                ((secondRow & 1) * SCORES_FACE_STAGGER),
+            ((secondRow & 1) * SCORES_FACE_STAGGER) + SCORES_FACE_LEFT +
+                g_Scorecard.x,
             frontTop + (secondRow * PLAYER_ROW_SPACING) + PLAYER_ROW_TOP -
                 SCORES_FACE_RISE + g_Scorecard.y,
             1, TRUE);
@@ -2590,8 +2590,8 @@ void DrawScoresPage(Gfx** displayListHead) {
             backTop + PLAYER_ROW_TOP - SCORES_FACE_RISE + g_Scorecard.y, 0,
             TRUE);
         DrawSmallFace(&gfx,
-            g_Scorecard.x + SCORES_FACE_LEFT +
-                ((secondRow & 1) * SCORES_FACE_STAGGER),
+            ((secondRow & 1) * SCORES_FACE_STAGGER) + SCORES_FACE_LEFT +
+                g_Scorecard.x,
             backTop + (secondRow * PLAYER_ROW_SPACING) + PLAYER_ROW_TOP -
                 SCORES_FACE_RISE + g_Scorecard.y,
             1, TRUE);
@@ -2613,19 +2613,19 @@ void DrawScoresPage(Gfx** displayListHead) {
             MIRRORED_FACE_MASK, 0, 0, 0);
         if (!(g_GameState.holeSelection & HOLE_SELECTION_BACK_NINE)) {
           DrawSmallFace(&gfx,
-              g_Scorecard.x + ((facePlayerIndex & 1) * SCORES_FACE_STAGGER) +
-                  SCORES_FACE_LEFT,
-              frontTop + (facePlayerIndex * PLAYER_ROW_SPACING) +
-                  PLAYER_ROW_TOP - SCORES_FACE_RISE + g_Scorecard.y,
+              ((facePlayerIndex & 1) * SCORES_FACE_STAGGER) + SCORES_FACE_LEFT +
+                  g_Scorecard.x,
+              PLAYER_ROW_TOP - SCORES_FACE_RISE + g_Scorecard.y +
+                  ((facePlayerIndex * PLAYER_ROW_SPACING) + frontTop),
               facePlayerIndex, TRUE);
         }
 
         if (!(g_GameState.holeSelection & HOLE_SELECTION_FRONT_NINE)) {
           DrawSmallFace(&gfx,
-              g_Scorecard.x + ((facePlayerIndex & 1) * SCORES_FACE_STAGGER) +
-                  SCORES_FACE_LEFT,
-              backTop + (facePlayerIndex * PLAYER_ROW_SPACING) +
-                  PLAYER_ROW_TOP - SCORES_FACE_RISE + g_Scorecard.y,
+              ((facePlayerIndex & 1) * SCORES_FACE_STAGGER) + SCORES_FACE_LEFT +
+                  g_Scorecard.x,
+              PLAYER_ROW_TOP - SCORES_FACE_RISE + g_Scorecard.y +
+                  ((facePlayerIndex * PLAYER_ROW_SPACING) + backTop),
               facePlayerIndex, TRUE);
         }
       }
