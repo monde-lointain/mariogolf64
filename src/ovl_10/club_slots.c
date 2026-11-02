@@ -532,7 +532,7 @@ s32 GetClubSlotsState(void) {
   return f_ClubSlotsState;
 }
 
-/* Doesn't match: 100 words differ, 54 in shape. */
+/* Doesn't match: 89 words differ, 45 in shape. */
 #ifdef NON_MATCHING
 void DrawClubSlots(Gfx** displayListHead) {
   Mat4 matrix;
@@ -589,7 +589,7 @@ void DrawClubSlots(Gfx** displayListHead) {
               if (f_Slots->stoppedReelCount == reelIndex) {
                 if (f_Slots->stoppedSymbols[0] == SYMBOL_STAR &&
                     f_Slots->stoppedSymbols[1] == SYMBOL_STAR) {
-                  if (f_ReelStrips[LAST_REEL][symbolIndex] == SYMBOL_STAR) {
+                  if (f_ReelStrips[reelIndex][symbolIndex] == SYMBOL_STAR) {
                     f_Slots->stoppedSymbols[LAST_REEL] = SYMBOL_STAR;
                     f_Slots->stoppedReelCount++;
                   }
