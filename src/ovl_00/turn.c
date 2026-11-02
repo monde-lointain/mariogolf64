@@ -976,10 +976,12 @@ void ResetAimCamera(void) {
  * is close.
  *
  * Doesn't match: the original loads one float constant five instructions
- * later, and stores the eased height before taking the distance error's
- * absolute value, where this stores it after; 17 words differ. Testing the
- * absolute value directly gives 27, and taking it before easing the height
- * gives 57.
+ * later, and takes the distance error's absolute value into a register of
+ * its own, where local-alloc ties it to the error, which is set once and dies
+ * there. Keeping the signed error and testing its absolute value orders the
+ * height's store as the original does (17 words differed). Setting the error
+ * for the first test too gives 17, testing the absolute value directly 27,
+ * and taking it before easing the height 57. 13 words differ, 7 in shape.
  */
 #ifdef NON_MATCHING
 void EaseAimCamera(void) {
@@ -1020,10 +1022,10 @@ void EaseAimCamera(void) {
 
   g_CurrentShot.aimCameraHeight +=
       (targetHeight - g_CurrentShot.aimCameraHeight) * AIM_CAMERA_EASE_FRACTION;
-  distanceError = fabsf(g_CurrentShot.aimCameraDistance - targetDistance);
+  distanceError = g_CurrentShot.aimCameraDistance - targetDistance;
   /* The test in its own block, to match */
   END_BASIC_BLOCK();
-  if (distanceError < UNITS_PER_YARD) {
+  if (fabsf(distanceError) < UNITS_PER_YARD) {
     g_IsAimCameraEasing = 0;
   }
 }
