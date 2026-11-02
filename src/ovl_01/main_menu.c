@@ -2236,7 +2236,7 @@ void UpdateAnimationViewer(void) {
  * g_GameState.gameMode in another order, the B button's path loads
  * g_ChosenCharacters and g_CharacterGrid in another order, and the spin's
  * slowing keeps the spin in a register where the original reads it again after
- * the step. 85 words differ.
+ * the step. 78 words differ, 28 in shape.
  */
 #ifdef NON_MATCHING
 void UpdateModeSelect(void) {
@@ -2545,6 +2545,9 @@ void UpdateModeSelect(void) {
   if (Abs(g_MenuMemory.modeSpin) != 0) {
     step = AmountPerMode(MODE_SELECT_SPIN_SPEED);
     direction = g_MenuMemory.modeSpin < 0 ? -1 : 1;
+    /* The clamp starts a block of its own, to match; writing the direction
+     * as an if-else, either way round, or clamping first doesn't */
+    END_BASIC_BLOCK();
     if (step == 0) {
       step = 1;
     }
