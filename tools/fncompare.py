@@ -38,7 +38,7 @@ import subprocess
 import sys
 import tempfile
 import threading
-from collections.abc import Callable, Sequence
+from collections.abc import Callable, Iterator, Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import cast
@@ -438,7 +438,7 @@ def find_definitions(source: str) -> list[tuple[str, int, int, bool]]:
     return definitions
 
 
-def isolate_functions(source: str, keep: set[str]) -> str:
+def isolate_functions(source: str, keep: set[str], *, prune: bool = True) -> str:
     """Return the preprocessed SOURCE with the bodies it needn't compile cut.
 
     Each top-level function body becomes a prototype, except those that hold
@@ -450,7 +450,8 @@ def isolate_functions(source: str, keep: set[str]) -> str:
     pads a function's first instruction after a hazard in the last one
     before it, so that one stays too. A builtin without its definition
     would be expanded instead of called. A cut body leaves its newlines,
-    so the lines after it keep their numbers.
+    so the lines after it keep their numbers. With PRUNE, the declarations
+    the kept functions can't use go too.
     """
     definitions = find_definitions(source)
     names = "|".join(map(re.escape, keep))
@@ -460,10 +461,14 @@ def isolate_functions(source: str, keep: set[str]) -> str:
         for name, start, end, _ in definitions
     ]
     pieces: list[str] = []
+    # The definitions compiled in full, which the pruning starts from
+    roots: list[str] = []
     copied = 0
     for number, (name, start, end, is_inline) in enumerate(definitions):
         is_before_kept = number + 1 < len(holds) and holds[number + 1]
         is_builtin = name in BUILTIN_NAMES
+        if holds[number] or is_before_kept:
+            roots.append(name)
         if holds[number] or is_before_kept or is_inline or is_builtin:
             continue
         prototype = source[copied:start].rstrip() + ";"
@@ -471,7 +476,210 @@ def isolate_functions(source: str, keep: set[str]) -> str:
         pieces.append(prototype + "\n" * cut_line_count)
         copied = end
     pieces.append(source[copied:])
-    return "".join(pieces)
+    isolated = "".join(pieces)
+    return prune_declarations(isolated, set(roots)) if prune else isolated
+
+
+# The tokens of preprocessed C that a declaration names things with. Strings
+# and characters are matched whole, so that the words in them are passed
+# over, and line markers so that they end the declaration before them.
+DECLARATION_TOKEN_RE = re.compile(
+    r""""(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|^#[^\n]*|[A-Za-z_]\w*|\S""",
+    re.MULTILINE,
+)
+# The words that name no declaration of the file's own
+C_KEYWORDS = frozenset(
+    (
+        "__asm__", "__attribute__", "__extension__", "__inline__", "asm",
+        "auto", "break", "case", "char", "const", "continue", "default", "do",
+        "double", "else", "enum", "extern", "float", "for", "goto", "if",
+        "inline", "int", "long", "register", "return", "short", "signed",
+        "sizeof", "static", "struct", "switch", "typedef", "union",
+        "unsigned", "void", "volatile", "while",
+    )
+)  # fmt: skip
+# What follows a name where a top-level declaration declares it, and where
+# it declares an object
+DECLARING_FOLLOWERS = frozenset("([=;,{:")
+OBJECT_FOLLOWERS = frozenset("[=;,")
+OPENING_BRACKETS = frozenset("([")
+CLOSING_BRACKETS = frozenset(")]")
+# What comes before an enumeration's constant
+ENUMERATOR_LEADERS = frozenset("{,")
+
+
+@dataclass
+class Declaration:
+    """One top-level declaration or definition of preprocessed C."""
+
+    text: str
+    # The names it declares, and every name in it
+    names: set[str]
+    words: set[str]
+    # Whether it defines an object, which takes room in the file's data
+    is_object: bool
+
+
+def split_declarations(source: str) -> list[Declaration]:
+    """Return SOURCE's top-level declarations, definitions and line markers.
+
+    A function definition ends at its closing brace, and anything else at
+    its semicolon, so that a structure's body and the name it is typedefed
+    as stay together.
+    """
+    declarations: list[Declaration] = []
+    tokens: list[str] = []
+    start = 0
+    depth = 0
+    for match in DECLARATION_TOKEN_RE.finditer(source):
+        part = match.group()
+        ends = False
+        if part[0] == "#":
+            ends = depth == 0
+        elif part == "{":
+            depth += 1
+        elif part == "}":
+            depth -= 1
+            # A definition's header ends in its parameters, an initializer's
+            # in "=" and a structure's in its tag
+            ends = depth == 0 and is_function_header(tokens)
+        elif part == ";":
+            ends = depth == 0
+        tokens.append(part)
+        if ends:
+            text = source[start : match.end()]
+            names = find_declared_names(tokens)
+            declarations.append(
+                Declaration(text, names, set(tokens), defines_object(tokens))
+            )
+            tokens = []
+            start = match.end()
+    declarations.append(
+        Declaration(source[start:], set(), set(tokens), is_object=False)
+    )
+    return declarations
+
+
+def is_function_header(tokens: list[str]) -> bool:
+    """Tell whether TOKENS, through a closing brace, are a function definition."""
+    depth = 0
+    for number, part in enumerate(tokens):
+        if part == "{":
+            if depth == 0:
+                return number > 0 and tokens[number - 1] == ")"
+            depth += 1
+    return False
+
+
+@dataclass(frozen=True)
+class Word:
+    """A name in a declaration, where it stands among the others."""
+
+    text: str
+    previous: str
+    following: str
+    # How deep in parentheses or brackets, and in braces, it is
+    parentheses: int
+    braces: int
+
+
+def read_words(parts: list[str]) -> Iterator[Word]:
+    """Yield each name in a declaration's PARTS, other than C's keywords."""
+    parentheses = 0
+    braces = 0
+    for number, part in enumerate(parts):
+        if part in OPENING_BRACKETS:
+            parentheses += 1
+        elif part in CLOSING_BRACKETS:
+            parentheses -= 1
+        elif part == "{":
+            braces += 1
+        elif part == "}":
+            braces -= 1
+        elif (part[0].isalpha() or part[0] == "_") and part not in C_KEYWORDS:
+            previous = parts[number - 1] if number else ""
+            following = parts[number + 1] if number + 1 < len(parts) else ""
+            yield Word(part, previous, following, parentheses, braces)
+
+
+def find_declared_names(parts: list[str]) -> set[str]:
+    """Return the names that a top-level declaration's PARTS declare.
+
+    These are the declarator's name, at the top level of the declaration's
+    parentheses and braces, or the name a function pointer gets in its
+    parentheses, and an enumeration's constants.
+    """
+    is_enumeration = "enum" in parts
+    names: set[str] = set()
+    for word in read_words(parts):
+        is_declarator = (
+            word.braces == 0
+            and word.parentheses == 0
+            and word.following in DECLARING_FOLLOWERS
+        )
+        is_function_pointer = (
+            word.braces == 0
+            and word.parentheses == 1
+            and word.previous == "*"
+            and word.following in CLOSING_BRACKETS
+        )
+        is_constant = (
+            is_enumeration and word.braces == 1 and word.previous in ENUMERATOR_LEADERS
+        )
+        if is_declarator or is_function_pointer or is_constant:
+            names.add(word.text)
+    return names
+
+
+def defines_object(parts: list[str]) -> bool:
+    """Tell whether a top-level declaration's PARTS define an object.
+
+    Neither a typedef, an extern declaration, a function's declaration nor
+    a bare structure, union or enumeration does. Its first top-level name
+    that a declaration could follow tells which it is.
+    """
+    if "typedef" in parts or "extern" in parts or parts[-1] != ";":
+        return False
+    for word in read_words(parts):
+        if word.braces == 0 and word.parentheses == 0:
+            if word.following == "(":
+                return False
+            if word.following in OBJECT_FOLLOWERS:
+                return True
+    return False
+
+
+def prune_declarations(source: str, roots: set[str]) -> str:
+    """Return SOURCE without the declarations that the definitions of ROOTS can't use.
+
+    Each declaration that a kept one names is kept in turn, and so is each
+    that declares nothing this can tell, such as a line marker, and each
+    object's definition, since dropping one would move the others in the
+    file's data, and with them the addresses the functions use. Parsing the
+    rest took about half of each compile. A pruned declaration leaves its
+    newlines, so the lines after it keep their numbers.
+    """
+    declarations = split_declarations(source)
+    declaring: dict[str, list[int]] = collections.defaultdict(list)
+    for number, declaration in enumerate(declarations):
+        for name in declaration.names:
+            declaring[name].append(number)
+    pending = [
+        number
+        for number, declaration in enumerate(declarations)
+        if not declaration.names or declaration.names & roots or declaration.is_object
+    ]
+    kept = set(pending)
+    while pending:
+        for word in declarations[pending.pop()].words:
+            for number in declaring.get(word, ()):
+                if number not in kept:
+                    kept.add(number)
+                    pending.append(number)
+    return "".join(
+        declaration.text if number in kept else "\n" * declaration.text.count("\n")
+        for number, declaration in enumerate(declarations)
+    )
 
 
 def run_compiler(
@@ -508,7 +716,8 @@ def compile_isolated(
     """Compile only the functions in KEEP of C_PATH, as compile_functions does.
 
     Falls back on compiling all of C_PATH when a function in KEEP is defined
-    under another name, as through a macro, and so was cut.
+    under another name, as through a macro, and so was cut, or when the cut
+    file fails, as when the pruning misses a declaration.
     """
     if optflags is None:
         optflags = get_optflags(c_path)
@@ -519,7 +728,7 @@ def compile_isolated(
         isolated = Path(tmp) / "isolated.i"
         _ = isolated.write_text(isolate_functions(result.stdout, keep))
         compiled, error = compile_functions(isolated, optflags)
-    if compiled is not None and not keep <= compiled.keys():
+    if compiled is None or not keep <= compiled.keys():
         return compile_functions(c_path, optflags)
     return compiled, error
 
@@ -568,9 +777,12 @@ class BodyVariants:
     start: int
     end: int
     optflags: list[str]
-    # The preprocessed, isolated file before and after the body
+    # The preprocessed, isolated file before and after the body, with only
+    # the declarations the body uses and with all of them
     before: str = field(init=False)
     after: str = field(init=False)
+    whole_before: str = field(init=False)
+    whole_after: str = field(init=False)
 
     def __post_init__(self) -> None:
         """Preprocess and isolate the file around the fenced body."""
@@ -582,6 +794,9 @@ class BodyVariants:
         isolated = isolate_functions(preprocessed, {self.function})
         self.before, _, self.after = isolated.partition(BODY_MARK)
         self.after = self.after.partition(BODY_MARK)[2]
+        whole = isolate_functions(preprocessed, {self.function}, prune=False)
+        self.whole_before, _, self.whole_after = whole.partition(BODY_MARK)
+        self.whole_after = self.whole_after.partition(BODY_MARK)[2]
 
     def preprocess(self, text: str) -> str:
         """Return TEXT preprocessed as though it were the file at C_PATH.
@@ -626,10 +841,19 @@ class BodyVariants:
         return preprocessed
 
     def compile(self, preprocessed_body: str) -> tuple[Functions | None, str]:
-        """Compile the file with PREPROCESSED_BODY, as compile_functions does."""
+        """Compile the file with PREPROCESSED_BODY, as compile_functions does.
+
+        The declarations were pruned for the original body, and a variant
+        can name others, so one that fails compiles again with them all.
+        """
         with tempfile.TemporaryDirectory() as tmp:
             unit = Path(tmp) / "variant.i"
             _ = unit.write_text(self.before + preprocessed_body + self.after)
+            compiled, error = compile_functions(unit, self.optflags)
+            if compiled is not None:
+                return compiled, error
+            whole = self.whole_before + preprocessed_body + self.whole_after
+            _ = unit.write_text(whole)
             return compile_functions(unit, self.optflags)
 
 
