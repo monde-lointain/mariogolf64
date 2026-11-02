@@ -225,8 +225,11 @@ void ClearHoleCreatures(void) {
  *
  * Doesn't match: GCC schedules the store of the rotation's zero X angle
  * right after the Cheep Cheep's velocity, where the original stores it after
- * converting the translation. Clearing it at any later point between the
- * velocity and the matrix build gives 10 to 26 differing words, not 2. 2 words
+ * converting the translation. sched can't tell the array store from the loads
+ * of the creature's position, so they wait for it. Clearing it later, or
+ * through a pointer, which frees it, lets the velocity's Z store slide past
+ * the first load instead: 14 to 26 words. No order of the eight statements
+ * does better, nor velocity stores through a pointer or the array. 2 words
  * differ.
  */
 #ifdef NON_MATCHING
