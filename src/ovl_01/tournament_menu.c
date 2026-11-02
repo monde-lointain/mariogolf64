@@ -1503,6 +1503,7 @@ void DrawClubNumber(Gfx** displayListHead, s32 x, s32 top, s32 number) {
     width += PLACE_GLYPH_SPACING;
   }
 
+  /* x moves to the left edge itself; a local for it doesn't match */
   x -= (PLACE_GLYPH_SIZE / 2) + (width / 2);
   width = 0;
   for (digit = g_PrintBuffer; *digit != '\0';
