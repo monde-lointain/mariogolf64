@@ -3201,10 +3201,7 @@ void SetShotOffsetMarker(s32 x, s32 y) {
 /*
  * Draws the shot offset marker, animated while HUD_FLAG_ANIMATE_OFFSET_MARKER
  * is set
- *
- * Doesn't match: 49 words differ.
  */
-#ifdef NON_MATCHING
 void DrawShotOffsetMarker(void) {
   gDPPipeSync(g_DisplayListHead++);
   gDPLoadTLUT_pal16(g_DisplayListHead++, 0,
@@ -3227,21 +3224,16 @@ void DrawShotOffsetMarker(void) {
       G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
   gDPPipeSync(g_DisplayListHead++);
   gSPScisTextureRectangle(g_DisplayListHead++,
-      QuarterPixels(f_ShotOffsetMarkerXs[0] +
-          (g_ShotPanelOffsetX + SHOT_OFFSET_MARKER_X)),
-      QuarterPixels(f_ShotOffsetMarkerYs[0] +
-          (f_ShotPanelOffsetY + SHOT_OFFSET_MARKER_Y) + f_HudOffsetY),
-      QuarterPixels(f_ShotOffsetMarkerXs[0] + SHOT_OFFSET_MARKER_SIZE +
-          (g_ShotPanelOffsetX + SHOT_OFFSET_MARKER_X)),
-      QuarterPixels(f_ShotOffsetMarkerYs[0] +
-          (f_ShotPanelOffsetY + SHOT_OFFSET_MARKER_Y +
-              SHOT_OFFSET_MARKER_SIZE) +
-          f_HudOffsetY),
+      QuarterPixels(
+          SHOT_OFFSET_MARKER_X + f_ShotOffsetMarkerXs[0] + g_ShotPanelOffsetX),
+      QuarterPixels(SHOT_OFFSET_MARKER_Y + f_ShotOffsetMarkerYs[0] +
+          f_ShotPanelOffsetY + f_HudOffsetY),
+      QuarterPixels(SHOT_OFFSET_MARKER_X + SHOT_OFFSET_MARKER_SIZE +
+          f_ShotOffsetMarkerXs[0] + g_ShotPanelOffsetX),
+      QuarterPixels(SHOT_OFFSET_MARKER_Y + SHOT_OFFSET_MARKER_SIZE +
+          f_ShotOffsetMarkerYs[0] + f_ShotPanelOffsetY + f_HudOffsetY),
       G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/round_hud", DrawShotOffsetMarker);
-#endif
 
 /* A new image of the icon every ANIMATED_ICON_FRAME_LENGTH frames */
 #define ANIMATED_ICON_FRAME_LENGTH 4
