@@ -498,7 +498,6 @@ s32 GetBallDistance(
   s32 distance;
   s32 pointId = WOOD_DISTANCE_POINT;
   s32 column;
-  s32 modelIndex;
   CharacterSlot* slot;
   ClubKind kind;
   f32 depth;
@@ -538,9 +537,9 @@ s32 GetBallDistance(
   }
 
   if (!IsGameFlagSet(GAME_FLAG_GENERATE_BALL_DISTANCES) && slot != NULL &&
-      (modelIndex = slot->modelIndex) >= 0 &&
-      (modelIndex %= CHARACTER_MODELS_PER_KIND) < CHARACTER_COUNT) {
-    distance = f_BallDistances[modelIndex][column];
+      slot->modelIndex >= 0 &&
+      ModelCharacter(slot->modelIndex) < CHARACTER_COUNT) {
+    distance = f_BallDistances[ModelCharacter(slot->modelIndex)][column];
   } else if (GetCharacterPointModelPosition(slotIndex, pointId, position) ==
       0) {
     sprintf(text, "pres %f,%f,%f", position[AXIS_X], position[AXIS_Y],
