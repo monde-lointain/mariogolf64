@@ -356,13 +356,10 @@ void DrawMatchResult(Gfx** displayListHead) {
   *displayListHead = gfx;
 }
 
-INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard_drawing", f_HoleNumberFormat);
-
-INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard_drawing", f_DrawText);
-
-INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard_drawing", f_WinText);
-
-INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard_drawing", f_LoseText);
+const char f_HoleNumberFormat[] = "ﾎｰﾙ%d";
+const char f_DrawText[] = "DRAW";
+const char f_WinText[] = "WIN";
+const char f_LoseText[] = "LOSE";
 
 #define NO_BETS_SHIFT 32
 #define STANDINGS_PLACE_LEFT 32
@@ -478,15 +475,11 @@ void DrawStandingsPage(Gfx** displayListHead) {
   *displayListHead = gfx;
 }
 
-INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard_drawing", f_ZeroToParFormat);
-
-INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard_drawing", f_ScoreToParFormat);
-
-INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard_drawing", f_WideTotalFormat);
-
-INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard_drawing", f_TotalFormat);
-
-INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard_drawing", f_CompactHoleFormat);
+const char f_ZeroToParFormat[] = "  #0";
+const char f_ScoreToParFormat[] = "%+4d";
+const char f_WideTotalFormat[] = "%5d";
+const char f_TotalFormat[] = "%4d";
+const char f_CompactHoleFormat[] = "Hole%d";
 
 /* SetTextSlot messages */
 /* Shows SetTextSlotValue's count */
@@ -878,7 +871,8 @@ void DrawMatchPage(Gfx** displayListHead) {
 INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard_drawing", DrawMatchPage);
 #endif
 
-INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard_drawing", f_StringFormat);
+RESUME_RODATA_SECTION();
+const char f_StringFormat[] = "%s";
 
 /*
  * The skins page lists each player's place, face and skins, and the skins
@@ -1410,9 +1404,9 @@ void DrawBetsPage(Gfx** displayListHead) {
 INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard_drawing", DrawBetsPage);
 #endif
 
-INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard_drawing", f_TwoDigitFormat);
-
-INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard_drawing", f_BetDashText);
+RESUME_RODATA_SECTION();
+const char f_TwoDigitFormat[] = "%2d";
+const char f_BetDashText[] = "-";
 
 /* The Speed Golf page: the front nine's times on the left, the back nine's on
  * the right */
@@ -1530,6 +1524,7 @@ void DrawSpeedGolfPage(Gfx** displayListHead) {
 }
 #else
 INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard_drawing", DrawSpeedGolfPage);
+RESUME_RODATA_SECTION();
 #endif
 
 /* Writes a standing's place, score to par and holes played into a leaderboard
@@ -3116,7 +3111,8 @@ void DrawScoresPage(Gfx** displayListHead) {
 INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard_drawing", DrawScoresPage);
 #endif
 
-INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard_drawing", f_DecimalFormat);
+RESUME_RODATA_SECTION();
+const char f_DecimalFormat[] = "%d";
 
 #ifndef NON_MATCHING
 INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard_drawing", f_ScoreTotalFormat);
