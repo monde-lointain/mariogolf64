@@ -1919,10 +1919,7 @@ s32 CrossProductXZ(s32 originX, s32 originZ, s32 firstX, s32 firstZ,
 /*
  * Finds the ground triangle under a point and copies its corners. Returns
  * 0, or -1 off the ground.
- *
- * Doesn't match: 34 words differ.
  */
-#ifdef NON_MATCHING
 s32 FindGroundTriangle(s32 x, s32 z, PlaneTriangle* triangle) {
   s32 baseColumn;
   s32 baseRow;
@@ -1974,15 +1971,18 @@ s32 FindGroundTriangle(s32 x, s32 z, PlaneTriangle* triangle) {
   }
 
   if (g_GameState.isMiniGolf) {
-    baseColumn = (x >> MINI_GOLF_TILE_X_SHIFT) * GROUND_TILE_POINT_SPAN;
-    IN_OWN_BLOCK(
-        baseRow = (z >> MINI_GOLF_TILE_Z_SHIFT) * GROUND_TILE_POINT_SPAN);
+    baseColumn = x >> MINI_GOLF_TILE_X_SHIFT;
+    baseRow = z >> MINI_GOLF_TILE_Z_SHIFT;
+    baseColumn *= GROUND_TILE_POINT_SPAN;
+    baseRow *= GROUND_TILE_POINT_SPAN;
     slotColumn =
         PointSlot(x >> (MINI_GOLF_TILE_X_SHIFT - TILE_POINT_SPAN_SHIFT));
     slotRow = PointSlot(z >> (MINI_GOLF_TILE_Z_SHIFT - TILE_POINT_SPAN_SHIFT));
   } else {
-    baseColumn = (x >> GROUND_TILE_SHIFT) * GROUND_TILE_POINT_SPAN;
-    IN_OWN_BLOCK(baseRow = (z >> GROUND_TILE_SHIFT) * GROUND_TILE_POINT_SPAN);
+    baseColumn = x >> GROUND_TILE_SHIFT;
+    baseRow = z >> GROUND_TILE_SHIFT;
+    baseColumn *= GROUND_TILE_POINT_SPAN;
+    baseRow *= GROUND_TILE_POINT_SPAN;
     slotColumn = PointSlot(x >> (GROUND_TILE_SHIFT - TILE_POINT_SPAN_SHIFT));
     slotRow = PointSlot(z >> (GROUND_TILE_SHIFT - TILE_POINT_SPAN_SHIFT));
   }
@@ -2011,10 +2011,6 @@ s32 FindGroundTriangle(s32 x, s32 z, PlaneTriangle* triangle) {
   PrintDebugText("GetHeightInfo", GROUND_ERROR_COLUMN, GROUND_ERROR_ROW);
   return -1;
 }
-
-#else
-INCLUDE_ASM("asm/nonmatchings/terrain", FindGroundTriangle);
-#endif
 
 Boolean AreTrianglesDifferent(PlaneTriangle* first, PlaneTriangle* second) {
   s32 i;
