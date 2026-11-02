@@ -2162,11 +2162,18 @@ s32 LaunchBallSimulation(
   f32 spinBase;
   Radians windAngle;
   f32 windScale;
-  f32 along; /* Reusing it for the pitch below is there to match */
+  /*
+   * Reusing it for the offset-free pitch below is there to match: a variable
+   * of its own gives 4 differing words, though none in shape
+   */
+  f32 along;
   s32 index;
   s8 surface;
 
-  /* Reading the player each time is there to match */
+  /*
+   * Reading the player each time is there to match: a pointer to the player
+   * gives 22 differing words, and a local copy of the field 8
+   */
   f32 PickLieBlend(void) {
     return (u32)((simulation->position[AXIS_X] + simulation->position[AXIS_Z] +
                      g_Players[simulation->playerIndex].unk88) &
