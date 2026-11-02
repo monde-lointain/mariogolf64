@@ -326,10 +326,13 @@ void TiltEditorCamera(s32 index, Radians angle, s32 frameCount) {
 void ZoomEditorCamera(s32 index, f32 distance, s32 frameCount) {
   s32 easeFrameCount;
   f32 change;
-  f32 speed; /* Also the magnitude, to match */
+  f32 speed; /* Also the magnitude, to match: a local of its own gives 11
+              * differing words, and testing fabsf directly 12 */
 
   change = distance - g_CameraEditor.distance;
   speed = fabsf(change);
+  /* The test in a block of its own, to match; without it 3 words differ, and
+   * with only the block ended before it 18 */
   IN_OWN_BLOCK(if (speed < 0.1f) {
     g_CameraEditor.distance = distance;
     return;
@@ -337,9 +340,12 @@ void ZoomEditorCamera(s32 index, f32 distance, s32 frameCount) {
 
   if (frameCount != 0) {
     easeFrameCount = frameCount / 4;
-    speed = g_CameraEditor.zoomTopSpeed =
-        change / (frameCount - easeFrameCount);
+    g_CameraEditor.zoomTopSpeed = change / (frameCount - easeFrameCount);
+    speed = g_CameraEditor.zoomTopSpeed;
     g_CameraEditor.zoomAcceleration = speed / (easeFrameCount + 1);
+    /* The braking distance in a block of its own, and in double precision,
+     * to match; without the block 32 words differ, and a float quarter or a
+     * division by 4 gives 9 */
     IN_OWN_BLOCK(g_CameraEditor.zoomBrakingDistance = fabsf(change) * 0.25);
   }
 
