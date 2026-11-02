@@ -1604,7 +1604,8 @@ s32 SlideBrickWall(Gfx** displayListHead, u8 slide) {
   gDPPipeSync(gfx++);
   *displayListHead = gfx;
   for (index = 0; index != STATS_SLIDE_ROW_COUNT; index++) {
-    if ((offset = f_BrickRowOffsets[0]) != f_BrickRowOffsets[index]) {
+    offset = f_BrickRowOffsets[0];
+    if (offset != f_BrickRowOffsets[index]) {
       break;
     }
   }
