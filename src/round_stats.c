@@ -575,13 +575,7 @@ s32 RecordDrive(void) {
  * Settles the bets on the hole just played and keeps the tallies and pots
  * in the game state, for the game to be continued. SettleNassau is a
  * nested function, a GNU C extension.
- *
- * Doesn't match: in the stroke bets, the original loads j before i, as GCC
- * does, but compares i with j, where GCC compares j with i. Writing i != j
- * loads i first, and 6 words differ; continue or an empty if branch changes
- * nothing. 2 words differ.
  */
-#ifdef NON_MATCHING
 void SettleHoleBets(void) {
   s32 i;
   s32 j;
@@ -629,7 +623,9 @@ void SettleHoleBets(void) {
   if (g_GameState.betRates[BET_STROKES] > 0) {
     for (i = 0; i != g_GameState.playerCount; i++) {
       for (j = 0; j != g_GameState.playerCount; j++) {
-        if (j != i) {
+        /* Load the rival first without reversing the comparison, to match. */
+        s32 rivalIndex = j;
+        if (i != rivalIndex) {
           score = g_Players[i].strokeCount +
               GetHandicapOffset(
                   GetCourseRecordIndex(), lastHole, g_Players[i].handicap);
@@ -785,9 +781,3 @@ void SettleHoleBets(void) {
 
   f_IsContestDecided = FALSE;
 }
-
-#else
-INCLUDE_ASM("asm/nonmatchings/round_stats", SettleNassau);
-
-INCLUDE_ASM("asm/nonmatchings/round_stats", SettleHoleBets);
-#endif
