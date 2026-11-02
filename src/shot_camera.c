@@ -2328,6 +2328,9 @@ void PlaceFlightCamera(s32 step) {
       delta = point[AXIS_X] - f_CameraPosition[AXIS_X];
       point[AXIS_Y] *= COURSE_TO_WORLD_SCALE;
       point[AXIS_Z] *= COURSE_TO_WORLD_SCALE;
+      /* The x test in a block of its own is there to match too; without it,
+       * or with only the block ended before it, fabs, or the comparison
+       * written otherwise, 190 words or more differ */
       IN_OWN_BLOCK(if (fabsf(delta) > FACING_CUP_EASE_DEAD_ZONE) {
         f_CameraPosition[AXIS_X] += delta * FACING_CUP_EASE_FRACTION;
       });
