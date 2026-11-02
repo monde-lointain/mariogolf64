@@ -3452,7 +3452,10 @@ void SecondUnusedCameraStub(void) {}
  * Taking sqrtf of the sum directly gives 10 differing words, as cse2 makes
  * radius read the root and the copy moves into a delay slot. Setting
  * distance before the loops gives 3, as cse then makes the root's insn set
- * distance directly. 6 words differ.
+ * distance directly. A root temporary copied to distance also gives 3. Per
+ * cse.c's make_regs_eqv, radius reads distance only when distance outlives
+ * the root beyond the extended block or was used before it; writing it in
+ * the first loop as well gives 9. 6 words differ.
  */
 #ifdef NON_MATCHING
 void BuildSpotTexels(u8* texels, Boolean isSoft) {
