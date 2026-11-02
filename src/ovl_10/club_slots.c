@@ -532,7 +532,7 @@ s32 GetClubSlotsState(void) {
   return f_ClubSlotsState;
 }
 
-/* Doesn't match: 89 words differ, 45 in shape. */
+/* Doesn't match: 77 words differ, 41 in shape. */
 #ifdef NON_MATCHING
 void DrawClubSlots(Gfx** displayListHead) {
   Mat4 matrix;
@@ -713,8 +713,8 @@ void DrawClubSlots(Gfx** displayListHead) {
       }
 
       LoadTextureBlock(&gfx,
-          ImageBody(f_Slots->symbolImages +
-              (f_ReelStrips[reelIndex][symbolIndex] * SYMBOL_IMAGE_SIZE)),
+          ImageBodyAt(f_Slots->symbolImages,
+              f_ReelStrips[reelIndex][symbolIndex] * SYMBOL_IMAGE_SIZE),
           G_IM_FMT_RGBA, G_IM_SIZ_16b, SYMBOL_SIZE, SYMBOL_SIZE, 0, 0, 0, 0, 0,
           0, 0);
       gDPPipeSync(gfx++);
