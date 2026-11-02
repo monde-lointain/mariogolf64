@@ -3868,6 +3868,9 @@ void WriteHexDumpFile(u32* words, s32 byteCount, char* fileName) {
   FreeMemory(&buffer);
 }
 
+/* The first vertex column of one of the ground's halves */
+#define HalfFirstColumn(half) ((half) * GROUND_HALF_VERTEX_COLUMNS)
+
 /*
  * The hole editor's copy of DrawGround, which DrawGround hands off to while
  * GAME_FLAG_READ_HOST_HOLE is set. It draws into a display list of its own,
@@ -3880,8 +3883,10 @@ void WriteHexDumpFile(u32* words, s32 byteCount, char* fileName) {
  *
  * Doesn't match: the original also steps column + 1 alongside half, where
  * GCC computes it in each use; most of the rest follows from the registers
- * and spill slots that changes. The frame is 0x20 bytes larger than the
- * original's, so the stack offsets differ. 2403 words differ, 581 in shape.
+ * and spill slots that changes. The frame is 0x18 bytes larger than the
+ * original's, so the stack offsets differ. Stepping the half's first column
+ * beside half gives 2403 words differing, 581 in shape. 2258 words differ,
+ * 518 in shape.
  */
 #ifdef NON_MATCHING
 void DrawHoleEditorGround(CameraMatrices* matrices UNUSED, s32 terrainStyle) {
@@ -4234,8 +4239,7 @@ void DrawHoleEditorGround(CameraMatrices* matrices UNUSED, s32 terrainStyle) {
   gSPSegment(gfx++, 6, 0);
   gSPSegment(gfx++, 7, 0);
   gSPSegment(gfx++, 8, 0);
-  for (half = 0, column = 0; half < GROUND_HALF_COUNT;
-      half++, column += GROUND_HALF_VERTEX_COLUMNS) {
+  for (half = 0; half < GROUND_HALF_COUNT; half++) {
     s32 topSlot;
 
     previousDetail = GROUND_DETAIL_HIDDEN;
@@ -4340,7 +4344,7 @@ void DrawHoleEditorGround(CameraMatrices* matrices UNUSED, s32 terrainStyle) {
             } else {
               /* Builds the tile's 5 by 5 points: its grid vertices, then the
                * edge midpoints, which line up with a medium neighbor */
-              vertexColumn = column + (k * 2);
+              vertexColumn = HalfFirstColumn(half) + (k * 2);
               CopyDoublePair(
                   (f64*)GridVertex(vertexColumn, row * 2), (f64*)&vertices[0]);
               CopyDoublePair((f64*)GridVertex(vertexColumn, (row * 2) + 1),
@@ -4584,15 +4588,22 @@ void DrawHoleEditorGround(CameraMatrices* matrices UNUSED, s32 terrainStyle) {
             }
           } else if (g_WorkArea.hole.tiles[tileIndex].detail >= 0) {
             /* A medium tile among fine ones loads only its own vertices */
-            IN_OWN_BLOCK(
-                gSPVertex(gfx++, GridVertex(column + (k * 2), row * 2), 2, 0));
-            gSPVertex(gfx++, GridVertex(column + (k * 2) + 1, row * 2), 1, 2);
-            gSPVertex(gfx++, GridVertex(column + (k * 2), (row * 2) + 1), 2, 3);
-            gSPVertex(
-                gfx++, GridVertex(column + (k * 2) + 1, (row * 2) + 1), 1, 5);
-            gSPVertex(gfx++, GridVertex(column + (k * 2), (row * 2) + 2), 2, 6);
-            gSPVertex(
-                gfx++, GridVertex(column + (k * 2) + 1, (row * 2) + 2), 1, 8);
+            gSPVertex(gfx++,
+                GridVertex(HalfFirstColumn(half) + (k * 2), row * 2), 2, 0);
+            gSPVertex(gfx++,
+                GridVertex(HalfFirstColumn(half) + (k * 2) + 1, row * 2), 1, 2);
+            gSPVertex(gfx++,
+                GridVertex(HalfFirstColumn(half) + (k * 2), (row * 2) + 1), 2,
+                3);
+            gSPVertex(gfx++,
+                GridVertex(HalfFirstColumn(half) + (k * 2) + 1, (row * 2) + 1),
+                1, 5);
+            gSPVertex(gfx++,
+                GridVertex(HalfFirstColumn(half) + (k * 2), (row * 2) + 2), 2,
+                6);
+            gSPVertex(gfx++,
+                GridVertex(HalfFirstColumn(half) + (k * 2) + 1, (row * 2) + 2),
+                1, 8);
             for (pass = 0; pass < GROUND_TILE_MAX_PASSES; pass++) {
               LoadEditorTileTexture(
                   tileIndex, tileColumn, row, pass, GROUND_OVERLAY_NOISE);
@@ -4622,28 +4633,29 @@ void DrawHoleEditorGround(CameraMatrices* matrices UNUSED, s32 terrainStyle) {
         /* The last row's bottom vertices are still in the cache, unless it was
          * fine or skipped */
         if (previousDetail < 0 || previousDetail == GROUND_DETAIL_FINE) {
-          gSPVertex(gfx++, GridVertex(column, row * 2),
+          gSPVertex(gfx++, GridVertex(HalfFirstColumn(half), row * 2),
               GROUND_TILE_GROUP_SIZE + 1, topSlot);
-          gSPVertex(gfx++, GridVertex(column + 1, row * 2),
+          gSPVertex(gfx++, GridVertex(HalfFirstColumn(half) + 1, row * 2),
               GROUND_TILE_GROUP_SIZE, topSlot + ODD_SLOT);
         } else if (previousDetail == GROUND_DETAIL_COARSE) {
           LoadEditorAveragedRow(
-              GridVertex(column, row * 2), topSlot + ODD_SLOT);
+              GridVertex(HalfFirstColumn(half), row * 2), topSlot + ODD_SLOT);
         }
 
-        gSPVertex(gfx++, GridVertex(column, (row * 2) + 1),
+        gSPVertex(gfx++, GridVertex(HalfFirstColumn(half), (row * 2) + 1),
             GROUND_TILE_GROUP_SIZE + 1, middleSlot);
-        gSPVertex(gfx++, GridVertex(column + 1, (row * 2) + 1),
+        gSPVertex(gfx++, GridVertex(HalfFirstColumn(half) + 1, (row * 2) + 1),
             GROUND_TILE_GROUP_SIZE, middleSlot + ODD_SLOT);
-        gSPVertex(gfx++, GridVertex(column, (row * 2) + 2),
+        gSPVertex(gfx++, GridVertex(HalfFirstColumn(half), (row * 2) + 2),
             GROUND_TILE_GROUP_SIZE + 1, bottomSlot);
         if (row != GROUND_TILE_ROW_COUNT - 1 &&
             g_WorkArea.hole.tiles[tileIndex + GROUND_TILE_COLUMN_COUNT]
                     .detail == GROUND_DETAIL_COARSE) {
           LoadEditorAveragedRow(
-              GridVertex(column, (row * 2) + 2), bottomSlot + ODD_SLOT);
+              GridVertex(HalfFirstColumn(half), (row * 2) + 2),
+              bottomSlot + ODD_SLOT);
         } else {
-          gSPVertex(gfx++, GridVertex(column + 1, (row * 2) + 2),
+          gSPVertex(gfx++, GridVertex(HalfFirstColumn(half) + 1, (row * 2) + 2),
               GROUND_TILE_GROUP_SIZE, bottomSlot + ODD_SLOT);
         }
 
@@ -4682,11 +4694,11 @@ void DrawHoleEditorGround(CameraMatrices* matrices UNUSED, s32 terrainStyle) {
         topSlot = bottomSlot;
         bottomSlot = spareSlot;
         if (previousDetail < 0 || previousDetail == GROUND_DETAIL_FINE) {
-          gSPVertex(gfx++, GridVertex(column, row * 2),
+          gSPVertex(gfx++, GridVertex(HalfFirstColumn(half), row * 2),
               GROUND_TILE_GROUP_SIZE + 1, topSlot);
         }
 
-        gSPVertex(gfx++, GridVertex(column, (row * 2) + 2),
+        gSPVertex(gfx++, GridVertex(HalfFirstColumn(half), (row * 2) + 2),
             GROUND_TILE_GROUP_SIZE + 1, bottomSlot);
         for (k = 0; k < GROUND_TILE_GROUP_SIZE; k++, topSlot++, bottomSlot++,
             tileIndex++, slopeIndex += TILE_TRIANGLE_COUNT) {
