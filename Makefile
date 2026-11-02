@@ -250,7 +250,8 @@ pycheck:
 
 # Measures the matching build against the drafts' build and draws the
 # progress map in build/progress. Each run adds the measured commit to the
-# history kept there.
+# history kept there, which follows tools/progress_seed.json, the commits
+# before the first run (see tools/progress_seed.py).
 PROGRESS_DIR := build/progress
 DRAFTS_DIR   := build/nonmatching
 PROGRESS_O_FILES := $(filter $(BUILD_DIR)/src/% $(BUILD_DIR)/lib/%,$(O_FILES))
@@ -261,7 +262,8 @@ progress: $(ROM)
 	$(PYTHON) tools/progress_report.py $(PROGRESS_DIR) $(DRAFTS_DIR) \
 	    $(PROGRESS_O_FILES)
 	$(PYTHON) tools/progress_map.py $(PROGRESS_DIR)/report.json -o $(PROGRESS_DIR) \
-	    --regs $(PROGRESS_DIR)/regs.json --history $(PROGRESS_DIR)/history.json \
+	    --regs $(PROGRESS_DIR)/regs.json --history tools/progress_seed.json \
+	    --history $(PROGRESS_DIR)/history.json \
 	    --commit $$(git rev-parse HEAD) --date $$(git log -1 --format=%cI)
 
 # Links this build's objects in the shiftable layout, which fails on each
