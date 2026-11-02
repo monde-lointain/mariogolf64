@@ -3637,7 +3637,8 @@ void GetGroundLightColors(GroundLightColor* light, GroundLightColor* shade) {
  * the leading height row last and keeps a second, spilled copy of the trailing
  * one, and it reads the fade flags from the stack for each tile, where ours
  * extends isHighGroundFaded once per row and keeps it in another stack slot.
- * 110 words differ.
+ * Indexing the trailing row where it is read, as the walk's setup does, takes
+ * 110 words differing, 24 in shape, to 109 and 23.
  */
 #ifdef NON_MATCHING
 void ShadeGroundTiles(void) {
@@ -3677,7 +3678,6 @@ void ShadeGroundTiles(void) {
   s32 trailingColumn;
   s32 leadingColumn;
   s16* heights;
-  s16* trailingHeights;
   s16* leadingHeights;
   s16* trailing;
   s16* leading;
@@ -3748,7 +3748,6 @@ void ShadeGroundTiles(void) {
     }
 
     heights = heightRows[row & HEIGHT_RING_ROW_MASK];
-    trailingHeights = heightRows[(row - lightRowOffset) & HEIGHT_RING_ROW_MASK];
     leadingHeights = heightRows[(row + lightRowOffset) & HEIGHT_RING_ROW_MASK];
     column = 0;
     do {
@@ -3784,8 +3783,9 @@ void ShadeGroundTiles(void) {
             leadingColumn = MAP_COLUMN_COUNT - 1;
           }
 
-          slope =
-              trailingHeights[trailingColumn] - leadingHeights[leadingColumn];
+          slope = heightRows[(row - lightRowOffset) & HEIGHT_RING_ROW_MASK]
+                            [trailingColumn] -
+              leadingHeights[leadingColumn];
         } else {
           slope = *trailing++ - *leading++;
         }
