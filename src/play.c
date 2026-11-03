@@ -2025,30 +2025,33 @@ INCLUDE_ASM("asm/nonmatchings/play", RebuildGroundTextureCoordinates);
 
 void DrawHoleEditorGround(CameraMatrices* matrices, s32 terrainStyle);
 
-/* The column of tile k of a group in a half of the ground */
-#define GroundTileColumn(half, k) (((half) * GROUND_TILE_GROUP_SIZE) + (k))
-
 /*
  * Draws the ground's tiles, each at a detail that its distance picks. The
  * tiles go down two halves in rows of four, and a fine tile snaps the edge
  * vertices it shares with coarser neighbors so that no gaps open between them.
  *
- * Doesn't match: 1160 words differ, 348 in shape. The original's frame is 0x38
+ * Doesn't match: 1179 words differ, 283 in shape. The original's frame is 0x38
  * bytes larger, so every stack offset differs, and terrainStyle and the locals
- * take other saved registers. The original works out column + 1 and its
- * parity once per half, where ours does at each GridVertex, with three more
- * andi: loop.c finds moving them out of the row loop not desirable, since
- * the six invariants it moved out of the inner tile loops come first and
- * each doubles the row loop's count. A nextColumn local set once per half
- * keeps the andi too (1214 words, 322 in shape). Writing the tile column out
- * where it is used, and giving the medium tiles' pass loop its own counter,
- * took it from 1194 words differing, 352 in shape.
+ * take other saved registers. The original works out column + 1 and its parity
+ * once per half, where ours does at each GridVertex, with three more andi:
+ * loop.c finds moving them out of the row loop not desirable, since the six
+ * invariants it moved out of the inner tile loops come first and each doubles
+ * the row loop's count. A nextColumn local set once per half keeps the andi too
+ * (1214 words, 322 in shape). Writing the tile column out where it is used, and
+ * giving the medium tiles' pass loop its own counter, took it from 1194 words
+ * differing, 352 in shape, to 1160 (348). Naming the half's first tile column,
+ * as a permuter run's copy of half * 4 suggested, then brought the shape to
+ * 283, with words at 1179; declaring it first gives 1185 (283). The run's other
+ * changes, a char for the slot after the top one and a flag for the detail
+ * test, change the shape by at most one.
  */
 void DrawGround(CameraMatrices* matrices, s32 terrainStyle) {
   u8 snapsEdge[2][TILE_VERTEX_SEGMENT_COUNT]; /* For the current and the last
                                                  fine tile */
   Gfx* gfx;
   s32 half;
+  /* The column of the half's first tile */
+  s32 firstTileColumn;
   Vtx* vertices;
   u32 start;
   u8 current;
@@ -2291,7 +2294,8 @@ void DrawGround(CameraMatrices* matrices, s32 terrainStyle) {
     topSlot = FIRST_TOP_SLOT;
     bottomSlot = FIRST_BOTTOM_SLOT;
     middleSlot = FIRST_MIDDLE_SLOT;
-    tileIndex = half * GROUND_TILE_GROUP_SIZE;
+    firstTileColumn = half * GROUND_TILE_GROUP_SIZE;
+    tileIndex = firstTileColumn;
     if (IsGameFlagSet(GAME_FLAG_LOG_GROUND_ROWS)) {
       osSyncPrintf("DG[");
       if (half != 0) {
@@ -2321,7 +2325,7 @@ void DrawGround(CameraMatrices* matrices, s32 terrainStyle) {
           if (g_WorkArea.hole.tiles[tileIndex].detail == GROUND_DETAIL_FINE &&
               g_WorkArea.hole.tiles[tileIndex].midpointBlockIndex >= 0) {
             if (IsGameFlagSet(GAME_FLAG_HOLE_LOADED)) {
-              if (GroundTileColumn(half, k) != 0) {
+              if (firstTileColumn + k != 0) {
                 snapsEdge[current][TILE_EDGE_COUNT + TILE_EDGE_LEFT] =
                     IsCoarse(tileIndex - 1);
                 snapsEdge[current][TILE_EDGE_LEFT] =
@@ -2351,7 +2355,7 @@ void DrawGround(CameraMatrices* matrices, s32 terrainStyle) {
                 snapsEdge[current][TILE_EDGE_BOTTOM] = FALSE;
               }
 
-              if (GroundTileColumn(half, k) != GROUND_TILE_COLUMN_COUNT - 1) {
+              if (firstTileColumn + k != GROUND_TILE_COLUMN_COUNT - 1) {
                 snapsEdge[current][TILE_EDGE_COUNT + TILE_EDGE_RIGHT] =
                     IsCoarse(tileIndex + 1);
                 snapsEdge[current][TILE_EDGE_RIGHT] =
@@ -2389,7 +2393,7 @@ void DrawGround(CameraMatrices* matrices, s32 terrainStyle) {
                 gfx++, GridVertex(column + (k * 2) + 1, (row * 2) + 2), 1, 8);
             for (mediumPass = 0; mediumPass < GROUND_TILE_MAX_PASSES;
                 mediumPass++) {
-              LoadTileTexture(tileIndex, GroundTileColumn(half, k), row);
+              LoadTileTexture(tileIndex, firstTileColumn + k, row);
               DrawTileQuads(0, 2, 1, 3, 5, 4, 6, 8, 7);
               if (g_WorkArea.hole.tiles[tileIndex].unk990 <= 0) {
                 break;
@@ -2436,7 +2440,7 @@ void DrawGround(CameraMatrices* matrices, s32 terrainStyle) {
         for (k = 0; k < GROUND_TILE_GROUP_SIZE; k++) {
           if (g_WorkArea.hole.tiles[tileIndex].detail >= 0) {
             for (pass = 0; pass < GROUND_TILE_MAX_PASSES; pass++) {
-              LoadTileTexture(tileIndex, GroundTileColumn(half, k), row);
+              LoadTileTexture(tileIndex, firstTileColumn + k, row);
               DrawTileQuads(topSlot, topSlot + ODD_SLOT, topSlot + 1,
                   middleSlot, middleSlot + ODD_SLOT, middleSlot + 1, bottomSlot,
                   bottomSlot + ODD_SLOT, bottomSlot + 1);
@@ -2472,8 +2476,7 @@ void DrawGround(CameraMatrices* matrices, s32 terrainStyle) {
           if (g_WorkArea.hole.tiles[tileIndex].detail >= 0) {
             for (passIndex = 0; passIndex < GROUND_TILE_MAX_PASSES;
                 passIndex++) {
-              LoadTileTexture(tileIndex,
-                  (half * GROUND_TILE_GROUP_SIZE) + groupTileIndex, row);
+              LoadTileTexture(tileIndex, firstTileColumn + groupTileIndex, row);
               gSP2Triangles(gfx++, topSlot, topSlot + 1, bottomSlot, 0,
                   topSlot + 1, bottomSlot + 1, bottomSlot, 0);
               if (g_WorkArea.hole.tiles[tileIndex].unk990 <= 0) {
