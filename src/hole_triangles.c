@@ -114,7 +114,10 @@ void DimNextTranslucentTriangles(void) {
  * by an othermode command the original has the pair's slots the other way
  * round. The original also takes both absolute values of the shaded edge
  * before adding them, and leaves for the next triangle with a branch-likely.
- * 69 words differ.
+ * The permuter's best, 68 words and 8 in shape against 69 and 17, tests the
+ * edge's sign before normalizing it, where the original tests it after; fabsf
+ * gives 354 words, and AbsFloat, an if/else, a ternary or testing edgeZ leave
+ * 69. 69 words differ, 17 in shape.
  */
 #ifdef NON_MATCHING
 void DrawHoleTriangles(Gfx** displayListHead, CameraMatrices* matrices UNUSED,
