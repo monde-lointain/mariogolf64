@@ -125,7 +125,10 @@ void InitOverlayManager(void) {
     g_ModuleRdpRequestFrames[i] = RDP_REQUEST_FRAME_NEVER;
   }
 
-  /* The unsigned compare is there to match */
+  /*
+   * The unsigned compare is there to match: a signed one gives 2 words
+   * differing, a u32 index 4, and != 10
+   */
   for (i = 0; (u32)i < OVERLAY_COUNT; i++) {
     moduleIds = f_Overlays[i].moduleIds;
     moduleIndex = 0;
