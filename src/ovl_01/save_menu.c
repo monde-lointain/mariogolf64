@@ -1840,8 +1840,13 @@ void DrawSavedMiniGolfImage(Gfx** displayListHead);
  * course and hole, and the prompt for giving out the controllers.
  *
  * Doesn't match: the original keeps the menu memory pointer on the stack
- * and the mode icons' texel step in a saved register, and doesn't keep
- * the degrees-to-radians factor in a register. 403 words differ, 151 in shape.
+ * and the mode icons' texel step in a saved register. Like the original,
+ * ours loads the degrees-to-radians factor on each pass of the board loop
+ * only when boardDegrees is the loop's own: set before the loop, loop.c
+ * hoists the factor instead (403 words, 151 in shape). The original still
+ * multiplies by a 120 it loads in the loop, where ours keeps it in a saved
+ * register; a literal 120 is expanded into shifts (417 words, 163 in
+ * shape). 401 words differ, 149 in shape.
  */
 #ifdef NON_MATCHING
 void DrawSavedGames(Gfx** displayListHead) {
@@ -1879,7 +1884,6 @@ void DrawSavedGames(Gfx** displayListHead) {
   s32 holeIndex;
   s32* chosenMode;
   s32* labelOffset;
-  s32 boardDegrees;
   u32 modeLabelTexels;
   s32 slotOffset;
 
@@ -1911,9 +1915,9 @@ void DrawSavedGames(Gfx** displayListHead) {
   gDPPipeSync(gfx++);
   gDPSetTexturePersp(gfx++, G_TP_NONE);
 
-  boardDegrees = DEGREES_PER_TURN / SAVED_GAME_COUNT;
   for (index = 0; index != SAVED_GAME_COUNT; index++) {
     ScreenPoint point;
+    s32 boardDegrees = DEGREES_PER_TURN / SAVED_GAME_COUNT;
 
     slotOffset = (memory->savedGameIndex - index) % SAVED_GAME_COUNT;
     angle = -DegreesToRadians((slotOffset * boardDegrees) +
