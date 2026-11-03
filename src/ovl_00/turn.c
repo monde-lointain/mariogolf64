@@ -2925,7 +2925,7 @@ void ShowHoleOutBanner(s32 playerIndex) {
  * inline: inlined, their buffers share one stack slot, as in the
  * original's frame.
  *
- * Doesn't match: 465 words differ, 187 in shape, spread through the
+ * Doesn't match: 454 words differ, 182 in shape, spread through the
  * routine's states.
  *
  * The letterbox test before the debug output is written "== FALSE", for
@@ -3617,8 +3617,8 @@ void UpdateTurns(void) {
               preparingPollIndex < PLAN_PREPARING_POLL_COUNT;
               preparingPollIndex++) {
             /*
-             * In its own block, as without it 721 words differ, 207 in shape,
-             * against 465 and 187
+             * In its own block, as without it 710 words differ, 202 in shape,
+             * against 454 and 182
              */
             IN_OWN_BLOCK(f_ShotSource = (GetPlannedShot(&g_ScriptedShot) !=
                                             PLANNED_SHOT_UNFINISHED)
@@ -3900,8 +3900,8 @@ void UpdateTurns(void) {
           f_IsSwingAnimationStarted = FALSE;
           if (IsGameFlagSet(GAME_FLAG_CHOOSE_CUP)) {
             /*
-             * In its own block, as without it 483 words differ, 187 in shape,
-             * against 465 and 187
+             * In its own block, as without it 472 words differ, 182 in shape,
+             * against 454 and 182
              */
             IN_OWN_BLOCK(DebugPlaceBall(playerIndex));
           }
@@ -4609,12 +4609,13 @@ void UpdateTurns(void) {
                 nextState = PLAYER_STATE_ENDING_TURN;
               }
             } else if (g_GameState.gameMode == GAME_MODE_TRAINING) {
-              nextState = PLAYER_STATE_CHOOSING;
               if (g_GameState.courseIndex == DRIVING_RANGE_COURSE_INDEX) {
                 OpenChoiceBox(CHOICE_BOX_ID_DRIVING_RANGE);
               } else {
                 OpenChoiceBox(CHOICE_BOX_ID_TRAINING_SHOT);
               }
+
+              nextState = PLAYER_STATE_CHOOSING;
             } else if (g_GameState.replayKind == REPLAY_KIND_NONE &&
                 IsOneOnOneMatchMode(g_GameState.gameMode)) {
               if (g_Players[playerIndex].strokeCount >=
