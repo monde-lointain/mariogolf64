@@ -606,9 +606,11 @@ INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", KeepAimCameraOnCourse);
  * through it. Calling KeepAimCameraOnCourse first gives 151 words; only a
  * barrier around the call helps (137). On the green the look-at's height is
  * worked out after its x and z; between them, as before, gave 113 words, 43 in
- * shape. The permuter's best (67 words, 9 in shape) also adds a float local
- * holding 1/1024 for the tilt's scale, set just before the look-at's height, a
- * fake; alone it gives 102 (32). 78 words differ, 20 in shape.
+ * shape. The tilt in world units gets its own local, set just before the
+ * look-at's height: scaling it inside that expression gives 78 words, 20 in
+ * shape, and setting it before the look-at's x or after the clamp 86 (18). The
+ * permuter reached the same 67 words with a float local holding 1/1024. 67
+ * words differ, 9 in shape.
  */
 #ifdef NON_MATCHING
 void PlaceShotCamera(void) {
@@ -689,6 +691,8 @@ void PlaceShotCamera(void) {
     s32 offset;
     s32 rise;
     f32 tilt;
+    /* The tilt in world units */
+    f32 worldTilt;
 
     heading = (u16)g_CurrentShot.heading * BINARY_ANGLE_TO_RADIANS;
     KeepAimCameraOnCourse();
@@ -775,9 +779,10 @@ void PlaceShotCamera(void) {
               (g_CurrentShot.aimCameraDistance + DOWN_RANGE_LOOK_AHEAD)) +
           g_CurrentShot.ballPosition[AXIS_Z];
       point[AXIS_Y] = g_Cameras[0].view.eye[AXIS_Y];
+      worldTilt = tilt * COURSE_TO_WORLD_SCALE;
       g_Cameras[0].view.lookAt[AXIS_Y] =
           (g_Cameras[0].view.eye[AXIS_Y] * COURSE_TO_WORLD_SCALE) -
-          (g_CurrentShot.aimCameraHeight * (tilt * COURSE_TO_WORLD_SCALE)) +
+          (g_CurrentShot.aimCameraHeight * worldTilt) +
           (f_DebugAimCameraTilt * AIM_CAMERA_DEBUG_TILT_SCALE);
     }
 
