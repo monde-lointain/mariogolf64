@@ -878,7 +878,8 @@ void DrawStatsBadgeCount(Gfx** displayListHead) {
  * Copying hasRowsBelow under "if (arrowCount == 1)" gives 107 words (33 in
  * shape), and copying hasRowsBelow != FALSE there 109; the same with
  * "arrowCount += hasRowsBelow" gives 99 words but 23 in shape, as the original
- * branches to count that arrow.
+ * branches to count that arrow. Adding the arrows' offsets as two products
+ * gives 103-113 words, 27-31 in shape.
  */
 #ifdef NON_MATCHING
 void DrawStatsScrollArrows(Gfx** displayListHead) {
