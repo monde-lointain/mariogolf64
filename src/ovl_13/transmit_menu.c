@@ -3435,7 +3435,11 @@ void DrawNotice(Gfx** displayListHead) {
   s32 halfWidth;
   s32 halfHeight;
 
-  /* The copy of halfHeight, and its starting value, are there to match */
+  /*
+   * The copy of halfHeight, and its starting value, are there to match:
+   * without the 0, or using halfHeight itself, 34 words differ, none in
+   * shape; computing the strip height in place of halfHeight gives 98
+   */
   s32 stripHeight = 0;
   s32 bottom;
 
