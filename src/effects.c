@@ -1774,7 +1774,11 @@ void DrawBillboardEffect(Gfx** displayListHead, Effect* effect, u16 color) {
           effect->position[AXIS_Z], &center) < EFFECT_NEAREST_DEPTH) {
     halfSize = center.scaleX * effect->scale;
 
-    /* Returning early here is there to match */
+    /*
+     * Returning early here is there to match: testing alpha and the size in
+     * one && chain gives 10 words differing (10 in shape), and the size
+     * first 92 (30)
+     */
     if (effect->alpha == 0.0f) {
       *displayListHead = gfx;
       return;
@@ -1902,7 +1906,10 @@ void DrawEffectShadow(Gfx** displayListHead, Effect* effect) {
   depth = ProjectPoint(effect->position[AXIS_X],
       f_SpawnGroundHeight * COURSE_TO_WORLD_SCALE, effect->position[AXIS_Z],
       &shadow);
-  /* Nesting the tests is there to match */
+  /*
+   * Nesting the tests is there to match: one && chain gives 11 words
+   * differing (11 in shape), and with the tests swapped 25 (11)
+   */
   if (depth < EFFECT_NEAREST_DEPTH) {
     if (depth > SHADOW_FARTHEST_DEPTH) {
       gDPPipeSync(gfx++);
