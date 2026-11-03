@@ -586,7 +586,9 @@ s32 NextCameraPick(Boolean isDealing) {
   if (!isDealing) {
     f_NextCameraPickIndex = 0;
 
-    /* The != tests are there to match */
+    /*
+     * The != tests are there to match: < gives 24 words differing, 14 in shape
+     */
     for (index = 0; index != CAMERA_PICK_COUNT; index++) {
       f_CameraPicks[index] = index;
     }
@@ -679,7 +681,10 @@ void StartFlightCamera(s32 earlierFlightCount) {
   StartBanner(BANNER_NONE);
   f_FlightCameraFlags = 0;
 
-  /* The separate tests are there to match */
+  /*
+   * The separate tests are there to match: one || test gives 3 words differing,
+   * 3 in shape
+   */
   if (earlierFlightCount == 0) {
     f_FlightCameraFlags |= FLIGHT_CAMERA_FLAG_UNK2;
   } else if (RandomBelow(2) == 0) {
@@ -694,7 +699,10 @@ void StartFlightCamera(s32 earlierFlightCount) {
   g_InsetView.step = 0;
   g_Cameras[INSET_CAMERA].view.drawFlags = 0;
 
-  /* The nested ifs are there to match */
+  /*
+   * The nested ifs are there to match: one && chain gives 10 words differing, 4
+   * in shape
+   */
   if (!g_SimulatedShot.startsOnGreen) {
     if (earlierFlightCount != 0 && g_ContactEffect == CONTACT_EFFECT_NONE) {
       g_RoundHud.unk17 = TRUE;
@@ -776,7 +784,10 @@ void StartFlightCamera(s32 earlierFlightCount) {
       f_ShotEndPosition[AXIS_Z] - g_HoleSetup.cupPosition[AXIS_Z]);
   f_ComingFlightEvents = 0;
 
-  /* The != tests are there to match */
+  /*
+   * The != tests are there to match: < in the first loop gives 34 words
+   * differing (6 in shape), and in both 50 (10)
+   */
   for (i = 0; i != SCANNED_STEP_COUNT; i++) {
     if (i < g_SimulatedShot.stepCount &&
         IsCupPassPoint(IntLength2D(g_SimulatedShot.path[i][AXIS_X] -
@@ -1737,7 +1748,10 @@ s32 StepHoleFlyover(void) {
   yaw = atan2(offset[AXIS_X], offset[AXIS_Z]) + (halfTurns * M_PI);
   holeRadius = GetHoleRadius(GetCourseRecordIndex(), GetHoleRecordIndex());
 
-  /* Storing the sine before computing distance is there to match */
+  /*
+   * Storing the sine before computing distance is there to match: multiplying
+   * it by distance afterwards gives 22 words differing, 6 in shape
+   */
   offset[AXIS_X] = sinf(yaw);
   distance = ((holeRadius - (approach * FLYOVER_RADIUS_APPROACH)) +
                  (holeRadius * widening)) *
@@ -2208,7 +2222,11 @@ void PlaceFlightCamera(s32 step) {
               (sinf(sideYaw) * sideDistance);
           point[AXIS_Z] = f_ShotStartPosition[AXIS_Z] - (cosf(yaw) * distance) -
               (cosf(sideYaw) * sideDistance);
-          /* Computing extraRise before GetGroundHeight is there to match */
+          /*
+           * Computing extraRise before GetGroundHeight is there to match: after
+           * it gives 123 words differing (21 in shape), and in the branch 127
+           * (15), against the draft's 98 (4)
+           */
           extraRise = f_ShotLength * SIDE_VIEW_RISE_FRACTION;
           point[AXIS_Y] = GetGroundHeight(point[AXIS_X], point[AXIS_Z]);
           if (!g_SimulatedShot.startsOnGreen) {
@@ -2278,7 +2296,11 @@ void PlaceFlightCamera(s32 step) {
       /* Unused; the original has it */
       rand();
 
-      /* Converting step through easeFraction is there to match */
+      /*
+       * Converting step through easeFraction is there to match: multiplying
+       * step itself, with or without a cast, gives 104 words differing (4 in
+       * shape) against the draft's 98 (4)
+       */
       easeFraction = step;
       easeFraction =
           TRAIL_EASE_START_PERCENT - (TRAIL_EASE_PERCENT_STEP * easeFraction);
@@ -2751,7 +2773,11 @@ void ChooseFlightCameraKind(void) {
             kind = FLIGHT_CAMERA_SIDE_OF_FLIGHT;
           }
         } else if (f_FlightCameraKind != FLIGHT_CAMERA_TRAILING_BALL) {
-          /* The nested ifs and the separate cases are there to match */
+          /*
+           * The nested ifs and the separate cases are there to match: one &&
+           * test gives 9 words differing (5 in shape), and shared cases 12
+           * (10), against the draft's 2 (0)
+           */
           if (f_FlightCameraKind != FLIGHT_CAMERA_FOLLOWING_PATH) {
             if (f_FlightCameraKind != FLIGHT_CAMERA_SIDE_OF_FLIGHT) {
               switch (RandomBelow(5)) {
@@ -2774,7 +2800,11 @@ void ChooseFlightCameraKind(void) {
         if (f_CameraChangeHoldCount) {
           f_HasFlightPhaseChanged = TRUE;
         } else if (f_FlightCameraKind == FLIGHT_CAMERA_TRAILING_BALL) {
-          /* The empty branches are there to match */
+          /*
+           * The empty branches are there to match: one && test of the other
+           * kinds gives 16 words differing (10 in shape) against the draft's 2
+           * (0)
+           */
         } else if (f_FlightCameraKind == FLIGHT_CAMERA_FOLLOWING_PATH) {
         } else {
           if (f_LandingCupDistance <= SHORT_SHOT_MAX_LENGTH) {
@@ -2814,7 +2844,10 @@ void ChooseFlightCameraKind(void) {
         break;
       case FLIGHT_PHASE_END:
         if (IsTroubleSurface(f_EndSurfaceInfo) || g_SimulatedShot.endsInCup) {
-          /* The empty branch is there to match */
+          /*
+           * The empty branch is there to match: the inverted test gives 10
+           * words differing (8 in shape) against the draft's 2 (0)
+           */
         } else {
           if (f_CameraChangeHoldCount || g_SimulatedShot.stepCount < 21) {
             f_HasFlightPhaseChanged = TRUE;
@@ -2869,7 +2902,10 @@ void ChooseFlightCameraKind(void) {
         f_HasFlightPhaseChanged = TRUE;
         break;
       case FLIGHT_PHASE_CONTACT:
-        /* The empty case is there to match */
+        /*
+         * The empty case is there to match: without it 17 words differ (9 in
+         * shape) against the draft's 2 (0)
+         */
         break;
     }
   }
@@ -3136,12 +3172,18 @@ s32 UpdateFlightCamera(Boolean isAdvancing, s32 buttons) {
 
         break;
       case FLIGHT_PHASE_NEARING_CONTACT:
-        /* The empty case is there to match */
+        /*
+         * The empty case is there to match: without it 66 words differ, 32 in
+         * shape
+         */
         break;
     }
   }
 
-  /* Holding both look-ahead steps in aheadStep is there to match */
+  /*
+   * Holding both look-ahead steps in aheadStep is there to match: a flagStep
+   * local for the second gives 8 words differing, none in shape
+   */
   aheadStep = step + CUP_PASS_LOOKAHEAD_STEP_COUNT;
   if (aheadStep <= g_SimulatedShot.stepCount &&
       IsCupPassPoint(IntLength2D(g_SimulatedShot.path[aheadStep][AXIS_X] -
@@ -3689,7 +3731,11 @@ static inline void SelectNoiseGrid(s16 gridIndex) {
  * the grids, so the new one fades in.
  */
 void StepNoiseTexture(void) {
-  /* index counts the grids, then the texels; sharing it is there to match */
+  /*
+   * index counts the grids, then the texels. Sharing it is there to match: an
+   * s16 texel local gives 28 words differing (none in shape), and an s32 one 45
+   * (9)
+   */
   s16 index;
   s16 row;
   s16 column;
