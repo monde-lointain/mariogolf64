@@ -2230,7 +2230,7 @@ static inline void SetCellTerrainCode(u32 column, u32 row, s32 code) {
  * other registers, copies the new block's index before repeating the code
  * across the fill word rather than after, and when the blocks run out it
  * branches to the texel loop's increment, where the original's branch-likely
- * does the increment in its delay slot. 95 words differ.
+ * does the increment in its delay slot. 134 words differ, 6 in shape.
  */
 #ifdef NON_MATCHING
 void PaintGroundTiles(void) {
@@ -2263,7 +2263,10 @@ void PaintGroundTiles(void) {
   nextCode = f_BuildCursor;
   searchSpans = f_PaintLogics[f_PaintLogic].searchSpans;
 
-  /* row is there to match */
+  /*
+   * row is there to match: counting with column or a codeIndex of its own
+   * gives 150 words, with texelIndex 164, and with code 314
+   */
   for (row = 0; row < TERRAIN_CODE_COUNT; row++) {
     codePaintings[row] = paint(row, row, 0, 0, 0);
     g_TerrainCodeColors[codePaintings[row] & TERRAIN_CODE_MASK] =
