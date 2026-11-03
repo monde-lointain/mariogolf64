@@ -1896,38 +1896,33 @@ s32 PaintDrivingRange(
 }
 
 /*
- * Returns the map texel at a column and row of the whole hole's map. Adding
- * the offsets in bytes, the texel's first, is closest to the original:
- * indexing the tiles or texels, or adding the tile offset to the base first,
- * lets GCC fold the base address in last or first. Without tileRow, with a
- * tileColumn local or with the row's product first, LoadCodeMap differs by 40
- * to 42 words and EncodeCodeMap by 36 to 48, against 6 and 7.
+ * Returns the map texel at a column and row of the whole hole's map, adding the
+ * base, the texel's offset and the tile's in that order as the original does.
+ * The callers have ruled out negative rows and columns, so dividing the row, as
+ * the column is, finds the same tile as shifting it. Shifting the row gives 36
+ * words differing (6 in shape) in EncodeCodeMap and 40 (6) in LoadCodeMap, also
+ * with a tileColumn local; adding the offsets before the base gives 2 (0) in
+ * each, and the tile's offset before the texel's 14 (0) and 6 (0).
  */
 static inline u16* GetMapTexel(s32 column, s32 row) {
-  /*
-   * tileRow is there to match: shifting the row in place gives 36 words
-   * differing (6 in shape) in EncodeCodeMap against its draft's 7 (5), 40 (6)
-   * in LoadCodeMap against 6 (4), 138 (18) in CleanCodeMap against 95 (17), and
-   * 56 (6) in SaveHoleFiles against 7 (5)
-   */
-  s32 tileRow = row >> MAP_TILE_SHIFT;
-  s32 tileOffset = ((column / GROUND_TILE_TEXEL_SPAN) +
-                       (tileRow * GROUND_TILE_COLUMN_COUNT)) *
+  s32 tileOffset =
+      ((column / GROUND_TILE_TEXEL_SPAN) +
+          ((row / GROUND_TILE_TEXEL_SPAN) * GROUND_TILE_COLUMN_COUNT)) *
       sizeof(GroundTile);
   s32 texelOffset = (((row & MAP_TILE_MASK) * GROUND_TILE_TEXEL_SPAN) +
                         (column & MAP_TILE_MASK)) *
       sizeof(u16);
 
-  return (u16*)((u8*)g_WorkArea.hole.tiles + (texelOffset + tileOffset));
+  return (u16*)((u8*)g_WorkArea.hole.tiles + texelOffset + tileOffset);
 }
 
 /* Returns the map texel at a column and row, or 0 off the map */
 static inline u16 ReadMapTexel(s32 column, s32 row) {
   /*
-   * The separate tests are there to match: one || test gives 31 words differing
-   * (17 in shape) in EncodeCodeMap, 133 (29) in CleanCodeMap and 51 (17) in
-   * SaveHoleFiles, and one && test for being on the map 41 (19), 143 (31) and
-   * 93 (19), against their drafts' 7 (5), 95 (17) and 7 (5)
+   * The separate tests are there to match: one || test gives 43 words differing
+   * (15 in shape) in EncodeCodeMap, 63 (15) in SaveHoleFiles and 145 (27) in
+   * CleanCodeMap, and one && test for being on the map 51 (17), 103 (17) and
+   * 153 (29), against the CleanCodeMap draft's 88 (12)
    */
   if (column < 0) {
     return 0;
@@ -1950,13 +1945,8 @@ static inline u16 ReadMapTexel(s32 column, s32 row) {
 
 /*
  * Encodes the map's texels as terrain codes, a byte each, in the hole file
- * buffer. Doesn't match: the original divides the column before
- * shifting the row and adds the work area's address to the tile offset before
- * the texel offset, where this adds the offsets first. Dividing the column
- * into its own local first gives 25 differing words, and a local pointer to
- * the tiles 31 to 47. 7 words differ.
+ * buffer.
  */
-#ifdef NON_MATCHING
 void EncodeCodeMap(void) {
   s32 column;
   s32 row;
@@ -1971,16 +1961,11 @@ void EncodeCodeMap(void) {
   }
 }
 
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", EncodeCodeMap);
-#endif
-
 /* Sets the map texel at a column and row, unless it is off the map */
 static inline void WriteMapTexel(s32 column, s32 row, u16 color) {
   /*
-   * The separate tests are there to match: one || test gives 30 words differing
-   * (16 in shape) in LoadCodeMap, and one && test for being on the map 36 (14),
-   * against its draft's 6 (4)
+   * The separate tests are there to match: one || test gives 43 words differing
+   * (15 in shape) in LoadCodeMap, and one && test for being on the map 49 (13)
    */
   if (column < 0) {
     return;
@@ -2003,10 +1988,8 @@ static inline void WriteMapTexel(s32 column, s32 row, u16 color) {
 
 /*
  * Clears the map, reads a code map from the host and paints the map's texels
- * with the colors of its terrain codes. Doesn't match: for the same
- * reason as EncodeCodeMap. 6 words differ.
+ * with the colors of its terrain codes.
  */
-#ifdef NON_MATCHING
 void LoadCodeMap(char* path) {
   u32 size;
   s32 tileIndex;
@@ -2038,9 +2021,6 @@ void LoadCodeMap(char* path) {
     }
   }
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", LoadCodeMap);
-#endif
 
 /* Repaints the ground tiles from the code map saved before the last clean-up */
 void LoadBackupCodeMap(void) {
@@ -2079,8 +2059,8 @@ static inline void FillCodeGap(
 
   /*
    * The second read of the previous code is there to match: testing
-   * previousCode against the next code gives CleanCodeMap 125 words
-   * differing, 23 in shape, against 95, 17; also setting nextCode gives 151
+   * previousCode against the next code gives CleanCodeMap 118 words
+   * differing, 18 in shape, against 88, 12; also setting nextCode gives 144
    */
   u8 rereadPreviousCode = GetCode(column - columnStep, row - rowStep);
   u8 nextCode = GetCode(column + columnStep, row + rowStep);
@@ -2094,15 +2074,15 @@ static inline void FillCodeGap(
  * Encodes the map as EncodeCodeMap does, then runs the clean-up passes, each
  * filling the codes that differ from two equal neighbors, along the row
  * and then down the column. There are no passes, so it only encodes the map.
- * Doesn't match: the encoding has EncodeCodeMap's texel address order,
- * and the passes add the row's offset to the buffer before the column, where
- * the original adds the column to the row's offset first and steps each
- * neighbor's index from that sum. GetCode's pointer sum gives 95 words, 17 in
- * shape, against 137 and 31 for indexing the buffer; indexing it in SetCode
- * too 143, and passing GetCode and SetCode the index, with FillCodeGap
- * stepping it, 130 to 144. Narrowing the row pass's column to an unsigned
- * char, the permuter's best, gives 108 words, 10 in shape; the column is no
- * byte. 95 words differ, 17 in shape.
+ * Doesn't match: the passes add the row's offset to the buffer before the
+ * column, where the original adds the column to the row's offset first and
+ * steps each neighbor's index from that sum. Before the encoding matched,
+ * GetCode's pointer sum gave 95 words, 17 in shape, against 137 and 31 for
+ * indexing the buffer; indexing it in SetCode too 143, and passing GetCode
+ * and SetCode the index, with FillCodeGap stepping it, 130 to 144. Narrowing
+ * the row pass's column to an unsigned char, the permuter's best then, gave
+ * 108 words, 10 in shape; the column is no byte. 88 words differ, 12 in
+ * shape.
  */
 #ifdef NON_MATCHING
 void CleanCodeMap(void) {
@@ -2660,9 +2640,7 @@ void BuildHole(s32 course, s32 hole) {
 /*
  * Writes a hole's files to the host, the attributes as the map's terrain
  * codes, a byte each. A cleaned code map is first restored from its backup.
- * Doesn't match: for the same reason as EncodeCodeMap. 7 words differ.
  */
-#ifdef NON_MATCHING
 void SaveHoleFiles(s32 course, s32 hole) {
   char path[HOST_PATH_SIZE];
   s32 column;
@@ -2699,9 +2677,6 @@ void SaveHoleFiles(s32 course, s32 hole) {
     f_BuildCursor = f_BuildBuffer;
   }
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", SaveHoleFiles);
-#endif
 
 /*
  * MoveRingsToEnd's debug text cells: its start and end notices share one, and
