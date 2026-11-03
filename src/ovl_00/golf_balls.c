@@ -769,7 +769,8 @@ enum BallSprite {
  * differing to 834; updating f_BallRollFrame anywhere else gives 822 to
  * 1633 words, 158 or more in shape. The original aligns the Pika ball
  * texture's address to 8 bytes, as TextureAddress does; without that, 894
- * words differ, 152 in shape.
+ * words differ, 152 in shape. Forcing the original's registers gives 1113
+ * words or more, so the code itself differs.
  */
 #ifdef NON_MATCHING
 void DrawGolfBalls(CameraMatrices* matrices UNUSED) {
