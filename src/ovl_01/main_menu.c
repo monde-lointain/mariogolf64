@@ -5800,9 +5800,9 @@ void DrawAnimationViewer(Gfx** displayListHead) {
  */
 /*
  * Doesn't match: GCC reloads the chosen course from the stack in the icon
- * loop, where the original keeps it in a register, and orders the
- * g_BetPagesWallSlide switch's branches differently. Clearing the place count
- * in the place loop's initializer takes 51 words differing to 49.
+ * loop, where the original keeps it in a register. Clearing the place count
+ * in the place loop's initializer takes 51 words differing to 49. 40 words
+ * differ, 10 in shape.
  */
 #ifdef NON_MATCHING
 void DrawCourseSelect(Gfx** displayListHead) {
@@ -6272,11 +6272,14 @@ void DrawCourseSelect(Gfx** displayListHead) {
       gDPSetTextureLUT(gfx++, G_TT_RGBA16);
     }
 
+    /*
+     * The wall stays still at other slides. With a case for
+     * STATS_SLIDE_CURRENT the five labels make a jump table, and with
+     * default for the slides out the tree tests differently (49 words)
+     */
     switch (g_BetPagesWallSlide) {
-      case STATS_SLIDE_CURRENT:
-        break;
-
-      default:
+      case STATS_SLIDE_OUT_RIGHT:
+      case STATS_SLIDE_OUT_LEFT:
         if (SlideBrickWall(&gfx, STATS_SLIDE_OUT_RIGHT) == 0) {
           g_BetPagesPhase = BET_PHASE_CHOOSING;
         }
