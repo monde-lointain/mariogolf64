@@ -45,6 +45,13 @@ typedef struct ImageHeader {
  */
 #define IMAGE_WIDTH_LOW_BYTE 3
 #define IMAGE_HEIGHT_LOW_BYTE 5
+/* An image's width and height, read from its header a byte at a time */
+#define ReadImageWidth(image) \
+  ((((u8*)(image))[IMAGE_WIDTH_OFFSET] << 8) | \
+      ((u8*)(image))[IMAGE_WIDTH_LOW_BYTE])
+#define ReadImageHeight(image) \
+  ((((u8*)(image))[IMAGE_HEIGHT_OFFSET] << 8) | \
+      ((u8*)(image))[IMAGE_HEIGHT_LOW_BYTE])
 
 void OpenAssetFile(s32 assetId, AssetFile* file);
 AssetFile* OpenPooledAssetFile(s32 assetId);

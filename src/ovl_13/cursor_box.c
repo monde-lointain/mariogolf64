@@ -31,15 +31,19 @@ static Mtx f_CursorBoxTranslations[DRAW_BUFFER_COUNT];
 void LoadCursorBox(void* image) {
   EncodedAsset asset;
 
-  /* s32 sizes are there to match */
+  /*
+   * s32 sizes are there to match: u16 sizes give 12 words differing (none in
+   * shape), u32 48 (4) and s16 68 (14). Reading the sizes as the header's
+   * halfwords, rather than a byte at a time, gives 10 (10).
+   */
   s32 width;
   s32 height;
 
   f_CursorBoxImage = image;
   OpenEncodedAsset(ASSET_CURSOR_BOX, &asset);
   ReadEncodedAsset(f_CursorBoxImage, &asset);
-  width = (((u8*)f_CursorBoxImage)[2] << 8) | ((u8*)f_CursorBoxImage)[3];
-  height = (((u8*)f_CursorBoxImage)[4] << 8) | ((u8*)f_CursorBoxImage)[5];
+  width = ReadImageWidth(f_CursorBoxImage);
+  height = ReadImageHeight(f_CursorBoxImage);
   f_CursorBoxVertices[0].v.tc[TEXTURE_AXIS_S] = 0;
   f_CursorBoxVertices[1].v.tc[TEXTURE_AXIS_S] = 0;
   f_CursorBoxVertices[0].v.tc[TEXTURE_AXIS_T] = 0;
@@ -76,8 +80,8 @@ void DrawCursorBox(Gfx** displayListHead, s32 left, s32 top) {
   s32 width;
   s32 height;
 
-  width = (((u8*)f_CursorBoxImage)[2] << 8) | ((u8*)f_CursorBoxImage)[3];
-  height = (((u8*)f_CursorBoxImage)[4] << 8) | ((u8*)f_CursorBoxImage)[5];
+  width = ReadImageWidth(f_CursorBoxImage);
+  height = ReadImageHeight(f_CursorBoxImage);
   for (corner = 0; corner != CURSOR_BOX_CORNER_COUNT; corner++) {
     /* In its own block, to match; without it 173 words differ, 11 in shape */
     IN_OWN_BLOCK(f_CursorCornerPhases[corner] += DegreesToRadians(15));

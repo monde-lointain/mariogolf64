@@ -1107,9 +1107,8 @@ s32 UpdateShownScorecard(u16 buttons) {
  */
 void DrawLargeImage(Gfx** displayListHead, u8* image, s32 left, s32 top) {
   Gfx* gfx = *displayListHead;
-  s32 width = (image[IMAGE_WIDTH_OFFSET] << 8) | image[IMAGE_WIDTH_OFFSET + 1];
-  s32 height =
-      (image[IMAGE_HEIGHT_OFFSET] << 8) | image[IMAGE_HEIGHT_OFFSET + 1];
+  s32 width = ReadImageWidth(image);
+  s32 height = ReadImageHeight(image);
   s32 stripCount;
   s32 stripIndex;
 
