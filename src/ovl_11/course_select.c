@@ -988,7 +988,14 @@ void DrawNamePlate(Gfx** displayListHead, s32 centerX, s32 centerY) {
  * Spins the chosen hole's star; the position is unused, the stars are always in
  * one place
  *
- * Doesn't match: 266 words differ, 152 in shape.
+ * Doesn't match: the original keeps save in $s5 and leaves constants such as
+ * the load blocks' 0x070BF400 without registers, reloading them into $t4,
+ * where this spills save and gives the constants registers; that reorders the
+ * texture loads. Forcing the allocation the original's registers imply
+ * still leaves 137 words. Choosing the tile in one if, from course, read
+ * before it, rather than overriding the still tile, takes it from 280 words
+ * to 259, 142 in shape to 133; a Boolean row pointer gives 275 and 145, a u8
+ * width and height 288 and 146. 259 words differ, 133 in shape.
  */
 #ifdef NON_MATCHING
 void DrawRingShotStars(
@@ -1012,32 +1019,35 @@ void DrawRingShotStars(
   s32 height;
   s32 left;
   s32 tile;
+  s32 course;
   u8* starImage = f_StarImages[f_StarBufferIndex];
   u8* emptyStarImage;
 
   LoadSmallPalette(&gfx, TILE_SPINNING_STAR, ImageBody(starImage));
-  gDPLoadTextureBlock_4b(gfx++, ImageTexels(starImage), G_IM_FMT_CI, STAR_WIDTH,
-      STAR_HEIGHT, TILE_SPINNING_STAR, G_TX_NOMIRROR | G_TX_WRAP,
-      G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
-      G_TX_NOLOD);
+  gDPLoadTextureBlock_4b(gfx++, TextureAddress(ImageTexels(starImage)),
+      G_IM_FMT_CI, STAR_WIDTH, STAR_HEIGHT, TILE_SPINNING_STAR,
+      G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+      G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
   gDPPipeSync(gfx++);
   emptyStarImage = f_EmptyStarImages[f_StarBufferIndex];
   LoadSmallPalette(&gfx, TILE_SPINNING_EMPTY_STAR, ImageBody(emptyStarImage));
-  gDPLoadMultiBlock_4b(gfx++, ImageTexels(emptyStarImage),
+  gDPLoadMultiBlock_4b(gfx++, TextureAddress(ImageTexels(emptyStarImage)),
       STAR_TMEM_STEP * TILE_SPINNING_EMPTY_STAR, TILE_SPINNING_EMPTY_STAR,
       G_IM_FMT_CI, STAR_WIDTH, STAR_HEIGHT, TILE_SPINNING_EMPTY_STAR,
       G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
       G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
   LoadSmallPalette(
       &gfx, TILE_STILL_STAR, ImageBody(f_StarImages[STILL_STAR_IMAGE]));
-  gDPLoadMultiBlock_4b(gfx++, ImageTexels(f_StarImages[STILL_STAR_IMAGE]),
+  gDPLoadMultiBlock_4b(gfx++,
+      TextureAddress(ImageTexels(f_StarImages[STILL_STAR_IMAGE])),
       STAR_TMEM_STEP * TILE_STILL_STAR, TILE_STILL_STAR, G_IM_FMT_CI,
       STAR_WIDTH, STAR_HEIGHT, TILE_STILL_STAR, G_TX_NOMIRROR | G_TX_WRAP,
       G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
       G_TX_NOLOD);
   LoadSmallPalette(&gfx, TILE_STILL_EMPTY_STAR,
       ImageBody(f_EmptyStarImages[STILL_STAR_IMAGE]));
-  gDPLoadMultiBlock_4b(gfx++, ImageTexels(f_EmptyStarImages[STILL_STAR_IMAGE]),
+  gDPLoadMultiBlock_4b(gfx++,
+      TextureAddress(ImageTexels(f_EmptyStarImages[STILL_STAR_IMAGE])),
       STAR_TMEM_STEP * TILE_STILL_EMPTY_STAR, TILE_STILL_EMPTY_STAR,
       G_IM_FMT_CI, STAR_WIDTH, STAR_HEIGHT, TILE_STILL_EMPTY_STAR,
       G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
@@ -1054,13 +1064,14 @@ void DrawRingShotStars(
       left = (hole * STAR_SPACING) + STARS_LEFT;
     }
 
-    tile = (save->hasRingShotStar[memory->courseIndex][hole] == 0)
-        ? TILE_STILL_EMPTY_STAR
-        : TILE_STILL_STAR;
+    course = memory->courseIndex;
     if (hole == memory->holeIndex) {
-      tile = (save->hasRingShotStar[memory->courseIndex][hole] == 0)
+      tile = (save->hasRingShotStar[course][hole] == 0)
           ? TILE_SPINNING_EMPTY_STAR
           : TILE_SPINNING_STAR;
+    } else {
+      tile = (save->hasRingShotStar[course][hole] == 0) ? TILE_STILL_EMPTY_STAR
+                                                        : TILE_STILL_STAR;
     }
 
     DrawTextureRect(&gfx, QuarterPixels(left - (width / 2)),
