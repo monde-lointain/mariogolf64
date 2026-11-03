@@ -2882,9 +2882,7 @@ void ToggleCellMirroring(s32 column, s32 row) {
     return;
   }
 
-  /* Shifts the row but divides the column, to match */
-  tileIndex =
-      ((row >> GROUND_TILE_POINT_SPAN_SHIFT) * GROUND_TILE_COLUMN_COUNT) +
+  tileIndex = ((row / GROUND_TILE_POINT_SPAN) * GROUND_TILE_COLUMN_COUNT) +
       (column / GROUND_TILE_POINT_SPAN);
   cellBits = g_WorkArea.hole.tiles[tileIndex].mirroredCells;
   g_WorkArea.hole.tiles[tileIndex].mirroredCells = cellBits ^
@@ -3928,13 +3926,14 @@ void DrawHoleEditorGround(CameraMatrices* matrices UNUSED, s32 terrainStyle) {
   s32 segmentIndex;
   s32 edge;
   s32 pass;
-  /* The fine tiles' own pass counter, to match */
   s32 tileIndex;
+  /*
+   * The fine tiles' own pass counter, to match: using pass gives 2480 words
+   * differing (512 in shape) against the draft's 2128 (488)
+   */
   s32 finePass;
-  /* Also the tile index in the first loop, to match */
   s32 middleSlot;
   s32 bottomSlot;
-  s32 column;
   s32 spareSlot;
   s32 blockColumn;
   s32 blockRow;
@@ -4191,17 +4190,17 @@ void DrawHoleEditorGround(CameraMatrices* matrices UNUSED, s32 terrainStyle) {
   gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
   g_GroundFarthestDepth = 0.0f;
   g_GroundNearDepthEighth = NO_NEAR_DEPTH;
-  for (column = 0; column < GROUND_TILE_COUNT; column++) {
-    tile = &g_WorkArea.hole.tiles[column];
+  for (tileIndex = 0; tileIndex < GROUND_TILE_COUNT; tileIndex++) {
+    tile = &g_WorkArea.hole.tiles[tileIndex];
     visibility = GetSphereVisibility(tile->center[0], tile->center[1],
         tile->center[2], MIN_GROUND_TILE_RADIUS);
     detail = GROUND_DETAIL_HIDDEN;
     if (visibility < 0) {
       if (tile->midpointBlockIndex >= 0 &&
-          visibility * FINE_DEPTH_SCALE < g_GroundTileHeightRanges[column]) {
+          visibility * FINE_DEPTH_SCALE < g_GroundTileHeightRanges[tileIndex]) {
         detail = GROUND_DETAIL_FINE;
       } else if (visibility * MEDIUM_DEPTH_SCALE <
-          g_GroundTileHeightRanges[column]) {
+          g_GroundTileHeightRanges[tileIndex]) {
         detail = GROUND_DETAIL_MEDIUM;
       } else {
         detail = GROUND_DETAIL_COARSE;
