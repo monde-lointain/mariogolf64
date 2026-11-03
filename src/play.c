@@ -2036,9 +2036,10 @@ void DrawHoleEditorGround(CameraMatrices* matrices, s32 terrainStyle);
  * parity once per half, where ours does at each GridVertex, with three more
  * andi: loop.c finds moving them out of the row loop not desirable, since
  * the six invariants it moved out of the inner tile loops come first and
- * each doubles the row loop's count. Writing the tile column out where it is
- * used, and giving the medium tiles' pass loop its own counter, took it from
- * 1194 words differing, 352 in shape.
+ * each doubles the row loop's count. A nextColumn local set once per half
+ * keeps the andi too (1214 words, 322 in shape). Writing the tile column out
+ * where it is used, and giving the medium tiles' pass loop its own counter,
+ * took it from 1194 words differing, 352 in shape.
  */
 void DrawGround(CameraMatrices* matrices, s32 terrainStyle) {
   u8 snapsEdge[2][TILE_VERTEX_SEGMENT_COUNT]; /* For the current and the last
