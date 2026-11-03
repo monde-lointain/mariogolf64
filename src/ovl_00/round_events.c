@@ -2213,7 +2213,9 @@ void DrawGoombaMovie(Gfx** displayListHead) {
  * conversions are scheduled differently. Stepping offset in the loop's
  * header, or setting it before the palette load, gives 89 words differing,
  * 49 in shape. Rounding the half width before the tile load takes 87 words
- * differing, 47 in shape, to 87 and 45.
+ * differing, 47 in shape, to 87 and 45, and working out the strip's start S
+ * there too takes it to 83 and 41. Naming each strip's bottom, or the start T
+ * after its rounding, changes nothing; a 16-bit offset gives 136.
  */
 #ifdef NON_MATCHING
 void DrawLakituMovie(Gfx** displayListHead) {
@@ -2227,6 +2229,8 @@ void DrawLakituMovie(Gfx** displayListHead) {
   s32 x;
   s32 y;
   s32 offset;
+  f32 startS;
+  f32 startT;
 
   if (f_MovieDrawCount == LAKITU_RED_LIGHT_DRAW) {
     PlaySound(SOUND_START_LIGHT_RED, g_NextSoundChannel, SOUND_FULL_SCALE);
@@ -2284,6 +2288,12 @@ void DrawLakituMovie(Gfx** displayListHead) {
     halfWidth = f_Lakitu.scale * (LAKITU_WIDTH / 2);
     halfHeight = f_Lakitu.scale * LAKITU_STRIP_HEIGHT;
     roundedHalfWidth = halfWidth + 0.5f;
+
+    /*
+     * Start half a texel in, less the rounding, so that the image stays
+     * centered as it scales
+     */
+    startS = 16.0f - (((f32)roundedHalfWidth - halfWidth) * 16.0f);
     gDPLoadTextureTile(gfx++,
         TextureAddress(
             f_MovieBuffer + ((f_MovieBackBuffer * LAKITU_FRAME_SIZE) + offset)),
@@ -2293,17 +2303,14 @@ void DrawLakituMovie(Gfx** displayListHead) {
         G_TX_NOLOD);
     y = f_Lakitu.y;
     roundedHalfHeight = halfHeight + 0.5f;
+    startT = 16.0f - (((f32)roundedHalfHeight - halfHeight) * 16.0f);
     x = f_Lakitu.x;
 
-    /* Start half a texel in, less the rounding, so that the image stays
-     * centered as it scales */
     DrawTextureRect(&gfx, QuarterPixels(x - roundedHalfWidth),
         QuarterPixels(y - roundedHalfHeight + (i * roundedHalfHeight)),
         QuarterPixels(x + roundedHalfWidth),
-        QuarterPixels(y + (i * roundedHalfHeight)), G_TX_RENDERTILE,
-        16.0f - (((f32)roundedHalfWidth - halfWidth) * 16.0f),
-        16.0f - (((f32)roundedHalfHeight - halfHeight) * 16.0f),
-        ((LAKITU_WIDTH / 2) << 10) / halfWidth,
+        QuarterPixels(y + (i * roundedHalfHeight)), G_TX_RENDERTILE, startS,
+        startT, ((LAKITU_WIDTH / 2) << 10) / halfWidth,
         (LAKITU_STRIP_HEIGHT << 10) / halfHeight);
     gDPPipeSync(gfx++);
   }
