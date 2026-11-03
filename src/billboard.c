@@ -344,8 +344,10 @@ void DrawBillboard(Gfx** gfxPtr, Billboard* billboard,
  * in $fp and rebuilds both tables' addresses, where ours keeps
  * g_BillboardTransforms in $fp. Counting the far loop up and indexing
  * f_DrawOrder from the end gives more words: loop.c doesn't reduce the index.
- * Unused locals for the frame move the spill slots. 139 words differ, 17 in
- * shape.
+ * Unused locals for the frame move the spill slots. The permuter's flag
+ * for the near loop's viewDepth >= 0 test (131 words, 9 in shape) only
+ * takes an 8-byte slot that grows the frame, so it is a pad in disguise.
+ * 139 words differ, 17 in shape.
  */
 #ifdef NON_MATCHING
 void DrawBillboards(CameraMatrices* cameraMatrices, s32 cameraIndex) {
