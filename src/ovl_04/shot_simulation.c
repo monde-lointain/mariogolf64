@@ -40,16 +40,20 @@ void SimulateShot(ShotLaunch* shot) {
   g_SimulatedShot.minPositionStep[2] = 0;
   g_SimulatedShot.flagHitStep = NO_STEP;
 
-  /* The chained assignment is there to match */
+  /*
+   * The start and both bounds begin at the ball, each stored from it (start
+   * first) or chained; copying the start into the minimum and the minimum
+   * into the maximum instead gives x 29 words differing, 9 in shape
+   */
   g_SimulatedShot.maxPosition[AXIS_X] = g_SimulatedShot.minPosition[AXIS_X] =
       g_SimulatedShot.startPosition[AXIS_X] =
           g_CurrentShot.ballPosition[AXIS_X];
-  g_SimulatedShot.startPosition[AXIS_Y] = g_CurrentShot.ballPosition[AXIS_Y];
-  g_SimulatedShot.minPosition[AXIS_Y] = g_SimulatedShot.startPosition[AXIS_Y];
-  g_SimulatedShot.maxPosition[AXIS_Y] = g_SimulatedShot.minPosition[AXIS_Y];
-  g_SimulatedShot.startPosition[AXIS_Z] = g_CurrentShot.ballPosition[AXIS_Z];
-  g_SimulatedShot.minPosition[AXIS_Z] = g_SimulatedShot.startPosition[AXIS_Z];
-  g_SimulatedShot.maxPosition[AXIS_Z] = g_SimulatedShot.minPosition[AXIS_Z];
+  g_SimulatedShot.maxPosition[AXIS_Y] = g_SimulatedShot.minPosition[AXIS_Y] =
+      g_SimulatedShot.startPosition[AXIS_Y] =
+          g_CurrentShot.ballPosition[AXIS_Y];
+  g_SimulatedShot.maxPosition[AXIS_Z] = g_SimulatedShot.minPosition[AXIS_Z] =
+      g_SimulatedShot.startPosition[AXIS_Z] =
+          g_CurrentShot.ballPosition[AXIS_Z];
   simulation->position[AXIS_X] = g_CurrentShot.ballPosition[AXIS_X];
   simulation->position[AXIS_Y] = g_CurrentShot.ballPosition[AXIS_Y];
   simulation->position[AXIS_Z] = g_CurrentShot.ballPosition[AXIS_Z];
