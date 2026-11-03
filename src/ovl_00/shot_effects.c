@@ -701,7 +701,13 @@ void DrawSwingTrail(Gfx** displayListHead, CameraMatrices* matrices) {
 
     f_SwingTrailHead--;
     if (f_SwingTrailHead < 0) {
-      /* Storing 1 first keeps the 1 in a register through the loop, to match */
+      /*
+       * Storing 1 first keeps the 1 in a register through the loop, for
+       * step == 1, to match: storing SWING_TRAIL_MATRIX_COUNT - 1 at once
+       * gives 7 words differing, all in shape, also with a for loop or a
+       * decrement within the test; adding the count gives 21, testing
+       * step > 0 3 and step != 0 7, and a two-pass for loop 15 to 17
+       */
       f_SwingTrailHead = 1;
       f_SwingTrailHead = SWING_TRAIL_MATRIX_COUNT - f_SwingTrailHead;
     }
