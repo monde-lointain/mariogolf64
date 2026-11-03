@@ -1870,8 +1870,8 @@ void PlaceAimCamera(void);
  * course. The kinds that test f_IsCameraKindNew do their setup once when it is
  * set, then clear it. Doesn't match: the original allocates some registers
  * differently, and orders the stores of point for FLIGHT_CAMERA_FACING_CUP
- * differently. The register oracle forces 14 pseudos and still leaves 28
- * words differing. 120 words differ, 4 in shape.
+ * differently. The register oracle forces 13 pseudos and still leaves 22
+ * words differing. 98 words differ, 4 in shape.
  */
 #ifdef NON_MATCHING
 void PlaceFlightCamera(s32 step) {
@@ -2180,8 +2180,7 @@ void PlaceFlightCamera(s32 step) {
           sideDistance = f_ShotLength * SIDE_VIEW_LENGTH_FRACTION;
           distance = f_ShotLength * SIDE_VIEW_AHEAD_FRACTION;
 
-          /* Holding this yaw in angle is there to match */
-          angle = f_ShotFlightYaw + (M_PI / 2) +
+          sideYaw = f_ShotFlightYaw + (M_PI / 2) +
               ((f32)(rand() & RANDOM_YAW_MASK) * RANDOM_YAW_TO_RADIANS);
           g_Cameras[0].view.fieldOfView = DEFAULT_FIELD_OF_VIEW;
           yaw = f_ShotFlightYaw + M_PI;
@@ -2196,9 +2195,9 @@ void PlaceFlightCamera(s32 step) {
           }
 
           point[AXIS_X] = f_ShotStartPosition[AXIS_X] + (sinf(yaw) * distance) +
-              (sinf(angle) * sideDistance);
+              (sinf(sideYaw) * sideDistance);
           point[AXIS_Z] = f_ShotStartPosition[AXIS_Z] - (cosf(yaw) * distance) -
-              (cosf(angle) * sideDistance);
+              (cosf(sideYaw) * sideDistance);
           /* Computing extraRise before GetGroundHeight is there to match */
           extraRise = f_ShotLength * SIDE_VIEW_RISE_FRACTION;
           point[AXIS_Y] = GetGroundHeight(point[AXIS_X], point[AXIS_Z]);
