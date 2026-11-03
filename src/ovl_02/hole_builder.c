@@ -4036,7 +4036,9 @@ static inline u16 ReadTileTexel(
  * stripped loop's != test, indexing texels[row + 1][column + 1] gives 97
  * differing words, texels[0] at the row's sum 79 to 85, and the offset added
  * to &texels[1][1] 79; indexing the tile in g_WorkArea rather than through
- * tile gives 132 to 153. 76 words differ, 26 in shape.
+ * tile gives 132 to 153. The permuter's best holds the last texel's
+ * column in a variable for the corner's two stores, a fake (82 words, 24
+ * in shape). 76 words differ, 26 in shape.
  */
 #ifdef NON_MATCHING
 void ToggleGroundTileBorders(void) {
