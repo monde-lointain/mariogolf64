@@ -1427,34 +1427,32 @@ const char f_BetDashText[] = "-";
 /*
  * Draws the Speed Golf page: each hole's time, with dashes for a hole without
  * one, and the round's time and score so far.
- *
- * Doesn't match: the target indexes the minute arrays from the offset it
- * shares with the other time arrays, where this steps pointers through them,
- * and it adds the rows' offsets to the scorecard's y in a different order.
- * Keeping the round's seconds in scoreToPar, which the original may share
- * with them, leaves 95. 104 words differ.
  */
-#ifdef NON_MATCHING
 void DrawSpeedGolfPage(Gfx** displayListHead) {
-  s32 shownHoleCount = g_Scorecard.content.holeIndex +
-      (g_Players[0].holeStatus != HOLE_STATUS_PLAYING);
+  s32 shownHoleCount;
   Gfx* gfx = *displayListHead;
   s32 i;
   s32 minutes;
   s32 seconds;
+  s32 hundredths;
   s32 scoreToPar;
+
+  shownHoleCount = g_Scorecard.content.holeIndex;
+  if (g_Players[0].holeStatus != HOLE_STATUS_PLAYING) {
+    shownHoleCount++;
+  }
 
   SetUpGradientTextDrawing(&gfx, 0);
   for (i = 0; i != NINE_HOLE_COUNT; i++) {
     sprintf(g_PrintBuffer, f_TwoDigitFormat, i + 1);
     DrawLargeTextWithShadow(&gfx, g_Scorecard.x + HOLE_NUMBER_LEFT,
-        (i * HOLE_ROW_SPACING) + (g_Scorecard.y + HOLE_NUMBER_TOP),
-        g_PrintBuffer, HOLE_NUMBER_ENV_COLOR, HOLE_NUMBER_PRIM_COLOR, 0);
+        (i * HOLE_ROW_SPACING) + HOLE_NUMBER_TOP + g_Scorecard.y, g_PrintBuffer,
+        HOLE_NUMBER_ENV_COLOR, HOLE_NUMBER_PRIM_COLOR, 0);
     sprintf(g_PrintBuffer, f_TwoDigitFormat, i + NINE_HOLE_COUNT + 1);
     DrawLargeTextWithShadow(&gfx,
         g_Scorecard.x + HOLE_NUMBER_LEFT + BACK_NINE_SPACING,
-        (i * HOLE_ROW_SPACING) + (g_Scorecard.y + HOLE_NUMBER_TOP),
-        g_PrintBuffer, HOLE_NUMBER_ENV_COLOR, HOLE_NUMBER_PRIM_COLOR, 0);
+        (i * HOLE_ROW_SPACING) + HOLE_NUMBER_TOP + g_Scorecard.y, g_PrintBuffer,
+        HOLE_NUMBER_ENV_COLOR, HOLE_NUMBER_PRIM_COLOR, 0);
   }
 
   sprintf(g_PrintBuffer, "Time");
@@ -1474,13 +1472,14 @@ void DrawSpeedGolfPage(Gfx** displayListHead) {
       if (minutes < 0) {
         sprintf(g_PrintBuffer, f_StringFormat, "--------");
         DrawMediumText(&gfx, g_Scorecard.x + HOLE_TIME_LEFT,
-            (i * HOLE_ROW_SPACING) + (g_Scorecard.y + HOLE_TIME_TOP),
+            (i * HOLE_ROW_SPACING) + HOLE_TIME_TOP + g_Scorecard.y,
             g_PrintBuffer);
       } else {
-        sprintf(g_PrintBuffer, "%02d:%02d:%02d", minutes, g_HoleTimeSeconds[i],
-            g_HoleTimeHundredths[i]);
+        hundredths = g_HoleTimeHundredths[i];
+        seconds = g_HoleTimeSeconds[i];
+        sprintf(g_PrintBuffer, "%02d:%02d:%02d", minutes, seconds, hundredths);
         DrawMediumText(&gfx, g_Scorecard.x + HOLE_TIME_LEFT,
-            (i * HOLE_ROW_SPACING) + (g_Scorecard.y + HOLE_TIME_TOP),
+            (i * HOLE_ROW_SPACING) + HOLE_TIME_TOP + g_Scorecard.y,
             g_PrintBuffer);
       }
     }
@@ -1490,27 +1489,27 @@ void DrawSpeedGolfPage(Gfx** displayListHead) {
       if (minutes < 0) {
         sprintf(g_PrintBuffer, f_StringFormat, "--------");
         DrawMediumText(&gfx, g_Scorecard.x + HOLE_TIME_LEFT + BACK_NINE_SPACING,
-            (i * HOLE_ROW_SPACING) + (g_Scorecard.y + HOLE_TIME_TOP),
+            (i * HOLE_ROW_SPACING) + HOLE_TIME_TOP + g_Scorecard.y,
             g_PrintBuffer);
       } else {
-        sprintf(g_PrintBuffer, "%02d:%02d:%02d", minutes,
-            g_HoleTimeSeconds[i + NINE_HOLE_COUNT],
-            g_HoleTimeHundredths[i + NINE_HOLE_COUNT]);
+        hundredths = g_HoleTimeHundredths[i + NINE_HOLE_COUNT];
+        seconds = g_HoleTimeSeconds[i + NINE_HOLE_COUNT];
+        sprintf(g_PrintBuffer, "%02d:%02d:%02d", minutes, seconds, hundredths);
         DrawMediumText(&gfx, g_Scorecard.x + HOLE_TIME_LEFT + BACK_NINE_SPACING,
-            (i * HOLE_ROW_SPACING) + (g_Scorecard.y + HOLE_TIME_TOP),
+            (i * HOLE_ROW_SPACING) + HOLE_TIME_TOP + g_Scorecard.y,
             g_PrintBuffer);
       }
     }
   }
 
+  hundredths = (s32)(g_GameState.stopwatchFrameCount *
+                   ((f32)HUNDREDTHS_PER_SECOND / FRAMES_PER_SECOND)) %
+      HUNDREDTHS_PER_SECOND;
   seconds =
       g_GameState.stopwatchFrameCount / FRAMES_PER_SECOND % SECONDS_PER_MINUTE;
   sprintf(g_PrintBuffer, "%02d:%02d:%02d",
       g_GameState.stopwatchFrameCount / FRAMES_PER_SECOND / SECONDS_PER_MINUTE,
-      seconds,
-      (s32)(g_GameState.stopwatchFrameCount *
-          ((f32)HUNDREDTHS_PER_SECOND / FRAMES_PER_SECOND)) %
-          HUNDREDTHS_PER_SECOND);
+      seconds, hundredths);
   DrawFixedWidthLargeText(&gfx, g_Scorecard.x + ROUND_TOTAL_LEFT,
       g_Scorecard.y + ROUND_TIME_TOP, g_PrintBuffer);
   scoreToPar = GetNetScoreToPar(shownHoleCount, 0);
@@ -1524,10 +1523,6 @@ void DrawSpeedGolfPage(Gfx** displayListHead) {
       g_Scorecard.y + ROUND_SCORE_TOP, g_PrintBuffer);
   *displayListHead = gfx;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard_drawing", DrawSpeedGolfPage);
-RESUME_RODATA_SECTION();
-#endif
 
 /* Writes a standing's place, score to par and holes played into a leaderboard
  * row */
