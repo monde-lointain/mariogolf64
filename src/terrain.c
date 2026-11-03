@@ -1216,7 +1216,10 @@ NO_RESULT SetGroundPointHeightAndShade(
         point = &midpoints[f_PointSlots[PointSlot(row)][PointSlot(column)]];
         point->v.ob[AXIS_Y] = height;
 
-        /* The chained assignment is there to match */
+        /*
+         * The chained assignment is there to match: three separate stores,
+         * in either order, in all three places give 21 words differing
+         */
         point->v.cn[0] = point->v.cn[1] = point->v.cn[2] = shade;
       }
     }
@@ -1230,7 +1233,10 @@ NO_RESULT SetGroundPointHeightAndShade(
             &midpoints[f_PointSlots[GROUND_TILE_POINT_SPAN][PointSlot(column)]];
         point->v.ob[AXIS_Y] = height;
 
-        /* The chained assignment is there to match */
+        /*
+         * The chained assignment is there to match: three separate stores,
+         * in either order, in all three places give 21 words differing
+         */
         point->v.cn[0] = point->v.cn[1] = point->v.cn[2] = shade;
       }
     }
@@ -1244,7 +1250,10 @@ NO_RESULT SetGroundPointHeightAndShade(
             &midpoints[f_PointSlots[PointSlot(row)][GROUND_TILE_POINT_SPAN]];
         point->v.ob[AXIS_Y] = height;
 
-        /* The chained assignment is there to match */
+        /*
+         * The chained assignment is there to match: three separate stores,
+         * in either order, in all three places give 21 words differing
+         */
         point->v.cn[0] = point->v.cn[1] = point->v.cn[2] = shade;
       }
     }
