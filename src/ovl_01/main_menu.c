@@ -1742,7 +1742,6 @@ void SetUpChosenGame(void) {
   Player* player;
   s32 index;
   s32 slot;
-  s32 clubSet;
   s32* holeSelection;
   s32 row;
   s32 column;
@@ -1861,13 +1860,13 @@ void SetUpChosenGame(void) {
       if (!((f_PlayerClubMasks[index] >> slot) & 1)) {
         player->clubs[slot] = NO_CLUB;
       } else {
-        clubSet = g_ChosenCharacters[index];
-        if (clubSet >= CHARACTER_KID) {
-          clubSet = player->gameBoyCharacterIndex;
-          clubSet += CHARACTER_KID;
+        if (g_ChosenCharacters[index] >= CHARACTER_KID) {
+          player->clubs[slot] = slot +
+              ((player->gameBoyCharacterIndex + CHARACTER_KID) * CLUB_SET_SIZE);
+        } else {
+          player->clubs[slot] =
+              slot + (g_ChosenCharacters[index] * CLUB_SET_SIZE);
         }
-
-        player->clubs[slot] = slot + (clubSet * CLUB_SET_SIZE);
       }
     }
 
