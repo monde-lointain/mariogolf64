@@ -443,7 +443,9 @@ void OpenRoundResults(s32 request) {
  * across the calls instead (228 words, 62 in shape, or 234 and 64 for the
  * total too), and summing the points in a local gives 247. The tournament's
  * open course count is stored first, as the original does (211 words the
- * other way). 207 words differ, 45 in shape.
+ * other way). The ranks are counted in f_PlayerRanks itself, which a
+ * permuter run pointed to; counting them through a pointer to the rank gives
+ * 207 words differing, 45 in shape. 177 words differ, 39 in shape.
  */
 void LoadRoundResults(void) {
   EncodedAsset asset;
@@ -453,7 +455,6 @@ void LoadRoundResults(void) {
   s32 j;
   s32 k;
   void* palette;
-  s32* rank;
   u32 size;
 
   save = GetSaveData();
@@ -603,11 +604,10 @@ void LoadRoundResults(void) {
         }
 
         for (i = 0; i != g_GameState.playerCount; i++) {
-          rank = &f_PlayerRanks[i];
-          *rank = 0;
+          f_PlayerRanks[i] = 0;
           for (j = 0; j != g_GameState.playerCount; j++) {
             if (i != j && f_PlayerResults[i] > f_PlayerResults[j]) {
-              (*rank)++;
+              f_PlayerRanks[i]++;
             }
           }
         }
@@ -660,11 +660,10 @@ void LoadRoundResults(void) {
         }
 
         for (k = 0; k != g_GameState.playerCount; k++) {
-          rank = &f_PlayerRanks[k];
-          *rank = 0;
+          f_PlayerRanks[k] = 0;
           for (j = 0; j != g_GameState.playerCount; j++) {
             if (k != j && f_PlayerResults[k] < f_PlayerResults[j]) {
-              (*rank)++;
+              f_PlayerRanks[k]++;
             }
           }
         }
