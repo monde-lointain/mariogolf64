@@ -807,8 +807,10 @@ void UpdateBetSettings(void) {
  * Doesn't match: the original keeps the stake marks' coordinates in other
  * registers, and uses markGrowth without masking it to 16 bits. The marks'
  * left edges add slide and their offset as one sum, which the loop hoists:
- * written in a row they give 32 differing words. 25 words differ, 5 in
- * shape.
+ * written in a row they give 32 differing words. Halving markGrowth as
+ * unsigned, by a cast to u32 or "/ 2u", gives 20 but keeps the mask; no
+ * type of markGrowth, markRaise or a halfGrowth local removes it. 25 words
+ * differ, 5 in shape.
  */
 #ifdef NON_MATCHING
 void DrawBetSettings(
