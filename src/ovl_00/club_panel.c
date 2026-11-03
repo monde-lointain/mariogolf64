@@ -362,9 +362,11 @@ s32 GetGaugeFill(void);
 /*
  * Draws the power gauge, its markers, and the bar for the lie's span.
  *
- * Doesn't match: 210 words differ. The stack frame is 8 bytes larger, and
- * after the medium ticks the display list pointers and the 0xE7 command
- * word take different registers.
+ * Doesn't match: the stack frame is 8 bytes larger, and after the medium
+ * ticks the display list pointers and the 0xE7 command word take different
+ * registers. The original branches on each of the player state tests, which
+ * as && chains fold_truthop makes branchless: 210 words differ that way.
+ * 172 words differ, 20 in shape.
  */
 void DrawClubPanel(Gfx** displayListHead) {
   s32 span;
@@ -496,9 +498,10 @@ void DrawClubPanel(Gfx** displayListHead) {
   gDPLoadTextureBlock(gfx++, TextureAddress(ImageBody(f_ShotModeImage)),
       G_IM_FMT_RGBA, G_IM_SIZ_16b, fillWidth, GAUGE_FILL_IMAGE_HEIGHT, 0,
       G_TX_WRAP, G_TX_WRAP, 0, 0, 0, 0);
-  if (playerState != PLAYER_STATE_AIMING &&
-      playerState == PLAYER_STATE_SETTING_POWER) {
-    f_ClubPanelUnk24 = value;
+  if (playerState != PLAYER_STATE_AIMING) {
+    if (playerState == PLAYER_STATE_SETTING_POWER) {
+      f_ClubPanelUnk24 = value;
+    }
   }
 
   gDPPipeSync(gfx++);
@@ -578,25 +581,30 @@ void DrawClubPanel(Gfx** displayListHead) {
           GAUGE_MARKER_BOTTOM + g_ShotPanelOffsetX + f_ClubPanelDebugValue),
       G_TX_RENDERTILE, 0, 0, 0x400, 0x400);
   gDPPipeSync(gfx++);
-  if (playerState != PLAYER_STATE_AIMING &&
-      playerState != PLAYER_STATE_SETTING_POWER && !isPutter) {
-    gDPSetPrimColor(gfx++, 0, 0, 191, 191, 191, 255);
-    markerOffset = f_ClubPanelUnk24 * GAUGE_LENGTH / GAUGE_MAX_VALUE;
-    if (f_ClubPanelUnk24 == GAUGE_MAX_VALUE) {
-      gDPSetEnvColor(gfx++, pulse, pulse, pulse, 255);
-    } else {
-      gDPSetEnvColor(gfx++, 0, 0, 0, 255);
-    }
+  switch (playerState) {
+    case PLAYER_STATE_AIMING:
+    case PLAYER_STATE_SETTING_POWER:
+      break;
+    default:
+      if (!isPutter) {
+        gDPSetPrimColor(gfx++, 0, 0, 191, 191, 191, 255);
+        markerOffset = f_ClubPanelUnk24 * GAUGE_LENGTH / GAUGE_MAX_VALUE;
+        if (f_ClubPanelUnk24 == GAUGE_MAX_VALUE) {
+          gDPSetEnvColor(gfx++, pulse, pulse, pulse, 255);
+        } else {
+          gDPSetEnvColor(gfx++, 0, 0, 0, 255);
+        }
 
-    gDPPipeSync(gfx++);
-    gSPTextureRectangle(gfx++, QuarterPixels(GAUGE_EMPTY_X - markerOffset),
-        QuarterPixels(
-            GAUGE_MARKER_TOP + g_ShotPanelOffsetX + f_ClubPanelDebugValue),
-        QuarterPixels(GAUGE_EMPTY_X + GAUGE_MARKER_WIDTH - markerOffset),
-        QuarterPixels(
-            GAUGE_MARKER_BOTTOM + g_ShotPanelOffsetX + f_ClubPanelDebugValue),
-        G_TX_RENDERTILE, 0, 0, 0x400, 0x400);
-    gDPPipeSync(gfx++);
+        gDPPipeSync(gfx++);
+        gSPTextureRectangle(gfx++, QuarterPixels(GAUGE_EMPTY_X - markerOffset),
+            QuarterPixels(
+                GAUGE_MARKER_TOP + g_ShotPanelOffsetX + f_ClubPanelDebugValue),
+            QuarterPixels(GAUGE_EMPTY_X + GAUGE_MARKER_WIDTH - markerOffset),
+            QuarterPixels(GAUGE_MARKER_BOTTOM + g_ShotPanelOffsetX +
+                f_ClubPanelDebugValue),
+            G_TX_RENDERTILE, 0, 0, 0x400, 0x400);
+        gDPPipeSync(gfx++);
+      }
   }
 
   gDPPipeSync(gfx++);
