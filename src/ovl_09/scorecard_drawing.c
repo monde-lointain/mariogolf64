@@ -115,15 +115,14 @@ extern const char f_TotalFormat[];
 extern const char f_DrawText[];
 extern const char f_WinText[];
 extern const char f_LoseText[];
-/* " ", still in the assembly's rodata */
-extern char f_BlankBetName[];
+static const char f_BlankBetName[];
 
 static s32 f_MatchResultFrameCount = 0;
 static u8 f_WinMarkFrames[] = {3, 4, 5, 0, 1, 2, 3, 4, 5, 0};
 static char f_CarryOverText[] = "Carry over";
 /* The angle the colors of "Win" are at */
 static Radians f_WinColorAngle = 0.0f;
-static char* f_BetNames[BET_COUNT] = {
+static const char* f_BetNames[BET_COUNT] = {
     f_BlankBetName,
     f_BlankBetName,
     f_BlankBetName,
@@ -1028,7 +1027,7 @@ void DrawSkinsPage(Gfx** displayListHead) {
   *displayListHead = gfx;
 }
 
-INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard_drawing", f_BlankBetName);
+static const char f_BlankBetName[] = " ";
 
 /* The bets page: a grid with a column for each bet being played and one for the
  * totals */
@@ -1298,7 +1297,7 @@ void DrawBetsPage(Gfx** displayListHead) {
       }
 
       DrawCenteredSmallText(&gfx, BET_NAME_LEFT + left + g_Scorecard.x,
-          g_Scorecard.y + BET_NAME_TOP, f_BetNames[i]);
+          g_Scorecard.y + BET_NAME_TOP, (READ_ONLY char*)f_BetNames[i]);
       left += BET_NAME_SPACING;
     }
   }
@@ -3123,20 +3122,20 @@ RESUME_RODATA_SECTION();
 const char f_DecimalFormat[] = "%d";
 
 #ifndef NON_MATCHING
-INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard_drawing", f_ScoreTotalFormat);
-INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard_drawing", f_EmptyFormat);
-INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard_drawing", f_EvenStandingText);
-INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard_drawing", f_UpStandingFormat);
-INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard_drawing", f_DownStandingFormat);
-INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard_drawing", f_ScoreGlyphFormat);
-INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard_drawing", f_PointsStandingFormat);
-INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard_drawing", f_EvenParText);
-INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard_drawing", f_OverParFormat);
-INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard_drawing", f_UnderParFormat);
-INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard_drawing", f_ScoresTwentyDegrees);
-INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard_drawing", f_ScoresPi);
-INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard_drawing", f_ScoresHalfPi);
-INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard_drawing", f_ScoresTenDegrees);
+static const char f_ScoreTotalFormat[] = "%3d";
+static const char f_EmptyFormat[] = "";
+static const char f_EvenStandingText[] = " EVEN";
+static const char f_UpStandingFormat[] = "%2dUP";
+static const char f_DownStandingFormat[] = "%2dDOWN";
+static const char f_ScoreGlyphFormat[] = "%c";
+static const char f_PointsStandingFormat[] = "%2dP";
+static const char f_EvenParText[] = "<0";
+static const char f_OverParFormat[] = ":%d";
+static const char f_UnderParFormat[] = ";%d";
+static const f64 f_ScoresTwentyDegrees = DegreesToRadians(20);
+static const f64 f_ScoresPi = M_PI;
+static const f64 f_ScoresHalfPi = M_PI / 2;
+static const f64 f_ScoresTenDegrees = DegreesToRadians(10);
 #endif
 
 /*
