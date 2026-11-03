@@ -1684,22 +1684,22 @@ typedef struct GridScreenPoint {
 /*
  * Doesn't match: the club and the shot's distance take each other's saved
  * registers, and registers differ through the grid's loops. The register oracle
- * came no closer than 249 words differing, with 27 pseudos forced, while the
- * first two loops indexed through a local. The permuter's best outputs, 5478 to
- * 5518 against 6454, set columnCount only in the fade's last branch (367 words
- * differing, 45 in shape) or drop the near-landing branch, which change what
- * the code does, or shift both sides of the scroll test by 1 and nest a color
- * in a chained assignment, which are fakes. A later output, 5445 (362 words, 48
- * in shape), computes distance * GREEN_GRID_ROW_SPACING into a temp before its
- * division, for shots short of GREEN_GRID_LANDING_DISTANCE, and joins the early
- * exit's first two tests in an int temp; without the first temp it gives 366
- * (52), without the second 351 (51). A Boolean local for those two tests gave
- * 366 (52) too, but it made the exit store the Boolean and test it, where the
- * original and this branch straight to the return, so its gain was incidental.
- * Indexing the first two loops' arrays by rowStart + column, as a later output
- * did in part, gives 337 words (51 in shape) where a local holding it gave 345
- * (55), and in either loop alone 341 (53). Indexing the third loop's the same
- * way, without point, gives 339 (43). 337 words differ, 51 in shape.
+ * comes no closer than 228 words differing, with 29 pseudos forced. The quads
+ * across the aim sync once after choosing their depth, and the lines along it
+ * don't sync before choosing theirs, as in the original's display list; with a
+ * sync inside each of the quads' depth branches and another before the lines'
+ * test, 337 words differed (51 in shape) but the later commands went to other
+ * slots and the oracle came no closer than 241. The permuter's best outputs,
+ * 5478 to 5518 against 6454, set columnCount only in the fade's last branch or
+ * drop the near-landing branch, which change what the code does, or shift both
+ * sides of the scroll test by 1 and nest a color in a chained assignment, which
+ * are fakes. A later output computed distance * GREEN_GRID_ROW_SPACING into a
+ * temp before its division and joined the early exit's first two tests in an
+ * int temp; a Boolean local for those tests made the exit store the Boolean and
+ * test it, where the original branches straight to the return. Before the syncs
+ * were moved, indexing the first two loops' arrays by rowStart + column gave
+ * 337 words (51 in shape) where a local holding it gave 345 (55). 342 words
+ * differ, 48 in shape.
  */
 void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
   f32 points[GREEN_GRID_POINT_COUNT][3];
@@ -2005,11 +2005,11 @@ void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
             gDPPipeSync(gfx++);
             if (screenPoints[point].depth < screenPoints[point - 1].depth) {
               gDPSetPrimDepth(gfx++, screenPoints[point].depth, 0);
-              gDPPipeSync(gfx++);
             } else {
               gDPSetPrimDepth(gfx++, screenPoints[point - 1].depth, 0);
-              gDPPipeSync(gfx++);
             }
+
+            gDPPipeSync(gfx++);
             gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
           }
         } else {
@@ -2089,7 +2089,6 @@ void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
         gSPModifyVertex(gfx++, 3, G_MWO_POINT_XYSCREEN,
             ScreenPointWord(screenPoints[point + columnCount].x - (s32)dy,
                 screenPoints[point + columnCount].y + (s32)dx));
-        gDPPipeSync(gfx++);
         if (screenPoints[point].depth <
             screenPoints[point + columnCount].depth) {
           gDPSetPrimDepth(gfx++, screenPoints[point].depth, 0);
