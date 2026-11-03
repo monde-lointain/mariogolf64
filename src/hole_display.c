@@ -1013,7 +1013,7 @@ void InitSkyColors(void) {
     ReadEncodedAsset(g_SkyImage + SKY_IMAGE_HALF_OFFSET, &asset);
   }
 
-  OpenEncodedAsset((u16)f_CourseSkyImageAssets[GetCourseRecordIndex()], &asset);
+  OpenEncodedAsset(f_CourseSkyImageAssets[GetCourseRecordIndex()], &asset);
   ReadEncodedAsset(g_CourseSkyImage, &asset);
   for (i = 0; i != LARGE_PALETTE_COLOR_COUNT; i++) {
     color = ((u16*)g_CourseSkyImage)[PALETTE_START + i];
@@ -1322,8 +1322,7 @@ s32 UpdateSkyEditor(void) {
   }
 
   if (isImageChanged) {
-    OpenEncodedAsset(
-        (u16)f_CourseSkyImageAssets[GetCourseRecordIndex()], &asset);
+    OpenEncodedAsset(f_CourseSkyImageAssets[GetCourseRecordIndex()], &asset);
     ReadEncodedAsset(g_CourseSkyImage, &asset);
     for (index = 0; index != LARGE_PALETTE_COLOR_COUNT; index++) {
       color = ((u16*)g_CourseSkyImage)[PALETTE_START + index];

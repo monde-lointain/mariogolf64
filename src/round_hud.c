@@ -3447,8 +3447,7 @@ void DrawColorTest(Gfx** displayListHead) {
   gDPPipeSync(gfx++);
 
   /* The casts read only the low halves, as the target does */
-  DrawCenteredLargeText(
-      &gfx, (s16)f_TestTextX, (s16)f_TestTextY, f_ColorTestSampleText);
+  DrawCenteredLargeText(&gfx, f_TestTextX, f_TestTextY, f_ColorTestSampleText);
   gDPPipeSync(gfx++);
   PrintDebugText(f_BlankText,
       (f_TestChannelIndex * COLOR_TEST_COLUMN_WIDTH) + COLOR_TEST_TEXT_COLUMN -
