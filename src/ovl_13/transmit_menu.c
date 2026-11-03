@@ -2969,8 +2969,11 @@ s32 ReadCartridgeCharacters(void) {
   s32 storedSum;
   s32 dataAddress;
   s32 dataSize;
-  s32 sum; /* Of the save, then of the character data; sharing it is there to
-              match */
+  /*
+   * Of the save, then of the character data. Sharing it is there to match: a
+   * dataSum local gives 112 words differing, 8 in shape
+   */
+  s32 sum;
   Boolean isAlreadyBrought;
   s32 slot;
 
@@ -3054,13 +3057,20 @@ s32 ReadCartridgeCharacters(void) {
       }
     }
 
-    /* The nested tests are there to match */
+    /*
+     * The nested tests are there to match: one && chain gives 37 words
+     * differing, 13 in shape
+     */
     if (checkedState == SAVE_CHECKED) {
       if (result == 0) {
         if (save[recordOffset] == RECORD_PRESENT) {
           checkedState = NOT_CHECKED;
 
-          /* Working out the address in storedSum first is there to match */
+          /*
+           * Working out the address in storedSum first is there to match:
+           * working it out in dataAddress gives 20 words differing, 10 in
+           * shape
+           */
           storedSum = save[recordOffset + RECORD_ADDRESS_OFFSET] +
               (save[recordOffset + RECORD_ADDRESS_OFFSET + 1]
                   << BITS_PER_BYTE) -
@@ -3164,7 +3174,11 @@ s32 ReadCartridgeCharacters(void) {
   }
 
   if (transfer->readStep == LastCartridgeReadStep(g_ControllerCount)) {
-    /* Repeating the results for one cartridge is there to match */
+    /*
+     * Repeating the results for one cartridge is there to match: testing
+     * only for an uninitialized one here gives 13 words differing, 7 in
+     * shape
+     */
     if (transfer->openedCartridgeCount == 1) {
       if (transfer->hasUninitializedCartridge == TRUE) {
         return PAK_RESULT_UNINITIALIZED;
