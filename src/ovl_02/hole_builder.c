@@ -3716,7 +3716,9 @@ void GetGroundLightColors(GroundLightColor* light, GroundLightColor* shade) {
  * Holding the trailing row in trailingHeights beside the leading one, for
  * the inner tiles, gives 154 words differing, 14 in shape, against 109 and
  * 23 for indexing heightRows there; the register oracle then gets to 94
- * words forcing 9 pseudos, where it got to 107. 154 words differ, 14 in
+ * words forcing 9 pseudos, where it got to 107. The permuter's best, 134
+ * words (16 in shape), sets heights inside the texel loop, which resets it
+ * for each texel and so changes what is drawn. 154 words differ, 14 in
  * shape.
  */
 #ifdef NON_MATCHING
