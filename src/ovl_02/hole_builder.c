@@ -822,8 +822,7 @@ void DrawBandHeights(s16* heights, s32 band) {
           (texelRow >> HEIGHT_ROW_SPAN_SHIFT) - band * HEIGHT_BAND_ROW_COUNT;
       if (texelRow >= 0 && texelRow < HEIGHT_BAND_ROW_COUNT) {
         height = fromHeight << TEXEL_HEIGHT_FRACTION_BITS;
-        texel = &heights[texelRow * MAP_COLUMN_COUNT];
-        texel += texelColumn;
+        texel = &heights[(texelRow * MAP_COLUMN_COUNT) + texelColumn];
         for (texelIndex = 0; texelIndex <= count; texelIndex++) {
           if (texelColumn >= 0 && texelColumn < MAP_COLUMN_COUNT) {
             value = height >> TEXEL_HEIGHT_FRACTION_BITS;
