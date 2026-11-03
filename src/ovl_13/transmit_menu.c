@@ -759,7 +759,11 @@ void UpdateBringCharacters(void) {
           transfer->screenStep = BRING_CHOOSING;
           transfer->isAccessing = FALSE;
           break;
-        case PAK_RESULT_STILL_READING: /* The empty case is there to match */
+        /*
+         * The empty case is there to match: without it 11 words differ (9 in
+         * shape), and leaving the default early for it 17 (13)
+         */
+        case PAK_RESULT_STILL_READING:
           break;
         case PAK_RESULT_NO_CHARACTERS:
           SetNoticeState(NOTICE_OPENING, NO_CHARACTERS_MESSAGE);
@@ -1933,6 +1937,7 @@ void DrawSendStatusScreen(Gfx** displayListHead, GameBoyTransfer* transfer) {
   s32 index;
   s32 slot;
   s32 pointerRestLeft;
+  s32 pointerLeft;
   s32 pointerSwing;
 
   DrawImportedFaces(&displayList, transfer);
@@ -1991,14 +1996,13 @@ void DrawSendStatusScreen(Gfx** displayListHead, GameBoyTransfer* transfer) {
           TextureAddress(ImageTexels(transfer->pointerImage)), G_IM_FMT_CI,
           POINTER_WIDTH, 0, 0, 0, POINTER_WIDTH - 1, POINTER_IMAGE_HEIGHT - 1,
           0, 0, 0, 0, 0, 0, 0);
-      /* Subtracting the swing in each coordinate is there to match */
       pointerRestLeft =
           (transfer->chosenCartridgeIndex * CONTROLLER_ICON_SPACING) +
           (CONTROLLER_ICONS_LEFT - POINTER_WIDTH);
-      DrawTextureRect(&displayList,
-          QuarterPixels(pointerRestLeft - pointerSwing),
+      pointerLeft = pointerRestLeft - pointerSwing;
+      DrawTextureRect(&displayList, QuarterPixels(pointerLeft),
           QuarterPixels(POINTER_TOP),
-          QuarterPixels(pointerRestLeft - pointerSwing + POINTER_WIDTH),
+          QuarterPixels(pointerLeft + POINTER_WIDTH),
           QuarterPixels(POINTER_TOP + POINTER_HEIGHT), G_TX_RENDERTILE, 0, 0,
           TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     } else if (transfer->screenStep == SEND_STATUS_READY) {
