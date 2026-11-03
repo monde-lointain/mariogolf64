@@ -534,13 +534,17 @@ s32 GetClubSlotsState(void) {
 
 /*
  * Doesn't match: the reel loops' counters take $s3 and $s4 the other way
- * round, the original keeps &asset in $s2 for the face reads where ours
- * rebuilds it from $sp, and the face loop scales playerIndex for its palettes
- * at another point. Each face image is read into faceImage before its texture
- * load, as the original reads it ahead of the call's other arguments; passing
- * the lookups straight to LoadTextureBlock gives 53 words differing, 33 in
- * shape. Reading the second face after the branches gives 55 words differing,
- * 35 in shape. 25 words differ, 7 in shape.
+ * round, &asset and the face loop's scaled playerIndex swap $s1 and $s2, and
+ * the face loop scales playerIndex for its palettes at another point; the
+ * register oracle, forcing those 3 pseudos, leaves 13 words. Each face image
+ * is read into faceImage before its texture load, as the original reads it
+ * ahead of the call's other arguments; passing the lookups straight to
+ * LoadTextureBlock gives 53 words differing, 33 in shape. Reading the second
+ * face after the branches gives 55 words differing, 35 in shape. The next
+ * frame is opened by one call, as the original does; a call in each branch
+ * of the star count's test gives 25 words, 7 in shape, but rebuilds &asset
+ * from $sp for those reads, and the oracle leaves 17 words. 49 words differ,
+ * 3 in shape.
  */
 #ifdef NON_MATCHING
 void DrawClubSlots(Gfx** displayListHead) {
@@ -951,13 +955,10 @@ void DrawClubSlots(Gfx** displayListHead) {
           }
         } else {
           row = f_CharacterFaceRows[g_Players[playerIndex].characterIndex];
-          if (f_StarCount == REEL_COUNT) {
-            OpenEncodedAsset(
-                g_FaceAnimationAssets[row][f_FaceFrameIndex], &asset);
-          } else {
-            OpenEncodedAsset(
-                g_AlternateFaceAnimationAssets[row][f_FaceFrameIndex], &asset);
-          }
+          OpenEncodedAsset((f_StarCount == REEL_COUNT)
+                  ? g_FaceAnimationAssets[row][f_FaceFrameIndex]
+                  : g_AlternateFaceAnimationAssets[row][f_FaceFrameIndex],
+              &asset);
           ReadEncodedAsset(
               f_Slots->faceImages[playerIndex][f_FaceBufferIndex ^ 1], &asset);
           f_FaceBufferIndex ^= 1;
