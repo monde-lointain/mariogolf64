@@ -245,7 +245,8 @@ void DrawLargeTextWithShadow(Gfx** displayListHead, s32 x, s32 y, char* text,
     s32 envColor, s32 primColor, TextFlags flags);
 /*
  * The call leaves out MeasureText's flags, so this file declares its text
- * routines itself rather than including text.h; it is there to match.
+ * routines itself rather than including text.h; it is there to match:
+ * passing the flags gives 5 words differing in DrawGameSaveMenu, 1 in shape.
  */
 #ifdef AVOID_UB
 s32 MeasureText(char* text, s32 fontSize, TextFlags flags);
