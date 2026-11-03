@@ -1409,6 +1409,10 @@ void UpdatePlay(void) {
                   f_HoleEndStep = HOLE_END_STEP_LOAD_RING_SHOT;
                   g_SubModuleState = SUB_MODULE_SWAP_PENDING;
                   g_PendingSubModuleId = MODULE_SAVE_MENU;
+                  /* Past the step's store, to match: setting nextStep here
+                   * instead, before or after the module swap, gives 15 words
+                   * differing, 3 in shape, and each branch setting
+                   * f_HoleEndStep itself 24, 16 in shape */
                   goto DIM_BACKDROP;
                 }
 

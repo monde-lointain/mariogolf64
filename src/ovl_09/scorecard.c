@@ -509,6 +509,9 @@ void StartScorecardTally(s32 layout) {
             g_Players[0].holes[holeIndex].strokes) {
           song = SONG_HOLE_LOST;
         } else {
+          /* A jump to the other branch's halved song, to match: setting the
+           * song here instead gives 16 words differing, 2 in shape, and
+           * setting the halved song before the tests 13, 5 in shape */
           goto HALVED;
         }
       } else {
