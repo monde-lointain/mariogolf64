@@ -227,8 +227,17 @@ void ResetBallSimulations(void) {
  * though the original has abs.s at the slope's two: with fabsf at the spin
  * grip's two uses 767 words differ (243 in shape), at the slope's 1340 (314),
  * at both or inside the helper 1433 (369), and with fabs at the slope 808
- * (240); the helper not inline gives 1408 (354). 769 words differ, 233 in
- * shape.
+ * (240); the helper not inline gives 1408 (354). Those counts were measured
+ * when the draft had 769 words differing, 233 in shape. The pull toward the cup
+ * sets toCup's X before its zero Y, so the zero store follows the cup's X load
+ * as in the original rather than filling the debug text branch's delay slot;
+ * with Y first, 769 words differ (233 in shape). A permuter output reached 760
+ * words (230 in shape) with Y first but the ball's X copied to a fake s32 temp
+ * before it, from 766 (236) without the copy; reverting its fake temp for push
+ * or its move of semi-rough's case label below the friction scaling changes
+ * nothing. On the 769-word draft, setting side's X inside the landing tilt test
+ * gave 766 (236), as did side's three stores, and the gravity's nested if as an
+ * else-if changed nothing. 763 words differ, 227 in shape.
  */
 #ifdef NON_MATCHING
 s32 StepBallSimulation(BallSimulation* simulation) {
@@ -669,9 +678,9 @@ s32 StepBallSimulation(BallSimulation* simulation) {
                       "KURU!", CUP_DEBUG_TEXT_COLUMN, CUP_DEBUG_TEXT_ROW);
                 }
 
-                toCup[AXIS_Y] = 0.0f;
                 toCup[AXIS_X] = g_HoleSetup.cupPosition[AXIS_X] -
                     simulation->position[AXIS_X];
+                toCup[AXIS_Y] = 0.0f;
                 toCup[AXIS_Z] = g_HoleSetup.cupPosition[AXIS_Z] -
                     simulation->position[AXIS_Z];
                 guNormalize(&toCup[AXIS_X], &toCup[AXIS_Y], &toCup[AXIS_Z]);
@@ -1557,8 +1566,8 @@ s32 StepBallSimulation(BallSimulation* simulation) {
         simulation->lastBounceStep = simulation->stepCount;
         spinVelocityX = simulation->spinSpeed * cosf(simulation->spinHeading);
         /*
-         * In its own block, as without it 798 words differ, 230 in shape,
-         * against 769 and 233
+         * In its own block, as without it 792 words differ, 224 in shape,
+         * against 763 and 227
          */
         IN_OWN_BLOCK(spinVelocityZ =
                          simulation->spinSpeed * sinf(simulation->spinHeading));
