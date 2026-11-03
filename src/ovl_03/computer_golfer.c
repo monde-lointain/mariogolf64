@@ -2947,7 +2947,10 @@ Boolean IsLineMostlyLost(CoursePoint from, CoursePoint to) {
  * Doesn't match: ours reads the simulation's state in the loop test from
  * its address, where the original reads it through the register that holds the
  * simulation's address, and the original places the fault report after the
- * surface test. 24 words differ.
+ * surface test. Testing the step count before the outside flag, or the
+ * surface with && gives 30 differing words; nesting its tests, joining them
+ * with || or comparing the state with BALL_STATE_STOPPED changes nothing.
+ * 24 words differ.
  */
 #ifdef NON_MATCHING
 Boolean IsTrialShotSafe(void) {
