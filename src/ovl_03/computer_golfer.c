@@ -2219,8 +2219,13 @@ INCLUDE_RODATA("asm/nonmatchings/ovl_03/computer_golfer", f_SimFaultText);
  *
  * Doesn't match: ours gives some values other saved registers than the
  * original does, and it keeps the address of f_Shot.ballPosition's z in a saved
- * register across the atan2 calls, where the original loads it again.
- * 117 words differ, 43 in shape.
+ * register across the atan2 calls, where the original loads it again, as
+ * reload does for an address that gets no register. The poor landing's sum
+ * takes $v0, so the store waits for the kind tests' reuse of it; the
+ * original's sum is in $v1 and its store comes after them. Reading kind
+ * after the sum, testing surfaceInfo->kind directly, and spelling the tests
+ * out with || or | leave the code as it is. The register oracle, forcing 16
+ * pseudos, leaves 76 words. 117 words differ, 43 in shape.
  */
 #ifdef NON_MATCHING
 s32 StepTrialShot(void) {
