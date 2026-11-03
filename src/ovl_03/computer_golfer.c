@@ -2430,6 +2430,14 @@ s32 StepTrialShot(void) {
         f_TrialEvaluation = POOR_LANDING_EVALUATION;
       }
 
+      /*
+       * A long putt is evaluated even if it holed out. The goto into the
+       * evaluation, to match: a flag set by an if here and tested with the
+       * holed-out one gives 118 words differing, 40 in shape; the flag assigned
+       * this test 125, 39; this test moved into the holed-out one's 107, 39;
+       * and an inline helper for the evaluation, called in both places,
+       * 151, 45.
+       */
       if (g_Players[f_Shot.playerIndex].strokeCount + 1 <
               g_HoleSetup.par + f_HoleTargetToPar &&
           f_HoleTargetToPar > 0 &&
