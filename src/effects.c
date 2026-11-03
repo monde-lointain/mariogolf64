@@ -2179,7 +2179,10 @@ void PlaceRainCenter(void) {
   viewX = g_Cameras[0].view.lookAt[AXIS_X] - g_Cameras[0].view.eye[AXIS_X];
   viewZ = g_Cameras[0].view.lookAt[AXIS_Z] - g_Cameras[0].view.eye[AXIS_Z];
 
-  /* Holding the view's length in scale is there to match */
+  /*
+   * Holding the view's length in scale is there to match: a length local
+   * gives 6 words differing, none in shape
+   */
   scale = sqrtf((viewX * viewX) + (viewZ * viewZ));
   f_RainCenter[0] = viewX;
   f_RainCenter[1] = viewZ;
@@ -2430,7 +2433,11 @@ void DrawRain(Gfx** displayListHead, CameraMatrices* matrices) {
   Gfx* gfx = *displayListHead;
   s32 index;
 
-  /* Separate variables for each loop are there to match */
+  /*
+   * Separate variables for each loop are there to match: drop for the
+   * streaks gives 40 words differing, for the landed drops 26, and for both
+   * 66, none in shape
+   */
   Raindrop* drop;
   Raindrop* streak;
   Raindrop* landedDrop;
@@ -2446,7 +2453,10 @@ void DrawRain(Gfx** displayListHead, CameraMatrices* matrices) {
   if (g_HoleSetup.conditions.isRaining == TRUE &&
       f_Weather == WEATHER_RAIN
 
-      /* Comparing with FALSE is there to match */
+      /*
+       * Comparing with FALSE is there to match: ! gives 8 words differing,
+       * 8 in shape
+       */
       && IsCloseUpCameraMode(g_Cameras[0].mode) == FALSE) {
     UpdateRain();
     for (index = 0; index != f_RaindropCount; index++) {
@@ -2456,7 +2466,11 @@ void DrawRain(Gfx** displayListHead, CameraMatrices* matrices) {
         drop->tailScreenX = point.x * QUARTER_PIXELS_PER_PIXEL;
         drop->tailScreenY = point.y * QUARTER_PIXELS_PER_PIXEL;
 
-        /* Storing the depth before the flags is there to match */
+        /*
+         * Storing the depth before the flags is there to match: the flags
+         * first give 10 words differing (8 in shape), and after the scale 15
+         * (7)
+         */
         drop->tailDepth = point.depth;
         drop->flags &= ~RAINDROP_OFF_SCREEN;
         drop->tailScale = point.scaleX;
@@ -2515,12 +2529,16 @@ void DrawRain(Gfx** displayListHead, CameraMatrices* matrices) {
           gDPSetPrimDepth(gfx++, streak->tailDepth, 0);
           gDPPipeSync(gfx++);
 
-          /* Scaling the lengths in place is there to match */
+          /*
+           * Scaling the lengths in place is there to match: widening locals,
+           * or the products in the vertex words, give 34 words differing,
+           * none in shape
+           */
           lengthY *= widthScale;
+          lengthX *= widthScale;
           gSPModifyVertex(gfx++, 0, G_MWO_POINT_XYSCREEN,
               ScreenPointWord(
                   streak->headScreenX + (s32)lengthY, streak->headScreenY));
-          lengthX *= widthScale;
           gSPModifyVertex(gfx++, 1, G_MWO_POINT_XYSCREEN,
               ScreenPointWord(
                   streak->headScreenX, streak->headScreenY + (s32)lengthX));
