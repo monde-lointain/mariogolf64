@@ -2240,14 +2240,16 @@ void UpdateAnimationViewer(void) {
  * the step. The second cse pass shares the spin test's address with the
  * subtraction; testing the step's quotient in the clamp instead of setting the
  * step, as the permuter's best does (35 words, 15 in shape), reads it again as
- * the original does, but leaves the step unset. Setting the step in both arms
- * of the clamp or in a ternary gives 55 to 74 words, and moving the barrier
- * past the clamp changes nothing. The B button's path reads the previous
- * player's character before clearing their choices, and clears the controller
- * before the character, as the original stores them (64 words, 24 in shape,
- * reading it in the store). The register oracle, forcing 5 pseudos' registers,
- * leaves 31 words at best, so the code differs too. 52 words differ, 18 in
- * shape.
+ * the original does, but leaves the step unset. A later run's best does the
+ * same with 23 words, 9 in shape. Setting the direction before the step gives
+ * 54 words, 18 in shape, setting the step in the clamp's test 60, and a barrier
+ * before the subtraction 52 or 54. Setting the step in both arms of the clamp
+ * or in a ternary gives 55 to 74 words, and moving the barrier past the clamp
+ * changes nothing. The B button's path reads the previous player's character
+ * before clearing their choices, and clears the controller before the
+ * character, as the original stores them (64 words, 24 in shape, reading it in
+ * the store). The register oracle, forcing 5 pseudos' registers, leaves 31
+ * words at best, so the code differs too. 52 words differ, 18 in shape.
  */
 #ifdef NON_MATCHING
 void UpdateModeSelect(void) {
@@ -2562,8 +2564,8 @@ void UpdateModeSelect(void) {
   if (Abs(g_MenuMemory.modeSpin) != 0) {
     step = AmountPerMode(MODE_SELECT_SPIN_SPEED);
     direction = g_MenuMemory.modeSpin < 0 ? -1 : 1;
-    /* The clamp starts a block of its own, to match (without it 71 words
-     * differ, 27 in shape); writing the direction as an if-else, either way
+    /* The clamp starts a block of its own, to match (without it 59 words
+     * differ, 21 in shape); writing the direction as an if-else, either way
      * round, or clamping first doesn't */
     END_BASIC_BLOCK();
     if (step == 0) {
