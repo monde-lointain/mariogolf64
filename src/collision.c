@@ -3040,10 +3040,12 @@ s32 PushBallOutOfWalls(BallSimulation* simulation, s32 checksHeight) {
 
 #else
 INCLUDE_ASM("asm/nonmatchings/collision", PushBallOutOfWalls);
-INCLUDE_RODATA("asm/nonmatchings/collision", f_WallUghText);
-INCLUDE_RODATA("asm/nonmatchings/collision", f_WallInsideOutCornerText);
-INCLUDE_RODATA("asm/nonmatchings/collision", f_WallInsideOutTwoText);
-INCLUDE_RODATA("asm/nonmatchings/collision", f_WallInsideOutText);
+RESUME_RODATA_SECTION();
+static const char f_WallUghText[] = "うっ\n";
+static const char f_WallInsideOutCornerText[] = "WallInsideOutCorner!\n";
+static const char f_WallInsideOutTwoText[] = "WallInsideOut2!\n";
+static const char f_WallInsideOutText[] = "WallInsideOut!\n";
+static const char f_UnusedWallText[3][4] = {"", "", ""};
 #endif
 
 /*
