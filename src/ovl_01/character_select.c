@@ -1721,7 +1721,10 @@ void DrawCharacterGridCursor(Gfx** displayListHead, s32 x, s32 y);
  * grid cursor of the player choosing.
  * Doesn't match: 2 words differ, 2 in shape. The original subtracts the
  * cursor's left shift after both multiplies, where ours subtracts it right
- * after the column's; computing the top first costs 23 words.
+ * after the column's; computing the top first costs 23 words. The register
+ * oracle finds nothing to force: the closest it reaches is these 2 words with
+ * no register forced, so the difference is in the code, not the allocation; the
+ * subtraction is insn 1096, from the RTL expander and changed by cse.
  *
  * The cursor's cell is read into column and row first: computed from the
  * grid arrays in place, the row's offset folds into the call and 5 words
