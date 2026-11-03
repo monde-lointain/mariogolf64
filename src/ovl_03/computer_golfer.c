@@ -1146,7 +1146,7 @@ s32 GetScoreToParSoFar(s32 playerIndex) {
 
   for (hole = 0; hole < g_GameState.holeIndex; hole++) {
     strokes = g_Players[playerIndex].holes[hole].strokes;
-    par = (s8)g_CourseRecords[g_GameState.courseIndex].holes[hole].par;
+    par = g_CourseRecords[g_GameState.courseIndex].holes[hole].par;
     if ((par * 2) + 1 < strokes) {
       strokes = par - 1;
     }
@@ -1280,8 +1280,7 @@ s32 ChooseHoleStrokeTarget(void) {
   for (index = 0; index < COURSE_HOLE_COUNT; index++) {
     handicaps[index] =
         g_CourseRecords[g_GameState.courseIndex].holes[index].handicap;
-    strokes[index] =
-        (s8)g_CourseRecords[g_GameState.courseIndex].holes[index].par;
+    strokes[index] = g_CourseRecords[g_GameState.courseIndex].holes[index].par;
     holes[index] = index;
   }
 
@@ -1437,7 +1436,7 @@ s32 ChooseHoleStrokeTarget(void) {
   for (index = 0; index < COURSE_HOLE_COUNT; index++) {
     if (holes[index] >= g_GameState.holeIndex) {
       plannedLeftToPar += strokes[index] -
-          (s8)g_CourseRecords[g_GameState.courseIndex].holes[holes[index]].par;
+          g_CourseRecords[g_GameState.courseIndex].holes[holes[index]].par;
     }
   }
 
@@ -1503,7 +1502,7 @@ s32 ChooseHoleStrokeTarget(void) {
   osSyncPrintf("OS => ");
   for (index = 0; index < COURSE_HOLE_COUNT; index++) {
     osSyncPrintf(
-        " %d", (s8)g_CourseRecords[g_GameState.courseIndex].holes[index].par);
+        " %d", g_CourseRecords[g_GameState.courseIndex].holes[index].par);
   }
 
   osSyncPrintf("\n");
@@ -1519,7 +1518,7 @@ s32 ChooseHoleStrokeTarget(void) {
 #ifdef AVOID_UB
   return g_HoleSetup.par;
 #else
-  return (s8)g_CourseRecords[g_GameState.courseIndex].holes[index].par;
+  return g_CourseRecords[g_GameState.courseIndex].holes[index].par;
 #endif
 }
 

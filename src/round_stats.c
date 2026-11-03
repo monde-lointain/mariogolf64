@@ -69,9 +69,8 @@ s32 GetNetScoreToPar(s32 endHole, s32 playerIndex) {
   }
 
   for (hole = GetFirstHoleIndex(); hole < endHole; hole++) {
-    /* The par's cast is there to match */
     score += g_Players[playerIndex].holes[hole].strokes -
-        (s8)course->holes[hole].par +
+        course->holes[hole].par +
         GetHandicapOffset(
             g_GameState.courseIndex, hole, g_Players[playerIndex].handicap);
   }
@@ -453,7 +452,7 @@ void RecordCourseRound(void) {
   record->puttTotal = total;
 
   for (hole = 0; hole != COURSE_HOLE_COUNT; hole++) {
-    if (g_Players[0].holes[hole].strokes <= (s8)course->holes[hole].par) {
+    if (g_Players[0].holes[hole].strokes <= course->holes[hole].par) {
       if (record->parOrBetterCount < RECORD_TOTAL_LIMIT) {
         record->parOrBetterCount++;
       }
@@ -468,7 +467,7 @@ void RecordCourseRound(void) {
   for (hole = 0; hole != COURSE_HOLE_COUNT; hole++) {
     shotsToGreen =
         g_Players[0].holes[hole].strokes - g_Players[0].holes[hole].putts;
-    if ((s8)course->holes[hole].par - shotsToGreen >= PAR_ON_SPARE_STROKES) {
+    if (course->holes[hole].par - shotsToGreen >= PAR_ON_SPARE_STROKES) {
       if (record->parOnCount < RECORD_TOTAL_LIMIT) {
         record->parOnCount++;
       }

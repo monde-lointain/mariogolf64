@@ -659,7 +659,7 @@ HALVED:
         CourseRecord* course = &g_CourseRecords[GetCourseRecordIndex()];
 
         if (g_Players[i].holes[g_Scorecard.content.holeIndex - 1].strokes -
-                (s8)course->holes[g_Scorecard.content.holeIndex - 1].par +
+                course->holes[g_Scorecard.content.holeIndex - 1].par +
                 GetHandicapOffset(g_GameState.courseIndex,
                     g_Scorecard.content.holeIndex - 1, g_Players[i].handicap) <=
             0) {

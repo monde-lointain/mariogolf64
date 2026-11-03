@@ -67,7 +67,7 @@ extern s32 g_CourseNamePrimColors[];
 #define TOURNAMENT_NAME_SIZE 25
 
 typedef struct HoleRecord {
-  /* 0x0 */ u8 par;
+  /* 0x0 */ s8 par;
   /* 0x1 */ s8 handicap; /* Ranks a course's holes from 1 to 18 */
   /* 0x2 */ u16 yardages[3]; /* The three are equal in every hole */
   /* 0x8 */ u8 flags;
