@@ -237,12 +237,13 @@ void ResetBallSimulations(void) {
  * or its move of semi-rough's case label below the friction scaling changes
  * nothing. On the 769-word draft, setting side's X inside the landing tilt test
  * gave 766 (236), as did side's three stores, and the gravity's nested if as an
- * else-if changed nothing. The register oracle, forcing 126 pseudos' registers,
- * leaves 425 words at best, so the code differs too. A permuter output gaining
- * 1 word (5 in shape) normalizes the triangle's normal after both of the hit's
- * surface branches, but the original's club-test branch jumps past that call
- * and the other skips it unless the surface is green or green edge, so the
- * output's call changes what the code does. 763 words differ, 227 in shape.
+ * else-if changed nothing. On the 763-word draft, the register oracle, forcing
+ * 126 pseudos' registers, left 425 words at best, so the code differs too, and
+ * a permuter output gaining 1 word (5 in shape) normalized the triangle's
+ * normal after both of the hit's surface branches, but the original's club-test
+ * branch jumps past that call and the other skips it unless the surface is
+ * green or green edge, so the output's call changes what the code does. 749
+ * words differ, 225 in shape.
  */
 #ifdef NON_MATCHING
 s32 StepBallSimulation(BallSimulation* simulation) {
@@ -381,7 +382,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
     hitsHoleTriangle = FALSE;
     /*
      * The goto, to match: the rest of the step in an if on the ball not having
-     * stopped gives 1255 words differing, 227 in shape, against 763 and 227.
+     * stopped gives 1241 words differing, 225 in shape, against 749 and 225.
      */
     if (simulation->state == BALL_STATE_STOPPED) {
       goto SETTLE;
@@ -1204,8 +1205,15 @@ s32 StepBallSimulation(BallSimulation* simulation) {
                   fabsf(impactSpeed))) {
         simulation->state = BALL_STATE_IN_WATER;
         impactSpeed = 0.0f;
-        velocity[AXIS_X] =
-            velocity[AXIS_X] * WATER_ENTRY_DRAG * WATER_ENTRY_DRAG;
+        /*
+         * Twice, to match: under -ffast-math, fold-const reassociates one
+         * expression's two products into a product by 0.04f, where the
+         * original multiplies by 0.2f twice. As one expression, in any order
+         * or with the drags' product grouped, 763 words differ, 227 in shape,
+         * against 749 and 225.
+         */
+        velocity[AXIS_X] *= WATER_ENTRY_DRAG;
+        velocity[AXIS_X] *= WATER_ENTRY_DRAG;
       }
 
       softness =
@@ -1579,8 +1587,8 @@ s32 StepBallSimulation(BallSimulation* simulation) {
         simulation->lastBounceStep = simulation->stepCount;
         spinVelocityX = simulation->spinSpeed * cosf(simulation->spinHeading);
         /*
-         * In its own block, as without it 792 words differ, 224 in shape,
-         * against 763 and 227
+         * In its own block, as without it 778 words differ, 222 in shape,
+         * against 749 and 225
          */
         IN_OWN_BLOCK(spinVelocityZ =
                          simulation->spinSpeed * sinf(simulation->spinHeading));
