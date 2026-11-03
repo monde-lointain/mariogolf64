@@ -2310,7 +2310,7 @@ INCLUDE_ASM("asm/nonmatchings/collision", FindHoleTriangleHit);
  * passes an end of it is moved back to where it reaches the end. A hit
  * near or below the ground counts whatever the edges say.
  *
- * Doesn't match: 418 words differ, 72 in shape. The reach test is compared with
+ * Doesn't match: 204 words differ, 66 in shape. The reach test is compared with
  * FALSE, as the original ands the macro's crossing tests before branching:
  * negated with !, fold rewrites it into xori and or chains (563 words, when the
  * draft had 535). Nesting the rest of the loop under the plain test gave the
@@ -2322,7 +2322,10 @@ INCLUDE_ASM("asm/nonmatchings/collision", FindHoleTriangleHit);
  * the result. The original works out the ball's height before calling
  * GetGroundHeight, so the height is the comparison's first operand; with the
  * call first, 535 words differed (85), and a local for the height gives the
- * same 418.
+ * same 418. The original converts each hit point to a float again in each of
+ * its two corner tests, IsLessThanCorners and IsMoreThanCorners; converting it
+ * once into a float local, as the draft did, gave 418 words (72 in shape), or
+ * 415 (69) and 381 (69) passing only one of the two hit points directly.
  */
 #ifdef NON_MATCHING
 s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
@@ -2350,7 +2353,6 @@ s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
   f32 farEnd;
   f32 nearestCorner;
   f32 cornerDistance;
-  f32 hitU;
   f32 nearEnd;
   s32 hitPointU;
   s32 hitPointV;
@@ -2631,12 +2633,11 @@ s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
           cornersV[1] * WORLD_TO_COURSE_SCALE,
           cornersV[2] * WORLD_TO_COURSE_SCALE);
       osSyncPrintf("xxc[%d]zzc[%d]\n", hitPointU, hitPointV);
-      hitU = hitPointU;
-      if (IsLessThanCorners(hitU, cornersU)) {
+      if (IsLessThanCorners(hitPointU, cornersU)) {
         continue;
       }
 
-      if (IsMoreThanCorners(hitU, cornersU)) {
+      if (IsMoreThanCorners(hitPointU, cornersU)) {
         continue;
       }
     } else if (facing == TRIANGLE_FACING_X) {
@@ -2783,12 +2784,11 @@ s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
           cornersU[1] * WORLD_TO_COURSE_SCALE,
           cornersU[2] * WORLD_TO_COURSE_SCALE);
       osSyncPrintf("xxc[%d]zzc[%d]\n", hitPointU, hitPointV);
-      hitU = hitPointV;
-      if (IsLessThanCorners(hitU, cornersV)) {
+      if (IsLessThanCorners(hitPointV, cornersV)) {
         continue;
       }
 
-      if (IsMoreThanCorners(hitU, cornersV)) {
+      if (IsMoreThanCorners(hitPointV, cornersV)) {
         continue;
       }
     } else {
