@@ -2213,8 +2213,12 @@ void DrawBallTrail(Gfx** displayListHead, CameraMatrices* matrices) {
           deltaX = f_BallTrailPoints[i].x - f_BallTrailPoints[i + 1].x;
           deltaY = f_BallTrailPoints[i].y - f_BallTrailPoints[i + 1].y;
 
-          /* The empty branch for a segment of no length is there to match */
-          if ((deltaX == 0.0f) & (deltaY == 0.0f)) {
+          /*
+           * The empty branch for a segment of no length is there to match:
+           * testing for a nonzero delta, with || or | or by negating the
+           * test, doesn't match
+           */
+          if (deltaX == 0.0f && deltaY == 0.0f) {
           } else {
             scale = BALL_TRAIL_HALF_WIDTH /
                 sqrtf((deltaX * deltaX) + (deltaY * deltaY));
