@@ -3154,7 +3154,7 @@ void UpdateTurns(void) {
 
   /* The turn controller's stick X, which left and right on the control pad tilt
    * fully */
-  s8 GetTurnStickX(void) {
+  s32 GetTurnStickX(void) {
     s32 x = (g_TurnController.buttons & L_JPAD) ? -DPAD_STICK_TILT : 0;
 
     if (g_TurnController.buttons & R_JPAD) {
@@ -3170,7 +3170,7 @@ void UpdateTurns(void) {
 
   /* The turn controller's stick Y, which down and up on the control pad tilt
    * fully */
-  s8 GetTurnStickY(void) {
+  s32 GetTurnStickY(void) {
     s32 y = (g_TurnController.buttons & D_JPAD) ? -DPAD_STICK_TILT : 0;
 
     if (g_TurnController.buttons & U_JPAD) {
