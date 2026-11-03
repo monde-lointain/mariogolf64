@@ -51,6 +51,9 @@
 #define PUTT_STEP_COUNT 30
 /* A generated putt is aimed this many world units past its target */
 #define PUTT_OVERSHOOT 0x600
+/* The initial power estimate is truncated before dividing. */
+#define PUTT_POWER_ESTIMATE_SCALE 130.048f
+#define PUTT_POWER_ESTIMATE_DIVISOR 3
 #define PUTT_TEST_SURFACE 4
 
 /* The size of WriteClubParameters' text */
@@ -1291,17 +1294,6 @@ void InitClubs(void) {
  * MAX_LAUNCH_POWER, of the shot mode's reach. With GAME_FLAG_GENERATE_CLUBS
  * set, it is found by test-firing the first set's putter instead.
  * InterpolatePuttPower is a nested function, a GNU C extension.
- *
- * Doesn't match: the original copies shotMode to $fp before the flag test
- * and uses the copy only when test-firing, and it schedules the conversion of
- * fraction later. Copying shotMode to a local at the start of the test path
- * reproduces the copy (89 words differ, 19 in shape), and forcing 14 pseudos
- * to the original's registers then leaves 19. The permuter's best output
- * (65 words, 15 in shape) computes both products of reach early in new_var
- * temporaries and adds the overshoot in a second statement; a named local
- * for the target's product gives 96 to 118, and reordering the putter's
- * power, the target distance and the clears 94 to 116. 94 words differ, 22
- * in shape.
  */
 #ifdef NON_MATCHING
 s32 GetPuttPower(s32 fraction, ShotMode shotMode) {
@@ -1317,6 +1309,8 @@ s32 GetPuttPower(s32 fraction, ShotMode shotMode) {
   s32 step;
   s32 index;
   f32 reach;
+  f32 distancePerPower;
+  s32 initialPowerNumerator;
   f32 error;
   s32 power;
 
@@ -1342,16 +1336,17 @@ s32 GetPuttPower(s32 fraction, ShotMode shotMode) {
   f_PutterTestShot.shotMode = shotMode;
   putter = &g_Clubs[CLUB_TYPE_PUTTER];
   reach = GetShotDistance(putter, shotMode);
+  distancePerPower = reach * (UNITS_PER_FOOT / MAX_LAUNCH_POWER);
+  initialPowerNumerator = (s32)(reach * PUTT_POWER_ESTIMATE_SCALE);
   shortDistance = 0;
   shortPower = 0;
   longDistance = 0;
   longPower = 0;
   tryIndex = 0;
   g_ClubTestMode = CLUB_TEST_PUTT;
-  targetDistance =
-      (s32)(reach * (UNITS_PER_FOOT / MAX_LAUNCH_POWER) * fraction) +
-      PUTT_OVERSHOOT;
-  putter->power[shotMode] = (s32)(reach * 130.048f) / 3;
+  targetDistance = (s32)(distancePerPower * fraction);
+  targetDistance += PUTT_OVERSHOOT;
+  putter->power[shotMode] = initialPowerNumerator / PUTT_POWER_ESTIMATE_DIVISOR;
   for (; tryIndex < MAX_PUTT_TRY_COUNT; tryIndex++) {
     simulation.position[AXIS_X] = 0;
     simulation.position[AXIS_Y] = 0;
