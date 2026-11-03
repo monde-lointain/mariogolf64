@@ -2950,8 +2950,11 @@ Boolean IsLineMostlyLost(CoursePoint from, CoursePoint to) {
  * surface test. Testing the step count before the outside flag, or the
  * surface with && gives 30 differing words; nesting its tests, joining them
  * with || or comparing the state with BALL_STATE_STOPPED changes nothing.
- * The permuter's best, 15 words, prints the TRUE message for a water hazard
- * too and falls off the end without a return. 24 words differ.
+ * The original reaches its TRUE message by a jump past the fault report; a
+ * switch on the kind, a goto to a closing TRUE block, an else for the TRUE
+ * case or a safe flag give 24 to 31 words, and a pointer to the simulation
+ * 32 to 39. The permuter's best, 15 words, prints the TRUE message for a
+ * water hazard too and falls off the end without a return. 24 words differ.
  */
 #ifdef NON_MATCHING
 Boolean IsTrialShotSafe(void) {
