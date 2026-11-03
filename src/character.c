@@ -1947,7 +1947,10 @@ void SetCharacterLights(void) {
  * Doesn't match: for the reaction light's fallback, the original addresses the
  * lights' first light from the table plus 8, adding the index's offset to
  * that, where ours adds the offset to the table first. Without IN_OWN_BLOCK
- * it's 99 words, 15 in shape. 71 words differ, 7 in shape.
+ * it's 99 words, 15 in shape. Choosing the table first and making one
+ * AddReactionLight call gives 117 words, 21 in shape (89 and 13 with the
+ * block), and keeping a pointer to the chosen lights 174 to 186. 71 words
+ * differ, 7 in shape.
  */
 #ifdef NON_MATCHING
 void DrawCharacter(u32 slotIndex) {
