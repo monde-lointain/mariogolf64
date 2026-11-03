@@ -2166,15 +2166,7 @@ void PlaceRainCenter(void) {
  * Places a raindrop at a random spot above the area around the rain's center,
  * moved back along the rain's path by as far as it drifts while falling to just
  * below the camera.
- *
- * Doesn't match: from the head's z drift on, the instructions are scheduled
- * differently. The original reloads each head coordinate for the tail, as
- * ours does when the field resets come between them, but that order schedules
- * further from it; none of the 180 orders of these statements does better.
- * Adding the head's x to its drift, rather than the drift to it, takes 35
- * words differing to 27, 11 in shape.
  */
-#ifdef NON_MATCHING
 void ResetRaindrop(Raindrop* drop) {
   f32 fallFrameCount;
 
@@ -2195,18 +2187,15 @@ void ResetRaindrop(Raindrop* drop) {
   drop->head[AXIS_Y] += g_Cameras[0].view.eye[AXIS_Y] + RAIN_TOP_BELOW_EYE;
   drop->head[AXIS_X] += f_RainVelocity[AXIS_X] * fallFrameCount;
   drop->head[AXIS_Z] += f_RainVelocity[AXIS_Z] * fallFrameCount;
+  drop->tail[AXIS_X] = drop->head[AXIS_X] + (f_RainDriftX * RAINDROP_LENGTH);
   drop->tail[AXIS_Z] = drop->head[AXIS_Z] + (f_RainDriftZ * RAINDROP_LENGTH);
-  drop->tail[AXIS_X] = (f_RainDriftX * RAINDROP_LENGTH) + drop->head[AXIS_X];
   drop->tail[AXIS_Y] = drop->head[AXIS_Y] + RAINDROP_LENGTH;
   drop->groundHeight = 0;
-  drop->flags = 0;
   drop->landedFrameCount = RAINDROP_FALLING;
+  drop->flags = 0;
   drop->splashColumn = 0;
   drop->tailScale = 1.0f;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/effects", ResetRaindrop);
-#endif
 
 /* Moves a splash to a random spot on the ground around the rain's center */
 void ResetRainSplash(RainSplash* splash) {
