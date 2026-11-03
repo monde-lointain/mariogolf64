@@ -564,19 +564,17 @@ void DrawAimGuides(CameraMatrices* matrices) {
 
       /* The sign fades with distance, except on PAUSE_SCREEN_FREE_LOOK */
       if (g_PauseScreen == PAUSE_SCREEN_FREE_LOOK) {
-        goto OPAQUE;
-      }
-
-      alpha = SIGN_MIN_ALPHA;
-      if (depth >= SIGN_FADE_START_DEPTH) {
-        if (depth >= SIGN_FADE_END_DEPTH) {
-OPAQUE:
-
-          alpha = 255;
-        } else {
-          alpha = ((depth - SIGN_FADE_START_DEPTH) * SIGN_FADE_ALPHA_RANGE /
-                      SIGN_FADE_DEPTH_RANGE) +
-              SIGN_MIN_ALPHA;
+        alpha = 255;
+      } else {
+        alpha = SIGN_MIN_ALPHA;
+        if (depth >= SIGN_FADE_START_DEPTH) {
+          if (depth >= SIGN_FADE_END_DEPTH) {
+            alpha = 255;
+          } else {
+            alpha = ((depth - SIGN_FADE_START_DEPTH) * SIGN_FADE_ALPHA_RANGE /
+                        SIGN_FADE_DEPTH_RANGE) +
+                SIGN_MIN_ALPHA;
+          }
         }
       }
 
