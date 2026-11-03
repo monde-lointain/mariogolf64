@@ -2188,7 +2188,10 @@ void DrawBallTrail(Gfx** displayListHead, CameraMatrices* matrices) {
       guMtxIdent(&f_BallTrailMatrix);
       gDPPipeSync(gfx++);
       gDPPipeSync(gfx++);
-      /* Through a pointer of its own, to match */
+      /*
+       * Through a pointer of its own, to match: gfx++ in the macro gives 8
+       * words differing, none in shape
+       */
       cycleTypeCommand = gfx++;
       gDPSetCycleType(cycleTypeCommand, G_CYC_1CYCLE);
       gSPClearGeometryMode(gfx++, 0xFFFFFFFF);
