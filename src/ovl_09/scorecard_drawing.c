@@ -2016,10 +2016,10 @@ INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard_drawing", DrawLeaderboardPage);
  * hole numbers, a row of pars and a row for each player
  */
 /*
- * Some tests compare it with FALSE rather than negate it, to match:
- * negating all four gives 799 words differing (251 in shape), against
- * DrawScoresPage's 762 (212), and negating any one 770 to 773 (220 to
- * 223). The one negated test compared with FALSE gives 770 (220).
+ * Some tests compare it with FALSE rather than negate it, to match: negating
+ * all four gave 799 words differing (251 in shape), against DrawScoresPage's
+ * 762 (212) at the time, and negating any one 770 to 773 (220 to 223). The one
+ * negated test compared with FALSE gave 770 (220).
  */
 #define IsMatchPlayMode() \
   (g_GameState.gameMode == GAME_MODE_MATCH_GAME || \
@@ -2149,10 +2149,12 @@ INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard_drawing", DrawLeaderboardPage);
  * standing's non-even branch, which leaves it unset at its earlier uses and for
  * an even standing; the original loads 137 as a constant at each use, so
  * backTop is 137 on every path there. With backTop set at its declaration
- * again, the output gives 768 (218); its other change, a temp for one texture
- * rectangle's top, 56 below the card's, gives 842 (194) without it. The
- * register oracle, forcing 45 pseudos' registers, leaves 628 words at best, so
- * the code differs too. 762 words differ, 212 in shape.
+ * again, the output gave 768 (218); its other change, a temp for one texture
+ * rectangle's top, 56 below the card's, gave 842 (194) without it. The register
+ * oracle, forcing 45 pseudos' registers, leaves 628 words at best, so the code
+ * differs too. The faded style sets the cells' alpha after its commands, as the
+ * yellow style does; set first, 762 words differed (212 in shape). 760 words
+ * differ, 210 in shape.
  */
 #ifdef NON_MATCHING
 void DrawScoresPage(Gfx** displayListHead) {
@@ -2213,7 +2215,6 @@ void DrawScoresPage(Gfx** displayListHead) {
       cellAlpha = 0xFF;
       break;
     case SCORES_STYLE_FADED:
-      cellAlpha = 0x9F;
       gDPSetEnvColor(gfx++, 0, 0x3F, 0, 0xFF);
       gDPSetBlendColor(gfx++, 0, 0, 0, 0x40);
       gDPPipeSync(gfx++);
@@ -2221,6 +2222,7 @@ void DrawScoresPage(Gfx** displayListHead) {
       gDPSetCombineLERP(gfx++, PRIMITIVE, ENVIRONMENT, TEXEL0, ENVIRONMENT, 0,
           0, 0, PRIMITIVE, PRIMITIVE, ENVIRONMENT, TEXEL0, ENVIRONMENT, 0, 0, 0,
           PRIMITIVE);
+      cellAlpha = 0x9F;
       break;
     case SCORES_STYLE_OPAQUE:
       /* The cells are opaque, so the original leaves their alpha unset */
