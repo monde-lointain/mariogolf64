@@ -68,10 +68,12 @@
   texelPairs[((row) * HALF_TURN_PAIRS_PER_ROW) + (column)]
 /*
  * Marks the eight octants' points two rows deep, then steps the circle.
- * The offsets are clamped to keep the points on the picture.
+ * The offsets are clamped to keep the points on the picture. This and
+ * MarkOctantPoints are plain blocks: as do { } while (0), each gives GCC's
+ * loop pass another loop, and 370 to 396 words differ, against 108.
  */
 #define MarkCirclePoints(operation) \
-  do { \
+  { \
     radiusOffset = radius; \
     stepOffset = step; \
     if (radius > HALF_TURN_LAST_COLUMN_OFFSET) { \
@@ -90,20 +92,20 @@
       stepOffset = HALF_TURN_LAST_COLUMN_OFFSET; \
     } \
     MarkOctantPoints(stepOffset, radiusOffset, operation); \
-    error = error - 1 - (step * 2); \
+    error -= (step * 2) + 1; \
     if (error < 0) { \
       error += (radius - 1) * 2; \
       radius--; \
     } \
     step++; \
-  } while (0)
+  }
 /*
  * operation is the rest of an assignment, such as |= HALF_TURN_ALPHA_BITS,
  * which parentheses would break.
  */
 /* NOLINTBEGIN(bugprone-macro-parentheses) */
 #define MarkOctantPoints(column, row, operation) \
-  do { \
+  { \
     HALF_TURN_PAIR(centerColumn + (column), centerRow + (row)) operation; \
     HALF_TURN_PAIR(centerColumn + (column), centerRow - (row)) operation; \
     HALF_TURN_PAIR(centerColumn + (column), centerRow + (row) + 1) operation; \
@@ -112,7 +114,7 @@
     HALF_TURN_PAIR(centerColumn - (column), centerRow - (row)) operation; \
     HALF_TURN_PAIR(centerColumn - (column), centerRow + (row) + 1) operation; \
     HALF_TURN_PAIR(centerColumn - (column), centerRow - (row) + 1) operation; \
-  } while (0)
+  }
 /* NOLINTEND(bugprone-macro-parentheses) */
 
 enum HalfTurnState {
@@ -837,7 +839,14 @@ void MarkHalfTurnCircle(
  * showing the bits are cleared, which reveals the texels; otherwise they
  * are set, which hides them again.
  *
- * Doesn't match: 222 words differ.
+ * Doesn't match: the loop-invariant alpha mask takes $t0 ahead of
+ * radiusOffset, as their priorities are close (12790 against 12698); the
+ * oracle matches with the two masks and radiusOffset forced. Subtracting
+ * error's step as (step * 2) + 1 keeps the loop pass from making it an
+ * induction variable, which error - 1 - (step * 2) lets it do (192 words).
+ * Other declaration orders give 108 to 264 words, clamp and step orders 108
+ * to 264, and column and row offsets in place of radiusOffset and stepOffset
+ * 330. 108 words differ.
  */
 #ifdef NON_MATCHING
 void MarkHalfTurnCircle(
