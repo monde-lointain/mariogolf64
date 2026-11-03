@@ -762,15 +762,18 @@ enum BallSprite {
 
 /*
  * Doesn't match: 834 words differ, 142 in shape. The original's reload spills
- * the divide by 9's constant first, to 0x54($sp), and the depth in
- * pseudo 87 later, so its spill slots come in another order and the display
- * list pointers take other registers. Updating f_UnusedBallFrame ahead of
- * the display list, rather than after f_BallRollFrame, cuts 1220 words
- * differing to 834; updating f_BallRollFrame anywhere else gives 822 to
- * 1633 words, 158 or more in shape. The original aligns the Pika ball
- * texture's address to 8 bytes, as TextureAddress does; without that, 894
- * words differ, 152 in shape. Forcing the original's registers gives 1113
- * words or more, so the code itself differs.
+ * the divide by 9's constant first, to 0x54($sp), and the depth in pseudo 87
+ * later, so its spill slots come in another order and the display list pointers
+ * take other registers. Updating f_UnusedBallFrame ahead of the display list,
+ * rather than after f_BallRollFrame, cuts 1220 words differing to 834; updating
+ * f_BallRollFrame anywhere else gives 822 to 1633 words, 158 or more in shape.
+ * The original aligns the Pika ball texture's address to 8 bytes, as
+ * TextureAddress does; without that, 894 words differ, 152 in shape. Forcing
+ * the original's registers gives 1113 words or more, so the code itself
+ * differs. The afterimages' loop tests i != f_BallAfterimageLength, as the
+ * original's bne against the reloaded length shows; with < it compiles to slt
+ * and bnez, and the draft had 834 words differing, 142 in shape, where it now
+ * has 911, 137 in shape.
  */
 #ifdef NON_MATCHING
 void DrawGolfBalls(CameraMatrices* matrices UNUSED) {
@@ -1216,7 +1219,7 @@ void DrawGolfBalls(CameraMatrices* matrices UNUSED) {
     gDPSetCombineLERP(gfx++, PRIMITIVE, 0, TEXEL0, ENVIRONMENT, PRIMITIVE, 0,
         TEXEL0, 0, PRIMITIVE, 0, TEXEL0, ENVIRONMENT, PRIMITIVE, 0, TEXEL0, 0);
     gDPSetEnvColor(gfx++, 0x00, 0x00, 0x80, 0x1E);
-    for (i = 0; i < f_BallAfterimageLength; i++) {
+    for (i = 0; i != f_BallAfterimageLength; i++) {
       BallAfterimage* afterimage = &f_BallAfterimages[i];
 
       if (afterimage->alpha > 0) {
