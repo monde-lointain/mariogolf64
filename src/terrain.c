@@ -666,8 +666,11 @@ f32 ConvertToFloat(s32 value) {
  * the steps give more: comparing each plus one 32 words (10 in shape), still
  * with a bne, their sum 33 (13), their product 37 (19), pairs of sign tests 38
  * (18), pairs of -1 and 1 tests 42 (24), and comparing which halves the
- * fractions are in 63 (17); XORing them changes nothing. 30 words differ, 12 in
- * shape.
+ * fractions are in 63 (17); XORing them changes nothing. The best weight's loop
+ * tests i < NEAREST_CODE_COUNT - 1, as the original's slti shows; with != it
+ * compiles to a bne against a register holding the bound, 30 words (12 in
+ * shape), and with < the index takes $s0 where the original's takes $v1. 34
+ * words differ, 8 in shape.
  */
 #ifdef NON_MATCHING
 Surface FindSurface(s32 x, s32 z, Boolean lowersWaterLevel) {
@@ -854,7 +857,7 @@ Surface FindSurface(s32 x, s32 z, Boolean lowersWaterLevel) {
 
   /* The last code's weight has gone to another's or been dropped */
   bestWeight = 0.0f;
-  for (i = 0; i != NEAREST_CODE_COUNT - 1; i++) {
+  for (i = 0; i < NEAREST_CODE_COUNT - 1; i++) {
     if (bestWeight < weights[i]) {
       bestIndex = i;
       bestWeight = weights[i];
