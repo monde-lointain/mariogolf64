@@ -1602,9 +1602,13 @@ void DrawOffLabel(Gfx** displayListHead, s32 x, s32 y) {
  * Draws the green left and right arrows either side of a width centered on a
  * point, switching their blink frame every SIDE_ARROW_BLINK_FRAME_COUNT calls
  *
- * Doesn't match: the original's frame is 8 bytes smaller, and most
- * registers differ. Working out frameOffset before the palette load comes
- * closest; after it, 264 words differ. 134 words differ, 38 in shape.
+ * Doesn't match: the original spills centerX less half the width before the
+ * loop, and registers differ. Working out frameOffset before the
+ * palette load comes closest; after it, 264 words differ. The image offset
+ * is written as two products: (SIDE_ARROW_FIRST_IMAGE + arrowIndex) times
+ * the size lets loop.c step the sum on its own, 134 words. Setting top just
+ * before the rectangle gives 98 words, 20 in shape, but a frame 16 bytes
+ * smaller than the original's. 64 words differ, 32 in shape.
  */
 #ifdef NON_MATCHING
 void DrawBlinkingSideArrows(Gfx** displayListHead, void* image, s32* blinkFrame,
@@ -1627,8 +1631,8 @@ void DrawBlinkingSideArrows(Gfx** displayListHead, void* image, s32* blinkFrame,
   for (arrowIndex = 0; arrowIndex != SIDE_ARROW_COUNT; arrowIndex++) {
     gDPLoadTextureTile_4b(gfx++,
         TextureAddress((u32)image +
-            ((SIDE_ARROW_FIRST_IMAGE + arrowIndex) * GREEN_ARROW_IMAGE_SIZE +
-                frameOffset)),
+            ((SIDE_ARROW_FIRST_IMAGE * GREEN_ARROW_IMAGE_SIZE) +
+                (arrowIndex * GREEN_ARROW_IMAGE_SIZE) + frameOffset)),
         G_IM_FMT_CI, GREEN_ARROW_SIZE, GREEN_ARROW_SIZE, 0, 0,
         GREEN_ARROW_SIZE - 1, GREEN_ARROW_SIZE - 1, 0,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
