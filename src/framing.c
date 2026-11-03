@@ -300,7 +300,11 @@ void FrameSpheres(f32 depthOffset) {
 
   depth = (Z_MARGIN - minZ) + eyeZ;
   frontDistance = depth - horizontalEyeZ;
-  /* distance holds the right edge from here, to match */
+  /*
+   * distance holds the right edge from here, to match: a right variable,
+   * declared beside left or rightRadians, gives 494 words differing (110 in
+   * shape), against the draft's 279 (109)
+   */
   rightRadians = FramingDegreesToRadians(rightAngle);
   distance = frontDistance * tan(rightRadians);
   left = frontDistance * tan(FramingDegreesToRadians(leftAngle));
