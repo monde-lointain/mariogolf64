@@ -1428,7 +1428,9 @@ s32 GetUnusedPalette(s32 choiceIndex);
  * next frame.
  * Doesn't match: the original keeps row in a temporary register and spills the
  * menu memory pointer, where GCC keeps the pointer in a saved register and
- * spills row instead (148 diff lines, 38 opcodes). 91 words differ.
+ * spills row instead. Comparing row as a byte with the cursor's row, the
+ * permuter's best form, gives 175 words, 13 in shape. 91 words differ, 25
+ * in shape.
  */
 #ifdef NON_MATCHING
 void DrawGridFaces(Gfx** displayListHead, u8 isSinglePlayer) {
