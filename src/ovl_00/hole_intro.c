@@ -47,8 +47,7 @@
 #define INTRO_FRAME_TEXT_COLUMN 20
 #define INTRO_FRAME_TEXT_ROW 2
 
-/* g_GameState.holeIndex under a symbol of its own, which
- * UpdateHoleIntroCamera needs to match */
+/* Frames since the intro started, counting up to INTRO_FRAME_COUNT_MAX */
 static s32 f_IntroFrame = 0;
 /* How far in front of the ball the camera is; negative when behind it */
 static f32 f_IntroCameraDistance = 0.0f;
