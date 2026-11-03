@@ -3940,12 +3940,14 @@ void DrawMenuScreen(Gfx** displayListHead) {
  * Draws the chosen layers of the menu's backdrop: the course backdrop, the
  * board and the banner
  *
- * Doesn't match: the game keeps 0xFD500000 in a register and spills
- * 0x073DB06C where this spills the other way, and it reads g_MenuScreen for
+ * Doesn't match: the scenery strips' 0xFD500000 and -8 swap registers, and the
+ * board loop's registers differ. The original also reads g_MenuScreen for
  * MENU_LAYER_UNK20 where this drops the read. An empty case or default, an
- * empty if, a (void) read and switches of 4, 6 or 10 shared cases all drop
- * it too; 6 cases that each break give 359 words but still drop it. 360
- * words differ, 38 in shape.
+ * empty if, a (void) read and switches of 4, 6 or 10 shared cases all dropped
+ * it too before the strips' row count variable, as did 6 cases that each break.
+ * A permuter run pointed to the variable. Adding the strip's offset to the
+ * texels' start, rather than both to the image, gives 61 words differing (17 in
+ * shape). 58 words differ, 16 in shape.
  */
 #ifdef NON_MATCHING
 void DrawMenuBackdropLayers(Gfx** displayListHead, s32 layers) {
@@ -3955,9 +3957,9 @@ void DrawMenuBackdropLayers(Gfx** displayListHead, s32 layers) {
   s32 stripTop;
   s32 bobOffset;
   u8* image;
-  u8* sceneryTexels;
   u32 firstStripTexels;
   s32 stripTopQuarters;
+  s32 loadedRowCount;
 
   /* The menu memory goes unused */
   GetMenuMemory();
@@ -3997,29 +3999,30 @@ void DrawMenuBackdropLayers(Gfx** displayListHead, s32 layers) {
               TEXEL_STEP_ONE / BACKDROP_SCALE);
         } else {
           gDPPipeSync(gfx++);
-          sceneryTexels = LargeImageTexels(g_MenuCourseSceneryAsset);
+          /*
+           * The loaded rows are counted in a variable here, to match: the
+           * constant gives 851 words differing (445 in shape), or 359 (37) with
+           * the last strip's rectangle in a block of its own; counting them in
+           * the first strip's load too gives 851 (445), setting the count
+           * before the loop 269 (43), and the block with the variable 130 (16)
+           */
+          loadedRowCount = BACKDROP_STRIP_ROW_COUNT + BACKDROP_SEAM_ROW_COUNT;
           gDPLoadTextureBlock(gfx++,
-              TextureAddress(sceneryTexels +
-                  (stripIndex * BACKDROP_WIDTH * BACKDROP_STRIP_ROW_COUNT)),
-              G_IM_FMT_CI, G_IM_SIZ_8b, BACKDROP_WIDTH,
-              BACKDROP_STRIP_ROW_COUNT + BACKDROP_SEAM_ROW_COUNT, 0,
+              TextureAddress(LargeImageTexelsAt(g_MenuCourseSceneryAsset,
+                  stripIndex * BACKDROP_WIDTH * BACKDROP_STRIP_ROW_COUNT)),
+              G_IM_FMT_CI, G_IM_SIZ_8b, BACKDROP_WIDTH, loadedRowCount, 0,
               G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMIRROR | G_TX_CLAMP,
               G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
           gDPPipeSync(gfx++);
 
           if (stripIndex == CLAMPED_BACKDROP_STRIP_COUNT - 1) {
-            /*
-             * In its own block, as without it 854 words differ, 446 in shape,
-             * against 360 and 38
-             */
-            IN_OWN_BLOCK(
-                gSPScisTextureRectangle(gfx++, QuarterPixels(BACKDROP_LEFT),
-                    QuarterPixels(CLAMPED_BACKDROP_LAST_TOP),
-                    QuarterPixels(
-                        BACKDROP_LEFT + (BACKDROP_WIDTH * BACKDROP_SCALE)),
-                    QuarterPixels(CLAMPED_BACKDROP_BOTTOM), G_TX_RENDERTILE, 0,
-                    BACKDROP_SECOND_ROW_START, TEXEL_STEP_ONE / BACKDROP_SCALE,
-                    TEXEL_STEP_ONE / BACKDROP_SCALE));
+            gSPScisTextureRectangle(gfx++, QuarterPixels(BACKDROP_LEFT),
+                QuarterPixels(CLAMPED_BACKDROP_LAST_TOP),
+                QuarterPixels(
+                    BACKDROP_LEFT + (BACKDROP_WIDTH * BACKDROP_SCALE)),
+                QuarterPixels(CLAMPED_BACKDROP_BOTTOM), G_TX_RENDERTILE, 0,
+                BACKDROP_SECOND_ROW_START, TEXEL_STEP_ONE / BACKDROP_SCALE,
+                TEXEL_STEP_ONE / BACKDROP_SCALE);
           } else {
             stripTop = BACKDROP_TOP +
                 (stripIndex * BACKDROP_STRIP_ROW_COUNT * BACKDROP_SCALE);
