@@ -11,7 +11,7 @@ known when the matching build's ELF names its symbol once; one whose symbol
 it doesn't name, such as a compiler's anonymous constant, compares equal. A
 field whose value can't be an address is compared as the constant it is.
 
-    fncompare.py [-v] ASM_FILE C_FILE [FUNCTION ...]
+    fncompare.py [-v | -s] ASM_FILE C_FILE [FUNCTION ...]
 
 ASM_FILE is a splat assembly file holding one or more functions and C_FILE
 the C to compile, or an object file already compiled. Prints one line per
@@ -21,7 +21,8 @@ which still moves when a change is too small to show in the score, and how
 many of them differ in shape, with registers and constants ignored. With -v,
 also prints the instructions that differ, with each branch's destination as
 @INDEX, and the calls one side makes more often than the other, which always
-mean the sources differ.
+mean the sources differ. With -s, prints instead only the instructions
+that differ in shape, which a change of registers can't explain.
 """
 
 import atexit
@@ -1511,12 +1512,27 @@ def print_diff(
     print_call_differences(target, compiled)
 
 
+def print_shape_diff(target: Routine, compiled: Routine) -> None:
+    """Print the instructions that have no pair by operation."""
+    matcher = difflib.SequenceMatcher(
+        None, read_operations(target), read_operations(compiled), autojunk=False
+    )
+    for tag, first, last, compiled_first, compiled_last in matcher.get_opcodes():
+        if tag == "equal":
+            continue
+        for index in range(first, last):
+            print(f"  -{index:4} {disassemble(target, index)}")
+        for index in range(compiled_first, compiled_last):
+            print(f"  +{index:4} {disassemble(compiled, index)}")
+        print("  --")
+
+
 def report(
-    function: str, original: Original, compiled: Functions, *, verbose: bool
+    function: str, original: Original, compiled: Functions, *, verbosity: str
 ) -> None:
-    """Print FUNCTION's score and, if VERBOSE, its diff and its nested ones'."""
+    """Print FUNCTION's score and, given -v or -s, its diffs and its nested ones'."""
     print(f"{function} {describe_original(original, compiled, function)}")
-    if not verbose:
+    if not verbosity:
         return
     pairs = {function: (original.routine, compiled[function])}
     for name, routine in original.nested.items():
@@ -1525,13 +1541,16 @@ def report(
         if count_differences(original_routine, ours):
             if len(pairs) > 1:
                 print(f" {name}:")
-            print_diff(original_routine, ours)
+            if verbosity == "-s":
+                print_shape_diff(original_routine, ours)
+            else:
+                print_diff(original_routine, ours)
 
 
 def main() -> None:
     """Score the functions named on the command line, or all of them."""
-    verbose = "-v" in sys.argv
-    args = [arg for arg in sys.argv[1:] if arg != "-v"]
+    verbosity = next((arg for arg in sys.argv[1:] if arg in {"-v", "-s"}), "")
+    args = [arg for arg in sys.argv[1:] if arg not in {"-v", "-s"}]
     asm_path, c_path, *names = args
     targets = read_target_functions(asm_path)
     if c_path.endswith(".o"):
@@ -1550,7 +1569,7 @@ def main() -> None:
         nested: Functions = {}
         if names and not c_path.endswith(".o"):
             nested = read_original(asm_path, c_path, name).nested
-        report(name, Original(targets[name], nested), compiled, verbose=verbose)
+        report(name, Original(targets[name], nested), compiled, verbosity=verbosity)
 
 
 if __name__ == "__main__":
