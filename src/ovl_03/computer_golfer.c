@@ -2438,8 +2438,10 @@ EVALUATE:
       par = g_HoleSetup.par;
       if (GetSurfaceInfoAt(f_PlanTarget[AXIS_X], f_PlanTarget[AXIS_Z])->kind ==
           SURFACE_KIND_GREEN) {
-        strokesOver = strokes + 1;
-        strokesOver -= par + f_HoleTargetToPar;
+        /* Counts the stroke this shot would be. In one expression with the
+         * subtraction, 130 to 133 words differ */
+        strokes++;
+        strokesOver = strokes - (par + f_HoleTargetToPar);
         if (strokesOver >= 0) {
           if (f_BestEvaluation <= f_AcceptableEvaluation) {
             f_IsTrialAccepted = TRUE;
