@@ -1195,8 +1195,10 @@ void DrawTwoDigitMenuNumber(
  *
  * Doesn't match: the original adds the label's offset to the slide, and the
  * columns' top to the vertical slide, once before their loops, and adds the
- * texel offset to the blink frame's offset before the arrow's.
- * 197 words differ, 51 in shape.
+ * texel offset to the blink frame's offset before the arrow's. Naming the
+ * arrow's left texel as a u16 takes it from 197 words differing to 191, 51
+ * in shape to 41; as an s32 it gives 205, 53 in shape. 191 words differ, 41
+ * in shape.
  */
 #ifdef NON_MATCHING
 void DrawHandicaps(Gfx** displayListHead, s32 slide, u8 reverseVerticalSlide,
@@ -1206,6 +1208,7 @@ void DrawHandicaps(Gfx** displayListHead, s32 slide, u8 reverseVerticalSlide,
   u16 playerIndex;
   s32 columnIndex;
   s32 stripIndex;
+  u16 textureLeft;
   s32 arrowIndex;
   s32 labelIndex;
   s32 offsetY;
@@ -1468,6 +1471,8 @@ void DrawHandicaps(Gfx** displayListHead, s32 slide, u8 reverseVerticalSlide,
     }
 
     /* The left arrow starts at the right edge of its mirrored image */
+    textureLeft =
+        (arrowIndex == MENU_ARROW_LEFT) ? TexelCoordinate(GREEN_ARROW_SIZE) : 0;
     gSPScisTextureRectangle(gfx++,
         QuarterPixels(f_HandicapColumnLefts[g_ChosenPlayerCount - 1]
                                            [memory->handicapPlayer] +
@@ -1478,9 +1483,7 @@ void DrawHandicaps(Gfx** displayListHead, s32 slide, u8 reverseVerticalSlide,
             arrowX + slide + GREEN_ARROW_SIZE),
         QuarterPixels(
             offsetY + HANDICAP_COLUMN_TOP + arrowY + GREEN_ARROW_SIZE),
-        G_TX_RENDERTILE,
-        (arrowIndex == MENU_ARROW_LEFT) ? TexelCoordinate(GREEN_ARROW_SIZE) : 0,
-        0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+        G_TX_RENDERTILE, textureLeft, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     gDPPipeSync(gfx++);
   }
 
