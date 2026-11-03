@@ -5017,6 +5017,10 @@ void DrawOpeningLogo(Gfx** displayListHead, Boolean isDrawn) {
               continue;
             }
 
+            /*
+             * In its own block, as without it 708 words differ, 80 in
+             * shape, against 166 and 30
+             */
             IN_OWN_BLOCK(f_LogoLetterSpeeds[LOGO_LETTER_L] =
                              -f_LogoLetterSpeeds[LOGO_LETTER_L]);
             f_LogoLetterStates[LOGO_LETTER_L] = LOGO_LETTER_SQUASHING;
