@@ -12,9 +12,13 @@ it doesn't name, such as a compiler's anonymous constant, compares equal. A
 field whose value can't be an address is compared as the constant it is.
 
     fncompare.py [-v | -s] ASM_FILE C_FILE [FUNCTION ...]
+    fncompare.py [-v | -s] FUNCTION ...
 
 ASM_FILE is a splat assembly file holding one or more functions and C_FILE
-the C to compile, or an object file already compiled. Prints one line per
+the C to compile, or an object file already compiled. Given only function
+names, finds each one's assembly under asm/nonmatchings and the C file of
+the same path under src, and compiles each C file once for all its names.
+Prints one line per
 function: its name, its score (the fraction of equal instructions) and either
 OK for an exact match or the count of differing instructions, on either side,
 which still moves when a change is too small to show in the score, and how
@@ -1547,11 +1551,35 @@ def report(
                 print_diff(original_routine, ours)
 
 
-def main() -> None:
-    """Score the functions named on the command line, or all of them."""
-    verbosity = next((arg for arg in sys.argv[1:] if arg in {"-v", "-s"}), "")
-    args = [arg for arg in sys.argv[1:] if arg not in {"-v", "-s"}]
-    asm_path, c_path, *names = args
+# What the tools' file arguments end with, which no function name does
+PATH_SUFFIXES = (".s", ".c", ".o")
+
+
+def locate_function(function: str) -> tuple[str, str]:
+    """Find FUNCTION's original assembly and the C file that holds its draft."""
+    asm_root = ROOT / "asm" / "nonmatchings"
+    asm_paths = list(asm_root.rglob(f"{function}.s"))
+    if len(asm_paths) != 1:
+        sys.exit(f"{function}: {len(asm_paths)} assembly files under {asm_root}")
+    unit = asm_paths[0].parent.relative_to(asm_root)
+    return str(asm_paths[0]), str(ROOT / "src" / unit.with_suffix(".c"))
+
+
+def expand_function_name(arguments: list[str]) -> list[str]:
+    """Replace a leading function name with its ASM_FILE, C_FILE and name.
+
+    The tools take an assembly file, a C file and a function name first; the
+    name alone stands for all three.
+    """
+    if not arguments or arguments[0].startswith("-"):
+        return arguments
+    if arguments[0].endswith(PATH_SUFFIXES):
+        return arguments
+    return [*locate_function(arguments[0]), *arguments]
+
+
+def score(asm_path: str, c_path: str, names: list[str], verbosity: str) -> None:
+    """Score NAMES, or all of ASM_PATH's functions, as compiled from C_PATH."""
     targets = read_target_functions(asm_path)
     if c_path.endswith(".o"):
         compiled, error = read_object_file(c_path), ""
@@ -1570,6 +1598,21 @@ def main() -> None:
         if names and not c_path.endswith(".o"):
             nested = read_original(asm_path, c_path, name).nested
         report(name, Original(targets[name], nested), compiled, verbosity=verbosity)
+
+
+def main() -> None:
+    """Score the functions named on the command line, or all of them."""
+    verbosity = next((arg for arg in sys.argv[1:] if arg in {"-v", "-s"}), "")
+    args = [arg for arg in sys.argv[1:] if arg not in {"-v", "-s"}]
+    if args and not args[0].endswith(PATH_SUFFIXES):
+        units: dict[tuple[str, str], list[str]] = {}
+        for name in args:
+            units.setdefault(locate_function(name), []).append(name)
+        for (asm_path, c_path), names in units.items():
+            score(asm_path, c_path, names, verbosity)
+        return
+    asm_path, c_path, *names = args
+    score(asm_path, c_path, names, verbosity)
 
 
 if __name__ == "__main__":

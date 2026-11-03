@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Score variants of a C file, each made by text replacements.
 
-    try_variants.py [--apply NUMBER] ASM_FILE C_FILE FUNCTION VARIANTS_FILE
+    try_variants.py [--apply NUMBER] [ASM_FILE C_FILE] FUNCTION VARIANTS_FILE
     try_variants.py --batch JOBS_FILE
 
 VARIANTS_FILE holds blocks separated by lines of "====". Each block is the
@@ -12,6 +12,8 @@ replacements, such as at a change's twin sites, joined by lines of "++++".
 Prints the score of each variant, so that several guesses cost one compile
 each. With --apply, writes variant NUMBER into C_FILE instead, made the same
 way as the one that was scored.
+
+Without ASM_FILE and C_FILE, finds them from FUNCTION as fncompare does.
 
 With --batch, each line of JOBS_FILE names an ASM_FILE, C_FILE, FUNCTION
 and VARIANTS_FILE, and each score is printed after its function's name.
@@ -287,6 +289,10 @@ def score_jobs(jobs: list[list[str]], *, prefix_names: bool) -> None:
 def main() -> None:
     """Print the score of each variant, in order, or apply one."""
     arguments = sys.argv[1:]
+    if arguments[:1] == ["--apply"]:
+        arguments[2:] = fncompare.expand_function_name(arguments[2:])
+    else:
+        arguments = fncompare.expand_function_name(arguments)
     usage_lengths = {"--batch": 2, "--apply": 6}
     expected_length = usage_lengths.get(arguments[0] if arguments else "", 4)
     if len(arguments) != expected_length:

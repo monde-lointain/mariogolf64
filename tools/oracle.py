@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """Find the register allocation that would make a draft match, and why.
 
-    oracle.py [--allocation] ASM_FILE C_FILE FUNCTION [PSEUDO=HARD ...]
+    oracle.py [--allocation] [ASM_FILE C_FILE] FUNCTION [PSEUDO=HARD ...]
+
+Without ASM_FILE and C_FILE, finds them from FUNCTION as fncompare does.
 
 Compiles FUNCTION with the debug build of cc1 that tools/build_oracle.sh
 makes, under gdb (see oracle_gdb.py). The instructions that equal the
@@ -509,7 +511,7 @@ def main() -> None:
     show_allocation = "--allocation" in arguments
     if show_allocation:
         arguments.remove("--allocation")
-    asm_path, c_path, function, *pairs = arguments
+    asm_path, c_path, function, *pairs = fncompare.expand_function_name(arguments)
     if not (ORACLE_DIR / "cc1.debug").exists():
         sys.exit("run tools/build_oracle.sh first")
     os.environ["KMC_DIR"] = str(ORACLE_DIR)

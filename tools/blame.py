@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """Show where KMC GCC made each instruction that differs from the target.
 
-    blame.py [--keep DIR] ASM_FILE C_FILE FUNCTION
+    blame.py [--keep DIR] [ASM_FILE C_FILE] FUNCTION
+
+Without ASM_FILE and C_FILE, finds them from FUNCTION as fncompare does.
 
 Prints fncompare's diff of FUNCTION, noting after each of our differing
 instructions the insn that made it, as -dp names it, the first pass whose
@@ -767,6 +769,7 @@ def main() -> None:
     if arguments[:1] == ["--keep"] and len(arguments) > 1:
         keep = Path(arguments[1])
         arguments = arguments[2:]
+    arguments = fncompare.expand_function_name(arguments)
     if len(arguments) != EXPECTED_ARGUMENT_COUNT:
         sys.exit(__doc__)
     asm_path, c_path, function = arguments
