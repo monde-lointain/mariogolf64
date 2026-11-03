@@ -819,7 +819,10 @@ void DrawBetSettings(
     Gfx** displayListHead, s32 slide, u8 isSlideReversed, u8 isSettled) {
   Gfx* gfx = *displayListHead;
   MenuMemory* memory = GetMenuMemory();
-  /* One index for the bet columns and the banner strips, to match */
+  /*
+   * One index for the bet columns and the banner strips, to match: a strip
+   * variable for the strips gives 57 words differing, 5 in shape
+   */
   s16 i;
   s16 stakeLevel;
   s16 betIndex;
@@ -828,7 +831,10 @@ void DrawBetSettings(
   s16 bannerShift;
   u8* icon;
   s32 stripTop;
-  /* The wide banner's strips, kept apart from stripTop to match */
+  /*
+   * The wide banner's strips, kept apart from stripTop to match: sharing
+   * stripTop gives 349 words differing, 41 in shape
+   */
   s32 wideStripTop;
   s8 stakeAmount;
 
@@ -1817,7 +1823,10 @@ void DrawCenteredPageArrows(Gfx** displayListHead, s32 gap, s32 centerY) {
     }
 
     gDPPipeSync(gfx++);
-    /* Computed before the rectangle, which keeps its register, to match */
+    /*
+     * Computed into a local, which keeps its register, to match: computing it
+     * in the rectangle's arguments gives 5 words differing, 3 in shape
+     */
     textureColumn = MirroredArrowColumn(arrowIndex);
     gSPScisTextureRectangle(gfx++, QuarterPixels(left),
         QuarterPixels(centerY - (PAGE_ARROW_SIZE / 2)),
@@ -2355,7 +2364,11 @@ void ReadBestShots(void) {
     }
   }
 
-  /* The record index is reused for the saved row, to match */
+  /*
+   * The record index is reused for the saved row, to match: a savedRow
+   * variable, or switching on the row directly, gives 12 words differing, none
+   * in shape
+   */
   recordIndex = memory->bestShotRow;
   switch (recordIndex) {
     case BEST_SHOT_ROW_BIRDIE:
