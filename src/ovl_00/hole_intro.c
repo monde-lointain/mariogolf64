@@ -58,12 +58,16 @@ static f32 f_IntroCameraHeight = 0.0f;
  * Places the camera for the start of the hole intro. The heading is worked
  * out in double precision and narrowed once for sinf and cosf.
  *
- * Doesn't match: the original stores the look-at point's Z through its
- * pointer and its Y through the camera's address, where GCC stores both
- * through the camera's address. Storing Z before Y, or Y straight into
- * g_Cameras, doesn't help. The heading is built in two steps, as one
- * expression gives 37 words and hoisting the shared first step above the
- * test 101; an f32 heading gives 39-47. 33 words differ.
+ * Doesn't match: the original stores the look-at point's Z through its pointer
+ * and its Y through the camera's address, where GCC stores both through the
+ * camera's address. Storing Z before Y, or Y straight into g_Cameras, doesn't
+ * help. The heading is built in two steps, as one expression gives 37 words and
+ * hoisting the shared first step above the test 101; an f32 heading gives
+ * 39-47. The original also builds the heading and its double precision steps in
+ * $f20, where global-alloc gives the heading $f4 although it prefers $f20; the
+ * register oracle, forcing 8 pseudos into the original's registers, leaves 7
+ * words: the Y store and the first multiply's registers. 33 words differ, 1 in
+ * shape.
  */
 #ifdef NON_MATCHING
 void StartHoleIntroCamera(void) {
