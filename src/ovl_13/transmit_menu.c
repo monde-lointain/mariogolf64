@@ -524,7 +524,9 @@ s32 GetNoticeState(void);
 /*
  * g_GameBoyTransfer.pressingHandImage under a scalar name. Reading it as a
  * scalar is there to match: GCC keeps a struct field's constant address in a
- * register when it is used twice.
+ * register when it is used twice. In DrawPressingHand, reading the field
+ * gives 24 words differing (12 in shape), and copying it to a local first 28
+ * (6).
  */
 extern void* g_PressingHandImage;
 
