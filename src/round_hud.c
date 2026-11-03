@@ -2271,7 +2271,12 @@ void DrawBallTrail(Gfx** displayListHead, CameraMatrices* matrices) {
  * the reciprocal at the division. Scaling the speed in the division's
  * statement gives 20 words differing, 22 in shape; scaling it before the
  * pulse step with that step not kept in its own block, or stepping the pulse
- * first, gives 32 to 41. 16 words differ, 6 in shape.
+ * first, gives 32 to 41, and dividing before the pulse step 41 in either
+ * form. sched1 runs before local-alloc, so the original's reciprocal was
+ * hoisted into $v1 before the speed got a register, which needs the
+ * scaling and the division in one block; the register oracle, forcing
+ * the speed into $a0, leaves the 6 words of the reciprocal's placement.
+ * 16 words differ, 6 in shape.
  */
 #ifdef NON_MATCHING
 void DrawWindSpeed(Gfx** displayListHead, f32 x, f32 y) {
