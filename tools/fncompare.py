@@ -53,7 +53,8 @@ from elftools.construct.lib.container import Container
 
 ROOT = Path(__file__).resolve().parent.parent
 LINKED_ELF = ROOT / "build" / "mariogolf64.elf"
-KMC_DIR = ROOT / "tools" / "gcc_kmc"
+# The compiler's directory; KMC_DIR overrides it to try another build of cc1
+KMC_DIR = Path(os.environ.get("KMC_DIR", ROOT / "tools" / "gcc_kmc"))
 CFLAGS = [
     "-G0",
     "-mips3",
