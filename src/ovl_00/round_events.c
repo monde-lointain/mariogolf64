@@ -2014,15 +2014,19 @@ void DrawReadyGoMovie(Gfx** displayListHead) {
  * Unused: draws the movie image in f_MovieBuffer, shrinking it from double size
  * to its own size
  *
- * Doesn't match: the original keeps stripCount in $fp where ours spills it,
- * and it copies width to $s1 before the sound for the scale's (width >> 1).
- * Its strip loop also leaves stripHeight * 4 and offset * 6 inside, where
- * loop.c hoists the one and strength-reduces the other in ours. Making width's
- * copy a variable, reordering the increments, a u32 offset and a for-clause
- * increment change nothing. Taking offset and bottom from the strip index
- * gives 113 words differing, 25 in shape, but loop.c then reduces
- * offset * 6 too. Taking bottom alone from it takes 115 words differing,
- * 29 in shape, to 107 and 27.
+ * Doesn't match: the original copies width to $s1 before the sound for the
+ * scale's (width >> 1), and its strip loop keeps bottom stepping by
+ * stripHeight, takes stripHeight * 4 from it inside the loop, and leaves
+ * offset * 6 unreduced. loop.c moves an invariant only while threshold times
+ * its savings and lifetime reach the loop's insn count, and lowers the
+ * threshold by 3 for each register it moves, so the original's loop is longer
+ * or meets its invariants in another order. Taking top from bottom, as
+ * bottom less 4 strips, hoists stripHeight * 4 into $fp and spills stripCount
+ * (107 words differing, 27 in shape); taking top from the strip index, as
+ * here, leaves stripCount in $fp but drops bottom's stepping. Pointer and
+ * corner locals in the loop, stepping bottom by hand, a while loop, a u32
+ * offset and taking offset from the strip index give 107 to 119 words.
+ * 54 words differ, 24 in shape.
  */
 #ifdef NON_MATCHING
 void DrawShrinkingMovieImage(Gfx** displayListHead) {
@@ -2034,7 +2038,6 @@ void DrawShrinkingMovieImage(Gfx** displayListHead) {
   s32 stripHeight;
   s32 i;
   s32 offset;
-  s32 bottom;
   s32 top;
 
   stripHeight = MOVIE_IMAGE_STRIP_HEIGHT;
@@ -2067,14 +2070,14 @@ void DrawShrinkingMovieImage(Gfx** displayListHead) {
     if (halfWidth > 0 && stripHeight > 0) {
       offset = 0;
       for (i = 0; i != stripCount; i++) {
-        bottom = SHRINKING_IMAGE_CENTER_Y + (i * stripHeight);
         LoadTextureBlock(&gfx,
             f_MovieBuffer +
                 ((offset * MOVIE_IMAGE_STRIP_HEIGHT) +
                     MOVIE_IMAGE_PIXELS_OFFSET),
             G_IM_FMT_CI, G_IM_SIZ_8b, width, MOVIE_IMAGE_STRIP_HEIGHT, 0, 0, 0,
             0, 0, 0, 0);
-        top = bottom - (stripHeight * SHRINKING_IMAGE_STRIPS_ABOVE_CENTER);
+        top = SHRINKING_IMAGE_CENTER_Y +
+            ((i - SHRINKING_IMAGE_STRIPS_ABOVE_CENTER) * stripHeight);
         DrawTextureRect(&gfx,
             QuarterPixels(SHRINKING_IMAGE_CENTER_X - halfWidth),
             QuarterPixels(top),
