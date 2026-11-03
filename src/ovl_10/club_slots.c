@@ -935,7 +935,11 @@ void DrawClubSlots(Gfx** displayListHead) {
               ReadEncodedAsset(f_Slots->faceImages[playerIndex][1], &asset);
             }
 
-            /* f_FaceBufferIndex is cleared twice; it is there to match */
+            /*
+             * f_FaceBufferIndex is cleared twice; it is there to match:
+             * clearing it only after the frame index gives 27 words
+             * differing, 9 in shape, and only first 29
+             */
             f_FaceBufferIndex = 0;
             f_StarCount = 0;
             f_IsShowingResult = FALSE;
