@@ -131,6 +131,9 @@ void TransformPoint(Mat4 mf, Vec3 point, Vec3 result) {
  * bottomAngle, where cse no longer knows minZ's value. Written -Z_MARGIN the
  * negation folds (282 words, 108 in shape), as it does from minZ in the same
  * block (291, 117); setting minZ just before the block's end gives 285.
+ * The permuter's best (269 words, 89 in shape) sets eyeZ from
+ * horizontalEyeZ before working it out. Setting eyeZ to the horizontal
+ * distance first and raising it to the vertical one gives 279 to 332.
  * 279 words differ, 109 in shape.
  */
 #ifdef NON_MATCHING
