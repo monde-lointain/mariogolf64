@@ -217,7 +217,10 @@ s32 GetViewDepth(f32 x, f32 y, f32 z) {
  * store, leaves 13 differing words or gives 20; storing the depth after its
  * step gives 59, (f32)fabs leaves 13, and multiplying by perspective instead of
  * dividing by viewZ gives 45. The register oracle, forcing one pseudo's
- * register, leaves 7 words at best, so the code differs too. 11 words differ.
+ * register, leaves 7 words at best, so the code differs too. 11 words differ. A
+ * permuter output with 9 words (1 in shape) adds SCREEN_DEPTH_SCALE to the
+ * depth before setting it and then stores the product alone, which drops the
+ * add.s of 16352.0 that the original makes after its mul.s, so it is left out.
  */
 #ifdef NON_MATCHING
 s32 ProjectPoint(f32 x, f32 y, f32 z, ScreenPoint* point) {
