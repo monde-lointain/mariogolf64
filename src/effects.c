@@ -1750,7 +1750,9 @@ void DrawEffects(CameraMatrices* matrices, Gfx** displayListHead) {
 /*
  * 1 << this is BILLBOARD_IMAGE_SIZE texels in s10.5, which the droplet's tile,
  * shifted down by 2 and mirrored every 16 texels, draws flipped. Shifting
- * instead of multiplying is there to match.
+ * instead of multiplying is there to match: the frame's parity times
+ * TexelCoordinate(BILLBOARD_IMAGE_SIZE), or a ternary, gives 5 words
+ * differing, 3 in shape.
  */
 #define TEAR_MIRROR_S_SHIFT 11
 #define PUFF_LIGHTENING 0x40
