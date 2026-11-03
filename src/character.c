@@ -1057,7 +1057,11 @@ void LoadCharacter(u32 slotIndex, s32 character, s32 kind) {
 
     slot->frameData[0] = OS_PHYSICAL_TO_K0(
         osVirtualToPhysical((void*)slot->model->frameDataStart));
-    /* Added as integers, the size first, to match */
+    /*
+     * Added as integers, the size first, to match: adding the size to a u8
+     * pointer, on either side, or adding the integers pointer first gives 4
+     * words differing, none in shape
+     */
     slot->frameData[1] = (void*)(frameDataSize + (u32)slot->frameData[0]);
     slot->frameData[2] = (void*)(frameDataSize + (u32)slot->frameData[1]);
     memcpy(slot->frameData[1], slot->frameData[0], frameDataSize);
