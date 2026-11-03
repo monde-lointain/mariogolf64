@@ -2099,7 +2099,11 @@ void UpdateBestShots(void) {
 /*
  * Doesn't match: the original works out the chosen cell's address again after
  * checking that it holds a record, before drawing its course's image and name,
- * where GCC reuses the address from the check. 101 words differ.
+ * where GCC reuses the address from the check. Reading the cell from the
+ * menu memory at each use gives 245 words, chosenRow and chosenColumn as
+ * u8 or s16 107, and the record index in a local 177. The permuter's best,
+ * a u8 cast on chosenRow at the name's lookup, gives 104 words, 12 in shape.
+ * 101 words differ, 17 in shape.
  */
 #ifdef NON_MATCHING
 void DrawBestShots(Gfx** displayListHead) {
