@@ -4632,7 +4632,9 @@ void LoadOpeningLogo(void) {
  * the letter loops GCC works out the texel offset before stepping the display
  * list pointer, where the original steps it first, and in the falling letters'
  * loop it derives f_LogoLetters' address from another table's instead of
- * loading it. 166 words differ, 30 in shape.
+ * loading it. The fade colors are set red first, as the original stores
+ * them (blue first gives 166 words, 30 in shape). 146 words differ, 30 in
+ * shape.
  */
 #ifdef NON_MATCHING
 void DrawOpeningLogo(Gfx** displayListHead, Boolean isDrawn) {
@@ -4665,12 +4667,12 @@ void DrawOpeningLogo(Gfx** displayListHead, Boolean isDrawn) {
       break;
     case LOGO_FADE_WHITENING:
       g_ScreenFadeFramesLeft = f_LogoFadeFramesLeft;
-      g_ScreenFadeBlue =
+      g_ScreenFadeRed =
           (s32)((LOGO_FADE_WHITENING_FRAMES - f_LogoFadeFramesLeft) *
               LOGO_FADE_WHITENING_STEP) +
           LOGO_FADE_GRAY_LEVEL;
-      g_ScreenFadeGreen = g_ScreenFadeBlue;
-      g_ScreenFadeRed = g_ScreenFadeGreen;
+      g_ScreenFadeGreen = g_ScreenFadeRed;
+      g_ScreenFadeBlue = g_ScreenFadeGreen;
       f_LogoFadeFramesLeft--;
       if (f_LogoFadeFramesLeft == 0) {
         f_LogoFadeStage++;
@@ -4679,9 +4681,9 @@ void DrawOpeningLogo(Gfx** displayListHead, Boolean isDrawn) {
       break;
     case LOGO_FADE_WHITE:
       g_ScreenFadeDuration = LOGO_FADE_WHITE_DURATION;
-      g_ScreenFadeBlue = LOGO_FADE_WHITE_LEVEL;
-      g_ScreenFadeGreen = g_ScreenFadeBlue;
-      g_ScreenFadeRed = g_ScreenFadeGreen;
+      g_ScreenFadeRed = LOGO_FADE_WHITE_LEVEL;
+      g_ScreenFadeGreen = g_ScreenFadeRed;
+      g_ScreenFadeBlue = g_ScreenFadeGreen;
       g_ScreenFadeKind = FADE_OUT;
       g_ScreenFadeFramesLeft = 0;
       if (f_LogoState == LOGO_SHRINKING) {
@@ -4693,9 +4695,9 @@ void DrawOpeningLogo(Gfx** displayListHead, Boolean isDrawn) {
       g_ScreenFadeDuration = LOGO_FADE_WHITE_DURATION;
       g_ScreenFadeKind = FADE_OUT;
       g_ScreenFadeFramesLeft = 0;
-      g_ScreenFadeBlue = LOGO_FADE_WHITE_LEVEL;
-      g_ScreenFadeGreen = g_ScreenFadeBlue;
-      g_ScreenFadeRed = g_ScreenFadeGreen;
+      g_ScreenFadeRed = LOGO_FADE_WHITE_LEVEL;
+      g_ScreenFadeGreen = g_ScreenFadeRed;
+      g_ScreenFadeBlue = g_ScreenFadeGreen;
       f_LogoLettersAlpha -= LOGO_FADE_OUT_STEP;
       f_LogoClubAlpha -= LOGO_FADE_OUT_STEP;
       if (f_LogoLettersAlpha < 0) {
@@ -4713,12 +4715,12 @@ void DrawOpeningLogo(Gfx** displayListHead, Boolean isDrawn) {
     f_LogoLetters[LOGO_LETTER_M].x = LOGO_M_DROP_X;
     f_LogoLetters[LOGO_LETTER_M].y = f_LakituScreenPoint[1];
     f_LogoLetterStates[LOGO_LETTER_M] = LOGO_LETTER_FALLING;
-    g_ScreenFadeFramesLeft = LOGO_GRAYING_DURATION;
-    g_ScreenFadeDuration = g_ScreenFadeFramesLeft;
+    g_ScreenFadeDuration = LOGO_GRAYING_DURATION;
+    g_ScreenFadeFramesLeft = g_ScreenFadeDuration;
     g_ScreenFadeKind = FADE_OUT;
-    g_ScreenFadeBlue = LOGO_FADE_GRAY_LEVEL;
-    g_ScreenFadeGreen = g_ScreenFadeBlue;
-    g_ScreenFadeRed = g_ScreenFadeGreen;
+    g_ScreenFadeRed = LOGO_FADE_GRAY_LEVEL;
+    g_ScreenFadeGreen = g_ScreenFadeRed;
+    g_ScreenFadeBlue = g_ScreenFadeGreen;
     f_LogoFadeStage = LOGO_FADE_GRAYING;
     f_HasLogoStarted = TRUE;
   }
