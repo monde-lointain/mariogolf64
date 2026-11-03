@@ -4645,8 +4645,11 @@ void LoadOpeningLogo(void) {
  * list pointer, where the original steps it first, and in the falling letters'
  * loop it derives f_LogoLetters' address from another table's instead of
  * loading it. The fade colors are set red first, as the original stores
- * them (blue first gives 166 words, 30 in shape). 146 words differ, 30 in
- * shape.
+ * them (blue first gave 166 words, 30 in shape, against 146 and 30). The L
+ * letter's bounce goes through a pointer to it: indexing f_LogoLetters gives
+ * 688 words (80 in shape), or 123 (19) with its speed's negation in its own
+ * block, and the pointer declared at the function's top 109 (21). 104 words
+ * differ, 14 in shape.
  */
 #ifdef NON_MATCHING
 void DrawOpeningLogo(Gfx** displayListHead, Boolean isDrawn) {
@@ -4654,7 +4657,7 @@ void DrawOpeningLogo(Gfx** displayListHead, Boolean isDrawn) {
   s32 texelsOffset;
   /*
    * Kept apart, unlike the shine pass's, to match: sharing texelsOffset gives
-   * 154 words differing (38 in shape) against the draft's 146 (30)
+   * 112 words differing (22 in shape) against the draft's 104 (14)
    */
   s32 letterTexelsOffset;
   s32 i;
@@ -5023,11 +5026,12 @@ void DrawOpeningLogo(Gfx** displayListHead, Boolean isDrawn) {
             f_LogoLetterSquashFrames[i] = LOGO_LETTER_SQUASH_FRAMES;
           }
         } else {
-          if (f_LogoLetters[LOGO_LETTER_L].y +
-                  (s32)f_LogoLetterSpeeds[LOGO_LETTER_L] >=
+          LogoLetter* letterL = &f_LogoLetters[LOGO_LETTER_L];
+
+          if (letterL->y + (s32)f_LogoLetterSpeeds[LOGO_LETTER_L] >=
               LOGO_LETTER_L_GROUND_Y) {
             f_LogoLetterSpeeds[LOGO_LETTER_L] *= LOGO_LETTER_BOUNCINESS;
-            f_LogoLetters[LOGO_LETTER_L].y = LOGO_LETTER_L_GROUND_Y - 1;
+            letterL->y = LOGO_LETTER_L_GROUND_Y - 1;
             if (f_LogoLetterSpeeds[LOGO_LETTER_L] <=
                 LOGO_LETTER_MIN_BOUNCE_SPEED) {
               f_LogoLetterSpeeds[LOGO_LETTER_L] = 0.0f;
@@ -5035,12 +5039,8 @@ void DrawOpeningLogo(Gfx** displayListHead, Boolean isDrawn) {
               continue;
             }
 
-            /*
-             * In its own block, as without it 708 words differ, 80 in
-             * shape, against 166 and 30
-             */
-            IN_OWN_BLOCK(f_LogoLetterSpeeds[LOGO_LETTER_L] =
-                             -f_LogoLetterSpeeds[LOGO_LETTER_L]);
+            f_LogoLetterSpeeds[LOGO_LETTER_L] =
+                -f_LogoLetterSpeeds[LOGO_LETTER_L];
             f_LogoLetterStates[LOGO_LETTER_L] = LOGO_LETTER_SQUASHING;
             f_LogoLetterSquashFrames[LOGO_LETTER_L] = LOGO_LETTER_SQUASH_FRAMES;
           }
