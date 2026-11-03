@@ -3147,7 +3147,9 @@ static const f64 f_ScoresTenDegrees = DegreesToRadians(10);
  * BET_TALLY_LEFT where it sets each digit's left edge, and tests
  * g_PrintBuffer's first character at its own address before the digits' loop.
  * The nested ifs make GCC compare the bet rate with zero and UNSET_BET_RATE in
- * turn, as the original does, rather than as a range. 35 words differ.
+ * turn, as the original does, rather than as a range. Counting the column
+ * from 0 and adding BET_TALLY_LEFT to left gives 37 words, 17 in shape. 35
+ * words differ, 15 in shape.
  */
 #ifdef NON_MATCHING
 void DrawBetTallies(Gfx** displayListHead) {
