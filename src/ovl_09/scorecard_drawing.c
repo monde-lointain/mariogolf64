@@ -1093,13 +1093,15 @@ static const char f_BlankBetName[] = " ";
  * and what each player has won on it and in total. A bet with a rate of zero is
  * grayed out.
  *
- * Doesn't match: GCC's loop pass hoists a table address into $s2 before
- * the bet rates' loop, which the original doesn't, and the loop's
- * registers differ from there. The original aligns the bet images' texels
- * to 8 bytes, as TextureAddress does; without that, 210 words differ, 42 in
- * shape. The permuter's best output, 3120 against 3610, holds the wrap
- * flags in a variable, a fake, and gives 206 words differing, 36 in shape.
- * 204 words differ, 36 in shape.
+ * Doesn't match: GCC's loop pass hoists a table address into $s2 before the bet
+ * rates' loop, which the original doesn't, and the loop's registers differ from
+ * there. The original aligns the bet images' texels to 8 bytes, as
+ * TextureAddress does; without that, 210 words differ, 42 in shape. The
+ * permuter's best output, 3120 against 3610, holds the wrap flags in a
+ * variable, a fake, and gives 206 words differing, 36 in shape. The subtitles'
+ * loop tests i != BET_COUNT, as the original's bne shows, though GCC keeps the
+ * bound in $s7 where the original loads it each pass; with < it compiles to
+ * slti and bnez, 204 words (36 in shape). 206 words differ, 32 in shape.
  */
 #ifdef NON_MATCHING
 void DrawBetsPage(Gfx** displayListHead) {
@@ -1262,7 +1264,7 @@ void DrawBetsPage(Gfx** displayListHead) {
   LoadNibbleTextureBlock(&gfx, ImageTexels(g_Scorecard.betSubtitlesImage),
       G_IM_FMT_CI, BET_SUBTITLE_WIDTH, BET_SUBTITLE_IMAGE_HEIGHT, 0, 0, 0, 0, 0,
       0, 0);
-  for (i = 0, left = 0; i < BET_COUNT; i++) {
+  for (i = 0, left = 0; i != BET_COUNT; i++) {
     if (g_GameState.betRates[i] != UNSET_BET_RATE) {
       if (f_BetSubtitleRows[i] != NO_BET_SUBTITLE) {
         if (g_GameState.betRates[i] == 0) {
