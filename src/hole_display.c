@@ -2292,7 +2292,12 @@ void HandleFrameBufferSwap(void) {}
  * leaves 74 words, starting with the frame's size, so reload's spill choice
  * differs too. That height written as a plain ?: branches, where the original
  * doesn't; it gave 174 words, 50 in shape, against 193 (45) with the |, whose
- * extra words are register choices. 193 words differ, 45 in shape.
+ * extra words are register choices. A permuter output, 215 words with 31 in
+ * shape, needs two temps: a u32 copy of frame, set before the first PipeSync,
+ * for the strip loop's two texture images, and ~7 held in a variable for one of
+ * them. Without the copy it gives 202 words, 48 in shape, and without the
+ * mask's variable 299, 35 in shape; writing the load block's count as width
+ * times height changes nothing. 193 words differ, 45 in shape.
  */
 #ifdef NON_MATCHING
 void DrawFadeAnimation(Gfx** displayListHead) {
