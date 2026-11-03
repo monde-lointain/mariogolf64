@@ -1618,7 +1618,13 @@ void FormatLeaderboardRow(char* row, TournamentStanding* standing) {
  * this spills it, so its frame is 0xE0 bytes, not 0xD8. The bottom flaps'
  * loop also reads the flip angles through the stagger's index instead of a
  * pointer of their own. Stepping the rows' tops beside the index gives 140
- * words differing, 54 in shape. 124 words differ, 48 in shape.
+ * words differing, 54 in shape. The name flaps' shade test branches over the
+ * sine and jumps past it with 0xFF, where GCC branches to the join with 0xFF in
+ * the delay slot; testing !(angle >= FLAP_EDGE_ON_ANGLE) gives that layout but
+ * reverses the compare (121 words, 45 in shape), and >= with the sine first
+ * gives 125. In both flap loops the original masks the shade in its own
+ * register; a u8, u16 or u32 shade gives 202-208 words, s16 changes nothing.
+ * 120 words differ, 46 in shape.
  */
 #ifdef NON_MATCHING
 void DrawLeaderboardPage(Gfx** displayListHead) {
