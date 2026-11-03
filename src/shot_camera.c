@@ -1869,12 +1869,9 @@ void PlaceAimCamera(void);
  * step of the ball's flight, then keeps the eye above the ground and over the
  * course. The kinds that test f_IsCameraKindNew do their setup once when it is
  * set, then clear it. Doesn't match: the original allocates some registers
- * differently, and orders two spots differently: the load of
- * CHASE_FIELD_OF_VIEW and the stores of point for FLIGHT_CAMERA_FACING_CUP.
- * The register oracle forces 27 pseudos, in five separate spots, and still
- * leaves 38 words differing, among them the chasing camera's offset stores,
- * which the original makes after its look-at sums. 184 words differ, 8 in
- * shape.
+ * differently, and orders the stores of point for FLIGHT_CAMERA_FACING_CUP
+ * differently. The register oracle forces 14 pseudos and still leaves 28
+ * words differing. 120 words differ, 4 in shape.
  */
 #ifdef NON_MATCHING
 void PlaceFlightCamera(s32 step) {
@@ -2005,21 +2002,25 @@ void PlaceFlightCamera(s32 step) {
       }
 
       break;
-    case FLIGHT_CAMERA_CHASING_BALL:
+    case FLIGHT_CAMERA_CHASING_BALL: {
+      /* Its own, as the original keeps it in a temporary register rather
+       * than distance's saved one; sharing distance gives 184 differing
+       * words, 8 in shape */
+      f32 scale;
+
       /* Back along the path, level with the ball */
       position[AXIS_X] = g_SimulatedShot.path[step - 1][AXIS_X] -
           (f32)f_FlightBallPosition[AXIS_X];
       position[AXIS_Y] = 0.0f;
       position[AXIS_Z] = g_SimulatedShot.path[step - 1][AXIS_Z] -
           (f32)f_FlightBallPosition[AXIS_Z];
-      distance = CHASE_DISTANCE /
+      scale = CHASE_DISTANCE /
           sqrtf((position[AXIS_X] * position[AXIS_X]) +
               (position[AXIS_Y] * position[AXIS_Y]) +
               (position[AXIS_Z] * position[AXIS_Z]));
-      position[AXIS_X] *= distance;
-      position[AXIS_Y] *= distance;
-      position[AXIS_Z] *= distance;
-      g_Cameras[0].view.fieldOfView = CHASE_FIELD_OF_VIEW;
+      position[AXIS_X] *= scale;
+      position[AXIS_Y] *= scale;
+      position[AXIS_Z] *= scale;
       f_LookAtPoint[AXIS_X] =
           (f_FlightBallPosition[AXIS_X] * COURSE_TO_WORLD_SCALE) -
           position[AXIS_X];
@@ -2036,7 +2037,9 @@ void PlaceFlightCamera(s32 step) {
       f_CameraPosition[AXIS_Z] =
           (f_FlightBallPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE) +
           position[AXIS_Z];
+      g_Cameras[0].view.fieldOfView = CHASE_FIELD_OF_VIEW;
       break;
+    }
     case FLIGHT_CAMERA_FOLLOWING_PATH:
       f_CameraPosition[AXIS_X] =
           (f32)g_SimulatedShot.path[step - FOLLOW_STEP_COUNT][AXIS_X] *
