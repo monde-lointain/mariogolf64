@@ -393,7 +393,11 @@ void DrawBestTimes(Gfx** displayListHead) {
       gDPSetRenderMode(gfx++, G_RM_AA_TEX_EDGE, G_RM_AA_TEX_EDGE2);
       gDPPipeSync(gfx++);
       gDPSetTextureFilter(gfx++, G_TF_BILERP);
-      /* Read into a local of its own to match */
+      /*
+       * Read into a local of its own to match: indexing with
+       * memory->bestTimesCourse gives 37 words differing (13 in shape), and
+       * with the bestTimesCourse read at the top 217 (27)
+       */
       holderCourse = memory->bestTimesCourse;
       character = save->bestTimeCharacters[holderCourse][otherIndex];
       DrawCharacterFace(&gfx, g_CharacterFaceImages[character],

@@ -373,7 +373,10 @@ void SetUpPlayers(void) {
       }
     }
 
-    /* The index variable is there to match */
+    /*
+     * The index variable is there to match: indexing player 0 directly gives
+     * 12 words differing, 6 in shape
+     */
     i = 0;
     for (slot = PLAYER_UNKAA_COUNT - 1; slot >= 0; slot--) {
       g_Players[i].unkAA[slot] = 0;

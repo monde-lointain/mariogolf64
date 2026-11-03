@@ -455,7 +455,11 @@ void SetTextSlot(s32 x, s32 y, MessageId messageId, s32 fontSize, s32 slot,
       MeasureMessage(messageId, FONT_SIZE_LARGE, &width, &height, slot);
     }
 
-    /* The pointer, used only for the message comparison, is there to match */
+    /*
+     * The pointer, used only for the message comparison, is there to match:
+     * comparing through g_TextSlots[slot] gives 6 words differing (4 in
+     * shape), and writing every field through the pointer 75 (33)
+     */
     textSlot = &g_TextSlots[slot];
     halfWidth = width / 2;
     halfHeight = height / 2;
