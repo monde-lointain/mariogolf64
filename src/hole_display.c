@@ -2280,8 +2280,12 @@ void HandleFrameBufferSwap(void) {}
  * splitting the frame into halves that slide apart. When a fade ends,
  * the unread f_UnusedFadeEndCount counts up, wrapping at FADE_COUNT_PERIOD.
  *
- * Doesn't match: registers are allocated differently, and f_CapturedFrame is
- * kept in a saved register and on the stack. 174 words differ.
+ * Doesn't match: registers are allocated differently. The original loads
+ * f_CapturedFrame into $s3, stores it at once in a reload slot (0xC($sp)) and
+ * reads it back for the strip loops, using $s3 for gbi words; its frame is 8
+ * bytes larger for that slot. The register oracle forces 16 pseudos and still
+ * leaves 78 words, among them that slot, so reload's spill choice differs
+ * too. 174 words differ, 50 in shape.
  */
 #ifdef NON_MATCHING
 void DrawFadeAnimation(Gfx** displayListHead) {
