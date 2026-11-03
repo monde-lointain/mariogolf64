@@ -2025,8 +2025,11 @@ void DrawReadyGoMovie(Gfx** displayListHead) {
  * (107 words differing, 27 in shape); taking top from the strip index, as
  * here, leaves stripCount in $fp but drops bottom's stepping. Pointer and
  * corner locals in the loop, stepping bottom by hand, a while loop, a u32
- * offset and taking offset from the strip index give 107 to 119 words.
- * 54 words differ, 24 in shape.
+ * offset and taking offset from the strip index give 107 to 119 words. A
+ * permuter run got to 50 words, 12 in shape, only by dropping the 4 strips
+ * from top and reading an unset variable; its other changes, naming the
+ * image's height and writing 1.0f + cosf(angle), leave 54. 54 words differ,
+ * 24 in shape.
  */
 #ifdef NON_MATCHING
 void DrawShrinkingMovieImage(Gfx** displayListHead) {
