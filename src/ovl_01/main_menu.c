@@ -4811,7 +4811,11 @@ void DrawUpDownArrows(Gfx** displayListHead, s32 centerY);
  * other's saved registers, whatever order they are declared in, and the
  * strips lack one of the original's three adds of zero. Adding the bob to the
  * chosen board's top last, as here, gives 86 words against 104; adding it first
- * or second, 102-104. 86 words differ, 2 in shape.
+ * or second, 102-104. The permuter's best reads modeSpin through a pointer
+ * taken before the boards, which gives 38 words, but the original loads
+ * g_MenuMemory.modeSpin directly, so the pointer only perturbs allocation;
+ * testing modeSpin first gives 130 words, and == FALSE or ! leave 86.
+ * 86 words differ, 2 in shape.
  */
 #ifdef NON_MATCHING
 void DrawModeSelect(Gfx** displayListHead) {
