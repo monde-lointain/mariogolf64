@@ -3143,13 +3143,17 @@ static const f64 f_ScoresTenDegrees = DegreesToRadians(10);
  * at the end. The bet columns show g_PrintBuffer as it already stands, and
  * are skipped when the bet rate at the player's index is zero or unset.
  *
- * Doesn't match: the original counts the bet column from 0 and adds
- * BET_TALLY_LEFT where it sets each digit's left edge, and tests
- * g_PrintBuffer's first character at its own address before the digits' loop.
- * The nested ifs make GCC compare the bet rate with zero and UNSET_BET_RATE in
- * turn, as the original does, rather than as a range. Counting the column
- * from 0 and adding BET_TALLY_LEFT to left gives 37 words, 17 in shape. 35
- * words differ, 15 in shape.
+ * Doesn't match: loop.c strength-reduces BET_TALLY_TOP + rowOffset into the
+ * register that steps by BET_TALLY_ROW_SPACING, where the original steps
+ * rowOffset itself from 0 and adds BET_TALLY_TOP at each digit. The nested
+ * ifs make GCC compare the bet rate with zero and UNSET_BET_RATE in turn, as
+ * the original does, rather than as a range. Indexing g_PrintBuffer by digit,
+ * where walking a pointer gave 35 words, 15 in shape, tests its first
+ * character at its own address and reloads each character, as the original
+ * does; setting left from the digit index gives 123. Stepping rowOffset at
+ * the end of the player loop gives 24 words, 14 in shape; a top of its own,
+ * 25 and 15; no rowOffset, 92; and rowOffset as an s16, u16 or u32, 98 to
+ * 112. 22 words differ, 12 in shape.
  */
 #ifdef NON_MATCHING
 void DrawBetTallies(Gfx** displayListHead) {
@@ -3159,7 +3163,7 @@ void DrawBetTallies(Gfx** displayListHead) {
   s32 total;
   s32 column;
   s32 left;
-  char* text;
+  s32 digit;
   s32 rowOffset;
 
   LoadSmallPalette(&gfx, 0, ImageBody(g_Scorecard.digitsImage));
@@ -3173,13 +3177,14 @@ void DrawBetTallies(Gfx** displayListHead) {
       total += g_BetTallies[playerIndex][betIndex];
       if (g_GameState.betRates[playerIndex] != 0) {
         if (g_GameState.betRates[playerIndex] != UNSET_BET_RATE) {
-          for (text = g_PrintBuffer, left = column; *text != '\0';
-              left += DIGIT_GLYPH_SIZE) {
+          for (digit = 0, left = column; g_PrintBuffer[digit] != '\0';
+              digit++, left += DIGIT_GLYPH_SIZE) {
             DrawTextureRect(&gfx, QuarterPixels(left + g_Scorecard.x),
                 QuarterPixels(BET_TALLY_TOP + rowOffset),
                 QuarterPixels(left + g_Scorecard.x + DIGIT_GLYPH_SIZE),
                 QuarterPixels(BET_TALLY_TOP + DIGIT_GLYPH_SIZE + rowOffset),
-                G_TX_RENDERTILE, 0, TexelCoordinate(GetDigitGlyphTop(*text++)),
+                G_TX_RENDERTILE, 0,
+                TexelCoordinate(GetDigitGlyphTop(g_PrintBuffer[digit])),
                 TEXEL_STEP_ONE, TEXEL_STEP_ONE);
           }
         }
@@ -3189,13 +3194,14 @@ void DrawBetTallies(Gfx** displayListHead) {
     }
 
     sprintf(g_PrintBuffer, f_DecimalFormat, total);
-    for (text = g_PrintBuffer, left = BET_TOTAL_LEFT; *text != '\0';
-        left += DIGIT_GLYPH_SIZE) {
+    for (digit = 0, left = BET_TOTAL_LEFT; g_PrintBuffer[digit] != '\0';
+        digit++, left += DIGIT_GLYPH_SIZE) {
       DrawTextureRect(&gfx, QuarterPixels(left + g_Scorecard.x),
           QuarterPixels(BET_TALLY_TOP + rowOffset),
           QuarterPixels(left + g_Scorecard.x + DIGIT_GLYPH_SIZE),
           QuarterPixels(BET_TALLY_TOP + DIGIT_GLYPH_SIZE + rowOffset),
-          G_TX_RENDERTILE, 0, TexelCoordinate(GetDigitGlyphTop(*text++)),
+          G_TX_RENDERTILE, 0,
+          TexelCoordinate(GetDigitGlyphTop(g_PrintBuffer[digit])),
           TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     }
   }
