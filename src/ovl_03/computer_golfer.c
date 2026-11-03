@@ -3001,17 +3001,22 @@ Boolean IsLineMostlyLost(CoursePoint from, CoursePoint to) {
  * Simulates f_TrialShot and returns TRUE if the ball comes to rest, and not out
  * of bounds, off the course or in a water hazard
  *
- * Doesn't match: ours reads the simulation's state in the loop test from
- * its address, where the original reads it through the register that holds the
+ * Doesn't match: ours reads the simulation's state in the loop test from its
+ * address, where the original reads it through the register that holds the
  * simulation's address, and the original places the fault report after the
- * surface test. Testing the step count before the outside flag, or the
- * surface with && gives 30 differing words; nesting its tests, joining them
- * with || or comparing the state with BALL_STATE_STOPPED changes nothing.
- * The original reaches its TRUE message by a jump past the fault report; a
- * switch on the kind, a goto to a closing TRUE block, an else for the TRUE
- * case or a safe flag give 24 to 31 words, and a pointer to the simulation
- * 32 to 39. The permuter's best, 15 words, prints the TRUE message for a
- * water hazard too and falls off the end without a return. 24 words differ.
+ * surface test. Testing the step count before the outside flag, or the surface
+ * with && gives 30 differing words; nesting its tests, joining them with || or
+ * comparing the state with BALL_STATE_STOPPED changes nothing. The original
+ * reaches its TRUE message by a jump past the fault report; a switch on the
+ * kind, a goto to a closing TRUE block, an else for the TRUE case or a safe
+ * flag give 24 to 31 words, and a pointer to the simulation 32 to 39. The
+ * original's register holds the simulation's address plus 0x28, which it takes
+ * off for the step's argument; a pointer used only by the loop reads the state
+ * through its register, without that bias, and gives 25 words (13 in shape),
+ * while one also used for the launch, the later state test and the surface
+ * gives 39 (17). The permuter's best, 15 words, prints the TRUE message for a
+ * water hazard too and falls off the end without a return. 24 words differ, 14
+ * in shape.
  */
 #ifdef NON_MATCHING
 Boolean IsTrialShotSafe(void) {
