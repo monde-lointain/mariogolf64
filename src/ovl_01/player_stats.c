@@ -1260,8 +1260,8 @@ void DrawHandicaps(Gfx** displayListHead, s32 slide, u8 reverseVerticalSlide,
         FreeCharacterSlot(playerIndex);
       } else {
         LoadCharacter(playerIndex,
-            (s8)g_Players[playerIndex].characterIndex + CHARACTER_COUNT,
-            (s8)g_Players[playerIndex].paletteIndex);
+            g_Players[playerIndex].characterIndex + CHARACTER_COUNT,
+            g_Players[playerIndex].paletteIndex);
         g_IsMenuCharacterLoaded[playerIndex] = TRUE;
         SetCharacterAnimation(playerIndex, MENU_ANIMATION_STANDING);
         SetAnimationSpeed(playerIndex, 1.0f);
@@ -1994,8 +1994,8 @@ void UpdateBestShots(void) {
           PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
           g_IsMenuWipeOpening = FALSE;
           column = memory->bestShotColumn;
-          LoadWipeShape((s8)save
-                  ->rankedRecords[f_BestShotRecords[memory->bestShotRow]
+          LoadWipeShape(
+              save->rankedRecords[f_BestShotRecords[memory->bestShotRow]
                                                    [column]]
                   .courseIndex);
           StartWipe(WIPE_CLOSING);

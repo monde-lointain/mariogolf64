@@ -1439,11 +1439,11 @@ void DrawContestWinnerMovie(Gfx** displayListHead) {
 
   if (f_MovieDrawCount == CONTEST_CHEER_DRAW) {
     if (f_CurrentMovie == MOVIE_LONGEST_DRIVE) {
-      PlayCharacterSound((s8)g_Players[GetContestWinner()].characterIndex,
+      PlayCharacterSound(g_Players[GetContestWinner()].characterIndex,
           GetContestWinner(), CHARACTER_SOUND_LONGEST_DRIVE, SOUND_FULL_SCALE,
           SOUND_FULL_SCALE);
     } else {
-      PlayCharacterSound((s8)g_Players[GetContestWinner()].characterIndex,
+      PlayCharacterSound(g_Players[GetContestWinner()].characterIndex,
           GetContestWinner(), CHARACTER_SOUND_NEAREST_PIN, SOUND_FULL_SCALE,
           SOUND_FULL_SCALE);
     }
@@ -1465,14 +1465,14 @@ void DrawContestWinnerMovie(Gfx** displayListHead) {
     gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
     gDPSetEnvColor(gfx++, 255, 255, 255, CONTEST_COPY_ALPHA);
     if (f_MovieDrawCount == 0) {
-      OpenAssetFile(g_CharacterPaletteAssets[(s8)g_Players[GetContestWinner()]
+      OpenAssetFile(g_CharacterPaletteAssets[g_Players[GetContestWinner()]
                             .characterIndex] +
-              (s8)g_Players[GetContestWinner()].paletteIndex,
+              g_Players[GetContestWinner()].paletteIndex,
           &file);
       ReadAssetFile(f_MovieBuffer + WINNER_PALETTE_OFFSET,
           GetAssetFileSize(&file), &file);
-      OpenEncodedAsset(g_CharacterImageAssets[(s8)g_Players[GetContestWinner()]
-                               .characterIndex],
+      OpenEncodedAsset(
+          g_CharacterImageAssets[g_Players[GetContestWinner()].characterIndex],
           &asset);
       ReadEncodedAsset(f_MovieBuffer + WINNER_FACE_OFFSET, &asset);
       OpenEncodedAsset(ASSET_WOODEN_PLAQUE, &asset);
@@ -1525,26 +1525,26 @@ void DrawContestWinnerMovie(Gfx** displayListHead) {
       f_MovieDrawCount <= CONTEST_MEET_DRAW + WINNER_LAST_FRAME) {
     frame = f_MovieDrawCount - CONTEST_MEET_DRAW;
     if (frame == WINNER_BLINK_FRAME) {
-      OpenEncodedAsset(g_CharacterImageAssets[(s8)g_Players[GetContestWinner()]
-                               .characterIndex] +
+      OpenEncodedAsset(
+          g_CharacterImageAssets[g_Players[GetContestWinner()].characterIndex] +
               1,
           &asset);
       ReadEncodedAsset(f_MovieBuffer + WINNER_FACE_OFFSET, &asset);
     } else if (frame == WINNER_BLINK_FRAME + 2) {
-      OpenEncodedAsset(g_CharacterImageAssets[(s8)g_Players[GetContestWinner()]
-                               .characterIndex] +
+      OpenEncodedAsset(
+          g_CharacterImageAssets[g_Players[GetContestWinner()].characterIndex] +
               2,
           &asset);
       ReadEncodedAsset(f_MovieBuffer + WINNER_FACE_OFFSET, &asset);
     } else if (frame == WINNER_BLINK_FRAME + 4) {
-      OpenEncodedAsset(g_CharacterImageAssets[(s8)g_Players[GetContestWinner()]
-                               .characterIndex] +
+      OpenEncodedAsset(
+          g_CharacterImageAssets[g_Players[GetContestWinner()].characterIndex] +
               3,
           &asset);
       ReadEncodedAsset(f_MovieBuffer + WINNER_FACE_OFFSET, &asset);
     } else if (frame == WINNER_BLINK_FRAME + 6) {
-      OpenEncodedAsset(g_CharacterImageAssets[(s8)g_Players[GetContestWinner()]
-                               .characterIndex] +
+      OpenEncodedAsset(
+          g_CharacterImageAssets[g_Players[GetContestWinner()].characterIndex] +
               4,
           &asset);
       ReadEncodedAsset(f_MovieBuffer + WINNER_FACE_OFFSET, &asset);

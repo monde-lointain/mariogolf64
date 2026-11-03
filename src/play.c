@@ -363,14 +363,13 @@ void SetUpPlayers(void) {
     }
 
     g_Players[0].unk28 = -1;
-    LoadPlayerFace(
-        0, (s8)g_Players[0].characterIndex, (s8)g_Players[0].paletteIndex);
+    LoadPlayerFace(0, g_Players[0].characterIndex, g_Players[0].paletteIndex);
     for (slot = 0; slot < CLUB_SLOT_COUNT; slot++) {
       if (slot >= CLUB_SET_SIZE) {
         g_Players[0].clubs[slot] = NO_CLUB;
       } else {
         g_Players[0].clubs[slot] =
-            slot + ((s8)g_Players[0].characterIndex * CLUB_SET_SIZE);
+            slot + (g_Players[0].characterIndex * CLUB_SET_SIZE);
       }
     }
 
@@ -401,7 +400,7 @@ void SetUpPlayers(void) {
           g_Players[i].clubs[slot] = NO_CLUB;
         } else {
           g_Players[i].clubs[slot] =
-              slot + ((s8)g_Players[i].characterIndex * CLUB_SET_SIZE);
+              slot + (g_Players[i].characterIndex * CLUB_SET_SIZE);
         }
       }
 
@@ -804,7 +803,7 @@ Boolean HasWonFinalChallenge(void) {
 
   if (g_GameState.gameMode == GAME_MODE_GET_CHARACTER) {
     if (GetMatchWinner(0, 1) == MATCH_SIDE_PLAYER) {
-      if ((s8)g_Players[1].characterIndex == CHARACTER_BOWSER) {
+      if (g_Players[1].characterIndex == CHARACTER_BOWSER) {
         return TRUE;
       }
     }
@@ -1452,8 +1451,7 @@ DIM_BACKDROP:
                 InsertBestTime(g_GameState.courseIndex,
                     g_GameState.stopwatchFrameCount,
                     GetNetScoreToPar(COURSE_HOLE_COUNT, 0),
-                    (s8)g_Players[0].characterIndex,
-                    (s8)g_Players[0].paletteIndex);
+                    g_Players[0].characterIndex, g_Players[0].paletteIndex);
               }
             } else if (g_GameState.gameMode == GAME_MODE_TRAINING) {
               f_HoleEndStep = HOLE_END_STEP_FREE_SLOT;

@@ -400,7 +400,7 @@ void UpdateRingShotRecords(void) {
           memory->courseIndex =
               save->ringShotRecords[f_RecordedReplaySlots[index]].courseIndex;
           g_IsChosenHoleLoadStarted = FALSE;
-          LoadWipeShape((s8)save->ringShotRecords[index].courseIndex);
+          LoadWipeShape(save->ringShotRecords[index].courseIndex);
           StartWipe(WIPE_CLOSING);
           g_IsRingShotWipeOpening = FALSE;
         }
@@ -883,10 +883,10 @@ void LoadRingShotRecordFaces(void) {
 
   for (index = 0; index != SAVE_MENU_SLOT_COUNT; index++) {
     if (f_RecordedReplaySlots[index] != -1) {
-      character = (s8)save->ringShotRecords[f_RecordedReplaySlots[index]]
-                      .characterIndex;
+      character =
+          save->ringShotRecords[f_RecordedReplaySlots[index]].characterIndex;
       palette =
-          (s8)save->ringShotRecords[f_RecordedReplaySlots[index]].paletteIndex;
+          save->ringShotRecords[f_RecordedReplaySlots[index]].paletteIndex;
       if (character < 0) {
         character = 0;
       }
@@ -1729,11 +1729,10 @@ s32 ContinueSavedGame(void) {
     g_Players[playerIndex].controllerIndex = controller;
     sprintf(
         g_Players[playerIndex].name, f_SaveMenuNameFormat, savedPlayer->name);
-    character = (s8)savedPlayer->characterIndex;
+    character = savedPlayer->characterIndex;
     g_ChosenCharacters[playerIndex] = character;
     g_Players[playerIndex].characterIndex = character;
-    LoadPlayerFace(
-        playerIndex, character, (s8)g_Players[playerIndex].paletteIndex);
+    LoadPlayerFace(playerIndex, character, g_Players[playerIndex].paletteIndex);
     savedPlayer++;
   }
 
@@ -2343,8 +2342,8 @@ void DrawSavedGolfers(Gfx** displayListHead) {
         FreeCharacterSlot(playerIndex);
       } else {
         LoadCharacter(playerIndex,
-            (s8)players[playerIndex].characterIndex + CHARACTER_COUNT,
-            (s8)players[playerIndex].paletteIndex);
+            players[playerIndex].characterIndex + CHARACTER_COUNT,
+            players[playerIndex].paletteIndex);
         g_IsMenuCharacterLoaded[playerIndex] = TRUE;
         SetCharacterAnimation(playerIndex, MENU_ANIMATION_STANDING);
         SetAnimationSpeed(playerIndex, 1.0f);
@@ -2354,7 +2353,7 @@ void DrawSavedGolfers(Gfx** displayListHead) {
     rotation[AXIS_X] = DegreesToRadians(f_SavedGolferAngles[0]);
     rotation[AXIS_Y] = DegreesToRadians(f_SavedGolferAngles[1]);
     rotation[AXIS_Z] = 0.0f;
-    raise = ((s8)players[playerIndex].characterIndex == CHARACTER_BABY_MARIO)
+    raise = (players[playerIndex].characterIndex == CHARACTER_BABY_MARIO)
         ? BABY_MARIO_RAISE
         : 0;
     translation[AXIS_X] =

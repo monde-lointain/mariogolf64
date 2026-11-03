@@ -2735,18 +2735,17 @@ void DrawScoresPage(Gfx** displayListHead) {
   SetTextColor(&gfx, 0xFF, 0xFF, 0xFF);
   for (parHoleIndex = 0; parHoleIndex != HOLES_PER_NINE; parHoleIndex++) {
     if (!(g_GameState.holeSelection & HOLE_SELECTION_BACK_NINE)) {
-      frontPar += (s8)course->holes[parHoleIndex].par;
-      sprintf(
-          g_PrintBuffer, f_DecimalFormat, (s8)course->holes[parHoleIndex].par);
+      frontPar += course->holes[parHoleIndex].par;
+      sprintf(g_PrintBuffer, f_DecimalFormat, course->holes[parHoleIndex].par);
       DrawCondensedShadowedText(&gfx,
           (parHoleIndex * CELL_WIDTH) + PAR_LEFT + g_Scorecard.x,
           frontTop + PAR_TOP + g_Scorecard.y, g_PrintBuffer);
     }
 
     if (!(g_GameState.holeSelection & HOLE_SELECTION_FRONT_NINE)) {
-      backPar += (s8)course->holes[parHoleIndex + HOLES_PER_NINE].par;
+      backPar += course->holes[parHoleIndex + HOLES_PER_NINE].par;
       sprintf(g_PrintBuffer, f_DecimalFormat,
-          (s8)course->holes[parHoleIndex + HOLES_PER_NINE].par);
+          course->holes[parHoleIndex + HOLES_PER_NINE].par);
       DrawCondensedShadowedText(&gfx,
           (parHoleIndex * CELL_WIDTH) + PAR_LEFT + g_Scorecard.x,
           backTop + PAR_TOP + g_Scorecard.y, g_PrintBuffer);

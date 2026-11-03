@@ -1627,11 +1627,12 @@ void InvalidateBrokenSavedGames(void) {
 
     for (entryIndex = 0; entryIndex != sub->playerCount; entryIndex++) {
       player = &save->savedPlayers[index][entryIndex];
-      if (player->characterIndex >= CHARACTER_COUNT) {
+      /* The unsigned tests also catch negative indices */
+      if ((u8)player->characterIndex >= CHARACTER_COUNT) {
         isInvalid[index] = TRUE;
       }
 
-      if (player->paletteIndex >= CHARACTER_PALETTE_COUNT) {
+      if ((u8)player->paletteIndex >= CHARACTER_PALETTE_COUNT) {
         isInvalid[index] = TRUE;
       }
     }
@@ -1680,11 +1681,12 @@ void InvalidateBrokenRingShotRecords(void) {
       }
     }
 
-    if (record->characterIndex >= CHARACTER_COUNT) {
+    /* The unsigned tests also catch negative indices */
+    if ((u8)record->characterIndex >= CHARACTER_COUNT) {
       isInvalid[recordIndex] = TRUE;
     }
 
-    if (record->paletteIndex >= CHARACTER_PALETTE_COUNT) {
+    if ((u8)record->paletteIndex >= CHARACTER_PALETTE_COUNT) {
       isInvalid[recordIndex] = TRUE;
     }
 

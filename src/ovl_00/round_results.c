@@ -528,10 +528,10 @@ void LoadRoundResults(void) {
 
   for (i = 0; i != g_GameState.playerCount; i++) {
     f_PlayerPortraitImages[i] = AllocMemory(OpenEncodedAsset(
-        g_CharacterImageAssets[(s8)g_Players[i].characterIndex], &asset));
+        g_CharacterImageAssets[g_Players[i].characterIndex], &asset));
     ReadEncodedAsset(f_PlayerPortraitImages[i], &asset);
-    OpenAssetFile(g_CharacterPaletteAssets[(s8)g_Players[i].characterIndex] +
-            (s8)g_Players[i].paletteIndex,
+    OpenAssetFile(g_CharacterPaletteAssets[g_Players[i].characterIndex] +
+            g_Players[i].paletteIndex,
         &file);
     size = GetAssetFileSize(&file);
     palette = AllocMemory(size);
@@ -562,7 +562,7 @@ void LoadRoundResults(void) {
       f_MatchStandingWordsImage =
           AllocMemory(OpenEncodedAsset(MATCH_STANDING_WORDS_ASSET, &asset));
       ReadEncodedAsset(f_MatchStandingWordsImage, &asset);
-      f_PortraitCharacterIndex = (s8)g_Players[1].characterIndex;
+      f_PortraitCharacterIndex = g_Players[1].characterIndex;
     } else {
       f_ResultsPlacesImage =
           AllocMemory(OpenEncodedAsset(ASSET_PLACES, &asset));
@@ -632,11 +632,10 @@ void LoadRoundResults(void) {
         }
 
         f_PortraitImage = AllocMemory(OpenEncodedAsset(
-            g_CharacterImageAssets[(s8)g_Players[1].characterIndex], &asset));
+            g_CharacterImageAssets[g_Players[1].characterIndex], &asset));
         ReadEncodedAsset(f_PortraitImage, &asset);
-        OpenAssetFile(
-            g_CharacterPaletteAssets[(s8)g_Players[1].characterIndex] +
-                (s8)g_Players[1].paletteIndex,
+        OpenAssetFile(g_CharacterPaletteAssets[g_Players[1].characterIndex] +
+                g_Players[1].paletteIndex,
             &file);
         size = GetAssetFileSize(&file);
         f_PortraitPalette = AllocMemory(size);
@@ -731,8 +730,7 @@ void LoadRoundResults(void) {
   }
 
   for (k = 0; k != g_GameState.playerCount; k++) {
-    if ((s8)g_Players[k].characterIndex >= CHARACTER_KID &&
-        f_PlayerPoints[k] > 0) {
+    if (g_Players[k].characterIndex >= CHARACTER_KID && f_PlayerPoints[k] > 0) {
       AddGameBoyExperience(
           g_Players[k].gameBoyCharacterIndex, f_PlayerPoints[k]);
     }
@@ -1550,8 +1548,8 @@ void UpdateCharacterResultsNotice(void) {
       !(f_NoticeTime & NOTICE_FACE_INTERVAL_MASK) &&
       f_NoticeFaceIndex < NOTICE_LAST_FACE) {
     f_NoticeFaceIndex++;
-    OpenEncodedAsset(g_CharacterImageAssets[(s8)g_Players[1].characterIndex] +
-            f_NoticeFaceIndex,
+    OpenEncodedAsset(
+        g_CharacterImageAssets[g_Players[1].characterIndex] + f_NoticeFaceIndex,
         &asset);
     ReadEncodedAsset(f_PortraitImage, &asset);
   }
@@ -2261,7 +2259,7 @@ s32 UpdateTournamentResults(ControllerState* controller) {
             f_ResultsUnk78 = TOURNAMENT_STEP_TALLYING_PRIZE;
             if (f_PlayerRanks[0] == 1) {
               StartPortraitAnimation(PORTRAIT_ANIMATION_UNK1, 0);
-              PlayCharacterSound((s8)g_Players[0].characterIndex, 0,
+              PlayCharacterSound(g_Players[0].characterIndex, 0,
                   CHARACTER_SOUND_WIN, SOUND_FULL_SCALE, WIN_SOUND_PAN);
             }
           }
@@ -2777,14 +2775,14 @@ s32 UpdateMatchResults(ControllerState* controller) {
           if (g_GameState.gameMode == GAME_MODE_GET_CHARACTER) {
             /* Beating a still locked opponent unlocks them */
             if (f_PlayerRanks[0] == MATCH_RANK_WON &&
-                FindCharacterOnGrid((s8)g_Players[1].characterIndex) ==
+                FindCharacterOnGrid(g_Players[1].characterIndex) ==
                     CHARACTER_OFF_GRID &&
-                IsUnlockedByBeating((s8)g_Players[1].characterIndex)) {
+                IsUnlockedByBeating(g_Players[1].characterIndex)) {
               f_ResultsUnk78 = MATCH_STEP_SHOW_CHARACTER_NOTICE;
             }
 
-            RecordComCharacterResult((s8)g_Players[0].characterIndex,
-                (s8)g_Players[1].characterIndex,
+            RecordComCharacterResult(g_Players[0].characterIndex,
+                g_Players[1].characterIndex,
                 GetMatchWinner(0, 1) == MATCH_SIDE_PLAYER);
           }
 
@@ -2839,8 +2837,8 @@ s32 UpdateMatchResults(ControllerState* controller) {
                   &portraitAsset);
               ReadEncodedAsset(f_PortraitImage, &portraitAsset);
               OpenAssetFile(
-                  g_CharacterPaletteAssets[(s8)g_Players[1].characterIndex] +
-                      (s8)g_Players[1].paletteIndex,
+                  g_CharacterPaletteAssets[g_Players[1].characterIndex] +
+                      g_Players[1].paletteIndex,
                   &file);
               ReadAssetFile(f_PortraitPalette, GetAssetFileSize(&file), &file);
               OpenEncodedAsset(CHARACTER_NOTICE_TITLE_ASSET, &portraitAsset);
@@ -3820,14 +3818,13 @@ void DrawRoundResults(Gfx** displayListHead) {
         switch (f_PortraitAnimations[i]) {
           case PORTRAIT_ANIMATION_REST:
             OpenEncodedAsset(
-                g_CharacterImageAssets[(s8)g_Players[i].characterIndex],
-                &asset);
+                g_CharacterImageAssets[g_Players[i].characterIndex], &asset);
             ReadEncodedAsset(f_PlayerPortraitImages[i], &asset);
             f_PortraitFrames[i] = NO_PORTRAIT_FRAME;
             break;
           case PORTRAIT_ANIMATION_UNK1:
             OpenEncodedAsset(
-                g_CharacterImageAssets[(s8)g_Players[i].characterIndex] +
+                g_CharacterImageAssets[g_Players[i].characterIndex] +
                     f_PortraitFrames[i],
                 &asset);
             ReadEncodedAsset(f_PlayerPortraitImages[i], &asset);
@@ -3841,7 +3838,7 @@ void DrawRoundResults(Gfx** displayListHead) {
             s32 unk4Faces[PORTRAIT_ANIMATION_FRAME_COUNT] = {0, 5, 6, 7, 8};
 
             OpenEncodedAsset(
-                g_CharacterImageAssets[(s8)g_Players[i].characterIndex] +
+                g_CharacterImageAssets[g_Players[i].characterIndex] +
                     unk4Faces[f_PortraitFrames[i]],
                 &asset);
             ReadEncodedAsset(f_PlayerPortraitImages[i], &asset);

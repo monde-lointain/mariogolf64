@@ -355,7 +355,7 @@ s32 GetPlannedShot(CurrentShot* shot) {
 }
 
 s32 GetGolferTraitUnk2(void) {
-  return f_GolferTraits[(s8)g_Players[f_Shot.playerIndex].characterIndex].unk2;
+  return f_GolferTraits[g_Players[f_Shot.playerIndex].characterIndex].unk2;
 }
 
 Boolean IsStrokeLimitReached(void) {
@@ -789,7 +789,7 @@ s32 PlanShot(CurrentShot* plannedShot) {
       }
 
       if (f_Shot.shotMode == SHOT_MODE_APPROACH) {
-        if (f_GolferTraits[(s8)g_Players[f_Shot.playerIndex].characterIndex]
+        if (f_GolferTraits[g_Players[f_Shot.playerIndex].characterIndex]
                     .windPlay < 2 &&
             f_Shot.clubSlot ==
                 FindClubSlot(f_Shot.playerIndex, CLUB_TYPE_PITCHING_WEDGE)) {
@@ -864,8 +864,8 @@ s32 PlanShot(CurrentShot* plannedShot) {
           f_TrialShot.surface, f_TrialShot.shotMode);
       maxMishit -= maxMishit != 0;
       if (strokes < par + f_HoleTargetToPar - 2) {
-        switch (f_GolferTraits[(s8)g_Players[f_TrialShot.playerIndex]
-                                   .characterIndex]
+        switch (
+            f_GolferTraits[g_Players[f_TrialShot.playerIndex].characterIndex]
                 .unk1) {
           case 0:
             mishitDivisor = 62;
@@ -1248,13 +1248,13 @@ s32 ChooseHoleStrokeTarget(void) {
   if (g_GameState.gameMode == GAME_MODE_GET_CHARACTER) {
     lossCount = GetSaveData()
                     ->awards
-                    .matchups[(s8)g_Players[0].characterIndex]
-                             [(s8)g_Players[f_Shot.playerIndex].characterIndex]
+                    .matchups[g_Players[0].characterIndex]
+                             [g_Players[f_Shot.playerIndex].characterIndex]
                     .lossCount;
     winBits = GetSaveData()
                   ->awards
-                  .matchups[(s8)g_Players[0].characterIndex]
-                           [(s8)g_Players[f_Shot.playerIndex].characterIndex]
+                  .matchups[g_Players[0].characterIndex]
+                           [g_Players[f_Shot.playerIndex].characterIndex]
                   .winBits;
     if ((winBits & WIN_COUNT_MASK) < (lossCount & WIN_COUNT_MASK)) {
       luckyBonus = g_GameState.unk2C & 3;
@@ -1264,14 +1264,14 @@ s32 ChooseHoleStrokeTarget(void) {
   }
 
   targetScore = luckyBonus +
-      f_GolferTraits[(s8)g_Players[f_Shot.playerIndex].characterIndex].unkD +
-      f_GolferTraits[(s8)g_Players[f_Shot.playerIndex].characterIndex]
+      f_GolferTraits[g_Players[f_Shot.playerIndex].characterIndex].unkD +
+      f_GolferTraits[g_Players[f_Shot.playerIndex].characterIndex]
           .targetScores[g_GameState.courseIndex];
   osSyncPrintf(
-      "Char Index = %d\n", (s8)g_Players[f_Shot.playerIndex].characterIndex);
+      "Char Index = %d\n", g_Players[f_Shot.playerIndex].characterIndex);
   osSyncPrintf("TargetScore = %d\n", targetScore);
   spreadStyle =
-      f_GolferTraits[(s8)g_Players[f_Shot.playerIndex].characterIndex].unk0;
+      f_GolferTraits[g_Players[f_Shot.playerIndex].characterIndex].unk0;
   for (index = 0; index < COURSE_HOLE_COUNT; index++) {
     strokes[index] = 0;
     handicaps[index] = 0;
@@ -2109,8 +2109,8 @@ ClubType ChooseApproachClub(s32* targetX, s32* targetZ) {
   GetSurfaceInfo(f_Shot.surface);
   if (IsLineOffFairway(f_Shot.ballPosition, g_HoleSetup.cupPosition) == TRUE) {
     osSyncPrintf("Appr60 Return point 1\n");
-    if (f_GolferTraits[(s8)g_Players[f_Shot.playerIndex].characterIndex]
-            .windPlay < WIND_PLAY_FOLLOWING_WINDS) {
+    if (f_GolferTraits[g_Players[f_Shot.playerIndex].characterIndex].windPlay <
+        WIND_PLAY_FOLLOWING_WINDS) {
       return CLUB_TYPE_PITCHING_WEDGE;
     }
 
@@ -2131,7 +2131,7 @@ ClubType ChooseApproachClub(s32* targetX, s32* targetZ) {
     edgeShare = (f32)edgeDistance / (f32)cupDistance;
   }
 
-  style = f_GolferTraits[(s8)g_Players[f_Shot.playerIndex].characterIndex].unk1;
+  style = f_GolferTraits[g_Players[f_Shot.playerIndex].characterIndex].unk1;
   for (band = 0; band < APPROACH_BAND_COUNT; band++) {
     if (edgeShare < f_ApproachBandLimits[band][style]) {
       if (band == 0) {
@@ -2527,13 +2527,13 @@ EVALUATE:
     osSyncPrintf("powermode = %d\n", f_Shot.shotMode);
     osSyncPrintf("powermodeleft = %d\n", f_Shot.unk54);
     osSyncPrintf("ClubSelectType = %d\n",
-        f_GolferTraits[(s8)g_Players[f_Shot.playerIndex].characterIndex].unk2);
+        f_GolferTraits[g_Players[f_Shot.playerIndex].characterIndex].unk2);
     if (flyDistance != 0) {
       ratio = (f32)targetDistance / flyDistance;
       launchPower = f_TrialLaunch->power * ratio;
       if (launchPower > MAX_LAUNCH_POWER) {
         if (f_Shot.shotMode == SHOT_MODE_NORMAL && f_Shot.unk54 > 0 &&
-            ((f_GolferTraits[(s8)g_Players[f_Shot.playerIndex].characterIndex]
+            ((f_GolferTraits[g_Players[f_Shot.playerIndex].characterIndex]
                          .unk6 != 0 &&
                  f_GolferTraits[(s8)g_Players[f_Shot.playerIndex]
                                     .characterIndex]
@@ -2544,8 +2544,8 @@ EVALUATE:
           f_Shot.shotMode = SHOT_MODE_POWER;
           osSyncPrintf("Power mode\n ");
         } else if (f_Shot.shotMode == SHOT_MODE_NORMAL && f_Shot.unk54 > 0 &&
-            f_GolferTraits[(s8)g_Players[f_Shot.playerIndex].characterIndex]
-                    .unk2 == 2) {
+            f_GolferTraits[g_Players[f_Shot.playerIndex].characterIndex].unk2 ==
+                2) {
           f_Shot.shotMode = SHOT_MODE_POWER;
           osSyncPrintf("Power mode\n ");
         } else if (f_Shot.shotMode == SHOT_MODE_APPROACH) {
@@ -2699,15 +2699,13 @@ ClubType ChooseClubForDistance(s32 distance) {
     club = GetClub(g_Players[f_Shot.playerIndex].clubs[slot]);
     carry = GetShotWorldDistance(club, SHOT_MODE_NORMAL);
     if (g_HoleSetup.conditions.isRaining == TRUE &&
-        f_GolferTraits[(s8)g_Players[f_Shot.playerIndex].characterIndex].unk1 <
-            2) {
+        f_GolferTraits[g_Players[f_Shot.playerIndex].characterIndex].unk1 < 2) {
       carry = carry * RAINY_DISTANCE_FRACTION;
     }
 
     carry = carry * GetSurfaceInfo(f_Shot.surface)->minPercent / 100;
     rating = GetLieRating(club, f_Shot.surface, SHOT_MODE_NORMAL);
-    if (f_GolferTraits[(s8)g_Players[f_Shot.playerIndex].characterIndex].unk2 <
-        2) {
+    if (f_GolferTraits[g_Players[f_Shot.playerIndex].characterIndex].unk2 < 2) {
       if (rating == WORST_LIE_RATING) {
         continue;
       }
@@ -2778,7 +2776,7 @@ s32 ChooseShotOffset(void) {
   }
 
   windPlay =
-      f_GolferTraits[(s8)g_Players[f_Shot.playerIndex].characterIndex].windPlay;
+      f_GolferTraits[g_Players[f_Shot.playerIndex].characterIndex].windPlay;
   if (f_PlanTarget[AXIS_X] == g_HoleSetup.cupPosition[AXIS_X] &&
       f_PlanTarget[AXIS_Z] == g_HoleSetup.cupPosition[AXIS_Z]) {
     switch (windPlay) {

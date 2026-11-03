@@ -284,7 +284,7 @@ void LoadClubSlots(void) {
   f_Slots->startImage = AllocMemory(OpenEncodedAsset(START_ASSET, &asset));
   ReadEncodedAsset(f_Slots->startImage, &asset);
   for (index = 0; index != g_GameState.playerCount; index++) {
-    row = f_CharacterFaceRows[(s8)g_Players[index].characterIndex];
+    row = f_CharacterFaceRows[g_Players[index].characterIndex];
     f_Slots->faceImages[index][0] =
         AllocMemory(OpenEncodedAsset(g_FaceAnimationAssets[row][0], &asset));
     ReadEncodedAsset(f_Slots->faceImages[index][0], &asset);
@@ -405,7 +405,7 @@ void GiveSlotClubs(s32 playerIndex) {
   }
 
   player->clubs[CLUB_TYPE_PUTTER] =
-      ((s8)player->characterIndex * CLUB_SET_SIZE) + CLUB_TYPE_PUTTER;
+      (player->characterIndex * CLUB_SET_SIZE) + CLUB_TYPE_PUTTER;
   f_StarCount = 0;
   for (index = 0; index != REEL_COUNT; index++) {
     symbolIndex = f_Slots->reelPositions[index] - SHOWN_SYMBOL_OFFSET;
@@ -415,14 +415,14 @@ void GiveSlotClubs(s32 playerIndex) {
 
     symbol = f_ReelStrips[index][symbolIndex];
     if (symbol != SYMBOL_STAR) {
-      if ((s8)player->characterIndex >= CHARACTER_CLUB_SET_COUNT) {
+      if (player->characterIndex >= CHARACTER_CLUB_SET_COUNT) {
         player->clubs[symbol] =
             ((player->gameBoyCharacterIndex + CHARACTER_CLUB_SET_COUNT) *
                 CLUB_SET_SIZE) +
             symbol;
       } else {
         player->clubs[symbol] =
-            ((s8)player->characterIndex * CLUB_SET_SIZE) + symbol;
+            (player->characterIndex * CLUB_SET_SIZE) + symbol;
       }
     } else {
       starCount++;
@@ -432,7 +432,7 @@ void GiveSlotClubs(s32 playerIndex) {
 
   if (starCount == REEL_COUNT) {
     for (slot = 0; slot != CLUB_SYMBOL_COUNT; slot++) {
-      clubSet = (s8)player->characterIndex;
+      clubSet = player->characterIndex;
       if (clubSet >= CHARACTER_CLUB_SET_COUNT) {
         clubSet = player->gameBoyCharacterIndex;
         clubSet += CHARACTER_CLUB_SET_COUNT;
@@ -914,8 +914,7 @@ void DrawClubSlots(Gfx** displayListHead) {
         f_FaceFrameTime = 0;
         if (++f_FaceFrameIndex >= FACE_LAST_FRAME + 1) {
           if (++f_FaceHoldCount >= FACE_HOLD_COUNT) {
-            row =
-                f_CharacterFaceRows[(s8)g_Players[playerIndex].characterIndex];
+            row = f_CharacterFaceRows[g_Players[playerIndex].characterIndex];
             if (f_StarCount == REEL_COUNT) {
               OpenEncodedAsset(
                   g_FaceAnimationAssets[row][FACE_LAST_FRAME], &asset);
@@ -943,7 +942,7 @@ void DrawClubSlots(Gfx** displayListHead) {
             f_Slots->playerIndex++;
           }
         } else {
-          row = f_CharacterFaceRows[(s8)g_Players[playerIndex].characterIndex];
+          row = f_CharacterFaceRows[g_Players[playerIndex].characterIndex];
           if (f_StarCount == REEL_COUNT) {
             OpenEncodedAsset(
                 g_FaceAnimationAssets[row][f_FaceFrameIndex], &asset);

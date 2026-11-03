@@ -2266,7 +2266,7 @@ Boolean IsRecordableHoleOut(s32 playerIndex) {
     return FALSE;
   }
 
-  if ((s8)g_Players[playerIndex].characterIndex >= CHARACTER_KID) {
+  if (g_Players[playerIndex].characterIndex >= CHARACTER_KID) {
     return FALSE;
   }
 
@@ -2396,10 +2396,10 @@ void RecordRingShotClear(s32 playerIndex) {
     *count = MAX_RING_SHOT_CLEAR_COUNT;
   }
 
-  if ((s8)g_Players[playerIndex].characterIndex < SAVE_UNK1344_ENTRY_COUNT) {
+  if (g_Players[playerIndex].characterIndex < SAVE_UNK1344_ENTRY_COUNT) {
     count =
         &GetSaveData()->unk1344[g_GameState.courseIndex][g_GameState.holeIndex]
-                               [(s8)g_Players[playerIndex].characterIndex];
+                               [g_Players[playerIndex].characterIndex];
     (*count)++;
     if (*count < 0) {
       *count = 0;
@@ -2791,35 +2791,35 @@ void PlayWaitingPlayersCalls(void) {
 
         pressed = g_ControllerStates[controllerIndex].pressedButtons;
         if (pressed & U_JPAD) {
-          PlayCharacterSound((s8)g_Players[i].characterIndex, i,
+          PlayCharacterSound(g_Players[i].characterIndex, i,
               CHARACTER_SOUND_CALL_OUT_UP, SOUND_FULL_SCALE,
               g_Players[i].soundPan);
         } else if (pressed & D_JPAD) {
-          PlayCharacterSound((s8)g_Players[i].characterIndex, i,
+          PlayCharacterSound(g_Players[i].characterIndex, i,
               CHARACTER_SOUND_CALL_OUT_DOWN, SOUND_FULL_SCALE,
               g_Players[i].soundPan);
         } else if (pressed & L_JPAD) {
-          PlayCharacterSound((s8)g_Players[i].characterIndex, i,
+          PlayCharacterSound(g_Players[i].characterIndex, i,
               CHARACTER_SOUND_CALL_OUT_LEFT, SOUND_FULL_SCALE,
               g_Players[i].soundPan);
         } else if (pressed & R_JPAD) {
-          PlayCharacterSound((s8)g_Players[i].characterIndex, i,
+          PlayCharacterSound(g_Players[i].characterIndex, i,
               CHARACTER_SOUND_CALL_OUT_RIGHT, SOUND_FULL_SCALE,
               g_Players[i].soundPan);
         } else if (pressed & U_CBUTTONS) {
-          PlayCharacterSound((s8)g_Players[i].characterIndex, i,
+          PlayCharacterSound(g_Players[i].characterIndex, i,
               CHARACTER_SOUND_CALL_OUT_C_UP, SOUND_FULL_SCALE,
               g_Players[i].soundPan);
         } else if (pressed & D_CBUTTONS) {
-          PlayCharacterSound((s8)g_Players[i].characterIndex, i,
+          PlayCharacterSound(g_Players[i].characterIndex, i,
               CHARACTER_SOUND_CALL_OUT_C_DOWN, SOUND_FULL_SCALE,
               g_Players[i].soundPan);
         } else if (pressed & L_CBUTTONS) {
-          PlayCharacterSound((s8)g_Players[i].characterIndex, i,
+          PlayCharacterSound(g_Players[i].characterIndex, i,
               CHARACTER_SOUND_CALL_OUT_C_LEFT, SOUND_FULL_SCALE,
               g_Players[i].soundPan);
         } else if (pressed & R_CBUTTONS) {
-          PlayCharacterSound((s8)g_Players[i].characterIndex, i,
+          PlayCharacterSound(g_Players[i].characterIndex, i,
               CHARACTER_SOUND_CALL_OUT_C_RIGHT, SOUND_FULL_SCALE,
               g_Players[i].soundPan);
         }

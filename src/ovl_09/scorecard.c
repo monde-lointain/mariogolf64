@@ -195,10 +195,10 @@ void OpenScorecard(CourseIndex courseIndex, s32 holeIndex) {
 
   for (i = 0; i != g_GameState.playerCount; i++) {
     g_Scorecard.faceImages[i] = AllocMemory(OpenEncodedAsset(
-        g_CharacterImageAssets[(s8)g_Players[i].characterIndex], &asset));
+        g_CharacterImageAssets[g_Players[i].characterIndex], &asset));
     ReadEncodedAsset(g_Scorecard.faceImages[i], &asset);
-    OpenAssetFile(g_CharacterPaletteAssets[(s8)g_Players[i].characterIndex] +
-            (s8)g_Players[i].paletteIndex,
+    OpenAssetFile(g_CharacterPaletteAssets[g_Players[i].characterIndex] +
+            g_Players[i].paletteIndex,
         &file);
     size = GetAssetFileSize(&file);
     g_Scorecard.facePalettes[i] = AllocMemory(size);
@@ -947,7 +947,7 @@ void AnimateScorecard(void) {
         if (g_Scorecard.faceFrame < FACE_FRAME_COUNT) {
           for (i = 0; i != g_GameState.playerCount; i++) {
             OpenEncodedAsset(
-                g_CharacterImageAssets[(s8)g_Players[i].characterIndex] +
+                g_CharacterImageAssets[g_Players[i].characterIndex] +
                     g_Scorecard.faceFrame +
                     g_Scorecard.content.faceImageOffsets[i],
                 &asset);
@@ -1393,10 +1393,10 @@ s32 LoadResultCharacters(void) {
     return FALSE;
   }
 
-  LoadCharacter(0, (s8)g_Players[0].characterIndex + CHARACTER_COUNT,
-      (s8)g_Players[0].paletteIndex);
-  LoadCharacter(1, (s8)g_Players[1].characterIndex + CHARACTER_COUNT,
-      (s8)g_Players[1].paletteIndex);
+  LoadCharacter(0, g_Players[0].characterIndex + CHARACTER_COUNT,
+      g_Players[0].paletteIndex);
+  LoadCharacter(1, g_Players[1].characterIndex + CHARACTER_COUNT,
+      g_Players[1].paletteIndex);
   song = SONG_MATCH_RESULT;
   if (g_GameState.gameMode == GAME_MODE_GET_CHARACTER) {
     /* The original passes the strokes through song's register */

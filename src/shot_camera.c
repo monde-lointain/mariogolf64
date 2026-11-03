@@ -1028,7 +1028,7 @@ static inline void QueueOnlookerSounds(s32 kind) {
 
   for (i = 0; i != g_GameState.playerCount; i++) {
     if (i != g_CurrentShot.playerIndex) {
-      QueueCharacterSound((s8)g_Players[i].characterIndex, i, kind,
+      QueueCharacterSound(g_Players[i].characterIndex, i, kind,
           SOUND_FULL_SCALE, g_Players[i].soundPan);
     }
   }
@@ -1104,7 +1104,7 @@ void PlayFlightSounds(s32 step) {
     for (i = 0; i != g_GameState.playerCount; i++) {
       PlaySound(SOUND_UNK151, FLIGHT_SOUND_CHANNEL_UNK3, SOUND_FULL_SCALE);
       if (i != g_CurrentShot.playerIndex) {
-        QueueCharacterSound((s8)g_Players[i].characterIndex, i,
+        QueueCharacterSound(g_Players[i].characterIndex, i,
             CHARACTER_SOUND_KIND_TROUBLE, SOUND_FULL_SCALE,
             g_Players[i].soundPan);
       }

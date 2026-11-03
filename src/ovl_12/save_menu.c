@@ -229,12 +229,6 @@ enum ModeName {
 #define REPLAY_LABEL_PAR 4
 #define NO_REPLAY_LABEL (-1)
 
-/*
- * This overlay reads the characters and variants of saved players and
- * records as signed, though Player and RingShotRecord keep them unsigned; the
- * casts are there to match. Without them SaveGameToSlot and SaveReplayToSlot
- * differ in 6 words each, and OpenSaveMenu's draft in 23 against 11.
- */
 void SaveRingShotRecord(s32 recordIndex, RingShotRecord* record);
 void InvalidateBrokenRingShotRecords(void);
 /* Its colors are u8s, which these calls pass as ints, to match */
@@ -462,14 +456,14 @@ void OpenSaveMenu(s32 kind) {
         for (playerIndex = 0; playerIndex != state->playerCount;
             playerIndex++) {
           player = &save->savedPlayers[slot][playerIndex];
-          OpenEncodedAsset(g_CharacterImageAssets[(s8)player->characterIndex] +
+          OpenEncodedAsset(g_CharacterImageAssets[player->characterIndex] +
                   CHARACTER_FACE_IMAGE_OFFSET,
               &encodedAsset);
           ReadEncodedAsset(
               f_CharacterImages[(slot * MAX_PLAYER_COUNT) + playerIndex],
               &encodedAsset);
-          OpenAssetFile(g_CharacterPaletteAssets[(s8)player->characterIndex] +
-                  (s8)player->paletteIndex,
+          OpenAssetFile(g_CharacterPaletteAssets[player->characterIndex] +
+                  player->paletteIndex,
               &file);
           ReadAssetFile(
               f_CharacterFiles[(slot * MAX_PLAYER_COUNT) + playerIndex],
@@ -481,12 +475,12 @@ void OpenSaveMenu(s32 kind) {
     for (slot = 0; slot != RING_SHOT_RECORD_COUNT; slot++) {
       record = &save->ringShotRecords[slot];
       if (record->scoreKind & SCORE_KIND_RECORDED) {
-        OpenEncodedAsset(g_CharacterImageAssets[(s8)record->characterIndex] +
+        OpenEncodedAsset(g_CharacterImageAssets[record->characterIndex] +
                 CHARACTER_FACE_IMAGE_OFFSET,
             &encodedAsset);
         ReadEncodedAsset(f_CharacterImages[slot], &encodedAsset);
-        OpenAssetFile(g_CharacterPaletteAssets[(s8)record->characterIndex] +
-                (s8)record->paletteIndex,
+        OpenAssetFile(g_CharacterPaletteAssets[record->characterIndex] +
+                record->paletteIndex,
             &file);
         ReadAssetFile(f_CharacterFiles[slot], GetAssetFileSize(&file), &file);
       }
@@ -1062,14 +1056,14 @@ void SaveGameToSlot(void) {
     AnimateModeIcons(TRUE);
     for (playerIndex = 0; playerIndex != state->playerCount; playerIndex++) {
       player = &save->savedPlayers[f_CursorIndex][playerIndex];
-      OpenEncodedAsset(g_CharacterImageAssets[(s8)player->characterIndex] +
+      OpenEncodedAsset(g_CharacterImageAssets[player->characterIndex] +
               CHARACTER_FACE_IMAGE_OFFSET,
           &encodedAsset);
       ReadEncodedAsset(
           f_CharacterImages[(f_CursorIndex * MAX_PLAYER_COUNT) + playerIndex],
           &encodedAsset);
-      OpenAssetFile(g_CharacterPaletteAssets[(s8)player->characterIndex] +
-              (s8)player->paletteIndex,
+      OpenAssetFile(g_CharacterPaletteAssets[player->characterIndex] +
+              player->paletteIndex,
           &file);
       ReadAssetFile(
           f_CharacterFiles[(f_CursorIndex * MAX_PLAYER_COUNT) + playerIndex],
@@ -1099,12 +1093,12 @@ void SaveReplayToSlot(void) {
   f_StateFrame = 0;
   InvalidateBrokenRingShotRecords();
   if (record->scoreKind & SCORE_KIND_RECORDED) {
-    OpenEncodedAsset(g_CharacterImageAssets[(s8)record->characterIndex] +
+    OpenEncodedAsset(g_CharacterImageAssets[record->characterIndex] +
             CHARACTER_FACE_IMAGE_OFFSET,
         &encodedAsset);
     ReadEncodedAsset(f_CharacterImages[f_CursorIndex], &encodedAsset);
-    OpenAssetFile(g_CharacterPaletteAssets[(s8)record->characterIndex] +
-            (s8)record->paletteIndex,
+    OpenAssetFile(
+        g_CharacterPaletteAssets[record->characterIndex] + record->paletteIndex,
         &file);
     ReadAssetFile(
         f_CharacterFiles[f_CursorIndex], GetAssetFileSize(&file), &file);

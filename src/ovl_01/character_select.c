@@ -835,15 +835,15 @@ s32 UpdateCharacterSelect(
     /* A palette that an earlier player of the same character wears gives way
      * to the first one that none of them does */
     for (index = 0, sameCharacterCount = 0; index != playerIndex; index++) {
-      if ((s8)g_Players[index].characterIndex ==
-          (s8)g_Players[playerIndex].characterIndex) {
+      if (g_Players[index].characterIndex ==
+          g_Players[playerIndex].characterIndex) {
         sameCharacterPlayers[sameCharacterCount] = index;
         sameCharacterCount++;
       }
     }
 
     for (index = 0; index != sameCharacterCount; index++) {
-      if ((s8)g_Players[sameCharacterPlayers[index]].paletteIndex == palette) {
+      if (g_Players[sameCharacterPlayers[index]].paletteIndex == palette) {
         break;
       }
     }
@@ -853,7 +853,7 @@ s32 UpdateCharacterSelect(
     } else {
       for (index = 0; index != CHARACTER_PALETTE_COUNT; index++) {
         for (otherIndex = 0; otherIndex != sameCharacterCount; otherIndex++) {
-          if ((s8)g_Players[sameCharacterPlayers[otherIndex]].paletteIndex ==
+          if (g_Players[sameCharacterPlayers[otherIndex]].paletteIndex ==
               index) {
             break;
           }
@@ -1109,14 +1109,14 @@ s32 UpdateCharacterSelect(
 
     /* The preview gives way as the A button's palette does */
     for (index = 0, sameCharacterCount = 0; index != playerIndex; index++) {
-      if ((s8)g_Players[index].characterIndex == character) {
+      if (g_Players[index].characterIndex == character) {
         sameCharacterPlayers[sameCharacterCount] = index;
         sameCharacterCount++;
       }
     }
 
     for (index = 0; index != sameCharacterCount; index++) {
-      if ((s8)g_Players[sameCharacterPlayers[index]].paletteIndex == palette) {
+      if (g_Players[sameCharacterPlayers[index]].paletteIndex == palette) {
         break;
       }
     }
@@ -1126,7 +1126,7 @@ s32 UpdateCharacterSelect(
     } else {
       for (index = 0; index != CHARACTER_PALETTE_COUNT; index++) {
         for (otherIndex = 0; otherIndex != sameCharacterCount; otherIndex++) {
-          if ((s8)g_Players[sameCharacterPlayers[otherIndex]].paletteIndex ==
+          if (g_Players[sameCharacterPlayers[otherIndex]].paletteIndex ==
               index) {
             break;
           }
@@ -1449,7 +1449,7 @@ void DrawGridFaces(Gfx** displayListHead, u8 isSinglePlayer) {
       if (g_MenuScreen == MENU_SCREEN_OPPONENT_SELECT &&
           row == memory->characterRows[0] &&
           column == memory->characterColumns[0] &&
-          (s8)g_Players[0].characterIndex >= FIRST_IMPORTED_CHARACTER) {
+          g_Players[0].characterIndex >= FIRST_IMPORTED_CHARACTER) {
         slot = column + FIRST_IMPORTED_CHARACTER;
       }
 
@@ -1571,7 +1571,7 @@ s32 GetUnusedPalette(s32 choiceIndex) {
   s32 sameIndex;
 
   for (; playerIndex != g_ChoosingPlayerIndex; playerIndex++) {
-    if ((s8)g_Players[playerIndex].characterIndex == character) {
+    if (g_Players[playerIndex].characterIndex == character) {
       samePlayers[sameCount++] = playerIndex;
     }
   }
@@ -1582,7 +1582,7 @@ s32 GetUnusedPalette(s32 choiceIndex) {
     for (playerIndex = 0; playerIndex != CHARACTER_PALETTE_COUNT;
         playerIndex++) {
       for (sameIndex = 0; sameIndex != sameCount; sameIndex++) {
-        if ((s8)g_Players[samePlayers[sameIndex]].paletteIndex == playerIndex) {
+        if (g_Players[samePlayers[sameIndex]].paletteIndex == playerIndex) {
           break;
         }
       }

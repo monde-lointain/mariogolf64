@@ -374,12 +374,12 @@ void RecordCourseRound(void) {
     record->bestScore = LOWEST_SCORE_TO_PAR;
   }
 
-  if (score < record->characterBestScores[(s8)g_Players[0].characterIndex]) {
-    record->characterBestScores[(s8)g_Players[0].characterIndex] = score;
-    record->hasCharacterBestScore[(s8)g_Players[0].characterIndex] = TRUE;
-    if (record->characterBestScores[(s8)g_Players[0].characterIndex] <
+  if (score < record->characterBestScores[g_Players[0].characterIndex]) {
+    record->characterBestScores[g_Players[0].characterIndex] = score;
+    record->hasCharacterBestScore[g_Players[0].characterIndex] = TRUE;
+    if (record->characterBestScores[g_Players[0].characterIndex] <
         LOWEST_SCORE_TO_PAR) {
-      record->characterBestScores[(s8)g_Players[0].characterIndex] =
+      record->characterBestScores[g_Players[0].characterIndex] =
           LOWEST_SCORE_TO_PAR;
     }
   }

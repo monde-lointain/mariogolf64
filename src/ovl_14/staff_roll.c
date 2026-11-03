@@ -695,7 +695,7 @@ void LoadStaffRoll(void) {
   s32 textSize;
 
   f_ShownSceneColorIndex = SCENE_COLOR_INDEX_SUDDEN_DEATH;
-  ShuffleCastOrder((s8)g_Players[0].characterIndex);
+  ShuffleCastOrder(g_Players[0].characterIndex);
   FreeAllCharacterSlots();
   for (index = 0; index < CAST_BUFFER_COUNT; index++) {
     f_CastBuffers[index] = AllocMemory(GetCharacterBufferSize());
@@ -1594,8 +1594,8 @@ void UpdateStaffRoll(void) {
         OpenEncodedAsset(PAINTING_ASSET, &asset);
         ReadEncodedAsset(&f_StaffRollImage, &asset);
         g_Players[0].characterIndex =
-            ((s8)g_Players[0].characterIndex + 1) % CHARACTER_COUNT;
-        ShuffleCastOrder((s8)g_Players[0].characterIndex);
+            (g_Players[0].characterIndex + 1) % CHARACTER_COUNT;
+        ShuffleCastOrder(g_Players[0].characterIndex);
         f_TopLineIndex = FIRST_TOP_LINE_INDEX;
         f_StaffRollFrame = -1;
         f_IsLeavingStaffRoll = FALSE;

@@ -1884,7 +1884,7 @@ void SetUpChosenGame(void) {
       player->unk28 = PLAYER_UNK28_EIGHTEEN_HOLES;
     }
 
-    LoadPlayerFace(index, (s8)player->characterIndex, (s8)player->paletteIndex);
+    LoadPlayerFace(index, player->characterIndex, player->paletteIndex);
   }
 
   if (g_GameState.gameMode == GAME_MODE_GET_CHARACTER) {
@@ -5432,8 +5432,8 @@ void DrawMenuCharacters(Gfx** displayListHead) {
       character = rival;
       palette = 1;
     } else {
-      character = (s8)g_Players[slot].characterIndex;
-      palette = (s8)g_Players[slot].paletteIndex;
+      character = g_Players[slot].characterIndex;
+      palette = g_Players[slot].paletteIndex;
     }
 
     if (!g_IsMenuCharacterLoaded[slot]) {

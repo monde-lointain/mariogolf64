@@ -264,9 +264,9 @@ typedef struct RingShotRecord {
   /* 0x35 */ s8 holeIndex;
   /* 0x36 */ s8
       scoreKind; /* What GetRecordedScoreKind returns for the strokes */
-  /* 0x37 */ u8 characterIndex;
+  /* 0x37 */ s8 characterIndex;
   /* 0x38 */ u8 unk38;
-  /* 0x39 */ u8 paletteIndex;
+  /* 0x39 */ s8 paletteIndex;
   /* 0x3A */ u8 strokeCount;
   /* 0x3B */ u8 unk3B;
   /* 0x3C */ s32 unk3C;
@@ -412,7 +412,7 @@ typedef struct Player {
   /* 0x0C */ s32 state; /* A PLAYER_STATE_* value */
   /* 0x10 */ CoursePoint ballPosition;
   /* 0x1C */ u8 ballSurface; /* A SURFACE_* value */
-  /* 0x1D */ u8 characterIndex; /* Also the index of the character's club set */
+  /* 0x1D */ s8 characterIndex; /* Also the index of the character's club set */
   /* 0x1E */ s8 isComputer; /* Played by the computer, with no controller */
   /* 0x1F */ s8 unk1F;
   /* 0x20 */ u8 unk20[0x22 - 0x20];
@@ -433,7 +433,7 @@ typedef struct Player {
   /* 0x74 */ s32
       stopwatchFrameCount; /* The player's time in the stopwatch modes */
   /* 0x78 */ s8 ringStates[RING_COUNT]; /* RING_STATE_* values, for Ring Shot */
-  /* 0x7B */ u8 paletteIndex; /* Which of the character's palettes it wears */
+  /* 0x7B */ s8 paletteIndex; /* Which of the character's palettes it wears */
   /* 0x7C */ s8 gameBoyCharacterIndex; /* For the Game Boy characters, from
                                           CHARACTER_KID on */
   /* 0x7D */ u8 unk7D[3];
