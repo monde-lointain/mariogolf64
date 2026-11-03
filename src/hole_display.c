@@ -3053,7 +3053,9 @@ INCLUDE_ASM("asm/nonmatchings/hole_display", DrawTurnAwayAnimation);
  * Giving the slice copy its own row counter, and adding the tile start to
  * the column before the row, take it from 144 words differing to 116.
  * Indexing the grid's vertices, in place of the two pointers, gives 184.
- * 97 words differ, 17 in shape.
+ * 97 words differ, 17 in shape. The permuter's best, at 103 words (15 in
+ * shape), stores the column's x after the step to the next vertex, which
+ * changes what is drawn.
  */
 #ifdef NON_MATCHING
 void CaptureHudAnimationFrame(void) {
