@@ -872,12 +872,13 @@ void DrawStatsBadgeCount(Gfx** displayListHead) {
 /*
  * Draws the arrows beside the panel that show there are more statistics above
  * or below.
- * Doesn't match: the original counts the arrows and picks the first one with
- * branches, where this version computes them without, so the registers and the
- * spills to the stack differ. GCC's jump pass turns the copy of hasRowsBelow
- * into branchless code because it is a single instruction; copying
- * hasRowsBelow != FALSE keeps the branch but gives 109 differing words, not
- * 107. 107 words differ.
+ * Doesn't match: 102 words differ, 22 in shape. The original picks the first
+ * arrow with a branch around a copy of hasRowsBelow; GCC's jump pass makes the
+ * copy branchless here, so the registers and the spills to the stack differ.
+ * Copying hasRowsBelow under "if (arrowCount == 1)" gives 107 words (33 in
+ * shape), and copying hasRowsBelow != FALSE there 109; the same with
+ * "arrowCount += hasRowsBelow" gives 99 words but 23 in shape, as the original
+ * branches to count that arrow.
  */
 #ifdef NON_MATCHING
 void DrawStatsScrollArrows(Gfx** displayListHead) {
@@ -896,10 +897,7 @@ void DrawStatsScrollArrows(Gfx** displayListHead) {
   }
 
   if (arrowCount != 0) {
-    firstArrow = 0;
-    if (arrowCount == 1) {
-      firstArrow = hasRowsBelow;
-    }
+    firstArrow = arrowCount == 1 && hasRowsBelow;
 
     gDPPipeSync(gfx++);
     gDPPipeSync(gfx++);
