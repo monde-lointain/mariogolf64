@@ -172,13 +172,17 @@ extern char g_PrintBuffer[];
  * of the others. DrawLeaderLine and DrawPlayerTag are nested functions, a GNU
  * C extension.
  *
+ * Each corner search places the tag where it stops, and the corner is
+ * stored after the two searches join: placing the tag after the join, with
+ * the corner's store in a block of its own, gives 291 words differing, 73
+ * in shape, and storing the corner in each search too 262.
+ *
  * Doesn't match: the original steps a pointer to each label's corner and
- * reaches the other fields from the label's offset; ours has loop.c reach them
- * from the corner pointer as well, and its frame is 8 bytes larger. Indexing
- * the labels, rather than through a label pointer (193 words, 91 in shape),
- * gives the original's pointer; the register oracle then gets to 108 words
- * with 27 pseudos forced, against 174 with 22 for the pointer. 291 words
- * differ, 73 in shape.
+ * reaches the other fields from the label's offset; ours has loop.c reach
+ * them from the corner pointer as well. Indexing the labels, rather than
+ * through a label pointer (193 words before the searches placed the tag),
+ * gives the original's pointer. The register oracle, forcing 18 pseudos,
+ * leaves 84 words. 96 words differ, 44 in shape.
  */
 #ifdef NON_MATCHING
 void DrawShotLabels(Gfx** displayListHead) {
@@ -336,6 +340,8 @@ void DrawShotLabels(Gfx** displayListHead) {
 
           tries++;
           if (!overlaps) {
+            f_ShotLabels[i].x = point.x + f_TagOffsetsX[corner];
+            f_ShotLabels[i].y = point.y + f_TagOffsetsY[corner];
             break;
           }
 
@@ -376,6 +382,8 @@ void DrawShotLabels(Gfx** displayListHead) {
 
           tries++;
           if (!overlaps) {
+            f_ShotLabels[i].x = point.x + f_TagOffsetsX[corner];
+            f_ShotLabels[i].y = point.y + f_TagOffsetsY[corner];
             break;
           }
 
@@ -385,9 +393,7 @@ void DrawShotLabels(Gfx** displayListHead) {
         }
       }
 
-      f_ShotLabels[i].x = point.x + f_TagOffsetsX[corner];
-      f_ShotLabels[i].y = point.y + f_TagOffsetsY[corner];
-      IN_OWN_BLOCK(f_ShotLabels[i].corner = corner);
+      f_ShotLabels[i].corner = corner;
 
 NEXT:;
     }
