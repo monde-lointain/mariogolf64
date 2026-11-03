@@ -76,7 +76,9 @@ void LoadCursorBox(void* image) {
  * are hoisted wherever they are set (44 words, 12 in shape): set before the
  * clamp, loop.c's dump treats them as always set, and set after it they are
  * used in their own block. A static inline function stepping the phase, in
- * place of the block, gives 173 words (11 in shape), as with no barrier. 44
+ * place of the block, gives 173 words (11 in shape), as with no barrier. So
+ * does a pointer to the corner's phase, set inside or outside the block or with
+ * the step outside it. A pointer to the projection matrix changes nothing. 44
  * words differ, 12 in shape.
  */
 #ifdef NON_MATCHING
