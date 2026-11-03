@@ -968,7 +968,10 @@ s32 PlanCupDistance(s32 unused UNUSED) {
     windFollow = (cupX * windX) + (cupZ * windZ);
     osSyncPrintf("WindFollow%f\n", windFollow);
 
-    /* Turning windFollow into the distance ratio is there to match */
+    /*
+     * Turning windFollow into the distance ratio is there to match: a ratio
+     * local of its own gives 8 words differing, none in shape
+     */
     windFollow = (-windFollow * WIND_FOLLOW_FRACTION) + 1.0f;
     osSyncPrintf("WindCareRatio%f\n", windFollow);
     if (windFollow < WIND_DISTANCE_RATIO_MIN) {
@@ -1929,16 +1932,21 @@ void ChooseLongShot(s32 unused UNUSED, ClubType* clubType, s32* targetX,
   s32 pad[44] UNUSED; /* Unused; it is there to match */
   ShotMode shotModes[STROKE_SHOT_MODE_COUNT];
   s32 index;
-  s32 one; /* one is there to match */
+  /*
+   * normalMode is there to match: the constant in its place as the argument
+   * gives 3 words differing (3 in shape), and as the stored mode or in both
+   * places 5 (3)
+   */
+  s32 normalMode;
   s32 strokeCount;
 
-  one = SHOT_MODE_NORMAL;
+  normalMode = SHOT_MODE_NORMAL;
   for (index = STROKE_SHOT_MODE_COUNT - 1; index >= 0; index--) {
-    shotModes[index] = one;
+    shotModes[index] = normalMode;
   }
 
   strokeCount = g_Players[f_Shot.playerIndex].strokeCount;
-  *clubType = ChooseClubForDistance(PlanCupDistance(one));
+  *clubType = ChooseClubForDistance(PlanCupDistance(normalMode));
   *targetX = g_HoleSetup.cupPosition[AXIS_X];
   *targetZ = g_HoleSetup.cupPosition[AXIS_Z];
   *shotMode = shotModes[strokeCount];
