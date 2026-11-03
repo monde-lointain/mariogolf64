@@ -686,7 +686,11 @@ void SettleHoleBets(void) {
     if (g_GameState.betRates[BET_UNK4] != UNSET_BET_RATE) {
       bet = BET_UNK4;
     } else {
-      /* The store is dead; it is there to match */
+      /*
+       * The store is dead, as each case that reads count sets it first, but
+       * the original has it: without it, or with it before or after the
+       * test instead, 14 words differ, 10 in shape
+       */
       count = 0;
     }
 
