@@ -336,6 +336,10 @@ s32 DecodePatchedLzChunk(LzStream* stream) {
     input += LZ_HEADER_WORD_COUNT;
     output = stream->outputStart;
     history = stream->history;
+    /* The first chunk enters the decode loop past the refill, as its control
+     * bits are already set; the jump is there to match. Skipping the refill
+     * on a first-call flag gives 77 words differing, 11 in shape, and the
+     * refill written before the loop and again at its end 150, 48 in shape */
     goto DECODE;
   }
 

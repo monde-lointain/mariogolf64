@@ -357,6 +357,9 @@ s32 GetStickDirection(s32 stick, s32 previousDirection, u32 pressThreshold,
       stick = previousDirection;
     }
 
+    /* A jump to the shared return, to match: returning the direction here,
+     * or as a ternary, or leaving early on each failed test gives 6 words
+     * differing, 4 in shape, and a direction local 12, 8 in shape */
     if (stick != 0) {
       goto HAS_DIRECTION;
     }
