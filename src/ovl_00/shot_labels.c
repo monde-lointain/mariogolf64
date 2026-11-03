@@ -182,7 +182,9 @@ extern char g_PrintBuffer[];
  * them from the corner pointer as well. Indexing the labels, rather than
  * through a label pointer (193 words before the searches placed the tag),
  * gives the original's pointer. The register oracle, forcing 18 pseudos,
- * leaves 84 words. 96 words differ, 44 in shape.
+ * leaves 84 words. The original reads the tag offsets before the label in
+ * the overlap tests, but working the tag's place out once per corner, before
+ * the tests, gives 242 to 252 words. 96 words differ, 44 in shape.
  */
 #ifdef NON_MATCHING
 void DrawShotLabels(Gfx** displayListHead) {
