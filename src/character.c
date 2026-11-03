@@ -830,13 +830,15 @@ void ResetTriangleTextures(u32 slotIndex) {
  * Shows the keyed textures of the slot's playing texture animations, then
  * advances each one a frame. The arguments after the slot are unused.
  *
- * Doesn't match: the original keeps state->frame in a saved register
- * through the keys, and indexes the slot's states for each key set rather
- * than keeping a pointer to the state. The unused bytes, the slot found
- * through its address and the while loop are as ResetTriangleTextures'; with
- * them, 161 words differing became 111. 111 words differ, 15 in shape.
+ * The unused bytes, the slot found through its address and the while loop
+ * are as ResetTriangleTextures'. The 0x80 bytes above the slot come after
+ * its address is taken; declared with unusedHead, 10 words differ, and
+ * without them 20. With pointers to the state and the animation, 111 words
+ * differed; reading the state's frame once into stateFrame and indexing the
+ * states in the key loop made 80, indexing them in the animation loop 33,
+ * storing the copy count before the test rather than in each branch 16, and
+ * declaring keyIndex before key, which swaps their registers, 0.
  */
-#ifdef NON_MATCHING
 void AdvanceTextureAnimations(u32 slotIndex, s32 unused UNUSED,
     s32 frameLastDigit UNUSED, s32 frame UNUSED) {
   /* Pads the frame to match, with unusedTail */
@@ -844,15 +846,15 @@ void AdvanceTextureAnimations(u32 slotIndex, s32 unused UNUSED,
   s32 triangleIndex = 0;
   CharacterSlot* slot;
   AnimatedTriangle* triangle;
+  s32 keySetIndex;
   TriangleTextureKeys* keySet;
+  s32 keyIndex;
   TriangleTextureKey* key;
-  TextureAnimationState* state;
   AnimatedTexture* texture;
-  TextureAnimation* animation;
   Gfx* gfx;
   Vtx* vertex;
-  s32 keySetIndex;
-  s32 keyIndex;
+  s32 stateFrame;
+  s32 animationIndex;
   s32 i;
 
   if (FindUsedSlot(slotIndex, &slot)) {
@@ -864,11 +866,13 @@ void AdvanceTextureAnimations(u32 slotIndex, s32 unused UNUSED,
       for (keySetIndex = 0; keySetIndex < triangle->keySetCount;
           keySetIndex++) {
         keySet = &triangle->keySets[keySetIndex];
-        state = &slot->textureAnimations[keySet->textureAnimationIndex];
-        if (state->pendingCopyCount != 0) {
+        if (slot->textureAnimations[keySet->textureAnimationIndex]
+                .pendingCopyCount != 0) {
+          stateFrame =
+              slot->textureAnimations[keySet->textureAnimationIndex].frame;
           for (keyIndex = 0; keyIndex < keySet->count; keyIndex++) {
             key = &keySet->keys[keyIndex];
-            if (state->frame >= key->frame) {
+            if (stateFrame >= key->frame) {
               texture = &ModelAnimatedTextures(slot->model)[key->textureIndex];
               SetTriangleTexture(slot, triangle, texture, key->s, key->t);
             }
@@ -880,32 +884,31 @@ void AdvanceTextureAnimations(u32 slotIndex, s32 unused UNUSED,
     }
 
     for (i = 0; i < TEXTURE_ANIMATION_COUNT; i++) {
-      animation = &ModelTextureAnimations(slot->model)[i];
-      if (animation->index < 0) {
+      animationIndex = ModelTextureAnimations(slot->model)[i].index;
+      if (animationIndex < 0) {
         break;
       }
 
-      state = &slot->textureAnimations[animation->index];
-      if (state->pendingCopyCount >= TEXTURE_ANIMATION_PLAYING) {
-        if (++state->frame >= animation->frameCount) {
-          if (animation->index == RANDOM_TEXTURE_ANIMATION) {
-            state->pendingCopyCount = FRAME_DATA_COPY_COUNT;
+      if (slot->textureAnimations[animationIndex].pendingCopyCount >=
+          TEXTURE_ANIMATION_PLAYING) {
+        if (++slot->textureAnimations[animationIndex].frame >=
+            ModelTextureAnimations(slot->model)[i].frameCount) {
+          slot->textureAnimations[animationIndex].pendingCopyCount =
+              FRAME_DATA_COPY_COUNT;
+          if (animationIndex == RANDOM_TEXTURE_ANIMATION) {
             slot->textureAnimations[RANDOM_TEXTURE_ANIMATION].frame = 0;
           } else {
-            state->pendingCopyCount = FRAME_DATA_COPY_COUNT;
-            state->frame = animation->frameCount;
+            slot->textureAnimations[animationIndex].frame =
+                ModelTextureAnimations(slot->model)[i].frameCount;
           }
         }
-      } else if (state->pendingCopyCount != 0) {
-        state->pendingCopyCount--;
+      } else if (slot->textureAnimations[animationIndex].pendingCopyCount !=
+          0) {
+        slot->textureAnimations[animationIndex].pendingCopyCount--;
       }
     }
   }
 }
-
-#else
-INCLUDE_ASM("asm/nonmatchings/character", AdvanceTextureAnimations);
-#endif
 
 NO_RESULT SetTextureAnimationFrame(u32 slotIndex, s32 index, s32 frame) {
   CharacterSlot* slot = GetUsedCharacterSlot(slotIndex);
