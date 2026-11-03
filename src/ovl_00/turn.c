@@ -610,8 +610,9 @@ INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", KeepAimCameraOnCourse);
  * shape. The tilt in world units gets its own local, set just before the
  * look-at's height: scaling it inside that expression gives 78 words, 20 in
  * shape, and setting it before the look-at's x or after the clamp 86 (18). The
- * permuter reached the same 67 words with a float local holding 1/1024. 67
- * words differ, 9 in shape.
+ * permuter reached the same 67 words with a float local holding 1/1024. The
+ * register oracle, forcing 12 pseudos' registers, leaves 31 words at best, so
+ * the code differs too. 67 words differ, 9 in shape.
  */
 #ifdef NON_MATCHING
 void PlaceShotCamera(void) {
@@ -998,13 +999,15 @@ void ResetAimCamera(void) {
  * Eases the aim camera towards the place that suits the shot, and stops once it
  * is close.
  *
- * Doesn't match: the original loads one float constant five instructions
- * later, and takes the distance error's absolute value into a register of
- * its own, where local-alloc ties it to the error, which is set once and dies
- * there. Keeping the signed error and testing its absolute value orders the
- * height's store as the original does (17 words differed). Setting the error
- * for the first test too gives 17, testing the absolute value directly 27,
- * and taking it before easing the height 57. 13 words differ, 7 in shape.
+ * Doesn't match: the original loads one float constant five instructions later,
+ * and takes the distance error's absolute value into a register of its own,
+ * where local-alloc ties it to the error, which is set once and dies there.
+ * Keeping the signed error and testing its absolute value orders the height's
+ * store as the original does (17 words differed). Setting the error for the
+ * first test too gives 17, testing the absolute value directly 27, and taking
+ * it before easing the height 57. The register oracle, forcing 2 pseudos'
+ * registers, leaves 7 words at best, so the code differs too. 13 words differ,
+ * 7 in shape.
  */
 #ifdef NON_MATCHING
 void EaseAimCamera(void) {

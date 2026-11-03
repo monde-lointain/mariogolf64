@@ -2014,17 +2014,18 @@ void DrawReadyGoMovie(Gfx** displayListHead) {
  * offset * 6 unreduced. loop.c moves an invariant only while threshold times
  * its savings and lifetime reach the loop's insn count, and lowers the
  * threshold by 3 for each register it moves, so the original's loop is longer
- * or meets its invariants in another order. Taking top from bottom, as
- * bottom less 4 strips, hoists stripHeight * 4 into $fp and spills stripCount
- * (107 words differing, 27 in shape); taking top from the strip index, as
- * here, leaves stripCount in $fp but drops bottom's stepping. Pointer and
- * corner locals in the loop, stepping bottom by hand, a while loop, a u32
- * offset and taking offset from the strip index give 107 to 119 words. A
- * permuter run got to 50 words, 12 in shape, only by dropping the 4 strips
- * from top and reading an unset variable; its other changes, naming the
- * image's height and writing 1.0f + cosf(angle), leave 54. A second run got
- * to 40 words, 14 in shape, by taking top as 104 + (i - 4) * 4, which drops
- * the strip height. 54 words differ, 24 in shape.
+ * or meets its invariants in another order. Taking top from bottom, as bottom
+ * less 4 strips, hoists stripHeight * 4 into $fp and spills stripCount (107
+ * words differing, 27 in shape); taking top from the strip index, as here,
+ * leaves stripCount in $fp but drops bottom's stepping. Pointer and corner
+ * locals in the loop, stepping bottom by hand, a while loop, a u32 offset and
+ * taking offset from the strip index give 107 to 119 words. A permuter run got
+ * to 50 words, 12 in shape, only by dropping the 4 strips from top and reading
+ * an unset variable; its other changes, naming the image's height and writing
+ * 1.0f + cosf(angle), leave 54. A second run got to 40 words, 14 in shape, by
+ * taking top as 104 + (i - 4) * 4, which drops the strip height. The register
+ * oracle's closest result is these 54 words with no register forced, so
+ * allocation isn't the cause. 54 words differ, 24 in shape.
  */
 #ifdef NON_MATCHING
 void DrawShrinkingMovieImage(Gfx** displayListHead) {
@@ -2200,14 +2201,16 @@ void DrawGoombaMovie(Gfx** displayListHead) {
  * off
  *
  * Doesn't match: of the constants loop.c hoists out of the strip loop, the
- * original keeps f_Lakitu's address in $s4 and the tile commands' words in
- * $s2 and $s3, where GCC gives them $s3, $s2 and $s4, and the strips' float
- * conversions are scheduled differently. Stepping offset in the loop's
- * header, or setting it before the palette load, gives 89 words differing,
- * 49 in shape. Rounding the half width before the tile load takes 87 words
- * differing, 47 in shape, to 87 and 45, and working out the strip's start S
- * there too takes it to 83 and 41. Naming each strip's bottom, or the start T
- * after its rounding, changes nothing; a 16-bit offset gives 136.
+ * original keeps f_Lakitu's address in $s4 and the tile commands' words in $s2
+ * and $s3, where GCC gives them $s3, $s2 and $s4, and the strips' float
+ * conversions are scheduled differently. Stepping offset in the loop's header,
+ * or setting it before the palette load, gives 89 words differing, 49 in shape.
+ * Rounding the half width before the tile load takes 87 words differing, 47 in
+ * shape, to 87 and 45, and working out the strip's start S there too takes it
+ * to 83 and 41. Naming each strip's bottom, or the start T after its rounding,
+ * changes nothing; a 16-bit offset gives 136. The register oracle, forcing 8
+ * pseudos' registers, leaves 55 words of the 83 at best, so the code differs
+ * too.
  */
 #ifdef NON_MATCHING
 void DrawLakituMovie(Gfx** displayListHead) {

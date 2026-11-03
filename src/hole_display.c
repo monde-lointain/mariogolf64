@@ -2605,7 +2605,9 @@ void SetMenuBackdrop(s32 backdrop) {
  * nothing; setting it in its declaration gives 125 (45), and indexing
  * f_LastFrameBuffer by strip in place of the walk 195 (41). The permuter's best
  * kept output, 7 words, loads every strip from the first strip's address
- * truncated to a char. 45 words differ, 11 in shape.
+ * truncated to a char. The register oracle's closest result is these 45 words
+ * with no register forced, so allocation isn't the cause. 45 words differ, 11
+ * in shape.
  */
 #ifdef NON_MATCHING
 void CaptureMenuBackdrop(Gfx** displayListHead, s32 unused UNUSED) {
@@ -3192,14 +3194,15 @@ INCLUDE_ASM("asm/nonmatchings/hole_display", CaptureHudAnimationFrame);
  * strip syncs before its rectangle and after it, as the original's twelve
  * commands a strip show.
  *
- * Doesn't match: the strip loop schedules its display-list stores in
- * another order, and the column and word index take other registers.
- * Setting left once per column, with the rectangle's right in an s16 set at
- * each strip's start, gives 17 words differing, 3 in shape, but masks the
- * right edge with 0xFC0 where the original masks 0xFFF; as an s32, u16 or
- * u32 it spills the slice count and gives 94-96, and left per column alone
- * 132. 61 words differ, 7 in shape; without the sync before the rectangle,
- * 44 and 16.
+ * Doesn't match: the strip loop schedules its display-list stores in another
+ * order, and the column and word index take other registers. Setting left once
+ * per column, with the rectangle's right in an s16 set at each strip's start,
+ * gives 17 words differing, 3 in shape, but masks the right edge with 0xFC0
+ * where the original masks 0xFFF; as an s32, u16 or u32 it spills the slice
+ * count and gives 94-96, and left per column alone 132. 61 words differ, 7 in
+ * shape; without the sync before the rectangle, 44 and 16. The register oracle,
+ * forcing 10 pseudos' registers, leaves 15 words of the 61 at best, so the code
+ * differs too.
  */
 #ifdef NON_MATCHING
 void DrawSliceAnimation(void) {

@@ -994,13 +994,14 @@ const char g_PathDebugBlankText[] = "          ";
  * that starts on the plane, or, while the ball rolls, barely crosses
  * it, hits it at the path's end.
  *
- * Doesn't match: the original takes each absolute value into a register
- * of its own and ahead of the work around it: in the bare crossing test,
- * before loading the distance, and for the hit fraction, before working out
- * the side change. GCC ties the bare crossing test's absolute value to its
- * operand and schedules it after. Dividing hitFraction in place, as in
- * FindGroundHit, unties the hit fraction's (16 words differed).
- * 14 words differ, 6 in shape.
+ * Doesn't match: the original takes each absolute value into a register of its
+ * own and ahead of the work around it: in the bare crossing test, before
+ * loading the distance, and for the hit fraction, before working out the side
+ * change. GCC ties the bare crossing test's absolute value to its operand and
+ * schedules it after. Dividing hitFraction in place, as in FindGroundHit,
+ * unties the hit fraction's (16 words differed). The register oracle, forcing 2
+ * pseudos' registers, leaves 9 words at best, so the code differs too. 14 words
+ * differ, 6 in shape.
  */
 #ifdef NON_MATCHING
 s32 FindMiniGolfGroundHit(BallSimulation* simulation, s32 startX, s32 startY,
@@ -1286,7 +1287,9 @@ INCLUDE_ASM("asm/nonmatchings/collision", FindMiniGolfGroundHit);
  * block, and the subtraction moves into the side test's delay slot. Keeping the
  * start side's absolute value in step or planeOffset, which live beyond the
  * block, gives 35 words, and in tileFraction 7. The original also fills the
- * side test's delay slot differently. 7 words differ, 3 in shape.
+ * side test's delay slot differently. The register oracle's closest result is
+ * these 7 words with no register forced, so allocation isn't the cause. 7 words
+ * differ, 3 in shape.
  */
 #ifdef NON_MATCHING
 s32 FindGroundHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
@@ -2081,7 +2084,8 @@ s32 GetTrianglePlaneCopy(PlaneTriangle* triangle, TrianglePlane* plane) {
  * it only at the start of the debug branch, which leaves it unset without the
  * flag. As a statement before the flag test it changes nothing, and after the
  * debug branch, before the x range or before the loop it gives 58 to 128 words,
- * 14 in shape. 24 words differ, 10 in shape.
+ * 14 in shape. The register oracle, forcing 2 pseudos' registers, leaves 14
+ * words at best, so the code differs too. 24 words differ, 10 in shape.
  */
 #ifdef NON_MATCHING
 s32 FindHoleTriangleHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
@@ -3112,8 +3116,9 @@ static const char f_UnusedWallText[3][4] = {"", "", ""};
  * in shape), before the loop's other setup gives 52 (10), and in both arms of
  * the debug test 72 (14). Its endSide also takes the partial sum's register,
  * and it takes the start side's abs.s before testing sideChange's sign, which
- * moving the fabsf up gives at the cost of 2 more words in shape. 32 words
- * differ, 10 in shape.
+ * moving the fabsf up gives at the cost of 2 more words in shape. The register
+ * oracle, forcing 3 pseudos' registers, leaves 22 words at best, so the code
+ * differs too. 32 words differ, 10 in shape.
  */
 #ifdef NON_MATCHING
 s32 FindRingHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,

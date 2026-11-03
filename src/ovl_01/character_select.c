@@ -594,14 +594,15 @@ s32 GetClubTournamentCourse(void);
  */
 
 /*
- * Doesn't match: the original sign-extends the cursor's column and row as
- * soon as it loads them, and sets up the chosen character's sound with the
- * stack argument first. Clearing the same-character count in the preview
- * loop's initializer takes 52 words differing to 46. It reads canChooseMarked
- * as a byte throughout, hence the casts; declared u8 instead, 58 words
- * differ. The permuter's best (43 words) returns from the diagonal move
- * only when it fails, so a successful move would go on to the other
- * buttons' tests.
+ * Doesn't match: the original sign-extends the cursor's column and row as soon
+ * as it loads them, and sets up the chosen character's sound with the stack
+ * argument first. Clearing the same-character count in the preview loop's
+ * initializer takes 52 words differing to 46. It reads canChooseMarked as a
+ * byte throughout, hence the casts; declared u8 instead, 58 words differ. The
+ * permuter's best (43 words) returns from the diagonal move only when it fails,
+ * so a successful move would go on to the other buttons' tests. The register
+ * oracle, forcing 7 pseudos' registers, leaves 24 words of the 46 at best, so
+ * the code differs too.
  */
 #ifdef NON_MATCHING
 s32 UpdateCharacterSelect(

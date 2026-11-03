@@ -211,12 +211,13 @@ void FreeFromHeap(s32 heapIndex, void* pointerToBlock) {
  * AddMemoryRegion is nested, a GNU C extension, as in the original: the
  * calls pass a static chain that it saves but never uses.
  *
- * Doesn't match: the original loads the sentinel's prev back from memory to
- * set next, where GCC reuses the address it has just stored. Writing through
- * a MemoryBlock pointer, const or not, leaves 6 or gives 13 differing words,
- * and a chained assignment, next = prev = &f_MemorySentinel, gives 10. Only
- * volatile accesses to the sentinel reproduce the load, and the sentinel
- * isn't hardware. 6 words differ.
+ * Doesn't match: the original loads the sentinel's prev back from memory to set
+ * next, where GCC reuses the address it has just stored. Writing through a
+ * MemoryBlock pointer, const or not, leaves 6 or gives 13 differing words, and
+ * a chained assignment, next = prev = &f_MemorySentinel, gives 10. Only
+ * volatile accesses to the sentinel reproduce the load, and the sentinel isn't
+ * hardware. The register oracle's closest result is these 6 words with no
+ * register forced, so allocation isn't the cause. 6 words differ.
  */
 #ifdef NON_MATCHING
 void InitHeapRegions(Boolean hasExpansionPak) {

@@ -1116,10 +1116,11 @@ s32 PaintMainCourse(
  * it. Neither the paint-logic table nor any code refers to it.
  *
  * Doesn't match: the original zeroes $t0, which nothing reads, in the delay
- * slot of the range test, and its two cart-way arms share one jump to the
- * end. 12 words differ. Initializing color, paintedCode or fairwayRandom
- * doesn't bring the zeroing back, and setting paintedCode after the arms
- * lets GCC merge them and drop the test (18).
+ * slot of the range test, and its two cart-way arms share one jump to the end.
+ * 12 words differ. Initializing color, paintedCode or fairwayRandom doesn't
+ * bring the zeroing back, and setting paintedCode after the arms lets GCC merge
+ * them and drop the test (18). The register oracle, forcing one pseudo's
+ * register, leaves 8 words of the 12 at best, so the code differs too.
  */
 #ifdef NON_MATCHING
 s32 PaintPaleRoughCourse(
@@ -4082,7 +4083,8 @@ static inline u16 ReadTileTexel(
  * copy loop sets its source and the source's end before the destination, as the
  * original does: with the end computed in the loop's test and the source set
  * after the destination 16 words differed (6), and moving only the source first
- * gave 28 (4). 12 words differ, 4 in shape.
+ * gave 28 (4). The register oracle, forcing 2 pseudos' registers, leaves 10
+ * words at best, so the code differs too. 12 words differ, 4 in shape.
  */
 #ifdef NON_MATCHING
 void ToggleGroundTileBorders(void) {

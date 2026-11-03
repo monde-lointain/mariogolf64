@@ -354,14 +354,15 @@ s32 GetModeIconIndex(GameState* state) {
  * records (SAVE_MENU_REPLAYS), loading its images and putting the cursor on
  * the first free slot.
  *
- * Doesn't match: in the mode icon loop the original steps two pointers,
- * one to each slot's second image and one 4 bytes before it, and stores
- * both images through them; GCC steps the first image's address and an
- * offset for the second. Storing the second image as the first is stored
- * gives 44 differing words, and storing it plainly or reading it back 30.
- * Stepping a pointer to the second image gives the two pointers but swaps
- * their registers and copies one (19); pointers to the slot's row give 31
- * to 120. 11 words differ.
+ * Doesn't match: in the mode icon loop the original steps two pointers, one to
+ * each slot's second image and one 4 bytes before it, and stores both images
+ * through them; GCC steps the first image's address and an offset for the
+ * second. Storing the second image as the first is stored gives 44 differing
+ * words, and storing it plainly or reading it back 30. Stepping a pointer to
+ * the second image gives the two pointers but swaps their registers and copies
+ * one (19); pointers to the slot's row give 31 to 120. The register oracle,
+ * forcing one pseudo's register, leaves 9 words at best, so the code differs
+ * too. 11 words differ.
  */
 #ifdef NON_MATCHING
 void OpenSaveMenu(s32 kind) {

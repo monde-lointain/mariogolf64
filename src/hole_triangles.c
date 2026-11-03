@@ -110,14 +110,15 @@ void DimNextTranslucentTriangles(void) {
  * Draws the hole's triangles other than the rings
  *
  * Doesn't match: reload gives the display list pointers that don't get
- * registers stack slots in pseudo order, and after each gDPPipeSync followed
- * by an othermode command the original has the pair's slots the other way
- * round. The original also takes both absolute values of the shaded edge
- * before adding them, and leaves for the next triangle with a branch-likely.
- * The permuter's best, 68 words and 8 in shape against 69 and 17, tests the
- * edge's sign before normalizing it, where the original tests it after; fabsf
- * gives 354 words, and AbsFloat, an if/else, a ternary or testing edgeZ leave
- * 69. 69 words differ, 17 in shape.
+ * registers stack slots in pseudo order, and after each gDPPipeSync followed by
+ * an othermode command the original has the pair's slots the other way round.
+ * The original also takes both absolute values of the shaded edge before adding
+ * them, and leaves for the next triangle with a branch-likely. The permuter's
+ * best, 68 words and 8 in shape against 69 and 17, tests the edge's sign before
+ * normalizing it, where the original tests it after; fabsf gives 354 words, and
+ * AbsFloat, an if/else, a ternary or testing edgeZ leave 69. The register
+ * oracle, forcing 3 pseudos' registers, leaves 58 words at best, so the code
+ * differs too. 69 words differ, 17 in shape.
  */
 #ifdef NON_MATCHING
 void DrawHoleTriangles(Gfx** displayListHead, CameraMatrices* matrices UNUSED,
@@ -294,8 +295,9 @@ INCLUDE_ASM("asm/nonmatchings/hole_triangles", DrawHoleTriangles);
  * computing the next side once, into nextSide, gave 69 rather than 79; as a u8,
  * or masked with & 3, 368 to 382. The permuter's best runs, 1347 and 887 (41
  * words, 15 in shape), keep side + 1 or section + 1 in a u8, used in only some
- * of the places it is needed, which no natural form explains. 65 words differ,
- * 19 in shape.
+ * of the places it is needed, which no natural form explains. The register
+ * oracle, forcing 5 pseudos' registers, leaves 38 words at best, so the code
+ * differs too. 65 words differ, 19 in shape.
  */
 #ifdef NON_MATCHING
 void DrawRings(Gfx** displayListHead, CameraMatrices* matrices UNUSED,

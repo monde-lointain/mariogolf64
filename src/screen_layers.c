@@ -509,11 +509,12 @@ void StartScreenFadeIn(s32 red, s32 green, s32 blue, s32 frameCount) {
 /*
  * Covers the screen with the fade's color, at the opacity it has reached.
  *
- * Doesn't match: near the color loads, the original loads a value from a
- * stack slot, sets bit 0x400 in it and stores it back, where this sets the
- * bit earlier and keeps the value in $s7; 10 words differ. Reading blue as an
- * int gives 15, putting the first pipe sync in its own block gives 196, and
- * other orders of the color loads give 12 to 34.
+ * Doesn't match: near the color loads, the original loads a value from a stack
+ * slot, sets bit 0x400 in it and stores it back, where this sets the bit
+ * earlier and keeps the value in $s7; 10 words differ. Reading blue as an int
+ * gives 15, putting the first pipe sync in its own block gives 196, and other
+ * orders of the color loads give 12 to 34. The register oracle's closest result
+ * is these 10 words with no register forced, so allocation isn't the cause.
  */
 #ifdef NON_MATCHING
 void DrawScreenFade(Gfx** displayListHead) {
@@ -673,8 +674,9 @@ s32 UpdatePrompt(ControllerState* controller) {
  * constant 1 then kept in a saved register and the frame 8 bytes larger),
  * writing the cloud's top with the product first changes nothing, as halfHeight
  * times (half - 1) it gives 34 words, 12 in shape, and an inline helper that
- * draws a choice around its middle 69 words, 31 in shape. 29 words differ, 5 in
- * shape.
+ * draws a choice around its middle 69 words, 31 in shape. The register oracle,
+ * forcing one pseudo's register, leaves 21 words at best, so the code differs
+ * too. 29 words differ, 5 in shape.
  */
 #ifdef NON_MATCHING
 void DrawPrompt(Gfx** displayListHead) {

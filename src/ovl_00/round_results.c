@@ -2489,9 +2489,10 @@ enum PointsStep {
  * Counts the earned course points into the save, showing a notice when they
  * open a course, then returns TRUE once A is pressed
  *
- * Doesn't match: when starting the tally, the original reads the player
- * count through the address of g_GameState.gameMode, which moves the
- * branches after it by a word. 5 words differ.
+ * Doesn't match: when starting the tally, the original reads the player count
+ * through the address of g_GameState.gameMode, which moves the branches after
+ * it by a word. The register oracle's closest result is these 5 words with no
+ * register forced, so allocation isn't the cause. 5 words differ.
  */
 #ifdef NON_MATCHING
 s32 UpdateCoursePointsResults(ControllerState* controller) {
@@ -3662,9 +3663,10 @@ void DrawClubTournamentResults(Gfx** displayListHead) {
  * portraits.
  *
  * Doesn't match: GCC merges the doubling of the title's texture coordinates
- * into the shift that packs them, where the original shifts twice. Setting
- * the title's right edge before its strip loop gives 8 words differing, and
- * inlining it 14. 6 words differ, 4 in shape.
+ * into the shift that packs them, where the original shifts twice. Setting the
+ * title's right edge before its strip loop gives 8 words differing, and
+ * inlining it 14. The register oracle's closest result is these 6 words with no
+ * register forced, so allocation isn't the cause. 6 words differ, 4 in shape.
  */
 #ifdef NON_MATCHING
 void DrawRoundResults(Gfx** displayListHead) {

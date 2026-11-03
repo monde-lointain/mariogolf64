@@ -960,7 +960,8 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/course_menu", DrawStatsScrollArrows);
  * unsigned x or place 20 or more. The permuter's best casts y to unsigned at
  * the rectangle's top edge, the same 19 words, 5 in shape; its fewest words, 12
  * (10 in shape), come from casting the rectangle's dtdy to a char, which makes
- * it 0. 31 words differ, 21 in shape.
+ * it 0. The register oracle, forcing 3 pseudos' registers, leaves 29 words at
+ * best, so the code differs too. 31 words differ, 21 in shape.
  */
 #ifdef NON_MATCHING
 void DrawCourseTrophies(Gfx** displayListHead) {

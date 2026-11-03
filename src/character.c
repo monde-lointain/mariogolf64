@@ -1963,14 +1963,15 @@ void SetCharacterLights(void) {
  * Draws the character in the slot with its lights, alpha and culling
  *
  * Doesn't match: for the reaction light's fallback, the original addresses the
- * lights' first light from the table plus 8, adding the index's offset to
- * that, where ours adds the offset to the table first. Without IN_OWN_BLOCK
- * it's 99 words, 15 in shape. Choosing the table first and making one
- * AddReactionLight call gives 117 words, 21 in shape (89 and 13 with the
- * block), and keeping a pointer to the chosen lights 174 to 186. The
- * permuter's best outputs (660 and 720, from 980) read f_DryLights in place
- * of lights, which saves the wrong lights when the wet ones are chosen. 71
- * words differ, 7 in shape.
+ * lights' first light from the table plus 8, adding the index's offset to that,
+ * where ours adds the offset to the table first. Without IN_OWN_BLOCK it's 99
+ * words, 15 in shape. Choosing the table first and making one AddReactionLight
+ * call gives 117 words, 21 in shape (89 and 13 with the block), and keeping a
+ * pointer to the chosen lights 174 to 186. The permuter's best outputs (660 and
+ * 720, from 980) read f_DryLights in place of lights, which saves the wrong
+ * lights when the wet ones are chosen. The register oracle, forcing 4 pseudos'
+ * registers, leaves 61 words at best, so the code differs too. 71 words differ,
+ * 7 in shape.
  */
 #ifdef NON_MATCHING
 void DrawCharacter(u32 slotIndex) {
@@ -2172,13 +2173,14 @@ void PlaceCharacter(u32 slotIndex, CoursePoint point, Radians heading) {
  * The shadow lies on the ground plane under three points around the
  * character's shadow point.
  *
- * Doesn't match: the original loads the light's rotation into $f0 and picks
- * it or its negation into $f12, which is jump.c's form of a general ?:
- * expansion. Ours is expand_expr's single-operand form, which loads straight
- * into $f12 and negates it in place. Reading the rotation into a local first,
- * or writing the arms differently, keeps that form. The view direction's
- * stores and the shadow scale's abs.s are also scheduled otherwise. 49 words
- * differ, 19 in shape.
+ * Doesn't match: the original loads the light's rotation into $f0 and picks it
+ * or its negation into $f12, which is jump.c's form of a general ?: expansion.
+ * Ours is expand_expr's single-operand form, which loads straight into $f12 and
+ * negates it in place. Reading the rotation into a local first, or writing the
+ * arms differently, keeps that form. The view direction's stores and the shadow
+ * scale's abs.s are also scheduled otherwise. The register oracle, forcing 10
+ * pseudos' registers, leaves 47 words at best, so the code differs too. 49
+ * words differ, 19 in shape.
  */
 #ifdef NON_MATCHING
 void DrawCharacterAndShadow(

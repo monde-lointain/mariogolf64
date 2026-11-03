@@ -601,20 +601,21 @@ void SetPlankMotion(s32 motion) {
 }
 
 /*
- * Doesn't match: the original's loop.c hoists the plank group's division
- * magic number into $s7 and a second 0x20 into $s3, where ours loads the magic
- * number inside the loop, so the saved registers shift by one and the group
- * takes $s0 rather than $v1. The other hoisted constants come from strength
- * reduction and match. move_movables moves a constant used once only when
- * its threshold, 62 in a loop with calls, reaches the loop's 101 insns, so
- * the original's hoist needs a longer life or a second set of the magic
- * number. Naming the group gives 70 words, computing it before the if 92, a
- * ternary clamp 77 and an if/else strip height worse; testing a second
- * division in the clamp 56 to 77 without the hoist, and a do-while (0)
- * around the division changes nothing. The permuter's 26 words come from
- * dropping the group's division, which leaves the lag unset below the last
- * group; writing the strips' bottom into both rectangles, with or without a
- * group local, gives 70. 56 words differ, 10 in shape.
+ * Doesn't match: the original's loop.c hoists the plank group's division magic
+ * number into $s7 and a second 0x20 into $s3, where ours loads the magic number
+ * inside the loop, so the saved registers shift by one and the group takes $s0
+ * rather than $v1. The other hoisted constants come from strength reduction and
+ * match. move_movables moves a constant used once only when its threshold, 62
+ * in a loop with calls, reaches the loop's 101 insns, so the original's hoist
+ * needs a longer life or a second set of the magic number. Naming the group
+ * gives 70 words, computing it before the if 92, a ternary clamp 77 and an
+ * if/else strip height worse; testing a second division in the clamp 56 to 77
+ * without the hoist, and a do-while (0) around the division changes nothing.
+ * The permuter's 26 words come from dropping the group's division, which leaves
+ * the lag unset below the last group; writing the strips' bottom into both
+ * rectangles, with or without a group local, gives 70. The register oracle,
+ * forcing 5 pseudos' registers, leaves 38 words at best, so the code differs
+ * too. 56 words differ, 10 in shape.
  */
 #ifdef NON_MATCHING
 void DrawPlanks(Gfx** displayListHead) {

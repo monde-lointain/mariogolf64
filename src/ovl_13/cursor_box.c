@@ -78,8 +78,9 @@ void LoadCursorBox(void* image) {
  * used in their own block. A static inline function stepping the phase, in
  * place of the block, gives 173 words (11 in shape), as with no barrier. So
  * does a pointer to the corner's phase, set inside or outside the block or with
- * the step outside it. A pointer to the projection matrix changes nothing. 44
- * words differ, 12 in shape.
+ * the step outside it. A pointer to the projection matrix changes nothing. The
+ * register oracle, forcing 6 pseudos' registers, leaves 14 words at best, so
+ * the code differs too. 44 words differ, 12 in shape.
  */
 #ifdef NON_MATCHING
 void DrawCursorBox(Gfx** displayListHead, s32 left, s32 top) {

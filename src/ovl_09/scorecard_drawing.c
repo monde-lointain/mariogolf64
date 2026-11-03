@@ -551,13 +551,14 @@ const char f_CompactHoleFormat[] = "Hole%d";
  * Doesn't match: sched places $fp's setup from the matchPanelImage address
  * later, after the panel's calls, and the tile loops take &gfx from $s1 where
  * the original copies it to $s7, spilling zero rather than $s1 to 0x6C($sp).
- * The tiles' texel offsets are worked out once per tile, as the original
- * scales them before the calls (scaling at each call gives 110 words, 104 in
- * shape). Grouping the tiles' y as g_Scorecard.y + (rowOffset + TILE_TOP)
- * gives 111 words, 49 in shape; stepping rowOffset as i * MATCH_ROW_SPACING
- * gives 183. The win arrow's rise is read once, before the strokes test, as
- * the original does (86 words, 66 in shape, reading it in each call). 70
- * words differ, 50 in shape.
+ * The tiles' texel offsets are worked out once per tile, as the original scales
+ * them before the calls (scaling at each call gives 110 words, 104 in shape).
+ * Grouping the tiles' y as g_Scorecard.y + (rowOffset + TILE_TOP) gives 111
+ * words, 49 in shape; stepping rowOffset as i * MATCH_ROW_SPACING gives 183.
+ * The win arrow's rise is read once, before the strokes test, as the original
+ * does (86 words, 66 in shape, reading it in each call). The register oracle's
+ * closest result is these 70 words with no register forced, so allocation isn't
+ * the cause. 70 words differ, 50 in shape.
  */
 #ifdef NON_MATCHING
 void DrawMatchPage(Gfx** displayListHead) {

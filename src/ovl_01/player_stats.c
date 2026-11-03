@@ -805,14 +805,15 @@ void UpdateBetSettings(void) {
  * chosen bet's explanation
  *
  * Doesn't match: the original keeps the stake marks' coordinates in other
- * registers, and uses markGrowth without masking it to 16 bits. The marks'
- * left edges add slide and their offset as one sum, which the loop hoists:
- * written in a row they give 32 differing words. Halving markGrowth as
- * unsigned, by a cast to u32 or "/ 2u", gives 20 but keeps the mask; no
- * type of markGrowth, markRaise or a halfGrowth local removes it. The
- * permuter's u16 local for the right edge's column sum alone gives 16 and
- * still masks; as s16 or s32 it gives 25 and as u32 28, and used for both
- * edges 207 whatever its type. 25 words differ, 5 in shape.
+ * registers, and uses markGrowth without masking it to 16 bits. The marks' left
+ * edges add slide and their offset as one sum, which the loop hoists: written
+ * in a row they give 32 differing words. Halving markGrowth as unsigned, by a
+ * cast to u32 or "/ 2u", gives 20 but keeps the mask; no type of markGrowth,
+ * markRaise or a halfGrowth local removes it. The permuter's u16 local for the
+ * right edge's column sum alone gives 16 and still masks; as s16 or s32 it
+ * gives 25 and as u32 28, and used for both edges 207 whatever its type. The
+ * register oracle's closest result is these 25 words with no register forced,
+ * so allocation isn't the cause. 25 words differ, 5 in shape.
  */
 #ifdef NON_MATCHING
 void DrawBetSettings(

@@ -183,13 +183,14 @@ static inline s32 RandomLaunchHeightJitter(void) {
 }
 
 /*
- * Sends every particle of the firework out from one random point.
- * Doesn't match: the original also keeps a copy of the row's first cell
- * index, beside the register loop.c steps it in, and spills the copy, which
- * moves width and height to other registers. A rowStart variable compiles the
- * same as row * width. Keeping the row's offset from the middle in a local
- * gives 108 words, a halfHeight beside halfWidth 118. 50 words differ, 14 in
- * shape.
+ * Sends every particle of the firework out from one random point. Doesn't
+ * match: the original also keeps a copy of the row's first cell index, beside
+ * the register loop.c steps it in, and spills the copy, which moves width and
+ * height to other registers. A rowStart variable compiles the same as row *
+ * width. Keeping the row's offset from the middle in a local gives 108 words, a
+ * halfHeight beside halfWidth 118. The register oracle, forcing 6 pseudos'
+ * registers, leaves 24 words at best, so the code differs too. 50 words differ,
+ * 14 in shape.
  */
 #ifdef NON_MATCHING
 void LaunchFirework(Firework* firework, s32 fireworkIndex UNUSED) {

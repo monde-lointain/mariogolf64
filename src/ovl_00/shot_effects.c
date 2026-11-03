@@ -524,7 +524,9 @@ void DrawShotEffectsHud(Gfx** displayListHead UNUSED) {}
  * state from another register. Testing i < f_SwingTrailSampleCount gives 20
  * differing words, storing the count without IN_OWN_BLOCK 23, storing it first
  * 25 and swapping the alpha and state 10. Only a volatile count reproduces the
- * reload, and the count isn't hardware. 9 words differ, 5 in shape.
+ * reload, and the count isn't hardware. The register oracle's closest result is
+ * these 9 words with no register forced, so allocation isn't the cause. 9 words
+ * differ, 5 in shape.
  */
 #ifdef NON_MATCHING
 void StartSwingTrail(s32 kind) {

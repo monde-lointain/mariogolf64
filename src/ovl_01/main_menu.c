@@ -2238,14 +2238,16 @@ void UpdateAnimationViewer(void) {
  * g_CharacterGrid's address before the player's row and column, and the spin's
  * slowing keeps the spin in a register where the original reads it again after
  * the step. The second cse pass shares the spin test's address with the
- * subtraction; testing the step's quotient in the clamp instead of setting
- * the step, as the permuter's best does (35 words, 15 in shape), reads it
- * again as the original does, but leaves the step unset. Setting the step
- * in both arms of the clamp or in a ternary gives 55 to 74 words, and moving
- * the barrier past the clamp changes nothing. The B button's path reads the
- * previous player's character before clearing their choices, and clears the
- * controller before the character, as the original stores them (64 words, 24
- * in shape, reading it in the store). 52 words differ, 18 in shape.
+ * subtraction; testing the step's quotient in the clamp instead of setting the
+ * step, as the permuter's best does (35 words, 15 in shape), reads it again as
+ * the original does, but leaves the step unset. Setting the step in both arms
+ * of the clamp or in a ternary gives 55 to 74 words, and moving the barrier
+ * past the clamp changes nothing. The B button's path reads the previous
+ * player's character before clearing their choices, and clears the controller
+ * before the character, as the original stores them (64 words, 24 in shape,
+ * reading it in the store). The register oracle, forcing 5 pseudos' registers,
+ * leaves 31 words at best, so the code differs too. 52 words differ, 18 in
+ * shape.
  */
 #ifdef NON_MATCHING
 void UpdateModeSelect(void) {
@@ -3952,7 +3954,8 @@ void DrawMenuScreen(Gfx** displayListHead) {
  * it too before the strips' row count variable, as did 6 cases that each break.
  * A permuter run pointed to the variable. Adding the strip's offset to the
  * texels' start, rather than both to the image, gives 61 words differing (17 in
- * shape). 58 words differ, 16 in shape.
+ * shape). The register oracle's closest result is these 58 words with no
+ * register forced, so allocation isn't the cause. 58 words differ, 16 in shape.
  */
 #ifdef NON_MATCHING
 void DrawMenuBackdropLayers(Gfx** displayListHead, s32 layers) {
