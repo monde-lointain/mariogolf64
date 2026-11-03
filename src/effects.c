@@ -155,6 +155,12 @@ FILE_STATIC Mtx f_EffectMatrices[EFFECT_COUNT];
 FILE_STATIC Mtx f_DropMatrices[DRAW_BUFFER_COUNT];
 FILE_STATIC Mtx f_DivotMarkMatrix;
 FILE_STATIC ShotDebris f_ShotDebris;
+/*
+ * Every spawn sets it through a float, as the original converts the ground
+ * height to a float and back. Without the (f32), 8 words differ in each of
+ * SpawnSpreadingCircle, SpawnTear and SpawnSparkleNearPoint, all in shape; an
+ * f32 local matches as well. Declaring it f32, without the casts, doesn't.
+ */
 FILE_STATIC s32 f_SpawnGroundHeight;
 FILE_STATIC u8* f_RainSplashImage;
 FILE_STATIC Raindrop* f_Raindrops;
@@ -385,7 +391,6 @@ void SpawnSpreadingCircle(u32 slotIndex, s32 pointId) {
   Effect* effect;
 
   if (GetCharacterPointPosition(slotIndex, pointId, point) == 0) {
-    /* The (f32) conversion is there to match */
     f_SpawnGroundHeight =
         (f32)GetGroundHeight(point[AXIS_X] * WORLD_TO_COURSE_SCALE,
             point[AXIS_Z] * WORLD_TO_COURSE_SCALE);
@@ -447,7 +452,6 @@ void SpawnTear(u32 slotIndex, s32 pointId, Radians heading) {
   Effect* effect;
 
   if (GetCharacterPointPosition(slotIndex, pointId, point) == 0) {
-    /* The (f32) conversion is there to match */
     f_SpawnGroundHeight =
         (f32)GetGroundHeight(point[AXIS_X] * WORLD_TO_COURSE_SCALE,
             point[AXIS_Z] * WORLD_TO_COURSE_SCALE);
@@ -508,7 +512,6 @@ void SpawnSparkleNearPoint(u32 slotIndex, s32 pointId) {
   Effect* effect;
 
   if (GetCharacterPointPosition(slotIndex, pointId, point) == 0) {
-    /* The (f32) conversion is there to match */
     f_SpawnGroundHeight =
         (f32)GetGroundHeight(point[AXIS_X] * WORLD_TO_COURSE_SCALE,
             point[AXIS_Z] * WORLD_TO_COURSE_SCALE);
