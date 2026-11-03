@@ -446,6 +446,11 @@ void DrawPerformanceMeter(u32 extraFrameCount, u32 y, u32 cpuStartTime,
   startX = BAR_START_X;
   for (i = 0; i < nuDebTaskPerfPtr->gfxTaskCnt; i++) {
     vertexIndex = i * 4;
+    /*
+     * The RDP counters are loaded into the 64-bit taskTime before they are
+     * converted. Converting each as it is read gives 180 words differing (150
+     * in shape) for the three, or 138 (126) with the counter cast to s64.
+     */
     taskTime = nuDebTaskPerfPtr->gfxTaskTime[i].dpCnt[NU_DEB_DP_CMD_CTR];
     taskTime = RdpCountToMicroseconds(taskTime);
     barLength = taskTime * FRAME_WIDTH / FRAME_MICROSECONDS;
