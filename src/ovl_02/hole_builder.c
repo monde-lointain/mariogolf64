@@ -743,7 +743,14 @@ s32 ListOffsetsByDistance(s32 span, GridOffset* offsets, s32 maxCount) {
  *
  * Doesn't match: the nested DrawTriangleHeights allocates its registers
  * differently, using $s7 where the original reloads the static chain. 323
- * words differ in it.
+ * words differ in it, 45 in shape. Indexing the row, as texel[texelColumn]
+ * from texel = &heights[texelRow * MAP_COLUMN_COUNT], gives 497 words but
+ * only 29 in shape: the inner loop takes the original's form, and what is
+ * left is the extra saved register, with span in $s1 rather than $t8, and the
+ * order of the sra and mul.s around it. Indexing heights directly gives 335
+ * words, 51 in shape; texel[0] for *texel, 323 and 45. Swapping the operands
+ * of longX's sum or of its product, or moving longX after shortSlopeX or
+ * before the reciprocal's update, gives 490 to 511 words, 29 to 54 in shape.
  */
 #ifdef NON_MATCHING
 void DrawBandHeights(s16* heights, s32 band) {
