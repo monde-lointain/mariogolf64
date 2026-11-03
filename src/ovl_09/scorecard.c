@@ -383,7 +383,7 @@ void FreeScorecard(void);
  *
  * Doesn't match: the original addresses the closing frees from
  * totalLabelsImage and derives tableImage's address from it, where this
- * addresses them from tableImage. 17 words differ.
+ * addresses them from tableImage. 17 words differ, 3 in shape.
  */
 #ifdef NON_MATCHING
 void FreeScorecard(void) {
@@ -443,7 +443,12 @@ void FreeScorecard(void) {
         break;
     }
 
-    /* Taken before the frees above it, to match */
+    /*
+     * Taken before the frees above it, to match: the original keeps this
+     * address in a register and steps the face images' addresses from it.
+     * Freeing g_Scorecard.tableImage in place, or taking its address after
+     * any of the frees here, gives 33 words.
+     */
     tableImage = &g_Scorecard.tableImage;
     FreeMemory(&g_Scorecard.totalLabelsImage);
     FreeMemory(&g_Scorecard.labelsImage);
