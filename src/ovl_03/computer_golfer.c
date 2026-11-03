@@ -2225,7 +2225,12 @@ INCLUDE_RODATA("asm/nonmatchings/ovl_03/computer_golfer", f_SimFaultText);
  * original's sum is in $v1 and its store comes after them. Reading kind
  * after the sum, testing surfaceInfo->kind directly, and spelling the tests
  * out with || or | leave the code as it is. The register oracle, forcing 16
- * pseudos, leaves 76 words. 117 words differ, 43 in shape.
+ * pseudos, leaves 76 words. The permuter's best, 103 words and 35 in shape,
+ * reads the heading for the excluded sectors through a pointer taken before
+ * the club checks, where the original reads f_Shot.heading directly; taking it
+ * just before the loop gives 116 and 36, using it for the aim change too 118
+ * and 36, and reading the centre sector into a local 153 and 57. 117 words
+ * differ, 43 in shape.
  */
 #ifdef NON_MATCHING
 s32 StepTrialShot(void) {
