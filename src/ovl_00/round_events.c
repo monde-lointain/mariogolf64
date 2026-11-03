@@ -1910,12 +1910,14 @@ void DrawReadyGoMovie(Gfx** displayListHead) {
       alpha = 0;
     }
 
-    /* The chained assignment is there to match */
+    /*
+     * The chained assignment is there to match: three separate stores, in
+     * either order, give 19 words differing, 9 in shape
+     */
     rotation[AXIS_X] = rotation[AXIS_Y] = rotation[AXIS_Z] = 0.0f;
     scale[AXIS_Z] =
         (GO_GROWTH_PER_FRAME * (f_MovieDrawCount - GO_GROW_DRAW)) + 1.0f;
-    scale[AXIS_Y] = scale[AXIS_Z];
-    scale[AXIS_X] = scale[AXIS_Y];
+    scale[AXIS_X] = scale[AXIS_Y] = scale[AXIS_Z];
   } else {
     f_CurrentMovie = MOVIE_NONE;
     return;
