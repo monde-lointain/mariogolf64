@@ -2993,7 +2993,13 @@ void ShowHoleOutBanner(s32 playerIndex) {
  * clamp and used by the debug clamp and the timing test after the launch, which
  * accounts for all of its gain: with the field read directly again it gives the
  * draft's 392 (148). Clamping through an inline helper or macro taking the
- * field's address gives 392 to 400 words (148 to 152 in shape).
+ * field's address gives 392 to 400 words (148 to 152 in shape). The original
+ * branches on each of the cup-in song's two game mode tests, where the && here
+ * compiles to xori, sltu and and; nesting the tests, either way round, or a
+ * switch with the two modes breaking out gives 571 to 575 words (149 in shape),
+ * and !(... || ...) changes nothing. Nested with the Speed Golf test outside,
+ * the branches match the original's, but 0x80227170 moves from $s7 to $fp
+ * across the function.
  */
 #ifdef NON_MATCHING
 /* Debug flag 0x47: prints where the ball lies, and the second controller moves
