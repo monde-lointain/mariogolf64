@@ -3124,22 +3124,18 @@ static const char f_UnusedWallText[3][4] = {"", "", ""};
  * hit ring's index, and the fraction of the way along the path. It returns
  * 1 for a hit, 0 for none and -1 for a start or end off the ground.
  *
- * Doesn't match: the original sets hitNumber after IsGameFlagSet's call, in its
- * branch's delay slot, where ours sets it before the call; setting it after the
- * debug block puts it in the first off-ground test's delay slot (38 words, 14
- * in shape), before the loop's other setup gives 52 (10), and in both arms of
- * the debug test 72 (14). Its endSide also takes the partial sum's register,
+ * Doesn't match: the original's endSide takes the partial sum's register,
  * and it takes the start side's abs.s before testing sideChange's sign, which
  * moving the fabsf up gives at the cost of 2 more words in shape. The register
  * oracle, forcing 3 pseudos' registers, leaves 22 words at best, so the code
- * differs too. 32 words differ, 10 in shape.
+ * differs too. 28 words differ, 8 in shape.
  */
 #ifdef NON_MATCHING
 s32 FindRingHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
     s32 endZ, PlaneTriangle* hitRing, f32* fraction) {
   PlaneTriangle ring;
   TrianglePlane plane;
-  s32 hitNumber = NO_RING_NUMBER;
+  s32 hitNumber;
   s32 ringNumber;
   s32 i;
   HoleTriangle* triangle;
@@ -3151,8 +3147,11 @@ s32 FindRingHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
   /* The original frame has room for this; without it 106 words differ, 10 in
    * shape */
   s32 unused[4] UNUSED;
+  Boolean isDebug = IsGameFlagSet(GAME_FLAG_UNK0);
 
-  if (IsGameFlagSet(GAME_FLAG_UNK0)) {
+  /* After the flag query, so this fills the debug branch's delay slot. */
+  hitNumber = NO_RING_NUMBER;
+  if (isDebug) {
     PrintDebugPaddedHex(startX, PATH_DEBUG_COLUMN, PATH_DEBUG_ROW);
     PrintDebugPaddedHex(startY, PATH_DEBUG_COLUMN, PATH_DEBUG_ROW + 1);
     PrintDebugPaddedHex(startZ, PATH_DEBUG_COLUMN, PATH_DEBUG_ROW + 2);
