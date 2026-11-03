@@ -2200,17 +2200,17 @@ void DrawGoombaMovie(Gfx** displayListHead) {
  * Lakitu flies in, counts down to the start on its starting light, then flies
  * off
  *
- * Doesn't match: of the constants loop.c hoists out of the strip loop, the
- * original keeps f_Lakitu's address in $s4 and the tile commands' words in $s2
- * and $s3, where GCC gives them $s3, $s2 and $s4, and the strips' float
- * conversions are scheduled differently. Stepping offset in the loop's header,
- * or setting it before the palette load, gives 89 words differing, 49 in shape.
- * Rounding the half width before the tile load takes 87 words differing, 47 in
- * shape, to 87 and 45, and working out the strip's start S there too takes it
- * to 83 and 41. Naming each strip's bottom, or the start T after its rounding,
- * changes nothing; a 16-bit offset gives 136. The register oracle, forcing 8
- * pseudos' registers, leaves 55 words of the 83 at best, so the code differs
- * too.
+ * Doesn't match: 69 words differ, 37 in shape. In the strip loop the original
+ * builds the tile load's command words in $v1, $a2 and $a3, where this uses
+ * $a2, $a3 and $t0, and it reads f_Lakitu's fields at other points; the
+ * register oracle, forcing 7 pseudos' registers, leaves 50 words at best, so
+ * the code differs too. Before the second sync in the strip loop, which the
+ * original's display list has after the tile load, stepping offset in the
+ * loop's header, or setting it before the palette load, gave 89 words
+ * differing, 49 in shape. Rounding the half width before the tile load took 87
+ * words differing, 47 in shape, to 87 and 45, and working out the strip's start
+ * S there too took it to 83 and 41. Naming each strip's bottom, or the start T
+ * after its rounding, changed nothing; a 16-bit offset gave 136.
  */
 #ifdef NON_MATCHING
 void DrawLakituMovie(Gfx** displayListHead) {
@@ -2296,6 +2296,7 @@ void DrawLakituMovie(Gfx** displayListHead) {
         LAKITU_WIDTH - 1, LAKITU_STRIP_HEIGHT - 1, 0, G_TX_NOMIRROR | G_TX_WRAP,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
         G_TX_NOLOD);
+    gDPPipeSync(gfx++);
     y = f_Lakitu.y;
     roundedHalfHeight = halfHeight + 0.5f;
     startT = 16.0f - (((f32)roundedHalfHeight - halfHeight) * 16.0f);
