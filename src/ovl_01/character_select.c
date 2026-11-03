@@ -336,7 +336,11 @@ s32 MoveGridCursor(s32 playerNumber, u8 direction, u8 canChooseMarked) {
     }
 
     if ((s16)character >= FIRST_IMPORTED_CHARACTER) {
-      slot = character; /* Set in each branch to match */
+      /*
+       * Set in each branch to match: setting slot before the test gives 48
+       * words differing, 6 in shape
+       */
+      slot = character;
       character =
           g_ImportedCharacters[(s16)slot - FIRST_IMPORTED_CHARACTER].character;
     } else {
@@ -457,7 +461,11 @@ s32 MoveGridCursorDiagonal(s32 playerNumber, u8 diagonal, u8 canChooseMarked) {
     }
 
     if ((s16)character >= FIRST_IMPORTED_CHARACTER) {
-      slot = character; /* Set in each branch to match */
+      /*
+       * Set in each branch to match: setting slot before the test gives 42
+       * words differing, 6 in shape
+       */
+      slot = character;
       character =
           g_ImportedCharacters[(s16)slot - FIRST_IMPORTED_CHARACTER].character;
     } else {
@@ -603,7 +611,12 @@ s32 UpdateCharacterSelect(
   u16 button;
   s32 palette;
   s8 column;
-  u16 slot; /* The cursor's row, then the face's slot, to match */
+  /*
+   * The cursor's row, then the face's slot, to match: a u16 row variable
+   * gives 56 words differing (8 in shape), and an s8 one 62 (14), against
+   * the draft's 46 (8)
+   */
+  u16 slot;
   u16 faceCharacter;
   void* faceImage;
   SoundChannel channel;
@@ -888,7 +901,12 @@ s32 UpdateCharacterSelect(
         slot = faceCharacter + MARKED_CHARACTER_OFFSET;
         faceCharacter = slot;
       } else if (gridMark >= FIRST_IMPORTED_CHARACTER) {
-        slot = faceCharacter; /* Set in each branch to match */
+        /*
+         * Set in each branch to match: setting slot before the tests, here
+         * and in the other face load, gives 130 words differing (24 in shape)
+         * against the draft's 46 (8)
+         */
+        slot = faceCharacter;
         faceCharacter =
             g_ImportedCharacters[gridMark - FIRST_IMPORTED_CHARACTER].character;
       } else {
@@ -1042,7 +1060,12 @@ s32 UpdateCharacterSelect(
       slot = faceCharacter + MARKED_CHARACTER_OFFSET;
       faceCharacter = slot;
     } else if (gridMark >= FIRST_IMPORTED_CHARACTER) {
-      slot = faceCharacter; /* Set in each branch to match */
+      /*
+       * Set in each branch to match: setting slot before the tests, here
+       * and in the other face load, gives 130 words differing (24 in shape)
+       * against the draft's 46 (8)
+       */
+      slot = faceCharacter;
       faceCharacter =
           g_ImportedCharacters[gridMark - FIRST_IMPORTED_CHARACTER].character;
     } else {
@@ -1660,7 +1683,9 @@ void DrawCharacterGridCursor(Gfx** displayListHead, s32 x, s32 y);
 #define PLAYER_TAG_IMAGE_SIZE 64
 /*
  * The texels of the tag playerIndex tags past firstTag, as the tags sit side
- * by side in one image. The two offsets are scaled apart, to match.
+ * by side in one image. The two offsets are scaled apart, to match: scaling
+ * their sum gives 14 words differing (10 in shape) in DrawPlayerTags' draft,
+ * against 2 (2).
  */
 #define PlayerTagTexels(firstTag, playerIndex) \
   (TextureAddress(ImageTexelsAt(f_PlayerTags, \
