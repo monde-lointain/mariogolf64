@@ -534,6 +534,10 @@ Surface GetMiniGolfSurface(s32 x, s32 z, Boolean lowersWaterLevel) {
   f32 weight;
   Surface surface;
 
+  /*
+   * Copied, then shifted, to match: shifting in the copies gives 50 words
+   * differing, none in shape
+   */
   shiftedX = x;
   shiftedZ = z;
   shiftedX -= MINI_GOLF_TEXEL_WIDTH / 2;
@@ -561,7 +565,11 @@ Surface GetMiniGolfSurface(s32 x, s32 z, Boolean lowersWaterLevel) {
     }
 
     if (hit.unk0 == HOLE_TRIANGLE_KIND_FLAT) {
-      /* Reuses i as the water height to match */
+      /*
+       * Reuses i as the water height to match: a waterHeight variable,
+       * wherever it is declared, gives 4 words differing (none in shape), and
+       * comparing the height directly 37 (17)
+       */
       i = WaterProbeHeight(fraction, MINI_GOLF_WATER_PROBE_REACH) + waterBias;
       if (i < GetTerrainHeight(x, z)) {
         return SURFACE_WATER_HAZARD;
