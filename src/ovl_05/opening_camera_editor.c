@@ -445,11 +445,11 @@ void StopEditorMoves(void) {
 
 /* Braking lowers a top speed no further than the acceleration */
 #define KeepTopSpeed(topSpeed, acceleration) \
-  do { \
+  { \
     if (fabsf(topSpeed) < fabsf(acceleration)) { \
       (topSpeed) = (acceleration); \
     } \
-  } while (0)
+  }
 
 /*
  * Moves the camera on by an update: the point being moved, or carried with
@@ -939,7 +939,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_camera_editor", UpdateCameraEditor)
 
 /* Moves the eye along its line to the look-at point, scaling their distance */
 #define ZoomEditorEye(scale) \
-  do { \
+  { \
     g_CameraEditor.points[EDITOR_POINT_EYE][0] = \
         ((g_CameraEditor.points[EDITOR_POINT_EYE][0] - \
              g_CameraEditor.points[EDITOR_POINT_LOOK_AT][0]) * \
@@ -955,12 +955,12 @@ INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_camera_editor", UpdateCameraEditor)
              g_CameraEditor.points[EDITOR_POINT_LOOK_AT][2]) * \
             (scale)) + \
         g_CameraEditor.points[EDITOR_POINT_LOOK_AT][2]; \
-  } while (0)
+  }
 
 /* Steps one coordinate of a point while the second controller holds a
  * button; step is += or -= */
 #define StepEditorCoordinate(button, point, axis, step) \
-  do { \
+  { \
     if (g_ControllerStates[SECOND_EDITOR_PAD].buttons & (button)) { \
       if (g_ControllerStates[SECOND_EDITOR_PAD].buttons & START_BUTTON) { \
         g_CameraEditor.points[point][axis] step FAST_PAD_STEP; \
@@ -969,19 +969,19 @@ INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_camera_editor", UpdateCameraEditor)
         g_CameraEditor.points[point][axis] step SLOW_PAD_STEP; \
       } \
     } \
-  } while (0)
+  }
 
 /* The control pad moves a point across the ground and the C buttons up and
  * down */
 #define StepEditorPoint(point) \
-  do { \
+  { \
     StepEditorCoordinate(R_JPAD, point, 0, +=); \
     StepEditorCoordinate(L_JPAD, point, 0, -=); \
     StepEditorCoordinate(U_JPAD, point, 2, +=); \
     StepEditorCoordinate(D_JPAD, point, 2, -=); \
     StepEditorCoordinate(U_CBUTTONS, point, 1, -=); \
     StepEditorCoordinate(D_CBUTTONS, point, 1, +=); \
-  } while (0)
+  }
 
 /*
  * The opening's camera editor screen. The first controller slides or moves
