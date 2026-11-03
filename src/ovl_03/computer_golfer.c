@@ -1761,10 +1761,12 @@ void ChooseLandingTarget(
           "PointList[%d] = (%d, %d)\n", index, pointX[index], pointZ[index]);
     }
 
-    pointX[pointCount] = g_HoleSetup.cupPosition[AXIS_X];
-
-    /* Reading the cup's z through g_HoleSetup here and below is there to match
+    /*
+     * Reading the cup's position through g_HoleSetup here and below is there
+     * to match: a cupZ local read once gives 35 words differing (11 in
+     * shape), and cupX and cupZ locals 47 (19)
      */
+    pointX[pointCount] = g_HoleSetup.cupPosition[AXIS_X];
     pointZ[pointCount] = g_HoleSetup.cupPosition[AXIS_Z];
     order[pointCount] = END_ROUTE_POINT;
     pointCount++;
