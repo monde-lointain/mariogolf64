@@ -2061,8 +2061,13 @@ s32 GetTriangleIntegerPlane(PlaneTriangle* triangle, IntegerPlane* plane) {
   s32 length;
 
   secondZ = triangle->corners[AXIS_Z][2] - triangle->corners[AXIS_Z][0];
-  firstY =
-      triangle->corners[AXIS_Y][1]; /* Split from the subtraction to match */
+  /*
+   * Split from the subtraction to match: as one statement, cast or written
+   * with a negation, 6 to 8 words differ, none in shape. Of the 720 orders of
+   * GetTrianglePlane's six differences with it in one statement, none
+   * matches; the best leave 2 words.
+   */
+  firstY = triangle->corners[AXIS_Y][1];
   firstY -= triangle->corners[AXIS_Y][0];
   secondY = triangle->corners[AXIS_Y][2] - triangle->corners[AXIS_Y][0];
   firstZ = triangle->corners[AXIS_Z][1] - triangle->corners[AXIS_Z][0];
@@ -2120,8 +2125,13 @@ s32 GetTrianglePlane(PlaneTriangle* triangle, TrianglePlane* plane) {
   f32 scale;
 
   secondZ = triangle->corners[AXIS_Z][2] - triangle->corners[AXIS_Z][0];
-  firstY =
-      triangle->corners[AXIS_Y][1]; /* Split from the subtraction to match */
+  /*
+   * Split from the subtraction to match: as one statement, cast or written
+   * with a negation, 6 to 8 words differ, none in shape. Of the 720 orders of
+   * GetTrianglePlane's six differences with it in one statement, none
+   * matches; the best leave 2 words.
+   */
+  firstY = triangle->corners[AXIS_Y][1];
   firstY -= triangle->corners[AXIS_Y][0];
   secondY = triangle->corners[AXIS_Y][2] - triangle->corners[AXIS_Y][0];
   firstZ = triangle->corners[AXIS_Z][1] - triangle->corners[AXIS_Z][0];
