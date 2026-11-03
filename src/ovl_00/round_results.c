@@ -441,8 +441,9 @@ void OpenRoundResults(s32 request) {
  * registers differ. The original builds the address again after each call;
  * reading f_PointsEarned through a pointer in AddRoundPoints keeps it in $s1
  * across the calls instead (228 words, 62 in shape, or 234 and 64 for the
- * total too), and summing the points in a local gives 247. 211 words differ,
- * 45 in shape.
+ * total too), and summing the points in a local gives 247. The tournament's
+ * open course count is stored first, as the original does (211 words the
+ * other way). 207 words differ, 45 in shape.
  */
 void LoadRoundResults(void) {
   EncodedAsset asset;
@@ -715,8 +716,8 @@ void LoadRoundResults(void) {
         f_PointsEarned =
             f_PlayerPoints[0] * f_CoursePointRates[g_GameState.courseIndex];
         f_PointsShown = f_PointsEarned;
-        f_OpenCourseCount = CountOpenCourses(save->coursePoints);
-        f_TournamentOpenCourseCount = f_OpenCourseCount;
+        f_TournamentOpenCourseCount = CountOpenCourses(save->coursePoints);
+        f_OpenCourseCount = f_TournamentOpenCourseCount;
         if (f_OpenCourseCount < COURSE_COUNT) {
           f_PointsToNextCourse = GetCoursePointsNeeded(f_OpenCourseCount) -
               save->coursePoints - f_PrizePoints - f_PointsEarned;
