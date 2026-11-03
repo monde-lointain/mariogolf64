@@ -2932,8 +2932,13 @@ void ShowHoleOutBanner(s32 playerIndex) {
  * inline: inlined, their buffers share one stack slot, as in the
  * original's frame.
  *
- * Doesn't match: 517 words differ, 243 in shape, spread through the
+ * Doesn't match: 493 words differ, 219 in shape, spread through the
  * routine's states.
+ *
+ * The letterbox test before the debug output is written "== FALSE": the
+ * original computes both comparisons and ors them, as for "(a || b) ==
+ * FALSE", where "!(a || b)" becomes "a != b && ..." and 501 words differ
+ * (227 in shape). The same test later in the shot setup matches with "!".
  */
 #ifdef NON_MATCHING
 /* Debug flag 0x47: prints where the ball lies, and the second controller moves
@@ -3294,8 +3299,8 @@ void UpdateTurns(void) {
   }
 
   f_IsShotPreviewBuilt = FALSE;
-  if (!(g_LetterboxState == LETTERBOX_STATE_NONE ||
-          g_LetterboxState == LETTERBOX_STATE_UNK5)) {
+  if ((g_LetterboxState == LETTERBOX_STATE_NONE ||
+          g_LetterboxState == LETTERBOX_STATE_UNK5) == FALSE) {
     SetScreenEffect(SCREEN_EFFECT_NONE, 0);
   }
 
