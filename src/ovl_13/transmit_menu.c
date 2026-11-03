@@ -2464,8 +2464,10 @@ void ClearCartridgeCharacters(void) {
  * Clamping with an if statement gives that shape, but the record offset and
  * the save index then swap $s1 and $s2 (49 words, 1 in shape); the register
  * oracle leaves 3 words differing once it forces 6 pseudos of that form. A
- * switch or an else-if chain for the record offset gives 25 to 51. 18 words
- * differ, 4 in shape.
+ * switch or an else-if chain for the record offset gives 25 to 51. Splitting
+ * the sum into a load and an add gives the shape (18 words, none in shape);
+ * a total local of its own gives 54 words, 4 in shape, and adding into the
+ * experience 49 to 57. 18 words differ, 4 in shape.
  */
 #ifdef NON_MATCHING
 s32 WriteExperienceToCartridge(s32 characterIndex) {
