@@ -2032,9 +2032,13 @@ void DrawHoleEditorGround(CameraMatrices* matrices, s32 terrainStyle);
  *
  * Doesn't match: 1160 words differ, 348 in shape. The original's frame is 0x38
  * bytes larger, so every stack offset differs, and terrainStyle and the locals
- * take other saved registers. Writing the tile column out where it is used,
- * and giving the medium tiles' pass loop its own counter, took it from 1194
- * words differing, 352 in shape.
+ * take other saved registers. The original works out column + 1 and its
+ * parity once per half, where ours does at each GridVertex, with three more
+ * andi: loop.c finds moving them out of the row loop not desirable, since
+ * the six invariants it moved out of the inner tile loops come first and
+ * each doubles the row loop's count. Writing the tile column out where it is
+ * used, and giving the medium tiles' pass loop its own counter, took it from
+ * 1194 words differing, 352 in shape.
  */
 void DrawGround(CameraMatrices* matrices, s32 terrainStyle) {
   u8 snapsEdge[2][TILE_VERTEX_SEGMENT_COUNT]; /* For the current and the last
