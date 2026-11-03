@@ -1202,9 +1202,11 @@ void DrawTwoDigitMenuNumber(
  * Doesn't match: the original adds the label's offset to the slide, and the
  * columns' top to the vertical slide, once before their loops, and adds the
  * texel offset to the blink frame's offset before the arrow's. Naming the
- * arrow's left texel as a u16 takes it from 197 words differing to 191, 51
- * in shape to 41; as an s32 it gives 205, 53 in shape. 191 words differ, 41
- * in shape.
+ * arrow's left texel as a u16 takes it from 197 words differing to 191, 51 in
+ * shape to 41; as an s32 it gives 205, 53 in shape. The columns' loop tests
+ * columnIndex != g_ChosenPlayerCount, as the original's bne shows; with <,
+ * which d849c579 chose for its lower count, it compiles to slt and bnez, 191
+ * words (41 in shape). 222 words differ, 32 in shape.
  */
 #ifdef NON_MATCHING
 void DrawHandicaps(Gfx** displayListHead, s32 slide, u8 reverseVerticalSlide,
@@ -1364,7 +1366,7 @@ void DrawHandicaps(Gfx** displayListHead, s32 slide, u8 reverseVerticalSlide,
   gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(f_HandicapPlaque)));
   gDPLoadTLUT_pal16(gfx++, HANDICAP_LABEL_PALETTE,
       TextureAddress(ImageBody(f_StatsPlayerLabels)));
-  for (columnIndex = 0; columnIndex < g_ChosenPlayerCount; columnIndex++) {
+  for (columnIndex = 0; columnIndex != g_ChosenPlayerCount; columnIndex++) {
     if (columnIndex == memory->handicapPlayer) {
       gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
     } else {
@@ -2112,11 +2114,13 @@ void UpdateBestShots(void) {
 /*
  * Doesn't match: the original works out the chosen cell's address again after
  * checking that it holds a record, before drawing its course's image and name,
- * where GCC reuses the address from the check. Reading the cell from the
- * menu memory at each use gives 245 words, chosenRow and chosenColumn as
- * u8 or s16 107, and the record index in a local 177. The permuter's best,
- * a u8 cast on chosenRow at the name's lookup, gives 104 words, 12 in shape.
- * 101 words differ, 17 in shape.
+ * where GCC reuses the address from the check. Reading the cell from the menu
+ * memory at each use gives 245 words, chosenRow and chosenColumn as u8 or s16
+ * 107, and the record index in a local 177. The permuter's best, a u8 cast on
+ * chosenRow at the name's lookup, gives 104 words, 12 in shape. The labels'
+ * loop tests labelRow != STATS_GRID_ROW_COUNT, as the original's bne shows;
+ * with <, which d849c579 chose for its lower count, it compiles to slti and
+ * bnez, 101 words (17 in shape). 107 words differ, 13 in shape.
  */
 #ifdef NON_MATCHING
 void DrawBestShots(Gfx** displayListHead) {
@@ -2250,7 +2254,7 @@ void DrawBestShots(Gfx** displayListHead) {
 
   SetUpTextDrawing(&gfx);
   SetTextColor(&gfx, 255, 255, 255);
-  for (labelRow = 0; labelRow < STATS_GRID_ROW_COUNT; labelRow++) {
+  for (labelRow = 0; labelRow != STATS_GRID_ROW_COUNT; labelRow++) {
     sprintf(g_PrintBuffer, "%s", f_RecordLabels[labelRow]);
     DrawLargeText(&gfx, RECORD_LABEL_X,
         (s16)(RECORD_PLACE_Y + (labelRow * STATS_CURSOR_ROW_HEIGHT)),
