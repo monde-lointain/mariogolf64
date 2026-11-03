@@ -2276,7 +2276,11 @@ INCLUDE_ASM("asm/nonmatchings/collision", FindHoleTriangleHit);
  * passes an end of it is moved back to where it reaches the end. A hit
  * near or below the ground counts whatever the edges say.
  *
- * Doesn't match: 563 words differ, 103 in shape.
+ * Doesn't match: 535 words differ, 85 in shape. The reach test is
+ * compared with FALSE, as the original ands the macro's crossing tests
+ * before branching: negated with !, fold rewrites it into xori and or
+ * chains (563 words). Nesting the rest of the loop under the plain test
+ * gives the same 535.
  */
 #ifdef NON_MATCHING
 s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
@@ -2390,7 +2394,7 @@ s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
     GetTrianglePlane(&triangle, &plane);
     startSide = GetPlaneSide(plane, startX, startY, startZ);
     endSide = GetPlaneSide(plane, endX, endY, endZ);
-    if (!DoesPathReachWall(startSide, endSide)) {
+    if (DoesPathReachWall(startSide, endSide) == FALSE) {
       continue;
     }
 
