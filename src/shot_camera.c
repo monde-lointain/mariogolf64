@@ -2331,14 +2331,15 @@ void PlaceFlightCamera(s32 step) {
       }
 
       point[AXIS_X] *= COURSE_TO_WORLD_SCALE;
-
-      /* Computing delta before scaling y and z is there to match */
-      delta = point[AXIS_X] - f_CameraPosition[AXIS_X];
       point[AXIS_Y] *= COURSE_TO_WORLD_SCALE;
       point[AXIS_Z] *= COURSE_TO_WORLD_SCALE;
-      /* The x test in a block of its own is there to match too; without it,
-       * or with only the block ended before it, fabs, or the comparison
-       * written otherwise, 190 words or more differ */
+      delta = point[AXIS_X] - f_CameraPosition[AXIS_X];
+      /* The x test in a block of its own is there to match; without it 138
+       * words differ, 16 in shape, and with only the block ended before it
+       * 104, 6 in shape. Each axis's test in its own block gives the same as
+       * this, the delta step in such a block too 97, 11 in shape, AbsFloat
+       * 93, 11 in shape, fabs 141 and the comparison spelled as two tests
+       * 151 */
       IN_OWN_BLOCK(if (fabsf(delta) > FACING_CUP_EASE_DEAD_ZONE) {
         f_CameraPosition[AXIS_X] += delta * FACING_CUP_EASE_FRACTION;
       });
@@ -2451,8 +2452,8 @@ void PlaceFlightCamera(s32 step) {
         for (index = BESIDE_GOLFER_FIRST_STEP; index < BESIDE_GOLFER_STEP_LIMIT;
             index++) {
           /* Setting distance inside the x term comes closer to the original:
-           * a statement of its own before it gives 187 differing words, not
-           * 184, and 13 in shape, not 8 */
+           * a statement of its own before it gives 101 differing words, not
+           * 98, and 9 in shape, not 4 */
           f_CameraPosition[AXIS_X] =
               (cosf(yaw) * (distance = index * BESIDE_GOLFER_STEP)) +
               g_CurrentShot.ballPosition[AXIS_X];
