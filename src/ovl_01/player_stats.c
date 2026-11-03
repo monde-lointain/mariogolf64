@@ -1200,16 +1200,21 @@ void DrawTwoDigitMenuNumber(
  * naming that player is typed once each time f_IsHandicapPromptShown is
  * cleared.
  *
- * Doesn't match: the original adds the label's offset to the slide, and the
- * columns' top to the vertical slide, once before their loops, and adds the
- * texel offset to the blink frame's offset before the arrow's. Naming the
- * arrow's left texel as a u16 takes it from 197 words differing to 191, 51 in
- * shape to 41; as an s32 it gives 205, 53 in shape. The columns' loop tests
- * columnIndex != g_ChosenPlayerCount, as the original's bne shows; with <,
- * which d849c579 chose for its lower count, it compiles to slt and bnez, 191
- * words (41 in shape). The register oracle, forcing 17 pseudos' registers,
- * leaves 122 words at best, so the code differs too. 222 words differ, 32 in
- * shape.
+ * Doesn't match: the original adds the label's offset to the slide once before
+ * the columns' loop, and adds the texel offset to the blink frame's offset
+ * before the arrow's. The arrows' top is worked out once before their loop, as
+ * the original adds 150 to the vertical slide there; added in each rectangle,
+ * as the draft had it, 222 words differed (32 in shape), and worked out where
+ * the vertical slide is set gives 237 (33). A local for the label's left edge
+ * as well gives 212 (32), and one for the chosen column's left edge 351 (89).
+ * Before the arrows' top was hoisted, naming the arrow's left texel as a u16
+ * took the draft from 197 words differing to 191, 51 in shape to 41, and as an
+ * s32 gave 205, 53 in shape. The columns' loop tests columnIndex !=
+ * g_ChosenPlayerCount, as the original's bne shows; with <, which d849c579
+ * chose for its lower count, it compiles to slt and bnez. The register oracle,
+ * forcing 16 pseudos' registers, leaves 185 words at best, where it left 122
+ * with 17 forced before the hoist, so the code differs too. 213 words differ,
+ * 31 in shape.
  */
 #ifdef NON_MATCHING
 void DrawHandicaps(Gfx** displayListHead, s32 slide, u8 reverseVerticalSlide,
@@ -1231,6 +1236,7 @@ void DrawHandicaps(Gfx** displayListHead, s32 slide, u8 reverseVerticalSlide,
   u8 unusedStack[0x30] UNUSED;
   Mat4 transform;
   s32 numberOffsetX;
+  s32 arrowTop;
 
   BuildDynamicTextures(&gfx);
   gDPPipeSync(gfx++);
@@ -1437,6 +1443,7 @@ void DrawHandicaps(Gfx** displayListHead, s32 slide, u8 reverseVerticalSlide,
 
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
   gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(f_StatsGreenArrows)));
+  arrowTop = offsetY + HANDICAP_COLUMN_TOP;
   for (arrowIndex = 0; arrowIndex != MENU_ARROW_COUNT; arrowIndex++) {
     if (arrowIndex == MENU_ARROW_LEFT) {
       gDPLoadTextureTile_4b(gfx++,
@@ -1488,13 +1495,12 @@ void DrawHandicaps(Gfx** displayListHead, s32 slide, u8 reverseVerticalSlide,
         QuarterPixels(f_HandicapColumnLefts[g_ChosenPlayerCount - 1]
                                            [memory->handicapPlayer] +
             arrowX + slide),
-        QuarterPixels(offsetY + HANDICAP_COLUMN_TOP + arrowY),
+        QuarterPixels(arrowTop + arrowY),
         QuarterPixels(f_HandicapColumnLefts[g_ChosenPlayerCount - 1]
                                            [memory->handicapPlayer] +
             arrowX + slide + GREEN_ARROW_SIZE),
-        QuarterPixels(
-            offsetY + HANDICAP_COLUMN_TOP + arrowY + GREEN_ARROW_SIZE),
-        G_TX_RENDERTILE, textureLeft, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+        QuarterPixels(arrowTop + arrowY + GREEN_ARROW_SIZE), G_TX_RENDERTILE,
+        textureLeft, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     gDPPipeSync(gfx++);
   }
 
