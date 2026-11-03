@@ -873,7 +873,10 @@ s32 StepBallSimulation(BallSimulation* simulation) {
           g_HoleSetup.cupPosition[AXIS_Y] + CUP_DEPTH) {
         BallSpeed fallSpeed = velocity[AXIS_Y];
 
-        /* The chained assignment is there to match */
+        /*
+         * The chained assignment is there to match: two statements, in
+         * either order, give 775 words differing, 239 in shape
+         */
         velocity[AXIS_X] = velocity[AXIS_Z] = 0.0f;
         velocity[AXIS_Y] = (-fallSpeed * CUP_FLOOR_BOUNCE) + CUP_GRAVITY;
         if (velocity[AXIS_Y] > 0.0f) {
