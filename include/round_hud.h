@@ -95,7 +95,7 @@ typedef struct RoundHud {
   /* 0x2C */ s32 stopwatchFrameCount; /* The Speed Golf stopwatch of the player
                                          taking a turn */
   /* 0x30 */ u8 unk30[0x78 - 0x30];
-  /* 0x78 */ u16
+  /* 0x78 */ s16
       skinsTotals[MAX_PLAYER_COUNT]; /* The skins each player has won, as
                                         TallySkins counts them */
   /* 0x80 */ BinaryAngle clubHeadTilt; /* The icons tilt by half */

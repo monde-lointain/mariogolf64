@@ -438,7 +438,7 @@ void OpenRoundResults(s32 request) {
  * Doesn't match: in the course points tally, the original keeps
  * f_PointsEarned's address in a register and the counter in $s2, where ours
  * addresses it through $at each time and counts in $a1, and the later loops'
- * registers differ. 213 words differ, 47 in shape.
+ * registers differ. 211 words differ, 45 in shape.
  */
 void LoadRoundResults(void) {
   EncodedAsset asset;

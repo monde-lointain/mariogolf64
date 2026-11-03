@@ -935,10 +935,10 @@ void DrawSkinsPage(Gfx** displayListHead) {
 
   for (i = 0; i != g_GameState.playerCount; i++) {
     if (g_Scorecard.holeWinnerIndex == i) {
-      skinCounts[i] = (s16)g_RoundHud.skinsTotals[i] -
-          g_Scorecard.skinsCarryover.onLastHole;
+      skinCounts[i] =
+          g_RoundHud.skinsTotals[i] - g_Scorecard.skinsCarryover.onLastHole;
     } else {
-      skinCounts[i] = (s16)g_RoundHud.skinsTotals[i];
+      skinCounts[i] = g_RoundHud.skinsTotals[i];
     }
   }
 

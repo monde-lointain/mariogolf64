@@ -818,8 +818,7 @@ void SetScorecardLayout(s32 layout) {
       for (i = 0; i != g_GameState.playerCount; i++) {
         skinsRanks[i] = 0;
         for (j = 0; j != g_GameState.playerCount; j++) {
-          if (i != j &&
-              (s16)g_RoundHud.skinsTotals[i] > (s16)g_RoundHud.skinsTotals[j]) {
+          if (i != j && g_RoundHud.skinsTotals[i] > g_RoundHud.skinsTotals[j]) {
             skinsRanks[i]++;
           }
         }

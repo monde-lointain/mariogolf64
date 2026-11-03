@@ -702,7 +702,7 @@ void DrawLargeTextSlot(Gfx** displayListHead, s32 slot) {
           sprintf(g_PrintBuffer, g_TextNumberFormat, textSlot->values[3]);
           break;
         case MESSAGE_CODE_SCORE:
-          score = (s16)g_RoundHud.skinsTotals[g_CurrentShot.playerIndex];
+          score = g_RoundHud.skinsTotals[g_CurrentShot.playerIndex];
           isPrinted = TRUE;
           if (IsOneOnOneMatchMode(g_GameState.gameMode)) {
             if (score == 0) {
@@ -966,7 +966,7 @@ void DrawMediumTextSlot(Gfx** displayListHead, s32 slot) {
           sprintf(g_PrintBuffer, g_TextNumberFormat, textSlot->values[3]);
           break;
         case MESSAGE_CODE_SCORE:
-          score = (s16)g_RoundHud.skinsTotals[g_CurrentShot.playerIndex];
+          score = g_RoundHud.skinsTotals[g_CurrentShot.playerIndex];
           isPrinted = TRUE;
           if (IsOneOnOneMatchMode(g_GameState.gameMode)) {
             if (score == 0) {

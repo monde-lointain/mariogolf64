@@ -4092,27 +4092,27 @@ void DrawRoundHud(CameraView* view) {
           case GAME_MODE_UNK1:
           case GAME_MODE_TOURNAMENT:
           case GAME_MODE_SPEED_GOLF:
-            if ((s16)g_RoundHud.skinsTotals[i] == 0) {
+            if (g_RoundHud.skinsTotals[i] == 0) {
               sprintf(g_PrintBuffer, "#0");
             } else {
-              sprintf(g_PrintBuffer, "%+d", (s16)g_RoundHud.skinsTotals[i]);
+              sprintf(g_PrintBuffer, "%+d", g_RoundHud.skinsTotals[i]);
             }
 
             break;
           case GAME_MODE_MATCH_GAME:
           case GAME_MODE_GET_CHARACTER:
-            if ((s16)g_RoundHud.skinsTotals[i] == 0) {
+            if (g_RoundHud.skinsTotals[i] == 0) {
               sprintf(g_PrintBuffer, "EVEN");
-            } else if ((s16)g_RoundHud.skinsTotals[i] < 0) {
-              sprintf(g_PrintBuffer, "%dUP", -(s16)g_RoundHud.skinsTotals[i]);
+            } else if (g_RoundHud.skinsTotals[i] < 0) {
+              sprintf(g_PrintBuffer, "%dUP", -g_RoundHud.skinsTotals[i]);
             } else {
-              sprintf(g_PrintBuffer, "%dDW", (s16)g_RoundHud.skinsTotals[i]);
+              sprintf(g_PrintBuffer, "%dDW", g_RoundHud.skinsTotals[i]);
             }
 
             break;
           case GAME_MODE_SKINS_MATCH:
           case GAME_MODE_CLUB_SLOTS:
-            sprintf(g_PrintBuffer, "%dP", (s16)g_RoundHud.skinsTotals[i]);
+            sprintf(g_PrintBuffer, "%dP", g_RoundHud.skinsTotals[i]);
             break;
           case GAME_MODE_TRAINING:
           case GAME_MODE_UNK8:
