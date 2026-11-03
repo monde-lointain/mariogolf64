@@ -1089,7 +1089,9 @@ INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard_drawing", f_BlankBetName);
  *
  * Doesn't match: GCC's loop pass hoists a table address into $s2 before
  * the bet rates' loop, which the original doesn't, and the loop's
- * registers differ from there. 210 words differ, 42 in shape.
+ * registers differ from there. The original aligns the bet images' texels
+ * to 8 bytes, as TextureAddress does; without that, 210 words differ, 42 in
+ * shape. 204 words differ, 36 in shape.
  */
 #ifdef NON_MATCHING
 void DrawBetsPage(Gfx** displayListHead) {
@@ -1214,8 +1216,8 @@ void DrawBetsPage(Gfx** displayListHead) {
       LoadSmallPalette(
           &gfx, 0, ImageBody(g_Scorecard.betImages[column][frame]));
       gDPLoadTextureTile_4b(gfx++,
-          ImageTexels(g_Scorecard.betImages[column][frame]), G_IM_FMT_CI,
-          BET_IMAGE_SIZE, BET_IMAGE_SIZE, 0, 0, BET_IMAGE_SIZE - 1,
+          TextureAddress(ImageTexels(g_Scorecard.betImages[column][frame])),
+          G_IM_FMT_CI, BET_IMAGE_SIZE, BET_IMAGE_SIZE, 0, 0, BET_IMAGE_SIZE - 1,
           BET_IMAGE_SIZE - 1, 0, G_TX_NOMIRROR | G_TX_WRAP,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
           G_TX_NOLOD);
@@ -1233,8 +1235,9 @@ void DrawBetsPage(Gfx** displayListHead) {
 
   gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
   LoadSmallPalette(&gfx, 0, ImageBody(g_Scorecard.totalHeadingImage));
-  gDPLoadTextureTile_4b(gfx++, ImageTexels(g_Scorecard.totalHeadingImage),
-      G_IM_FMT_CI, BET_IMAGE_SIZE, BET_IMAGE_SIZE, 0, 0, BET_IMAGE_SIZE - 1,
+  gDPLoadTextureTile_4b(gfx++,
+      TextureAddress(ImageTexels(g_Scorecard.totalHeadingImage)), G_IM_FMT_CI,
+      BET_IMAGE_SIZE, BET_IMAGE_SIZE, 0, 0, BET_IMAGE_SIZE - 1,
       BET_IMAGE_SIZE - 1, 0, G_TX_NOMIRROR | G_TX_WRAP,
       G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
       G_TX_NOLOD);
