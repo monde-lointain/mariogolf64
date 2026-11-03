@@ -2947,7 +2947,7 @@ void ShowHoleOutBanner(s32 playerIndex) {
  * inline: inlined, their buffers share one stack slot, as in the
  * original's frame.
  *
- * Doesn't match: 392 words differ, 148 in shape, spread through the routine's
+ * Doesn't match: 386 words differ, 142 in shape, spread through the routine's
  * states. The counts in the paragraphs after the next were measured before it,
  * when 454 words differed, 184 in shape.
  *
@@ -2999,7 +2999,11 @@ void ShowHoleOutBanner(s32 playerIndex) {
  * switch with the two modes breaking out gives 571 to 575 words (149 in shape),
  * and !(... || ...) changes nothing. Nested with the Speed Golf test outside,
  * the branches match the original's, but 0x80227170 moves from $s7 to $fp
- * across the function.
+ * across the function. These counts were measured when the draft gave 392 words
+ * (148 in shape). The debug step's test of the triggers and isCameraDone is
+ * nested, as the original branches on isCameraDone apart from the triggers; as
+ * one && test, fold_truthop compiles it to sltiu, sltu and and, and 392 words
+ * differ (148 in shape), with == FALSE or != 0 too.
  */
 #ifdef NON_MATCHING
 /* Debug flag 0x47: prints where the ball lies, and the second controller moves
@@ -4470,11 +4474,13 @@ void UpdateTurns(void) {
 
         if (IsReplayingShot() || g_IsDebugEnabled) {
           if (g_IsDebugEnabled) {
-            if ((g_MergedController.buttons & (Z_TRIG | L_TRIG)) &&
-                !isCameraDone) {
-              StepBallSimulation(&g_TurnBallSimulation);
-              OnBallStepped(&g_Players[playerIndex]);
-              isCameraDone = UpdateFlightCamera(TRUE, g_TurnController.buttons);
+            if (g_MergedController.buttons & (Z_TRIG | L_TRIG)) {
+              if (!isCameraDone) {
+                StepBallSimulation(&g_TurnBallSimulation);
+                OnBallStepped(&g_Players[playerIndex]);
+                isCameraDone =
+                    UpdateFlightCamera(TRUE, g_TurnController.buttons);
+              }
             }
 
             if (IsGameFlagSet(GAME_FLAG_FAST_FLIGHT) ||
