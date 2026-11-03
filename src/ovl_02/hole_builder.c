@@ -3282,8 +3282,14 @@ static inline u16* GetShadowedTexel(u32 column, u32 row) {
  * texture in f_ShadowlessTextures cast no shadow.
  * Doesn't match: ours keeps heightScale in a float register and loads
  * SHADOW_LIGHT_DISTANCE again for each use, where the original keeps them in
- * $s2 and $f22, and the other registers differ from there. 271 words differ, 45
- * in shape.
+ * $s2 and $f22, and the other registers differ from there. The original loads
+ * SHADOW_LIGHT_DISTANCE inside the billboard loop; ours has loop.c hoist it
+ * out (threshold 58 times its life of 19 against 718), so it gets no register.
+ * One more invariant moved from an inner loop before it would double the 718
+ * and keep it in, but no form of the solidity loop's 1/16 scales does that.
+ * The register oracle, forcing 36 pseudos, still leaves 198 words. Reordering
+ * the light point's components gives 287 to 372. 271 words differ, 45 in
+ * shape.
  */
 #ifdef NON_MATCHING
 void CastBillboardShadows(void) {
