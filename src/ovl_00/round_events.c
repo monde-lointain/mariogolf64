@@ -154,8 +154,6 @@ typedef struct LakituVelocity {
 #define BANNER_FRAME_NONE (-1)
 #define CONTACT_MATRIX_COUNT 81
 /* A movie image starts with its size, then its palette, then its CI8 pixels */
-#define MOVIE_IMAGE_WIDTH_OFFSET 2
-#define MOVIE_IMAGE_HEIGHT_OFFSET 4
 #define MOVIE_IMAGE_PALETTE_OFFSET 8
 #define MOVIE_IMAGE_PIXELS_OFFSET 0x208
 #define MOVIE_IMAGE_STRIP_HEIGHT 6
@@ -1420,11 +1418,9 @@ void DrawContestWinnerMovie(Gfx** displayListHead) {
   s32 step;
   f32 alpha;
 
-  width = (f_MovieBuffer[MOVIE_IMAGE_WIDTH_OFFSET] << 8) |
-      f_MovieBuffer[MOVIE_IMAGE_WIDTH_OFFSET + 1];
+  width = ReadImageWidth(f_MovieBuffer);
   stripHeight = MOVIE_IMAGE_STRIP_HEIGHT;
-  height = (f_MovieBuffer[MOVIE_IMAGE_HEIGHT_OFFSET] << 8) |
-      f_MovieBuffer[MOVIE_IMAGE_HEIGHT_OFFSET + 1];
+  height = ReadImageHeight(f_MovieBuffer);
   stripCount = height / stripHeight;
   slide = 0;
   gDPPipeSync(gfx++);
@@ -1629,10 +1625,8 @@ void DrawDriveRecord(Gfx** displayListHead) {
   f32 fade;
   f32 alpha;
 
-  width = (f_MovieBuffer[MOVIE_IMAGE_WIDTH_OFFSET] << 8) |
-      f_MovieBuffer[MOVIE_IMAGE_WIDTH_OFFSET + 1];
-  height = (f_MovieBuffer[MOVIE_IMAGE_HEIGHT_OFFSET] << 8) |
-      f_MovieBuffer[MOVIE_IMAGE_HEIGHT_OFFSET + 1];
+  width = ReadImageWidth(f_MovieBuffer);
+  height = ReadImageHeight(f_MovieBuffer);
   if (f_MovieDrawCount == CAPTION_MEET_DRAW + 1) {
     PlaySoundWithEffects(SOUND_SHRINKING_IMAGE, CAPTION_SOUND_CHANNEL,
         CAPTION_SOUND_VOLUME, 0, SOUND_FULL_SCALE);
@@ -1747,10 +1741,8 @@ void DrawPuttCaption(Gfx** displayListHead) {
   f32 fade;
   f32 alpha;
 
-  width = (f_MovieBuffer[MOVIE_IMAGE_WIDTH_OFFSET] << 8) |
-      f_MovieBuffer[MOVIE_IMAGE_WIDTH_OFFSET + 1];
-  height = (f_MovieBuffer[MOVIE_IMAGE_HEIGHT_OFFSET] << 8) |
-      f_MovieBuffer[MOVIE_IMAGE_HEIGHT_OFFSET + 1];
+  width = ReadImageWidth(f_MovieBuffer);
+  height = ReadImageHeight(f_MovieBuffer);
   gDPPipeSync(gfx++);
   gDPSetCombineLERP(gfx++, TEXEL0, ENVIRONMENT, PRIMITIVE_ALPHA, ENVIRONMENT,
       ENVIRONMENT, 0, TEXEL0, 0, TEXEL0, ENVIRONMENT, PRIMITIVE_ALPHA,
@@ -2047,11 +2039,8 @@ void DrawShrinkingMovieImage(Gfx** displayListHead) {
   s32 top;
 
   stripHeight = MOVIE_IMAGE_STRIP_HEIGHT;
-  width = (f_MovieBuffer[MOVIE_IMAGE_WIDTH_OFFSET] << 8) |
-      f_MovieBuffer[MOVIE_IMAGE_WIDTH_OFFSET + 1];
-  stripCount = ((f_MovieBuffer[MOVIE_IMAGE_HEIGHT_OFFSET] << 8) |
-                   f_MovieBuffer[MOVIE_IMAGE_HEIGHT_OFFSET + 1]) /
-      stripHeight;
+  width = ReadImageWidth(f_MovieBuffer);
+  stripCount = ReadImageHeight(f_MovieBuffer) / stripHeight;
   if (f_MovieDrawCount == SHRINKING_IMAGE_SOUND_DRAW) {
     PlaySoundWithEffects(SOUND_SHRINKING_IMAGE, SHRINKING_IMAGE_SOUND_CHANNEL,
         SHRINKING_IMAGE_SOUND_VOLUME, 0, SOUND_FULL_SCALE);
