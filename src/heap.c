@@ -214,7 +214,11 @@ void FreeFromHeap(s32 heapIndex, void* pointerToBlock) {
  * Doesn't match: the original loads the sentinel's prev back from memory to set
  * next, where GCC reuses the address it has just stored. Writing through a
  * MemoryBlock pointer, const or not, leaves 6 or gives 13 differing words, and
- * a chained assignment, next = prev = &f_MemorySentinel, gives 10. Only
+ * a chained assignment, next = prev = &f_MemorySentinel, gives 10. Clearing the
+ * list in an inline helper that takes the sentinel's address, or reading or
+ * writing prev through &f_MemorySentinel, leaves 6, and the helper nested 33.
+ * Ending the basic block after the prev store, which empties cse's table, gives
+ * 12 words (10 in shape), and after the free size's store 20 (10). Only
  * volatile accesses to the sentinel reproduce the load, and the sentinel isn't
  * hardware. The register oracle's closest result is these 6 words with no
  * register forced, so allocation isn't the cause. 6 words differ.
