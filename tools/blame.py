@@ -26,6 +26,7 @@ unit.sched2, in DIR.
 import re
 import sys
 import tempfile
+from collections import Counter
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -382,6 +383,31 @@ def blame(compilation: Compilation, index: int) -> str:
     line = compilation.insn_lines.get(made, {}).get(uid)
     at = f" at {line}" if line else ""
     return f"insn {uid} {pattern}{at}, from {made}{shaped}"
+
+
+def find_blamed_lines(asm_path: str, c_path: str, function: str) -> Counter[int]:
+    """Return how many of FUNCTION's differing words each line of C_PATH made.
+
+    ASM_PATH holds the target's FUNCTION.
+    Words that the target alone holds, or that no line of C_PATH made, such as
+    those of inline functions from headers, are left out.
+    """
+    target = fncompare.read_target_functions(asm_path)[function]
+    with tempfile.TemporaryDirectory() as work:
+        compilation = compile_function(c_path, function, Path(work))
+    file_name = Path(c_path).name
+    counts: Counter[int] = Counter()
+    for run in fncompare.find_diff_runs(target, compilation.routine):
+        for _, index in run:
+            insn = None if index is None else get_insn(compilation, index)
+            if insn is None:
+                continue
+            made = find_changes(compilation, insn[0])[0]
+            line = compilation.insn_lines.get(made, {}).get(insn[0], "")
+            name, _, number = line.rpartition(":")
+            if name == file_name:
+                counts[int(number)] += 1
+    return counts
 
 
 def find_pseudos(compilation: Compilation, indices: list[int]) -> list[int]:

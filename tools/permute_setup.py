@@ -1,12 +1,17 @@
 #!/usr/bin/env python3
 """Set up a decomp-permuter directory for one function.
 
-    permute_setup.py C_FILE TARGET_ASM FUNCTION [OUT_DIR]
+    permute_setup.py [--focus] C_FILE TARGET_ASM FUNCTION [OUT_DIR]
 
 C_FILE holds the current attempt at FUNCTION and TARGET_ASM its original
 assembly (a single-function splat file). Writes base.c, target.o,
 compile.sh, objdump.sh and settings.toml into OUT_DIR (build/permuter/FUNCTION by
 default), ready for:
+
+--focus limits the permuter's changes to the statements around the lines that
+blame.py finds made our differing words, as PERM_RANDOMIZE regions. Without
+it, the permuter picks among all of FUNCTION's statements, though most of a
+large draft already matches.
 
     permuter.py OUT_DIR -j 16
 
@@ -18,6 +23,7 @@ and attributes. Any other branch is refused, since its importer writes a
 base.c that compiles to different code.
 """
 
+import bisect
 import contextlib
 import importlib.util
 import os
@@ -29,6 +35,8 @@ from pathlib import Path
 from types import ModuleType
 from typing import Protocol, cast
 
+import blame
+
 import fncompare
 
 ROOT = fncompare.ROOT
@@ -38,7 +46,7 @@ PERMUTER_DIR = Path(
     )
 )
 PERMUTER_BRANCH = "nested-functions"
-OUT_DIR_ARGUMENT_COUNT = 5
+OUT_DIR_ARGUMENT_COUNT = 4
 # compile.sh has to be executable for the permuter to run it
 SCRIPT_MODE = 0o755
 
@@ -109,6 +117,12 @@ PreprocessWithMacros = Callable[
     tuple[str, list[str]],
 ]
 
+# The statements a focus region takes on either side of a blamed one, so that
+# the permuter can move statements past it
+FOCUS_CONTEXT = 1
+# What find_statement_starts reads code as, outside comments: comment starts,
+# strings, characters, then any other character
+CODE_TOKEN_RE = re.compile(r"""/\*|//.*|"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|\s+|.""")
 # The importer's prune_source, given the source, whether to prune it, and the
 # function to keep. Returns the source and a compilable copy of it.
 PruneSource = Callable[[str, bool, str], tuple[str, str | None]]
@@ -364,6 +378,118 @@ def prune_base(out_dir: Path, function: str) -> None:
     _ = base_path.write_text(pruned)
 
 
+class CodeScanner:
+    """Follows C code line by line: comments, parentheses and braces."""
+
+    def __init__(self) -> None:
+        """Start inside a function body, just after its opening brace."""
+        self.in_comment: bool = False
+        self.depth: int = 0
+        # Whether each open brace opens an initializer rather than a block
+        self.braces: list[bool] = []
+        self.last_code: str = "{"
+
+    def may_start_statement(self) -> bool:
+        """Tell whether a statement may start where the scan has reached.
+
+        It may when the code before ends a statement or opens or closes a
+        block, outside any parentheses, comment or initializer.
+        """
+        in_initializer = bool(self.braces) and self.braces[-1]
+        return (
+            not self.in_comment
+            and self.depth == 0
+            and not in_initializer
+            and self.last_code in ";{}"
+        )
+
+    def scan_line(self, line: str) -> None:
+        """Follow LINE, a line of code that is no preprocessor directive."""
+        position = 0
+        while position < len(line):
+            if self.in_comment:
+                comment_end = line.find("*/", position)
+                if comment_end < 0:
+                    return
+                self.in_comment = False
+                position = comment_end + len("*/")
+                continue
+            token = CODE_TOKEN_RE.match(line, position)
+            if token is None or token.group().startswith("//"):
+                return
+            position = token.end()
+            self.scan_token(token.group())
+
+    def scan_token(self, text: str) -> None:
+        """Follow TEXT, a token of CODE_TOKEN_RE outside comments."""
+        if text == "/*":
+            self.in_comment = True
+            return
+        if text in "()":
+            self.depth += 1 if text == "(" else -1
+        elif text == "{":
+            in_initializer = bool(self.braces) and self.braces[-1]
+            self.braces.append(self.last_code in "=," or in_initializer)
+        elif text == "}" and self.braces:
+            _ = self.braces.pop()
+        if not text.isspace():
+            self.last_code = text[-1]
+
+
+def find_statement_starts(lines: list[str], first: int, last: int) -> list[int]:
+    """Return the lines of LINES[FIRST:LAST] that a statement may start on.
+
+    A pragma line can go before each. Indices are LINES' own.
+    """
+    scanner = CodeScanner()
+    starts: list[int] = []
+    for number in range(first, last):
+        if scanner.may_start_statement():
+            starts.append(number)
+        if not lines[number].lstrip().startswith("#"):
+            scanner.scan_line(lines[number])
+    return starts
+
+
+def mark_focus_regions(c_path: str, asm_path: str, function: str) -> str:
+    """Return C_PATH with PERM_RANDOMIZE regions around FUNCTION's blamed lines.
+
+    Each region spans the statement that holds a blamed line and FOCUS_CONTEXT
+    statements on either side; regions that meet are merged, as the permuter
+    can't nest them.
+    """
+    source = Path(c_path).read_text()
+    definition = re.search(
+        rf"^[A-Za-z_][^;{{}}#]*\b{re.escape(function)}\s*\([^;{{}}]*\)\s*\{{",
+        source,
+        re.MULTILINE,
+    )
+    if definition is None:
+        sys.exit(f"{c_path}: no definition of {function}")
+    lines = source.splitlines(keepends=True)
+    first = source.count("\n", 0, definition.end()) + 1
+    body_end = source.find("\n}", definition.end())
+    last = source.count("\n", 0, body_end) + 2
+    starts = find_statement_starts(lines, first, last)
+    regions: list[tuple[int, int]] = []
+    for line_number in sorted(blame.find_blamed_lines(asm_path, c_path, function)):
+        index = bisect.bisect_right(starts, line_number - 1) - 1
+        if not first <= line_number - 1 < last or index < 0:
+            continue
+        start = starts[max(0, index - FOCUS_CONTEXT)]
+        end = starts[min(len(starts) - 1, index + 1 + FOCUS_CONTEXT)]
+        if regions and start <= regions[-1][1]:
+            regions[-1] = (regions[-1][0], max(end, regions[-1][1]))
+        else:
+            regions.append((start, end))
+    pragmas: dict[int, str] = {}
+    for start, end in regions:
+        pragmas[start] = "#pragma _permuter randomizer start\n"
+        pragmas[end] = "#pragma _permuter randomizer end\n"
+    print(f"{function}: {len(regions)} focus regions", file=sys.stderr)
+    return "".join(pragmas.get(index, "") + line for index, line in enumerate(lines))
+
+
 def find_nested_functions(base_path: Path, asm_path: str) -> list[str]:
     """List the nested functions in BASE_PATH that ASM_PATH's directory holds."""
     names = [
@@ -416,16 +542,29 @@ def check_permuter_branch() -> None:
 
 def main() -> None:
     """Fill the permuter directory for the function named."""
-    c_path, asm_path, function = sys.argv[1:4]
+    arguments = sys.argv[1:]
+    is_focused = arguments[:1] == ["--focus"]
+    if is_focused:
+        arguments = arguments[1:]
+    c_path, asm_path, function = arguments[:3]
     check_permuter_branch()
     out_dir = (
-        Path(sys.argv[4])
-        if len(sys.argv) >= OUT_DIR_ARGUMENT_COUNT
+        Path(arguments[3])
+        if len(arguments) >= OUT_DIR_ARGUMENT_COUNT
         else ROOT / "build" / "permuter" / function
     )
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    write_base(c_path, function, out_dir / "base.c")
+    if is_focused:
+        # A copy beside the original, so that its quoted includes still resolve
+        focused_path = Path(c_path).with_name(f".focus_{Path(c_path).name}")
+        _ = focused_path.write_text(mark_focus_regions(c_path, asm_path, function))
+        try:
+            write_base(str(focused_path), function, out_dir / "base.c")
+        finally:
+            focused_path.unlink()
+    else:
+        write_base(c_path, function, out_dir / "base.c")
     nested = find_nested_functions(out_dir / "base.c", asm_path)
     asm_dir = Path(asm_path).parent
     write_target([str(asm_dir / f"{name}.s") for name in nested] + [asm_path], out_dir)
