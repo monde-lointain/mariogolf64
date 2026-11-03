@@ -4204,8 +4204,9 @@ void LoadOpeningBurst(void) {
  * size by some condition. Placing such an if here keeps the divisions, but
  * its arms spill the size differently and are not merged. The original aligns
  * the palette's and texels' addresses to 8 bytes, as TextureAddress does;
- * without that, 391 words differ, 145 in shape. 364 words differ, 132 in
- * shape.
+ * without that, 391 words differed, 145 in shape, when the draft had 364
+ * (132). The original has one pipe sync after the palette load, not two,
+ * which leaves 367 words differing, 127 in shape.
  */
 #ifdef NON_MATCHING
 void DrawOpeningBurst(Gfx** displayListHead) {
@@ -4236,15 +4237,15 @@ void DrawOpeningBurst(Gfx** displayListHead) {
     gDPLoadTLUT_pal16(
         gfx++, 0, TextureAddress(ImageBody(f_OpeningEffectImage)));
     gDPPipeSync(gfx++);
-    gDPPipeSync(gfx++);
     gDPLoadTextureBlock_4b(gfx++,
         TextureAddress(ImageTexels(f_OpeningEffectImage)), G_IM_FMT_CI,
         BURST_IMAGE_SIZE, BURST_IMAGE_SIZE, 0, G_TX_NOMIRROR | G_TX_WRAP,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
         G_TX_NOLOD);
     /*
-     * In its own block, as without it 449 words differ, 91 in shape, against
-     * 364 and 132; the register oracle stays above 420 then, and above 364 here
+     * In its own block, as without it 476 words differ, 86 in shape, against
+     * 367 and 127. With the second palette sync, 449 (91) against 364 (132),
+     * the register oracle stayed above 420 then and above 364 here.
      */
     IN_OWN_BLOCK(gDPPipeSync(gfx++));
     gSPTextureRectangle(gfx++, QuarterPixels(left), QuarterPixels(top),
