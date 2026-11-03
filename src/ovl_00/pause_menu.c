@@ -1148,7 +1148,9 @@ s32 UpdateChoiceBox(ControllerState* controller) {
  * the priorities. Stepping the label's y beside the index gives 67 words
  * differing, 15 in shape. Working out the cursor's y before its texture
  * load, rather than just before drawing it, gives 65 words, 9 in shape.
- * 61 words differ, 5 in shape.
+ * The permuter's best (53 words) clears textWidth after the labels are
+ * measured, which moves the cursor; clearing it just before measuring them
+ * gives 63 words, 9 in shape. 61 words differ, 5 in shape.
  */
 #ifdef NON_MATCHING
 void DrawChoiceBox(Gfx** displayListHead) {
