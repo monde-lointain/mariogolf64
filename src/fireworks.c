@@ -189,8 +189,12 @@ static inline s32 RandomLaunchHeightJitter(void) {
  * height to other registers. A rowStart variable compiles the same as row *
  * width. Keeping the row's offset from the middle in a local gives 108 words, a
  * halfHeight beside halfWidth 118. The register oracle, forcing 6 pseudos'
- * registers, leaves 24 words at best, so the code differs too. 50 words differ,
- * 14 in shape.
+ * registers, leaves 24 words at best, so the code differs too. A permuter
+ * output, 94 words with 2 in shape, sets halfWidth to width and halves it in
+ * another statement inside the cell's test, which divides signed, where the
+ * original's srl halves width unsigned. Setting halfWidth inside the cell's
+ * test gives 57 words, 19 in shape, before the row loop 50, 16 in shape, and
+ * width / 2 written in place 116. 50 words differ, 14 in shape.
  */
 #ifdef NON_MATCHING
 void LaunchFirework(Firework* firework, s32 fireworkIndex UNUSED) {
