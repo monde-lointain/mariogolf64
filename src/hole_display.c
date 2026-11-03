@@ -704,6 +704,18 @@ void SetUpTitleHole(void) {
   SetFramebufferCount(DOUBLE_BUFFERING);
 }
 
+/* Grows the sun's glare until it flares, then holds it at full strength */
+static inline void GrowSunGlare(void) {
+  if (!f_IsSunGlareSettled) {
+    f_SunGlareStrength += SUN_GLARE_GROWTH_STEP;
+  }
+
+  if (f_SunGlareStrength > SUN_GLARE_FLARE_STRENGTH && !f_IsSunGlareSettled) {
+    f_IsSunGlareSettled = TRUE;
+    f_SunGlareStrength = SUN_GLARE_FULL_STRENGTH;
+  }
+}
+
 /* Grows or fades the sun's glare by whether the z-buffer shows anything in
  * front of the sun */
 void UpdateSunGlare(void) {
@@ -714,25 +726,16 @@ void UpdateSunGlare(void) {
     f_SunDepth =
         zBuffer[((s32)f_SunScreenY[0] * SCREEN_WIDTH) + (s32)f_SunScreenX[0]];
     if (f_SunDepth >= SUN_SKY_DEPTH) {
-      goto GROW;
-    }
-
-    f_IsSunGlareSettled = FALSE;
-    f_SunGlareStrength -= SUN_GLARE_FADE_STEP;
-    if (f_SunGlareStrength < 0.0f) {
-      f_SunGlareStrength = 0.0f;
+      GrowSunGlare();
+    } else {
+      f_IsSunGlareSettled = FALSE;
+      f_SunGlareStrength -= SUN_GLARE_FADE_STEP;
+      if (f_SunGlareStrength < 0.0f) {
+        f_SunGlareStrength = 0.0f;
+      }
     }
   } else if (IsNearScreen(f_SunScreenX[0], f_SunScreenY[0], SUN_GLARE_MARGIN)) {
-GROW:
-
-    if (!f_IsSunGlareSettled) {
-      f_SunGlareStrength += SUN_GLARE_GROWTH_STEP;
-    }
-
-    if (f_SunGlareStrength > SUN_GLARE_FLARE_STRENGTH && !f_IsSunGlareSettled) {
-      f_IsSunGlareSettled = TRUE;
-      f_SunGlareStrength = SUN_GLARE_FULL_STRENGTH;
-    }
+    GrowSunGlare();
   } else {
     f_SunDepth = 0;
     f_IsSunGlareSettled = FALSE;
