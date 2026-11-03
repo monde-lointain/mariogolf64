@@ -4195,7 +4195,10 @@ void LoadOpeningBurst(void) {
  * the size is set the same way in both arms of an if, which cse cannot see
  * through but cross-jumping later merges, so the original likely chose the
  * size by some condition. Placing such an if here keeps the divisions, but
- * its arms spill the size differently and are not merged. 391 words differ.
+ * its arms spill the size differently and are not merged. The original aligns
+ * the palette's and texels' addresses to 8 bytes, as TextureAddress does;
+ * without that, 391 words differ, 145 in shape. 364 words differ, 132 in
+ * shape.
  */
 #ifdef NON_MATCHING
 void DrawOpeningBurst(Gfx** displayListHead) {
@@ -4223,13 +4226,15 @@ void DrawOpeningBurst(Gfx** displayListHead) {
     gDPSetAlphaCompare(gfx++, G_AC_NONE);
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-    gDPLoadTLUT_pal16(gfx++, 0, ImageBody(f_OpeningEffectImage));
+    gDPLoadTLUT_pal16(
+        gfx++, 0, TextureAddress(ImageBody(f_OpeningEffectImage)));
     gDPPipeSync(gfx++);
     gDPPipeSync(gfx++);
-    gDPLoadTextureBlock_4b(gfx++, ImageTexels(f_OpeningEffectImage),
-        G_IM_FMT_CI, BURST_IMAGE_SIZE, BURST_IMAGE_SIZE, 0,
-        G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
-        G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+    gDPLoadTextureBlock_4b(gfx++,
+        TextureAddress(ImageTexels(f_OpeningEffectImage)), G_IM_FMT_CI,
+        BURST_IMAGE_SIZE, BURST_IMAGE_SIZE, 0, G_TX_NOMIRROR | G_TX_WRAP,
+        G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
+        G_TX_NOLOD);
     IN_OWN_BLOCK(gDPPipeSync(gfx++));
     gSPTextureRectangle(gfx++, QuarterPixels(left), QuarterPixels(top),
         QuarterPixels(right), QuarterPixels(bottom), G_TX_RENDERTILE, 0, 0,
