@@ -392,11 +392,15 @@ void FreeClubSlots(void) {
 void GiveSlotClubs(s32 playerIndex) {
   Player* player;
   s32 starCount;
-  s32 index; /* Counts the slots, then the reels; it is reused to match */
+  /*
+   * Counts the slots, then the reels; it is reused to match: a reel variable
+   * for the reels gives 30 words differing, and counting the slots with slot
+   * 44, none in shape
+   */
+  s32 index;
   s32 slot;
   s32 symbolIndex;
   s32 symbol;
-  s32 clubSet;
 
   starCount = 0;
   player = &g_Players[playerIndex];
@@ -432,13 +436,14 @@ void GiveSlotClubs(s32 playerIndex) {
 
   if (starCount == REEL_COUNT) {
     for (slot = 0; slot != CLUB_SYMBOL_COUNT; slot++) {
-      clubSet = player->characterIndex;
-      if (clubSet >= CHARACTER_CLUB_SET_COUNT) {
-        clubSet = player->gameBoyCharacterIndex;
-        clubSet += CHARACTER_CLUB_SET_COUNT;
+      if (player->characterIndex >= CHARACTER_CLUB_SET_COUNT) {
+        player->clubs[slot] =
+            ((player->gameBoyCharacterIndex + CHARACTER_CLUB_SET_COUNT) *
+                CLUB_SET_SIZE) +
+            slot;
+      } else {
+        player->clubs[slot] = (player->characterIndex * CLUB_SET_SIZE) + slot;
       }
-
-      player->clubs[slot] = (clubSet * CLUB_SET_SIZE) + slot;
     }
 
     PlaySound(SOUND_THREE_STARS, g_NextSoundChannel, SOUND_FULL_SCALE);
@@ -996,7 +1001,11 @@ void DrawClubSlotsLogo(
   Gfx* gfx;
   s32 starCount;
   s32 symbolIndex;
-  s32 index; /* Counts the reels, then the strips; it is reused to match */
+  /*
+   * Counts the reels, then the strips; it is reused to match: a reel or
+   * stripIndex variable gives 8 words differing, none in shape
+   */
+  s32 index;
   s32 shineTime;
   f32 width;
   f32 stripHeight;
