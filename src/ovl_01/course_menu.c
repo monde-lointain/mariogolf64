@@ -886,9 +886,11 @@ void DrawStatsBadgeCount(Gfx** displayListHead) {
  * branches to count that arrow. Adding the arrows' offsets as two products
  * gives 103-113 words, 27-31 in shape. The permuter's best outputs (66 and 70
  * words) load the arrow's texture only for a lone down arrow, which changes
- * what is drawn, so they are left out. A ternary or an if/else choosing
- * hasRowsBelow or FALSE gives the 107 words (33 in shape) of the copy, and
- * setting TRUE under nested tests 109 (39).
+ * what is drawn: the original's loop sets the texture image on every pass. They
+ * are left out, as are a later run's outputs of 65 and 66 words, which do the
+ * same. A ternary or an if/else choosing hasRowsBelow or FALSE gives the 107
+ * words (33 in shape) of the copy, and setting TRUE under nested tests 109
+ * (39).
  */
 #ifdef NON_MATCHING
 void DrawStatsScrollArrows(Gfx** displayListHead) {
