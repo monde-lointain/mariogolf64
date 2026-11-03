@@ -1907,7 +1907,11 @@ void ComputeRoundStatistics(void) {
     }
   }
 
-  courseIndex = 0; /* Zeroed this early to match */
+  /*
+   * Zeroed this early to match: zeroing it after the flag, or in the loop's
+   * for, gives 2 words differing
+   */
+  courseIndex = 0;
   hasPlayedCourse = FALSE;
   g_CourseStatFigures[COURSE_COUNT].roundCount = 0.0f;
   g_CourseStatFigures[COURSE_COUNT].bestScore = 0.0f;
