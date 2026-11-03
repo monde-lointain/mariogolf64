@@ -245,8 +245,11 @@
 /* The scissor height that gives a zoom of 2 */
 #define UNIT_ZOOM_HEIGHT 224
 
-/* Sets frames to count clamped to 0 through limit; its do-while is there to
- * match */
+/*
+ * Sets frames to count clamped to 0 through limit. Its do-while is there to
+ * match: as a plain block, RunStaffRollTimeline's draft goes from 254 words
+ * differing, none in shape, to 262, 8 in shape.
+ */
 #define ClampFrames(frames, count, limit) \
   do { \
     (frames) = (count); \
@@ -261,7 +264,8 @@
 /*
  * Sets a view's scissor box, viewport center and zoom for a frame of
  * its shrink to the screen's upper right. Its do-while is there to
- * match.
+ * match: as a plain block, RunStaffRollTimeline's draft goes from 254 words
+ * differing, none in shape, to 322, 34 in shape.
  */
 #define ShrinkView(view, frames) \
   do { \

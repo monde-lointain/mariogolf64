@@ -10,6 +10,9 @@ typedef union {
   s32 word;
 } FloatShape;
 
+/* As in fdlibm, these are do-while (0) loops, which the original needs: as
+ * plain blocks, fabsf gives 2 words differing, 2 in shape, and acosf 18, 2 in
+ * shape */
 #define GET_FLOAT_WORD(destination, source) \
   do { \
     FloatShape shape; \
