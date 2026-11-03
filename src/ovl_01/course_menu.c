@@ -814,7 +814,12 @@ void DrawStatsBadgeCount(Gfx** displayListHead) {
   SaveData* save = GetSaveData();
   MenuMemory* memory = GetMenuMemory();
   s16 badgeCount;
-  /* A hole, then a course, then where the count moves to, to match */
+  /*
+   * A hole, then a course, then where the count moves to, to match: a
+   * separate holeIndex for the open course's holes, or an s16 countShift for
+   * the shift, gives 60 words differing (2 in shape), a courseIndex 64 (2),
+   * and an s32 countShift 72 (4)
+   */
   s16 index;
   s16 holeIndex;
   /* The stats page after the open courses' pages shows every course */
@@ -1013,7 +1018,12 @@ void DrawCourseTrophies(Gfx** displayListHead) {
             G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
             G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
         gDPPipeSync(gfx++);
-        /* The right edge adds the offset before the position, to match */
+        /*
+         * The right edge adds the offset before the position, to match: the
+         * position, offset and width in that order, the offset first, or the
+         * position before the offset, give 39 words differing (21 in shape),
+         * against the draft's 31 (21)
+         */
         gSPScisTextureRectangle(gfx++,
             QuarterPixels(f_StatsTrophyPositions[memory->statsCourse].x +
                 PlaceTrophyOffsetX(place)),
