@@ -319,10 +319,12 @@ typedef s32 (*BillboardHitFinder)(s32 startX, s32 startY, s32 startZ, s32 endX,
  * addresses, which lie in the opening's BSS while it is loaded. Returns the
  * STEP_FLAG_* bits for the step.
  *
- * Doesn't match: the nested helpers match, but the routine keeps 614.4f and
- * 1996.8f in saved registers where the original reloads them, so 0.5f loses
- * the register it had and the floating-point registers are allocated
- * differently. Reading the side spin before the drag, and adding the
+ * Doesn't match: the nested helpers match, but the substep loop's hoisted
+ * 0.5f gets no register and is loaded at each use, where the original keeps
+ * it in $f30, with 0.0f and 1.0f in $f26 and $f28 rather than $f28 and $f30,
+ * so the floating-point registers are allocated differently. Forcing the
+ * original's registers on 61 pseudos leaves 632 words at best, so the code
+ * differs too. Reading the side spin before the drag, and adding the
  * velocity to the spin's push rather than the other way round, take it from
  * 676 words differing to 662. The water skip's last two tests are grouped,
  * as the original branches on the rolling state and then the impact speed:
