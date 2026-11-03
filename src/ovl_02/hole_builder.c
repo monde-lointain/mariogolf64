@@ -4064,20 +4064,25 @@ static inline u16 ReadTileTexel(
  * Switches the ground tiles between their two texel layouts: 32 texels a
  * row, or inside a border of their neighbors' texels.
  *
- * Doesn't match: ours steps the copy loop's column and loads the texel in
- * another order, and gives the bordered texel's address another register.
- * ReadTileTexel adds the byte offsets of the tile and the texel to the first
- * tile's texels, in that order in the source; GCC adds the bordered texel's
- * offset first, as the original does. Adding the texel's offset first in both
- * layouts gives 20 words differing (8 in shape), in the plain layout only 24
- * (10); the offsets in locals 24 (10), the sum through AddressPast 26 (6), a
- * tile pointer for the plain layout 142 (16). Before, indexing the tile's
- * texels gave 76 (26): with the stripped loop's != test, indexing texels[row +
- * 1][column + 1] gave 97, texels[0] at the row's sum 79 to 85, and the offset
- * added to &texels[1][1] 79; indexing the tile in g_WorkArea rather than
- * through tile 132 to 153. The permuter's best then held the last texel's
- * column in a variable for the corner's two stores, a fake (82 words, 24 in
- * shape). 16 words differ, 6 in shape.
+ * Doesn't match: ours steps the border loop's column and loads the texel in
+ * another order, and adds two of the texel addresses' terms the other way
+ * round. ReadTileTexel adds the byte offsets of the tile and the texel to the
+ * first tile's texels, in that order in the bordered layout's source; GCC adds
+ * the bordered texel's offset first, as the original does. Adding the tile's
+ * offset first in the plain layout gives 20 words differing (8 in shape), and
+ * swapping both layouts 22 (4). Earlier, adding the texel's offset first in
+ * both layouts gave 20 (8), in the plain layout only 24 (10); the offsets in
+ * locals 24 (10), the sum through AddressPast 26 (6), a tile pointer for the
+ * plain layout 142 (16). Before that, indexing the tile's texels gave 76 (26):
+ * with the stripped loop's != test, indexing texels[row + 1][column + 1] gave
+ * 97, texels[0] at the row's sum 79 to 85, and the offset added to
+ * &texels[1][1] 79; indexing the tile in g_WorkArea rather than through tile
+ * 132 to 153. The permuter's best then held the last texel's column in a
+ * variable for the corner's two stores, a fake (82 words, 24 in shape). The
+ * copy loop sets its source and the source's end before the destination, as the
+ * original does: with the end computed in the loop's test and the source set
+ * after the destination 16 words differed (6), and moving only the source first
+ * gave 28 (4). 12 words differ, 4 in shape.
  */
 #ifdef NON_MATCHING
 void ToggleGroundTileBorders(void) {
@@ -4089,6 +4094,7 @@ void ToggleGroundTileBorders(void) {
   u16* texel;
   u16* tileTexel;
   f64* source;
+  f64* sourceEnd;
   f64* destination;
 
   if (g_WorkArea.hole.tiles[0].texels[GROUND_TILE_TEXEL_ROW_COUNT - 1]
@@ -4165,12 +4171,13 @@ void ToggleGroundTileBorders(void) {
 
       texels[GROUND_TILE_TEXEL_ROW_COUNT - 1]
             [GROUND_TILE_TEXEL_ROW_LENGTH - 1] = 0xFFFF;
+      source = (f64*)texels;
+      sourceEnd = (f64*)&texels[GROUND_TILE_TEXEL_ROW_COUNT];
       destination =
           (f64*)g_WorkArea.hole
               .tiles[(tileRow * GROUND_TILE_COLUMN_COUNT) + tileColumn]
               .texels;
-      source = (f64*)texels;
-      while (source != (f64*)&texels[GROUND_TILE_TEXEL_ROW_COUNT]) {
+      while (source != sourceEnd) {
         *destination++ = *source++;
         *destination++ = *source++;
       }
