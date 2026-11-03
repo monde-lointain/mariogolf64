@@ -4460,6 +4460,11 @@ void DrawMenuBanner(Gfx** displayListHead) {
  * insns or fewer. 62 words differ. A permuter run got to 2 only by testing
  * f_TitleLabelCorners around two identical labelOffset branches, and an else
  * if around identical branches gets 16; neither test has any meaning.
+ * Another got to 4 words, none in shape, by setting labelOffset to
+ * TITLE_LABEL_WIDTH and then multiplying it in, which leaves loop.c a mult
+ * whose reduction it rates higher, so it steps the offset even in a 270-insn
+ * loop; that split alone gives 6 words. Every constant spelling of the size,
+ * in either operand order or with a named size, gives 62 to 73.
  */
 #ifdef NON_MATCHING
 const char f_PlainMenuHeading[] = "MAIN MENU";
