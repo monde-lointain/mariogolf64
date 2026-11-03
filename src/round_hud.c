@@ -3634,7 +3634,10 @@ void DrawShotEffectsHud(Gfx** displayListHead);
  * aids that game flags turn on
  *
  * Doesn't match: the original loads the height for its magnitude into a
- * register other than fabsf's result, as in IsEasedEyeHeightZero. The stroke
+ * register other than fabsf's result, as in IsEasedEyeHeightZero. Local-alloc
+ * ties the two because both are local to the block and die once; taking the
+ * magnitude into shotLength, which other blocks use, keeps them apart, but
+ * as shotLength crosses calls it gets $f20 and 13 words differ. The stroke
  * counts' loop tests i != playerCount, as the faces' loop does; with i <
  * playerCount, 77 words differ. The small faces' left edge goes straight into
  * its rectangle; through a local, its spill slot comes first and 34 words
