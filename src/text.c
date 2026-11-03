@@ -34,6 +34,12 @@ typedef struct MessageTable {
       messages[1]; /* messageCount of them, then the codes */
 } MessageTable;
 
+/*
+ * The table entry of message ID, by pointer arithmetic to match: indexing
+ * the messages gives 4 to 14 words differing, none in shape
+ */
+#define MessageEntryAt(id) (f_Messages->messages + (id))
+
 #define TEXT_ASSET_SMALL_FONT 0x4B3
 #define TEXT_ASSET_MEDIUM_FONT 0x4B5
 #define TEXT_ASSET_LARGE_FONT 0x4B6
@@ -503,9 +509,7 @@ void RevealTextSlot(s32 slot) {
 Boolean IsTextSlotRevealed(s32 slot) {
   TextSlot* textSlot = &g_TextSlots[slot];
 
-  /* The operand order is there to match */
-  return !(textSlot->shownCount <
-      (textSlot->messageId + f_Messages->messages)->length);
+  return !(textSlot->shownCount < MessageEntryAt(textSlot->messageId)->length);
 }
 
 /*
@@ -536,9 +540,8 @@ void DrawLargeTextSlot(Gfx** displayListHead, s32 slot) {
   x = textSlot->x;
   y = textSlot->y;
 
-  /* The operand order is there to match */
-  length = (textSlot->messageId + f_Messages->messages)->length;
-  start = (textSlot->messageId + f_Messages->messages)->start;
+  length = MessageEntryAt(textSlot->messageId)->length;
+  start = MessageEntryAt(textSlot->messageId)->start;
   if (textSlot->flags & TEXT_FLAG_TYPED) {
     if (textSlot->shownCount < length) {
       length = textSlot->shownCount;
@@ -835,9 +838,8 @@ void DrawMediumTextSlot(Gfx** displayListHead, s32 slot) {
   x = textSlot->x;
   y = textSlot->y;
 
-  /* The operand order is there to match */
-  length = (textSlot->messageId + f_Messages->messages)->length;
-  start = (textSlot->messageId + f_Messages->messages)->start;
+  length = MessageEntryAt(textSlot->messageId)->length;
+  start = MessageEntryAt(textSlot->messageId)->start;
   if (textSlot->flags & TEXT_FLAG_TYPED) {
     if (textSlot->shownCount < length) {
       length = textSlot->shownCount;
@@ -1192,9 +1194,8 @@ void MeasureMessage(
 
   lineCount = 0;
 
-  /* The operand order is there to match */
-  length = (messageId + f_Messages->messages)->length;
-  start = (messageId + f_Messages->messages)->start;
+  length = MessageEntryAt(messageId)->length;
+  start = MessageEntryAt(messageId)->start;
   line = 0;
   for (i = 0; i != length; i++) {
     code = ((u16*)f_Messages)[g_MessageCodesStart + start + i];
@@ -1908,9 +1909,8 @@ s32 PlaceMessageGlyphGroup(
     return UNSET_RESULT;
   }
 
-  /* The operand order is there to match */
-  start = (messageId + f_Messages->messages)->start;
-  length = (messageId + f_Messages->messages)->length;
+  start = MessageEntryAt(messageId)->start;
+  length = MessageEntryAt(messageId)->length;
   MeasureMessage(messageId, fontSize, &width, &height, 0);
   width /= 2;
   height /= 2;
