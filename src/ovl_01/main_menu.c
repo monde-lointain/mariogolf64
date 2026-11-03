@@ -6951,7 +6951,9 @@ void DrawYesNoWindow(Gfx** displayListHead, s32 width, s32 height, s32 centerX,
  * grouping, in two statements or from a second loop variable, moves the
  * constant to the toggle's and gives 8-25 shape differences against 7.
  * Splitting loopIndex per loop, which the register oracle hints at, doesn't
- * help. 112 words differ, 6 in shape.
+ * help. The permuter's best output, 720, only works out stripTop before the
+ * banner's combine mode, which gives 115 words differing, 7 in shape. 112
+ * words differ, 6 in shape.
  */
 #ifdef NON_MATCHING
 void DrawOptionsScreen(Gfx** displayListHead) {

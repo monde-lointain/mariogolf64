@@ -2030,8 +2030,9 @@ void DrawReadyGoMovie(Gfx** displayListHead) {
  * offset and taking offset from the strip index give 107 to 119 words. A
  * permuter run got to 50 words, 12 in shape, only by dropping the 4 strips
  * from top and reading an unset variable; its other changes, naming the
- * image's height and writing 1.0f + cosf(angle), leave 54. 54 words differ,
- * 24 in shape.
+ * image's height and writing 1.0f + cosf(angle), leave 54. A second run got
+ * to 40 words, 14 in shape, by taking top as 104 + (i - 4) * 4, which drops
+ * the strip height. 54 words differ, 24 in shape.
  */
 #ifdef NON_MATCHING
 void DrawShrinkingMovieImage(Gfx** displayListHead) {
