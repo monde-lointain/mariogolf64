@@ -3926,7 +3926,10 @@ void DrawMenuScreen(Gfx** displayListHead) {
  *
  * Doesn't match: the game keeps 0xFD500000 in a register and spills
  * 0x073DB06C where this spills the other way, and it reads g_MenuScreen for
- * MENU_LAYER_UNK20 where this drops the read. 360 words differ.
+ * MENU_LAYER_UNK20 where this drops the read. An empty case or default, an
+ * empty if, a (void) read and switches of 4, 6 or 10 shared cases all drop
+ * it too; 6 cases that each break give 359 words but still drop it. 360
+ * words differ, 38 in shape.
  */
 #ifdef NON_MATCHING
 void DrawMenuBackdropLayers(Gfx** displayListHead, s32 layers) {
