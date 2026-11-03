@@ -1683,13 +1683,20 @@ typedef struct GridScreenPoint {
 
 /*
  * Doesn't match: the club and the shot's distance take each other's saved
- * registers, and registers differ through the grid's loops. The register
- * oracle comes no closer than 249 words differing, with 27 pseudos forced.
- * The permuter's best outputs, 5478 to 5518 against 6454, set columnCount
- * only in the fade's last branch (367 words differing, 45 in shape) or drop
- * the near-landing branch, which change what the code does, or shift both
- * sides of the scroll test by 1 and nest a color in a chained assignment,
- * which are fakes. 345 words differ, 55 in shape.
+ * registers, and registers differ through the grid's loops. The register oracle
+ * comes no closer than 249 words differing, with 27 pseudos forced. The
+ * permuter's best outputs, 5478 to 5518 against 6454, set columnCount only in
+ * the fade's last branch (367 words differing, 45 in shape) or drop the
+ * near-landing branch, which change what the code does, or shift both sides of
+ * the scroll test by 1 and nest a color in a chained assignment, which are
+ * fakes. A later output, 5445 (362 words, 48 in shape), computes distance *
+ * GREEN_GRID_ROW_SPACING into a temp before its division, for shots short of
+ * GREEN_GRID_LANDING_DISTANCE, and joins the early exit's first two tests in an
+ * int temp; without the first temp it gives 366 (52), without the second 351
+ * (51). A Boolean local for those two tests gives 366 (52) too, but it makes
+ * the exit store the Boolean and test it, where the original and this branch
+ * straight to the return, so its gain is incidental. 345 words differ, 55 in
+ * shape.
  */
 void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
   f32 points[GREEN_GRID_POINT_COUNT][3];
