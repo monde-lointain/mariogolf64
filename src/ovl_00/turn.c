@@ -2932,7 +2932,7 @@ void ShowHoleOutBanner(s32 playerIndex) {
  * inline: inlined, their buffers share one stack slot, as in the
  * original's frame.
  *
- * Doesn't match: 485 words differ, 211 in shape, spread through the
+ * Doesn't match: 475 words differ, 193 in shape, spread through the
  * routine's states.
  *
  * The letterbox test before the debug output is written "== FALSE", for
@@ -2944,6 +2944,12 @@ void ShowHoleOutBanner(s32 playerIndex) {
  * round_hud.c's (f32)GetCupDistance does: the original converts the
  * integer to single and truncates it back. Without the cast 493 words
  * differ, 219 in shape.
+ *
+ * The hole-out song test for Speed Golf and Ring Shot compares one operand
+ * with two constants, which fold_truthop always evaluates without a branch,
+ * where the original branches on each. Nested ifs or a switch give the
+ * original's branches but 654 words; "!(a || b)" or swapped operands
+ * change nothing.
  */
 #ifdef NON_MATCHING
 /* Debug flag 0x47: prints where the ball lies, and the second controller moves
@@ -3512,64 +3518,72 @@ void UpdateTurns(void) {
           } else {
             song = SONG_MINI_GOLF;
             if (!g_GameState.isMiniGolf) {
-              if (g_GameState.gameMode == GAME_MODE_TOURNAMENT) {
-                switch (g_GameState.courseIndex) {
-                  case COURSE_TOAD_HIGHLANDS:
-                    song = SONG_TOURNAMENT_TOAD_HIGHLANDS;
-                    break;
-                  case COURSE_KOOPA_PARK:
-                    song = SONG_TOURNAMENT_KOOPA_PARK;
-                    break;
-                  case COURSE_SHY_GUY_DESERT:
-                    song = SONG_TOURNAMENT_SHY_GUY_DESERT;
-                    break;
-                  case COURSE_YOSHIS_ISLAND:
-                    song = SONG_TOURNAMENT_YOSHIS_ISLAND;
-                    break;
-                  case COURSE_BOO_VALLEY:
-                    song = SONG_TOURNAMENT_BOO_VALLEY;
-                    break;
-                  case COURSE_MARIOS_STAR:
-                  default:
-                    song = SONG_TOURNAMENT_MARIOS_STAR;
-                    break;
-                }
-              } else if (g_GameState.gameMode == GAME_MODE_TRAINING) {
-                song = SONG_TRAINING;
-              } else if (g_GameState.gameMode == GAME_MODE_SPEED_GOLF) {
-                song = SONG_SPEED_GOLF;
-              } else if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
-                song = SONG_RING_SHOT;
-              } else if (GetLastHoleIndex() == g_GameState.holeIndex &&
-                  g_GameState.playerCount != 1) {
-                song = SONG_ROUND_FINAL;
-              } else if (IsOneOnOneMatchMode(g_GameState.gameMode) &&
-                  GetMatchStanding(0, 1) != MATCH_STANDING_OPEN) {
-                song = SONG_ROUND_FINAL;
-              } else if (IsYoshiAndDonkeyKongRound()) {
-                song = SONG_YOSHI_AND_DONKEY_KONG;
-              } else {
-                switch (g_GameState.courseIndex) {
-                  case COURSE_TOAD_HIGHLANDS:
-                    song = SONG_COURSE_TOAD_HIGHLANDS;
-                    break;
-                  case COURSE_KOOPA_PARK:
-                    song = SONG_COURSE_KOOPA_PARK;
-                    break;
-                  case COURSE_SHY_GUY_DESERT:
-                    song = SONG_COURSE_SHY_GUY_DESERT;
-                    break;
-                  case COURSE_YOSHIS_ISLAND:
-                    song = SONG_COURSE_YOSHIS_ISLAND;
-                    break;
-                  case COURSE_BOO_VALLEY:
-                    song = SONG_COURSE_BOO_VALLEY;
-                    break;
-                  case COURSE_MARIOS_STAR:
-                  default:
-                    song = SONG_COURSE_MARIOS_STAR;
-                    break;
-                }
+              switch (g_GameState.gameMode) {
+                case GAME_MODE_TOURNAMENT:
+                  switch (g_GameState.courseIndex) {
+                    case COURSE_TOAD_HIGHLANDS:
+                      song = SONG_TOURNAMENT_TOAD_HIGHLANDS;
+                      break;
+                    case COURSE_KOOPA_PARK:
+                      song = SONG_TOURNAMENT_KOOPA_PARK;
+                      break;
+                    case COURSE_SHY_GUY_DESERT:
+                      song = SONG_TOURNAMENT_SHY_GUY_DESERT;
+                      break;
+                    case COURSE_YOSHIS_ISLAND:
+                      song = SONG_TOURNAMENT_YOSHIS_ISLAND;
+                      break;
+                    case COURSE_BOO_VALLEY:
+                      song = SONG_TOURNAMENT_BOO_VALLEY;
+                      break;
+                    case COURSE_MARIOS_STAR:
+                    default:
+                      song = SONG_TOURNAMENT_MARIOS_STAR;
+                      break;
+                  }
+                  break;
+                case GAME_MODE_TRAINING:
+                  song = SONG_TRAINING;
+                  break;
+                case GAME_MODE_SPEED_GOLF:
+                  song = SONG_SPEED_GOLF;
+                  break;
+                case GAME_MODE_RING_SHOT:
+                  song = SONG_RING_SHOT;
+                  break;
+                default:
+                  if (GetLastHoleIndex() == g_GameState.holeIndex &&
+                      g_GameState.playerCount != 1) {
+                    song = SONG_ROUND_FINAL;
+                  } else if (IsOneOnOneMatchMode(g_GameState.gameMode) &&
+                      GetMatchStanding(0, 1) != MATCH_STANDING_OPEN) {
+                    song = SONG_ROUND_FINAL;
+                  } else if (IsYoshiAndDonkeyKongRound()) {
+                    song = SONG_YOSHI_AND_DONKEY_KONG;
+                  } else {
+                    switch (g_GameState.courseIndex) {
+                      case COURSE_TOAD_HIGHLANDS:
+                        song = SONG_COURSE_TOAD_HIGHLANDS;
+                        break;
+                      case COURSE_KOOPA_PARK:
+                        song = SONG_COURSE_KOOPA_PARK;
+                        break;
+                      case COURSE_SHY_GUY_DESERT:
+                        song = SONG_COURSE_SHY_GUY_DESERT;
+                        break;
+                      case COURSE_YOSHIS_ISLAND:
+                        song = SONG_COURSE_YOSHIS_ISLAND;
+                        break;
+                      case COURSE_BOO_VALLEY:
+                        song = SONG_COURSE_BOO_VALLEY;
+                        break;
+                      case COURSE_MARIOS_STAR:
+                      default:
+                        song = SONG_COURSE_MARIOS_STAR;
+                        break;
+                    }
+                  }
+                  break;
               }
             }
 
