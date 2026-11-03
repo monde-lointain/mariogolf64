@@ -20,6 +20,9 @@ in local-alloc or its allocno in global-alloc, with its priority, and the
 pseudos that took the register it needed. A draft whose code differs
 otherwise gets the closest forcing found, and the instructions that still
 differ under it, which register allocation does not explain.
+
+Only FUNCTION's own routine is compared; the functions nested in it, which
+fncompare counts with it, are named so that each can be given as FUNCTION.
 """
 
 import collections
@@ -520,8 +523,11 @@ def main() -> None:
         int(pseudo): parse_register(hard)
         for pseudo, hard in (pair.split("=") for pair in pairs)
     }
-    target = fncompare.read_target_functions(asm_path)[function]
+    original = fncompare.read_original(asm_path, c_path, function)
+    target = original.routine
     print(function)
+    if original.nested:
+        print(f"  nested, not compared: {' '.join(original.nested)}")
     with tempfile.TemporaryDirectory() as work_name:
         work = Path(work_name)
         if show_allocation:
