@@ -210,8 +210,10 @@ void PrintFaultText(void) {
  * thread's offsets from $s0. The text buffer's register swaps with it. The
  * second CSE pass does the folding, as it knows context to be thread plus
  * 0x20 throughout a function without branches; setting context after the
- * first block boundary or in a block of its own leaves it so. 278 words
- * differ.
+ * first block boundary or in a block of its own leaves it so. Compiling with
+ * -fno-rerun-cse-after-loop, which skips that pass, leaves 276 words, only 2
+ * in shape, but costs the matched PrintRegisterFields 3 words, so the file
+ * wasn't built so. 278 words differ, 4 in shape.
  */
 #ifdef NON_MATCHING
 void PrintFaultContext(OSThread* thread) {
