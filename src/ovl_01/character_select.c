@@ -1673,9 +1673,13 @@ void DrawCharacterGridCursor(Gfx** displayListHead, s32 x, s32 y);
 /*
  * Draws each player's tag on the cell where that player's cursor sits, then the
  * grid cursor of the player choosing.
- * Doesn't match: the original sign-extends the cursor's x to 16 bits before
- * adding GRID_LEFT, where GCC here sees that it already fits and folds the two
- * offsets together. 5 words differ.
+ * Doesn't match: 2 words differ, 2 in shape. The original subtracts the
+ * cursor's left shift after both multiplies, where ours subtracts it right
+ * after the column's; computing the top first costs 23 words.
+ *
+ * The cursor's cell is read into column and row first: computed from the
+ * grid arrays in place, the row's offset folds into the call and 5 words
+ * differ, as they do for 54 other forms of the top with one local.
  */
 #ifdef NON_MATCHING
 void DrawPlayerTags(Gfx** displayListHead, u8 tagMode) {
@@ -1687,6 +1691,9 @@ void DrawPlayerTags(Gfx** displayListHead, u8 tagMode) {
   s16 shiftX; /* Both layouts leave it at 0 */
   s16 top;
   s16 cursorLeft;
+  s16 cursorTop;
+  s8 column;
+  s8 row;
 
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
@@ -1755,10 +1762,11 @@ void DrawPlayerTags(Gfx** displayListHead, u8 tagMode) {
     playerIndex = g_ChoosingPlayerIndex;
   }
 
-  cursorLeft = (memory->characterColumns[playerIndex] * GRID_CELL_SIZE) -
-      GRID_CURSOR_SHIFT_LEFT;
-  DrawCharacterGridCursor(&gfx, cursorLeft + GRID_LEFT,
-      (memory->characterRows[playerIndex] * GRID_CELL_SIZE) + GRID_TOP);
+  column = memory->characterColumns[playerIndex];
+  row = memory->characterRows[playerIndex];
+  cursorLeft = (column * GRID_CELL_SIZE) - GRID_CURSOR_SHIFT_LEFT;
+  cursorTop = (row * GRID_CELL_SIZE) + GRID_TOP;
+  DrawCharacterGridCursor(&gfx, cursorLeft + GRID_LEFT, cursorTop);
   gDPPipeSync(gfx++);
   *displayListHead = gfx;
 }
