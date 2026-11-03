@@ -3622,6 +3622,11 @@ void BlendGroundAroundPoint(u32 column, u32 row, s32 radius, s32 falloff) {
   radiusSquared = radius * radius;
   for (rowOffset = -radius; rowOffset <= radius; rowOffset++) {
     if (row + rowOffset < GROUND_POINT_ROW_COUNT) {
+      /*
+       * halfWidth holds its square until the root, to match: a
+       * halfWidthSquared local, wherever it is declared, gives 46 words
+       * differing (0 in shape)
+       */
       halfWidth = radiusSquared - (rowOffset * rowOffset);
       if (halfWidth < 0) {
         halfWidth = 0;
