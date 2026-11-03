@@ -1036,7 +1036,10 @@ void EaseAimCamera(void) {
   g_CurrentShot.aimCameraHeight +=
       (targetHeight - g_CurrentShot.aimCameraHeight) * AIM_CAMERA_EASE_FRACTION;
   distanceError = g_CurrentShot.aimCameraDistance - targetDistance;
-  /* The test in its own block, to match */
+  /*
+   * The test in its own block, to match; without the barrier 27 words
+   * differ, 23 in shape, against 13
+   */
   END_BASIC_BLOCK();
   if (fabsf(distanceError) < UNITS_PER_YARD) {
     g_IsAimCameraEasing = 0;
