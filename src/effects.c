@@ -417,6 +417,7 @@ void SpawnSpreadingCircle(u32 slotIndex, s32 pointId) {
         effect->scale = 0.2f;
         effect->scaleStep = 0.8f;
         effect->matrixIndex = f_NextMatrixIndex;
+        f_NextMatrixIndex = (f_NextMatrixIndex + 1) % EFFECT_COUNT;
         translation[AXIS_X] = effect->position[AXIS_X];
         translation[AXIS_Y] = effect->position[AXIS_Y];
         translation[AXIS_Z] = effect->position[AXIS_Z];
@@ -426,8 +427,6 @@ void SpawnSpreadingCircle(u32 slotIndex, s32 pointId) {
         scale[AXIS_X] = effect->scale;
         scale[AXIS_Y] = effect->scale;
 
-        /* Updating f_NextMatrixIndex here is there to match */
-        f_NextMatrixIndex = (f_NextMatrixIndex + 1) % EFFECT_COUNT;
         scale[AXIS_Z] = effect->scale;
         BuildTransformMatrix(matrix, rotation, translation, scale);
         ConvertMatrixToFixed(matrix, &f_EffectMatrices[effect->matrixIndex]);
@@ -568,6 +567,7 @@ void SpawnRipple(CoursePoint position) {
       effect->kind = EFFECT_KIND_RIPPLE;
       effect->unk3B = 0;
       effect->matrixIndex = f_NextMatrixIndex;
+      f_NextMatrixIndex = (f_NextMatrixIndex + 1) % EFFECT_COUNT;
       effect->velocity[AXIS_X] = 0;
       effect->velocity[AXIS_Y] = 0;
       effect->velocity[AXIS_Z] = 0;
@@ -584,8 +584,6 @@ void SpawnRipple(CoursePoint position) {
       scale[AXIS_X] = effect->scale;
       scale[AXIS_Y] = effect->scale;
 
-      /* Updating f_NextMatrixIndex here is there to match */
-      f_NextMatrixIndex = (f_NextMatrixIndex + 1) % EFFECT_COUNT;
       scale[AXIS_Z] = effect->scale;
       BuildTransformMatrix(matrix, rotation, translation, scale);
       ConvertMatrixToFixed(matrix, &f_EffectMatrices[effect->matrixIndex]);
@@ -811,6 +809,7 @@ void SpawnImpactEffects(BallSimulation* simulation) {
           effect->kind = EFFECT_KIND_RIPPLE;
           effect->unk3B = 0;
           effect->matrixIndex = f_NextMatrixIndex;
+          f_NextMatrixIndex = (f_NextMatrixIndex + 1) % EFFECT_COUNT;
           effect->velocity[AXIS_X] = 0;
           effect->velocity[AXIS_Y] = 0;
           effect->velocity[AXIS_Z] = 0;
@@ -826,7 +825,6 @@ void SpawnImpactEffects(BallSimulation* simulation) {
           rotation[AXIS_Z] = 0;
           scale[AXIS_X] = effect->scale;
           scale[AXIS_Y] = effect->scale;
-          f_NextMatrixIndex = (f_NextMatrixIndex + 1) % EFFECT_COUNT;
           scale[AXIS_Z] = effect->scale;
           BuildTransformMatrix(matrix, rotation, translation, scale);
           ConvertMatrixToFixed(matrix, &f_EffectMatrices[effect->matrixIndex]);
@@ -1464,6 +1462,7 @@ void UpdateEffects(void) {
 
     if (effect->kind == EFFECT_KIND_RIPPLE) {
       effect->matrixIndex = f_NextMatrixIndex;
+      f_NextMatrixIndex = (f_NextMatrixIndex + 1) % EFFECT_COUNT;
       translation[AXIS_X] = effect->position[AXIS_X];
       translation[AXIS_Y] = effect->position[AXIS_Y];
       translation[AXIS_Z] = effect->position[AXIS_Z];
@@ -1473,13 +1472,13 @@ void UpdateEffects(void) {
       scale[AXIS_X] = effect->scale;
       scale[AXIS_Y] = effect->scale;
       scale[AXIS_Z] = effect->scale;
-      f_NextMatrixIndex = (f_NextMatrixIndex + 1) % EFFECT_COUNT;
       BuildTransformMatrix(matrix, rotation, translation, scale);
       ConvertMatrixToFixed(matrix, &f_EffectMatrices[effect->matrixIndex]);
     }
 
     if (effect->kind == EFFECT_KIND_SPREADING_CIRCLE) {
       effect->matrixIndex = f_NextMatrixIndex;
+      f_NextMatrixIndex = (f_NextMatrixIndex + 1) % EFFECT_COUNT;
       translation[AXIS_X] = effect->position[AXIS_X];
       translation[AXIS_Y] = effect->position[AXIS_Y];
       translation[AXIS_Z] = effect->position[AXIS_Z];
@@ -1489,7 +1488,6 @@ void UpdateEffects(void) {
       scale[AXIS_X] = effect->scale;
       scale[AXIS_Y] = effect->scale;
       scale[AXIS_Z] = effect->scale;
-      f_NextMatrixIndex = (f_NextMatrixIndex + 1) % EFFECT_COUNT;
       BuildTransformMatrix(matrix, rotation, translation, scale);
       ConvertMatrixToFixed(matrix, &f_EffectMatrices[effect->matrixIndex]);
     }
