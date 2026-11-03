@@ -57,6 +57,11 @@
  * match the original better that way. */
 extern volatile Boolean g_HasLoaderFinished;
 
+/* Declared volatile here too, as the original reads its player index in
+ * BuildHorizonDynamicTextures although the value is never used: flow deletes
+ * a dead load that isn't volatile */
+extern volatile CurrentShot g_CurrentShot;
+
 #define INSET_VIEW_SOUND_VOLUME 0x3F
 #define INSET_VIEW_SOUND_REVERB 0x1E
 
@@ -839,9 +844,12 @@ void BuildHorizonDynamicTextures(Gfx** displayListHead) {
     destOffset = 0;
     rowCount = DYNAMIC_TEXTURE_SIZE;
   } else {
-    /* The value read here is never used */
+    /* The value read here is never used, but the original loads it, as
+     * g_CurrentShot's volatile declaration makes it. A plain read without
+     * that gives 7 words differing, 5 in shape, and no read or an empty if
+     * 11 (7) */
     if (mode == GAME_STATE_UNK6) {
-      mode = *(volatile s32*)&g_CurrentShot.playerIndex;
+      mode = g_CurrentShot.playerIndex;
     }
 
     FitStripToScreen();
