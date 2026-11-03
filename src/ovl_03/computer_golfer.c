@@ -406,8 +406,12 @@ s32 GetSideSlope(void) {
   for (sampleIndex = 1;
       sampleIndex < (s32)(distance * (1.0f / SIDE_SLOPE_SAMPLE_SPACING));
       sampleIndex++) {
-    /* Setting along inside the x term is there to match: setting it first,
-     * with z first or not, or writing its product out in both terms differs */
+    /*
+     * Setting along inside the x term is there to match: setting it first
+     * gives 2 words differing (2 in shape) in either order of its product,
+     * 4 to 30 in the other operand orders of the terms, 6 with z first, and
+     * writing its product out in both terms 10 (8)
+     */
     sampleX = f_Shot.ballPosition[AXIS_X] +
         ((along = sampleIndex * SIDE_SLOPE_SAMPLE_SPACING) * direction[AXIS_X]);
     sampleZ = f_Shot.ballPosition[AXIS_Z] + (along * direction[AXIS_Z]);
@@ -1597,7 +1601,10 @@ s32 PlanRoute(s8* route) {
     }
   }
 
-  /* Counting the route in index is there to match */
+  /*
+   * Counting the route in index is there to match: a routeLength local gives
+   * 64 words differing, none in shape
+   */
   index = 0;
   for (orderIndex = orderCount - 1; orderIndex >= 0; orderIndex--) {
     if (order[orderIndex] != pointCount - 1) {
@@ -1813,7 +1820,10 @@ void ChooseLandingTarget(
   endRating = GetLandingRating(GetSurfaceInfoAt(endX, endZ)->kind);
   osSyncPrintf("TALevel %d\n", endRating);
 
-  /* Counting the steps in index is there to match */
+  /*
+   * Counting the steps in index is there to match: a step local gives 289
+   * words differing, 27 in shape
+   */
   for (index = 0;
       index < (reach * TARGET_STEPS_PER_UNIT) + EXTRA_TARGET_STEP_COUNT;
       index++) {
