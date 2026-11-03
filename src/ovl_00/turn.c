@@ -2932,13 +2932,18 @@ void ShowHoleOutBanner(s32 playerIndex) {
  * inline: inlined, their buffers share one stack slot, as in the
  * original's frame.
  *
- * Doesn't match: 493 words differ, 219 in shape, spread through the
+ * Doesn't match: 485 words differ, 211 in shape, spread through the
  * routine's states.
  *
- * The letterbox test before the debug output is written "== FALSE": the
- * original computes both comparisons and ors them, as for "(a || b) ==
- * FALSE", where "!(a || b)" becomes "a != b && ..." and 501 words differ
- * (227 in shape). The same test later in the shot setup matches with "!".
+ * The letterbox test before the debug output is written "== FALSE", for
+ * which the original ors both comparisons; "!(a || b)" turns into an and
+ * of two "!=" tests, and 501 words differ (227 in shape). The same test
+ * later in the shot setup matches with "!".
+ *
+ * The cup distance after the ball comes to rest goes through a float, as
+ * round_hud.c's (f32)GetCupDistance does: the original converts the
+ * integer to single and truncates it back. Without the cast 493 words
+ * differ, 219 in shape.
  */
 #ifdef NON_MATCHING
 /* Debug flag 0x47: prints where the ball lies, and the second controller moves
@@ -3375,7 +3380,7 @@ void UpdateTurns(void) {
         UpdateShotFlags();
         PlaceBallAtRest(playerIndex, &g_TurnBallSimulation);
         g_CurrentShot.cupDistance =
-            GetCupDistance(g_TurnBallSimulation.position[AXIS_X] -
+            (f32)GetCupDistance(g_TurnBallSimulation.position[AXIS_X] -
                     g_HoleSetup.cupPosition[AXIS_X],
                 g_TurnBallSimulation.position[AXIS_Z] -
                     g_HoleSetup.cupPosition[AXIS_Z]);
