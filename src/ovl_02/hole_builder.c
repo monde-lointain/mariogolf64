@@ -4019,7 +4019,6 @@ void ShadeGround(s32 shadeVariant UNUSED) {
 static inline u16 ReadTileTexel(
     s32 tileColumn, s32 tileRow, s32 texelColumn, s32 texelRow) {
   s32 tileIndex;
-  GroundTile* tile;
   u16* texel;
 
   if (tileColumn < 0) {
@@ -4045,13 +4044,17 @@ static inline u16 ReadTileTexel(
 
   texelColumn = (texelColumn + GROUND_TILE_TEXEL_SPAN) & MAP_TILE_MASK;
   texelRow = (texelRow + GROUND_TILE_TEXEL_SPAN) & MAP_TILE_MASK;
-  tile = &g_WorkArea.hole.tiles[tileIndex];
   if (g_WorkArea.hole.tiles[tileIndex].texels[GROUND_TILE_TEXEL_ROW_COUNT -
           1][GROUND_TILE_TEXEL_ROW_LENGTH - 1] != 0) {
-    texel = &tile->texels[TILE_BORDER_BEFORE][TILE_BORDER_BEFORE] +
-        ((texelRow * GROUND_TILE_TEXEL_ROW_LENGTH) + texelColumn);
+    texel = (u16*)((u8*)&g_WorkArea.hole.tiles[0]
+                       .texels[TILE_BORDER_BEFORE][TILE_BORDER_BEFORE] +
+        (tileIndex * sizeof(GroundTile)) +
+        (((texelRow * GROUND_TILE_TEXEL_ROW_LENGTH) + texelColumn) *
+            sizeof(u16)));
   } else {
-    texel = &tile->texels[0][(texelRow * GROUND_TILE_TEXEL_SPAN) + texelColumn];
+    texel = (u16*)((u8*)g_WorkArea.hole.tiles[0].texels +
+        (((texelRow * GROUND_TILE_TEXEL_SPAN) + texelColumn) * sizeof(u16)) +
+        (tileIndex * sizeof(GroundTile)));
   }
 
   return *texel;
@@ -4059,17 +4062,22 @@ static inline u16 ReadTileTexel(
 
 /*
  * Switches the ground tiles between their two texel layouts: 32 texels a
- * row, or inside a border of their neighbors' texels. Doesn't match:
- * where ReadTileTexel reads a bordered tile, the original adds the texel's
- * offset to the hoisted address of the first tile's texels[1][1] and the
- * tile's offset last; ours adds the offset to the tile's own texels[1][1].
- * Ours also masks the texel coordinates in another order. With the
- * stripped loop's != test, indexing texels[row + 1][column + 1] gives 97
- * differing words, texels[0] at the row's sum 79 to 85, and the offset added
- * to &texels[1][1] 79; indexing the tile in g_WorkArea rather than through
- * tile gives 132 to 153. The permuter's best holds the last texel's
- * column in a variable for the corner's two stores, a fake (82 words, 24
- * in shape). 76 words differ, 26 in shape.
+ * row, or inside a border of their neighbors' texels.
+ *
+ * Doesn't match: ours steps the copy loop's column and loads the texel in
+ * another order, and gives the bordered texel's address another register.
+ * ReadTileTexel adds the byte offsets of the tile and the texel to the first
+ * tile's texels, in that order in the source; GCC adds the bordered texel's
+ * offset first, as the original does. Adding the texel's offset first in both
+ * layouts gives 20 words differing (8 in shape), in the plain layout only 24
+ * (10); the offsets in locals 24 (10), the sum through AddressPast 26 (6), a
+ * tile pointer for the plain layout 142 (16). Before, indexing the tile's
+ * texels gave 76 (26): with the stripped loop's != test, indexing texels[row +
+ * 1][column + 1] gave 97, texels[0] at the row's sum 79 to 85, and the offset
+ * added to &texels[1][1] 79; indexing the tile in g_WorkArea rather than
+ * through tile 132 to 153. The permuter's best then held the last texel's
+ * column in a variable for the corner's two stores, a fake (82 words, 24 in
+ * shape). 16 words differ, 6 in shape.
  */
 #ifdef NON_MATCHING
 void ToggleGroundTileBorders(void) {
