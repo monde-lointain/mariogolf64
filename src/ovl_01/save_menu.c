@@ -1267,7 +1267,10 @@ void ResetSavedGameControllers(void) {
   f_AssignedHumanCount = 0;
   gameIndex = memory->savedGameIndex;
   savedPlayers = save->savedPlayers[gameIndex];
-  /* Through f_HumanPlayerCount, to match */
+  /*
+   * Through f_HumanPlayerCount, to match: reading the count into playerCount
+   * first gives 92 words differing, 10 in shape
+   */
   f_HumanPlayerCount = save->savedGames[gameIndex].state.playerCount;
   playerCount = f_HumanPlayerCount;
   for (playerIndex = 0; playerIndex != playerCount; playerIndex++) {
@@ -1279,8 +1282,7 @@ void ResetSavedGameControllers(void) {
     }
   }
 
-  /* Chained, to match */
-  for (humanCount = playerIndex = 0; playerIndex != playerCount;
+  for (playerIndex = 0, humanCount = 0; playerIndex != playerCount;
       playerIndex++) {
     if (f_SavedPlayerControllers[playerIndex] != COMPUTER_CONTROLLER) {
       f_HumanPlayerIndices[humanCount] = playerIndex;
@@ -1302,7 +1304,12 @@ void LoadSaveMenuBuffers(void** buffers, u8 bufferKind) {
   MenuMemory* memory = GetMenuMemory();
   s32 imageIndex;
   s32 mode;
-  /* A copy of f_ModeImageAssets for each case, set in its loop, to match */
+  /*
+   * A copy of f_ModeImageAssets for each case, set in its loop, to match:
+   * reading f_ModeImageAssets directly gives 24 words differing (8 in shape),
+   * one pointer for both cases 20 (0), and setting both before the switch 15
+   * (7)
+   */
   SaveMenuModeImage* modeImages;
   SaveMenuModeImage* slotImages;
 
@@ -1413,7 +1420,12 @@ void UpdateSavedGames(void) {
   AssetFile file;
   /* Pads the frame to match; without it 28 words differ */
   u8 unusedStack[0xA0] UNUSED;
-  /* One index for the text slots, players, controllers and humans, to match */
+  /*
+   * One index for the text slots, players, controllers and humans, to match:
+   * a variable of its own for the text slots gives 99 words differing (9 in
+   * shape), for the players 20 (2), for the humans 44 (2), for the
+   * controllers 46 (6), and for each 110 (10)
+   */
   s32 i;
   s32 miniGolfIndex;
 
@@ -1890,9 +1902,16 @@ void DrawSavedGames(Gfx** displayListHead) {
   s32 stripLeft;
   s32 stripShownWidth;
   s32 gameIndex;
-  /* Also the game mode label's x, to match */
+  /*
+   * Also the game mode label's x, to match: a labelX variable gives 339 words
+   * differing (97 in shape) against the draft's 307 (121)
+   */
   s32 courseIndex;
-  /* Also the board and strip index in the loops, to match */
+  /*
+   * Also the board and strip index in the loops, to match: a board variable
+   * for them gives 564 words differing (138 in shape) against the draft's 307
+   * (121)
+   */
   s32 holeIndex;
   s32* chosenMode;
   s32* labelOffset;
