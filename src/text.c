@@ -1707,7 +1707,11 @@ void DrawCenteredShadowedText(
     Gfx** displayListHead, s16 x, s16 y, READ_ONLY char* text) {
   Gfx* gfx = *displayListHead;
 
-  /* The copy of x and the s16 are there to match */
+  /*
+   * The copy of x and the s16 are there to match: summing a width from 0
+   * instead gives 12 words differing (6 to 8 in shape), a right edge
+   * without the copy 14 to 20, and an s32 right edge 20
+   */
   s32 left = x;
   s16 right = x;
   s32 i;
