@@ -2757,7 +2757,10 @@ void StartTurnRumble(s32 playerIndex) {
           nuContRmbStart(g_PlayerControllerPorts[controllerIndex],
               TURN_RUMBLE_FREQUENCY, TURN_RUMBLE_FRAME_COUNT);
           break;
-        /* The empty cases are there to match */
+        /*
+         * The empty cases are there to match: without them, with one or a
+         * default, or with an if for the 0 case, 23 words differ, 9 in shape
+         */
         case PFS_ERR_NOPACK:
           break;
         case PFS_ERR_CONTRFAIL:
