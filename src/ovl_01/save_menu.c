@@ -1846,7 +1846,9 @@ void DrawSavedMiniGolfImage(Gfx** displayListHead);
  * hoists the factor instead (403 words, 151 in shape). The original still
  * multiplies by a 120 it loads in the loop, where ours keeps it in a saved
  * register; a literal 120 is expanded into shifts (417 words, 163 in
- * shape). 401 words differ, 149 in shape.
+ * shape). Each mode icon's image is read once into modeImage, as the
+ * original reads it once for the palette and the strips; reading the table
+ * at each use gives 401 words, 149 in shape. 307 words differ, 121 in shape.
  */
 #ifdef NON_MATCHING
 void DrawSavedGames(Gfx** displayListHead) {
@@ -1999,14 +2001,14 @@ void DrawSavedGames(Gfx** displayListHead) {
       }
 
       if (f_SavedGameModes[slot] != NO_SAVE_MENU_MODE) {
-        gDPLoadTLUT_pal256(
-            gfx++, TextureAddress(ImageBody(f_SavedGameModeImages[slot])));
+        u8* modeImage = f_SavedGameModeImages[slot];
+
+        gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(modeImage)));
         for (holeIndex = 0; holeIndex != MODE_ICON_STRIP_COUNT; holeIndex++) {
           gDPLoadTextureBlock(gfx++,
               TextureAddress(
                   (holeIndex * MODE_ICON_WIDTH * MODE_ICON_STRIP_HEIGHT) +
-                  (u8*)f_SavedGameModeImages[slot] +
-                  LARGE_PALETTED_TEXELS_OFFSET),
+                  modeImage + LARGE_PALETTED_TEXELS_OFFSET),
               G_IM_FMT_CI, G_IM_SIZ_8b, MODE_ICON_WIDTH, MODE_ICON_STRIP_HEIGHT,
               0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
               G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
