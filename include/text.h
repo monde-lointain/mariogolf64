@@ -133,9 +133,14 @@ void PlaceGlyphGroup(s32 group, s32 fontSize, TextFlags flags, s32 x, s32 y,
 void SetTextPaletteColor(s32 red, s32 green, s32 blue, s32 colorIndex);
 void SetTextSlotValue(s32 value, s32 slot, s32 valueIndex);
 void SetTextName(char* name);
-/* SetTextSlot reads only each color's low byte, but its callers pass the
+/*
+ * SetTextSlot reads only each color's low byte, but its callers pass the
  * colors as ints without narrowing them. text.c, which defines it with u8
- * colors, takes the definition's form. */
+ * colors, takes the definition's form. With the u8 form everywhere, only
+ * help_board.c's and pause_menu.c's objects differ of the 20 files that call
+ * it, and DrawRingShotRecords' draft gives 35 words differing (3 in shape)
+ * rather than 26 (0).
+ */
 #if defined(AVOID_UB) || defined(DEFINES_SET_TEXT_SLOT)
 void SetTextSlot(s32 x, s32 y, MessageId messageId, s32 fontSize, s32 slot,
     TextFlags flags, u8 red, u8 green, u8 blue, u8 alpha);
