@@ -2954,6 +2954,12 @@ void ShowHoleOutBanner(s32 playerIndex) {
  * The hole-out song switch lists its modes from Ring Shot down to Training,
  * the order the original places their bodies in; in the enum's order 475
  * words differ (193 in shape).
+ *
+ * The original keeps DebugPlaceBall's and DebugTestGutsMotion's buffer
+ * address in $s0. One buffer declared in UpdateTurns before its nested
+ * functions and passed to both gives that (175 in shape), but puts
+ * playerIndex's slot above the buffer and grows the frame, 751 words;
+ * declared after the nested functions it keeps the frame but not $s0, 485.
  */
 #ifdef NON_MATCHING
 /* Debug flag 0x47: prints where the ball lies, and the second controller moves
