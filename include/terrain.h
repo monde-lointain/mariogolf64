@@ -156,6 +156,10 @@ extern u16 g_TerrainCodeColors[TERRAIN_CODE_COUNT];
  */
 #define TERRAIN_CODE_CELL_ROW_COUNT 32
 #define TERRAIN_CODE_CELL_COLUMN_COUNT 16
+/* The size of a terrain code cell, and of a row of them */
+#define TERRAIN_CODE_CELL_SIZE 2
+#define TERRAIN_CODE_CELL_ROW_SIZE \
+  (TERRAIN_CODE_CELL_COLUMN_COUNT * TERRAIN_CODE_CELL_SIZE)
 /* The map texels a terrain code cell covers each way */
 #define TERRAIN_CODE_CELL_SPAN 16
 /* The terrain code grid's columns and rows */

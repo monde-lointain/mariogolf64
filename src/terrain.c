@@ -326,16 +326,14 @@ static inline s32 GetPackedCodeOffset(s32 column, s32 row, s32 block) {
  * Returns the terrain code at a code column and row, clamped to the grid,
  * or -1 where there is none.
  *
- * Doesn't match: the original scales the cell's column and row to bytes
- * separately and adds them, where this adds them and scales the sum; 6 words
- * differ. Indexing the cells by row and column gives 17 to 31, the flat index
- * written in the array access 8 to 18, a byte offset through AddressPast 16
- * to 22, and keeping the packed offset in a local 24.
+ * The cell is addressed by byte offset, column first, as in
+ * ResetTerrainCodeCells: the row's offset first gives 22 words differing,
+ * a flat index scaled after the sum 6 (4 in shape), and indexing the cells
+ * by row and column 17 to 31.
  */
-#ifdef NON_MATCHING
 s32 GetTerrainCode(s32 column, s32 row) {
   s32 block;
-  s32 cellIndex;
+  s32 cellOffset;
 
   if (column < 0) {
     column = 0;
@@ -349,9 +347,9 @@ s32 GetTerrainCode(s32 column, s32 row) {
     row = CODE_GRID_ROW_COUNT - 1;
   }
 
-  cellIndex = (column / TERRAIN_CODE_CELL_SPAN) +
-      ((row / TERRAIN_CODE_CELL_SPAN) * TERRAIN_CODE_CELL_COLUMN_COUNT);
-  block = g_TerrainCodeCells[0][cellIndex];
+  cellOffset = ((column / TERRAIN_CODE_CELL_SPAN) * TERRAIN_CODE_CELL_SIZE) +
+      ((row / TERRAIN_CODE_CELL_SPAN) * TERRAIN_CODE_CELL_ROW_SIZE);
+  block = *(s16*)AddressPast(g_TerrainCodeCells, cellOffset);
   if (block == NO_CELL_TERRAIN_CODE) {
     return NO_CELL_TERRAIN_CODE;
   }
@@ -369,10 +367,6 @@ s32 GetTerrainCode(s32 column, s32 row) {
   return g_WorkArea.hole.terrainCodes[GetPackedCodeOffset(column, row, block)] &
       TERRAIN_CODE_MASK;
 }
-
-#else
-INCLUDE_ASM("asm/nonmatchings/terrain", GetTerrainCode);
-#endif
 
 /*
  * Starts the search for the nearest color past any squared distance

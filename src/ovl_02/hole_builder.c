@@ -93,10 +93,6 @@ enum VertexEncoding {
 /* The paint logic of the last mini-golf course; later courses use it too */
 #define LAST_MINI_GOLF_PAINT_LOGIC PAINT_LOGIC_PEACHS_CASTLE_THIRD
 
-/* The size of a terrain code cell, and of a row of them */
-#define TERRAIN_CODE_CELL_SIZE 2
-#define TERRAIN_CODE_CELL_ROW_SIZE \
-  (TERRAIN_CODE_CELL_COLUMN_COUNT * TERRAIN_CODE_CELL_SIZE)
 /* The words a block of packed codes fills */
 #define TERRAIN_CODE_BLOCK_WORD_COUNT (TERRAIN_CODE_BLOCK_SIZE / 4)
 /* The size of the host file paths that BuildHole and SaveHoleFiles use */
