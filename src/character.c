@@ -1542,7 +1542,10 @@ void UpdateJointKeyframeSpans(u32 slotIndex) {
       } else {
         /*
          * This and the other two progress fractions read the global again,
-         * though frame holds it, to match
+         * though frame holds it, to match: reading frame in all three gives 228
+         * words differing (68 in shape), in the translation's alone 222 (68),
+         * the rotation's 212 (64) and the scale's 222 (68), against the draft's
+         * 184 (66)
          */
         progress =
             (g_CurrentAnimationFrame - joint->translationSpan.startFrame) /
@@ -1668,7 +1671,10 @@ void UpdateJointKeyframeSpans(u32 slotIndex) {
     xx = rotation[0] * xs;
     wy = rotation[3] * ys;
     yy = rotation[1] * ys;
-    /* dot holds the z axis's square term from here, to match */
+    /*
+     * dot holds the z axis's square term from here, to match: a zz variable
+     * gives 191 words differing (73 in shape) against the draft's 184 (66)
+     */
     dot = rotation[2] * zs;
     xy = rotation[0] * ys;
     yz = rotation[1] * zs;
