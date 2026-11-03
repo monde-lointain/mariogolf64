@@ -673,6 +673,9 @@ void SetNextTeeOrder(void) {
     }
   }
 
+  /* The copy loop in a block of its own is there to match; without it 38
+   * words differ, none in shape, counting it with j 46 and with a counter of
+   * its own 60 */
   IN_OWN_BLOCK(for (i = 0; i < g_GameState.playerCount;
       i++) { g_Players[i].teeOrder = orders[i]; });
 }

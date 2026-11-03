@@ -1435,6 +1435,10 @@ void EaseCameraPosition(Vec3 target) {
 
   offset = target[AXIS_X] - f_CameraPosition[AXIS_X];
 
+  /* The x test in a block of its own is there to match; without it 3 words
+   * differ, all in shape, as with a local for each axis's offset. A loop
+   * over the axes gives 66, 54 in shape, fabs 66 and the comparison spelled
+   * as two tests 27 */
   IN_OWN_BLOCK(if (fabsf(offset) > CAMERA_EASE_DEAD_ZONE) {
     f_CameraPosition[AXIS_X] += offset * CAMERA_EASE_FRACTION;
   });

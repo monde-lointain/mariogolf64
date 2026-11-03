@@ -249,6 +249,10 @@ void TurnEditorCamera(s32 index, Radians angle, s32 frameCount) {
   f32 speed;
   f32 magnitude;
 
+  /* The magnitude in a block of its own is there to match; without it, or
+   * tested as fabsf(angle) itself, 8 words differ, 4 in shape, as with
+   * __builtin_fabsf. A ternary gives 8, all in shape, fabs 26 and the
+   * comparison spelled as two tests 23 */
   IN_OWN_BLOCK(magnitude = fabsf(angle));
   if (magnitude < 0.001f) {
     g_CameraEditor.heading += angle;
@@ -289,6 +293,10 @@ void TiltEditorCamera(s32 index, Radians angle, s32 frameCount) {
   f32 speed;
   f32 magnitude;
 
+  /* The magnitude in a block of its own is there to match; without it, or
+   * tested as fabsf(angle) itself, 8 words differ, 4 in shape, as with
+   * __builtin_fabsf. A ternary gives 8, all in shape, fabs 26 and the
+   * comparison spelled as two tests 23 */
   IN_OWN_BLOCK(magnitude = fabsf(angle));
   if (magnitude < 0.001f) {
     g_CameraEditor.pitch += angle;
