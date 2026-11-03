@@ -379,7 +379,11 @@ void AddToDebugLog(char* text) {
 void ShowDebugLog(void) {
   s32 textIndex = ARRAY_COUNT(f_DebugText) -
       ((f_DebugLogShownLineCount + LOG_BOTTOM_MARGIN) * TEXT_COLUMN_COUNT);
-  /* The line is reused for the cursor's line, to match */
+  /*
+   * The line is reused for the cursor's line, to match: a cursorLine local,
+   * or the division written into logIndex, gives 30 words differing, 2 in
+   * shape
+   */
   s32 line = f_DebugLogCursor / TEXT_COLUMN_COUNT;
   s32 logIndex = (((line - f_DebugLogShownLineCount) * TEXT_COLUMN_COUNT) +
                      ARRAY_COUNT(f_DebugLog)) %
