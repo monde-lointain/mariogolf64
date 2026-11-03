@@ -3286,8 +3286,9 @@ static inline u16* GetShadowedTexel(u32 column, u32 row) {
  * texels are kept, and bright ones are darkened the most. A row with no texel
  * within the width ends the shadow once one has started. Billboards with a
  * texture in f_ShadowlessTextures cast no shadow.
- * Doesn't match: the registers differ throughout, and ours spills one more
- * value, so its frame is 8 bytes larger. The register oracle, forcing 35
+ * Doesn't match: the registers differ throughout, and ours finds no saved
+ * register for widthScale, which the original keeps in $fp, so it spills it
+ * and its frame is 8 bytes larger. The register oracle, forcing 35
  * pseudos, still leaves 156 words. Indexing the solidities as one flat array,
  * where a row pointer into a two-dimensional one gave 271 words, 45 in shape,
  * lets SHADOW_LIGHT_DISTANCE's load stay inside the billboard loop, as the
