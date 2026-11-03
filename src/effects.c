@@ -1659,8 +1659,12 @@ void DrawEffects(CameraMatrices* matrices, Gfx** displayListHead) {
     }
   }
 
-  /* Setting color before each group's commands (after one for sparkles) is
-   * there to match */
+  /*
+   * Setting color before each group's commands (after one for sparkles) is
+   * there to match: setting it just before each loop gives 4 words
+   * differing (4 in shape), the sparkles' before their first command 2 (2),
+   * and the tints passed as constants 43
+   */
   color = RISING_CLUMP_TINT;
   gDPPipeSync(gfx++);
   gDPSetAlphaCompare(gfx++, G_AC_THRESHOLD);
@@ -1707,7 +1711,11 @@ void DrawEffects(CameraMatrices* matrices, Gfx** displayListHead) {
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
   gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(f_DropletImage)));
-  /* Reusing the sparkles' color for the tears is there to match */
+  /*
+   * Reusing the sparkles' color for the tears is there to match: setting it
+   * again gives 1 word differing (1 in shape), and the constant in the call
+   * 10 (2)
+   */
   for (index = 0; index != EFFECT_COUNT; index++) {
     effect = &f_Effects[index];
     if (effect->kind == EFFECT_KIND_TEAR) {
