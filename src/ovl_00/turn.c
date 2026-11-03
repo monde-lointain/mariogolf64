@@ -2934,8 +2934,14 @@ void ShowHoleOutBanner(s32 playerIndex) {
  * inline: inlined, their buffers share one stack slot, as in the
  * original's frame.
  *
- * Doesn't match: 454 words differ, 184 in shape, spread through the
- * routine's states.
+ * Doesn't match: 415 words differ, 165 in shape, spread through the
+ * routine's states. The counts in the paragraphs after the next were
+ * measured before it, when 454 words differed, 184 in shape.
+ *
+ * A player out of the group game has the hole's strokes and the stroke
+ * count zeroed by one chained assignment. As two statements, the strokes
+ * first, 454 words differ (184 in shape), and zeroing the stroke count
+ * first gives 456 (186).
  *
  * The letterbox test before the debug output is written "== FALSE", for
  * which the original ors both comparisons; "!(a || b)" turns into an and
@@ -4659,10 +4665,10 @@ void UpdateTurns(void) {
               if (GetGroupHoleResult(results) ||
                   results[playerIndex] == GROUP_PLAYER_OUT) {
                 g_Players[playerIndex].holeStatus = HOLE_STATUS_OUT;
-                g_Players[playerIndex]
-                    .holes[g_GameState.holeIndex % COURSE_HOLE_COUNT]
-                    .strokes = 0;
-                g_Players[playerIndex].strokeCount = 0;
+                g_Players[playerIndex].strokeCount =
+                    g_Players[playerIndex]
+                        .holes[g_GameState.holeIndex % COURSE_HOLE_COUNT]
+                        .strokes = 0;
                 nextState = PLAYER_STATE_STARTING_REACTION;
               } else {
                 EndFlightCamera();
