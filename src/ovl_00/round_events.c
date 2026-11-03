@@ -2659,13 +2659,15 @@ void LoadContactImages(Player* player) {
  * Draws the contact effect as a ribbon through the ball's last positions, and
  * Mario's as a spinning image, while it fades
  *
- * Doesn't match: the original's frame is 16 bytes bigger, as reload gives it
- * two more spill slots, 53 stack words stored to against 51. Of the 221
- * differing words that blame.py ties to a line, 107 come from the two
- * DrawContactRibbon expansions. Counting the reload loops from 0 and adding
- * each pass's first segment to i gives 1358 words differing, 430 in shape, or
- * with the first loop alone 1156 (268) and the second 1268 (336), against 476
- * and 70. 476 words differ, 70 in shape.
+ * Doesn't match: 170 words differ, 18 in shape, and of the 85 that blame.py
+ * ties to a line, 82 come from the two DrawContactRibbon expansions. There the
+ * remainder of the ring's index takes a register of its own, and the reload
+ * loops' vertex numbers subtract 16 or 31 before pass * 30, where this
+ * subtracts pass * 30 first. Writing i - 16 - (pass * 30) gives 1014 words
+ * differing, 184 in shape, and i - 31 - (pass * 30) in the second loop 268
+ * (20). Counting the reload loops from 0 and adding each pass's first segment
+ * to i gives 1352 (420), or with the first loop alone 1052 (256) and the second
+ * 1276 (332).
  */
 void DrawContactEffect(Gfx** displayListHead, CameraMatrices* matrices) {
   Mat4 scale;
@@ -2765,13 +2767,10 @@ void DrawContactEffect(Gfx** displayListHead, CameraMatrices* matrices) {
         g_TurnBallSimulation.position[AXIS_Z] * COURSE_TO_WORLD_SCALE);
   }
 
-  /*
-   * In its own block, as without it 497 words differ, 57 in shape, against
-   * 476 and 70; the register oracle improves on neither
-   */
-  IN_OWN_BLOCK(gDPPipeSync(gfx++));
+  gDPPipeSync(gfx++);
   gDPPipeSync(gfx++);
   gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+  gDPPipeSync(gfx++);
   gDPPipeSync(gfx++);
   gDPSetRenderMode(gfx++, G_RM_ZB_XLU_SURF, G_RM_ZB_XLU_SURF2);
   gDPPipeSync(gfx++);
