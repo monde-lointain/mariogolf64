@@ -1699,7 +1699,12 @@ void MarkBillboardsOnMap(void) {
 /* Runs the debug scene menu and the update routine of the current debug scene
  */
 void UpdateDebugScenes(void) {
-  s32 openState = BOX_OPEN; /* A local, rather than the constant, to match */
+  /*
+   * A local, rather than the constant, to match: comparing the box's state
+   * with BOX_OPEN itself, either way round or in a nested test, gives 17
+   * words differing, 5 in shape
+   */
+  s32 openState = BOX_OPEN;
   s32 stickStep;
 
   if (f_IsFirstDebugUpdate) {
