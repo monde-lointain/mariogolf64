@@ -1183,7 +1183,9 @@ void MoveAimCameraDistance(void) {
  *
  * Doesn't match: 55 words differ, in the stick's step. The original keeps the
  * stick's 16-bit value and its pointers in other registers, and schedules the
- * divisions and the heading's load differently.
+ * divisions and the heading's load differently. Storing heading - step, or
+ * subtracting in both arms of the speed test (57 words), doesn't help; an
+ * inline helper taking the divisor gives 97, as the divisor isn't folded.
  */
 #ifdef NON_MATCHING
 void TurnAim(s32 turnsAltHeading) {
