@@ -3672,7 +3672,14 @@ void DrawClubTournamentResults(Gfx** displayListHead) {
  * into the shift that packs them, where the original shifts twice. Setting the
  * title's right edge before its strip loop gives 8 words differing, and
  * inlining it 14. The register oracle's closest result is these 6 words with no
- * register forced, so allocation isn't the cause. 6 words differ, 4 in shape.
+ * register forced, so allocation isn't the cause. Combine folds the doubling,
+ * through textureS's s16 copy and the rectangle's sign extension and mask, into
+ * the shift that loop hoists out of the strip loop. Doubling by a shift or with
+ * the 2 first, doubling at the macro's argument with an s16 or s32 local, or
+ * converting to s16 there leaves 6; doubling the float gives 23, other integer
+ * types for textureS 44 to 48, and ending the basic block before or after
+ * LoadLargePalette 42 or 16, with the shifts still merged. 6 words differ, 4 in
+ * shape.
  */
 #ifdef NON_MATCHING
 void DrawRoundResults(Gfx** displayListHead) {
