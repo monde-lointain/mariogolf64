@@ -1898,20 +1898,19 @@ void DrawEnteredCode(Gfx** displayListHead) {
   *displayListHead = gfx;
 }
 
-/* Returns the code keyboard's chosen column; reading it through a call is
- * needed to match */
-static inline s8 GetCodeKeyColumn(MenuMemory* memory) {
-  return memory->codeKeyColumn;
-}
-
 /*
  * Types the chosen key's character into the code, or deletes one or ends the
  * code, and returns a CodeKeyResult.
  */
 s32 PressCodeKey(void) {
   MenuMemory* memory = GetMenuMemory();
+  /*
+   * Widened to match: an s8 column, or the field read in place, gives 26
+   * words differing, 2 in shape
+   */
+  s32 column = memory->codeKeyColumn;
   s32 result = CODE_KEY_RESULT_TYPING;
-  u8 key = f_CodeKeys[memory->codeKeyRow][GetCodeKeyColumn(memory)];
+  u8 key = f_CodeKeys[memory->codeKeyRow][column];
 
   switch (key) {
     case CODE_KEY_BACK:
