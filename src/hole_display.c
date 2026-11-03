@@ -2288,9 +2288,12 @@ void HandleFrameBufferSwap(void) {}
  * Doesn't match: registers are allocated differently. The original loads
  * f_CapturedFrame into $s3, stores it at once in a reload slot (0xC($sp)) and
  * reads it back for the strip loops, using $s3 for gbi words; its frame is 8
- * bytes larger for that slot. The register oracle forces 16 pseudos and still
- * leaves 78 words, among them that slot, so reload's spill choice differs
- * too. 174 words differ, 50 in shape.
+ * bytes larger for that slot. On the draft before the third strip loop's height
+ * took the | form, the register oracle forced 16 pseudos and still left 78
+ * words, among them that slot, so reload's spill choice differs too. That
+ * height written as a plain ?: branches, where the original doesn't; it gave
+ * 174 words, 50 in shape, against 193 (45) with the |, whose extra words are
+ * register choices. 193 words differ, 45 in shape.
  */
 #ifdef NON_MATCHING
 void DrawFadeAnimation(Gfx** displayListHead) {
@@ -2394,9 +2397,11 @@ void DrawFadeAnimation(Gfx** displayListHead) {
     gDPPipeSync(gfx++);
     for (i = BACKDROP_BORDER; i < SCREEN_HEIGHT - BACKDROP_BORDER;
         i += BACKDROP_STRIP_STEP) {
-      height = i + BACKDROP_STRIP_STEP <= SCREEN_HEIGHT - BACKDROP_BORDER
-          ? BACKDROP_STRIP_HEIGHT
-          : BACKDROP_LAST_STRIP_HEIGHT;
+      /* Written with | for the reason StripHeight is */
+      height = BACKDROP_LAST_STRIP_HEIGHT |
+          ((i + BACKDROP_STRIP_STEP <= SCREEN_HEIGHT - BACKDROP_BORDER)
+                  ? (BACKDROP_STRIP_HEIGHT - BACKDROP_LAST_STRIP_HEIGHT)
+                  : 0);
       LoadFadeFrameStrip(gfx, frame, height, isTileSet);
       gSPTextureRectangle(gfx++, QuarterPixels(BACKDROP_BORDER),
           QuarterPixels(i), QuarterPixels(BACKDROP_RIGHT + 1),
