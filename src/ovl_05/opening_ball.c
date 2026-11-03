@@ -1800,20 +1800,24 @@ INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_ball", StepOpeningBallSimulation);
 /*
  * A cut-down copy of LaunchBallSimulation. It always takes the club test's
  * entry, picks a lie blend of 0, leaves out the slopes, rain and wind, and
- * prints the launch velocity to the debug output.
- *
- * Doesn't match: in the side spin's sum, local-alloc gives shot->offsetX and
- * the club's doubled side spin the same priority, 1.0, and the tie goes to the
- * club's, where the original gives it the other register. Forcing those four
- * pseudos matches, so the RTL is the original's. Writing the doubling as "* 2"
- * lets fold move the 2 onto sideSign: (club->sideSpin * CLUB_SIDE_SPIN_SCALE) *
- * sideSign gives 4 words differing, sideSign * (club->sideSpin *
- * CLUB_SIDE_SPIN_SCALE) 6, but the wrong operand is shifted. Swapping either
- * sum's operands gives 16 to 28 words, and doubling the club's side spin into a
- * local first, just before the sum or before yawRadians, changes nothing.
- * Putting sideSign second in the change's product gives 16, and in the club's
- * 14, and reading shot->offsetX or the change's product into a local first,
- * just before the sum or before yawRadians, leaves 14. 14 words differ.
+ * prints the launch velocity to the debug output.  Doesn't match: in the side
+ * spin's sum, local-alloc gives shot->offsetX and the club's doubled side spin
+ * the same priority, 1.0, and the tie goes to the club's, where the original
+ * gives it the other register. Forcing those four pseudos matches, so the RTL
+ * is the original's. Writing the doubling as "* 2" lets fold move the 2 onto
+ * sideSign: (club->sideSpin * CLUB_SIDE_SPIN_SCALE) * sideSign gives 4 words
+ * differing, sideSign * (club->sideSpin * CLUB_SIDE_SPIN_SCALE) 6, but the
+ * wrong operand is shifted. Swapping either sum's operands gives 16 to 28
+ * words, and doubling the club's side spin into a local first, just before the
+ * sum or before yawRadians, changes nothing. Putting sideSign second in the
+ * change's product gives 16, and in the club's 14, and reading shot->offsetX or
+ * the change's product into a local first, just before the sum or before
+ * yawRadians, leaves 14. Reading club->sideSpin into a local just before the
+ * sum leaves 14 too, or 6 with the local's doubling written as "* 2", which
+ * fold again moves onto sideSign; before pitch it gives 4, all in shape. The
+ * permuter came to 4 words only by giving one temporary the club's side spin
+ * and then its signed double, and in two locals those leave 14. 14 words
+ * differ.
  */
 #ifdef NON_MATCHING
 s32 LaunchOpeningBallSimulation(
