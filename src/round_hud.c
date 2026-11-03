@@ -3636,19 +3636,23 @@ void DrawShotEffectsHud(Gfx** displayListHead);
  * and scores, the shot panel's labels, distances and club, and the debugging
  * aids that game flags turn on
  *
- * Doesn't match: the original's branches show the stroke counts' loop
- * testing i != playerCount, as the faces' loop does. Written that way, its
- * loop matches, but the frame comes out 8 bytes smaller and hasHandicap's
- * spill slot comes before club's and scoreboardX's, which moves every stack
- * offset, so 96 words differ. Moving hasHandicap's declaration doesn't
- * reorder the slots. 61 words differ.
+ * Doesn't match: the original loads the height for its magnitude into a
+ * register other than fabsf's result, as in IsEasedEyeHeightZero. The stroke
+ * counts' loop tests i != playerCount, as the faces' loop does; with i <
+ * playerCount, 77 words differ. The small faces' left edge goes straight into
+ * its rectangle; through a local, its spill slot comes first and 34 words
+ * differ. 4 words differ.
  */
 #ifdef NON_MATCHING
 void DrawRoundHud(CameraView* view) {
-  Boolean hasHandicap;
+  /* Pads the frame to match; without it 130 words differ, against 4 */
+  s32 unused[2] UNUSED;
   s32 percentRange[2];
   Club* club;
   s32 scoreboardX;
+  /* Declared after scoreboardX so that its spill slot follows; declared
+   * first, 40 words differ */
+  Boolean hasHandicap;
   s32 i;
   s32 ringCount;
   s32 height;
@@ -3658,7 +3662,6 @@ void DrawRoundHud(CameraView* view) {
   f32 shotLength;
   s32 contestDistance;
   s32 totalSeconds;
-  s32 scoreboardLeft;
 
   club = GetClub(
       g_Players[g_CurrentShot.playerIndex].clubs[g_CurrentShot.clubSlot]);
@@ -3745,8 +3748,7 @@ void DrawRoundHud(CameraView* view) {
         gDPSetTextureFilter(g_DisplayListHead++, G_TF_BILERP);
         gDPSetPrimColor(g_DisplayListHead++, 0, 0, 127, 127, 127, 127);
         gDPPipeSync(g_DisplayListHead++);
-        scoreboardLeft = QuarterPixels(scoreboardX);
-        gSPScisTextureRectangle(g_DisplayListHead++, scoreboardLeft,
+        gSPScisTextureRectangle(g_DisplayListHead++, QuarterPixels(scoreboardX),
             QuarterPixels(SCOREBOARD_Y + i * SCOREBOARD_ROW_HEIGHT),
             QuarterPixels(scoreboardX + SMALL_FACE_WIDTH),
             QuarterPixels(
@@ -4069,7 +4071,7 @@ void DrawRoundHud(CameraView* view) {
   }
 
   if (g_RoundHud.unkD && !g_IsCupViewShown && !IsOnDrivingRange()) {
-    for (i = 0; i < g_GameState.playerCount; i++) {
+    for (i = 0; i != g_GameState.playerCount; i++) {
       SetTextColor(&g_DisplayListHead, 255, 255, 255);
       sprintf(g_PrintBuffer, "%d", g_Players[i].strokeCount);
       DrawShadowedText(&g_DisplayListHead, scoreboardX + SCOREBOARD_TEXT_X,
