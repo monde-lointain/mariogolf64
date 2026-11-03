@@ -1203,7 +1203,10 @@ void MoveAimCameraDistance(void) {
  * saved heading, which the original loads with lhu, 56 (20). Storing heading -
  * step changes nothing, subtracting in both arms of the speed test gave 57
  * words, and an inline helper taking the divisor gave 97, as the divisor isn't
- * folded.
+ * folded. A permuter output with 39 words (9 in shape) works out g_AltHeading's
+ * half stick into a temp before the speed and copies it to step after;
+ * computing step after the speed instead gives 43 (19), and in both branches 54
+ * (30).
  */
 #ifdef NON_MATCHING
 void TurnAim(s32 turnsAltHeading) {
