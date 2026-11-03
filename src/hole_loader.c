@@ -393,7 +393,11 @@ DECODE:
 
       reference = *input++;
 
-      /* The u16 casts are redundant, but they are needed to match */
+      /*
+       * The u16 casts are redundant, but they are needed to match: without
+       * either or both, 5 words differ (1 to 3 in shape); with no casts, a
+       * u32 reference gives 5 and a u16 one 92
+       */
       if ((u16)reference == 0) {
         return BytesBetween(stream->outputStart, output);
       }
