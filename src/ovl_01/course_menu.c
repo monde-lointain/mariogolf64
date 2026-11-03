@@ -948,7 +948,8 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/course_menu", DrawStatsScrollArrows);
  * and this works out the clipped top edge a second time where the original
  * reuses it. An unsigned TrophyPosition y leaves 19, but makes the rectangle
  * macro's clamp of a negative top edge dead, which -Wextra reports in the
- * modern build. 31 words differ.
+ * modern build. Taking the offset into a local, of any type, gives 41 words
+ * or more, and an unsigned x or place 20 or more. 31 words differ.
  */
 #ifdef NON_MATCHING
 void DrawCourseTrophies(Gfx** displayListHead) {
