@@ -1971,7 +1971,11 @@ Boolean IsLineOffFairway(CoursePoint from, CoursePoint to) {
   angle =
       atan2((f32)(to[AXIS_Z] - from[AXIS_Z]), (f32)(to[AXIS_X] - from[AXIS_X]));
   for (step = 0; step < distance * YARDS_PER_UNIT; step++) {
-    /* Setting stepLength in the loop is there to match */
+    /*
+     * Setting stepLength in the loop is there to match: setting it before
+     * the loop gives 7 words differing (7 in shape), and the constant in
+     * its place 26
+     */
     stepLength = UNITS_PER_YARD;
     x = (step * (cosf(angle) * stepLength)) + from[AXIS_X];
     z = (step * (sinf(angle) * stepLength)) + from[AXIS_Z];
@@ -2005,7 +2009,11 @@ s32 FindGreenEdgeOnLine(CoursePoint from, CoursePoint to, CoursePoint edge) {
   osSyncPrintf("StartPoint = (%d, %d)\n", from[AXIS_X], from[AXIS_Z]);
   osSyncPrintf("EndPoint = (%d, %d)\n", to[AXIS_X], to[AXIS_Z]);
   for (step = 1; step < (distance * YARDS_PER_UNIT) + 1; step++) {
-    /* Setting stepLength in the loop is there to match */
+    /*
+     * Setting stepLength in the loop is there to match: setting it before
+     * the loop gives 7 words differing (7 in shape), and the constant in
+     * its place 26
+     */
     stepLength = UNITS_PER_YARD;
     x = (step * (cosf(angle) * stepLength)) + from[AXIS_X];
     z = (step * (sinf(angle) * stepLength)) + from[AXIS_Z];
@@ -2061,7 +2069,11 @@ void FindPeakOnLine(CoursePoint from, CoursePoint to, CoursePoint peak) {
   peak[AXIS_X] = from[AXIS_X];
   peak[AXIS_Z] = from[AXIS_Z];
   for (step = 1; step < distance * YARDS_PER_UNIT; step++) {
-    /* Setting stepLength in the loop is there to match */
+    /*
+     * Setting stepLength in the loop is there to match: setting it before
+     * the loop gives 26 words differing (6 in shape), and the constant in
+     * its place 46
+     */
     stepLength = UNITS_PER_YARD;
     x = (step * (cosf(angle) * stepLength)) + from[AXIS_X];
     z = (step * (sinf(angle) * stepLength)) + from[AXIS_Z];
@@ -2936,7 +2948,11 @@ Boolean IsLineMostlyLost(CoursePoint from, CoursePoint to) {
   sampleCount = 0;
   lostCount = 0;
   for (step = 1; step < distance * TENS_OF_YARDS_PER_UNIT; step++) {
-    /* Setting stepLength in the loop is there to match */
+    /*
+     * Setting stepLength in the loop is there to match: setting it before
+     * the loop gives 8 words differing (8 in shape), and the constant in
+     * its place 26
+     */
     stepLength = UNITS_PER_YARD;
     x = (step * (cosf(angle) * stepLength)) + from[AXIS_X];
     z = (step * (sinf(angle) * stepLength)) + from[AXIS_Z];
