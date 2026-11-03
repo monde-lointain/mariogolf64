@@ -833,7 +833,10 @@ void SpawnImpactEffects(BallSimulation* simulation) {
       }
 
       break;
-    /* The empty case is there to match */
+    /*
+     * The empty case is there to match: without it, or with a default, 2
+     * words differ, none in shape
+     */
     case SURFACE_KIND_DEEP_ROUGH:
       break;
   }
@@ -956,7 +959,10 @@ void SpawnShotDebris(
         effect->position[AXIS_Y] = point[AXIS_Y] * COURSE_TO_WORLD_SCALE;
         effect->position[AXIS_Z] = point[AXIS_Z] * COURSE_TO_WORLD_SCALE;
 
-        /* Reading launchSpeed here is there to match */
+        /*
+         * Reading launchSpeed here, though both branches below overwrite it,
+         * is there to match: without it 22 words differ, 22 in shape
+         */
         speed = launchSpeed;
         if (kind == EFFECT_KIND_UNK2) {
           speed = (RandomBelow(spawnedCount * 2) + DEBRIS_SLOWEST_STEP_COUNT) *
@@ -1392,7 +1398,10 @@ void UpdateEffects(void) {
         effect->velocity[AXIS_Z] *= HIGH_DEBRIS_VELOCITY_KEPT;
       } else if (effect->kind == EFFECT_KIND_RIPPLE ||
           effect->kind == EFFECT_KIND_SPREADING_CIRCLE) {
-        /* The empty branch is there to match */
+        /*
+         * The empty branch is there to match: the else's test inverted, as
+         * an && chain or negated, gives 8 words differing, 8 in shape
+         */
       } else {
         effect->velocity[AXIS_Y] += OTHER_EFFECT_FALL_ACCELERATION;
         effect->velocity[AXIS_X] *= OTHER_EFFECT_VELOCITY_KEPT;
@@ -2080,9 +2089,11 @@ void StartPlayerRumble(Player* player) {
         nuContRmbStart(g_PlayerControllerPorts[player->controllerIndex],
             RUMBLE_FREQUENCY, RUMBLE_FRAME_COUNT);
         break;
-      /* The empty cases are there to match */
+      /*
+       * The empty cases are there to match: without them, with one, or with
+       * a default 8 words differ, 6 in shape
+       */
       case PFS_ERR_NOPACK:
-        break;
       case PFS_ERR_CONTRFAIL:
         break;
     }
@@ -2099,9 +2110,11 @@ void StartRingPassRumble(Player* player) {
         nuContRmbStart(g_PlayerControllerPorts[player->controllerIndex],
             RUMBLE_FREQUENCY, RUMBLE_FRAME_COUNT);
         break;
-      /* The empty cases are there to match */
+      /*
+       * The empty cases are there to match: without them, with one, or with
+       * a default 8 words differ, 6 in shape
+       */
       case PFS_ERR_NOPACK:
-        break;
       case PFS_ERR_CONTRFAIL:
         break;
     }
@@ -2476,7 +2489,10 @@ void DrawRain(Gfx** displayListHead, CameraMatrices* matrices) {
         lengthX = streak->headScreenX - streak->tailScreenX;
         lengthY = streak->headScreenY - streak->tailScreenY;
         if (lengthX == 0.0f && lengthY == 0.0f) {
-          /* The empty branch is there to match */
+          /*
+           * The empty branch is there to match: the else's test inverted, as
+           * an || chain or negated, gives 8 words differing, 8 in shape
+           */
         } else {
           widthScale =
               RAINDROP_WIDTH / sqrtf((lengthX * lengthX) + (lengthY * lengthY));
