@@ -4235,6 +4235,10 @@ void DrawOpeningBurst(Gfx** displayListHead) {
         BURST_IMAGE_SIZE, BURST_IMAGE_SIZE, 0, G_TX_NOMIRROR | G_TX_WRAP,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
         G_TX_NOLOD);
+    /*
+     * In its own block, as without it 449 words differ, 91 in shape, against
+     * 364 and 132; the register oracle stays above 420 then, and above 364 here
+     */
     IN_OWN_BLOCK(gDPPipeSync(gfx++));
     gSPTextureRectangle(gfx++, QuarterPixels(left), QuarterPixels(top),
         QuarterPixels(right), QuarterPixels(bottom), G_TX_RENDERTILE, 0, 0,
