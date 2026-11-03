@@ -2687,13 +2687,12 @@ s32 WriteExperienceToCartridge(s32 characterIndex) {
 INCLUDE_ASM("asm/nonmatchings/ovl_13/transmit_menu", WriteExperienceToCartridge);
 #endif
 
-#ifndef NON_MATCHING
-INCLUDE_RODATA("asm/nonmatchings/ovl_13/transmit_menu", f_WriteSumFormat);
-INCLUDE_RODATA("asm/nonmatchings/ovl_13/transmit_menu", f_PhaseTwelveText);
-INCLUDE_RODATA("asm/nonmatchings/ovl_13/transmit_menu", f_PhaseThirteenText);
-INCLUDE_RODATA("asm/nonmatchings/ovl_13/transmit_menu", f_PhaseFourteenText);
-#else
+RESUME_RODATA_SECTION();
 const char f_WriteSumFormat[] = "write sum %04x\n";
+#ifndef NON_MATCHING
+static const char f_PhaseTwelveText[] = "PHASE 12\n";
+static const char f_PhaseThirteenText[] = "PHASE 13\n";
+static const char f_PhaseFourteenText[] = "PHASE 14\n";
 #endif
 
 /*
