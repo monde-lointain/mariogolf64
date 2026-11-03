@@ -1487,7 +1487,10 @@ void DrawLandingReaction(Gfx** displayListHead) {
               g_HoleSetup.cupPosition[AXIS_Z]);
       /* Mini golf and the green measure in feet */
       if (g_GameState.isMiniGolf || surface->kind == SURFACE_KIND_GREEN) {
-        /* One per branch, so each is allocated within its block, to match */
+        /*
+         * One per branch, so each is allocated within its block, to match: one
+         * declared at the top gives 22 words differing, none in shape
+         */
         s32 hundredths =
             distance * (FEET_PER_YARD * HUNDREDTHS_PER_UNIT) * YARDS_PER_UNIT;
 
@@ -1803,7 +1806,10 @@ void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
   centering = 0.5f - (columnCount * 0.5f);
   originX = (shift * forwardX) + (sideX * centering);
   originZ = (shift * forwardZ) + (sideZ * centering);
-  /* forwardX holds the row step's x from here, to match */
+  /*
+   * forwardX holds the row step's x from here, to match: a stepX variable gives
+   * 387 words differing (59 in shape) against the draft's 345 (55)
+   */
   forwardX = -cosf(yaw) * rowSpacing;
   stepZ = -sinf(yaw) * rowSpacing;
   if (g_RoundHud.greenGridState == GREEN_GRID_SHOWN) {
@@ -2223,8 +2229,8 @@ void DrawBallTrail(Gfx** displayListHead, CameraMatrices* matrices) {
 
           /*
            * The empty branch for a segment of no length is there to match:
-           * testing for a nonzero delta, with || or | or by negating the
-           * test, doesn't match
+           * testing for a nonzero delta with ||, or negating the test, gives 11
+           * words differing, all in shape; | doesn't match either
            */
           if (deltaX == 0.0f && deltaY == 0.0f) {
           } else {
