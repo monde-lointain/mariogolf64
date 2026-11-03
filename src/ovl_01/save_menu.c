@@ -1140,7 +1140,11 @@ void LoadSaveGameBuffer(void* buffer, u8 bufferKind) {
         ReadEncodedAsset(
             f_CourseImageBuffers[COURSE_IMAGE_BUFFER_FIRST], &asset);
       } else {
-        /* Subtracting in a second statement is needed to match */
+        /*
+         * Subtracting in a second statement is needed to match: one
+         * statement, with or without a course index local, gives 16 words
+         * differing, and indexing with the difference itself 13
+         */
         miniGolfIndex = save->savedGames[gameIndex].state.courseIndex;
         miniGolfIndex -= MINI_GOLF_COURSE_INDEX;
         OpenEncodedAsset(g_MiniGolfCourseIconAssets[miniGolfIndex], &asset);
@@ -1173,7 +1177,11 @@ void LoadSaveGameBuffer(void* buffer, u8 bufferKind) {
         ReadEncodedAsset(
             f_CourseImageBuffers[COURSE_IMAGE_BUFFER_SECOND], &asset);
       } else {
-        /* Subtracting in a second statement is needed to match */
+        /*
+         * Subtracting in a second statement is needed to match: one
+         * statement, with or without a course index local, gives 16 words
+         * differing, and indexing with the difference itself 13
+         */
         miniGolfIndex = save->savedGames[gameIndex].state.courseIndex;
         miniGolfIndex -= MINI_GOLF_COURSE_INDEX;
         OpenEncodedAsset(g_MiniGolfCourseIconAssets[miniGolfIndex], &asset);
