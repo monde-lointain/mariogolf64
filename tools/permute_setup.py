@@ -287,9 +287,17 @@ def write_base(c_path: str, function: str, base_path: Path) -> None:
     )
     # The definition is the last line naming the function, the others being
     # its prototypes
-    definition = list(
+    mentions = list(
         re.finditer(rf"^.*\b{re.escape(function)}\s*\(", base, re.MULTILINE)
-    )[-1]
+    )
+    if not mentions:
+        # A nested function goes with the function enclosing it
+        message = (
+            f"{c_path}: {function} has no top-level definition; "
+            "if it is nested, permute the function enclosing it"
+        )
+        raise SystemExit(message)
+    definition = mentions[-1]
     base = base[: definition.start()] + late_defines + base[definition.start() :]
     _ = base_path.write_text(base)
 
