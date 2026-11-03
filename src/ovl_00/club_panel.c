@@ -362,11 +362,10 @@ s32 GetGaugeFill(void);
 /*
  * Draws the power gauge, its markers, and the bar for the lie's span.
  *
- * Doesn't match: the stack frame is 8 bytes larger, and after the medium
- * ticks the display list pointers and the 0xE7 command word take different
- * registers. The original branches on each of the player state tests, which
- * as && chains fold_truthop makes branchless: 210 words differ that way.
- * 172 words differ, 20 in shape.
+ * Doesn't match: before the span bar, the original takes all six display
+ * list pointers of the pipe syncs and other modes before storing any
+ * command, and reads the span last, where this stores as it goes. 32 words
+ * differ, 8 in shape.
  */
 void DrawClubPanel(Gfx** displayListHead) {
   s32 span;
@@ -375,8 +374,11 @@ void DrawClubPanel(Gfx** displayListHead) {
   s32 value;
   s32 playerState;
   s32 tick;
-  /* Also the group, end tick and medium tick index, to match */
-  s32 fillWidth;
+  /*
+   * Also the end tick and medium tick index, to match: a counter of their own
+   * for either gives 54 words differing, and for both 88
+   */
+  s32 group;
   s32 emptyLeft;
 
   s32 markerOffset;
@@ -434,9 +436,9 @@ void DrawClubPanel(Gfx** displayListHead) {
   gDPLoadTextureBlock_4b(gfx++, TextureAddress(ImageBody(f_ClubPanelImage)),
       G_IM_FMT_I, GAUGE_TICK_IMAGE_WIDTH, GAUGE_TICK_IMAGE_HEIGHT, 0, G_TX_WRAP,
       G_TX_WRAP, 2, 0, 0, 0);
-  for (fillWidth = 0; fillWidth != GAUGE_GROUP_COUNT; fillWidth++) {
+  for (group = 0; group != GAUGE_GROUP_COUNT; group++) {
     for (tick = 1; tick != GAUGE_TICKS_PER_GROUP; tick++) {
-      s32 x = (tick + (fillWidth * GAUGE_TICKS_PER_GROUP)) * GAUGE_TICK_SPACING;
+      s32 x = (tick + (group * GAUGE_TICKS_PER_GROUP)) * GAUGE_TICK_SPACING;
 
       gSPTextureRectangle(gfx++, QuarterPixels(GAUGE_FULL_X + x),
           QuarterPixels(GAUGE_TOP + g_ShotPanelOffsetX + f_ClubPanelDebugValue),
@@ -448,7 +450,7 @@ void DrawClubPanel(Gfx** displayListHead) {
   }
 
   for (tick = 0; tick != GAUGE_EXTRA_TICK_COUNT; tick++) {
-    s32 x = (tick + (fillWidth * GAUGE_TICKS_PER_GROUP)) * GAUGE_TICK_SPACING;
+    s32 x = (tick + (group * GAUGE_TICKS_PER_GROUP)) * GAUGE_TICK_SPACING;
 
     gSPTextureRectangle(gfx++, QuarterPixels(GAUGE_FULL_X + x),
         QuarterPixels(GAUGE_TOP + g_ShotPanelOffsetX + f_ClubPanelDebugValue),
@@ -458,20 +460,18 @@ void DrawClubPanel(Gfx** displayListHead) {
         G_TX_RENDERTILE, 0, 0, 0x400, 0x600);
   }
 
-  for (fillWidth = 0; fillWidth != GAUGE_END_TICK_COUNT; fillWidth++) {
+  for (group = 0; group != GAUGE_END_TICK_COUNT; group++) {
     gSPTextureRectangle(gfx++,
-        QuarterPixels(GAUGE_FULL_X + fillWidth * GAUGE_LENGTH),
+        QuarterPixels(GAUGE_FULL_X + group * GAUGE_LENGTH),
         QuarterPixels(
             GAUGE_MARKER_TOP + g_ShotPanelOffsetX + f_ClubPanelDebugValue),
-        QuarterPixels(
-            GAUGE_FULL_X + fillWidth * GAUGE_LENGTH + GAUGE_TICK_WIDTH),
+        QuarterPixels(GAUGE_FULL_X + group * GAUGE_LENGTH + GAUGE_TICK_WIDTH),
         QuarterPixels(
             GAUGE_MARKER_BOTTOM + g_ShotPanelOffsetX + f_ClubPanelDebugValue),
         G_TX_RENDERTILE, 0, 0, 0x400, 0x400);
   }
 
-  for (fillWidth = 0, tick = 1; fillWidth != GAUGE_MEDIUM_TICK_COUNT;
-      tick++, fillWidth++) {
+  for (group = 0, tick = 1; group != GAUGE_MEDIUM_TICK_COUNT; tick++, group++) {
     gSPTextureRectangle(gfx++,
         QuarterPixels(
             GAUGE_FULL_X + tick * GAUGE_TICKS_PER_GROUP * GAUGE_TICK_SPACING),
@@ -492,16 +492,15 @@ void DrawClubPanel(Gfx** displayListHead) {
   gDPSetCombineMode(gfx++, G_CC_DECALRGB, G_CC_DECALRGB);
   gDPPipeSync(gfx++);
   gDPSetRenderMode(gfx++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
-  /*
-   * In its own block, as without it 242 words differ, 16 in shape, against 172
-   * and 20
-   */
-  IN_OWN_BLOCK(gDPPipeSync(gfx++));
-  fillWidth = GAUGE_FILL_IMAGE_WIDTH;
+  gDPPipeSync(gfx++);
   value = GetGaugeFill();
   gDPLoadTextureBlock(gfx++, TextureAddress(ImageBody(f_ShotModeImage)),
-      G_IM_FMT_RGBA, G_IM_SIZ_16b, fillWidth, GAUGE_FILL_IMAGE_HEIGHT, 0,
-      G_TX_WRAP, G_TX_WRAP, 0, 0, 0, 0);
+      G_IM_FMT_RGBA, G_IM_SIZ_16b, GAUGE_FILL_IMAGE_WIDTH,
+      GAUGE_FILL_IMAGE_HEIGHT, 0, G_TX_WRAP, G_TX_WRAP, 0, 0, 0, 0);
+  /*
+   * The original branches on both tests: only the second gives 321 words
+   * differing (89 in shape), and the two as an && chain 325 (95)
+   */
   if (playerState != PLAYER_STATE_AIMING) {
     if (playerState == PLAYER_STATE_SETTING_POWER) {
       f_ClubPanelUnk24 = value;
