@@ -727,9 +727,9 @@ void DrawLargeTextSlot(Gfx** displayListHead, s32 slot) {
       if (isPrinted == TRUE) {
         for (index = 0; g_PrintBuffer[index] != '\0'; index++) {
           characterLeft =
-              (u8)g_PrintBuffer[index] % FONT_GLYPHS_PER_ROW * FONT_SIZE_LARGE;
+              g_PrintBuffer[index] % FONT_GLYPHS_PER_ROW * FONT_SIZE_LARGE;
           characterTop =
-              (u8)g_PrintBuffer[index] / FONT_GLYPHS_PER_ROW * FONT_SIZE_LARGE;
+              g_PrintBuffer[index] / FONT_GLYPHS_PER_ROW * FONT_SIZE_LARGE;
           gDPSetTextureImage(gfx++, G_IM_FMT_I, G_IM_SIZ_8b,
               FONT_SIZE_LARGE * FONT_GLYPHS_PER_ROW / 2,
               TextureAddress(ImageBody(f_LargeFontImage)));
@@ -748,8 +748,8 @@ void DrawLargeTextSlot(Gfx** displayListHead, s32 slot) {
               characterTop << 2, (characterLeft + GLYPH_TILE_WIDTH - 1) << 2,
               (characterTop + FONT_SIZE_LARGE - 1) << 2);
           gDPPipeSync(gfx++);
-          if ((u8)g_PrintBuffer[index] >= CHARACTER_CODE_MARK_FIRST &&
-              (u8)g_PrintBuffer[index] <
+          if (g_PrintBuffer[index] >= CHARACTER_CODE_MARK_FIRST &&
+              g_PrintBuffer[index] <
                   CHARACTER_CODE_MARK_FIRST + CHARACTER_CODE_MARK_COUNT) {
             gSPTextureRectangle(gfx++,
                 QuarterPixels(x - LARGE_TEXT_MARK_BACKSPACE),
@@ -764,7 +764,7 @@ void DrawLargeTextSlot(Gfx** displayListHead, s32 slot) {
                 QuarterPixels(y + FONT_SIZE_LARGE), G_TX_RENDERTILE,
                 TexelCoordinate(characterLeft), TexelCoordinate(characterTop),
                 TEXEL_STEP_ONE, TEXEL_STEP_ONE);
-            x += f_LargeFontWidths[(u8)g_PrintBuffer[index]];
+            x += f_LargeFontWidths[g_PrintBuffer[index]];
           }
         }
       }
@@ -991,9 +991,9 @@ void DrawMediumTextSlot(Gfx** displayListHead, s32 slot) {
       if (isPrinted == TRUE) {
         for (index = 0; g_PrintBuffer[index] != '\0'; index++) {
           characterLeft =
-              (u8)g_PrintBuffer[index] % FONT_GLYPHS_PER_ROW * FONT_SIZE_MEDIUM;
+              g_PrintBuffer[index] % FONT_GLYPHS_PER_ROW * FONT_SIZE_MEDIUM;
           characterTop =
-              (u8)g_PrintBuffer[index] / FONT_GLYPHS_PER_ROW * FONT_SIZE_MEDIUM;
+              g_PrintBuffer[index] / FONT_GLYPHS_PER_ROW * FONT_SIZE_MEDIUM;
           gDPSetTextureImage(gfx++, G_IM_FMT_I, G_IM_SIZ_8b,
               FONT_SIZE_MEDIUM * FONT_GLYPHS_PER_ROW / 2,
               TextureAddress(ImageBody(f_MediumFontImage)));
@@ -1012,8 +1012,8 @@ void DrawMediumTextSlot(Gfx** displayListHead, s32 slot) {
               characterTop << 2, (characterLeft + GLYPH_TILE_WIDTH - 1) << 2,
               (characterTop + FONT_SIZE_LARGE - 1) << 2);
           gDPPipeSync(gfx++);
-          if ((u8)g_PrintBuffer[index] >= CHARACTER_CODE_MARK_FIRST &&
-              (u8)g_PrintBuffer[index] <
+          if (g_PrintBuffer[index] >= CHARACTER_CODE_MARK_FIRST &&
+              g_PrintBuffer[index] <
                   CHARACTER_CODE_MARK_FIRST + CHARACTER_CODE_MARK_COUNT) {
             gSPTextureRectangle(gfx++,
                 QuarterPixels(x - (FONT_SIZE_MEDIUM / 2)),
@@ -1859,7 +1859,7 @@ void PlaceGlyphGroup(s32 group, s32 fontSize, TextFlags flags, s32 x, s32 y,
             if (flags & TEXT_FLAG_FIXED_WIDTH) {
               advance += FONT_SIZE_LARGE;
             } else {
-              advance += f_LargeFontWidths[(u8)text[placedCount]];
+              advance += f_LargeFontWidths[text[placedCount]];
             }
           } else {
             advance += fontSize;

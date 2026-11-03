@@ -1322,14 +1322,14 @@ void DrawCharacterSelect(Gfx** displayListHead, u8 isSinglePlayer) {
   DrawMenuScenery(&gfx);
   DrawMenuBanner(&gfx);
   DrawCharacterBoard(&gfx);
-  DrawGridFaces(&gfx, (u8)isSinglePlayer);
-  if ((u8)isSinglePlayer == TRUE) {
+  DrawGridFaces(&gfx, isSinglePlayer);
+  if (isSinglePlayer == TRUE) {
     DrawPlayerTags(&gfx, 2);
   } else {
     DrawPlayerTags(&gfx, 1);
   }
 
-  if ((f_IsComButtonHeld == TRUE) & ((u8)isSinglePlayer == FALSE)) {
+  if ((f_IsComButtonHeld == TRUE) & (isSinglePlayer == FALSE)) {
     DrawComIcon(&gfx, 0);
   }
 
@@ -1338,7 +1338,7 @@ void DrawCharacterSelect(Gfx** displayListHead, u8 isSinglePlayer) {
   }
 
   gDPPipeSync(gfx++);
-  if ((u8)isSinglePlayer == FALSE) {
+  if (isSinglePlayer == FALSE) {
     playerNumber = g_ChoosingPlayerIndex;
     if (playerNumber >= g_ChosenPlayerCount) {
       playerNumber = g_ChosenPlayerCount - 1;
@@ -1372,7 +1372,7 @@ void DrawCharacterSelect(Gfx** displayListHead, u8 isSinglePlayer) {
       g_Clubs[(clubSet * CLUB_SET_SIZE) + CLUB_TYPE_DRIVER].distance);
   DrawShadowedText(&gfx, DRIVE_DISTANCE_X, DRIVE_DISTANCE_Y, g_PrintBuffer);
   if (f_IsPromptShown == FALSE) {
-    if ((u8)isSinglePlayer == TRUE) {
+    if (isSinglePlayer == TRUE) {
       SetTextSlot(PROMPT_X, PROMPT_Y, MESSAGE_CHOOSE_CHARACTER,
           TEXT_SLOT_LARGE_FONT, 0, TEXT_FLAG_TYPED, 255, 255, 255, 255);
     } else {
