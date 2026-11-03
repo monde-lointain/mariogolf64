@@ -2342,6 +2342,9 @@ s32 StepTrialShot(void) {
 
   ballState = f_TrialSimulation.state;
   if (ballState) {
+    /* A loop that runs once, so that the step's checks can break out to the
+     * end point's update; the original has no loop here, and jumping to a
+     * label instead gives 139 words differing, 55 in shape, against 101 (35) */
     do {
       velocityY = f_TrialSimulation.velocity[AXIS_Y];
       bounceCount = f_TrialSimulation.bounceCount;
