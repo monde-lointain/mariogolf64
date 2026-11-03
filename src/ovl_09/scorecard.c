@@ -1331,10 +1331,11 @@ void DrawScorecardTable(Gfx** displayListHead, s32 pageCount, s32 page) {
   for (tabIndex = 0; tabIndex != pageCount; tabIndex++) {
     texelsOffset = (tabStrips[tabIndex] * TAB_HEIGHT * TABLE_WIDTH) +
         LARGE_PALETTED_TEXELS_OFFSET;
-    IN_OWN_BLOCK(dropY = TAB_BACK_DROP);
     if (tabIndex == pageCount - 1) {
       gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
       dropY = 0;
+    } else {
+      dropY = TAB_BACK_DROP;
     }
 
     for (row = 0; row < TAB_HEIGHT; row += TABLE_LOAD_HEIGHT) {
