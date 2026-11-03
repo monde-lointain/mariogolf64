@@ -1462,7 +1462,11 @@ s32 DrawGame(void) {
           FillScreen();
         }
 
-        /* The look-at is set within the call, to match */
+        /*
+         * The look-at is set within the call, to match: setting it before
+         * the call gives 59 words differing (21 in shape) against 41, or 63
+         * set in z, y, x order
+         */
         guLookAt(&matrices->viewing, g_MapCamera.view.eye[0],
             g_MapCamera.view.eye[1], g_MapCamera.view.eye[2],
             lookAtX = g_MapCamera.view.eye[0] + 10.0f,
