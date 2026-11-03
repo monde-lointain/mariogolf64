@@ -3052,7 +3052,11 @@ void UpdateMiniGolfCourseSelect(void) {
   if (Abs(g_MenuMemory.miniGolfRecordSlide) != 0) {
     direction = g_MenuMemory.miniGolfRecordSlide >= 0 ? 1 : -1;
     step = MINI_GOLF_RECORD_SLIDE_STEP;
-    /* A variable rather than a constant, to match */
+    /*
+     * A variable rather than a constant, to match: testing the slide's sign
+     * as 1 or -1 itself, either way round, gives 8 words differing, 2 to 4
+     * in shape, and setting the variable before the direction 8, none
+     */
     positiveSign = 1;
     g_MenuMemory.miniGolfRecordSlide -= direction * step;
 
