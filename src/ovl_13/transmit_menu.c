@@ -2527,7 +2527,10 @@ s32 WriteExperienceToCartridge(s32 characterIndex) {
       osSyncPrintf("PHASE 1\n");
       result = nuContGBPakFread(
           &transfer->pakFile, CARTRIDGE_RAM_ADDRESS, save, CARTRIDGE_SAVE_SIZE);
-      /* Powering off and continuing after each pak error is there to match */
+      /*
+       * Each pak error powers off and continues, to match: jumping to the
+       * loop's last power off instead gives 189 words differing, 81 in shape
+       */
       if (result != 0) {
         nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
         continue;
