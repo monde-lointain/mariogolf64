@@ -2337,7 +2337,14 @@ INCLUDE_ASM("asm/nonmatchings/collision", FindHoleTriangleHit);
  * shape) copies the plane's X normal to a temp before GetTrianglePlane sets it
  * and uses the copy for each side and hit test, so it reads the previous
  * triangle's normal; another, with 176 words, splits startSide's sum and
- * changes the hit test's < 307.2f to <= 306.2f.
+ * changes the hit test's < 307.2f to <= 306.2f. A later output reads the
+ * normal's x into a local after GetTrianglePlane and uses it in the two hit
+ * tests for walls facing z (176 words, 58 in shape), but the same local in all
+ * four hit tests gives 230 (80), in the other two alone 266 (88), and locals
+ * for the y or z normal, in either pair, 548 to 865. So it isn't adopted.
+ * Commuting the x term, adding the y or distance term first, grouping the y and
+ * z terms, or putting the start first in the hit point, in the first two tests,
+ * give 204 to 248.
  */
 #ifdef NON_MATCHING
 s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
