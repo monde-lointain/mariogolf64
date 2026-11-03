@@ -3013,8 +3013,12 @@ Boolean IsLineMostlyLost(CoursePoint from, CoursePoint to) {
  * through its register, without that bias, and gives 25 words (13 in shape),
  * while one also used for the launch, the later state test and the surface
  * gives 39 (17). The permuter's best, 15 words, prints the TRUE message for a
- * water hazard too and falls off the end without a return. 24 words differ, 14
- * in shape.
+ * water hazard too and falls off the end without a return; a later best, 14 (8
+ * in shape), prints it for the out-of-bounds kinds instead, then FALSE, where
+ * the original prints only FALSE for them (D_802542CC, the ROM's FALSE string,
+ * 0x18 bytes before TRUE's) and prints TRUE only before returning TRUE, and its
+ * copies of the offset and surface through locals change nothing alone. 24
+ * words differ, 14 in shape.
  */
 #ifdef NON_MATCHING
 Boolean IsTrialShotSafe(void) {
