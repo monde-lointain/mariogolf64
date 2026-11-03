@@ -1745,7 +1745,11 @@ void MoveBallToCupEdge(BallSimulation* simulation) {
  * of the way along the path, and returns which it hits as a PIN_HIT_*.
  *
  * Doesn't match: setting the hit fraction with an if rather than a ternary
- * takes 203 words differing, 41 in shape, to 198 and 40.
+ * takes 203 words differing, 41 in shape, to 198 and 40. The original sets
+ * a flag for each of the direction's components and ors them before its
+ * one branch, as a | gives; with || GCC branches on each (177 against
+ * 198). It ors the contact offsets themselves to test them, where with ||
+ * GCC sets and ors flags (173 against 177). 173 words differ, 27 in shape.
  */
 #ifdef NON_MATCHING
 s32 FindPinHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY, s32 endZ,
@@ -1871,7 +1875,7 @@ s32 FindPinHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY, s32 endZ,
     direction[AXIS_X] = startX - contactX;
     direction[AXIS_Y] = 0.0f;
     direction[AXIS_Z] = startZ - contactZ;
-    if (direction[AXIS_X] != 0.0f || direction[AXIS_Z] != 0.0f) {
+    if ((direction[AXIS_X] != 0.0f) | (direction[AXIS_Z] != 0.0f)) {
       guNormalize(&direction[AXIS_X], &direction[AXIS_Y], &direction[AXIS_Z]);
     }
 
@@ -1883,7 +1887,7 @@ s32 FindPinHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY, s32 endZ,
     contactX =
         (s32)(contactX + direction[AXIS_X]) - g_HoleSetup.cupPosition[AXIS_X];
     angle = 0.0f;
-    if (contactX != 0 || contactZ != 0) {
+    if ((contactX | contactZ) != 0) {
       angle = atan2(contactZ, contactX);
     }
 
