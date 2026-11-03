@@ -2256,13 +2256,16 @@ INCLUDE_RODATA("asm/nonmatchings/ovl_03/computer_golfer", f_SimFaultText);
  * takes $v0, so the store waits for the kind tests' reuse of it; the
  * original's sum is in $v1 and its store comes after them. Reading kind
  * after the sum, testing surfaceInfo->kind directly, and spelling the tests
- * out with || or | leave the code as it is. The register oracle, forcing 16
- * pseudos, leaves 76 words. The permuter's best, 103 words and 35 in shape,
- * reads the heading for the excluded sectors through a pointer taken before
- * the club checks, where the original reads f_Shot.heading directly; taking it
- * just before the loop gives 116 and 36, using it for the aim change too 118
- * and 36, and reading the centre sector into a local 153 and 57. 117 words
- * differ, 43 in shape.
+ * out with || or | leave the code as it is. Working out the aim change once,
+ * into headingChange, gives 106 words differing (40 in shape) rather than 117
+ * (43), before or after the shot offset's store. Earlier, the register oracle,
+ * forcing 16 pseudos, left 76 words. The permuter's best runs, 103 words (35 in
+ * shape) and later 89 (31) with the aim change worked out once, read the
+ * heading for the excluded sectors through a pointer taken before the club
+ * checks, where the original reads f_Shot.heading directly; taking it just
+ * before the loop gave 116 (36), using it for the aim change too 118 (36), and
+ * reading the centre sector into a local 153 (57). 106 words differ, 40 in
+ * shape.
  */
 #ifdef NON_MATCHING
 s32 StepTrialShot(void) {
@@ -2287,6 +2290,7 @@ s32 StepTrialShot(void) {
   f32 aimSin;
   f32 ratio;
   s32 launchPower;
+  s32 headingChange;
   s32 index;
 
   flags = 0;
@@ -2675,10 +2679,11 @@ EVALUATE:
   }
 
   f_ShotOffset = SHOT_OFFSET_MINUS_LARGE;
+  headingChange = f_AimChangeCount * AIM_CHANGE_STEP;
   if (!(f_AimChangeCount & 1)) {
-    f_Shot.heading -= f_AimChangeCount * AIM_CHANGE_STEP;
+    f_Shot.heading -= headingChange;
   } else {
-    f_Shot.heading += f_AimChangeCount * AIM_CHANGE_STEP;
+    f_Shot.heading += headingChange;
   }
 
   osSyncPrintf("Angle Change4\n");
