@@ -62,6 +62,12 @@ typedef struct MessageTable {
  * at 4; a message file's holds the file's size at 0. Both are big-endian.
  */
 #define FILE_HEADER_SIZE 8
+#define GLYPH_COUNT_OFFSET 2
+#define GLYPH_SIZE_OFFSET 4
+#define MESSAGE_FILE_SIZE_OFFSET 0
+/* Reads the big-endian halfword at offset in a file header */
+#define ReadHeaderHalfword(header, offset) \
+  (((header)[offset] << 8) | (header)[(offset) + 1])
 
 /* Character codes */
 enum MessageCode {
@@ -336,12 +342,13 @@ void LoadTextAssets(void) {
   ReadEncodedAsset(f_TextGradientImages[1], &asset);
   header = AllocMemory(FILE_HEADER_SIZE);
   nuPiReadRom((u32)g_GlyphFileRomStart, header, FILE_HEADER_SIZE);
-  size = (((header[2] << 8) | header[3]) * ((header[4] << 8) | header[5])) +
+  size = (ReadHeaderHalfword(header, GLYPH_COUNT_OFFSET) *
+             ReadHeaderHalfword(header, GLYPH_SIZE_OFFSET)) +
       FILE_HEADER_SIZE;
   f_MessageGlyphs = AllocMemory(size);
   nuPiReadRom((u32)g_GlyphFileRomStart, f_MessageGlyphs, size);
   nuPiReadRom((u32)g_MessageFileRomStart, header, FILE_HEADER_SIZE);
-  size = (header[0] << 8) | header[1];
+  size = ReadHeaderHalfword(header, MESSAGE_FILE_SIZE_OFFSET);
   FreeMemory(&header);
   f_Messages = AllocMemory(size);
   nuPiReadRom((u32)g_MessageFileRomStart, f_Messages, size);
