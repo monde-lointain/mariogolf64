@@ -2061,14 +2061,19 @@ s32 GetTrianglePlaneCopy(PlaneTriangle* triangle, TrianglePlane* plane) {
  * by more than PATH_MOST_RISE, as course y points down, or that start or
  * end off the ground hit nothing.
  *
- * Doesn't match: the original works out the start's and the end's sides of
- * the plane together, adding their terms in turn, where this works out the
- * start's first, and so the tests on the sides and the fraction's terms take
- * other registers. The prologue and the triangle lookup are scheduled
- * differently too. While endSide also held the side change, which gave 58
- * words differing (28 in shape), copying the hit's corners straight from the
- * table gave 107 (47), and through a pointer to its vertices 78 (28). 24
- * words differ, 10 in shape.
+ * Doesn't match: the original works out the start's and the end's sides of the
+ * plane together, adding their terms in turn, where this works out the start's
+ * first, and so the tests on the sides and the fraction's terms take other
+ * registers. The prologue and the triangle lookup are scheduled differently
+ * too. While endSide also held the side change, which gave 58 words differing
+ * (28 in shape), copying the hit's corners straight from the table gave 107
+ * (47), and through a pointer to its vertices 78 (28). The original sets
+ * hitIndex to NO_HOLE_TRIANGLE after the flag test's call, in its branch's
+ * delay slot. The permuter's best, 16 words (2 in shape), gets that by setting
+ * it only at the start of the debug branch, which leaves it unset without the
+ * flag. As a statement before the flag test it changes nothing, and after the
+ * debug branch, before the x range or before the loop it gives 58 to 128 words,
+ * 14 in shape. 24 words differ, 10 in shape.
  */
 #ifdef NON_MATCHING
 s32 FindHoleTriangleHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
