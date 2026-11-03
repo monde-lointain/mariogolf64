@@ -548,7 +548,10 @@ void GetSaveDataAndMenuMemory(void) {
  * Doesn't match: GCC spills the button's half height to the stack, where the
  * original keeps it in a saved register like the other halves. The oracle
  * finds no allocation that avoids the spill, and clamping the half height
- * without its flag gives 65 words. 54 words differ, 18 in shape.
+ * without its flag gives 65 words. The permuter's best truncates each
+ * button size into its half and halves it in a second statement (85 words,
+ * 7 in shape), a split assignment; swapping the sizes' declarations alone
+ * changes nothing. 54 words differ, 18 in shape.
  */
 #ifdef NON_MATCHING
 void DrawYesNoWindow(Gfx** displayListHead, s32 width, s32 height, s32 centerX,
