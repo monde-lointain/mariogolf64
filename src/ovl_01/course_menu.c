@@ -1604,22 +1604,20 @@ void DrawOffLabel(Gfx** displayListHead, s32 x, s32 y) {
  * Draws the green left and right arrows either side of a width centered on a
  * point, switching their blink frame every SIDE_ARROW_BLINK_FRAME_COUNT calls
  *
- * Doesn't match: the original spills centerX less half the width before the
- * loop, and registers differ. Working out frameOffset before the
- * palette load comes closest; after it, 264 words differ. The image offset
- * is written as two products: (SIDE_ARROW_FIRST_IMAGE + arrowIndex) times
- * the size lets loop.c step the sum on its own, 134 words. Setting top just
- * before the rectangle gives 98 words, 20 in shape, but a frame 16 bytes
- * smaller than the original's. 64 words differ, 32 in shape.
+ * frameOffset is worked out before the palette load; after it, 264 words
+ * differ. The arrow's image offset is added to frameOffset before the
+ * image's address; added to the address in turn, 4 words differ, and with
+ * frameOffset first, 2. Setting top at its declaration, not just before the
+ * rectangle, gives 134 words, 38 in shape.
  */
-#ifdef NON_MATCHING
 void DrawBlinkingSideArrows(Gfx** displayListHead, void* image, s32* blinkFrame,
     s32* blinkTimer, s32 width, s32 centerX, s32 centerY) {
   Gfx* gfx = *displayListHead;
   s32 left = 0;
   s32 arrowIndex;
   s32 frameOffset;
-  s32 top = centerY - (GREEN_ARROW_SIZE / 2);
+  s32 top;
+  s32 imageOffset;
 
   (*blinkTimer)++;
   if (*blinkTimer == SIDE_ARROW_BLINK_FRAME_COUNT) {
@@ -1631,14 +1629,14 @@ void DrawBlinkingSideArrows(Gfx** displayListHead, void* image, s32* blinkFrame,
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
   gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(image)));
   for (arrowIndex = 0; arrowIndex != SIDE_ARROW_COUNT; arrowIndex++) {
+    imageOffset =
+        (SIDE_ARROW_FIRST_IMAGE + arrowIndex) * GREEN_ARROW_IMAGE_SIZE;
     gDPLoadTextureTile_4b(gfx++,
-        TextureAddress((u32)image +
-            ((SIDE_ARROW_FIRST_IMAGE * GREEN_ARROW_IMAGE_SIZE) +
-                (arrowIndex * GREEN_ARROW_IMAGE_SIZE) + frameOffset)),
-        G_IM_FMT_CI, GREEN_ARROW_SIZE, GREEN_ARROW_SIZE, 0, 0,
-        GREEN_ARROW_SIZE - 1, GREEN_ARROW_SIZE - 1, 0,
-        G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
-        G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+        TextureAddress((u32)image + (imageOffset + frameOffset)), G_IM_FMT_CI,
+        GREEN_ARROW_SIZE, GREEN_ARROW_SIZE, 0, 0, GREEN_ARROW_SIZE - 1,
+        GREEN_ARROW_SIZE - 1, 0, G_TX_NOMIRROR | G_TX_WRAP,
+        G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
+        G_TX_NOLOD);
     gDPPipeSync(gfx++);
     if (arrowIndex == SIDE_ARROW_RIGHT) {
       left = centerX + (width / 2);
@@ -1648,6 +1646,7 @@ void DrawBlinkingSideArrows(Gfx** displayListHead, void* image, s32* blinkFrame,
       left = centerX - (width / 2) - GREEN_ARROW_SIZE;
     }
 
+    top = centerY - (GREEN_ARROW_SIZE / 2);
     gSPScisTextureRectangle(gfx++, QuarterPixels(left), QuarterPixels(top),
         QuarterPixels(left + GREEN_ARROW_SIZE),
         QuarterPixels(centerY + (GREEN_ARROW_SIZE / 2)), G_TX_RENDERTILE, 0, 0,
@@ -1657,9 +1656,6 @@ void DrawBlinkingSideArrows(Gfx** displayListHead, void* image, s32* blinkFrame,
 
   *displayListHead = gfx;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/course_menu", DrawBlinkingSideArrows);
-#endif
 
 /*
  * Draws one of the four side arrow images, in either blink state, centered on
