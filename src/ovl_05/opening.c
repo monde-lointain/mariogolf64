@@ -3877,8 +3877,14 @@ void LoadOpeningImpactLines(void) {
  *
  * Doesn't match: the registers and scheduling differ throughout. Working out
  * each strip's texel offset from its index, with the row counted down in the
- * strip loop's initializer, took it from 229 words differing, 27 in shape.
- * 217 words differ, 23 in shape.
+ * strip loop's initializer, took it from 229 words differing, 27 in shape, to
+ * 217 (23), and dropping a second pipe sync after the palette load, which the
+ * original doesn't have, to 186 (16). The permuter's best, 36 words (4 in
+ * shape), moves that sync into the strip loop, adding a command there, and
+ * stores the rectangle's left edge into a new variable on each pass, a fake.
+ * Without the sync, a left variable set on each pass gives 45 (1), and one
+ * set once, at its declaration or before the loop, 284 (26). 186 words
+ * differ, 16 in shape.
  */
 #ifdef NON_MATCHING
 void DrawOpeningImpactLines(Gfx** displayListHead) {
@@ -3916,7 +3922,6 @@ void DrawOpeningImpactLines(Gfx** displayListHead) {
       gDPSetTextureLUT(gfx++, G_TT_RGBA16);
       gDPLoadTLUT_pal256(
           gfx++, TextureAddress(ImageBody(f_OpeningEffectImage)));
-      gDPPipeSync(gfx++);
       gDPPipeSync(gfx++);
 
       /* The rows count up from the bottom, so the top strip is row 1 */
