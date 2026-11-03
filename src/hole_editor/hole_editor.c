@@ -3908,7 +3908,12 @@ void WriteHexDumpFile(u32* words, s32 byteCount, char* fileName) {
  * calls to the original's 12. A local for the half's first tile column, which
  * brought DrawGround's shape from 348 to 283, gives 3683 words differing here
  * (505 in shape) when declared after half, and 3709 (505) when declared first.
- * 2128 words differ, 488 in shape.
+ * A permuter output with 2050 words (472 in shape) holds TILE_COORDINATE_SPAN
+ * in a variable set before the tiles and multiplies by it in seven of the eight
+ * tile coordinates the texture loads work out, leaving the first expansion's S
+ * as the constant; through such a local in all of them, 2236 words differ (474
+ * in shape), and in the rows' coordinates only, 2231 (483). 2128 words differ,
+ * 488 in shape.
  */
 #ifdef NON_MATCHING
 void DrawHoleEditorGround(CameraMatrices* matrices UNUSED, s32 terrainStyle) {
