@@ -977,8 +977,7 @@ void DrawPauseMenu(Gfx** displayListHead) {
     gDPSetPrimColor(gfx++, 0, 0, red, green, blue, 0xFF);
     DrawLargeTextSlot(&gfx, i);
     if (kind == PAUSE_OPTION_KIND_GRID_COLOR) {
-      if ((s8)g_Players[g_CurrentShot.playerIndex].gridColor ==
-          GRID_COLOR_BLACK) {
+      if (g_Players[g_CurrentShot.playerIndex].gridColor == GRID_COLOR_BLACK) {
         DrawLargeText(&gfx, PAUSE_VALUE_X, PauseLabelY(i),
             f_PauseValueTexts[PAUSE_VALUE_TEXT_BLACK]);
       } else {

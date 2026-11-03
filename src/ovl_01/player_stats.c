@@ -2144,8 +2144,8 @@ void DrawBestShots(Gfx** displayListHead) {
   for (row = 0; row != STATS_GRID_ROW_COUNT; row++) {
     for (column = 0; column != STATS_GRID_COLUMN_COUNT; column++) {
       if (f_BestShotRecords[row][column] != STATS_CELL_EMPTY) {
-        character = (s8)save->rankedRecords[f_BestShotRecords[row][column]]
-                        .characterIndex;
+        character =
+            save->rankedRecords[f_BestShotRecords[row][column]].characterIndex;
         DrawCharacterFace(&gfx, g_CharacterFaceImages[character],
             f_BestShotFaces[row][column],
             RECORD_FACE_X + (column * STATS_CURSOR_COLUMN_WIDTH),
@@ -2184,14 +2184,14 @@ void DrawBestShots(Gfx** displayListHead) {
   if (f_BestShotRecords[chosenRow][chosenColumn] != STATS_CELL_EMPTY) {
     gDPLoadTLUT_pal256(gfx++,
         TextureAddress(
-            (u32)f_BestShotsCourseIcons[(s8)save
+            (u32)f_BestShotsCourseIcons[save
                     ->rankedRecords[f_BestShotRecords[chosenRow][chosenColumn]]
                     .courseIndex] +
             IMAGE_HEADER_SIZE));
     for (index = 0; index != RECORD_COURSE_STRIP_COUNT; index++) {
       gDPLoadTextureBlock(gfx++,
           TextureAddress(
-              (u32)f_BestShotsCourseIcons[(s8)save
+              (u32)f_BestShotsCourseIcons[save
                       ->rankedRecords[f_BestShotRecords[chosenRow]
                                                        [chosenColumn]]
                       .courseIndex] +
@@ -2230,13 +2230,13 @@ void DrawBestShots(Gfx** displayListHead) {
   if (f_BestShotRecords[chosenRow][chosenColumn] != STATS_CELL_EMPTY) {
     sprintf(g_PrintBuffer, "%s",
         g_CourseRecords
-            [(s8)save->rankedRecords[f_BestShotRecords[chosenRow][chosenColumn]]
+            [save->rankedRecords[f_BestShotRecords[chosenRow][chosenColumn]]
                     .courseIndex]
                 .name);
     DrawLargeText(
         &gfx, RECORD_COURSE_NAME_X, RECORD_COURSE_NAME_Y, g_PrintBuffer);
     SetTextSlotValue(
-        (s8)save->rankedRecords[f_BestShotRecords[chosenRow][chosenColumn]]
+        save->rankedRecords[f_BestShotRecords[chosenRow][chosenColumn]]
                 .holeIndex +
             1,
         1, 0);
@@ -2620,10 +2620,10 @@ void LoadBestShotFaces(void) {
     for (column = 0, cell = rowStart; column != STATS_GRID_COLUMN_COUNT;
         column++, cell++) {
       if (f_BestShotRecords[row][column] != STATS_CELL_EMPTY) {
-        character = (s8)save->rankedRecords[f_BestShotRecords[row][column]]
-                        .characterIndex;
-        palette = (s8)save->rankedRecords[f_BestShotRecords[row][column]]
-                      .paletteIndex;
+        character =
+            save->rankedRecords[f_BestShotRecords[row][column]].characterIndex;
+        palette =
+            save->rankedRecords[f_BestShotRecords[row][column]].paletteIndex;
         if (character < 0) {
           character = 0;
         }

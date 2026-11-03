@@ -246,9 +246,9 @@ typedef struct PlayRecord {
   /* 0x39 */ s8 holeIndex;
   /* 0x3A */ u8
       scoreKind; /* What GetRecordedScoreKind returns for the strokes */
-  /* 0x3B */ u8 characterIndex;
+  /* 0x3B */ s8 characterIndex;
   /* 0x3C */ u8 unk3C;
-  /* 0x3D */ u8 paletteIndex;
+  /* 0x3D */ s8 paletteIndex;
   /* 0x3E */ u8 strokeCount;
   /* 0x3F */ u8 unk3F;
   /* 0x40 */ s32 unk40;
@@ -411,7 +411,7 @@ typedef struct Player {
   /* 0x00 */ char name[PLAYER_NAME_SIZE];
   /* 0x0C */ s32 state; /* A PLAYER_STATE_* value */
   /* 0x10 */ CoursePoint ballPosition;
-  /* 0x1C */ u8 ballSurface; /* A SURFACE_* value */
+  /* 0x1C */ s8 ballSurface; /* A SURFACE_* value */
   /* 0x1D */ s8 characterIndex; /* Also the index of the character's club set */
   /* 0x1E */ s8 isComputer; /* Played by the computer, with no controller */
   /* 0x1F */ s8 unk1F;
@@ -440,7 +440,7 @@ typedef struct Player {
   /* 0x80 */ s32 driveDistance; /* UNMEASURED_DISTANCE, or UNCOUNTED_DISTANCE */
   /* 0x84 */ s32 pinDistance; /* UNMEASURED_DISTANCE, or UNCOUNTED_DISTANCE */
   /* 0x88 */ s32 unk88;
-  /* 0x8C */ u8 gridColor; /* GRID_COLOR_*, for the grid drawn over the green */
+  /* 0x8C */ s8 gridColor; /* GRID_COLOR_*, for the grid drawn over the green */
   /* 0x8D */ u8 unk8D;
   /* 0x8E */ s16
       betTallies[BET_COUNT]; /* What the player has won on each BET_* bet */

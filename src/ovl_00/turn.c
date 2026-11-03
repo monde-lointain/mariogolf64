@@ -2507,7 +2507,7 @@ void StartPlayerShot(s32 playerIndex) {
   g_CurrentShot.ballPosition[AXIS_Y] = player->ballPosition[AXIS_Y];
   z = player->ballPosition[AXIS_Z];
   g_CurrentShot.ballPosition[AXIS_Z] = z;
-  g_CurrentShot.surface = (s8)player->ballSurface;
+  g_CurrentShot.surface = player->ballSurface;
   g_CurrentShot.offsetY = 0;
   g_CurrentShot.offsetX = 0;
   g_CurrentShot.unk54 = player->unk28;
@@ -2619,7 +2619,7 @@ void PickNextPlayer(void) {
       priority = STROKE_PRIORITY_BASE - g_Players[i].strokeCount;
     } else {
       if (g_Players[i].strokeCount != 0) {
-        priority = GetSurfaceInfo((s8)g_Players[i].ballSurface)->kind !=
+        priority = GetSurfaceInfo(g_Players[i].ballSurface)->kind !=
             SURFACE_KIND_GREEN;
       }
 
@@ -4500,7 +4500,7 @@ void UpdateTurns(void) {
                   g_HoleSetup.par * STROKE_LIMIT_PER_PAR;
             }
 
-            if ((s8)player->ballSurface != SURFACE_TEE_UP) {
+            if (player->ballSurface != SURFACE_TEE_UP) {
               player->ballSurface = GetSurface(
                   player->ballPosition[AXIS_X], player->ballPosition[AXIS_Z]);
             }

@@ -151,7 +151,7 @@ static s8 f_FaceFrame = 0;
 /* Flipped whenever the grid face changes, but read by no routine */
 static u8 f_UnreadFaceToggle = 0;
 /* The draws that f_FaceFrame has been shown for */
-static u8 f_FaceFrameTimer = 0;
+static s8 f_FaceFrameTimer = 0;
 /* Whether R, or Z or L, is held, which shows the COM or LEFTY icon */
 static s8 f_IsComButtonHeld = FALSE;
 static s8 f_IsLeftyButtonHeld = FALSE;
@@ -1499,7 +1499,7 @@ void DrawGridFaces(Gfx** displayListHead, u8 isSinglePlayer) {
   }
 
   f_FaceFrameTimer++;
-  if ((s8)f_FaceFrameTimer == FACE_FRAME_DURATION) {
+  if (f_FaceFrameTimer == FACE_FRAME_DURATION) {
     f_FaceFrameTimer = 0;
     f_FaceFrame++;
     if (f_FaceFrame >= FACE_ANIMATION_FRAME_COUNT) {

@@ -747,7 +747,7 @@ void DrawRingShotRecords(Gfx** displayListHead) {
             RING_SHOT_REPLAY_FACE_Y + (index * RING_SHOT_SLOT_SPACING),
             replayCharacter, FACE_PLAIN);
         DrawCourseLabel(&gfx,
-            (s8)save->ringShotRecords[f_RecordedReplaySlots[index]].courseIndex,
+            save->ringShotRecords[f_RecordedReplaySlots[index]].courseIndex,
             RING_SHOT_REPLAY_COURSE_X,
             RING_SHOT_REPLAY_COURSE_Y + (index * RING_SHOT_SLOT_SPACING), TRUE);
       } else {
@@ -797,9 +797,9 @@ void DrawRingShotRecords(Gfx** displayListHead) {
         }
 
         replayCourse =
-            (s8)save->ringShotRecords[f_RecordedReplaySlots[index]].courseIndex;
+            save->ringShotRecords[f_RecordedReplaySlots[index]].courseIndex;
         replayHole =
-            (s8)save->ringShotRecords[f_RecordedReplaySlots[index]].holeIndex;
+            save->ringShotRecords[f_RecordedReplaySlots[index]].holeIndex;
         if (index == memory->ringShotReplaySlot) {
           SetTextSlot(RING_SHOT_REPLAY_TEXT_X,
               RING_SHOT_REPLAY_TEXT_Y + (index * RING_SHOT_SLOT_SPACING),

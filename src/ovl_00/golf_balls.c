@@ -489,7 +489,7 @@ void UpdateGolfBalls(void) {
 
     if (currentIndex != i) {
       ball->state = BALL_STATE_STOPPED;
-      if (GetSurfaceInfo((s8)player->ballSurface)->kind != SURFACE_KIND_GREEN &&
+      if (GetSurfaceInfo(player->ballSurface)->kind != SURFACE_KIND_GREEN &&
           !g_GameState.isMiniGolf) {
         ball->markerPlayerIndex = BALL_NO_MARKER;
       } else {

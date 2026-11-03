@@ -1394,7 +1394,7 @@ s32 ChooseHoleStrokeTarget(void) {
       if (holes[index] < HOLES_PER_NINE) {
         if (frontStrokes < 0) {
           if (strokes[index] ==
-                  (s8)g_CourseRecords[g_GameState.courseIndex]
+                  g_CourseRecords[g_GameState.courseIndex]
                       .holes[holes[index]]
                       .par &&
               strokes[index] != LOWEST_LOWERED_STROKES) {
@@ -1403,7 +1403,7 @@ s32 ChooseHoleStrokeTarget(void) {
           }
         } else if (frontStrokes > 0) {
           if (strokes[index] ==
-              (s8)g_CourseRecords[g_GameState.courseIndex]
+              g_CourseRecords[g_GameState.courseIndex]
                   .holes[holes[index]]
                   .par) {
             strokes[index]++;
@@ -1412,7 +1412,7 @@ s32 ChooseHoleStrokeTarget(void) {
         }
       } else if (backStrokes < 0) {
         if (strokes[index] ==
-                (s8)g_CourseRecords[g_GameState.courseIndex]
+                g_CourseRecords[g_GameState.courseIndex]
                     .holes[holes[index]]
                     .par &&
             strokes[index] != LOWEST_LOWERED_STROKES) {
@@ -1421,9 +1421,7 @@ s32 ChooseHoleStrokeTarget(void) {
         }
       } else if (backStrokes > 0) {
         if (strokes[index] ==
-            (s8)g_CourseRecords[g_GameState.courseIndex]
-                .holes[holes[index]]
-                .par) {
+            g_CourseRecords[g_GameState.courseIndex].holes[holes[index]].par) {
           strokes[index]++;
           backStrokes--;
         }
@@ -1447,9 +1445,7 @@ s32 ChooseHoleStrokeTarget(void) {
       for (index = 0; index < COURSE_HOLE_COUNT; index++) {
         if (holes[index] < HOLES_PER_NINE) {
           targetLeftToPar += strokes[index] -
-              (s8)g_CourseRecords[g_GameState.courseIndex]
-                  .holes[holes[index]]
-                  .par;
+              g_CourseRecords[g_GameState.courseIndex].holes[holes[index]].par;
         }
       }
 
@@ -1458,9 +1454,7 @@ s32 ChooseHoleStrokeTarget(void) {
             holes[index] < g_GameState.holeIndex) {
           targetLeftToPar +=
               g_Players[f_Shot.playerIndex].holes[holes[index]].strokes -
-              (s8)g_CourseRecords[g_GameState.courseIndex]
-                  .holes[holes[index]]
-                  .par;
+              g_CourseRecords[g_GameState.courseIndex].holes[holes[index]].par;
         }
       }
 
@@ -1475,9 +1469,7 @@ s32 ChooseHoleStrokeTarget(void) {
     for (index = 0; index < COURSE_HOLE_COUNT; index++) {
       if (holes[index] < g_GameState.holeIndex) {
         targetLeftToPar += strokes[index] -
-            (s8)g_CourseRecords[g_GameState.courseIndex]
-                .holes[holes[index]]
-                .par;
+            g_CourseRecords[g_GameState.courseIndex].holes[holes[index]].par;
       }
     }
 
@@ -2534,8 +2526,7 @@ EVALUATE:
         if (f_Shot.shotMode == SHOT_MODE_NORMAL && f_Shot.unk54 > 0 &&
             ((f_GolferTraits[g_Players[f_Shot.playerIndex].characterIndex]
                          .unk6 != 0 &&
-                 f_GolferTraits[(s8)g_Players[f_Shot.playerIndex]
-                                    .characterIndex]
+                 f_GolferTraits[g_Players[f_Shot.playerIndex].characterIndex]
                          .unk2 < 2) ||
                 (rand() & 1)) &&
             GetSurfaceInfoAt(f_PlanTarget[AXIS_X], f_PlanTarget[AXIS_Z])

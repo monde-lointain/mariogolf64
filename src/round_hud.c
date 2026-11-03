@@ -944,9 +944,8 @@ void StartHoleIntro(void) {
       f_HoleImageAssets[GetCourseRecordIndex()] + GetHoleIndexInRecord(),
       &asset);
   ReadEncodedAsset(f_HoleImage, &asset);
-  switch ((s8)g_CourseRecords[GetCourseRecordIndex()]
-          .holes[GetHoleRecordIndex()]
-          .par) {
+  switch (
+      g_CourseRecords[GetCourseRecordIndex()].holes[GetHoleRecordIndex()].par) {
     case PAR_THREE:
       OpenEncodedAsset(ASSET_PAR_THREE_IMAGE, &asset);
       break;
@@ -1655,8 +1654,7 @@ typedef struct GridScreenPoint {
  * it falls; black lines turn red or blue.
  */
 #define SetGreenGridTint(slope) \
-  if ((s8)g_Players[g_CurrentShot.playerIndex].gridColor == \
-      GRID_COLOR_WHITE) { \
+  if (g_Players[g_CurrentShot.playerIndex].gridColor == GRID_COLOR_WHITE) { \
     blue = TINT_CHANNEL_MAX; \
     if ((slope) == 0) { \
       green = TINT_CHANNEL_MAX; \

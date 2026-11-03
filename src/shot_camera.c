@@ -473,8 +473,7 @@ SignedBinaryAngle GetCrossSlopeAngle(Player* player, ShotLaunch* shot) {
 
   aimYaw = shot->heading;
 
-  /* The (s8) cast is there to match */
-  surfaceInfo = GetSurfaceInfo((s8)player->ballSurface);
+  surfaceInfo = GetSurfaceInfo(player->ballSurface);
   sampleDistance = CROSS_SLOPE_DISTANCE;
   yaw = aimYaw + (BINARY_ANGLE_TURN / 4);
   if (player->unk22) {
