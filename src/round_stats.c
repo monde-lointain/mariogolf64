@@ -505,7 +505,10 @@ void StartRoundStats(void) {
   g_RoundStats.measuredDriveCount = 0;
   g_RoundStats.averagedDriveCount = 0;
 
-  /* The pointer arithmetic is there to match */
+  /*
+   * The pointer arithmetic is there to match: indexing the course stats
+   * gives 18 words differing, none in shape
+   */
   g_RoundStats.longestDrive =
       (save->courseStats + g_GameState.courseIndex)->longestDrive;
   g_RoundStats.averagedDriveTotal = 0;
@@ -522,7 +525,10 @@ void RestartRoundStats(void) {
   g_RoundStats.measuredDriveCount = 0;
   g_RoundStats.averagedDriveCount = 0;
 
-  /* The pointer arithmetic is there to match */
+  /*
+   * The pointer arithmetic is there to match: indexing the course stats
+   * gives 18 words differing, none in shape
+   */
   g_RoundStats.longestDrive =
       (save->courseStats + g_GameState.courseIndex)->longestDrive;
   g_RoundStats.isDriveAveraged = FALSE;

@@ -1300,7 +1300,10 @@ s32 UpdateReplaySaveMenu(ControllerState* controller) {
 
       if (controller->pressedButtons & A_BUTTON) {
         if (f_CursorIndex >= 0 && f_CursorIndex < RING_SHOT_RECORD_COUNT) {
-          /* The pointer arithmetic is there to match */
+          /*
+           * The pointer arithmetic is there to match: indexing the records
+           * gives 2 words differing, none in shape
+           */
           if ((save->ringShotRecords + f_CursorIndex)->scoreKind &
               SCORE_KIND_RECORDED) {
             g_PauseScreen = PAUSE_SCREEN_PROMPT;
