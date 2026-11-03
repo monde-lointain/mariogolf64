@@ -210,11 +210,17 @@ void PrintFaultText(void) {
  * offsets from $s0. The text buffer's register swaps with it. The second CSE
  * pass does the folding, as it knows context to be thread plus 0x20 throughout
  * a function without branches; setting context after the first block boundary
- * or in a block of its own leaves it so. Compiling with
- * -fno-rerun-cse-after-loop, which skips that pass, leaves 276 words, only 2 in
- * shape, but costs the matched PrintRegisterFields 3 words, so the file wasn't
- * built so. The register oracle, forcing 2 pseudos' registers, leaves 200 words
- * at best, so the code differs too. 278 words differ, 4 in shape.
+ * or in a block of its own leaves it so. Compiling
+ * with -fno-rerun-cse-after-loop, which skips that pass, leaves 276 words, only
+ * 2 in shape, but costs the matched PrintRegisterFields 3 words, so the file
+ * wasn't built so. The first CSE pass leaves context alone only because
+ * IN_OWN_BLOCK's loop ends its block after context is set; jump deletes that
+ * loop's labels before the second pass, and the original has no branch here to
+ * keep a boundary. At -O1, 475 words differ (319 in shape), and
+ * PrintRegisterFields 96; at -O3, which inlines PrintFaultText where the
+ * original calls it, 378 (54). The register oracle, forcing 2 pseudos'
+ * registers, leaves 200 words at best, so the code differs too. 278 words
+ * differ, 4 in shape.
  */
 #ifdef NON_MATCHING
 void PrintFaultContext(OSThread* thread) {
