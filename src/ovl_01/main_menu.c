@@ -2236,7 +2236,7 @@ void UpdateAnimationViewer(void) {
  * g_GameState.gameMode in another order, the B button's path loads
  * g_ChosenCharacters and g_CharacterGrid in another order, and the spin's
  * slowing keeps the spin in a register where the original reads it again after
- * the step. 78 words differ, 28 in shape.
+ * the step. 64 words differ, 24 in shape.
  */
 #ifdef NON_MATCHING
 void UpdateModeSelect(void) {
@@ -2387,11 +2387,10 @@ void UpdateModeSelect(void) {
         g_GameState.isMiniGolf = TRUE;
         g_MenuMemory.holesChoice = HOLES_CHOICE_ALL;
         g_CourseSelectKind = COURSE_SELECT_KIND_COURSES;
+        MAP_CAMERA_MODE_TOP_BYTE = 1;
         if (g_ChosenPlayerCount == MAX_PLAYER_COUNT) {
-          MAP_CAMERA_MODE_TOP_BYTE = 1;
           g_BetSet = BET_SET_MINI_GOLF_FOUR_PLAYER;
         } else {
-          MAP_CAMERA_MODE_TOP_BYTE = 1;
           g_BetSet = BET_SET_MINI_GOLF;
         }
 
