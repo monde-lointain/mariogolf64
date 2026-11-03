@@ -3291,15 +3291,17 @@ static inline u16* GetShadowedTexel(u32 column, u32 row) {
  * texels are kept, and bright ones are darkened the most. A row with no texel
  * within the width ends the shadow once one has started. Billboards with a
  * texture in f_ShadowlessTextures cast no shadow.
- * Doesn't match: the registers differ throughout, and ours finds no saved
- * register for widthScale, which the original keeps in $fp, so it spills it
- * and its frame is 8 bytes larger. The register oracle, forcing 35
- * pseudos, still leaves 156 words. Indexing the solidities as one flat array,
- * where a row pointer into a two-dimensional one gave 271 words, 45 in shape,
- * lets SHADOW_LIGHT_DISTANCE's load stay inside the billboard loop, as the
- * original's does; the oracle came no closer than 198 words there. Indexing
- * the two-dimensional array by row and column gives 315 words, 41 in shape.
- * 303 words differ, 29 in shape.
+ * Doesn't match: the registers differ throughout, and ours works out the
+ * mask row's start before its row test, where the original does so after
+ * it. Indexing the solidities as one flat array, where a row pointer into a
+ * two-dimensional one gave 271 words, 45 in shape, lets
+ * SHADOW_LIGHT_DISTANCE's load stay inside the billboard loop, as the
+ * original's does; indexing the two-dimensional array by row and column gives
+ * 315 words, 41 in shape. Shifting the row inside the index spills
+ * widthScale, which the original keeps in $fp, for an 8 byte larger frame
+ * (303 words, 29 in shape); a row pointer for the mask rows gives 308 and 32,
+ * and testing the row's width the other way round 162 and 28. 159 words
+ * differ, 23 in shape.
  */
 #ifdef NON_MATCHING
 void CastBillboardShadows(void) {
@@ -3369,8 +3371,10 @@ void CastBillboardShadows(void) {
 
     if (g_Billboards[index].textureIndex != lastTextureIndex) {
       for (row = 0; row <= BILLBOARD_MASK_SIZE; row++) {
+        s32 rowStart = row << SOLIDITY_ROW_SHIFT;
+
         for (column = 0; column <= BILLBOARD_MASK_SIZE; column++) {
-          solidities[(row << SOLIDITY_ROW_SHIFT) + column] =
+          solidities[rowStart + column] =
               GetBillboardSolidity(g_Billboards[index].textureIndex,
                   column * (1.0f / BILLBOARD_MASK_SIZE),
                   row * (1.0f / BILLBOARD_MASK_SIZE));
@@ -3518,10 +3522,12 @@ void CastBillboardShadows(void) {
         *GetShadowedTexel(column, row) = color;
       }
 
-      if (isRowInWidth) {
+      if (!isRowInWidth) {
+        if (hasShadowStarted == TRUE) {
+          break;
+        }
+      } else {
         hasShadowStarted = TRUE;
-      } else if (hasShadowStarted == TRUE) {
-        break;
       }
     }
   }
