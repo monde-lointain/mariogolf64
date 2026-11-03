@@ -3891,11 +3891,13 @@ void WriteHexDumpFile(u32* words, s32 byteCount, char* fileName) {
  * Doesn't match: the original also steps column + 1 alongside half, where
  * GCC computes it in each use; most of the rest follows from the registers
  * and spill slots that changes. The frame is 0x18 bytes larger than the
- * original's, so the stack offsets differ. Stepping the half's first column
- * beside half gives 2403 words differing, 581 in shape. Giving the fine
- * tiles' loop its own counter and setting the middle slot after the wave's
- * tile took it from 2258 words differing, 518 in shape. 2128 words differ,
- * 488 in shape.
+ * original's, so the stack offsets differ: reload gives ours 55 spill slots
+ * of 8 bytes before the caller-save area, where the original has 50 there and
+ * 2 after it, and ours saves $a3 with $t0 to $t7 around the calls. Stepping the
+ * half's first column beside half gives 2403 words differing, 581 in shape.
+ * Giving the fine tiles' loop its own counter and setting the middle slot after
+ * the wave's tile took it from 2258 words differing, 518 in shape. 2128 words
+ * differ, 488 in shape.
  */
 #ifdef NON_MATCHING
 void DrawHoleEditorGround(CameraMatrices* matrices UNUSED, s32 terrainStyle) {
