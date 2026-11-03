@@ -522,7 +522,6 @@ s32 PlanShot(CurrentShot* plannedShot) {
   s32 mishit;
   s32 maxMishit;
   s32 mishitDivisor;
-  s32* shotPower;
   u32 kind;
 
   if (f_PlanStage == PLAN_STAGE_UNSTARTED) {
@@ -718,7 +717,10 @@ s32 PlanShot(CurrentShot* plannedShot) {
       /* The carry per unit of f_Shot.powerGaugeFrame at the mean percent */
       reach = reach * (percentRange[1] + percentRange[0]) /
           (2 * FULL_PERCENT * GAUGE_FULL_FRAME);
-      /* Holding f_Shot.powerGaugeFrame in distance is there to match */
+      /*
+       * Holding f_Shot.powerGaugeFrame in distance is there to match: a
+       * powerFrame local of its own gives 26 words differing, none in shape
+       */
       distance = (rand() & 3) + (distance / reach);
       if (GetGolferTraitUnk2() >= 2) {
         distance = distance * POWER_GAUGE_FRAME_BOOST;
@@ -730,9 +732,7 @@ s32 PlanShot(CurrentShot* plannedShot) {
         distance = GAUGE_FULL_FRAME;
       }
 
-      /* Storing through shotPower is there to match */
-      shotPower = &f_Shot.powerGaugeFrame;
-      *shotPower = distance;
+      f_Shot.powerGaugeFrame = distance;
       if (f_ShotOffset == SHOT_OFFSET_NONE) {
         f_Shot.offsetX = 0;
         f_Shot.offsetY = 0;
