@@ -245,7 +245,11 @@ void UpdateAndDrawFireworks(Gfx** displayListHead) {
   Mat4 transform;
   /* The original frame has room for this too; without it 100 words differ */
   s32 unusedAfter[6] UNUSED;
-  /* One index for the fireworks and the particles, to match */
+  /*
+   * One index for the fireworks and the particles, to match: a particleIndex
+   * for the particles gives 34 words differing, and for the updated particles
+   * alone 62, none in shape
+   */
   s32 i;
   s32 index;
   FireworkParticle* particle;
@@ -253,7 +257,10 @@ void UpdateAndDrawFireworks(Gfx** displayListHead) {
   f32 directionX;
   f32 directionY;
   f32 inverseSpeed;
-  /* The particle's speed, until it scales into its trail's length, to match */
+  /*
+   * The particle's speed, until it scales into its trail's length, to match:
+   * a separate speed variable gives 30 words differing, none in shape
+   */
   f32 length;
   f32 tailScale;
   s32 timer;
