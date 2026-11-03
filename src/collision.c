@@ -2048,7 +2048,9 @@ s32 GetTrianglePlaneCopy(PlaneTriangle* triangle, TrianglePlane* plane) {
  * the plane together, adding their terms in turn, where this works out the
  * start's first, and so the tests on the sides and the fraction's terms take
  * other registers. The prologue and the triangle lookup are scheduled
- * differently too. 107 words differ, 47 in shape.
+ * differently too. Copying the hit's corners straight from the table gives
+ * 107 words differing, 47 in shape, and through a pointer to its vertices
+ * 78 and 28. 58 words differ, 28 in shape.
  */
 #ifdef NON_MATCHING
 s32 FindHoleTriangleHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
@@ -2240,24 +2242,22 @@ s32 FindHoleTriangleHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
   }
 
   if (hitIndex >= 0) {
-    hit->corners[AXIS_X][0] =
-        g_WorkArea.hole.triangles[hitIndex].vertices[0].v.ob[AXIS_X];
-    hit->corners[AXIS_X][1] =
-        g_WorkArea.hole.triangles[hitIndex].vertices[1].v.ob[AXIS_X];
-    hit->corners[AXIS_X][2] =
-        g_WorkArea.hole.triangles[hitIndex].vertices[2].v.ob[AXIS_X];
-    hit->corners[AXIS_Y][0] =
-        g_WorkArea.hole.triangles[hitIndex].vertices[0].v.ob[AXIS_Y];
-    hit->corners[AXIS_Y][1] =
-        g_WorkArea.hole.triangles[hitIndex].vertices[1].v.ob[AXIS_Y];
-    hit->corners[AXIS_Y][2] =
-        g_WorkArea.hole.triangles[hitIndex].vertices[2].v.ob[AXIS_Y];
-    hit->corners[AXIS_Z][0] =
-        g_WorkArea.hole.triangles[hitIndex].vertices[0].v.ob[AXIS_Z];
-    hit->corners[AXIS_Z][1] =
-        g_WorkArea.hole.triangles[hitIndex].vertices[1].v.ob[AXIS_Z];
-    hit->corners[AXIS_Z][2] =
-        g_WorkArea.hole.triangles[hitIndex].vertices[2].v.ob[AXIS_Z];
+    HoleTriangle* hitTriangle = &g_WorkArea.hole.triangles[hitIndex];
+
+    hit->corners[AXIS_X][0] = hitTriangle->vertices[0].v.ob[AXIS_X];
+    hit->corners[AXIS_X][1] = hitTriangle->vertices[1].v.ob[AXIS_X];
+    hit->corners[AXIS_X][2] = hitTriangle->vertices[2].v.ob[AXIS_X];
+    hit->corners[AXIS_Y][0] = hitTriangle->vertices[0].v.ob[AXIS_Y];
+    hit->corners[AXIS_Y][1] = hitTriangle->vertices[1].v.ob[AXIS_Y];
+    hit->corners[AXIS_Y][2] = hitTriangle->vertices[2].v.ob[AXIS_Y];
+    hit->corners[AXIS_Z][0] = hitTriangle->vertices[0].v.ob[AXIS_Z];
+    hit->corners[AXIS_Z][1] = hitTriangle->vertices[1].v.ob[AXIS_Z];
+    hit->corners[AXIS_Z][2] = hitTriangle->vertices[2].v.ob[AXIS_Z];
+
+    /*
+     * The kind is read from the table, as the original addresses it afresh;
+     * reading it through hitTriangle gives 78 words differing, 30 in shape
+     */
     hit->unk0 = g_WorkArea.hole.triangles[hitIndex].kind;
     *fraction = nearestFraction;
     return TRUE;
