@@ -2598,7 +2598,9 @@ void DrawBestShotsCursor(Gfx** displayListHead) {
  * face in each branch makes the address worth strength reduction; storing it
  * once after the branches leaves the index but keeps the table's address in
  * the loop, which is too long for a constant used once to be moved out of it
- * (46 words). 19 words differ, 9 in shape.
+ * (46 words). An s16 cell gives 15 words differing, 1 in shape, but it
+ * sign-extends the cell before the palette offset, where the original
+ * shifts it by 9 alone, so the cell is a word. 19 words differ, 9 in shape.
  */
 #ifdef NON_MATCHING
 void LoadBestShotFaces(void) {
