@@ -237,7 +237,9 @@ void ResetBallSimulations(void) {
  * or its move of semi-rough's case label below the friction scaling changes
  * nothing. On the 769-word draft, setting side's X inside the landing tilt test
  * gave 766 (236), as did side's three stores, and the gravity's nested if as an
- * else-if changed nothing. 763 words differ, 227 in shape.
+ * else-if changed nothing. The register oracle, forcing 126 pseudos' registers,
+ * leaves 425 words at best, so the code differs too. 763 words differ, 227 in
+ * shape.
  */
 #ifdef NON_MATCHING
 s32 StepBallSimulation(BallSimulation* simulation) {
