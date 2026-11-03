@@ -1749,7 +1749,10 @@ void MoveBallToCupEdge(BallSimulation* simulation) {
  * a flag for each of the direction's components and ors them before its
  * one branch, as a | gives; with || GCC branches on each (177 against
  * 198). It ors the contact offsets themselves to test them, where with ||
- * GCC sets and ors flags (173 against 177). 173 words differ, 27 in shape.
+ * GCC sets and ors flags (173 against 177). The permuter's best output
+ * (144 words, 20 in shape) scales the direction's y before normalizing,
+ * where the original scales it after, with x and z; moving that line alone
+ * gains incidentally, and is left out. 173 words differ, 27 in shape.
  */
 #ifdef NON_MATCHING
 s32 FindPinHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY, s32 endZ,
