@@ -535,9 +535,12 @@ s32 GetClubSlotsState(void) {
 /*
  * Doesn't match: the reel loops' counters take $s3 and $s4 the other way
  * round, the original keeps &asset in $s2 for the face reads where ours
- * rebuilds it from $sp, and the face lookups schedule their argument loads
- * differently. Reading the second face after the branches gives 55 words
- * differing, 35 in shape. 53 words differ, 33 in shape.
+ * rebuilds it from $sp, and the face loop scales playerIndex for its palettes
+ * at another point. Each face image is read into faceImage before its texture
+ * load, as the original reads it ahead of the call's other arguments; passing
+ * the lookups straight to LoadTextureBlock gives 53 words differing, 33 in
+ * shape. Reading the second face after the branches gives 55 words differing,
+ * 35 in shape. 25 words differ, 7 in shape.
  */
 #ifdef NON_MATCHING
 void DrawClubSlots(Gfx** displayListHead) {
@@ -900,9 +903,10 @@ void DrawClubSlots(Gfx** displayListHead) {
   for (playerIndex = 0; playerIndex != g_GameState.playerCount; playerIndex++) {
     LoadLargePalette(&gfx, g_PlayerFacePalettes[playerIndex]);
     if (playerIndex == f_Slots->playerIndex) {
-      LoadTextureBlock(&gfx,
-          f_Slots->faceImages[playerIndex][f_FaceBufferIndex], G_IM_FMT_CI,
-          G_IM_SIZ_8b, FACE_SIZE, FACE_SIZE, 0, 0, 0, 0, 0, 0, 0);
+      u8* faceImage = f_Slots->faceImages[playerIndex][f_FaceBufferIndex];
+
+      LoadTextureBlock(&gfx, faceImage, G_IM_FMT_CI, G_IM_SIZ_8b, FACE_SIZE,
+          FACE_SIZE, 0, 0, 0, 0, 0, 0, 0);
       gDPPipeSync(gfx++);
       gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
       DrawTextureRect(&gfx, QuarterPixels(FACE_LEFT),
@@ -956,8 +960,10 @@ void DrawClubSlots(Gfx** displayListHead) {
         }
       }
     } else {
-      LoadTextureBlock(&gfx, g_PlayerFaceImages[playerIndex], G_IM_FMT_CI,
-          G_IM_SIZ_8b, FACE_SIZE, FACE_SIZE, 0, 0, 0, 0, 0, 0, 0);
+      u8* faceImage = g_PlayerFaceImages[playerIndex];
+
+      LoadTextureBlock(&gfx, faceImage, G_IM_FMT_CI, G_IM_SIZ_8b, FACE_SIZE,
+          FACE_SIZE, 0, 0, 0, 0, 0, 0, 0);
       gDPSetPrimColor(gfx++, 0, 0, 127, 127, 127, 127);
       DrawTextureRect(&gfx, QuarterPixels(OTHER_FACE_LEFT),
           QuarterPixels(OTHER_FACE_TOP + (playerIndex * FACE_SPACING)),
