@@ -455,8 +455,11 @@ void StopEditorMoves(void) {
  * turnLeft and tiltLeft once before stepping them, where the original reads
  * each twice. The distance to a target sums the offsets' squares in x, y, z
  * order, as the original adds them; summing x, z, y gives 266 words, but the
- * register oracle then comes no closer than 173, against 161. 278 words
- * differ, 80 in shape.
+ * register oracle then comes no closer than 173, against 161. A permuter
+ * run's best output, 6723 against 7158, only clears turnLeft after toggling
+ * the turning flag, giving 278 words differing, 74 in shape; the original
+ * clears it with the turn's speed and braking angle, as here, so the gain is
+ * incidental. 278 words differ, 80 in shape.
  *
  * The eight flag tests before letting go of the pivot each clear isDone:
  * jump.c turns each "if (test) isDone = FALSE" into an and with the negated
