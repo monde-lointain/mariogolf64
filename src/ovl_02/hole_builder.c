@@ -2783,6 +2783,11 @@ void ClearHolePoints(void) {
 void ResetBuildBuffer(void) {
   f_BuildCursor = BUILD_BUFFER_START;
   f_BuildBuffer = f_BuildCursor;
+  /*
+   * Rewinds the cursor to the buffer, as the file routines do after a read;
+   * the original makes all three stores, and any two of them, chained or
+   * not, give 4 words differing, 2 in shape
+   */
   f_BuildCursor = f_BuildBuffer;
 }
 
