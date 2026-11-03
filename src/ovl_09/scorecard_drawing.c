@@ -546,8 +546,11 @@ const char f_CompactHoleFormat[] = "Hole%d";
  * Doesn't match: sched places $fp's setup from the matchPanelImage address
  * later, after the panel's calls, and the tile loops take &gfx from $s1 where
  * the original copies it to $s7, spilling zero rather than $s1 to 0x6C($sp).
- * The allocation oracle finds no closer forcing. 110 words differ, 104 in
- * shape.
+ * The tiles' texel offsets are worked out once per tile, as the original
+ * scales them before the calls (scaling at each call gives 110 words, 104 in
+ * shape). Grouping the tiles' y as g_Scorecard.y + (rowOffset + TILE_TOP)
+ * gives 111 words, 49 in shape; stepping rowOffset as i * MATCH_ROW_SPACING
+ * gives 183. 86 words differ, 66 in shape.
  */
 #ifdef NON_MATCHING
 void DrawMatchPage(Gfx** displayListHead) {
@@ -563,8 +566,8 @@ void DrawMatchPage(Gfx** displayListHead) {
   s32 i;
   s32 shareCount;
   s32 j;
-  s32 column;
-  s32 imageRow;
+  s32 imageLeft;
+  s32 imageTop;
   s32 frame;
   s32 bounce;
 
@@ -714,8 +717,8 @@ void DrawMatchPage(Gfx** displayListHead) {
   for (i = 0, rowOffset = 0; i != MATCH_PLAYER_COUNT;
       i++, rowOffset += MATCH_ROW_SPACING) {
     for (j = 0; j != winsNeeded; j++) {
-      column = j % TILES_PER_IMAGE_ROW;
-      imageRow = j / TILES_PER_IMAGE_ROW;
+      imageLeft = (j % TILES_PER_IMAGE_ROW) * TILE_PIECE_WIDTH;
+      imageTop = (j / TILES_PER_IMAGE_ROW) * TILE_HEIGHT;
       if (j == WIDE_TILE_INDEX) {
         DrawTextureRect(&gfx, QuarterPixels(g_Scorecard.x + WIDE_TILE_LEFT),
             QuarterPixels(g_Scorecard.y + rowOffset + TILE_TOP),
@@ -743,9 +746,8 @@ void DrawMatchPage(Gfx** displayListHead) {
             QuarterPixels((j * TILE_SPACING) +
                 (g_Scorecard.x + TILE_LEFT + (TILE_PIECE_WIDTH * 2))),
             QuarterPixels(g_Scorecard.y + rowOffset + TILE_TOP + TILE_HEIGHT),
-            G_TX_RENDERTILE, TexelCoordinate(column * TILE_PIECE_WIDTH),
-            TexelCoordinate(imageRow * TILE_HEIGHT), TEXEL_STEP_ONE,
-            TEXEL_STEP_ONE);
+            G_TX_RENDERTILE, TexelCoordinate(imageLeft),
+            TexelCoordinate(imageTop), TEXEL_STEP_ONE, TEXEL_STEP_ONE);
         DrawTextureRect(&gfx,
             QuarterPixels((j * TILE_SPACING) +
                 (g_Scorecard.x + TILE_LEFT + (TILE_PIECE_WIDTH * 2))),
