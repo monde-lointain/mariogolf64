@@ -1919,7 +1919,8 @@ void DrawSky(
  * the first syncs' stores. GCC takes both to be structure accesses through
  * pointers that may alias, so here it keeps them in the source's order;
  * computing centerShift before the syncs comes closest, where after them
- * gives 87 differing words. 46 words differ, 10 in shape.
+ * gives 87 differing words. The rest are register choices that forcing
+ * pseudos doesn't settle (20 words remain). 56 words differ, none in shape.
  */
 #ifdef NON_MATCHING
 void DrawBackdrop(Gfx** displayListHead, CameraView* view, s32 cameraIndex) {
@@ -2097,9 +2098,11 @@ void DrawBackdrop(Gfx** displayListHead, CameraView* view, s32 cameraIndex) {
     top = y + view->scissorY - centerShift;
     bottom =
         (f32)y + (f_BackdropStripHeight * zoom) + view->scissorY - centerShift;
-    for (row = 0;; row++, top = bottom,
-        bottom = bottom + (view->zoom * f_BackdropStripHeight)) {
-      if (top < view->scissorY - (view->zoom * f_BackdropStripHeight)) {
+    for (row = 0;; row++) {
+      /* A skipped strip steps on to the next by itself */
+      if (top < view->scissorY - (f_BackdropStripHeight * view->zoom)) {
+        top = bottom;
+        bottom = bottom + (f_BackdropStripHeight * view->zoom);
         continue;
       }
 
@@ -2151,9 +2154,12 @@ void DrawBackdrop(Gfx** displayListHead, CameraView* view, s32 cameraIndex) {
           QuarterPixels(view->scissorX + view->scissorWidth),
           QuarterPixels(bottom), G_TX_RENDERTILE, textureX, 0, texelStepX,
           texelStepY);
+      top = bottom;
       if (bottom == view->scissorY + view->scissorHeight) {
         break;
       }
+
+      bottom = bottom + (f_BackdropStripHeight * view->zoom);
     }
   }
 
