@@ -1296,7 +1296,12 @@ void InitClubs(void) {
  * and uses the copy only when test-firing, and it schedules the conversion of
  * fraction later. Copying shotMode to a local at the start of the test path
  * reproduces the copy (89 words differ, 19 in shape), and forcing 14 pseudos
- * to the original's registers then leaves 19. 94 words differ, 22 in shape.
+ * to the original's registers then leaves 19. The permuter's best output
+ * (65 words, 15 in shape) computes both products of reach early in new_var
+ * temporaries and adds the overshoot in a second statement; a named local
+ * for the target's product gives 96 to 118, and reordering the putter's
+ * power, the target distance and the clears 94 to 116. 94 words differ, 22
+ * in shape.
  */
 #ifdef NON_MATCHING
 s32 GetPuttPower(s32 fraction, ShotMode shotMode) {
