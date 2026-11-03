@@ -452,6 +452,11 @@ s32 StepOpeningBallSimulation(BallSimulation* simulation) {
       }
     }
 
+    /*
+     * The rest of the step in an if instead of this goto gives the same code.
+     * The goto stays as in StepBallSimulation, where the same test needs it to
+     * match.
+     */
     if (simulation->state == BALL_STATE_STOPPED) {
       goto SETTLE;
     }

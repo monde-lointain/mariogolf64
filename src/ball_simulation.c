@@ -363,6 +363,10 @@ s32 StepBallSimulation(BallSimulation* simulation) {
   fraction = 1.0f;
   substep = 0;
   do {
+    /*
+     * The rest of the substep in an if instead of this goto gives the same
+     * code. The goto stays like the one to SETTLE below, which matching needs.
+     */
     if (substep != 0 && simulation->purpose == LAUNCH_PURPOSE_UNK5) {
       goto NEXT;
     }
@@ -375,6 +379,10 @@ s32 StepBallSimulation(BallSimulation* simulation) {
     previousVelocityZ = velocity[AXIS_Z];
     simulation->unkB1 = simulation->unkA6;
     hitsHoleTriangle = FALSE;
+    /*
+     * The goto, to match: the rest of the step in an if on the ball not having
+     * stopped gives 1255 words differing, 227 in shape, against 763 and 227.
+     */
     if (simulation->state == BALL_STATE_STOPPED) {
       goto SETTLE;
     }
