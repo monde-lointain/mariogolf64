@@ -1717,7 +1717,6 @@ void MoveBallToCupEdge(BallSimulation* simulation) {
   s32 deltaX;
   s32 deltaZ;
   f32 offsetZ;
-  s32* position;
 
   if (distance < CUP_EDGE_DISTANCE) {
     if (distance != 0) {
@@ -1730,11 +1729,8 @@ void MoveBallToCupEdge(BallSimulation* simulation) {
       offsetX = direction[AXIS_X] * CUP_EDGE_DISTANCE;
       offsetZ = direction[AXIS_Z] * CUP_EDGE_DISTANCE;
 
-      /* The pointer is there to match; GCC keeps its stores ahead of the later
-       * cup load */
-      position = simulation->position;
-      position[AXIS_X] = offsetX + g_HoleSetup.cupPosition[AXIS_X];
-      position[AXIS_Z] = offsetZ + g_HoleSetup.cupPosition[AXIS_Z];
+      simulation->position[AXIS_X] = offsetX + g_HoleSetup.cupPosition[AXIS_X];
+      simulation->position[AXIS_Z] = offsetZ + g_HoleSetup.cupPosition[AXIS_Z];
     }
   }
 }
@@ -2056,9 +2052,10 @@ s32 GetTrianglePlaneCopy(PlaneTriangle* triangle, TrianglePlane* plane) {
  * the plane together, adding their terms in turn, where this works out the
  * start's first, and so the tests on the sides and the fraction's terms take
  * other registers. The prologue and the triangle lookup are scheduled
- * differently too. Copying the hit's corners straight from the table gives
- * 107 words differing, 47 in shape, and through a pointer to its vertices
- * 78 and 28. 58 words differ, 28 in shape.
+ * differently too. While endSide also held the side change, which gave 58
+ * words differing (28 in shape), copying the hit's corners straight from the
+ * table gave 107 (47), and through a pointer to its vertices 78 (28). 24
+ * words differ, 10 in shape.
  */
 #ifdef NON_MATCHING
 s32 FindHoleTriangleHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
@@ -2077,8 +2074,8 @@ s32 FindHoleTriangleHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
   HoleTriangle* candidate;
   f32 nearestFraction;
   f32 startSide;
-  /* Also the side change along the path, to match */
   f32 endSide;
+  f32 sideChange;
   f32 hitFraction;
   s32 hitX;
   s32 hitZ;
@@ -2168,9 +2165,8 @@ s32 FindHoleTriangleHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
     triangle.corners[AXIS_Z][1] = candidate->vertices[1].v.ob[AXIS_Z];
     triangle.corners[AXIS_Z][2] = candidate->vertices[2].v.ob[AXIS_Z];
     GetTrianglePlane(&triangle, &plane);
-    /* The start's z comes before its normal component, to match */
     startSide = (plane.normal[AXIS_X] * startX) +
-        (plane.normal[AXIS_Y] * startY) + (startZ * plane.normal[AXIS_Z]) +
+        (plane.normal[AXIS_Y] * startY) + (plane.normal[AXIS_Z] * startZ) +
         (plane.distance * WORLD_TO_COURSE_SCALE);
     endSide = (plane.normal[AXIS_X] * endX) + (plane.normal[AXIS_Y] * endY) +
         (plane.normal[AXIS_Z] * endZ) +
@@ -2180,9 +2176,9 @@ s32 FindHoleTriangleHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
      * or fabs leave as many words or more */
     END_BASIC_BLOCK();
     if (DoesPathMeetPlane(startSide, endSide)) {
-      endSide = startSide - endSide;
-      if ((s32)endSide != 0) {
-        endDistance = fabsf(endSide);
+      sideChange = startSide - endSide;
+      if ((s32)sideChange != 0) {
+        endDistance = fabsf(sideChange);
         hitFraction = fabsf(startSide) / endDistance;
       } else {
         hitFraction = 0.0f;
