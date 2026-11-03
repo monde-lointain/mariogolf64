@@ -605,10 +605,10 @@ INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", KeepAimCameraOnCourse);
  * heading's read across KeepAimCameraOnCourse, and reads aimCameraDistance
  * through it. Calling KeepAimCameraOnCourse first gives 151 words; only a
  * barrier around the call helps (137). On the green the look-at's height is
- * worked out after its x and z (148 words, 74 in shape, between them; z
- * first gives 125, and the other orders 150 to 162). The permuter's best
- * (119 words, 35 in shape) puts z first and adds a float local holding
- * 1/1024 for the tilt's scale, a fake. 113 words differ, 43 in shape.
+ * worked out after its x and z; between them, as before, gave 113 words, 43 in
+ * shape. The permuter's best (67 words, 9 in shape) also adds a float local
+ * holding 1/1024 for the tilt's scale, set just before the look-at's height, a
+ * fake; alone it gives 102 (32). 78 words differ, 20 in shape.
  */
 #ifdef NON_MATCHING
 void PlaceShotCamera(void) {
@@ -819,11 +819,11 @@ void PlaceShotCamera(void) {
     point[AXIS_X] =
         (cosf(heading) * (g_CurrentShot.aimCameraDistance + GREEN_LOOK_AHEAD)) +
         center[AXIS_X];
-    point[AXIS_Y] = (g_CurrentShot.ballPosition[AXIS_Y] - LOOK_BACK_RISE) -
-        (g_CurrentShot.aimCameraHeight * LOOK_BACK_HEIGHT_SCALE);
     point[AXIS_Z] =
         (sinf(heading) * (g_CurrentShot.aimCameraDistance + GREEN_LOOK_AHEAD)) +
         center[AXIS_Z];
+    point[AXIS_Y] = (g_CurrentShot.ballPosition[AXIS_Y] - LOOK_BACK_RISE) -
+        (g_CurrentShot.aimCameraHeight * LOOK_BACK_HEIGHT_SCALE);
     g_Cameras[0].view.heading = heading;
     g_Cameras[0].view.lookAt[AXIS_X] = point[AXIS_X] * COURSE_TO_WORLD_SCALE;
     g_Cameras[0].view.lookAt[AXIS_Y] = point[AXIS_Y] * COURSE_TO_WORLD_SCALE;
