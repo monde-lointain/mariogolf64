@@ -1440,8 +1440,12 @@ void AnimateCharacter(u32 slotIndex) {
  * them unused. Nothing calls it.
  *
  * Doesn't match: GCC keeps other values in saved registers across the joint
- * loop. The original keeps the two words of a double constant, where GCC
- * keeps 1.0f and a stack address. 184 words differ, 66 in shape.
+ * loop. The original keeps the two words of a double constant, and the
+ * quaternion product scale in $fp, where GCC keeps 1.0f and a stack address.
+ * loop.c hoists both constants in ours; global-alloc ranks 1.0f just above the
+ * product scale, which reload then loads at each use, the reverse of the
+ * original. The register oracle comes no closer than 136 words differing with
+ * 28 pseudos forced, so the code differs too. 184 words differ, 66 in shape.
  */
 #ifdef NON_MATCHING
 void UpdateJointKeyframeSpans(u32 slotIndex) {
@@ -1639,12 +1643,13 @@ void UpdateJointKeyframeSpans(u32 slotIndex) {
     /* The rotation quaternion (x, y, z, w) as a matrix */
     lengthSquared = (rotation[0] * rotation[0]) + (rotation[1] * rotation[1]) +
         (rotation[2] * rotation[2]) + (rotation[3] * rotation[3]);
+    /* Fills the matrix through a pointer, which matches more closely: writing
+     * jointMatrix itself gives 186 words differing, 72 in shape */
+    rotationMatrix = jointMatrix;
     if (lengthSquared > 0.0f) {
       scale = 2.0f / lengthSquared;
-      rotationMatrix = jointMatrix;
     } else {
       scale = 0.0f;
-      rotationMatrix = jointMatrix;
     }
 
     xs = rotation[0] * scale;
