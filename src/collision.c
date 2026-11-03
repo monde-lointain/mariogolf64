@@ -3141,6 +3141,8 @@ s32 FindRingHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
   f32 endSide;
   f32 sideChange;
   f32 hitFraction;
+  /* The original frame has room for this; without it 106 words differ, 10 in
+   * shape */
   s32 unused[4] UNUSED;
 
   if (IsGameFlagSet(GAME_FLAG_UNK0)) {

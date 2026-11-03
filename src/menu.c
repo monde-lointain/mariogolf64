@@ -1136,7 +1136,9 @@ void InsertBestTime(s32 courseIndex, s32 time, s32 scoreToPar,
   s32 runIndex;
   s32 scanIndex;
   s32 otherIndex;
-  s32 unused[4] UNUSED; /* The original frame has room for this */
+  /* The original frame has room for this; without it 64 words differ, none in
+   * shape */
+  s32 unused[4] UNUSED;
 
   save = GetSaveData();
   if (courseIndex < 0) {

@@ -1716,6 +1716,8 @@ void DrawSky(
   Gfx* gfx = *displayListHead;
   SkyColors* colors;
   Mat4 matrix;
+  /* The original frame has room for this; without it 194 words differ, none
+   * in shape */
   s32 unused[16] UNUSED;
   Vec3 rotation;
   Vec3 translation;

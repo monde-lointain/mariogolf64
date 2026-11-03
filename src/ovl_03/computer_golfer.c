@@ -1941,7 +1941,9 @@ void ChooseLandingTarget(
  */
 void ChooseLongShot(s32 unused UNUSED, ClubType* clubType, s32* targetX,
     s32* targetZ, ShotMode* shotMode) {
-  s32 pad[44] UNUSED; /* Unused; it is there to match */
+  /* The original frame has room for this; without it 34 words differ, none in
+   * shape */
+  s32 pad[44] UNUSED;
   ShotMode shotModes[STROKE_SHOT_MODE_COUNT];
   s32 index;
   /*
