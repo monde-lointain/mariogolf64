@@ -192,7 +192,11 @@ void InitPeriodicSpline(f32 knotX[], f32 knotY[], f32 coefficients[]) {
     coefficients[index] = slopes[index] - slopes[index - 1];
   }
 
-  /* slopes is reused from here as the column that the period adds, to match */
+  /*
+   * slopes is reused from here as the column that the period adds, to match:
+   * an array of its own grows the frame, and gives 30 words differing
+   * (none in shape) declared after slopes, or 212 declared first
+   */
   slopes[1] = widths[0];
   slopes[SPLINE_SEGMENT_COUNT - 1] = widths[SPLINE_SEGMENT_COUNT - 1];
   slopes[SPLINE_SEGMENT_COUNT] = diagonal[SPLINE_SEGMENT_COUNT];
