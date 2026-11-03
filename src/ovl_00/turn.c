@@ -2939,9 +2939,9 @@ void ShowHoleOutBanner(s32 playerIndex) {
  * inline: inlined, their buffers share one stack slot, as in the
  * original's frame.
  *
- * Doesn't match: 415 words differ, 165 in shape, spread through the
- * routine's states. The counts in the paragraphs after the next were
- * measured before it, when 454 words differed, 184 in shape.
+ * Doesn't match: 392 words differ, 148 in shape, spread through the routine's
+ * states. The counts in the paragraphs after the next were measured before it,
+ * when 454 words differed, 184 in shape.
  *
  * A player out of the group game has the hole's strokes and the stroke
  * count zeroed by one chained assignment. As two statements, the strokes
