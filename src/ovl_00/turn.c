@@ -1275,22 +1275,37 @@ INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", TurnAim);
 #endif
 
 /*
+ * Clamps the aim camera's height between minHeight and AIM_CAMERA_MAX_HEIGHT,
+ * and its distance between minDistance and maxDistance. Each view clamps all
+ * four, as in the original, whose green and other views share their tails;
+ * clamping the common bounds once after the views gives 24 differing words.
+ */
+#define ClampAimCamera(minHeight, minDistance, maxDistance) \
+  { \
+    if (g_CurrentShot.aimCameraHeight > (minHeight)) { \
+      g_CurrentShot.aimCameraHeight = (minHeight); \
+    } \
+    if (g_CurrentShot.aimCameraHeight < AIM_CAMERA_MAX_HEIGHT) { \
+      g_CurrentShot.aimCameraHeight = AIM_CAMERA_MAX_HEIGHT; \
+    } \
+    if (g_CurrentShot.aimCameraDistance < (minDistance)) { \
+      g_CurrentShot.aimCameraDistance = (minDistance); \
+    } \
+    if (g_CurrentShot.aimCameraDistance > (maxDistance)) { \
+      g_CurrentShot.aimCameraDistance = (maxDistance); \
+    } \
+  }
+
+/*
  * Handles the aim's buttons for a frame: switching between looking down the
  * range, at the cup and back from past the ball, and moving the camera. A
  * replay instead turns the aim to the recorded heading, and returns TRUE once
  * it has settled there for a while.
- *
- * Doesn't match: outside the look-back view, the original keeps the address of
- * aimCameraHeight in one register from the lower clamp through the upper one.
- * This holds it in another register for the lower clamp and loads it again.
- * 24 words differ.
  */
-#ifdef NON_MATCHING
 s32 UpdateAimControls(void) {
   Vec3 toCup;
   s32 headingLeft;
   s32 step;
-  s32 maxDistance;
   s32 turn;
   s32 heading;
 
@@ -1598,43 +1613,14 @@ s32 UpdateAimControls(void) {
   }
 
   if (g_LetterboxState == LETTERBOX_STATE_LOOKING_BACK) {
-    if (g_CurrentShot.aimCameraHeight > GREEN_AIM_CAMERA_MIN_HEIGHT) {
-      g_CurrentShot.aimCameraHeight = GREEN_AIM_CAMERA_MIN_HEIGHT;
-    }
-
-    if (g_CurrentShot.aimCameraHeight < AIM_CAMERA_MAX_HEIGHT) {
-      g_CurrentShot.aimCameraHeight = AIM_CAMERA_MAX_HEIGHT;
-    }
-
-    if (g_CurrentShot.aimCameraDistance < LOOK_BACK_MIN_DISTANCE) {
-      g_CurrentShot.aimCameraDistance = LOOK_BACK_MIN_DISTANCE;
-    }
-
-    maxDistance = LOOK_BACK_MAX_DISTANCE;
-    if (g_CurrentShot.aimCameraDistance > maxDistance) {
-      g_CurrentShot.aimCameraDistance = maxDistance;
-    }
+    ClampAimCamera(GREEN_AIM_CAMERA_MIN_HEIGHT, LOOK_BACK_MIN_DISTANCE,
+        LOOK_BACK_MAX_DISTANCE);
+  } else if (g_ShotFlags & SHOT_FLAG_ON_GREEN) {
+    ClampAimCamera(GREEN_AIM_CAMERA_MIN_HEIGHT, AIM_CAMERA_MIN_DISTANCE,
+        AIM_CAMERA_MAX_DISTANCE);
   } else {
-    if (g_ShotFlags & SHOT_FLAG_ON_GREEN) {
-      if (g_CurrentShot.aimCameraHeight > GREEN_AIM_CAMERA_MIN_HEIGHT) {
-        g_CurrentShot.aimCameraHeight = GREEN_AIM_CAMERA_MIN_HEIGHT;
-      }
-    } else if (g_CurrentShot.aimCameraHeight > AIM_CAMERA_MIN_HEIGHT) {
-      g_CurrentShot.aimCameraHeight = AIM_CAMERA_MIN_HEIGHT;
-    }
-
-    if (g_CurrentShot.aimCameraHeight < AIM_CAMERA_MAX_HEIGHT) {
-      g_CurrentShot.aimCameraHeight = AIM_CAMERA_MAX_HEIGHT;
-    }
-
-    if (g_CurrentShot.aimCameraDistance < AIM_CAMERA_MIN_DISTANCE) {
-      g_CurrentShot.aimCameraDistance = AIM_CAMERA_MIN_DISTANCE;
-    }
-
-    maxDistance = AIM_CAMERA_MAX_DISTANCE;
-    if (g_CurrentShot.aimCameraDistance > maxDistance) {
-      g_CurrentShot.aimCameraDistance = maxDistance;
-    }
+    ClampAimCamera(AIM_CAMERA_MIN_HEIGHT, AIM_CAMERA_MIN_DISTANCE,
+        AIM_CAMERA_MAX_DISTANCE);
   }
 
   g_Cameras[1].view.eye[AXIS_X] = g_Cameras[0].view.eye[AXIS_X];
@@ -1645,9 +1631,6 @@ s32 UpdateAimControls(void) {
   g_Cameras[1].view.lookAt[AXIS_Z] = g_Cameras[0].view.lookAt[AXIS_Z];
   return FALSE;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", UpdateAimControls);
-#endif
 
 void UpdateShotFlags(void) {
   s32 surfaceMask = GetSelectedClub()->surfaceMask;
