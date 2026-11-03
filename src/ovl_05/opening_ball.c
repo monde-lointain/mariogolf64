@@ -324,7 +324,10 @@ typedef s32 (*BillboardHitFinder)(s32 startX, s32 startY, s32 startZ, s32 endX,
  * the register it had and the floating-point registers are allocated
  * differently. Reading the side spin before the drag, and adding the
  * velocity to the spin's push rather than the other way round, take it from
- * 676 words differing to 662.
+ * 676 words differing to 662. The water skip's last two tests are grouped,
+ * as the original branches on the rolling state and then the impact speed:
+ * in one chain fold_truthop ors their flags (662). 652 words differ, 248 in
+ * shape.
  */
 #ifdef NON_MATCHING
 s32 StepOpeningBallSimulation(BallSimulation* simulation) {
@@ -1076,11 +1079,11 @@ s32 StepOpeningBallSimulation(BallSimulation* simulation) {
         }
       } else if (simulation->surface == SURFACE_WATER_HAZARD) {
         if (simulation->state == BALL_STATE_ROLLING ||
-            impactSpeed <= OPENING_MIN_SKIP_IMPACT_SPEED ||
-            GetOpeningLength2D(
-                simulation->velocity[AXIS_X], simulation->velocity[AXIS_Z]) *
-                    OPENING_SKIP_SPEED_RATIO <=
-                impactSpeed) {
+            (impactSpeed <= OPENING_MIN_SKIP_IMPACT_SPEED ||
+                GetOpeningLength2D(simulation->velocity[AXIS_X],
+                    simulation->velocity[AXIS_Z]) *
+                        OPENING_SKIP_SPEED_RATIO <=
+                    impactSpeed)) {
           simulation->state = BALL_STATE_IN_WATER;
           /* The chained assignment is there to match */
           simulation->velocity[AXIS_X] = simulation->velocity[AXIS_Z] = 0;
