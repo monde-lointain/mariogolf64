@@ -3912,8 +3912,9 @@ void WriteHexDumpFile(u32* words, s32 byteCount, char* fileName) {
  * in a variable set before the tiles and multiplies by it in seven of the eight
  * tile coordinates the texture loads work out, leaving the first expansion's S
  * as the constant; through such a local in all of them, 2236 words differ (474
- * in shape), and in the rows' coordinates only, 2231 (483). 2128 words differ,
- * 488 in shape.
+ * in shape), and in the rows' coordinates only, 2231 (483). The register
+ * oracle, forcing 113 pseudos' registers, leaves 1763 words at best, so the
+ * code differs too. 2128 words differ, 488 in shape.
  */
 #ifdef NON_MATCHING
 void DrawHoleEditorGround(CameraMatrices* matrices UNUSED, s32 terrainStyle) {

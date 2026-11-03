@@ -768,8 +768,8 @@ enum BallSprite {
  * rather than after f_BallRollFrame, cuts 1220 words differing to 834; updating
  * f_BallRollFrame anywhere else gives 822 to 1633 words, 158 or more in shape.
  * The original aligns the Pika ball texture's address to 8 bytes, as
- * TextureAddress does; without that, 894 words differ, 152 in shape. Forcing
- * the original's registers gives 1113 words or more, so the code itself
+ * TextureAddress does; without that, 894 words differ, 152 in shape. The
+ * register oracle's closest result has no register forced, so the code itself
  * differs. The afterimages' loop tests i != f_BallAfterimageLength, as the
  * original's bne against the reloaded length shows; with < it compiles to slt
  * and bnez, and the draft had 834 words differing, 142 in shape, where it now
