@@ -3659,12 +3659,15 @@ void GetGroundLightColors(GroundLightColor* light, GroundLightColor* shade) {
  * the leading height row last and keeps a second, spilled copy of the trailing
  * one, and it reads the fade flags from the stack for each tile, where ours
  * extends isHighGroundFaded once per row and keeps it in another stack slot.
- * Indexing the trailing row where it is read, as the walk's setup does, takes
- * 110 words differing, 24 in shape, to 109 and 23.
+ * Holding the trailing row in trailingHeights beside the leading one, for
+ * the inner tiles, gives 154 words differing, 14 in shape, against 109 and
+ * 23 for indexing heightRows there; the register oracle then gets to 94
+ * words forcing 9 pseudos, where it got to 107. 154 words differ, 14 in
+ * shape.
  */
 #ifdef NON_MATCHING
 void ShadeGroundTiles(void) {
-  /* Pads the frame to match; without it 257 words differ, against 109 */
+  /* Pads the frame to match; without it 248 words differ, against 154 */
   s32 unused[20] UNUSED;
   GroundLightColor light = {24, 22, 16};
   GroundLightColor shade;
@@ -3702,6 +3705,7 @@ void ShadeGroundTiles(void) {
   s32 leadingColumn;
   s16* heights;
   s16* leadingHeights;
+  s16* trailingHeights;
   s16* trailing;
   s16* leading;
   u16* texel;
@@ -3772,6 +3776,7 @@ void ShadeGroundTiles(void) {
 
     heights = heightRows[row & HEIGHT_RING_ROW_MASK];
     leadingHeights = heightRows[(row + lightRowOffset) & HEIGHT_RING_ROW_MASK];
+    trailingHeights = heightRows[(row - lightRowOffset) & HEIGHT_RING_ROW_MASK];
     column = 0;
     do {
       texel =
@@ -3783,9 +3788,7 @@ void ShadeGroundTiles(void) {
       isMapEdge =
           column == 0 || column == MAP_COLUMN_COUNT - GROUND_TILE_TEXEL_SPAN;
       if (!isMapEdge) {
-        /* Indexing heightRows again is there to match */
-        trailing = &heightRows[(row - lightRowOffset) & HEIGHT_RING_ROW_MASK]
-                              [column - lightColumnOffset];
+        trailing = &trailingHeights[column - lightColumnOffset];
         leading = &leadingHeights[column + lightColumnOffset];
       }
 
@@ -3806,6 +3809,10 @@ void ShadeGroundTiles(void) {
             leadingColumn = MAP_COLUMN_COUNT - 1;
           }
 
+          /*
+           * Indexing heightRows again is there to match: reading
+           * trailingHeights here as well gives 161 words, 35 in shape
+           */
           slope = heightRows[(row - lightRowOffset) & HEIGHT_RING_ROW_MASK]
                             [trailingColumn] -
               leadingHeights[leadingColumn];
