@@ -601,7 +601,10 @@ INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", KeepAimCameraOnCourse);
  * screen, behind the ball while aiming, or looking back at it from past the
  * ball.
  *
- * Doesn't match: 224 words differ.
+ * Doesn't match: the original keeps g_CurrentShot's address in $s0 from the
+ * heading's read across KeepAimCameraOnCourse, and reads aimCameraDistance
+ * through it. Calling KeepAimCameraOnCourse first gives 151 words; only a
+ * barrier around the call helps (137). 148 words differ, 74 in shape.
  */
 #ifdef NON_MATCHING
 void PlaceShotCamera(void) {
@@ -780,26 +783,31 @@ void PlaceShotCamera(void) {
   } else {
     KeepAimCameraOnCourse();
 
-    /* The middle of the ball and the cup is worked out, but the ball is used */
-    center[AXIS_Y] = g_HoleSetup.cupPosition[AXIS_Y];
-    center[AXIS_Y] = g_CurrentShot.ballPosition[AXIS_Y];
+    /*
+     * The middle of the ball and the cup, at the cup's height, is worked out,
+     * but the ball is used. Setting the components in turn keeps flow from
+     * deleting the middle's stores, which it does when each store directly
+     * follows another to the same component.
+     */
     heading = ((u16)g_AltHeading * BINARY_ANGLE_TO_RADIANS) + M_PI;
     center[AXIS_X] = g_CurrentShot.ballPosition[AXIS_X] +
         ((g_HoleSetup.cupPosition[AXIS_X] -
              g_CurrentShot.ballPosition[AXIS_X]) *
             0.5f);
-    IN_OWN_BLOCK(center[AXIS_X] = g_CurrentShot.ballPosition[AXIS_X]);
+    center[AXIS_Y] = g_HoleSetup.cupPosition[AXIS_Y];
     center[AXIS_Z] = g_CurrentShot.ballPosition[AXIS_Z] +
         ((g_HoleSetup.cupPosition[AXIS_Z] -
              g_CurrentShot.ballPosition[AXIS_Z]) *
             0.5f);
+    center[AXIS_X] = g_CurrentShot.ballPosition[AXIS_X];
+    center[AXIS_Y] = g_CurrentShot.ballPosition[AXIS_Y];
     center[AXIS_Z] = g_CurrentShot.ballPosition[AXIS_Z];
     point[AXIS_X] =
         (cosf(heading) * g_CurrentShot.aimCameraDistance) + center[AXIS_X];
     point[AXIS_Y] = g_CurrentShot.aimCameraHeight + center[AXIS_Y];
     point[AXIS_Z] =
         (sinf(heading) * g_CurrentShot.aimCameraDistance) + center[AXIS_Z];
-    point[AXIS_Y] = GetAimCameraGround(point[AXIS_X], point[AXIS_Z]) +
+    point[AXIS_Y] = (f32)GetAimCameraGround(point[AXIS_X], point[AXIS_Z]) +
         g_CurrentShot.aimCameraHeight;
     g_Cameras[0].view.eye[AXIS_X] = point[AXIS_X] * COURSE_TO_WORLD_SCALE;
     g_Cameras[0].view.eye[AXIS_Z] = point[AXIS_Z] * COURSE_TO_WORLD_SCALE;
