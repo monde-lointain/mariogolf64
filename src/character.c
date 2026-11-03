@@ -1949,8 +1949,10 @@ void SetCharacterLights(void) {
  * that, where ours adds the offset to the table first. Without IN_OWN_BLOCK
  * it's 99 words, 15 in shape. Choosing the table first and making one
  * AddReactionLight call gives 117 words, 21 in shape (89 and 13 with the
- * block), and keeping a pointer to the chosen lights 174 to 186. 71 words
- * differ, 7 in shape.
+ * block), and keeping a pointer to the chosen lights 174 to 186. The
+ * permuter's best outputs (660 and 720, from 980) read f_DryLights in place
+ * of lights, which saves the wrong lights when the wet ones are chosen. 71
+ * words differ, 7 in shape.
  */
 #ifdef NON_MATCHING
 void DrawCharacter(u32 slotIndex) {
