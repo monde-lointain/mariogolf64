@@ -1493,7 +1493,10 @@ void PlaceAtReactionSpot(Vec3 position, Vec3 rotation, Vec3 scale) {
  * branch's delay slot otherwise (4 words); SDK math.h's fabsf, a
  * __builtin_fabsf of the value cast to float, keeps the tie. No function
  * in the ROM that matches loads straight into abs.s; the six drafts that
- * do all differ there. 4 words differ.
+ * do all differ there. The ROM's compiler isn't refusing every abs.s tie:
+ * 15 of its abs.s use one register for both, and a cc1 whose abssf2 output
+ * is earlyclobber gives the load $f0 and the magnitude $f2 (4 words).
+ * 4 words differ.
  */
 #ifdef NON_MATCHING
 Boolean IsEasedEyeHeightZero(void) {
