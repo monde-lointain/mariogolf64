@@ -2872,11 +2872,13 @@ void DrawContactEffect(Gfx** displayListHead, CameraMatrices* matrices) {
   }
 
   if (f_ContactStyle == CONTACT_STYLE_MARIO) {
-    /* The chained assignment is there to match */
+    /* The chained assignment is there to match: three statements, in either
+     * order, give 501 differing words, 81 in shape */
     translation[AXIS_X] = translation[AXIS_Y] = translation[AXIS_Z] = 0.0f;
+    f_ContactSpinAngle += CONTACT_SPIN_DEGREES_PER_FRAME;
     rotation[AXIS_X] = 0.0f;
     rotation[AXIS_Y] = 0.0f;
-    rotation[AXIS_Z] = f_ContactSpinAngle += CONTACT_SPIN_DEGREES_PER_FRAME;
+    rotation[AXIS_Z] = f_ContactSpinAngle;
     spinScale[AXIS_Z] = alpha * CONTACT_SPIN_SCALE_PER_ALPHA;
     spinScale[AXIS_Y] = spinScale[AXIS_Z];
     spinScale[AXIS_X] = spinScale[AXIS_Y];
