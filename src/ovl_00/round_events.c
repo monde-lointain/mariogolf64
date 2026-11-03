@@ -2659,7 +2659,13 @@ void LoadContactImages(Player* player) {
  * Draws the contact effect as a ribbon through the ball's last positions, and
  * Mario's as a spinning image, while it fades
  *
- * Doesn't match: 476 words differ.
+ * Doesn't match: the original's frame is 16 bytes bigger, as reload gives it
+ * two more spill slots, 53 stack words stored to against 51. Of the 221
+ * differing words that blame.py ties to a line, 107 come from the two
+ * DrawContactRibbon expansions. Counting the reload loops from 0 and adding
+ * each pass's first segment to i gives 1358 words differing, 430 in shape, or
+ * with the first loop alone 1156 (268) and the second 1268 (336), against 476
+ * and 70. 476 words differ, 70 in shape.
  */
 void DrawContactEffect(Gfx** displayListHead, CameraMatrices* matrices) {
   Mat4 scale;
