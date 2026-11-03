@@ -2236,7 +2236,12 @@ void UpdateAnimationViewer(void) {
  * g_GameState.gameMode in another order, the B button's path loads
  * g_ChosenCharacters and g_CharacterGrid in another order, and the spin's
  * slowing keeps the spin in a register where the original reads it again after
- * the step. 64 words differ, 24 in shape.
+ * the step. The second cse pass shares the spin test's address with the
+ * subtraction; testing the step's quotient in the clamp instead of setting
+ * the step, as the permuter's best does (35 words, 15 in shape), reads it
+ * again as the original does, but leaves the step unset. Setting the step
+ * in both arms of the clamp or in a ternary gives 55 to 74 words, and moving
+ * the barrier past the clamp changes nothing. 64 words differ, 24 in shape.
  */
 #ifdef NON_MATCHING
 void UpdateModeSelect(void) {
