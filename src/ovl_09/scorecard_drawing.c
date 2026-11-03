@@ -1623,7 +1623,11 @@ void FormatLeaderboardRow(char* row, TournamentStanding* standing) {
  * reverses the compare (121 words, 45 in shape), and >= with the sine first
  * gives 125. In both flap loops the original masks the shade in its own
  * register; a u8, u16 or u32 shade gives 202-208 words, s16 changes nothing.
- * 120 words differ, 46 in shape.
+ * The permuter's best read g_Scorecard.x through a pointer to it in the
+ * faces' and arrow's calls, giving 99 to 104 words, 41 to 44 in shape; no
+ * such pointer is natural here, and setting the arrow's bottom edge in a
+ * local of its own, as one of them also did, changes nothing. 120 words
+ * differ, 46 in shape.
  */
 #ifdef NON_MATCHING
 void DrawLeaderboardPage(Gfx** displayListHead) {
