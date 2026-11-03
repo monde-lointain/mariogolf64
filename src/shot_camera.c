@@ -3532,7 +3532,9 @@ void SecondUnusedCameraStub(void) {}
  * distance directly. A root temporary copied to distance also gives 3. Per
  * cse.c's make_regs_eqv, radius reads distance only when distance outlives
  * the root beyond the extended block or was used before it; writing it in
- * the first loop as well gives 9. 6 words differ.
+ * the first loop as well gives 9. Keeping the squared distance in a
+ * squaredDistance local of its own, wherever it is declared, gives 10 (4 in
+ * shape), so distance holds both. 6 words differ.
  */
 #ifdef NON_MATCHING
 void BuildSpotTexels(u8* texels, Boolean isSoft) {
