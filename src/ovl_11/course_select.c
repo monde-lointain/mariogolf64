@@ -611,7 +611,10 @@ void SetPlankMotion(s32 motion) {
  * number. Naming the group gives 70 words, computing it before the if 92, a
  * ternary clamp 77 and an if/else strip height worse; testing a second
  * division in the clamp 56 to 77 without the hoist, and a do-while (0)
- * around the division changes nothing. 56 words differ, 10 in shape.
+ * around the division changes nothing. The permuter's 26 words come from
+ * dropping the group's division, which leaves the lag unset below the last
+ * group; writing the strips' bottom into both rectangles, with or without a
+ * group local, gives 70. 56 words differ, 10 in shape.
  */
 #ifdef NON_MATCHING
 void DrawPlanks(Gfx** displayListHead) {
