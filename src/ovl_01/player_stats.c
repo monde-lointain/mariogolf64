@@ -805,8 +805,10 @@ void UpdateBetSettings(void) {
  * chosen bet's explanation
  *
  * Doesn't match: the original keeps the stake marks' coordinates in other
- * registers, and uses markGrowth without masking it to 16 bits. 32 words
- * differ.
+ * registers, and uses markGrowth without masking it to 16 bits. The marks'
+ * left edges add slide and their offset as one sum, which the loop hoists:
+ * written in a row they give 32 differing words. 25 words differ, 5 in
+ * shape.
  */
 #ifdef NON_MATCHING
 void DrawBetSettings(
@@ -818,7 +820,7 @@ void DrawBetSettings(
   s16 stakeLevel;
   s16 betIndex;
   u16 markGrowth;
-  s32 markRaise;
+  u16 markRaise;
   s16 bannerShift;
   u8* icon;
   s32 stripTop;
@@ -923,12 +925,13 @@ void DrawBetSettings(
       gDPPipeSync(gfx++);
 
       gSPScisTextureRectangle(gfx++,
-          QuarterPixels(f_BetSetColumnXs[g_BetSet - 1][i] + slide +
-              STAKE_MARK_OFFSET_X - (markGrowth >> 1)),
+          QuarterPixels(f_BetSetColumnXs[g_BetSet - 1][i] +
+              (slide + STAKE_MARK_OFFSET_X) - (markGrowth >> 1)),
           QuarterPixels((STAKE_MARK_BOTTOM - STAKE_MARK_SIZE) - markGrowth -
               markRaise - (stakeLevel * STAKE_MARK_SPACING)),
-          QuarterPixels(f_BetSetColumnXs[g_BetSet - 1][i] + slide +
-              STAKE_MARK_OFFSET_X + ((markGrowth >> 1) + STAKE_MARK_SIZE)),
+          QuarterPixels(f_BetSetColumnXs[g_BetSet - 1][i] +
+              (slide + STAKE_MARK_OFFSET_X) +
+              ((markGrowth >> 1) + STAKE_MARK_SIZE)),
           QuarterPixels(STAKE_MARK_BOTTOM - markRaise -
               (stakeLevel * STAKE_MARK_SPACING)),
           G_TX_RENDERTILE, 0, 0,
