@@ -1871,7 +1871,10 @@ void PlaceAimCamera(void);
  * set, then clear it. Doesn't match: the original allocates some registers
  * differently, and orders two spots differently: the load of
  * CHASE_FIELD_OF_VIEW and the stores of point for FLIGHT_CAMERA_FACING_CUP.
- * 184 words differ, 8 in shape.
+ * The register oracle forces 27 pseudos, in five separate spots, and still
+ * leaves 38 words differing, among them the chasing camera's offset stores,
+ * which the original makes after its look-at sums. 184 words differ, 8 in
+ * shape.
  */
 #ifdef NON_MATCHING
 void PlaceFlightCamera(s32 step) {
