@@ -881,8 +881,8 @@ s32 StepOpeningBallSimulation(BallSimulation* simulation) {
         simulation->velocity[AXIS_Y] = (f32)(-simulation->velocity[AXIS_Y] /
                                            OPENING_CUP_FLOOR_BOUNCE_DIVISOR) +
             CUP_GRAVITY;
-        /* The chained assignment is there to match */
-        simulation->velocity[AXIS_X] = simulation->velocity[AXIS_Z] = 0;
+        simulation->velocity[AXIS_Z] = 0;
+        simulation->velocity[AXIS_X] = 0;
         if (simulation->velocity[AXIS_Y] > 0) {
           simulation->isHoledOut = 1;
           simulation->state = BALL_STATE_STOPPED;
@@ -1087,8 +1087,8 @@ s32 StepOpeningBallSimulation(BallSimulation* simulation) {
                         OPENING_SKIP_SPEED_RATIO <=
                     impactSpeed)) {
           simulation->state = BALL_STATE_IN_WATER;
-          /* The chained assignment is there to match */
-          simulation->velocity[AXIS_X] = simulation->velocity[AXIS_Z] = 0;
+          simulation->velocity[AXIS_Z] = 0;
+          simulation->velocity[AXIS_X] = 0;
         }
       }
 
