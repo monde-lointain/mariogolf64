@@ -1463,8 +1463,11 @@ void DrawCourseResultsNotice(Gfx** displayListHead) {
             (i * NOTICE_TITLE_STRIP_WIDTH * NOTICE_TITLE_STRIP_HEIGHT),
         G_IM_FMT_CI, G_IM_SIZ_8b, NOTICE_TITLE_STRIP_WIDTH,
         NOTICE_TITLE_STRIP_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
-    /* The top is written out and the bottom's offset kept in a local, unlike
-     * the colored title's, to match */
+    /*
+     * The top is written out and the bottom's offset kept in a local, unlike
+     * the colored title's, to match: writing the bottom out too gives 35
+     * words differing, 5 in shape
+     */
     stripBottomOffset = f_NoticeUnk54 + NOTICE_TITLE_STRIP_HEIGHT;
     DrawTextureRect(&gfx, QuarterPixels(f_NoticeSwing + NOTICE_TITLE_LEFT),
         QuarterPixels(TitleStripTop(depthLift, i) + f_NoticeUnk54),
@@ -1657,7 +1660,6 @@ void DrawCharacterResultsNotice(Gfx** displayListHead) {
     LoadLargePalette(&gfx, f_PortraitPalette);
     LoadTextureBlock(&gfx, f_PortraitImage, G_IM_FMT_CI, G_IM_SIZ_8b,
         NOTICE_PORTRAIT_SIZE, NOTICE_PORTRAIT_SIZE, 0, 0, 0, 0, 0, 0, 0);
-    /* Kept in a local, unlike the nameplate's, to match */
     step = TexelRunStep(NOTICE_PORTRAIT_SIZE / 2, size);
     centerX = f_NoticeLift + NOTICE_CENTER_X;
     centerY = f_NoticeUnk6C + NOTICE_CENTER_Y;
@@ -3655,11 +3657,6 @@ void DrawClubTournamentResults(Gfx** displayListHead) {
 #define PORTRAIT_ANIMATION_REST 0
 #define NO_PORTRAIT_FRAME (-1)
 
-/* The index of the last of stripCount strips */
-static inline s32 GetLastStripIndex(s32 stripCount) {
-  return stripCount - 1;
-}
-
 /*
  * The results card, its game mode's results, the bobbing title and the players'
  * portraits.
@@ -3786,10 +3783,14 @@ void DrawRoundResults(Gfx** displayListHead) {
     f_TitleBobAngle += FINAL_RESULTS_TITLE_BOB_STEP;
     LoadLargePalette(&gfx, ImageBody(f_FinalResultsTitleImage));
     for (i = 0; i != FINAL_RESULTS_TITLE_STRIP_COUNT; i++) {
-      stripHeight = FINAL_RESULTS_TITLE_STRIP_HEIGHT;
-      /* The helper keeps the limit of 3 in a register, to match */
-      if (i == GetLastStripIndex(FINAL_RESULTS_TITLE_STRIP_COUNT)) {
+      /*
+       * Setting the usual height first and the last strip's in an if, or
+       * testing for not the last strip, gives 10 words differing, 6 in shape
+       */
+      if (i == FINAL_RESULTS_TITLE_STRIP_COUNT - 1) {
         stripHeight = FINAL_RESULTS_TITLE_LAST_STRIP_HEIGHT;
+      } else {
+        stripHeight = FINAL_RESULTS_TITLE_STRIP_HEIGHT;
       }
 
       right = left + FINAL_RESULTS_TITLE_WIDTH;
