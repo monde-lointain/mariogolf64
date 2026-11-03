@@ -2432,7 +2432,10 @@ void AnimateCharacterJoints(u32 slotIndex) {
       } else {
         /*
          * This and the other two progress fractions read the global again,
-         * though frame holds it, to match
+         * though frame holds it, to match: reading frame in all three gives 328
+         * words differing (72 in shape), in the translation's alone 214 (44),
+         * the rotation's 312 (68) and the scale's 214 (44), against the draft's
+         * 206 (42)
          */
         progress =
             (g_CurrentAnimationFrame - joint->translationSpan.startFrame) /
@@ -2541,8 +2544,12 @@ void AnimateCharacterJoints(u32 slotIndex) {
     /* The rotation quaternion (x, y, z, w) as a matrix */
     lengthSquared = (rotation[2] * rotation[2]) + (rotation[3] * rotation[3]) +
         (rotation[0] * rotation[0]) + (rotation[1] * rotation[1]);
-    /* dot holds the quaternion's scale from here, and progress holds the w
-     * and x term, to match */
+    /*
+     * dot holds the quaternion's scale from here, and progress holds the w and
+     * x term, to match: a scale variable gives 223 words differing (53 in
+     * shape), a wx variable 228 (42), and both 245 (53), against the draft's
+     * 206 (42)
+     */
     if (lengthSquared > 0.0f) {
       dot = 2.0f / lengthSquared;
     } else {
