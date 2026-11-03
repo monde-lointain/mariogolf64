@@ -1730,7 +1730,10 @@ void DrawCharacterStats(Gfx** displayListHead, GameBoyCharacter* character,
   Gfx* displayList = *displayListHead;
   s32 segment;
 
-  /* Holding the shot type row in segmentCurve first is there to match */
+  /*
+   * Holding the shot type row in segmentCurve first is there to match: a
+   * shotType local gives 50 words differing, none in shape
+   */
   s32 segmentCurve;
 
   SetUpTextDrawing(&displayList);
@@ -1791,8 +1794,11 @@ void DrawCharacterStats(Gfx** displayListHead, GameBoyCharacter* character,
       CURVE_SEGMENT_WIDTH * CURVE_SEGMENT_COUNT, 0, 0, 0, 0, 0, 0, 0);
   for (segment = 0, segmentCurve = -CURVE_SEGMENT_COUNT / 2;
       segment != CURVE_SEGMENT_COUNT; segment++, segmentCurve++) {
-    /* Light segments from the center out to the shot curve; the continues are
-     * there to match */
+    /*
+     * Light segments from the center out to the shot curve. The continues are
+     * there to match: each pair joined with || gives 20 words differing, 8 in
+     * shape
+     */
     if (character->shotCurve < 0) {
       if (segmentCurve < character->shotCurve) {
         continue;
@@ -1975,7 +1981,10 @@ void DrawSendStatusScreen(Gfx** displayListHead, GameBoyTransfer* transfer) {
 
   gDPSetPrimColor(displayList++, 0, 0, 255, 255, 255, 255);
   if (transfer->taggedCartridgeCount != 0) {
-    /* An if-chain rather than a switch is there to match */
+    /*
+     * An if-chain rather than a switch is there to match: a switch gives 8
+     * words differing, 8 in shape
+     */
     if (transfer->screenStep == SEND_STATUS_CHOOSING) {
       f_StatusPointerAngle += POINTER_SWING_STEP;
       if (f_StatusPointerAngle > M_PI) {
@@ -2205,7 +2214,10 @@ void DrawSendExperienceScreen(
   Gfx* displayList = *displayListHead;
   s32 index;
 
-  /* A second counter alongside index is there to match */
+  /*
+   * A second counter alongside index is there to match: index in its place
+   * gives 70 words differing (4 in shape), and counting it in the for 22 (4)
+   */
   s32 slot;
 
   DrawImportedFaces(&displayList, transfer);
