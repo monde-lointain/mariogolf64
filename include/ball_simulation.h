@@ -196,7 +196,7 @@ typedef struct BallSimulation {
   /* Keeps the flag from being hit twice */
   /* 0xB0 */ s8 hasHitFlag;
   /* 0xB1 */ u8 unkB1;
-  /* 0xB2 */ s16 rollFrameCount; /* Frames since the ball began rolling */
+  /* 0xB2 */ u16 rollFrameCount; /* Frames since the ball began rolling */
   /* 0xB4 */ s8 unkB4;
   /* 0xB5 */ u8 unkB5[0xB8 - 0xB5];
 } BallSimulation; /* size = 0xB8 */

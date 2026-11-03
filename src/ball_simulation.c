@@ -1761,7 +1761,7 @@ TAKE_OFF:
       }
 
       if (simulation->hasEnteredWater &&
-          (u16)simulation->rollFrameCount < WATER_EXIT_ROLL_FRAMES) {
+          simulation->rollFrameCount < WATER_EXIT_ROLL_FRAMES) {
         slopeX *= WATER_EXIT_SLOPE_SCALE;
         slopeZ *= WATER_EXIT_SLOPE_SCALE;
         isSteep = TRUE;
@@ -1828,10 +1828,10 @@ TAKE_OFF:
         osSyncPrintf("V[1] %d\n", velocity[AXIS_Y]);
       }
 
-      if ((u16)simulation->rollFrameCount >= MIN_STOP_ROLL_FRAMES) {
+      if (simulation->rollFrameCount >= MIN_STOP_ROLL_FRAMES) {
         s32 speed = IntLength2D(velocity[AXIS_X], velocity[AXIS_Z]);
 
-        if ((u16)simulation->rollFrameCount >= WATER_STOP_ROLL_FRAMES &&
+        if (simulation->rollFrameCount >= WATER_STOP_ROLL_FRAMES &&
             simulation->hasEnteredWater) {
           simulation->state = BALL_STATE_STOPPED;
         } else if (speed < MAX_STOP_SPEED) {
@@ -2067,7 +2067,7 @@ NEXT:
         StopSound(ROLL_SOUND_CHANNEL);
         simulation->unkA8[1] = FALSE;
       } else {
-        s32 rollFrames = (u16)simulation->rollFrameCount;
+        s32 rollFrames = simulation->rollFrameCount;
         SoundVolume volume;
 
         if (rollFrames > ROLL_VOLUME_RAMP_FRAMES) {
