@@ -550,7 +550,9 @@ const char f_CompactHoleFormat[] = "Hole%d";
  * scales them before the calls (scaling at each call gives 110 words, 104 in
  * shape). Grouping the tiles' y as g_Scorecard.y + (rowOffset + TILE_TOP)
  * gives 111 words, 49 in shape; stepping rowOffset as i * MATCH_ROW_SPACING
- * gives 183. 86 words differ, 66 in shape.
+ * gives 183. The win arrow's rise is read once, before the strokes test, as
+ * the original does (86 words, 66 in shape, reading it in each call). 70
+ * words differ, 50 in shape.
  */
 #ifdef NON_MATCHING
 void DrawMatchPage(Gfx** displayListHead) {
@@ -570,6 +572,7 @@ void DrawMatchPage(Gfx** displayListHead) {
   s32 imageTop;
   s32 frame;
   s32 bounce;
+  s32 arrowRise;
 
   head = displayListHead;
   gfx = *displayListHead;
@@ -835,32 +838,29 @@ void DrawMatchPage(Gfx** displayListHead) {
     LoadSmallPalette(&gfx, 0, ImageBody(g_Scorecard.winnerArrowImage));
     LoadNibbleTextureBlock(&gfx, ImageTexels(g_Scorecard.winnerArrowImage),
         G_IM_FMT_CI, ARROW_WIDTH, ARROW_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
+    /* The arrow rises as the count goes on */
+    arrowRise = g_Scorecard.skinsCarryover.onLastHole;
     holeIndex = g_Scorecard.skinsCarryover.intoLastHole;
     if (g_Players[0].holes[holeIndex].strokes <
         g_Players[1].holes[holeIndex].strokes) {
-      /* In a local, to match */
-      s32 arrowRight = g_Scorecard.x + ARROW_LEFT + ARROW_WIDTH;
-
       DrawTextureRect(&gfx,
           QuarterPixels((wins[0] * TILE_SPACING) + ARROW_LEFT + g_Scorecard.x),
-          QuarterPixels(-g_Scorecard.skinsCarryover.onLastHole + ARROW_TOP +
-              g_Scorecard.y),
-          QuarterPixels((wins[0] * TILE_SPACING) + arrowRight),
-          QuarterPixels(-g_Scorecard.skinsCarryover.onLastHole +
-              (ARROW_HEIGHT + ARROW_TOP) + g_Scorecard.y),
+          QuarterPixels(-arrowRise + ARROW_TOP + g_Scorecard.y),
+          QuarterPixels((wins[0] * TILE_SPACING) + ARROW_LEFT + ARROW_WIDTH +
+              g_Scorecard.x),
+          QuarterPixels(
+              -arrowRise + (ARROW_HEIGHT + ARROW_TOP) + g_Scorecard.y),
           G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     } else if (g_Players[1].holes[holeIndex].strokes <
         g_Players[0].holes[holeIndex].strokes) {
-      /* In a local, to match */
-      s32 arrowRight = g_Scorecard.x + ARROW_LEFT + ARROW_WIDTH;
-
       DrawTextureRect(&gfx,
           QuarterPixels((wins[1] * TILE_SPACING) + ARROW_LEFT + g_Scorecard.x),
-          QuarterPixels(-g_Scorecard.skinsCarryover.onLastHole +
-              (ARROW_TOP + MATCH_ROW_SPACING) + g_Scorecard.y),
-          QuarterPixels((wins[1] * TILE_SPACING) + arrowRight),
-          QuarterPixels(-g_Scorecard.skinsCarryover.onLastHole + ARROW_HEIGHT +
-              ARROW_TOP + MATCH_ROW_SPACING + g_Scorecard.y),
+          QuarterPixels(
+              -arrowRise + (ARROW_TOP + MATCH_ROW_SPACING) + g_Scorecard.y),
+          QuarterPixels((wins[1] * TILE_SPACING) + ARROW_LEFT + ARROW_WIDTH +
+              g_Scorecard.x),
+          QuarterPixels(-arrowRise + ARROW_HEIGHT + ARROW_TOP +
+              MATCH_ROW_SPACING + g_Scorecard.y),
           G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     }
   }
