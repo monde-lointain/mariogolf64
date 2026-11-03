@@ -1595,11 +1595,13 @@ BillboardCell GetBillboardCell(s32 textureIndex, f32 across, f32 down) {
  * sets the hit mask cell there and the fraction of the way along the path,
  * which stays above 1 when nothing is hit, and returns whether something is.
  *
- * Doesn't match: GCC puts fabsf's abs.s in the delay slot of the branch for
- * the first Abs, inverting it, where the original issues it before a
- * branch-likely, and it stores startY to its argument slot one instruction
- * earlier. Casting either side of the division or swapping the Abs terms
- * changes nothing or makes it worse. 4 words differ.
+ * Doesn't match: GCC puts fabsf's abs.s in the delay slot of the branch for the
+ * first Abs, inverting it, where the original issues it before a branch-likely,
+ * and it stores startY to its argument slot one instruction earlier. Casting
+ * either side of the division or swapping the Abs terms changes nothing or
+ * makes it worse. Writing the division's absolute values as plain conditional
+ * expressions, either or both, gives 11 to 15 words (7 to 12 in shape), and as
+ * abs() 16 (4). 4 words differ, 2 in shape.
  */
 #ifdef NON_MATCHING
 s32 FindBillboardHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
