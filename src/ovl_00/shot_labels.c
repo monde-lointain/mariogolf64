@@ -172,14 +172,18 @@ extern char g_PrintBuffer[];
  * of the others. DrawLeaderLine and DrawPlayerTag are nested functions, a GNU
  * C extension.
  *
- * Doesn't match: the tag loop keeps its corner pointer and label offsets in
- * other registers. 193 words differ.
+ * Doesn't match: the original steps a pointer to each label's corner and
+ * reaches the other fields from the label's offset; ours has loop.c reach them
+ * from the corner pointer as well, and its frame is 8 bytes larger. Indexing
+ * the labels, rather than through a label pointer (193 words, 91 in shape),
+ * gives the original's pointer; the register oracle then gets to 108 words
+ * with 27 pseudos forced, against 174 with 22 for the pointer. 291 words
+ * differ, 73 in shape.
  */
 #ifdef NON_MATCHING
 void DrawShotLabels(Gfx** displayListHead) {
   ScreenPoint point;
   ScreenSpot cup;
-  ShotLabel* label;
   Gfx* gfx = *displayListHead;
   s32 players;
   s32 corner;
@@ -274,15 +278,14 @@ void DrawShotLabels(Gfx** displayListHead) {
     }
 
     for (i = 0; i != g_GameState.playerCount; i++) {
-      label = &f_ShotLabels[i];
       if (players == SHOT_LABELS_OTHER_BALLS &&
           (g_CurrentShot.playerIndex == i || g_Players[i].strokeCount == 0)) {
-        label->corner = NO_CORNER;
+        f_ShotLabels[i].corner = NO_CORNER;
         continue;
       }
 
       if (g_Players[i].holeStatus != HOLE_STATUS_PLAYING) {
-        label->corner = NO_CORNER;
+        f_ShotLabels[i].corner = NO_CORNER;
         continue;
       }
 
@@ -291,7 +294,7 @@ void DrawShotLabels(Gfx** displayListHead) {
               g_Players[i].ballPosition[AXIS_Y] * COURSE_TO_WORLD_SCALE,
               g_Players[i].ballPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE,
               &point) >= 0) {
-        label->corner = NO_CORNER;
+        f_ShotLabels[i].corner = NO_CORNER;
         continue;
       }
 
@@ -299,29 +302,29 @@ void DrawShotLabels(Gfx** displayListHead) {
           point.x > SCREEN_WIDTH + TAG_SCREEN_MARGIN ||
           point.y < -TAG_SCREEN_MARGIN ||
           point.y > SCREEN_HEIGHT + TAG_SCREEN_MARGIN) {
-        label->x = point.x;
-        label->y = point.y;
-        label->depth = point.depth;
-        label->corner = NO_CORNER;
+        f_ShotLabels[i].x = point.x;
+        f_ShotLabels[i].y = point.y;
+        f_ShotLabels[i].depth = point.depth;
+        f_ShotLabels[i].corner = NO_CORNER;
         continue;
       }
 
-      if (label->corner == NO_CORNER) {
+      if (f_ShotLabels[i].corner == NO_CORNER) {
         if (players == SHOT_LABELS_OTHER_BALLS) {
-          label->corner = (i & 1) + CORNER_UPPER_LEFT;
+          f_ShotLabels[i].corner = (i & 1) + CORNER_UPPER_LEFT;
         } else {
-          label->corner = i;
+          f_ShotLabels[i].corner = i;
         }
       }
 
-      label->x = point.x + f_TagOffsetsX[label->corner];
-      label->y = point.y + f_TagOffsetsY[label->corner];
-      label->depth = point.depth;
+      f_ShotLabels[i].x = point.x + f_TagOffsetsX[f_ShotLabels[i].corner];
+      f_ShotLabels[i].y = point.y + f_TagOffsetsY[f_ShotLabels[i].corner];
+      f_ShotLabels[i].depth = point.depth;
       tries = 0;
       if (players == SHOT_LABELS_OVERHEAD) {
         overlaps = FALSE;
         while (TRUE) {
-          corner = (label->corner + tries) % CORNER_COUNT;
+          corner = (f_ShotLabels[i].corner + tries) % CORNER_COUNT;
           for (j = 0; j != i; j++) {
             if (f_ShotLabels[j].corner != NO_CORNER &&
                 IsTagOverlapping(f_ShotLabels[j],
