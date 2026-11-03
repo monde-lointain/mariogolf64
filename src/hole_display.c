@@ -1921,10 +1921,12 @@ void DrawSky(
  * the first syncs' stores. GCC takes both to be structure accesses through
  * pointers that may alias, so here it keeps them in the source's order;
  * computing centerShift before the syncs comes closest, where after them
- * gives 87 differing words. The rest are register choices that forcing
- * pseudos doesn't settle (20 words remain). The permuter's best, 28 words,
- * clears isNibbleImage only in the nibble strips' branch, so the first strip
- * reads it unset; it is not used. 56 words differ, none in shape.
+ * gave 87 differing words. The rest are register choices that forcing
+ * pseudos didn't settle. The permuter's best, 28 words when the draft had
+ * 56, clears isNibbleImage only in the nibble strips' branch, so the first
+ * strip reads it unset; it is not used. The second strip loop computes the
+ * word offset as the first does; keeping a byte offset in its own local gave
+ * 56. 18 words differ, none in shape.
  */
 #ifdef NON_MATCHING
 void DrawBackdrop(Gfx** displayListHead, CameraView* view, s32 cameraIndex) {
@@ -1936,7 +1938,6 @@ void DrawBackdrop(Gfx** displayListHead, CameraView* view, s32 cameraIndex) {
   s32 row;
   s32 imageRow;
   s32 texelWord;
-  s32 texelByte;
   s32 bottom;
   s32 top;
   s32 texelStepX;
@@ -2110,19 +2111,19 @@ void DrawBackdrop(Gfx** displayListHead, CameraView* view, s32 cameraIndex) {
         continue;
       }
 
-      /* Kept in a byte local, unlike the first strip loop's, to match */
       if (row < f_BackdropStripCount - 1) {
         imageRow = row;
-        texelByte = (f_BackdropImageWidth * row * f_BackdropStripHeight) +
-            (LARGE_PALETTE_COLOR_COUNT * PALETTE_COLOR_SIZE);
+        texelWord = ((f_BackdropImageWidth * row * f_BackdropStripHeight) +
+                        (LARGE_PALETTE_COLOR_COUNT * PALETTE_COLOR_SIZE)) /
+            2;
       } else {
-        texelByte = (f_BackdropImageWidth * (f_BackdropStripCount - 1) *
-                        f_BackdropStripHeight) +
-            (LARGE_PALETTE_COLOR_COUNT * PALETTE_COLOR_SIZE);
+        texelWord = ((f_BackdropImageWidth * (f_BackdropStripCount - 1) *
+                         f_BackdropStripHeight) +
+                        (LARGE_PALETTE_COLOR_COUNT * PALETTE_COLOR_SIZE)) /
+            2;
         imageRow = f_BackdropStripCount - 1;
       }
 
-      texelWord = texelByte / 2;
       if (!isNibbleImage) {
         gDPLoadTextureBlock(gfx++,
             TextureAddress((u16*)g_CourseSkyImage + texelWord), G_IM_FMT_CI,
@@ -2296,7 +2297,11 @@ void DrawFadeAnimation(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   u32* frame = f_CapturedFrame;
   Boolean isTileSet;
-  /* One index for the strips and the rows, to match */
+  /*
+   * One index for the strips and the rows, to match: a separate row or strip
+   * variable gives 216 words differing (50 in shape) against the draft's 174
+   * (50)
+   */
   s32 i;
   s16 height;
   u16* source;
