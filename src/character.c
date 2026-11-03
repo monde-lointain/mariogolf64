@@ -58,10 +58,13 @@ static inline CharacterAnimation* ModelAnimations(const CharacterModel* model) {
 #define ModelAnimatedTextures(model) \
   ((AnimatedTexture*)(model)->segmentAddresses[CHARACTER_MODEL_TEXTURES])
 
-/* Where a segment address into the frame data points in the slot's copy being
- * written */
+/*
+ * Where a segment address into the frame data points in the slot's copy being
+ * written. With the copy's address first, the texture routines' registers
+ * swap.
+ */
 #define FrameDataAddress(slot, address) \
-  ((u8*)(slot)->frameData[(slot)->frameDataIndex] + SEGMENT_OFFSET(address))
+  (SEGMENT_OFFSET(address) + (u32)(slot)->frameData[(slot)->frameDataIndex])
 
 /*
  * Patches the slot's frame data copy being written so the triangle shows the
@@ -77,7 +80,7 @@ static inline CharacterAnimation* ModelAnimations(const CharacterModel* model) {
       ANIMATED_TEXTURE_MASK, ANIMATED_TEXTURE_MASK, G_TX_NOLOD, G_TX_NOLOD); \
   for (i = 0; i < TRIANGLE_VERTEX_COUNT; i++) { \
     vertex = \
-        (Vtx*)FrameDataAddress(slot, (triangle)->vertices + (i * VTX_SIZE)); \
+        (Vtx*)FrameDataAddress(slot, (i * VTX_SIZE) + (triangle)->vertices); \
     vertex->v.tc[TEXTURE_AXIS_S] = (sCoordinates)[i]; \
     vertex->v.tc[TEXTURE_AXIS_T] = (tCoordinates)[i]; \
   }
@@ -97,6 +100,16 @@ static inline CharacterAnimation* ModelAnimations(const CharacterModel* model) {
 #define MapModelBuffer(slot) \
   SetMultiTlb(0, TLB_PAGE_MODE_4K, CHARACTER_MODEL_PAGE_COUNT, \
       CHARACTER_MODEL_ADDRESS, osVirtualToPhysical((slot)->modelBuffer))
+
+/*
+ * Looks up the slot in use at slotIndex into *slot, and tells whether there is
+ * one. Taking the slot's address keeps it on the stack, as the texture
+ * routines' originals do.
+ */
+static inline Boolean FindUsedSlot(u32 slotIndex, CharacterSlot** slot) {
+  *slot = GetUsedCharacterSlot(slotIndex);
+  return *slot != NULL;
+}
 
 /* The models with a row of f_BallDistances are the playable characters, below
  * CHARACTER_COUNT */
@@ -781,59 +794,55 @@ s32 GetImpactEventFrame(u32 slotIndex) {
 /*
  * Gives each of the slot's animated triangles its default texture.
  *
- * Doesn't match: 75 words differ. The original's frame has 0x40 unused bytes
- * from 0x18 and keeps the slot at 0x58, reloading it at the top of the
- * triangle loop, where GCC keeps the slot in a saved register. Making
- * SetTriangleTexture a static inline function left the frame as it is, but
- * 137 words differed where 87 did without it. Making it an inline function
- * nested here keeps the slot on the stack and reloads it as the original
- * does, but leaves out the unused bytes and computes the slot's address for
- * the static chain: 133 words differ. Clearing triangleIndex before the
- * slot lookup, as the original's delay slot does, puts both in saved
- * registers: 87 words differ.
+ * The original's frame has 0x40 bytes nothing uses below the slot, which it
+ * keeps on the stack, so the slot is found through its address; without the
+ * unused bytes 18 words differ, and with the slot taken from the return value
+ * 68. Walking the triangles with a for loop, or clearing triangleIndex at the
+ * loop, gives 27.
  */
-#ifdef NON_MATCHING
 void ResetTriangleTextures(u32 slotIndex) {
-  s32 triangleIndex;
-  CharacterSlot* slot = GetUsedCharacterSlot(slotIndex);
+  /* Pads the frame to match */
+  u8 unused[0x40] UNUSED;
+  s32 triangleIndex = 0;
+  CharacterSlot* slot;
   AnimatedTriangle* triangle;
   AnimatedTexture* texture;
   Gfx* gfx;
   Vtx* vertex;
   s32 i;
 
-  if (slot != NULL) {
+  if (FindUsedSlot(slotIndex, &slot)) {
     MapModelBuffer(slot);
-    triangleIndex = 0;
-    for (triangle = ModelAnimatedTriangles(slot->model)[0]; triangle != NULL;
-        triangle = ModelAnimatedTriangles(slot->model)[++triangleIndex]) {
+    while ((triangle = ModelAnimatedTriangles(slot->model)[triangleIndex]) !=
+        NULL) {
       texture = ModelAnimatedTextures(slot->model);
       if (triangle->textureIndex >= 0) {
         texture += triangle->textureIndex;
       }
 
       SetTriangleTexture(slot, triangle, texture, triangle->s, triangle->t);
+      triangleIndex++;
     }
   }
 }
-
-#else
-INCLUDE_ASM("asm/nonmatchings/character", ResetTriangleTextures);
-#endif
 
 /*
  * Shows the keyed textures of the slot's playing texture animations, then
  * advances each one a frame. The arguments after the slot are unused.
  *
- * Doesn't match: the original's frame leaves 0x18 to 0x57 and 0x5C to 0xF7
- * unused and keeps the slot at 0x58, reloading it at the top of the triangle
- * loop, where GCC keeps the slot in a saved register. 161 words differ.
+ * Doesn't match: the original keeps state->frame in a saved register
+ * through the keys, and indexes the slot's states for each key set rather
+ * than keeping a pointer to the state. The unused bytes, the slot found
+ * through its address and the while loop are as ResetTriangleTextures'; with
+ * them, 161 words differing became 111. 111 words differ, 15 in shape.
  */
 #ifdef NON_MATCHING
 void AdvanceTextureAnimations(u32 slotIndex, s32 unused UNUSED,
     s32 frameLastDigit UNUSED, s32 frame UNUSED) {
+  /* Pads the frame to match, with unusedTail */
+  u8 unusedHead[0x40] UNUSED;
   s32 triangleIndex = 0;
-  CharacterSlot* slot = GetUsedCharacterSlot(slotIndex);
+  CharacterSlot* slot;
   AnimatedTriangle* triangle;
   TriangleTextureKeys* keySet;
   TriangleTextureKey* key;
@@ -846,10 +855,12 @@ void AdvanceTextureAnimations(u32 slotIndex, s32 unused UNUSED,
   s32 keyIndex;
   s32 i;
 
-  if (slot != NULL) {
+  if (FindUsedSlot(slotIndex, &slot)) {
+    u8 unusedTail[0x80] UNUSED;
+
     MapModelBuffer(slot);
-    for (triangle = ModelAnimatedTriangles(slot->model)[0]; triangle != NULL;
-        triangle = ModelAnimatedTriangles(slot->model)[++triangleIndex]) {
+    while ((triangle = ModelAnimatedTriangles(slot->model)[triangleIndex]) !=
+        NULL) {
       for (keySetIndex = 0; keySetIndex < triangle->keySetCount;
           keySetIndex++) {
         keySet = &triangle->keySets[keySetIndex];
@@ -864,6 +875,8 @@ void AdvanceTextureAnimations(u32 slotIndex, s32 unused UNUSED,
           }
         }
       }
+
+      triangleIndex++;
     }
 
     for (i = 0; i < TEXTURE_ANIMATION_COUNT; i++) {
@@ -930,41 +943,40 @@ NO_RESULT PlayTextureAnimation(u32 slotIndex, s32 index) {
  * Gives the slot's triangles that the texture animation changes their default
  * texture. Nothing calls it.
  *
- * Doesn't match: the original's frame has 0x40 unused bytes from 0x18 and
- * keeps the slot at 0x58, reloading it at the top of the triangle loop, where
- * GCC keeps the slot in a saved register. 87 words differ.
+ * Laid out as ResetTriangleTextures: without the unused bytes 22 words
+ * differ, with the slot taken from the return value 76, and with a for loop
+ * 27. Indexing the key sets in the test, rather than through keySet, gives 4.
  */
-#ifdef NON_MATCHING
 void ResetAnimationTriangleTextures(u32 slotIndex, s32 textureAnimationIndex) {
-  s32 triangleIndex;
-  CharacterSlot* slot = GetUsedCharacterSlot(slotIndex);
+  /* Pads the frame to match */
+  u8 unused[0x40] UNUSED;
+  s32 triangleIndex = 0;
+  CharacterSlot* slot;
   AnimatedTriangle* triangle;
   AnimatedTexture* texture;
   Gfx* gfx;
   Vtx* vertex;
+  TriangleTextureKeys* keySet;
   s32 keySetIndex;
   s32 i;
 
-  if (slot != NULL) {
+  if (FindUsedSlot(slotIndex, &slot)) {
     MapModelBuffer(slot);
-    triangleIndex = 0;
-    for (triangle = ModelAnimatedTriangles(slot->model)[0]; triangle != NULL;
-        triangle = ModelAnimatedTriangles(slot->model)[++triangleIndex]) {
+    while ((triangle = ModelAnimatedTriangles(slot->model)[triangleIndex]) !=
+        NULL) {
       texture = &ModelAnimatedTextures(slot->model)[triangle->textureIndex];
       for (keySetIndex = 0; keySetIndex < triangle->keySetCount;
           keySetIndex++) {
-        if (triangle->keySets[keySetIndex].textureAnimationIndex ==
-            textureAnimationIndex) {
+        keySet = &triangle->keySets[keySetIndex];
+        if (keySet->textureAnimationIndex == textureAnimationIndex) {
           SetTriangleTexture(slot, triangle, texture, triangle->s, triangle->t);
         }
       }
+
+      triangleIndex++;
     }
   }
 }
-
-#else
-INCLUDE_ASM("asm/nonmatchings/character", ResetAnimationTriangleTextures);
-#endif
 
 /* As above, so the data below lands in .rodata */
 RESUME_RODATA_SECTION();
