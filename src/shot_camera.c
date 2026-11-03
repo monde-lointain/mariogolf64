@@ -1466,7 +1466,12 @@ void EaseCameraPosition(Vec3 target) {
 void PlaceCameraAroundShotEnd(void) {
   CoursePoint point;
   f32 height;
-  f64 yawScale; /* Holding the scale in yawScale is there to match */
+  /*
+   * Holding the scale in yawScale is there to match: the constant in its
+   * place, on either side, gives 2 words differing (2 in shape), and an f32
+   * local 25
+   */
+  f64 yawScale;
   f32 distance;
   Radians yaw;
 
