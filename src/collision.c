@@ -2333,7 +2333,11 @@ INCLUDE_ASM("asm/nonmatchings/collision", FindHoleTriangleHit);
  * once into a float local, as the draft did, gave 418 words (72 in shape), or
  * 415 (69) and 381 (69) passing only one of the two hit points directly. The
  * register oracle, forcing 35 pseudos' registers, leaves 139 words of the 204
- * at best, so the code differs too.
+ * at best, so the code differs too. A permuter output with 178 words (62 in
+ * shape) copies the plane's X normal to a temp before GetTrianglePlane sets it
+ * and uses the copy for each side and hit test, so it reads the previous
+ * triangle's normal; another, with 176 words, splits startSide's sum and
+ * changes the hit test's < 307.2f to <= 306.2f.
  */
 #ifdef NON_MATCHING
 s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
