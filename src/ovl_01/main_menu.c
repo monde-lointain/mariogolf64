@@ -2233,15 +2233,18 @@ void UpdateAnimationViewer(void) {
  * character.
  *
  * Doesn't match: the stroke and mini golf cases load their 1 and store
- * g_GameState.gameMode in another order, the B button's path loads
- * g_ChosenCharacters and g_CharacterGrid in another order, and the spin's
+ * g_GameState.gameMode in another order, the B button's path builds
+ * g_CharacterGrid's address before the player's row and column, and the spin's
  * slowing keeps the spin in a register where the original reads it again after
  * the step. The second cse pass shares the spin test's address with the
  * subtraction; testing the step's quotient in the clamp instead of setting
  * the step, as the permuter's best does (35 words, 15 in shape), reads it
  * again as the original does, but leaves the step unset. Setting the step
  * in both arms of the clamp or in a ternary gives 55 to 74 words, and moving
- * the barrier past the clamp changes nothing. 64 words differ, 24 in shape.
+ * the barrier past the clamp changes nothing. The B button's path reads the
+ * previous player's character before clearing their choices, and clears the
+ * controller before the character, as the original stores them (64 words, 24
+ * in shape, reading it in the store). 52 words differ, 18 in shape.
  */
 #ifdef NON_MATCHING
 void UpdateModeSelect(void) {
@@ -2486,6 +2489,9 @@ void UpdateModeSelect(void) {
   }
 
   if (g_MenuPressedButtons & B_BUTTON) {
+    /* The previous player's character, freed for the others */
+    s32 character;
+
     if (g_MenuMemory.modeSpin != 0) {
       g_MenuMemory.modeSpin = 0;
       LoadChosenModeIcon();
@@ -2498,10 +2504,10 @@ void UpdateModeSelect(void) {
     PlaySound(SOUND_MENU_CANCEL, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
     g_MenuScreen = MENU_SCREEN_CHARACTER_SELECT;
     g_ChoosingPlayerIndex--;
+    character = g_ChosenCharacters[g_ChoosingPlayerIndex];
     g_ChosenLefties[g_ChoosingPlayerIndex] = 0;
-    g_TakenCharacters
-        .isCharacterTaken[g_ChosenCharacters[g_ChoosingPlayerIndex]] = 0;
     g_PlayerControllerIndices[g_ChoosingPlayerIndex] = 0;
+    g_TakenCharacters.isCharacterTaken[character] = 0;
     slot =
         g_CharacterGrid[g_MenuMemory.characterRows[g_ChoosingPlayerIndex]]
                        [g_MenuMemory.characterColumns[g_ChoosingPlayerIndex]];
