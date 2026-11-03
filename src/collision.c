@@ -2310,15 +2310,19 @@ INCLUDE_ASM("asm/nonmatchings/collision", FindHoleTriangleHit);
  * passes an end of it is moved back to where it reaches the end. A hit
  * near or below the ground counts whatever the edges say.
  *
- * Doesn't match: 535 words differ, 85 in shape. The reach test is
- * compared with FALSE, as the original ands the macro's crossing tests
- * before branching: negated with !, fold rewrites it into xori and or
- * chains (563 words). Nesting the rest of the loop under the plain test
- * gives the same 535. The permuter's best outputs read the plane's normal x
- * into a local for two of the six plane tests (500 words, 78 in shape), one
- * before GetTrianglePlane sets it, and moved the second arm's highestX into
- * the first, where it is dead, so the second leaves it unset (431 words, 83
- * in shape); neither is natural, and the second changes the result.
+ * Doesn't match: 418 words differ, 72 in shape. The reach test is compared with
+ * FALSE, as the original ands the macro's crossing tests before branching:
+ * negated with !, fold rewrites it into xori and or chains (563 words, when the
+ * draft had 535). Nesting the rest of the loop under the plain test gave the
+ * same 535. The permuter's best outputs, against the draft's 535 words (85 in
+ * shape), read the plane's normal x into a local for two of the six plane tests
+ * (500 words, 78 in shape), one before GetTrianglePlane sets it, and moved the
+ * second arm's highestX into the first, where it is dead, so the second leaves
+ * it unset (431 words, 83 in shape); neither is natural, and the second changes
+ * the result. The original works out the ball's height before calling
+ * GetGroundHeight, so the height is the comparison's first operand; with the
+ * call first, 535 words differed (85), and a local for the height gives the
+ * same 418.
  */
 #ifdef NON_MATCHING
 s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
@@ -2793,9 +2797,9 @@ s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
     }
 
     /* A hit near or below the ground is taken whatever the edges say */
-    if (GetGroundHeight(((endX - startX) * hitFraction) + startX,
-            ((endZ - startZ) * hitFraction) + startZ) <
-        (s32)(((endY - startY) * hitFraction) + startY) + WALL_HEIGHT_SLACK) {
+    if ((s32)(((endY - startY) * hitFraction) + startY) + WALL_HEIGHT_SLACK >
+        GetGroundHeight(((endX - startX) * hitFraction) + startX,
+            ((endZ - startZ) * hitFraction) + startZ)) {
       nearestFraction = hitFraction;
       if (hitIndex != i) {
         osSyncPrintf("New Logic attemped!!!!! ratio %f\n", nearestFraction);
