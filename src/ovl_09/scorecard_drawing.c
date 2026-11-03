@@ -1930,6 +1930,10 @@ void DrawLeaderboardPage(Gfx** displayListHead) {
       if (g_TournamentStandings[g_Scorecard.topRow + i].contestantId ==
           PLAYER_CONTESTANT) {
         gSPDisplayList(gfx++, g_DecalTextureSetup);
+        /*
+         * In its own block, as without it 150 words differ, 42 in shape,
+         * against 120 and 46
+         */
         IN_OWN_BLOCK(gDPPipeSync(gfx++));
         gDPSetTextureLUT(gfx++, G_TT_RGBA16);
         DrawSmallFace(&gfx, g_Scorecard.x + LEADERBOARD_FACE_LEFT,

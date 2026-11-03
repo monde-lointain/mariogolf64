@@ -3110,6 +3110,10 @@ void CaptureHudAnimationFrame(void) {
           gridColumn++, x += TILE_GRID_SPACING) {
         vertex->v.ob[AXIS_X] = x;
         vertex->v.ob[AXIS_Y] = TileGridRowY(gridRow);
+        /*
+         * In its own block, as without it 99 words differ, 21 in shape, against
+         * 97 and 17
+         */
         IN_OWN_BLOCK(vertex->v.ob[AXIS_Z] = 0);
         nextVertex->v.ob[AXIS_X] = x;
         nextVertex->v.ob[AXIS_Y] = TileGridRowY(gridRow);

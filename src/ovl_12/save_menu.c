@@ -432,6 +432,10 @@ void OpenSaveMenu(s32 kind) {
             &encodedAsset);
         frameId = g_ModeIconAnimations[0][1];
         picture = AllocMemory(OpenEncodedAsset(frameId, &encodedAsset));
+        /*
+         * In its own block, as without it 17 words differ, 5 in shape, against
+         * 11 and 5
+         */
         IN_OWN_BLOCK(f_ModeIconImages[slot][1] = picture);
       }
 

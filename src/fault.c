@@ -219,6 +219,10 @@ void PrintFaultText(void) {
 void PrintFaultContext(OSThread* thread) {
   __OSThreadContext* context = &thread->context;
 
+  /*
+   * In its own block, as without it 294 words differ, 6 in shape, against 278
+   * and 4
+   */
   IN_OWN_BLOCK(f_FaultUnk = 0);
   sprintf(f_FaultText, "\nFault in thread %d:\n\n", thread->id);
   PrintFaultText();

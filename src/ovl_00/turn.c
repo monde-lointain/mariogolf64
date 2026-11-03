@@ -3616,6 +3616,10 @@ void UpdateTurns(void) {
           for (preparingPollIndex = 0; f_ShotSource == SHOT_SOURCE_PLANNING &&
               preparingPollIndex < PLAN_PREPARING_POLL_COUNT;
               preparingPollIndex++) {
+            /*
+             * In its own block, as without it 721 words differ, 207 in shape,
+             * against 465 and 187
+             */
             IN_OWN_BLOCK(f_ShotSource = (GetPlannedShot(&g_ScriptedShot) !=
                                             PLANNED_SHOT_UNFINISHED)
                     ? SHOT_SOURCE_PREPARED
@@ -3895,6 +3899,10 @@ void UpdateTurns(void) {
               ANIMATION_EVENT_IMPACT);
           f_IsSwingAnimationStarted = FALSE;
           if (IsGameFlagSet(GAME_FLAG_CHOOSE_CUP)) {
+            /*
+             * In its own block, as without it 483 words differ, 187 in shape,
+             * against 465 and 187
+             */
             IN_OWN_BLOCK(DebugPlaceBall(playerIndex));
           }
 

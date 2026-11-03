@@ -3992,6 +3992,10 @@ void DrawMenuBackdropLayers(Gfx** displayListHead, s32 layers) {
           gDPPipeSync(gfx++);
 
           if (stripIndex == CLAMPED_BACKDROP_STRIP_COUNT - 1) {
+            /*
+             * In its own block, as without it 854 words differ, 446 in shape,
+             * against 360 and 38
+             */
             IN_OWN_BLOCK(
                 gSPScisTextureRectangle(gfx++, QuarterPixels(BACKDROP_LEFT),
                     QuarterPixels(CLAMPED_BACKDROP_LAST_TOP),

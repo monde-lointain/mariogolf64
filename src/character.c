@@ -1675,6 +1675,10 @@ void UpdateJointKeyframeSpans(u32 slotIndex) {
     rotationMatrix[1][3] = 0.0f;
     rotationMatrix[2][0] = xz + wy;
     rotationMatrix[2][1] = yz - wx;
+    /*
+     * In its own block, as without it 315 words differ, 71 in shape, against
+     * 184 and 66
+     */
     IN_OWN_BLOCK(rotationMatrix[2][2] = 1.0f - (xx + yy));
     rotationMatrix[2][3] = 0.0f;
     rotationMatrix[3][0] = 0.0f;
@@ -1943,7 +1947,7 @@ void SetCharacterLights(void) {
  * Doesn't match: for the reaction light's fallback, the original addresses the
  * lights' first light from the table plus 8, adding the index's offset to
  * that, where ours adds the offset to the table first. Without IN_OWN_BLOCK
- * it's 123 words. 71 words differ, 7 in shape.
+ * it's 99 words, 15 in shape. 71 words differ, 7 in shape.
  */
 #ifdef NON_MATCHING
 void DrawCharacter(u32 slotIndex) {

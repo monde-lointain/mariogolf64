@@ -91,6 +91,7 @@ void SetFramingAngles(Radians pitch, Radians yaw) {
   f32 cosine;
 
   cosine = cosf(pitch);
+  /* Ended here, as without it 7 words differ, 3 in shape, against 6 and 0 */
   END_BASIC_BLOCK();
   if (fabsf(cosine) < STEEP_PITCH_COSINE) {
     pitch += FramingDegreesToRadians(20);
@@ -178,6 +179,10 @@ void FrameSpheres(f32 depthOffset) {
   rightAngle = g_Cameras[0].view.fieldOfView * 0.5f;
   leftAngle = -rightAngle;
   topAngle = rightAngle * 0.75f;
+  /*
+   * In its own block, as without it 292 words differ, 112 in shape, against 279
+   * and 109
+   */
   IN_OWN_BLOCK(bottomAngle = leftAngle * 0.75f);
   maxZ = -minZ;
   if (g_ControllerData[1].trigger & D_CBUTTONS) {

@@ -1550,6 +1550,10 @@ s32 StepBallSimulation(BallSimulation* simulation) {
             (tangent[AXIS_Z] * keep) + (normalPart[AXIS_Z] * restitution);
         simulation->lastBounceStep = simulation->stepCount;
         spinVelocityX = simulation->spinSpeed * cosf(simulation->spinHeading);
+        /*
+         * In its own block, as without it 800 words differ, 232 in shape,
+         * against 771 and 235
+         */
         IN_OWN_BLOCK(spinVelocityZ =
                          simulation->spinSpeed * sinf(simulation->spinHeading));
         driftX = (spinVelocityX - velocity[AXIS_X]) *

@@ -2604,6 +2604,10 @@ EVALUATE:
       }
     }
 
+    /*
+     * In its own block, as without it 124 words differ, 46 in shape, against
+     * 117 and 43
+     */
     IN_OWN_BLOCK(f_Shot.heading +=
         (s32)(atan2(f_PlanTarget[AXIS_Z] - f_Shot.ballPosition[AXIS_Z],
                   f_PlanTarget[AXIS_X] - f_Shot.ballPosition[AXIS_X]) *

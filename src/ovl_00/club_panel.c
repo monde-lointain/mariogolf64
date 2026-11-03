@@ -492,6 +492,10 @@ void DrawClubPanel(Gfx** displayListHead) {
   gDPSetCombineMode(gfx++, G_CC_DECALRGB, G_CC_DECALRGB);
   gDPPipeSync(gfx++);
   gDPSetRenderMode(gfx++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
+  /*
+   * In its own block, as without it 242 words differ, 16 in shape, against 172
+   * and 20
+   */
   IN_OWN_BLOCK(gDPPipeSync(gfx++));
   fillWidth = GAUGE_FILL_IMAGE_WIDTH;
   value = GetGaugeFill();
