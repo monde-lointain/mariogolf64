@@ -4009,8 +4009,8 @@ static inline u16 ReadTileTexel(
   tile = &g_WorkArea.hole.tiles[tileIndex];
   if (g_WorkArea.hole.tiles[tileIndex].texels[GROUND_TILE_TEXEL_ROW_COUNT -
           1][GROUND_TILE_TEXEL_ROW_LENGTH - 1] != 0) {
-    texel = &tile->texels[texelRow + TILE_BORDER_BEFORE]
-                         [texelColumn + TILE_BORDER_BEFORE];
+    texel = &tile->texels[TILE_BORDER_BEFORE][TILE_BORDER_BEFORE] +
+        ((texelRow * GROUND_TILE_TEXEL_ROW_LENGTH) + texelColumn);
   } else {
     texel = &tile->texels[0][(texelRow * GROUND_TILE_TEXEL_SPAN) + texelColumn];
   }
@@ -4021,9 +4021,14 @@ static inline u16 ReadTileTexel(
 /*
  * Switches the ground tiles between their two texel layouts: 32 texels a
  * row, or inside a border of their neighbors' texels. Doesn't match:
- * where ReadTileTexel reads a tile, the original adds the tile's address
- * after the layout test, and ours adds it before; ours also masks the texel
- * coordinates in another order. 97 words differ.
+ * where ReadTileTexel reads a bordered tile, the original adds the texel's
+ * offset to the hoisted address of the first tile's texels[1][1] and the
+ * tile's offset last; ours adds the offset to the tile's own texels[1][1].
+ * Ours also masks the texel coordinates in another order. With the
+ * stripped loop's != test, indexing texels[row + 1][column + 1] gives 97
+ * differing words, texels[0] at the row's sum 79 to 85, and the offset added
+ * to &texels[1][1] 79; indexing the tile in g_WorkArea rather than through
+ * tile gives 132 to 153. 76 words differ, 26 in shape.
  */
 #ifdef NON_MATCHING
 void ToggleGroundTileBorders(void) {
@@ -4052,7 +4057,7 @@ void ToggleGroundTileBorders(void) {
         for (strippedTexelRow = 0; strippedTexelRow < GROUND_TILE_TEXEL_SPAN;
             strippedTexelRow++) {
           for (strippedTexelColumn = 0;
-              strippedTexelColumn != GROUND_TILE_TEXEL_SPAN;
+              strippedTexelColumn < GROUND_TILE_TEXEL_SPAN;
               strippedTexelColumn++) {
             texels[0][(strippedTexelRow * GROUND_TILE_TEXEL_SPAN) +
                 strippedTexelColumn] = ReadTileTexel(strippedTileColumn,
