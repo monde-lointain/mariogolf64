@@ -4167,11 +4167,14 @@ void SetMiniGolfTileTextureCoords(
         TILE_TEXTURE_ORIGIN;
     vertex->tc[TEXTURE_AXIS_S] = coord;
 
-    /* The second coordinate's two steps are there to match */
+    /*
+     * coord holds the row offset here, to match: an offset local of its own
+     * gives 8 words differing, 2 in shape, and the coordinate in one
+     * statement 6, 2 in shape
+     */
     coord = (vertex->ob[AXIS_Z] * MINI_GOLF_TEXTURE_SCALE_Z) -
         (row << TILE_ORIGIN_SHIFT);
-    coord = TexelCoordinate(coord) + TILE_TEXTURE_ORIGIN;
-    vertex->tc[TEXTURE_AXIS_T] = coord;
+    vertex->tc[TEXTURE_AXIS_T] = TexelCoordinate(coord) + TILE_TEXTURE_ORIGIN;
   }
 }
 
@@ -4194,10 +4197,13 @@ void SetTileTextureCoords(s32 column, s32 row, Vtx_t* start, Vtx_t* end) {
         TILE_TEXTURE_ORIGIN;
     vertex->tc[TEXTURE_AXIS_S] = coord;
 
-    /* The second coordinate's two steps are there to match */
+    /*
+     * coord holds the row offset here, to match: an offset local of its own
+     * gives 8 words differing, 2 in shape, and the coordinate in one
+     * statement 6, 2 in shape
+     */
     coord = vertex->ob[AXIS_Z] - (row << TILE_ORIGIN_SHIFT);
-    coord = TexelCoordinate(coord) + TILE_TEXTURE_ORIGIN;
-    vertex->tc[TEXTURE_AXIS_T] = coord;
+    vertex->tc[TEXTURE_AXIS_T] = TexelCoordinate(coord) + TILE_TEXTURE_ORIGIN;
   }
 }
 
