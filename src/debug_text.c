@@ -108,7 +108,11 @@ void DrawTextIntoTexture(READ_ONLY char* text, s32 length, u16* texture) {
   s32 glyphFontIndex;
 
   for (index = 0; index < length; index++, text++) {
-    /* Signed to match; either way a byte past 0x7F is drawn as FIRST_GLYPH */
+    /*
+     * Signed to match; either way a byte past 0x7F is drawn as FIRST_GLYPH.
+     * Reading it unsigned, by cast or as the plain char, gives 2 words
+     * differing, both in shape.
+     */
     character = (s8)*text;
     if (character == '\0') {
       break;
