@@ -319,17 +319,17 @@ typedef s32 (*BillboardHitFinder)(s32 startX, s32 startY, s32 startZ, s32 endX,
  * addresses, which lie in the opening's BSS while it is loaded. Returns the
  * STEP_FLAG_* bits for the step.
  *
- * Doesn't match: the nested helpers match, but the substep loop's hoisted
- * 0.5f gets no register and is loaded at each use, where the original keeps
- * it in $f30, with 0.0f and 1.0f in $f26 and $f28 rather than $f28 and $f30,
- * so the floating-point registers are allocated differently. Forcing the
- * original's registers on 61 pseudos leaves 632 words at best, so the code
- * differs too. Reading the side spin before the drag, and adding the
- * velocity to the spin's push rather than the other way round, take it from
- * 676 words differing to 662. The water skip's last two tests are grouped,
- * as the original branches on the rolling state and then the impact speed:
- * in one chain fold_truthop ors their flags (662). 652 words differ, 248 in
- * shape.
+ * Doesn't match: the nested helpers match. The substep loop's hoisted 0.5f now
+ * sits in $f30 as in the original; of the 552 differing lines, 216 use
+ * floating-point registers. On an older base, forcing the original's registers
+ * on 61 pseudos left 632 words at best, so the code differs too. Reading the
+ * side spin before the drag, and adding the velocity to the spin's push rather
+ * than the other way round, took it from 676 words differing to 662. The water
+ * skip's last two tests are grouped, as the original branches on the rolling
+ * state and then the impact speed: in one chain fold_truthop ors their flags
+ * (662). Working out the horizontal speed before the side spin's magnitude, as
+ * StepBallSimulation does, takes it from 652 words, 248 in shape, to 422. 422
+ * words differ, 182 in shape.
  */
 #ifdef NON_MATCHING
 s32 StepOpeningBallSimulation(BallSimulation* simulation) {
@@ -1580,8 +1580,8 @@ ROLLED:
       drag =
           (sqrtf(airSpeed * AIR_DRAG_SPEED_SCALE) * AIR_DRAG_PER_ROOT_SPEED) +
           MIN_AIR_DRAG;
-      sideSpinMagnitude = AbsFloat(sideSpin * SIDE_SPIN_SPEED_SCALE);
       horizontalSpeed = GetOpeningLength2D(relative[AXIS_X], relative[AXIS_Z]);
+      sideSpinMagnitude = AbsFloat(sideSpin * SIDE_SPIN_SPEED_SCALE);
       ratio = 0.0f;
       if (sideSpinMagnitude != 0.0f) {
         ratio = horizontalSpeed / sideSpinMagnitude;
