@@ -1092,7 +1092,9 @@ static const char f_BlankBetName[] = " ";
  * the bet rates' loop, which the original doesn't, and the loop's
  * registers differ from there. The original aligns the bet images' texels
  * to 8 bytes, as TextureAddress does; without that, 210 words differ, 42 in
- * shape. 204 words differ, 36 in shape.
+ * shape. The permuter's best output, 3120 against 3610, holds the wrap
+ * flags in a variable, a fake, and gives 206 words differing, 36 in shape.
+ * 204 words differ, 36 in shape.
  */
 #ifdef NON_MATCHING
 void DrawBetsPage(Gfx** displayListHead) {
