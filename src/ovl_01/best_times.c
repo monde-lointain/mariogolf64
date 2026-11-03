@@ -471,8 +471,9 @@ void DrawBestTimeFace(Gfx** displayListHead, s32 left, s32 top,
  * Draws a place's label, such as 1st, at (left, top): its number and then its
  * suffix, from the places image, with the place kept within the label's range.
  * Doesn't match: the original needs one register fewer for the display
- * list's pointers, so its frame is 16 bytes smaller. 274 words differ, 32 in
- * shape.
+ * list's pointers, so its frame is 16 bytes smaller. Moving the sync after
+ * the palette into the low place's clamp gives 10 words differing, but the
+ * original syncs there whatever the place. 274 words differ, 32 in shape.
  */
 #ifdef NON_MATCHING
 void DrawPlaceLabel(Gfx** displayListHead, s32 left, s32 top, s32 place) {
