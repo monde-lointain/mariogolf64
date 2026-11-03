@@ -141,6 +141,8 @@ enum SkyImageKind {
 #define TILE_GRID_TOP 112
 #define TILE_GRID_SPACING 64
 #define TILE_GRID_ROW_SPACING 32
+/* The height of a row of the tile grid's vertices */
+#define TileGridRowY(row) (TILE_GRID_TOP - ((row) * TILE_GRID_ROW_SPACING))
 
 /*
  * The plain backdrop copies the last frame, inside a border, into
@@ -3029,11 +3031,20 @@ INCLUDE_ASM("asm/nonmatchings/hole_display", DrawTurnAwayAnimation);
 /*
  * Copies the frame that a HUD animation that has just started breaks apart
  *
+ * The original copies the row's height into a register of its own for the
+ * last column, and reloads the row count on each pass, as when each store
+ * works the height out from the row: stepping it beside the row gives 116
+ * words differing, 18 in shape, and setting it at the start of each column
+ * 119-139. The narrow column's vertex z is stored in a block of its own;
+ * stored plainly, or with the stores in the wide columns' order, 99-101
+ * words differ.
+ *
  * Doesn't match: the copy's loops allocate their counters and addresses to
- * other registers, and the grid's loops differ too. Forcing 20 pseudos to the
- * original's registers leaves 66 words differing, all in the grid. Giving the
- * slice copy its own row counter, and adding the tile start to the column
- * before the row, take it from 144 words differing to 116, 18 in shape.
+ * other registers, and the grid's stores are scheduled in another order.
+ * Giving the slice copy its own row counter, and adding the tile start to
+ * the column before the row, take it from 144 words differing to 116.
+ * Indexing the grid's vertices, in place of the two pointers, gives 184.
+ * 97 words differ, 17 in shape.
  */
 #ifdef NON_MATCHING
 void CaptureHudAnimationFrame(void) {
@@ -3049,7 +3060,6 @@ void CaptureHudAnimationFrame(void) {
   s32 gridColumn;
   Vtx* vertex;
   Vtx* nextVertex;
-  s32 y;
   s32 x;
 
   if (!f_IsFrameCapturePending) {
@@ -3080,15 +3090,14 @@ void CaptureHudAnimationFrame(void) {
 
     vertex = f_TileGridVertices[0];
     nextVertex = f_TileGridVertices[1];
-    for (gridRow = 0, y = TILE_GRID_TOP; gridRow != TILE_GRID_ROW_COUNT;
-        gridRow++, y -= TILE_GRID_ROW_SPACING) {
+    for (gridRow = 0; gridRow != TILE_GRID_ROW_COUNT; gridRow++) {
       for (gridColumn = 0, x = TILE_GRID_LEFT;
           gridColumn != TILE_GRID_COLUMN_COUNT - 1;
           gridColumn++, x += TILE_GRID_SPACING) {
         vertex->v.ob[AXIS_X] = x;
-        vertex->v.ob[AXIS_Y] = y;
+        vertex->v.ob[AXIS_Y] = TileGridRowY(gridRow);
         nextVertex->v.ob[AXIS_X] = x;
-        nextVertex->v.ob[AXIS_Y] = y;
+        nextVertex->v.ob[AXIS_Y] = TileGridRowY(gridRow);
         vertex->v.ob[AXIS_Z] = 0;
         nextVertex->v.ob[AXIS_Z] = 0;
         vertex++;
@@ -3100,10 +3109,10 @@ void CaptureHudAnimationFrame(void) {
           gridColumn != TILE_GRID_COLUMN_COUNT;
           gridColumn++, x += TILE_GRID_SPACING) {
         vertex->v.ob[AXIS_X] = x;
-        vertex->v.ob[AXIS_Y] = y;
+        vertex->v.ob[AXIS_Y] = TileGridRowY(gridRow);
         IN_OWN_BLOCK(vertex->v.ob[AXIS_Z] = 0);
         nextVertex->v.ob[AXIS_X] = x;
-        nextVertex->v.ob[AXIS_Y] = y;
+        nextVertex->v.ob[AXIS_Y] = TileGridRowY(gridRow);
         nextVertex->v.ob[AXIS_Z] = 0;
         vertex++;
         nextVertex++;
