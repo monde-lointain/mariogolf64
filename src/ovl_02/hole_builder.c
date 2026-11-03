@@ -3300,8 +3300,9 @@ static inline u16* GetShadowedTexel(u32 column, u32 row) {
  * 315 words, 41 in shape. Shifting the row inside the index spills
  * widthScale, which the original keeps in $fp, for an 8 byte larger frame
  * (303 words, 29 in shape); a row pointer for the mask rows gives 308 and 32,
- * and testing the row's width the other way round 162 and 28. 159 words
- * differ, 23 in shape.
+ * and testing the row's width the other way round 162 and 28. The register
+ * oracle, forcing 28 pseudos, leaves 70 words. 159 words differ, 23 in
+ * shape.
  */
 #ifdef NON_MATCHING
 void CastBillboardShadows(void) {
