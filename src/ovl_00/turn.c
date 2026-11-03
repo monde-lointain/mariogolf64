@@ -2310,8 +2310,6 @@ void RecordHoleOut(s32 playerIndex) {
   if (shotIndex < HOLE_RECORD_MAX_STROKES) {
     PlayRecord* record = &g_PlayRecords[playerIndex];
 
-    /* Read through g_GameState, which keeps GCC from loading the fields early,
-     * to match */
     record->gameMode = g_GameState.gameMode;
     record->courseIndex = g_GameState.courseIndex;
     record->holeIndex = g_GameState.holeIndex;
