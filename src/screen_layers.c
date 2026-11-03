@@ -941,8 +941,11 @@ void DrawHalfTurn(Gfx** displayListHead) {
     } else {
       f_HalfTurnState = HALF_TURN_STATE_DONE;
 
-      /* Any nonzero value makes HideHalfTurn free the picture; the state's
-       * value is there to match */
+      /*
+       * Any nonzero value makes HideHalfTurn free the picture; the state's
+       * value is there to match: storing TRUE gives 3 words differing (1 in
+       * shape), and leaving the store out 4 (2)
+       */
       f_IsHalfTurnShown = HALF_TURN_STATE_LEAVING;
       HideHalfTurn();
       return;
