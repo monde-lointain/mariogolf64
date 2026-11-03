@@ -3896,8 +3896,14 @@ void WriteHexDumpFile(u32* words, s32 byteCount, char* fileName) {
  * 2 after it, and ours saves $a3 with $t0 to $t7 around the calls. Stepping the
  * half's first column beside half gives 2403 words differing, 581 in shape.
  * Giving the fine tiles' loop its own counter and setting the middle slot after
- * the wave's tile took it from 2258 words differing, 518 in shape. 2128 words
- * differ, 488 in shape.
+ * the wave's tile took it from 2258 words differing, 518 in shape. In the
+ * medium tiles' pass loop, loop.c hoists 0xF5100000 in the original, as it
+ * does in the coarse tiles' loop, but finds it not worth moving in ours
+ * (savings 3, the loop 308 insns against 259); with that constant also live
+ * across the calls, the original's two SetEditorCombineMode calls restore it
+ * in different orders, where ours have the same tail and cross-jumping merges
+ * them, so ours has 11 calls to the original's 12. 2128 words differ, 488 in
+ * shape.
  */
 #ifdef NON_MATCHING
 void DrawHoleEditorGround(CameraMatrices* matrices UNUSED, s32 terrainStyle) {
