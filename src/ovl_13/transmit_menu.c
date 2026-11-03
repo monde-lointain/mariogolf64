@@ -551,7 +551,10 @@ static ControllerState f_TransmitController;
 /* Debug code that writes the cartridge RAM of controller 1's Game Boy cartridge
  * to the host */
 void DumpCartridgeRam(void) {
-  /* The transfer pointer is there to match */
+  /*
+   * The transfer pointer is there to match: reading g_GameBoyTransfer
+   * directly gives 7 words differing, 1 in shape
+   */
   GameBoyTransfer* transfer = &g_GameBoyTransfer;
   u8 cartridgeRam[CARTRIDGE_RAM_SIZE];
 
@@ -680,7 +683,10 @@ void ShowTransferError(u32 result);
  * another Game Boy cartridge.
  */
 void UpdateBringCharacters(void) {
-  /* The transfer pointer is there to match */
+  /*
+   * The transfer pointer is there to match: reading g_GameBoyTransfer
+   * directly gives 299 words differing, 97 in shape
+   */
   GameBoyTransfer* transfer = &g_GameBoyTransfer;
   s32 result;
 
@@ -948,7 +954,10 @@ void ShowTransferError(u32 result) {
  * overwrite any status already there.
  */
 void UpdateSendStatus(void) {
-  /* The transfer pointer is there to match */
+  /*
+   * The transfer pointer is there to match: reading g_GameBoyTransfer
+   * directly gives 285 words differing, 95 in shape
+   */
   GameBoyTransfer* transfer = &g_GameBoyTransfer;
   s32 result;
 
@@ -1125,7 +1134,10 @@ void UpdateSendStatus(void) {
  * result.
  */
 void UpdateSendExperience(void) {
-  /* The transfer pointer is there to match */
+  /*
+   * The transfer pointer is there to match: reading g_GameBoyTransfer
+   * directly gives 150 words differing, 70 in shape
+   */
   GameBoyTransfer* transfer = &g_GameBoyTransfer;
 
   switch (transfer->screenStep) {
@@ -1294,7 +1306,10 @@ s32 HaveAllRumblePaks(void) {
  * Pak first.
  */
 void UpdateTransmitMenu(void) {
-  /* The transfer pointer is there to match */
+  /*
+   * The transfer pointer is there to match: reading g_GameBoyTransfer
+   * directly gives 110 words differing, 40 in shape
+   */
   GameBoyTransfer* transfer = &g_GameBoyTransfer;
   s32 controller;
 
@@ -1595,7 +1610,10 @@ static s32 f_StatusCharacterOrder[CHARACTER_COUNT] = {
 /* Copies a listed cartridge character into a Game Boy character slot and
  * marks it brought over, remembering where it came from */
 void BringOverCharacter(s32 listedIndex, s32 slot) {
-  /* The transfer pointer is there to match */
+  /*
+   * The transfer pointer is there to match: reading g_GameBoyTransfer
+   * directly gives 34 words differing, 14 in shape
+   */
   GameBoyTransfer* transfer = &g_GameBoyTransfer;
 
   g_GameBoyCharacters[slot] =
@@ -1652,7 +1670,10 @@ s32 ComputeSaveChecksum(u8* save) {
 /* Rebuilds the list of cartridge characters that can still be brought over,
  * padding the rest with -1 */
 void ListPresentCharacters(void) {
-  /* The transfer pointer is there to match */
+  /*
+   * The transfer pointer is there to match: reading g_GameBoyTransfer
+   * directly gives 39 words differing, 9 in shape
+   */
   GameBoyTransfer* transfer = &g_GameBoyTransfer;
   s32 listedCount = 0;
   s32 index;
@@ -2431,7 +2452,10 @@ void DrawTransmitMenu(Gfx** displayListHead) {
 /* Forgets the cartridge characters read before, so that the Bring Characters
  * screen reads them again */
 void ClearCartridgeCharacters(void) {
-  /* The transfer pointer is there to match */
+  /*
+   * The transfer pointer is there to match: reading g_GameBoyTransfer
+   * directly gives 28 words differing, 12 in shape
+   */
   GameBoyTransfer* transfer = &g_GameBoyTransfer;
   s32 controller;
   s32 save;
@@ -2709,7 +2733,10 @@ static const char f_PhaseFourteenText[] = "PHASE 14\n";
  * WriteStatusToCartridge marks.
  */
 s32 CheckStatusCartridge(s32 cartridgeIndex) {
-  /* The transfer pointer is there to match */
+  /*
+   * The transfer pointer is there to match: reading g_GameBoyTransfer
+   * directly gives 81 words differing, 19 in shape
+   */
   GameBoyTransfer* transfer = &g_GameBoyTransfer;
   u8 save[CARTRIDGE_SAVE_SIZE];
   Boolean isSignatureWrong;
@@ -2786,7 +2813,10 @@ void BuildStatusData(u8* status);
  * cartridge is the one tagged and that its save is intact.
  */
 s32 WriteStatusToCartridge(s32 cartridgeIndex) {
-  /* The transfer pointer is there to match */
+  /*
+   * The transfer pointer is there to match: reading g_GameBoyTransfer
+   * directly gives 80 words differing, 24 in shape
+   */
   GameBoyTransfer* transfer = &g_GameBoyTransfer;
   u8 save[CARTRIDGE_SAVE_SIZE];
   u8 status[STATUS_DATA_SIZE];
@@ -2901,7 +2931,10 @@ s32 WriteStatusToCartridge(s32 cartridgeIndex) {
  * found.
  */
 s32 ReadCartridgeCharacters(void) {
-  /* The transfer pointer is there to match */
+  /*
+   * The transfer pointer is there to match: reading g_GameBoyTransfer
+   * directly gives 234 words differing, 64 in shape
+   */
   GameBoyTransfer* transfer = &g_GameBoyTransfer;
   u8 save[CARTRIDGE_SAVE_SIZE];
   u8 characterData[CHARACTER_DATA_SIZE];
@@ -3316,7 +3349,10 @@ s32 OpenGameBoyPak(s32 port, OSGbpakId* header, NUContPakFile* file) {
  * whether a cartridge was swapped.
  */
 s32 TagCartridges(void) {
-  /* The transfer pointer is there to match */
+  /*
+   * The transfer pointer is there to match: reading g_GameBoyTransfer
+   * directly gives 102 words differing, 22 in shape
+   */
   GameBoyTransfer* transfer = &g_GameBoyTransfer;
   OSGbpakId header;
   NUContPakFile file;
