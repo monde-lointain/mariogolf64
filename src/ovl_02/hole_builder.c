@@ -3337,6 +3337,7 @@ static inline u16* GetShadowedTexel(u32 column, u32 row) {
  * texels are kept, and bright ones are darkened the most. A row with no texel
  * within the width ends the shadow once one has started. Billboards with a
  * texture in f_ShadowlessTextures cast no shadow.
+ *
  * Doesn't match: the registers differ throughout, and ours works out the
  * mask row's start before its row test, where the original does so after
  * it. Indexing the solidities as one flat array, where a row pointer into a
@@ -3347,8 +3348,12 @@ static inline u16* GetShadowedTexel(u32 column, u32 row) {
  * widthScale, which the original keeps in $fp, for an 8 byte larger frame
  * (303 words, 29 in shape); a row pointer for the mask rows gives 308 and 32,
  * and testing the row's width the other way round 162 and 28. The register
- * oracle, forcing 28 pseudos, leaves 70 words. 159 words differ, 23 in
- * shape.
+ * oracle, forcing 28 pseudos, left 70 words. Taking the alpha bit after the
+ * channels are scaled, where the original does, rather than just before
+ * repacking them, gives 153 words (19 in shape) against 159 (23); so does
+ * taking it before the scale or after scaling red, but with the channels'
+ * unpacking 302 (28). The permuter's best, 164 (16), adds swapping the solidity
+ * index's terms, which alone gives 170 (20). 153 words differ, 19 in shape.
  */
 #ifdef NON_MATCHING
 void CastBillboardShadows(void) {
@@ -3546,6 +3551,7 @@ void CastBillboardShadows(void) {
         red = (red * scale) >> SHADOW_SCALE_FRACTION_BITS;
         green = (green * scale) >> SHADOW_SCALE_FRACTION_BITS;
         blue = (blue * scale) >> SHADOW_SCALE_FRACTION_BITS;
+        alpha = color & TEXEL_ALPHA_MASK;
         if (red > TEXEL_RED_MASK) {
           red = TEXEL_RED_MASK;
         } else {
@@ -3564,7 +3570,6 @@ void CastBillboardShadows(void) {
           blue &= TEXEL_BLUE_MASK;
         }
 
-        alpha = color & TEXEL_ALPHA_MASK;
         color = red | green | blue | alpha;
         *GetShadowedTexel(column, row) = color;
       }
