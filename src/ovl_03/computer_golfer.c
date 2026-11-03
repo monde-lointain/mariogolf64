@@ -2268,7 +2268,10 @@ INCLUDE_RODATA("asm/nonmatchings/ovl_03/computer_golfer", f_SimFaultText);
  * excluded sectors through a pointer taken before the club checks, where the
  * original reads f_Shot.heading directly; taking it just before the loop gave
  * 116 (36), using it for the aim change too 118 (36), and reading the centre
- * sector into a local 153 (57). 101 words differ, 35 in shape.
+ * sector into a local 153 (57). A later run reached 87 (27) with the same
+ * pointer alone. Now, a local holding the heading's sector before the loop, or
+ * the heading itself, gives 139 (47), and one holding the first excluded sector
+ * 135 (47). 101 words differ, 35 in shape.
  */
 #ifdef NON_MATCHING
 s32 StepTrialShot(void) {
