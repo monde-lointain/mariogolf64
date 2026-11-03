@@ -485,7 +485,12 @@ void UpdateCameraEditor(void) {
   f32 gap;
   f32 zoomTarget;
   f32 left;
-  /* The point's x, then the pitch's cosine, to match */
+  /*
+   * The point's x, then the pitch's cosine, to match: a pitchCosine variable
+   * in either of the two direction blocks alone compiles the same, but in both
+   * gives 310 words differing (80 in shape), against the draft's 278 (80),
+   * wherever it is declared
+   */
   f32 x;
 
   if (g_CameraEditor.flags[EDITOR_POINT_EYE] == 0 &&
