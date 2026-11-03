@@ -761,9 +761,11 @@ enum BallSprite {
       TexelStep(width, xl, xh), TexelStep(height, yl, yh))
 
 /*
- * Doesn't match: 1288 words differ. The stack frame is 8 bytes smaller, so
- * the register saves move, and the display list pointers take other
- * registers.
+ * Doesn't match: 1220 words differ, 190 in shape. The stack frame is 8 bytes
+ * smaller, so the register saves move, and the display list pointers take
+ * other registers. The original aligns the Pika ball texture's address to 8
+ * bytes, as TextureAddress does; without that, 1288 words differ, 200 in
+ * shape.
  */
 #ifdef NON_MATCHING
 void DrawGolfBalls(CameraMatrices* matrices UNUSED) {
@@ -1372,10 +1374,10 @@ void DrawGolfBalls(CameraMatrices* matrices UNUSED) {
     gDPSetCombineLERP(gfx++, 0, 0, 0, SHADE, PRIMITIVE, 0, TEXEL0, 0, 0, 0, 0,
         SHADE, PRIMITIVE, 0, TEXEL0, 0);
     gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0x7F, 0x00, 0x60);
-    gDPLoadTextureBlock_4b(gfx++, f_PikaBallTexture, G_IM_FMT_IA,
-        PIKA_TEXTURE_WIDTH, PIKA_TEXTURE_HEIGHT, 0, G_TX_NOMIRROR | G_TX_CLAMP,
-        G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
-        G_TX_NOLOD);
+    gDPLoadTextureBlock_4b(gfx++, TextureAddress(f_PikaBallTexture),
+        G_IM_FMT_IA, PIKA_TEXTURE_WIDTH, PIKA_TEXTURE_HEIGHT, 0,
+        G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMASK,
+        G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
     gDPSetPrimDepth(gfx++, f_CurrentBallScreenPoint.depth - 4, 0);
     if (f_CurrentBallScreenPoint.depth < PIKA_BALL_DEPTH) {
