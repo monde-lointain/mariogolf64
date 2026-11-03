@@ -122,7 +122,15 @@ void TransformPoint(Mat4 mf, Vec3 point, Vec3 result) {
  * Places the eye and look-at point so that the first camera's field of view
  * takes in every framed sphere, looking from the framing angles
  *
- * Doesn't match: 282 words differ, 108 in shape.
+ * Doesn't match: the original's frame is 8 bytes larger, it keeps
+ * horizontalEyeZ on the stack where ours keeps it in $fp, and its float
+ * registers differ from the first eye distance on. The register oracle,
+ * forcing 12 pseudos, still leaves 227 words. The original negates 10.0 at
+ * run time for maxZ, so maxZ is set from minZ after the block that ends at
+ * bottomAngle, where cse no longer knows minZ's value. Written -Z_MARGIN the
+ * negation folds (282 words, 108 in shape), as it does from minZ in the same
+ * block (291, 117); setting minZ just before the block's end gives 285.
+ * 279 words differ, 109 in shape.
  */
 #ifdef NON_MATCHING
 void FrameSpheres(f32 depthOffset) {
@@ -162,16 +170,16 @@ void FrameSpheres(f32 depthOffset) {
   s32 i;
   f32 rightRadians;
 
+  minZ = Z_MARGIN;
   minY = FAR_EXTENT;
   minX = minY;
-  maxZ = -Z_MARGIN;
   maxY = -FAR_EXTENT;
   maxX = maxY;
   rightAngle = g_Cameras[0].view.fieldOfView * 0.5f;
   leftAngle = -rightAngle;
   topAngle = rightAngle * 0.75f;
   IN_OWN_BLOCK(bottomAngle = leftAngle * 0.75f);
-  minZ = Z_MARGIN;
+  maxZ = -minZ;
   if (g_ControllerData[1].trigger & D_CBUTTONS) {
     osSyncPrintf("forv %f\n", g_Cameras[0].view.fieldOfView);
   }
