@@ -2853,13 +2853,18 @@ INCLUDE_ASM("asm/nonmatchings/collision", FindWallHit);
  * above the ground, where course y points down, is left alone. It returns
  * a value only for a ball off the ground.
  *
- * Doesn't match: the push's two arms keep their products in other float
- * registers, and the start of the wall loop places the 0x7C($sp) store a word
- * earlier. The original's first arm converts x back before its jump, so only
- * z's conversion is shared with the second arm; ours shares both. Either
- * operand order of the products, x = x + ..., z pushed before x and either
- * arm first give 41 to 48 words, 5 to 19 in shape. 45 words differ, 5 in
- * shape.
+ * Doesn't match: the push's two arms keep their products and sums in other
+ * float registers. The original's first arm converts x back from a register
+ * the second arm's doesn't use, so cross-jumping shares only z's conversion
+ * between them; ours shares both. Local-alloc gives x's sum (priority 45000)
+ * its register before z's product (36000). The register oracle, forcing 11
+ * pseudos, leaves 12 words, all in the first arm's schedule. Either operand
+ * order of the products, x = x + ..., z pushed before x, either arm first, a
+ * push distance set in the arms, subtracting WALL_PUSH_DISTANCE + side, and
+ * the push as a ternary give 41 to 91 words, 5 to 45 in shape. The corner
+ * push sets y between x and z, which puts its store after the corner's load
+ * as in the original; set first, 45 words differ, 5 in shape, and set last
+ * or with z before x, 47 to 109. 43 words differ, 3 in shape.
  */
 #ifdef NON_MATCHING
 s32 PushBallOutOfWalls(BallSimulation* simulation, s32 checksHeight) {
@@ -2960,9 +2965,9 @@ s32 PushBallOutOfWalls(BallSimulation* simulation, s32 checksHeight) {
             (wall.corners[AXIS_X][corner] << WORLD_TO_COURSE_SHIFT) - x,
             (wall.corners[AXIS_Z][corner] << WORLD_TO_COURSE_SHIFT) - z);
         if (cornerDistance < WALL_TOUCH_DISTANCE) {
-          push[AXIS_Y] = 0.0f;
           push[AXIS_X] =
               x - (wall.corners[AXIS_X][corner] << WORLD_TO_COURSE_SHIFT);
+          push[AXIS_Y] = 0.0f;
           push[AXIS_Z] =
               z - (wall.corners[AXIS_Z][corner] << WORLD_TO_COURSE_SHIFT);
           if (cornerDistance > CORNER_LEAST_DISTANCE) {
