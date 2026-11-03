@@ -2925,7 +2925,7 @@ void ShowHoleOutBanner(s32 playerIndex) {
  * inline: inlined, their buffers share one stack slot, as in the
  * original's frame.
  *
- * Doesn't match: 454 words differ, 182 in shape, spread through the
+ * Doesn't match: 454 words differ, 184 in shape, spread through the
  * routine's states.
  *
  * The letterbox test before the debug output is written "== FALSE", for
@@ -2953,6 +2953,12 @@ void ShowHoleOutBanner(s32 playerIndex) {
  * functions and passed to both gives that (175 in shape), but puts
  * playerIndex's slot above the buffer and grows the frame, 751 words;
  * declared after the nested functions it keeps the frame but not $s0, 485.
+ *
+ * The Ring Shot hole-out sets nextState before stopping the rumble, so its
+ * tail is the other hole-outs' and cross-jumping shares their call, giving
+ * the original's four ForceStopRumble calls; stopping the rumble first keeps
+ * a fifth (454 words, 182 in shape). Setting the pause menu hole-out's
+ * nextState first too gives 458 (186 in shape).
  */
 #ifdef NON_MATCHING
 /* Debug flag 0x47: prints where the ball lies, and the second controller moves
@@ -4892,10 +4898,10 @@ void UpdateTurns(void) {
               nextState = PLAYER_STATE_WAITING;
               break;
             case CHOICE_RESULT_RING_SHOT_HOLE_OUT:
+              nextState = PLAYER_STATE_HOLE_DONE;
               EndFlightCamera();
               FreeCharacterAndReactionLight(0);
               ForceStopRumble();
-              nextState = PLAYER_STATE_HOLE_DONE;
               break;
             case CHOICE_RESULT_RETURN_TO_MENU:
               QuitPlayToTitle();
