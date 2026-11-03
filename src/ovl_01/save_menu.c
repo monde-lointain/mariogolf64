@@ -1848,7 +1848,9 @@ void DrawSavedMiniGolfImage(Gfx** displayListHead);
  * register; a literal 120 is expanded into shifts (417 words, 163 in
  * shape). Each mode icon's image is read once into modeImage, as the
  * original reads it once for the palette and the strips; reading the table
- * at each use gives 401 words, 149 in shape. 307 words differ, 121 in shape.
+ * at each use gives 401 words, 149 in shape. Reading the name plate into a
+ * local too, as a permuter output does, gives 331 words, 131 in shape, or
+ * 328 and 132 for its strips alone. 307 words differ, 121 in shape.
  */
 #ifdef NON_MATCHING
 void DrawSavedGames(Gfx** displayListHead) {
