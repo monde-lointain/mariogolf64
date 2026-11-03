@@ -510,9 +510,14 @@ void EndRumbleForceStop(void) {
  * within the course. Once it has moved, a held C button pushes it on by a step.
  *
  * Doesn't match: the original takes both absolute values of the offset before
- * subtracting the overshoot, where this subtracts between them. The register
- * oracle's closest result is these 4 words with no register forced, so
- * allocation isn't the cause. 4 words differ.
+ * subtracting the overshoot, where this subtracts between them. The scheduler
+ * can't give the original's order from this RTL: the adder takes 4 cycles for a
+ * subtraction and 2 for an absolute value (mips.md), so the subtraction is
+ * queued 4 cycles ahead of the division and the second absolute value 2. Taking
+ * the double fabs in the numerator gives these 4 words, in both 6 (2 in shape),
+ * and adding the negated overshoot 4; a double subtraction gives 64 or 110, and
+ * a double division 24. The register oracle's closest result is these 4 words
+ * with no register forced, so allocation isn't the cause. 4 words differ.
  */
 #ifdef NON_MATCHING
 void KeepAimCameraOnCourse(void) {
