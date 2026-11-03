@@ -862,7 +862,11 @@ void InsertRankedRecord(PlayRecord* record) {
     lowestPriority = 0x40000000; /* Above any priority */
     lowestIndex = 0;
 
-    /* Every case sets the length, which the original needs to match */
+    /*
+     * Every case sets the length, which the original needs to match: setting
+     * it once after the switch gives 113 words differing (1 in shape), once
+     * before it 71 (7), and using RANKED_GROUP_LENGTH in the loops 219 (31)
+     */
     switch (record->scoreKind & SCORE_KIND_MASK) {
       case SCORE_KIND_BIRDIE:
         firstIndex = 0 * RANKED_GROUP_LENGTH;
@@ -1355,7 +1359,8 @@ Boolean IsMetalMarioUnlocked(void) {
  * for more than one player, those whose matchup records show a win, the
  * unlocked ones and the imported ones, whose faces load too unless
  * skipsImportedFaces is set. playerCount is reused below as a record count and
- * a character id, to match.
+ * a character id, to match: a winCount variable gives 50 words differing (none
+ * in shape), and a character variable 4 (0).
  */
 void BuildCharacterGrid(s32 playerCount, Boolean skipsImportedFaces) {
   EncodedAsset asset;
@@ -1364,7 +1369,11 @@ void BuildCharacterGrid(s32 playerCount, Boolean skipsImportedFaces) {
   s32 row;
   s32 column;
   s32 index;
-  s32 recordIndex; /* Also holds a grid entry at the end, to match */
+  /*
+   * Also holds a grid entry at the end, to match: a gridEntry variable gives 4
+   * words differing, none in shape
+   */
+  s32 recordIndex;
 
   save = GetSaveData();
   for (row = 0; row != CHARACTER_GRID_ROW_COUNT; row++) {
@@ -1393,9 +1402,8 @@ void BuildCharacterGrid(s32 playerCount, Boolean skipsImportedFaces) {
   }
 
   for (index = 0; index != RECORD_CHARACTER_COUNT; index++) {
-    recordIndex = 0;
-    playerCount = 0;
-    for (; recordIndex != CHARACTER_COUNT; recordIndex++) {
+    for (recordIndex = 0, playerCount = 0; recordIndex != CHARACTER_COUNT;
+        recordIndex++) {
       if (save->awards.matchups[recordIndex][index].winBits & WIN_COUNT_MASK) {
         playerCount++;
         break;
@@ -1465,7 +1473,11 @@ void BuildCharacterGrid(s32 playerCount, Boolean skipsImportedFaces) {
 void PlaceImportedCharacters(void) {
   s16 index;
   s16 byteIndex;
-  s16 count; /* Also the byte index of the first loops, to match */
+  /*
+   * Also the byte index of the first loops, to match: clearing the names with
+   * byteIndex gives 43 words differing, 3 in shape
+   */
+  s16 count;
   char* name;
   u8 letter;
 
@@ -1668,13 +1680,17 @@ void InvalidateBrokenRingShotRecords(void) {
 
     scoreKind = record->scoreKind;
     kind = scoreKind;
-    /* Masked in place, so that the test reads the loaded kind and the bounds
-     * read its copy, to match */
+    /*
+     * Masked in place, so that the test reads the loaded kind and the bounds
+     * read its copy, to match: testing scoreKind & SCORE_KIND_RECORDED gives 5
+     * words differing, 1 in shape
+     */
     scoreKind &= SCORE_KIND_RECORDED;
     if (scoreKind) {
       /*
        * Masking within the test keeps GCC from merging the two bounds into
-       * one unsigned test, to match
+       * one unsigned test, to match: masking before the test gives 4 words
+       * differing, 4 in shape
        */
       if ((kind &= SCORE_KIND_MASK) >= SCORE_KIND_COUNT || kind < 0) {
         isInvalid[recordIndex] = TRUE;
