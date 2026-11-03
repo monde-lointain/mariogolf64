@@ -2274,9 +2274,7 @@ void DrawBallTrail(Gfx** displayListHead, CameraMatrices* matrices) {
  * first, gives 32 to 41, and dividing before the pulse step 41 in either
  * form. sched1 runs before local-alloc, so the original's reciprocal was
  * hoisted into $v1 before the speed got a register, which needs the
- * scaling and the division in one block; the register oracle, forcing
- * the speed into $a0, leaves the 6 words of the reciprocal's placement.
- * 16 words differ, 6 in shape.
+ * scaling and the division in one block. 14 words differ, 4 in shape.
  */
 #ifdef NON_MATCHING
 void DrawWindSpeed(Gfx** displayListHead, f32 x, f32 y) {
@@ -2327,7 +2325,12 @@ void DrawWindSpeed(Gfx** displayListHead, f32 x, f32 y) {
 
   scaledSpeed =
       (u32)g_HoleSetup.conditions.windSpeed * WIND_SPEED_TO_METERS_SCALE;
-  IN_OWN_BLOCK(f_WindIconPulseAngle += WIND_ICON_PULSE_STEP);
+  /*
+   * The scaling ends its block, as with the pulse step in a block of its
+   * own instead 16 words differ, 6 in shape, and with no barrier 41 and 31
+   */
+  END_BASIC_BLOCK();
+  f_WindIconPulseAngle += WIND_ICON_PULSE_STEP;
   speed = scaledSpeed / WIND_SPEED_TO_METERS_DIVISOR;
   if (speed >= WIND_SPEED_TWO_DIGITS) {
     halfWidth = sinf(f_WindIconPulseAngle) + WIND_ICON_WIDE_HALF_WIDTH;
