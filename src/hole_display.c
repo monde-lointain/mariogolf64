@@ -2886,7 +2886,11 @@ void DrawTurnAwayAnimation(void);
  * inside the loops, and registers are allocated differently. GCC's loop
  * optimizer moves more out of the loops when its threshold is one higher.
  * Writing the corners' expressions differently in each loop gets closer, but
- * no single form matches. 106 words differ, 30 in shape.
+ * no single form matches. The permuter's best output, 2715 against 3450
+ * (81 words differing, 23 in shape), holds the last column in a variable
+ * and splits the corners into temporaries; its natural parts, the matrix
+ * address or the lower right corner in a local, give 106 and 102 words
+ * differing (30 and 36 in shape). 106 words differ, 30 in shape.
  */
 #ifdef NON_MATCHING
 void DrawTurnAwayAnimation(void) {
