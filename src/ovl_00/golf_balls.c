@@ -761,19 +761,21 @@ enum BallSprite {
       TexelStep(width, xl, xh), TexelStep(height, yl, yh))
 
 /*
- * Doesn't match: 834 words differ, 142 in shape. The original's reload spills
- * the divide by 9's constant first, to 0x54($sp), and the depth in pseudo 87
- * later, so its spill slots come in another order and the display list pointers
- * take other registers. Updating f_UnusedBallFrame ahead of the display list,
- * rather than after f_BallRollFrame, cuts 1220 words differing to 834; updating
- * f_BallRollFrame anywhere else gives 822 to 1633 words, 158 or more in shape.
- * The original aligns the Pika ball texture's address to 8 bytes, as
- * TextureAddress does; without that, 894 words differ, 152 in shape. The
- * register oracle's closest result has no register forced, so the code itself
- * differs. The afterimages' loop tests i != f_BallAfterimageLength, as the
- * original's bne against the reloaded length shows; with < it compiles to slt
- * and bnez, and the draft had 834 words differing, 142 in shape, where it now
- * has 911, 137 in shape.
+ * Doesn't match: the original's reload spills the divide by 9's constant first,
+ * to 0x54($sp), and the depth in pseudo 87 later, so its spill slots come in
+ * another order, its frame is 8 bytes larger and the display list pointers take
+ * other registers. The sprite branches share one sync after the chain, which
+ * the original reaches by jumping from each branch; with a sync ending each
+ * branch instead, which emits the same commands, 911 words differed, 137 in
+ * shape. Before that change, updating f_UnusedBallFrame ahead of the display
+ * list, rather than after f_BallRollFrame, cut 1220 words differing to 834, and
+ * updating f_BallRollFrame anywhere else gave 822 to 1633 words, 158 or more in
+ * shape. The original aligns the Pika ball texture's address to 8 bytes, as
+ * TextureAddress does; without that, 894 words differed, 152 in shape. The
+ * afterimages' loop tests i != f_BallAfterimageLength, as the original's bne
+ * against the reloaded length shows; < compiles to slt and bnez. The register
+ * oracle's closest result has no register forced, so the code itself differs.
+ * 654 words differ, 90 in shape.
  */
 #ifdef NON_MATCHING
 void DrawGolfBalls(CameraMatrices* matrices UNUSED) {
@@ -1003,7 +1005,6 @@ void DrawGolfBalls(CameraMatrices* matrices UNUSED) {
                     (BALL_TEXTURE_SIZE / 2) +
                         (exposure * (BALL_TEXTURE_SIZE / 2)));
               }
-              gDPPipeSync(gfx++);
             } else if (ballDepth >= BALL_FULL_SPRITE_DEPTH) {
               spriteKind = BALL_SPRITE_SMALL;
               gSPStretchedTextureRectangle(gfx++,
@@ -1014,7 +1015,6 @@ void DrawGolfBalls(CameraMatrices* matrices UNUSED) {
                   BALL_TILE_SMALL, 0, 0, SMALL_BALL_TEXTURE_SIZE,
                   (SMALL_BALL_TEXTURE_SIZE / 2) +
                       (exposure * (SMALL_BALL_TEXTURE_SIZE / 2)));
-              gDPPipeSync(gfx++);
             } else if (ballDepth > BALL_DOT_DEPTH) {
               gDPSetCombineMode(gfx++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
               gDPPipeSync(gfx++);
@@ -1043,7 +1043,6 @@ void DrawGolfBalls(CameraMatrices* matrices UNUSED) {
               } else {
                 spriteKind = BALL_SPRITE_DOT;
               }
-              gDPPipeSync(gfx++);
             } else {
               gDPPipeSync(gfx++);
               gDPSetRenderMode(
@@ -1064,9 +1063,9 @@ void DrawGolfBalls(CameraMatrices* matrices UNUSED) {
               if (isAboveGround == TRUE) {
                 spriteKind = BALL_SPRITE_FAR_DOT_SHADOWED;
               }
-              gDPPipeSync(gfx++);
             }
 
+            gDPPipeSync(gfx++);
             gDPPipeSync(gfx++);
             gDPSetRenderMode(gfx++, G_RM_AA_ZB_XLU_SURF, G_RM_AA_ZB_XLU_SURF2);
             gDPSetCombineMode(
