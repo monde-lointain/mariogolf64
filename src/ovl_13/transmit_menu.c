@@ -3677,7 +3677,10 @@ void BuildStatusData(u8* status) {
   StatusCourse* course;
   StatusProgress* progress;
 
-  /* Reading the records through a pointer to the awards is there to match */
+  /*
+   * Reading the records through a pointer to the awards is there to match:
+   * reading them through save gives 181 words differing, 21 in shape
+   */
   SaveRecords* records = (SaveRecords*)&save->awards;
   CourseStats* entry;
   CourseStats* scores;
@@ -3695,12 +3698,18 @@ void BuildStatusData(u8* status) {
     entry = &save->courseStats[courseIndex];
     course = &data->courses[courseIndex];
 
-    /* Testing for zero first is there to match */
+    /*
+     * Testing for zero first is there to match: without it 2 words differ, 2
+     * in shape
+     */
     if (entry->roundCount != 0) {
       if (entry->roundCount > 0) {
         reciprocal = 1.0f / entry->roundCount;
 
-        /* Copying the count into value is there to match */
+        /*
+         * Copying the count into value is there to match: storing its bytes
+         * straight from the entry gives 11 words differing, 7 in shape
+         */
         value = entry->roundCount;
         course->roundCount[0] = value;
         course->roundCount[1] = value >> BITS_PER_BYTE;
@@ -3731,7 +3740,10 @@ void BuildStatusData(u8* status) {
 
         course->places = 0;
 
-        /* Setting the first bit with |= is there to match */
+        /*
+         * Setting the first bit with |= is there to match: setting places to
+         * it or to 0 in an if-else gives 22 words differing, 12 in shape
+         */
         if (entry->hasPlace[THIRD_PLACE_INDEX] > 0) {
           course->places |= STATUS_THIRD_PLACE;
         }
@@ -3757,7 +3769,10 @@ void BuildStatusData(u8* status) {
 
     for (index = 0; index != BEST_TIME_COUNT; index++) {
       if (records->bestTimes[courseIndex][index] > 0) {
-        /* Passing the parts through value is there to match */
+        /*
+         * Passing the parts through value is there to match: storing them
+         * directly gives 20 words differing, none in shape
+         */
         value = records->bestTimes[courseIndex][index] / FRAMES_PER_MINUTE;
         course->bestTimes[index].minutes = value;
         value = records->bestTimes[courseIndex][index] / FRAMES_PER_SECOND %
@@ -3899,8 +3914,12 @@ void BuildStatusData(u8* status) {
   }
 
   for (courseIndex = 0; courseIndex != CHARACTER_COUNT; courseIndex++) {
-    /* The bits array, zeroed from its end, and courseIndex as row index are
-     * there to match */
+    /*
+     * The bits array, zeroed from its end, and courseIndex as row index are
+     * there to match: two locals for the bits give 285 words differing (21
+     * in shape), zeroing bits[0] first 2 (0), and a character loop variable
+     * 16 (0)
+     */
     row = f_StatusCharacterOrder[courseIndex];
     bits[1] = 0;
     bits[0] = 0;
@@ -3926,8 +3945,11 @@ void BuildStatusData(u8* status) {
 s32 RoundedWholePart(f32 value) {
   s32 wholePart = value;
 
-  /* The fraction in hundredths, then in tenths; reusing one variable is there
-   * to match */
+  /*
+   * The fraction in hundredths, then in tenths. Reusing one variable is there
+   * to match: a tenths local, or testing the quotient, gives 8 words
+   * differing, none in shape
+   */
   s32 fraction = (value - wholePart) * HUNDREDTHS_PER_ONE;
 
   if (fraction % HUNDREDTHS_PER_TENTH >= HALF_TENTH_HUNDREDTHS) {
