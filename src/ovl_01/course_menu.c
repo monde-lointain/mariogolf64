@@ -950,13 +950,17 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/course_menu", DrawStatsScrollArrows);
  * Draws the course's spinning trophy in the color of each place won in its
  * tournament, stepping the spin's images, or on the totals the points needed to
  * open the next course.
+ *
  * Doesn't match: the original loads the trophies' shift once as 0xFFEC, the low
- * half of -20, and adds it in a register, where this adds -20 to each edge,
- * and this works out the clipped top edge a second time where the original
- * reuses it. An unsigned TrophyPosition y leaves 19, but makes the rectangle
- * macro's clamp of a negative top edge dead, which -Wextra reports in the
- * modern build. Taking the offset into a local, of any type, gives 41 words
- * or more, and an unsigned x or place 20 or more. 31 words differ.
+ * half of -20, and adds it in a register, where this adds -20 to each edge, and
+ * this works out the clipped top edge a second time where the original reuses
+ * it. An unsigned TrophyPosition y leaves 19, but makes the rectangle macro's
+ * clamp of a negative top edge dead, which -Wextra reports in the modern build.
+ * Taking the offset into a local, of any type, gives 41 words or more, and an
+ * unsigned x or place 20 or more. The permuter's best casts y to unsigned at
+ * the rectangle's top edge, the same 19 words, 5 in shape; its fewest words, 12
+ * (10 in shape), come from casting the rectangle's dtdy to a char, which makes
+ * it 0. 31 words differ, 21 in shape.
  */
 #ifdef NON_MATCHING
 void DrawCourseTrophies(Gfx** displayListHead) {
