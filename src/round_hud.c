@@ -818,8 +818,10 @@ void PrepareHoleDisplay(void) {
  * free register, ahead of the column's texel offset and the vertex, where
  * global allocation ranks the counter, with 11 uses over 29 insns, below
  * them. The instructions are the same. Sharing the row or the vertex with
- * the back loop gives 46 to 48 words, and indexing the vertex 79 to 134. 40
- * words differ.
+ * the back loop gives 46 to 48 words, and indexing the vertex 79 to 134; an
+ * s16 row 95, and other orders of the declarations or of the Y and T stores 40
+ * to 44. The oracle comes within 8 words with 6 pseudos forced, leaving the
+ * shade loop's counter in $v1 where the original has $a1. 40 words differ.
  */
 #ifdef NON_MATCHING
 void InitRoundHud(void) {
