@@ -2284,7 +2284,11 @@ INCLUDE_ASM("asm/nonmatchings/collision", FindHoleTriangleHit);
  * compared with FALSE, as the original ands the macro's crossing tests
  * before branching: negated with !, fold rewrites it into xori and or
  * chains (563 words). Nesting the rest of the loop under the plain test
- * gives the same 535.
+ * gives the same 535. The permuter's best outputs read the plane's normal x
+ * into a local for two of the six plane tests (500 words, 78 in shape), one
+ * before GetTrianglePlane sets it, and moved the second arm's highestX into
+ * the first, where it is dead, so the second leaves it unset (431 words, 83
+ * in shape); neither is natural, and the second changes the result.
  */
 #ifdef NON_MATCHING
 s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
