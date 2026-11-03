@@ -223,14 +223,15 @@ void ClearHoleCreatures(void) {
 /*
  * Sends a Cheep Cheep leaping across the wind from below the ball.
  *
- * Doesn't match: GCC schedules the store of the rotation's zero X angle
- * right after the Cheep Cheep's velocity, where the original stores it after
+ * Doesn't match: GCC schedules the store of the rotation's zero X angle right
+ * after the Cheep Cheep's velocity, where the original stores it after
  * converting the translation. sched can't tell the array store from the loads
  * of the creature's position, so they wait for it. Clearing it later, or
- * through a pointer, which frees it, lets the velocity's Z store slide past
- * the first load instead: 14 to 26 words. No order of the eight statements
- * does better, nor velocity stores through a pointer or the array. 2 words
- * differ.
+ * through a pointer, which frees it, lets the velocity's Z store slide past the
+ * first load instead: 14 to 26 words. No order of the eight statements does
+ * better, nor velocity stores through a pointer or the array. The register
+ * oracle's closest result is these 2 words with no register forced, so
+ * allocation isn't the cause. 2 words differ.
  */
 #ifdef NON_MATCHING
 void StartCheepCheepLeap(s32 arg0) {
