@@ -450,11 +450,17 @@ void StopEditorMoves(void) {
  * point that moves around the pivot is then placed from the heading, pitch
  * and distance.
  *
- * Doesn't match: GCC folds the eight flag tests before letting go of the pivot
- * into one mask test, keeps the zoom's gap in a float register rather than
+ * Doesn't match: GCC keeps the zoom's gap in a float register rather than
  * $s6, and allocates the fabsf operands to other registers. It also reads
  * turnLeft and tiltLeft once before stepping them, where the original reads
- * each twice. 298 words differ.
+ * each twice. 266 words differ, 80 in shape.
+ *
+ * The eight flag tests before letting go of the pivot each clear isDone:
+ * jump.c turns each "if (test) isDone = FALSE" into an and with the negated
+ * test, the original's branchless chain. Written as one expression, fold
+ * merges the tests into two mask tests: with & or && between them 298 or
+ * 309 words differ (102 and 111 in shape), and with * 322. A new flag
+ * variable instead of isDone gives 314, in any declaration position.
  */
 #ifdef NON_MATCHING
 void UpdateCameraEditor(void) {
@@ -802,16 +808,32 @@ void UpdateCameraEditor(void) {
   }
 
   /* The pivot is let go once nothing turns, tilts, zooms or carries */
-  if (hasLeader &&
-      (!(g_CameraEditor.flags[EDITOR_POINT_EYE] & EDITOR_FLAG_TURNING) &
-          !(g_CameraEditor.flags[EDITOR_POINT_EYE] & EDITOR_FLAG_TILTING) &
-          !(g_CameraEditor.flags[EDITOR_POINT_EYE] & EDITOR_FLAG_ZOOMING) &
-          !(g_CameraEditor.flags[EDITOR_POINT_EYE] & EDITOR_FLAG_CARRYING) &
-          !(g_CameraEditor.flags[EDITOR_POINT_LOOK_AT] & EDITOR_FLAG_TURNING) &
-          !(g_CameraEditor.flags[EDITOR_POINT_LOOK_AT] & EDITOR_FLAG_TILTING) &
-          !(g_CameraEditor.flags[EDITOR_POINT_LOOK_AT] & EDITOR_FLAG_ZOOMING) &
-          !(g_CameraEditor.flags[EDITOR_POINT_LOOK_AT] &
-              EDITOR_FLAG_CARRYING))) {
+  isDone = TRUE;
+  if (g_CameraEditor.flags[EDITOR_POINT_EYE] & EDITOR_FLAG_TURNING) {
+    isDone = FALSE;
+  }
+  if (g_CameraEditor.flags[EDITOR_POINT_EYE] & EDITOR_FLAG_TILTING) {
+    isDone = FALSE;
+  }
+  if (g_CameraEditor.flags[EDITOR_POINT_EYE] & EDITOR_FLAG_ZOOMING) {
+    isDone = FALSE;
+  }
+  if (g_CameraEditor.flags[EDITOR_POINT_EYE] & EDITOR_FLAG_CARRYING) {
+    isDone = FALSE;
+  }
+  if (g_CameraEditor.flags[EDITOR_POINT_LOOK_AT] & EDITOR_FLAG_TURNING) {
+    isDone = FALSE;
+  }
+  if (g_CameraEditor.flags[EDITOR_POINT_LOOK_AT] & EDITOR_FLAG_TILTING) {
+    isDone = FALSE;
+  }
+  if (g_CameraEditor.flags[EDITOR_POINT_LOOK_AT] & EDITOR_FLAG_ZOOMING) {
+    isDone = FALSE;
+  }
+  if (g_CameraEditor.flags[EDITOR_POINT_LOOK_AT] & EDITOR_FLAG_CARRYING) {
+    isDone = FALSE;
+  }
+  if (hasLeader && isDone) {
     if (g_CameraEditor.flags[EDITOR_POINT_EYE] & EDITOR_FLAG_PIVOT) {
       g_CameraEditor.flags[EDITOR_POINT_EYE] = 0;
     }
