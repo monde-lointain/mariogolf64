@@ -639,7 +639,10 @@ void DrawGameSaveMenu(Gfx** displayListHead) {
   SaveData* save;
   s32 row;
 
-  /* Counts rows, icon halves or golfers; sharing one variable is there to match
+  /*
+   * Counts rows, icon halves or golfers. Sharing one variable is there to
+   * match: a variable of its own for the rows gives 411 words differing (3 in
+   * shape), for the icon halves 12 (0), and for the golfers 54 (0)
    */
   s32 index;
   s32 strip;
@@ -748,7 +751,10 @@ void DrawGameSaveMenu(Gfx** displayListHead) {
     LoadLargePalette(&gfx, ImageBody(f_SaveMenuTitleImage));
     imageLeft = TITLE_IMAGE_LEFT;
 
-    /* The strips are counted with row; reusing it is there to match */
+    /*
+     * The strips are counted with row. Reusing it is there to match: counting
+     * them with strip gives 114 words differing, none in shape
+     */
     for (row = 0; row != TITLE_STRIP_COUNT; row++) {
       drawnHeight = TITLE_STRIP_DRAWN_HEIGHT;
       if (row == TITLE_STRIP_COUNT - 1) {
@@ -1381,7 +1387,11 @@ void DrawReplaySaveMenu(Gfx** displayListHead) {
   SaveData* save;
   s32 row;
 
-  /* Counts strips or records; sharing one variable is there to match */
+  /*
+   * Counts strips or records. Sharing one variable is there to match: a
+   * variable of its own for the strips, or for the records, gives 174 words
+   * differing, none in shape
+   */
   s32 index;
   s32 stripHeight;
   s32 titleBob;
@@ -1658,7 +1668,9 @@ void DrawReplaySaveMenu(Gfx** displayListHead) {
     f_ReplayTitleBobAngle += DegreesToRadians(TITLE_BOB_DEGREES_PER_FRAME);
     LoadLargePalette(&gfx, ImageBody(f_PanelImage));
     for (index = 0; index != PANEL_STRIP_COUNT; index++) {
-      /* Unused; it is there to match */
+      /*
+       * Unused; it is there to match: without it 8 words differ, 4 in shape
+       */
       stripHeight = TITLE_PANEL_STRIP_HEIGHT;
       LoadTextureBlock(&gfx,
           LargeImageTexels(f_PanelImage) + (index * PANEL_STRIP_SIZE),
