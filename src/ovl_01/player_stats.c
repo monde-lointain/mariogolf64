@@ -2337,7 +2337,11 @@ void ReadBestShots(void) {
     }
   }
 
-  /* Setting the column twice is needed to match */
+  /*
+   * Setting the column twice is needed to match: copying the row into it only
+   * after the call gives 2 words differing; only before it, or setting it to
+   * 0, 22; the chained store alone 20; and calling first 111
+   */
   row = column = BEST_SHOT_ROW_BIRDIE;
   memory = GetMenuMemory();
   column = row;
