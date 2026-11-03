@@ -1900,7 +1900,9 @@ s32 PaintDrivingRange(
  * Returns the map texel at a column and row of the whole hole's map. Adding
  * the offsets in bytes, the texel's first, is closest to the original:
  * indexing the tiles or texels, or adding the tile offset to the base first,
- * lets GCC fold the base address in last or first.
+ * lets GCC fold the base address in last or first. Without tileRow, with a
+ * tileColumn local or with the row's product first, LoadCodeMap differs by 40
+ * to 42 words and EncodeCodeMap by 36 to 48, against 6 and 7.
  */
 static inline u16* GetMapTexel(s32 column, s32 row) {
   /* tileRow is there to match */
