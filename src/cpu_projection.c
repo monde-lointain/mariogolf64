@@ -131,16 +131,6 @@ void SetCpuProjectionF(Mat4 projection, Mat4 viewing, Vp* viewport) {
 }
 
 /*
- * Whether the screen offset OFFSET, stored in EDGE as it is tested, lies
- * past the screen's edge CENTER from its center on the positive side, or on
- * the negative side
- */
-#define IsPastPositiveEdge(edge, offset, center) \
-  (((edge) = (offset)), ((center) < (edge)))
-#define IsPastNegativeEdge(edge, offset, center) \
-  (((edge) = (offset)), ((edge) < -(center)))
-
-/*
  * Returns SPHERE_BEHIND_CAMERA if the sphere is not in front of the camera,
  * SPHERE_PAST_SIDE if it is off the left or right of the screen,
  * SPHERE_PAST_TOP_OR_BOTTOM if it is off the top or bottom, or else its view
@@ -149,63 +139,66 @@ void SetCpuProjectionF(Mat4 projection, Mat4 viewing, Vp* viewport) {
  */
 s32 GetSphereVisibility(f32 x, f32 y, f32 z, f32 radius) {
   f32 depth;
-  /* The point's view-space x, then its y, to match */
-  f32 viewCoordinate;
+  f32 viewX;
+  f32 viewY;
   f32 perspective;
-  /* The screen offset of the side tested, kept in one local to match */
+  /*
+   * The screen offset of the side tested; testing the offsets directly gives
+   * 32 words differing, none in shape
+   */
   f32 screenEdge;
 
   depth = (f_CpuViewingMatrix[0][2] * x) + (f_CpuViewingMatrix[1][2] * y) +
       (f_CpuViewingMatrix[2][2] * z) + f_CpuViewingMatrix[3][2];
-  /* The depth of the sphere's nearest point, taken apart to match */
+  /*
+   * The depth of the sphere's nearest point, taken apart to match: in one
+   * expression, 18 words differ, none in shape
+   */
   depth -= radius;
   if ((s32)depth >= 0) {
     return SPHERE_BEHIND_CAMERA;
   }
 
-  viewCoordinate = (f_CpuViewingMatrix[0][0] * x) +
-      (f_CpuViewingMatrix[1][0] * y) + (f_CpuViewingMatrix[2][0] * z) +
-      f_CpuViewingMatrix[3][0];
+  viewX = (f_CpuViewingMatrix[0][0] * x) + (f_CpuViewingMatrix[1][0] * y) +
+      (f_CpuViewingMatrix[2][0] * z) + f_CpuViewingMatrix[3][0];
   if ((s32)f_CpuProjectionMatrix[3][3] == 1) {
     perspective = 1.0f;
   } else {
     perspective = 1.0f / depth;
   }
 
-  /*
-   * Tested as whether the sphere is on screen, so that each edge's test
-   * branches to the one return, to match. Each test moves the coordinate to
-   * the sphere's side nearest the screen's center in place, to match.
-   */
-  if (!((viewCoordinate > 0.0f)
-              ? IsPastPositiveEdge(screenEdge,
-                    f_CpuScreenScaleX * (viewCoordinate -= radius) *
-                        perspective,
-                    f_CpuViewportCenterX)
-              : IsPastNegativeEdge(screenEdge,
-                    f_CpuScreenScaleX * (viewCoordinate += radius) *
-                        perspective,
-                    f_CpuViewportCenterX))) {
-    /* The screen's y runs down, opposite the view's */
-    viewCoordinate = (f_CpuViewingMatrix[0][1] * x) +
-        (f_CpuViewingMatrix[1][1] * y) + (f_CpuViewingMatrix[2][1] * z) +
-        f_CpuViewingMatrix[3][1];
-    if (!((viewCoordinate > 0.0f)
-                ? IsPastNegativeEdge(screenEdge,
-                      f_CpuScreenScaleY * (viewCoordinate -= radius) *
-                          perspective,
-                      f_CpuViewportCenterY)
-                : IsPastPositiveEdge(screenEdge,
-                      f_CpuScreenScaleY * (viewCoordinate += radius) *
-                          perspective,
-                      f_CpuViewportCenterY))) {
-      return depth;
+  if (viewX > 0.0f) {
+    viewX -= radius;
+    screenEdge = f_CpuScreenScaleX * viewX * perspective;
+    if (screenEdge > f_CpuViewportCenterX) {
+      return SPHERE_PAST_SIDE;
     }
-
-    return SPHERE_PAST_TOP_OR_BOTTOM;
+  } else {
+    viewX += radius;
+    screenEdge = f_CpuScreenScaleX * viewX * perspective;
+    if (screenEdge < -f_CpuViewportCenterX) {
+      return SPHERE_PAST_SIDE;
+    }
   }
 
-  return SPHERE_PAST_SIDE;
+  /* The screen's y runs down, opposite the view's */
+  viewY = (f_CpuViewingMatrix[0][1] * x) + (f_CpuViewingMatrix[1][1] * y) +
+      (f_CpuViewingMatrix[2][1] * z) + f_CpuViewingMatrix[3][1];
+  if (viewY > 0.0f) {
+    viewY -= radius;
+    screenEdge = f_CpuScreenScaleY * viewY * perspective;
+    if (screenEdge < -f_CpuViewportCenterY) {
+      return SPHERE_PAST_TOP_OR_BOTTOM;
+    }
+  } else {
+    viewY += radius;
+    screenEdge = f_CpuScreenScaleY * viewY * perspective;
+    if (screenEdge > f_CpuViewportCenterY) {
+      return SPHERE_PAST_TOP_OR_BOTTOM;
+    }
+  }
+
+  return depth;
 }
 
 s32 GetViewDepth(f32 x, f32 y, f32 z) {
@@ -423,7 +416,10 @@ void SetTriangleNormal(Vtx* vertices, s32 firstIndex, s32 secondIndex,
   Vtx_tn* second = (Vtx_tn*)((secondIndex * sizeof(Vtx)) + (u32)vertices);
   Vtx_tn* third = (Vtx_tn*)((thirdIndex * sizeof(Vtx)) + (u32)vertices);
   s32 firstEdgeX = second->ob[AXIS_X] - first->ob[AXIS_X];
-  /* Written to read first's coordinate first, to match */
+  /*
+   * Written to read first's coordinate first, to match: second's y less
+   * first's gives 18 words differing, none in shape
+   */
   s32 firstEdgeY = -first->ob[AXIS_Y] + second->ob[AXIS_Y];
   s32 firstEdgeZ = second->ob[AXIS_Z] - first->ob[AXIS_Z];
   s32 secondEdgeX = third->ob[AXIS_X] - second->ob[AXIS_X];
