@@ -337,17 +337,18 @@ void DrawBillboard(Gfx** gfxPtr, Billboard* billboard,
  * that need to stay see-through. Here, the close ones are only drawn when
  * they stay opaque.
  *
- * Doesn't match: the original's frame is 16 bytes larger, with the space
- * unused above the spill slots, which moves every register save. Between the
- * loops it sets $s6 to 0 and never reads it, as a biv that loop.c eliminated
- * would leave, and in the far loop it keeps ballDepth - BALL_CLEARANCE_DEPTH
- * in $fp and rebuilds both tables' addresses, where ours keeps
- * g_BillboardTransforms in $fp. Counting the far loop up and indexing
- * f_DrawOrder from the end gives more words: loop.c doesn't reduce the index.
- * Unused locals for the frame move the spill slots. The permuter's flag
- * for the near loop's viewDepth >= 0 test (131 words, 9 in shape) only
- * takes an 8-byte slot that grows the frame, so it is a pad in disguise.
- * 139 words differ, 17 in shape.
+ * Doesn't match: the original's frame is 16 bytes larger, with the space unused
+ * above the spill slots, which moves every register save. Between the loops it
+ * sets $s6 to 0 and never reads it, as a biv that loop.c eliminated would
+ * leave, and in the far loop it keeps ballDepth - BALL_CLEARANCE_DEPTH in $fp
+ * and rebuilds both tables' addresses, where ours keeps g_BillboardTransforms
+ * in $fp. Counting the far loop up and indexing f_DrawOrder from the end gives
+ * more words: loop.c doesn't reduce the index. Unused locals for the frame move
+ * the spill slots. The permuter's flag for the near loop's viewDepth >= 0 test
+ * (131 words, 9 in shape) only takes an 8-byte slot that grows the frame, so it
+ * is a pad in disguise. The register oracle, forcing 7 pseudos' registers,
+ * leaves 77 words at best, so the code differs too. 139 words differ, 17 in
+ * shape.
  */
 #ifdef NON_MATCHING
 void DrawBillboards(CameraMatrices* cameraMatrices, s32 cameraIndex) {

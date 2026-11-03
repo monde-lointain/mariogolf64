@@ -3882,9 +3882,10 @@ void LoadOpeningImpactLines(void) {
  * original doesn't have, to 186 (16). The permuter's best, 36 words (4 in
  * shape), moves that sync into the strip loop, adding a command there, and
  * stores the rectangle's left edge into a new variable on each pass, a fake.
- * Without the sync, a left variable set on each pass gives 45 (1), and one
- * set once, at its declaration or before the loop, 284 (26). 186 words
- * differ, 16 in shape.
+ * Without the sync, a left variable set on each pass gives 45 (1), and one set
+ * once, at its declaration or before the loop, 284 (26). The register oracle's
+ * closest result is these 186 words with no register forced, so allocation
+ * isn't the cause. 186 words differ, 16 in shape.
  */
 #ifdef NON_MATCHING
 void DrawOpeningImpactLines(Gfx** displayListHead) {
@@ -4193,20 +4194,21 @@ void LoadOpeningBurst(void) {
  * Draws a yellow burst for a few frames, stretched over the burst's corners.
  *
  * Doesn't match: the original divides for the texture's steps at run time,
- * dividing 0x8000 by 28 and 26 loaded as constants, where this folds them
- * into constants. Here cse doesn't yet know the corners when it meets the
- * divisions, and cse2 folds them; the original's divisions survive cse2,
- * though its corners are folded into the rectangle's words. The scheduler
- * then starts the long divisions first and spills every command's address
- * ahead of them, so almost every word moves. GCC keeps such a division when
- * the size is set the same way in both arms of an if, which cse cannot see
- * through but cross-jumping later merges, so the original likely chose the
- * size by some condition. Placing such an if here keeps the divisions, but
- * its arms spill the size differently and are not merged. The original aligns
- * the palette's and texels' addresses to 8 bytes, as TextureAddress does;
- * without that, 391 words differed, 145 in shape, when the draft had 364
- * (132). The original has one pipe sync after the palette load, not two,
- * which leaves 367 words differing, 127 in shape.
+ * dividing 0x8000 by 28 and 26 loaded as constants, where this folds them into
+ * constants. Here cse doesn't yet know the corners when it meets the divisions,
+ * and cse2 folds them; the original's divisions survive cse2, though its
+ * corners are folded into the rectangle's words. The scheduler then starts the
+ * long divisions first and spills every command's address ahead of them, so
+ * almost every word moves. GCC keeps such a division when the size is set the
+ * same way in both arms of an if, which cse cannot see through but
+ * cross-jumping later merges, so the original likely chose the size by some
+ * condition. Placing such an if here keeps the divisions, but its arms spill
+ * the size differently and are not merged. The original aligns the palette's
+ * and texels' addresses to 8 bytes, as TextureAddress does; without that, 391
+ * words differed, 145 in shape, when the draft had 364 (132). The original has
+ * one pipe sync after the palette load, not two, which leaves 367 words
+ * differing, 127 in shape. The register oracle's closest result is these 367
+ * words with no register forced, so allocation isn't the cause.
  */
 #ifdef NON_MATCHING
 void DrawOpeningBurst(Gfx** displayListHead) {

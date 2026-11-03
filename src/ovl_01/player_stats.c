@@ -1207,7 +1207,9 @@ void DrawTwoDigitMenuNumber(
  * shape to 41; as an s32 it gives 205, 53 in shape. The columns' loop tests
  * columnIndex != g_ChosenPlayerCount, as the original's bne shows; with <,
  * which d849c579 chose for its lower count, it compiles to slt and bnez, 191
- * words (41 in shape). 222 words differ, 32 in shape.
+ * words (41 in shape). The register oracle, forcing 17 pseudos' registers,
+ * leaves 122 words at best, so the code differs too. 222 words differ, 32 in
+ * shape.
  */
 #ifdef NON_MATCHING
 void DrawHandicaps(Gfx** displayListHead, s32 slide, u8 reverseVerticalSlide,

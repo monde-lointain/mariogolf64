@@ -331,7 +331,9 @@ typedef s32 (*BillboardHitFinder)(s32 startX, s32 startY, s32 startZ, s32 endX,
  * StepBallSimulation does, took it from 652 words, 248 in shape, to 422 (182).
  * Naming the lift per unit of spin, as a permuter run's float temp suggested,
  * takes it to 395 (167) wherever the local is declared; scaling weight in place
- * instead gives 412 (170). 395 words differ, 167 in shape.
+ * instead gives 412 (170). The register oracle, forcing 53 pseudos' registers,
+ * leaves 188 words at best, so the code differs too. 395 words differ, 167 in
+ * shape.
  */
 #ifdef NON_MATCHING
 s32 StepOpeningBallSimulation(BallSimulation* simulation) {

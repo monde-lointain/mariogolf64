@@ -738,15 +738,17 @@ s32 ListOffsetsByDistance(s32 span, GridOffset* offsets, s32 maxCount) {
  * their heights. A band at or past GROUND_TILE_ROW_COUNT is left untouched.
  *
  * Doesn't match: the nested DrawTriangleHeights allocates its registers
- * differently, using $s7 where the original reloads the static chain. 323
- * words differ in it, 45 in shape. Indexing the row, as texel[texelColumn]
- * from texel = &heights[texelRow * MAP_COLUMN_COUNT], gives 497 words but
- * only 29 in shape: the inner loop takes the original's form, and what is
- * left is the extra saved register, with span in $s1 rather than $t8, and the
- * order of the sra and mul.s around it. Indexing heights directly gives 335
- * words, 51 in shape; texel[0] for *texel, 323 and 45. Swapping the operands
- * of longX's sum or of its product, or moving longX after shortSlopeX or
- * before the reciprocal's update, gives 490 to 511 words, 29 to 54 in shape.
+ * differently, using $s7 where the original reloads the static chain. 323 words
+ * differ in it, 45 in shape. Indexing the row, as texel[texelColumn] from texel
+ * = &heights[texelRow * MAP_COLUMN_COUNT], gives 497 words but only 29 in
+ * shape: the inner loop takes the original's form, and what is left is the
+ * extra saved register, with span in $s1 rather than $t8, and the order of the
+ * sra and mul.s around it. Indexing heights directly gives 335 words, 51 in
+ * shape; texel[0] for *texel, 323 and 45. Swapping the operands of longX's sum
+ * or of its product, or moving longX after shortSlopeX or before the
+ * reciprocal's update, gives 490 to 511 words, 29 to 54 in shape. The register
+ * oracle, forcing 52 pseudos' registers in DrawTriangleHeights, leaves 166 of
+ * its 323 words at best, so its code differs too.
  */
 #ifdef NON_MATCHING
 void DrawBandHeights(s16* heights, s32 band) {
@@ -2228,13 +2230,14 @@ static inline void SetCellTerrainCode(u32 column, u32 row, s32 code) {
 }
 
 /*
- * Paints the map's texels from the code map with the course's paint logic,
- * sets each terrain code's color, and stores the painted terrain codes in
- * their cells. Doesn't match: ours keeps the cell's offset and code in
- * other registers, copies the new block's index before repeating the code
- * across the fill word rather than after, and when the blocks run out it
- * branches to the texel loop's increment, where the original's branch-likely
- * does the increment in its delay slot. 134 words differ, 6 in shape.
+ * Paints the map's texels from the code map with the course's paint logic, sets
+ * each terrain code's color, and stores the painted terrain codes in their
+ * cells. Doesn't match: ours keeps the cell's offset and code in other
+ * registers, copies the new block's index before repeating the code across the
+ * fill word rather than after, and when the blocks run out it branches to the
+ * texel loop's increment, where the original's branch-likely does the increment
+ * in its delay slot. The register oracle, forcing 25 pseudos' registers, leaves
+ * 22 words at best, so the code differs too. 134 words differ, 6 in shape.
  */
 #ifdef NON_MATCHING
 void PaintGroundTiles(void) {

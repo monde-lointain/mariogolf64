@@ -770,13 +770,14 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/tournament_menu", DrawYesNoWindow);
 /*
  * Doesn't match: GCC works out a texture rectangle's edge (a difference with
  * the value in $s4) early and keeps it on the stack, where the original
- * subtracts at the call. The spill makes the frame 8 bytes larger, 0x118
- * rather than 0x110, which moves every stack offset. Working out windowLeft
- * before courseTop takes it from 224 words differing (62 in shape) to 166
- * (26), wherever windowLeft is declared; computing courseLeft before
- * courseTop gives 242 (78), and a windowRight for pictureX changes nothing.
- * Earlier, spelling the edges as DrawYesNoWindow does gave 378 to 442. 166
- * words differ, 26 in shape.
+ * subtracts at the call. The spill makes the frame 8 bytes larger, 0x118 rather
+ * than 0x110, which moves every stack offset. Working out windowLeft before
+ * courseTop takes it from 224 words differing (62 in shape) to 166 (26),
+ * wherever windowLeft is declared; computing courseLeft before courseTop gives
+ * 242 (78), and a windowRight for pictureX changes nothing. Earlier, spelling
+ * the edges as DrawYesNoWindow does gave 378 to 442. The register oracle,
+ * forcing 5 pseudos' registers, leaves 152 words at best, so the code differs
+ * too. 166 words differ, 26 in shape.
  */
 #ifdef NON_MATCHING
 void DrawClubWindow(Gfx** displayListHead, s32 width, s32 height, s32 centerX,

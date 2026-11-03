@@ -1761,14 +1761,15 @@ void MoveBallToCupEdge(BallSimulation* simulation) {
  * of the way along the path, and returns which it hits as a PIN_HIT_*.
  *
  * Doesn't match: setting the hit fraction with an if rather than a ternary
- * takes 203 words differing, 41 in shape, to 198 and 40. The original sets
- * a flag for each of the direction's components and ors them before its
- * one branch, as a | gives; with || GCC branches on each (177 against
- * 198). It ors the contact offsets themselves to test them, where with ||
- * GCC sets and ors flags (173 against 177). The permuter's best output
- * (144 words, 20 in shape) scales the direction's y before normalizing,
- * where the original scales it after, with x and z; moving that line alone
- * gains incidentally, and is left out. 173 words differ, 27 in shape.
+ * takes 203 words differing, 41 in shape, to 198 and 40. The original sets a
+ * flag for each of the direction's components and ors them before its one
+ * branch, as a | gives; with || GCC branches on each (177 against 198). It ors
+ * the contact offsets themselves to test them, where with || GCC sets and ors
+ * flags (173 against 177). The permuter's best output (144 words, 20 in shape)
+ * scales the direction's y before normalizing, where the original scales it
+ * after, with x and z; moving that line alone gains incidentally, and is left
+ * out. The register oracle, forcing 17 pseudos' registers, leaves 78 words at
+ * best, so the code differs too. 173 words differ, 27 in shape.
  */
 #ifdef NON_MATCHING
 s32 FindPinHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY, s32 endZ,
@@ -2330,7 +2331,9 @@ INCLUDE_ASM("asm/nonmatchings/collision", FindHoleTriangleHit);
  * same 418. The original converts each hit point to a float again in each of
  * its two corner tests, IsLessThanCorners and IsMoreThanCorners; converting it
  * once into a float local, as the draft did, gave 418 words (72 in shape), or
- * 415 (69) and 381 (69) passing only one of the two hit points directly.
+ * 415 (69) and 381 (69) passing only one of the two hit points directly. The
+ * register oracle, forcing 35 pseudos' registers, leaves 139 words of the 204
+ * at best, so the code differs too.
  */
 #ifdef NON_MATCHING
 s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,

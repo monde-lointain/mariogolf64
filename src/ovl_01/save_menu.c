@@ -1867,18 +1867,19 @@ void DrawSavedMiniGolfImage(Gfx** displayListHead);
  * turning on their circle with each game's mode icon, the chosen game's mode,
  * course and hole, and the prompt for giving out the controllers.
  *
- * Doesn't match: the original keeps the menu memory pointer on the stack
- * and the mode icons' texel step in a saved register. Like the original,
- * ours loads the degrees-to-radians factor on each pass of the board loop
- * only when boardDegrees is the loop's own: set before the loop, loop.c
- * hoists the factor instead (403 words, 151 in shape). The original still
- * multiplies by a 120 it loads in the loop, where ours keeps it in a saved
- * register; a literal 120 is expanded into shifts (417 words, 163 in
- * shape). Each mode icon's image is read once into modeImage, as the
- * original reads it once for the palette and the strips; reading the table
- * at each use gives 401 words, 149 in shape. Reading the name plate into a
- * local too, as a permuter output does, gives 331 words, 131 in shape, or
- * 328 and 132 for its strips alone. 307 words differ, 121 in shape.
+ * Doesn't match: the original keeps the menu memory pointer on the stack and
+ * the mode icons' texel step in a saved register. Like the original, ours loads
+ * the degrees-to-radians factor on each pass of the board loop only when
+ * boardDegrees is the loop's own: set before the loop, loop.c hoists the factor
+ * instead (403 words, 151 in shape). The original still multiplies by a 120 it
+ * loads in the loop, where ours keeps it in a saved register; a literal 120 is
+ * expanded into shifts (417 words, 163 in shape). Each mode icon's image is
+ * read once into modeImage, as the original reads it once for the palette and
+ * the strips; reading the table at each use gives 401 words, 149 in shape.
+ * Reading the name plate into a local too, as a permuter output does, gives 331
+ * words, 131 in shape, or 328 and 132 for its strips alone. The register
+ * oracle, forcing 31 pseudos' registers, leaves 237 words at best, so the code
+ * differs too. 307 words differ, 121 in shape.
  */
 #ifdef NON_MATCHING
 void DrawSavedGames(Gfx** displayListHead) {

@@ -1102,7 +1102,9 @@ static const char f_BlankBetName[] = " ";
  * variable, a fake, and gives 206 words differing, 36 in shape. The subtitles'
  * loop tests i != BET_COUNT, as the original's bne shows, though GCC keeps the
  * bound in $s7 where the original loads it each pass; with < it compiles to
- * slti and bnez, 204 words (36 in shape). 206 words differ, 32 in shape.
+ * slti and bnez, 204 words (36 in shape). The register oracle, forcing 13
+ * pseudos' registers, leaves 78 words at best, so the code differs too. 206
+ * words differ, 32 in shape.
  */
 #ifdef NON_MATCHING
 void DrawBetsPage(Gfx** displayListHead) {
@@ -2148,8 +2150,9 @@ INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard_drawing", DrawLeaderboardPage);
  * an even standing; the original loads 137 as a constant at each use, so
  * backTop is 137 on every path there. With backTop set at its declaration
  * again, the output gives 768 (218); its other change, a temp for one texture
- * rectangle's top, 56 below the card's, gives 842 (194) without it. 762 words
- * differ, 212 in shape.
+ * rectangle's top, 56 below the card's, gives 842 (194) without it. The
+ * register oracle, forcing 45 pseudos' registers, leaves 628 words at best, so
+ * the code differs too. 762 words differ, 212 in shape.
  */
 #ifdef NON_MATCHING
 void DrawScoresPage(Gfx** displayListHead) {
