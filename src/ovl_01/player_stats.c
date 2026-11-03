@@ -2639,8 +2639,12 @@ void DrawBestShotsCursor(Gfx** displayListHead) {
  * nothing, and reading the palette file before the store gives 38 (18 in
  * shape). An s16 cell gave 15 words differing, 1 in shape, with the store in
  * each branch, but it sign-extends the cell before the palette offset, where
- * the original shifts it by 9 alone, so the cell is a word. 46 words differ, 4
- * in shape.
+ * the original shifts it by 9 alone, so the cell is a word. A permuter run's
+ * best, 38 words with none in shape, passes the palette file through a pointer
+ * to file set at the start of each pass, a second name for one local; the
+ * pointer set in its declaration gives 50 (6), and an inline helper taking the
+ * file's pointer, opening and reading it, 49 (13), or reading it only, 125
+ * (13). 46 words differ, 4 in shape.
  */
 #ifdef NON_MATCHING
 void LoadBestShotFaces(void) {
