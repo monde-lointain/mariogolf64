@@ -546,12 +546,15 @@ void GetSaveDataAndMenuMemory(void) {
 
 /*
  * Doesn't match: GCC spills the button's half height to the stack, where the
- * original keeps it in a saved register like the other halves. The oracle
- * finds no allocation that avoids the spill, and clamping the half height
- * without its flag gives 65 words. The permuter's best truncates each
- * button size into its half and halves it in a second statement (85 words,
- * 7 in shape), a split assignment; swapping the sizes' declarations alone
- * changes nothing. 54 words differ, 18 in shape.
+ * original keeps it in a saved register like the other halves. The oracle found
+ * no allocation that avoids the spill, and clamping the half height without its
+ * flag gave 65 words, when the draft had 54. The permuter's best truncated each
+ * button size into its half and halved it in a second statement (85 words, 7 in
+ * shape), a split assignment; swapping the sizes' declarations alone changed
+ * nothing. Keeping the window's half width in its own variable, rather than in
+ * buttonY before the button's y, took it from 54 words differing to 44, 18 in
+ * shape either way; where halfWidth is declared makes no difference. 44 words
+ * differ, 18 in shape.
  */
 #ifdef NON_MATCHING
 void DrawYesNoWindow(Gfx** displayListHead, s32 width, s32 height, s32 centerX,
@@ -561,6 +564,7 @@ void DrawYesNoWindow(Gfx** displayListHead, s32 width, s32 height, s32 centerX,
   f32 windowHalfHeight;
   f32 buttonWidth;
   f32 buttonHeight;
+  s32 halfWidth;
   s32 halfHeight;
   s32 buttonHalfWidth;
   s32 buttonHalfHeight;
@@ -568,7 +572,6 @@ void DrawYesNoWindow(Gfx** displayListHead, s32 width, s32 height, s32 centerX,
   s32 windowLeft;
   s16 index;
   s32 buttonX;
-  /* The window's half width first, to match */
   s32 buttonY;
   s32 pulse;
   s32 growth;
@@ -628,12 +631,12 @@ void DrawYesNoWindow(Gfx** displayListHead, s32 width, s32 height, s32 centerX,
       return;
   }
 
-  buttonY = (s32)windowWidth / 2;
+  halfWidth = (s32)windowWidth / 2;
   halfHeight = windowHalfHeight;
   buttonHalfWidth = (s32)buttonWidth / 2;
   buttonHalfHeight = (s32)buttonHeight / 2;
   halfHeight = (halfHeight <= 0) ? 1 : halfHeight;
-  buttonY = (buttonY <= 0) ? 1 : buttonY;
+  halfWidth = (halfWidth <= 0) ? 1 : halfWidth;
   buttonHalfWidth = (buttonHalfWidth <= 0) ? 1 : buttonHalfWidth;
   isButtonHeightEmpty = buttonHalfHeight <= 0;
   buttonHalfHeight = isButtonHeightEmpty ? 1 : buttonHalfHeight;
@@ -660,10 +663,10 @@ void DrawYesNoWindow(Gfx** displayListHead, s32 width, s32 height, s32 centerX,
             (index * MENU_WINDOW_IMAGE_WIDTH * MENU_WINDOW_STRIP_HEIGHT / 2),
         G_IM_FMT_I, MENU_WINDOW_IMAGE_WIDTH, MENU_WINDOW_STRIP_HEIGHT, 0, 0, 0,
         0, 0, 0, 0);
-    windowLeft = centerX - buttonY;
+    windowLeft = centerX - halfWidth;
     DrawTextureRect(&gfx, QuarterPixels(windowLeft),
         QuarterPixels(windowTop + (index * halfHeight)),
-        QuarterPixels(centerX + buttonY),
+        QuarterPixels(centerX + halfWidth),
         QuarterPixels((index * halfHeight) + (halfHeight + windowTop)),
         G_TX_RENDERTILE, 0, 0,
         (MENU_WINDOW_IMAGE_WIDTH << 10) / (s32)windowWidth,
@@ -795,7 +798,11 @@ void DrawClubWindow(Gfx** displayListHead, s32 width, s32 height, s32 centerX,
   s32 buttonY;
   s32 pulse;
   s32 growth;
-  /* The window's half width, then the badge's top, to match */
+  /*
+   * The window's half width, then the badge's top, to match: a separate
+   * halfWidth gives 272 words differing (62 in shape) against the draft's
+   * 224 (62)
+   */
   s32 badgeTop;
   s32 courseLeft;
   s32 courseTop;
@@ -1080,7 +1087,11 @@ void DrawUnusedWideCloud(Gfx** displayListHead, s32 centerX, s32 centerY,
     s32 halfWidth, s32 stripHeight, s32 width, s32 shownStripHeight) {
   Gfx* gfx = *displayListHead;
   s32 stripIndex;
-  s32 filterOrHalfWidth; /* One variable for both, to match */
+  /*
+   * One variable for both, to match: passing G_TF_BILERP directly, using
+   * halfWidth directly, or both, gives 28 words differing, 6 in shape
+   */
+  s32 filterOrHalfWidth;
   s32 stripTop = centerY - stripHeight;
 
   gDPPipeSync(gfx++);
