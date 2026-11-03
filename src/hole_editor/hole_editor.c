@@ -3136,8 +3136,10 @@ void ShapeGroundFromCodes(void) {
             treePositions[treeCount][1] = z;
             treeCount++;
 
-            /* The limit is checked at the end of each block; one check compiles
-             * differently */
+            /* The limit is checked at the end of each block, to match: one
+             * check here alone gives 178 words differing, 28 in shape, the
+             * limit in the row and column loops' conditions 193, 37 in
+             * shape, and every check but this one 121, 1 in shape */
             if (treeCount == BILLBOARD_COUNT) {
               goto PLANTED;
             }
