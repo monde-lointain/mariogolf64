@@ -1655,7 +1655,7 @@ void BeginShadowedText(Gfx** displayListHead) {
 }
 
 /* Sets the color, fully opaque, of the text drawn after it */
-void SetTextColor(Gfx** displayListHead, s32 red, s32 green, s32 blue) {
+void SetTextColor(Gfx** displayListHead, u8 red, u8 green, u8 blue) {
   Gfx* gfx = *displayListHead;
 
   gDPPipeSync(gfx++);

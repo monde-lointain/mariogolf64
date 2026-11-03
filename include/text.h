@@ -144,7 +144,7 @@ void SetTextSlot(s32 x, s32 y, MessageId messageId, s32 fontSize, s32 slot,
     TextFlags flags, s32 red, s32 green, s32 blue, s32 alpha);
 #endif
 void SetUpTextDrawing(Gfx** displayListHead);
-void SetTextColor(Gfx** displayListHead, s32 red, s32 green, s32 blue);
+void SetTextColor(Gfx** displayListHead, u8 red, u8 green, u8 blue);
 void SetUpGradientTextDrawing(Gfx** displayListHead, s32 gradient);
 void DrawTextSlots(Gfx** displayListHead);
 void DrawLargeTextSlot(Gfx** displayListHead, s32 slot);
