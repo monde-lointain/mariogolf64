@@ -3134,7 +3134,11 @@ void ReadVertexX(s16* coord, s32 flags) {
  */
 void ReadVertexY(s16* coord, s32 flags) {
   *coord = 0;
-  /* The u8 cast is there to match */
+  /*
+   * The u8 cast is there to match: without it 2 words differ, 2 in shape;
+   * shifting before masking gives 4, a u32 cast 7, and a u8 flags parameter
+   * 16 in each reader
+   */
   switch (
       (u8)(flags & VERTEX_FLAG_Y_ENCODING) >> VERTEX_FLAG_Y_ENCODING_SHIFT) {
     case VERTEX_ENCODING_BYTE:
@@ -3161,7 +3165,11 @@ void ReadVertexY(s16* coord, s32 flags) {
  */
 void ReadVertexZ(s16* coord, s32 flags) {
   *coord = 0;
-  /* The u8 cast is there to match */
+  /*
+   * The u8 cast is there to match: without it 2 words differ, 2 in shape;
+   * shifting before masking gives 4, a u32 cast 7, and a u8 flags parameter
+   * 16 in each reader
+   */
   switch (
       (u8)(flags & VERTEX_FLAG_Z_ENCODING) >> VERTEX_FLAG_Z_ENCODING_SHIFT) {
     case VERTEX_ENCODING_BYTE:
