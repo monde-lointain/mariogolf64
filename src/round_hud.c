@@ -813,21 +813,16 @@ void PrepareHoleDisplay(void) {
 
 /*
  * Lays out the wind flag and builds the projections the HUD draws with
- *
- * Doesn't match: the original gives the first loop's row counter the first
- * free register, ahead of the column's texel offset and the vertex, where
- * global allocation ranks the counter, with 11 uses over 29 insns, below
- * them. The instructions are the same. Sharing the row or the vertex with
- * the back loop gives 46 to 48 words, and indexing the vertex 79 to 134; an
- * s16 row 95, and other orders of the declarations or of the Y and T stores 40
- * to 44. The oracle comes within 8 words with 6 pseudos forced, leaving the
- * shade loop's counter in $v1 where the original has $a1. 40 words differ.
  */
-#ifdef NON_MATCHING
 void InitRoundHud(void) {
   s32 grid;
+  /*
+   * Also the back grids' rows and the shades' index, to match: a backRow for
+   * the back grids gives 20 words differing, and counting the shades with
+   * column 48, with a vertexIndex of their own 50 and with grid 88, all in
+   * registers only
+   */
   s32 row;
-  s32 backRow;
   s32 column;
 
   f_UnusedHudInitWord = 0;
@@ -853,7 +848,7 @@ void InitRoundHud(void) {
       grid != HOLE_FLAG_SIDE_COUNT * MATRIX_BUFFER_COUNT; grid++) {
     Vtx* vertex = HoleFlagGridVertices(grid);
 
-    for (backRow = 0; backRow != HOLE_FLAG_ROW_COUNT; backRow++) {
+    for (row = 0; row != HOLE_FLAG_ROW_COUNT; row++) {
       for (column = 0; column != HOLE_FLAG_COLUMN_COUNT; column++, vertex++) {
         vertex->v.tc[TEXTURE_AXIS_S] =
             HOLE_FLAG_BACK_TEXEL_START - (column * HOLE_FLAG_TEXEL_COLUMN_STEP);
@@ -861,8 +856,8 @@ void InitRoundHud(void) {
     }
   }
 
-  for (column = 0; column != HOLE_FLAG_VERTEX_COUNT; column++) {
-    f_HoleFlagShades[column] = HOLE_FLAG_START_SHADE;
+  for (row = 0; row != HOLE_FLAG_VERTEX_COUNT; row++) {
+    f_HoleFlagShades[row] = HOLE_FLAG_START_SHADE;
   }
 
   guOrtho(&g_ScreenOrthoMatrix, -SCREEN_WIDTH / 2, SCREEN_WIDTH / 2,
@@ -889,9 +884,6 @@ void InitRoundHud(void) {
   g_InsetView.animation = INSET_VIEW_STILL;
   g_InsetView.step = 0;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/round_hud", InitRoundHud);
-#endif
 
 /* Loads the face of a player's character in the colors of the given palette */
 void LoadPlayerFace(s32 playerIndex, CharacterId character, s32 paletteIndex) {
