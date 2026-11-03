@@ -1894,8 +1894,13 @@ void PlaceAimCamera(void);
  * course. The kinds that test f_IsCameraKindNew do their setup once when it is
  * set, then clear it. Doesn't match: the original allocates some registers
  * differently, and orders the stores of point for FLIGHT_CAMERA_FACING_CUP
- * differently. The register oracle forces 13 pseudos and still leaves 22
- * words differing. 98 words differ, 4 in shape.
+ * differently. The register oracle forces 13 pseudos and still leaves 22 words
+ * differing. A permuter output with 96 words (2 in shape) gets both from a temp
+ * that it sets to point's Z only in unreachable code before a case label, and
+ * then reads instead of point's Z in FLIGHT_CAMERA_FACING_CUP's Z ease, so the
+ * value it reads is never set. Keeping the scaled Z in a local for that ease
+ * changes nothing, and scaling Z after the Y ease gives 148 (12). 98 words
+ * differ, 4 in shape.
  */
 #ifdef NON_MATCHING
 void PlaceFlightCamera(s32 step) {
