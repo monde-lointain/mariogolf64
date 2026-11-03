@@ -1146,7 +1146,9 @@ s32 UpdateChoiceBox(ControllerState* controller) {
  * reloads the constant in the loop; textWidth and the label table also take
  * other saved registers. Declaration orders, splits and moves don't change
  * the priorities. Stepping the label's y beside the index gives 67 words
- * differing, 15 in shape. 65 words differ, 9 in shape.
+ * differing, 15 in shape. Working out the cursor's y before its texture
+ * load, rather than just before drawing it, gives 65 words, 9 in shape.
+ * 61 words differ, 5 in shape.
  */
 #ifdef NON_MATCHING
 void DrawChoiceBox(Gfx** displayListHead) {
@@ -1243,11 +1245,11 @@ void DrawChoiceBox(Gfx** displayListHead) {
           CHOICE_CURSOR_X;
       cursorX -= textWidth / 2;
       LoadSmallPalette(&gfx, 0, ImageBody(f_ChoiceBoxCursorImage));
-      cursorY = labelsTop + (f_ChoiceBoxSelection * CHOICE_LABEL_SPACING);
       gDPLoadTextureTile_4b(gfx++,
           TextureAddress(ImageTexels(f_ChoiceBoxCursorImage)), G_IM_FMT_CI,
           CHOICE_CURSOR_SIZE, 0, 0, 0, CHOICE_CURSOR_SIZE - 1,
           CHOICE_CURSOR_LOADED_HEIGHT - 1, 0, 0, 0, 0, 0, 0, 0);
+      cursorY = labelsTop + (f_ChoiceBoxSelection * CHOICE_LABEL_SPACING);
       DrawTextureRect(&gfx, QuarterPixels(cursorX), QuarterPixels(cursorY - 2),
           QuarterPixels(cursorX + CHOICE_CURSOR_SIZE),
           QuarterPixels(cursorY + CHOICE_CURSOR_SIZE - 2), G_TX_RENDERTILE, 0,
