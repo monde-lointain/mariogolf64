@@ -3286,23 +3286,20 @@ static inline u16* GetShadowedTexel(u32 column, u32 row) {
  * texels are kept, and bright ones are darkened the most. A row with no texel
  * within the width ends the shadow once one has started. Billboards with a
  * texture in f_ShadowlessTextures cast no shadow.
- * Doesn't match: ours keeps heightScale in a float register and loads
- * SHADOW_LIGHT_DISTANCE again for each use, where the original keeps them in
- * $s2 and $f22, and the other registers differ from there. The original loads
- * SHADOW_LIGHT_DISTANCE inside the billboard loop; ours has loop.c hoist it
- * out (threshold 58 times its life of 19 against 718), so it gets no register.
- * One more invariant moved from an inner loop before it would double the 718
- * and keep it in, but no form of the solidity loop's 1/16 scales does that.
- * The register oracle, forcing 36 pseudos, still leaves 198 words. Reordering
- * the light point's components gives 287 to 372. 271 words differ, 45 in
- * shape.
+ * Doesn't match: the registers differ throughout, and ours spills one more
+ * value, so its frame is 8 bytes larger. The register oracle, forcing 35
+ * pseudos, still leaves 156 words. Indexing the solidities as one flat array,
+ * where a row pointer into a two-dimensional one gave 271 words, 45 in shape,
+ * lets SHADOW_LIGHT_DISTANCE's load stay inside the billboard loop, as the
+ * original's does; the oracle came no closer than 198 words there. Indexing
+ * the two-dimensional array by row and column gives 315 words, 41 in shape.
+ * 303 words differ, 29 in shape.
  */
 #ifdef NON_MATCHING
 void CastBillboardShadows(void) {
   Mat4 lightView;
   Vec3 lightPoint;
-  u8 solidities[SOLIDITY_ROW_LENGTH][SOLIDITY_ROW_LENGTH];
-  u8* solidityCells;
+  u8 solidities[SOLIDITY_ROW_LENGTH * SOLIDITY_ROW_LENGTH];
   Vec3 rowPoint;
   Radians lightYaw;
   Radians lightPitch;
@@ -3343,8 +3340,6 @@ void CastBillboardShadows(void) {
   lightYaw = g_HoleSetup.conditions.lightYaw * BINARY_ANGLE_TO_RADIANS;
   lightPitch = g_HoleSetup.conditions.lightPitch * BINARY_ANGLE_TO_RADIANS;
 
-  /* solidityCells is there to match */
-  solidityCells = solidities[0];
   for (index = 0; index != BILLBOARD_COUNT; index++) {
     hasShadowStarted = FALSE;
     if (g_Billboards[index].textureIndex < 0) {
@@ -3369,7 +3364,7 @@ void CastBillboardShadows(void) {
     if (g_Billboards[index].textureIndex != lastTextureIndex) {
       for (row = 0; row <= BILLBOARD_MASK_SIZE; row++) {
         for (column = 0; column <= BILLBOARD_MASK_SIZE; column++) {
-          solidityCells[(row << SOLIDITY_ROW_SHIFT) + column] =
+          solidities[(row << SOLIDITY_ROW_SHIFT) + column] =
               GetBillboardSolidity(g_Billboards[index].textureIndex,
                   column * (1.0f / BILLBOARD_MASK_SIZE),
                   row * (1.0f / BILLBOARD_MASK_SIZE));
@@ -3456,8 +3451,8 @@ void CastBillboardShadows(void) {
         }
 
         if (viewY >= 0.0f) {
-          solidity = solidityCells[((s32)(heightFraction * BILLBOARD_MASK_SIZE)
-                                       << SOLIDITY_ROW_SHIFT) +
+          solidity = solidities[((s32)(heightFraction * BILLBOARD_MASK_SIZE)
+                                    << SOLIDITY_ROW_SHIFT) +
               (s32)(widthFraction * BILLBOARD_MASK_SIZE)];
           if (solidity != 0) {
             nearness = SHADOW_NEARNESS_LIMIT -
