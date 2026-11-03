@@ -4826,15 +4826,17 @@ void DrawUpDownArrows(Gfx** displayListHead, s32 centerY);
  * an or, so the left edges add wheelShiftX; without it 121 words differ, 9
  * in shape, and adding it before the truncation gives 112, 52 in shape.
  *
- * Doesn't match: the mode count and the drawn board's slot take each
- * other's saved registers, whatever order they are declared in, and the
- * strips lack one of the original's three adds of zero. Adding the bob to the
- * chosen board's top last, as here, gives 86 words against 104; adding it first
- * or second, 102-104. The permuter's best reads modeSpin through a pointer
- * taken before the boards, which gives 38 words, but the original loads
- * g_MenuMemory.modeSpin directly, so the pointer only perturbs allocation;
- * testing modeSpin first gives 130 words, and == FALSE or ! leave 86.
- * 86 words differ, 2 in shape.
+ * Doesn't match: the mode count and the drawn board's slot take each other's
+ * saved registers, whatever order they are declared in: global-alloc ranks the
+ * mode count at priority 1658 (25 references over 603 instructions, across 7
+ * calls) and the slot at 1657 (10 over 181, across 2), and forcing them and one
+ * player label pseudo leaves 34 words differing. The strips lack one of the
+ * original's three adds of zero. Adding the bob to the chosen board's top last,
+ * as here, gives 86 words against 104; adding it first or second, 102-104. The
+ * permuter's best reads modeSpin through a pointer taken before the boards,
+ * which gives 38 words, but the original loads g_MenuMemory.modeSpin directly,
+ * so the pointer only perturbs allocation; testing modeSpin first gives 130
+ * words, and == FALSE or ! leave 86. 86 words differ, 2 in shape.
  */
 #ifdef NON_MATCHING
 void DrawModeSelect(Gfx** displayListHead) {
