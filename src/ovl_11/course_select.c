@@ -1007,7 +1007,11 @@ void DrawNamePlate(Gfx** displayListHead, s32 centerX, s32 centerY) {
  * still leaves 137 words. Choosing the tile in one if, from course, read
  * before it, rather than overriding the still tile, takes it from 280 words
  * to 259, 142 in shape to 133; a Boolean row pointer gives 275 and 145, a u8
- * width and height 288 and 146. 259 words differ, 133 in shape.
+ * width and height 288 and 146. The permuter's best, 219 words (9 in shape),
+ * passes the last three palette loads a Gfx** that is set to &gfx only later,
+ * in the loop, so it reads garbage. Passing a gfxHead local set to &gfx gives
+ * 243 to 307 words (135 to 137 in shape), and writing through displayListHead
+ * throughout 506 (328). 259 words differ, 133 in shape.
  */
 #ifdef NON_MATCHING
 void DrawRingShotStars(
