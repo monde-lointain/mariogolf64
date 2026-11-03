@@ -761,11 +761,15 @@ enum BallSprite {
       TexelStep(width, xl, xh), TexelStep(height, yl, yh))
 
 /*
- * Doesn't match: 1220 words differ, 190 in shape. The stack frame is 8 bytes
- * smaller, so the register saves move, and the display list pointers take
- * other registers. The original aligns the Pika ball texture's address to 8
- * bytes, as TextureAddress does; without that, 1288 words differ, 200 in
- * shape.
+ * Doesn't match: 834 words differ, 142 in shape. The original's reload spills
+ * the divide by 9's constant first, to 0x54($sp), and the depth in
+ * pseudo 87 later, so its spill slots come in another order and the display
+ * list pointers take other registers. Updating f_UnusedBallFrame ahead of
+ * the display list, rather than after f_BallRollFrame, cuts 1220 words
+ * differing to 834; updating f_BallRollFrame anywhere else gives 822 to
+ * 1633 words, 158 or more in shape. The original aligns the Pika ball
+ * texture's address to 8 bytes, as TextureAddress does; without that, 894
+ * words differ, 152 in shape.
  */
 #ifdef NON_MATCHING
 void DrawGolfBalls(CameraMatrices* matrices UNUSED) {
@@ -804,6 +808,7 @@ void DrawGolfBalls(CameraMatrices* matrices UNUSED) {
       g_GameState.step != GAME_STATE_UNK11) {
     return;
   }
+  f_UnusedBallFrame = (f_UnusedBallFrame + 1) % 9;
   {
     g_ModuleRdpRequestFrames[MODULE_GOLF_BALLS] = g_FrameCount;
     gDPPipeSync(gfx++);
@@ -821,7 +826,6 @@ void DrawGolfBalls(CameraMatrices* matrices UNUSED) {
     gDPPipeSync(gfx++);
     gDPSetDepthSource(gfx++, G_ZS_PRIM);
     f_BallRollFrame = (f_BallRollFrame + 1) & (BALL_ROLL_FRAME_COUNT - 1);
-    f_UnusedBallFrame = (f_UnusedBallFrame + 1) % 9;
     gDPLoadTextureBlock(gfx++,
         TextureAddress(ImageBodyAt(
             f_RollingBallImage, f_BallRollFrame / 4 * BALL_ROLL_FRAME_SIZE)),
