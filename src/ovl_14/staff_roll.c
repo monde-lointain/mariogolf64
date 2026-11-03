@@ -1643,8 +1643,11 @@ void DrawStaffRoll(Gfx** displayListHead) {
   s32 fadeAlpha;
   s32 closingAlpha;
   s32 pass;
-  s32 index; /* Counts the rows, then the strips; sharing it is there to match
-              */
+  /*
+   * Counts the rows, then the strips; sharing it is there to match: a row or
+   * stripIndex variable gives 70 words differing, none in shape
+   */
+  s32 index;
   s32 lineIndex;
   s32 stripHeight;
 
