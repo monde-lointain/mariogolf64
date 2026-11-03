@@ -2135,7 +2135,10 @@ ImpactEffect* GetImpactTimingEntry(
 }
 
 SignedBinaryAngle GetCrossSlopeAngle(Player* player, ShotLaunch* shot);
-/* It returns a SignedBinaryAngle; declaring it s32 here is there to match */
+/*
+ * It returns a SignedBinaryAngle; declaring it s32 here is there to match: as a
+ * SignedBinaryAngle, LaunchBallSimulation has 2 words differing, 2 in shape
+ */
 #ifdef AVOID_UB
 SignedBinaryAngle GetAimSlopeAngle(Player* player, ShotLaunch* shot);
 #else
@@ -2220,7 +2223,12 @@ s32 LaunchBallSimulation(
   simulation->unkA6 = 0;
   simulation->unkB4 = 0;
 
-  /* The tests of purpose, and their senses, are there to match */
+  /*
+   * The tests of purpose, and their senses, are there to match: setting the
+   * player index in the club's test gives 140 words differing (14 in shape),
+   * testing for the club test first in the player index's test 4 (4), and in
+   * the club's test 6 (6)
+   */
   if (simulation->purpose != LAUNCH_PURPOSE_CLUB_TEST) {
     simulation->playerIndex = shot->playerIndex;
   } else {
@@ -2239,7 +2247,10 @@ s32 LaunchBallSimulation(
     entry = &f_ImpactEffects[0][IMPACT_TIMING_ENTRY_LIMIT];
     rumbles = f_ImpactEffects[0][IMPACT_TIMING_ENTRY_LIMIT].rumbles;
   } else {
-    /* The same as GetImpactTimingEntry; writing it out is there to match */
+    /*
+     * The same as GetImpactTimingEntry; writing it out is there to match:
+     * calling it gives 33 words differing, 27 in shape
+     */
     s32 row = GetLieRating(club, simulation->surface, shot->shotMode) - 1;
 
     if (row < 0) {
@@ -2285,7 +2296,10 @@ s32 LaunchBallSimulation(
     speed = ((percentRange[0] * blend) + (percentRange[1] * (1.0f - blend))) *
         speed * ONE_PER_PERCENT;
   } else {
-    /* The local is there to match */
+    /*
+     * The local is there to match: the constant gives 143 words differing, 13
+     * in shape
+     */
     s32 percent = CLUB_TEST_SPEED_HALF_PERCENTS;
 
     speed = speed * percent / HALF_PERCENTS_PER_ONE;
@@ -2429,7 +2443,10 @@ s32 LaunchBallSimulation(
     simulation->unkA8[index] = 0;
   }
 
-  /* The local is there to match */
+  /*
+   * The local is there to match: the constant gives 75 words differing, 5 in
+   * shape
+   */
   windScale = WIND_SPEED_TO_VELOCITY;
   if (simulation->purpose != LAUNCH_PURPOSE_CLUB_TEST) {
     windAngle = g_HoleSetup.conditions.windDirection * BINARY_ANGLE_TO_RADIANS;
@@ -2458,7 +2475,10 @@ s32 LaunchBallSimulation(
     /* The original tests the purpose again */
     if (simulation->purpose == LAUNCH_PURPOSE_STROKE &&
         IsGameFlagSet(GAME_FLAG_SHOW_LAUNCH_VALUES)) {
-      /* Declaring it here is there to match */
+      /*
+       * Declaring it here is there to match: declaring it at the top gives 6
+       * words differing, none in shape
+       */
       char text[DEBUG_TEXT_BUFFER_SIZE];
 
       sprintf(text, "ANGLEY = %3.3d/360",
