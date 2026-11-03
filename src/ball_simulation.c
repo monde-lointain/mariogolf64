@@ -222,7 +222,8 @@ void ResetBallSimulations(void) {
  * many places, and where the original recomputes abs.s for each use of a
  * float's absolute value, this code shares one abs.s or compiles a compare and
  * branch. Adding the height to its slide step, rather than the step to the
- * height, takes 779 words differing to 771, 235 in shape.
+ * height, took 779 words differing to 771, 235 in shape. 769 words differ,
+ * 233 in shape.
  */
 #ifdef NON_MATCHING
 s32 StepBallSimulation(BallSimulation* simulation) {
@@ -1551,8 +1552,8 @@ s32 StepBallSimulation(BallSimulation* simulation) {
         simulation->lastBounceStep = simulation->stepCount;
         spinVelocityX = simulation->spinSpeed * cosf(simulation->spinHeading);
         /*
-         * In its own block, as without it 800 words differ, 232 in shape,
-         * against 771 and 235
+         * In its own block, as without it 798 words differ, 230 in shape,
+         * against 769 and 233
          */
         IN_OWN_BLOCK(spinVelocityZ =
                          simulation->spinSpeed * sinf(simulation->spinHeading));
