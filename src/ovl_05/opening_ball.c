@@ -1804,9 +1804,11 @@ INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_ball", StepOpeningBallSimulation);
  * lets fold move the 2 onto sideSign: (club->sideSpin * CLUB_SIDE_SPIN_SCALE) *
  * sideSign gives 4 words differing, sideSign * (club->sideSpin *
  * CLUB_SIDE_SPIN_SCALE) 6, but the wrong operand is shifted. Swapping either
- * sum's operands gives 16 to 28 words, and doubling the club's side spin into
- * a local first, just before the sum or before yawRadians, changes nothing. 14
- * words differ.
+ * sum's operands gives 16 to 28 words, and doubling the club's side spin into a
+ * local first, just before the sum or before yawRadians, changes nothing.
+ * Putting sideSign second in the change's product gives 16, and in the club's
+ * 14, and reading shot->offsetX or the change's product into a local first,
+ * just before the sum or before yawRadians, leaves 14. 14 words differ.
  */
 #ifdef NON_MATCHING
 s32 LaunchOpeningBallSimulation(
