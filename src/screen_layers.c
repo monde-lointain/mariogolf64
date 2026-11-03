@@ -666,11 +666,14 @@ s32 UpdatePrompt(ControllerState* controller) {
  * and No under its message once it has opened. The chosen answer bobs.
  *
  * Doesn't match: the original works out each rectangle's middle, such as
- * CHOICES_MIDDLE_Y plus a quarter of the cloud, once and takes halfHeight
- * from it, where GCC folds the top into middle - (halfHeight - constant) and
- * adds the constant to the bottom separately. A middleY temporary at the
- * draws gives 10-38 shape differences, and an inline helper that draws a
- * choice around its middle 69 words, 31 in shape. 29 words differ, 5 in
+ * CHOICES_MIDDLE_Y plus a quarter of the cloud, once and takes halfHeight from
+ * it, where GCC folds the top into middle - (halfHeight - constant) and adds
+ * the constant to the bottom separately. A middleY temporary at the draws gives
+ * 10-38 shape differences (for the cloud alone 50 words, 10 in shape, with the
+ * constant 1 then kept in a saved register and the frame 8 bytes larger),
+ * writing the cloud's top with the product first changes nothing, as halfHeight
+ * times (half - 1) it gives 34 words, 12 in shape, and an inline helper that
+ * draws a choice around its middle 69 words, 31 in shape. 29 words differ, 5 in
  * shape.
  */
 #ifdef NON_MATCHING
