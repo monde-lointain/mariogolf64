@@ -277,7 +277,7 @@ def read_insn_lines(
 ) -> dict[str, dict[int, str]]:
     """Return {pass: {insn UID: source line}} for the insns of DUMPS."""
     noted_work = work / "noted"
-    noted_work.mkdir()
+    noted_work.mkdir(exist_ok=True)
     _ = (noted_work / "unit.i").write_text((work / "unit.i").read_text())
     run(
         noted_work / "unit.i", optflags, ["-S", "-g", "-da", "-o", "unit.s"], noted_work
