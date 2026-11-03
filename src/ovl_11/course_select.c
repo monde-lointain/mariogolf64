@@ -677,7 +677,11 @@ void DrawPlanks(Gfx** displayListHead) {
     if (f_PlankMotion == PLANKS_SHUT) {
       slide = PLANKS_MIDDLE;
     } else {
-      /* bottom holds the strip's plank group here, to match */
+      /*
+       * bottom holds the strip's plank group here, to match: a plankGroup
+       * variable gives 70 words differing (16 in shape), against the draft's
+       * 56 (10)
+       */
       bottom = stripIndex / PLANK_GROUP_STRIP_COUNT;
       if (bottom > PLANK_LAST_GROUP) {
         bottom = PLANK_LAST_GROUP;
