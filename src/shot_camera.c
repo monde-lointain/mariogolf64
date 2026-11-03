@@ -2783,7 +2783,11 @@ void ChooseFlightCameraKind(void) {
       case FLIGHT_PHASE_NEARING_CONTACT:
         kind = FLIGHT_CAMERA_AROUND_END;
 
-        /* The repeated store is there to match */
+        /*
+         * The repeated store is there to match: dropping the test, keeping
+         * only its call, or leaving its branch empty gives 26 words
+         * differing (22 in shape), and storing in both arms 19
+         */
         if (IsTroubleSurface(f_EndSurfaceInfo) ||
             f_FlightCameraKind == FLIGHT_CAMERA_FOLLOWING_PATH) {
           kind = FLIGHT_CAMERA_AROUND_END;
