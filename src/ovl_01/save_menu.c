@@ -1378,29 +1378,32 @@ s32 ContinueSavedGame(void);
  * course buffer not on screen, which then becomes the one on screen
  */
 #define LoadChosenGameImages() \
-  OpenEncodedAsset( \
-      g_ModeIconAnimations[( \
-          u8)f_SaveMenuModeIcons[f_SavedGameModes[memory->savedGameIndex]]] \
-                          [g_AnimatedIconFrameIndex], \
-      &asset); \
-  ReadEncodedAsset( \
-      f_ChosenModeIconBuffers[g_AnimatedIconBufferIndex], &asset); \
-  if (CHOSEN_GAME.isValid) { \
-    if (!CHOSEN_GAME.state.isMiniGolf) { \
-      OpenEncodedAsset( \
-          g_CourseIconAssets[CHOSEN_GAME.state.courseIndex], &asset); \
-      ReadEncodedAsset( \
-          f_CourseImageBuffers[f_ShownCourseBufferIndex ^ 1], &asset); \
-      f_ShownCourseBufferIndex ^= 1; \
-    } else { \
-      miniGolfIndex = CHOSEN_GAME.state.courseIndex; \
-      miniGolfIndex -= MINI_GOLF_COURSE_INDEX; \
-      OpenEncodedAsset(g_MiniGolfCourseIconAssets[miniGolfIndex], &asset); \
-      ReadEncodedAsset( \
-          f_CourseImageBuffers[f_ShownCourseBufferIndex ^ 1], &asset); \
-      OpenAssetFile(g_MiniGolfDiscFiles[miniGolfIndex], &file); \
-      ReadAssetFile(g_MiniGolfDiscImages[0], GetAssetFileSize(&file), &file); \
-      f_ShownCourseBufferIndex ^= 1; \
+  { \
+    OpenEncodedAsset( \
+        g_ModeIconAnimations[( \
+            u8)f_SaveMenuModeIcons[f_SavedGameModes[memory->savedGameIndex]]] \
+                            [g_AnimatedIconFrameIndex], \
+        &asset); \
+    ReadEncodedAsset( \
+        f_ChosenModeIconBuffers[g_AnimatedIconBufferIndex], &asset); \
+    if (CHOSEN_GAME.isValid) { \
+      if (!CHOSEN_GAME.state.isMiniGolf) { \
+        OpenEncodedAsset( \
+            g_CourseIconAssets[CHOSEN_GAME.state.courseIndex], &asset); \
+        ReadEncodedAsset( \
+            f_CourseImageBuffers[f_ShownCourseBufferIndex ^ 1], &asset); \
+        f_ShownCourseBufferIndex ^= 1; \
+      } else { \
+        miniGolfIndex = CHOSEN_GAME.state.courseIndex; \
+        miniGolfIndex -= MINI_GOLF_COURSE_INDEX; \
+        OpenEncodedAsset(g_MiniGolfCourseIconAssets[miniGolfIndex], &asset); \
+        ReadEncodedAsset( \
+            f_CourseImageBuffers[f_ShownCourseBufferIndex ^ 1], &asset); \
+        OpenAssetFile(g_MiniGolfDiscFiles[miniGolfIndex], &file); \
+        ReadAssetFile( \
+            g_MiniGolfDiscImages[0], GetAssetFileSize(&file), &file); \
+        f_ShownCourseBufferIndex ^= 1; \
+      } \
     } \
   }
 

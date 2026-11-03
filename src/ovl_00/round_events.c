@@ -2620,19 +2620,21 @@ void LoadContactImages(Player* player) {
 /* Draws the ribbon segment between two of the ball's positions, as vertex pair
  * firstVertex */
 #define DrawContactSegment(segment, firstVertex) \
-  gSPMatrix(gfx++, \
-      PhysicalAddress(&f_ContactMatrices[(f_ContactTrailHead + (segment)) % \
-          CONTACT_TRAIL_LENGTH]), \
-      G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW); \
-  gSPMatrix(gfx++, \
-      PhysicalAddress(&f_ContactRibbonMatrices[g_DrawBufferIndex]), \
-      G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW); \
-  gSPVertex(gfx++, f_ContactVertices, 2, firstVertex); \
-  gSPPopMatrix(gfx++, G_MTX_MODELVIEW); \
-  gSPModifyVertex( \
-      gfx++, firstVertex, G_MWO_POINT_ST, f_ContactTextureT*(segment)); \
-  gSPModifyVertex(gfx++, (firstVertex) + 1, G_MWO_POINT_ST, \
-      TexcoordWord(f_ContactTextureS, f_ContactTextureT * (segment)))
+  { \
+    gSPMatrix(gfx++, \
+        PhysicalAddress(&f_ContactMatrices[(f_ContactTrailHead + (segment)) % \
+            CONTACT_TRAIL_LENGTH]), \
+        G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW); \
+    gSPMatrix(gfx++, \
+        PhysicalAddress(&f_ContactRibbonMatrices[g_DrawBufferIndex]), \
+        G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW); \
+    gSPVertex(gfx++, f_ContactVertices, 2, firstVertex); \
+    gSPPopMatrix(gfx++, G_MTX_MODELVIEW); \
+    gSPModifyVertex( \
+        gfx++, firstVertex, G_MWO_POINT_ST, f_ContactTextureT * (segment)); \
+    gSPModifyVertex(gfx++, (firstVertex) + 1, G_MWO_POINT_ST, \
+        TexcoordWord(f_ContactTextureS, f_ContactTextureT * (segment))); \
+  }
 
 #define DrawContactTriangles() \
   for (i = 0; i != CONTACT_RIBBON_RELOAD_SEGMENTS; i++) { \
@@ -2642,20 +2644,22 @@ void LoadContactImages(Player* player) {
 
 /* The shot style draws only the first segments */
 #define DrawContactRibbon() \
-  for (i = 0; i != CONTACT_RIBBON_FIRST_SEGMENTS; i++) { \
-    DrawContactSegment(i, i * 2); \
-  } \
-  DrawContactTriangles(); \
-  if (f_ContactStyle != CONTACT_STYLE_SHOT) { \
-    for (pass = 0; pass != CONTACT_RIBBON_RELOAD_PASSES; pass++) { \
-      for (i = (pass * 30) + 16; i != (pass * 30) + 31; i++) { \
-        DrawContactSegment(i, 28 - ((i - (pass * 30) - 16) * 2)); \
+  { \
+    for (i = 0; i != CONTACT_RIBBON_FIRST_SEGMENTS; i++) { \
+      DrawContactSegment(i, i * 2); \
+    } \
+    DrawContactTriangles(); \
+    if (f_ContactStyle != CONTACT_STYLE_SHOT) { \
+      for (pass = 0; pass != CONTACT_RIBBON_RELOAD_PASSES; pass++) { \
+        for (i = (pass * 30) + 16; i != (pass * 30) + 31; i++) { \
+          DrawContactSegment(i, 28 - ((i - (pass * 30) - 16) * 2)); \
+        } \
+        DrawContactTriangles(); \
+        for (i = (pass * 30) + 31; i != (pass * 30) + 46; i++) { \
+          DrawContactSegment(i, ((i - (pass * 30) - 31) * 2) + 2); \
+        } \
+        DrawContactTriangles(); \
       } \
-      DrawContactTriangles(); \
-      for (i = (pass * 30) + 31; i != (pass * 30) + 46; i++) { \
-        DrawContactSegment(i, ((i - (pass * 30) - 31) * 2) + 2); \
-      } \
-      DrawContactTriangles(); \
     } \
   }
 

@@ -72,17 +72,19 @@ static inline CharacterAnimation* ModelAnimations(const CharacterModel* model) {
  */
 #define SetTriangleTexture( \
     slot, triangle, texture, sCoordinates, tCoordinates) \
-  gfx = (Gfx*)FrameDataAddress( \
-      slot, (triangle)->loadTextureBlock + LOAD_TEXTURE_BLOCK_OFFSET); \
-  gDPLoadTextureBlock(gfx++, (texture)->address & ~(TEXTURE_ALIGNMENT - 1), \
-      G_IM_FMT_RGBA, G_IM_SIZ_16b, (texture)->width, (texture)->height, 0, \
-      G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMIRROR | G_TX_CLAMP, \
-      ANIMATED_TEXTURE_MASK, ANIMATED_TEXTURE_MASK, G_TX_NOLOD, G_TX_NOLOD); \
-  for (i = 0; i < TRIANGLE_VERTEX_COUNT; i++) { \
-    vertex = \
-        (Vtx*)FrameDataAddress(slot, (i * VTX_SIZE) + (triangle)->vertices); \
-    vertex->v.tc[TEXTURE_AXIS_S] = (sCoordinates)[i]; \
-    vertex->v.tc[TEXTURE_AXIS_T] = (tCoordinates)[i]; \
+  { \
+    gfx = (Gfx*)FrameDataAddress( \
+        slot, (triangle)->loadTextureBlock + LOAD_TEXTURE_BLOCK_OFFSET); \
+    gDPLoadTextureBlock(gfx++, (texture)->address & ~(TEXTURE_ALIGNMENT - 1), \
+        G_IM_FMT_RGBA, G_IM_SIZ_16b, (texture)->width, (texture)->height, 0, \
+        G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMIRROR | G_TX_CLAMP, \
+        ANIMATED_TEXTURE_MASK, ANIMATED_TEXTURE_MASK, G_TX_NOLOD, G_TX_NOLOD); \
+    for (i = 0; i < TRIANGLE_VERTEX_COUNT; i++) { \
+      vertex = \
+          (Vtx*)FrameDataAddress(slot, (i * VTX_SIZE) + (triangle)->vertices); \
+      vertex->v.tc[TEXTURE_AXIS_S] = (sCoordinates)[i]; \
+      vertex->v.tc[TEXTURE_AXIS_T] = (tCoordinates)[i]; \
+    } \
   }
 
 /* The size of a Vtx */
@@ -1950,10 +1952,12 @@ void SetCharacterLights(void) {
 
 /* Copies the ambient and first light into both of f_SavedLights */
 #define SaveLights(lights) \
-  f_SavedLights[0].l[0].l = (lights).l[0].l; \
-  f_SavedLights[1].l[0].l = (lights).l[0].l; \
-  f_SavedLights[0].a.l = (lights).a.l; \
-  f_SavedLights[1].a.l = (lights).a.l
+  { \
+    f_SavedLights[0].l[0].l = (lights).l[0].l; \
+    f_SavedLights[1].l[0].l = (lights).l[0].l; \
+    f_SavedLights[0].a.l = (lights).a.l; \
+    f_SavedLights[1].a.l = (lights).a.l; \
+  }
 
 /*
  * Draws the character in the slot with its lights, alpha and culling

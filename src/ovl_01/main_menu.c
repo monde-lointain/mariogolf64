@@ -2216,15 +2216,17 @@ void UpdateAnimationViewer(void) {
  * the buffers swap.
  */
 #define LoadChosenModeIcon() \
-  g_AnimatedIconFrameIndex = 0; \
-  g_AnimatedIconFrameTime = 0; \
-  OpenEncodedAsset( \
-      g_ModeIconAnimations[f_ModeChoiceIcons[g_ChosenPlayerCount - 1] \
-                                            [g_MenuMemory.modeChoice]][0], \
-      &asset); \
-  ReadEncodedAsset( \
-      g_AnimatedIconImages[g_AnimatedIconBufferIndex ^ 1], &asset); \
-  g_AnimatedIconBufferIndex ^= 1
+  { \
+    g_AnimatedIconFrameIndex = 0; \
+    g_AnimatedIconFrameTime = 0; \
+    OpenEncodedAsset( \
+        g_ModeIconAnimations[f_ModeChoiceIcons[g_ChosenPlayerCount - 1] \
+                                              [g_MenuMemory.modeChoice]][0], \
+        &asset); \
+    ReadEncodedAsset( \
+        g_AnimatedIconImages[g_AnimatedIconBufferIndex ^ 1], &asset); \
+    g_AnimatedIconBufferIndex ^= 1; \
+  }
 
 /*
  * Updates the mode select, the wheel of the modes that the chosen player count

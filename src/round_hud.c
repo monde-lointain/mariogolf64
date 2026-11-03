@@ -3652,13 +3652,15 @@ void DrawShotEffectsHud(Gfx** displayListHead);
 /* Loads one of the shot panel's labels, which DrawRoundHud does in each branch
  * that picks one */
 #define LoadShotPanelLabel(image) \
-  gDPLoadTLUT_pal16(g_DisplayListHead++, 0, \
-      TextureAddress((u32)(image) + IMAGE_HEADER_SIZE)); \
-  gDPLoadTextureBlock_4b(g_DisplayListHead++, \
-      TextureAddress((u32)(image) + PALETTED_TEXELS_OFFSET), G_IM_FMT_CI, \
-      SHOT_PANEL_LABEL_WIDTH, SHOT_PANEL_LABEL_HEIGHT, 0, \
-      G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, \
-      G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD)
+  { \
+    gDPLoadTLUT_pal16(g_DisplayListHead++, 0, \
+        TextureAddress((u32)(image) + IMAGE_HEADER_SIZE)); \
+    gDPLoadTextureBlock_4b(g_DisplayListHead++, \
+        TextureAddress((u32)(image) + PALETTED_TEXELS_OFFSET), G_IM_FMT_CI, \
+        SHOT_PANEL_LABEL_WIDTH, SHOT_PANEL_LABEL_HEIGHT, 0, \
+        G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, \
+        G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD); \
+  }
 
 /*
  * Draws the round's HUD over the course: the letterbox, the players' faces
