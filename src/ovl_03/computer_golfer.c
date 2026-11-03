@@ -2249,23 +2249,26 @@ INCLUDE_RODATA("asm/nonmatchings/ovl_03/computer_golfer", f_SimFaultText);
  * better than the best so far, and 1 once it has evaluated the trial, or
  * abandoned it, and adjusted f_Shot's power, mode or aim for the next one.
  *
- * Doesn't match: ours gives some values other saved registers than the
- * original does, and it keeps the address of f_Shot.ballPosition's z in a saved
- * register across the atan2 calls, where the original loads it again, as
- * reload does for an address that gets no register. The poor landing's sum
- * takes $v0, so the store waits for the kind tests' reuse of it; the
- * original's sum is in $v1 and its store comes after them. Reading kind
- * after the sum, testing surfaceInfo->kind directly, and spelling the tests
- * out with || or | leave the code as it is. Working out the aim change once,
- * into headingChange, gives 106 words differing (40 in shape) rather than 117
- * (43), before or after the shot offset's store. Earlier, the register oracle,
- * forcing 16 pseudos, left 76 words. The permuter's best runs, 103 words (35 in
- * shape) and later 89 (31) with the aim change worked out once, read the
- * heading for the excluded sectors through a pointer taken before the club
- * checks, where the original reads f_Shot.heading directly; taking it just
- * before the loop gave 116 (36), using it for the aim change too 118 (36), and
- * reading the centre sector into a local 153 (57). 106 words differ, 40 in
- * shape.
+ * Doesn't match: ours gives some values other saved registers than the original
+ * does, and it keeps the address of f_Shot.ballPosition's z in a saved register
+ * across the atan2 calls, where the original loads it again, as reload does for
+ * an address that gets no register. The poor landing's sum takes $v0, so the
+ * store waits for the kind tests' reuse of it; the original's sum is in $v1 and
+ * its store comes after them. Reading kind after the sum, testing
+ * surfaceInfo->kind directly, and spelling the tests out with || or | leave the
+ * code as it is. Writing the last aim change as the earlier one is, the step
+ * times -1 or 1, reads f_Shot.heading signed once before the parity test, as
+ * the original does, and gives 101 words differing (35 in shape); adding the
+ * change or its negation, chosen by ?:, gives the same, and choosing by ?:
+ * between the heading minus and plus the change 106 (38). With an if/else
+ * subtracting or adding, the change worked out once into a local gave 106 (40)
+ * and worked out in each arm 117 (43). Earlier, the register oracle, forcing 16
+ * pseudos, left 76 words. The permuter's best runs, 103 words (35 in shape) and
+ * later 89 (31) with the aim change worked out once, read the heading for the
+ * excluded sectors through a pointer taken before the club checks, where the
+ * original reads f_Shot.heading directly; taking it just before the loop gave
+ * 116 (36), using it for the aim change too 118 (36), and reading the centre
+ * sector into a local 153 (57). 101 words differ, 35 in shape.
  */
 #ifdef NON_MATCHING
 s32 StepTrialShot(void) {
@@ -2290,7 +2293,6 @@ s32 StepTrialShot(void) {
   f32 aimSin;
   f32 ratio;
   s32 launchPower;
-  s32 headingChange;
   s32 index;
 
   flags = 0;
@@ -2679,12 +2681,8 @@ EVALUATE:
   }
 
   f_ShotOffset = SHOT_OFFSET_MINUS_LARGE;
-  headingChange = f_AimChangeCount * AIM_CHANGE_STEP;
-  if (!(f_AimChangeCount & 1)) {
-    f_Shot.heading -= headingChange;
-  } else {
-    f_Shot.heading += headingChange;
-  }
+  f_Shot.heading +=
+      (!(f_AimChangeCount & 1) ? -1 : 1) * (f_AimChangeCount * AIM_CHANGE_STEP);
 
   osSyncPrintf("Angle Change4\n");
   if (f_AimChangeCount >= 3) {
