@@ -550,7 +550,10 @@ void DrawScreenFade(Gfx** displayListHead) {
     gDPSetBlendColor(gfx++, 255, 255, 255, 1);
     gDPPipeSync(gfx++);
     gDPSetAlphaDither(gfx++, G_AD_PATTERN);
-    /* Through bytes, to match */
+    /*
+     * Through bytes, to match: s32 locals give 36 words differing (12 in
+     * shape), and the globals passed straight to the macro 308
+     */
     red = g_ScreenFadeRed;
     green = g_ScreenFadeGreen;
     blue = g_ScreenFadeBlue;
