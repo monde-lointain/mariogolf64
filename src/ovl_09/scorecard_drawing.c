@@ -2144,9 +2144,9 @@ INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard_drawing", DrawLeaderboardPage);
  * standing's non-even branch, which leaves it unset at its earlier uses and for
  * an even standing; the original loads 137 as a constant at each use, so
  * backTop is 137 on every path there. With backTop set at its declaration
- * again, the output gives 768 (218); its other change, a temp for g_Scorecard.y
- * + 56 in one texture rectangle, gives 842 (194) without it. 762 words differ,
- * 212 in shape.
+ * again, the output gives 768 (218); its other change, a temp for one texture
+ * rectangle's top, 56 below the card's, gives 842 (194) without it. 762 words
+ * differ, 212 in shape.
  */
 #ifdef NON_MATCHING
 void DrawScoresPage(Gfx** displayListHead) {
