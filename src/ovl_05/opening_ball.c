@@ -328,8 +328,10 @@ typedef s32 (*BillboardHitFinder)(s32 startX, s32 startY, s32 startZ, s32 endX,
  * skip's last two tests are grouped, as the original branches on the rolling
  * state and then the impact speed: in one chain fold_truthop ors their flags
  * (662). Working out the horizontal speed before the side spin's magnitude, as
- * StepBallSimulation does, takes it from 652 words, 248 in shape, to 422. 422
- * words differ, 182 in shape.
+ * StepBallSimulation does, took it from 652 words, 248 in shape, to 422 (182).
+ * Naming the lift per unit of spin, as a permuter run's float temp suggested,
+ * takes it to 395 (167) wherever the local is declared; scaling weight in place
+ * instead gives 412 (170). 395 words differ, 167 in shape.
  */
 #ifdef NON_MATCHING
 s32 StepOpeningBallSimulation(BallSimulation* simulation) {
@@ -1562,6 +1564,7 @@ ROLLED:
       f32 sideSpinMagnitude;
       f32 ratio;
       f32 weight;
+      f32 liftPerSpin;
       f32 curve;
       f32 spinMagnitude;
       f32 lift;
@@ -1622,8 +1625,8 @@ ROLLED:
         weight = 0.0f;
       }
 
-      lift = (simulation->spinSpeed * OPENING_LIFT_SPIN_SCALE) *
-          (weight * OPENING_LIFT_PER_SPIN);
+      liftPerSpin = weight * OPENING_LIFT_PER_SPIN;
+      lift = (simulation->spinSpeed * OPENING_LIFT_SPIN_SCALE) * liftPerSpin;
       if (simulation->spinSpeed != 0 && airSpeed > MIN_LIFT_AIR_SPEED) {
         guMtxXFMF(simulation->liftRotation, relative[AXIS_X], relative[AXIS_Y],
             relative[AXIS_Z], &turned[AXIS_X], &turned[AXIS_Y],
