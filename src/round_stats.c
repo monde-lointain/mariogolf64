@@ -86,8 +86,16 @@ s32 GetNetScoreToPar(s32 endHole, s32 playerIndex) {
  */
 void TallySkins(s32 endHole) {
   s32 player;
-  s32 hole; /* Also the player whose total is cleared, to match */
-  s32 winner; /* Also whether anyone is still playing, to match */
+  /*
+   * Also the player whose total is cleared, to match: clearing the totals with
+   * player gives 6 words differing, none in shape
+   */
+  s32 hole;
+  /*
+   * Also whether anyone is still playing, to match: an isAnyonePlaying variable
+   * gives 12 words differing, none in shape
+   */
+  s32 winner;
   s32 skins;
 
   for (hole = 0; hole != g_GameState.playerCount; hole++) {
@@ -592,7 +600,11 @@ void SettleHoleBets(void) {
   s32 count;
   s32 score;
 
-  /* The Las Vegas pointers are there to match */
+  /*
+   * The Las Vegas pointers are there to match: reading both entries directly
+   * gives 44 words differing (8 in shape), the rate alone 18 (4), the tally
+   * alone 26 (4), and the rate as a value 10 (2)
+   */
   s8* lasVegasRate;
   s16* lasVegasTally;
 
@@ -621,7 +633,10 @@ void SettleHoleBets(void) {
     }
   }
 
-  /* Declared after SettleNassau to match the stack layout */
+  /*
+   * Declared after SettleNassau to match the stack layout: declared before it,
+   * 130 words differ, none in shape
+   */
   s32 scores[MAX_PLAYER_COUNT];
   /* Pads the frame to match; without it 24 words differ */
   s32 unused[8] UNUSED;
@@ -629,7 +644,10 @@ void SettleHoleBets(void) {
   if (g_GameState.betRates[BET_STROKES] > 0) {
     for (i = 0; i != g_GameState.playerCount; i++) {
       for (j = 0; j != g_GameState.playerCount; j++) {
-        /* Load the rival first without reversing the comparison, to match. */
+        /*
+         * Load the rival first without reversing the comparison, to match:
+         * testing i != j gives 6 words differing, and j != i 2, none in shape
+         */
         s32 rivalIndex = j;
         if (i != rivalIndex) {
           score = g_Players[i].strokeCount +
