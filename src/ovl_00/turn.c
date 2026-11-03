@@ -2987,6 +2987,13 @@ void ShowHoleOutBanner(s32 playerIndex) {
  * the original's four ForceStopRumble calls; stopping the rumble first keeps
  * a fifth (454 words, 182 in shape). Setting the pause menu hole-out's
  * nextState first too gives 458 (186 in shape).
+ *
+ * A permuter output with 378 words (134 in shape) reads
+ * f_ShotLaunch.impactTiming through a pointer, set before the swing's lower
+ * clamp and used by the debug clamp and the timing test after the launch, which
+ * accounts for all of its gain: with the field read directly again it gives the
+ * draft's 392 (148). Clamping through an inline helper or macro taking the
+ * field's address gives 392 to 400 words (148 to 152 in shape).
  */
 #ifdef NON_MATCHING
 /* Debug flag 0x47: prints where the ball lies, and the second controller moves
