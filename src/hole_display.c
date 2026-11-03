@@ -3168,9 +3168,13 @@ INCLUDE_ASM("asm/nonmatchings/hole_display", CaptureHudAnimationFrame);
  * commands a strip show.
  *
  * Doesn't match: the strip loop schedules its display-list stores in
- * another order, and the column and word index take other registers. 61
- * words differ, 7 in shape; without the sync before the rectangle, 44 and
- * 16.
+ * another order, and the column and word index take other registers.
+ * Setting left once per column, with the rectangle's right in an s16 set at
+ * each strip's start, gives 17 words differing, 3 in shape, but masks the
+ * right edge with 0xFC0 where the original masks 0xFFF; as an s32, u16 or
+ * u32 it spills the slice count and gives 94-96, and left per column alone
+ * 132. 61 words differ, 7 in shape; without the sync before the rectangle,
+ * 44 and 16.
  */
 #ifdef NON_MATCHING
 void DrawSliceAnimation(void) {
