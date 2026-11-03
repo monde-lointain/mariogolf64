@@ -580,7 +580,9 @@ s32 GetClubTournamentCourse(void);
  * Doesn't match: the original sign-extends the cursor's column and row as
  * soon as it loads them, and sets up the chosen character's sound with the
  * stack argument first. Clearing the same-character count in the preview
- * loop's initializer takes 52 words differing to 46.
+ * loop's initializer takes 52 words differing to 46. It reads canChooseMarked
+ * as a byte throughout, hence the casts; declared u8 instead, 58 words
+ * differ.
  */
 #ifdef NON_MATCHING
 s32 UpdateCharacterSelect(
