@@ -1171,12 +1171,21 @@ void ResetCodeEntry(void) {
   f_UnusedCodeEntryWord = 0;
 }
 
+/* Returns the code keyboard's key at row and column */
+static inline u8 GetCodeKey(s32 row, s32 column) {
+  return f_CodeKeys[row][column];
+}
+
 void UpdateClubWindow(void);
 
 /*
- * Doesn't match: when the cursor moves, the original reads the other
- * coordinate before it stores the new one, and adds it to the key's
- * address last. 68 words differ.
+ * Doesn't match: when the cursor moves, the original stores the new
+ * coordinate after sign-extending it, and builds the key's address after the
+ * step. Reading the keys through GetCodeKey loads both coordinates before the
+ * address, as the original does; indexing f_CodeKeys directly gives 68 words
+ * differing, 26 in shape. Swapping its parameters, or stepping the cursor
+ * before a call that reads both from memory (68), doesn't help, and s16 or s8
+ * parameters give 68-76. 64 words differ, 18 in shape.
  */
 #ifdef NON_MATCHING
 void UpdateClubTournament(void) {
@@ -1319,13 +1328,13 @@ void UpdateClubTournament(void) {
       memory->codeKeyRow = CODE_KEYBOARD_ROW_COUNT - 1;
     }
 
-    if (f_CodeKeys[memory->codeKeyRow][memory->codeKeyColumn] ==
+    if (GetCodeKey(memory->codeKeyRow, memory->codeKeyColumn) ==
         CODE_KEY_BLANK) {
       memory->codeKeyRow = CODE_KEYBOARD_END_ROW - 1;
     }
   } else if (g_MenuRepeatButtons & D_JPAD) {
     PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
-    if (f_CodeKeys[++memory->codeKeyRow][memory->codeKeyColumn] ==
+    if (GetCodeKey(++memory->codeKeyRow, memory->codeKeyColumn) ==
         CODE_KEY_BLANK) {
       memory->codeKeyRow = 0;
     }
@@ -1335,7 +1344,7 @@ void UpdateClubTournament(void) {
     }
   } else if (g_MenuRepeatButtons & L_JPAD) {
     PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
-    if (f_CodeKeys[memory->codeKeyRow][--memory->codeKeyColumn] ==
+    if (GetCodeKey(memory->codeKeyRow, --memory->codeKeyColumn) ==
         CODE_KEY_BLANK) {
       memory->codeKeyColumn = CODE_KEYBOARD_FIRST_BLANK_COLUMN - 1;
     }
@@ -1345,7 +1354,7 @@ void UpdateClubTournament(void) {
     }
   } else if (g_MenuRepeatButtons & R_JPAD) {
     PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
-    if (f_CodeKeys[memory->codeKeyRow][++memory->codeKeyColumn] ==
+    if (GetCodeKey(memory->codeKeyRow, ++memory->codeKeyColumn) ==
         CODE_KEY_BLANK) {
       memory->codeKeyColumn = CODE_KEYBOARD_BACK_COLUMN;
     }
