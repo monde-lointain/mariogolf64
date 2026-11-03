@@ -561,8 +561,13 @@ void UpdateRingShotRecords(void) {
 #define REPLAY_GLOW_DIVISOR 4
 
 /*
- * Doesn't match: the original gives several values other saved registers,
- * and keeps memory on the stack. 26 words differ.
+ * Doesn't match: the original gives several values other saved registers, and
+ * keeps memory on the stack. The register oracle comes within 14 words with 3
+ * pseudos forced: the face loop's itemIndex and listIndex, each in the other's
+ * register, and row. Other orders of their declarations, setting listIndex
+ * before row or in the loop's header, change nothing; counting the empty slot's
+ * dashes with listIndex, column, drop or row gives 70 to 92 words, all in
+ * registers. 26 words differ.
  */
 #ifdef NON_MATCHING
 void DrawRingShotRecords(Gfx** displayListHead) {
