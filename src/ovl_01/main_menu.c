@@ -2549,8 +2549,9 @@ void UpdateModeSelect(void) {
   if (Abs(g_MenuMemory.modeSpin) != 0) {
     step = AmountPerMode(MODE_SELECT_SPIN_SPEED);
     direction = g_MenuMemory.modeSpin < 0 ? -1 : 1;
-    /* The clamp starts a block of its own, to match; writing the direction
-     * as an if-else, either way round, or clamping first doesn't */
+    /* The clamp starts a block of its own, to match (without it 71 words
+     * differ, 27 in shape); writing the direction as an if-else, either way
+     * round, or clamping first doesn't */
     END_BASIC_BLOCK();
     if (step == 0) {
       step = 1;

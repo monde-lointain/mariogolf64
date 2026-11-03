@@ -1504,6 +1504,7 @@ Boolean IsEasedEyeHeightZero(void) {
   f32 height;
 
   height = fabsf(f_EasedView.eye[AXIS_Y]);
+  /* In its own block, to match; without it 9 words differ, 3 in shape */
   IN_OWN_BLOCK(if (height == 0.0f) { isZero = TRUE; });
 
   return isZero;

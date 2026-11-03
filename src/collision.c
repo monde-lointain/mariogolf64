@@ -2167,8 +2167,9 @@ s32 FindHoleTriangleHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
     endSide = (plane.normal[AXIS_X] * endX) + (plane.normal[AXIS_Y] * endY) +
         (plane.normal[AXIS_Z] * endZ) +
         (plane.distance * WORLD_TO_COURSE_SCALE);
-    /* The test starts a block of its own, to match; ordering the macro's
-     * tests otherwise, && for &, or fabs leave as many words or more */
+    /* The test starts a block of its own, to match (without it 67 words
+     * differ, 31 in shape); ordering the macro's tests otherwise, && for &,
+     * or fabs leave as many words or more */
     END_BASIC_BLOCK();
     if (DoesPathMeetPlane(startSide, endSide)) {
       endSide = startSide - endSide;

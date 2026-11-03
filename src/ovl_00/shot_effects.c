@@ -543,6 +543,7 @@ void StartSwingTrail(s32 kind) {
     f_SwingTrailState = SWING_TRAIL_SHOWN;
     f_SwingTrailLength = 0;
     f_SwingTrailKind = kind;
+    /* In its own block, to match; without it 23 words differ, 21 in shape */
     IN_OWN_BLOCK(f_SwingTrailSampleCount = SWING_TRAIL_SAMPLES);
     for (i = 0; i != f_SwingTrailSampleCount; i++) {
       GetCharacterPointPosition(0, SWING_TRAIL_OUTER_POINT, point);
@@ -558,7 +559,8 @@ void StartSwingTrail(s32 kind) {
 
     /* Rewinds the swing to where it was. Ending the block first reloads the
      * count, as the original does, to match; negating it as a float, through
-     * a cast or by subtraction, IN_OWN_BLOCK or an empty block don't */
+     * a cast or by subtraction, IN_OWN_BLOCK or an empty block don't.
+     * Without it 13 words differ, 7 in shape */
     END_BASIC_BLOCK();
     SetAnimationSpeed(0, -f_SwingTrailSampleCount);
     AnimateCharacterInSameCopy(0);

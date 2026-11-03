@@ -79,6 +79,7 @@ void DrawCursorBox(Gfx** displayListHead, s32 left, s32 top) {
   width = (((u8*)f_CursorBoxImage)[2] << 8) | ((u8*)f_CursorBoxImage)[3];
   height = (((u8*)f_CursorBoxImage)[4] << 8) | ((u8*)f_CursorBoxImage)[5];
   for (corner = 0; corner != CURSOR_BOX_CORNER_COUNT; corner++) {
+    /* In its own block, to match; without it 173 words differ, 11 in shape */
     IN_OWN_BLOCK(f_CursorCornerPhases[corner] += DegreesToRadians(15));
     red = (s32)(sinf(f_CursorCornerPhases[corner]) * 127.0f) + 127;
     if (red > 255) {
