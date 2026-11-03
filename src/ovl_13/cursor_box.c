@@ -68,9 +68,16 @@ void LoadCursorBox(void* image) {
  * corners start a quarter turn apart. Doesn't match: the original keeps the
  * green and blue in the loop rather than hoisting them, which leaves left in a
  * saved register and the frame 8 bytes smaller. It also keeps corner as a
- * counter rather than turning it into an offset. Other types for corner, a
- * < test, storing the alpha first or dropping the barrier give 46-176.
- * 44 words differ.
+ * counter rather than turning it into an offset. Other types for corner, a <
+ * test, storing the alpha first or dropping the barrier give 46-176. The
+ * original sets the green before the red's clamp and stores it after it. loop.c
+ * keeps a variable's set in the loop when the set may not run in every pass,
+ * past a label or jump, and is used in another block. Green and blue variables
+ * are hoisted wherever they are set (44 words, 12 in shape): set before the
+ * clamp, loop.c's dump treats them as always set, and set after it they are
+ * used in their own block. A static inline function stepping the phase, in
+ * place of the block, gives 173 words (11 in shape), as with no barrier. 44
+ * words differ, 12 in shape.
  */
 #ifdef NON_MATCHING
 void DrawCursorBox(Gfx** displayListHead, s32 left, s32 top) {
