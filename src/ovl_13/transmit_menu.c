@@ -2269,7 +2269,11 @@ void DrawTransmitMenu(Gfx** displayListHead) {
   Gfx* displayList = *displayListHead;
   s32 index;
   s32 rowCount;
-  s32 panelRowCount; /* Apart from rowCount, which is there to match */
+  /*
+   * Apart from rowCount, which is there to match: reusing rowCount for the
+   * panel's strips gives 180 words differing, 20 in shape
+   */
+  s32 panelRowCount;
   s32 option;
   s32 width;
   s32 height;
