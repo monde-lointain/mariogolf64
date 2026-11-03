@@ -4785,7 +4785,7 @@ void DrawUpDownArrows(Gfx** displayListHead, s32 centerY);
  *
  * Doesn't match: the boards' strips schedule their address loads differently,
  * and values take other registers through the boards' and the players' loops.
- * 175 words differ, 25 in shape.
+ * 109 words differ, 23 in shape.
  */
 #ifdef NON_MATCHING
 void DrawModeSelect(Gfx** displayListHead) {
@@ -5112,8 +5112,8 @@ void DrawModeSelect(Gfx** displayListHead) {
     if (g_PlayerControllerIndices[index] == NO_CONTROLLER_INDEX) {
       gDPLoadTextureBlock_4b(gfx++,
           TextureAddress(ImageTexels(image) +
-              ((index + PLAYER_LABEL_COMPUTER_FIRST) *
-                  PLAYER_LABEL_IMAGE_SIZE)),
+              (PLAYER_LABEL_COMPUTER_FIRST * PLAYER_LABEL_IMAGE_SIZE) +
+              (index * PLAYER_LABEL_IMAGE_SIZE)),
           G_IM_FMT_CI, PLAYER_LABEL_WIDTH, PLAYER_LABEL_HEIGHT, 0,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
