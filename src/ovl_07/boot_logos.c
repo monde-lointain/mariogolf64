@@ -269,8 +269,10 @@ void UpdateBootLogos(void) {
  * Doesn't match: GCC clamps the N64 logo's fade-in alpha after storing the
  * color command's first word, where the original clamps it first, and loads
  * the strip loops' constants into other registers in another order. Clamping
- * through alpha, as the Nintendo logo does, gives 60 words, not 58.
- * 58 words differ.
+ * through alpha, as the Nintendo logo does, gives 60 words, not 58, as does
+ * clamping into alpha with MIN. The permuter's 21 words come from moving the
+ * N64 logo's bottom step out of the strip loop, so every strip would draw to
+ * the first one's bottom. 58 words differ.
  */
 #ifdef NON_MATCHING
 void DrawBootLogos(Gfx** displayListHead) {
