@@ -509,9 +509,10 @@ void EndRumbleForceStop(void) {
  * Pulls the aim camera in along the heading, as far as it takes to keep it
  * within the course. Once it has moved, a held C button pushes it on by a step.
  *
- * Doesn't match: the original takes both absolute values of the offset
- * before subtracting the overshoot, where this subtracts between them.
- * 4 words differ.
+ * Doesn't match: the original takes both absolute values of the offset before
+ * subtracting the overshoot, where this subtracts between them. The register
+ * oracle's closest result is these 4 words with no register forced, so
+ * allocation isn't the cause. 4 words differ.
  */
 #ifdef NON_MATCHING
 void KeepAimCameraOnCourse(void) {

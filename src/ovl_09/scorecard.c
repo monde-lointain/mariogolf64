@@ -381,9 +381,10 @@ void FreeScorecard(void);
  * game mode and clears its text slots. It stops any rumble even if the
  * scorecard was already closed.
  *
- * Doesn't match: the original addresses the closing frees from
- * totalLabelsImage and derives tableImage's address from it, where this
- * addresses them from tableImage. 17 words differ, 3 in shape.
+ * Doesn't match: the original addresses the closing frees from totalLabelsImage
+ * and derives tableImage's address from it, where this addresses them from
+ * tableImage. The register oracle's closest result is these 17 words with no
+ * register forced, so allocation isn't the cause. 17 words differ, 3 in shape.
  */
 #ifdef NON_MATCHING
 void FreeScorecard(void) {

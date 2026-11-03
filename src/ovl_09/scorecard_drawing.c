@@ -3168,15 +3168,16 @@ static const f64 f_ScoresTenDegrees = DegreesToRadians(10);
  *
  * Doesn't match: loop.c strength-reduces BET_TALLY_TOP + rowOffset into the
  * register that steps by BET_TALLY_ROW_SPACING, where the original steps
- * rowOffset itself from 0 and adds BET_TALLY_TOP at each digit. The nested
- * ifs make GCC compare the bet rate with zero and UNSET_BET_RATE in turn, as
- * the original does, rather than as a range. Indexing g_PrintBuffer by digit,
- * where walking a pointer gave 35 words, 15 in shape, tests its first
- * character at its own address and reloads each character, as the original
- * does; setting left from the digit index gives 123. Stepping rowOffset at
- * the end of the player loop gives 24 words, 14 in shape; a top of its own,
- * 25 and 15; no rowOffset, 92; and rowOffset as an s16, u16 or u32, 98 to
- * 112. 22 words differ, 12 in shape.
+ * rowOffset itself from 0 and adds BET_TALLY_TOP at each digit. The nested ifs
+ * make GCC compare the bet rate with zero and UNSET_BET_RATE in turn, as the
+ * original does, rather than as a range. Indexing g_PrintBuffer by digit, where
+ * walking a pointer gave 35 words, 15 in shape, tests its first character at
+ * its own address and reloads each character, as the original does; setting
+ * left from the digit index gives 123. Stepping rowOffset at the end of the
+ * player loop gives 24 words, 14 in shape; a top of its own, 25 and 15; no
+ * rowOffset, 92; and rowOffset as an s16, u16 or u32, 98 to 112. The register
+ * oracle's closest result is these 22 words with no register forced, so
+ * allocation isn't the cause. 22 words differ, 12 in shape.
  */
 #ifdef NON_MATCHING
 void DrawBetTallies(Gfx** displayListHead) {

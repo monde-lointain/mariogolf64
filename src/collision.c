@@ -1606,7 +1606,8 @@ BillboardCell GetBillboardCell(s32 textureIndex, f32 across, f32 down) {
  * either side of the division or swapping the Abs terms changes nothing or
  * makes it worse. Writing the division's absolute values as plain conditional
  * expressions, either or both, gives 11 to 15 words (7 to 12 in shape), and as
- * abs() 16 (4). 4 words differ, 2 in shape.
+ * abs() 16 (4). The register oracle's closest result is these 4 words with no
+ * register forced, so allocation isn't the cause. 4 words differ, 2 in shape.
  */
 #ifdef NON_MATCHING
 s32 FindBillboardHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
