@@ -1746,7 +1746,7 @@ SETTLE:
 
         simulation->unkA4 = GetSurface(
             simulation->position[AXIS_X], simulation->position[AXIS_Z]);
-        kind = GetOpeningSurfaceInfo((s8)simulation->unkA4)->kind;
+        kind = GetOpeningSurfaceInfo(simulation->unkA4)->kind;
         if (IsDropKind(kind) &&
             FindGroundTriangle(simulation->position[AXIS_X],
                 simulation->position[AXIS_Z], &ground) == 0 &&

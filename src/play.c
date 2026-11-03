@@ -101,7 +101,7 @@ enum HoleResultsKind {
 };
 
 CurrentShot g_ScriptedShot;
-u8 g_ReplayStrokeCount;
+s8 g_ReplayStrokeCount;
 ContestMovieState g_ContestMovieState;
 u32 g_GroundDrawFrame;
 CurrentShot g_SavedShots[MAX_PLAYER_COUNT];

@@ -110,7 +110,7 @@ s32 g_CoarseVertexOffsets[GROUND_TILE_COUNT][TILE_VERTEX_SEGMENT_COUNT] BSS
     ALIGNED(8) = {{0}};
 Mtx f_EffectMatrices[EFFECT_COUNT] BSS ALIGNED(8) = {{{{0}}}};
 Mtx g_ScreenEffectProjection BSS ALIGNED(8) = {{{0}}};
-u8 g_ReplayStrokeCount BSS = {0};
+s8 g_ReplayStrokeCount BSS = {0};
 Boolean g_IsChosenHoleLoadStarted BSS = {0};
 FireworkShape* f_FireworkShape BSS = {0};
 s16 g_ChosenLabelGrowth BSS = {0};

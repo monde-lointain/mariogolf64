@@ -186,7 +186,7 @@ typedef struct BallSimulation {
   /* 0xA1 */ s8 hasEnteredWater; /* Set once the ball is in the water */
   /* 0xA2 */ s8 unkA2; /* A SURFACE_* value */
   /* 0xA3 */ s8 surface; /* The SURFACE_* that the ball is on */
-  /* 0xA4 */ u8 unkA4; /* A SURFACE_* value */
+  /* 0xA4 */ s8 unkA4; /* A SURFACE_* value */
   /* 0xA5 */ s8 playerIndex;
   /* 0xA6 */ s8 unkA6;
   /* The SURFACE_* of the first bounce, if on the ground; at first, where

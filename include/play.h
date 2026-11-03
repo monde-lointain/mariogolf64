@@ -108,7 +108,7 @@ extern s8 g_IsHudTurnAwayRequested;
  * computer golfer's finished plan */
 extern CurrentShot g_ScriptedShot;
 /* The strokes the replayed record took, after which the replay ends */
-extern u8 g_ReplayStrokeCount;
+extern s8 g_ReplayStrokeCount;
 
 /* The states of PlayContestMovies */
 enum ContestMovieState {
