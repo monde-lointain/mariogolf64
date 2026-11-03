@@ -453,7 +453,10 @@ void StopEditorMoves(void) {
  * Doesn't match: GCC keeps the zoom's gap in a float register rather than
  * $s6, and allocates the fabsf operands to other registers. It also reads
  * turnLeft and tiltLeft once before stepping them, where the original reads
- * each twice. 266 words differ, 80 in shape.
+ * each twice. The distance to a target sums the offsets' squares in x, y, z
+ * order, as the original adds them; summing x, z, y gives 266 words, but the
+ * register oracle then comes no closer than 173, against 161. 278 words
+ * differ, 80 in shape.
  *
  * The eight flag tests before letting go of the pivot each clear isDone:
  * jump.c turns each "if (test) isDone = FALSE" into an and with the negated
@@ -521,7 +524,7 @@ void UpdateCameraEditor(void) {
       offsetY = g_CameraEditor.targets[index][1] - y;
       offsetZ = g_CameraEditor.targets[index][2] - z;
       distance = sqrtf(
-          (offsetX * offsetX) + (offsetZ * offsetZ) + (offsetY * offsetY));
+          (offsetX * offsetX) + (offsetY * offsetY) + (offsetZ * offsetZ));
       if (distance < EDITOR_ARRIVAL_DISTANCE) {
         x = g_CameraEditor.targets[index][0];
         y = g_CameraEditor.targets[index][1];
