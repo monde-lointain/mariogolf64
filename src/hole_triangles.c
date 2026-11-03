@@ -287,8 +287,11 @@ INCLUDE_ASM("asm/nonmatchings/hole_triangles", DrawHoleTriangles);
  * Doesn't match: the original also masks the side, as & 3, but doing so
  * shortens the outer loop so that loop.c hoists one more display list command
  * (0xDC08060A) out of it, which takes $t3 and shifts the other registers.
- * Elsewhere the scheduling and delay slots differ. 79 words differ, 25 in
- * shape.
+ * Elsewhere the scheduling and delay slots differ. Computing the next side
+ * once, into nextSide, gives 69 words differing rather than 79; as a u8, or
+ * masked with & 3, it gives 368 to 382. The permuter's best, 1347, keeps
+ * side + 1 in a u8 and the mask 7 in a variable of its own, which no natural
+ * form explains. 69 words differ, 25 in shape.
  */
 #ifdef NON_MATCHING
 void DrawRings(Gfx** displayListHead, CameraMatrices* matrices UNUSED,
@@ -307,6 +310,7 @@ void DrawRings(Gfx** displayListHead, CameraMatrices* matrices UNUSED,
   s32 state;
   s32 section;
   s32 side;
+  s32 nextSide;
   s32 alpha;
   Radians angle;
   f32 turn;
@@ -415,11 +419,11 @@ void DrawRings(Gfx** displayListHead, CameraMatrices* matrices UNUSED,
         gSPVertex(gfx++, f_RingVertices, RING_VERTEX_COUNT, 0);
         for (section = 0; section < RING_SECTION_COUNT; section++) {
           for (side = 0; side < RING_SIDE_COUNT; side++) {
+            nextSide = (side + 1) % RING_SIDE_COUNT;
             gSP2Triangles(gfx++, RingVertex(section, side),
-                RingVertex(section, (side + 1) % RING_SIDE_COUNT),
-                RingVertex(section + 1, (side + 1) % RING_SIDE_COUNT), 0,
-                RingVertex(section, side),
-                RingVertex(section + 1, (side + 1) % RING_SIDE_COUNT),
+                RingVertex(section, nextSide),
+                RingVertex(section + 1, nextSide), 0, RingVertex(section, side),
+                RingVertex(section + 1, nextSide),
                 RingVertex(section + 1, side), 0);
           }
         }
