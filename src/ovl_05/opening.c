@@ -997,14 +997,16 @@ enum OpeningModel {
 s32 ToggleOpeningCharacter(u32 slotIndex, s32 character);
 
 /*
- * Places the cue slot's character, leaving the point's height unset. It is
- * three bare statements, to match, so it must not be the body of an
- * unbraced if.
+ * Places the cue slot's character, leaving the point's height unset. It is a
+ * plain block, as the gbi macros are; as a do-while (0) loop,
+ * UpdateOpeningCharacters has 28 words differing, 10 in shape.
  */
 #define PlaceCueCharacter(point, x, z, heading) \
-  (point)[0] = (x); \
-  (point)[2] = (z); \
-  PlaceCharacter(f_CueSlotIndex, (point), DegreesToRadians(heading))
+  { \
+    (point)[0] = (x); \
+    (point)[2] = (z); \
+    PlaceCharacter(f_CueSlotIndex, (point), DegreesToRadians(heading)); \
+  }
 
 /*
  * Sets up the opening's characters for the cue that its script has given, and
@@ -4393,7 +4395,11 @@ void DrawOpeningShotBall(Gfx** displayListHead) {
             G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
             G_TX_NOLOD);
         if (g_CameraEditor.distance > SHOT_BALL_FAR_DISTANCE) {
-          /* Kept in a local, unlike the near branch's, to match */
+          /*
+           * Kept in a local, unlike the near branch's, to match:
+           * ShotBallHalfWidth at each use gives 33 words differing (1 in
+           * shape), and stripHeight as the local 41 (1)
+           */
           size = ShotBallHalfWidth();
           left = ballPoint.x - size;
           right = left + SHOT_BALL_DOT_SIZE;
@@ -4640,7 +4646,11 @@ void LoadOpeningLogo(void) {
 void DrawOpeningLogo(Gfx** displayListHead, Boolean isDrawn) {
   Gfx* gfx = *displayListHead;
   s32 texelsOffset;
-  s32 letterTexelsOffset; /* Kept apart, unlike the shine pass's, to match */
+  /*
+   * Kept apart, unlike the shine pass's, to match: sharing texelsOffset gives
+   * 154 words differing (38 in shape) against the draft's 146 (30)
+   */
+  s32 letterTexelsOffset;
   s32 i;
   s32 letterIndex;
   s32 clubStripIndex;
