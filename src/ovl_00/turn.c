@@ -2932,7 +2932,7 @@ void ShowHoleOutBanner(s32 playerIndex) {
  * inline: inlined, their buffers share one stack slot, as in the
  * original's frame.
  *
- * Doesn't match: 475 words differ, 193 in shape, spread through the
+ * Doesn't match: 465 words differ, 187 in shape, spread through the
  * routine's states.
  *
  * The letterbox test before the debug output is written "== FALSE", for
@@ -2950,6 +2950,10 @@ void ShowHoleOutBanner(s32 playerIndex) {
  * where the original branches on each. Nested ifs or a switch give the
  * original's branches but 654 words; "!(a || b)" or swapped operands
  * change nothing.
+ *
+ * The hole-out song switch lists its modes from Ring Shot down to Training,
+ * the order the original places their bodies in; in the enum's order 475
+ * words differ (193 in shape).
  */
 #ifdef NON_MATCHING
 /* Debug flag 0x47: prints where the ball lies, and the second controller moves
@@ -3519,6 +3523,12 @@ void UpdateTurns(void) {
             song = SONG_MINI_GOLF;
             if (!g_GameState.isMiniGolf) {
               switch (g_GameState.gameMode) {
+                case GAME_MODE_RING_SHOT:
+                  song = SONG_RING_SHOT;
+                  break;
+                case GAME_MODE_SPEED_GOLF:
+                  song = SONG_SPEED_GOLF;
+                  break;
                 case GAME_MODE_TOURNAMENT:
                   switch (g_GameState.courseIndex) {
                     case COURSE_TOAD_HIGHLANDS:
@@ -3544,12 +3554,6 @@ void UpdateTurns(void) {
                   break;
                 case GAME_MODE_TRAINING:
                   song = SONG_TRAINING;
-                  break;
-                case GAME_MODE_SPEED_GOLF:
-                  song = SONG_SPEED_GOLF;
-                  break;
-                case GAME_MODE_RING_SHOT:
-                  song = SONG_RING_SHOT;
                   break;
                 default:
                   if (GetLastHoleIndex() == g_GameState.holeIndex &&
