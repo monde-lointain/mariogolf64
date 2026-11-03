@@ -310,7 +310,10 @@ void PrepareShotEffects(BallSimulation* simulation) {
   OpenEncodedAsset(DIVOT_IMAGE_ASSET, &asset);
   ReadEncodedAsset(f_DivotImage, &asset);
 
-  /* Clearing the effects here instead of calling ClearEffects is there to match
+  /*
+   * Clearing the effects here instead of calling ClearEffects is there to
+   * match: the call gives 11 words differing (11 in shape), clearing each
+   * kind without the effect pointer 16 (6), and testing with < 15 (3)
    */
   for (index = 0; index != EFFECT_COUNT; index++) {
     effect = &f_Effects[index];
@@ -369,7 +372,11 @@ void ClearEffects(void) {
   s32 index;
   Effect* effect;
 
-  /* Testing index with != and naming the effect are there to match */
+  /*
+   * Testing index with != and naming the effect are there to match: with <
+   * 15 words differ (3 in shape), clearing each kind without the pointer 16
+   * (6), and both 17 (7)
+   */
   for (index = 0; index != EFFECT_COUNT; index++) {
     effect = &f_Effects[index];
     effect->kind = EFFECT_KIND_NONE;
@@ -1066,7 +1073,10 @@ void SpawnShotDebris(
     debrisAmount = DEBRIS_AMOUNT_MOST;
   }
 
-  /* Clearing the effects here instead of calling ClearEffects is there to match
+  /*
+   * Clearing the effects here instead of calling ClearEffects is there to
+   * match: the call gives 28 words differing (18 in shape), clearing each
+   * kind without the effect pointer 7 (3), and testing with < 16 (6)
    */
   for (index = 0; index != EFFECT_COUNT; index++) {
     clearedEffect = &f_Effects[index];
