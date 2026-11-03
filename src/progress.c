@@ -29,7 +29,18 @@ void ShowBirdieBadgeCount(s32 badgeCount);
  * Doesn't match: GCC masks the new win bits to a byte before printing them,
  * where the original prints the unmasked value. Building them in newValue
  * gives 19 differing words, not 3; dropping newValue or printing the stored
- * byte gives 5, and an s32 or u32 value gives 9. 3 words differ.
+ * byte gives 5, and an s32 or u32 value gives 9. Blame traces the extra
+ * andi to the RTL zero_extendqisi2 at newValue = value; mips.md emits it
+ * for a register-to-register QI-to-SI conversion. Widening value removes
+ * that mask but moves the flag mask and ties the combined bits to the
+ * final result instead of copying them in the branch delay slot.
+ * Widening count too gives 33 differing words; casting the comparison
+ * back to u8 does not restore the original. Promoting value to newValue
+ * before the saveCount test gives 6, and assigning newValue separately
+ * in both branches gives 23. END_BASIC_BLOCK before the combination or
+ * final promotion leaves 3; before the saveCount test gives 21. Keep the
+ * byte draft until both the promotion and delay-slot copy are explained.
+ * 3 words differ.
  */
 #ifdef NON_MATCHING
 void RecordComCharacterResult(s32 row, s32 column, Boolean isWin) {
@@ -51,7 +62,7 @@ void RecordComCharacterResult(s32 row, s32 column, Boolean isWin) {
       value |= WON_UNSAVED_FLAG;
     }
 
-    newValue = value; /* Passed on unmasked, to match */
+    newValue = value;
     awards->matchups[row][column].winBits = newValue;
     osSyncPrintf("Win Com Chara[%d]\n", newValue);
   } else {
