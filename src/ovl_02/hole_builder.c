@@ -3376,11 +3376,7 @@ void CastBillboardShadows(void) {
 
     width = g_Billboards[index].width;
     widthScale = 1.0f / width;
-    /*
-     * In its own block to match: without it 284 words differ, and in a bare
-     * block 378, against 271
-     */
-    IN_OWN_BLOCK(height = g_Billboards[index].height);
+    height = g_Billboards[index].height;
     heightScale = 1.0f / height;
     x = g_Billboards[index].x;
     z = g_Billboards[index].z;
