@@ -996,7 +996,10 @@ void ResetTerrainCodeCells(void) {
   g_TerrainCodeBlockCount = 0;
   for (row = 0; row < TERRAIN_CODE_CELL_ROW_COUNT; row++) {
     for (column = TERRAIN_CODE_CELL_COLUMN_COUNT - 1; column >= 0; column--) {
-      /* Addressed by byte offset to match */
+      /*
+       * Addressed by byte offset to match: indexing the cells gives 23 words
+       * differing, 7 in shape
+       */
       cellOffset = (row * TERRAIN_CODE_CELL_ROW_SIZE) +
           (column * TERRAIN_CODE_CELL_SIZE);
       *(s16*)AddressPast(g_TerrainCodeCells, cellOffset) = -1;
@@ -1906,7 +1909,12 @@ s32 PaintDrivingRange(
  * to 42 words and EncodeCodeMap by 36 to 48, against 6 and 7.
  */
 static inline u16* GetMapTexel(s32 column, s32 row) {
-  /* tileRow is there to match */
+  /*
+   * tileRow is there to match: shifting the row in place gives 36 words
+   * differing (6 in shape) in EncodeCodeMap against its draft's 7 (5), 40 (6)
+   * in LoadCodeMap against 6 (4), 138 (18) in CleanCodeMap against 95 (17), and
+   * 56 (6) in SaveHoleFiles against 7 (5)
+   */
   s32 tileRow = row >> MAP_TILE_SHIFT;
   s32 tileOffset = ((column / GROUND_TILE_TEXEL_SPAN) +
                        (tileRow * GROUND_TILE_COLUMN_COUNT)) *
@@ -1920,7 +1928,12 @@ static inline u16* GetMapTexel(s32 column, s32 row) {
 
 /* Returns the map texel at a column and row, or 0 off the map */
 static inline u16 ReadMapTexel(s32 column, s32 row) {
-  /* The separate tests are there to match */
+  /*
+   * The separate tests are there to match: one || test gives 31 words differing
+   * (17 in shape) in EncodeCodeMap, 133 (29) in CleanCodeMap and 51 (17) in
+   * SaveHoleFiles, and one && test for being on the map 41 (19), 143 (31) and
+   * 93 (19), against their drafts' 7 (5), 95 (17) and 7 (5)
+   */
   if (column < 0) {
     return 0;
   }
@@ -1969,7 +1982,11 @@ INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", EncodeCodeMap);
 
 /* Sets the map texel at a column and row, unless it is off the map */
 static inline void WriteMapTexel(s32 column, s32 row, u16 color) {
-  /* The separate tests are there to match */
+  /*
+   * The separate tests are there to match: one || test gives 30 words differing
+   * (16 in shape) in LoadCodeMap, and one && test for being on the map 36 (14),
+   * against its draft's 6 (4)
+   */
   if (column < 0) {
     return;
   }
@@ -4237,7 +4254,10 @@ void SetTileTextureCoords(s32 column, s32 row, Vtx_t* start, Vtx_t* end) {
   }
 }
 
-/* Copies count vertices; copying them as f64s is there to match */
+/*
+ * Copies count vertices; copying them as f64s is there to match: copying the
+ * structs gives 177 words differing in BuildGroundTileDisplayList, 93 in shape
+ */
 static inline void CopyVertices(Vtx* destination, Vtx* source, s32 count) {
   s32 i;
 
