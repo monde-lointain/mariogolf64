@@ -2340,7 +2340,10 @@ void UpdateRain(void) {
     f_LastRainEye[AXIS_Y] = g_Cameras[0].view.eye[AXIS_Y];
     f_LastRainEye[AXIS_Z] = g_Cameras[0].view.eye[AXIS_Z];
 
-    /* Indexing the drop each time is there to match */
+    /*
+     * Indexing the drop each time is there to match: reading it through drop
+     * gives 168 words differing, 14 in shape
+     */
     f_Raindrops[f_GroundCheckDropIndex].groundHeight =
         GetGroundHeight(f_Raindrops[f_GroundCheckDropIndex].head[AXIS_X] *
                 WORLD_TO_COURSE_SCALE,
