@@ -2855,7 +2855,11 @@ INCLUDE_ASM("asm/nonmatchings/collision", FindWallHit);
  *
  * Doesn't match: the push's two arms keep their products in other float
  * registers, and the start of the wall loop places the 0x7C($sp) store a word
- * earlier. 45 words differ, 5 in shape.
+ * earlier. The original's first arm converts x back before its jump, so only
+ * z's conversion is shared with the second arm; ours shares both. Either
+ * operand order of the products, x = x + ..., z pushed before x and either
+ * arm first give 41 to 48 words, 5 to 19 in shape. 45 words differ, 5 in
+ * shape.
  */
 #ifdef NON_MATCHING
 s32 PushBallOutOfWalls(BallSimulation* simulation, s32 checksHeight) {
