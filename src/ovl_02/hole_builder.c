@@ -2043,7 +2043,7 @@ void LoadToolCodeMap(void) {
 /* Returns the code at a column and row of the code map, pointing the build
  * cursor at it */
 static inline u8 GetCode(s32 column, s32 row) {
-  f_BuildCursor = &f_BuildBuffer[(row * MAP_COLUMN_COUNT) + column];
+  f_BuildCursor = f_BuildBuffer + (row * MAP_COLUMN_COUNT) + column;
   return *f_BuildCursor;
 }
 
@@ -2078,9 +2078,12 @@ static inline void FillCodeGap(
  * filling the codes that differ from two equal neighbors, along the row
  * and then down the column. There are no passes, so it only encodes the map.
  * Doesn't match: the encoding has EncodeCodeMap's texel address order,
- * and the passes compute each neighbor's index from one strength-reduced
- * index and read the previous code's address once, where the original
- * computes it for both reads. 149 words differ.
+ * and the passes add the row's offset to the buffer before the column, where
+ * the original adds the column to the row's offset first and steps each
+ * neighbor's index from that sum. GetCode's pointer sum gives 95 words, 17 in
+ * shape, against 137 and 31 for indexing the buffer; indexing it in SetCode
+ * too 143, and passing GetCode and SetCode the index, with FillCodeGap
+ * stepping it, 130 to 144. 95 words differ, 17 in shape.
  */
 #ifdef NON_MATCHING
 void CleanCodeMap(void) {
