@@ -2821,12 +2821,18 @@ s32 GetCharacterPointModelPosition(u32 slotIndex, s32 pointId, f32* position) {
       return 0;
     }
 
-    /* The chained assignment is there to match */
+    /*
+     * The chained assignment is there to match: three separate stores, in
+     * either order, in both places give 17 words differing, 13 in shape
+     */
     position[AXIS_X] = position[AXIS_Y] = position[AXIS_Z] = 0.0f;
     return 1;
   }
 
-  /* The chained assignment is there to match */
+  /*
+   * The chained assignment is there to match: three separate stores, in
+   * either order, in both places give 17 words differing, 13 in shape
+   */
   position[AXIS_X] = position[AXIS_Y] = position[AXIS_Z] = 0.0f;
   return -1;
 }
@@ -2856,7 +2862,10 @@ s32 GetCharacterPointPosition(u32 slotIndex, s32 pointId, f32* position) {
 
   result = GetCharacterPointModelPosition(slotIndex, pointId, modelPosition);
   if (result < 0) {
-    /* The chained assignment is there to match */
+    /*
+     * The chained assignment is there to match: three separate stores, in
+     * either order, give 8 words differing, all in shape
+     */
     position[AXIS_X] = position[AXIS_Y] = position[AXIS_Z] = 0.0f;
   } else {
     GetCharacterSlotMatrix(GetUsedCharacterSlot(slotIndex), matrix);
