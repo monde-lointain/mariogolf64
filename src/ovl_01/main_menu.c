@@ -4786,13 +4786,18 @@ void DrawUpDownArrows(Gfx** displayListHead, s32 centerY);
  * controller icon and label, and for a single player the birdie badges or
  * stars won.
  *
- * Doesn't match: the boards' strips schedule their address loads differently,
- * and values take other registers through the boards' and the players' loops.
  * The original adds a zero to each board's truncated left edge (addu $v0,
- * $zero, $v0, and ori $a1, $a1, 0 for the chosen board), as reload does for
- * a variable known to be zero, so its left edges likely add an offset that
- * is zero here. Subtracting the half size from boardY before adding the bob
- * gives 129 words differing, 9 in shape. 121 words differ, 9 in shape.
+ * $zero, $v0, and ori $a1, $a1, 0 for the chosen board), which no other
+ * function in the game does. Reload gives that for a variable set once to
+ * zero that gets no register, and combine turns the chosen board's add into
+ * an or, so the left edges add wheelShiftX; without it 121 words differ, 9
+ * in shape, and adding it before the truncation gives 112, 52 in shape.
+ *
+ * Doesn't match: the mode count and the drawn board's slot take each
+ * other's saved registers, whatever order they are declared in, and the
+ * strips lack one of the original's three adds of zero. Adding the bob to the
+ * chosen board's top last, as here, gives 86 words against 104; adding it first
+ * or second, 102-104. 86 words differ, 2 in shape.
  */
 #ifdef NON_MATCHING
 void DrawModeSelect(Gfx** displayListHead) {
@@ -4821,6 +4826,8 @@ void DrawModeSelect(Gfx** displayListHead) {
   s32 halfSize;
   s32 step;
   f32 bob;
+  /* The boards' sideways offset; the wheel never shifts, so it stays zero */
+  s32 wheelShiftX = 0;
   u8 areCharactersDrawn;
   s32 labelIndex;
   s32 labelX;
@@ -4940,8 +4947,8 @@ void DrawModeSelect(Gfx** displayListHead) {
       }
 
       gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-      DrawScaledModeIcon(&gfx, boardX[slot] - halfSize,
-          bob - halfSize + boardY[slot], halfSize, step);
+      DrawScaledModeIcon(&gfx, wheelShiftX + (s32)(boardX[slot] - halfSize),
+          boardY[slot] - halfSize + bob, halfSize, step);
     } else {
       if (g_MenuMemory.modeChoice == slot) {
         /* The characters go behind the chosen board, and change the state */
@@ -4979,7 +4986,8 @@ void DrawModeSelect(Gfx** displayListHead) {
             0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
             G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
         gDPPipeSync(gfx++);
-        gSPScisTextureRectangle(gfx++, (s32)(boardX[slot] - halfSize) << 2,
+        gSPScisTextureRectangle(gfx++,
+            (wheelShiftX + (s32)(boardX[slot] - halfSize)) << 2,
             (s32)(boardY[slot] - halfSize + (countShift * halfSize) + bob) << 2,
             (s32)(boardX[slot] + halfSize) << 2,
             (s32)(boardY[slot] + (countShift * halfSize) + bob) << 2,
