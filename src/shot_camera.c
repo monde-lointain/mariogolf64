@@ -1066,7 +1066,12 @@ void PlayFlightSounds(s32 step) {
   s32 i;
   SurfaceInfo* info;
   Player* player;
-  s32* greenSoundCount; /* The pointers are there to match */
+  /*
+   * The pointers are there to match: reading the green sound count
+   * directly gives 11 words differing (3 in shape), either landing sound
+   * flag 8 (2), and all three 27 (7)
+   */
+  s32* greenSoundCount;
   s32* isPlayed;
   s32* isStillPlayed;
 
