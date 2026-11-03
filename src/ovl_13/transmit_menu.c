@@ -2471,7 +2471,10 @@ void ClearCartridgeCharacters(void) {
  */
 #ifdef NON_MATCHING
 s32 WriteExperienceToCartridge(s32 characterIndex) {
-  /* The transfer pointer is there to match */
+  /*
+   * The transfer pointer is there to match: reaching g_GameBoyTransfer
+   * directly gives 170 words differing, 70 in shape
+   */
   GameBoyTransfer* transfer = &g_GameBoyTransfer;
   u8 characterData[CHARACTER_DATA_SIZE];
   u8 save[CARTRIDGE_SAVE_SIZE];
