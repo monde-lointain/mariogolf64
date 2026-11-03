@@ -4785,7 +4785,11 @@ void DrawUpDownArrows(Gfx** displayListHead, s32 centerY);
  *
  * Doesn't match: the boards' strips schedule their address loads differently,
  * and values take other registers through the boards' and the players' loops.
- * 121 words differ, 9 in shape.
+ * The original adds a zero to each board's truncated left edge (addu $v0,
+ * $zero, $v0, and ori $a1, $a1, 0 for the chosen board), as reload does for
+ * a variable known to be zero, so its left edges likely add an offset that
+ * is zero here. Subtracting the half size from boardY before adding the bob
+ * gives 129 words differing, 9 in shape. 121 words differ, 9 in shape.
  */
 #ifdef NON_MATCHING
 void DrawModeSelect(Gfx** displayListHead) {
