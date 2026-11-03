@@ -1193,11 +1193,16 @@ void MoveAimCameraDistance(void) {
  * heading holds still, the scene is drawn from a saved frame, through two
  * framebuffers.
  *
- * Doesn't match: 55 words differ, in the stick's step. The original keeps the
- * stick's 16-bit value and its pointers in other registers, and schedules the
- * divisions and the heading's load differently. Storing heading - step, or
- * subtracting in both arms of the speed test (57 words), doesn't help; an
- * inline helper taking the divisor gives 97, as the divisor isn't folded.
+ * Doesn't match: 44 words differ, 12 in shape, in the stick's step. The
+ * original keeps the stick's 16-bit value and its pointers in other registers,
+ * and schedules the divisions differently. Choosing g_AltHeading's step with ?:
+ * loads the heading with lh, as the original does, though after the speed test
+ * where the original loads it before; with an if it gave 55 words (21 in
+ * shape). The aim heading's step as ?: too gives 64 (22), and a BinaryAngle
+ * saved heading, which the original loads with lhu, 56 (20). Storing heading -
+ * step changes nothing, subtracting in both arms of the speed test gave 57
+ * words, and an inline helper taking the divisor gave 97, as the divisor isn't
+ * folded.
  */
 #ifdef NON_MATCHING
 void TurnAim(s32 turnsAltHeading) {
@@ -1231,11 +1236,7 @@ void TurnAim(s32 turnsAltHeading) {
       speed = -speed;
     }
 
-    if (speed != 0) {
-      step *= speed;
-    }
-
-    g_AltHeading -= step;
+    g_AltHeading -= (speed != 0) ? step * speed : step;
   }
 
   dpad = g_TurnController.buttons & (L_JPAD | R_JPAD);
