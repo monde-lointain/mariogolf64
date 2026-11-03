@@ -1197,7 +1197,11 @@ void DrawTargetPole(CameraMatrices* matrices, Gfx** displayListHead);
  * Returns the frame count, which the caller ignores
  *
  * Doesn't match: the original keeps the far plane's dead clamp to the
- * short far plane, where GCC deletes it. 41 words differ.
+ * short far plane, where flow deletes its move, which needs the clamped
+ * value live past the course's far plane. The clamp as a ternary, with an
+ * empty else, as a negated >= test, with the course's far plane set under
+ * if (TRUE) or after END_BASIC_BLOCK() all still lose it. 41 words differ,
+ * 17 in shape.
  */
 #ifdef NON_MATCHING
 s32 DrawGame(void) {
