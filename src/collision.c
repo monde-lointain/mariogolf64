@@ -1278,9 +1278,14 @@ INCLUDE_ASM("asm/nonmatchings/collision", FindMiniGolfGroundHit);
  *
  * Doesn't match: the original takes the start side's absolute value into a
  * temporary register, where this keeps it in hitFraction's. Dividing
- * hitFraction by the side change's magnitude after working the change out
- * gives the original's order (9 words differed); a local for the magnitude or
- * the converted side subtracts first again (13). The original also fills the
+ * hitFraction by the side change's magnitude after working the change out gives
+ * the original's order (9 words differed); a local for the magnitude or the
+ * converted side subtracts first again (13). Dividing the two absolute values
+ * in one expression also gives 13: local-alloc ties each conversion to its
+ * absolute value, which it refuses only for a pseudo that lives outside the
+ * block, and the subtraction moves into the side test's delay slot. Keeping the
+ * start side's absolute value in step or planeOffset, which live beyond the
+ * block, gives 35 words, and in tileFraction 7. The original also fills the
  * side test's delay slot differently. 7 words differ, 3 in shape.
  */
 #ifdef NON_MATCHING
