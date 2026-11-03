@@ -1557,13 +1557,21 @@ PATH_SUFFIXES = (".s", ".c", ".o")
 
 
 def locate_function(function: str) -> tuple[str, str]:
-    """Find FUNCTION's original assembly and the C file that holds its draft."""
-    asm_root = ROOT / "asm" / "nonmatchings"
-    asm_paths = list(asm_root.rglob(f"{function}.s"))
-    if len(asm_paths) != 1:
-        sys.exit(f"{function}: {len(asm_paths)} assembly files under {asm_root}")
-    unit = asm_paths[0].parent.relative_to(asm_root)
-    return str(asm_paths[0]), str(ROOT / "src" / unit.with_suffix(".c"))
+    """Find FUNCTION's original assembly and the C file that holds it.
+
+    Drafts are under asm/nonmatchings. Matched functions are found under
+    asm/matchings, which splat writes when told to disassemble everything,
+    so that changes to them can be scored too.
+    """
+    for kind in ("nonmatchings", "matchings"):
+        asm_root = ROOT / "asm" / kind
+        asm_paths = list(asm_root.rglob(f"{function}.s"))
+        if len(asm_paths) > 1:
+            sys.exit(f"{function}: {len(asm_paths)} assembly files under {asm_root}")
+        if asm_paths:
+            unit = asm_paths[0].parent.relative_to(asm_root)
+            return str(asm_paths[0]), str(ROOT / "src" / unit.with_suffix(".c"))
+    sys.exit(f"{function}: no assembly file under {ROOT / 'asm'}")
 
 
 def expand_function_name(arguments: list[str]) -> list[str]:
