@@ -238,8 +238,11 @@ void ResetBallSimulations(void) {
  * nothing. On the 769-word draft, setting side's X inside the landing tilt test
  * gave 766 (236), as did side's three stores, and the gravity's nested if as an
  * else-if changed nothing. The register oracle, forcing 126 pseudos' registers,
- * leaves 425 words at best, so the code differs too. 763 words differ, 227 in
- * shape.
+ * leaves 425 words at best, so the code differs too. A permuter output gaining
+ * 1 word (5 in shape) normalizes the triangle's normal after both of the hit's
+ * surface branches, but the original's club-test branch jumps past that call
+ * and the other skips it unless the surface is green or green edge, so the
+ * output's call changes what the code does. 763 words differ, 227 in shape.
  */
 #ifdef NON_MATCHING
 s32 StepBallSimulation(BallSimulation* simulation) {
