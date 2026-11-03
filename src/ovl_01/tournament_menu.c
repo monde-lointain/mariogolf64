@@ -765,16 +765,22 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/tournament_menu", DrawYesNoWindow);
  * open. The window grows and shrinks as DrawYesNoWindow's does.
  */
 /*
- * Doesn't match: GCC hoists the window's edges out of the strip loop where the
- * original works them out in the loop from centerX on the stack, and it
- * schedules the course image's position differently. Spelling the edges as
- * DrawYesNoWindow does gives 378 to 442 differing words. 224 words differ.
+ * Doesn't match: GCC works out a texture rectangle's edge (a difference with
+ * the value in $s4) early and keeps it on the stack, where the original
+ * subtracts at the call. The spill makes the frame 8 bytes larger, 0x118
+ * rather than 0x110, which moves every stack offset. Working out windowLeft
+ * before courseTop takes it from 224 words differing (62 in shape) to 166
+ * (26), wherever windowLeft is declared; computing courseLeft before
+ * courseTop gives 242 (78), and a windowRight for pictureX changes nothing.
+ * Earlier, spelling the edges as DrawYesNoWindow does gave 378 to 442. 166
+ * words differ, 26 in shape.
  */
 #ifdef NON_MATCHING
 void DrawClubWindow(Gfx** displayListHead, s32 width, s32 height, s32 centerX,
     s32 centerY, s32 okTextShown UNUSED, s32 chosenButton, s32 windowStyle) {
   Gfx* gfx = *displayListHead;
   f32 windowWidth;
+  f32 windowLeft;
   f32 windowHalfHeight;
   f32 buttonWidth;
   f32 buttonHeight;
@@ -1027,11 +1033,11 @@ void DrawClubWindow(Gfx** displayListHead, s32 width, s32 height, s32 centerX,
     }
   }
 
+  windowLeft = centerX - (windowWidth * 0.5f);
   courseTop = (s32)(centerY + windowHalfHeight -
                   (s32)(f_MenuWindowScaleY * WINDOW_IMAGE_OFFSET_Y)) -
       courseStripRows;
-  courseLeft = centerX - (windowWidth * 0.5f) +
-      (s32)(f_MenuWindowScaleX * WINDOW_IMAGE_OFFSET_X);
+  courseLeft = windowLeft + (s32)(f_MenuWindowScaleX * WINDOW_IMAGE_OFFSET_X);
   LoadLargePalette(&gfx, ImageBody(f_ClubCourseIcon));
   for (index = 0; index != COURSE_IMAGE_STRIP_COUNT; index++) {
     LoadTextureBlock(&gfx,
