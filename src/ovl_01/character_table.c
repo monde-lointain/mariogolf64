@@ -602,7 +602,13 @@ void DrawTableLines(Gfx** displayListHead) {
  * give 52 to 142. Wrapping the last four statements in a do-while (0),
  * whose loop notes weight the uses inside and stop sched1, gives 18 words
  * with only the two counts of wins swapped, and a do-while (0) macro per
- * count gives 26. 48 words differ, 2 in shape.
+ * count gives 26. Loading rowWins' raw bits and masking them in a second
+ * assignment gives 40 words, none in shape, but only with the last range
+ * test written "rowWins + 1 <= 1000" (or "< 1001"); with "< 1000", "<= 999"
+ * or "< 999 + 1" it gives 60. The +1 alone changes nothing, and the natural
+ * ways to split the load give 48 to 63: a separate raw-bits variable, both
+ * counts read raw and then masked, or a MatchupRecord pointer. 48 words
+ * differ, 2 in shape.
  */
 #ifdef NON_MATCHING
 void DrawTablePopup(Gfx** displayListHead) {
