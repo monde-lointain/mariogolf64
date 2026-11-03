@@ -5801,8 +5801,11 @@ void DrawAnimationViewer(Gfx** displayListHead) {
 /*
  * Doesn't match: GCC reloads the chosen course from the stack in the icon
  * loop, where the original keeps it in a register. Clearing the place count
- * in the place loop's initializer takes 51 words differing to 49. 40 words
- * differ, 10 in shape.
+ * in the place loop's initializer takes 51 words differing to 49. Reading
+ * the slot in its own block gives 40 words differing, 10 in shape, but the
+ * register oracle then needs 3 forced registers to reach 10, where read
+ * plainly 5 forced reach 5; no declaration order changes either. 89 words
+ * differ, 5 in shape.
  */
 #ifdef NON_MATCHING
 void DrawCourseSelect(Gfx** displayListHead) {
@@ -5982,7 +5985,7 @@ void DrawCourseSelect(Gfx** displayListHead) {
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
     f_FrontCourseBobPhase += FRONT_COURSE_BOB_PHASE_STEP;
     for (index = 0; index != courseCount; index++) {
-      IN_OWN_BLOCK(slot = drawOrder[index]);
+      slot = drawOrder[index];
       halfSize = iconScale[slot] * COURSE_ICON_HALF_SIZE;
       step = (f32)(COURSE_ICON_STRIP_HEIGHT << 10) / halfSize;
       if (index == (courseCount - 1)) {
