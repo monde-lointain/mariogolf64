@@ -2084,7 +2084,9 @@ static inline void FillCodeGap(
  * neighbor's index from that sum. GetCode's pointer sum gives 95 words, 17 in
  * shape, against 137 and 31 for indexing the buffer; indexing it in SetCode
  * too 143, and passing GetCode and SetCode the index, with FillCodeGap
- * stepping it, 130 to 144. 95 words differ, 17 in shape.
+ * stepping it, 130 to 144. Narrowing the row pass's column to an unsigned
+ * char, the permuter's best, gives 108 words, 10 in shape; the column is no
+ * byte. 95 words differ, 17 in shape.
  */
 #ifdef NON_MATCHING
 void CleanCodeMap(void) {
