@@ -166,7 +166,8 @@ enum TriangleFacing {
 
 /*
  * IsOffGround's test with signed bounds, which FindRingHit's draft comes
- * closer to matching with
+ * closer to matching with: IsOffGround gives 86 words differing (24 in shape)
+ * against 32 (10)
  */
 #define IsOffGroundSigned(x, z) \
   ((x) < 0 || (x) >= GROUND_WIDTH || (z) < 0 || (z) >= GROUND_LENGTH)
@@ -1022,7 +1023,11 @@ s32 FindMiniGolfGroundHit(BallSimulation* simulation, s32 startX, s32 startY,
   s32 firstRow;
   s32 column;
   s32 triangleCount;
-  /* One index for the triangles and the search steps, to match */
+  /*
+   * One index for the triangles and the search steps, to match: a searchStep
+   * variable for the steps gives 84 words differing (22 in shape) against the
+   * draft's 14 (6)
+   */
   s32 i;
   s32 hitIndex;
   s32 startSide;
@@ -1298,7 +1303,11 @@ s32 FindGroundHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
   s32 firstRow;
   s32 column;
   s32 triangleCount;
-  /* One index for the triangles and the search steps, to match */
+  /*
+   * One index for the triangles and the search steps, to match: a searchStep
+   * variable for the steps gives 77 words differing (19 in shape) against the
+   * draft's 7 (3)
+   */
   s32 i;
   s32 hitIndex;
   s32 startSide;
@@ -1776,7 +1785,11 @@ s32 FindPinHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY, s32 endZ,
   s32 contactX;
   s32 contactZ;
   Radians angle;
-  /* Also the flagstick chord's squared half length, to match */
+  /*
+   * Also the flagstick chord's squared half length, to match: a chordSquared
+   * variable gives 179 words differing (29 in shape) against the draft's 173
+   * (27)
+   */
   f32 bounceSpeed;
   s32 unused[2] UNUSED;
 
