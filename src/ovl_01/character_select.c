@@ -508,6 +508,11 @@ s32 GetStickDiagonal(void) {
   anyStick = g_ControllerStates[3].stickX |
       (g_ControllerStates[2].stickX |
           (g_ControllerStates[0].stickX | g_ControllerStates[1].stickX));
+  /*
+   * The newly pushed directions, in two statements to match: in one, either
+   * as (previous ^ any) & any or as any & ~previous, 20 words differ (none
+   * and 2 in shape), and as any & ~previous for both axes 44 (4)
+   */
   stickX = f_PreviousStickX ^ anyStick;
   stickX &= anyStick;
   if (f_PreviousStickX == stickX) {
@@ -523,6 +528,10 @@ s32 GetStickDiagonal(void) {
   anyStick = g_ControllerStates[3].stickY |
       (g_ControllerStates[2].stickY |
           (g_ControllerStates[0].stickY | g_ControllerStates[1].stickY));
+  /*
+   * In two statements to match, as for x: in one, 24 words differ, none in
+   * shape
+   */
   stickY = f_PreviousStickY ^ anyStick;
   stickY &= anyStick;
   if (f_PreviousStickY == stickY) {
@@ -1657,6 +1666,10 @@ void DrawCharacterBoard(Gfx** displayListHead) {
     gDPPipeSync(gfx++);
   }
 
+  /*
+   * Offset in a second statement, to match: adding the offset to the call's
+   * result gives 6 words differing, 2 in shape
+   */
   labelImage = GetMenuImageBuffer();
   labelImage += CHARACTER_SELECT_FIRST_IMAGE_SIZE;
   LoadSmallPalette(&gfx, 0, ImageBody(labelImage));
