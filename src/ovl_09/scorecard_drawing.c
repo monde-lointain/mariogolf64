@@ -277,7 +277,12 @@ void DrawMatchResult(Gfx** displayListHead) {
   s32 i;
   s32 x;
   s32 holeIndex;
-  s32 ownHole; /* holeIndex again, for the player's own record, to match */
+  /*
+   * holeIndex again, for the player's own record, to match: indexing with
+   * holeIndex, or both with holeNumber - 1, gives 6 words differing, none in
+   * shape
+   */
+  s32 ownHole;
   Gfx* gfx = *displayListHead;
 
   SetUpTextDrawing(&gfx);
@@ -2005,7 +2010,12 @@ INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard_drawing", DrawLeaderboardPage);
  * The scores page: the front nine above the back nine, each with a row of
  * hole numbers, a row of pars and a row for each player
  */
-/* Some tests compare it with FALSE rather than negate it, to match */
+/*
+ * Some tests compare it with FALSE rather than negate it, to match:
+ * negating all four gives 799 words differing (251 in shape), against
+ * DrawScoresPage's 762 (212), and negating any one 770 to 773 (220 to
+ * 223). The one negated test compared with FALSE gives 770 (220).
+ */
 #define IsMatchPlayMode() \
   (g_GameState.gameMode == GAME_MODE_MATCH_GAME || \
       g_GameState.gameMode == GAME_MODE_GET_CHARACTER || \
