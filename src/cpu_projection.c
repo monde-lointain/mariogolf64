@@ -117,7 +117,10 @@ void SetCpuProjectionF(Mat4 projection, Mat4 viewing, Vp* viewport) {
     f_CpuScreenScaleX = 1.0f;
     f_CpuScreenScaleY = -1.0f;
   } else {
-    /* Overwritten at once; the stores are kept to match */
+    /*
+     * Overwritten at once; the stores are kept to match, as the original
+     * makes them: without them 68 words differ, 20 in shape
+     */
     f_CpuScreenScaleX = -f_CpuViewportCenterX * f_CpuProjectionMatrix[0][0];
     f_CpuScreenScaleY = f_CpuViewportCenterY * f_CpuProjectionMatrix[1][1];
     f_CpuScreenScaleX = f_CpuProjectionMatrix[0][0] * (SCREEN_WIDTH / 2.0f) /
