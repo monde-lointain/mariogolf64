@@ -2624,14 +2624,23 @@ void DrawBestShotsCursor(Gfx** displayListHead) {
  * Reads every character's face, then the palette of each best shot's character
  * in the grid, clamped to the known ones
  *
- * Doesn't match: the original keeps the cell as an index that it shifts each
- * pass, where this steps a pointer through the palettes instead. Storing a
- * face in each branch makes the address worth strength reduction; storing it
- * once after the branches leaves the index but keeps the table's address in
- * the loop, which is too long for a constant used once to be moved out of it
- * (46 words). An s16 cell gives 15 words differing, 1 in shape, but it
- * sign-extends the cell before the palette offset, where the original
- * shifts it by 9 alone, so the cell is a word. 19 words differ, 9 in shape.
+ * Doesn't match: GCC moves the palette files' address out of the loop, and
+ * reload then rebuilds it in the loop where the original builds it, so the
+ * face's store is scheduled after the palette lookup's first steps rather than
+ * before them; the palette and the character, and the cell and the record
+ * pointer, also take each other's registers. The register oracle, forcing 4
+ * pseudos, leaves 20 words differing. Storing the face once after the branches,
+ * as the original does, keeps the cell as an index that is shifted each pass. A
+ * store in each branch made the address worth strength reduction, a pointer
+ * stepped through the palettes, which gave 19 words differing but 9 in shape,
+ * and the oracle found nothing closer. Declaring the character before the
+ * palette gives 62 words and clamping the palette first 58; reading the palette
+ * first, or a variable for the record index or the palette file, changes
+ * nothing, and reading the palette file before the store gives 38 (18 in
+ * shape). An s16 cell gave 15 words differing, 1 in shape, with the store in
+ * each branch, but it sign-extends the cell before the palette offset, where
+ * the original shifts it by 9 alone, so the cell is a word. 46 words differ, 4
+ * in shape.
  */
 #ifdef NON_MATCHING
 void LoadBestShotFaces(void) {
@@ -2641,8 +2650,8 @@ void LoadBestShotFaces(void) {
   s32 index;
   s32 row;
   s32 column;
-  CharacterId character;
   s32 palette;
+  CharacterId character;
   s32 cell;
   s32 rowStart;
 
@@ -2677,13 +2686,12 @@ void LoadBestShotFaces(void) {
         if (palette >= CHARACTER_PALETTE_COUNT) {
           palette = CHARACTER_PALETTE_COUNT - 1;
         }
-        f_BestShotFaces[row][column] = g_MenuCharacterPalettes[cell];
       } else {
         character = 0;
         palette = 0;
-        f_BestShotFaces[row][column] = g_MenuCharacterPalettes[cell];
       }
 
+      f_BestShotFaces[row][column] = g_MenuCharacterPalettes[cell];
       OpenAssetFile(g_CharacterPaletteFiles[character][palette], &file);
       ReadAssetFile(
           f_BestShotFaces[row][column], GetAssetFileSize(&file), &file);
