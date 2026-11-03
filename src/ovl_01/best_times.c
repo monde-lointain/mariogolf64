@@ -470,12 +470,8 @@ void DrawBestTimeFace(Gfx** displayListHead, s32 left, s32 top,
 /*
  * Draws a place's label, such as 1st, at (left, top): its number and then its
  * suffix, from the places image, with the place kept within the label's range.
- * Doesn't match: the original needs one register fewer for the display
- * list's pointers, so its frame is 16 bytes smaller. Moving the sync after
- * the palette into the low place's clamp gives 10 words differing, but the
- * original syncs there whatever the place. 274 words differ, 32 in shape.
+ * The suffixes' frames follow the digits'.
  */
-#ifdef NON_MATCHING
 void DrawPlaceLabel(Gfx** displayListHead, s32 left, s32 top, s32 place) {
   Gfx* gfx = *displayListHead;
 
@@ -496,7 +492,6 @@ void DrawPlaceLabel(Gfx** displayListHead, s32 left, s32 top, s32 place) {
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
   gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_PlaceLabels)));
-  gDPPipeSync(gfx++);
   gDPLoadTextureBlock(gfx++,
       TextureAddress(LargeImageTexelsAt(
           f_PlaceLabels, (place - 1) * PLACE_LABEL_FRAME_BYTES)),
@@ -512,7 +507,8 @@ void DrawPlaceLabel(Gfx** displayListHead, s32 left, s32 top, s32 place) {
   gDPPipeSync(gfx++);
   gDPLoadTextureBlock(gfx++,
       TextureAddress(LargeImageTexelsAt(f_PlaceLabels,
-          (place + PLACE_LABEL_DIGIT_COUNT - 1) * PLACE_LABEL_FRAME_BYTES)),
+          ((place - 1) * PLACE_LABEL_FRAME_BYTES) +
+              (PLACE_LABEL_DIGIT_COUNT * PLACE_LABEL_FRAME_BYTES))),
       G_IM_FMT_CI, G_IM_SIZ_8b, PLACE_LABEL_FRAME_SIZE, PLACE_LABEL_FRAME_SIZE,
       0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
       G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
@@ -526,9 +522,6 @@ void DrawPlaceLabel(Gfx** displayListHead, s32 left, s32 top, s32 place) {
   gDPPipeSync(gfx++);
   *displayListHead = gfx;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/best_times", DrawPlaceLabel);
-#endif
 
 void DrawStopwatchTime(
     Gfx** displayListHead, s32 left, s32 top, s32 frameCount) {
