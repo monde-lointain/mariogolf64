@@ -1305,9 +1305,8 @@ void StartResultsNotice(s32 kind) {
   }
 }
 
-INCLUDE_RODATA("asm/nonmatchings/ovl_00/round_results", f_NumberFormat);
-
-INCLUDE_RODATA("asm/nonmatchings/ovl_00/round_results", f_PlaceNumberFormat);
+const char f_NumberFormat[] = "%4d";
+const char f_PlaceNumberFormat[] = "%d";
 
 /* Swings the notice in, then counts the course it opened */
 void UpdateCourseResultsNotice(void) {
@@ -2922,15 +2921,11 @@ void DrawTournamentResults(Gfx** displayListHead) {
   *displayListHead = gfx;
 }
 
-INCLUDE_RODATA("asm/nonmatchings/ovl_00/round_results", f_EvenScoreFormat);
-
-INCLUDE_RODATA("asm/nonmatchings/ovl_00/round_results", f_ScoreFormat);
-
-INCLUDE_RODATA("asm/nonmatchings/ovl_00/round_results", f_PointsFormat);
-
-INCLUDE_RODATA("asm/nonmatchings/ovl_00/round_results", f_TimeFormat);
-
-INCLUDE_RODATA("asm/nonmatchings/ovl_00/round_results", f_TimeLabel);
+const char f_EvenScoreFormat[] = " #0";
+const char f_ScoreFormat[] = "%+3d";
+const char f_PointsFormat[] = "%3d";
+const char f_TimeFormat[] = "%02d:%02d:%02d";
+const char f_TimeLabel[] = "Time";
 
 #define RESULTS_HEADING_ENV_COLOR 0xFFFF0000
 #define RESULTS_HEADING_PRIM_COLOR 0x30FF0000
@@ -3177,7 +3172,7 @@ void DrawPlayersResults(Gfx** displayListHead) {
   *displayListHead = gfx;
 }
 
-INCLUDE_RODATA("asm/nonmatchings/ovl_00/round_results", f_NoPointsText);
+const char f_NoPointsText[] = "  -";
 
 /*
  * Where the match results draw their parts, a row of MATCH_ROW_HEIGHT for
