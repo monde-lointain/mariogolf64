@@ -2250,7 +2250,11 @@ void UpdateAnimationViewer(void) {
 void UpdateModeSelect(void) {
   EncodedAsset asset;
   Boolean isDone = IsHudAnimationDone();
-  /* Also the player and bet loops' index, to match */
+  /*
+   * Also the player and bet loops' index, to match: an i for every loop gives
+   * 58 words differing (18 in shape), and a playerIndex and a betIndex 100
+   * (18), against the draft's 52 (18)
+   */
   s32 direction;
   s32 step;
   s16 slot;
@@ -4864,8 +4868,12 @@ void DrawModeSelect(Gfx** displayListHead) {
   s32 labelIndex;
   s32 labelX;
   void* image;
-  /* The board and strip index in the loops, then the chosen mode, then the
-   * won count's shift, to match */
+  /*
+   * The board and strip index in the loops, then the chosen mode, then the won
+   * count's shift, to match: an i for the loops gives 202 words differing (4 in
+   * shape), a modeChoice for the chosen mode 108 (8), and both 224 (10),
+   * against the draft's 86 (2)
+   */
   s32 countShift;
   s32 courseIndex;
   s32 holeIndex;
@@ -6484,11 +6492,16 @@ void DrawCourseSelectBanners(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   s32 slide = g_CourseBannersSlide;
 
-  /* Also the course's index into the name colors, to match the original's
-   * registers */
+  /*
+   * Also the course's index into the name colors, to match: a courseIndex gives
+   * 34 words differing, none in shape
+   */
   s32 stripIndex;
-  /* Also whether a full course is chosen; a variable of its own gets other
-   * registers in the strip loop above */
+  /*
+   * Also whether a full course is chosen, to match: an isFullCourse variable,
+   * or testing g_GameState.isMiniGolf directly, gives 5 words differing, 3 in
+   * shape, in the strip loop above; with a courseIndex too, 37 (3)
+   */
   s32 stripTop;
   s32 squeeze;
   s32 cameraModeTopByte;
