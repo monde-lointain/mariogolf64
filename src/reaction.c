@@ -1488,7 +1488,12 @@ void PlaceAtReactionSpot(Vec3 position, Vec3 rotation, Vec3 scale) {
  * float load into abs.s, and some subtractions, use a register other than
  * abs.s's, as in UpdateCameraEditor and DrawBillboards. Taking the magnitude
  * in the test, a >= ternary, or a magnitude local compared with a zeroed
- * height also leave the tie or cost the delay slot. 4 words differ.
+ * height also leave the tie or cost the delay slot. An asm abs.s, which
+ * local-alloc cannot tie, gives the original's registers but fills the
+ * branch's delay slot otherwise (4 words); SDK math.h's fabsf, a
+ * __builtin_fabsf of the value cast to float, keeps the tie. No function
+ * in the ROM that matches loads straight into abs.s; the six drafts that
+ * do all differ there. 4 words differ.
  */
 #ifdef NON_MATCHING
 Boolean IsEasedEyeHeightZero(void) {
