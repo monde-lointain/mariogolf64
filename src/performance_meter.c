@@ -321,10 +321,11 @@ void DrawPerformanceMeter(u32 extraFrameCount, u32 y, u32 cpuStartTime,
     scale = 2;
   }
 
-  /* The chained assignment is there to match */
+  /*
+   * The chained assignments are there to match: separate stores give 32 to 38
+   * words differing for the x pair, and 60 to 64 for the y pair
+   */
   f_MeterViewport.vp.vscale[0] = f_MeterViewport.vp.vtrans[0] = 320 * 2 * scale;
-
-  /* The chained assignment is there to match */
   f_MeterViewport.vp.vscale[1] = f_MeterViewport.vp.vtrans[1] = 240 * 2 * scale;
   gSPViewport(gfx++, &f_MeterViewport);
   gSPDisplayList(gfx++, PhysicalAddress(f_InitRcpDisplayList));
