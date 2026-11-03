@@ -101,7 +101,10 @@ void DrawTextIntoTexture(READ_ONLY char* text, s32 length, u16* texture) {
   s32 fontIndex;
   s32 textureIndex;
   s32 character;
-  /* The glyph's first word in the font, copied to fontIndex to match */
+  /*
+   * The glyph's first word in the font, copied to fontIndex to match:
+   * computing fontIndex directly gives 14 words differing, 2 in shape
+   */
   s32 glyphFontIndex;
 
   for (index = 0; index < length; index++, text++) {
