@@ -1684,19 +1684,22 @@ typedef struct GridScreenPoint {
 /*
  * Doesn't match: the club and the shot's distance take each other's saved
  * registers, and registers differ through the grid's loops. The register oracle
- * comes no closer than 249 words differing, with 27 pseudos forced. The
- * permuter's best outputs, 5478 to 5518 against 6454, set columnCount only in
- * the fade's last branch (367 words differing, 45 in shape) or drop the
- * near-landing branch, which change what the code does, or shift both sides of
- * the scroll test by 1 and nest a color in a chained assignment, which are
- * fakes. A later output, 5445 (362 words, 48 in shape), computes distance *
- * GREEN_GRID_ROW_SPACING into a temp before its division, for shots short of
- * GREEN_GRID_LANDING_DISTANCE, and joins the early exit's first two tests in an
- * int temp; without the first temp it gives 366 (52), without the second 351
- * (51). A Boolean local for those two tests gives 366 (52) too, but it makes
- * the exit store the Boolean and test it, where the original and this branch
- * straight to the return, so its gain is incidental. 345 words differ, 55 in
- * shape.
+ * came no closer than 249 words differing, with 27 pseudos forced, while the
+ * first two loops indexed through a local. The permuter's best outputs, 5478 to
+ * 5518 against 6454, set columnCount only in the fade's last branch (367 words
+ * differing, 45 in shape) or drop the near-landing branch, which change what
+ * the code does, or shift both sides of the scroll test by 1 and nest a color
+ * in a chained assignment, which are fakes. A later output, 5445 (362 words, 48
+ * in shape), computes distance * GREEN_GRID_ROW_SPACING into a temp before its
+ * division, for shots short of GREEN_GRID_LANDING_DISTANCE, and joins the early
+ * exit's first two tests in an int temp; without the first temp it gives 366
+ * (52), without the second 351 (51). A Boolean local for those two tests gave
+ * 366 (52) too, but it made the exit store the Boolean and test it, where the
+ * original and this branch straight to the return, so its gain was incidental.
+ * Indexing the first two loops' arrays by rowStart + column, as a later output
+ * did in part, gives 337 words (51 in shape) where a local holding it gave 345
+ * (55), and in either loop alone 341 (53). Indexing the third loop's the same
+ * way, without point, gives 339 (43). 337 words differ, 51 in shape.
  */
 void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
   f32 points[GREEN_GRID_POINT_COUNT][3];
@@ -1829,8 +1832,6 @@ void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
 
   for (row = 0, rowStart = 0; row != rowCount;) {
     for (column = 0; column != columnCount; column++) {
-      s32 i = rowStart + column;
-
       isUnscrolledRow = row == rowCount - 1 || row == 0;
       rowPosition = row;
       if (row != 0) {
@@ -1838,24 +1839,27 @@ void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
       }
 
       if (isUnscrolledRow || (f_GreenGridScroll < 0.0f && row == 1)) {
-        points[i][AXIS_X] = center[AXIS_X] + originX +
+        points[rowStart + column][AXIS_X] = center[AXIS_X] + originX +
             (forwardX * rowPosition) + (sideX * column);
-        points[i][AXIS_Z] =
+        points[rowStart + column][AXIS_Z] =
             center[AXIS_Z] + originZ + (stepZ * rowPosition) + (sideZ * column);
       } else {
-        points[i][AXIS_X] = center[AXIS_X] + originX +
+        points[rowStart + column][AXIS_X] = center[AXIS_X] + originX +
             (forwardX * rowPosition) + (sideX * column) + scrollX;
-        points[i][AXIS_Z] = center[AXIS_Z] + originZ + (stepZ * rowPosition) +
-            (sideZ * column) + scrollZ;
+        points[rowStart + column][AXIS_Z] = center[AXIS_Z] + originZ +
+            (stepZ * rowPosition) + (sideZ * column) + scrollZ;
       }
 
       if (g_RoundHud.greenGridState == GREEN_GRID_SHOWN) {
         g_UnusedGroundQueryFlag = 1;
-        points[i][AXIS_Y] =
-            GetGroundHeight(points[i][AXIS_X], points[i][AXIS_Z]);
-        f_GreenGridHeights[i] = points[i][AXIS_Y];
+        points[rowStart + column][AXIS_Y] =
+            GetGroundHeight(points[rowStart + column][AXIS_X],
+                points[rowStart + column][AXIS_Z]);
+        f_GreenGridHeights[rowStart + column] =
+            points[rowStart + column][AXIS_Y];
       } else {
-        points[i][AXIS_Y] = f_GreenGridHeights[i];
+        points[rowStart + column][AXIS_Y] =
+            f_GreenGridHeights[rowStart + column];
       }
     }
 
@@ -1893,35 +1897,37 @@ void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
 
   for (row = 0, rowStart = 0; row != rowCount; row++, rowStart += columnCount) {
     for (column = 0; column != columnCount; column++) {
-      s32 i = rowStart + column;
-
-      if (ProjectPoint(points[i][AXIS_X] * COURSE_TO_WORLD_SCALE,
-              points[i][AXIS_Y] * COURSE_TO_WORLD_SCALE,
-              points[i][AXIS_Z] * COURSE_TO_WORLD_SCALE, &projected) < 0) {
-        screenPoints[i].x = projected.x * QUARTER_PIXELS_PER_PIXEL;
-        screenPoints[i].y = projected.y * QUARTER_PIXELS_PER_PIXEL;
-        screenPoints[i].isVisible = TRUE;
-        screenPoints[i].depth =
+      if (ProjectPoint(
+              points[rowStart + column][AXIS_X] * COURSE_TO_WORLD_SCALE,
+              points[rowStart + column][AXIS_Y] * COURSE_TO_WORLD_SCALE,
+              points[rowStart + column][AXIS_Z] * COURSE_TO_WORLD_SCALE,
+              &projected) < 0) {
+        screenPoints[rowStart + column].x =
+            projected.x * QUARTER_PIXELS_PER_PIXEL;
+        screenPoints[rowStart + column].y =
+            projected.y * QUARTER_PIXELS_PER_PIXEL;
+        screenPoints[rowStart + column].isVisible = TRUE;
+        screenPoints[rowStart + column].depth =
             projected.depth - (projected.depthStep * GREEN_GRID_DEPTH_BIAS);
       } else {
-        screenPoints[i].isVisible = FALSE;
+        screenPoints[rowStart + column].isVisible = FALSE;
       }
 
-      height = points[i][AXIS_Y] - center[AXIS_Y];
+      height = points[rowStart + column][AXIS_Y] - center[AXIS_Y];
       if (height < 0.0f) {
-        slopes[i] = sqrtf(-height) * GREEN_GRID_SLOPE_SCALE;
+        slopes[rowStart + column] = sqrtf(-height) * GREEN_GRID_SLOPE_SCALE;
       } else if (height > 0.0f) {
-        slopes[i] = -sqrtf(height) * GREEN_GRID_SLOPE_SCALE;
+        slopes[rowStart + column] = -sqrtf(height) * GREEN_GRID_SLOPE_SCALE;
       } else {
-        slopes[i] = 0;
+        slopes[rowStart + column] = 0;
       }
 
-      if (slopes[i] > GREEN_GRID_MAX_SLOPE) {
-        slopes[i] = GREEN_GRID_MAX_SLOPE;
+      if (slopes[rowStart + column] > GREEN_GRID_MAX_SLOPE) {
+        slopes[rowStart + column] = GREEN_GRID_MAX_SLOPE;
       }
 
-      if (slopes[i] < -GREEN_GRID_MAX_SLOPE) {
-        slopes[i] = -GREEN_GRID_MAX_SLOPE;
+      if (slopes[rowStart + column] < -GREEN_GRID_MAX_SLOPE) {
+        slopes[rowStart + column] = -GREEN_GRID_MAX_SLOPE;
       }
     }
   }
