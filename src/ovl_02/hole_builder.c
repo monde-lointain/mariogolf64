@@ -2065,7 +2065,11 @@ static inline void FillCodeGap(
   u8 code = GetCode(column, row);
   u8 previousCode = GetCode(column - columnStep, row - rowStep);
 
-  /* The second read of the previous code is there to match */
+  /*
+   * The second read of the previous code is there to match: testing
+   * previousCode against the next code gives CleanCodeMap 125 words
+   * differing, 23 in shape, against 95, 17; also setting nextCode gives 151
+   */
   u8 rereadPreviousCode = GetCode(column - columnStep, row - rowStep);
   u8 nextCode = GetCode(column + columnStep, row + rowStep);
 
@@ -2202,13 +2206,20 @@ static inline void SetCellTerrainCode(u32 column, u32 row, s32 code) {
         *word++ = fill;
       }
 
-      /* Computing the offset again is there to match */
+      /*
+       * Computing the offset again is there to match: without it
+       * PaintGroundTiles gives 237 words differing, 19 in shape, against 134,
+       * 6
+       */
       cellOffset = GetCellOffset(column, row);
       CellAt(cellOffset) = block | TERRAIN_CODE_CELL_BLOCK;
       SetPackedTerrainCode(block, column, row, code);
     }
   } else {
-    /* The separate stores are there to match */
+    /*
+     * The separate stores are there to match: computing the byte's offset
+     * once, into i, gives PaintGroundTiles 159 words differing, 23 in shape
+     */
     if (column & 1) {
       g_WorkArea.hole.terrainCodes[GetCellCodeOffset(cell, column, row)] =
           (g_WorkArea.hole.terrainCodes[GetCellCodeOffset(cell, column, row)] &
@@ -2518,7 +2529,10 @@ void BuildHole(s32 course, s32 hole) {
   u32 size;
   s32 pointsSize;
 
-  /* The repeated case is there to match */
+  /*
+   * The repeated case is there to match: testing both courses with ||
+   * gives 9 words differing (7 in shape), and a switch 10
+   */
   if (course == COURSE_RECORD_SHY_GUY_DESERT) {
     FillGroundNoise(GROUND_NOISE_RANGE, LIGHT_GROUND_NOISE_BASE);
   } else if (course == COURSE_RECORD_YOSHIS_ISLAND) {
@@ -2756,7 +2770,10 @@ void ClearHolePoints(void) {
     g_HolePoints.unk60[i][AXIS_Y] = 0;
     g_HolePoints.unk60[i][AXIS_Z] = 0;
 
-    /* The dereference is there to match */
+    /*
+     * The dereference is there to match: indexing AXIS_X gives 7 words
+     * differing, 5 in shape
+     */
     *g_HolePoints.routePoints[i] = 0;
     g_HolePoints.routePoints[i][AXIS_Z] = 0;
   }
