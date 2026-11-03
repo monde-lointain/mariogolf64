@@ -1706,16 +1706,20 @@ void DrawBrickWallRows(Gfx** displayListHead, u8 slide) {
  * Draws the animated page arrows either side of the course select screen
  *
  * Doesn't match: the original spills the display list head to 0x4($sp), the
- * second word of reload's first 8-byte slot, so the 24 bytes above it come
- * from slots reload allocates later, for pseudos it moves out of the spilled
- * registers and then gives registers again. Ours moves one pseudo out of
- * $t3 and leaves an 8-byte slot; the pad stands in for the rest but sits
- * below the head's slot, at 0x14. The original also shifts the mirrored
- * arrow's start into place in two steps where combine folds them into one
- * here, which also merges two of the display list increments. Working the start
- * out into a variable, as DrawCenteredPageArrows does, avoids the branch the
- * inline comparison gives (22 words, 10 in shape); its other places and types
- * change nothing. 25 words differ, 5 in shape.
+ * second word of reload's first 8-byte slot, so the 24 bytes above it come from
+ * slots reload allocates later, for pseudos it moves out of the spilled
+ * registers and then gives registers again. Ours moves one pseudo out of $t3
+ * and leaves an 8-byte slot; the pad stands in for the rest but sits below the
+ * head's slot, at 0x14. The original also shifts the mirrored arrow's start
+ * into place in two steps where combine folds them into one here, which also
+ * merges two of the display list increments. Working the start out into a
+ * variable, as DrawCenteredPageArrows does, avoids the branch the inline
+ * comparison gives (22 words, 10 in shape); its other places and types change
+ * nothing. The permuter's best output, 20 words (4 in shape), sets the column
+ * to the arrow size and then multiplies it by the mirrored test again in the
+ * rectangle, a split assignment; its other changes, the pad in the timer's
+ * block and a local for the right edge, give 25 (5) alone or together. 25 words
+ * differ, 5 in shape.
  */
 #ifdef NON_MATCHING
 void DrawPageArrows(Gfx** displayListHead) {
