@@ -30,10 +30,12 @@
   }
 /* Moves past a byte of chunk, reading the next chunk at its end */
 #define AdvanceChunkPosition(chunk, position, remaining, asset) \
-  (position)++; \
-  if ((remaining) != 0 && (position) == ASSET_CHUNK_SIZE) { \
-    ReadNextChunk(chunk, remaining, asset); \
-    (position) = 0; \
+  { \
+    (position)++; \
+    if ((remaining) != 0 && (position) == ASSET_CHUNK_SIZE) { \
+      ReadNextChunk(chunk, remaining, asset); \
+      (position) = 0; \
+    } \
   }
 
 typedef struct AssetTableEntry {
@@ -228,7 +230,12 @@ void DecodeHalfwordRuns(u8* buffer, EncodedAsset* asset) {
       high = chunk[reader.position];
       AdvanceChunkPosition(chunk, reader.position, reader.remaining, asset);
       low = chunk[reader.position];
-      repeatCount = count; /* Copied here, rather than count used, to match */
+      /*
+       * Copied here, rather than count used, to match: looping to count gives
+       * 24 words differing (none in shape), and copying it after the next
+       * advance 30 (2)
+       */
+      repeatCount = count;
       AdvanceChunkPosition(chunk, reader.position, reader.remaining, asset);
       for (index = 0; index != repeatCount; index++) {
         *buffer++ = high;
