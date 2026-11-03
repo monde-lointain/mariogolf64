@@ -1795,9 +1795,13 @@ INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_ball", StepOpeningBallSimulation);
  * Doesn't match: in the side spin's sum, local-alloc gives shot->offsetX and
  * the club's doubled side spin the same priority, 1.0, and the tie goes to the
  * club's, where the original gives it the other register. Forcing those four
- * pseudos matches, so the RTL is the original's. Writing the doubling as
- * "* 2" lets fold move the 2 onto sideSign: 4 words differ, but the wrong
- * operand is shifted. 14 words differ.
+ * pseudos matches, so the RTL is the original's. Writing the doubling as "* 2"
+ * lets fold move the 2 onto sideSign: (club->sideSpin * CLUB_SIDE_SPIN_SCALE) *
+ * sideSign gives 4 words differing, sideSign * (club->sideSpin *
+ * CLUB_SIDE_SPIN_SCALE) 6, but the wrong operand is shifted. Swapping either
+ * sum's operands gives 16 to 28 words, and doubling the club's side spin into
+ * a local first, just before the sum or before yawRadians, changes nothing. 14
+ * words differ.
  */
 #ifdef NON_MATCHING
 s32 LaunchOpeningBallSimulation(
