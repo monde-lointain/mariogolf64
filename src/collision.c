@@ -2789,7 +2789,11 @@ s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
                          (hitPointV - (cornersV[0] * WORLD_TO_COURSE_SCALE))) -
         ((cornersV[1] - cornersV[0]) *
             (hitPointU - (cornersU[0] * WORLD_TO_COURSE_SCALE)));
-    /* k holds the sides the edges cross on from here, to match */
+    /*
+     * k holds the sides the edges cross on from here, to match: a sides
+     * local of its own, declared anywhere, gives 559 words differing
+     * rather than 535, 85 in shape either way
+     */
     if (edgeCrosses[0] < 0) {
       k = EDGE_SIDE_NEGATIVE;
     } else {
