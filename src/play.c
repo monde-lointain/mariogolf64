@@ -2038,20 +2038,24 @@ void DrawHoleEditorGround(CameraMatrices* matrices, s32 terrainStyle);
  * tiles go down two halves in rows of four, and a fine tile snaps the edge
  * vertices it shares with coarser neighbors so that no gaps open between them.
  *
- * Doesn't match: 1179 words differ, 283 in shape. The original's frame is 0x38
+ * Doesn't match: 950 words differ, 244 in shape. The original's frame is 0x18
  * bytes larger, so every stack offset differs, and terrainStyle and the locals
- * take other saved registers. The original works out column + 1 and its parity
- * once per half, where ours does at each GridVertex, with three more andi:
- * loop.c finds moving them out of the row loop not desirable, since the six
- * invariants it moved out of the inner tile loops come first and each doubles
- * the row loop's count. A nextColumn local set once per half keeps the andi too
- * (1214 words, 322 in shape). Writing the tile column out where it is used, and
- * giving the medium tiles' pass loop its own counter, took it from 1194 words
- * differing, 352 in shape, to 1160 (348). Naming the half's first tile column,
- * as a permuter run's copy of half * 4 suggested, then brought the shape to
- * 283, with words at 1179; declaring it first gives 1185 (283). The run's other
- * changes, a char for the slot after the top one and a flag for the detail
- * test, change the shape by at most one.
+ * take other saved registers. The original works out column + 1's parity once
+ * per half, where ours did at each GridVertex, with three more andi: loop.c
+ * finds moving them out of the row loop not desirable, since the six invariants
+ * it moved out of the inner tile loops come first and each doubles the row
+ * loop's count. A nextColumnParity local set once per half, as a permuter run's
+ * temp suggested, gives the original's andi count and took the function from
+ * 1179 words, 283 in shape, to these 950 (244); an s32 parity gives the same. A
+ * nextColumn local set once per half kept the andi (1214 words, 322 in shape),
+ * and with the parity local it gives 1073 (261); the next column's offset
+ * within a row as a local gives 1457 (291). Earlier, writing the tile column
+ * out where it is used, and giving the medium tiles' pass loop its own counter,
+ * took it from 1194 words differing, 352 in shape, to 1160 (348). Naming the
+ * half's first tile column, as a permuter run's copy of half * 4 suggested,
+ * then brought the shape to 283, with words at 1179; declaring it first gave
+ * 1185 (283). That run's other changes, a char for the slot after the top one
+ * and a flag for the detail test, changed the shape by at most one.
  */
 void DrawGround(CameraMatrices* matrices, s32 terrainStyle) {
   u8 snapsEdge[2][TILE_VERTEX_SEGMENT_COUNT]; /* For the current and the last
@@ -2075,6 +2079,7 @@ void DrawGround(CameraMatrices* matrices, s32 terrainStyle) {
   s32 segmentIndex;
   s32 row;
   s32 k;
+  u32 nextColumnParity;
   s32 groupTileIndex;
   s32 detailTileIndex;
   s32 pass;
@@ -2312,6 +2317,7 @@ void DrawGround(CameraMatrices* matrices, s32 terrainStyle) {
     }
 
     column = half * GROUND_HALF_VERTEX_COLUMNS;
+    nextColumnParity = (u32)(column + 1) & 1;
     for (row = 0; row < GROUND_TILE_ROW_COUNT; row++) {
       s32 groupDetail;
 
@@ -2423,7 +2429,8 @@ void DrawGround(CameraMatrices* matrices, s32 terrainStyle) {
         if (previousDetail < 0 || previousDetail == GROUND_DETAIL_FINE) {
           gSPVertex(gfx++, GridVertex(column, row * 2),
               GROUND_TILE_GROUP_SIZE + 1, topSlot);
-          gSPVertex(gfx++, GridVertex(column + 1, row * 2),
+          gSPVertex(gfx++,
+              GridVertexOfParity(column + 1, nextColumnParity, row * 2),
               GROUND_TILE_GROUP_SIZE, topSlot + ODD_SLOT);
         } else if (previousDetail == GROUND_DETAIL_COARSE) {
           LoadAveragedRow(GridVertex(column, row * 2), topSlot + ODD_SLOT);
@@ -2431,7 +2438,8 @@ void DrawGround(CameraMatrices* matrices, s32 terrainStyle) {
 
         gSPVertex(gfx++, GridVertex(column, (row * 2) + 1),
             GROUND_TILE_GROUP_SIZE + 1, middleSlot);
-        gSPVertex(gfx++, GridVertex(column + 1, (row * 2) + 1),
+        gSPVertex(gfx++,
+            GridVertexOfParity(column + 1, nextColumnParity, (row * 2) + 1),
             GROUND_TILE_GROUP_SIZE, middleSlot + ODD_SLOT);
         gSPVertex(gfx++, GridVertex(column, (row * 2) + 2),
             GROUND_TILE_GROUP_SIZE + 1, bottomSlot);
@@ -2441,7 +2449,8 @@ void DrawGround(CameraMatrices* matrices, s32 terrainStyle) {
           LoadAveragedRow(
               GridVertex(column, (row * 2) + 2), bottomSlot + ODD_SLOT);
         } else {
-          gSPVertex(gfx++, GridVertex(column + 1, (row * 2) + 2),
+          gSPVertex(gfx++,
+              GridVertexOfParity(column + 1, nextColumnParity, (row * 2) + 2),
               GROUND_TILE_GROUP_SIZE, bottomSlot + ODD_SLOT);
         }
 
