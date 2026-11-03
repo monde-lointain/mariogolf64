@@ -582,7 +582,9 @@ s32 GetClubTournamentCourse(void);
  * stack argument first. Clearing the same-character count in the preview
  * loop's initializer takes 52 words differing to 46. It reads canChooseMarked
  * as a byte throughout, hence the casts; declared u8 instead, 58 words
- * differ.
+ * differ. The permuter's best (43 words) returns from the diagonal move
+ * only when it fails, so a successful move would go on to the other
+ * buttons' tests.
  */
 #ifdef NON_MATCHING
 s32 UpdateCharacterSelect(

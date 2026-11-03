@@ -2340,7 +2340,9 @@ const CharacterModel g_OtherCharacterModels[OTHER_CHARACTER_MODEL_COUNT] = {
  * higher (translationMatrix at 0xD0, rotation at 0x190). Pads of 40 to 52
  * floats give 228 to 280 words, and other orders of the quaternion's
  * products 208 to 342. The register oracle finds no closer allocation, so
- * the code differs too. 206 words differ, 42 in shape.
+ * the code differs too. The permuter's best (199 words, 27 in shape) scale
+ * rotationProgress by the angle before acosf sets it. 206 words differ, 42
+ * in shape.
  */
 #ifdef NON_MATCHING
 void AnimateCharacterJoints(u32 slotIndex) {
