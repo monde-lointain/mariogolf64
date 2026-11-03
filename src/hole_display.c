@@ -1920,7 +1920,9 @@ void DrawSky(
  * pointers that may alias, so here it keeps them in the source's order;
  * computing centerShift before the syncs comes closest, where after them
  * gives 87 differing words. The rest are register choices that forcing
- * pseudos doesn't settle (20 words remain). 56 words differ, none in shape.
+ * pseudos doesn't settle (20 words remain). The permuter's best, 28 words,
+ * clears isNibbleImage only in the nibble strips' branch, so the first strip
+ * reads it unset; it is not used. 56 words differ, none in shape.
  */
 #ifdef NON_MATCHING
 void DrawBackdrop(Gfx** displayListHead, CameraView* view, s32 cameraIndex) {
