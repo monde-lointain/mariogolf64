@@ -2266,10 +2266,13 @@ void DrawBallTrail(Gfx** displayListHead, CameraMatrices* matrices) {
  * Draws the wind's icon, which pulses in size, and the wind's speed in
  * meters below it. Both lean away from the given point along the viewed wind.
  *
- * Doesn't match: the target reads *displayListHead before the other loads and
- * schedules the last commands before reading
- * g_RoundHud.areWindSpeedArrowsShown. Its rodata also has an empty string after
- * "%dm", which this doesn't emit. 20 words differ.
+ * Doesn't match: the target loads the wind speed into $a0 and its divisor's
+ * reciprocal before the scaling, where ours takes $v1 for the speed and loads
+ * the reciprocal at the division. Its rodata also has an empty string after
+ * "%dm", which this doesn't emit. Scaling the speed in the division's
+ * statement gives 20 words differing, 22 in shape; scaling it before the
+ * pulse step with that step not kept in its own block, or stepping the pulse
+ * first, gives 32 to 41. 16 words differ, 6 in shape.
  */
 #ifdef NON_MATCHING
 void DrawWindSpeed(Gfx** displayListHead, f32 x, f32 y) {
@@ -2281,6 +2284,7 @@ void DrawWindSpeed(Gfx** displayListHead, f32 x, f32 y) {
   s32 dsdx;
   s32 dtdy;
   s32 speed;
+  u32 scaledSpeed;
   f32 halfWidth;
   f32 halfHeight;
   f32 centerX;
@@ -2317,9 +2321,10 @@ void DrawWindSpeed(Gfx** displayListHead, f32 x, f32 y) {
     }
   }
 
+  scaledSpeed =
+      (u32)g_HoleSetup.conditions.windSpeed * WIND_SPEED_TO_METERS_SCALE;
   IN_OWN_BLOCK(f_WindIconPulseAngle += WIND_ICON_PULSE_STEP);
-  speed = (u32)g_HoleSetup.conditions.windSpeed * WIND_SPEED_TO_METERS_SCALE /
-      WIND_SPEED_TO_METERS_DIVISOR;
+  speed = scaledSpeed / WIND_SPEED_TO_METERS_DIVISOR;
   if (speed >= WIND_SPEED_TWO_DIGITS) {
     halfWidth = sinf(f_WindIconPulseAngle) + WIND_ICON_WIDE_HALF_WIDTH;
   } else {
