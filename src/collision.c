@@ -2072,23 +2072,7 @@ s32 GetTrianglePlaneCopy(PlaneTriangle* triangle, TrianglePlane* plane) {
  * the way along the path, and returns whether one is hit. Paths that rise
  * by more than PATH_MOST_RISE, as course y points down, or that start or
  * end off the ground hit nothing.
- *
- * Doesn't match: the original works out the start's and the end's sides of the
- * plane together, adding their terms in turn, where this works out the start's
- * first, and so the tests on the sides and the fraction's terms take other
- * registers. The prologue and the triangle lookup are scheduled differently
- * too. While endSide also held the side change, which gave 58 words differing
- * (28 in shape), copying the hit's corners straight from the table gave 107
- * (47), and through a pointer to its vertices 78 (28). The original sets
- * hitIndex to NO_HOLE_TRIANGLE after the flag test's call, in its branch's
- * delay slot. The permuter's best, 16 words (2 in shape), gets that by setting
- * it only at the start of the debug branch, which leaves it unset without the
- * flag. As a statement before the flag test it changes nothing, and after the
- * debug branch, before the x range or before the loop it gives 58 to 128 words,
- * 14 in shape. The register oracle, forcing 2 pseudos' registers, leaves 14
- * words at best, so the code differs too. 24 words differ, 10 in shape.
  */
-#ifdef NON_MATCHING
 s32 FindHoleTriangleHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
     s32 endZ, PlaneTriangle* hit, f32* fraction) {
   PlaneTriangle triangle;
@@ -2100,7 +2084,7 @@ s32 FindHoleTriangleHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
   s32 highestY;
   s32 lowestZ;
   s32 highestZ;
-  s32 hitIndex = NO_HOLE_TRIANGLE;
+  s32 hitIndex;
   s32 i;
   HoleTriangle* candidate;
   f32 nearestFraction;
@@ -2111,9 +2095,10 @@ s32 FindHoleTriangleHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
   s32 hitX;
   s32 hitZ;
   s32 sides;
-  f32 endDistance;
+  Boolean isDebug = IsGameFlagSet(GAME_FLAG_UNK0);
 
-  if (IsGameFlagSet(GAME_FLAG_UNK0)) {
+  hitIndex = NO_HOLE_TRIANGLE;
+  if (isDebug) {
     PrintDebugPaddedHex(startX, PATH_DEBUG_COLUMN, PATH_DEBUG_ROW);
     PrintDebugPaddedHex(startY, PATH_DEBUG_COLUMN, PATH_DEBUG_ROW + 1);
     PrintDebugPaddedHex(startZ, PATH_DEBUG_COLUMN, PATH_DEBUG_ROW + 2);
@@ -2202,15 +2187,12 @@ s32 FindHoleTriangleHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
     endSide = (plane.normal[AXIS_X] * endX) + (plane.normal[AXIS_Y] * endY) +
         (plane.normal[AXIS_Z] * endZ) +
         (plane.distance * WORLD_TO_COURSE_SCALE);
-    /* The test starts a block of its own, to match (without it 67 words
-     * differ, 31 in shape); ordering the macro's tests otherwise, && for &,
-     * or fabs leave as many words or more */
+    /* The original ends the plane-side calculation's basic block here. */
     END_BASIC_BLOCK();
     if (DoesPathMeetPlane(startSide, endSide)) {
       sideChange = startSide - endSide;
       if ((s32)sideChange != 0) {
-        endDistance = fabsf(sideChange);
-        hitFraction = fabsf(startSide) / endDistance;
+        hitFraction = fabsf(startSide) / fabsf(sideChange);
       } else {
         hitFraction = 0.0f;
       }
@@ -2301,10 +2283,6 @@ s32 FindHoleTriangleHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
 
   return FALSE;
 }
-
-#else
-INCLUDE_ASM("asm/nonmatchings/collision", FindHoleTriangleHit);
-#endif
 
 /*
  * Finds the nearest wall, a shaded hole triangle, that a ball moving from
