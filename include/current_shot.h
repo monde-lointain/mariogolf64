@@ -50,7 +50,13 @@ enum ImpactPointState {
 #define GAUGE_FULL_FRAME 30
 #define GAUGE_IMPACT_FRAME (2 * GAUGE_FULL_FRAME)
 
+#ifdef __IS_KMC__
+/* current_shot.c defines g_CurrentShot volatile, but most files saw it
+ * without the qualifier. game.c declares it itself, with the qualifier. */
 extern CurrentShot g_CurrentShot;
+#else
+extern volatile CurrentShot g_CurrentShot;
+#endif
 /* An IMPACT_POINT_* value */
 extern s32 g_ImpactPointState;
 

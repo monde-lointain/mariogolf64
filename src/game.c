@@ -57,10 +57,13 @@
  * match the original better that way. */
 extern volatile Boolean g_HasLoaderFinished;
 
-/* Declared volatile here too, as the original reads its player index in
+/* On KMC, declared volatile here, as the original reads its player index in
  * BuildHorizonDynamicTextures although the value is never used: flow deletes
- * a dead load that isn't volatile */
+ * a dead load that isn't volatile. On modern, current_shot.h declares it
+ * volatile already. */
+#ifdef __IS_KMC__
 extern volatile CurrentShot g_CurrentShot;
+#endif
 
 #define INSET_VIEW_SOUND_VOLUME 0x3F
 #define INSET_VIEW_SOUND_REVERB 0x1E
