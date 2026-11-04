@@ -2201,12 +2201,8 @@ s32 GetTrianglePlane(PlaneTriangle* triangle, TrianglePlane* plane) {
  * Returns the ground's height at a point, clamped to the ground, or
  * NO_GROUND_HEIGHT where no ground triangle holds it
  *
- * Doesn't match: the first corner's y and z, which the edges, the offsets and
- * the height share, take other registers; ours shifts y in place for the height
- * where the original keeps it. Forcing 8 pseudos leaves 12 words differing.
- * None of the 720 orders of the edges' statements does better. The register
- * oracle, forcing 8 pseudos' registers, leaves 12 words at best, so the code
- * differs too. 34 words differ, 2 in shape.
+ * Doesn't match: the first edge's Y load and the X offset subtraction are
+ * scheduled differently. 4 words differ, 2 in shape.
  */
 #ifdef NON_MATCHING
 s32 GetTerrainHeight(s32 x, s32 z) {
@@ -2262,18 +2258,18 @@ s32 GetTerrainHeight(s32 x, s32 z) {
     return NO_GROUND_HEIGHT;
   }
 
-  firstY = triangle.corners[AXIS_Y][1] - triangle.corners[AXIS_Y][0];
   secondZ = triangle.corners[AXIS_Z][2] - triangle.corners[AXIS_Z][0];
+  firstY = triangle.corners[AXIS_Y][1] - triangle.corners[AXIS_Y][0];
   firstZ = triangle.corners[AXIS_Z][1] - triangle.corners[AXIS_Z][0];
   firstX = triangle.corners[AXIS_X][1] - triangle.corners[AXIS_X][0];
   secondY = triangle.corners[AXIS_Y][2] - triangle.corners[AXIS_Y][0];
   secondX = triangle.corners[AXIS_X][2] - triangle.corners[AXIS_X][0];
-  normalX = (firstY * secondZ) + (secondY * -firstZ);
+  height = triangle.corners[AXIS_Y][0] << WORLD_TO_COURSE_SHIFT;
   offsetX = x - (triangle.corners[AXIS_X][0] << WORLD_TO_COURSE_SHIFT);
+  offsetZ = z - (triangle.corners[AXIS_Z][0] << WORLD_TO_COURSE_SHIFT);
+  normalX = (firstY * secondZ) + (secondY * -firstZ);
   normalY = (firstX * -secondZ) + (secondX * firstZ);
   normalZ = (firstY * -secondX) + (secondY * firstX);
-  height = triangle.corners[AXIS_Y][0] << WORLD_TO_COURSE_SHIFT;
-  offsetZ = z - (triangle.corners[AXIS_Z][0] << WORLD_TO_COURSE_SHIFT);
   if ((s32)normalY != 0) {
     return height +
         (s32)(((-normalX * offsetX) - (normalZ * offsetZ)) / normalY);
