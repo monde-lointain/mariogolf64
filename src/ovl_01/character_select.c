@@ -1720,18 +1720,7 @@ void DrawCharacterGridCursor(Gfx** displayListHead, s32 x, s32 y);
 /*
  * Draws each player's tag on the cell where that player's cursor sits, then the
  * grid cursor of the player choosing.
- * Doesn't match: 2 words differ, 2 in shape. The original subtracts the
- * cursor's left shift after both multiplies, where ours subtracts it right
- * after the column's; computing the top first costs 23 words. The register
- * oracle finds nothing to force: the closest it reaches is these 2 words with
- * no register forced, so the difference is in the code, not the allocation; the
- * subtraction is insn 1096, from the RTL expander and changed by cse.
- *
- * The cursor's cell is read into column and row first: computed from the
- * grid arrays in place, the row's offset folds into the call and 5 words
- * differ, as they do for 54 other forms of the top with one local.
  */
-#ifdef NON_MATCHING
 void DrawPlayerTags(Gfx** displayListHead, u8 tagMode) {
   MenuMemory* memory = GetMenuMemory();
   s16 tagCount = g_ChoosingPlayerIndex + 1;
@@ -1814,15 +1803,13 @@ void DrawPlayerTags(Gfx** displayListHead, u8 tagMode) {
 
   column = memory->characterColumns[playerIndex];
   row = memory->characterRows[playerIndex];
-  cursorLeft = (column * GRID_CELL_SIZE) - GRID_CURSOR_SHIFT_LEFT;
+  cursorLeft = column * GRID_CELL_SIZE;
   cursorTop = (row * GRID_CELL_SIZE) + GRID_TOP;
+  cursorLeft -= GRID_CURSOR_SHIFT_LEFT;
   DrawCharacterGridCursor(&gfx, cursorLeft + GRID_LEFT, cursorTop);
   gDPPipeSync(gfx++);
   *displayListHead = gfx;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/character_select", DrawPlayerTags);
-#endif
 
 /*
  * Draws the menu cursor at (x, y), its vertex colors cycling a little further
