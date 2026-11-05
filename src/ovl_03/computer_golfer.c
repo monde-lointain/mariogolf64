@@ -2200,6 +2200,7 @@ ClubType ChooseApproachClub(s32* targetX, s32* targetZ) {
 
 #define POWER_TO_GAUGE_FRAME_SCALE (GAUGE_FULL_FRAME / 256.0f)
 
+#ifndef NON_MATCHING
 /* The power gauge frame for a launch power out of 256 */
 s32 GetPowerGaugeFrame(s32 amount) {
   s32 value;
@@ -2211,7 +2212,8 @@ s32 GetPowerGaugeFrame(s32 amount) {
    * The original nests this routine in StepTrialShot, a GNU C extension:
    * nested there, it compiles to the original's code, and StepTrialShot
    * passes a stack address in $v0 as the static chain, which this stores.
-   * It stays separate here, as StepTrialShot does not match. The store of
+   * This copy stands in for it while StepTrialShot doesn't match; the
+   * draft below nests it in the block that calls it. The store of
    * an uninitialized value is there to match: it stands in for the static
    * chain's store, which no other C makes, and without it 7 words differ.
    */
@@ -2229,6 +2231,7 @@ s32 GetPowerGaugeFrame(s32 amount) {
 
   return value;
 }
+#endif
 
 INCLUDE_RODATA("asm/nonmatchings/ovl_03/computer_golfer", f_SimFaultText);
 
@@ -2251,31 +2254,46 @@ INCLUDE_RODATA("asm/nonmatchings/ovl_03/computer_golfer", f_SimFaultText);
  * better than the best so far, and 1 once it has evaluated the trial, or
  * abandoned it, and adjusted f_Shot's power, mode or aim for the next one.
  *
- * Doesn't match: ours gives some values other saved registers than the original
- * does, and it keeps the address of f_Shot.ballPosition's z in a saved register
- * across the atan2 calls, where the original loads it again, as reload does for
- * an address that gets no register. The poor landing's sum takes $v0, so the
- * store waits for the kind tests' reuse of it; the original's sum is in $v1 and
- * its store comes after them. Reading kind after the sum, testing
- * surfaceInfo->kind directly, and spelling the tests out with || or | leave the
- * code as it is. Writing the last aim change as the earlier one is, the step
- * times -1 or 1, reads f_Shot.heading signed once before the parity test, as
- * the original does, and gives 101 words differing (35 in shape); adding the
- * change or its negation, chosen by ?:, gives the same, and choosing by ?:
- * between the heading minus and plus the change 106 (38). With an if/else
- * subtracting or adding, the change worked out once into a local gave 106 (40)
- * and worked out in each arm 117 (43). Earlier, the register oracle, forcing 16
- * pseudos, left 76 words. The permuter's best runs, 103 words (35 in shape) and
- * later 89 (31) with the aim change worked out once, read the heading for the
- * excluded sectors through a pointer taken before the club checks, where the
- * original reads f_Shot.heading directly; taking it just before the loop gave
- * 116 (36), using it for the aim change too 118 (36), and reading the centre
- * sector into a local 153 (57). A later run reached 87 (27) with the same
- * pointer alone. Now, a local holding the heading's sector before the loop, or
- * the heading itself, gives 139 (47), and one holding the first excluded sector
+ * GetPowerGaugeFrame is nested in the block that calls it, as in the original;
+ * see its copy above. GCC compiles a nested function at its definition, and
+ * rest_of_compilation sets cse_not_expected, which isn't saved across it, so
+ * the code after the definition is expanded with constant addresses inside its
+ * memory references, as the original's is there, and the code before it with
+ * the addresses in registers. Nested at the start of the routine, 215 words
+ * differ (131 in shape); at the start of the evaluation block, 178 (114); at
+ * the start of the ratio's test, 86 (40); in the block that calls it, 30 (8);
+ * and separate, 101 (35).
+ *
+ * Doesn't match: 30 words differ, 8 in shape. Ours sums the poor landing's
+ * evaluation into $v0 and stores it at once, where the original sums into $v1
+ * and stores it later; the stroke count's increment goes into strokes' own
+ * register, where the original's goes into $v1; and the last aim change loads
+ * f_Shot.heading after the conversion, where the original loads it before.
+ * Adding the stroke in the subtraction gives 43 words (11 in shape), the aim
+ * change as an if/else subtracting or adding 75 (31), and adding the change or
+ * its negation, chosen by ?:, 45 (17).
+ *
+ * Before the nesting, when 101 words differed (35 in shape): reading kind
+ * after the sum, testing surfaceInfo->kind directly, and spelling the tests
+ * out with || or | leave the code as it is. Writing the last aim change as
+ * the earlier one is, the step times -1 or 1, reads f_Shot.heading signed
+ * once before the parity test, as the original does, and gives 101 words
+ * differing (35 in shape); adding the change or its negation, chosen by ?:,
+ * gives the same, and choosing by ?: between the heading minus and plus the
+ * change 106 (38). With an if/else subtracting or adding, the change worked
+ * out once into a local gave 106 (40) and worked out in each arm 117 (43).
+ * Earlier, the register oracle, forcing 16 pseudos, left 76 words. The
+ * permuter's best runs, 103 words (35 in shape) and later 89 (31) with the
+ * aim change worked out once, read the heading for the excluded sectors
+ * through a pointer taken before the club checks, where the original reads
+ * f_Shot.heading directly; taking it just before the loop gave 116 (36),
+ * using it for the aim change too 118 (36), and reading the centre sector
+ * into a local 153 (57). A later run reached 87 (27) with the same pointer
+ * alone. Now, a local holding the heading's sector before the loop, or the
+ * heading itself, gives 139 (47), and one holding the first excluded sector
  * 135 (47). A focused run reached 73 (23) with the same pointer, the aim's
- * update out of its block and an empty do-while (0) after it, neither of which
- * is natural. 101 words differ, 35 in shape.
+ * update out of its block and an empty do-while (0) after it, neither of
+ * which is natural.
  */
 #ifdef NON_MATCHING
 s32 StepTrialShot(void) {
@@ -2348,7 +2366,7 @@ s32 StepTrialShot(void) {
   if (ballState) {
     /* A loop that runs once, so that the step's checks can break out to the
      * end point's update; the original has no loop here, and jumping to a
-     * label instead gives 139 words differing, 55 in shape, against 101 (35) */
+     * label instead gives 68 words differing, 28 in shape, against 30 (8) */
     do {
       velocityY = f_TrialSimulation.velocity[AXIS_Y];
       bounceCount = f_TrialSimulation.bounceCount;
@@ -2505,7 +2523,7 @@ EVALUATE:
       if (GetSurfaceInfoAt(f_PlanTarget[AXIS_X], f_PlanTarget[AXIS_Z])->kind ==
           SURFACE_KIND_GREEN) {
         /* Counts the stroke this shot would be. In one expression with the
-         * subtraction, 130 to 133 words differ */
+         * subtraction, 43 words differ, against 30 */
         strokes++;
         strokesOver = strokes - (par + f_HoleTargetToPar);
         if (strokesOver >= 0) {
@@ -2636,6 +2654,21 @@ EVALUATE:
           return 1;
         }
       } else {
+        /* The power gauge frame for a launch power out of 256 */
+        s32 GetPowerGaugeFrame(s32 amount) {
+          s32 value = (amount * POWER_TO_GAUGE_FRAME_SCALE) + 0.5f;
+
+          if (value < MIN_POWER_GAUGE_FRAME) {
+            value = MIN_POWER_GAUGE_FRAME;
+          }
+
+          if (value > GAUGE_FULL_FRAME - 1) {
+            value = GAUGE_FULL_FRAME;
+          }
+
+          return value;
+        }
+
         f_Shot.powerGaugeFrame = GetPowerGaugeFrame(launchPower);
         if (f_IsPutting) {
           f_Shot.powerGaugeFrame = f_Shot.powerGaugeFrame + ((rand() & 1) + 1);
