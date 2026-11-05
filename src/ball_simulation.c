@@ -260,7 +260,11 @@ void ResetBallSimulations(void) {
  * local set before the call gave 727 words (209 in shape) against 680 (206). Of
  * the six orders of the flight's drag updates, only y, z and x gives fewer
  * words, 676, and it still stores z before y, where the original, having worked
- * out y's drag first, stores x, y and z in turn. 680 words differ, 206 in
+ * out y's drag first, stores x, y and z in turn. An s16 spinVelocityZ in the
+ * triangle bounce gives 666 words (208 in shape), but adds two shifts or masks
+ * to the ten the draft has, as many as the original; s16 for spinVelocityX as
+ * well gives 779, for spinVelocityX alone 757, and the same s16 in
+ * StepOpeningBallSimulation 277 against its 247. 680 words differ, 206 in
  * shape.
  */
 #ifdef NON_MATCHING
