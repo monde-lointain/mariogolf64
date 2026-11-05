@@ -24,7 +24,7 @@ void SimulateShot(ShotLaunch* shot) {
   BallSimulation* simulation;
   s32 step;
   Boolean hasGroundHit;
-  Boolean hasUnk40Flag;
+  Boolean hasHoleTriangleBounce;
   s32 flags;
   s32 firstBounceKind;
   u8 isWaterCut;
@@ -59,7 +59,7 @@ void SimulateShot(ShotLaunch* shot) {
   simulation->position[AXIS_Z] = g_CurrentShot.ballPosition[AXIS_Z];
   simulation->surface = g_CurrentShot.surface;
   hasGroundHit = FALSE;
-  hasUnk40Flag = FALSE;
+  hasHoleTriangleBounce = FALSE;
   g_SimulatedShot.usesPutter =
       GetClub(shot->clubIndex)->surfaceMask & CLUB_SURFACE_GREEN;
   g_SimulatedShot.isPerfectSwing = shot->impactTiming == 0 &&
@@ -92,7 +92,7 @@ void SimulateShot(ShotLaunch* shot) {
     }
 
     if (flags & STEP_FLAG_HOLE_TRIANGLE_BOUNCE) {
-      hasUnk40Flag = TRUE;
+      hasHoleTriangleBounce = TRUE;
     }
 
     if (step < PATH_STEP_COUNT) {
@@ -144,7 +144,7 @@ void SimulateShot(ShotLaunch* shot) {
   g_SimulatedShot.endsOnGreen =
       GetSurfaceInfo(simulation->surface)->kind == SURFACE_KIND_GREEN;
   isWaterCut = FALSE;
-  if (hasUnk40Flag) {
+  if (hasHoleTriangleBounce) {
     isWaterCut =
         GetSurfaceInfo(simulation->surface)->kind != SURFACE_KIND_WATER_HAZARD;
   }
