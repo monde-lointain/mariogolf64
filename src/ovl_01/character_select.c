@@ -594,15 +594,18 @@ s32 GetClubTournamentCourse(void);
  */
 
 /*
- * Doesn't match: the original sign-extends the cursor's column and row as soon
- * as it loads them, and sets up the chosen character's sound with the stack
- * argument first. Clearing the same-character count in the preview loop's
+ * Doesn't match: the original sets up the chosen character's sound with the
+ * stack argument first, and keeps the cursor's column in $s4 where this keeps
+ * it in $s3. Clearing the same-character count in the preview loop's
  * initializer takes 52 words differing to 46. It reads canChooseMarked as a
  * byte throughout, hence the casts; declared u8 instead, 58 words differ. The
  * permuter's best (43 words) returns from the diagonal move only when it fails,
- * so a successful move would go on to the other buttons' tests. The register
- * oracle, forcing 7 pseudos' registers, leaves 24 words of the 46 at best, so
- * the code differs too.
+ * so a successful move would go on to the other buttons' tests. The counts
+ * before this were measured with an s8 column used for the chosen character
+ * too, which gave 46 words (8 in shape); a u16 cursor column and an s8
+ * chosenColumn of its own give more words, but the register oracle, forcing 9
+ * pseudos' registers, leaves 10, against 24 with 7 forced before. 136 words
+ * differ, 6 in shape.
  */
 #ifdef NON_MATCHING
 s32 UpdateCharacterSelect(
@@ -620,11 +623,18 @@ s32 UpdateCharacterSelect(
   s32 controllerIndex;
   u16 button;
   s32 palette;
-  s8 column;
+  /*
+   * The cursor's column, a u16 like the row, as the original sign-extends
+   * it to 16 bits at each use: with an s8 column, also used for the chosen
+   * character, 46 words differ, but the register oracle's best is 24 words
+   * against 10 with this one
+   */
+  u16 column;
+  s8 chosenColumn;
   /*
    * The cursor's row, then the face's slot, to match: a u16 row variable
    * gives 56 words differing (8 in shape), and an s8 one 62 (14), against
-   * the draft's 46 (8)
+   * the draft's 46 (8), measured when the column was an s8
    */
   u16 slot;
   u16 faceCharacter;
@@ -1119,8 +1129,9 @@ s32 UpdateCharacterSelect(
   }
 
   if (palette != NO_PALETTE) {
-    column = memory->characterColumns[playerIndex];
-    character = g_CharacterGrid[memory->characterRows[playerIndex]][column];
+    chosenColumn = memory->characterColumns[playerIndex];
+    character =
+        g_CharacterGrid[memory->characterRows[playerIndex]][chosenColumn];
     if (((u8)canChooseMarked == TRUE) & (character < CHOOSABLE_MARK_LIMIT)) {
       character += MARKED_CHARACTER_OFFSET;
     }
@@ -1134,8 +1145,8 @@ s32 UpdateCharacterSelect(
 
       character =
           g_ImportedCharacters[character - FIRST_IMPORTED_CHARACTER].character;
-      g_ImportedCharacterColumns[playerIndex] = column;
-      if (column < 0) {
+      g_ImportedCharacterColumns[playerIndex] = chosenColumn;
+      if (chosenColumn < 0) {
         g_ImportedCharacterColumns[playerIndex] = 0;
       }
 
