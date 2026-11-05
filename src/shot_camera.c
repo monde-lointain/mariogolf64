@@ -1898,13 +1898,20 @@ void PlaceAimCamera(void);
  * course. The kinds that test f_IsCameraKindNew do their setup once when it is
  * set, then clear it. Doesn't match: the original allocates some registers
  * differently, and orders the stores of point for FLIGHT_CAMERA_FACING_CUP
- * differently. The register oracle forces 13 pseudos and still leaves 22 words
- * differing. A permuter output with 96 words (2 in shape) gets both from a temp
- * that it sets to point's Z only in unreachable code before a case label, and
- * then reads instead of point's Z in FLIGHT_CAMERA_FACING_CUP's Z ease, so the
- * value it reads is never set. Keeping the scaled Z in a local for that ease
- * changes nothing, and scaling Z after the Y ease gives 148 (12). 98 words
- * differ, 4 in shape.
+ * differently. The register oracle forced 13 pseudos and still left 22 words
+ * differing when the draft gave 98. A permuter output with 96 words (2 in
+ * shape) got both from a temp that it sets to point's Z only in unreachable
+ * code before a case label, and then reads instead of point's Z in
+ * FLIGHT_CAMERA_FACING_CUP's Z ease, so the value it reads is never set.
+ * Keeping the scaled Z in a local for that ease changed nothing, and scaling Z
+ * after the Y ease gave 148 (12). A focused run's best (65 words, 3 in shape)
+ * reads point's Z before it is set again, but the original subtracts the
+ * camera's Z from the newly scaled Z, so that changes behaviour.
+ * FLIGHT_CAMERA_CIRCLING_BALL sets the field of view after the look-at point,
+ * as that run also did, which took the draft from 98 words differing to 66, 4
+ * in shape either way; set after the eye's height, as the draft had it, or
+ * anywhere before the look-at point's Y, it gives 98 to 138. 66 words differ, 4
+ * in shape.
  */
 #ifdef NON_MATCHING
 void PlaceFlightCamera(s32 step) {
@@ -2465,7 +2472,6 @@ void PlaceFlightCamera(s32 step) {
       f_CameraPosition[AXIS_Y] =
           GetGroundHeight(f_CameraPosition[AXIS_X], f_CameraPosition[AXIS_Z]) -
           CIRCLE_RISE;
-      g_Cameras[0].view.fieldOfView = DEFAULT_FIELD_OF_VIEW;
       f_CameraPosition[AXIS_X] *= COURSE_TO_WORLD_SCALE;
       f_CameraPosition[AXIS_Y] *= COURSE_TO_WORLD_SCALE;
       f_CameraPosition[AXIS_Z] *= COURSE_TO_WORLD_SCALE;
@@ -2476,6 +2482,7 @@ void PlaceFlightCamera(s32 step) {
           COURSE_TO_WORLD_SCALE;
       f_LookAtPoint[AXIS_Z] =
           (f32)g_CurrentShot.ballPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE;
+      g_Cameras[0].view.fieldOfView = DEFAULT_FIELD_OF_VIEW;
       break;
     case FLIGHT_CAMERA_BESIDE_GOLFER:
       if (f_IsCameraKindNew == TRUE) {
