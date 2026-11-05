@@ -246,51 +246,52 @@ void ResetBallSimulations(void) {
  * height, took 779 words differing to 771, 235 in shape; it later cost 8 words,
  * so the slide adds the step to the height, as it does in x and z. The slope's
  * two compare-and-branch magnitudes come from the nested AbsoluteValue
- * helper; with fabsf there 1020 words differ (212 in shape) and with
- * common.h's AbsFloat 488 (134). The spin grip's two take fabsf, an abs.s:
- * with AbsoluteValue there 518 words differed (144). The pull toward the cup
- * sets toCup's X before its zero Y, so the zero store follows the cup's X load
- * as in the original rather than filling the debug text branch's delay slot;
- * with Y first, 769 words differ (233 in shape). A permuter output reached 760
- * words (230 in shape) with Y first but the ball's X copied to a fake s32 temp
- * before it, from 766 (236) without the copy; reverting its fake temp for push
- * or its move of semi-rough's case label below the friction scaling changes
- * nothing. On the 769-word draft, setting side's X inside the landing tilt test
- * gave 766 (236), as did side's three stores, and the gravity's nested if as an
- * else-if changed nothing. On the 763-word draft, the register oracle, forcing
- * 126 pseudos' registers, left 425 words at best, so the code differs too, and
- * a permuter output gaining 1 word (5 in shape) normalized the triangle's
- * normal after both of the hit's surface branches, but the original's club-test
- * branch jumps past that call and the other skips it unless the surface is
- * green or green edge, so the output's call changes what the code does. The
- * second toCup, for a ball between CUP_PULL_INNER_RADIUS and
- * CUP_PULL_OUTER_RADIUS of the cup, is set in axis order too, which took the
- * draft from 749 words to 747 and from 225 in shape to 221; with its Y of 1
- * first, as the draft had it, 749 differed. Past MAX_STEP_COUNT, the ball's
- * position is set before its velocity, both in axis order, which took the draft
- * from 747 words (221 in shape) to 743 (217). A wall hit clears the spin after
- * all three position updates, as the opening's copy clears it after its
- * velocities, which keeps 743 words and takes the shape from 217 to 215; the
- * register oracle then gets to 409 words forcing 124 pseudos, against 413
- * forcing 123. A triangle bounce's spin grip, 1.0f - bounce, is written into
- * both velocity updates, as their other factors are, where a grip local gave
- * 743 words (215 in shape) against 727 (209); in the opening's copy the two
- * forms give 288 words and the same oracle result. The floor's in-cup and
- * rolling tests read simulation->state after GetGroundHeight, where a state
- * local set before the call gave 727 words (209 in shape) against 680 (206). Of
- * the six orders of the flight's drag updates, only y, z and x gives fewer
- * words, 668 (676 when the draft had 680), the others 672, and it still stores
- * z before y, where the original, having worked out y's drag first, stores x, y
- * and z in turn. An s16 spinVelocityZ where the ball starts rolling gives 658
- * words (208 in shape), but adds two shifts or masks to the ten that the draft
- * and the original have; s16 for spinVelocityX as well gives 662 (210) and adds
- * two 16-bit shift pairs, spinVelocityX alone 680, and in
- * StepOpeningBallSimulation's roll start spinVelocityZ alone 259 and both 265
- * against its 247. In the triangle bounce an s16 spinVelocityZ gives 743 words
- * (215), both 771 and spinVelocityX alone 749, and spinVelocityZ in
- * StepOpeningBallSimulation's 277. Apart from the magnitudes', this note's
- * counts were measured with GCC's built-in fabsf, which left 672 words
- * differing, 206 in shape. 478 words differ, 126 in shape.
+ * helper; with fabsf there 1194 words differ (326 in shape) and with
+ * common.h's AbsFloat 482 (128). Mixing two forms, one per slope, gives 452 to
+ * 482, but takes one magnitude two ways. The spin grip's two take fabsf, an
+ * abs.s: with AbsoluteValue there 518 words differed (144). The pull toward the
+ * cup sets toCup's X before its zero Y, so the zero store follows the cup's X
+ * load as in the original rather than filling the debug text branch's delay
+ * slot; with Y first, 769 words differ (233 in shape). A permuter output
+ * reached 760 words (230 in shape) with Y first but the ball's X copied to a
+ * fake s32 temp before it, from 766 (236) without the copy; reverting its fake
+ * temp for push or its move of semi-rough's case label below the friction
+ * scaling changes nothing. On the 769-word draft, setting side's X inside the
+ * landing tilt test gave 766 (236), as did side's three stores, and the
+ * gravity's nested if as an else-if changed nothing. On the 763-word draft, the
+ * register oracle, forcing 126 pseudos' registers, left 425 words at best, so
+ * the code differs too, and a permuter output gaining 1 word (5 in shape)
+ * normalized the triangle's normal after both of the hit's surface branches,
+ * but the original's club-test branch jumps past that call and the other skips
+ * it unless the surface is green or green edge, so the output's call changes
+ * what the code does. The second toCup, for a ball between
+ * CUP_PULL_INNER_RADIUS and CUP_PULL_OUTER_RADIUS of the cup, is set in axis
+ * order too, which took the draft from 749 words to 747 and from 225 in shape
+ * to 221; with its Y of 1 first, as the draft had it, 749 differed. Past
+ * MAX_STEP_COUNT, the ball's position is set before its velocity, both in axis
+ * order, which took the draft from 747 words (221 in shape) to 743 (217). A
+ * wall hit clears the spin after all three position updates, as the opening's
+ * copy clears it after its velocities, which keeps 743 words and takes the
+ * shape from 217 to 215; the register oracle then gets to 409 words forcing 124
+ * pseudos, against 413 forcing 123. A triangle bounce's spin grip, 1.0f -
+ * bounce, is written into both velocity updates, as their other factors are,
+ * where a grip local gave 743 words (215 in shape) against 727 (209); in the
+ * opening's copy the two forms give 288 words and the same oracle result. The
+ * floor's in-cup and rolling tests read simulation->state after
+ * GetGroundHeight, where a state local set before the call gave 727 words (209
+ * in shape) against 680 (206). Of the six orders of the flight's drag updates,
+ * only y, z and x gives fewer words, 668 (676 when the draft had 680), the
+ * others 672, and it still stores z before y, where the original, having worked
+ * out y's drag first, stores x, y and z in turn. An s16 spinVelocityZ where the
+ * ball starts rolling gives 658 words (208 in shape), but adds two shifts or
+ * masks to the ten that the draft and the original have; s16 for spinVelocityX
+ * as well gives 662 (210) and adds two 16-bit shift pairs, spinVelocityX alone
+ * 680, and in StepOpeningBallSimulation's roll start spinVelocityZ alone 259
+ * and both 265 against its 247. In the triangle bounce an s16 spinVelocityZ
+ * gives 743 words (215), both 771 and spinVelocityX alone 749, and
+ * spinVelocityZ in StepOpeningBallSimulation's 277. Apart from the magnitudes',
+ * this note's counts were measured with GCC's built-in fabsf, which left 672
+ * words differing, 206 in shape. 478 words differ, 126 in shape.
  */
 #ifdef NON_MATCHING
 s32 StepBallSimulation(BallSimulation* simulation) {
