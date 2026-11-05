@@ -2514,6 +2514,12 @@ void ClearCartridgeCharacters(void) {
  * the sum into a load and an add gives the shape (18 words, none in shape);
  * a total local of its own gives 54 words, 4 in shape, and adding into the
  * experience 49 to 57. 18 words differ, 4 in shape.
+ *
+ * The focused permuter's best, 9 words (3 in shape), reads
+ * character->experience into a local before IsCharacterFromSave and clamps
+ * with sum <= MAX_EXPERIENCE first; the read alone gives 88 words (6 in
+ * shape) and the flipped clamp alone 49 (1). The original loads it from
+ * 0x28($fp) after the call, so the early read isn't its form.
  */
 #ifdef NON_MATCHING
 s32 WriteExperienceToCartridge(s32 characterIndex) {
