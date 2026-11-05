@@ -753,7 +753,9 @@ s32 ListOffsetsByDistance(s32 span, GridOffset* offsets, s32 maxCount) {
  * its 323 words at best, so its code differs too. A u32 width gives 315 words,
  * but 65 in shape, as it drops the test before negating the width and the
  * rounding of its signed division, which the original's DrawTriangleHeights
- * keeps as a bgez and a bltzl before an sra.
+ * keeps as a bgez and a bltzl before an sra. Deriving texelColumn from the
+ * already converted fromX rather than longX leaves 321 words, 45 in shape;
+ * both signed shifts still fold into the original's single shift by 16.
  */
 #ifdef NON_MATCHING
 void DrawBandHeights(s16* heights, s32 band) {
@@ -820,7 +822,7 @@ void DrawBandHeights(s16* heights, s32 band) {
             ((toHeight - fromHeight) << TEXEL_HEIGHT_FRACTION_BITS) / count;
       }
 
-      texelColumn = longX >> (HEIGHT_FRACTION_BITS + HEIGHT_ROW_SPAN_SHIFT);
+      texelColumn = fromX >> HEIGHT_ROW_SPAN_SHIFT;
       texelRow =
           (texelRow >> HEIGHT_ROW_SPAN_SHIFT) - band * HEIGHT_BAND_ROW_COUNT;
       if (texelRow >= 0 && texelRow < HEIGHT_BAND_ROW_COUNT) {
