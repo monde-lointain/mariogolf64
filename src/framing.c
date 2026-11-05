@@ -84,6 +84,11 @@ void AddFramedSphere(Vec3 center, f32 radius) {
  * local, before or after the block's end, or swapping the comparison doesn't
  * help. The register oracle finds nothing closer: forcing the magnitude's
  * pseudo into $f2 gives 16 words. 6 words differ.
+ *
+ * Braces in place of the empty block, around the cosine and its test, with the
+ * cosine declared in them or not, or around the test alone or with a magnitude
+ * local, give 7 words (3 in shape), as without the block, since braces end no
+ * basic block; so does testing cosf's result directly, with no cosine local.
  */
 #ifdef NON_MATCHING
 void SetFramingAngles(Radians pitch, Radians yaw) {
