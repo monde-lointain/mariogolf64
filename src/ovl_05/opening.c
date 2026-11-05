@@ -1647,7 +1647,7 @@ void UpdateOpening(void) {
         break;
       case 0x2A:
         if (f_OpeningSceneFramesLeft == 0) {
-          StartHudAnimation(9);
+          StartHudAnimation(HUD_ANIMATION_FAST_FADE_OUT);
           f_OpeningScene = 0x32;
           LoadNameLogo(2, 0);
         }
@@ -1772,7 +1772,7 @@ void UpdateOpening(void) {
       case 0x47:
         if (f_OpeningSceneFramesLeft == 0) {
           f_OpeningScene = 0x50;
-          StartHudAnimation(9);
+          StartHudAnimation(HUD_ANIMATION_FAST_FADE_OUT);
         }
 
         break;
@@ -1867,7 +1867,7 @@ void UpdateOpening(void) {
 
         if (f_OpeningSceneFramesLeft == 0) {
           StopEditorMoves();
-          StartHudAnimation(9);
+          StartHudAnimation(HUD_ANIMATION_FAST_FADE_OUT);
           f_OpeningScene++;
         }
 
@@ -1993,7 +1993,7 @@ void UpdateOpening(void) {
         break;
       case 0x78:
         if (AreEditorMovesDone()) {
-          StartHudAnimation(1);
+          StartHudAnimation(HUD_ANIMATION_FADE_OUT);
           f_OpeningScene++;
           LoadOpeningBall(4, 0);
           LoadOpeningBall(4, 1);
@@ -2109,7 +2109,7 @@ void UpdateOpening(void) {
         break;
       case 0x96:
         if (f_OpeningSceneFramesLeft == 0) {
-          StartHudAnimation(9);
+          StartHudAnimation(HUD_ANIMATION_FAST_FADE_OUT);
           PlaceEditorCamera(
               2801.815f, -255.822f, 2196.813f, 2823.524f, -256.5f, 2177.502f);
           MoveEditorPoint(1, 2855.966f, -256.5f, 2213.121f, 0x32);
@@ -2375,7 +2375,7 @@ void UpdateOpening(void) {
         }
 
         if (f_OpeningSceneFramesLeft == 0) {
-          StartHudAnimation(9);
+          StartHudAnimation(HUD_ANIMATION_FAST_FADE_OUT);
           PlaceEditorCamera(
               2878.956f, -391.282f, 2514.85f, 2431.88f, -315.0f, 992.943f);
           MoveEditorPoint(0, 2051.33f, -258.127f, 862.423f, 0x28);

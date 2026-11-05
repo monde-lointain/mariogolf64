@@ -4632,7 +4632,7 @@ void UpdateTurns(void) {
               nextState = PLAYER_STATE_STARTING_REACTION;
               if (g_Players[playerIndex].strokeCount < g_HoleSetup.par) {
                 EndFlightCamera();
-                StartHudAnimation(2);
+                StartHudAnimation(HUD_ANIMATION_TURN_AWAY);
                 nextState = PLAYER_STATE_ENDING_TURN;
               }
             } else if (g_GameState.gameMode == GAME_MODE_TRAINING) {
@@ -4652,7 +4652,7 @@ void UpdateTurns(void) {
                 GiveUpHole(playerIndex);
               } else {
                 EndFlightCamera();
-                StartHudAnimation(2);
+                StartHudAnimation(HUD_ANIMATION_TURN_AWAY);
                 nextState = PLAYER_STATE_ENDING_TURN;
               }
             } else if (g_GameState.replayKind == REPLAY_KIND_NONE &&
@@ -4678,7 +4678,7 @@ void UpdateTurns(void) {
                 nextState = PLAYER_STATE_STARTING_REACTION;
               } else {
                 EndFlightCamera();
-                StartHudAnimation(2);
+                StartHudAnimation(HUD_ANIMATION_TURN_AWAY);
                 nextState = PLAYER_STATE_ENDING_TURN;
               }
             } else if (g_Players[playerIndex].strokeCount >=
@@ -4716,7 +4716,7 @@ void UpdateTurns(void) {
             } else {
               EndFlightCamera();
               if (!IsGameFlagSet(GAME_FLAG_FAST_AUTOPLAY)) {
-                StartHudAnimation(2);
+                StartHudAnimation(HUD_ANIMATION_TURN_AWAY);
               }
 
               nextState = PLAYER_STATE_ENDING_TURN;
@@ -4947,7 +4947,7 @@ void UpdateTurns(void) {
           switch (UpdateChoiceBox(&g_TurnController)) {
             case CHOICE_RESULT_CONTINUE:
               EndFlightCamera();
-              StartHudAnimation(2);
+              StartHudAnimation(HUD_ANIMATION_TURN_AWAY);
               ForceStopRumble();
               nextState = PLAYER_STATE_WAITING;
               break;
@@ -4955,7 +4955,7 @@ void UpdateTurns(void) {
               g_IsTrainingHeadingKept = TRUE;
               g_Players[playerIndex] = g_SavedPlayers[playerIndex];
               EndFlightCamera();
-              StartHudAnimation(2);
+              StartHudAnimation(HUD_ANIMATION_TURN_AWAY);
               ForceStopRumble();
               nextState = PLAYER_STATE_WAITING;
               break;
