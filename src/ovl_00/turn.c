@@ -3078,6 +3078,16 @@ void ShowHoleOutBanner(s32 playerIndex) {
  * static chain takes the first slot of a nested function's frame, which puts
  * the buffer at 0x28 where the original's is at 0x20, and 953 words differ (900
  * with 55 registers forced).
+ *
+ * DebugPlaceBall's Z_TRIG test compiles to andi and a branch, where the
+ * original shifts the bit down with srl 13 and andi 1 before branching. do_jump
+ * tests an & of one bit with andi; only a test expanded as a value goes through
+ * do_store_flag, which shifts and masks. A Boolean local set to the test, or an
+ * inline helper returning it, gives the original's instructions, 238 words (110
+ * in shape), as does shifting the button bits right 13 and testing the low bit,
+ * but each adds a name or a shift the draft has no other reason for. Comparing
+ * the test with 0 or Z_TRIG, comparing that != 0 with TRUE, negating it twice
+ * or choosing TRUE or FALSE with it leaves 241 words (111).
  */
 #ifdef NON_MATCHING
 /* Debug flag 0x47: prints where the ball lies, and the second controller moves
