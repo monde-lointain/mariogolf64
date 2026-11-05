@@ -2342,7 +2342,10 @@ s32 FindHoleTriangleHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
  * oracle from 139 words to 135, each forcing 35 pseudos; the earlier counts
  * here were measured before it. Naming the end point too, in f32 locals for the
  * four wall-end tests, gives 860 words (162 in shape), whether or not hitPointU
- * and hitPointV are set from them. 200 words differ, 62 in shape.
+ * and hitPointV are set from them. A u16 or u8 facing gives 197 words (63 in
+ * shape), and an s16 or s8 198 (64), but each adds an extension the original
+ * lacks: an andi 0xffff or 0xff, or an sll and sra by 16 or 24. 200 words
+ * differ, 62 in shape.
  */
 #ifdef NON_MATCHING
 s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
