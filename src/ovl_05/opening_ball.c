@@ -353,8 +353,10 @@ typedef s32 (*BillboardHitFinder)(s32 startX, s32 startY, s32 startZ, s32 endX,
  * words (138 in shape) to 296 (126). The cup pull sets toCup in axis order, as
  * StepBallSimulation does, and a wall hit's reflection sets all three
  * velocities before clearing the spin, which took the draft from 296 words (126
- * in shape) to 290 (122); alone, they gave 292 (124) and 294 (124). 290 words
- * differ, 122 in shape.
+ * in shape) to 290 (122); alone, they gave 292 (124) and 294 (124). The ground
+ * spin's grip clears the spin after both velocity updates, as
+ * StepBallSimulation's does, which took the draft from 290 words (122 in shape)
+ * to 288 (120). 288 words differ, 120 in shape.
  */
 #ifdef NON_MATCHING
 s32 StepOpeningBallSimulation(BallSimulation* simulation) {
@@ -1308,10 +1310,10 @@ s32 StepOpeningBallSimulation(BallSimulation* simulation) {
         simulation->velocity[AXIS_X] = simulation->velocity[AXIS_X] +
             ((spinVelocityX - simulation->velocity[AXIS_X]) *
                 AbsFloat(plane.normal[AXIS_Y]) * GROUND_SPIN_GRIP);
-        simulation->spinSpeed = 0;
         simulation->velocity[AXIS_Z] = simulation->velocity[AXIS_Z] +
             ((spinVelocityZ - simulation->velocity[AXIS_Z]) *
                 AbsFloat(plane.normal[AXIS_Y]) * GROUND_SPIN_GRIP);
+        simulation->spinSpeed = 0;
       } else {
         f32 keep = 1.0f - spin;
         s32 bounced[3];
