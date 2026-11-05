@@ -37,60 +37,84 @@ static s8 f_OpeningClubTestMode = CLUB_TEST_NONE;
  * half-width katakana and differs from it in eight entries' values */
 static SurfaceInfo f_OpeningSurfaceInfo[SURFACE_COUNT] = {
     /* SURFACE_OUT_OF_BOUNDS */
-    {SURFACE_KIND_OUT_OF_BOUNDS, "O.B.", 100, 100, 0, 0, 0, 0x500, 1, 7},
+    {SURFACE_KIND_OUT_OF_BOUNDS, "O.B.", 100, 100, 0, 0, 0, 0x500,
+        SINK_DEPTH_HALF, 7},
     /* SURFACE_FAIRWAY */
-    {SURFACE_KIND_FAIRWAY, "ﾌｪｱｳｪｲ", 98, 100, 5, 960, 400, 0x501, 0, 0},
+    {SURFACE_KIND_FAIRWAY, "ﾌｪｱｳｪｲ", 98, 100, 5, 960, 400, 0x501,
+        SINK_DEPTH_NONE, 0},
     /* SURFACE_ROUGH */
-    {SURFACE_KIND_ROUGH, "ﾗﾌ", 80, 90, 30, 600, 200, 0x508, 1, 1},
+    {SURFACE_KIND_ROUGH, "ﾗﾌ", 80, 90, 30, 600, 200, 0x508, SINK_DEPTH_HALF, 1},
     /* SURFACE_BUNKER */
-    {SURFACE_KIND_BUNKER, "ﾊﾞﾝｶｰ", 70, 85, 30, 600, 0, 0x504, 0, 2},
+    {SURFACE_KIND_BUNKER, "ﾊﾞﾝｶｰ", 70, 85, 30, 600, 0, 0x504, SINK_DEPTH_NONE,
+        2},
     /* SURFACE_GREEN */
-    {SURFACE_KIND_GREEN, "ｵﾝ ｸﾞﾘｰﾝ", 100, 100, 0, 972, 500, 0x50A, 0, 6},
+    {SURFACE_KIND_GREEN, "ｵﾝ ｸﾞﾘｰﾝ", 100, 100, 0, 972, 500, 0x50A,
+        SINK_DEPTH_NONE, 6},
     /* SURFACE_WATER_HAZARD */
-    {SURFACE_KIND_WATER_HAZARD, "ｳｫｰﾀｰﾊｻﾞｰﾄﾞ", 100, 100, 0, 0, 0, 0x50C, 2, 3},
+    {SURFACE_KIND_WATER_HAZARD, "ｳｫｰﾀｰﾊｻﾞｰﾄﾞ", 100, 100, 0, 0, 0, 0x50C,
+        SINK_DEPTH_BURIED, 3},
     /* SURFACE_CART_WAY */
-    {SURFACE_KIND_CART_WAY, "ｶｰﾄｳｪｲ", 80, 100, 10, 975, 890, 0x50B, 0, 4},
+    {SURFACE_KIND_CART_WAY, "ｶｰﾄｳｪｲ", 80, 100, 10, 975, 890, 0x50B,
+        SINK_DEPTH_NONE, 4},
     /* SURFACE_TEE_GROUND */
-    {SURFACE_KIND_TEE_GROUND, "ﾃｨｰｸﾞﾗｳﾝﾄﾞ", 98, 100, 10, 930, 500, 0x501, 0, 8},
+    {SURFACE_KIND_TEE_GROUND, "ﾃｨｰｸﾞﾗｳﾝﾄﾞ", 98, 100, 10, 930, 500, 0x501,
+        SINK_DEPTH_NONE, 8},
     /* SURFACE_ROCK */
-    {SURFACE_KIND_ROCK, "ﾛｯｸ", 80, 90, 30, 930, 900, 0x50D, 0, 9},
+    {SURFACE_KIND_ROCK, "ﾛｯｸ", 80, 90, 30, 930, 900, 0x50D, SINK_DEPTH_NONE, 9},
     /* SURFACE_GREEN_EDGE */
-    {SURFACE_KIND_GREEN_EDGE, "ｸﾞﾘｰﾝ ｴｯｼﾞ", 98, 100, 10, 966, 400, 0x501, 0, 0},
+    {SURFACE_KIND_GREEN_EDGE, "ｸﾞﾘｰﾝ ｴｯｼﾞ", 98, 100, 10, 966, 400, 0x501,
+        SINK_DEPTH_NONE, 0},
     /* SURFACE_SEMI_ROUGH */
-    {SURFACE_KIND_SEMI_ROUGH, "ｾﾐﾗﾌ", 90, 98, 30, 930, 500, 0x507, 0, 0},
+    {SURFACE_KIND_SEMI_ROUGH, "ｾﾐﾗﾌ", 90, 98, 30, 930, 500, 0x507,
+        SINK_DEPTH_NONE, 0},
     /* SURFACE_BARE_GROUND */
-    {SURFACE_KIND_BARE_GROUND, "ﾍﾞｱｸﾞﾗｳﾝﾄﾞ", 80, 90, 30, 930, 500, 0x50C, 0, 1},
+    {SURFACE_KIND_BARE_GROUND, "ﾍﾞｱｸﾞﾗｳﾝﾄﾞ", 80, 90, 30, 930, 500, 0x50C,
+        SINK_DEPTH_NONE, 1},
     /* SURFACE_DEEP_ROUGH */
-    {SURFACE_KIND_DEEP_ROUGH, "ﾃﾞｨｰﾌﾟﾗﾌ", 50, 80, 30, 430, 100, 0x509, 2, 5},
+    {SURFACE_KIND_DEEP_ROUGH, "ﾃﾞｨｰﾌﾟﾗﾌ", 50, 80, 30, 430, 100, 0x509,
+        SINK_DEPTH_BURIED, 5},
     /* SURFACE_BARE_GROUND_UNK13 */
     {SURFACE_KIND_BARE_GROUND_UNK20, "ﾍﾞｱｸﾞﾗｳﾝﾄﾞ", 80, 90, 30, 930, 500, 0x50C,
-        0, 1},
+        SINK_DEPTH_NONE, 1},
     /* SURFACE_WASTE_AREA */
-    {SURFACE_KIND_WASTE_AREA, "ｳｴｽﾄｴﾘｱ", 50, 80, 30, 430, 100, 0x8F1, 1, 5},
+    {SURFACE_KIND_WASTE_AREA, "ｳｴｽﾄｴﾘｱ", 50, 80, 30, 430, 100, 0x8F1,
+        SINK_DEPTH_HALF, 5},
     /* SURFACE_UNK15 */
-    {SURFACE_KIND_ROCK, "            ", 98, 100, 40, 930, 500, 0x500, 0, 9},
+    {SURFACE_KIND_ROCK, "            ", 98, 100, 40, 930, 500, 0x500,
+        SINK_DEPTH_NONE, 9},
     /* SURFACE_BUNKER_FAIR_LIE */
-    {SURFACE_KIND_BUNKER_FAIR_LIE, "ﾊﾞﾝｶｰ", 50, 70, 30, 600, 0, 0x505, 1, 2},
+    {SURFACE_KIND_BUNKER_FAIR_LIE, "ﾊﾞﾝｶｰ", 50, 70, 30, 600, 0, 0x505,
+        SINK_DEPTH_HALF, 2},
     /* SURFACE_BUNKER_POOR_LIE */
-    {SURFACE_KIND_BUNKER_POOR_LIE, "ﾊﾞﾝｶｰ", 40, 60, 30, 600, 0, 0x506, 1, 2},
+    {SURFACE_KIND_BUNKER_POOR_LIE, "ﾊﾞﾝｶｰ", 40, 60, 30, 600, 0, 0x506,
+        SINK_DEPTH_HALF, 2},
     /* SURFACE_BUNKER_UNK18 */
-    {SURFACE_KIND_BUNKER_UNK9, "ﾊﾞﾝｶｰ", 40, 60, 40, 600, 0, 0x506, 1, 2},
+    {SURFACE_KIND_BUNKER_UNK9, "ﾊﾞﾝｶｰ", 40, 60, 40, 600, 0, 0x506,
+        SINK_DEPTH_HALF, 2},
     /* SURFACE_FAIRWAY_FAIR_LIE */
-    {SURFACE_KIND_FAIRWAY_FAIR_LIE, "ﾌｪｱｳｪｲ", 94, 98, 7, 950, 380, 0x502, 0, 0},
+    {SURFACE_KIND_FAIRWAY_FAIR_LIE, "ﾌｪｱｳｪｲ", 94, 98, 7, 950, 380, 0x502,
+        SINK_DEPTH_NONE, 0},
     /* SURFACE_FAIRWAY_POOR_LIE */
-    {SURFACE_KIND_FAIRWAY_POOR_LIE, "ﾌｪｱｳｪｲ", 90, 94, 7, 950, 380, 0x503, 0, 0},
+    {SURFACE_KIND_FAIRWAY_POOR_LIE, "ﾌｪｱｳｪｲ", 90, 94, 7, 950, 380, 0x503,
+        SINK_DEPTH_NONE, 0},
     /* SURFACE_ROUGH_POOR_LIE */
-    {SURFACE_KIND_ROUGH_POOR_LIE, "ﾗﾌ", 70, 85, 30, 600, 200, 0x509, 1, 5},
+    {SURFACE_KIND_ROUGH_POOR_LIE, "ﾗﾌ", 70, 85, 30, 600, 200, 0x509,
+        SINK_DEPTH_HALF, 5},
     /* SURFACE_OUT_OF_COURSE */
-    {SURFACE_KIND_OUT_OF_COURSE, "ｱｳﾄ ｵﾌﾞ ｺｰｽ", 100, 100, 0, 0, 0, 0x500, 2, 7},
+    {SURFACE_KIND_OUT_OF_COURSE, "ｱｳﾄ ｵﾌﾞ ｺｰｽ", 100, 100, 0, 0, 0, 0x500,
+        SINK_DEPTH_BURIED, 7},
     /* SURFACE_TEE_UP */
-    {SURFACE_KIND_TEE_UP, "TEE UP", 98, 100, 10, 930, 500, 0x500, 0, 8},
+    {SURFACE_KIND_TEE_UP, "TEE UP", 98, 100, 10, 930, 500, 0x500,
+        SINK_DEPTH_NONE, 8},
     /* SURFACE_MINI_GOLF_GREEN */
-    {SURFACE_KIND_GREEN, "ｸﾞﾘｰﾝ", 100, 100, 0, 972, 500, 0x8F2, 0, 6},
+    {SURFACE_KIND_GREEN, "ｸﾞﾘｰﾝ", 100, 100, 0, 972, 500, 0x8F2, SINK_DEPTH_NONE,
+        6},
     /* SURFACE_MINI_GOLF_FAIRWAY */
-    {SURFACE_KIND_FAIRWAY, "ﾌﾞﾙｰ", 98, 100, 5, 960, 400, 0x8F3, 0, 0},
+    {SURFACE_KIND_FAIRWAY, "ﾌﾞﾙｰ", 98, 100, 5, 960, 400, 0x8F3, SINK_DEPTH_NONE,
+        0},
     /* SURFACE_MINI_GOLF_CART_WAY */
-    {SURFACE_KIND_CART_WAY, "ﾚｯﾄﾞ", 80, 100, 10, 980, 890, 0x8F4, 0, 4}};
+    {SURFACE_KIND_CART_WAY, "ﾚｯﾄﾞ", 80, 100, 10, 980, 890, 0x8F4,
+        SINK_DEPTH_NONE, 4}};
 
 /* The debug text row, of SPEED_TEXT_ROW_COUNT, that the next ball speed goes in
  */

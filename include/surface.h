@@ -105,6 +105,11 @@ typedef s32 SurfaceKind;
   ((kind) == SURFACE_KIND_BUNKER || (kind) == SURFACE_KIND_BUNKER_FAIR_LIE || \
       (kind) == SURFACE_KIND_BUNKER_POOR_LIE)
 
+/* How far a ball resting on a surface sinks into it, as it is drawn */
+#define SINK_DEPTH_NONE 0
+#define SINK_DEPTH_HALF 1
+#define SINK_DEPTH_BURIED 2
+
 typedef struct SurfaceInfo {
   /* 0x00 */ SurfaceKind kind;
   /* 0x04 */ char* name; /* As the lie is shown */
@@ -116,8 +121,8 @@ typedef struct SurfaceInfo {
      how much a landing ball bounces */
   /* 0x0C */ s16 rollSpeedKept;
   /* 0x0E */ s16 bounciness;
-  /* 0x10 */ s32 unk10;
-  /* 0x14 */ s32 unk14;
+  /* 0x10 */ s32 lieImageAsset; /* The HUD's picture of the lie */
+  /* 0x14 */ s32 sinkDepth; /* A SINK_DEPTH_* value */
   /* 0x18 */ s32 unk18;
 } SurfaceInfo; /* size = 0x1C */
 

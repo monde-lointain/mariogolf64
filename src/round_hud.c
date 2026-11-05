@@ -1158,8 +1158,8 @@ void StartShotPanel(void) {
   g_RoundHud.cupDistance = (f32)GetCupDistance(
       g_CurrentShot.ballPosition[AXIS_X] - g_HoleSetup.cupPosition[AXIS_X],
       g_CurrentShot.ballPosition[AXIS_Z] - g_HoleSetup.cupPosition[AXIS_Z]);
-  if (GetSurfaceInfo(g_CurrentShot.surface)->unk10 != f_LieImageAsset) {
-    f_LieImageAsset = GetSurfaceInfo(g_CurrentShot.surface)->unk10;
+  if (GetSurfaceInfo(g_CurrentShot.surface)->lieImageAsset != f_LieImageAsset) {
+    f_LieImageAsset = GetSurfaceInfo(g_CurrentShot.surface)->lieImageAsset;
     if (GetSurfaceInfo(g_CurrentShot.surface)->kind ==
         SURFACE_KIND_TEE_GROUND) {
       f_ShotPanelOffsetY = TEE_GROUND_PANEL_OFFSET_Y;

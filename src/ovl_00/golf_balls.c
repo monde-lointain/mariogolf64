@@ -715,7 +715,7 @@ Boolean IsAnyBallInCup(void) {
 #define BALL_TEXTURE_SIZE 32
 #define SMALL_BALL_TEXTURE_SIZE 8
 
-/* How a ball sits in its surface, from SurfaceInfo.unk14 */
+/* How a ball sits in its surface, from SurfaceInfo.sinkDepth */
 enum BallLie {
   BALL_BURIED = -1,
   BALL_HALF_SUNK,
@@ -891,9 +891,9 @@ void DrawGolfBalls(CameraMatrices* matrices UNUSED) {
       }
 
       if (isAboveGround) {
-        if (surface->unk14 == 2) {
+        if (surface->sinkDepth == SINK_DEPTH_BURIED) {
           exposure = BALL_BURIED;
-        } else if (surface->unk14 == 1) {
+        } else if (surface->sinkDepth == SINK_DEPTH_HALF) {
           exposure = BALL_HALF_SUNK;
         } else {
           exposure = BALL_EXPOSED;
@@ -1394,7 +1394,8 @@ void DrawGolfBalls(CameraMatrices* matrices UNUSED) {
       if (ball->markerPlayerIndex == BALL_NO_MARKER &&
           f_GolfBalls[i].alpha == BALL_SHOWN &&
           (g_IsCupViewShown || ball->isInCup != TRUE) &&
-          (!isCurrentBallAboveGround || ball->surface->unk14 == 0) &&
+          (!isCurrentBallAboveGround ||
+              ball->surface->sinkDepth == SINK_DEPTH_NONE) &&
           ball->alpha > 0) {
         gDPPipeSync(gfx++);
         gSPMatrix(gfx++, &ball->matrices[g_DrawBufferIndex],
