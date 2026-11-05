@@ -3001,10 +3001,9 @@ s32 PushBallOutOfWalls(BallSimulation* simulation, s32 checksHeight) {
       side = (plane.normal[AXIS_X] * x) + (plane.normal[AXIS_Y] * y) +
           (plane.normal[AXIS_Z] * z) + (plane.distance * WORLD_TO_COURSE_SCALE);
       osSyncPrintf("?");
-      /* The test starts a block of its own, to match: it places the abs.s as
-       * the original does. Testing >=, fabs, Abs, a ternary, the two bounds
-       * or a magnitude in side don't (54-115 words differ) */
-      END_BASIC_BLOCK();
+      /* The original tests whether the magnitude is less than the distance,
+       * a c.lt.s, and skips the wall when it isn't; testing >= gives 47
+       * differing words, fabs 52 and AbsFloat 90 */
       if (!(fabsf(side) < WALL_TOUCH_DISTANCE)) {
         continue;
       }
