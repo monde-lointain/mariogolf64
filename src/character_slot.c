@@ -2548,7 +2548,8 @@ void AnimateCharacterJoints(u32 slotIndex) {
      * dot holds the quaternion's scale from here, and progress holds the w and
      * x term, to match: a scale variable gives 223 words differing (53 in
      * shape), a wx variable 228 (42), and both 245 (53), against the draft's
-     * 206 (42)
+     * 206 (42); a static inline converter with its own locals gives 298 (50),
+     * and 318 to 374 with other pads from 30 to 52 floats
      */
     if (lengthSquared > 0.0f) {
       dot = 2.0f / lengthSquared;
