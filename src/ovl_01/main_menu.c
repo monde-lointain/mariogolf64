@@ -6980,6 +6980,11 @@ void DrawYesNoWindow(Gfx** displayListHead, s32 width, s32 height, s32 centerX,
  * three of the chosen toggle's four rectangle edges from it rather than from
  * stripTop; a stripRowTop local set there gives 118 words, and set just before
  * the choice test 112, both 6 in shape. 112 words differ, 6 in shape.
+ *
+ * Holding OPTION_LABEL_HEIGHT in a local set on each pass gives 106 words,
+ * but 8 in shape; both builds hoist 20 out of the loop the same way, and the
+ * only change is that it and g_MenuLabelImages swap $21 and $22, so it only
+ * renumbers the pseudos.
  */
 #ifdef NON_MATCHING
 void DrawOptionsScreen(Gfx** displayListHead) {
