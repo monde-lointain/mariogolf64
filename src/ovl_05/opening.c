@@ -4,6 +4,9 @@
  * the balls, Lakitu, the impact lines, the burst, the sparks and the title
  * logo.
  */
+/* Takes GCC's built-in fabsf: with the game's inline assembly, DrawOpeningBalls
+ * keeps its abs.s where it is written and grows by 6 words */
+#define USES_BUILTIN_FABSF
 #include "common.h"
 
 #include "opening.h"

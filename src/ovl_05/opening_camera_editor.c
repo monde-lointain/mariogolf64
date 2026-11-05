@@ -2,6 +2,9 @@
  * The camera editor that moves the opening's camera: its eye and look-at point
  * move, turn, tilt and zoom at set speeds.
  */
+/* Takes GCC's built-in fabsf: with the game's inline assembly, MoveEditorPoint
+ * keeps its abs.s where it is written and grows by 2 words */
+#define USES_BUILTIN_FABSF
 #include "common.h"
 
 #include "camera_editor.h"
