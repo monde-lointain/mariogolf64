@@ -3114,11 +3114,15 @@ static const char f_UnusedWallText[3][4] = {"", "", ""};
  * hit ring's index, and the fraction of the way along the path. It returns
  * 1 for a hit, 0 for none and -1 for a start or end off the ground.
  *
- * Doesn't match: the original's endSide takes the partial sum's register,
- * and it takes the start side's abs.s before testing sideChange's sign, which
- * moving the fabsf up gives at the cost of 2 more words in shape. The register
- * oracle, forcing 3 pseudos' registers, leaves 22 words at best, so the code
- * differs too. 28 words differ, 8 in shape.
+ * Doesn't match: the original's endSide takes the partial sum's register, and
+ * it takes the start side's abs.s before testing sideChange's sign. Moving the
+ * fabsf up keeps 16 words but adds 2 in shape, as the scheduler puts the abs.s
+ * in the sign test's delay slot. Working out the hit point in hitX, hitY and
+ * hitZ before measuring its distance from the ring's center took the draft from
+ * 28 words differing (8 in shape) to 16 (2), and the register oracle from 22
+ * words forcing 3 pseudos to 4 forcing 1, which leaves only the abs.s. An s32
+ * hitPoint array instead gives 42 (16) in place of the unused words and 118
+ * (16) beside them. 16 words differ, 2 in shape.
  */
 #ifdef NON_MATCHING
 s32 FindRingHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
@@ -3134,9 +3138,14 @@ s32 FindRingHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
   f32 endSide;
   f32 sideChange;
   f32 hitFraction;
-  /* The original frame has room for this; without it 106 words differ, 10 in
-   * shape */
+  /*
+   * The original frame has room for this; without it 92 words differ, 2 in
+   * shape, and 106 (10) before the hit point had locals
+   */
   s32 unused[4] UNUSED;
+  s32 hitX;
+  s32 hitY;
+  s32 hitZ;
   Boolean isDebug = IsGameFlagSet(GAME_FLAG_UNK0);
 
   /* After the flag query, so this fills the debug branch's delay slot. */
@@ -3216,14 +3225,14 @@ s32 FindRingHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
       }
 
       if (hitFraction < nearestFraction) {
-        if (Length3D(((s32)(((endX - startX) * hitFraction) + startX) *
-                         COURSE_TO_WORLD_SCALE) -
+        hitX = ((endX - startX) * hitFraction) + startX;
+        hitY = ((endY - startY) * hitFraction) + startY;
+        hitZ = ((endZ - startZ) * hitFraction) + startZ;
+        if (Length3D((hitX * COURSE_TO_WORLD_SCALE) -
                     ring.corners[AXIS_X][RING_CENTER],
-                ((s32)(((endY - startY) * hitFraction) + startY) *
-                    COURSE_TO_WORLD_SCALE) -
+                (hitY * COURSE_TO_WORLD_SCALE) -
                     ring.corners[AXIS_Y][RING_CENTER],
-                ((s32)(((endZ - startZ) * hitFraction) + startZ) *
-                    COURSE_TO_WORLD_SCALE) -
+                (hitZ * COURSE_TO_WORLD_SCALE) -
                     ring.corners[AXIS_Z][RING_CENTER]) <
             ring.corners[AXIS_X][RING_SCALE] * RING_HIT_RADIUS_PER_SCALE) {
           nearestFraction = hitFraction;
