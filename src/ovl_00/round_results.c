@@ -438,14 +438,17 @@ void OpenRoundResults(s32 request) {
  * Doesn't match: in the course points tally, the original keeps
  * f_PointsEarned's address in a register and the counter in $s2, where ours
  * addresses it through $at each time and counts in $a1, and the later loops'
- * registers differ. The original builds the address again after each call;
- * reading f_PointsEarned through a pointer in AddRoundPoints keeps it in $s1
- * across the calls instead (228 words, 62 in shape, or 234 and 64 for the
- * total too), and summing the points in a local gives 247. The tournament's
- * open course count is stored first, as the original does (211 words the
- * other way). The ranks are counted in f_PlayerRanks itself, which a
- * permuter run pointed to; counting them through a pointer to the rank gives
- * 207 words differing, 45 in shape. 177 words differ, 39 in shape.
+ * registers differ. The original builds the address again after each call. The
+ * tournament's open course count is stored first, as the original does, and the
+ * ranks are counted in f_PlayerRanks itself, which a permuter run pointed to.
+ * The tournament finds the player's standing through a pointer to the standing
+ * it tests, as another permuter run suggested; indexing g_TournamentStandings
+ * in both reads gave 177 words differing, 39 in shape. Earlier, reading
+ * f_PointsEarned through a pointer in AddRoundPoints kept it in $s1 across the
+ * calls instead (228 words, 62 in shape, or 234 and 64 for the total too),
+ * summing the points in a local gave 247, storing the open course count last
+ * 211, and counting the ranks through a pointer to the rank 207 (45). 166 words
+ * differ, 34 in shape.
  */
 void LoadRoundResults(void) {
   EncodedAsset asset;
@@ -679,8 +682,10 @@ void LoadRoundResults(void) {
         RankTournament(
             COURSE_HOLE_COUNT, 0, f_PlayerResults[0], g_GameState.unk2C);
         for (k = 0; k != TOURNAMENT_CONTESTANT_COUNT; k++) {
-          if (g_TournamentStandings[k].contestantId == -1) {
-            f_PlayerRanks[0] = g_TournamentStandings[k].place & PLACE_MASK;
+          TournamentStanding* standing = &g_TournamentStandings[k];
+
+          if (standing->contestantId == -1) {
+            f_PlayerRanks[0] = standing->place & PLACE_MASK;
             break;
           }
         }
