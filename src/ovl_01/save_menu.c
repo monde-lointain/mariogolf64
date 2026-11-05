@@ -1883,7 +1883,10 @@ void DrawSavedMiniGolfImage(Gfx** displayListHead);
  * icon's texels, rather than adding the texel offset last, took the draft from
  * 307 words differing to 293, 121 in shape to 115; any order that adds the
  * texel offset to modeImage first gives 293, and a texels pointer set before
- * the strip loop 320. 293 words differ, 115 in shape.
+ * the strip loop 320. Clearing the text slots with the strips' counter took the
+ * draft to 255 words, 115 in shape, and the register oracle's closest result
+ * from 227 words, forcing 30 pseudos, to 219, forcing 24. 255 words differ, 115
+ * in shape.
  */
 #ifdef NON_MATCHING
 void DrawSavedGames(Gfx** displayListHead) {
@@ -1902,7 +1905,12 @@ void DrawSavedGames(Gfx** displayListHead) {
   MenuMemory* memory = GetMenuMemory();
   s16 playerCount = save->savedGames[memory->savedGameIndex].state.playerCount;
   s32 index;
-  s32 stripIndex;
+  /*
+   * Also the text slots that the controller prompt clears, to match: index
+   * for them gives 293 words differing against the draft's 255, 115 in shape
+   * both
+   */
+  s32 stripOrTextSlotIndex;
   s32 key;
   Radians angle;
   f32 circleX;
@@ -2089,7 +2097,8 @@ void DrawSavedGames(Gfx** displayListHead) {
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
 
   gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_SavedGamesNamePlate)));
-  for (stripIndex = 0; stripIndex != SAVED_GAME_STRIP_COUNT; stripIndex++) {
+  for (stripOrTextSlotIndex = 0; stripOrTextSlotIndex != SAVED_GAME_STRIP_COUNT;
+      stripOrTextSlotIndex++) {
     if (playerCount == 1) {
       stripLeft = SAVED_GAME_STRIP_LEFT;
       stripShownWidth = SAVED_GAME_FEW_PLAYER_STRIP_SHOWN_WIDTH;
@@ -2103,18 +2112,19 @@ void DrawSavedGames(Gfx** displayListHead) {
 
     gDPLoadTextureBlock(gfx++,
         TextureAddress(LargeImageTexels(f_SavedGamesNamePlate) +
-            (stripIndex * SAVED_GAME_STRIP_WIDTH * SAVED_GAME_STRIP_HEIGHT)),
+            (stripOrTextSlotIndex * SAVED_GAME_STRIP_WIDTH *
+                SAVED_GAME_STRIP_HEIGHT)),
         G_IM_FMT_CI, G_IM_SIZ_8b, SAVED_GAME_STRIP_WIDTH,
         SAVED_GAME_STRIP_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
         G_TX_NOLOD);
     gDPPipeSync(gfx++);
     gSPScisTextureRectangle(gfx++, QuarterPixels(stripLeft),
-        QuarterPixels(
-            SAVED_GAME_STRIP_TOP + (stripIndex * SAVED_GAME_STRIP_HEIGHT)),
+        QuarterPixels(SAVED_GAME_STRIP_TOP +
+            (stripOrTextSlotIndex * SAVED_GAME_STRIP_HEIGHT)),
         QuarterPixels(stripLeft + stripShownWidth),
         QuarterPixels(SAVED_GAME_STRIP_TOP + SAVED_GAME_STRIP_HEIGHT +
-            (stripIndex * SAVED_GAME_STRIP_HEIGHT)),
+            (stripOrTextSlotIndex * SAVED_GAME_STRIP_HEIGHT)),
         G_TX_RENDERTILE, 0, 0, (SAVED_GAME_STRIP_WIDTH << 10) / stripShownWidth,
         TEXEL_STEP_ONE);
     gDPPipeSync(gfx++);
@@ -2210,9 +2220,11 @@ void DrawSavedGames(Gfx** displayListHead) {
 
       SetTextSlot(CONTROLLER_PROMPT_X, PROMPT_Y, MESSAGE_CONTROLLER_PROMPT,
           TEXT_SLOT_LARGE_FONT, 0, TEXT_FLAG_TYPED, 0xFF, 0xFF, 0xFF, 0xFF);
-      for (index = 1; index != SAVED_GAME_TEXT_SLOT_COUNT; index++) {
-        SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, index, 0, 0xFF,
-            0xFF, 0xFF, 0xFF);
+      for (stripOrTextSlotIndex = 1;
+          stripOrTextSlotIndex != SAVED_GAME_TEXT_SLOT_COUNT;
+          stripOrTextSlotIndex++) {
+        SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT,
+            stripOrTextSlotIndex, 0, 0xFF, 0xFF, 0xFF, 0xFF);
       }
     } else {
       SetTextSlot(CONTINUE_PROMPT_X, PROMPT_Y, MESSAGE_CONTINUE_PROMPT,
