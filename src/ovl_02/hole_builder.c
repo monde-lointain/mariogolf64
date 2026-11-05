@@ -3344,7 +3344,9 @@ static inline u16* GetShadowedTexel(u32 column, u32 row) {
  * as the rows and columns are. Naming the solidity texel's row and column, as a
  * focused permuter run's best did, took 153 words (19 in shape) to 149 (15),
  * and the register oracle's best from 64 to 60, forcing 28 pseudos; the figures
- * above were measured before it. 149 words differ, 15 in shape.
+ * above were measured before it. Since then, an s16 centerColumn gives 148
+ * words (16 in shape), with the same 3 extensions as the target and the oracle
+ * still at 60. 149 words differ, 15 in shape.
  */
 #ifdef NON_MATCHING
 void CastBillboardShadows(void) {
