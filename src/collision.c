@@ -1780,7 +1780,9 @@ void MoveBallToCupEdge(BallSimulation* simulation) {
  * x's product and its store, as either order allows. A focused permuter run's
  * best also scales the direction's z before its y, which gives 167 words (21 in
  * shape) alone and 160 (16) with the velocity in axis order, so it is left out.
- * 150 words differ, 22 in shape.
+ * Working out endSide before startSide gives 144 words, but 26 in shape, and
+ * the register oracle then gets no closer than 107 words, forcing 25 pseudos,
+ * against 71 forcing 16. 150 words differ, 22 in shape.
  */
 #ifdef NON_MATCHING
 s32 FindPinHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY, s32 endZ,
