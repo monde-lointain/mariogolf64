@@ -3707,12 +3707,16 @@ void GetGroundLightColors(GroundLightColor* light, GroundLightColor* shade) {
  * indexing heightRows there; the register oracle then gets to 94 words forcing
  * 9 pseudos, where it got to 107. The permuter's best, 134 words (16 in shape),
  * sets heights inside the texel loop, which resets it for each texel and so
- * changes what is drawn. Writing the fade's kept weight into its three uses, in
- * place of keptWeight, gives 117 words, 23 in shape, but the oracle then gets
- * no closer than 111 words, forcing 10, against 94 forcing 9. Widening the
- * shaded color's alpha to an s32 or u32 gives 110 words (18 in shape), and its
- * blue 120 (22), but the original stores all four channels as halfwords, with
- * sh to 0x478-0x47E($sp). 154 words differ, 14 in shape.
+ * changes what is drawn. Pointing heights at each tile's first column, as
+ * trailing and leading are, gives 110 words (12 in shape) at the top of the
+ * tile loop and 108 (20) beside them, but the oracle then gets no closer than
+ * 106 words forcing 10, and 108 forcing none, against 94 forcing 9. Writing the
+ * fade's kept weight into its three uses, in place of keptWeight, gives 117
+ * words, 23 in shape, but the oracle then gets no closer than 111 words,
+ * forcing 10, against 94 forcing 9. Widening the shaded color's alpha to an s32
+ * or u32 gives 110 words (18 in shape), and its blue 120 (22), but the original
+ * stores all four channels as halfwords, with sh to 0x478-0x47E($sp). 154 words
+ * differ, 14 in shape.
  */
 #ifdef NON_MATCHING
 void ShadeGroundTiles(void) {
