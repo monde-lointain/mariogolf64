@@ -2,9 +2,6 @@
  * The camera editor that moves the opening's camera: its eye and look-at point
  * move, turn, tilt and zoom at set speeds.
  */
-/* Takes GCC's built-in fabsf: with the game's inline assembly, MoveEditorPoint
- * keeps its abs.s where it is written and grows by 2 words */
-#define USES_BUILTIN_FABSF
 #include "common.h"
 
 #include "camera_editor.h"
@@ -207,17 +204,19 @@ void MoveEditorPoint(s32 index, f32 x, f32 y, f32 z, s32 frameCount) {
   g_CameraEditor.targets[index][1] = y;
   g_CameraEditor.targets[index][2] = z;
 
-  /* The arguments become the offsets, and x the larger of the ground ones */
+  /* The arguments become the offsets, and x the larger of the ground ones.
+   * The magnitudes come from fabs in double precision, which GCC narrows to
+   * abs.s: fabsf gives 28 differing words, and fabs without the casts 18 */
   x -= g_CameraEditor.points[index][0];
   y -= g_CameraEditor.points[index][1];
   z -= g_CameraEditor.points[index][2];
   g_CameraEditor.moveAxes[index] = EDITOR_MOVE_AXIS_X;
-  if (fabsf(x) < fabsf(z)) {
+  if ((f32)fabs(x) < (f32)fabs(z)) {
     g_CameraEditor.moveAxes[index] = EDITOR_MOVE_AXIS_Z;
     x = z;
   }
 
-  if (fabsf(x) < fabsf(y)) {
+  if ((f32)fabs(x) < (f32)fabs(y)) {
     g_CameraEditor.moveAxes[index] = EDITOR_MOVE_AXIS_Y;
   }
 }
@@ -250,14 +249,8 @@ void MoveEditorCamera(s32 index, f32 x, f32 y, f32 z, s32 frameCount) {
 void TurnEditorCamera(s32 index, Radians angle, s32 frameCount) {
   s32 easeFrameCount;
   f32 speed;
-  f32 magnitude;
 
-  /* The magnitude in a block of its own is there to match; without it, or
-   * tested as fabsf(angle) itself, 8 words differ, 4 in shape, as with
-   * __builtin_fabsf. A ternary gives 8, all in shape, fabs 26 and the
-   * comparison spelled as two tests 23 */
-  IN_OWN_BLOCK(magnitude = fabsf(angle));
-  if (magnitude < 0.001f) {
+  if (fabsf(angle) < 0.001f) {
     g_CameraEditor.heading += angle;
     return;
   }
@@ -294,14 +287,8 @@ void TurnEditorCamera(s32 index, Radians angle, s32 frameCount) {
 void TiltEditorCamera(s32 index, Radians angle, s32 frameCount) {
   s32 easeFrameCount;
   f32 speed;
-  f32 magnitude;
 
-  /* The magnitude in a block of its own is there to match; without it, or
-   * tested as fabsf(angle) itself, 8 words differ, 4 in shape, as with
-   * __builtin_fabsf. A ternary gives 8, all in shape, fabs 26 and the
-   * comparison spelled as two tests 23 */
-  IN_OWN_BLOCK(magnitude = fabsf(angle));
-  if (magnitude < 0.001f) {
+  if (fabsf(angle) < 0.001f) {
     g_CameraEditor.pitch += angle;
     return;
   }
@@ -337,27 +324,22 @@ void TiltEditorCamera(s32 index, Radians angle, s32 frameCount) {
 void ZoomEditorCamera(s32 index, f32 distance, s32 frameCount) {
   s32 easeFrameCount;
   f32 change;
-  f32 speed; /* Also the magnitude, to match: a local of its own gives 11
-              * differing words, and testing fabsf directly 12 */
+  f32 speed;
 
   change = distance - g_CameraEditor.distance;
-  speed = fabsf(change);
-  /* The test in a block of its own, to match; without it 3 words differ, and
-   * with only the block ended before it 18 */
-  IN_OWN_BLOCK(if (speed < 0.1f) {
+  if (fabsf(change) < 0.1f) {
     g_CameraEditor.distance = distance;
     return;
-  });
+  }
 
   if (frameCount != 0) {
     easeFrameCount = frameCount / 4;
     g_CameraEditor.zoomTopSpeed = change / (frameCount - easeFrameCount);
     speed = g_CameraEditor.zoomTopSpeed;
     g_CameraEditor.zoomAcceleration = speed / (easeFrameCount + 1);
-    /* The braking distance in a block of its own, and in double precision,
-     * to match; without the block 32 words differ, and a float quarter or a
-     * division by 4 gives 9 */
-    IN_OWN_BLOCK(g_CameraEditor.zoomBrakingDistance = fabsf(change) * 0.25);
+    /* The braking distance in double precision, to match; a float quarter or
+     * a division by 4 gives 9 differing words */
+    g_CameraEditor.zoomBrakingDistance = fabsf(change) * 0.25;
   }
 
   g_CameraEditor.zoomTarget = distance;
@@ -476,8 +458,10 @@ void StopEditorMoves(void) {
  * turn's speed and braking angle, as here, so the gain is incidental. Setting a
  * reached target's z before its y also gives 266 words (80 in shape), but the
  * oracle then comes no closer than 165 words, forcing 48 pseudos, against 161
- * forcing 49, and the offsets and velocities around it go x, y, z. 278 words
- * differ, 80 in shape.
+ * forcing 49, and the offsets and velocities around it go x, y, z. Those
+ * counts were measured with GCC's built-in fabsf, when 278 words differed, 80
+ * in shape. With the game's fabsf, an abs.s in volatile inline assembly, 188
+ * words differ, 44 in shape.
  *
  * The eight flag tests before letting go of the pivot each clear isDone:
  * jump.c turns each "if (test) isDone = FALSE" into an and with the negated
