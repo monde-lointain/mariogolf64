@@ -1736,8 +1736,8 @@ void UpdateDebugScenes(void) {
   }
 
   if (IsGameFlagSet(GAME_FLAG_SHOW_SURFACE_NAME)) {
-    PrintDebugText(GetSurfaceInfoAt(
-                       g_CurrentShot.unk44[AXIS_X], g_CurrentShot.unk44[AXIS_Z])
+    PrintDebugText(GetSurfaceInfoAt(g_CurrentShot.targetPoint[AXIS_X],
+                       g_CurrentShot.targetPoint[AXIS_Z])
                        ->name,
         SURFACE_NAME_COLUMN, SURFACE_NAME_ROW);
   }

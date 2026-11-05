@@ -2466,7 +2466,7 @@ void StartContactEffect(s32 effect) {
     } else if (effect == CONTACT_EFFECT_PUTT) {
       f_ContactStyle = CONTACT_STYLE_PUTT;
     } else {
-      f_ContactStyle = GetContactStyle(&g_Players[g_RoundHud.unk87]);
+      f_ContactStyle = GetContactStyle(&g_Players[g_RoundHud.shooterIndex]);
     }
   } else {
     f_IsContactEffectFading = TRUE;

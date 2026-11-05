@@ -28,7 +28,8 @@ typedef struct CurrentShot {
   /* 0x3C */ s32 aimCameraHeight; /* Added to the lower of the ground's and the
                                      ball's heights */
   /* 0x40 */ s32 gaugeFrame; /* Frames since the swing gauge started */
-  /* 0x44 */ CoursePoint unk44;
+  /* 0x44 */ CoursePoint targetPoint; /* On the ground, the selected club's
+                                         distance along the heading */
   /* 0x50 */ s32 cupDistance; /* From GetCupDistance */
   /* 0x54 */ s8 unk54;
 } CurrentShot; /* size = 0x58 */

@@ -705,12 +705,12 @@ void StartFlightCamera(s32 earlierFlightCount) {
    */
   if (!g_SimulatedShot.startsOnGreen) {
     if (earlierFlightCount != 0 && g_ContactEffect == CONTACT_EFFECT_NONE) {
-      g_RoundHud.unk17 = TRUE;
+      g_RoundHud.isBallTrailShown = TRUE;
     } else {
-      g_RoundHud.unk17 = FALSE;
+      g_RoundHud.isBallTrailShown = FALSE;
     }
   } else {
-    g_RoundHud.unk17 = FALSE;
+    g_RoundHud.isBallTrailShown = FALSE;
   }
 
   g_BallFlightStep = 0;
@@ -1090,7 +1090,7 @@ void PlayFlightSounds(s32 step) {
       g_Players[g_CurrentShot.playerIndex].strokeCount - g_HoleSetup.par;
   shownRingCount = 0;
   if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
-    player = &g_Players[g_RoundHud.unk87];
+    player = &g_Players[g_RoundHud.shooterIndex];
     for (i = 0; i != RING_COUNT; i++) {
       shownRingCount += player->ringStates[i] == RING_STATE_SHOWN;
     }
@@ -3046,7 +3046,7 @@ INCLUDE_ASM("asm/nonmatchings/shot_camera", ChooseFlightCameraKind);
  * of the ball's flight, and advances g_BallFlightStep when isAdvancing is 1.
  * Once the flight has ended, it counts the landing wait and returns TRUE when
  * it is over. The START button clears g_RoundHud.isWindIndicatorShown through
- * g_RoundHud.isProgressShown and g_RoundHud.unk13.
+ * g_RoundHud.isProgressShown and g_RoundHud.isShotLengthShown.
  */
 s32 UpdateFlightCamera(Boolean isAdvancing, s32 buttons) {
   f32 point[3];
@@ -3057,9 +3057,9 @@ s32 UpdateFlightCamera(Boolean isAdvancing, s32 buttons) {
   s32* flightStep;
 
   if (!isAdvancing) {
-    g_RoundHud.unk13 = 0;
+    g_RoundHud.isShotLengthShown = 0;
   } else {
-    g_RoundHud.unk13 = 1;
+    g_RoundHud.isShotLengthShown = 1;
   }
 
   if (buttons & START_BUTTON) {
@@ -3070,7 +3070,7 @@ s32 UpdateFlightCamera(Boolean isAdvancing, s32 buttons) {
     g_RoundHud.isClubHeadIconShown = FALSE;
     g_RoundHud.isUnreadItemShown = 0;
     g_RoundHud.isProgressShown = 0;
-    g_RoundHud.unk13 = 0;
+    g_RoundHud.isShotLengthShown = 0;
   } else {
     g_RoundHud.isClubPanelShown = f_IsFlightHudShown;
     g_RoundHud.isWindIndicatorShown = f_IsFlightHudShown;

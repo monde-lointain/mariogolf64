@@ -2603,7 +2603,7 @@ void StartPlayerShot(s32 playerIndex) {
   g_RoundHud.isUnreadItemShown = TRUE;
   g_RoundHud.isHoleIntroTextShown = FALSE;
   g_RoundHud.isClubPanelShown = TRUE;
-  g_RoundHud.unk13 = FALSE;
+  g_RoundHud.isShotLengthShown = FALSE;
   g_RoundHud.isProgressShown = TRUE;
   g_RoundHud.unk84[0] = TRUE;
   g_RoundHud.unk84[1] = FALSE;
@@ -3043,13 +3043,13 @@ void ShowHoleOutBanner(s32 playerIndex) {
  * fold_truthop compiles it to sltiu, sltu and and, and 392 words differ (148 in
  * shape), with == FALSE or != 0 too. A focused permuter run's best by words,
  * 311 (145 in shape), comes mostly from copying the heading, in the aiming
- * state, into a function-wide variable that the angle in the g_RoundHud.unkF
- * block at the end also reads: that alone gives 325 words (147 in shape), but
- * outside the aiming state the angle then reads the variable unset, and the
- * original reloads g_CurrentShot.heading there with an lhu. Setting nextState
- * after the calls when a ring shot holes out, as starting over does, gives 386
- * words (140 in shape); it is kept first, as the training choice box's hole out
- * has it.
+ * state, into a function-wide variable that the angle in the
+ * g_RoundHud.isDistanceSignShown block at the end also reads: that alone gives
+ * 325 words (147 in shape), but outside the aiming state the angle then reads
+ * the variable unset, and the original reloads g_CurrentShot.heading there with
+ * an lhu. Setting nextState after the calls when a ring shot holes out, as
+ * starting over does, gives 386 words (140 in shape); it is kept first, as the
+ * training choice box's hole out has it.
  *
  * Setting a local to MAX_ROLL_SKIP_STEPS before the player loop and bounding
  * the roll skip with it gives 336 words (144 in shape), but the build still
@@ -3386,8 +3386,8 @@ void UpdateTurns(void) {
         UpdateContest(FALSE);
         ResetShotSetup();
         g_RoundHud.flags = 0;
-        g_RoundHud.unk17 = 0;
-        g_RoundHud.unk87 = playerIndex;
+        g_RoundHud.isBallTrailShown = 0;
+        g_RoundHud.shooterIndex = playerIndex;
         ResetShotOffsetMarker();
         if (IsCharacterSlotBusy(0)) {
           FreeCharacterAndReactionLight(0);
@@ -3417,8 +3417,8 @@ void UpdateTurns(void) {
                 g_TurnBallSimulation.position[AXIS_Z] -
                     g_HoleSetup.cupPosition[AXIS_Z]);
         g_RoundHud.greenGridState = 1;
-        g_RoundHud.unkF = 1;
-        g_RoundHud.unk12 = 1;
+        g_RoundHud.isDistanceSignShown = 1;
+        g_RoundHud.isPinFlagShown = 1;
         f_ShotLaunch.clubIndex = g_CurrentShot.clubSlot;
         f_ShotLaunch.shotMode = g_CurrentShot.shotMode;
         g_ShotSetupFrameCount = 0;
@@ -4100,8 +4100,8 @@ void UpdateTurns(void) {
           g_RoundHud.greenGridState = 2;
         }
 
-        g_RoundHud.unkF = 0;
-        g_RoundHud.unk12 = 0;
+        g_RoundHud.isDistanceSignShown = 0;
+        g_RoundHud.isPinFlagShown = 0;
         if (g_ShotFlags & SHOT_FLAG_NO_IMPACT_POINT) {
           g_RoundHud.flags = HUD_FLAG_SETTING_POWER;
         } else {
@@ -4176,8 +4176,8 @@ void UpdateTurns(void) {
             g_RoundHud.greenGridState = 1;
           }
 
-          g_RoundHud.unkF = 1;
-          g_RoundHud.unk12 = 1;
+          g_RoundHud.isDistanceSignShown = 1;
+          g_RoundHud.isPinFlagShown = 1;
         }
 
         g_CurrentShot.gaugeFrame++;
@@ -5269,7 +5269,7 @@ void UpdateTurns(void) {
     GetFramedView(g_Cameras[0].view.eye, g_Cameras[0].view.lookAt);
   }
 
-  if (g_RoundHud.unkF) {
+  if (g_RoundHud.isDistanceSignShown) {
     s32 distance = GetSelectedShotDistance();
     Radians angle = (u16)g_CurrentShot.heading * BINARY_ANGLE_TO_RADIANS;
     f32 cosine;
@@ -5285,12 +5285,12 @@ void UpdateTurns(void) {
     }
 
     length = distance * scale;
-    g_CurrentShot.unk44[AXIS_X] =
+    g_CurrentShot.targetPoint[AXIS_X] =
         (cosine * length) + g_CurrentShot.ballPosition[AXIS_X];
-    g_CurrentShot.unk44[AXIS_Z] =
+    g_CurrentShot.targetPoint[AXIS_Z] =
         (sinf(angle) * length) + g_CurrentShot.ballPosition[AXIS_Z];
-    g_CurrentShot.unk44[AXIS_Y] = GetGroundHeight(
-        g_CurrentShot.unk44[AXIS_X], g_CurrentShot.unk44[AXIS_Z]);
+    g_CurrentShot.targetPoint[AXIS_Y] = GetGroundHeight(
+        g_CurrentShot.targetPoint[AXIS_X], g_CurrentShot.targetPoint[AXIS_Z]);
   }
 
   UpdateGolfBalls();

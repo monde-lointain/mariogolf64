@@ -300,7 +300,7 @@ void ClearAllGameFlags(void);
 #define GAME_FLAG_HIDE_GOLF_BALLS 0x18
 #define GAME_FLAG_HIDE_CHARACTERS 0x19
 
-/* Prints the name of the surface under the shot's unk44 */
+/* Prints the name of the surface under the shot's targetPoint */
 #define GAME_FLAG_SHOW_SURFACE_NAME 0x1A
 /* Lets controller 2's Z toggle HIDE_DEBUG_TEXT */
 #define GAME_FLAG_DEBUG_TEXT_BUTTON 0x1B

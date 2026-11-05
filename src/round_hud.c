@@ -1210,7 +1210,7 @@ void StartShotPanel(void) {
 
   g_ShotPanelOffsetX = SHOT_PANEL_START_OFFSET_X;
   ResetShotModeChange();
-  LoadContactImages(&g_Players[g_RoundHud.unk87]);
+  LoadContactImages(&g_Players[g_RoundHud.shooterIndex]);
 }
 
 /*
@@ -2189,7 +2189,7 @@ void DrawBallTrail(Gfx** displayListHead, CameraMatrices* matrices) {
   f32 scale;
   Gfx* cycleTypeCommand;
 
-  if (g_BallTrailState != BALL_TRAIL_OFF && g_RoundHud.unk17) {
+  if (g_BallTrailState != BALL_TRAIL_OFF && g_RoundHud.isBallTrailShown) {
     if (g_BallTrailState == BALL_TRAIL_RECORDING) {
       if (++f_BallTrailHead == BALL_TRAIL_LENGTH) {
         f_BallTrailHead = 0;
@@ -2914,7 +2914,7 @@ void StartShotEffect(s32 effect) {
   }
 
   if (effect == SHOT_EFFECT_LONG_SHOT) {
-    contactStyle = GetContactStyle(&g_Players[g_RoundHud.unk87]);
+    contactStyle = GetContactStyle(&g_Players[g_RoundHud.shooterIndex]);
     if (ShowsLongShotEffect(contactStyle)) {
       PlaySoundWithEffects(SOUND_LONG_SHOT, LONG_SHOT_SOUND_CHANNEL,
           LONG_SHOT_SOUND_VOLUME, LONG_SHOT_SOUND_REVERB, SOUND_FULL_SCALE);
@@ -2974,7 +2974,7 @@ void DrawShotEffect(Gfx** displayListHead) {
     return;
   }
 
-  contactStyle = GetContactStyle(&g_Players[g_RoundHud.unk87]);
+  contactStyle = GetContactStyle(&g_Players[g_RoundHud.shooterIndex]);
   if (ShowsLongShotEffect(contactStyle)) {
     scale = sinf(f_ShotEffectTime) * SHOT_EFFECT_SCALE;
     f_ShotEffectRotation[AXIS_X] = 0.0f;
@@ -3958,7 +3958,7 @@ void DrawRoundHud(CameraView* view) {
         g_DisplayListHead++, 0, TextureAddress(f_WhiteDistancePalette));
     ringCount = 0;
     if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
-      shooter = &g_Players[g_RoundHud.unk87];
+      shooter = &g_Players[g_RoundHud.shooterIndex];
       for (i = 0; i != RING_COUNT; i++) {
         ringCount += shooter->ringStates[i] == RING_STATE_SHOWN;
       }
@@ -3971,7 +3971,7 @@ void DrawRoundHud(CameraView* view) {
     if (g_IsDebugEnabled &&
         (g_ControllerStates[HUD_OFFSET_CONTROLLER].pressedButtons &
             D_CBUTTONS)) {
-      shooter = &g_Players[g_RoundHud.unk87];
+      shooter = &g_Players[g_RoundHud.shooterIndex];
       for (i = 0; i != RING_COUNT; i++) {
         shooter->ringStates[i] = RING_STATE_NONE;
       }
@@ -4096,7 +4096,7 @@ void DrawRoundHud(CameraView* view) {
     Player* player;
 
     selectedClub = GetSelectedClub();
-    player = &g_Players[g_RoundHud.unk87];
+    player = &g_Players[g_RoundHud.shooterIndex];
     if (selectedClub->surfaceMask & CLUB_SURFACE_GREEN) {
       sprintf(g_PrintBuffer, "%3d%c", GetSelectedShotDistance(),
           SHADOWED_FEET_GLYPH);
@@ -4116,10 +4116,10 @@ void DrawRoundHud(CameraView* view) {
     }
   }
 
-  if (g_RoundHud.unk13 && !g_IsCupViewShown) {
+  if (g_RoundHud.isShotLengthShown && !g_IsCupViewShown) {
     Player* player;
 
-    player = &g_Players[g_RoundHud.unk87];
+    player = &g_Players[g_RoundHud.shooterIndex];
     shotLength = IntLength2D(g_CurrentShot.ballPosition[AXIS_X] -
             g_TurnBallSimulation.position[AXIS_X],
         g_CurrentShot.ballPosition[AXIS_Z] -

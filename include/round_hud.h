@@ -71,17 +71,17 @@ typedef struct RoundHud {
                                     the cup, the ring count and the
                                     stopwatch */
   /* 0x0E */ u8 unkE;
-  /* 0x0F */ s8 unkF;
+  /* 0x0F */ s8 isDistanceSignShown; /* At g_CurrentShot.targetPoint */
   /* 0x10 */ s8 greenGridState; /* Whether the grid over the ground shows; B
                                    toggles it while aiming */
   /* 0x11 */ u8 unk11;
-  /* 0x12 */ s8 unk12;
-  /* 0x13 */ s8 unk13;
+  /* 0x12 */ s8 isPinFlagShown;
+  /* 0x13 */ s8 isShotLengthShown; /* How far the ball has flown */
   /* 0x14 */ u8 unk14[2];
   /* 0x16 */ s8
       isHoleIntroTextShown; /* Whether the course's name and the hole's number
                                show before the flyover */
-  /* 0x17 */ s8 unk17;
+  /* 0x17 */ s8 isBallTrailShown;
   /*
    * The height of the ball above the cup, in yards, meters and feet, and for
    * each whether the ball is above, below or level with it
@@ -103,7 +103,7 @@ typedef struct RoundHud {
   /* 0x80 */ BinaryAngle clubHeadTilt; /* The icons tilt by half */
   /* 0x82 */ BinaryAngle lieTilt; /* The slope under the ball */
   /* 0x84 */ u8 unk84[3];
-  /* 0x87 */ s8 unk87;
+  /* 0x87 */ s8 shooterIndex; /* Of the player whose turn it is */
   /* 0x88 */ u8 flags; /* HUD_FLAG_* bits */
   /* 0x89 */ u8 areLieArrowsShown; /* While the pause menu sets the lie */
   /* 0x8A */ u8 areWindSpeedArrowsShown;

@@ -506,9 +506,9 @@ void DrawAimGuides(CameraMatrices* matrices) {
 
   club = GetSelectedClub();
   outOfBoundsGreen = sinf(f_OutOfBoundsPulseAngle) * OUT_OF_BOUNDS_GREEN_SWING;
-  surfaceKind =
-      GetSurfaceInfoAt(g_CurrentShot.unk44[AXIS_X], g_CurrentShot.unk44[AXIS_Z])
-          ->kind;
+  surfaceKind = GetSurfaceInfoAt(
+      g_CurrentShot.targetPoint[AXIS_X], g_CurrentShot.targetPoint[AXIS_Z])
+                    ->kind;
   if (g_IsCupViewShown) {
     return;
   }
@@ -519,15 +519,19 @@ void DrawAimGuides(CameraMatrices* matrices) {
   gDPPipeSync(g_DisplayListHead++);
   gDPSetPrimColor(g_DisplayListHead++, 0, 0, 255, 255, 255, 255);
   gDPPipeSync(g_DisplayListHead++);
-  if (!(club->surfaceMask & CLUB_SURFACE_GREEN) && g_RoundHud.unkF != 0) {
-    position[AXIS_X] = g_CurrentShot.unk44[AXIS_X] * COURSE_TO_WORLD_SCALE;
-    position[AXIS_Y] = g_CurrentShot.unk44[AXIS_Y] * COURSE_TO_WORLD_SCALE;
-    position[AXIS_Z] = g_CurrentShot.unk44[AXIS_Z] * COURSE_TO_WORLD_SCALE;
+  if (!(club->surfaceMask & CLUB_SURFACE_GREEN) &&
+      g_RoundHud.isDistanceSignShown != 0) {
+    position[AXIS_X] =
+        g_CurrentShot.targetPoint[AXIS_X] * COURSE_TO_WORLD_SCALE;
+    position[AXIS_Y] =
+        g_CurrentShot.targetPoint[AXIS_Y] * COURSE_TO_WORLD_SCALE;
+    position[AXIS_Z] =
+        g_CurrentShot.targetPoint[AXIS_Z] * COURSE_TO_WORLD_SCALE;
     depth = ProjectPoint(
         position[AXIS_X], position[AXIS_Y], position[AXIS_Z], &point);
     if (depth < 0) {
-      heightYards =
-          (g_CurrentShot.ballPosition[AXIS_Y] - g_CurrentShot.unk44[AXIS_Y]) *
+      heightYards = (g_CurrentShot.ballPosition[AXIS_Y] -
+                        g_CurrentShot.targetPoint[AXIS_Y]) *
           YARDS_PER_UNIT;
       if (heightYards > MAX_HEIGHT_YARDS) {
         heightYards = MAX_HEIGHT_YARDS;
@@ -717,7 +721,7 @@ void DrawAimGuides(CameraMatrices* matrices) {
     g_ShotSetupFrameCount++;
   }
 
-  if (g_RoundHud.unk12 == 1) {
+  if (g_RoundHud.isPinFlagShown == 1) {
     position[AXIS_X] = g_HoleSetup.cupPosition[AXIS_X] * COURSE_TO_WORLD_SCALE;
     position[AXIS_Z] = g_HoleSetup.cupPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE;
     if (g_PauseScreen == PAUSE_SCREEN_FREE_LOOK) {

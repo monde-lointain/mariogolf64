@@ -1513,7 +1513,7 @@ DIM_BACKDROP:
               g_RoundHud.isClubHeadIconShown = FALSE;
               g_RoundHud.isUnreadItemShown = 0;
               g_RoundHud.isClubPanelShown = 0;
-              g_RoundHud.unk13 = 0;
+              g_RoundHud.isShotLengthShown = 0;
               g_RoundHud.isProgressShown = 0;
             }
 
