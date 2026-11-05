@@ -782,8 +782,14 @@ enum BallSprite {
  * sync and render mode in each case 677, the last case as default 827, a
  * default case 654, and an if chain 827. A focused permuter run's best, 620
  * words (74 in shape), keeps G_BL_CLR_IN << 30, which is 0, in an unsigned long
- * variable that three render modes or in, in place of the constant zero. 654
- * words differ, 90 in shape.
+ * variable that three render modes or in, in place of the constant zero.
+ * Setting a local to BALL_NEAR_DEPTH, BALL_NEAREST_DEPTH or
+ * BALL_FULL_SPRITE_DEPTH on each ball's pass and testing it gives 518 words (88
+ * in shape) for each of the three. With BALL_NEAR_DEPTH, the constant still
+ * folds into the same slti immediates the original has, and the build differs
+ * from this one only in which temporaries hold display list words and in one
+ * store moved by a slot, so the gain comes from the extra pseudo's numbering,
+ * not from the code. 654 words differ, 90 in shape.
  */
 #ifdef NON_MATCHING
 void DrawGolfBalls(CameraMatrices* matrices UNUSED) {
