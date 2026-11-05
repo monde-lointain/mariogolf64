@@ -252,7 +252,11 @@ void ResetBallSimulations(void) {
  * all three position updates, as the opening's copy clears it after its
  * velocities, which keeps 743 words and takes the shape from 217 to 215; the
  * register oracle then gets to 409 words forcing 124 pseudos, against 413
- * forcing 123. 743 words differ, 215 in shape.
+ * forcing 123. A triangle bounce's spin grip, 1.0f - bounce, is written into
+ * both velocity updates, as their other factors are, where a grip local gave
+ * 743 words (215 in shape) against 727 (209); in the opening's copy the two
+ * forms give 288 words and the same oracle result. 727 words differ, 209 in
+ * shape.
  */
 #ifdef NON_MATCHING
 s32 StepBallSimulation(BallSimulation* simulation) {
@@ -1249,12 +1253,13 @@ s32 StepBallSimulation(BallSimulation* simulation) {
             simulation->spinSpeed * cosf(simulation->spinHeading);
         s32 spinVelocityZ =
             simulation->spinSpeed * sinf(simulation->spinHeading);
-        f32 grip = 1.0f - bounce;
 
-        velocity[AXIS_X] += (spinVelocityX - velocity[AXIS_X]) * grip *
-            AbsFloat(plane.normal[AXIS_Y]) * TRIANGLE_SPIN_GRIP;
-        velocity[AXIS_Z] += (spinVelocityZ - velocity[AXIS_Z]) * grip *
-            AbsFloat(plane.normal[AXIS_Y]) * TRIANGLE_SPIN_GRIP;
+        velocity[AXIS_X] += (spinVelocityX - velocity[AXIS_X]) *
+            (1.0f - bounce) * AbsFloat(plane.normal[AXIS_Y]) *
+            TRIANGLE_SPIN_GRIP;
+        velocity[AXIS_Z] += (spinVelocityZ - velocity[AXIS_Z]) *
+            (1.0f - bounce) * AbsFloat(plane.normal[AXIS_Y]) *
+            TRIANGLE_SPIN_GRIP;
         spinVelocityX *= BOUNCE_SPIN_DECAY;
         spinVelocityZ *= BOUNCE_SPIN_DECAY;
         spinVelocityX = spinVelocityX +
