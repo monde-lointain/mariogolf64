@@ -92,7 +92,7 @@ typedef struct ClubSetStats {
   /* 0x00 */ u8 unk0[0x1C];
   /* 0x1C */ s8 pitch; /* In degrees, added to each club's */
   /* 0x1D */ s8 curve; /* Positive draws, negative fades */
-  /* 0x1E */ s8 unk1E;
+  /* 0x1E */ s8 lieRatingLevel; /* Picks the clubs' lieRatingPercent */
   /* 0x1F */ s8 mishitResistance; /* Lowers the clubs' mishitScale */
   /* 0x20 */ u8 unk20[0x3C - 0x20];
   /* 0x3C */ ClubStats clubs[CLUB_SET_SIZE]; /* The putter's run 4 bytes into
@@ -641,11 +641,12 @@ static Club f_NoClub = {80, "0000", 0, {0}, 0, 230, -11, 0, 14, 100,
     ASSET_DRIVER_HEAD_IMAGE, 0, {0}};
 static ShotLaunch f_ClubTestShot = {
     STRAIGHT_ANGLE, NO_CLUB, MAX_LAUNCH_POWER, 0, 0, 0, 0, SHOT_MODE_NORMAL};
-/* A generated club's lieRatingPercent, by its set's unk1E from -MAX_SET_UNK1E
- * to MAX_SET_UNK1E; other unk1E values give DEFAULT_LIE_RATING_PERCENT */
-#define MAX_SET_UNK1E 4
+/* A generated club's lieRatingPercent, by its set's lieRatingLevel from
+ * -MAX_LIE_RATING_LEVEL to MAX_LIE_RATING_LEVEL; other levels give
+ * DEFAULT_LIE_RATING_PERCENT */
+#define MAX_LIE_RATING_LEVEL 4
 #define DEFAULT_LIE_RATING_PERCENT 100
-static u8 f_LieRatingPercents[(MAX_SET_UNK1E * 2) + 1] = {
+static u8 f_LieRatingPercents[(MAX_LIE_RATING_LEVEL * 2) + 1] = {
     30, 50, 70, 80, 100, 115, 120, 145, 170};
 /* Each stock club set's curve, from -4, the strongest fade, to 4 */
 static s8 f_StockCurves[CLUB_SET_COUNT] = {
@@ -1207,12 +1208,12 @@ void GenerateClubSet(s32 setIndex, ClubSetStats* stats) {
       club->sideSpin = -MAX_CLUB_SIDE_SPIN;
     }
 
-    if ((u8)(stats->unk1E + MAX_SET_UNK1E) >=
+    if ((u8)(stats->lieRatingLevel + MAX_LIE_RATING_LEVEL) >=
         ARRAY_COUNT(f_LieRatingPercents)) {
       club->lieRatingPercent = DEFAULT_LIE_RATING_PERCENT;
     } else {
       club->lieRatingPercent =
-          f_LieRatingPercents[stats->unk1E + MAX_SET_UNK1E];
+          f_LieRatingPercents[stats->lieRatingLevel + MAX_LIE_RATING_LEVEL];
     }
 
     club->mishitScale = BASE_MISHIT_SCALE -
