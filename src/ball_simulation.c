@@ -246,7 +246,9 @@ void ResetBallSimulations(void) {
  * second toCup, for a ball between CUP_PULL_INNER_RADIUS and
  * CUP_PULL_OUTER_RADIUS of the cup, is set in axis order too, which took the
  * draft from 749 words to 747 and from 225 in shape to 221; with its Y of 1
- * first, as the draft had it, 749 differed. 747 words differ, 221 in shape.
+ * first, as the draft had it, 749 differed. Past MAX_STEP_COUNT, the ball's
+ * position is set before its velocity, both in axis order, which took the draft
+ * from 747 words (221 in shape) to 743 (217). 743 words differ, 217 in shape.
  */
 #ifdef NON_MATCHING
 s32 StepBallSimulation(BallSimulation* simulation) {
@@ -397,9 +399,9 @@ s32 StepBallSimulation(BallSimulation* simulation) {
 
     if (++simulation->stepCount >= MAX_STEP_COUNT) {
       simulation->position[AXIS_X] = g_HoleSetup.cupPosition[AXIS_X] + 614.4f;
+      simulation->position[AXIS_Z] = g_HoleSetup.cupPosition[AXIS_Z];
       simulation->velocity[AXIS_X] = 0;
       simulation->velocity[AXIS_Z] = 0;
-      simulation->position[AXIS_Z] = g_HoleSetup.cupPosition[AXIS_Z];
     }
 
     if (simulation->state == BALL_STATE_ROLLING) {
