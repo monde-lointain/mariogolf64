@@ -357,7 +357,11 @@ void DrawBillboard(Gfx** gfxPtr, Billboard* billboard,
  * loop alone 164. An s16 viewDepth gives 133 words (11 in shape) but loads the
  * field's low half with an lh, and an s8 billboardIndex 135 (13) but loads each
  * order entry's low byte with an lb, where the original loads the depth with lw
- * and the entries with lhu. 139 words differ, 17 in shape.
+ * and the entries with lhu. Reading the texture index from the billboard at
+ * both uses in the second loop, which counts down, gives 121 words (21 in
+ * shape), but it loads the field again after IsDebugBButtonView, where the
+ * original keeps its one load in $s4 for the call; a focused permuter run's 88
+ * words test textureIndex before setting it. 139 words differ, 17 in shape.
  */
 #ifdef NON_MATCHING
 void DrawBillboards(CameraMatrices* cameraMatrices, s32 cameraIndex) {
