@@ -1566,19 +1566,17 @@ BillboardCell GetBillboardCell(s32 textureIndex, f32 across, f32 down) {
  * sets the hit mask cell there and the fraction of the way along the path,
  * which stays above 1 when nothing is hit, and returns whether something is.
  *
- * Doesn't match: GCC puts fabsf's abs.s in the delay slot of the branch for the
- * first Abs, inverting it, where the original issues it before a branch-likely,
- * and it stores startY to its argument slot one instruction earlier. Casting
- * either side of the division or swapping the Abs terms changes nothing or
- * makes it worse. Writing the division's absolute values as plain conditional
- * expressions, either or both, gives 11 to 15 words (7 to 12 in shape), and as
- * abs() 16 (4). The register oracle's closest result is these 4 words with no
- * register forced, so allocation isn't the cause. 4 words differ, 2 in shape.
- *
- * Testing the sum itself rather than comparing it with 0, or converting
- * startSide or the sum to f32 explicitly, gives the same 4 words (2 in
- * shape); testing for 0 with the arms swapped gives 12 (10), and setting
- * 0.0f before an if without an else 11 (7).
+ * Doesn't match: the original stores fromY, which stays in startY's register,
+ * to startY's argument slot after clearing isHit's stack slot, where this
+ * stores it one instruction before. Moving any one of the initialized
+ * declarations to any other place among them, 99 orders, leaves 2 words or
+ * more. With fabsf an abs.s in volatile inline assembly, the hit fraction's
+ * abs.s comes before the branch-likely as in the original; with GCC's
+ * built-in fabsf it filled the branch's delay slot and 4 words differed, 2
+ * in shape. Testing the sum itself rather than comparing it with 0 gives the
+ * same 2 words, the arms swapped on a test for 0 gives 10 (8 in shape), and
+ * setting 0.0f before an if without an else 9 (5). 2 words differ, none in
+ * shape.
  */
 #ifdef NON_MATCHING
 s32 FindBillboardHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
@@ -1752,16 +1750,16 @@ void MoveBallToCupEdge(BallSimulation* simulation) {
  * the register oracle then gets no closer than 107 words, forcing 25 pseudos,
  * against 71 forcing 16. Working out the end side before the start side gives
  * 144 words (26 in shape), but the original multiplies the start side's terms
- * first; the start side before the end-to-cup values ties at 150. 150 words
- * differ, 22 in shape.
+ * first; the start side before the end-to-cup values ties at 150. Those
+ * counts were measured with GCC's built-in fabsf. 145 words differ, 17 in
+ * shape.
  *
- * As in FindBillboardHit, GCC puts fabsf's abs.s for the hit fraction in the
- * delay slot of the branch for the divisor's first Abs, inverting it to a
- * bgez, where the original issues it before a branch-likely. Testing the sum
- * itself rather than comparing it with 0, or converting startSide or the sum
- * to f32 explicitly, gives the same 150 words (22 in shape); testing for 0
- * with the arms swapped gives 156 (28), and setting 0.0f before an if
- * without an else 159 (27).
+ * With fabsf an abs.s in volatile inline assembly, the hit fraction's abs.s
+ * comes before the branch-likely as in the original, which took the draft
+ * from 150 words differing, 22 in shape, to 145 (17). Testing the sum itself
+ * rather than comparing it with 0 gives the same 145 words, the arms swapped
+ * on a test for 0 153 (25), and setting 0.0f before an if without an else
+ * 154 (22).
  */
 #ifdef NON_MATCHING
 s32 FindPinHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY, s32 endZ,
