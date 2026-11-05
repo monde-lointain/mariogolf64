@@ -556,13 +556,17 @@ const char f_CompactHoleFormat[] = "Hole%d";
  * Grouping the tiles' y as g_Scorecard.y + (rowOffset + TILE_TOP) gives 111
  * words, 49 in shape; stepping rowOffset as i * MATCH_ROW_SPACING gives 183.
  * The win arrow's rise is read once, before the strokes test, as the original
- * does (86 words, 66 in shape, reading it in each call). The tile's first
- * piece's right edge adds the scorecard's x last; added first, as before, 70
- * words differed, and the other orders and groupings gave 68 to 103. Its last
- * piece's right edge sums the same way; with the x second, as before, 68 words
- * differed, and this is one of 20 orders and groupings of that sum giving 66.
- * The register oracle's closest result is these 66 words with no register
- * forced, so allocation isn't the cause. 66 words differ, 50 in shape.
+ * does (86 words, 66 in shape, reading it in each call). The tiles' x edges add
+ * the scorecard's x last, but for the middle one. Moving it last in the second
+ * piece's left edge took the draft from 70 words to 68, where the sum's other
+ * orders and groupings gave 68 to 103; in the last piece's right edge from 68
+ * to 66, one of 20 forms giving 66; and in both of the first piece's edges from
+ * 66 to 63, 45 in shape, where either alone gave 65 or 67. Adding it last in
+ * the middle edge, which the second piece's right and the third's left share,
+ * gives 86 words in one and 137 in both; in the wide tile's edges it ties at
+ * 63, first or last, and is added last as in the other tiles. The register
+ * oracle's closest result is these 63 words with no register forced, so
+ * allocation isn't the cause. 63 words differ, 45 in shape.
  */
 #ifdef NON_MATCHING
 void DrawMatchPage(Gfx** displayListHead) {
@@ -733,10 +737,10 @@ void DrawMatchPage(Gfx** displayListHead) {
       imageLeft = (j % TILES_PER_IMAGE_ROW) * TILE_PIECE_WIDTH;
       imageTop = (j / TILES_PER_IMAGE_ROW) * TILE_HEIGHT;
       if (j == WIDE_TILE_INDEX) {
-        DrawTextureRect(&gfx, QuarterPixels(g_Scorecard.x + WIDE_TILE_LEFT),
+        DrawTextureRect(&gfx, QuarterPixels(WIDE_TILE_LEFT + g_Scorecard.x),
             QuarterPixels(g_Scorecard.y + rowOffset + TILE_TOP),
             QuarterPixels(
-                g_Scorecard.x + WIDE_TILE_LEFT + (TILE_PIECE_WIDTH * 3)),
+                WIDE_TILE_LEFT + (TILE_PIECE_WIDTH * 3) + g_Scorecard.x),
             QuarterPixels(g_Scorecard.y + rowOffset + TILE_TOP + TILE_HEIGHT),
             G_TX_RENDERTILE,
             TexelCoordinate(WIDE_TILE_IMAGE_COLUMN * TILE_PIECE_WIDTH),
@@ -744,10 +748,10 @@ void DrawMatchPage(Gfx** displayListHead) {
             TEXEL_STEP_ONE);
       } else {
         DrawTextureRect(&gfx,
-            QuarterPixels(g_Scorecard.x + (j * TILE_SPACING) + TILE_LEFT),
+            QuarterPixels((j * TILE_SPACING) + TILE_LEFT + g_Scorecard.x),
             QuarterPixels(g_Scorecard.y + rowOffset + TILE_TOP),
-            QuarterPixels(g_Scorecard.x + (j * TILE_SPACING) + TILE_LEFT +
-                TILE_PIECE_WIDTH),
+            QuarterPixels((j * TILE_SPACING) + TILE_LEFT + TILE_PIECE_WIDTH +
+                g_Scorecard.x),
             QuarterPixels(g_Scorecard.y + rowOffset + TILE_TOP + TILE_HEIGHT),
             G_TX_RENDERTILE, 0,
             TexelCoordinate(TILE_EDGE_IMAGE_ROW * TILE_HEIGHT), TEXEL_STEP_ONE,
