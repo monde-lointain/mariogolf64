@@ -1878,8 +1878,12 @@ void DrawSavedMiniGolfImage(Gfx** displayListHead);
  * the strips; reading the table at each use gives 401 words, 149 in shape.
  * Reading the name plate into a local too, as a permuter output does, gives 331
  * words, 131 in shape, or 328 and 132 for its strips alone. The register
- * oracle, forcing 31 pseudos' registers, leaves 237 words at best, so the code
- * differs too. 307 words differ, 121 in shape.
+ * oracle, forcing 31 pseudos' registers, left 237 words at best when the draft
+ * gave 307, so the code differs too. Adding the strip's offset to the mode
+ * icon's texels, rather than adding the texel offset last, took the draft from
+ * 307 words differing to 293, 121 in shape to 115; any order that adds the
+ * texel offset to modeImage first gives 293, and a texels pointer set before
+ * the strip loop 320. 293 words differ, 115 in shape.
  */
 #ifdef NON_MATCHING
 void DrawSavedGames(Gfx** displayListHead) {
@@ -2044,9 +2048,8 @@ void DrawSavedGames(Gfx** displayListHead) {
         gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(modeImage)));
         for (holeIndex = 0; holeIndex != MODE_ICON_STRIP_COUNT; holeIndex++) {
           gDPLoadTextureBlock(gfx++,
-              TextureAddress(
-                  (holeIndex * MODE_ICON_WIDTH * MODE_ICON_STRIP_HEIGHT) +
-                  modeImage + LARGE_PALETTED_TEXELS_OFFSET),
+              TextureAddress(modeImage + LARGE_PALETTED_TEXELS_OFFSET +
+                  (holeIndex * MODE_ICON_WIDTH * MODE_ICON_STRIP_HEIGHT)),
               G_IM_FMT_CI, G_IM_SIZ_8b, MODE_ICON_WIDTH, MODE_ICON_STRIP_HEIGHT,
               0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
               G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
