@@ -1499,7 +1499,12 @@ void PlaceAtReactionSpot(Vec3 position, Vec3 rotation, Vec3 scale) {
  * Writing the magnitude of the eye's height as a >= 0.0f ?: on it, which fold
  * turns into the same abs.s under -ffast-math, also leaves the tie (4 words),
  * and inlining float_math.c's fabsf, which masks the sign bit in an integer
- * register, gives 15, 9 in shape.
+ * register, gives 15, 9 in shape. Local-alloc ties only a pseudo that is
+ * local to its block, so the test was tried behind a label, to put the
+ * magnitude in a second block: a while with a break and a goto past the
+ * store each give 9 words differing, 3 in shape, and a switch on the test
+ * 20, 14 in shape. A do-while whose test folds away leaves no label and
+ * the tie (4 words).
  * 4 words differ.
  */
 #ifdef NON_MATCHING
