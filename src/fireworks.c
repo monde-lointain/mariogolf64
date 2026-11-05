@@ -201,7 +201,14 @@ static inline s32 RandomLaunchHeightJitter(void) {
  * two sizes different types. A u16 or u8 row gives 44 words (22 in shape), but
  * masks the row with an andi, 0xffff or 0xff, both for the loop test after the
  * increment and for its use in the body, where the original has no andi at all.
- * 50 words differ, 14 in shape.
+ * A focused permuter run's best, 36 words (8 in shape), holds 64 / 2 in a
+ * temporary at one of the two jitters, copies the half width through a
+ * temporary and works out the row's offset from the center once per row. Of its
+ * natural parts, a local for the shape at all three reads gives 114 words (20
+ * in shape), and at the width and height alone 50 (14); naming the row's offset
+ * once per row, before or after the half width, gives 108 (12), and where the
+ * particle is set 118 (14), or 67 (15) with the shape local. 50 words differ,
+ * 14 in shape.
  */
 #ifdef NON_MATCHING
 void LaunchFirework(Firework* firework, s32 fireworkIndex UNUSED) {
