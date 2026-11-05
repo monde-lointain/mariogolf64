@@ -3924,7 +3924,11 @@ void WriteHexDumpFile(u32* words, s32 byteCount, char* fileName) {
  * out where the vertex change uses it, in a local declared there, rather than
  * once per fine tile beside tileColumn, which took the draft from 2128 words
  * differing to 2037, 488 in shape to 491; written straight into the vertex
- * change it gives the same. 2037 words differ, 491 in shape.
+ * change it gives the same. A u32 groupDetail gives 2026 words (488 in shape),
+ * but it would rank a hidden tile's -1 above every detail level when comparing
+ * it with the s32 field; it compiles 27 signed and 16 unsigned compares and 4
+ * blez where the original, like the s32, has 29, 14 and 5. 2037 words differ,
+ * 491 in shape.
  */
 #ifdef NON_MATCHING
 void DrawHoleEditorGround(CameraMatrices* matrices UNUSED, s32 terrainStyle) {
