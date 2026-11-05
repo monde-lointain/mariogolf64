@@ -275,8 +275,10 @@ extern char f_UnusedModeNamesText[];
 
 static Boolean f_AreResultsLoaded = FALSE;
 static s32 f_ResultsState = RESULTS_SLIDING_IN;
-static s32 f_ResultsUnk78 = 0;
-static s32 f_ResultsUnk7C = 0;
+/* The step within the results' state, from each mode's *_STEP_* values */
+static s32 f_ResultsStep = 0;
+/* Frames the results have run, which some steps reset to time a wait */
+static s32 f_ResultsStepTime = 0;
 static s32 f_ResultsSlide = SCREEN_WIDTH;
 static s32 f_ResultsTop = 0;
 static s32 f_TallySpeed = NORMAL_TALLY_SPEED;
@@ -1830,8 +1832,8 @@ s32 UpdateRoundResults(ControllerState* controller) {
       if (f_ResultsSlide == 1) {
         f_ResultsState = RESULTS_SHOWN;
         f_ResultsSlide = 0;
-        f_ResultsUnk78 = 0;
-        f_ResultsUnk7C = 0;
+        f_ResultsStep = 0;
+        f_ResultsStepTime = 0;
         break;
       }
 
@@ -2248,7 +2250,7 @@ void DrawResultsBanner(Gfx** displayListHead) {
 INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", DrawResultsBanner);
 #endif
 
-/* f_ResultsUnk78 values while UpdateTournamentResults runs */
+/* f_ResultsStep values while UpdateTournamentResults runs */
 enum TournamentStep {
   TOURNAMENT_STEP_START,
   TOURNAMENT_STEP_SLIDING_IN_PRIZE,
@@ -2296,10 +2298,10 @@ s32 UpdateTournamentResults(ControllerState* controller) {
         return FALSE;
       }
 
-      switch (f_ResultsUnk78) {
+      switch (f_ResultsStep) {
         case TOURNAMENT_STEP_START:
           record = &GetSaveData()->courseStats[g_GameState.courseIndex];
-          f_ResultsUnk78 = TOURNAMENT_STEP_SHOWN;
+          f_ResultsStep = TOURNAMENT_STEP_SHOWN;
           if (record->roundCount <= 0 ||
               record->bestScore >= f_PlayerResults[0]) {
             PlaySound(SOUND_NEW_BEST_SCORE, NEW_BEST_SCORE_SOUND_CHANNEL,
@@ -2314,13 +2316,13 @@ s32 UpdateTournamentResults(ControllerState* controller) {
             SetResultsBanner(BANNER_SLIDING_IN, BANNER_KIND_TOURNAMENT_PLACE);
             PlaySound(SOUND_MENU_CONFIRM, CONFIRM_SOUND_CHANNEL,
                 CONFIRM_SOUND_VOLUME);
-            f_ResultsUnk78 = TOURNAMENT_STEP_SLIDING_IN_PRIZE;
+            f_ResultsStep = TOURNAMENT_STEP_SLIDING_IN_PRIZE;
           }
 
           break;
         case TOURNAMENT_STEP_SLIDING_IN_PRIZE:
           if (GetBannerState() == BANNER_SHOWN) {
-            f_ResultsUnk78 = TOURNAMENT_STEP_TALLYING_PRIZE;
+            f_ResultsStep = TOURNAMENT_STEP_TALLYING_PRIZE;
             if (f_PlayerRanks[0] == 1) {
               StartPortraitAnimation(PORTRAIT_ANIMATION_UNK1, 0);
               PlayCharacterSound(g_Players[0].characterIndex, 0,
@@ -2343,7 +2345,7 @@ s32 UpdateTournamentResults(ControllerState* controller) {
 
             if (f_OpenCourseCount == COURSE_COUNT) {
               *points = 0;
-              f_ResultsUnk78 = TOURNAMENT_STEP_PRIZE_TALLIED;
+              f_ResultsStep = TOURNAMENT_STEP_PRIZE_TALLIED;
               if (f_TournamentOpenCourseCount < COURSE_COUNT) {
                 PlaySound(
                     SOUND_TALLY_DONE, g_NextSoundChannel, SOUND_FULL_SCALE);
@@ -2361,7 +2363,7 @@ s32 UpdateTournamentResults(ControllerState* controller) {
             }
 
             if (*points < 0) {
-              f_ResultsUnk78 = TOURNAMENT_STEP_PRIZE_TALLIED;
+              f_ResultsStep = TOURNAMENT_STEP_PRIZE_TALLIED;
               *points = 0;
               f_IsAwaitingConfirm = TRUE;
               if (f_TournamentOpenCourseCount < COURSE_COUNT) {
@@ -2378,7 +2380,7 @@ s32 UpdateTournamentResults(ControllerState* controller) {
                 CONFIRM_SOUND_VOLUME);
             f_TallySpeed = NORMAL_TALLY_SPEED;
             f_IsAwaitingConfirm = FALSE;
-            f_ResultsUnk78 = TOURNAMENT_STEP_SLIDE_OUT_PRIZE;
+            f_ResultsStep = TOURNAMENT_STEP_SLIDE_OUT_PRIZE;
           }
 
           /* A debugging shortcut to the course notice */
@@ -2389,23 +2391,23 @@ s32 UpdateTournamentResults(ControllerState* controller) {
           break;
         case TOURNAMENT_STEP_SLIDE_OUT_PRIZE:
           SetResultsBanner(BANNER_SLIDING_OUT, BANNER_KIND_TOURNAMENT_PLACE);
-          f_ResultsUnk78 = TOURNAMENT_STEP_SLIDING_OUT_PRIZE;
+          f_ResultsStep = TOURNAMENT_STEP_SLIDING_OUT_PRIZE;
           break;
         case TOURNAMENT_STEP_SLIDING_OUT_PRIZE:
           if (GetBannerState() == BANNER_HIDDEN) {
             if (f_CoursePointsTally.earned > 0 &&
                 f_OpenCourseCount < COURSE_COUNT) {
-              f_ResultsUnk78 = TOURNAMENT_STEP_SLIDING_IN_POINTS;
+              f_ResultsStep = TOURNAMENT_STEP_SLIDING_IN_POINTS;
               SetResultsBanner(BANNER_SLIDING_IN, BANNER_KIND_POINTS);
             } else {
-              f_ResultsUnk78 = TOURNAMENT_STEP_WAITING;
+              f_ResultsStep = TOURNAMENT_STEP_WAITING;
             }
           }
 
           break;
         case TOURNAMENT_STEP_SLIDING_IN_POINTS:
           if (GetBannerState() == BANNER_SHOWN) {
-            f_ResultsUnk78 = TOURNAMENT_STEP_TALLYING_POINTS;
+            f_ResultsStep = TOURNAMENT_STEP_TALLYING_POINTS;
           }
 
           break;
@@ -2434,7 +2436,7 @@ s32 UpdateTournamentResults(ControllerState* controller) {
 
           if (f_CoursePointsTally.earned == 0) {
             PlaySound(SOUND_TALLY_DONE, g_NextSoundChannel, SOUND_FULL_SCALE);
-            f_ResultsUnk78 = TOURNAMENT_STEP_POINTS_TALLIED;
+            f_ResultsStep = TOURNAMENT_STEP_POINTS_TALLIED;
             f_IsAwaitingConfirm = TRUE;
           }
 
@@ -2444,14 +2446,14 @@ s32 UpdateTournamentResults(ControllerState* controller) {
             PlaySound(SOUND_MENU_CONFIRM, CONFIRM_SOUND_CHANNEL,
                 CONFIRM_SOUND_VOLUME);
             SetResultsBanner(BANNER_SLIDING_OUT, BANNER_KIND_POINTS);
-            f_ResultsUnk78 = TOURNAMENT_STEP_SLIDING_OUT_POINTS;
+            f_ResultsStep = TOURNAMENT_STEP_SLIDING_OUT_POINTS;
           }
 
           break;
         case TOURNAMENT_STEP_SLIDING_OUT_POINTS:
           if (GetBannerState() == BANNER_HIDDEN) {
             f_IsAwaitingConfirm = TRUE;
-            f_ResultsUnk78 = TOURNAMENT_STEP_WAITING;
+            f_ResultsStep = TOURNAMENT_STEP_WAITING;
           }
 
           break;
@@ -2472,7 +2474,7 @@ s32 UpdateTournamentResults(ControllerState* controller) {
   return FALSE;
 }
 
-/* The steps of ShowScorePassword, in f_ResultsUnk78 */
+/* The steps of ShowScorePassword, in f_ResultsStep */
 enum ScorePasswordStep {
   SCORE_PASSWORD_STEP_START,
   SCORE_PASSWORD_STEP_SHOWN,
@@ -2488,10 +2490,10 @@ s32 ShowScorePassword(ControllerState* controller) {
   s32 unused[2] UNUSED;
 
   GetSaveData();
-  f_ResultsUnk7C++;
-  switch (f_ResultsUnk78) {
+  f_ResultsStepTime++;
+  switch (f_ResultsStep) {
     case SCORE_PASSWORD_STEP_START:
-      f_ResultsUnk78 = SCORE_PASSWORD_STEP_SHOWN;
+      f_ResultsStep = SCORE_PASSWORD_STEP_SHOWN;
       StartPortraitAnimation(PORTRAIT_ANIMATION_UNK1, 0);
       CopyTournamentCode(report.tournamentCode);
       report.characterIndex = g_Players[0].characterIndex;
@@ -2505,7 +2507,7 @@ s32 ShowScorePassword(ControllerState* controller) {
     case SCORE_PASSWORD_STEP_SHOWN:
       if (controller->buttons & A_BUTTON) {
         f_IsAwaitingConfirm = FALSE;
-        f_ResultsUnk78 = SCORE_PASSWORD_STEP_ASKING;
+        f_ResultsStep = SCORE_PASSWORD_STEP_ASKING;
         OpenPrompt(PROMPT_SCORE_PASSWORD);
         PlaySound(
             SOUND_MENU_CONFIRM, CONFIRM_SOUND_CHANNEL, CONFIRM_SOUND_VOLUME);
@@ -2515,10 +2517,10 @@ s32 ShowScorePassword(ControllerState* controller) {
     case SCORE_PASSWORD_STEP_ASKING:
       switch (UpdatePrompt(controller)) {
         case PROMPT_RESULT_YES:
-          f_ResultsUnk78 = SCORE_PASSWORD_STEP_DONE;
+          f_ResultsStep = SCORE_PASSWORD_STEP_DONE;
           break;
         case PROMPT_RESULT_NO:
-          f_ResultsUnk78 = SCORE_PASSWORD_STEP_SHOWN;
+          f_ResultsStep = SCORE_PASSWORD_STEP_SHOWN;
           f_IsAwaitingConfirm = TRUE;
           break;
       }
@@ -2532,7 +2534,7 @@ s32 ShowScorePassword(ControllerState* controller) {
   return FALSE;
 }
 
-/* f_ResultsUnk78 values while UpdateCoursePointsResults runs */
+/* f_ResultsStep values while UpdateCoursePointsResults runs */
 enum PointsStep {
   POINTS_STEP_SHOWN,
   POINTS_STEP_SLIDING_IN_TALLY,
@@ -2562,7 +2564,7 @@ s32 UpdateCoursePointsResults(ControllerState* controller) {
   s32 overshoot;
 
   GetSaveData();
-  f_ResultsUnk7C++;
+  f_ResultsStepTime++;
   switch (f_UnlockNoticeKind) {
     case UNLOCK_NOTICE_KIND_COURSE:
       UpdateCourseResultsNotice();
@@ -2585,12 +2587,12 @@ s32 UpdateCoursePointsResults(ControllerState* controller) {
         return FALSE;
       }
 
-      switch (f_ResultsUnk78) {
+      switch (f_ResultsStep) {
         case POINTS_STEP_SHOWN:
           f_IsAwaitingConfirm = TRUE;
           if (controller->buttons & A_BUTTON) {
             f_IsAwaitingConfirm = FALSE;
-            f_ResultsUnk78 = POINTS_STEP_START_TALLY;
+            f_ResultsStep = POINTS_STEP_START_TALLY;
             PlaySound(SOUND_MENU_CONFIRM, CONFIRM_SOUND_CHANNEL,
                 CONFIRM_SOUND_VOLUME);
           }
@@ -2599,10 +2601,10 @@ s32 UpdateCoursePointsResults(ControllerState* controller) {
         case POINTS_STEP_START_TALLY:
           if (f_CoursePointsTally.earned > 0 &&
               f_OpenCourseCount < COURSE_COUNT) {
-            f_ResultsUnk78 = POINTS_STEP_SLIDING_IN_TALLY;
+            f_ResultsStep = POINTS_STEP_SLIDING_IN_TALLY;
             SetResultsBanner(BANNER_SLIDING_IN, BANNER_KIND_POINTS);
           } else {
-            f_ResultsUnk78 = POINTS_STEP_WAITING;
+            f_ResultsStep = POINTS_STEP_WAITING;
           }
 
           for (i = 0; i != g_GameState.playerCount; i++) {
@@ -2617,7 +2619,7 @@ s32 UpdateCoursePointsResults(ControllerState* controller) {
           break;
         case POINTS_STEP_SLIDING_IN_TALLY:
           if (GetBannerState() == BANNER_SHOWN) {
-            f_ResultsUnk78 = POINTS_STEP_TALLYING;
+            f_ResultsStep = POINTS_STEP_TALLYING;
           }
 
           break;
@@ -2646,9 +2648,9 @@ s32 UpdateCoursePointsResults(ControllerState* controller) {
           }
 
           if (f_CoursePointsTally.earned == 0) {
-            f_ResultsUnk7C = 0;
+            f_ResultsStepTime = 0;
             PlaySound(SOUND_TALLY_DONE, g_NextSoundChannel, SOUND_FULL_SCALE);
-            f_ResultsUnk78 = POINTS_STEP_TALLIED;
+            f_ResultsStep = POINTS_STEP_TALLIED;
             f_IsAwaitingConfirm = TRUE;
           }
 
@@ -2656,14 +2658,14 @@ s32 UpdateCoursePointsResults(ControllerState* controller) {
         case POINTS_STEP_TALLIED:
           if (controller->buttons & A_BUTTON) {
             SetResultsBanner(BANNER_SLIDING_OUT, BANNER_KIND_POINTS);
-            f_ResultsUnk78 = POINTS_STEP_SLIDING_OUT_TALLY;
+            f_ResultsStep = POINTS_STEP_SLIDING_OUT_TALLY;
             f_IsAwaitingConfirm = FALSE;
           }
 
           break;
         case POINTS_STEP_SLIDING_OUT_TALLY:
           if (GetBannerState() == BANNER_HIDDEN) {
-            f_ResultsUnk78 = POINTS_STEP_WAITING;
+            f_ResultsStep = POINTS_STEP_WAITING;
           }
 
           break;
@@ -2688,7 +2690,7 @@ s32 UpdateCoursePointsResults(ControllerState* controller) {
 INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", UpdateCoursePointsResults);
 #endif
 
-/* f_ResultsUnk78 values while UpdateMatchResults runs */
+/* f_ResultsStep values while UpdateMatchResults runs */
 enum MatchStep {
   MATCH_STEP_SHOWN,
   MATCH_STEP_SLIDING_IN_TALLY,
@@ -2726,7 +2728,7 @@ s32 UpdateMatchResults(ControllerState* controller) {
   s32 overshoot;
 
   GetSaveData();
-  f_ResultsUnk7C++;
+  f_ResultsStepTime++;
   switch (f_UnlockNoticeKind) {
     case UNLOCK_NOTICE_KIND_COURSE:
       UpdateCourseResultsNotice();
@@ -2749,12 +2751,12 @@ s32 UpdateMatchResults(ControllerState* controller) {
         return FALSE;
       }
 
-      switch (f_ResultsUnk78) {
+      switch (f_ResultsStep) {
         case MATCH_STEP_SHOWN:
           f_IsAwaitingConfirm = TRUE;
           if (controller->buttons & A_BUTTON) {
             f_IsAwaitingConfirm = FALSE;
-            f_ResultsUnk78 = MATCH_STEP_START_TALLY;
+            f_ResultsStep = MATCH_STEP_START_TALLY;
             PlaySound(SOUND_MENU_CONFIRM, CONFIRM_SOUND_CHANNEL,
                 CONFIRM_SOUND_VOLUME);
           }
@@ -2763,10 +2765,10 @@ s32 UpdateMatchResults(ControllerState* controller) {
         case MATCH_STEP_START_TALLY:
           if (f_CoursePointsTally.earned > 0 &&
               f_OpenCourseCount < COURSE_COUNT) {
-            f_ResultsUnk78 = MATCH_STEP_SLIDING_IN_TALLY;
+            f_ResultsStep = MATCH_STEP_SLIDING_IN_TALLY;
             SetResultsBanner(BANNER_SLIDING_IN, BANNER_KIND_POINTS);
           } else {
-            f_ResultsUnk78 = MATCH_STEP_RECORD_RESULT;
+            f_ResultsStep = MATCH_STEP_RECORD_RESULT;
           }
 
           if (f_PlayerRanks[0] == MATCH_RANK_WON) {
@@ -2780,7 +2782,7 @@ s32 UpdateMatchResults(ControllerState* controller) {
           break;
         case MATCH_STEP_SLIDING_IN_TALLY:
           if (GetBannerState() == BANNER_SHOWN) {
-            f_ResultsUnk78 = MATCH_STEP_TALLYING;
+            f_ResultsStep = MATCH_STEP_TALLYING;
           }
 
           break;
@@ -2809,7 +2811,7 @@ s32 UpdateMatchResults(ControllerState* controller) {
           }
 
           if (f_CoursePointsTally.earned == 0) {
-            f_ResultsUnk78 = MATCH_STEP_TALLIED;
+            f_ResultsStep = MATCH_STEP_TALLIED;
             PlaySound(SOUND_TALLY_DONE, g_NextSoundChannel, SOUND_FULL_SCALE);
           }
 
@@ -2818,27 +2820,27 @@ s32 UpdateMatchResults(ControllerState* controller) {
           f_IsAwaitingConfirm = TRUE;
           if (controller->buttons & A_BUTTON) {
             SetResultsBanner(BANNER_SLIDING_OUT, BANNER_KIND_POINTS);
-            f_ResultsUnk78 = MATCH_STEP_SLIDING_OUT_TALLY;
+            f_ResultsStep = MATCH_STEP_SLIDING_OUT_TALLY;
             f_IsAwaitingConfirm = FALSE;
           }
 
           break;
         case MATCH_STEP_SLIDING_OUT_TALLY:
           if (GetBannerState() == BANNER_HIDDEN) {
-            f_ResultsUnk78 = MATCH_STEP_RECORD_RESULT;
+            f_ResultsStep = MATCH_STEP_RECORD_RESULT;
           }
 
           break;
         case MATCH_STEP_RECORD_RESULT:
-          f_ResultsUnk78 = MATCH_STEP_WAITING;
-          f_ResultsUnk7C = 0;
+          f_ResultsStep = MATCH_STEP_WAITING;
+          f_ResultsStepTime = 0;
           if (g_GameState.gameMode == GAME_MODE_GET_CHARACTER) {
             /* Beating a still locked opponent unlocks them */
             if (f_PlayerRanks[0] == MATCH_RANK_WON &&
                 FindCharacterOnGrid(g_Players[1].characterIndex) ==
                     CHARACTER_OFF_GRID &&
                 IsUnlockedByBeating(g_Players[1].characterIndex)) {
-              f_ResultsUnk78 = MATCH_STEP_SHOW_CHARACTER_NOTICE;
+              f_ResultsStep = MATCH_STEP_SHOW_CHARACTER_NOTICE;
             }
 
             RecordComCharacterResult(g_Players[0].characterIndex,
@@ -2853,16 +2855,16 @@ s32 UpdateMatchResults(ControllerState* controller) {
           StartResultsNotice(UNLOCK_NOTICE_KIND_CHARACTER);
           OpenEncodedAsset(CHARACTER_NOTICE_TITLE_ASSET, &titleAsset);
           ReadEncodedAsset(f_NoticeTitleImage, &titleAsset);
-          f_ResultsUnk78 = MATCH_STEP_START_NOTICE_WAIT;
+          f_ResultsStep = MATCH_STEP_START_NOTICE_WAIT;
           break;
         }
         case MATCH_STEP_START_NOTICE_WAIT:
-          f_ResultsUnk78 = MATCH_STEP_NOTICE_WAIT;
-          f_ResultsUnk7C = 0;
+          f_ResultsStep = MATCH_STEP_NOTICE_WAIT;
+          f_ResultsStepTime = 0;
           break;
         case MATCH_STEP_NOTICE_WAIT:
-          if (f_ResultsUnk7C == CHARACTER_NOTICE_WAIT_FRAMES) {
-            f_ResultsUnk78 = MATCH_STEP_WAITING;
+          if (f_ResultsStepTime == CHARACTER_NOTICE_WAIT_FRAMES) {
+            f_ResultsStep = MATCH_STEP_WAITING;
           }
 
           break;
@@ -2903,7 +2905,7 @@ s32 UpdateMatchResults(ControllerState* controller) {
               ReadAssetFile(f_PortraitPalette, GetAssetFileSize(&file), &file);
               OpenEncodedAsset(CHARACTER_NOTICE_TITLE_ASSET, &portraitAsset);
               ReadEncodedAsset(f_NoticeTitleImage, &portraitAsset);
-              f_ResultsUnk78 = MATCH_STEP_SLIDING_OUT_TALLY;
+              f_ResultsStep = MATCH_STEP_SLIDING_OUT_TALLY;
             }
           }
 
