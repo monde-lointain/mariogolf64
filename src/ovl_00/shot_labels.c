@@ -47,8 +47,8 @@ enum ShotLabels {
 #define TAG_HEIGHT 8
 /* Whether a tag at tagX and tagY would overlap a spot with a tag's size */
 #define IsTagOverlapping(spot, tagX, tagY) \
-  ((spot).x - TAG_WIDTH < (tagX) && (tagX) < (spot).x + TAG_WIDTH && \
-      (spot).y - TAG_HEIGHT < (tagY) && (tagY) < (spot).y + TAG_HEIGHT)
+  ((tagX) > (spot).x - TAG_WIDTH && (tagX) < (spot).x + TAG_WIDTH && \
+      (tagY) > (spot).y - TAG_HEIGHT && (tagY) < (spot).y + TAG_HEIGHT)
 /* In bytes, at four bits a texel */
 #define TAG_IMAGE_SIZE (TAG_WIDTH * TAG_HEIGHT / 2)
 /* Balls this far off the screen are not tagged */
@@ -172,19 +172,19 @@ extern char g_PrintBuffer[];
  * of the others. DrawLeaderLine and DrawPlayerTag are nested functions, a GNU
  * C extension.
  *
- * Each corner search places the tag where it stops, and the corner is
- * stored after the two searches join: placing the tag after the join, with
- * the corner's store in a block of its own, gives 291 words differing, 73
- * in shape, and storing the corner in each search too 262.
+ * Each corner search places the tag where it stops, and the corner is stored
+ * after the two searches join: placing the tag after the join, with the
+ * corner's store in a block of its own, gives 233 to 241 words differing, 41 to
+ * 69 in shape, and storing the corner in each search too 234 to 244.
  *
  * Doesn't match: the original steps a pointer to each label's corner and
- * reaches the other fields from the label's offset; ours has loop.c reach
- * them from the corner pointer as well. Indexing the labels, rather than
- * through a label pointer (193 words before the searches placed the tag),
- * gives the original's pointer. The register oracle, forcing 18 pseudos,
- * leaves 84 words. The original reads the tag offsets before the label in
- * the overlap tests, but working the tag's place out once per corner, before
- * the tests, gives 242 to 252 words. 96 words differ, 44 in shape.
+ * reaches the other fields from the label's offset; ours has loop.c reach them
+ * from the corner pointer as well. Indexing the labels, rather than through a
+ * label pointer, gave the original's pointer. IsTagOverlapping puts the tag's
+ * coordinate first in both lower-bound tests; the spot-first spelling gave 96
+ * words, 44 in shape, and the 14 other mixes 38 to 96. Working the tag's place
+ * out once per corner, before the tests, gives 242 to 252 words. The register
+ * oracle, forcing 4 pseudos, leaves 20 words. 38 words differ, 12 in shape.
  */
 #ifdef NON_MATCHING
 void DrawShotLabels(Gfx** displayListHead) {
