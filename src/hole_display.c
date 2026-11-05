@@ -2310,12 +2310,15 @@ void HandleFrameBufferSwap(void) {}
  * words, 41 in shape, and the oracle from 74 words forcing 19 pseudos to 69
  * forcing 16, and the first loop's type changes nothing. The last loop's as an
  * s32 as well gives 181 words (37 in shape), though the oracle gets to 62, or
- * 197 (41) with the second's an s16. 163 words differ, 41 in shape.
+ * 197 (41) with the second's an s16. Declaring the frame pointer before the
+ * display list pointer, as a permuter run suggested, keeps 163 words and takes
+ * the shape from 41 to 37, with the oracle at 69 words forcing 15 pseudos. 163
+ * words differ, 37 in shape.
  */
 #ifdef NON_MATCHING
 void DrawFadeAnimation(Gfx** displayListHead) {
-  Gfx* gfx = *displayListHead;
   u32* frame = f_CapturedFrame;
+  Gfx* gfx = *displayListHead;
   Boolean isTileSet;
   /*
    * One index for the strips and the rows, to match: a separate row or strip
