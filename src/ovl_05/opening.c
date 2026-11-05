@@ -3883,9 +3883,13 @@ void LoadOpeningImpactLines(void) {
  * shape), moves that sync into the strip loop, adding a command there, and
  * stores the rectangle's left edge into a new variable on each pass, a fake.
  * Without the sync, a left variable set on each pass gives 45 (1), and one set
- * once, at its declaration or before the loop, 284 (26). The register oracle's
- * closest result is these 186 words with no register forced, so allocation
- * isn't the cause. 186 words differ, 16 in shape.
+ * once, at its declaration or before the loop, 284 (26). A focused run's best,
+ * 32 words (4 in shape), sets the left variable on each pass too, and also
+ * counts the row down before the rectangle and works out the top from the row's
+ * offset; counting the row down there alone gives 252 (30), and naming the top
+ * edge in a local 186 (16). The register oracle's closest result is these 186
+ * words with no register forced, so allocation isn't the cause. 186 words
+ * differ, 16 in shape.
  */
 #ifdef NON_MATCHING
 void DrawOpeningImpactLines(Gfx** displayListHead) {
