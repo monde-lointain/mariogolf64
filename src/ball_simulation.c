@@ -244,13 +244,11 @@ void ResetBallSimulations(void) {
  * float's absolute value, this code shares one abs.s or compiles a compare and
  * branch. Adding the height to its slide step, rather than the step to the
  * height, took 779 words differing to 771, 235 in shape; it later cost 8 words,
- * so the slide adds the step to the height, as it does in x and z. The four
- * compare-and-branch magnitudes come from the nested AbsoluteValue helper,
- * though the original has abs.s at the slope's two: with fabsf at the spin
- * grip's two uses 767 words differ (243 in shape), at the slope's 1340 (314),
- * at both or inside the helper 1433 (369), and with fabs at the slope 808
- * (240); the helper not inline gives 1408 (354). Those counts were measured
- * when the draft had 769 words differing, 233 in shape. The pull toward the cup
+ * so the slide adds the step to the height, as it does in x and z. The slope's
+ * two compare-and-branch magnitudes come from the nested AbsoluteValue
+ * helper; with fabsf there 1020 words differ (212 in shape) and with
+ * common.h's AbsFloat 488 (134). The spin grip's two take fabsf, an abs.s:
+ * with AbsoluteValue there 518 words differed (144). The pull toward the cup
  * sets toCup's X before its zero Y, so the zero store follows the cup's X load
  * as in the original rather than filling the debug text branch's delay slot;
  * with Y first, 769 words differ (233 in shape). A permuter output reached 760
@@ -290,7 +288,9 @@ void ResetBallSimulations(void) {
  * StepOpeningBallSimulation's roll start spinVelocityZ alone 259 and both 265
  * against its 247. In the triangle bounce an s16 spinVelocityZ gives 743 words
  * (215), both 771 and spinVelocityX alone 749, and spinVelocityZ in
- * StepOpeningBallSimulation's 277. 672 words differ, 206 in shape.
+ * StepOpeningBallSimulation's 277. Apart from the magnitudes', this note's
+ * counts were measured with GCC's built-in fabsf, which left 672 words
+ * differing, 206 in shape. 484 words differ, 132 in shape.
  */
 #ifdef NON_MATCHING
 s32 StepBallSimulation(BallSimulation* simulation) {
@@ -1598,9 +1598,9 @@ s32 StepBallSimulation(BallSimulation* simulation) {
         spinVelocityX = simulation->spinSpeed * cosf(simulation->spinHeading);
         spinVelocityZ = simulation->spinSpeed * sinf(simulation->spinHeading);
         velocity[AXIS_X] += (spinVelocityX - velocity[AXIS_X]) *
-            AbsoluteValue(plane.normal[AXIS_Y]) * GROUND_SPIN_GRIP;
+            fabsf(plane.normal[AXIS_Y]) * GROUND_SPIN_GRIP;
         velocity[AXIS_Z] += (spinVelocityZ - velocity[AXIS_Z]) *
-            AbsoluteValue(plane.normal[AXIS_Y]) * GROUND_SPIN_GRIP;
+            fabsf(plane.normal[AXIS_Y]) * GROUND_SPIN_GRIP;
         simulation->spinSpeed = 0;
       } else {
         f32 keep = 1.0f - spin;
