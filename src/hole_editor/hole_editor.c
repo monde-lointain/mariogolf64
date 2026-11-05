@@ -3927,8 +3927,12 @@ void WriteHexDumpFile(u32* words, s32 byteCount, char* fileName) {
  * change it gives the same. A u32 groupDetail gives 2026 words (488 in shape),
  * but it would rank a hidden tile's -1 above every detail level when comparing
  * it with the s32 field; it compiles 27 signed and 16 unsigned compares and 4
- * blez where the original, like the s32, has 29, 14 and 5. 2037 words differ,
- * 491 in shape.
+ * blez where the original, like the s32, has 29, 14 and 5. The medium groups
+ * step their slots middle, bottom, tile index and top, and rewind them middle,
+ * bottom and top: stepping them top, middle, bottom and tile index, as
+ * DrawGround does, gives 2055 words (491 in shape), also with a top, middle and
+ * bottom rewind; that rewind alone gives 2074 (494) and DrawGround's top,
+ * bottom and middle 2086 (494). 2037 words differ, 491 in shape.
  */
 #ifdef NON_MATCHING
 void DrawHoleEditorGround(CameraMatrices* matrices UNUSED, s32 terrainStyle) {
