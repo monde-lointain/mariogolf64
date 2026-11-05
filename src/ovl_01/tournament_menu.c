@@ -569,7 +569,10 @@ void GetSaveDataAndMenuMemory(void) {
  * the register oracle's best, with none forced, from 36 to 34; with the half
  * height and the top grouped, as before, 36 words differed, with the top first
  * and the offset and half height grouped the same 34, and the other orders 36
- * to 175. 34 words differ, 20 in shape.
+ * to 175. A focused permuter run's best (32 words, 14 in shape) puts the
+ * button's top at buttonY - 1, but the original subtracts the button's half
+ * height there, from the same register it adds for the bottom. 34 words differ,
+ * 20 in shape.
  */
 #ifdef NON_MATCHING
 void DrawYesNoWindow(Gfx** displayListHead, s32 width, s32 height, s32 centerX,
