@@ -182,36 +182,7 @@ static inline s32 RandomLaunchHeightJitter(void) {
   return guRandom() % FIREWORK_LAUNCH_HEIGHT_JITTER;
 }
 
-/*
- * Sends every particle of the firework out from one random point. Doesn't
- * match: the original also keeps a copy of the row's first cell index, beside
- * the register loop.c steps it in, spills the copy on each row and reloads it
- * at each cell to add the column, which makes its frame 8 bytes larger. Every
- * save and the half width's spill slot sit 8 bytes lower here, so with 3
- * pseudos' registers forced, the register oracle leaves 74 words, all but the
- * copy's spill and reload and the cell address's adds in those offsets. A
- * rowStart variable compiles the same as row * width.
- *
- * The sizes are s32s, as LoadFireworks declares them, and each is halved where
- * it is used. Both are loaded with lbu, and GCC halves them with srl, as the
- * original does. The draft before held them in u32s, with the half width in a
- * halfWidth local set on each row, for 50 words differing (14 in shape), but
- * the register oracle left 24 words with 6 pseudos forced, among them the half
- * width's srl and the jitter scale's load in other places. A focused permuter
- * run's best wrote the width's half in place, with an int width, but left
- * halfWidth set and unread. An s32 width with a u32 or u8 height gives 94
- * words (2 in shape), u8 or u16 sizes 129 (13), u32 139 (27), s16 215 (45),
- * and a u8 width with a u32 height 51 (15). The loop tests' u32 casts and the
- * row offset's s32 cast compile the same without them.
- *
- * A local for the shape at all three reads gives 31 words (3 in shape), but
- * spills the shape into the copy's slot, where the original reads the field
- * again at each cell's test; at the width and height alone it gives 92 (2). A
- * u16 or u8 row gives 86 words (10 in shape), the row's offset from the middle
- * in a local set on each row 50 (18), and the height's half there 118 (22). 92
- * words differ, 2 in shape.
- */
-#ifdef NON_MATCHING
+/* Sends every particle of the firework out from one random point */
 void LaunchFirework(Firework* firework, s32 fireworkIndex UNUSED) {
   s32 particleIndex;
   f32 originX;
@@ -231,7 +202,13 @@ void LaunchFirework(Firework* firework, s32 fireworkIndex UNUSED) {
   originY = random + FIREWORK_LAUNCH_HEIGHT;
   for (row = 0; row != height; row++) {
     for (column = 0; column != width; column++) {
-      if (firework->shape->cells[column + (row * width)] == 0) {
+      /*
+       * Through the cells' address, not by indexing them: GCC builds the
+       * index as an array reference instead, and 92 words differ. The cell's
+       * index is added as a whole; adding the column and the row's offset
+       * one at a time, 10 words differ
+       */
+      if (*(firework->shape->cells + (column + (row * width))) == 0) {
         firework->particles[particleIndex].x = originX;
         firework->particles[particleIndex].y = originY;
         firework->particles[particleIndex].velocityX =
@@ -247,10 +224,6 @@ void LaunchFirework(Firework* firework, s32 fireworkIndex UNUSED) {
     }
   }
 }
-
-#else
-INCLUDE_ASM("asm/nonmatchings/fireworks", LaunchFirework);
-#endif
 
 /*
  * Moves the active fireworks' particles and draws each as a triangle along its
