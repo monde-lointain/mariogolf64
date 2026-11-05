@@ -2968,11 +2968,21 @@ void ShowHoleOutBanner(s32 playerIndex) {
 /*
  * UpdateTurns holds ten functions nested in it, a GNU C extension. GCC
  * passes them the parent's frame in $v0, its static chain, and they read
- * the parent's playerIndex through it. The debug helper before it is
- * inline: inlined, its buffer shares one stack slot with the others, as in
- * the original's frame.
+ * the parent's playerIndex through it.
  *
- * Doesn't match: 146 words differ, 78 in shape, spread through the routine's
+ * Its three debug blocks are written in place. The original's ball placement
+ * was expanded with the constant addresses inside its memory references: GCC
+ * compiles each nested function at its definition, and rest_of_compilation sets
+ * cse_not_expected, which push_function_context doesn't save, so the rest of
+ * UpdateTurns is expanded with it set. A separate inline helper is expanded
+ * first, under its own init_function_start, which clears it, so memory_address
+ * puts each constant address in a register; as a helper, the ball placement
+ * kept the ball's X address in a register and CSE reached Z through it with an
+ * offset, where the original loads and stores each through its own lui. Written
+ * in place, the ball placement gives 90 words (48 in shape) against 146 (78) as
+ * a helper.
+ *
+ * Doesn't match: 90 words differ, 48 in shape, spread through the routine's
  * states. The counts in the paragraphs after the next were measured before it,
  * when 454 words differed, 184 in shape.
  *
@@ -2998,13 +3008,13 @@ void ShowHoleOutBanner(s32 playerIndex) {
  * nesting them the other way round gives 150 (78), a switch whose two modes
  * break out 146 (78), and an empty arm for the two modes 227 (97). Unlike the
  * paragraphs around it, these counts were measured after the debug timing's two
- * stores.
+ * stores, but before the ball placement was written in place.
  *
  * The hole-out song switch lists its modes from Ring Shot down to Training,
  * the order the original places their bodies in; in the enum's order 475
  * words differ (193 in shape).
  *
- * The original keeps DebugPlaceBall's and DebugTestGutsMotion's buffer
+ * The original keeps the ball placement's and reaction test's buffer
  * address in $s0. One buffer declared in UpdateTurns before its nested
  * functions and passed to both gives that (175 in shape), but puts
  * playerIndex's slot above the buffer and grows the frame, 751 words;
@@ -3055,27 +3065,19 @@ void ShowHoleOutBanner(s32 playerIndex) {
  * before these two changes.
  *
  * The training choice box's reaction test and the frame test at the end are
- * written in place, where they were inline helpers like DebugPlaceBall. In
- * place, the frame test keeps 7.5f in $f22 and its buffer address in $s0
- * across both AddFramedSphere calls, as the original does, where the helper
- * loaded both again for each call. The reaction test in place alone gives 252
- * words (120 in shape), the frame test alone 338 (116), and both 241 (111),
- * against 349 (125) with both as helpers; the register oracle's closest result
- * is these 241 words with no register forced. DebugPlaceBall in place too
- * gives 287 words (81 in shape) and grows the frame from 0x118 to 0x1A0 bytes,
- * whether its buffer is declared in its own block or in the enclosing one. The
- * buffer's address is taken, and expand_expr_stmt's preserve_temp_slots moves
- * such a slot out to the enclosing level at each expression statement after
- * it, so the slot stays in use for the rest of the player loop. An inlined
- * function's frame is one slot whose address the caller never takes, so the
- * helper's buffer is freed with its block and shares its slot, as the
- * original's does. As an inline function nested in UpdateTurns, DebugPlaceBall
- * reads playerIndex from the frame at each use, as the original does, but the
- * static chain takes the first slot of a nested function's frame, which puts
- * the buffer at 0x28 where the original's is at 0x20, and 953 words differ (900
- * with 55 registers forced).
+ * written in place, where they were inline helpers. In place, the frame test
+ * keeps 7.5f in $f22 and its buffer address in $s0 across both AddFramedSphere
+ * calls, as the original does, where the helper loaded both again for each
+ * call. The reaction test in place alone gives 252 words (120 in shape), the
+ * frame test alone 338 (116), and both 241 (111), against 349 (125) with both
+ * as helpers; the register oracle's closest result is these 241 words with no
+ * register forced. As an inline function nested in UpdateTurns, the ball
+ * placement reads playerIndex from the frame at each use, as the original
+ * does, but the static chain takes the first slot of a nested function's
+ * frame, which puts the buffer at 0x28 where the original's is at 0x20, and
+ * 953 words differ (900 with 55 registers forced).
  *
- * DebugPlaceBall's Z_TRIG test compiles to andi and a branch, where the
+ * The ball placement's Z_TRIG test compiles to andi and a branch, where the
  * original shifts the bit down with srl 13 and andi 1 before branching. do_jump
  * tests an & of one bit with andi; only a test expanded as a value goes through
  * do_store_flag, which shifts and masks. A Boolean local set to the test, or an
@@ -3088,38 +3090,6 @@ void ShowHoleOutBanner(s32 playerIndex) {
  * stores.
  */
 #ifdef NON_MATCHING
-/* Debug flag 0x47: prints where the ball lies, and the second controller moves
- * it while Z is held */
-static inline void DebugPlaceBall(s32 playerIndex) {
-  char text[DEBUG_TEXT_BUFFER_SIZE];
-
-  f_UnusedDebugCourseIndex = g_GameState.courseIndex;
-  f_UnusedDebugHoleIndex = g_GameState.holeIndex;
-  SetGameFlag(GAME_FLAG_RANDOM_FRAMEBUFFER_COUNT);
-  sprintf(text, "X:%X Y:%X Z:%X  Attr%d             ",
-      g_CurrentShot.ballPosition[AXIS_X], g_CurrentShot.ballPosition[AXIS_Y],
-      g_CurrentShot.ballPosition[AXIS_Z],
-      GetSurface(g_CurrentShot.ballPosition[AXIS_X],
-          g_CurrentShot.ballPosition[AXIS_Z]));
-  PrintDebugText(text, 3, 6);
-  ClearGameFlag(GAME_FLAG_RANDOM_FRAMEBUFFER_COUNT);
-  if (g_ControllerData[1].button & Z_TRIG) {
-    g_CurrentShot.ballPosition[AXIS_X] += g_ControllerStates[1].stickX *
-        ((Abs(g_ControllerStates[1].stickX) * 2) + 1);
-    g_CurrentShot.ballPosition[AXIS_Z] += g_ControllerStates[1].stickY *
-        ((Abs(g_ControllerStates[1].stickY) * 2) + 1);
-    g_CurrentShot.ballPosition[AXIS_Y] = GetGroundHeight(
-        g_CurrentShot.ballPosition[AXIS_X], g_CurrentShot.ballPosition[AXIS_Z]);
-    g_Players[playerIndex].ballPosition[AXIS_X] =
-        g_CurrentShot.ballPosition[AXIS_X];
-    g_Players[playerIndex].ballPosition[AXIS_Y] =
-        g_CurrentShot.ballPosition[AXIS_Y];
-    g_Players[playerIndex].ballPosition[AXIS_Z] =
-        g_CurrentShot.ballPosition[AXIS_Z];
-    PlaceBallAtRest(playerIndex, &g_TurnBallSimulation);
-  }
-}
-
 /* Whether the stopwatches run in a player state: from aiming to the flight */
 #define IsTimedState(state) \
   ((state) == PLAYER_STATE_AIMING || (state) == PLAYER_STATE_SETTING_POWER || \
@@ -3941,10 +3911,47 @@ void UpdateTurns(void) {
           f_IsSwingAnimationStarted = FALSE;
           if (IsGameFlagSet(GAME_FLAG_CHOOSE_CUP)) {
             /*
-             * In its own block, as without it 472 words differ, 182 in shape,
-             * against 454 and 182
+             * Debug flag 0x47: prints where the ball lies, and the second
+             * controller moves it while Z is held. In its own block, which
+             * frees the buffer's slot when the flag's test ends, so it shares
+             * one slot with the other debug buffers, as in the original's
+             * frame; declared in the flag's block or the state's, the frame
+             * outgrows the original's 0x118 bytes and 192 words differ (48 in
+             * shape), and in a do-while 104 (48), against 90 (48).
              */
-            IN_OWN_BLOCK(DebugPlaceBall(playerIndex));
+            {
+              char text[DEBUG_TEXT_BUFFER_SIZE];
+
+              f_UnusedDebugCourseIndex = g_GameState.courseIndex;
+              f_UnusedDebugHoleIndex = g_GameState.holeIndex;
+              SetGameFlag(GAME_FLAG_RANDOM_FRAMEBUFFER_COUNT);
+              sprintf(text, "X:%X Y:%X Z:%X  Attr%d             ",
+                  g_CurrentShot.ballPosition[AXIS_X],
+                  g_CurrentShot.ballPosition[AXIS_Y],
+                  g_CurrentShot.ballPosition[AXIS_Z],
+                  GetSurface(g_CurrentShot.ballPosition[AXIS_X],
+                      g_CurrentShot.ballPosition[AXIS_Z]));
+              PrintDebugText(text, 3, 6);
+              ClearGameFlag(GAME_FLAG_RANDOM_FRAMEBUFFER_COUNT);
+              if (g_ControllerData[1].button & Z_TRIG) {
+                g_CurrentShot.ballPosition[AXIS_X] +=
+                    g_ControllerStates[1].stickX *
+                    ((Abs(g_ControllerStates[1].stickX) * 2) + 1);
+                g_CurrentShot.ballPosition[AXIS_Z] +=
+                    g_ControllerStates[1].stickY *
+                    ((Abs(g_ControllerStates[1].stickY) * 2) + 1);
+                g_CurrentShot.ballPosition[AXIS_Y] =
+                    GetGroundHeight(g_CurrentShot.ballPosition[AXIS_X],
+                        g_CurrentShot.ballPosition[AXIS_Z]);
+                g_Players[playerIndex].ballPosition[AXIS_X] =
+                    g_CurrentShot.ballPosition[AXIS_X];
+                g_Players[playerIndex].ballPosition[AXIS_Y] =
+                    g_CurrentShot.ballPosition[AXIS_Y];
+                g_Players[playerIndex].ballPosition[AXIS_Z] =
+                    g_CurrentShot.ballPosition[AXIS_Z];
+                PlaceBallAtRest(playerIndex, &g_TurnBallSimulation);
+              }
+            }
           }
 
           if (isReady) {
@@ -4252,8 +4259,8 @@ void UpdateTurns(void) {
            * folds the clamp's upper test below and the second its lower
            * test, where the original loads the timing back for both. A
            * store in each arm keeps a join between the stores and the
-           * clamp until cross-jumping merges them: 146 words differ, 78 in
-           * shape, against 160 and 92.
+           * clamp until cross-jumping merges them: 90 words differ, 48 in
+           * shape, against 104 and 62.
            */
           if (g_TurnController.pressedButtons & B_BUTTON) {
             f_ShotLaunch.power = MAX_LAUNCH_POWER;
