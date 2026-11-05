@@ -4830,7 +4830,11 @@ void DrawUpDownArrows(Gfx** displayListHead, s32 centerY);
  * lacks; a u16 gives 55 (7) but adds two andi 0xffff, and a u8 also 55 (7) but
  * adds two andi 0xff and can't hold the step of 360 that one mode or none
  * gives; an s16 or s8 key gives 60 (8), but the s16 adds two sll and one sra by
- * 16 that the original lacks. 86 words differ, 2 in shape.
+ * 16 that the original lacks. Keeping the board's half size in the angle step's
+ * variable, which would give one variable two meanings, gives 68 words (2 in
+ * shape), but the register oracle's closest is then 40 words, forcing 3
+ * pseudos, against 34 here; no declaration order of the two gives other than
+ * 86. 86 words differ, 2 in shape.
  */
 #ifdef NON_MATCHING
 void DrawModeSelect(Gfx** displayListHead) {
