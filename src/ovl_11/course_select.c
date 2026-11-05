@@ -1013,10 +1013,14 @@ void DrawNamePlate(Gfx** displayListHead, s32 centerX, s32 centerY) {
  * shape), and in each arm of the test 268 (136). The permuter's best, 219 words
  * (9 in shape), passes the last three palette loads a Gfx** that is set to &gfx
  * only later, in the loop, so it reads garbage. Passing a gfxHead local set to
- * &gfx gives 243 to 307 words (135 to 137 in shape), and writing through
+ * &gfx gave 243 to 307 words (135 to 137 in shape), and writing through
  * displayListHead throughout 506 (328). The register oracle, forcing 27
- * pseudos' registers, leaves 137 words at best, so the code differs too. 259
- * words differ, 133 in shape.
+ * pseudos' registers, left 137 words at best when the draft gave 259, so the
+ * code differs too. Writing the stars' right and bottom edges as the left or
+ * top edge plus the star's size plus half the growth took the draft from 259
+ * words differing to 257, 133 in shape either way; the bottom edge's order
+ * changes nothing, and the right edge as the left plus half the growth plus the
+ * star's width gives 259. 257 words differ, 133 in shape.
  */
 #ifdef NON_MATCHING
 void DrawRingShotStars(
@@ -1097,8 +1101,8 @@ void DrawRingShotStars(
 
     DrawTextureRect(&gfx, QuarterPixels(left - (width / 2)),
         QuarterPixels(STARS_TOP - (height / 2)),
-        QuarterPixels((width / 2) + (STAR_WIDTH + left)),
-        QuarterPixels((height / 2) + STAR_HEIGHT + STARS_TOP), tile, 0, 0,
+        QuarterPixels(left + STAR_WIDTH + (width / 2)),
+        QuarterPixels(STARS_TOP + STAR_HEIGHT + (height / 2)), tile, 0, 0,
         (STAR_WIDTH * TEXEL_STEP_ONE) / (width + STAR_WIDTH),
         (STAR_HEIGHT * TEXEL_STEP_ONE) / (height + STAR_HEIGHT));
     gDPPipeSync(gfx++);
