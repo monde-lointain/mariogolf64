@@ -91,9 +91,9 @@ enum SkyImageKind {
 /* The course sky image is paletted, and InitSkyColors recolors its palette */
 #define PALETTE_START (IMAGE_HEADER_SIZE / PALETTE_COLOR_SIZE)
 #define SKY_IMAGE_CHANNEL_MAX 31
-/* The palette colors mix five parts of unk7 with one of unk4, shifted down to
- * five bits */
-#define SKY_IMAGE_UNK7_PARTS 5
+/* The palette colors mix five parts of the horizon color with one of the top
+ * color, shifted down to five bits */
+#define SKY_IMAGE_HORIZON_PARTS 5
 #define SKY_IMAGE_DIVISOR (6 * 8)
 #define RGB_CHANNEL_COUNT 3
 /*
@@ -891,20 +891,20 @@ void BlendSkyColors(void) {
                        f_SkyTimeIndex + 1];
   for (group = 0; group != SKY_VIEW_COUNT * MATRIX_BUFFER_COUNT; group++) {
     for (channel = 0; channel != 3; channel++) {
-      f_SkyVertices[group][0].v.cn[channel] = from->unk4[channel] +
-          ((to->unk4[channel] - from->unk4[channel]) * f_SkyBlendStep /
+      f_SkyVertices[group][0].v.cn[channel] = from->topColor[channel] +
+          ((to->topColor[channel] - from->topColor[channel]) * f_SkyBlendStep /
               SKY_BLEND_STEP_COUNT);
-      f_SkyVertices[group][1].v.cn[channel] = from->unk7[channel] +
-          ((to->unk7[channel] - from->unk7[channel]) * f_SkyBlendStep /
+      f_SkyVertices[group][1].v.cn[channel] = from->horizonColor[channel] +
+          ((to->horizonColor[channel] - from->horizonColor[channel]) *
+              f_SkyBlendStep / SKY_BLEND_STEP_COUNT);
+      f_SkyVertices[group][2].v.cn[channel] = from->horizonColor[channel] +
+          ((to->horizonColor[channel] - from->horizonColor[channel]) *
+              f_SkyBlendStep / SKY_BLEND_STEP_COUNT);
+      f_SkyVertices[group][3].v.cn[channel] = from->topColor[channel] +
+          ((to->topColor[channel] - from->topColor[channel]) * f_SkyBlendStep /
               SKY_BLEND_STEP_COUNT);
-      f_SkyVertices[group][2].v.cn[channel] = from->unk7[channel] +
-          ((to->unk7[channel] - from->unk7[channel]) * f_SkyBlendStep /
-              SKY_BLEND_STEP_COUNT);
-      f_SkyVertices[group][3].v.cn[channel] = from->unk4[channel] +
-          ((to->unk4[channel] - from->unk4[channel]) * f_SkyBlendStep /
-              SKY_BLEND_STEP_COUNT);
-      f_SkyVertices[group][4].v.cn[channel] = from->unk4[channel] +
-          ((to->unk4[channel] - from->unk4[channel]) * f_SkyBlendStep /
+      f_SkyVertices[group][4].v.cn[channel] = from->topColor[channel] +
+          ((to->topColor[channel] - from->topColor[channel]) * f_SkyBlendStep /
               SKY_BLEND_STEP_COUNT);
     }
   }
@@ -989,13 +989,15 @@ void InitSkyColors(void) {
   g_SkyState.scrollY = 0.0f;
   for (i = 0; i != SKY_VIEW_COUNT * MATRIX_BUFFER_COUNT; i++) {
     for (channel = 0; channel != RGB_CHANNEL_COUNT; channel++) {
-      f_SkyVertices[i][0].v.cn[channel] = colors->unk4[channel];
-      f_SkyVertices[i][1].v.cn[channel] = colors->unk7[channel];
-      f_SkyVertices[i][2].v.cn[channel] = colors->unk7[channel];
-      f_SkyVertices[i][3].v.cn[channel] = colors->unk4[channel];
-      f_SkyVertices[i][4].v.cn[channel] = colors->unk4[channel];
-      outerMix = (colors->unk4[channel] + f_SkyHorizonColor[channel]) * 0.5f;
-      innerMix = (colors->unk7[channel] + colors->unk4[channel]) * 0.5f;
+      f_SkyVertices[i][0].v.cn[channel] = colors->topColor[channel];
+      f_SkyVertices[i][1].v.cn[channel] = colors->horizonColor[channel];
+      f_SkyVertices[i][2].v.cn[channel] = colors->horizonColor[channel];
+      f_SkyVertices[i][3].v.cn[channel] = colors->topColor[channel];
+      f_SkyVertices[i][4].v.cn[channel] = colors->topColor[channel];
+      outerMix =
+          (colors->topColor[channel] + f_SkyHorizonColor[channel]) * 0.5f;
+      innerMix =
+          (colors->horizonColor[channel] + colors->topColor[channel]) * 0.5f;
       innerMix = (innerMix + f_SkyHorizonColor[channel]) * 0.5f;
       f_SkyVertices[i][5].v.cn[channel] = outerMix;
       f_SkyVertices[i][6].v.cn[channel] = innerMix;
@@ -1027,11 +1029,14 @@ void InitSkyColors(void) {
     blue = (color >> 1) & SKY_IMAGE_CHANNEL_MAX;
     alpha = color & 1;
     if (!alpha) {
-      red = ((colors->unk7[0] * SKY_IMAGE_UNK7_PARTS) + colors->unk4[0]) /
+      red = ((colors->horizonColor[0] * SKY_IMAGE_HORIZON_PARTS) +
+                colors->topColor[0]) /
           SKY_IMAGE_DIVISOR;
-      green = ((colors->unk7[1] * SKY_IMAGE_UNK7_PARTS) + colors->unk4[1]) /
+      green = ((colors->horizonColor[1] * SKY_IMAGE_HORIZON_PARTS) +
+                  colors->topColor[1]) /
           SKY_IMAGE_DIVISOR;
-      blue = ((colors->unk7[2] * SKY_IMAGE_UNK7_PARTS) + colors->unk4[2]) /
+      blue = ((colors->horizonColor[2] * SKY_IMAGE_HORIZON_PARTS) +
+                 colors->topColor[2]) /
           SKY_IMAGE_DIVISOR;
     } else {
       blended[0] = from->backgroundColor[0] +
@@ -1100,11 +1105,11 @@ void InitSkyColors(void) {
 #define SKY_EDITOR_ERASE_COLUMN 14
 #define SKY_EDITOR_ERASE_ROW 5
 
-/* The table's columns: top, bottom, the unkA colors, the background image's
- * color, and fog */
+/* The table's columns: the top, horizon and noise colors, the background
+ * image's color, and fog */
 #define SKY_EDITOR_TOP 0
-#define SKY_EDITOR_BOTTOM 1
-#define SKY_EDITOR_UNKA 2
+#define SKY_EDITOR_HORIZON 1
+#define SKY_EDITOR_NOISE 2
 #define SKY_EDITOR_BACKGROUND 3
 #define SKY_EDITOR_FOG 4
 /* Rows past blue: the background's alpha, and the fog's near and far */
@@ -1192,16 +1197,17 @@ s32 UpdateSkyEditor(void) {
   if (g_ControllerStates[SKY_EDITOR_CONTROLLER].buttons & A_BUTTON) {
     switch (f_SkyEditorColumn) {
       case SKY_EDITOR_TOP:
-        f_EditedSkyColors->unk4[f_SkyEditorRow] += SKY_EDITOR_COLOR_STEP;
-        f_EditedSkyColors->unk4[f_SkyEditorRow] %= BYTE_VALUE_COUNT;
+        f_EditedSkyColors->topColor[f_SkyEditorRow] += SKY_EDITOR_COLOR_STEP;
+        f_EditedSkyColors->topColor[f_SkyEditorRow] %= BYTE_VALUE_COUNT;
         break;
-      case SKY_EDITOR_BOTTOM:
-        f_EditedSkyColors->unk7[f_SkyEditorRow] += SKY_EDITOR_COLOR_STEP;
-        f_EditedSkyColors->unk7[f_SkyEditorRow] %= BYTE_VALUE_COUNT;
+      case SKY_EDITOR_HORIZON:
+        f_EditedSkyColors->horizonColor[f_SkyEditorRow] +=
+            SKY_EDITOR_COLOR_STEP;
+        f_EditedSkyColors->horizonColor[f_SkyEditorRow] %= BYTE_VALUE_COUNT;
         break;
-      case SKY_EDITOR_UNKA:
-        f_EditedSkyColors->unkA[f_SkyEditorRow] += SKY_EDITOR_COLOR_STEP;
-        f_EditedSkyColors->unkA[f_SkyEditorRow] %= BYTE_VALUE_COUNT;
+      case SKY_EDITOR_NOISE:
+        f_EditedSkyColors->noiseColor[f_SkyEditorRow] += SKY_EDITOR_COLOR_STEP;
+        f_EditedSkyColors->noiseColor[f_SkyEditorRow] %= BYTE_VALUE_COUNT;
         break;
       case SKY_EDITOR_BACKGROUND:
         f_EditedSkyColors->backgroundColor[f_SkyEditorRow]++;
@@ -1230,16 +1236,17 @@ s32 UpdateSkyEditor(void) {
   } else if (g_ControllerStates[SKY_EDITOR_CONTROLLER].buttons & B_BUTTON) {
     switch (f_SkyEditorColumn) {
       case SKY_EDITOR_TOP:
-        f_EditedSkyColors->unk4[f_SkyEditorRow] -= SKY_EDITOR_COLOR_STEP;
-        f_EditedSkyColors->unk4[f_SkyEditorRow] %= BYTE_VALUE_COUNT;
+        f_EditedSkyColors->topColor[f_SkyEditorRow] -= SKY_EDITOR_COLOR_STEP;
+        f_EditedSkyColors->topColor[f_SkyEditorRow] %= BYTE_VALUE_COUNT;
         break;
-      case SKY_EDITOR_BOTTOM:
-        f_EditedSkyColors->unk7[f_SkyEditorRow] -= SKY_EDITOR_COLOR_STEP;
-        f_EditedSkyColors->unk7[f_SkyEditorRow] %= BYTE_VALUE_COUNT;
+      case SKY_EDITOR_HORIZON:
+        f_EditedSkyColors->horizonColor[f_SkyEditorRow] -=
+            SKY_EDITOR_COLOR_STEP;
+        f_EditedSkyColors->horizonColor[f_SkyEditorRow] %= BYTE_VALUE_COUNT;
         break;
-      case SKY_EDITOR_UNKA:
-        f_EditedSkyColors->unkA[f_SkyEditorRow] -= SKY_EDITOR_COLOR_STEP;
-        f_EditedSkyColors->unkA[f_SkyEditorRow] %= BYTE_VALUE_COUNT;
+      case SKY_EDITOR_NOISE:
+        f_EditedSkyColors->noiseColor[f_SkyEditorRow] -= SKY_EDITOR_COLOR_STEP;
+        f_EditedSkyColors->noiseColor[f_SkyEditorRow] %= BYTE_VALUE_COUNT;
         break;
       case SKY_EDITOR_BACKGROUND:
         f_EditedSkyColors->backgroundColor[f_SkyEditorRow]--;
@@ -1308,15 +1315,21 @@ s32 UpdateSkyEditor(void) {
 
   for (index = 0; index != SKY_VIEW_COUNT * MATRIX_BUFFER_COUNT; index++) {
     for (channel = 0; channel != RGB_CHANNEL_COUNT; channel++) {
-      f_SkyVertices[index][0].v.cn[channel] = f_EditedSkyColors->unk4[channel];
-      f_SkyVertices[index][1].v.cn[channel] = f_EditedSkyColors->unk7[channel];
-      f_SkyVertices[index][2].v.cn[channel] = f_EditedSkyColors->unk7[channel];
-      f_SkyVertices[index][3].v.cn[channel] = f_EditedSkyColors->unk4[channel];
-      f_SkyVertices[index][4].v.cn[channel] = f_EditedSkyColors->unk4[channel];
-      innerMix = (u16)(f_EditedSkyColors->unk4[channel] +
-                     f_EditedSkyColors->unk7[channel]) *
+      f_SkyVertices[index][0].v.cn[channel] =
+          f_EditedSkyColors->topColor[channel];
+      f_SkyVertices[index][1].v.cn[channel] =
+          f_EditedSkyColors->horizonColor[channel];
+      f_SkyVertices[index][2].v.cn[channel] =
+          f_EditedSkyColors->horizonColor[channel];
+      f_SkyVertices[index][3].v.cn[channel] =
+          f_EditedSkyColors->topColor[channel];
+      f_SkyVertices[index][4].v.cn[channel] =
+          f_EditedSkyColors->topColor[channel];
+      innerMix = (u16)(f_EditedSkyColors->topColor[channel] +
+                     f_EditedSkyColors->horizonColor[channel]) *
           0.5f;
-      outerMix = (f_EditedSkyColors->unk4[channel] + SKY_HORIZON_LEVEL) * 0.5f;
+      outerMix =
+          (f_EditedSkyColors->topColor[channel] + SKY_HORIZON_LEVEL) * 0.5f;
       innerMix = (innerMix + SKY_HORIZON_LEVEL) * 0.5f;
       f_SkyVertices[index][5].v.cn[channel] = outerMix;
       f_SkyVertices[index][6].v.cn[channel] = innerMix;
@@ -1336,14 +1349,15 @@ s32 UpdateSkyEditor(void) {
       blue = (color >> 1) & SKY_IMAGE_CHANNEL_MAX;
       alpha = color & 1;
       if (!alpha) {
-        red = ((f_EditedSkyColors->unk7[0] * SKY_IMAGE_UNK7_PARTS) +
-                  f_EditedSkyColors->unk4[0]) /
+        red = ((f_EditedSkyColors->horizonColor[0] * SKY_IMAGE_HORIZON_PARTS) +
+                  f_EditedSkyColors->topColor[0]) /
             SKY_IMAGE_DIVISOR;
-        green = ((f_EditedSkyColors->unk7[1] * SKY_IMAGE_UNK7_PARTS) +
-                    f_EditedSkyColors->unk4[1]) /
+        green =
+            ((f_EditedSkyColors->horizonColor[1] * SKY_IMAGE_HORIZON_PARTS) +
+                f_EditedSkyColors->topColor[1]) /
             SKY_IMAGE_DIVISOR;
-        blue = ((f_EditedSkyColors->unk7[2] * SKY_IMAGE_UNK7_PARTS) +
-                   f_EditedSkyColors->unk4[2]) /
+        blue = ((f_EditedSkyColors->horizonColor[2] * SKY_IMAGE_HORIZON_PARTS) +
+                   f_EditedSkyColors->topColor[2]) /
             SKY_IMAGE_DIVISOR;
       } else {
         red =
@@ -1404,19 +1418,22 @@ s32 UpdateSkyEditor(void) {
 
   PrintDebugText(
       "   T   B   C   BG  FOG", SKY_EDITOR_TEXT_COLUMN, SKY_EDITOR_TEXT_ROW);
-  sprintf(g_PrintBuffer, "R: %3d %3d %3d %3d %4d  ", f_EditedSkyColors->unk4[0],
-      f_EditedSkyColors->unk7[0], f_EditedSkyColors->unkA[0],
-      f_EditedSkyColors->backgroundColor[0], (int)g_DebugFog.color[0]);
+  sprintf(g_PrintBuffer, "R: %3d %3d %3d %3d %4d  ",
+      f_EditedSkyColors->topColor[0], f_EditedSkyColors->horizonColor[0],
+      f_EditedSkyColors->noiseColor[0], f_EditedSkyColors->backgroundColor[0],
+      (int)g_DebugFog.color[0]);
   PrintDebugText(
       g_PrintBuffer, SKY_EDITOR_TEXT_COLUMN, SKY_EDITOR_TEXT_ROW + 1);
-  sprintf(g_PrintBuffer, "G: %3d %3d %3d %3d %4d  ", f_EditedSkyColors->unk4[1],
-      f_EditedSkyColors->unk7[1], f_EditedSkyColors->unkA[1],
-      f_EditedSkyColors->backgroundColor[1], (int)g_DebugFog.color[1]);
+  sprintf(g_PrintBuffer, "G: %3d %3d %3d %3d %4d  ",
+      f_EditedSkyColors->topColor[1], f_EditedSkyColors->horizonColor[1],
+      f_EditedSkyColors->noiseColor[1], f_EditedSkyColors->backgroundColor[1],
+      (int)g_DebugFog.color[1]);
   PrintDebugText(
       g_PrintBuffer, SKY_EDITOR_TEXT_COLUMN, SKY_EDITOR_TEXT_ROW + 2);
-  sprintf(g_PrintBuffer, "B: %3d %3d %3d %3d %4d  ", f_EditedSkyColors->unk4[2],
-      f_EditedSkyColors->unk7[2], f_EditedSkyColors->unkA[2],
-      f_EditedSkyColors->backgroundColor[2], (int)g_DebugFog.color[2]);
+  sprintf(g_PrintBuffer, "B: %3d %3d %3d %3d %4d  ",
+      f_EditedSkyColors->topColor[2], f_EditedSkyColors->horizonColor[2],
+      f_EditedSkyColors->noiseColor[2], f_EditedSkyColors->backgroundColor[2],
+      (int)g_DebugFog.color[2]);
   PrintDebugText(
       g_PrintBuffer, SKY_EDITOR_TEXT_COLUMN, SKY_EDITOR_TEXT_ROW + 3);
   sprintf(g_PrintBuffer, "A:             %3d %4d  ",
@@ -1425,7 +1442,7 @@ s32 UpdateSkyEditor(void) {
   PrintDebugText(
       g_PrintBuffer, SKY_EDITOR_TEXT_COLUMN, SKY_EDITOR_TEXT_ROW + 4);
   sprintf(g_PrintBuffer, "CC:%d               %4d  ",
-      (int)f_EditedSkyColors->unk0, (int)g_DebugFog.far);
+      (int)f_EditedSkyColors->addsNoise, (int)g_DebugFog.far);
   PrintDebugText(
       g_PrintBuffer, SKY_EDITOR_TEXT_COLUMN, SKY_EDITOR_TEXT_ROW + 5);
   PrintDebugText(">",
@@ -1766,7 +1783,7 @@ void DrawSky(
   gDPSetAlphaCompare(gfx++, G_AC_NONE);
   gSPClearGeometryMode(gfx++, 0xFFFFFFFF);
   gSPSetGeometryMode(gfx++, G_SHADE | G_CULL_BACK | G_SHADING_SMOOTH);
-  if (colors->unk0 == 0) {
+  if (colors->addsNoise == 0) {
     gDPSetCombineLERP(gfx++, ENVIRONMENT, SHADE, TEXEL0, SHADE, 0, 0, 0, TEXEL0,
         ENVIRONMENT, SHADE, TEXEL0, SHADE, 0, 0, 0, TEXEL0);
   } else {
@@ -1774,7 +1791,8 @@ void DrawSky(
         TEXEL0, 0, ENVIRONMENT, SHADE, 0, 0, 0, TEXEL0);
   }
 
-  gDPSetEnvColor(gfx++, colors->unkA[0], colors->unkA[1], colors->unkA[2], 255);
+  gDPSetEnvColor(gfx++, colors->noiseColor[0], colors->noiseColor[1],
+      colors->noiseColor[2], 255);
   gDPLoadTextureBlock(gfx++, TextureAddress(g_NoiseTexels), G_IM_FMT_I,
       G_IM_SIZ_8b, SKY_NOISE_IMAGE_SIZE, SKY_NOISE_IMAGE_SIZE, 0, G_TX_WRAP,
       G_TX_WRAP, SKY_NOISE_MASK, SKY_NOISE_MASK, G_TX_NOLOD, G_TX_NOLOD);

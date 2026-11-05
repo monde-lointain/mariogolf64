@@ -58,14 +58,16 @@ extern Fog g_DebugFog;
 #define SKY_BACKGROUND_CHANNEL_COUNT 4
 
 /*
- * The scene's colors at one time of day. The sky's two colors go to its
- * vertices; DeriveSceneColors also derives other colors from them.
+ * The scene's colors at one time of day. The sky is shaded from its top
+ * color down to its horizon color, and a noise texture tinted with its noise
+ * color is either added to that gradient or blends the gradient toward the
+ * noise color. DeriveSceneColors also derives other colors from them.
  */
 typedef struct SkyColors {
-  /* 0x00 */ s32 unk0; /* UpdateSkyEditor shows it as "CC" */
-  /* 0x04 */ u8 unk4[3];
-  /* 0x07 */ u8 unk7[3];
-  /* 0x0A */ u8 unkA[3];
+  /* 0x00 */ s32 addsNoise;
+  /* 0x04 */ u8 topColor[3];
+  /* 0x07 */ u8 horizonColor[3];
+  /* 0x0A */ u8 noiseColor[3];
   /* 0x0D */ u8 backgroundColor[SKY_BACKGROUND_CHANNEL_COUNT];
   /* 0x11 */ u8 hasLensFlare;
   /* 0x12 */ u8 unk12[2];

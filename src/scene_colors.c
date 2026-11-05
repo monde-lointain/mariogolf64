@@ -80,18 +80,25 @@ void DeriveSceneColors(void) {
   for (vertexOffset = 0; vertexOffset != QUAD_VERTEX_COUNT; vertexOffset++) {
     for (channelIndex = 0; channelIndex != RGB_CHANNEL_COUNT; channelIndex++) {
       f_ShadedVertices[0][SHADED_QUAD_START + vertexOffset].v.cn[channelIndex] =
-          (s32)((entry->unk4[channelIndex] + entry->unk7[channelIndex]) * 0.3f);
+          (s32)((entry->topColor[channelIndex] +
+                    entry->horizonColor[channelIndex]) *
+              0.3f);
       f_ShadedVertices[1][SHADED_QUAD_START + vertexOffset].v.cn[channelIndex] =
-          (s32)((entry->unk4[channelIndex] + entry->unk7[channelIndex]) * 0.3f);
+          (s32)((entry->topColor[channelIndex] +
+                    entry->horizonColor[channelIndex]) *
+              0.3f);
     }
   }
 
-  f_UnusedBlendedRed = (s32)((entry->unk4[0] + entry->unk7[0]) * 0.35f);
-  f_UnusedBlendedGreen = (s32)((entry->unk4[1] + entry->unk7[1]) * 0.35f);
-  f_UnusedBlendedBlue = (s32)((entry->unk4[2] + entry->unk7[2]) * 0.35f);
-  f_UnusedDimmedRed = entry->unkA[0] * 0.8;
-  f_UnusedDimmedGreen = entry->unkA[1] * 0.8;
-  f_UnusedDimmedBlue = entry->unkA[2] * 0.8;
+  f_UnusedBlendedRed =
+      (s32)((entry->topColor[0] + entry->horizonColor[0]) * 0.35f);
+  f_UnusedBlendedGreen =
+      (s32)((entry->topColor[1] + entry->horizonColor[1]) * 0.35f);
+  f_UnusedBlendedBlue =
+      (s32)((entry->topColor[2] + entry->horizonColor[2]) * 0.35f);
+  f_UnusedDimmedRed = entry->noiseColor[0] * 0.8;
+  f_UnusedDimmedGreen = entry->noiseColor[1] * 0.8;
+  f_UnusedDimmedBlue = entry->noiseColor[2] * 0.8;
 }
 
 void DoNothing(void) {}
