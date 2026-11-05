@@ -358,8 +358,12 @@ typedef s32 (*BillboardHitFinder)(s32 startX, s32 startY, s32 startZ, s32 endX,
  * StepBallSimulation's does, which took the draft from 290 words (122 in shape)
  * to 288 (120). Holding the side spin in an s32, the field's type, and testing
  * it for the curve's sign keeps 288 words, takes the shape from 120 to 114 and
- * the register oracle from 129 words forcing 34 pseudos to 127 forcing 35. 288
- * words differ, 114 in shape.
+ * the register oracle from 129 words forcing 34 pseudos to 127 forcing 35.
+ * Scaling the wall hit's x velocity into a local before its hit position gives
+ * 278 words (106 in shape), but not for y and z: locals for all three first
+ * give 328, one step local set for each axis in turn 289 (101), and the contact
+ * fraction in a local 288. Writing the x line as the sibling writes its z, or
+ * its triangle hit's x, gives 290 and 298. 288 words differ, 114 in shape.
  */
 #ifdef NON_MATCHING
 s32 StepOpeningBallSimulation(BallSimulation* simulation) {
