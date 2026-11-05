@@ -1492,7 +1492,7 @@ s32 ChooseHoleStrokeTarget(void) {
     }
   }
 
-  if (g_GameState.betRates[BET_UNK4] > 0 ||
+  if (g_GameState.betRates[BET_SKINS] > 0 ||
       g_GameState.gameMode == GAME_MODE_SKINS_MATCH ||
       g_GameState.gameMode == GAME_MODE_CLUB_SLOTS) {
     targetLeftToPar = 0;

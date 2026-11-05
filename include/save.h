@@ -114,9 +114,10 @@ enum SaveReadResult {
 #define BET_STROKES 2
 /* Paid on the front nine, the back nine and the round */
 #define BET_NASSAU 3
-/* Settled on each hole; a tie carries the pot over */
-#define BET_UNK4 4
-/* Settled as BET_UNK4, when that bet is not set */
+/* Settled on each hole; a tie carries the pot over. The Skins Match and Club
+ * Slots bet presets stake it. */
+#define BET_SKINS 4
+/* Settled as BET_SKINS, when that bet is not set */
 #define BET_UNK5 5
 /* Paid per stroke, between the two teams of two */
 #define BET_LAS_VEGAS 6

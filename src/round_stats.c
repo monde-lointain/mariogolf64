@@ -167,8 +167,8 @@ void StartBets(void) {
     g_HolePot = g_GameState.betRates[BET_UNK5];
   }
 
-  if (g_GameState.betRates[BET_UNK4] != UNSET_BET_RATE) {
-    g_HolePot = g_GameState.betRates[BET_UNK4];
+  if (g_GameState.betRates[BET_SKINS] != UNSET_BET_RATE) {
+    g_HolePot = g_GameState.betRates[BET_SKINS];
   }
 
   g_GameState.carriedPots[CARRIED_POT_LONGEST_DRIVE] = g_LongestDrivePot;
@@ -704,11 +704,11 @@ void SettleHoleBets(void) {
     }
   }
 
-  if (g_GameState.betRates[BET_UNK4] != UNSET_BET_RATE ||
+  if (g_GameState.betRates[BET_SKINS] != UNSET_BET_RATE ||
       g_GameState.betRates[BET_UNK5] != UNSET_BET_RATE) {
     bet = BET_UNK5;
-    if (g_GameState.betRates[BET_UNK4] != UNSET_BET_RATE) {
-      bet = BET_UNK4;
+    if (g_GameState.betRates[BET_SKINS] != UNSET_BET_RATE) {
+      bet = BET_SKINS;
     } else {
       /*
        * The store is dead, as each case that reads count sets it first, but

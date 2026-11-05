@@ -1363,9 +1363,9 @@ void DrawBetsPage(Gfx** displayListHead) {
             g_Scorecard.y + BET_POT_TOP, g_PrintBuffer);
       }
 
-      if (i == BET_UNK4) {
+      if (i == BET_SKINS) {
         sprintf(g_PrintBuffer, f_TotalFormat,
-            g_HolePot - g_GameState.betRates[BET_UNK4]);
+            g_HolePot - g_GameState.betRates[BET_SKINS]);
         DrawCenteredSmallText(&gfx,
             (column * BET_COLUMN_SPACING) + BET_POT_LEFT + g_Scorecard.x,
             g_Scorecard.y + BET_POT_TOP, g_PrintBuffer);
