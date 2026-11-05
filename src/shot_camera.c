@@ -1428,29 +1428,34 @@ void SnapLookAtPoint(void) {
   f_LookAtPoint[AXIS_Z] = f_FlightBallPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE;
 }
 
+/*
+ * Moves the camera's axis coordinate a fraction of the way along offset, unless
+ * it is already within the dead zone. It is a do-while (0) statement macro, as
+ * the original's code needs a loop around the first axis's test; the macro
+ * gives every axis one, and the other two compile the same either way. Written
+ * out without the loop, the tests leave 3 words differing, all in shape, as
+ * with a local for each axis's offset; working the offset out inside the macro
+ * too gives 3, a loop over the axes 66 (54 in shape), fabs 66 and the
+ * comparison spelled as two tests 27.
+ */
+#define EaseCameraCoordinate(axis, offset) \
+  do { \
+    if (fabsf(offset) > CAMERA_EASE_DEAD_ZONE) { \
+      f_CameraPosition[axis] += (offset) * CAMERA_EASE_FRACTION; \
+    } \
+  } while (0)
+
 /* Eases each of the camera's coordinates toward target's, unless it is already
  * close */
 void EaseCameraPosition(Vec3 target) {
   f32 offset;
 
   offset = target[AXIS_X] - f_CameraPosition[AXIS_X];
-
-  /* The x test in a block of its own is there to match; without it 3 words
-   * differ, all in shape, as with a local for each axis's offset. A loop
-   * over the axes gives 66, 54 in shape, fabs 66 and the comparison spelled
-   * as two tests 27 */
-  IN_OWN_BLOCK(if (fabsf(offset) > CAMERA_EASE_DEAD_ZONE) {
-    f_CameraPosition[AXIS_X] += offset * CAMERA_EASE_FRACTION;
-  });
+  EaseCameraCoordinate(AXIS_X, offset);
   offset = target[AXIS_Y] - f_CameraPosition[AXIS_Y];
-  if (fabsf(offset) > CAMERA_EASE_DEAD_ZONE) {
-    f_CameraPosition[AXIS_Y] += offset * CAMERA_EASE_FRACTION;
-  }
-
+  EaseCameraCoordinate(AXIS_Y, offset);
   offset = target[AXIS_Z] - f_CameraPosition[AXIS_Z];
-  if (fabsf(offset) > CAMERA_EASE_DEAD_ZONE) {
-    f_CameraPosition[AXIS_Z] += offset * CAMERA_EASE_FRACTION;
-  }
+  EaseCameraCoordinate(AXIS_Z, offset);
 }
 
 #define UNK2E08_HEIGHT_SPREAD_FRACTION 0.2
