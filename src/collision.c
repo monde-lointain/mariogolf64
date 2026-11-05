@@ -2215,8 +2215,6 @@ s32 FindHoleTriangleHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
     endSide = (plane.normal[AXIS_X] * endX) + (plane.normal[AXIS_Y] * endY) +
         (plane.normal[AXIS_Z] * endZ) +
         (plane.distance * WORLD_TO_COURSE_SCALE);
-    /* The original ends the plane-side calculation's basic block here. */
-    END_BASIC_BLOCK();
     if (DoesPathMeetPlane(startSide, endSide)) {
       sideChange = startSide - endSide;
       if ((s32)sideChange != 0) {
