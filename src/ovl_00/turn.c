@@ -3029,7 +3029,12 @@ void ShowHoleOutBanner(s32 playerIndex) {
  * function-wide variable that the angle in the g_RoundHud.unkF block at the end
  * also reads: that alone gives 325 words (147 in shape), but outside the aiming
  * state the angle then reads the variable unset, and the original reloads
- * g_CurrentShot.heading there with an lhu.
+ * g_CurrentShot.heading there with an lhu. An s8 or s16 shotSource gives 385
+ * words but 149 in shape, against 386 and 142, and adds three left shifts and a
+ * right shift by 24 or 16 to narrow it, where the original has none, so the
+ * local keeps the static's s32. Setting nextState after the calls when a ring
+ * shot holes out, as starting over does, gives 386 words (140 in shape); it is
+ * kept first, as the training choice box's hole out has it.
  */
 #ifdef NON_MATCHING
 /* Debug flag 0x47: prints where the ball lies, and the second controller moves
