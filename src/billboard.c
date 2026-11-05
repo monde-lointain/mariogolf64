@@ -347,8 +347,10 @@ void DrawBillboard(Gfx** gfxPtr, Billboard* billboard,
  * the spill slots. The permuter's flag for the near loop's viewDepth >= 0 test
  * (131 words, 9 in shape) only takes an 8-byte slot that grows the frame, so it
  * is a pad in disguise. The register oracle, forcing 7 pseudos' registers,
- * leaves 77 words at best, so the code differs too. 139 words differ, 17 in
- * shape.
+ * leaves 77 words at best, so the code differs too. Declaring the far loop's
+ * textureIndex unsigned gives 107 words (25 in shape) only because it drops the
+ * unused-billboard test, which the original keeps as an lb and a bltzl. 139
+ * words differ, 17 in shape.
  */
 #ifdef NON_MATCHING
 void DrawBillboards(CameraMatrices* cameraMatrices, s32 cameraIndex) {
