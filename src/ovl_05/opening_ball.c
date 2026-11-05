@@ -356,7 +356,10 @@ typedef s32 (*BillboardHitFinder)(s32 startX, s32 startY, s32 startZ, s32 endX,
  * in shape) to 290 (122); alone, they gave 292 (124) and 294 (124). The ground
  * spin's grip clears the spin after both velocity updates, as
  * StepBallSimulation's does, which took the draft from 290 words (122 in shape)
- * to 288 (120). 288 words differ, 120 in shape.
+ * to 288 (120). Holding the side spin in an s32, the field's type, and testing
+ * it for the curve's sign keeps 288 words, takes the shape from 120 to 114 and
+ * the register oracle from 129 words forcing 34 pseudos to 127 forcing 35. 288
+ * words differ, 114 in shape.
  */
 #ifdef NON_MATCHING
 s32 StepOpeningBallSimulation(BallSimulation* simulation) {
@@ -1589,7 +1592,7 @@ ROLLED:
       f32 turned[3];
       BallSpeed airSpeed;
       f32 drag;
-      f32 sideSpin;
+      s32 sideSpin;
       BallSpeed horizontalSpeed;
       f32 sideSpinMagnitude;
       f32 ratio;
@@ -1628,7 +1631,7 @@ ROLLED:
       curve = sideSpin * (weight * CURVE_PER_SIDE_SPIN);
       if (horizontalSpeed < AbsFloat(curve) * MAX_CURVE_SPEED_RATIO) {
         curve = horizontalSpeed * (1.0f / MAX_CURVE_SPEED_RATIO);
-        if (simulation->sideSpin < 0) {
+        if (sideSpin < 0) {
           curve = -curve;
         }
       }
