@@ -126,16 +126,20 @@ void TransformPoint(Mat4 mf, Vec3 point, Vec3 result) {
  *
  * Doesn't match: the original's frame is 8 bytes larger, it keeps
  * horizontalEyeZ on the stack where ours keeps it in $fp, and its float
- * registers differ from the first eye distance on. The register oracle,
- * forcing 12 pseudos, still leaves 227 words. The original negates 10.0 at
- * run time for maxZ, so maxZ is set from minZ after the block that ends at
- * bottomAngle, where cse no longer knows minZ's value. Written -Z_MARGIN the
- * negation folds (282 words, 108 in shape), as it does from minZ in the same
- * block (291, 117); setting minZ just before the block's end gives 285.
- * The permuter's best (269 words, 89 in shape) sets eyeZ from
- * horizontalEyeZ before working it out. Setting eyeZ to the horizontal
- * distance first and raising it to the vertical one gives 279 to 332.
- * 279 words differ, 109 in shape.
+ * registers differ from the first eye distance on. The register oracle, forcing
+ * 7 pseudos, still leaves 225 words. The original negates 10.0 at run time for
+ * maxZ, so maxZ is set from minZ after the block that ends at bottomAngle,
+ * where cse no longer knows minZ's value. Written -Z_MARGIN the negation folded
+ * (282 words, 108 in shape, when the draft gave 279), as it did from minZ in
+ * the same block (291, 117); setting minZ just before the block's end gave 285.
+ * The permuter's best (269 words, 89 in shape) set eyeZ from horizontalEyeZ
+ * before working it out. Setting eyeZ to the horizontal distance first and
+ * raising it to the vertical one gave 279 to 332. The vertical distance to the
+ * depth is written into the top and bottom edges' products, where a double
+ * verticalFrontDistance held it, which took the draft from 279 words differing
+ * to 269, 109 in shape to 113, and the oracle from 227 words, forcing 12, to
+ * 225; as a float variable it gives 281, and writing frontDistance into its two
+ * uses as well 282. 269 words differ, 113 in shape.
  */
 #ifdef NON_MATCHING
 void FrameSpheres(f32 depthOffset) {
@@ -171,7 +175,6 @@ void FrameSpheres(f32 depthOffset) {
   f32 centerY;
   f32 radius;
   f64 frontDistance;
-  f64 verticalFrontDistance;
   s32 i;
   f32 rightRadians;
 
@@ -303,17 +306,16 @@ void FrameSpheres(f32 depthOffset) {
   frontDistance = depth - horizontalEyeZ;
   /*
    * distance holds the right edge from here, to match: a right variable,
-   * declared beside left or rightRadians, gives 494 words differing (110 in
-   * shape), against the draft's 279 (109)
+   * declared beside left or rightRadians, gave 494 words differing (110 in
+   * shape), against the draft's 279 (109) at the time
    */
   rightRadians = FramingDegreesToRadians(rightAngle);
   distance = frontDistance * tan(rightRadians);
   left = frontDistance * tan(FramingDegreesToRadians(leftAngle));
-  verticalFrontDistance = depth - verticalEyeZ;
-  top = verticalFrontDistance * tan(FramingDegreesToRadians(topAngle));
+  top = (depth - verticalEyeZ) * tan(FramingDegreesToRadians(topAngle));
   centerX = (minX + maxX) * 0.5f;
   centerY = (minY + maxY) * 0.5f;
-  bottom = verticalFrontDistance * tan(FramingDegreesToRadians(bottomAngle));
+  bottom = (depth - verticalEyeZ) * tan(FramingDegreesToRadians(bottomAngle));
   if (centerX < left) {
     centerX = left;
   }
