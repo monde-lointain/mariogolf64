@@ -3015,26 +3015,9 @@ Boolean IsLineMostlyLost(CoursePoint from, CoursePoint to) {
  * Simulates f_TrialShot and returns TRUE if the ball comes to rest, and not out
  * of bounds, off the course or in a water hazard
  *
- * Doesn't match: ours reads the simulation's state in the loop test from its
- * address, where the original reads it through the register that holds the
- * simulation's address, and the original places the fault report after the
- * surface test. Testing the step count before the outside flag, or the surface
- * with && gives 30 differing words; nesting its tests, joining them with || or
- * comparing the state with BALL_STATE_STOPPED changes nothing. The original
- * reaches its TRUE message by a jump past the fault report; a switch on the
- * kind, a goto to a closing TRUE block, an else for the TRUE case or a safe
- * flag give 24 to 31 words, and a pointer to the simulation 32 to 39. The
- * original's register holds the simulation's address plus 0x28, which it takes
- * off for the step's argument; a pointer used only by the loop reads the state
- * through its register, without that bias, and gives 25 words (13 in shape),
- * while one also used for the launch, the later state test and the surface
- * gives 39 (17). The permuter's best, 15 words, prints the TRUE message for a
- * water hazard too and falls off the end without a return; a later best, 14 (8
- * in shape), prints it for the out-of-bounds kinds instead, then FALSE, where
- * the original prints only FALSE for them (D_802542CC, the ROM's FALSE string,
- * 0x18 bytes before TRUE's) and prints TRUE only before returning TRUE, and its
- * copies of the offset and surface through locals change nothing alone. 24
- * words differ, 14 in shape.
+ * Doesn't match: the original reads the loop's state through a saved address
+ * biased into the simulation, also used for StepBallSimulation's argument.
+ * Here the state is read from its global address. 6 words differ, 4 in shape.
  */
 #ifdef NON_MATCHING
 Boolean IsTrialShotSafe(void) {
@@ -3058,26 +3041,38 @@ Boolean IsTrialShotSafe(void) {
   while (f_TrialSimulation.state) {
     f_TrialStepCount++;
     flags = StepBallSimulation(&f_TrialSimulation);
-    if (f_TrialStepCount < MAX_STEP_COUNT) {
-      if (flags & STEP_FLAG_OUTSIDE_COURSE) {
-        break;
-      }
-    } else {
-      SetDebugTextHighlight(TRUE);
-      PrintDebugText(f_SimFaultText, 10, 12);
+    if (f_TrialStepCount >= MAX_STEP_COUNT) {
+      goto reportFault;
+    }
+
+    if (flags & STEP_FLAG_OUTSIDE_COURSE) {
       break;
     }
   }
 
+checkResult:
   if (!f_TrialSimulation.state) {
     kind = GetSurfaceInfo(f_TrialSimulation.surface)->kind;
     if (IsOutOfBoundsKind(kind)) {
+      goto unsafe;
     } else if (kind != SURFACE_KIND_WATER_HAZARD) {
-      osSyncPrintf("nmResultCheck: TRUE\n");
-      return TRUE;
+      goto safe;
     }
   }
 
+  goto unsafe;
+
+reportFault:
+  /* The step limit reports a fault, then rejoins the normal result checks. */
+  SetDebugTextHighlight(TRUE);
+  PrintDebugText(f_SimFaultText, 10, 12);
+  goto checkResult;
+
+safe:
+  osSyncPrintf("nmResultCheck: TRUE\n");
+  return TRUE;
+
+unsafe:
   osSyncPrintf("nmResultCheck: FALSE\n");
   return FALSE;
 }
