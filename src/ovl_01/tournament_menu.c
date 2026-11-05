@@ -1230,13 +1230,15 @@ void UpdateClubWindow(void);
  * the keys through GetCodeKey loads both coordinates before the address, as the
  * original does; indexing f_CodeKeys directly gives 68 words differing, 26 in
  * shape. Swapping its parameters, or stepping the cursor before a call that
- * reads both from memory (68), doesn't help, and s16 or s8 parameters give
- * 68-76. The register oracle matches the draft when it forces 14 pseudos, in
- * the four moves' key tests, so the RTL is the original's and only
- * local-alloc's choices differ: in each move two of the block's quantities take
- * each other's registers. GetCodeKey returning s32 changes nothing, and reading
- * the row through a pointer gives 64 words (22 in shape); a u8 row gives 67
- * (23), and a macro in its place 68 (26). 64 words differ, 18 in shape.
+ * reads both from memory (68), doesn't help, s16 or s8 parameters give 68-76,
+ * and u16 or u8 ones, on either or both, 66-82. The register oracle matches the
+ * draft when it forces 14 pseudos, in the four moves' key tests, so the RTL is
+ * the original's and only local-alloc's choices differ: in each move two of the
+ * block's quantities take each other's registers. GetCodeKey returning s32
+ * changes nothing, and reading the row through a pointer gives 64 words (22 in
+ * shape); a u8 row gives 67 (23), and a macro in its place 68 (26). A focused
+ * permuter run's best, 57 words (17 in shape), casts the stepped row to
+ * unsigned short in the call, a fake. 64 words differ, 18 in shape.
  */
 #ifdef NON_MATCHING
 void UpdateClubTournament(void) {
