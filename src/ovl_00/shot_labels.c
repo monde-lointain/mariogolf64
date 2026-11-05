@@ -171,22 +171,7 @@ extern char g_PrintBuffer[];
  * Draws the tags of the players' balls, moving each to a corner that is clear
  * of the others. DrawLeaderLine and DrawPlayerTag are nested functions, a GNU
  * C extension.
- *
- * Each corner search places the tag where it stops, and the corner is stored
- * after the two searches join: placing the tag after the join, with the
- * corner's store in a block of its own, gives 233 to 241 words differing, 41 to
- * 69 in shape, and storing the corner in each search too 234 to 244.
- *
- * Doesn't match: the original steps a pointer to each label's corner and
- * reaches the other fields from the label's offset; ours has loop.c reach them
- * from the corner pointer as well. Indexing the labels, rather than through a
- * label pointer, gave the original's pointer. IsTagOverlapping puts the tag's
- * coordinate first in both lower-bound tests; the spot-first spelling gave 96
- * words, 44 in shape, and the 14 other mixes 38 to 96. Working the tag's place
- * out once per corner, before the tests, gives 242 to 252 words. The register
- * oracle, forcing 4 pseudos, leaves 20 words. 38 words differ, 12 in shape.
  */
-#ifdef NON_MATCHING
 void DrawShotLabels(Gfx** displayListHead) {
   ScreenPoint point;
   ScreenSpot cup;
@@ -194,7 +179,7 @@ void DrawShotLabels(Gfx** displayListHead) {
   s32 players;
   s32 corner;
   s32 tries;
-  s32 overlaps;
+
   s32 i;
   s32 j;
 
@@ -326,10 +311,21 @@ void DrawShotLabels(Gfx** displayListHead) {
       f_ShotLabels[i].x = point.x + f_TagOffsetsX[f_ShotLabels[i].corner];
       f_ShotLabels[i].y = point.y + f_TagOffsetsY[f_ShotLabels[i].corner];
       f_ShotLabels[i].depth = point.depth;
+      /*
+       * Each search, with a flag of its own, tries corners until one is clear,
+       * placing the tag there and leaving for the shared corner store, or until
+       * it runs out, leaving the tag where it was. To match: ending endless
+       * loops with a break and a test of the tries gives 12 words differing,
+       * all in shape; placing the tag after the label instead 205, 29 in shape;
+       * storing the corner in each search and breaking out 176, 82 in shape;
+       * and testing the flag after the searches, which needs one flag for both,
+       * 144 to 318. One flag for both searches gives 26 words, none in shape.
+       */
       tries = 0;
       if (players == SHOT_LABELS_OVERHEAD) {
-        overlaps = FALSE;
-        while (TRUE) {
+        do {
+          s32 overlaps = FALSE;
+
           corner = (f_ShotLabels[i].corner + tries) % CORNER_COUNT;
           for (j = 0; j != i; j++) {
             if (f_ShotLabels[j].corner != NO_CORNER &&
@@ -344,17 +340,14 @@ void DrawShotLabels(Gfx** displayListHead) {
           if (!overlaps) {
             f_ShotLabels[i].x = point.x + f_TagOffsetsX[corner];
             f_ShotLabels[i].y = point.y + f_TagOffsetsY[corner];
-            break;
+            goto PLACED;
           }
-
-          overlaps = FALSE;
-          if (tries == CORNER_COUNT) {
-            goto NEXT;
-          }
-        }
+        } while (tries != CORNER_COUNT);
+        continue;
       } else {
-        while (TRUE) {
-          overlaps = FALSE;
+        do {
+          s32 overlaps = FALSE;
+
           corner = ((f_ShotLabels[i].corner + tries) % UPPER_CORNER_COUNT) +
               CORNER_UPPER_LEFT;
           if (cup.state == SPOT_SHOWN &&
@@ -386,15 +379,13 @@ void DrawShotLabels(Gfx** displayListHead) {
           if (!overlaps) {
             f_ShotLabels[i].x = point.x + f_TagOffsetsX[corner];
             f_ShotLabels[i].y = point.y + f_TagOffsetsY[corner];
-            break;
+            goto PLACED;
           }
-
-          if (tries == UPPER_CORNER_COUNT) {
-            goto NEXT;
-          }
-        }
+        } while (tries != UPPER_CORNER_COUNT);
+        continue;
       }
 
+PLACED:
       f_ShotLabels[i].corner = corner;
 
 NEXT:;
@@ -494,13 +485,6 @@ NEXT:;
 
   *displayListHead = gfx;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_00/shot_labels", DrawLeaderLine);
-
-INCLUDE_ASM("asm/nonmatchings/ovl_00/shot_labels", DrawPlayerTag);
-
-INCLUDE_ASM("asm/nonmatchings/ovl_00/shot_labels", DrawShotLabels);
-#endif
 
 /*
  * Draws what helps aim the shot: the players' tags, the sign over the target
