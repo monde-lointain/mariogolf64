@@ -1940,7 +1940,9 @@ static inline s32 GetMirroredOffset(s16 coordinate) {
  * Taking the coordinate as an s32 copies the coordinate twice instead (44);
  * other helper shapes, a separate tile helper and code written out in the loop
  * give 40-52. The register oracle, forcing 6 pseudos' registers, leaves 10
- * words at best, so the code differs too. 40 words differ.
+ * words at best, so the code differs too. A u16 offset gives 34 words (8 in
+ * shape against 6), but masks each offset with an andi 0xffff, which the
+ * original never does. 40 words differ.
  */
 #ifdef NON_MATCHING
 void RebuildGroundTextureCoordinates(void) {
