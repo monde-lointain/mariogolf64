@@ -359,13 +359,15 @@ static CharacterId f_PortraitCharacterIndex;
 static s32 f_NoticeStage;
 static s32 f_NoticeFrameCount;
 static s32 f_NoticeSwing;
-static s32 f_NoticeUnk54;
+/* Moves the course notice down; only ever set to 0 */
+static s32 f_CourseNoticeShift;
 static Radians f_NoticeAngle;
 static Boolean f_IsNoticeHeld;
 static s32 f_NoticeTime;
 static s32 f_NoticeFaceIndex;
 static s32 f_NoticeLift;
-static s32 f_NoticeUnk6C;
+/* Moves the character notice down; only ever set to 0 */
+static s32 f_CharacterNoticeShift;
 /* The score password of a round of a tournament entered by password */
 static char f_ScorePassword[SCORE_PASSWORD_LENGTH];
 static s32 f_PlayerResults[MAX_PLAYER_COUNT];
@@ -827,11 +829,11 @@ void LoadUnlockNotice(s32 unlock) {
   f_NoticeTime = 0;
   f_NoticeFaceIndex = 0;
   f_NoticeLift = 0;
-  f_NoticeUnk6C = 0;
+  f_CharacterNoticeShift = 0;
   f_NoticeFrameCount = 0;
   f_NoticeStage = 0;
   f_NoticeSwing = 0;
-  f_NoticeUnk54 = 0;
+  f_CourseNoticeShift = 0;
   f_NoticeAngle = 0;
   courseIndex = 0;
   if (unlock == UNLOCK_NOTICE_DONKEY_KONG) {
@@ -903,7 +905,7 @@ s32 UpdateUnlockNotice(void) {
     switch (f_NoticeStage) {
       case 0:
         f_NoticeSwing = -sinf(f_NoticeAngle) * NOTICE_SWING_HEIGHT;
-        f_NoticeUnk54 = 0;
+        f_CourseNoticeShift = 0;
         f_NoticeAngle += NOTICE_SWING_STEP;
         if (f_NoticeAngle > M_PI) {
           f_NoticeAngle = M_PI;
@@ -1346,7 +1348,7 @@ void StartResultsNotice(s32 kind) {
       f_NoticeStage = 0;
       f_NoticeFrameCount = 0;
       f_NoticeSwing = SCREEN_WIDTH;
-      f_NoticeUnk54 = 0;
+      f_CourseNoticeShift = 0;
       f_NoticeAngle = NOTICE_SWING_START_ANGLE;
       break;
     case UNLOCK_NOTICE_KIND_CHARACTER:
@@ -1354,7 +1356,7 @@ void StartResultsNotice(s32 kind) {
       f_NoticeTime = 0;
       f_NoticeFaceIndex = 0;
       f_NoticeLift = 0;
-      f_NoticeUnk6C = 0;
+      f_CharacterNoticeShift = 0;
       break;
   }
 }
@@ -1370,7 +1372,7 @@ void UpdateCourseResultsNotice(void) {
   switch (f_NoticeStage) {
     case 0:
       f_NoticeSwing = -sinf(f_NoticeAngle) * NOTICE_SWING_HEIGHT;
-      f_NoticeUnk54 = 0;
+      f_CourseNoticeShift = 0;
       f_NoticeAngle += NOTICE_SWING_STEP;
       if (f_NoticeAngle > M_PI) {
         f_NoticeAngle = M_PI;
@@ -1470,9 +1472,9 @@ void DrawCourseResultsNotice(Gfx** displayListHead) {
     top = NOTICE_COURSE_CENTER_Y - size + (i * size);
     centerX = f_NoticeSwing + NOTICE_COURSE_CENTER_X;
     DrawTextureRect(&gfx, QuarterPixels(centerX - size),
-        QuarterPixels(top + f_NoticeUnk54), QuarterPixels(size + centerX),
-        QuarterPixels(top + size + f_NoticeUnk54), G_TX_RENDERTILE, 0, 0, step,
-        step);
+        QuarterPixels(top + f_CourseNoticeShift), QuarterPixels(size + centerX),
+        QuarterPixels(top + size + f_CourseNoticeShift), G_TX_RENDERTILE, 0, 0,
+        step, step);
   }
 
   LoadLargePalette(&gfx, ImageBody(f_NoticeTitleImage));
@@ -1487,10 +1489,10 @@ void DrawCourseResultsNotice(Gfx** displayListHead) {
         NOTICE_TITLE_STRIP_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
     top = TitleStripTop(lift, i);
     DrawTextureRect(&gfx, QuarterPixels(f_NoticeSwing + NOTICE_TITLE_LEFT),
-        QuarterPixels(top + f_NoticeUnk54),
+        QuarterPixels(top + f_CourseNoticeShift),
         QuarterPixels(
             f_NoticeSwing + NOTICE_TITLE_LEFT + NOTICE_TITLE_STRIP_WIDTH),
-        QuarterPixels(top + NOTICE_TITLE_STRIP_HEIGHT + f_NoticeUnk54),
+        QuarterPixels(top + NOTICE_TITLE_STRIP_HEIGHT + f_CourseNoticeShift),
         G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   }
 
@@ -1518,9 +1520,9 @@ void DrawCourseResultsNotice(Gfx** displayListHead) {
      * the colored title's, to match: writing the bottom out too gives 35
      * words differing, 5 in shape
      */
-    stripBottomOffset = f_NoticeUnk54 + NOTICE_TITLE_STRIP_HEIGHT;
+    stripBottomOffset = f_CourseNoticeShift + NOTICE_TITLE_STRIP_HEIGHT;
     DrawTextureRect(&gfx, QuarterPixels(f_NoticeSwing + NOTICE_TITLE_LEFT),
-        QuarterPixels(TitleStripTop(depthLift, i) + f_NoticeUnk54),
+        QuarterPixels(TitleStripTop(depthLift, i) + f_CourseNoticeShift),
         QuarterPixels(
             f_NoticeSwing + NOTICE_TITLE_LEFT + NOTICE_TITLE_STRIP_WIDTH),
         QuarterPixels(TitleStripTop(depthLift, i) + stripBottomOffset),
@@ -1576,11 +1578,11 @@ void DrawCourseResultsNotice(Gfx** displayListHead) {
       shineTexelX = TexelCoordinate(NOTICE_SHINE_SIZE -
           ((f_NoticeFrameCount - NOTICE_SHINE_START) * NOTICE_SHINE_STEP));
       DrawTextureRect(&gfx, QuarterPixels(f_NoticeSwing + NOTICE_TITLE_LEFT),
-          QuarterPixels(NOTICE_TITLE_TOP + shineLift + f_NoticeUnk54),
+          QuarterPixels(NOTICE_TITLE_TOP + shineLift + f_CourseNoticeShift),
           QuarterPixels(
               f_NoticeSwing + NOTICE_TITLE_LEFT + NOTICE_TITLE_STRIP_WIDTH),
-          QuarterPixels(
-              NOTICE_TITLE_TOP + shineLift + NOTICE_SHINE_SIZE + f_NoticeUnk54),
+          QuarterPixels(NOTICE_TITLE_TOP + shineLift + NOTICE_SHINE_SIZE +
+              f_CourseNoticeShift),
           G_TX_RENDERTILE, shineTexelX, 0, NOTICE_SHINE_DSDX, TEXEL_STEP_ONE);
     }
   }
@@ -1694,7 +1696,7 @@ void DrawCharacterResultsNotice(Gfx** displayListHead) {
     LoadNibbleTextureBlock(&gfx, ImageTexels(f_NameplateImage), G_IM_FMT_CI,
         NOTICE_NAMEPLATE_SIZE, NOTICE_NAMEPLATE_SIZE, 0, 0, 0, 0, 0, 0, 0);
     centerX = f_NoticeLift + NOTICE_CENTER_X;
-    centerY = f_NoticeUnk6C + NOTICE_CENTER_Y;
+    centerY = f_CharacterNoticeShift + NOTICE_CENTER_Y;
     DrawTextureRect(&gfx, QuarterPixels(centerX - size),
         QuarterPixels(centerY - size), QuarterPixels(size + centerX),
         QuarterPixels(size + centerY), G_TX_RENDERTILE, 0, 0,
@@ -1712,7 +1714,7 @@ void DrawCharacterResultsNotice(Gfx** displayListHead) {
         NOTICE_PORTRAIT_SIZE, NOTICE_PORTRAIT_SIZE, 0, 0, 0, 0, 0, 0, 0);
     step = TexelRunStep(NOTICE_PORTRAIT_SIZE / 2, size);
     centerX = f_NoticeLift + NOTICE_CENTER_X;
-    centerY = f_NoticeUnk6C + NOTICE_CENTER_Y;
+    centerY = f_CharacterNoticeShift + NOTICE_CENTER_Y;
     DrawTextureRect(&gfx, QuarterPixels(centerX - size),
         QuarterPixels(centerY - size), QuarterPixels(size + centerX),
         QuarterPixels(size + centerY), G_TX_RENDERTILE, 0, 0, step, step);
@@ -1734,10 +1736,11 @@ void DrawCharacterResultsNotice(Gfx** displayListHead) {
       liftFromCenter = f_NoticeLift - NOTICE_CENTER_X;
       DrawTextureRect(&gfx,
           QuarterPixels(NOTICE_CENTER_X - width - f_NoticeLift),
-          QuarterPixels(CharacterTitleStripTop(i, height) + f_NoticeUnk6C),
-          QuarterPixels(width - liftFromCenter),
           QuarterPixels(
-              CharacterTitleStripTop(i, height) + height + f_NoticeUnk6C),
+              CharacterTitleStripTop(i, height) + f_CharacterNoticeShift),
+          QuarterPixels(width - liftFromCenter),
+          QuarterPixels(CharacterTitleStripTop(i, height) + height +
+              f_CharacterNoticeShift),
           G_TX_RENDERTILE, 0, 0,
           ((NOTICE_CHARACTER_TITLE_WIDTH / 2) << 10) / width,
           (NOTICE_TITLE_STRIP_HEIGHT << 10) / height);
@@ -1762,10 +1765,11 @@ void DrawCharacterResultsNotice(Gfx** displayListHead) {
           NOTICE_TITLE_STRIP_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
       titleCenterX = f_NoticeLift + NOTICE_CENTER_X;
       DrawTextureRect(&gfx, QuarterPixels(titleCenterX - width),
-          QuarterPixels(CharacterTitleStripTop(i, height) + f_NoticeUnk6C),
-          QuarterPixels(width + titleCenterX),
           QuarterPixels(
-              CharacterTitleStripTop(i, height) + height + f_NoticeUnk6C),
+              CharacterTitleStripTop(i, height) + f_CharacterNoticeShift),
+          QuarterPixels(width + titleCenterX),
+          QuarterPixels(CharacterTitleStripTop(i, height) + height +
+              f_CharacterNoticeShift),
           G_TX_RENDERTILE, 0, 0,
           ((NOTICE_CHARACTER_TITLE_WIDTH / 2) << 10) / width,
           (NOTICE_TITLE_STRIP_HEIGHT << 10) / height);
@@ -1806,10 +1810,10 @@ void DrawCharacterResultsNotice(Gfx** displayListHead) {
             ((f_NoticeTime - NOTICE_SHINE_START) * NOTICE_SHINE_STEP));
         DrawTextureRect(&gfx,
             QuarterPixels(f_NoticeLift + NOTICE_CHARACTER_SHINE_LEFT),
-            QuarterPixels(f_NoticeUnk6C + NOTICE_CHARACTER_SHINE_TOP),
+            QuarterPixels(f_CharacterNoticeShift + NOTICE_CHARACTER_SHINE_TOP),
             QuarterPixels(f_NoticeLift + NOTICE_CHARACTER_SHINE_LEFT +
                 NOTICE_CHARACTER_TITLE_WIDTH),
-            QuarterPixels(f_NoticeUnk6C + NOTICE_CHARACTER_SHINE_TOP +
+            QuarterPixels(f_CharacterNoticeShift + NOTICE_CHARACTER_SHINE_TOP +
                 NOTICE_CHARACTER_SHINE_HEIGHT),
             G_TX_RENDERTILE, shineTexelX, 0, NOTICE_CHARACTER_SHINE_DSDX,
             NOTICE_CHARACTER_SHINE_DTDY);
