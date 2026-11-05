@@ -1151,7 +1151,9 @@ s32 UpdateChoiceBox(ControllerState* controller) {
  * clears textWidth after the labels are measured, which moves the cursor;
  * clearing it just before measuring them gives 63 words, 9 in shape. The
  * register oracle, forcing 10 pseudos' registers, leaves 13 words at best, so
- * the code differs too. 61 words differ, 5 in shape.
+ * the code differs too. A u32 textWidth gives 59 words, but 11 in shape, as it
+ * compares and halves the width unsigned, where the original uses slt and a
+ * signed halving. 61 words differ, 5 in shape.
  */
 #ifdef NON_MATCHING
 void DrawChoiceBox(Gfx** displayListHead) {

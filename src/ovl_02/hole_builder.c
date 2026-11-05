@@ -750,7 +750,10 @@ s32 ListOffsetsByDistance(s32 span, GridOffset* offsets, s32 maxCount) {
  * or of its product, or moving longX after shortSlopeX or before the
  * reciprocal's update, gives 490 to 511 words, 29 to 54 in shape. The register
  * oracle, forcing 52 pseudos' registers in DrawTriangleHeights, leaves 166 of
- * its 323 words at best, so its code differs too.
+ * its 323 words at best, so its code differs too. A u32 width gives 315 words,
+ * but 65 in shape, as it drops the test before negating the width and the
+ * rounding of its signed division, which the original's DrawTriangleHeights
+ * keeps as a bgez and a bltzl before an sra.
  */
 #ifdef NON_MATCHING
 void DrawBandHeights(s16* heights, s32 band) {
