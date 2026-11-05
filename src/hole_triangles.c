@@ -78,10 +78,6 @@ typedef struct RingCorners {
 #define RING_MODE_FOUR_GREEN 0xC8
 #define RING_MODE_FOUR_BLUE 0x00
 
-/* GameState.unk30's value with which InitRings leaves the players' rings alone
- */
-#define KEEP_RING_STATES 2
-
 static s8 f_DimsTranslucentTriangles = FALSE;
 /* Read by no routine */
 static s32 f_UnusedWordAfterDimmingFlag UNUSED = 0;
@@ -582,7 +578,7 @@ void InitRings(void) {
     ringCount = RING_COUNT;
   }
 
-  if (g_GameState.unk30 != KEEP_RING_STATES) {
+  if (g_GameState.isRoundContinued != ROUND_CONTINUED) {
     for (playerIndex = 0; playerIndex < MAX_PLAYER_COUNT; playerIndex++) {
       for (ringIndex = 0; ringIndex < RING_COUNT; ringIndex++) {
         g_Players[playerIndex].ringStates[ringIndex] = ringIndex < ringCount;

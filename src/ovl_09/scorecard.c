@@ -296,11 +296,11 @@ void OpenScorecard(CourseIndex courseIndex, s32 holeIndex) {
       pageTitlesRow = PAGE_TITLES_TOURNAMENT;
       if (shownHoleCount > 0) {
         if (g_Scorecard.content.holeIndex == 1) {
-          RankTournament(shownHoleCount - 1, 0, 0, g_GameState.unk2C);
+          RankTournament(shownHoleCount - 1, 0, 0, g_GameState.roundSeed);
         } else {
           RankTournament(shownHoleCount - 1, 0,
               GetNetScoreToPar(g_Scorecard.content.holeIndex - 1, 0),
-              g_GameState.unk2C);
+              g_GameState.roundSeed);
         }
 
         oldPlace = -1;
@@ -317,7 +317,7 @@ void OpenScorecard(CourseIndex courseIndex, s32 holeIndex) {
 
         RankTournament(shownHoleCount, 0,
             GetNetScoreToPar(g_Scorecard.content.holeIndex, 0),
-            g_GameState.unk2C);
+            g_GameState.roundSeed);
         for (standingIndex = 0; standingIndex != TOURNAMENT_CONTESTANT_COUNT;
             standingIndex++) {
           standing = &g_TournamentStandings[standingIndex];
@@ -337,7 +337,7 @@ void OpenScorecard(CourseIndex courseIndex, s32 holeIndex) {
       } else {
         RankTournament(shownHoleCount, 0,
             GetNetScoreToPar(g_Scorecard.content.holeIndex, 0),
-            g_GameState.unk2C);
+            g_GameState.roundSeed);
         g_Scorecard.placeChange = PLACE_HELD;
       }
 

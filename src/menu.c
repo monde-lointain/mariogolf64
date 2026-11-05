@@ -1030,7 +1030,7 @@ s32 SaveOrContinueGameByMode(Boolean isContinuing) {
     g_HoleSetup = game->hole;
   }
 
-  g_GameState.unk30 = 2;
+  g_GameState.isRoundContinued = ROUND_CONTINUED;
   osSyncPrintf("Go Continue\n");
   return 0;
 }
@@ -1106,7 +1106,7 @@ s32 SaveOrContinueGame(s32 slotIndex, Boolean isContinuing) {
       g_RoundStats = game->roundStats;
     }
 
-    g_GameState.unk30 = 2;
+    g_GameState.isRoundContinued = ROUND_CONTINUED;
     osSyncPrintf("Go Continue\n");
   }
 

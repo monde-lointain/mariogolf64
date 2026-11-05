@@ -145,7 +145,7 @@ void RecordTournamentPlace(void) {
   hasPlace = FALSE;
   if (g_GameState.gameMode == GAME_MODE_TOURNAMENT) {
     RankTournament(GetLastHoleIndex() + 1, 0,
-        GetNetScoreToPar(GetLastHoleIndex() + 1, 0), g_GameState.unk2C);
+        GetNetScoreToPar(GetLastHoleIndex() + 1, 0), g_GameState.roundSeed);
     place = PLACE_UNPLACED;
     for (index = 0; index != TOURNAMENT_CONTESTANT_COUNT; index++) {
       standing = &g_TournamentStandings[index];

@@ -429,7 +429,7 @@ void InitPlay(PlayKind kind) {
   }
 
   RenumberHoleHandicaps();
-  if (!g_GameState.unk30) {
+  if (!g_GameState.isRoundContinued) {
     SetUpPlayers();
   }
 
@@ -449,8 +449,8 @@ void InitPlay(PlayKind kind) {
 }
 
 /*
- * Unless g_GameState.unk30 is 2, starts each player's ball on the tee,
- * with the hole's per-player state cleared
+ * Unless g_GameState.isRoundContinued is set, starts each player's ball on the
+ * tee, with the hole's per-player state cleared
  */
 void PlacePlayersOnTee(void) {
   s32 i;
@@ -459,7 +459,7 @@ void PlacePlayersOnTee(void) {
 
   g_HasShotComeToRest = 0;
   g_IsHudTurnAwayRequested = FALSE;
-  if (g_GameState.unk30 != 2) {
+  if (g_GameState.isRoundContinued != ROUND_CONTINUED) {
     for (i = 0; i < MAX_PLAYER_COUNT; i++) {
       g_Players[i].state = PLAYER_STATE_WAITING;
       g_Players[i].ballPosition[AXIS_X] = g_HoleSetup.teePosition[AXIS_X];
@@ -819,7 +819,7 @@ Boolean HasWonFinalChallenge(void) {
       firstHole = GetFirstHoleIndex();
       RankTournament(COURSE_HOLE_COUNT, 0,
           GetNetScoreToPar(firstHole + GetRoundHoleCount(), 0),
-          g_GameState.unk2C);
+          g_GameState.roundSeed);
       for (i = 0; i != TOURNAMENT_CONTESTANT_COUNT; i++) {
         standing = &g_TournamentStandings[i];
         if (standing->contestantId == PLAYER_CONTESTANT &&
@@ -1129,7 +1129,7 @@ void UpdatePlay(void) {
           if (g_IsModuleAlive[MODULE_CLUB_SLOTS] &&
               (f_PlayStateFrameCount >= SHORT_HOLE_INTRO_FRAMES ||
                   IsAButtonPressed())) {
-            if (!g_GameState.unk30) {
+            if (!g_GameState.isRoundContinued) {
               g_GameState.step = GAME_STATE_SLOTS;
               LoadClubSlots();
             } else {
@@ -1248,7 +1248,7 @@ void UpdatePlay(void) {
         if (UpdateClubSlots() == TRUE) {
           StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
           if (g_GameState.gameMode == GAME_MODE_CLUB_SLOTS &&
-              !g_GameState.unk30) {
+              !g_GameState.isRoundContinued) {
             FreeClubSlots();
           }
 
@@ -1295,7 +1295,7 @@ void UpdatePlay(void) {
           g_RingShotCourseOpenedAtStart = GetRingShotCourseOpenedAtStarCount();
         }
 
-        g_GameState.unk30 = 0;
+        g_GameState.isRoundContinued = FALSE;
         g_Cameras[0].mode = CAMERA_MODE_BEHIND_GOLFER;
         g_Cameras[1].mode = CAMERA_MODE_BEHIND_GOLFER;
         if (g_IsModuleAlive[MODULE_PLAY] || ReportModuleNotAlive(MODULE_PLAY)) {

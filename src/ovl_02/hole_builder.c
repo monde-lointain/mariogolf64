@@ -2582,7 +2582,7 @@ void BuildHole(s32 course, s32 hole) {
     ReadTileMidpoints();
     OpenHoleAsset(course, hole, HOLE_ASSET_TREES);
     ReadBillboards();
-    if (!g_GameState.unk30 && g_Scene != SCENE_STAFF_ROLL) {
+    if (!g_GameState.isRoundContinued && g_Scene != SCENE_STAFF_ROLL) {
       if (g_GameState.gameMode == GAME_MODE_UNK12) {
         OpenAssetFile(UNK12_UNK6_ASSET, &asset);
       } else {
@@ -2745,12 +2745,14 @@ void ClearHoleBuild(void) {
   ResetBuildBuffer();
 }
 
-/* Clears the hole's points and, unless g_GameState.unk30 is set, its cup and
- * tee */
+/*
+ * Clears the hole's points and, unless g_GameState.isRoundContinued is set,
+ * its cup and tee
+ */
 void ClearHolePoints(void) {
   s32 i;
 
-  if (!g_GameState.unk30) {
+  if (!g_GameState.isRoundContinued) {
     g_HoleSetup.cupPosition[AXIS_X] = 0;
     g_HoleSetup.cupPosition[AXIS_Y] = 0;
     g_HoleSetup.cupPosition[AXIS_Z] = 0;

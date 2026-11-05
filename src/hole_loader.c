@@ -785,7 +785,7 @@ NO_RESULT ChooseHoleConditions(void) {
     return;
   }
 
-  if (g_GameState.unk30 != 0) {
+  if (g_GameState.isRoundContinued) {
     return;
   }
 
@@ -868,7 +868,7 @@ NO_RESULT ChooseHoleConditions(void) {
     }
   }
 
-  if (g_GameState.unk30 != 0) {
+  if (g_GameState.isRoundContinued) {
     return;
   }
 
@@ -882,7 +882,7 @@ NO_RESULT ChooseHoleConditions(void) {
     cupIndex = f_CycledCupIndex++ & (CUP_POSITION_COUNT - 1);
   } else {
     /* The cups are drawn three, three, two and one times in nine */
-    random = (u32)GetHoleRandom(g_GameState.unk2C, g_GameState.holeIndex) >>
+    random = (u32)GetHoleRandom(g_GameState.roundSeed, g_GameState.holeIndex) >>
         CUP_DRAW_SHIFT;
     random %= CUP_DRAW_COUNT;
     if (random < CUP_DRAW_FIRST_END) {

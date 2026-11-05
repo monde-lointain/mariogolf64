@@ -1264,7 +1264,7 @@ s32 ChooseHoleStrokeTarget(void) {
                            [g_Players[f_Shot.playerIndex].characterIndex]
                   .winBits;
     if ((winBits & WIN_COUNT_MASK) < (lossCount & WIN_COUNT_MASK)) {
-      luckyBonus = g_GameState.unk2C & 3;
+      luckyBonus = g_GameState.roundSeed & 3;
     }
 
     osSyncPrintf("win%d lose%d lucky%d\n", winBits, lossCount, luckyBonus);

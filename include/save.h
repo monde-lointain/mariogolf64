@@ -165,6 +165,12 @@ enum ReplayKind {
 };
 
 /*
+ * GameState.isRoundContinued's value once a saved round is continued; the
+ * players, cup and rings then stay as saved
+ */
+#define ROUND_CONTINUED 2
+
+/*
  * The current game's settings and place, which a saved game keeps for it
  * to be continued with.
  */
@@ -181,8 +187,9 @@ typedef struct GameState {
   /* 0x24 */ s32 holeSelection; /* A HOLE_SELECTION_* value */
   /* 0x28 */ s32
       stopwatchFrameCount; /* The time the stopwatch modes show, in frames */
-  /* 0x2C */ s32 unk2C;
-  /* 0x30 */ s8 unk30;
+  /* 0x2C */ s32 roundSeed; /* Draws the cups, the tournament field's scores
+                              and the computers' luck */
+  /* 0x30 */ s8 isRoundContinued; /* ROUND_CONTINUED or FALSE */
   /* 0x31 */ s8 replayKind; /* The replay that leaving the menus starts */
   /* 0x32 */ s8 betRates[BET_COUNT]; /* What each BET_* bet is worth; the
                                         menus also set one past the end */

@@ -1664,7 +1664,7 @@ void UpdateMenus(void) {
       g_MenuScreen = MENU_SCREEN_BLANK;
     }
 
-    if (g_GameState.unk30) {
+    if (g_GameState.isRoundContinued) {
       InitPlay(PLAY_KIND_WITHOUT_HOLE_DISPLAY);
       InitRoundHud();
       osSyncPrintf("ContPhase2\n");
@@ -1907,7 +1907,7 @@ void UpdateMenuTitleScreen(void) {
   g_CourseBannersSlide = 0;
   f_BetSettingsSlide = 0;
   f_HandicapsSlide = 0;
-  g_GameState.unk30 = 0;
+  g_GameState.isRoundContinued = FALSE;
   g_GameState.isSuddenDeath = FALSE;
   g_GameState.isMiniGolf = FALSE;
   g_GameState.replayKind = REPLAY_KIND_NONE;
@@ -2266,7 +2266,7 @@ void UpdateModeSelect(void) {
     f_HandicapsSlide = 0;
     g_GameState.isMiniGolf = FALSE;
     mode = f_ModeChoiceIcons[g_ChosenPlayerCount - 1][g_MenuMemory.modeChoice];
-    g_GameState.unk2C = rand();
+    g_GameState.roundSeed = rand();
     switch (mode) {
       case MODE_ICON_TOURNAMENT:
         PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);

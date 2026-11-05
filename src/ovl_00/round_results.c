@@ -717,7 +717,7 @@ void LoadRoundResults(void) {
         f_PlayerResults[0] =
             GetNetScoreToPar(GetFirstHoleIndex() + GetRoundHoleCount(), 0);
         RankTournament(
-            COURSE_HOLE_COUNT, 0, f_PlayerResults[0], g_GameState.unk2C);
+            COURSE_HOLE_COUNT, 0, f_PlayerResults[0], g_GameState.roundSeed);
         for (k = 0; k != TOURNAMENT_CONTESTANT_COUNT; k++) {
           TournamentStanding* standing = &g_TournamentStandings[k];
 

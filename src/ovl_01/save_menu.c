@@ -1725,7 +1725,7 @@ s32 ContinueModeGame(void) {
   g_GameState.step = GAME_STATE_LOAD_HOLE;
   SetGameFlag(GAME_FLAG_UNK1E);
   g_HoleSetup = game->hole;
-  g_GameState.unk30 = 2;
+  g_GameState.isRoundContinued = ROUND_CONTINUED;
   return 0;
 }
 

@@ -1446,7 +1446,7 @@ void UpdateClubWindow(void) {
     }
 
     if (GetWipeProgress() == WIPE_CLOSED_PROGRESS) {
-      g_GameState.unk2C = (g_TournamentCode[0] << 16) |
+      g_GameState.roundSeed = (g_TournamentCode[0] << 16) |
           (g_TournamentCode[1] << 8) | g_TournamentCode[2];
       StartLoadingChosenHole();
       g_MenuScreen = MENU_SCREEN_EXIT;

@@ -589,8 +589,8 @@ s32 GetClubTournamentCourse(void);
  * without a controller. Holding a C button previews its palette in
  * f_PreviewedPalette, and holding R, or Z or L, sets f_IsComButtonHeld or
  * f_IsLeftyButtonHeld. Once a club tournament's choice is made, the closing
- * wipe ends the menus and g_GameState.unk2C, which RankTournament takes, gets
- * the tournament code.
+ * wipe ends the menus and g_GameState.roundSeed, which RankTournament takes,
+ * gets the tournament code.
  */
 
 /*
@@ -665,7 +665,7 @@ s32 UpdateCharacterSelect(
 
     if (GetWipeProgress() == WIPE_CLOSED_PROGRESS) {
       g_MenuScreen = MENU_SCREEN_EXIT;
-      g_GameState.unk2C = (g_TournamentCode[0] << (2 * BITS_PER_BYTE)) |
+      g_GameState.roundSeed = (g_TournamentCode[0] << (2 * BITS_PER_BYTE)) |
           (g_TournamentCode[1] << BITS_PER_BYTE) | g_TournamentCode[2];
     }
 
