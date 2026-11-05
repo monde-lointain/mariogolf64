@@ -977,7 +977,7 @@ void StartFreeLook(void) {
   SetMenuBackdrop(MENU_BACKDROP_PATTERN);
   g_PauseScreen = PAUSE_SCREEN_FREE_LOOK;
   g_RoundHud.isLetterboxShown = FALSE;
-  g_RoundHud.unkC = 0;
+  g_RoundHud.isClubPanelShown = 0;
   if (g_ScreenEffect == SCREEN_EFFECT_SAVED_FRAME) {
     SetFramebufferCount(TRIPLE_BUFFERING);
     SetScreenEffect(SCREEN_EFFECT_NONE, 0);
@@ -2596,15 +2596,15 @@ void StartPlayerShot(s32 playerIndex) {
 
   g_RoundHud.scorecardPage = -1;
   g_RoundHud.isWindIndicatorShown = TRUE;
-  g_RoundHud.unk8 = TRUE;
+  g_RoundHud.isHoleInfoShown = TRUE;
   g_RoundHud.isLetterboxShown = TRUE;
   g_RoundHud.isLieIconShown = TRUE;
   g_RoundHud.isClubHeadIconShown = TRUE;
-  g_RoundHud.unkB = TRUE;
+  g_RoundHud.isUnreadItemShown = TRUE;
   g_RoundHud.isHoleIntroTextShown = FALSE;
-  g_RoundHud.unkC = TRUE;
+  g_RoundHud.isClubPanelShown = TRUE;
   g_RoundHud.unk13 = FALSE;
-  g_RoundHud.unkD = TRUE;
+  g_RoundHud.isProgressShown = TRUE;
   g_RoundHud.unk84[0] = TRUE;
   g_RoundHud.unk84[1] = FALSE;
   g_RoundHud.flags = 0;
@@ -3303,11 +3303,11 @@ void UpdateTurns(void) {
    */
   void SetRoundHudPartsShown(s8 isShown) {
     g_RoundHud.isWindIndicatorShown = isShown;
-    g_RoundHud.unk8 = isShown;
+    g_RoundHud.isHoleInfoShown = isShown;
     g_RoundHud.isLieIconShown = isShown;
     g_RoundHud.isClubHeadIconShown = isShown;
-    g_RoundHud.unkB = isShown;
-    g_RoundHud.unkD = isShown;
+    g_RoundHud.isUnreadItemShown = isShown;
+    g_RoundHud.isProgressShown = isShown;
   }
 
   /* Returns whether a shot stopped this far from the impact mark rumbles, as a
@@ -3810,7 +3810,7 @@ void UpdateTurns(void) {
             PlaySound(SOUND_LOOK_BACK, g_NextSoundChannel, LOOK_SOUND_VOLUME);
             ResetAimCamera();
             ResetShotSetup();
-            g_RoundHud.unkC = 1;
+            g_RoundHud.isClubPanelShown = 1;
             g_RoundHud.isLetterboxShown = TRUE;
             SetRoundHudPartsShown(1);
           } else {

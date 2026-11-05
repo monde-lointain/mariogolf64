@@ -62,12 +62,14 @@ typedef struct RoundHud {
                                      this is set */
   /* 0x06 */ s8 unk6;
   /* 0x07 */ s8 isWindIndicatorShown;
-  /* 0x08 */ s8 unk8;
+  /* 0x08 */ s8 isHoleInfoShown; /* The hole's model, yardage and par */
   /* 0x09 */ s8 isLieIconShown;
   /* 0x0A */ s8 isClubHeadIconShown;
-  /* 0x0B */ s8 unkB;
-  /* 0x0C */ s8 unkC;
-  /* 0x0D */ s8 unkD;
+  /* 0x0B */ s8 isUnreadItemShown; /* Set with the others; read by none */
+  /* 0x0C */ s8 isClubPanelShown;
+  /* 0x0D */ s8 isProgressShown; /* The scoreboard, the distance left to
+                                    the cup, the ring count and the
+                                    stopwatch */
   /* 0x0E */ u8 unkE;
   /* 0x0F */ s8 unkF;
   /* 0x10 */ s8 greenGridState; /* Whether the grid over the ground shows; B

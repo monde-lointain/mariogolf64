@@ -1508,13 +1508,13 @@ DIM_BACKDROP:
 
             if (clearHud) {
               g_RoundHud.isWindIndicatorShown = FALSE;
-              g_RoundHud.unk8 = 0;
+              g_RoundHud.isHoleInfoShown = 0;
               g_RoundHud.isLieIconShown = FALSE;
               g_RoundHud.isClubHeadIconShown = FALSE;
-              g_RoundHud.unkB = 0;
-              g_RoundHud.unkC = 0;
+              g_RoundHud.isUnreadItemShown = 0;
+              g_RoundHud.isClubPanelShown = 0;
               g_RoundHud.unk13 = 0;
-              g_RoundHud.unkD = 0;
+              g_RoundHud.isProgressShown = 0;
             }
 
             g_PauseScreen = PAUSE_SCREEN_SCORECARD;

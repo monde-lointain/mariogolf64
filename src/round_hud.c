@@ -3777,7 +3777,7 @@ void DrawRoundHud(CameraView* view) {
   gDPPipeSync(g_DisplayListHead++);
   gDPSetRenderMode(g_DisplayListHead++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
   gDPPipeSync(g_DisplayListHead++);
-  if (g_RoundHud.unkD && !g_IsCupViewShown && !IsOnDrivingRange()) {
+  if (g_RoundHud.isProgressShown && !g_IsCupViewShown && !IsOnDrivingRange()) {
     gDPPipeSync(g_DisplayListHead++);
     gDPSetTextureLUT(g_DisplayListHead++, G_TT_NONE);
     gDPPipeSync(g_DisplayListHead++);
@@ -3827,7 +3827,7 @@ void DrawRoundHud(CameraView* view) {
     gDPPipeSync(g_DisplayListHead++);
   }
 
-  if (g_RoundHud.unk8 && !g_IsCupViewShown) {
+  if (g_RoundHud.isHoleInfoShown && !g_IsCupViewShown) {
     DrawHoleImageModel();
   }
 
@@ -3848,7 +3848,7 @@ void DrawRoundHud(CameraView* view) {
     DrawShotOffsetMarker();
   }
 
-  if (g_RoundHud.unkD && !g_IsCupViewShown && !IsOnDrivingRange()) {
+  if (g_RoundHud.isProgressShown && !g_IsCupViewShown && !IsOnDrivingRange()) {
     f_PinFlagTime = (f_PinFlagTime + 1) & (PIN_FLAG_TIME_COUNT - 1);
     gDPPipeSync(g_DisplayListHead++);
     gDPLoadTLUT_pal16(
@@ -3942,7 +3942,7 @@ void DrawRoundHud(CameraView* view) {
       DISTANCE_FONT_WIDTH, DISTANCE_GLYPH_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
       G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
       G_TX_NOLOD);
-  if (g_RoundHud.unk8 && !g_IsCupViewShown && !IsOnDrivingRange() &&
+  if (g_RoundHud.isHoleInfoShown && !g_IsCupViewShown && !IsOnDrivingRange() &&
       !g_GameState.isMiniGolf) {
     sprintf(g_PrintBuffer, "%3dy",
         (s16)g_CourseRecords[GetCourseRecordIndex()]
@@ -3952,7 +3952,7 @@ void DrawRoundHud(CameraView* view) {
         HOLE_YARDAGE_Y, g_PrintBuffer);
   }
 
-  if (g_RoundHud.unkD && !g_IsCupViewShown && !IsOnDrivingRange()) {
+  if (g_RoundHud.isProgressShown && !g_IsCupViewShown && !IsOnDrivingRange()) {
     /* The shot panel's distances are white, rather than the font's yellow */
     gDPLoadTLUT_pal16(
         g_DisplayListHead++, 0, TextureAddress(f_WhiteDistancePalette));
@@ -4058,7 +4058,7 @@ void DrawRoundHud(CameraView* view) {
     gDPPipeSync(g_DisplayListHead++);
   }
 
-  if (g_RoundHud.unk8 && !g_IsCupViewShown && !IsOnDrivingRange()) {
+  if (g_RoundHud.isHoleInfoShown && !g_IsCupViewShown && !IsOnDrivingRange()) {
     gDPLoadTLUT_pal16(
         g_DisplayListHead++, 0, TextureAddress(ImageBody(f_ParImage)));
     gDPLoadTextureBlock_4b(g_DisplayListHead++,
@@ -4137,7 +4137,7 @@ void DrawRoundHud(CameraView* view) {
         &g_DisplayListHead, SHOT_LENGTH_X, SHOT_LENGTH_Y, g_PrintBuffer);
   }
 
-  if (g_RoundHud.unkD && !g_IsCupViewShown && !IsOnDrivingRange()) {
+  if (g_RoundHud.isProgressShown && !g_IsCupViewShown && !IsOnDrivingRange()) {
     for (i = 0; i != g_GameState.playerCount; i++) {
       SetTextColor(&g_DisplayListHead, 255, 255, 255);
       sprintf(g_PrintBuffer, "%d", g_Players[i].strokeCount);
@@ -4235,7 +4235,7 @@ void DrawRoundHud(CameraView* view) {
     }
   }
 
-  if (g_RoundHud.unkD && !IsOnDrivingRange() &&
+  if (g_RoundHud.isProgressShown && !IsOnDrivingRange() &&
       g_GameState.gameMode == GAME_MODE_SPEED_GOLF &&
       g_GameState.replayKind == REPLAY_KIND_NONE) {
     s32 hundredths = (s32)(g_GameState.stopwatchFrameCount *

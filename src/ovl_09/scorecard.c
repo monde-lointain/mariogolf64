@@ -943,14 +943,14 @@ void AnimateScorecard(void) {
         SetFramebufferCount(TRIPLE_BUFFERING);
         SetScreenEffect(SCREEN_EFFECT_NONE, 0);
         g_RoundHud.isLetterboxShown = TRUE;
-        g_RoundHud.unkC = 1;
+        g_RoundHud.isClubPanelShown = 1;
         g_RoundHud.isWindIndicatorShown = TRUE;
         g_RoundHud.unk6 = 0;
-        g_RoundHud.unk8 = 1;
+        g_RoundHud.isHoleInfoShown = 1;
         g_RoundHud.isLieIconShown = TRUE;
         g_RoundHud.isClubHeadIconShown = TRUE;
-        g_RoundHud.unkB = 1;
-        g_RoundHud.unkD = 1;
+        g_RoundHud.isUnreadItemShown = 1;
+        g_RoundHud.isProgressShown = 1;
       }
 
       break;

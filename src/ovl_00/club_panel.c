@@ -631,7 +631,7 @@ void DrawClubPanel(Gfx** displayListHead) {
 void DrawClubPanelIfShown(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
 
-  if (g_RoundHud.unkC != 0) {
+  if (g_RoundHud.isClubPanelShown != 0) {
     UpdateClubPanelDebugValue();
     DrawClubPanel(&gfx);
     *displayListHead = gfx;

@@ -320,30 +320,30 @@ Boolean f_IsGiveUpAllowed;
 
 void HideRoundHud(void) {
   g_RoundHud.isLetterboxShown = FALSE;
-  g_RoundHud.unkC = 0;
+  g_RoundHud.isClubPanelShown = 0;
   g_RoundHud.isWindIndicatorShown = FALSE;
   g_RoundHud.areLieArrowsShown = FALSE;
   g_RoundHud.areWindSpeedArrowsShown = FALSE;
   g_RoundHud.areWindDirectionArrowsShown = FALSE;
-  g_RoundHud.unk8 = 0;
+  g_RoundHud.isHoleInfoShown = 0;
   g_RoundHud.isLieIconShown = FALSE;
   g_RoundHud.isClubHeadIconShown = FALSE;
-  g_RoundHud.unkB = 0;
-  g_RoundHud.unkD = 0;
+  g_RoundHud.isUnreadItemShown = 0;
+  g_RoundHud.isProgressShown = 0;
 }
 
 void ResumeRound(void) {
   g_RoundHud.isLetterboxShown = TRUE;
-  g_RoundHud.unkC = 1;
+  g_RoundHud.isClubPanelShown = 1;
   g_RoundHud.isWindIndicatorShown = TRUE;
   g_RoundHud.areLieArrowsShown = FALSE;
   g_RoundHud.areWindSpeedArrowsShown = FALSE;
   g_RoundHud.areWindDirectionArrowsShown = FALSE;
-  g_RoundHud.unk8 = 1;
+  g_RoundHud.isHoleInfoShown = 1;
   g_RoundHud.isLieIconShown = TRUE;
   g_RoundHud.isClubHeadIconShown = TRUE;
-  g_RoundHud.unkB = 1;
-  g_RoundHud.unkD = 1;
+  g_RoundHud.isUnreadItemShown = 1;
+  g_RoundHud.isProgressShown = 1;
   SetMenuBackdrop(MENU_BACKDROP_NONE);
   g_PauseScreen = PAUSE_SCREEN_NONE;
   SetFramebufferCount(TRIPLE_BUFFERING);

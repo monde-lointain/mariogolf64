@@ -1227,14 +1227,14 @@ void UpdateGameSaveMenu(ControllerState* controller) {
       SetFramebufferCount(TRIPLE_BUFFERING);
       SetScreenEffect(SCREEN_EFFECT_NONE, 0);
       g_RoundHud.isLetterboxShown = TRUE;
-      g_RoundHud.unkC = TRUE;
+      g_RoundHud.isClubPanelShown = TRUE;
       g_RoundHud.isWindIndicatorShown = TRUE;
       g_RoundHud.unk6 = FALSE;
-      g_RoundHud.unk8 = TRUE;
+      g_RoundHud.isHoleInfoShown = TRUE;
       g_RoundHud.isLieIconShown = TRUE;
       g_RoundHud.isClubHeadIconShown = TRUE;
-      g_RoundHud.unkB = TRUE;
-      g_RoundHud.unkD = TRUE;
+      g_RoundHud.isUnreadItemShown = TRUE;
+      g_RoundHud.isProgressShown = TRUE;
       break;
     case SAVE_MENU_STATE_SAVED:
       if (f_StateFrame == SAVED_WAIT_FRAMES) {
@@ -1859,14 +1859,14 @@ void UpdateControlsScreen(ControllerState* controller) {
       SetFramebufferCount(TRIPLE_BUFFERING);
       SetScreenEffect(SCREEN_EFFECT_NONE, 0);
       g_RoundHud.isLetterboxShown = TRUE;
-      g_RoundHud.unkC = TRUE;
+      g_RoundHud.isClubPanelShown = TRUE;
       g_RoundHud.isWindIndicatorShown = TRUE;
       g_RoundHud.unk6 = FALSE;
-      g_RoundHud.unk8 = TRUE;
+      g_RoundHud.isHoleInfoShown = TRUE;
       g_RoundHud.isLieIconShown = TRUE;
       g_RoundHud.isClubHeadIconShown = TRUE;
-      g_RoundHud.unkB = TRUE;
-      g_RoundHud.unkD = TRUE;
+      g_RoundHud.isUnreadItemShown = TRUE;
+      g_RoundHud.isProgressShown = TRUE;
       break;
   }
 }

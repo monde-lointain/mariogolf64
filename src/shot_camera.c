@@ -742,13 +742,13 @@ void StartFlightCamera(s32 earlierFlightCount) {
   f_IsFlightHudShown = 1;
   if (f_IsLaterFlight) {
     f_IsFlightHudShown = RandomBelow(2);
-    g_RoundHud.unkC = f_IsFlightHudShown;
+    g_RoundHud.isClubPanelShown = f_IsFlightHudShown;
     g_RoundHud.isWindIndicatorShown = f_IsFlightHudShown;
-    g_RoundHud.unk8 = f_IsFlightHudShown;
+    g_RoundHud.isHoleInfoShown = f_IsFlightHudShown;
     g_RoundHud.isLieIconShown = f_IsFlightHudShown;
     g_RoundHud.isClubHeadIconShown = f_IsFlightHudShown;
-    g_RoundHud.unkB = f_IsFlightHudShown;
-    g_RoundHud.unkD = f_IsFlightHudShown;
+    g_RoundHud.isUnreadItemShown = f_IsFlightHudShown;
+    g_RoundHud.isProgressShown = f_IsFlightHudShown;
   }
 
   /* Converting through f32, and writing the start point first, are there to
@@ -1588,8 +1588,8 @@ void StartHoleCamerasAndSong(void) {
   SetMenuBackdrop(MENU_BACKDROP_NONE);
   g_RoundHud.isHoleIntroTextShown = TRUE;
   g_RoundHud.scorecardPage = NO_SCORECARD_PAGE;
-  g_RoundHud.unk8 = 1;
-  g_RoundHud.unkB = 1;
+  g_RoundHud.isHoleInfoShown = 1;
+  g_RoundHud.isUnreadItemShown = 1;
   g_InsetView.animation = INSET_VIEW_STILL;
   g_InsetView.step = 0;
   g_HoleFlyoverFrame = 0;
@@ -1629,8 +1629,8 @@ void StartHoleCamerasAndSong(void) {
       break;
     case GAME_MODE_RING_SHOT:
       PlaySong(SONG_ROUND_RING_SHOT, SONG_FLAG_UNREAD);
-      g_RoundHud.unk8 = 0;
-      g_RoundHud.unkB = 0;
+      g_RoundHud.isHoleInfoShown = 0;
+      g_RoundHud.isUnreadItemShown = 0;
       break;
     case GAME_MODE_CLUB_SLOTS:
       if (GetLastHoleIndex() == g_GameState.holeIndex) {
@@ -3046,7 +3046,7 @@ INCLUDE_ASM("asm/nonmatchings/shot_camera", ChooseFlightCameraKind);
  * of the ball's flight, and advances g_BallFlightStep when isAdvancing is 1.
  * Once the flight has ended, it counts the landing wait and returns TRUE when
  * it is over. The START button clears g_RoundHud.isWindIndicatorShown through
- * g_RoundHud.unkD and g_RoundHud.unk13.
+ * g_RoundHud.isProgressShown and g_RoundHud.unk13.
  */
 s32 UpdateFlightCamera(Boolean isAdvancing, s32 buttons) {
   f32 point[3];
@@ -3063,22 +3063,22 @@ s32 UpdateFlightCamera(Boolean isAdvancing, s32 buttons) {
   }
 
   if (buttons & START_BUTTON) {
-    g_RoundHud.unkC = 0;
+    g_RoundHud.isClubPanelShown = 0;
     g_RoundHud.isWindIndicatorShown = FALSE;
-    g_RoundHud.unk8 = 0;
+    g_RoundHud.isHoleInfoShown = 0;
     g_RoundHud.isLieIconShown = FALSE;
     g_RoundHud.isClubHeadIconShown = FALSE;
-    g_RoundHud.unkB = 0;
-    g_RoundHud.unkD = 0;
+    g_RoundHud.isUnreadItemShown = 0;
+    g_RoundHud.isProgressShown = 0;
     g_RoundHud.unk13 = 0;
   } else {
-    g_RoundHud.unkC = f_IsFlightHudShown;
+    g_RoundHud.isClubPanelShown = f_IsFlightHudShown;
     g_RoundHud.isWindIndicatorShown = f_IsFlightHudShown;
-    g_RoundHud.unk8 = f_IsFlightHudShown;
+    g_RoundHud.isHoleInfoShown = f_IsFlightHudShown;
     g_RoundHud.isLieIconShown = f_IsFlightHudShown;
     g_RoundHud.isClubHeadIconShown = f_IsFlightHudShown;
-    g_RoundHud.unkB = f_IsFlightHudShown;
-    g_RoundHud.unkD = f_IsFlightHudShown;
+    g_RoundHud.isUnreadItemShown = f_IsFlightHudShown;
+    g_RoundHud.isProgressShown = f_IsFlightHudShown;
   }
 
   if (g_BallFlightStep >= PATH_STEP_COUNT) {
