@@ -262,12 +262,14 @@ void ResetBallSimulations(void) {
  * the six orders of the flight's drag updates, only y, z and x gives fewer
  * words, 668 (676 when the draft had 680), the others 672, and it still stores
  * z before y, where the original, having worked out y's drag first, stores x, y
- * and z in turn. An s16 spinVelocityZ in the triangle bounce gave 666 words
- * (208 in shape) when the draft had 680, with two more shifts or masks than the
- * ten the draft and the original have; with the slide's sum in order it gives
- * 743 (215), s16 for spinVelocityX as well 771 and for spinVelocityX alone 749,
- * and the same s16 in StepOpeningBallSimulation 277 against its 247. 672 words
- * differ, 206 in shape.
+ * and z in turn. An s16 spinVelocityZ where the ball starts rolling gives 658
+ * words (208 in shape), but adds two shifts or masks to the ten that the draft
+ * and the original have; s16 for spinVelocityX as well gives 662 (210) and adds
+ * two 16-bit shift pairs, spinVelocityX alone 680, and in
+ * StepOpeningBallSimulation's roll start spinVelocityZ alone 259 and both 265
+ * against its 247. In the triangle bounce an s16 spinVelocityZ gives 743 words
+ * (215), both 771 and spinVelocityX alone 749, and spinVelocityZ in
+ * StepOpeningBallSimulation's 277. 672 words differ, 206 in shape.
  */
 #ifdef NON_MATCHING
 s32 StepBallSimulation(BallSimulation* simulation) {
