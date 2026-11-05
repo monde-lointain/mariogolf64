@@ -988,7 +988,8 @@ s32 GetEndReaction(void) {
   return f_EndReaction;
 }
 
-#define FLIGHT_SOUND_CHANNEL_UNK3 3
+/* The channel of the calls on a shot and of the other sounds on its result */
+#define FLIGHT_SOUND_CHANNEL_CALLS 3
 #define FLIGHT_SOUND_CHANNEL_UNKE 0xE
 #define FLIGHT_SOUND_VOLUME_UNK50 0x50
 #define FLIGHT_SOUND_VOLUME_UNK60 0x60
@@ -1098,10 +1099,10 @@ void PlayFlightSounds(s32 step) {
     if (f_EndSurfaceInfo->kind == SURFACE_KIND_OUT_OF_COURSE &&
         !g_GameState.isMiniGolf) {
       PlaySound(
-          SOUND_OUT_OF_COURSE, FLIGHT_SOUND_CHANNEL_UNK3, SOUND_FULL_SCALE);
+          SOUND_OUT_OF_COURSE, FLIGHT_SOUND_CHANNEL_CALLS, SOUND_FULL_SCALE);
       QueueOnlookerSounds(CHARACTER_SOUND_KIND_OUT_OF_COURSE);
     } else if (RateShotLength() == SHOT_LENGTH_FULL) {
-      PlaySoundWithEffects(SOUND_FULL_SHOT, FLIGHT_SOUND_CHANNEL_UNK3,
+      PlaySoundWithEffects(SOUND_FULL_SHOT, FLIGHT_SOUND_CHANNEL_CALLS,
           SOUND_FULL_SCALE, FULL_SHOT_REVERB,
           g_Players[g_CurrentShot.playerIndex].soundPan);
     }
@@ -1110,7 +1111,7 @@ void PlayFlightSounds(s32 step) {
   if (step == RUMBLE_REACTION_STEP && g_SimulatedShot.impactRumbles) {
     /* Plays the sound again for each player; the original has it */
     for (i = 0; i != g_GameState.playerCount; i++) {
-      PlaySound(SOUND_UNK151, FLIGHT_SOUND_CHANNEL_UNK3, SOUND_FULL_SCALE);
+      PlaySound(SOUND_UNK151, FLIGHT_SOUND_CHANNEL_CALLS, SOUND_FULL_SCALE);
       if (i != g_CurrentShot.playerIndex) {
         QueueCharacterSound(g_Players[i].characterIndex, i,
             CHARACTER_SOUND_KIND_TROUBLE, SOUND_FULL_SCALE,
@@ -1164,20 +1165,20 @@ void PlayFlightSounds(s32 step) {
     if (g_SimulatedShot.startsOnGreen) {
       if (IsNiceTouchPutt()) {
         StartBanner(BANNER_NICE_TOUCH);
-        PlaySound(
-            SOUND_CALL_NICE_TOUCH, FLIGHT_SOUND_CHANNEL_UNK3, SOUND_FULL_SCALE);
+        PlaySound(SOUND_CALL_NICE_TOUCH, FLIGHT_SOUND_CHANNEL_CALLS,
+            SOUND_FULL_SCALE);
       }
     } else if (g_SimulatedShot.flagHitStep != NO_STEP) {
       StartBanner(BANNER_FLAG_SHOT);
       PlaySound(
-          SOUND_CALL_FLAG_SHOT, FLIGHT_SOUND_CHANNEL_UNK3, SOUND_FULL_SCALE);
+          SOUND_CALL_FLAG_SHOT, FLIGHT_SOUND_CHANNEL_CALLS, SOUND_FULL_SCALE);
       CountNotableShot(g_CurrentShot.playerIndex, SHOT_KIND_FLAG_SHOT);
       f_PendingResultSound = RESULT_SOUND_UNK2;
     } else if (f_PassedPathFlags & STEP_FLAG_PIN_HIT) {
       CountNotableShot(g_CurrentShot.playerIndex, SHOT_KIND_PIN_SHOT);
       StartBanner(BANNER_PIN_SHOT);
       PlaySound(
-          SOUND_CALL_PIN_SHOT, FLIGHT_SOUND_CHANNEL_UNK3, SOUND_FULL_SCALE);
+          SOUND_CALL_PIN_SHOT, FLIGHT_SOUND_CHANNEL_CALLS, SOUND_FULL_SCALE);
       f_PendingResultSound = RESULT_SOUND_UNK2;
     } else if (g_SimulatedShot.endsOnGreen) {
       if (IsAlbatrossOrBetter(
@@ -1185,7 +1186,7 @@ void PlayFlightSounds(s32 step) {
         CountNotableShot(g_CurrentShot.playerIndex, SHOT_KIND_GREAT);
         StartBanner(BANNER_GREAT);
         PlaySound(
-            SOUND_CALL_GREAT, FLIGHT_SOUND_CHANNEL_UNK3, SOUND_FULL_SCALE);
+            SOUND_CALL_GREAT, FLIGHT_SOUND_CHANNEL_CALLS, SOUND_FULL_SCALE);
         QueueOnlookerSounds(CHARACTER_SOUND_KIND_GREAT);
         f_PendingResultSound = RESULT_SOUND_UNK2;
       } else if (g_HoleSetup.par + SCORE_TO_PAR_EAGLE ==
@@ -1193,31 +1194,31 @@ void PlayFlightSounds(s32 step) {
         if (f_LandingCupDistance <= CLOSE_LANDING_DISTANCE) {
           CountNotableShot(g_CurrentShot.playerIndex, SHOT_KIND_EXCELLENT);
           StartBanner(BANNER_EXCELLENT);
-          PlaySound(SOUND_CALL_EXCELLENT, FLIGHT_SOUND_CHANNEL_UNK3,
+          PlaySound(SOUND_CALL_EXCELLENT, FLIGHT_SOUND_CHANNEL_CALLS,
               SOUND_FULL_SCALE);
           QueueOnlookerSounds(CHARACTER_SOUND_KIND_EXCELLENT);
           f_PendingResultSound = RESULT_SOUND_UNK1;
         } else if (IsApproachShot()) {
           if (f_LandingCupDistance <= NEAR_LANDING_DISTANCE) {
             StartBanner(BANNER_NICE_APPROACH);
-            PlaySound(SOUND_CALL_NICE_APPROACH, FLIGHT_SOUND_CHANNEL_UNK3,
+            PlaySound(SOUND_CALL_NICE_APPROACH, FLIGHT_SOUND_CHANNEL_CALLS,
                 SOUND_FULL_SCALE);
             f_PendingResultSound = RESULT_SOUND_UNK1;
           } else {
             StartBanner(BANNER_NICE_ON);
-            PlaySound(SOUND_CALL_NICE_ON, FLIGHT_SOUND_CHANNEL_UNK3,
+            PlaySound(SOUND_CALL_NICE_ON, FLIGHT_SOUND_CHANNEL_CALLS,
                 SOUND_FULL_SCALE);
           }
         } else {
           StartBanner(BANNER_NICE_ON);
           PlaySound(
-              SOUND_CALL_NICE_ON, FLIGHT_SOUND_CHANNEL_UNK3, SOUND_FULL_SCALE);
+              SOUND_CALL_NICE_ON, FLIGHT_SOUND_CHANNEL_CALLS, SOUND_FULL_SCALE);
         }
       } else if (g_HoleSetup.par + SCORE_TO_PAR_BIRDIE ==
               g_Players[g_CurrentShot.playerIndex].strokeCount &&
           IsApproachShot() && f_LandingCupDistance <= NEAR_LANDING_DISTANCE) {
         StartBanner(BANNER_NICE_APPROACH);
-        PlaySound(SOUND_CALL_NICE_APPROACH, FLIGHT_SOUND_CHANNEL_UNK3,
+        PlaySound(SOUND_CALL_NICE_APPROACH, FLIGHT_SOUND_CHANNEL_CALLS,
             SOUND_FULL_SCALE);
       }
     }
@@ -1230,7 +1231,7 @@ void PlayFlightSounds(s32 step) {
         g_SimulatedShot.flagHitStep != NO_STEP) {
       StartBanner(BANNER_FLAG_SHOT);
       PlaySound(
-          SOUND_CALL_FLAG_SHOT, FLIGHT_SOUND_CHANNEL_UNK3, SOUND_FULL_SCALE);
+          SOUND_CALL_FLAG_SHOT, FLIGHT_SOUND_CHANNEL_CALLS, SOUND_FULL_SCALE);
       QueueOnlookerSounds(CHARACTER_SOUND_KIND_EXCELLENT);
       CountNotableShot(g_CurrentShot.playerIndex, SHOT_KIND_FLAG_SHOT);
       f_EndReaction = END_REACTION_ONLOOKERS;
@@ -1242,7 +1243,7 @@ void PlayFlightSounds(s32 step) {
         f_EndReaction == END_REACTION_NONE && IsChipIn()) {
       StartBanner(BANNER_CHIP_IN);
       PlaySound(
-          SOUND_CALL_CHIP_IN, FLIGHT_SOUND_CHANNEL_UNK3, SOUND_FULL_SCALE);
+          SOUND_CALL_CHIP_IN, FLIGHT_SOUND_CHANNEL_CALLS, SOUND_FULL_SCALE);
       QueueOnlookerSounds(CHARACTER_SOUND_KIND_GREAT);
       f_EndReaction = END_REACTION_ONLOOKERS;
     }
@@ -1273,7 +1274,7 @@ void PlayFlightSounds(s32 step) {
       if (g_SimulatedShot.startsOnGreen) {
         if (f_StartCupDistance > LONG_SHOT_SOUND_MIN_DISTANCE ||
             IsGameFlagSet(GAME_FLAG_UNK48)) {
-          PlaySound(SOUND_UNK155, FLIGHT_SOUND_CHANNEL_UNK3, SOUND_FULL_SCALE);
+          PlaySound(SOUND_UNK155, FLIGHT_SOUND_CHANNEL_CALLS, SOUND_FULL_SCALE);
           f_EndReaction = END_REACTION_UNK2;
         }
       }
