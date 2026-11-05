@@ -2194,13 +2194,7 @@ s32 GetTrianglePlane(PlaneTriangle* triangle, TrianglePlane* plane) {
 /*
  * Returns the ground's height at a point, clamped to the ground, or
  * NO_GROUND_HEIGHT where no ground triangle holds it
- *
- * Doesn't match: the first edge's Y load is scheduled two instructions late.
- * None of the 719 other orders of the six edge subtractions does better: 44 of
- * them leave 2 words differing, as this one does, and the rest 4 to 62. 2 words
- * differ, none in shape.
  */
-#ifdef NON_MATCHING
 s32 GetTerrainHeight(s32 x, s32 z) {
   PlaneTriangle triangle;
   s32 firstX;
@@ -2217,6 +2211,7 @@ s32 GetTerrainHeight(s32 x, s32 z) {
   s32 offsetX;
   s32 offsetZ;
   s32 height;
+  s32 firstEdgeEndY;
 
   if (g_GameState.isMiniGolf) {
     if ((u32)x > MINI_GOLF_GROUND_SIZE - 1) {
@@ -2256,8 +2251,18 @@ s32 GetTerrainHeight(s32 x, s32 z) {
     return NO_GROUND_HEIGHT;
   }
 
+  /*
+   * The first edge's far Y is read before the edges, to match: it is loaded
+   * two instructions before the rest. Subtracting it in place, in any of the
+   * 720 orders of the six edge subtractions, gives 2 or more words differing,
+   * none in shape; so does reading it into an s16, reading it after the
+   * second Z edge, or reaching each axis's corners through a row pointer.
+   * Reading all three Y corners first gives 4, and the first corner of each
+   * axis 50.
+   */
+  firstEdgeEndY = triangle.corners[AXIS_Y][1];
   secondZ = triangle.corners[AXIS_Z][2] - triangle.corners[AXIS_Z][0];
-  firstY = triangle.corners[AXIS_Y][1] - triangle.corners[AXIS_Y][0];
+  firstY = firstEdgeEndY - triangle.corners[AXIS_Y][0];
   firstZ = triangle.corners[AXIS_Z][1] - triangle.corners[AXIS_Z][0];
   firstX = triangle.corners[AXIS_X][1] - triangle.corners[AXIS_X][0];
   secondY = triangle.corners[AXIS_Y][2] - triangle.corners[AXIS_Y][0];
@@ -2277,10 +2282,6 @@ s32 GetTerrainHeight(s32 x, s32 z) {
 
   return 0;
 }
-
-#else
-INCLUDE_ASM("asm/nonmatchings/terrain", GetTerrainHeight);
-#endif
 
 s32 GetGroundHeight(s32 x, s32 z) {
   return GetTerrainHeight(x, z);
