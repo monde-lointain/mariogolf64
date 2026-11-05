@@ -333,7 +333,7 @@ void FormatDefaultPlayerName(s32 index, char* name) {
 
 /*
  * Sets up the players for a round. In SCENE_PLAY_BEST_SHOT_REPLAY, in
- * GAME_MODE_UNK8 or during a replay, only the first player
+ * GAME_MODE_RECORD_REPLAY or during a replay, only the first player
  * is set up, from the Ring Shot record or the Best Shot replay record;
  * otherwise all four get default names, their own character's clubs and
  * cleared scores.
@@ -344,7 +344,7 @@ void SetUpPlayers(void) {
   s32 slot;
 
   if (g_Scene == SCENE_PLAY_BEST_SHOT_REPLAY ||
-      g_GameState.gameMode == GAME_MODE_UNK8 ||
+      g_GameState.gameMode == GAME_MODE_RECORD_REPLAY ||
       g_GameState.replayKind != REPLAY_KIND_NONE) {
     if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
       g_Players[0].isComputer = FALSE;
@@ -1375,7 +1375,7 @@ void UpdatePlay(void) {
               g_GameState.holeIndex++;
             }
 
-            if (g_GameState.gameMode == GAME_MODE_UNK8 ||
+            if (g_GameState.gameMode == GAME_MODE_RECORD_REPLAY ||
                 g_GameState.replayKind != REPLAY_KIND_NONE) {
               g_GameState.replayKind = REPLAY_KIND_NONE;
               QuitPlayToTitle();

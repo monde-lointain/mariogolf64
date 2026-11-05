@@ -4200,7 +4200,7 @@ void DrawRoundHud(CameraView* view) {
             sprintf(g_PrintBuffer, "%dP", g_RoundHud.skinsTotals[i]);
             break;
           case GAME_MODE_TRAINING:
-          case GAME_MODE_UNK8:
+          case GAME_MODE_RECORD_REPLAY:
           case GAME_MODE_RING_SHOT:
             sprintf(g_PrintBuffer, f_BlankText);
             break;

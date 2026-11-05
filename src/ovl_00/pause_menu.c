@@ -408,7 +408,7 @@ void LoadPauseMenu(void) {
         case GAME_MODE_CLUB_SLOTS:
           f_PauseLayout = PAUSE_LAYOUT_VERSUS;
           break;
-        case GAME_MODE_UNK8:
+        case GAME_MODE_RECORD_REPLAY:
           f_PauseLayout = PAUSE_LAYOUT_NONE;
           break;
         case GAME_MODE_STROKE:

@@ -2286,7 +2286,7 @@ Boolean IsRecordableHoleOut(s32 playerIndex) {
       return TRUE;
     case GAME_MODE_MATCH_GAME:
     case GAME_MODE_UNK6:
-    case GAME_MODE_UNK8:
+    case GAME_MODE_RECORD_REPLAY:
     case GAME_MODE_RING_SHOT:
     case GAME_MODE_SKINS_MATCH:
       return FALSE;

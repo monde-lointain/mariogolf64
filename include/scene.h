@@ -120,8 +120,14 @@ enum GameMode {
    * score. EndHoleFlyover skips its call for a strong wind in it.
    */
   GAME_MODE_SPEED_GOLF = 7,
-  /* A mode in which SetUpPlayers sets up the players from a record */
-  GAME_MODE_UNK8 = 8,
+  /*
+   * A mode played as a replay is: SetUpPlayers sets up only its first player,
+   * from a record, ChooseHoleConditions takes its hole from g_PlayRecords[0],
+   * it has no pause menu layout, the HUD leaves the players' totals blank, and
+   * UpdatePlay quits to the title after the hole. The decompiled code sets it
+   * only by copying a loaded record's mode.
+   */
+  GAME_MODE_RECORD_REPLAY = 8,
   /* The mode whose holes GetCourseRecordIndex takes from f_RingShotHoles */
   GAME_MODE_RING_SHOT = 9,
   GAME_MODE_SKINS_MATCH = 10,

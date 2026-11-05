@@ -219,7 +219,7 @@ void OpenScorecard(CourseIndex courseIndex, s32 holeIndex) {
     case GAME_MODE_UNLISTED_STROKE:
     case GAME_MODE_TRAINING:
     case GAME_MODE_UNK6:
-    case GAME_MODE_UNK8:
+    case GAME_MODE_RECORD_REPLAY:
     case GAME_MODE_RING_SHOT:
       /* The bets get a page of their own */
       if (g_GameState.playerCount == 1) {
@@ -424,7 +424,7 @@ void FreeScorecard(void) {
       case GAME_MODE_UNLISTED_STROKE:
       case GAME_MODE_TRAINING:
       case GAME_MODE_UNK6:
-      case GAME_MODE_UNK8:
+      case GAME_MODE_RECORD_REPLAY:
       case GAME_MODE_RING_SHOT:
         FreeMemory(&g_Scorecard.placesImage);
         break;
@@ -648,7 +648,7 @@ HALVED:
     case GAME_MODE_TOURNAMENT:
     case GAME_MODE_UNK6:
     case GAME_MODE_SPEED_GOLF:
-    case GAME_MODE_UNK8:
+    case GAME_MODE_RECORD_REPLAY:
     case GAME_MODE_RING_SHOT:
       for (i = 0; i != g_GameState.playerCount; i++) {
         g_Scorecard.content.faceImageOffsets[i] = 0;
@@ -771,7 +771,7 @@ void SetScorecardLayout(s32 layout) {
     case GAME_MODE_TOURNAMENT:
     case GAME_MODE_UNK6:
     case GAME_MODE_SPEED_GOLF:
-    case GAME_MODE_UNK8:
+    case GAME_MODE_RECORD_REPLAY:
     case GAME_MODE_RING_SHOT:
       for (i = 0; i != g_GameState.playerCount; i++) {
         g_Scorecard.content.faceImageOffsets[i] = 0;
@@ -1070,7 +1070,7 @@ void UpdateScorecard(u16 buttons, u16 pressedButtons) {
       case GAME_MODE_GET_CHARACTER:
       case GAME_MODE_UNK6:
       case GAME_MODE_SPEED_GOLF:
-      case GAME_MODE_UNK8:
+      case GAME_MODE_RECORD_REPLAY:
       case GAME_MODE_RING_SHOT:
       case GAME_MODE_SKINS_MATCH:
       case GAME_MODE_CLUB_SLOTS:
@@ -1098,7 +1098,7 @@ s32 UpdateShownScorecard(u16 buttons) {
     case GAME_MODE_GET_CHARACTER:
     case GAME_MODE_UNK6:
     case GAME_MODE_SPEED_GOLF:
-    case GAME_MODE_UNK8:
+    case GAME_MODE_RECORD_REPLAY:
     case GAME_MODE_RING_SHOT:
     case GAME_MODE_SKINS_MATCH:
     case GAME_MODE_CLUB_SLOTS:
@@ -1239,7 +1239,7 @@ void DrawScorecard(Gfx** displayListHead) {
         case GAME_MODE_UNLISTED_STROKE:
         case GAME_MODE_TRAINING:
         case GAME_MODE_UNK6:
-        case GAME_MODE_UNK8:
+        case GAME_MODE_RECORD_REPLAY:
         case GAME_MODE_RING_SHOT:
           if (g_GameState.playerCount == 1) {
             if (g_RoundHud.scorecardPage == 0) {

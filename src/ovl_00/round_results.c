@@ -694,7 +694,7 @@ void LoadRoundResults(void) {
       case GAME_MODE_UNLISTED_STROKE:
       case GAME_MODE_TRAINING:
       case GAME_MODE_UNK6:
-      case GAME_MODE_UNK8:
+      case GAME_MODE_RECORD_REPLAY:
       case GAME_MODE_RING_SHOT:
       case GAME_MODE_SKINS_MATCH:
       case GAME_MODE_CLUB_SLOTS:
@@ -1003,7 +1003,7 @@ void FreeRoundResults(void) {
         case GAME_MODE_TRAINING:
         case GAME_MODE_UNK6:
         case GAME_MODE_SPEED_GOLF:
-        case GAME_MODE_UNK8:
+        case GAME_MODE_RECORD_REPLAY:
         case GAME_MODE_RING_SHOT:
         case GAME_MODE_SKINS_MATCH:
         case GAME_MODE_CLUB_SLOTS:
@@ -3819,7 +3819,7 @@ void DrawRoundResults(Gfx** displayListHead) {
       case GAME_MODE_UNLISTED_STROKE:
       case GAME_MODE_TRAINING:
       case GAME_MODE_UNK6:
-      case GAME_MODE_UNK8:
+      case GAME_MODE_RECORD_REPLAY:
       case GAME_MODE_RING_SHOT:
       case GAME_MODE_SKINS_MATCH:
       case GAME_MODE_CLUB_SLOTS:
