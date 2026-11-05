@@ -4657,21 +4657,25 @@ void LoadOpeningLogo(void) {
  * into place. Meanwhile the screen behind it fades to gray and then white.
  * The logo is only drawn when isDrawn is 1, but moves on every call.
  *
- * Doesn't match: the register allocation and instruction order differ. In the
- * letter loops GCC works out the texel offset before stepping the display list
- * pointer, where the original steps it first, and in the falling letters' loop
- * it derives f_LogoLetters' address from another table's instead of loading it.
- * The fade colors are set red first, as the original stores them (blue first
- * gave 166 words, 30 in shape, against 146 and 30). The L letter's bounce goes
- * through a pointer to it: indexing f_LogoLetters gave 688 words (80 in shape),
- * or 123 (19) with its speed's negation in its own block, and the pointer
- * declared at the function's top 109 (21), against the draft's 104 (14) at the
- * time. While the logo shrinks, the L letter's position and scale are stepped
- * before the club's, as a focused permuter run suggested; stepping the club's
- * position between them, as the draft did, gave 104 words (14 in shape), with
- * its y step first 90 (6), and the club's position after its scale 128 (22).
- * Forcing registers doesn't help: the register oracle's rounds, forcing 9 to 15
- * pseudos, give 605 to 678 words. 80 words differ, 6 in shape.
+ * Doesn't match: in the letter loops GCC works out the texel offset before
+ * stepping the display list pointer, where the original steps it first,
+ * and in the falling letters' loop it derives f_LogoLetters' address from
+ * another table's instead of loading it. The fade colors are set red
+ * first, as the original stores them (blue first gave 166 words, 30 in
+ * shape, against 146 and 30). The L letter's bounce goes through a pointer
+ * to it: indexing f_LogoLetters gave 688 words (80 in shape), or 123 (19)
+ * with its speed's negation in its own block, and the pointer declared at
+ * the function's top 109 (21), against the draft's 104 (14) at the time.
+ * While the logo shrinks, the L letter's position and scale are stepped
+ * before the club's, as a focused permuter run suggested; stepping the
+ * club's position between them, as the draft did, gave 104 words (14 in
+ * shape), with its y step first 90 (6), and the club's position after its
+ * scale 128 (22). The counts before here were measured while the club's
+ * strips had a clubStripIndex of their own, which gave 80 words differing,
+ * 6 in shape; stepping them with j, as the letters' halves are, gives 38,
+ * and with i 138 (8 in shape). The register oracle's closest result is
+ * these 38 words with no pseudo forced, so the rest differs in the code.
+ * 38 words differ, 6 in shape.
  */
 #ifdef NON_MATCHING
 void DrawOpeningLogo(Gfx** displayListHead, Boolean isDrawn) {
@@ -4684,7 +4688,6 @@ void DrawOpeningLogo(Gfx** displayListHead, Boolean isDrawn) {
   s32 letterTexelsOffset;
   s32 i;
   s32 letterIndex;
-  s32 clubStripIndex;
   s32 j;
   Radians angle;
   Radians orbitAngle;
@@ -4910,10 +4913,8 @@ void DrawOpeningLogo(Gfx** displayListHead, Boolean isDrawn) {
     gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, f_LogoClubAlpha);
     gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_LogoClubImage)));
     gDPPipeSync(gfx++);
-    for (clubStripIndex = 0; clubStripIndex < LOGO_CLUB_STRIP_COUNT;
-        clubStripIndex++) {
-      texelsOffset =
-          (clubStripIndex * LOGO_CLUB_WIDTH * LOGO_CLUB_STRIP_HEIGHT) +
+    for (j = 0; j < LOGO_CLUB_STRIP_COUNT; j++) {
+      texelsOffset = (j * LOGO_CLUB_WIDTH * LOGO_CLUB_STRIP_HEIGHT) +
           LARGE_PALETTED_TEXELS_OFFSET;
       gDPLoadTextureBlock(gfx++, TextureAddress(f_LogoClubImage + texelsOffset),
           G_IM_FMT_CI, G_IM_SIZ_8b, LOGO_CLUB_WIDTH, LOGO_CLUB_STRIP_HEIGHT, 0,
@@ -4930,7 +4931,7 @@ void DrawOpeningLogo(Gfx** displayListHead, Boolean isDrawn) {
           G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_NOPUSH);
       gDPSetPrimDepth(gfx++, LOGO_CLUB_DEPTH, 0);
       gDPPipeSync(gfx++);
-      gSPVertex(gfx++, f_LogoClubVertices[clubStripIndex], 4, 0);
+      gSPVertex(gfx++, f_LogoClubVertices[j], 4, 0);
       gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
       gDPPipeSync(gfx++);
     }
