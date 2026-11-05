@@ -3910,17 +3910,21 @@ void WriteHexDumpFile(u32* words, s32 byteCount, char* fileName) {
  * calls to the original's 12. A local for the half's first tile column, which
  * brought DrawGround's shape from 348 to 283, gives 3683 words differing here
  * (505 in shape) when declared after half, and 3709 (505) when declared first.
- * A permuter output with 2050 words (472 in shape) holds TILE_COORDINATE_SPAN
- * in a variable set before the tiles and multiplies by it in seven of the eight
+ * A permuter output with 2050 words (472 in shape) held TILE_COORDINATE_SPAN in
+ * a variable set before the tiles and multiplied by it in seven of the eight
  * tile coordinates the texture loads work out, leaving the first expansion's S
- * as the constant; through such a local in all of them, 2236 words differ (474
- * in shape), and in the rows' coordinates only, 2231 (483). The register
- * oracle, forcing 113 pseudos' registers, leaves 1763 words at best, so the
- * code differs too. Counting the tile column in tileColumn, set before a tile
- * loop and stepped with tileIndex, as DrawGround's fine tiles do, gives 2158
- * words (480 in shape) in the medium tiles' loop, 2534 (1216) in the coarse
- * tiles', 2268 (1226) in both, 2985 (499) in the fine tiles' and 3002 (1232) in
- * all three. 2128 words differ, 488 in shape.
+ * as the constant; through such a local in all of them, 2236 words differed
+ * (474 in shape), and in the rows' coordinates only, 2231 (483). The register
+ * oracle, forcing 113 pseudos' registers, left 1763 words at best, so the code
+ * differs too. Counting the tile column in tileColumn, set before a tile loop
+ * and stepped with tileIndex, as DrawGround's fine tiles do, gave 2158 words
+ * (480 in shape) in the medium tiles' loop, 2534 (1216) in the coarse tiles',
+ * 2268 (1226) in both, 2985 (499) in the fine tiles' and 3002 (1232) in all
+ * three, when the draft gave 2128 (488). The mirrored cells' S line is worked
+ * out where the vertex change uses it, in a local declared there, rather than
+ * once per fine tile beside tileColumn, which took the draft from 2128 words
+ * differing to 2037, 488 in shape to 491; written straight into the vertex
+ * change it gives the same. 2037 words differ, 491 in shape.
  */
 #ifdef NON_MATCHING
 void DrawHoleEditorGround(CameraMatrices* matrices UNUSED, s32 terrainStyle) {
@@ -3962,7 +3966,6 @@ void DrawHoleEditorGround(CameraMatrices* matrices UNUSED, s32 terrainStyle) {
   s32 pointColumn;
   s32 pointRow;
   Boolean isMirrored;
-  s32 mirroredS;
   s32 st;
   Vtx* midpoints;
   s32 tileColumn;
@@ -4310,8 +4313,6 @@ void DrawHoleEditorGround(CameraMatrices* matrices UNUSED, s32 terrainStyle) {
           midpoints = g_WorkArea.hole.midpoints[g_WorkArea.hole.tiles[tileIndex]
                   .midpointBlockIndex];
           tileColumn = (half * GROUND_TILE_GROUP_SIZE) + groupTile;
-          mirroredS = ((tileColumn * TILE_COORDINATE_SPAN) + MIRROR_S_OFFSET) *
-              MIRROR_S_SCALE;
 
           /* The maps tell each tile from its neighbors by color */
           if (IsMapTerrainStyle(terrainStyle)) {
@@ -4509,6 +4510,11 @@ void DrawHoleEditorGround(CameraMatrices* matrices UNUSED, s32 terrainStyle) {
                                     ((point->v.tc[TEXTURE_AXIS_T] / 2) &
                                         0xFFFF);
                               } else {
+                                s32 mirroredS =
+                                    ((tileColumn * TILE_COORDINATE_SPAN) +
+                                        MIRROR_S_OFFSET) *
+                                    MIRROR_S_SCALE;
+
                                 st = ((mirroredS -
                                           (point->v.tc[TEXTURE_AXIS_S] / 2))
                                          << 16) |
