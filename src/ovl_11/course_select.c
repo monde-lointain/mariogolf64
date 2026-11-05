@@ -622,6 +622,14 @@ void SetPlankMotion(s32 motion) {
  * of four orders and groupings, gives 55 words but 13 in shape, and with the
  * border first the oracle's best rises to 39 words with 5 forced. 56 words
  * differ, 10 in shape.
+ *
+ * A focused permuter run reached 19 words (11 in shape) by writing the
+ * bottom into both rectangles and testing the strip index against a u16
+ * local set to PLANK_STRIP_COUNT - 1 before the loop; a u8 or s16 local
+ * gives the same, an s32 one 35 (17), and the local alone changes nothing.
+ * That build compares with xor against 37 held in $fp, where the original
+ * uses xori 0x25, so the local only fills a saved register and isn't the
+ * original's form.
  */
 #ifdef NON_MATCHING
 void DrawPlanks(Gfx** displayListHead) {
