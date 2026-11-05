@@ -195,11 +195,13 @@
 #define GAME_FLAG_FADE_HIGH_GROUND_FULLY 0x60
 #define GAME_FLAG_NO_HIGH_GROUND_FADE 0x69
 
+/* Has the character select show each character's alternate face animation */
+#define GAME_FLAG_ALTERNATE_SELECT_FACES 0x64
+
 /* Flags that the hole loader reads or sets, whose purpose is not yet known */
 #define GAME_FLAG_UNK11 0x11
 #define GAME_FLAG_UNK51 0x51
 #define GAME_FLAG_UNK56 0x56
-#define GAME_FLAG_UNK64 0x64
 #define GAME_FLAG_UNK67 0x67
 /* Debug cheats that pad the first player's round points */
 #define GAME_FLAG_ADD_500_POINTS 0x66

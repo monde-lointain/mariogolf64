@@ -348,7 +348,7 @@ s32 MoveGridCursor(s32 playerNumber, u8 direction, u8 canChooseMarked) {
     }
 
     faceImage = g_CharacterFaceImages[(s16)slot];
-    if (IsGameFlagSet(GAME_FLAG_UNK64)) {
+    if (IsGameFlagSet(GAME_FLAG_ALTERNATE_SELECT_FACES)) {
       OpenEncodedAsset(
           g_AlternateFaceAnimationAssets[(s16)character][f_FaceFrame], &asset);
     } else {
@@ -473,7 +473,7 @@ s32 MoveGridCursorDiagonal(s32 playerNumber, u8 diagonal, u8 canChooseMarked) {
     }
 
     faceImage = g_CharacterFaceImages[(s16)slot];
-    if (IsGameFlagSet(GAME_FLAG_UNK64)) {
+    if (IsGameFlagSet(GAME_FLAG_ALTERNATE_SELECT_FACES)) {
       OpenEncodedAsset(
           g_AlternateFaceAnimationAssets[(s16)character][f_FaceFrame], &asset);
     } else {
@@ -946,7 +946,7 @@ s32 UpdateCharacterSelect(
       }
 
       faceImage = g_CharacterFaceImages[(s16)slot];
-      if (IsGameFlagSet(GAME_FLAG_UNK64)) {
+      if (IsGameFlagSet(GAME_FLAG_ALTERNATE_SELECT_FACES)) {
         OpenEncodedAsset(
             g_AlternateFaceAnimationAssets[(s16)faceCharacter][f_FaceFrame],
             &asset);
@@ -1105,7 +1105,7 @@ s32 UpdateCharacterSelect(
     }
 
     faceImage = g_CharacterFaceImages[(s16)slot];
-    if (IsGameFlagSet(GAME_FLAG_UNK64)) {
+    if (IsGameFlagSet(GAME_FLAG_ALTERNATE_SELECT_FACES)) {
       OpenEncodedAsset(
           g_AlternateFaceAnimationAssets[(s16)faceCharacter][f_FaceFrame],
           &asset);
@@ -1340,7 +1340,7 @@ void LoadCharacterFaces(void) {
       character = slotIndex;
     }
 
-    if (IsGameFlagSet(GAME_FLAG_UNK64)) {
+    if (IsGameFlagSet(GAME_FLAG_ALTERNATE_SELECT_FACES)) {
       faceAsset = g_AlternateFaceAnimationAssets[character][0];
     } else {
       faceAsset = g_FaceAnimationAssets[character][0];
@@ -1606,7 +1606,7 @@ void DrawGridFaces(Gfx** displayListHead, u8 isSinglePlayer) {
     }
 
     ReadAssetFile(facePalette, (s16)GetAssetFileSize(&file), &file);
-    if (!IsGameFlagSet(GAME_FLAG_UNK64)) {
+    if (!IsGameFlagSet(GAME_FLAG_ALTERNATE_SELECT_FACES)) {
       faceAssets = g_FaceAnimationAssets;
     } else {
       faceAssets = g_AlternateFaceAnimationAssets;
