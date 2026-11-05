@@ -215,9 +215,11 @@ typedef s32 Boolean;
 
 /*
  * The magnitude of a float, as a compare and branch where fabsf compiles to
- * abs.s. It is a macro because StepBallSimulation compiles further from the
- * original when these sites call an inline function instead, whether a static
- * one or its AbsoluteValue nested one.
+ * abs.s. It is a macro because the ball simulations compile further from the
+ * original when these sites call an inline function instead: a static one
+ * takes StepBallSimulation from 478 differing words to 580 and
+ * StepOpeningBallSimulation from 247 to 472, and StepBallSimulation's nested
+ * AbsoluteValue gives it 580 too.
  */
 #define AbsFloat(value) \
   ({ \
