@@ -307,7 +307,15 @@ static u8 ReverseBits(u8 bits) {
  * $t1; forcing 6 pseudos leaves 9 words differing. A u8, s32 or u32 symbol
  * local and *password++ don't help. A u16 or u8 i gives 32 words, but 12 in
  * shape, as it masks i with three andi 0xffff or 0xff that the original
- * lacks. 34 words differ, 2 in shape.
+ * lacks. Blame also finds a loop-order difference: ours advances the input
+ * pointer and index before storing the character; the original stores first.
+ * Putting the store in IN_OWN_BLOCK gives 32 differing words, none in shape,
+ * but introduces a boundary solely for scheduling, so that form is not kept.
+ * Inline alphabet-lookup helpers taking either the combined index or the
+ * symbol and position separately leave 34 words, for char and s32 returns.
+ * KMC sched.c schedules within basic blocks; the wrapper's improvement is
+ * not evidence for an alphabet helper in the original. 34 words differ,
+ * 2 in shape.
  */
 #ifdef NON_MATCHING
 s32 WritePasswordSymbols(
