@@ -1294,6 +1294,14 @@ void InitClubs(void) {
  * MAX_LAUNCH_POWER, of the shot mode's reach. With GAME_FLAG_GENERATE_CLUBS
  * set, it is found by test-firing the first set's putter instead.
  * InterpolatePuttPower is a nested function, a GNU C extension.
+ *
+ * Doesn't match: the original copies shotMode into $fp as the flag's test
+ * branches and uses the copy only when test-firing, and works out the tolerance
+ * after the error's abs.s, where this works it out first. Each half of the
+ * search stores the new power in both arms, as the long half did, which took
+ * the draft from 65 words differing to 63. Negating the error by an if gives 58
+ * words, and a ?: on the integer difference 54, 6 in shape, but both branch
+ * around a neg.s where the original has abs.s. 63 words differ, 15 in shape.
  */
 #ifdef NON_MATCHING
 s32 GetPuttPower(s32 fraction, ShotMode shotMode) {
@@ -1394,12 +1402,13 @@ s32 GetPuttPower(s32 fraction, ShotMode shotMode) {
 
       if (longPower == 0) {
         power = shortPower * 3 / 2;
+        putter->power[shotMode] = power;
       } else {
         power = InterpolatePuttPower(shortPower, longPower,
             (f32)(targetDistance - shortDistance) /
                 (f32)(longDistance - shortDistance));
+        putter->power[shotMode] = power;
       }
-      putter->power[shotMode] = power;
     }
   }
 
