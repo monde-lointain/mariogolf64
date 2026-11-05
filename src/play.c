@@ -317,7 +317,7 @@ void SetUpOneHole(void) {
   g_GameState.playerCount = 1;
   g_GameState.holeIndex = 0;
   g_GameState.unk14 = 0;
-  g_GameState.step = GAME_STATE_UNK11;
+  g_GameState.step = GAME_STATE_REPEATING_HOLE;
   if (IsGameFlagSet(GAME_FLAG_INIT_RING_SHOT)) {
     g_GameState.gameMode = 9;
   } else {
@@ -1285,7 +1285,7 @@ void UpdatePlay(void) {
       case GAME_STATE_TAKING_TURNS:
         UnloadOverlay(GetOverlayOfModule(MODULE_HOLE_BUILDER));
         /* Falls through */
-      case GAME_STATE_UNK11:
+      case GAME_STATE_REPEATING_HOLE:
         if (!f_IsPlayStateBackedUp) {
           g_ContestMovieState = CONTEST_MOVIES_WAITING;
           ClearContestWinner();
@@ -1307,7 +1307,7 @@ void UpdatePlay(void) {
 
         PlayContestMovies();
         if (IsHoleOver()) {
-          if (g_GameState.step == GAME_STATE_UNK11) {
+          if (g_GameState.step == GAME_STATE_REPEATING_HOLE) {
             ChooseConditionsAndInitHole();
           } else {
             g_GameState.step = GAME_STATE_HOLE_END;

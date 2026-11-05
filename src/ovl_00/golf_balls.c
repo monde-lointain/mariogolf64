@@ -499,7 +499,7 @@ void UpdateGolfBalls(void) {
   }
 
   if (g_GameState.step == GAME_STATE_TAKING_TURNS ||
-      g_GameState.step == GAME_STATE_UNK11) {
+      g_GameState.step == GAME_STATE_REPEATING_HOLE) {
     GolfBall* ball;
 
     for (i = 0, ball = &f_GolfBalls[currentIndex]; i < BALL_SIMULATION_COUNT;
@@ -825,7 +825,7 @@ void DrawGolfBalls(CameraMatrices* matrices UNUSED) {
   primDepth = 0;
 #endif
   if (g_GameState.step != GAME_STATE_TAKING_TURNS &&
-      g_GameState.step != GAME_STATE_UNK11) {
+      g_GameState.step != GAME_STATE_REPEATING_HOLE) {
     return;
   }
 

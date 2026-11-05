@@ -142,12 +142,13 @@ enum GameStateStep {
   GAME_STATE_HOLE_INTRO,
   GAME_STATE_FLYOVER,
   GAME_STATE_UNK5,
-  /* Taking turns. It and GAME_STATE_UNK11 play a single ball, rather than one
-   * for each player */
+  /* Taking turns. It and GAME_STATE_REPEATING_HOLE play a single ball, rather
+   * than one for each player */
   GAME_STATE_TAKING_TURNS,
   GAME_STATE_HOLE_END,
   GAME_STATE_SLOTS, /* Spinning the club slots before the hole */
-  GAME_STATE_UNK11 = 11,
+  /* Taking turns on SetUpOneHole's hole, which starts again once over */
+  GAME_STATE_REPEATING_HOLE = 11,
   GAME_STATE_END_INTRO,
   GAME_STATE_RELOAD_HOLE
 };

@@ -1783,7 +1783,7 @@ void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
   if (g_RoundHud.greenGridState == GREEN_GRID_HIDDEN ||
       g_IsCupViewShown == TRUE || IsGameFlagSet(GAME_FLAG_HIDE_GREEN_GRID) ||
       (g_GameState.step != GAME_STATE_TAKING_TURNS &&
-          g_GameState.step != GAME_STATE_UNK11)) {
+          g_GameState.step != GAME_STATE_REPEATING_HOLE)) {
     return;
   }
 
