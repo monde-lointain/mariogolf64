@@ -1008,25 +1008,30 @@ void DrawNamePlate(Gfx** displayListHead, s32 centerX, s32 centerY) {
  * one place
  *
  * Doesn't match: the original keeps save in $s5 and leaves constants such as
- * the load blocks' 0x070BF400 without registers, reloading them into $t4, where
- * this spills save and gives the constants registers; that reorders the texture
- * loads. Forcing the allocation the original's registers imply still leaves 137
- * words. Choosing the tile in one if, from course, read before it, rather than
- * overriding the still tile, takes it from 280 words to 259, 142 in shape to
- * 133; a Boolean row pointer gives 275 and 145, a u8 width and height 288 and
- * 146. The original reads course in each pass of the loop, beside the hole
- * test's read of holeIndex; reading it before the loop gives 288 words (92 in
- * shape), and in each arm of the test 268 (136). The permuter's best, 219 words
- * (9 in shape), passes the last three palette loads a Gfx** that is set to &gfx
- * only later, in the loop, so it reads garbage. Passing a gfxHead local set to
- * &gfx gave 243 to 307 words (135 to 137 in shape), and writing through
- * displayListHead throughout 506 (328). The register oracle, forcing 27
- * pseudos' registers, left 137 words at best when the draft gave 259, so the
- * code differs too. Writing the stars' right and bottom edges as the left or
- * top edge plus the star's size plus half the growth took the draft from 259
- * words differing to 257, 133 in shape either way; the bottom edge's order
- * changes nothing, and the right edge as the left plus half the growth plus the
- * star's width gives 259. 257 words differ, 133 in shape.
+ * the load blocks' 0x070BF400 without registers, reloading them into $t4,
+ * where this spills save and gives the constants registers; that reorders the
+ * texture loads. Forcing the allocation the original's registers imply still
+ * leaves 137 words. Choosing the tile in one if, from course, read before it,
+ * rather than overriding the still tile, takes it from 280 words to 259, 142
+ * in shape to 133; a Boolean row pointer gives 275 and 145, a u8 width and
+ * height 288 and 146. The original reads course in each pass of the loop,
+ * beside the hole test's read of holeIndex; reading it before the loop gives
+ * 288 words (92 in shape), and in each arm of the test 268 (136). The
+ * permuter's best, 219 words (9 in shape), passes the last three palette loads
+ * a Gfx** that is set to &gfx only later, in the loop, so it reads garbage.
+ * Passing a gfxHead local set to &gfx gave 243 to 307 words (135 to 137 in
+ * shape), and writing through displayListHead throughout 506 (328). The
+ * register oracle, forcing 27 pseudos' registers, left 137 words at best when
+ * the draft gave 259, so the code differs too. Writing the stars' right and
+ * bottom edges as the left or top edge plus the star's size plus half the
+ * growth took the draft from 259 words differing to 257, 133 in shape either
+ * way; the bottom edge's order changes nothing, and the right edge as the left
+ * plus half the growth plus the star's width gives 259. Setting the top edge
+ * in a variable on each pass, after the size test, as the original keeps
+ * STARS_TOP in a register set inside the loop, took the draft from 257 words
+ * to 219, 133 in shape to 129, and the oracle's best from 135 words to 127;
+ * set after reading course it gives 221 (129), and after choosing the tile 255
+ * (133). 219 words differ, 129 in shape.
  */
 #ifdef NON_MATCHING
 void DrawRingShotStars(
@@ -1049,6 +1054,7 @@ void DrawRingShotStars(
   s32 width;
   s32 height;
   s32 left;
+  s32 top;
   s32 tile;
   s32 course;
   u8* starImage = f_StarImages[f_StarBufferIndex];
@@ -1095,6 +1101,13 @@ void DrawRingShotStars(
       left = (hole * STAR_SPACING) + STARS_LEFT;
     }
 
+    /*
+     * The top edge is set on each pass, as the original keeps it in a
+     * register set inside the loop: STARS_TOP at both edges gives 257 words
+     * differing (133 in shape), top set once before the loop 252 (132), and
+     * in each arm beside left 237 (129)
+     */
+    top = STARS_TOP;
     course = memory->courseIndex;
     if (hole == memory->holeIndex) {
       tile = (save->hasRingShotStar[course][hole] == 0)
@@ -1106,9 +1119,9 @@ void DrawRingShotStars(
     }
 
     DrawTextureRect(&gfx, QuarterPixels(left - (width / 2)),
-        QuarterPixels(STARS_TOP - (height / 2)),
+        QuarterPixels(top - (height / 2)),
         QuarterPixels(left + STAR_WIDTH + (width / 2)),
-        QuarterPixels(STARS_TOP + STAR_HEIGHT + (height / 2)), tile, 0, 0,
+        QuarterPixels(top + STAR_HEIGHT + (height / 2)), tile, 0, 0,
         (STAR_WIDTH * TEXEL_STEP_ONE) / (width + STAR_WIDTH),
         (STAR_HEIGHT * TEXEL_STEP_ONE) / (height + STAR_HEIGHT));
     gDPPipeSync(gfx++);
