@@ -76,6 +76,12 @@ INSTRUCTION_LINE_RE = re.compile(r"^(\t[a-z][^#]*?)(\s*#.*)?$")
 MARK_PREFIX = "blame_line_"
 # The insn UID and pattern name -dp writes after each instruction
 INSN_NAME_RE = re.compile(r"#\s+(\d+)\s+(\S+)$")
+# The line before an asm statement's lines in the assembly
+ASM_START = "#APP"
+# An asm statement's insn in an RTL dump: one with operands, or a bare one
+ASM_INSN_RE = re.compile(
+    r"^\S+ \d+ \d+ \d+ \((?:set \(reg\S* \d+(?: \S+)?\)\s+)?\(asm_"
+)
 # What follows an insn's pattern: its recognized code and pattern name
 PATTERN_END_RE = re.compile(r"\) (?:-1|\d+ \{\S+\}) ")
 # The start of an insn's header in an RTL dump, before its UID
@@ -348,6 +354,9 @@ def get_insn(compilation: Compilation, index: int) -> tuple[int, str] | None:
     """Return the UID and pattern of the insn that made word INDEX.
 
     An insn whose template takes several lines names itself on the first.
+    -dp names no asm statement, whose lines final writes between #APP and
+    #NO_APP, so those words take the asm insn in the same place among the
+    function's asm insns in the last pass's dump.
     """
     number = compilation.word_lines[index]
     while number > 0:
@@ -355,10 +364,27 @@ def get_insn(compilation: Compilation, index: int) -> tuple[int, str] | None:
         match = INSN_NAME_RE.search(line)
         if match:
             return int(match.group(1)), match.group(2)
+        if line.strip() == ASM_START:
+            return get_asm_insn(compilation, number)
         if not INSTRUCTION_LINE_RE.match(line):
             return None
         number -= 1
     return None
+
+
+def get_asm_insn(compilation: Compilation, number: int) -> tuple[int, str] | None:
+    """Return the UID and pattern of the asm insn whose #APP is line NUMBER."""
+    start = min(line for line in compilation.word_lines if line > 0)
+    earlier = compilation.lines[start - 1 : number - 1]
+    place = sum(line.strip() == ASM_START for line in earlier)
+    asm_uids = [
+        uid
+        for uid, rtl in index_insns(compilation.dumps.get(PASSES[-1], "")).items()
+        if ASM_INSN_RE.search(rtl)
+    ]
+    if place >= len(asm_uids):
+        return None
+    return asm_uids[place], "asm_operands"
 
 
 def read_pattern(insn: str) -> str:
