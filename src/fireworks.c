@@ -198,7 +198,10 @@ static inline s32 RandomLaunchHeightJitter(void) {
  * width and height give 49 words (15 in shape), but the height is then halved
  * signed, with an addu and sra, where the original halves both sizes with srl;
  * an s32 width with a u32 height gives 48 (14) and keeps the srl, but gives the
- * two sizes different types. 50 words differ, 14 in shape.
+ * two sizes different types. A u16 or u8 row gives 44 words (22 in shape), but
+ * masks the row with an andi, 0xffff or 0xff, both for the loop test after the
+ * increment and for its use in the body, where the original has no andi at all.
+ * 50 words differ, 14 in shape.
  */
 #ifdef NON_MATCHING
 void LaunchFirework(Firework* firework, s32 fireworkIndex UNUSED) {
