@@ -3350,7 +3350,11 @@ static inline u16* GetShadowedTexel(u32 column, u32 row) {
  * and the register oracle's best from 64 to 60, forcing 28 pseudos; the figures
  * above were measured before it. Since then, an s16 centerColumn gives 148
  * words (16 in shape), with the same 3 extensions as the target and the oracle
- * still at 60. 149 words differ, 15 in shape.
+ * still at 60. Those counts were measured with GCC's built-in fabsf, when 149
+ * words differed, 15 in shape. With fabsf an abs.s in volatile inline
+ * assembly, 157 words differ, 23 in shape; AbsFloat at any one of its four
+ * sites gives 163 to 187 (39 to 43 in shape), and at all four 364 (80). An
+ * s16 centerColumn, alone or with centerRow, now gives 156 (24).
  */
 #ifdef NON_MATCHING
 void CastBillboardShadows(void) {
