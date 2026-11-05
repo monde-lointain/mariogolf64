@@ -2210,10 +2210,16 @@ INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard_drawing", DrawLeaderboardPage);
  *
  * The score colors test overPar >= 2 for a double bogey and then overPar > 0
  * for a bogey, after the par's test, as the original's slti 2 and blez show;
- * with == 1 for the bogey and the double bogey in the last else, as the
- * draft had, 755 words differed (165 in shape). A test of overPar > 1 gives
- * the same as >= 2, and == 1 for the bogey before > 1 for the double bogey
- * 755 (165). 733 words differ, 157 in shape.
+ * with == 1 for the bogey and the double bogey in the last else, as the draft
+ * had, 755 words differed (165 in shape). A test of overPar > 1 gives the same
+ * as >= 2, and == 1 for the bogey before > 1 for the double bogey 755 (165).
+ * The counts before here were measured while the skins total was kept in
+ * standing, the match standing's variable; a skinsWon of the skins branch's own
+ * took the draft from 733 words differing to 710, 157 in shape to 156, and the
+ * register oracle's closest from 569 words, forcing 44 pseudos, to 568, forcing
+ * 42. Declared beside standing and zeroed with it, it gives 718 words (158 in
+ * shape). Merging cellColumn or facePlayerIndex into standing gives 691 words,
+ * but the oracle's closest is then 589. 710 words differ, 156 in shape.
  */
 #ifdef NON_MATCHING
 void DrawScoresPage(Gfx** displayListHead) {
@@ -2934,6 +2940,8 @@ void DrawScoresPage(Gfx** displayListHead) {
       }
     } else if (g_GameState.gameMode == GAME_MODE_SKINS_MATCH ||
         g_GameState.gameMode == GAME_MODE_CLUB_SLOTS) {
+      s32 skinsWon = 0;
+
       /* Strokes here count the skins won on the hole */
       SetTextColor(&gfx, 0xFF, 0xFF, 0xFF);
       for (hole = firstHole; hole != shownHoleCount; hole++) {
@@ -2967,11 +2975,11 @@ void DrawScoresPage(Gfx** displayListHead) {
                 g_PrintBuffer);
           }
 
-          standing += g_Players[i].holes[hole].strokes;
+          skinsWon += g_Players[i].holes[hole].strokes;
         }
       }
 
-      sprintf(g_PrintBuffer, "%2dP", standing);
+      sprintf(g_PrintBuffer, "%2dP", skinsWon);
       if (g_GameState.holeSelection & HOLE_SELECTION_FRONT_NINE) {
         DrawShadowedText(&gfx, g_Scorecard.x + SKINS_TOTAL_LEFT,
             (i * rowSpacing) + frontTop + (PLAYER_ROW_TOP + g_Scorecard.y),
