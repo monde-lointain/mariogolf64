@@ -348,7 +348,9 @@ typedef s32 (*BillboardHitFinder)(s32 startX, s32 startY, s32 startZ, s32 endX,
  * second alone 333 (145). Each substep copies unkA6 to unkB1 after saving the
  * start and the previous velocity, as StepBallSimulation does, which took the
  * draft from 325 words (141 in shape) to 314 (138); with the start's y saved
- * before its x as well, 316 (138). 314 words differ, 138 in shape.
+ * before its x as well, 316 (138). The lift decays the spin after all three
+ * velocity updates, as StepBallSimulation does, which took the draft from 314
+ * words (138 in shape) to 296 (126). 296 words differ, 126 in shape.
  */
 #ifdef NON_MATCHING
 s32 StepOpeningBallSimulation(BallSimulation* simulation) {
@@ -1663,9 +1665,9 @@ ROLLED:
             simulation->velocity[AXIS_X] + turned[AXIS_X];
         simulation->velocity[AXIS_Y] =
             simulation->velocity[AXIS_Y] + turned[AXIS_Y];
-        simulation->spinSpeed = simulation->spinSpeed * OPENING_SPIN_DECAY;
         simulation->velocity[AXIS_Z] =
             simulation->velocity[AXIS_Z] + turned[AXIS_Z];
+        simulation->spinSpeed = simulation->spinSpeed * OPENING_SPIN_DECAY;
       }
 
       height = simulation->startPosition[AXIS_Y] - simulation->position[AXIS_Y];
