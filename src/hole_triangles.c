@@ -108,16 +108,12 @@ void DimNextTranslucentTriangles(void) {
  * Doesn't match: reload gives the display list pointers that don't get
  * registers stack slots in pseudo order, and after each gDPPipeSync followed by
  * an othermode command the original has the pair's slots the other way round.
- * The original also takes both absolute values of the shaded edge before adding
- * them, and leaves for the next triangle with a branch-likely. The permuter's
- * best, 68 words and 8 in shape against 69 and 17, tests the edge's sign before
- * normalizing it, where the original tests it after; fabsf gives 354 words, and
- * AbsFloat, an if/else, a ternary or testing edgeZ leave 69. The register
- * oracle, forcing 3 pseudos' registers, leaves 58 words at best, so the code
- * differs too. Focused runs reached 49 words (9 in shape), and later 48 (6), by
- * testing the vertices' differences without storing them in edgeX and edgeZ,
- * which guNormalize then reads unset; the original stores both to the stack
- * before taking their absolute values. 69 words differ, 17 in shape.
+ * With fabsf an abs.s in volatile inline assembly, the edge test takes both
+ * absolute values before adding them, as the original does, and leaves for
+ * the next triangle with its branch-likely; with GCC's built-in fabsf 69
+ * words differed, 17 in shape. The normalized edge's magnitude keeps its
+ * if, as the original negates it in a branch; through fabsf 328 words differ
+ * (38 in shape). 40 words differ, none in shape, all in those slots.
  */
 #ifdef NON_MATCHING
 void DrawHoleTriangles(Gfx** displayListHead, CameraMatrices* matrices UNUSED,
