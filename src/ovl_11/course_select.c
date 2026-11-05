@@ -1039,6 +1039,12 @@ void DrawNamePlate(Gfx** displayListHead, s32 centerX, s32 centerY) {
  * (9 in shape), passed the last three palette loads a Gfx** set to &gfx only
  * later, so it read garbage. The register oracle's closest result is 96 words,
  * forcing 2 pseudos. 102 words differ, 6 in shape.
+ *
+ * A focused permuter run's best, 29 words (7 in shape), sets the height's
+ * half in a variable before the tile is chosen; its srl then takes the place
+ * where the original loads 88 into $t3, and the original halves both sizes
+ * just before the call. Set just before the call instead, the height's half,
+ * the width's or both give 102 words (6).
  */
 #ifdef NON_MATCHING
 void DrawRingShotStars(
