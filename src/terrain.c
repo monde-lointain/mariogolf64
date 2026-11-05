@@ -2195,8 +2195,8 @@ s32 GetTrianglePlane(PlaneTriangle* triangle, TrianglePlane* plane) {
  * Returns the ground's height at a point, clamped to the ground, or
  * NO_GROUND_HEIGHT where no ground triangle holds it
  *
- * Doesn't match: the first edge's Y load and the X offset subtraction are
- * scheduled differently. 4 words differ, 2 in shape.
+ * Doesn't match: the first edge's Y load is scheduled two instructions late.
+ * 2 words differ, none in shape.
  */
 #ifdef NON_MATCHING
 s32 GetTerrainHeight(s32 x, s32 z) {
@@ -2210,6 +2210,8 @@ s32 GetTerrainHeight(s32 x, s32 z) {
   f32 normalX;
   f32 normalY;
   f32 normalZ;
+  s32 originX;
+  s32 originZ;
   s32 offsetX;
   s32 offsetZ;
   s32 height;
@@ -2259,8 +2261,10 @@ s32 GetTerrainHeight(s32 x, s32 z) {
   secondY = triangle.corners[AXIS_Y][2] - triangle.corners[AXIS_Y][0];
   secondX = triangle.corners[AXIS_X][2] - triangle.corners[AXIS_X][0];
   height = triangle.corners[AXIS_Y][0] << WORLD_TO_COURSE_SHIFT;
-  offsetX = x - (triangle.corners[AXIS_X][0] << WORLD_TO_COURSE_SHIFT);
-  offsetZ = z - (triangle.corners[AXIS_Z][0] << WORLD_TO_COURSE_SHIFT);
+  originX = triangle.corners[AXIS_X][0] << WORLD_TO_COURSE_SHIFT;
+  originZ = triangle.corners[AXIS_Z][0] << WORLD_TO_COURSE_SHIFT;
+  offsetX = x - originX;
+  offsetZ = z - originZ;
   normalX = (firstY * secondZ) + (secondY * -firstZ);
   normalY = (firstX * -secondZ) + (secondX * firstZ);
   normalZ = (firstY * -secondX) + (secondY * firstX);
