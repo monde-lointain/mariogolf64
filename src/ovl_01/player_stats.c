@@ -1224,7 +1224,11 @@ void DrawTwoDigitMenuNumber(
  * offset to the frame's, which took the draft from 213 words differing to 210,
  * 31 in shape to 30; the other arrows keep their sum, as through ImageTexelsAt
  * or ImageTexels they give 272 to 372 words, and the left arrow written as they
- * are 275. 210 words differ, 30 in shape.
+ * are 275. A focused permuter run's best, 172 words (30 in shape), sets
+ * numberOffsetX first of all. Setting it once before the players' loop or the
+ * columns' loop gives 174 words, but adds 16 to the slide there, where the
+ * original adds it in the preheader of the numbers' loop, as the draft does;
+ * set just before that loop, it gives 212. 210 words differ, 30 in shape.
  */
 #ifdef NON_MATCHING
 void DrawHandicaps(Gfx** displayListHead, s32 slide, u8 reverseVerticalSlide,
