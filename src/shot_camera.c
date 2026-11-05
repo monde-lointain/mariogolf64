@@ -380,14 +380,6 @@ static FlightPhase f_FlightPhase;
 #define STANCE_AIM_OFFSET (-921.60004f)
 #define STANCE_SLOPE_PASS_COUNT 2
 
-static inline f32 AbsoluteF32(f32 value) {
-  if (value < 0.0f) {
-    value = -value;
-  }
-
-  return value;
-}
-
 /*
  * Places a golfer at the current shot's ball, its club's ball distance away a
  * quarter turn from the shot's yaw, and tilts it to the slope of the ground
@@ -433,8 +425,8 @@ void PlaceGolferAtBall(Vec3 position, Vec3 rotation, Vec3 scale) {
     position[AXIS_Z] = (sinf(angle) * reach) -
         (cosf(angle) * STANCE_AIM_OFFSET) + player->ballPosition[AXIS_Z];
     position[AXIS_Y] = GetGroundHeight(position[AXIS_X], position[AXIS_Z]);
-    if (position[AXIS_Y] - ballHeight > AbsoluteF32(distance)) {
-      position[AXIS_Y] = AbsoluteF32(distance) + ballHeight;
+    if (position[AXIS_Y] - ballHeight > AbsFloat(distance)) {
+      position[AXIS_Y] = AbsFloat(distance) + ballHeight;
     }
 
     rotation[AXIS_X] = atan2(position[AXIS_Y] - ballHeight, reach);
