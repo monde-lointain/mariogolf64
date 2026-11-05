@@ -254,7 +254,7 @@ static s32 f_SceneMenuScenes[SCENE_MENU_LENGTH] = {
     SCENE_MAP_OVERVIEW,
     SCENE_HOLE_FILES,
     SCENE_PLAY_ROUND,
-    SCENE_PLAY_UNK13,
+    SCENE_PLAY_BEST_SHOT_REPLAY,
     SCENE_RINGS,
     SCENE_WALLS,
 };
@@ -1515,7 +1515,7 @@ const char* GetDebugSceneLabel(u32 scene) {
       return " FILE ";
     case SCENE_PLAY_ROUND:
       return "STROKE";
-    case SCENE_PLAY_UNK13:
+    case SCENE_PLAY_BEST_SHOT_REPLAY:
       return "S-SHOT";
     case SCENE_RINGS:
       return "RING  ";
@@ -1602,7 +1602,7 @@ NO_RESULT UpdateDebugSceneMenu(void) {
         InitPlay(PLAY_KIND_FLAGGED_ROUND);
         InitRoundHud();
         break;
-      case SCENE_PLAY_UNK13:
+      case SCENE_PLAY_BEST_SHOT_REPLAY:
         InitPlay(PLAY_KIND_BEST_SHOT_REPLAY);
         InitRoundHud();
         break;

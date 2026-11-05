@@ -774,7 +774,8 @@ NO_RESULT ChooseHoleConditions(void) {
   s32 courseRecordIndex;
 
   g_TurnBallSimulation.playerIndex = -1;
-  if (g_Scene == SCENE_PLAY_UNK13 || g_GameState.gameMode == GAME_MODE_UNK8 ||
+  if (g_Scene == SCENE_PLAY_BEST_SHOT_REPLAY ||
+      g_GameState.gameMode == GAME_MODE_UNK8 ||
       g_GameState.replayKind != REPLAY_KIND_NONE) {
     if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
       g_HoleSetup = g_RingShotRecords[0].hole;

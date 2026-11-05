@@ -2452,7 +2452,7 @@ void UpdateGame(void) {
     UpdateOpening();
     UpdateEffects();
   } else if (g_Scene == SCENE_PLAY_HOLE || g_Scene == SCENE_PLAY_ROUND ||
-      g_Scene == SCENE_PLAY_UNK13) {
+      g_Scene == SCENE_PLAY_BEST_SHOT_REPLAY) {
     if (g_ScreenEffect != SCREEN_EFFECT_SAVED_FRAME) {
       StepNoiseTexture();
     }

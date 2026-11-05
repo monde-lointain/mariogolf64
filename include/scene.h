@@ -39,7 +39,11 @@ enum Scene {
    * SCENE_PLAY_HOLE, but UpdateDebugScenes doesn't label it.
    */
   SCENE_PLAY_ROUND = 12,
-  SCENE_PLAY_UNK13 = 13, /* Updates like SCENE_PLAY_HOLE */
+  /*
+   * The scene menu's scene that replays the hole of f_BestShotReplayRecord,
+   * labeled "S-SHOT". It updates like SCENE_PLAY_HOLE.
+   */
+  SCENE_PLAY_BEST_SHOT_REPLAY = 13,
   SCENE_MENU = 14,
   SCENE_TRIANGLES = 15,
   SCENE_RINGS = 16,
