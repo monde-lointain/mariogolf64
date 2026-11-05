@@ -2657,26 +2657,35 @@ void DrawBestShotsCursor(Gfx** displayListHead) {
  *
  * Doesn't match: GCC moves the palette files' address out of the loop, and
  * reload then rebuilds it in the loop where the original builds it, so the
- * face's store is scheduled after the palette lookup's first steps rather than
- * before them; the palette and the character, and the cell and the record
- * pointer, also take each other's registers. The register oracle, forcing 4
- * pseudos, leaves 20 words differing. Storing the face once after the branches,
- * as the original does, keeps the cell as an index that is shifted each pass. A
- * store in each branch made the address worth strength reduction, a pointer
- * stepped through the palettes, which gave 19 words differing but 9 in shape,
- * and the oracle found nothing closer. Declaring the character before the
- * palette gives 62 words and clamping the palette first 58; reading the palette
- * first, or a variable for the record index or the palette file, changes
- * nothing, and reading the palette file before the store gives 38 (18 in
- * shape). An s16 cell gave 15 words differing, 1 in shape, with the store in
- * each branch, and an s16 or s8 cell gives 39 (1) with the single store, but
- * each sign-extends the cell with sll and sra before the palette offset, where
- * the original shifts it by 9 alone, so the cell is a word. A permuter run's
- * best, 38 words with none in shape, passes the palette file through a pointer
- * to file set at the start of each pass, a second name for one local; the
- * pointer set in its declaration gives 50 (6), and an inline helper taking the
- * file's pointer, opening and reading it, 49 (13), or reading it only, 125
- * (13). 46 words differ, 4 in shape.
+ * face's store is scheduled after the palette lookup's first steps rather
+ * than before them; the palette and the character, and the cell and the
+ * record pointer, also take each other's registers. The register oracle,
+ * forcing 4 pseudos, leaves 20 words differing. Storing the face once
+ * after the branches, as the original does, keeps the cell as an index
+ * that is shifted each pass. A store in each branch made the address worth
+ * strength reduction, a pointer stepped through the palettes, which gave
+ * 19 words differing but 9 in shape, and the oracle found nothing closer.
+ * Declaring the character before the palette gives 62 words and clamping
+ * the palette first 58; reading the palette first, or a variable for the
+ * record index or the palette file, changes nothing, and reading the
+ * palette file before the store gives 38 (18 in shape). An s16 cell gave
+ * 15 words differing, 1 in shape, with the store in each branch, and an
+ * s16 or s8 cell gives 39 (1) with the single store, but each sign-extends
+ * the cell with sll and sra before the palette offset, where the original
+ * shifts it by 9 alone, so the cell is a word. A permuter run's best, 38
+ * words with none in shape, passes the palette file through a pointer to
+ * file set at the start of each pass, a second name for one local; the
+ * pointer set in its declaration gives 50 (6), and an inline helper taking
+ * the file's pointer, opening and reading it, 49 (13), or reading it only,
+ * 125 (13). Setting a local to STATS_CELL_EMPTY on each pass and testing
+ * the record against it gives 42 words with none in shape, and the
+ * register oracle's closest is then 16 words against 20 here, both forcing
+ * 4 pseudos; reading the record into an s32 or s16 local, in or before the
+ * test, changes nothing, and a pointer to it gives 124 (16). Both the
+ * original and this load the empty cell's value just before the compare on
+ * each pass, and the matched FindNextBestShotCell writes the same test
+ * with the constant, so nothing shows the original kept the value in a
+ * variable. 46 words differ, 4 in shape.
  */
 #ifdef NON_MATCHING
 void LoadBestShotFaces(void) {
