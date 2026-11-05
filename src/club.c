@@ -75,10 +75,10 @@
 
 /* A stock club, whose power and deflection GenerateClub fills in */
 #define CLUB_ENTRY(type, name, kind, surfaceMask, mishitScale, distance, \
-    pitch, offsetPitch, spin, unk14, sideSpin) \
+    pitch, offsetPitch, spin, lieRatingPercent, sideSpin) \
   {(mishitScale), (name), 0, {0}, (surfaceMask), (distance), (pitch), \
-      (offsetPitch), (spin), (unk14), (type), {0, 0, 0}, (kind), (sideSpin), \
-      {0, 0, 0}, ASSET_DRIVER_HEAD_IMAGE + (type), 0, {0}}
+      (offsetPitch), (spin), (lieRatingPercent), (type), {0, 0, 0}, (kind), \
+      (sideSpin), {0, 0, 0}, ASSET_DRIVER_HEAD_IMAGE + (type), 0, {0}}
 
 /* A club's stats, as GenerateClubSet takes them */
 typedef struct ClubStats {
@@ -641,11 +641,11 @@ static Club f_NoClub = {80, "0000", 0, {0}, 0, 230, -11, 0, 14, 100,
     ASSET_DRIVER_HEAD_IMAGE, 0, {0}};
 static ShotLaunch f_ClubTestShot = {
     STRAIGHT_ANGLE, NO_CLUB, MAX_LAUNCH_POWER, 0, 0, 0, 0, SHOT_MODE_NORMAL};
-/* A generated club's unk14, by its set's unk1E from -MAX_SET_UNK1E to
- * MAX_SET_UNK1E; other unk1E values give DEFAULT_CLUB_UNK14 */
+/* A generated club's lieRatingPercent, by its set's unk1E from -MAX_SET_UNK1E
+ * to MAX_SET_UNK1E; other unk1E values give DEFAULT_LIE_RATING_PERCENT */
 #define MAX_SET_UNK1E 4
-#define DEFAULT_CLUB_UNK14 100
-static u8 f_Unk14Values[(MAX_SET_UNK1E * 2) + 1] = {
+#define DEFAULT_LIE_RATING_PERCENT 100
+static u8 f_LieRatingPercents[(MAX_SET_UNK1E * 2) + 1] = {
     30, 50, 70, 80, 100, 115, 120, 145, 170};
 /* Each stock club set's curve, from -4, the strongest fade, to 4 */
 static s8 f_StockCurves[CLUB_SET_COUNT] = {
@@ -1207,10 +1207,12 @@ void GenerateClubSet(s32 setIndex, ClubSetStats* stats) {
       club->sideSpin = -MAX_CLUB_SIDE_SPIN;
     }
 
-    if ((u8)(stats->unk1E + MAX_SET_UNK1E) >= ARRAY_COUNT(f_Unk14Values)) {
-      club->unk14 = DEFAULT_CLUB_UNK14;
+    if ((u8)(stats->unk1E + MAX_SET_UNK1E) >=
+        ARRAY_COUNT(f_LieRatingPercents)) {
+      club->lieRatingPercent = DEFAULT_LIE_RATING_PERCENT;
     } else {
-      club->unk14 = f_Unk14Values[stats->unk1E + MAX_SET_UNK1E];
+      club->lieRatingPercent =
+          f_LieRatingPercents[stats->unk1E + MAX_SET_UNK1E];
     }
 
     club->mishitScale = BASE_MISHIT_SCALE -
@@ -1545,7 +1547,7 @@ static const char f_DefaultLieRatings[LIE_RATING_LENGTH + 1] = "3333333333333";
 
 /*
  * Rates how well the club plays from the surface, from 1 to MAX_LIE_RATING,
- * scaled by the club's unk14 as a percentage; the putter rates 0. Each kind
+ * scaled by the club's lieRatingPercent; the putter rates 0. Each kind
  * of surface has a digit for each club type, with its own digits for an
  * approach shot.
  */
@@ -1618,7 +1620,7 @@ s32 GetLieRating(Club* club, Surface surface, ShotMode shotMode) {
       rating = ratings[club->type] - '0';
     }
 
-    rating = ((rating * club->unk14) + 50) / 100;
+    rating = ((rating * club->lieRatingPercent) + 50) / 100;
     if (rating <= 0) {
       rating = 1;
     }

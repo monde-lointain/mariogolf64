@@ -99,7 +99,7 @@ typedef struct Club {
   /* 0x0E */ s16 pitch; /* In degrees, from -45 to -7 */
   /* 0x10 */ s16 offsetPitch; /* In degrees per 32 of offsetY */
   /* 0x12 */ s16 spin; /* Shown as SPIN beside the debug character viewer */
-  /* 0x14 */ s16 unk14;
+  /* 0x14 */ s16 lieRatingPercent; /* Scales GetLieRating's rating */
   /* 0x16 */ s16 type; /* The club's place in its set */
   /* 0x18 */ s32 power[SHOT_MODE_COUNT];
   /* 0x24 */ s16 kind;
