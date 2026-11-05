@@ -51,7 +51,8 @@ typedef struct Scorecard {
   /* 0x0C */ u8* tableImage;
   /* 0x10 */ u8*
       placeArrowImage; /* Beside the player's row when their place changed */
-  /* 0x14 */ u8* unk14;
+  /* 0x14 */ u8* raisedPanelImage; /* scoresPanelImage's cells lit from the
+                                      other side; loaded but never drawn */
   /* 0x18 */ u8*
       scoresPanelImage; /* Fills and edges the scores page's panels and cells */
   /* 0x1C */ u8* labelsImage;

@@ -82,7 +82,7 @@ void SetScorecardState(s32 state);
 
 #define TABLE_IMAGE_ASSET 0x68F
 #define PLACE_ARROW_IMAGE_ASSET 0x682
-#define UNK14_IMAGE_ASSET 0x690
+#define RAISED_PANEL_IMAGE_ASSET 0x690
 #define SCORES_PANEL_IMAGE_ASSET 0x691
 #define BET_SUBTITLES_IMAGE_ASSET 0x97A
 #define TOTAL_LABELS_IMAGE_ASSET 0x693
@@ -167,8 +167,9 @@ void OpenScorecard(CourseIndex courseIndex, s32 holeIndex) {
   g_Scorecard.tableImage =
       AllocMemory(OpenEncodedAsset(TABLE_IMAGE_ASSET, &asset));
   ReadEncodedAsset(g_Scorecard.tableImage, &asset);
-  g_Scorecard.unk14 = AllocMemory(OpenEncodedAsset(UNK14_IMAGE_ASSET, &asset));
-  ReadEncodedAsset(g_Scorecard.unk14, &asset);
+  g_Scorecard.raisedPanelImage =
+      AllocMemory(OpenEncodedAsset(RAISED_PANEL_IMAGE_ASSET, &asset));
+  ReadEncodedAsset(g_Scorecard.raisedPanelImage, &asset);
   g_Scorecard.scoresPanelImage =
       AllocMemory(OpenEncodedAsset(SCORES_PANEL_IMAGE_ASSET, &asset));
   ReadEncodedAsset(g_Scorecard.scoresPanelImage, &asset);
@@ -462,7 +463,7 @@ void FreeScorecard(void) {
     FreeMemory(&g_Scorecard.digitsImage);
     FreeMemory(&g_Scorecard.betSubtitlesImage);
     FreeMemory(&g_Scorecard.scoresPanelImage);
-    FreeMemory(&g_Scorecard.unk14);
+    FreeMemory(&g_Scorecard.raisedPanelImage);
     FreeMemory(tableImage);
     for (i = 0; i != g_GameState.playerCount; i++) {
       FreeMemory(&g_Scorecard.faceImages[i]);
