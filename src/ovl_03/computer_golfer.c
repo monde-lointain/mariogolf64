@@ -2273,7 +2273,9 @@ INCLUDE_RODATA("asm/nonmatchings/ovl_03/computer_golfer", f_SimFaultText);
  * sector into a local 153 (57). A later run reached 87 (27) with the same
  * pointer alone. Now, a local holding the heading's sector before the loop, or
  * the heading itself, gives 139 (47), and one holding the first excluded sector
- * 135 (47). 101 words differ, 35 in shape.
+ * 135 (47). A focused run reached 73 (23) with the same pointer, the aim's
+ * update out of its block and an empty do-while (0) after it, neither of which
+ * is natural. 101 words differ, 35 in shape.
  */
 #ifdef NON_MATCHING
 s32 StepTrialShot(void) {
