@@ -1202,26 +1202,28 @@ void MoveAimCameraDistance(void) {
  * heading holds still, the scene is drawn from a saved frame, through two
  * framebuffers.
  *
- * Doesn't match: 44 words differ, 12 in shape, in the stick's step. The
- * original keeps the stick's 16-bit value and its pointers in other registers,
- * and schedules the divisions differently. Choosing g_AltHeading's step with ?:
- * loads the heading with lh, as the original does, though after the speed test
+ * Each stick branch has its own step and speed. The original holds the speed in
+ * different registers in the two branches, but a speed of its own in each
+ * changes nothing; a step of its own in each takes the draft from 44 words
+ * differing, 12 in shape, to 39. Doesn't match: 39 words differ, 9 in shape, in
+ * the stick's step. The original keeps the stick's 16-bit value and its
+ * pointers in other registers, and schedules the divisions differently. Before
+ * the branches had their own variables: choosing g_AltHeading's step with ?:
+ * loaded the heading with lh, as the original does, though after the speed test
  * where the original loads it before; with an if it gave 55 words (21 in
- * shape). The aim heading's step as ?: too gives 64 (22), and a BinaryAngle
+ * shape). The aim heading's step as ?: too gave 64 (22), and a BinaryAngle
  * saved heading, which the original loads with lhu, 56 (20). Storing heading -
- * step changes nothing, subtracting in both arms of the speed test gave 57
+ * step changed nothing, subtracting in both arms of the speed test gave 57
  * words, and an inline helper taking the divisor gave 97, as the divisor isn't
- * folded. A permuter output with 39 words (9 in shape) works out g_AltHeading's
- * half stick into a temp before the speed and copies it to step after;
- * computing step after the speed instead gives 43 (19), and in both branches 54
- * (30).
+ * folded. A permuter output with 39 words (9 in shape) worked out
+ * g_AltHeading's half stick into a temp before the speed and copied it to step
+ * after; computing step after the speed instead gave 43 (19), and in both
+ * branches 54 (30).
  */
 #ifdef NON_MATCHING
 void TurnAim(s32 turnsAltHeading) {
   s32 stickX = g_TurnController.stickX;
   SignedBinaryAngle heading = g_CurrentShot.heading;
-  s32 speed;
-  s32 step;
   s32 dpad;
   s32 dpadSpeed;
 
@@ -1230,8 +1232,9 @@ void TurnAim(s32 turnsAltHeading) {
   }
 
   if (!turnsAltHeading) {
-    step = stickX / 2;
-    speed = stickX / AIM_STICK_SPEED_DIVISOR;
+    s32 step = stickX / 2;
+    s32 speed = stickX / AIM_STICK_SPEED_DIVISOR;
+
     if (speed < 0) {
       speed = -speed;
     }
@@ -1242,8 +1245,9 @@ void TurnAim(s32 turnsAltHeading) {
 
     g_CurrentShot.heading -= step;
   } else {
-    step = stickX / 2;
-    speed = stickX / ALT_HEADING_STICK_SPEED_DIVISOR;
+    s32 step = stickX / 2;
+    s32 speed = stickX / ALT_HEADING_STICK_SPEED_DIVISOR;
+
     if (speed < 0) {
       speed = -speed;
     }
