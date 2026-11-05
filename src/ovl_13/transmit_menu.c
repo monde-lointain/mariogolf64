@@ -319,8 +319,8 @@ typedef struct StatusTime {
   /* 0x0 */ u8 minutes;
   /* 0x1 */ u8 seconds;
   /* 0x2 */ u8 hundredths;
-  /* 0x3 */ u8 unk3;
-  /* 0x4 */ u8 unk4;
+  /* 0x3 */ u8 character;
+  /* 0x4 */ u8 scoreToPar; /* Plus STATUS_SCORE_BIAS */
 } StatusTime; /* size = 0x5 */
 
 /*
@@ -3790,17 +3790,17 @@ void BuildStatusData(u8* status) {
                     ((f32)HUNDREDTHS_PER_SECOND / FRAMES_PER_SECOND)) %
             HUNDREDTHS_PER_SECOND;
         course->bestTimes[index].hundredths = value;
-        course->bestTimes[index].unk3 =
+        course->bestTimes[index].character =
             records->bestTimeCharacters[courseIndex][index];
-        course->bestTimes[index].unk4 =
+        course->bestTimes[index].scoreToPar =
             records->bestTimeScoresToPar[courseIndex][index] +
             STATUS_SCORE_BIAS;
       } else {
         course->bestTimes[index].minutes = 0;
         course->bestTimes[index].seconds = 0;
         course->bestTimes[index].hundredths = 0;
-        course->bestTimes[index].unk3 = 0;
-        course->bestTimes[index].unk4 = 0;
+        course->bestTimes[index].character = 0;
+        course->bestTimes[index].scoreToPar = 0;
       }
     }
 
@@ -3886,8 +3886,8 @@ void BuildStatusData(u8* status) {
       course->bestTimes[index].minutes = 0;
       course->bestTimes[index].seconds = 0;
       course->bestTimes[index].hundredths = 0;
-      course->bestTimes[index].unk3 = 0;
-      course->bestTimes[index].unk4 = 0;
+      course->bestTimes[index].character = 0;
+      course->bestTimes[index].scoreToPar = 0;
     }
 
     course->birdieBadges[0] = 0;
