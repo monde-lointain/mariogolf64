@@ -2317,9 +2317,10 @@ void HandleFrameBufferSwap(void) {}
  * next loop indexes the captured frame, in place of stepping a source pointer,
  * which took the draft to 147 words, 33 in shape, and the oracle to 67 words
  * forcing 12 pseudos; setting a source pointer from the index in each strip
- * gives the same. A u16 or u8 height in the last loop gives 147 words, 31 in
- * shape, but adds two andi masks, 0xffff or 0xff, to the original's three andi
- * 0xffff. 147 words differ, 33 in shape.
+ * gives the same. The last loop still steps frame: indexing it by i -
+ * BACKDROP_BORDER gives 180 words, 40 in shape. A u16 or u8 height in the last
+ * loop gives 147 words, 31 in shape, but adds two andi masks, 0xffff or 0xff,
+ * to the original's three andi 0xffff. 147 words differ, 33 in shape.
  */
 #ifdef NON_MATCHING
 void DrawFadeAnimation(Gfx** displayListHead) {
