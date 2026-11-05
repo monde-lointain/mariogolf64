@@ -539,7 +539,7 @@ s32 StepOpeningBallSimulation(BallSimulation* simulation) {
                 simulation->position[AXIS_Y], simulation->position[AXIS_Z],
                 &f_OpeningContactTriangle, &f_OpeningContactFraction) > 0) {
           s8* ringState = &g_Players[simulation->playerIndex]
-                               .ringStates[f_OpeningContactTriangle.unk0];
+                               .ringStates[f_OpeningContactTriangle.tag];
 
           if (*ringState == RING_STATE_SHOWN &&
               simulation->purpose == LAUNCH_PURPOSE_STROKE) {
@@ -580,7 +580,7 @@ s32 StepOpeningBallSimulation(BallSimulation* simulation) {
               simulation->stepCount) {
             hitsBillboard = FindOpeningBillboardHit(startX, startY, startZ,
                 simulation->position[AXIS_X], simulation->position[AXIS_Y],
-                simulation->position[AXIS_Z], &triangle.unk0, &fraction,
+                simulation->position[AXIS_Z], &triangle.tag, &fraction,
                 simulation);
           } else {
             hitsBillboard = FALSE;
@@ -953,7 +953,7 @@ s32 StepOpeningBallSimulation(BallSimulation* simulation) {
       simulation->lastBounceStep = simulation->stepCount;
       simulation->spinSpeed /= BILLBOARD_HIT_SPIN_DIVISOR;
       simulation->sideSpin /= BILLBOARD_HIT_SPIN_DIVISOR;
-      switch (triangle.unk0) {
+      switch (triangle.tag) {
         case BILLBOARD_CELL_TRUNK:
         case BILLBOARD_CELL_SOLID:
           simulation->velocity[AXIS_X] = -simulation->velocity[AXIS_Z] /
@@ -979,7 +979,7 @@ s32 StepOpeningBallSimulation(BallSimulation* simulation) {
         FindWallHit(startX, startY, startZ, simulation->position[AXIS_X],
             simulation->position[AXIS_Y], simulation->position[AXIS_Z],
             &f_OpeningContactTriangle, &f_OpeningContactFraction) == TRUE &&
-        f_OpeningContactTriangle.unk0 == HOLE_TRIANGLE_KIND_SHADED) {
+        f_OpeningContactTriangle.tag == HOLE_TRIANGLE_KIND_SHADED) {
       CoursePoint hitPosition;
       f32 normalX;
       f32 normalY;

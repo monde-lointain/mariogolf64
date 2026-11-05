@@ -320,7 +320,12 @@ extern f32 g_GroundNearDepthEighth;
 /* A triangle as GetTrianglePlane takes it: each axis's coordinates, by corner
  */
 typedef struct PlaneTriangle {
-  /* 0x00 */ s32 unk0;
+  /*
+   * What was hit: the HOLE_TRIANGLE_KIND_* of a hole triangle, the ring's
+   * index from FindRingHit, or the BILLBOARD_CELL_* that FindBillboardHit
+   * writes here
+   */
+  /* 0x00 */ s32 tag;
   /* 0x04 */ s16 corners[AXIS_COUNT][TRIANGLE_CORNER_COUNT];
 } PlaneTriangle; /* size = 0x18 */
 

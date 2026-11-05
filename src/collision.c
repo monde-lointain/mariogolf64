@@ -1056,7 +1056,7 @@ s32 FindMiniGolfGroundHit(BallSimulation* simulation, s32 startX, s32 startY,
   if (IsOffMiniGolfGround(startX, startZ) || IsOffMiniGolfGround(endX, endZ)) {
     if (endY >= GetGroundHeight(endX, endZ)) {
       *fraction = 1.0f;
-      hit->unk0 = HOLE_TRIANGLE_KIND_FLAT;
+      hit->tag = HOLE_TRIANGLE_KIND_FLAT;
       hit->corners[AXIS_X][0] = 0;
       hit->corners[AXIS_Y][0] = 0;
       hit->corners[AXIS_Z][0] = 0;
@@ -1219,7 +1219,7 @@ s32 FindMiniGolfGroundHit(BallSimulation* simulation, s32 startX, s32 startY,
 
     if (hitIndex >= 0) {
       *hit = triangles[hitIndex];
-      hit->unk0 = HOLE_TRIANGLE_KIND_FLAT;
+      hit->tag = HOLE_TRIANGLE_KIND_FLAT;
       *fraction = nearestFraction;
       return TRUE;
     }
@@ -1272,7 +1272,7 @@ INCLUDE_ASM("asm/nonmatchings/collision", FindMiniGolfGroundHit);
 /*
  * Finds the nearest ground triangle that a ball moving from one point to
  * another hits, walking the ground tiles along the path from its start.
- * It sets the triangle, whose unk0 is HOLE_TRIANGLE_KIND_FLAT, and the
+ * It sets the triangle, whose tag is HOLE_TRIANGLE_KIND_FLAT, and the
  * fraction of the way along the path, and returns whether one is hit. A
  * path that starts or ends off the ground hits a level triangle at its end
  * if it ends below the ground there, and nothing otherwise.
@@ -1343,7 +1343,7 @@ s32 FindGroundHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
   if (IsOffGround(startX, startZ) || IsOffGround(endX, endZ)) {
     if (endY >= GetGroundHeight(endX, endZ)) {
       *fraction = 1.0f;
-      hit->unk0 = HOLE_TRIANGLE_KIND_FLAT;
+      hit->tag = HOLE_TRIANGLE_KIND_FLAT;
       hit->corners[AXIS_X][0] = 0;
       hit->corners[AXIS_Y][0] = 0;
       hit->corners[AXIS_Z][0] = 0;
@@ -1505,7 +1505,7 @@ s32 FindGroundHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
 
     if (hitIndex >= 0) {
       *hit = triangles[hitIndex];
-      hit->unk0 = HOLE_TRIANGLE_KIND_FLAT;
+      hit->tag = HOLE_TRIANGLE_KIND_FLAT;
       *fraction = nearestFraction;
       return TRUE;
     }
@@ -2304,7 +2304,7 @@ s32 FindHoleTriangleHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
      * The kind is read from the table, as the original addresses it afresh;
      * reading it through hitTriangle gives 78 words differing, 30 in shape
      */
-    hit->unk0 = g_WorkArea.hole.triangles[hitIndex].kind;
+    hit->tag = g_WorkArea.hole.triangles[hitIndex].kind;
     *fraction = nearestFraction;
     return TRUE;
   }
@@ -2314,7 +2314,7 @@ s32 FindHoleTriangleHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
 
 /*
  * Finds the nearest wall, a shaded hole triangle, that a ball moving from
- * one point to another hits. It sets the triangle, with its kind as unk0,
+ * one point to another hits. It sets the triangle, with its kind as tag,
  * and the fraction of the way along the path, and returns whether one is
  * hit. A path that comes within WALL_REACH_DISTANCE of a wall's plane
  * counts as crossing it. A wall facing x or z is tested in its own plane:
@@ -2916,7 +2916,7 @@ s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
     hit->corners[AXIS_Z][0] = candidate->vertices[0].v.ob[AXIS_Z];
     hit->corners[AXIS_Z][1] = candidate->vertices[1].v.ob[AXIS_Z];
     hit->corners[AXIS_Z][2] = candidate->vertices[2].v.ob[AXIS_Z];
-    hit->unk0 = g_WorkArea.hole.triangles[hitIndex].kind;
+    hit->tag = g_WorkArea.hole.triangles[hitIndex].kind;
     *fraction = nearestFraction;
     return TRUE;
   }
@@ -3279,7 +3279,7 @@ s32 FindRingHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
 
   if (hitNumber >= 0) {
     *hitRing = ring;
-    hitRing->unk0 = hitNumber - 1;
+    hitRing->tag = hitNumber - 1;
     *fraction = nearestFraction;
     return 1;
   }

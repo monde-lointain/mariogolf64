@@ -470,12 +470,12 @@ s32 StepBallSimulation(BallSimulation* simulation) {
             FindRingHit(startX, startY, startZ, simulation->position[AXIS_X],
                 simulation->position[AXIS_Y], simulation->position[AXIS_Z],
                 &hit, &hitFraction) > 0 &&
-            g_Players[simulation->playerIndex].ringStates[hit.unk0] ==
+            g_Players[simulation->playerIndex].ringStates[hit.tag] ==
                 RING_STATE_SHOWN &&
             simulation->purpose == LAUNCH_PURPOSE_STROKE) {
           PlaySound(SOUND_IMPACT_ON_MARK, RING_SOUND_CHANNEL, SOUND_FULL_SCALE);
           if (simulation->purpose == LAUNCH_PURPOSE_STROKE) {
-            g_Players[simulation->playerIndex].ringStates[hit.unk0] =
+            g_Players[simulation->playerIndex].ringStates[hit.tag] =
                 RING_STATE_PASSED;
             StartRingPassRumble(&g_Players[simulation->playerIndex]);
           }
@@ -528,7 +528,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
                     simulation->stepCount)) {
           hitsBillboard = FindBillboardHit(startX, startY, startZ,
               simulation->position[AXIS_X], simulation->position[AXIS_Y],
-              simulation->position[AXIS_Z], &triangle.unk0, &fraction);
+              simulation->position[AXIS_Z], &triangle.tag, &fraction);
         }
 
         if (hitsBillboard && contact == STEP_FLAG_GROUND_HIT) {
@@ -977,7 +977,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
       simulation->lastBounceStep = simulation->stepCount;
       simulation->spinSpeed /= BILLBOARD_HIT_SPIN_DIVISOR;
       simulation->sideSpin /= BILLBOARD_HIT_SPIN_DIVISOR;
-      switch (triangle.unk0) {
+      switch (triangle.tag) {
         case BILLBOARD_CELL_TRUNK:
         case BILLBOARD_CELL_SOLID:
         case BILLBOARD_CELL_SHELL:
@@ -992,7 +992,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
       }
 
       if (simulation->purpose == LAUNCH_PURPOSE_STROKE) {
-        PlayBillboardHitSound(triangle.unk0,
+        PlayBillboardHitSound(triangle.tag,
             IntLength3D(velocity[AXIS_X], velocity[AXIS_Y], velocity[AXIS_Z]));
       }
     }
@@ -1018,7 +1018,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
       if (FindWallHit(startX, startY, startZ, simulation->position[AXIS_X],
               endY, simulation->position[AXIS_Z], &wall,
               &wallFraction) == TRUE &&
-          wall.unk0 == HOLE_TRIANGLE_KIND_SHADED) {
+          wall.tag == HOLE_TRIANGLE_KIND_SHADED) {
         f32 bounce = 1.0f;
         BallSpeed inwardSpeed;
         f32 slide;

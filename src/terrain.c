@@ -558,7 +558,7 @@ Surface GetMiniGolfSurface(s32 x, s32 z, Boolean lowersWaterLevel) {
       PrintDebugText(text, WATER_RATIO_COLUMN, WATER_RATIO_ROW);
     }
 
-    if (hit.unk0 == HOLE_TRIANGLE_KIND_FLAT) {
+    if (hit.tag == HOLE_TRIANGLE_KIND_FLAT) {
       /*
        * Reuses i as the water height to match: a waterHeight variable,
        * wherever it is declared, gives 4 words differing (none in shape), and
