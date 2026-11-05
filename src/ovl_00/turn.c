@@ -3601,14 +3601,10 @@ void UpdateTurns(void) {
           for (preparingPollIndex = 0; f_ShotSource == SHOT_SOURCE_PLANNING &&
               preparingPollIndex < PLAN_PREPARING_POLL_COUNT;
               preparingPollIndex++) {
-            /*
-             * In its own block, as without it 710 words differ, 202 in shape,
-             * against 454 and 182
-             */
-            IN_OWN_BLOCK(f_ShotSource = (GetPlannedShot(&g_ScriptedShot) !=
-                                            PLANNED_SHOT_UNFINISHED)
-                    ? SHOT_SOURCE_PREPARED
-                    : SHOT_SOURCE_PLANNING);
+            f_ShotSource =
+                (GetPlannedShot(&g_ScriptedShot) != PLANNED_SHOT_UNFINISHED)
+                ? SHOT_SOURCE_PREPARED
+                : SHOT_SOURCE_PLANNING;
             if (!HasPlanTime(PLAN_PREPARING_TIME_BUDGET)) {
               break;
             }
