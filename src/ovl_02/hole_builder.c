@@ -1015,8 +1015,8 @@ void ResetTerrainCodeCells(void) {
  * The paint logic of Toad Highlands, Koopa Park and Mario's Star. It returns
  * a cell's color in the upper half and its painted terrain code in the
  * lower: fairway near other terrain is painted as semi-rough, fairway and
- * greens are striped, rough away from fairway and TERRAIN_CODE_UNK3 are
- * mottled with random colors, and greens are edged as green edge.
+ * greens are striped, rough away from fairway and TERRAIN_CODE_NO_DROP_GROUND
+ * are mottled with random colors, and greens are edged as green edge.
  */
 s32 PaintMainCourse(
     s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32 z) {
@@ -1072,8 +1072,8 @@ s32 PaintMainCourse(
       color = 0xE739;
       paintedCode = TERRAIN_CODE_BUNKER;
       break;
-    case TERRAIN_CODE_UNK3:
-      paintedCode = TERRAIN_CODE_UNK3;
+    case TERRAIN_CODE_NO_DROP_GROUND:
+      paintedCode = TERRAIN_CODE_NO_DROP_GROUND;
       f_PaintSeed = NextRandomSeed(f_PaintSeed);
       random = f_PaintSeed >> PAINT_RANDOM_SHIFT;
       color = (((random & 4) + 2) << RGBA16_RED_SHIFT) |
@@ -1121,8 +1121,8 @@ s32 PaintMainCourse(
 
 /*
  * A paint logic like PaintMainCourse with pale rough, out-of-bounds ground
- * painted 0xBEEF, and TERRAIN_CODE_UNK3 painted as cart way away from more of
- * it. Neither the paint-logic table nor any code refers to it.
+ * painted 0xBEEF, and TERRAIN_CODE_NO_DROP_GROUND painted as cart way away from
+ * more of it. Neither the paint-logic table nor any code refers to it.
  *
  * Doesn't match: the original zeroes $t0, which nothing reads, in the delay
  * slot of the range test, and its two cart-way arms share one jump to the
@@ -1182,10 +1182,10 @@ s32 PaintPaleRoughCourse(
       color = 0xE739;
       paintedCode = TERRAIN_CODE_BUNKER;
       break;
-    case TERRAIN_CODE_UNK3:
-      if (nearestCode == TERRAIN_CODE_UNK3 ||
+    case TERRAIN_CODE_NO_DROP_GROUND:
+      if (nearestCode == TERRAIN_CODE_NO_DROP_GROUND ||
           nearestDistance >= TERRAIN_BORDER_DISTANCE) {
-        paintedCode = TERRAIN_CODE_UNK3;
+        paintedCode = TERRAIN_CODE_NO_DROP_GROUND;
         color = 0x3E;
       } else {
         /* Both colors are the same in the original, which stores the color
@@ -1306,8 +1306,8 @@ s32 PaintShyGuyDesert(
       color = 0xE721;
       paintedCode = TERRAIN_CODE_BUNKER;
       break;
-    case TERRAIN_CODE_UNK3:
-      paintedCode = TERRAIN_CODE_UNK3;
+    case TERRAIN_CODE_NO_DROP_GROUND:
+      paintedCode = TERRAIN_CODE_NO_DROP_GROUND;
       f_PaintSeed = NextRandomSeed(f_PaintSeed);
       random = f_PaintSeed >> PAINT_RANDOM_SHIFT;
       color = (((random & 4) + 2) << RGBA16_RED_SHIFT) |
@@ -1409,8 +1409,8 @@ s32 PaintBooValley(
       color = 0xE721;
       paintedCode = TERRAIN_CODE_BUNKER;
       break;
-    case TERRAIN_CODE_UNK3:
-      paintedCode = TERRAIN_CODE_UNK3;
+    case TERRAIN_CODE_NO_DROP_GROUND:
+      paintedCode = TERRAIN_CODE_NO_DROP_GROUND;
       f_PaintSeed = NextRandomSeed(f_PaintSeed);
       random = f_PaintSeed >> PAINT_RANDOM_SHIFT;
       color = (((random & 4) + 2) << RGBA16_RED_SHIFT) |
@@ -1511,8 +1511,8 @@ s32 PaintYoshisIsland(
       color = 0xEF37;
       paintedCode = TERRAIN_CODE_BUNKER;
       break;
-    case TERRAIN_CODE_UNK3:
-      paintedCode = TERRAIN_CODE_UNK3;
+    case TERRAIN_CODE_NO_DROP_GROUND:
+      paintedCode = TERRAIN_CODE_NO_DROP_GROUND;
       f_PaintSeed = NextRandomSeed(f_PaintSeed);
       random = f_PaintSeed >> PAINT_RANDOM_SHIFT;
       color = (((random & 4) + 2) << RGBA16_RED_SHIFT) |
@@ -1560,7 +1560,8 @@ s32 PaintYoshisIsland(
 
 /*
  * PaintMainCourse with PaintFirstMiniGolfCourse's mottling of
- * TERRAIN_CODE_UNK3. Neither the paint-logic table nor any code refers to it.
+ * TERRAIN_CODE_NO_DROP_GROUND. Neither the paint-logic table nor any code
+ * refers to it.
  */
 s32 PaintUnlistedCourse(
     s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32 z) {
@@ -1616,8 +1617,8 @@ s32 PaintUnlistedCourse(
       color = 0xE739;
       paintedCode = TERRAIN_CODE_BUNKER;
       break;
-    case TERRAIN_CODE_UNK3:
-      paintedCode = TERRAIN_CODE_UNK3;
+    case TERRAIN_CODE_NO_DROP_GROUND:
+      paintedCode = TERRAIN_CODE_NO_DROP_GROUND;
       f_PaintSeed = NextRandomSeed(f_PaintSeed);
       random = f_PaintSeed >> PAINT_RANDOM_SHIFT;
       color = (((random & 7) + 4) << RGBA16_RED_SHIFT) |
@@ -1666,8 +1667,8 @@ s32 PaintUnlistedCourse(
 /*
  * The paint logic of the first course of each mini-golf set. It returns a
  * cell's color in the upper half and its painted terrain code in the
- * lower: greens are striped and edged, TERRAIN_CODE_UNK3 is mottled with
- * random colors, and anything other than out of bounds is painted white as
+ * lower: greens are striped and edged, TERRAIN_CODE_NO_DROP_GROUND is mottled
+ * with random colors, and anything other than out of bounds is painted white as
  * out of bounds.
  */
 s32 PaintFirstMiniGolfCourse(
@@ -1678,8 +1679,8 @@ s32 PaintFirstMiniGolfCourse(
   s32 random;
 
   switch (code) {
-    case TERRAIN_CODE_UNK3:
-      paintedCode = TERRAIN_CODE_UNK3;
+    case TERRAIN_CODE_NO_DROP_GROUND:
+      paintedCode = TERRAIN_CODE_NO_DROP_GROUND;
       f_PaintSeed = NextRandomSeed(f_PaintSeed);
       random = f_PaintSeed >> PAINT_RANDOM_SHIFT;
       color = (((random & 7) + 4) << RGBA16_RED_SHIFT) |
@@ -1730,8 +1731,8 @@ s32 PaintSecondMiniGolfCourse(
   s32 random;
 
   switch (code) {
-    case TERRAIN_CODE_UNK3:
-      paintedCode = TERRAIN_CODE_UNK3;
+    case TERRAIN_CODE_NO_DROP_GROUND:
+      paintedCode = TERRAIN_CODE_NO_DROP_GROUND;
       f_PaintSeed = NextRandomSeed(f_PaintSeed);
       random = f_PaintSeed >> PAINT_RANDOM_SHIFT;
       color = (((random & 4) + 2) << RGBA16_RED_SHIFT) |
@@ -1781,8 +1782,8 @@ s32 PaintThirdMiniGolfCourse(
   s32 random;
 
   switch (code) {
-    case TERRAIN_CODE_UNK3:
-      paintedCode = TERRAIN_CODE_UNK3;
+    case TERRAIN_CODE_NO_DROP_GROUND:
+      paintedCode = TERRAIN_CODE_NO_DROP_GROUND;
       f_PaintSeed = NextRandomSeed(f_PaintSeed);
       random = f_PaintSeed >> PAINT_RANDOM_SHIFT;
       color = (((random & 4) + 2) << RGBA16_RED_SHIFT) |
@@ -1820,8 +1821,8 @@ s32 PaintThirdMiniGolfCourse(
 /*
  * The paint logic of the driving range. It returns a cell's color in the
  * upper half and its painted terrain code in the lower: fairway and greens
- * are striped, rough away from fairway and TERRAIN_CODE_UNK3 are mottled
- * with random colors, and greens are edged as green edge.
+ * are striped, rough away from fairway and TERRAIN_CODE_NO_DROP_GROUND are
+ * mottled with random colors, and greens are edged as green edge.
  */
 s32 PaintDrivingRange(
     s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32 z) {
@@ -1862,8 +1863,8 @@ s32 PaintDrivingRange(
       color = 0xE739;
       paintedCode = TERRAIN_CODE_BUNKER;
       break;
-    case TERRAIN_CODE_UNK3:
-      paintedCode = TERRAIN_CODE_UNK3;
+    case TERRAIN_CODE_NO_DROP_GROUND:
+      paintedCode = TERRAIN_CODE_NO_DROP_GROUND;
       f_PaintSeed = NextRandomSeed(f_PaintSeed);
       random = f_PaintSeed >> PAINT_RANDOM_SHIFT;
       color = (((random & 4) + 2) << RGBA16_RED_SHIFT) |

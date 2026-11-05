@@ -73,8 +73,8 @@ static SurfaceInfo f_OpeningSurfaceInfo[SURFACE_COUNT] = {
     /* SURFACE_DEEP_ROUGH */
     {SURFACE_KIND_DEEP_ROUGH, "ﾃﾞｨｰﾌﾟﾗﾌ", 50, 80, 30, 430, 100, 0x509,
         SINK_DEPTH_BURIED, 5},
-    /* SURFACE_BARE_GROUND_UNK13 */
-    {SURFACE_KIND_BARE_GROUND_UNK20, "ﾍﾞｱｸﾞﾗｳﾝﾄﾞ", 80, 90, 30, 930, 500, 0x50C,
+    /* SURFACE_NO_DROP_GROUND */
+    {SURFACE_KIND_NO_DROP_GROUND, "ﾍﾞｱｸﾞﾗｳﾝﾄﾞ", 80, 90, 30, 930, 500, 0x50C,
         SINK_DEPTH_NONE, 1},
     /* SURFACE_WASTE_AREA */
     {SURFACE_KIND_WASTE_AREA, "ｳｴｽﾄｴﾘｱ", 50, 80, 30, 430, 100, 0x8F1,

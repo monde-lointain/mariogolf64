@@ -161,7 +161,7 @@ enum TerrainColorIndex {
   TERRAIN_COLOR_GREEN,
   TERRAIN_COLOR_BUNKER,
   TERRAIN_COLOR_ROUGH,
-  TERRAIN_COLOR_UNK3,
+  TERRAIN_COLOR_NO_DROP_GROUND,
   TERRAIN_COLOR_OUT_OF_BOUNDS,
   TERRAIN_COLOR_CART_WAY,
   TERRAIN_COLOR_UNK7,
@@ -224,7 +224,7 @@ static TerrainColor f_TerrainColors[TERRAIN_COLOR_COUNT] = {
     {0x05, 0x1E, 0x05, 1}, /* TERRAIN_COLOR_GREEN */
     {0x1C, 0x1C, 0x1C, 1}, /* TERRAIN_COLOR_BUNKER */
     {0x00, 0x10, 0x00, 1}, /* TERRAIN_COLOR_ROUGH */
-    {0x00, 0x00, 0x1F, 0}, /* TERRAIN_COLOR_UNK3 */
+    {0x00, 0x00, 0x1F, 0}, /* TERRAIN_COLOR_NO_DROP_GROUND */
     {0x0F, 0x08, 0x00, 1}, /* TERRAIN_COLOR_OUT_OF_BOUNDS */
     {0x0F, 0x0F, 0x0F, 1}, /* TERRAIN_COLOR_CART_WAY */
     {0x08, 0x16, 0x00, 1}, /* TERRAIN_COLOR_UNK7 */
@@ -426,8 +426,8 @@ s32 GetTerrainCodeColor(s32 code) {
     case TERRAIN_CODE_ROUGH:
       colorIndex = TERRAIN_COLOR_ROUGH;
       break;
-    case TERRAIN_CODE_UNK3:
-      colorIndex = TERRAIN_COLOR_UNK3;
+    case TERRAIN_CODE_NO_DROP_GROUND:
+      colorIndex = TERRAIN_COLOR_NO_DROP_GROUND;
       break;
     case TERRAIN_CODE_OUT_OF_BOUNDS:
       colorIndex = TERRAIN_COLOR_OUT_OF_BOUNDS;
@@ -461,8 +461,8 @@ s32 GetColorTerrainCode(s32 color) {
       return TERRAIN_CODE_BUNKER;
     case TERRAIN_COLOR_ROUGH:
       return TERRAIN_CODE_ROUGH;
-    case TERRAIN_COLOR_UNK3:
-      return TERRAIN_CODE_UNK3;
+    case TERRAIN_COLOR_NO_DROP_GROUND:
+      return TERRAIN_CODE_NO_DROP_GROUND;
     case TERRAIN_COLOR_CART_WAY:
       return TERRAIN_CODE_CART_WAY;
     case TERRAIN_COLOR_FAIRWAY:
@@ -628,9 +628,9 @@ Surface GetMiniGolfSurface(s32 x, s32 z, Boolean lowersWaterLevel) {
         weight = 1.0f;
         surface = SURFACE_BARE_GROUND;
         break;
-      case TERRAIN_CODE_UNK3:
+      case TERRAIN_CODE_NO_DROP_GROUND:
         weight = 1.0f;
-        surface = SURFACE_BARE_GROUND_UNK13;
+        surface = SURFACE_NO_DROP_GROUND;
         break;
       case TERRAIN_CODE_DEEP_ROUGH:
         weight = ROUGH_SURFACE_WEIGHT;
@@ -774,9 +774,9 @@ Surface FindSurface(s32 x, s32 z, Boolean lowersWaterLevel) {
         weight = 1.0f;
         surface = SURFACE_BARE_GROUND;
         break;
-      case TERRAIN_CODE_UNK3:
+      case TERRAIN_CODE_NO_DROP_GROUND:
         weight = 1.0f;
-        surface = SURFACE_BARE_GROUND_UNK13;
+        surface = SURFACE_NO_DROP_GROUND;
         break;
       case TERRAIN_CODE_DEEP_ROUGH:
         weight = ROUGH_SURFACE_WEIGHT;
@@ -941,7 +941,7 @@ s32 BlendSurfaceMapColor(s32 x, s32 z, Surface surface) {
       code = TERRAIN_CODE_ROCK;
       break;
     case SURFACE_KIND_BARE_GROUND:
-    case SURFACE_KIND_BARE_GROUND_UNK20:
+    case SURFACE_KIND_NO_DROP_GROUND:
       code = TERRAIN_CODE_BARE_GROUND;
       break;
     case SURFACE_KIND_TEE_GROUND:

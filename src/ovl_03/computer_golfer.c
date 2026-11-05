@@ -1677,7 +1677,7 @@ s32 GetLandingRating(u32 surfaceKind) {
     case SURFACE_KIND_ROCK:
     case SURFACE_KIND_BARE_GROUND:
     case SURFACE_KIND_DEEP_ROUGH:
-    case SURFACE_KIND_BARE_GROUND_UNK20:
+    case SURFACE_KIND_NO_DROP_GROUND:
     case SURFACE_KIND_WASTE_AREA:
       rating = LANDING_FAIR;
       break;
@@ -2897,7 +2897,7 @@ s32 ChooseShotOffset(void) {
     case SURFACE_KIND_GREEN_EDGE:
     case SURFACE_KIND_BARE_GROUND:
     case SURFACE_KIND_DEEP_ROUGH:
-    case SURFACE_KIND_BARE_GROUND_UNK20:
+    case SURFACE_KIND_NO_DROP_GROUND:
     case SURFACE_KIND_WASTE_AREA:
       return SHOT_OFFSET_NONE;
   }

@@ -102,7 +102,7 @@ enum BallState {
 #define IsDropKind(kind) \
   ((kind) != SURFACE_KIND_WATER_HAZARD && \
       (kind) != SURFACE_KIND_OUT_OF_BOUNDS && \
-      (kind) != SURFACE_KIND_BARE_GROUND_UNK20 && \
+      (kind) != SURFACE_KIND_NO_DROP_GROUND && \
       (kind) != SURFACE_KIND_OUT_OF_COURSE)
 /* Whether a ground plane is gentle enough for dropPosition */
 #define IsDropSlope(plane) \
@@ -169,7 +169,7 @@ typedef struct BallSimulation {
   /* 0x00 */ s32 startPosition[3];
   /*
    * The last point the ball crossed over gently sloping ground that is not
-   * lost (IsLostBallKind) or SURFACE_KIND_BARE_GROUND_UNK20; a ball in a
+   * lost (IsLostBallKind) or SURFACE_KIND_NO_DROP_GROUND; a ball in a
    * water hazard is dropped there. Launching sets it to the start.
    */
   /* 0x0C */ s32 dropPosition[3];

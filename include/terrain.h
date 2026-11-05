@@ -132,7 +132,9 @@ enum TerrainCode {
   TERRAIN_CODE_FAIRWAY,
   TERRAIN_CODE_ROUGH,
   TERRAIN_CODE_BUNKER,
-  TERRAIN_CODE_UNK3, /* Read as SURFACE_BARE_GROUND_UNK13 */
+  /* Bare ground that never becomes the point where a ball in a water hazard
+   * is dropped; read as SURFACE_NO_DROP_GROUND */
+  TERRAIN_CODE_NO_DROP_GROUND,
   TERRAIN_CODE_CART_WAY,
   TERRAIN_CODE_DEEP_ROUGH,
   TERRAIN_CODE_GREEN,
