@@ -447,8 +447,14 @@ void OpenRoundResults(s32 request) {
  * f_PointsEarned through a pointer in AddRoundPoints kept it in $s1 across the
  * calls instead (228 words, 62 in shape, or 234 and 64 for the total too),
  * summing the points in a local gave 247, storing the open course count last
- * 211, and counting the ranks through a pointer to the rank 207 (45). 166 words
- * differ, 34 in shape.
+ * 211, and counting the ranks through a pointer to the rank 207 (45). A focused
+ * permuter run's best, 162 words (30 in shape), passes the tournament's course
+ * points to CountOpenCourses through a pointer to the field; the same pointer
+ * at all five of the tally's uses also gives 162 (30), and a copy of the points
+ * 187 (43). The original loads the field through the saved data pointer at each
+ * use, as ours does, where ours loads the call's argument with four
+ * instructions between it and the call, and the original in its delay slot; a
+ * pointer to the single field is not kept. 166 words differ, 34 in shape.
  */
 void LoadRoundResults(void) {
   EncodedAsset asset;
