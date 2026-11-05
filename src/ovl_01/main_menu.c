@@ -4541,29 +4541,28 @@ void DrawMenuTitleScreen(Gfx** displayListHead) {
     if (IsChosenTitleLabel(labelIndex)) {
       continue;
     }
-    {
-      if (labelIndex == TITLE_LABEL_SAVED_GAMES &&
-          g_HasBroughtOverCharacter == TRUE) {
-        labelOffset = TITLE_LABEL_TRANSMIT * TITLE_LABEL_IMAGE_SIZE;
-      } else {
-        labelOffset = labelIndex * TITLE_LABEL_IMAGE_SIZE;
-      }
 
-      gDPLoadTextureBlock_4b(gfx++,
-          TextureAddress(
-              ImageTexels(g_ImageSlots[f_ImageSlotIndex]) + labelOffset),
-          G_IM_FMT_CI, TITLE_LABEL_WIDTH, TITLE_LABEL_HEIGHT, 0,
-          G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
-          G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-      gDPPipeSync(gfx++);
-      gSPScisTextureRectangle(gfx++,
-          QuarterPixels(f_TitleLabelCorners[labelIndex].x),
-          QuarterPixels(f_TitleLabelCorners[labelIndex].y),
-          QuarterPixels(f_TitleLabelCorners[labelIndex].x + TITLE_LABEL_WIDTH),
-          QuarterPixels(f_TitleLabelCorners[labelIndex].y + TITLE_LABEL_HEIGHT),
-          G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
-      gDPPipeSync(gfx++);
+    if (labelIndex == TITLE_LABEL_SAVED_GAMES &&
+        g_HasBroughtOverCharacter == TRUE) {
+      labelOffset = TITLE_LABEL_TRANSMIT * TITLE_LABEL_IMAGE_SIZE;
+    } else {
+      labelOffset = labelIndex * TITLE_LABEL_IMAGE_SIZE;
     }
+
+    gDPLoadTextureBlock_4b(gfx++,
+        TextureAddress(
+            ImageTexels(g_ImageSlots[f_ImageSlotIndex]) + labelOffset),
+        G_IM_FMT_CI, TITLE_LABEL_WIDTH, TITLE_LABEL_HEIGHT, 0,
+        G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+        G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+    gDPPipeSync(gfx++);
+    gSPScisTextureRectangle(gfx++,
+        QuarterPixels(f_TitleLabelCorners[labelIndex].x),
+        QuarterPixels(f_TitleLabelCorners[labelIndex].y),
+        QuarterPixels(f_TitleLabelCorners[labelIndex].x + TITLE_LABEL_WIDTH),
+        QuarterPixels(f_TitleLabelCorners[labelIndex].y + TITLE_LABEL_HEIGHT),
+        G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+    gDPPipeSync(gfx++);
   }
 
   gDPLoadTLUT_pal16(gfx++, 0,
