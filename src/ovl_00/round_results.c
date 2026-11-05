@@ -405,14 +405,13 @@ void OpenRoundResults(s32 request) {
 #ifdef NON_MATCHING
 /*
  * Adds to the save the average points of the players that have them,
- * scaled by the course's rate. A macro, since the original repeats it
- * for each mode.
+ * scaled by the course's rate, counting them with index. A macro, since the
+ * original repeats it for each mode.
  */
-#define AddRoundPoints(save) \
+#define AddRoundPoints(save, index) \
   { \
     s32 counted_; \
     s32 total_; \
-    s32 i_; \
 \
     f_OpenCourseCount = CountOpenCourses((save)->coursePoints); \
     if (f_OpenCourseCount < COURSE_COUNT) { \
@@ -420,10 +419,10 @@ void OpenRoundResults(s32 request) {
       f_PointsToNextCourse = \
           GetCoursePointsNeeded(f_OpenCourseCount) - (save)->coursePoints; \
       f_CoursePointsTally.earned = 0; \
-      for (i_ = 0; i_ != g_GameState.playerCount; i_++) { \
-        if (f_PlayerPoints[i_] >= 0) { \
+      for ((index) = 0; (index) != g_GameState.playerCount; (index)++) { \
+        if (f_PlayerPoints[(index)] >= 0) { \
           counted_++; \
-          f_CoursePointsTally.earned += f_PlayerPoints[i_]; \
+          f_CoursePointsTally.earned += f_PlayerPoints[(index)]; \
         } \
       } \
       if (counted_ == 0) { \
@@ -444,10 +443,13 @@ void OpenRoundResults(s32 request) {
   }
 
 /*
- * Doesn't match: in the course points tally, the original counts in $s2 where
- * ours counts in $a1, and the later loops' registers differ. The register
- * oracle matches with 14 registers forced, so what remains is allocation. 90
- * words differ, none in shape.
+ * Doesn't match: the original keeps k in $s2 and the tally's count in $s0,
+ * where ours keeps them in $s0 and $s1, which also changes which delay slots
+ * are filled. The register oracle matches with 6 registers forced, so what
+ * remains is allocation. The tally counts with k, which the original keeps in
+ * $s2 there too though the loop crosses no call; with a counter of its own the
+ * function gave 90 words, none in shape, and the oracle matched only with 14
+ * forced, and with i or j 158 or 128. 89 words differ, 7 in shape.
  *
  * The match game reads the last hole into holeEnd before clearing the results,
  * as the matched scorecard_drawing.c reads its countEnd, and the original loads
@@ -649,7 +651,7 @@ void LoadRoundResults(void) {
           }
         }
 
-        AddRoundPoints(save);
+        AddRoundPoints(save, k);
         break;
       case GAME_MODE_MATCH_GAME:
       case GAME_MODE_GET_CHARACTER:
@@ -683,7 +685,7 @@ void LoadRoundResults(void) {
         size = GetAssetFileSize(&file);
         f_PortraitPalette = AllocMemory(size);
         ReadAssetFile(f_PortraitPalette, size, &file);
-        AddRoundPoints(save);
+        AddRoundPoints(save, k);
         break;
       case GAME_MODE_UNK1:
       case GAME_MODE_TRAINING:
@@ -706,7 +708,7 @@ void LoadRoundResults(void) {
           }
         }
 
-        AddRoundPoints(save);
+        AddRoundPoints(save, k);
         break;
       case GAME_MODE_TOURNAMENT:
         f_SecondBannerImage =
