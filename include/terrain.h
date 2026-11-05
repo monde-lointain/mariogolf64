@@ -214,7 +214,7 @@ extern s32 g_CoarseVertexOffsets[GROUND_TILE_COUNT][TILE_VERTEX_SEGMENT_COUNT];
 typedef struct IntegerPlane {
   /* 0x00 */ s32 normal[AXIS_COUNT];
   /* 0x0C */ s32 distance;
-  /* 0x10 */ s32 unk10; /* Always INTEGER_PLANE_UNIT */
+  /* 0x10 */ s32 normalLength; /* Always INTEGER_PLANE_UNIT */
 } IntegerPlane; /* size = 0x14 */
 
 /* Drawing the ground, which DrawGround and the hole editor's copy share */
@@ -334,7 +334,7 @@ typedef struct PlaneTriangle {
 typedef struct TrianglePlane {
   /* 0x00 */ f32 normal[AXIS_COUNT];
   /* 0x0C */ f32 distance;
-  /* 0x10 */ f32 unk10; /* Always 1 */
+  /* 0x10 */ f32 normalLength; /* Always 1 */
 } TrianglePlane; /* size = 0x14 */
 
 /* Returns 0, or -1 for a triangle without area, whose plane is then level */

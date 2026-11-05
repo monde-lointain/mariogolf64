@@ -2117,7 +2117,7 @@ s32 GetTriangleIntegerPlane(PlaneTriangle* triangle, IntegerPlane* plane) {
     plane->normal[AXIS_Y] = INTEGER_PLANE_UNIT;
     plane->normal[AXIS_Z] = 0;
     plane->distance = 0;
-    plane->unk10 = INTEGER_PLANE_UNIT;
+    plane->normalLength = INTEGER_PLANE_UNIT;
     return -1;
   }
 
@@ -2125,7 +2125,7 @@ s32 GetTriangleIntegerPlane(PlaneTriangle* triangle, IntegerPlane* plane) {
     length = -length;
   }
 
-  plane->unk10 = INTEGER_PLANE_UNIT;
+  plane->normalLength = INTEGER_PLANE_UNIT;
   plane->normal[AXIS_X] = (normalX << INTEGER_PLANE_SHIFT) / length;
   plane->normal[AXIS_Y] = (normalY << INTEGER_PLANE_SHIFT) / length;
   plane->normal[AXIS_Z] = (normalZ << INTEGER_PLANE_SHIFT) / length;
@@ -2177,7 +2177,7 @@ s32 GetTrianglePlane(PlaneTriangle* triangle, TrianglePlane* plane) {
     plane->normal[AXIS_Z] = 0.0f;
     plane->distance = 0.0f;
     plane->normal[AXIS_Y] = 1.0f;
-    plane->unk10 = 1.0f;
+    plane->normalLength = 1.0f;
     return -1;
   }
 
@@ -2186,7 +2186,7 @@ s32 GetTrianglePlane(PlaneTriangle* triangle, TrianglePlane* plane) {
   }
 
   scale = 1.0f / length;
-  plane->unk10 = 1.0f;
+  plane->normalLength = 1.0f;
   plane->normal[AXIS_X] = normalX * scale;
   plane->normal[AXIS_Y] = normalY * scale;
   plane->normal[AXIS_Z] = normalZ * scale;

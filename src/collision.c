@@ -2076,7 +2076,7 @@ s32 GetTrianglePlaneCopy(PlaneTriangle* triangle, TrianglePlane* plane) {
     plane->normal[AXIS_Z] = 0.0f;
     plane->distance = 0.0f;
     plane->normal[AXIS_Y] = 1.0f;
-    plane->unk10 = 1.0f;
+    plane->normalLength = 1.0f;
     return -1;
   }
 
@@ -2085,7 +2085,7 @@ s32 GetTrianglePlaneCopy(PlaneTriangle* triangle, TrianglePlane* plane) {
   }
 
   scale = 1.0f / length;
-  plane->unk10 = 1.0f;
+  plane->normalLength = 1.0f;
   plane->normal[AXIS_X] = normalX * scale;
   plane->normal[AXIS_Y] = normalY * scale;
   plane->normal[AXIS_Z] = normalZ * scale;
