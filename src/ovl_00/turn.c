@@ -2141,6 +2141,12 @@ void BuildShotPreview(ShotLaunch* swing, s32 playerState) {
  * sum's other order and the sweeps' moves give 49 to 67 words. The register
  * oracle gets no closer than 32 with 13 pseudos forced. 52 words differ, 12
  * in shape.
+ *
+ * A focused permuter run's best, 50 words (10 in shape), works out dx
+ * after scaling ball.x but before scaling end.x, so dx changes; the
+ * original subtracts the scaled ball.x from the scaled end.x. Its other
+ * change, scale * dy in place of dy * scale, and the same for dx, give 52
+ * words (12).
  */
 #ifdef NON_MATCHING
 void DrawShotPreview(CameraMatrices* matrices) {
