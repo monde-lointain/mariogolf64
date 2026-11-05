@@ -626,6 +626,12 @@ INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", KeepAimCameraOnCourse);
  * 9 in shape either way; setting its z before its y, as the draft did, gave 67.
  * The counts above were measured with the draft at 67. 59 words differ, 9 in
  * shape.
+ *
+ * Taking the current player's address with & and reading its clubs through it,
+ * as CheckControllersAndSetPans sets soundPan, or adding the index to
+ * g_Players, gives 51 words differing, 9 in shape, but the register oracle's
+ * closest is 31 words either way, so the gain is in the registers alone, and
+ * the draft keeps indexing.
  */
 #ifdef NON_MATCHING
 void PlaceShotCamera(void) {
