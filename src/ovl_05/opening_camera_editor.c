@@ -958,7 +958,6 @@ INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_camera_editor", UpdateCameraEditor)
     if (g_ControllerStates[SECOND_EDITOR_PAD].buttons & (button)) { \
       if (g_ControllerStates[SECOND_EDITOR_PAD].buttons & START_BUTTON) { \
         g_CameraEditor.points[point][axis] step FAST_PAD_STEP; \
-        END_BASIC_BLOCK(); \
       } else { \
         g_CameraEditor.points[point][axis] step SLOW_PAD_STEP; \
       } \
