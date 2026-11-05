@@ -2232,29 +2232,7 @@ void UpdateAnimationViewer(void) {
  * can play. A starts the chosen mode, or first stops the wheel on it while it
  * still turns; B goes back to the character select, undoing the last player's
  * character.
- *
- * Doesn't match: the stroke and mini golf cases load their 1 and store
- * g_GameState.gameMode in another order, the B button's path builds
- * g_CharacterGrid's address before the player's row and column, and the spin's
- * slowing keeps the spin in a register where the original reads it again after
- * the step. The second cse pass shares the spin test's address with the
- * subtraction; testing the step's quotient in the clamp instead of setting the
- * step, as the permuter's best does (35 words, 15 in shape), reads it again as
- * the original does, but leaves the step unset. A later run's best does the
- * same with 23 words, 9 in shape. Setting the direction before the step gives
- * 54 words, 18 in shape, setting the step in the clamp's test 60, and a barrier
- * before the subtraction 52 or 54. Setting the step in both arms of the clamp
- * or in a ternary gives 55 to 74 words, and moving the barrier past the clamp
- * changes nothing. The B button's path reads the previous player's character
- * before clearing their choices, and clears the controller before the
- * character, as the original stores them (64 words, 24 in shape, reading it in
- * the store). The register oracle, forcing 5 pseudos' registers, leaves 31
- * words at best, so the code differs too. The counts above were measured with
- * the draft at 52 words. Setting gameMode before g_MenuScreen in the mini golf
- * case, as the other cases do, took it to 50; in the stroke case it changes
- * nothing. 50 words differ, 18 in shape.
  */
-#ifdef NON_MATCHING
 void UpdateModeSelect(void) {
   EncodedAsset asset;
   Boolean isDone = IsHudAnimationDone();
@@ -2264,7 +2242,7 @@ void UpdateModeSelect(void) {
    * (18), against the draft's 52 (18)
    */
   s32 direction;
-  s32 step;
+  u32 step;
   s16 slot;
   s32 mode;
   s32 chosenIcon;
@@ -2503,6 +2481,8 @@ void UpdateModeSelect(void) {
   if (g_MenuPressedButtons & B_BUTTON) {
     /* The previous player's character, freed for the others */
     s32 character;
+    s32 row;
+    s32 column;
 
     if (g_MenuMemory.modeSpin != 0) {
       g_MenuMemory.modeSpin = 0;
@@ -2520,9 +2500,9 @@ void UpdateModeSelect(void) {
     g_ChosenLefties[g_ChoosingPlayerIndex] = 0;
     g_PlayerControllerIndices[g_ChoosingPlayerIndex] = 0;
     g_TakenCharacters.isCharacterTaken[character] = 0;
-    slot =
-        g_CharacterGrid[g_MenuMemory.characterRows[g_ChoosingPlayerIndex]]
-                       [g_MenuMemory.characterColumns[g_ChoosingPlayerIndex]];
+    column = g_MenuMemory.characterColumns[g_ChoosingPlayerIndex];
+    row = g_MenuMemory.characterRows[g_ChoosingPlayerIndex];
+    slot = g_CharacterGrid[row][column];
     if (slot >= FIRST_IMPORTED_CHARACTER) {
       g_ImportedCharacters[slot - FIRST_IMPORTED_CHARACTER].isChosen = 0;
       g_ImportedCharacterColumns[g_ChoosingPlayerIndex] = NO_IMPORTED_COLUMN;
@@ -2565,12 +2545,8 @@ void UpdateModeSelect(void) {
   }
 
   if (Abs(g_MenuMemory.modeSpin) != 0) {
-    step = AmountPerMode(MODE_SELECT_SPIN_SPEED);
     direction = g_MenuMemory.modeSpin < 0 ? -1 : 1;
-    /* The clamp starts a block of its own, to match (without it 59 words
-     * differ, 21 in shape); writing the direction as an if-else, either way
-     * round, or clamping first doesn't */
-    END_BASIC_BLOCK();
+    step = AmountPerMode(MODE_SELECT_SPIN_SPEED);
     if (step == 0) {
       step = 1;
     }
@@ -2612,9 +2588,6 @@ void UpdateModeSelect(void) {
         0xFF);
   }
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", UpdateModeSelect);
-#endif
 
 void UpdateCourseSelect(void) {
   EncodedAsset asset;
