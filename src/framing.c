@@ -127,7 +127,7 @@ void TransformPoint(Mat4 mf, Vec3 point, Vec3 result) {
  * Doesn't match: the original's frame is 8 bytes larger, it keeps
  * horizontalEyeZ on the stack where ours keeps it in $fp, and its float
  * registers differ from the first eye distance on. The register oracle, forcing
- * 7 pseudos, still leaves 225 words. The original negates 10.0 at run time for
+ * 7 pseudos, still leaves 221 words. The original negates 10.0 at run time for
  * maxZ, so maxZ is set from minZ after the block that ends at bottomAngle,
  * where cse no longer knows minZ's value. Written -Z_MARGIN the negation folded
  * (282 words, 108 in shape, when the draft gave 279), as it did from minZ in
@@ -138,8 +138,12 @@ void TransformPoint(Mat4 mf, Vec3 point, Vec3 result) {
  * depth is written into the top and bottom edges' products, where a double
  * verticalFrontDistance held it, which took the draft from 279 words differing
  * to 269, 109 in shape to 113, and the oracle from 227 words, forcing 12, to
- * 225; as a float variable it gives 281, and writing frontDistance into its two
- * uses as well 282. 269 words differ, 113 in shape.
+ * 225; as a float variable it gave 281, and writing frontDistance into its two
+ * uses as well 282. Each sphere's radius is read from f_FramedSphereRadii at
+ * each of its twelve uses, rather than through a radius local, which took the
+ * draft from 269 words differing to 265, 113 in shape either way, and the
+ * oracle from 225 words to 221, 7 forced either way. 265 words differ, 113 in
+ * shape.
  */
 #ifdef NON_MATCHING
 void FrameSpheres(f32 depthOffset) {
@@ -173,7 +177,6 @@ void FrameSpheres(f32 depthOffset) {
   f32 bottom;
   f32 centerX;
   f32 centerY;
-  f32 radius;
   f64 frontDistance;
   s32 i;
   f32 rightRadians;
@@ -275,30 +278,28 @@ void FrameSpheres(f32 depthOffset) {
     if (g_ControllerData[1].trigger & D_CBUTTONS) {
       osSyncPrintf("rZ %f\n", point[AXIS_Z]);
     }
-
-    radius = f_FramedSphereRadii[i];
-    if (point[AXIS_Z] - radius < minZ) {
-      minZ = point[AXIS_Z] - radius;
+    if (point[AXIS_Z] - f_FramedSphereRadii[i] < minZ) {
+      minZ = point[AXIS_Z] - f_FramedSphereRadii[i];
     }
 
-    if (maxZ < point[AXIS_Z] + radius) {
-      maxZ = point[AXIS_Z] + radius;
+    if (maxZ < point[AXIS_Z] + f_FramedSphereRadii[i]) {
+      maxZ = point[AXIS_Z] + f_FramedSphereRadii[i];
     }
 
-    if (point[AXIS_X] - radius < minX) {
-      minX = point[AXIS_X] - radius;
+    if (point[AXIS_X] - f_FramedSphereRadii[i] < minX) {
+      minX = point[AXIS_X] - f_FramedSphereRadii[i];
     }
 
-    if (maxX < point[AXIS_X] + radius) {
-      maxX = point[AXIS_X] + radius;
+    if (maxX < point[AXIS_X] + f_FramedSphereRadii[i]) {
+      maxX = point[AXIS_X] + f_FramedSphereRadii[i];
     }
 
-    if (point[AXIS_Y] - radius < minY) {
-      minY = point[AXIS_Y] - radius;
+    if (point[AXIS_Y] - f_FramedSphereRadii[i] < minY) {
+      minY = point[AXIS_Y] - f_FramedSphereRadii[i];
     }
 
-    if (maxY < point[AXIS_Y] + radius) {
-      maxY = point[AXIS_Y] + radius;
+    if (maxY < point[AXIS_Y] + f_FramedSphereRadii[i]) {
+      maxY = point[AXIS_Y] + f_FramedSphereRadii[i];
     }
   }
 
