@@ -2326,10 +2326,17 @@ s32 FindHoleTriangleHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
  * z then ordered their x ends by testing whether the first corner was the
  * larger; the original tests whether it is the smaller, setting the ends from
  * the other corner first, as the walls facing x do with their z ends. Testing
- * it so took the draft to 55 words, 7 in shape. The original sets hitIndex to
- * NO_HOLE_TRIANGLE near its start, but setting it in its declaration or first,
- * alone or with nearestFraction, gives 57 to 61 words, 13 in shape. 55 words
- * differ, 7 in shape.
+ * it so took the draft to 55 words, 7 in shape. The draft then set facing to
+ * TRIANGLE_FACING_NONE before its test of the triangle's kind, so that other
+ * triangles fell through the facing tests to the flat hit point; the original
+ * instead branches from the kind test straight to that hit point's code. It
+ * does so when the kind test has an else of its own with the same code as the
+ * last facing arm, as GCC merges the two copies. Writing it so took the draft
+ * to 44 words, 4 in shape; setting facing in an else, or by a conditional
+ * expression, gives 395 words (99 in shape). The original sets hitIndex to
+ * NO_HOLE_TRIANGLE near its start, but setting it in its declaration or first
+ * gives 46 words, 10 in shape, before the IsOffGround tests 49 (9), and before
+ * nearestFraction 44 (4). 44 words differ, 4 in shape.
  */
 #ifdef NON_MATCHING
 s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
@@ -2470,335 +2477,339 @@ s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
     cornersV[0] = triangle.corners[AXIS_Z][0];
     cornersV[1] = triangle.corners[AXIS_Z][1];
     cornersV[2] = triangle.corners[AXIS_Z][2];
-    facing = TRIANGLE_FACING_NONE;
     if (candidate->kind == HOLE_TRIANGLE_KIND_SHADED) {
       facing = GetTriangleFacing(triangle.corners[AXIS_X][0],
           triangle.corners[AXIS_Y][0], triangle.corners[AXIS_Z][0],
           triangle.corners[AXIS_X][1], triangle.corners[AXIS_Y][1],
           triangle.corners[AXIS_Z][1], triangle.corners[AXIS_X][2],
           triangle.corners[AXIS_Y][2], triangle.corners[AXIS_Z][2]);
-    }
 
-    if (facing == TRIANGLE_FACING_Z) {
-      /* The wall spans x and y */
-      hitPointU = ((endX - startX) * hitFraction) + startX;
-      hitPointV = ((endY - startY) * hitFraction) + startY;
-      if (triangle.corners[AXIS_X][0] == triangle.corners[AXIS_X][1] &&
-          triangle.corners[AXIS_X][0] != triangle.corners[AXIS_X][2]) {
-        f32 edgeLength;
-        endFraction = 0.0f;
-        edgeLength =
-            Length2D(triangle.corners[AXIS_X][0] - triangle.corners[AXIS_X][2],
-                triangle.corners[AXIS_Z][0] - triangle.corners[AXIS_Z][2]);
-        if (triangle.corners[AXIS_X][0] < triangle.corners[AXIS_X][2]) {
-          farEnd = triangle.corners[AXIS_X][2] << WORLD_TO_COURSE_SHIFT;
-          nearEnd = triangle.corners[AXIS_X][0] << WORLD_TO_COURSE_SHIFT;
-        } else {
-          farEnd = triangle.corners[AXIS_X][0] << WORLD_TO_COURSE_SHIFT;
-          nearEnd = triangle.corners[AXIS_X][2] << WORLD_TO_COURSE_SHIFT;
-        }
-
-        if (endX < startX) {
-          wallEnd = farEnd + WALL_END_DISTANCE;
-          if (endX <= wallEnd && wallEnd < startX) {
-            endFraction = (startX - wallEnd) / (startX - endX);
+      if (facing == TRIANGLE_FACING_Z) {
+        /* The wall spans x and y */
+        hitPointU = ((endX - startX) * hitFraction) + startX;
+        hitPointV = ((endY - startY) * hitFraction) + startY;
+        if (triangle.corners[AXIS_X][0] == triangle.corners[AXIS_X][1] &&
+            triangle.corners[AXIS_X][0] != triangle.corners[AXIS_X][2]) {
+          f32 edgeLength;
+          endFraction = 0.0f;
+          edgeLength = Length2D(
+              triangle.corners[AXIS_X][0] - triangle.corners[AXIS_X][2],
+              triangle.corners[AXIS_Z][0] - triangle.corners[AXIS_Z][2]);
+          if (triangle.corners[AXIS_X][0] < triangle.corners[AXIS_X][2]) {
+            farEnd = triangle.corners[AXIS_X][2] << WORLD_TO_COURSE_SHIFT;
+            nearEnd = triangle.corners[AXIS_X][0] << WORLD_TO_COURSE_SHIFT;
+          } else {
+            farEnd = triangle.corners[AXIS_X][0] << WORLD_TO_COURSE_SHIFT;
+            nearEnd = triangle.corners[AXIS_X][2] << WORLD_TO_COURSE_SHIFT;
           }
-        }
 
-        if (startX < endX) {
-          wallEnd = nearEnd - WALL_END_DISTANCE;
-          if (wallEnd <= endX && startX < wallEnd) {
-            endFraction = (startX - wallEnd) / (startX - endX);
-          }
-        }
-
-        if (endFraction != 0.0f) {
-          osSyncPrintf("X Adjust? %f,%f\n", hitFraction, endFraction);
-        }
-
-        if ((hitFraction >= 0.0f) & (hitFraction < endFraction)) {
-          if (fabsf(
-                  GetPlaneSide(plane, ((endX - startX) * endFraction) + startX,
-                      ((endY - startY) * endFraction) + startY,
-                      ((endZ - startZ) * endFraction) + startZ)) <
-              WALL_END_DISTANCE) {
-            osSyncPrintf("X Adjust Logic %f,%f\n", hitFraction, endFraction);
-            hitFraction = endFraction;
-            hitPointU = ((endX - startX) * endFraction) + startX;
-            hitPointV = ((endY - startY) * endFraction) + startY;
-            osSyncPrintf("x0[%f]x1[%f]x2[%f] y0[%f]y1[%f]y2[%f]\n",
-                cornersU[0] * WORLD_TO_COURSE_SCALE,
-                cornersU[1] * WORLD_TO_COURSE_SCALE,
-                cornersU[2] * WORLD_TO_COURSE_SCALE,
-                cornersV[0] * WORLD_TO_COURSE_SCALE,
-                cornersV[1] * WORLD_TO_COURSE_SCALE,
-                cornersV[2] * WORLD_TO_COURSE_SCALE);
-            osSyncPrintf("xxc[%d]zzc[%d]\n", hitPointU, hitPointV);
-            if (nearestFraction < hitFraction) {
-              continue;
+          if (endX < startX) {
+            wallEnd = farEnd + WALL_END_DISTANCE;
+            if (endX <= wallEnd && wallEnd < startX) {
+              endFraction = (startX - wallEnd) / (startX - endX);
             }
           }
-        }
 
-        cornersU[0] += WallWidening(triangle.corners[AXIS_X], 2, edgeLength);
-        cornersU[1] += WallWidening(triangle.corners[AXIS_X], 2, edgeLength);
-        cornersU[2] -= WallWidening(triangle.corners[AXIS_X], 2, edgeLength);
-        osSyncPrintf("X2To0 %f\n",
-            WallWidening(triangle.corners[AXIS_X], 2, edgeLength));
-      } else if (triangle.corners[AXIS_X][0] == triangle.corners[AXIS_X][2] &&
-          triangle.corners[AXIS_X][0] != triangle.corners[AXIS_X][1]) {
-        f32 edgeLength;
-        endFraction = 0.0f;
-        edgeLength =
-            Length2D(triangle.corners[AXIS_X][0] - triangle.corners[AXIS_X][1],
-                triangle.corners[AXIS_Z][0] - triangle.corners[AXIS_Z][1]);
-        if (triangle.corners[AXIS_X][0] < triangle.corners[AXIS_X][1]) {
-          farEnd = triangle.corners[AXIS_X][1] << WORLD_TO_COURSE_SHIFT;
-          nearEnd = triangle.corners[AXIS_X][0] << WORLD_TO_COURSE_SHIFT;
-        } else {
-          farEnd = triangle.corners[AXIS_X][0] << WORLD_TO_COURSE_SHIFT;
-          nearEnd = triangle.corners[AXIS_X][1] << WORLD_TO_COURSE_SHIFT;
-        }
-
-        if (endX < startX) {
-          wallEnd = farEnd + WALL_END_DISTANCE;
-          if (endX <= wallEnd && wallEnd < startX) {
-            endFraction = (startX - wallEnd) / (startX - endX);
-          }
-        }
-
-        if (startX < endX) {
-          wallEnd = nearEnd - WALL_END_DISTANCE;
-          if (wallEnd <= endX && startX < wallEnd) {
-            endFraction = (startX - wallEnd) / (startX - endX);
-          }
-        }
-
-        if (endFraction != 0.0f) {
-          osSyncPrintf("X Adjust? %f,%f\n", hitFraction, endFraction);
-        }
-
-        if ((hitFraction >= 0.0f) & (hitFraction < endFraction)) {
-          if (fabsf(
-                  GetPlaneSide(plane, ((endX - startX) * endFraction) + startX,
-                      ((endY - startY) * endFraction) + startY,
-                      ((endZ - startZ) * endFraction) + startZ)) <
-              WALL_END_DISTANCE) {
-            osSyncPrintf("X Adjust Logic %f,%f\n", hitFraction, endFraction);
-            hitFraction = endFraction;
-            hitPointU = ((endX - startX) * endFraction) + startX;
-            hitPointV = ((endY - startY) * endFraction) + startY;
-            osSyncPrintf("x0[%f]x1[%f]x2[%f] y0[%f]y1[%f]y2[%f]\n",
-                cornersU[0] * WORLD_TO_COURSE_SCALE,
-                cornersU[1] * WORLD_TO_COURSE_SCALE,
-                cornersU[2] * WORLD_TO_COURSE_SCALE,
-                cornersV[0] * WORLD_TO_COURSE_SCALE,
-                cornersV[1] * WORLD_TO_COURSE_SCALE,
-                cornersV[2] * WORLD_TO_COURSE_SCALE);
-            osSyncPrintf("xxc[%d]zzc[%d]\n", hitPointU, hitPointV);
-            if (nearestFraction < hitFraction) {
-              continue;
+          if (startX < endX) {
+            wallEnd = nearEnd - WALL_END_DISTANCE;
+            if (wallEnd <= endX && startX < wallEnd) {
+              endFraction = (startX - wallEnd) / (startX - endX);
             }
           }
+
+          if (endFraction != 0.0f) {
+            osSyncPrintf("X Adjust? %f,%f\n", hitFraction, endFraction);
+          }
+
+          if ((hitFraction >= 0.0f) & (hitFraction < endFraction)) {
+            if (fabsf(GetPlaneSide(plane,
+                    ((endX - startX) * endFraction) + startX,
+                    ((endY - startY) * endFraction) + startY,
+                    ((endZ - startZ) * endFraction) + startZ)) <
+                WALL_END_DISTANCE) {
+              osSyncPrintf("X Adjust Logic %f,%f\n", hitFraction, endFraction);
+              hitFraction = endFraction;
+              hitPointU = ((endX - startX) * endFraction) + startX;
+              hitPointV = ((endY - startY) * endFraction) + startY;
+              osSyncPrintf("x0[%f]x1[%f]x2[%f] y0[%f]y1[%f]y2[%f]\n",
+                  cornersU[0] * WORLD_TO_COURSE_SCALE,
+                  cornersU[1] * WORLD_TO_COURSE_SCALE,
+                  cornersU[2] * WORLD_TO_COURSE_SCALE,
+                  cornersV[0] * WORLD_TO_COURSE_SCALE,
+                  cornersV[1] * WORLD_TO_COURSE_SCALE,
+                  cornersV[2] * WORLD_TO_COURSE_SCALE);
+              osSyncPrintf("xxc[%d]zzc[%d]\n", hitPointU, hitPointV);
+              if (nearestFraction < hitFraction) {
+                continue;
+              }
+            }
+          }
+
+          cornersU[0] += WallWidening(triangle.corners[AXIS_X], 2, edgeLength);
+          cornersU[1] += WallWidening(triangle.corners[AXIS_X], 2, edgeLength);
+          cornersU[2] -= WallWidening(triangle.corners[AXIS_X], 2, edgeLength);
+          osSyncPrintf("X2To0 %f\n",
+              WallWidening(triangle.corners[AXIS_X], 2, edgeLength));
+        } else if (triangle.corners[AXIS_X][0] == triangle.corners[AXIS_X][2] &&
+            triangle.corners[AXIS_X][0] != triangle.corners[AXIS_X][1]) {
+          f32 edgeLength;
+          endFraction = 0.0f;
+          edgeLength = Length2D(
+              triangle.corners[AXIS_X][0] - triangle.corners[AXIS_X][1],
+              triangle.corners[AXIS_Z][0] - triangle.corners[AXIS_Z][1]);
+          if (triangle.corners[AXIS_X][0] < triangle.corners[AXIS_X][1]) {
+            farEnd = triangle.corners[AXIS_X][1] << WORLD_TO_COURSE_SHIFT;
+            nearEnd = triangle.corners[AXIS_X][0] << WORLD_TO_COURSE_SHIFT;
+          } else {
+            farEnd = triangle.corners[AXIS_X][0] << WORLD_TO_COURSE_SHIFT;
+            nearEnd = triangle.corners[AXIS_X][1] << WORLD_TO_COURSE_SHIFT;
+          }
+
+          if (endX < startX) {
+            wallEnd = farEnd + WALL_END_DISTANCE;
+            if (endX <= wallEnd && wallEnd < startX) {
+              endFraction = (startX - wallEnd) / (startX - endX);
+            }
+          }
+
+          if (startX < endX) {
+            wallEnd = nearEnd - WALL_END_DISTANCE;
+            if (wallEnd <= endX && startX < wallEnd) {
+              endFraction = (startX - wallEnd) / (startX - endX);
+            }
+          }
+
+          if (endFraction != 0.0f) {
+            osSyncPrintf("X Adjust? %f,%f\n", hitFraction, endFraction);
+          }
+
+          if ((hitFraction >= 0.0f) & (hitFraction < endFraction)) {
+            if (fabsf(GetPlaneSide(plane,
+                    ((endX - startX) * endFraction) + startX,
+                    ((endY - startY) * endFraction) + startY,
+                    ((endZ - startZ) * endFraction) + startZ)) <
+                WALL_END_DISTANCE) {
+              osSyncPrintf("X Adjust Logic %f,%f\n", hitFraction, endFraction);
+              hitFraction = endFraction;
+              hitPointU = ((endX - startX) * endFraction) + startX;
+              hitPointV = ((endY - startY) * endFraction) + startY;
+              osSyncPrintf("x0[%f]x1[%f]x2[%f] y0[%f]y1[%f]y2[%f]\n",
+                  cornersU[0] * WORLD_TO_COURSE_SCALE,
+                  cornersU[1] * WORLD_TO_COURSE_SCALE,
+                  cornersU[2] * WORLD_TO_COURSE_SCALE,
+                  cornersV[0] * WORLD_TO_COURSE_SCALE,
+                  cornersV[1] * WORLD_TO_COURSE_SCALE,
+                  cornersV[2] * WORLD_TO_COURSE_SCALE);
+              osSyncPrintf("xxc[%d]zzc[%d]\n", hitPointU, hitPointV);
+              if (nearestFraction < hitFraction) {
+                continue;
+              }
+            }
+          }
+
+          cornersU[0] += WallWidening(triangle.corners[AXIS_X], 1, edgeLength);
+          cornersU[1] -= WallWidening(triangle.corners[AXIS_X], 1, edgeLength);
+          cornersU[2] += WallWidening(triangle.corners[AXIS_X], 1, edgeLength);
+          osSyncPrintf("X1To0 %f\n",
+              WallWidening(triangle.corners[AXIS_X], 1, edgeLength));
+        } else {
+          osSyncPrintf("Illegal Wall!!!!!!!!!\n");
         }
 
-        cornersU[0] += WallWidening(triangle.corners[AXIS_X], 1, edgeLength);
-        cornersU[1] -= WallWidening(triangle.corners[AXIS_X], 1, edgeLength);
-        cornersU[2] += WallWidening(triangle.corners[AXIS_X], 1, edgeLength);
-        osSyncPrintf("X1To0 %f\n",
-            WallWidening(triangle.corners[AXIS_X], 1, edgeLength));
+        /* A path that starts at the wall beside a corner is taken to hit it
+         * before it starts */
+        if (hitFraction == 0.0f) {
+          nearestCorner = FARTHEST_CORNER_DISTANCE;
+          for (k = 0; k < TRIANGLE_CORNER_COUNT; k++) {
+            cornerDistance = fabsf(hitPointU -
+                (triangle.corners[AXIS_X][k] << WORLD_TO_COURSE_SHIFT));
+            if (cornerDistance < nearestCorner) {
+              nearestCorner = cornerDistance;
+            }
+          }
+
+          if (nearestCorner < WALL_END_DISTANCE) {
+            hitFraction = CORNER_HIT_FRACTION;
+          }
+        }
+
+        cornersV[0] = triangle.corners[AXIS_Y][0];
+        cornersV[1] = triangle.corners[AXIS_Y][1];
+        cornersV[2] = triangle.corners[AXIS_Y][2];
+        PrintDebugText("CheckXY axis\n", WALL_DEBUG_COLUMN, WALL_DEBUG_ROW);
+        osSyncPrintf("x0[%f]x1[%f]x2[%f] y0[%f]y1[%f]y2[%f]\n",
+            cornersU[0] * WORLD_TO_COURSE_SCALE,
+            cornersU[1] * WORLD_TO_COURSE_SCALE,
+            cornersU[2] * WORLD_TO_COURSE_SCALE,
+            cornersV[0] * WORLD_TO_COURSE_SCALE,
+            cornersV[1] * WORLD_TO_COURSE_SCALE,
+            cornersV[2] * WORLD_TO_COURSE_SCALE);
+        osSyncPrintf("xxc[%d]zzc[%d]\n", hitPointU, hitPointV);
+        if (IsLessThanCorners(hitPointU, cornersU)) {
+          continue;
+        }
+
+        if (IsMoreThanCorners(hitPointU, cornersU)) {
+          continue;
+        }
+      } else if (facing == TRIANGLE_FACING_X) {
+        /* The wall spans y and z */
+        hitPointU = ((endY - startY) * hitFraction) + startY;
+        hitPointV = ((endZ - startZ) * hitFraction) + startZ;
+        if (triangle.corners[AXIS_Z][0] == triangle.corners[AXIS_Z][1] &&
+            triangle.corners[AXIS_Z][0] != triangle.corners[AXIS_Z][2]) {
+          f32 edgeLength;
+          endFraction = 0.0f;
+          edgeLength = Length2D(
+              triangle.corners[AXIS_Z][0] - triangle.corners[AXIS_Z][2],
+              triangle.corners[AXIS_X][0] - triangle.corners[AXIS_X][2]);
+          if (triangle.corners[AXIS_Z][0] < triangle.corners[AXIS_Z][2]) {
+            farEnd = triangle.corners[AXIS_Z][2] << WORLD_TO_COURSE_SHIFT;
+            nearEnd = triangle.corners[AXIS_Z][0] << WORLD_TO_COURSE_SHIFT;
+          } else {
+            farEnd = triangle.corners[AXIS_Z][0] << WORLD_TO_COURSE_SHIFT;
+            nearEnd = triangle.corners[AXIS_Z][2] << WORLD_TO_COURSE_SHIFT;
+          }
+
+          /* Unlike along x, the fraction is to the wall's end itself, not past
+           * it
+           */
+          if (endZ < startZ) {
+            wallEnd = farEnd + WALL_END_DISTANCE;
+            if (endZ <= wallEnd && wallEnd < startZ) {
+              endFraction = (startZ - farEnd) / (startZ - endZ);
+            }
+          }
+
+          if (startZ < endZ) {
+            wallEnd = nearEnd - WALL_END_DISTANCE;
+            if (wallEnd <= endZ && startZ < wallEnd) {
+              endFraction = (startZ - nearEnd) / (startZ - endZ);
+            }
+          }
+
+          if (endFraction != 0.0f) {
+            osSyncPrintf("Z Adjust? %f,%f\n", hitFraction, endFraction);
+          }
+
+          if ((hitFraction >= 0.0f) & (hitFraction < endFraction)) {
+            if (fabsf(GetPlaneSide(plane,
+                    ((endX - startX) * endFraction) + startX,
+                    ((endY - startY) * endFraction) + startY,
+                    ((endZ - startZ) * endFraction) + startZ)) <
+                WALL_END_DISTANCE) {
+              osSyncPrintf("Z Adjust Logic %f,%f\n", hitFraction, endFraction);
+              hitFraction = endFraction;
+              hitPointU = ((endY - startY) * endFraction) + startY;
+              hitPointV = ((endZ - startZ) * endFraction) + startZ;
+              if (nearestFraction < hitFraction) {
+                continue;
+              }
+            }
+          }
+
+          cornersV[0] += WallWidening(triangle.corners[AXIS_Z], 2, edgeLength);
+          cornersV[1] += WallWidening(triangle.corners[AXIS_Z], 2, edgeLength);
+          cornersV[2] -= WallWidening(triangle.corners[AXIS_Z], 2, edgeLength);
+          osSyncPrintf("Z2To0 %f\n",
+              WallWidening(triangle.corners[AXIS_Z], 2, edgeLength));
+        } else if (triangle.corners[AXIS_Z][0] == triangle.corners[AXIS_Z][2] &&
+            triangle.corners[AXIS_Z][0] != triangle.corners[AXIS_Z][1]) {
+          f32 edgeLength;
+          endFraction = 0.0f;
+          edgeLength = Length2D(
+              triangle.corners[AXIS_Z][0] - triangle.corners[AXIS_Z][1],
+              triangle.corners[AXIS_X][0] - triangle.corners[AXIS_X][1]);
+          if (triangle.corners[AXIS_Z][0] < triangle.corners[AXIS_Z][1]) {
+            farEnd = triangle.corners[AXIS_Z][1] << WORLD_TO_COURSE_SHIFT;
+            nearEnd = triangle.corners[AXIS_Z][0] << WORLD_TO_COURSE_SHIFT;
+          } else {
+            farEnd = triangle.corners[AXIS_Z][0] << WORLD_TO_COURSE_SHIFT;
+            nearEnd = triangle.corners[AXIS_Z][1] << WORLD_TO_COURSE_SHIFT;
+          }
+
+          if (endZ < startZ) {
+            wallEnd = farEnd + WALL_END_DISTANCE;
+            if (endZ <= wallEnd && wallEnd < startZ) {
+              endFraction = (startZ - farEnd) / (startZ - endZ);
+            }
+          }
+
+          if (startZ < endZ) {
+            wallEnd = nearEnd - WALL_END_DISTANCE;
+            if (wallEnd <= endZ && startZ < wallEnd) {
+              endFraction = (startZ - nearEnd) / (startZ - endZ);
+            }
+          }
+
+          if (endFraction != 0.0f) {
+            osSyncPrintf("Z Adjust? %f,%f\n", hitFraction, endFraction);
+          }
+
+          if ((hitFraction >= 0.0f) & (hitFraction < endFraction)) {
+            if (fabsf(GetPlaneSide(plane,
+                    ((endX - startX) * endFraction) + startX,
+                    ((endY - startY) * endFraction) + startY,
+                    ((endZ - startZ) * endFraction) + startZ)) <
+                WALL_END_DISTANCE) {
+              osSyncPrintf("Z Adjust Logic %f,%f\n", hitFraction, endFraction);
+              hitFraction = endFraction;
+              hitPointU = ((endY - startY) * endFraction) + startY;
+              hitPointV = ((endZ - startZ) * endFraction) + startZ;
+              if (nearestFraction < hitFraction) {
+                continue;
+              }
+            }
+          }
+
+          cornersV[0] += WallWidening(triangle.corners[AXIS_Z], 1, edgeLength);
+          cornersV[1] -= WallWidening(triangle.corners[AXIS_Z], 1, edgeLength);
+          cornersV[2] += WallWidening(triangle.corners[AXIS_Z], 1, edgeLength);
+          osSyncPrintf("Z1To0 %f\n",
+              WallWidening(triangle.corners[AXIS_Z], 1, edgeLength));
+        } else {
+          osSyncPrintf("Illegal Wall!!!!!!!!!\n");
+        }
+
+        if (hitFraction == 0.0f) {
+          nearestCorner = FARTHEST_CORNER_DISTANCE;
+          for (k = 0; k < TRIANGLE_CORNER_COUNT; k++) {
+            cornerDistance = fabsf(hitPointV -
+                (triangle.corners[AXIS_Z][k] << WORLD_TO_COURSE_SHIFT));
+            if (cornerDistance < nearestCorner) {
+              nearestCorner = cornerDistance;
+            }
+          }
+
+          if (nearestCorner < WALL_END_DISTANCE) {
+            hitFraction = CORNER_HIT_FRACTION;
+          }
+        }
+
+        cornersU[0] = triangle.corners[AXIS_Y][0];
+        cornersU[1] = triangle.corners[AXIS_Y][1];
+        cornersU[2] = triangle.corners[AXIS_Y][2];
+        osSyncPrintf("z0[%f]z1[%f]z2[%f] x0[%f]x1[%f]x2[%f]\n",
+            cornersV[0] * WORLD_TO_COURSE_SCALE,
+            cornersV[1] * WORLD_TO_COURSE_SCALE,
+            cornersV[2] * WORLD_TO_COURSE_SCALE,
+            cornersU[0] * WORLD_TO_COURSE_SCALE,
+            cornersU[1] * WORLD_TO_COURSE_SCALE,
+            cornersU[2] * WORLD_TO_COURSE_SCALE);
+        osSyncPrintf("xxc[%d]zzc[%d]\n", hitPointU, hitPointV);
+        if (IsLessThanCorners(hitPointV, cornersV)) {
+          continue;
+        }
+
+        if (IsMoreThanCorners(hitPointV, cornersV)) {
+          continue;
+        }
       } else {
-        osSyncPrintf("Illegal Wall!!!!!!!!!\n");
-      }
-
-      /* A path that starts at the wall beside a corner is taken to hit it
-       * before it starts */
-      if (hitFraction == 0.0f) {
-        nearestCorner = FARTHEST_CORNER_DISTANCE;
-        for (k = 0; k < TRIANGLE_CORNER_COUNT; k++) {
-          cornerDistance = fabsf(hitPointU -
-              (triangle.corners[AXIS_X][k] << WORLD_TO_COURSE_SHIFT));
-          if (cornerDistance < nearestCorner) {
-            nearestCorner = cornerDistance;
-          }
-        }
-
-        if (nearestCorner < WALL_END_DISTANCE) {
-          hitFraction = CORNER_HIT_FRACTION;
-        }
-      }
-
-      cornersV[0] = triangle.corners[AXIS_Y][0];
-      cornersV[1] = triangle.corners[AXIS_Y][1];
-      cornersV[2] = triangle.corners[AXIS_Y][2];
-      PrintDebugText("CheckXY axis\n", WALL_DEBUG_COLUMN, WALL_DEBUG_ROW);
-      osSyncPrintf("x0[%f]x1[%f]x2[%f] y0[%f]y1[%f]y2[%f]\n",
-          cornersU[0] * WORLD_TO_COURSE_SCALE,
-          cornersU[1] * WORLD_TO_COURSE_SCALE,
-          cornersU[2] * WORLD_TO_COURSE_SCALE,
-          cornersV[0] * WORLD_TO_COURSE_SCALE,
-          cornersV[1] * WORLD_TO_COURSE_SCALE,
-          cornersV[2] * WORLD_TO_COURSE_SCALE);
-      osSyncPrintf("xxc[%d]zzc[%d]\n", hitPointU, hitPointV);
-      if (IsLessThanCorners(hitPointU, cornersU)) {
-        continue;
-      }
-
-      if (IsMoreThanCorners(hitPointU, cornersU)) {
-        continue;
-      }
-    } else if (facing == TRIANGLE_FACING_X) {
-      /* The wall spans y and z */
-      hitPointU = ((endY - startY) * hitFraction) + startY;
-      hitPointV = ((endZ - startZ) * hitFraction) + startZ;
-      if (triangle.corners[AXIS_Z][0] == triangle.corners[AXIS_Z][1] &&
-          triangle.corners[AXIS_Z][0] != triangle.corners[AXIS_Z][2]) {
-        f32 edgeLength;
-        endFraction = 0.0f;
-        edgeLength =
-            Length2D(triangle.corners[AXIS_Z][0] - triangle.corners[AXIS_Z][2],
-                triangle.corners[AXIS_X][0] - triangle.corners[AXIS_X][2]);
-        if (triangle.corners[AXIS_Z][0] < triangle.corners[AXIS_Z][2]) {
-          farEnd = triangle.corners[AXIS_Z][2] << WORLD_TO_COURSE_SHIFT;
-          nearEnd = triangle.corners[AXIS_Z][0] << WORLD_TO_COURSE_SHIFT;
-        } else {
-          farEnd = triangle.corners[AXIS_Z][0] << WORLD_TO_COURSE_SHIFT;
-          nearEnd = triangle.corners[AXIS_Z][2] << WORLD_TO_COURSE_SHIFT;
-        }
-
-        /* Unlike along x, the fraction is to the wall's end itself, not past it
-         */
-        if (endZ < startZ) {
-          wallEnd = farEnd + WALL_END_DISTANCE;
-          if (endZ <= wallEnd && wallEnd < startZ) {
-            endFraction = (startZ - farEnd) / (startZ - endZ);
-          }
-        }
-
-        if (startZ < endZ) {
-          wallEnd = nearEnd - WALL_END_DISTANCE;
-          if (wallEnd <= endZ && startZ < wallEnd) {
-            endFraction = (startZ - nearEnd) / (startZ - endZ);
-          }
-        }
-
-        if (endFraction != 0.0f) {
-          osSyncPrintf("Z Adjust? %f,%f\n", hitFraction, endFraction);
-        }
-
-        if ((hitFraction >= 0.0f) & (hitFraction < endFraction)) {
-          if (fabsf(
-                  GetPlaneSide(plane, ((endX - startX) * endFraction) + startX,
-                      ((endY - startY) * endFraction) + startY,
-                      ((endZ - startZ) * endFraction) + startZ)) <
-              WALL_END_DISTANCE) {
-            osSyncPrintf("Z Adjust Logic %f,%f\n", hitFraction, endFraction);
-            hitFraction = endFraction;
-            hitPointU = ((endY - startY) * endFraction) + startY;
-            hitPointV = ((endZ - startZ) * endFraction) + startZ;
-            if (nearestFraction < hitFraction) {
-              continue;
-            }
-          }
-        }
-
-        cornersV[0] += WallWidening(triangle.corners[AXIS_Z], 2, edgeLength);
-        cornersV[1] += WallWidening(triangle.corners[AXIS_Z], 2, edgeLength);
-        cornersV[2] -= WallWidening(triangle.corners[AXIS_Z], 2, edgeLength);
-        osSyncPrintf("Z2To0 %f\n",
-            WallWidening(triangle.corners[AXIS_Z], 2, edgeLength));
-      } else if (triangle.corners[AXIS_Z][0] == triangle.corners[AXIS_Z][2] &&
-          triangle.corners[AXIS_Z][0] != triangle.corners[AXIS_Z][1]) {
-        f32 edgeLength;
-        endFraction = 0.0f;
-        edgeLength =
-            Length2D(triangle.corners[AXIS_Z][0] - triangle.corners[AXIS_Z][1],
-                triangle.corners[AXIS_X][0] - triangle.corners[AXIS_X][1]);
-        if (triangle.corners[AXIS_Z][0] < triangle.corners[AXIS_Z][1]) {
-          farEnd = triangle.corners[AXIS_Z][1] << WORLD_TO_COURSE_SHIFT;
-          nearEnd = triangle.corners[AXIS_Z][0] << WORLD_TO_COURSE_SHIFT;
-        } else {
-          farEnd = triangle.corners[AXIS_Z][0] << WORLD_TO_COURSE_SHIFT;
-          nearEnd = triangle.corners[AXIS_Z][1] << WORLD_TO_COURSE_SHIFT;
-        }
-
-        if (endZ < startZ) {
-          wallEnd = farEnd + WALL_END_DISTANCE;
-          if (endZ <= wallEnd && wallEnd < startZ) {
-            endFraction = (startZ - farEnd) / (startZ - endZ);
-          }
-        }
-
-        if (startZ < endZ) {
-          wallEnd = nearEnd - WALL_END_DISTANCE;
-          if (wallEnd <= endZ && startZ < wallEnd) {
-            endFraction = (startZ - nearEnd) / (startZ - endZ);
-          }
-        }
-
-        if (endFraction != 0.0f) {
-          osSyncPrintf("Z Adjust? %f,%f\n", hitFraction, endFraction);
-        }
-
-        if ((hitFraction >= 0.0f) & (hitFraction < endFraction)) {
-          if (fabsf(
-                  GetPlaneSide(plane, ((endX - startX) * endFraction) + startX,
-                      ((endY - startY) * endFraction) + startY,
-                      ((endZ - startZ) * endFraction) + startZ)) <
-              WALL_END_DISTANCE) {
-            osSyncPrintf("Z Adjust Logic %f,%f\n", hitFraction, endFraction);
-            hitFraction = endFraction;
-            hitPointU = ((endY - startY) * endFraction) + startY;
-            hitPointV = ((endZ - startZ) * endFraction) + startZ;
-            if (nearestFraction < hitFraction) {
-              continue;
-            }
-          }
-        }
-
-        cornersV[0] += WallWidening(triangle.corners[AXIS_Z], 1, edgeLength);
-        cornersV[1] -= WallWidening(triangle.corners[AXIS_Z], 1, edgeLength);
-        cornersV[2] += WallWidening(triangle.corners[AXIS_Z], 1, edgeLength);
-        osSyncPrintf("Z1To0 %f\n",
-            WallWidening(triangle.corners[AXIS_Z], 1, edgeLength));
-      } else {
-        osSyncPrintf("Illegal Wall!!!!!!!!!\n");
-      }
-
-      if (hitFraction == 0.0f) {
-        nearestCorner = FARTHEST_CORNER_DISTANCE;
-        for (k = 0; k < TRIANGLE_CORNER_COUNT; k++) {
-          cornerDistance = fabsf(hitPointV -
-              (triangle.corners[AXIS_Z][k] << WORLD_TO_COURSE_SHIFT));
-          if (cornerDistance < nearestCorner) {
-            nearestCorner = cornerDistance;
-          }
-        }
-
-        if (nearestCorner < WALL_END_DISTANCE) {
-          hitFraction = CORNER_HIT_FRACTION;
-        }
-      }
-
-      cornersU[0] = triangle.corners[AXIS_Y][0];
-      cornersU[1] = triangle.corners[AXIS_Y][1];
-      cornersU[2] = triangle.corners[AXIS_Y][2];
-      osSyncPrintf("z0[%f]z1[%f]z2[%f] x0[%f]x1[%f]x2[%f]\n",
-          cornersV[0] * WORLD_TO_COURSE_SCALE,
-          cornersV[1] * WORLD_TO_COURSE_SCALE,
-          cornersV[2] * WORLD_TO_COURSE_SCALE,
-          cornersU[0] * WORLD_TO_COURSE_SCALE,
-          cornersU[1] * WORLD_TO_COURSE_SCALE,
-          cornersU[2] * WORLD_TO_COURSE_SCALE);
-      osSyncPrintf("xxc[%d]zzc[%d]\n", hitPointU, hitPointV);
-      if (IsLessThanCorners(hitPointV, cornersV)) {
-        continue;
-      }
-
-      if (IsMoreThanCorners(hitPointV, cornersV)) {
-        continue;
+        hitPointU = ((endX - startX) * hitFraction) + startX;
+        hitPointV = ((endZ - startZ) * hitFraction) + startZ;
       }
     } else {
+      /* As for a triangle facing neither way */
       hitPointU = ((endX - startX) * hitFraction) + startX;
       hitPointV = ((endZ - startZ) * hitFraction) + startZ;
     }
