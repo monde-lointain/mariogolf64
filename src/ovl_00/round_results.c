@@ -446,14 +446,18 @@ void OpenRoundResults(s32 request) {
 /*
  * Doesn't match: in the course points tally, the original counts in $s2 where
  * ours counts in $a1, and the later loops' registers differ. The register
- * oracle's closest result is 5 words with 17 registers forced, so what remains
- * is mostly allocation. The match game clears the second result before the
- * first, as the original does, written as f_PlayerResults[0] =
- * f_PlayerResults[1] = 0; the other chain order gave 117 words (5 in shape) and
- * the oracle's closest 19, and two statements in either order 117 or 119 (7).
- * The tournament's cap adds the prize before the earned points, as the
- * subtraction before it does, where the other order gave 115 words (5 in shape)
- * and the oracle's closest 13. 107 words differ, 3 in shape.
+ * oracle matches with 14 registers forced, so what remains is allocation. 90
+ * words differ, none in shape.
+ *
+ * The match game reads the last hole into holeEnd before clearing the results,
+ * as the matched scorecard_drawing.c reads its countEnd, and the original loads
+ * it in GetFirstHoleIndex's delay slot; testing g_GameState.holeIndex in the
+ * loop gave 107 words (3 in shape), with the oracle's closest 5 words with 17
+ * forced. Its clear is written as f_PlayerResults[0] = f_PlayerResults[1] = 0,
+ * which stores the second result first, as the original does; two statements in
+ * that order give 100 words (8 in shape). The tournament's cap adds the prize
+ * before the earned points, as the subtraction before it does, where the other
+ * order gave 115 words (5 in shape) with the bound tested in the loop.
  *
  * The original keeps the earned points' address in $a1 across the tally and
  * builds it again in $a0 after GetCourseRecordIndex, the address forms GCC
@@ -486,6 +490,7 @@ void LoadRoundResults(void) {
   s32 i;
   s32 j;
   s32 k;
+  s32 holeEnd;
   void* palette;
   u32 size;
 
@@ -648,8 +653,9 @@ void LoadRoundResults(void) {
         break;
       case GAME_MODE_MATCH_GAME:
       case GAME_MODE_GET_CHARACTER:
+        holeEnd = g_GameState.holeIndex;
         f_PlayerResults[0] = f_PlayerResults[1] = 0;
-        for (i = GetFirstHoleIndex(); i != g_GameState.holeIndex; i++) {
+        for (i = GetFirstHoleIndex(); i != holeEnd; i++) {
           if (g_Players[0].holes[i].strokes < g_Players[1].holes[i].strokes) {
             f_PlayerResults[0]++;
             f_PlayerResults[1]--;
