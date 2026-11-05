@@ -679,7 +679,7 @@ void PlaceShotCamera(void) {
           COURSE_TO_WORLD_SCALE;
     }
   } else if (g_LetterboxState == LETTERBOX_STATE_NONE ||
-      g_LetterboxState == LETTERBOX_STATE_UNK5) {
+      g_LetterboxState == LETTERBOX_STATE_UNUSED_AIMING) {
     PlaceAimCamera();
   } else if (g_LetterboxState == LETTERBOX_STATE_MOVING_CAMERA ||
       g_LetterboxState == LETTERBOX_STATE_LOOKING_DOWN_RANGE) {
@@ -1259,7 +1259,7 @@ void TurnAim(s32 turnsAltHeading) {
       dpad * ((dpadSpeed / AIM_DPAD_SPEED_DIVISOR) + AIM_DPAD_BASE_SPEED);
   if (!IsGameFlagSet(GAME_FLAG_RANDOM_FRAMEBUFFER_COUNT)) {
     if (g_LetterboxState == LETTERBOX_STATE_NONE ||
-        g_LetterboxState == LETTERBOX_STATE_UNK5) {
+        g_LetterboxState == LETTERBOX_STATE_UNUSED_AIMING) {
       if (heading == (s16)g_CurrentShot.heading) {
         if (g_ScreenEffect != SCREEN_EFFECT_SAVED_FRAME) {
           SetScreenEffect(SCREEN_EFFECT_SAVED_FRAME, SAVED_FRAME_STEP_SAVING);
@@ -1473,7 +1473,7 @@ s32 UpdateAimControls(void) {
 
     switch (g_LetterboxState) {
       case LETTERBOX_STATE_NONE:
-      case LETTERBOX_STATE_UNK5:
+      case LETTERBOX_STATE_UNUSED_AIMING:
         if ((g_TurnController.pressedButtons & A_BUTTON) &&
             IsShotModeChangeDone()) {
           g_HasPressedShotButton = TRUE;
@@ -1580,7 +1580,7 @@ s32 UpdateAimControls(void) {
   if (g_HasPressedShotButton != TRUE) {
     if (g_TurnController.buttons & AIM_CAMERA_BUTTONS) {
       if (g_LetterboxState == LETTERBOX_STATE_NONE ||
-          g_LetterboxState == LETTERBOX_STATE_UNK5 ||
+          g_LetterboxState == LETTERBOX_STATE_UNUSED_AIMING ||
           g_LetterboxState == LETTERBOX_STATE_LOOKING_DOWN_RANGE) {
         g_LetterboxState = LETTERBOX_STATE_MOVING_CAMERA;
         g_IsAimCameraEasing = 0;
@@ -2213,7 +2213,7 @@ void DrawShotPreview(CameraMatrices* matrices) {
     s32 step;
 
     if (g_LetterboxState == LETTERBOX_STATE_NONE ||
-        g_LetterboxState == LETTERBOX_STATE_UNK5) {
+        g_LetterboxState == LETTERBOX_STATE_UNUSED_AIMING) {
       gDPPipeSync(g_DisplayListHead++);
       gDPSetRenderMode(
           g_DisplayListHead++, G_RM_ZB_CLD_SURF, G_RM_ZB_CLD_SURF2);
@@ -3294,7 +3294,7 @@ void UpdateTurns(void) {
 
   f_IsShotPreviewBuilt = FALSE;
   if ((g_LetterboxState == LETTERBOX_STATE_NONE ||
-          g_LetterboxState == LETTERBOX_STATE_UNK5) == FALSE) {
+          g_LetterboxState == LETTERBOX_STATE_UNUSED_AIMING) == FALSE) {
     SetScreenEffect(SCREEN_EFFECT_NONE, 0);
   }
 
@@ -3930,13 +3930,13 @@ void UpdateTurns(void) {
           PlaceCharacterForShot(0);
           UpdateGolferTranslucency();
           if (!(g_LetterboxState == LETTERBOX_STATE_NONE ||
-                  g_LetterboxState == LETTERBOX_STATE_UNK5) &&
+                  g_LetterboxState == LETTERBOX_STATE_UNUSED_AIMING) &&
               g_ScreenEffect == SCREEN_EFFECT_SAVED_FRAME) {
             SetScreenEffect(SCREEN_EFFECT_NONE, 0);
           }
 
           if (g_LetterboxState == LETTERBOX_STATE_NONE ||
-              g_LetterboxState == LETTERBOX_STATE_UNK5) {
+              g_LetterboxState == LETTERBOX_STATE_UNUSED_AIMING) {
             if (g_CurrentShot.shotMode == SHOT_MODE_APPROACH) {
               SetSwingAnimation(0,
                   g_Players[playerIndex].clubs[g_CurrentShot.clubSlot],
@@ -4007,7 +4007,7 @@ void UpdateTurns(void) {
           f_ShotLaunch.offsetY = g_CurrentShot.offsetY;
           PlaceShotCamera();
           if (g_ShotFlags & SHOT_FLAG_ON_GREEN) {
-            if (g_LetterboxState == LETTERBOX_STATE_UNK5 ||
+            if (g_LetterboxState == LETTERBOX_STATE_UNUSED_AIMING ||
                 g_LetterboxState == LETTERBOX_STATE_NONE) {
               g_RoundHud.flags = HUD_FLAG_AIMING | HUD_FLAG_UNK4;
             } else {
@@ -4015,7 +4015,7 @@ void UpdateTurns(void) {
                   HUD_FLAG_AIMING | HUD_FLAG_UNK4 | HUD_FLAG_TRANSLUCENT_GAUGE;
             }
           } else if (g_ShotFlags & SHOT_FLAG_NO_IMPACT_POINT) {
-            if (g_LetterboxState == LETTERBOX_STATE_UNK5 ||
+            if (g_LetterboxState == LETTERBOX_STATE_UNUSED_AIMING ||
                 g_LetterboxState == LETTERBOX_STATE_NONE) {
               g_RoundHud.flags =
                   HUD_FLAG_AIMING | HUD_FLAG_LIGHT_CLUB_HEAD | HUD_FLAG_UNK4;
@@ -4024,7 +4024,7 @@ void UpdateTurns(void) {
                   HUD_FLAG_UNK4 | HUD_FLAG_TRANSLUCENT_GAUGE;
             }
           } else {
-            if (g_LetterboxState == LETTERBOX_STATE_UNK5) {
+            if (g_LetterboxState == LETTERBOX_STATE_UNUSED_AIMING) {
               g_RoundHud.flags =
                   HUD_FLAG_AIMING | HUD_FLAG_ANIMATE_OFFSET_MARKER;
             } else if (g_LetterboxState == LETTERBOX_STATE_NONE) {

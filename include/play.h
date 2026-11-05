@@ -64,14 +64,19 @@ enum LetterboxState {
   /* The first frame of looking back at the ball from beyond the cup */
   LETTERBOX_STATE_STARTING_LOOK_BACK,
   LETTERBOX_STATE_LOOKING_BACK,
-  /* Nothing sets it */
-  LETTERBOX_STATE_UNK5
+  /*
+   * Nothing sets it. Every test treats it as the unletterboxed aiming view,
+   * except that off the green the HUD animates the offset marker in it rather
+   * than lighting the club head, as while the impact point is set.
+   */
+  LETTERBOX_STATE_UNUSED_AIMING
 };
 
 /* Whether a LetterboxState letterboxes the view. The original tests with &
  * rather than && */
 #define IsLetterboxState(state) \
-  (((state) != LETTERBOX_STATE_NONE) & ((state) != LETTERBOX_STATE_UNK5))
+  (((state) != LETTERBOX_STATE_NONE) & \
+      ((state) != LETTERBOX_STATE_UNUSED_AIMING))
 
 /*
  * The state of the black bars that grow over the top and bottom of the
