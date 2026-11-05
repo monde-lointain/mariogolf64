@@ -1664,7 +1664,10 @@ void FormatLeaderboardRow(char* row, TournamentStanding* standing) {
  * falls from 76 words to 68 without it, forcing 13 pseudos either way; the
  * original loads g_Scorecard.y late, among the texel start's float steps, and
  * works out the top once for both edges. The local set just before the call
- * gives 116 words (44 in shape), and other orders of the sum 119 to 127.
+ * gives 116 words (44 in shape), and other orders of the sum 119 to 127. With
+ * the top in place, writing the texel step's division into both of its
+ * arguments gives 108 words (42 in shape) and the oracle's closest 66, still
+ * forcing 13, but it repeats the division for a gain of 2 words in the code.
  */
 #ifdef NON_MATCHING
 void DrawLeaderboardPage(Gfx** displayListHead) {
