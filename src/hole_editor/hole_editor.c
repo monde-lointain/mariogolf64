@@ -3916,7 +3916,11 @@ void WriteHexDumpFile(u32* words, s32 byteCount, char* fileName) {
  * as the constant; through such a local in all of them, 2236 words differ (474
  * in shape), and in the rows' coordinates only, 2231 (483). The register
  * oracle, forcing 113 pseudos' registers, leaves 1763 words at best, so the
- * code differs too. 2128 words differ, 488 in shape.
+ * code differs too. Counting the tile column in tileColumn, set before a tile
+ * loop and stepped with tileIndex, as DrawGround's fine tiles do, gives 2158
+ * words (480 in shape) in the medium tiles' loop, 2534 (1216) in the coarse
+ * tiles', 2268 (1226) in both, 2985 (499) in the fine tiles' and 3002 (1232) in
+ * all three. 2128 words differ, 488 in shape.
  */
 #ifdef NON_MATCHING
 void DrawHoleEditorGround(CameraMatrices* matrices UNUSED, s32 terrainStyle) {
