@@ -2262,16 +2262,15 @@ INCLUDE_RODATA("asm/nonmatchings/ovl_03/computer_golfer", f_SimFaultText);
  * the addresses in registers. Nested at the start of the routine, 215 words
  * differ (131 in shape); at the start of the evaluation block, 178 (114); at
  * the start of the ratio's test, 86 (40); in the block that calls it, 30 (8);
- * and separate, 101 (35).
+ * and separate, 101 (35). These counts were measured before shotStroke.
  *
- * Doesn't match: 30 words differ, 8 in shape. Ours sums the poor landing's
+ * Doesn't match: 26 words differ, 8 in shape. Ours sums the poor landing's
  * evaluation into $v0 and stores it at once, where the original sums into $v1
- * and stores it later; the stroke count's increment goes into strokes' own
- * register, where the original's goes into $v1; and the last aim change loads
- * f_Shot.heading after the conversion, where the original loads it before.
- * Adding the stroke in the subtraction gives 43 words (11 in shape), the aim
- * change as an if/else subtracting or adding 75 (31), and adding the change or
- * its negation, chosen by ?:, 45 (17).
+ * and stores it later, and the last aim change loads f_Shot.heading after the
+ * conversion, where the original loads it before. The aim change as an if/else
+ * subtracting or adding gives 75 words (31 in shape), and adding the change or
+ * its negation, chosen by ?:, 45 (17); these two counts were measured before
+ * shotStroke, when 30 words differed (8 in shape).
  *
  * Before the nesting, when 101 words differed (35 in shape): reading kind
  * after the sum, testing surfaceInfo->kind directly, and spelling the tests
@@ -2308,8 +2307,8 @@ s32 StepTrialShot(void) {
   SurfaceInfo* surfaceInfo;
   s32 targetRating;
   s32 kind;
-  s32 par;
   s32 strokes;
+  s32 par;
   s32 strokesOver;
   s32 approachDistance;
   s32 flyDistance;
@@ -2522,10 +2521,12 @@ EVALUATE:
       par = g_HoleSetup.par;
       if (GetSurfaceInfoAt(f_PlanTarget[AXIS_X], f_PlanTarget[AXIS_Z])->kind ==
           SURFACE_KIND_GREEN) {
-        /* Counts the stroke this shot would be. In one expression with the
-         * subtraction, 43 words differ, against 30 */
-        strokes++;
-        strokesOver = strokes - (par + f_HoleTargetToPar);
+        /* The stroke this shot would be. Counting it in strokes with ++
+         * gives 30 words differing (8 in shape), and adding it in the
+         * subtraction 43 (11), against 26 (8) */
+        s32 shotStroke = strokes + 1;
+
+        strokesOver = shotStroke - (par + f_HoleTargetToPar);
         if (strokesOver >= 0) {
           if (f_BestEvaluation <= f_AcceptableEvaluation) {
             f_IsTrialAccepted = TRUE;
