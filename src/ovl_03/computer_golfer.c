@@ -52,7 +52,7 @@
 typedef struct GolferTraits {
   /* 0x0 */ s8 unk0;
   /* 0x1 */ s8 unk1;
-  /* 0x2 */ s8 unk2;
+  /* 0x2 */ s8 clubBoldness; /* BOLD_CLUB_CHOICE or less */
   /* 0x3 */ s8 unk3;
   /* 0x4 */ s8 unk4;
   /* 0x5 */ s8
@@ -62,6 +62,12 @@ typedef struct GolferTraits {
                                               each course */
   /* 0xD */ s8 unkD; /* Added to the target score */
 } GolferTraits; /* size = 0xE */
+
+/*
+ * The GolferTraits.clubBoldness of a golfer who chooses clubs regardless of
+ * poor lies, swings harder at planned shots and takes power shots readily
+ */
+#define BOLD_CLUB_CHOICE 2
 
 /* GolferTraits.windPlay values */
 enum WindPlay {
@@ -354,8 +360,9 @@ s32 GetPlannedShot(CurrentShot* shot) {
   return PLANNED_SHOT_UNFINISHED;
 }
 
-s32 GetGolferTraitUnk2(void) {
-  return f_GolferTraits[g_Players[f_Shot.playerIndex].characterIndex].unk2;
+s32 GetClubBoldness(void) {
+  return f_GolferTraits[g_Players[f_Shot.playerIndex].characterIndex]
+      .clubBoldness;
 }
 
 Boolean IsStrokeLimitReached(void) {
@@ -726,7 +733,7 @@ s32 PlanShot(CurrentShot* plannedShot) {
        * powerFrame local of its own gives 26 words differing, none in shape
        */
       distance = (rand() & 3) + (distance / reach);
-      if (GetGolferTraitUnk2() >= 2) {
+      if (GetClubBoldness() >= BOLD_CLUB_CHOICE) {
         distance = distance * POWER_GAUGE_FRAME_BOOST;
       }
 
@@ -830,7 +837,7 @@ s32 PlanShot(CurrentShot* plannedShot) {
       if (f_Shot.clubSlot > 0) {
         f_Shot.clubSlot--;
         if (!f_IsClubUsable[f_Shot.clubSlot] ||
-            (GetGolferTraitUnk2() < 2 &&
+            (GetClubBoldness() < BOLD_CLUB_CHOICE &&
                 GetLieRating(
                     GetClub(
                         g_Players[f_Shot.playerIndex].clubs[f_Shot.clubSlot]),
@@ -2607,7 +2614,8 @@ EVALUATE:
     osSyncPrintf("powermode = %d\n", f_Shot.shotMode);
     osSyncPrintf("powermodeleft = %d\n", f_Shot.powerShotCount);
     osSyncPrintf("ClubSelectType = %d\n",
-        f_GolferTraits[g_Players[f_Shot.playerIndex].characterIndex].unk2);
+        f_GolferTraits[g_Players[f_Shot.playerIndex].characterIndex]
+            .clubBoldness);
     if (flyDistance != 0) {
       ratio = (f32)targetDistance / flyDistance;
       launchPower = f_TrialLaunch->power * ratio;
@@ -2616,7 +2624,7 @@ EVALUATE:
             ((f_GolferTraits[g_Players[f_Shot.playerIndex].characterIndex]
                          .unk6 != 0 &&
                  f_GolferTraits[g_Players[f_Shot.playerIndex].characterIndex]
-                         .unk2 < 2) ||
+                         .clubBoldness < BOLD_CLUB_CHOICE) ||
                 (rand() & 1)) &&
             GetSurfaceInfoAt(f_PlanTarget[AXIS_X], f_PlanTarget[AXIS_Z])
                     ->kind == SURFACE_KIND_GREEN) {
@@ -2624,8 +2632,8 @@ EVALUATE:
           osSyncPrintf("Power mode\n ");
         } else if (f_Shot.shotMode == SHOT_MODE_NORMAL &&
             f_Shot.powerShotCount > 0 &&
-            f_GolferTraits[g_Players[f_Shot.playerIndex].characterIndex].unk2 ==
-                2) {
+            f_GolferTraits[g_Players[f_Shot.playerIndex].characterIndex]
+                    .clubBoldness == BOLD_CLUB_CHOICE) {
           f_Shot.shotMode = SHOT_MODE_POWER;
           osSyncPrintf("Power mode\n ");
         } else if (f_Shot.shotMode == SHOT_MODE_APPROACH) {
@@ -2777,9 +2785,9 @@ s32 FindClubSlot(s32 unused UNUSED, ClubType clubType) {
 /*
  * Returns the type of the shortest usable club, from the sand wedge up, whose
  * normal shot carries beyond distance from the ball's lie. A club the golfer
- * would hit from the worst lie only counts if the golfer's unk2 trait is 2 or
- * more. If no club carries that far, it returns the slot of the longest club
- * that counted, or CLUB_TYPE_SAND_WEDGE if none did.
+ * would hit from the worst lie only counts if the golfer's club boldness is
+ * BOLD_CLUB_CHOICE. If no club carries that far, it returns the slot of the
+ * longest club that counted, or CLUB_TYPE_SAND_WEDGE if none did.
  */
 ClubType ChooseClubForDistance(s32 distance) {
   s32 fallback = CLUB_TYPE_SAND_WEDGE;
@@ -2804,7 +2812,8 @@ ClubType ChooseClubForDistance(s32 distance) {
 
     carry = carry * GetSurfaceInfo(f_Shot.surface)->minPercent / 100;
     rating = GetLieRating(club, f_Shot.surface, SHOT_MODE_NORMAL);
-    if (f_GolferTraits[g_Players[f_Shot.playerIndex].characterIndex].unk2 < 2) {
+    if (f_GolferTraits[g_Players[f_Shot.playerIndex].characterIndex]
+            .clubBoldness < BOLD_CLUB_CHOICE) {
       if (rating == WORST_LIE_RATING) {
         continue;
       }
