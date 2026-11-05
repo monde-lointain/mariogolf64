@@ -2083,7 +2083,11 @@ void DrawHoleEditorGround(CameraMatrices* matrices, s32 terrainStyle);
  * middle after the tile index, then took it to 909; the register oracle gets to
  * 896 words forcing 70 pseudos either way. A u16 or u8 groupTileIndex gives 908
  * words (236 in shape) against 909 (233), but adds two 16- or 8-bit shifts or
- * masks to the 23 that the draft and the original have.
+ * masks to the 23 that the draft and the original have. The medium groups
+ * rewind their slots top, bottom and middle: in DrawHoleEditorGround's order,
+ * middle, bottom and top, 915 words differ (237 in shape), and top, middle and
+ * bottom 913 (245); stepping them after each tile in its order, middle, bottom,
+ * tile index and top, gives 935 (267), and with its rewind too 937 (267).
  */
 void DrawGround(CameraMatrices* matrices, s32 terrainStyle) {
   u8 snapsEdge[2][TILE_VERTEX_SEGMENT_COUNT]; /* For the current and the last
