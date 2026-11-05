@@ -244,10 +244,13 @@ static const char f_UnusedFloatFormat[] = "            %f";
 /* The field of view, in degrees, of the main camera between shots */
 #define DEFAULT_FIELD_OF_VIEW 45.0f
 
-/* The sound channels of the flight's sounds, which fade over
- * SOUND_FADE_FRAME_COUNT */
-#define FLIGHT_SOUND_CHANNEL_UNKB 0xB
-#define FLIGHT_SOUND_CHANNEL_UNKF 0xF
+/*
+ * The sound channels of the flight's sounds, which fade over
+ * SOUND_FADE_FRAME_COUNT: the sounds of the ball's landing, on the green, the
+ * fairway or in trouble, and the sounds of its going in the cup, by score
+ */
+#define FLIGHT_SOUND_CHANNEL_LANDING 0xB
+#define FLIGHT_SOUND_CHANNEL_CUP_IN 0xF
 #define SOUND_FADE_FRAME_COUNT 120
 
 /* f_EndReaction values: how the others reacted as the ball neared its end */
@@ -620,8 +623,8 @@ void EndFlightCamera(void) {
   g_InsetView.animation = INSET_VIEW_STILL;
   g_InsetView.step = 0;
   g_Cameras[INSET_CAMERA].view.drawFlags = 0;
-  FadeOutSound(FLIGHT_SOUND_CHANNEL_UNKB, SOUND_FADE_FRAME_COUNT);
-  FadeOutSound(FLIGHT_SOUND_CHANNEL_UNKF, SOUND_FADE_FRAME_COUNT);
+  FadeOutSound(FLIGHT_SOUND_CHANNEL_LANDING, SOUND_FADE_FRAME_COUNT);
+  FadeOutSound(FLIGHT_SOUND_CHANNEL_CUP_IN, SOUND_FADE_FRAME_COUNT);
   ClearShotEffects(CLEAR_KIND_EFFECTS);
   f_FlightCameraKind = FLIGHT_CAMERA_NONE;
   if (g_BallFlightStep == g_SimulatedShot.stepCount) {
@@ -995,10 +998,12 @@ s32 GetEndReaction(void) {
 
 /* The channel of the calls on a shot and of the other sounds on its result */
 #define FLIGHT_SOUND_CHANNEL_CALLS 3
-#define FLIGHT_SOUND_CHANNEL_UNKE 0xE
-#define FLIGHT_SOUND_VOLUME_UNK50 0x50
-#define FLIGHT_SOUND_VOLUME_UNK60 0x60
-#define FLIGHT_SOUND_VOLUME_UNK64 0x64
+/* The channel of the sounds f_PendingResultSound queues */
+#define FLIGHT_SOUND_CHANNEL_RESULT 0xE
+/* The volumes of the cup-in sounds below a hole in one, by score */
+#define EAGLE_CUP_IN_VOLUME 0x50
+#define BIRDIE_CUP_IN_VOLUME 0x60
+#define ALBATROSS_CUP_IN_VOLUME 0x64
 #define GREEN_SOUND_VOLUME 0x5F
 #define FAIRWAY_SOUND_VOLUME 0x3F
 #define FULL_SHOT_REVERB 0x14
@@ -1133,21 +1138,24 @@ void PlayFlightSounds(s32 step) {
       if (g_HoleSetup.par >
           g_Players[g_CurrentShot.playerIndex].strokeCount + 1) {
         (*greenSoundCount)++;
-        PlaySound(SOUND_UNK117, FLIGHT_SOUND_CHANNEL_UNKB, GREEN_SOUND_VOLUME);
+        PlaySound(
+            SOUND_UNK117, FLIGHT_SOUND_CHANNEL_LANDING, GREEN_SOUND_VOLUME);
       } else if (g_HoleSetup.par >
               g_Players[g_CurrentShot.playerIndex].strokeCount + 2 &&
           f_LandingCupDistance < GREEN_SOUND_MAX_DISTANCE) {
         (*greenSoundCount)++;
-        PlaySound(SOUND_UNK118, FLIGHT_SOUND_CHANNEL_UNKB, GREEN_SOUND_VOLUME);
+        PlaySound(
+            SOUND_UNK118, FLIGHT_SOUND_CHANNEL_LANDING, GREEN_SOUND_VOLUME);
       }
     }
   }
 
   if (f_LandingWaitFrame == RESULT_SOUND_STAGE) {
     if (f_PendingResultSound == RESULT_SOUND_GOOD_SHOT) {
-      PlaySound(SOUND_UNK23, FLIGHT_SOUND_CHANNEL_UNKE, SOUND_FULL_SCALE);
+      PlaySound(SOUND_UNK23, FLIGHT_SOUND_CHANNEL_RESULT, SOUND_FULL_SCALE);
     } else if (f_PendingResultSound == RESULT_SOUND_SUPERB_SHOT) {
-      PlaySound(SOUND_THREE_STARS, FLIGHT_SOUND_CHANNEL_UNKE, SOUND_FULL_SCALE);
+      PlaySound(
+          SOUND_THREE_STARS, FLIGHT_SOUND_CHANNEL_RESULT, SOUND_FULL_SCALE);
     }
   }
 
@@ -1295,19 +1303,19 @@ void PlayFlightSounds(s32 step) {
       }
 
       if (g_Players[g_CurrentShot.playerIndex].strokeCount == 1) {
-        PlaySound(SOUND_UNK118, FLIGHT_SOUND_CHANNEL_UNKF, SOUND_FULL_SCALE);
+        PlaySound(SOUND_UNK118, FLIGHT_SOUND_CHANNEL_CUP_IN, SOUND_FULL_SCALE);
       } else if (g_HoleSetup.par + SCORE_TO_PAR_ALBATROSS ==
           g_Players[g_CurrentShot.playerIndex].strokeCount) {
         PlaySound(
-            SOUND_UNK118, FLIGHT_SOUND_CHANNEL_UNKF, FLIGHT_SOUND_VOLUME_UNK64);
+            SOUND_UNK118, FLIGHT_SOUND_CHANNEL_CUP_IN, ALBATROSS_CUP_IN_VOLUME);
       } else if (g_HoleSetup.par + SCORE_TO_PAR_EAGLE ==
           g_Players[g_CurrentShot.playerIndex].strokeCount) {
         PlaySound(
-            SOUND_UNK118, FLIGHT_SOUND_CHANNEL_UNKF, FLIGHT_SOUND_VOLUME_UNK50);
+            SOUND_UNK118, FLIGHT_SOUND_CHANNEL_CUP_IN, EAGLE_CUP_IN_VOLUME);
       } else if (g_HoleSetup.par + SCORE_TO_PAR_BIRDIE ==
           g_Players[g_CurrentShot.playerIndex].strokeCount) {
         PlaySound(
-            SOUND_UNK116, FLIGHT_SOUND_CHANNEL_UNKF, FLIGHT_SOUND_VOLUME_UNK60);
+            SOUND_UNK116, FLIGHT_SOUND_CHANNEL_CUP_IN, BIRDIE_CUP_IN_VOLUME);
       }
     }
 
@@ -1323,7 +1331,8 @@ void PlayFlightSounds(s32 step) {
         !g_GameState.isMiniGolf && f_StartCupDistance > f_LandingCupDistance &&
         IsAlbatrossOrBetter(g_Players[g_CurrentShot.playerIndex].strokeCount)) {
       *isStillPlayed = TRUE;
-      PlaySound(SOUND_UNK117, FLIGHT_SOUND_CHANNEL_UNKB, FAIRWAY_SOUND_VOLUME);
+      PlaySound(
+          SOUND_UNK117, FLIGHT_SOUND_CHANNEL_LANDING, FAIRWAY_SOUND_VOLUME);
     }
   }
 
@@ -1332,20 +1341,20 @@ void PlayFlightSounds(s32 step) {
           g_SimulatedShot.stepCount - LANDING_SOUND_STEP_COUNT) {
     if (IsBunkerKind(f_EndSurfaceInfo->kind)) {
       f_IsLandingSoundPlayed = TRUE;
-      PlaySound(
-          SOUND_TROUBLE_LANDING, FLIGHT_SOUND_CHANNEL_UNKB, SOUND_FULL_SCALE);
+      PlaySound(SOUND_TROUBLE_LANDING, FLIGHT_SOUND_CHANNEL_LANDING,
+          SOUND_FULL_SCALE);
       QueueOnlookerSounds(CHARACTER_SOUND_KIND_BUNKER);
     } else if (f_EndSurfaceInfo->kind == SURFACE_KIND_DEEP_ROUGH) {
-      PlaySound(SOUND_DEEP_ROUGH_LANDING, FLIGHT_SOUND_CHANNEL_UNKB,
+      PlaySound(SOUND_DEEP_ROUGH_LANDING, FLIGHT_SOUND_CHANNEL_LANDING,
           SOUND_FULL_SCALE);
       QueueOnlookerSounds(CHARACTER_SOUND_KIND_BUNKER);
     } else if (f_EndSurfaceInfo->kind == SURFACE_KIND_WASTE_AREA) {
-      PlaySound(SOUND_WASTE_AREA_LANDING, FLIGHT_SOUND_CHANNEL_UNKB,
+      PlaySound(SOUND_WASTE_AREA_LANDING, FLIGHT_SOUND_CHANNEL_LANDING,
           SOUND_FULL_SCALE);
     } else if (IsLostBallKind(f_EndSurfaceInfo->kind)) {
       f_IsLandingSoundPlayed = TRUE;
-      PlaySound(
-          SOUND_TROUBLE_LANDING, FLIGHT_SOUND_CHANNEL_UNKB, SOUND_FULL_SCALE);
+      PlaySound(SOUND_TROUBLE_LANDING, FLIGHT_SOUND_CHANNEL_LANDING,
+          SOUND_FULL_SCALE);
       QueueOnlookerSounds(CHARACTER_SOUND_KIND_TROUBLE);
     }
   }
