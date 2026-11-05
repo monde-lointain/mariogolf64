@@ -613,6 +613,11 @@ s32 GetClubTournamentCourse(void);
  * variable for the A press changes nothing. A focused permuter run's best, 23
  * words (5 in shape), copies the button through an unsigned long long
  * temporary.
+ *
+ * Reading an imported character's character after marking it chosen and setting
+ * g_GameState.unk3C gives 30 words differing, 10 in shape, but the register
+ * oracle then comes no closer than 18 words, forcing 3 pseudos, against 10
+ * forcing 9 here, so the code moves away from the original's.
  */
 #ifdef NON_MATCHING
 s32 UpdateCharacterSelect(
