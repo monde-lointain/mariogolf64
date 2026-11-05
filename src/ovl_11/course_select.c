@@ -615,7 +615,10 @@ void SetPlankMotion(s32 motion) {
  * the lag unset below the last group; writing the strips' bottom into both
  * rectangles, with or without a group local, gives 70. The register oracle,
  * forcing 5 pseudos' registers, leaves 38 words at best, so the code differs
- * too. 56 words differ, 10 in shape.
+ * too. Working out the strip's top before its pipe sync gives 54 words (12 in
+ * shape), but the oracle's best rises to 44 words with 4 forced, so the order
+ * is kept; the bottom moved with it, or alone, gives 124 to 126. 56 words
+ * differ, 10 in shape.
  */
 #ifdef NON_MATCHING
 void DrawPlanks(Gfx** displayListHead) {
