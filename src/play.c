@@ -2038,7 +2038,7 @@ void DrawHoleEditorGround(CameraMatrices* matrices, s32 terrainStyle);
  * tiles go down two halves in rows of four, and a fine tile snaps the edge
  * vertices it shares with coarser neighbors so that no gaps open between them.
  *
- * Doesn't match: 911 words differ, 233 in shape. The original's frame is 8
+ * Doesn't match: 909 words differ, 233 in shape. The original's frame is 8
  * bytes larger (0x260 against 0x258; it was 0x18 when first measured), so most
  * stack offsets differ, and terrainStyle and the locals take other saved
  * registers. The original works out column + 1's parity once per half, where
@@ -2074,7 +2074,10 @@ void DrawHoleEditorGround(CameraMatrices* matrices, s32 terrainStyle);
  * Writing it as the else arm, or as a default that the medium and coarse
  * details override, gives those branches, but as branch-likelies, and moves the
  * tile loop's registers: 967 to 972 words, 231 to 236 in shape. Testing the
- * nearby flag and the fine depth in two else-if arms leaves 911.
+ * nearby flag and the fine depth in two else-if arms left 911. Setting the
+ * slots in DrawHoleEditorGround's order, the bottom before the top and the
+ * middle after the tile index, then took it to 909; the register oracle gets to
+ * 896 words forcing 70 pseudos either way.
  */
 void DrawGround(CameraMatrices* matrices, s32 terrainStyle) {
   u8 snapsEdge[2][TILE_VERTEX_SEGMENT_COUNT]; /* For the current and the last
@@ -2324,11 +2327,11 @@ void DrawGround(CameraMatrices* matrices, s32 terrainStyle) {
   SetGroundCombineMode(0, 0);
   for (half = 0; half < GROUND_HALF_COUNT; half++) {
     previousDetail = GROUND_DETAIL_HIDDEN;
-    topSlot = FIRST_TOP_SLOT;
     bottomSlot = FIRST_BOTTOM_SLOT;
-    middleSlot = FIRST_MIDDLE_SLOT;
+    topSlot = FIRST_TOP_SLOT;
     firstTileColumn = half * GROUND_TILE_GROUP_SIZE;
     tileIndex = firstTileColumn;
+    middleSlot = FIRST_MIDDLE_SLOT;
     if (IsGameFlagSet(GAME_FLAG_LOG_GROUND_ROWS)) {
       osSyncPrintf("DG[");
       if (half != 0) {
