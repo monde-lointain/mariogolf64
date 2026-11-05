@@ -571,8 +571,11 @@ void GetSaveDataAndMenuMemory(void) {
  * and the offset and half height grouped the same 34, and the other orders 36
  * to 175. A focused permuter run's best (32 words, 14 in shape) puts the
  * button's top at buttonY - 1, but the original subtracts the button's half
- * height there, from the same register it adds for the bottom. 34 words differ,
- * 20 in shape.
+ * height there, from the same register it adds for the bottom. A u16 or u8
+ * button half height gives 29 words (19 in shape); the u16 halves the height
+ * with srl and stores a halfword, where the original halves it with sra into
+ * $s7 and tests it with bgtz as it does the other halves. 34 words differ, 20
+ * in shape.
  */
 #ifdef NON_MATCHING
 void DrawYesNoWindow(Gfx** displayListHead, s32 width, s32 height, s32 centerX,
