@@ -993,17 +993,7 @@ const char g_PathDebugBlankText[] = "          ";
  * whose start is on its plane or on the side away from its end. A path
  * that starts on the plane, or, while the ball rolls, barely crosses
  * it, hits it at the path's end.
- *
- * Doesn't match: the original takes each absolute value into a register of its
- * own and ahead of the work around it: in the bare crossing test, before
- * loading the distance, and for the hit fraction, before working out the side
- * change. GCC ties the bare crossing test's absolute value to its operand and
- * schedules it after. Dividing hitFraction in place, as in FindGroundHit,
- * unties the hit fraction's (16 words differed). The register oracle, forcing 2
- * pseudos' registers, leaves 9 words at best, so the code differs too. 14 words
- * differ, 6 in shape.
  */
-#ifdef NON_MATCHING
 s32 FindMiniGolfGroundHit(BallSimulation* simulation, s32 startX, s32 startY,
     s32 startZ, s32 endX, s32 endY, s32 endZ, PlaneTriangle* hit,
     f32* fraction) {
@@ -1040,7 +1030,6 @@ s32 FindMiniGolfGroundHit(BallSimulation* simulation, s32 startX, s32 startY,
   f32 hitFraction;
   f32 tileFraction;
   f32 step;
-  s32 sideChange;
 
   if (IsGameFlagSet(GAME_FLAG_UNK0)) {
     PrintDebugPaddedHex(startX, PATH_DEBUG_COLUMN, PATH_DEBUG_ROW);
@@ -1165,9 +1154,8 @@ s32 FindMiniGolfGroundHit(BallSimulation* simulation, s32 startX, s32 startY,
       if ((endSide >= 0) & (startSide <= 0)) {
         if (startSide < 0 && !IsBareCrossing(simulation, startSide, endSide) &&
             startSide != endSide) {
-          hitFraction = fabsf((f32)startSide);
-          sideChange = startSide - endSide;
-          hitFraction /= fabsf((f32)sideChange);
+          hitFraction =
+              fabsf((f32)startSide) / fabsf((f32)(startSide - endSide));
         } else {
           hitFraction = 1.0f;
         }
@@ -1265,10 +1253,6 @@ s32 FindMiniGolfGroundHit(BallSimulation* simulation, s32 startX, s32 startY,
   return FALSE;
 }
 
-#else
-INCLUDE_ASM("asm/nonmatchings/collision", FindMiniGolfGroundHit);
-#endif
-
 /*
  * Finds the nearest ground triangle that a ball moving from one point to
  * another hits, walking the ground tiles along the path from its start.
@@ -1276,22 +1260,7 @@ INCLUDE_ASM("asm/nonmatchings/collision", FindMiniGolfGroundHit);
  * fraction of the way along the path, and returns whether one is hit. A
  * path that starts or ends off the ground hits a level triangle at its end
  * if it ends below the ground there, and nothing otherwise.
- *
- * Doesn't match: the original takes the start side's absolute value into a
- * temporary register, where this keeps it in hitFraction's. Dividing
- * hitFraction by the side change's magnitude after working the change out gives
- * the original's order (9 words differed); a local for the magnitude or the
- * converted side subtracts first again (13). Dividing the two absolute values
- * in one expression also gives 13: local-alloc ties each conversion to its
- * absolute value, which it refuses only for a pseudo that lives outside the
- * block, and the subtraction moves into the side test's delay slot. Keeping the
- * start side's absolute value in step or planeOffset, which live beyond the
- * block, gives 35 words, and in tileFraction 7. The original also fills the
- * side test's delay slot differently. The register oracle's closest result is
- * these 7 words with no register forced, so allocation isn't the cause. 7 words
- * differ, 3 in shape.
  */
-#ifdef NON_MATCHING
 s32 FindGroundHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
     s32 endZ, PlaneTriangle* hit, f32* fraction) {
   Vtx* points[GROUND_TILE_POINT_SPAN + 1][GROUND_TILE_POINT_SPAN + 1];
@@ -1327,7 +1296,6 @@ s32 FindGroundHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
   f32 hitFraction;
   f32 tileFraction;
   f32 step;
-  s32 sideChange;
 
   if (IsGameFlagSet(GAME_FLAG_UNK0)) {
     PrintDebugPaddedHex(startX, PATH_DEBUG_COLUMN, PATH_DEBUG_ROW);
@@ -1451,9 +1419,8 @@ s32 FindGroundHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
             (plane.normal[AXIS_Y] * startY) + (plane.normal[AXIS_Z] * startZ) +
             planeOffset;
         if (startSide != endSide) {
-          hitFraction = fabsf((f32)startSide);
-          sideChange = startSide - endSide;
-          hitFraction /= fabsf((f32)sideChange);
+          hitFraction =
+              fabsf((f32)startSide) / fabsf((f32)(startSide - endSide));
         } else {
           hitFraction = 0.0f;
         }
@@ -1549,10 +1516,6 @@ s32 FindGroundHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
 
   return FALSE;
 }
-
-#else
-INCLUDE_ASM("asm/nonmatchings/collision", FindGroundHit);
-#endif
 
 /*
  * Returns the cell of a billboard texture's hit mask at fractions of the
