@@ -59,8 +59,8 @@ typedef struct GolferTraits {
       windPlay; /* WIND_PLAY_*: which winds the golfer offsets shots for */
   /* 0x6 */ s8 unk6;
   /* Added to baseTargetScore on each course */
-  /* 0x7 */ s8 targetScores[COURSE_COUNT];
-  /* Its target score to par before targetScores */
+  /* 0x7 */ s8 courseTargetOffsets[COURSE_COUNT];
+  /* Its target score to par before the course's offset */
   /* 0xD */ s8 baseTargetScore;
 } GolferTraits; /* size = 0xE */
 
@@ -1282,7 +1282,7 @@ s32 ChooseHoleStrokeTarget(void) {
       f_GolferTraits[g_Players[f_Shot.playerIndex].characterIndex]
           .baseTargetScore +
       f_GolferTraits[g_Players[f_Shot.playerIndex].characterIndex]
-          .targetScores[g_GameState.courseIndex];
+          .courseTargetOffsets[g_GameState.courseIndex];
   osSyncPrintf(
       "Char Index = %d\n", g_Players[f_Shot.playerIndex].characterIndex);
   osSyncPrintf("TargetScore = %d\n", targetScore);
