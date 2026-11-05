@@ -185,30 +185,31 @@ static inline s32 RandomLaunchHeightJitter(void) {
 /*
  * Sends every particle of the firework out from one random point. Doesn't
  * match: the original also keeps a copy of the row's first cell index, beside
- * the register loop.c steps it in, and spills the copy, which moves width and
- * height to other registers. A rowStart variable compiles the same as row *
- * width. Keeping the row's offset from the middle in a local gives 108 words, a
- * halfHeight beside halfWidth 118. The register oracle, forcing 6 pseudos'
- * registers, leaves 24 words at best, so the code differs too. A permuter
- * output, 94 words with 2 in shape, sets halfWidth to width and halves it in
- * another statement inside the cell's test, which divides signed, where the
- * original's srl halves width unsigned. Setting halfWidth inside the cell's
- * test gives 57 words, 19 in shape, before the row loop 50, 16 in shape, and
- * width / 2 written in place 116. As s32s, as LoadFireworks declares them,
- * width and height give 49 words (15 in shape), but the height is then halved
- * signed, with an addu and sra, where the original halves both sizes with srl;
- * an s32 width with a u32 height gives 48 (14) and keeps the srl, but gives the
- * two sizes different types. A u16 or u8 row gives 44 words (22 in shape), but
- * masks the row with an andi, 0xffff or 0xff, both for the loop test after the
- * increment and for its use in the body, where the original has no andi at all.
- * A focused permuter run's best, 36 words (8 in shape), holds 64 / 2 in a
- * temporary at one of the two jitters, copies the half width through a
- * temporary and works out the row's offset from the center once per row. Of its
- * natural parts, a local for the shape at all three reads gives 114 words (20
- * in shape), and at the width and height alone 50 (14); naming the row's offset
- * once per row, before or after the half width, gives 108 (12), and where the
- * particle is set 118 (14), or 67 (15) with the shape local. 50 words differ,
- * 14 in shape.
+ * the register loop.c steps it in, spills the copy on each row and reloads it
+ * at each cell to add the column, which makes its frame 8 bytes larger. Every
+ * save and the half width's spill slot sit 8 bytes lower here, so with 3
+ * pseudos' registers forced, the register oracle leaves 74 words, all but the
+ * copy's spill and reload and the cell address's adds in those offsets. A
+ * rowStart variable compiles the same as row * width.
+ *
+ * The sizes are s32s, as LoadFireworks declares them, and each is halved where
+ * it is used. Both are loaded with lbu, and GCC halves them with srl, as the
+ * original does. The draft before held them in u32s, with the half width in a
+ * halfWidth local set on each row, for 50 words differing (14 in shape), but
+ * the register oracle left 24 words with 6 pseudos forced, among them the half
+ * width's srl and the jitter scale's load in other places. A focused permuter
+ * run's best wrote the width's half in place, with an int width, but left
+ * halfWidth set and unread. An s32 width with a u32 or u8 height gives 94
+ * words (2 in shape), u8 or u16 sizes 129 (13), u32 139 (27), s16 215 (45),
+ * and a u8 width with a u32 height 51 (15). The loop tests' u32 casts and the
+ * row offset's s32 cast compile the same without them.
+ *
+ * A local for the shape at all three reads gives 31 words (3 in shape), but
+ * spills the shape into the copy's slot, where the original reads the field
+ * again at each cell's test; at the width and height alone it gives 92 (2). A
+ * u16 or u8 row gives 86 words (10 in shape), the row's offset from the middle
+ * in a local set on each row 50 (18), and the height's half there 118 (22). 92
+ * words differ, 2 in shape.
  */
 #ifdef NON_MATCHING
 void LaunchFirework(Firework* firework, s32 fireworkIndex UNUSED) {
@@ -216,9 +217,8 @@ void LaunchFirework(Firework* firework, s32 fireworkIndex UNUSED) {
   f32 originX;
   s32 random;
   f32 originY;
-  u32 width;
-  u32 height;
-  s32 halfWidth;
+  s32 width;
+  s32 height;
   s32 row;
   s32 column;
 
@@ -229,17 +229,16 @@ void LaunchFirework(Firework* firework, s32 fireworkIndex UNUSED) {
   height = firework->shape->height;
   firework->unkC = 0xFF;
   originY = random + FIREWORK_LAUNCH_HEIGHT;
-  for (row = 0; (u32)row != height; row++) {
-    halfWidth = width / 2;
-    for (column = 0; (u32)column != width; column++) {
+  for (row = 0; row != height; row++) {
+    for (column = 0; column != width; column++) {
       if (firework->shape->cells[column + (row * width)] == 0) {
         firework->particles[particleIndex].x = originX;
         firework->particles[particleIndex].y = originY;
         firework->particles[particleIndex].velocityX =
-            ((column - halfWidth) * PARTICLE_SPEED_PER_CELL) +
+            ((column - (width / 2)) * PARTICLE_SPEED_PER_CELL) +
             RandomParticleVelocityJitter();
         firework->particles[particleIndex].velocityY =
-            ((s32)((height / 2) - row) * PARTICLE_SPEED_PER_CELL) -
+            (((height / 2) - row) * PARTICLE_SPEED_PER_CELL) -
             PARTICLE_LAUNCH_DOWNWARD_SPEED + RandomParticleVelocityJitter();
         firework->particles[particleIndex].life =
             (guRandom() % PARTICLE_LIFE_JITTER) + PARTICLE_MIN_LIFE;
