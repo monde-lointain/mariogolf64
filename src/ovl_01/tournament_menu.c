@@ -574,8 +574,10 @@ void GetSaveDataAndMenuMemory(void) {
  * height there, from the same register it adds for the bottom. A u16 or u8
  * button half height gives 29 words (19 in shape); the u16 halves the height
  * with srl and stores a halfword, where the original halves it with sra into
- * $s7 and tests it with bgtz as it does the other halves. 34 words differ, 20
- * in shape.
+ * $s7 and tests it with bgtz as it does the other halves. Subtracting the
+ * growth before the half height from the button's y, but not its x, gives 34
+ * words with 18 in shape, but the original subtracts the half height first, as
+ * here; growth first in both gives 38 words. 34 words differ, 20 in shape.
  */
 #ifdef NON_MATCHING
 void DrawYesNoWindow(Gfx** displayListHead, s32 width, s32 height, s32 centerX,
