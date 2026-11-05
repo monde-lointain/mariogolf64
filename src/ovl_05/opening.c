@@ -4,9 +4,6 @@
  * the balls, Lakitu, the impact lines, the burst, the sparks and the title
  * logo.
  */
-/* Takes GCC's built-in fabsf: with the game's inline assembly, DrawOpeningBalls
- * keeps its abs.s where it is written and grows by 6 words */
-#define USES_BUILTIN_FABSF
 #include "common.h"
 
 #include "opening.h"
@@ -3459,7 +3456,9 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
           f_LogoBallLastPosition[AXIS_X] = f_OpeningBallPositions[slot][0];
           f_LogoBallLastPosition[AXIS_Y] = f_OpeningBallPositions[slot][1];
           f_LogoBallLastPosition[AXIS_Z] = f_OpeningBallPositions[slot][2];
-          rollAngle = fabsf(rollAngle);
+          /* fabs, in double precision, which GCC narrows to abs.s; fabsf
+           * here and below gives 44 differing words */
+          rollAngle = fabs(rollAngle);
           if (rollAngle > LOGO_BALL_FRAME_ANGLE) {
             f_LogoBallFrameIndex++;
             if (f_LogoBallFrameIndex == LOGO_BALL_FRAME_COUNT) {
@@ -3764,7 +3763,7 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
                 f_OpeningBallPositions[slot][1];
             f_ProjectedLogoBallLastPosition[AXIS_Z] =
                 f_OpeningBallPositions[slot][2];
-            rollAngle = fabsf(rollAngle);
+            rollAngle = fabs(rollAngle);
             if (rollAngle > LOGO_BALL_FRAME_ANGLE) {
               f_ProjectedLogoBallFrameIndex++;
               if (f_ProjectedLogoBallFrameIndex == LOGO_BALL_FRAME_COUNT) {
