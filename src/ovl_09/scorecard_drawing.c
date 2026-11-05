@@ -556,9 +556,11 @@ const char f_CompactHoleFormat[] = "Hole%d";
  * Grouping the tiles' y as g_Scorecard.y + (rowOffset + TILE_TOP) gives 111
  * words, 49 in shape; stepping rowOffset as i * MATCH_ROW_SPACING gives 183.
  * The win arrow's rise is read once, before the strokes test, as the original
- * does (86 words, 66 in shape, reading it in each call). The register oracle's
- * closest result is these 70 words with no register forced, so allocation isn't
- * the cause. 70 words differ, 50 in shape.
+ * does (86 words, 66 in shape, reading it in each call). The tile's right edge
+ * adds the scorecard's x last; added first, as before, 70 words differed, and
+ * the other orders and groupings give 68 to 103. The register oracle's closest
+ * result is these 68 words with no register forced, so allocation isn't the
+ * cause. 68 words differ, 50 in shape.
  */
 #ifdef NON_MATCHING
 void DrawMatchPage(Gfx** displayListHead) {
@@ -749,8 +751,8 @@ void DrawMatchPage(Gfx** displayListHead) {
             TexelCoordinate(TILE_EDGE_IMAGE_ROW * TILE_HEIGHT), TEXEL_STEP_ONE,
             TEXEL_STEP_ONE);
         DrawTextureRect(&gfx,
-            QuarterPixels(g_Scorecard.x +
-                ((j * TILE_SPACING) + TILE_LEFT + TILE_PIECE_WIDTH)),
+            QuarterPixels((j * TILE_SPACING) + TILE_LEFT + TILE_PIECE_WIDTH +
+                g_Scorecard.x),
             QuarterPixels(g_Scorecard.y + rowOffset + TILE_TOP),
             QuarterPixels((j * TILE_SPACING) +
                 (g_Scorecard.x + TILE_LEFT + (TILE_PIECE_WIDTH * 2))),
