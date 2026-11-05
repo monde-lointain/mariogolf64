@@ -33,7 +33,11 @@ enum Scene {
   /* A top-down map where the editor moves the ground points */
   SCENE_POINT_EDITOR = 10,
   SCENE_UNK11 = 11,
-  SCENE_PLAY_UNK12 = 12, /* Updates like SCENE_PLAY_HOLE */
+  /*
+   * The scene of a round the menu has loaded the hole for. It updates like
+   * SCENE_PLAY_HOLE, but UpdateDebugScenes doesn't label it.
+   */
+  SCENE_PLAY_ROUND = 12,
   SCENE_PLAY_UNK13 = 13, /* Updates like SCENE_PLAY_HOLE */
   SCENE_MENU = 14,
   SCENE_TRIANGLES = 15,

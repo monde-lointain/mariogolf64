@@ -1681,7 +1681,7 @@ void UpdateMenus(void) {
       OnMenuResourcesLoaded();
     } else {
       g_Scene = SCENE_SWAPPING_MODULES;
-      g_NextScene = SCENE_PLAY_UNK12;
+      g_NextScene = SCENE_PLAY_ROUND;
       g_SceneModuleToUnload = MODULE_MENU;
       g_SceneModuleToLoad = MODULE_PLAY;
       RequestSubModule();

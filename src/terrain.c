@@ -253,7 +253,7 @@ static s32 f_SceneMenuScenes[SCENE_MENU_LENGTH] = {
     SCENE_MENU,
     SCENE_MAP_OVERVIEW,
     SCENE_UNK11,
-    SCENE_PLAY_UNK12,
+    SCENE_PLAY_ROUND,
     SCENE_PLAY_UNK13,
     SCENE_RINGS,
     SCENE_WALLS,
@@ -1513,7 +1513,7 @@ const char* GetDebugSceneLabel(u32 scene) {
       return "XZ-DIV";
     case SCENE_UNK11:
       return " FILE ";
-    case SCENE_PLAY_UNK12:
+    case SCENE_PLAY_ROUND:
       return "STROKE";
     case SCENE_PLAY_UNK13:
       return "S-SHOT";
@@ -1598,7 +1598,7 @@ NO_RESULT UpdateDebugSceneMenu(void) {
         break;
       case SCENE_CELL_EDITOR:
         break;
-      case SCENE_PLAY_UNK12:
+      case SCENE_PLAY_ROUND:
         InitPlay(PLAY_KIND_FLAGGED_ROUND);
         InitRoundHud();
         break;
@@ -1777,7 +1777,7 @@ void UpdateDebugScenes(void) {
   }
 
   QueueAnimatedBox(&f_SceneMenuBox);
-  if ((g_Scene != SCENE_PLAY_UNK12) & (g_Scene != SCENE_MENU)) {
+  if ((g_Scene != SCENE_PLAY_ROUND) & (g_Scene != SCENE_MENU)) {
     SetDebugTextHighlight(TRUE);
     PrintDebugText(
         GetDebugSceneLabel(g_Scene), SCENE_LABEL_COLUMN, SCENE_LABEL_ROW);

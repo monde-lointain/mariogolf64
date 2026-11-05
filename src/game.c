@@ -801,7 +801,7 @@ void DrawScreenEffect(CameraMatrices* matrices, CameraView* view) {
 
 /*
  * Draws the dynamic textures, filling g_MirrorTexture from a strip of the
- * frame above the horizon. Only SCENE_PLAY_UNK12 and SCENE_MENU
+ * frame above the horizon. Only SCENE_PLAY_ROUND and SCENE_MENU
  * use it.
  */
 void BuildHorizonDynamicTextures(Gfx** displayListHead) {
@@ -836,7 +836,7 @@ void BuildHorizonDynamicTextures(Gfx** displayListHead) {
     }
   }
 
-  if ((g_Scene != SCENE_PLAY_UNK12) & (g_Scene != SCENE_MENU)) {
+  if ((g_Scene != SCENE_PLAY_ROUND) & (g_Scene != SCENE_MENU)) {
     return;
   }
 
@@ -2451,7 +2451,7 @@ void UpdateGame(void) {
 
     UpdateOpening();
     UpdateEffects();
-  } else if (g_Scene == SCENE_PLAY_HOLE || g_Scene == SCENE_PLAY_UNK12 ||
+  } else if (g_Scene == SCENE_PLAY_HOLE || g_Scene == SCENE_PLAY_ROUND ||
       g_Scene == SCENE_PLAY_UNK13) {
     if (g_ScreenEffect != SCREEN_EFFECT_SAVED_FRAME) {
       StepNoiseTexture();
