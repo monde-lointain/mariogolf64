@@ -242,8 +242,11 @@ void ResetBallSimulations(void) {
  * a permuter output gaining 1 word (5 in shape) normalized the triangle's
  * normal after both of the hit's surface branches, but the original's club-test
  * branch jumps past that call and the other skips it unless the surface is
- * green or green edge, so the output's call changes what the code does. 749
- * words differ, 225 in shape.
+ * green or green edge, so the output's call changes what the code does. The
+ * second toCup, for a ball between CUP_PULL_INNER_RADIUS and
+ * CUP_PULL_OUTER_RADIUS of the cup, is set in axis order too, which took the
+ * draft from 749 words to 747 and from 225 in shape to 221; with its Y of 1
+ * first, as the draft had it, 749 differed. 747 words differ, 221 in shape.
  */
 #ifdef NON_MATCHING
 s32 StepBallSimulation(BallSimulation* simulation) {
@@ -1287,9 +1290,9 @@ s32 StepBallSimulation(BallSimulation* simulation) {
           (f32)cupDistance >= CUP_PULL_INNER_RADIUS) {
         f32 toCup[3];
 
-        toCup[AXIS_Y] = 1.0f;
         toCup[AXIS_X] =
             g_HoleSetup.cupPosition[AXIS_X] - simulation->position[AXIS_X];
+        toCup[AXIS_Y] = 1.0f;
         toCup[AXIS_Z] =
             g_HoleSetup.cupPosition[AXIS_Z] - simulation->position[AXIS_Z];
         guNormalize(&toCup[AXIS_X], &toCup[AXIS_Y], &toCup[AXIS_Z]);
