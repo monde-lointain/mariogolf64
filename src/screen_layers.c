@@ -858,6 +858,13 @@ void MarkHalfTurnCircle(
  * 264, and column and row offsets in place of radiusOffset and stepOffset 330.
  * An s16 error gives 94 words (4 in shape), but it sign-extends error with two
  * 16-bit shifts the original lacks. 108 words differ.
+ *
+ * A do-while (0) around the first clamp pair's lines through radiusOffset's
+ * clamp matches, as does one around the whole first pair with another around
+ * the second pair's radiusOffset lines; both are devices to match, so they are
+ * left out. Clamping with ternaries gives 56 to 270 words, at least 48 in
+ * shape, and an inline clamp function 64 to 284; testing each offset in place
+ * of its source leaves 108, as copy propagation folds the test back.
  */
 #ifdef NON_MATCHING
 void MarkHalfTurnCircle(
