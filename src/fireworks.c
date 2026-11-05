@@ -194,7 +194,11 @@ static inline s32 RandomLaunchHeightJitter(void) {
  * another statement inside the cell's test, which divides signed, where the
  * original's srl halves width unsigned. Setting halfWidth inside the cell's
  * test gives 57 words, 19 in shape, before the row loop 50, 16 in shape, and
- * width / 2 written in place 116. 50 words differ, 14 in shape.
+ * width / 2 written in place 116. As s32s, as LoadFireworks declares them,
+ * width and height give 49 words (15 in shape), but the height is then halved
+ * signed, with an addu and sra, where the original halves both sizes with srl;
+ * an s32 width with a u32 height gives 48 (14) and keeps the srl, but gives the
+ * two sizes different types. 50 words differ, 14 in shape.
  */
 #ifdef NON_MATCHING
 void LaunchFirework(Firework* firework, s32 fireworkIndex UNUSED) {
