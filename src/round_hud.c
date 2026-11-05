@@ -3703,7 +3703,11 @@ void DrawShotEffectsHud(Gfx** displayListHead);
  * register other than fabsf's result, as in IsEasedEyeHeightZero. Local-alloc
  * ties the two because both are local to the block and die once; taking the
  * magnitude into shotLength, which other blocks use, keeps them apart, but as
- * shotLength crosses calls it gets $f20 and 13 words differ. The stroke counts'
+ * shotLength crosses calls it gets $f20 and 13 words differ. A new f32 that
+ * holds the magnitude here and the yards' product in the other branch, so
+ * that it spans blocks without crossing a call, also breaks the tie, but
+ * the load gets $f0 and the magnitude $f2, where the original has $f4 and
+ * $f0, and 12 words differ (0 in shape). The stroke counts'
  * loop tests i != playerCount, as the faces' loop does; with i < playerCount,
  * 77 words differ. The small faces' left edge goes straight into its rectangle;
  * through a local, its spill slot comes first and 34 words differ. The register
