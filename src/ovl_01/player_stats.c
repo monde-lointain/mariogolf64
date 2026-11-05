@@ -816,9 +816,10 @@ void UpdateBetSettings(void) {
  * right edge's column sum alone gave 16 and still masked; as s16 or s32 it gave
  * 25 and as u32 28, and used for both edges 207 whatever its type. Earlier, the
  * register oracle's closest result was the 25 words of the draft then, with no
- * register forced. Ordering the marks' top and bottom subtractions otherwise
- * gives 18 to 126 words, and no pair of types among u8, s8, u16, s16, u32 and
- * s32 for markGrowth and markRaise fewer than 16. 16 words differ, 2 in shape.
+ * register forced. Ordering the marks' top subtractions otherwise gives 18 to
+ * 126 words; subtracting the bottom edge's spacing before its raise gives the
+ * same 16, and no pair of types among u8, s8, u16, s16, u32 and s32 for
+ * markGrowth and markRaise fewer than 16. 16 words differ, 2 in shape.
  */
 #ifdef NON_MATCHING
 void DrawBetSettings(
