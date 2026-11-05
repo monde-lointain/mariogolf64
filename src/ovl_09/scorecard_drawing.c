@@ -2166,28 +2166,29 @@ INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard_drawing", DrawLeaderboardPage);
  * backTop is 137 on every path there. With backTop set at its declaration
  * again, the output gave 768 (218); its other change, a temp for one texture
  * rectangle's top, 56 below the card's, gave 842 (194) without it. The register
- * oracle, forcing 45 pseudos' registers, leaves 598 words at best, so the code
+ * oracle, forcing 45 pseudos' registers, leaves 593 words at best, so the code
  * differs too. The faded style sets the cells' alpha after its commands, as the
  * yellow style does; set first, 762 words differed (212 in shape). Adding the
  * skins won to standing in both arms of the front and back nine test, after
- * each DrawShadowedText, gave 734 words (216 in shape) and now 734 (184), but
- * the original adds them once, after both arms, as the draft does. The skins,
- * strokes, putts, over-par and handicap-stroke texts add g_Scorecard.x last, as
- * the hole numbers, par and badges do; with x first, as the draft had them, 760
- * words differed, 210 in shape, and the oracle left 628. The back nine's match
- * mark still adds x first, to the cell's offset grouped, which leaves the same
- * words with 2 fewer in shape and the same oracle result as the plain sum: x
- * last there gives 767 words (165 in shape), and the front nine's mark grouped
- * with x first too gives 755 (165), but the oracle leaves 595 words against
- * 593. Writing each of the four cell rectangles' edges as plain sums, with
- * g_Scorecard.x and g_Scorecard.y all first or all last in each, gave 1031 to
- * 1041 words in all sixteen combinations when the draft had 760. The first cell
- * loop's back nine adds g_Scorecard.x last at its right edge, as at its left;
- * added first there, 760 words differed, 178 in shape. The second loop's
- * front-nine rectangle adds x last at both edges, as the first loop's does;
- * with x first at both, 758 words differ (172 in shape). Grouping the y sums of
- * the second loop's front rectangle as the first loop's are gives 762 to 764
- * words. 755 words differ, 165 in shape.
+ * each DrawShadowedText, gave 734 words (216 in shape), later 734 (184), and
+ * now 729 (171), but the original adds them once, after both arms, as the draft
+ * does. The skins, strokes, putts, over-par and handicap-stroke texts add
+ * g_Scorecard.x last, as the hole numbers, par and badges do; with x first, as
+ * the draft had them, 760 words differed, 210 in shape, and the oracle left
+ * 628. The back nine's match mark still adds x first, to the cell's offset
+ * grouped, which leaves the same words with 2 fewer in shape and the same
+ * oracle result as the plain sum: x last there gives 767 words (165 in shape),
+ * and the front nine's mark grouped with x first too gives 755 (165), but the
+ * oracle leaves 595 words against 593. Writing each of the four cell
+ * rectangles' edges as plain sums, with g_Scorecard.x and g_Scorecard.y all
+ * first or all last in each, gave 1031 to 1041 words in all sixteen
+ * combinations when the draft had 760. The first cell loop's back nine adds
+ * g_Scorecard.x last at its right edge, as at its left; added first there, 760
+ * words differed, 178 in shape. The second loop's front-nine rectangle adds x
+ * last at both edges, as the first loop's does; with x first at both, 758 words
+ * differ (172 in shape). Grouping the y sums of the second loop's front
+ * rectangle as the first loop's are gives 762 to 764 words. 755 words differ,
+ * 165 in shape.
  */
 #ifdef NON_MATCHING
 void DrawScoresPage(Gfx** displayListHead) {
