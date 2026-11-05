@@ -1592,6 +1592,8 @@ void FormatLeaderboardRow(char* row, TournamentStanding* standing) {
 #define SCORE_LABEL_LEFT 184
 #define HOLES_LABEL_LEFT 248
 #define LEADERBOARD_ROW_SPACING 16
+/* The faces and arrows show once the last row has begun flipping in */
+#define LAST_ROW_FLIP_TIME ((LEADERBOARD_ROW_COUNT - 1) * ROW_FLIP_STAGGER)
 #define ROW_IMAGE_WIDTH 256
 #define ROW_IMAGE_HEIGHT 14
 #define ROW_LEFT 32
@@ -1638,20 +1640,23 @@ void FormatLeaderboardRow(char* row, TournamentStanding* standing) {
  * this spills it, so its frame is 0xE0 bytes, not 0xD8. The bottom flaps' loop
  * also reads the flip angles through the stagger's index instead of a pointer
  * of their own. Stepping the rows' tops beside the index gives 140 words
- * differing, 54 in shape. The name flaps' shade test branches over the sine and
- * jumps past it with 0xFF, where GCC branches to the join with 0xFF in the
+ * differing, 54 in shape. The name flaps' shade test branches over the sine
+ * and jumps past it with 0xFF, where GCC branches to the join with 0xFF in the
  * delay slot; testing !(angle >= FLAP_EDGE_ON_ANGLE) gives that layout but
  * reverses the compare (121 words, 45 in shape), and >= with the sine first
  * gives 125. In both flap loops the original masks the shade in its own
  * register; a u8, u16 or u32 shade gives 202-208 words, s16 changes nothing.
  * The permuter's best read g_Scorecard.x through a pointer to it in the faces'
- * and arrow's calls, giving 99 to 104 words, 41 to 44 in shape; no such pointer
- * is natural here, and setting the arrow's bottom edge in a local of its own,
- * as one of them also did, changes nothing. The original divides and truncates
- * the arrow's texel step once, storing it as both of DrawTextureRect's steps;
- * writing the division into both arguments instead of texelStep gives 118 words
- * (44 in shape) but repeats it, and an f32 texelStep the call converts gives
- * 120. 120 words differ, 46 in shape.
+ * and arrow's calls, giving 99 to 104 words, 41 to 44 in shape; no such
+ * pointer is natural here, and setting the arrow's bottom edge in a local of
+ * its own, as one of them also did, changes nothing. The original divides and
+ * truncates the arrow's texel step once, storing it as both of
+ * DrawTextureRect's steps; writing the division into both arguments instead of
+ * texelStep gives 118 words (44 in shape) but repeats it, and an f32 texelStep
+ * the call converts gives 120. These counts were measured when the faces and
+ * arrows were drawn only once flipTime passed ROW_FLIP_TIME, which it never
+ * does, and the draft gave 120 words (46 in shape); the original compares it
+ * with 36, the last row's start. 116 words differ, 46 in shape.
  */
 #ifdef NON_MATCHING
 void DrawLeaderboardPage(Gfx** displayListHead) {
@@ -1949,7 +1954,7 @@ void DrawLeaderboardPage(Gfx** displayListHead) {
   gDPPipeSync(gfx++);
   gDPSetTexturePersp(gfx++, G_TP_NONE);
 
-  if (g_Scorecard.content.flipTime > ROW_FLIP_TIME) {
+  if (g_Scorecard.content.flipTime > LAST_ROW_FLIP_TIME) {
     for (i = 0; i != LEADERBOARD_ROW_COUNT; i++) {
       if (g_TournamentStandings[g_Scorecard.topRow + i].contestantId ==
           PLAYER_CONTESTANT) {
@@ -1979,7 +1984,7 @@ void DrawLeaderboardPage(Gfx** displayListHead) {
   gDPSetRenderMode(gfx++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
   gDPPipeSync(gfx++);
   gDPSetTextureFilter(gfx++, G_TF_BILERP);
-  if (g_Scorecard.content.flipTime > ROW_FLIP_TIME) {
+  if (g_Scorecard.content.flipTime > LAST_ROW_FLIP_TIME) {
     for (i = 0; i != LEADERBOARD_ROW_COUNT; i++) {
       if (g_TournamentStandings[g_Scorecard.topRow + i].contestantId ==
               PLAYER_CONTESTANT &&
