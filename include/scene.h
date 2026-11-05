@@ -111,8 +111,9 @@ enum GameMode {
   GAME_MODE_RING_SHOT = 9,
   GAME_MODE_SKINS_MATCH = 10,
   GAME_MODE_CLUB_SLOTS = 11,
-  /* A mode in which every hole is built from the same hole assets */
-  GAME_MODE_UNK12 = 12,
+  /* Set by SetUpTitleHole for the hole behind the title screen, which is
+   * built from assets of its own */
+  GAME_MODE_TITLE_HOLE = 12,
   /* Set by the staff roll for the hole its cast plays */
   GAME_MODE_STAFF_ROLL = 13
 };

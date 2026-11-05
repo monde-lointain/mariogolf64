@@ -789,7 +789,7 @@ NO_RESULT ChooseHoleConditions(void) {
     return;
   }
 
-  if (g_GameState.gameMode != GAME_MODE_UNK12 &&
+  if (g_GameState.gameMode != GAME_MODE_TITLE_HOLE &&
       g_GameState.gameMode != GAME_MODE_STAFF_ROLL) {
     /* The first hole, mini-golf and GAME_MODE_TRAINING stay dry */
     if (g_GameState.holeIndex != 0 &&
