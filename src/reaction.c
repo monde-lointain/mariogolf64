@@ -1496,6 +1496,10 @@ void PlaceAtReactionSpot(Vec3 position, Vec3 rotation, Vec3 scale) {
  * do all differ there. The ROM's compiler isn't refusing every abs.s tie:
  * 15 of its abs.s use one register for both, and a cc1 whose abssf2 output
  * is earlyclobber gives the load $f0 and the magnitude $f2 (4 words).
+ * Writing the magnitude of the eye's height as a >= 0.0f ?: on it, which fold
+ * turns into the same abs.s under -ffast-math, also leaves the tie (4 words),
+ * and inlining float_math.c's fabsf, which masks the sign bit in an integer
+ * register, gives 15, 9 in shape.
  * 4 words differ.
  */
 #ifdef NON_MATCHING
