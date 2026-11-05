@@ -205,12 +205,14 @@ def compile_function(
     assemble = ["-c", f"-Wa,-I{fncompare.ROOT}", "-o"]
     blame.run(work / "unit.s", optflags, [*assemble, "unit.o"], work)
     blame.run(work / "marked.s", optflags, [*assemble, "marked.o"], work)
-    routine = fncompare.read_object_file(work / "unit.o")[function]
+    functions = fncompare.read_object_file(work / "unit.o")
+    routine = functions[function]
     start, ends = blame.read_line_ends(work / "marked.o", function)
     blamed = blame.Compilation(
         lines,
         blame.read_word_lines(lines, routine, start, ends),
         routine,
+        functions,
         blame.read_dumps(work, function),
         {},
     )

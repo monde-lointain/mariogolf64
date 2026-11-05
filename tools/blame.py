@@ -125,6 +125,8 @@ class Compilation:
     # The .s line number that made each word of the function
     word_lines: list[int]
     routine: fncompare.Routine
+    # Every routine in the object, the function's nested ones among them
+    functions: fncompare.Functions
     # {pass: the function's part of that pass's dump}
     dumps: dict[str, str]
     # {pass: {insn UID: the source line that made it}}
@@ -307,7 +309,8 @@ def compile_function(c_path: str, function: str, work: Path) -> Compilation:
     assemble = ["-c", f"-Wa,-I{fncompare.ROOT}", "-o"]
     run(work / "unit.s", optflags, [*assemble, "unit.o"], work)
     run(work / "marked.s", optflags, [*assemble, "marked.o"], work)
-    routine = fncompare.read_object_file(work / "unit.o")[function]
+    functions = fncompare.read_object_file(work / "unit.o")
+    routine = functions[function]
     if fncompare.read_object_file(work / "marked.o")[function].words != routine.words:
         sys.exit("marking the lines changed the code")
     start, ends = read_line_ends(work / "marked.o", function)
@@ -316,6 +319,7 @@ def compile_function(c_path: str, function: str, work: Path) -> Compilation:
         lines,
         read_word_lines(lines, routine, start, ends),
         routine,
+        functions,
         dumps,
         read_insn_lines(optflags, dumps, work, function),
     )
@@ -808,7 +812,8 @@ def main() -> None:
     if len(arguments) != EXPECTED_ARGUMENT_COUNT:
         sys.exit(__doc__)
     asm_path, c_path, function = arguments
-    target = fncompare.read_target_functions(asm_path)[function]
+    original = fncompare.read_original(asm_path, c_path, function)
+    target = original.routine
     if keep:
         keep.mkdir(parents=True, exist_ok=True)
         compilation = compile_function(c_path, function, keep)
@@ -816,8 +821,21 @@ def main() -> None:
         with tempfile.TemporaryDirectory() as work:
             compilation = compile_function(c_path, function, Path(work))
     compiled = compilation.routine
-    print(f"{function} {fncompare.describe(target, compiled)}")
+    score = fncompare.describe_original(original, compilation.functions, function)
+    print(f"{function} {score}")
+    nested_pairs = {
+        name: (routine, compilation.functions.get(name, fncompare.NOT_COMPILED))
+        for name, routine in original.nested.items()
+    }
+    if nested_pairs and fncompare.count_differences(target, compiled):
+        print(f" {function}:")
     fncompare.print_diff(target, compiled, lambda index: blame(compilation, index))
+    # The nested routines' words are left unblamed: word_lines covers the
+    # function's own
+    for name, pair in nested_pairs.items():
+        if fncompare.count_differences(*pair):
+            print(f" {name}:")
+            fncompare.print_diff(*pair)
     runs = fncompare.find_diff_runs(target, compiled)[: fncompare.MAX_DIFF_HUNKS]
     indices = [index for run in runs for _, index in run if index is not None]
     for pseudo in find_pseudos(compilation, indices):
