@@ -23,6 +23,7 @@ the compiler's work files, such as the pass dumps unit.sched and
 unit.sched2, in DIR.
 """
 
+import functools
 import re
 import sys
 import tempfile
@@ -320,13 +321,23 @@ def compile_function(c_path: str, function: str, work: Path) -> Compilation:
     )
 
 
+@functools.cache
+def index_insns(dump: str) -> dict[int, str]:
+    """Return {insn UID: its RTL} for the insns of DUMP, the first of each UID.
+
+    Searching the dump for each insn took most of a large function's run.
+    """
+    insns: dict[int, str] = {}
+    for match in INSN_HEADER_RE.finditer(dump):
+        end = dump.find("\n\n", match.start())
+        rtl = dump[match.start() : end if end >= 0 else len(dump)]
+        _ = insns.setdefault(int(match.group(1)), rtl)
+    return insns
+
+
 def find_insn(dump: str, uid: int) -> str:
     """Return the RTL of insn UID in DUMP, or an empty string."""
-    match = re.search(rf"{INSN_HEADER_START}{uid} ", dump, re.MULTILINE)
-    if not match:
-        return ""
-    end = dump.find("\n\n", match.start())
-    return dump[match.start() : end if end >= 0 else len(dump)]
+    return index_insns(dump).get(uid, "")
 
 
 def get_insn(compilation: Compilation, index: int) -> tuple[int, str] | None:
@@ -423,6 +434,17 @@ def find_pseudos(compilation: Compilation, indices: list[int]) -> list[int]:
     return sorted(pseudos)
 
 
+@functools.cache
+def index_matches(
+    pattern: re.Pattern[str], group: int, dump: str
+) -> dict[int, re.Match[str]]:
+    """Return {UID: the first match of PATTERN in DUMP whose GROUP is UID}."""
+    matches: dict[int, re.Match[str]] = {}
+    for match in pattern.finditer(dump):
+        _ = matches.setdefault(int(match.group(group)), match)
+    return matches
+
+
 def describe_schedule(dump: str, uid: int) -> str:
     """Return how the scheduler that wrote DUMP placed insn UID.
 
@@ -431,28 +453,15 @@ def describe_schedule(dump: str, uid: int) -> str:
     needs, and is placed at the clock of the ready list it heads, ahead of
     the others still ready then.
     """
-    priority = next(
-        (
-            match.group(2)
-            for match in PRIORITY_RE.finditer(dump)
-            if int(match.group(1)) == uid
-        ),
-        None,
-    )
+    priority = index_matches(PRIORITY_RE, 1, dump).get(uid)
     if priority is None:
         return ""
-    parts = [f"priority {priority}"]
-    launch = next(
-        (match for match in LAUNCH_RE.finditer(dump) if int(match.group(1)) == uid),
-        None,
-    )
+    parts = [f"priority {priority.group(2)}"]
+    launch = index_matches(LAUNCH_RE, 1, dump).get(uid)
     if launch:
         after, stalls, clock = launch.group(2, 3, 4)
         parts.append(f"ready before insn {after} after {stalls} stalls at T-{clock}")
-    placed = next(
-        (match for match in READY_RE.finditer(dump) if int(match.group(2)) == uid),
-        None,
-    )
+    placed = index_matches(READY_RE, 2, dump).get(uid)
     if placed:
         others = placed.group(3).split()
         rivals = f" ahead of {' '.join(others)}" if others else " alone"
