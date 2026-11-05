@@ -3035,6 +3035,11 @@ void ShowHoleOutBanner(s32 playerIndex) {
  * local keeps the static's s32. Setting nextState after the calls when a ring
  * shot holes out, as starting over does, gives 386 words (140 in shape); it is
  * kept first, as the training choice box's hole out has it.
+ *
+ * Setting a local to MAX_ROLL_SKIP_STEPS before the player loop and bounding
+ * the roll skip with it gives 336 words (144 in shape), but the build still
+ * compares the step count with slti 4, as the original does, so the gain comes
+ * from the extra pseudo's numbering.
  */
 #ifdef NON_MATCHING
 /* Debug flag 0x47: prints where the ball lies, and the second controller moves
