@@ -15,9 +15,9 @@
 /* GrantWinsStarsAndBadges gives a win, where there is none, in this many of the
  * first rows of the matchups */
 #define GRANTED_WIN_ROW_COUNT 14
-/* GrantRingShotProgressAndPoints sets this many of each hole's unk1344 entries
- */
-#define GRANTED_UNK1344_COUNT 13
+/* GrantRingShotProgressAndPoints records a clear of each hole for this many of
+ * the first characters */
+#define GRANTED_CLEAR_CHARACTER_COUNT 13
 /* Enough to open every course but the last */
 #define GRANTED_COURSE_POINTS 3000
 
@@ -120,8 +120,8 @@ void GrantRingShotProgressAndPoints(void) {
   for (courseIndex = 0; courseIndex != RING_SHOT_COURSE_COUNT; courseIndex++) {
     for (holeIndex = 0; holeIndex != RING_SHOT_HOLE_COUNT; holeIndex++) {
       save->hasRingShotStar[courseIndex][holeIndex] = TRUE;
-      for (index = 0; index != GRANTED_UNK1344_COUNT; index++) {
-        save->unk1344[courseIndex][holeIndex][index] = 1;
+      for (index = 0; index != GRANTED_CLEAR_CHARACTER_COUNT; index++) {
+        save->ringShotClearCounts[courseIndex][holeIndex][index] = 1;
       }
     }
   }

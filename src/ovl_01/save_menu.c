@@ -164,7 +164,7 @@ static s32 f_UnusedRingShotArrowWord = 0;
 /* Read by no routine */
 static s32 f_UnusedWordAfterArrowTimer UNUSED = 0;
 /* The order that the Ring Shot records list the characters in */
-static u8 f_RingShotCharacterOrder[SAVE_UNK1344_ENTRY_COUNT] = {
+static u8 f_RingShotCharacterOrder[CHARACTER_COUNT] = {
     0, 1, 5, 3, 4, 10, 6, 7, 8, 9, 2, 11, 12, 13, 14, 15, 16, 17};
 /* Read by no routine; words holding 0xFF, 0xFF00FF, 0xFF0000 or 0 */
 static s32 f_UnusedColorWords[11] UNUSED = {0x000000FF, 0x00FF00FF, 0x000000FF,
@@ -490,11 +490,11 @@ void UpdateRingShotRecords(void) {
  * open course and one for the saved replays, sits above a shaded panel, with
  * the blinking arrows around the chosen one. For a course the panel shows each
  * hole's number over a column of four characters from ringShotFirstCharacters
- * on, crossed out and darkened where the hole's unk1344 entry for them is 0,
- * with arrows where the list scrolls further. For the replays it shows each
- * slot's character face, course and a message for its course and hole, or
- * dashes where it is empty, and the chosen slot's message glows in shifting
- * colors. Message 0x1E plus the row is shown below the panel.
+ * on, crossed out and darkened where they haven't cleared the hole, with arrows
+ * where the list scrolls further. For the replays it shows each slot's
+ * character face, course and a message for its course and hole, or dashes where
+ * it is empty, and the chosen slot's message glows in shifting colors. Message
+ * 0x1E plus the row is shown below the panel.
  */
 #define RING_SHOT_PANEL_LEFT 24
 #define RING_SHOT_PANEL_TOP 70
@@ -706,7 +706,7 @@ void DrawRingShotRecords(Gfx** displayListHead) {
           itemIndex++) {
         character = f_RingShotCharacterOrder[listIndex];
         index = FACE_PLAIN;
-        if (save->unk1344[row][column][character] == 0) {
+        if (save->ringShotClearCounts[row][column][character] == 0) {
           index = FACE_DARKENED;
         }
 

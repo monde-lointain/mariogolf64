@@ -98,7 +98,6 @@ enum SaveReadResult {
 #define HOLES_PER_NINE 9
 #define RING_SHOT_COURSE_COUNT 6
 #define RING_SHOT_HOLE_COUNT 6
-#define SAVE_UNK1344_ENTRY_COUNT 18
 
 /* GameState.holeSelection values; code tests the nines as bits */
 #define HOLE_SELECTION_ALL 0
@@ -504,8 +503,8 @@ typedef struct SaveData {
   /* 0x0E98 */ CourseStats courseStats[COURSE_COUNT];
   /* 0x1150 */ u8 unk1150[0x1320 - 0x1150];
   /* 0x1320 */ s8 hasRingShotStar[RING_SHOT_COURSE_COUNT][RING_SHOT_HOLE_COUNT];
-  /* 0x1344 */ s8 unk1344[RING_SHOT_COURSE_COUNT][RING_SHOT_HOLE_COUNT]
-                         [SAVE_UNK1344_ENTRY_COUNT];
+  /* 0x1344 */ s8 ringShotClearCounts[RING_SHOT_COURSE_COUNT]
+                                     [RING_SHOT_HOLE_COUNT][CHARACTER_COUNT];
   /* 0x15CC */ s32 coursePoints; /* Earned in total, so it never goes down */
   /* 0x15D0 */ PlayRecord rankedRecords[RANKED_RECORD_COUNT];
   /* 0x1DF0 */ RingShotRecord ringShotRecords[RING_SHOT_RECORD_COUNT];
