@@ -556,11 +556,13 @@ const char f_CompactHoleFormat[] = "Hole%d";
  * Grouping the tiles' y as g_Scorecard.y + (rowOffset + TILE_TOP) gives 111
  * words, 49 in shape; stepping rowOffset as i * MATCH_ROW_SPACING gives 183.
  * The win arrow's rise is read once, before the strokes test, as the original
- * does (86 words, 66 in shape, reading it in each call). The tile's right edge
- * adds the scorecard's x last; added first, as before, 70 words differed, and
- * the other orders and groupings give 68 to 103. The register oracle's closest
- * result is these 68 words with no register forced, so allocation isn't the
- * cause. 68 words differ, 50 in shape.
+ * does (86 words, 66 in shape, reading it in each call). The tile's first
+ * piece's right edge adds the scorecard's x last; added first, as before, 70
+ * words differed, and the other orders and groupings gave 68 to 103. Its last
+ * piece's right edge sums the same way; with the x second, as before, 68 words
+ * differed, and this is one of 20 orders and groupings of that sum giving 66.
+ * The register oracle's closest result is these 66 words with no register
+ * forced, so allocation isn't the cause. 66 words differ, 50 in shape.
  */
 #ifdef NON_MATCHING
 void DrawMatchPage(Gfx** displayListHead) {
@@ -763,8 +765,8 @@ void DrawMatchPage(Gfx** displayListHead) {
             QuarterPixels((j * TILE_SPACING) +
                 (g_Scorecard.x + TILE_LEFT + (TILE_PIECE_WIDTH * 2))),
             QuarterPixels(g_Scorecard.y + rowOffset + TILE_TOP),
-            QuarterPixels((j * TILE_SPACING) + g_Scorecard.x + TILE_LEFT +
-                (TILE_PIECE_WIDTH * 3)),
+            QuarterPixels((j * TILE_SPACING) + TILE_LEFT +
+                (TILE_PIECE_WIDTH * 3) + g_Scorecard.x),
             QuarterPixels(g_Scorecard.y + rowOffset + TILE_TOP + TILE_HEIGHT),
             G_TX_RENDERTILE, TexelCoordinate(TILE_PIECE_WIDTH),
             TexelCoordinate(TILE_EDGE_IMAGE_ROW * TILE_HEIGHT), TEXEL_STEP_ONE,
