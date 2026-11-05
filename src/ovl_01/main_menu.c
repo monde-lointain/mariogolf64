@@ -5851,13 +5851,16 @@ void DrawAnimationViewer(Gfx** displayListHead) {
  * picks; when that is 3 or 4, the chosen hole starts loading once they stop.
  */
 /*
- * Doesn't match: GCC reloads the chosen course from the stack in the icon
- * loop, where the original keeps it in a register. Clearing the place count
- * in the place loop's initializer takes 51 words differing to 49. Reading
- * the slot in its own block gives 40 words differing, 10 in shape, but the
- * register oracle then needs 3 forced registers to reach 10, where read
- * plainly 5 forced reach 5; no declaration order changes either. 89 words
- * differ, 5 in shape.
+ * Doesn't match: GCC reloads the chosen course from the stack in the icon loop,
+ * where the original keeps it in a register. Clearing the place count in the
+ * place loop's initializer took 51 words differing to 49. Earlier, reading the
+ * slot in its own block gave 40 words differing, 10 in shape, but the register
+ * oracle then needed 3 forced registers to reach 10, where read plainly 5
+ * forced reached 5; no declaration order changed either. Setting the course
+ * icons' texels before their palette, from the texels, takes 89 words differing
+ * to 24, 5 in shape to 6. The original keeps the texels in $fp and the address
+ * of the local arrays on the stack in $s4, where this has them the other way
+ * round. 24 words differ, 6 in shape.
  */
 #ifdef NON_MATCHING
 void DrawCourseSelect(Gfx** displayListHead) {
@@ -6048,13 +6051,16 @@ void DrawCourseSelect(Gfx** displayListHead) {
 
       if (g_GameState.isMiniGolf == TRUE) {
         palette = g_MiniGolfDiscImages[slot];
-        /* Indexed as one row, as that matches the original better */
+        /*
+         * Indexed as one row, to match: indexed by the buffer and the slot,
+         * 43 words differ, 7 in shape, against 24 and 6
+         */
         texels = MENU_ICON_IMAGE_PAIRS[0][(f_MiniGolfDiscBufferIndex *
                                               MINI_GOLF_DISC_IMAGE_COUNT) +
             slot];
       } else {
-        palette = ImageBody(MENU_ICON_IMAGE_PAIRS[0][slot]);
         texels = MENU_ICON_IMAGE_PAIRS[0][slot];
+        palette = ImageBody(texels);
       }
 
       gDPLoadTLUT_pal256(gfx++, TextureAddress(palette));
