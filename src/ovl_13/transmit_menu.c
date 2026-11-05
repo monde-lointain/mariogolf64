@@ -342,7 +342,7 @@ typedef struct StatusCourse {
   /* 0x09 */ u8 averagePutts; /* In tenths, from PackTenths */
   /* 0x0A */ u8 parOrBetterRate; /* As percentages */
   /* 0x0B */ u8 parOnRate;
-  /* 0x0C */ u8 unkC;
+  /* 0x0C */ u8 sandSaveRate;
   /* 0x0D */ u8 places; /* STATUS_*_PLACE bits */
   /* 0x0E */ u8 characterBestScores[CHARACTER_COUNT];
   /* 0x20 */ StatusTime bestTimes[BEST_TIME_COUNT];
@@ -3740,9 +3740,9 @@ void BuildStatusData(u8* status) {
             (PERCENTS_PER_ONE / HOLES_PER_ROUND));
         sum = entry->sandSaveCount + entry->missedSandSaveCount;
         if (sum == 0) {
-          course->unkC = 0;
+          course->sandSaveRate = 0;
         } else {
-          course->unkC = RoundedWholePart(
+          course->sandSaveRate = RoundedWholePart(
               ((f32)entry->sandSaveCount / (f32)sum) * PERCENTS_PER_ONE);
         }
 
@@ -3854,7 +3854,7 @@ void BuildStatusData(u8* status) {
         RoundedWholePart(g_CourseStatFigures[COURSE_COUNT].parSavePercent);
     course->parOnRate =
         RoundedWholePart(g_CourseStatFigures[COURSE_COUNT].parOnPercent);
-    course->unkC =
+    course->sandSaveRate =
         RoundedWholePart(g_CourseStatFigures[COURSE_COUNT].sandSavePercent);
     course->places = 0;
     for (index = 0; index != CHARACTER_COUNT; index++) {
