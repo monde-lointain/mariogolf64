@@ -547,17 +547,23 @@ void GetSaveDataAndMenuMemory(void) {
 /*
  * Doesn't match: GCC spills the button's half height to the stack, where the
  * original keeps it in a saved register like the other halves. The oracle found
- * no allocation that avoids the spill, and clamping the half height without its
- * flag gave 65 words, when the draft had 54. The permuter's best truncates each
- * button size into its half and halves it in a second statement (71 words, 7 in
- * shape, on the current draft; 85 on an earlier one), a split assignment that
- * gives the variable two meanings. Truncating into separate integer locals
- * first changes nothing, and halving the float sizes gives 73 words (37 in
- * shape); swapping the sizes' declarations alone changed nothing. Keeping the
- * window's half width in its own variable, rather than in buttonY before the
- * button's y, took it from 54 words differing to 44, 18 in shape either way;
- * where halfWidth is declared makes no difference. 44 words differ, 18 in
- * shape.
+ * no allocation that avoids the spill. Earlier, a flag held whether the
+ * button's half height was empty, as clamping it without the flag gave 65 words
+ * when the draft had 54; an if clamping it gives the same code as the flag did.
+ * The permuter's best truncates each button size into its half and halves it in
+ * a second statement (71 words, 7 in shape, on the current draft; 85 on an
+ * earlier one), a split assignment that gives the variable two meanings.
+ * Truncating into separate integer locals first changes nothing, and halving
+ * the float sizes gives 73 words (37 in shape); swapping the sizes'
+ * declarations alone changed nothing. Keeping the window's half width in its
+ * own variable, rather than in buttonY before the button's y, took it from 54
+ * words differing to 44, 18 in shape either way; where halfWidth is declared
+ * makes no difference. Clamping the half width before the half height took it
+ * to 36, 18 in shape. The button's half height is clamped by an if, to match,
+ * where the other halves use the conditional operator: with that operator it
+ * gives 47 words (19 in shape), and with ifs for every half 140 (56); of the 32
+ * mixes of the two forms, with either order of the window's halves,, this one
+ * is the lowest. 36 words differ, 18 in shape.
  */
 #ifdef NON_MATCHING
 void DrawYesNoWindow(Gfx** displayListHead, s32 width, s32 height, s32 centerX,
@@ -578,8 +584,6 @@ void DrawYesNoWindow(Gfx** displayListHead, s32 width, s32 height, s32 centerX,
   s32 buttonY;
   s32 pulse;
   s32 growth;
-
-  s32 isButtonHeightEmpty;
 
   GetMenuMemory();
   switch (f_MenuWindowState) {
@@ -638,11 +642,13 @@ void DrawYesNoWindow(Gfx** displayListHead, s32 width, s32 height, s32 centerX,
   halfHeight = windowHalfHeight;
   buttonHalfWidth = (s32)buttonWidth / 2;
   buttonHalfHeight = (s32)buttonHeight / 2;
-  halfHeight = (halfHeight <= 0) ? 1 : halfHeight;
   halfWidth = (halfWidth <= 0) ? 1 : halfWidth;
+  halfHeight = (halfHeight <= 0) ? 1 : halfHeight;
   buttonHalfWidth = (buttonHalfWidth <= 0) ? 1 : buttonHalfWidth;
-  isButtonHeightEmpty = buttonHalfHeight <= 0;
-  buttonHalfHeight = isButtonHeightEmpty ? 1 : buttonHalfHeight;
+  if (buttonHalfHeight <= 0) {
+    buttonHalfHeight = 1;
+  }
+
   windowWidth = (windowWidth <= 0.0f) ? 1.0f : windowWidth;
   windowHalfHeight = (windowHalfHeight <= 0.0f) ? 1.0f : windowHalfHeight;
   buttonWidth = (buttonWidth <= 0.0f) ? 1.0f : buttonWidth;
