@@ -1290,12 +1290,17 @@ void InitClubs(void) {
  * InterpolatePuttPower is a nested function, a GNU C extension.
  *
  * Doesn't match: the original copies shotMode into $fp as the flag's test
- * branches and uses the copy only when test-firing, and works out the tolerance
- * after the error's abs.s, where this works it out first. Each half of the
- * search stores the new power in both arms, as the long half did, which took
- * the draft from 65 words differing to 63. Negating the error by an if gives 58
- * words, and a ?: on the integer difference 54, 6 in shape, but both branch
- * around a neg.s where the original has abs.s. 63 words differ, 15 in shape.
+ * branches and uses the copy only when test-firing. With GCC's built-in
+ * fabsf, the short half of the search storing the new power in both arms, as
+ * the long half did, took the draft from 65 words differing to 63. With
+ * fabsf an abs.s in volatile inline assembly, the tolerance is worked out
+ * after the error's abs.s, as in the original, which took the draft to 47
+ * words, 3 in shape. Negating the error by an if, or through AbsFloat, gives
+ * 58 words (10 in shape), and a ?: on the integer difference 31 (7), but
+ * neither form takes the original's abs.s. The long half now stores the
+ * power once after its arms, which ties; the short half keeps a store in
+ * each arm, as storing once in both halves gives 67 words (3 in shape). 47
+ * words differ, 3 in shape.
  */
 #ifdef NON_MATCHING
 s32 GetPuttPower(s32 fraction, ShotMode shotMode) {
@@ -1380,13 +1385,13 @@ s32 GetPuttPower(s32 fraction, ShotMode shotMode) {
 
       if (shortPower == 0) {
         power = longPower * 3 / 4;
-        putter->power[shotMode] = power;
       } else {
         power = InterpolatePuttPower(shortPower, longPower,
             (f32)(targetDistance - shortDistance) /
                 (f32)(longDistance - shortDistance));
-        putter->power[shotMode] = power;
       }
+
+      putter->power[shotMode] = power;
     } else {
       shortDistance = distance;
       shortPower = putter->power[shotMode];
