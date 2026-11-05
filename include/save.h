@@ -412,6 +412,12 @@ enum HoleStatus {
   HOLE_STATUS_OUT
 };
 
+/*
+ * Player.powerShotCount's value when power shots are not counted; the HUD
+ * then shows no count
+ */
+#define POWER_SHOTS_UNLIMITED (-1)
+
 /* A golfer in the round, human or computer, and their round so far */
 typedef struct Player {
   /* 0x00 */ char name[PLAYER_NAME_SIZE];
@@ -429,7 +435,8 @@ typedef struct Player {
   /* 0x26 */ s8 holeStatus; /* A HOLE_STATUS_* value */
   /* 0x27 */ s8 controllerIndex; /* Into g_PlayerControllerPorts, when below
                                     MAXCONTROLLERS */
-  /* 0x28 */ s8 unk28;
+  /* 0x28 */ s8 powerShotCount; /* Left in the round; POWER_SHOTS_UNLIMITED
+                                 in training and replays */
   /* 0x29 */ s8 handicap; /* Gives strokes on the holes it ranks within */
   /* 0x2A */ s8 soundPan;
   /* 0x2B */ PlayerHole holes[COURSE_HOLE_COUNT];

@@ -57,6 +57,9 @@
 /* How far above the tee a ball starts on the main courses */
 #define TEE_HEIGHT 307.2f
 
+/* The power shots that each Ring Shot hole gives */
+#define RING_SHOT_POWER_SHOT_COUNT 1
+
 /* f_HoleEndStep, the step of the sequence between holes */
 enum HoleEndStep {
   HOLE_END_STEP_START,
@@ -362,7 +365,7 @@ void SetUpPlayers(void) {
       g_Players[0].holes[hole].putts = UNCOUNTED_PUTTS;
     }
 
-    g_Players[0].unk28 = -1;
+    g_Players[0].powerShotCount = POWER_SHOTS_UNLIMITED;
     LoadPlayerFace(0, g_Players[0].characterIndex, g_Players[0].paletteIndex);
     for (slot = 0; slot < CLUB_SLOT_COUNT; slot++) {
       if (slot >= CLUB_SET_SIZE) {
@@ -484,7 +487,7 @@ void PlacePlayersOnTee(void) {
       }
 
       if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
-        g_Players[i].unk28 = 1;
+        g_Players[i].powerShotCount = RING_SHOT_POWER_SHOT_COUNT;
       }
     }
   }

@@ -1767,9 +1767,9 @@ static inline Boolean IsFartherThan(s32 distance, s32 limit) {
  * B changes the shot mode. With a club usable on the green it goes from a
  * middle putt to a long putt to a short putt and back. With other clubs,
  * further than APPROACH_SHOT_DISTANCE yards from the cup, it switches between
- * normal and power, though not to power while unk54 is clear; closer, between
- * normal and approach. Modes that don't fit the distance are then put back to
- * normal.
+ * normal and power, though not to power with no power shots left; closer,
+ * between normal and approach. Modes that don't fit the distance are then put
+ * back to normal.
  */
 void HandleShotModeInput(void) {
   Club* club = GetSelectedClub();
@@ -1796,7 +1796,7 @@ void HandleShotModeInput(void) {
     } else if (IsFartherThan(cupDistance, APPROACH_SHOT_DISTANCE)) {
       if (g_CurrentShot.shotMode == SHOT_MODE_NORMAL) {
         sound = SOUND_POWER_SHOT_REFUSED;
-        if (g_CurrentShot.unk54) {
+        if (g_CurrentShot.powerShotCount) {
           g_CurrentShot.shotMode = SHOT_MODE_POWER;
           sound = SOUND_LOOK_DOWN_RANGE;
         }
@@ -1827,7 +1827,8 @@ void HandleShotModeInput(void) {
       g_CurrentShot.shotMode = SHOT_MODE_NORMAL;
     }
 
-    if (g_CurrentShot.shotMode == SHOT_MODE_POWER && !g_CurrentShot.unk54) {
+    if (g_CurrentShot.shotMode == SHOT_MODE_POWER &&
+        !g_CurrentShot.powerShotCount) {
       g_CurrentShot.shotMode = SHOT_MODE_NORMAL;
     }
   }

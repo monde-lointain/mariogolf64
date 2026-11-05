@@ -259,9 +259,9 @@ typedef struct LabelCorner {
 
 extern const char f_NameFormat[];
 
-#define PLAYER_UNK28_TRAINING (-1)
-#define PLAYER_UNK28_NINE_HOLES 3
-#define PLAYER_UNK28_EIGHTEEN_HOLES 6
+/* The power shots a round gives each player */
+#define NINE_HOLE_POWER_SHOT_COUNT 3
+#define EIGHTEEN_HOLE_POWER_SHOT_COUNT 6
 
 /* The choices of the list that UpdateUnusedList runs, which no menu screen
  * dispatches to */
@@ -1875,12 +1875,12 @@ void SetUpChosenGame(void) {
     }
 
     if (g_GameState.gameMode == GAME_MODE_TRAINING) {
-      player->unk28 = PLAYER_UNK28_TRAINING;
+      player->powerShotCount = POWER_SHOTS_UNLIMITED;
     } else if (g_GameState.holeSelection == HOLE_SELECTION_FRONT_NINE ||
         g_GameState.holeSelection == HOLE_SELECTION_BACK_NINE) {
-      player->unk28 = PLAYER_UNK28_NINE_HOLES;
+      player->powerShotCount = NINE_HOLE_POWER_SHOT_COUNT;
     } else {
-      player->unk28 = PLAYER_UNK28_EIGHTEEN_HOLES;
+      player->powerShotCount = EIGHTEEN_HOLE_POWER_SHOT_COUNT;
     }
 
     LoadPlayerFace(index, player->characterIndex, player->paletteIndex);

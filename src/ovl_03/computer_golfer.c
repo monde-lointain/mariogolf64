@@ -2605,14 +2605,14 @@ EVALUATE:
     osSyncPrintf("flydist = %d\n", flyDistance);
     osSyncPrintf("targetdist = %d\n", targetDistance);
     osSyncPrintf("powermode = %d\n", f_Shot.shotMode);
-    osSyncPrintf("powermodeleft = %d\n", f_Shot.unk54);
+    osSyncPrintf("powermodeleft = %d\n", f_Shot.powerShotCount);
     osSyncPrintf("ClubSelectType = %d\n",
         f_GolferTraits[g_Players[f_Shot.playerIndex].characterIndex].unk2);
     if (flyDistance != 0) {
       ratio = (f32)targetDistance / flyDistance;
       launchPower = f_TrialLaunch->power * ratio;
       if (launchPower > MAX_LAUNCH_POWER) {
-        if (f_Shot.shotMode == SHOT_MODE_NORMAL && f_Shot.unk54 > 0 &&
+        if (f_Shot.shotMode == SHOT_MODE_NORMAL && f_Shot.powerShotCount > 0 &&
             ((f_GolferTraits[g_Players[f_Shot.playerIndex].characterIndex]
                          .unk6 != 0 &&
                  f_GolferTraits[g_Players[f_Shot.playerIndex].characterIndex]
@@ -2622,7 +2622,8 @@ EVALUATE:
                     ->kind == SURFACE_KIND_GREEN) {
           f_Shot.shotMode = SHOT_MODE_POWER;
           osSyncPrintf("Power mode\n ");
-        } else if (f_Shot.shotMode == SHOT_MODE_NORMAL && f_Shot.unk54 > 0 &&
+        } else if (f_Shot.shotMode == SHOT_MODE_NORMAL &&
+            f_Shot.powerShotCount > 0 &&
             f_GolferTraits[g_Players[f_Shot.playerIndex].characterIndex].unk2 ==
                 2) {
           f_Shot.shotMode = SHOT_MODE_POWER;

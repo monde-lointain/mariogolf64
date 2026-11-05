@@ -1773,7 +1773,7 @@ void PickStartingClub(HoleSetup* hole) {
 
       if (GetShotWorldDistance(club, PUTT_MODE_SHORT) >= cupDistance) {
         g_CurrentShot.shotMode = PUTT_MODE_SHORT;
-      } else if (!g_CurrentShot.unk54 ||
+      } else if (!g_CurrentShot.powerShotCount ||
           GetShotWorldDistance(club, PUTT_MODE_MIDDLE) >= cupDistance) {
         g_CurrentShot.shotMode = PUTT_MODE_MIDDLE;
       } else {
@@ -2553,7 +2553,7 @@ void StartPlayerShot(s32 playerIndex) {
   g_CurrentShot.surface = player->ballSurface;
   g_CurrentShot.offsetY = 0;
   g_CurrentShot.offsetX = 0;
-  g_CurrentShot.unk54 = player->unk28;
+  g_CurrentShot.powerShotCount = player->powerShotCount;
   g_CurrentShot.gaugeFrame = 0;
   g_CurrentShot.cupDistance = GetCupDistance(
       x - g_HoleSetup.cupPosition[AXIS_X], z - g_HoleSetup.cupPosition[AXIS_Z]);
@@ -4240,8 +4240,8 @@ void UpdateTurns(void) {
           if (g_CurrentShot.shotMode == SHOT_MODE_POWER &&
               (f_ShotLaunch.impactTiming != 0 ||
                   f_ShotLaunch.power < MAX_LAUNCH_POWER)) {
-            if (g_Players[playerIndex].unk28 > 0) {
-              g_Players[playerIndex].unk28--;
+            if (g_Players[playerIndex].powerShotCount > 0) {
+              g_Players[playerIndex].powerShotCount--;
             }
           }
 

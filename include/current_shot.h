@@ -31,7 +31,7 @@ typedef struct CurrentShot {
   /* 0x44 */ CoursePoint targetPoint; /* On the ground, the selected club's
                                          distance along the heading */
   /* 0x50 */ s32 cupDistance; /* From GetCupDistance */
-  /* 0x54 */ s8 unk54;
+  /* 0x54 */ s8 powerShotCount; /* The shooter's, as the shot began */
 } CurrentShot; /* size = 0x58 */
 
 /*

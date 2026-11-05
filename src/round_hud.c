@@ -3664,8 +3664,8 @@ void DrawColorTest(Gfx** displayListHead) {
 #define SHOT_PANEL_TEXT_Y 216
 #define CLUB_DISTANCE_X 21
 #define LIE_PERCENT_X 240
-#define UNK28_TEXT_X 36
-#define UNK28_TEXT_Y 176
+#define POWER_SHOT_COUNT_X 36
+#define POWER_SHOT_COUNT_Y 176
 /* How far the ball has gone from where the shot was played */
 #define SHOT_LENGTH_X 132
 #define SHOT_LENGTH_Y 200
@@ -4109,10 +4109,11 @@ void DrawRoundHud(CameraView* view) {
     if (g_CurrentShot.shotMode == SHOT_MODE_POWER &&
         !(selectedClub->surfaceMask & CLUB_SURFACE_GREEN) &&
         g_IsModuleAlive[MODULE_CLUB_PANEL] && IsShotModeChangeDone() &&
-        player->unk28 != -1) {
-      sprintf(g_PrintBuffer, "%d", player->unk28);
-      DrawShadowedText(&g_DisplayListHead, UNK28_TEXT_X - g_ShotPanelOffsetX,
-          f_HudOffsetY + UNK28_TEXT_Y, g_PrintBuffer);
+        player->powerShotCount != POWER_SHOTS_UNLIMITED) {
+      sprintf(g_PrintBuffer, "%d", player->powerShotCount);
+      DrawShadowedText(&g_DisplayListHead,
+          POWER_SHOT_COUNT_X - g_ShotPanelOffsetX,
+          f_HudOffsetY + POWER_SHOT_COUNT_Y, g_PrintBuffer);
     }
   }
 
