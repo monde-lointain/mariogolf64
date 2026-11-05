@@ -345,7 +345,10 @@ typedef s32 (*BillboardHitFinder)(s32 startX, s32 startY, s32 startZ, s32 endX,
  * and both 345. Both bounces set the last bounce step after the three
  * velocities, as StepBallSimulation's do, which took the draft from 337 words
  * (149 in shape) to 325 (141); moving the first alone gave 329 (145), the
- * second alone 333 (145). 325 words differ, 141 in shape.
+ * second alone 333 (145). Each substep copies unkA6 to unkB1 after saving the
+ * start and the previous velocity, as StepBallSimulation does, which took the
+ * draft from 325 words (141 in shape) to 314 (138); with the start's y saved
+ * before its x as well, 316 (138). 314 words differ, 138 in shape.
  */
 #ifdef NON_MATCHING
 s32 StepOpeningBallSimulation(BallSimulation* simulation) {
@@ -437,10 +440,10 @@ s32 StepOpeningBallSimulation(BallSimulation* simulation) {
   do {
     startX = simulation->position[AXIS_X];
     startY = simulation->position[AXIS_Y];
-    simulation->unkB1 = simulation->unkA6;
     startZ = simulation->position[AXIS_Z];
     previousVelocityX = simulation->velocity[AXIS_X];
     previousVelocityZ = simulation->velocity[AXIS_Z];
+    simulation->unkB1 = simulation->unkA6;
     if (IsGameFlagSet(GAME_FLAG_SHOW_OPENING_BALL_SPEED) &&
         simulation->purpose == LAUNCH_PURPOSE_STROKE) {
       sprintf(speedText, "%fkm/h   ",
