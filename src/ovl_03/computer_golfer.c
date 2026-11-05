@@ -58,9 +58,10 @@ typedef struct GolferTraits {
   /* 0x5 */ s8
       windPlay; /* WIND_PLAY_*: which winds the golfer offsets shots for */
   /* 0x6 */ s8 unk6;
-  /* 0x7 */ s8 targetScores[COURSE_COUNT]; /* The score to par it aims at on
-                                              each course */
-  /* 0xD */ s8 unkD; /* Added to the target score */
+  /* Added to baseTargetScore on each course */
+  /* 0x7 */ s8 targetScores[COURSE_COUNT];
+  /* Its target score to par before targetScores */
+  /* 0xD */ s8 baseTargetScore;
 } GolferTraits; /* size = 0xE */
 
 /*
@@ -1222,11 +1223,11 @@ s32 GetScoreToParSoFar(s32 playerIndex) {
 
 /*
  * Chooses how many strokes the golfer aims to take on this hole. It takes the
- * character's target score to par for the course, plus a lucky bonus of 0 to 3
- * strokes in Get Character when its record against the player's character has
- * more losses than wins. It spreads that score over the holes by par and
- * handicap, then spreads what the score so far leaves over the holes still to
- * play.
+ * character's base target score to par, plus the course's adjustment to it,
+ * plus a lucky bonus of 0 to 3 strokes in Get Character when its record against
+ * the player's character has more losses than wins. It spreads that score over
+ * the holes by par and handicap, then spreads what the score so far leaves over
+ * the holes still to play.
  */
 s32 ChooseHoleStrokeTarget(void) {
   s32 strokes[COURSE_HOLE_COUNT];
@@ -1278,7 +1279,8 @@ s32 ChooseHoleStrokeTarget(void) {
   }
 
   targetScore = luckyBonus +
-      f_GolferTraits[g_Players[f_Shot.playerIndex].characterIndex].unkD +
+      f_GolferTraits[g_Players[f_Shot.playerIndex].characterIndex]
+          .baseTargetScore +
       f_GolferTraits[g_Players[f_Shot.playerIndex].characterIndex]
           .targetScores[g_GameState.courseIndex];
   osSyncPrintf(
