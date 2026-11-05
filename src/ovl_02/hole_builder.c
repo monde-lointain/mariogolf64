@@ -1125,10 +1125,10 @@ s32 PaintMainCourse(
  * it. Neither the paint-logic table nor any code refers to it.
  *
  * Doesn't match: the original zeroes $t0, which nothing reads, in the delay
- * slot of the range test, and its two cart-way arms share one jump to the end.
- * 12 words differ. Initializing color, paintedCode or fairwayRandom doesn't
- * bring the zeroing back, and setting paintedCode after the arms lets GCC merge
- * them and drop the test (18). The register oracle, forcing one pseudo's
+ * slot of the range test, and its two cart-way arms share one jump to the
+ * end. 12 words differ. Initializing color, paintedCode or fairwayRandom
+ * doesn't bring the zeroing back; the cart-way arms' comment gives the
+ * counts for their other forms. The register oracle, forcing one pseudo's
  * register, leaves 8 words of the 12 at best, so the code differs too.
  */
 #ifdef NON_MATCHING
@@ -1188,8 +1188,12 @@ s32 PaintPaleRoughCourse(
         paintedCode = TERRAIN_CODE_UNK3;
         color = 0x3E;
       } else {
-        /* Both colors are the same in the original. The arms' differing
-         * order keeps GCC from merging them, which would drop the test */
+        /* Both colors are the same in the original, which stores the color
+         * in each arm. Against these arms' 12 words differing (8 in shape),
+         * the same order in both gives 14 (8) with the color first or 16 (10)
+         * with the code first, the other differing order 14 (10), the code
+         * set once after the test, which GCC then drops, 18 (10) or before it
+         * 20 (12), and no test 16 (10) */
         if (nearestDistance == 1) {
           paintedCode = TERRAIN_CODE_CART_WAY;
           color = 0x94A5;
