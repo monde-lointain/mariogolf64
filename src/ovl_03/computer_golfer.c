@@ -57,7 +57,7 @@ typedef struct GolferTraits {
   /* 0x4 */ s8 unk4;
   /* 0x5 */ s8
       windPlay; /* WIND_PLAY_*: which winds the golfer offsets shots for */
-  /* 0x6 */ s8 unk6;
+  /* 0x6 */ s8 powerShotEagerness; /* 0 to 2; only nonzero is tested */
   /* Added to baseTargetScore on each course */
   /* 0x7 */ s8 courseTargetOffsets[COURSE_COUNT];
   /* Its target score to par before the course's offset */
@@ -2637,7 +2637,7 @@ EVALUATE:
       if (launchPower > MAX_LAUNCH_POWER) {
         if (f_Shot.shotMode == SHOT_MODE_NORMAL && f_Shot.powerShotCount > 0 &&
             ((f_GolferTraits[g_Players[f_Shot.playerIndex].characterIndex]
-                         .unk6 != 0 &&
+                         .powerShotEagerness != 0 &&
                  f_GolferTraits[g_Players[f_Shot.playerIndex].characterIndex]
                          .clubBoldness < BOLD_CLUB_CHOICE) ||
                 (rand() & 1)) &&
