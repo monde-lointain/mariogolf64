@@ -1738,19 +1738,19 @@ void RememberPlayedHole(void) {
 }
 
 s32 GetClubTournamentGameMode(void) {
-  s32 value;
+  s32 gameMode;
 
   switch (g_ClubTournamentRules.isSpeedGolf) {
-    case 0:
+    case FALSE:
     default:
-      value = 0;
+      gameMode = GAME_MODE_STROKE;
       break;
-    case 1:
-      value = 7;
+    case TRUE:
+      gameMode = GAME_MODE_SPEED_GOLF;
       break;
   }
 
-  return value;
+  return gameMode;
 }
 
 s32 GetClubTournamentCourse(void) {
