@@ -1103,7 +1103,11 @@ static const char f_BlankBetName[] = " ";
  * loop tests i != BET_COUNT, as the original's bne shows, though GCC keeps the
  * bound in $s7 where the original loads it each pass; with < it compiles to
  * slti and bnez, 204 words (36 in shape). The register oracle, forcing 13
- * pseudos' registers, leaves 78 words at best, so the code differs too. 206
+ * pseudos' registers, leaves 78 words at best, so the code differs too. The
+ * original adds the grid columns' left to the rest of each column line's x; of
+ * five other orders of those terms, in the column loop, the crossings' or both,
+ * none gives fewer words: the constant first gives 212 to 230 (24 to 30 in
+ * shape), and the oracle still leaves 78 with that form in both loops. 206
  * words differ, 32 in shape.
  */
 #ifdef NON_MATCHING
