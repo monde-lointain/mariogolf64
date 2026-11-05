@@ -2166,13 +2166,17 @@ INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard_drawing", DrawLeaderboardPage);
  * backTop is 137 on every path there. With backTop set at its declaration
  * again, the output gave 768 (218); its other change, a temp for one texture
  * rectangle's top, 56 below the card's, gave 842 (194) without it. The register
- * oracle, forcing 45 pseudos' registers, leaves 628 words at best, so the code
+ * oracle, forcing 45 pseudos' registers, leaves 598 words at best, so the code
  * differs too. The faded style sets the cells' alpha after its commands, as the
  * yellow style does; set first, 762 words differed (212 in shape). Adding the
  * skins won to standing in both arms of the front and back nine test, after
  * each DrawShadowedText, gives 734 words (216 in shape), but the original adds
- * them once, after both arms, as the draft does. 760 words differ, 210 in
- * shape.
+ * them once, after both arms, as the draft does. The skins, strokes, putts,
+ * over-par and handicap-stroke texts add g_Scorecard.x last, as the hole
+ * numbers, par and badges do; with x first, as the draft had them, 760 words
+ * differed, 210 in shape, and the oracle left 628. The back nine's match mark
+ * still adds x first: x last there gives 772 words (176 in shape), and x first
+ * in the front nine's too 760 (180). 760 words differ, 178 in shape.
  */
 #ifdef NON_MATCHING
 void DrawScoresPage(Gfx** displayListHead) {
@@ -2893,13 +2897,13 @@ void DrawScoresPage(Gfx** displayListHead) {
           sprintf(g_PrintBuffer, "%c", NO_SCORE_CODE);
           if (hole < HOLES_PER_NINE) {
             DrawShadowedText(&gfx,
-                g_Scorecard.x + (hole * CELL_WIDTH) + SKINS_MARK_LEFT,
+                (hole * CELL_WIDTH) + SKINS_MARK_LEFT + g_Scorecard.x,
                 frontTop + (i * rowSpacing) + PLAYER_ROW_TOP + g_Scorecard.y,
                 g_PrintBuffer);
           } else {
             DrawShadowedText(&gfx,
-                g_Scorecard.x + ((hole - HOLES_PER_NINE) * CELL_WIDTH) +
-                    SKINS_MARK_LEFT,
+                ((hole - HOLES_PER_NINE) * CELL_WIDTH) + SKINS_MARK_LEFT +
+                    g_Scorecard.x,
                 backTop + (i * rowSpacing) + PLAYER_ROW_TOP + g_Scorecard.y,
                 g_PrintBuffer);
           }
@@ -2908,13 +2912,13 @@ void DrawScoresPage(Gfx** displayListHead) {
               g_Players[i].holes[hole].strokes);
           if (hole < HOLES_PER_NINE) {
             DrawShadowedText(&gfx,
-                g_Scorecard.x + (hole * CELL_WIDTH) + SKINS_WON_LEFT,
+                (hole * CELL_WIDTH) + SKINS_WON_LEFT + g_Scorecard.x,
                 frontTop + (i * rowSpacing) + PLAYER_ROW_TOP + g_Scorecard.y,
                 g_PrintBuffer);
           } else {
             DrawShadowedText(&gfx,
-                g_Scorecard.x + ((hole - HOLES_PER_NINE) * CELL_WIDTH) +
-                    SKINS_WON_LEFT,
+                ((hole - HOLES_PER_NINE) * CELL_WIDTH) + SKINS_WON_LEFT +
+                    g_Scorecard.x,
                 backTop + (i * rowSpacing) + PLAYER_ROW_TOP + g_Scorecard.y,
                 g_PrintBuffer);
           }
@@ -2978,13 +2982,13 @@ void DrawScoresPage(Gfx** displayListHead) {
             g_PrintBuffer, f_TwoDigitFormat, g_Players[i].holes[hole].strokes);
         if (hole < HOLES_PER_NINE) {
           DrawCondensedShadowedText(&gfx,
-              g_Scorecard.x + (hole * CELL_WIDTH) + STROKES_LEFT,
+              (hole * CELL_WIDTH) + STROKES_LEFT + g_Scorecard.x,
               frontTop + (i * rowSpacing) + PLAYER_ROW_TOP + g_Scorecard.y,
               g_PrintBuffer);
         } else {
           DrawCondensedShadowedText(&gfx,
-              g_Scorecard.x + ((hole - HOLES_PER_NINE) * CELL_WIDTH) +
-                  STROKES_LEFT,
+              ((hole - HOLES_PER_NINE) * CELL_WIDTH) + STROKES_LEFT +
+                  g_Scorecard.x,
               backTop + (i * rowSpacing) + PLAYER_ROW_TOP + g_Scorecard.y,
               g_PrintBuffer);
         }
@@ -2996,13 +3000,13 @@ void DrawScoresPage(Gfx** displayListHead) {
             overTop += PLAYER_ROW_SPACING;
             if (hole < HOLES_PER_NINE) {
               DrawShadowedText(&gfx,
-                  g_Scorecard.x + (hole * CELL_WIDTH) + PUTTS_LEFT,
+                  (hole * CELL_WIDTH) + PUTTS_LEFT + g_Scorecard.x,
                   frontTop + (i * rowSpacing) + PUTTS_TOP + g_Scorecard.y,
                   g_PrintBuffer);
             } else {
               DrawShadowedText(&gfx,
-                  g_Scorecard.x + ((hole - HOLES_PER_NINE) * CELL_WIDTH) +
-                      PUTTS_LEFT,
+                  ((hole - HOLES_PER_NINE) * CELL_WIDTH) + PUTTS_LEFT +
+                      g_Scorecard.x,
                   backTop + (i * rowSpacing) + PUTTS_TOP + g_Scorecard.y,
                   g_PrintBuffer);
             }
@@ -3012,14 +3016,14 @@ void DrawScoresPage(Gfx** displayListHead) {
             if (hole < HOLES_PER_NINE) {
               overTop += PLAYER_ROW_SPACING;
               DrawCenteredNarrowText(&gfx,
-                  g_Scorecard.x + (hole * CELL_WIDTH) + PUTTS_LEFT,
+                  (hole * CELL_WIDTH) + PUTTS_LEFT + g_Scorecard.x,
                   frontTop + (i * rowSpacing) + PUTTS_TOP + g_Scorecard.y,
                   g_PrintBuffer);
             } else {
               overTop += PLAYER_ROW_SPACING;
               DrawCenteredNarrowText(&gfx,
-                  g_Scorecard.x + ((hole - HOLES_PER_NINE) * CELL_WIDTH) +
-                      PUTTS_LEFT,
+                  ((hole - HOLES_PER_NINE) * CELL_WIDTH) + PUTTS_LEFT +
+                      g_Scorecard.x,
                   backTop + (i * rowSpacing) + PUTTS_TOP + g_Scorecard.y,
                   g_PrintBuffer);
             }
@@ -3037,13 +3041,13 @@ void DrawScoresPage(Gfx** displayListHead) {
 
           if (hole < HOLES_PER_NINE) {
             DrawCenteredNarrowText(&gfx,
-                g_Scorecard.x + (hole * CELL_WIDTH) + OVER_LEFT,
+                (hole * CELL_WIDTH) + OVER_LEFT + g_Scorecard.x,
                 frontTop + overTop + (i * rowSpacing) + g_Scorecard.y,
                 g_PrintBuffer);
           } else {
             DrawCenteredNarrowText(&gfx,
-                g_Scorecard.x + ((hole - HOLES_PER_NINE) * CELL_WIDTH) +
-                    OVER_LEFT,
+                ((hole - HOLES_PER_NINE) * CELL_WIDTH) + OVER_LEFT +
+                    g_Scorecard.x,
                 backTop + (i * rowSpacing) + overTop + g_Scorecard.y,
                 g_PrintBuffer);
           }
@@ -3102,7 +3106,7 @@ void DrawScoresPage(Gfx** displayListHead) {
       if (!(g_GameState.holeSelection & HOLE_SELECTION_BACK_NINE)) {
         if (handicapStrokes[i][j] < 0) {
           DrawShadowedText(&gfx,
-              g_Scorecard.x + (j * CELL_WIDTH) + HANDICAP_STROKE_LEFT,
+              (j * CELL_WIDTH) + HANDICAP_STROKE_LEFT + g_Scorecard.x,
               frontTop + (i * PLAYER_ROW_SPACING) + HANDICAP_STROKE_TOP +
                   g_Scorecard.y,
               g_PrintBuffer);
@@ -3110,7 +3114,7 @@ void DrawScoresPage(Gfx** displayListHead) {
 
         if (handicapStrokes[i][j] < -1) {
           DrawShadowedText(&gfx,
-              g_Scorecard.x + (j * CELL_WIDTH) + SECOND_HANDICAP_STROKE_LEFT,
+              (j * CELL_WIDTH) + SECOND_HANDICAP_STROKE_LEFT + g_Scorecard.x,
               frontTop + (i * PLAYER_ROW_SPACING) + HANDICAP_STROKE_TOP +
                   g_Scorecard.y,
               g_PrintBuffer);
@@ -3120,7 +3124,7 @@ void DrawScoresPage(Gfx** displayListHead) {
       if (!(g_GameState.holeSelection & HOLE_SELECTION_FRONT_NINE)) {
         if (handicapStrokes[i][j + HOLES_PER_NINE] < 0) {
           DrawShadowedText(&gfx,
-              g_Scorecard.x + (j * CELL_WIDTH) + HANDICAP_STROKE_LEFT,
+              (j * CELL_WIDTH) + HANDICAP_STROKE_LEFT + g_Scorecard.x,
               backTop + (i * PLAYER_ROW_SPACING) + HANDICAP_STROKE_TOP +
                   g_Scorecard.y,
               g_PrintBuffer);
@@ -3128,7 +3132,7 @@ void DrawScoresPage(Gfx** displayListHead) {
 
         if (handicapStrokes[i][j + HOLES_PER_NINE] < -1) {
           DrawShadowedText(&gfx,
-              g_Scorecard.x + (j * CELL_WIDTH) + SECOND_HANDICAP_STROKE_LEFT,
+              (j * CELL_WIDTH) + SECOND_HANDICAP_STROKE_LEFT + g_Scorecard.x,
               backTop + (i * PLAYER_ROW_SPACING) + HANDICAP_STROKE_TOP +
                   g_Scorecard.y,
               g_PrintBuffer);
