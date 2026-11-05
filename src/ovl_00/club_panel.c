@@ -83,7 +83,8 @@ static u8 f_PanelShotMode = PANEL_NOT_SHOWN;
 static u8 f_PanelIsPutter = PANEL_NOT_SHOWN;
 /* The frame of the shot mode change, or 0 while it is not changing */
 static u8 f_ShotModeChangeFrame = 0;
-static s32 f_ClubPanelUnk24 = 0;
+/* The gauge's fill while the power is set, which then holds the chosen power */
+static s32 f_ChosenPowerFill = 0;
 /* Which of the two panel buffers is loaded next */
 static s32 f_PanelBufferIndex = 0;
 static s32 f_ClubPanelState = CLUB_PANEL_FREED;
@@ -175,7 +176,7 @@ void FreeClubPanelImages(void) {
 }
 
 void ResetShotModeChange(void) {
-  f_ClubPanelUnk24 = 0;
+  f_ChosenPowerFill = 0;
   f_ShotModeChangeFrame = 0;
 }
 
@@ -496,7 +497,7 @@ void DrawClubPanel(Gfx** displayListHead) {
    */
   if (playerState != PLAYER_STATE_AIMING) {
     if (playerState == PLAYER_STATE_SETTING_POWER) {
-      f_ClubPanelUnk24 = value;
+      f_ChosenPowerFill = value;
     }
   }
 
@@ -504,7 +505,7 @@ void DrawClubPanel(Gfx** displayListHead) {
   gDPSetTextureFilter(gfx++, G_TF_BILERP);
   if (playerState != PLAYER_STATE_AIMING) {
     emptyLeft = QuarterPixels(
-        GAUGE_EMPTY_X - f_ClubPanelUnk24 * GAUGE_LENGTH / GAUGE_MAX_VALUE);
+        GAUGE_EMPTY_X - f_ChosenPowerFill * GAUGE_LENGTH / GAUGE_MAX_VALUE);
     gSPTextureRectangle(gfx++, emptyLeft,
         QuarterPixels(GAUGE_TOP + g_ShotPanelOffsetX + f_ClubPanelDebugValue),
         QuarterPixels(GAUGE_EMPTY_X + GAUGE_MARKER_WIDTH),
@@ -512,7 +513,7 @@ void DrawClubPanel(Gfx** displayListHead) {
             GAUGE_BOTTOM + g_ShotPanelOffsetX + f_ClubPanelDebugValue),
         G_TX_RENDERTILE,
         TexelCoordinate(
-            (((GAUGE_MAX_VALUE * 5) - (f_ClubPanelUnk24 * 5)) << 6) /
+            (((GAUGE_MAX_VALUE * 5) - (f_ChosenPowerFill * 5)) << 6) /
             (GAUGE_MAX_VALUE * 5)),
         0, 0x1B4, 0x800);
   }
@@ -537,7 +538,7 @@ void DrawClubPanel(Gfx** displayListHead) {
           GAUGE_MARKER_BOTTOM + g_ShotPanelOffsetX + f_ClubPanelDebugValue),
       G_TX_RENDERTILE, 0, 0, 0x400, 0x400);
   if (isPutter) {
-    markerOffset = f_ClubPanelUnk24 * GAUGE_LENGTH / GAUGE_MAX_VALUE;
+    markerOffset = f_ChosenPowerFill * GAUGE_LENGTH / GAUGE_MAX_VALUE;
   } else {
     markerOffset = value * GAUGE_LENGTH / GAUGE_MAX_VALUE;
   }
@@ -584,8 +585,8 @@ void DrawClubPanel(Gfx** displayListHead) {
     default:
       if (!isPutter) {
         gDPSetPrimColor(gfx++, 0, 0, 191, 191, 191, 255);
-        markerOffset = f_ClubPanelUnk24 * GAUGE_LENGTH / GAUGE_MAX_VALUE;
-        if (f_ClubPanelUnk24 == GAUGE_MAX_VALUE) {
+        markerOffset = f_ChosenPowerFill * GAUGE_LENGTH / GAUGE_MAX_VALUE;
+        if (f_ChosenPowerFill == GAUGE_MAX_VALUE) {
           gDPSetEnvColor(gfx++, pulse, pulse, pulse, 255);
         } else {
           gDPSetEnvColor(gfx++, 0, 0, 0, 255);
