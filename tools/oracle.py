@@ -37,6 +37,7 @@ import re
 import shutil
 import sys
 import tempfile
+from collections.abc import Iterator
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Literal, TypedDict, cast
@@ -227,10 +228,10 @@ def compile_function(
     return compilation
 
 
-def read_pseudo_lines(
+def read_insn_lines(
     c_path: str, function: str, compilation: Compilation, work: Path
-) -> dict[int, set[int]]:
-    """Return {pseudo: the source lines of the insns using it before reload}.
+) -> dict[int, int]:
+    """Return {insn UID: its source line}, for the insns before reload.
 
     WORK must hold the unit.i that COMPILATION was compiled from.
     """
@@ -238,13 +239,21 @@ def read_pseudo_lines(
     insn_lines = blame.read_insn_lines(
         fncompare.get_optflags(c_path), {"lreg": lreg}, work, function
     ).get("lreg", {})
+    return {uid: int(place.split(":")[1]) for uid, place in insn_lines.items()}
+
+
+def read_pseudo_lines(
+    compilation: Compilation, insn_lines: dict[int, int]
+) -> dict[int, set[int]]:
+    """Return {pseudo: the source lines of the insns using it before reload}."""
+    lreg = compilation.blamed.dumps.get("lreg", "")
     lines: dict[int, set[int]] = collections.defaultdict(set)
     for header in blame.INSN_HEADER_RE.finditer(lreg):
         uid = int(header.group(1))
         rtl = blame.find_insn(lreg, uid)
         for match in blame.PSEUDO_RE.finditer(rtl):
             if uid in insn_lines:
-                lines[int(match.group(1))].add(int(insn_lines[uid].split(":")[1]))
+                lines[int(match.group(1))].add(insn_lines[uid])
     return lines
 
 
@@ -268,11 +277,23 @@ def get_register_count(compilation: Compilation, pseudo: int) -> int:
 def vote_registers(
     target: fncompare.Routine, compilation: Compilation
 ) -> dict[int, collections.Counter[int]]:
-    """Return {pseudo: Counter of the target registers it lines up with}.
+    """Return {pseudo: Counter of the target registers it lines up with}."""
+    votes: dict[int, collections.Counter[int]] = collections.defaultdict(
+        collections.Counter
+    )
+    for pseudo, wanted, _ in iterate_votes(target, compilation):
+        votes[pseudo][wanted] += 1
+    return votes
+
+
+def iterate_votes(
+    target: fncompare.Routine, compilation: Compilation
+) -> Iterator[tuple[int, int, int]]:
+    """Yield (pseudo, target register, our word's index) for each vote.
 
     The instructions are paired by their words without their registers, and
-    each pair's differing register fields vote for the pseudo, in the insn
-    that made our instruction, that holds our register.
+    each pair's register fields vote for the pseudo, in the insn that made
+    our instruction, that holds our register.
     """
     compiled = compilation.routine
     registers = compilation.registers
@@ -281,9 +302,6 @@ def vote_registers(
         [mask_registers(word) for word in target.words],
         [mask_registers(word) for word in compiled.words],
         autojunk=False,
-    )
-    votes: dict[int, collections.Counter[int]] = collections.defaultdict(
-        collections.Counter
     )
     for target_start, compiled_start, length in matcher.get_matching_blocks():
         for offset in range(length):
@@ -306,8 +324,7 @@ def vote_registers(
                 ]
                 if len(holders) == 1:
                     pseudo = holders[0]
-                    votes[pseudo][wanted - (ours - registers[pseudo])] += 1
-    return votes
+                    yield pseudo, wanted - (ours - registers[pseudo]), compiled_index
 
 
 def count_differences(target: fncompare.Routine, compilation: Compilation) -> int:
@@ -494,29 +511,45 @@ def explain(
             print("    not allocated by either pass")
 
 
+def get_word_line(
+    compilation: Compilation, index: int, insn_lines: dict[int, int]
+) -> int | None:
+    """Return the source line of the insn that made word INDEX, if known."""
+    insn = blame.get_insn(compilation.blamed, index)
+    return insn_lines.get(insn[0]) if insn is not None else None
+
+
 def print_splits(
-    target: fncompare.Routine, compilation: Compilation, lines: dict[int, set[int]]
+    target: fncompare.Routine, compilation: Compilation, insn_lines: dict[int, int]
 ) -> None:
     """Print the pseudos whose instructions line up with more than one register.
 
     GCC gives a variable one pseudo, and global-alloc one register, so a
     pseudo the original holds in two registers in different places was
     likely two variables there, such as a flag declared in each of two loops.
+    Each register is followed by the source lines of its votes.
     """
-    for pseudo, votes in sorted(vote_registers(target, compilation).items()):
-        registers = [
-            (register, count)
-            for register, count in votes.most_common()
-            if count >= MIN_SPLIT_VOTES
-        ]
-        if len(registers) <= 1:
-            continue
-        held = ", ".join(
-            f"{register_name(register)} x{count}" for register, count in registers
+    votes: dict[int, dict[int, list[int]]] = collections.defaultdict(
+        lambda: collections.defaultdict(list)
+    )
+    for pseudo, wanted, index in iterate_votes(target, compilation):
+        votes[pseudo][wanted].append(index)
+    for pseudo, registers in sorted(votes.items()):
+        held = sorted(
+            (
+                (register, indices)
+                for register, indices in registers.items()
+                if len(indices) >= MIN_SPLIT_VOTES
+            ),
+            key=lambda pair: -len(pair[1]),
         )
-        used = join_lines([pseudo], lines)
-        guess = f"maybe two variables, lines {used}"
-        print(f"pseudo {pseudo} lines up with {held}; {guess}")
+        if len(held) <= 1:
+            continue
+        print(f"pseudo {pseudo} lines up with several registers; maybe two variables")
+        for register, indices in held:
+            lines = (get_word_line(compilation, index, insn_lines) for index in indices)
+            used = sorted({line for line in lines if line is not None})
+            print(f"  {register_name(register)} x{len(indices)}, lines {used}")
 
 
 def join_lines(pseudos: list[int], lines: dict[int, set[int]]) -> str:
@@ -568,13 +601,16 @@ def main() -> None:
             compilation = compile_function(c_path, function, force, work)
             print(f"  {count_differences(target, compilation)} differ")
             print_allocation(
-                compilation, read_pseudo_lines(c_path, function, compilation, work)
+                compilation,
+                read_pseudo_lines(
+                    compilation, read_insn_lines(c_path, function, compilation, work)
+                ),
             )
             return
         if show_splits:
             compilation = compile_function(c_path, function, force, work)
-            lines = read_pseudo_lines(c_path, function, compilation, work)
-            print_splits(target, compilation, lines)
+            insn_lines = read_insn_lines(c_path, function, compilation, work)
+            print_splits(target, compilation, insn_lines)
             return
         force, differences, compilation = search_forcing(
             target, c_path, function, force, work
@@ -597,9 +633,9 @@ def main() -> None:
         noted_work = work / "noted"
         if noted_work.exists():
             shutil.rmtree(noted_work)
-        lines = read_pseudo_lines(c_path, function, compilation, work)
-        explain(compilation, force, lines)
-        print_splits(target, compilation, lines)
+        insn_lines = read_insn_lines(c_path, function, compilation, work)
+        explain(compilation, force, read_pseudo_lines(compilation, insn_lines))
+        print_splits(target, compilation, insn_lines)
 
 
 if __name__ == "__main__":
