@@ -2039,7 +2039,7 @@ void DrawHoleEditorGround(CameraMatrices* matrices, s32 terrainStyle);
  * vertices it shares with coarser neighbors so that no gaps open between them.
  *
  * Doesn't match: 909 words differ, 233 in shape. The original's frame is 8
- * bytes larger (0x260 against 0x258; it was 0x18 when first measured), so most
+ * bytes larger (0x260 against 0x258; it was 0x38 when first measured), so most
  * stack offsets differ, and terrainStyle and the locals take other saved
  * registers. The original works out column + 1's parity once per half, where
  * ours did at each GridVertex, with three more andi: loop.c finds moving them
