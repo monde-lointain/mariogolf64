@@ -51,7 +51,7 @@
 /* How a character plays when the computer controls it */
 typedef struct GolferTraits {
   /* 0x0 */ s8 unk0;
-  /* 0x1 */ s8 unk1;
+  /* 0x1 */ s8 consistency; /* Steadier golfers mishit less */
   /* 0x2 */ s8 clubBoldness; /* BOLD_CLUB_CHOICE or less */
   /* 0x3 */ s8 unk3;
   /* 0x4 */ s8 unk4;
@@ -185,7 +185,7 @@ static u32 f_UnusedWordAfterThreadState UNUSED = 0xD24CC5E5;
 static Boolean f_HasBestEvaluation = FALSE;
 /*
  * The upper limits of each approach band, as shares of the cup distance that
- * lie short of the green, for each value of the golfer's unk1 trait
+ * lie short of the green, for each value of the golfer's consistency
  */
 static f32 f_ApproachBandLimits[APPROACH_BAND_COUNT][APPROACH_STYLE_COUNT] = {
     {0.2f, 0.15f, 0.1f},
@@ -878,7 +878,7 @@ s32 PlanShot(CurrentShot* plannedShot) {
       if (strokes < par + f_HoleTargetToPar - 2) {
         switch (
             f_GolferTraits[g_Players[f_TrialShot.playerIndex].characterIndex]
-                .unk1) {
+                .consistency) {
           case 0:
             mishitDivisor = 62;
             break;
@@ -2122,7 +2122,7 @@ void FindPeakOnLine(CoursePoint from, CoursePoint to, CoursePoint peak) {
 /*
  * Aims at the cup and returns the type of club to approach it with. The club
  * depends on how much of the line to the cup lies short of the green, where the
- * line's peak counts when it is on the green, and on the golfer's unk1 trait.
+ * line's peak counts when it is on the green, and on the golfer's consistency.
  * A line that crosses rough or hazards takes a wedge.
  */
 ClubType ChooseApproachClub(s32* targetX, s32* targetZ) {
@@ -2165,7 +2165,8 @@ ClubType ChooseApproachClub(s32* targetX, s32* targetZ) {
     edgeShare = (f32)edgeDistance / (f32)cupDistance;
   }
 
-  style = f_GolferTraits[g_Players[f_Shot.playerIndex].characterIndex].unk1;
+  style =
+      f_GolferTraits[g_Players[f_Shot.playerIndex].characterIndex].consistency;
   for (band = 0; band < APPROACH_BAND_COUNT; band++) {
     if (edgeShare < f_ApproachBandLimits[band][style]) {
       if (band == 0) {
@@ -2808,7 +2809,8 @@ ClubType ChooseClubForDistance(s32 distance) {
     club = GetClub(g_Players[f_Shot.playerIndex].clubs[slot]);
     carry = GetShotWorldDistance(club, SHOT_MODE_NORMAL);
     if (g_HoleSetup.conditions.isRaining == TRUE &&
-        f_GolferTraits[g_Players[f_Shot.playerIndex].characterIndex].unk1 < 2) {
+        f_GolferTraits[g_Players[f_Shot.playerIndex].characterIndex]
+                .consistency < 2) {
       carry = carry * RAINY_DISTANCE_FRACTION;
     }
 
