@@ -1848,6 +1848,18 @@ INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_ball", StepOpeningBallSimulation);
  * Computing the doubled club contribution in a local before yawRadians or
  * just before the sum leaves 14, unless staged multiplications let fold move
  * the scale onto sideSign again (4). No extra local is needed for that form.
+ *
+ * With the doubled club value in a local, the register oracle matches when 4
+ * pseudos are forced, so only allocation differs: local-alloc ties the load to
+ * its doubling and gives that quantity $v1 before shot->offsetX's load, where
+ * the original has them the other way round. Setting the local just before the
+ * pitch's offset term, the yaw or the sum, with either operand order at the yaw
+ * or the sum, leaves 14 words, as do 48 orders of the operands of the sum and
+ * of its product with speed with the local; set before the pitch or its sign
+ * test, 11 differ (9 in shape), and earlier 20 to 30 (8 to 14), as the load
+ * moves into earlier blocks. Staging the product in the local, or putting the
+ * offset's part or the whole sum in locals of their own, leaves 14 too, or 18
+ * when the sum starts with the club's part.
  */
 #ifdef NON_MATCHING
 s32 LaunchOpeningBallSimulation(
