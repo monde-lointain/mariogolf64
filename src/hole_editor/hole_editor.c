@@ -1109,9 +1109,9 @@ void UpdateHolePointEditor(void) {
     }
 
     if (f_HolePointEditMode == HOLE_POINT_MODE_MESON) {
-      f_HolePointCursor[0] = g_HolePoints.unk60[f_MesonPointIndex][AXIS_X] /
+      f_HolePointCursor[0] = g_HolePoints.aimPoints[f_MesonPointIndex][AXIS_X] /
           (1 << WORLD_TO_COURSE_SHIFT);
-      f_HolePointCursor[1] = g_HolePoints.unk60[f_MesonPointIndex][AXIS_Z] /
+      f_HolePointCursor[1] = g_HolePoints.aimPoints[f_MesonPointIndex][AXIS_Z] /
           (1 << WORLD_TO_COURSE_SHIFT);
     }
 
@@ -1142,9 +1142,9 @@ void UpdateHolePointEditor(void) {
     }
 
     if (f_HolePointEditMode == HOLE_POINT_MODE_MESON) {
-      f_HolePointCursor[0] = g_HolePoints.unk60[f_MesonPointIndex][AXIS_X] /
+      f_HolePointCursor[0] = g_HolePoints.aimPoints[f_MesonPointIndex][AXIS_X] /
           (1 << WORLD_TO_COURSE_SHIFT);
-      f_HolePointCursor[1] = g_HolePoints.unk60[f_MesonPointIndex][AXIS_Z] /
+      f_HolePointCursor[1] = g_HolePoints.aimPoints[f_MesonPointIndex][AXIS_Z] /
           (1 << WORLD_TO_COURSE_SHIFT);
     }
 
@@ -1253,51 +1253,51 @@ void UpdateHolePointEditor(void) {
 
   if (f_HolePointEditMode == HOLE_POINT_MODE_MESON) {
     if (g_MenuControllerData[EDITOR_PAD].button & A_BUTTON) {
-      g_HolePoints.unk60[f_MesonPointIndex][AXIS_X] = f_HolePointCursor[0]
+      g_HolePoints.aimPoints[f_MesonPointIndex][AXIS_X] = f_HolePointCursor[0]
           << WORLD_TO_COURSE_SHIFT;
-      g_HolePoints.unk60[f_MesonPointIndex][AXIS_Z] = f_HolePointCursor[1]
+      g_HolePoints.aimPoints[f_MesonPointIndex][AXIS_Z] = f_HolePointCursor[1]
           << WORLD_TO_COURSE_SHIFT;
-      g_HolePoints.unk60[f_MesonPointIndex][AXIS_Y] =
-          GetGroundHeight(g_HolePoints.unk60[f_MesonPointIndex][AXIS_X],
-              g_HolePoints.unk60[f_MesonPointIndex][AXIS_Z]);
+      g_HolePoints.aimPoints[f_MesonPointIndex][AXIS_Y] =
+          GetGroundHeight(g_HolePoints.aimPoints[f_MesonPointIndex][AXIS_X],
+              g_HolePoints.aimPoints[f_MesonPointIndex][AXIS_Z]);
       PlaySound(SOUND_MENU_CONFIRM, EDITOR_SOUND_CHANNEL, SOUND_FULL_SCALE);
       PrintDebugText(
-          GetSurfaceInfoAt(g_HolePoints.unk60[f_MesonPointIndex][AXIS_X],
-              g_HolePoints.unk60[f_MesonPointIndex][AXIS_Z])
+          GetSurfaceInfoAt(g_HolePoints.aimPoints[f_MesonPointIndex][AXIS_X],
+              g_HolePoints.aimPoints[f_MesonPointIndex][AXIS_Z])
               ->name,
           SURFACE_TEXT_COLUMN, SURFACE_TEXT_ROW);
     }
 
     /* The second pad's B clears the point */
     if (g_MenuControllerData[OPTION_PAD].button & B_BUTTON) {
-      g_HolePoints.unk60[f_MesonPointIndex][AXIS_X] = 0;
-      g_HolePoints.unk60[f_MesonPointIndex][AXIS_Y] = 0;
-      g_HolePoints.unk60[f_MesonPointIndex][AXIS_Z] = 0;
+      g_HolePoints.aimPoints[f_MesonPointIndex][AXIS_X] = 0;
+      g_HolePoints.aimPoints[f_MesonPointIndex][AXIS_Y] = 0;
+      g_HolePoints.aimPoints[f_MesonPointIndex][AXIS_Z] = 0;
       f_HolePointCursor[0] = 0;
       f_HolePointCursor[1] = 0;
     }
 
     if (g_MenuControllerData[EDITOR_PAD].button & U_CBUTTONS) {
       f_MesonPointIndex++;
-      if (f_MesonPointIndex == ARRAY_COUNT(g_HolePoints.unk60)) {
+      if (f_MesonPointIndex == ARRAY_COUNT(g_HolePoints.aimPoints)) {
         f_MesonPointIndex = 0;
       }
 
-      f_HolePointCursor[0] = g_HolePoints.unk60[f_MesonPointIndex][AXIS_X] /
+      f_HolePointCursor[0] = g_HolePoints.aimPoints[f_MesonPointIndex][AXIS_X] /
           (1 << WORLD_TO_COURSE_SHIFT);
-      f_HolePointCursor[1] = g_HolePoints.unk60[f_MesonPointIndex][AXIS_Z] /
+      f_HolePointCursor[1] = g_HolePoints.aimPoints[f_MesonPointIndex][AXIS_Z] /
           (1 << WORLD_TO_COURSE_SHIFT);
     }
 
     if (g_MenuControllerData[EDITOR_PAD].button & D_CBUTTONS) {
       f_MesonPointIndex--;
       if (f_MesonPointIndex < 0) {
-        f_MesonPointIndex = ARRAY_COUNT(g_HolePoints.unk60) - 1;
+        f_MesonPointIndex = ARRAY_COUNT(g_HolePoints.aimPoints) - 1;
       }
 
-      f_HolePointCursor[0] = g_HolePoints.unk60[f_MesonPointIndex][AXIS_X] /
+      f_HolePointCursor[0] = g_HolePoints.aimPoints[f_MesonPointIndex][AXIS_X] /
           (1 << WORLD_TO_COURSE_SHIFT);
-      f_HolePointCursor[1] = g_HolePoints.unk60[f_MesonPointIndex][AXIS_Z] /
+      f_HolePointCursor[1] = g_HolePoints.aimPoints[f_MesonPointIndex][AXIS_Z] /
           (1 << WORLD_TO_COURSE_SHIFT);
     }
 
@@ -2338,10 +2338,10 @@ void PutObjectsOnGround(void) {
   g_HoleSetup.teePosition[AXIS_Y] = g_HolePoints.teePositions[0][AXIS_Y];
   g_HoleSetup.teePosition[AXIS_Z] = g_HolePoints.teePositions[0][AXIS_Z];
   for (i = 0; i < ROUTE_POINT_COUNT; i++) {
-    if (g_HolePoints.unk60[i][AXIS_X] != 0 &&
-        g_HolePoints.unk60[i][AXIS_Z] != 0) {
-      g_HolePoints.unk60[i][AXIS_Y] = GetGroundHeight(
-          g_HolePoints.unk60[i][AXIS_X], g_HolePoints.unk60[i][AXIS_Z]);
+    if (g_HolePoints.aimPoints[i][AXIS_X] != 0 &&
+        g_HolePoints.aimPoints[i][AXIS_Z] != 0) {
+      g_HolePoints.aimPoints[i][AXIS_Y] = GetGroundHeight(
+          g_HolePoints.aimPoints[i][AXIS_X], g_HolePoints.aimPoints[i][AXIS_Z]);
     }
 
     if (g_HolePoints.routePoints[i][AXIS_X] != 0 &&

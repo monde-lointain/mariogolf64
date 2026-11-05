@@ -2768,10 +2768,10 @@ void ClearHolePoints(void) {
     g_HolePoints.teePositions[i][AXIS_Z] = 0;
   }
 
-  for (i = 0; i < ARRAY_COUNT(g_HolePoints.unk60); i++) {
-    g_HolePoints.unk60[i][AXIS_X] = 0;
-    g_HolePoints.unk60[i][AXIS_Y] = 0;
-    g_HolePoints.unk60[i][AXIS_Z] = 0;
+  for (i = 0; i < ARRAY_COUNT(g_HolePoints.aimPoints); i++) {
+    g_HolePoints.aimPoints[i][AXIS_X] = 0;
+    g_HolePoints.aimPoints[i][AXIS_Y] = 0;
+    g_HolePoints.aimPoints[i][AXIS_Z] = 0;
 
     /*
      * The dereference is there to match: indexing AXIS_X gives 7 words

@@ -10,13 +10,17 @@
 #define CUP_POSITION_COUNT 4
 /* Points that the computer golfer may route its shots through */
 #define ROUTE_POINT_COUNT 8
+/* Points along the hole that shots aim for, the hole editor's "Meson" points */
+#define AIM_POINT_COUNT 8
 
 typedef struct HolePoints {
   /* 0x00 */ CoursePoint
       cupPositions[CUP_POSITION_COUNT]; /* Zero where a hole has fewer */
   /* 0x30 */ CoursePoint
       teePositions[CUP_POSITION_COUNT]; /* Only the first is read as the tee */
-  /* 0x60 */ CoursePoint unk60[8];
+  /* 0x60 */ CoursePoint aimPoints[AIM_POINT_COUNT]; /* A par 4 or 5's tee shot
+                                                     faces the first; zero
+                                                     where unset */
   /* 0xC0 */ CoursePoint
       routePoints[ROUTE_POINT_COUNT]; /* For the computer golfer; zero where
                                          unused */
