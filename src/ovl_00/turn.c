@@ -4597,7 +4597,7 @@ void UpdateTurns(void) {
           }
 
           if (IsBunkerKind(surfaceInfo->kind) ||
-              surfaceInfo->kind == SURFACE_KIND_BUNKER_UNK9) {
+              surfaceInfo->kind == SURFACE_KIND_BUNKER_UNUSED_LIE) {
             player->hasBeenInBunker = TRUE;
           }
 

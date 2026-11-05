@@ -87,8 +87,8 @@ static SurfaceInfo f_SurfaceInfo[SURFACE_COUNT] = {
     /* SURFACE_BUNKER_POOR_LIE */
     {SURFACE_KIND_BUNKER_POOR_LIE, "BUNKER", 40, 60, 30, 600, 0, 0x506,
         SINK_DEPTH_HALF, 2},
-    /* SURFACE_BUNKER_UNK18 */
-    {SURFACE_KIND_BUNKER_UNK9, "BUNKER", 40, 60, 40, 600, 0, 0x506,
+    /* SURFACE_BUNKER_UNUSED_LIE */
+    {SURFACE_KIND_BUNKER_UNUSED_LIE, "BUNKER", 40, 60, 40, 600, 0, 0x506,
         SINK_DEPTH_HALF, 2},
     /* SURFACE_FAIRWAY_FAIR_LIE */
     {SURFACE_KIND_FAIRWAY_FAIR_LIE, "FAIRWAY", 94, 98, 7, 950, 380, 0x502,
@@ -1214,7 +1214,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
         case SURFACE_KIND_BUNKER:
         case SURFACE_KIND_BUNKER_FAIR_LIE:
         case SURFACE_KIND_BUNKER_POOR_LIE:
-        case SURFACE_KIND_BUNKER_UNK9:
+        case SURFACE_KIND_BUNKER_UNUSED_LIE:
         case SURFACE_KIND_BARE_GROUND:
           if (simulation->purpose == LAUNCH_PURPOSE_STROKE) {
             PlaySound(SOUND_LAND_SAND, g_NextSoundChannel, SOUND_FULL_SCALE);
@@ -1432,7 +1432,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
         case SURFACE_KIND_BUNKER:
         case SURFACE_KIND_BUNKER_FAIR_LIE:
         case SURFACE_KIND_BUNKER_POOR_LIE:
-        case SURFACE_KIND_BUNKER_UNK9:
+        case SURFACE_KIND_BUNKER_UNUSED_LIE:
         case SURFACE_KIND_BARE_GROUND:
         case SURFACE_KIND_WASTE_AREA:
           PlayStrokeImpactSound(

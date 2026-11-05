@@ -1078,7 +1078,7 @@ void PlanClubAndTarget(CoursePoint target) {
       break;
     case SURFACE_KIND_BUNKER_FAIR_LIE:
     case SURFACE_KIND_BUNKER_POOR_LIE:
-    case SURFACE_KIND_BUNKER_UNK9:
+    case SURFACE_KIND_BUNKER_UNUSED_LIE:
       f_Shot.shotMode = SHOT_MODE_NORMAL;
       f_Shot.clubSlot = FindClubSlot(f_Shot.playerIndex, CLUB_TYPE_SAND_WEDGE);
       ChooseLandingTarget(f_Shot.ballPosition[AXIS_X],
@@ -1686,7 +1686,7 @@ s32 GetLandingRating(u32 surfaceKind) {
     case SURFACE_KIND_BUNKER_POOR_LIE:
       rating = LANDING_POOR;
       break;
-    case SURFACE_KIND_BUNKER_UNK9:
+    case SURFACE_KIND_BUNKER_UNUSED_LIE:
     case SURFACE_KIND_WATER_HAZARD:
     case SURFACE_KIND_OUT_OF_BOUNDS:
     case SURFACE_KIND_OUT_OF_COURSE:
@@ -2892,7 +2892,7 @@ s32 ChooseShotOffset(void) {
     case SURFACE_KIND_BUNKER:
     case SURFACE_KIND_BUNKER_FAIR_LIE:
     case SURFACE_KIND_BUNKER_POOR_LIE:
-    case SURFACE_KIND_BUNKER_UNK9:
+    case SURFACE_KIND_BUNKER_UNUSED_LIE:
     case SURFACE_KIND_GREEN:
     case SURFACE_KIND_GREEN_EDGE:
     case SURFACE_KIND_BARE_GROUND:

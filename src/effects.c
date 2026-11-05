@@ -353,7 +353,7 @@ void PrepareShotEffects(BallSimulation* simulation) {
         break;
       case SURFACE_KIND_BUNKER_FAIR_LIE:
       case SURFACE_KIND_BUNKER_POOR_LIE:
-      case SURFACE_KIND_BUNKER_UNK9:
+      case SURFACE_KIND_BUNKER_UNUSED_LIE:
         f_DebrisKind = DEBRIS_KIND_BURIED;
         OpenEncodedAsset(CLOUD_IMAGE_ASSET, &asset);
         ReadEncodedAsset(f_DebrisImage, &asset);
@@ -765,7 +765,7 @@ void SpawnImpactEffects(BallSimulation* simulation) {
     case SURFACE_KIND_BUNKER:
     case SURFACE_KIND_BUNKER_FAIR_LIE:
     case SURFACE_KIND_BUNKER_POOR_LIE:
-    case SURFACE_KIND_BUNKER_UNK9:
+    case SURFACE_KIND_BUNKER_UNUSED_LIE:
     case SURFACE_KIND_BARE_GROUND:
       for (index = 0; index != EFFECT_COUNT; index++) {
         effect = &f_Effects[index];

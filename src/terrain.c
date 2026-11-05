@@ -924,7 +924,7 @@ s32 BlendSurfaceMapColor(s32 x, s32 z, Surface surface) {
     case SURFACE_KIND_BUNKER:
     case SURFACE_KIND_BUNKER_FAIR_LIE:
     case SURFACE_KIND_BUNKER_POOR_LIE:
-    case SURFACE_KIND_BUNKER_UNK9:
+    case SURFACE_KIND_BUNKER_UNUSED_LIE:
       code = TERRAIN_CODE_BUNKER;
       break;
     case SURFACE_KIND_DEEP_ROUGH:

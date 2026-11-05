@@ -24,7 +24,7 @@ enum Surface {
   SURFACE_UNK15, /* A nameless rock */
   SURFACE_BUNKER_FAIR_LIE,
   SURFACE_BUNKER_POOR_LIE,
-  SURFACE_BUNKER_UNK18,
+  SURFACE_BUNKER_UNUSED_LIE,
   SURFACE_FAIRWAY_FAIR_LIE,
   SURFACE_FAIRWAY_POOR_LIE,
   SURFACE_ROUGH_POOR_LIE,
@@ -59,8 +59,12 @@ enum SurfaceKind {
   SURFACE_KIND_BUNKER,
   SURFACE_KIND_BUNKER_FAIR_LIE, /* Half buried */
   SURFACE_KIND_BUNKER_POOR_LIE, /* Mostly buried */
-  /* Has BUNKER_POOR_LIE's image, but the default ratings and clubs */
-  SURFACE_KIND_BUNKER_UNK9,
+  /*
+   * The kind of SURFACE_BUNKER_UNUSED_LIE, which no decompiled code gives a
+   * ball. Its surface is BUNKER_POOR_LIE's with a 40 wrong-club penalty, not
+   * 30. Has BUNKER_POOR_LIE's image, but the default ratings and clubs
+   */
+  SURFACE_KIND_BUNKER_UNUSED_LIE,
   SURFACE_KIND_WATER_HAZARD,
   SURFACE_KIND_GREEN,
   SURFACE_KIND_GREEN_EDGE,
