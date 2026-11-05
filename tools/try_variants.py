@@ -165,6 +165,7 @@ def replace_all(before: str, body: str, block: str) -> tuple[str, str] | None:
     for replacement in block.split("\n++++\n"):
         old, _, new = replacement.partition("\n----")
         new = new.removeprefix("\n")
+        warn_if_repeated(before + body, old)
         if old in body:
             body = delete_or_replace(body, old, new)
         elif old in before:
@@ -172,6 +173,22 @@ def replace_all(before: str, body: str, block: str) -> tuple[str, str] | None:
         else:
             return None
     return before, body
+
+
+def warn_if_repeated(text: str, old: str) -> None:
+    """Warn when OLD occurs more than once in TEXT, as only its first is replaced.
+
+    Twin sites with the same text are changed by naming the text once for
+    each, but a variant that means to change only a later one changes the
+    first instead.
+    """
+    count = text.count(old)
+    if count > 1:
+        first_line = old.strip().splitlines()[0] if old.strip() else old
+        print(
+            f"warning: {count} instances of {first_line!r}; the first is replaced",
+            file=sys.stderr,
+        )
 
 
 def delete_or_replace(text: str, old: str, new: str) -> str:
