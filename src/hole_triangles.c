@@ -118,7 +118,10 @@ void DimNextTranslucentTriangles(void) {
  * normalizing it, where the original tests it after; fabsf gives 354 words, and
  * AbsFloat, an if/else, a ternary or testing edgeZ leave 69. The register
  * oracle, forcing 3 pseudos' registers, leaves 58 words at best, so the code
- * differs too. 69 words differ, 17 in shape.
+ * differs too. A focused run reached 49 words (9 in shape) by testing the
+ * vertices' differences without storing them in edgeX and edgeZ, which
+ * guNormalize then reads unset; the original stores both to the stack before
+ * taking their absolute values. 69 words differ, 17 in shape.
  */
 #ifdef NON_MATCHING
 void DrawHoleTriangles(Gfx** displayListHead, CameraMatrices* matrices UNUSED,
