@@ -2081,7 +2081,9 @@ void DrawHoleEditorGround(CameraMatrices* matrices, s32 terrainStyle);
  * nearby flag and the fine depth in two else-if arms left 911. Setting the
  * slots in DrawHoleEditorGround's order, the bottom before the top and the
  * middle after the tile index, then took it to 909; the register oracle gets to
- * 896 words forcing 70 pseudos either way.
+ * 896 words forcing 70 pseudos either way. A u16 or u8 groupTileIndex gives 908
+ * words (236 in shape) against 909 (233), but adds two 16- or 8-bit shifts or
+ * masks to the 23 that the draft and the original have.
  */
 void DrawGround(CameraMatrices* matrices, s32 terrainStyle) {
   u8 snapsEdge[2][TILE_VERTEX_SEGMENT_COUNT]; /* For the current and the last
