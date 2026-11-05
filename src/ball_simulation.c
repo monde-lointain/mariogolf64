@@ -290,7 +290,7 @@ void ResetBallSimulations(void) {
  * (215), both 771 and spinVelocityX alone 749, and spinVelocityZ in
  * StepOpeningBallSimulation's 277. Apart from the magnitudes', this note's
  * counts were measured with GCC's built-in fabsf, which left 672 words
- * differing, 206 in shape. 484 words differ, 132 in shape.
+ * differing, 206 in shape. 478 words differ, 126 in shape.
  */
 #ifdef NON_MATCHING
 s32 StepBallSimulation(BallSimulation* simulation) {
@@ -1636,12 +1636,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
             (tangent[AXIS_Z] * keep) + (normalPart[AXIS_Z] * restitution);
         simulation->lastBounceStep = simulation->stepCount;
         spinVelocityX = simulation->spinSpeed * cosf(simulation->spinHeading);
-        /*
-         * In its own block, as without it 778 words differ, 222 in shape,
-         * against 749 and 225
-         */
-        IN_OWN_BLOCK(spinVelocityZ =
-                         simulation->spinSpeed * sinf(simulation->spinHeading));
+        spinVelocityZ = simulation->spinSpeed * sinf(simulation->spinHeading);
         driftX = (spinVelocityX - velocity[AXIS_X]) *
             ((1.0f - restitution) * fabsf(plane.normal[AXIS_Y]) *
                 GROUND_SPIN_GRIP);
