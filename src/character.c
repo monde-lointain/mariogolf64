@@ -1451,11 +1451,15 @@ void AnimateCharacter(u32 slotIndex) {
  * loop.c hoists both constants in ours; global-alloc ranks 1.0f just above the
  * product scale, which reload then loads at each use, the reverse of the
  * original. The register oracle comes no closer than 136 words differing with
- * 28 pseudos forced, so the code differs too. The permuter's best outputs,
- * 4354 to 4419 against 5254 (177 words differing, 51 in shape, at best), all
- * move rotationProgress *= angle out of the slerp branch, which changes the
- * sines' angle; the original scales it in place, right after acosf. 184
- * words differ, 66 in shape.
+ * 28 pseudos forced, so the code differs too. The permuter's best outputs, 4354
+ * to 4419 against 5254 (177 words differing, 51 in shape, at best), all move
+ * rotationProgress *= angle out of the slerp branch, which changes the sines'
+ * angle; the original scales it in place, right after acosf. Storing the
+ * rotation's [0][2] after [1][1] gives 180 words (62 in shape), but no whole
+ * order does better than the rows: all 16 stores by column give 184 (66), the
+ * nine values by row or by column before the constants 242, the diagonal first
+ * 254, and the paired off-diagonal terms first 313. 184 words differ, 66 in
+ * shape.
  */
 #ifdef NON_MATCHING
 void UpdateJointKeyframeSpans(u32 slotIndex) {
