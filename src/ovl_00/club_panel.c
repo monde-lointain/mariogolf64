@@ -322,7 +322,6 @@ Boolean IsShotModeChangeDone(void) {
   return f_ShotModeChangeFrame == 0;
 }
 
-#ifdef NON_MATCHING
 /*
  * The power gauge runs from GAUGE_EMPTY_X leftwards, so a fuller gauge
  * reaches further left. Its ticks are GAUGE_TICK_SPACING apart, with
@@ -359,16 +358,10 @@ Boolean IsShotModeChangeDone(void) {
 
 s32 GetGaugeFill(void);
 
-/*
- * Draws the power gauge, its markers, and the bar for the lie's span.
- *
- * Doesn't match: before the span bar, the original takes all six display
- * list pointers of the pipe syncs and other modes before storing any
- * command, and reads the span last, where this stores as it goes. 32 words
- * differ, 8 in shape.
- */
+/* Draws the power gauge, its markers, and the bar for the lie's span */
 void DrawClubPanel(Gfx** displayListHead) {
-  s32 span;
+  /* GetLieSpan sets both; the panel shows the first */
+  s32 span[2];
   Gfx* gfx;
   Boolean isPutter;
   s32 value;
@@ -392,7 +385,7 @@ void DrawClubPanel(Gfx** displayListHead) {
   GetLieSpan(
       GetClub(
           g_Players[g_CurrentShot.playerIndex].clubs[g_CurrentShot.clubSlot]),
-      g_CurrentShot.surface, &span, g_CurrentShot.shotMode);
+      g_CurrentShot.surface, span, g_CurrentShot.shotMode);
   gDPPipeSync(gfx++);
   gDPPipeSync(gfx++);
   gDPSetTexturePersp(gfx++, G_TP_NONE);
@@ -565,7 +558,7 @@ void DrawClubPanel(Gfx** displayListHead) {
       absValue = -absValue;
     }
 
-    if (absValue <= span / 2) {
+    if (absValue <= span[0] / 2) {
       gDPSetEnvColor(gfx++, 0, 0, 0, 255);
     } else {
       gDPSetPrimColor(gfx++, 0, 0, 127, 127, 127, 255);
@@ -616,11 +609,11 @@ void DrawClubPanel(Gfx** displayListHead) {
   gDPPipeSync(gfx++);
   gDPSetTextureFilter(gfx++, G_TF_BILERP);
   gDPPipeSync(gfx++);
-  if (span != 0) {
+  if (span[0] != 0) {
     guTranslate(&f_SpanBarTranslation, SPAN_BAR_X,
         SPAN_BAR_Y - g_ShotPanelOffsetX - f_ClubPanelDebugValue, SPAN_BAR_Z);
-    guScale(&f_SpanBarScale, span * SPAN_BAR_SCALE_PER_SPAN, SPAN_BAR_THICKNESS,
-        SPAN_BAR_THICKNESS);
+    guScale(&f_SpanBarScale, span[0] * SPAN_BAR_SCALE_PER_SPAN,
+        SPAN_BAR_THICKNESS, SPAN_BAR_THICKNESS);
     gDPSetCombineMode(gfx++, G_CC_SHADE, G_CC_SHADE);
     gDPPipeSync(gfx++);
     gSPMatrix(gfx++, PhysicalAddress(&f_SpanBarTranslation),
@@ -634,10 +627,6 @@ void DrawClubPanel(Gfx** displayListHead) {
   gDPPipeSync(gfx++);
   *displayListHead = gfx;
 }
-
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_00/club_panel", DrawClubPanel);
-#endif
 
 void DrawClubPanelIfShown(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
