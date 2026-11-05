@@ -2322,7 +2322,14 @@ s32 FindHoleTriangleHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
  * the plane; a local for all six gives 226 words (76 in shape), and for the
  * start and end sides alone 200 (62). Those counts were measured with GCC's
  * built-in fabsf, when 200 words differed, 62 in shape. With fabsf an abs.s in
- * volatile inline assembly, 63 words differ, 15 in shape.
+ * volatile inline assembly, 63 words differed, 15 in shape. The walls facing
+ * z then ordered their x ends by testing whether the first corner was the
+ * larger; the original tests whether it is the smaller, setting the ends from
+ * the other corner first, as the walls facing x do with their z ends. Testing
+ * it so took the draft to 55 words, 7 in shape. The original sets hitIndex to
+ * NO_HOLE_TRIANGLE near its start, but setting it in its declaration or first,
+ * alone or with nearestFraction, gives 57 to 61 words, 13 in shape. 55 words
+ * differ, 7 in shape.
  */
 #ifdef NON_MATCHING
 s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
@@ -2483,12 +2490,12 @@ s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
         edgeLength =
             Length2D(triangle.corners[AXIS_X][0] - triangle.corners[AXIS_X][2],
                 triangle.corners[AXIS_Z][0] - triangle.corners[AXIS_Z][2]);
-        if (triangle.corners[AXIS_X][0] >= triangle.corners[AXIS_X][2]) {
-          farEnd = triangle.corners[AXIS_X][0] << WORLD_TO_COURSE_SHIFT;
-          nearEnd = triangle.corners[AXIS_X][2] << WORLD_TO_COURSE_SHIFT;
-        } else {
+        if (triangle.corners[AXIS_X][0] < triangle.corners[AXIS_X][2]) {
           farEnd = triangle.corners[AXIS_X][2] << WORLD_TO_COURSE_SHIFT;
           nearEnd = triangle.corners[AXIS_X][0] << WORLD_TO_COURSE_SHIFT;
+        } else {
+          farEnd = triangle.corners[AXIS_X][0] << WORLD_TO_COURSE_SHIFT;
+          nearEnd = triangle.corners[AXIS_X][2] << WORLD_TO_COURSE_SHIFT;
         }
 
         if (endX < startX) {
@@ -2545,12 +2552,12 @@ s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
         edgeLength =
             Length2D(triangle.corners[AXIS_X][0] - triangle.corners[AXIS_X][1],
                 triangle.corners[AXIS_Z][0] - triangle.corners[AXIS_Z][1]);
-        if (triangle.corners[AXIS_X][0] >= triangle.corners[AXIS_X][1]) {
-          farEnd = triangle.corners[AXIS_X][0] << WORLD_TO_COURSE_SHIFT;
-          nearEnd = triangle.corners[AXIS_X][1] << WORLD_TO_COURSE_SHIFT;
-        } else {
+        if (triangle.corners[AXIS_X][0] < triangle.corners[AXIS_X][1]) {
           farEnd = triangle.corners[AXIS_X][1] << WORLD_TO_COURSE_SHIFT;
           nearEnd = triangle.corners[AXIS_X][0] << WORLD_TO_COURSE_SHIFT;
+        } else {
+          farEnd = triangle.corners[AXIS_X][0] << WORLD_TO_COURSE_SHIFT;
+          nearEnd = triangle.corners[AXIS_X][1] << WORLD_TO_COURSE_SHIFT;
         }
 
         if (endX < startX) {
