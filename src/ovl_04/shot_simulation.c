@@ -65,11 +65,11 @@ void SimulateShot(ShotLaunch* shot) {
   g_SimulatedShot.isPerfectSwing = shot->impactTiming == 0 &&
       shot->power >= MAX_LAUNCH_POWER &&
       !(GetClub(shot->clubIndex)->surfaceMask & CLUB_SURFACE_GREEN);
-  g_SimulatedShot.unk2E42 = GetImpactTimingEntry(
+  g_SimulatedShot.impactRumbles = GetImpactTimingEntry(
       GetClub(
           g_Players[g_CurrentShot.playerIndex].clubs[g_CurrentShot.clubSlot]),
       g_CurrentShot.surface, g_CurrentShot.shotMode, shot->impactTiming)
-                                ->rumbles;
+                                      ->rumbles;
   LaunchBallSimulation(simulation, LAUNCH_PURPOSE_TRIAL, shot);
   g_SimulatedShot.startsOnGreen = g_GameState.isMiniGolf ||
       GetSurfaceInfo(g_CurrentShot.surface)->kind == SURFACE_KIND_GREEN;

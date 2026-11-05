@@ -998,7 +998,7 @@ s32 GetEndReaction(void) {
 #define FULL_SHOT_REVERB 0x14
 
 /* The steps of the flight at which PlayFlightSounds plays some sounds */
-#define UNK2E42_SOUND_STEP 10
+#define RUMBLE_REACTION_STEP 10
 #define FULL_SHOT_REACTION_STEP 14
 #define SHOT_RESULT_STEP 20
 /* Most sounds wait for the flight to pass its first steps */
@@ -1107,7 +1107,7 @@ void PlayFlightSounds(s32 step) {
     }
   }
 
-  if (step == UNK2E42_SOUND_STEP && g_SimulatedShot.unk2E42) {
+  if (step == RUMBLE_REACTION_STEP && g_SimulatedShot.impactRumbles) {
     /* Plays the sound again for each player; the original has it */
     for (i = 0; i != g_GameState.playerCount; i++) {
       PlaySound(SOUND_UNK151, FLIGHT_SOUND_CHANNEL_UNK3, SOUND_FULL_SCALE);

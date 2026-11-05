@@ -479,7 +479,7 @@ enum CharacterSoundKind {
   CHARACTER_SOUND_KIND_OUT_OF_COURSE,
   /*
    * A landing in a water hazard, out of bounds or out of course, and a step
-   * of the flight when unk2E42 is set
+   * of the flight of a shot whose impact rumbles
    */
   CHARACTER_SOUND_KIND_TROUBLE,
   CHARACTER_SOUND_KIND_BUNKER, /* Also a landing in deep rough */
