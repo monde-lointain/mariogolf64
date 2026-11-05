@@ -166,12 +166,25 @@ def replace_all(before: str, body: str, block: str) -> tuple[str, str] | None:
         old, _, new = replacement.partition("\n----")
         new = new.removeprefix("\n")
         if old in body:
-            body = body.replace(old, new, 1)
+            body = delete_or_replace(body, old, new)
         elif old in before:
-            before = before.replace(old, new, 1)
+            before = delete_or_replace(before, old, new)
         else:
             return None
     return before, body
+
+
+def delete_or_replace(text: str, old: str, new: str) -> str:
+    """Return TEXT with OLD's first instance replaced by NEW.
+
+    An empty NEW deletes OLD's line with its newline, which the separators
+    took from OLD, rather than leave a blank line.
+    """
+    start = text.index(old)
+    end = start + len(old)
+    if not new and text[end : end + 1] == "\n":
+        end += 1
+    return text[:start] + new + text[end:]
 
 
 def read_variants(c_path: str, function: str, variants_path: str) -> list[str | None]:
