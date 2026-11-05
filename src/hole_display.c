@@ -3098,8 +3098,10 @@ INCLUDE_ASM("asm/nonmatchings/hole_display", DrawTurnAwayAnimation);
  * draft from 97 words differing to 95, 17 in shape to 19. Storing the first
  * vertex's z between the second's x and y gives 95 words, 15 in shape, but
  * splits both vertices' stores for no reason; storing the x's, the y's and the
- * z's in pairs gives 97, and the second vertex first 101. 95 words differ, 19
- * in shape.
+ * z's in pairs gives 97, and the second vertex first 101. A focused permuter
+ * run's best by words (93, 15 in shape) gives the second vertex an x 64
+ * greater, but the original stores the same register as both vertices' x before
+ * adding 64 to it. 95 words differ, 19 in shape.
  */
 #ifdef NON_MATCHING
 void CaptureHudAnimationFrame(void) {
