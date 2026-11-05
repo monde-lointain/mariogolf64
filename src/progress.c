@@ -43,7 +43,13 @@ void ShowBirdieBadgeCount(s32 badgeCount);
  * whatever the other two are, though the original adds 1 to the count unmasked.
  * Keep the byte draft until both the promotion and delay-slot copy are
  * explained. The register oracle's closest result is these 3 words with no
- * register forced, so allocation isn't the cause. 3 words differ.
+ * register forced, so allocation isn't the cause. The original picks the
+ * printed value as either the combined bits or the bits with the flag, in
+ * another register, so choosing newValue from the combined value with a ternary
+ * or an if/else in either order was tried, with value and count each a u8, s32
+ * or u32 and newValue an s32 or u32: these give 19 to 47 words, and setting
+ * newValue to the combined bits and or-ing the flag into it 19 to 27. 3 words
+ * differ.
  */
 #ifdef NON_MATCHING
 void RecordComCharacterResult(s32 row, s32 column, Boolean isWin) {
