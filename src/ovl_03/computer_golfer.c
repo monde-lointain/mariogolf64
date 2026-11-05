@@ -205,7 +205,9 @@ static f32 f_ApproachBandLimits[APPROACH_BAND_COUNT][CONSISTENCY_COUNT] = {
     {0.4f, 0.45f, 0.35f},
     {0.6f, 0.7f, 0.5f},
 };
-static Boolean f_HasUnk3Contact = FALSE;
+/* Whether the trial ball, falling before its first bounce, hit the ground or a
+ * billboard, on a later trial level with no evaluation kept yet */
+static Boolean f_HasFirstFallHit = FALSE;
 /* Read by no routine. The 2W and AW share the 3W's and SW's types. */
 static ClubName f_UnusedPlanClubNames[] UNUSED = {
     {"1W", CLUB_TYPE_DRIVER},
@@ -2376,7 +2378,7 @@ s32 StepTrialShot(void) {
     LaunchBallSimulation(
         &f_TrialSimulation, LAUNCH_PURPOSE_TRIAL, f_TrialLaunch);
     f_TrialStepCount = 0;
-    f_HasUnk3Contact = FALSE;
+    f_HasFirstFallHit = FALSE;
     f_TrialEndPoint[AXIS_X] = f_TrialSimulation.position[AXIS_X];
     f_TrialEndPoint[AXIS_Y] = f_TrialSimulation.position[AXIS_Y];
     f_TrialEndPoint[AXIS_Z] = f_TrialSimulation.position[AXIS_Z];
@@ -2413,7 +2415,7 @@ s32 StepTrialShot(void) {
           break;
         }
 
-        f_HasUnk3Contact = ballState;
+        f_HasFirstFallHit = ballState;
       }
 
       if (f_IsPutting) {
@@ -2658,7 +2660,7 @@ EVALUATE:
           osSyncPrintf("Level Down\n");
           f_NeedsShorterClub = TRUE;
           return 1;
-        } else if (f_HasUnk3Contact || ratio >= 10.0f) {
+        } else if (f_HasFirstFallHit || ratio >= 10.0f) {
           f_AimChangeCount++;
           f_Shot.heading += (!(f_AimChangeCount & 1) ? -1 : 1) *
               (f_AimChangeCount * AIM_CHANGE_STEP);
