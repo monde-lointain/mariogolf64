@@ -1656,7 +1656,15 @@ void FormatLeaderboardRow(char* row, TournamentStanding* standing) {
  * the call converts gives 120. These counts were measured when the faces and
  * arrows were drawn only once flipTime passed ROW_FLIP_TIME, which it never
  * does, and the draft gave 120 words (46 in shape); the original compares it
- * with 36, the last row's start. 116 words differ, 46 in shape.
+ * with 36, the last row's start. 110 words differ, 44 in shape.
+ *
+ * The arrow's rect adds the row's top in place in each edge, as the
+ * function's other rects do. A local for the top, set before the texel start,
+ * gave 116 words (46 in shape), and the register oracle's closest result
+ * falls from 76 words to 68 without it, forcing 13 pseudos either way; the
+ * original loads g_Scorecard.y late, among the texel start's float steps, and
+ * works out the top once for both edges. The local set just before the call
+ * gives 116 words (44 in shape), and other orders of the sum 119 to 127.
  */
 #ifdef NON_MATCHING
 void DrawLeaderboardPage(Gfx** displayListHead) {
@@ -1668,7 +1676,6 @@ void DrawLeaderboardPage(Gfx** displayListHead) {
   s32 contestantId;
   f32 halfSize;
   s32 roundedHalfSize;
-  s32 top;
   s32 texelStart;
   s32 texelStep;
 
@@ -2006,8 +2013,6 @@ void DrawLeaderboardPage(Gfx** displayListHead) {
         }
 
         roundedHalfSize = halfSize + 0.5f;
-        top = (i * LEADERBOARD_ROW_SPACING) + ROW_HINGE_TOP + g_Scorecard.y;
-
         /* Starts the texels part of a texel in, as far as the rect's rounding
          * moved its edge */
         texelStart = (ARROW_IMAGE_SIZE / 2) -
@@ -2015,9 +2020,14 @@ void DrawLeaderboardPage(Gfx** displayListHead) {
         texelStep = (TEXEL_STEP_ONE * ARROW_IMAGE_SIZE / 2) / halfSize;
         DrawTextureRect(&gfx,
             QuarterPixels(g_Scorecard.x - (roundedHalfSize - ARROW_CENTER_X)),
-            QuarterPixels(top - roundedHalfSize),
+            QuarterPixels(((i * LEADERBOARD_ROW_SPACING) + ROW_HINGE_TOP +
+                              g_Scorecard.y) -
+                roundedHalfSize),
             QuarterPixels(g_Scorecard.x + ARROW_CENTER_X + roundedHalfSize),
-            QuarterPixels(top + roundedHalfSize), G_TX_RENDERTILE, texelStart,
+            QuarterPixels(((i * LEADERBOARD_ROW_SPACING) + ROW_HINGE_TOP +
+                              g_Scorecard.y) +
+                roundedHalfSize),
+            G_TX_RENDERTILE, texelStart,
             texelStart +
                 TexelCoordinate(g_Scorecard.placeChange * ARROW_IMAGE_SIZE),
             texelStep, texelStep);
