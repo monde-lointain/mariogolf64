@@ -471,8 +471,14 @@ def mark_focus_regions(c_path: str, asm_path: str, function: str) -> str:
     body_end = source.find("\n}", definition.end())
     last = source.count("\n", 0, body_end) + 2
     starts = find_statement_starts(lines, first, last)
+    # A nested function is compiled as a routine of its own, so the enclosing
+    # one's blame leaves out the lines of its body
+    blamed = blame.find_blamed_lines(asm_path, c_path, function)
+    for name in find_nested_functions(source[definition.end() : body_end], asm_path):
+        nested_asm = str(Path(asm_path).with_name(f"{name}.s"))
+        blamed += blame.find_blamed_lines(nested_asm, c_path, name)
     regions: list[tuple[int, int]] = []
-    for line_number in sorted(blame.find_blamed_lines(asm_path, c_path, function)):
+    for line_number in sorted(blamed):
         index = bisect.bisect_right(starts, line_number - 1) - 1
         if not first <= line_number - 1 < last or index < 0:
             continue
@@ -490,11 +496,11 @@ def mark_focus_regions(c_path: str, asm_path: str, function: str) -> str:
     return "".join(pragmas.get(index, "") + line for index, line in enumerate(lines))
 
 
-def find_nested_functions(base_path: Path, asm_path: str) -> list[str]:
-    """List the nested functions in BASE_PATH that ASM_PATH's directory holds."""
+def find_nested_functions(source: str, asm_path: str) -> list[str]:
+    """List the nested functions in SOURCE that ASM_PATH's directory holds."""
     names = [
         match.group(1)
-        for match in fncompare.NESTED_DEFINITION_RE.finditer(base_path.read_text())
+        for match in fncompare.NESTED_DEFINITION_RE.finditer(source)
         if match.group(1) not in fncompare.NESTED_DEFINITION_KEYWORDS
     ]
     # Inline ones that were never emitted on their own have no assembly
@@ -565,7 +571,7 @@ def main() -> None:
             focused_path.unlink()
     else:
         write_base(c_path, function, out_dir / "base.c")
-    nested = find_nested_functions(out_dir / "base.c", asm_path)
+    nested = find_nested_functions((out_dir / "base.c").read_text(), asm_path)
     asm_dir = Path(asm_path).parent
     write_target([str(asm_dir / f"{name}.s") for name in nested] + [asm_path], out_dir)
 
