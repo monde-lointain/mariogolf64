@@ -3341,7 +3341,10 @@ static inline u16* GetShadowedTexel(u32 column, u32 row) {
  * centerColumn, alone or with centerRow, gives 152 words (20 in shape) but only
  * moves the column's quotient to another register, adding a move; it adds no
  * extension, and the oracle leaves 64 words either way, so the centers stay s32
- * as the rows and columns are. 153 words differ, 19 in shape.
+ * as the rows and columns are. Naming the solidity texel's row and column, as a
+ * focused permuter run's best did, took 153 words (19 in shape) to 149 (15),
+ * and the register oracle's best from 64 to 60, forcing 28 pseudos; the figures
+ * above were measured before it. 149 words differ, 15 in shape.
  */
 #ifdef NON_MATCHING
 void CastBillboardShadows(void) {
@@ -3497,9 +3500,10 @@ void CastBillboardShadows(void) {
         }
 
         if (viewY >= 0.0f) {
-          solidity = solidities[((s32)(heightFraction * BILLBOARD_MASK_SIZE)
-                                    << SOLIDITY_ROW_SHIFT) +
-              (s32)(widthFraction * BILLBOARD_MASK_SIZE)];
+          s32 texelRow = heightFraction * BILLBOARD_MASK_SIZE;
+          s32 texelColumn = widthFraction * BILLBOARD_MASK_SIZE;
+
+          solidity = solidities[(texelRow << SOLIDITY_ROW_SHIFT) + texelColumn];
           if (solidity != 0) {
             nearness = SHADOW_NEARNESS_LIMIT -
                 (fabsf((lightView[0][2] * column) + rowPoint[AXIS_Z]) *
