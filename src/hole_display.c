@@ -2293,16 +2293,19 @@ void HandleFrameBufferSwap(void) {}
  * Doesn't match: registers are allocated differently. The original loads
  * f_CapturedFrame into $s3, stores it at once in a reload slot (0xC($sp)) and
  * reads it back for the strip loops, using $s3 for gbi words; its frame is 8
- * bytes larger for that slot. The register oracle forces 20 pseudos and still
- * leaves 74 words, starting with the frame's size, so reload's spill choice
+ * bytes larger for that slot. The register oracle forced 20 pseudos and still
+ * left 74 words, starting with the frame's size, so reload's spill choice
  * differs too. That height written as a plain ?: branches, where the original
  * doesn't; it gave 174 words, 50 in shape, against 193 (45) with the |, whose
  * extra words are register choices. A permuter output, 215 words with 31 in
- * shape, needs two temps: a u32 copy of frame, set before the first PipeSync,
+ * shape, needed two temps: a u32 copy of frame, set before the first PipeSync,
  * for the strip loop's two texture images, and ~7 held in a variable for one of
- * them. Without the copy it gives 202 words, 48 in shape, and without the
- * mask's variable 299, 35 in shape; writing the load block's count as width
- * times height changes nothing. 193 words differ, 45 in shape.
+ * them. Without the copy it gave 202 words, 48 in shape, and without the mask's
+ * variable 299, 35 in shape; writing the load block's count as width times
+ * height changed nothing. Each strip loop declares its own height, as each
+ * loop's height is a different strip's or row's, which took the draft from 193
+ * words differing to 179, 45 in shape either way; declaring it in the second or
+ * third loop alone gives 179 too. 179 words differ, 45 in shape.
  */
 #ifdef NON_MATCHING
 void DrawFadeAnimation(Gfx** displayListHead) {
@@ -2311,11 +2314,11 @@ void DrawFadeAnimation(Gfx** displayListHead) {
   Boolean isTileSet;
   /*
    * One index for the strips and the rows, to match: a separate row or strip
-   * variable gives 216 words differing (50 in shape) against the draft's 174
-   * (50)
+   * variable gave 216 words differing (50 in shape) against the draft's 174
+   * (50) at the time, and a separate row variable gives 215 (45) against 179
+   * (45)
    */
   s32 i;
-  s16 height;
   u16* source;
 
   if (f_HudAnimationFramesLeft > 0) {
@@ -2347,7 +2350,8 @@ void DrawFadeAnimation(Gfx** displayListHead) {
         gDPSetCombineMode(gfx++, G_CC_MODULATEI_PRIM, G_CC_MODULATEI_PRIM);
         source = f_LastFrameBuffer;
         for (i = 0; i != BACKDROP_STRIP_COUNT; i++) {
-          height = StripHeight(i);
+          s16 height = StripHeight(i);
+
           gDPLoadTextureTile(gfx++, TextureAddress(source), G_IM_FMT_RGBA,
               G_IM_SIZ_16b, SCREEN_WIDTH, 0, BACKDROP_BORDER, BACKDROP_BORDER,
               BACKDROP_RIGHT, BACKDROP_BORDER + height - 1, 0,
@@ -2374,7 +2378,8 @@ void DrawFadeAnimation(Gfx** displayListHead) {
         gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
         gDPPipeSync(gfx++);
         for (i = 0; i != BACKDROP_STRIP_COUNT; i++) {
-          height = StripHeight(i);
+          s16 height = StripHeight(i);
+
           LoadFadeFrameStrip(gfx,
               &frame[i * BACKDROP_STRIP_STEP * FADE_FRAME_WORDS_PER_ROW],
               height, isTileSet);
@@ -2407,7 +2412,7 @@ void DrawFadeAnimation(Gfx** displayListHead) {
     for (i = BACKDROP_BORDER; i < SCREEN_HEIGHT - BACKDROP_BORDER;
         i += BACKDROP_STRIP_STEP) {
       /* Written with | for the reason StripHeight is */
-      height = BACKDROP_LAST_STRIP_HEIGHT |
+      s16 height = BACKDROP_LAST_STRIP_HEIGHT |
           ((i + BACKDROP_STRIP_STEP <= SCREEN_HEIGHT - BACKDROP_BORDER)
                   ? (BACKDROP_STRIP_HEIGHT - BACKDROP_LAST_STRIP_HEIGHT)
                   : 0);
