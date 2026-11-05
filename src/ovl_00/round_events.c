@@ -2567,7 +2567,6 @@ void LoadContactImages(Player* player) {
   }
 }
 
-#ifdef NON_MATCHING
 /* g_ContactEffect counts the frames since contact, faster while fading, up to
  * here */
 #define CONTACT_AGE_MAX 255
@@ -2634,11 +2633,11 @@ void LoadContactImages(Player* player) {
     if (f_ContactStyle != CONTACT_STYLE_SHOT) { \
       for (pass = 0; pass != CONTACT_RIBBON_RELOAD_PASSES; pass++) { \
         for (i = (pass * 30) + 16; i != (pass * 30) + 31; i++) { \
-          DrawContactSegment(i, 28 - ((i - (pass * 30) - 16) * 2)); \
+          DrawContactSegment(i, 28 - ((i - ((pass * 30) + 16)) * 2)); \
         } \
         DrawContactTriangles(); \
         for (i = (pass * 30) + 31; i != (pass * 30) + 46; i++) { \
-          DrawContactSegment(i, ((i - (pass * 30) - 31) * 2) + 2); \
+          DrawContactSegment(i, ((i - ((pass * 30) + 31)) * 2) + 2); \
         } \
         DrawContactTriangles(); \
       } \
@@ -2648,18 +2647,6 @@ void LoadContactImages(Player* player) {
 /*
  * Draws the contact effect as a ribbon through the ball's last positions, and
  * Mario's as a spinning image, while it fades
- *
- * Doesn't match: 22 words differ, 18 in shape. In the two DrawContactRibbon
- * expansions, the reload loops' vertex numbers subtract 16 or 31 before pass *
- * 30, where this subtracts pass * 30 first. Writing i - 16 - (pass * 30) gives
- * 940 words differing, 184 in shape, i - 31 - (pass * 30) in the second loop
- * 132 (20), and both 922 (174). Earlier, when the draft gave 170 words,
- * counting the reload loops from 0 and adding each pass's first segment to i
- * gave 1352 (420), or with the first loop alone 1052 (256) and the second 1276
- * (332). The original holds each segment's ring slot in a register of its own,
- * so DrawContactSegment works it out into a local, as a focused permuter run's
- * temp suggested; written into the matrix's address, 170 words differed, also
- * 18 in shape.
  */
 void DrawContactEffect(Gfx** displayListHead, CameraMatrices* matrices) {
   Mat4 scale;
@@ -2737,202 +2724,202 @@ void DrawContactEffect(Gfx** displayListHead, CameraMatrices* matrices) {
     g_ContactEffect = CONTACT_EFFECT_NONE;
   }
 
-  if (alpha <= 0) {
-    return;
-  }
-
-  /* The ribbon starts where the ball was hit, then follows it */
-  if (g_ContactEffect == 1) {
-    f_ContactTrailHead = 0;
-    for (i = 0; i != CONTACT_MATRIX_COUNT; i++) {
-      guTranslate(&f_ContactMatrices[i],
-          g_CurrentShot.ballPosition[AXIS_X] * COURSE_TO_WORLD_SCALE,
-          (g_CurrentShot.ballPosition[AXIS_Y] * COURSE_TO_WORLD_SCALE) -
+  if (alpha > 0) {
+    /* The ribbon starts where the ball was hit, then follows it */
+    if (g_ContactEffect == 1) {
+      f_ContactTrailHead = 0;
+      for (i = 0; i != CONTACT_MATRIX_COUNT; i++) {
+        guTranslate(&f_ContactMatrices[i],
+            g_CurrentShot.ballPosition[AXIS_X] * COURSE_TO_WORLD_SCALE,
+            (g_CurrentShot.ballPosition[AXIS_Y] * COURSE_TO_WORLD_SCALE) -
+                (g_PinVertexScale * CONTACT_DROP_PER_PIN_SCALE),
+            g_CurrentShot.ballPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE);
+      }
+    } else {
+      guTranslate(&f_ContactMatrices[f_ContactTrailHead],
+          g_TurnBallSimulation.position[AXIS_X] * COURSE_TO_WORLD_SCALE,
+          (g_TurnBallSimulation.position[AXIS_Y] * COURSE_TO_WORLD_SCALE) -
               (g_PinVertexScale * CONTACT_DROP_PER_PIN_SCALE),
-          g_CurrentShot.ballPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE);
+          g_TurnBallSimulation.position[AXIS_Z] * COURSE_TO_WORLD_SCALE);
     }
-  } else {
-    guTranslate(&f_ContactMatrices[f_ContactTrailHead],
-        g_TurnBallSimulation.position[AXIS_X] * COURSE_TO_WORLD_SCALE,
-        (g_TurnBallSimulation.position[AXIS_Y] * COURSE_TO_WORLD_SCALE) -
-            (g_PinVertexScale * CONTACT_DROP_PER_PIN_SCALE),
-        g_TurnBallSimulation.position[AXIS_Z] * COURSE_TO_WORLD_SCALE);
-  }
 
-  gDPPipeSync(gfx++);
-  gDPPipeSync(gfx++);
-  gDPSetCycleType(gfx++, G_CYC_1CYCLE);
-  gDPPipeSync(gfx++);
-  gDPPipeSync(gfx++);
-  gDPSetRenderMode(gfx++, G_RM_ZB_XLU_SURF, G_RM_ZB_XLU_SURF2);
-  gDPPipeSync(gfx++);
-  gDPSetAlphaCompare(gfx++, G_AC_NONE);
-  gDPPipeSync(gfx++);
-  gDPSetAlphaDither(gfx++, G_AD_PATTERN);
-  gDPPipeSync(gfx++);
-  gDPSetTexturePersp(gfx++, G_TP_PERSP);
-  gDPPipeSync(gfx++);
-  gDPSetTextureFilter(gfx++, G_TF_BILERP);
-  gDPPipeSync(gfx++);
-  gDPSetTextureLUT(gfx++, G_TT_NONE);
-  gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
-  gSPClearGeometryMode(gfx++, 0xFFFFFFFF);
-  gSPSetGeometryMode(gfx++, G_ZBUFFER | G_SHADE | G_SHADING_SMOOTH);
-  gDPSetEnvColor(gfx++, 255, 255, 255, 255);
-  if (f_ContactStyle == CONTACT_STYLE_WARIO) {
-    gDPSetPrimColor(gfx++, 0, 0, 255, 0, 255, alpha);
-  } else if (f_ContactStyle == CONTACT_STYLE_GAME_BOY_BALL_7) {
-    gDPSetEnvColor(gfx++, 255, 255, 127, 255);
-    gDPSetPrimColor(gfx++, 0, 0, guRandom() % 255, guRandom() % 255,
-        guRandom() % 255, alpha);
-  } else if (f_ContactStyle == CONTACT_STYLE_BOWSER) {
-    gDPSetPrimColor(gfx++, 0, 0, 255, 0, 255, alpha);
-    gDPSetPrimColor(gfx++, 0, 0, 255, 0, 0, alpha);
-    gDPSetEnvColor(gfx++, 255, 247, 239, 255);
-  } else if (f_ContactStyle == CONTACT_STYLE_MARIO) {
-    gDPSetPrimColor(gfx++, 0, 0, 255, 0, 0, alpha);
-  } else if (f_ContactStyle == CONTACT_STYLE_PLAIN ||
-      f_ContactStyle == CONTACT_STYLE_GAME_BOY_BALL_5 ||
-      f_ContactStyle == CONTACT_STYLE_PUTT) {
-    gDPSetPrimColor(gfx++, 0, 0, 0, 0, 255, alpha);
-  } else if (f_ContactStyle == CONTACT_STYLE_GAME_BOY_BALL_6) {
-    gDPSetPrimColor(gfx++, 0, 0, 255, 127, 0, alpha);
-    gDPSetEnvColor(gfx++, 255, 191, 63, 255);
-  } else {
-    gDPSetPrimColor(gfx++, 0, 0, 191, 191, 255, alpha);
-  }
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_ZB_XLU_SURF, G_RM_ZB_XLU_SURF2);
+    gDPPipeSync(gfx++);
+    gDPSetAlphaCompare(gfx++, G_AC_NONE);
+    gDPPipeSync(gfx++);
+    gDPSetAlphaDither(gfx++, G_AD_PATTERN);
+    gDPPipeSync(gfx++);
+    gDPSetTexturePersp(gfx++, G_TP_PERSP);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_BILERP);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_NONE);
+    gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+    gSPClearGeometryMode(gfx++, 0xFFFFFFFF);
+    gSPSetGeometryMode(gfx++, G_ZBUFFER | G_SHADE | G_SHADING_SMOOTH);
+    gDPSetEnvColor(gfx++, 255, 255, 255, 255);
+    if (f_ContactStyle == CONTACT_STYLE_WARIO) {
+      gDPSetPrimColor(gfx++, 0, 0, 255, 0, 255, alpha);
+    } else if (f_ContactStyle == CONTACT_STYLE_GAME_BOY_BALL_7) {
+      gDPSetEnvColor(gfx++, 255, 255, 127, 255);
+      gDPSetPrimColor(gfx++, 0, 0, guRandom() % 255, guRandom() % 255,
+          guRandom() % 255, alpha);
+    } else if (f_ContactStyle == CONTACT_STYLE_BOWSER) {
+      gDPSetPrimColor(gfx++, 0, 0, 255, 0, 255, alpha);
+      gDPSetPrimColor(gfx++, 0, 0, 255, 0, 0, alpha);
+      gDPSetEnvColor(gfx++, 255, 247, 239, 255);
+    } else if (f_ContactStyle == CONTACT_STYLE_MARIO) {
+      gDPSetPrimColor(gfx++, 0, 0, 255, 0, 0, alpha);
+    } else if (f_ContactStyle == CONTACT_STYLE_PLAIN ||
+        f_ContactStyle == CONTACT_STYLE_GAME_BOY_BALL_5 ||
+        f_ContactStyle == CONTACT_STYLE_PUTT) {
+      gDPSetPrimColor(gfx++, 0, 0, 0, 0, 255, alpha);
+    } else if (f_ContactStyle == CONTACT_STYLE_GAME_BOY_BALL_6) {
+      gDPSetPrimColor(gfx++, 0, 0, 255, 127, 0, alpha);
+      gDPSetEnvColor(gfx++, 255, 191, 63, 255);
+    } else {
+      gDPSetPrimColor(gfx++, 0, 0, 191, 191, 255, alpha);
+    }
 
-  /* Bowser's image and the rainbow have their own colors */
-  if (f_ContactStyle == CONTACT_STYLE_BOWSER ||
-      f_ContactStyle == CONTACT_STYLE_RAINBOW) {
-    gDPSetCombineLERP(gfx++, 0, 0, 0, TEXEL0, TEXEL0, 0, PRIMITIVE, 0, 0, 0, 0,
-        TEXEL0, TEXEL0, 0, PRIMITIVE, 0);
-  } else {
-    gDPSetCombineLERP(gfx++, ENVIRONMENT, PRIMITIVE, TEXEL0, PRIMITIVE,
-        PRIMITIVE, 0, TEXEL0, 0, ENVIRONMENT, PRIMITIVE, TEXEL0, PRIMITIVE,
-        PRIMITIVE, 0, TEXEL0, 0);
-  }
+    /* Bowser's image and the rainbow have their own colors */
+    if (f_ContactStyle == CONTACT_STYLE_BOWSER ||
+        f_ContactStyle == CONTACT_STYLE_RAINBOW) {
+      gDPSetCombineLERP(gfx++, 0, 0, 0, TEXEL0, TEXEL0, 0, PRIMITIVE, 0, 0, 0,
+          0, TEXEL0, TEXEL0, 0, PRIMITIVE, 0);
+    } else {
+      gDPSetCombineLERP(gfx++, ENVIRONMENT, PRIMITIVE, TEXEL0, PRIMITIVE,
+          PRIMITIVE, 0, TEXEL0, 0, ENVIRONMENT, PRIMITIVE, TEXEL0, PRIMITIVE,
+          PRIMITIVE, 0, TEXEL0, 0);
+    }
 
-  if (f_ContactStyle == CONTACT_STYLE_RAINBOW) {
-    gDPPipeSync(gfx++);
-    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-    gDPLoadTLUT_pal256(gfx++,
-        TextureAddress(ImageBody(g_SharedEffectImages + CONTACT_IMAGE_OFFSET)));
-    gDPLoadTextureBlock(gfx++,
-        TextureAddress(g_SharedEffectImages + CONTACT_IMAGE_PIXELS_OFFSET),
-        G_IM_FMT_CI, G_IM_SIZ_8b, 64, 8, 0, G_TX_NOMIRROR | G_TX_WRAP,
-        G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, 7, G_TX_NOLOD, G_TX_NOLOD);
-  } else if (f_ContactStyle == CONTACT_STYLE_BOWSER) {
-    gDPPipeSync(gfx++);
-    gDPSetAlphaCompare(gfx++, G_AC_THRESHOLD);
-    gDPSetBlendColor(gfx++, 255, 255, 255, 1);
-    gDPPipeSync(gfx++);
-    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-    gDPLoadTLUT_pal256(gfx++,
-        TextureAddress(ImageBody(g_SharedEffectImages + CONTACT_IMAGE_OFFSET)));
-    gDPLoadTextureBlock(gfx++,
-        TextureAddress(g_SharedEffectImages + CONTACT_IMAGE_PIXELS_OFFSET),
-        G_IM_FMT_CI, G_IM_SIZ_8b, 16, 100, 0, G_TX_MIRROR | G_TX_WRAP,
-        G_TX_NOMIRROR | G_TX_WRAP, 4, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-  } else if (f_ContactStyle == CONTACT_STYLE_WARIO ||
-      f_ContactStyle == CONTACT_STYLE_GAME_BOY_BALL_7) {
-    gDPLoadTextureBlock_4b(gfx++,
-        TextureAddress(ImageBody(g_SharedEffectImages + CONTACT_IMAGE_OFFSET)),
-        G_IM_FMT_I, 48, 128, 0, G_TX_NOMIRROR | G_TX_WRAP,
-        G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, 7, G_TX_NOLOD, G_TX_NOLOD);
-  } else if (f_ContactStyle == CONTACT_STYLE_PLAIN ||
-      f_ContactStyle == CONTACT_STYLE_GAME_BOY_BALL_6 ||
-      f_ContactStyle == CONTACT_STYLE_GAME_BOY_BALL_5) {
-    gDPLoadTextureBlock_4b(gfx++,
-        TextureAddress(ImageBody(g_SharedEffectImages)), G_IM_FMT_I, 32, 100, 0,
-        G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
-        G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-  } else if (f_ContactStyle == CONTACT_STYLE_PUTT) {
-    gDPLoadTextureBlock_4b(gfx++,
-        TextureAddress(
-            ImageBody(g_SharedEffectImages + CONTACT_PUTT_IMAGE_OFFSET)),
-        G_IM_FMT_I, 16, 100, 0, G_TX_NOMIRROR | G_TX_WRAP,
-        G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
-        G_TX_NOLOD);
-  } else {
-    gDPLoadTextureBlock_4b(gfx++,
-        TextureAddress(ImageBody(g_SharedEffectImages)), G_IM_FMT_I, 32, 100, 0,
-        G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
-        G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-  }
-
-  guScaleF(
-      scale, CONTACT_RIBBON_SCALE, CONTACT_RIBBON_SCALE, CONTACT_RIBBON_SCALE);
-  guMtxL2F(antiBillboard, &matrices->antiBillboard);
-  MultiplyMatrices(scale, antiBillboard, ribbon);
-  guMtxF2L(ribbon, &f_ContactRibbonMatrices[g_DrawBufferIndex]);
-  if (f_ContactStyle != CONTACT_STYLE_MARIO) {
-    gDPPipeSync(gfx++);
-    DrawContactRibbon();
-    if (f_ContactStyle == CONTACT_STYLE_WARIO ||
+    if (f_ContactStyle == CONTACT_STYLE_RAINBOW) {
+      gDPPipeSync(gfx++);
+      gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+      gDPLoadTLUT_pal256(gfx++,
+          TextureAddress(
+              ImageBody(g_SharedEffectImages + CONTACT_IMAGE_OFFSET)));
+      gDPLoadTextureBlock(gfx++,
+          TextureAddress(g_SharedEffectImages + CONTACT_IMAGE_PIXELS_OFFSET),
+          G_IM_FMT_CI, G_IM_SIZ_8b, 64, 8, 0, G_TX_NOMIRROR | G_TX_WRAP,
+          G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, 7, G_TX_NOLOD, G_TX_NOLOD);
+    } else if (f_ContactStyle == CONTACT_STYLE_BOWSER) {
+      gDPPipeSync(gfx++);
+      gDPSetAlphaCompare(gfx++, G_AC_THRESHOLD);
+      gDPSetBlendColor(gfx++, 255, 255, 255, 1);
+      gDPPipeSync(gfx++);
+      gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+      gDPLoadTLUT_pal256(gfx++,
+          TextureAddress(
+              ImageBody(g_SharedEffectImages + CONTACT_IMAGE_OFFSET)));
+      gDPLoadTextureBlock(gfx++,
+          TextureAddress(g_SharedEffectImages + CONTACT_IMAGE_PIXELS_OFFSET),
+          G_IM_FMT_CI, G_IM_SIZ_8b, 16, 100, 0, G_TX_MIRROR | G_TX_WRAP,
+          G_TX_NOMIRROR | G_TX_WRAP, 4, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+    } else if (f_ContactStyle == CONTACT_STYLE_WARIO ||
         f_ContactStyle == CONTACT_STYLE_GAME_BOY_BALL_7) {
       gDPLoadTextureBlock_4b(gfx++,
           TextureAddress(
-              ImageBody(g_SharedEffectImages + CONTACT_SECOND_IMAGE_OFFSET)),
+              ImageBody(g_SharedEffectImages + CONTACT_IMAGE_OFFSET)),
           G_IM_FMT_I, 48, 128, 0, G_TX_NOMIRROR | G_TX_WRAP,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, 7, G_TX_NOLOD, G_TX_NOLOD);
+    } else if (f_ContactStyle == CONTACT_STYLE_PLAIN ||
+        f_ContactStyle == CONTACT_STYLE_GAME_BOY_BALL_6 ||
+        f_ContactStyle == CONTACT_STYLE_GAME_BOY_BALL_5) {
+      gDPLoadTextureBlock_4b(gfx++,
+          TextureAddress(ImageBody(g_SharedEffectImages)), G_IM_FMT_I, 32, 100,
+          0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+          G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+    } else if (f_ContactStyle == CONTACT_STYLE_PUTT) {
+      gDPLoadTextureBlock_4b(gfx++,
+          TextureAddress(
+              ImageBody(g_SharedEffectImages + CONTACT_PUTT_IMAGE_OFFSET)),
+          G_IM_FMT_I, 16, 100, 0, G_TX_NOMIRROR | G_TX_WRAP,
+          G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
+          G_TX_NOLOD);
+    } else {
+      gDPLoadTextureBlock_4b(gfx++,
+          TextureAddress(ImageBody(g_SharedEffectImages)), G_IM_FMT_I, 32, 100,
+          0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+          G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+    }
+
+    guScaleF(scale, CONTACT_RIBBON_SCALE, CONTACT_RIBBON_SCALE,
+        CONTACT_RIBBON_SCALE);
+    guMtxL2F(antiBillboard, &matrices->antiBillboard);
+    MultiplyMatrices(scale, antiBillboard, ribbon);
+    guMtxF2L(ribbon, &f_ContactRibbonMatrices[g_DrawBufferIndex]);
+    if (f_ContactStyle != CONTACT_STYLE_MARIO) {
       gDPPipeSync(gfx++);
       DrawContactRibbon();
+      if (f_ContactStyle == CONTACT_STYLE_WARIO ||
+          f_ContactStyle == CONTACT_STYLE_GAME_BOY_BALL_7) {
+        gDPLoadTextureBlock_4b(gfx++,
+            TextureAddress(
+                ImageBody(g_SharedEffectImages + CONTACT_SECOND_IMAGE_OFFSET)),
+            G_IM_FMT_I, 48, 128, 0, G_TX_NOMIRROR | G_TX_WRAP,
+            G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, 7, G_TX_NOLOD, G_TX_NOLOD);
+        gDPPipeSync(gfx++);
+        DrawContactRibbon();
+      }
     }
+
+    if (f_ContactStyle == CONTACT_STYLE_MARIO) {
+      /* The chained assignment is there to match: three statements, in either
+       * order, give 501 differing words, 81 in shape */
+      translation[AXIS_X] = translation[AXIS_Y] = translation[AXIS_Z] = 0.0f;
+      f_ContactSpinAngle += CONTACT_SPIN_DEGREES_PER_FRAME;
+      rotation[AXIS_X] = 0.0f;
+      rotation[AXIS_Y] = 0.0f;
+      rotation[AXIS_Z] = f_ContactSpinAngle;
+      spinScale[AXIS_Z] = alpha * CONTACT_SPIN_SCALE_PER_ALPHA;
+      spinScale[AXIS_Y] = spinScale[AXIS_Z];
+      spinScale[AXIS_X] = spinScale[AXIS_Y];
+      BuildTransformMatrix(spin, rotation, translation, spinScale);
+      ConvertMatrixToFixed(spin, &f_ContactSpinMatrices[g_MatrixBufferIndex]);
+      gDPPipeSync(gfx++);
+      gDPPipeSync(gfx++);
+      gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+      gDPLoadTLUT_pal256(gfx++,
+          TextureAddress(
+              ImageBody(g_SharedEffectImages + CONTACT_IMAGE_OFFSET)));
+      gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, CONTACT_SPIN_ALPHA);
+      gDPLoadTextureBlock(gfx++,
+          TextureAddress(g_SharedEffectImages + CONTACT_IMAGE_PIXELS_OFFSET),
+          G_IM_FMT_CI, G_IM_SIZ_8b, 32, 32, 0, G_TX_NOMIRROR | G_TX_WRAP,
+          G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
+          G_TX_NOLOD);
+      gDPSetCombineLERP(gfx++, 0, 0, 0, TEXEL0, PRIMITIVE, 0, TEXEL0, 0, 0, 0,
+          0, TEXEL0, PRIMITIVE, 0, TEXEL0, 0);
+      gDPPipeSync(gfx++);
+      gSPMatrix(gfx++, PhysicalAddress(&f_ContactMatrices[f_ContactTrailHead]),
+          G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
+      gSPMatrix(gfx++, PhysicalAddress(&matrices->antiBillboard),
+          G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
+      gSPMatrix(gfx++,
+          PhysicalAddress(&f_ContactSpinMatrices[g_MatrixBufferIndex]),
+          G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
+      gSPVertex(gfx++, f_ContactSpinVertices, 4, 0);
+      gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
+      gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
+    }
+
+    /* The ring of matrices turns back one so the newest position takes the slot
+     * before */
+    f_ContactTrailHead--;
+    if (f_ContactTrailHead < 0) {
+      f_ContactTrailHead = CONTACT_TRAIL_LENGTH - 1;
+    }
+
+    gDPPipeSync(gfx++);
   }
 
-  if (f_ContactStyle == CONTACT_STYLE_MARIO) {
-    /* The chained assignment is there to match: three statements, in either
-     * order, give 501 differing words, 81 in shape */
-    translation[AXIS_X] = translation[AXIS_Y] = translation[AXIS_Z] = 0.0f;
-    f_ContactSpinAngle += CONTACT_SPIN_DEGREES_PER_FRAME;
-    rotation[AXIS_X] = 0.0f;
-    rotation[AXIS_Y] = 0.0f;
-    rotation[AXIS_Z] = f_ContactSpinAngle;
-    spinScale[AXIS_Z] = alpha * CONTACT_SPIN_SCALE_PER_ALPHA;
-    spinScale[AXIS_Y] = spinScale[AXIS_Z];
-    spinScale[AXIS_X] = spinScale[AXIS_Y];
-    BuildTransformMatrix(spin, rotation, translation, spinScale);
-    ConvertMatrixToFixed(spin, &f_ContactSpinMatrices[g_MatrixBufferIndex]);
-    gDPPipeSync(gfx++);
-    gDPPipeSync(gfx++);
-    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-    gDPLoadTLUT_pal256(gfx++,
-        TextureAddress(ImageBody(g_SharedEffectImages + CONTACT_IMAGE_OFFSET)));
-    gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, CONTACT_SPIN_ALPHA);
-    gDPLoadTextureBlock(gfx++,
-        TextureAddress(g_SharedEffectImages + CONTACT_IMAGE_PIXELS_OFFSET),
-        G_IM_FMT_CI, G_IM_SIZ_8b, 32, 32, 0, G_TX_NOMIRROR | G_TX_WRAP,
-        G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
-        G_TX_NOLOD);
-    gDPSetCombineLERP(gfx++, 0, 0, 0, TEXEL0, PRIMITIVE, 0, TEXEL0, 0, 0, 0, 0,
-        TEXEL0, PRIMITIVE, 0, TEXEL0, 0);
-    gDPPipeSync(gfx++);
-    gSPMatrix(gfx++, PhysicalAddress(&f_ContactMatrices[f_ContactTrailHead]),
-        G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
-    gSPMatrix(gfx++, PhysicalAddress(&matrices->antiBillboard),
-        G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
-    gSPMatrix(gfx++,
-        PhysicalAddress(&f_ContactSpinMatrices[g_MatrixBufferIndex]),
-        G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
-    gSPVertex(gfx++, f_ContactSpinVertices, 4, 0);
-    gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
-    gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
-  }
-
-  /* The ring of matrices turns back one so the newest position takes the slot
-   * before */
-  f_ContactTrailHead--;
-  if (f_ContactTrailHead < 0) {
-    f_ContactTrailHead = CONTACT_TRAIL_LENGTH - 1;
-  }
-
-  gDPPipeSync(gfx++);
   *displayListHead = gfx;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_00/round_events", DrawContactEffect);
-#endif
 
 /* Shows the Fly Guy that warns of a strong wind, or hides it given
  * FLY_GUY_HIDDEN */
