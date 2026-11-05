@@ -497,7 +497,7 @@ void DrawTextSlots(Gfx** displayListHead) {
   SetUpTextDrawing(&gfx);
   for (slot = 0; slot != TEXT_SLOT_COUNT; slot++) {
     if (g_TextSlots[slot].messageId != NO_MESSAGE &&
-        !(g_TextSlots[slot].flags & TEXT_FLAG_UNK20)) {
+        !(g_TextSlots[slot].flags & TEXT_FLAG_DRAWN_BY_OWNER)) {
       gDPSetPrimColor(gfx++, 0, 0, g_TextSlots[slot].red,
           g_TextSlots[slot].green, g_TextSlots[slot].blue,
           g_TextSlots[slot].alpha);

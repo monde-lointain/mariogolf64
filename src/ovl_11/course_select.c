@@ -828,8 +828,8 @@ void DrawRingShotSelect(Gfx** displayListHead) {
     SetTextSlot(SCREEN_WIDTH / 2, 42,
         (memory->courseIndex * RING_SHOT_HOLE_COUNT) + memory->holeIndex +
             RING_SHOT_TEXT_FIRST_IMAGE,
-        TEXT_SLOT_LARGE_FONT, stripIndex, TEXT_FLAG_CENTERED | TEXT_FLAG_UNK20,
-        255, 255, 255, 255);
+        TEXT_SLOT_LARGE_FONT, stripIndex,
+        TEXT_FLAG_CENTERED | TEXT_FLAG_DRAWN_BY_OWNER, 255, 255, 255, 255);
     DrawLargeTextSlot(&gfx, stripIndex);
     *displayListHead = gfx;
   }

@@ -858,7 +858,7 @@ void DrawPauseArrows(Gfx** displayListHead, s32 x, s32 y, s32 gap) {
 #define PAUSE_LABELS_TOP 48
 #define PAUSE_LABEL_SPACING 18
 #define PauseLabelY(row) (PAUSE_LABELS_TOP + ((row) * PAUSE_LABEL_SPACING))
-#define PAUSE_LABEL_FLAGS TEXT_FLAG_UNK20
+#define PAUSE_LABEL_FLAGS TEXT_FLAG_DRAWN_BY_OWNER
 #define PAUSE_VALUE_X 212
 #define PAUSE_RED_WAVE_MIDDLE 95
 #define PAUSE_RED_WAVE_AMPLITUDE 95.0f

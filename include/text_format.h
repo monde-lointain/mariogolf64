@@ -15,8 +15,9 @@ typedef s32 TextFlags;
 /* A typed message plays a sound every few codes */
 #define TEXT_FLAG_TYPING_SOUND 0x02
 #define TEXT_FLAG_CENTERED 0x10
-/* DrawTextSlots skips a slot with this flag */
-#define TEXT_FLAG_UNK20 0x20
+/* DrawTextSlots skips a slot with this flag; its owner draws it itself with
+ * DrawLargeTextSlot */
+#define TEXT_FLAG_DRAWN_BY_OWNER 0x20
 /* Widens the advance of the fonts drawn in text slots */
 #define TEXT_FLAG_WIDE_SPACING 0x40
 /* Each glyph of the large font takes the same width */

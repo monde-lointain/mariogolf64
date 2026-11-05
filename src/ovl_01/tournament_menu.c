@@ -2036,17 +2036,17 @@ void DrawCodePrompt(Gfx** displayListHead) {
     case CLUB_CODE_STATE_ENTERING:
       messageOffset = 0;
       x = CLUB_CODE_PROMPT_X;
-      flags = !IsMenuWindowOpen() ? TEXT_FLAG_UNK20 | TEXT_FLAG_TYPED
-                                  : TEXT_FLAG_UNK20;
+      flags = !IsMenuWindowOpen() ? TEXT_FLAG_DRAWN_BY_OWNER | TEXT_FLAG_TYPED
+                                  : TEXT_FLAG_DRAWN_BY_OWNER;
       break;
     case CLUB_CODE_STATE_INCORRECT:
       messageOffset = 1;
       x = CLUB_CODE_INCORRECT_X;
-      flags = TEXT_FLAG_UNK20 | TEXT_FLAG_TYPED;
+      flags = TEXT_FLAG_DRAWN_BY_OWNER | TEXT_FLAG_TYPED;
       break;
     default:
       messageOffset = -1;
-      flags = TEXT_FLAG_UNK20 | TEXT_FLAG_TYPED;
+      flags = TEXT_FLAG_DRAWN_BY_OWNER | TEXT_FLAG_TYPED;
       break;
   }
 

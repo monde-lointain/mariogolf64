@@ -6313,8 +6313,8 @@ void DrawCourseSelect(Gfx** displayListHead) {
           GetCoursePointsNeeded(g_MenuMemory.courseChoice) - save->coursePoints,
           0, 0);
       SetTextSlot(LOCKED_COURSE_TEXT_X, LOCKED_COURSE_TEXT_Y,
-          MESSAGE_POINTS_TO_UNLOCK, TEXT_SLOT_LARGE_FONT, 0, TEXT_FLAG_UNK20,
-          255, 255, 255, 255);
+          MESSAGE_POINTS_TO_UNLOCK, TEXT_SLOT_LARGE_FONT, 0,
+          TEXT_FLAG_DRAWN_BY_OWNER, 255, 255, 255, 255);
       DrawLargeTextSlot(&gfx, 0);
       gDPPipeSync(gfx++);
       gDPPipeSync(gfx++);
@@ -6610,7 +6610,7 @@ void DrawCourseSelectBanners(Gfx** displayListHead) {
     SetTextSlot(SCREEN_WIDTH / 2, slide + HOLES_CHOICE_Y,
         g_MenuMemory.holesChoice + HOLES_CHOICE_MESSAGE_BASE,
         TEXT_SLOT_LARGE_FONT, HOLES_CHOICE_TEXT_SLOT,
-        TEXT_FLAG_CENTERED | TEXT_FLAG_UNK20, 255, 255, 255, 255);
+        TEXT_FLAG_CENTERED | TEXT_FLAG_DRAWN_BY_OWNER, 255, 255, 255, 255);
     DrawLargeTextSlot(&gfx, HOLES_CHOICE_TEXT_SLOT);
   }
 

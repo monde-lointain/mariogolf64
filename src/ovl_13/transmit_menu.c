@@ -1716,7 +1716,7 @@ void DrawSendStatusHint(Gfx** displayListHead, GameBoyTransfer* transfer) {
 
   if (message != NO_MESSAGE) {
     SetTextSlot(HINT_LEFT, HINT_TOP, message, TEXT_SLOT_LARGE_FONT,
-        HINT_TEXT_SLOT, TEXT_FLAG_UNK20, 255, 255, 255, 255);
+        HINT_TEXT_SLOT, TEXT_FLAG_DRAWN_BY_OWNER, 255, 255, 255, 255);
     DrawLargeTextSlot(&displayList, HINT_TEXT_SLOT);
   }
 
@@ -1753,8 +1753,8 @@ void DrawCharacterStats(Gfx** displayListHead, GameBoyCharacter* character,
   }
 
   SetTextSlot(HINT_LEFT, HINT_TOP, CHOOSE_CHARACTER_MESSAGE,
-      TEXT_SLOT_LARGE_FONT, HINT_TEXT_SLOT, TEXT_FLAG_UNK20, 255, 255, 255,
-      255);
+      TEXT_SLOT_LARGE_FONT, HINT_TEXT_SLOT, TEXT_FLAG_DRAWN_BY_OWNER, 255, 255,
+      255, 255);
   gDPPipeSync(displayList++);
   gDPSetAlphaCompare(displayList++, G_AC_NONE);
   gDPPipeSync(displayList++);
@@ -1887,7 +1887,7 @@ void DrawBringCharactersText(Gfx** displayListHead, GameBoyTransfer* transfer) {
 
     if (message != NO_MESSAGE) {
       SetTextSlot(HINT_LEFT, HINT_TOP, message, TEXT_SLOT_LARGE_FONT,
-          HINT_TEXT_SLOT, TEXT_FLAG_UNK20, 255, 255, 255, 255);
+          HINT_TEXT_SLOT, TEXT_FLAG_DRAWN_BY_OWNER, 255, 255, 255, 255);
       DrawLargeTextSlot(&displayList, HINT_TEXT_SLOT);
     }
   }
@@ -1927,7 +1927,7 @@ void DrawSendExperienceText(Gfx** displayListHead, GameBoyTransfer* transfer) {
 
   if (message != NO_MESSAGE) {
     SetTextSlot(HINT_LEFT, HINT_TOP, message, TEXT_SLOT_LARGE_FONT,
-        HINT_TEXT_SLOT, TEXT_FLAG_UNK20, 255, 255, 255, 255);
+        HINT_TEXT_SLOT, TEXT_FLAG_DRAWN_BY_OWNER, 255, 255, 255, 255);
     DrawLargeTextSlot(&displayList, HINT_TEXT_SLOT);
   }
 
@@ -2429,7 +2429,7 @@ void DrawTransmitMenu(Gfx** displayListHead) {
       if (option != TRANSMIT_OPTION_NONE) {
         SetTextSlot(OPTIONS_CENTER_X, OPTIONS_TOP + (index * OPTION_SPACING),
             option + TRANSMIT_OPTION_MESSAGES, TEXT_SLOT_LARGE_FONT, index,
-            TEXT_FLAG_CENTERED | TEXT_FLAG_UNK20, 255, 255, 255, 255);
+            TEXT_FLAG_CENTERED | TEXT_FLAG_DRAWN_BY_OWNER, 255, 255, 255, 255);
         DrawLargeTextSlot(&displayList, index);
       }
     }
@@ -2437,8 +2437,8 @@ void DrawTransmitMenu(Gfx** displayListHead) {
     SetTextSlot(HINT_LEFT, HINT_TOP,
         f_ModeOptions[transfer->transferMode][transfer->optionIndex] +
             TRANSMIT_OPTION_HINTS,
-        TEXT_SLOT_LARGE_FONT, HINT_TEXT_SLOT, TEXT_FLAG_UNK20, 255, 255, 255,
-        255);
+        TEXT_SLOT_LARGE_FONT, HINT_TEXT_SLOT, TEXT_FLAG_DRAWN_BY_OWNER, 255,
+        255, 255, 255);
     DrawLargeTextSlot(&displayList, HINT_TEXT_SLOT);
   }
 
@@ -3578,7 +3578,7 @@ void DrawNotice(Gfx** displayListHead) {
 
     SetTextSlot(NOTICE_CENTER_X, NOTICE_TEXT_TOP, f_NoticeMessage,
         TEXT_SLOT_LARGE_FONT, NOTICE_TEXT_SLOT,
-        TEXT_FLAG_CENTERED | TEXT_FLAG_UNK20, 255, 255, 255, 255);
+        TEXT_FLAG_CENTERED | TEXT_FLAG_DRAWN_BY_OWNER, 255, 255, 255, 255);
     gDPSetPrimColor(displayList++, 0, 0, 32, 64, 255, 255);
     DrawLargeTextSlot(&displayList, NOTICE_TEXT_SLOT);
   }

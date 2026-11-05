@@ -1099,7 +1099,7 @@ void ShowFlipMessage(MessageId messageId) {
       -halfHeight - FLIP_MESSAGE_BOARD_MARGIN_Y;
   SetTextSlot(FLIP_MESSAGE_X, FLIP_MESSAGE_Y, f_FlipMessageId,
       TEXT_SLOT_LARGE_FONT, FLIP_MESSAGE_TEXT_SLOT,
-      TEXT_FLAG_CENTERED | TEXT_FLAG_UNK20, 127, 255, 127, 255);
+      TEXT_FLAG_CENTERED | TEXT_FLAG_DRAWN_BY_OWNER, 127, 255, 127, 255);
 }
 
 /* Turns the flip message board a frame further in or out, then draws it and its

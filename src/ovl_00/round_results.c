@@ -2021,7 +2021,7 @@ void DrawResultsBanner(Gfx** displayListHead) {
       SetTextSlotValue(f_CoursePointsTally.shown, BANNER_TEXT_SLOT, 0);
       SetTextSlot(f_BannerX + BANNER_TEXT_X, f_BannerY + BANNER_TEXT_Y,
           MESSAGE_POINTS_EARNED, TEXT_SLOT_LARGE_FONT, BANNER_TEXT_SLOT,
-          TEXT_FLAG_UNK20 | TEXT_FLAG_CENTERED, BANNER_TEXT_RED,
+          TEXT_FLAG_DRAWN_BY_OWNER | TEXT_FLAG_CENTERED, BANNER_TEXT_RED,
           BANNER_TEXT_GREEN, BANNER_TEXT_BLUE, BANNER_TEXT_ALPHA);
       break;
     case BANNER_KIND_TOURNAMENT_PLACE:
@@ -2032,7 +2032,7 @@ void DrawResultsBanner(Gfx** displayListHead) {
           SetTextSlotValue(f_PrizeShown, BANNER_TEXT_SLOT, 0);
           SetTextSlot(f_BannerX + PRIZE_TEXT_X, f_BannerY + PRIZE_TEXT_Y,
               rank + MESSAGE_TROPHY_PRIZE, TEXT_SLOT_LARGE_FONT,
-              BANNER_TEXT_SLOT, TEXT_FLAG_UNK20, BANNER_TEXT_RED,
+              BANNER_TEXT_SLOT, TEXT_FLAG_DRAWN_BY_OWNER, BANNER_TEXT_RED,
               BANNER_TEXT_GREEN, BANNER_TEXT_BLUE, BANNER_TEXT_ALPHA);
         } else {
           if (rank < PLACE_TWENTY_FIRST || rank > PLACE_TWENTY_THIRD) {
@@ -2049,19 +2049,19 @@ void DrawResultsBanner(Gfx** displayListHead) {
           SetTextSlotValue(f_PrizeShown, BANNER_TEXT_SLOT, 1);
           SetTextSlot(f_BannerX + PRIZE_TEXT_X, f_BannerY + PRIZE_TEXT_Y,
               MESSAGE_PLACE_PRIZE, TEXT_SLOT_LARGE_FONT, BANNER_TEXT_SLOT,
-              TEXT_FLAG_UNK20, BANNER_TEXT_RED, BANNER_TEXT_GREEN,
+              TEXT_FLAG_DRAWN_BY_OWNER, BANNER_TEXT_RED, BANNER_TEXT_GREEN,
               BANNER_TEXT_BLUE, BANNER_TEXT_ALPHA);
         }
       } else if (place < TROPHY_PLACE_COUNT) {
         SetTextSlot(f_BannerX + BANNER_TEXT_X, f_BannerY + BANNER_TEXT_Y,
             rank + MESSAGE_TROPHY_PLACE, TEXT_SLOT_LARGE_FONT, BANNER_TEXT_SLOT,
-            TEXT_FLAG_UNK20 | TEXT_FLAG_CENTERED, BANNER_TEXT_RED,
+            TEXT_FLAG_DRAWN_BY_OWNER | TEXT_FLAG_CENTERED, BANNER_TEXT_RED,
             BANNER_TEXT_GREEN, BANNER_TEXT_BLUE, BANNER_TEXT_ALPHA);
       } else {
         SetTextSlotValue(rank, BANNER_TEXT_SLOT, 0);
         SetTextSlot(f_BannerX + BANNER_TEXT_X, f_BannerY + BANNER_TEXT_Y,
             MESSAGE_PLACE, TEXT_SLOT_LARGE_FONT, BANNER_TEXT_SLOT,
-            TEXT_FLAG_UNK20 | TEXT_FLAG_CENTERED, BANNER_TEXT_RED,
+            TEXT_FLAG_DRAWN_BY_OWNER | TEXT_FLAG_CENTERED, BANNER_TEXT_RED,
             BANNER_TEXT_GREEN, BANNER_TEXT_BLUE, BANNER_TEXT_ALPHA);
       }
 
@@ -2069,7 +2069,7 @@ void DrawResultsBanner(Gfx** displayListHead) {
     case BANNER_KIND_UNK5:
       SetTextSlot(f_BannerX + BANNER_TEXT_X, f_BannerY + BANNER_TEXT_Y,
           MESSAGE_UNK48, TEXT_SLOT_LARGE_FONT, BANNER_TEXT_SLOT,
-          TEXT_FLAG_UNK20 | TEXT_FLAG_CENTERED, BANNER_TEXT_RED,
+          TEXT_FLAG_DRAWN_BY_OWNER | TEXT_FLAG_CENTERED, BANNER_TEXT_RED,
           BANNER_TEXT_GREEN, BANNER_TEXT_BLUE, BANNER_TEXT_ALPHA);
       break;
   }
@@ -3483,7 +3483,8 @@ INCLUDE_RODATA("asm/nonmatchings/ovl_00/round_results", f_UnusedModeNamesText);
 #define CLUB_TOURNAMENT_NAME_SLOT 3
 #define CLUB_TOURNAMENT_COURSE_SLOT 4
 #define CLUB_TOURNAMENT_MODE_SLOT 5
-#define CLUB_TOURNAMENT_TEXT_FLAGS (TEXT_FLAG_CENTERED | TEXT_FLAG_UNK20)
+#define CLUB_TOURNAMENT_TEXT_FLAGS \
+  (TEXT_FLAG_CENTERED | TEXT_FLAG_DRAWN_BY_OWNER)
 /* Where the club tournament results draw their parts */
 #define CLUB_TOURNAMENT_COURSE_X 28
 #define CLUB_TOURNAMENT_COURSE_Y 104
