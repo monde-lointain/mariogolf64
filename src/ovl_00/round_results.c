@@ -254,6 +254,15 @@ typedef struct TrophyAssets {
   /* 0x8 */ s32 frameCount; /* Of image, as the trophy turns */
 } TrophyAssets; /* size = 0xC */
 
+/*
+ * The course points a round earned: earned counts down as the results add
+ * them to the save, and shown keeps the total for the banner
+ */
+typedef struct CoursePointsTally {
+  s32 earned;
+  s32 shown;
+} CoursePointsTally; /* size = 0x8 */
+
 /* Each course's trophy image's sizes, indexed by these */
 #define TROPHY_WIDTH 0
 /* TROPHY_PART_COUNT of them */
@@ -363,8 +372,7 @@ static s32 f_PlayerBetTotals[MAX_PLAYER_COUNT];
 static s32 f_PlayerRanks[MAX_PLAYER_COUNT];
 static s32 f_PrizePoints;
 static s32 f_PrizeShown;
-static s32 f_PointsEarned;
-static s32 f_PointsShown;
+static CoursePointsTally f_CoursePointsTally;
 static s32 f_PortraitAnimations[MAX_PLAYER_COUNT];
 static s32 f_PortraitFrames[MAX_PLAYER_COUNT];
 static s32 f_PortraitTimers[MAX_PLAYER_COUNT];
@@ -411,23 +419,23 @@ void OpenRoundResults(s32 request) {
       counted_ = 0; \
       f_PointsToNextCourse = \
           GetCoursePointsNeeded(f_OpenCourseCount) - (save)->coursePoints; \
-      f_PointsEarned = 0; \
+      f_CoursePointsTally.earned = 0; \
       for (i_ = 0; i_ != g_GameState.playerCount; i_++) { \
         if (f_PlayerPoints[i_] >= 0) { \
           counted_++; \
-          f_PointsEarned += f_PlayerPoints[i_]; \
+          f_CoursePointsTally.earned += f_PlayerPoints[i_]; \
         } \
       } \
       if (counted_ == 0) { \
         counted_ = 1; \
       } \
-      f_PointsEarned = f_PointsEarned * \
+      f_CoursePointsTally.earned = f_CoursePointsTally.earned * \
           f_CoursePointRates[GetCourseRecordIndex(g_GameState.courseIndex)] / \
           counted_; \
-      f_PointsShown = f_PointsEarned; \
-      f_PointsToNextCourse -= f_PointsEarned; \
+      f_CoursePointsTally.shown = f_CoursePointsTally.earned; \
+      f_PointsToNextCourse -= f_CoursePointsTally.earned; \
     } \
-    total_ = (save)->coursePoints + f_PointsEarned; \
+    total_ = (save)->coursePoints + f_CoursePointsTally.earned; \
     if (total_ > MAX_COURSE_POINTS) { \
       (save)->coursePoints = MAX_COURSE_POINTS; \
     } else { \
@@ -436,32 +444,34 @@ void OpenRoundResults(s32 request) {
   }
 
 /*
- * Doesn't match: in the course points tally, the original keeps
- * f_PointsEarned's address in a register and the counter in $s2, where ours
- * addresses it through $at each time and counts in $a1, and the later loops'
- * registers differ. The original builds the address again after each call. The
- * tournament's open course count is stored first, as the original does, and the
- * ranks are counted in f_PlayerRanks itself, which a permuter run pointed to.
- * The tournament finds the player's standing through a pointer to the standing
- * it tests, as another permuter run suggested; indexing g_TournamentStandings
- * in both reads gave 177 words differing, 39 in shape. Earlier, reading
- * f_PointsEarned through a pointer in AddRoundPoints kept it in $s1 across the
- * calls instead (228 words, 62 in shape, or 234 and 64 for the total too),
- * summing the points in a local gave 247, storing the open course count last
- * 211, and counting the ranks through a pointer to the rank 207 (45). A focused
- * permuter run's best, 162 words (30 in shape), passes the tournament's course
- * points to CountOpenCourses through a pointer to the field; the same pointer
- * at all five of the tally's uses also gives 162 (30), and a copy of the points
- * 187 (43). The original loads the field through the saved data pointer at each
- * use, as ours does, where ours loads the call's argument with four
- * instructions between it and the call, and the original in its delay slot; a
- * pointer to the single field is not kept. 156 words differ, 28 in shape.
+ * Doesn't match: in the course points tally, the original counts in $s2 where
+ * ours counts in $a1, and the later loops' registers differ. The register
+ * oracle's closest result is 19 words with 19 registers forced, so what remains
+ * is mostly allocation. 117 words differ, 5 in shape.
  *
- * AddRoundPoints passes g_GameState.courseIndex to GetCourseRecordIndex, which
- * ignores it, as the original loads it into $a0 before both calls; play.c
- * passes the same field where it opens the scorecard. That took the function
- * from 166 words differing, 34 in shape, to 156 (28); the other counts in the
- * paragraph above were measured before it.
+ * The original keeps the earned points' address in $a1 across the tally and
+ * builds it again in $a0 after GetCourseRecordIndex, the address forms GCC
+ * gives a struct's fields; as two separate s32s they were addressed through $at
+ * each time (156 words, 28 in shape, the oracle's closest 82 with 14 forced).
+ * The pointers to the earned points that UpdateTournamentResults,
+ * UpdateCoursePointsResults and UpdateMatchResults kept are gone; the first and
+ * last still match, and the other still differs by 5 words.
+ *
+ * The tournament's open course count is stored first, as the original does, and
+ * the ranks are counted in f_PlayerRanks itself, which a permuter run pointed
+ * to. The tournament finds the player's standing through a pointer to the
+ * standing it tests, as another permuter run suggested. AddRoundPoints passes
+ * g_GameState.courseIndex to GetCourseRecordIndex, which ignores it, as the
+ * original loads it into $a0 before both calls; play.c passes the same field
+ * where it opens the scorecard.
+ *
+ * Measured before the struct, against 156 words or more: indexing
+ * g_TournamentStandings in both reads gave 177 words differing, 39 in shape;
+ * reading the earned points through a pointer in AddRoundPoints 228 (62);
+ * summing the points in a local 247; storing the open course count last 211;
+ * counting the ranks through a pointer to the rank 207 (45); and passing the
+ * tournament's course points to CountOpenCourses through a pointer to the field
+ * 162 (30).
  */
 void LoadRoundResults(void) {
   EncodedAsset asset;
@@ -730,21 +740,21 @@ void LoadRoundResults(void) {
           ReadAssetFile(f_TrophyPalette, size, &file);
         }
 
-        f_PointsEarned =
+        f_CoursePointsTally.earned =
             f_PlayerPoints[0] * f_CoursePointRates[g_GameState.courseIndex];
-        f_PointsShown = f_PointsEarned;
+        f_CoursePointsTally.shown = f_CoursePointsTally.earned;
         f_TournamentOpenCourseCount = CountOpenCourses(save->coursePoints);
         f_OpenCourseCount = f_TournamentOpenCourseCount;
         if (f_OpenCourseCount < COURSE_COUNT) {
           f_PointsToNextCourse = GetCoursePointsNeeded(f_OpenCourseCount) -
-              save->coursePoints - f_PrizePoints - f_PointsEarned;
+              save->coursePoints - f_PrizePoints - f_CoursePointsTally.earned;
         }
 
-        if (save->coursePoints + f_PointsEarned + f_PrizePoints >
+        if (save->coursePoints + f_CoursePointsTally.earned + f_PrizePoints >
             MAX_COURSE_POINTS) {
           save->coursePoints = MAX_COURSE_POINTS;
         } else {
-          save->coursePoints += f_PrizePoints + f_PointsEarned;
+          save->coursePoints += f_PrizePoints + f_CoursePointsTally.earned;
         }
 
         break;
@@ -1978,7 +1988,7 @@ void DrawResultsBanner(Gfx** displayListHead) {
     case BANNER_KIND_UNK4:
       break;
     case BANNER_KIND_POINTS:
-      SetTextSlotValue(f_PointsShown, BANNER_TEXT_SLOT, 0);
+      SetTextSlotValue(f_CoursePointsTally.shown, BANNER_TEXT_SLOT, 0);
       SetTextSlot(f_BannerX + BANNER_TEXT_X, f_BannerY + BANNER_TEXT_Y,
           MESSAGE_POINTS_EARNED, TEXT_SLOT_LARGE_FONT, BANNER_TEXT_SLOT,
           TEXT_FLAG_UNK20 | TEXT_FLAG_CENTERED, BANNER_TEXT_RED,
@@ -2251,7 +2261,8 @@ s32 UpdateTournamentResults(ControllerState* controller) {
       break;
     case UNLOCK_NOTICE_KIND_NONE:
       if (f_OpenCourseCount < COURSE_COUNT &&
-          f_PointsToNextCourse + f_PrizePoints + f_PointsEarned == 0) {
+          f_PointsToNextCourse + f_PrizePoints + f_CoursePointsTally.earned ==
+              0) {
         StartPortraitAnimation(PORTRAIT_ANIMATION_UNK1, 0);
         StartResultsNotice(UNLOCK_NOTICE_KIND_COURSE);
         OpenEncodedAsset(g_TournamentIconAssets[f_OpenCourseCount], &asset);
@@ -2319,7 +2330,8 @@ s32 UpdateTournamentResults(ControllerState* controller) {
 
             /* Stop on the points that open the next course, so that its notice
              * shows */
-            overshoot = f_PointsToNextCourse + *points + f_PointsEarned;
+            overshoot =
+                f_PointsToNextCourse + *points + f_CoursePointsTally.earned;
             if (overshoot < 0) {
               *points -= overshoot;
             }
@@ -2357,7 +2369,8 @@ s32 UpdateTournamentResults(ControllerState* controller) {
           break;
         case TOURNAMENT_STEP_SLIDING_OUT_PRIZE:
           if (GetBannerState() == BANNER_HIDDEN) {
-            if (f_PointsEarned > 0 && f_OpenCourseCount < COURSE_COUNT) {
+            if (f_CoursePointsTally.earned > 0 &&
+                f_OpenCourseCount < COURSE_COUNT) {
               f_ResultsUnk78 = TOURNAMENT_STEP_SLIDING_IN_POINTS;
               SetResultsBanner(BANNER_SLIDING_IN, BANNER_KIND_POINTS);
             } else {
@@ -2376,29 +2389,26 @@ s32 UpdateTournamentResults(ControllerState* controller) {
           if (controller->buttons & A_BUTTON) {
             f_TallySpeed = FAST_TALLY_SPEED;
           }
-          {
-            s32* points = &f_PointsEarned;
+          if (f_CoursePointsTally.earned > 0) {
+            PlayTallySound();
+          }
 
-            if (*points > 0) {
-              PlayTallySound();
-            }
+          f_CoursePointsTally.earned -= f_TallySpeed;
+          if (f_CoursePointsTally.earned < 0) {
+            f_CoursePointsTally.earned = 0;
+          }
 
-            *points -= f_TallySpeed;
-            if (*points < 0) {
-              *points = 0;
-            }
-
-            if (f_OpenCourseCount == COURSE_COUNT) {
-              *points = 0;
-            } else {
-              overshoot = f_PointsToNextCourse + f_PrizePoints + *points;
-              if (overshoot < 0) {
-                *points -= overshoot;
-              }
+          if (f_OpenCourseCount == COURSE_COUNT) {
+            f_CoursePointsTally.earned = 0;
+          } else {
+            overshoot = f_PointsToNextCourse + f_PrizePoints +
+                f_CoursePointsTally.earned;
+            if (overshoot < 0) {
+              f_CoursePointsTally.earned -= overshoot;
             }
           }
 
-          if (f_PointsEarned == 0) {
+          if (f_CoursePointsTally.earned == 0) {
             PlaySound(SOUND_TALLY_DONE, g_NextSoundChannel, SOUND_FULL_SCALE);
             f_ResultsUnk78 = TOURNAMENT_STEP_POINTS_TALLIED;
             f_IsAwaitingConfirm = TRUE;
@@ -2536,7 +2546,7 @@ s32 UpdateCoursePointsResults(ControllerState* controller) {
 
     case UNLOCK_NOTICE_KIND_NONE:
       if (f_OpenCourseCount < COURSE_COUNT &&
-          f_PointsToNextCourse + f_PointsEarned == 0) {
+          f_PointsToNextCourse + f_CoursePointsTally.earned == 0) {
         for (i = 0; i != g_GameState.playerCount; i++) {
           StartPortraitAnimation(PORTRAIT_ANIMATION_UNK1, i);
         }
@@ -2561,7 +2571,8 @@ s32 UpdateCoursePointsResults(ControllerState* controller) {
 
           break;
         case POINTS_STEP_START_TALLY:
-          if (f_PointsEarned > 0 && f_OpenCourseCount < COURSE_COUNT) {
+          if (f_CoursePointsTally.earned > 0 &&
+              f_OpenCourseCount < COURSE_COUNT) {
             f_ResultsUnk78 = POINTS_STEP_SLIDING_IN_TALLY;
             SetResultsBanner(BANNER_SLIDING_IN, BANNER_KIND_POINTS);
           } else {
@@ -2588,31 +2599,27 @@ s32 UpdateCoursePointsResults(ControllerState* controller) {
           if (controller->buttons & A_BUTTON) {
             f_TallySpeed = FAST_TALLY_SPEED;
           }
-          {
-            s32* points = &f_PointsEarned;
+          if (f_CoursePointsTally.earned > 0) {
+            PlayTallySound();
+          }
 
-            if (*points > 0) {
-              PlayTallySound();
-            }
+          f_CoursePointsTally.earned -= f_TallySpeed;
+          if (f_CoursePointsTally.earned < 0) {
+            f_CoursePointsTally.earned = 0;
+          }
 
-            *points -= f_TallySpeed;
-            if (*points < 0) {
-              *points = 0;
-            }
-
-            if (f_OpenCourseCount == COURSE_COUNT) {
-              *points = 0;
-            } else {
-              /* Stop on the points that open the next course, so that its
-               * notice shows */
-              overshoot = f_PointsToNextCourse + *points;
-              if (overshoot < 0) {
-                *points -= overshoot;
-              }
+          if (f_OpenCourseCount == COURSE_COUNT) {
+            f_CoursePointsTally.earned = 0;
+          } else {
+            /* Stop on the points that open the next course, so that its
+             * notice shows */
+            overshoot = f_PointsToNextCourse + f_CoursePointsTally.earned;
+            if (overshoot < 0) {
+              f_CoursePointsTally.earned -= overshoot;
             }
           }
 
-          if (f_PointsEarned == 0) {
+          if (f_CoursePointsTally.earned == 0) {
             f_ResultsUnk7C = 0;
             PlaySound(SOUND_TALLY_DONE, g_NextSoundChannel, SOUND_FULL_SCALE);
             f_ResultsUnk78 = POINTS_STEP_TALLIED;
@@ -2703,7 +2710,7 @@ s32 UpdateMatchResults(ControllerState* controller) {
       break;
     case UNLOCK_NOTICE_KIND_NONE:
       if (f_OpenCourseCount < COURSE_COUNT &&
-          f_PointsToNextCourse + f_PointsEarned == 0) {
+          f_PointsToNextCourse + f_CoursePointsTally.earned == 0) {
         for (i = 0; i != g_GameState.playerCount; i++) {
           StartPortraitAnimation(PORTRAIT_ANIMATION_UNK1, i);
         }
@@ -2728,7 +2735,8 @@ s32 UpdateMatchResults(ControllerState* controller) {
 
           break;
         case MATCH_STEP_START_TALLY:
-          if (f_PointsEarned > 0 && f_OpenCourseCount < COURSE_COUNT) {
+          if (f_CoursePointsTally.earned > 0 &&
+              f_OpenCourseCount < COURSE_COUNT) {
             f_ResultsUnk78 = MATCH_STEP_SLIDING_IN_TALLY;
             SetResultsBanner(BANNER_SLIDING_IN, BANNER_KIND_POINTS);
           } else {
@@ -2754,31 +2762,27 @@ s32 UpdateMatchResults(ControllerState* controller) {
           if (controller->buttons & A_BUTTON) {
             f_TallySpeed = FAST_TALLY_SPEED;
           }
-          {
-            s32* points = &f_PointsEarned;
+          if (f_CoursePointsTally.earned > 0) {
+            PlayTallySound();
+          }
 
-            if (*points > 0) {
-              PlayTallySound();
-            }
+          f_CoursePointsTally.earned -= f_TallySpeed;
+          if (f_CoursePointsTally.earned < 0) {
+            f_CoursePointsTally.earned = 0;
+          }
 
-            *points -= f_TallySpeed;
-            if (*points < 0) {
-              *points = 0;
-            }
-
-            if (f_OpenCourseCount == COURSE_COUNT) {
-              *points = 0;
-            } else {
-              /* Stop on the points that open the next course, so that its
-               * notice shows */
-              overshoot = f_PointsToNextCourse + *points;
-              if (overshoot < 0) {
-                *points -= overshoot;
-              }
+          if (f_OpenCourseCount == COURSE_COUNT) {
+            f_CoursePointsTally.earned = 0;
+          } else {
+            /* Stop on the points that open the next course, so that its
+             * notice shows */
+            overshoot = f_PointsToNextCourse + f_CoursePointsTally.earned;
+            if (overshoot < 0) {
+              f_CoursePointsTally.earned -= overshoot;
             }
           }
 
-          if (f_PointsEarned == 0) {
+          if (f_CoursePointsTally.earned == 0) {
             f_ResultsUnk78 = MATCH_STEP_TALLIED;
             PlaySound(SOUND_TALLY_DONE, g_NextSoundChannel, SOUND_FULL_SCALE);
           }
@@ -2928,7 +2932,7 @@ void DrawTournamentResults(Gfx** displayListHead) {
         RESULTS_TEXT_GREEN, RESULTS_TEXT_BLUE, RESULTS_TEXT_ALPHA);
   } else {
     DrawResultsNumber(&gfx, f_ResultsSlide + POINTS_TOTAL_X, POINTS_TOTAL_Y,
-        f_PointsToNextCourse + f_PrizePoints + f_PointsEarned);
+        f_PointsToNextCourse + f_PrizePoints + f_CoursePointsTally.earned);
     SetTextSlot(f_ResultsSlide + POINTS_TO_NEXT_COURSE_X,
         f_ResultsTop + POINTS_TO_NEXT_COURSE_Y, MESSAGE_POINTS_TO_NEXT_COURSE,
         TEXT_SLOT_LARGE_FONT, RESULTS_TEXT_SLOT, 0, RESULTS_TEXT_RED,
@@ -3003,7 +3007,7 @@ void DrawSpeedGolfResults(Gfx** displayListHead) {
         RESULTS_TEXT_GREEN, RESULTS_TEXT_BLUE, RESULTS_TEXT_ALPHA);
   } else {
     DrawResultsNumber(&gfx, f_ResultsSlide + POINTS_TOTAL_X, POINTS_TOTAL_Y,
-        f_PointsToNextCourse + f_PrizePoints + f_PointsEarned);
+        f_PointsToNextCourse + f_PrizePoints + f_CoursePointsTally.earned);
     SetTextSlot(f_ResultsSlide + POINTS_TO_NEXT_COURSE_X,
         f_ResultsTop + POINTS_TO_NEXT_COURSE_Y, MESSAGE_POINTS_TO_NEXT_COURSE,
         TEXT_SLOT_LARGE_FONT, RESULTS_TEXT_SLOT, 0, RESULTS_TEXT_RED,
@@ -3193,7 +3197,7 @@ void DrawPlayersResults(Gfx** displayListHead) {
         RESULTS_TEXT_GREEN, RESULTS_TEXT_BLUE, RESULTS_TEXT_ALPHA);
   } else {
     DrawResultsNumber(&gfx, f_ResultsSlide + POINTS_TOTAL_X, POINTS_TOTAL_Y,
-        f_PointsToNextCourse + f_PointsEarned);
+        f_PointsToNextCourse + f_CoursePointsTally.earned);
     SetTextSlot(f_ResultsSlide + POINTS_TO_NEXT_COURSE_X,
         f_ResultsTop + POINTS_TO_NEXT_COURSE_Y, MESSAGE_POINTS_TO_NEXT_COURSE,
         TEXT_SLOT_LARGE_FONT, RESULTS_TEXT_SLOT, 0, RESULTS_TEXT_RED,
@@ -3421,7 +3425,7 @@ void DrawMatchResults(Gfx** displayListHead) {
         RESULTS_TEXT_GREEN, RESULTS_TEXT_BLUE, RESULTS_TEXT_ALPHA);
   } else {
     DrawResultsNumber(&gfx, f_ResultsSlide + POINTS_TOTAL_X, POINTS_TOTAL_Y,
-        f_PointsToNextCourse + f_PointsEarned);
+        f_PointsToNextCourse + f_CoursePointsTally.earned);
     SetTextSlot(f_ResultsSlide + POINTS_TO_NEXT_COURSE_X,
         f_ResultsTop + POINTS_TO_NEXT_COURSE_Y, MESSAGE_POINTS_TO_NEXT_COURSE,
         TEXT_SLOT_LARGE_FONT, RESULTS_TEXT_SLOT, 0, RESULTS_TEXT_RED,
