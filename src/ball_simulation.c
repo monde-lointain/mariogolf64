@@ -222,7 +222,8 @@ void ResetBallSimulations(void) {
  * many places, and where the original recomputes abs.s for each use of a
  * float's absolute value, this code shares one abs.s or compiles a compare and
  * branch. Adding the height to its slide step, rather than the step to the
- * height, took 779 words differing to 771, 235 in shape. The four
+ * height, took 779 words differing to 771, 235 in shape; it later cost 8 words,
+ * so the slide adds the step to the height, as it does in x and z. The four
  * compare-and-branch magnitudes come from the nested AbsoluteValue helper,
  * though the original has abs.s at the slope's two: with fabsf at the spin
  * grip's two uses 767 words differ (243 in shape), at the slope's 1340 (314),
@@ -259,13 +260,14 @@ void ResetBallSimulations(void) {
  * rolling tests read simulation->state after GetGroundHeight, where a state
  * local set before the call gave 727 words (209 in shape) against 680 (206). Of
  * the six orders of the flight's drag updates, only y, z and x gives fewer
- * words, 676, and it still stores z before y, where the original, having worked
- * out y's drag first, stores x, y and z in turn. An s16 spinVelocityZ in the
- * triangle bounce gives 666 words (208 in shape), but adds two shifts or masks
- * to the ten the draft has, as many as the original; s16 for spinVelocityX as
- * well gives 779, for spinVelocityX alone 757, and the same s16 in
- * StepOpeningBallSimulation 277 against its 247. 680 words differ, 206 in
- * shape.
+ * words, 668 (676 when the draft had 680), the others 672, and it still stores
+ * z before y, where the original, having worked out y's drag first, stores x, y
+ * and z in turn. An s16 spinVelocityZ in the triangle bounce gave 666 words
+ * (208 in shape) when the draft had 680, with two more shifts or masks than the
+ * ten the draft and the original have; with the slide's sum in order it gives
+ * 743 (215), s16 for spinVelocityX as well 771 and for spinVelocityX alone 749,
+ * and the same s16 in StepOpeningBallSimulation 277 against its 247. 672 words
+ * differ, 206 in shape.
  */
 #ifdef NON_MATCHING
 s32 StepBallSimulation(BallSimulation* simulation) {
@@ -1089,7 +1091,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
         simulation->position[AXIS_X] =
             simulation->position[AXIS_X] + (velocity[AXIS_X] * slide);
         simulation->position[AXIS_Y] =
-            (velocity[AXIS_Y] * slide) + simulation->position[AXIS_Y];
+            simulation->position[AXIS_Y] + (velocity[AXIS_Y] * slide);
         simulation->position[AXIS_Z] =
             simulation->position[AXIS_Z] + (velocity[AXIS_Z] * slide);
         simulation->spinSpeed = 0;
