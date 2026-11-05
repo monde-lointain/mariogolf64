@@ -951,7 +951,7 @@ Boolean IsCupPassPoint(s32 cupDistance, s32 height) {
   ((endKind) != SURFACE_KIND_WATER_HAZARD && \
       f_StartCupDistance >= f_LandingCupDistance && \
       f_HitsBillboardEarly != TRUE && g_SimulatedShot.isPerfectSwing && \
-      !g_SimulatedShot.unk2E00 && \
+      !g_SimulatedShot.isFirstBounceOut && \
       g_SimulatedShot.shot.shotMode != SHOT_MODE_APPROACH)
 
 /*

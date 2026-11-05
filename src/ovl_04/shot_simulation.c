@@ -154,9 +154,9 @@ void SimulateShot(ShotLaunch* shot) {
   firstBounceKind = GetSurfaceInfo(simulation->firstBounceSurface)->kind;
   if ((firstBounceKind == SURFACE_KIND_OUT_OF_BOUNDS) |
       (firstBounceKind == SURFACE_KIND_OUT_OF_COURSE)) {
-    g_SimulatedShot.unk2E00 = TRUE;
+    g_SimulatedShot.isFirstBounceOut = TRUE;
   } else {
-    g_SimulatedShot.unk2E00 = FALSE;
+    g_SimulatedShot.isFirstBounceOut = FALSE;
   }
 
   g_SimulatedShot.unk2E18 = simulation->firstBounceSurface;

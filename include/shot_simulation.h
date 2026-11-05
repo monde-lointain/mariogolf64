@@ -22,7 +22,7 @@ typedef struct SimulatedShot {
   /* 0x2DDC */ s32 maxPositionStep[3];
   /* 0x2DE8 */ s32 minPosition[3];
   /* 0x2DF4 */ s32 minPositionStep[3];
-  /* 0x2E00 */ s32 unk2E00;
+  /* 0x2E00 */ Boolean isFirstBounceOut; /* Out of bounds or off the course */
   /* 0x2E04 */ s32 endsOnGreen;
   /* 0x2E08 */ Boolean startsOnGreen; /* Always, in mini-golf */
   /* 0x2E0C */ Boolean usesPutter;
