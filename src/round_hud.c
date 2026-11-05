@@ -290,6 +290,13 @@ enum LandingGlyphGroup {
 #define LANDING_NAME_Y 96
 #define LANDING_DISTANCE_Y 112
 #define HUNDREDTHS_PER_UNIT 100
+/*
+ * Whether the shot panel shows distances off the green in meters, which its
+ * text can draw. This version shows yards, but DrawRoundHud's meter formats
+ * stay in its strings, each between the feet and yards formats of the same
+ * choice, as a branch on a constant leaves them.
+ */
+#define SHOWS_METERS FALSE
 /* The translucent black panel behind the text spins half a turn as it grows */
 #define LANDING_PANEL_ALPHA 159
 #define LANDING_PANEL_START_DEGREES 180.0f
@@ -416,8 +423,6 @@ void DrawWindSpeed(Gfx** displayListHead, f32 x, f32 y);
 /* On the tee ground, the shot panel sits this much higher */
 #define TEE_GROUND_PANEL_OFFSET_Y (-3)
 #define SHOT_PANEL_START_OFFSET_X 64
-/* "%02d:%02d:%02d", which DrawRoundHud also uses */
-extern char f_ElapsedTimeFormat[];
 
 s32 GetClubSlotsState(void);
 void DrawClubSlots(Gfx** displayListHead);
@@ -3698,25 +3703,9 @@ void DrawShotEffectsHud(Gfx** displayListHead);
  * Draws the round's HUD over the course: the letterbox, the players' faces
  * and scores, the shot panel's labels, distances and club, and the debugging
  * aids that game flags turn on
- *
- * Doesn't match: the original loads the height for its magnitude into a
- * register other than fabsf's result, as in IsEasedEyeHeightZero. Local-alloc
- * ties the two because both are local to the block and die once; taking the
- * magnitude into shotLength, which other blocks use, keeps them apart, but as
- * shotLength crosses calls it gets $f20 and 13 words differ. A new f32 that
- * holds the magnitude here and the yards' product in the other branch, so
- * that it spans blocks without crossing a call, also breaks the tie, but
- * the load gets $f0 and the magnitude $f2, where the original has $f4 and
- * $f0, and 12 words differ (0 in shape). The stroke counts'
- * loop tests i != playerCount, as the faces' loop does; with i < playerCount,
- * 77 words differ. The small faces' left edge goes straight into its rectangle;
- * through a local, its spill slot comes first and 34 words differ. The register
- * oracle's closest result is these 4 words with no register forced, so
- * allocation isn't the cause. 4 words differ.
  */
-#ifdef NON_MATCHING
 void DrawRoundHud(CameraView* view) {
-  /* Pads the frame to match; without it 130 words differ, against 4 */
+  /* Pads the frame to match; without it 126 words differ */
   s32 unused[2] UNUSED;
   s32 percentRange[2];
   Club* club;
@@ -3996,6 +3985,21 @@ void DrawRoundHud(CameraView* view) {
             SHOT_PANEL_DISTANCE_X - g_ShotPanelOffsetX, HEIGHT_LABEL_Y,
             g_PrintBuffer);
       }
+    } else if (SHOWS_METERS) {
+      s32 restHundredths =
+          g_RoundHud.cupDistance * HUNDREDTHS_PER_UNIT * METERS_PER_UNIT;
+
+      sprintf(g_PrintBuffer, "%2d.%02dm", restHundredths / HUNDREDTHS_PER_UNIT,
+          restHundredths % HUNDREDTHS_PER_UNIT);
+      DrawDistanceText(&g_DisplayListHead,
+          SHOT_PANEL_DISTANCE_X - g_ShotPanelOffsetX, REST_LABEL_Y,
+          g_PrintBuffer);
+      if (g_RoundHud.ballHeightMetersDirection != HEIGHT_LEVEL) {
+        sprintf(g_PrintBuffer, "%6.2fm", fabsf(g_RoundHud.ballHeightMeters));
+        DrawDistanceText(&g_DisplayListHead,
+            SHOT_PANEL_DISTANCE_X - g_ShotPanelOffsetX, HEIGHT_LABEL_Y,
+            g_PrintBuffer);
+      }
     } else {
       sprintf(g_PrintBuffer, "%3dy",
           (s32)(g_RoundHud.cupDistance * YARDS_PER_UNIT));
@@ -4104,6 +4108,10 @@ void DrawRoundHud(CameraView* view) {
     if (selectedClub->surfaceMask & CLUB_SURFACE_GREEN) {
       sprintf(g_PrintBuffer, "%3d%c", GetSelectedShotDistance(),
           SHADOWED_FEET_GLYPH);
+    } else if (SHOWS_METERS) {
+      sprintf(g_PrintBuffer, "%3dm",
+          (s32)(GetSelectedShotDistance() *
+              (METERS_PER_UNIT / YARDS_PER_UNIT)));
     } else {
       sprintf(g_PrintBuffer, "%3dy", GetSelectedShotDistance());
     }
@@ -4134,6 +4142,8 @@ void DrawRoundHud(CameraView* view) {
         CLUB_SURFACE_GREEN) {
       sprintf(g_PrintBuffer, "%5.2f%c",
           shotLength * (FEET_PER_YARD * YARDS_PER_UNIT), SHADOWED_FEET_GLYPH);
+    } else if (SHOWS_METERS) {
+      sprintf(g_PrintBuffer, "%5.2fm", shotLength * METERS_PER_UNIT);
     } else {
       sprintf(g_PrintBuffer, "%5.2fy", shotLength * YARDS_PER_UNIT);
     }
@@ -4248,9 +4258,8 @@ void DrawRoundHud(CameraView* view) {
         HUNDREDTHS_PER_SECOND;
 
     totalSeconds = g_GameState.stopwatchFrameCount / FRAMES_PER_SECOND;
-    sprintf(g_PrintBuffer, f_ElapsedTimeFormat,
-        totalSeconds / SECONDS_PER_MINUTE, totalSeconds % SECONDS_PER_MINUTE,
-        hundredths);
+    sprintf(g_PrintBuffer, "%02d:%02d:%02d", totalSeconds / SECONDS_PER_MINUTE,
+        totalSeconds % SECONDS_PER_MINUTE, hundredths);
     DrawShadowedText(&g_DisplayListHead, PANEL_STOPWATCH_X - g_ShotPanelOffsetX,
         PANEL_STOPWATCH_Y, g_PrintBuffer);
   }
@@ -4298,19 +4307,6 @@ void DrawRoundHud(CameraView* view) {
 
   AdjustHudOffset();
 }
-
-#else
-INCLUDE_ASM("asm/nonmatchings/round_hud", DrawRoundHud);
-#endif
-
-INCLUDE_RODATA("asm/nonmatchings/round_hud", f_ElapsedTimeFormat);
-
-/* DrawRoundHud's, which the C version generates itself */
-#ifndef NON_MATCHING
-INCLUDE_RODATA("asm/nonmatchings/round_hud", f_TwoToThe32);
-
-INCLUDE_RODATA("asm/nonmatchings/round_hud", jtbl_800D1CA0);
-#endif
 
 /* Loads the images that the hole's intro shows for its contest bet and the
  * match standing */
@@ -4470,7 +4466,7 @@ void DrawHoleIntroText(Gfx** displayListHead) {
       seconds = totalSeconds % SECONDS_PER_MINUTE;
       minutes = totalSeconds / SECONDS_PER_MINUTE;
       SetUpGradientTextDrawing(&gfx, 0);
-      sprintf(g_PrintBuffer, f_ElapsedTimeFormat, minutes, seconds, hundredths);
+      sprintf(g_PrintBuffer, "%02d:%02d:%02d", minutes, seconds, hundredths);
       DrawLargeTextWithShadow(&gfx, STOPWATCH_X, STOPWATCH_Y, g_PrintBuffer,
           STOPWATCH_ENV_COLOR, STOPWATCH_PRIM_COLOR, TEXT_FLAG_FIXED_WIDTH);
     } else {
