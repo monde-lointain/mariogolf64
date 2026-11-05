@@ -3872,24 +3872,22 @@ void LoadOpeningImpactLines(void) {
  * Draws blinking impact lines around the burst for a few frames, once
  * f_AreImpactLinesShown is set.
  *
- * The original keeps the bottom edge's 88 in one register for both of a
- * strip's edges, where this folds the top edge into a separate constant.
- *
- * Doesn't match: the registers and scheduling differ throughout. Working out
- * each strip's texel offset from its index, with the row counted down in the
- * strip loop's initializer, took it from 229 words differing, 27 in shape, to
- * 217 (23), and dropping a second pipe sync after the palette load, which the
- * original doesn't have, to 186 (16). The permuter's best, 36 words (4 in
- * shape), moves that sync into the strip loop, adding a command there, and
- * stores the rectangle's left edge into a new variable on each pass, a fake.
- * Without the sync, a left variable set on each pass gives 45 (1), and one set
- * once, at its declaration or before the loop, 284 (26). A focused run's best,
- * 32 words (4 in shape), sets the left variable on each pass too, and also
- * counts the row down before the rectangle and works out the top from the row's
- * offset; counting the row down there alone gives 252 (30), and naming the top
- * edge in a local 186 (16). The register oracle's closest result is these 186
- * words with no register forced, so allocation isn't the cause. 186 words
- * differ, 16 in shape.
+ * Doesn't match: the registers and scheduling in the strip loop differ.
+ * Working out each strip's texel offset from its index, with the row counted
+ * down in the strip loop's initializer, took it from 229 words differing, 27
+ * in shape, to 217 (23), and dropping a second pipe sync after the palette
+ * load, which the original doesn't have, to 186 (16). Setting the left edge
+ * in a variable on each pass took it to 45 (1); one set once, at its
+ * declaration or before the loop, gives 284 (26). Working out the top edge
+ * from the row, as the original does, rather than from the bottom then gave
+ * 46 words, none in shape; the bottom less the strip height gives 45 (1), and
+ * the next row's offset, (row + 1) times the height, 184 (54). The permuter's
+ * best, 36 words (4 in shape), also sets the left edge on each pass and moves
+ * that sync into the strip loop, adding a command there. A focused run's
+ * best, 32 words (4 in shape), also counts the row down before the rectangle;
+ * measured before the left edge, that alone gave 252 (30). The register
+ * oracle's closest result is the 46 words with no register forced; forcing
+ * any gives 212 or more. 46 words differ, none in shape.
  */
 #ifdef NON_MATCHING
 void DrawOpeningImpactLines(Gfx** displayListHead) {
@@ -3901,7 +3899,9 @@ void DrawOpeningImpactLines(Gfx** displayListHead) {
 
   /* A variable, so GCC does not fold the right edge into the command */
   s32 width = IMPACT_LINES_SIZE;
+  s32 left;
   s32 bottom;
+  s32 top;
 
   if (f_AreImpactLinesShown) {
     frame = f_ImpactLinesFrame++;
@@ -3932,7 +3932,16 @@ void DrawOpeningImpactLines(Gfx** displayListHead) {
       /* The rows count up from the bottom, so the top strip is row 1 */
       for (stripIndex = 0, row = IMPACT_LINES_STRIP_COUNT - 1;
           stripIndex != IMPACT_LINES_STRIP_COUNT; stripIndex++) {
+        /*
+         * Set on each pass, as the original works out the rectangle's shifted
+         * left and right edges once, outside the loop, and keeps them on the
+         * stack; written as the constant, the edges fold into the commands,
+         * 186 words differing (16 in shape) against 45 (1)
+         */
+        left = IMPACT_LINES_LEFT;
         bottom = IMPACT_LINES_BOTTOM - (row * IMPACT_LINES_STRIP_HEIGHT);
+        top = IMPACT_LINES_BOTTOM - (row * IMPACT_LINES_STRIP_HEIGHT) -
+            IMPACT_LINES_STRIP_HEIGHT;
         texelOffset = LARGE_PALETTED_TEXELS_OFFSET +
             (stripIndex * IMPACT_LINES_SIZE * IMPACT_LINES_STRIP_HEIGHT);
         gDPLoadTextureBlock(gfx++,
@@ -3941,10 +3950,9 @@ void DrawOpeningImpactLines(Gfx** displayListHead) {
             G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
             G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
         gDPPipeSync(gfx++);
-        gSPScisTextureRectangle(gfx++, QuarterPixels(IMPACT_LINES_LEFT),
-            QuarterPixels(bottom - IMPACT_LINES_STRIP_HEIGHT),
-            QuarterPixels(IMPACT_LINES_LEFT + width), QuarterPixels(bottom),
-            G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+        gSPScisTextureRectangle(gfx++, QuarterPixels(left), QuarterPixels(top),
+            QuarterPixels(left + width), QuarterPixels(bottom), G_TX_RENDERTILE,
+            0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
         gDPPipeSync(gfx++);
         row--;
       }
