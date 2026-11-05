@@ -2170,16 +2170,16 @@ INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard_drawing", DrawLeaderboardPage);
  * differs too. The faded style sets the cells' alpha after its commands, as the
  * yellow style does; set first, 762 words differed (212 in shape). Adding the
  * skins won to standing in both arms of the front and back nine test, after
- * each DrawShadowedText, gives 734 words (216 in shape), but the original adds
- * them once, after both arms, as the draft does. The skins, strokes, putts,
- * over-par and handicap-stroke texts add g_Scorecard.x last, as the hole
- * numbers, par and badges do; with x first, as the draft had them, 760 words
- * differed, 210 in shape, and the oracle left 628. The back nine's match mark
- * still adds x first: x last there gives 772 words (176 in shape), and x first
- * in the front nine's too 760 (180). Writing each of the four cell rectangles'
- * edges as plain sums, with g_Scorecard.x and g_Scorecard.y all first or all
- * last in each, gives 1031 to 1041 words in all sixteen combinations. 760 words
- * differ, 178 in shape.
+ * each DrawShadowedText, gave 734 words (216 in shape) and now 734 (184), but
+ * the original adds them once, after both arms, as the draft does. The skins,
+ * strokes, putts, over-par and handicap-stroke texts add g_Scorecard.x last, as
+ * the hole numbers, par and badges do; with x first, as the draft had them, 760
+ * words differed, 210 in shape, and the oracle left 628. The back nine's match
+ * mark still adds x first: x last there gives 772 words (176 in shape), and x
+ * first in the front nine's too 760 (180). Writing each of the four cell
+ * rectangles' edges as plain sums, with g_Scorecard.x and g_Scorecard.y all
+ * first or all last in each, gives 1031 to 1041 words in all sixteen
+ * combinations. 760 words differ, 178 in shape.
  */
 #ifdef NON_MATCHING
 void DrawScoresPage(Gfx** displayListHead) {
