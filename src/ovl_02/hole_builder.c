@@ -3709,8 +3709,10 @@ void GetGroundLightColors(GroundLightColor* light, GroundLightColor* shade) {
  * sets heights inside the texel loop, which resets it for each texel and so
  * changes what is drawn. Writing the fade's kept weight into its three uses, in
  * place of keptWeight, gives 117 words, 23 in shape, but the oracle then gets
- * no closer than 111 words, forcing 10, against 94 forcing 9. 154 words differ,
- * 14 in shape.
+ * no closer than 111 words, forcing 10, against 94 forcing 9. Widening the
+ * shaded color's alpha to an s32 or u32 gives 110 words (18 in shape), and its
+ * blue 120 (22), but the original stores all four channels as halfwords, with
+ * sh to 0x478-0x47E($sp). 154 words differ, 14 in shape.
  */
 #ifdef NON_MATCHING
 void ShadeGroundTiles(void) {
