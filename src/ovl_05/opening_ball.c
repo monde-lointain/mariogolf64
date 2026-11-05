@@ -369,7 +369,7 @@ typedef s32 (*BillboardHitFinder)(s32 startX, s32 startY, s32 startZ, s32 endX,
  * its triangle hit's x, gives 290 and 298. The floor's in-cup and rolling tests
  * read simulation->state after GetGroundHeight, as StepBallSimulation's do,
  * where a state local set before the call gave 288 words (114 in shape) against
- * 247 (111). 247 words differ, 111 in shape.
+ * 247 (111) before the stop test's cast. 247 words differ, 109 in shape.
  */
 #ifdef NON_MATCHING
 s32 StepOpeningBallSimulation(BallSimulation* simulation) {
@@ -1575,7 +1575,7 @@ s32 StepOpeningBallSimulation(BallSimulation* simulation) {
         osSyncPrintf("V[1] %d\n", simulation->velocity[AXIS_Y]);
       }
 
-      if (IntLength2D(simulation->velocity[AXIS_X],
+      if ((s32)IntLength2D(simulation->velocity[AXIS_X],
               simulation->velocity[AXIS_Z]) < MAX_STOP_SPEED) {
         if (!isSteep &&
             IntLength2D(slopeX, slopeZ) * friction < MAX_STOP_SLOPE_PULL) {
