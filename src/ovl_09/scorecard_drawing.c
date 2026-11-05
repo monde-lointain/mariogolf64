@@ -2179,7 +2179,9 @@ INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard_drawing", DrawLeaderboardPage);
  * first in the front nine's too 760 (180). Writing each of the four cell
  * rectangles' edges as plain sums, with g_Scorecard.x and g_Scorecard.y all
  * first or all last in each, gives 1031 to 1041 words in all sixteen
- * combinations. 760 words differ, 178 in shape.
+ * combinations. The first cell loop's back nine adds g_Scorecard.x last at its
+ * right edge, as at its left; added first there, 760 words differed, 178 in
+ * shape. 758 words differ, 174 in shape.
  */
 #ifdef NON_MATCHING
 void DrawScoresPage(Gfx** displayListHead) {
@@ -2478,7 +2480,7 @@ void DrawScoresPage(Gfx** displayListHead) {
               QuarterPixels(
                   g_Scorecard.y + (i * CELL_HEIGHT) + CELL_TOP + NINE_SPACING),
               QuarterPixels(
-                  g_Scorecard.x + (j * CELL_WIDTH) + CELL_LEFT + CELL_WIDTH),
+                  (j * CELL_WIDTH) + CELL_LEFT + CELL_WIDTH + g_Scorecard.x),
               QuarterPixels(g_Scorecard.y + (i * CELL_HEIGHT) + CELL_TOP +
                   NINE_SPACING + CELL_HEIGHT),
               G_TX_RENDERTILE, 0, TexelCoordinate(i * CELL_HEIGHT),
