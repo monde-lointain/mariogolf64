@@ -86,7 +86,7 @@ enum VertexEncoding {
 #define UNK12_VERTICES_ASSET 0x3F0
 #define UNK12_MIDPOINTS_ASSET 0x3F1
 #define UNK12_TREES_ASSET 0x3F2
-#define UNK12_UNK6_ASSET 0x3F3
+#define UNK12_SETUP_ASSET 0x3F3
 #define UNK12_POINTS_ASSET 0x3F4
 #define UNK12_TRIANGLES_ASSET 0x3F5
 #define UNK12_ATTRIBUTES_ASSET 0x3F6
@@ -263,7 +263,7 @@ typedef struct HoleAssetIds {
   /* 0x0 */ u16 vertices;
   /* 0x2 */ u16 midpoints;
   /* 0x4 */ u16 trees;
-  /* 0x6 */ u16 unk6;
+  /* 0x6 */ u16 setup; /* Read into g_HoleSetup */
   /* 0x8 */ u16 points;
   /* 0xA */ u16 triangles;
   /* 0xC */ u16 attributes;
@@ -2588,9 +2588,9 @@ void BuildHole(s32 course, s32 hole) {
     ReadBillboards();
     if (!g_GameState.isRoundContinued && g_Scene != SCENE_STAFF_ROLL) {
       if (g_GameState.gameMode == GAME_MODE_UNK12) {
-        OpenAssetFile(UNK12_UNK6_ASSET, &asset);
+        OpenAssetFile(UNK12_SETUP_ASSET, &asset);
       } else {
-        OpenAssetFile(f_HoleAssetIds[course][hole].unk6, &asset);
+        OpenAssetFile(f_HoleAssetIds[course][hole].setup, &asset);
       }
 
       ReadAssetFile(&g_HoleSetup, GetAssetFileSize(&asset), &asset);
