@@ -216,7 +216,7 @@ void OpenScorecard(CourseIndex courseIndex, s32 holeIndex) {
       pageTitlesRow = PAGE_TITLES_SPEED_GOLF;
       break;
     case GAME_MODE_STROKE:
-    case GAME_MODE_UNK1:
+    case GAME_MODE_UNLISTED_STROKE:
     case GAME_MODE_TRAINING:
     case GAME_MODE_UNK6:
     case GAME_MODE_UNK8:
@@ -421,7 +421,7 @@ void FreeScorecard(void) {
     FreeMemory(&g_Scorecard.gridImage);
     switch (g_GameState.gameMode) {
       case GAME_MODE_STROKE:
-      case GAME_MODE_UNK1:
+      case GAME_MODE_UNLISTED_STROKE:
       case GAME_MODE_TRAINING:
       case GAME_MODE_UNK6:
       case GAME_MODE_UNK8:
@@ -643,7 +643,7 @@ HALVED:
 
   g_RoundHud.scorecardPage = 0;
   switch (g_GameState.gameMode) {
-    case GAME_MODE_UNK1:
+    case GAME_MODE_UNLISTED_STROKE:
     case GAME_MODE_TRAINING:
     case GAME_MODE_TOURNAMENT:
     case GAME_MODE_UNK6:
@@ -766,7 +766,7 @@ void SetScorecardLayout(s32 layout) {
 
   g_RoundHud.scorecardPage = 0;
   switch (g_GameState.gameMode) {
-    case GAME_MODE_UNK1:
+    case GAME_MODE_UNLISTED_STROKE:
     case GAME_MODE_TRAINING:
     case GAME_MODE_TOURNAMENT:
     case GAME_MODE_UNK6:
@@ -1064,7 +1064,7 @@ void UpdateScorecard(u16 buttons, u16 pressedButtons) {
 
     switch (g_GameState.gameMode) {
       case GAME_MODE_STROKE:
-      case GAME_MODE_UNK1:
+      case GAME_MODE_UNLISTED_STROKE:
       case GAME_MODE_MATCH_GAME:
       case GAME_MODE_TRAINING:
       case GAME_MODE_GET_CHARACTER:
@@ -1092,7 +1092,7 @@ s32 UpdateShownScorecard(u16 buttons) {
 
   switch (g_GameState.gameMode) {
     case GAME_MODE_STROKE:
-    case GAME_MODE_UNK1:
+    case GAME_MODE_UNLISTED_STROKE:
     case GAME_MODE_MATCH_GAME:
     case GAME_MODE_TRAINING:
     case GAME_MODE_GET_CHARACTER:
@@ -1236,7 +1236,7 @@ void DrawScorecard(Gfx** displayListHead) {
 
           break;
         case GAME_MODE_STROKE:
-        case GAME_MODE_UNK1:
+        case GAME_MODE_UNLISTED_STROKE:
         case GAME_MODE_TRAINING:
         case GAME_MODE_UNK6:
         case GAME_MODE_UNK8:

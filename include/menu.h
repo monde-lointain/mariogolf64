@@ -274,7 +274,7 @@ extern s16 g_ImportedCharacterColumns[MAX_PLAYER_COUNT];
 #define MODE_ICON_MATCH_GAME 6
 #define MODE_ICON_SKINS_MATCH 7
 #define MODE_ICON_RING_SHOT 8
-#define MODE_ICON_UNK9 9
+#define MODE_ICON_UNLISTED_STROKE 9
 #define MODE_ICON_CLUB_SLOTS 10
 #define NO_MODE_ICON (-1)
 #define MODE_ICON_COUNT 11

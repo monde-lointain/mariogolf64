@@ -2413,10 +2413,10 @@ void UpdateModeSelect(void) {
         g_MenuMemory.holesChoice = HOLES_CHOICE_FRONT_NINE;
         ApplyBetPreset(BET_PRESET_NONE);
         break;
-      case MODE_ICON_UNK9:
+      case MODE_ICON_UNLISTED_STROKE:
         PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
         StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
-        g_GameState.gameMode = GAME_MODE_UNK1;
+        g_GameState.gameMode = GAME_MODE_UNLISTED_STROKE;
         g_MenuScreen = MENU_SCREEN_COURSE_SELECT;
         g_CourseSelectKind = COURSE_SELECT_KIND_COURSES;
         MAP_CAMERA_MODE_TOP_BYTE = 2;

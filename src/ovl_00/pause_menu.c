@@ -412,7 +412,7 @@ void LoadPauseMenu(void) {
           f_PauseLayout = PAUSE_LAYOUT_NONE;
           break;
         case GAME_MODE_STROKE:
-        case GAME_MODE_UNK1:
+        case GAME_MODE_UNLISTED_STROKE:
         case GAME_MODE_TOURNAMENT:
         case GAME_MODE_UNK6:
           f_PauseLayout = PAUSE_LAYOUT_STROKE;

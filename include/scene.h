@@ -86,7 +86,14 @@ extern s32 g_SubModuleState;
  */
 enum GameMode {
   GAME_MODE_STROKE = 0,
-  GAME_MODE_UNK1 = 1, /* SettleHoleBets settles its bets like Stroke's */
+  /*
+   * A mode played like Stroke, but chosen with no bet set and over all the
+   * holes. Only MODE_ICON_UNLISTED_STROKE starts it, which no mode select list
+   * offers; its icon is two scorecards like Stroke's with an "OUT" bubble, and
+   * a saved game in it shows Stroke's label. SettleHoleBets settles its bets
+   * like Stroke's.
+   */
+  GAME_MODE_UNLISTED_STROKE = 1,
   GAME_MODE_MATCH_GAME = 2,
   /*
    * The walkthrough's Training: it has dry holes, cup positions taken in

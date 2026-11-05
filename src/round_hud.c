@@ -1181,7 +1181,7 @@ void StartShotPanel(void) {
   } else {
     switch (g_GameState.gameMode) {
       case GAME_MODE_STROKE:
-      case GAME_MODE_UNK1:
+      case GAME_MODE_UNLISTED_STROKE:
       case GAME_MODE_TOURNAMENT:
       case GAME_MODE_SPEED_GOLF:
         for (playerIndex = 0; playerIndex < g_GameState.playerCount;
@@ -4174,7 +4174,7 @@ void DrawRoundHud(CameraView* view) {
       } else {
         switch (g_GameState.gameMode) {
           case GAME_MODE_STROKE:
-          case GAME_MODE_UNK1:
+          case GAME_MODE_UNLISTED_STROKE:
           case GAME_MODE_TOURNAMENT:
           case GAME_MODE_SPEED_GOLF:
             if (g_RoundHud.skinsTotals[i] == 0) {

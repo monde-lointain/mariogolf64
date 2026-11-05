@@ -691,7 +691,7 @@ void LoadRoundResults(void) {
         ReadAssetFile(f_PortraitPalette, size, &file);
         AddRoundPoints(save, k);
         break;
-      case GAME_MODE_UNK1:
+      case GAME_MODE_UNLISTED_STROKE:
       case GAME_MODE_TRAINING:
       case GAME_MODE_UNK6:
       case GAME_MODE_UNK8:
@@ -999,7 +999,7 @@ void FreeRoundResults(void) {
 
       switch (g_GameState.gameMode) {
         case GAME_MODE_STROKE:
-        case GAME_MODE_UNK1:
+        case GAME_MODE_UNLISTED_STROKE:
         case GAME_MODE_TRAINING:
         case GAME_MODE_UNK6:
         case GAME_MODE_SPEED_GOLF:
@@ -3816,7 +3816,7 @@ void DrawRoundResults(Gfx** displayListHead) {
         DrawSpeedGolfResults(&gfx);
         break;
       case GAME_MODE_STROKE:
-      case GAME_MODE_UNK1:
+      case GAME_MODE_UNLISTED_STROKE:
       case GAME_MODE_TRAINING:
       case GAME_MODE_UNK6:
       case GAME_MODE_UNK8:

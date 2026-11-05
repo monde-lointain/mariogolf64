@@ -2278,7 +2278,7 @@ Boolean IsRecordableHoleOut(s32 playerIndex) {
 
   switch (g_GameState.gameMode) {
     case GAME_MODE_STROKE:
-    case GAME_MODE_UNK1:
+    case GAME_MODE_UNLISTED_STROKE:
     case GAME_MODE_TRAINING:
     case GAME_MODE_GET_CHARACTER:
     case GAME_MODE_TOURNAMENT:
