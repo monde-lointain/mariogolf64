@@ -363,7 +363,10 @@ typedef s32 (*BillboardHitFinder)(s32 startX, s32 startY, s32 startZ, s32 endX,
  * 278 words (106 in shape), but not for y and z: locals for all three first
  * give 328, one step local set for each axis in turn 289 (101), and the contact
  * fraction in a local 288. Writing the x line as the sibling writes its z, or
- * its triangle hit's x, gives 290 and 298. 288 words differ, 114 in shape.
+ * its triangle hit's x, gives 290 and 298. The floor's in-cup and rolling tests
+ * read simulation->state after GetGroundHeight, as StepBallSimulation's do,
+ * where a state local set before the call gave 288 words (114 in shape) against
+ * 247 (111). 247 words differ, 111 in shape.
  */
 #ifdef NON_MATCHING
 s32 StepOpeningBallSimulation(BallSimulation* simulation) {
@@ -1736,13 +1739,11 @@ SETTLE:
         floor = GetGroundHeight(
             simulation->position[AXIS_X], simulation->position[AXIS_Z]);
       } else {
-        s32 state = simulation->state;
-
         floor = GetGroundHeight(
             simulation->position[AXIS_X], simulation->position[AXIS_Z]);
-        if (state == BALL_STATE_IN_CUP || simulation->isHoledOut) {
+        if (simulation->state == BALL_STATE_IN_CUP || simulation->isHoledOut) {
           floor += IN_CUP_FLOOR_DEPTH;
-        } else if (state == BALL_STATE_ROLLING) {
+        } else if (simulation->state == BALL_STATE_ROLLING) {
           s32 cupOffsetX =
               simulation->position[AXIS_X] - g_HoleSetup.cupPosition[AXIS_X];
 

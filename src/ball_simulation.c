@@ -255,8 +255,10 @@ void ResetBallSimulations(void) {
  * forcing 123. A triangle bounce's spin grip, 1.0f - bounce, is written into
  * both velocity updates, as their other factors are, where a grip local gave
  * 743 words (215 in shape) against 727 (209); in the opening's copy the two
- * forms give 288 words and the same oracle result. 727 words differ, 209 in
- * shape.
+ * forms give 288 words and the same oracle result. The floor's in-cup and
+ * rolling tests read simulation->state after GetGroundHeight, where a state
+ * local set before the call gave 727 words (209 in shape) against 680 (206).
+ * 680 words differ, 206 in shape.
  */
 #ifdef NON_MATCHING
 s32 StepBallSimulation(BallSimulation* simulation) {
@@ -2044,13 +2046,11 @@ SETTLE:
         floor = GetGroundHeight(
             simulation->position[AXIS_X], simulation->position[AXIS_Z]);
       } else {
-        s32 state = simulation->state;
-
         floor = GetGroundHeight(
             simulation->position[AXIS_X], simulation->position[AXIS_Z]);
-        if (state == BALL_STATE_IN_CUP || simulation->isHoledOut) {
+        if (simulation->state == BALL_STATE_IN_CUP || simulation->isHoledOut) {
           floor += IN_CUP_FLOOR_DEPTH;
-        } else if (state == BALL_STATE_ROLLING) {
+        } else if (simulation->state == BALL_STATE_ROLLING) {
           s32 cupOffsetX =
               simulation->position[AXIS_X] - g_HoleSetup.cupPosition[AXIS_X];
 
