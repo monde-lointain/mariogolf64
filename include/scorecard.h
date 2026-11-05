@@ -78,7 +78,7 @@ typedef struct Scorecard {
   /* 0xA8 */ u16* facePalettes[MAX_PLAYER_COUNT];
   /* 0xB8 */ u8*
       betSubtitlesImage; /* Rows of the subtitles under some bets' headings */
-  /* 0xBC */ u8 unkBC;
+  /* 0xBC */ u8 isOddFaceStep; /* Flips at each face step; never read */
   /* 0xBD */ u8 faceTime; /* Frames since the faces were opened */
   /* 0xBE */ u8 faceFrame; /* Which of the faces' images they show */
   /* 0xBF */ s8 placeChange; /* Which way a tournament player's place moved on

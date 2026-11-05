@@ -206,7 +206,7 @@ void OpenScorecard(CourseIndex courseIndex, s32 holeIndex) {
     ReadAssetFile(g_Scorecard.facePalettes[i], size, &file);
   }
 
-  g_Scorecard.unkBC = 0;
+  g_Scorecard.isOddFaceStep = FALSE;
   g_Scorecard.faceTime = 0;
   g_Scorecard.faceFrame = 0;
 
@@ -958,7 +958,7 @@ void AnimateScorecard(void) {
     case SCORECARD_SHOWN:
       if (g_Scorecard.faceTime++ % FACE_FRAME_TIME == 1) {
         g_Scorecard.faceFrame++;
-        g_Scorecard.unkBC ^= 1;
+        g_Scorecard.isOddFaceStep ^= 1;
         if (g_Scorecard.faceFrame < FACE_FRAME_COUNT) {
           for (i = 0; i != g_GameState.playerCount; i++) {
             OpenEncodedAsset(
