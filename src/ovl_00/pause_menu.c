@@ -1154,6 +1154,11 @@ s32 UpdateChoiceBox(ControllerState* controller) {
  * the code differs too. A u32 textWidth gives 59 words, but 11 in shape, as it
  * compares and halves the width unsigned, where the original uses slt and a
  * signed halving. 61 words differ, 5 in shape.
+ *
+ * Holding CHOICE_BOX_CLOUD_WIDTH in a local set before the cloud loop gives
+ * 57 words (5 in shape), but both builds load 128 the same way, and the only
+ * change is which of the loop's 0x290 and 0x2C8 stays in $fp, so it only
+ * renumbers the pseudos.
  */
 #ifdef NON_MATCHING
 void DrawChoiceBox(Gfx** displayListHead) {
