@@ -2322,7 +2322,7 @@ s32 FindHoleTriangleHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
  * its two corner tests, IsLessThanCorners and IsMoreThanCorners; converting it
  * once into a float local, as the draft did, gave 418 words (72 in shape), or
  * 415 (69) and 381 (69) passing only one of the two hit points directly. The
- * register oracle, forcing 35 pseudos' registers, leaves 139 words of the 204
+ * register oracle, forcing 35 pseudos' registers, leaves 135 words of the 200
  * at best, so the code differs too. A permuter output with 178 words (62 in
  * shape) copies the plane's X normal to a temp before GetTrianglePlane sets it
  * and uses the copy for each side and hit test, so it reads the previous
@@ -2334,7 +2334,12 @@ s32 FindHoleTriangleHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
  * for the y or z normal, in either pair, 548 to 865. So it isn't adopted.
  * Commuting the x term, adding the y or distance term first, grouping the y and
  * z terms, or putting the start first in the hit point, in the first two tests,
- * give 204 to 248.
+ * give 204 to 248. Naming the hit point, as hitX, hitY and hitZ, for the ground
+ * height test took the draft from 204 words (66 in shape) to 200 (62), and the
+ * oracle from 139 words to 135, each forcing 35 pseudos; the earlier counts
+ * here were measured before it. Naming the end point too, in f32 locals for the
+ * four wall-end tests, gives 860 words (162 in shape), whether or not hitPointU
+ * and hitPointV are set from them. 200 words differ, 62 in shape.
  */
 #ifdef NON_MATCHING
 s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
@@ -2351,6 +2356,9 @@ s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
   s32 lowestZ;
   s32 highestZ;
   s32 hitIndex;
+  s32 hitX;
+  s32 hitY;
+  s32 hitZ;
   s32 i;
   f32 nearestFraction;
   f32 startSide;
@@ -2806,9 +2814,10 @@ s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
     }
 
     /* A hit near or below the ground is taken whatever the edges say */
-    if ((s32)(((endY - startY) * hitFraction) + startY) + WALL_HEIGHT_SLACK >
-        GetGroundHeight(((endX - startX) * hitFraction) + startX,
-            ((endZ - startZ) * hitFraction) + startZ)) {
+    hitX = ((endX - startX) * hitFraction) + startX;
+    hitY = ((endY - startY) * hitFraction) + startY;
+    hitZ = ((endZ - startZ) * hitFraction) + startZ;
+    if (hitY + WALL_HEIGHT_SLACK > GetGroundHeight(hitX, hitZ)) {
       nearestFraction = hitFraction;
       if (hitIndex != i) {
         osSyncPrintf("New Logic attemped!!!!! ratio %f\n", nearestFraction);
