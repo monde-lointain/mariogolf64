@@ -87,9 +87,15 @@ enum UnlockNoticeKind {
 #define CONFIRM_SOUND_CHANNEL 15
 #define CONFIRM_SOUND_VOLUME 100
 
+/*
+ * The faces a results portrait plays through: the pleased one, the character's
+ * faces 1 to 4, is given to winners, to the player shown a score password, and
+ * to every player when a course opens; the beaten one, faces 5 to 8, to players
+ * ranked below another.
+ */
 enum PortraitAnimation {
-  PORTRAIT_ANIMATION_UNK1 = 1,
-  PORTRAIT_ANIMATION_UNK4 = 4
+  PORTRAIT_ANIMATION_PLEASED = 1,
+  PORTRAIT_ANIMATION_BEATEN = 4
 };
 
 /*
@@ -2293,7 +2299,7 @@ s32 UpdateTournamentResults(ControllerState* controller) {
       if (f_OpenCourseCount < COURSE_COUNT &&
           f_PointsToNextCourse + f_PrizePoints + f_CoursePointsTally.earned ==
               0) {
-        StartPortraitAnimation(PORTRAIT_ANIMATION_UNK1, 0);
+        StartPortraitAnimation(PORTRAIT_ANIMATION_PLEASED, 0);
         StartResultsNotice(UNLOCK_NOTICE_KIND_COURSE);
         OpenEncodedAsset(g_TournamentIconAssets[f_OpenCourseCount], &asset);
         ReadEncodedAsset(f_ResultsCourseImage, &asset);
@@ -2328,7 +2334,7 @@ s32 UpdateTournamentResults(ControllerState* controller) {
           if (GetBannerState() == BANNER_SHOWN) {
             f_ResultsStep = TOURNAMENT_STEP_TALLYING_PRIZE;
             if (f_PlayerRanks[0] == 1) {
-              StartPortraitAnimation(PORTRAIT_ANIMATION_UNK1, 0);
+              StartPortraitAnimation(PORTRAIT_ANIMATION_PLEASED, 0);
               PlayCharacterSound(g_Players[0].characterIndex, 0,
                   CHARACTER_SOUND_WIN, SOUND_FULL_SCALE, WIN_SOUND_PAN);
             }
@@ -2498,7 +2504,7 @@ s32 ShowScorePassword(ControllerState* controller) {
   switch (f_ResultsStep) {
     case SCORE_PASSWORD_STEP_START:
       f_ResultsStep = SCORE_PASSWORD_STEP_SHOWN;
-      StartPortraitAnimation(PORTRAIT_ANIMATION_UNK1, 0);
+      StartPortraitAnimation(PORTRAIT_ANIMATION_PLEASED, 0);
       CopyTournamentCode(report.tournamentCode);
       report.characterIndex = g_Players[0].characterIndex;
       report.score = f_PlayerResults[0];
@@ -2580,7 +2586,7 @@ s32 UpdateCoursePointsResults(ControllerState* controller) {
       if (f_OpenCourseCount < COURSE_COUNT &&
           f_PointsToNextCourse + f_CoursePointsTally.earned == 0) {
         for (i = 0; i != g_GameState.playerCount; i++) {
-          StartPortraitAnimation(PORTRAIT_ANIMATION_UNK1, i);
+          StartPortraitAnimation(PORTRAIT_ANIMATION_PLEASED, i);
         }
 
         StartResultsNotice(UNLOCK_NOTICE_KIND_COURSE);
@@ -2612,10 +2618,10 @@ s32 UpdateCoursePointsResults(ControllerState* controller) {
           }
 
           for (i = 0; i != g_GameState.playerCount; i++) {
-            StartPortraitAnimation(PORTRAIT_ANIMATION_UNK1, i);
+            StartPortraitAnimation(PORTRAIT_ANIMATION_PLEASED, i);
             for (j = 0; j != g_GameState.playerCount; j++) {
               if (i != j && f_PlayerRanks[i] > f_PlayerRanks[j]) {
-                StartPortraitAnimation(PORTRAIT_ANIMATION_UNK4, i);
+                StartPortraitAnimation(PORTRAIT_ANIMATION_BEATEN, i);
               }
             }
           }
@@ -2744,7 +2750,7 @@ s32 UpdateMatchResults(ControllerState* controller) {
       if (f_OpenCourseCount < COURSE_COUNT &&
           f_PointsToNextCourse + f_CoursePointsTally.earned == 0) {
         for (i = 0; i != g_GameState.playerCount; i++) {
-          StartPortraitAnimation(PORTRAIT_ANIMATION_UNK1, i);
+          StartPortraitAnimation(PORTRAIT_ANIMATION_PLEASED, i);
         }
 
         StartResultsNotice(UNLOCK_NOTICE_KIND_COURSE);
@@ -2776,11 +2782,11 @@ s32 UpdateMatchResults(ControllerState* controller) {
           }
 
           if (f_PlayerRanks[0] == MATCH_RANK_WON) {
-            StartPortraitAnimation(PORTRAIT_ANIMATION_UNK1, 0);
-            StartPortraitAnimation(PORTRAIT_ANIMATION_UNK4, 1);
+            StartPortraitAnimation(PORTRAIT_ANIMATION_PLEASED, 0);
+            StartPortraitAnimation(PORTRAIT_ANIMATION_BEATEN, 1);
           } else {
-            StartPortraitAnimation(PORTRAIT_ANIMATION_UNK1, 1);
-            StartPortraitAnimation(PORTRAIT_ANIMATION_UNK4, 0);
+            StartPortraitAnimation(PORTRAIT_ANIMATION_PLEASED, 1);
+            StartPortraitAnimation(PORTRAIT_ANIMATION_BEATEN, 0);
           }
 
           break;
@@ -3892,7 +3898,7 @@ void DrawRoundResults(Gfx** displayListHead) {
             ReadEncodedAsset(f_PlayerPortraitImages[i], &asset);
             f_PortraitFrames[i] = NO_PORTRAIT_FRAME;
             break;
-          case PORTRAIT_ANIMATION_UNK1:
+          case PORTRAIT_ANIMATION_PLEASED:
             OpenEncodedAsset(
                 g_CharacterImageAssets[g_Players[i].characterIndex] +
                     f_PortraitFrames[i],
@@ -3904,12 +3910,12 @@ void DrawRoundResults(Gfx** displayListHead) {
             }
 
             break;
-          case PORTRAIT_ANIMATION_UNK4: {
-            s32 unk4Faces[PORTRAIT_ANIMATION_FRAME_COUNT] = {0, 5, 6, 7, 8};
+          case PORTRAIT_ANIMATION_BEATEN: {
+            s32 beatenFaces[PORTRAIT_ANIMATION_FRAME_COUNT] = {0, 5, 6, 7, 8};
 
             OpenEncodedAsset(
                 g_CharacterImageAssets[g_Players[i].characterIndex] +
-                    unk4Faces[f_PortraitFrames[i]],
+                    beatenFaces[f_PortraitFrames[i]],
                 &asset);
             ReadEncodedAsset(f_PlayerPortraitImages[i], &asset);
             f_PortraitFrames[i]++;
@@ -3930,7 +3936,7 @@ void DrawRoundResults(Gfx** displayListHead) {
   *displayListHead = gfx;
 }
 #else
-INCLUDE_RODATA("asm/nonmatchings/ovl_00/round_results", f_Unk4FaceFrames);
+INCLUDE_RODATA("asm/nonmatchings/ovl_00/round_results", f_BeatenFaceFrames);
 
 INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", DrawRoundResults);
 #endif
