@@ -443,13 +443,17 @@ void StopEditorMoves(void) {
 /* The closest a zoom brings the eye to the look-at point */
 #define EDITOR_MIN_DISTANCE 1.0f
 
-/* Braking lowers a top speed no further than the acceleration */
+/*
+ * Braking lowers a top speed no further than the acceleration. A do-while,
+ * as with a plain block UpdateCameraEditor gives 347 words differing, 127 in
+ * shape, against 278 (80)
+ */
 #define KeepTopSpeed(topSpeed, acceleration) \
-  { \
+  do { \
     if (fabsf(topSpeed) < fabsf(acceleration)) { \
       (topSpeed) = (acceleration); \
     } \
-  }
+  } while (0)
 
 /*
  * Moves the camera on by an update: the point being moved, or carried with
