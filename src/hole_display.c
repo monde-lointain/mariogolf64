@@ -2305,7 +2305,12 @@ void HandleFrameBufferSwap(void) {}
  * height changed nothing. Each strip loop declares its own height, as each
  * loop's height is a different strip's or row's, which took the draft from 193
  * words differing to 179, 45 in shape either way; declaring it in the second or
- * third loop alone gives 179 too. 179 words differ, 45 in shape.
+ * third loop alone gave 179 too. The two StripHeight loops' heights are s32 and
+ * the last loop's an s16: the second loop's as an s32 takes the draft to 163
+ * words, 41 in shape, and the oracle from 74 words forcing 19 pseudos to 69
+ * forcing 16, and the first loop's type changes nothing. The last loop's as an
+ * s32 as well gives 181 words (37 in shape), though the oracle gets to 62, or
+ * 197 (41) with the second's an s16. 163 words differ, 41 in shape.
  */
 #ifdef NON_MATCHING
 void DrawFadeAnimation(Gfx** displayListHead) {
@@ -2350,7 +2355,7 @@ void DrawFadeAnimation(Gfx** displayListHead) {
         gDPSetCombineMode(gfx++, G_CC_MODULATEI_PRIM, G_CC_MODULATEI_PRIM);
         source = f_LastFrameBuffer;
         for (i = 0; i != BACKDROP_STRIP_COUNT; i++) {
-          s16 height = StripHeight(i);
+          s32 height = StripHeight(i);
 
           gDPLoadTextureTile(gfx++, TextureAddress(source), G_IM_FMT_RGBA,
               G_IM_SIZ_16b, SCREEN_WIDTH, 0, BACKDROP_BORDER, BACKDROP_BORDER,
@@ -2378,7 +2383,7 @@ void DrawFadeAnimation(Gfx** displayListHead) {
         gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
         gDPPipeSync(gfx++);
         for (i = 0; i != BACKDROP_STRIP_COUNT; i++) {
-          s16 height = StripHeight(i);
+          s32 height = StripHeight(i);
 
           LoadFadeFrameStrip(gfx,
               &frame[i * BACKDROP_STRIP_STEP * FADE_FRAME_WORDS_PER_ROW],
