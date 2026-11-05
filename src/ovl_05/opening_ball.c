@@ -341,17 +341,20 @@ typedef s32 (*BillboardHitFinder)(s32 startX, s32 startY, s32 startZ, s32 endX,
  * step, then both spins, which took the draft from 395 words (167 in shape) to
  * 337 (149); of the 58 other orders of those five steps that divide the spin
  * speed before the side spin, the best gave 341 (153). With that, writing the x
- * line as velocity + pull gives 343 words, the z line as pull + velocity 341,
- * and both 345. Both bounces set the last bounce step after the three
- * velocities, as StepBallSimulation's do, which took the draft from 337 words
- * (149 in shape) to 325 (141); moving the first alone gave 329 (145), the
- * second alone 333 (145). Each substep copies unkA6 to unkB1 after saving the
- * start and the previous velocity, as StepBallSimulation does, which took the
- * draft from 325 words (141 in shape) to 314 (138); with the start's y saved
- * before its x as well, 316 (138). The lift decays the spin after all three
- * velocity updates, as StepBallSimulation does, which took the draft from 314
- * words (138 in shape) to 296 (126). The cup pull sets toCup in axis order, as
- * StepBallSimulation does, and a wall hit's reflection sets all three
+ * line as velocity + pull gave 343 words, the z line as pull + velocity 341,
+ * and both 345. On the current draft, 247 words (111 in shape), velocity + pull
+ * gives 245 words in the x line alone, 249 in the z line alone and 249 in both,
+ * and with both the register oracle gets no closer than 128 words forcing 32,
+ * against the draft's 124 forcing 32. Both bounces set the last bounce step
+ * after the three velocities, as StepBallSimulation's do, which took the draft
+ * from 337 words (149 in shape) to 325 (141); moving the first alone gave 329
+ * (145), the second alone 333 (145). Each substep copies unkA6 to unkB1 after
+ * saving the start and the previous velocity, as StepBallSimulation does, which
+ * took the draft from 325 words (141 in shape) to 314 (138); with the start's y
+ * saved before its x as well, 316 (138). The lift decays the spin after all
+ * three velocity updates, as StepBallSimulation does, which took the draft from
+ * 314 words (138 in shape) to 296 (126). The cup pull sets toCup in axis order,
+ * as StepBallSimulation does, and a wall hit's reflection sets all three
  * velocities before clearing the spin, which took the draft from 296 words (126
  * in shape) to 290 (122); alone, they gave 292 (124) and 294 (124). The ground
  * spin's grip clears the spin after both velocity updates, as
