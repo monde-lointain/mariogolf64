@@ -2205,8 +2205,8 @@ static inline void SetCellTerrainCode(u32 column, u32 row, s32 code) {
 
       /*
        * Computing the offset again is there to match: without it
-       * PaintGroundTiles gives 237 words differing, 19 in shape, against 134,
-       * 6
+       * PaintGroundTiles gives 237 words differing, 19 in shape, against 132,
+       * 4
        */
       cellOffset = GetCellOffset(column, row);
       CellAt(cellOffset) = block | TERRAIN_CODE_CELL_BLOCK;
@@ -2239,7 +2239,10 @@ static inline void SetCellTerrainCode(u32 column, u32 row, s32 code) {
  * fill word rather than after, and when the blocks run out it branches to the
  * texel loop's increment, where the original's branch-likely does the increment
  * in its delay slot. The register oracle, forcing 25 pseudos' registers, leaves
- * 22 words at best, so the code differs too. 134 words differ, 6 in shape.
+ * 22 words at best, so the code differs too. Like the original, which shifts it
+ * before the search loop, this works out the search's limit once in
+ * searchDistance; comparing against the product in the loop gave 134 words
+ * differing, 6 in shape. 132 words differ, 4 in shape.
  */
 #ifdef NON_MATCHING
 void PaintGroundTiles(void) {
@@ -2260,6 +2263,8 @@ void PaintGroundTiles(void) {
   s32 code;
   s32 nearestCode;
   s32 nearestDistance;
+  /* The nearest distance in the offsets' units, which the search stops at */
+  s32 searchDistance;
   u32 painting;
 
   SetPaintSeed(0);
@@ -2298,16 +2303,16 @@ void PaintGroundTiles(void) {
             /*
              * The goto is there to match: testing for a fixed painting first
              * in an if-else, and searching and painting in its else, gives
-             * 140 words (12 in shape) against 134 (6); testing for no search
-             * first gives 241, as does keeping the nesting with the paint
+             * 138 words (10 in shape) against 132 (4); testing for no search
+             * first gives 243, as does keeping the nesting with the paint
              * call in both arms
              */
             goto PAINTED;
           }
 
+          searchDistance = nearestDistance * OFFSET_DISTANCE_SCALE;
           for (offsetIndex = 1; offsetIndex < offsetCount; offsetIndex++) {
-            if (offsets[offsetIndex].distance >=
-                nearestDistance * OFFSET_DISTANCE_SCALE) {
+            if (offsets[offsetIndex].distance >= searchDistance) {
               break;
             }
 
