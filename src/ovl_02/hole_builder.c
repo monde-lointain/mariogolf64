@@ -660,9 +660,9 @@ s32 ListOffsetsByDistance(s32 span, GridOffset* offsets, s32 maxCount) {
   squares[0] = 0.0f;
   row = 0;
   while (row < span) {
-    /* The block of their own gives the row counter its register; without it
-     * 20 words differ, none in shape. A for loop storing squares[row + 1]
-     * gives 29, and one counting from 1 to span 35 to 39 */
+    /* The block of their own gives the row counter its register; without it,
+     * or with plain braces, 20 words differ, none in shape. A for loop storing
+     * squares[row + 1] gives 29, and one counting from 1 to span 35 to 39 */
     IN_OWN_BLOCK(row++; squares[row] = (f32)(row * row) *
             (OFFSET_DISTANCE_SCALE * OFFSET_DISTANCE_SCALE));
   }

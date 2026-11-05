@@ -554,9 +554,9 @@ s32 IsHoleOver(void) {
 
   if (g_GameState.replayKind == REPLAY_KIND_NONE) {
     /*
-     * In its own block to match: without it 6 words differ, and moving the
-     * players' done-or-waiting loop into an inline helper, in 3 forms, leaves
-     * 63-86 lines of the diff differing
+     * In its own block to match: without it, or in plain braces, 6 words
+     * differ, and moving the players' done-or-waiting loop into an inline
+     * helper, in 3 forms, leaves 63-86 lines of the diff differing
      */
     IN_OWN_BLOCK(
         if (g_GameState.gameMode == GAME_MODE_SKINS_MATCH ||
@@ -575,9 +575,9 @@ s32 IsHoleOver(void) {
           /*
            * Through isDone, returning in its own block, to match. The block's
            * loop labels part the store from the return, so jump's store-flag
-           * conversion (jump.c, "Try to use a conditional move") can't make
-           * the test a set-on-equal, which the original lacks. Returning TRUE
-           * gives 5 words; returning isDone outside a block, 16.
+           * conversion (jump.c, "Try to use a conditional move") can't make the
+           * test a set-on-equal, which the original lacks. Returning TRUE gives
+           * 5 words; returning isDone outside a block, or in plain braces, 16.
            */
           if (i == g_GameState.playerCount) {
             isDone = TRUE;
@@ -602,8 +602,8 @@ s32 IsHoleOver(void) {
           /*
            * Clearing isDone, though it is clear already, returning it, unlike
            * the FALSE above, and setting it in its own block, to match, as
-           * above: setting it outside a block gives 12 words, and returning
-           * TRUE or FALSE directly 11
+           * above: setting it outside a block, or in plain braces, gives 12
+           * words, and returning TRUE or FALSE directly 11
            */
           isDone = FALSE;
           if (i == g_GameState.playerCount) {
@@ -676,9 +676,9 @@ void SetNextTeeOrder(void) {
     }
   }
 
-  /* The copy loop in a block of its own is there to match; without it 38
-   * words differ, none in shape, counting it with j 46 and with a counter of
-   * its own 60 */
+  /* The copy loop in a block of its own is there to match; without it, or in
+   * plain braces, 38 words differ, none in shape, counting it with j 46 and
+   * with a counter of its own 60 */
   IN_OWN_BLOCK(for (i = 0; i < g_GameState.playerCount;
       i++) { g_Players[i].teeOrder = orders[i]; });
 }
