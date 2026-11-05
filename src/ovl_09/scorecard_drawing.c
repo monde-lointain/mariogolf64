@@ -2175,17 +2175,19 @@ INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard_drawing", DrawLeaderboardPage);
  * strokes, putts, over-par and handicap-stroke texts add g_Scorecard.x last, as
  * the hole numbers, par and badges do; with x first, as the draft had them, 760
  * words differed, 210 in shape, and the oracle left 628. The back nine's match
- * mark still adds x first: x last there gives 772 words (176 in shape), and x
- * first in the front nine's too 760 (180). Writing each of the four cell
- * rectangles' edges as plain sums, with g_Scorecard.x and g_Scorecard.y all
- * first or all last in each, gave 1031 to 1041 words in all sixteen
- * combinations when the draft had 760. The first cell loop's back nine adds
- * g_Scorecard.x last at its right edge, as at its left; added first there, 760
- * words differed, 178 in shape. The second loop's front-nine rectangle adds x
- * last at both edges, as the first loop's does; with x first at both, 758 words
- * differ (172 in shape). Grouping the y sums of the second loop's front
- * rectangle as the first loop's are gives 762 to 764 words. 755 words differ,
- * 167 in shape.
+ * mark still adds x first, to the cell's offset grouped, which leaves the same
+ * words with 2 fewer in shape and the same oracle result as the plain sum: x
+ * last there gives 767 words (165 in shape), and the front nine's mark grouped
+ * with x first too gives 755 (165), but the oracle leaves 595 words against
+ * 593. Writing each of the four cell rectangles' edges as plain sums, with
+ * g_Scorecard.x and g_Scorecard.y all first or all last in each, gave 1031 to
+ * 1041 words in all sixteen combinations when the draft had 760. The first cell
+ * loop's back nine adds g_Scorecard.x last at its right edge, as at its left;
+ * added first there, 760 words differed, 178 in shape. The second loop's
+ * front-nine rectangle adds x last at both edges, as the first loop's does;
+ * with x first at both, 758 words differ (172 in shape). Grouping the y sums of
+ * the second loop's front rectangle as the first loop's are gives 762 to 764
+ * words. 755 words differ, 165 in shape.
  */
 #ifdef NON_MATCHING
 void DrawScoresPage(Gfx** displayListHead) {
@@ -2880,8 +2882,8 @@ void DrawScoresPage(Gfx** displayListHead) {
               g_PrintBuffer);
         } else {
           DrawShadowedText(&gfx,
-              g_Scorecard.x + ((hole - HOLES_PER_NINE) * CELL_WIDTH) +
-                  MATCH_MARK_LEFT,
+              g_Scorecard.x +
+                  (((hole - HOLES_PER_NINE) * CELL_WIDTH) + MATCH_MARK_LEFT),
               backTop + (i * rowSpacing) + PLAYER_ROW_TOP + g_Scorecard.y,
               g_PrintBuffer);
         }
