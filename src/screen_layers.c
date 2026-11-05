@@ -854,9 +854,10 @@ void MarkHalfTurnCircle(
  * oracle matches with the two masks and radiusOffset forced. Subtracting
  * error's step as (step * 2) + 1 keeps the loop pass from making it an
  * induction variable, which error - 1 - (step * 2) lets it do (192 words).
- * Other declaration orders give 108 to 264 words, clamp and step orders 108
- * to 264, and column and row offsets in place of radiusOffset and stepOffset
- * 330. 108 words differ.
+ * Other declaration orders give 108 to 264 words, clamp and step orders 108 to
+ * 264, and column and row offsets in place of radiusOffset and stepOffset 330.
+ * An s16 error gives 94 words (4 in shape), but it sign-extends error with two
+ * 16-bit shifts the original lacks. 108 words differ.
  */
 #ifdef NON_MATCHING
 void MarkHalfTurnCircle(
