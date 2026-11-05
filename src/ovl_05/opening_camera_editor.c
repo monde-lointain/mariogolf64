@@ -462,16 +462,19 @@ void StopEditorMoves(void) {
  * point that moves around the pivot is then placed from the heading, pitch
  * and distance.
  *
- * Doesn't match: GCC keeps the zoom's gap in a float register rather than
- * $s6, and allocates the fabsf operands to other registers. It also reads
- * turnLeft and tiltLeft once before stepping them, where the original reads
- * each twice. The distance to a target sums the offsets' squares in x, y, z
- * order, as the original adds them; summing x, z, y gives 266 words, but the
- * register oracle then comes no closer than 173, against 161. A permuter
- * run's best output, 6723 against 7158, only clears turnLeft after toggling
- * the turning flag, giving 278 words differing, 74 in shape; the original
- * clears it with the turn's speed and braking angle, as here, so the gain is
- * incidental. 278 words differ, 80 in shape.
+ * Doesn't match: GCC keeps the zoom's gap in a float register rather than $s6,
+ * and allocates the fabsf operands to other registers. It also reads turnLeft
+ * and tiltLeft once before stepping them, where the original reads each twice.
+ * The distance to a target sums the offsets' squares in x, y, z order, as the
+ * original adds them; summing x, z, y gives 266 words, but the register oracle
+ * then comes no closer than 173, against 161. A permuter run's best output,
+ * 6723 against 7158, only clears turnLeft after toggling the turning flag,
+ * giving 278 words differing, 74 in shape; the original clears it with the
+ * turn's speed and braking angle, as here, so the gain is incidental. Setting a
+ * reached target's z before its y also gives 266 words (80 in shape), but the
+ * oracle then comes no closer than 165 words, forcing 48 pseudos, against 161
+ * forcing 49, and the offsets and velocities around it go x, y, z. 278 words
+ * differ, 80 in shape.
  *
  * The eight flag tests before letting go of the pivot each clear isDone:
  * jump.c turns each "if (test) isDone = FALSE" into an and with the negated
