@@ -2540,7 +2540,9 @@ enum PointsStep {
  * Doesn't match: when starting the tally, the original reads the player count
  * through the address of g_GameState.gameMode, which moves the branches after
  * it by a word. The register oracle's closest result is these 5 words with no
- * register forced, so allocation isn't the cause. 5 words differ.
+ * register forced, so allocation isn't the cause. Reading g_GameState.gameMode
+ * just before the loop, into j, as a switch with only a default, or as an empty
+ * if's test, still reads the player count directly. 5 words differ.
  */
 #ifdef NON_MATCHING
 s32 UpdateCoursePointsResults(ControllerState* controller) {
