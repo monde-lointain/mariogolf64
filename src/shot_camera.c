@@ -602,8 +602,8 @@ s32 NextCameraPick(Boolean isDealing) {
 
 /*
  * Ends the flight camera: it restores the main camera's field of view, stops
- * drawing the inset view, fades the flight's sounds, and reports a ball that
- * has finished its path with unk2E41 set.
+ * drawing the inset view, fades the flight's sounds, and counts a water cut for
+ * a ball that has finished its path.
  */
 void EndFlightCamera(void) {
   g_AreCharactersDrawn = TRUE;
@@ -621,7 +621,7 @@ void EndFlightCamera(void) {
   f_FlightCameraKind = FLIGHT_CAMERA_NONE;
   if (g_BallFlightStep == g_SimulatedShot.stepCount) {
     osSyncPrintf("\nCheckWater1\n");
-    if (g_SimulatedShot.unk2E41) {
+    if (g_SimulatedShot.isWaterCut) {
       osSyncPrintf("\nCheckWater2\n");
       CountNotableShot(g_CurrentShot.playerIndex, SHOT_KIND_WATER_CUT);
     }

@@ -33,7 +33,7 @@ typedef struct SimulatedShot {
   /* 0x2E1C */ ShotLaunch shot;
   /* 0x2E3C */ s32 flagHitStep; /* The step that hits the flag, or NO_STEP */
   /* 0x2E40 */ s8 endSurface; /* A SURFACE_* value */
-  /* 0x2E41 */ s8 unk2E41;
+  /* 0x2E41 */ s8 isWaterCut; /* See SHOT_KIND_WATER_CUT */
   /* 0x2E42 */ s8 unk2E42;
 } SimulatedShot; /* size = 0x2E44 */
 
