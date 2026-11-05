@@ -3715,8 +3715,10 @@ void GetGroundLightColors(GroundLightColor* light, GroundLightColor* shade) {
  * words, 23 in shape, but the oracle then gets no closer than 111 words,
  * forcing 10, against 94 forcing 9. Widening the shaded color's alpha to an s32
  * or u32 gives 110 words (18 in shape), and its blue 120 (22), but the original
- * stores all four channels as halfwords, with sh to 0x478-0x47E($sp). 154 words
- * differ, 14 in shape.
+ * stores all four channels as halfwords, with sh to 0x478-0x47E($sp). Widening
+ * isFadeUnlimited or isFadeDisabled to an s32 or u32 gives 145 words (25 in
+ * shape), but the original stores the three flags with sb and reloads them with
+ * lbu, at 0x487, 0x48F and 0x497($sp). 154 words differ, 14 in shape.
  */
 #ifdef NON_MATCHING
 void ShadeGroundTiles(void) {
