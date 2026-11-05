@@ -446,8 +446,12 @@ void OpenRoundResults(s32 request) {
 /*
  * Doesn't match: in the course points tally, the original counts in $s2 where
  * ours counts in $a1, and the later loops' registers differ. The register
- * oracle's closest result is 19 words with 19 registers forced, so what remains
- * is mostly allocation. 117 words differ, 5 in shape.
+ * oracle's closest result is 13 words with 19 registers forced, so what remains
+ * is mostly allocation. The match game clears the second result before the
+ * first, as the original does, written as f_PlayerResults[0] =
+ * f_PlayerResults[1] = 0; the other chain order gave 117 words (5 in shape) and
+ * the oracle's closest 19, and two statements in either order 117 or 119 (7).
+ * 115 words differ, 5 in shape.
  *
  * The original keeps the earned points' address in $a1 across the tally and
  * builds it again in $a0 after GetCourseRecordIndex, the address forms GCC
@@ -642,7 +646,7 @@ void LoadRoundResults(void) {
         break;
       case GAME_MODE_MATCH_GAME:
       case GAME_MODE_GET_CHARACTER:
-        f_PlayerResults[1] = f_PlayerResults[0] = 0;
+        f_PlayerResults[0] = f_PlayerResults[1] = 0;
         for (i = GetFirstHoleIndex(); i != g_GameState.holeIndex; i++) {
           if (g_Players[0].holes[i].strokes < g_Players[1].holes[i].strokes) {
             f_PlayerResults[0]++;
