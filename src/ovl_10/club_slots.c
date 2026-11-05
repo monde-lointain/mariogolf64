@@ -552,6 +552,11 @@ s32 GetClubSlotsState(void) {
  * measured before the START strips shared the button loop's counter, which took
  * the draft from 49 words differing to 33, 3 in shape both. 33 words differ, 3
  * in shape.
+ *
+ * Opening the face's asset in an if and an else, one per animation set, in
+ * place of choosing the asset with ?: gives 9 words differing, 7 in shape, but
+ * the register oracle then finds nothing closer than those 9, against 5 words
+ * forcing 2 pseudos here, so the ?: stays.
  */
 #ifdef NON_MATCHING
 void DrawClubSlots(Gfx** displayListHead) {
