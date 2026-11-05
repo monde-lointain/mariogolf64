@@ -2972,7 +2972,7 @@ void ShowHoleOutBanner(s32 playerIndex) {
  * inline: inlined, its buffer shares one stack slot with the others, as in
  * the original's frame.
  *
- * Doesn't match: 227 words differ, 97 in shape, spread through the routine's
+ * Doesn't match: 146 words differ, 78 in shape, spread through the routine's
  * states. The counts in the paragraphs after the next were measured before it,
  * when 454 words differed, 184 in shape.
  *
@@ -2991,11 +2991,14 @@ void ShowHoleOutBanner(s32 playerIndex) {
  * integer to single and truncates it back. Without the cast 493 words
  * differ, 219 in shape.
  *
- * The hole-out song test for Speed Golf and Ring Shot compares one operand
- * with two constants, which fold_truthop always evaluates without a branch,
- * where the original branches on each. Nested ifs or a switch give the
- * original's branches but 654 words; "!(a || b)" or swapped operands
- * change nothing.
+ * The hole-out song's Speed Golf and Ring Shot tests are nested, Speed Golf
+ * outside, as the original branches on each in that order. As one && test,
+ * fold_truthop evaluates the two compares of one operand without a branch, with
+ * xori, sltu and and, and 227 words differ (97 in shape) against 146 (78);
+ * nesting them the other way round gives 150 (78), a switch whose two modes
+ * break out 146 (78), and an empty arm for the two modes 227 (97). Unlike the
+ * paragraphs around it, these counts were measured after the debug timing's two
+ * stores.
  *
  * The hole-out song switch lists its modes from Ring Shot down to Training,
  * the order the original places their bodies in; in the enum's order 475
@@ -3018,26 +3021,19 @@ void ShowHoleOutBanner(s32 playerIndex) {
  * clamp and used by the debug clamp and the timing test after the launch, which
  * accounts for all of its gain: with the field read directly again it gives the
  * draft's 392 (148). Clamping through an inline helper or macro taking the
- * field's address gives 392 to 400 words (148 to 152 in shape). The original
- * branches on each of the cup-in song's two game mode tests, where the && here
- * compiles to xori, sltu and and; nesting the tests, either way round, or a
- * switch with the two modes breaking out gives 571 to 575 words (149 in shape),
- * and !(... || ...) changes nothing. Nested with the Speed Golf test outside,
- * the branches match the original's, but 0x80227170 moves from $s7 to $fp
- * across the function. These counts were measured when the draft gave 392 words
- * (148 in shape). On the current draft, nesting with the Speed Golf test
- * outside, or the switch, gives 565 words (143 in shape). The debug step's test
- * of the triggers and isCameraDone is nested, as the original branches on
- * isCameraDone apart from the triggers; as one && test, fold_truthop compiles
- * it to sltiu, sltu and and, and 392 words differ (148 in shape), with == FALSE
- * or != 0 too. A focused permuter run's best by words, 311 (145 in shape),
- * comes mostly from copying the heading, in the aiming state, into a
- * function-wide variable that the angle in the g_RoundHud.unkF block at the end
- * also reads: that alone gives 325 words (147 in shape), but outside the aiming
- * state the angle then reads the variable unset, and the original reloads
- * g_CurrentShot.heading there with an lhu. Setting nextState after the calls
- * when a ring shot holes out, as starting over does, gives 386 words (140 in
- * shape); it is kept first, as the training choice box's hole out has it.
+ * field's address gives 392 to 400 words (148 to 152 in shape). The debug
+ * step's test of the triggers and isCameraDone is nested, as the original
+ * branches on isCameraDone apart from the triggers; as one && test,
+ * fold_truthop compiles it to sltiu, sltu and and, and 392 words differ (148 in
+ * shape), with == FALSE or != 0 too. A focused permuter run's best by words,
+ * 311 (145 in shape), comes mostly from copying the heading, in the aiming
+ * state, into a function-wide variable that the angle in the g_RoundHud.unkF
+ * block at the end also reads: that alone gives 325 words (147 in shape), but
+ * outside the aiming state the angle then reads the variable unset, and the
+ * original reloads g_CurrentShot.heading there with an lhu. Setting nextState
+ * after the calls when a ring shot holes out, as starting over does, gives 386
+ * words (140 in shape); it is kept first, as the training choice box's hole out
+ * has it.
  *
  * Setting a local to MAX_ROLL_SKIP_STEPS before the player loop and bounding
  * the roll skip with it gives 336 words (144 in shape), but the build still
@@ -3523,41 +3519,45 @@ void UpdateTurns(void) {
             song = SONG_MINI_GOLF;
             if (g_GameState.isMiniGolf) {
               PlaySong(song, SONG_FLAG_UNK10 | SONG_FLAG_UNREAD);
-            } else if (g_GameState.gameMode != GAME_MODE_SPEED_GOLF &&
-                g_GameState.gameMode != GAME_MODE_RING_SHOT) {
-              s32 scoreToPar =
-                  g_Players[playerIndex].strokeCount - (g_HoleSetup.par - 1);
+            } else if (g_GameState.gameMode != GAME_MODE_SPEED_GOLF) {
+              if (g_GameState.gameMode != GAME_MODE_RING_SHOT) {
+                s32 scoreToPar =
+                    g_Players[playerIndex].strokeCount - (g_HoleSetup.par - 1);
 
-              if (scoreToPar > SCORE_TO_PAR_PAR) {
-                PlaySong(
-                    SONG_CUP_IN_OVER_PAR, SONG_FLAG_UNK10 | SONG_FLAG_UNREAD);
-                osSyncPrintf("BOGEY\n");
-              } else if (scoreToPar < SCORE_TO_PAR_EAGLE) {
-                PlaySong(
-                    SONG_CUP_IN_UNDER_PAR, SONG_FLAG_UNK10 | SONG_FLAG_UNREAD);
-                osSyncPrintf("EAGLE\n");
-                if (GetHolingOutStakes(playerIndex) == HOLING_OUT_STAKES_NONE &&
-                    !g_GameState.isMiniGolf) {
-                  StartMovie(MOVIE_ALBATROSS_PUTT);
-                }
-              } else if (scoreToPar < SCORE_TO_PAR_BIRDIE) {
-                PlaySong(
-                    SONG_CUP_IN_UNDER_PAR, SONG_FLAG_UNK10 | SONG_FLAG_UNREAD);
-                osSyncPrintf("EAGLE\n");
-                if (GetHolingOutStakes(playerIndex) == HOLING_OUT_STAKES_NONE &&
-                    !g_GameState.isMiniGolf) {
-                  StartMovie(MOVIE_EAGLE_PUTT);
-                }
-              } else if (scoreToPar == SCORE_TO_PAR_PAR) {
-                PlaySong(SONG_CUP_IN_PAR, SONG_FLAG_UNK10 | SONG_FLAG_UNREAD);
-                osSyncPrintf("PAR\n");
-              } else {
-                PlaySong(
-                    SONG_CUP_IN_UNDER_PAR, SONG_FLAG_UNK10 | SONG_FLAG_UNREAD);
-                osSyncPrintf("BIRDIE\n");
-                if (GetHolingOutStakes(playerIndex) == HOLING_OUT_STAKES_NONE &&
-                    !g_GameState.isMiniGolf) {
-                  StartMovie(MOVIE_BIRDIE_PUTT);
+                if (scoreToPar > SCORE_TO_PAR_PAR) {
+                  PlaySong(
+                      SONG_CUP_IN_OVER_PAR, SONG_FLAG_UNK10 | SONG_FLAG_UNREAD);
+                  osSyncPrintf("BOGEY\n");
+                } else if (scoreToPar < SCORE_TO_PAR_EAGLE) {
+                  PlaySong(SONG_CUP_IN_UNDER_PAR,
+                      SONG_FLAG_UNK10 | SONG_FLAG_UNREAD);
+                  osSyncPrintf("EAGLE\n");
+                  if (GetHolingOutStakes(playerIndex) ==
+                          HOLING_OUT_STAKES_NONE &&
+                      !g_GameState.isMiniGolf) {
+                    StartMovie(MOVIE_ALBATROSS_PUTT);
+                  }
+                } else if (scoreToPar < SCORE_TO_PAR_BIRDIE) {
+                  PlaySong(SONG_CUP_IN_UNDER_PAR,
+                      SONG_FLAG_UNK10 | SONG_FLAG_UNREAD);
+                  osSyncPrintf("EAGLE\n");
+                  if (GetHolingOutStakes(playerIndex) ==
+                          HOLING_OUT_STAKES_NONE &&
+                      !g_GameState.isMiniGolf) {
+                    StartMovie(MOVIE_EAGLE_PUTT);
+                  }
+                } else if (scoreToPar == SCORE_TO_PAR_PAR) {
+                  PlaySong(SONG_CUP_IN_PAR, SONG_FLAG_UNK10 | SONG_FLAG_UNREAD);
+                  osSyncPrintf("PAR\n");
+                } else {
+                  PlaySong(SONG_CUP_IN_UNDER_PAR,
+                      SONG_FLAG_UNK10 | SONG_FLAG_UNREAD);
+                  osSyncPrintf("BIRDIE\n");
+                  if (GetHolingOutStakes(playerIndex) ==
+                          HOLING_OUT_STAKES_NONE &&
+                      !g_GameState.isMiniGolf) {
+                    StartMovie(MOVIE_BIRDIE_PUTT);
+                  }
                 }
               }
             }
@@ -4252,8 +4252,8 @@ void UpdateTurns(void) {
            * folds the clamp's upper test below and the second its lower
            * test, where the original loads the timing back for both. A
            * store in each arm keeps a join between the stores and the
-           * clamp until cross-jumping merges them: 227 words differ, 97 in
-           * shape, against 241 and 111.
+           * clamp until cross-jumping merges them: 146 words differ, 78 in
+           * shape, against 160 and 92.
            */
           if (g_TurnController.pressedButtons & B_BUTTON) {
             f_ShotLaunch.power = MAX_LAUNCH_POWER;
