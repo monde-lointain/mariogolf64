@@ -79,11 +79,10 @@ extern s32 g_SubModuleId;
 extern s32 g_PendingSubModuleId;
 extern s32 g_SubModuleState;
 
-/* The game's modes, as GameState.gameMode holds them */
 /*
- * The game's modes. The save menu names Stroke, Match Game, Get Character,
- * Skins Match and Club Slots for a saved game; Mini-Golf is not a mode, as
- * GameState.isMiniGolf marks it.
+ * The game's modes, as GameState.gameMode holds them. The save menu names
+ * Stroke, Match Game, Get Character, Skins Match and Club Slots for a saved
+ * game; Mini-Golf is not a mode, as GameState.isMiniGolf marks it.
  */
 enum GameMode {
   GAME_MODE_STROKE = 0,
