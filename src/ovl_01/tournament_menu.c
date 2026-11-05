@@ -797,7 +797,9 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/tournament_menu", DrawYesNoWindow);
  * 242 (78), and a windowRight for pictureX changes nothing. Earlier, spelling
  * the edges as DrawYesNoWindow does gave 378 to 442. The register oracle,
  * forcing 5 pseudos' registers, leaves 152 words at best, so the code differs
- * too. 166 words differ, 26 in shape.
+ * too. An s16 or s8 badgeHalfWidth gives 165 words but 49 in shape, adding
+ * three shifts or masks to the draft's 18, as many as the original has. 166
+ * words differ, 26 in shape.
  */
 #ifdef NON_MATCHING
 void DrawClubWindow(Gfx** displayListHead, s32 width, s32 height, s32 centerX,
