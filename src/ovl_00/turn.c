@@ -3005,10 +3005,12 @@ void ShowHoleOutBanner(s32 playerIndex) {
  * and !(... || ...) changes nothing. Nested with the Speed Golf test outside,
  * the branches match the original's, but 0x80227170 moves from $s7 to $fp
  * across the function. These counts were measured when the draft gave 392 words
- * (148 in shape). The debug step's test of the triggers and isCameraDone is
- * nested, as the original branches on isCameraDone apart from the triggers; as
- * one && test, fold_truthop compiles it to sltiu, sltu and and, and 392 words
- * differ (148 in shape), with == FALSE or != 0 too.
+ * (148 in shape). On the current draft, nesting with the Speed Golf test
+ * outside, or the switch, gives 565 words (143 in shape). The debug step's test
+ * of the triggers and isCameraDone is nested, as the original branches on
+ * isCameraDone apart from the triggers; as one && test, fold_truthop compiles
+ * it to sltiu, sltu and and, and 392 words differ (148 in shape), with == FALSE
+ * or != 0 too.
  */
 #ifdef NON_MATCHING
 /* Debug flag 0x47: prints where the ball lies, and the second controller moves
