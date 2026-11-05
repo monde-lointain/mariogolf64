@@ -2344,8 +2344,12 @@ s32 FindHoleTriangleHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
  * four wall-end tests, gives 860 words (162 in shape), whether or not hitPointU
  * and hitPointV are set from them. A u16 or u8 facing gives 197 words (63 in
  * shape), and an s16 or s8 198 (64), but each adds an extension the original
- * lacks: an andi 0xffff or 0xff, or an sll and sra by 16 or 24. 200 words
- * differ, 62 in shape.
+ * lacks: an andi 0xffff or 0xff, or an sll and sra by 16 or 24. A focused
+ * permuter run's best, 167 words (51 in shape), reads the plane's x normal into
+ * a local for the start side and the first two of the four end fraction tests,
+ * leaving the end side and the other two tests reading the plane; a local for
+ * all six gives 226 words (76 in shape), and for the start and end sides alone
+ * 200 (62). 200 words differ, 62 in shape.
  */
 #ifdef NON_MATCHING
 s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
