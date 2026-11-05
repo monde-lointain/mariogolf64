@@ -877,11 +877,16 @@ void DrawStatsBadgeCount(Gfx** displayListHead) {
 /*
  * Draws the arrows beside the panel that show there are more statistics above
  * or below.
- * Doesn't match: 102 words differ, 22 in shape. The original picks the first
+ * Doesn't match: 94 words differ, 20 in shape. The original picks the first
  * arrow with a branch around a copy of hasRowsBelow; GCC's jump pass makes the
  * copy branchless here, so the registers and the spills to the stack differ.
- * Copying hasRowsBelow under "if (arrowCount == 1)" gives 107 words (33 in
- * shape), and copying hasRowsBelow != FALSE there 109; the same with
+ * The first arrow is an s16, as the arrow index it is added to is; as an s32
+ * 102 words differed, 22 in shape, and the register oracle got to 83 words
+ * where it now gets to 77, forcing 14 pseudos either way. With it an s16, the
+ * copy under "if (arrowCount == 1)", a ternary or an if/else gives 101 words
+ * (23 in shape). The counts that follow were measured with the draft at 102
+ * words. Copying hasRowsBelow under "if (arrowCount == 1)" gives 107 words (33
+ * in shape), and copying hasRowsBelow != FALSE there 109; the same with
  * "arrowCount += hasRowsBelow" gives 99 words but 23 in shape, as the original
  * branches to count that arrow. Adding the arrows' offsets as two products
  * gives 103-113 words, 27-31 in shape. The permuter's best outputs (66 and 70
@@ -898,7 +903,7 @@ void DrawStatsScrollArrows(Gfx** displayListHead) {
   Boolean hasRowsAbove = f_FirstShownStat > 0;
   s16 arrowCount = hasRowsAbove;
   Boolean hasRowsBelow = f_FirstShownStat + STATS_SHOWN_ROW_COUNT < STATS_COUNT;
-  s32 firstArrow;
+  s16 firstArrow;
   s16 arrowIndex;
   s32 top;
   /* Pads the frame to match; without it 139 words differ, against 107 */
