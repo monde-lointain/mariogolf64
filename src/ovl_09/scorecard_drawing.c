@@ -1668,6 +1668,13 @@ void FormatLeaderboardRow(char* row, TournamentStanding* standing) {
  * the top in place, writing the texel step's division into both of its
  * arguments gives 108 words (42 in shape) and the oracle's closest 66, still
  * forcing 13, but it repeats the division for a gain of 2 words in the code.
+ *
+ * A focused permuter run's best outputs read the row's contestantId through a
+ * pointer to its standing. Setting standing to the row's entry, as the flipping
+ * rows' loop does, and reading contestantId through it gives 111 words (47 in
+ * shape) in the faces' loop, 132 (44) in the arrows' loop, 111 (47) in both,
+ * and 212 (52) in the row text's loop, where it is also passed to
+ * FormatLeaderboardRow.
  */
 #ifdef NON_MATCHING
 void DrawLeaderboardPage(Gfx** displayListHead) {
