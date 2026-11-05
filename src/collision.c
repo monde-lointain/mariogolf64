@@ -3143,21 +3143,7 @@ static const char f_UnusedWallText[3][4] = {"", "", ""};
  * passes through. It sets a copy of the last ring's corners, holding the
  * hit ring's index, and the fraction of the way along the path. It returns
  * 1 for a hit, 0 for none and -1 for a start or end off the ground.
- *
- * Doesn't match: the original's endSide takes the partial sum's register, and
- * it takes the start side's abs.s before testing sideChange's sign. Moving the
- * fabsf up keeps 16 words but adds 2 in shape, as the scheduler puts the abs.s
- * in the sign test's delay slot. Working out the hit point in hitX, hitY and
- * hitZ before measuring its distance from the ring's center took the draft from
- * 28 words differing (8 in shape) to 16 (2), and the register oracle from 22
- * words forcing 3 pseudos to 4 forcing 1, which leaves only the abs.s. An s32
- * hitPoint array instead gives 42 (16) in place of the unused words and 118
- * (16) beside them. Taking sideChange's fabsf gives 13 words (5 in shape), but
- * cse then reuses the test's abs.s, where the original tests the sign with
- * c.lt.s and negates it with a branch-likely neg.s; AbsFloat for the start side
- * gives 21 (7), and for both 26 (10). 16 words differ, 2 in shape.
  */
-#ifdef NON_MATCHING
 s32 FindRingHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
     s32 endZ, PlaneTriangle* hitRing, f32* fraction) {
   PlaneTriangle ring;
@@ -3247,12 +3233,13 @@ s32 FindRingHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
     if (DoesPathMeetRingPlane(startSide, endSide)) {
       sideChange = startSide - endSide;
       if (fabsf(sideChange) > 1.0f) {
+        f32 startDistance = fabsf(startSide);
+
         if (sideChange < 0.0f) {
           sideChange = -sideChange;
         }
 
-        startSide = fabsf(startSide);
-        hitFraction = startSide / sideChange;
+        hitFraction = startDistance / sideChange;
       } else {
         hitFraction = 1.0f;
       }
@@ -3284,10 +3271,6 @@ s32 FindRingHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
 
   return 0;
 }
-
-#else
-INCLUDE_ASM("asm/nonmatchings/collision", FindRingHit);
-#endif
 
 /*
  * Returns how solid a billboard's hit mask is around a point: the cell
