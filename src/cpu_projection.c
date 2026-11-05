@@ -210,19 +210,7 @@ s32 GetViewDepth(f32 x, f32 y, f32 z) {
  * Projects a point onto the screen, filling in its position, scale and depth.
  * Returns the view depth, which is negative when the point is in front of the
  * camera.
- *
- * Doesn't match: the original computes viewZ - 1.0f before storing the depth,
- * where GCC leaves a nop there, and takes the depth step's absolute value into
- * another register. Computing the difference into a local, before or after the
- * store, leaves 13 differing words or gives 20; storing the depth after its
- * step gives 59, (f32)fabs leaves 13, and multiplying by perspective instead of
- * dividing by viewZ gives 45. The register oracle, forcing one pseudo's
- * register, leaves 7 words at best, so the code differs too. 11 words differ. A
- * permuter output with 9 words (1 in shape) adds SCREEN_DEPTH_SCALE to the
- * depth before setting it and then stores the product alone, which drops the
- * add.s of 16352.0 that the original makes after its mul.s, so it is left out.
  */
-#ifdef NON_MATCHING
 s32 ProjectPoint(f32 x, f32 y, f32 z, ScreenPoint* point) {
   f32 viewX;
   f32 viewY;
@@ -276,10 +264,6 @@ s32 ProjectPoint(f32 x, f32 y, f32 z, ScreenPoint* point) {
       SCREEN_DEPTH_SCALE - depth);
   return viewZ;
 }
-
-#else
-INCLUDE_ASM("asm/nonmatchings/cpu_projection", ProjectPoint);
-#endif
 
 /*
  * Like ProjectPoint, without the screen depth. The viewing matrix's [1][0]
