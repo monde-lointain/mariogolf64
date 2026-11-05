@@ -2154,6 +2154,11 @@ void UpdateBestShots(void) {
  * loop tests labelRow != STATS_GRID_ROW_COUNT, as the original's bne shows;
  * with <, which d849c579 chose for its lower count, it compiles to slti and
  * bnez, 101 words (17 in shape). 107 words differ, 13 in shape.
+ *
+ * Counting the labels' loop with index, as the strip loops count, gives 89
+ * words differing, 13 in shape, but the register oracle's closest result is 37
+ * words either way, forcing 9 pseudos against 12, so the gain is in the
+ * registers alone.
  */
 #ifdef NON_MATCHING
 void DrawBestShots(Gfx** displayListHead) {
