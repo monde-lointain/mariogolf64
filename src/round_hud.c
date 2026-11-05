@@ -1684,7 +1684,7 @@ typedef struct GridScreenPoint {
 /*
  * Doesn't match: the club and the shot's distance take each other's saved
  * registers, and registers differ through the grid's loops. The register oracle
- * comes no closer than 228 words differing, with 29 pseudos forced. The quads
+ * comes no closer than 222 words differing, with 26 pseudos forced. The quads
  * across the aim sync once after choosing their depth, and the lines along it
  * don't sync before choosing theirs, as in the original's display list; with a
  * sync inside each of the quads' depth branches and another before the lines'
@@ -1710,7 +1710,12 @@ typedef struct GridScreenPoint {
  * Keeping the neighbor point's index in distance's variable, which would give
  * one variable two meanings, gives 336 words (50 in shape), but the register
  * oracle's closest is then 236 words, forcing 28 pseudos, against 228, forcing
- * 29, here. 342 words differ, 48 in shape.
+ * 29, at the time. The counts before here were measured while the pass across
+ * the aim stepped rowStart, as the first two loops do; a row start of that
+ * pass's own, acrossRowStart, took the draft from 342 words differing to 308,
+ * 48 in shape both, in each of the five declaration places tried, and the
+ * oracle's closest from 228 words, forcing 29 pseudos, to 222, forcing 26. 308
+ * words differ, 48 in shape.
  */
 void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
   f32 points[GREEN_GRID_POINT_COUNT][3];
@@ -1732,6 +1737,7 @@ void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
   s32 column;
   s32 acrossColumn;
   s32 rowStart;
+  s32 acrossRowStart;
   s32 point;
   s32 rowPosition;
   Boolean isUnscrolledRow;
@@ -1976,9 +1982,9 @@ void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
   if (g_RoundHud.greenGridState != GREEN_GRID_HIDDEN) {
     /* The lines across the aim, one quad between each pair of points in a row
      */
-    for (acrossRow = 0, rowStart = 0; acrossRow != rowCount;) {
+    for (acrossRow = 0, acrossRowStart = 0; acrossRow != rowCount;) {
       for (acrossColumn = 0; acrossColumn != columnCount; acrossColumn++) {
-        point = rowStart + acrossColumn;
+        point = acrossRowStart + acrossColumn;
         if (screenPoints[point].isVisible != TRUE) {
           continue;
         }
@@ -2048,13 +2054,13 @@ void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
       }
 
       if (rowCount != GREEN_GRID_MAX_ROW_COUNT) {
-        rowStart += columnCount;
+        acrossRowStart += columnCount;
         acrossRow++;
       } else if (acrossRow >= GREEN_GRID_FIRST_FULL_ROW) {
-        rowStart += columnCount;
+        acrossRowStart += columnCount;
         acrossRow++;
       } else {
-        rowStart += columnCount * 2;
+        acrossRowStart += columnCount * 2;
         acrossRow += 2;
       }
     }
