@@ -2312,8 +2312,12 @@ void HandleFrameBufferSwap(void) {}
  * s32 as well gives 181 words (37 in shape), though the oracle gets to 62, or
  * 197 (41) with the second's an s16. Declaring the frame pointer before the
  * display list pointer, as a permuter run suggested, keeps 163 words and takes
- * the shape from 41 to 37, with the oracle at 69 words forcing 15 pseudos. 163
- * words differ, 37 in shape.
+ * the shape from 41 to 37, with the oracle at 69 words forcing 15 pseudos. The
+ * motion blur's strip loop indexes the last frame buffer for each strip, as the
+ * next loop indexes the captured frame, in place of stepping a source pointer,
+ * which took the draft to 147 words, 33 in shape, and the oracle to 67 words
+ * forcing 12 pseudos; setting a source pointer from the index in each strip
+ * gives the same. 147 words differ, 33 in shape.
  */
 #ifdef NON_MATCHING
 void DrawFadeAnimation(Gfx** displayListHead) {
@@ -2327,7 +2331,6 @@ void DrawFadeAnimation(Gfx** displayListHead) {
    * (45)
    */
   s32 i;
-  u16* source;
 
   if (f_HudAnimationFramesLeft > 0) {
     isTileSet = FALSE;
@@ -2356,13 +2359,14 @@ void DrawFadeAnimation(Gfx** displayListHead) {
         gDPPipeSync(gfx++);
         gDPSetRenderMode(gfx++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
         gDPSetCombineMode(gfx++, G_CC_MODULATEI_PRIM, G_CC_MODULATEI_PRIM);
-        source = f_LastFrameBuffer;
         for (i = 0; i != BACKDROP_STRIP_COUNT; i++) {
           s32 height = StripHeight(i);
 
-          gDPLoadTextureTile(gfx++, TextureAddress(source), G_IM_FMT_RGBA,
-              G_IM_SIZ_16b, SCREEN_WIDTH, 0, BACKDROP_BORDER, BACKDROP_BORDER,
-              BACKDROP_RIGHT, BACKDROP_BORDER + height - 1, 0,
+          gDPLoadTextureTile(gfx++,
+              TextureAddress(
+                  &f_LastFrameBuffer[i * BACKDROP_STRIP_STEP * SCREEN_WIDTH]),
+              G_IM_FMT_RGBA, G_IM_SIZ_16b, SCREEN_WIDTH, 0, BACKDROP_BORDER,
+              BACKDROP_BORDER, BACKDROP_RIGHT, BACKDROP_BORDER + height - 1, 0,
               G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
               G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
           gSPScisTextureRectangle(gfx++, QuarterPixels(BACKDROP_BORDER),
@@ -2371,7 +2375,6 @@ void DrawFadeAnimation(Gfx** displayListHead) {
               QuarterPixels(i * BACKDROP_STRIP_STEP + BACKDROP_BORDER + height),
               G_TX_RENDERTILE, TexelCoordinate(BACKDROP_BORDER),
               TexelCoordinate(BACKDROP_BORDER), TEXEL_STEP_ONE, TEXEL_STEP_ONE);
-          source += BACKDROP_STRIP_STEP * SCREEN_WIDTH;
         }
 
         *displayListHead = gfx;
