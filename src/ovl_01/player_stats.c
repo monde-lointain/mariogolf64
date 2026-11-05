@@ -1206,8 +1206,7 @@ void DrawTwoDigitMenuNumber(
  * naming that player is typed once each time f_IsHandicapPromptShown is
  * cleared.
  *
- * Doesn't match: the original adds the label's offset to the slide once before
- * the columns' loop, and adds the texel offset to the blink frame's offset
+ * Doesn't match: the original adds the texel offset to the blink frame's offset
  * before the arrow's. The arrows' top is worked out once before their loop, as
  * the original adds 150 to the vertical slide there; added in each rectangle,
  * as the draft had it, 222 words differed (32 in shape), and worked out where
@@ -1228,12 +1227,21 @@ void DrawTwoDigitMenuNumber(
  * numberOffsetX first of all. Setting it once before the players' loop or the
  * columns' loop gives 174 words, but adds 16 to the slide there, where the
  * original adds it in the preheader of the numbers' loop, as the draft does;
- * set just before that loop, it gives 212. 210 words differ, 30 in shape.
+ * set just before that loop, it gives 212. The label's slid offset, labelSlide,
+ * is worked out once before the columns' loop, as the original keeps slide + 4
+ * in $s3 there and adds 16 to it for the right edge; written into both edges,
+ * the right edge folds to slide + 20, and 210 words differed (30 in shape),
+ * against 209 (31) here, with the register oracle's closest 182 words, forcing
+ * 16 pseudos, against 175 forcing 17. Holding the offset alone in a local set
+ * before the loop gives 207 words (27 in shape) and an oracle closest of 171
+ * forcing 17, but the local only holds the constant 4, which the build still
+ * adds as an immediate. 209 words differ, 31 in shape.
  */
 #ifdef NON_MATCHING
 void DrawHandicaps(Gfx** displayListHead, s32 slide, u8 reverseVerticalSlide,
     u8 canShowPrompt) {
   Gfx* gfx = *displayListHead;
+  s32 labelSlide;
   MenuMemory* memory = GetMenuMemory();
   u16 playerIndex;
   s32 columnIndex;
@@ -1389,6 +1397,8 @@ void DrawHandicaps(Gfx** displayListHead, s32 slide, u8 reverseVerticalSlide,
   gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(f_HandicapPlaque)));
   gDPLoadTLUT_pal16(gfx++, HANDICAP_LABEL_PALETTE,
       TextureAddress(ImageBody(f_StatsPlayerLabels)));
+  /* The original adds the label's offset to the slide once, before the loop */
+  labelSlide = slide + HANDICAP_LABEL_OFFSET_X;
   for (columnIndex = 0; columnIndex != g_ChosenPlayerCount; columnIndex++) {
     if (columnIndex == memory->handicapPlayer) {
       gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
@@ -1439,11 +1449,11 @@ void DrawHandicaps(Gfx** displayListHead, s32 slide, u8 reverseVerticalSlide,
     gSPScisTextureRectangle(gfx++,
         QuarterPixels(
             f_HandicapColumnLefts[g_ChosenPlayerCount - 1][columnIndex] +
-            (slide + HANDICAP_LABEL_OFFSET_X)),
+            labelSlide),
         QuarterPixels(HANDICAP_LABEL_TOP),
         QuarterPixels(
             f_HandicapColumnLefts[g_ChosenPlayerCount - 1][columnIndex] +
-            (slide + HANDICAP_LABEL_OFFSET_X) + PLAYER_LABEL_WIDTH),
+            labelSlide + PLAYER_LABEL_WIDTH),
         QuarterPixels(HANDICAP_LABEL_TOP + PLAYER_LABEL_HEIGHT),
         HANDICAP_LABEL_TILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     gDPPipeSync(gfx++);
