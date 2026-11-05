@@ -107,7 +107,8 @@ typedef struct TerrainColor {
 typedef struct GroundTile {
   /* 0x000 */ u16 texels[GROUND_TILE_TEXEL_ROW_COUNT]
                         [GROUND_TILE_TEXEL_ROW_LENGTH]; /* RGBA16 */
-  /* 0x990 */ s16 unk990;
+  /* 0x990 */ s16 extraPassCount; /* Positive to draw the tile again over
+                                     itself; the game only clears it */
   /* 0x992 */ u16 mirroredCells; /* A bit for each of the tile's cells, row by
                                    row, set when the cell is drawn mirrored */
   /* 0x994 */ s32 detail; /* How finely the tile is drawn this frame, negative
@@ -260,7 +261,7 @@ enum TerrainStyle {
 /* A vertex row's odd vertices follow its even ones */
 #define ODD_SLOT (GROUND_TILE_GROUP_SIZE + 1)
 
-/* A tile whose unk990 is positive is drawn a second time */
+/* A tile whose extraPassCount is positive is drawn a second time */
 #define GROUND_TILE_MAX_PASSES 2
 
 /* The noise texture sits in TMEM after a tile's texels, and is blended in by

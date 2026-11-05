@@ -4237,7 +4237,7 @@ void ToggleGroundTileBorders(void) {
       }
 
       g_WorkArea.hole.tiles[(tileRow * GROUND_TILE_COLUMN_COUNT) + tileColumn]
-          .unk990 = 0;
+          .extraPassCount = 0;
     }
   }
 }

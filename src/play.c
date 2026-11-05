@@ -2443,7 +2443,7 @@ void DrawGround(CameraMatrices* matrices, s32 terrainStyle) {
                 mediumPass++) {
               LoadTileTexture(tileIndex, tileColumn, row);
               DrawTileQuads(0, 2, 1, 3, 5, 4, 6, 8, 7);
-              if (g_WorkArea.hole.tiles[tileIndex].unk990 <= 0) {
+              if (g_WorkArea.hole.tiles[tileIndex].extraPassCount <= 0) {
                 break;
               }
             }
@@ -2496,7 +2496,7 @@ void DrawGround(CameraMatrices* matrices, s32 terrainStyle) {
               DrawTileQuads(topSlot, topSlot + ODD_SLOT, topSlot + 1,
                   middleSlot, middleSlot + ODD_SLOT, middleSlot + 1, bottomSlot,
                   bottomSlot + ODD_SLOT, bottomSlot + 1);
-              if (g_WorkArea.hole.tiles[tileIndex].unk990 <= 0) {
+              if (g_WorkArea.hole.tiles[tileIndex].extraPassCount <= 0) {
                 break;
               }
             }
@@ -2531,7 +2531,7 @@ void DrawGround(CameraMatrices* matrices, s32 terrainStyle) {
               LoadTileTexture(tileIndex, firstTileColumn + groupTileIndex, row);
               gSP2Triangles(gfx++, topSlot, topSlot + 1, bottomSlot, 0,
                   topSlot + 1, bottomSlot + 1, bottomSlot, 0);
-              if (g_WorkArea.hole.tiles[tileIndex].unk990 <= 0) {
+              if (g_WorkArea.hole.tiles[tileIndex].extraPassCount <= 0) {
                 break;
               }
             }

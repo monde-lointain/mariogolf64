@@ -489,8 +489,9 @@ enum EditorCombineMode {
     s32 tileT = (row) * TILE_COORDINATE_SPAN; \
 \
     if (HasTileBorders(tileIndex)) { \
-      if ((pass) == 0 || g_WorkArea.hole.tiles[tileIndex].unk990 <= 0) { \
-        if (g_WorkArea.hole.tiles[tileIndex].unk990 != 0) { \
+      if ((pass) == 0 || \
+          g_WorkArea.hole.tiles[tileIndex].extraPassCount <= 0) { \
+        if (g_WorkArea.hole.tiles[tileIndex].extraPassCount != 0) { \
           SetEditorCombineMode(TILE_PASS_FIRST, overlay); \
         } else { \
           SetEditorCombineMode(TILE_PASS_ONLY, overlay); \
@@ -3058,7 +3059,7 @@ void ShapeGroundFromCodes(void) {
         continue;
       }
 
-      g_WorkArea.hole.tiles[tileIndex].unk990 = 0;
+      g_WorkArea.hole.tiles[tileIndex].extraPassCount = 0;
       for (edgeRow = 0; edgeRow < EDGE_POINT_COUNT; edgeRow++) {
         for (edgeColumn = 0; edgeColumn < EDGE_POINT_COUNT; edgeColumn++) {
           if ((edgeRow & 1) == (edgeColumn & 1)) {
@@ -4629,7 +4630,7 @@ void DrawHoleEditorGround(CameraMatrices* matrices UNUSED, s32 terrainStyle) {
                   }
                 }
 
-                if (g_WorkArea.hole.tiles[tileIndex].unk990 <= 0) {
+                if (g_WorkArea.hole.tiles[tileIndex].extraPassCount <= 0) {
                   break;
                 }
 
@@ -4668,7 +4669,7 @@ void DrawHoleEditorGround(CameraMatrices* matrices UNUSED, s32 terrainStyle) {
               gSP2Triangles(gfx++, 2, 1, 5, 0, 1, 4, 5, 0);
               gSP2Triangles(gfx++, 3, 5, 6, 0, 5, 8, 6, 0);
               gSP2Triangles(gfx++, 5, 4, 8, 0, 4, 7, 8, 0);
-              if (g_WorkArea.hole.tiles[tileIndex].unk990 <= 0) {
+              if (g_WorkArea.hole.tiles[tileIndex].extraPassCount <= 0) {
                 break;
               }
             }
@@ -4726,7 +4727,7 @@ void DrawHoleEditorGround(CameraMatrices* matrices UNUSED, s32 terrainStyle) {
               DrawTileQuads(topSlot, topSlot + ODD_SLOT, topSlot + 1,
                   middleSlot, middleSlot + ODD_SLOT, middleSlot + 1, bottomSlot,
                   bottomSlot + ODD_SLOT, bottomSlot + 1);
-              if (g_WorkArea.hole.tiles[tileIndex].unk990 <= 0) {
+              if (g_WorkArea.hole.tiles[tileIndex].extraPassCount <= 0) {
                 break;
               }
             }
@@ -4769,7 +4770,7 @@ void DrawHoleEditorGround(CameraMatrices* matrices UNUSED, s32 terrainStyle) {
                 GROUND_OVERLAY_NOISE);
             gSP2Triangles(gfx++, topSlot, topSlot + 1, bottomSlot, 0,
                 topSlot + 1, bottomSlot + 1, bottomSlot, 0);
-            if (g_WorkArea.hole.tiles[tileIndex].unk990 <= 0) {
+            if (g_WorkArea.hole.tiles[tileIndex].extraPassCount <= 0) {
               break;
             }
           }

@@ -1284,7 +1284,7 @@ void InitTerrainTextures(void) {
     g_GroundTileHeightRanges[tileIndex] = 1.0f;
     tile->detail = GROUND_DETAIL_MEDIUM;
     tile->midpointBlockIndex = -1;
-    tile->unk990 = 0;
+    tile->extraPassCount = 0;
     /* Fills the image's first texels as if its rows were unpadded */
     for (texelRow = 0; texelRow < GROUND_TILE_TEXEL_SPAN; texelRow++) {
       for (texelColumn = 0; texelColumn < GROUND_TILE_TEXEL_SPAN;
