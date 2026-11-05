@@ -1689,19 +1689,22 @@ typedef struct GridScreenPoint {
  * don't sync before choosing theirs, as in the original's display list; with a
  * sync inside each of the quads' depth branches and another before the lines'
  * test, 337 words differed (51 in shape) but the later commands went to other
- * slots and the oracle came no closer than 241. The permuter's best outputs,
- * 5478 to 5518 against 6454, set columnCount only in the fade's last branch or
- * drop the near-landing branch, which change what the code does, or shift both
- * sides of the scroll test by 1 and nest a color in a chained assignment, which
- * are fakes. A later output computed distance * GREEN_GRID_ROW_SPACING into a
- * temp before its division and joined the early exit's first two tests in an
- * int temp; a Boolean local for those tests made the exit store the Boolean and
- * test it, where the original branches straight to the return. Before the syncs
- * were moved, indexing the first two loops' arrays by rowStart + column gave
- * 337 words (51 in shape) where a local holding it gave 345 (55). A BinaryAngle
- * local for the heading changes nothing in place, and read before
- * GetSelectedClub gives 311 words (51 in shape), but the original reads the
- * heading after that call returns. 342 words differ, 48 in shape.
+ * slots and the oracle came no closer than 241. A sync in each of the quads'
+ * depth branches alone, in place of the one after them, gives 338 words (48 in
+ * shape), but the original's branches join before a single sync. The permuter's
+ * best outputs, 5478 to 5518 against 6454, set columnCount only in the fade's
+ * last branch or drop the near-landing branch, which change what the code does,
+ * or shift both sides of the scroll test by 1 and nest a color in a chained
+ * assignment, which are fakes. A later output computed distance *
+ * GREEN_GRID_ROW_SPACING into a temp before its division and joined the early
+ * exit's first two tests in an int temp; a Boolean local for those tests made
+ * the exit store the Boolean and test it, where the original branches straight
+ * to the return. Before the syncs were moved, indexing the first two loops'
+ * arrays by rowStart + column gave 337 words (51 in shape) where a local
+ * holding it gave 345 (55). A BinaryAngle local for the heading changes nothing
+ * in place, and read before GetSelectedClub gives 311 words (51 in shape), but
+ * the original reads the heading after that call returns. 342 words differ, 48
+ * in shape.
  */
 void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
   f32 points[GREEN_GRID_POINT_COUNT][3];
