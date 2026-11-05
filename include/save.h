@@ -117,8 +117,9 @@ enum SaveReadResult {
 /* Settled on each hole; a tie carries the pot over. The Skins Match and Club
  * Slots bet presets stake it. */
 #define BET_SKINS 4
-/* Settled as BET_SKINS, when that bet is not set */
-#define BET_UNK5 5
+/* A hole pot, settled as BET_SKINS is when that bet is not set; of the bet
+ * presets, only Match Game's stakes it */
+#define BET_MATCH_POT 5
 /* Paid per stroke, between the two teams of two */
 #define BET_LAS_VEGAS 6
 #define BET_COUNT 7

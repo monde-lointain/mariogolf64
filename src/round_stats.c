@@ -163,8 +163,8 @@ void StartBets(void) {
   f_ContestWinner = NO_CONTEST_WINNER;
   g_LongestDrivePot = g_GameState.betRates[BET_LONGEST_DRIVE];
   g_NearestPinPot = g_GameState.betRates[BET_NEAREST_PIN];
-  if (g_GameState.betRates[BET_UNK5] != UNSET_BET_RATE) {
-    g_HolePot = g_GameState.betRates[BET_UNK5];
+  if (g_GameState.betRates[BET_MATCH_POT] != UNSET_BET_RATE) {
+    g_HolePot = g_GameState.betRates[BET_MATCH_POT];
   }
 
   if (g_GameState.betRates[BET_SKINS] != UNSET_BET_RATE) {
@@ -705,8 +705,8 @@ void SettleHoleBets(void) {
   }
 
   if (g_GameState.betRates[BET_SKINS] != UNSET_BET_RATE ||
-      g_GameState.betRates[BET_UNK5] != UNSET_BET_RATE) {
-    bet = BET_UNK5;
+      g_GameState.betRates[BET_MATCH_POT] != UNSET_BET_RATE) {
+    bet = BET_MATCH_POT;
     if (g_GameState.betRates[BET_SKINS] != UNSET_BET_RATE) {
       bet = BET_SKINS;
     } else {
