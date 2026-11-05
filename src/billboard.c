@@ -349,8 +349,15 @@ void DrawBillboard(Gfx** gfxPtr, Billboard* billboard,
  * is a pad in disguise. The register oracle, forcing 7 pseudos' registers,
  * leaves 77 words at best, so the code differs too. Declaring the far loop's
  * textureIndex unsigned gives 107 words (25 in shape) only because it drops the
- * unused-billboard test, which the original keeps as an lb and a bltzl. 139
- * words differ, 17 in shape.
+ * unused-billboard test, which the original keeps as an lb and a bltzl.
+ * Declaring it an s16 gives 131 words (9 in shape), and the oracle's best 67
+ * with 8 forced, but only changes which table's address the far loop keeps; it
+ * adds no extension, but the field is an s8, which as the local's type changes
+ * nothing, and the s16 in the near loop too gives 156 words, or in the near
+ * loop alone 164. An s16 viewDepth gives 133 words (11 in shape) but loads the
+ * field's low half with an lh, and an s8 billboardIndex 135 (13) but loads each
+ * order entry's low byte with an lb, where the original loads the depth with lw
+ * and the entries with lhu. 139 words differ, 17 in shape.
  */
 #ifdef NON_MATCHING
 void DrawBillboards(CameraMatrices* cameraMatrices, s32 cameraIndex) {
