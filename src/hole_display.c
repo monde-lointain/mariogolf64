@@ -3064,22 +3064,26 @@ INCLUDE_ASM("asm/nonmatchings/hole_display", DrawTurnAwayAnimation);
 /*
  * Copies the frame that a HUD animation that has just started breaks apart
  *
- * The original copies the row's height into a register of its own for the
- * last column, and reloads the row count on each pass, as when each store
- * works the height out from the row: stepping it beside the row gives 116
- * words differing, 18 in shape, and setting it at the start of each column
- * 119-139. The narrow column's vertex z is stored in a block of its own;
- * stored plainly, or with the stores in the wide columns' order, 99-101
- * words differ.
+ * The original copies the row's height into a register of its own for the last
+ * column, and reloads the row count on each pass, as when each store works the
+ * height out from the row: earlier, stepping it beside the row gave 116 words
+ * differing, 18 in shape, and setting it at the start of each column 119-139.
+ * The narrow column's vertex z is stored in a block of its own; stored plainly,
+ * 97 words differ, 21 in shape.
  *
  * Doesn't match: the copy's loops allocate their counters and addresses to
- * other registers, and the grid's stores are scheduled in another order.
- * Giving the slice copy its own row counter, and adding the tile start to
- * the column before the row, take it from 144 words differing to 116.
- * Indexing the grid's vertices, in place of the two pointers, gives 184.
- * 97 words differ, 17 in shape. The permuter's best, at 103 words (15 in
- * shape), stores the column's x after the step to the next vertex, which
- * changes what is drawn.
+ * other registers, and the grid's stores are scheduled in another order. Giving
+ * the slice copy its own row counter, and adding the tile start to the column
+ * before the row, took it from 144 words differing to 116. Indexing the grid's
+ * vertices, in place of the two pointers, gave 184. The permuter's best, at 103
+ * words (15 in shape) when the draft gave 97, stored the column's x after the
+ * step to the next vertex, which changes what is drawn. The wide columns store
+ * each vertex's coordinates in turn, as the narrow column does, which took the
+ * draft from 97 words differing to 95, 17 in shape to 19. Storing the first
+ * vertex's z between the second's x and y gives 95 words, 15 in shape, but
+ * splits both vertices' stores for no reason; storing the x's, the y's and the
+ * z's in pairs gives 97, and the second vertex first 101. 95 words differ, 19
+ * in shape.
  */
 #ifdef NON_MATCHING
 void CaptureHudAnimationFrame(void) {
@@ -3131,9 +3135,9 @@ void CaptureHudAnimationFrame(void) {
           gridColumn++, x += TILE_GRID_SPACING) {
         vertex->v.ob[AXIS_X] = x;
         vertex->v.ob[AXIS_Y] = TileGridRowY(gridRow);
+        vertex->v.ob[AXIS_Z] = 0;
         nextVertex->v.ob[AXIS_X] = x;
         nextVertex->v.ob[AXIS_Y] = TileGridRowY(gridRow);
-        vertex->v.ob[AXIS_Z] = 0;
         nextVertex->v.ob[AXIS_Z] = 0;
         vertex++;
         nextVertex++;
@@ -3146,8 +3150,8 @@ void CaptureHudAnimationFrame(void) {
         vertex->v.ob[AXIS_X] = x;
         vertex->v.ob[AXIS_Y] = TileGridRowY(gridRow);
         /*
-         * In its own block, as without it 99 words differ, 21 in shape, against
-         * 97 and 17
+         * In its own block, as without it 97 words differ, 21 in shape, against
+         * 95 and 19
          */
         IN_OWN_BLOCK(vertex->v.ob[AXIS_Z] = 0);
         nextVertex->v.ob[AXIS_X] = x;
