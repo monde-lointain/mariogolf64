@@ -257,8 +257,11 @@ void ResetBallSimulations(void) {
  * 743 words (215 in shape) against 727 (209); in the opening's copy the two
  * forms give 288 words and the same oracle result. The floor's in-cup and
  * rolling tests read simulation->state after GetGroundHeight, where a state
- * local set before the call gave 727 words (209 in shape) against 680 (206).
- * 680 words differ, 206 in shape.
+ * local set before the call gave 727 words (209 in shape) against 680 (206). Of
+ * the six orders of the flight's drag updates, only y, z and x gives fewer
+ * words, 676, and it still stores z before y, where the original, having worked
+ * out y's drag first, stores x, y and z in turn. 680 words differ, 206 in
+ * shape.
  */
 #ifdef NON_MATCHING
 s32 StepBallSimulation(BallSimulation* simulation) {
