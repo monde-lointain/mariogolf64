@@ -3454,24 +3454,24 @@ void UpdateTurns(void) {
           SongId song = SONG_ROUND_UNK31;
 
           if (g_GameState.replayKind != REPLAY_KIND_NONE) {
-            PlaySong(song, SONG_FLAG_UNK10 | SONG_FLAG_UNREAD);
+            PlaySong(song, SONG_FLAG_FOLLOWS_MUSIC_OPTION | SONG_FLAG_UNREAD);
           } else if (GetSurfaceInfo(g_CurrentShot.surface)->kind ==
               SURFACE_KIND_GREEN) {
             song = SONG_MINI_GOLF;
             if (g_GameState.isMiniGolf) {
-              PlaySong(song, SONG_FLAG_UNK10 | SONG_FLAG_UNREAD);
+              PlaySong(song, SONG_FLAG_FOLLOWS_MUSIC_OPTION | SONG_FLAG_UNREAD);
             } else if (g_GameState.gameMode != GAME_MODE_SPEED_GOLF) {
               if (g_GameState.gameMode != GAME_MODE_RING_SHOT) {
                 s32 scoreToPar =
                     g_Players[playerIndex].strokeCount - (g_HoleSetup.par - 1);
 
                 if (scoreToPar > SCORE_TO_PAR_PAR) {
-                  PlaySong(
-                      SONG_CUP_IN_OVER_PAR, SONG_FLAG_UNK10 | SONG_FLAG_UNREAD);
+                  PlaySong(SONG_CUP_IN_OVER_PAR,
+                      SONG_FLAG_FOLLOWS_MUSIC_OPTION | SONG_FLAG_UNREAD);
                   osSyncPrintf("BOGEY\n");
                 } else if (scoreToPar < SCORE_TO_PAR_EAGLE) {
                   PlaySong(SONG_CUP_IN_UNDER_PAR,
-                      SONG_FLAG_UNK10 | SONG_FLAG_UNREAD);
+                      SONG_FLAG_FOLLOWS_MUSIC_OPTION | SONG_FLAG_UNREAD);
                   osSyncPrintf("EAGLE\n");
                   if (GetHolingOutStakes(playerIndex) ==
                           HOLING_OUT_STAKES_NONE &&
@@ -3480,7 +3480,7 @@ void UpdateTurns(void) {
                   }
                 } else if (scoreToPar < SCORE_TO_PAR_BIRDIE) {
                   PlaySong(SONG_CUP_IN_UNDER_PAR,
-                      SONG_FLAG_UNK10 | SONG_FLAG_UNREAD);
+                      SONG_FLAG_FOLLOWS_MUSIC_OPTION | SONG_FLAG_UNREAD);
                   osSyncPrintf("EAGLE\n");
                   if (GetHolingOutStakes(playerIndex) ==
                           HOLING_OUT_STAKES_NONE &&
@@ -3488,11 +3488,12 @@ void UpdateTurns(void) {
                     StartMovie(MOVIE_EAGLE_PUTT);
                   }
                 } else if (scoreToPar == SCORE_TO_PAR_PAR) {
-                  PlaySong(SONG_CUP_IN_PAR, SONG_FLAG_UNK10 | SONG_FLAG_UNREAD);
+                  PlaySong(SONG_CUP_IN_PAR,
+                      SONG_FLAG_FOLLOWS_MUSIC_OPTION | SONG_FLAG_UNREAD);
                   osSyncPrintf("PAR\n");
                 } else {
                   PlaySong(SONG_CUP_IN_UNDER_PAR,
-                      SONG_FLAG_UNK10 | SONG_FLAG_UNREAD);
+                      SONG_FLAG_FOLLOWS_MUSIC_OPTION | SONG_FLAG_UNREAD);
                   osSyncPrintf("BIRDIE\n");
                   if (GetHolingOutStakes(playerIndex) ==
                           HOLING_OUT_STAKES_NONE &&
@@ -3574,7 +3575,7 @@ void UpdateTurns(void) {
               }
             }
 
-            PlaySong(song, SONG_FLAG_UNK10 | SONG_FLAG_UNREAD);
+            PlaySong(song, SONG_FLAG_FOLLOWS_MUSIC_OPTION | SONG_FLAG_UNREAD);
           }
         }
 

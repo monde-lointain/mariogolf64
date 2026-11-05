@@ -666,7 +666,7 @@ SongId GetSongId(void) {
  */
 void PlaySong(SongId songId, s32 flags) {
   if (!IsGameFlagSet(GAME_FLAG_SILENCE_SONGS)) {
-    if (IsMusicOffChosen() && (flags & SONG_FLAG_UNK10)) {
+    if (IsMusicOffChosen() && (flags & SONG_FLAG_FOLLOWS_MUSIC_OPTION)) {
       RequestSongStop();
       return;
     }
@@ -683,7 +683,7 @@ void PlaySong(SongId songId, s32 flags) {
       f_PendingSongChange.flags = flags;
     } else {
       osSyncPrintf("SeqGo %d\n", songId);
-      if (!IsMusicOffChosen() || !(flags & SONG_FLAG_UNK10)) {
+      if (!IsMusicOffChosen() || !(flags & SONG_FLAG_FOLLOWS_MUSIC_OPTION)) {
         f_SongId = songId;
         if (songId > LAST_SONG_ID) {
           songId = LAST_SONG_ID;

@@ -1752,13 +1752,13 @@ void OpenControlsScreen(void) {
   f_IsControlsShown = TRUE;
   f_StateFrame = 0;
   f_ResumedSongId = GetSongId();
-  PlaySong(SONG_CONTROLS, SONG_FLAG_UNK10 | SONG_FLAG_UNREAD);
+  PlaySong(SONG_CONTROLS, SONG_FLAG_FOLLOWS_MUSIC_OPTION | SONG_FLAG_UNREAD);
 }
 
 void CloseControlsScreen(void) {
   FreeMemory(&f_PanelImage);
   f_IsControlsShown = FALSE;
-  PlaySong(f_ResumedSongId, SONG_FLAG_UNK10 | SONG_FLAG_UNREAD);
+  PlaySong(f_ResumedSongId, SONG_FLAG_FOLLOWS_MUSIC_OPTION | SONG_FLAG_UNREAD);
 }
 
 /* Draws the Controls picture in strips, slid down by f_SlideOffsets[0] */

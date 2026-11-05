@@ -427,7 +427,7 @@ enum Song {
 /* Passed by some callers, but PlaySong never tests it */
 #define SONG_FLAG_UNREAD 0x01
 /* Stops the song instead when SAVE_OPTION_MUSIC_OFF is set */
-#define SONG_FLAG_UNK10 0x10
+#define SONG_FLAG_FOLLOWS_MUSIC_OPTION 0x10
 /* Restarts the song if it is already playing */
 #define SONG_FLAG_RESTART 0x80
 
