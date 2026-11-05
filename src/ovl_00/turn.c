@@ -617,7 +617,11 @@ INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", KeepAimCameraOnCourse);
  * shape, and setting it before the look-at's x or after the clamp 86 (18). The
  * permuter reached the same 67 words with a float local holding 1/1024. The
  * register oracle, forcing 12 pseudos' registers, leaves 31 words at best, so
- * the code differs too. 67 words differ, 9 in shape.
+ * the code differs too. A focused permuter run reached 60 words (8 in shape) by
+ * reading aimCameraDistance through a pointer to that field, set just before
+ * rise is worked out and read from there on; a CurrentShot pointer used for
+ * every field in the branch instead gives 120 (18), so the draft keeps reading
+ * g_CurrentShot directly. 67 words differ, 9 in shape.
  */
 #ifdef NON_MATCHING
 void PlaceShotCamera(void) {
