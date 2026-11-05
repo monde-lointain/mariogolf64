@@ -296,11 +296,12 @@ INCLUDE_ASM("asm/nonmatchings/hole_triangles", DrawHoleTriangles);
  * 364 (14), where the hoisted command and the register shift are the only
  * differences left. Masking the side inside RingVertex gives 392 (26). Earlier,
  * computing the next side once, into nextSide, gave 69 rather than 79; as a u8,
- * or masked with & 3, 368 to 382. The permuter's best runs, 1347 and 887 (41
- * words, 15 in shape), keep side + 1 or section + 1 in a u8, used in only some
- * of the places it is needed, which no natural form explains. The register
- * oracle, forcing 5 pseudos' registers, leaves 38 words at best, so the code
- * differs too. 65 words differ, 19 in shape.
+ * or masked with & 3, 368 to 382. A u32 side gives 366 (16), with nextSide a
+ * u32 as well or not; a u32 nextSide alone changes nothing. The permuter's best
+ * runs, 1347 and 887 (41 words, 15 in shape), keep side + 1 or section + 1 in a
+ * u8, used in only some of the places it is needed, which no natural form
+ * explains. The register oracle, forcing 5 pseudos' registers, leaves 38 words
+ * at best, so the code differs too. 65 words differ, 19 in shape.
  */
 #ifdef NON_MATCHING
 void DrawRings(Gfx** displayListHead, CameraMatrices* matrices UNUSED,
