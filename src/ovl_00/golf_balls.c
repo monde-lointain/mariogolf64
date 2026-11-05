@@ -780,7 +780,10 @@ enum BallSprite {
  * outside -1 to 3 would skip them, where the original's range check jumps to
  * the one copy after the switch. A sync ending each case gives 666 words, the
  * sync and render mode in each case 677, the last case as default 827, a
- * default case 654, and an if chain 827. 654 words differ, 90 in shape.
+ * default case 654, and an if chain 827. A focused permuter run's best, 620
+ * words (74 in shape), keeps G_BL_CLR_IN << 30, which is 0, in an unsigned long
+ * variable that three render modes or in, in place of the constant zero. 654
+ * words differ, 90 in shape.
  */
 #ifdef NON_MATCHING
 void DrawGolfBalls(CameraMatrices* matrices UNUSED) {
