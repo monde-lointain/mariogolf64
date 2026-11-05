@@ -1611,6 +1611,11 @@ BillboardCell GetBillboardCell(s32 textureIndex, f32 across, f32 down) {
  * expressions, either or both, gives 11 to 15 words (7 to 12 in shape), and as
  * abs() 16 (4). The register oracle's closest result is these 4 words with no
  * register forced, so allocation isn't the cause. 4 words differ, 2 in shape.
+ *
+ * Testing the sum itself rather than comparing it with 0, or converting
+ * startSide or the sum to f32 explicitly, gives the same 4 words (2 in
+ * shape); testing for 0 with the arms swapped gives 12 (10), and setting
+ * 0.0f before an if without an else 11 (7).
  */
 #ifdef NON_MATCHING
 s32 FindBillboardHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
@@ -1786,6 +1791,14 @@ void MoveBallToCupEdge(BallSimulation* simulation) {
  * 144 words (26 in shape), but the original multiplies the start side's terms
  * first; the start side before the end-to-cup values ties at 150. 150 words
  * differ, 22 in shape.
+ *
+ * As in FindBillboardHit, GCC puts fabsf's abs.s for the hit fraction in the
+ * delay slot of the branch for the divisor's first Abs, inverting it to a
+ * bgez, where the original issues it before a branch-likely. Testing the sum
+ * itself rather than comparing it with 0, or converting startSide or the sum
+ * to f32 explicitly, gives the same 150 words (22 in shape); testing for 0
+ * with the arms swapped gives 156 (28), and setting 0.0f before an if
+ * without an else 159 (27).
  */
 #ifdef NON_MATCHING
 s32 FindPinHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY, s32 endZ,
