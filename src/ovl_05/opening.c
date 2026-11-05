@@ -4642,16 +4642,20 @@ void LoadOpeningLogo(void) {
  * into place. Meanwhile the screen behind it fades to gray and then white.
  * The logo is only drawn when isDrawn is 1, but moves on every call.
  *
- * Doesn't match: the register allocation and instruction order differ. In
- * the letter loops GCC works out the texel offset before stepping the display
- * list pointer, where the original steps it first, and in the falling letters'
- * loop it derives f_LogoLetters' address from another table's instead of
- * loading it. The fade colors are set red first, as the original stores
- * them (blue first gave 166 words, 30 in shape, against 146 and 30). The L
- * letter's bounce goes through a pointer to it: indexing f_LogoLetters gives
- * 688 words (80 in shape), or 123 (19) with its speed's negation in its own
- * block, and the pointer declared at the function's top 109 (21). 104 words
- * differ, 14 in shape.
+ * Doesn't match: the register allocation and instruction order differ. In the
+ * letter loops GCC works out the texel offset before stepping the display list
+ * pointer, where the original steps it first, and in the falling letters' loop
+ * it derives f_LogoLetters' address from another table's instead of loading it.
+ * The fade colors are set red first, as the original stores them (blue first
+ * gave 166 words, 30 in shape, against 146 and 30). The L letter's bounce goes
+ * through a pointer to it: indexing f_LogoLetters gave 688 words (80 in shape),
+ * or 123 (19) with its speed's negation in its own block, and the pointer
+ * declared at the function's top 109 (21), against the draft's 104 (14) at the
+ * time. While the logo shrinks, the L letter's position and scale are stepped
+ * before the club's, as a focused permuter run suggested; stepping the club's
+ * position between them, as the draft did, gave 104 words (14 in shape), with
+ * its y step first 90 (6), and the club's position after its scale 128 (22). 80
+ * words differ, 6 in shape.
  */
 #ifdef NON_MATCHING
 void DrawOpeningLogo(Gfx** displayListHead, Boolean isDrawn) {
@@ -5185,10 +5189,10 @@ void DrawOpeningLogo(Gfx** displayListHead, Boolean isDrawn) {
 
     f_LogoLetters[LOGO_LETTER_L].x += f_LogoLetterSteps[LOGO_LETTER_L];
     f_LogoLetters[LOGO_LETTER_L].y += f_LogoLetterRises[LOGO_LETTER_A];
-    f_LogoClubPosition[AXIS_X] += f_LogoClubStepX;
-    f_LogoClubPosition[AXIS_Y] += f_LogoClubStepY;
     f_LogoLetterScales[LOGO_LETTER_L][AXIS_X] += f_LogoScaleStep;
     f_LogoLetterScales[LOGO_LETTER_L][AXIS_Y] += f_LogoScaleStep;
+    f_LogoClubPosition[AXIS_X] += f_LogoClubStepX;
+    f_LogoClubPosition[AXIS_Y] += f_LogoClubStepY;
     f_LogoClubScale[0] += f_LogoScaleStep;
     f_LogoClubScale[1] += f_LogoScaleStep;
     if (f_LogoLetterScales[LOGO_LETTER_M][AXIS_X] < LOGO_SHRUNK_SCALE) {
