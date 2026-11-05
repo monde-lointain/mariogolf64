@@ -1236,6 +1236,13 @@ void DrawTwoDigitMenuNumber(
  * before the loop gives 207 words (27 in shape) and an oracle closest of 171
  * forcing 17, but the local only holds the constant 4, which the build still
  * adds as an immediate. 209 words differ, 31 in shape.
+ *
+ * The original's frame is 0x170 bytes against 0x168 here: it keeps offsetY in a
+ * stack slot at 0x13C($sp), storing slide there before the banner and its
+ * negation after the reverseVerticalSlide test, and reloading it in the
+ * banner's loop and before the arrows, where the build keeps it in a register.
+ * Setting offsetY by if/else, by ?:, by negating offsetY itself, or testing
+ * reverseVerticalSlide != FALSE all leave 209 words.
  */
 #ifdef NON_MATCHING
 void DrawHandicaps(Gfx** displayListHead, s32 slide, u8 reverseVerticalSlide,
