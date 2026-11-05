@@ -377,11 +377,11 @@ s32 StepOpeningBallSimulation(BallSimulation* simulation) {
 
   f32 GetOpeningStepNoise(void) {
     return ((u32)((simulation->position[AXIS_X] + simulation->position[AXIS_Z] +
-                      g_Players[simulation->playerIndex].unk88) &
+                      g_Players[simulation->playerIndex].noiseSeed) &
                 NOISE_BYTE_MASK) *
                (1.0f / MAX_NOISE_BYTE_PAIR_SUM)) +
         ((u32)((simulation->position[AXIS_X] - simulation->position[AXIS_Z] +
-                   g_Players[simulation->playerIndex].unk88) &
+                   g_Players[simulation->playerIndex].noiseSeed) &
              NOISE_BYTE_MASK) *
             (1.0f / MAX_NOISE_BYTE_PAIR_SUM));
   }

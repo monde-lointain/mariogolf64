@@ -125,7 +125,7 @@ extern TakenCharacters g_TakenCharacters;
 #define NO_CHOSEN_CHARACTER (-1)
 extern s32 g_ChosenCharacters[MAX_PLAYER_COUNT];
 
-/* Whether each player swings left-handed, which becomes g_Players[].unk22 */
+/* Whether each player swings left-handed, which becomes g_Players[].isLefty */
 extern s8 g_ChosenLefties[MAX_PLAYER_COUNT];
 
 /* Whether the menus have loaded each character slot's character */

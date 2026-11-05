@@ -391,7 +391,7 @@ static inline f32 AbsoluteF32(f32 value) {
 /*
  * Places a golfer at the current shot's ball, its club's ball distance away a
  * quarter turn from the shot's yaw, and tilts it to the slope of the ground
- * there. The golfer stands on the other side, mirrored, when player->unk22 is
+ * there. The golfer stands on the other side, mirrored, when player->isLefty is
  * set. Each pass measures the slope again at the point the last slope gives.
  */
 void PlaceGolferAtBall(Vec3 position, Vec3 rotation, Vec3 scale) {
@@ -413,7 +413,7 @@ void PlaceGolferAtBall(Vec3 position, Vec3 rotation, Vec3 scale) {
       0, player->clubs[g_CurrentShot.clubSlot], FALSE, g_CurrentShot.shotMode);
   angle = ((aimYaw + (BINARY_ANGLE_TURN / 4)) & BINARY_ANGLE_MASK) *
       BINARY_ANGLE_TO_RADIANS;
-  if (player->unk22) {
+  if (player->isLefty) {
     distance = -distance;
   }
 
@@ -444,7 +444,7 @@ void PlaceGolferAtBall(Vec3 position, Vec3 rotation, Vec3 scale) {
   scale[AXIS_Z] = 1.0f;
   scale[AXIS_Y] = scale[AXIS_Z];
   scale[AXIS_X] = scale[AXIS_Y];
-  if (player->unk22) {
+  if (player->isLefty) {
     scale[AXIS_Y] = -1.0f;
   }
 
@@ -460,7 +460,7 @@ void PlaceGolferAtBall(Vec3 position, Vec3 rotation, Vec3 scale) {
 /*
  * Returns the binary angle of the ground's slope from the ball to a point
  * CROSS_SLOPE_DISTANCE away, a quarter turn from the shot's yaw. The point is
- * on the other side when player->unk22 is set, and the slope is then negated.
+ * on the other side when player->isLefty is set, and the slope is then negated.
  */
 SignedBinaryAngle GetCrossSlopeAngle(Player* player, ShotLaunch* shot) {
   SurfaceInfo* surfaceInfo;
@@ -476,7 +476,7 @@ SignedBinaryAngle GetCrossSlopeAngle(Player* player, ShotLaunch* shot) {
   surfaceInfo = GetSurfaceInfo(player->ballSurface);
   sampleDistance = CROSS_SLOPE_DISTANCE;
   yaw = aimYaw + (BINARY_ANGLE_TURN / 4);
-  if (player->unk22) {
+  if (player->isLefty) {
     angle = BINARY_ANGLE_TO_RADIANS *
         ((yaw + (BINARY_ANGLE_TURN / 2)) & BINARY_ANGLE_MASK);
   } else {
@@ -499,7 +499,7 @@ SignedBinaryAngle GetCrossSlopeAngle(Player* player, ShotLaunch* shot) {
   }
 
   rise = height - player->ballPosition[AXIS_Y];
-  if (player->unk22) {
+  if (player->isLefty) {
     rise = -rise;
   }
 
@@ -816,7 +816,7 @@ void StartFlightCamera(s32 earlierFlightCount) {
 
   f_IsBallGroundLevel = TRUE;
   for (i = 0; i != GROUND_PROBE_COUNT; i++) {
-    if (g_Players[g_CurrentShot.playerIndex].unk22 == 1) {
+    if (g_Players[g_CurrentShot.playerIndex].isLefty == 1) {
       yaw = ((u16)g_CurrentShot.heading * BINARY_ANGLE_TO_RADIANS) +
           ((f32)i * GROUND_PROBE_ANGLE_STEP);
     } else {
@@ -2449,14 +2449,14 @@ void PlaceFlightCamera(s32 step) {
         f_IsCameraKindNew = FALSE;
         if (f_EarlierFlightCount < CIRCLE_START_FLIGHT_COUNT) {
           f_CircleAngle = 0.0f;
-        } else if (g_Players[g_CurrentShot.playerIndex].unk22 == TRUE) {
+        } else if (g_Players[g_CurrentShot.playerIndex].isLefty == TRUE) {
           f_CircleAngle = M_PI / 2;
         } else {
           f_CircleAngle = -M_PI / 2;
         }
       }
 
-      if (g_Players[g_CurrentShot.playerIndex].unk22 == 1) {
+      if (g_Players[g_CurrentShot.playerIndex].isLefty == 1) {
         f_CircleAngle += CIRCLE_ANGLE_STEP;
         if (f_CircleAngle > M_PI) {
           f_CircleAngle = M_PI;
@@ -2494,7 +2494,7 @@ void PlaceFlightCamera(s32 step) {
         g_Cameras[0].view.fieldOfView = BESIDE_GOLFER_FIELD_OF_VIEW;
         GetCharacterPointPosition(0, 1, position);
         f_IsCameraKindNew = FALSE;
-        if (g_Players[g_CurrentShot.playerIndex].unk22 == TRUE) {
+        if (g_Players[g_CurrentShot.playerIndex].isLefty == TRUE) {
           yaw = ((u16)g_CurrentShot.heading * BINARY_ANGLE_TO_RADIANS) +
               (M_PI / 2);
         } else {

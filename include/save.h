@@ -253,11 +253,11 @@ typedef struct PlayRecord {
   /* 0x3A */ u8
       scoreKind; /* What GetRecordedScoreKind returns for the strokes */
   /* 0x3B */ s8 characterIndex;
-  /* 0x3C */ u8 unk3C;
+  /* 0x3C */ u8 isLefty;
   /* 0x3D */ s8 paletteIndex;
   /* 0x3E */ u8 strokeCount;
   /* 0x3F */ u8 unk3F;
-  /* 0x40 */ s32 unk40;
+  /* 0x40 */ s32 noiseSeed;
   /* 0x44 */ RecordedShot
       shots[4]; /* RecordHoleOut writes a fifth past the end */
   /* 0x64 */ u8 unk64[0x68 - 0x64];
@@ -271,11 +271,11 @@ typedef struct RingShotRecord {
   /* 0x36 */ s8
       scoreKind; /* What GetRecordedScoreKind returns for the strokes */
   /* 0x37 */ s8 characterIndex;
-  /* 0x38 */ u8 unk38;
+  /* 0x38 */ u8 isLefty;
   /* 0x39 */ s8 paletteIndex;
   /* 0x3A */ u8 strokeCount;
   /* 0x3B */ u8 unk3B;
-  /* 0x3C */ s32 unk3C;
+  /* 0x3C */ s32 noiseSeed;
   /* 0x40 */ RecordedShot shots[4]; /* RecordRingShotHole writes up to six */
   /* 0x60 */ u8 unk60[0x68 - 0x60];
 } RingShotRecord; /* size = 0x68 */
@@ -422,7 +422,7 @@ typedef struct Player {
   /* 0x1E */ s8 isComputer; /* Played by the computer, with no controller */
   /* 0x1F */ s8 unk1F;
   /* 0x20 */ u8 unk20[0x22 - 0x20];
-  /* 0x22 */ s8 unk22;
+  /* 0x22 */ s8 isLefty; /* Swings left-handed, so stands mirrored */
   /* 0x23 */ s8 strokeCount; /* On the current hole */
   /* 0x24 */ s8 puttCount; /* Strokes from the green on the current hole */
   /* 0x25 */ s8 teeOrder; /* From 0, the player's turn on the next tee */
@@ -445,7 +445,8 @@ typedef struct Player {
   /* 0x7D */ u8 unk7D[3];
   /* 0x80 */ s32 driveDistance; /* UNMEASURED_DISTANCE, or UNCOUNTED_DISTANCE */
   /* 0x84 */ s32 pinDistance; /* UNMEASURED_DISTANCE, or UNCOUNTED_DISTANCE */
-  /* 0x88 */ s32 unk88;
+  /* 0x88 */ s32 noiseSeed; /* Added into the ball's flight noise, and kept
+                               in the replay records */
   /* 0x8C */ s8 gridColor; /* GRID_COLOR_*, for the grid drawn over the green */
   /* 0x8D */ u8 unk8D;
   /* 0x8E */ s16

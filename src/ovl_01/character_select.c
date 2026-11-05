@@ -1065,7 +1065,7 @@ s32 UpdateCharacterSelect(
         g_CharacterGrid[GAME_BOY_CHARACTER_ROW][3] = f_SavedGameBoySlots[3];
       }
     } else {
-      g_Players[playerIndex].unk22 = 0;
+      g_Players[playerIndex].isLefty = 0;
       playerIndex--;
       f_FaceFrame = 0;
       f_FaceFrameTimer = 0;

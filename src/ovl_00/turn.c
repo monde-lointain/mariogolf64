@@ -2360,10 +2360,10 @@ void RecordHoleOut(s32 playerIndex) {
     record->scoreKind =
         GetRecordedScoreKind(g_Players[playerIndex].strokeCount);
     record->characterIndex = g_Players[playerIndex].characterIndex;
-    record->unk3C = g_Players[playerIndex].unk22;
+    record->isLefty = g_Players[playerIndex].isLefty;
     record->paletteIndex = g_Players[playerIndex].paletteIndex;
     record->strokeCount = g_Players[playerIndex].strokeCount;
-    record->unk40 = g_Players[playerIndex].unk88;
+    record->noiseSeed = g_Players[playerIndex].noiseSeed;
     record->hole = g_HoleSetup;
     record->shots[shotIndex].heading = g_CurrentShot.heading;
     record->shots[shotIndex].powerGaugeFrame = g_CurrentShot.powerGaugeFrame;
@@ -2388,10 +2388,10 @@ void RecordRingShotHole(s32 playerIndex) {
     record->scoreKind =
         GetRecordedScoreKind(g_Players[playerIndex].strokeCount);
     record->characterIndex = g_Players[playerIndex].characterIndex;
-    record->unk38 = g_Players[playerIndex].unk22;
+    record->isLefty = g_Players[playerIndex].isLefty;
     record->paletteIndex = g_Players[playerIndex].paletteIndex;
     record->strokeCount = g_Players[playerIndex].strokeCount;
-    record->unk3C = g_Players[playerIndex].unk88;
+    record->noiseSeed = g_Players[playerIndex].noiseSeed;
     record->hole = g_HoleSetup;
     record->shots[shotIndex].heading = g_CurrentShot.heading;
     record->shots[shotIndex].powerGaugeFrame = g_CurrentShot.powerGaugeFrame;
@@ -3396,7 +3396,7 @@ void UpdateTurns(void) {
 
         LoadCharacter(0, g_Players[playerIndex].characterIndex,
             g_Players[playerIndex].paletteIndex);
-        if (g_Players[playerIndex].unk22) {
+        if (g_Players[playerIndex].isLefty) {
           SetTextureAnimationFrame(0, 1, 1);
           SetCharacterUnk188(0, 1);
         }

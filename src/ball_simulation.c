@@ -375,11 +375,11 @@ s32 StepBallSimulation(BallSimulation* simulation) {
 
   inline f32 GetStepNoise(void) {
     return (u32)((simulation->position[AXIS_X] + simulation->position[AXIS_Z] +
-                     g_Players[simulation->playerIndex].unk88) &
+                     g_Players[simulation->playerIndex].noiseSeed) &
                NOISE_BYTE_MASK) /
         MAX_NOISE_BYTE_PAIR_SUM +
         (u32)((simulation->position[AXIS_X] - simulation->position[AXIS_Z] +
-                  g_Players[simulation->playerIndex].unk88) &
+                  g_Players[simulation->playerIndex].noiseSeed) &
             NOISE_BYTE_MASK) /
         MAX_NOISE_BYTE_PAIR_SUM;
   }
@@ -2247,11 +2247,11 @@ s32 LaunchBallSimulation(
    */
   f32 PickLieBlend(void) {
     return (u32)((simulation->position[AXIS_X] + simulation->position[AXIS_Z] +
-                     g_Players[simulation->playerIndex].unk88) &
+                     g_Players[simulation->playerIndex].noiseSeed) &
                NOISE_BYTE_MASK) /
         MAX_NOISE_BYTE_PAIR_SUM +
         (u32)((simulation->position[AXIS_X] - simulation->position[AXIS_Z] +
-                  g_Players[simulation->playerIndex].unk88) &
+                  g_Players[simulation->playerIndex].noiseSeed) &
             NOISE_BYTE_MASK) /
         MAX_NOISE_BYTE_PAIR_SUM;
   }
@@ -2410,7 +2410,7 @@ s32 LaunchBallSimulation(
     }
 
     curve = sqrtf(crossSlopeSize * CROSS_SLOPE_SPIN_SCALE);
-    sideSign = g_Players[shot->playerIndex].unk22 ? -1 : 1;
+    sideSign = g_Players[shot->playerIndex].isLefty ? -1 : 1;
     if (crossSlope < 0) {
       curve = -curve;
     }

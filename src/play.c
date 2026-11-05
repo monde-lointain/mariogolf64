@@ -345,16 +345,16 @@ void SetUpPlayers(void) {
       g_Players[0].isComputer = FALSE;
       g_Players[0].teeOrder = 0;
       g_Players[0].characterIndex = g_RingShotRecords->characterIndex;
-      g_Players[0].unk22 = g_RingShotRecords->unk38;
+      g_Players[0].isLefty = g_RingShotRecords->isLefty;
       g_Players[0].paletteIndex = g_RingShotRecords->paletteIndex;
-      g_Players[0].unk88 = g_RingShotRecords->unk3C;
+      g_Players[0].noiseSeed = g_RingShotRecords->noiseSeed;
     } else {
       g_Players[0].isComputer = FALSE;
       g_Players[0].teeOrder = 0;
       g_Players[0].characterIndex = g_PlayRecords->characterIndex;
-      g_Players[0].unk22 = g_PlayRecords->unk3C;
+      g_Players[0].isLefty = g_PlayRecords->isLefty;
       g_Players[0].paletteIndex = g_PlayRecords->paletteIndex;
-      g_Players[0].unk88 = g_PlayRecords->unk40;
+      g_Players[0].noiseSeed = g_PlayRecords->noiseSeed;
     }
 
     for (hole = 0; hole < COURSE_HOLE_COUNT; hole++) {
@@ -385,7 +385,7 @@ void SetUpPlayers(void) {
     for (i = 0; i < MAX_PLAYER_COUNT; i++) {
       FormatDefaultPlayerName(i, g_Players[i].name);
       g_Players[i].characterIndex = i;
-      g_Players[i].unk22 = 0;
+      g_Players[i].isLefty = 0;
       g_Players[i].isComputer = FALSE;
       g_Players[i].teeOrder = 0;
       g_Players[i].gridColor = GetSaveData()->options[SAVE_OPTION_GRID_COLOR];
@@ -408,7 +408,7 @@ void SetUpPlayers(void) {
       }
 
       g_Players[i].stopwatchFrameCount = 0;
-      g_Players[i].unk88 = NextRandom();
+      g_Players[i].noiseSeed = NextRandom();
     }
   }
 }

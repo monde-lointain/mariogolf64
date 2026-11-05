@@ -2250,13 +2250,13 @@ void DrawCharacterAndShadow(
       f_SavedLights[g_DrawBufferIndex ^ 1].l[1].l.colc[2] =
           g_ImpactFlashLevel / 2;
       f_SavedLights[g_DrawBufferIndex ^ 1].l[1].l.dir[0] =
-          sinf(g_Players[g_CurrentShot.playerIndex].unk22
+          sinf(g_Players[g_CurrentShot.playerIndex].isLefty
                   ? slot->rotation[1]
                   : -slot->rotation[1]) *
           LIGHT_DIRECTION_SCALE;
       f_SavedLights[g_DrawBufferIndex ^ 1].l[1].l.dir[1] = 0;
       f_SavedLights[g_DrawBufferIndex ^ 1].l[1].l.dir[2] =
-          -cosf(g_Players[g_CurrentShot.playerIndex].unk22
+          -cosf(g_Players[g_CurrentShot.playerIndex].isLefty
                   ? slot->rotation[1]
                   : -slot->rotation[1]) *
           LIGHT_DIRECTION_SCALE;

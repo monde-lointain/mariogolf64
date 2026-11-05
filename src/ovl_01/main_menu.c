@@ -1828,7 +1828,7 @@ void SetUpChosenGame(void) {
   for (index = 0; index != g_GameState.playerCount; index++) {
     player = &g_Players[index];
     player->handicap = g_ChosenHandicaps[index];
-    player->unk22 = g_ChosenLefties[index];
+    player->isLefty = g_ChosenLefties[index];
     player->characterIndex = g_ChosenCharacters[index];
     player->controllerIndex = g_PlayerControllerIndices[index];
     sprintf(player->name, f_NameFormat,
