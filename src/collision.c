@@ -2281,47 +2281,48 @@ s32 FindHoleTriangleHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
  * passes an end of it is moved back to where it reaches the end. A hit
  * near or below the ground counts whatever the edges say.
  *
- * Doesn't match: 204 words differ, 66 in shape. The reach test is compared with
- * FALSE, as the original ands the macro's crossing tests before branching:
- * negated with !, fold rewrites it into xori and or chains (563 words, when the
- * draft had 535). Nesting the rest of the loop under the plain test gave the
- * same 535. The permuter's best outputs, against the draft's 535 words (85 in
- * shape), read the plane's normal x into a local for two of the six plane tests
- * (500 words, 78 in shape), one before GetTrianglePlane sets it, and moved the
- * second arm's highestX into the first, where it is dead, so the second leaves
- * it unset (431 words, 83 in shape); neither is natural, and the second changes
- * the result. The original works out the ball's height before calling
- * GetGroundHeight, so the height is the comparison's first operand; with the
- * call first, 535 words differed (85), and a local for the height gives the
- * same 418. The original converts each hit point to a float again in each of
- * its two corner tests, IsLessThanCorners and IsMoreThanCorners; converting it
- * once into a float local, as the draft did, gave 418 words (72 in shape), or
- * 415 (69) and 381 (69) passing only one of the two hit points directly. The
- * register oracle, forcing 35 pseudos' registers, leaves 135 words of the 200
- * at best, so the code differs too. A permuter output with 178 words (62 in
- * shape) copies the plane's X normal to a temp before GetTrianglePlane sets it
- * and uses the copy for each side and hit test, so it reads the previous
- * triangle's normal; another, with 176 words, splits startSide's sum and
- * changes the hit test's < 307.2f to <= 306.2f. A later output reads the
- * normal's x into a local after GetTrianglePlane and uses it in the two hit
- * tests for walls facing z (176 words, 58 in shape), but the same local in all
- * four hit tests gives 230 (80), in the other two alone 266 (88), and locals
- * for the y or z normal, in either pair, 548 to 865. So it isn't adopted.
- * Commuting the x term, adding the y or distance term first, grouping the y and
- * z terms, or putting the start first in the hit point, in the first two tests,
- * give 204 to 248. Naming the hit point, as hitX, hitY and hitZ, for the ground
- * height test took the draft from 204 words (66 in shape) to 200 (62), and the
- * oracle from 139 words to 135, each forcing 35 pseudos; the earlier counts
- * here were measured before it. Naming the end point too, in f32 locals for the
- * four wall-end tests, gives 860 words (162 in shape), whether or not hitPointU
- * and hitPointV are set from them. A u16 or u8 facing gives 197 words (63 in
- * shape), and an s16 or s8 198 (64), but each adds an extension the original
- * lacks: an andi 0xffff or 0xff, or an sll and sra by 16 or 24. A focused
- * permuter run's best, 167 words (51 in shape), reads the plane's x normal into
- * a local for the start side and the first two of the four end fraction tests,
- * leaving the end side and the other two tests reading the plane; a local for
- * all six gives 226 words (76 in shape), and for the start and end sides alone
- * 200 (62). 200 words differ, 62 in shape.
+ * Doesn't match: the reach test is compared with FALSE, as the original ands
+ * the macro's crossing tests before branching: negated with !, fold rewrites it
+ * into xori and or chains (563 words, when the draft had 535). Nesting the rest
+ * of the loop under the plain test gave the same 535. The permuter's best
+ * outputs, against the draft's 535 words (85 in shape), read the plane's normal
+ * x into a local for two of the six plane tests (500 words, 78 in shape), one
+ * before GetTrianglePlane sets it, and moved the second arm's highestX into the
+ * first, where it is dead, so the second leaves it unset (431 words, 83 in
+ * shape); neither is natural, and the second changes the result. The original
+ * works out the ball's height before calling GetGroundHeight, so the height is
+ * the comparison's first operand; with the call first, 535 words differed (85),
+ * and a local for the height gives the same 418. The original converts each hit
+ * point to a float again in each of its two corner tests, IsLessThanCorners and
+ * IsMoreThanCorners; converting it once into a float local, as the draft did,
+ * gave 418 words (72 in shape), or 415 (69) and 381 (69) passing only one of
+ * the two hit points directly. The register oracle, forcing 35 pseudos'
+ * registers, leaves 135 words of the 200 at best, so the code differs too. A
+ * permuter output with 178 words (62 in shape) copies the plane's X normal to a
+ * temp before GetTrianglePlane sets it and uses the copy for each side and hit
+ * test, so it reads the previous triangle's normal; another, with 176 words,
+ * splits startSide's sum and changes the hit test's < 307.2f to <= 306.2f. A
+ * later output reads the normal's x into a local after GetTrianglePlane and
+ * uses it in the two hit tests for walls facing z (176 words, 58 in shape), but
+ * the same local in all four hit tests gives 230 (80), in the other two alone
+ * 266 (88), and locals for the y or z normal, in either pair, 548 to 865. So it
+ * isn't adopted. Commuting the x term, adding the y or distance term first,
+ * grouping the y and z terms, or putting the start first in the hit point, in
+ * the first two tests, give 204 to 248. Naming the hit point, as hitX, hitY and
+ * hitZ, for the ground height test took the draft from 204 words (66 in shape)
+ * to 200 (62), and the oracle from 139 words to 135, each forcing 35 pseudos;
+ * the earlier counts here were measured before it. Naming the end point too, in
+ * f32 locals for the four wall-end tests, gives 860 words (162 in shape),
+ * whether or not hitPointU and hitPointV are set from them. A u16 or u8 facing
+ * gives 197 words (63 in shape), and an s16 or s8 198 (64), but each adds an
+ * extension the original lacks: an andi 0xffff or 0xff, or an sll and sra by 16
+ * or 24. A focused permuter run's best, 167 words (51 in shape), reads the
+ * plane's x normal into a local for the start side and the first two of the
+ * four end fraction tests, leaving the end side and the other two tests reading
+ * the plane; a local for all six gives 226 words (76 in shape), and for the
+ * start and end sides alone 200 (62). Those counts were measured with GCC's
+ * built-in fabsf, when 200 words differed, 62 in shape. With fabsf an abs.s in
+ * volatile inline assembly, 63 words differ, 15 in shape.
  */
 #ifdef NON_MATCHING
 s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
