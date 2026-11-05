@@ -4848,7 +4848,10 @@ void DrawUpDownArrows(Gfx** displayListHead, s32 centerY);
  * original loads g_MenuMemory.modeChoice directly on each pass too. The
  * original holds index in s0 in the boards' loops and in s1 in the banner
  * strips' and players' loops, but counters of their own for those loops give
- * 138 to 230 words. 86 words differ, 2 in shape.
+ * 138 to 230 words. Working out a board's angle and x in both arms of the mode
+ * count's test, which still compiles to the target's two sinf calls, gives 74
+ * words differing but 16 in shape, and copies code for no reason. 86 words
+ * differ, 2 in shape.
  */
 #ifdef NON_MATCHING
 void DrawModeSelect(Gfx** displayListHead) {
