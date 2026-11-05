@@ -238,13 +238,16 @@
 #define GAME_FLAG_UNK9A 0x9A
 
 /*
- * Flags that Club Slots reads, whose purpose is not yet known. In a turn, it
- * or UNK9B makes the shot the computer golfer's, and UNK32 also takes the
- * shot's unk40 from g_ScriptedShot, turns on FAST_FLIGHT, skips a HUD animation
- * and shortens the wait after the reaction.
+ * Flags under which the game plays itself: outside replays, the
+ * computer golfer plans every shot, and the hole intro, flyover and results
+ * move on without A. FAST_AUTOPLAY also takes the power gauge's frame from
+ * g_ScriptedShot, turns on FAST_FLIGHT, skips a HUD animation, shortens the
+ * wait after the reaction and stops Club Slots' reels at once.
  */
-#define GAME_FLAG_UNK32 0x32
-#define GAME_FLAG_UNK9B 0x9B
+#define GAME_FLAG_FAST_AUTOPLAY 0x32
+#define GAME_FLAG_AUTOPLAY 0x9B
+/* A flag that Club Slots and the main menu read, whose purpose is not yet
+ * known */
 #define GAME_FLAG_UNK55 0x55
 
 /* Makes ChooseHoleStrokeTarget plan no strokes for each hole; its purpose is

@@ -176,10 +176,11 @@ void LoadBestShotReplay(PlayRecord* record);
 
 /*
  * Whether play's hole intro, flyover and results move on without A, as under
- * GAME_FLAG_UNK32 or GAME_FLAG_UNK9B
+ * GAME_FLAG_FAST_AUTOPLAY or GAME_FLAG_AUTOPLAY
  */
 s32 IsPlayAdvancingItself(void) {
-  return IsGameFlagSet(GAME_FLAG_UNK32) || IsGameFlagSet(GAME_FLAG_UNK9B);
+  return IsGameFlagSet(GAME_FLAG_FAST_AUTOPLAY) ||
+      IsGameFlagSet(GAME_FLAG_AUTOPLAY);
 }
 
 /*

@@ -331,7 +331,7 @@
 /* A reaction lasts this many frames past its animation, whose end calls
  * StartBanner(-1) */
 #define REACTION_HOLD_FRAMES 10
-/* How long a reaction lasts with GAME_FLAG_UNK32 set */
+/* How long a reaction lasts with GAME_FLAG_FAST_AUTOPLAY set */
 #define SHORT_REACTION_FRAMES 15
 /* How long a reaction lasts in sudden death */
 #define SUDDEN_DEATH_REACTION_FRAMES 160
@@ -3402,9 +3402,9 @@ void UpdateTurns(void) {
           }
 
           f_ShotSource = SHOT_SOURCE_PREPARED;
-        } else if (IsGameFlagSet(GAME_FLAG_UNK32) ||
+        } else if (IsGameFlagSet(GAME_FLAG_FAST_AUTOPLAY) ||
             g_Players[playerIndex].isComputer ||
-            IsGameFlagSet(GAME_FLAG_UNK9B)) {
+            IsGameFlagSet(GAME_FLAG_AUTOPLAY)) {
           g_Players[playerIndex].unk1F = -9;
           LoadOverlay(GetOverlayOfModule(MODULE_COMPUTER_GOLFER));
           StartShotPlan();
@@ -3997,7 +3997,7 @@ void UpdateTurns(void) {
           }
 
           g_CurrentShot.gaugeFrame = 0;
-          if (IsGameFlagSet(GAME_FLAG_UNK32)) {
+          if (IsGameFlagSet(GAME_FLAG_FAST_AUTOPLAY)) {
             g_CurrentShot.gaugeFrame = g_ScriptedShot.powerGaugeFrame;
           }
 
@@ -4273,7 +4273,7 @@ void UpdateTurns(void) {
           RecordRingShotHole(playerIndex);
         }
 
-        if (IsGameFlagSet(GAME_FLAG_UNK32)) {
+        if (IsGameFlagSet(GAME_FLAG_FAST_AUTOPLAY)) {
           SetGameFlag(GAME_FLAG_FAST_FLIGHT);
         }
 
@@ -4715,7 +4715,7 @@ void UpdateTurns(void) {
               }
             } else {
               EndFlightCamera();
-              if (!IsGameFlagSet(GAME_FLAG_UNK32)) {
+              if (!IsGameFlagSet(GAME_FLAG_FAST_AUTOPLAY)) {
                 StartHudAnimation(2);
               }
 
@@ -4801,7 +4801,7 @@ void UpdateTurns(void) {
 
         f_StateEventFrame = GetCurrentAnimationEndFrame(0) -
             GetAnimationFrame(0) + REACTION_HOLD_FRAMES;
-        if (IsGameFlagSet(GAME_FLAG_UNK32)) {
+        if (IsGameFlagSet(GAME_FLAG_FAST_AUTOPLAY)) {
           f_StateEventFrame = SHORT_REACTION_FRAMES;
         }
 
