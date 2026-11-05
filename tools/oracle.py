@@ -19,7 +19,9 @@ For each forced pseudo, prints what the allocator knew of it: its quantity
 in local-alloc or its allocno in global-alloc, with its priority, and the
 pseudos that took the register it needed. A draft whose code differs
 otherwise gets the closest forcing found, and the instructions that still
-differ under it, which register allocation does not explain.
+differ under it, which register allocation does not explain. Last, it
+names each pseudo that lines up with two or more target registers, a sign
+that the original used a variable for each place.
 
 Only FUNCTION's own routine is compared; the functions nested in it, which
 fncompare counts with it, are named so that each can be given as FUNCTION.
@@ -43,6 +45,8 @@ import fncompare
 
 ORACLE_DIR = fncompare.ROOT / "build" / "oracle"
 MAX_ROUNDS = 8
+# The instructions a register needs from a pseudo to count as holding it
+MIN_SPLIT_VOTES = 2
 FIRST_PSEUDO_REGISTER = blame.FIRST_PSEUDO_REGISTER
 FPR_BASE = len(blame.GPR_NAMES)
 FIELD_MASK = 0x1F
@@ -488,6 +492,31 @@ def explain(
             print("    not allocated by either pass")
 
 
+def print_splits(
+    target: fncompare.Routine, compilation: Compilation, lines: dict[int, set[int]]
+) -> None:
+    """Print the pseudos whose instructions line up with more than one register.
+
+    GCC gives a variable one pseudo, and global-alloc one register, so a
+    pseudo the original holds in two registers in different places was
+    likely two variables there, such as a flag declared in each of two loops.
+    """
+    for pseudo, votes in sorted(vote_registers(target, compilation).items()):
+        registers = [
+            (register, count)
+            for register, count in votes.most_common()
+            if count >= MIN_SPLIT_VOTES
+        ]
+        if len(registers) <= 1:
+            continue
+        held = ", ".join(
+            f"{register_name(register)} x{count}" for register, count in registers
+        )
+        used = join_lines([pseudo], lines)
+        guess = f"maybe two variables, lines {used}"
+        print(f"pseudo {pseudo} lines up with {held}; {guess}")
+
+
 def join_lines(pseudos: list[int], lines: dict[int, set[int]]) -> str:
     """Return the source lines that use any of PSEUDOS, in order."""
     used: set[int] = set()
@@ -558,9 +587,9 @@ def main() -> None:
         noted_work = work / "noted"
         if noted_work.exists():
             shutil.rmtree(noted_work)
-        explain(
-            compilation, force, read_pseudo_lines(c_path, function, compilation, work)
-        )
+        lines = read_pseudo_lines(c_path, function, compilation, work)
+        explain(compilation, force, lines)
+        print_splits(target, compilation, lines)
 
 
 if __name__ == "__main__":
