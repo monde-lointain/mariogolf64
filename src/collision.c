@@ -3131,7 +3131,10 @@ static const char f_UnusedWallText[3][4] = {"", "", ""};
  * 28 words differing (8 in shape) to 16 (2), and the register oracle from 22
  * words forcing 3 pseudos to 4 forcing 1, which leaves only the abs.s. An s32
  * hitPoint array instead gives 42 (16) in place of the unused words and 118
- * (16) beside them. 16 words differ, 2 in shape.
+ * (16) beside them. Taking sideChange's fabsf gives 13 words (5 in shape), but
+ * cse then reuses the test's abs.s, where the original tests the sign with
+ * c.lt.s and negates it with a branch-likely neg.s; AbsFloat for the start side
+ * gives 21 (7), and for both 26 (10). 16 words differ, 2 in shape.
  */
 #ifdef NON_MATCHING
 s32 FindRingHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
