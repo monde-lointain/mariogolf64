@@ -2968,11 +2968,11 @@ void ShowHoleOutBanner(s32 playerIndex) {
 /*
  * UpdateTurns holds ten functions nested in it, a GNU C extension. GCC
  * passes them the parent's frame in $v0, its static chain, and they read
- * the parent's playerIndex through it. The debug helpers before it are
- * inline: inlined, their buffers share one stack slot, as in the
- * original's frame.
+ * the parent's playerIndex through it. The debug helper before it is
+ * inline: inlined, its buffer shares one stack slot with the others, as in
+ * the original's frame.
  *
- * Doesn't match: 349 words differ, 125 in shape, spread through the routine's
+ * Doesn't match: 241 words differ, 111 in shape, spread through the routine's
  * states. The counts in the paragraphs after the next were measured before it,
  * when 454 words differed, 184 in shape.
  *
@@ -3057,6 +3057,27 @@ void ShowHoleOutBanner(s32 playerIndex) {
  * in shape, against 386 (142), and the register oracle's closest result is
  * these 349 words with no register forced. The counts above were measured
  * before these two changes.
+ *
+ * The training choice box's reaction test and the frame test at the end are
+ * written in place, where they were inline helpers like DebugPlaceBall. In
+ * place, the frame test keeps 7.5f in $f22 and its buffer address in $s0
+ * across both AddFramedSphere calls, as the original does, where the helper
+ * loaded both again for each call. The reaction test in place alone gives 252
+ * words (120 in shape), the frame test alone 338 (116), and both 241 (111),
+ * against 349 (125) with both as helpers; the register oracle's closest result
+ * is these 241 words with no register forced. DebugPlaceBall in place too
+ * gives 287 words (81 in shape) and grows the frame from 0x118 to 0x1A0 bytes,
+ * whether its buffer is declared in its own block or in the enclosing one. The
+ * buffer's address is taken, and expand_expr_stmt's preserve_temp_slots moves
+ * such a slot out to the enclosing level at each expression statement after
+ * it, so the slot stays in use for the rest of the player loop. An inlined
+ * function's frame is one slot whose address the caller never takes, so the
+ * helper's buffer is freed with its block and shares its slot, as the
+ * original's does. As an inline function nested in UpdateTurns, DebugPlaceBall
+ * reads playerIndex from the frame at each use, as the original does, but the
+ * static chain takes the first slot of a nested function's frame, which puts
+ * the buffer at 0x28 where the original's is at 0x20, and 953 words differ (900
+ * with 55 registers forced).
  */
 #ifdef NON_MATCHING
 /* Debug flag 0x47: prints where the ball lies, and the second controller moves
@@ -3089,100 +3110,6 @@ static inline void DebugPlaceBall(s32 playerIndex) {
         g_CurrentShot.ballPosition[AXIS_Z];
     PlaceBallAtRest(playerIndex, &g_TurnBallSimulation);
   }
-}
-
-/* Debug flag 0x3E: the D-pad picks a character and a reaction to load in its
- * place */
-static inline void DebugTestGutsMotion(void) {
-  char* motionName;
-  char text[DEBUG_TEXT_BUFFER_SIZE];
-  switch (f_GutsTestMotion) {
-    case REACTION_ANIMATION_EAGLE:
-      motionName = "EAGLE ";
-      break;
-    case REACTION_ANIMATION_BIRDIE:
-      motionName = "BIRDIE";
-      break;
-    case REACTION_ANIMATION_PAR:
-      motionName = "PAR   ";
-      break;
-    case REACTION_ANIMATION_BOGEY:
-      motionName = "BOGEY ";
-      break;
-    default:
-      motionName = "ERROR  ";
-      break;
-  }
-
-  f_HasGutsTestRun = TRUE;
-  if (g_TurnController.repeatedButtons & L_JPAD) {
-    f_GutsTestCharacter--;
-  }
-
-  if (g_TurnController.repeatedButtons & R_JPAD) {
-    f_GutsTestCharacter++;
-  }
-
-  if (g_TurnController.repeatedButtons & U_JPAD) {
-    f_GutsTestMotion--;
-  }
-
-  if (g_TurnController.repeatedButtons & D_JPAD) {
-    f_GutsTestMotion++;
-  }
-
-  if (f_GutsTestCharacter < 0) {
-    f_GutsTestCharacter = CHARACTER_COUNT - 1;
-  }
-
-  if (f_GutsTestCharacter >= CHARACTER_COUNT) {
-    f_GutsTestCharacter = 0;
-  }
-
-  if (f_GutsTestMotion < REACTION_ANIMATION_EAGLE) {
-    f_GutsTestMotion = REACTION_ANIMATION_BOGEY;
-  }
-
-  if (f_GutsTestMotion > REACTION_ANIMATION_BOGEY) {
-    f_GutsTestMotion = REACTION_ANIMATION_EAGLE;
-  }
-
-  sprintf(
-      text, "GUTS TEST CH[%2.2d] MOTION %s", f_GutsTestCharacter, motionName);
-  PrintDebugText(text, 3, 3);
-  if (!IsCharacterSlotBusy(0)) {
-    LoadCharacter(0, f_GutsTestCharacter + CHARACTER_COUNT, 0);
-  }
-
-  if (g_TurnController.buttons) {
-    FreeCharacterAndReactionLight(0);
-  }
-
-  g_TurnController.repeatedButtons &= ~(U_JPAD | D_JPAD);
-}
-
-/* Debug flag 0x4A: the second stick turns a camera that frames the ball and the
- * shot */
-static inline void FrameBallAndShot(void) {
-  Vec3 center;
-
-  f_DebugFramingYaw += g_ControllerStates[1].stickX * 0.002f;
-  f_DebugFramingPitch += g_ControllerStates[1].stickY * 0.002f;
-  ClearFramedSpheres();
-  SetFramingAngles(f_DebugFramingPitch, f_DebugFramingYaw);
-  center[AXIS_X] =
-      g_TurnBallSimulation.position[AXIS_X] * COURSE_TO_WORLD_SCALE;
-  center[AXIS_Y] =
-      g_TurnBallSimulation.position[AXIS_Y] * COURSE_TO_WORLD_SCALE;
-  center[AXIS_Z] =
-      g_TurnBallSimulation.position[AXIS_Z] * COURSE_TO_WORLD_SCALE;
-  AddFramedSphere(center, 7.5f);
-  center[AXIS_X] = g_CurrentShot.ballPosition[AXIS_X] * COURSE_TO_WORLD_SCALE;
-  center[AXIS_Y] = g_CurrentShot.ballPosition[AXIS_Y] * COURSE_TO_WORLD_SCALE;
-  center[AXIS_Z] = g_CurrentShot.ballPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE;
-  AddFramedSphere(center, 7.5f);
-  FrameSpheres(0);
-  GetFramedView(g_Cameras[0].view.eye, g_Cameras[0].view.lookAt);
 }
 
 /* Whether the stopwatches run in a player state: from aiming to the flight */
@@ -4947,7 +4874,74 @@ void UpdateTurns(void) {
         if (g_GameState.gameMode == GAME_MODE_TRAINING) {
           if (IsGameFlagSet(GAME_FLAG_SHOW_REACTION_FRAME) &&
               g_Players[playerIndex].holeStatus != HOLE_STATUS_PLAYING) {
-            DebugTestGutsMotion();
+            /* Debug flag 0x3E: the D-pad picks a character and a reaction to
+             * load in its place */
+            char* motionName;
+            char text[DEBUG_TEXT_BUFFER_SIZE];
+
+            switch (f_GutsTestMotion) {
+              case REACTION_ANIMATION_EAGLE:
+                motionName = "EAGLE ";
+                break;
+              case REACTION_ANIMATION_BIRDIE:
+                motionName = "BIRDIE";
+                break;
+              case REACTION_ANIMATION_PAR:
+                motionName = "PAR   ";
+                break;
+              case REACTION_ANIMATION_BOGEY:
+                motionName = "BOGEY ";
+                break;
+              default:
+                motionName = "ERROR  ";
+                break;
+            }
+
+            f_HasGutsTestRun = TRUE;
+            if (g_TurnController.repeatedButtons & L_JPAD) {
+              f_GutsTestCharacter--;
+            }
+
+            if (g_TurnController.repeatedButtons & R_JPAD) {
+              f_GutsTestCharacter++;
+            }
+
+            if (g_TurnController.repeatedButtons & U_JPAD) {
+              f_GutsTestMotion--;
+            }
+
+            if (g_TurnController.repeatedButtons & D_JPAD) {
+              f_GutsTestMotion++;
+            }
+
+            if (f_GutsTestCharacter < 0) {
+              f_GutsTestCharacter = CHARACTER_COUNT - 1;
+            }
+
+            if (f_GutsTestCharacter >= CHARACTER_COUNT) {
+              f_GutsTestCharacter = 0;
+            }
+
+            if (f_GutsTestMotion < REACTION_ANIMATION_EAGLE) {
+              f_GutsTestMotion = REACTION_ANIMATION_BOGEY;
+            }
+
+            if (f_GutsTestMotion > REACTION_ANIMATION_BOGEY) {
+              f_GutsTestMotion = REACTION_ANIMATION_EAGLE;
+            }
+
+            sprintf(text, "GUTS TEST CH[%2.2d] MOTION %s", f_GutsTestCharacter,
+                motionName);
+            PrintDebugText(text, 3, 3);
+            if (!IsCharacterSlotBusy(0)) {
+              LoadCharacter(0, f_GutsTestCharacter + CHARACTER_COUNT, 0);
+            }
+
+            if (g_TurnController.buttons) {
+              FreeCharacterAndReactionLight(0);
+            }
+
+            g_TurnController.repeatedButtons &= ~(U_JPAD | D_JPAD);
           }
 
           switch (UpdateChoiceBox(&g_TurnController)) {
@@ -5204,8 +5198,28 @@ void UpdateTurns(void) {
     UpdateReaction(0);
   }
 
+  /* Debug flag 0x4A: the second stick turns a camera that frames the ball and
+   * the shot */
   if (IsGameFlagSet(GAME_FLAG_FRAME_BALL_AND_SHOT)) {
-    FrameBallAndShot();
+    Vec3 center;
+
+    f_DebugFramingYaw += g_ControllerStates[1].stickX * 0.002f;
+    f_DebugFramingPitch += g_ControllerStates[1].stickY * 0.002f;
+    ClearFramedSpheres();
+    SetFramingAngles(f_DebugFramingPitch, f_DebugFramingYaw);
+    center[AXIS_X] =
+        g_TurnBallSimulation.position[AXIS_X] * COURSE_TO_WORLD_SCALE;
+    center[AXIS_Y] =
+        g_TurnBallSimulation.position[AXIS_Y] * COURSE_TO_WORLD_SCALE;
+    center[AXIS_Z] =
+        g_TurnBallSimulation.position[AXIS_Z] * COURSE_TO_WORLD_SCALE;
+    AddFramedSphere(center, 7.5f);
+    center[AXIS_X] = g_CurrentShot.ballPosition[AXIS_X] * COURSE_TO_WORLD_SCALE;
+    center[AXIS_Y] = g_CurrentShot.ballPosition[AXIS_Y] * COURSE_TO_WORLD_SCALE;
+    center[AXIS_Z] = g_CurrentShot.ballPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE;
+    AddFramedSphere(center, 7.5f);
+    FrameSpheres(0);
+    GetFramedView(g_Cameras[0].view.eye, g_Cameras[0].view.lookAt);
   }
 
   if (g_RoundHud.unkF) {
