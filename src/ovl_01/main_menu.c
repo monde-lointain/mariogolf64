@@ -4840,7 +4840,10 @@ void DrawUpDownArrows(Gfx** displayListHead, s32 centerY);
  * permuter's best reads modeSpin through a pointer taken before the boards,
  * which gives 38 words, but the original loads g_MenuMemory.modeSpin directly,
  * so the pointer only perturbs allocation; testing modeSpin first gives 130
- * words, and == FALSE or ! leave 86. 86 words differ, 2 in shape.
+ * words, and == FALSE or ! leave 86. A focused run's best reads modeChoice
+ * through a pointer in the boards' loop instead (38 words, 2 in shape), but the
+ * original loads g_MenuMemory.modeChoice directly on each pass too. 86 words
+ * differ, 2 in shape.
  */
 #ifdef NON_MATCHING
 void DrawModeSelect(Gfx** displayListHead) {
