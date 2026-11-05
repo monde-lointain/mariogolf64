@@ -538,18 +538,20 @@ s32 GetClubSlotsState(void) {
 }
 
 /*
- * Doesn't match: the reel loops' counters take $s3 and $s4 the other way
- * round, &asset and the face loop's scaled playerIndex swap $s1 and $s2, and
- * the face loop scales playerIndex for its palettes at another point; the
- * register oracle, forcing those 3 pseudos, leaves 13 words. Each face image
- * is read into faceImage before its texture load, as the original reads it
- * ahead of the call's other arguments; passing the lookups straight to
+ * Doesn't match: &asset and the face loop's scaled playerIndex swap $s1 and
+ * $s2, the face loop steps playerIndex's scaled value where the original shifts
+ * playerIndex at each pass, and the machine strips' top is stepped a slot
+ * earlier; the register oracle, forcing those 2 pseudos, leaves 5 words. Each
+ * face image is read into faceImage before its texture load, as the original
+ * reads it ahead of the call's other arguments; passing the lookups straight to
  * LoadTextureBlock gives 53 words differing, 33 in shape. Reading the second
- * face after the branches gives 55 words differing, 35 in shape. The next
- * frame is opened by one call, as the original does; a call in each branch
- * of the star count's test gives 25 words, 7 in shape, but rebuilds &asset
- * from $sp for those reads, and the oracle leaves 17 words. 49 words differ,
- * 3 in shape.
+ * face after the branches gives 55 words differing, 35 in shape. The next frame
+ * is opened by one call, as the original does; a call in each branch of the
+ * star count's test gives 25 words, 7 in shape, but rebuilds &asset from $sp
+ * for those reads, and the oracle leaves 17 words. The counts before here were
+ * measured before the START strips shared the button loop's counter, which took
+ * the draft from 49 words differing to 33, 3 in shape both. 33 words differ, 3
+ * in shape.
  */
 #ifdef NON_MATCHING
 void DrawClubSlots(Gfx** displayListHead) {
@@ -566,7 +568,7 @@ void DrawClubSlots(Gfx** displayListHead) {
   s32 stripHeight;
   s32 loadedStripHeight;
   s32 texelOffset;
-  s32 buttonIndex;
+  s32 buttonOrStartStripIndex;
   s32 stripIndex;
   s32 playerIndex;
   s32 row;
@@ -818,8 +820,9 @@ void DrawClubSlots(Gfx** displayListHead) {
 
   /* The stop buttons pushed so far */
   LoadLargePalette(&gfx, ImageBody(f_Slots->buttonsImage));
-  for (buttonIndex = 0; buttonIndex != REEL_COUNT; buttonIndex++) {
-    if (buttonIndex > f_Slots->pressCount - 1) {
+  for (buttonOrStartStripIndex = 0; buttonOrStartStripIndex != REEL_COUNT;
+      buttonOrStartStripIndex++) {
+    if (buttonOrStartStripIndex > f_Slots->pressCount - 1) {
       break;
     }
 
@@ -828,15 +831,15 @@ void DrawClubSlots(Gfx** displayListHead) {
           f_Slots->buttonsImage +
               (LARGE_PALETTED_TEXELS_OFFSET +
                   (stripIndex * BUTTON_STRIP_HEIGHT * BUTTON_WIDTH) +
-                  (buttonIndex * BUTTON_HEIGHT * BUTTON_WIDTH)),
+                  (buttonOrStartStripIndex * BUTTON_HEIGHT * BUTTON_WIDTH)),
           G_IM_FMT_CI, G_IM_SIZ_8b, BUTTON_WIDTH, BUTTON_STRIP_HEIGHT, 0, 0, 0,
           0, 0, 0, 0);
       gDPPipeSync(gfx++);
       DrawTextureRect(&gfx,
-          QuarterPixels((buttonIndex * BUTTON_WIDTH) + BUTTON_LEFT),
+          QuarterPixels((buttonOrStartStripIndex * BUTTON_WIDTH) + BUTTON_LEFT),
           QuarterPixels(BUTTON_TOP + (stripIndex * BUTTON_STRIP_HEIGHT)),
           QuarterPixels(BUTTON_LEFT + BUTTON_SHOWN_WIDTH - 1 +
-              (buttonIndex * BUTTON_WIDTH)),
+              (buttonOrStartStripIndex * BUTTON_WIDTH)),
           QuarterPixels(BUTTON_TOP + BUTTON_STRIP_HEIGHT - 1 +
               (stripIndex * BUTTON_STRIP_HEIGHT)),
           G_TX_RENDERTILE, 0, 0, COPY_MODE_TEXEL_STEP, TEXEL_STEP_ONE);
@@ -873,10 +876,16 @@ void DrawClubSlots(Gfx** displayListHead) {
 
     gDPPipeSync(gfx++);
     LoadLargePalette(&gfx, ImageBody(f_Slots->startImage));
-    for (texelOffset = LARGE_PALETTED_TEXELS_OFFSET, stripIndex = 0;
-        stripIndex != START_STRIP_COUNT;
-        stripIndex++, texelOffset += START_STRIP_SPACING * START_WIDTH) {
-      loadedStripHeight = (stripIndex != START_STRIP_COUNT - 1)
+    /*
+     * The button loop's counter steps the strips too, as in the original,
+     * which keeps both in $s4; a counter of their own, declared before or
+     * after stripIndex, takes $t0 and gives 97 words differing, 7 in shape
+     */
+    for (texelOffset = LARGE_PALETTED_TEXELS_OFFSET,
+        buttonOrStartStripIndex = 0;
+        buttonOrStartStripIndex != START_STRIP_COUNT; buttonOrStartStripIndex++,
+        texelOffset += START_STRIP_SPACING * START_WIDTH) {
+      loadedStripHeight = (buttonOrStartStripIndex != START_STRIP_COUNT - 1)
           ? START_STRIP_HEIGHT
           : START_LAST_STRIP_HEIGHT;
       gDPLoadTextureTile(gfx++,
@@ -886,11 +895,11 @@ void DrawClubSlots(Gfx** displayListHead) {
       gDPPipeSync(gfx++);
       gSPScisTextureRectangle(gfx++, (s32)((SCREEN_WIDTH / 2) - halfWidth) << 2,
           (s32)(((SCREEN_HEIGHT / 2) - halfHeight) +
-              (stripIndex * startStripHeight))
+              (buttonOrStartStripIndex * startStripHeight))
               << 2,
           (s32)(halfWidth + (SCREEN_WIDTH / 2)) << 2,
           (s32)(((SCREEN_HEIGHT / 2) - halfHeight) +
-              (stripIndex * startStripHeight) + startStripHeight)
+              (buttonOrStartStripIndex * startStripHeight) + startStripHeight)
               << 2,
           G_TX_RENDERTILE, 0, TexelCoordinate(1), dsdx, dtdy);
     }
