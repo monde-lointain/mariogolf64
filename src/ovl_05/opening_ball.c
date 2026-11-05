@@ -342,7 +342,10 @@ typedef s32 (*BillboardHitFinder)(s32 startX, s32 startY, s32 startZ, s32 endX,
  * 337 (149); of the 58 other orders of those five steps that divide the spin
  * speed before the side spin, the best gave 341 (153). With that, writing the x
  * line as velocity + pull gives 343 words, the z line as pull + velocity 341,
- * and both 345. 337 words differ, 149 in shape.
+ * and both 345. Both bounces set the last bounce step after the three
+ * velocities, as StepBallSimulation's do, which took the draft from 337 words
+ * (149 in shape) to 325 (141); moving the first alone gave 329 (145), the
+ * second alone 333 (145). 325 words differ, 141 in shape.
  */
 #ifdef NON_MATCHING
 s32 StepOpeningBallSimulation(BallSimulation* simulation) {
@@ -1130,8 +1133,8 @@ s32 StepOpeningBallSimulation(BallSimulation* simulation) {
           simulation->velocity[AXIS_Z] - (plane.normal[AXIS_Z] * push);
       simulation->velocity[AXIS_X] = bounced[AXIS_X] * keep;
       simulation->velocity[AXIS_Y] = bounced[AXIS_Y] * keep;
-      simulation->lastBounceStep = simulation->stepCount;
       simulation->velocity[AXIS_Z] = bounced[AXIS_Z] * keep;
+      simulation->lastBounceStep = simulation->stepCount;
       if (simulation->state == BALL_STATE_FLYING) {
         s32 spinVelocityX =
             simulation->spinSpeed * cosf(simulation->spinHeading);
@@ -1335,8 +1338,8 @@ s32 StepOpeningBallSimulation(BallSimulation* simulation) {
             simulation->velocity[AXIS_Z] - (plane.normal[AXIS_Z] * push);
         simulation->velocity[AXIS_X] = bounced[AXIS_X] * keep;
         simulation->velocity[AXIS_Y] = bounced[AXIS_Y] * keep;
-        simulation->lastBounceStep = simulation->stepCount;
         simulation->velocity[AXIS_Z] = bounced[AXIS_Z] * keep;
+        simulation->lastBounceStep = simulation->stepCount;
         spinVelocityX = simulation->spinSpeed * cosf(simulation->spinHeading);
         spinVelocityZ = simulation->spinSpeed * sinf(simulation->spinHeading);
         grip = 1.0f - restitution;
