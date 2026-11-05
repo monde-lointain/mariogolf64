@@ -4208,7 +4208,10 @@ void LoadOpeningBurst(void) {
  * words differed, 145 in shape, when the draft had 364 (132). The original has
  * one pipe sync after the palette load, not two, which leaves 367 words
  * differing, 127 in shape. The register oracle's closest result is these 367
- * words with no register forced, so allocation isn't the cause.
+ * words with no register forced, so allocation isn't the cause. Width and
+ * height locals, or corners held as u8, s16, u16 or u32, still fold the
+ * divisions, leaving 367 words. The permuter's best, 322 words (128 in shape),
+ * declares left as an unset char, so it draws from garbage.
  */
 #ifdef NON_MATCHING
 void DrawOpeningBurst(Gfx** displayListHead) {
