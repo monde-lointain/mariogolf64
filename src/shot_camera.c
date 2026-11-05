@@ -2632,6 +2632,16 @@ INCLUDE_ASM("asm/nonmatchings/shot_camera", PlaceFlightCamera);
  * other instructions are the same. The register oracle's closest result is
  * these 2 words with no register forced, so allocation isn't the cause. 2 words
  * differ.
+ *
+ * The original cross-jumps the same way: its jump table sends the mini-golf
+ * pick's cases 3 and 4 to the shared store and jump. The difference is in
+ * reorg. relax_delay_slots moves a branch past a redundant store at its target.
+ * For the later tests, redundant_insn finds the store in the first test's delay
+ * slot, but for the first test it starts scanning before the branch, which
+ * leaves out its own delay slot, and stops at the case label. Breaking out of
+ * the case on a trouble surface, alone or after its store, testing the
+ * following-path kind in a second if, an if/else storing in each arm, a ?: of
+ * the two equal kinds, and storing after the if give 2 to 35 words.
  */
 #ifdef NON_MATCHING
 void ChooseFlightCameraKind(void) {
