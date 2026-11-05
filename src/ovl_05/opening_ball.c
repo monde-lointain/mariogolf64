@@ -350,7 +350,11 @@ typedef s32 (*BillboardHitFinder)(s32 startX, s32 startY, s32 startZ, s32 endX,
  * draft from 325 words (141 in shape) to 314 (138); with the start's y saved
  * before its x as well, 316 (138). The lift decays the spin after all three
  * velocity updates, as StepBallSimulation does, which took the draft from 314
- * words (138 in shape) to 296 (126). 296 words differ, 126 in shape.
+ * words (138 in shape) to 296 (126). The cup pull sets toCup in axis order, as
+ * StepBallSimulation does, and a wall hit's reflection sets all three
+ * velocities before clearing the spin, which took the draft from 296 words (126
+ * in shape) to 290 (122); alone, they gave 292 (124) and 294 (124). 290 words
+ * differ, 122 in shape.
  */
 #ifdef NON_MATCHING
 s32 StepOpeningBallSimulation(BallSimulation* simulation) {
@@ -741,9 +745,9 @@ s32 StepOpeningBallSimulation(BallSimulation* simulation) {
                       "KURU!", CUP_DEBUG_TEXT_COLUMN, CUP_DEBUG_TEXT_ROW);
                 }
 
-                toCup[AXIS_Y] = 0.0f;
                 toCup[AXIS_X] = g_HoleSetup.cupPosition[AXIS_X] -
                     simulation->position[AXIS_X];
+                toCup[AXIS_Y] = 0.0f;
                 toCup[AXIS_Z] = g_HoleSetup.cupPosition[AXIS_Z] -
                     simulation->position[AXIS_Z];
                 guNormalize(&toCup[AXIS_X], &toCup[AXIS_Y], &toCup[AXIS_Z]);
@@ -1024,8 +1028,8 @@ s32 StepOpeningBallSimulation(BallSimulation* simulation) {
         reflected[AXIS_Z] = simulation->velocity[AXIS_Z] - (normalX * push);
         simulation->velocity[AXIS_X] = reflected[AXIS_X];
         simulation->velocity[AXIS_Y] = reflected[AXIS_Y];
-        simulation->spinSpeed = 0;
         simulation->velocity[AXIS_Z] = reflected[AXIS_Z];
+        simulation->spinSpeed = 0;
       }
       BuildOpeningLiftRotation();
       contact &= ~STEP_FLAG_HOLE_TRIANGLE_HIT;
