@@ -864,8 +864,9 @@ void StartFlightCamera(s32 earlierFlightCount) {
 
 /* These are macros, as inline functions compile differently from the original
  */
-#define IsUnk2E14PowerShot() \
-  (g_SimulatedShot.shot.shotMode == SHOT_MODE_POWER && g_SimulatedShot.unk2E14)
+#define IsPerfectPowerShot() \
+  (g_SimulatedShot.shot.shotMode == SHOT_MODE_POWER && \
+      g_SimulatedShot.isPerfectSwing)
 
 /* Plays the sound of the simulated shot's club meeting the ball */
 void PlayContactSound(void) {
@@ -876,7 +877,7 @@ void PlayContactSound(void) {
           .clubs[g_SimulatedShot.shot.clubIndex]);
   surfaceInfo = GetSurfaceInfo(g_CurrentShot.surface);
   if (club->kind == CLUB_KIND_WOOD) {
-    if (IsUnk2E14PowerShot()) {
+    if (IsPerfectPowerShot()) {
       PlaySound(SOUND_MENU_START, CONTACT_SOUND_CHANNEL, SOUND_FULL_SCALE);
       StartContactEffect(CONTACT_EFFECT_POWER_WOOD);
     } else if (surfaceInfo->kind == SURFACE_KIND_TEE_UP) {
@@ -889,7 +890,7 @@ void PlayContactSound(void) {
 
     StartImpactSparks();
   } else if (club->kind == CLUB_KIND_IRON || club->kind == CLUB_KIND_WEDGE) {
-    if (IsUnk2E14PowerShot()) {
+    if (IsPerfectPowerShot()) {
       if (g_CurrentShot.clubSlot < LEADING_CLUB_SLOT_COUNT) {
         StartContactEffect(CONTACT_EFFECT_POWER_IRON);
       } else {
@@ -949,7 +950,7 @@ Boolean IsCupPassPoint(s32 cupDistance, s32 height) {
 #define IsShotLengthRated(endKind) \
   ((endKind) != SURFACE_KIND_WATER_HAZARD && \
       f_StartCupDistance >= f_LandingCupDistance && \
-      f_HitsBillboardEarly != TRUE && g_SimulatedShot.unk2E14 && \
+      f_HitsBillboardEarly != TRUE && g_SimulatedShot.isPerfectSwing && \
       !g_SimulatedShot.unk2E00 && \
       g_SimulatedShot.shot.shotMode != SHOT_MODE_APPROACH)
 

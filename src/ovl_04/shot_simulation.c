@@ -62,7 +62,7 @@ void SimulateShot(ShotLaunch* shot) {
   hasUnk40Flag = FALSE;
   g_SimulatedShot.usesPutter =
       GetClub(shot->clubIndex)->surfaceMask & CLUB_SURFACE_GREEN;
-  g_SimulatedShot.unk2E14 = shot->impactTiming == 0 &&
+  g_SimulatedShot.isPerfectSwing = shot->impactTiming == 0 &&
       shot->power >= MAX_LAUNCH_POWER &&
       !(GetClub(shot->clubIndex)->surfaceMask & CLUB_SURFACE_GREEN);
   g_SimulatedShot.unk2E42 = GetImpactTimingEntry(
