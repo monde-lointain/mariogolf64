@@ -2199,20 +2199,7 @@ void DrawGoombaMovie(Gfx** displayListHead) {
 /*
  * Lakitu flies in, counts down to the start on its starting light, then flies
  * off
- *
- * Doesn't match: 69 words differ, 37 in shape. In the strip loop the original
- * builds the tile load's command words in $v1, $a2 and $a3, where this uses
- * $a2, $a3 and $t0, and it reads f_Lakitu's fields at other points; the
- * register oracle, forcing 7 pseudos' registers, leaves 50 words at best, so
- * the code differs too. Before the second sync in the strip loop, which the
- * original's display list has after the tile load, stepping offset in the
- * loop's header, or setting it before the palette load, gave 89 words
- * differing, 49 in shape. Rounding the half width before the tile load took 87
- * words differing, 47 in shape, to 87 and 45, and working out the strip's start
- * S there too took it to 83 and 41. Naming each strip's bottom, or the start T
- * after its rounding, changed nothing; a 16-bit offset gave 136.
  */
-#ifdef NON_MATCHING
 void DrawLakituMovie(Gfx** displayListHead) {
   EncodedAsset asset;
   Gfx* gfx = *displayListHead;
@@ -2223,9 +2210,12 @@ void DrawLakituMovie(Gfx** displayListHead) {
   s32 roundedHalfHeight;
   s32 x;
   s32 y;
+  s32 left;
   s32 offset;
   f32 startS;
   f32 startT;
+  f32 stepS;
+  f32 stepT;
 
   if (f_MovieDrawCount == LAKITU_RED_LIGHT_DRAW) {
     PlaySound(SOUND_START_LIGHT_RED, g_NextSoundChannel, SOUND_FULL_SCALE);
@@ -2282,6 +2272,8 @@ void DrawLakituMovie(Gfx** displayListHead) {
     offset = MOVIE_IMAGE_PIXELS_OFFSET + (i * LAKITU_STRIP_SIZE);
     halfWidth = f_Lakitu.scale * (LAKITU_WIDTH / 2);
     halfHeight = f_Lakitu.scale * LAKITU_STRIP_HEIGHT;
+    stepS = ((LAKITU_WIDTH / 2) << 10) / halfWidth;
+    stepT = (LAKITU_STRIP_HEIGHT << 10) / halfHeight;
     roundedHalfWidth = halfWidth + 0.5f;
 
     /*
@@ -2297,25 +2289,22 @@ void DrawLakituMovie(Gfx** displayListHead) {
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
         G_TX_NOLOD);
     gDPPipeSync(gfx++);
-    y = f_Lakitu.y;
     roundedHalfHeight = halfHeight + 0.5f;
     startT = 16.0f - (((f32)roundedHalfHeight - halfHeight) * 16.0f);
     x = f_Lakitu.x;
+    left = x - roundedHalfWidth;
+    y = f_Lakitu.y;
 
-    DrawTextureRect(&gfx, QuarterPixels(x - roundedHalfWidth),
+    DrawTextureRect(&gfx, QuarterPixels(left),
         QuarterPixels(y - roundedHalfHeight + (i * roundedHalfHeight)),
         QuarterPixels(x + roundedHalfWidth),
         QuarterPixels(y + (i * roundedHalfHeight)), G_TX_RENDERTILE, startS,
-        startT, ((LAKITU_WIDTH / 2) << 10) / halfWidth,
-        (LAKITU_STRIP_HEIGHT << 10) / halfHeight);
+        startT, stepS, stepT);
     gDPPipeSync(gfx++);
   }
 
   *displayListHead = gfx;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_00/round_events", DrawLakituMovie);
-#endif
 
 /* Toad waves the out of bounds flag in the inset view */
 void DrawToadMovie(Gfx** displayListHead) {
