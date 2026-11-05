@@ -562,8 +562,14 @@ void GetSaveDataAndMenuMemory(void) {
  * to 36, 18 in shape. The button's half height is clamped by an if, to match,
  * where the other halves use the conditional operator: with that operator it
  * gives 47 words (19 in shape), and with ifs for every half 140 (56); of the 32
- * mixes of the two forms, with either order of the window's halves,, this one
- * is the lowest. 36 words differ, 18 in shape.
+ * mixes of the two forms, with either order of the window's halves, this one
+ * was the lowest, when the draft gave 36 words. Each button's bottom edge sums
+ * its row's offset, the half height and the window's top in that order, which
+ * took the draft from 36 words differing to 34, though 18 in shape to 20, and
+ * the register oracle's best, with none forced, from 36 to 34; with the half
+ * height and the top grouped, as before, 36 words differed, with the top first
+ * and the offset and half height grouped the same 34, and the other orders 36
+ * to 175. 34 words differ, 20 in shape.
  */
 #ifdef NON_MATCHING
 void DrawYesNoWindow(Gfx** displayListHead, s32 width, s32 height, s32 centerX,
@@ -676,7 +682,7 @@ void DrawYesNoWindow(Gfx** displayListHead, s32 width, s32 height, s32 centerX,
     DrawTextureRect(&gfx, QuarterPixels(windowLeft),
         QuarterPixels(windowTop + (index * halfHeight)),
         QuarterPixels(centerX + halfWidth),
-        QuarterPixels((index * halfHeight) + (halfHeight + windowTop)),
+        QuarterPixels((index * halfHeight) + halfHeight + windowTop),
         G_TX_RENDERTILE, 0, 0,
         (MENU_WINDOW_IMAGE_WIDTH << 10) / (s32)windowWidth,
         (MENU_WINDOW_STRIP_HEIGHT << 10) / (s32)windowHalfHeight);
