@@ -473,7 +473,7 @@ void UpdateGolfBalls(void) {
   f32 scale;
   f32 distance;
 
-  if (g_GameState.step == GAME_STATE_UNK6) {
+  if (g_GameState.step == GAME_STATE_TAKING_TURNS) {
     currentIndex = g_GameState.currentPlayerIndex;
   } else {
     currentIndex = 0;
@@ -498,7 +498,7 @@ void UpdateGolfBalls(void) {
     }
   }
 
-  if (g_GameState.step == GAME_STATE_UNK6 ||
+  if (g_GameState.step == GAME_STATE_TAKING_TURNS ||
       g_GameState.step == GAME_STATE_UNK11) {
     GolfBall* ball;
 
@@ -824,7 +824,7 @@ void DrawGolfBalls(CameraMatrices* matrices UNUSED) {
 #ifdef AVOID_UB
   primDepth = 0;
 #endif
-  if (g_GameState.step != GAME_STATE_UNK6 &&
+  if (g_GameState.step != GAME_STATE_TAKING_TURNS &&
       g_GameState.step != GAME_STATE_UNK11) {
     return;
   }

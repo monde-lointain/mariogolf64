@@ -327,7 +327,7 @@ void SkipNextPinDraw(void) {
 }
 
 /*
- * Returns whether the pin stands in the cup. During GAME_STATE_UNK6 and
+ * Returns whether the pin stands in the cup. During GAME_STATE_TAKING_TURNS and
  * GAME_STATE_HOLE_END it is taken out while the shot is from the green,
  * except in mini-golf.
  */
@@ -336,7 +336,7 @@ Boolean IsPinInCup(void) {
     return FALSE;
   }
 
-  if (g_GameState.step == GAME_STATE_UNK6 ||
+  if (g_GameState.step == GAME_STATE_TAKING_TURNS ||
       g_GameState.step == GAME_STATE_HOLE_END) {
     if (g_GameState.isMiniGolf) {
       return TRUE;

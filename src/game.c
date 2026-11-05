@@ -851,7 +851,7 @@ void BuildHorizonDynamicTextures(Gfx** displayListHead) {
      * g_CurrentShot's volatile declaration makes it. A plain read without
      * that gives 7 words differing, 5 in shape, and no read or an empty if
      * 11 (7) */
-    if (mode == GAME_STATE_UNK6) {
+    if (mode == GAME_STATE_TAKING_TURNS) {
       mode = g_CurrentShot.playerIndex;
     }
 

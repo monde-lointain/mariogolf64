@@ -1146,7 +1146,7 @@ void UpdatePlay(void) {
             if (g_GameState.gameMode == GAME_MODE_SPEED_GOLF) {
               StartHoleFlyover();
               EndHoleIntro();
-              g_GameState.step = GAME_STATE_UNK6;
+              g_GameState.step = GAME_STATE_TAKING_TURNS;
               EndHoleFlyover();
               StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
               f_PlayStateFrameCount = 0;
@@ -1162,7 +1162,7 @@ void UpdatePlay(void) {
           if (g_GameState.gameMode == GAME_MODE_SPEED_GOLF) {
             StartHoleFlyover();
             EndHoleIntro();
-            g_GameState.step = GAME_STATE_UNK6;
+            g_GameState.step = GAME_STATE_TAKING_TURNS;
             EndHoleFlyover();
             StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
             f_PlayStateFrameCount = 0;
@@ -1273,7 +1273,7 @@ void UpdatePlay(void) {
         if (StepHoleFlyover() ||
             (IsHudAnimationDone() &&
                 (IsAButtonPressed() || IsPlayAdvancingItself()))) {
-          g_GameState.step = GAME_STATE_UNK6;
+          g_GameState.step = GAME_STATE_TAKING_TURNS;
           EndHoleFlyover();
         }
 
@@ -1282,7 +1282,7 @@ void UpdatePlay(void) {
       case GAME_STATE_UNK5:
         f_PlayStateFrameCount++;
         break;
-      case GAME_STATE_UNK6:
+      case GAME_STATE_TAKING_TURNS:
         UnloadOverlay(GetOverlayOfModule(MODULE_HOLE_BUILDER));
         /* Falls through */
       case GAME_STATE_UNK11:

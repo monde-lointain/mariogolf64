@@ -144,7 +144,7 @@ enum GameStateStep {
   GAME_STATE_UNK5,
   /* Taking turns. It and GAME_STATE_UNK11 play a single ball, rather than one
    * for each player */
-  GAME_STATE_UNK6,
+  GAME_STATE_TAKING_TURNS,
   GAME_STATE_HOLE_END,
   GAME_STATE_SLOTS, /* Spinning the club slots before the hole */
   GAME_STATE_UNK11 = 11,
