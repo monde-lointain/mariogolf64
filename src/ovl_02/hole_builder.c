@@ -3739,6 +3739,11 @@ void GetGroundLightColors(GroundLightColor* light, GroundLightColor* shade) {
  * differing to 132, 14 in shape both, in each of the eight declaration places
  * tried, and the register oracle's closest from 94 words, forcing 9 pseudos, to
  * 88, forcing 6. 132 words differ, 14 in shape.
+ *
+ * A focused permuter run's best output declares isMapEdge as a short and keeps
+ * the texel's alpha by reading *texel again. As an s16, isMapEdge gives 101
+ * words (17 in shape), but the register oracle's closest stays 88, forcing 6.
+ * Reading *texel for the alpha leaves 132 words.
  */
 #ifdef NON_MATCHING
 void ShadeGroundTiles(void) {
