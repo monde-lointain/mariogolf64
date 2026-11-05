@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Find the register allocation that would make a draft match, and why.
 
-    oracle.py [--allocation] [ASM_FILE C_FILE] FUNCTION [PSEUDO=HARD ...]
+    oracle.py [--allocation | --splits] [ASM_FILE C_FILE] FUNCTION
+              [PSEUDO=HARD ...]
 
 Without ASM_FILE and C_FILE, finds them from FUNCTION as fncompare does.
 
@@ -21,7 +22,8 @@ pseudos that took the register it needed. A draft whose code differs
 otherwise gets the closest forcing found, and the instructions that still
 differ under it, which register allocation does not explain. Last, it
 names each pseudo that lines up with two or more target registers, a sign
-that the original used a variable for each place.
+that the original used a variable for each place; --splits prints only
+that, from one compile.
 
 Only FUNCTION's own routine is compared; the functions nested in it, which
 fncompare counts with it, are named so that each can be given as FUNCTION.
@@ -543,6 +545,9 @@ def main() -> None:
     show_allocation = "--allocation" in arguments
     if show_allocation:
         arguments.remove("--allocation")
+    show_splits = "--splits" in arguments
+    if show_splits:
+        arguments.remove("--splits")
     asm_path, c_path, function, *pairs = fncompare.expand_function_name(arguments)
     if not (ORACLE_DIR / "cc1.debug").exists():
         sys.exit("run tools/build_oracle.sh first")
@@ -565,6 +570,11 @@ def main() -> None:
             print_allocation(
                 compilation, read_pseudo_lines(c_path, function, compilation, work)
             )
+            return
+        if show_splits:
+            compilation = compile_function(c_path, function, force, work)
+            lines = read_pseudo_lines(c_path, function, compilation, work)
+            print_splits(target, compilation, lines)
             return
         force, differences, compilation = search_forcing(
             target, c_path, function, force, work
