@@ -2406,8 +2406,9 @@ s32 StepTrialShot(void) {
         break;
       }
 
-      if (bounceCount == 0 && (flags & 3) && velocityY < 0 &&
-          ballState == BALL_STATE_FLYING) {
+      if (bounceCount == 0 &&
+          (flags & (STEP_FLAG_GROUND_HIT | STEP_FLAG_BILLBOARD_HIT)) &&
+          velocityY < 0 && ballState == BALL_STATE_FLYING) {
         if (f_HasBestEvaluation || f_TrialLevel < 2) {
           break;
         }
