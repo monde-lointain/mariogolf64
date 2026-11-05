@@ -1907,8 +1907,10 @@ void PlaceAimCamera(void);
  * FLIGHT_CAMERA_CIRCLING_BALL sets the field of view after the look-at point,
  * as that run also did, which took the draft from 98 words differing to 66, 4
  * in shape either way; set after the eye's height, as the draft had it, or
- * anywhere before the look-at point's Y, it gives 98 to 138. 66 words differ, 4
- * in shape.
+ * anywhere before the look-at point's Y, it gives 98 to 138. With fabsf an
+ * abs.s in volatile inline assembly, 64 words differ, 2 in shape, with or
+ * without the x ease's test in a block of its own, which saved words with
+ * GCC's built-in fabsf.
  */
 #ifdef NON_MATCHING
 void PlaceFlightCamera(s32 step) {
@@ -2379,15 +2381,10 @@ void PlaceFlightCamera(s32 step) {
       point[AXIS_Y] *= COURSE_TO_WORLD_SCALE;
       point[AXIS_Z] *= COURSE_TO_WORLD_SCALE;
       delta = point[AXIS_X] - f_CameraPosition[AXIS_X];
-      /* The x test in a block of its own is there to match; without it 138
-       * words differ, 16 in shape, and with only the block ended before it
-       * 104, 6 in shape. Each axis's test in its own block gives the same as
-       * this, the delta step in such a block too 97, 11 in shape, AbsFloat
-       * 93, 11 in shape, fabs 141 and the comparison spelled as two tests
-       * 151 */
-      IN_OWN_BLOCK(if (fabsf(delta) > FACING_CUP_EASE_DEAD_ZONE) {
+      if (fabsf(delta) > FACING_CUP_EASE_DEAD_ZONE) {
         f_CameraPosition[AXIS_X] += delta * FACING_CUP_EASE_FRACTION;
-      });
+      }
+
       delta = point[AXIS_Y] - f_CameraPosition[AXIS_Y];
       if (fabsf(delta) > FACING_CUP_EASE_DEAD_ZONE) {
         f_CameraPosition[AXIS_Y] += delta * FACING_CUP_EASE_FRACTION;
