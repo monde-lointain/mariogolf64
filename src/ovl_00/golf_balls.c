@@ -74,7 +74,7 @@ typedef struct GolfBall {
   /* 0x98 */ s32 state; /* A BALL_STATE_* value */
   /* 0x9C */ s8 markerPlayerIndex; /* Or BALL_NO_MARKER */
   /* 0x9D */ s8 purpose; /* A LAUNCH_PURPOSE_* value */
-  /* 0x9E */ s8 unk9E;
+  /* 0x9E */ s8 hasEnteredWater; /* As its simulation's */
 } GolfBall; /* size = 0xA0 */
 
 typedef struct BallAfterimage {
@@ -551,7 +551,7 @@ void UpdateGolfBalls(void) {
 
         RollGolfBall(ball, simulation);
         ball->state = simulation->state;
-        ball->unk9E = simulation->hasEnteredWater;
+        ball->hasEnteredWater = simulation->hasEnteredWater;
         ball->purpose = simulation->purpose;
         if (currentIndex == simulation->playerIndex ||
             (GetSurfaceInfo(simulation->surface)->kind != SURFACE_KIND_GREEN &&
@@ -917,7 +917,7 @@ void DrawGolfBalls(CameraMatrices* matrices UNUSED) {
       if (ball->markerPlayerIndex == BALL_NO_MARKER) {
         if (ballDepth < BALL_NEAREST_DEPTH && exposure >= BALL_HALF_SUNK) {
           gDPPipeSync(gfx++);
-          if (ball->unk9E) {
+          if (ball->hasEnteredWater) {
             groundHeight = GetGroundOrWaterHeight(
                 ball->position[AXIS_X] * WORLD_TO_COURSE_SCALE,
                 ball->position[AXIS_Z] * WORLD_TO_COURSE_SCALE);
@@ -1081,7 +1081,7 @@ void DrawGolfBalls(CameraMatrices* matrices UNUSED) {
         }
 
         if (exposure == BALL_EXPOSED && shadowDepth < BALL_NEAREST_DEPTH &&
-            !isAboveCup && !ball->unk9E) {
+            !isAboveCup && !ball->hasEnteredWater) {
           size = (s32)(AbsFloat(shadowPoint.scaleX) *
               (0.6f * (2.0f * g_PinVertexScale)) * 0.25f);
           if (g_IsCupViewShown == TRUE) {
