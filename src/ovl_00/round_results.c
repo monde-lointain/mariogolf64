@@ -1958,6 +1958,16 @@ void SetResultsBanner(s32 state, s32 kind) {
  * course gets $fp. Assigning course later or before the kind test, narrower
  * or unsigned types, reading frameCount through g_GameState, and regrouping
  * the trophy heights give 32-63 words.
+ *
+ * Advancing the trophy frame inside a do-while (0) matches, since flow weights
+ * each reference by its loop depth and course then counts 8 references instead
+ * of 6, but it is a device to match: all 32 increment-and-wrap sites in the
+ * source are written plainly, and wrapping them all in do-while (0) breaks 14
+ * of the 21 matched functions that hold them. A static inline function in its
+ * place leaves 32 words. A struct for each course's trophy sizes gives 52
+ * words, and the oracle's closest is then 20 with 4 forced; a helper for the
+ * two identical trophy-part loops gives 207 words taking the course, or 295
+ * taking its sizes' address.
  */
 #ifdef NON_MATCHING
 void DrawResultsBanner(Gfx** displayListHead) {
