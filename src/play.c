@@ -381,8 +381,8 @@ void SetUpPlayers(void) {
      * 12 words differing, 6 in shape
      */
     i = 0;
-    for (slot = PLAYER_UNKAA_COUNT - 1; slot >= 0; slot--) {
-      g_Players[i].unkAA[slot] = 0;
+    for (slot = SHOT_KIND_COUNT - 1; slot >= 0; slot--) {
+      g_Players[i].notableShotCounts[slot] = 0;
     }
   } else {
     for (i = 0; i < MAX_PLAYER_COUNT; i++) {
@@ -397,8 +397,8 @@ void SetUpPlayers(void) {
         g_Players[i].holes[hole].putts = UNCOUNTED_PUTTS;
       }
 
-      for (slot = PLAYER_UNKAA_COUNT - 1; slot >= 0; slot--) {
-        g_Players[i].unkAA[slot] = 0;
+      for (slot = SHOT_KIND_COUNT - 1; slot >= 0; slot--) {
+        g_Players[i].notableShotCounts[slot] = 0;
       }
 
       for (slot = 0; slot < CLUB_SLOT_COUNT; slot++) {

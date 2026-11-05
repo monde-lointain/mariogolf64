@@ -8,6 +8,7 @@
 #include "course.h"
 #include "hole_conditions.h"
 #include "math_util.h"
+#include "turn.h"
 
 /* Marks save data that has been written at least once */
 #define SAVE_MAGIC 0x12345678
@@ -351,8 +352,6 @@ typedef struct PlayerHole {
 /* The size of Player.name, with its terminator */
 #define PLAYER_NAME_SIZE 12
 
-#define PLAYER_UNKAA_COUNT 12
-
 /*
  * Player.state's values, which the game's messages call the PlayerState. A
  * saved game keeps PLAYER_STATE_WAITING and PLAYER_STATE_HOLE_DONE, restarts
@@ -464,7 +463,7 @@ typedef struct Player {
       lastDriveDistance; /* The driveDistance that RecordDrive took */
   /* 0xA4 */ s32 points; /* Earned in the round, towards opening courses */
   /* 0xA8 */ s16 unkA8;
-  /* 0xAA */ s8 unkAA[PLAYER_UNKAA_COUNT];
+  /* 0xAA */ s8 notableShotCounts[SHOT_KIND_COUNT]; /* By ShotKind */
   /* 0xB6 */ u8 unkB6[0xB8 - 0xB6];
 } Player; /* size = 0xB8 */
 

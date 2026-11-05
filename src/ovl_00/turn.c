@@ -73,8 +73,7 @@
 /* Sixty meters */
 #define NEAR_CUP_MAX_DECIMETERS 600.0f
 
-/* The kinds of notable shot that earn Course Points, as counted in unkAA */
-#define SHOT_KIND_COUNT PLAYER_UNKAA_COUNT
+/* The most of one kind of notable shot that a player's count holds */
 #define SHOT_KIND_MAX_COUNT 0xFF
 #define MAX_RING_SHOT_CLEAR_COUNT 99
 
@@ -1855,7 +1854,7 @@ void CountNotableShot(s32 playerIndex, s32 shotKind) {
     return;
   }
 
-  count = (u8*)&g_Players[playerIndex].unkAA[shotKind];
+  count = (u8*)&g_Players[playerIndex].notableShotCounts[shotKind];
   if (*count < SHOT_KIND_MAX_COUNT) {
     osSyncPrintf("EXP GET type %d\n", shotKind);
     (*count)++;
@@ -1876,7 +1875,7 @@ void CountNotableShot(s32 playerIndex, s32 shotKind) {
 
 /* The course points that the player has earned with the shots of one kind */
 s32 GetShotKindPoints(s32 playerIndex, s32 shotKind) {
-  s32 count = (u8)g_Players[playerIndex].unkAA[shotKind];
+  s32 count = (u8)g_Players[playerIndex].notableShotCounts[shotKind];
   s32 points;
 
   switch (shotKind) {
@@ -1932,7 +1931,7 @@ s32 TallyCoursePoints(void) {
     points = 0;
     for (shotKind = 0; shotKind < SHOT_KIND_COUNT; shotKind++) {
       points += GetShotKindPoints(playerIndex, shotKind);
-      g_Players[playerIndex].unkAA[shotKind] = 0;
+      g_Players[playerIndex].notableShotCounts[shotKind] = 0;
     }
 
     total += points;

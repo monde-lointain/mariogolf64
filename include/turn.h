@@ -24,7 +24,8 @@ enum ShotKind {
   SHOT_KIND_EAGLE,
   SHOT_KIND_BIRDIE,
   /* Crosses water without stopping in it, the debug text's "WaterCut" */
-  SHOT_KIND_WATER_CUT
+  SHOT_KIND_WATER_CUT,
+  SHOT_KIND_COUNT
 };
 
 /* The ball of the player whose turn it is, as PlaceBallAtRest sets it */
