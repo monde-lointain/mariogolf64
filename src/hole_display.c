@@ -3246,6 +3246,14 @@ INCLUDE_ASM("asm/nonmatchings/hole_display", CaptureHudAnimationFrame);
  * shape; without the sync before the rectangle, 44 and 16. The register oracle,
  * forcing 10 pseudos' registers, leaves 15 words of the 61 at best, so the code
  * differs too.
+ *
+ * A focused permuter run's best, 15 words (3 in shape), works out the column's
+ * left edge once per slice for the right edge alone, beside the left set at
+ * each strip, two names for one value; the left once per slice for both edges
+ * gives 132 words, and a right edge set once per slice 94. Counting the slice
+ * rows and multiplying them by SLICE_HEIGHT gives 62 words (6), and the
+ * oracle's closest 12, but the original adds 0x78 to the slice's top when the
+ * column wraps, as sliceY does here.
  */
 #ifdef NON_MATCHING
 void DrawSliceAnimation(void) {
