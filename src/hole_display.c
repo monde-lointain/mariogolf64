@@ -2921,10 +2921,15 @@ void DrawTurnAwayAnimation(void);
  * matches. The permuter's best output, 2715 against 3450 (81 words differing,
  * 23 in shape), holds the last column in a variable and splits the corners into
  * temporaries; its natural parts, the matrix address or the lower right corner
- * in a local, give 106 and 102 words differing (30 and 36 in shape). A local
- * for each tile's first vertex, with the other corners as offsets from it,
- * gives 126 to 159 words differing (34 to 55 in shape) in any one tile loop and
- * 167 to 234 in two or three. 106 words differ, 30 in shape.
+ * in a local, gave 106 and 102 words differing (30 and 36 in shape). A local
+ * for each tile's first vertex, with the other corners as offsets from it, gave
+ * 126 to 159 words differing (34 to 55 in shape) in any one tile loop and 167
+ * to 234 in two or three, when the draft gave 106. The lower rows' tile width
+ * is chosen by an if/else, which took the draft from 106 words to 104, 30 in
+ * shape either way, and the register oracle's best from 51 words to 49; set
+ * first and overridden for the last column, as before, it gave 106, a
+ * conditional operator gives the same 104, and the upper rows' width chosen by
+ * an if/else gives 158. 104 words differ, 30 in shape.
  */
 #ifdef NON_MATCHING
 void DrawTurnAwayAnimation(void) {
@@ -3028,9 +3033,10 @@ void DrawTurnAwayAnimation(void) {
             G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
             G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
         wordIndex += FRAME_TILE_WORD_COUNT;
-        width = FRAME_TILE_WIDTH;
         if (column == FRAME_TILE_COLUMN_COUNT - 1) {
           width = LAST_TILE_TEXEL_WIDTH;
+        } else {
+          width = FRAME_TILE_WIDTH;
         }
 
         gDPPipeSync(g_DisplayListHead++);
