@@ -2179,8 +2179,11 @@ void PlaceCharacter(u32 slotIndex, CoursePoint point, Radians heading) {
  * negates it in place. Reading the rotation into a local first, or writing the
  * arms differently, keeps that form. The view direction's stores and the shadow
  * scale's abs.s are also scheduled otherwise. The register oracle, forcing 10
- * pseudos' registers, leaves 47 words at best, so the code differs too. 49
- * words differ, 19 in shape.
+ * pseudos' registers, leaves 47 words at best, so the code differs too. Setting
+ * the view direction's z before its x, in any order of the three, gives 45
+ * words (19 in shape), but ours still stores x and z after the abs.s where the
+ * original stores them before, so only registers change, and the order is left
+ * as written. 49 words differ, 19 in shape.
  */
 #ifdef NON_MATCHING
 void DrawCharacterAndShadow(
