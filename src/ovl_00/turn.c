@@ -1017,22 +1017,10 @@ void ResetAimCamera(void) {
 /*
  * Eases the aim camera towards the place that suits the shot, and stops once it
  * is close.
- *
- * Doesn't match: the original loads one float constant five instructions later,
- * and takes the distance error's absolute value into a register of its own,
- * where local-alloc ties it to the error, which is set once and dies there.
- * Keeping the signed error and testing its absolute value orders the height's
- * store as the original does (17 words differed). Setting the error for the
- * first test too gives 17, testing the absolute value directly 27, and taking
- * it before easing the height 57. The register oracle, forcing 2 pseudos'
- * registers, leaves 7 words at best, so the code differs too. 13 words differ,
- * 7 in shape.
  */
-#ifdef NON_MATCHING
 void EaseAimCamera(void) {
   s32 targetDistance;
   s32 targetHeight;
-  f32 distanceError;
 
   if (g_ShotFlags & SHOT_FLAG_NO_IMPACT_POINT) {
     targetDistance = AIM_CAMERA_PUTT_DISTANCE;
@@ -1067,19 +1055,11 @@ void EaseAimCamera(void) {
 
   g_CurrentShot.aimCameraHeight +=
       (targetHeight - g_CurrentShot.aimCameraHeight) * AIM_CAMERA_EASE_FRACTION;
-  distanceError = g_CurrentShot.aimCameraDistance - targetDistance;
-  /*
-   * The test in its own block, to match; without the barrier 27 words
-   * differ, 23 in shape, against 13
-   */
-  END_BASIC_BLOCK();
-  if (fabsf(distanceError) < UNITS_PER_YARD) {
+  if (fabsf(g_CurrentShot.aimCameraDistance - targetDistance) <
+      UNITS_PER_YARD) {
     g_IsAimCameraEasing = 0;
   }
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", EaseAimCamera);
-#endif
 
 /* Raises or lowers the aim camera with the C buttons, in smaller steps for a
  * putt */
