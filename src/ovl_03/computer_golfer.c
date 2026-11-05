@@ -2266,11 +2266,13 @@ INCLUDE_RODATA("asm/nonmatchings/ovl_03/computer_golfer", f_SimFaultText);
  *
  * Doesn't match: 26 words differ, 8 in shape. Ours sums the poor landing's
  * evaluation into $v0 and stores it at once, where the original sums into $v1
- * and stores it later, and the last aim change loads f_Shot.heading after the
- * conversion, where the original loads it before. The aim change as an if/else
- * subtracting or adding gives 75 words (31 in shape), and adding the change or
- * its negation, chosen by ?:, 45 (17); these two counts were measured before
- * shotStroke, when 30 words differed (8 in shape).
+ * and stores it later: the sum's and the constant's quantities tie on
+ * local-alloc's priority, and the tie goes to the lower quantity number, the
+ * sum's. The heading's correction at the end loads f_Shot.heading before both
+ * conversions, where the original loads it between them. The aim change's step
+ * as an if/else subtracting or adding gives 75 words (31 in shape), and adding
+ * the step or its negation, chosen by ?:, 45 (17); these two counts were
+ * measured before shotStroke, when 30 words differed (8 in shape).
  *
  * Before the nesting, when 101 words differed (35 in shape): reading kind
  * after the sum, testing surfaceInfo->kind directly, and spelling the tests
@@ -2700,8 +2702,11 @@ EVALUATE:
     }
 
     /*
-     * In its own block, as without it 124 words differ, 46 in shape, against
-     * 117 and 43
+     * In its own block, as without it 33 words differ, 11 in shape, against
+     * 26 and 8. Adding the heading and the first angle and then subtracting
+     * the second gives 23 (11), but the register oracle's closest result
+     * rises from 10 words to 17; the heading added to the change, with the
+     * operands reversed, gives 24 (8)
      */
     IN_OWN_BLOCK(f_Shot.heading +=
         (s32)(atan2(f_PlanTarget[AXIS_Z] - f_Shot.ballPosition[AXIS_Z],
