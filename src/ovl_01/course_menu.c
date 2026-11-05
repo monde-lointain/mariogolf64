@@ -895,7 +895,9 @@ void DrawStatsBadgeCount(Gfx** displayListHead) {
  * are left out, as are a later run's outputs of 65 and 66 words, which do the
  * same. A ternary or an if/else choosing hasRowsBelow or FALSE gives the 107
  * words (33 in shape) of the copy, and setting TRUE under nested tests 109
- * (39).
+ * (39). A u16 arrow index gives 75 words (27 in shape), but zero-extends it
+ * with andi 0xffff at both of the two places where the original sign-extends it
+ * with sll and sra by 16, as the s16 does.
  */
 #ifdef NON_MATCHING
 void DrawStatsScrollArrows(Gfx** displayListHead) {
