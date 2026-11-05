@@ -38,8 +38,11 @@ void ShowBirdieBadgeCount(s32 badgeCount);
  * original. Promoting value to newValue before the saveCount test gives 6, and
  * assigning newValue separately in both branches gives 23. END_BASIC_BLOCK
  * before the combination or final promotion leaves 3; before the saveCount test
- * gives 21. Keep the byte draft until both the promotion and delay-slot copy
- * are explained. The register oracle's closest result is these 3 words with no
+ * gives 21. Of the 27 combinations of u8, s32 and u32 for value, count and
+ * newValue, none gives fewer than 3, and an s32 or u32 count gives 31 to 36
+ * whatever the other two are, though the original adds 1 to the count unmasked.
+ * Keep the byte draft until both the promotion and delay-slot copy are
+ * explained. The register oracle's closest result is these 3 words with no
  * register forced, so allocation isn't the cause. 3 words differ.
  */
 #ifdef NON_MATCHING
