@@ -807,13 +807,18 @@ void UpdateBetSettings(void) {
  * Doesn't match: the original keeps the stake marks' coordinates in other
  * registers, and uses markGrowth without masking it to 16 bits. The marks' left
  * edges add slide and their offset as one sum, which the loop hoists: written
- * in a row they give 32 differing words. Halving markGrowth as unsigned, by a
- * cast to u32 or "/ 2u", gives 20 but keeps the mask; no type of markGrowth,
- * markRaise or a halfGrowth local removes it. The permuter's u16 local for the
- * right edge's column sum alone gives 16 and still masks; as s16 or s32 it
- * gives 25 and as u32 28, and used for both edges 207 whatever its type. The
- * register oracle's closest result is these 25 words with no register forced,
- * so allocation isn't the cause. 25 words differ, 5 in shape.
+ * in a row they give 147 differing words, or 33 with slide first. The right
+ * edges are written in a row, which took the draft from 25 words to 16, 5 in
+ * shape to 2; the grouped sum of the left edge there gives 25, and the other
+ * orders of the row 26 to 29. Before that, halving markGrowth as unsigned, by a
+ * cast to u32 or "/ 2u", gave 20 but kept the mask; no type of markGrowth,
+ * markRaise or a halfGrowth local removed it. The permuter's u16 local for the
+ * right edge's column sum alone gave 16 and still masked; as s16 or s32 it gave
+ * 25 and as u32 28, and used for both edges 207 whatever its type. Earlier, the
+ * register oracle's closest result was the 25 words of the draft then, with no
+ * register forced. Ordering the marks' top and bottom subtractions otherwise
+ * gives 18 to 126 words, and no pair of types among u8, s8, u16, s16, u32 and
+ * s32 for markGrowth and markRaise fewer than 16. 16 words differ, 2 in shape.
  */
 #ifdef NON_MATCHING
 void DrawBetSettings(
@@ -941,8 +946,8 @@ void DrawBetSettings(
           QuarterPixels((STAKE_MARK_BOTTOM - STAKE_MARK_SIZE) - markGrowth -
               markRaise - (stakeLevel * STAKE_MARK_SPACING)),
           QuarterPixels(f_BetSetColumnXs[g_BetSet - 1][i] +
-              (slide + STAKE_MARK_OFFSET_X) +
-              ((markGrowth >> 1) + STAKE_MARK_SIZE)),
+              STAKE_MARK_OFFSET_X + slide + STAKE_MARK_SIZE +
+              (markGrowth >> 1)),
           QuarterPixels(STAKE_MARK_BOTTOM - markRaise -
               (stakeLevel * STAKE_MARK_SPACING)),
           G_TX_RENDERTILE, 0, 0,
