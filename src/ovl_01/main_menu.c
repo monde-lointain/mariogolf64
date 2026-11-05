@@ -4835,6 +4835,12 @@ void DrawUpDownArrows(Gfx** displayListHead, s32 centerY);
  * shape), but the register oracle's closest is then 40 words, forcing 3
  * pseudos, against 34 here; no declaration order of the two gives other than
  * 86. 86 words differ, 2 in shape.
+ *
+ * Stepping the players' second loop, which draws their labels, with slot gives
+ * 42 words differing, 2 in shape, but the register oracle's closest is still 34
+ * words forcing 3 pseudos, so the gain is in the registers alone; stepping any
+ * of the banner strips' loops or the players' first loop with slot as well
+ * gives 86 or 87 words.
  */
 #ifdef NON_MATCHING
 void DrawModeSelect(Gfx** displayListHead) {
