@@ -2280,72 +2280,7 @@ s32 FindHoleTriangleHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
  * it is widened by WALL_WIDENING units at each end, and a path that
  * passes an end of it is moved back to where it reaches the end. A hit
  * near or below the ground counts whatever the edges say.
- *
- * Doesn't match: the reach test is compared with FALSE, as the original ands
- * the macro's crossing tests before branching: negated with !, fold rewrites it
- * into xori and or chains (563 words, when the draft had 535). Nesting the rest
- * of the loop under the plain test gave the same 535. The permuter's best
- * outputs, against the draft's 535 words (85 in shape), read the plane's normal
- * x into a local for two of the six plane tests (500 words, 78 in shape), one
- * before GetTrianglePlane sets it, and moved the second arm's highestX into the
- * first, where it is dead, so the second leaves it unset (431 words, 83 in
- * shape); neither is natural, and the second changes the result. The original
- * works out the ball's height before calling GetGroundHeight, so the height is
- * the comparison's first operand; with the call first, 535 words differed (85),
- * and a local for the height gives the same 418. The original converts each hit
- * point to a float again in each of its two corner tests, IsLessThanCorners and
- * IsMoreThanCorners; converting it once into a float local, as the draft did,
- * gave 418 words (72 in shape), or 415 (69) and 381 (69) passing only one of
- * the two hit points directly. The register oracle, forcing 35 pseudos'
- * registers, leaves 135 words of the 200 at best, so the code differs too. A
- * permuter output with 178 words (62 in shape) copies the plane's X normal to a
- * temp before GetTrianglePlane sets it and uses the copy for each side and hit
- * test, so it reads the previous triangle's normal; another, with 176 words,
- * splits startSide's sum and changes the hit test's < 307.2f to <= 306.2f. A
- * later output reads the normal's x into a local after GetTrianglePlane and
- * uses it in the two hit tests for walls facing z (176 words, 58 in shape), but
- * the same local in all four hit tests gives 230 (80), in the other two alone
- * 266 (88), and locals for the y or z normal, in either pair, 548 to 865. So it
- * isn't adopted. Commuting the x term, adding the y or distance term first,
- * grouping the y and z terms, or putting the start first in the hit point, in
- * the first two tests, give 204 to 248. Naming the hit point, as hitX, hitY and
- * hitZ, for the ground height test took the draft from 204 words (66 in shape)
- * to 200 (62), and the oracle from 139 words to 135, each forcing 35 pseudos;
- * the earlier counts here were measured before it. Naming the end point too, in
- * f32 locals for the four wall-end tests, gives 860 words (162 in shape),
- * whether or not hitPointU and hitPointV are set from them. A u16 or u8 facing
- * gives 197 words (63 in shape), and an s16 or s8 198 (64), but each adds an
- * extension the original lacks: an andi 0xffff or 0xff, or an sll and sra by 16
- * or 24. A focused permuter run's best, 167 words (51 in shape), reads the
- * plane's x normal into a local for the start side and the first two of the
- * four end fraction tests, leaving the end side and the other two tests reading
- * the plane; a local for all six gives 226 words (76 in shape), and for the
- * start and end sides alone 200 (62). Those counts were measured with GCC's
- * built-in fabsf, when 200 words differed, 62 in shape. With fabsf an abs.s in
- * volatile inline assembly, 63 words differed, 15 in shape. The walls facing
- * z then ordered their x ends by testing whether the first corner was the
- * larger; the original tests whether it is the smaller, setting the ends from
- * the other corner first, as the walls facing x do with their z ends. Testing
- * it so took the draft to 55 words, 7 in shape. The draft then set facing to
- * TRIANGLE_FACING_NONE before its test of the triangle's kind, so that other
- * triangles fell through the facing tests to the flat hit point; the original
- * instead branches from the kind test straight to that hit point's code. It
- * does so when the kind test has an else of its own with the same code as the
- * last facing arm, as GCC merges the two copies. Writing it so took the draft
- * to 44 words, 4 in shape; setting facing in an else, or by a conditional
- * expression, gives 395 words (99 in shape). Each wall arm then kept its far
- * and near ends in the function's farEnd and nearEnd, which put them in the
- * same float registers in all four arms; the original's arms for walls facing z
- * use other registers than those facing x, as block-scoped ends in each arm
- * give. That took the draft from 44 words to 8, 4 in shape, with ends scoped to
- * only the z arms or only the x arms giving the same 8. What is left is where
- * hitIndex is set to NO_HOLE_TRIANGLE: the original sets it just after the
- * IsGameFlagSet call, in the block that tests its result, which none of these
- * placements gives: setting it in its declaration or first gives 10 words, all
- * in shape, and before the IsOffGround tests 13 (9). 8 words differ, 4 in
- * shape.
  */
-#ifdef NON_MATCHING
 s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
     s32 endZ, PlaneTriangle* hit, f32* fraction) {
   PlaneTriangle triangle;
@@ -2377,8 +2312,15 @@ s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
   s32 hitPointV;
   s32 facing;
   s32 k;
+  Boolean isDebug = IsGameFlagSet(GAME_FLAG_UNK0);
 
-  if (IsGameFlagSet(GAME_FLAG_UNK0)) {
+  /*
+   * Set between the flag query and its test, as in FindHoleTriangleHit and
+   * FindRingHit; testing the query directly, with this set first, after the
+   * debug block or before the loop, gives 8 to 13 words differing
+   */
+  hitIndex = NO_HOLE_TRIANGLE;
+  if (isDebug) {
     PrintDebugPaddedHex(startX, PATH_DEBUG_COLUMN, PATH_DEBUG_ROW);
     PrintDebugPaddedHex(startY, PATH_DEBUG_COLUMN, PATH_DEBUG_ROW + 1);
     PrintDebugPaddedHex(startZ, PATH_DEBUG_COLUMN, PATH_DEBUG_ROW + 2);
@@ -2422,7 +2364,6 @@ s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
   }
 
   nearestFraction = NO_PLANE_HIT_FRACTION;
-  hitIndex = NO_HOLE_TRIANGLE;
   for (i = 0; i < HOLE_TRIANGLE_COUNT; i++) {
     HoleTriangle* candidate = &g_WorkArea.hole.triangles[i];
 
@@ -2914,10 +2855,6 @@ s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
 
   return FALSE;
 }
-
-#else
-INCLUDE_ASM("asm/nonmatchings/collision", FindWallHit);
-#endif
 
 /*
  * Pushes a ball that is inside a wall, a shaded hole triangle, back out
