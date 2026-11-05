@@ -142,8 +142,13 @@ void TransformPoint(Mat4 mf, Vec3 point, Vec3 result) {
  * uses as well 282. Each sphere's radius is read from f_FramedSphereRadii at
  * each of its twelve uses, rather than through a radius local, which took the
  * draft from 269 words differing to 265, 113 in shape either way, and the
- * oracle from 225 words to 221, 7 forced either way. 265 words differ, 113 in
- * shape.
+ * oracle from 225 words to 221, 7 forced either way. Computing both centers
+ * after the four edges, keeping the horizontal front distance as f32, and
+ * giving the right edge its own variable reduces 265 words (113 in shape) to
+ * 228 (66). The original also computes the centers after its fourth tan call.
+ * The front-distance subtraction is single precision before promotion in
+ * either form; a double local changes which value lives across the calls.
+ * Inlining that subtraction at both uses gives the same 228 words.
  */
 #ifdef NON_MATCHING
 void FrameSpheres(f32 depthOffset) {
@@ -172,12 +177,13 @@ void FrameSpheres(f32 depthOffset) {
   f32 eyeZ;
   f32 verticalEyeZ;
   f32 depth;
+  f32 right;
   f32 left;
   f32 top;
   f32 bottom;
   f32 centerX;
   f32 centerY;
-  f64 frontDistance;
+  f32 frontDistance;
   s32 i;
   f32 rightRadians;
 
@@ -305,24 +311,19 @@ void FrameSpheres(f32 depthOffset) {
 
   depth = (Z_MARGIN - minZ) + eyeZ;
   frontDistance = depth - horizontalEyeZ;
-  /*
-   * distance holds the right edge from here, to match: a right variable,
-   * declared beside left or rightRadians, gave 494 words differing (110 in
-   * shape), against the draft's 279 (109) at the time
-   */
   rightRadians = FramingDegreesToRadians(rightAngle);
-  distance = frontDistance * tan(rightRadians);
+  right = frontDistance * tan(rightRadians);
   left = frontDistance * tan(FramingDegreesToRadians(leftAngle));
   top = (depth - verticalEyeZ) * tan(FramingDegreesToRadians(topAngle));
+  bottom = (depth - verticalEyeZ) * tan(FramingDegreesToRadians(bottomAngle));
   centerX = (minX + maxX) * 0.5f;
   centerY = (minY + maxY) * 0.5f;
-  bottom = (depth - verticalEyeZ) * tan(FramingDegreesToRadians(bottomAngle));
   if (centerX < left) {
     centerX = left;
   }
 
-  if (distance < centerX) {
-    centerX = distance;
+  if (right < centerX) {
+    centerX = right;
   }
 
   if (centerY < bottom) {
