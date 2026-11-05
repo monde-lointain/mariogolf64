@@ -3699,13 +3699,15 @@ void GetGroundLightColors(GroundLightColor* light, GroundLightColor* shade) {
  * the leading height row last and keeps a second, spilled copy of the trailing
  * one, and it reads the fade flags from the stack for each tile, where ours
  * extends isHighGroundFaded once per row and keeps it in another stack slot.
- * Holding the trailing row in trailingHeights beside the leading one, for
- * the inner tiles, gives 154 words differing, 14 in shape, against 109 and
- * 23 for indexing heightRows there; the register oracle then gets to 94
- * words forcing 9 pseudos, where it got to 107. The permuter's best, 134
- * words (16 in shape), sets heights inside the texel loop, which resets it
- * for each texel and so changes what is drawn. 154 words differ, 14 in
- * shape.
+ * Holding the trailing row in trailingHeights beside the leading one, for the
+ * inner tiles, gives 154 words differing, 14 in shape, against 109 and 23 for
+ * indexing heightRows there; the register oracle then gets to 94 words forcing
+ * 9 pseudos, where it got to 107. The permuter's best, 134 words (16 in shape),
+ * sets heights inside the texel loop, which resets it for each texel and so
+ * changes what is drawn. Writing the fade's kept weight into its three uses, in
+ * place of keptWeight, gives 117 words, 23 in shape, but the oracle then gets
+ * no closer than 111 words, forcing 10, against 94 forcing 9. 154 words differ,
+ * 14 in shape.
  */
 #ifdef NON_MATCHING
 void ShadeGroundTiles(void) {
