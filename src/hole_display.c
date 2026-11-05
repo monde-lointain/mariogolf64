@@ -2909,15 +2909,17 @@ void DrawTurnAwayAnimation(void);
  * Draws HUD_ANIMATION_TURN_AWAY.
  *
  * Doesn't match: the original keeps the texture image command in a saved
- * register and adds the lower corners' offsets to the row's first vertex
- * inside the loops, and registers are allocated differently. GCC's loop
- * optimizer moves more out of the loops when its threshold is one higher.
- * Writing the corners' expressions differently in each loop gets closer, but
- * no single form matches. The permuter's best output, 2715 against 3450
- * (81 words differing, 23 in shape), holds the last column in a variable
- * and splits the corners into temporaries; its natural parts, the matrix
- * address or the lower right corner in a local, give 106 and 102 words
- * differing (30 and 36 in shape). 106 words differ, 30 in shape.
+ * register and adds the lower corners' offsets to the row's first vertex inside
+ * the loops, and registers are allocated differently. GCC's loop optimizer
+ * moves more out of the loops when its threshold is one higher. Writing the
+ * corners' expressions differently in each loop gets closer, but no single form
+ * matches. The permuter's best output, 2715 against 3450 (81 words differing,
+ * 23 in shape), holds the last column in a variable and splits the corners into
+ * temporaries; its natural parts, the matrix address or the lower right corner
+ * in a local, give 106 and 102 words differing (30 and 36 in shape). A local
+ * for each tile's first vertex, with the other corners as offsets from it,
+ * gives 126 to 159 words differing (34 to 55 in shape) in any one tile loop and
+ * 167 to 234 in two or three. 106 words differ, 30 in shape.
  */
 #ifdef NON_MATCHING
 void DrawTurnAwayAnimation(void) {
