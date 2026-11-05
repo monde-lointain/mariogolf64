@@ -2972,7 +2972,7 @@ void ShowHoleOutBanner(s32 playerIndex) {
  * inline: inlined, their buffers share one stack slot, as in the
  * original's frame.
  *
- * Doesn't match: 386 words differ, 142 in shape, spread through the routine's
+ * Doesn't match: 349 words differ, 125 in shape, spread through the routine's
  * states. The counts in the paragraphs after the next were measured before it,
  * when 454 words differed, 184 in shape.
  *
@@ -3035,17 +3035,28 @@ void ShowHoleOutBanner(s32 playerIndex) {
  * function-wide variable that the angle in the g_RoundHud.unkF block at the end
  * also reads: that alone gives 325 words (147 in shape), but outside the aiming
  * state the angle then reads the variable unset, and the original reloads
- * g_CurrentShot.heading there with an lhu. An s8 or s16 shotSource gives 385
- * words but 149 in shape, against 386 and 142, and adds three left shifts and a
- * right shift by 24 or 16 to narrow it, where the original has none, so the
- * local keeps the static's s32. Setting nextState after the calls when a ring
- * shot holes out, as starting over does, gives 386 words (140 in shape); it is
- * kept first, as the training choice box's hole out has it.
+ * g_CurrentShot.heading there with an lhu. Setting nextState after the calls
+ * when a ring shot holes out, as starting over does, gives 386 words (140 in
+ * shape); it is kept first, as the training choice box's hole out has it.
  *
  * Setting a local to MAX_ROLL_SKIP_STEPS before the player loop and bounding
  * the roll skip with it gives 336 words (144 in shape), but the build still
  * compares the step count with slti 4, as the original does, so the gain comes
  * from the extra pseudo's numbering.
+ *
+ * The score switch lists a bogey's case before the default it shares: the
+ * original dispatches through a five-entry jump table from -3 to 1 (addiu 3,
+ * sltiu 5), where with four case labels GCC branches. The planning test and the
+ * prepared-shot test read f_ShotSource itself, where a copy was kept across the
+ * planning loop; the original loads it again (beqz on the reload after the
+ * loop). With the bogey's case alone, 622 words differ (148 in shape): the -1
+ * that the GetPlannedShot loops compare with moves to $s1 for each loop, as the
+ * original's does, and with the copy also live across the loop, the constant 2
+ * gets no register and is loaded at each use, where the original keeps it in
+ * $fp. With the direct reads alone, 412 (142); with both, 349 words differ, 125
+ * in shape, against 386 (142), and the register oracle's closest result is
+ * these 349 words with no register forced. The counts above were measured
+ * before these two changes.
  */
 #ifdef NON_MATCHING
 /* Debug flag 0x47: prints where the ball lies, and the second controller moves
@@ -3902,7 +3913,6 @@ void UpdateTurns(void) {
         } else if (g_PauseScreen == PAUSE_SCREEN_NONE) {
           Boolean isReady;
           s32 tempo;
-          s32 shotSource;
 
           if (f_ShotSource == SHOT_SOURCE_PLAYER &&
               (g_TurnController.buttons & (Z_TRIG | L_TRIG)) &&
@@ -3936,8 +3946,7 @@ void UpdateTurns(void) {
           }
 
           SetSongTempo(tempo);
-          shotSource = f_ShotSource;
-          if (shotSource == SHOT_SOURCE_PLANNING) {
+          if (f_ShotSource == SHOT_SOURCE_PLANNING) {
             if (g_ScreenEffect != SCREEN_EFFECT_SAVED_FRAME) {
               SetScreenEffect(
                   SCREEN_EFFECT_SAVED_FRAME, SAVED_FRAME_STEP_SAVING);
@@ -3967,7 +3976,7 @@ void UpdateTurns(void) {
             }
           }
 
-          if (shotSource != SHOT_SOURCE_PLAYER &&
+          if (f_ShotSource != SHOT_SOURCE_PLAYER &&
               f_AimFrameCount < PREPARED_SHOT_MIN_AIM_FRAMES) {
             break;
           }
@@ -4847,6 +4856,7 @@ void UpdateTurns(void) {
             case SCORE_TO_PAR_PAR:
               reaction = REACTION_ANIMATION_PAR;
               break;
+            case SCORE_TO_PAR_BOGEY:
             default:
               reaction = REACTION_ANIMATION_BOGEY;
               break;
