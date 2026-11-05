@@ -279,7 +279,7 @@ void SetUpFlaggedRound(void) {
           (IsGameFlagSet(GAME_FLAG_EXTRA_PLAYERS_HIGH_BIT) * 2) +
           IsGameFlagSet(GAME_FLAG_EXTRA_PLAYERS_LOW_BIT) + 1;
       g_GameState.step = GAME_STATE_START;
-      g_GameState.gameMode = 0;
+      g_GameState.gameMode = GAME_MODE_STROKE;
       break;
     case 1:
       g_GameState.courseIndex = 0;
@@ -287,7 +287,7 @@ void SetUpFlaggedRound(void) {
       g_GameState.unk14 = 0;
       g_GameState.playerCount = 1;
       g_GameState.step = GAME_STATE_START;
-      g_GameState.gameMode = 3;
+      g_GameState.gameMode = GAME_MODE_TRAINING;
       break;
     case 2:
       g_GameState.courseIndex = 0;
@@ -295,7 +295,7 @@ void SetUpFlaggedRound(void) {
       g_GameState.unk14 = 0;
       g_GameState.playerCount = 2;
       g_GameState.step = GAME_STATE_START;
-      g_GameState.gameMode = 2;
+      g_GameState.gameMode = GAME_MODE_MATCH_GAME;
 
       /* The original has no break here, so the default case overrides this one
        */
@@ -306,7 +306,7 @@ void SetUpFlaggedRound(void) {
       g_GameState.holeIndex = 0;
       g_GameState.unk14 = 0;
       g_GameState.step = GAME_STATE_START;
-      g_GameState.gameMode = 10;
+      g_GameState.gameMode = GAME_MODE_SKINS_MATCH;
       break;
   }
 }
@@ -319,9 +319,9 @@ void SetUpOneHole(void) {
   g_GameState.unk14 = 0;
   g_GameState.step = GAME_STATE_REPEATING_HOLE;
   if (IsGameFlagSet(GAME_FLAG_INIT_RING_SHOT)) {
-    g_GameState.gameMode = 9;
+    g_GameState.gameMode = GAME_MODE_RING_SHOT;
   } else {
-    g_GameState.gameMode = 0;
+    g_GameState.gameMode = GAME_MODE_STROKE;
   }
 }
 
