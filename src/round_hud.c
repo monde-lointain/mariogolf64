@@ -1707,7 +1707,10 @@ typedef struct GridScreenPoint {
  * GetSelectedClub gives 311 words (51 in shape), but the original reads the
  * heading after that call returns. An s16 green gives 328 words, but 60 in
  * shape, as it adds three sll and sra pairs by 16, which the original lacks.
- * 342 words differ, 48 in shape.
+ * Keeping the neighbor point's index in distance's variable, which would give
+ * one variable two meanings, gives 336 words (50 in shape), but the register
+ * oracle's closest is then 236 words, forcing 28 pseudos, against 228, forcing
+ * 29, here. 342 words differ, 48 in shape.
  */
 void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
   f32 points[GREEN_GRID_POINT_COUNT][3];
