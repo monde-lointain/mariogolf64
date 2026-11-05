@@ -775,7 +775,12 @@ enum BallSprite {
  * afterimages' loop tests i != f_BallAfterimageLength, as the original's bne
  * against the reloaded length shows; < compiles to slt and bnez. The register
  * oracle's closest result has no register forced, so the code itself differs.
- * 654 words differ, 90 in shape.
+ * Copying the sync, render mode and sync that follow the marker colors' switch
+ * into each of its cases gives 515 words, 89 in shape, but then a marker player
+ * outside -1 to 3 would skip them, where the original's range check jumps to
+ * the one copy after the switch. A sync ending each case gives 666 words, the
+ * sync and render mode in each case 677, the last case as default 827, a
+ * default case 654, and an if chain 827. 654 words differ, 90 in shape.
  */
 #ifdef NON_MATCHING
 void DrawGolfBalls(CameraMatrices* matrices UNUSED) {
