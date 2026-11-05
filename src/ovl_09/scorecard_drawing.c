@@ -2192,8 +2192,15 @@ INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard_drawing", DrawLeaderboardPage);
  * words differed, 178 in shape. The second loop's front-nine rectangle adds x
  * last at both edges, as the first loop's does; with x first at both, 758 words
  * differ (172 in shape). Grouping the y sums of the second loop's front
- * rectangle as the first loop's are gives 762 to 764 words. 755 words differ,
- * 165 in shape.
+ * rectangle as the first loop's are gave 762 to 764 words. These counts were
+ * measured before the bogey tests below.
+ *
+ * The score colors test overPar >= 2 for a double bogey and then overPar > 0
+ * for a bogey, after the par's test, as the original's slti 2 and blez show;
+ * with == 1 for the bogey and the double bogey in the last else, as the
+ * draft had, 755 words differed (165 in shape). A test of overPar > 1 gives
+ * the same as >= 2, and == 1 for the bogey before > 1 for the double bogey
+ * 755 (165). 733 words differ, 157 in shape.
  */
 #ifdef NON_MATCHING
 void DrawScoresPage(Gfx** displayListHead) {
@@ -2992,14 +2999,16 @@ void DrawScoresPage(Gfx** displayListHead) {
             colorIndex = PAR_COLOR;
             SetTextColor(&gfx, 0xFF, 0xFF, 0xFF);
           }
-        } else if (overPar == 1) {
+        } else if (overPar >= 2) {
+          if (colorIndex != DOUBLE_BOGEY_COLOR) {
+            colorIndex = DOUBLE_BOGEY_COLOR;
+            SetTextColor(&gfx, 0x9F, 0xBF, 0xFF);
+          }
+        } else if (overPar > 0) {
           if (colorIndex != BOGEY_COLOR) {
             colorIndex = BOGEY_COLOR;
             SetTextColor(&gfx, 0x7F, 0xFF, 0x7F);
           }
-        } else if (colorIndex != DOUBLE_BOGEY_COLOR) {
-          colorIndex = DOUBLE_BOGEY_COLOR;
-          SetTextColor(&gfx, 0x9F, 0xBF, 0xFF);
         }
 
         sprintf(
