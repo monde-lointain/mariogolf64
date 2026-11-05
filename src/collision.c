@@ -1774,8 +1774,13 @@ void MoveBallToCupEdge(BallSimulation* simulation) {
  * or a conditional operator, gives 173 to 175. The original works out the
  * direction once, after both; setting it in each arm instead gave 147 words, 47
  * in shape, when the draft gave 173. The register oracle, forcing 16 pseudos'
- * registers, leaves 78 words at best, so the code differs too. 157 words
- * differ, 27 in shape.
+ * registers, left 78 words at best with the draft at 157, so the code differs
+ * too. Setting the bounce's velocity in axis order, as the flag's is set, took
+ * it from 157 words, 27 in shape, to 150 (22); the original stores y between
+ * x's product and its store, as either order allows. A focused permuter run's
+ * best also scales the direction's z before its y, which gives 167 words (21 in
+ * shape) alone and 160 (16) with the velocity in axis order, so it is left out.
+ * 150 words differ, 22 in shape.
  */
 #ifdef NON_MATCHING
 s32 FindPinHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY, s32 endZ,
@@ -1938,8 +1943,8 @@ s32 FindPinHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY, s32 endZ,
         bounceSpeed = speed * FLAGSTICK_LEAST_BOUNCE;
       }
 
-      velocity[AXIS_Y] = deltaY;
       velocity[AXIS_X] = cosf(angle) * bounceSpeed;
+      velocity[AXIS_Y] = deltaY;
       velocity[AXIS_Z] = sinf(angle) * bounceSpeed;
     }
   }
