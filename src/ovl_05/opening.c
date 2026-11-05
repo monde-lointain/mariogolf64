@@ -1541,9 +1541,9 @@ void UpdateOpening(void) {
 
         if (f_OpeningSceneFramesLeft == 0x18) {
           f_OpeningShotSimulation.playerIndex = 0;
-          f_OpeningShotSimulation.isHoledOut = 0;
+          f_OpeningShotSimulation.isHoledOut = FALSE;
           f_OpeningShotSimulation.state = BALL_STATE_STOPPED;
-          f_OpeningShotSimulation.surface = 0x17;
+          f_OpeningShotSimulation.surface = SURFACE_TEE_UP;
           LaunchOpeningBallSimulation(
               &f_OpeningShotSimulation, 0, &f_OpeningFirstShot);
           f_OpeningShotState = 1;
@@ -1620,9 +1620,9 @@ void UpdateOpening(void) {
         f_OpeningShotSimulation.position[AXIS_Y] =
             GetGroundHeight(0xF1B96, 0x48CFDC);
         f_OpeningShotSimulation.playerIndex = 0;
-        f_OpeningShotSimulation.isHoledOut = 0;
+        f_OpeningShotSimulation.isHoledOut = FALSE;
         f_OpeningShotSimulation.state = BALL_STATE_STOPPED;
-        f_OpeningShotSimulation.surface = 0x17;
+        f_OpeningShotSimulation.surface = SURFACE_TEE_UP;
         LaunchOpeningBallSimulation(
             &f_OpeningShotSimulation, 0, &f_OpeningFirstShot);
         f_OpeningShotState = 1;
@@ -1692,9 +1692,9 @@ void UpdateOpening(void) {
 
         if (f_OpeningSceneFramesLeft == 0x16) {
           f_OpeningShotSimulation.playerIndex = 0;
-          f_OpeningShotSimulation.isHoledOut = 0;
+          f_OpeningShotSimulation.isHoledOut = FALSE;
           f_OpeningShotSimulation.state = BALL_STATE_STOPPED;
-          f_OpeningShotSimulation.surface = 0x17;
+          f_OpeningShotSimulation.surface = SURFACE_TEE_UP;
           LaunchOpeningBallSimulation(
               &f_OpeningShotSimulation, 0, &f_OpeningSecondShot);
           f_OpeningShotState = 1;
@@ -1750,9 +1750,9 @@ void UpdateOpening(void) {
           f_OpeningShotSimulation.position[AXIS_Y] =
               GetGroundHeight(0xF1B96, 0x48CFDC);
           f_OpeningShotSimulation.playerIndex = 0;
-          f_OpeningShotSimulation.isHoledOut = 0;
+          f_OpeningShotSimulation.isHoledOut = FALSE;
           f_OpeningShotSimulation.state = BALL_STATE_STOPPED;
-          f_OpeningShotSimulation.surface = 0x17;
+          f_OpeningShotSimulation.surface = SURFACE_TEE_UP;
           LaunchOpeningBallSimulation(
               &f_OpeningShotSimulation, 0, &f_OpeningSecondShot);
           f_OpeningShotState = 1;
@@ -1816,9 +1816,9 @@ void UpdateOpening(void) {
 
         if (f_OpeningSceneFramesLeft == 0x14) {
           f_OpeningShotSimulation.playerIndex = 0;
-          f_OpeningShotSimulation.isHoledOut = 0;
+          f_OpeningShotSimulation.isHoledOut = FALSE;
           f_OpeningShotSimulation.state = BALL_STATE_STOPPED;
-          f_OpeningShotSimulation.surface = 0x17;
+          f_OpeningShotSimulation.surface = SURFACE_TEE_UP;
           LaunchOpeningBallSimulation(
               &f_OpeningShotSimulation, 0, &f_OpeningThirdShot);
           f_OpeningShotState = 1;
@@ -1918,9 +1918,9 @@ void UpdateOpening(void) {
 
         if (f_OpeningSceneFramesLeft == 0) {
           f_OpeningShotSimulation.playerIndex = 0;
-          f_OpeningShotSimulation.isHoledOut = 0;
+          f_OpeningShotSimulation.isHoledOut = FALSE;
           f_OpeningShotSimulation.state = BALL_STATE_STOPPED;
-          f_OpeningShotSimulation.surface = 0x17;
+          f_OpeningShotSimulation.surface = SURFACE_TEE_UP;
           LaunchOpeningBallSimulation(
               &f_OpeningShotSimulation, 0, &f_OpeningFourthShot);
           f_OpeningShotState = 1;
