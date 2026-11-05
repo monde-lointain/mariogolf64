@@ -4822,7 +4822,10 @@ void DrawUpDownArrows(Gfx** displayListHead, s32 centerY);
  * words differing but 16 in shape, and copies code for no reason. Declaring a
  * board's turns as a u16 or u8 gives 43 words (7 in shape), but turns goes
  * negative, and the original multiplies the remainder from mfhi by the angle
- * step without masking it. 86 words differ, 2 in shape.
+ * step without masking it. areCharactersDrawn is a u8, as the original masks it
+ * with andi 0xff before testing it in the boards' loop; as a Boolean or s32 it
+ * gives 44 words (4 in shape) without the mask, and as an s8 or s16 88 (4). 86
+ * words differ, 2 in shape.
  */
 #ifdef NON_MATCHING
 void DrawModeSelect(Gfx** displayListHead) {
