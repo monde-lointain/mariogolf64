@@ -2985,10 +2985,10 @@ void ShowHoleOutBanner(s32 playerIndex) {
  * puts each constant address in a register; as a helper, the ball placement
  * kept the ball's X address in a register and CSE reached Z through it with an
  * offset, where the original loads and stores each through its own lui. Written
- * in place, the ball placement gives 90 words (48 in shape) against 146 (78) as
+ * in place, the ball placement gave 90 words (48 in shape) against 146 (78) as
  * a helper.
  *
- * Doesn't match: 90 words differ, 48 in shape, spread through the routine's
+ * Doesn't match: 83 words differ, 45 in shape, spread through the routine's
  * states. The counts in the paragraphs after the next were measured before it,
  * when 454 words differed, 184 in shape.
  *
@@ -3094,6 +3094,14 @@ void ShowHoleOutBanner(s32 playerIndex) {
  * or choosing TRUE or FALSE with it leaves 241 words (111). The counts in this
  * paragraph and the one before were measured before the debug timing's two
  * stores.
+ *
+ * The holed-out reaction works out the score to par before testing for a hole
+ * in one, and tests for it first; the original subtracts par in the delay slot
+ * of the branch taken for a hole in one. That gives 83 words differing, 45 in
+ * shape, against 90 (48) with the subtraction in the switch after the != 1
+ * test, and the register oracle's closest result falls from 75 words to 68,
+ * with 5 registers forced for each. Testing for a hole in one first without the
+ * local gives 86 (48), and the local with the != 1 test first 89 (45).
  */
 #ifdef NON_MATCHING
 /* Whether the stopwatches run in a player state: from aiming to the flight */
@@ -3921,9 +3929,9 @@ void UpdateTurns(void) {
              * controller moves it while Z is held. In its own block, which
              * frees the buffer's slot when the flag's test ends, so it shares
              * one slot with the other debug buffers, as in the original's
-             * frame; declared in the flag's block or the state's, the frame
-             * outgrows the original's 0x118 bytes and 192 words differ (48 in
-             * shape), and in a do-while 104 (48), against 90 (48).
+             * frame; declared in the flag's block, the frame grows from the
+             * original's 0x118 bytes to 0x1A0 and 185 words differ (45 in
+             * shape), and in a do-while 97 (45), against 83 (45).
              */
             {
               char text[DEBUG_TEXT_BUFFER_SIZE];
@@ -4265,8 +4273,8 @@ void UpdateTurns(void) {
            * folds the clamp's upper test below and the second its lower
            * test, where the original loads the timing back for both. A
            * store in each arm keeps a join between the stores and the
-           * clamp until cross-jumping merges them: 90 words differ, 48 in
-           * shape, against 104 and 62.
+           * clamp until cross-jumping merges them: 83 words differ, 45 in
+           * shape, against 97 and 59.
            */
           if (g_TurnController.pressedButtons & B_BUTTON) {
             f_ShotLaunch.power = MAX_LAUNCH_POWER;
@@ -4806,25 +4814,29 @@ void UpdateTurns(void) {
             SetRingShotCleared(TRUE);
             reaction = REACTION_ANIMATION_EAGLE;
           }
-        } else if (g_Players[playerIndex].strokeCount != 1) {
-          switch (g_Players[playerIndex].strokeCount - g_HoleSetup.par) {
-            case SCORE_TO_PAR_ALBATROSS:
-            case SCORE_TO_PAR_EAGLE:
-              reaction = REACTION_ANIMATION_EAGLE;
-              break;
-            case SCORE_TO_PAR_BIRDIE:
-              reaction = REACTION_ANIMATION_BIRDIE;
-              break;
-            case SCORE_TO_PAR_PAR:
-              reaction = REACTION_ANIMATION_PAR;
-              break;
-            case SCORE_TO_PAR_BOGEY:
-            default:
-              reaction = REACTION_ANIMATION_BOGEY;
-              break;
-          }
         } else {
-          reaction = REACTION_ANIMATION_EAGLE;
+          s32 scoreToPar = g_Players[playerIndex].strokeCount - g_HoleSetup.par;
+
+          if (g_Players[playerIndex].strokeCount == 1) {
+            reaction = REACTION_ANIMATION_EAGLE;
+          } else {
+            switch (scoreToPar) {
+              case SCORE_TO_PAR_ALBATROSS:
+              case SCORE_TO_PAR_EAGLE:
+                reaction = REACTION_ANIMATION_EAGLE;
+                break;
+              case SCORE_TO_PAR_BIRDIE:
+                reaction = REACTION_ANIMATION_BIRDIE;
+                break;
+              case SCORE_TO_PAR_PAR:
+                reaction = REACTION_ANIMATION_PAR;
+                break;
+              case SCORE_TO_PAR_BOGEY:
+              default:
+                reaction = REACTION_ANIMATION_BOGEY;
+                break;
+            }
+          }
         }
 
         StartReaction(0, g_Players[playerIndex].characterIndex, reaction);
