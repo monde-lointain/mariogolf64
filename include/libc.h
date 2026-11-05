@@ -13,6 +13,7 @@ s32 rand(void);
 void srand(u32 seed);
 /* Built into GCC, which compiles it to an abs.d instruction */
 double fabs(double value);
+
 /*
  * The game's own fabsf, an abs.s in volatile inline assembly. Local-alloc
  * can't give its result the operand's register, as it can the built-in's,
@@ -28,12 +29,19 @@ static inline float fabsf(float value) {
   __asm__ volatile("abs.s %0, %1" : "=f"(magnitude) : "f"(value));
   return magnitude;
 }
+
 double atan(double value);
 double atan2(double y, double x);
 double sin(double angle);
 double cos(double angle);
 /* Built into GCC, which compiles it to a sqrt.d instruction */
 double sqrt(double value);
+/*
+ * Built into GCC, which compiles it to a sqrt.s instruction. Unlike fabsf, the
+ * game uses the built-in: as inline assembly like fabsf's, volatile or not,
+ * the matched code of 20 files compiles differently.
+ */
+float sqrtf(float value);
 #ifndef __IS_KMC__
 /* The freestanding modern build has no built-ins but those named so, and no
  * library defines these */

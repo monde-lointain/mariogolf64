@@ -206,7 +206,9 @@ typedef s32 Boolean;
 #define MemberSize(type, member) (s32)sizeof(((type*)0)->member)
 
 /* The magnitude of an integer. The game's code evaluates the value once,
-   into a variable of its own, as a GNU statement expression does. */
+   into a variable of its own, as a GNU statement expression does. GCC's
+   built-in abs compiles differently: with it, the matched code of 10 files
+   changes. */
 #define Abs(value) \
   ({ \
     s32 absValue = (value); \
