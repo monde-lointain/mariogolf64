@@ -4451,13 +4451,16 @@ void DrawMenuBanner(Gfx** displayListHead) {
  * pointer from s0 to t7. loop.c turns the offset down because the loop has 268
  * insns after CSE and the offset is worth 252; the original's loop must be 252
  * insns or fewer. 62 words differ. A permuter run got to 2 only by testing
- * f_TitleLabelCorners around two identical labelOffset branches, and an else
- * if around identical branches gets 16; neither test has any meaning.
- * Another got to 4 words, none in shape, by setting labelOffset to
- * TITLE_LABEL_WIDTH and then multiplying it in, which leaves loop.c a mult
- * whose reduction it rates higher, so it steps the offset even in a 270-insn
- * loop; that split alone gives 6 words. Every constant spelling of the size,
- * in either operand order or with a named size, gives 62 to 73.
+ * f_TitleLabelCorners around two identical labelOffset branches, and an else if
+ * around identical branches gets 16; neither test has any meaning. Another got
+ * to 4 words, none in shape, by setting labelOffset to TITLE_LABEL_WIDTH and
+ * then multiplying it in, which leaves loop.c a mult whose reduction it rates
+ * higher, so it steps the offset even in a 270-insn loop; that split alone
+ * gives 6 words. Every constant spelling of the size, in either operand order
+ * or with a named size, gives 62 to 73. A u16 labelOffset gives 27 words (17 in
+ * shape), and an s16 29 (19). With the u16, loop.c steps the offset, by 0x500
+ * where the original steps by 5 and shifts, but each use masks it with andi
+ * 0xFFFF, which the original doesn't.
  */
 #ifdef NON_MATCHING
 const char f_PlainMenuHeading[] = "MAIN MENU";
@@ -4816,8 +4819,10 @@ void DrawUpDownArrows(Gfx** displayListHead, s32 centerY);
  * strips' and players' loops, but counters of their own for those loops give
  * 138 to 230 words. Working out a board's angle and x in both arms of the mode
  * count's test, which still compiles to the target's two sinf calls, gives 74
- * words differing but 16 in shape, and copies code for no reason. 86 words
- * differ, 2 in shape.
+ * words differing but 16 in shape, and copies code for no reason. Declaring a
+ * board's turns as a u16 or u8 gives 43 words (7 in shape), but turns goes
+ * negative, and the original multiplies the remainder from mfhi by the angle
+ * step without masking it. 86 words differ, 2 in shape.
  */
 #ifdef NON_MATCHING
 void DrawModeSelect(Gfx** displayListHead) {
