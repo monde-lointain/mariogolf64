@@ -4654,8 +4654,9 @@ void LoadOpeningLogo(void) {
  * time. While the logo shrinks, the L letter's position and scale are stepped
  * before the club's, as a focused permuter run suggested; stepping the club's
  * position between them, as the draft did, gave 104 words (14 in shape), with
- * its y step first 90 (6), and the club's position after its scale 128 (22). 80
- * words differ, 6 in shape.
+ * its y step first 90 (6), and the club's position after its scale 128 (22).
+ * Forcing registers doesn't help: the register oracle's rounds, forcing 9 to 15
+ * pseudos, give 605 to 678 words. 80 words differ, 6 in shape.
  */
 #ifdef NON_MATCHING
 void DrawOpeningLogo(Gfx** displayListHead, Boolean isDrawn) {
