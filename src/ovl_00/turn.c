@@ -1226,7 +1226,9 @@ void MoveAimCameraDistance(void) {
  * folded. A permuter output with 39 words (9 in shape) worked out
  * g_AltHeading's half stick into a temp before the speed and copied it to step
  * after; computing step after the speed instead gave 43 (19), and in both
- * branches 54 (30).
+ * branches 54 (30). A u32 speed for the aim heading's step gives 37 words (11
+ * in shape), but it drops the speed's < 0 test, where the original keeps its
+ * bltzl and negu.
  */
 #ifdef NON_MATCHING
 void TurnAim(s32 turnsAltHeading) {
