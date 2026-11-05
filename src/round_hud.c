@@ -1698,8 +1698,10 @@ typedef struct GridScreenPoint {
  * int temp; a Boolean local for those tests made the exit store the Boolean and
  * test it, where the original branches straight to the return. Before the syncs
  * were moved, indexing the first two loops' arrays by rowStart + column gave
- * 337 words (51 in shape) where a local holding it gave 345 (55). 342 words
- * differ, 48 in shape.
+ * 337 words (51 in shape) where a local holding it gave 345 (55). A BinaryAngle
+ * local for the heading changes nothing in place, and read before
+ * GetSelectedClub gives 311 words (51 in shape), but the original reads the
+ * heading after that call returns. 342 words differ, 48 in shape.
  */
 void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
   f32 points[GREEN_GRID_POINT_COUNT][3];
