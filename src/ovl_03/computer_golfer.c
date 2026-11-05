@@ -3059,6 +3059,17 @@ Boolean IsLineMostlyLost(CoursePoint from, CoursePoint to) {
  * Doesn't match: the original reads the loop's state through a saved address
  * biased into the simulation, also used for StepBallSimulation's argument.
  * Here the state is read from its global address. 6 words differ, 4 in shape.
+ *
+ * The original reads the state inside the loop as 0x64 from that address, 0x28
+ * past the simulation, and outside it from the global. Reading the loop's state
+ * and passing StepBallSimulation's argument through a simulation pointer set
+ * before the loop reads the state from the saved address, unbiased, and gives 7
+ * words, 3 in shape; setting it at the top gives 15, using it after the launch
+ * as well 13, and for every access 60. The pointer isn't adopted: cse's
+ * use_related_value derives one address in a symbol from a register holding
+ * another, as StepTrialShot's draft passes &f_TrialSimulation and is compiled
+ * to its state's address less 140, as in its target. The 0x28 bias is
+ * unexplained.
  */
 #ifdef NON_MATCHING
 Boolean IsTrialShotSafe(void) {
