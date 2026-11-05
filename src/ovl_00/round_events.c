@@ -2603,9 +2603,9 @@ void LoadContactImages(Player* player) {
  * firstVertex */
 #define DrawContactSegment(segment, firstVertex) \
   { \
-    gSPMatrix(gfx++, \
-        PhysicalAddress(&f_ContactMatrices[(f_ContactTrailHead + (segment)) % \
-            CONTACT_TRAIL_LENGTH]), \
+    s32 slot = (f_ContactTrailHead + (segment)) % CONTACT_TRAIL_LENGTH; \
+\
+    gSPMatrix(gfx++, PhysicalAddress(&f_ContactMatrices[slot]), \
         G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW); \
     gSPMatrix(gfx++, \
         PhysicalAddress(&f_ContactRibbonMatrices[g_DrawBufferIndex]), \
@@ -2649,15 +2649,17 @@ void LoadContactImages(Player* player) {
  * Draws the contact effect as a ribbon through the ball's last positions, and
  * Mario's as a spinning image, while it fades
  *
- * Doesn't match: 170 words differ, 18 in shape, and of the 85 that blame.py
- * ties to a line, 82 come from the two DrawContactRibbon expansions. There the
- * remainder of the ring's index takes a register of its own, and the reload
- * loops' vertex numbers subtract 16 or 31 before pass * 30, where this
- * subtracts pass * 30 first. Writing i - 16 - (pass * 30) gives 1014 words
- * differing, 184 in shape, and i - 31 - (pass * 30) in the second loop 268
- * (20). Counting the reload loops from 0 and adding each pass's first segment
- * to i gives 1352 (420), or with the first loop alone 1052 (256) and the second
- * 1276 (332).
+ * Doesn't match: 22 words differ, 18 in shape. In the two DrawContactRibbon
+ * expansions, the reload loops' vertex numbers subtract 16 or 31 before pass *
+ * 30, where this subtracts pass * 30 first. Writing i - 16 - (pass * 30) gives
+ * 940 words differing, 184 in shape, i - 31 - (pass * 30) in the second loop
+ * 132 (20), and both 922 (174). Earlier, when the draft gave 170 words,
+ * counting the reload loops from 0 and adding each pass's first segment to i
+ * gave 1352 (420), or with the first loop alone 1052 (256) and the second 1276
+ * (332). The original holds each segment's ring slot in a register of its own,
+ * so DrawContactSegment works it out into a local, as a focused permuter run's
+ * temp suggested; written into the matrix's address, 170 words differed, also
+ * 18 in shape.
  */
 void DrawContactEffect(Gfx** displayListHead, CameraMatrices* matrices) {
   Mat4 scale;
