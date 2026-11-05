@@ -1031,7 +1031,7 @@ s32 FindMiniGolfGroundHit(BallSimulation* simulation, s32 startX, s32 startY,
   f32 tileFraction;
   f32 step;
 
-  if (IsGameFlagSet(GAME_FLAG_UNK0)) {
+  if (IsGameFlagSet(GAME_FLAG_PRINT_HIT_PATHS)) {
     PrintDebugPaddedHex(startX, PATH_DEBUG_COLUMN, PATH_DEBUG_ROW);
     PrintDebugPaddedHex(startY, PATH_DEBUG_COLUMN, PATH_DEBUG_ROW + 1);
     PrintDebugPaddedHex(startZ, PATH_DEBUG_COLUMN, PATH_DEBUG_ROW + 2);
@@ -1297,7 +1297,7 @@ s32 FindGroundHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
   f32 tileFraction;
   f32 step;
 
-  if (IsGameFlagSet(GAME_FLAG_UNK0)) {
+  if (IsGameFlagSet(GAME_FLAG_PRINT_HIT_PATHS)) {
     PrintDebugPaddedHex(startX, PATH_DEBUG_COLUMN, PATH_DEBUG_ROW);
     PrintDebugPaddedHex(startY, PATH_DEBUG_COLUMN, PATH_DEBUG_ROW + 1);
     PrintDebugPaddedHex(startZ, PATH_DEBUG_COLUMN, PATH_DEBUG_ROW + 2);
@@ -2084,7 +2084,7 @@ s32 FindHoleTriangleHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
   s32 hitX;
   s32 hitZ;
   s32 sides;
-  Boolean isDebug = IsGameFlagSet(GAME_FLAG_UNK0);
+  Boolean isDebug = IsGameFlagSet(GAME_FLAG_PRINT_HIT_PATHS);
 
   hitIndex = NO_HOLE_TRIANGLE;
   if (isDebug) {
@@ -2312,7 +2312,7 @@ s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
   s32 hitPointV;
   s32 facing;
   s32 k;
-  Boolean isDebug = IsGameFlagSet(GAME_FLAG_UNK0);
+  Boolean isDebug = IsGameFlagSet(GAME_FLAG_PRINT_HIT_PATHS);
 
   /*
    * Set between the flag query and its test, as in FindHoleTriangleHit and
@@ -2900,7 +2900,7 @@ s32 PushBallOutOfWalls(BallSimulation* simulation, s32 checksHeight) {
   f32 side;
   f32 cornerDistance;
 
-  IsGameFlagSet(GAME_FLAG_UNK0);
+  IsGameFlagSet(GAME_FLAG_PRINT_HIT_PATHS);
   x = simulation->position[AXIS_X];
   z = simulation->position[AXIS_Z];
   y = simulation->position[AXIS_Y];
@@ -3094,7 +3094,7 @@ s32 FindRingHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
   s32 hitX;
   s32 hitY;
   s32 hitZ;
-  Boolean isDebug = IsGameFlagSet(GAME_FLAG_UNK0);
+  Boolean isDebug = IsGameFlagSet(GAME_FLAG_PRINT_HIT_PATHS);
 
   /* After the flag query, so this fills the debug branch's delay slot. */
   hitNumber = NO_RING_NUMBER;

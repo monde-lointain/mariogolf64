@@ -13,7 +13,7 @@
 #define GAME_FLAG_COUNT 256
 
 /* Prints the paths that the collision tests are given */
-#define GAME_FLAG_UNK0 0x00
+#define GAME_FLAG_PRINT_HIT_PATHS 0x00
 
 /* Logs a stroke's rolling ball's vertical velocity each step */
 #define GAME_FLAG_LOG_VERTICAL_VELOCITY 0x02
