@@ -111,7 +111,7 @@ extern const char f_ZeroToParFormat[];
 extern const char f_ScoreToParFormat[];
 extern const char f_WideTotalFormat[];
 extern const char f_TotalFormat[];
-/* Each player's result in a match. func_802460F8 shows f_WinText too. */
+/* Each player's result in a match. DrawSkinsPage shows f_WinText too. */
 extern const char f_DrawText[];
 extern const char f_WinText[];
 extern const char f_LoseText[];
