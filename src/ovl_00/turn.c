@@ -4481,7 +4481,7 @@ void UpdateTurns(void) {
 
             if (g_TurnBallSimulation.state != BALL_STATE_ROLLING ||
                 g_GameState.isMiniGolf ||
-                (GetSurfaceInfo(g_TurnBallSimulation.unkA4)->kind ==
+                (GetSurfaceInfo(g_TurnBallSimulation.surfaceBelow)->kind ==
                         SURFACE_KIND_GREEN &&
                     (s32)distance < (s32)previousDistance)) {
               break;

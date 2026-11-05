@@ -404,7 +404,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
     startZ = simulation->position[AXIS_Z];
     previousVelocityX = velocity[AXIS_X];
     previousVelocityZ = velocity[AXIS_Z];
-    simulation->unkB1 = simulation->unkA6;
+    simulation->previousStepFlags = simulation->stepFlags;
     hitsHoleTriangle = FALSE;
     /*
      * The goto, to match: the rest of the step in an if on the ball not having
@@ -481,14 +481,14 @@ s32 StepBallSimulation(BallSimulation* simulation) {
           }
         }
 
-        if (simulation->state == BALL_STATE_ROLLING && simulation->unkB4) {
+        if (simulation->state == BALL_STATE_ROLLING && simulation->isOverCup) {
           s32 groundHeight = GetGroundHeight(startX, startZ);
 
           if (groundHeight < startY) {
             startY = groundHeight;
           }
 
-          simulation->unkB4 = 0;
+          simulation->isOverCup = 0;
         }
 
         if (g_GameState.isMiniGolf) {
@@ -582,12 +582,13 @@ s32 StepBallSimulation(BallSimulation* simulation) {
       s32 pinHit;
 
       if (g_GameState.isMiniGolf ||
-          GetSurfaceInfo(simulation->unkA2)->kind != SURFACE_KIND_GREEN) {
+          GetSurfaceInfo(simulation->launchSurface)->kind !=
+              SURFACE_KIND_GREEN) {
         pinHit =
             FindPinHit(startX, startY, startZ, simulation->position[AXIS_X],
                 simulation->position[AXIS_Y], simulation->position[AXIS_Z],
                 pinVelocity, &pinFraction, simulation->hasHitFlag, simulation);
-        if (pinHit && !(simulation->unkB1 & 8)) {
+        if (pinHit && !(simulation->previousStepFlags & STEP_FLAG_PIN_HIT)) {
           simulation->bounceCount++;
           simulation->position[AXIS_X] =
               startX + (pinFraction * velocity[AXIS_X]);
@@ -694,7 +695,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
 
                 simulation->state = BALL_STATE_IN_CUP;
                 if (speed < MAX_CUP_IN_SOUND_SPEED) {
-                  simulation->unkA8[0] = 1;
+                  simulation->soundStates[BALL_SOUND_CUP_IN] = CUP_IN_SOUND_DUE;
                 }
               }
             }
@@ -939,13 +940,14 @@ s32 StepBallSimulation(BallSimulation* simulation) {
           simulation->state = BALL_STATE_STOPPED;
         }
 
-        if (simulation->unkA8[0] == 1) {
+        if (simulation->soundStates[BALL_SOUND_CUP_IN] == CUP_IN_SOUND_DUE) {
           if (simulation->purpose == LAUNCH_PURPOSE_STROKE) {
             PlaySound(SOUND_CUP_IN, g_NextSoundChannel, SOUND_FULL_SCALE);
           }
 
-          simulation->unkA8[0] = 2;
-        } else if (simulation->unkA8[0] == 0) {
+          simulation->soundStates[BALL_SOUND_CUP_IN] = CUP_IN_SOUND_PLAYED;
+        } else if (simulation->soundStates[BALL_SOUND_CUP_IN] ==
+            CUP_IN_SOUND_NONE) {
           if (fallSpeed >= MIN_CUP_FLOOR_SOUND_SPEED) {
             SoundVolume volume = fallSpeed * CUP_SOUND_VOLUME_PER_SPEED;
 
@@ -2074,14 +2076,14 @@ SETTLE:
 
               if (cupDistance < CUP_DROP_RADIUS) {
                 floor += CUP_DEPTH;
-                simulation->unkB4 = 1;
+                simulation->isOverCup = 1;
               } else if (cupDistance < CUP_RIM_OUTER_RADIUS) {
                 f32 rimDistance = CUP_RIM_OUTER_RADIUS - cupDistance;
                 f32 rest = (CUP_RIM_CURVE_RADIUS * CUP_RIM_CURVE_RADIUS) -
                     (rimDistance * rimDistance);
 
                 if (rest > 0.0f) {
-                  simulation->unkB4 = 1;
+                  simulation->isOverCup = 1;
                   floor = floor +
                       ((CUP_RIM_CURVE_RADIUS - sqrtf(rest)) *
                           CUP_RIM_SINK_SCALE);
@@ -2105,9 +2107,9 @@ SETTLE:
         PlaneTriangle ground;
         TrianglePlane plane;
 
-        simulation->unkA4 = FindSurface(
+        simulation->surfaceBelow = FindSurface(
             simulation->position[AXIS_X], simulation->position[AXIS_Z], TRUE);
-        kind = GetSurfaceInfo(simulation->unkA4)->kind;
+        kind = GetSurfaceInfo(simulation->surfaceBelow)->kind;
         if (IsDropKind(kind) &&
             FindGroundTriangle(simulation->position[AXIS_X],
                 simulation->position[AXIS_Z], &ground) == 0 &&
@@ -2121,19 +2123,20 @@ SETTLE:
 
 NEXT:
 
-    simulation->unkA6 = flags;
+    simulation->stepFlags = flags;
   } while (++substep < substepCount);
   simulation->velocity[AXIS_X] = velocity[AXIS_X];
   simulation->velocity[AXIS_Y] = velocity[AXIS_Y];
   simulation->velocity[AXIS_Z] = velocity[AXIS_Z];
   if (simulation->purpose == LAUNCH_PURPOSE_STROKE) {
-    if (simulation->state == BALL_STATE_ROLLING && !simulation->unkA8[1]) {
+    if (simulation->state == BALL_STATE_ROLLING &&
+        !simulation->soundStates[BALL_SOUND_ROLL]) {
       PlaySound(SOUND_ROLL, ROLL_SOUND_CHANNEL, SOUND_FULL_SCALE);
-      simulation->unkA8[1] = TRUE;
-    } else if (simulation->unkA8[1]) {
+      simulation->soundStates[BALL_SOUND_ROLL] = TRUE;
+    } else if (simulation->soundStates[BALL_SOUND_ROLL]) {
       if (simulation->state != BALL_STATE_ROLLING) {
         StopSound(ROLL_SOUND_CHANNEL);
-        simulation->unkA8[1] = FALSE;
+        simulation->soundStates[BALL_SOUND_ROLL] = FALSE;
       } else {
         s32 rollFrames = simulation->rollFrameCount;
         SoundVolume volume;
@@ -2278,11 +2281,11 @@ s32 LaunchBallSimulation(
   simulation->startPosition[AXIS_Y] = simulation->dropPosition[AXIS_Y];
   simulation->dropPosition[AXIS_Z] = simulation->position[AXIS_Z];
   simulation->startPosition[AXIS_Z] = simulation->dropPosition[AXIS_Z];
-  simulation->unkA2 = surface;
+  simulation->launchSurface = surface;
   simulation->firstBounceSurface = surface;
   simulation->hasEnteredWater = 0;
-  simulation->unkA6 = 0;
-  simulation->unkB4 = 0;
+  simulation->stepFlags = 0;
+  simulation->isOverCup = 0;
 
   /*
    * The tests of purpose, and their senses, are there to match: setting the
@@ -2350,7 +2353,7 @@ s32 LaunchBallSimulation(
   }
 
   if (simulation->purpose != LAUNCH_PURPOSE_CLUB_TEST) {
-    SurfaceInfo* info = GetSurfaceInfo(simulation->unkA2);
+    SurfaceInfo* info = GetSurfaceInfo(simulation->launchSurface);
 
     blend = PickLieBlend();
     GetSurfacePercentRange(info, club, percentRange);
@@ -2428,7 +2431,7 @@ s32 LaunchBallSimulation(
     simulation->sideSpin =
         (sideSign * (club->sideSpin * CLUB_SIDE_SPIN_SCALE) * speed) *
         SIDE_SPIN_PER_SPEED;
-    simulation->unk40 = 0.0f;
+    simulation->spinSize = 0.0f;
     spinBase = club->spin * CLUB_SPIN_BASE_SCALE;
     simulation->spinSpeed = (((spinBase + CLUB_TEST_SPIN_OFFSET) *
                                  CLUB_TEST_SPIN_PER_OFFSET * shot->offsetY) -
@@ -2443,7 +2446,7 @@ s32 LaunchBallSimulation(
       speed = 0;
     }
   } else {
-    GetSurfaceInfo(simulation->unkA2); /* The original has it */
+    GetSurfaceInfo(simulation->launchSurface); /* The original has it */
     simulation->sideSpin =
         (((sideSign * entry->sideSpinChange * club->mishitScale) /
              MISHIT_SIDE_SPIN_DIVISOR) +
@@ -2474,9 +2477,9 @@ s32 LaunchBallSimulation(
       simulation->sideSpin = simulation->sideSpin * RAIN_SIDE_SPIN_SCALE;
     }
 
-    simulation->unk40 =
+    simulation->spinSize =
         IntLength2D(simulation->spinSpeed, simulation->sideSpin) *
-        UNK40_SPIN_SCALE;
+        SPIN_SIZE_SCALE;
     simulation->spinHeading = yawRadians;
   }
 
@@ -2500,8 +2503,8 @@ s32 LaunchBallSimulation(
   simulation->isHoledOut = 0;
   simulation->hasHitFlag = FALSE;
   simulation->rollFrameCount = 0;
-  for (index = 0; index < UNKA8_COUNT; index++) {
-    simulation->unkA8[index] = 0;
+  for (index = 0; index < BALL_SOUND_COUNT; index++) {
+    simulation->soundStates[index] = 0;
   }
 
   /*

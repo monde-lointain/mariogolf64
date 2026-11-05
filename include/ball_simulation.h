@@ -139,7 +139,19 @@ typedef struct ShotLaunch {
 /* BallSimulation's lastBounceStep before the ball's first bounce */
 #define NO_BOUNCE_STEP (-2)
 
-#define UNKA8_COUNT 8
+/* BallSimulation.soundStates' entries */
+#define BALL_SOUND_CUP_IN 0 /* A CUP_IN_SOUND_* value */
+#define BALL_SOUND_ROLL 1 /* Whether the roll sound is playing */
+#define BALL_SOUND_COUNT 8
+
+/*
+ * The cup-in sound's states. A ball that drops in slowly makes the sound due,
+ * and it plays as the ball reaches the cup's floor; any other ball knocks on
+ * the floor instead.
+ */
+#define CUP_IN_SOUND_NONE 0
+#define CUP_IN_SOUND_DUE 1
+#define CUP_IN_SOUND_PLAYED 2
 
 /* Added to a putt's y velocity as it launches */
 #define PUTT_VELOCITY_Y_OFFSET 0x106
@@ -170,7 +182,7 @@ typedef struct BallSimulation {
   /* Curves the ball in flight; the debug display calls it SpinY */
   /* 0x38 */ s32 sideSpin;
   /* 0x3C */ Radians spinHeading; /* Launching sets it to the yaw */
-  /* 0x40 */ f32 unk40;
+  /* 0x40 */ f32 spinSize; /* Set at launch; read by no routine */
   /* Turns the ball's velocity through the air into its lift's direction */
   /* 0x44 */ Mat4 liftRotation;
   /* 0x84 */ f32 windVelocityX;
@@ -184,20 +196,20 @@ typedef struct BallSimulation {
   /* 0x9C */ s32 lastBounceStep;
   /* 0xA0 */ s8 isHoledOut; /* Set as the ball stops in the cup */
   /* 0xA1 */ s8 hasEnteredWater; /* Set once the ball is in the water */
-  /* 0xA2 */ s8 unkA2; /* A SURFACE_* value */
+  /* 0xA2 */ s8 launchSurface; /* The SURFACE_* launched from */
   /* 0xA3 */ s8 surface; /* The SURFACE_* that the ball is on */
-  /* 0xA4 */ s8 unkA4; /* A SURFACE_* value */
+  /* 0xA4 */ s8 surfaceBelow; /* The SURFACE_* under the ball, in the air too */
   /* 0xA5 */ s8 playerIndex;
-  /* 0xA6 */ s8 unkA6;
+  /* 0xA6 */ s8 stepFlags; /* STEP_FLAG_* bits of the last substep */
   /* The SURFACE_* of the first bounce, if on the ground; at first, where
      the ball started */
   /* 0xA7 */ s8 firstBounceSurface;
-  /* 0xA8 */ s8 unkA8[UNKA8_COUNT];
+  /* 0xA8 */ s8 soundStates[BALL_SOUND_COUNT];
   /* Keeps the flag from being hit twice */
   /* 0xB0 */ s8 hasHitFlag;
-  /* 0xB1 */ u8 unkB1;
+  /* 0xB1 */ u8 previousStepFlags; /* stepFlags as the step started */
   /* 0xB2 */ u16 rollFrameCount; /* Frames since the ball began rolling */
-  /* 0xB4 */ s8 unkB4;
+  /* 0xB4 */ s8 isOverCup; /* The floor under the ball dips into the cup */
   /* 0xB5 */ u8 unkB5[0xB8 - 0xB5];
 } BallSimulation; /* size = 0xB8 */
 

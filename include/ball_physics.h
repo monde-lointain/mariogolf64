@@ -483,7 +483,7 @@ typedef s32 BunkerBurial;
 #define RAIN_LAUNCH_SPEED_SCALE 0.95f
 #define RAIN_SPIN_SCALE 0.6f
 #define RAIN_SIDE_SPIN_SCALE 0.95f
-#define UNK40_SPIN_SCALE 0.4f
+#define SPIN_SIZE_SCALE 0.4f
 /*
  * The wind's speed becomes its velocity at this scale. Out of the rain, the
  * wind loses this share of its part along the shot's heading.
