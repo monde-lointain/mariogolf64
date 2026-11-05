@@ -1684,7 +1684,7 @@ typedef struct GridScreenPoint {
 /*
  * Doesn't match: the club and the shot's distance take each other's saved
  * registers, and registers differ through the grid's loops. The register oracle
- * comes no closer than 222 words differing, with 26 pseudos forced. The quads
+ * comes no closer than 214 words differing, with 26 pseudos forced. The quads
  * across the aim sync once after choosing their depth, and the lines along it
  * don't sync before choosing theirs, as in the original's display list; with a
  * sync inside each of the quads' depth branches and another before the lines'
@@ -1715,7 +1715,11 @@ typedef struct GridScreenPoint {
  * pass's own, acrossRowStart, took the draft from 342 words differing to 308,
  * 48 in shape both, in each of the five declaration places tried, and the
  * oracle's closest from 228 words, forcing 29 pseudos, to 222, forcing 26. 308
- * words differ, 48 in shape.
+ * words differed, 48 in shape, at the time. Stepping the lines along the aim
+ * with the quads' column counter, drawnColumn, rather than the column the first
+ * two loops step, took the draft to 302 words, 48 in shape, and the oracle's
+ * closest from 222 words to 214, forcing 26 pseudos both. 302 words differ, 48
+ * in shape.
  */
 void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
   f32 points[GREEN_GRID_POINT_COUNT][3];
@@ -1735,7 +1739,12 @@ void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
   s32 row;
   s32 acrossRow;
   s32 column;
-  s32 acrossColumn;
+  /*
+   * The column in both the quads across the aim and the lines along it, to
+   * match: a column variable of the lines' own gives 308 words differing
+   * against 302, 48 in shape both
+   */
+  s32 drawnColumn;
   s32 rowStart;
   s32 acrossRowStart;
   s32 point;
@@ -1983,13 +1992,13 @@ void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
     /* The lines across the aim, one quad between each pair of points in a row
      */
     for (acrossRow = 0, acrossRowStart = 0; acrossRow != rowCount;) {
-      for (acrossColumn = 0; acrossColumn != columnCount; acrossColumn++) {
-        point = acrossRowStart + acrossColumn;
+      for (drawnColumn = 0; drawnColumn != columnCount; drawnColumn++) {
+        point = acrossRowStart + drawnColumn;
         if (screenPoints[point].isVisible != TRUE) {
           continue;
         }
 
-        if (acrossColumn & 1) {
+        if (drawnColumn & 1) {
           neighbor = point - 1;
           dx = screenPoints[point].x - screenPoints[neighbor].x;
           dy = screenPoints[point].y - screenPoints[neighbor].y;
@@ -2008,7 +2017,7 @@ void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
         dx *= scale;
         dy *= scale;
         SetGreenGridTint(slopes[point]);
-        if (acrossColumn & 1) {
+        if (drawnColumn & 1) {
           gSPModifyVertex(gfx++, 2, G_MWO_POINT_XYSCREEN,
               ScreenPointWord(screenPoints[point].x, screenPoints[point].y));
           gSPModifyVertex(gfx++, 3, G_MWO_POINT_XYSCREEN,
@@ -2039,7 +2048,7 @@ void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
               RgbaColor(red, green, blue, f_GreenGridAlpha));
           gSPModifyVertex(gfx++, 1, G_MWO_POINT_RGBA,
               RgbaColor(red, green, blue, f_GreenGridAlpha));
-          if (acrossColumn != 0 && screenPoints[point - 1].isVisible == TRUE) {
+          if (drawnColumn != 0 && screenPoints[point - 1].isVisible == TRUE) {
             gDPPipeSync(gfx++);
             if (screenPoints[point].depth < screenPoints[point - 1].depth) {
               gDPSetPrimDepth(gfx++, screenPoints[point].depth, 0);
@@ -2067,9 +2076,9 @@ void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
 
     /* The lines along the aim, one quad between each pair of points in a column
      */
-    for (column = 0; column != columnCount; column++) {
+    for (drawnColumn = 0; drawnColumn != columnCount; drawnColumn++) {
       for (row = 0; row != rowCount - 1; row++) {
-        point = (row * columnCount) + column;
+        point = (row * columnCount) + drawnColumn;
 
         if (screenPoints[point].isVisible != TRUE ||
             screenPoints[point + columnCount].isVisible != TRUE) {
