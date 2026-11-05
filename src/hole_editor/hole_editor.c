@@ -2804,7 +2804,6 @@ s32 ShouldMirrorCell(s32 column, s32 row, s32 endColumn, s32 endRow) {
   s32 code;
   f32 inverseLength;
   f32 distance;
-  f32 absDistance;
 
   void AddSideCode(s32 * codes, s32 code) {
     s32 i;
@@ -2835,8 +2834,7 @@ s32 ShouldMirrorCell(s32 column, s32 row, s32 endColumn, s32 endRow) {
       code = GetTerrainCode(column + columnOffset, row + rowOffset);
       distance = ((width * (rowOffset - height)) + (columnOffset * height)) *
           inverseLength;
-      absDistance = distance < 0.0f ? -distance : distance;
-      if (absDistance >= DIAGONAL_MIN_DISTANCE) {
+      if (AbsFloat(distance) >= DIAGONAL_MIN_DISTANCE) {
         if (distance >= 0.0f) {
           AddSideCode(sideCodes[2], code);
         } else {
@@ -2846,8 +2844,7 @@ s32 ShouldMirrorCell(s32 column, s32 row, s32 endColumn, s32 endRow) {
 
       distance =
           ((-height * columnOffset) + (rowOffset * width)) * inverseLength;
-      absDistance = distance < 0.0f ? -distance : distance;
-      if (absDistance >= DIAGONAL_MIN_DISTANCE) {
+      if (AbsFloat(distance) >= DIAGONAL_MIN_DISTANCE) {
         if (distance >= 0.0f) {
           AddSideCode(sideCodes[0], code);
         } else {
