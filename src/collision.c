@@ -2333,10 +2333,17 @@ s32 FindHoleTriangleHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
  * does so when the kind test has an else of its own with the same code as the
  * last facing arm, as GCC merges the two copies. Writing it so took the draft
  * to 44 words, 4 in shape; setting facing in an else, or by a conditional
- * expression, gives 395 words (99 in shape). The original sets hitIndex to
- * NO_HOLE_TRIANGLE near its start, but setting it in its declaration or first
- * gives 46 words, 10 in shape, before the IsOffGround tests 49 (9), and before
- * nearestFraction 44 (4). 44 words differ, 4 in shape.
+ * expression, gives 395 words (99 in shape). Each wall arm then kept its far
+ * and near ends in the function's farEnd and nearEnd, which put them in the
+ * same float registers in all four arms; the original's arms for walls facing z
+ * use other registers than those facing x, as block-scoped ends in each arm
+ * give. That took the draft from 44 words to 8, 4 in shape, with ends scoped to
+ * only the z arms or only the x arms giving the same 8. What is left is where
+ * hitIndex is set to NO_HOLE_TRIANGLE: the original sets it just after the
+ * IsGameFlagSet call, in the block that tests its result, which none of these
+ * placements gives: setting it in its declaration or first gives 10 words, all
+ * in shape, and before the IsOffGround tests 13 (9). 8 words differ, 4 in
+ * shape.
  */
 #ifdef NON_MATCHING
 s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
@@ -2364,10 +2371,8 @@ s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
   f32 hitFraction;
   f32 endFraction;
   f32 wallEnd;
-  f32 farEnd;
   f32 nearestCorner;
   f32 cornerDistance;
-  f32 nearEnd;
   s32 hitPointU;
   s32 hitPointV;
   s32 facing;
@@ -2491,6 +2496,8 @@ s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
         if (triangle.corners[AXIS_X][0] == triangle.corners[AXIS_X][1] &&
             triangle.corners[AXIS_X][0] != triangle.corners[AXIS_X][2]) {
           f32 edgeLength;
+          f32 farEnd;
+          f32 nearEnd;
           endFraction = 0.0f;
           edgeLength = Length2D(
               triangle.corners[AXIS_X][0] - triangle.corners[AXIS_X][2],
@@ -2553,6 +2560,8 @@ s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
         } else if (triangle.corners[AXIS_X][0] == triangle.corners[AXIS_X][2] &&
             triangle.corners[AXIS_X][0] != triangle.corners[AXIS_X][1]) {
           f32 edgeLength;
+          f32 farEnd;
+          f32 nearEnd;
           endFraction = 0.0f;
           edgeLength = Length2D(
               triangle.corners[AXIS_X][0] - triangle.corners[AXIS_X][1],
@@ -2659,6 +2668,8 @@ s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
         if (triangle.corners[AXIS_Z][0] == triangle.corners[AXIS_Z][1] &&
             triangle.corners[AXIS_Z][0] != triangle.corners[AXIS_Z][2]) {
           f32 edgeLength;
+          f32 farEnd;
+          f32 nearEnd;
           endFraction = 0.0f;
           edgeLength = Length2D(
               triangle.corners[AXIS_Z][0] - triangle.corners[AXIS_Z][2],
@@ -2716,6 +2727,8 @@ s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
         } else if (triangle.corners[AXIS_Z][0] == triangle.corners[AXIS_Z][2] &&
             triangle.corners[AXIS_Z][0] != triangle.corners[AXIS_Z][1]) {
           f32 edgeLength;
+          f32 farEnd;
+          f32 nearEnd;
           endFraction = 0.0f;
           edgeLength = Length2D(
               triangle.corners[AXIS_Z][0] - triangle.corners[AXIS_Z][1],
