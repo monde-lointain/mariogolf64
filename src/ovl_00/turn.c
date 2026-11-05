@@ -3024,7 +3024,12 @@ void ShowHoleOutBanner(s32 playerIndex) {
  * of the triggers and isCameraDone is nested, as the original branches on
  * isCameraDone apart from the triggers; as one && test, fold_truthop compiles
  * it to sltiu, sltu and and, and 392 words differ (148 in shape), with == FALSE
- * or != 0 too.
+ * or != 0 too. A focused permuter run's best by words, 311 (145 in shape),
+ * comes mostly from copying the heading, in the aiming state, into a
+ * function-wide variable that the angle in the g_RoundHud.unkF block at the end
+ * also reads: that alone gives 325 words (147 in shape), but outside the aiming
+ * state the angle then reads the variable unset, and the original reloads
+ * g_CurrentShot.heading there with an lhu.
  */
 #ifdef NON_MATCHING
 /* Debug flag 0x47: prints where the ball lies, and the second controller moves
