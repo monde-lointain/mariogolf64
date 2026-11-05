@@ -261,8 +261,13 @@ enum EndReaction {
  * RESULT_SOUND_STAGE */
 enum ResultSound {
   RESULT_SOUND_NONE,
-  RESULT_SOUND_UNK1, /* Plays SOUND_UNK23 */
-  RESULT_SOUND_UNK2, /* Plays SOUND_THREE_STARS */
+  /* Plays SOUND_UNK23, after an excellent shot, a near approach or a chip-in */
+  RESULT_SOUND_GOOD_SHOT,
+  /*
+   * Plays SOUND_THREE_STARS, after a flag shot, a pin shot, an albatross or
+   * better, or a long chip-in
+   */
+  RESULT_SOUND_SUPERB_SHOT,
   RESULT_SOUND_STAGE = 15
 };
 
@@ -1139,9 +1144,9 @@ void PlayFlightSounds(s32 step) {
   }
 
   if (f_LandingWaitFrame == RESULT_SOUND_STAGE) {
-    if (f_PendingResultSound == RESULT_SOUND_UNK1) {
+    if (f_PendingResultSound == RESULT_SOUND_GOOD_SHOT) {
       PlaySound(SOUND_UNK23, FLIGHT_SOUND_CHANNEL_UNKE, SOUND_FULL_SCALE);
-    } else if (f_PendingResultSound == RESULT_SOUND_UNK2) {
+    } else if (f_PendingResultSound == RESULT_SOUND_SUPERB_SHOT) {
       PlaySound(SOUND_THREE_STARS, FLIGHT_SOUND_CHANNEL_UNKE, SOUND_FULL_SCALE);
     }
   }
@@ -1173,13 +1178,13 @@ void PlayFlightSounds(s32 step) {
       PlaySound(
           SOUND_CALL_FLAG_SHOT, FLIGHT_SOUND_CHANNEL_CALLS, SOUND_FULL_SCALE);
       CountNotableShot(g_CurrentShot.playerIndex, SHOT_KIND_FLAG_SHOT);
-      f_PendingResultSound = RESULT_SOUND_UNK2;
+      f_PendingResultSound = RESULT_SOUND_SUPERB_SHOT;
     } else if (f_PassedPathFlags & STEP_FLAG_PIN_HIT) {
       CountNotableShot(g_CurrentShot.playerIndex, SHOT_KIND_PIN_SHOT);
       StartBanner(BANNER_PIN_SHOT);
       PlaySound(
           SOUND_CALL_PIN_SHOT, FLIGHT_SOUND_CHANNEL_CALLS, SOUND_FULL_SCALE);
-      f_PendingResultSound = RESULT_SOUND_UNK2;
+      f_PendingResultSound = RESULT_SOUND_SUPERB_SHOT;
     } else if (g_SimulatedShot.endsOnGreen) {
       if (IsAlbatrossOrBetter(
               g_Players[g_CurrentShot.playerIndex].strokeCount)) {
@@ -1188,7 +1193,7 @@ void PlayFlightSounds(s32 step) {
         PlaySound(
             SOUND_CALL_GREAT, FLIGHT_SOUND_CHANNEL_CALLS, SOUND_FULL_SCALE);
         QueueOnlookerSounds(CHARACTER_SOUND_KIND_GREAT);
-        f_PendingResultSound = RESULT_SOUND_UNK2;
+        f_PendingResultSound = RESULT_SOUND_SUPERB_SHOT;
       } else if (g_HoleSetup.par + SCORE_TO_PAR_EAGLE ==
           g_Players[g_CurrentShot.playerIndex].strokeCount) {
         if (f_LandingCupDistance <= CLOSE_LANDING_DISTANCE) {
@@ -1197,13 +1202,13 @@ void PlayFlightSounds(s32 step) {
           PlaySound(SOUND_CALL_EXCELLENT, FLIGHT_SOUND_CHANNEL_CALLS,
               SOUND_FULL_SCALE);
           QueueOnlookerSounds(CHARACTER_SOUND_KIND_EXCELLENT);
-          f_PendingResultSound = RESULT_SOUND_UNK1;
+          f_PendingResultSound = RESULT_SOUND_GOOD_SHOT;
         } else if (IsApproachShot()) {
           if (f_LandingCupDistance <= NEAR_LANDING_DISTANCE) {
             StartBanner(BANNER_NICE_APPROACH);
             PlaySound(SOUND_CALL_NICE_APPROACH, FLIGHT_SOUND_CHANNEL_CALLS,
                 SOUND_FULL_SCALE);
-            f_PendingResultSound = RESULT_SOUND_UNK1;
+            f_PendingResultSound = RESULT_SOUND_GOOD_SHOT;
           } else {
             StartBanner(BANNER_NICE_ON);
             PlaySound(SOUND_CALL_NICE_ON, FLIGHT_SOUND_CHANNEL_CALLS,
@@ -1235,7 +1240,7 @@ void PlayFlightSounds(s32 step) {
       QueueOnlookerSounds(CHARACTER_SOUND_KIND_EXCELLENT);
       CountNotableShot(g_CurrentShot.playerIndex, SHOT_KIND_FLAG_SHOT);
       f_EndReaction = END_REACTION_ONLOOKERS;
-      f_PendingResultSound = RESULT_SOUND_UNK2;
+      f_PendingResultSound = RESULT_SOUND_SUPERB_SHOT;
     }
 
     if (g_BallFlightStep >=
@@ -1282,10 +1287,10 @@ void PlayFlightSounds(s32 step) {
       if (!g_SimulatedShot.startsOnGreen) {
         if (f_StartCupDistance > LONG_LANDING_MIN_DISTANCE) {
           CountNotableShot(g_CurrentShot.playerIndex, SHOT_KIND_LONG_CHIP_IN);
-          f_PendingResultSound = RESULT_SOUND_UNK2;
+          f_PendingResultSound = RESULT_SOUND_SUPERB_SHOT;
         } else {
           CountNotableShot(g_CurrentShot.playerIndex, SHOT_KIND_CHIP_IN);
-          f_PendingResultSound = RESULT_SOUND_UNK1;
+          f_PendingResultSound = RESULT_SOUND_GOOD_SHOT;
         }
       }
 
