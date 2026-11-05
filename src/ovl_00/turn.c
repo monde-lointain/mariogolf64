@@ -2972,7 +2972,7 @@ void ShowHoleOutBanner(s32 playerIndex) {
  * inline: inlined, its buffer shares one stack slot with the others, as in
  * the original's frame.
  *
- * Doesn't match: 241 words differ, 111 in shape, spread through the routine's
+ * Doesn't match: 227 words differ, 97 in shape, spread through the routine's
  * states. The counts in the paragraphs after the next were measured before it,
  * when 454 words differed, 184 in shape.
  *
@@ -3087,7 +3087,9 @@ void ShowHoleOutBanner(s32 playerIndex) {
  * in shape), as does shifting the button bits right 13 and testing the low bit,
  * but each adds a name or a shift the draft has no other reason for. Comparing
  * the test with 0 or Z_TRIG, comparing that != 0 with TRUE, negating it twice
- * or choosing TRUE or FALSE with it leaves 241 words (111).
+ * or choosing TRUE or FALSE with it leaves 241 words (111). The counts in this
+ * paragraph and the one before were measured before the debug timing's two
+ * stores.
  */
 #ifdef NON_MATCHING
 /* Debug flag 0x47: prints where the ball lies, and the second controller moves
@@ -4244,11 +4246,21 @@ void UpdateTurns(void) {
         if (g_IsDebugEnabled &&
             (g_TurnController.pressedButtons & (B_BUTTON | D_CBUTTONS))) {
           g_CurrentShot.impactGaugeFrame = g_CurrentShot.gaugeFrame;
+          /*
+           * B gives full power and on-mark timing, C-down on-mark timing
+           * alone. With one store after the B test, the first CSE pass
+           * folds the clamp's upper test below and the second its lower
+           * test, where the original loads the timing back for both. A
+           * store in each arm keeps a join between the stores and the
+           * clamp until cross-jumping merges them: 227 words differ, 97 in
+           * shape, against 241 and 111.
+           */
           if (g_TurnController.pressedButtons & B_BUTTON) {
             f_ShotLaunch.power = MAX_LAUNCH_POWER;
+            f_ShotLaunch.impactTiming = 0;
+          } else {
+            f_ShotLaunch.impactTiming = 0;
           }
-
-          f_ShotLaunch.impactTiming = 0;
           if (f_ShotLaunch.impactTiming > MAX_IMPACT_TIMING) {
             f_ShotLaunch.impactTiming = MAX_IMPACT_TIMING;
           }
