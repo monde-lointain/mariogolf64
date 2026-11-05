@@ -3355,7 +3355,7 @@ void UpdateTurns(void) {
             g_Players[playerIndex].paletteIndex);
         if (g_Players[playerIndex].isLefty) {
           SetTextureAnimationFrame(0, 1, 1);
-          SetCharacterUnk188(0, 1);
+          SetCharacterFrontCulling(0, TRUE);
         }
 
         SetCharacterLighting(0, 1);

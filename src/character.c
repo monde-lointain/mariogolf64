@@ -1037,7 +1037,7 @@ void LoadCharacter(u32 slotIndex, s32 character, s32 kind) {
     slot->nextAnimationId = NO_NEXT_ANIMATION;
     slot->playsRandomTextureAnimation = TRUE;
     slot->randomTextureAnimationDelay = LOADED_RANDOM_TEXTURE_ANIMATION_DELAY;
-    slot->unk188 = 0;
+    slot->usesFrontCulling = 0;
     slot->reusesLastMatrices = 0;
     f_CurrentModelBuffer = slot->modelBuffer;
     if (isPatched) {
@@ -1320,11 +1320,11 @@ s32 GetAnimationFrameCount(u32 slotIndex, s32 id) {
   return -1;
 }
 
-void SetCharacterUnk188(u32 slotIndex, s32 value) {
+void SetCharacterFrontCulling(u32 slotIndex, s32 value) {
   CharacterSlot* slot = GetUsedCharacterSlot(slotIndex);
 
   if (slot != NULL) {
-    slot->unk188 = value;
+    slot->usesFrontCulling = value;
   }
 }
 
@@ -2088,7 +2088,7 @@ void DrawCharacter(u32 slotIndex) {
           osVirtualToPhysical(f_OpaqueRenderModes));
     }
 
-    if (slot->unk188) {
+    if (slot->usesFrontCulling) {
       gSPSegment(gfx++, CULLING_SEGMENT, osVirtualToPhysical(f_FrontCulling));
     } else {
       gSPSegment(gfx++, CULLING_SEGMENT, osVirtualToPhysical(f_BackCulling));

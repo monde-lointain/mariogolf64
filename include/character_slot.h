@@ -268,7 +268,7 @@ typedef struct CharacterSlot {
   /* 0x085 */ s8 playsRandomTextureAnimation;
   /* 0x086 */ s8 randomTextureAnimationDelay; /* In steps */
   /* 0x088 */ TextureAnimationState textureAnimations[TEXTURE_ANIMATION_COUNT];
-  /* 0x188 */ s8 unk188;
+  /* 0x188 */ s8 usesFrontCulling; /* Set for a lefty golfer */
   /* 0x189 */ s8 reusesLastMatrices; /* For the next draw, which clears it */
 } CharacterSlot; /* size = 0x18C */
 
