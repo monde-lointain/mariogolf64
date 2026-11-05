@@ -482,6 +482,8 @@ NESTED_DEFINITION_KEYWORDS = frozenset(
 )
 # A function definition's name, the first identifier its header calls
 DEFINITION_NAME_RE = re.compile(r"(\w+)\s*\(")
+# A C identifier, or a keyword
+IDENTIFIER_RE = re.compile(r"\b[A-Za-z_]\w*")
 # The functions that KMC GCC expands itself when it sees no definition of
 # them, from c-decl.c
 BUILTIN_NAMES = frozenset(
@@ -891,6 +893,8 @@ class BodyVariants:
     after: str = field(init=False)
     whole_before: str = field(init=False)
     whole_after: str = field(init=False)
+    # The identifiers the preprocessed original body names
+    body_names: set[str] = field(init=False)
 
     def __post_init__(self) -> None:
         """Preprocess and isolate the file around the fenced body."""
@@ -903,6 +907,7 @@ class BodyVariants:
         self.before, _, self.after = isolated.partition(BODY_MARK)
         self.after = self.after.partition(BODY_MARK)[2]
         whole = isolate_functions(preprocessed, {self.function}, prune=False)
+        self.body_names = set(IDENTIFIER_RE.findall(preprocessed.split(BODY_MARK)[1]))
         self.whole_before, _, self.whole_after = whole.partition(BODY_MARK)
         self.whole_after = self.whole_after.partition(BODY_MARK)[2]
 
@@ -951,15 +956,18 @@ class BodyVariants:
     def compile(self, preprocessed_body: str) -> tuple[Functions | None, str]:
         """Compile the file with PREPROCESSED_BODY, as compile_functions does.
 
-        The declarations were pruned for the original body, and a variant
-        can name others, so one that fails compiles again with them all.
+        The declarations were pruned for the original body, so a variant
+        that names others compiles with them all, as does one that fails:
+        without a pruned static inline definition, a call to it would
+        compile as a call to an undeclared function.
         """
         with tempfile.TemporaryDirectory() as tmp:
             unit = Path(tmp) / "variant.i"
-            _ = unit.write_text(self.before + preprocessed_body + self.after)
-            compiled, error = compile_functions(unit, self.optflags)
-            if compiled is not None:
-                return compiled, error
+            if set(IDENTIFIER_RE.findall(preprocessed_body)) <= self.body_names:
+                _ = unit.write_text(self.before + preprocessed_body + self.after)
+                compiled, error = compile_functions(unit, self.optflags)
+                if compiled is not None:
+                    return compiled, error
             whole = self.whole_before + preprocessed_body + self.whole_after
             _ = unit.write_text(whole)
             return compile_functions(unit, self.optflags)
