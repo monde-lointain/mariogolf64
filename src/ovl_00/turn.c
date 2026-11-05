@@ -508,18 +508,7 @@ void EndRumbleForceStop(void) {
 /*
  * Pulls the aim camera in along the heading, as far as it takes to keep it
  * within the course. Once it has moved, a held C button pushes it on by a step.
- *
- * Doesn't match: the original takes both absolute values of the offset before
- * subtracting the overshoot, where this subtracts between them. The scheduler
- * can't give the original's order from this RTL: the adder takes 4 cycles for a
- * subtraction and 2 for an absolute value (mips.md), so the subtraction is
- * queued 4 cycles ahead of the division and the second absolute value 2. Taking
- * the double fabs in the numerator gives these 4 words, in both 6 (2 in shape),
- * and adding the negated overshoot 4; a double subtraction gives 64 or 110, and
- * a double division 24. The register oracle's closest result is these 4 words
- * with no register forced, so allocation isn't the cause. 4 words differ.
  */
-#ifdef NON_MATCHING
 void KeepAimCameraOnCourse(void) {
   Vec3 eye;
   s32 oldDistance = g_CurrentShot.aimCameraDistance;
@@ -539,13 +528,10 @@ void KeepAimCameraOnCourse(void) {
   }
 
   heading = (u16)g_CurrentShot.heading * BINARY_ANGLE_TO_RADIANS;
-  /* Clearing the overshoot here too is needed to match; without it, 48 words
-   * differ */
   overshoot = 0.0f;
   offset = cosf(heading) * g_CurrentShot.aimCameraDistance;
   eye[AXIS_X] = offset + g_CurrentShot.ballPosition[AXIS_X];
   minCoord = AIM_CAMERA_MIN_COORD;
-  overshoot = 0.0f;
   if (eye[AXIS_X] < minCoord) {
     overshoot = minCoord - eye[AXIS_X];
   } else if (eye[AXIS_X] > maxX) {
@@ -553,12 +539,8 @@ void KeepAimCameraOnCourse(void) {
   }
 
   if ((s32)offset != 0) {
-    /* The double fabs keeps the two absolute values apart, to match: CSE
-     * merges two fabsf calls into one abs.s (6 words differ), and
-     * subtracting in double precision or multiplying by a reciprocal gives
-     * 62-64 */
     g_CurrentShot.aimCameraDistance *=
-        (fabsf(offset) - overshoot) / (f32)fabs(offset);
+        (fabsf(offset) - overshoot) / fabsf(offset);
   }
 
   offset = sinf(heading) * g_CurrentShot.aimCameraDistance;
@@ -573,9 +555,8 @@ void KeepAimCameraOnCourse(void) {
   }
 
   if ((s32)offset != 0) {
-    /* The double fabs keeps the two absolute values apart, as above */
     g_CurrentShot.aimCameraDistance *=
-        (fabsf(offset) - overshoot) / (f32)fabs(offset);
+        (fabsf(offset) - overshoot) / fabsf(offset);
   }
 
   if (g_GameState.isMiniGolf) {
@@ -598,9 +579,6 @@ void KeepAimCameraOnCourse(void) {
     }
   }
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", KeepAimCameraOnCourse);
-#endif
 
 /*
  * Places the camera for the shot being set up: circling the ball on the pause
