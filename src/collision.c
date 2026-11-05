@@ -1782,7 +1782,10 @@ void MoveBallToCupEdge(BallSimulation* simulation) {
  * shape) alone and 160 (16) with the velocity in axis order, so it is left out.
  * Working out endSide before startSide gives 144 words, but 26 in shape, and
  * the register oracle then gets no closer than 107 words, forcing 25 pseudos,
- * against 71 forcing 16. 150 words differ, 22 in shape.
+ * against 71 forcing 16. Working out the end side before the start side gives
+ * 144 words (26 in shape), but the original multiplies the start side's terms
+ * first; the start side before the end-to-cup values ties at 150. 150 words
+ * differ, 22 in shape.
  */
 #ifdef NON_MATCHING
 s32 FindPinHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY, s32 endZ,
