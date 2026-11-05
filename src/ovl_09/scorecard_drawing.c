@@ -2178,10 +2178,14 @@ INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard_drawing", DrawLeaderboardPage);
  * mark still adds x first: x last there gives 772 words (176 in shape), and x
  * first in the front nine's too 760 (180). Writing each of the four cell
  * rectangles' edges as plain sums, with g_Scorecard.x and g_Scorecard.y all
- * first or all last in each, gives 1031 to 1041 words in all sixteen
- * combinations. The first cell loop's back nine adds g_Scorecard.x last at its
- * right edge, as at its left; added first there, 760 words differed, 178 in
- * shape. 758 words differ, 174 in shape.
+ * first or all last in each, gave 1031 to 1041 words in all sixteen
+ * combinations when the draft had 760. The first cell loop's back nine adds
+ * g_Scorecard.x last at its right edge, as at its left; added first there, 760
+ * words differed, 178 in shape. The second loop's front-nine rectangle adds x
+ * last at both edges, as the first loop's does; with x first at both, 758 words
+ * differ (172 in shape). Grouping the y sums of the second loop's front
+ * rectangle as the first loop's are gives 762 to 764 words. 755 words differ,
+ * 167 in shape.
  */
 #ifdef NON_MATCHING
 void DrawScoresPage(Gfx** displayListHead) {
@@ -2458,10 +2462,11 @@ void DrawScoresPage(Gfx** displayListHead) {
       if (j & 1) {
         if (!(g_GameState.holeSelection & HOLE_SELECTION_BACK_NINE)) {
           /*
-           * The top adds the row's offset to CELL_TOP before g_Scorecard.y,
-           * to match: adding them in order gives 762 words differing (184 in
-           * shape) against the draft's 760 (178), and with the row's offset
-           * before CELL_TOP 765 (179)
+           * The top and bottom add the row's offset to CELL_TOP before
+           * g_Scorecard.y, to match: the top's terms added in order, or with
+           * the row's offset first, give 757 words differing (169 in shape)
+           * against the draft's 755 (167), the bottom's 755 (169), and both
+           * edges' 760 or more
            */
           DrawTextureRect(&gfx,
               QuarterPixels((j * CELL_WIDTH) + CELL_LEFT + g_Scorecard.x),
@@ -2469,7 +2474,7 @@ void DrawScoresPage(Gfx** displayListHead) {
               QuarterPixels(
                   (j * CELL_WIDTH) + CELL_LEFT + CELL_WIDTH + g_Scorecard.x),
               QuarterPixels(
-                  g_Scorecard.y + (i * CELL_HEIGHT) + CELL_TOP + CELL_HEIGHT),
+                  g_Scorecard.y + (CELL_TOP + (i * CELL_HEIGHT) + CELL_HEIGHT)),
               G_TX_RENDERTILE, 0, TexelCoordinate(i * CELL_HEIGHT),
               TEXEL_STEP_ONE, TEXEL_STEP_ONE);
         }
@@ -2535,11 +2540,11 @@ void DrawScoresPage(Gfx** displayListHead) {
         if (!(g_GameState.holeSelection & HOLE_SELECTION_BACK_NINE)) {
           DrawTextureRect(&gfx,
               QuarterPixels(
-                  g_Scorecard.x + (cellColumn * CELL_WIDTH) + CELL_LEFT),
+                  (cellColumn * CELL_WIDTH) + CELL_LEFT + g_Scorecard.x),
               QuarterPixels(
                   g_Scorecard.y + (cellRowIndex * CELL_HEIGHT) + CELL_TOP),
-              QuarterPixels(g_Scorecard.x + (cellColumn * CELL_WIDTH) +
-                  CELL_LEFT + CELL_WIDTH),
+              QuarterPixels((cellColumn * CELL_WIDTH) + CELL_LEFT + CELL_WIDTH +
+                  g_Scorecard.x),
               QuarterPixels(g_Scorecard.y + (cellRowIndex * CELL_HEIGHT) +
                   CELL_TOP + CELL_HEIGHT),
               G_TX_RENDERTILE, 0, TexelCoordinate(cellRowIndex * CELL_HEIGHT),
