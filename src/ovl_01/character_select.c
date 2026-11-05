@@ -606,6 +606,13 @@ s32 GetClubTournamentCourse(void);
  * chosenColumn of its own give more words, but the register oracle, forcing 9
  * pseudos' registers, leaves 10, against 24 with 7 forced before. 136 words
  * differ, 6 in shape.
+ *
+ * Declaring the button as an s16 gives 75 words differing, 7 in shape, but
+ * loads it with lh where the original loads it with lhu, so the button is
+ * unsigned; as a u32 or s32 it gives 154, and a separate u16, u32 or s32
+ * variable for the A press changes nothing. A focused permuter run's best, 23
+ * words (5 in shape), copies the button through an unsigned long long
+ * temporary.
  */
 #ifdef NON_MATCHING
 s32 UpdateCharacterSelect(
