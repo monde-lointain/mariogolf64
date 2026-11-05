@@ -4842,8 +4842,10 @@ void DrawUpDownArrows(Gfx** displayListHead, s32 centerY);
  * so the pointer only perturbs allocation; testing modeSpin first gives 130
  * words, and == FALSE or ! leave 86. A focused run's best reads modeChoice
  * through a pointer in the boards' loop instead (38 words, 2 in shape), but the
- * original loads g_MenuMemory.modeChoice directly on each pass too. 86 words
- * differ, 2 in shape.
+ * original loads g_MenuMemory.modeChoice directly on each pass too. The
+ * original holds index in s0 in the boards' loops and in s1 in the banner
+ * strips' and players' loops, but counters of their own for those loops give
+ * 138 to 230 words. 86 words differ, 2 in shape.
  */
 #ifdef NON_MATCHING
 void DrawModeSelect(Gfx** displayListHead) {
