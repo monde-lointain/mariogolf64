@@ -383,8 +383,14 @@ void FreeScorecard(void);
  *
  * Doesn't match: the original addresses the closing frees from totalLabelsImage
  * and derives tableImage's address from it, where this addresses them from
- * tableImage. The register oracle's closest result is these 17 words with no
- * register forced, so allocation isn't the cause. 17 words differ, 3 in shape.
+ * tableImage. cse's use_related_value bases a constant address on the oldest
+ * related table entry that holds a register, so taking tableImage's address
+ * first makes it the base. Taken where it is freed, the frees are based on
+ * totalLabelsImage as in the original, but cse2 then bases the face images'
+ * addresses on totalLabelsImage's too, where the original bases them on
+ * tableImage's (33 words differ). The register oracle's closest result is these
+ * 17 words with no register forced, so allocation isn't the cause. 17 words
+ * differ, 3 in shape.
  */
 #ifdef NON_MATCHING
 void FreeScorecard(void) {
