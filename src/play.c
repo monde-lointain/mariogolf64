@@ -2038,7 +2038,7 @@ void DrawHoleEditorGround(CameraMatrices* matrices, s32 terrainStyle);
  * tiles go down two halves in rows of four, and a fine tile snaps the edge
  * vertices it shares with coarser neighbors so that no gaps open between them.
  *
- * Doesn't match: 945 words differ, 233 in shape. The original's frame is 0x18
+ * Doesn't match: 911 words differ, 233 in shape. The original's frame is 0x18
  * bytes larger, so every stack offset differs, and terrainStyle and the locals
  * take other saved registers. The original works out column + 1's parity once
  * per half, where ours did at each GridVertex, with three more andi: loop.c
@@ -2058,13 +2058,16 @@ void DrawHoleEditorGround(CameraMatrices* matrices, s32 terrainStyle);
  * and a flag for the detail test, changed the shape by at most one. The fine
  * tiles count their column in tileColumn, stepped with tileIndex, which took
  * the function from 950 words to 945 and the shape from 244 to 233; counting
- * the medium tiles' column the same way gives 988 (252) alone and 1133 (253)
+ * the medium tiles' column the same way gave 988 (252) alone and 1133 (253)
  * with the fine tiles', the coarse tiles' 1131 (285) alone, and all three 1213
- * (277). In each tile loop the original steps two more registers by 0x80: one
- * starts at half << 9, the first tile's s coordinate, and the other at 0x80,
- * which it adds to that coordinate and 6 for the right edge. Ours can't, as
- * simplify_giv_expr in loop.c distributes (firstTileColumn + k) * 128 and gives
- * up on an invariant times a constant, so its shift is never a giv.
+ * (277). Declaring vertices after current, and column after middleSlot, then
+ * took it from 945 words to 911, 233 in shape either way; a greedy search over
+ * single declaration moves found no further gain. In each tile loop the
+ * original steps two more registers by 0x80: one starts at half << 9, the first
+ * tile's s coordinate, and the other at 0x80, which it adds to that coordinate
+ * and 6 for the right edge. Ours can't, as simplify_giv_expr in loop.c
+ * distributes (firstTileColumn + k) * 128 and gives up on an invariant times a
+ * constant, so its shift is never a giv.
  */
 void DrawGround(CameraMatrices* matrices, s32 terrainStyle) {
   u8 snapsEdge[2][TILE_VERTEX_SEGMENT_COUNT]; /* For the current and the last
@@ -2074,9 +2077,9 @@ void DrawGround(CameraMatrices* matrices, s32 terrainStyle) {
   /* The column of the half's first tile */
   s32 firstTileColumn;
   s32 tileColumn;
-  Vtx* vertices;
   u32 start;
   u8 current;
+  Vtx* vertices;
   f32 fineScale;
   f32 radius;
   s32 visibility;
@@ -2096,9 +2099,9 @@ void DrawGround(CameraMatrices* matrices, s32 terrainStyle) {
   s32 mediumPass;
   s32 passIndex;
   s32 tileIndex;
-  s32 column;
   s32 topSlot;
   s32 middleSlot;
+  s32 column;
   s32 bottomSlot;
   s32 spareSlot;
   GroundTile* tiles;
