@@ -2665,7 +2665,8 @@ void DrawBestShotsCursor(Gfx** displayListHead) {
  * first, or a variable for the record index or the palette file, changes
  * nothing, and reading the palette file before the store gives 38 (18 in
  * shape). An s16 cell gave 15 words differing, 1 in shape, with the store in
- * each branch, but it sign-extends the cell before the palette offset, where
+ * each branch, and an s16 or s8 cell gives 39 (1) with the single store, but
+ * each sign-extends the cell with sll and sra before the palette offset, where
  * the original shifts it by 9 alone, so the cell is a word. A permuter run's
  * best, 38 words with none in shape, passes the palette file through a pointer
  * to file set at the start of each pass, a second name for one local; the
