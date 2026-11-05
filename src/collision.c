@@ -1768,8 +1768,14 @@ void MoveBallToCupEdge(BallSimulation* simulation) {
  * flags (173 against 177). The permuter's best output (144 words, 20 in shape)
  * scales the direction's y before normalizing, where the original scales it
  * after, with x and z; moving that line alone gains incidentally, and is left
- * out. The register oracle, forcing 17 pseudos' registers, leaves 78 words at
- * best, so the code differs too. 173 words differ, 27 in shape.
+ * out. The half chord starts as the flagstick's radius and takes the square
+ * root when the bounce speed isn't negative, which took the draft from 173
+ * words differing to 157, 27 in shape either way; an if/else either way round,
+ * or a conditional operator, gives 173 to 175. The original works out the
+ * direction once, after both; setting it in each arm instead gave 147 words, 47
+ * in shape, when the draft gave 173. The register oracle, forcing 16 pseudos'
+ * registers, leaves 78 words at best, so the code differs too. 157 words
+ * differ, 27 in shape.
  */
 #ifdef NON_MATCHING
 s32 FindPinHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY, s32 endZ,
@@ -1890,10 +1896,9 @@ s32 FindPinHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY, s32 endZ,
     }
 
     bounceSpeed = FLAGSTICK_RADIUS_SQUARED - (distance * distance);
+    halfChord = FLAGSTICK_RADIUS;
     if (bounceSpeed >= 0.0f) {
       halfChord = sqrtf(bounceSpeed);
-    } else {
-      halfChord = FLAGSTICK_RADIUS;
     }
 
     direction[AXIS_X] = startX - contactX;
