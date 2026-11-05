@@ -1475,53 +1475,19 @@ void PlaceAtReactionSpot(Vec3 position, Vec3 rotation, Vec3 scale) {
 }
 
 /*
- * Whether the eased eye sits at height zero.
- * Doesn't match: the original loads the height into one register and its
- * magnitude into another, where this reuses the first for both. Local-alloc
- * ties the loaded height to fabsf's result, since it dies there within its
- * block; it ties no value that lives past its block. The oracle matches with
- * the loaded height in $f4, which global-alloc would give it, as it conflicts
- * with the zero in $f0 and the magnitude in $f2. An END_BASIC_BLOCK after the
- * load leaves no label, so the block stays whole and gives 8 differing words,
- * as does the load in IN_OWN_BLOCK; fabs, __builtin_fabsf, a separate eyeY
- * local, an inline helper and an early return each give 9. In the ROM every
- * float load into abs.s, and some subtractions, use a register other than
- * abs.s's, as in UpdateCameraEditor and DrawBillboards. Taking the magnitude
- * in the test, a >= ternary, or a magnitude local compared with a zeroed
- * height also leave the tie or cost the delay slot. An asm abs.s, which
- * local-alloc cannot tie, gives the original's registers but fills the
- * branch's delay slot otherwise (4 words); SDK math.h's fabsf, a
- * __builtin_fabsf of the value cast to float, keeps the tie. No function
- * in the ROM that matches loads straight into abs.s; the six drafts that
- * do all differ there. The ROM's compiler isn't refusing every abs.s tie:
- * 15 of its abs.s use one register for both, and a cc1 whose abssf2 output
- * is earlyclobber gives the load $f0 and the magnitude $f2 (4 words).
- * Writing the magnitude of the eye's height as a >= 0.0f ?: on it, which fold
- * turns into the same abs.s under -ffast-math, also leaves the tie (4 words),
- * and inlining float_math.c's fabsf, which masks the sign bit in an integer
- * register, gives 15, 9 in shape. Local-alloc ties only a pseudo that is
- * local to its block, so the test was tried behind a label, to put the
- * magnitude in a second block: a while with a break and a goto past the
- * store each give 9 words differing, 3 in shape, and a switch on the test
- * 20, 14 in shape. A do-while whose test folds away leaves no label and
- * the tie (4 words).
- * 4 words differ.
+ * Whether the eased eye sits at height zero
  */
-#ifdef NON_MATCHING
 Boolean IsEasedEyeHeightZero(void) {
-  Boolean isZero = FALSE;
-  f32 height;
+  Boolean isZero;
 
-  height = fabsf(f_EasedView.eye[AXIS_Y]);
-  /* In its own block, to match; without it 9 words differ, 3 in shape */
-  IN_OWN_BLOCK(if (height == 0.0f) { isZero = TRUE; });
+  if (fabsf(f_EasedView.eye[AXIS_Y]) == 0.0f) {
+    isZero = TRUE;
+  } else {
+    isZero = FALSE;
+  }
 
   return isZero;
 }
-
-#else
-INCLUDE_ASM("asm/nonmatchings/reaction", IsEasedEyeHeightZero);
-#endif
 
 RESUME_RODATA_SECTION();
 static const char f_UnusedFloatFormat[] = "            %f";
