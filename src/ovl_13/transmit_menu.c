@@ -338,7 +338,7 @@ typedef struct StatusCourse {
   /* 0x03 */ u8 averageStrokes;
   /* 0x04 */ u8 longestDrive[2];
   /* 0x06 */ u8 averageDrive[2];
-  /* 0x08 */ u8 unk8;
+  /* 0x08 */ u8 fairwayRate; /* As a percentage */
   /* 0x09 */ u8 averagePutts; /* In tenths, from PackTenths */
   /* 0x0A */ u8 parOrBetterRate; /* As percentages */
   /* 0x0B */ u8 parOnRate;
@@ -3730,8 +3730,8 @@ void BuildStatusData(u8* status) {
         value = RoundedWholePart(entry->averageDrive * UNK_SCALE);
         course->averageDrive[0] = value;
         course->averageDrive[1] = value >> BITS_PER_BYTE;
-        course->unk8 = RoundedWholePart(entry->measuredDriveTotal * reciprocal *
-            (PERCENTS_PER_ONE / HOLES_PER_ROUND));
+        course->fairwayRate = RoundedWholePart(entry->measuredDriveTotal *
+            reciprocal * (PERCENTS_PER_ONE / HOLES_PER_ROUND));
         course->averagePutts = PackTenths(
             entry->puttTotal * reciprocal * (1.0f / HOLES_PER_ROUND));
         course->parOrBetterRate = RoundedWholePart(entry->parOrBetterCount *
@@ -3846,7 +3846,7 @@ void BuildStatusData(u8* status) {
     sum = RoundedWholePart(g_CourseStatFigures[COURSE_COUNT].averageDrive);
     course->averageDrive[0] = sum;
     course->averageDrive[1] = sum >> BITS_PER_BYTE;
-    course->unk8 =
+    course->fairwayRate =
         RoundedWholePart(g_CourseStatFigures[COURSE_COUNT].fairwayPercent);
     course->averagePutts =
         PackTenths(g_CourseStatFigures[COURSE_COUNT].averagePutts);
