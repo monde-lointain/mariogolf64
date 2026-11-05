@@ -98,11 +98,18 @@ struct RainSplash {
 
 enum EffectKind {
   EFFECT_KIND_NONE = -1,
-  EFFECT_KIND_UNK0,
-  EFFECT_KIND_UNK1,
-  EFFECT_KIND_UNK2,
-  EFFECT_KIND_UNK3,
-  EFFECT_KIND_UNK4,
+  /*
+   * The debris a shot throws up, in the ground's color, from SpawnHighDebris
+   * and SpawnLowDebris: puffs from bunkers and bare ground, drawn lightened, of
+   * which SpawnImpactEffects' landing puffs are high ones too; pieces of the
+   * rough, drawn with an alpha threshold; and low pieces of grass, from
+   * fairways, semi-rough and the tee.
+   */
+  EFFECT_KIND_HIGH_PUFF,
+  EFFECT_KIND_LOW_PUFF,
+  EFFECT_KIND_LOW_GRASS,
+  EFFECT_KIND_HIGH_ROUGH,
+  EFFECT_KIND_LOW_ROUGH,
   EFFECT_KIND_DROP, /* Drawn with f_DropImage */
   EFFECT_KIND_DIVOT, /* Drawn with f_DivotImage */
   EFFECT_KIND_DIVOT_MARK, /* Drawn with f_DivotImage's last frame */
@@ -752,7 +759,7 @@ void SpawnImpactEffects(BallSimulation* simulation) {
           effect->alphaStep = -2.0f;
           effect->scale = 1.0f;
           effect->scaleStep = 0.04f;
-          effect->kind = EFFECT_KIND_UNK0;
+          effect->kind = EFFECT_KIND_HIGH_PUFF;
           effect->frame = 0;
           puffNumber++;
           if (puffNumber == IMPACT_PUFF_COUNT + 1) {
@@ -785,7 +792,7 @@ void SpawnImpactEffects(BallSimulation* simulation) {
           effect->alphaStep = -2.0f;
           effect->scale = 2.0f;
           effect->scaleStep = 0.1f;
-          effect->kind = EFFECT_KIND_UNK0;
+          effect->kind = EFFECT_KIND_HIGH_PUFF;
           effect->frame = 0;
           puffNumber++;
           if (puffNumber == IMPACT_PUFF_COUNT + 1) {
@@ -964,7 +971,7 @@ void SpawnShotDebris(
          * is there to match: without it 22 words differ, 22 in shape
          */
         speed = launchSpeed;
-        if (kind == EFFECT_KIND_UNK2) {
+        if (kind == EFFECT_KIND_LOW_GRASS) {
           speed = (RandomBelow(spawnedCount * 2) + DEBRIS_SLOWEST_STEP_COUNT) *
               DEBRIS_SPEED_STEP;
         } else {
@@ -979,7 +986,7 @@ void SpawnShotDebris(
         effect->color = groundColor;
         effect->alpha = guRandom() % 32 + 95;
         effect->alphaStep = -1.0f;
-        if (kind == EFFECT_KIND_UNK1) {
+        if (kind == EFFECT_KIND_LOW_PUFF) {
           effect->scale = (guRandom() % 16 + 10) * 0.2f;
           effect->scaleStep = debrisAmount * 0.01f + 0.6f;
         } else {
@@ -1023,7 +1030,7 @@ void SpawnShotDebris(
             sinPitch * speed * (0.15f * COURSE_TO_WORLD_SCALE);
         effect->velocity[AXIS_Z] = sinYaw * speed * DEBRIS_OUTWARD_SCALE;
         effect->color = groundColor;
-        if (kind == EFFECT_KIND_UNK0) {
+        if (kind == EFFECT_KIND_HIGH_PUFF) {
           effect->alpha = guRandom() % 32 + 191;
         } else {
           effect->alpha = guRandom() % 32 + 159;
@@ -1256,16 +1263,18 @@ void SpawnShotDebris(
   switch (f_DebrisKind) {
     case DEBRIS_KIND_TEE_UP:
     case DEBRIS_KIND_GRASS:
-      SpawnLowDebris(nextIndex, lowDebrisCount, EFFECT_KIND_UNK2);
+      SpawnLowDebris(nextIndex, lowDebrisCount, EFFECT_KIND_LOW_GRASS);
       break;
     case DEBRIS_KIND_ROUGH:
-      nextIndex += SpawnLowDebris(nextIndex, lowDebrisCount, EFFECT_KIND_UNK4);
-      SpawnHighDebris(nextIndex, highDebrisCount, EFFECT_KIND_UNK3);
+      nextIndex +=
+          SpawnLowDebris(nextIndex, lowDebrisCount, EFFECT_KIND_LOW_ROUGH);
+      SpawnHighDebris(nextIndex, highDebrisCount, EFFECT_KIND_HIGH_ROUGH);
       break;
     case DEBRIS_KIND_DUST:
     case DEBRIS_KIND_BURIED:
-      nextIndex += SpawnLowDebris(nextIndex, lowDebrisCount, EFFECT_KIND_UNK1);
-      SpawnHighDebris(nextIndex, highDebrisCount, EFFECT_KIND_UNK0);
+      nextIndex +=
+          SpawnLowDebris(nextIndex, lowDebrisCount, EFFECT_KIND_LOW_PUFF);
+      SpawnHighDebris(nextIndex, highDebrisCount, EFFECT_KIND_HIGH_PUFF);
       break;
   }
 }
@@ -1388,8 +1397,8 @@ void UpdateEffects(void) {
         effect->velocity[AXIS_X] *= LIGHT_EFFECT_VELOCITY_KEPT;
         effect->velocity[AXIS_Y] *= LIGHT_EFFECT_VELOCITY_KEPT;
         effect->velocity[AXIS_Z] *= LIGHT_EFFECT_VELOCITY_KEPT;
-      } else if (effect->kind == EFFECT_KIND_UNK0 ||
-          effect->kind == EFFECT_KIND_UNK3) {
+      } else if (effect->kind == EFFECT_KIND_HIGH_PUFF ||
+          effect->kind == EFFECT_KIND_HIGH_ROUGH) {
         effect->velocity[AXIS_X] += windPushX;
         effect->velocity[AXIS_Y] += EFFECT_FALL_ACCELERATION;
         effect->velocity[AXIS_Z] += windPushZ;
@@ -1424,8 +1433,8 @@ void UpdateEffects(void) {
         effect->tilt += 2 * M_PI;
       }
 
-      if (effect->kind == EFFECT_KIND_UNK0 ||
-          effect->kind == EFFECT_KIND_UNK3) {
+      if (effect->kind == EFFECT_KIND_HIGH_PUFF ||
+          effect->kind == EFFECT_KIND_HIGH_ROUGH) {
         if (effect->velocity[AXIS_Y] < HIGH_DEBRIS_FAST_RISE_SPEED) {
           effect->frame = 0;
         } else if (effect->velocity[AXIS_Y] < HIGH_DEBRIS_SLOW_RISE_SPEED) {
@@ -1641,8 +1650,9 @@ void DrawEffects(CameraMatrices* matrices, Gfx** displayListHead) {
   gDPSetTextureLUT(gfx++, G_TT_NONE);
   for (index = 0; index != EFFECT_COUNT; index++) {
     effect = &f_Effects[index];
-    if (effect->kind == EFFECT_KIND_UNK0 || effect->kind == EFFECT_KIND_UNK1 ||
-        effect->kind == EFFECT_KIND_UNK2) {
+    if (effect->kind == EFFECT_KIND_HIGH_PUFF ||
+        effect->kind == EFFECT_KIND_LOW_PUFF ||
+        effect->kind == EFFECT_KIND_LOW_GRASS) {
       DrawBillboardEffect(&gfx, effect, effect->color);
     }
   }
@@ -1654,7 +1664,8 @@ void DrawEffects(CameraMatrices* matrices, Gfx** displayListHead) {
       TEXEL0, 0, PRIMITIVE, 0, PRIMITIVE, 0, TEXEL0, 0);
   for (index = 0; index != EFFECT_COUNT; index++) {
     effect = &f_Effects[index];
-    if (effect->kind == EFFECT_KIND_UNK3 || effect->kind == EFFECT_KIND_UNK4) {
+    if (effect->kind == EFFECT_KIND_HIGH_ROUGH ||
+        effect->kind == EFFECT_KIND_LOW_ROUGH) {
       DrawBillboardEffect(&gfx, effect, effect->color);
     }
   }
@@ -1851,8 +1862,8 @@ void DrawBillboardEffect(Gfx** displayListHead, Effect* effect, u16 color) {
           << RGBA16_CHANNEL_WIDEN_SHIFT;
       blue = ((color >> RGBA16_BLUE_SHIFT) & RGBA16_CHANNEL_MASK)
           << RGBA16_CHANNEL_WIDEN_SHIFT;
-      if (effect->kind == EFFECT_KIND_UNK0 ||
-          effect->kind == EFFECT_KIND_UNK1) {
+      if (effect->kind == EFFECT_KIND_HIGH_PUFF ||
+          effect->kind == EFFECT_KIND_LOW_PUFF) {
         red += PUFF_LIGHTENING;
         green += PUFF_LIGHTENING;
         blue += PUFF_LIGHTENING;
