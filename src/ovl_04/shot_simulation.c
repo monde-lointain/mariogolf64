@@ -159,5 +159,5 @@ void SimulateShot(ShotLaunch* shot) {
     g_SimulatedShot.isFirstBounceOut = FALSE;
   }
 
-  g_SimulatedShot.unk2E18 = simulation->firstBounceSurface;
+  g_SimulatedShot.firstBounceSurface = simulation->firstBounceSurface;
 }

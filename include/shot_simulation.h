@@ -29,7 +29,7 @@ typedef struct SimulatedShot {
   /* 0x2E10 */ Boolean endsInCup;
   /* A full-power shot on the impact mark, with any club but a putter */
   /* 0x2E14 */ Boolean isPerfectSwing;
-  /* 0x2E18 */ s32 unk2E18;
+  /* 0x2E18 */ s32 firstBounceSurface; /* As the simulation's; never read */
   /* 0x2E1C */ ShotLaunch shot;
   /* 0x2E3C */ s32 flagHitStep; /* The step that hits the flag, or NO_STEP */
   /* 0x2E40 */ s8 endSurface; /* A SURFACE_* value */
