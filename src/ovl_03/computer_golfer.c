@@ -51,7 +51,7 @@
 /* How a character plays when the computer controls it */
 typedef struct GolferTraits {
   /* 0x0 */ s8 unk0;
-  /* 0x1 */ s8 consistency; /* Steadier golfers mishit less */
+  /* 0x1 */ s8 consistency; /* CONSISTENCY_*: steadier golfers mishit less */
   /* 0x2 */ s8 clubBoldness; /* BOLD_CLUB_CHOICE or less */
   /* 0x3 */ s8 unk3;
   /* 0x4 */ s8 unk4;
@@ -70,6 +70,14 @@ typedef struct GolferTraits {
  */
 #define BOLD_CLUB_CHOICE 2
 
+/* GolferTraits.consistency values */
+enum Consistency {
+  CONSISTENCY_LOW,
+  CONSISTENCY_MIDDLE,
+  CONSISTENCY_HIGH,
+  CONSISTENCY_COUNT
+};
+
 /* GolferTraits.windPlay values */
 enum WindPlay {
   WIND_PLAY_HEAD_WINDS, /* Offsets shots for head winds */
@@ -85,9 +93,6 @@ typedef struct ShotOffset {
 } ShotOffset; /* size = 0x2 */
 
 #define APPROACH_BAND_COUNT 4
-#define APPROACH_STYLE_COUNT 3
-#define APPROACH_STYLE_UNK1 1
-#define APPROACH_STYLE_UNK2 2
 
 /* The rows of f_ClubKindChances */
 #define CLUB_CHANCE_SET_COUNT 2
@@ -187,7 +192,7 @@ static Boolean f_HasBestEvaluation = FALSE;
  * The upper limits of each approach band, as shares of the cup distance that
  * lie short of the green, for each value of the golfer's consistency
  */
-static f32 f_ApproachBandLimits[APPROACH_BAND_COUNT][APPROACH_STYLE_COUNT] = {
+static f32 f_ApproachBandLimits[APPROACH_BAND_COUNT][CONSISTENCY_COUNT] = {
     {0.2f, 0.15f, 0.1f},
     {0.25f, 0.25f, 0.25f},
     {0.4f, 0.45f, 0.35f},
@@ -879,13 +884,13 @@ s32 PlanShot(CurrentShot* plannedShot) {
         switch (
             f_GolferTraits[g_Players[f_TrialShot.playerIndex].characterIndex]
                 .consistency) {
-          case 0:
+          case CONSISTENCY_LOW:
             mishitDivisor = 62;
             break;
-          case 1:
+          case CONSISTENCY_MIDDLE:
             mishitDivisor = 83;
             break;
-          case 2:
+          case CONSISTENCY_HIGH:
           default:
             mishitDivisor = 125;
             break;
@@ -2132,7 +2137,7 @@ ClubType ChooseApproachClub(s32* targetX, s32* targetZ) {
   f32 edgeShare;
   u32 peakKind;
   s32 band;
-  s32 style;
+  s32 consistency;
 
   *targetX = g_HoleSetup.cupPosition[AXIS_X];
   *targetZ = g_HoleSetup.cupPosition[AXIS_Z];
@@ -2165,38 +2170,38 @@ ClubType ChooseApproachClub(s32* targetX, s32* targetZ) {
     edgeShare = (f32)edgeDistance / (f32)cupDistance;
   }
 
-  style =
+  consistency =
       f_GolferTraits[g_Players[f_Shot.playerIndex].characterIndex].consistency;
   for (band = 0; band < APPROACH_BAND_COUNT; band++) {
-    if (edgeShare < f_ApproachBandLimits[band][style]) {
+    if (edgeShare < f_ApproachBandLimits[band][consistency]) {
       if (band == 0) {
         return CLUB_TYPE_PITCHING_WEDGE;
       } else if (band == 1) {
-        if (style == APPROACH_STYLE_UNK2) {
+        if (consistency == CONSISTENCY_HIGH) {
           return CLUB_TYPE_DRIVER;
         }
 
-        if (style == APPROACH_STYLE_UNK1) {
+        if (consistency == CONSISTENCY_MIDDLE) {
           return CLUB_TYPE_THREE_WOOD;
         }
 
         return CLUB_TYPE_FOUR_WOOD;
       } else if (band == 2) {
-        if (style == APPROACH_STYLE_UNK2) {
+        if (consistency == CONSISTENCY_HIGH) {
           return CLUB_TYPE_FIVE_IRON;
         }
 
-        if (style == APPROACH_STYLE_UNK1) {
+        if (consistency == CONSISTENCY_MIDDLE) {
           return CLUB_TYPE_FOUR_IRON;
         }
 
         return CLUB_TYPE_THREE_IRON;
       } else if (band == 3) {
-        if (style == APPROACH_STYLE_UNK2) {
+        if (consistency == CONSISTENCY_HIGH) {
           return CLUB_TYPE_SAND_WEDGE;
         }
 
-        if (style == APPROACH_STYLE_UNK1) {
+        if (consistency == CONSISTENCY_MIDDLE) {
           return CLUB_TYPE_PITCHING_WEDGE;
         }
 
@@ -2810,7 +2815,7 @@ ClubType ChooseClubForDistance(s32 distance) {
     carry = GetShotWorldDistance(club, SHOT_MODE_NORMAL);
     if (g_HoleSetup.conditions.isRaining == TRUE &&
         f_GolferTraits[g_Players[f_Shot.playerIndex].characterIndex]
-                .consistency < 2) {
+                .consistency < CONSISTENCY_HIGH) {
       carry = carry * RAINY_DISTANCE_FRACTION;
     }
 
