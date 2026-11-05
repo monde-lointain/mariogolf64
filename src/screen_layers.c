@@ -119,7 +119,8 @@
 
 enum HalfTurnState {
   HALF_TURN_STATE_SHOWING,
-  HALF_TURN_STATE_UNK1,
+  /* Still shown HALF_TURN_WAIT_FRAMES after the reveal finished */
+  HALF_TURN_STATE_EXPIRED,
   HALF_TURN_STATE_LEAVING,
   HALF_TURN_STATE_DONE
 };
@@ -359,7 +360,7 @@ s32 GetWipeProgress(void) {
   }
 
   switch (f_HalfTurnState) {
-    case HALF_TURN_STATE_UNK1:
+    case HALF_TURN_STATE_EXPIRED:
     default:
       return 0;
     case HALF_TURN_STATE_DONE:
@@ -937,7 +938,7 @@ void DrawHalfTurn(Gfx** displayListHead) {
     } else if (f_HalfTurnTimer > -HALF_TURN_WAIT_FRAMES) {
       f_HalfTurnTimer--;
     } else {
-      f_HalfTurnState = HALF_TURN_STATE_UNK1;
+      f_HalfTurnState = HALF_TURN_STATE_EXPIRED;
     }
   }
 
