@@ -3552,19 +3552,29 @@ void SecondUnusedCameraStub(void) {}
  * edge. Otherwise it is a disc, a dark gap and a ring that brightens outward.
  * Doesn't match: the original converts the soft spot's squared distance into a
  * temporary, takes its root there and copies the root to distance, which radius
- * then reads. Here the conversion goes into distance itself. Taking sqrtf of
- * the sum directly gives 10 differing words, as cse2 makes radius read the root
- * and the copy moves into a delay slot. Setting distance before the loops gives
- * 3, as cse then makes the root's insn set distance directly. A root temporary
- * copied to distance also gives 3. Per cse.c's make_regs_eqv, radius reads
- * distance only when distance outlives the root beyond the extended block or
- * was used before it; writing it in the first loop as well gives 9. Keeping the
- * squared distance in a squaredDistance local of its own, wherever it is
- * declared, gives 10 (4 in shape), so distance holds both. The register oracle,
- * forcing 1 pseudo's register, leaves 5 words at best, so the code differs too.
- * 6 words differ.
+ * then reads. Here cse2 replaces distance with the root's register, so the copy
+ * goes. Per cse.c, the copy survives only if make_regs_eqv makes distance the
+ * class's canonical register, which needs distance to outlive the root beyond
+ * the extended block or to be used before it, and if cse_insn's swap, which
+ * makes the root's insn set distance itself, then fails, which needs the copy's
+ * previous insn to set something other than the root. Getting the distance from
+ * an inline helper, with the squared distance and the root in locals of their
+ * own, gives these 3 words (1 in shape), and the register oracle leaves them
+ * with no register forced, so allocation isn't the cause. Before the helper,
+ * the draft converted into distance and took the root there, leaving 6 words;
+ * taking sqrtf of the sum directly gave 10, setting distance before the loops
+ * or copying a root temporary to it 3, writing it in the first loop as well 9,
+ * and a squaredDistance local, wherever declared, 10 (4 in shape). 3 words
+ * differ, 1 in shape.
  */
 #ifdef NON_MATCHING
+static inline f32 GetSpotDistance(s32 rowOffset, s32 columnOffset) {
+  f32 squaredDistance = (rowOffset * rowOffset) + (columnOffset * columnOffset);
+  f32 distance = sqrtf(squaredDistance);
+
+  return distance;
+}
+
 void BuildSpotTexels(u8* texels, Boolean isSoft) {
   s32 row;
   s32 column;
@@ -3584,8 +3594,7 @@ void BuildSpotTexels(u8* texels, Boolean isSoft) {
   if (!isSoft) {
     for (row = 0; row != height; row++) {
       for (column = 0; column != width; column++) {
-        radius = sqrtf(((row - height) * (row - height)) +
-            ((column - width) * (column - width)));
+        radius = GetSpotDistance(row - height, column - width);
         if (radius <= SPOT_DISC_RADIUS) {
           intensity = SPOT_PEAK_INTENSITY;
         } else if (radius <= SPOT_GAP_RADIUS) {
@@ -3604,9 +3613,7 @@ void BuildSpotTexels(u8* texels, Boolean isSoft) {
     for (row = 0, softDiscRadius = SPOT_SOFT_DISC_RADIUS; row != height;
         row++) {
       for (column = 0; column != width; column++) {
-        distance = ((row - height) * (row - height)) +
-            ((column - width) * (column - width));
-        distance = sqrtf(distance);
+        distance = GetSpotDistance(row - height, column - width);
         radius = distance;
         if (radius <= softDiscRadius) {
           intensity = SPOT_PEAK_INTENSITY;
