@@ -1217,9 +1217,13 @@ void DrawTwoDigitMenuNumber(
  * s32 gave 205, 53 in shape. The columns' loop tests columnIndex !=
  * g_ChosenPlayerCount, as the original's bne shows; with <, which d849c579
  * chose for its lower count, it compiles to slt and bnez. The register oracle,
- * forcing 16 pseudos' registers, leaves 185 words at best, where it left 122
- * with 17 forced before the hoist, so the code differs too. 213 words differ,
- * 31 in shape.
+ * forcing 16 pseudos' registers, left 185 words at best when the draft gave
+ * 213, where it left 122 with 17 forced before the hoist, so the code differs
+ * too. The left arrow's texels are found by ImageTexelsAt, adding the arrow's
+ * offset to the frame's, which took the draft from 213 words differing to 210,
+ * 31 in shape to 30; the other arrows keep their sum, as through ImageTexelsAt
+ * or ImageTexels they give 272 to 372 words, and the left arrow written as they
+ * are 275. 210 words differ, 30 in shape.
  */
 #ifdef NON_MATCHING
 void DrawHandicaps(Gfx** displayListHead, s32 slide, u8 reverseVerticalSlide,
@@ -1452,8 +1456,8 @@ void DrawHandicaps(Gfx** displayListHead, s32 slide, u8 reverseVerticalSlide,
   for (arrowIndex = 0; arrowIndex != MENU_ARROW_COUNT; arrowIndex++) {
     if (arrowIndex == MENU_ARROW_LEFT) {
       gDPLoadTextureTile_4b(gfx++,
-          TextureAddress((MENU_ARROW_RIGHT * GREEN_ARROW_IMAGE_SIZE) +
-              ((u32)f_StatsGreenArrows + PALETTED_TEXELS_OFFSET +
+          TextureAddress(ImageTexelsAt(f_StatsGreenArrows,
+              (MENU_ARROW_RIGHT * GREEN_ARROW_IMAGE_SIZE) +
                   (f_GreenArrowFrame * GREEN_ARROW_FRAME_SIZE))),
           G_IM_FMT_CI, GREEN_ARROW_SIZE, GREEN_ARROW_SIZE, 0, 0,
           GREEN_ARROW_SIZE - 1, GREEN_ARROW_SIZE - 1, 0,
