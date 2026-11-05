@@ -2182,15 +2182,16 @@ void PlaceCharacter(u32 slotIndex, CoursePoint point, Radians heading) {
  *
  * Doesn't match: the original loads the light's rotation into $f0 and picks it
  * or its negation into $f12, which is jump.c's form of a general ?: expansion.
- * Ours is expand_expr's single-operand form, which loads straight into $f12 and
- * negates it in place. Reading the rotation into a local first, or writing the
- * arms differently, keeps that form. The view direction's stores and the shadow
- * scale's abs.s are also scheduled otherwise. The register oracle, forcing 10
- * pseudos' registers, leaves 47 words at best, so the code differs too. Setting
- * the view direction's z before its x, in any order of the three, gives 45
- * words (19 in shape), but ours still stores x and z after the abs.s where the
- * original stores them before, so only registers change, and the order is left
- * as written. 49 words differ, 19 in shape.
+ * Ours is expand_expr's single-operand form, which expr.c takes when one arm
+ * negates the other, and which loads straight into $f12 and negates it in
+ * place. Reading the rotation into a local first, or writing the arms
+ * differently, keeps that form. The negated arm as a subtraction from 0, or a
+ * static inline function that picks the yaw with a ?: or negates it under an
+ * if, gives the same 14 words, and one that returns from an if and
+ * an else 53 (23 in shape), still negating in place. With fabsf an abs.s in
+ * volatile inline assembly, the view direction's stores and the shadow
+ * scale's abs.s are scheduled as in the original, which took the draft from
+ * 49 words differing, 19 in shape, to 14, 6 in shape, all in the two ?:s.
  */
 #ifdef NON_MATCHING
 void DrawCharacterAndShadow(
