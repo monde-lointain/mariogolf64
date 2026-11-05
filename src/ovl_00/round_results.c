@@ -422,7 +422,8 @@ void OpenRoundResults(s32 request) {
         counted_ = 1; \
       } \
       f_PointsEarned = f_PointsEarned * \
-          f_CoursePointRates[GetCourseRecordIndex()] / counted_; \
+          f_CoursePointRates[GetCourseRecordIndex(g_GameState.courseIndex)] / \
+          counted_; \
       f_PointsShown = f_PointsEarned; \
       f_PointsToNextCourse -= f_PointsEarned; \
     } \
@@ -454,7 +455,13 @@ void OpenRoundResults(s32 request) {
  * 187 (43). The original loads the field through the saved data pointer at each
  * use, as ours does, where ours loads the call's argument with four
  * instructions between it and the call, and the original in its delay slot; a
- * pointer to the single field is not kept. 166 words differ, 34 in shape.
+ * pointer to the single field is not kept. 156 words differ, 28 in shape.
+ *
+ * AddRoundPoints passes g_GameState.courseIndex to GetCourseRecordIndex, which
+ * ignores it, as the original loads it into $a0 before both calls; play.c
+ * passes the same field where it opens the scorecard. That took the function
+ * from 166 words differing, 34 in shape, to 156 (28); the other counts in the
+ * paragraph above were measured before it.
  */
 void LoadRoundResults(void) {
   EncodedAsset asset;
