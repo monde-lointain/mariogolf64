@@ -50,7 +50,7 @@
 
 /* How a character plays when the computer controls it */
 typedef struct GolferTraits {
-  /* 0x0 */ s8 unk0;
+  /* 0x0 */ s8 strongNine; /* STRONG_NINE_* */
   /* 0x1 */ s8 consistency; /* CONSISTENCY_*: steadier golfers mishit less */
   /* 0x2 */ s8 clubBoldness; /* BOLD_CLUB_CHOICE or less */
   /* 0x3 */ s8 unk3;
@@ -69,6 +69,13 @@ typedef struct GolferTraits {
  * poor lies, swings harder at planned shots and takes power shots readily
  */
 #define BOLD_CLUB_CHOICE 2
+
+/* GolferTraits.strongNine values */
+enum StrongNine {
+  STRONG_NINE_NEITHER,
+  STRONG_NINE_FRONT, /* Strokes move from the front nine to the back */
+  STRONG_NINE_BACK /* Strokes move from the back nine to the front */
+};
 
 /* GolferTraits.consistency values */
 enum Consistency {
@@ -1245,7 +1252,7 @@ s32 ChooseHoleStrokeTarget(void) {
   s32 lossCount;
   s32 winBits;
   s32 targetScore;
-  s32 spreadStyle;
+  s32 strongNine;
   s32 index;
   s32 groupCount;
   s32 frontStrokes;
@@ -1291,8 +1298,8 @@ s32 ChooseHoleStrokeTarget(void) {
   osSyncPrintf(
       "Char Index = %d\n", g_Players[f_Shot.playerIndex].characterIndex);
   osSyncPrintf("TargetScore = %d\n", targetScore);
-  spreadStyle =
-      f_GolferTraits[g_Players[f_Shot.playerIndex].characterIndex].unk0;
+  strongNine =
+      f_GolferTraits[g_Players[f_Shot.playerIndex].characterIndex].strongNine;
   for (index = 0; index < COURSE_HOLE_COUNT; index++) {
     strokes[index] = 0;
     handicaps[index] = 0;
@@ -1345,15 +1352,15 @@ s32 ChooseHoleStrokeTarget(void) {
 
   backStrokes = targetScore / 2;
   frontStrokes = backStrokes;
-  if (spreadStyle == 0) {
+  if (strongNine == STRONG_NINE_NEITHER) {
     if (targetScore & 1) {
       frontStrokes = targetScore - backStrokes;
     }
-  } else if (spreadStyle == 1) {
+  } else if (strongNine == STRONG_NINE_FRONT) {
     if (targetScore & 1) {
       frontStrokes = targetScore - backStrokes;
     }
-  } else if (spreadStyle == 2) {
+  } else if (strongNine == STRONG_NINE_BACK) {
     if (targetScore & 1) {
       backStrokes = targetScore - backStrokes;
     }
@@ -1363,16 +1370,16 @@ s32 ChooseHoleStrokeTarget(void) {
   SpreadStrokes(strokes, strokesLeft, holes[index] < HOLES_PER_NINE);
   strokesLeft = backStrokes;
   SpreadStrokes(strokes, strokesLeft, holes[index] >= HOLES_PER_NINE);
-  if (spreadStyle == 1 || spreadStyle == 2) {
+  if (strongNine == STRONG_NINE_FRONT || strongNine == STRONG_NINE_BACK) {
     negativeCount = 0;
     backStrokes = 0;
     frontStrokes = 0;
     for (index = 0; index < COURSE_HOLE_COUNT; index++) {
-      if (spreadStyle == 1 && !(holes[index] < HOLES_PER_NINE)) {
+      if (strongNine == STRONG_NINE_FRONT && !(holes[index] < HOLES_PER_NINE)) {
         continue;
       }
 
-      if (spreadStyle == 2 && holes[index] < HOLES_PER_NINE) {
+      if (strongNine == STRONG_NINE_BACK && holes[index] < HOLES_PER_NINE) {
         continue;
       }
 
@@ -1383,29 +1390,29 @@ s32 ChooseHoleStrokeTarget(void) {
 
     if (targetScore > 0) {
       if (negativeCount == 0) {
-        if (spreadStyle == 1) {
+        if (strongNine == STRONG_NINE_FRONT) {
           frontStrokes--;
           backStrokes++;
-        } else if (spreadStyle == 2) {
+        } else if (strongNine == STRONG_NINE_BACK) {
           backStrokes--;
           frontStrokes++;
         }
       }
     } else if (targetScore == 0 || targetScore == -1) {
       if (negativeCount < 2) {
-        if (spreadStyle == 1) {
+        if (strongNine == STRONG_NINE_FRONT) {
           frontStrokes += negativeCount - 2;
           backStrokes -= negativeCount - 2;
-        } else if (spreadStyle == 2) {
+        } else if (strongNine == STRONG_NINE_BACK) {
           backStrokes += negativeCount - 2;
           frontStrokes -= negativeCount - 2;
         }
       }
     } else if (negativeCount < 3) {
-      if (spreadStyle == 1) {
+      if (strongNine == STRONG_NINE_FRONT) {
         frontStrokes += negativeCount - 3;
         backStrokes -= negativeCount - 3;
-      } else if (spreadStyle == 2) {
+      } else if (strongNine == STRONG_NINE_BACK) {
         backStrokes += negativeCount - 3;
         frontStrokes -= negativeCount - 3;
       }
