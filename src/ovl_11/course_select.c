@@ -617,7 +617,10 @@ void SetPlankMotion(s32 motion) {
  * forcing 5 pseudos' registers, leaves 38 words at best, so the code differs
  * too. Working out the strip's top before its pipe sync gives 54 words (12 in
  * shape), but the oracle's best rises to 44 words with 4 forced, so the order
- * is kept; the bottom moved with it, or alone, gives 124 to 126. 56 words
+ * is kept; the bottom moved with it, or alone, gives 124 to 126. Summing the
+ * border and the strip's height before its offset, in the bottom edge, in any
+ * of four orders and groupings, gives 55 words but 13 in shape, and with the
+ * border first the oracle's best rises to 39 words with 5 forced. 56 words
  * differ, 10 in shape.
  */
 #ifdef NON_MATCHING
