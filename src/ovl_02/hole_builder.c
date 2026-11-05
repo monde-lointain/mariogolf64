@@ -740,8 +740,10 @@ s32 ListOffsetsByDistance(s32 span, GridOffset* offsets, s32 maxCount) {
  * their heights. A band at or past GROUND_TILE_ROW_COUNT is left untouched.
  *
  * Doesn't match: the nested DrawTriangleHeights allocates its registers
- * differently, using $s7 where the original reloads the static chain. 323 words
- * differ in it, 45 in shape. Indexing the row, as texel[texelColumn] from texel
+ * differently, using $s7 where the original reloads the static chain. 321 words
+ * differ in it, 45 in shape. The counts that follow were measured when
+ * texelColumn came from longX rather than the converted fromX, which gave 323
+ * words, 45 in shape. Indexing the row, as texel[texelColumn] from texel
  * = &heights[texelRow * MAP_COLUMN_COUNT], gives 497 words but only 29 in
  * shape: the inner loop takes the original's form, and what is left is the
  * extra saved register, with span in $s1 rather than $t8, and the order of the
@@ -753,9 +755,8 @@ s32 ListOffsetsByDistance(s32 span, GridOffset* offsets, s32 maxCount) {
  * its 323 words at best, so its code differs too. A u32 width gives 315 words,
  * but 65 in shape, as it drops the test before negating the width and the
  * rounding of its signed division, which the original's DrawTriangleHeights
- * keeps as a bgez and a bltzl before an sra. Deriving texelColumn from the
- * already converted fromX rather than longX leaves 321 words, 45 in shape;
- * both signed shifts still fold into the original's single shift by 16.
+ * keeps as a bgez and a bltzl before an sra. Both signed shifts of the current
+ * form still fold into the original's single shift by 16.
  */
 #ifdef NON_MATCHING
 void DrawBandHeights(s16* heights, s32 band) {
