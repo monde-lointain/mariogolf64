@@ -361,7 +361,10 @@ void DrawBillboard(Gfx** gfxPtr, Billboard* billboard,
  * both uses in the second loop, which counts down, gives 121 words (21 in
  * shape), but it loads the field again after IsDebugBButtonView, where the
  * original keeps its one load in $s4 for the call; a focused permuter run's 88
- * words test textureIndex before setting it. 139 words differ, 17 in shape.
+ * words test textureIndex before setting it. Those counts were measured with
+ * the view test taking fabs of each component converted back to f32, when 139
+ * words differed, 17 in shape. With the game's fabsf there, 125 words differ,
+ * 13 in shape.
  */
 #ifdef NON_MATCHING
 void DrawBillboards(CameraMatrices* cameraMatrices, s32 cameraIndex) {
@@ -400,7 +403,7 @@ void DrawBillboards(CameraMatrices* cameraMatrices, s32 cameraIndex) {
   lightDir[AXIS_X] = cosf(lightPitch) * cosf(lightYaw);
   lightDir[AXIS_Z] = cosf(lightPitch) * sinf(lightYaw);
   lightDir[AXIS_Y] = sinf(lightPitch);
-  if ((f32)fabs(viewDir[AXIS_X]) + (f32)fabs(viewDir[AXIS_Z]) >= 1.0f) {
+  if (fabsf(viewDir[AXIS_X]) + fabsf(viewDir[AXIS_Z]) >= 1.0f) {
     guNormalize(&viewDir[AXIS_X], &viewDir[AXIS_Y], &viewDir[AXIS_Z]);
     guNormalize(&lightDir[AXIS_X], &lightDir[AXIS_Y], &lightDir[AXIS_Z]);
     alignment = (viewDir[AXIS_X] * lightDir[AXIS_X]) +
