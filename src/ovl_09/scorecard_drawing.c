@@ -2157,8 +2157,11 @@ INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard_drawing", DrawLeaderboardPage);
  * rectangle's top, 56 below the card's, gave 842 (194) without it. The register
  * oracle, forcing 45 pseudos' registers, leaves 628 words at best, so the code
  * differs too. The faded style sets the cells' alpha after its commands, as the
- * yellow style does; set first, 762 words differed (212 in shape). 760 words
- * differ, 210 in shape.
+ * yellow style does; set first, 762 words differed (212 in shape). Adding the
+ * skins won to standing in both arms of the front and back nine test, after
+ * each DrawShadowedText, gives 734 words (216 in shape), but the original adds
+ * them once, after both arms, as the draft does. 760 words differ, 210 in
+ * shape.
  */
 #ifdef NON_MATCHING
 void DrawScoresPage(Gfx** displayListHead) {
