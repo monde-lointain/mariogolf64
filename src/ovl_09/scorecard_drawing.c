@@ -2176,7 +2176,10 @@ INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard_drawing", DrawLeaderboardPage);
  * numbers, par and badges do; with x first, as the draft had them, 760 words
  * differed, 210 in shape, and the oracle left 628. The back nine's match mark
  * still adds x first: x last there gives 772 words (176 in shape), and x first
- * in the front nine's too 760 (180). 760 words differ, 178 in shape.
+ * in the front nine's too 760 (180). Writing each of the four cell rectangles'
+ * edges as plain sums, with g_Scorecard.x and g_Scorecard.y all first or all
+ * last in each, gives 1031 to 1041 words in all sixteen combinations. 760 words
+ * differ, 178 in shape.
  */
 #ifdef NON_MATCHING
 void DrawScoresPage(Gfx** displayListHead) {
@@ -2452,11 +2455,17 @@ void DrawScoresPage(Gfx** displayListHead) {
       gDPPipeSync(gfx++);
       if (j & 1) {
         if (!(g_GameState.holeSelection & HOLE_SELECTION_BACK_NINE)) {
+          /*
+           * The top adds the row's offset to CELL_TOP before g_Scorecard.y,
+           * to match: adding them in order gives 762 words differing (184 in
+           * shape) against the draft's 760 (178), and with the row's offset
+           * before CELL_TOP 765 (179)
+           */
           DrawTextureRect(&gfx,
-              QuarterPixels(((j * CELL_WIDTH) + CELL_LEFT) + g_Scorecard.x),
+              QuarterPixels((j * CELL_WIDTH) + CELL_LEFT + g_Scorecard.x),
               QuarterPixels(g_Scorecard.y + (CELL_TOP + (i * CELL_HEIGHT))),
               QuarterPixels(
-                  (j * CELL_WIDTH) + (CELL_LEFT + CELL_WIDTH) + g_Scorecard.x),
+                  (j * CELL_WIDTH) + CELL_LEFT + CELL_WIDTH + g_Scorecard.x),
               QuarterPixels(
                   g_Scorecard.y + (i * CELL_HEIGHT) + CELL_TOP + CELL_HEIGHT),
               G_TX_RENDERTILE, 0, TexelCoordinate(i * CELL_HEIGHT),
@@ -2538,11 +2547,11 @@ void DrawScoresPage(Gfx** displayListHead) {
         if (!(g_GameState.holeSelection & HOLE_SELECTION_FRONT_NINE)) {
           DrawTextureRect(&gfx,
               QuarterPixels(
-                  ((cellColumn * CELL_WIDTH) + CELL_LEFT) + g_Scorecard.x),
-              QuarterPixels((cellRowIndex * CELL_HEIGHT) +
-                  (CELL_TOP + NINE_SPACING) + g_Scorecard.y),
-              QuarterPixels((cellColumn * CELL_WIDTH) +
-                  (CELL_LEFT + CELL_WIDTH) + g_Scorecard.x),
+                  (cellColumn * CELL_WIDTH) + CELL_LEFT + g_Scorecard.x),
+              QuarterPixels((cellRowIndex * CELL_HEIGHT) + CELL_TOP +
+                  NINE_SPACING + g_Scorecard.y),
+              QuarterPixels((cellColumn * CELL_WIDTH) + CELL_LEFT + CELL_WIDTH +
+                  g_Scorecard.x),
               QuarterPixels((cellRowIndex * CELL_HEIGHT) + CELL_HEIGHT +
                   CELL_TOP + NINE_SPACING + g_Scorecard.y),
               G_TX_RENDERTILE, 0, TexelCoordinate(cellRowIndex * CELL_HEIGHT),
