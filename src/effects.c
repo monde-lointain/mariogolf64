@@ -408,7 +408,7 @@ void SpawnSpreadingCircle(u32 slotIndex, s32 pointId) {
         effect->position[AXIS_Y] = point[AXIS_Y] - SPREADING_CIRCLE_RISE;
         effect->position[AXIS_Z] = point[AXIS_Z];
         effect->kind = EFFECT_KIND_SPREADING_CIRCLE;
-        effect->unk3B = 0;
+        effect->frame = 0;
         effect->velocity[AXIS_X] = 0;
         effect->velocity[AXIS_Y] = 0;
         effect->velocity[AXIS_Z] = 0;
@@ -440,8 +440,8 @@ void SpawnSpreadingCircle(u32 slotIndex, s32 pointId) {
 #define TEAR_OFFSET_SCALE (COURSE_TO_WORLD_SCALE / 5)
 /* Tears fly out at between 0.4 and 1.4 times this many course units a frame */
 #define TEAR_SPEED_RANGE 1536
-/* Tears from this point get unk3B set */
-#define TEAR_UNK3B_POINT 3
+/* Tears from this point start on an odd frame, which draws them mirrored */
+#define TEAR_MIRRORED_POINT 3
 
 /*
  * Throws a tear from a character's point toward heading, and up; Baby
@@ -488,16 +488,16 @@ void SpawnTear(u32 slotIndex, s32 pointId, Radians heading) {
         effect->position[AXIS_X] += effect->velocity[AXIS_X];
         effect->position[AXIS_Y] += effect->velocity[AXIS_Y];
         effect->position[AXIS_Z] += effect->velocity[AXIS_Z];
-        effect->unk38 = 0;
+        effect->color = 0;
         effect->alpha = 159.0f;
         effect->alphaStep = -1.0f;
         effect->scale = 1.3f;
         effect->scaleStep = -0.04f;
         effect->kind = EFFECT_KIND_TEAR;
-        if (pointId == TEAR_UNK3B_POINT) {
-          effect->unk3B = 1;
+        if (pointId == TEAR_MIRRORED_POINT) {
+          effect->frame = 1;
         } else {
-          effect->unk3B = 0;
+          effect->frame = 0;
         }
 
         return;
@@ -536,13 +536,13 @@ void SpawnSparkleNearPoint(u32 slotIndex, s32 pointId) {
         effect->velocity[AXIS_X] = 0;
         effect->velocity[AXIS_Y] = SPARKLE_FALL_SPEED;
         effect->velocity[AXIS_Z] = 0;
-        effect->unk38 = 0;
+        effect->color = 0;
         effect->alpha = 255.0f;
         effect->alphaStep = -4.0f;
         effect->scale = 6.0f;
         effect->scaleStep = -0.2f;
         effect->kind = EFFECT_KIND_SPARKLE;
-        effect->unk3B = 0;
+        effect->frame = 0;
         return;
       }
     }
@@ -565,7 +565,7 @@ void SpawnRipple(CoursePoint position) {
       effect->position[AXIS_Y] = position[AXIS_Y] * COURSE_TO_WORLD_SCALE;
       effect->position[AXIS_Z] = position[AXIS_Z] * COURSE_TO_WORLD_SCALE;
       effect->kind = EFFECT_KIND_RIPPLE;
-      effect->unk3B = 0;
+      effect->frame = 0;
       effect->matrixIndex = f_NextMatrixIndex;
       f_NextMatrixIndex = (f_NextMatrixIndex + 1) % EFFECT_COUNT;
       effect->velocity[AXIS_X] = 0;
@@ -625,7 +625,7 @@ void LaunchDrop(CoursePoint point) {
       effect->velocity[AXIS_Z] = sinf(heading) * speed * COURSE_TO_WORLD_SCALE;
       effect->velocity[AXIS_Y] =
           -DROP_SLOWEST_RISE_SPEED - (speedOffset * COURSE_TO_WORLD_SCALE);
-      effect->unk24 = 0;
+      effect->tilt = 0;
       effect->kind = EFFECT_KIND_DROP;
       effect->alphaStep = 0;
       effect->scaleStep = 0;
@@ -634,9 +634,9 @@ void LaunchDrop(CoursePoint point) {
       translation[AXIS_X] = effect->position[AXIS_X];
       translation[AXIS_Y] = effect->position[AXIS_Y];
       translation[AXIS_Z] = effect->position[AXIS_Z];
-      rotation[AXIS_X] = effect->unk24;
+      rotation[AXIS_X] = effect->tilt;
       rotation[AXIS_Y] = 0;
-      rotation[AXIS_Z] = effect->unk24;
+      rotation[AXIS_Z] = effect->tilt;
       scale[AXIS_X] = effect->scale;
       scale[AXIS_Y] = effect->scale;
       scale[AXIS_Z] = effect->scale;
@@ -661,13 +661,13 @@ void SpawnSparkle(CoursePoint position) {
       effect->velocity[AXIS_X] = 0;
       effect->velocity[AXIS_Y] = SPARKLE_FALL_SPEED;
       effect->velocity[AXIS_Z] = 0;
-      effect->unk38 = 0;
+      effect->color = 0;
       effect->alpha = 255.0f;
       effect->alphaStep = -4.0f;
       effect->scale = 24.0f;
       effect->scaleStep = -0.2f;
       effect->kind = EFFECT_KIND_SPARKLE;
-      effect->unk3B = 0;
+      effect->frame = 0;
       return;
     }
   }
@@ -696,13 +696,13 @@ void SpawnUnkEEffect(u32 slotIndex, s32 pointId) {
         effect->velocity[AXIS_X] = 0;
         effect->velocity[AXIS_Y] = riseScale * (-1.5 * 0.1);
         effect->velocity[AXIS_Z] = 0;
-        effect->unk38 = 0;
+        effect->color = 0;
         effect->alpha = 230.0f;
         effect->alphaStep = -2.0f;
         effect->scale = 2.0f;
         effect->scaleStep = 0.02f;
         effect->kind = EFFECT_KIND_UNKE;
-        effect->unk3B = 0;
+        effect->frame = 0;
         return;
       }
     }
@@ -747,13 +747,13 @@ void SpawnImpactEffects(BallSimulation* simulation) {
           effect->velocity[AXIS_Y] =
               -puffNumber * DEBRIS_SPEED_STEP * (0.2f * COURSE_TO_WORLD_SCALE);
           effect->velocity[AXIS_Z] = 0;
-          effect->unk38 = color;
+          effect->color = color;
           effect->alpha = 230.0f;
           effect->alphaStep = -2.0f;
           effect->scale = 1.0f;
           effect->scaleStep = 0.04f;
           effect->kind = EFFECT_KIND_UNK0;
-          effect->unk3B = 0;
+          effect->frame = 0;
           puffNumber++;
           if (puffNumber == IMPACT_PUFF_COUNT + 1) {
             break;
@@ -780,13 +780,13 @@ void SpawnImpactEffects(BallSimulation* simulation) {
           effect->velocity[AXIS_Y] =
               -puffNumber * DEBRIS_SPEED_STEP * (0.7f * COURSE_TO_WORLD_SCALE);
           effect->velocity[AXIS_Z] = 0;
-          effect->unk38 = color;
+          effect->color = color;
           effect->alpha = 230.0f;
           effect->alphaStep = -2.0f;
           effect->scale = 2.0f;
           effect->scaleStep = 0.1f;
           effect->kind = EFFECT_KIND_UNK0;
-          effect->unk3B = 0;
+          effect->frame = 0;
           puffNumber++;
           if (puffNumber == IMPACT_PUFF_COUNT + 1) {
             break;
@@ -807,7 +807,7 @@ void SpawnImpactEffects(BallSimulation* simulation) {
           effect->position[AXIS_Z] =
               g_TurnBallSimulation.position[AXIS_Z] * COURSE_TO_WORLD_SCALE;
           effect->kind = EFFECT_KIND_RIPPLE;
-          effect->unk3B = 0;
+          effect->frame = 0;
           effect->matrixIndex = f_NextMatrixIndex;
           f_NextMatrixIndex = (f_NextMatrixIndex + 1) % EFFECT_COUNT;
           effect->velocity[AXIS_X] = 0;
@@ -875,7 +875,7 @@ void SpawnRisingClumps(CoursePoint unusedPoint UNUSED) {
       effect->alphaStep = -1.0f;
       effect->scale = (guRandom() % 30 * 0.1f) + 1.0f;
       effect->scaleStep = (guRandom() % 10 * 0.001f) + 0.04;
-      effect->unk3B = 0;
+      effect->frame = 0;
       effect->kind = EFFECT_KIND_RISING_CLUMP;
       spawnCount++;
       if (spawnCount == RISING_CLUMP_COUNT) {
@@ -976,7 +976,7 @@ void SpawnShotDebris(
         effect->velocity[AXIS_Y] =
             sinPitch * speed * (0.1f * COURSE_TO_WORLD_SCALE);
         effect->velocity[AXIS_Z] = sinYaw * speed * DEBRIS_OUTWARD_SCALE;
-        effect->unk38 = groundColor;
+        effect->color = groundColor;
         effect->alpha = guRandom() % 32 + 95;
         effect->alphaStep = -1.0f;
         if (kind == EFFECT_KIND_UNK1) {
@@ -988,7 +988,7 @@ void SpawnShotDebris(
         }
 
         effect->kind = kind;
-        effect->unk3B = 0;
+        effect->frame = 0;
       }
     }
 
@@ -1022,7 +1022,7 @@ void SpawnShotDebris(
         effect->velocity[AXIS_Y] =
             sinPitch * speed * (0.15f * COURSE_TO_WORLD_SCALE);
         effect->velocity[AXIS_Z] = sinYaw * speed * DEBRIS_OUTWARD_SCALE;
-        effect->unk38 = groundColor;
+        effect->color = groundColor;
         if (kind == EFFECT_KIND_UNK0) {
           effect->alpha = guRandom() % 32 + 191;
         } else {
@@ -1033,7 +1033,7 @@ void SpawnShotDebris(
         effect->scale = guRandom() % 32 * 0.2f;
         effect->scaleStep = debrisAmount * 0.01f + 0.4f;
         effect->kind = kind;
-        effect->unk3B = 0;
+        effect->frame = 0;
       }
     }
 
@@ -1147,7 +1147,7 @@ void SpawnShotDebris(
             (headingIndex * DROP_SPEED_STEP * COURSE_TO_WORLD_SCALE);
       }
 
-      effect->unk24 = 0.0f;
+      effect->tilt = 0.0f;
       effect->kind = EFFECT_KIND_DROP;
       effect->alphaStep = 0;
       effect->scaleStep = 0;
@@ -1156,9 +1156,9 @@ void SpawnShotDebris(
       translation[AXIS_X] = effect->position[AXIS_X];
       translation[AXIS_Y] = effect->position[AXIS_Y];
       translation[AXIS_Z] = effect->position[AXIS_Z];
-      rotation[AXIS_X] = effect->unk24;
+      rotation[AXIS_X] = effect->tilt;
       rotation[AXIS_Y] = 0.0f;
-      rotation[AXIS_Z] = effect->unk24;
+      rotation[AXIS_Z] = effect->tilt;
       scale[AXIS_X] = effect->scale;
       scale[AXIS_Y] = effect->scale;
       spawnedCount++;
@@ -1190,7 +1190,7 @@ void SpawnShotDebris(
       divotEffect->velocity[AXIS_Z] =
           sinf(heading) * speed * COURSE_TO_WORLD_SCALE;
       divotEffect->kind = EFFECT_KIND_DIVOT;
-      divotEffect->unk24 = 0;
+      divotEffect->tilt = 0;
       divotEffect->alphaStep = 0;
       divotEffect->alpha = 255.0f;
       divotEffect->velocity[AXIS_Y] = -DROP_SLOWEST_RISE_SPEED -
@@ -1412,51 +1412,51 @@ void UpdateEffects(void) {
       effect->alpha += effect->alphaStep;
       effect->scale += effect->scaleStep;
       if (effect->velocity[AXIS_Y] < SPIN_FALL_SPEED) {
-        effect->unk24 -=
+        effect->tilt -=
             (effect->velocity[AXIS_Y] - SPIN_FALL_SPEED) * SPIN_PER_SPEED;
       }
 
-      if (effect->unk24 > 2 * M_PI) {
-        effect->unk24 -= 2 * M_PI;
+      if (effect->tilt > 2 * M_PI) {
+        effect->tilt -= 2 * M_PI;
       }
 
-      if (effect->unk24 < 0.0f) {
-        effect->unk24 += 2 * M_PI;
+      if (effect->tilt < 0.0f) {
+        effect->tilt += 2 * M_PI;
       }
 
       if (effect->kind == EFFECT_KIND_UNK0 ||
           effect->kind == EFFECT_KIND_UNK3) {
         if (effect->velocity[AXIS_Y] < HIGH_DEBRIS_FAST_RISE_SPEED) {
-          effect->unk3B = 0;
+          effect->frame = 0;
         } else if (effect->velocity[AXIS_Y] < HIGH_DEBRIS_SLOW_RISE_SPEED) {
-          effect->unk3B = 1;
+          effect->frame = 1;
         } else {
-          effect->unk3B = 2;
+          effect->frame = 2;
         }
       } else if (effect->kind == EFFECT_KIND_TEAR) {
-        effect->unk3B += TEAR_FRAME_STEP;
-        if (effect->unk3B > TEAR_LAST_FRAME) {
+        effect->frame += TEAR_FRAME_STEP;
+        if (effect->frame > TEAR_LAST_FRAME) {
           effect->kind = EFFECT_KIND_NONE;
         }
       } else if (effect->kind == EFFECT_KIND_SPARKLE) {
-        if (effect->unk3B < SPARKLE_LAST_FRAME) {
-          effect->unk3B++;
+        if (effect->frame < SPARKLE_LAST_FRAME) {
+          effect->frame++;
         } else {
           effect->kind = EFFECT_KIND_NONE;
         }
       } else if (effect->kind == EFFECT_KIND_RISING_CLUMP ||
           effect->kind == EFFECT_KIND_UNKE) {
-        effect->unk3B = (effect->unk3B + 1) % CYCLING_FRAME_COUNT;
+        effect->frame = (effect->frame + 1) % CYCLING_FRAME_COUNT;
       } else {
         if (effect->velocity[AXIS_Y] < OTHER_EFFECT_FAST_RISE_SPEED) {
-          effect->unk3B = 0;
+          effect->frame = 0;
         } else if (effect->velocity[AXIS_Y] > OTHER_EFFECT_FAST_FALL_SPEED) {
-          effect->unk3B = 2;
+          effect->frame = 2;
         } else {
-          effect->unk3B = 1;
+          effect->frame = 1;
         }
 
-        effect->unk3B =
+        effect->frame =
             0; /* Overwrites the frame picked above; the original has it */
       }
 
@@ -1511,9 +1511,9 @@ void UpdateEffects(void) {
       translation[AXIS_X] = effect->position[AXIS_X];
       translation[AXIS_Y] = effect->position[AXIS_Y];
       translation[AXIS_Z] = effect->position[AXIS_Z];
-      rotation[AXIS_X] = effect->unk24;
+      rotation[AXIS_X] = effect->tilt;
       rotation[AXIS_Y] = 0;
-      rotation[AXIS_Z] = effect->unk24;
+      rotation[AXIS_Z] = effect->tilt;
       scale[AXIS_X] = effect->scale;
       scale[AXIS_Y] = effect->scale;
       scale[AXIS_Z] = effect->scale;
@@ -1643,7 +1643,7 @@ void DrawEffects(CameraMatrices* matrices, Gfx** displayListHead) {
     effect = &f_Effects[index];
     if (effect->kind == EFFECT_KIND_UNK0 || effect->kind == EFFECT_KIND_UNK1 ||
         effect->kind == EFFECT_KIND_UNK2) {
-      DrawBillboardEffect(&gfx, effect, effect->unk38);
+      DrawBillboardEffect(&gfx, effect, effect->color);
     }
   }
 
@@ -1655,7 +1655,7 @@ void DrawEffects(CameraMatrices* matrices, Gfx** displayListHead) {
   for (index = 0; index != EFFECT_COUNT; index++) {
     effect = &f_Effects[index];
     if (effect->kind == EFFECT_KIND_UNK3 || effect->kind == EFFECT_KIND_UNK4) {
-      DrawBillboardEffect(&gfx, effect, effect->unk38);
+      DrawBillboardEffect(&gfx, effect, effect->color);
     }
   }
 
@@ -1787,7 +1787,7 @@ void DrawBillboardEffect(Gfx** displayListHead, Effect* effect, u16 color) {
     }
 
     if (halfSize >= 2) {
-      frameOffset = effect->unk3B * BILLBOARD_FRAME_SIZE;
+      frameOffset = effect->frame * BILLBOARD_FRAME_SIZE;
       gDPPipeSync(gfx++);
       gDPSetPrimDepth(gfx++, center.depth, 0);
       gDPPipeSync(gfx++);
@@ -1802,8 +1802,8 @@ void DrawBillboardEffect(Gfx** displayListHead, Effect* effect, u16 color) {
       } else if (effect->kind == EFFECT_KIND_SPARKLE) {
         s32 sparkleFrames[SPARKLE_STEP_COUNT] = {2, 1, 0, 0, 1, 1, 2};
 
-        sparkleStep = effect->unk3B - SPARKLE_HIDDEN_FRAME_COUNT;
-        if (effect->unk3B < SPARKLE_HIDDEN_FRAME_COUNT) {
+        sparkleStep = effect->frame - SPARKLE_HIDDEN_FRAME_COUNT;
+        if (effect->frame < SPARKLE_HIDDEN_FRAME_COUNT) {
           *displayListHead = gfx;
           return;
         }
@@ -1822,9 +1822,9 @@ void DrawBillboardEffect(Gfx** displayListHead, Effect* effect, u16 color) {
             BILLBOARD_IMAGE_SIZE, BILLBOARD_IMAGE_SIZE, 0, G_TX_WRAP, G_TX_WRAP,
             6, 6, G_TX_NOLOD, G_TX_NOLOD);
       } else if (effect->kind == EFFECT_KIND_TEAR) {
-        if (effect->unk3B < TEAR_SECOND_FRAME_START) {
+        if (effect->frame < TEAR_SECOND_FRAME_START) {
           frameOffset = 0 * DROPLET_FRAME_SIZE;
-        } else if (effect->unk3B < TEAR_THIRD_FRAME_START) {
+        } else if (effect->frame < TEAR_THIRD_FRAME_START) {
           frameOffset = 1 * DROPLET_FRAME_SIZE;
         } else {
           frameOffset = 2 * DROPLET_FRAME_SIZE;
@@ -1878,7 +1878,7 @@ void DrawBillboardEffect(Gfx** displayListHead, Effect* effect, u16 color) {
             QuarterPixels(center.y - halfSize),
             QuarterPixels(center.x + halfSize),
             QuarterPixels(center.y + halfSize), G_TX_RENDERTILE,
-            (effect->unk3B & 1) << TEAR_MIRROR_S_SHIFT, 0, textureStep,
+            (effect->frame & 1) << TEAR_MIRROR_S_SHIFT, 0, textureStep,
             textureStep);
       } else {
         gSPScisTextureRectangle(gfx++, QuarterPixels(center.x - halfSize),
@@ -1999,7 +1999,7 @@ void DrawDivot(Gfx** displayListHead, Effect* effect) {
       textureStep = ((DIVOT_IMAGE_SIZE / 2) << 10) / halfSize;
 
       /* Half a step on, so that each frame is centered on its step */
-      angle = effect->unk24 + (M_PI / DIVOT_SPIN_STEP_COUNT);
+      angle = effect->tilt + (M_PI / DIVOT_SPIN_STEP_COUNT);
       if (angle > 2 * M_PI) {
         angle -= 2 * M_PI;
       }

@@ -28,14 +28,14 @@ typedef struct Effect {
   /* 0x00 */ Vec3 position; /* In world units */
   /* 0x0C */ Vec3 velocity; /* In world units a frame */
   /* 0x18 */ u8 unk18[0xC];
-  /* 0x24 */ f32 unk24; /* An angle about x and z */
+  /* 0x24 */ f32 tilt; /* An angle about x and z */
   /* 0x28 */ f32 alpha;
   /* 0x2C */ f32 alphaStep;
   /* 0x30 */ f32 scale;
   /* 0x34 */ f32 scaleStep;
-  /* 0x38 */ s16 unk38;
+  /* 0x38 */ s16 color; /* A billboard effect's color, in RGBA16 */
   /* 0x3A */ s8 kind;
-  /* 0x3B */ s8 unk3B;
+  /* 0x3B */ s8 frame; /* Of the effect's animation */
   /* 0x3C */ s8 matrixIndex; /* Of the effects' transform matrices */
 } Effect; /* size = 0x40 */
 
