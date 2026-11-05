@@ -3264,7 +3264,7 @@ s32 HasDeadTriangleNearPoint(s32 column, s32 row) {
 }
 
 /*
- * Runs SCENE_UNK11's menu, which loads a hole with BuildHole or saves the
+ * Runs SCENE_HOLE_FILES's menu, which loads a hole with BuildHole or saves the
  * one in memory with SaveHoleFiles. The D-pad picks the action, then the
  * course and the hole; A goes on to the next step and B goes back.
  */

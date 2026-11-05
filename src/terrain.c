@@ -252,7 +252,7 @@ static s32 f_SceneMenuScenes[SCENE_MENU_LENGTH] = {
     SCENE_FLAG_PANEL,
     SCENE_MENU,
     SCENE_MAP_OVERVIEW,
-    SCENE_UNK11,
+    SCENE_HOLE_FILES,
     SCENE_PLAY_ROUND,
     SCENE_PLAY_UNK13,
     SCENE_RINGS,
@@ -1511,7 +1511,7 @@ const char* GetDebugSceneLabel(u32 scene) {
       return "MENU";
     case SCENE_POINT_EDITOR:
       return "XZ-DIV";
-    case SCENE_UNK11:
+    case SCENE_HOLE_FILES:
       return " FILE ";
     case SCENE_PLAY_ROUND:
       return "STROKE";
@@ -1783,7 +1783,7 @@ void UpdateDebugScenes(void) {
         GetDebugSceneLabel(g_Scene), SCENE_LABEL_COLUMN, SCENE_LABEL_ROW);
   }
 
-  if (g_Scene == SCENE_UNK11) {
+  if (g_Scene == SCENE_HOLE_FILES) {
     UpdateHoleFileMenu();
   }
 

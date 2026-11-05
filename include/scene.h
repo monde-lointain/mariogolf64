@@ -32,7 +32,8 @@ enum Scene {
   SCENE_CELL_EDITOR = 9,
   /* A top-down map where the editor moves the ground points */
   SCENE_POINT_EDITOR = 10,
-  SCENE_UNK11 = 11,
+  /* A debug menu that loads a hole or saves the hole in memory */
+  SCENE_HOLE_FILES = 11,
   /*
    * The scene of a round the menu has loaded the hole for. It updates like
    * SCENE_PLAY_HOLE, but UpdateDebugScenes doesn't label it.
