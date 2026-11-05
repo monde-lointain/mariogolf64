@@ -335,9 +335,14 @@ typedef s32 (*BillboardHitFinder)(s32 startX, s32 startY, s32 startZ, s32 endX,
  * leaves 188 words at best, so the code differs too. The original's add.s for
  * the x and z velocities takes the velocity first and the wind's pull second,
  * as velocity + pull does, where the draft writes pull + velocity; written as
- * the original orders them, both lines give 397 words, and the x line alone
- * 393, which leaves z in the order the original contradicts. 395 words differ,
- * 167 in shape.
+ * the original orders them, both lines gave 397 words, and the x line alone
+ * 393, with the draft at 395. A billboard hit now updates the ball in
+ * StepBallSimulation's order: the bounce count, the position, the last bounce
+ * step, then both spins, which took the draft from 395 words (167 in shape) to
+ * 337 (149); of the 58 other orders of those five steps that divide the spin
+ * speed before the side spin, the best gave 341 (153). With that, writing the x
+ * line as velocity + pull gives 343 words, the z line as pull + velocity 341,
+ * and both 345. 337 words differ, 149 in shape.
  */
 #ifdef NON_MATCHING
 s32 StepOpeningBallSimulation(BallSimulation* simulation) {
@@ -912,15 +917,15 @@ s32 StepOpeningBallSimulation(BallSimulation* simulation) {
     if (contact == STEP_FLAG_BILLBOARD_HIT &&
         simulation->state == BALL_STATE_FLYING) {
       simulation->bounceCount++;
-      simulation->spinSpeed /= BILLBOARD_HIT_SPIN_DIVISOR;
-      simulation->lastBounceStep = simulation->stepCount;
-      simulation->sideSpin /= BILLBOARD_HIT_SPIN_DIVISOR;
       simulation->position[AXIS_X] =
           startX + (fraction * simulation->velocity[AXIS_X]);
       simulation->position[AXIS_Y] =
           startY + (fraction * simulation->velocity[AXIS_Y]);
       simulation->position[AXIS_Z] =
           startZ + (fraction * simulation->velocity[AXIS_Z]);
+      simulation->lastBounceStep = simulation->stepCount;
+      simulation->spinSpeed /= BILLBOARD_HIT_SPIN_DIVISOR;
+      simulation->sideSpin /= BILLBOARD_HIT_SPIN_DIVISOR;
       switch (triangle.unk0) {
         case BILLBOARD_CELL_TRUNK:
         case BILLBOARD_CELL_SOLID:
