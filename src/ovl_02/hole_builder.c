@@ -3731,7 +3731,12 @@ void GetGroundLightColors(GroundLightColor* light, GroundLightColor* shade) {
  * each texel's pass and masking with it gives 105 words (21 in shape) and the
  * original's 0x500-byte frame, 8 bytes more than here, but only because the
  * local takes a stack slot: the build masks with and from a register where the
- * original has andi with 1 at both uses. 154 words differ, 14 in shape.
+ * original has andi with 1 at both uses. The counts before here were measured
+ * while the loop filling slopeLights stepped slope, the variable the texel loop
+ * clamps; a lightSlope of that loop's own took the draft from 154 words
+ * differing to 132, 14 in shape both, in each of the eight declaration places
+ * tried, and the register oracle's closest from 94 words, forcing 9 pseudos, to
+ * 88, forcing 6. 132 words differ, 14 in shape.
  */
 #ifdef NON_MATCHING
 void ShadeGroundTiles(void) {
@@ -3763,6 +3768,7 @@ void ShadeGroundTiles(void) {
   s32 lightColumnOffset;
   s32 lightRowOffset;
   s32 slope;
+  s32 lightSlope;
   s32 scale;
   s32 row;
   s32 bandRow;
@@ -3806,19 +3812,20 @@ void ShadeGroundTiles(void) {
   /* The light's pitch is unused */
   cosf(pitch);
   sinf(pitch);
-  for (slope = LIGHT_SLOPE_MIN; slope <= LIGHT_SLOPE_MAX; slope++) {
-    scale = LIGHT_SCALE_ONE + (slope * LIGHT_SCALE_SLOPE_STEP);
+  for (lightSlope = LIGHT_SLOPE_MIN; lightSlope <= LIGHT_SLOPE_MAX;
+      lightSlope++) {
+    scale = LIGHT_SCALE_ONE + (lightSlope * LIGHT_SCALE_SLOPE_STEP);
     if (scale < LIGHT_SCALE_MIN) {
       scale = LIGHT_SCALE_MIN;
     } else if (scale > LIGHT_SCALE_MAX) {
       scale = LIGHT_SCALE_MAX;
     }
 
-    slopeLights[((slope - LIGHT_SLOPE_MIN) * SLOPE_LIGHT_WORD_COUNT) +
+    slopeLights[((lightSlope - LIGHT_SLOPE_MIN) * SLOPE_LIGHT_WORD_COUNT) +
         SLOPE_LIGHT_RED] = light.red * scale;
-    slopeLights[((slope - LIGHT_SLOPE_MIN) * SLOPE_LIGHT_WORD_COUNT) +
+    slopeLights[((lightSlope - LIGHT_SLOPE_MIN) * SLOPE_LIGHT_WORD_COUNT) +
         SLOPE_LIGHT_GREEN] = light.green * scale;
-    slopeLights[((slope - LIGHT_SLOPE_MIN) * SLOPE_LIGHT_WORD_COUNT) +
+    slopeLights[((lightSlope - LIGHT_SLOPE_MIN) * SLOPE_LIGHT_WORD_COUNT) +
         SLOPE_LIGHT_BLUE] = light.blue * scale;
   }
 
