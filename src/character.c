@@ -1458,8 +1458,11 @@ void AnimateCharacter(u32 slotIndex) {
  * rotation's [0][2] after [1][1] gives 180 words (62 in shape), but no whole
  * order does better than the rows: all 16 stores by column give 184 (66), the
  * nine values by row or by column before the constants 242, the diagonal first
- * 254, and the paired off-diagonal terms first 313. 184 words differ, 66 in
- * shape.
+ * 254, and the paired off-diagonal terms first 313. A focused permuter run's
+ * output, 172 words (56 in shape), reads the rotation span's start frame into
+ * an unsigned short for the progress's first difference alone, where the field
+ * is an s16; s16 locals for the span's frames at each of their uses in the
+ * interpolation give 184 to 186 words. 184 words differ, 66 in shape.
  */
 #ifdef NON_MATCHING
 void UpdateJointKeyframeSpans(u32 slotIndex) {
