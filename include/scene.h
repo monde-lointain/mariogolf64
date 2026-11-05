@@ -113,7 +113,13 @@ enum GameMode {
    * with birdie badges and 30 contestants
    */
   GAME_MODE_TOURNAMENT = 5,
-  GAME_MODE_UNK6 = 6, /* SettleHoleBets settles its bets like Stroke's */
+  /*
+   * A mode no menu sets that is played like Stroke: its scorecard, pause menu
+   * layout, results, save slot and bets settled by SettleHoleBets are Stroke's.
+   * But entering the course select in it sets no bets, and IsRecordableHoleOut
+   * records none of its hole-outs.
+   */
+  GAME_MODE_UNRECORDED_STROKE = 6,
   /*
    * The walkthrough's Speed Golf: the HUD shows g_GameState.stopwatchFrameCount
    * in this mode, and its scorecard page shows each hole's time and the round's

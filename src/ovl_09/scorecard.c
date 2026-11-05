@@ -218,7 +218,7 @@ void OpenScorecard(CourseIndex courseIndex, s32 holeIndex) {
     case GAME_MODE_STROKE:
     case GAME_MODE_UNLISTED_STROKE:
     case GAME_MODE_TRAINING:
-    case GAME_MODE_UNK6:
+    case GAME_MODE_UNRECORDED_STROKE:
     case GAME_MODE_RECORD_REPLAY:
     case GAME_MODE_RING_SHOT:
       /* The bets get a page of their own */
@@ -423,7 +423,7 @@ void FreeScorecard(void) {
       case GAME_MODE_STROKE:
       case GAME_MODE_UNLISTED_STROKE:
       case GAME_MODE_TRAINING:
-      case GAME_MODE_UNK6:
+      case GAME_MODE_UNRECORDED_STROKE:
       case GAME_MODE_RECORD_REPLAY:
       case GAME_MODE_RING_SHOT:
         FreeMemory(&g_Scorecard.placesImage);
@@ -646,7 +646,7 @@ HALVED:
     case GAME_MODE_UNLISTED_STROKE:
     case GAME_MODE_TRAINING:
     case GAME_MODE_TOURNAMENT:
-    case GAME_MODE_UNK6:
+    case GAME_MODE_UNRECORDED_STROKE:
     case GAME_MODE_SPEED_GOLF:
     case GAME_MODE_RECORD_REPLAY:
     case GAME_MODE_RING_SHOT:
@@ -769,7 +769,7 @@ void SetScorecardLayout(s32 layout) {
     case GAME_MODE_UNLISTED_STROKE:
     case GAME_MODE_TRAINING:
     case GAME_MODE_TOURNAMENT:
-    case GAME_MODE_UNK6:
+    case GAME_MODE_UNRECORDED_STROKE:
     case GAME_MODE_SPEED_GOLF:
     case GAME_MODE_RECORD_REPLAY:
     case GAME_MODE_RING_SHOT:
@@ -1068,7 +1068,7 @@ void UpdateScorecard(u16 buttons, u16 pressedButtons) {
       case GAME_MODE_MATCH_GAME:
       case GAME_MODE_TRAINING:
       case GAME_MODE_GET_CHARACTER:
-      case GAME_MODE_UNK6:
+      case GAME_MODE_UNRECORDED_STROKE:
       case GAME_MODE_SPEED_GOLF:
       case GAME_MODE_RECORD_REPLAY:
       case GAME_MODE_RING_SHOT:
@@ -1096,7 +1096,7 @@ s32 UpdateShownScorecard(u16 buttons) {
     case GAME_MODE_MATCH_GAME:
     case GAME_MODE_TRAINING:
     case GAME_MODE_GET_CHARACTER:
-    case GAME_MODE_UNK6:
+    case GAME_MODE_UNRECORDED_STROKE:
     case GAME_MODE_SPEED_GOLF:
     case GAME_MODE_RECORD_REPLAY:
     case GAME_MODE_RING_SHOT:
@@ -1238,7 +1238,7 @@ void DrawScorecard(Gfx** displayListHead) {
         case GAME_MODE_STROKE:
         case GAME_MODE_UNLISTED_STROKE:
         case GAME_MODE_TRAINING:
-        case GAME_MODE_UNK6:
+        case GAME_MODE_UNRECORDED_STROKE:
         case GAME_MODE_RECORD_REPLAY:
         case GAME_MODE_RING_SHOT:
           if (g_GameState.playerCount == 1) {

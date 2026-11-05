@@ -760,7 +760,7 @@ void SettleHoleBets(void) {
         break;
       case GAME_MODE_STROKE:
       case GAME_MODE_UNLISTED_STROKE:
-      case GAME_MODE_UNK6: {
+      case GAME_MODE_UNRECORDED_STROKE: {
         for (i = 0; i != g_GameState.playerCount; i++) {
           scores[i] = g_Players[i].strokeCount +
               GetHandicapOffset(g_GameState.courseIndex,

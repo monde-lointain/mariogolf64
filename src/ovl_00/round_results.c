@@ -699,7 +699,7 @@ void LoadRoundResults(void) {
         break;
       case GAME_MODE_UNLISTED_STROKE:
       case GAME_MODE_TRAINING:
-      case GAME_MODE_UNK6:
+      case GAME_MODE_UNRECORDED_STROKE:
       case GAME_MODE_RECORD_REPLAY:
       case GAME_MODE_RING_SHOT:
       case GAME_MODE_SKINS_MATCH:
@@ -1007,7 +1007,7 @@ void FreeRoundResults(void) {
         case GAME_MODE_STROKE:
         case GAME_MODE_UNLISTED_STROKE:
         case GAME_MODE_TRAINING:
-        case GAME_MODE_UNK6:
+        case GAME_MODE_UNRECORDED_STROKE:
         case GAME_MODE_SPEED_GOLF:
         case GAME_MODE_RECORD_REPLAY:
         case GAME_MODE_RING_SHOT:
@@ -1855,7 +1855,7 @@ s32 UpdateRoundResults(ControllerState* controller) {
       } else {
         switch (g_GameState.gameMode) {
           case GAME_MODE_STROKE:
-          case GAME_MODE_UNK6:
+          case GAME_MODE_UNRECORDED_STROKE:
           case GAME_MODE_SPEED_GOLF:
           case GAME_MODE_SKINS_MATCH:
           case GAME_MODE_CLUB_SLOTS:
@@ -3824,7 +3824,7 @@ void DrawRoundResults(Gfx** displayListHead) {
       case GAME_MODE_STROKE:
       case GAME_MODE_UNLISTED_STROKE:
       case GAME_MODE_TRAINING:
-      case GAME_MODE_UNK6:
+      case GAME_MODE_UNRECORDED_STROKE:
       case GAME_MODE_RECORD_REPLAY:
       case GAME_MODE_RING_SHOT:
       case GAME_MODE_SKINS_MATCH:

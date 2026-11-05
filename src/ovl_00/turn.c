@@ -2285,7 +2285,7 @@ Boolean IsRecordableHoleOut(s32 playerIndex) {
     case GAME_MODE_SPEED_GOLF:
       return TRUE;
     case GAME_MODE_MATCH_GAME:
-    case GAME_MODE_UNK6:
+    case GAME_MODE_UNRECORDED_STROKE:
     case GAME_MODE_RECORD_REPLAY:
     case GAME_MODE_RING_SHOT:
     case GAME_MODE_SKINS_MATCH:

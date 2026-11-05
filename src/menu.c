@@ -946,7 +946,7 @@ s32 SaveOrContinueGameByMode(Boolean isContinuing) {
   playerCount = 0;
   switch (g_GameState.gameMode) {
     case GAME_MODE_STROKE:
-    case GAME_MODE_UNK6:
+    case GAME_MODE_UNRECORDED_STROKE:
     case GAME_MODE_SKINS_MATCH:
       players = &g_SaveData.modePlayers[MODE0_PLAYER_INDEX];
       records = &g_SaveData.modeRecords[MODE0_RECORD_INDEX];
@@ -2114,7 +2114,7 @@ void EnterMenuAtCourseSelect(void) {
       break;
     case GAME_MODE_TRAINING:
     case GAME_MODE_GET_CHARACTER:
-    case GAME_MODE_UNK6:
+    case GAME_MODE_UNRECORDED_STROKE:
     case GAME_MODE_SPEED_GOLF:
     case GAME_MODE_RING_SHOT:
       g_CourseSelectKind = COURSE_SELECT_KIND_COURSES;
