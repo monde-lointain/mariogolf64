@@ -332,8 +332,12 @@ typedef s32 (*BillboardHitFinder)(s32 startX, s32 startY, s32 startZ, s32 endX,
  * Naming the lift per unit of spin, as a permuter run's float temp suggested,
  * takes it to 395 (167) wherever the local is declared; scaling weight in place
  * instead gives 412 (170). The register oracle, forcing 53 pseudos' registers,
- * leaves 188 words at best, so the code differs too. 395 words differ, 167 in
- * shape.
+ * leaves 188 words at best, so the code differs too. The original's add.s for
+ * the x and z velocities takes the velocity first and the wind's pull second,
+ * as velocity + pull does, where the draft writes pull + velocity; written as
+ * the original orders them, both lines give 397 words, and the x line alone
+ * 393, which leaves z in the order the original contradicts. 395 words differ,
+ * 167 in shape.
  */
 #ifdef NON_MATCHING
 s32 StepOpeningBallSimulation(BallSimulation* simulation) {
