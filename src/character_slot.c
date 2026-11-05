@@ -2334,15 +2334,18 @@ const CharacterModel g_OtherCharacterModels[OTHER_CHARACTER_MODEL_COUNT] = {
  * outside them or past g_CurrentAnimationEndFrame.
  *
  * Doesn't match: GCC keeps frame in $f6, where the original keeps it in $f2,
- * which shifts the other floating-point registers. Reload also puts yy on
- * the stack, in an 8-byte slot above rotation, to free a float pair for a
- * hoisted constant; the original spills nothing, so its locals sit 8 bytes
- * higher (translationMatrix at 0xD0, rotation at 0x190). Pads of 40 to 52
- * floats give 228 to 280 words, and other orders of the quaternion's
- * products 208 to 342. The register oracle finds no closer allocation, so
- * the code differs too. The permuter's best (199 words, 27 in shape) scale
- * rotationProgress by the angle before acosf sets it. 206 words differ, 42
- * in shape.
+ * which shifts the other floating-point registers. Reload also puts yy on the
+ * stack, in an 8-byte slot above rotation, to free a float pair for a hoisted
+ * constant; the original spills nothing, so its locals sit 8 bytes higher
+ * (translationMatrix at 0xD0, rotation at 0x190). Pads of 40 to 52 floats give
+ * 228 to 280 words, and other orders of the quaternion's products 208 to 342.
+ * The register oracle finds no closer allocation, so the code differs too. The
+ * permuter's best (199 words, 27 in shape) scale rotationProgress by the angle
+ * before acosf sets it. A focused permuter run's output, 200 words (32 in
+ * shape), reads the rotation span's end frame into an unsigned short for the
+ * interpolation test alone, where the field is an s16 and the original loads it
+ * there with lh; s16 locals for the span's frames at each of their uses in the
+ * interpolation give 206 to 208 words. 206 words differ, 42 in shape.
  */
 #ifdef NON_MATCHING
 void AnimateCharacterJoints(u32 slotIndex) {
