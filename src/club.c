@@ -1108,12 +1108,6 @@ void GenerateClub(s32 clubIndex) {
       error = distance - targetDistance;
       osSyncPrintf("Try %d: dist %fYd:  Error %f%\n", tryIndex + 1,
           distance * YARDS_PER_UNIT, error / targetDistance * 100.0f);
-      /* The tolerance test starts a block of its own, to match: without it,
-       * the abs.s is scheduled after the tolerance multiply. None of 18 other
-       * forms of the test and the print (IN_OWN_BLOCK, goto, locals for the
-       * magnitude, tolerance or result, fabs, Abs, a ternary, swapped or
-       * negated comparisons) does it */
-      END_BASIC_BLOCK();
       if (fabsf(error) < targetDistance * GENERATION_TOLERANCE) {
         break;
       }
