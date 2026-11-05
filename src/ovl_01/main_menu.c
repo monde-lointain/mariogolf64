@@ -2249,7 +2249,10 @@ void UpdateAnimationViewer(void) {
  * before clearing their choices, and clears the controller before the
  * character, as the original stores them (64 words, 24 in shape, reading it in
  * the store). The register oracle, forcing 5 pseudos' registers, leaves 31
- * words at best, so the code differs too. 52 words differ, 18 in shape.
+ * words at best, so the code differs too. The counts above were measured with
+ * the draft at 52 words. Setting gameMode before g_MenuScreen in the mini golf
+ * case, as the other cases do, took it to 50; in the stroke case it changes
+ * nothing. 50 words differ, 18 in shape.
  */
 #ifdef NON_MATCHING
 void UpdateModeSelect(void) {
@@ -2399,9 +2402,9 @@ void UpdateModeSelect(void) {
 
         PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
         StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
-        g_MenuScreen = MENU_SCREEN_COURSE_SELECT;
         g_GameState.gameMode = GAME_MODE_STROKE;
         g_GameState.isMiniGolf = TRUE;
+        g_MenuScreen = MENU_SCREEN_COURSE_SELECT;
         g_MenuMemory.holesChoice = HOLES_CHOICE_ALL;
         g_CourseSelectKind = COURSE_SELECT_KIND_COURSES;
         MAP_CAMERA_MODE_TOP_BYTE = 1;
