@@ -814,7 +814,7 @@ s32 PlanShot(CurrentShot* plannedShot) {
 
       if (f_Shot.shotMode == SHOT_MODE_APPROACH) {
         if (f_GolferTraits[g_Players[f_Shot.playerIndex].characterIndex]
-                    .windPlay < 2 &&
+                    .windPlay < WIND_PLAY_FOLLOWING_WINDS &&
             f_Shot.clubSlot ==
                 FindClubSlot(f_Shot.playerIndex, CLUB_TYPE_PITCHING_WEDGE)) {
           f_Shot.clubSlot =
