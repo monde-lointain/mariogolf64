@@ -248,7 +248,11 @@ void ResetBallSimulations(void) {
  * draft from 749 words to 747 and from 225 in shape to 221; with its Y of 1
  * first, as the draft had it, 749 differed. Past MAX_STEP_COUNT, the ball's
  * position is set before its velocity, both in axis order, which took the draft
- * from 747 words (221 in shape) to 743 (217). 743 words differ, 217 in shape.
+ * from 747 words (221 in shape) to 743 (217). A wall hit clears the spin after
+ * all three position updates, as the opening's copy clears it after its
+ * velocities, which keeps 743 words and takes the shape from 217 to 215; the
+ * register oracle then gets to 409 words forcing 124 pseudos, against 413
+ * forcing 123. 743 words differ, 215 in shape.
  */
 #ifdef NON_MATCHING
 s32 StepBallSimulation(BallSimulation* simulation) {
@@ -1073,9 +1077,9 @@ s32 StepBallSimulation(BallSimulation* simulation) {
             simulation->position[AXIS_X] + (velocity[AXIS_X] * slide);
         simulation->position[AXIS_Y] =
             (velocity[AXIS_Y] * slide) + simulation->position[AXIS_Y];
-        simulation->spinSpeed = 0;
         simulation->position[AXIS_Z] =
             simulation->position[AXIS_Z] + (velocity[AXIS_Z] * slide);
+        simulation->spinSpeed = 0;
         BuildLiftRotation();
         PushBallOutOfWalls(simulation, FALSE);
         goto SETTLE;
