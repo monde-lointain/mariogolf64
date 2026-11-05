@@ -3727,7 +3727,11 @@ void GetGroundLightColors(GroundLightColor* light, GroundLightColor* shade) {
  * stores all four channels as halfwords, with sh to 0x478-0x47E($sp). Widening
  * isFadeUnlimited or isFadeDisabled to an s32 or u32 gives 145 words (25 in
  * shape), but the original stores the three flags with sb and reloads them with
- * lbu, at 0x487, 0x48F and 0x497($sp). 154 words differ, 14 in shape.
+ * lbu, at 0x487, 0x48F and 0x497($sp). Setting a local to TEXEL_ALPHA_MASK on
+ * each texel's pass and masking with it gives 105 words (21 in shape) and the
+ * original's 0x500-byte frame, 8 bytes more than here, but only because the
+ * local takes a stack slot: the build masks with and from a register where the
+ * original has andi with 1 at both uses. 154 words differ, 14 in shape.
  */
 #ifdef NON_MATCHING
 void ShadeGroundTiles(void) {
