@@ -1089,27 +1089,16 @@ void DrawResultsNumber(Gfx** displayListHead, s32 x, s32 y, s32 value) {
       G_IM_FMT_CI, DISTANCE_FONT_WIDTH, DISTANCE_GLYPH_HEIGHT, 0,
       G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
       G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-  c = (u8*)g_PrintBuffer;
   offset = 0;
-  while (*c != '\0') {
-    ch = *c;
+  for (c = (u8*)g_PrintBuffer; (ch = *c) != '\0';
+      c++, offset += DISTANCE_DIGIT_WIDTH) {
     if (ch != ' ') {
       gSPScisTextureRectangle(gfx++, QuarterPixels(x + offset),
           QuarterPixels(y), QuarterPixels(x + offset + DISTANCE_DIGIT_WIDTH),
           QuarterPixels(y + DISTANCE_GLYPH_HEIGHT), G_TX_RENDERTILE,
           TexelCoordinate((ch - '0') * DISTANCE_DIGIT_WIDTH), 0, TEXEL_STEP_ONE,
           TEXEL_STEP_ONE);
-      /* The rectangle ends a block of its own, to match: without the barrier
-       * the space test branches with beq, where the original's beql takes
-       * c++ into its delay slot, and 5 words differ, all in shape. A for
-       * loop stepping c, reading ch in the loop test, or stepping offset
-       * first gives the same; testing *c without ch gives 33, and skipping
-       * spaces with continue 23 */
-      END_BASIC_BLOCK();
     }
-
-    c++;
-    offset += DISTANCE_DIGIT_WIDTH;
   }
 
   *displayListHead = gfx;
