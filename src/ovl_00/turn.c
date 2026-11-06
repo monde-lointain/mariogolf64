@@ -1195,6 +1195,11 @@ void MoveAimCameraDistance(void) {
  * in shape), but it drops the speed's < 0 test, where the original keeps its
  * bltzl and negu.
  *
+ * Reading g_TurnController.stickX directly in the steps, alone or in either
+ * branch, as a focused permuter run's best did through a temporary, leaves
+ * 39 words; in the speeds it gives 51, at every use 96 (30 in shape), and an
+ * s16 stickX 86 (28).
+ *
  * Each D-pad branch counts through a pointer to f_AimTurnFrameCount of its own:
  * naming the static directly, with ++ and -- inside the tests or as statements
  * of their own, or counting in static inline helpers that take its address,
