@@ -2284,6 +2284,11 @@ void DrawPressingHand(Gfx** displayListHead);
 /* Draws the backdrop, the title, the current screen and the options, notice
  * and hand over it */
 void DrawTransmitMenu(Gfx** displayListHead) {
+  /*
+   * The drawing helpers take this pointer, and the fields are read through
+   * it too: reading them from g_GameBoyTransfer, and passing its address,
+   * gives 162 words differing, 40 in shape
+   */
   GameBoyTransfer* transfer = &g_GameBoyTransfer;
   Gfx* displayList = *displayListHead;
   s32 index;
