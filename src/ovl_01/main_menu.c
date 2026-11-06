@@ -2692,7 +2692,6 @@ void UpdateCourseSelect(void) {
     return;
   }
 
-  /* isDone is still TRUE, and the C-up test compares with it */
   if (g_MenuMemory.courseSpin == 0) {
     if (g_MenuRepeatButtons & L_JPAD) {
       PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
@@ -2717,8 +2716,8 @@ void UpdateCourseSelect(void) {
             0xFF, 0xFF, 0xFF);
       }
     } else if ((g_MenuRepeatButtons & U_CBUTTONS) &&
-        COURSE_SELECT_LAYOUT == isDone) {
-      if (g_AreBetPagesBlocked != COURSE_SELECT_LAYOUT) {
+        COURSE_SELECT_LAYOUT == COURSE_SELECT_LAYOUT_HOLES) {
+      if (g_AreBetPagesBlocked != TRUE) {
         PlaySound(SOUND_WALL_SLIDE_OUT, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
         g_BetPagesPhase = BET_PHASE_OPENING;
         g_BetPagesWallSlide = STATS_SLIDE_OUT_RIGHT;
@@ -2976,7 +2975,6 @@ void UpdateMiniGolfCourseSelect(void) {
     return;
   }
 
-  /* isDone is still TRUE, and the C-up test compares with it */
   if (g_MenuMemory.miniGolfRecordSlide == 0) {
     if (g_MenuRepeatButtons & L_JPAD) {
       PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
@@ -2999,8 +2997,8 @@ void UpdateMiniGolfCourseSelect(void) {
       PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
       f_MiniGolfDiscTurn = MINI_GOLF_TURN_TO_NEXT;
     } else if ((g_MenuRepeatButtons & U_CBUTTONS) &&
-        COURSE_SELECT_LAYOUT == isDone) {
-      if (g_AreBetPagesBlocked != COURSE_SELECT_LAYOUT) {
+        COURSE_SELECT_LAYOUT == COURSE_SELECT_LAYOUT_HOLES) {
+      if (g_AreBetPagesBlocked != TRUE) {
         PlaySound(SOUND_WALL_SLIDE_OUT, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
         g_BetPagesPhase = BET_PHASE_OPENING;
         g_BetPagesWallSlide = STATS_SLIDE_OUT_RIGHT;
