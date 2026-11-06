@@ -1932,28 +1932,14 @@ void PlaceAimCamera(void);
  * Places the flight camera's eye and look-at point for f_FlightCameraKind at a
  * step of the ball's flight, then keeps the eye above the ground and over the
  * course. The kinds that test f_IsCameraKindNew do their setup once when it is
- * set, then clear it. Doesn't match: the original allocates some float
- * registers differently. The register oracle forced 13 pseudos and still left
- * 22 words differing when the draft gave 98. A permuter output with 96 words (2
- * in shape) got both from a temp that it sets to point's Z only in unreachable
- * code before a case label, and then reads instead of point's Z in
- * FLIGHT_CAMERA_FACING_CUP's Z ease, so the value it reads is never set.
- * Keeping the scaled Z in a local for that ease changed nothing, and scaling Z
- * after the Y ease gave 148 (12). A focused run's best (65 words, 3 in shape)
- * reads point's Z before it is set again, but the original subtracts the
- * camera's Z from the newly scaled Z, so that changes behaviour.
- * FLIGHT_CAMERA_CIRCLING_BALL sets the field of view after the look-at point,
- * as that run also did, which took the draft from 98 words differing to 66, 4
- * in shape either way; set after the eye's height, as the draft had it, or
- * anywhere before the look-at point's Y, it gives 98 to 138. With fabsf an
- * abs.s in volatile inline assembly, 64 words differed, 2 in shape.
- * FLIGHT_CAMERA_FACING_CUP's eases then kept each axis's difference from the
- * camera in a local; writing the difference out at both its uses, as a later
- * focused run did in the x ease, gives 34 words, none in shape, whether in the
- * x ease alone or in all three, so all three do. 34 words differ, none in
- * shape.
+ * set, then clear it. FLIGHT_CAMERA_BEHIND_START keeps its distance, and
+ * FLIGHT_CAMERA_BESIDE_GOLFER its yaw and distance, in variables of their own,
+ * as the original allocates them apart from the shared ones; sharing any one of
+ * them gives 36 to 52 words differing. FLIGHT_CAMERA_CIRCLING_BALL sets the
+ * field of view after the look-at point, where before it gives 32 words, none
+ * in shape; FLIGHT_CAMERA_FACING_CUP's eases write each difference out at both
+ * its uses, where a local for it gives 30 words, 2 in shape.
  */
-#ifdef NON_MATCHING
 void PlaceFlightCamera(s32 step) {
   Vec3 point;
   f32 extraRise;
@@ -2168,8 +2154,11 @@ void PlaceFlightCamera(s32 step) {
       break;
     case FLIGHT_CAMERA_BEHIND_START:
       if (f_IsCameraKindNew == TRUE) {
-        /* Its own, as the original allocates these within the branch */
+        /* Its own, as the original allocates these within the branch;
+         * sharing the function-wide sideYaw and sideDistance gives 42
+         * words differing, 2 in shape */
         Radians sideYaw;
+        f32 behindDistance;
         f32 sideDistance;
 
         f_IsCameraKindNew = FALSE;
@@ -2179,13 +2168,13 @@ void PlaceFlightCamera(s32 step) {
         if (f_IsBehindViewFar == FALSE) {
           sideYaw = f_ShotFlightYaw + (M_PI / 4) +
               ((f32)(rand() & RANDOM_YAW_MASK) * (M_PI / 65536));
-          distance = (f_ShotLength * NEAR_BEHIND_VIEW_LENGTH_FRACTION) +
+          behindDistance = (f_ShotLength * NEAR_BEHIND_VIEW_LENGTH_FRACTION) +
               NEAR_BEHIND_VIEW_DISTANCE -
               RandomBelow(f_ShotLength * BEHIND_VIEW_SPREAD_FRACTION);
         } else {
           sideYaw = f_ShotFlightYaw - (M_PI / 4) -
               ((f32)(rand() & RANDOM_YAW_MASK) * (M_PI / 65536));
-          distance = (f_ShotLength * FAR_BEHIND_VIEW_LENGTH_FRACTION) +
+          behindDistance = (f_ShotLength * FAR_BEHIND_VIEW_LENGTH_FRACTION) +
               FAR_BEHIND_VIEW_DISTANCE -
               RandomBelow(f_ShotLength * BEHIND_VIEW_SPREAD_FRACTION);
         }
@@ -2193,10 +2182,10 @@ void PlaceFlightCamera(s32 step) {
         sideDistance =
             RandomBelow(f_ShotLength * BEHIND_VIEW_SIDE_SPREAD_FRACTION) +
             BEHIND_VIEW_SIDE_DISTANCE;
-        point[AXIS_X] = f_ShotStartPosition[AXIS_X] + (sinf(yaw) * distance) +
-            (sinf(sideYaw) * sideDistance);
-        point[AXIS_Z] = f_ShotStartPosition[AXIS_Z] - (cosf(yaw) * distance) -
-            (cosf(sideYaw) * sideDistance);
+        point[AXIS_X] = f_ShotStartPosition[AXIS_X] +
+            (sinf(yaw) * behindDistance) + (sinf(sideYaw) * sideDistance);
+        point[AXIS_Z] = f_ShotStartPosition[AXIS_Z] -
+            (cosf(yaw) * behindDistance) - (cosf(sideYaw) * sideDistance);
         point[AXIS_Y] =
             GetGroundHeight(point[AXIS_X], point[AXIS_Z]) - BEHIND_VIEW_RISE;
         f_CameraPosition[AXIS_X] = point[AXIS_X] * COURSE_TO_WORLD_SCALE;
@@ -2488,7 +2477,7 @@ void PlaceFlightCamera(s32 step) {
         }
       }
 
-      if (g_Players[g_CurrentShot.playerIndex].isLefty == 1) {
+      if (g_Players[g_CurrentShot.playerIndex].isLefty == TRUE) {
         f_CircleAngle += CIRCLE_ANGLE_STEP;
         if (f_CircleAngle > M_PI) {
           f_CircleAngle = M_PI;
@@ -2523,28 +2512,34 @@ void PlaceFlightCamera(s32 step) {
       break;
     case FLIGHT_CAMERA_BESIDE_GOLFER:
       if (f_IsCameraKindNew == TRUE) {
+        /* Their own, as the original allocates them apart from yaw and
+         * distance; sharing yaw gives 48 words differing and sharing
+         * distance 52, none in shape */
+        Radians besideYaw;
+        f32 besideDistance;
+
         g_Cameras[0].view.fieldOfView = BESIDE_GOLFER_FIELD_OF_VIEW;
         GetCharacterPointPosition(0, 1, position);
         f_IsCameraKindNew = FALSE;
         if (g_Players[g_CurrentShot.playerIndex].isLefty == TRUE) {
-          yaw = ((u16)g_CurrentShot.heading * BINARY_ANGLE_TO_RADIANS) +
+          besideYaw = ((u16)g_CurrentShot.heading * BINARY_ANGLE_TO_RADIANS) +
               (M_PI / 2);
         } else {
-          yaw = ((u16)g_CurrentShot.heading * BINARY_ANGLE_TO_RADIANS) -
+          besideYaw = ((u16)g_CurrentShot.heading * BINARY_ANGLE_TO_RADIANS) -
               (M_PI / 2);
         }
 
         for (index = BESIDE_GOLFER_FIRST_STEP; index < BESIDE_GOLFER_STEP_LIMIT;
             index++) {
-          /* Setting distance inside the x term comes closer to the original:
-           * a statement of its own before it gives 37 differing words, not
-           * 34, and 5 in shape, not none; a float local declared in the loop
-           * 53 (5); and the product written in both terms 52 (6) */
+          /* Setting besideDistance inside the x term is there to match: a
+           * statement of its own before it gives 7 differing words, 5 in
+           * shape, and the product written in both terms 6 (6) */
           f_CameraPosition[AXIS_X] =
-              (cosf(yaw) * (distance = index * BESIDE_GOLFER_STEP)) +
+              (cosf(besideYaw) *
+                  (besideDistance = index * BESIDE_GOLFER_STEP)) +
               g_CurrentShot.ballPosition[AXIS_X];
-          f_CameraPosition[AXIS_Z] =
-              (sinf(yaw) * distance) + g_CurrentShot.ballPosition[AXIS_Z];
+          f_CameraPosition[AXIS_Z] = (sinf(besideYaw) * besideDistance) +
+              g_CurrentShot.ballPosition[AXIS_Z];
           f_CameraPosition[AXIS_Y] = GetGroundHeight(f_CameraPosition[AXIS_X],
                                          f_CameraPosition[AXIS_Z]) -
               BESIDE_GOLFER_RISE;
@@ -2640,9 +2635,6 @@ void PlaceFlightCamera(s32 step) {
   f_CameraPosition[AXIS_Y] = position[AXIS_Y] * COURSE_TO_WORLD_SCALE;
   f_CameraPosition[AXIS_Z] = position[AXIS_Z] * COURSE_TO_WORLD_SCALE;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/shot_camera", PlaceFlightCamera);
-#endif
 
 #define LONG_SHOT_MIN_LENGTH 0x1C2000
 #define MID_SHOT_MIN_LENGTH 0x4B001
