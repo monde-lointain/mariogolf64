@@ -1729,31 +1729,30 @@ void MoveBallToCupEdge(BallSimulation* simulation) {
  * Doesn't match: setting the hit fraction with an if rather than a ternary
  * takes 203 words differing, 41 in shape, to 198 and 40. The original sets a
  * flag for each of the direction's components and ors them before its one
- * branch, as a | gives; with || GCC branches on each (177 against 198). It ors
- * the contact offsets themselves to test them, where with || GCC sets and ors
- * flags (173 against 177). The permuter's best output (144 words, 20 in shape)
- * scales the direction's y before normalizing, where the original scales it
- * after, with x and z; moving that line alone gains incidentally, and is left
- * out. A later run scaled z before y; that gives 155 words, 11 in shape, where
- * the draft's scaling already matches, so it is left out too. The half chord
- * starts as the flagstick's radius and takes the square root when the bounce
- * speed isn't negative, which took the draft from 173 words differing to 157,
- * 27 in shape either way; an if/else either way round, or a conditional
- * operator, gives 173 to 175. The original works out the direction once, after
- * both; setting it in each arm instead gave 147 words, 47 in shape, when the
- * draft gave 173. The register oracle, forcing 16 pseudos' registers, left 78
- * words at best with the draft at 157, so the code differs too. Setting the
- * bounce's velocity in axis order, as the flag's is set, took it from 157
- * words, 27 in shape, to 150 (22); the original stores y between x's product
- * and its store, as either order allows. A focused permuter run's best also
- * scales the direction's z before its y, which gives 167 words (21 in shape)
- * alone and 160 (16) with the velocity in axis order, so it is left out.
- * Working out endSide before startSide gives 144 words, but 26 in shape, and
- * the register oracle then gets no closer than 107 words, forcing 25 pseudos,
- * against 71 forcing 16. Working out the end side before the start side gives
- * 144 words (26 in shape), but the original multiplies the start side's terms
- * first; the start side before the end-to-cup values ties at 150. Those counts
- * were measured with GCC's built-in fabsf. 145 words differ, 17 in shape.
+ * branch, as a | gives; with || GCC branches on each (177 against 198). It
+ * ors the contact offsets themselves to test them, where with || GCC sets
+ * and ors flags (173 against 177). The permuter's best output (144 words, 20
+ * in shape) scales the direction's y before normalizing, where the original
+ * scales it after, with x and z; moving that line alone gains incidentally,
+ * and is left out. A later run scaled z before y; that gives 155 words, 11
+ * in shape, where the draft's scaling already matches, so it is left out
+ * too; also reading the cup's position through a pointer, as another run's
+ * best did, gives the same. The half chord starts as the flagstick's radius
+ * and takes the square root when the bounce speed isn't negative, which took
+ * the draft from 173 words differing to 157, 27 in shape either way; an
+ * if/else either way round, or a conditional operator, gives 173 to 175. The
+ * original works out the direction once, after both; setting it in each arm
+ * instead gave 147 words, 47 in shape, when the draft gave 173. The register
+ * oracle, forcing 16 pseudos' registers, left 78 words at best with the
+ * draft at 157, so the code differs too. Setting the bounce's velocity in
+ * axis order, as the flag's is set, took it from 157 words, 27 in shape, to
+ * 150 (22); the original stores y between x's product and its store, as
+ * either order allows. Working out endSide before startSide gives 144 words,
+ * but 26 in shape, and the register oracle then gets no closer than 107
+ * words, forcing 25 pseudos, against 71 forcing 16. The original multiplies
+ * the start side's terms first; the start side before the end-to-cup values
+ * ties at 150. Those counts were measured with GCC's built-in fabsf. 145
+ * words differ, 17 in shape.
  *
  * With fabsf an abs.s in volatile inline assembly, the hit fraction's abs.s
  * comes before the branch-likely as in the original, which took the draft
