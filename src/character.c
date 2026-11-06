@@ -1461,6 +1461,11 @@ void AnimateCharacter(u32 slotIndex) {
  * an unsigned short for the progress's first difference alone, where the field
  * is an s16; s16 locals for the span's frames at each of their uses in the
  * interpolation give 184 to 186 words. 184 words differ, 66 in shape.
+ *
+ * The original loads g_CurrentAnimationFrame for the rotation's progress
+ * after the slerp test's compare, where the draft loads it before the test.
+ * Working out the progress before the dot product instead also gives 184
+ * words (66 in shape), and working it out in each arm of the test 203 (71).
  */
 #ifdef NON_MATCHING
 void UpdateJointKeyframeSpans(u32 slotIndex) {
