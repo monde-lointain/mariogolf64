@@ -40,7 +40,9 @@
  * Like the SDK's GBI macros, this expands to a block: brace callers' if/else
  * bodies. A do/while wrapper introduces a block boundary in KMC's optimizer.
  *
- * Declaring the state command before the sync preserves KMC's spill order.
+ * Declaring the state command's pointer before the sync's swaps the stack
+ * slots of the two pointers when neither gets a register, matching the
+ * original's slots.
  * A macro keeps that declaration in the caller; an inline function changes
  * register allocation. Named variadic arguments support KMC's pre-C99 GCC.
  */

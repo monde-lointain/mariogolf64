@@ -286,14 +286,14 @@ void DrawHoleTriangles(Gfx** displayListHead, CameraMatrices* matrices UNUSED,
  * Two of the display list pointers the draft saved were in each other's
  * stack slots, 0x13C and 0x144: those of the pipe sync before
  * gDPSetTextureLUT, at 0x144 in the original, and of gDPSetTextureLUT, at
- * 0x13C. Neither pointer gets a register, and reload gives such pseudos
- * their slots in pseudo order. Writing the pipe sync, the LUT command or
- * both with gfx stepped after them gave 199 to 253 words. Each pipe sync and
- * the RDP state command after it now goes through AppendSyncedRdpState,
- * which declares the command's pointer first, as DrawHoleTriangles does;
- * that swaps the two slots and takes the draft from 16 words differing (8 in
- * shape) to 8 (8). Of the pairs alone, only the LUT command's changes
- * anything.
+ * 0x13C. Neither pointer gets a register, and which slot each gets
+ * follows the order the pointers are declared in. Writing the pipe sync,
+ * the LUT command or both with gfx stepped after them gave 199 to 253
+ * words. Each pipe sync and the RDP state command after it now goes
+ * through AppendSyncedRdpState, which declares the command's pointer
+ * first, as DrawHoleTriangles does; that swaps the two slots and takes
+ * the draft from 16 words differing (8 in shape) to 8 (8). Of the pairs
+ * alone, only the LUT command's changes anything.
  */
 #ifdef NON_MATCHING
 void DrawRings(Gfx** displayListHead, CameraMatrices* matrices UNUSED,
