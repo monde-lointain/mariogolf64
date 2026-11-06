@@ -55,7 +55,7 @@ typedef struct GameBoyCharacter {
   /* 0x00 */ u8 status;
   /* 0x01 */ char name[GAME_BOY_CHARACTER_NAME_LENGTH];
   /* 0x0D */ u8 saveName[SAVE_NAME_SIZE]; /* As the Game Boy save spells it */
-  /* 0x18 */ u8 unk18;
+  /* 0x18 */ u8 unusedAfterSaveName;
   /* 0x19 */ u8 character;
   /* 0x1A */ u8 isLefty; /* Plays left-handed, as the Game Boy save says */
   /* 0x1B */ u8 level;
@@ -73,7 +73,6 @@ typedef struct GameBoyCharacter {
   /* The save's bytes from 0xB, which with saveName tell whether a save's
    * character was brought over */
   /* 0x2E */ u8 saveKey[SAVE_KEY_SIZE];
-  /* 0x33 */ u8 unk33;
   /* 0x34 */ s32 companyCode; /* Its cartridge header's, or -1 */
   /* 0x38 */ s32 saveIndex; /* Its save on the cartridge, or -1 */
   /* 0x3C */ GameBoyClubStats clubs[GAME_BOY_CLUB_COUNT];
