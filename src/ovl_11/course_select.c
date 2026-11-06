@@ -4,6 +4,8 @@
  * backdrop of planks and a star for each hole, gold once its rings are
  * cleared. The hole select draws a sign with the course's name and hole.
  */
+#include "course_select.h"
+
 #include <ultra64.h>
 
 #include "address.h"

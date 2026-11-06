@@ -3,6 +3,8 @@
  * round ends: the players' portraits and scores, the course points the
  * round earned and the notices of what those points unlocked.
  */
+#include "round_results.h"
+
 #include <ultra64.h>
 
 #include "address.h"

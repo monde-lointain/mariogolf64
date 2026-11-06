@@ -13,6 +13,7 @@
 #include "compiler.h"
 #include "controller.h"
 #include "course_space.h"
+#include "cursor_box.h"
 #include "debug_text.h"
 #include "frame_time.h"
 #include "game_flags.h"
@@ -490,7 +491,6 @@ enum ExperienceWriteResult {
  */
 extern const char f_WriteSumFormat[];
 
-void LoadCursorBox(void* image);
 void UpdateBringCharacters(void);
 s32 ReadCartridgeCharacters(void);
 void BringOverCharacter(s32 listedIndex, s32 slot);
@@ -545,7 +545,6 @@ extern void* g_PressingHandImage;
 void DrawCharacterStats(Gfx** displayListHead, GameBoyCharacter* character,
     GameBoyTransfer* transfer);
 void DrawImportedFaces(Gfx** displayListHead, GameBoyTransfer* transfer);
-void DrawCursorBox(Gfx** displayListHead, s32 left, s32 top);
 
 s32 OpenGameBoyPak(s32 port, OSGbpakId* header, NUContPakFile* file);
 s32 OpenGameBoyPakWithRetries(s32 port, OSGbpakId* header, NUContPakFile* file);

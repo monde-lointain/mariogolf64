@@ -2,6 +2,8 @@
  * Starts the music player and its audio tasks, and loads the songs, the sound
  * effect banks and the sample bank.
  */
+#include "music.h"
+
 #include <PR/libmus.h>
 #include <nusys.h>
 #include <ultra64.h>

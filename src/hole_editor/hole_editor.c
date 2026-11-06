@@ -3,6 +3,8 @@
  * triangles, rings and billboards over its map. They also load and save holes
  * and write captures of the frame to the host.
  */
+#include "hole_editor.h"
+
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>

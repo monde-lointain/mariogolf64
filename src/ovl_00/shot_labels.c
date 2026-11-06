@@ -5,6 +5,8 @@
  * off one of the ball's corners, and moves to another corner when it would
  * cover a tag drawn before it.
  */
+#include "shot_labels.h"
+
 #include <ultra64.h>
 
 #include "address.h"

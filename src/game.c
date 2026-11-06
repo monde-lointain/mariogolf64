@@ -27,6 +27,7 @@
 #include "golf_balls.h"
 #include "heap.h"
 #include "hole_display.h"
+#include "hole_editor.h"
 #include "hole_objects.h"
 #include "hole_triangles.h"
 #include "include_asm.h"
@@ -44,13 +45,16 @@
 #include "rcp.h"
 #include "round_events.h"
 #include "round_hud.h"
+#include "round_results.h"
 #include "save.h"
+#include "save_menu.h"
 #include "scene.h"
 #include "scorecard.h"
 #include "screen.h"
 #include "screen_layers.h"
 #include "shot_camera.h"
 #include "shot_effects.h"
+#include "shot_labels.h"
 #include "sound.h"
 #include "staff_roll.h"
 #include "terrain.h"
@@ -1196,15 +1200,6 @@ extern s32 _mus_cpu_worst;
 
 void MusPrintDmaUsage(void);
 s32 __MusIntMemRemaining(void);
-void DrawRoundResults(Gfx** displayListHead);
-void DrawResultsNotice(Gfx** displayListHead);
-void DrawAimGuides(CameraMatrices* matrices);
-void DrawGameSaveMenu(Gfx** displayListHead);
-void DrawReplaySaveMenu(Gfx** displayListHead);
-void DrawControlsScreen(Gfx** displayListHead);
-void CaptureMapImage(void);
-void CaptureFrame(void);
-void DrawTargetPole(CameraMatrices* matrices, Gfx** displayListHead);
 
 #define SetCameraScissor(view) \
   gDPSetScissor(g_DisplayListHead++, G_SC_NON_INTERLACE, (view).scissorX, \

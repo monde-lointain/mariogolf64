@@ -17,9 +17,11 @@
 #include "character.h"
 #include "character_slot.h"
 #include "club.h"
+#include "club_slots.h"
 #include "compiler.h"
 #include "controller.h"
 #include "course.h"
+#include "course_select.h"
 #include "course_space.h"
 #include "cpu_projection.h"
 #include "current_shot.h"
@@ -30,6 +32,7 @@
 #include "geometry.h"
 #include "golf_balls.h"
 #include "hole_display.h"
+#include "hole_editor.h"
 #include "hole_loader.h"
 #include "hole_triangles.h"
 #include "include_asm.h"
@@ -43,8 +46,10 @@
 #include "progress.h"
 #include "round_events.h"
 #include "round_hud.h"
+#include "round_results.h"
 #include "round_stats.h"
 #include "save.h"
+#include "save_menu.h"
 #include "scene.h"
 #include "scorecard.h"
 #include "scoring.h"
@@ -178,7 +183,6 @@ static s32 f_GroundTimingRow = 0;
 
 static u8 f_GroundNoiseTexels[GROUND_NOISE_SIZE * GROUND_NOISE_SIZE];
 
-void FillWaveTexels(void);
 void SetUpPlayers(void);
 
 /*
@@ -845,21 +849,6 @@ Boolean HasWonFinalChallenge(void) {
 
   return FALSE;
 }
-
-void LoadClubSlots(void);
-void SetPlankMotion(s32 motion);
-s32 UpdateHoleSelect(s32 pressedButtons, s32 repeatedButtons);
-s32 UpdateRingShotSelect(s32 pressedButtons, u32 repeatedButtons);
-void LoadUnlockNotice(s32 unlock);
-s32 UpdateUnlockNotice(void);
-void FreeUnlockNotice(void);
-s32 UpdateReplaySaveMenu(ControllerState* controller);
-s32 UpdateRoundResults(ControllerState* controller);
-void OpenRoundResults(s32 request);
-s32 UpdateClubSlots(void);
-s32 ArePlanksOpen(void);
-void FreeClubSlots(void);
-void LeaveReplaySaveMenu(void);
 
 /* The choices that the Training and Ring Shot menus return */
 enum HoleMenuChoice {
@@ -2037,8 +2026,6 @@ INCLUDE_ASM("asm/nonmatchings/play", RebuildGroundTextureCoordinates);
       GROUND_NOISE_SIZE, 0, G_TX_MIRROR, G_TX_MIRROR, \
       TextureMask(GROUND_NOISE_SIZE), TextureMask(GROUND_NOISE_SIZE), shiftS, \
       shiftT)
-
-void DrawHoleEditorGround(CameraMatrices* matrices, s32 terrainStyle);
 
 /*
  * Draws the ground's tiles, each at a detail that its distance picks. The

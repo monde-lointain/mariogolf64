@@ -3,6 +3,8 @@
  * the three saved games or the five replay records beside each one's
  * mode icon, and the Controls screen, a picture of the controller.
  */
+#include "save_menu.h"
+
 #include <framebuffer_count.h>
 #include <ultra64.h>
 

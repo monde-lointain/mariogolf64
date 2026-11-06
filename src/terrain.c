@@ -24,6 +24,7 @@
 #include "gbi_helpers.h"
 #include "geometry.h"
 #include "hole_builder.h"
+#include "hole_editor.h"
 #include "hole_loader.h"
 #include "include_asm.h"
 #include "language.h"
@@ -280,16 +281,6 @@ s32 g_UnreadGroundQueryMarker = 0;
 static s8 f_CellSearchOffsets[GROUND_TILE_POINT_SPAN] = {0, 1, 3, 2};
 
 static s32 f_SceneMenuSelection;
-
-void UpdateCellEditor(void);
-void UpdateGroundPointEditor(void);
-void UpdateHolePointEditor(void);
-void UpdateTriangleEditor(void);
-void UpdateRingEditor(void);
-void UpdateWallEditor(void);
-void UpdateHeightEditor(void);
-void UpdateHoleFileMenu(void);
-void UpdateTreeEditor(void);
 
 void InitGridVertex(s32 column, s32 row, s32 height, u8 shade);
 void SetGridVertexHeight(s32 column, s32 row, s32 height);

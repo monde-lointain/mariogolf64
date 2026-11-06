@@ -1,6 +1,8 @@
 /*
  * Loads the cursor box's image and draws it around a point.
  */
+#include "cursor_box.h"
+
 #include <ultra64.h>
 
 #include "address.h"

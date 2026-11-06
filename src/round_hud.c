@@ -16,9 +16,11 @@
 #include "camera.h"
 #include "character.h"
 #include "club_panel.h"
+#include "club_slots.h"
 #include "compiler.h"
 #include "controller.h"
 #include "course.h"
+#include "course_select.h"
 #include "course_space.h"
 #include "cpu_projection.h"
 #include "current_shot.h"
@@ -434,11 +436,6 @@ void DrawWindSpeed(Gfx** displayListHead, f32 x, f32 y);
 #define TEE_GROUND_PANEL_OFFSET_Y (-3)
 #define SHOT_PANEL_START_OFFSET_X 64
 
-s32 GetClubSlotsState(void);
-void DrawClubSlots(Gfx** displayListHead);
-void DrawHoleSelect(Gfx** displayListHead);
-void DrawRingShotSelect(Gfx** displayListHead);
-
 #define STOPWATCH_X 168
 #define STOPWATCH_Y 176
 #define STOPWATCH_ENV_COLOR 0xFFFF0000
@@ -446,9 +443,6 @@ void DrawRingShotSelect(Gfx** displayListHead);
 #define HOLE_TITLE_X (SCREEN_WIDTH / 2)
 #define COURSE_NAME_Y 32
 #define HOLE_NUMBER_Y 48
-
-void LoadCourseSelect(s32);
-void FreeCourseSelect(void);
 
 /* The asset loaded into an image's buffer, before any is */
 #define NO_IMAGE_ASSET (-1)

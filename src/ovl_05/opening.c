@@ -36,6 +36,7 @@
 #include "main.h"
 #include "math_util.h"
 #include "menu.h"
+#include "opening_ball.h"
 #include "overlay_manager.h"
 #include "rcp.h"
 #include "round_hud.h"
@@ -1038,8 +1039,6 @@ enum OpeningModel {
   OPENING_MODEL_TOAD = 16
 };
 
-s32 ToggleOpeningCharacter(u32 slotIndex, s32 character);
-
 /* The animations the opening plays on its characters, numbered per model */
 #define MARIO_TEE_SHOT_ANIMATION 0x10
 #define MARIO_CHEER_ANIMATION 0x11
@@ -1510,13 +1509,9 @@ s32 UpdateOpeningCharacters(void) {
 /* The first channel after the rotating ones */
 #define CLOSING_SOUND_CHANNEL ROTATING_SOUND_CHANNEL_COUNT
 
-s32 StepOpeningBallSimulation(BallSimulation* simulation);
 void AnimateNameLogos(void);
 void LoadNameLogo(s32 logoIndex, s32 slot);
 void MoveLakitu(void);
-
-s32 LaunchOpeningBallSimulation(
-    BallSimulation* simulation, s32 purpose, ShotLaunch* shot);
 
 /* Fades the screen to white when a button skips the rest of the opening */
 #define OPENING_SCENE_SKIPPED 998

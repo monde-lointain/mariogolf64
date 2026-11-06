@@ -3,6 +3,8 @@
  * simulates its shot, and a routine that loads one of the other characters with
  * its birdie animation.
  */
+#include "opening_ball.h"
+
 #include <math.h>
 #include <stdlib.h>
 #include <ultra64.h>

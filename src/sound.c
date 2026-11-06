@@ -15,6 +15,7 @@
 #include "controller.h"
 #include "debug_text.h"
 #include "game_flags.h"
+#include "music.h"
 #include "save.h"
 #include "text.h"
 
@@ -229,12 +230,6 @@ static s32 f_UnusedWordsAfterSongRomBounds[10] UNUSED = {
     5, 0, 5, 5, 0, 5, 5, 5, 0, 0};
 static u32 f_LastAudioFrame;
 
-musHandle StartSoundEffect(SoundId soundId);
-musHandle StartLoadedSong(void);
-void LoadSong(u32 romAddress, u32 size);
-void LoadSampleBank(u8* pointerBankRom, u32 pointerBankSize, u8* waveBankRom);
-void LoadSoundEffectBank(u8* rom, u32 size);
-void InitMusic(musConfig* config);
 /* Defined as returning s8, but its caller here uses the whole register */
 #ifdef AVOID_UB
 s8 IsMusicOffChosen(void);
