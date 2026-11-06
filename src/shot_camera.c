@@ -279,9 +279,13 @@ enum ResultSound {
 #define FLYOVER_INSET_CENTER_X 160
 #define FLYOVER_INSET_CENTER_Y 112
 #define FLYOVER_INSET_SIZE 128
-/* The text slots that the hole's introduction shows */
-#define INTRO_TEXT_SLOT_UNK0 0
-#define INTRO_TEXT_SLOT_UNK1 1
+/*
+ * The text slots that the hole's introduction blanks. The menus leave a
+ * prompt in the first and a choice in the second, and the round's coin flip
+ * and banners use them too.
+ */
+#define PROMPT_TEXT_SLOT 0
+#define CHOICE_TEXT_SLOT 1
 
 /* How far the camera must be from where it eases to before it moves, and how
  * far it goes */
@@ -1684,10 +1688,10 @@ void StartHoleFlyover(void) {
   g_Cameras[0].mode = CAMERA_MODE_BEHIND_GOLFER;
   g_Cameras[INSET_CAMERA].mode = CAMERA_MODE_BEHIND_GOLFER;
   g_Cameras[0].view.fieldOfView = FLYOVER_FIELD_OF_VIEW;
-  SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, INTRO_TEXT_SLOT_UNK0, 0,
-      0, 0, 0, 0);
-  SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, INTRO_TEXT_SLOT_UNK1, 0,
-      0, 0, 0, 0);
+  SetTextSlot(
+      0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, PROMPT_TEXT_SLOT, 0, 0, 0, 0, 0);
+  SetTextSlot(
+      0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, CHOICE_TEXT_SLOT, 0, 0, 0, 0, 0);
   SetInsetViewRect(FLYOVER_INSET_CENTER_X, FLYOVER_INSET_CENTER_Y,
       FLYOVER_INSET_SIZE, FLYOVER_INSET_SIZE);
   StepHoleFlyover();
@@ -1695,10 +1699,10 @@ void StartHoleFlyover(void) {
 
 void ClearHoleIntroText(void) {
   g_RoundHud.isHoleIntroTextShown = FALSE;
-  SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, INTRO_TEXT_SLOT_UNK0, 0,
-      0, 0, 0, 0);
-  SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, INTRO_TEXT_SLOT_UNK1, 0,
-      0, 0, 0, 0);
+  SetTextSlot(
+      0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, PROMPT_TEXT_SLOT, 0, 0, 0, 0, 0);
+  SetTextSlot(
+      0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, CHOICE_TEXT_SLOT, 0, 0, 0, 0, 0);
 }
 
 /* Ends the hole flyover; the screen fades back, and a strong wind brings the
