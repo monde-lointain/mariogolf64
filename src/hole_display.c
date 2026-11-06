@@ -236,7 +236,7 @@ typedef struct LensFlare {
 
 static u32* f_CapturedFrame = (u32*)MAIN_REGION_END;
 static s32 f_HudAnimationFramesLeft = 0;
-static s32 f_HudAnimation = HUD_ANIMATION_UNK0;
+static s32 f_HudAnimation = HUD_ANIMATION_UNUSED;
 static s32 f_SkyTimeIndex = 0;
 static s32 f_SkyColorTimeIndex = 0;
 static s32 f_SkyBlendStep = 0;
@@ -2217,7 +2217,7 @@ void StartHudAnimation(s32 animation) {
   }
 
   switch (animation) {
-    case HUD_ANIMATION_UNK0:
+    case HUD_ANIMATION_UNUSED:
       f_HudAnimationFramesLeft = 352;
       break;
     case HUD_ANIMATION_FADE_OUT:

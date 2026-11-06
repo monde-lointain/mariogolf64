@@ -27,7 +27,8 @@ enum MenuBackdropState {
 /* StartHudAnimation's animations, which DrawHudAnimation draws */
 enum HudAnimation {
   HUD_ANIMATION_NONE = -1,
-  HUD_ANIMATION_UNK0,
+  /* Never started, only f_HudAnimation's first value */
+  HUD_ANIMATION_UNUSED,
   HUD_ANIMATION_FADE_OUT,
   HUD_ANIMATION_TURN_AWAY,
   HUD_ANIMATION_TILES,
