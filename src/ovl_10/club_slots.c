@@ -538,28 +538,25 @@ s32 GetClubSlotsState(void) {
 }
 
 /*
- * Doesn't match: playerIndex and &gfx, hoisted out of the face loop, swap
- * $s3 and $s4. Global allocation ranks playerIndex first (13 references live
- * over 234 insns against 11 over 230); the register oracle, forcing those 2
- * pseudos, leaves the 2 words where the machine strips' top is stepped a
- * slot earlier. Each face image is read into faceImage before its texture
- * load, as the original reads it ahead of the call's other arguments;
- * passing the lookups straight to LoadTextureBlock gives 40 or 36 words
- * differing. Testing playerIndex with < gives 99. 24 words differ, none in
- * shape.
+ * The machine strips' loop counts their top in the face loop's counter, as
+ * the original keeps both in $s4; a top of its own leaves the counter and
+ * &gfx, hoisted out of the face loop, in each other's registers, which gives
+ * 24 words differing, none in shape, or 22 with the strip loop's steps in
+ * this order. Stepping the top before the texel offset gives 2 words;
+ * setting it first gives 4, and both 6.
+ *
+ * Each face image is read into faceImage before its texture load, as the
+ * original reads it ahead of the call's other arguments; passing the lookups
+ * straight to LoadTextureBlock gives 16 or 14 words differing. Testing the
+ * counter with < gives 77.
  *
  * The next frame is opened and read in an if and an else, one per animation
- * set, and GCC merges the two reads. The original shifts playerIndex once
- * per pass and keeps the result from the current face's image through the
- * next frame's read. Choosing the asset with ?: and reading once after it
- * gave 33 words, 3 in shape: cse's extended block ends at the ?:'s join, so
- * the read shifts playerIndex again, and loop.c, combining the two shifts,
- * finds it worth stepping the result instead. Opening in an if and an else
- * with one read after them gives 9 words, 7 in shape; the frames chosen
- * first, then replaced for the other set, 83; indexing by
- * f_Slots->playerIndex, 68.
+ * set, and GCC merges the two reads. Choosing the asset with ?: and reading
+ * once after it gives 31 words, 3 in shape: cse's extended block ends at the
+ * ?:'s join, so the read shifts the counter again, and loop.c, combining the
+ * two shifts, finds it worth stepping the result instead. Opening in an if
+ * and an else with one read after them gives 7 words, all in shape.
  */
-#ifdef NON_MATCHING
 void DrawClubSlots(Gfx** displayListHead) {
   Mat4 matrix;
   Vec3 translation;
@@ -570,13 +567,12 @@ void DrawClubSlots(Gfx** displayListHead) {
   Boolean isStripLoaded;
   s32 reelIndex;
   s32 quadIndex;
-  s32 top;
+  s32 topOrPlayerIndex;
   s32 stripHeight;
   s32 loadedStripHeight;
   s32 texelOffset;
   s32 buttonOrStartStripIndex;
   s32 stripIndex;
-  s32 playerIndex;
   s32 row;
   f32 halfWidth;
   f32 dsdx;
@@ -794,10 +790,12 @@ void DrawClubSlots(Gfx** displayListHead) {
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
   LoadLargePalette(&gfx, ImageBody(f_Slots->machineImage));
-  for (texelOffset = LARGE_PALETTED_TEXELS_OFFSET, top = SCREEN_BORDER;
-      top < MACHINE_BOTTOM; top += MACHINE_STRIP_HEIGHT,
-      texelOffset += MACHINE_STRIP_HEIGHT * MACHINE_WIDTH) {
-    stripHeight = (top + MACHINE_STRIP_HEIGHT <= MACHINE_BOTTOM)
+  for (texelOffset = LARGE_PALETTED_TEXELS_OFFSET,
+      topOrPlayerIndex = SCREEN_BORDER;
+      topOrPlayerIndex < MACHINE_BOTTOM;
+      texelOffset += MACHINE_STRIP_HEIGHT * MACHINE_WIDTH,
+      topOrPlayerIndex += MACHINE_STRIP_HEIGHT) {
+    stripHeight = (topOrPlayerIndex + MACHINE_STRIP_HEIGHT <= MACHINE_BOTTOM)
         ? MACHINE_STRIP_HEIGHT
         : MACHINE_LAST_STRIP_HEIGHT;
     if (!isStripLoaded) {
@@ -817,10 +815,11 @@ void DrawClubSlots(Gfx** displayListHead) {
     }
 
     gDPPipeSync(gfx++);
-    DrawTextureRect(&gfx, QuarterPixels(SCREEN_BORDER), QuarterPixels(top),
+    DrawTextureRect(&gfx, QuarterPixels(SCREEN_BORDER),
+        QuarterPixels(topOrPlayerIndex),
         QuarterPixels(SCREEN_BORDER + MACHINE_WIDTH - 1),
-        QuarterPixels(top + stripHeight - 1), G_TX_RENDERTILE, 0, 0,
-        COPY_MODE_TEXEL_STEP, TEXEL_STEP_ONE);
+        QuarterPixels(topOrPlayerIndex + stripHeight - 1), G_TX_RENDERTILE, 0,
+        0, COPY_MODE_TEXEL_STEP, TEXEL_STEP_ONE);
     gDPPipeSync(gfx++);
   }
 
@@ -924,45 +923,52 @@ void DrawClubSlots(Gfx** displayListHead) {
   gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-  for (playerIndex = 0; playerIndex != g_GameState.playerCount; playerIndex++) {
-    LoadLargePalette(&gfx, g_PlayerFacePalettes[playerIndex]);
-    if (playerIndex == f_Slots->playerIndex) {
-      u8* faceImage = f_Slots->faceImages[playerIndex][f_FaceBufferIndex];
+  for (topOrPlayerIndex = 0; topOrPlayerIndex != g_GameState.playerCount;
+      topOrPlayerIndex++) {
+    LoadLargePalette(&gfx, g_PlayerFacePalettes[topOrPlayerIndex]);
+    if (topOrPlayerIndex == f_Slots->playerIndex) {
+      u8* faceImage = f_Slots->faceImages[topOrPlayerIndex][f_FaceBufferIndex];
 
       LoadTextureBlock(&gfx, faceImage, G_IM_FMT_CI, G_IM_SIZ_8b, FACE_SIZE,
           FACE_SIZE, 0, 0, 0, 0, 0, 0, 0);
       gDPPipeSync(gfx++);
       gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
       DrawTextureRect(&gfx, QuarterPixels(FACE_LEFT),
-          QuarterPixels(FACE_TOP + (playerIndex * FACE_SPACING)),
+          QuarterPixels(FACE_TOP + (topOrPlayerIndex * FACE_SPACING)),
           QuarterPixels(FACE_LEFT + FACE_SIZE),
-          QuarterPixels(FACE_TOP + FACE_SIZE + (playerIndex * FACE_SPACING)),
+          QuarterPixels(
+              FACE_TOP + FACE_SIZE + (topOrPlayerIndex * FACE_SPACING)),
           G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       if (f_IsShowingResult == TRUE && ++f_FaceFrameTime >= FACE_FRAME_TIME) {
         f_FaceFrameTime = 0;
         if (++f_FaceFrameIndex >= FACE_LAST_FRAME + 1) {
           if (++f_FaceHoldCount >= FACE_HOLD_COUNT) {
-            row = f_CharacterFaceRows[g_Players[playerIndex].characterIndex];
+            row =
+                f_CharacterFaceRows[g_Players[topOrPlayerIndex].characterIndex];
             if (f_StarCount == REEL_COUNT) {
               OpenEncodedAsset(
                   g_FaceAnimationAssets[row][FACE_LAST_FRAME], &asset);
-              ReadEncodedAsset(f_Slots->faceImages[playerIndex][0], &asset);
+              ReadEncodedAsset(
+                  f_Slots->faceImages[topOrPlayerIndex][0], &asset);
               OpenEncodedAsset(
                   g_FaceAnimationAssets[row][FACE_LAST_FRAME], &asset);
-              ReadEncodedAsset(f_Slots->faceImages[playerIndex][1], &asset);
+              ReadEncodedAsset(
+                  f_Slots->faceImages[topOrPlayerIndex][1], &asset);
             } else {
               OpenEncodedAsset(
                   g_AlternateFaceAnimationAssets[row][FACE_LAST_FRAME], &asset);
-              ReadEncodedAsset(f_Slots->faceImages[playerIndex][0], &asset);
+              ReadEncodedAsset(
+                  f_Slots->faceImages[topOrPlayerIndex][0], &asset);
               OpenEncodedAsset(
                   g_AlternateFaceAnimationAssets[row][FACE_LAST_FRAME], &asset);
-              ReadEncodedAsset(f_Slots->faceImages[playerIndex][1], &asset);
+              ReadEncodedAsset(
+                  f_Slots->faceImages[topOrPlayerIndex][1], &asset);
             }
 
             /*
              * f_FaceBufferIndex is cleared twice; it is there to match:
-             * clearing it only after the frame index gives 26 words
-             * differing, 2 in shape, and only first 28, 2 in shape
+             * clearing it only after the frame index gives 2 words
+             * differing, both in shape, and only first 4, 2 in shape
              */
             f_FaceBufferIndex = 0;
             f_StarCount = 0;
@@ -974,18 +980,18 @@ void DrawClubSlots(Gfx** displayListHead) {
             f_Slots->playerIndex++;
           }
         } else {
-          row = f_CharacterFaceRows[g_Players[playerIndex].characterIndex];
+          row = f_CharacterFaceRows[g_Players[topOrPlayerIndex].characterIndex];
           if (f_StarCount == REEL_COUNT) {
             OpenEncodedAsset(
                 g_FaceAnimationAssets[row][f_FaceFrameIndex], &asset);
             ReadEncodedAsset(
-                f_Slots->faceImages[playerIndex][f_FaceBufferIndex ^ 1],
+                f_Slots->faceImages[topOrPlayerIndex][f_FaceBufferIndex ^ 1],
                 &asset);
           } else {
             OpenEncodedAsset(
                 g_AlternateFaceAnimationAssets[row][f_FaceFrameIndex], &asset);
             ReadEncodedAsset(
-                f_Slots->faceImages[playerIndex][f_FaceBufferIndex ^ 1],
+                f_Slots->faceImages[topOrPlayerIndex][f_FaceBufferIndex ^ 1],
                 &asset);
           }
 
@@ -993,16 +999,16 @@ void DrawClubSlots(Gfx** displayListHead) {
         }
       }
     } else {
-      u8* faceImage = g_PlayerFaceImages[playerIndex];
+      u8* faceImage = g_PlayerFaceImages[topOrPlayerIndex];
 
       LoadTextureBlock(&gfx, faceImage, G_IM_FMT_CI, G_IM_SIZ_8b, FACE_SIZE,
           FACE_SIZE, 0, 0, 0, 0, 0, 0, 0);
       gDPSetPrimColor(gfx++, 0, 0, 127, 127, 127, 127);
       DrawTextureRect(&gfx, QuarterPixels(OTHER_FACE_LEFT),
-          QuarterPixels(OTHER_FACE_TOP + (playerIndex * FACE_SPACING)),
+          QuarterPixels(OTHER_FACE_TOP + (topOrPlayerIndex * FACE_SPACING)),
           QuarterPixels(OTHER_FACE_LEFT + FACE_SIZE),
           QuarterPixels(OTHER_FACE_TOP + OTHER_FACE_HEIGHT +
-              (playerIndex * FACE_SPACING)),
+              (topOrPlayerIndex * FACE_SPACING)),
           G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     }
 
@@ -1013,10 +1019,6 @@ void DrawClubSlots(Gfx** displayListHead) {
   DrawClubSlotsLogo(&gfx, LOGO_X, LOGO_Y, 1.0f);
   *displayListHead = gfx;
 }
-
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_10/club_slots", DrawClubSlots);
-#endif
 
 /* Draws the logo centered there, bobbing until the result, and its shine */
 void DrawClubSlotsLogo(
