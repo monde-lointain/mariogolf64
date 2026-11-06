@@ -356,6 +356,9 @@ Boolean IsShotModeChangeDone(void) {
 /* The fill's gradient image */
 #define GAUGE_FILL_IMAGE_WIDTH 64
 #define GAUGE_FILL_IMAGE_HEIGHT 16
+/* The fill image spans 5 pixels for each gauge value, across the full gauge */
+#define GAUGE_FILL_SPAN_PER_VALUE 5
+#define GAUGE_FILL_SPAN (GAUGE_MAX_VALUE * GAUGE_FILL_SPAN_PER_VALUE)
 #define GAUGE_TICK_IMAGE_WIDTH 16
 #define GAUGE_TICK_IMAGE_HEIGHT 12
 
@@ -518,10 +521,12 @@ void DrawClubPanel(Gfx** displayListHead) {
         QuarterPixels(
             GAUGE_BOTTOM + g_ShotPanelOffsetX + f_ClubPanelDebugValue),
         G_TX_RENDERTILE,
-        TexelCoordinate(
-            (((GAUGE_MAX_VALUE * 5) - (f_ChosenPowerFill * 5)) << 6) /
-            (GAUGE_MAX_VALUE * 5)),
-        0, 0x1B4, 0x800);
+        TexelCoordinate(((GAUGE_FILL_SPAN -
+                             (f_ChosenPowerFill * GAUGE_FILL_SPAN_PER_VALUE)) *
+                            GAUGE_FILL_IMAGE_WIDTH) /
+            GAUGE_FILL_SPAN),
+        0, TexelRunStep(GAUGE_FILL_IMAGE_WIDTH, GAUGE_FILL_SPAN),
+        TexelRunStep(GAUGE_FILL_IMAGE_HEIGHT, GAUGE_BOTTOM - GAUGE_TOP));
   }
 
   gDPPipeSync(gfx++);
