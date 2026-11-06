@@ -83,7 +83,8 @@ void AddFramedSphere(Vec3 center, f32 radius) {
  * took 7 words differing, 3 in shape. Taking the magnitude into the cosine
  * local, before or after the block's end, or swapping the comparison doesn't
  * help. The register oracle finds nothing closer: forcing the magnitude's
- * pseudo into $f2 gives 16 words. 6 words differ.
+ * pseudo into $f2 gives 16 words, and an early-clobber output ("=&f") in
+ * fabsf's assembly 20 words, none in shape. 6 words differ.
  *
  * Braces in place of the empty block, around the cosine and its test, with the
  * cosine declared in them or not, or around the test alone or with a magnitude
