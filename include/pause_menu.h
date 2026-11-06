@@ -29,8 +29,8 @@ enum PauseAction {
   PAUSE_ACTION_CONTROLS,
   /* "Quit Game" in the PAUSE_LAYOUT_BROUGHT_OVER layouts */
   PAUSE_ACTION_QUIT_BROUGHT_OVER_GAME,
-  /* "Quit Game" in the PAUSE_LAYOUT_UNK3B layouts */
-  PAUSE_ACTION_QUIT_UNK3B_GAME,
+  /* "Quit Game" in the PAUSE_LAYOUT_CLUB_TOURNAMENT layouts */
+  PAUSE_ACTION_QUIT_CLUB_TOURNAMENT,
   /* UpdatePauseMenu's result while no option is chosen */
   PAUSE_ACTION_NONE = -1
 };

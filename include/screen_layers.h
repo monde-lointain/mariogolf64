@@ -32,8 +32,8 @@ enum PromptId {
   PROMPT_BRING_MORE_CHARACTERS,
   /* The pause menu's quit, in a game brought over from a cartridge */
   PROMPT_QUIT_BROUGHT_OVER_GAME,
-  /* The pause menu's PAUSE_ACTION_QUIT_UNK3B_GAME */
-  PROMPT_QUIT_UNK3B_GAME,
+  /* The pause menu's PAUSE_ACTION_QUIT_CLUB_TOURNAMENT */
+  PROMPT_QUIT_CLUB_TOURNAMENT,
   /* Under a tournament round's score password */
   PROMPT_SCORE_PASSWORD,
   /* On the cartridge, from the Transmit menu */
