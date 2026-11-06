@@ -117,6 +117,17 @@
 #define LZ_REFERENCE_DISTANCE_SHIFT 5
 #define LZ_MIN_REFERENCE_LENGTH 2
 
+/*
+ * A control word's 16 bits say whether each item is a literal or a reference.
+ * They are shifted up to the top of controlBits, with LZ_CONTROL_END_BIT set
+ * below them; once that bit is shifted out, the next word is read.
+ * LZ_SPENT_CONTROL_BITS is that bit alone at the top, which the next shift
+ * shifts out.
+ */
+#define LZ_CONTROL_BIT_COUNT 16
+#define LZ_CONTROL_END_BIT 0x8000
+#define LZ_SPENT_CONTROL_BITS 0x80000000
+
 /* A patch command holds its kind or offset in its high byte and its count less
  * one in its low byte */
 #define LZ_PATCH_COUNT_MASK 0xFF
@@ -240,9 +251,8 @@ s32 DecodeLzChunk(LzStream* stream) {
       continue;
     }
 
-    /* The bits are read from the top; the 1 below them marks their end */
-    controlBits <<= 16;
-    controlBits |= 0x8000;
+    controlBits <<= LZ_CONTROL_BIT_COUNT;
+    controlBits |= LZ_CONTROL_END_BIT;
     while (TRUE) {
       while (controlBits >= 0) {
         *output++ = *input++;
@@ -331,7 +341,7 @@ s32 DecodePatchedLzChunk(LzStream* stream) {
     input = stream->input;
     window = stream->window;
     windowIndex = 0;
-    controlBits = 0x80000000;
+    controlBits = LZ_SPENT_CONTROL_BITS;
     historyIndex = 0;
     patchCount = 0;
     input += LZ_HEADER_WORD_COUNT;
@@ -369,8 +379,8 @@ s32 DecodePatchedLzChunk(LzStream* stream) {
     }
 
     controlBits = *input++;
-    controlBits <<= 16;
-    controlBits |= 0x8000;
+    controlBits <<= LZ_CONTROL_BIT_COUNT;
+    controlBits |= LZ_CONTROL_END_BIT;
 
 DECODE:
 
