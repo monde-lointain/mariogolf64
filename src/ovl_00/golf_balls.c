@@ -797,8 +797,14 @@ enum BallSprite {
  * up with one register for the shadow and another for the route points. That
  * takes the draft from 654 words differing to 648, 90 in shape either way,
  * and the oracle still forces none; a screen point of their own as well
- * gives 988 or 1002, as it moves the stack slots. 648 words differ, 90 in
- * shape.
+ * gives 988 or 1002, as it moves the stack slots.
+ *
+ * Setting each marker color, sync, render mode and sync through one
+ * statement macro in each case gives 509 words (89 in shape), with the same
+ * skipped commands for other marker players: the original's range check
+ * branches to the sync after the switch. The macro in each case with a
+ * default case holding the copy as well gives 1155 (207). 648 words differ,
+ * 90 in shape.
  */
 #ifdef NON_MATCHING
 void DrawGolfBalls(CameraMatrices* matrices UNUSED) {
