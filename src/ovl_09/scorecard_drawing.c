@@ -1727,6 +1727,15 @@ void FormatLeaderboardRow(char* row, TournamentStanding* standing) {
  * bytes larger, and the oracle's closest is 72 words, forcing 10. Reading
  * contestantId through standing as well gives 134 words (24 in shape), and
  * the oracle's closest 75, forcing 15. 81 words differ, 35 in shape.
+ *
+ * A later focused run's best reads g_Scorecard.x through an s32 pointer and
+ * topRow through a temporary in the faces' loop: 65 words (29 in shape). A
+ * Scorecard pointer local to that loop, read for both fields, gives 74 (30),
+ * and for x alone 77 (29); without the block, 133 (45) and 122 (36), each in
+ * a frame 8 bytes smaller. None is kept: the original never forms
+ * g_Scorecard's address in that loop, but reads topRow and x at 0 and 4 from
+ * a register it derives from flipTime's address, as the draft's direct reads
+ * do without the block.
  */
 #ifdef NON_MATCHING
 void DrawLeaderboardPage(Gfx** displayListHead) {
