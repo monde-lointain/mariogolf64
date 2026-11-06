@@ -10,6 +10,7 @@
 #include "game.h"
 #include "game_flags.h"
 #include "gbi_helpers.h"
+#include "libc.h"
 #include "math_util.h"
 #include "play.h"
 #include "save.h"

@@ -15,6 +15,7 @@
 #include "hole_loader.h"
 #include "hole_triangles.h"
 #include "host_file.h"
+#include "libc.h"
 #include "math_util.h"
 #include "play.h"
 #include "save.h"
