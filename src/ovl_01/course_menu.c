@@ -980,7 +980,15 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/course_menu", DrawStatsScrollArrows);
  * unsigned x or place 20 or more, with the s32 y. The permuter's best cast y
  * to unsigned at the rectangle's top edge, the same 19 words, 5 in shape;
  * its fewest words, 12 (10 in shape), came from casting the rectangle's dtdy
- * to a char, which makes it 0. 19 words differ, 5 in shape.
+ * to a char, which makes it 0.
+ *
+ * Re-measured with the unsigned y: the offset in a local, as an s32, s16,
+ * u16 or u32, gives 179 words (11 in shape); place as an s8 gives 27 (5), as
+ * a u8 or u16 50 (14), as an s32 174 (22) and as a u32 179 (23). Subtracting
+ * 20U, or TROPHY_SHIFT_LEFT cast to u32, or casting the offset to u16, loads
+ * 0xFFEC as the original does, but once before the trophies' loop, where the
+ * original loads it on each pass: 28 words (6 in shape), or 36 (8) for the
+ * casts. 19 words differ, 5 in shape.
  */
 #ifdef NON_MATCHING
 void DrawCourseTrophies(Gfx** displayListHead) {
@@ -1044,9 +1052,8 @@ void DrawCourseTrophies(Gfx** displayListHead) {
         gDPPipeSync(gfx++);
         /*
          * The right edge adds the offset before the position, to match: the
-         * position, offset and width in that order, the offset first, or the
-         * position before the offset, give 39 words differing (21 in shape),
-         * against the draft's 31 (21)
+         * other orders give 27 words differing (5 in shape) against the
+         * draft's 19 (5), but for the offset, width and position, which ties
          */
         gSPScisTextureRectangle(gfx++,
             QuarterPixels(f_StatsTrophyPositions[memory->statsCourse].x +
