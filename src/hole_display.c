@@ -194,6 +194,12 @@ enum SkyImageKind {
 /* The tiles are drawn white, fading by SPIRAL_ALPHA_STEP each */
 #define SPIRAL_SHADE 255
 #define SPIRAL_ALPHA_STEP (OPAQUE_ALPHA / (SPIRAL_FADING_TILE_COUNT + 1))
+/*
+ * The count of tiles left drops by SPIRAL_FADING_TILE_COUNT each frame, from
+ * this start that keeps the whole grid opaque for two frames
+ */
+#define SPIRAL_START_TILE_COUNT \
+  (SPIRAL_TILE_COUNT + (2 * SPIRAL_FADING_TILE_COUNT))
 
 enum SpiralDirection {
   SPIRAL_RIGHT,
@@ -2268,7 +2274,7 @@ void StartHudAnimation(s32 animation) {
       f_HudAnimationFramesLeft = SCREEN_WIDTH / 2;
       break;
     case HUD_ANIMATION_SPIRAL:
-      f_HudAnimationFramesLeft = 72;
+      f_HudAnimationFramesLeft = SPIRAL_START_TILE_COUNT;
       break;
     case HUD_ANIMATION_TILES:
       f_HudAnimationFramesLeft = TILE_ANIMATION_FRAME_COUNT;
