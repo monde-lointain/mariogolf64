@@ -1315,7 +1315,7 @@ void PlayFlightSounds(s32 step) {
       } else if (g_HoleSetup.par + SCORE_TO_PAR_BIRDIE ==
           g_Players[g_CurrentShot.playerIndex].strokeCount) {
         PlaySound(
-            SOUND_UNK116, FLIGHT_SOUND_CHANNEL_CUP_IN, BIRDIE_CUP_IN_VOLUME);
+            SOUND_BIRDIE_CUP_IN, FLIGHT_SOUND_CHANNEL_CUP_IN, BIRDIE_CUP_IN_VOLUME);
       }
     }
 

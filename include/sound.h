@@ -199,11 +199,12 @@ enum Sound {
   SOUND_CONTROLS_OPEN,
   /* Also played when the main menu shows the transmit option */
   SOUND_CONTROLS_CLOSE,
+  /* As a shot drops for a birdie */
+  SOUND_BIRDIE_CUP_IN,
   /*
-   * SOUND_UNK116 to SOUND_UNK118 play in a shot's flight; SOUND_UNK118,
+   * SOUND_UNK117 and SOUND_UNK118 play in a shot's flight; SOUND_UNK118,
    * SOUND_CALL_BIRDIE and SOUND_UNK400 also play in the audio test
    */
-  SOUND_UNK116,
   SOUND_UNK117,
   SOUND_UNK118,
   SOUND_OUT_OF_BOUNDS, /* Also played in the opening */
