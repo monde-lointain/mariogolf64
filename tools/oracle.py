@@ -554,6 +554,56 @@ def print_splits(
             print(f"  {register_name(register)} x{len(indices)}, lines {used}")
 
 
+# The registers a call keeps: $s0-$s7 and $fp
+SAVED_REGISTERS = frozenset([*range(16, 24), 30])
+
+
+def print_merges(
+    target: fncompare.Routine, compilation: Compilation, insn_lines: dict[int, int]
+) -> None:
+    """Print pseudos held in a saved register there and a clobbered one here.
+
+    Each comes with the other pseudos the original holds in that register.
+    A value live across no call takes a saved register only by sharing a
+    variable with one that is, so the original likely read it into one of
+    the others' variables, such as a grid mark read into the character.
+    """
+    votes: dict[int, collections.Counter[int]] = collections.defaultdict(
+        collections.Counter
+    )
+    indices: dict[int, list[int]] = collections.defaultdict(list)
+    for pseudo, wanted, index in iterate_votes(target, compilation):
+        votes[pseudo][wanted] += 1
+        indices[pseudo].append(index)
+    held: dict[int, list[int]] = collections.defaultdict(list)
+    for pseudo, counts in sorted(votes.items()):
+        register, count = counts.most_common(1)[0]
+        # One vote is enough when no other register gets any
+        agreed = count >= MIN_SPLIT_VOTES or count == counts.total()
+        if agreed and register in SAVED_REGISTERS:
+            held[register].append(pseudo)
+
+    def describe(pseudo: int) -> str:
+        lines = (
+            get_word_line(compilation, index, insn_lines) for index in indices[pseudo]
+        )
+        used = sorted({line for line in lines if line is not None})
+        ours = register_name(compilation.registers.get(pseudo, -1))
+        return f"pseudo {pseudo} (in {ours}, lines {used})"
+
+    for register, pseudos in sorted(held.items()):
+        for pseudo in pseudos:
+            if compilation.registers.get(pseudo, -1) in SAVED_REGISTERS:
+                continue
+            others = [other for other in pseudos if other != pseudo]
+            if not others:
+                continue
+            saved = register_name(register)
+            print(f"{describe(pseudo)} lines up with {saved}; maybe one variable with")
+            for other in others:
+                print(f"  {describe(other)}")
+
+
 def join_lines(pseudos: list[int], lines: dict[int, set[int]]) -> str:
     """Return the source lines that use any of PSEUDOS, in order."""
     used: set[int] = set()
@@ -613,6 +663,7 @@ def main() -> None:
             compilation = compile_function(c_path, function, force, work)
             insn_lines = read_insn_lines(c_path, function, compilation, work)
             print_splits(target, compilation, insn_lines)
+            print_merges(target, compilation, insn_lines)
             return
         force, differences, compilation = search_forcing(
             target, c_path, function, force, work
@@ -638,6 +689,7 @@ def main() -> None:
         insn_lines = read_insn_lines(c_path, function, compilation, work)
         explain(compilation, force, read_pseudo_lines(compilation, insn_lines))
         print_splits(target, compilation, insn_lines)
+        print_merges(target, compilation, insn_lines)
 
 
 if __name__ == "__main__":
