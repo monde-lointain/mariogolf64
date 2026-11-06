@@ -380,7 +380,7 @@ s32 GetChosenBestShot(void);
 void LoadRingShotRecord(RingShotRecord* record);
 void LoadBestShotReplay(PlayRecord* record);
 s32 SaveOrContinueGameByMode(Boolean isContinuing);
-s32 UpdateViewerCharacter(s32 arg0, s32 playerNumber);
+s32 UpdateViewerCharacter(s32 unusedSetting, s32 playerNumber);
 void ApplyBetPreset(s32 requestedPreset);
 void ResetCodeEntry(void);
 void DrawMenuScenery(Gfx** displayListHead);
@@ -2065,9 +2065,10 @@ void ResetViewerCharacter(void) {
  * UpdateViewerCharacter moves the character cursor past the characters marked
  * as taken, and plays the voice of the one chosen. It returns -1 when B leaves,
  * 1 once the chosen character's animation ends while g_ChoosingPlayerIndex
- * equals playerNumber, and 0 otherwise. Nothing reads arg0.
+ * equals playerNumber, and 0 otherwise. Nothing reads unusedSetting, which the
+ * one caller passes as 1.
  */
-s32 UpdateViewerCharacter(s32 arg0 UNUSED, s32 playerNumber) {
+s32 UpdateViewerCharacter(s32 unusedSetting UNUSED, s32 playerNumber) {
   if (f_IsViewerAdjusting != 0) {
     while (
         g_TakenCharacters.isCharacterTaken[g_MenuMemory.viewerCharacter] == 1) {

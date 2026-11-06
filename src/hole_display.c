@@ -1732,8 +1732,8 @@ static Mtx f_TileMatrices[MATRIX_BUFFER_COUNT][FRAME_TILE_COUNT];
  * The sun is a textured rectangle placed from the camera's yaw against the
  * light's, and the dome's height above the horizon.
  */
-void DrawSky(
-    Gfx** displayListHead, f32 eyeY UNUSED, s32 arg2 UNUSED, s32 cameraIndex) {
+void DrawSky(Gfx** displayListHead, f32 eyeY UNUSED, s32 unusedSetting UNUSED,
+    s32 cameraIndex) {
   Gfx* gfx = *displayListHead;
   SkyColors* colors;
   Mat4 matrix;
