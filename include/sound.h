@@ -201,12 +201,12 @@ enum Sound {
   SOUND_CONTROLS_CLOSE,
   /* As a shot drops for a birdie */
   SOUND_BIRDIE_CUP_IN,
+  SOUND_UNK117, /* Plays in a shot's flight */
   /*
-   * SOUND_UNK117 and SOUND_UNK118 play in a shot's flight; SOUND_UNK118,
+   * As a shot drops for an eagle or better; SOUND_EAGLE_CUP_IN,
    * SOUND_CALL_BIRDIE and SOUND_UNK400 also play in the audio test
    */
-  SOUND_UNK117,
-  SOUND_UNK118,
+  SOUND_EAGLE_CUP_IN,
   SOUND_OUT_OF_BOUNDS, /* Also played in the opening */
   SOUND_FULL_SHOT = 0x7B,
   SOUND_TROUBLE_LANDING, /* In a bunker, water or out of play */

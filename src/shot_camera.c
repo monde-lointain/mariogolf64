@@ -1135,6 +1135,8 @@ void PlayFlightSounds(s32 step) {
     if (!*greenSoundCount && !shownRingCount &&
         HasHitGroundBefore(step, GREEN_SOUND_DELAY_STEP_COUNT) &&
         IsShotOntoGreen()) {
+      /* The second arm is never taken: the first takes every stroke count
+       * that it would */
       if (g_HoleSetup.par >
           g_Players[g_CurrentShot.playerIndex].strokeCount + 1) {
         (*greenSoundCount)++;
@@ -1144,8 +1146,8 @@ void PlayFlightSounds(s32 step) {
               g_Players[g_CurrentShot.playerIndex].strokeCount + 2 &&
           f_LandingCupDistance < GREEN_SOUND_MAX_DISTANCE) {
         (*greenSoundCount)++;
-        PlaySound(
-            SOUND_UNK118, FLIGHT_SOUND_CHANNEL_LANDING, GREEN_SOUND_VOLUME);
+        PlaySound(SOUND_EAGLE_CUP_IN, FLIGHT_SOUND_CHANNEL_LANDING,
+            GREEN_SOUND_VOLUME);
       }
     }
   }
@@ -1303,19 +1305,20 @@ void PlayFlightSounds(s32 step) {
       }
 
       if (g_Players[g_CurrentShot.playerIndex].strokeCount == 1) {
-        PlaySound(SOUND_UNK118, FLIGHT_SOUND_CHANNEL_CUP_IN, SOUND_FULL_SCALE);
+        PlaySound(
+            SOUND_EAGLE_CUP_IN, FLIGHT_SOUND_CHANNEL_CUP_IN, SOUND_FULL_SCALE);
       } else if (g_HoleSetup.par + SCORE_TO_PAR_ALBATROSS ==
           g_Players[g_CurrentShot.playerIndex].strokeCount) {
-        PlaySound(
-            SOUND_UNK118, FLIGHT_SOUND_CHANNEL_CUP_IN, ALBATROSS_CUP_IN_VOLUME);
+        PlaySound(SOUND_EAGLE_CUP_IN, FLIGHT_SOUND_CHANNEL_CUP_IN,
+            ALBATROSS_CUP_IN_VOLUME);
       } else if (g_HoleSetup.par + SCORE_TO_PAR_EAGLE ==
           g_Players[g_CurrentShot.playerIndex].strokeCount) {
-        PlaySound(
-            SOUND_UNK118, FLIGHT_SOUND_CHANNEL_CUP_IN, EAGLE_CUP_IN_VOLUME);
+        PlaySound(SOUND_EAGLE_CUP_IN, FLIGHT_SOUND_CHANNEL_CUP_IN,
+            EAGLE_CUP_IN_VOLUME);
       } else if (g_HoleSetup.par + SCORE_TO_PAR_BIRDIE ==
           g_Players[g_CurrentShot.playerIndex].strokeCount) {
-        PlaySound(
-            SOUND_BIRDIE_CUP_IN, FLIGHT_SOUND_CHANNEL_CUP_IN, BIRDIE_CUP_IN_VOLUME);
+        PlaySound(SOUND_BIRDIE_CUP_IN, FLIGHT_SOUND_CHANNEL_CUP_IN,
+            BIRDIE_CUP_IN_VOLUME);
       }
     }
 
