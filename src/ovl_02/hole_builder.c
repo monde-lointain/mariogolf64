@@ -3362,6 +3362,15 @@ static inline u16* GetShadowedTexel(u32 column, u32 row) {
  * assembly, 157 words differ, 23 in shape; AbsFloat at any one of its four
  * sites gives 163 to 187 (39 to 43 in shape), and at all four 364 (80). An
  * s16 centerColumn, alone or with centerRow, now gives 156 (24).
+ *
+ * Giving the mask loops their own maskRow and maskColumn, and the clamped
+ * starts their own firstRow and firstColumn, as the register oracle's split-
+ * variable hints suggested, gives 67 words (21 in shape); the mask variables
+ * alone give 85 (23), maskRow alone 175, maskColumn alone 135, the starts
+ * alone 262 (26), and the mask variables with only one start 76 (22). The
+ * oracle then leaves 59 words, forcing 6. An s16 centerColumn, alone or with
+ * centerRow, and any other order of the three opening assignments give 67 or
+ * 75.
  */
 #ifdef NON_MATCHING
 void CastBillboardShadows(void) {
@@ -3378,6 +3387,11 @@ void CastBillboardShadows(void) {
   Boolean isRowInWidth;
   s32 row;
   s32 column;
+  s32 maskRow;
+  s32 maskColumn;
+  s32 firstRow;
+  s32 firstColumn;
+
   s32 rowEnd;
   s32 columnEnd;
   s32 centerColumn;
@@ -3430,14 +3444,14 @@ void CastBillboardShadows(void) {
     }
 
     if (g_Billboards[index].textureIndex != lastTextureIndex) {
-      for (row = 0; row <= BILLBOARD_MASK_SIZE; row++) {
-        s32 rowStart = row << SOLIDITY_ROW_SHIFT;
+      for (maskRow = 0; maskRow <= BILLBOARD_MASK_SIZE; maskRow++) {
+        s32 rowStart = maskRow << SOLIDITY_ROW_SHIFT;
 
-        for (column = 0; column <= BILLBOARD_MASK_SIZE; column++) {
-          solidities[rowStart + column] =
+        for (maskColumn = 0; maskColumn <= BILLBOARD_MASK_SIZE; maskColumn++) {
+          solidities[rowStart + maskColumn] =
               GetBillboardSolidity(g_Billboards[index].textureIndex,
-                  column * (1.0f / BILLBOARD_MASK_SIZE),
-                  row * (1.0f / BILLBOARD_MASK_SIZE));
+                  maskColumn * (1.0f / BILLBOARD_MASK_SIZE),
+                  maskRow * (1.0f / BILLBOARD_MASK_SIZE));
         }
       }
 
@@ -3465,32 +3479,32 @@ void CastBillboardShadows(void) {
     lightView[2][0] *= BILLBOARD_UNITS_PER_TEXEL;
     lightView[2][1] *= BILLBOARD_UNITS_PER_TEXEL;
     lightView[2][2] *= BILLBOARD_UNITS_PER_TEXEL;
-    row = centerRow - SHADOW_ROWS_BEFORE;
+    firstRow = centerRow - SHADOW_ROWS_BEFORE;
     rowEnd = centerRow + SHADOW_ROWS_AFTER;
-    if (row < 0) {
-      row = 0;
+    if (firstRow < 0) {
+      firstRow = 0;
     }
 
     if (rowEnd >= MAP_ROW_COUNT) {
       rowEnd = MAP_ROW_COUNT - 1;
     }
 
-    for (; row < rowEnd; row++) {
+    for (row = firstRow; row < rowEnd; row++) {
       rowPoint[AXIS_X] = (lightView[2][0] * row) + lightView[3][0];
       rowPoint[AXIS_Y] = (lightView[2][1] * row) + lightView[3][1];
       rowPoint[AXIS_Z] = (lightView[2][2] * row) + lightView[3][2];
       isRowInWidth = FALSE;
-      column = centerColumn - SHADOW_COLUMN_REACH;
+      firstColumn = centerColumn - SHADOW_COLUMN_REACH;
       columnEnd = centerColumn + SHADOW_COLUMN_REACH;
-      if (column < 0) {
-        column = 0;
+      if (firstColumn < 0) {
+        firstColumn = 0;
       }
 
       if (columnEnd >= MAP_COLUMN_COUNT) {
         columnEnd = MAP_COLUMN_COUNT - 1;
       }
 
-      for (; column < columnEnd; column++) {
+      for (column = firstColumn; column < columnEnd; column++) {
         viewX = (lightView[0][0] * column) + rowPoint[AXIS_X];
         if (width <= fabsf(viewX)) {
           if (!isRowInWidth) {
