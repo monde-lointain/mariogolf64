@@ -70,7 +70,6 @@ typedef struct RingCorners {
 /* In sections */
 #define RING_SPARKLE_SPACING 4
 #define RING_SPARKLE_TURN ((f32)M_PI / 64) /* Radians each frame */
-#define POSITION_SCALE 1024.0f
 
 /* The rings' colors, apart from under PAUSE_SCREEN_FREE_LOOK */
 #define RING_RED 0xFF
@@ -386,9 +385,9 @@ void DrawRings(Gfx** displayListHead, CameraMatrices* matrices UNUSED,
               ringPoint[2] = 0;
               guMtxXFMF(transform, ringPoint[0], ringPoint[1], ringPoint[2],
                   &worldPoint[0], &worldPoint[1], &worldPoint[2]);
-              position[AXIS_X] = worldPoint[0] * POSITION_SCALE;
-              position[AXIS_Y] = worldPoint[1] * POSITION_SCALE;
-              position[AXIS_Z] = worldPoint[2] * POSITION_SCALE;
+              position[AXIS_X] = worldPoint[0] * WORLD_TO_COURSE_SCALE;
+              position[AXIS_Y] = worldPoint[1] * WORLD_TO_COURSE_SCALE;
+              position[AXIS_Z] = worldPoint[2] * WORLD_TO_COURSE_SCALE;
               SpawnSparkle(position);
             }
           }
