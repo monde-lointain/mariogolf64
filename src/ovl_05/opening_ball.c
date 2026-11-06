@@ -1916,7 +1916,9 @@ INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_ball", StepOpeningBallSimulation);
  * Doubling through a static inline helper, which GCC inlines after fold,
  * keeps the target's sll before the mult but leaves 14 words, as the local
  * does, and so does adding club->sideSpin to itself, with sideSign on either
- * side.
+ * side. Holding the scale in a local, as the club test holds its percent,
+ * leaves 14 words too, none in shape, and setting it at the routine's start
+ * 23 (15).
  */
 #ifdef NON_MATCHING
 s32 LaunchOpeningBallSimulation(
