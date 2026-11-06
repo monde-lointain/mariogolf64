@@ -72,7 +72,7 @@
 
 /* Each particle's triangle's scale and its depth in the orthographic view */
 #define PARTICLE_SCALE 0.1f
-#define PARTICLE_DEPTH -100.0f
+#define PARTICLE_DEPTH (-100.0f)
 
 /*
  * The fireworks' color cycles through hues: each channel swings around the
