@@ -2969,8 +2969,10 @@ void ShowHoleOutBanner(s32 playerIndex) {
  * a helper.
  *
  * Doesn't match: 77 words differ, 43 in shape, spread through the routine's
- * states. The counts in the paragraphs after the next were measured before it,
- * when 454 words differed, 184 in shape.
+ * states; the register oracle's closest result is 60 words with 4 pseudos
+ * forced, so most of the difference is in the code. The counts in the
+ * paragraphs after the next were measured when 454 words differed, 184 in
+ * shape.
  *
  * A player out of the group game has the hole's strokes and the stroke
  * count zeroed by one chained assignment. As two statements, the strokes
