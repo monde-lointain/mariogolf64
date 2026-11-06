@@ -57,6 +57,7 @@
 /* The texture that "PIKA" is written into for Pikachu's ball */
 #define PIKA_TEXTURE_WIDTH 32
 #define PIKA_TEXTURE_HEIGHT 8
+#define PIKA_BALL_TEXT "PIKA"
 
 /*
  * A model that no routine draws. Rendered from its vertices, it is a round
@@ -345,7 +346,8 @@ static s32 f_UnusedGolfBallResetValue;
 static s32 f_LastRolledBallPosition[3];
 
 void DrawPikaBallTexture(void) {
-  DrawTextIntoTexture("PIKA", 4, f_PikaBallTexture);
+  DrawTextIntoTexture(
+      PIKA_BALL_TEXT, ARRAY_COUNT(PIKA_BALL_TEXT) - 1, f_PikaBallTexture);
 }
 
 void LoadGolfBallImages(void) {
