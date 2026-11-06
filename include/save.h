@@ -143,7 +143,8 @@ enum GameStateStep {
   GAME_STATE_WAIT_FOR_HOLE,
   GAME_STATE_HOLE_INTRO,
   GAME_STATE_FLYOVER,
-  GAME_STATE_UNK5,
+  /* Never set: would only count frames */
+  GAME_STATE_UNUSED_IDLE,
   /* Taking turns. It and GAME_STATE_REPEATING_HOLE play a single ball, rather
    * than one for each player */
   GAME_STATE_TAKING_TURNS,

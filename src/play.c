@@ -1283,7 +1283,7 @@ void UpdatePlay(void) {
 
         f_PlayStateFrameCount = 0;
         break;
-      case GAME_STATE_UNK5:
+      case GAME_STATE_UNUSED_IDLE:
         f_PlayStateFrameCount++;
         break;
       case GAME_STATE_TAKING_TURNS:
