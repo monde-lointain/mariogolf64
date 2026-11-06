@@ -265,40 +265,9 @@ void UpdateBootLogos(void) {
 
 /*
  * Draws the boot logo being shown, strip by strip, faded by its frame.
- *
- * Doesn't match: GCC clamps the N64 logo's fade-in alpha after storing the
- * color command's first word, where the original clamps it first, and
- * reloads the display list pointer for the Nintendo logo's fade-out a few
- * instructions early. The counts in this paragraph and the next were
- * measured with each strip's edges stepped by hand, when the strip loops'
- * constants also went into other registers in another order. Clamping
- * through alpha, as the Nintendo logo does, gives 60 words, not 58, as does
- * clamping into alpha with MIN. The permuter's 21 words come from moving the
- * N64 logo's bottom step out of the strip loop, so every strip would draw to
- * the first one's bottom. The register oracle, forcing 4 pseudos' registers,
- * leaves 26 words at best, so the code differs too.
- *
- * A later focused permuter run's best, 790 against 1180, set the clamped
- * alphas into temporaries before their color commands. Through alpha, the
- * Nintendo logo's fade-out alone gives 75 words (27 in shape); the N64
- * logo's fade-out 89 (39); both N64 fades, or its fade-in and the Nintendo
- * fade-out, 77 (21); and all three 94 (30). 58 words differed, 18 in shape.
- *
- * Writing each strip's top and bottom edges from the strip index, and
- * leaving loop.c to step them, takes the draft from 58 words differing, 18
- * in shape, to 8 (8) when done in all three logos, and the register oracle's
- * closest result is those 8 words with no register forced. One edge written
- * that way gives 56 words or more, and giving each logo stepped edges of its
- * own 48 (18). With the edges from the index, clamping the N64 logo's
- * fade-in through alpha, as the other two logos do, gives 10 words, 2 in
- * shape, and the oracle's closest is also 10; a ?: clamp gives 9, 5 in
- * shape, and also setting a fade-out through alpha 22 words or more. 8 words
- * differ, 8 in shape.
  */
-#ifdef NON_MATCHING
 void DrawBootLogos(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
-  s32 alpha;
   s32 stripIndex;
   s32 texelOffset;
   u16* n64Texels;
@@ -326,12 +295,19 @@ void DrawBootLogos(Gfx** displayListHead) {
     case BOOT_LOGO_N64:
       gDPPipeSync(gfx++);
       gDPSetTextureLUT(gfx++, G_TT_NONE);
+      /*
+       * Each fade's alpha is set before its color command, to match: clamped
+       * in the command, the N64 logo's fade-in is clamped after the command's
+       * first word is stored, where the original clamps it first
+       */
       if (f_BootLogoFrame > FADE_OUT_FIRST_FRAME) {
-        gDPSetPrimColor(
-            gfx++, 0, 0, 255, 255, 255, MAX(FadeOutAlpha(f_BootLogoFrame), 0));
+        s32 fadeOutAlpha = MAX(FadeOutAlpha(f_BootLogoFrame), 0);
+
+        gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, fadeOutAlpha);
       } else if (f_BootLogoFrame < FADE_IN_FRAME_COUNT) {
-        gDPSetPrimColor(
-            gfx++, 0, 0, 255, 255, 255, MIN(FadeInAlpha(f_BootLogoFrame), 255));
+        s32 fadeInAlpha = MIN(FadeInAlpha(f_BootLogoFrame), 255);
+
+        gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, fadeInAlpha);
       }
 
       gDPSetCombineLERP(gfx++, 0, 0, 0, TEXEL0, PRIMITIVE, 0, TEXEL0, 0, 0, 0,
@@ -354,15 +330,13 @@ void DrawBootLogos(Gfx** displayListHead) {
     case BOOT_LOGO_LEAVING_NINTENDO:
       if (f_BootLogoStage == BOOT_LOGO_NINTENDO) {
         if (f_BootLogoFrame > FADE_OUT_FIRST_FRAME) {
-          gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255,
-              MAX(FadeOutAlpha(f_BootLogoFrame), 0));
-        } else if (f_BootLogoFrame < FADE_IN_FRAME_COUNT) {
-          alpha = FadeInAlpha(f_BootLogoFrame);
-          if (alpha > 255) {
-            alpha = 255;
-          }
+          s32 fadeOutAlpha = MAX(FadeOutAlpha(f_BootLogoFrame), 0);
 
-          gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, alpha);
+          gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, fadeOutAlpha);
+        } else if (f_BootLogoFrame < FADE_IN_FRAME_COUNT) {
+          s32 fadeInAlpha = MIN(FadeInAlpha(f_BootLogoFrame), 255);
+
+          gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, fadeInAlpha);
         }
       }
 
@@ -392,12 +366,9 @@ void DrawBootLogos(Gfx** displayListHead) {
     case BOOT_LOGO_LEAVING_CAMELOT:
       if (f_BootLogoStage == BOOT_LOGO_CAMELOT &&
           f_BootLogoFrame < FADE_IN_FRAME_COUNT) {
-        alpha = FadeInAlpha(f_BootLogoFrame);
-        if (alpha > 255) {
-          alpha = 255;
-        }
+        s32 fadeInAlpha = MIN(FadeInAlpha(f_BootLogoFrame), 255);
 
-        gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, alpha);
+        gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, fadeInAlpha);
       }
 
       gDPSetCombineLERP(gfx++, 0, 0, 0, TEXEL0, PRIMITIVE, 0, TEXEL0, 0, 0, 0,
@@ -430,6 +401,3 @@ void DrawBootLogos(Gfx** displayListHead) {
 
   *displayListHead = gfx;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_07/boot_logos", DrawBootLogos);
-#endif
