@@ -2129,6 +2129,11 @@ void DrawHoleEditorGround(CameraMatrices* matrices, s32 terrainStyle);
  * s8 899 (235), with the frame still 8 bytes short. So the original may keep
  * one more value on the stack, though which one isn't shown. 897 words
  * differ, 233 in shape.
+ *
+ * The register oracle lines j up with different registers in the tile
+ * groups' loop and the vertex segments' loop. A counter of its own for
+ * the segments, declared before or after j, gives 903 words (233 in
+ * shape).
  */
 void DrawGround(CameraMatrices* matrices, s32 terrainStyle) {
   u8 snapsEdge[2][TILE_VERTEX_SEGMENT_COUNT]; /* For the current and the last

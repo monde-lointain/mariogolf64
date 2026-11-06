@@ -764,7 +764,9 @@ s32 ListOffsetsByDistance(s32 span, GridOffset* offsets, s32 maxCount) {
  * and shortSlopeHeight, which only that half uses. That takes the draft from
  * 321 words differing to 284, 45 in shape to 34; shortSlopeHeight alone in
  * each half gives 296 (34) and shortSlopeX alone 352 (38). The register
- * oracle doesn't compare nested routines. 284 words differ, 34 in shape.
+ * oracle, given DrawTriangleHeights, leaves 118 of its 284 words at best,
+ * forcing 53 pseudos, so its code still differs. 284 words differ, 34 in
+ * shape.
  */
 #ifdef NON_MATCHING
 void DrawBandHeights(s16* heights, s32 band) {
