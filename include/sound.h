@@ -201,7 +201,12 @@ enum Sound {
   SOUND_CONTROLS_CLOSE,
   /* As a shot drops for a birdie */
   SOUND_BIRDIE_CUP_IN,
-  SOUND_UNK117, /* Plays in a shot's flight */
+  /*
+   * As a ball lands where holing the next stroke beats par: on the green for
+   * a birdie or better, or on the fairway after a full-length shot toward the
+   * cup for an eagle or better
+   */
+  SOUND_UNDER_PAR_CHANCE,
   /*
    * As a shot drops for an eagle or better; SOUND_EAGLE_CUP_IN,
    * SOUND_CALL_BIRDIE and SOUND_UNK400 also play in the audio test

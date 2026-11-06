@@ -1140,8 +1140,8 @@ void PlayFlightSounds(s32 step) {
       if (g_HoleSetup.par >
           g_Players[g_CurrentShot.playerIndex].strokeCount + 1) {
         (*greenSoundCount)++;
-        PlaySound(
-            SOUND_UNK117, FLIGHT_SOUND_CHANNEL_LANDING, GREEN_SOUND_VOLUME);
+        PlaySound(SOUND_UNDER_PAR_CHANCE, FLIGHT_SOUND_CHANNEL_LANDING,
+            GREEN_SOUND_VOLUME);
       } else if (g_HoleSetup.par >
               g_Players[g_CurrentShot.playerIndex].strokeCount + 2 &&
           f_LandingCupDistance < GREEN_SOUND_MAX_DISTANCE) {
@@ -1334,8 +1334,8 @@ void PlayFlightSounds(s32 step) {
         !g_GameState.isMiniGolf && f_StartCupDistance > f_LandingCupDistance &&
         IsAlbatrossOrBetter(g_Players[g_CurrentShot.playerIndex].strokeCount)) {
       *isStillPlayed = TRUE;
-      PlaySound(
-          SOUND_UNK117, FLIGHT_SOUND_CHANNEL_LANDING, FAIRWAY_SOUND_VOLUME);
+      PlaySound(SOUND_UNDER_PAR_CHANCE, FLIGHT_SOUND_CHANNEL_LANDING,
+          FAIRWAY_SOUND_VOLUME);
     }
   }
 
