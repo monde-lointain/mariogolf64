@@ -1571,42 +1571,24 @@ BillboardCell GetBillboardCell(s32 textureIndex, f32 across, f32 down) {
  * sets the hit mask cell there and the fraction of the way along the path,
  * which stays above 1 when nothing is hit, and returns whether something is.
  *
- * Doesn't match: the original stores fromY, which stays in startY's register,
- * to startY's argument slot after clearing isHit's stack slot, where this
- * stores it one instruction before. Moving any one of the initialized
- * declarations to any other place among them, 99 orders, leaves 2 words or
- * more. With fabsf an abs.s in volatile inline assembly, the hit fraction's
- * abs.s comes before the branch-likely as in the original; with GCC's
- * built-in fabsf it filled the branch's delay slot and 4 words differed, 2
- * in shape. Testing the sum itself rather than comparing it with 0 gives the
- * same 2 words, the arms swapped on a test for 0 gives 10 (8 in shape), and
- * setting 0.0f before an if without an else 9 (5).
- *
- * Shifting startY itself after the declarations, in place of fromY, as the
- * original stores fromY to startY's slot, gives 28 words (16 in shape), and
- * gives startY two meanings. 2 words differ, none in shape.
- *
- * The scheduler orders the two stores by their order in the RTL, as they
- * have equal priority, so the original's order would follow from setting
- * fromY after isHit. With fromY's declaration anywhere after isHit's, and at
- * most one other initialized declaration moved as well, the 157 orders that
- * keep each difference after its operands give 14 to 28 words (0 to 6 in
- * shape).
+ * Keep declarations separate from initialization: KMC's register allocation
+ * depends on declaration order, while its scheduler uses initialization
+ * order to break ties. Initializing in declaration order puts fromY's stack
+ * store before isHit's rather than after it, leaving two words different.
  */
-#ifdef NON_MATCHING
 s32 FindBillboardHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
     s32 endZ, BillboardCell* cell, f32* fraction) {
-  s32 fromY = startY >> WORLD_TO_COURSE_SHIFT;
-  f32 nearestFraction = NO_HIT_FRACTION;
-  s32 fromX = startX >> WORLD_TO_COURSE_SHIFT;
-  s32 toX = endX >> WORLD_TO_COURSE_SHIFT;
-  s32 deltaX = toX - fromX;
-  s32 i = 0;
-  s32 fromZ = startZ >> WORLD_TO_COURSE_SHIFT;
-  s32 toZ = endZ >> WORLD_TO_COURSE_SHIFT;
-  s32 toY = endY >> WORLD_TO_COURSE_SHIFT;
-  Boolean isHit = FALSE;
-  s32 deltaZ = toZ - fromZ;
+  s32 fromY;
+  f32 nearestFraction;
+  s32 fromX;
+  s32 toX;
+  s32 deltaX;
+  s32 billboardIndex;
+  s32 fromZ;
+  s32 toZ;
+  s32 toY;
+  Boolean isHit;
+  s32 deltaZ;
   Billboard* billboard;
   s32 startSide;
   s32 endSide;
@@ -1618,8 +1600,20 @@ s32 FindBillboardHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
   s32 distance;
   BillboardCell hitCell;
 
-  for (; i < BILLBOARD_COUNT; i++) {
-    billboard = &g_Billboards[i];
+  nearestFraction = NO_HIT_FRACTION;
+  toY = endY >> WORLD_TO_COURSE_SHIFT;
+  isHit = FALSE;
+  fromX = startX >> WORLD_TO_COURSE_SHIFT;
+  fromY = startY >> WORLD_TO_COURSE_SHIFT;
+  toX = endX >> WORLD_TO_COURSE_SHIFT;
+  deltaX = toX - fromX;
+  billboardIndex = 0;
+  fromZ = startZ >> WORLD_TO_COURSE_SHIFT;
+  toZ = endZ >> WORLD_TO_COURSE_SHIFT;
+  deltaZ = toZ - fromZ;
+
+  for (; billboardIndex < BILLBOARD_COUNT; billboardIndex++) {
+    billboard = &g_Billboards[billboardIndex];
     if (billboard->textureIndex < 0) {
       continue;
     }
@@ -1702,10 +1696,6 @@ s32 FindBillboardHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
   *fraction = nearestFraction;
   return isHit;
 }
-
-#else
-INCLUDE_ASM("asm/nonmatchings/collision", FindBillboardHit);
-#endif
 
 /* Moves a ball that is nearer the cup than CUP_EDGE_DISTANCE out to that
  * distance */
