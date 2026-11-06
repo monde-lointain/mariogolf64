@@ -17,7 +17,6 @@
 
 typedef struct TournamentStanding {
   /* 0x0 */ s8 contestantId;
-  /* 0x1 */ u8 unk1;
   /* 0x2 */ s16 score; /* Strokes over par, so lower ranks higher */
   /* 0x4 */ s8 holeCount;
   /* 0x5 */ u8 place;
