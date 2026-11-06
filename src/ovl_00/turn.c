@@ -1205,6 +1205,15 @@ void MoveAimCameraDistance(void) {
  * 39 words; in the speeds it gives 51, at every use 96 (30 in shape), and an
  * s16 stickX 86 (28).
  *
+ * The original subtracts the aim's step from the heading it saved, sign-
+ * extended, rather than reading g_CurrentShot.heading again, and the draft's
+ * code does the same. Storing heading - step leaves 39 words; subtracting
+ * step * speed or step in the two arms of the speed test, with -= or from
+ * heading, gives 37 (9 in shape), and a ?: as g_AltHeading's step has it 35
+ * (15), but the register oracle's closest result rises from 27 words,
+ * forcing 3 pseudos, to 29 for both the -= arms and the ?:. A saved heading
+ * of s32 or BinaryAngle gives 49 to 66 words (17 to 20 in shape).
+ *
  * Each D-pad branch counts through a pointer to f_AimTurnFrameCount of its own:
  * naming the static directly, with ++ and -- inside the tests or as statements
  * of their own, or counting in static inline helpers that take its address,
