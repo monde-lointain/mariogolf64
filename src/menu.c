@@ -986,7 +986,7 @@ s32 SaveOrContinueGameByMode(Boolean isContinuing) {
       switch (players[index].state) {
         case PLAYER_STATE_STARTING_TURN:
         case PLAYER_STATE_AIMING:
-        case PLAYER_STATE_UNK3:
+        case PLAYER_STATE_UNUSED_AIMING:
         case PLAYER_STATE_PREPARING_AIM:
           players[index].state = PLAYER_STATE_STARTING_TURN;
           break;
@@ -1061,7 +1061,7 @@ s32 SaveOrContinueGame(s32 slotIndex, Boolean isContinuing) {
       switch (players[index].state) {
         case PLAYER_STATE_STARTING_TURN:
         case PLAYER_STATE_AIMING:
-        case PLAYER_STATE_UNK3:
+        case PLAYER_STATE_UNUSED_AIMING:
         case PLAYER_STATE_PREPARING_AIM:
           players[index].state = PLAYER_STATE_STARTING_TURN;
           break;

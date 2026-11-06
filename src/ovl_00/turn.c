@@ -1966,11 +1966,12 @@ void PrintCoursePoints(void) {
 /* Whether the swing has yet to set the power in a player state */
 #define IsBeforePowerSet(state) \
   ((state) == PLAYER_STATE_AIMING || (state) == PLAYER_STATE_SETTING_POWER || \
-      (state) == PLAYER_STATE_UNK3)
+      (state) == PLAYER_STATE_UNUSED_AIMING)
 /* Whether the swing has yet to set the impact in a player state */
 #define IsBeforeImpactSet(state) \
   ((state) == PLAYER_STATE_AIMING || (state) == PLAYER_STATE_SETTING_POWER || \
-      (state) == PLAYER_STATE_SETTING_IMPACT || (state) == PLAYER_STATE_UNK3)
+      (state) == PLAYER_STATE_SETTING_IMPACT || \
+      (state) == PLAYER_STATE_UNUSED_AIMING)
 
 void BuildShotPreview(ShotLaunch* swing, s32 playerState) {
   BallSimulation simulation;

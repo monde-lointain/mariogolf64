@@ -368,8 +368,12 @@ enum PlayerState {
   PLAYER_STATE_HOLE_INTRO,
   /* Hides the gauge's markers */
   PLAYER_STATE_AIMING,
-  /* Never set */
-  PLAYER_STATE_UNK3,
+  /*
+   * Never set, but treated as aiming: the shot preview counts it as before
+   * the power and impact are set, and a saved game resumes it at the turn's
+   * start
+   */
+  PLAYER_STATE_UNUSED_AIMING,
   /* Hides the gauge's markers */
   PLAYER_STATE_SETTING_POWER,
   /* Hides the gauge's markers */
