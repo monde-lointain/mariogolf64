@@ -1731,7 +1731,7 @@ void UsePrimitiveDepth(Boolean isPrimitiveDepthSet) {
 #define SUN_GLOW_IMAGE_SIZE 64
 #define SUN_GLOW_MASK 6
 #define SUN_MASK_TMEM 0x100
-#define LIGHT_YAW_TO_RADIANS ((f32)(2 * M_PI / 0x10000))
+#define LIGHT_YAW_TO_RADIANS ((f32)(FULL_TURN_RADIANS / 0x10000))
 static Mtx f_SkyModelMatrix;
 
 /* Read by no routine */
@@ -1828,23 +1828,24 @@ void DrawSky(Gfx** displayListHead, f32 eyeY UNUSED, s32 unusedSetting UNUSED,
   if (colors->hasLensFlare == TRUE) {
     angle = -g_SkyState.yaws[cameraIndex] - SUN_YAW_OFFSET -
         (g_HoleSetup.conditions.lightYaw * LIGHT_YAW_TO_RADIANS);
-    if (angle > 2 * M_PI) {
-      angle -= 2 * M_PI;
+    if (angle > FULL_TURN_RADIANS) {
+      angle -= FULL_TURN_RADIANS;
     }
 
     if (angle < 0.0f) {
-      angle += 2 * M_PI;
+      angle += FULL_TURN_RADIANS;
     }
 
-    if (angle > 2 * M_PI) {
-      angle -= 2 * M_PI;
+    if (angle > FULL_TURN_RADIANS) {
+      angle -= FULL_TURN_RADIANS;
     }
 
     if (angle < 0.0f) {
-      angle += 2 * M_PI;
+      angle += FULL_TURN_RADIANS;
     }
 
-    f_SunScreenX[cameraIndex] = angle * SUN_TURN_WIDTH * (1 / (2 * M_PI));
+    f_SunScreenX[cameraIndex] =
+        angle * SUN_TURN_WIDTH * (1 / FULL_TURN_RADIANS);
     f_SunScreenY[cameraIndex] = -g_SkyState.horizonLevels[cameraIndex] -
         colors->sun->height + SUN_HORIZON_Y;
     if (f_SunScreenX[cameraIndex] > SUN_TURN_WIDTH / 2) {
@@ -2002,8 +2003,8 @@ void DrawBackdrop(Gfx** displayListHead, CameraView* view, s32 cameraIndex) {
     UpdateAndDrawFireworks(&gfx);
   }
 
-  yawOffset =
-      g_SkyState.yaws[cameraIndex] * BACKDROP_YAW_TEXELS * (1 / (2 * M_PI));
+  yawOffset = g_SkyState.yaws[cameraIndex] * BACKDROP_YAW_TEXELS *
+      (1 / FULL_TURN_RADIANS);
   if (g_Scene == SCENE_STAFF_ROLL) {
     y = (s32)((BACKDROP_HORIZON_LEVEL - g_SkyState.horizonLevels[cameraIndex]) *
             view->zoom) -

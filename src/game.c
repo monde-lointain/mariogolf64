@@ -748,7 +748,7 @@ void DrawSpinEffect(Gfx** displayListHead, CameraView* view) {
     f_SpinAngle += M_PI;
   }
 
-  if (f_SpinAngle > 2 * M_PI) {
+  if (f_SpinAngle > FULL_TURN_RADIANS) {
     f_SpinAngle = 0.0f;
     view->drawFlags = CAMERA_DRAW_SCENE;
   }
@@ -2465,12 +2465,12 @@ void UpdateGame(void) {
     StepNoiseTexture();
     g_SkyState.viewedWindAngles[0] = ViewedWindAngle(
         g_HoleSetup.conditions.windDirection, &g_Cameras[0].view);
-    if (g_SkyState.viewedWindAngles[0] > 2 * M_PI) {
-      g_SkyState.viewedWindAngles[0] -= 2 * M_PI;
+    if (g_SkyState.viewedWindAngles[0] > FULL_TURN_RADIANS) {
+      g_SkyState.viewedWindAngles[0] -= FULL_TURN_RADIANS;
     }
 
     if (g_SkyState.viewedWindAngles[0] < 0.0f) {
-      g_SkyState.viewedWindAngles[0] += 2 * M_PI;
+      g_SkyState.viewedWindAngles[0] += FULL_TURN_RADIANS;
     }
 
     UpdateOpening();
@@ -2511,20 +2511,20 @@ void UpdateGame(void) {
         ViewedWindAngle(*windDirection, &g_Cameras[0].view);
     g_SkyState.viewedWindAngles[1] =
         ViewedWindAngle(*windDirection, &g_Cameras[INSET_CAMERA].view);
-    if (g_SkyState.viewedWindAngles[0] > 2 * M_PI) {
-      g_SkyState.viewedWindAngles[0] -= 2 * M_PI;
+    if (g_SkyState.viewedWindAngles[0] > FULL_TURN_RADIANS) {
+      g_SkyState.viewedWindAngles[0] -= FULL_TURN_RADIANS;
     }
 
     if (g_SkyState.viewedWindAngles[0] < 0.0f) {
-      g_SkyState.viewedWindAngles[0] += 2 * M_PI;
+      g_SkyState.viewedWindAngles[0] += FULL_TURN_RADIANS;
     }
 
-    if (g_SkyState.viewedWindAngles[1] > 2 * M_PI) {
-      g_SkyState.viewedWindAngles[1] -= 2 * M_PI;
+    if (g_SkyState.viewedWindAngles[1] > FULL_TURN_RADIANS) {
+      g_SkyState.viewedWindAngles[1] -= FULL_TURN_RADIANS;
     }
 
     if (g_SkyState.viewedWindAngles[1] < 0.0f) {
-      g_SkyState.viewedWindAngles[1] += 2 * M_PI;
+      g_SkyState.viewedWindAngles[1] += FULL_TURN_RADIANS;
     }
   } else if (g_Scene == SCENE_MENU) {
     StepNoiseTexture();

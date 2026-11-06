@@ -858,7 +858,7 @@ void StartFlightCamera(s32 earlierFlightCount) {
   }
 
   degrees = g_RoundHud.lieTilt * (DEGREES_PER_TURN * BINARY_ANGLE_TO_RADIANS) *
-      (1.0 / (2 * M_PI));
+      (1.0 / FULL_TURN_RADIANS);
   if (degrees < DEGREES_PER_TURN - LEVEL_LIE_TILT_DEGREES &&
       degrees > LEVEL_LIE_TILT_DEGREES) {
     f_IsBallGroundLevel = FALSE;
@@ -2369,8 +2369,8 @@ void PlaceFlightCamera(s32 step) {
         angle = M_PI / 6;
       }
 
-      if (angle > (2 * M_PI) - (M_PI / 6)) {
-        angle = (2 * M_PI) - (M_PI / 6);
+      if (angle > FULL_TURN_RADIANS - (M_PI / 6)) {
+        angle = FULL_TURN_RADIANS - (M_PI / 6);
       }
 
       if (f_ShotLength <= SHORT_SHOT_MAX_LENGTH) {

@@ -1536,8 +1536,8 @@ void DrawLandingReaction(Gfx** displayListHead) {
     angle = DegreesToRadians(
         (f_LandingReactionFrame * LANDING_PANEL_DEGREES_PER_FRAME) +
         LANDING_PANEL_START_DEGREES);
-    if (angle > 2 * M_PI) {
-      angle = 2 * M_PI;
+    if (angle > FULL_TURN_RADIANS) {
+      angle = FULL_TURN_RADIANS;
     }
 
     size = f_LandingReactionFrame * LANDING_PANEL_GROWTH_PER_FRAME;
@@ -2577,7 +2577,7 @@ void DrawWindIndicator(Gfx** displayListHead, f32 x, f32 y) {
   guRotateRPYF(transform, 0.0f,
       WIND_INDICATOR_FACING_DEGREES -
           (g_SkyState.viewedWindAngles[0] * DEGREES_PER_TURN *
-              (1.0 / (2 * M_PI))),
+              (1.0 / FULL_TURN_RADIANS)),
       0.0f);
   guMtxCatF(transform, matrix, matrix);
   guScaleF(transform, WIND_INDICATOR_SCALE, WIND_INDICATOR_SCALE,
@@ -2733,7 +2733,7 @@ void DrawShotPanelIcons(Gfx** displayListHead, CameraView* view UNUSED) {
 
     clubHeadAngle = g_RoundHud.clubHeadTilt * BINARY_ANGLE_TO_RADIANS;
     if (clubHeadAngle > M_PI) {
-      clubHeadAngle -= 2 * M_PI;
+      clubHeadAngle -= FULL_TURN_RADIANS;
     }
 
     rotation[AXIS_X] = 0;
@@ -2778,7 +2778,7 @@ void DrawShotPanelIcons(Gfx** displayListHead, CameraView* view UNUSED) {
       !g_IsCupViewShown) {
     lieAngle = g_RoundHud.lieTilt * BINARY_ANGLE_TO_RADIANS;
     if (lieAngle > M_PI) {
-      lieAngle -= 2 * M_PI;
+      lieAngle -= FULL_TURN_RADIANS;
     }
 
     rotation[AXIS_X] = 0;
@@ -3237,12 +3237,12 @@ void WaveHoleFlag(void) {
   f_HoleFlagWavePhase += ((HOLE_FLAG_SWING_DEGREES_PER_SPEED * windSpeed) +
                              HOLE_FLAG_MIN_SWING_DEGREES) *
       DegreesToRadians(1);
-  if (f_HoleFlagWavePhase > 2 * M_PI) {
-    f_HoleFlagWavePhase -= 2 * M_PI;
+  if (f_HoleFlagWavePhase > FULL_TURN_RADIANS) {
+    f_HoleFlagWavePhase -= FULL_TURN_RADIANS;
   }
 
   if (f_HoleFlagWavePhase < 0.0f) {
-    f_HoleFlagWavePhase += 2 * M_PI;
+    f_HoleFlagWavePhase += FULL_TURN_RADIANS;
   }
 
   /* factor is the swing's amplitude here */

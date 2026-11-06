@@ -380,8 +380,8 @@ void DrawHoleCreatures(Gfx** displayListHead) {
       }
 
       BuildTransformMatrix(transform, rotation, translation, scale);
-      guRotateRPYF(
-          roll, 0.0f, 0.0f, -creature->pitch * DEGREES_PER_TURN / (2 * M_PI));
+      guRotateRPYF(roll, 0.0f, 0.0f,
+          -creature->pitch * DEGREES_PER_TURN / FULL_TURN_RADIANS);
       guMtxCatF(roll, transform, transform);
       ConvertMatrixToFixed(transform, &creature->matrices[g_MatrixBufferIndex]);
       if (wasUnderwater == TRUE) {

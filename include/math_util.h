@@ -15,6 +15,8 @@
 #define RADIANS_TO_BINARY_ANGLE (32768.0 / (f32)M_PI)
 /* A quarter turn in radians */
 #define QUARTER_TURN_RADIANS 1.5707964f
+/* A full turn in radians */
+#define FULL_TURN_RADIANS (2 * M_PI)
 
 /* The linear congruential step that the game's random generators share */
 #define RANDOM_MULTIPLIER 0x5D588B65

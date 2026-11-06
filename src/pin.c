@@ -701,12 +701,12 @@ void DrawPin(
   if (!isPinOut) {
     if (g_HoleSetup.conditions.windSpeed != 0) {
       f_FlagWavePhase += DegreesToRadians(FLAG_WAVE_STEP_DEGREES);
-      if (f_FlagWavePhase > 2 * M_PI) {
-        f_FlagWavePhase -= 2 * M_PI;
+      if (f_FlagWavePhase > FULL_TURN_RADIANS) {
+        f_FlagWavePhase -= FULL_TURN_RADIANS;
       }
 
       if (f_FlagWavePhase < 0.0f) {
-        f_FlagWavePhase += 2 * M_PI;
+        f_FlagWavePhase += FULL_TURN_RADIANS;
       }
 
       wave = (((g_HoleSetup.conditions.windSpeed / FLAG_WIND_SPEED_UNIT) *

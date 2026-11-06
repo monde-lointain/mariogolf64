@@ -1436,12 +1436,12 @@ void UpdateEffects(void) {
             (effect->velocity[AXIS_Y] - SPIN_FALL_SPEED) * SPIN_PER_SPEED;
       }
 
-      if (effect->tilt > 2 * M_PI) {
-        effect->tilt -= 2 * M_PI;
+      if (effect->tilt > FULL_TURN_RADIANS) {
+        effect->tilt -= FULL_TURN_RADIANS;
       }
 
       if (effect->tilt < 0.0f) {
-        effect->tilt += 2 * M_PI;
+        effect->tilt += FULL_TURN_RADIANS;
       }
 
       if (effect->kind == EFFECT_KIND_HIGH_PUFF ||
@@ -2029,17 +2029,17 @@ void DrawDivot(Gfx** displayListHead, Effect* effect) {
 
       /* Half a step on, so that each frame is centered on its step */
       angle = effect->tilt + (M_PI / DIVOT_SPIN_STEP_COUNT);
-      if (angle > 2 * M_PI) {
-        angle -= 2 * M_PI;
+      if (angle > FULL_TURN_RADIANS) {
+        angle -= FULL_TURN_RADIANS;
       }
 
       if (angle < 0.0f) {
-        angle += 2 * M_PI;
+        angle += FULL_TURN_RADIANS;
       }
 
       center.depth -= center.depthStep * DIVOT_DEPTH_BIAS;
       gDPSetPrimDepth(gfx++, center.depth, 0);
-      spinStep = angle * DIVOT_SPIN_STEP_COUNT / (2 * M_PI);
+      spinStep = angle * DIVOT_SPIN_STEP_COUNT / FULL_TURN_RADIANS;
       gDPLoadTextureBlock_4b(gfx++,
           TextureAddress(f_DivotImage +
               ((f_PingPongFrameIndices[spinStep] * DIVOT_FRAME_SIZE) +

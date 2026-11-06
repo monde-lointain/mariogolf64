@@ -1631,12 +1631,12 @@ void UpdateStaffRoll(void) {
     StepNoiseTexture();
     g_SkyState.viewedWindAngles[0] = ViewedWindAngle(
         g_HoleSetup.conditions.windDirection, &g_Cameras[0].view);
-    if (g_SkyState.viewedWindAngles[0] > 2 * M_PI) {
-      g_SkyState.viewedWindAngles[0] -= 2 * M_PI;
+    if (g_SkyState.viewedWindAngles[0] > FULL_TURN_RADIANS) {
+      g_SkyState.viewedWindAngles[0] -= FULL_TURN_RADIANS;
     }
 
     if (g_SkyState.viewedWindAngles[0] < 0.0f) {
-      g_SkyState.viewedWindAngles[0] += 2 * M_PI;
+      g_SkyState.viewedWindAngles[0] += FULL_TURN_RADIANS;
     }
   }
 }

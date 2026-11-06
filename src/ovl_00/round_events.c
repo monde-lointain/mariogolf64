@@ -883,8 +883,8 @@ void DrawBanner(Gfx** displayListHead) {
         alpha = BANNER_MAX_ALPHA;
       }
 
-      angle = f_BannerFrame * BANNER_SPIN_GROWTH_PER_FRAME * (2 * M_PI);
-      if (angle > 2 * M_PI) {
+      angle = f_BannerFrame * BANNER_SPIN_GROWTH_PER_FRAME * FULL_TURN_RADIANS;
+      if (angle > FULL_TURN_RADIANS) {
         angle = 0.0f;
       }
 
@@ -1164,8 +1164,8 @@ void DrawFlipMessage(Gfx** displayListHead) {
     angle =
         DegreesToRadians((f_FlipMessageFrame * FLIP_MESSAGE_DEGREES_PER_FRAME) +
             FLIP_MESSAGE_START_DEGREES);
-    if (angle > 2 * M_PI) {
-      angle = 2 * M_PI;
+    if (angle > FULL_TURN_RADIANS) {
+      angle = FULL_TURN_RADIANS;
     }
 
     size = f_FlipMessageFrame * FLIP_MESSAGE_GROWTH_PER_FRAME;

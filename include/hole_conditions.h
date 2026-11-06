@@ -36,7 +36,7 @@ typedef struct HoleConditions {
 #define WIND_SPEED_UNIT 0x10000
 
 /* HoleConditions.windDirection's units per radian */
-#define WIND_DIRECTION_TO_RADIANS ((f32)(2 * M_PI / 0x10000))
+#define WIND_DIRECTION_TO_RADIANS ((f32)(FULL_TURN_RADIANS / 0x10000))
 
 /*
  * The wind's direction as seen from a camera: the arrow turns with the
