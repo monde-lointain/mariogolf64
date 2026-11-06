@@ -2051,7 +2051,7 @@ void UpdateOpening(void) {
           case 0x5E:
           case 0x68:
           case 0x73:
-            PlaySound(SOUND_UNK78, f_OpeningSoundChannel, 0x46);
+            PlaySound(SOUND_BLOOP, f_OpeningSoundChannel, 0x46);
             AdvanceOpeningSoundChannel();
             break;
           case 0x6A:
@@ -2128,22 +2128,22 @@ void UpdateOpening(void) {
         switch (f_OpeningSceneFramesLeft) {
           case 0x57:
             PlaySoundWithEffects(
-                SOUND_UNK78, f_OpeningSoundChannel, 0x50, 0, 0xA7);
+                SOUND_BLOOP, f_OpeningSoundChannel, 0x50, 0, 0xA7);
             AdvanceOpeningSoundChannel();
             break;
           case 0x4D:
             PlaySoundWithEffects(
-                SOUND_UNK78, f_OpeningSoundChannel, 0x4C, 0, 0x9D);
+                SOUND_BLOOP, f_OpeningSoundChannel, 0x4C, 0, 0x9D);
             AdvanceOpeningSoundChannel();
             break;
           case 0x43:
             PlaySoundWithEffects(
-                SOUND_UNK78, f_OpeningSoundChannel, 0x48, 0, 0x93);
+                SOUND_BLOOP, f_OpeningSoundChannel, 0x48, 0, 0x93);
             AdvanceOpeningSoundChannel();
             break;
           case 0x39:
             PlaySoundWithEffects(
-                SOUND_UNK78, f_OpeningSoundChannel, 0x3A, 0, 0x89);
+                SOUND_BLOOP, f_OpeningSoundChannel, 0x3A, 0, 0x89);
             AdvanceOpeningSoundChannel();
             break;
           case 0x2A:
@@ -2216,7 +2216,7 @@ void UpdateOpening(void) {
           case 0x35:
           case 0x2A:
           case 0x1A:
-            PlaySound(SOUND_UNK78, f_OpeningSoundChannel, 0x30);
+            PlaySound(SOUND_BLOOP, f_OpeningSoundChannel, 0x30);
             AdvanceOpeningSoundChannel();
             break;
         }
@@ -2614,22 +2614,22 @@ void UpdateOpening(void) {
         switch (f_OpeningSceneFramesLeft) {
           case 0x93:
             PlaySoundWithEffects(
-                SOUND_UNK78, f_OpeningSoundChannel, 0x50, 0, 0x61);
+                SOUND_BLOOP, f_OpeningSoundChannel, 0x50, 0, 0x61);
             AdvanceOpeningSoundChannel();
             break;
           case 0x89:
             PlaySoundWithEffects(
-                SOUND_UNK78, f_OpeningSoundChannel, 0x50, 0, 0x6B);
+                SOUND_BLOOP, f_OpeningSoundChannel, 0x50, 0, 0x6B);
             AdvanceOpeningSoundChannel();
             break;
           case 0x7F:
             PlaySoundWithEffects(
-                SOUND_UNK78, f_OpeningSoundChannel, 0x50, 0, 0x75);
+                SOUND_BLOOP, f_OpeningSoundChannel, 0x50, 0, 0x75);
             AdvanceOpeningSoundChannel();
             break;
           case 0x74:
             PlaySoundWithEffects(
-                SOUND_UNK78, f_OpeningSoundChannel, 0x50, 0, SOUND_FULL_SCALE);
+                SOUND_BLOOP, f_OpeningSoundChannel, 0x50, 0, SOUND_FULL_SCALE);
             AdvanceOpeningSoundChannel();
             break;
           case 0x1E:

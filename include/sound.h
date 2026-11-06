@@ -132,8 +132,11 @@ enum Sound {
   SOUND_GO,
   SOUND_CAPTION_MEET, /* Also played when the save data is erased */
   SOUND_UNK77 = 0x4D,
-  /* In the opening, in steps across the pan */
-  SOUND_UNK78,
+  /*
+   * A tone that falls about two and a half octaves as it fades. The opening
+   * plays it in steps across the pan
+   */
+  SOUND_BLOOP,
   /* Over and over in her reactions and the opening */
   SOUND_YOSHI_REPEATED,
   /*
