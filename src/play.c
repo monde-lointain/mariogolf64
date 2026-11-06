@@ -1058,7 +1058,7 @@ void UpdatePlay(void) {
               LoadWipeShape(g_GameState.courseIndex);
               SetMenuBackdrop(MENU_BACKDROP_STILL);
               SetPlankMotion(FALSE);
-              g_GameState.step = result;
+              g_GameState.step = GAME_STATE_LOAD_HOLE;
               repeat = TRUE;
             }
           }
@@ -1077,7 +1077,7 @@ void UpdatePlay(void) {
                 SetMenuBackdrop(MENU_BACKDROP_STILL);
                 StartWipe(WIPE_CLOSING);
                 LoadWipeShape(g_GameState.courseIndex);
-                g_GameState.step = result;
+                g_GameState.step = GAME_STATE_LOAD_HOLE;
                 repeat = TRUE;
                 break;
               case HOLE_MENU_QUIT:
@@ -1108,7 +1108,7 @@ void UpdatePlay(void) {
               case HOLE_MENU_RELOAD:
                 SetMenuBackdrop(MENU_BACKDROP_STILL);
                 SetPlankMotion(FALSE);
-                g_GameState.step = result;
+                g_GameState.step = GAME_STATE_LOAD_HOLE;
                 repeat = TRUE;
                 LoadWipeShape(g_GameState.courseIndex);
                 break;
