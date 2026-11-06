@@ -665,6 +665,8 @@ s32 RandomBelow(s32 limit);
 #define GROUND_PROBE_ANGLE_STEP (M_PI / 4)
 #define GROUND_PROBE_DISTANCE 30720.0f
 #define GROUND_PROBE_MAX_RISE 4608.0f
+/* The lie counts as level while it tilts by less than this either way */
+#define LEVEL_LIE_TILT_DEGREES 10
 
 /*
  * Starts the flight camera for the simulated shot. It resets the flight state,
@@ -852,9 +854,10 @@ void StartFlightCamera(s32 earlierFlightCount) {
     }
   }
 
-  degrees = g_RoundHud.lieTilt * (360.0f * BINARY_ANGLE_TO_RADIANS) *
+  degrees = g_RoundHud.lieTilt * (DEGREES_PER_TURN * BINARY_ANGLE_TO_RADIANS) *
       (1.0 / (2 * M_PI));
-  if (degrees < 350.0f && degrees > 10.0f) {
+  if (degrees < DEGREES_PER_TURN - LEVEL_LIE_TILT_DEGREES &&
+      degrees > LEVEL_LIE_TILT_DEGREES) {
     f_IsBallGroundLevel = FALSE;
   }
 
