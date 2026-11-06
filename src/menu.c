@@ -492,6 +492,12 @@ static SaveCopyLocation f_SaveCopyLocations[SAVE_COPY_COUNT] = {
 /* Read by no routine */
 static s32 f_UnusedWordsAfterSaveCopyLocations[4] UNUSED = {0};
 
+/* The byte sizes of buffers that hold one of several images in turn: the
+ * labels and image slots, a trophy frame and a course's trophy image */
+#define MENU_LABEL_BUFFER_SIZE 0x70A8
+#define TROPHY_FRAME_BUFFER_SIZE 0xFA0
+#define COURSE_TROPHY_BUFFER_SIZE 0x125C
+
 /*
  * Allocates and reads the menu's assets, then reads the save. Overlay 3
  * calls this as it loads.
@@ -525,10 +531,10 @@ void LoadMenuResources(void) {
   ReadEncodedAsset(g_MenuBoardImages[1], &asset);
   g_NamePlateImage = AllocMemory(OpenEncodedAsset(ASSET_NAME_PLATE, &asset));
   ReadEncodedAsset(g_NamePlateImage, &asset);
-  g_MenuLabelImages[0] = AllocMemory(0x70A8);
-  g_ImageSlots[0] = AllocMemory(0x70A8);
-  g_MenuLabelImages[1] = AllocMemory(0x70A8);
-  g_ImageSlots[1] = AllocMemory(0x70A8);
+  g_MenuLabelImages[0] = AllocMemory(MENU_LABEL_BUFFER_SIZE);
+  g_ImageSlots[0] = AllocMemory(MENU_LABEL_BUFFER_SIZE);
+  g_MenuLabelImages[1] = AllocMemory(MENU_LABEL_BUFFER_SIZE);
+  g_ImageSlots[1] = AllocMemory(MENU_LABEL_BUFFER_SIZE);
   OpenEncodedAsset(*f_MenuLabelAssets, &asset);
   ReadEncodedAsset(g_MenuLabelImages[0], &asset);
   OpenEncodedAsset(*f_MenuLabelAssets, &asset);
@@ -580,14 +586,14 @@ void LoadMenuResources(void) {
   }
 
   OpenEncodedAsset(g_TrophyFrameAssets[0][0], &asset);
-  g_TrophyFrameBuffers[0] = AllocMemory(0xFA0);
+  g_TrophyFrameBuffers[0] = AllocMemory(TROPHY_FRAME_BUFFER_SIZE);
   ReadEncodedAsset(g_TrophyFrameBuffers[0], &asset);
   OpenEncodedAsset(g_TrophyFrameAssets[0][0], &asset);
-  g_TrophyFrameBuffers[1] = AllocMemory(0xFA0);
+  g_TrophyFrameBuffers[1] = AllocMemory(TROPHY_FRAME_BUFFER_SIZE);
   ReadEncodedAsset(g_TrophyFrameBuffers[1], &asset);
   for (index = 0; index != ARRAY_COUNT(g_CourseTrophyImages); index++) {
     OpenEncodedAsset(g_TrophyFrameAssets[0][0], &asset);
-    g_CourseTrophyImages[index] = AllocMemory(0x125C);
+    g_CourseTrophyImages[index] = AllocMemory(COURSE_TROPHY_BUFFER_SIZE);
     ReadEncodedAsset(g_CourseTrophyImages[index], &asset);
   }
 
