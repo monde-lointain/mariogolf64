@@ -22,7 +22,9 @@ Prints one line per
 function: its name, its score (the fraction of equal instructions) and either
 OK for an exact match or the count of differing instructions, on either side,
 which still moves when a change is too small to show in the score, and how
-many of them differ in shape, with registers and constants ignored. With -v,
+many of them differ in shape, with registers and constants ignored, then,
+where the frames' sizes differ, by how many bytes the original's is larger
+than ours. With -v,
 also prints the instructions that differ, with each branch's destination as
 @INDEX, and the calls one side makes more often than the other, which always
 mean the sources differ. With -s, prints instead only the instructions
@@ -1382,6 +1384,10 @@ def count_operation_differences(
     return len(target_operations) + len(compiled_operations) - 2 * shared
 
 
+# The upper half of addiu $sp, $sp, N, which sets up a routine's frame
+ADDIU_SP_SP = 0x27BD
+
+
 def describe(
     target: Routine,
     compiled: Routine,
@@ -1403,7 +1409,22 @@ def describe(
     if not differences:
         return f"{score:.3f} OK"
     shape_differences = sum(count_shape_differences(*pair) for pair in pairs)
-    return f"{score:.3f} ({differences} differ, {shape_differences} in shape)"
+    description = f"{score:.3f} ({differences} differ, {shape_differences} in shape)"
+    growth = frame_size(target) - frame_size(compiled)
+    if growth:
+        # A frame of another size shows a stack slot more or fewer, as a
+        # local that the original reads once into a register it spills
+        description += f" frame {growth:+d}"
+    return description
+
+
+def frame_size(routine: Routine) -> int:
+    """Return the bytes the routine's first addiu $sp, $sp, -N takes, or 0."""
+    for word in routine.words:
+        if word >> 16 == ADDIU_SP_SP:
+            immediate = word & 0xFFFF
+            return 0x10000 - immediate if immediate & 0x8000 else 0
+    return 0
 
 
 # The routine of a nested function that was not compiled on its own, so that
