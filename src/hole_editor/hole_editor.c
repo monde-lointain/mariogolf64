@@ -3387,10 +3387,10 @@ void UpdateHoleFileMenu(void) {
 /*
  * Scene SCENE_TREES's editor for the billboards that stand for a hole's
  * trees. The editor pad's C-up and C-down change the edited tree's height,
- * C-right and C-left its width, A toggles unk8, up and down on the control
- * pad its texture, and the stick moves it. Right and left on the control pad
- * pick the tree, and B copies it. R zooms in, L or Z with R zooms out, and Z
- * with the stick orbits the camera around the tree.
+ * C-right and C-left its width, A toggles isIgnoredEditorMark, up and down on
+ * the control pad its texture, and the stick moves it. Right and left on the
+ * control pad pick the tree, and B copies it. R zooms in, L or Z with R zooms
+ * out, and Z with the stick orbits the camera around the tree.
  */
 void UpdateTreeEditor(void) {
   Mat4 translation;
@@ -3451,8 +3451,8 @@ void UpdateTreeEditor(void) {
 
   if (g_MenuControllerData[EDITOR_PAD].button & A_BUTTON) {
     editKind = TRIANGLE_EDIT_MOVE;
-    g_Billboards[f_EditedTreeIndex].unk8 =
-        !g_Billboards[f_EditedTreeIndex].unk8;
+    g_Billboards[f_EditedTreeIndex].isIgnoredEditorMark =
+        !g_Billboards[f_EditedTreeIndex].isIgnoredEditorMark;
   }
 
   if ((g_MenuControllerData[EDITOR_PAD].button & R_JPAD) &&

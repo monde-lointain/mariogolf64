@@ -2812,7 +2812,7 @@ void ClearBillboards(void) {
     g_Billboards[i].y = 0;
     g_Billboards[i].z = 0;
     g_Billboards[i].textureIndex = -1;
-    g_Billboards[i].unk8 = 0;
+    g_Billboards[i].isIgnoredEditorMark = 0;
     g_Billboards[i].isNearCourseEdge = TRUE;
     g_Billboards[i].width = CLEARED_BILLBOARD_WIDTH;
     g_Billboards[i].height = CLEARED_BILLBOARD_HEIGHT;
@@ -3008,7 +3008,7 @@ void ReadBillboards(void) {
     ReadFileBytes(&g_Billboards[i].z, sizeof(s16));
     ReadFileBytes(&g_Billboards[i].textureIndex, sizeof(s8));
     g_Billboards[i].shapeIndex = 0;
-    ReadFileBytes(&g_Billboards[i].unk8, sizeof(u8));
+    ReadFileBytes(&g_Billboards[i].isIgnoredEditorMark, sizeof(u8));
     g_Billboards[i].isNearCourseEdge = FALSE;
     ReadFileBytes(&g_Billboards[i].width, sizeof(u16));
     ReadFileBytes(&g_Billboards[i].height, sizeof(u16));

@@ -19,7 +19,9 @@ typedef struct Billboard {
   /* 0x4 */ s16 z;
   /* 0x6 */ s8 textureIndex; /* Negative when the billboard is unused */
   /* 0x7 */ u8 shapeIndex;
-  /* 0x8 */ u8 unk8;
+  /* Read from a hole's billboard file and toggled by the tree editor's A
+   * button, but nothing else reads it */
+  /* 0x8 */ u8 isIgnoredEditorMark;
   /* 0xA */ u16 isNearCourseEdge;
   /* 0xC */ u16 width;
   /* 0xE */ u16 height;
