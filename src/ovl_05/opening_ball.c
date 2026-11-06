@@ -1885,6 +1885,15 @@ INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_ball", StepOpeningBallSimulation);
  * moves into earlier blocks. Staging the product in the local, or putting the
  * offset's part or the whole sum in locals of their own, leaves 14 too, or 18
  * when the sum starts with the club's part.
+ *
+ * fold's associate step rewrites (club->sideSpin * 2) * sideSign as
+ * club->sideSpin * (sideSign * 2), and does so too with sideSign written
+ * first, as LaunchBallSimulation's club test writes it, which gives 6 words;
+ * other orders of the club's part give 14 to 26, multiplying each part by
+ * speed 12 to 20, and doubling the offset's and club's parts together 16.
+ * Doubling through a static inline helper, which GCC inlines after fold,
+ * keeps the target's sll before the mult but leaves 14 words, as the local
+ * does.
  */
 #ifdef NON_MATCHING
 s32 LaunchOpeningBallSimulation(
