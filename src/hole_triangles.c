@@ -56,9 +56,9 @@
  * them are never used; they keep the original's stack layout.
  */
 typedef struct RingCorners {
-  /* 0x00 */ s32 unk0;
+  /* 0x00 */ s32 unusedBeforeCoordinates;
   /* 0x04 */ s16 coordinates[3][HOLE_TRIANGLE_VERTEX_COUNT];
-  /* 0x16 */ s16 unk16[(0x2C - 0x16) / 2];
+  /* 0x16 */ s16 unusedAfterCoordinates[(0x2C - 0x16) / 2];
 } RingCorners; /* size = 0x2C */
 
 /* Degrees that the rings spin by each frame */
