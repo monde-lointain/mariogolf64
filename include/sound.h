@@ -214,7 +214,8 @@ enum Sound {
   SOUND_UNDER_PAR_CHANCE,
   /*
    * As a shot drops for an eagle or better; SOUND_EAGLE_CUP_IN,
-   * SOUND_CALL_BIRDIE and SOUND_UNK400 also play in the audio test
+   * SOUND_CALL_BIRDIE and SOUND_PEACH_CALL_OUT_C_LEFT also play in the audio
+   * test
    */
   SOUND_EAGLE_CUP_IN,
   SOUND_OUT_OF_BOUNDS, /* Also played in the opening */
@@ -328,7 +329,8 @@ enum Sound {
   SOUND_UNK394,
   SOUND_AMBIENT_REPEATING,
   SOUND_PEACH_PAR = 0x18E,
-  SOUND_UNK400 = 0x190, /* Also one of Peach's voice sounds */
+  /* Also Peach's trouble reaction */
+  SOUND_PEACH_CALL_OUT_C_LEFT = 0x190,
   SOUND_PEACH_BIRDIE = 0x194,
   SOUND_UNK406 = 0x196,
   /* Also Peach's full-shot sound */
