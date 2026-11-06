@@ -26,7 +26,9 @@
 
 /* What holesChoice holds once the C buttons choose the holes to play */
 enum HolesChoice {
-  HOLES_CHOICE_UNK0,
+  /* Never stored, only cleared: ResetMenuChoices sets HOLES_CHOICE_ALL right
+   * after clearing g_MenuMemory, and SetUpChosenGame reads it as all holes */
+  HOLES_CHOICE_UNUSED,
   HOLES_CHOICE_FRONT_NINE,
   HOLES_CHOICE_BACK_NINE,
   HOLES_CHOICE_ALL

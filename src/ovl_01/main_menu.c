@@ -1795,7 +1795,7 @@ void SetUpChosenGame(void) {
       *holeSelection = f_StartingHoleSelection;
       if (MAP_CAMERA_MODE_TOP_BYTE == 1) {
         switch (g_MenuMemory.holesChoice) {
-          case HOLES_CHOICE_UNK0:
+          case HOLES_CHOICE_UNUSED:
             *holeSelection = HOLE_SELECTION_ALL;
             break;
           case HOLES_CHOICE_FRONT_NINE:
