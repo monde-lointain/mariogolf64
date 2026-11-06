@@ -946,7 +946,7 @@ void AnimateScorecard(void) {
         g_RoundHud.isLetterboxShown = TRUE;
         g_RoundHud.isClubPanelShown = 1;
         g_RoundHud.isWindIndicatorShown = TRUE;
-        g_RoundHud.unk6 = 0;
+        g_RoundHud.isIgnoredPausePartShown = FALSE;
         g_RoundHud.isHoleInfoShown = 1;
         g_RoundHud.isLieIconShown = TRUE;
         g_RoundHud.isClubHeadIconShown = TRUE;

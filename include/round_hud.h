@@ -64,7 +64,9 @@ typedef struct RoundHud {
   /* 0x04 */ u8 unk4;
   /* 0x05 */ s8 isLetterboxShown; /* DrawLetterbox draws its bars only while
                                      this is set */
-  /* 0x06 */ s8 unk6;
+  /* Cleared as a pause screen closes, while the HUD's other parts show again;
+   * nothing reads it */
+  /* 0x06 */ s8 isIgnoredPausePartShown;
   /* 0x07 */ s8 isWindIndicatorShown;
   /* 0x08 */ s8 isHoleInfoShown; /* The hole's model, yardage and par */
   /* 0x09 */ s8 isLieIconShown;
