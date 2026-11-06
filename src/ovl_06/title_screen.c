@@ -100,9 +100,6 @@ typedef struct ButtonCode {
   /* 0x8 */ void (*onEntered)(void);
 } ButtonCode; /* size = 0xC */
 
-#define GAME_FLAG_UNK44 0x44
-#define GAME_FLAG_UNK65 0x65
-
 void EnterMenuAtTitle(void);
 
 void OnUnlockCodeEntered(void);
@@ -144,10 +141,10 @@ void EnableDebug(void) {
   g_IsDebugEnabled = TRUE;
 }
 
-/* No code calls this */
-void SetUnknownGameFlags(void) {
-  SetGameFlag(GAME_FLAG_UNK44);
-  SetGameFlag(GAME_FLAG_UNK65);
+/* Ends the round after the hole with the staff roll. No code calls this */
+void ShowStaffRollAfterHole(void) {
+  SetGameFlag(GAME_FLAG_END_ROUND_AFTER_HOLE);
+  SetGameFlag(GAME_FLAG_SHOW_STAFF_ROLL);
 }
 
 void ResetButtonCodes(void) {
