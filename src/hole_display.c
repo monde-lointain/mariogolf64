@@ -229,7 +229,9 @@ typedef struct LensFlare {
   /* 0x03 */ u8
       envColor[3]; /* Where it is darkest, and the texels blend between them */
   /* 0x08 */ s32 size;
-  /* 0x0C */ s32 unkC;
+  /* Nothing reads it. Each is about 0x10000 over a size from 8 to 64, though
+   * not always this flare's size. */
+  /* 0x0C */ s32 ignoredScaleValue;
   /* 0x10 */ f32
       position; /* Along the line, 0 at the sun and 1 at its axis point */
 } LensFlare; /* size = 0x14 */
