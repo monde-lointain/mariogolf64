@@ -264,7 +264,8 @@ enum EndReaction {
  * RESULT_SOUND_STAGE */
 enum ResultSound {
   RESULT_SOUND_NONE,
-  /* Plays SOUND_UNK23, after an excellent shot, a near approach or a chip-in */
+  /* Plays SOUND_GOOD_SHOT, after an excellent shot, a near approach or a
+   * chip-in */
   RESULT_SOUND_GOOD_SHOT,
   /*
    * Plays SOUND_THREE_STARS, after a flag shot, a pin shot, an albatross or
@@ -1154,7 +1155,7 @@ void PlayFlightSounds(s32 step) {
 
   if (f_LandingWaitFrame == RESULT_SOUND_STAGE) {
     if (f_PendingResultSound == RESULT_SOUND_GOOD_SHOT) {
-      PlaySound(SOUND_UNK23, FLIGHT_SOUND_CHANNEL_RESULT, SOUND_FULL_SCALE);
+      PlaySound(SOUND_GOOD_SHOT, FLIGHT_SOUND_CHANNEL_RESULT, SOUND_FULL_SCALE);
     } else if (f_PendingResultSound == RESULT_SOUND_SUPERB_SHOT) {
       PlaySound(
           SOUND_THREE_STARS, FLIGHT_SOUND_CHANNEL_RESULT, SOUND_FULL_SCALE);

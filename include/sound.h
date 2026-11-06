@@ -66,8 +66,8 @@ enum Sound {
   SOUND_CUP_IN,
   SOUND_ROLL = 0x14, /* Also played in the opening */
   SOUND_HIT_WALL,
-  /* SOUND_UNK23, SOUND_UNK151 and SOUND_UNK155 play in a shot's flight */
-  SOUND_UNK23 = 0x17,
+  /* After an excellent shot, a near approach or a chip-in */
+  SOUND_GOOD_SHOT = 0x17,
   SOUND_FLAG_SWISH = 0x1F, /* Also played in the opening */
   SOUND_TICK, /* A tally's tick and each click of the club slots' reels */
   SOUND_REEL_STOP,
@@ -234,11 +234,11 @@ enum Sound {
   SOUND_CALL_CHIP_IN,
   SOUND_CALL_PIN_SHOT,
   SOUND_CALL_COMPLETE = 0x96,
-  SOUND_UNK151,
+  SOUND_UNK151, /* Plays in a shot's flight */
   SOUND_CALL_BOGEY,
   SOUND_DEEP_ROUGH_LANDING,
   SOUND_WASTE_AREA_LANDING,
-  SOUND_UNK155,
+  SOUND_UNK155, /* Plays in a shot's flight */
   SOUND_NEW_BEST_SCORE,
   /* As a course notice swings in */
   SOUND_COURSE_NOTICE_CHEER,
