@@ -22,7 +22,7 @@
 
 typedef struct ContestantProfile {
   /* 0x0 */ s8 baseScore; /* Final strokes over par on the first course */
-  /* 0x1 */ u8 unk1[2];
+  /* 0x1 */ u8 unusedBeforeHoleOffset[2];
   /* 0x3 */ s8 holeOffset; /* Holes played ahead of the player */
 } ContestantProfile; /* size = 0x4 */
 
