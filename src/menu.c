@@ -747,52 +747,74 @@ s32 GetCoursePointsNeeded(CourseIndex courseIndex) {
   return f_CoursePointsNeeded[courseIndex];
 }
 
+/* GetRecordPriority's ranks of Best Shot records */
+#define BIRDIE_PRIORITY 50
+#define BONUS_BIRDIE_PRIORITY 60
+#define EAGLE_PRIORITY 60
+#define BONUS_EAGLE_PRIORITY 70
+#define SHORT_HOLE_EAGLE_BONUS 10
+#define HOLE_IN_ONE_PRIORITY 90
+/* The highest */
+#define ALBATROSS_PRIORITY 100
+
+/*
+ * Ranks a Best Shot record for keeping: rarer scores rank higher, as do
+ * birdies and eagles with SCORE_KIND_UNUSED_BONUS set and eagles on holes
+ * under par 5. A hole in one on a par 4 or 5 ranks as an albatross. A record
+ * not worth keeping, or a par, ranks 0.
+ */
 s32 GetRecordPriority(PlayRecord* record) {
-  s32 value;
+  s32 priority;
   s32 bits;
-  s32 unk2C;
+  s32 par;
   s32 kind;
-  s32 maxValue;
+  s32 maxPriority;
 
   bits = record->scoreKind;
   kind = bits & SCORE_KIND_MASK;
-  value = 0;
-  unk2C = record->hole.par;
-  maxValue = 0x64;
+  priority = 0;
+  par = record->hole.par;
+  /*
+   * Kept in a variable, which the original's register choices need: the
+   * constant in its place swaps registers in 16 words, as do also initializing
+   * priority in its declaration, declaring bits, kind, par and priority in
+   * that order, clearing priority first or switching on the masked bits
+   */
+  maxPriority = ALBATROSS_PRIORITY;
   if (bits & SCORE_KIND_RECORDED) {
     switch (kind) {
       case SCORE_KIND_BIRDIE:
-        value = 0x32;
+        priority = BIRDIE_PRIORITY;
         if (bits & SCORE_KIND_UNUSED_BONUS) {
-          value = 0x3C;
+          priority = BONUS_BIRDIE_PRIORITY;
         }
 
         break;
       case SCORE_KIND_EAGLE:
-        value = 0x3C;
+        priority = EAGLE_PRIORITY;
         if (bits & SCORE_KIND_UNUSED_BONUS) {
-          value = 0x46;
+          priority = BONUS_EAGLE_PRIORITY;
         }
 
-        if (unk2C < 5) {
-          value += 0xA;
+        if (par < PAR_FIVE) {
+          priority += SHORT_HOLE_EAGLE_BONUS;
         }
 
         break;
       case SCORE_KIND_HOLE_IN_ONE:
-        value = 0x5A;
-        if (unk2C < 4) {
+        priority = HOLE_IN_ONE_PRIORITY;
+        if (par < PAR_FOUR) {
           break;
         }
 
         /* fallthrough */
       case SCORE_KIND_ALBATROSS:
-        value = maxValue;
+        priority = maxPriority;
         break;
     }
   }
 
-  return value;
+  return priority;
 }
 
 /* Fills order with the indices of values from the largest value down, keeping
