@@ -1869,7 +1869,7 @@ void UpdateRingEditor(void) {
   }
 
   if (g_ControllerData[SECOND_EDITOR_PAD].button & B_BUTTON) {
-    /* Clears every field but unk4 and unk5C */
+    /* Clears every field */
     g_WorkArea.hole.triangles[f_RingTriangleIndex].kind =
         HOLE_TRIANGLE_KIND_FLAT;
     g_WorkArea.hole.triangles[f_RingTriangleIndex].vertices[0].v.ob[AXIS_X] = 0;
@@ -1929,9 +1929,9 @@ void UpdateRingEditor(void) {
     g_WorkArea.hole.triangles[f_RingTriangleIndex].center[AXIS_X] = 0.0f;
     g_WorkArea.hole.triangles[f_RingTriangleIndex].center[AXIS_Y] = 0.0f;
     g_WorkArea.hole.triangles[f_RingTriangleIndex].center[AXIS_Z] = 0.0f;
-    g_WorkArea.hole.triangles[f_RingTriangleIndex].unk50[0] = 0;
-    g_WorkArea.hole.triangles[f_RingTriangleIndex].unk50[1] = 0;
-    g_WorkArea.hole.triangles[f_RingTriangleIndex].unk50[2] = 0;
+    g_WorkArea.hole.triangles[f_RingTriangleIndex].unusedEditorValues[0] = 0;
+    g_WorkArea.hole.triangles[f_RingTriangleIndex].unusedEditorValues[1] = 0;
+    g_WorkArea.hole.triangles[f_RingTriangleIndex].unusedEditorValues[2] = 0;
   }
 
   if ((g_ControllerData[EDITOR_PAD].button & (Z_TRIG | R_TRIG)) == R_TRIG) {
