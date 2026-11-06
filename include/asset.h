@@ -31,10 +31,15 @@ typedef struct EncodedAsset {
 /* The boot logos, among other image assets, begin with this before their texels
  */
 typedef struct ImageHeader {
-  /* 0x0 */ u16 unk0;
+  /*
+   * How the texels are stored: 0 for four-bit ones with no palette, 2 for
+   * four-bit indices into a 16-color palette, 4 for eight-bit ones with no
+   * palette, 6 for eight-bit indices into a 256-color palette and 8 for RGBA16
+   */
+  /* 0x0 */ u16 format;
   /* 0x2 */ u16 width;
   /* 0x4 */ u16 height;
-  /* 0x6 */ u16 unk6;
+  /* 0x6 */ u16 unusedAfterHeight;
 } ImageHeader; /* size = 0x8 */
 
 /* Where ImageHeader's width and height start, for reading them a byte at a time
