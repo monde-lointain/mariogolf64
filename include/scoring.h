@@ -4,6 +4,7 @@
 #include <ultra64.h>
 
 #include "course.h"
+#include "language.h"
 
 /* GetMatchStanding's results, from the first player's side */
 enum MatchStanding {

@@ -1,7 +1,7 @@
 #ifndef PROGRESS_H
 #define PROGRESS_H
 
-#include "common.h"
+#include <ultra64.h>
 
 /* The player's progress in the save: wins against the characters, birdie
  * badges and tournament places */

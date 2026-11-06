@@ -3,18 +3,23 @@
  * round ends: the players' portraits and scores, the course points the
  * round earned and the notices of what those points unlocked.
  */
-#include "common.h"
+#include <ultra64.h>
 
+#include "address.h"
 #include "asset.h"
 #include "billboard.h"
 #include "character.h"
+#include "compiler.h"
 #include "controller.h"
 #include "course.h"
 #include "debug_text.h"
 #include "effects.h"
+#include "frame_time.h"
 #include "game_flags.h"
 #include "gbi_helpers.h"
 #include "heap.h"
+#include "include_asm.h"
+#include "language.h"
 #include "main.h"
 #include "math_util.h"
 #include "menu.h"

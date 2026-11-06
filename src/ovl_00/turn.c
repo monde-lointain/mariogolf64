@@ -3,10 +3,11 @@
  * taking the shot, the shot preview, Course Points, records of holes and Ring
  * Shot, picking the next player, and the round's debug tools.
  */
-#include "common.h"
-
 #include "turn.h"
 
+#include <ultra64.h>
+
+#include "address.h"
 #include "asset.h"
 #include "ball_simulation.h"
 #include "billboard.h"
@@ -15,23 +16,29 @@
 #include "character_slot.h"
 #include "club.h"
 #include "club_panel.h"
+#include "compiler.h"
 #include "computer_golfer.h"
 #include "controller.h"
 #include "course.h"
+#include "course_space.h"
 #include "cpu_projection.h"
 #include "current_shot.h"
 #include "debug_text.h"
 #include "effects.h"
 #include "fireworks.h"
+#include "frame_time.h"
 #include "framebuffer.h"
 #include "framing.h"
 #include "game.h"
 #include "game_flags.h"
 #include "gbi_helpers.h"
+#include "geometry.h"
 #include "golf_balls.h"
 #include "hole_display.h"
 #include "hole_intro.h"
 #include "hole_loader.h"
+#include "include_asm.h"
+#include "language.h"
 #include "libc.h"
 #include "main.h"
 #include "math_util.h"

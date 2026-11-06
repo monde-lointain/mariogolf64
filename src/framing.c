@@ -2,12 +2,15 @@
  * Places the first camera so that its view takes in a set of spheres, looking
  * from a given direction.
  */
-#include "common.h"
-
 #include "framing.h"
 
+#include <ultra64.h>
+
 #include "camera.h"
+#include "compiler.h"
 #include "controller.h"
+#include "geometry.h"
+#include "include_asm.h"
 #include "libc.h"
 #include "math_util.h"
 

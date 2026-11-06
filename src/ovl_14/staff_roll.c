@@ -3,18 +3,21 @@
  * staff text a pixel a frame, has characters from the cast swing on Yoshi's
  * Island's seventh hole, and ends on a closing picture.
  */
-#include "common.h"
-
 #include "staff_roll.h"
 
+#include <ultra64.h>
+
+#include "address.h"
 #include "asset.h"
 #include "billboard.h"
 #include "camera.h"
 #include "character.h"
 #include "character_slot.h"
 #include "club.h"
+#include "compiler.h"
 #include "controller.h"
 #include "course.h"
+#include "course_space.h"
 #include "current_shot.h"
 #include "debug_text.h"
 #include "effects.h"
@@ -23,9 +26,11 @@
 #include "game.h"
 #include "game_flags.h"
 #include "gbi_helpers.h"
+#include "geometry.h"
 #include "heap.h"
 #include "hole_display.h"
 #include "hole_loader.h"
+#include "language.h"
 #include "libc.h"
 #include "main.h"
 #include "math_util.h"

@@ -3,17 +3,18 @@
  * effects, the dynamic textures and the inset view, and loading and unloading
  * the overlays' modules.
  */
-#include "common.h"
-
 #include "game.h"
 
 #include <lib/libnusys/nusys.h>
+#include <ultra64.h>
 
+#include "address.h"
 #include "animated_box.h"
 #include "billboard.h"
 #include "boot_logos.h"
 #include "camera.h"
 #include "character_slot.h"
+#include "compiler.h"
 #include "confirm_wait.h"
 #include "controller.h"
 #include "cpu_projection.h"
@@ -22,10 +23,13 @@
 #include "effects.h"
 #include "game_flags.h"
 #include "gbi_helpers.h"
+#include "geometry.h"
 #include "heap.h"
 #include "hole_display.h"
 #include "hole_objects.h"
 #include "hole_triangles.h"
+#include "include_asm.h"
+#include "language.h"
 #include "libc.h"
 #include "main.h"
 #include "main_menu.h"

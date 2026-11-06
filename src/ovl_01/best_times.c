@@ -2,13 +2,17 @@
  * The clubhouse's Best Times screen. Left and right turn it between the open
  * courses, and it shows each course's best times with their places and holders.
  */
-#include "common.h"
+#include <ultra64.h>
 
+#include "address.h"
 #include "asset.h"
 #include "character.h"
+#include "compiler.h"
 #include "cpu_projection.h"
+#include "frame_time.h"
 #include "game.h"
 #include "gbi_helpers.h"
+#include "geometry.h"
 #include "hole_display.h"
 #include "libc.h"
 #include "main_menu.h"

@@ -3,14 +3,17 @@
  * on the first hole; on later holes it starts behind the ball. Either way it
  * closes in and drops to the shot's camera.
  */
-#include "common.h"
-
 #include "hole_intro.h"
+
+#include <ultra64.h>
 
 #include "camera.h"
 #include "course.h"
+#include "course_space.h"
 #include "current_shot.h"
 #include "debug_text.h"
+#include "geometry.h"
+#include "include_asm.h"
 #include "libc.h"
 #include "math_util.h"
 #include "movie.h"

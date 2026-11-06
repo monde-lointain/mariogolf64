@@ -4,6 +4,7 @@
 #include <lib/libnusys/nusys.h>
 #include <ultra64.h>
 
+#include "language.h"
 #include "math_util.h"
 
 #define GAME_BOY_CHARACTER_COUNT 4

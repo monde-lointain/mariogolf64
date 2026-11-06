@@ -2,18 +2,23 @@
  * The pin: the cup, the flagstick, the flag that turns to the wind, and their
  * shadow.
  */
-#include "common.h"
-
 #include "pin.h"
 
+#include <ultra64.h>
+
+#include "address.h"
 #include "asset.h"
 #include "billboard.h"
 #include "camera.h"
+#include "compiler.h"
+#include "course_space.h"
 #include "cpu_projection.h"
 #include "current_shot.h"
 #include "game.h"
 #include "gbi_helpers.h"
+#include "geometry.h"
 #include "heap.h"
+#include "language.h"
 #include "libc.h"
 #include "math_util.h"
 #include "round_hud.h"

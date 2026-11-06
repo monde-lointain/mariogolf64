@@ -3,14 +3,15 @@
  * animation, all played through libmus, with the interrupts masked around
  * each libmus call that changes a sound.
  */
-#include "common.h"
-
 #include "sound.h"
 
 #include <PR/libmus.h>
+#include <ultra64.h>
 
+#include "address.h"
 #include "asset.h"
 #include "character.h"
+#include "compiler.h"
 #include "controller.h"
 #include "debug_text.h"
 #include "game_flags.h"

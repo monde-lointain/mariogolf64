@@ -1,7 +1,9 @@
 #ifndef CPU_PROJECTION_H
 #define CPU_PROJECTION_H
 
-#include "common.h"
+#include <ultra64.h>
+
+#include "geometry.h"
 
 /* SetTriangleNormal's targets */
 enum NormalPlacement {

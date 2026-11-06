@@ -4,10 +4,12 @@
  * The file also builds and multiplies matrices and converts them to the RSP's
  * fixed point.
  */
-#include "common.h"
-
 #include "cpu_projection.h"
 
+#include <ultra64.h>
+
+#include "compiler.h"
+#include "geometry.h"
 #include "libc.h"
 #include "screen.h"
 

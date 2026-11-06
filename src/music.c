@@ -2,11 +2,12 @@
  * Starts the music player and its audio tasks, and loads the songs, the sound
  * effect banks and the sample bank.
  */
-#include "common.h"
-
 #include <PR/libmus.h>
 #include <lib/libnusys/nusys.h>
+#include <ultra64.h>
 
+#include "address.h"
+#include "compiler.h"
 #include "sound.h"
 
 /* Called with NU_SC_PRENMI_MSG on a pre-NMI, then with NU_SC_RETRACE_MSG after

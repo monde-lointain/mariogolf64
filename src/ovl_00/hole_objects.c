@@ -2,19 +2,25 @@
  * The creatures that appear on a hole: Cheep Cheeps that leap out of the
  * water where the ball lands, and a monkey that drops onto the cup.
  */
-#include "common.h"
-
 #include "hole_objects.h"
 
+#include <ultra64.h>
+
+#include "address.h"
 #include "asset.h"
 #include "camera.h"
+#include "compiler.h"
+#include "course_space.h"
 #include "cpu_projection.h"
 #include "effects.h"
 #include "game.h"
 #include "game_flags.h"
 #include "gbi_helpers.h"
+#include "geometry.h"
 #include "heap.h"
 #include "hole_display.h"
+#include "include_asm.h"
+#include "language.h"
 #include "libc.h"
 #include "math_util.h"
 #include "round_hud.h"

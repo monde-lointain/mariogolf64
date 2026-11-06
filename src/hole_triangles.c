@@ -2,14 +2,20 @@
  * Draws the hole triangles, making the shaded ones see-through, and builds and
  * draws Ring Shot's rings, which are kept among them.
  */
-#include "common.h"
-
 #include "hole_triangles.h"
 
+#include <ultra64.h>
+
+#include "address.h"
 #include "camera.h"
+#include "compiler.h"
+#include "course_space.h"
 #include "game.h"
 #include "game_flags.h"
 #include "gbi_helpers.h"
+#include "geometry.h"
+#include "include_asm.h"
+#include "language.h"
 #include "libc.h"
 #include "math_util.h"
 #include "play.h"

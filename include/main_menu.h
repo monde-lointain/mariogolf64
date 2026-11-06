@@ -1,9 +1,10 @@
 #ifndef MAIN_MENU_H
 #define MAIN_MENU_H
 
-#include "common.h"
+#include <ultra64.h>
 
 #include "character.h"
+#include "language.h"
 #include "menu_memory.h"
 
 /*

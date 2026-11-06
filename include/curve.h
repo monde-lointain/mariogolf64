@@ -1,7 +1,7 @@
 #ifndef CURVE_H
 #define CURVE_H
 
-#include "common.h"
+#include <ultra64.h>
 
 /* Periodic splines, Hermite interpolation and stepping along paths */
 

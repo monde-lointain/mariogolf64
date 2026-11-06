@@ -3,6 +3,8 @@
 
 #include <ultra64.h>
 
+#include "language.h"
+
 /* Movies that StartMovie plays */
 enum Movie {
   MOVIE_NONE = -1, /* Stops the movie */

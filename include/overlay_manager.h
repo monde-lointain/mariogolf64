@@ -3,6 +3,8 @@
 
 #include <ultra64.h>
 
+#include "language.h"
+
 /*
  * The game's code outside the main segment is split into modules, each
  * identified by a number below MODULE_COUNT. Modules reach memory inside

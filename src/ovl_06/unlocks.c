@@ -2,11 +2,12 @@
  * The parts of the save that the title screen's button codes unlock, and a
  * code of this file's own that nothing reads
  */
-#include "common.h"
-
 #include "unlocks.h"
 
+#include <ultra64.h>
+
 #include "controller.h"
+#include "language.h"
 #include "menu.h"
 #include "save.h"
 #include "sound.h"

@@ -55,6 +55,10 @@ static inline void SetLightColor(Light* light, s32 red, s32 green, s32 blue) {
 #define TRANSPARENT_ALPHA 0
 #define OPAQUE_ALPHA 0xFF
 
+/* A 32-bit RGBA color, as gSPModifyVertex takes a vertex color */
+#define RgbaColor(red, green, blue, alpha) \
+  (((red) << 24) | ((green) << 16) | ((blue) << 8) | (alpha))
+
 /*
  * Appends a pipe sync followed by a single-command GBI state setter.
  * displayList must be a side-effect-free Gfx* lvalue with room for both

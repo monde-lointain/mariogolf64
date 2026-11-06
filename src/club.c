@@ -3,18 +3,22 @@
  * parameters from its stats, how well each plays from each surface, and
  * choosing the club and the shot mode with the controller.
  */
-#include "common.h"
-
 #include "club.h"
+
+#include <ultra64.h>
 
 #include "asset.h"
 #include "ball_simulation.h"
 #include "club_panel.h"
 #include "controller.h"
+#include "course_space.h"
 #include "current_shot.h"
 #include "game_flags.h"
+#include "geometry.h"
 #include "heap.h"
 #include "host_file.h"
+#include "include_asm.h"
+#include "language.h"
 #include "libc.h"
 #include "main.h"
 #include "math_util.h"

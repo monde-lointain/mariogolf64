@@ -3,15 +3,20 @@
  * hole triangles, the walls and the rings. It also pushes the ball out of
  * walls, and out to the cup's edge when it comes too close.
  */
-#include "common.h"
-
 #include "collision.h"
+
+#include <ultra64.h>
 
 #include "ball_simulation.h"
 #include "billboard.h"
+#include "compiler.h"
+#include "course_space.h"
 #include "debug_text.h"
 #include "game_flags.h"
+#include "geometry.h"
 #include "hole_triangles.h"
+#include "include_asm.h"
+#include "language.h"
 #include "libc.h"
 #include "main.h"
 #include "math_util.h"

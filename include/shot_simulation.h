@@ -1,9 +1,10 @@
 #ifndef SHOT_SIMULATION_H
 #define SHOT_SIMULATION_H
 
-#include "common.h"
+#include <ultra64.h>
 
 #include "ball_simulation.h"
+#include "language.h"
 
 /* Steps past this aren't kept, though the simulation goes on */
 #define PATH_STEP_COUNT 900

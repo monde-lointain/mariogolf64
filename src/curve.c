@@ -2,9 +2,12 @@
  * Curves: periodic splines, Hermite interpolation, and stepping along a path of
  * points at a pace.
  */
-#include "common.h"
-
 #include "curve.h"
+
+#include <ultra64.h>
+
+#include "compiler.h"
+#include "geometry.h"
 
 /* The splines have this many segments, between one more knots */
 #define SPLINE_SEGMENT_COUNT 10

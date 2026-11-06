@@ -2,17 +2,23 @@
  * Draws the scorecard's pages: the standings, the match, the skins, the bets,
  * Speed Golf, the leaderboard and the scores.
  */
-#include "common.h"
+#include <ultra64.h>
 
+#include "address.h"
 #include "asset.h"
 #include "billboard.h"
 #include "character_slot.h"
+#include "compiler.h"
 #include "course.h"
 #include "cpu_projection.h"
 #include "fireworks.h"
+#include "frame_time.h"
 #include "game.h"
 #include "gbi_helpers.h"
+#include "geometry.h"
 #include "hole_loader.h"
+#include "include_asm.h"
+#include "language.h"
 #include "math_util.h"
 #include "round_hud.h"
 #include "round_stats.h"

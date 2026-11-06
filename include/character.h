@@ -4,6 +4,7 @@
 #include <ultra64.h>
 
 #include "asset.h"
+#include "compiler.h"
 
 /*
  * Indices of the playable characters, in the order of g_Players'

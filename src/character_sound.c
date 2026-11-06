@@ -2,9 +2,10 @@
  * Plays a character's sounds from its table of sound IDs and volumes, on a
  * channel for each character slot.
  */
-#include "common.h"
+#include <ultra64.h>
 
 #include "character.h"
+#include "compiler.h"
 #include "sound.h"
 
 /* Each character's sounds are pairs of a sound ID and the volume it plays at */

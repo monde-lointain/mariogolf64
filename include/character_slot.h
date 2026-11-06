@@ -5,6 +5,10 @@
 
 #include "camera.h"
 #include "club.h"
+#include "compiler.h"
+#include "course_space.h"
+#include "geometry.h"
+#include "language.h"
 #include "math_util.h"
 
 #define CHARACTER_MODEL_KIND_COUNT 4

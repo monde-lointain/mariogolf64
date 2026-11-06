@@ -3,19 +3,24 @@
  * the ground tiles, shaping and shading the ground, building its display lists,
  * and placing the billboards and their shadows.
  */
-#include "common.h"
-
 #include "hole_builder.h"
 
+#include <ultra64.h>
+
+#include "address.h"
 #include "asset.h"
 #include "billboard.h"
+#include "compiler.h"
 #include "course.h"
 #include "debug_text.h"
 #include "game_flags.h"
 #include "gbi_helpers.h"
+#include "geometry.h"
 #include "hole_loader.h"
 #include "hole_triangles.h"
 #include "host_file.h"
+#include "include_asm.h"
+#include "language.h"
 #include "libc.h"
 #include "math_util.h"
 #include "play.h"

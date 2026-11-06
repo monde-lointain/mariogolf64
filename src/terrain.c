@@ -3,25 +3,32 @@
  * ground's grid vertices, tiles, triangles and heights. The debug scene menu
  * and the flag panel are here too.
  */
-#include "common.h"
-
 #include "terrain.h"
 
+#include <ultra64.h>
+
+#include "address.h"
 #include "animated_box.h"
 #include "billboard.h"
 #include "camera.h"
 #include "character_slot.h"
 #include "club.h"
 #include "collision.h"
+#include "compiler.h"
 #include "controller.h"
+#include "course_space.h"
 #include "current_shot.h"
 #include "debug_text.h"
 #include "game_flags.h"
 #include "gbi_helpers.h"
+#include "geometry.h"
 #include "hole_builder.h"
 #include "hole_loader.h"
+#include "include_asm.h"
+#include "language.h"
 #include "libc.h"
 #include "main.h"
+#include "math_util.h"
 #include "overlay_manager.h"
 #include "play.h"
 #include "round_hud.h"

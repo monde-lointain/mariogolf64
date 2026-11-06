@@ -1,17 +1,4 @@
 BasedOnStyle: Google
-# The headers rely on common.h's types, so it always comes first.
-# The rest are Google's own categories.
-IncludeCategories:
-  - Regex: '^"common\.h"$'
-    Priority: -1
-  - Regex: '^<ext/.*\.h>'
-    Priority: 2
-  - Regex: '^<.*\.h>'
-    Priority: 1
-  - Regex: '^<.*'
-    Priority: 2
-  - Regex: '.*'
-    Priority: 3
 # splat reads the function or symbol name from each INCLUDE_ASM and
 # INCLUDE_RODATA call, and doesn't expect it on a line of its own
 WhitespaceSensitiveMacros: [INCLUDE_ASM, INCLUDE_RODATA]

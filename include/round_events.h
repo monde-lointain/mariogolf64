@@ -3,6 +3,7 @@
 
 #include <ultra64.h>
 
+#include "language.h"
 #include "save.h"
 #include "text.h"
 

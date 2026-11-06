@@ -3,6 +3,8 @@
 
 #include <ultra64.h>
 
+#include "language.h"
+
 /*
  * A set of 256 switches, numbered from 0, which boot clears. Game code
  * sets and clears some of them as it runs, such as HOLE_LOADED and LOADED_PLAY.

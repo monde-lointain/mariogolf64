@@ -50,6 +50,37 @@ typedef s16 SignedBinaryAngle;
     {0, 0, 0, 0}}}
 /* clang-format on */
 
+/* The magnitude of an integer. The game's code evaluates the value once,
+   into a variable of its own, as a GNU statement expression does. GCC's
+   built-in abs compiles differently: with it, the matched code of 10 files
+   changes. */
+#define Abs(value) \
+  ({ \
+    s32 absValue = (value); \
+    (absValue < 0) ? -absValue : absValue; \
+  })
+
+/*
+ * The magnitude of a float, as a compare and branch where fabsf compiles to
+ * abs.s. It is a macro because the ball simulations compile further from the
+ * original when these sites call an inline function instead: a static one
+ * takes StepBallSimulation from 478 differing words to 580 and
+ * StepOpeningBallSimulation from 247 to 472, and StepBallSimulation's nested
+ * AbsoluteValue gives it 580 too.
+ */
+#define AbsFloat(value) \
+  ({ \
+    f32 absValue = (value); \
+    (absValue < 0.0f) ? -absValue : absValue; \
+  })
+
+/* A float moved half a unit toward zero, as the title positions are before
+ * converting them to whole pixels */
+#define HalfTowardZero(value) ((value) < 0.0f ? (value) + 0.5f : (value) - 0.5f)
+/* value rounded up to a multiple of alignment, which is a power of two */
+#define RoundUpTo(value, alignment) \
+  (((value) + (alignment) - 1) & ~((alignment) - 1))
+
 u32 IntLength3D(s32 x, s32 y, s32 z);
 u32 IntLength2D(s32 x, s32 y);
 void SetRandomSeed(s32 seed);

@@ -10,27 +10,32 @@
  * players' characters and the waving Toad, a debug character viewer and a
  * debug caddy select.
  */
-#include "common.h"
-
 #include "main_menu.h"
 
 #include <PR/libmus.h>
+#include <ultra64.h>
 
+#include "address.h"
 #include "asset.h"
 #include "billboard.h"
 #include "camera.h"
 #include "character.h"
 #include "character_slot.h"
 #include "club.h"
+#include "compiler.h"
 #include "controller.h"
 #include "course.h"
+#include "course_space.h"
 #include "cpu_projection.h"
 #include "game.h"
 #include "game_flags.h"
 #include "gbi_helpers.h"
+#include "geometry.h"
 #include "help_board.h"
 #include "hole_display.h"
 #include "hole_loader.h"
+#include "include_asm.h"
+#include "language.h"
 #include "libc.h"
 #include "main.h"
 #include "math_util.h"

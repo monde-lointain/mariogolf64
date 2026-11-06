@@ -4,10 +4,11 @@
  * Its draw routine, RewriteWord, draws nothing. No code found enters
  * SCENE_CONFIRM_WAIT.
  */
-#include "common.h"
-
 #include "confirm_wait.h"
 
+#include <ultra64.h>
+
+#include "compiler.h"
 #include "controller.h"
 #include "hole_display.h"
 #include "overlay_manager.h"

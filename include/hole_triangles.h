@@ -1,11 +1,10 @@
 #ifndef HOLE_TRIANGLES_H
 #define HOLE_TRIANGLES_H
 
-#include "common.h"
-
 #include <ultra64.h>
 
 #include "camera.h"
+#include "geometry.h"
 
 /*
  * Single triangles that the hole editor places on a hole, apart from its

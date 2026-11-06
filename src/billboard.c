@@ -3,19 +3,25 @@
  * sorting them by depth and drawing them, translucent close to the camera. The
  * file also reads and writes files on the host.
  */
-#include "common.h"
-
 #include "billboard.h"
 
+#include <ultra64.h>
+
+#include "address.h"
 #include "asset.h"
 #include "camera.h"
+#include "compiler.h"
+#include "course_space.h"
 #include "cpu_projection.h"
 #include "current_shot.h"
 #include "game.h"
 #include "game_flags.h"
 #include "gbi_helpers.h"
+#include "geometry.h"
 #include "heap.h"
 #include "host_file.h"
+#include "include_asm.h"
+#include "language.h"
 #include "libc.h"
 #include "math_util.h"
 #include "save.h"

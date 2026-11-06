@@ -1,9 +1,10 @@
 #ifndef SCREEN_LAYERS_H
 #define SCREEN_LAYERS_H
 
-#include "common.h"
+#include <ultra64.h>
 
 #include "controller.h"
+#include "language.h"
 
 /* StartWipe's kinds */
 enum WipeState {

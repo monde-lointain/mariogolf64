@@ -4,12 +4,14 @@
  * that fade, spiral, tile, turn away or slice the whole frame, and sets up the
  * hole behind the title screen.
  */
-#include "common.h"
-
 #include "hole_display.h"
 
+#include <ultra64.h>
+
+#include "address.h"
 #include "asset.h"
 #include "camera.h"
+#include "compiler.h"
 #include "controller.h"
 #include "course.h"
 #include "cpu_projection.h"
@@ -19,8 +21,11 @@
 #include "game.h"
 #include "game_flags.h"
 #include "gbi_helpers.h"
+#include "geometry.h"
 #include "heap.h"
 #include "hole_loader.h"
+#include "include_asm.h"
+#include "language.h"
 #include "libc.h"
 #include "math_util.h"
 #include "round_hud.h"

@@ -1,11 +1,12 @@
 #ifndef EFFECTS_H
 #define EFFECTS_H
 
-#include "common.h"
-
 #include <ultra64.h>
 
 #include "ball_simulation.h"
+#include "compiler.h"
+#include "course_space.h"
+#include "geometry.h"
 #include "math_util.h"
 #include "save.h"
 

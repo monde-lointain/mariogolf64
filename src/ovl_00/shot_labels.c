@@ -5,15 +5,19 @@
  * off one of the ball's corners, and moves to another corner when it would
  * cover a tag drawn before it.
  */
-#include "common.h"
+#include <ultra64.h>
 
+#include "address.h"
 #include "asset.h"
 #include "camera.h"
 #include "club.h"
+#include "compiler.h"
+#include "course_space.h"
 #include "cpu_projection.h"
 #include "current_shot.h"
 #include "game.h"
 #include "gbi_helpers.h"
+#include "geometry.h"
 #include "math_util.h"
 #include "overlay_manager.h"
 #include "play.h"

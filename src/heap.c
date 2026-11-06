@@ -4,9 +4,14 @@
  * a block of its own that is never free. Allocations take the smallest
  * free block that fits, and frees merge a block with free neighbors.
  */
-#include "common.h"
-
 #include "heap.h"
+
+#include <ultra64.h>
+
+#include "address.h"
+#include "include_asm.h"
+#include "language.h"
+#include "math_util.h"
 
 #define HEAP_COUNT 3
 

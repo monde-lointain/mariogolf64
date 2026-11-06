@@ -4,19 +4,23 @@
  * over the character grid, and the chosen character's shot curve shows as a
  * meter.
  */
-#include "common.h"
+#include <ultra64.h>
 
+#include "address.h"
 #include "asset.h"
 #include "camera.h"
 #include "character.h"
 #include "character_slot.h"
 #include "club.h"
+#include "compiler.h"
 #include "controller.h"
 #include "debug_text.h"
 #include "game.h"
 #include "game_flags.h"
 #include "gbi_helpers.h"
 #include "hole_display.h"
+#include "include_asm.h"
+#include "language.h"
 #include "libc.h"
 #include "main_menu.h"
 #include "menu.h"

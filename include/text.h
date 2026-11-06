@@ -3,6 +3,8 @@
 
 #include <ultra64.h>
 
+#include "compiler.h"
+#include "language.h"
 #include "text_format.h"
 
 /*
@@ -69,6 +71,9 @@ typedef struct TextSlot {
   /* 0x1B */ u8 alpha;
   /* 0x1C */ s32 values[TEXT_SLOT_VALUE_COUNT];
 } TextSlot; /* size = 0x2C */
+
+/* The base of the decimal numbers the game shows */
+#define DECIMAL_BASE 10
 
 /*
  * The digit font's glyphs are 16 pixels square, one to a row of its image,

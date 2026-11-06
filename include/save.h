@@ -6,7 +6,9 @@
 #include "character.h"
 #include "club.h"
 #include "course.h"
+#include "course_space.h"
 #include "hole_conditions.h"
+#include "language.h"
 #include "math_util.h"
 #include "turn.h"
 

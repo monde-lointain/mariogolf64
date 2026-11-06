@@ -3,19 +3,24 @@
  * routines frame the golfer for it, cue its sounds, and pick a flat spot
  * for it to play on.
  */
-#include "common.h"
-
 #include "reaction.h"
+
+#include <ultra64.h>
 
 #include "billboard.h"
 #include "camera.h"
 #include "character.h"
 #include "character_slot.h"
+#include "compiler.h"
+#include "course_space.h"
 #include "current_shot.h"
 #include "debug_text.h"
 #include "game_flags.h"
 #include "gbi_helpers.h"
+#include "geometry.h"
 #include "hole_triangles.h"
+#include "include_asm.h"
+#include "language.h"
 #include "libc.h"
 #include "math_util.h"
 #include "pin.h"

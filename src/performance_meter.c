@@ -2,14 +2,17 @@
  * The performance meter is the game's copy of NuSystem's nuDebTaskPerfBar1,
  * extended with a CPU bar, statistics for every bar and a numeric readout.
  */
-#include "common.h"
-
 #include "performance_meter.h"
 
 #include <lib/libnusys/nusys.h>
+#include <ultra64.h>
 
+#include "address.h"
+#include "compiler.h"
 #include "gbi_helpers.h"
+#include "geometry.h"
 #include "heap.h"
+#include "language.h"
 #include "screen.h"
 
 /* A frame of time is this wide on the meter, in the meter's own units */

@@ -3,18 +3,21 @@
  * shot mode animates the panel over a few frames, by loading one image per
  * frame into whichever of two buffers is not being shown.
  */
-#include "common.h"
-
 #include "club_panel.h"
 
+#include <ultra64.h>
+
+#include "address.h"
 #include "asset.h"
 #include "club.h"
+#include "compiler.h"
 #include "controller.h"
 #include "current_shot.h"
 #include "debug_text.h"
 #include "game_flags.h"
 #include "gbi_helpers.h"
 #include "heap.h"
+#include "language.h"
 #include "math_util.h"
 #include "menu.h"
 #include "round_hud.h"

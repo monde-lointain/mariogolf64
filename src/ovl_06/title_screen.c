@@ -5,15 +5,18 @@
  * for one and stays there. Button codes entered on the first controller
  * unlock parts of the save or enable debugging.
  */
-#include "common.h"
-
 #include "title_screen.h"
 
+#include <ultra64.h>
+
+#include "address.h"
 #include "asset.h"
+#include "compiler.h"
 #include "controller.h"
 #include "game_flags.h"
 #include "gbi_helpers.h"
 #include "hole_display.h"
+#include "language.h"
 #include "main.h"
 #include "math_util.h"
 #include "overlay_manager.h"

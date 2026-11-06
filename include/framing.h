@@ -1,8 +1,9 @@
 #ifndef FRAMING_H
 #define FRAMING_H
 
-#include "common.h"
+#include <ultra64.h>
 
+#include "geometry.h"
 #include "math_util.h"
 
 void GetFramedView(Vec3 eye, Vec3 lookAt);

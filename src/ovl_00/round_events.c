@@ -3,21 +3,27 @@
  * movies such as Lakitu's countdown, the contact effects and the Fly Guy that
  * warns of a strong wind.
  */
-#include "common.h"
-
 #include "round_events.h"
 
+#include <ultra64.h>
+
+#include "address.h"
 #include "asset.h"
 #include "camera.h"
 #include "character.h"
+#include "compiler.h"
 #include "controller.h"
+#include "course_space.h"
 #include "cpu_projection.h"
 #include "current_shot.h"
 #include "curve.h"
 #include "game.h"
 #include "game_flags.h"
 #include "gbi_helpers.h"
+#include "geometry.h"
 #include "heap.h"
+#include "include_asm.h"
+#include "language.h"
 #include "libc.h"
 #include "math_util.h"
 #include "movie.h"

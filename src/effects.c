@@ -3,24 +3,28 @@
  * sparkles, spreading circles and rising clumps. The rain, the Rumble Paks'
  * rumbles and the birdie badge count are here too.
  */
-#include "common.h"
-
 #include "effects.h"
 
 #include <lib/libnusys/nusys.h>
+#include <ultra64.h>
 
+#include "address.h"
 #include "asset.h"
 #include "ball_simulation.h"
 #include "camera.h"
 #include "character_slot.h"
 #include "club.h"
+#include "compiler.h"
 #include "controller.h"
+#include "course_space.h"
 #include "cpu_projection.h"
 #include "current_shot.h"
 #include "game.h"
 #include "gbi_helpers.h"
+#include "geometry.h"
 #include "heap.h"
 #include "hole_loader.h"
+#include "language.h"
 #include "libc.h"
 #include "math_util.h"
 #include "save.h"

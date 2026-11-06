@@ -3,17 +3,21 @@
  * golf holes, choosing the wind, the rain and the scene colors, and setting up
  * the hole's state.
  */
-#include "common.h"
-
 #include "hole_loader.h"
 
+#include <ultra64.h>
+
+#include "address.h"
 #include "ball_simulation.h"
 #include "billboard.h"
 #include "character_slot.h"
+#include "compiler.h"
 #include "course.h"
 #include "current_shot.h"
 #include "game_flags.h"
+#include "geometry.h"
 #include "hole_builder.h"
+#include "language.h"
 #include "libc.h"
 #include "main.h"
 #include "math_util.h"

@@ -3,6 +3,8 @@
 
 #include <ultra64.h>
 
+#include "language.h"
+
 /*
  * The courses' layouts are kept as course records. The six main courses
  * have one each, as do the two mini-golf courses and the driving range.

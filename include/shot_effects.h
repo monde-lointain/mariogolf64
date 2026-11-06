@@ -1,11 +1,10 @@
 #ifndef SHOT_EFFECTS_H
 #define SHOT_EFFECTS_H
 
-#include "common.h"
-
 #include <ultra64.h>
 
 #include "camera.h"
+#include "course_space.h"
 
 /* The states of g_ImpactFlashState, which lights the golfer as the ball is
  * struck */

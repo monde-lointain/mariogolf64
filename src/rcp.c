@@ -1,12 +1,12 @@
 /*
  * Sets up the RCP, and clears the depth buffer and the frame.
  */
-#include "common.h"
-
 #include "rcp.h"
 
 #include <lib/libnusys/nusys.h>
+#include <ultra64.h>
 
+#include "address.h"
 #include "cpu_projection.h"
 #include "game.h"
 #include "gbi_helpers.h"

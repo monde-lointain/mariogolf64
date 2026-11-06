@@ -1,7 +1,7 @@
 #ifndef COMPUTER_GOLFER_H
 #define COMPUTER_GOLFER_H
 
-#include "common.h"
+#include <ultra64.h>
 
 #include "current_shot.h"
 

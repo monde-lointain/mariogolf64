@@ -3,21 +3,26 @@
  * and the trail that the club leaves through the swing. Each burst of sparks
  * spreads from a point that stays fixed in the world.
  */
-#include "common.h"
-
 #include "shot_effects.h"
 
+#include <ultra64.h>
+
+#include "address.h"
 #include "asset.h"
 #include "camera.h"
 #include "character_slot.h"
+#include "compiler.h"
+#include "course_space.h"
 #include "cpu_projection.h"
 #include "current_shot.h"
 #include "effects.h"
 #include "game.h"
 #include "gbi_helpers.h"
+#include "geometry.h"
 #include "golf_balls.h"
 #include "heap.h"
 #include "hole_objects.h"
+#include "include_asm.h"
 #include "math_util.h"
 #include "movie.h"
 #include "round_events.h"

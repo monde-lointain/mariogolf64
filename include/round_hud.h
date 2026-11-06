@@ -4,6 +4,7 @@
 #include <ultra64.h>
 
 #include "camera.h"
+#include "language.h"
 #include "math_util.h"
 #include "save.h"
 

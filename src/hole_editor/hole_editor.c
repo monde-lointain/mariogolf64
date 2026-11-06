@@ -3,20 +3,26 @@
  * triangles, rings and billboards over its map. They also load and save holes
  * and write captures of the frame to the host.
  */
-#include "common.h"
+#include <ultra64.h>
 
+#include "address.h"
 #include "billboard.h"
 #include "camera.h"
+#include "compiler.h"
 #include "controller.h"
+#include "course_space.h"
 #include "cpu_projection.h"
 #include "debug_text.h"
 #include "game.h"
 #include "game_flags.h"
 #include "gbi_helpers.h"
+#include "geometry.h"
 #include "heap.h"
 #include "hole_builder.h"
 #include "hole_loader.h"
 #include "host_file.h"
+#include "include_asm.h"
+#include "language.h"
 #include "libc.h"
 #include "main.h"
 #include "math_util.h"

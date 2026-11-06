@@ -3,20 +3,24 @@
  * players' scores, and with each game mode's own pages, such as the
  * tournament's leaderboard and a match's results.
  */
-#include "common.h"
-
 #include "scorecard.h"
 
+#include <ultra64.h>
+
+#include "address.h"
 #include "asset.h"
 #include "character.h"
 #include "character_slot.h"
+#include "compiler.h"
 #include "course.h"
+#include "frame_time.h"
 #include "framebuffer.h"
 #include "game_flags.h"
 #include "gbi_helpers.h"
 #include "heap.h"
 #include "hole_display.h"
 #include "hole_loader.h"
+#include "include_asm.h"
 #include "math_util.h"
 #include "play.h"
 #include "reaction.h"

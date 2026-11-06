@@ -2,11 +2,13 @@
  * The tournament's computer contestants: their random numbers, simulating their
  * scores, ranking the field and naming them.
  */
-#include "common.h"
-
 #include "tournament.h"
 
+#include <ultra64.h>
+
+#include "compiler.h"
 #include "course.h"
+#include "language.h"
 #include "libc.h"
 #include "math_util.h"
 #include "save.h"

@@ -1,6 +1,8 @@
 #ifndef SEGMENT_SYMBOLS_H
 #define SEGMENT_SYMBOLS_H
 
+#include <ultra64.h>
+
 /* Bounds of the ROM segments, which the linker script defines */
 
 #define DECLARE_SEGMENT(name) \

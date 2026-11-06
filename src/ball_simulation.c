@@ -3,19 +3,24 @@
  * then moves it a step at a time as it flies, bounces and rolls over the
  * course. It plays the sounds of the ball's impacts and spawns their effects.
  */
-#include "common.h"
-
 #include "ball_simulation.h"
+
+#include <ultra64.h>
 
 #include "ball_physics.h"
 #include "billboard.h"
 #include "club.h"
 #include "collision.h"
+#include "compiler.h"
+#include "course_space.h"
 #include "debug_text.h"
 #include "effects.h"
 #include "game_flags.h"
+#include "geometry.h"
 #include "hole_objects.h"
 #include "hole_triangles.h"
+#include "include_asm.h"
+#include "language.h"
 #include "libc.h"
 #include "math_util.h"
 #include "save.h"
@@ -247,7 +252,7 @@ void ResetBallSimulations(void) {
  * so the slide adds the step to the height, as it does in x and z. The slope's
  * two compare-and-branch magnitudes come from the nested AbsoluteValue
  * helper; with fabsf there 1194 words differ (326 in shape) and with
- * common.h's AbsFloat 482 (128). Mixing two forms, one per slope, gives 452 to
+ * AbsFloat 482 (128). Mixing two forms, one per slope, gives 452 to
  * 482, but takes one magnitude two ways. The spin grip's two take fabsf, an
  * abs.s: with AbsoluteValue there 518 words differed (144). The pull toward the
  * cup sets toCup's X before its zero Y, so the zero store follows the cup's X

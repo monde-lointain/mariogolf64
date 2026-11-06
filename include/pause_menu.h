@@ -4,6 +4,7 @@
 #include <ultra64.h>
 
 #include "controller.h"
+#include "language.h"
 
 /* What OpenSaveMenu lists, and f_MenuKind */
 enum SaveMenuList {

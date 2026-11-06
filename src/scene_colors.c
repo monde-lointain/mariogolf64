@@ -2,13 +2,16 @@
  * Derives the shaded quads' colors from the scene's colors, and draws the
  * plane of two blended texture layers.
  */
-#include "common.h"
-
 #include "scene_colors.h"
 
+#include <ultra64.h>
+
+#include "address.h"
+#include "compiler.h"
 #include "game.h"
 #include "gbi_helpers.h"
 #include "hole_display.h"
+#include "language.h"
 #include "play.h"
 #include "save.h"
 

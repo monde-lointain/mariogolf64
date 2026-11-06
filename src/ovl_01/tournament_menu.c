@@ -2,16 +2,20 @@
  * The window that opens over the menus, and the Club Tournament screen with its
  * code entry.
  */
-#include "common.h"
+#include <ultra64.h>
 
+#include "address.h"
 #include "asset.h"
 #include "billboard.h"
 #include "character.h"
+#include "compiler.h"
 #include "controller.h"
 #include "debug_text.h"
 #include "game_flags.h"
 #include "gbi_helpers.h"
 #include "hole_display.h"
+#include "include_asm.h"
+#include "language.h"
 #include "libc.h"
 #include "main_menu.h"
 #include "menu.h"

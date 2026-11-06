@@ -1,11 +1,10 @@
 #ifndef COLLISION_H
 #define COLLISION_H
 
-#include "common.h"
-
 #include <ultra64.h>
 
 #include "ball_simulation.h"
+#include "course_space.h"
 #include "terrain.h"
 
 /* What FindPinHit returns */

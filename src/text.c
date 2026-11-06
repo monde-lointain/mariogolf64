@@ -2,16 +2,19 @@
  * Text: the fonts, the message table and the text slots that show messages, and
  * drawing text in each font.
  */
-#include "common.h"
+#include <ultra64.h>
 
 /* Keeps text.h from declaring SetTextSlot with the int colors its callers pass
  */
 #define DEFINES_SET_TEXT_SLOT
 
+#include "address.h"
 #include "asset.h"
+#include "compiler.h"
 #include "current_shot.h"
 #include "gbi_helpers.h"
 #include "heap.h"
+#include "language.h"
 #include "libc.h"
 #include "round_hud.h"
 #include "round_stats.h"

@@ -1,11 +1,10 @@
 #ifndef CURRENT_SHOT_H
 #define CURRENT_SHOT_H
 
-#include "common.h"
-
 #include <ultra64.h>
 
 #include "club.h"
+#include "course_space.h"
 #include "math_util.h"
 #include "surface.h"
 

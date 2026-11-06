@@ -2,10 +2,11 @@
  * Facts about the courses and their holes: where their records are kept, and
  * which holes are par threes or are marked as par fives.
  */
-#include "common.h"
+#include <ultra64.h>
 
 #include "billboard.h"
 #include "course.h"
+#include "language.h"
 #include "main.h"
 #include "save.h"
 #include "scene.h"

@@ -1,10 +1,10 @@
 #ifndef HOLE_LOADER_H
 #define HOLE_LOADER_H
 
-#include "common.h"
-
 #include <ultra64.h>
 
+#include "course_space.h"
+#include "language.h"
 #include "save.h"
 
 #define CUP_POSITION_COUNT 4

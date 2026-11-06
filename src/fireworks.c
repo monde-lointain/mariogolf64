@@ -2,14 +2,18 @@
  * The fireworks that the turn starts in sudden death. Each one bursts from a
  * random point into the outline of a character, picked by the course.
  */
-#include "common.h"
-
 #include "fireworks.h"
 
+#include <ultra64.h>
+
+#include "address.h"
 #include "asset.h"
+#include "compiler.h"
 #include "cpu_projection.h"
 #include "gbi_helpers.h"
+#include "geometry.h"
 #include "heap.h"
+#include "language.h"
 #include "math_util.h"
 #include "round_hud.h"
 #include "screen.h"

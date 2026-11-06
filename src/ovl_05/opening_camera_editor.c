@@ -2,12 +2,16 @@
  * The camera editor that moves the opening's camera: its eye and look-at point
  * move, turn, tilt and zoom at set speeds.
  */
-#include "common.h"
+#include <ultra64.h>
 
 #include "camera_editor.h"
+#include "compiler.h"
 #include "controller.h"
 #include "debug_text.h"
+#include "geometry.h"
 #include "host_file.h"
+#include "include_asm.h"
+#include "language.h"
 #include "libc.h"
 #include "math_util.h"
 #include "sound.h"

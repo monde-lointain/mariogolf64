@@ -3,7 +3,7 @@
  * They work on the bits of floats, unlike KMC's libm, which the game
  * also links and which works on doubles with CORDIC loops.
  */
-#include "common.h"
+#include <ultra64.h>
 
 typedef union {
   f32 value;

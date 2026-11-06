@@ -2,11 +2,12 @@
  * The controller paks: finding Transfer Paks with Game Boy cartridges, the Game
  * Boy characters on them, and starting and stopping the Rumble Paks.
  */
-#include "common.h"
-
 #include <lib/libnusys/nusys.h>
+#include <ultra64.h>
 
+#include "compiler.h"
 #include "controller.h"
+#include "language.h"
 #include "transfer_pak.h"
 
 Boolean g_HasBroughtOverCharacter = FALSE;

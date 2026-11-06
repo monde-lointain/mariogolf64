@@ -5,19 +5,23 @@
  * on a club adds that club to the bag beside the putter; three stars give
  * every club.
  */
-#include "common.h"
+#include <ultra64.h>
 
+#include "address.h"
 #include "asset.h"
 #include "character.h"
 #include "club.h"
+#include "compiler.h"
 #include "controller.h"
 #include "cpu_projection.h"
 #include "framebuffer.h"
 #include "game.h"
 #include "game_flags.h"
 #include "gbi_helpers.h"
+#include "geometry.h"
 #include "heap.h"
 #include "hole_display.h"
+#include "language.h"
 #include "math_util.h"
 #include "menu.h"
 #include "round_hud.h"

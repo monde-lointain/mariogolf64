@@ -3,6 +3,7 @@
 
 #include <ultra64.h>
 
+#include "geometry.h"
 #include "math_util.h"
 
 /* How a camera is placed */

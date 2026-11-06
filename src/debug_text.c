@@ -4,12 +4,15 @@
  * lines, the log, can be copied into the grid. Messages are also drawn
  * straight into the framebuffers; the fault handler prints with them.
  */
-#include "common.h"
-
 #include "debug_text.h"
 
+#include <ultra64.h>
+
+#include "address.h"
+#include "compiler.h"
 #include "game_flags.h"
 #include "gbi_helpers.h"
+#include "language.h"
 #include "main.h"
 #include "screen.h"
 #include "text.h"

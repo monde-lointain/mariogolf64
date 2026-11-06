@@ -7,9 +7,10 @@
  * copies of them
  */
 
-#include "common.h"
+#include <ultra64.h>
 
 #include "ball_simulation.h"
+#include "course_space.h"
 #include "sound.h"
 
 /* The channels of a rolling ball's sound and of a ring passed through */

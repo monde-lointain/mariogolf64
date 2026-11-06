@@ -1,7 +1,7 @@
 #ifndef ANIMATED_BOX_H
 #define ANIMATED_BOX_H
 
-#include "common.h"
+#include <ultra64.h>
 
 typedef enum AnimatedBoxState {
   BOX_OPENING,

@@ -1,11 +1,12 @@
 #ifndef REACTION_H
 #define REACTION_H
 
-#include "common.h"
-
 #include <ultra64.h>
 
 #include "character.h"
+#include "compiler.h"
+#include "course_space.h"
+#include "geometry.h"
 
 /*
  * The reaction animations, picked from the strokes against par. The

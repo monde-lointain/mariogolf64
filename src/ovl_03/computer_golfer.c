@@ -2,18 +2,23 @@
  * The computer golfer, which plans its shot on a thread of its own by trying
  * shots in the ball simulation.
  */
-#include "common.h"
-
 #include "computer_golfer.h"
+
+#include <ultra64.h>
 
 #include "ball_simulation.h"
 #include "club.h"
 #include "collision.h"
+#include "compiler.h"
 #include "course.h"
+#include "course_space.h"
 #include "current_shot.h"
 #include "debug_text.h"
 #include "game_flags.h"
+#include "geometry.h"
 #include "hole_loader.h"
+#include "include_asm.h"
+#include "language.h"
 #include "libc.h"
 #include "math_util.h"
 #include "play.h"

@@ -2,20 +2,25 @@
  * The pause menu over a round, and the choice box that asks the player to
  * pick between a few options during a turn.
  */
-#include "common.h"
-
 #include "pause_menu.h"
 
+#include <ultra64.h>
+
+#include "address.h"
 #include "asset.h"
 #include "billboard.h"
+#include "compiler.h"
 #include "controller.h"
 #include "course.h"
 #include "current_shot.h"
 #include "effects.h"
 #include "framebuffer.h"
 #include "gbi_helpers.h"
+#include "geometry.h"
 #include "heap.h"
 #include "hole_display.h"
+#include "include_asm.h"
+#include "language.h"
 #include "main.h"
 #include "math_util.h"
 #include "overlay_manager.h"

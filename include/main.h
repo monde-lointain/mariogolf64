@@ -3,6 +3,8 @@
 
 #include <ultra64.h>
 
+#include "language.h"
+
 /* End of the RDRAM that every console has, without the Expansion Pak */
 #define BASE_RDRAM_END 0x80400000
 

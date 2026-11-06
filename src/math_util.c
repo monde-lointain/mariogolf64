@@ -2,10 +2,11 @@
  * Math helpers: vector lengths in floats and integers, the random number
  * generator and a CRC-16.
  */
-#include "common.h"
-
 #include "math_util.h"
 
+#include <ultra64.h>
+
+#include "compiler.h"
 #include "libc.h"
 
 /* The integer lengths halve their components until they are below this

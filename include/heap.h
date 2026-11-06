@@ -3,6 +3,8 @@
 
 #include <ultra64.h>
 
+#include "language.h"
+
 /*
  * The game divides spare memory into a few heaps, numbered from 0, each a
  * list of blocks taken from regions of memory added to it.

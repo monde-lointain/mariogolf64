@@ -1,7 +1,7 @@
 #ifndef HOLE_INTRO_H
 #define HOLE_INTRO_H
 
-#include "common.h"
+#include <ultra64.h>
 
 /* The hole intro camera */
 

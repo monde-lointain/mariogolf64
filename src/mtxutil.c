@@ -5,7 +5,7 @@
  * between MIN_FIXED_ELEMENT and MAX_FIXED_ELEMENT before converting
  * it.
  */
-#include "common.h"
+#include <ultra64.h>
 
 /* Converts between floats and the 16.16 fixed point of a Mtx */
 #define FloatToFixed(value) (s32)((value) * (f32)0x10000)

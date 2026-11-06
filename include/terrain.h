@@ -1,10 +1,11 @@
 #ifndef TERRAIN_H
 #define TERRAIN_H
 
-#include "common.h"
-
 #include <ultra64.h>
 
+#include "compiler.h"
+#include "geometry.h"
+#include "language.h"
 #include "surface.h"
 
 /*

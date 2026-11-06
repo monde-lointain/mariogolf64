@@ -3,31 +3,38 @@
  * wind, the landing reaction, the green's grid, the ball's trail and the hole
  * intro's images.
  */
-#include "common.h"
-
 #include "round_hud.h"
 
+#include <ultra64.h>
+
+#include "address.h"
 #include "asset.h"
 #include "billboard.h"
 #include "camera.h"
 #include "character.h"
 #include "club_panel.h"
+#include "compiler.h"
 #include "controller.h"
 #include "course.h"
+#include "course_space.h"
 #include "cpu_projection.h"
 #include "current_shot.h"
 #include "curve.h"
 #include "debug_text.h"
 #include "effects.h"
 #include "fireworks.h"
+#include "frame_time.h"
 #include "game.h"
 #include "game_flags.h"
 #include "gbi_helpers.h"
+#include "geometry.h"
 #include "golf_balls.h"
 #include "heap.h"
 #include "hole_display.h"
 #include "hole_loader.h"
 #include "hole_objects.h"
+#include "include_asm.h"
+#include "language.h"
 #include "libc.h"
 #include "main.h"
 #include "math_util.h"

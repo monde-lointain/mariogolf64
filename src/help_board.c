@@ -2,17 +2,19 @@
  * The help board that the menus show: a chalkboard listing the topics, with a
  * hand and arrows, and each topic's pages of text.
  */
-#include "common.h"
-
 #include "help_board.h"
 
 #include <lib/libnusys/nusys.h>
+#include <ultra64.h>
 
+#include "address.h"
 #include "asset.h"
 #include "character_slot.h"
+#include "compiler.h"
 #include "gbi_helpers.h"
 #include "hole_display.h"
 #include "hole_loader.h"
+#include "language.h"
 #include "main_menu.h"
 #include "math_util.h"
 #include "menu.h"

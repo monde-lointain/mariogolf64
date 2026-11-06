@@ -11,7 +11,6 @@
  * library, defines it too, as a common that binds to the definition here.
  * Other builds place each object with its module instead.
  */
-#include "common.h"
 
 #include <PRinternal/controller.h>
 #include <PRinternal/macros.h>
@@ -26,6 +25,7 @@
 #include "camera.h"
 #include "character.h"
 #include "character_slot.h"
+#include "compiler.h"
 #include "controller.h"
 #include "current_shot.h"
 #include "effects.h"
@@ -33,8 +33,10 @@
 #include "fireworks.h"
 #include "game.h"
 #include "game_flags.h"
+#include "geometry.h"
 #include "hole_display.h"
 #include "hole_loader.h"
+#include "language.h"
 #include "main.h"
 #include "main_menu.h"
 #include "menu.h"

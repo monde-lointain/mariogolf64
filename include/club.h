@@ -4,6 +4,7 @@
 #include <ultra64.h>
 
 #include "asset.h"
+#include "compiler.h"
 #include "surface.h"
 
 /* How far the selected club hits: a power shot, a normal shot or an approach

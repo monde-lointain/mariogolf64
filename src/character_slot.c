@@ -3,13 +3,17 @@
  * joint matrices, freeing them once no display list uses them, and the
  * positions of points on their models.
  */
-#include "common.h"
-
 #include "character_slot.h"
+
+#include <ultra64.h>
 
 #include "camera.h"
 #include "club.h"
+#include "compiler.h"
 #include "game.h"
+#include "geometry.h"
+#include "include_asm.h"
+#include "language.h"
 #include "main.h"
 #include "math_util.h"
 #include "save.h"

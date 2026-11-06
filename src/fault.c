@@ -1,12 +1,15 @@
 /*
  * Waits for CPU faults and prints the faulted thread's registers.
  */
-#include "common.h"
-
 #include "fault.h"
 
+#include <ultra64.h>
+
 #include "PR/R4300.h"
+#include "compiler.h"
 #include "debug_text.h"
+#include "include_asm.h"
+#include "language.h"
 #include "libc.h"
 #include "sound.h"
 

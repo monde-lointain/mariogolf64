@@ -4,17 +4,20 @@
  * runs each hole and what comes between holes. It also sets the scene's fog and
  * draws the ground.
  */
-#include "common.h"
-
 #include "play.h"
 
+#include <ultra64.h>
+
+#include "address.h"
 #include "ball_simulation.h"
 #include "camera.h"
 #include "character.h"
 #include "character_slot.h"
 #include "club.h"
+#include "compiler.h"
 #include "controller.h"
 #include "course.h"
+#include "course_space.h"
 #include "cpu_projection.h"
 #include "current_shot.h"
 #include "debug_text.h"
@@ -22,10 +25,13 @@
 #include "game.h"
 #include "game_flags.h"
 #include "gbi_helpers.h"
+#include "geometry.h"
 #include "golf_balls.h"
 #include "hole_display.h"
 #include "hole_loader.h"
 #include "hole_triangles.h"
+#include "include_asm.h"
+#include "language.h"
 #include "libc.h"
 #include "main.h"
 #include "math_util.h"

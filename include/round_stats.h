@@ -1,8 +1,9 @@
 #ifndef ROUND_STATS_H
 #define ROUND_STATS_H
 
-#include "common.h"
+#include <ultra64.h>
 
+#include "language.h"
 #include "save.h"
 
 /* What each player has won on each BET_* bet this game */

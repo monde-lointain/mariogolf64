@@ -1,9 +1,10 @@
 #ifndef SOUND_H
 #define SOUND_H
 
-#include "common.h"
+#include <ultra64.h>
 
 #include "character.h"
+#include "compiler.h"
 
 /* Sound effects play on channels, each holding one effect at a time */
 #define SOUND_CHANNEL_COUNT 16

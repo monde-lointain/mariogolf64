@@ -2,12 +2,16 @@
  * The clubhouse's character table, screen 15: the characters' wins against each
  * other, and a popup of two characters' faces with their wins.
  */
-#include "common.h"
+#include <ultra64.h>
 
+#include "address.h"
 #include "asset.h"
 #include "character.h"
+#include "compiler.h"
 #include "gbi_helpers.h"
 #include "hole_display.h"
+#include "include_asm.h"
+#include "language.h"
 #include "main_menu.h"
 #include "menu.h"
 #include "menu_memory.h"

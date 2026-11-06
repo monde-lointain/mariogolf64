@@ -3,10 +3,11 @@
  * for each frame it shows, and drawing empties the queue. The debug scene menu
  * draws its box with them.
  */
-#include "common.h"
-
 #include "animated_box.h"
 
+#include <ultra64.h>
+
+#include "compiler.h"
 #include "game.h"
 #include "screen.h"
 

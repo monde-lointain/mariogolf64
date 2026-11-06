@@ -4,11 +4,14 @@
  * depends on its position in the password, and the last symbols are checksums
  * of the others.
  */
-#include "common.h"
-
 #include "password.h"
 
+#include <ultra64.h>
+
 #include "character.h"
+#include "compiler.h"
+#include "include_asm.h"
+#include "language.h"
 #include "libc.h"
 
 #define PASSWORD_SYMBOL_COUNT 28

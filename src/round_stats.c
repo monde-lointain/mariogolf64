@@ -2,13 +2,15 @@
  * The round's statistics and the course's records of rounds, with the skins,
  * the bets and Nassau, and the longest drive and nearest pin contests.
  */
-#include "common.h"
-
 #include "round_stats.h"
 
+#include <ultra64.h>
+
 #include "club.h"
+#include "compiler.h"
 #include "course.h"
 #include "debug_text.h"
+#include "language.h"
 #include "round_hud.h"
 #include "save.h"
 #include "scene.h"

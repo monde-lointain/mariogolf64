@@ -1,16 +1,17 @@
 /*
  * Loads and unloads the overlays that hold the game's modules.
  */
-#include "common.h"
-
 #include "overlay_manager.h"
 
 #include <lib/libnusys/nusys.h>
+#include <ultra64.h>
 
 #include "boot_logos.h"
 #include "camera_editor.h"
+#include "compiler.h"
 #include "game_flags.h"
 #include "golf_balls.h"
+#include "language.h"
 #include "main.h"
 #include "menu.h"
 #include "opening.h"

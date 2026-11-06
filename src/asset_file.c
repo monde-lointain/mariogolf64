@@ -3,11 +3,11 @@
  * asset and read a part at a time, and encoded assets are decoded from runs of
  * bytes or of halfwords.
  */
-#include "common.h"
-
 #include <lib/libnusys/nusys.h>
+#include <ultra64.h>
 
 #include "asset.h"
+#include "compiler.h"
 #include "game_flags.h"
 
 /* How many files OpenPooledAssetFile can keep open at once */

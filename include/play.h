@@ -1,10 +1,11 @@
 #ifndef PLAY_H
 #define PLAY_H
 
-#include "common.h"
+#include <ultra64.h>
 
 #include "ball_simulation.h"
 #include "current_shot.h"
+#include "language.h"
 #include "math_util.h"
 #include "save.h"
 

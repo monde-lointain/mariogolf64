@@ -2,22 +2,29 @@
  * The golf balls on the course, one for each player, and the fading
  * afterimages that the ball in play leaves behind it.
  */
-#include "common.h"
-
 #include "golf_balls.h"
 
+#include <ultra64.h>
+
+#include "address.h"
 #include "asset.h"
 #include "ball_simulation.h"
 #include "billboard.h"
 #include "camera.h"
+#include "compiler.h"
+#include "course_space.h"
 #include "cpu_projection.h"
 #include "debug_text.h"
 #include "game.h"
 #include "game_flags.h"
 #include "gbi_helpers.h"
+#include "geometry.h"
 #include "heap.h"
 #include "hole_loader.h"
+#include "include_asm.h"
+#include "language.h"
 #include "main.h"
+#include "math_util.h"
 #include "overlay_manager.h"
 #include "pin.h"
 #include "save.h"

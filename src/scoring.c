@@ -2,12 +2,14 @@
  * Scoring: the round's holes, handicaps and net scores, and who wins a hole of
  * a match or of a group.
  */
-#include "common.h"
-
 #include "scoring.h"
+
+#include <ultra64.h>
 
 #include "course.h"
 #include "game_flags.h"
+#include "language.h"
+#include "math_util.h"
 #include "save.h"
 #include "scene.h"
 

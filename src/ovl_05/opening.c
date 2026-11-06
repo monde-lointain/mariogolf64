@@ -4,10 +4,11 @@
  * the balls, Lakitu, the impact lines, the burst, the sparks and the title
  * logo.
  */
-#include "common.h"
-
 #include "opening.h"
 
+#include <ultra64.h>
+
+#include "address.h"
 #include "asset.h"
 #include "ball_simulation.h"
 #include "billboard.h"
@@ -15,7 +16,9 @@
 #include "camera_editor.h"
 #include "character.h"
 #include "character_slot.h"
+#include "compiler.h"
 #include "controller.h"
+#include "course_space.h"
 #include "cpu_projection.h"
 #include "current_shot.h"
 #include "debug_text.h"
@@ -23,8 +26,11 @@
 #include "game.h"
 #include "game_flags.h"
 #include "gbi_helpers.h"
+#include "geometry.h"
 #include "heap.h"
 #include "hole_display.h"
+#include "include_asm.h"
+#include "language.h"
 #include "libc.h"
 #include "main.h"
 #include "math_util.h"

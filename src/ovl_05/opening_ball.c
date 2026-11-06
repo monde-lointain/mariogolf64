@@ -3,7 +3,7 @@
  * simulates its shot, and a routine that loads one of the other characters with
  * its birdie animation.
  */
-#include "common.h"
+#include <ultra64.h>
 
 #include "ball_physics.h"
 #include "ball_simulation.h"
@@ -11,10 +11,15 @@
 #include "character_slot.h"
 #include "club.h"
 #include "collision.h"
+#include "compiler.h"
+#include "course_space.h"
 #include "debug_text.h"
 #include "effects.h"
 #include "game_flags.h"
+#include "geometry.h"
 #include "hole_triangles.h"
+#include "include_asm.h"
+#include "language.h"
 #include "libc.h"
 #include "math_util.h"
 #include "reaction.h"

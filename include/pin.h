@@ -4,6 +4,7 @@
 #include <ultra64.h>
 
 #include "camera.h"
+#include "language.h"
 
 /* How many times its model's size the pin, the cup and the ball's trail are
  * drawn */

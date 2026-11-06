@@ -3,17 +3,18 @@
  * heartbeat loop. The file also keeps the game flags, reads the controllers and
  * prepares for a reset.
  */
-#include "common.h"
-
 #include "main.h"
 
 #include <PR/libmus.h>
+#include <ultra64.h>
 
+#include "address.h"
 #include "asset.h"
 #include "ball_simulation.h"
 #include "character.h"
 #include "character_slot.h"
 #include "club.h"
+#include "compiler.h"
 #include "controller.h"
 #include "debug_text.h"
 #include "fault.h"
@@ -21,7 +22,9 @@
 #include "game_flags.h"
 #include "heap.h"
 #include "hole_loader.h"
+#include "language.h"
 #include "libc.h"
+#include "math_util.h"
 #include "overlay_manager.h"
 #include "play.h"
 #include "save.h"

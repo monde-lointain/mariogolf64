@@ -1,11 +1,12 @@
 #ifndef MENU_H
 #define MENU_H
 
-#include "common.h"
+#include <ultra64.h>
 
 #include "asset.h"
 #include "character.h"
 #include "course.h"
+#include "language.h"
 #include "password.h"
 #include "save.h"
 

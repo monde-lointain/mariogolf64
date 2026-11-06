@@ -2,18 +2,24 @@
  * The Transmit menu, which brings characters over from Game Boy cartridges and
  * writes status and experience to them.
  */
-#include "common.h"
-
 #include "transmit_menu.h"
 
+#include <ultra64.h>
+
+#include "address.h"
 #include "asset.h"
 #include "character.h"
+#include "compiler.h"
 #include "controller.h"
+#include "course_space.h"
 #include "debug_text.h"
+#include "frame_time.h"
 #include "game_flags.h"
 #include "gbi_helpers.h"
 #include "heap.h"
 #include "host_file.h"
+#include "include_asm.h"
+#include "language.h"
 #include "libc.h"
 #include "math_util.h"
 #include "overlay_manager.h"

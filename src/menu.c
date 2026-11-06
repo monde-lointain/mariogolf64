@@ -3,22 +3,25 @@
  * records and best times, what is unlocked, the Club Tournaments and the round
  * statistics. It also loads the menus' resources.
  */
-#include "common.h"
-
 #include "menu.h"
 
 #include <lib/libnusys/nusys.h>
+#include <ultra64.h>
 
 #include "asset.h"
 #include "camera.h"
 #include "character.h"
 #include "club.h"
+#include "compiler.h"
 #include "course.h"
+#include "course_space.h"
 #include "fault.h"
+#include "frame_time.h"
 #include "framebuffer.h"
 #include "game_flags.h"
 #include "heap.h"
 #include "host_file.h"
+#include "language.h"
 #include "libc.h"
 #include "main.h"
 #include "main_menu.h"

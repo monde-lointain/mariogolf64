@@ -3,6 +3,8 @@
 
 #include <ultra64.h>
 
+#include "language.h"
+
 /*
  * The game runs one scene at a time: a menu, a round of golf and so on.
  * A scene's code lives in a module. To change scenes, code names the

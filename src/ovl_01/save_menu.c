@@ -3,19 +3,23 @@
  * course's records and saved replays, and the saved games to continue, on
  * numbered boards with each game's mode, course and players.
  */
-#include "common.h"
+#include <ultra64.h>
 
+#include "address.h"
 #include "asset.h"
 #include "character.h"
 #include "character_slot.h"
+#include "compiler.h"
 #include "controller.h"
 #include "course.h"
 #include "cpu_projection.h"
 #include "game.h"
 #include "game_flags.h"
 #include "gbi_helpers.h"
+#include "geometry.h"
 #include "hole_display.h"
 #include "hole_loader.h"
+#include "include_asm.h"
 #include "libc.h"
 #include "main_menu.h"
 #include "math_util.h"

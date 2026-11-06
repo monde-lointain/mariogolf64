@@ -1,8 +1,10 @@
 #ifndef CAMERA_EDITOR_H
 #define CAMERA_EDITOR_H
 
-#include "common.h"
+#include <ultra64.h>
 
+#include "geometry.h"
+#include "language.h"
 #include "math_util.h"
 
 /* The points of the camera that the editor moves */

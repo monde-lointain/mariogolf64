@@ -3,22 +3,28 @@
  * animations, posing, lighting, placing and drawing them. It also measures how
  * far to the side of the ball each character stands for each club.
  */
-#include "common.h"
-
 #include "character.h"
 
+#include <ultra64.h>
+
+#include "address.h"
 #include "camera.h"
 #include "character_slot.h"
 #include "club.h"
+#include "compiler.h"
+#include "course_space.h"
 #include "cpu_projection.h"
 #include "current_shot.h"
 #include "debug_text.h"
 #include "game.h"
 #include "game_flags.h"
 #include "gbi_helpers.h"
+#include "geometry.h"
 #include "heap.h"
 #include "hole_loader.h"
 #include "host_file.h"
+#include "include_asm.h"
+#include "language.h"
 #include "libc.h"
 #include "main.h"
 #include "math_util.h"

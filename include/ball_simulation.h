@@ -1,11 +1,12 @@
 #ifndef BALL_SIMULATION_H
 #define BALL_SIMULATION_H
 
-#include "common.h"
-
 #include <ultra64.h>
 
 #include "club.h"
+#include "course_space.h"
+#include "frame_time.h"
+#include "geometry.h"
 #include "math_util.h"
 
 /* The ball moves its speed in course units each frame */

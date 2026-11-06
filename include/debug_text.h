@@ -1,7 +1,10 @@
 #ifndef DEBUG_TEXT_H
 #define DEBUG_TEXT_H
 
-#include "common.h"
+#include <ultra64.h>
+
+#include "compiler.h"
+#include "language.h"
 
 /*
  * The framebuffer that DrawMessageCharacter last drew a message into, which

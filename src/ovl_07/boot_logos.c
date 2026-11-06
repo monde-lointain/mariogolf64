@@ -4,17 +4,20 @@
  * then Camelot's. The first two fade in and out through the primitive alpha;
  * Camelot's only fades in.
  */
-#include "common.h"
-
 #include "boot_logos.h"
 
+#include <ultra64.h>
+
+#include "address.h"
 #include "asset.h"
 #include "camera.h"
 #include "character_slot.h"
+#include "compiler.h"
 #include "controller.h"
 #include "gbi_helpers.h"
 #include "hole_display.h"
 #include "hole_loader.h"
+#include "language.h"
 #include "main.h"
 #include "overlay_manager.h"
 #include "scene.h"

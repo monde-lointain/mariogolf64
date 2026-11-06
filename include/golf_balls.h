@@ -3,6 +3,8 @@
 
 #include <ultra64.h>
 
+#include "language.h"
+
 /* The wind indicator draws it while MODULE_WIND_BOO is alive */
 extern Gfx g_BooDisplayList[];
 

@@ -1,11 +1,15 @@
 /*
  * Loads the cursor box's image and draws it around a point.
  */
-#include "common.h"
+#include <ultra64.h>
 
+#include "address.h"
 #include "asset.h"
+#include "compiler.h"
 #include "game.h"
 #include "gbi_helpers.h"
+#include "geometry.h"
+#include "include_asm.h"
 #include "math_util.h"
 #include "screen.h"
 

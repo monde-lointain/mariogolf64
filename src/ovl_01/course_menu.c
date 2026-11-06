@@ -2,14 +2,19 @@
  * The clubhouse's course statistics: a wheel of the open courses that turns
  * from one to the next, and the chosen course's panel of statistics.
  */
-#include "common.h"
+#include <ultra64.h>
 
+#include "address.h"
 #include "asset.h"
+#include "compiler.h"
 #include "course.h"
 #include "cpu_projection.h"
 #include "game.h"
 #include "gbi_helpers.h"
+#include "geometry.h"
 #include "hole_display.h"
+#include "include_asm.h"
+#include "language.h"
 #include "libc.h"
 #include "main_menu.h"
 #include "math_util.h"
