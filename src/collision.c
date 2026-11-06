@@ -1580,6 +1580,13 @@ BillboardCell GetBillboardCell(s32 textureIndex, f32 across, f32 down) {
  * Shifting startY itself after the declarations, in place of fromY, as the
  * original stores fromY to startY's slot, gives 28 words (16 in shape), and
  * gives startY two meanings. 2 words differ, none in shape.
+ *
+ * The scheduler orders the two stores by their order in the RTL, as they
+ * have equal priority, so the original's order would follow from setting
+ * fromY after isHit. With fromY's declaration anywhere after isHit's, and at
+ * most one other initialized declaration moved as well, the 157 orders that
+ * keep each difference after its operands give 14 to 28 words (0 to 6 in
+ * shape).
  */
 #ifdef NON_MATCHING
 s32 FindBillboardHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
