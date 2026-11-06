@@ -1707,7 +1707,10 @@ void UpdateJointKeyframeSpans(u32 slotIndex) {
     rotationMatrix[2][1] = yz - wx;
     /*
      * In its own block, as without it 315 words differ, 71 in shape, against
-     * 184 and 66
+     * 184 and 66. The block around the element before it instead gives 182
+     * words, 68 in shape, and around the two before it 186, 64 in shape; the
+     * register oracle's closest result is 136 words, forcing 27 pseudos, and
+     * 135, forcing 31, against 136, forcing 28
      */
     IN_OWN_BLOCK(rotationMatrix[2][2] = 1.0f - (xx + yy));
     rotationMatrix[2][3] = 0.0f;
