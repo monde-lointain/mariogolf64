@@ -2188,6 +2188,12 @@ const CharacterModel g_OtherCharacterModels[OTHER_CHARACTER_MODEL_COUNT] = {
  * A search over merges of two variables found none with a single meaning
  * that gains: holding the scale's frame in lengthSquared gives 198 words, 42
  * in shape, but would give the quaternion's squared length a second meaning.
+ *
+ * A later focused run's best reads the span's start frame into an unsigned
+ * short for the progress's divisor alone: 259 words (29 in shape), in a
+ * frame 8 bytes smaller, reading an s16 field as unsigned. An s16 or s32
+ * local for the start frame, used in the divisor alone or in both its reads,
+ * and a u16 local used in both, compile as the draft does.
  */
 #ifdef NON_MATCHING
 void AnimateCharacterJoints(u32 slotIndex) {
