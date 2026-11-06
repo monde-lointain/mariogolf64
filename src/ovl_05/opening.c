@@ -1384,8 +1384,8 @@ void AnimateNameLogos(void);
 void LoadNameLogo(s32 logoIndex, s32 slot);
 void MoveLakitu(void);
 
-void LaunchOpeningBallSimulation(
-    BallSimulation* simulation, s32 arg1, ShotLaunch* arg2);
+s32 LaunchOpeningBallSimulation(
+    BallSimulation* simulation, s32 purpose, ShotLaunch* shot);
 
 /* Fades the screen to white when a button skips the rest of the opening */
 #define OPENING_SCENE_SKIPPED 998
