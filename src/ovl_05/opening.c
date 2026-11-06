@@ -3884,16 +3884,16 @@ void LoadOpeningImpactLines(void) {
  * in shape, to 217 (23), and dropping a second pipe sync after the palette
  * load, which the original doesn't have, to 186 (16). Setting the left edge
  * in a variable on each pass took it to 45 (1); one set once, at its
- * declaration or before the loop, gives 284 (26). Working out the top edge
- * from the row, as the original does, rather than from the bottom then gave
- * 46 words, none in shape; the bottom less the strip height gives 45 (1), and
- * the next row's offset, (row + 1) times the height, 184 (54). The permuter's
- * best, 36 words (4 in shape), also sets the left edge on each pass and moves
- * that sync into the strip loop, adding a command there. A focused run's
- * best, 32 words (4 in shape), also counts the row down before the rectangle;
- * measured before the left edge, that alone gave 252 (30). The register
- * oracle's closest result is the 46 words with no register forced; forcing
- * any gives 212 or more. 46 words differ, none in shape.
+ * declaration or before the loop, gives 274 (32) on the current draft. Working
+ * out the top edge from the row, as the original does, rather than from the
+ * bottom then gave 46 words, none in shape; the bottom less the strip height
+ * gives 45 (1), and the next row's offset, (row + 1) times the height, 184
+ * (54). The permuter's best, 36 words (4 in shape), also sets the left edge on
+ * each pass and moves that sync into the strip loop, adding a command there. A
+ * focused run's best, 32 words (4 in shape), also counts the row down before
+ * the rectangle; measured before the left edge, that alone gave 252 (30). The
+ * register oracle's closest result is the 46 words with no register forced;
+ * forcing any gives 212 or more. 46 words differ, none in shape.
  */
 #ifdef NON_MATCHING
 void DrawOpeningImpactLines(Gfx** displayListHead) {
@@ -3942,7 +3942,7 @@ void DrawOpeningImpactLines(Gfx** displayListHead) {
          * Set on each pass, as the original works out the rectangle's shifted
          * left and right edges once, outside the loop, and keeps them on the
          * stack; written as the constant, the edges fold into the commands,
-         * 186 words differing (16 in shape) against 45 (1)
+         * 253 words differing (19 in shape) against 46 (none)
          */
         left = IMPACT_LINES_LEFT;
         bottom = IMPACT_LINES_BOTTOM - (row * IMPACT_LINES_STRIP_HEIGHT);
