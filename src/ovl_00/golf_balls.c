@@ -849,6 +849,11 @@ enum BallSprite {
  * block 852 (114), and read only for the switch, at the top of the near
  * ball's block, 492 (100). The counts in the paragraphs above were measured
  * before this change. 492 words differ, 100 in shape.
+ *
+ * The Pika Ball's test reads the shown alpha as f_GolfBalls[i].alpha,
+ * beside ball's other fields: reading it through ball, alone or with the
+ * whole test in a macro taking ball, gives 522 words differing (122 in
+ * shape) against 492 (100).
  */
 #ifdef NON_MATCHING
 void DrawGolfBalls(CameraMatrices* matrices UNUSED) {
