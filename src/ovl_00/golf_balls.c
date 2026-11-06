@@ -315,9 +315,11 @@ void UnusedGolfBallStub(void) {}
 
 /* Where the ball of the player whose turn it is was last drawn */
 static BallScreenPoint f_CurrentBallScreenPoint;
-static u8* f_BallShadowImage;
+/* A dot, drawn in place of the full ball sprite for a farther ball */
+static u8* f_SmallBallImage;
 static u8* f_RollingBallImage;
-static u8* f_BallSparkleImage;
+/* A quarter of the soft disc that shades the ground under a ball, mirrored */
+static u8* f_BallShadowImage;
 static u8* f_BallMarkerImage;
 static u8* f_BallAfterimageImage;
 
@@ -344,15 +346,15 @@ void LoadGolfBallImages(void) {
   ResetHeap(HEAP_BALL_IMAGES);
   AddHeapRegion(HEAP_BALL_IMAGES, f_BallImageHeap,
       f_BallImageHeap + BALL_IMAGE_HEAP_SIZE);
-  f_BallShadowImage =
+  f_SmallBallImage =
       AllocFromHeap(HEAP_BALL_IMAGES, OpenEncodedAsset(0x4C7, &asset));
-  ReadEncodedAsset(f_BallShadowImage, &asset);
+  ReadEncodedAsset(f_SmallBallImage, &asset);
   f_RollingBallImage =
       AllocFromHeap(HEAP_BALL_IMAGES, OpenEncodedAsset(0x4C8, &asset));
   ReadEncodedAsset(f_RollingBallImage, &asset);
-  f_BallSparkleImage =
+  f_BallShadowImage =
       AllocFromHeap(HEAP_BALL_IMAGES, OpenEncodedAsset(0x4DA, &asset));
-  ReadEncodedAsset(f_BallSparkleImage, &asset);
+  ReadEncodedAsset(f_BallShadowImage, &asset);
   f_BallMarkerImage =
       AllocFromHeap(HEAP_BALL_IMAGES, OpenEncodedAsset(0x4C6, &asset));
   ReadEncodedAsset(f_BallMarkerImage, &asset);
@@ -715,6 +717,7 @@ Boolean IsAnyBallInCup(void) {
 #define BALL_TILE_AFTERIMAGE 5
 #define BALL_TEXTURE_SIZE 32
 #define SMALL_BALL_TEXTURE_SIZE 8
+#define MARKER_TEXTURE_SIZE 16
 
 /* How a ball sits in its surface, from SurfaceInfo.sinkDepth */
 enum BallLie {
@@ -881,14 +884,14 @@ void DrawGolfBalls(CameraMatrices* matrices UNUSED) {
       BALL_TILE_STILL, G_IM_FMT_I, G_IM_SIZ_8b, BALL_TEXTURE_SIZE,
       BALL_TEXTURE_SIZE, 0, G_TX_NOMIRROR | G_TX_CLAMP,
       G_TX_NOMIRROR | G_TX_CLAMP, 6, 6, G_TX_NOLOD, G_TX_NOLOD);
-  gDPLoadMultiBlock_4b(gfx++, TextureAddress(ImageBody(f_BallSparkleImage)),
+  gDPLoadMultiBlock_4b(gfx++, TextureAddress(ImageBody(f_BallShadowImage)),
       0x100, BALL_TILE_SHADOW, G_IM_FMT_I, 16, 16, 0, G_TX_MIRROR | G_TX_WRAP,
       G_TX_MIRROR | G_TX_WRAP, 4, 4, G_TX_NOLOD, G_TX_NOLOD);
   gDPLoadMultiBlock_4b(gfx++, TextureAddress(ImageBody(f_BallMarkerImage)),
-      0x140, BALL_TILE_MARKER, G_IM_FMT_I, 16, 16, 0,
-      G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMIRROR | G_TX_CLAMP, 6, 6, G_TX_NOLOD,
-      G_TX_NOLOD);
-  gDPLoadMultiBlock_4b(gfx++, TextureAddress(ImageBody(f_BallShadowImage)),
+      0x140, BALL_TILE_MARKER, G_IM_FMT_I, MARKER_TEXTURE_SIZE,
+      MARKER_TEXTURE_SIZE, 0, G_TX_NOMIRROR | G_TX_CLAMP,
+      G_TX_NOMIRROR | G_TX_CLAMP, 6, 6, G_TX_NOLOD, G_TX_NOLOD);
+  gDPLoadMultiBlock_4b(gfx++, TextureAddress(ImageBody(f_SmallBallImage)),
       0x150, BALL_TILE_SMALL, G_IM_FMT_I, 16, 16, 0, G_TX_NOMIRROR | G_TX_CLAMP,
       G_TX_NOMIRROR | G_TX_CLAMP, 6, 6, G_TX_NOLOD, G_TX_NOLOD);
   gDPLoadMultiBlock_4b(gfx++, TextureAddress(ImageBody(f_BallAfterimageImage)),
@@ -1218,7 +1221,7 @@ void DrawGolfBalls(CameraMatrices* matrices UNUSED) {
           gDPSetPrimDepth(gfx++, shadowPrimDepth & ~3, 0);
           gDPPipeSync(gfx++);
           switch (markerPlayer) {
-            case -1:
+            case BALL_NO_MARKER:
               gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, 0);
               break;
             case 0:
@@ -1241,8 +1244,8 @@ void DrawGolfBalls(CameraMatrices* matrices UNUSED) {
           gSPStretchedTextureRectangle(gfx++, QuarterPixels(ballPoint.x - size),
               QuarterPixels(ballPoint.y - size),
               QuarterPixels(ballPoint.x + size),
-              QuarterPixels(ballPoint.y + size), BALL_TILE_MARKER, 0, 0, 16,
-              16);
+              QuarterPixels(ballPoint.y + size), BALL_TILE_MARKER, 0, 0,
+              MARKER_TEXTURE_SIZE, MARKER_TEXTURE_SIZE);
         }
       }
     }
