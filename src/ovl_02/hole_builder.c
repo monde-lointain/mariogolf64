@@ -740,8 +740,8 @@ s32 ListOffsetsByDistance(s32 span, GridOffset* offsets, s32 maxCount) {
  * their heights. A band at or past GROUND_TILE_ROW_COUNT is left untouched.
  *
  * Doesn't match: the nested DrawTriangleHeights allocates its registers
- * differently, using $s7 where the original reloads the static chain. 321 words
- * differ in it, 45 in shape. The counts that follow were measured when
+ * differently, using $s7 where the original reloads the static chain. 284 words
+ * differ in it, 34 in shape. The counts that follow were measured when
  * texelColumn came from longX rather than the converted fromX, which gave 323
  * words, 45 in shape. Indexing the row, as texel[texelColumn] from texel
  * = &heights[texelRow * MAP_COLUMN_COUNT], gives 497 words but only 29 in
@@ -757,6 +757,12 @@ s32 ListOffsetsByDistance(s32 span, GridOffset* offsets, s32 maxCount) {
  * rounding of its signed division, which the original's DrawTriangleHeights
  * keeps as a bgez and a bltzl before an sra. Both signed shifts of the current
  * form still fold into the original's single shift by 16.
+ *
+ * Each half of the triangle, upper and lower, declares its own shortSlopeX
+ * and shortSlopeHeight, which only that half uses. That takes the draft from
+ * 321 words differing to 284, 45 in shape to 34; shortSlopeHeight alone in
+ * each half gives 296 (34) and shortSlopeX alone 352 (38). The register
+ * oracle doesn't compare nested routines. 284 words differ, 34 in shape.
  */
 #ifdef NON_MATCHING
 void DrawBandHeights(s16* heights, s32 band) {
@@ -778,8 +784,6 @@ void DrawBandHeights(s16* heights, s32 band) {
   void DrawTriangleHeights(void) {
     f32 longSlopeX;
     f32 longSlopeHeight;
-    f32 shortSlopeX;
-    f32 shortSlopeHeight;
     s32 longX;
     s32 longHeight;
     s32 shortX;
@@ -863,6 +867,9 @@ void DrawBandHeights(s16* heights, s32 band) {
         cachedReciprocal;
     span = corners[1]->v.ob[AXIS_Z] - corners[0]->v.ob[AXIS_Z];
     if (span != 0) {
+      f32 shortSlopeX;
+      f32 shortSlopeHeight;
+
       if (cachedSpan != span) {
         cachedSpan = span;
         cachedReciprocal = 1.0f / span;
@@ -892,6 +899,9 @@ void DrawBandHeights(s16* heights, s32 band) {
 
     lowerSpan = corners[2]->v.ob[AXIS_Z] - corners[1]->v.ob[AXIS_Z];
     if (lowerSpan != 0) {
+      f32 shortSlopeX;
+      f32 shortSlopeHeight;
+
       if (cachedSpan != lowerSpan) {
         cachedSpan = lowerSpan;
         cachedReciprocal = 1.0f / lowerSpan;
