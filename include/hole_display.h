@@ -71,7 +71,6 @@ typedef struct SkyColors {
   /* 0x0A */ u8 noiseColor[3];
   /* 0x0D */ u8 backgroundColor[SKY_BACKGROUND_CHANNEL_COUNT];
   /* 0x11 */ u8 hasLensFlare;
-  /* 0x12 */ u8 unk12[2];
   /* 0x14 */ struct Sun* sun;
   /* 0x18 */ u8 fogColor[3];
   /* 0x1C */ s16 fogNear;
@@ -90,7 +89,6 @@ typedef struct Sun {
   /* 0x04 */ s32 height; /* Above the horizon */
   /* 0x08 */ u8 primColor[3];
   /* 0x0B */ u8 envColor[3];
-  /* 0x0E */ u8 unkE[2];
   /* 0x10 */ s32 radius;
   /* 0x14 */ s16 unk14;
   /* 0x16 */ s16 texelStep;
