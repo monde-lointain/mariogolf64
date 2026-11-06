@@ -641,8 +641,8 @@ s32 GetCastModelKind(void) {
 /*
  * Fills f_CastOrder with the characters that follow start, leaving out the
  * one just after it, then shuffles all but the last unless
- * GAME_FLAG_UNK99 is set. SwapCastMembers is a nested function, a GNU C
- * extension.
+ * GAME_FLAG_UNSHUFFLED_CAST is set. SwapCastMembers is a nested function, a GNU
+ * C extension.
  */
 void ShuffleCastOrder(s32 start) {
   s32 member;
@@ -661,7 +661,7 @@ void ShuffleCastOrder(s32 start) {
         (member + start + FIRST_CAST_OFFSET) % CHARACTER_COUNT;
   }
 
-  if (!IsGameFlagSet(GAME_FLAG_UNK99)) {
+  if (!IsGameFlagSet(GAME_FLAG_UNSHUFFLED_CAST)) {
     for (round = 0; round < SHUFFLE_ROUND_COUNT; round++) {
       for (index = 0; index < SHUFFLED_MEMBER_COUNT; index++) {
         SwapCastMembers(index, (rand() & 0x7FFF) % SHUFFLED_MEMBER_COUNT);

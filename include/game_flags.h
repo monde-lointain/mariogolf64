@@ -274,7 +274,7 @@
 #define GAME_FLAG_LOW_REACTION_VIEWS 0x7F
 
 /* Keeps the staff roll from shuffling its cast */
-#define GAME_FLAG_UNK99 0x99
+#define GAME_FLAG_UNSHUFFLED_CAST 0x99
 
 /*
  * Set by the staff roll's timeline as the cast takes to the course; it has
