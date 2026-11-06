@@ -3980,12 +3980,9 @@ void DrawMenuBackdropLayers(Gfx** displayListHead, s32 layers) {
           gDPPipeSync(gfx++);
           /*
            * The loaded rows are counted in a variable here, to match: the
-           * constant gives 849 words differing (441 in shape); with the first
-           * strip's texels and the strip's top in locals, the constant gave
-           * 359 (37) with the last strip's rectangle in a block of its own,
-           * counting the rows in the first strip's load too 851 (445), setting
-           * the count before the loop 269 (43), and the block with the
-           * variable 130 (16)
+           * constant gives 849 words differing (441 in shape), setting the
+           * count where it is declared 261 (39), and counting the rows in the
+           * first strip's load too 849 (441), against 42 (10)
            */
           loadedRowCount = BACKDROP_STRIP_ROW_COUNT + BACKDROP_SEAM_ROW_COUNT;
           gDPLoadTextureBlock(gfx++,
