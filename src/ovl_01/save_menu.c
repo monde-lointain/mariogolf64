@@ -1873,8 +1873,14 @@ void DrawSavedMiniGolfImage(Gfx** displayListHead);
  * texel offset to modeImage first gives 293, and a texels pointer set before
  * the strip loop 320. Clearing the text slots with the strips' counter took the
  * draft to 255 words, 115 in shape, and the register oracle's closest result
- * from 227 words, forcing 30 pseudos, to 219, forcing 24. 255 words differ, 115
- * in shape.
+ * from 227 words, forcing 30 pseudos, to 219, forcing 24.
+ *
+ * The draft then gave 255 words, 115 in shape. The game mode label's x was
+ * held in courseIndex; in a labelX local of its own, 287 words differ, but
+ * 91 in shape, and the register oracle's closest result falls from 219
+ * words, forcing 24 pseudos, to 183, forcing 28: the code comes closer to
+ * the original's, though more registers differ. 287 words differ, 91 in
+ * shape.
  */
 #ifdef NON_MATCHING
 void DrawSavedGames(Gfx** displayListHead) {
@@ -1911,10 +1917,6 @@ void DrawSavedGames(Gfx** displayListHead) {
   s32 stripLeft;
   s32 stripShownWidth;
   s32 gameIndex;
-  /*
-   * Also the game mode label's x, to match: a labelX variable gives 339 words
-   * differing (97 in shape) against the draft's 307 (121)
-   */
   s32 courseIndex;
   /*
    * Also the board and strip index in the loops, to match: a board variable
@@ -1922,6 +1924,7 @@ void DrawSavedGames(Gfx** displayListHead) {
    * (121)
    */
   s32 holeIndex;
+  s32 labelX;
   s32* chosenMode;
   s32* labelOffset;
   u32 modeLabelTexels;
@@ -2130,11 +2133,11 @@ void DrawSavedGames(Gfx** displayListHead) {
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(gfx++);
-    courseIndex = (playerCount == 1) ? SINGLE_PLAYER_GAME_MODE_LABEL_X
-                                     : GAME_MODE_LABEL_X;
-    gSPScisTextureRectangle(gfx++, QuarterPixels(courseIndex - *labelOffset),
+    labelX = (playerCount == 1) ? SINGLE_PLAYER_GAME_MODE_LABEL_X
+                                : GAME_MODE_LABEL_X;
+    gSPScisTextureRectangle(gfx++, QuarterPixels(labelX - *labelOffset),
         QuarterPixels(GAME_MODE_LABEL_TOP),
-        QuarterPixels(courseIndex - *labelOffset + GAME_MODE_LABEL_WIDTH),
+        QuarterPixels(labelX - *labelOffset + GAME_MODE_LABEL_WIDTH),
         QuarterPixels(GAME_MODE_LABEL_TOP + GAME_MODE_LABEL_HEIGHT),
         G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     gDPPipeSync(gfx++);
