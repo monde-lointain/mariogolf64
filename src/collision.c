@@ -1764,6 +1764,12 @@ void MoveBallToCupEdge(BallSimulation* simulation) {
  * bounceSpeed, which took the draft from 145 words differing to 143, 17 in
  * shape either way; the register oracle's closest stays at 66 words forcing
  * 16 pseudos. 143 words differ, 17 in shape.
+ *
+ * A focused permuter run's best scales the direction's z before its x and y,
+ * the order the contact point is moved in. That alone gives 155 words, 11 in
+ * shape, as does any order scaling z before y, but the register oracle's
+ * closest rises to 78 words, forcing 11 pseudos, so the draft keeps axis
+ * order.
  */
 #ifdef NON_MATCHING
 s32 FindPinHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY, s32 endZ,
