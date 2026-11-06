@@ -4689,7 +4689,7 @@ void DrawOpeningLogo(Gfx** displayListHead, Boolean isDrawn) {
   s32 texelsOffset;
   /*
    * Kept apart, unlike the shine pass's, to match: sharing texelsOffset gives
-   * 112 words differing (22 in shape) against the draft's 104 (14)
+   * 50 words differing (14 in shape) against the draft's 38 (6)
    */
   s32 letterTexelsOffset;
   s32 i;
