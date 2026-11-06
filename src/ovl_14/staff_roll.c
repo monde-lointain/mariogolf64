@@ -180,6 +180,15 @@
 #define FINALE_FADE_OUT_FRAME 2590
 /* The last of the cast takes all four shots */
 #define FINALE_FRAME 2630
+/* Then reacts with a par, swings from the fairway, reacts with a bogey,
+ * approaches, reacts with a birdie, putts and reacts with an eagle */
+#define FINALE_PAR_FRAME 2740
+#define FINALE_FAIRWAY_FRAME 2800
+#define FINALE_BOGEY_FRAME 2950
+#define FINALE_APPROACH_FRAME 3030
+#define FINALE_BIRDIE_FRAME 3100
+#define FINALE_PUTT_FRAME 3180
+#define FINALE_EAGLE_FRAME 3240
 #define LAST_FADE_OUT_FRAME 3360
 #define NEVER_FRAME 0x100000
 
@@ -1321,7 +1330,7 @@ void RunStaffRollTimeline(s32 frame) {
     f_CastSlot = slot;
   }
 
-  if (frame == 2740) {
+  if (frame == FINALE_PAR_FRAME) {
     ClearEffects();
     FreeCharacterSlot(f_CastSlot);
     ResetStaffRollEase();
@@ -1345,7 +1354,7 @@ void RunStaffRollTimeline(s32 frame) {
     f_CastSlot = slot;
   }
 
-  if (frame == 2800) {
+  if (frame == FINALE_FAIRWAY_FRAME) {
     ClearEffects();
     f_CastFramingYaw = 0.0f;
     PickFramingPitch();
@@ -1368,7 +1377,7 @@ void RunStaffRollTimeline(s32 frame) {
     f_CastSlot = slot;
   }
 
-  if (frame == 2950) {
+  if (frame == FINALE_BOGEY_FRAME) {
     ClearEffects();
     FreeCharacterSlot(f_CastSlot);
     ResetStaffRollEase();
@@ -1392,7 +1401,7 @@ void RunStaffRollTimeline(s32 frame) {
     f_CastSlot = slot;
   }
 
-  if (frame == 3030) {
+  if (frame == FINALE_APPROACH_FRAME) {
     f_CastFramingYaw = DEGREES_TO_RADIANS_F * CAST_YAW_STEP;
     ClearEffects();
     PickFramingPitch();
@@ -1416,7 +1425,7 @@ void RunStaffRollTimeline(s32 frame) {
     f_CastSlot = slot;
   }
 
-  if (frame == 3100) {
+  if (frame == FINALE_BIRDIE_FRAME) {
     ClearEffects();
     FreeCharacterSlot(f_CastSlot);
     ResetStaffRollEase();
@@ -1440,7 +1449,7 @@ void RunStaffRollTimeline(s32 frame) {
     f_CastSlot = slot;
   }
 
-  if (frame == 3180) {
+  if (frame == FINALE_PUTT_FRAME) {
     ClearEffects();
     PickFramingPitch();
     FreeCharacterSlot(f_CastSlot);
@@ -1463,7 +1472,7 @@ void RunStaffRollTimeline(s32 frame) {
     f_CastSlot = slot;
   }
 
-  if (frame == 3240) {
+  if (frame == FINALE_EAGLE_FRAME) {
     ClearEffects();
     FreeCharacterSlot(f_CastSlot);
     ResetStaffRollEase();
