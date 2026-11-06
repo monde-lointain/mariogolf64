@@ -2644,6 +2644,14 @@ void PlaceFlightCamera(s32 step) {
 #define NEAR_CUP_DISTANCE 0x1E00
 #define CUP_LANDING_MIN_DISTANCE 0x1201
 #define CUP_LANDING_MAX_DISTANCE 0x4AFFF
+/* Whether a shot from the green starts in the range that the camera framing
+ * the cup is chosen for */
+#define IsCupLandingDistance(distance) \
+  ((distance) >= CUP_LANDING_MIN_DISTANCE && \
+      (distance) <= CUP_LANDING_MAX_DISTANCE)
+/* Whether the simulated shot ends in the cup or within NEAR_CUP_DISTANCE */
+#define IsEndingNearCup() \
+  (g_SimulatedShot.endsInCup || f_LandingCupDistance < NEAR_CUP_DISTANCE)
 #define DEBUG_CAMERA_CONTROLLER 1
 
 /* It is a macro, as an inline function compiles differently from the original
@@ -2692,10 +2700,7 @@ void ChooseFlightCameraKind(void) {
       case FLIGHT_PHASE_LAUNCH:
         if (!(f_FlightCameraFlags & FLIGHT_CAMERA_FLAG_CUP_VIEW_ALLOWED) &&
             RandomBelow(2) == 0 && !IsPinInCup() &&
-            f_StartCupDistance >= CUP_LANDING_MIN_DISTANCE &&
-            f_StartCupDistance <= CUP_LANDING_MAX_DISTANCE &&
-            (g_SimulatedShot.endsInCup ||
-                f_LandingCupDistance < NEAR_CUP_DISTANCE)) {
+            IsCupLandingDistance(f_StartCupDistance) && IsEndingNearCup()) {
           kind = FLIGHT_CAMERA_FRAMING_CUP;
         } else if (g_GameState.isMiniGolf) {
           pick = RandomBelow(10);
