@@ -2353,9 +2353,8 @@ void DrawFadeAnimation(Gfx** displayListHead) {
   Boolean isTileSet;
   /*
    * One index for the strips and the rows, to match: a separate row or strip
-   * variable gave 216 words differing (50 in shape) against the draft's 174
-   * (50) at the time, and a separate row variable gives 215 (45) against 179
-   * (45)
+   * variable gives 183 words differing against the draft's 147, 33 in shape
+   * both
    */
   s32 i;
 
