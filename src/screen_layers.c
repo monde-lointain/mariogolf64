@@ -889,6 +889,11 @@ void MarkHalfTurnCircle(
  * than before its clamp's test, leaves 108 words for the second radiusOffset
  * clamp alone and 112 for the first or both, and gives 264 to 266 words (8
  * to 24 in shape) once any stepOffset clamp takes it.
+ *
+ * Giving either octant pair's clamped offsets variables of their own, as a
+ * permuter run split them, gives 104 words, declared before or after the
+ * others, but the register oracle then matches only with 4 pseudos forced,
+ * against 3, so the split only moves registers.
  */
 #ifdef NON_MATCHING
 void MarkHalfTurnCircle(
