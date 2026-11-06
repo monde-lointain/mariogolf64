@@ -1250,7 +1250,10 @@ void DrawTwoDigitMenuNumber(
  * register that the player loops' playerIndex takes in the original.
  * Counting the strips with playerIndex gives 416 words (90 in shape), the
  * arrows 248 (46) and both 455 (105); with playerIndex an s32 as well, 417
- * to 465, 117 in shape.
+ * to 465, 117 in shape. It also lines columnIndex up with $t2 in the
+ * players' column loop and with $s1 in the handicap numbers' loop, but
+ * counting the numbers with a local of their own gives 239 words, 31 in
+ * shape.
  */
 #ifdef NON_MATCHING
 void DrawHandicaps(Gfx** displayListHead, s32 slide, u8 reverseVerticalSlide,
