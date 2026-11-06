@@ -3596,6 +3596,9 @@ void SecondUnusedCameraStub(void) {}
  * or copying a root temporary to it 3, writing it in the first loop as well 9,
  * and a squaredDistance local, wherever declared, 10 (4 in shape). 3 words
  * differ, 1 in shape.
+ *
+ * Taking the helper's root with an sqrt.s in inline assembly, volatile or
+ * not, as the game's fabsf takes its magnitude, gives 10 words, 4 in shape.
  */
 #ifdef NON_MATCHING
 static inline f32 GetSpotDistance(s32 rowOffset, s32 columnOffset) {
