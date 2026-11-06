@@ -636,9 +636,9 @@ void DrawRingShotRecords(Gfx** displayListHead) {
         QuarterPixels(RING_SHOT_STRIP_TOP + RING_SHOT_STRIP_SPACING +
             (index * RING_SHOT_STRIP_SPACING)),
         G_TX_RENDERTILE, 0, 0,
-        (RING_SHOT_STRIP_WIDTH << 10) /
-            (RING_SHOT_STRIP_RIGHT - RING_SHOT_STRIP_LEFT),
-        (RING_SHOT_STRIP_HEIGHT << 10) / RING_SHOT_STRIP_SPACING);
+        TexelRunStep(RING_SHOT_STRIP_WIDTH,
+            RING_SHOT_STRIP_RIGHT - RING_SHOT_STRIP_LEFT),
+        TexelRunStep(RING_SHOT_STRIP_HEIGHT, RING_SHOT_STRIP_SPACING));
     gDPPipeSync(gfx++);
     index++;
   } while (index != RING_SHOT_STRIP_COUNT);
@@ -1048,8 +1048,9 @@ void DrawRingShotRowIcon(
         QuarterPixels(left + SAVE_ICON_SHOWN_WIDTH),
         QuarterPixels(top + (stripIndex * SAVE_ICON_SHOWN_STRIP_HEIGHT) +
             SAVE_ICON_SHOWN_STRIP_HEIGHT),
-        G_TX_RENDERTILE, 0, 0, (SAVE_ICON_WIDTH << 10) / SAVE_ICON_SHOWN_WIDTH,
-        (SAVE_ICON_STRIP_HEIGHT << 10) / SAVE_ICON_SHOWN_STRIP_HEIGHT);
+        G_TX_RENDERTILE, 0, 0,
+        TexelRunStep(SAVE_ICON_WIDTH, SAVE_ICON_SHOWN_WIDTH),
+        TexelRunStep(SAVE_ICON_STRIP_HEIGHT, SAVE_ICON_SHOWN_STRIP_HEIGHT));
     gDPPipeSync(gfx++);
   }
 
@@ -2037,9 +2038,9 @@ void DrawSavedGames(Gfx** displayListHead) {
     iconHalfSize = boardScale[slot] * MODE_ICON_HALF_SIZE;
     halfSize = boardScale[slot] * GAME_BOARD_HALF_SIZE;
     f_ChosenModeIconHalfSize = iconHalfSize;
-    iconStep = (f32)(MODE_ICON_STRIP_HEIGHT << 10) / iconHalfSize;
+    iconStep = (f32)(MODE_ICON_STRIP_HEIGHT << TEXEL_STEP_SHIFT) / iconHalfSize;
     f_ChosenModeIconScale = iconStep;
-    step = (f32)(GAME_BOARD_STRIP_HEIGHT << 10) / halfSize;
+    step = (f32)(GAME_BOARD_STRIP_HEIGHT << TEXEL_STEP_SHIFT) / halfSize;
     /* The loop stops before SAVED_GAME_COUNT, so no board bobs */
     if (index == SAVED_GAME_COUNT) {
       bob = sinf(f_BoardBobPhase) * BOARD_BOB_HEIGHT;
@@ -2155,8 +2156,8 @@ void DrawSavedGames(Gfx** displayListHead) {
         QuarterPixels(stripLeft + stripShownWidth),
         QuarterPixels(SAVED_GAME_STRIP_TOP + SAVED_GAME_STRIP_HEIGHT +
             (stripOrTextSlotIndex * SAVED_GAME_STRIP_HEIGHT)),
-        G_TX_RENDERTILE, 0, 0, (SAVED_GAME_STRIP_WIDTH << 10) / stripShownWidth,
-        TEXEL_STEP_ONE);
+        G_TX_RENDERTILE, 0, 0,
+        TexelRunStep(SAVED_GAME_STRIP_WIDTH, stripShownWidth), TEXEL_STEP_ONE);
     gDPPipeSync(gfx++);
   }
 
@@ -2605,8 +2606,9 @@ void DrawSavedCourseImage(Gfx** displayListHead) {
         QuarterPixels(COURSE_THUMBNAIL_LEFT + COURSE_THUMBNAIL_SHOWN_WIDTH),
         QuarterPixels(stripTop + COURSE_THUMBNAIL_SHOWN_HEIGHT),
         G_TX_RENDERTILE, 0, 0,
-        (COURSE_THUMBNAIL_WIDTH << 10) / COURSE_THUMBNAIL_SHOWN_WIDTH,
-        (COURSE_THUMBNAIL_STRIP_HEIGHT << 10) / COURSE_THUMBNAIL_SHOWN_HEIGHT);
+        TexelRunStep(COURSE_THUMBNAIL_WIDTH, COURSE_THUMBNAIL_SHOWN_WIDTH),
+        TexelRunStep(
+            COURSE_THUMBNAIL_STRIP_HEIGHT, COURSE_THUMBNAIL_SHOWN_HEIGHT));
     gDPPipeSync(gfx++);
   }
 
@@ -2642,8 +2644,9 @@ void DrawSavedMiniGolfImage(Gfx** displayListHead) {
         QuarterPixels(COURSE_THUMBNAIL_LEFT + COURSE_THUMBNAIL_SHOWN_WIDTH),
         QuarterPixels(stripTop + COURSE_THUMBNAIL_SHOWN_HEIGHT),
         G_TX_RENDERTILE, 0, 0,
-        (COURSE_THUMBNAIL_WIDTH << 10) / COURSE_THUMBNAIL_SHOWN_WIDTH,
-        (COURSE_THUMBNAIL_STRIP_HEIGHT << 10) / COURSE_THUMBNAIL_SHOWN_HEIGHT);
+        TexelRunStep(COURSE_THUMBNAIL_WIDTH, COURSE_THUMBNAIL_SHOWN_WIDTH),
+        TexelRunStep(
+            COURSE_THUMBNAIL_STRIP_HEIGHT, COURSE_THUMBNAIL_SHOWN_HEIGHT));
     gDPPipeSync(gfx++);
   }
 

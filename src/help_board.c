@@ -455,8 +455,9 @@ void DrawUnusedHelpBoardImage(Gfx** displayListHead) {
   gSPTextureRectangle(gfx++, QuarterPixels(UNUSED_IMAGE_LEFT),
       QuarterPixels(UNUSED_IMAGE_TOP), QuarterPixels(UNUSED_IMAGE_RIGHT),
       QuarterPixels(UNUSED_IMAGE_BOTTOM), G_TX_RENDERTILE, 0, 0,
-      (UNUSED_IMAGE_WIDTH << 10) / (UNUSED_IMAGE_RIGHT - UNUSED_IMAGE_LEFT),
-      (UNUSED_IMAGE_HEIGHT << 10) / (UNUSED_IMAGE_BOTTOM - UNUSED_IMAGE_TOP));
+      TexelRunStep(UNUSED_IMAGE_WIDTH, UNUSED_IMAGE_RIGHT - UNUSED_IMAGE_LEFT),
+      TexelRunStep(
+          UNUSED_IMAGE_HEIGHT, UNUSED_IMAGE_BOTTOM - UNUSED_IMAGE_TOP));
   gDPPipeSync(gfx++);
   *displayListHead = gfx;
 }
@@ -495,7 +496,7 @@ void DrawChalkboard(Gfx** displayListHead) {
         QuarterPixels(CHALKBOARD_LEFT + CHALKBOARD_WIDTH),
         QuarterPixels(stripTop + CHALKBOARD_DRAWN_STRIP_HEIGHT),
         G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE,
-        (CHALKBOARD_STRIP_HEIGHT << 10) / CHALKBOARD_DRAWN_STRIP_HEIGHT);
+        TexelRunStep(CHALKBOARD_STRIP_HEIGHT, CHALKBOARD_DRAWN_STRIP_HEIGHT));
     gDPPipeSync(gfx++);
   }
 

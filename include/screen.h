@@ -22,10 +22,12 @@
  */
 #define QuarterPixels(pixels) ((pixels) << QUARTER_PIXEL_SHIFT)
 
-/* A texture rectangle step of one texel per pixel, in 5.10 fixed point */
-#define TEXEL_STEP_ONE (1 << 10)
+/* Texture rectangle steps are 5.10 fixed point */
+#define TEXEL_STEP_SHIFT 10
+/* A texture rectangle step of one texel per pixel */
+#define TEXEL_STEP_ONE (1 << TEXEL_STEP_SHIFT)
 /* The step that draws a run of texels across a run of pixels */
-#define TexelRunStep(texels, pixels) (((texels) << 10) / (pixels))
+#define TexelRunStep(texels, pixels) (((texels) << TEXEL_STEP_SHIFT) / (pixels))
 /* Indices of a vertex's texture coordinates */
 #define TEXTURE_AXIS_S 0
 #define TEXTURE_AXIS_T 1

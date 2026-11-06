@@ -1432,7 +1432,8 @@ void UpdateCourseResultsNotice(void) {
   ((lift) + NOTICE_TITLE_TOP + ((i) * NOTICE_TITLE_STRIP_HEIGHT))
 #define NOTICE_TITLE_LIFT 96.0f
 /* Wider than the shine texture, so that it sweeps across the title */
-#define NOTICE_SHINE_DSDX ((NOTICE_SHINE_SIZE << 10) / NOTICE_TITLE_STRIP_WIDTH)
+#define NOTICE_SHINE_DSDX \
+  TexelRunStep(NOTICE_SHINE_SIZE, NOTICE_TITLE_STRIP_WIDTH)
 #define NOTICE_PAN_START 3
 #define NOTICE_PAN_END 60
 #define NOTICE_PAN_MAX 255
@@ -1479,7 +1480,7 @@ void DrawCourseResultsNotice(Gfx** displayListHead) {
     s32 top;
     size = (cosf(f_NoticeAngle) + NOTICE_COURSE_SCALE_BIAS) *
         NOTICE_COURSE_STRIP_HEIGHT;
-    step = (NOTICE_COURSE_STRIP_HEIGHT << 10) / size;
+    step = TexelRunStep(NOTICE_COURSE_STRIP_HEIGHT, size);
     LoadTextureBlock(&gfx,
         LargeImageTexels(f_ResultsCourseImage) +
             (i * NOTICE_COURSE_STRIP_WIDTH * NOTICE_COURSE_STRIP_HEIGHT),
@@ -1667,9 +1668,9 @@ void UpdateCharacterResultsNotice(void) {
 #define NOTICE_CHARACTER_SHINE_LEFT 88
 #define NOTICE_CHARACTER_SHINE_TOP 52
 #define NOTICE_CHARACTER_SHINE_HEIGHT 56
-#define NOTICE_CHARACTER_SHINE_DSDX ((NOTICE_SHINE_SIZE << 10) / 128)
+#define NOTICE_CHARACTER_SHINE_DSDX TexelRunStep(NOTICE_SHINE_SIZE, 128)
 #define NOTICE_CHARACTER_SHINE_DTDY \
-  ((NOTICE_SHINE_SIZE << 10) / NOTICE_CHARACTER_SHINE_HEIGHT)
+  TexelRunStep(NOTICE_SHINE_SIZE, NOTICE_CHARACTER_SHINE_HEIGHT)
 #define NOTICE_CHARACTER_VOICE_FRAME 14
 #define NOTICE_CHARACTER_VOICE_SLOT 1
 
@@ -1758,8 +1759,8 @@ void DrawCharacterResultsNotice(Gfx** displayListHead) {
           QuarterPixels(CharacterTitleStripTop(i, height) + height +
               f_CharacterNoticeShift),
           G_TX_RENDERTILE, 0, 0,
-          ((NOTICE_CHARACTER_TITLE_WIDTH / 2) << 10) / width,
-          (NOTICE_TITLE_STRIP_HEIGHT << 10) / height);
+          TexelRunStep((NOTICE_CHARACTER_TITLE_WIDTH / 2), width),
+          TexelRunStep(NOTICE_TITLE_STRIP_HEIGHT, height));
     }
 
     /* The title again, into the depth buffer alone, so that the shine behind it
@@ -1787,8 +1788,8 @@ void DrawCharacterResultsNotice(Gfx** displayListHead) {
           QuarterPixels(CharacterTitleStripTop(i, height) + height +
               f_CharacterNoticeShift),
           G_TX_RENDERTILE, 0, 0,
-          ((NOTICE_CHARACTER_TITLE_WIDTH / 2) << 10) / width,
-          (NOTICE_TITLE_STRIP_HEIGHT << 10) / height);
+          TexelRunStep((NOTICE_CHARACTER_TITLE_WIDTH / 2), width),
+          TexelRunStep(NOTICE_TITLE_STRIP_HEIGHT, height));
     }
 
     gDPSetPrimDepth(gfx++, NOTICE_SHINE_DEPTH, 0);

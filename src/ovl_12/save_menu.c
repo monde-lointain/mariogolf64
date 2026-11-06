@@ -129,7 +129,7 @@ enum ReplayMenuState {
 #define MODE_ICON_PART_COUNT 2
 #define MODE_ICON_LEFT 26
 #define MODE_ICON_TOP 54
-#define HALF_SIZE_TEXEL_STEP (2 << 10)
+#define HALF_SIZE_TEXEL_STEP (2 * TEXEL_STEP_ONE)
 #define GOLFERS_LEFT 240
 #define GOLFER_SPACING 26
 #define GOLFER_TOP 52
@@ -709,8 +709,9 @@ void DrawGameSaveMenu(Gfx** displayListHead) {
             QuarterPixels(GAME_PANEL_MIDDLE + (index * GAME_ROW_SPACING) +
                 (strip * stripHeight) - (stripHeight * PANEL_STRIP_COUNT / 2) +
                 stripHeight),
-            G_TX_RENDERTILE, 0, 0, (PANEL_IMAGE_WIDTH << 10) / WIDE_PANEL_WIDTH,
-            (PANEL_IMAGE_HEIGHT << 10) / (stripHeight * PANEL_STRIP_COUNT));
+            G_TX_RENDERTILE, 0, 0,
+            TexelRunStep(PANEL_IMAGE_WIDTH, WIDE_PANEL_WIDTH),
+            TexelRunStep(PANEL_IMAGE_HEIGHT, stripHeight * PANEL_STRIP_COUNT));
       }
 
       if (f_CursorIndex == index) {
@@ -731,8 +732,9 @@ void DrawGameSaveMenu(Gfx** displayListHead) {
           QuarterPixels(END_GAME_PANEL_MIDDLE + (index * GAME_ROW_SPACING) +
               (strip * stripHeight) - (stripHeight * PANEL_STRIP_COUNT / 2) +
               stripHeight),
-          G_TX_RENDERTILE, 0, 0, (PANEL_IMAGE_WIDTH << 10) / NARROW_PANEL_WIDTH,
-          (PANEL_IMAGE_HEIGHT << 10) / (stripHeight * PANEL_STRIP_COUNT));
+          G_TX_RENDERTILE, 0, 0,
+          TexelRunStep(PANEL_IMAGE_WIDTH, NARROW_PANEL_WIDTH),
+          TexelRunStep(PANEL_IMAGE_HEIGHT, stripHeight * PANEL_STRIP_COUNT));
       gDPSetPrimColor(gfx++, 0, 0, CHOSEN_PANEL_SHADE, CHOSEN_PANEL_SHADE,
           CHOSEN_PANEL_SHADE, CHOSEN_PANEL_SHADE);
     }
@@ -1457,8 +1459,9 @@ void DrawReplaySaveMenu(Gfx** displayListHead) {
             QuarterPixels(rowOffsets[row] + WIDE_PANEL_LEFT + WIDE_PANEL_WIDTH),
             QuarterPixels(FIRST_REPLAY_ROW_TOP + (row * REPLAY_ROW_SPACING) +
                 (index * stripHeight) + stripHeight),
-            G_TX_RENDERTILE, 0, 0, (PANEL_IMAGE_WIDTH << 10) / WIDE_PANEL_WIDTH,
-            (PANEL_IMAGE_HEIGHT << 10) / (stripHeight * PANEL_STRIP_COUNT));
+            G_TX_RENDERTILE, 0, 0,
+            TexelRunStep(PANEL_IMAGE_WIDTH, WIDE_PANEL_WIDTH),
+            TexelRunStep(PANEL_IMAGE_HEIGHT, stripHeight * PANEL_STRIP_COUNT));
       }
 
       stripHeight = HOLE_OUT_PANEL_STRIP_HEIGHT;
@@ -1478,8 +1481,9 @@ void DrawReplaySaveMenu(Gfx** displayListHead) {
               rowOffsets[row] + NARROW_PANEL_LEFT + NARROW_PANEL_WIDTH),
           QuarterPixels(FIRST_REPLAY_ROW_TOP + (row * REPLAY_ROW_SPACING) +
               (index * stripHeight) + stripHeight),
-          G_TX_RENDERTILE, 0, 0, (PANEL_IMAGE_WIDTH << 10) / NARROW_PANEL_WIDTH,
-          (PANEL_IMAGE_HEIGHT << 10) / (stripHeight * PANEL_STRIP_COUNT));
+          G_TX_RENDERTILE, 0, 0,
+          TexelRunStep(PANEL_IMAGE_WIDTH, NARROW_PANEL_WIDTH),
+          TexelRunStep(PANEL_IMAGE_HEIGHT, stripHeight * PANEL_STRIP_COUNT));
     }
 
     /* Each record's "COURSE" and course number */
@@ -1689,8 +1693,9 @@ void DrawReplaySaveMenu(Gfx** displayListHead) {
           QuarterPixels(rowOffsets[1] + TITLE_PANEL_LEFT + TITLE_PANEL_WIDTH),
           QuarterPixels(titleBob + TITLE_PANEL_TOP +
               (index * TITLE_PANEL_STRIP_HEIGHT) + stripHeight),
-          G_TX_RENDERTILE, 0, 0, (PANEL_IMAGE_WIDTH << 10) / TITLE_PANEL_WIDTH,
-          (PANEL_IMAGE_HEIGHT << 10) / titleHeight);
+          G_TX_RENDERTILE, 0, 0,
+          TexelRunStep(PANEL_IMAGE_WIDTH, TITLE_PANEL_WIDTH),
+          TexelRunStep(PANEL_IMAGE_HEIGHT, titleHeight));
     }
 
     /* Each record's hole text, or that the row is empty */

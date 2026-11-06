@@ -954,8 +954,8 @@ void DrawBetSettings(
           QuarterPixels(STAKE_MARK_BOTTOM - markRaise -
               (stakeLevel * STAKE_MARK_SPACING)),
           G_TX_RENDERTILE, 0, 0,
-          (STAKE_MARK_SIZE << 10) / (markGrowth + STAKE_MARK_SIZE),
-          (STAKE_MARK_SIZE << 10) / (markGrowth + STAKE_MARK_SIZE));
+          TexelRunStep(STAKE_MARK_SIZE, markGrowth + STAKE_MARK_SIZE),
+          TexelRunStep(STAKE_MARK_SIZE, markGrowth + STAKE_MARK_SIZE));
       gDPPipeSync(gfx++);
     }
   }
@@ -991,8 +991,8 @@ void DrawBetSettings(
         QuarterPixels(bannerShift + wideStripTop - WIDE_BANNER_RAISE +
             WIDE_BANNER_STRIP_HEIGHT),
         G_TX_RENDERTILE, 0, 0,
-        (MENU_BANNER_WIDTH << 10) / (WIDE_BANNER_RIGHT - WIDE_BANNER_LEFT),
-        (MENU_BANNER_STRIP_HEIGHT << 10) / WIDE_BANNER_STRIP_HEIGHT);
+        TexelRunStep(MENU_BANNER_WIDTH, WIDE_BANNER_RIGHT - WIDE_BANNER_LEFT),
+        TexelRunStep(MENU_BANNER_STRIP_HEIGHT, WIDE_BANNER_STRIP_HEIGHT));
     gDPPipeSync(gfx++);
   }
 
@@ -1009,7 +1009,7 @@ void DrawBetSettings(
         QuarterPixels(bannerShift + stripTop), QuarterPixels(BET_BANNER_RIGHT),
         QuarterPixels(bannerShift + stripTop + MENU_BANNER_STRIP_HEIGHT),
         G_TX_RENDERTILE, 0, 0,
-        (MENU_BANNER_WIDTH << 10) / (BET_BANNER_RIGHT - BET_BANNER_LEFT),
+        TexelRunStep(MENU_BANNER_WIDTH, BET_BANNER_RIGHT - BET_BANNER_LEFT),
         TEXEL_STEP_ONE);
     gDPPipeSync(gfx++);
   }
@@ -1159,8 +1159,8 @@ NO_RESULT UpdateHandicaps(s32 firstPlayerIndex UNUSED, s32 playerCount UNUSED) {
 #define HANDICAP_BANNER_RIGHT 296
 #define HANDICAP_BANNER_TOP 190
 #define HANDICAP_BANNER_STEP_X \
-  ((HANDICAP_BANNER_WIDTH << 10) / \
-      (HANDICAP_BANNER_RIGHT - HANDICAP_BANNER_LEFT))
+  TexelRunStep( \
+      HANDICAP_BANNER_WIDTH, HANDICAP_BANNER_RIGHT - HANDICAP_BANNER_LEFT)
 
 /* Each player's 64x44 CI4 column, drawn in strips of 22 rows, with the
  * player's label and choice on it */
@@ -1756,8 +1756,9 @@ void DrawBrickWallRows(Gfx** displayListHead, u8 slide) {
         QuarterPixels(f_BrickRowOffsets[rowIndex] + SCREEN_WIDTH),
         QuarterPixels(
             (rowIndex * STATS_WALL_ROW_HEIGHT) + STATS_WALL_ROW_HEIGHT),
-        G_TX_RENDERTILE, 0, 0, (STATS_WALL_IMAGE_WIDTH << 10) / SCREEN_WIDTH,
-        (stripHeight << 10) / STATS_WALL_ROW_HEIGHT);
+        G_TX_RENDERTILE, 0, 0,
+        TexelRunStep(STATS_WALL_IMAGE_WIDTH, SCREEN_WIDTH),
+        TexelRunStep(stripHeight, STATS_WALL_ROW_HEIGHT));
   }
 
   gDPPipeSync(gfx++);
@@ -2235,9 +2236,9 @@ void DrawBestShots(Gfx** displayListHead) {
         QuarterPixels(RECORDS_STRIP_TOP + RECORDS_STRIP_SPACING +
             (index * RECORDS_STRIP_SPACING)),
         G_TX_RENDERTILE, 0, 0,
-        (RECORDS_STRIP_WIDTH << 10) /
-            (RECORDS_STRIP_RIGHT - RECORDS_STRIP_LEFT),
-        (RECORDS_STRIP_HEIGHT << 10) / RECORDS_STRIP_SPACING);
+        TexelRunStep(
+            RECORDS_STRIP_WIDTH, RECORDS_STRIP_RIGHT - RECORDS_STRIP_LEFT),
+        TexelRunStep(RECORDS_STRIP_HEIGHT, RECORDS_STRIP_SPACING));
     gDPPipeSync(gfx++);
     index++;
   } while (index != RECORDS_STRIP_COUNT);
@@ -2310,9 +2311,10 @@ void DrawBestShots(Gfx** displayListHead) {
           QuarterPixels(RECORD_COURSE_TOP + RECORD_COURSE_STRIP_SPACING +
               (index * RECORD_COURSE_STRIP_SPACING)),
           G_TX_RENDERTILE, 0, 0,
-          (RECORD_COURSE_IMAGE_WIDTH << 10) /
-              (RECORD_COURSE_RIGHT - RECORD_COURSE_LEFT),
-          (RECORD_COURSE_STRIP_HEIGHT << 10) / RECORD_COURSE_STRIP_SPACING);
+          TexelRunStep(RECORD_COURSE_IMAGE_WIDTH,
+              RECORD_COURSE_RIGHT - RECORD_COURSE_LEFT),
+          TexelRunStep(
+              RECORD_COURSE_STRIP_HEIGHT, RECORD_COURSE_STRIP_SPACING));
       gDPPipeSync(gfx++);
     }
   }

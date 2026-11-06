@@ -1514,8 +1514,9 @@ void DrawContestWinnerMovie(Gfx** displayListHead) {
           QuarterPixels(bottom -
               (stripHeight * CONTEST_IMAGE_STRIPS_ABOVE_CENTER) +
               MOVIE_IMAGE_STRIP_HEIGHT),
-          G_TX_RENDERTILE, 0, 0, (s32)((width >> 1) << 10) / halfWidth,
-          (MOVIE_IMAGE_STRIP_HEIGHT << 10) / stripHeight);
+          G_TX_RENDERTILE, 0, 0,
+          (s32)((width >> 1) << TEXEL_STEP_SHIFT) / halfWidth,
+          TexelRunStep(MOVIE_IMAGE_STRIP_HEIGHT, stripHeight));
     }
   }
 
@@ -1574,7 +1575,7 @@ void DrawContestWinnerMovie(Gfx** displayListHead) {
         ImageTexels(f_MovieBuffer + WINNER_PLAQUE_OFFSET), G_IM_FMT_CI,
         WINNER_PLAQUE_SIZE, WINNER_PLAQUE_SIZE, 0, 0, 0, 0, 0, 0, 0);
     plaqueHalfSize = growth + WINNER_PLAQUE_MARGIN;
-    step = ((WINNER_PLAQUE_SIZE / 2) << 10) / plaqueHalfSize;
+    step = TexelRunStep((WINNER_PLAQUE_SIZE / 2), plaqueHalfSize);
     DrawTextureRect(&gfx, QuarterPixels(WINNER_CENTER_X - plaqueHalfSize),
         QuarterPixels(WINNER_CENTER_Y - plaqueHalfSize),
         QuarterPixels(WINNER_CENTER_X + plaqueHalfSize),
@@ -1583,7 +1584,7 @@ void DrawContestWinnerMovie(Gfx** displayListHead) {
     LoadLargePalette(&gfx, f_MovieBuffer + WINNER_PALETTE_OFFSET);
     LoadTextureBlock(&gfx, f_MovieBuffer + WINNER_FACE_OFFSET, G_IM_FMT_CI,
         G_IM_SIZ_8b, WINNER_FACE_SIZE, WINNER_FACE_SIZE, 0, 0, 0, 0, 0, 0, 0);
-    step = ((WINNER_FACE_SIZE / 2) << 10) / growth;
+    step = TexelRunStep((WINNER_FACE_SIZE / 2), growth);
     /*
      * Reuses width for the face's left edge, as the original seems to: the
      * extra use raises width's global-alloc priority above the strips' right
@@ -1693,8 +1694,9 @@ void DrawDriveRecord(Gfx** displayListHead) {
           QuarterPixels(bottom -
               (stripHeight * SHRINKING_IMAGE_STRIPS_ABOVE_CENTER) +
               stripHeight),
-          G_TX_RENDERTILE, 0, 0, (s32)((width >> 1) << 10) / halfWidth,
-          (MOVIE_IMAGE_STRIP_HEIGHT << 10) / stripHeight);
+          G_TX_RENDERTILE, 0, 0,
+          (s32)((width >> 1) << TEXEL_STEP_SHIFT) / halfWidth,
+          TexelRunStep(MOVIE_IMAGE_STRIP_HEIGHT, stripHeight));
       if (f_MovieDrawCount >= CAPTION_MEET_DRAW) {
         continue;
       }
@@ -1809,8 +1811,9 @@ void DrawPuttCaption(Gfx** displayListHead) {
           QuarterPixels(bottom -
               (stripHeight * SHRINKING_IMAGE_STRIPS_ABOVE_CENTER) +
               stripHeight),
-          G_TX_RENDERTILE, 0, 0, (s32)((width >> 1) << 10) / halfWidth,
-          (MOVIE_IMAGE_STRIP_HEIGHT << 10) / stripHeight);
+          G_TX_RENDERTILE, 0, 0,
+          (s32)((width >> 1) << TEXEL_STEP_SHIFT) / halfWidth,
+          TexelRunStep(MOVIE_IMAGE_STRIP_HEIGHT, stripHeight));
       if (f_MovieDrawCount >= CAPTION_MEET_DRAW) {
         continue;
       }
@@ -2089,8 +2092,8 @@ void DrawShrinkingMovieImage(Gfx** displayListHead) {
             QuarterPixels(top),
             QuarterPixels(SHRINKING_IMAGE_CENTER_X + halfWidth),
             QuarterPixels(top + stripHeight), G_TX_RENDERTILE, 0, 0,
-            ((width >> 1) << 10) / halfWidth,
-            (MOVIE_IMAGE_STRIP_HEIGHT << 10) / stripHeight);
+            TexelRunStep((width >> 1), halfWidth),
+            TexelRunStep(MOVIE_IMAGE_STRIP_HEIGHT, stripHeight));
         offset += width;
       }
     }
@@ -2282,8 +2285,8 @@ void DrawLakituMovie(Gfx** displayListHead) {
     offset = MOVIE_IMAGE_PIXELS_OFFSET + (i * LAKITU_STRIP_SIZE);
     halfWidth = f_Lakitu.scale * (LAKITU_WIDTH / 2);
     halfHeight = f_Lakitu.scale * LAKITU_STRIP_HEIGHT;
-    stepS = ((LAKITU_WIDTH / 2) << 10) / halfWidth;
-    stepT = (LAKITU_STRIP_HEIGHT << 10) / halfHeight;
+    stepS = TexelRunStep((LAKITU_WIDTH / 2), halfWidth);
+    stepT = TexelRunStep(LAKITU_STRIP_HEIGHT, halfHeight);
     roundedHalfWidth = halfWidth + 0.5f;
 
     /*

@@ -672,8 +672,9 @@ void DrawTablePopup(Gfx** displayListHead) {
         QuarterPixels(f_TablePopupLeft + TABLE_POPUP_WIDTH),
         QuarterPixels(f_TablePopupTop + index * TABLE_POPUP_STRIP_HEIGHT +
             TABLE_POPUP_STRIP_HEIGHT),
-        G_TX_RENDERTILE, 0, 0, (MENU_BANNER_WIDTH << 10) / TABLE_POPUP_WIDTH,
-        (MENU_BANNER_STRIP_HEIGHT << 10) / TABLE_POPUP_STRIP_HEIGHT);
+        G_TX_RENDERTILE, 0, 0,
+        TexelRunStep(MENU_BANNER_WIDTH, TABLE_POPUP_WIDTH),
+        TexelRunStep(MENU_BANNER_STRIP_HEIGHT, TABLE_POPUP_STRIP_HEIGHT));
     gDPPipeSync(gfx++);
   }
 
@@ -813,8 +814,8 @@ void DrawTableStar(Gfx** displayListHead, s32 left, s32 top) {
   gSPScisTextureRectangle(gfx++, QuarterPixels(left), QuarterPixels(top),
       QuarterPixels(left + TABLE_STAR_WIDTH),
       QuarterPixels(top + TABLE_STAR_HEIGHT), G_TX_RENDERTILE, 0, 0,
-      (TABLE_STAR_IMAGE_WIDTH << 10) / TABLE_STAR_WIDTH,
-      (TABLE_STAR_IMAGE_HEIGHT << 10) / TABLE_STAR_HEIGHT);
+      TexelRunStep(TABLE_STAR_IMAGE_WIDTH, TABLE_STAR_WIDTH),
+      TexelRunStep(TABLE_STAR_IMAGE_HEIGHT, TABLE_STAR_HEIGHT));
   gDPPipeSync(gfx++);
   *displayListHead = gfx;
 }

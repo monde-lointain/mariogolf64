@@ -528,7 +528,7 @@ void DrawCourseStats(Gfx** displayListHead) {
     slot = drawOrder[index];
     image = (slot == courseCount) ? COURSE_TOTALS_IMAGE : slot;
     halfSize = iconScale[slot] * COURSE_ICON_HALF_SIZE;
-    step = (f32)(COURSE_ICON_STRIP_HEIGHT << 10) / halfSize;
+    step = (f32)(COURSE_ICON_STRIP_HEIGHT << TEXEL_STEP_SHIFT) / halfSize;
     gDPLoadTLUT_pal256(
         gfx++, TextureAddress(ImageBody(f_CourseStatsIcons[image])));
     gDPPipeSync(gfx++);
@@ -603,7 +603,7 @@ void DrawCourseBanner(
         QuarterPixels(MENU_BANNER_LEFT + MENU_BANNER_WIDTH),
         QuarterPixels(stripTop + COURSE_BANNER_STRIP_SPACING), G_TX_RENDERTILE,
         0, 0, TEXEL_STEP_ONE,
-        (MENU_BANNER_STRIP_HEIGHT << 10) / COURSE_BANNER_STRIP_SPACING);
+        TexelRunStep(MENU_BANNER_STRIP_HEIGHT, COURSE_BANNER_STRIP_SPACING));
     gDPPipeSync(gfx++);
   }
 

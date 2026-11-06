@@ -1813,7 +1813,7 @@ void DrawBillboardEffect(Gfx** displayListHead, Effect* effect, u16 color) {
       gDPPipeSync(gfx++);
 
       /* Texels per pixel, in s5.10 fixed point */
-      textureStep = ((BILLBOARD_IMAGE_SIZE / 2) << 10) / halfSize;
+      textureStep = TexelRunStep((BILLBOARD_IMAGE_SIZE / 2), halfSize);
       if (effect->kind == EFFECT_KIND_RISING_CLUMP) {
         gDPLoadTextureBlock(gfx++,
             TextureAddress(ImageBodyAt(f_ClumpImage, frameOffset)), G_IM_FMT_I,
@@ -2016,7 +2016,7 @@ void DrawDivot(Gfx** displayListHead, Effect* effect) {
     halfSize = center.scaleX * effect->scale;
     if (halfSize > 0) {
       /* Texels per pixel, in s5.10 fixed point */
-      textureStep = ((DIVOT_IMAGE_SIZE / 2) << 10) / halfSize;
+      textureStep = TexelRunStep((DIVOT_IMAGE_SIZE / 2), halfSize);
 
       /* Half a step on, so that each frame is centered on its step */
       angle = effect->tilt + (M_PI / DIVOT_SPIN_STEP_COUNT);
@@ -2614,7 +2614,7 @@ void DrawRain(Gfx** displayListHead, CameraMatrices* matrices) {
             halfSize = RAIN_SPLASH_LARGEST_HALF_SIZE;
           }
 
-          textureStep = ((RAIN_SPLASH_FRAME_SIZE * 2) << 10) / halfSize;
+          textureStep = TexelRunStep((RAIN_SPLASH_FRAME_SIZE * 2), halfSize);
           gSPScisTextureRectangle(gfx++, landedDrop->tailScreenX - halfSize,
               landedDrop->tailScreenY - halfSize,
               landedDrop->tailScreenX + halfSize,
@@ -2638,7 +2638,7 @@ void DrawRain(Gfx** displayListHead, CameraMatrices* matrices) {
             splashSize = RAIN_SPLASH_LARGEST_HALF_SIZE;
           }
 
-          splashStep = ((RAIN_SPLASH_FRAME_SIZE * 2) << 10) / splashSize;
+          splashStep = TexelRunStep((RAIN_SPLASH_FRAME_SIZE * 2), splashSize);
           gSPScisTextureRectangle(gfx++,
               (splashPoint.x * QUARTER_PIXELS_PER_PIXEL) - splashSize,
               (splashPoint.y * QUARTER_PIXELS_PER_PIXEL) - splashSize,

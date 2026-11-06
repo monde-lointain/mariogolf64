@@ -3129,7 +3129,7 @@ void DrawNameLogos(Gfx** displayListHead) {
               QuarterPixels(xEdges[1]),
               yEdges[NAME_LOGO_STRIP_COUNT - strip] << 2, G_TX_RENDERTILE, 0,
               TexelCoordinate(NAME_LOGO_STRIP_ROWS),
-              (SLOT_LOGO.width << 10) / drawnWidth,
+              TexelRunStep(SLOT_LOGO.width, drawnWidth),
               (SLOT_LOGO.height << 8) / drawnHeight);
         } else {
           s32 drawnWidth;
@@ -3155,7 +3155,7 @@ void DrawNameLogos(Gfx** displayListHead) {
           gSPScisTextureRectangle(gfx++, QuarterPixels(xEdges[0]),
               QuarterPixels(yEdges[strip]), QuarterPixels(xEdges[1]),
               yEdges[strip + 1] << 2, G_TX_RENDERTILE, 0, 0,
-              (SLOT_LOGO.width << 10) / drawnWidth,
+              TexelRunStep(SLOT_LOGO.width, drawnWidth),
               (SLOT_LOGO.height << 8) / drawnHeight);
         }
 
@@ -4007,7 +4007,7 @@ void LoadLakitu(void) {
 #define LAKITU_IMAGE_SIZE 32
 #define LAKITU_DRAWN_SIZE 48
 /* Texels a pixel when stretching Lakitu's image to its drawn size, in 5.10 */
-#define LAKITU_SCALE ((LAKITU_IMAGE_SIZE << 10) / LAKITU_DRAWN_SIZE)
+#define LAKITU_SCALE TexelRunStep(LAKITU_IMAGE_SIZE, LAKITU_DRAWN_SIZE)
 #define LAKITU_TRAIL_IMAGE_WIDTH 48
 #define LAKITU_TRAIL_IMAGE_HEIGHT 128
 /* Segments whose vertices fit in the vertex buffer at once */
@@ -4294,8 +4294,8 @@ void DrawOpeningBurst(Gfx** displayListHead) {
       gDPPipeSync(gfx++);
       gSPTextureRectangle(gfx++, QuarterPixels(left), QuarterPixels(top),
           QuarterPixels(right), QuarterPixels(bottom), G_TX_RENDERTILE, 0, 0,
-          (BURST_IMAGE_SIZE << 10) / (right - left),
-          (BURST_IMAGE_SIZE << 10) / (bottom - top));
+          TexelRunStep(BURST_IMAGE_SIZE, right - left),
+          TexelRunStep(BURST_IMAGE_SIZE, bottom - top));
     });
     gDPPipeSync(gfx++);
     *displayListHead = gfx;
@@ -4475,7 +4475,7 @@ void DrawOpeningShotBall(Gfx** displayListHead) {
 
         gSPTextureRectangle(gfx++, QuarterPixels(left), QuarterPixels(top),
             QuarterPixels(right), QuarterPixels(bottom), G_TX_RENDERTILE, 0, 0,
-            (SHOT_BALL_IMAGE_SIZE << 10) / (right - left),
+            TexelRunStep(SHOT_BALL_IMAGE_SIZE, right - left),
             SHOT_BALL_STRIP_ROWS_FIXED / (bottom - top));
         gDPPipeSync(gfx++);
       }

@@ -697,8 +697,8 @@ void DrawYesNoWindow(Gfx** displayListHead, s32 width, s32 height, s32 centerX,
         QuarterPixels(centerX + halfWidth),
         QuarterPixels((index * halfHeight) + halfHeight + windowTop),
         G_TX_RENDERTILE, 0, 0,
-        (MENU_WINDOW_IMAGE_WIDTH << 10) / (s32)windowWidth,
-        (MENU_WINDOW_STRIP_HEIGHT << 10) / (s32)windowHalfHeight);
+        TexelRunStep(MENU_WINDOW_IMAGE_WIDTH, (s32)windowWidth),
+        TexelRunStep(MENU_WINDOW_STRIP_HEIGHT, (s32)windowHalfHeight));
     gDPPipeSync(gfx++);
   }
 
@@ -734,8 +734,8 @@ void DrawYesNoWindow(Gfx** displayListHead, s32 width, s32 height, s32 centerX,
         QuarterPixels(buttonY - buttonHalfHeight - growth),
         QuarterPixels(buttonX + buttonHalfWidth + growth),
         QuarterPixels(buttonY + buttonHalfHeight + growth), G_TX_RENDERTILE, 0,
-        0, (YES_NO_BUTTON_WIDTH << 10) / (s32)(buttonWidth + pulse),
-        (YES_NO_BUTTON_HEIGHT << 10) / (s32)(buttonHeight + pulse));
+        0, TexelRunStep(YES_NO_BUTTON_WIDTH, (s32)(buttonWidth + pulse)),
+        TexelRunStep(YES_NO_BUTTON_HEIGHT, (s32)(buttonHeight + pulse)));
     gDPPipeSync(gfx++);
   }
 
@@ -975,8 +975,8 @@ void DrawClubWindow(Gfx** displayListHead, s32 width, s32 height, s32 centerX,
         QuarterPixels(centerX + badgeTop),
         QuarterPixels(windowTop + (index * halfHeight) + halfHeight),
         G_TX_RENDERTILE, 0, 0,
-        (MENU_WINDOW_IMAGE_WIDTH << 10) / (s32)windowWidth,
-        (MENU_WINDOW_STRIP_HEIGHT << 10) / (s32)windowHalfHeight);
+        TexelRunStep(MENU_WINDOW_IMAGE_WIDTH, (s32)windowWidth),
+        TexelRunStep(MENU_WINDOW_STRIP_HEIGHT, (s32)windowHalfHeight));
     gDPPipeSync(gfx++);
   }
 
@@ -1012,8 +1012,8 @@ void DrawClubWindow(Gfx** displayListHead, s32 width, s32 height, s32 centerX,
         QuarterPixels(buttonY - buttonHalfHeight - growth),
         QuarterPixels(buttonX + buttonHalfWidth + growth),
         QuarterPixels(buttonY + buttonHalfHeight + growth), G_TX_RENDERTILE, 0,
-        0, (YES_NO_BUTTON_WIDTH << 10) / (s32)(buttonWidth + pulse),
-        (YES_NO_BUTTON_HEIGHT << 10) / (s32)(buttonHeight + pulse));
+        0, TexelRunStep(YES_NO_BUTTON_WIDTH, (s32)(buttonWidth + pulse)),
+        TexelRunStep(YES_NO_BUTTON_HEIGHT, (s32)(buttonHeight + pulse)));
     gDPPipeSync(gfx++);
   }
 
@@ -1058,8 +1058,9 @@ void DrawClubWindow(Gfx** displayListHead, s32 width, s32 height, s32 centerX,
           QuarterPixels(badgeTop + (index * badgeStripRows)),
           QuarterPixels(centerX + badgeHalfWidth),
           QuarterPixels(badgeTop + (index * badgeStripRows) + badgeStripRows),
-          G_TX_RENDERTILE, 0, 0, (NINTENDO_BADGE_WIDTH << 10) / (s32)badgeWidth,
-          (NINTENDO_BADGE_STRIP_HEIGHT << 10) / (s32)badgeStripHeight);
+          G_TX_RENDERTILE, 0, 0,
+          TexelRunStep(NINTENDO_BADGE_WIDTH, (s32)badgeWidth),
+          TexelRunStep(NINTENDO_BADGE_STRIP_HEIGHT, (s32)badgeStripHeight));
       gDPPipeSync(gfx++);
     }
   }
@@ -1080,8 +1081,9 @@ void DrawClubWindow(Gfx** displayListHead, s32 width, s32 height, s32 centerX,
         QuarterPixels(courseTop + (index * courseStripRows)),
         QuarterPixels(courseLeft + courseHalfWidth),
         QuarterPixels(courseTop + (index * courseStripRows) + courseStripRows),
-        G_TX_RENDERTILE, 0, 0, (COURSE_IMAGE_WIDTH << 10) / (s32)courseWidth,
-        (COURSE_IMAGE_STRIP_HEIGHT << 10) / (s32)courseStripHeight);
+        G_TX_RENDERTILE, 0, 0,
+        TexelRunStep(COURSE_IMAGE_WIDTH, (s32)courseWidth),
+        TexelRunStep(COURSE_IMAGE_STRIP_HEIGHT, (s32)courseStripHeight));
     gDPPipeSync(gfx++);
   }
 
@@ -1098,8 +1100,8 @@ void DrawClubWindow(Gfx** displayListHead, s32 width, s32 height, s32 centerX,
       QuarterPixels(pictureY - pictureHalfHeight),
       QuarterPixels(pictureX + pictureHalfWidth),
       QuarterPixels(pictureY + pictureHalfHeight), G_TX_RENDERTILE, 0, 0,
-      (WINDOW_PICTURE_SIZE << 10) / (s32)pictureWidth,
-      (WINDOW_PICTURE_SIZE << 10) / (s32)pictureHeight);
+      TexelRunStep(WINDOW_PICTURE_SIZE, (s32)pictureWidth),
+      TexelRunStep(WINDOW_PICTURE_SIZE, (s32)pictureHeight));
   gDPPipeSync(gfx++);
 
   if (IsMenuWindowOpen()) {
@@ -1156,8 +1158,8 @@ void DrawUnusedWideCloud(Gfx** displayListHead, s32 centerX, s32 centerY,
     DrawTextureRect(&gfx, QuarterPixels(centerX - halfWidth),
         QuarterPixels(stripTop), QuarterPixels(centerX + filterOrHalfWidth),
         QuarterPixels(stripTop + stripHeight), G_TX_RENDERTILE, 0, 0,
-        (TOURNAMENT_BANNER_WIDTH << 10) / width,
-        (TOURNAMENT_BANNER_STRIP_HEIGHT << 10) / shownStripHeight);
+        TexelRunStep(TOURNAMENT_BANNER_WIDTH, width),
+        TexelRunStep(TOURNAMENT_BANNER_STRIP_HEIGHT, shownStripHeight));
     stripTop += stripHeight;
     gDPPipeSync(gfx++);
   }
@@ -1800,8 +1802,8 @@ void DrawCodePanels(Gfx** displayListHead) {
             (stripIndex * CODE_UPPER_PANEL_STRIP_HEIGHT) +
             CODE_UPPER_PANEL_STRIP_HEIGHT),
         G_TX_RENDERTILE, 0, 0,
-        (MENU_BANNER_WIDTH << 10) / CODE_UPPER_PANEL_WIDTH,
-        (MENU_BANNER_STRIP_HEIGHT << 10) / CODE_UPPER_PANEL_STRIP_HEIGHT);
+        TexelRunStep(MENU_BANNER_WIDTH, CODE_UPPER_PANEL_WIDTH),
+        TexelRunStep(MENU_BANNER_STRIP_HEIGHT, CODE_UPPER_PANEL_STRIP_HEIGHT));
     gDPPipeSync(gfx++);
     gSPScisTextureRectangle(gfx++, QuarterPixels(CODE_LOWER_PANEL_LEFT),
         QuarterPixels(CODE_LOWER_PANEL_TOP +
@@ -1811,8 +1813,8 @@ void DrawCodePanels(Gfx** displayListHead) {
             (stripIndex * CODE_LOWER_PANEL_STRIP_HEIGHT) +
             CODE_LOWER_PANEL_STRIP_HEIGHT),
         G_TX_RENDERTILE, 0, 0,
-        (MENU_BANNER_WIDTH << 10) / CODE_LOWER_PANEL_WIDTH,
-        (MENU_BANNER_STRIP_HEIGHT << 10) / CODE_LOWER_PANEL_STRIP_HEIGHT);
+        TexelRunStep(MENU_BANNER_WIDTH, CODE_LOWER_PANEL_WIDTH),
+        TexelRunStep(MENU_BANNER_STRIP_HEIGHT, CODE_LOWER_PANEL_STRIP_HEIGHT));
     gDPPipeSync(gfx++);
   }
 
@@ -1926,8 +1928,8 @@ void DrawCodeKeys(Gfx** displayListHead) {
               CODE_GLYPH_SIZE + grow),
           QuarterPixels((row * CODE_KEY_SPACING_Y) + CODE_GLYPH_FIRST_Y +
               CODE_GLYPH_SIZE + grow),
-          G_TX_RENDERTILE, 0, 0, (CODE_GLYPH_SIZE << 10) / size,
-          (CODE_GLYPH_SIZE << 10) / size);
+          G_TX_RENDERTILE, 0, 0, TexelRunStep(CODE_GLYPH_SIZE, size),
+          TexelRunStep(CODE_GLYPH_SIZE, size));
       gDPPipeSync(gfx++);
     }
   }

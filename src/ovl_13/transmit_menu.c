@@ -3580,8 +3580,8 @@ void DrawNotice(Gfx** displayListHead) {
       DrawTextureRect(&displayList, QuarterPixels(NOTICE_CENTER_X - halfWidth),
           QuarterPixels(bottom - stripHeight),
           QuarterPixels(NOTICE_CENTER_X + halfWidth), QuarterPixels(bottom),
-          G_TX_RENDERTILE, 0, 0, (NOTICE_WIDTH << 10) / 2 / halfWidth,
-          (NOTICE_STRIP_HEIGHT << 10) / stripHeight);
+          G_TX_RENDERTILE, 0, 0, TexelRunStep(NOTICE_WIDTH / 2, halfWidth),
+          TexelRunStep(NOTICE_STRIP_HEIGHT, stripHeight));
     }
   }
 

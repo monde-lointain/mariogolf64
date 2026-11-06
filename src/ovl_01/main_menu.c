@@ -4093,7 +4093,8 @@ void DrawMenuBackdropLayers(Gfx** displayListHead, s32 layers) {
       gSPScisTextureRectangle(gfx++, QuarterPixels(BOARD_LEFT),
           QuarterPixels(stripTop), QuarterPixels(BOARD_LEFT + BOARD_WIDTH),
           QuarterPixels(stripTop + BOARD_STRIP_SPACING), G_TX_RENDERTILE, 0, 0,
-          TEXEL_STEP_ONE, (BOARD_STRIP_HEIGHT << 10) / BOARD_STRIP_SPACING);
+          TEXEL_STEP_ONE,
+          TexelRunStep(BOARD_STRIP_HEIGHT, BOARD_STRIP_SPACING));
       gDPPipeSync(gfx++);
     }
   }
@@ -4126,7 +4127,7 @@ void DrawMenuBackdropLayers(Gfx** displayListHead, s32 layers) {
           QuarterPixels(TALL_NARROW_BOARD_LEFT + NARROW_BOARD_WIDTH),
           QuarterPixels(stripTop + BOARD_STRIP_SPACING), G_TX_RENDERTILE, 0, 0,
           TEXEL_STEP_ONE,
-          (NARROW_BOARD_STRIP_HEIGHT << 10) / BOARD_STRIP_SPACING);
+          TexelRunStep(NARROW_BOARD_STRIP_HEIGHT, BOARD_STRIP_SPACING));
       gDPPipeSync(gfx++);
     }
   }
@@ -4293,8 +4294,8 @@ void DrawNarrowMenuBoard(Gfx** displayListHead) {
         QuarterPixels(stripTop),
         QuarterPixels(NARROW_BOARD_LEFT + NARROW_BOARD_SHOWN_WIDTH),
         QuarterPixels(stripTop + NARROW_BOARD_STRIP_HEIGHT), G_TX_RENDERTILE, 0,
-        0, (NARROW_BOARD_WIDTH << 10) / NARROW_BOARD_SHOWN_WIDTH,
-        (NARROW_BOARD_STRIP_HEIGHT << 10) / NARROW_BOARD_ROW_SCALE);
+        0, TexelRunStep(NARROW_BOARD_WIDTH, NARROW_BOARD_SHOWN_WIDTH),
+        TexelRunStep(NARROW_BOARD_STRIP_HEIGHT, NARROW_BOARD_ROW_SCALE));
     gDPPipeSync(gfx++);
   }
 
@@ -4352,7 +4353,7 @@ void DrawSmallNamePlate(Gfx** displayListHead, s32 left, s32 top) {
     gSPScisTextureRectangle(gfx++, QuarterPixels(left), QuarterPixels(stripTop),
         QuarterPixels(left + SMALL_BANNER_WIDTH),
         QuarterPixels(stripTop + MENU_BANNER_STRIP_HEIGHT), G_TX_RENDERTILE, 0,
-        0, (MENU_BANNER_WIDTH << 10) / SMALL_BANNER_WIDTH, TEXEL_STEP_ONE);
+        0, TexelRunStep(MENU_BANNER_WIDTH, SMALL_BANNER_WIDTH), TEXEL_STEP_ONE);
     gDPPipeSync(gfx++);
   }
 
@@ -4382,8 +4383,8 @@ void DrawLargeMenuBanner(Gfx** displayListHead) {
         QuarterPixels(stripTop),
         QuarterPixels(LARGE_BANNER_LEFT + LARGE_BANNER_WIDTH),
         QuarterPixels(stripTop + LARGE_BANNER_STRIP_HEIGHT), G_TX_RENDERTILE, 0,
-        0, (MENU_BANNER_WIDTH << 10) / LARGE_BANNER_WIDTH,
-        (MENU_BANNER_STRIP_HEIGHT << 10) / LARGE_BANNER_STRIP_HEIGHT);
+        0, TexelRunStep(MENU_BANNER_WIDTH, LARGE_BANNER_WIDTH),
+        TexelRunStep(MENU_BANNER_STRIP_HEIGHT, LARGE_BANNER_STRIP_HEIGHT));
     gDPPipeSync(gfx++);
   }
 
@@ -4577,8 +4578,8 @@ void DrawMenuTitleScreen(Gfx** displayListHead) {
           QuarterPixels(f_TitleLabelCorners[labelIndex].y +
               (TITLE_LABEL_HEIGHT + (growth / 2))),
           G_TX_RENDERTILE, 0, 0,
-          (TITLE_LABEL_WIDTH << 10) / (growth + TITLE_LABEL_WIDTH),
-          (TITLE_LABEL_HEIGHT << 10) / (growth + TITLE_LABEL_HEIGHT));
+          TexelRunStep(TITLE_LABEL_WIDTH, growth + TITLE_LABEL_WIDTH),
+          TexelRunStep(TITLE_LABEL_HEIGHT, growth + TITLE_LABEL_HEIGHT));
       gDPPipeSync(gfx++);
     }
   }
@@ -4970,7 +4971,7 @@ void DrawModeSelect(Gfx** displayListHead) {
   for (index = 0; index != modeCount; index++) {
     slot = drawOrder[index];
     halfSize = boardScale[slot] * MODE_BOARD_HALF_SIZE;
-    step = (f32)(MODE_ICON_STRIP_HEIGHT << 10) / halfSize;
+    step = (f32)(MODE_ICON_STRIP_HEIGHT << TEXEL_STEP_SHIFT) / halfSize;
     /* The loop stops before modeCount, so no board bobs */
     if (index == modeCount) {
       bob = sinf(f_ModeBoardBobPhase) * MODE_BOARD_BOB_HEIGHT;
@@ -5086,7 +5087,8 @@ void DrawModeSelect(Gfx** displayListHead) {
           QuarterPixels(MODE_BANNER_TOP + MENU_BANNER_STRIP_HEIGHT +
               (index * MENU_BANNER_STRIP_HEIGHT)),
           G_TX_RENDERTILE, 0, 0,
-          (MENU_BANNER_WIDTH << 10) / SINGLE_PLAYER_MODE_BANNER_SHOWN_WIDTH,
+          TexelRunStep(
+              MENU_BANNER_WIDTH, SINGLE_PLAYER_MODE_BANNER_SHOWN_WIDTH),
           TEXEL_STEP_ONE);
       gDPPipeSync(gfx++);
     }
@@ -5105,7 +5107,8 @@ void DrawModeSelect(Gfx** displayListHead) {
           QuarterPixels(MODE_BANNER_TOP + MENU_BANNER_STRIP_HEIGHT +
               (index * MENU_BANNER_STRIP_HEIGHT)),
           G_TX_RENDERTILE, 0, 0,
-          (MENU_BANNER_WIDTH << 10) / MODE_BANNER_SHOWN_WIDTH, TEXEL_STEP_ONE);
+          TexelRunStep(MENU_BANNER_WIDTH, MODE_BANNER_SHOWN_WIDTH),
+          TEXEL_STEP_ONE);
       gDPPipeSync(gfx++);
     }
   }
@@ -6058,7 +6061,7 @@ void DrawCourseSelect(Gfx** displayListHead) {
     for (index = 0; index != courseCount; index++) {
       slot = drawOrder[index];
       halfSize = iconScale[slot] * COURSE_ICON_HALF_SIZE;
-      step = (f32)(COURSE_ICON_STRIP_HEIGHT << 10) / halfSize;
+      step = (f32)(COURSE_ICON_STRIP_HEIGHT << TEXEL_STEP_SHIFT) / halfSize;
       if (index == (courseCount - 1)) {
         bob = sinf(f_FrontCourseBobPhase) * FRONT_COURSE_BOB_HEIGHT;
       } else {
@@ -6566,8 +6569,9 @@ void DrawCourseSelectBanners(Gfx** displayListHead) {
           QuarterPixels(slide + stripTop),
           QuarterPixels(HOLES_BANNER_LEFT + HOLES_BANNER_WIDTH),
           QuarterPixels(slide + stripTop + HOLES_BANNER_STRIP_HEIGHT),
-          G_TX_RENDERTILE, 0, 0, (MENU_BANNER_WIDTH << 10) / HOLES_BANNER_WIDTH,
-          (MENU_BANNER_STRIP_HEIGHT << 10) / HOLES_BANNER_STRIP_HEIGHT);
+          G_TX_RENDERTILE, 0, 0,
+          TexelRunStep(MENU_BANNER_WIDTH, HOLES_BANNER_WIDTH),
+          TexelRunStep(MENU_BANNER_STRIP_HEIGHT, HOLES_BANNER_STRIP_HEIGHT));
       gDPPipeSync(gfx++);
     }
   }
@@ -6591,7 +6595,7 @@ void DrawCourseSelectBanners(Gfx** displayListHead) {
             COURSE_NAME_BANNER_LEFT + COURSE_NAME_BANNER_WIDTH - (squeeze / 2)),
         QuarterPixels(slide + stripTop + MENU_BANNER_STRIP_HEIGHT),
         G_TX_RENDERTILE, 0, 0,
-        (MENU_BANNER_WIDTH << 10) / (COURSE_NAME_BANNER_WIDTH - squeeze),
+        TexelRunStep(MENU_BANNER_WIDTH, COURSE_NAME_BANNER_WIDTH - squeeze),
         TEXEL_STEP_ONE);
     gDPPipeSync(gfx++);
   }
@@ -6701,10 +6705,10 @@ void DrawMainMenu(Gfx** displayListHead) {
       QuarterPixels(f_MainChoiceLabelCorners[choiceIndex].y +
           (MAIN_CHOICE_LABEL_HEIGHT + (g_ChosenLabelGrowth / 2))),
       G_TX_RENDERTILE, 0, 0,
-      (MAIN_CHOICE_LABEL_WIDTH << 10) /
-          (g_ChosenLabelGrowth + MAIN_CHOICE_LABEL_WIDTH),
-      (MAIN_CHOICE_LABEL_HEIGHT << 10) /
-          (g_ChosenLabelGrowth + MAIN_CHOICE_LABEL_HEIGHT));
+      TexelRunStep(MAIN_CHOICE_LABEL_WIDTH,
+          g_ChosenLabelGrowth + MAIN_CHOICE_LABEL_WIDTH),
+      TexelRunStep(MAIN_CHOICE_LABEL_HEIGHT,
+          g_ChosenLabelGrowth + MAIN_CHOICE_LABEL_HEIGHT));
   gDPPipeSync(gfx++);
   if (g_ChosenLabelGrowthDirection == LABEL_GROWING) {
     g_ChosenLabelGrowth += CHOSEN_LABEL_GROWTH_STEP;
@@ -6786,10 +6790,10 @@ void DrawMainMenuWithoutTransmit(Gfx** displayListHead) {
       QuarterPixels(f_ShortMainChoiceLabelCorners[choiceIndex].y +
           (MAIN_CHOICE_LABEL_HEIGHT + (g_ChosenLabelGrowth / 2))),
       G_TX_RENDERTILE, 0, 0,
-      (MAIN_CHOICE_LABEL_WIDTH << 10) /
-          (g_ChosenLabelGrowth + MAIN_CHOICE_LABEL_WIDTH),
-      (MAIN_CHOICE_LABEL_HEIGHT << 10) /
-          (g_ChosenLabelGrowth + MAIN_CHOICE_LABEL_HEIGHT));
+      TexelRunStep(MAIN_CHOICE_LABEL_WIDTH,
+          g_ChosenLabelGrowth + MAIN_CHOICE_LABEL_WIDTH),
+      TexelRunStep(MAIN_CHOICE_LABEL_HEIGHT,
+          g_ChosenLabelGrowth + MAIN_CHOICE_LABEL_HEIGHT));
   gDPPipeSync(gfx++);
   if (g_ChosenLabelGrowthDirection == LABEL_GROWING) {
     g_ChosenLabelGrowth += CHOSEN_LABEL_GROWTH_STEP;
@@ -6866,8 +6870,8 @@ void DrawClubhouse(Gfx** displayListHead) {
       QuarterPixels(f_ClubhouseLabelCorners[choiceIndex].y +
           (ROOM_LABEL_HEIGHT + (g_ChosenLabelGrowth / 2))),
       G_TX_RENDERTILE, 0, 0,
-      (ROOM_LABEL_WIDTH << 10) / (g_ChosenLabelGrowth + ROOM_LABEL_WIDTH),
-      (ROOM_LABEL_HEIGHT << 10) / (g_ChosenLabelGrowth + ROOM_LABEL_HEIGHT));
+      TexelRunStep(ROOM_LABEL_WIDTH, g_ChosenLabelGrowth + ROOM_LABEL_WIDTH),
+      TexelRunStep(ROOM_LABEL_HEIGHT, g_ChosenLabelGrowth + ROOM_LABEL_HEIGHT));
   gDPPipeSync(gfx++);
   if (g_ChosenLabelGrowthDirection == LABEL_GROWING) {
     g_ChosenLabelGrowth += CHOSEN_LABEL_GROWTH_STEP;
@@ -7102,8 +7106,8 @@ void DrawOptionsScreen(Gfx** displayListHead) {
                 VALUE_BANNER_OFFSET_Y + BANNER_SHADOW_DROP +
                 VALUE_BANNER_STRIP_HEIGHT),
             G_TX_RENDERTILE, 0, 0,
-            (MENU_BANNER_WIDTH << 10) / VALUE_BANNER_WIDTH,
-            (MENU_BANNER_STRIP_HEIGHT << 10) / VALUE_BANNER_STRIP_HEIGHT);
+            TexelRunStep(MENU_BANNER_WIDTH, VALUE_BANNER_WIDTH),
+            TexelRunStep(MENU_BANNER_STRIP_HEIGHT, VALUE_BANNER_STRIP_HEIGHT));
         gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
         DrawTextureRect(&gfx,
             QuarterPixels(VALUE_BANNER_LEFT - CHOSEN_BANNER_SHIFT),
@@ -7114,8 +7118,8 @@ void DrawOptionsScreen(Gfx** displayListHead) {
             QuarterPixels(ValueStripTop(toggleIndex, firstRowStripTop) +
                 VALUE_BANNER_OFFSET_Y + VALUE_BANNER_STRIP_HEIGHT),
             G_TX_RENDERTILE, 0, 0,
-            (MENU_BANNER_WIDTH << 10) / VALUE_BANNER_WIDTH,
-            (MENU_BANNER_STRIP_HEIGHT << 10) / VALUE_BANNER_STRIP_HEIGHT);
+            TexelRunStep(MENU_BANNER_WIDTH, VALUE_BANNER_WIDTH),
+            TexelRunStep(MENU_BANNER_STRIP_HEIGHT, VALUE_BANNER_STRIP_HEIGHT));
       } else {
         gDPSetCombineLERP(gfx++, PRIMITIVE, 0, TEXEL0, 0, 0, 0, 0, TEXEL0,
             PRIMITIVE, 0, TEXEL0, 0, 0, 0, 0, TEXEL0);
@@ -7128,8 +7132,8 @@ void DrawOptionsScreen(Gfx** displayListHead) {
             QuarterPixels(ValueStripTop(toggleIndex, firstRowStripTop) +
                 VALUE_BANNER_OFFSET_Y + VALUE_BANNER_STRIP_HEIGHT),
             G_TX_RENDERTILE, 0, 0,
-            (MENU_BANNER_WIDTH << 10) / VALUE_BANNER_WIDTH,
-            (MENU_BANNER_STRIP_HEIGHT << 10) / VALUE_BANNER_STRIP_HEIGHT);
+            TexelRunStep(MENU_BANNER_WIDTH, VALUE_BANNER_WIDTH),
+            TexelRunStep(MENU_BANNER_STRIP_HEIGHT, VALUE_BANNER_STRIP_HEIGHT));
       }
     }
   }
@@ -7490,8 +7494,8 @@ void DrawSpinningStars(Gfx** displayListHead, s32 left, s32 top, u8 starCount,
         QuarterPixels(
             left + starIndex * STAR_WIDTH + STAR_WIDTH + (growWidth / 2)),
         QuarterPixels(top + STAR_HEIGHT + (growHeight / 2)), G_TX_RENDERTILE, 0,
-        0, (STAR_WIDTH << 10) / (growWidth + STAR_WIDTH),
-        (STAR_HEIGHT << 10) / (growHeight + STAR_HEIGHT));
+        0, TexelRunStep(STAR_WIDTH, growWidth + STAR_WIDTH),
+        TexelRunStep(STAR_HEIGHT, growHeight + STAR_HEIGHT));
     gDPPipeSync(gfx++);
   }
 
@@ -7584,8 +7588,9 @@ void DrawMenuRingShotStars(Gfx** displayListHead, s32 centerX, s32 centerY) {
         QuarterPixels(top - (growHeight / 2)),
         QuarterPixels(left + RING_SHOT_STAR_WIDTH + (growWidth / 2)),
         QuarterPixels(top + RING_SHOT_STAR_HEIGHT + (growHeight / 2)), tile, 0,
-        0, (RING_SHOT_STAR_WIDTH << 10) / (growWidth + RING_SHOT_STAR_WIDTH),
-        (RING_SHOT_STAR_HEIGHT << 10) / (growHeight + RING_SHOT_STAR_HEIGHT));
+        0, TexelRunStep(RING_SHOT_STAR_WIDTH, growWidth + RING_SHOT_STAR_WIDTH),
+        TexelRunStep(
+            RING_SHOT_STAR_HEIGHT, growHeight + RING_SHOT_STAR_HEIGHT));
     gDPPipeSync(gfx++);
   }
 

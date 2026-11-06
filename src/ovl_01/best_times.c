@@ -330,7 +330,7 @@ void DrawBestTimes(Gfx** displayListHead) {
   for (index = 0; index != courseCount; index++) {
     slot = drawOrder[index];
     halfSize = iconScale[slot] * COURSE_ICON_HALF_SIZE;
-    step = (f32)(COURSE_ICON_STRIP_HEIGHT << 10) / halfSize;
+    step = (f32)(COURSE_ICON_STRIP_HEIGHT << TEXEL_STEP_SHIFT) / halfSize;
     gDPLoadTLUT_pal256(
         gfx++, TextureAddress(ImageBody(f_BestTimesCourseIcons[slot])));
     gDPPipeSync(gfx++);
@@ -509,8 +509,8 @@ void DrawPlaceLabel(Gfx** displayListHead, s32 left, s32 top, s32 place) {
   gSPScisTextureRectangle(gfx++, QuarterPixels(left), QuarterPixels(top),
       QuarterPixels(left + PLACE_LABEL_SIZE),
       QuarterPixels(top + PLACE_LABEL_SIZE), G_TX_RENDERTILE, 0, 0,
-      (PLACE_LABEL_FRAME_SIZE << 10) / PLACE_LABEL_SIZE,
-      (PLACE_LABEL_FRAME_SIZE << 10) / PLACE_LABEL_SIZE);
+      TexelRunStep(PLACE_LABEL_FRAME_SIZE, PLACE_LABEL_SIZE),
+      TexelRunStep(PLACE_LABEL_FRAME_SIZE, PLACE_LABEL_SIZE));
   gDPPipeSync(gfx++);
   gDPLoadTextureBlock(gfx++,
       TextureAddress(LargeImageTexelsAt(f_PlaceLabels,
@@ -524,8 +524,8 @@ void DrawPlaceLabel(Gfx** displayListHead, s32 left, s32 top, s32 place) {
       QuarterPixels(top),
       QuarterPixels(left + PLACE_LABEL_SUFFIX_X + PLACE_LABEL_SIZE),
       QuarterPixels(top + PLACE_LABEL_SIZE), G_TX_RENDERTILE, 0, 0,
-      (PLACE_LABEL_FRAME_SIZE << 10) / PLACE_LABEL_SIZE,
-      (PLACE_LABEL_FRAME_SIZE << 10) / PLACE_LABEL_SIZE);
+      TexelRunStep(PLACE_LABEL_FRAME_SIZE, PLACE_LABEL_SIZE),
+      TexelRunStep(PLACE_LABEL_FRAME_SIZE, PLACE_LABEL_SIZE));
   gDPPipeSync(gfx++);
   *displayListHead = gfx;
 }

@@ -1213,7 +1213,7 @@ void DrawChoiceBox(Gfx** displayListHead) {
           QuarterPixels(CHOICE_BOX_TOP),
           QuarterPixels(CHOICE_BOX_CENTER_X + halfWidth),
           QuarterPixels(CHOICE_BOX_BOTTOM), G_TX_RENDERTILE, 0, 0,
-          (CHOICE_BOX_CLOUD_WIDTH << 10) / 2 / halfWidth,
+          TexelRunStep(CHOICE_BOX_CLOUD_WIDTH / 2, halfWidth),
           CHOICE_BOX_CLOUD_DTDY);
     }
 

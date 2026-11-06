@@ -2430,8 +2430,8 @@ void DrawWindSpeed(Gfx** displayListHead, f32 x, f32 y) {
   halfHeight = sinf(f_WindIconPulseAngle) + WIND_ICON_HALF_HEIGHT;
   halfWidthRounded = halfWidth + 0.5f;
   halfHeightRounded = halfHeight + 0.5f;
-  dsdx = (WIND_ICON_TEXTURE_WIDTH / 2 << 10) / halfWidth;
-  dtdy = (WIND_ICON_TEXTURE_HEIGHT / 2 << 10) / halfHeight;
+  dsdx = TexelRunStep(WIND_ICON_TEXTURE_WIDTH / 2, halfWidth);
+  dtdy = TexelRunStep(WIND_ICON_TEXTURE_HEIGHT / 2, halfHeight);
 
   /* Moves the texture by the rounding, in 10.5 fixed point, from half a texel
    * in */
