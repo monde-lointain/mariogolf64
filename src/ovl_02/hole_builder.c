@@ -3043,7 +3043,7 @@ void ReadHoleTriangles(void) {
 }
 
 /* Reads each ground tile's mirrored cells from the file */
-void ReadTileUnk992s(void) {
+void ReadTileMirroredCells(void) {
   s32 i;
 
   for (i = 0; i < GROUND_TILE_COUNT; i++) {
