@@ -2638,7 +2638,8 @@ void UpdateOpening(void) {
             break;
           case 0x1C:
             if (f_IsDonkeyKongShown) {
-              PlaySound(SOUND_UNK321, f_OpeningSoundChannel, SOUND_FULL_SCALE);
+              PlaySound(
+                  SOUND_LUIGI_OH_NO, f_OpeningSoundChannel, SOUND_FULL_SCALE);
               f_DonkeyKongSoundChannel = f_OpeningSoundChannel;
             } else {
               PlaySound(SOUND_UNK338, f_OpeningSoundChannel, SOUND_FULL_SCALE);
@@ -2744,7 +2745,7 @@ void UpdateOpening(void) {
         }
 
         if (f_OpeningSceneFramesLeft == 0x1A) {
-          PlaySound(SOUND_UNK321, f_OpeningSoundChannel, SOUND_FULL_SCALE);
+          PlaySound(SOUND_LUIGI_OH_NO, f_OpeningSoundChannel, SOUND_FULL_SCALE);
           AdvanceOpeningSoundChannel();
         }
 

@@ -95,7 +95,7 @@ enum Sound {
   /* As the opening's burst appears */
   SOUND_BURST = 0x34,
   SOUND_YOSHI_EAGLE_SECOND_EFFECT, /* Also played in the opening */
-  /* In the opening, before SOUND_UNK321 or SOUND_UNK338 */
+  /* In the opening, before SOUND_LUIGI_OH_NO or SOUND_UNK338 */
   SOUND_CHIME,
   SOUND_METAL_MARIO_EAGLE_EFFECT = 0x38,
   SOUND_WARIO_BOGEY_EFFECT,
@@ -294,7 +294,7 @@ enum Sound {
    * With the opening's Donkey Kong where SOUND_UNK338 plays with Yoshi,
    * and as the opening's burst appears
    */
-  SOUND_UNK321,
+  SOUND_LUIGI_OH_NO,
   /*
    * Luigi's, Mario's, Peach's and Plum's *_OPENING_VOICE sounds lie in their
    * voice banks, each just before the character's CALL_OUT_UP sound, but no row
