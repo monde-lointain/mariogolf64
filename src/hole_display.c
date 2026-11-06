@@ -1967,8 +1967,22 @@ void DrawSky(Gfx** displayListHead, f32 eyeY UNUSED, s32 unusedSetting UNUSED,
  * word offset as the first does; keeping a byte offset in its own local gave
  * 56. 18 words differ, none in shape.
  *
- * The register oracle's closest result is these 18 words with no register
- * forced, so allocation isn't the cause.
+ * The 18 words are centerShift's floating-point registers, $f0 and $f2
+ * swapped. local-alloc ties the zoom, its product with FULL_VIEW_HEIGHT and
+ * the two values after it into one quantity: 8 refs over a life of 46,
+ * priority 5217, just above the 5000 of the converted viewport height (2
+ * refs, life 4), so the zoom's quantity takes $f0 first. sched1 places the
+ * 0.5f constant's load between that conversion and the subtraction; with the
+ * conversion's life at 2, or the quantity's above 48, qty_compare would rank
+ * the conversion first. Forcing the quantity into $f2 and FULL_VIEW_HEIGHT
+ * and the conversion into $f0 brings the register oracle to 14 words: the
+ * truncation's scratch register, which local-alloc chose before the forcing,
+ * and constant loads that the forced compile places elsewhere. 0.5f written
+ * first, a division by 2 or 2.0f, an explicit (f32) on the viewport height,
+ * the operands of either product swapped, or a shift for the doubling still
+ * give 18 words; adding the negated height to the product gives 14, 4 in
+ * shape. Setting isNibbleImage before the syncs, before DrawSky or right
+ * after gfx, or initializing gfx in its declaration, gives 18.
  */
 #ifdef NON_MATCHING
 void DrawBackdrop(Gfx** displayListHead, CameraView* view, s32 cameraIndex) {
