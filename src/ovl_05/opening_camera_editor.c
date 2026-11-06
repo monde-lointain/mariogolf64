@@ -155,6 +155,13 @@ void MeasureEditorCamera(void) {
           (offsetY * offsetY) + (offsetZ * offsetZ));
 }
 
+/* Within these, a move, turn, tilt or zoom has arrived */
+#define EDITOR_ARRIVAL_DISTANCE 0.1f
+#define EDITOR_ARRIVAL_ANGLE 0.001f
+/* A timed move speeds up over this share of its frames and brakes over the
+ * same share of its distance */
+#define EDITOR_EASE_SHARE 4
+
 /* Starts moving point index to (x, y, z) over frameCount frames, or snaps it
  * there when it is close */
 void MoveEditorPoint(s32 index, f32 x, f32 y, f32 z, s32 frameCount) {
@@ -168,7 +175,7 @@ void MoveEditorPoint(s32 index, f32 x, f32 y, f32 z, s32 frameCount) {
           (y - g_CameraEditor.points[index][1])) +
       ((z - g_CameraEditor.points[index][2]) *
           (z - g_CameraEditor.points[index][2])));
-  if (distance < 0.1f) {
+  if (distance < EDITOR_ARRIVAL_DISTANCE) {
     g_CameraEditor.points[index][0] = x;
     g_CameraEditor.points[index][1] = y;
     g_CameraEditor.points[index][2] = z;
@@ -176,11 +183,12 @@ void MoveEditorPoint(s32 index, f32 x, f32 y, f32 z, s32 frameCount) {
   }
 
   if (frameCount != 0) {
-    easeFrameCount = frameCount / 4;
+    easeFrameCount = frameCount / EDITOR_EASE_SHARE;
     speed = distance / (frameCount - easeFrameCount);
     g_CameraEditor.pointTopSpeeds[index] = speed;
     g_CameraEditor.pointAccelerations[index] = speed / (easeFrameCount + 1);
-    g_CameraEditor.pointBrakingDistances[index] = distance * 0.25;
+    g_CameraEditor.pointBrakingDistances[index] =
+        distance * (1.0 / EDITOR_EASE_SHARE);
     if (!(g_CameraEditor.flags[index] & EDITOR_FLAG_CARRYING)) {
       if (!(g_CameraEditor.flags[index] & EDITOR_FLAG_TIMED_MOVE)) {
         g_CameraEditor.flags[index] ^= EDITOR_FLAG_TIMED_MOVE;
@@ -250,15 +258,15 @@ void TurnEditorCamera(s32 index, Radians angle, s32 frameCount) {
   s32 easeFrameCount;
   f32 speed;
 
-  if (fabsf(angle) < 0.001f) {
+  if (fabsf(angle) < EDITOR_ARRIVAL_ANGLE) {
     g_CameraEditor.heading += angle;
     return;
   }
 
   if (frameCount != 0) {
-    easeFrameCount = frameCount / 4;
+    easeFrameCount = frameCount / EDITOR_EASE_SHARE;
     speed = angle / (frameCount - easeFrameCount);
-    g_CameraEditor.turnBrakingAngle = angle * 0.25;
+    g_CameraEditor.turnBrakingAngle = angle * (1.0 / EDITOR_EASE_SHARE);
     g_CameraEditor.turnTopSpeed = speed;
     g_CameraEditor.turnAcceleration = speed / (easeFrameCount + 1);
   }
@@ -288,15 +296,15 @@ void TiltEditorCamera(s32 index, Radians angle, s32 frameCount) {
   s32 easeFrameCount;
   f32 speed;
 
-  if (fabsf(angle) < 0.001f) {
+  if (fabsf(angle) < EDITOR_ARRIVAL_ANGLE) {
     g_CameraEditor.pitch += angle;
     return;
   }
 
   if (frameCount != 0) {
-    easeFrameCount = frameCount / 4;
+    easeFrameCount = frameCount / EDITOR_EASE_SHARE;
     speed = angle / (frameCount - easeFrameCount);
-    g_CameraEditor.tiltBrakingAngle = angle * 0.25;
+    g_CameraEditor.tiltBrakingAngle = angle * (1.0 / EDITOR_EASE_SHARE);
     g_CameraEditor.tiltTopSpeed = speed;
     g_CameraEditor.tiltAcceleration = speed / (easeFrameCount + 1);
   }
@@ -327,19 +335,20 @@ void ZoomEditorCamera(s32 index, f32 distance, s32 frameCount) {
   f32 speed;
 
   change = distance - g_CameraEditor.distance;
-  if (fabsf(change) < 0.1f) {
+  if (fabsf(change) < EDITOR_ARRIVAL_DISTANCE) {
     g_CameraEditor.distance = distance;
     return;
   }
 
   if (frameCount != 0) {
-    easeFrameCount = frameCount / 4;
+    easeFrameCount = frameCount / EDITOR_EASE_SHARE;
     g_CameraEditor.zoomTopSpeed = change / (frameCount - easeFrameCount);
     speed = g_CameraEditor.zoomTopSpeed;
     g_CameraEditor.zoomAcceleration = speed / (easeFrameCount + 1);
     /* The braking distance in double precision, to match; a float quarter or
      * a division by 4 gives 9 differing words */
-    g_CameraEditor.zoomBrakingDistance = fabsf(change) * 0.25;
+    g_CameraEditor.zoomBrakingDistance =
+        fabsf(change) * (1.0 / EDITOR_EASE_SHARE);
   }
 
   g_CameraEditor.zoomTarget = distance;
@@ -417,9 +426,6 @@ void StopEditorMoves(void) {
   MeasureEditorCamera();
 }
 
-/* Within these, a move, turn, tilt or zoom has arrived */
-#define EDITOR_ARRIVAL_DISTANCE 0.1f
-#define EDITOR_ARRIVAL_ANGLE 0.001f
 /* The share of the acceleration that braking takes off the top speed each
  * update */
 #define EDITOR_BRAKING_RATE 0.63979524f
