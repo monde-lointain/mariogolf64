@@ -10,6 +10,7 @@
 #include <ultra64.h>
 
 #include "address.h"
+#include "asset.h"
 #include "camera.h"
 #include "character.h"
 #include "character_slot.h"

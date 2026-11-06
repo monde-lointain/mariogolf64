@@ -7,6 +7,7 @@
 #include <ultra64.h>
 
 #include "address.h"
+#include "asset.h"
 #include "compiler.h"
 #include "game.h"
 #include "game_state.h"

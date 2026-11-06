@@ -10,6 +10,7 @@
 
 #include "address.h"
 #include "animated_box.h"
+#include "asset.h"
 #include "billboard.h"
 #include "boot_logos.h"
 #include "camera.h"

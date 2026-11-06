@@ -20,6 +20,7 @@
 #include "geometry.h"
 #include "hole_builder.h"
 #include "hole_conditions.h"
+#include "hole_triangles.h"
 #include "language.h"
 #include "main.h"
 #include "math_util.h"

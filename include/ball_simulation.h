@@ -8,6 +8,7 @@
 #include "frame_time.h"
 #include "geometry.h"
 #include "math_util.h"
+#include "surface.h"
 
 /* The ball moves its speed in course units each frame */
 typedef f32 BallSpeed;

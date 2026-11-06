@@ -46,6 +46,7 @@
 #include "screen.h"
 #include "screen_layers.h"
 #include "sound.h"
+#include "surface.h"
 #include "terrain.h"
 #include "text.h"
 

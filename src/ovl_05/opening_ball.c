@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <ultra64.h>
 
+#include "asset.h"
 #include "ball_physics.h"
 #include "ball_simulation.h"
 #include "character_slot.h"
