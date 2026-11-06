@@ -1192,6 +1192,12 @@ void MoveAimCameraDistance(void) {
  * branches 54 (30). A u32 speed for the aim heading's step gives 37 words (11
  * in shape), but it drops the speed's < 0 test, where the original keeps its
  * bltzl and negu.
+ *
+ * Each D-pad branch counts through a pointer to f_AimTurnFrameCount of its own:
+ * naming the static directly, with ++ and -- inside the tests or as statements
+ * of their own, or counting in static inline helpers that take its address,
+ * gives 80 words differing (28 in shape), and one pointer for the whole
+ * function, set as it is declared, 61 to 67.
  */
 #ifdef NON_MATCHING
 void TurnAim(s32 turnsAltHeading) {
