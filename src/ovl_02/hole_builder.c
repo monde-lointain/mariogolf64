@@ -101,7 +101,7 @@ enum VertexEncoding {
 #define HOLE_VERTICES_FILE_SIZE 0x2520
 #define HOLE_MIDPOINTS_FILE_SIZE 0x8000
 #define HOLE_TREES_FILE_SIZE 0x800
-#define HOLE_UNK6_FILE_SIZE 0x34
+#define HOLE_SETUP_FILE_SIZE sizeof(HoleSetup)
 #define HOLE_POINTS_FILE_SIZE 0x120
 #define HOLE_TRIANGLES_FILE_SIZE 0x3C00
 /* The size of the attributes unpacked into the build buffer */
@@ -2676,7 +2676,7 @@ void SaveHoleFiles(s32 course, s32 hole) {
   sprintf(path, "bin/course%d/hole%d%2.2d.tre", course, course, hole);
   WriteHostFile(path, HOLE_TREES_FILE_SIZE);
   sprintf(path, "bin/course%d/hole%d%2.2d.hol", course, course, hole);
-  WriteHostFile(path, HOLE_UNK6_FILE_SIZE);
+  WriteHostFile(path, HOLE_SETUP_FILE_SIZE);
   sprintf(path, "bin/course%d/hole%d%2.2d.pnt", course, course, hole);
   WriteHostFile(path, HOLE_POINTS_FILE_SIZE);
   sprintf(path, "bin/course%d/hole%d%2.2d.tri", course, course, hole);
