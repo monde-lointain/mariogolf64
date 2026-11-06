@@ -2572,12 +2572,17 @@ enum PointsStep {
  * Counts the earned course points into the save, showing a notice when they
  * open a course, then returns TRUE once A is pressed
  *
- * Doesn't match: when starting the tally, the original reads the player count
- * through the address of g_GameState.gameMode, which moves the branches after
- * it by a word. The register oracle's closest result is these 5 words with no
- * register forced, so allocation isn't the cause. Reading g_GameState.gameMode
- * just before the loop, into j, as a switch with only a default, or as an empty
- * if's test, still reads the player count directly. 5 words differ.
+ * Doesn't match: when starting the tally, the original reads the player
+ * count through the address of g_GameState.gameMode, which moves the
+ * branches after it by a word. The register oracle's closest result is these
+ * 5 words with no register forced, so allocation isn't the cause. Reading
+ * g_GameState.gameMode just before the loop, into j, as a switch with only a
+ * default, or as an empty if's test, still reads the player count directly.
+ * Ending the loops on < rather than != gives 42 words (6 in shape) for i's
+ * loop, 72 (6) for j's and 75 (11) for both; reading the count through a
+ * GameState pointer set to &g_GameState gives 21 words (7) for the outer
+ * loop alone, 25 (9) for both loops and 28 (10) everywhere. 5 words differ,
+ * 1 in shape.
  */
 #ifdef NON_MATCHING
 s32 UpdateCoursePointsResults(ControllerState* controller) {
