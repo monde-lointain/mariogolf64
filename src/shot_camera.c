@@ -1480,14 +1480,19 @@ void EaseCameraPosition(Vec3 target) {
   EaseCameraCoordinate(AXIS_Z, offset);
 }
 
-#define UNK2E08_HEIGHT_SPREAD_FRACTION 0.2
+/*
+ * PlaceCameraAroundShotEnd's ranges: PUTT_* for a shot from the green,
+ * SIMPLE_CAMERA_* when the simple flight camera is chosen in the options and
+ * DEFAULT_* otherwise
+ */
+#define PUTT_HEIGHT_SPREAD_FRACTION 0.2
 #define DISTANCE_SPREAD_FRACTION 0.2f
 #define DEFAULT_HEIGHT_SPREAD_FRACTION 0.1f
-#define OPTION_UNK3_HEIGHT_SPREAD_FRACTION 0.2f
-#define UNK2E08_MIN_HEIGHT 0x6600
+#define SIMPLE_CAMERA_HEIGHT_SPREAD_FRACTION 0.2f
+#define PUTT_MIN_HEIGHT 0x6600
 #define RANDOM_DISTANCE_STEP_COUNT 1536
-#define UNK2E08_DISTANCE_STEP 15
-#define UNK2E08_MIN_DISTANCE 0xB400
+#define PUTT_DISTANCE_STEP 15
+#define PUTT_MIN_DISTANCE 0xB400
 #define SHORT_SHOT_DISTANCE 76800.0f
 #define GREEN_DISTANCE_STEP 50
 #define GREEN_MIN_DISTANCE 0x12C00
@@ -1495,8 +1500,8 @@ void EaseCameraPosition(Vec3 target) {
 #define MAX_CAMERA_DISTANCE 460800.0f
 #define DEFAULT_MIN_HEIGHT 46080.0f
 #define DEFAULT_MAX_HEIGHT 92160.0f
-#define OPTION_UNK3_MIN_HEIGHT 92160.0f
-#define OPTION_UNK3_MAX_HEIGHT 153600.0f
+#define SIMPLE_CAMERA_MIN_HEIGHT 92160.0f
+#define SIMPLE_CAMERA_MAX_HEIGHT 153600.0f
 #define MIN_RISE_ABOVE_SHOT_END 0x7800
 
 /*
@@ -1518,11 +1523,11 @@ void PlaceCameraAroundShotEnd(void) {
   Radians yaw;
 
   if (g_SimulatedShot.startsOnGreen) {
-    height = RandomBelow(f_ShotLength * UNK2E08_HEIGHT_SPREAD_FRACTION) +
-        UNK2E08_MIN_HEIGHT;
+    height = RandomBelow(f_ShotLength * PUTT_HEIGHT_SPREAD_FRACTION) +
+        PUTT_MIN_HEIGHT;
     distance =
-        ((guRandom() % RANDOM_DISTANCE_STEP_COUNT) * UNK2E08_DISTANCE_STEP) +
-        UNK2E08_MIN_DISTANCE;
+        ((guRandom() % RANDOM_DISTANCE_STEP_COUNT) * PUTT_DISTANCE_STEP) +
+        PUTT_MIN_DISTANCE;
     RandomBelow(RANDOM_YAW_MASK);
     yawScale = M_PI / 65536;
     yaw = f_ShotFlightYaw - ((f32)(rand() & RANDOM_YAW_MASK) * yawScale);
@@ -1571,16 +1576,16 @@ void PlaceCameraAroundShotEnd(void) {
       distance = MIN_CAMERA_DISTANCE;
     }
 
-    if (f_ShotLength * OPTION_UNK3_HEIGHT_SPREAD_FRACTION != 0.0f) {
+    if (f_ShotLength * SIMPLE_CAMERA_HEIGHT_SPREAD_FRACTION != 0.0f) {
       height =
-          ((guRandom() % f_ShotLength) * OPTION_UNK3_HEIGHT_SPREAD_FRACTION) +
-          OPTION_UNK3_MIN_HEIGHT;
+          ((guRandom() % f_ShotLength) * SIMPLE_CAMERA_HEIGHT_SPREAD_FRACTION) +
+          SIMPLE_CAMERA_MIN_HEIGHT;
     } else {
-      height = OPTION_UNK3_MIN_HEIGHT;
+      height = SIMPLE_CAMERA_MIN_HEIGHT;
     }
 
-    if (height > OPTION_UNK3_MAX_HEIGHT) {
-      height = OPTION_UNK3_MAX_HEIGHT;
+    if (height > SIMPLE_CAMERA_MAX_HEIGHT) {
+      height = SIMPLE_CAMERA_MAX_HEIGHT;
     }
 
     if (distance > MAX_CAMERA_DISTANCE) {
