@@ -3917,15 +3917,18 @@ void DrawMenuScreen(Gfx** displayListHead) {
  * Draws the chosen layers of the menu's backdrop: the course backdrop, the
  * board and the banner
  *
- * Doesn't match: the scenery strips' 0xFD500000 and -8 swap registers, and the
- * board loop's registers differ. The original also reads g_MenuScreen for
- * MENU_LAYER_PER_SCREEN where this drops the read. An empty case or default, an
- * empty if, a (void) read and switches of 4, 6 or 10 shared cases all dropped
- * it too before the strips' row count variable, as did 6 cases that each break.
- * A permuter run pointed to the variable. Adding the strip's offset to the
- * texels' start, rather than both to the image, gives 61 words differing (17 in
- * shape). The register oracle's closest result is these 58 words with no
- * register forced, so allocation isn't the cause. 58 words differ, 16 in shape.
+ * Doesn't match: the scenery strips' 0xFD500000 and -8 swap registers, and
+ * the board loop's registers differ. The original also reads g_MenuScreen
+ * for MENU_LAYER_PER_SCREEN where this drops the read. An empty case or
+ * default, an empty if, a (void) read and switches of 4, 6 or 10 shared
+ * cases all dropped it too before the strips' row count variable, as did 6
+ * cases that each break. A permuter run pointed to the variable. Adding the
+ * strip's offset to the texels' start, rather than both to the image, gives
+ * the same code. The first strip's texels and a strip's top in quarter
+ * pixels go straight into their commands: holding them in locals gave 58
+ * words differing, 16 in shape. The register oracle's closest result is
+ * these 42 words with no register forced, so allocation isn't the cause. 42
+ * words differ, 10 in shape.
  */
 #ifdef NON_MATCHING
 void DrawMenuBackdropLayers(Gfx** displayListHead, s32 layers) {
@@ -3935,8 +3938,6 @@ void DrawMenuBackdropLayers(Gfx** displayListHead, s32 layers) {
   s32 stripTop;
   s32 bobOffset;
   u8* image;
-  u32 firstStripTexels;
-  s32 stripTopQuarters;
   s32 loadedRowCount;
 
   /* The menu memory goes unused */
@@ -3959,10 +3960,9 @@ void DrawMenuBackdropLayers(Gfx** displayListHead, s32 layers) {
       for (stripIndex = 0; stripIndex != CLAMPED_BACKDROP_STRIP_COUNT;
           stripIndex++) {
         if (stripIndex == 0) {
-          firstStripTexels =
-              TextureAddress(LargeImageTexels(g_MenuCourseSceneryAsset));
-          gDPLoadTextureBlock(gfx++, firstStripTexels, G_IM_FMT_CI, G_IM_SIZ_8b,
-              BACKDROP_WIDTH,
+          gDPLoadTextureBlock(gfx++,
+              TextureAddress(LargeImageTexels(g_MenuCourseSceneryAsset)),
+              G_IM_FMT_CI, G_IM_SIZ_8b, BACKDROP_WIDTH,
               BACKDROP_STRIP_ROW_COUNT + BACKDROP_SEAM_ROW_COUNT, 0,
               G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
               G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
@@ -3979,10 +3979,12 @@ void DrawMenuBackdropLayers(Gfx** displayListHead, s32 layers) {
           gDPPipeSync(gfx++);
           /*
            * The loaded rows are counted in a variable here, to match: the
-           * constant gives 851 words differing (445 in shape), or 359 (37) with
-           * the last strip's rectangle in a block of its own; counting them in
-           * the first strip's load too gives 851 (445), setting the count
-           * before the loop 269 (43), and the block with the variable 130 (16)
+           * constant gives 849 words differing (441 in shape); with the first
+           * strip's texels and the strip's top in locals, the constant gave
+           * 359 (37) with the last strip's rectangle in a block of its own,
+           * counting the rows in the first strip's load too 851 (445), setting
+           * the count before the loop 269 (43), and the block with the
+           * variable 130 (16)
            */
           loadedRowCount = BACKDROP_STRIP_ROW_COUNT + BACKDROP_SEAM_ROW_COUNT;
           gDPLoadTextureBlock(gfx++,
@@ -4004,9 +4006,8 @@ void DrawMenuBackdropLayers(Gfx** displayListHead, s32 layers) {
           } else {
             stripTop = BACKDROP_TOP +
                 (stripIndex * BACKDROP_STRIP_ROW_COUNT * BACKDROP_SCALE);
-            stripTopQuarters = QuarterPixels(stripTop);
             gSPScisTextureRectangle(gfx++, QuarterPixels(BACKDROP_LEFT),
-                stripTopQuarters,
+                QuarterPixels(stripTop),
                 QuarterPixels(
                     BACKDROP_LEFT + (BACKDROP_WIDTH * BACKDROP_SCALE)),
                 QuarterPixels(
