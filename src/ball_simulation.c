@@ -331,6 +331,14 @@ void ResetBallSimulations(void) {
  * words differing, 112 in shape, to 443 (113). The loss as one product in
  * speedLoss, or inside keep's expression, gives 457 (117). 443 words
  * differ, 113 in shape.
+ *
+ * At a hole triangle hit, the original recomputes the plane's address for
+ * guNormalize where ours keeps it in $s0 from GetTrianglePlane, as cse
+ * finds it equal. Moving the green leveling out of the else gives 435
+ * words (105 in shape), but the club test's arm then jumps to the green
+ * test, where the original's jumps past it. The original also leaves the
+ * first-bounce test's delay slot empty, where ours fills it with the
+ * surface load.
  */
 #ifdef NON_MATCHING
 s32 StepBallSimulation(BallSimulation* simulation) {
