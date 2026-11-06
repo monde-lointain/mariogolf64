@@ -858,7 +858,7 @@ NO_RESULT ChooseHoleConditions(void) {
     courseRecordIndex = GetCourseRecordIndex();
     g_HoleSetup.par =
         g_CourseRecords[courseRecordIndex].holes[GetHoleRecordIndex()].par;
-    if (IsGameFlagSet(GAME_FLAG_UNK7C)) {
+    if (IsGameFlagSet(GAME_FLAG_DRIVING_RANGE_COLORS)) {
       g_HoleSetup.conditions.isRaining = FALSE;
       g_HoleSetup.conditions.sceneColorIndex = SCENE_COLOR_INDEX_DRIVING_RANGE;
     }
