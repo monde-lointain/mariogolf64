@@ -1898,8 +1898,23 @@ void DrawSavedMiniGolfImage(Gfx** displayListHead);
  * A u16 playerCount gives 223 words, but 97 in shape. The original reloads
  * the count from its stack slot and sign-extends it with sll and sra by 16
  * before the first player-count test, as the s16 does, where the u16 uses
- * the reloaded half as it is, so the count is signed. 287 words differ, 91
- * in shape.
+ * the reloaded half as it is, so the count is signed.
+ *
+ * The original keeps 48.0, the board circle's x radius, in $f24 through the
+ * board loop, and the multiplier for the % 3 in $s7, but loads 120 and the
+ * degrees-to-radians factor on each pass. This draft keeps 120 and the
+ * multiplier out of the loop instead and loads 48.0 on each pass, so its
+ * frame lacks the $f24 slot and is 8 bytes smaller. The loop dump shows why:
+ * loop.c moves boardDegrees' 120 and then the multiplier, lowering its
+ * threshold by 3 with each move, and then finds moving the factor, 48.0 and
+ * 40.0 not desirable. Re-measured on the current draft, boardDegrees set
+ * before the loop gives 289 words (93 in shape), with the original's frame
+ * and $f24 saved, but loop.c then moves the multiplier and the factor rather
+ * than 48.0, and the register oracle's closest result rises from 183 words,
+ * forcing 28 pseudos, to 195, forcing 29. A literal 120 gives 303 words (105
+ * in shape). Writing the radius as the product's first factor, for x or for
+ * both axes, or the x product as ProjectPoint's argument leaves 287. 287
+ * words differ, 91 in shape.
  */
 #ifdef NON_MATCHING
 void DrawSavedGames(Gfx** displayListHead) {
