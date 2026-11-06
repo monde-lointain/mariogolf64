@@ -3167,7 +3167,7 @@ s32 ReadCartridgeCharacters(void) {
           osSyncPrintf("3rd PFS_ERR_DEVICE  \n");
           break;
         case PFS_ERR_CONTRFAIL:
-          transfer->unk7D4 = TRUE;
+          transfer->hasIgnoredControllerFailure = TRUE;
           osSyncPrintf("3rd PFS_ERR_CONTRFAIL  \n");
           break;
         case PFS_ERR_NO_GBCART:

@@ -161,7 +161,9 @@ typedef struct GameBoyTransfer {
   /* 0x7C8 */ Boolean hasMissingPak;
   /* 0x7CC */ Boolean hasWrongCartridge;
   /* 0x7D0 */ Boolean hasUninitializedCartridge;
-  /* 0x7D4 */ s32 unk7D4;
+  /* Set when a cartridge read fails with PFS_ERR_CONTRFAIL; nothing reads
+   * or clears it */
+  /* 0x7D4 */ Boolean hasIgnoredControllerFailure;
   /* 0x7D8 */ s8
       listedCharacters[CARTRIDGE_CHARACTER_COUNT]; /* Present ones, then -1 */
   /* 0x7E4 */ s32 chosenCartridgeIndex; /* Into taggedControllers */
