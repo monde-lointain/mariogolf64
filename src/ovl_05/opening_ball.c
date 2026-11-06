@@ -1893,7 +1893,8 @@ INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_ball", StepOpeningBallSimulation);
  * speed 12 to 20, and doubling the offset's and club's parts together 16.
  * Doubling through a static inline helper, which GCC inlines after fold,
  * keeps the target's sll before the mult but leaves 14 words, as the local
- * does.
+ * does, and so does adding club->sideSpin to itself, with sideSign on either
+ * side.
  */
 #ifdef NON_MATCHING
 s32 LaunchOpeningBallSimulation(
