@@ -401,8 +401,12 @@ typedef s32 (*BillboardHitFinder)(s32 startX, s32 startY, s32 startZ, s32 endX,
  * The side spin's curve and the lift each weigh the ball's speed against its
  * spin, with their own ratio and weight; one ratio and one weight for both
  * gave 247 words differing (109 in shape), a weight for each takes it to 237
- * (109), and a ratio for each as well keeps 237. 237 words differ, 109 in
- * shape.
+ * (109), and a ratio for each as well keeps 237.
+ *
+ * Adding the wind's pull to the x velocity, rather than the velocity to the
+ * pull, gives 235 words (109 in shape), but only two floating-point
+ * registers change, and z's would then be written the other way round. 237
+ * words differ, 109 in shape.
  */
 #ifdef NON_MATCHING
 s32 StepOpeningBallSimulation(BallSimulation* simulation) {
