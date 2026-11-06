@@ -116,16 +116,6 @@ enum GridMove {
 #define CHARACTER_SELECT_IMAGE_KIND_COUNT \
   (CHARACTER_SELECT_BUFFER_CURVE_CELLS + 1)
 
-/* The palettes that the C buttons choose, which the A button wears and which
- * the faces preview while held */
-enum CButtonPalette {
-  NO_PALETTE = -1,
-  UP_C_PALETTE,
-  LEFT_C_PALETTE,
-  DOWN_C_PALETTE,
-  RIGHT_C_PALETTE
-};
-
 /* Where the character cursor's translation is measured from, so that it is
  * placed by its corner */
 #define CHARACTER_CURSOR_ORIGIN_X 140

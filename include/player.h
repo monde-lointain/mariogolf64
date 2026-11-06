@@ -117,6 +117,19 @@ enum HoleStatus {
  */
 #define POWER_SHOTS_UNLIMITED (-1)
 
+/*
+ * Player.paletteIndex values, for the C button that chooses each: on the
+ * character select, the A button wears the held one and the faces preview
+ * it, and on the club tournament's start, the player wears the one held
+ */
+enum CButtonPalette {
+  NO_PALETTE = -1,
+  UP_C_PALETTE,
+  LEFT_C_PALETTE,
+  DOWN_C_PALETTE,
+  RIGHT_C_PALETTE
+};
+
 /* A golfer in the round, human or computer, and their round so far */
 typedef struct Player {
   /* 0x00 */ char name[PLAYER_NAME_SIZE];

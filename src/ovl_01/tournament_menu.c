@@ -1517,13 +1517,13 @@ void UpdateClubWindow(void) {
             g_ControllerStates[3].buttons;
         /* The held C buttons pick the player's colors */
         if (buttons & L_CBUTTONS) {
-          g_Players[0].paletteIndex = 1;
+          g_Players[0].paletteIndex = LEFT_C_PALETTE;
         } else if (buttons & D_CBUTTONS) {
-          g_Players[0].paletteIndex = 2;
+          g_Players[0].paletteIndex = DOWN_C_PALETTE;
         } else if (buttons & R_CBUTTONS) {
-          g_Players[0].paletteIndex = 3;
+          g_Players[0].paletteIndex = RIGHT_C_PALETTE;
         } else {
-          g_Players[0].paletteIndex = 0;
+          g_Players[0].paletteIndex = UP_C_PALETTE;
         }
 
         LoadWipeShape(GetClubTournamentCourse());
