@@ -3738,20 +3738,13 @@ void DrawClubTournamentResults(Gfx** displayListHead) {
  * The results card, its game mode's results, the bobbing title and the players'
  * portraits.
  *
- * Doesn't match: GCC merges the doubling of the title's texture coordinates
- * into the shift that packs them, where the original shifts twice. Setting the
- * title's right edge before its strip loop gives 8 words differing, and
- * inlining it 14. The register oracle's closest result is these 6 words with no
- * register forced, so allocation isn't the cause. Combine folds the doubling,
- * through textureS's s16 copy and the rectangle's sign extension and mask, into
- * the shift that loop hoists out of the strip loop. Doubling by a shift or with
- * the 2 first, doubling at the macro's argument with an s16 or s32 local, or
- * converting to s16 there leaves 6; doubling the float gives 23, other integer
- * types for textureS 44 to 48, and ending the basic block before or after
- * LoadLargePalette 42 or 16, with the shifts still merged. 6 words differ, 4 in
- * shape.
+ * The title's sub-texel offsets are both worked out before either is
+ * doubled, and the rectangle adds the texel row to the doubled T offset:
+ * converting and doubling each offset in one statement, or doubling the S
+ * offset before converting the T one, gives 42 words differing, and adding
+ * the row before the rectangle 4, where the original doubles the T offset in
+ * a call's delay slot.
  */
-#ifdef NON_MATCHING
 void DrawRoundResults(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   f32 titleX;
@@ -3760,7 +3753,9 @@ void DrawRoundResults(Gfx** displayListHead) {
   s32 top;
   s32 right;
   s32 stripHeight;
-  s16 textureS;
+  s32 titleSubtexelS;
+  s32 titleSubtexelT;
+  s32 textureS;
   s32 textureT;
   s32 i;
 
@@ -3862,9 +3857,10 @@ void DrawRoundResults(Gfx** displayListHead) {
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
     gDPPipeSync(gfx++);
     gDPSetTextureFilter(gfx++, G_TF_AVERAGE);
-    textureS = (s32)(SUBTEXEL_STEPS - ((titleX - left) * SUBTEXEL_STEPS)) * 2;
-    textureT = ((s32)(SUBTEXEL_STEPS - ((titleY - top) * SUBTEXEL_STEPS)) * 2) +
-        TEXEL_UNITS;
+    titleSubtexelS = (s32)(SUBTEXEL_STEPS - ((titleX - left) * SUBTEXEL_STEPS));
+    titleSubtexelT = (s32)(SUBTEXEL_STEPS - ((titleY - top) * SUBTEXEL_STEPS));
+    textureS = titleSubtexelS * 2;
+    textureT = titleSubtexelT * 2;
     f_TitleBobAngle += FINAL_RESULTS_TITLE_BOB_STEP;
     LoadLargePalette(&gfx, ImageBody(f_FinalResultsTitleImage));
     for (i = 0; i != FINAL_RESULTS_TITLE_STRIP_COUNT; i++) {
@@ -3891,7 +3887,8 @@ void DrawRoundResults(Gfx** displayListHead) {
           QuarterPixels(right - f_ResultsSlide),
           QuarterPixels(i * FINAL_RESULTS_TITLE_STRIP_HEIGHT + stripHeight +
               f_ResultsTop + top),
-          G_TX_RENDERTILE, textureS, textureT, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+          G_TX_RENDERTILE, textureS, textureT + TEXEL_UNITS, TEXEL_STEP_ONE,
+          TEXEL_STEP_ONE);
     }
   }
 
@@ -3944,11 +3941,6 @@ void DrawRoundResults(Gfx** displayListHead) {
   DrawResultsBanner(&gfx);
   *displayListHead = gfx;
 }
-#else
-INCLUDE_RODATA("asm/nonmatchings/ovl_00/round_results", f_BeatenFaceFrames);
-
-INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", DrawRoundResults);
-#endif
 
 void DrawResultsNotice(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
