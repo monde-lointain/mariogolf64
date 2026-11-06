@@ -460,7 +460,7 @@ enum CharacterSound {
   CHARACTER_SOUND_CALL_OUT_LEFT = 4,
   /* Also CHARACTER_SOUND_KIND_GREAT's sound */
   CHARACTER_SOUND_CALL_OUT_RIGHT = 6,
-  /* Also CHARACTER_SOUND_KIND_UNK3's sound */
+  /* Also CHARACTER_SOUND_KIND_UNUSED's sound */
   CHARACTER_SOUND_CALL_OUT_C_UP = 8,
   /* Also CHARACTER_SOUND_KIND_OUT_OF_COURSE's sound */
   CHARACTER_SOUND_CALL_OUT_C_DOWN = 10,
@@ -487,7 +487,8 @@ enum CharacterSoundKind {
   CHARACTER_SOUND_KIND_FULL_SHOT,
   CHARACTER_SOUND_KIND_EXCELLENT, /* Also a flag shot */
   CHARACTER_SOUND_KIND_GREAT, /* Also a chip-in */
-  CHARACTER_SOUND_KIND_UNK3,
+  /* Never queued; only the debug delay editor previews it */
+  CHARACTER_SOUND_KIND_UNUSED,
   CHARACTER_SOUND_KIND_OUT_OF_COURSE,
   /*
    * A landing in a water hazard, out of bounds or out of course, and a step
