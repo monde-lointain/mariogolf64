@@ -280,8 +280,6 @@ extern const char f_NameFormat[];
 #define MINI_GOLF_TURN_TO_NEXT 2
 #define MINI_GOLF_RECORD_SLIDE 45
 #define MINI_GOLF_RECORD_SLIDE_STEP 9
-/* g_BetPagesPhase's value once the popup opened with C-up has finished */
-#define MENU_PHASE_UNK2 2
 
 /*
  * The course select. Its wheel shows the open courses and the next one
@@ -2600,7 +2598,8 @@ void UpdateCourseSelect(void) {
     return;
   }
 
-  if (g_BetPagesPhase == MENU_PHASE_UNK2) {
+  /* The brick wall that C-up slides out has finished */
+  if (g_BetPagesPhase == BET_PHASE_CHOOSING) {
     PlaySong(SONG_CONTROLS, 0);
     g_MenuScreen = MENU_SCREEN_BET_SETTINGS;
     g_BetPagesPhase = BET_PHASE_OPENING;
@@ -2917,7 +2916,8 @@ void UpdateMiniGolfCourseSelect(void) {
     return;
   }
 
-  if (g_BetPagesPhase == MENU_PHASE_UNK2) {
+  /* The brick wall that C-up slides out has finished */
+  if (g_BetPagesPhase == BET_PHASE_CHOOSING) {
     PlaySong(SONG_CONTROLS, 0);
     g_MenuScreen = MENU_SCREEN_BET_SETTINGS;
     g_BetPagesPhase = BET_PHASE_OPENING;
@@ -4661,11 +4661,6 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", DrawMenuTitleScreen);
 #define CADDY_SELECT_LINE_HEIGHT 8
 
 extern const char g_CaddySelectTitle[];
-
-/* The g_BetPagesPhase phase in which the course select's banners slide the
- * other way
- */
-#define MENU_PHASE_UNK7 7
 
 /*
  * The mode select's boards turn on a circle like the saved games' boards,
@@ -6520,7 +6515,8 @@ void DrawCourseSelectBanners(Gfx** displayListHead) {
   s32 squeeze;
   s32 cameraModeTopByte;
 
-  if (g_BetPagesPhase == MENU_PHASE_UNK7) {
+  /* The banners slide back in as the handicaps are confirmed */
+  if (g_BetPagesPhase == MENU_PHASE_CONFIRMED) {
     slide = -slide;
   }
 
