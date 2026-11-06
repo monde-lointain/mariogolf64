@@ -1890,6 +1890,12 @@ void DrawSavedMiniGolfImage(Gfx** displayListHead);
  * its own, declared before or after holeIndex, which then holds only the
  * chosen game's hole, also gives 597 words (99 in shape), so holeIndex keeps
  * both roles.
+ *
+ * A u16 playerCount gives 223 words, but 97 in shape. The original reloads
+ * the count from its stack slot and sign-extends it with sll and sra by 16
+ * before the first player-count test, as the s16 does, where the u16 uses
+ * the reloaded half as it is, so the count is signed. 287 words differ, 91
+ * in shape.
  */
 #ifdef NON_MATCHING
 void DrawSavedGames(Gfx** displayListHead) {
