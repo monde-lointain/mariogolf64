@@ -863,14 +863,17 @@ void MarkHalfTurnCircle(
  *
  * A do-while (0) around the first clamp pair's lines through radiusOffset's
  * clamp matches, as does one around the whole first pair with another around
- * the second pair's radiusOffset lines; both are devices to match, so they are
- * left out. A ClampOffset(offset, value, limit) statement macro, as do { }
- * while (0), gives 28 to 136 words (16 in shape at best) for radiusOffset's
- * clamps alone, 52 to 268 (24) for all four in any order, and a macro
- * clamping a pair 256 (0 to 4). Clamping with ternaries gives 56 to 270 words,
- * at least 48 in shape, and an inline clamp function 64 to 284; testing each
- * offset in place of its source leaves 108, as copy propagation folds the test
- * back.
+ * the second pair's radiusOffset lines; both are devices to match, so they
+ * are left out. A ClampOffset(offset, value, limit) statement macro, as do {
+ * } while (0), gives 28 to 136 words (16 in shape at best) for
+ * radiusOffset's clamps alone, 52 to 268 (24) for all four in any order, and
+ * a macro clamping a pair 256 (0 to 4). Clamping with ternaries gives 56 to
+ * 270 words, at least 48 in shape, and an inline clamp function 64 to 284;
+ * testing each offset in place of its source leaves 108, as copy propagation
+ * folds the test back. Setting an offset from its source in an else, rather
+ * than before its clamp's test, leaves 108 words for the second radiusOffset
+ * clamp alone and 112 for the first or both, and gives 264 to 266 words (8
+ * to 24 in shape) once any stepOffset clamp takes it.
  */
 #ifdef NON_MATCHING
 void MarkHalfTurnCircle(
