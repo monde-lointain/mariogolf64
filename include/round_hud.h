@@ -106,7 +106,11 @@ typedef struct RoundHud {
                                         TallySkins counts them */
   /* 0x80 */ BinaryAngle clubHeadTilt; /* The icons tilt by half */
   /* 0x82 */ BinaryAngle lieTilt; /* The slope under the ball */
-  /* 0x84 */ u8 unk84[3];
+  /* Set as the turn starts, with the HUD's other parts; nothing reads it */
+  /* 0x84 */ u8 isIgnoredTurnPartShown;
+  /* Whether the chosen club can putt; nothing reads it */
+  /* 0x85 */ u8 isPuttingClubChosen;
+  /* 0x86 */ u8 unusedAfterClubChoice;
   /* 0x87 */ s8 shooterIndex; /* Of the player whose turn it is */
   /* 0x88 */ u8 flags; /* HUD_FLAG_* bits */
   /* 0x89 */ u8 areLieArrowsShown; /* While the pause menu sets the lie */

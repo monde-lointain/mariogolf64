@@ -2570,8 +2570,8 @@ void StartPlayerShot(s32 playerIndex) {
   g_RoundHud.isClubPanelShown = TRUE;
   g_RoundHud.isShotLengthShown = FALSE;
   g_RoundHud.isProgressShown = TRUE;
-  g_RoundHud.unk84[0] = TRUE;
-  g_RoundHud.unk84[1] = FALSE;
+  g_RoundHud.isIgnoredTurnPartShown = TRUE;
+  g_RoundHud.isPuttingClubChosen = FALSE;
   g_RoundHud.flags = 0;
   PlaceShotCamera();
   ResetShotOffsetMarker();
@@ -3987,9 +3987,9 @@ void UpdateTurns(void) {
               GetCrossSlopeAngle(&g_Players[playerIndex], &f_ShotLaunch);
           if (GetClub(f_ShotLaunch.clubIndex)->surfaceMask &
               CLUB_SURFACE_GREEN) {
-            g_RoundHud.unk84[1] = 1;
+            g_RoundHud.isPuttingClubChosen = TRUE;
           } else {
-            g_RoundHud.unk84[1] = 0;
+            g_RoundHud.isPuttingClubChosen = FALSE;
           }
 
           if (g_ImpactPointState == IMPACT_POINT_SETTING) {
