@@ -1288,6 +1288,10 @@ void InitClubs(void) {
  * power once after its arms, which ties; the short half keeps a store in
  * each arm, as storing once in both halves gives 67 words (3 in shape). 47
  * words differ, 3 in shape.
+ *
+ * The register oracle lines shotMode up with $s0 for the table and $fp for
+ * the test-firing. Moving the table lookup into a static inline helper, so
+ * that it gets its own copy of shotMode, gives 59 words (7 in shape).
  */
 #ifdef NON_MATCHING
 s32 GetPuttPower(s32 fraction, ShotMode shotMode) {
