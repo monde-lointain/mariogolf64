@@ -65,7 +65,7 @@ typedef struct CameraMatrices {
   /* 0x180 */ Mat4 viewingF;
   /* 0x1C0 */ Mtx projection; /* perspectiveF and viewingF combined */
   /* 0x200 */ LookAt lookAt;
-  /* 0x220 */ u8 unk220[0x10];
+  /* 0x220 */ u8 unusedAfterLookAt[0x10];
 } CameraMatrices; /* size = 0x230 */
 
 /* The camera of the inset view, a window over the main view */
