@@ -68,19 +68,21 @@ void LoadCursorBox(void* image) {
  * corners start a quarter turn apart. Doesn't match: the original keeps the
  * green and blue in the loop rather than hoisting them, which leaves left in a
  * saved register and the frame 8 bytes smaller. It also keeps corner as a
- * counter rather than turning it into an offset. Other types for corner, a <
- * test, storing the alpha first or dropping the barrier give 46-176. The
- * original sets the green before the red's clamp and stores it after it. loop.c
- * keeps a variable's set in the loop when the set may not run in every pass,
- * past a label or jump, and is used in another block. Green and blue variables
- * are hoisted wherever they are set (44 words, 12 in shape): set before the
- * clamp, loop.c's dump treats them as always set, and set after it they are
- * used in their own block. A static inline function stepping the phase, in
- * place of the block, gives 173 words (11 in shape), as with no barrier. So
- * does a pointer to the corner's phase, set inside or outside the block or with
- * the step outside it. A pointer to the projection matrix changes nothing. The
- * register oracle, forcing 6 pseudos' registers, leaves 14 words at best, so
- * the code differs too. 44 words differ, 12 in shape.
+ * counter rather than turning it into an offset. A u32 corner ties; an s16 or
+ * u8 corner, a < test or dropping the barrier give 72-176, and storing the
+ * alpha first 44. The original sets the green before the red's clamp and stores
+ * it after it. loop.c keeps a variable's set in the loop when the set may not
+ * run in every pass, past a label or jump, and is used in another block. Green
+ * and blue variables are hoisted wherever they are set (42 words, 10 in shape):
+ * set before the clamp, loop.c's dump treats them as always set, and set after
+ * it they are used in their own block. A static inline function stepping the
+ * phase, in place of the block, gives 173 words (11 in shape), as with no
+ * barrier. So does a pointer to the corner's phase, set inside or outside the
+ * block or with the step outside it. A pointer to the projection matrix changes
+ * nothing. Naming the translation's y as boxY saves 2 words and 2 in shape, and
+ * naming x too gains nothing more. The register oracle, forcing 6 pseudos'
+ * registers, leaves 12 words at best, so the code differs too. 42 words differ,
+ * 10 in shape.
  */
 #ifdef NON_MATCHING
 void DrawCursorBox(Gfx** displayListHead, s32 left, s32 top) {
@@ -89,6 +91,7 @@ void DrawCursorBox(Gfx** displayListHead, s32 left, s32 top) {
   s32 red;
   s32 width;
   s32 height;
+  s32 boxY;
 
   width = ReadImageWidth(f_CursorBoxImage);
   height = ReadImageHeight(f_CursorBoxImage);
@@ -112,9 +115,10 @@ void DrawCursorBox(Gfx** displayListHead, s32 left, s32 top) {
 
   guOrtho(&f_CursorBoxProjection, -SCREEN_WIDTH / 2, SCREEN_WIDTH / 2,
       -SCREEN_HEIGHT / 2, SCREEN_HEIGHT / 2, 10.0f, 2000.0f, 1.0f);
+  boxY = (SCREEN_HEIGHT / 2) - CURSOR_BOX_HALF_SIZE - top;
   guTranslate(&f_CursorBoxTranslations[g_DrawBufferIndex],
       (f32)(left + CURSOR_BOX_HALF_SIZE - (SCREEN_WIDTH / 2)) - 0.5f,
-      (f32)((SCREEN_HEIGHT / 2) - CURSOR_BOX_HALF_SIZE - top) + 0.5f, -100.0f);
+      (f32)boxY + 0.5f, -100.0f);
   gDPPipeSync(displayList++);
   gDPPipeSync(displayList++);
   gDPSetTextureLUT(displayList++, G_TT_NONE);
