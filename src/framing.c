@@ -348,8 +348,8 @@ void FrameSpheres(f32 depthOffset) {
     centerY = top;
   }
 
-  eyeY += centerY;
   eyeX += centerX;
+  eyeY += centerY;
 
   guRotateF(pitchRotation, (s32)(f_FramingPitch * RADIANS_TO_DEGREES), 1.0f,
       0.0f, 0.0f);

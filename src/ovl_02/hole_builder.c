@@ -916,8 +916,8 @@ void DrawBandHeights(s16* heights, s32 band) {
             corners[1]->v.ob[AXIS_Z] + z);
         longX += longXStep;
         shortX += shortXStep;
-        shortHeight += shortHeightStep;
         longHeight += longHeightStep;
+        shortHeight += shortHeightStep;
       }
     }
   }
