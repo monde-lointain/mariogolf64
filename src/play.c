@@ -782,14 +782,15 @@ void QuitPlayToTitle(void) {
 }
 
 /*
- * The number that GAME_FLAG_UNK82 to GAME_FLAG_UNK86 spell, from the high bit
- * down. Nothing calls it.
+ * The number that the GAME_FLAG_FLAGGED_NUMBER_* flags spell, one for each of
+ * its five bits. Nothing calls it.
  */
 s32 GetFlaggedFiveBitNumber(void) {
-  return (IsGameFlagSet(GAME_FLAG_UNK82) << 4) |
-      (IsGameFlagSet(GAME_FLAG_UNK83) << 3) |
-      (IsGameFlagSet(GAME_FLAG_UNK84) << 2) |
-      (IsGameFlagSet(GAME_FLAG_UNK85) << 1) | IsGameFlagSet(GAME_FLAG_UNK86);
+  return (IsGameFlagSet(GAME_FLAG_FLAGGED_NUMBER_SIXTEENS) << 4) |
+      (IsGameFlagSet(GAME_FLAG_FLAGGED_NUMBER_EIGHTS) << 3) |
+      (IsGameFlagSet(GAME_FLAG_FLAGGED_NUMBER_FOURS) << 2) |
+      (IsGameFlagSet(GAME_FLAG_FLAGGED_NUMBER_TWOS) << 1) |
+      IsGameFlagSet(GAME_FLAG_FLAGGED_NUMBER_ONES);
 }
 
 /* Copies the game state and players to g_BackedUpGameState and

@@ -391,10 +391,10 @@ void ClearAllGameFlags(void);
 
 /* Read as a five-bit number, from the high bit down, by
  * GetFlaggedFiveBitNumber, which nothing calls */
-#define GAME_FLAG_UNK82 0x82
-#define GAME_FLAG_UNK83 0x83
-#define GAME_FLAG_UNK84 0x84
-#define GAME_FLAG_UNK85 0x85
-#define GAME_FLAG_UNK86 0x86
+#define GAME_FLAG_FLAGGED_NUMBER_SIXTEENS 0x82
+#define GAME_FLAG_FLAGGED_NUMBER_EIGHTS 0x83
+#define GAME_FLAG_FLAGGED_NUMBER_FOURS 0x84
+#define GAME_FLAG_FLAGGED_NUMBER_TWOS 0x85
+#define GAME_FLAG_FLAGGED_NUMBER_ONES 0x86
 
 #endif
