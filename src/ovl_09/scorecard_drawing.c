@@ -2262,6 +2262,12 @@ INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard_drawing", DrawLeaderboardPage);
  * 42. Declared beside standing and zeroed with it, it gives 718 words (158 in
  * shape). Merging cellColumn or facePlayerIndex into standing gives 691 words,
  * but the oracle's closest is then 589. 710 words differ, 156 in shape.
+ *
+ * A search over merges of two variables found 674 words, 156 in shape, by
+ * counting the checkerboard's columns in overTop, which would give it a
+ * second meaning. Giving that loop a counter of its own, declared anywhere,
+ * gives 706 (156), but the register oracle's closest stays at 564 words,
+ * forcing 42 pseudos, so the loops keep sharing j.
  */
 #ifdef NON_MATCHING
 void DrawScoresPage(Gfx** displayListHead) {

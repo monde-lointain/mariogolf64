@@ -3930,6 +3930,10 @@ void WriteHexDumpFile(u32* words, s32 byteCount, char* fileName) {
  * DrawGround does, gives 2055 words (491 in shape), also with a top, middle and
  * bottom rewind; that rewind alone gives 2074 (494) and DrawGround's top,
  * bottom and middle 2086 (494). 2037 words differ, 491 in shape.
+ *
+ * A search over merges of two variables gains words only by giving one a
+ * second meaning: holding previousDetail in keepsCombineMode gives 2015
+ * words, but 515 in shape.
  */
 #ifdef NON_MATCHING
 void DrawHoleEditorGround(CameraMatrices* matrices UNUSED, s32 terrainStyle) {
