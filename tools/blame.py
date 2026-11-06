@@ -8,19 +8,20 @@ Without ASM_FILE and C_FILE, finds them from FUNCTION as fncompare does.
 Prints fncompare's diff of FUNCTION, noting after each of our differing
 instructions the insn that made it, as -dp names it, the first pass whose
 RTL dump holds that insn, and the passes before global-alloc that changed
-its pattern. Then, for each pseudo register those insns used before
-register allocation, prints what the allocators knew of it: its uses and
-live length from local-alloc, the hard register it was given, and its
-conflicts and preferences from global-alloc. For each such insn, it prints
-how sched and sched2 placed it: its priority, the stalls before it became
-ready and the insns it was placed ahead of, and whether local-alloc tied the
-pseudo it sets to one it uses, so that both take one register, or what kept
-it from doing so. Last, it checks the target's
-order of our insns against the dependences sched2 kept, or failing that
-lists the pairs it orders the other way and their priorities. Words are
-paired by text, so a pair it reports may be a mispairing. --keep leaves
-the compiler's work files, such as the pass dumps unit.sched and
-unit.sched2, in DIR.
+its pattern. Then, for each pseudo register those insns used before register
+allocation, prints what the allocators knew of it: its uses and live length
+from local-alloc, the hard register it was given, and its conflicts and
+preferences from global-alloc. For each such insn, it prints how sched and
+sched2 placed it: its priority, the stalls before it became ready and the
+insns it was placed ahead of, and whether local-alloc tied the pseudo it
+sets to one it uses, so that both take one register, or what kept it from
+doing so. Each pseudo's report also gives where it lived in the first pass
+and in each later pass before allocation that moved its insns, and the stack
+slot of one given no hard register. Last, it checks the target's order of
+our insns against the dependences sched2 kept, or failing that lists the
+pairs it orders the other way and their priorities. Words are paired by
+text, so a pair it reports may be a mispairing. --keep leaves the compiler's
+work files, such as the pass dumps unit.sched and unit.sched2, in DIR.
 """
 
 import functools
@@ -103,6 +104,11 @@ ELEMENT_HEADER_RE = re.compile(
     r"^\((insn|jump_insn|call_insn|code_label|barrier|note)(?:[/:]\w+)* (\d+) ",
     re.MULTILINE,
 )
+# How many times longer than in the last pass reported a pseudo's live range
+# must grow for its pass to be reported
+STRETCH_FACTOR = 2
+# A stack slot in RTL: its offset from the stack pointer
+STACK_SLOT_RE = re.compile(r"\(plus:SI \(reg:SI 29 sp\)\s+\(const_int (-?\d+)\)\)")
 # A dependence in LOG_LINKS: its kind, absent for a true one, and the insn
 LINK_RE = re.compile(r"\(insn_list(?::(\w+))? (\d+)")
 # The priority sched gives an insn as it schedules the insn's block
@@ -511,6 +517,13 @@ def describe_pseudo(compilation: Compilation, pseudo: int) -> str:
     given = register_name(hard[pseudo]) if pseudo in hard else "no hard register"
     local = re.search(rf"^;; Register {pseudo} in ", lreg, re.MULTILINE)
     parts = [f"pseudo {pseudo} in {given} ({'local' if local else 'global'})"]
+    if pseudo not in hard:
+        slot = find_stack_slot(compilation, pseudo)
+        if slot is not None:
+            parts[0] += f", on the stack at 0x{slot:X}($sp)"
+    live = describe_live_range(compilation, pseudo)
+    if live:
+        parts.append(f"live in {live}")
     for pattern, dump in (
         (rf"^Register {pseudo} (used .*)$", lreg),
         (rf"^;; {pseudo} (conflicts: .*)$", greg),
@@ -520,6 +533,66 @@ def describe_pseudo(compilation: Compilation, pseudo: int) -> str:
         if match:
             parts.append(match.group(1))
     return "\n    ".join(parts)
+
+
+def find_pseudo_insns(dump: str, pseudo: int) -> list[tuple[int, int]]:
+    """Return the place and UID of each insn of DUMP that uses PSEUDO."""
+    pattern = re.compile(rf"\(reg(?:/\w+)?:\w+ {pseudo}\)")
+    return [
+        (place, uid)
+        for place, (uid, rtl) in enumerate(index_insns(dump).items())
+        if pattern.search(rtl)
+    ]
+
+
+def describe_live_range(compilation: Compilation, pseudo: int) -> str:
+    """Return where PSEUDO lives in each pass before allocation that moved it.
+
+    A scheduler that moves a pseudo's uses away from its setting stretches
+    its life, which can cost it a hard register. Each range gives the places
+    of the first and last insns that use PSEUDO, counted in the pass's insn
+    order, and the source lines of their insns. A pass is left out unless
+    it changes the range's first or last insn or stretches it to at least
+    STRETCH_FACTOR times its length, since deleting insns shortens ranges
+    in every pass.
+    """
+    parts: list[str] = []
+    previous: tuple[tuple[int, int], int] | None = None
+    for name in PASSES_BEFORE_ALLOCATION:
+        found = find_pseudo_insns(compilation.dumps.get(name, ""), pseudo)
+        if not found:
+            continue
+        (first, first_uid), (last, last_uid) = found[0], found[-1]
+        if previous:
+            ends, length = previous
+            is_stretched = last - first >= length * STRETCH_FACTOR
+            if (first_uid, last_uid) == ends and not is_stretched:
+                continue
+        previous = (first_uid, last_uid), max(last - first, 1)
+        lines = compilation.insn_lines.get(name, {})
+        ends = " to ".join(
+            f"insn {uid}" + (f" ({lines[uid]})" if uid in lines else "")
+            for uid in dict.fromkeys((first_uid, last_uid))
+        )
+        parts.append(f"{name} places {first}-{last}, {ends}")
+    return "; ".join(parts)
+
+
+def find_stack_slot(compilation: Compilation, pseudo: int) -> int | None:
+    """Return the stack offset global-alloc's reload gave PSEUDO, if any.
+
+    Reload rewrites each insn that used a pseudo with no hard register to
+    use its slot, so the slot is the stack offset every such insn names.
+    """
+    greg = index_insns(compilation.dumps.get("greg", ""))
+    common: set[int] | None = None
+    for _, uid in find_pseudo_insns(compilation.dumps.get("lreg", ""), pseudo):
+        offsets = {
+            int(match.group(1)) for match in STACK_SLOT_RE.finditer(greg.get(uid, ""))
+        }
+        if offsets:
+            common = offsets if common is None else common & offsets
+    return min(common) if common else None
 
 
 def find_local_block(lreg: str, pseudo: int) -> str | None:
