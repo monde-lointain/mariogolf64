@@ -1736,6 +1736,13 @@ typedef struct GridScreenPoint {
  *
  * A focused permuter run's best indexes the tint's slope with acrossRowStart
  * + drawnColumn rather than acrossPoint, which gives 330 words, 40 in shape.
+ *
+ * A chained search over rewrites found 292 words (40 in shape) by giving the
+ * lines across the aim a column counter of their own and writing
+ * acrossPoint's sum, cast to s32, at each use. The cast is redundant, as the
+ * sum is already an s32; without it the two changes give 306 words, 40 in
+ * shape, the counter alone 310, 44 in shape, and the sum alone 330, 40 in
+ * shape, against 300, 44 in shape.
  */
 void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
   f32 points[GREEN_GRID_POINT_COUNT][3];
