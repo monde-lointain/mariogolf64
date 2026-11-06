@@ -2061,7 +2061,7 @@ void DrawBackdrop(Gfx** displayListHead, CameraView* view, s32 cameraIndex) {
             TextureAddress((u16*)g_CourseSkyImage + PALETTE_START + texelWord),
             G_IM_FMT_CI, G_IM_SIZ_8b, f_BackdropImageWidth,
             f_BackdropStripHeight, 0, G_TX_WRAP, G_TX_WRAP, f_BackdropWidthMask,
-            0, 0, 0);
+            G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
       } else {
         gDPSetTextureImage(gfx++, G_IM_FMT_CI, G_IM_SIZ_16b, 1,
             TextureAddress((u16*)g_CourseSkyImage + texelWord));
@@ -2072,7 +2072,8 @@ void DrawBackdrop(Gfx** displayListHead, CameraView* view, s32 cameraIndex) {
         gDPPipeSync(gfx++);
         gDPSetTile(gfx++, G_IM_FMT_CI, G_IM_SIZ_4b,
             ((f_BackdropImageWidth >> 1) + 7) >> 3, 0, G_TX_RENDERTILE,
-            imageRow, G_TX_WRAP, 0, 0, G_TX_WRAP, f_BackdropWidthMask, 0);
+            imageRow, G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD, G_TX_WRAP,
+            f_BackdropWidthMask, G_TX_NOLOD);
       }
 
       if (y >= 0) {
@@ -2156,7 +2157,8 @@ void DrawBackdrop(Gfx** displayListHead, CameraView* view, s32 cameraIndex) {
         gDPLoadTextureBlock(gfx++,
             TextureAddress((u16*)g_CourseSkyImage + texelWord), G_IM_FMT_CI,
             G_IM_SIZ_8b, f_BackdropImageWidth, f_BackdropStripHeight, 0,
-            G_TX_WRAP, G_TX_WRAP, f_BackdropWidthMask, 0, 0, 0);
+            G_TX_WRAP, G_TX_WRAP, f_BackdropWidthMask, G_TX_NOMASK, G_TX_NOLOD,
+            G_TX_NOLOD);
       } else {
         gDPSetTextureImage(gfx++, G_IM_FMT_CI, G_IM_SIZ_16b, 1,
             TextureAddress((u16*)g_CourseSkyImage + texelWord));
@@ -2167,7 +2169,8 @@ void DrawBackdrop(Gfx** displayListHead, CameraView* view, s32 cameraIndex) {
         gDPPipeSync(gfx++);
         gDPSetTile(gfx++, G_IM_FMT_CI, G_IM_SIZ_4b,
             ((f_BackdropImageWidth >> 1) + 7) >> 3, 0, G_TX_RENDERTILE,
-            imageRow, G_TX_WRAP, 0, 0, G_TX_WRAP, f_BackdropWidthMask, 0);
+            imageRow, G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD, G_TX_WRAP,
+            f_BackdropWidthMask, G_TX_NOLOD);
       }
 
       if (row < f_BackdropStripCount - 1) {
@@ -2283,7 +2286,7 @@ void HandleFrameBufferSwap(void) {}
       gDPSetTextureImage( \
           (gfx)++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, TextureAddress(texels)); \
       gDPSetTile((gfx)++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 0, 0, G_TX_LOADTILE, 0, \
-          0, 0, 0, 0, 0, 0); \
+          0, G_TX_NOMASK, G_TX_NOLOD, 0, G_TX_NOMASK, G_TX_NOLOD); \
       gDPLoadSync((gfx)++); \
       gDPLoadBlock((gfx)++, G_TX_LOADTILE, 0, 0, \
           ((height) * FADE_FRAME_WIDTH) - 1, \
@@ -2291,7 +2294,8 @@ void HandleFrameBufferSwap(void) {}
       gDPPipeSync((gfx)++); \
       gDPSetTile((gfx)++, G_IM_FMT_RGBA, G_IM_SIZ_16b, \
           ((FADE_FRAME_WIDTH * G_IM_SIZ_16b_BYTES) + 7) >> 3, 0, \
-          G_TX_RENDERTILE, 0, 0, 0, 0, 0, 0, 0); \
+          G_TX_RENDERTILE, 0, 0, G_TX_NOMASK, G_TX_NOLOD, 0, G_TX_NOMASK, \
+          G_TX_NOLOD); \
       gDPSetTileSize((gfx)++, G_TX_RENDERTILE, 0, 0, \
           (FADE_FRAME_WIDTH - 1) << G_TEXTURE_IMAGE_FRAC, \
           ((height) - 1) << G_TEXTURE_IMAGE_FRAC); \

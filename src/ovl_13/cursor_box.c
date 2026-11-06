@@ -126,7 +126,7 @@ void DrawCursorBox(Gfx** displayListHead, s32 left, s32 top) {
   gDPSetTextureLUT(displayList++, G_TT_NONE);
   gDPLoadTextureBlock_4b(displayList++,
       TextureAddress(ImageBody(f_CursorBoxImage)), G_IM_FMT_IA, width, height,
-      0, 0, 0, 0, 0, 0, 0);
+      0, 0, 0, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
   gDPPipeSync(displayList++);
   gDPPipeSync(displayList++);
   gDPSetCycleType(displayList++, G_CYC_1CYCLE);

@@ -1853,7 +1853,7 @@ void DrawBillboardEffect(Gfx** displayListHead, Effect* effect, u16 color) {
         gDPLoadTextureBlock_4b(gfx++,
             TextureAddress(ImageTexelsAt(f_DropletImage, frameOffset)),
             G_IM_FMT_CI, DROPLET_IMAGE_SIZE, DROPLET_IMAGE_SIZE, 0, G_TX_MIRROR,
-            G_TX_WRAP, 4, 0, 2, 2);
+            G_TX_WRAP, 4, G_TX_NOMASK, 2, 2);
       } else if (effect->kind == EFFECT_KIND_SMOKE_PUFF) {
         gDPLoadTextureBlock_4b(gfx++, TextureAddress(ImageBody(f_SpeckleImage)),
             G_IM_FMT_I, SPECKLE_IMAGE_SIZE, SPECKLE_IMAGE_SIZE, 0, G_TX_WRAP,
@@ -2730,7 +2730,8 @@ void DrawBirdieBadgeCount(Gfx** displayListHead) {
         TextureAddress(
             ImageTexelsAt(f_CloudImage, spinFrame * BADGE_FRAME_SIZE)),
         G_IM_FMT_CI, BADGE_SIZE, BADGE_SIZE, 0, 0, BADGE_SIZE - 1,
-        BADGE_SIZE - 1, 0, 0, 0, 0, 0, 0, 0);
+        BADGE_SIZE - 1, 0, 0, 0, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
+        G_TX_NOLOD);
     DrawTextureRect(&gfx, QuarterPixels(BADGE_LEFT),
         QuarterPixels(offsetY + BADGE_RESTING_TOP),
         QuarterPixels(BADGE_LEFT + BADGE_SIZE),
@@ -2738,7 +2739,8 @@ void DrawBirdieBadgeCount(Gfx** displayListHead) {
         G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     LoadSmallPalette(&gfx, 0, ImageBody(f_ClumpImage));
     LoadNibbleTextureBlock(&gfx, ImageTexels(f_ClumpImage), G_IM_FMT_CI, 16,
-        COUNT_GLYPHS_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
+        COUNT_GLYPHS_HEIGHT, 0, 0, 0, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
+        G_TX_NOLOD);
     DrawDigitText(
         &gfx, BADGE_LEFT + BADGE_SIZE, offsetY + BADGE_COUNT_TOP, "*");
     sprintf(g_PrintBuffer, "%d", (int)f_ShownBadgeCount);

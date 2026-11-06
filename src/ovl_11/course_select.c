@@ -721,8 +721,8 @@ void DrawPlanks(Gfx** displayListHead) {
     LoadTextureBlock(&gfx,
         LargeImageTexels(f_PlanksImage) +
             (stripIndex * PLANK_STRIP_HEIGHT * PLANKS_WIDTH),
-        G_IM_FMT_CI, G_IM_SIZ_8b, PLANKS_WIDTH, stripHeight, 0, 0, 0, 0, 0, 0,
-        0);
+        G_IM_FMT_CI, G_IM_SIZ_8b, PLANKS_WIDTH, stripHeight, 0, 0, 0,
+        G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     top = (SCREEN_BORDER + (stripIndex * PLANK_STRIP_HEIGHT)) << 2;
     bottom = (SCREEN_BORDER + (stripIndex * PLANK_STRIP_HEIGHT) + stripHeight)
         << 2;
@@ -772,7 +772,7 @@ void DrawRingShotSelect(Gfx** displayListHead) {
       LoadTextureBlock(&gfx,
           f_CourseImage + (stripIndex * COURSE_IMAGE_STRIP_SIZE), G_IM_FMT_CI,
           G_IM_SIZ_8b, COURSE_IMAGE_WIDTH, COURSE_IMAGE_STRIP_HEIGHT, 0, 0, 0,
-          0, 0, 0, 0);
+          G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
       gDPPipeSync(gfx++);
       DrawTextureRect(&gfx, QuarterPixels(COURSE_IMAGE_LEFT),
           QuarterPixels((stripIndex * COURSE_IMAGE_STRIP_HEIGHT) +
@@ -799,7 +799,8 @@ void DrawRingShotSelect(Gfx** displayListHead) {
           f_CourseArrowFrameTime++ % (2 * ARROW_FRAME_TIME) >= ARROW_FRAME_TIME;
       LoadNibbleTextureBlock(&gfx,
           ImageTexels(f_ArrowsImage) + (arrowFrame * ARROWS_FRAME_SIZE),
-          G_IM_FMT_CI, ARROWS_WIDTH, ARROWS_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
+          G_IM_FMT_CI, ARROWS_WIDTH, ARROWS_HEIGHT, 0, 0, 0, G_TX_NOMASK,
+          G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
       gDPPipeSync(gfx++);
       push = (f_RepeatedButtons & U_JPAD) ? ARROW_PUSH_UP : 0;
       DrawTextureRect(&gfx, QuarterPixels(ARROW_LEFT),
@@ -896,7 +897,7 @@ void DrawHoleSelect(Gfx** displayListHead) {
       LoadTextureBlock(&gfx,
           f_CourseImage + (stripIndex * COURSE_IMAGE_STRIP_SIZE), G_IM_FMT_CI,
           G_IM_SIZ_8b, COURSE_IMAGE_WIDTH, COURSE_IMAGE_STRIP_HEIGHT, 0, 0, 0,
-          0, 0, 0, 0);
+          G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
       gDPPipeSync(gfx++);
       DrawTextureRect(&gfx, QuarterPixels(COURSE_IMAGE_LEFT),
           QuarterPixels((stripIndex * COURSE_IMAGE_STRIP_HEIGHT) +
@@ -921,7 +922,8 @@ void DrawHoleSelect(Gfx** displayListHead) {
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
     LoadSmallPalette(&gfx, 0, ImageBody(f_ArrowsImage));
     LoadNibbleTextureBlock(&gfx, ImageTexelsAt(f_ArrowsImage, arrowFrame),
-        G_IM_FMT_CI, ARROWS_WIDTH, ARROWS_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
+        G_IM_FMT_CI, ARROWS_WIDTH, ARROWS_HEIGHT, 0, 0, 0, G_TX_NOMASK,
+        G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(gfx++);
     push = (f_RepeatedButtons & U_JPAD) ? ARROW_PUSH_UP : 0;
     DrawTextureRect(&gfx, QuarterPixels(ARROW_LEFT),
@@ -1004,7 +1006,7 @@ void DrawNamePlate(Gfx** displayListHead, s32 centerX, s32 centerY) {
         LargeImageTexels(f_BoardImage) +
             (stripIndex * NAME_PLATE_STRIP_HEIGHT * NAME_PLATE_WIDTH),
         G_IM_FMT_CI, G_IM_SIZ_8b, NAME_PLATE_WIDTH, NAME_PLATE_STRIP_HEIGHT, 0,
-        0, 0, 0, 0, 0, 0);
+        0, 0, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(gfx++);
     DrawTextureRect(&gfx, QuarterPixels(centerX - NAME_PLATE_HALF_WIDTH),
         QuarterPixels(NamePlateStripTop(centerY, stripIndex) - 15),

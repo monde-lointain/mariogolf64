@@ -833,8 +833,8 @@ void DrawPauseArrows(Gfx** displayListHead, s32 x, s32 y, s32 gap) {
       ImageTexels(f_PauseArrowsImage) +
           (f_PauseArrowsTick / PAUSE_ARROWS_TICKS_PER_FRAME *
               PAUSE_ARROWS_FRAME_SIZE),
-      G_IM_FMT_CI, PAUSE_ARROW_SIZE, PAUSE_ARROWS_FRAME_HEIGHT, 0, 0, 0, 0, 0,
-      0, 0);
+      G_IM_FMT_CI, PAUSE_ARROW_SIZE, PAUSE_ARROWS_FRAME_HEIGHT, 0, 0, 0,
+      G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
   top = (y - (PAUSE_ARROW_SIZE / 2)) << 2;
   bottom = (y + (PAUSE_ARROW_SIZE / 2)) << 2;
   gDPPipeSync(gfx++);
@@ -929,14 +929,15 @@ void DrawPauseMenu(Gfx** displayListHead) {
   labelsHeight = f_PauseLayoutOptionCounts[f_PauseLayout] * PAUSE_LABEL_SPACING;
   LoadNibbleTextureBlock(&gfx, ImageBody(f_MenuCloudImage), G_IM_FMT_I,
       PAUSE_CLOUD_PART_WIDTH, PAUSE_CLOUD_PART_HEIGHT, 0, G_TX_CLAMP,
-      G_TX_CLAMP, 0, 0, 0, 0);
+      G_TX_CLAMP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
   cloudMiddle = (labelsHeight + PAUSE_CLOUD_TOP) * 4;
   DrawTextureRect(&gfx, QuarterPixels(PAUSE_CLOUD_LEFT),
       QuarterPixels(PAUSE_CLOUD_TOP), QuarterPixels(PAUSE_CLOUD_RIGHT),
       cloudMiddle, G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   LoadNibbleTextureBlock(&gfx,
       ImageBody(f_MenuCloudImage) + PAUSE_CLOUD_PART_SIZE, G_IM_FMT_I,
-      PAUSE_CLOUD_PART_WIDTH, PAUSE_CLOUD_PART_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
+      PAUSE_CLOUD_PART_WIDTH, PAUSE_CLOUD_PART_HEIGHT, 0, 0, 0, G_TX_NOMASK,
+      G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
   DrawTextureRect(&gfx, QuarterPixels(PAUSE_CLOUD_LEFT), cloudMiddle,
       QuarterPixels(PAUSE_CLOUD_RIGHT),
       QuarterPixels(labelsHeight + PAUSE_CLOUD_TOP + PAUSE_CLOUD_PART_HEIGHT),
@@ -1013,7 +1014,8 @@ void DrawPauseMenu(Gfx** displayListHead) {
   LoadSmallPalette(&gfx, 0, ImageBody(f_PauseCursorImage));
   gDPLoadTextureTile_4b(gfx++, TextureAddress(ImageTexels(f_PauseCursorImage)),
       G_IM_FMT_CI, PAUSE_CURSOR_SIZE, 0, 0, 0, PAUSE_CURSOR_SIZE - 1,
-      PAUSE_CURSOR_LOADED_HEIGHT - 1, 0, 0, 0, 0, 0, 0, 0);
+      PAUSE_CURSOR_LOADED_HEIGHT - 1, 0, 0, 0, G_TX_NOMASK, G_TX_NOMASK,
+      G_TX_NOLOD, G_TX_NOLOD);
   gDPPipeSync(gfx++);
   if (f_PauseLayoutOptions[f_PauseLayout][f_PauseSelection] ==
           PAUSE_OPTION_GIVE_UP &&
@@ -1208,7 +1210,7 @@ void DrawChoiceBox(Gfx** displayListHead) {
       LoadNibbleTextureBlock(&gfx,
           ImageBody(f_MenuCloudImage) + (i * CHOICE_BOX_CLOUD_PART_SIZE),
           G_IM_FMT_I, CHOICE_BOX_CLOUD_WIDTH, CHOICE_BOX_CLOUD_HEIGHT, 0, 0, 0,
-          0, 0, 0, 0);
+          G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
       DrawTextureRect(&gfx, QuarterPixels(CHOICE_BOX_CENTER_X - halfWidth),
           QuarterPixels(CHOICE_BOX_TOP),
           QuarterPixels(CHOICE_BOX_CENTER_X + halfWidth),
@@ -1258,7 +1260,8 @@ void DrawChoiceBox(Gfx** displayListHead) {
       gDPLoadTextureTile_4b(gfx++,
           TextureAddress(ImageTexels(f_ChoiceBoxCursorImage)), G_IM_FMT_CI,
           CHOICE_CURSOR_SIZE, 0, 0, 0, CHOICE_CURSOR_SIZE - 1,
-          CHOICE_CURSOR_LOADED_HEIGHT - 1, 0, 0, 0, 0, 0, 0, 0);
+          CHOICE_CURSOR_LOADED_HEIGHT - 1, 0, 0, 0, G_TX_NOMASK, G_TX_NOMASK,
+          G_TX_NOLOD, G_TX_NOLOD);
       cursorY = labelsTop + (f_ChoiceBoxSelection * CHOICE_LABEL_SPACING);
       DrawTextureRect(&gfx, QuarterPixels(cursorX), QuarterPixels(cursorY - 2),
           QuarterPixels(cursorX + CHOICE_CURSOR_SIZE),

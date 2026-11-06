@@ -318,7 +318,8 @@ void DrawBootLogos(Gfx** displayListHead) {
         n64Texels = f_N64Logo.texels +
             stripIndex * (N64_LOGO_WIDTH * N64_LOGO_STRIP_HEIGHT);
         LoadTextureBlock(&gfx, n64Texels, G_IM_FMT_RGBA, G_IM_SIZ_16b,
-            N64_LOGO_WIDTH, N64_LOGO_STRIP_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
+            N64_LOGO_WIDTH, N64_LOGO_STRIP_HEIGHT, 0, 0, 0, G_TX_NOMASK,
+            G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
         DrawTextureRect(&gfx, QuarterPixels(N64_LOGO_LEFT),
             QuarterPixels(N64_LOGO_TOP + (stripIndex * N64_LOGO_STRIP_HEIGHT)),
             QuarterPixels(N64_LOGO_LEFT + N64_LOGO_WIDTH),

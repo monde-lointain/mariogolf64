@@ -1705,7 +1705,8 @@ void DrawCharacterBoard(Gfx** displayListHead) {
   labelImage += CHARACTER_SELECT_FIRST_IMAGE_SIZE;
   LoadSmallPalette(&gfx, 0, ImageBody(labelImage));
   LoadNibbleTextureBlock(&gfx, ImageTexels(labelImage), G_IM_FMT_CI,
-      LABEL_IMAGE_WIDTH, LABEL_IMAGE_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
+      LABEL_IMAGE_WIDTH, LABEL_IMAGE_HEIGHT, 0, 0, 0, G_TX_NOMASK, G_TX_NOMASK,
+      G_TX_NOLOD, G_TX_NOLOD);
   DrawTextureRect(&gfx, QuarterPixels(LABEL_LEFT), QuarterPixels(LABEL_TOP),
       QuarterPixels(LABEL_LEFT + LABEL_SHOWN_WIDTH),
       QuarterPixels(LABEL_TOP + LABEL_IMAGE_HEIGHT), G_TX_RENDERTILE,
@@ -2045,7 +2046,8 @@ void DrawCurveMeter(Gfx** displayListHead, s32 clubSet) {
   labelImage = GetMenuImageBuffer();
   LoadSmallPalette(&gfx, 0, ImageBody(labelImage));
   LoadNibbleTextureBlock(&gfx, ImageTexels(labelImage), G_IM_FMT_CI,
-      CURVE_LABEL_WIDTH, CURVE_LABEL_IMAGE_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
+      CURVE_LABEL_WIDTH, CURVE_LABEL_IMAGE_HEIGHT, 0, 0, 0, G_TX_NOMASK,
+      G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
   if (g_Clubs[clubSet * CLUB_SET_SIZE].curve > 0) {
     labelRow = CURVE_LABEL_DRAW;
   } else if (g_Clubs[clubSet * CLUB_SET_SIZE].curve < 0) {

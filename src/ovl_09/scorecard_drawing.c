@@ -196,7 +196,8 @@ void DrawScorecardFace(
 
   LoadLargePalette(&gfx, g_Scorecard.facePalettes[playerIndex]);
   LoadTextureBlock(&gfx, g_Scorecard.faceImages[playerIndex], G_IM_FMT_CI,
-      G_IM_SIZ_8b, FACE_SIZE, FACE_SIZE, 0, 0, 0, 0, 0, 0, 0);
+      G_IM_SIZ_8b, FACE_SIZE, FACE_SIZE, 0, 0, 0, G_TX_NOMASK, G_TX_NOMASK,
+      G_TX_NOLOD, G_TX_NOLOD);
   DrawTextureRect(&gfx, QuarterPixels(left), QuarterPixels(top),
       QuarterPixels(left + FACE_SIZE), QuarterPixels(top + FACE_SIZE),
       G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
@@ -210,7 +211,7 @@ void DrawSmallFace(Gfx** displayListHead, s32 left, s32 top, s32 playerIndex,
   LoadLargePalette(&gfx, g_PlayerFacePalettes[playerIndex]);
   LoadTextureBlock(&gfx, g_PlayerFaceImages[playerIndex], G_IM_FMT_CI,
       G_IM_SIZ_8b, FACE_SIZE, SMALL_FACE_HEIGHT, 0, G_TX_MIRROR, G_TX_MIRROR,
-      isMirrored * MIRRORED_FACE_MASK, 0, 0, 0);
+      isMirrored * MIRRORED_FACE_MASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
   /* Mirrored faces start one face width in, where the mirrored tile reads the
    * face backwards */
   DrawTextureRect(&gfx, QuarterPixels(left), QuarterPixels(top),
@@ -232,8 +233,8 @@ void DrawPlace(Gfx** displayListHead, s32 left, s32 top, s32 place) {
   LoadTextureBlock(&gfx,
       g_Scorecard.placesImage +
           ((place * PLACE_HALF_SIZE) + PLACE_RIGHT_HALVES_OFFSET),
-      G_IM_FMT_CI, G_IM_SIZ_8b, PLACE_HALF_WIDTH, PLACE_HEIGHT, 0, 0, 0, 0, 0,
-      0, 0);
+      G_IM_FMT_CI, G_IM_SIZ_8b, PLACE_HALF_WIDTH, PLACE_HEIGHT, 0, 0, 0,
+      G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
   DrawTextureRect(&gfx, QuarterPixels(left + PLACE_RIGHT_HALF_X),
       QuarterPixels(top),
       QuarterPixels(left + PLACE_RIGHT_HALF_X + PLACE_HALF_WIDTH),
@@ -241,8 +242,8 @@ void DrawPlace(Gfx** displayListHead, s32 left, s32 top, s32 place) {
       TEXEL_STEP_ONE);
   LoadTextureBlock(&gfx,
       LargeImageTexelsAt(g_Scorecard.placesImage, place * PLACE_HALF_SIZE),
-      G_IM_FMT_CI, G_IM_SIZ_8b, PLACE_HALF_WIDTH, PLACE_HEIGHT, 0, 0, 0, 0, 0,
-      0, 0);
+      G_IM_FMT_CI, G_IM_SIZ_8b, PLACE_HALF_WIDTH, PLACE_HEIGHT, 0, 0, 0,
+      G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
   DrawTextureRect(&gfx, QuarterPixels(left), QuarterPixels(top),
       QuarterPixels(left + PLACE_HALF_WIDTH), QuarterPixels(top + PLACE_HEIGHT),
       G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
@@ -448,7 +449,8 @@ void DrawStandingsPage(Gfx** displayListHead) {
 
   LoadSmallPalette(&gfx, 0, ImageBody(g_Scorecard.digitsImage));
   LoadNibbleTextureBlock(&gfx, ImageTexels(g_Scorecard.digitsImage),
-      G_IM_FMT_CI, DIGIT_GLYPH_SIZE, DIGIT_FONT_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
+      G_IM_FMT_CI, DIGIT_GLYPH_SIZE, DIGIT_FONT_HEIGHT, 0, 0, 0, G_TX_NOMASK,
+      G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
   for (i = 0; i != g_GameState.playerCount; i++) {
     betTotal = 0;
     if (scoresToPar[i] == 0) {
@@ -714,7 +716,8 @@ void DrawMatchPage(Gfx** displayListHead) {
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
   LoadSmallPalette(&gfx, 0, ImageBody(g_Scorecard.matchPanelImage));
   LoadNibbleTextureBlock(&gfx, ImageTexels(g_Scorecard.matchPanelImage),
-      G_IM_FMT_CI, PANEL_WIDTH, PANEL_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
+      G_IM_FMT_CI, PANEL_WIDTH, PANEL_HEIGHT, 0, 0, 0, G_TX_NOMASK, G_TX_NOMASK,
+      G_TX_NOLOD, G_TX_NOLOD);
   DrawTextureRect(&gfx, QuarterPixels(g_Scorecard.x + PANEL_LEFT),
       QuarterPixels(g_Scorecard.y + PANEL_TOP),
       QuarterPixels(g_Scorecard.x + PANEL_LEFT + (PANEL_WIDTH * 2)),
@@ -730,7 +733,8 @@ void DrawMatchPage(Gfx** displayListHead) {
   gDPSetTextureFilter(gfx++, G_TF_POINT);
   LoadSmallPalette(&gfx, 0, ImageBody(g_Scorecard.winsNeededImage));
   LoadNibbleTextureBlock(&gfx, ImageTexels(g_Scorecard.winsNeededImage),
-      G_IM_FMT_CI, TILE_IMAGE_WIDTH, TILE_IMAGE_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
+      G_IM_FMT_CI, TILE_IMAGE_WIDTH, TILE_IMAGE_HEIGHT, 0, 0, 0, G_TX_NOMASK,
+      G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
   gDPPipeSync(gfx++);
   for (i = 0, rowOffset = 0; i != MATCH_PLAYER_COUNT;
       i++, rowOffset += MATCH_ROW_SPACING) {
@@ -791,8 +795,8 @@ void DrawMatchPage(Gfx** displayListHead) {
   gDPPipeSync(gfx++);
   LoadLargePalette(&gfx, ImageBody(g_Scorecard.winMarkImage));
   LoadTextureBlock(&gfx, LargeImageTexels(g_Scorecard.winMarkImage),
-      G_IM_FMT_CI, G_IM_SIZ_8b, WIN_MARK_WIDTH, WIN_MARK_HEIGHT, 0, 0, 0, 0, 0,
-      0, 0);
+      G_IM_FMT_CI, G_IM_SIZ_8b, WIN_MARK_WIDTH, WIN_MARK_HEIGHT, 0, 0, 0,
+      G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
   gDPPipeSync(gfx++);
   for (i = 0; i != MATCH_PLAYER_COUNT; i++) {
     for (j = 0; j != wins[i]; j++) {
@@ -820,8 +824,8 @@ void DrawMatchPage(Gfx** displayListHead) {
     bounce = (bounce <= 0) ? bounce : 0;
     LoadTextureBlock(&gfx,
         LargeImageTexels(g_Scorecard.winMarkImage) + (j * WIN_MARK_SIZE),
-        G_IM_FMT_CI, G_IM_SIZ_8b, WIN_MARK_WIDTH, WIN_MARK_HEIGHT, 0, 0, 0, 0,
-        0, 0, 0);
+        G_IM_FMT_CI, G_IM_SIZ_8b, WIN_MARK_WIDTH, WIN_MARK_HEIGHT, 0, 0, 0,
+        G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     holeIndex = g_Scorecard.skinsCarryover.intoLastHole;
     if (g_Players[0].holes[holeIndex].strokes <
         g_Players[1].holes[holeIndex].strokes) {
@@ -852,7 +856,8 @@ void DrawMatchPage(Gfx** displayListHead) {
 
     LoadSmallPalette(&gfx, 0, ImageBody(g_Scorecard.winnerArrowImage));
     LoadNibbleTextureBlock(&gfx, ImageTexels(g_Scorecard.winnerArrowImage),
-        G_IM_FMT_CI, ARROW_WIDTH, ARROW_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
+        G_IM_FMT_CI, ARROW_WIDTH, ARROW_HEIGHT, 0, 0, 0, G_TX_NOMASK,
+        G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     /* The arrow rises as the count goes on */
     arrowRise = g_Scorecard.skinsCarryover.onLastHole;
     holeIndex = g_Scorecard.skinsCarryover.intoLastHole;
@@ -1009,8 +1014,8 @@ void DrawSkinsPage(Gfx** displayListHead) {
 
   LoadLargePalette(&gfx, ImageBody(g_Scorecard.winMarkImage));
   LoadTextureBlock(&gfx, g_Scorecard.winMarkImage + SKIN_ICON_TEXELS_OFFSET,
-      G_IM_FMT_CI, G_IM_SIZ_8b, SKIN_ICON_SIZE, SKIN_ICON_SIZE, 0, 0, 0, 0, 0,
-      0, 0);
+      G_IM_FMT_CI, G_IM_SIZ_8b, SKIN_ICON_SIZE, SKIN_ICON_SIZE, 0, 0, 0,
+      G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
   for (i = 0; i != g_GameState.playerCount; i++) {
     DrawTextureRect(&gfx, QuarterPixels(g_Scorecard.x + SKIN_ICON_LEFT),
         QuarterPixels(SKIN_ICON_TOP + (i * SKINS_ROW_SPACING)),
@@ -1027,8 +1032,8 @@ void DrawSkinsPage(Gfx** displayListHead) {
 
   LoadSmallPalette(&gfx, 0, ImageBody(g_Scorecard.digitsImage));
   LoadNibbleTextureBlock(&gfx, ImageTexels(g_Scorecard.digitsImage),
-      G_IM_FMT_CI, DIGIT_GLYPH_SIZE, SKINS_DIGIT_FONT_HEIGHT, 0, 0, 0, 0, 0, 0,
-      0);
+      G_IM_FMT_CI, DIGIT_GLYPH_SIZE, SKINS_DIGIT_FONT_HEIGHT, 0, 0, 0,
+      G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
   for (i = 0; i != g_GameState.playerCount; i++) {
     sprintf(g_PrintBuffer, "* %d", (int)skinCounts[i]);
     DrawDigitText(&gfx, g_Scorecard.x + SKINS_COUNT_LEFT,
@@ -1156,7 +1161,8 @@ void DrawBetsPage(Gfx** displayListHead) {
   gDPSetTextureFilter(gfx++, G_TF_POINT);
   LoadSmallPalette(&gfx, 0, ImageBody(g_Scorecard.gridImage));
   LoadNibbleTextureBlock(&gfx, ImageTexels(g_Scorecard.gridImage), G_IM_FMT_CI,
-      GRID_IMAGE_SIZE, GRID_IMAGE_SIZE, 0, 0, 0, 0, 0, 0, 0);
+      GRID_IMAGE_SIZE, GRID_IMAGE_SIZE, 0, 0, 0, G_TX_NOMASK, G_TX_NOMASK,
+      G_TX_NOLOD, G_TX_NOLOD);
   DrawTextureRect(&gfx, QuarterPixels(g_Scorecard.x + GRID_LEFT),
       QuarterPixels(g_Scorecard.y + GRID_HEADER_LINE_TOP),
       QuarterPixels(g_Scorecard.x + GRID_RIGHT),
@@ -1293,8 +1299,8 @@ void DrawBetsPage(Gfx** displayListHead) {
 
   LoadSmallPalette(&gfx, 0, ImageBody(g_Scorecard.betSubtitlesImage));
   LoadNibbleTextureBlock(&gfx, ImageTexels(g_Scorecard.betSubtitlesImage),
-      G_IM_FMT_CI, BET_SUBTITLE_WIDTH, BET_SUBTITLE_IMAGE_HEIGHT, 0, 0, 0, 0, 0,
-      0, 0);
+      G_IM_FMT_CI, BET_SUBTITLE_WIDTH, BET_SUBTITLE_IMAGE_HEIGHT, 0, 0, 0,
+      G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
   for (i = 0, left = 0; i != BET_COUNT; i++) {
     if (g_GameState.betRates[i] != UNSET_BET_RATE) {
       if (f_BetSubtitleRows[i] != NO_BET_SUBTITLE) {
@@ -1770,7 +1776,8 @@ void DrawLeaderboardPage(Gfx** displayListHead) {
   LoadSmallPalette(&gfx, 0, ImageBody(g_Scorecard.leaderboardRowImage));
   gDPSetCombineMode(gfx++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
   LoadNibbleTextureBlock(&gfx, ImageTexels(g_Scorecard.leaderboardRowImage),
-      G_IM_FMT_CI, ROW_IMAGE_WIDTH, ROW_IMAGE_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
+      G_IM_FMT_CI, ROW_IMAGE_WIDTH, ROW_IMAGE_HEIGHT, 0, 0, 0, G_TX_NOMASK,
+      G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
   gDPPipeSync(gfx++);
 
   /* The rows behind the flaps */
@@ -1808,7 +1815,7 @@ void DrawLeaderboardPage(Gfx** displayListHead) {
               ((i * FLAP_NAME_IMAGE_WIDTH * ROW_IMAGE_HEIGHT) +
                   LARGE_PALETTED_TEXELS_OFFSET),
           G_IM_FMT_CI, G_IM_SIZ_8b, FLAP_NAME_IMAGE_WIDTH, ROW_IMAGE_HEIGHT, 0,
-          0, 0, 0, 0, 0, 0);
+          0, 0, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
       DrawTextureRect(&gfx, QuarterPixels(g_Scorecard.x + FLAP_NAME_LEFT),
           QuarterPixels(
               ((i * LEADERBOARD_ROW_SPACING) + ROW_TOP) + g_Scorecard.y),
@@ -1888,7 +1895,8 @@ void DrawLeaderboardPage(Gfx** displayListHead) {
   gDPSetTexturePersp(gfx++, G_TP_NONE);
   LoadSmallPalette(&gfx, 0, ImageBody(g_Scorecard.leaderboardRowImage));
   LoadNibbleTextureBlock(&gfx, ImageTexels(g_Scorecard.leaderboardRowImage),
-      G_IM_FMT_CI, ROW_IMAGE_WIDTH, ROW_IMAGE_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
+      G_IM_FMT_CI, ROW_IMAGE_WIDTH, ROW_IMAGE_HEIGHT, 0, 0, 0, G_TX_NOMASK,
+      G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
   gDPPipeSync(gfx++);
   gDPSetCombineMode(gfx++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
 
@@ -1934,7 +1942,7 @@ void DrawLeaderboardPage(Gfx** displayListHead) {
               ((i * FLAP_NAME_IMAGE_WIDTH * ROW_IMAGE_HEIGHT) +
                   LARGE_PALETTED_TEXELS_OFFSET),
           G_IM_FMT_CI, G_IM_SIZ_8b, FLAP_NAME_IMAGE_WIDTH, ROW_IMAGE_HEIGHT, 0,
-          0, 0, 0, 0, 0, 0);
+          0, 0, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
       DrawTextureRect(&gfx, QuarterPixels(g_Scorecard.x + FLAP_NAME_LEFT),
           QuarterPixels((i * LEADERBOARD_ROW_SPACING) + ROW_TOP +
               ROW_BOTTOM_HALF_ROW + g_Scorecard.y),
@@ -1950,7 +1958,8 @@ void DrawLeaderboardPage(Gfx** displayListHead) {
   gDPPipeSync(gfx++);
   LoadSmallPalette(&gfx, 0, ImageBody(g_Scorecard.leaderboardRowImage));
   LoadNibbleTextureBlock(&gfx, ImageTexels(g_Scorecard.leaderboardRowImage),
-      G_IM_FMT_CI, ROW_IMAGE_WIDTH, ROW_IMAGE_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
+      G_IM_FMT_CI, ROW_IMAGE_WIDTH, ROW_IMAGE_HEIGHT, 0, 0, 0, G_TX_NOMASK,
+      G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
   gDPSetCombineMode(gfx++, G_CC_MODULATERGBA, G_CC_MODULATERGBA);
   gDPPipeSync(gfx++);
   gDPSetTexturePersp(gfx++, G_TP_PERSP);
@@ -1981,7 +1990,7 @@ void DrawLeaderboardPage(Gfx** displayListHead) {
               ((i * FLAP_NAME_IMAGE_WIDTH * ROW_IMAGE_HEIGHT) +
                   LARGE_PALETTED_TEXELS_OFFSET),
           G_IM_FMT_CI, G_IM_SIZ_8b, FLAP_NAME_IMAGE_WIDTH, ROW_IMAGE_HEIGHT, 0,
-          0, 0, 0, 0, 0, 0);
+          0, 0, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
       gSPMatrix(gfx++, PhysicalAddress(&f_FlapMatrices[i][g_MatrixBufferIndex]),
           G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
       gDPPipeSync(gfx++);
@@ -2406,7 +2415,7 @@ void DrawScoresPage(Gfx** displayListHead) {
   gDPSetPrimColor(gfx++, 0, 0, 0, CELL_SHADE, 0, cellAlpha);
   LoadNibbleTextureBlock(&gfx, ImageBody(g_Scorecard.scoresPanelImage),
       G_IM_FMT_I, SCORES_PANEL_IMAGE_WIDTH, SCORES_PANEL_IMAGE_HEIGHT, 0,
-      G_TX_CLAMP, 0, 0, 0, 0, 0);
+      G_TX_CLAMP, 0, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
   gDPSetTileSize(gfx++, G_TX_RENDERTILE, 0, 0, PANEL_TEXEL_RIGHT << 2,
       (SCORES_PANEL_IMAGE_HEIGHT - 1) << 2);
   gDPPipeSync(gfx++);
@@ -2616,7 +2625,7 @@ void DrawScoresPage(Gfx** displayListHead) {
   gDPPipeSync(gfx++);
   LoadNibbleTextureBlock(&gfx, ImageBody(g_Scorecard.scoresPanelImage),
       G_IM_FMT_I, SCORES_PANEL_IMAGE_WIDTH, SCORES_PANEL_IMAGE_HEIGHT, 0, 0, 0,
-      0, 0, 0, 0);
+      G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
   gDPSetPrimColor(gfx++, 0, 0, 0x7F, 0xFF, 0x1F, cellAlpha);
   gDPSetTileSize(gfx++, G_TX_RENDERTILE, 0, 0, PANEL_TEXEL_RIGHT << 2,
       (SCORES_PANEL_IMAGE_HEIGHT - 1) << 2);
@@ -2696,7 +2705,7 @@ void DrawScoresPage(Gfx** displayListHead) {
   LoadSmallPalette(&gfx, 0, ImageBody(g_Scorecard.totalLabelsImage));
   LoadNibbleTextureBlock(&gfx, ImageTexels(g_Scorecard.totalLabelsImage),
       G_IM_FMT_CI, TOTAL_LABEL_WIDTH, TOTAL_LABELS_IMAGE_HEIGHT, 0, G_TX_MIRROR,
-      0, 5, 0, 0, 0);
+      0, 5, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
   if (IsMatchPlayMode()) {
     if (g_GameState.holeSelection & HOLE_SELECTION_FRONT_NINE) {
       DrawTextureRect(&gfx, QuarterPixels(g_Scorecard.x + ROUND_LABEL_LEFT),
@@ -2806,7 +2815,7 @@ void DrawScoresPage(Gfx** displayListHead) {
         LoadLargePalette(&gfx, g_PlayerFacePalettes[facePlayerIndex]);
         LoadTextureBlock(&gfx, g_PlayerFaceImages[facePlayerIndex], G_IM_FMT_CI,
             G_IM_SIZ_8b, FACE_SIZE, SMALL_FACE_HEIGHT, 0, G_TX_MIRROR, 0,
-            MIRRORED_FACE_MASK, 0, 0, 0);
+            MIRRORED_FACE_MASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
         if (!(g_GameState.holeSelection & HOLE_SELECTION_BACK_NINE)) {
           DrawSmallFace(&gfx,
               ((facePlayerIndex & 1) * SCORES_FACE_STAGGER) + SCORES_FACE_LEFT +
@@ -3367,7 +3376,8 @@ void DrawBetTallies(Gfx** displayListHead) {
 
   LoadSmallPalette(&gfx, 0, ImageBody(g_Scorecard.digitsImage));
   LoadNibbleTextureBlock(&gfx, ImageTexels(g_Scorecard.digitsImage),
-      G_IM_FMT_CI, DIGIT_GLYPH_SIZE, DIGIT_FONT_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
+      G_IM_FMT_CI, DIGIT_GLYPH_SIZE, DIGIT_FONT_HEIGHT, 0, 0, 0, G_TX_NOMASK,
+      G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
   for (playerIndex = 0; playerIndex != g_GameState.playerCount; playerIndex++) {
     rowOffset = playerIndex * BET_TALLY_ROW_SPACING;
     total = 0;

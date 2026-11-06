@@ -7091,7 +7091,7 @@ void DrawOptionsScreen(Gfx** displayListHead) {
           LargeImageTexels(g_NamePlateImage) +
               (loopIndex * MENU_BANNER_WIDTH * MENU_BANNER_STRIP_HEIGHT),
           G_IM_FMT_CI, G_IM_SIZ_8b, MENU_BANNER_WIDTH, MENU_BANNER_STRIP_HEIGHT,
-          0, 0, 0, 0, 0, 0, 0);
+          0, 0, 0, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
       firstRowStripTop =
           (loopIndex * VALUE_BANNER_STRIP_HEIGHT) + VALUE_BANNER_ROW_TOP;
       if (g_MenuMemory.optionsChoice == toggleIndex) {
@@ -7147,8 +7147,8 @@ void DrawOptionsScreen(Gfx** displayListHead) {
       LoadNibbleTextureBlock(&gfx,
           ImageTexels(g_ImageSlots[f_ImageSlotIndex]) +
               (loopIndex * OPTION_LABEL_SPACING),
-          G_IM_FMT_CI, OPTION_LABEL_WIDTH, OPTION_LABEL_HEIGHT, 0, 0, 0, 0, 0,
-          0, 0);
+          G_IM_FMT_CI, OPTION_LABEL_WIDTH, OPTION_LABEL_HEIGHT, 0, 0, 0,
+          G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
       DrawTextureRect(&gfx, QuarterPixels(OPTION_LABEL_LEFT),
           QuarterPixels(OPTION_LABEL_TOP + (loopIndex * OPTION_ROW_SPACING)),
           QuarterPixels(OPTION_LABEL_LEFT + OPTION_LABEL_WIDTH),
@@ -7165,8 +7165,8 @@ void DrawOptionsScreen(Gfx** displayListHead) {
       LoadNibbleTextureBlock(&gfx,
           ImageTexels(g_MenuLabelImages[f_MenuLabelImageIndex]) +
               (loopIndex * OPTION_LABEL_SPACING),
-          G_IM_FMT_CI, OPTION_LABEL_WIDTH, OPTION_LABEL_HEIGHT, 0, 0, 0, 0, 0,
-          0, 0);
+          G_IM_FMT_CI, OPTION_LABEL_WIDTH, OPTION_LABEL_HEIGHT, 0, 0, 0,
+          G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
       gDPPipeSync(gfx++);
       DrawTextureRect(&gfx, QuarterPixels(OPTION_LABEL_LEFT),
           QuarterPixels(OPTION_LABEL_TOP + (loopIndex * OPTION_ROW_SPACING)),
@@ -7210,8 +7210,8 @@ void DrawOptionsScreen(Gfx** displayListHead) {
         ImageTexels(ImageAt(
             g_MenuLabelImages[f_MenuLabelImageIndex], OPTION_VALUES_OFFSET)) +
             valueOffset,
-        G_IM_FMT_CI, OPTION_LABEL_WIDTH, OPTION_LABEL_HEIGHT, 0, 0, 0, 0, 0, 0,
-        0);
+        G_IM_FMT_CI, OPTION_LABEL_WIDTH, OPTION_LABEL_HEIGHT, 0, 0, 0,
+        G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     if (g_MenuMemory.optionsChoice == loopIndex) {
       gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
     } else {
@@ -7233,8 +7233,8 @@ void DrawOptionsScreen(Gfx** displayListHead) {
     frameIndex = f_OptionsArrowTimer < ARROW_FRAME_DURATION;
     LoadNibbleTextureBlock(&gfx,
         ImageTexels(arrows) + (frameIndex * GREEN_ARROW_FRAME_SIZE),
-        G_IM_FMT_CI, GREEN_ARROW_SIZE, GREEN_ARROW_FRAME_HEIGHT, 0, 0, 0, 0, 0,
-        0, 0);
+        G_IM_FMT_CI, GREEN_ARROW_SIZE, GREEN_ARROW_FRAME_HEIGHT, 0, 0, 0,
+        G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     /* The first pass draws the arrows' shadows */
     for (loopIndex = 0; loopIndex != ARROW_PASS_COUNT; loopIndex++) {
       shiftX = 0;

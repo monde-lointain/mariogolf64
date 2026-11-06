@@ -1177,8 +1177,8 @@ void DrawPlaceIcon(Gfx** displayListHead, s32 x, s32 y, s32 place) {
       f_ResultsPlacesImage +
           ((place * PLACE_ICON_SIZE * PLACE_ICON_SIZE) +
               LARGE_PALETTED_TEXELS_OFFSET),
-      G_IM_FMT_CI, G_IM_SIZ_8b, PLACE_ICON_SIZE, PLACE_ICON_SIZE, 0, 0, 0, 0, 0,
-      0, 0);
+      G_IM_FMT_CI, G_IM_SIZ_8b, PLACE_ICON_SIZE, PLACE_ICON_SIZE, 0, 0, 0,
+      G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
   DrawTextureRect(&gfx, QuarterPixels(x), QuarterPixels(y),
       QuarterPixels(x + PLACE_ICON_SIZE), QuarterPixels(y + PLACE_ICON_SIZE),
       G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
@@ -1243,8 +1243,8 @@ void DrawRank(Gfx** displayListHead, s32 x, s32 y, s32 rank) {
             ((suffix * PLACE_ICON_SIZE * PLACE_ICON_SIZE) +
                 LARGE_PALETTED_TEXELS_OFFSET +
                 (PLACE_SUFFIX_ICON_FIRST * PLACE_ICON_SIZE * PLACE_ICON_SIZE)),
-        G_IM_FMT_CI, G_IM_SIZ_8b, PLACE_ICON_SIZE, PLACE_ICON_SIZE, 0, 0, 0, 0,
-        0, 0, 0);
+        G_IM_FMT_CI, G_IM_SIZ_8b, PLACE_ICON_SIZE, PLACE_ICON_SIZE, 0, 0, 0,
+        G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     DrawTextureRect(&gfx, QuarterPixels(x + PLACE_DIGIT_WIDTH),
         QuarterPixels(y),
         QuarterPixels(x + PLACE_DIGIT_WIDTH + PLACE_ICON_SIZE),
@@ -1290,7 +1290,8 @@ void DrawRank(Gfx** displayListHead, s32 x, s32 y, s32 rank) {
           (i * RANK_BANNER_WIDTH * RANK_BANNER_STRIP_HEIGHT);
       stripY = y + (i * RANK_BANNER_STRIP_HEIGHT);
       LoadTextureBlock(&gfx, image + offset, G_IM_FMT_CI, G_IM_SIZ_8b,
-          RANK_BANNER_WIDTH, RANK_BANNER_STRIP_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
+          RANK_BANNER_WIDTH, RANK_BANNER_STRIP_HEIGHT, 0, 0, 0, G_TX_NOMASK,
+          G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
       DrawTextureRect(&gfx, QuarterPixels(x + RANK_BANNER_X_OFFSET),
           QuarterPixels(stripY),
           QuarterPixels(x + RANK_BANNER_X_OFFSET + RANK_BANNER_WIDTH),
@@ -1304,8 +1305,8 @@ void DrawRank(Gfx** displayListHead, s32 x, s32 y, s32 rank) {
             ((rank * PLACE_ICON_SIZE * PLACE_ICON_SIZE) +
                 LARGE_PALETTED_TEXELS_OFFSET +
                 (PLACE_SUFFIX_ICON_FIRST * PLACE_ICON_SIZE * PLACE_ICON_SIZE)),
-        G_IM_FMT_CI, G_IM_SIZ_8b, PLACE_ICON_SIZE, PLACE_ICON_SIZE, 0, 0, 0, 0,
-        0, 0, 0);
+        G_IM_FMT_CI, G_IM_SIZ_8b, PLACE_ICON_SIZE, PLACE_ICON_SIZE, 0, 0, 0,
+        G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     DrawTextureRect(&gfx, QuarterPixels(x + PLACE_DIGIT_WIDTH),
         QuarterPixels(y),
         QuarterPixels(x + PLACE_DIGIT_WIDTH + PLACE_ICON_SIZE),
@@ -1485,7 +1486,8 @@ void DrawCourseResultsNotice(Gfx** displayListHead) {
         LargeImageTexels(f_ResultsCourseImage) +
             (i * NOTICE_COURSE_STRIP_WIDTH * NOTICE_COURSE_STRIP_HEIGHT),
         G_IM_FMT_CI, G_IM_SIZ_8b, NOTICE_COURSE_STRIP_WIDTH,
-        NOTICE_COURSE_STRIP_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
+        NOTICE_COURSE_STRIP_HEIGHT, 0, 0, 0, G_TX_NOMASK, G_TX_NOMASK,
+        G_TX_NOLOD, G_TX_NOLOD);
     top = NOTICE_COURSE_CENTER_Y - size + (i * size);
     centerX = f_NoticeSwing + NOTICE_COURSE_CENTER_X;
     DrawTextureRect(&gfx, QuarterPixels(centerX - size),
@@ -1503,7 +1505,8 @@ void DrawCourseResultsNotice(Gfx** displayListHead) {
         LargeImageTexels(f_NoticeTitleImage) +
             (i * NOTICE_TITLE_STRIP_WIDTH * NOTICE_TITLE_STRIP_HEIGHT),
         G_IM_FMT_CI, G_IM_SIZ_8b, NOTICE_TITLE_STRIP_WIDTH,
-        NOTICE_TITLE_STRIP_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
+        NOTICE_TITLE_STRIP_HEIGHT, 0, 0, 0, G_TX_NOMASK, G_TX_NOMASK,
+        G_TX_NOLOD, G_TX_NOLOD);
     top = TitleStripTop(lift, i);
     DrawTextureRect(&gfx, QuarterPixels(f_NoticeSwing + NOTICE_TITLE_LEFT),
         QuarterPixels(top + f_CourseNoticeShift),
@@ -1531,7 +1534,8 @@ void DrawCourseResultsNotice(Gfx** displayListHead) {
         LargeImageTexels(f_NoticeTitleImage) +
             (i * NOTICE_TITLE_STRIP_WIDTH * NOTICE_TITLE_STRIP_HEIGHT),
         G_IM_FMT_CI, G_IM_SIZ_8b, NOTICE_TITLE_STRIP_WIDTH,
-        NOTICE_TITLE_STRIP_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
+        NOTICE_TITLE_STRIP_HEIGHT, 0, 0, 0, G_TX_NOMASK, G_TX_NOMASK,
+        G_TX_NOLOD, G_TX_NOLOD);
     /*
      * The top is written out and the bottom's offset kept in a local, unlike
      * the colored title's, to match: writing the bottom out too gives 35
@@ -1559,7 +1563,8 @@ void DrawCourseResultsNotice(Gfx** displayListHead) {
   gDPSetAlphaCompare(gfx++, G_AC_NONE);
   gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
   LoadTextureBlock(&gfx, ImageBody(f_ResultsShineImage), G_IM_FMT_I,
-      G_IM_SIZ_8b, NOTICE_SHINE_SIZE, NOTICE_SHINE_SIZE, 0, 0, 0, 0, 0, 0, 0);
+      G_IM_SIZ_8b, NOTICE_SHINE_SIZE, NOTICE_SHINE_SIZE, 0, 0, 0, G_TX_NOMASK,
+      G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
   if (f_NoticeFrameCount == NOTICE_SHINE_START) {
     PlaySoundWithEffects(SOUND_SHRINKING_IMAGE, NOTICE_SHINE_SOUND_CHANNEL,
         NOTICE_SHINE_SOUND_VOLUME, 0, SOUND_FULL_SCALE);
@@ -1711,7 +1716,8 @@ void DrawCharacterResultsNotice(Gfx** displayListHead) {
 
     LoadSmallPalette(&gfx, 0, ImageBody(f_NameplateImage));
     LoadNibbleTextureBlock(&gfx, ImageTexels(f_NameplateImage), G_IM_FMT_CI,
-        NOTICE_NAMEPLATE_SIZE, NOTICE_NAMEPLATE_SIZE, 0, 0, 0, 0, 0, 0, 0);
+        NOTICE_NAMEPLATE_SIZE, NOTICE_NAMEPLATE_SIZE, 0, 0, 0, G_TX_NOMASK,
+        G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     centerX = f_NoticeLift + NOTICE_CENTER_X;
     centerY = f_CharacterNoticeShift + NOTICE_CENTER_Y;
     DrawTextureRect(&gfx, QuarterPixels(centerX - size),
@@ -1728,7 +1734,8 @@ void DrawCharacterResultsNotice(Gfx** displayListHead) {
 
     LoadLargePalette(&gfx, f_PortraitPalette);
     LoadTextureBlock(&gfx, f_PortraitImage, G_IM_FMT_CI, G_IM_SIZ_8b,
-        NOTICE_PORTRAIT_SIZE, NOTICE_PORTRAIT_SIZE, 0, 0, 0, 0, 0, 0, 0);
+        NOTICE_PORTRAIT_SIZE, NOTICE_PORTRAIT_SIZE, 0, 0, 0, G_TX_NOMASK,
+        G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     step = TexelRunStep(NOTICE_PORTRAIT_SIZE / 2, size);
     centerX = f_NoticeLift + NOTICE_CENTER_X;
     centerY = f_CharacterNoticeShift + NOTICE_CENTER_Y;
@@ -1748,7 +1755,8 @@ void DrawCharacterResultsNotice(Gfx** displayListHead) {
           LargeImageTexels(f_NoticeTitleImage) +
               (i * NOTICE_CHARACTER_TITLE_WIDTH * NOTICE_TITLE_STRIP_HEIGHT),
           G_IM_FMT_CI, G_IM_SIZ_8b, NOTICE_CHARACTER_TITLE_WIDTH,
-          NOTICE_TITLE_STRIP_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
+          NOTICE_TITLE_STRIP_HEIGHT, 0, 0, 0, G_TX_NOMASK, G_TX_NOMASK,
+          G_TX_NOLOD, G_TX_NOLOD);
       /* This pass mirrors the slide, unlike the depth pass and the shine */
       liftFromCenter = f_NoticeLift - NOTICE_CENTER_X;
       DrawTextureRect(&gfx,
@@ -1779,7 +1787,8 @@ void DrawCharacterResultsNotice(Gfx** displayListHead) {
           LargeImageTexels(f_NoticeTitleImage) +
               (i * NOTICE_CHARACTER_TITLE_WIDTH * NOTICE_TITLE_STRIP_HEIGHT),
           G_IM_FMT_CI, G_IM_SIZ_8b, NOTICE_CHARACTER_TITLE_WIDTH,
-          NOTICE_TITLE_STRIP_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
+          NOTICE_TITLE_STRIP_HEIGHT, 0, 0, 0, G_TX_NOMASK, G_TX_NOMASK,
+          G_TX_NOLOD, G_TX_NOLOD);
       titleCenterX = f_NoticeLift + NOTICE_CENTER_X;
       DrawTextureRect(&gfx, QuarterPixels(titleCenterX - width),
           QuarterPixels(
@@ -1805,7 +1814,8 @@ void DrawCharacterResultsNotice(Gfx** displayListHead) {
     gDPSetAlphaCompare(gfx++, G_AC_NONE);
     gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
     LoadTextureBlock(&gfx, ImageBody(f_ResultsShineImage), G_IM_FMT_I,
-        G_IM_SIZ_8b, NOTICE_SHINE_SIZE, NOTICE_SHINE_SIZE, 0, 0, 0, 0, 0, 0, 0);
+        G_IM_SIZ_8b, NOTICE_SHINE_SIZE, NOTICE_SHINE_SIZE, 0, 0, 0, G_TX_NOMASK,
+        G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     if (f_NoticeTime == NOTICE_CHARACTER_VOICE_FRAME) {
       PlayCharacterSound(f_PortraitCharacterIndex, NOTICE_CHARACTER_VOICE_SLOT,
           CHARACTER_SOUND_NOTICE, SOUND_FULL_SCALE, SOUND_FULL_SCALE);
@@ -2113,7 +2123,7 @@ void DrawResultsBanner(Gfx** displayListHead) {
     LoadNibbleTextureBlock(&gfx,
         ImageBody(f_ResultsCloudImage) + (i * BANNER_CLOUD_STRIP_SIZE),
         G_IM_FMT_I, BANNER_CLOUD_WIDTH, BANNER_CLOUD_HEIGHT, 0, G_TX_CLAMP,
-        G_TX_CLAMP, 0, 0, 0, 0);
+        G_TX_CLAMP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     if (f_BannerKind == BANNER_KIND_POINTS) {
       DrawTextureRect(&gfx, QuarterPixels(f_BannerX + BANNER_CLOUD_LEFT),
           QuarterPixels(f_BannerY + TALL_BANNER_CLOUD_TOP +
@@ -2170,8 +2180,8 @@ void DrawResultsBanner(Gfx** displayListHead) {
             G_IM_FMT_CI, G_IM_SIZ_8b, f_TrophySizes[course][TROPHY_WIDTH],
             f_TrophySizes[course][TROPHY_PART_HEIGHTS + i], 0, 0,
             f_TrophySizes[course][TROPHY_WIDTH] - 1,
-            f_TrophySizes[course][TROPHY_PART_HEIGHTS + i] - 1, 0, 0, 0, 0, 0,
-            0, 0);
+            f_TrophySizes[course][TROPHY_PART_HEIGHTS + i] - 1, 0, 0, 0,
+            G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
         DrawTextureRect(&gfx,
             QuarterPixels(TROPHY_CENTER_X + f_BannerX -
                 (f_TrophySizes[course][TROPHY_WIDTH] / 2)),
@@ -2204,8 +2214,8 @@ void DrawResultsBanner(Gfx** displayListHead) {
             G_IM_FMT_CI, G_IM_SIZ_8b, f_TrophySizes[course][TROPHY_WIDTH],
             f_TrophySizes[course][TROPHY_PART_HEIGHTS + i], 0, 0,
             f_TrophySizes[course][TROPHY_WIDTH] - 1,
-            f_TrophySizes[course][TROPHY_PART_HEIGHTS + i] - 1, 0, 0, 0, 0, 0,
-            0, 0);
+            f_TrophySizes[course][TROPHY_PART_HEIGHTS + i] - 1, 0, 0, 0,
+            G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
         DrawTextureRect(&gfx,
             QuarterPixels(TROPHY_CENTER_X + f_BannerX -
                 (f_TrophySizes[course][TROPHY_WIDTH] / 2)),
@@ -2231,8 +2241,8 @@ void DrawResultsBanner(Gfx** displayListHead) {
       gDPSetAlphaCompare(gfx++, G_AC_NONE);
       gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, TROPHY_SHINE_TEXT_ALPHA);
       LoadTextureBlock(&gfx, ImageBody(f_ResultsShineImage), G_IM_FMT_I,
-          G_IM_SIZ_8b, NOTICE_SHINE_SIZE, NOTICE_SHINE_SIZE, 0, 0, 0, 0, 0, 0,
-          0);
+          G_IM_SIZ_8b, NOTICE_SHINE_SIZE, NOTICE_SHINE_SIZE, 0, 0, 0,
+          G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
       if (f_TrophyShineFrame == TROPHY_SHINE_SOUND_FRAME) {
         PlaySoundWithEffects(SOUND_SHRINKING_IMAGE, TROPHY_SHINE_SOUND_CHANNEL,
             TROPHY_SHINE_SOUND_VOLUME, TROPHY_SHINE_SOUND_REVERB,
@@ -2999,7 +3009,8 @@ void DrawTournamentResults(Gfx** displayListHead) {
 
   LoadSmallPalette(&gfx, 0, ImageBody(f_ResultsLargeDigitsImage));
   LoadNibbleTextureBlock(&gfx, ImageTexels(f_ResultsLargeDigitsImage),
-      G_IM_FMT_CI, LARGE_DIGIT_WIDTH, LARGE_DIGITS_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
+      G_IM_FMT_CI, LARGE_DIGIT_WIDTH, LARGE_DIGITS_HEIGHT, 0, 0, 0, G_TX_NOMASK,
+      G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
   if (f_PlayerResults[0] == 0) {
     sprintf(g_PrintBuffer, f_EvenScoreFormat, 0);
   } else {
@@ -3074,7 +3085,8 @@ void DrawSpeedGolfResults(Gfx** displayListHead) {
 
   LoadSmallPalette(&gfx, 0, ImageBody(f_ResultsLargeDigitsImage));
   LoadNibbleTextureBlock(&gfx, ImageTexels(f_ResultsLargeDigitsImage),
-      G_IM_FMT_CI, LARGE_DIGIT_WIDTH, LARGE_DIGITS_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
+      G_IM_FMT_CI, LARGE_DIGIT_WIDTH, LARGE_DIGITS_HEIGHT, 0, 0, 0, G_TX_NOMASK,
+      G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
   if (f_PlayerResults[0] == 0) {
     sprintf(g_PrintBuffer, f_EvenScoreFormat, 0);
   } else {
@@ -3192,7 +3204,8 @@ void DrawPlayersResults(Gfx** displayListHead) {
 
   LoadSmallPalette(&gfx, 0, ImageBody(f_ResultsLargeDigitsImage));
   LoadNibbleTextureBlock(&gfx, ImageTexels(f_ResultsLargeDigitsImage),
-      G_IM_FMT_CI, LARGE_DIGIT_WIDTH, LARGE_DIGITS_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
+      G_IM_FMT_CI, LARGE_DIGIT_WIDTH, LARGE_DIGITS_HEIGHT, 0, 0, 0, G_TX_NOMASK,
+      G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
   if (f_HasBets) {
     for (i = 0; i != g_GameState.playerCount; i++) {
       if (g_GameState.gameMode == GAME_MODE_SKINS_MATCH ||
@@ -3363,8 +3376,8 @@ void DrawMatchResults(Gfx** displayListHead) {
 
   LoadSmallPalette(&gfx, 0, ImageBody(f_MatchStandingWordsImage));
   LoadNibbleTextureBlock(&gfx, ImageTexels(f_MatchStandingWordsImage),
-      G_IM_FMT_CI, STANDING_WORDS_SIZE, STANDING_WORDS_SIZE, 0, 0, 0, 0, 0, 0,
-      0);
+      G_IM_FMT_CI, STANDING_WORDS_SIZE, STANDING_WORDS_SIZE, 0, 0, 0,
+      G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
   for (i = 0; i != g_GameState.playerCount; i++) {
     if (f_PlayerResults[i] > 0) {
       if (f_PlayerResults[i] >= MIN_TWO_DIGIT_HOLE_COUNT) {
@@ -3419,7 +3432,8 @@ void DrawMatchResults(Gfx** displayListHead) {
 
   LoadSmallPalette(&gfx, 0, ImageBody(f_ResultsLargeDigitsImage));
   LoadNibbleTextureBlock(&gfx, ImageTexels(f_ResultsLargeDigitsImage),
-      G_IM_FMT_CI, LARGE_DIGIT_WIDTH, LARGE_DIGITS_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
+      G_IM_FMT_CI, LARGE_DIGIT_WIDTH, LARGE_DIGITS_HEIGHT, 0, 0, 0, G_TX_NOMASK,
+      G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
   for (i = 0; i != g_GameState.playerCount; i++) {
     if (f_HasBets) {
       /* An even match draws only the word */
@@ -3581,7 +3595,8 @@ void DrawClubTournamentResults(Gfx** displayListHead) {
             (i * CLUB_TOURNAMENT_COURSE_STRIP_WIDTH *
                 CLUB_TOURNAMENT_COURSE_STRIP_HEIGHT),
         G_IM_FMT_CI, G_IM_SIZ_8b, CLUB_TOURNAMENT_COURSE_STRIP_WIDTH,
-        CLUB_TOURNAMENT_COURSE_STRIP_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
+        CLUB_TOURNAMENT_COURSE_STRIP_HEIGHT, 0, 0, 0, G_TX_NOMASK, G_TX_NOMASK,
+        G_TX_NOLOD, G_TX_NOLOD);
     firstStripBottom = f_ResultsTop + CLUB_TOURNAMENT_COURSE_Y +
         CLUB_TOURNAMENT_COURSE_STRIP_HEIGHT;
     DrawTextureRect(&gfx,
@@ -3606,7 +3621,8 @@ void DrawClubTournamentResults(Gfx** displayListHead) {
           LargeImageTexels(f_NintendoBadgeImage) +
               (i * NINTENDO_BADGE_STRIP_WIDTH * NINTENDO_BADGE_STRIP_HEIGHT),
           G_IM_FMT_CI, G_IM_SIZ_8b, NINTENDO_BADGE_STRIP_WIDTH,
-          NINTENDO_BADGE_STRIP_HEIGHT, 0, G_TX_MIRROR, 0, 0, 0, 0, 0);
+          NINTENDO_BADGE_STRIP_HEIGHT, 0, G_TX_MIRROR, 0, G_TX_NOMASK,
+          G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
       DrawTextureRect(&gfx, QuarterPixels(f_ResultsSlide + NINTENDO_BADGE_X),
           QuarterPixels(f_ResultsTop + NINTENDO_BADGE_Y +
               (i * NINTENDO_BADGE_STRIP_HEIGHT)),
@@ -3789,7 +3805,8 @@ void DrawRoundResults(Gfx** displayListHead) {
               (i * BACKDROP_STRIP_WIDTH *
                   CLUB_TOURNAMENT_BACKDROP_STRIP_HEIGHT),
           G_IM_FMT_CI, G_IM_SIZ_8b, BACKDROP_STRIP_WIDTH,
-          CLUB_TOURNAMENT_BACKDROP_STRIP_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
+          CLUB_TOURNAMENT_BACKDROP_STRIP_HEIGHT, 0, 0, 0, G_TX_NOMASK,
+          G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
       DrawTextureRect(&gfx, QuarterPixels(f_ResultsSlide + BACKDROP_X),
           QuarterPixels((i * CLUB_TOURNAMENT_BACKDROP_STRIP_HEIGHT) +
               CLUB_TOURNAMENT_BACKDROP_Y + f_ResultsTop),
@@ -3805,7 +3822,7 @@ void DrawRoundResults(Gfx** displayListHead) {
           LargeImageTexels(f_ResultsBackdropImage) +
               (i * BACKDROP_STRIP_WIDTH * BACKDROP_STRIP_HEIGHT),
           G_IM_FMT_CI, G_IM_SIZ_8b, BACKDROP_STRIP_WIDTH, BACKDROP_STRIP_HEIGHT,
-          0, 0, 0, 0, 0, 0, 0);
+          0, 0, 0, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
       DrawTextureRect(&gfx, QuarterPixels(f_ResultsSlide + BACKDROP_X),
           QuarterPixels(
               (i * BACKDROP_STRIP_HEIGHT) + BACKDROP_Y + f_ResultsTop),
@@ -3822,7 +3839,8 @@ void DrawRoundResults(Gfx** displayListHead) {
     LoadTextureBlock(&gfx,
         LargeImageTexels(f_ResultsHandImage) +
             (f_HandFrame / HAND_FRAME_DRAWS * HAND_SIZE * HAND_SIZE),
-        G_IM_FMT_CI, G_IM_SIZ_8b, HAND_SIZE, HAND_SIZE, 0, 0, 0, 0, 0, 0, 0);
+        G_IM_FMT_CI, G_IM_SIZ_8b, HAND_SIZE, HAND_SIZE, 0, 0, 0, G_TX_NOMASK,
+        G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     DrawTextureRect(&gfx, QuarterPixels(f_ResultsSlide + HAND_X),
         QuarterPixels(f_ResultsTop + HAND_Y),
         QuarterPixels(f_ResultsSlide + HAND_X + HAND_SIZE),
@@ -3892,7 +3910,8 @@ void DrawRoundResults(Gfx** displayListHead) {
               (i * FINAL_RESULTS_TITLE_WIDTH *
                   FINAL_RESULTS_TITLE_STRIP_HEIGHT),
           G_IM_FMT_CI, G_IM_SIZ_8b, FINAL_RESULTS_TITLE_WIDTH,
-          FINAL_RESULTS_TITLE_LOADED_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
+          FINAL_RESULTS_TITLE_LOADED_HEIGHT, 0, 0, 0, G_TX_NOMASK, G_TX_NOMASK,
+          G_TX_NOLOD, G_TX_NOLOD);
       gSPTextureRectangle(gfx++, QuarterPixels(left - f_ResultsSlide),
           QuarterPixels(
               i * FINAL_RESULTS_TITLE_STRIP_HEIGHT + f_ResultsTop + top),

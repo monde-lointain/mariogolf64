@@ -690,7 +690,7 @@ void DrawYesNoWindow(Gfx** displayListHead, s32 width, s32 height, s32 centerX,
         ImageBody(f_WideCloudImage) +
             (index * MENU_WINDOW_IMAGE_WIDTH * MENU_WINDOW_STRIP_HEIGHT / 2),
         G_IM_FMT_I, MENU_WINDOW_IMAGE_WIDTH, MENU_WINDOW_STRIP_HEIGHT, 0, 0, 0,
-        0, 0, 0, 0);
+        G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     windowLeft = centerX - halfWidth;
     DrawTextureRect(&gfx, QuarterPixels(windowLeft),
         QuarterPixels(windowTop + (index * halfHeight)),
@@ -713,7 +713,7 @@ void DrawYesNoWindow(Gfx** displayListHead, s32 width, s32 height, s32 centerX,
         LargeImageTexels(f_YesNoButtons) +
             (index * YES_NO_BUTTON_WIDTH * YES_NO_BUTTON_HEIGHT),
         G_IM_FMT_CI, G_IM_SIZ_8b, YES_NO_BUTTON_WIDTH, YES_NO_BUTTON_HEIGHT, 0,
-        0, 0, 0, 0, 0, 0);
+        0, 0, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     if (index == 0) {
       buttonX = centerX - (s32)(f_MenuWindowScaleX * YES_NO_BUTTON_OFFSET);
     } else {
@@ -969,7 +969,7 @@ void DrawClubWindow(Gfx** displayListHead, s32 width, s32 height, s32 centerX,
         ImageBody(f_WideCloudImage) +
             (index * MENU_WINDOW_IMAGE_WIDTH * MENU_WINDOW_STRIP_HEIGHT / 2),
         G_IM_FMT_I, MENU_WINDOW_IMAGE_WIDTH, MENU_WINDOW_STRIP_HEIGHT, 0, 0, 0,
-        0, 0, 0, 0);
+        G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     DrawTextureRect(&gfx, QuarterPixels(centerX - badgeTop),
         QuarterPixels(windowTop + (index * halfHeight)),
         QuarterPixels(centerX + badgeTop),
@@ -991,7 +991,7 @@ void DrawClubWindow(Gfx** displayListHead, s32 width, s32 height, s32 centerX,
         LargeImageTexels(f_YesNoButtons) +
             (index * YES_NO_BUTTON_WIDTH * YES_NO_BUTTON_HEIGHT),
         G_IM_FMT_CI, G_IM_SIZ_8b, YES_NO_BUTTON_WIDTH, YES_NO_BUTTON_HEIGHT, 0,
-        0, 0, 0, 0, 0, 0);
+        0, 0, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     if (index == 0) {
       buttonX = centerX - (s32)(f_MenuWindowScaleX * YES_NO_BUTTON_OFFSET);
     } else {
@@ -1052,7 +1052,8 @@ void DrawClubWindow(Gfx** displayListHead, s32 width, s32 height, s32 centerX,
           LargeImageTexels(f_NintendoBadge) +
               (index * NINTENDO_BADGE_WIDTH * NINTENDO_BADGE_STRIP_HEIGHT),
           G_IM_FMT_CI, G_IM_SIZ_8b, NINTENDO_BADGE_WIDTH,
-          NINTENDO_BADGE_STRIP_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
+          NINTENDO_BADGE_STRIP_HEIGHT, 0, 0, 0, G_TX_NOMASK, G_TX_NOMASK,
+          G_TX_NOLOD, G_TX_NOLOD);
       gDPPipeSync(gfx++);
       DrawTextureRect(&gfx, QuarterPixels(centerX - badgeHalfWidth),
           QuarterPixels(badgeTop + (index * badgeStripRows)),
@@ -1076,7 +1077,7 @@ void DrawClubWindow(Gfx** displayListHead, s32 width, s32 height, s32 centerX,
         LargeImageTexels(f_ClubCourseIcon) +
             (index * COURSE_IMAGE_WIDTH * COURSE_IMAGE_STRIP_HEIGHT),
         G_IM_FMT_CI, G_IM_SIZ_8b, COURSE_IMAGE_WIDTH, COURSE_IMAGE_STRIP_HEIGHT,
-        0, 0, 0, 0, 0, 0, 0);
+        0, 0, 0, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     DrawTextureRect(&gfx, QuarterPixels(courseLeft - courseHalfWidth),
         QuarterPixels(courseTop + (index * courseStripRows)),
         QuarterPixels(courseLeft + courseHalfWidth),
@@ -1095,7 +1096,8 @@ void DrawClubWindow(Gfx** displayListHead, s32 width, s32 height, s32 centerX,
 
   LoadLargePalette(&gfx, f_MenuWindowPalette);
   LoadTextureBlock(&gfx, f_MenuWindowImage, G_IM_FMT_CI, G_IM_SIZ_8b,
-      WINDOW_PICTURE_SIZE, WINDOW_PICTURE_SIZE, 0, 0, 0, 0, 0, 0, 0);
+      WINDOW_PICTURE_SIZE, WINDOW_PICTURE_SIZE, 0, 0, 0, G_TX_NOMASK,
+      G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
   DrawTextureRect(&gfx, QuarterPixels(pictureX - pictureHalfWidth),
       QuarterPixels(pictureY - pictureHalfHeight),
       QuarterPixels(pictureX + pictureHalfWidth),
@@ -1153,7 +1155,7 @@ void DrawUnusedWideCloud(Gfx** displayListHead, s32 centerX, s32 centerY,
             (stripIndex * TOURNAMENT_BANNER_WIDTH *
                 TOURNAMENT_BANNER_STRIP_HEIGHT / 2),
         G_IM_FMT_I, TOURNAMENT_BANNER_WIDTH, TOURNAMENT_BANNER_STRIP_HEIGHT, 0,
-        0, 0, 0, 0, 0, 0);
+        0, 0, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     filterOrHalfWidth = halfWidth;
     DrawTextureRect(&gfx, QuarterPixels(centerX - halfWidth),
         QuarterPixels(stripTop), QuarterPixels(centerX + filterOrHalfWidth),

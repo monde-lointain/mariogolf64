@@ -431,7 +431,7 @@ void DrawClubPanel(Gfx** displayListHead) {
       PRIMITIVE, 0, TEXEL0, 0, 0, 0, 0, PRIMITIVE);
   gDPLoadTextureBlock_4b(gfx++, TextureAddress(ImageBody(f_ClubPanelImage)),
       G_IM_FMT_I, GAUGE_TICK_IMAGE_WIDTH, GAUGE_TICK_IMAGE_HEIGHT, 0, G_TX_WRAP,
-      G_TX_WRAP, 2, 0, 0, 0);
+      G_TX_WRAP, 2, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
   for (group = 0; group != GAUGE_GROUP_COUNT; group++) {
     for (tick = 1; tick != GAUGE_TICKS_PER_GROUP; tick++) {
       s32 x = (tick + (group * GAUGE_TICKS_PER_GROUP)) * GAUGE_TICK_SPACING;
@@ -492,7 +492,8 @@ void DrawClubPanel(Gfx** displayListHead) {
   value = GetGaugeFill();
   gDPLoadTextureBlock(gfx++, TextureAddress(ImageBody(f_ShotModeImage)),
       G_IM_FMT_RGBA, G_IM_SIZ_16b, GAUGE_FILL_IMAGE_WIDTH,
-      GAUGE_FILL_IMAGE_HEIGHT, 0, G_TX_WRAP, G_TX_WRAP, 0, 0, 0, 0);
+      GAUGE_FILL_IMAGE_HEIGHT, 0, G_TX_WRAP, G_TX_WRAP, G_TX_NOMASK,
+      G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
   /*
    * The original branches on both tests: only the second gives 321 words
    * differing (89 in shape), and the two as an && chain 325 (95)
@@ -525,7 +526,7 @@ void DrawClubPanel(Gfx** displayListHead) {
   gDPSetTextureFilter(gfx++, G_TF_POINT);
   gDPLoadTextureBlock_4b(gfx++, TextureAddress(ImageBody(f_ClubPanelImage)),
       G_IM_FMT_I, GAUGE_TICK_IMAGE_WIDTH, GAUGE_TICK_IMAGE_HEIGHT, 0, G_TX_WRAP,
-      G_TX_WRAP, 2, 0, 0, 0);
+      G_TX_WRAP, 2, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
   gDPSetCombineLERP(gfx++, PRIMITIVE, 0, TEXEL0, 0, 0, 0, 0, PRIMITIVE,
       PRIMITIVE, 0, TEXEL0, 0, 0, 0, 0, PRIMITIVE);
   gDPPipeSync(gfx++);

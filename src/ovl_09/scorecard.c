@@ -1136,7 +1136,8 @@ void DrawLargeImage(Gfx** displayListHead, u8* image, s32 left, s32 top) {
   for (stripIndex = 0; stripIndex != stripCount; stripIndex++) {
     LoadTextureBlock(&gfx,
         LargeImageTexels(image) + (stripIndex * width * height), G_IM_FMT_CI,
-        G_IM_SIZ_8b, width, height, 0, 0, 0, 0, 0, 0, 0);
+        G_IM_SIZ_8b, width, height, 0, 0, 0, G_TX_NOMASK, G_TX_NOMASK,
+        G_TX_NOLOD, G_TX_NOLOD);
     DrawTextureRect(&gfx, QuarterPixels(left), QuarterPixels(top),
         QuarterPixels(left + width), QuarterPixels(top + height),
         G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
@@ -1354,7 +1355,8 @@ void DrawScorecardTable(Gfx** displayListHead, s32 pageCount, s32 page) {
 
     for (row = 0; row < TAB_HEIGHT; row += TABLE_LOAD_HEIGHT) {
       LoadTextureBlock(&gfx, g_Scorecard.tableImage + texelsOffset, G_IM_FMT_CI,
-          G_IM_SIZ_8b, TABLE_WIDTH, TABLE_LOAD_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
+          G_IM_SIZ_8b, TABLE_WIDTH, TABLE_LOAD_HEIGHT, 0, 0, 0, G_TX_NOMASK,
+          G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
       tabBottom = g_Scorecard.y + TAB_TOP + TABLE_LOAD_HEIGHT;
       tabTop = g_Scorecard.y + TAB_TOP;
       DrawTextureRect(&gfx, QuarterPixels(g_Scorecard.x + TABLE_LEFT),

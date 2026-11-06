@@ -695,7 +695,8 @@ void DrawNumberBanner(Gfx** displayListHead) {
     LoadTextureBlock(&gfx,
         f_MovieBuffer + (imageOffset + BANNER_LETTER_IMAGES_OFFSET),
         G_IM_FMT_CI, G_IM_SIZ_8b, BANNER_LETTER_IMAGE_WIDTH,
-        BANNER_LETTER_IMAGE_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
+        BANNER_LETTER_IMAGE_HEIGHT, 0, 0, 0, G_TX_NOMASK, G_TX_NOMASK,
+        G_TX_NOLOD, G_TX_NOLOD);
     gSPMatrix(gfx++,
         PhysicalAddress(
             &f_ActiveBannerLetters[i].matrices[g_MatrixBufferIndex]),
@@ -719,7 +720,8 @@ void DrawBannerLetters(Gfx** displayListHead) {
         f_MovieBuffer + BANNER_LETTER_IMAGES_OFFSET +
             (i * BANNER_LETTER_IMAGE_SIZE),
         G_IM_FMT_CI, G_IM_SIZ_8b, BANNER_LETTER_IMAGE_WIDTH,
-        BANNER_LETTER_IMAGE_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
+        BANNER_LETTER_IMAGE_HEIGHT, 0, 0, 0, G_TX_NOMASK, G_TX_NOMASK,
+        G_TX_NOLOD, G_TX_NOLOD);
     gSPMatrix(gfx++, PhysicalAddress(&f_BannerMatrices[g_MatrixBufferIndex]),
         G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
     gSPMatrix(gfx++,
@@ -1504,8 +1506,8 @@ void DrawContestWinnerMovie(Gfx** displayListHead) {
           f_MovieBuffer +
               ((i * width * MOVIE_IMAGE_STRIP_HEIGHT) +
                   MOVIE_IMAGE_PIXELS_OFFSET),
-          G_IM_FMT_CI, G_IM_SIZ_8b, width, MOVIE_IMAGE_STRIP_HEIGHT, 0, 0, 0, 0,
-          0, 0, 0);
+          G_IM_FMT_CI, G_IM_SIZ_8b, width, MOVIE_IMAGE_STRIP_HEIGHT, 0, 0, 0,
+          G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
       bottom = CONTEST_IMAGE_CENTER_Y + i * MOVIE_IMAGE_STRIP_HEIGHT;
       centerX = CONTEST_IMAGE_CENTER_X + slide;
       DrawTextureRect(&gfx, QuarterPixels(centerX - halfWidth),
@@ -1574,7 +1576,8 @@ void DrawContestWinnerMovie(Gfx** displayListHead) {
     LoadSmallPalette(&gfx, 0, ImageBody(f_MovieBuffer + WINNER_PLAQUE_OFFSET));
     LoadNibbleTextureBlock(&gfx,
         ImageTexels(f_MovieBuffer + WINNER_PLAQUE_OFFSET), G_IM_FMT_CI,
-        WINNER_PLAQUE_SIZE, WINNER_PLAQUE_SIZE, 0, 0, 0, 0, 0, 0, 0);
+        WINNER_PLAQUE_SIZE, WINNER_PLAQUE_SIZE, 0, 0, 0, G_TX_NOMASK,
+        G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     plaqueHalfSize = growth + WINNER_PLAQUE_MARGIN;
     step = TexelRunStep((WINNER_PLAQUE_SIZE / 2), plaqueHalfSize);
     DrawTextureRect(&gfx, QuarterPixels(WINNER_CENTER_X - plaqueHalfSize),
@@ -1584,7 +1587,8 @@ void DrawContestWinnerMovie(Gfx** displayListHead) {
         step, step);
     LoadLargePalette(&gfx, f_MovieBuffer + WINNER_PALETTE_OFFSET);
     LoadTextureBlock(&gfx, f_MovieBuffer + WINNER_FACE_OFFSET, G_IM_FMT_CI,
-        G_IM_SIZ_8b, WINNER_FACE_SIZE, WINNER_FACE_SIZE, 0, 0, 0, 0, 0, 0, 0);
+        G_IM_SIZ_8b, WINNER_FACE_SIZE, WINNER_FACE_SIZE, 0, 0, 0, G_TX_NOMASK,
+        G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     step = TexelRunStep((WINNER_FACE_SIZE / 2), growth);
     /*
      * Reuses width for the face's left edge, as the original seems to: the
@@ -1684,8 +1688,8 @@ void DrawDriveRecord(Gfx** displayListHead) {
           f_MovieBuffer +
               ((i * width * MOVIE_IMAGE_STRIP_HEIGHT) +
                   MOVIE_IMAGE_PIXELS_OFFSET),
-          G_IM_FMT_CI, G_IM_SIZ_8b, width, MOVIE_IMAGE_STRIP_HEIGHT, 0, 0, 0, 0,
-          0, 0, 0);
+          G_IM_FMT_CI, G_IM_SIZ_8b, width, MOVIE_IMAGE_STRIP_HEIGHT, 0, 0, 0,
+          G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
       centerX = SHRINKING_IMAGE_CENTER_X + slide;
       bottom = SHRINKING_IMAGE_CENTER_Y + (i * stripHeight);
       DrawTextureRect(&gfx, QuarterPixels(centerX - halfWidth),
@@ -1801,8 +1805,8 @@ void DrawPuttCaption(Gfx** displayListHead) {
           f_MovieBuffer +
               ((i * width * MOVIE_IMAGE_STRIP_HEIGHT) +
                   MOVIE_IMAGE_PIXELS_OFFSET),
-          G_IM_FMT_CI, G_IM_SIZ_8b, width, MOVIE_IMAGE_STRIP_HEIGHT, 0, 0, 0, 0,
-          0, 0, 0);
+          G_IM_FMT_CI, G_IM_SIZ_8b, width, MOVIE_IMAGE_STRIP_HEIGHT, 0, 0, 0,
+          G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
       centerX = SHRINKING_IMAGE_CENTER_X + slide;
       bottom = SHRINKING_IMAGE_CENTER_Y + (i * stripHeight);
       DrawTextureRect(&gfx, QuarterPixels(centerX - halfWidth),
@@ -2085,7 +2089,7 @@ void DrawShrinkingMovieImage(Gfx** displayListHead) {
                 ((offset * MOVIE_IMAGE_STRIP_HEIGHT) +
                     MOVIE_IMAGE_PIXELS_OFFSET),
             G_IM_FMT_CI, G_IM_SIZ_8b, width, MOVIE_IMAGE_STRIP_HEIGHT, 0, 0, 0,
-            0, 0, 0, 0);
+            G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
         top = SHRINKING_IMAGE_CENTER_Y +
             ((i - SHRINKING_IMAGE_STRIPS_ABOVE_CENTER) * stripHeight);
         DrawTextureRect(&gfx,
@@ -3082,7 +3086,8 @@ void DrawWindFlyGuy(Gfx** displayListHead) {
       PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0);
   LoadNibbleTextureBlock(&gfx, ImageBody(f_MovieBuffer + FLY_GUY_IMAGE_SIZE),
       G_IM_FMT_I, WIND_STREAK_IMAGE_WIDTH, WIND_STREAK_IMAGE_HEIGHT, 0,
-      G_TX_MIRROR, G_TX_MIRROR, 0, WIND_STREAK_IMAGE_MASK_T, 0, 0);
+      G_TX_MIRROR, G_TX_MIRROR, G_TX_NOMASK, WIND_STREAK_IMAGE_MASK_T,
+      G_TX_NOLOD, G_TX_NOLOD);
   gSPMatrix(gfx++, PhysicalAddress(&g_ScreenOrthoMatrix),
       G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
   gDPPipeSync(gfx++);
@@ -3136,7 +3141,8 @@ void DrawWindFlyGuy(Gfx** displayListHead) {
   gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
   LoadTextureBlock(&gfx, ImageBody(f_MovieBuffer), G_IM_FMT_RGBA, G_IM_SIZ_16b,
-      FLY_GUY_IMAGE_WIDTH, FLY_GUY_IMAGE_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
+      FLY_GUY_IMAGE_WIDTH, FLY_GUY_IMAGE_HEIGHT, 0, 0, 0, G_TX_NOMASK,
+      G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
   DrawTextureRect(&gfx,
       QuarterPixels((s32)position.x - (FLY_GUY_IMAGE_WIDTH / 2)),
       QuarterPixels((s32)position.y - (FLY_GUY_IMAGE_HEIGHT / 2)),

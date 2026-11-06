@@ -689,7 +689,8 @@ void DrawGameSaveMenu(Gfx** displayListHead) {
       LoadTextureBlock(&gfx,
           LargeImageTexels(f_PanelImage) + (strip * PANEL_STRIP_SIZE),
           G_IM_FMT_CI, G_IM_SIZ_8b, PANEL_IMAGE_WIDTH, PANEL_STRIP_HEIGHT, 0,
-          G_TX_MIRROR, G_TX_MIRROR, 0, 0, 0, 0);
+          G_TX_MIRROR, G_TX_MIRROR, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
+          G_TX_NOLOD);
       for (index = 0; index != SAVED_GAME_COUNT; index++) {
         if (index == f_CursorIndex) {
           gDPSetPrimColor(gfx++, 0, 0, CHOSEN_PANEL_SHADE, CHOSEN_PANEL_SHADE,
@@ -772,8 +773,8 @@ void DrawGameSaveMenu(Gfx** displayListHead) {
           TextureAddress(LargeImageTexels(f_SaveMenuTitleImage) +
               (row * TITLE_STRIP_SIZE)),
           G_IM_FMT_CI, G_IM_SIZ_8b, TITLE_IMAGE_WIDTH, TITLE_STRIP_DRAWN_HEIGHT,
-          0, 0, TITLE_IMAGE_WIDTH - 1, TITLE_STRIP_DRAWN_HEIGHT - 1, 0, 0, 0, 0,
-          0, 0, 0);
+          0, 0, TITLE_IMAGE_WIDTH - 1, TITLE_STRIP_DRAWN_HEIGHT - 1, 0, 0, 0,
+          G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
       gSPTextureRectangle(gfx++,
           QuarterPixels(titleLeft + imageLeft - f_SlideOffsets[1]),
           QuarterPixels(titleTop + (row * TITLE_STRIP_HEIGHT)),
@@ -806,7 +807,8 @@ void DrawGameSaveMenu(Gfx** displayListHead) {
               LargeImageTexels(f_ModeIconImages[row][f_IconImageIndex ^ 1]) +
                   (index * MODE_ICON_PART_HEIGHT * MODE_ICON_SIZE),
               G_IM_FMT_CI, G_IM_SIZ_8b, MODE_ICON_SIZE, MODE_ICON_PART_HEIGHT,
-              0, G_TX_MIRROR, G_TX_MIRROR, 0, 0, 0, 0);
+              0, G_TX_MIRROR, G_TX_MIRROR, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
+              G_TX_NOLOD);
           DrawTextureRect(&gfx,
               QuarterPixels(f_SlideOffsets[row] + MODE_ICON_LEFT),
               QuarterPixels(MODE_ICON_TOP + (row * GAME_ROW_SPACING) +
@@ -849,7 +851,7 @@ void DrawGameSaveMenu(Gfx** displayListHead) {
           LoadTextureBlock(&gfx,
               f_CharacterImages[(row * MAX_PLAYER_COUNT) + index], G_IM_FMT_CI,
               G_IM_SIZ_8b, CHARACTER_IMAGE_WIDTH, CHARACTER_IMAGE_HEIGHT, 0, 0,
-              0, 0, 0, 0, 0);
+              0, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
           DrawTextureRect(&gfx,
               QuarterPixels((index * GOLFER_SPACING) +
                   (f_SlideOffsets[row] + golfersLeft) -
@@ -1442,7 +1444,8 @@ void DrawReplaySaveMenu(Gfx** displayListHead) {
       LoadTextureBlock(&gfx,
           LargeImageTexels(f_PanelImage) + (index * PANEL_STRIP_SIZE),
           G_IM_FMT_CI, G_IM_SIZ_8b, PANEL_IMAGE_WIDTH, PANEL_STRIP_HEIGHT, 0,
-          G_TX_MIRROR, G_TX_MIRROR, 0, 0, 0, 0);
+          G_TX_MIRROR, G_TX_MIRROR, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
+          G_TX_NOLOD);
       gDPPipeSync(gfx++);
       for (row = 0; row != RING_SHOT_RECORD_COUNT; row++) {
         if (row == f_CursorIndex) {
@@ -1568,7 +1571,8 @@ void DrawReplaySaveMenu(Gfx** displayListHead) {
             &gfx, 0, ImageBody(f_ReplayLabelImages[rowLabels[index]]));
         LoadNibbleTextureBlock(&gfx,
             ImageTexels(f_ReplayLabelImages[rowLabels[index]]), G_IM_FMT_CI,
-            labelWidth, labelHeight, 0, G_TX_MIRROR, G_TX_MIRROR, 0, 0, 0, 0);
+            labelWidth, labelHeight, 0, G_TX_MIRROR, G_TX_MIRROR, G_TX_NOMASK,
+            G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
         DrawTextureRect(&gfx, QuarterPixels(rowOffsets[index] + LABEL_LEFT),
             QuarterPixels(LABEL_TOP + (index * REPLAY_ROW_SPACING)),
             QuarterPixels(rowOffsets[index] + LABEL_LEFT + labelWidth),
@@ -1599,7 +1603,7 @@ void DrawReplaySaveMenu(Gfx** displayListHead) {
         LoadLargePalette(&gfx, f_CharacterFiles[index]);
         LoadTextureBlock(&gfx, f_CharacterImages[index], G_IM_FMT_CI,
             G_IM_SIZ_8b, CHARACTER_IMAGE_WIDTH, CHARACTER_IMAGE_HEIGHT, 0, 0, 0,
-            0, 0, 0, 0);
+            G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
         DrawTextureRect(&gfx, QuarterPixels(rowOffsets[index] + CHARACTER_LEFT),
             QuarterPixels(CHARACTER_TOP + (index * REPLAY_ROW_SPACING)),
             QuarterPixels(
@@ -1685,7 +1689,8 @@ void DrawReplaySaveMenu(Gfx** displayListHead) {
       LoadTextureBlock(&gfx,
           LargeImageTexels(f_PanelImage) + (index * PANEL_STRIP_SIZE),
           G_IM_FMT_CI, G_IM_SIZ_8b, PANEL_IMAGE_WIDTH, PANEL_STRIP_HEIGHT, 0,
-          G_TX_MIRROR, G_TX_MIRROR, 0, 0, 0, 0);
+          G_TX_MIRROR, G_TX_MIRROR, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
+          G_TX_NOLOD);
       titleHeight = stripHeight * PANEL_STRIP_COUNT;
       DrawTextureRect(&gfx, QuarterPixels(rowOffsets[1] + TITLE_PANEL_LEFT),
           QuarterPixels(
@@ -1804,7 +1809,8 @@ void DrawControlsScreen(Gfx** displayListHead) {
           LargeImageTexels(f_PanelImage) +
               (strip * CONTROLS_STRIP_HEIGHT * CONTROLS_PICTURE_WIDTH),
           G_IM_FMT_CI, G_IM_SIZ_8b, CONTROLS_PICTURE_WIDTH,
-          CONTROLS_STRIP_HEIGHT, 0, G_TX_MIRROR, G_TX_MIRROR, 0, 0, 0, 0);
+          CONTROLS_STRIP_HEIGHT, 0, G_TX_MIRROR, G_TX_MIRROR, G_TX_NOMASK,
+          G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
       /* How far above the screen top the first strip's top and bottom edges sit
        */
       topRaise = f_SlideOffsets[0] - SCREEN_BORDER;
