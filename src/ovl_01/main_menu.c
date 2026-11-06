@@ -6923,6 +6923,10 @@ const char f_LuigisGardenName[] = "Luigi's Garden";
 #define CHOSEN_BANNER_SHIFT 2
 #define BANNER_SHADOW_DROP 3
 #define BANNER_SHADOW_COLOR 31
+
+/* A value banner strip's top in the given option's row */
+#define ValueStripTop(toggleIndex, firstRowStripTop) \
+  (((toggleIndex) * OPTION_ROW_SPACING) + (firstRowStripTop))
 #define BANNER_SHADOW_ALPHA 159
 #define DIMMED_COLOR 191
 
@@ -6989,25 +6993,23 @@ void DrawYesNoWindow(Gfx** displayListHead, s32 width, s32 height, s32 centerX,
  * Draws the options screen: Mario and his shadow, each option's label, the
  * toggles' values on their banners with arrows beside the chosen one, the
  * sound test's lines when game flag 0x55 is set, and the erase window while it
- * is up
+ * is up.
  *
  * Mario's strips, the value banners' strips, the options' rows and the
  * arrows' passes are all counted with loopIndex. Counting Mario's strips
- * with a counter of their own gives 134 words differing, the banners' strips
- * 34, and both 112, all 6 in shape; the toggles counted with loopIndex in
- * place of the banners' strips give 28.
+ * with a counter of their own gives 132 words differing, the banners' strips
+ * 32, and every loop its own counter 58, none in shape; the toggles counted
+ * with loopIndex in place of the banners' strips give 26.
  *
- * Doesn't match: the original adds each value banner strip's row in both
- * branches without masking it to a byte, and keeps VALUE_BANNER_ROW_TOP in
- * the strip's induction value. A wider stripTop moves the constant to the
- * toggle's: as an s32 or u32 it gives 37 words, 17 in shape, and as an s16
- * or s8 70 (12); a u16 gives the same 6 as the u8. Grouping the constant
- * with the toggle's row or after both gives 48 or 50 words, 33 or 142 as an
- * s32, and working out the strip's row in a static inline helper, which fold
- * can't regroup, 6 to 48. A second loop variable for the strip's row gives 8
- * words at best, all in shape. 6 words differ, all in shape.
+ * Each value banner strip's top is written out at each use, through
+ * ValueStripTop, from the strip's top in the first option's row, which is
+ * worked out before the toggle test. Working that out at each use instead
+ * gives 136 words, 24 in shape, and at the top of the strip loop 6, none in
+ * shape; as an s16 it gives 33 (7), and as a u8 85 (11). The original
+ * doesn't mask the strip's top to a byte. A stripTop local set at the start
+ * of the chosen banner's branch gives 2 words, 2 in shape, and 3 as a u8;
+ * set before the toggle test for both branches, 125 (21).
  */
-#ifdef NON_MATCHING
 void DrawOptionsScreen(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   MenuMemory* memory = GetMenuMemory();
@@ -7017,7 +7019,7 @@ void DrawOptionsScreen(Gfx** displayListHead) {
   /* Counts Mario's strips, the banners' strips, the rows, the arrows' passes */
   s32 loopIndex;
   s32 toggleIndex;
-  u8 stripTop;
+  s32 firstRowStripTop;
   s32 valueOffset;
   s32 shiftX;
   s32 shiftY;
@@ -7074,45 +7076,46 @@ void DrawOptionsScreen(Gfx** displayListHead) {
               (loopIndex * MENU_BANNER_WIDTH * MENU_BANNER_STRIP_HEIGHT),
           G_IM_FMT_CI, G_IM_SIZ_8b, MENU_BANNER_WIDTH, MENU_BANNER_STRIP_HEIGHT,
           0, 0, 0, 0, 0, 0, 0);
+      firstRowStripTop =
+          (loopIndex * VALUE_BANNER_STRIP_HEIGHT) + VALUE_BANNER_ROW_TOP;
       if (g_MenuMemory.optionsChoice == toggleIndex) {
-        stripTop = (toggleIndex * OPTION_ROW_SPACING) +
-            ((loopIndex * VALUE_BANNER_STRIP_HEIGHT) + VALUE_BANNER_ROW_TOP);
         gDPSetPrimColor(gfx++, 0, 0, BANNER_SHADOW_COLOR, BANNER_SHADOW_COLOR,
             BANNER_SHADOW_COLOR, BANNER_SHADOW_ALPHA);
         gDPSetCombineLERP(gfx++, 0, 0, 0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0, 0,
             0, 0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0);
         DrawTextureRect(&gfx, QuarterPixels(VALUE_BANNER_LEFT),
-            QuarterPixels(
-                stripTop + VALUE_BANNER_OFFSET_Y + BANNER_SHADOW_DROP),
+            QuarterPixels(ValueStripTop(toggleIndex, firstRowStripTop) +
+                VALUE_BANNER_OFFSET_Y + BANNER_SHADOW_DROP),
             QuarterPixels(VALUE_BANNER_LEFT + VALUE_BANNER_WIDTH),
-            QuarterPixels(stripTop + VALUE_BANNER_OFFSET_Y +
-                BANNER_SHADOW_DROP + VALUE_BANNER_STRIP_HEIGHT),
+            QuarterPixels(ValueStripTop(toggleIndex, firstRowStripTop) +
+                VALUE_BANNER_OFFSET_Y + BANNER_SHADOW_DROP +
+                VALUE_BANNER_STRIP_HEIGHT),
             G_TX_RENDERTILE, 0, 0,
             (MENU_BANNER_WIDTH << 10) / VALUE_BANNER_WIDTH,
             (MENU_BANNER_STRIP_HEIGHT << 10) / VALUE_BANNER_STRIP_HEIGHT);
         gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
         DrawTextureRect(&gfx,
             QuarterPixels(VALUE_BANNER_LEFT - CHOSEN_BANNER_SHIFT),
-            QuarterPixels(stripTop + VALUE_BANNER_OFFSET_Y),
+            QuarterPixels(ValueStripTop(toggleIndex, firstRowStripTop) +
+                VALUE_BANNER_OFFSET_Y),
             QuarterPixels(
                 VALUE_BANNER_LEFT + VALUE_BANNER_WIDTH - CHOSEN_BANNER_SHIFT),
-            QuarterPixels(
-                stripTop + VALUE_BANNER_OFFSET_Y + VALUE_BANNER_STRIP_HEIGHT),
+            QuarterPixels(ValueStripTop(toggleIndex, firstRowStripTop) +
+                VALUE_BANNER_OFFSET_Y + VALUE_BANNER_STRIP_HEIGHT),
             G_TX_RENDERTILE, 0, 0,
             (MENU_BANNER_WIDTH << 10) / VALUE_BANNER_WIDTH,
             (MENU_BANNER_STRIP_HEIGHT << 10) / VALUE_BANNER_STRIP_HEIGHT);
       } else {
         gDPSetCombineLERP(gfx++, PRIMITIVE, 0, TEXEL0, 0, 0, 0, 0, TEXEL0,
             PRIMITIVE, 0, TEXEL0, 0, 0, 0, 0, TEXEL0);
-        stripTop = (toggleIndex * OPTION_ROW_SPACING) +
-            ((loopIndex * VALUE_BANNER_STRIP_HEIGHT) + VALUE_BANNER_ROW_TOP);
         gDPSetPrimColor(
             gfx++, 0, 0, DIMMED_COLOR, DIMMED_COLOR, DIMMED_COLOR, 255);
         DrawTextureRect(&gfx, QuarterPixels(VALUE_BANNER_LEFT),
-            QuarterPixels(stripTop + VALUE_BANNER_OFFSET_Y),
+            QuarterPixels(ValueStripTop(toggleIndex, firstRowStripTop) +
+                VALUE_BANNER_OFFSET_Y),
             QuarterPixels(VALUE_BANNER_LEFT + VALUE_BANNER_WIDTH),
-            QuarterPixels(
-                stripTop + VALUE_BANNER_OFFSET_Y + VALUE_BANNER_STRIP_HEIGHT),
+            QuarterPixels(ValueStripTop(toggleIndex, firstRowStripTop) +
+                VALUE_BANNER_OFFSET_Y + VALUE_BANNER_STRIP_HEIGHT),
             G_TX_RENDERTILE, 0, 0,
             (MENU_BANNER_WIDTH << 10) / VALUE_BANNER_WIDTH,
             (MENU_BANNER_STRIP_HEIGHT << 10) / VALUE_BANNER_STRIP_HEIGHT);
@@ -7357,9 +7360,6 @@ void DrawOptionsScreen(Gfx** displayListHead) {
   gDPPipeSync(gfx++);
   *displayListHead = gfx;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", DrawOptionsScreen);
-#endif
 
 void DrawCaddySelect(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
