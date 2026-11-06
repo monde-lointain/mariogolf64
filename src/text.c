@@ -78,12 +78,15 @@ enum MessageCode {
   /* The codes up to MESSAGE_CODE_R_BUTTON draw an icon of TEXT_ASSET_ICONS */
   MESSAGE_CODE_A_BUTTON = MESSAGE_CODE_CONTROL,
   MESSAGE_CODE_B_BUTTON,
+  /*
+   * The five codes from here all draw the Z button. Only the last appears in
+   * the message file, in message 58's list of buttons.
+   */
+  MESSAGE_CODE_UNUSED_Z_BUTTON_A,
+  MESSAGE_CODE_UNUSED_Z_BUTTON_B,
+  MESSAGE_CODE_UNUSED_Z_BUTTON_C,
+  MESSAGE_CODE_UNUSED_Z_BUTTON_D,
   MESSAGE_CODE_Z_BUTTON,
-  /* The next four draw the Z button too */
-  MESSAGE_CODE_UNK32771,
-  MESSAGE_CODE_UNK32772,
-  MESSAGE_CODE_UNK32773,
-  MESSAGE_CODE_UNK32774,
   MESSAGE_CODE_C_UP,
   MESSAGE_CODE_C_DOWN,
   MESSAGE_CODE_C_LEFT,
@@ -647,11 +650,11 @@ void DrawLargeTextSlot(Gfx** displayListHead, s32 slot) {
         case MESSAGE_CODE_B_BUTTON:
           iconOffset = TEXT_ICON_B_BUTTON * ICON_TEXEL_COUNT;
           break;
+        case MESSAGE_CODE_UNUSED_Z_BUTTON_A:
+        case MESSAGE_CODE_UNUSED_Z_BUTTON_B:
+        case MESSAGE_CODE_UNUSED_Z_BUTTON_C:
+        case MESSAGE_CODE_UNUSED_Z_BUTTON_D:
         case MESSAGE_CODE_Z_BUTTON:
-        case MESSAGE_CODE_UNK32771:
-        case MESSAGE_CODE_UNK32772:
-        case MESSAGE_CODE_UNK32773:
-        case MESSAGE_CODE_UNK32774:
           iconOffset = TEXT_ICON_Z_BUTTON * ICON_TEXEL_COUNT;
           break;
         case MESSAGE_CODE_C_UP:
@@ -930,11 +933,11 @@ void DrawMediumTextSlot(Gfx** displayListHead, s32 slot) {
         case MESSAGE_CODE_B_BUTTON:
           iconOffset = TEXT_ICON_B_BUTTON * ICON_TEXEL_COUNT;
           break;
+        case MESSAGE_CODE_UNUSED_Z_BUTTON_A:
+        case MESSAGE_CODE_UNUSED_Z_BUTTON_B:
+        case MESSAGE_CODE_UNUSED_Z_BUTTON_C:
+        case MESSAGE_CODE_UNUSED_Z_BUTTON_D:
         case MESSAGE_CODE_Z_BUTTON:
-        case MESSAGE_CODE_UNK32771:
-        case MESSAGE_CODE_UNK32772:
-        case MESSAGE_CODE_UNK32773:
-        case MESSAGE_CODE_UNK32774:
           iconOffset = TEXT_ICON_Z_BUTTON * ICON_TEXEL_COUNT;
           break;
         case MESSAGE_CODE_C_UP:
@@ -1240,11 +1243,11 @@ void MeasureMessage(
           break;
         case MESSAGE_CODE_A_BUTTON:
         case MESSAGE_CODE_B_BUTTON:
+        case MESSAGE_CODE_UNUSED_Z_BUTTON_A:
+        case MESSAGE_CODE_UNUSED_Z_BUTTON_B:
+        case MESSAGE_CODE_UNUSED_Z_BUTTON_C:
+        case MESSAGE_CODE_UNUSED_Z_BUTTON_D:
         case MESSAGE_CODE_Z_BUTTON:
-        case MESSAGE_CODE_UNK32771:
-        case MESSAGE_CODE_UNK32772:
-        case MESSAGE_CODE_UNK32773:
-        case MESSAGE_CODE_UNK32774:
         case MESSAGE_CODE_C_UP:
         case MESSAGE_CODE_C_DOWN:
         case MESSAGE_CODE_C_LEFT:
@@ -1960,11 +1963,11 @@ s32 PlaceMessageGlyphGroup(
             break;
           case MESSAGE_CODE_A_BUTTON:
           case MESSAGE_CODE_B_BUTTON:
+          case MESSAGE_CODE_UNUSED_Z_BUTTON_A:
+          case MESSAGE_CODE_UNUSED_Z_BUTTON_B:
+          case MESSAGE_CODE_UNUSED_Z_BUTTON_C:
+          case MESSAGE_CODE_UNUSED_Z_BUTTON_D:
           case MESSAGE_CODE_Z_BUTTON:
-          case MESSAGE_CODE_UNK32771:
-          case MESSAGE_CODE_UNK32772:
-          case MESSAGE_CODE_UNK32773:
-          case MESSAGE_CODE_UNK32774:
           case MESSAGE_CODE_C_UP:
           case MESSAGE_CODE_C_DOWN:
           case MESSAGE_CODE_C_LEFT:
@@ -2072,11 +2075,11 @@ void DrawGlyphGroup(Gfx** displayListHead, s32 group) {
           case MESSAGE_CODE_B_BUTTON:
             iconOffset = TEXT_ICON_B_BUTTON * ICON_TEXEL_COUNT;
             break;
+          case MESSAGE_CODE_UNUSED_Z_BUTTON_A:
+          case MESSAGE_CODE_UNUSED_Z_BUTTON_B:
+          case MESSAGE_CODE_UNUSED_Z_BUTTON_C:
+          case MESSAGE_CODE_UNUSED_Z_BUTTON_D:
           case MESSAGE_CODE_Z_BUTTON:
-          case MESSAGE_CODE_UNK32771:
-          case MESSAGE_CODE_UNK32772:
-          case MESSAGE_CODE_UNK32773:
-          case MESSAGE_CODE_UNK32774:
             iconOffset = TEXT_ICON_Z_BUTTON * ICON_TEXEL_COUNT;
             break;
           case MESSAGE_CODE_C_UP:
