@@ -499,7 +499,7 @@ s32 MarkUsableClubs(s32 unused, s16* clubs, s8* isUsable);
 #define MISS_STRETCH 2.5f
 /* How many times PlanShot reports a deliberate miss */
 #define MISS_REPORT_COUNT 40
-/* The whole of a surface's percent range */
+/* A whole in percent, as surfaces and club chances give them */
 #define FULL_PERCENT 100
 /* The least f_Shot.powerGaugeFrame that PlanShot plans, and how much it scales
  * it up by for some golfers */
@@ -2834,7 +2834,7 @@ ClubType ChooseClubForDistance(s32 distance) {
       carry = carry * RAINY_DISTANCE_FRACTION;
     }
 
-    carry = carry * GetSurfaceInfo(f_Shot.surface)->minPercent / 100;
+    carry = carry * GetSurfaceInfo(f_Shot.surface)->minPercent / FULL_PERCENT;
     rating = GetLieRating(club, f_Shot.surface, SHOT_MODE_NORMAL);
     if (f_GolferTraits[g_Players[f_Shot.playerIndex].characterIndex]
             .clubBoldness < BOLD_CLUB_CHOICE) {
@@ -3020,15 +3020,18 @@ s32 RollClubKindChance(s32 chanceSetIndex) {
   }
 
   if (IsShotClubOfTypes(CLUB_TYPE_DRIVER, CLUB_TYPE_LAST_WOOD)) {
-    if (rand() % 100 < f_ClubKindChances[chanceSetIndex][CLUB_CHANCE_WOOD]) {
+    if (rand() % FULL_PERCENT <
+        f_ClubKindChances[chanceSetIndex][CLUB_CHANCE_WOOD]) {
       return TRUE;
     }
   } else if (IsShotClubOfTypes(CLUB_TYPE_FIRST_IRON, CLUB_TYPE_LAST_IRON)) {
-    if (rand() % 100 < f_ClubKindChances[chanceSetIndex][CLUB_CHANCE_IRON]) {
+    if (rand() % FULL_PERCENT <
+        f_ClubKindChances[chanceSetIndex][CLUB_CHANCE_IRON]) {
       return TRUE;
     }
   } else {
-    if (rand() % 100 < f_ClubKindChances[chanceSetIndex][CLUB_CHANCE_OTHER]) {
+    if (rand() % FULL_PERCENT <
+        f_ClubKindChances[chanceSetIndex][CLUB_CHANCE_OTHER]) {
       return TRUE;
     }
   }
