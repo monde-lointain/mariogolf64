@@ -249,10 +249,11 @@ void DrawShotLabels(Gfx** displayListHead) {
     players = SHOT_LABELS_OVERHEAD;
   } else if (g_GameState.step == GAME_STATE_TAKING_TURNS &&
       g_CurrentShot.playerIndex >= 0 &&
-      g_CurrentShot.playerIndex < MAX_PLAYER_COUNT &&
-      g_Players[g_CurrentShot.playerIndex].state == PLAYER_STATE_AIMING &&
-      IsLetterboxState(g_LetterboxState)) {
-    players = SHOT_LABELS_OTHER_BALLS;
+      g_CurrentShot.playerIndex < MAX_PLAYER_COUNT) {
+    if (g_Players[g_CurrentShot.playerIndex].state == PLAYER_STATE_AIMING &&
+        IsLetterboxState(g_LetterboxState)) {
+      players = SHOT_LABELS_OTHER_BALLS;
+    }
   }
 
   if (f_ShotLabelPlayers != players) {

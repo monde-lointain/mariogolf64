@@ -4173,13 +4173,14 @@ void DrawRoundHud(CameraView* view) {
     DrawShadowedText(&g_DisplayListHead, CLUB_DISTANCE_X - g_ShotPanelOffsetX,
         f_HudOffsetY + SHOT_PANEL_TEXT_Y, g_PrintBuffer);
     if (g_CurrentShot.shotMode == SHOT_MODE_POWER &&
-        !(selectedClub->surfaceMask & CLUB_SURFACE_GREEN) &&
-        g_IsModuleAlive[MODULE_CLUB_PANEL] && IsShotModeChangeDone() &&
-        player->powerShotCount != POWER_SHOTS_UNLIMITED) {
-      sprintf(g_PrintBuffer, "%d", player->powerShotCount);
-      DrawShadowedText(&g_DisplayListHead,
-          POWER_SHOT_COUNT_X - g_ShotPanelOffsetX,
-          f_HudOffsetY + POWER_SHOT_COUNT_Y, g_PrintBuffer);
+        !(selectedClub->surfaceMask & CLUB_SURFACE_GREEN)) {
+      if (g_IsModuleAlive[MODULE_CLUB_PANEL] && IsShotModeChangeDone() &&
+          player->powerShotCount != POWER_SHOTS_UNLIMITED) {
+        sprintf(g_PrintBuffer, "%d", player->powerShotCount);
+        DrawShadowedText(&g_DisplayListHead,
+            POWER_SHOT_COUNT_X - g_ShotPanelOffsetX,
+            f_HudOffsetY + POWER_SHOT_COUNT_Y, g_PrintBuffer);
+      }
     }
   }
 
