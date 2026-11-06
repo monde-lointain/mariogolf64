@@ -1551,7 +1551,7 @@ void DecodeCartridgeCharacter(
   }
 
   character->unk34 = unk34;
-  character->unk38 = saveIndex;
+  character->saveIndex = saveIndex;
 }
 
 /* Would skip a save without characters, but does nothing */
@@ -2574,7 +2574,7 @@ s32 WriteExperienceToCartridge(s32 characterIndex) {
       recordOffset = SAVE_RECORDS_OFFSET;
       isSignatureWrong = FALSE;
       character = &g_GameBoyCharacters[characterIndex];
-      saveIndex = character->unk38;
+      saveIndex = character->saveIndex;
       transfer->openedCartridgeCount++;
       osSyncPrintf("PHASE 1\n");
       result = nuContGBPakFread(
