@@ -28,6 +28,7 @@ import contextlib
 import importlib.util
 import os
 import re
+import shutil
 import subprocess
 import sys
 from collections.abc import Callable
@@ -559,17 +560,29 @@ def main() -> None:
         if len(arguments) >= OUT_DIR_ARGUMENT_COUNT
         else ROOT / "build" / "permuter" / function
     )
-    # Marked before OUT_DIR is made, so that a function without a definition
-    # of its own leaves no directory the permuter would stop at
-    focused_text = mark_focus_regions(c_path, asm_path, function) if is_focused else ""
+    # A directory left half filled, as by a function without a definition of
+    # its own, would stop the permuter where it is given among others
+    is_new = not out_dir.exists()
     out_dir.mkdir(parents=True, exist_ok=True)
+    try:
+        fill_out_dir(c_path, asm_path, function, out_dir, is_focused=is_focused)
+    except BaseException:
+        if is_new:
+            shutil.rmtree(out_dir)
+        raise
+    print(out_dir)
 
+
+def fill_out_dir(
+    c_path: str, asm_path: str, function: str, out_dir: Path, *, is_focused: bool
+) -> None:
+    """Write the permuter's files for FUNCTION into OUT_DIR."""
     if is_focused:
         # A copy beside the original, so that its quoted includes still resolve,
         # named for the function, so that runs on the file's other functions
         # can set up at the same time
         focused_path = Path(c_path).with_name(f".focus_{function}_{Path(c_path).name}")
-        _ = focused_path.write_text(focused_text)
+        _ = focused_path.write_text(mark_focus_regions(c_path, asm_path, function))
         try:
             write_base(str(focused_path), function, out_dir / "base.c")
         finally:
@@ -600,7 +613,6 @@ compiler_type = "gcc"
 objdump_command = "{objdump}"
 {NATURAL_SETTINGS}"""
     _ = (out_dir / "settings.toml").write_text(settings)
-    print(out_dir)
 
 
 if __name__ == "__main__":
