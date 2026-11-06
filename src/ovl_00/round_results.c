@@ -3894,8 +3894,8 @@ void DrawRoundResults(Gfx** displayListHead) {
         FINAL_RESULTS_TITLE_X;
     titleY = (sinf(f_TitleBobAngle) * FINAL_RESULTS_TITLE_BOB) +
         FINAL_RESULTS_TITLE_Y;
-    left = titleX < 0.0f ? titleX + 0.5f : titleX - 0.5f;
-    top = titleY < 0.0f ? titleY + 0.5f : titleY - 0.5f;
+    left = HalfTowardZero(titleX);
+    top = HalfTowardZero(titleY);
     gSPDisplayList(gfx++, g_DecalTextureSetup);
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);

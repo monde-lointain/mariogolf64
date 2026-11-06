@@ -745,10 +745,8 @@ void DrawGameSaveMenu(Gfx** displayListHead) {
         (cosf(f_TitleSwayAngle * 0.5f) * TITLE_SWAY_DISTANCE) + TITLE_SWAY_LEFT;
     titleTopExact =
         (sinf(f_TitleSwayAngle) * TITLE_SWAY_DISTANCE) + TITLE_SWAY_TOP;
-    titleLeft =
-        titleLeftExact < 0.0f ? titleLeftExact + 0.5f : titleLeftExact - 0.5f;
-    titleTop =
-        titleTopExact < 0.0f ? titleTopExact + 0.5f : titleTopExact - 0.5f;
+    titleLeft = HalfTowardZero(titleLeftExact);
+    titleTop = HalfTowardZero(titleTopExact);
     titleTexelLeft = (s32)(HALF_TEXEL_COORDINATE -
         ((titleLeftExact - titleLeft) * HALF_TEXEL_COORDINATE));
     titleTexelTop = (s32)(HALF_TEXEL_COORDINATE -

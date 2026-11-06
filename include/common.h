@@ -235,6 +235,9 @@ typedef s32 Boolean;
 #define BytesBetween(start, end) ((u32)(end) - (u32)(start))
 /* The address byteCount bytes past pointer, whatever it points at */
 #define AddressPast(pointer, byteCount) ((u8*)(pointer) + (byteCount))
+/* A float moved half a unit toward zero, as the title positions are before
+ * converting them to whole pixels */
+#define HalfTowardZero(value) ((value) < 0.0f ? (value) + 0.5f : (value) - 0.5f)
 /* value rounded up to a multiple of alignment, which is a power of two */
 #define RoundUpTo(value, alignment) \
   (((value) + (alignment) - 1) & ~((alignment) - 1))
