@@ -654,16 +654,19 @@ f32 ConvertToFloat(s32 value) {
 
 /*
  * Returns the surface at a point: water if the water is above the ground,
- * otherwise the heaviest of the four nearest codes' surfaces
- * Doesn't match: the original tests whether the steps are equal by XORing each
- * plus one, and branches first on a register it has just zeroed. The direction
- * comparison accounts for the remaining 8 differing words, all in shape, and
- * the register oracle's closest result is these 8 with no register forced.
- * Comparing the steps plus one, for equality or by XORing them, gives 10 words,
- * 6 in shape; the equality compares them with a bne and has no zeroed
- * register's branch. Testing the steps' product for being above 0 or equal to 1
- * gives 15 and 13, their sum for being nonzero 11, their signs 12 and 13, and
- * which half each fraction is in 41. 8 words differ, all in shape.
+ * otherwise the heaviest of the four nearest codes' surfaces.
+ *
+ * Doesn't match: the original tests whether the steps are equal by XORing
+ * each plus one, and branches first on a register it has just zeroed. The
+ * direction comparison accounts for the remaining 8 differing words, all in
+ * shape, and the register oracle's closest result is these 8 with no
+ * register forced. Comparing the steps plus one, for equality or by XORing
+ * them, gives 10 words, 6 in shape; the equality compares them with a bne
+ * and has no zeroed register's branch. Testing the steps' product for being
+ * above 0 or equal to 1 gives 15 and 13, their sum for being nonzero 11,
+ * their signs 12 and 13, and which half each fraction is in 41. Comparing
+ * the steps plus one halved gives 44 words (10 in shape) by division and 12
+ * (8) by a shift. 8 words differ, all in shape.
  */
 #ifdef NON_MATCHING
 Surface FindSurface(s32 x, s32 z, Boolean lowersWaterLevel) {
