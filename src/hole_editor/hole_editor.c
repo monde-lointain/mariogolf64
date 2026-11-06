@@ -3946,8 +3946,14 @@ void WriteHexDumpFile(u32* words, s32 byteCount, char* fileName) {
  * which only those loops use. That takes the draft from 2033 words differing
  * to 2009, 491 in shape either way, and the oracle's closest result from
  * 1995 words, forcing 112 pseudos, to 1975, forcing 110. A pointColumn of
- * their own alone gives 2025, in either block or both. 2009 words differ,
- * 491 in shape.
+ * their own alone gives 2025, in either block or both.
+ *
+ * The fine tiles' loop declares its own groupTile, and its body its own
+ * tileColumn, which nothing else uses. Together they take the draft from
+ * 2009 words differing to 2007, 491 in shape either way, and leave the
+ * oracle's closest result at 1975 words, forcing 110 pseudos; tileColumn
+ * alone gives 2013 and groupTile alone 2015. 2007 words differ, 491 in
+ * shape.
  */
 #ifdef NON_MATCHING
 void DrawHoleEditorGround(CameraMatrices* matrices UNUSED, s32 terrainStyle) {
@@ -3990,10 +3996,8 @@ void DrawHoleEditorGround(CameraMatrices* matrices UNUSED, s32 terrainStyle) {
   s32 vertexColumn;
   Boolean isMirrored;
   Vtx* midpoints;
-  s32 tileColumn;
   GroundTile* tile;
   s32 k;
-  s32 groupTile;
 
   /* Sets a vertex halfway between two others */
   void GetMidpointVertex(Vtx_t * first, Vtx_t * second, Vtx_t * midpoint) {
@@ -4331,7 +4335,11 @@ void DrawHoleEditorGround(CameraMatrices* matrices UNUSED, s32 terrainStyle) {
       }
 
       if (groupDetail >= GROUND_DETAIL_FINE) {
+        s32 groupTile;
+
         for (groupTile = 0; groupTile < GROUND_TILE_GROUP_SIZE; groupTile++) {
+          s32 tileColumn;
+
           midpoints = g_WorkArea.hole.midpoints[g_WorkArea.hole.tiles[tileIndex]
                   .midpointBlockIndex];
           tileColumn = (half * GROUND_TILE_GROUP_SIZE) + groupTile;
