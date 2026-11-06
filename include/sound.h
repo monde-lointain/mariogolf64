@@ -96,7 +96,7 @@ enum Sound {
   SOUND_BURST = 0x34,
   SOUND_YOSHI_EAGLE_SECOND_EFFECT, /* Also played in the opening */
   /* In the opening, before SOUND_UNK321 or SOUND_UNK338 */
-  SOUND_UNK54,
+  SOUND_CHIME,
   SOUND_METAL_MARIO_EAGLE_EFFECT = 0x38,
   SOUND_WARIO_BOGEY_EFFECT,
   /* With each spreading circle of Bowser's bogey reaction */
