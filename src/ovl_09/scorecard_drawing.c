@@ -1653,26 +1653,29 @@ void FormatLeaderboardRow(char* row, TournamentStanding* standing) {
  * new standings, and the player's row shows their face and, if their place
  * changed, an arrow.
  *
- * Doesn't match: the target keeps displayListHead in a saved register, where
- * this spills it, so its frame is 0xE0 bytes, not 0xD8. The bottom flaps'
- * loop also reads the flip angles through the stagger's index instead of a
- * pointer of their own. Stepping the rows' tops beside the index gives 140
- * words differing, 54 in shape. The name flaps' shade test branches over the
- * sine and jumps past it with 0xFF, where GCC branches to the join with 0xFF
- * in the delay slot; testing !(angle >= FLAP_EDGE_ON_ANGLE) gives that
- * layout but reverses the compare (121 words, 45 in shape), and >= with the
- * sine first gives 125. In both flap loops the original masks the shade in
- * its own register; a u8, u16 or u32 shade gives 202-208 words, s16 changes
- * nothing. The permuter's best read g_Scorecard.x through a pointer to it in
- * the faces' and arrow's calls, giving 99 to 104 words, 41 to 44 in shape;
- * no such pointer is natural here, and setting the arrow's bottom edge in a
- * local of its own, as one of them also did, changes nothing. The original
- * divides and truncates the arrow's texel step once, storing it as both of
- * DrawTextureRect's steps; an f32 texelStep the call converts gave 120
- * words. These counts were measured when the faces and arrows were drawn
- * only once flipTime passed ROW_FLIP_TIME, which it never does, and the
- * draft gave 120 words (46 in shape); the original compares it with 36, the
- * last row's start. The draft then gave 110 words, 44 in shape.
+ * Doesn't match: in the faces' loop the original reads topRow and
+ * g_Scorecard.x through a register it sets from flipTime's address less
+ * 0x64, and loads two of the display list's words on each pass, where this
+ * draft reads both fields at their addresses and keeps those words in saved
+ * registers. The bottom flaps' loop also reads the flip angles through the
+ * stagger's index instead of a pointer of their own. Stepping the rows' tops
+ * beside the index gives 140 words differing, 54 in shape. The name flaps'
+ * shade test branches over the sine and jumps past it with 0xFF, where GCC
+ * branches to the join with 0xFF in the delay slot; testing !(angle >=
+ * FLAP_EDGE_ON_ANGLE) gives that layout but reverses the compare (121 words,
+ * 45 in shape), and >= with the sine first gives 125. In both flap loops the
+ * original masks the shade in its own register; a u8, u16 or u32 shade gives
+ * 202-208 words, s16 changes nothing. The permuter's best read g_Scorecard.x
+ * through a pointer to it in the faces' and arrow's calls, giving 99 to 104
+ * words, 41 to 44 in shape; no such pointer is natural here, and setting the
+ * arrow's bottom edge in a local of its own, as one of them also did,
+ * changes nothing. The original divides and truncates the arrow's texel step
+ * once, storing it as both of DrawTextureRect's steps; an f32 texelStep the
+ * call converts gave 120 words. These counts were measured when the faces
+ * and arrows were drawn only once flipTime passed ROW_FLIP_TIME, which it
+ * never does, and the draft gave 120 words (46 in shape); the original
+ * compares it with 36, the last row's start. The draft then gave 110 words,
+ * 44 in shape.
  *
  * The arrow's rect adds the row's top in place in each edge, as the
  * function's other rects do. A local for the top, set before the texel start,
@@ -1710,7 +1713,19 @@ void FormatLeaderboardRow(char* row, TournamentStanding* standing) {
  * rather than held in a texelStep local; GCC still divides and truncates it
  * once, as the original does. That takes the draft from 87 words to 85 (39
  * in shape to 37), and the register oracle's closest result from 60 words to
- * 58, forcing 12 pseudos for each. 85 words differ, 37 in shape.
+ * 58, forcing 12 pseudos for each. The counts above were measured before
+ * the change below.
+ *
+ * The faces' loop puts the display list call in its own block, rather than
+ * the pipe sync after it. That takes the draft from 85 words differing to
+ * 81, 37 in shape to 35, and the register oracle's closest result from 58
+ * words to 54, forcing 12 pseudos for each. With no block there, the faces'
+ * loop sets topRow's address from flipTime's and reads g_Scorecard.x through
+ * it, as the original does; but 115 words differ (33 in shape), 13 more each
+ * in the prologue and epilogue, where it spills displayListHead in a frame 8
+ * bytes larger, and the oracle's closest is 72 words, forcing 10. Reading
+ * contestantId through standing as well gives 134 words (24 in shape), and
+ * the oracle's closest 75, forcing 15. 81 words differ, 35 in shape.
  */
 #ifdef NON_MATCHING
 void DrawLeaderboardPage(Gfx** displayListHead) {
@@ -2012,13 +2027,16 @@ void DrawLeaderboardPage(Gfx** displayListHead) {
     for (i = 0; i != LEADERBOARD_ROW_COUNT; i++) {
       if (g_TournamentStandings[g_Scorecard.topRow + i].contestantId ==
           PLAYER_CONTESTANT) {
-        gSPDisplayList(gfx++, g_DecalTextureSetup);
         /*
-         * In its own block, as without it 117 words differ, 35 in shape,
-         * against 87 and 39, and the register oracle's closest result rises
-         * from 60 words, forcing 12 pseudos, to 74, forcing 10
+         * In its own block, to match: without a block 115 words
+         * differ, 33 in shape, against 81 and 35, and the register
+         * oracle's closest result rises from 54 words, forcing 12
+         * pseudos, to 72, forcing 10. The pipe sync in its own block
+         * instead, or in the same block, gives 85 (37), and a block
+         * for each 85 (37)
          */
-        IN_OWN_BLOCK(gDPPipeSync(gfx++));
+        IN_OWN_BLOCK(gSPDisplayList(gfx++, g_DecalTextureSetup));
+        gDPPipeSync(gfx++);
         gDPSetTextureLUT(gfx++, G_TT_RGBA16);
         DrawSmallFace(&gfx, g_Scorecard.x + LEADERBOARD_FACE_LEFT,
             LEADERBOARD_FACE_TOP + (i * LEADERBOARD_ROW_SPACING), 0, TRUE);
