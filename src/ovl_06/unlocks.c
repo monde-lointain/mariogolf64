@@ -7,10 +7,8 @@
 #include <ultra64.h>
 
 #include "character.h"
-#include "controller.h"
 #include "course.h"
 #include "course_stats.h"
-#include "language.h"
 #include "menu.h"
 #include "save.h"
 #include "sound.h"

@@ -4,7 +4,6 @@
  */
 #include <ultra64.h>
 
-#include "billboard.h"
 #include "course.h"
 #include "game_state.h"
 #include "language.h"

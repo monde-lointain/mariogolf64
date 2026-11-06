@@ -40,7 +40,6 @@
 #include "heap.h"
 #include "hole_conditions.h"
 #include "hole_display.h"
-#include "hole_loader.h"
 #include "hole_objects.h"
 #include "include_asm.h"
 #include "language.h"

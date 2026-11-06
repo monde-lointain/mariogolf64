@@ -14,7 +14,6 @@
 #include "address.h"
 #include "asset.h"
 #include "ball_simulation.h"
-#include "billboard.h"
 #include "camera.h"
 #include "character.h"
 #include "character_slot.h"

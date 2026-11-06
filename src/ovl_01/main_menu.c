@@ -21,7 +21,6 @@
 #include "asset.h"
 #include "best_times.h"
 #include "bets.h"
-#include "billboard.h"
 #include "camera.h"
 #include "character.h"
 #include "character_select.h"

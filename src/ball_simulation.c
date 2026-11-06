@@ -10,7 +10,6 @@
 #include <ultra64.h>
 
 #include "ball_physics.h"
-#include "billboard.h"
 #include "club.h"
 #include "collision.h"
 #include "compiler.h"

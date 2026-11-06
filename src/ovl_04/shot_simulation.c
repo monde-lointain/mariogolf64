@@ -6,7 +6,6 @@
 #include <ultra64.h>
 
 #include "ball_simulation.h"
-#include "billboard.h"
 #include "club.h"
 #include "compiler.h"
 #include "current_shot.h"

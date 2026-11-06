@@ -10,7 +10,6 @@
 #include <ultra64.h>
 
 #include "ball_simulation.h"
-#include "billboard.h"
 #include "camera.h"
 #include "character_slot.h"
 #include "club.h"
@@ -27,7 +26,6 @@
 #include "golf_balls.h"
 #include "hole_conditions.h"
 #include "hole_display.h"
-#include "hole_loader.h"
 #include "hole_objects.h"
 #include "include_asm.h"
 #include "language.h"

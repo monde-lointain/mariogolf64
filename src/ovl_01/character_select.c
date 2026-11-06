@@ -11,7 +11,6 @@
 
 #include "address.h"
 #include "asset.h"
-#include "camera.h"
 #include "character.h"
 #include "character_slot.h"
 #include "club.h"
@@ -28,7 +27,6 @@
 #include "main_menu.h"
 #include "menu.h"
 #include "menu_memory.h"
-#include "password.h"
 #include "player.h"
 #include "screen.h"
 #include "screen_layers.h"

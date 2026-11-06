@@ -5,7 +5,6 @@
 
 #include "character.h"
 #include "language.h"
-#include "menu_memory.h"
 #include "player.h"
 
 /*

@@ -8,7 +8,6 @@
 #include <ultra64.h>
 
 #include "camera.h"
-#include "course.h"
 #include "course_space.h"
 #include "current_shot.h"
 #include "debug_text.h"

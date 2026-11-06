@@ -4,7 +4,6 @@
 #include <ultra64.h>
 
 #include "asset.h"
-#include "camera.h"
 #include "character.h"
 #include "course.h"
 #include "language.h"

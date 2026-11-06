@@ -4,7 +4,6 @@
 #include <ultra64.h>
 
 #include "bets.h"
-#include "camera.h"
 #include "course.h"
 #include "language.h"
 #include "math_util.h"

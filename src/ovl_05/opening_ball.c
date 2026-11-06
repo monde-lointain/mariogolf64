@@ -11,7 +11,6 @@
 
 #include "ball_physics.h"
 #include "ball_simulation.h"
-#include "billboard.h"
 #include "character_slot.h"
 #include "club.h"
 #include "collision.h"

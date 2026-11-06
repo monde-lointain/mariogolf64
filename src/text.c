@@ -17,7 +17,6 @@
 #include "heap.h"
 #include "language.h"
 #include "round_hud.h"
-#include "round_stats.h"
 #include "scene.h"
 #include "screen.h"
 #include "screen_layers.h"
