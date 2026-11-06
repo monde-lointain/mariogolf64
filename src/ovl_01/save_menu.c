@@ -554,31 +554,32 @@ void UpdateRingShotRecords(void) {
 #define REPLAY_GLOW_DIVISOR 4
 
 /*
- * Doesn't match: the original gives several values other saved registers, and
- * keeps memory on the stack. The register oracle comes within 14 words with 3
- * pseudos forced: the face loop's itemIndex and listIndex, each in the other's
- * register, and row. Other orders of their declarations, setting listIndex
- * before row or in the loop's header, change nothing; counting the empty slot's
- * dashes with listIndex, column, drop or row gives 70 to 92 words, all in
- * registers. 26 words differ.
+ * Doesn't match: the original gives several values other saved registers,
+ * and keeps memory on the stack. The register oracle comes within 8 words
+ * with 2 pseudos forced: the face loop's itemIndex and listIndex, each in
+ * the other's register. Other orders of their declarations, setting
+ * listIndex before row or in the loop's header, change nothing; counting the
+ * empty slot's dashes with listIndex, column, drop, row or a counter of
+ * their own gives 26 to 62 words, all in registers. 16 words differ, none in
+ * shape.
  *
- * Giving the shared variables one purpose each costs words: a strip counter
- * of its own gives 50 (14 in shape), a face mode 209, a slot index 149, all
- * three 295; an icon draw counter 62 (0 in shape), a hole column 155, and
- * both 247.
+ * The row icon's draws are counted with index, which also counts the strips
+ * and the replay slots and holds each face's draw mode; counting them with
+ * column, the hole columns' counter, gives 26 words differing, and with a
+ * counter of their own 62. Giving index's other uses variables of their own
+ * costs words too: a strip counter gives 92, a face mode 248 (38 in shape)
+ * and a slot index 66.
  */
 #ifdef NON_MATCHING
 void DrawRingShotRecords(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
-  /* Counts the strips, holds each face's draw mode and counts the replay
-   * slots, as the original's shared register needs */
+  /* Counts the strips and a row icon's draws, holds each face's draw mode and
+   * counts the replay slots, as the original's shared register needs */
   s16 index = 0;
   SaveData* save = GetSaveData();
   MenuMemory* memory = GetMenuMemory();
   s32 openCourseCount = GetOpenRingShotCourseCount();
   s16 row;
-  /* Counts a row icon's draws, then the hole columns, as the original's
-   * shared register needs */
   s16 column;
   /* Counts the faces shown in a column, or an empty slot's dashes */
   s16 itemIndex;
@@ -651,12 +652,11 @@ void DrawRingShotRecords(Gfx** displayListHead) {
       if (f_RingShotIconPositions[openCourseCount - 1][row] != 0) {
         /*
          * The icon loop in a block of its own, as a macro's do-while would
-         * make it, to match: without it the loop pass hoists the icon loop's
-         * constant 20 to another level, and it and row take other saved
-         * registers; 42 words differ, against 26
+         * make it, to match: without it, or with plain braces, three saved
+         * values take each other's registers; 32 words differ, against 16
          */
         IN_OWN_BLOCK(
-            for (column = 0; column != RING_SHOT_ICON_DRAW_COUNT; column++) {
+            for (index = 0; index != RING_SHOT_ICON_DRAW_COUNT; index++) {
               if (row == 0) {
                 DrawRingShotRowIcon(
                     &gfx, 0, RING_SHOT_FIRST_ICON_X, RING_SHOT_ICON_TOP + drop);
