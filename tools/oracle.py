@@ -336,6 +336,20 @@ def count_differences(target: fncompare.Routine, compilation: Compilation) -> in
     return fncompare.count_differences(target, compilation.routine)
 
 
+def find_tied_pseudos(compilation: Compilation) -> dict[int, list[int]]:
+    """Return {pseudo: the pseudos local-alloc tied into its quantity}.
+
+    Forcing one pseudo of a quantity alone breaks the tie, so the others
+    are forced with it unless they have votes of their own.
+    """
+    tied: dict[int, list[int]] = {}
+    for block in compilation.blocks:
+        for quantity in block["quantities"]:
+            for pseudo in quantity["pseudos"]:
+                tied[pseudo] = quantity["pseudos"]
+    return tied
+
+
 def search_forcing(
     target: fncompare.Routine,
     c_path: str,
@@ -358,10 +372,14 @@ def search_forcing(
         if best[1] == 0:
             break
         registers = compilation.registers
+        tied = find_tied_pseudos(compilation)
         proposal = dict(tried[-1])
         for pseudo, counter in vote_registers(target, compilation).items():
             wanted, _ = counter.most_common(1)[0]
             if wanted != registers.get(pseudo):
+                for partner in tied.get(pseudo, [pseudo]):
+                    if partner not in proposal:
+                        proposal[partner] = wanted
                 proposal[pseudo] = wanted
         if proposal in tried:
             break
