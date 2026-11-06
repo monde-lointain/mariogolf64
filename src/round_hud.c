@@ -74,10 +74,10 @@ enum SceneryState {
 #define ASSET_BACKDROP_PATTERN_IMAGE 0x93C
 #define ASSET_SHOT_PREVIEW_DASH_IMAGE 0x4DB
 #define ASSET_BLENDED_TEXTURE_STILL_LAYER 0x4D9
-#define ASSET_ROUND_IMAGE_648 0x648
-#define ASSET_ROUND_IMAGE_563 0x563
-#define ASSET_ROUND_IMAGE_564 0x564
-#define ASSET_ROUND_IMAGE_562 0x562
+#define ASSET_LAKITU_ICON 0x648
+#define ASSET_JUMP_LABEL 0x563
+#define ASSET_MODE_LABEL 0x564
+#define ASSET_CUP_LABEL 0x562
 #define ASSET_SHOT_OFFSET_MARKER_IMAGE 0x57C
 #define ASSET_WIND_SPEED_FONT 0x97B
 #define ASSET_ROUND_IMAGE_725 0x725
@@ -1016,16 +1016,16 @@ void LoadSceneryImages(void) {
   f_LieImageAsset = NO_IMAGE_ASSET;
   f_LieImage = AllocMemory(LIE_IMAGE_SIZE);
   f_AnimatedIconImages[0] =
-      AllocMemory(OpenEncodedAsset(ASSET_ROUND_IMAGE_648, &asset));
+      AllocMemory(OpenEncodedAsset(ASSET_LAKITU_ICON, &asset));
   ReadEncodedAsset(f_AnimatedIconImages[0], &asset);
   f_AnimatedIconLabelImages[0] =
-      AllocMemory(OpenEncodedAsset(ASSET_ROUND_IMAGE_563, &asset));
+      AllocMemory(OpenEncodedAsset(ASSET_JUMP_LABEL, &asset));
   ReadEncodedAsset(f_AnimatedIconLabelImages[0], &asset);
   f_AnimatedIconLabelImages[1] =
-      AllocMemory(OpenEncodedAsset(ASSET_ROUND_IMAGE_564, &asset));
+      AllocMemory(OpenEncodedAsset(ASSET_MODE_LABEL, &asset));
   ReadEncodedAsset(f_AnimatedIconLabelImages[1], &asset);
   f_AnimatedIconLabelImages[2] =
-      AllocMemory(OpenEncodedAsset(ASSET_ROUND_IMAGE_562, &asset));
+      AllocMemory(OpenEncodedAsset(ASSET_CUP_LABEL, &asset));
   ReadEncodedAsset(f_AnimatedIconLabelImages[2], &asset);
   f_ShotOffsetMarkerImage =
       AllocMemory(OpenEncodedAsset(ASSET_SHOT_OFFSET_MARKER_IMAGE, &asset));
@@ -3325,26 +3325,28 @@ void DrawShotOffsetMarker(void) {
 #define ANIMATED_ICON_X 96.0f
 #define ANIMATED_ICON_Y 24.0f
 #define ANIMATED_ICON_EASING 0.2f
-#define ANIMATED_ICON_MODE_UNK2 2
 #define ANIMATED_ICON_LABEL_WIDTH 64
 #define ANIMATED_ICON_LABEL_HEIGHT 16
 #define ANIMATED_ICON_LABEL_OFFSET_X 24
-#define ANIMATED_ICON_LABEL_UNK0 0
-#define ANIMATED_ICON_LABEL_UNK1 1
-#define ANIMATED_ICON_LABEL_UNK2 2
+/* The labels' images, which read "JUMP", "MODE" and "CUP" */
+#define ANIMATED_ICON_LABEL_JUMP 0
+#define ANIMATED_ICON_LABEL_MODE 1
+#define ANIMATED_ICON_LABEL_CUP 2
 
 /*
- * Draws an animated icon that eases into place, with a label beside it that
- * depends on g_LetterboxState. Each new frame of the icon is read into the same
- * image.
+ * Draws an animated icon of Lakitu filming that eases into place, with a label
+ * beside it that depends on g_LetterboxState: "MODE" while the camera moves,
+ * "JUMP" looking down the range and "CUP" otherwise. Each new frame of the icon
+ * is read into the same image.
  */
-void DrawAnimatedIcon(Gfx** displayListHead, s32 mode) {
+void DrawAnimatedIcon(Gfx** displayListHead, s32 letterboxHeight) {
   Gfx* gfx = *displayListHead;
   EncodedAsset asset;
   s32 label;
 
   if (f_SceneryState == SCENERY_LOADED) {
-    if (mode == ANIMATED_ICON_MODE_UNK2) {
+    /* On the letterbox's first frame the icon starts again from the corner */
+    if (letterboxHeight == LETTERBOX_GROWTH_STEP) {
       f_AnimatedIconX = 0.0f;
       f_AnimatedIconY = 0.0f;
     } else {
@@ -3385,11 +3387,11 @@ void DrawAnimatedIcon(Gfx** displayListHead, s32 mode) {
         G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     gDPPipeSync(gfx++);
     if (g_LetterboxState == LETTERBOX_STATE_MOVING_CAMERA) {
-      label = ANIMATED_ICON_LABEL_UNK1;
+      label = ANIMATED_ICON_LABEL_MODE;
     } else if (g_LetterboxState == LETTERBOX_STATE_LOOKING_DOWN_RANGE) {
-      label = ANIMATED_ICON_LABEL_UNK0;
+      label = ANIMATED_ICON_LABEL_JUMP;
     } else {
-      label = ANIMATED_ICON_LABEL_UNK2;
+      label = ANIMATED_ICON_LABEL_CUP;
     }
 
     gDPLoadTLUT_pal16(
