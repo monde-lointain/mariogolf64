@@ -19,7 +19,8 @@ enum LandingReaction {
   LANDING_REACTION_NONE = -1,
   /* Shows the surface and how far the ball rests from the cup */
   LANDING_REACTION_REST = 1,
-  LANDING_REACTION_UNK2 /* In the water or off the course */
+  /* Shows only the surface's name, in the water or off the course */
+  LANDING_REACTION_SURFACE_ONLY
 };
 
 /* RoundHud.ballHeight*Direction values */

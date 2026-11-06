@@ -1435,7 +1435,7 @@ void StartLandingReaction(s32 reaction) {
       break;
     case SURFACE_KIND_OUT_OF_COURSE:
     case SURFACE_KIND_WATER_HAZARD:
-      f_LandingReaction = LANDING_REACTION_UNK2;
+      f_LandingReaction = LANDING_REACTION_SURFACE_ONLY;
       SetLandingWaitFrameCount(LANDING_WAIT_LONG_FRAME_COUNT);
       break;
     case SURFACE_KIND_GREEN:
