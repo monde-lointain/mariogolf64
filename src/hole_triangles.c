@@ -262,30 +262,35 @@ void DrawHoleTriangles(Gfx** displayListHead, CameraMatrices* matrices UNUSED,
  * Draws the current player's rings; one past RING_STATE_SHOWN fades out while
  * sparkles circle it
  *
- * Doesn't match: the original keeps two of the display list pointers it
- * saves in each other's stack slots, 0x13C and 0x144, and sets $s6, $s7 and
- * $t5 in another order before the ring loop; the register oracle, forcing no
- * pseudos, also leaves 16 words. The sparkle loop has its own section
- * counter, sparkleSection, and the next side is masked to RING_SIDE_COUNT -
- * 1 with &, as the original masks it: the two together take the draft from
- * 65 words differing (19 in shape) to 16 (8). The mask alone gives 364 (14),
- * since it shortens the outer loop so that loop.c hoists one more display
- * list command (0xDC08060A) out of it; the counter alone changes nothing.
- * Starting the counter in the loop's header or before it gives the same.
- * Before these, working out each section's first vertex before the side loop
- * gave 65 words rather than 69 (25), and computing the next side once, into
- * nextSide, 69 rather than 79. Masking the side inside RingVertex gave 392
- * words, 26 in shape, and a u32 side 366, 16 in shape. The permuter's best
- * runs, 1347 and 887 (41 words, 15 in shape), kept side + 1 or section + 1
- * in a u8, used in only some of the places it is needed, which no natural
- * form explains.
+ * Doesn't match: the original sets $s6, $s7 and $t5 in another order before
+ * the ring loop. 8 words differ, all in shape.
  *
- * The two slots hold the pointers of the pipe sync before gDPSetTextureLUT,
- * at 0x144 in the original, and of gDPSetTextureLUT, at 0x13C. Neither
- * pointer gets a register, and reload gives such pseudos their slots in
- * pseudo order, so the original may have numbered the LUT command's pointer
- * first. Writing the pipe sync, the LUT command or both with gfx stepped
- * after them gives 199 to 253 words. 16 words differ, 8 in shape.
+ * The counts in this paragraph were measured before the change below. The
+ * sparkle loop has its own section counter, sparkleSection, and the next
+ * side is masked to RING_SIDE_COUNT - 1 with &, as the original masks it:
+ * the two together take the draft from 65 words differing (19 in shape) to
+ * 16 (8). The mask alone gives 364 (14), since it shortens the outer loop so
+ * that loop.c hoists one more display list command (0xDC08060A) out of it;
+ * the counter alone changes nothing. Starting the counter in the loop's
+ * header or before it gives the same. Before these, working out each
+ * section's first vertex before the side loop gave 65 words rather than 69
+ * (25), and computing the next side once, into nextSide, 69 rather than 79.
+ * Masking the side inside RingVertex gave 392 words, 26 in shape, and a u32
+ * side 366, 16 in shape. The permuter's best runs, 1347 and 887 (41 words,
+ * 15 in shape), kept side + 1 or section + 1 in a u8, used in only some of
+ * the places it is needed, which no natural form explains.
+ *
+ * Two of the display list pointers the draft saved were in each other's
+ * stack slots, 0x13C and 0x144: those of the pipe sync before
+ * gDPSetTextureLUT, at 0x144 in the original, and of gDPSetTextureLUT, at
+ * 0x13C. Neither pointer gets a register, and reload gives such pseudos
+ * their slots in pseudo order. Writing the pipe sync, the LUT command or
+ * both with gfx stepped after them gave 199 to 253 words. Each pipe sync and
+ * the RDP state command after it now goes through AppendSyncedRdpState,
+ * which declares the command's pointer first, as DrawHoleTriangles does;
+ * that swaps the two slots and takes the draft from 16 words differing (8 in
+ * shape) to 8 (8). Of the pairs alone, only the LUT command's changes
+ * anything.
  */
 #ifdef NON_MATCHING
 void DrawRings(Gfx** displayListHead, CameraMatrices* matrices UNUSED,
@@ -315,27 +320,20 @@ void DrawRings(Gfx** displayListHead, CameraMatrices* matrices UNUSED,
   gDPPipeSync(gfx++);
   gSPSetLights1(gfx++, f_RingLights);
   gDPPipeSync(gfx++);
-  gDPPipeSync(gfx++);
-  gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+  AppendSyncedRdpState(gfx, gDPSetCycleType, G_CYC_1CYCLE);
   gSPClipRatio(gfx++, FRUSTRATIO_1);
-  gDPPipeSync(gfx++);
-  gDPSetColorDither(gfx++, G_CD_MAGICSQ);
+  AppendSyncedRdpState(gfx, gDPSetColorDither, G_CD_MAGICSQ);
   gSPClearGeometryMode(gfx++, ALL_GEOMETRY_MODES);
   gSPSetGeometryMode(gfx++,
       G_ZBUFFER | G_SHADE | G_CULL_BACK | G_FOG | G_LIGHTING | G_TEXTURE_GEN |
           G_SHADING_SMOOTH);
-  gDPPipeSync(gfx++);
-  gDPSetTextureFilter(gfx++, G_TF_BILERP);
-  gDPPipeSync(gfx++);
-  gDPSetTexturePersp(gfx++, G_TP_PERSP);
-  gDPPipeSync(gfx++);
-  gDPSetAlphaCompare(gfx++, G_AC_NONE);
+  AppendSyncedRdpState(gfx, gDPSetTextureFilter, G_TF_BILERP);
+  AppendSyncedRdpState(gfx, gDPSetTexturePersp, G_TP_PERSP);
+  AppendSyncedRdpState(gfx, gDPSetAlphaCompare, G_AC_NONE);
   gDPSetBlendColor(gfx++, 0xFF, 0xFF, 0xFF, 0xFE);
-  gDPPipeSync(gfx++);
-  gDPSetTextureLOD(gfx++, G_TL_TILE);
+  AppendSyncedRdpState(gfx, gDPSetTextureLOD, G_TL_TILE);
   gDPSetBlendColor(gfx++, 0xFF, 0xFF, 0xFF, 0x3F);
-  gDPPipeSync(gfx++);
-  gDPSetTextureLUT(gfx++, G_TT_NONE);
+  AppendSyncedRdpState(gfx, gDPSetTextureLUT, G_TT_NONE);
   gDPLoadTextureBlock(gfx++, TextureAddress(g_MirrorTexture), G_IM_FMT_RGBA,
       G_IM_SIZ_16b, DYNAMIC_TEXTURE_SIZE, DYNAMIC_TEXTURE_SIZE, 0,
       G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, 5, 5, G_TX_NOLOD,
@@ -401,12 +399,12 @@ void DrawRings(Gfx** displayListHead, CameraMatrices* matrices UNUSED,
 
           g_Players[g_GameState.currentPlayerIndex].ringStates[ringIndex] =
               state;
-          gDPPipeSync(gfx++);
-          gDPSetRenderMode(gfx++, G_RM_AA_ZB_XLU_SURF, G_RM_AA_ZB_XLU_SURF2);
+          AppendSyncedRdpState(
+              gfx, gDPSetRenderMode, G_RM_AA_ZB_XLU_SURF, G_RM_AA_ZB_XLU_SURF2);
         } else {
           alpha = 0xFF;
-          gDPPipeSync(gfx++);
-          gDPSetRenderMode(gfx++, G_RM_AA_ZB_OPA_SURF, G_RM_AA_ZB_OPA_SURF2);
+          AppendSyncedRdpState(
+              gfx, gDPSetRenderMode, G_RM_AA_ZB_OPA_SURF, G_RM_AA_ZB_OPA_SURF2);
         }
 
         gDPSetPrimColor(gfx++, 0, 0, red, green, blue, alpha);
