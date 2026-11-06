@@ -625,6 +625,13 @@ void KeepAimCameraOnCourse(void) {
  * loop's counter takes. Working rise out in probe gives 49 words, 9 in
  * shape, against 59 (in offset, 59), but it gives the counter a second
  * meaning, so rise keeps its own local.
+ *
+ * The camera's greatest rise above the ball has a local of its own, maxRise,
+ * where the clamp worked it out twice. That takes the draft from 59 words
+ * differing, 9 in shape, to 37 (7), and the register oracle's closest result
+ * from 31 words, forcing 12 pseudos, to 21, forcing 6. Declared before or after
+ * rise, first in the branch or last, it gives the same, as does a local for the
+ * ball's height plus the rise; as an f32, 48 (16). 37 words differ, 7 in shape.
  */
 #ifdef NON_MATCHING
 void PlaceShotCamera(void) {
@@ -704,6 +711,7 @@ void PlaceShotCamera(void) {
     s32 probe;
     s32 offset;
     s32 rise;
+    s32 maxRise;
     f32 tilt;
     /* The tilt in world units */
     f32 worldTilt;
@@ -754,11 +762,9 @@ void PlaceShotCamera(void) {
     }
 
     rise = g_CurrentShot.aimCameraDistance / 1000;
-    if (g_CurrentShot.ballPosition[AXIS_Y] +
-            (rise * rise / AIM_CAMERA_RISE_DIVISOR) <
-        point[AXIS_Y]) {
-      point[AXIS_Y] = g_CurrentShot.ballPosition[AXIS_Y] +
-          (rise * rise / AIM_CAMERA_RISE_DIVISOR);
+    maxRise = rise * rise / AIM_CAMERA_RISE_DIVISOR;
+    if (g_CurrentShot.ballPosition[AXIS_Y] + maxRise < point[AXIS_Y]) {
+      point[AXIS_Y] = g_CurrentShot.ballPosition[AXIS_Y] + maxRise;
     }
 
     g_Cameras[0].view.eye[AXIS_Y] = point[AXIS_Y] * COURSE_TO_WORLD_SCALE;
