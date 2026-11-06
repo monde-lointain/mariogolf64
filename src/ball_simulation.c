@@ -953,7 +953,8 @@ s32 StepBallSimulation(BallSimulation* simulation) {
 
         /*
          * The chained assignment is there to match: two statements, in
-         * either order, give 775 words differing, 239 in shape
+         * either order, give 1122 words differing, 262 in shape, against 478
+         * and 126
          */
         velocity[AXIS_X] = velocity[AXIS_Z] = 0.0f;
         velocity[AXIS_Y] = (-fallSpeed * CUP_FLOOR_BOUNCE) + CUP_GRAVITY;
