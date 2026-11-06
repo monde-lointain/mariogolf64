@@ -116,10 +116,11 @@ extern MenuMemory g_MenuMemory;
 
 /* The character select's record of which characters are taken */
 typedef struct TakenCharacters {
-  /* 0x00 */ s16 unk0;
-  /* 0x02 */ u8 unk2[0x8 - 0x2];
+  /* Only ever cleared, as the menu choices reset and with modeChoice */
+  /* 0x00 */ s16 unusedMenuValue;
+  /* 0x02 */ u8 unusedBeforeTakenCharacters[0x8 - 0x2];
   /* 0x08 */ Boolean isCharacterTaken[CHARACTER_COUNT];
-  /* 0x50 */ u8 unk50[0x54 - 0x50];
+  /* 0x50 */ u8 unusedAfterTakenCharacters[0x54 - 0x50];
 } TakenCharacters; /* size = 0x54 */
 
 extern TakenCharacters g_TakenCharacters;

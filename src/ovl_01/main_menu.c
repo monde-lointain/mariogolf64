@@ -1987,7 +1987,7 @@ void UpdateMenuTitleScreen(void) {
     if (g_LastMenuScreen != g_MenuScreen ||
         g_LastMenuPlayerCountChoice != g_MenuMemory.playerCountChoice) {
       g_MenuMemory.modeChoice = 0;
-      g_TakenCharacters.unk0 = 0;
+      g_TakenCharacters.unusedMenuValue = 0;
     }
 
     g_IsRingShotWipeOpening = FALSE;

@@ -2069,7 +2069,7 @@ void ResetMenuChoices(void) {
   g_IsMenuCharacterLoaded[2] = FALSE;
   g_IsMenuCharacterLoaded[3] = FALSE;
   memset(&g_MenuMemory, 0, sizeof(g_MenuMemory));
-  g_TakenCharacters.unk0 = 0;
+  g_TakenCharacters.unusedMenuValue = 0;
   g_LastMenuScreen = 0;
   g_LastMenuPlayerCountChoice = 0;
   g_ChosenLabelGrowthDirection = LABEL_GROWING;
