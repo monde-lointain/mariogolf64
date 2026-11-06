@@ -7,11 +7,22 @@
 #include "menu_memory.h"
 
 /*
- * The menus set the top byte of g_MapCamera's mode. Reading it as a
- * byte of the field rather than of the whole camera lets the compiler move
- * the read past display list words, as the original does.
+ * The course select's layout, which the menus keep in the top byte of
+ * g_MapCamera's mode. Reading it as a byte of the field rather than of the
+ * whole camera lets the compiler move the read past display list words, as
+ * the original does.
  */
-#define MAP_CAMERA_MODE_TOP_BYTE (*(u8*)&g_MapCamera.mode)
+#define COURSE_SELECT_LAYOUT (*(u8*)&g_MapCamera.mode)
+
+enum CourseSelectLayout {
+  /* Each course's birdie badge count and tournament trophies; also set on
+   * leaving the course select */
+  COURSE_SELECT_LAYOUT_AWARDS,
+  /* The holes choice, and the bet settings on C-up */
+  COURSE_SELECT_LAYOUT_HOLES,
+  /* Neither, for modes without bets or a holes choice */
+  COURSE_SELECT_LAYOUT_PLAIN
+};
 
 /*
  * The parts of the menu backdrop that DrawLargeBannerBackdropLayers and

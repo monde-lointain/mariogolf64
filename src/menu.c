@@ -33,12 +33,6 @@
 #include "sram.h"
 #include "transfer_pak.h"
 
-/*
- * The menus set a byte of the map camera's mode, its most significant one on
- * the big-endian N64, as though a flag of their own were kept there
- */
-#define MAP_CAMERA_MODE_HIGH_BYTE (*(u8*)&g_MapCamera.mode)
-
 /* Keeps the save data on the development host instead of in SRAM */
 #define GAME_FLAG_SAVE_TO_HOST 0x53
 
@@ -2079,7 +2073,7 @@ void ResetMenuChoices(void) {
   g_ChosenLabelGrowthDirection = LABEL_GROWING;
   g_ChosenLabelGrowth = 0;
   g_CourseSelectKind = COURSE_SELECT_KIND_NONE;
-  MAP_CAMERA_MODE_HIGH_BYTE = 0;
+  COURSE_SELECT_LAYOUT = COURSE_SELECT_LAYOUT_AWARDS;
   for (index = 0; index != ARRAY_COUNT(g_ChosenLefties); index++) {
     g_ChosenLefties[index] = 0;
   }
@@ -2110,12 +2104,12 @@ void EnterMenuAtCourseSelect(void) {
   switch (g_GameState.gameMode) {
     case GAME_MODE_TOURNAMENT:
       g_CourseSelectKind = COURSE_SELECT_KIND_TOURNAMENTS;
-      MAP_CAMERA_MODE_HIGH_BYTE = 0;
+      COURSE_SELECT_LAYOUT = COURSE_SELECT_LAYOUT_AWARDS;
       g_BetSet = BET_SET_NONE;
       break;
     case GAME_MODE_STROKE:
       g_CourseSelectKind = COURSE_SELECT_KIND_COURSES;
-      MAP_CAMERA_MODE_HIGH_BYTE = 1;
+      COURSE_SELECT_LAYOUT = COURSE_SELECT_LAYOUT_HOLES;
       if (g_ChosenPlayerCount == 4) {
         g_BetSet = BET_SET_STROKE_FOUR_PLAYER;
       } else {
@@ -2126,12 +2120,12 @@ void EnterMenuAtCourseSelect(void) {
       break;
     case GAME_MODE_MATCH_GAME:
       g_CourseSelectKind = COURSE_SELECT_KIND_COURSES;
-      MAP_CAMERA_MODE_HIGH_BYTE = 1;
+      COURSE_SELECT_LAYOUT = COURSE_SELECT_LAYOUT_HOLES;
       g_BetSet = BET_SET_MATCH_GAME;
       break;
     case GAME_MODE_SKINS_MATCH:
       g_CourseSelectKind = COURSE_SELECT_KIND_COURSES;
-      MAP_CAMERA_MODE_HIGH_BYTE = 1;
+      COURSE_SELECT_LAYOUT = COURSE_SELECT_LAYOUT_HOLES;
       g_BetSet = BET_SET_SKINS_MATCH;
       break;
     case GAME_MODE_TRAINING:
@@ -2140,12 +2134,12 @@ void EnterMenuAtCourseSelect(void) {
     case GAME_MODE_SPEED_GOLF:
     case GAME_MODE_RING_SHOT:
       g_CourseSelectKind = COURSE_SELECT_KIND_COURSES;
-      MAP_CAMERA_MODE_HIGH_BYTE = 2;
+      COURSE_SELECT_LAYOUT = COURSE_SELECT_LAYOUT_PLAIN;
       g_BetSet = BET_SET_NONE;
       break;
     case GAME_MODE_CLUB_SLOTS:
       g_CourseSelectKind = COURSE_SELECT_KIND_COURSES;
-      MAP_CAMERA_MODE_HIGH_BYTE = 1;
+      COURSE_SELECT_LAYOUT = COURSE_SELECT_LAYOUT_HOLES;
       g_BetSet = BET_SET_CLUB_SLOTS;
       break;
   }

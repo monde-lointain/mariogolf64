@@ -570,8 +570,6 @@ s32 GetStickDiagonal(void) {
 
 #define Z_OR_L_BUTTONS (Z_TRIG | L_TRIG)
 
-#define MAP_CAMERA_TOP_BYTE_UNK2 2
-
 /* Where pressing up blanks a line of debug text */
 #define BLANKED_DEBUG_TEXT_COLUMN 15
 #define BLANKED_DEBUG_TEXT_ROW 10
@@ -974,7 +972,7 @@ s32 UpdateCharacterSelect(
         StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
         g_MenuScreen = MENU_SCREEN_COURSE_SELECT;
         g_CourseSelectKind = COURSE_SELECT_KIND_COURSES;
-        MAP_CAMERA_MODE_TOP_BYTE = MAP_CAMERA_TOP_BYTE_UNK2;
+        COURSE_SELECT_LAYOUT = COURSE_SELECT_LAYOUT_PLAIN;
         g_BetSet = BET_SET_NONE;
       }
 
