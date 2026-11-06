@@ -1482,8 +1482,13 @@ s32 GetUnusedPalette(s32 choiceIndex);
  * Doesn't match: the original keeps row in a temporary register and spills the
  * menu memory pointer, where GCC keeps the pointer in a saved register and
  * spills row instead. Comparing row as a byte with the cursor's row, the
- * permuter's best form, gives 175 words, 13 in shape. 91 words differ, 25
- * in shape.
+ * permuter's best form, gives 175 words, 13 in shape.
+ *
+ * The original sets the alternate faces' table on the flag test's
+ * fall-through path, as a positive test of the flag would, and jumps over
+ * the other table. Testing the flag positively, with if/else or ?:, gives
+ * that order but 97 words (25 in shape); opening the asset in each arm gives
+ * 134 (24), or 140 (26) with the negated test. 91 words differ, 25 in shape.
  */
 #ifdef NON_MATCHING
 void DrawGridFaces(Gfx** displayListHead, u8 isSinglePlayer) {
