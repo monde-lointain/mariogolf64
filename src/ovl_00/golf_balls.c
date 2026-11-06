@@ -764,14 +764,14 @@ enum BallSprite {
 /*
  * Doesn't match: the original's reload spills the divide by 9's constant first,
  * to 0x54($sp), and the depth in pseudo 87 later, so its spill slots come in
- * another order, its frame is 8 bytes larger and the display list pointers take
- * other registers. The sprite branches share one sync after the chain, which
- * the original reaches by jumping from each branch; with a sync ending each
- * branch instead, which emits the same commands, 911 words differed, 137 in
- * shape. Before that change, updating f_UnusedBallFrame ahead of the display
- * list, rather than after f_BallRollFrame, cut 1220 words differing to 834, and
- * updating f_BallRollFrame anywhere else gave 822 to 1633 words, 158 or more in
- * shape. The original aligns the Pika ball texture's address to 8 bytes, as
+ * another order and the display list pointers take other registers. The sprite
+ * branches share one sync after the chain, which the original reaches by
+ * jumping from each branch; with a sync ending each branch instead, which emits
+ * the same commands, 911 words differed, 137 in shape. Before that change,
+ * updating f_UnusedBallFrame ahead of the display list, rather than after
+ * f_BallRollFrame, cut 1220 words differing to 834, and updating
+ * f_BallRollFrame anywhere else gave 822 to 1633 words, 158 or more in shape.
+ * The original aligns the Pika ball texture's address to 8 bytes, as
  * TextureAddress does; without that, 894 words differed, 152 in shape. The
  * afterimages' loop tests i != f_BallAfterimageLength, as the original's bne
  * against the reloaded length shows; < compiles to slt and bnez. The register
@@ -803,8 +803,17 @@ enum BallSprite {
  * statement macro in each case gives 509 words (89 in shape), with the same
  * skipped commands for other marker players: the original's range check
  * branches to the sync after the switch. The macro in each case with a
- * default case holding the copy as well gives 1155 (207). 648 words differ,
- * 90 in shape.
+ * default case holding the copy as well gives 1155 (207).
+ *
+ * Each ball's marker player is read once into markerPlayer, which the
+ * no-marker test and the marker colors' switch share. That takes the draft
+ * from 648 words differing, 90 in shape, to 492 (100), and the register
+ * oracle's closest result from 648 words to 492, with nothing forced; the
+ * frame grows 8 bytes to the original's 0x390. The local as an s32 gives 663
+ * words (101 in shape), set as it is declared at the top of the drawn ball's
+ * block 852 (114), and read only for the switch, at the top of the near
+ * ball's block, 492 (100). The counts in the paragraphs above were measured
+ * before this change. 492 words differ, 100 in shape.
  */
 #ifdef NON_MATCHING
 void DrawGolfBalls(CameraMatrices* matrices UNUSED) {
@@ -895,6 +904,8 @@ void DrawGolfBalls(CameraMatrices* matrices UNUSED) {
   for (i = 0; i < GOLF_BALL_COUNT; i++) {
     ball = &f_GolfBalls[i];
     if (ball->alpha > 0) {
+      s8 markerPlayer;
+
       surface = ball->surface;
       groundHeight =
           GetGroundHeight(ball->position[AXIS_X] * WORLD_TO_COURSE_SCALE,
@@ -930,7 +941,8 @@ void DrawGolfBalls(CameraMatrices* matrices UNUSED) {
       shadowDepth = ProjectPoint(ball->position[AXIS_X],
           (groundHeight * COURSE_TO_WORLD_SCALE) - (g_PinVertexScale * 0.06f),
           ball->position[AXIS_Z], &shadowPoint);
-      if (ball->markerPlayerIndex == BALL_NO_MARKER) {
+      markerPlayer = ball->markerPlayerIndex;
+      if (markerPlayer == BALL_NO_MARKER) {
         if (ballDepth < BALL_NEAREST_DEPTH && exposure >= BALL_HALF_SUNK) {
           gDPPipeSync(gfx++);
           if (ball->hasEnteredWater) {
@@ -1205,7 +1217,7 @@ void DrawGolfBalls(CameraMatrices* matrices UNUSED) {
 
           gDPSetPrimDepth(gfx++, shadowPrimDepth & ~3, 0);
           gDPPipeSync(gfx++);
-          switch (ball->markerPlayerIndex) {
+          switch (markerPlayer) {
             case -1:
               gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, 0);
               break;
