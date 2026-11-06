@@ -2,6 +2,8 @@
  * The clubhouse's course statistics: a wheel of the open courses that turns
  * from one to the next, and the chosen course's panel of statistics.
  */
+#include "course_menu.h"
+
 #include <ultra64.h>
 
 #include "address.h"
@@ -18,7 +20,9 @@
 #include "main_menu.h"
 #include "math_util.h"
 #include "menu.h"
+#include "menu_arrows.h"
 #include "menu_memory.h"
+#include "menu_number.h"
 #include "save.h"
 #include "screen.h"
 #include "sound.h"
@@ -149,12 +153,9 @@ extern const char f_StatsStringFormat[];
 extern const char f_NumberedCourseFormat[];
 
 void DrawStatFigure(Gfx** displayListHead, s16 statIndex, u8 row);
-void DrawSpinningBadge(Gfx** displayListHead, void* image, s32 x, s32 y);
 void DrawThreeDigitMenuNumber(
     Gfx** displayListHead, s32 x, s32 y, s32 value, u8 mark);
 void DrawFourDigitMenuNumber(
-    Gfx** displayListHead, s32 x, s32 y, s32 value, u8 mark);
-void DrawUnalignedMenuNumber(
     Gfx** displayListHead, s32 x, s32 y, s32 value, u8 mark);
 void DrawDecimalMenuNumber(Gfx** displayListHead, s32 x, s32 y, f32 value);
 void DrawMenuNumber(

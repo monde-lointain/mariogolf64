@@ -2,6 +2,8 @@
  * The window that opens over the menus, and the Club Tournament screen with its
  * code entry.
  */
+#include "tournament_menu.h"
+
 #include <ultra64.h>
 
 #include "address.h"
@@ -19,6 +21,7 @@
 #include "main_menu.h"
 #include "menu.h"
 #include "menu_memory.h"
+#include "menu_window.h"
 #include "password.h"
 #include "save.h"
 #include "screen.h"
@@ -153,7 +156,6 @@ enum CodeKeyResult {
 #define CLUB_CODE_MESSAGE_Y 180
 
 s32 GetClubTournamentCourse(void);
-void StartLoadingChosenHole(void);
 /* The first club tournament's name; g_ClubTournamentNameIndex picks the
  * tournament */
 #define MESSAGE_FIRST_CLUB_TOURNAMENT_NAME 0x16F
@@ -341,7 +343,6 @@ void DrawCodeKeys(Gfx** displayListHead);
 void DrawEnteredCode(Gfx** displayListHead);
 void DrawCodePrompt(Gfx** displayListHead);
 void DrawCodeCursor(Gfx** displayListHead);
-s32 GetClubTournamentCharacter(void);
 s32 PressCodeKey(void);
 s32 DeleteCodeCharacter(void);
 

@@ -4,6 +4,8 @@
  * over the character grid, and the chosen character's shot curve shows as a
  * meter.
  */
+#include "character_select.h"
+
 #include <stdlib.h>
 #include <ultra64.h>
 
@@ -138,8 +140,6 @@ typedef struct TagOffset {
   /* 0x1 */ s8 y;
 } TagOffset; /* size = 0x2 */
 
-void DrawMenuScenery(Gfx** displayListHead);
-void DrawMenuBanner(Gfx** displayListHead);
 void DrawGridFaces(Gfx** displayListHead, u8 isSinglePlayer);
 void DrawCharacterBoard(Gfx** displayListHead);
 void DrawPlayerTags(Gfx** displayListHead, u8 tagMode);

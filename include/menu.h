@@ -162,35 +162,6 @@ extern u8 g_MenuCharacterPalettes[CHARACTER_COUNT][MENU_PALETTE_FILE_SIZE];
 #define IMAGE_SLOT_COUNT 14
 extern void* g_ImageSlots[IMAGE_SLOT_COUNT];
 
-/* Returns an image buffer of the menu overlay */
-void* GetMenuImageBuffer(void);
-
-/* The states of the menus' popup window, which opens and closes by scaling */
-enum MenuWindowState {
-  MENU_WINDOW_OPENING,
-  MENU_WINDOW_OPEN,
-  MENU_WINDOW_CLOSING,
-  MENU_WINDOW_CLOSED
-};
-
-/*
- * The answers of IsMenuWindowOpen and IsMenuWindowClosed. MOVING is nonzero, so
- * a caller that only tests the answer counts a moving window as open or closed.
- */
-enum MenuWindowCheck {
-  MENU_WINDOW_CHECK_MOVING = -1,
-  MENU_WINDOW_CHECK_NO,
-  MENU_WINDOW_CHECK_YES
-};
-
-void ResetMenuWindow(void);
-void ShowMenuWindow(void);
-void CloseMenuWindow(void);
-/* These return MENU_WINDOW_CHECK_* values */
-s32 IsMenuWindowOpen(void);
-s32 IsMenuWindowClosed(void);
-void LoadMenuWindowImage(s32 imageIndex);
-
 /* The character select's grid of slots */
 #define CHARACTER_GRID_ROW_COUNT 3
 #define CHARACTER_GRID_COLUMN_COUNT 7
@@ -289,15 +260,6 @@ extern s16 g_ModeIconAnimations[MODE_ICON_ANIMATION_COUNT]
                                [MODE_ICON_FRAME_COUNT];
 
 /*
- * The menu banners, 256 color images such as asset 0x521, drawn in strips
- * that fit the texture memory
- */
-#define MENU_BANNER_WIDTH 200
-#define MENU_BANNER_STRIP_HEIGHT 10
-#define MENU_BANNER_STRIP_COUNT 3
-#define MENU_BANNER_LEFT 60
-
-/*
  * The menus draw characters' 32x24 faces, darkened or with the name
  * beside them
  */
@@ -336,27 +298,6 @@ extern s16 g_ModeIconAnimations[MODE_ICON_ANIMATION_COUNT]
 #define WHEEL_ARROW_X 160
 #define WHEEL_ARROW_Y 94
 
-/*
- * How DrawMenuNumber marks a number: with nothing, a cross before it, its
- * sign (a plus tinted red, a minus tinted green, or plus-minus for zero),
- * or a red or green tint
- */
-enum MenuNumberStyle {
-  MENU_NUMBER_PLAIN,
-  MENU_NUMBER_TIMES,
-  MENU_NUMBER_SIGNED,
-  MENU_NUMBER_RED_TINT,
-  MENU_NUMBER_GREEN_TINT
-};
-
-/* The signs that DrawMenuSign draws */
-enum MenuSign {
-  MENU_SIGN_DASH,
-  MENU_SIGN_TIMES,
-  MENU_SIGN_CIRCLE
-};
-
-void DrawMenuSign(Gfx** displayListHead, s32 x, s32 y, u8 sign);
 s32 SaveOrContinueGame(s32 slotIndex, Boolean isContinuing);
 s32 GetClubTournamentCourseTitleMessage(void);
 s32 GetClubTournamentGameMode(void);
@@ -388,147 +329,6 @@ void FreeMenuResources(void);
 #define MENU_CURSOR_FAR 2000.0f
 #define MENU_CURSOR_Z (-100.0f)
 #define MENU_CURSOR_SCALE_Y 0.87f
-
-/* The buffers of LoadSaveGameBuffer, and what it reads into them */
-enum SaveGameBuffer {
-  SAVE_GAME_BUFFER_CONTROLLER_ICONS = 1,
-  SAVE_GAME_BUFFER_PLAYER_LABELS,
-  SAVE_GAME_BUFFER_FIRST_BOARD,
-  SAVE_GAME_BUFFER_SECOND_BOARD,
-  SAVE_GAME_BUFFER_THIRD_BOARD,
-  SAVE_GAME_BUFFER_COURSE,
-  SAVE_GAME_BUFFER_CHOSEN_COURSE
-};
-
-/* What LoadSaveMenuBuffers reads: each saved game's mode image and a frame, or
- * the chosen game's two */
-enum SaveMenuBuffer {
-  SAVE_MENU_BUFFER_SLOTS = 1,
-  SAVE_MENU_BUFFER_CHOSEN
-};
-
-/* The buffers that LoadGameModeLabelBuffer keeps, by its caller's kind */
-enum GameModeLabelBuffer {
-  GAME_MODE_LABEL_BUFFER_NAME_PLATE = 1,
-  GAME_MODE_LABEL_BUFFER_LABELS
-};
-
-/* The buffers that LoadCharacterSelectBuffer keeps, by the kind its caller
- * gives, and the image of f_SelectBufferAssets that it reads into each. Callers
- * pass no kind below 1, nor 3, 4, 6, 7 or 9 */
-enum CharacterSelectBuffer {
-  CHARACTER_SELECT_BUFFER_PLAYER_LABELS = 1,
-  /* The wooden board of character cells */
-  CHARACTER_SELECT_BUFFER_BOARD,
-  /* The CHARACTER SELECT title */
-  CHARACTER_SELECT_BUFFER_TITLE,
-  CHARACTER_SELECT_BUFFER_NAME_PLATE,
-  CHARACTER_SELECT_BUFFER_CURSOR_BOX,
-  /* Small controllers numbered 1 to 4 */
-  CHARACTER_SELECT_BUFFER_CONTROLLER_ICONS,
-  /* A blue bar and a green bar */
-  CHARACTER_SELECT_BUFFER_COLOR_BARS,
-  /* The cells of the shot curve meter */
-  CHARACTER_SELECT_BUFFER_CURVE_CELLS,
-  /* Kept without reading an image into it */
-  CHARACTER_SELECT_BUFFER_UNREAD = 10
-};
-
-/* The buffers that LoadBestTimesBuffer keeps, by the kind its caller gives */
-enum BestTimesBuffer {
-  /* Read into g_WorkArea, whatever buffer the caller gives */
-  BEST_TIMES_BUFFER_FACE_STRIP = 1,
-  /* Kept without reading an image into it */
-  BEST_TIMES_BUFFER_UNREAD,
-  BEST_TIMES_BUFFER_PLACES,
-  BEST_TIMES_BUFFER_GREEN_ARROWS
-};
-
-/* The buffers that LoadCourseMenuBuffer keeps, by the kind its caller gives */
-enum CourseMenuBuffer {
-  /* Neither kept nor read */
-  COURSE_MENU_BUFFER_UNUSED = 1,
-  COURSE_MENU_BUFFER_HOLE_IN_ONE_BADGE,
-  COURSE_MENU_BUFFER_NAME_PLATE,
-  /* Kept in the hole-in-one badge's place */
-  COURSE_MENU_BUFFER_SPINNING_BADGE,
-  COURSE_MENU_BUFFER_DIGITS_AND_ARROWS,
-  COURSE_MENU_BUFFER_LARGE_DIGITS,
-  COURSE_MENU_BUFFER_GREEN_ARROWS
-};
-
-/* The buffers that LoadScoreLabelBuffer keeps, by the kind its caller gives */
-enum ScoreLabelBuffer {
-  /* The menus' name plate image, kept without reading an image into it */
-  SCORE_LABEL_BUFFER_NAME_PLATE = 1,
-  SCORE_LABEL_BUFFER_CURSOR_BOX,
-  /* The four Japanese score labels, one after another */
-  SCORE_LABEL_BUFFER_LABELS
-};
-
-/* The buffers that LoadRingShotRecordBuffer keeps, by its caller's kind */
-enum RingShotRecordBuffer {
-  /* Kept without reading an image into it */
-  RING_SHOT_RECORD_BUFFER_UNREAD = 1,
-  RING_SHOT_RECORD_BUFFER_RAINBOW_BOX,
-  RING_SHOT_RECORD_BUFFER_COURSE_NUMBERS,
-  RING_SHOT_RECORD_BUFFER_GREEN_ARROWS
-};
-
-/* The buffers that LoadTournamentBuffer keeps, by the kind its caller gives */
-enum TournamentBuffer {
-  TOURNAMENT_BUFFER_WIDE_CLOUD = 1,
-  TOURNAMENT_BUFFER_YES_NO,
-  TOURNAMENT_BUFFER_NINTENDO_BADGE,
-  /* The first of g_TournamentIconAssets */
-  TOURNAMENT_BUFFER_ICON,
-  /* The last of f_MenuWindowImageAssets */
-  TOURNAMENT_BUFFER_MENU_WINDOW,
-  /* The file of f_MenuWindowPaletteFiles's last row */
-  TOURNAMENT_BUFFER_ROW_FILE
-};
-
-/* The buffers that LoadCodeEntryBuffer keeps, by the kind its caller gives */
-enum CodeEntryBuffer {
-  CODE_ENTRY_BUFFER_NAME_PLATE = 1,
-  CODE_ENTRY_BUFFER_BAR,
-  CODE_ENTRY_BUFFER_GLYPHS,
-  CODE_ENTRY_BUFFER_POINTING_HAND,
-  CODE_ENTRY_BUFFER_CURSOR_BOX
-};
-
-/* The buffers that LoadCharacterTableBuffer keeps, by its caller's kind */
-enum TableBuffer {
-  TABLE_BUFFER_CURSOR = 1,
-  TABLE_BUFFER_UNREAD,
-  TABLE_BUFFER_ARROWS,
-  TABLE_BUFFER_STAR
-};
-
-/* The buffers LoadCourseTrophyImages keeps, by the kind its caller gives */
-enum CourseBuffer {
-  COURSE_BUFFER_FIRST = 1,
-  COURSE_BUFFER_SECOND,
-  COURSE_BUFFER_LAST
-};
-
-/* The buffers that LoadPlayerStatsBuffer fills, and the assets it reads into
- * them */
-enum PlayerStatsBuffer {
-  PLAYER_STATS_BUFFER_BET_ICONS = 1,
-  PLAYER_STATS_BUFFER_STAKE_MARK,
-  PLAYER_STATS_BUFFER_NAME_PLATE,
-  PLAYER_STATS_BUFFER_BET_ICON_FIRST_FRAME,
-  PLAYER_STATS_BUFFER_BET_ICON_SECOND_FRAME,
-  PLAYER_STATS_BUFFER_UNUSED,
-  PLAYER_STATS_BUFFER_GREEN_ARROWS,
-  PLAYER_STATS_BUFFER_HANDICAP_PLAQUE,
-  PLAYER_STATS_BUFFER_BET_LABELS,
-  PLAYER_STATS_BUFFER_PLAYER_LABELS,
-  PLAYER_STATS_BUFFER_BRICK_WALL,
-  PLAYER_STATS_BUFFER_TRIPLE_PAGE_ARROWS,
-  PLAYER_STATS_BUFFER_DOUBLE_PAGE_ARROWS
-};
 
 /* The sets of bets that a game's mode and player count offer, as g_BetSet */
 enum BetSet {
@@ -581,24 +381,5 @@ extern void* g_ModeIconImages[7];
 
 /* Read by no routine */
 extern u8 g_UnreadMenuBuffer[0x1218];
-
-/* The ways SlideBrickWall slides the stats panel's rows */
-#define STATS_SLIDE_CURRENT 0
-#define STATS_SLIDE_OUT_RIGHT 1
-#define STATS_SLIDE_OUT_LEFT 2
-#define STATS_SLIDE_IN_FROM_RIGHT 3
-#define STATS_SLIDE_IN_FROM_LEFT 4
-#define STATS_SLIDE_COUNT 5
-
-/* The phases of the handicap screen's update, which g_BetPagesPhase holds */
-#define MENU_PHASE_START 0
-#define MENU_PHASE_CHOOSING 5
-#define MENU_PHASE_CANCELED 6
-#define MENU_PHASE_CONFIRMED 7
-/* The bet settings screen's phases in g_BetPagesPhase */
-#define BET_PHASE_OPENING 1
-#define BET_PHASE_CHOOSING 2
-#define BET_PHASE_CANCELED 3
-#define BET_PHASE_CONFIRMED 4
 
 #endif

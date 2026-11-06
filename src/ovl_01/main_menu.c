@@ -19,14 +19,18 @@
 
 #include "address.h"
 #include "asset.h"
+#include "best_times.h"
 #include "billboard.h"
 #include "camera.h"
 #include "character.h"
+#include "character_select.h"
 #include "character_slot.h"
+#include "character_table.h"
 #include "club.h"
 #include "compiler.h"
 #include "controller.h"
 #include "course.h"
+#include "course_menu.h"
 #include "course_space.h"
 #include "cpu_projection.h"
 #include "game.h"
@@ -41,12 +45,17 @@
 #include "main.h"
 #include "math_util.h"
 #include "menu.h"
+#include "menu_arrows.h"
 #include "menu_memory.h"
+#include "menu_number.h"
+#include "menu_window.h"
 #include "overlay_manager.h"
 #include "play.h"
+#include "player_stats.h"
 #include "round_hud.h"
 #include "round_stats.h"
 #include "save.h"
+#include "save_screens.h"
 #include "scene.h"
 #include "scoring.h"
 #include "screen.h"
@@ -54,6 +63,7 @@
 #include "sound.h"
 #include "sram.h"
 #include "text.h"
+#include "tournament_menu.h"
 #include "transfer_pak.h"
 
 /* The most modes the mode select offers for a player count */
@@ -336,47 +346,7 @@ void LeaveMenuWithWipe(void);
 void LeaveMenuWithCourseWipe(void);
 void UpdateBirdieBadges(void);
 void UpdateBlankScreen(void);
-void HideGameBoyCharacters(void);
-void LoadCharacterSelectBuffer(void* buffer, s16 bufferKind);
-void PlaceRivalCursor(void);
-void LoadCharacterFaces(void);
-void LoadCourseStatsIcons(void** buffers);
-void LoadCourseTrophyImages(void** buffers, s32 requestedKind);
-void LoadCourseMenuBuffer(void* buffer, s16 bufferKind);
-void UpdateCourseStats(void);
-void LoadBestTimesCourseIcons(void** buffers);
-void LoadCharacterFaceStrip(void* buffer);
-void LoadBestTimesBuffer(void* buffer, s16 bufferKind);
-void UpdateBestTimes(void);
-void LoadBestTimesFaces(void);
-void LoadCharacterTableBuffer(void* buffer, s16 bufferKind);
-void UpdateCharacterTable(void);
-void MarkShownTableCharacters(void);
-void LoadTableFaces(void);
-void LoadPlayerStatsBuffer(void* buffer, s16 bufferKind);
-void UpdateBetSettings(void);
-NO_RESULT UpdateHandicaps(s32 firstPlayerIndex, s32 playerCount);
-void LoadBestShotsCourseIcons(void** buffers);
-void LoadScoreLabelBuffer(void* buffer, s16 bufferKind);
-void UpdateBestShots(void);
-void ReadBestShots(void);
-void LoadBestShotFaces(void);
-void LoadRingShotRecordBuffer(void* buffer, s16 bufferKind);
-void LoadRingShotCourseIcons(void** buffers);
-void UpdateRingShotRecords(void);
-void ReadRingShotReplays(void);
-void LoadRingShotRecordFaces(void);
-void ReadSavedGames(void);
-void LoadSaveGameBuffer(void* buffer, u8 bufferKind);
-void LoadSaveMenuBuffers(void** buffers, u8 bufferKind);
-void LoadGameModeLabelBuffer(void* buffer, u8 bufferKind);
-void UpdateSavedGames(void);
-void LoadTournamentBuffer(void* buffer, s16 bufferKind);
-void LoadCodeEntryBuffer(void* buffer, s32 bufferKind);
-void UpdateClubTournament(void);
 s32 GetClubTournamentCourse(void);
-s32 GetClubTournamentCharacter(void);
-s32 TakeClubTournamentEntry(void);
 /* Defined as returning s16, but its caller here uses the whole register */
 #ifdef AVOID_UB
 s16 GetChosenBestShot(void);
@@ -387,21 +357,9 @@ void LoadRingShotRecord(RingShotRecord* record);
 void LoadBestShotReplay(PlayRecord* record);
 s32 SaveOrContinueGameByMode(Boolean isContinuing);
 s32 UpdateViewerCharacter(s32 unusedSetting, s32 playerNumber);
-void ApplyBetPreset(s32 requestedPreset);
-void ResetCodeEntry(void);
-void DrawMenuScenery(Gfx** displayListHead);
 void DrawNarrowMenuBoard(Gfx** displayListHead);
 void DrawLargeMenuBanner(Gfx** displayListHead);
-void DrawMenuBanner(Gfx** displayListHead);
 void DrawMenuTitleScreen(Gfx** displayListHead);
-void DrawCharacterSelect(Gfx** displayListHead, u8 isSinglePlayer);
-void DrawCourseStats(Gfx** displayListHead);
-void DrawBestTimes(Gfx** displayListHead);
-void DrawCharacterTable(Gfx** displayListHead);
-void DrawBestShots(Gfx** displayListHead);
-void DrawRingShotRecords(Gfx** displayListHead);
-void DrawSavedGames(Gfx** displayListHead);
-void DrawClubTournament(Gfx** displayListHead);
 
 /* Not static: the original left these to the linker's common block */
 /* Frames until each menu character fidgets, or FIDGETING while it does */
@@ -4777,24 +4735,12 @@ extern const char g_CaddySelectTitle[];
 #define BET_SLIDE_STEP 32
 #define BET_SLIDE_DISTANCE 512
 
-void StartLoadingChosenHole(void);
 void DrawScaledModeIcon(
     Gfx** displayListHead, s32 left, s32 top, s32 halfSize, s32 scale);
 void DrawMenuCharacters(Gfx** displayListHead);
 void DrawCourseSelectBanners(Gfx** displayListHead);
-void DrawSpinningBadge(Gfx** displayListHead, void* image, s32 x, s32 y);
 void DrawSpinningStars(Gfx** displayListHead, s32 left, s32 top, u8 starCount,
     u8 enlargesChosenHole);
-void DrawUnalignedMenuNumber(
-    Gfx** displayListHead, s32 x, s32 y, s32 value, u8 mark);
-void DrawBetSettings(
-    Gfx** displayListHead, s32 slide, u8 isSlideReversed, u8 isSettled);
-void DrawHandicaps(Gfx** displayListHead, s32 slide, u8 reverseVerticalSlide,
-    u8 canShowPrompt);
-s32 SlideBrickWall(Gfx** displayListHead, u8 slide);
-void DrawPageArrows(Gfx** displayListHead);
-void DrawCenteredPageArrows(Gfx** displayListHead, s32 gap, s32 centerY);
-void DrawUpDownArrows(Gfx** displayListHead, s32 centerY);
 
 /*
  * Draws the mode select of screens 5, 23 and 26: the characters, the modes'
@@ -7007,9 +6953,6 @@ const char f_LuigisGardenName[] = "Luigi's Garden";
 #define ERASE_MESSAGE_PALETTE_RED 255
 #define ERASE_MESSAGE_PALETTE_GREEN 127
 #define ERASE_MESSAGE_PALETTE_BLUE 127
-
-void DrawYesNoWindow(Gfx** displayListHead, s32 width, s32 height, s32 centerX,
-    s32 centerY, s32 okTextShown, s32 chosenButton);
 
 /*
  * Draws the options screen: Mario and his shadow, each option's label, the

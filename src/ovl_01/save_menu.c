@@ -24,10 +24,13 @@
 #include "main_menu.h"
 #include "math_util.h"
 #include "menu.h"
+#include "menu_arrows.h"
 #include "menu_memory.h"
+#include "menu_number.h"
 #include "round_hud.h"
 #include "round_stats.h"
 #include "save.h"
+#include "save_screens.h"
 #include "scene.h"
 #include "screen.h"
 #include "screen_layers.h"
@@ -137,10 +140,6 @@ void ResetSavedGameControllers(void);
 s16 FindNextReplaySlot(s8 startSlot, u8 isForward);
 s16 GetChosenReplaySlot(void);
 s32 GetOpenRingShotCourseCount(void);
-void DrawOneDigitMenuNumber(
-    Gfx** displayListHead, s32 x, s32 y, s32 value, u8 mark);
-void DrawGreenArrow(Gfx** displayListHead, void* image, s32 blinkFrame,
-    s32 direction, s32 centerX, s32 centerY);
 /* DrawCharacterFace takes a u8 drawMode, but this file calls it without
  * narrowing the argument */
 #ifdef AVOID_UB
@@ -1862,7 +1861,6 @@ const char f_SaveMenuNameFormat[] = "%s";
 #define EMPTY_GAME_TEXT_Y 186
 #define MESSAGE_EMPTY_SAVED_GAME 0x26
 
-void DrawCenteredPageArrows(Gfx** displayListHead, s32 gap, s32 centerY);
 void DrawChosenGameBoard(
     Gfx** displayListHead, s32 left, s32 top, s32 halfSize, s32 scale);
 void DrawSavedGolfers(Gfx** displayListHead);

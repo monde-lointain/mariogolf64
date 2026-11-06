@@ -2,12 +2,15 @@
  * The clubhouse's Best Times screen. Left and right turn it between the open
  * courses, and it shows each course's best times with their places and holders.
  */
+#include "best_times.h"
+
 #include <ultra64.h>
 
 #include "address.h"
 #include "asset.h"
 #include "character.h"
 #include "compiler.h"
+#include "course_menu.h"
 #include "cpu_projection.h"
 #include "frame_time.h"
 #include "game.h"
@@ -17,7 +20,9 @@
 #include "main_menu.h"
 #include "math_util.h"
 #include "menu.h"
+#include "menu_arrows.h"
 #include "menu_memory.h"
+#include "menu_number.h"
 #include "save.h"
 #include "screen.h"
 #include "sound.h"
@@ -63,8 +68,6 @@
 #define TIME_SEPARATOR_SHIFT_LEFT 4
 #define TIME_SEPARATOR_SPACING 6
 
-void DrawNarrowTwoDigitMenuNumber(
-    Gfx** displayListHead, s32 x, s32 y, s32 value, u8 mark);
 void DrawCharacterFace(Gfx** displayListHead, void* texels, void* palette,
     s32 left, s32 top, s16 character, u8 drawMode);
 void DrawPlaceLabel(Gfx** displayListHead, s32 left, s32 top, s32 place);

@@ -1209,7 +1209,6 @@ void DrawBootLogos(Gfx** displayListHead);
 void DrawStaffRoll(Gfx** displayListHead);
 void DrawTransmitMenu(Gfx** displayListHead);
 void DrawOpening(CameraMatrices* matrices, Gfx** displayListHead);
-void DrawMenuScreen(Gfx** displayListHead);
 void DrawRoundResults(Gfx** displayListHead);
 void DrawResultsNotice(Gfx** displayListHead);
 void DrawGolfBalls(CameraMatrices* matrices);

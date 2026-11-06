@@ -69,6 +69,17 @@ extern void* g_NamePlateImage;
 /* The player count chosen on the title screen, which the saved games, the
  * menus and the club tournament set to 1 */
 extern s32 g_ChosenPlayerCount;
+
+/* The phases of the handicap screen's update, which g_BetPagesPhase holds */
+#define MENU_PHASE_START 0
+#define MENU_PHASE_CHOOSING 5
+#define MENU_PHASE_CANCELED 6
+#define MENU_PHASE_CONFIRMED 7
+/* The bet settings screen's phases in g_BetPagesPhase */
+#define BET_PHASE_OPENING 1
+#define BET_PHASE_CHOOSING 2
+#define BET_PHASE_CANCELED 3
+#define BET_PHASE_CONFIRMED 4
 extern u8 g_BetPagesPhase;
 extern u8 g_BetPagesWallSlide;
 extern s32 g_AnimatedIconFrameIndex;
@@ -106,16 +117,25 @@ extern s32 g_ChoosingPlayerIndex;
 extern char g_MenuCharacterNames[CHARACTER_COUNT]
                                 [IMPORTED_CHARACTER_NAME_LENGTH];
 
+/*
+ * The menu banners, 256 color images such as asset 0x521, drawn in strips
+ * that fit the texture memory
+ */
+#define MENU_BANNER_WIDTH 200
+#define MENU_BANNER_STRIP_HEIGHT 10
+#define MENU_BANNER_STRIP_COUNT 3
+#define MENU_BANNER_LEFT 60
+
 s32 GetOpenCourseCount(void);
 void CheckControllersAndSetPans(void);
-void DrawCourseBanner(
-    Gfx** displayListHead, u8 useCourseNames, s32 courseIndex);
-void DrawBlinkingSideArrows(Gfx** displayListHead, void* image, s32* blinkFrame,
-    s32* blinkTimer, s32 width, s32 centerX, s32 centerY);
-s32 UpdateCharacterSelect(
-    s32 firstPlayerIndex, s32 playerCount, Boolean canChooseMarked);
 void DrawMenuBackdropLayers(Gfx** displayListHead, s32 layers);
 void DrawLargeBannerBackdropLayers(Gfx** displayListHead, s32 layers);
 void UpdateMenus(void);
+void* GetMenuImageBuffer(void);
+void StartLoadingChosenHole(void);
+void DrawMenuScreen(Gfx** displayListHead);
+void DrawMenuScenery(Gfx** displayListHead);
+void DrawMenuBanner(Gfx** displayListHead);
+void DrawSpinningBadge(Gfx** displayListHead, void* image, s32 x, s32 y);
 
 #endif

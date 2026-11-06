@@ -2,6 +2,8 @@
  * The clubhouse's character table, screen 15: the characters' wins against each
  * other, and a popup of two characters' faces with their wins.
  */
+#include "character_table.h"
+
 #include <ultra64.h>
 
 #include "address.h"
@@ -14,7 +16,9 @@
 #include "language.h"
 #include "main_menu.h"
 #include "menu.h"
+#include "menu_arrows.h"
 #include "menu_memory.h"
+#include "menu_number.h"
 #include "save.h"
 #include "screen.h"
 #include "sound.h"
@@ -124,10 +128,6 @@ void DrawCharacterFace(Gfx** displayListHead, void* texels, void* palette,
 void DrawCharacterFace(Gfx** displayListHead, void* texels, void* palette,
     s32 left, s32 top, CharacterId character, u8 drawMode);
 #endif
-void DrawUnalignedMenuNumber(
-    Gfx** displayListHead, s32 x, s32 y, s32 value, u8 mark);
-void DrawGreenArrow(Gfx** displayListHead, void* image, s32 blinkFrame,
-    s32 direction, s32 centerX, s32 centerY);
 void DrawTableCursor(Gfx** displayListHead, s32 x, s32 y);
 void DrawTableLines(Gfx** displayListHead);
 void DrawTablePopup(Gfx** displayListHead);

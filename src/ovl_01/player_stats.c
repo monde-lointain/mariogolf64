@@ -3,6 +3,8 @@
  * ranked records and page arrows. The file also holds the bet settings screen
  * and the handicap screen, where each player chooses a handicap.
  */
+#include "player_stats.h"
+
 #include <ultra64.h>
 
 #include "address.h"
@@ -22,7 +24,9 @@
 #include "main_menu.h"
 #include "math_util.h"
 #include "menu.h"
+#include "menu_arrows.h"
 #include "menu_memory.h"
+#include "menu_number.h"
 #include "save.h"
 #include "screen.h"
 #include "screen_layers.h"
@@ -215,10 +219,6 @@ s16 GetChosenBestShot(void);
 void DrawBestShotsCursor(Gfx** displayListHead);
 void DrawCharacterFace(Gfx** displayListHead, void* texels, void* palette,
     s32 left, s32 top, s16 character, u8 drawMode);
-void DrawOneDigitMenuNumber(
-    Gfx** displayListHead, s32 x, s32 y, s32 value, u8 mark);
-void DrawUnalignedMenuNumber(
-    Gfx** displayListHead, s32 x, s32 y, s32 value, u8 mark);
 void DrawBetIcon(
     Gfx** displayListHead, s32 left, s32 top, s32 size, s32 textureStep);
 void DrawBetLabel(Gfx** displayListHead, s32 centerX, s32 top, u8 labelIndex);
@@ -1198,9 +1198,6 @@ NO_RESULT UpdateHandicaps(s32 firstPlayerIndex UNUSED, s32 playerCount UNUSED) {
 #define HANDICAP_PROMPT_X 36
 #define HANDICAP_PROMPT_Y 200
 #define HANDICAP_PROMPT_MESSAGE 0x1D
-
-void DrawTwoDigitMenuNumber(
-    Gfx** displayListHead, s32 x, s32 y, s32 value, u8 mark);
 
 /*
  * Draws the handicap screen: the players' characters, a column for each player
