@@ -43,10 +43,12 @@ enum ResultsState {
 enum BannerKind {
   BANNER_KIND_NONE, /* Set with BANNER_HIDDEN as the results load */
   BANNER_KIND_TOURNAMENT_PLACE,
-  BANNER_KIND_UNK2,
+  /* BANNER_KIND_UNUSED_* kinds are never set */
+  BANNER_KIND_UNUSED_A,
   BANNER_KIND_POINTS,
-  BANNER_KIND_UNK4,
-  BANNER_KIND_UNK5
+  BANNER_KIND_UNUSED_B,
+  /* Would show MESSAGE_UNUSED_BANNER */
+  BANNER_KIND_UNUSED_MESSAGE
 };
 
 /* f_BannerState values */
@@ -1912,7 +1914,7 @@ void SetResultsBanner(s32 state, s32 kind) {
 #define MESSAGE_PLACE_PRIZE 0x40
 /* Plus the place */
 #define MESSAGE_TROPHY_PLACE 0x40
-#define MESSAGE_UNK48 0x48
+#define MESSAGE_UNUSED_BANNER 0x48
 #define MESSAGE_PLACE 0x49
 #define MESSAGE_POINTS_EARNED 0x1F3
 
@@ -2020,8 +2022,8 @@ void DrawResultsBanner(Gfx** displayListHead) {
   }
 
   switch (f_BannerKind) {
-    case BANNER_KIND_UNK2:
-    case BANNER_KIND_UNK4:
+    case BANNER_KIND_UNUSED_A:
+    case BANNER_KIND_UNUSED_B:
       break;
     case BANNER_KIND_POINTS:
       SetTextSlotValue(f_CoursePointsTally.shown, BANNER_TEXT_SLOT, 0);
@@ -2072,9 +2074,9 @@ void DrawResultsBanner(Gfx** displayListHead) {
       }
 
       break;
-    case BANNER_KIND_UNK5:
+    case BANNER_KIND_UNUSED_MESSAGE:
       SetTextSlot(f_BannerX + BANNER_TEXT_X, f_BannerY + BANNER_TEXT_Y,
-          MESSAGE_UNK48, TEXT_SLOT_LARGE_FONT, BANNER_TEXT_SLOT,
+          MESSAGE_UNUSED_BANNER, TEXT_SLOT_LARGE_FONT, BANNER_TEXT_SLOT,
           TEXT_FLAG_DRAWN_BY_OWNER | TEXT_FLAG_CENTERED, BANNER_TEXT_RED,
           BANNER_TEXT_GREEN, BANNER_TEXT_BLUE, BANNER_TEXT_ALPHA);
       break;
