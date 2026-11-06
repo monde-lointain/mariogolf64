@@ -202,8 +202,8 @@ void FrameSpheres(f32 depthOffset) {
   leftAngle = -rightAngle;
   topAngle = rightAngle * 0.75f;
   /*
-   * In its own block, as without it 292 words differ, 112 in shape, against 279
-   * and 109
+   * In its own block, as without it 241 words differ, 69 in shape, against 228
+   * and 66
    */
   IN_OWN_BLOCK(bottomAngle = leftAngle * 0.75f);
   maxZ = -minZ;

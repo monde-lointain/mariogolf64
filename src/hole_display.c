@@ -3213,8 +3213,8 @@ void CaptureHudAnimationFrame(void) {
         vertex->v.ob[AXIS_X] = x;
         vertex->v.ob[AXIS_Y] = TileGridRowY(gridRow);
         /*
-         * In its own block, as without it 97 words differ, 21 in shape, against
-         * 95 and 19
+         * In its own block, as without it 74 words differ, 22 in shape, against
+         * 72 and 20
          */
         IN_OWN_BLOCK(vertex->v.ob[AXIS_Z] = 0);
         nextVertex->v.ob[AXIS_X] = x;
