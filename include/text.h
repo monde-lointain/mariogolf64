@@ -5,6 +5,7 @@
 
 #include "compiler.h"
 #include "language.h"
+#include "screen.h"
 #include "text_format.h"
 
 /*
@@ -25,6 +26,12 @@
 #define TEXT_SLOT_VALUE_COUNT 4
 /* Given this as its message, SetTextSlot clears the slot */
 #define NO_MESSAGE (-1)
+/*
+ * Where the scenes leave a text slot as they clear it; the position goes
+ * unused with NO_MESSAGE
+ */
+#define CLEARED_TEXT_X (SCREEN_WIDTH / 2)
+#define CLEARED_TEXT_Y 114
 
 /* The number of one of the game's messages, or NO_MESSAGE */
 typedef s32 MessageId;

@@ -1532,9 +1532,6 @@ void MoveLakitu(void);
 /* The channels that the script's sounds play on. The ambient sounds' channels
  * follow, and are left playing when the opening ends */
 #define SCRIPT_SOUND_CHANNEL_COUNT ALTERNATING_SOUND_CHANNEL
-/* Where the opening leaves the first text slot as it clears it */
-#define CLEARED_TEXT_X (SCREEN_WIDTH / 2)
-#define CLEARED_TEXT_Y 114
 /* Where the debug build prints the frame count, the scene and its frames left
  */
 #define FRAME_COUNT_TEXT_COLUMN 30

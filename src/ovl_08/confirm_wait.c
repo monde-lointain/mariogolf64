@@ -33,8 +33,8 @@ void WaitForConfirmButton(void) {
     g_SceneModuleToLoad = MODULE_BOOT_LOGOS;
     PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
 
-    /* The position goes unused with NO_MESSAGE */
-    SetTextSlot(160, 114, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, 0, 0, 0, 0, 0, 0);
+    SetTextSlot(CLEARED_TEXT_X, CLEARED_TEXT_Y, NO_MESSAGE,
+        TEXT_SLOT_LARGE_FONT, 0, 0, 0, 0, 0, 0);
   }
 }
 

@@ -224,9 +224,6 @@ typedef struct LabelCorner {
 #define TRANSMIT_SOUND_CHANNEL 14
 /* The wipe that leaves for the Transmit scene from the saved games row */
 #define TRANSMIT_WIPE_SHAPE 12
-/* Where the title scene's text goes; pressing B clears it before going back
- * there */
-#define TITLE_SCREEN_TEXT_Y 114
 
 /* How the menus' bobbing items move: the phase step per frame, and the height
  * in pixels */
@@ -1965,7 +1962,7 @@ void UpdateMenuTitleScreen(void) {
     g_SceneModuleToUnload = MODULE_MENU;
     g_SceneModuleToLoad = MODULE_TITLE_SCREEN;
     PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
-    SetTextSlot(SCREEN_WIDTH / 2, TITLE_SCREEN_TEXT_Y, NO_MESSAGE,
+    SetTextSlot(CLEARED_TEXT_X, CLEARED_TEXT_Y, NO_MESSAGE,
         TEXT_SLOT_LARGE_FONT, 0, 0, 0, 0, 0, 0);
     return;
   }
