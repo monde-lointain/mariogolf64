@@ -1267,7 +1267,7 @@ void PlayFlightSounds(s32 step) {
     if (g_BallFlightStep == g_SimulatedShot.stepCount && !shownRingCount &&
         g_SimulatedShot.endsInCup) {
       *isPlayed = TRUE;
-      if (IsGameFlagSet(GAME_FLAG_UNK48)) {
+      if (IsGameFlagSet(GAME_FLAG_FORCE_FLOURISHES)) {
         if (g_IsCupViewShown == TRUE &&
             IsScoreToParWithin(
                 scoreToPar, SCORE_TO_PAR_EAGLE, SCORE_TO_PAR_BOGEY) &&
@@ -1286,7 +1286,7 @@ void PlayFlightSounds(s32 step) {
 
       if (g_SimulatedShot.startsOnGreen) {
         if (f_StartCupDistance > LONG_SHOT_SOUND_MIN_DISTANCE ||
-            IsGameFlagSet(GAME_FLAG_UNK48)) {
+            IsGameFlagSet(GAME_FLAG_FORCE_FLOURISHES)) {
           PlaySound(SOUND_UNK155, FLIGHT_SOUND_CHANNEL_CALLS, SOUND_FULL_SCALE);
           f_EndReaction = END_REACTION_UNK2;
         }
@@ -1699,7 +1699,7 @@ void EndHoleFlyover(void) {
   g_InsetView.step = 0;
   g_Cameras[INSET_CAMERA].view.drawFlags = 0;
   if (g_GameState.gameMode != GAME_MODE_SPEED_GOLF && !g_GameState.isMiniGolf) {
-    if (IsGameFlagSet(GAME_FLAG_UNK48) ||
+    if (IsGameFlagSet(GAME_FLAG_FORCE_FLOURISHES) ||
         g_HoleSetup.conditions.windSpeed / WIND_SPEED_UNIT >=
             STRONG_WIND_SPEED) {
       ShowWindFlyGuy(TRUE);
