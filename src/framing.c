@@ -8,6 +8,7 @@
 
 #include "camera.h"
 #include "controller.h"
+#include "libc.h"
 #include "math_util.h"
 
 /* How many spheres f_FramedSphereCenters has room for */
@@ -37,7 +38,6 @@ static Radians f_FramingYaw;
 static Mat4 f_FramingRotation;
 
 void TransformPoint(Mat4 mf, Vec3 point, Vec3 result);
-float fabsf(float x);
 double tan(double x);
 
 FILE_STATIC Vec3 f_FramedEye;
@@ -74,33 +74,12 @@ void AddFramedSphere(Vec3 center, f32 radius) {
   }
 }
 
-/*
- * Sets the direction, in radians, from which FrameSpheres looks.
- *
- * Doesn't match: the original takes the cosine's magnitude into $f2, where
- * local-alloc gives it the $f0 cosf returns it in. A cosine local with a block
- * ending after it gives the original's order of instructions, where they
- * took 7 words differing, 3 in shape. Taking the magnitude into the cosine
- * local, before or after the block's end, or swapping the comparison doesn't
- * help. The register oracle finds nothing closer: forcing the magnitude's
- * pseudo into $f2 gives 16 words, and an early-clobber output ("=&f") in
- * fabsf's assembly 20 words, none in shape. 6 words differ.
- *
- * Braces in place of the empty block, around the cosine and its test, with the
- * cosine declared in them or not, or around the test alone or with a magnitude
- * local, give 7 words (3 in shape), as without the block, since braces end no
- * basic block; so does testing cosf's result directly, with no cosine local.
- */
-#ifdef NON_MATCHING
+/* Sets the direction, in radians, from which FrameSpheres looks */
 void SetFramingAngles(Radians pitch, Radians yaw) {
   Mat4 pitchRotation;
   Mat4 yawRotation;
-  f32 cosine;
 
-  cosine = cosf(pitch);
-  /* Ended here, as without it 7 words differ, 3 in shape, against 6 and 0 */
-  END_BASIC_BLOCK();
-  if (fabsf(cosine) < STEEP_PITCH_COSINE) {
+  if (fabsf(cosf(pitch)) < STEEP_PITCH_COSINE) {
     pitch += FramingDegreesToRadians(20);
   }
 
@@ -111,10 +90,6 @@ void SetFramingAngles(Radians pitch, Radians yaw) {
   guRotateF(yawRotation, (s32)(yaw * RADIANS_TO_DEGREES), 0.0f, -1.0f, 0.0f);
   guMtxCatF(yawRotation, pitchRotation, f_FramingRotation);
 }
-
-#else
-INCLUDE_ASM("asm/nonmatchings/framing", SetFramingAngles);
-#endif
 
 void TransformPoint(Mat4 mf, Vec3 point, Vec3 result) {
   f32 x = point[AXIS_X];
