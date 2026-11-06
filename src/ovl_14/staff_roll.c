@@ -296,8 +296,8 @@
     (view).scissorY = top; \
     (view).scissorWidth = width; \
     (view).scissorHeight = height; \
-    (view).viewportCenterX = (left * 2) + width; \
-    (view).viewportCenterY = (top * 2) + height; \
+    (view).viewportCenterX = ViewportCenter(left, width); \
+    (view).viewportCenterY = ViewportCenter(top, height); \
     (view).zoom = 2.0f * height * (1.0f / UNIT_ZOOM_HEIGHT); \
   } while (0)
 

@@ -382,6 +382,16 @@ FILE_STATIC s32 g_PerspectiveNormalization;
 FILE_STATIC CameraView g_SpareCameraView;
 FILE_STATIC Gfx g_DisplayLists[2][DISPLAY_LIST_LENGTH];
 
+/* Where StartGame places the spare view and the inset camera's view */
+#define SPARE_VIEW_LEFT 128
+#define SPARE_VIEW_TOP 64
+#define SPARE_VIEW_WIDTH (SCREEN_WIDTH / 2)
+#define SPARE_VIEW_HEIGHT (SCREEN_HEIGHT / 2)
+#define START_INSET_LEFT 64
+#define START_INSET_TOP 96
+#define START_INSET_WIDTH 128
+#define START_INSET_HEIGHT 64
+
 void StartGame(void) {
   g_MapCamera.view.eye[0] = 0.0f;
   g_MapCamera.view.eye[1] = 0.0f;
@@ -406,14 +416,16 @@ void StartGame(void) {
   g_SpareCameraView.lookAt[1] = 0.0f;
   g_SpareCameraView.lookAt[2] = 1.0f;
   g_SpareCameraView.heading = 0.0f;
-  g_SpareCameraView.scissorX = 128;
-  g_SpareCameraView.scissorY = 64;
-  g_SpareCameraView.scissorWidth = 160;
-  g_SpareCameraView.scissorHeight = 120;
+  g_SpareCameraView.scissorX = SPARE_VIEW_LEFT;
+  g_SpareCameraView.scissorY = SPARE_VIEW_TOP;
+  g_SpareCameraView.scissorWidth = SPARE_VIEW_WIDTH;
+  g_SpareCameraView.scissorHeight = SPARE_VIEW_HEIGHT;
   g_SpareCameraView.unreadSettings[0] = 0;
   g_SpareCameraView.unreadSettings[1] = 30;
-  g_SpareCameraView.viewportCenterX = 416;
-  g_SpareCameraView.viewportCenterY = 248;
+  g_SpareCameraView.viewportCenterX =
+      ViewportCenter(SPARE_VIEW_LEFT, SPARE_VIEW_WIDTH);
+  g_SpareCameraView.viewportCenterY =
+      ViewportCenter(SPARE_VIEW_TOP, SPARE_VIEW_HEIGHT);
   g_SpareCameraView.zoom = 0.5f;
   g_Cameras[0].mode = CAMERA_MODE_BEHIND_GOLFER;
   g_Cameras[0].view.eye[0] = 0.0f;
@@ -440,15 +452,17 @@ void StartGame(void) {
   g_Cameras[1].view.lookAt[0] = 0.0f;
   g_Cameras[1].view.lookAt[1] = 0.0f;
   g_Cameras[1].view.lookAt[2] = -100.0f;
-  g_Cameras[1].view.scissorX = 64;
-  g_Cameras[1].view.scissorY = 96;
-  g_Cameras[1].view.scissorWidth = 128;
-  g_Cameras[1].view.scissorHeight = 64;
+  g_Cameras[1].view.scissorX = START_INSET_LEFT;
+  g_Cameras[1].view.scissorY = START_INSET_TOP;
+  g_Cameras[1].view.scissorWidth = START_INSET_WIDTH;
+  g_Cameras[1].view.scissorHeight = START_INSET_HEIGHT;
   g_Cameras[1].view.unreadSettings[0] = 0;
   g_Cameras[1].view.unreadSettings[1] = 0;
   g_Cameras[1].view.zoom = 0.9f;
-  g_Cameras[1].view.viewportCenterX = 256;
-  g_Cameras[1].view.viewportCenterY = 256;
+  g_Cameras[1].view.viewportCenterX =
+      ViewportCenter(START_INSET_LEFT, START_INSET_WIDTH);
+  g_Cameras[1].view.viewportCenterY =
+      ViewportCenter(START_INSET_TOP, START_INSET_HEIGHT);
   g_Cameras[1].view.drawFlags = 0;
   g_Cameras[1].view.fieldOfView = 60.0f;
   osViSetSpecialFeatures(VI_FEATURES);
@@ -2607,11 +2621,11 @@ void UpdateGame(void) {
   }
 
   g_Cameras[INSET_CAMERA].view.viewportCenterX =
-      (g_Cameras[INSET_CAMERA].view.scissorX * 2) +
-      g_Cameras[INSET_CAMERA].view.scissorWidth;
+      ViewportCenter(g_Cameras[INSET_CAMERA].view.scissorX,
+          g_Cameras[INSET_CAMERA].view.scissorWidth);
   g_Cameras[INSET_CAMERA].view.viewportCenterY =
-      (g_Cameras[INSET_CAMERA].view.scissorY * 2) +
-      g_Cameras[INSET_CAMERA].view.scissorHeight;
+      ViewportCenter(g_Cameras[INSET_CAMERA].view.scissorY,
+          g_Cameras[INSET_CAMERA].view.scissorHeight);
   g_Viewports[VIEWPORT_INSET + g_DrawBufferIndex].vp.vscale[0] =
       2.0f * (g_Cameras[INSET_CAMERA].view.zoom * SCREEN_WIDTH);
   g_Viewports[VIEWPORT_INSET + g_DrawBufferIndex].vp.vscale[1] =

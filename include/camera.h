@@ -44,6 +44,10 @@ typedef struct CameraView {
   /* 0x44 */ f32 fieldOfView; /* In degrees */
 } CameraView; /* size = 0x48 */
 
+/* The viewport center, in half pixels, of a scissor box from start that spans
+ * size */
+#define ViewportCenter(start, size) (((start) * 2) + (size))
+
 typedef struct Camera {
   /* 0x00 */ s32 unusedBeforeView;
   /* 0x04 */ CameraView view;
