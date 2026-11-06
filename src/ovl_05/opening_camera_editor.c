@@ -514,7 +514,14 @@ void StopEditorMoves(void) {
  * oracle's closest result from 108 words to 99, with nothing forced.
  * Testing hasLeader && isDone after the flag tests as two nested ifs
  * gives 104 words (40 in shape), with isDone tested first 105 (41), and
- * as isDone && hasLeader 108 (40). 99 words differ, 37 in shape.
+ * as isDone && hasLeader 108 (40).
+ *
+ * Copying an arrived point's target as x, z, y, as a permuter run did,
+ * gives 87 words (37 in shape), with the register oracle's closest result
+ * 87 with nothing forced. But the original's three moves there write
+ * $f20, $f24 and $f22 in that order, as the draft's x, y, z does, and the
+ * swapped order writes the last two the other way round; only their source
+ * registers come to line up. 99 words differ, 37 in shape.
  */
 #ifdef NON_MATCHING
 void UpdateCameraEditor(void) {
