@@ -1032,8 +1032,8 @@ s32 GetEndReaction(void) {
 #define CLOSE_LANDING_DISTANCE 0x3C00
 #define NEAR_LANDING_DISTANCE 0x5A00
 #define GREEN_SOUND_MAX_DISTANCE 0x7800
-#define LONG_PUTT_MIN_DISTANCE 0x25800
-#define LONG_SHOT_SOUND_MIN_DISTANCE 0x4B000
+#define NICE_TOUCH_MIN_DISTANCE 0x25800
+#define LONG_PUTT_SOUND_MIN_DISTANCE 0x4B000
 #define LONG_LANDING_MIN_DISTANCE (60.0f * UNITS_PER_YARD)
 
 /* Queues a character sound of the given kind for each player but the one who
@@ -1060,7 +1060,7 @@ static inline void QueueOnlookerSounds(s32 kind) {
  */
 #define IsNiceTouchPutt() \
   (f_LandingCupDistance < CLOSE_LANDING_DISTANCE && \
-      f_StartCupDistance > LONG_PUTT_MIN_DISTANCE && \
+      f_StartCupDistance > NICE_TOUCH_MIN_DISTANCE && \
       !(f_PassedPathFlags & (STEP_FLAG_LIPPED_OUT | STEP_FLAG_PIN_HIT)) && \
       g_HoleSetup.par > g_Players[g_CurrentShot.playerIndex].strokeCount)
 
@@ -1288,9 +1288,10 @@ void PlayFlightSounds(s32 step) {
       }
 
       if (g_SimulatedShot.startsOnGreen) {
-        if (f_StartCupDistance > LONG_SHOT_SOUND_MIN_DISTANCE ||
+        if (f_StartCupDistance > LONG_PUTT_SOUND_MIN_DISTANCE ||
             IsGameFlagSet(GAME_FLAG_FORCE_FLOURISHES)) {
-          PlaySound(SOUND_UNK155, FLIGHT_SOUND_CHANNEL_CALLS, SOUND_FULL_SCALE);
+          PlaySound(SOUND_LONG_PUTT_HOLED, FLIGHT_SOUND_CHANNEL_CALLS,
+              SOUND_FULL_SCALE);
           f_EndReaction = END_REACTION_UNK2;
         }
       }

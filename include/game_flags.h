@@ -133,7 +133,7 @@
 /*
  * Brings on flourishes their conditions would hold back: EndHoleFlyover shows
  * the wind's Fly Guy as for a strong wind, a shot from the green that drops
- * plays the long shot's sound however short it was, and a shot that drops
+ * plays SOUND_LONG_PUTT_HOLED however short it was, and a shot that drops
  * in the cup view with the pin out plays the Goomba movie for any score from
  * eagle to bogey, whatever the shot mode
  */

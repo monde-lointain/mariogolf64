@@ -238,7 +238,8 @@ enum Sound {
   SOUND_CALL_BOGEY,
   SOUND_DEEP_ROUGH_LANDING,
   SOUND_WASTE_AREA_LANDING,
-  SOUND_UNK155, /* Plays in a shot's flight */
+  /* As a long putt drops, or any putt under GAME_FLAG_FORCE_FLOURISHES */
+  SOUND_LONG_PUTT_HOLED,
   SOUND_NEW_BEST_SCORE,
   /* As a course notice swings in */
   SOUND_COURSE_NOTICE_CHEER,
