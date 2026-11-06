@@ -46,13 +46,18 @@
        (PARTICLE_VELOCITY_JITTER_STEPS / 2)) * \
       PARTICLE_VELOCITY_JITTER_STEP)
 
-/* An image whose zero cells each become a particle of a firework */
+/*
+ * An image whose zero cells each become a particle of a firework. It begins
+ * with an ImageHeader whose format is 4, one byte a cell, read here a byte at
+ * a time: only the low bytes of the width and height are read.
+ */
 struct FireworkShape {
-  /* 0x0 */ u8 unk0[3];
+  /* 0x0 */ u16 format;
+  /* 0x2 */ u8 widthHighByte;
   /* 0x3 */ u8 width;
-  /* 0x4 */ u8 unk4;
+  /* 0x4 */ u8 heightHighByte;
   /* 0x5 */ u8 height;
-  /* 0x6 */ u8 unk6[2];
+  /* 0x6 */ u16 unusedAfterHeight;
   /* 0x8 */ u8 cells[TRAILING_ARRAY_LENGTH]; /* width * height, by rows */
 };
 
