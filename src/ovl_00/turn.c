@@ -3052,28 +3052,30 @@ void ShowHoleOutBanner(s32 playerIndex) {
  *
  * The training choice box's reaction test and the frame test at the end are
  * written in place, where they were inline helpers. In place, the frame test
- * keeps 7.5f in $f22 and its buffer address in $s0 across both AddFramedSphere
- * calls, as the original does, where the helper loaded both again for each
- * call. The reaction test in place alone gives 252 words (120 in shape), the
- * frame test alone 338 (116), and both 241 (111), against 349 (125) with both
- * as helpers; the register oracle's closest result is these 241 words with no
- * register forced. As an inline function nested in UpdateTurns, the ball
- * placement reads playerIndex from the frame at each use, as the original
- * does, but the static chain takes the first slot of a nested function's
- * frame, which puts the buffer at 0x28 where the original's is at 0x20, and
- * 953 words differ (900 with 55 registers forced).
+ * keeps 7.5f in $f22 and its buffer address in $s0 across both
+ * AddFramedSphere calls, as the original does, where the helper loaded both
+ * again for each call. The reaction test in place alone gives 252 words (120
+ * in shape), the frame test alone 338 (116), and both 241 (111), against 349
+ * (125) with both as helpers; the register oracle's closest result is these
+ * 241 words with no register forced. As an inline function nested in
+ * UpdateTurns, the ball placement reads playerIndex from the frame at each
+ * use, as the original does, but the static chain takes the first slot of a
+ * nested function's frame, which puts the buffer at 0x28 where the
+ * original's is at 0x20, and 953 words differ (900 with 55 registers
+ * forced). These counts were measured before the debug timing's two stores.
  *
  * The ball placement's Z_TRIG test compiles to andi and a branch, where the
- * original shifts the bit down with srl 13 and andi 1 before branching. do_jump
- * tests an & of one bit with andi; only a test expanded as a value goes through
- * do_store_flag, which shifts and masks. A Boolean local set to the test, or an
- * inline helper returning it, gives the original's instructions, 238 words (110
- * in shape), as does shifting the button bits right 13 and testing the low bit,
- * but each adds a name or a shift the draft has no other reason for. Comparing
- * the test with 0 or Z_TRIG, comparing that != 0 with TRUE, negating it twice
- * or choosing TRUE or FALSE with it leaves 241 words (111). The counts in this
- * paragraph and the one before were measured before the debug timing's two
- * stores.
+ * original shifts the bit down with srl 13 and andi 1 before branching.
+ * do_jump tests an & of one bit with andi; only a test expanded as a value
+ * goes through do_store_flag, which shifts and masks. A Boolean local set to
+ * the test gives the original's instructions, 74 words differing (42 in
+ * shape) against 77 (43), as does shifting the button bits right 13 and
+ * testing the low bit, but each adds a name or a shift the draft has no
+ * other reason for, and a shared helper would change the eleven other tests
+ * of g_ControllerData's buttons, which compile to andi and a branch as the
+ * draft's does. Comparing the test with 0 or Z_TRIG, comparing that != 0 with
+ * TRUE, negating it twice or choosing TRUE or FALSE with it leaves 77 words
+ * (43).
  *
  * The holed-out reaction works out the score to par before testing for a
  * hole in one, and tests for it first; the original subtracts par in the
