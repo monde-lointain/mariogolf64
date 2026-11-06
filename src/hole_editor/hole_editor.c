@@ -637,7 +637,6 @@ typedef struct TriangleSlope {
   /* 0x4 */ s16 normalX; /* Twice the normal's x, of a normal 256 long */
   /* 0x6 */ s16 normalZ;
   /* 0x8 */ u8 shade; /* 0 when flat, from SLOPE_SHADE_OFFSET up for slopes */
-  /* 0x9 */ u8 unk9;
 } TriangleSlope; /* size = 0xA */
 
 /* The size of the buffer that GetEditorBuffer returns */
