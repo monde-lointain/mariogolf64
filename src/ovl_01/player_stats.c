@@ -1924,7 +1924,7 @@ void DrawTurnedPageArrows(Gfx** displayListHead, s32 spacing, s32 y) {
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-  gSPClearGeometryMode(gfx++, 0xFFFFFFFF);
+  gSPClearGeometryMode(gfx++, ALL_GEOMETRY_MODES);
   gDPPipeSync(gfx++);
   for (arrowIndex = 0; arrowIndex != PAGE_ARROW_COUNT; arrowIndex++) {
     guOrtho(&f_TurnedArrowProjections[arrowIndex], -(SCREEN_WIDTH / 2),
@@ -2675,7 +2675,7 @@ void DrawBestShotsCursor(Gfx** displayListHead) {
   gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
   gDPSetCombineMode(gfx++, G_CC_SHADE, G_CC_SHADE);
   gDPSetCombineMode(gfx++, G_CC_SHADEDECALA, G_CC_SHADEDECALA);
-  gSPClearGeometryMode(gfx++, 0xFFFFFFFF);
+  gSPClearGeometryMode(gfx++, ALL_GEOMETRY_MODES);
   gSPSetGeometryMode(gfx++, G_SHADE | G_SHADING_SMOOTH);
   gDPPipeSync(gfx++);
   gSPMatrix(gfx++, PhysicalAddress(&f_BestShotsCursorProjection),

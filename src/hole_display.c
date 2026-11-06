@@ -1783,7 +1783,7 @@ void DrawSky(Gfx** displayListHead, f32 eyeY UNUSED, s32 unusedSetting UNUSED,
   gDPSetTextureFilter(gfx++, G_TF_BILERP);
   gDPPipeSync(gfx++);
   gDPSetAlphaCompare(gfx++, G_AC_NONE);
-  gSPClearGeometryMode(gfx++, 0xFFFFFFFF);
+  gSPClearGeometryMode(gfx++, ALL_GEOMETRY_MODES);
   gSPSetGeometryMode(gfx++, G_SHADE | G_CULL_BACK | G_SHADING_SMOOTH);
   if (colors->addsNoise == 0) {
     gDPSetCombineLERP(gfx++, ENVIRONMENT, SHADE, TEXEL0, SHADE, 0, 0, 0, TEXEL0,
@@ -2871,7 +2871,7 @@ void DrawTileAnimation(void) {
     gDPPipeSync(g_DisplayListHead++);
     gDPSetCycleType(g_DisplayListHead++, G_CYC_1CYCLE);
     gDPPipeSync(g_DisplayListHead++);
-    gSPClearGeometryMode(g_DisplayListHead++, 0xFFFFFFFF);
+    gSPClearGeometryMode(g_DisplayListHead++, ALL_GEOMETRY_MODES);
     gSPSetGeometryMode(
         g_DisplayListHead++, G_SHADE | G_CULL_BACK | G_SHADING_SMOOTH);
     gDPPipeSync(g_DisplayListHead++);
@@ -3022,7 +3022,7 @@ void DrawTurnAwayAnimation(void) {
     gDPPipeSync(g_DisplayListHead++);
     gDPSetCycleType(g_DisplayListHead++, G_CYC_1CYCLE);
     gDPPipeSync(g_DisplayListHead++);
-    gSPClearGeometryMode(g_DisplayListHead++, 0xFFFFFFFF);
+    gSPClearGeometryMode(g_DisplayListHead++, ALL_GEOMETRY_MODES);
     gSPSetGeometryMode(
         g_DisplayListHead++, G_SHADE | G_CULL_BACK | G_SHADING_SMOOTH);
     gDPPipeSync(g_DisplayListHead++);

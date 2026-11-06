@@ -143,7 +143,7 @@ void DrawHoleTriangles(Gfx** displayListHead, CameraMatrices* matrices UNUSED,
   gSPClipRatio(gfx++, FRUSTRATIO_1);
   gDPPipeSync(gfx++);
   gDPSetColorDither(gfx++, G_CD_MAGICSQ);
-  gSPClearGeometryMode(gfx++, 0xFFFFFFFF);
+  gSPClearGeometryMode(gfx++, ALL_GEOMETRY_MODES);
   gSPSetGeometryMode(gfx++, G_ZBUFFER | G_SHADE | G_FOG | G_SHADING_SMOOTH);
   gDPPipeSync(gfx++);
   gDPSetTextureFilter(gfx++, G_TF_BILERP);
@@ -340,7 +340,7 @@ void DrawRings(Gfx** displayListHead, CameraMatrices* matrices UNUSED,
   gSPClipRatio(gfx++, FRUSTRATIO_1);
   gDPPipeSync(gfx++);
   gDPSetColorDither(gfx++, G_CD_MAGICSQ);
-  gSPClearGeometryMode(gfx++, 0xFFFFFFFF);
+  gSPClearGeometryMode(gfx++, ALL_GEOMETRY_MODES);
   gSPSetGeometryMode(gfx++,
       G_ZBUFFER | G_SHADE | G_CULL_BACK | G_FOG | G_LIGHTING | G_TEXTURE_GEN |
           G_SHADING_SMOOTH);

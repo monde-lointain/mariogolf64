@@ -469,7 +469,7 @@ void DrawSparks(Gfx** displayListHead) {
   gDPSetRenderMode(gfx++, G_RM_ZB_XLU_SURF, G_RM_ZB_CLD_SURF2);
   gSPTexture(
       gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0, G_TX_RENDERTILE, G_OFF);
-  gSPClearGeometryMode(gfx++, 0xFFFFFFFF);
+  gSPClearGeometryMode(gfx++, ALL_GEOMETRY_MODES);
   gSPSetGeometryMode(gfx++, G_SHADE | G_SHADING_SMOOTH);
   gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
   gDPSetCombineLERP(gfx++, PRIMITIVE, 0, SHADE, 0, 0, 0, 0, SHADE, PRIMITIVE, 0,

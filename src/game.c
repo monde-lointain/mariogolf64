@@ -760,7 +760,7 @@ void DrawSpinEffect(Gfx** displayListHead, CameraView* view) {
   gDPSetScissor(gfx++, G_SC_NON_INTERLACE, view->scissorX, view->scissorY,
       view->scissorX + view->scissorWidth,
       view->scissorY + view->scissorHeight);
-  gSPClearGeometryMode(gfx++, 0xFFFFFFFF);
+  gSPClearGeometryMode(gfx++, ALL_GEOMETRY_MODES);
   gSPSetGeometryMode(gfx++, G_SHADE | G_CULL_BACK | G_SHADING_SMOOTH);
   gDPPipeSync(gfx++);
   gDPPipeSync(gfx++);

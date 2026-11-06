@@ -1036,7 +1036,7 @@ void DrawBanner(Gfx** displayListHead) {
   gDPSetBlendColor(gfx++, 255, 255, 255, BANNER_BLEND_ALPHA);
   gSPTexture(
       gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0, G_TX_RENDERTILE, G_ON);
-  gSPClearGeometryMode(gfx++, 0xFFFFFFFF);
+  gSPClearGeometryMode(gfx++, ALL_GEOMETRY_MODES);
   gSPSetGeometryMode(gfx++, G_SHADE | G_SHADING_SMOOTH);
   gDPLoadTLUT_pal256(
       gfx++, TextureAddress(f_MovieBuffer + MOVIE_IMAGE_PALETTE_OFFSET));
@@ -1129,7 +1129,7 @@ void DrawFlipMessage(Gfx** displayListHead) {
     gDPPipeSync(gfx++);
     gDPPipeSync(gfx++);
     gDPSetCycleType(gfx++, G_CYC_1CYCLE);
-    gSPClearGeometryMode(gfx++, 0xFFFFFFFF);
+    gSPClearGeometryMode(gfx++, ALL_GEOMETRY_MODES);
     gSPSetGeometryMode(gfx++, G_SHADE | G_SHADING_SMOOTH);
     gDPPipeSync(gfx++);
     gDPSetTexturePersp(gfx++, G_TP_PERSP);
@@ -1931,7 +1931,7 @@ void DrawReadyGoMovie(Gfx** displayListHead) {
   gSPDisplayList(gfx++, f_MovieImageSetupDisplayList);
   gDPPipeSync(gfx++);
   gDPSetTexturePersp(gfx++, G_TP_PERSP);
-  gSPClearGeometryMode(gfx++, 0xFFFFFFFF);
+  gSPClearGeometryMode(gfx++, ALL_GEOMETRY_MODES);
   gSPSetGeometryMode(gfx++, G_SHADE | G_SHADING_SMOOTH);
   if (alpha == 255) {
     gDPPipeSync(gfx++);
@@ -2771,7 +2771,7 @@ void DrawContactEffect(Gfx** displayListHead, CameraMatrices* matrices) {
     gDPSetTextureLUT(gfx++, G_TT_NONE);
     gSPTexture(gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0,
         G_TX_RENDERTILE, G_ON);
-    gSPClearGeometryMode(gfx++, 0xFFFFFFFF);
+    gSPClearGeometryMode(gfx++, ALL_GEOMETRY_MODES);
     gSPSetGeometryMode(gfx++, G_ZBUFFER | G_SHADE | G_SHADING_SMOOTH);
     gDPSetEnvColor(gfx++, 255, 255, 255, 255);
     if (f_ContactStyle == CONTACT_STYLE_WARIO) {
@@ -3062,7 +3062,7 @@ void DrawWindFlyGuy(Gfx** displayListHead) {
   ConvertMatrixToFixed(matrix, &f_ContactMatrices[f_WindStreakHead]);
   f_WindFlyGuyLastPosition = position;
   SetUpTextDrawing(&gfx);
-  gSPClearGeometryMode(gfx++, 0xFFFFFFFF);
+  gSPClearGeometryMode(gfx++, ALL_GEOMETRY_MODES);
   gSPSetGeometryMode(gfx++, G_SHADE | G_SHADING_SMOOTH);
   gDPPipeSync(gfx++);
   gDPSetRenderMode(gfx++, G_RM_CLD_SURF, G_RM_CLD_SURF2);

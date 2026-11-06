@@ -4994,7 +4994,7 @@ void DrawTargetPole(CameraMatrices* matrices UNUSED, Gfx** displayListHead) {
   gDPSetCycleType(gfx++, G_CYC_1CYCLE);
   gDPPipeSync(gfx++);
   gDPSetRenderMode(gfx++, G_RM_ZB_OPA_SURF, G_RM_ZB_OPA_SURF2);
-  gSPClearGeometryMode(gfx++, 0xFFFFFFFF);
+  gSPClearGeometryMode(gfx++, ALL_GEOMETRY_MODES);
   gSPSetGeometryMode(gfx++, G_ZBUFFER | G_SHADE | G_SHADING_SMOOTH);
   gDPSetCombineMode(gfx++, G_CC_SHADE, G_CC_SHADE);
   gSPMatrix(gfx++, PhysicalAddress(&f_PoleMatrix),

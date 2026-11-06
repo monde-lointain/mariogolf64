@@ -11,6 +11,7 @@
 #include "cpu_projection.h"
 #include "fireworks.h"
 #include "game.h"
+#include "gbi_helpers.h"
 #include "hole_loader.h"
 #include "math_util.h"
 #include "round_hud.h"
@@ -1834,7 +1835,7 @@ void DrawLeaderboardPage(Gfx** displayListHead) {
   gDPSetTextureFilter(gfx++, G_TF_BILERP);
   gDPPipeSync(gfx++);
   gSPSetLights1(gfx++, f_FlapLights);
-  gSPClearGeometryMode(gfx++, 0xFFFFFFFF);
+  gSPClearGeometryMode(gfx++, ALL_GEOMETRY_MODES);
   gSPSetGeometryMode(gfx++, G_SHADE | G_LIGHTING | G_SHADING_SMOOTH);
   for (i = 0; i != LEADERBOARD_ROW_COUNT; i++) {
     if (i * ROW_FLIP_STAGGER < g_Scorecard.content.flipTime &&

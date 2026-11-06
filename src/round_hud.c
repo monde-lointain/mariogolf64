@@ -1520,7 +1520,7 @@ void DrawLandingReaction(Gfx** displayListHead) {
     gDPPipeSync(gfx++);
     gDPPipeSync(gfx++);
     gDPSetCycleType(gfx++, G_CYC_1CYCLE);
-    gSPClearGeometryMode(gfx++, 0xFFFFFFFF);
+    gSPClearGeometryMode(gfx++, ALL_GEOMETRY_MODES);
     gSPSetGeometryMode(gfx++, G_SHADE | G_SHADING_SMOOTH);
     gDPPipeSync(gfx++);
     gDPSetTexturePersp(gfx++, G_TP_PERSP);
@@ -1988,7 +1988,7 @@ void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
   gDPPipeSync(gfx++);
   gDPPipeSync(gfx++);
   gDPSetCycleType(gfx++, G_CYC_1CYCLE);
-  gSPClearGeometryMode(gfx++, 0xFFFFFFFF);
+  gSPClearGeometryMode(gfx++, ALL_GEOMETRY_MODES);
   gSPSetGeometryMode(gfx++, G_SHADE | G_CULL_BACK | G_SHADING_SMOOTH);
   gDPPipeSync(gfx++);
   gDPSetTexturePersp(gfx++, G_TP_PERSP);
@@ -2267,7 +2267,7 @@ void DrawBallTrail(Gfx** displayListHead, CameraMatrices* matrices) {
        */
       cycleTypeCommand = gfx++;
       gDPSetCycleType(cycleTypeCommand, G_CYC_1CYCLE);
-      gSPClearGeometryMode(gfx++, 0xFFFFFFFF);
+      gSPClearGeometryMode(gfx++, ALL_GEOMETRY_MODES);
       gSPSetGeometryMode(
           gfx++, G_ZBUFFER | G_SHADE | G_CULL_BACK | G_SHADING_SMOOTH);
       gDPPipeSync(gfx++);
@@ -2680,7 +2680,7 @@ void DrawShotPanelIcons(Gfx** displayListHead, CameraView* view UNUSED) {
   gDPSetTexturePersp(gfx++, G_TP_PERSP);
   gDPPipeSync(gfx++);
   gDPSetTextureFilter(gfx++, G_TF_BILERP);
-  gSPClearGeometryMode(gfx++, 0xFFFFFFFF);
+  gSPClearGeometryMode(gfx++, ALL_GEOMETRY_MODES);
   gSPSetGeometryMode(gfx++, G_SHADE | G_CULL_BACK);
   if (g_RoundHud.areWindSpeedArrowsShown == TRUE ||
       g_RoundHud.areWindDirectionArrowsShown == TRUE) {
@@ -2701,7 +2701,7 @@ void DrawShotPanelIcons(Gfx** displayListHead, CameraView* view UNUSED) {
   gSPMatrix(gfx++, PhysicalAddress(&g_ScreenOrthoMatrix),
       G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
   gDPPipeSync(gfx++);
-  gSPClearGeometryMode(gfx++, 0xFFFFFFFF);
+  gSPClearGeometryMode(gfx++, ALL_GEOMETRY_MODES);
   gSPSetGeometryMode(gfx++, G_SHADE | G_SHADING_SMOOTH | G_CULL_BACK);
   if (!g_IsCupViewShown && g_IsModuleAlive[MODULE_CLUB_PANEL]) {
     DrawClubPanelIfShown(&gfx);
@@ -2928,7 +2928,7 @@ void DrawHoleImageModel(void) {
   gDPPipeSync(g_DisplayListHead++);
   gDPPipeSync(g_DisplayListHead++);
   gDPSetCycleType(g_DisplayListHead++, G_CYC_1CYCLE);
-  gSPClearGeometryMode(g_DisplayListHead++, 0xFFFFFFFF);
+  gSPClearGeometryMode(g_DisplayListHead++, ALL_GEOMETRY_MODES);
   gSPSetGeometryMode(
       g_DisplayListHead++, G_SHADE | G_CULL_BACK | G_SHADING_SMOOTH);
   gDPPipeSync(g_DisplayListHead++);
@@ -3041,7 +3041,7 @@ void DrawShotEffect(Gfx** displayListHead) {
   gDPPipeSync(gfx++);
   gDPPipeSync(gfx++);
   gDPSetCycleType(gfx++, G_CYC_1CYCLE);
-  gSPClearGeometryMode(gfx++, 0xFFFFFFFF);
+  gSPClearGeometryMode(gfx++, ALL_GEOMETRY_MODES);
   gSPSetGeometryMode(gfx++, G_SHADE | G_SHADING_SMOOTH);
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_NONE);

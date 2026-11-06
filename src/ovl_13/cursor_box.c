@@ -5,6 +5,7 @@
 
 #include "asset.h"
 #include "game.h"
+#include "gbi_helpers.h"
 #include "math_util.h"
 #include "screen.h"
 
@@ -138,7 +139,7 @@ void DrawCursorBox(Gfx** displayListHead, s32 left, s32 top) {
   gDPSetRenderMode(displayList++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
   gDPSetCombineLERP(displayList++, 0, 0, 0, SHADE, SHADE, 0, TEXEL0, 0, 0, 0, 0,
       SHADE, SHADE, 0, TEXEL0, 0);
-  gSPClearGeometryMode(displayList++, 0xFFFFFFFF);
+  gSPClearGeometryMode(displayList++, ALL_GEOMETRY_MODES);
   gSPSetGeometryMode(displayList++, G_SHADE | G_SHADING_SMOOTH);
   gDPPipeSync(displayList++);
   gSPMatrix(displayList++, PhysicalAddress(&f_CursorBoxProjection),
