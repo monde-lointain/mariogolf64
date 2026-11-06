@@ -2572,7 +2572,8 @@ void DrawWindIndicator(Gfx** displayListHead, f32 x, f32 y) {
   BuildRotationMatrix(matrix, rotation, translation);
   guRotateRPYF(transform, 0.0f,
       WIND_INDICATOR_FACING_DEGREES -
-          (g_SkyState.viewedWindAngles[0] * 360.0f * (1.0 / (2 * M_PI))),
+          (g_SkyState.viewedWindAngles[0] * DEGREES_PER_TURN *
+              (1.0 / (2 * M_PI))),
       0.0f);
   guMtxCatF(transform, matrix, matrix);
   guScaleF(transform, WIND_INDICATOR_SCALE, WIND_INDICATOR_SCALE,
@@ -3031,7 +3032,8 @@ void DrawShotEffect(Gfx** displayListHead) {
     scale = sinf(f_ShotEffectTime) * SPARK_TRAIL_SCALE;
     f_ShotEffectRotation[AXIS_X] = 0.0f;
     f_ShotEffectRotation[AXIS_Y] = 0.0f;
-    f_ShotEffectRotation[AXIS_Z] = (guRandom() % 360) * (M_PI / 180);
+    f_ShotEffectRotation[AXIS_Z] =
+        DegreesToRadians(guRandom() % DEGREES_PER_TURN);
   }
 
   f_ShotEffectScale[AXIS_X] = scale;
