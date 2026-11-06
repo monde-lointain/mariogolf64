@@ -1097,9 +1097,9 @@ void ShowFlipMessage(MessageId messageId) {
   f_FlipMessageFrame = 0;
   halfSize = PlaceMessageGlyphGroup(
       FLIP_MESSAGE_GLYPH_GROUP, FONT_SIZE_LARGE, 0, 0, messageId);
-  halfWidth = (u32)halfSize >> 16;
+  halfWidth = HalfSizeWidth(halfSize);
   f_FlipMessageHalfWidth = halfWidth;
-  halfHeight = halfSize & 0xFFFF;
+  halfHeight = HalfSizeHeight(halfSize);
   f_FlipMessageHalfHeight = halfHeight;
   f_FlipMessageBoardVertices[0].v.ob[AXIS_X] =
       -halfWidth - FLIP_MESSAGE_BOARD_MARGIN_X;

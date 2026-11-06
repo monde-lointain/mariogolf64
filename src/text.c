@@ -1992,7 +1992,7 @@ s32 PlaceMessageGlyphGroup(
     }
   }
 
-  return (width << 16) | height;
+  return PackHalfSize(width, height);
 }
 
 /*

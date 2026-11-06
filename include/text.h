@@ -185,6 +185,12 @@ s32 GetDigitGlyphTop(char code);
 void DrawDigitText(Gfx** displayListHead, s32 x, s32 y, READ_ONLY char* text);
 void DrawLargeTextWithShadow(Gfx** displayListHead, s32 x, s32 y,
     READ_ONLY char* text, s32 envColor, s32 primColor, TextFlags flags);
+/* PlaceMessageGlyphGroup's result: half the message's width in the high
+ * halfword and half its height in the low one */
+#define PackHalfSize(halfWidth, halfHeight) (((halfWidth) << 16) | (halfHeight))
+#define HalfSizeWidth(halfSize) ((u32)(halfSize) >> 16)
+#define HalfSizeHeight(halfSize) ((halfSize) & 0xFFFF)
+
 s32 PlaceMessageGlyphGroup(
     s32 group, s32 fontSize, s32 x, s32 y, MessageId messageId);
 
