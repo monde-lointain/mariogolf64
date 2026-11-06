@@ -4337,6 +4337,13 @@ void LoadOpeningBurst(void) {
  * and the register oracle's closest result from 367 words to 347, with no
  * register forced for either, so allocation still isn't the cause. 347 words
  * differ, 129 in shape.
+ *
+ * The counts above were measured before the change below. Each pipe sync and
+ * the RDP state command after it now goes through AppendSyncedRdpState,
+ * which declares the command's pointer first, as DrawHoleTriangles does. Of
+ * the seven pairs, the cycle type's and the render mode's each take 8 words
+ * off alone, and all seven take the draft from 347 words differing to 331,
+ * 129 in shape.
  */
 #ifdef NON_MATCHING
 void DrawOpeningBurst(Gfx** displayListHead) {
@@ -4348,23 +4355,16 @@ void DrawOpeningBurst(Gfx** displayListHead) {
 
   if (f_IsBurstShown && ++f_BurstFrame < BURST_FRAME_COUNT) {
     gDPPipeSync(gfx++);
-    gDPPipeSync(gfx++);
-    gDPSetCycleType(gfx++, G_CYC_1CYCLE);
-    gDPPipeSync(gfx++);
-    gDPSetRenderMode(gfx++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
+    AppendSyncedRdpState(gfx, gDPSetCycleType, G_CYC_1CYCLE);
+    AppendSyncedRdpState(gfx, gDPSetRenderMode, G_RM_XLU_SURF, G_RM_XLU_SURF2);
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-    gDPPipeSync(gfx++);
-    gDPSetColorDither(gfx++, G_CD_DISABLE);
+    AppendSyncedRdpState(gfx, gDPSetColorDither, G_CD_DISABLE);
     gSPTexture(gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0,
         G_TX_RENDERTILE, G_ON);
-    gDPPipeSync(gfx++);
-    gDPSetTexturePersp(gfx++, G_TP_NONE);
-    gDPPipeSync(gfx++);
-    gDPSetTextureFilter(gfx++, G_TF_BILERP);
-    gDPPipeSync(gfx++);
-    gDPSetAlphaCompare(gfx++, G_AC_NONE);
-    gDPPipeSync(gfx++);
-    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+    AppendSyncedRdpState(gfx, gDPSetTexturePersp, G_TP_NONE);
+    AppendSyncedRdpState(gfx, gDPSetTextureFilter, G_TF_BILERP);
+    AppendSyncedRdpState(gfx, gDPSetAlphaCompare, G_AC_NONE);
+    AppendSyncedRdpState(gfx, gDPSetTextureLUT, G_TT_RGBA16);
     gDPLoadTLUT_pal16(
         gfx++, 0, TextureAddress(ImageBody(f_OpeningEffectImage)));
     gDPPipeSync(gfx++);
