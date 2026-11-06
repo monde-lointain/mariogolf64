@@ -70,6 +70,11 @@ typedef struct CameraMatrices {
 
 /* The camera of the inset view, a window over the main view */
 #define INSET_CAMERA 1
+/*
+ * The camera index that the opening draws its characters with; it has no
+ * g_Cameras entry, and DrawCharacterAndShadow always draws for it
+ */
+#define OPENING_CAMERA 2
 
 /* InsetView.animation values */
 enum InsetViewState {

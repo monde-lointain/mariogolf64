@@ -227,8 +227,6 @@ FILE_STATIC s32 g_CurrentAnimationStartFrame;
  * image its tile wraps to */
 #define SHADOW_QUAD_TEXEL_SPAN TexelCoordinate(SHADOW_TEXTURE_SIZE * 2)
 #define ShadowTexturePixels(texture) (TextureAddress((u32)(texture) + 8))
-/* The camera index DrawCharacterAndShadow always draws for */
-#define CAMERA_UNK2 2
 #define SECOND_LIGHT_DIRECTION_LENGTH 64.0f
 /* How far from the shadow point, in model units, the ground is sampled */
 #define SHADOW_CORNER_DISTANCE 30.0f
@@ -2167,12 +2165,12 @@ void PlaceCharacter(u32 slotIndex, CoursePoint point, Radians heading) {
 }
 
 /*
- * Whether DrawCharacterAndShadow draws for a camera: CAMERA_UNK2, or any
+ * Whether DrawCharacterAndShadow draws for a camera: OPENING_CAMERA, or any
  * but the inset while g_AreCharactersDrawn is set. It is a macro, as an inline
  * function compiles differently from the original.
  */
 #define IsCharacterDrawnForCamera(cameraIndex) \
-  (((cameraIndex) == CAMERA_UNK2) || \
+  (((cameraIndex) == OPENING_CAMERA) || \
       (((cameraIndex) != INSET_CAMERA) && g_AreCharactersDrawn))
 
 /*

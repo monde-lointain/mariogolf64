@@ -39,9 +39,6 @@
 #include "terrain.h"
 #include "text.h"
 
-/* The view that the opening draws its characters through */
-#define OPENING_VIEW_INDEX 2
-
 /* The size of the heap that the opening's billboards are allocated from */
 #define OPENING_BILLBOARD_HEAP_SIZE 0x7038
 
@@ -874,7 +871,7 @@ void DrawOpeningCharacters(
 
   g_DisplayListHead = *displayListHead;
   do {
-    DrawCharacterAndShadow(matrices, OPENING_VIEW_INDEX, slotIndex);
+    DrawCharacterAndShadow(matrices, OPENING_CAMERA, slotIndex);
     slotIndex++;
   } while (slotIndex < CHARACTER_SLOT_COUNT);
   *displayListHead = g_DisplayListHead;
