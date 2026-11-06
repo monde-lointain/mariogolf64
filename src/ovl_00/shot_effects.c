@@ -526,7 +526,11 @@ void DrawShotEffectsHud(Gfx** displayListHead UNUSED) {}
  * first 25 and swapping the alpha and state 10. Declaring the count
  * volatile, with both blocks gone, gives 18 words, 14 in shape, and the
  * count isn't hardware. The register oracle's closest result is these 9
- * words with no register forced, so allocation isn't the cause. 9 words
+ * words with no register forced, so allocation isn't the cause.
+ *
+ * The eight trail statics from f_SwingTrailPathLength to f_SwingTrailAlpha
+ * lie side by side, but as the fields of one struct they give 40 words (14
+ * in shape), and DrawSwingTrail, which matches, then differs in 155. 9 words
  * differ, 5 in shape.
  */
 #ifdef NON_MATCHING
