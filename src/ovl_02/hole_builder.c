@@ -3371,6 +3371,14 @@ static inline u16* GetShadowedTexel(u32 column, u32 row) {
  * oracle then leaves 59 words, forcing 6. An s16 centerColumn, alone or with
  * centerRow, and any other order of the three opening assignments give 67 or
  * 75.
+ *
+ * Working out the texel's width fraction before its height fraction, as a
+ * focused permuter run's best did through a temporary, takes the draft from
+ * 67 words (21 in shape) to 59 (17), and the oracle's closest from 59 words
+ * forcing 6 to 55 forcing 5. The original takes viewX's absolute value
+ * first, though it multiplies the height first; setting litPercent between
+ * the two fractions or after both gives 61 (19), and the height first with
+ * litPercent last 67.
  */
 #ifdef NON_MATCHING
 void CastBillboardShadows(void) {
@@ -3521,8 +3529,8 @@ void CastBillboardShadows(void) {
         }
 
         litPercent = LIT_PERCENT_FULL;
-        heightFraction = viewY * heightScale;
         widthFraction = fabsf(viewX) * widthScale;
+        heightFraction = viewY * heightScale;
         if (widthFraction + fabsf(heightFraction * 2) < 1.0f) {
           litPercent = (sqrtf((widthFraction * widthFraction) +
                             (heightFraction * heightFraction * 4.0f)) *
