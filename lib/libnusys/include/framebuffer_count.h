@@ -1,5 +1,5 @@
-#ifndef FRAMEBUFFER_H
-#define FRAMEBUFFER_H
+#ifndef FRAMEBUFFER_COUNT_H
+#define FRAMEBUFFER_COUNT_H
 
 #include <ultra64.h>
 
@@ -10,7 +10,7 @@
 #define DOUBLE_BUFFERING 2
 #define TRIPLE_BUFFERING 3
 
-/* Defined in the modified NuSystem's nugfxsetcfb.c */
+/* Defined by nugfxsetcfb.c, which the game's NuSystem replaces */
 void SetFramebufferCount(u32 count);
 
 #endif

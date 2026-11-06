@@ -4,12 +4,13 @@
  */
 #include "tournament.h"
 
+#include <math.h>
+#include <string.h>
 #include <ultra64.h>
 
 #include "compiler.h"
 #include "course.h"
 #include "language.h"
-#include "libc.h"
 #include "math_util.h"
 #include "save.h"
 

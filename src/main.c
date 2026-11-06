@@ -6,6 +6,7 @@
 #include "main.h"
 
 #include <PR/libmus.h>
+#include <string.h>
 #include <ultra64.h>
 
 #include "address.h"
@@ -23,7 +24,6 @@
 #include "heap.h"
 #include "hole_loader.h"
 #include "language.h"
-#include "libc.h"
 #include "math_util.h"
 #include "overlay_manager.h"
 #include "play.h"

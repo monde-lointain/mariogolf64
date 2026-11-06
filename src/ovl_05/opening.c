@@ -6,6 +6,8 @@
  */
 #include "opening.h"
 
+#include <math.h>
+#include <stdlib.h>
 #include <ultra64.h>
 
 #include "address.h"
@@ -31,7 +33,6 @@
 #include "hole_display.h"
 #include "include_asm.h"
 #include "language.h"
-#include "libc.h"
 #include "main.h"
 #include "math_util.h"
 #include "menu.h"

@@ -5,6 +5,9 @@
  */
 #include "round_hud.h"
 
+#include <math.h>
+#include <stdlib.h>
+#include <string.h>
 #include <ultra64.h>
 
 #include "address.h"
@@ -35,7 +38,6 @@
 #include "hole_objects.h"
 #include "include_asm.h"
 #include "language.h"
-#include "libc.h"
 #include "main.h"
 #include "math_util.h"
 #include "movie.h"

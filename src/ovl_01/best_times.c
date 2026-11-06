@@ -14,7 +14,6 @@
 #include "gbi_helpers.h"
 #include "geometry.h"
 #include "hole_display.h"
-#include "libc.h"
 #include "main_menu.h"
 #include "math_util.h"
 #include "menu.h"

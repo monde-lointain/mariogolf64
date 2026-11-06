@@ -14,7 +14,6 @@
 #include "debug_text.h"
 #include "geometry.h"
 #include "include_asm.h"
-#include "libc.h"
 #include "math_util.h"
 #include "movie.h"
 #include "save.h"

@@ -4,6 +4,7 @@
  */
 #include "pin.h"
 
+#include <math.h>
 #include <ultra64.h>
 
 #include "address.h"
@@ -19,7 +20,6 @@
 #include "geometry.h"
 #include "heap.h"
 #include "language.h"
-#include "libc.h"
 #include "math_util.h"
 #include "round_hud.h"
 #include "save.h"

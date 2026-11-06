@@ -4,6 +4,7 @@
  */
 #include "hole_objects.h"
 
+#include <math.h>
 #include <ultra64.h>
 
 #include "address.h"
@@ -21,7 +22,6 @@
 #include "hole_display.h"
 #include "include_asm.h"
 #include "language.h"
-#include "libc.h"
 #include "math_util.h"
 #include "round_hud.h"
 #include "save.h"

@@ -3,7 +3,7 @@
  */
 #include "sram.h"
 
-#include <lib/libnusys/nusys.h>
+#include <nusys.h>
 #include <ultra64.h>
 
 void InitSram(void) {

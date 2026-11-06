@@ -10,7 +10,6 @@
 #include "debug_text.h"
 #include "include_asm.h"
 #include "language.h"
-#include "libc.h"
 #include "sound.h"
 
 /* The message the fault event posts; nothing reads it */

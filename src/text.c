@@ -15,7 +15,6 @@
 #include "gbi_helpers.h"
 #include "heap.h"
 #include "language.h"
-#include "libc.h"
 #include "round_hud.h"
 #include "round_stats.h"
 #include "save.h"

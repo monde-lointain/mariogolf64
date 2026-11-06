@@ -5,6 +5,8 @@
  */
 #include "ball_simulation.h"
 
+#include <math.h>
+#include <stdlib.h>
 #include <ultra64.h>
 
 #include "ball_physics.h"
@@ -21,7 +23,6 @@
 #include "hole_triangles.h"
 #include "include_asm.h"
 #include "language.h"
-#include "libc.h"
 #include "math_util.h"
 #include "save.h"
 #include "scene.h"

@@ -5,7 +5,8 @@
  */
 #include "effects.h"
 
-#include <lib/libnusys/nusys.h>
+#include <nusys.h>
+#include <stdlib.h>
 #include <ultra64.h>
 
 #include "address.h"
@@ -25,7 +26,6 @@
 #include "heap.h"
 #include "hole_loader.h"
 #include "language.h"
-#include "libc.h"
 #include "math_util.h"
 #include "save.h"
 #include "screen.h"

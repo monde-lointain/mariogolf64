@@ -6,6 +6,9 @@
  */
 #include "play.h"
 
+#include <framebuffer_count.h>
+#include <stdlib.h>
+#include <string.h>
 #include <ultra64.h>
 
 #include "address.h"
@@ -21,7 +24,6 @@
 #include "cpu_projection.h"
 #include "current_shot.h"
 #include "debug_text.h"
-#include "framebuffer.h"
 #include "game.h"
 #include "game_flags.h"
 #include "gbi_helpers.h"
@@ -32,7 +34,6 @@
 #include "hole_triangles.h"
 #include "include_asm.h"
 #include "language.h"
-#include "libc.h"
 #include "main.h"
 #include "math_util.h"
 #include "menu.h"

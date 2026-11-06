@@ -5,6 +5,7 @@
  */
 #include "scorecard.h"
 
+#include <framebuffer_count.h>
 #include <ultra64.h>
 
 #include "address.h"
@@ -14,7 +15,6 @@
 #include "compiler.h"
 #include "course.h"
 #include "frame_time.h"
-#include "framebuffer.h"
 #include "game_flags.h"
 #include "gbi_helpers.h"
 #include "heap.h"

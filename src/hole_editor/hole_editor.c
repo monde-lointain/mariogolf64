@@ -3,6 +3,9 @@
  * triangles, rings and billboards over its map. They also load and save holes
  * and write captures of the frame to the host.
  */
+#include <math.h>
+#include <stdlib.h>
+#include <string.h>
 #include <ultra64.h>
 
 #include "address.h"
@@ -23,7 +26,6 @@
 #include "host_file.h"
 #include "include_asm.h"
 #include "language.h"
-#include "libc.h"
 #include "main.h"
 #include "math_util.h"
 #include "play.h"

@@ -8,6 +8,7 @@
 /* Ver 1.0	97/10/9		Created by Kensaku Ohki(SLANP)		*/
 /*======================================================================*/  
 #include <nusys.h>
+#include <framebuffer_count.h>
 
 /* Mario Golf replaces this file. With two frame buffers, the memory of
    the third one holds the depth buffer; with three, the depth buffer
@@ -16,9 +17,6 @@
 
 /* Depth buffer address used while three frame buffers are in use */
 #define TRIPLE_BUFFERING_DEPTH_BUFFER ((u16*)0x802EA000)
-
-/* Number of frame buffers with which the depth buffer moves */
-#define TRIPLE_BUFFERING 3
 
 /* sSpareFramebuffer value while every frame buffer is in use */
 #define NO_SPARE_FRAMEBUFFER 0xFF

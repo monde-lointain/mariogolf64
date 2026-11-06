@@ -4,6 +4,7 @@
  * over the character grid, and the chosen character's shot curve shows as a
  * meter.
  */
+#include <stdlib.h>
 #include <ultra64.h>
 
 #include "address.h"
@@ -21,7 +22,6 @@
 #include "hole_display.h"
 #include "include_asm.h"
 #include "language.h"
-#include "libc.h"
 #include "main_menu.h"
 #include "menu.h"
 #include "menu_memory.h"

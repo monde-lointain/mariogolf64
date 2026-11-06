@@ -5,6 +5,7 @@
  */
 #include "hole_loader.h"
 
+#include <stdlib.h>
 #include <ultra64.h>
 
 #include "address.h"
@@ -18,7 +19,6 @@
 #include "geometry.h"
 #include "hole_builder.h"
 #include "language.h"
-#include "libc.h"
 #include "main.h"
 #include "math_util.h"
 #include "overlay_manager.h"

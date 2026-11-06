@@ -1,7 +1,7 @@
 #ifndef TRANSFER_PAK_H
 #define TRANSFER_PAK_H
 
-#include <lib/libnusys/nusys.h>
+#include <nusys.h>
 #include <ultra64.h>
 
 #include "language.h"

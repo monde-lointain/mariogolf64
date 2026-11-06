@@ -5,7 +5,10 @@
  */
 #include "menu.h"
 
-#include <lib/libnusys/nusys.h>
+#include <framebuffer_count.h>
+#include <nusys.h>
+#include <stdlib.h>
+#include <string.h>
 #include <ultra64.h>
 
 #include "asset.h"
@@ -17,12 +20,10 @@
 #include "course_space.h"
 #include "fault.h"
 #include "frame_time.h"
-#include "framebuffer.h"
 #include "game_flags.h"
 #include "heap.h"
 #include "host_file.h"
 #include "language.h"
-#include "libc.h"
 #include "main.h"
 #include "main_menu.h"
 #include "math_util.h"

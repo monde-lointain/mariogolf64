@@ -6,6 +6,10 @@
  */
 #include "hole_display.h"
 
+#include <framebuffer_count.h>
+#include <math.h>
+#include <stdlib.h>
+#include <string.h>
 #include <ultra64.h>
 
 #include "address.h"
@@ -17,7 +21,6 @@
 #include "cpu_projection.h"
 #include "debug_text.h"
 #include "fireworks.h"
-#include "framebuffer.h"
 #include "game.h"
 #include "game_flags.h"
 #include "gbi_helpers.h"
@@ -26,7 +29,6 @@
 #include "hole_loader.h"
 #include "include_asm.h"
 #include "language.h"
-#include "libc.h"
 #include "math_util.h"
 #include "round_hud.h"
 #include "save.h"

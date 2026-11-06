@@ -16,7 +16,6 @@
 #include "geometry.h"
 #include "include_asm.h"
 #include "language.h"
-#include "libc.h"
 #include "math_util.h"
 #include "play.h"
 #include "save.h"

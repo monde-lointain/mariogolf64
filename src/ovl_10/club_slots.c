@@ -5,6 +5,7 @@
  * on a club adds that club to the bag beside the putter; three stars give
  * every club.
  */
+#include <framebuffer_count.h>
 #include <ultra64.h>
 
 #include "address.h"
@@ -14,7 +15,6 @@
 #include "compiler.h"
 #include "controller.h"
 #include "cpu_projection.h"
-#include "framebuffer.h"
 #include "game.h"
 #include "game_flags.h"
 #include "gbi_helpers.h"

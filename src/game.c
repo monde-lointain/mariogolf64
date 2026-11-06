@@ -5,7 +5,7 @@
  */
 #include "game.h"
 
-#include <lib/libnusys/nusys.h>
+#include <nusys.h>
 #include <ultra64.h>
 
 #include "address.h"
@@ -30,7 +30,6 @@
 #include "hole_triangles.h"
 #include "include_asm.h"
 #include "language.h"
-#include "libc.h"
 #include "main.h"
 #include "main_menu.h"
 #include "math_util.h"

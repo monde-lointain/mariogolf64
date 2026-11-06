@@ -5,6 +5,10 @@
  */
 #include "turn.h"
 
+#include <framebuffer_count.h>
+#include <math.h>
+#include <stdlib.h>
+#include <string.h>
 #include <ultra64.h>
 
 #include "address.h"
@@ -27,7 +31,6 @@
 #include "effects.h"
 #include "fireworks.h"
 #include "frame_time.h"
-#include "framebuffer.h"
 #include "framing.h"
 #include "game.h"
 #include "game_flags.h"
@@ -39,7 +42,6 @@
 #include "hole_loader.h"
 #include "include_asm.h"
 #include "language.h"
-#include "libc.h"
 #include "main.h"
 #include "math_util.h"
 #include "menu.h"

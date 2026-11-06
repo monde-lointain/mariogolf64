@@ -6,13 +6,13 @@
  */
 #include "password.h"
 
+#include <stdlib.h>
 #include <ultra64.h>
 
 #include "character.h"
 #include "compiler.h"
 #include "include_asm.h"
 #include "language.h"
-#include "libc.h"
 
 #define PASSWORD_SYMBOL_COUNT 28
 

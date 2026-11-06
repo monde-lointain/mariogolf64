@@ -126,7 +126,10 @@ LD          := $(CROSS)ld
 OBJCOPY     := $(CROSS)objcopy
 PYTHON      := .venv/bin/python3
 
-INCLUDES    := -Iinclude -Iinclude/libc -Ilib/ultralib/include -Ilib/ultralib/include/PR -Ilib/libmus/include -Isrc -I$(BUILD_DIR)
+# Each library's headers are in its own include directory. NuSystem's is
+# included through its converted copy, as the rule below explains.
+INCLUDES    := -Iinclude -Ilib/libkmc/include -Ilib/ultralib/include -Ilib/ultralib/include/PR \
+               -Ilib/libmus/include -I$(BUILD_DIR)/lib/libnusys/include -Ilib/libnusys/include -Isrc -I$(BUILD_DIR)
 DEFINES     := -D_LANGUAGE_C -D_MIPS_SZLONG=32 -D_MIPS_SZINT=32 -DF3DEX_GBI_2 -DNDEBUG -D_FINALROM -DBUILD_VERSION=VERSION_J \
                $(GAME_DEFINES)
 # A ROM that doesn't match moves the code and data, so it must also avoid
@@ -193,7 +196,7 @@ LIBNAUDIO_CFLAGS    = $(LIBMUS_CFLAGS)
 # endings, and KMC's preprocessor doesn't join lines that end in a backslash
 # and a carriage return, so they're compiled from copies without the CRs.
 LIBNUSYS_DIR       := lib/libnusys
-LIBNUSYS_INCLUDES  := -I$(BUILD_DIR)/$(LIBNUSYS_DIR) $(ULTRALIB_INCLUDES)
+LIBNUSYS_INCLUDES  := -I$(BUILD_DIR)/$(LIBNUSYS_DIR)/include -I$(LIBNUSYS_DIR)/include $(ULTRALIB_INCLUDES)
 LIBNUSYS_DEFINES   := $(LIB_MODERN) -D_MIPS_SZLONG=32 -D_MIPS_SZINT=32 -DUSE_EPI -DBUILD_VERSION=VERSION_J -D_FINALROM
 LIBNUSYS_CFLAGS     = $(WARNINGS) -nostdinc $(TARGETFLAGS) -D_LANGUAGE_C $(OPTFLAGS) $(KMC_ALIGN)
 
@@ -207,18 +210,17 @@ $(BUILD_DIR)/$(LIBKMC_DIR)/%.o: FAST_MATH :=
 ifeq ($(MODERN),0)
 OPTFLAGS := -O2
 $(BUILD_DIR)/$(ULTRALIB_DIR)/%.o: OPTFLAGS := -O3
-$(BUILD_DIR)/src/libultra/%.o: OPTFLAGS := -O3
 $(BUILD_DIR)/$(LIBMUS_DIR)/%.o: OPTFLAGS := -O3
 $(BUILD_DIR)/$(LIBNAUDIO_DIR)/%.o: OPTFLAGS := -O3
 # Like the SDK's nusys.o, NuSystem's boot code is built without optimization
-$(BUILD_DIR)/$(LIBNUSYS_DIR)/nuboot.c.o: OPTFLAGS :=
+$(BUILD_DIR)/$(LIBNUSYS_DIR)/src/nuboot.c.o: OPTFLAGS :=
 $(BUILD_DIR)/$(LIBKMC_DIR)/%.o: OPTFLAGS := -O1
 else
 OPTFLAGS := -Os
 endif
 
 # Per-object compiler flags
-$(BUILD_DIR)/$(LIBNUSYS_DIR)/nusched.c.o: LIBNUSYS_DEFINES += -DNU_DEBUG
+$(BUILD_DIR)/$(LIBNUSYS_DIR)/src/nusched.c.o: LIBNUSYS_DEFINES += -DNU_DEBUG
 
 .PHONY: all extract clean distclean setup tools format lint typecheck pycheck check-shiftable \
         progress
@@ -273,9 +275,8 @@ check-shiftable: $(O_FILES) $(SHIFTABLE_LD) $(SHIFTABLE_SYMBOLS)
 	$(LD) $(addprefix -T ,$(SHIFTABLE_LD) $(SHIFTABLE_SYMBOLS)) $(LAYOUT_FLAGS) -o $(BUILD_DIR)/shiftable.elf
 
 CLANG_TIDY ?= run-clang-tidy-23
-# libkmc is KMC's C library, which keeps the C library's names, and
-# src/libultra holds the SDK's own code, which keeps the SDK's
-LINT_FILES := $(filter-out $(LIBKMC_DIR)/% src/libultra/%,\
+# libkmc is KMC's C library, which keeps the C library's names
+LINT_FILES := $(filter-out $(LIBKMC_DIR)/%,\
 	$(filter %.c,$(FORMAT_FILES)))
 
 $(BUILD_DIR)/compile_commands.json: tools/compile_commands.py Makefile
@@ -394,11 +395,6 @@ $(BUILD_DIR)/$(ULTRALIB_DIR)/%.c.o: $(ULTRALIB_DIR)/%.c
 	@mkdir -p $(dir $@)
 	$(DEPS) $(LIB_CC) -c $(ULTRALIB_CFLAGS) $(ULTRALIB_INCLUDES) $(ULTRALIB_DEFINES) -o $@ $<
 
-# The game's own variants of libultra objects, built the same way
-$(BUILD_DIR)/src/libultra/%.c.o: src/libultra/%.c
-	@mkdir -p $(dir $@)
-	$(DEPS) $(LIB_CC) -c $(ULTRALIB_CFLAGS) $(ULTRALIB_INCLUDES) $(ULTRALIB_DEFINES) -o $@ $<
-
 $(BUILD_DIR)/$(ULTRALIB_DIR)/%.s.o: $(ULTRALIB_DIR)/%.s
 	@mkdir -p $(dir $@)
 	$(DEPS) $(CC) -c $(ULTRALIB_ASFLAGS) $(ULTRALIB_INCLUDES) $(ULTRALIB_DEFINES) -o $@ $<
@@ -411,7 +407,7 @@ $(BUILD_DIR)/$(LIBNAUDIO_DIR)/%.c.o: $(LIBNAUDIO_DIR)/%.c
 	@mkdir -p $(dir $@)
 	$(DEPS) $(LIB_CC) -c $(LIBNAUDIO_CFLAGS) $(LIBNAUDIO_INCLUDES) $(LIBNAUDIO_DEFINES) -o $@ $<
 
-$(BUILD_DIR)/$(LIBNUSYS_DIR)/%.c.o: $(LIBNUSYS_DIR)/%.c $(BUILD_DIR)/$(LIBNUSYS_DIR)/nusys.h
+$(BUILD_DIR)/$(LIBNUSYS_DIR)/%.c.o: $(LIBNUSYS_DIR)/%.c $(BUILD_DIR)/$(LIBNUSYS_DIR)/include/nusys.h
 	@mkdir -p $(dir $@)
 	tr -d '\r' < $< > $(@:.o=)
 	$(DEPS) $(LIB_CC) -c $(LIBNUSYS_CFLAGS) $(LIBNUSYS_INCLUDES) $(LIBNUSYS_DEFINES) -o $@ $(@:.o=)
@@ -419,9 +415,9 @@ $(BUILD_DIR)/$(LIBNUSYS_DIR)/%.c.o: $(LIBNUSYS_DIR)/%.c $(BUILD_DIR)/$(LIBNUSYS_
 # Game code includes NuSystem's header through its converted copy, so the
 # copy must exist before any game file compiles. The .d files make the
 # files that include it rebuild when it changes.
-$(filter $(BUILD_DIR)/src/%,$(O_FILES)): | $(BUILD_DIR)/$(LIBNUSYS_DIR)/nusys.h
+$(filter $(BUILD_DIR)/src/%,$(O_FILES)): | $(BUILD_DIR)/$(LIBNUSYS_DIR)/include/nusys.h
 
-$(BUILD_DIR)/$(LIBNUSYS_DIR)/nusys.h: $(LIBNUSYS_DIR)/nusys.h
+$(BUILD_DIR)/$(LIBNUSYS_DIR)/include/nusys.h: $(LIBNUSYS_DIR)/include/nusys.h
 	@mkdir -p $(dir $@)
 	tr -d '\r' < $< > $@
 

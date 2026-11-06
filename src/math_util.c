@@ -4,10 +4,10 @@
  */
 #include "math_util.h"
 
+#include <math.h>
 #include <ultra64.h>
 
 #include "compiler.h"
-#include "libc.h"
 
 /* The integer lengths halve their components until they are below this
  * magnitude */

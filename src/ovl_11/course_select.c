@@ -16,7 +16,6 @@
 #include "heap.h"
 #include "include_asm.h"
 #include "language.h"
-#include "libc.h"
 #include "menu_memory.h"
 #include "save.h"
 #include "scoring.h"

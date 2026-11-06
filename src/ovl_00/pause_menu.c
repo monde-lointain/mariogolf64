@@ -4,6 +4,7 @@
  */
 #include "pause_menu.h"
 
+#include <framebuffer_count.h>
 #include <ultra64.h>
 
 #include "address.h"
@@ -14,7 +15,6 @@
 #include "course.h"
 #include "current_shot.h"
 #include "effects.h"
-#include "framebuffer.h"
 #include "gbi_helpers.h"
 #include "geometry.h"
 #include "heap.h"

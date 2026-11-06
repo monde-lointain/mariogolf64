@@ -4,6 +4,7 @@
  */
 #include "framing.h"
 
+#include <math.h>
 #include <ultra64.h>
 
 #include "camera.h"
@@ -11,7 +12,6 @@
 #include "controller.h"
 #include "geometry.h"
 #include "include_asm.h"
-#include "libc.h"
 #include "math_util.h"
 
 /* How many spheres f_FramedSphereCenters has room for */

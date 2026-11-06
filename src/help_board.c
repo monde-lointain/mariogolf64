@@ -4,7 +4,7 @@
  */
 #include "help_board.h"
 
-#include <lib/libnusys/nusys.h>
+#include <nusys.h>
 #include <ultra64.h>
 
 #include "address.h"

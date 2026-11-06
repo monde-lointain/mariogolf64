@@ -5,6 +5,8 @@
  */
 #include "shot_camera.h"
 
+#include <math.h>
+#include <stdlib.h>
 #include <ultra64.h>
 
 #include "ball_simulation.h"
@@ -27,7 +29,6 @@
 #include "hole_objects.h"
 #include "include_asm.h"
 #include "language.h"
-#include "libc.h"
 #include "main.h"
 #include "math_util.h"
 #include "movie.h"

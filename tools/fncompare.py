@@ -74,10 +74,12 @@ OPTFLAGS_BY_PATH = {Path("lib") / "libkmc": "-O1 -fno-fast-math"}
 DEFAULT_OPTFLAGS = os.environ.get("OPTFLAGS", "-O2")
 INCLUDES = [
     "-Iinclude",
-    "-Iinclude/libc",
+    "-Ilib/libkmc/include",
     "-Ilib/ultralib/include",
     "-Ilib/ultralib/include/PR",
     "-Ilib/libmus/include",
+    "-Ibuild/lib/libnusys/include",
+    "-Ilib/libnusys/include",
     "-Isrc",
     "-Ibuild",
 ]

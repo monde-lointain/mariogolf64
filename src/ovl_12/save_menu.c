@@ -3,6 +3,7 @@
  * the three saved games or the five replay records beside each one's
  * mode icon, and the Controls screen, a picture of the controller.
  */
+#include <framebuffer_count.h>
 #include <ultra64.h>
 
 #include "address.h"
@@ -12,7 +13,6 @@
 #include "compiler.h"
 #include "controller.h"
 #include "course.h"
-#include "framebuffer.h"
 #include "gbi_helpers.h"
 #include "heap.h"
 #include "hole_display.h"

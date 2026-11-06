@@ -5,6 +5,7 @@
  */
 #include "collision.h"
 
+#include <math.h>
 #include <ultra64.h>
 
 #include "ball_simulation.h"
@@ -17,7 +18,6 @@
 #include "hole_triangles.h"
 #include "include_asm.h"
 #include "language.h"
-#include "libc.h"
 #include "main.h"
 #include "math_util.h"
 #include "save.h"

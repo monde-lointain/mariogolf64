@@ -1,10 +1,10 @@
 #ifndef HOLE_CONDITIONS_H
 #define HOLE_CONDITIONS_H
 
+#include <math.h>
 #include <ultra64.h>
 
 #include "language.h"
-#include "libc.h"
 #include "math_util.h"
 
 /* The weather and light that a hole is played in */

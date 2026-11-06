@@ -4,6 +4,7 @@
  */
 #include "transmit_menu.h"
 
+#include <string.h>
 #include <ultra64.h>
 
 #include "address.h"
@@ -20,7 +21,6 @@
 #include "host_file.h"
 #include "include_asm.h"
 #include "language.h"
-#include "libc.h"
 #include "math_util.h"
 #include "overlay_manager.h"
 #include "save.h"

@@ -76,13 +76,13 @@ segments:
     bss_size: 0x122100
     subsegments:
       - [0x1000, hasm, entry]
-      - [0x1050, c, ../lib/libnusys/nupireadrom]
+      - [0x1050, c, ../lib/libnusys/src/nupireadrom]
       - [0x1130, c, overlay_manager]
       - [0x17B0, c, billboard]
-      - [0x3700, c, ../lib/libnusys/nugfxinit_ex2]
-      - [0x37B0, c, ../lib/libnusys/nusched]
-      - [0x4650, c, ../lib/libnusys/nugfxsetcfb]
-      - [0x4840, c, ../lib/libnusys/nugfxtaskmgr]
+      - [0x3700, c, ../lib/libnusys/src/nugfxinit_ex2]
+      - [0x37B0, c, ../lib/libnusys/src/nusched]
+      - [0x4650, c, ../lib/libnusys/src/nugfxsetcfb]
+      - [0x4840, c, ../lib/libnusys/src/nugfxtaskmgr]
       - [0x4CE0, c, main]
       - [0x5A40, c, game]
       - [0xDCE0, c, rcp]
@@ -130,7 +130,7 @@ segments:
       - [0x70E10, c, reaction]
       - [0x740A0, c, password]
       - [0x74890, c, sram]
-      - [0x748B0, c, ../lib/libnusys/nuboot]
+      - [0x748B0, c, ../lib/libnusys/src/nuboot]
       - [0x749F0, c, ../lib/libmus/src/player]
       - [0x78330, c, ../lib/libmus/src/player_fx]
       - [0x78D10, c, ../lib/libmus/src/aud_dma]
@@ -158,41 +158,41 @@ segments:
       - [0x7C6D0, c, ../lib/libnaudio/src/n_save]
       - [0x7C720, c, ../lib/libnaudio/src/n_synallocfx]
       - [0x7C770, c, ../lib/libnaudio/src/n_mainbus]
-      - [0x7C7F0, c, ../lib/libnusys/nuprenmifuncset]
-      - [0x7C830, c, ../lib/libnusys/nugfxthread]
-      - [0x7C960, c, ../lib/libnusys/nugfxfuncset]
-      - [0x7C9A0, c, ../lib/libnusys/nugfxswapcfbfuncset]
-      - [0x7C9E0, c, ../lib/libnusys/nugfxswapcfb]
-      - [0x7CA00, c, ../lib/libnusys/nugfxtaskallendwait]
-      - [0x7CA20, c, ../lib/libnusys/nugfxretracewait]
-      - [0x7CAA0, c, ../lib/libnusys/nugfxdisplayoff]
-      - [0x7CAD0, c, ../lib/libnusys/nugfxdisplayon]
-      - [0x7CAE0, c, ../lib/libnusys/nupiinit]
-      - [0x7CB20, c, ../lib/libnusys/nupiinitsram]
-      - [0x7CBD0, c, ../lib/libnusys/nupireadwritesram]
-      - [0x7CC90, c, ../lib/libnusys/nucontinit]
-      - [0x7CCD0, c, ../lib/libnusys/nucontdatagetex]
-      - [0x7CD60, c, ../lib/libnusys/nucontrmbmgr]
-      - [0x7D2D0, c, ../lib/libnusys/nucontrmbstart]
-      - [0x7D330, c, ../lib/libnusys/nucontrmbcheck]
-      - [0x7D3B0, c, ../lib/libnusys/nucontrmbmodeset]
-      - [0x7D470, c, ../lib/libnusys/nucontrmbforcestop]
+      - [0x7C7F0, c, ../lib/libnusys/src/nuprenmifuncset]
+      - [0x7C830, c, ../lib/libnusys/src/nugfxthread]
+      - [0x7C960, c, ../lib/libnusys/src/nugfxfuncset]
+      - [0x7C9A0, c, ../lib/libnusys/src/nugfxswapcfbfuncset]
+      - [0x7C9E0, c, ../lib/libnusys/src/nugfxswapcfb]
+      - [0x7CA00, c, ../lib/libnusys/src/nugfxtaskallendwait]
+      - [0x7CA20, c, ../lib/libnusys/src/nugfxretracewait]
+      - [0x7CAA0, c, ../lib/libnusys/src/nugfxdisplayoff]
+      - [0x7CAD0, c, ../lib/libnusys/src/nugfxdisplayon]
+      - [0x7CAE0, c, ../lib/libnusys/src/nupiinit]
+      - [0x7CB20, c, ../lib/libnusys/src/nupiinitsram]
+      - [0x7CBD0, c, ../lib/libnusys/src/nupireadwritesram]
+      - [0x7CC90, c, ../lib/libnusys/src/nucontinit]
+      - [0x7CCD0, c, ../lib/libnusys/src/nucontdatagetex]
+      - [0x7CD60, c, ../lib/libnusys/src/nucontrmbmgr]
+      - [0x7D2D0, c, ../lib/libnusys/src/nucontrmbstart]
+      - [0x7D330, c, ../lib/libnusys/src/nucontrmbcheck]
+      - [0x7D3B0, c, ../lib/libnusys/src/nucontrmbmodeset]
+      - [0x7D470, c, ../lib/libnusys/src/nucontrmbforcestop]
       - [0x7D490, c, ../lib/libnaudio/src/n_synfreefx]
-      - [0x7D4A0, c, ../lib/libnusys/nucontgbpakmgr]
-      - [0x7D5F0, c, ../lib/libnusys/nucontgbpakopen]
-      - [0x7D650, c, ../lib/libnusys/nucontgbpakgetstatus]
-      - [0x7D690, c, ../lib/libnusys/nucontgbpakpower]
-      - [0x7D6D0, c, ../lib/libnusys/nucontgbpakreadid]
-      - [0x7D710, c, ../lib/libnusys/nucontgbpakreadwrite]
-      - [0x7D760, c, ../lib/libnusys/nucontgbpakcheck]
-      - [0x7D7A0, c, ../lib/libnusys/nucontgbpakfread]
-      - [0x7D970, c, ../lib/libnusys/nucontgbpakfwrite]
-      - [0x7DB80, c, ../lib/libnusys/nusimgr]
-      - [0x7DE70, c, ../lib/libnusys/nusicallbackadd]
-      - [0x7DF10, c, ../lib/libnusys/nusicallbackremove]
-      - [0x7DF90, c, ../lib/libnusys/nucontmgr]
-      - [0x7E2D0, c, ../lib/libnusys/nucontdatalock]
-      - [0x7E330, c, ../lib/libnusys/nucontqueryread]
+      - [0x7D4A0, c, ../lib/libnusys/src/nucontgbpakmgr]
+      - [0x7D5F0, c, ../lib/libnusys/src/nucontgbpakopen]
+      - [0x7D650, c, ../lib/libnusys/src/nucontgbpakgetstatus]
+      - [0x7D690, c, ../lib/libnusys/src/nucontgbpakpower]
+      - [0x7D6D0, c, ../lib/libnusys/src/nucontgbpakreadid]
+      - [0x7D710, c, ../lib/libnusys/src/nucontgbpakreadwrite]
+      - [0x7D760, c, ../lib/libnusys/src/nucontgbpakcheck]
+      - [0x7D7A0, c, ../lib/libnusys/src/nucontgbpakfread]
+      - [0x7D970, c, ../lib/libnusys/src/nucontgbpakfwrite]
+      - [0x7DB80, c, ../lib/libnusys/src/nusimgr]
+      - [0x7DE70, c, ../lib/libnusys/src/nusicallbackadd]
+      - [0x7DF10, c, ../lib/libnusys/src/nusicallbackremove]
+      - [0x7DF90, c, ../lib/libnusys/src/nucontmgr]
+      - [0x7E2D0, c, ../lib/libnusys/src/nucontdatalock]
+      - [0x7E330, c, ../lib/libnusys/src/nucontqueryread]
       - [0x7E350, c, ../lib/ultralib/src/os/getcurrfaultthread]
       - [0x7E360, hasm, ../lib/ultralib/src/os/setintmask]
       - [0x7E400, c, ../lib/ultralib/src/io/pimgr]
@@ -225,7 +225,7 @@ segments:
       - [0x82560, hasm, ../lib/ultralib/src/os/writebackdcacheall]
       - [0x82590, c, ../lib/ultralib/src/io/contquery]
       - [0x82630, c, ../lib/ultralib/src/io/contreaddata]
-      - [0x82810, c, libultra/io/controller]
+      - [0x82810, c, ../lib/ultralib/src/io/controller]
       - [0x82B20, c, ../lib/ultralib/src/os/virtualtophysical]
       - [0x82B80, c, ../lib/ultralib/src/gu/align]
       - [0x82F20, c, ../lib/ultralib/src/gu/cosf]
@@ -302,7 +302,7 @@ segments:
       - [0x8AA10, c, ../lib/ultralib/src/io/contramwrite]
       - [0x8AC20, pad]
       - [0x8AC80, c, ../lib/ultralib/src/os/afterprenmi]
-      - [0x8ACA0, c, libultra/os/initialize]
+      - [0x8ACA0, c, ../lib/ultralib/src/os/initialize]
       - [0x8AF90, hasm, ../lib/ultralib/src/os/exceptasm]
       - [0x8B900, hasm, ../lib/ultralib/src/os/interrupt]
       - [0x8B990, c, ../lib/ultralib/src/os/setglobalintmask]
@@ -340,15 +340,15 @@ segments:
       - [0x8DF10, c, ../lib/ultralib/src/io/dp]
       - [0x8DF30, c, ../lib/ultralib/src/io/si]
       - [0x8DF50, c, ../lib/ultralib/src/libc/ldiv]
-      - [0x8E110, c, ../lib/libkmc/atan]
-      - [0x8E550, c, ../lib/libkmc/memset]
-      - [0x8E620, c, ../lib/libkmc/rand]
-      - [0x8E660, c, ../lib/libkmc/trig]
-      - [0x8EAD0, c, ../lib/libkmc/strcmp]
-      - [0x8EBE0, c, ../lib/libkmc/matherror]
-      - [0x8EC50, hasm, ../lib/libkmc/longlong]
-      - [0x8F140, hasm, ../lib/libkmc/floatdidf]
-      - [0x8F240, c, ../lib/libkmc/matherr]
+      - [0x8E110, c, ../lib/libkmc/src/atan]
+      - [0x8E550, c, ../lib/libkmc/src/memset]
+      - [0x8E620, c, ../lib/libkmc/src/rand]
+      - [0x8E660, c, ../lib/libkmc/src/trig]
+      - [0x8EAD0, c, ../lib/libkmc/src/strcmp]
+      - [0x8EBE0, c, ../lib/libkmc/src/matherror]
+      - [0x8EC50, hasm, ../lib/libkmc/src/longlong]
+      - [0x8F140, hasm, ../lib/libkmc/src/floatdidf]
+      - [0x8F240, c, ../lib/libkmc/src/matherr]
       # The RSP microcode, split where each program starts so that splat
       # labels it with the name the libraries know it by
       - [0x8F250, textbin, rspboot_text]
@@ -356,10 +356,10 @@ segments:
       - [0x8FF80, textbin, gspF3DEX2_fifo_text]
       - [0x91310, .data, overlay_manager]
       - [0x91600, .data, billboard]
-      - [0x91A80, .data, ../lib/libnusys/nugfxinit_ex2]
-      - [0x91B80, .data, ../lib/libnusys/nusched]
-      - [0x91BA0, .data, ../lib/libnusys/nugfxsetcfb]
-      - [0x91BB0, .data, ../lib/libnusys/nugfxtaskmgr]
+      - [0x91A80, .data, ../lib/libnusys/src/nugfxinit_ex2]
+      - [0x91B80, .data, ../lib/libnusys/src/nusched]
+      - [0x91BA0, .data, ../lib/libnusys/src/nugfxsetcfb]
+      - [0x91BB0, .data, ../lib/libnusys/src/nugfxtaskmgr]
       - [0x91BC0, .data, main]
       - [0x91C00, .data, game]
       - [0x92BF0, .data, rcp]
@@ -407,11 +407,11 @@ segments:
       - [0xA30A0, .data, ../lib/libnaudio/src/n_env]
       - [0xA31A0, .data, ../lib/libnaudio/src/n_reverb]
       - [0xA31B0, .data, ../lib/libnaudio/src/n_sl]
-      - [0xA31C0, .data, ../lib/libnusys/nugfxthread]
-      - [0xA31D0, .data, ../lib/libnusys/nucontrmbmgr]
-      - [0xA3200, .data, ../lib/libnusys/nucontgbpakmgr]
-      - [0xA3230, .data, ../lib/libnusys/nusimgr]
-      - [0xA3240, .data, ../lib/libnusys/nucontmgr]
+      - [0xA31C0, .data, ../lib/libnusys/src/nugfxthread]
+      - [0xA31D0, .data, ../lib/libnusys/src/nucontrmbmgr]
+      - [0xA3200, .data, ../lib/libnusys/src/nucontgbpakmgr]
+      - [0xA3230, .data, ../lib/libnusys/src/nusimgr]
+      - [0xA3240, .data, ../lib/libnusys/src/nucontmgr]
       - [0xA3270, .data, ../lib/ultralib/src/io/pimgr]
       - [0xA32A0, .data, ../lib/ultralib/src/io/cartrominit]
       - [0xA32B0, .data, ../lib/ultralib/src/io/piacs]
@@ -420,7 +420,7 @@ segments:
       - [0xA3460, .data, ../lib/ultralib/src/audio/env]
       - [0xA3560, .data, ../lib/ultralib/src/audio/reverb]
       - [0xA3580, .data, ../lib/ultralib/src/audio/sl]
-      - [0xA3590, .data, libultra/io/controller]
+      - [0xA3590, .data, ../lib/ultralib/src/io/controller]
       - [0xA35A0, .data, ../lib/ultralib/src/gu/align]
       - [0xA35B0, .data, ../lib/ultralib/src/gu/position]
       - [0xA35C0, .data, ../lib/ultralib/src/gu/random]
@@ -436,7 +436,7 @@ segments:
       - [0xA47F0, .data, ../lib/ultralib/src/io/gbpakreadid]
       - [0xA4840, .data, ../lib/ultralib/src/io/contpfs]
       - [0xA4850, .data, ../lib/ultralib/src/io/contramread]
-      - [0xA4860, .data, libultra/os/initialize]
+      - [0xA4860, .data, ../lib/ultralib/src/os/initialize]
       - [0xA4880, .data, ../lib/ultralib/src/os/exceptasm]
       - [0xA48B0, .data, ../lib/ultralib/src/libc/xprintf]
       - [0xA4900, .data, ../lib/ultralib/src/io/vi]
@@ -444,7 +444,7 @@ segments:
       - [0xA49C0, .data, ../lib/ultralib/src/vimodes/vimodepallan1]
       - [0xA4A10, .data, ../lib/ultralib/src/vimodes/vimodempallan1]
       - [0xA4A60, .data, ../lib/ultralib/src/libc/xlitob]
-      - [0xA4A90, .data, ../lib/libkmc/atan]
+      - [0xA4A90, .data, ../lib/libkmc/src/atan]
       - [0xA4C90, databin, n_aspMain_data]
       - [0xA4F40, databin, gspF3DEX2_fifo_data]
       - [0xA5360, .rodata, overlay_manager]
@@ -513,11 +513,11 @@ segments:
       - [0xADA40, .rodata, ../lib/ultralib/src/gu/libm_vals]
       - [0xADA50, .rodata, ../lib/ultralib/src/libc/xprintf]
       - [0xADBD0, .rodata, ../lib/ultralib/src/libc/xldtob]
-      - [0xADC40, .rodata, ../lib/libkmc/atan]
-      - [0xADCA0, .rodata, ../lib/libkmc/trig]
+      - [0xADC40, .rodata, ../lib/libkmc/src/atan]
+      - [0xADCA0, .rodata, ../lib/libkmc/src/trig]
       - { start: 0xADD30, type: .bss, vram: 0x800D2930, name: overlay_manager }
-      - { type: .bss, vram: 0x800D2970, name: ../lib/libnusys/nusched }
-      - { type: .bss, vram: 0x800D8980, name: ../lib/libnusys/nugfxtaskmgr }
+      - { type: .bss, vram: 0x800D2970, name: ../lib/libnusys/src/nusched }
+      - { type: .bss, vram: 0x800D8980, name: ../lib/libnusys/src/nugfxtaskmgr }
       - { type: .bss, vram: 0x800DAB60, name: game }
       - { type: .bss, vram: 0x800DAC40, name: pin }
       - { type: .bss, vram: 0x800DAED0, name: terrain }
@@ -545,18 +545,18 @@ segments:
       - { type: .bss, vram: 0x800E1DD0, name: round_hud }
       - { type: .bss, vram: 0x800E3980, name: hole_display }
       - { type: .bss, vram: 0x800E4C50, name: reaction }
-      - { type: .bss, vram: 0x800E4CD0, name: ../lib/libnusys/nuboot }
+      - { type: .bss, vram: 0x800E4CD0, name: ../lib/libnusys/src/nuboot }
       - { type: .bss, vram: 0x800E7030, name: ../lib/libmus/src/player }
       - { type: .bss, vram: 0x800E70A0, name: ../lib/libmus/src/aud_dma }
       - { type: .bss, vram: 0x800E70E0, name: ../lib/libmus/src/aud_sched }
       - { type: .bss, vram: 0x800E70F0, name: ../lib/libmus/src/aud_thread }
       - { type: .bss, vram: 0x800E72B0, name: ../lib/libmus/src/lib_memory }
       - { type: .bss, vram: 0x800E72C0, name: ../lib/libmus/src/aud_samples }
-      - { type: .bss, vram: 0x800E72D0, name: ../lib/libnusys/nugfxthread }
-      - { type: .bss, vram: 0x800F74A0, name: ../lib/libnusys/nupiinit }
-      - { type: .bss, vram: 0x800F7580, name: ../lib/libnusys/nupiinitsram }
-      - { type: .bss, vram: 0x800F7600, name: ../lib/libnusys/nusimgr }
-      - { type: .bss, vram: 0x800F97D0, name: ../lib/libnusys/nucontmgr }
+      - { type: .bss, vram: 0x800E72D0, name: ../lib/libnusys/src/nugfxthread }
+      - { type: .bss, vram: 0x800F74A0, name: ../lib/libnusys/src/nupiinit }
+      - { type: .bss, vram: 0x800F7580, name: ../lib/libnusys/src/nupiinitsram }
+      - { type: .bss, vram: 0x800F7600, name: ../lib/libnusys/src/nusimgr }
+      - { type: .bss, vram: 0x800F97D0, name: ../lib/libnusys/src/nucontmgr }
       - { type: .bss, vram: 0x800F97E0, name: ../lib/ultralib/src/io/pimgr }
       - { type: .bss, vram: 0x800FA9B0, name: ../lib/ultralib/src/io/piacs }
       - { type: .bss, vram: 0x800FA9C0, name: ../lib/ultralib/src/io/sptask }
@@ -567,11 +567,11 @@ segments:
       # build main_bss.c defines those objects, so these take no space here.
       - { type: .bss, vram: 0x800FBD30, name: current_shot }
       - { type: .bss, vram: 0x800FBD30, name: work_area }
-      - { type: .bss, vram: 0x800FBD30, name: ../lib/libkmc/errno }
+      - { type: .bss, vram: 0x800FBD30, name: ../lib/libkmc/src/errno }
       - { type: .bss, vram: 0x800FBD30, name: ../lib/ultralib/src/debug/kdebugserver }
-      - { type: .bss, vram: 0x800FBD30, name: ../lib/libnusys/nudramstack }
-      - { type: .bss, vram: 0x800FBD30, name: ../lib/libnusys/nurdpoutput }
-      - { type: .bss, vram: 0x800FBD30, name: ../lib/libnusys/nuyieldbuf }
+      - { type: .bss, vram: 0x800FBD30, name: ../lib/libnusys/src/nudramstack }
+      - { type: .bss, vram: 0x800FBD30, name: ../lib/libnusys/src/nurdpoutput }
+      - { type: .bss, vram: 0x800FBD30, name: ../lib/libnusys/src/nuyieldbuf }
       - { type: .bss, vram: 0x800FBD30, name: main_bss }
 
   - name: ovl_00

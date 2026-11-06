@@ -3,7 +3,7 @@
  * effect banks and the sample bank.
  */
 #include <PR/libmus.h>
-#include <lib/libnusys/nusys.h>
+#include <nusys.h>
 #include <ultra64.h>
 
 #include "address.h"

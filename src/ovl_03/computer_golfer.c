@@ -4,6 +4,8 @@
  */
 #include "computer_golfer.h"
 
+#include <math.h>
+#include <stdlib.h>
 #include <ultra64.h>
 
 #include "ball_simulation.h"
@@ -19,7 +21,6 @@
 #include "hole_loader.h"
 #include "include_asm.h"
 #include "language.h"
-#include "libc.h"
 #include "math_util.h"
 #include "play.h"
 #include "save.h"

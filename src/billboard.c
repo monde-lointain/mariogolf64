@@ -5,6 +5,7 @@
  */
 #include "billboard.h"
 
+#include <string.h>
 #include <ultra64.h>
 
 #include "address.h"
@@ -22,7 +23,6 @@
 #include "host_file.h"
 #include "include_asm.h"
 #include "language.h"
-#include "libc.h"
 #include "math_util.h"
 #include "save.h"
 #include "shot_camera.h"

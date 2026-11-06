@@ -95,4 +95,27 @@ float acosf(float x);
 float atan2f(float y, float x);
 float atanf(float x);
 
+/*
+ * The game's own fabsf, an abs.s in volatile inline assembly. Local-alloc
+ * can't give its result the operand's register, as it can the built-in's,
+ * and the scheduler keeps it in place. Every matched function compiles the
+ * same with it, and DrawRoundHud and IsEasedEyeHeightZero, which differed
+ * only at an abs.s, match with it; without volatile, 5 and 7 of their words
+ * differ. The matched functions that need the built-in's abs.s take fabs
+ * of a float, which GCC narrows to one.
+ */
+static inline float fabsf(float value) {
+  float magnitude;
+
+  __asm__ volatile("abs.s %0, %1" : "=f"(magnitude) : "f"(value));
+  return magnitude;
+}
+
+/*
+ * Built into GCC, which compiles it to a sqrt.s instruction. Unlike fabsf, the
+ * game uses the built-in: as inline assembly like fabsf's, volatile or not,
+ * the matched code of 20 files compiles differently.
+ */
+float sqrtf(float value);
+
 #endif

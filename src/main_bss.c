@@ -15,7 +15,7 @@
 #include <PRinternal/controller.h>
 #include <PRinternal/macros.h>
 #include <PRinternal/osint.h>
-#include <lib/libnusys/nusys.h>
+#include <nusys.h>
 #include <player_fx.h>
 #include <ultra64.h>
 

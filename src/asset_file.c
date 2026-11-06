@@ -3,7 +3,7 @@
  * asset and read a part at a time, and encoded assets are decoded from runs of
  * bytes or of halfwords.
  */
-#include <lib/libnusys/nusys.h>
+#include <nusys.h>
 #include <ultra64.h>
 
 #include "asset.h"

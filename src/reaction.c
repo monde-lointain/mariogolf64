@@ -5,6 +5,7 @@
  */
 #include "reaction.h"
 
+#include <math.h>
 #include <ultra64.h>
 
 #include "billboard.h"
@@ -21,7 +22,6 @@
 #include "hole_triangles.h"
 #include "include_asm.h"
 #include "language.h"
-#include "libc.h"
 #include "math_util.h"
 #include "pin.h"
 #include "save.h"

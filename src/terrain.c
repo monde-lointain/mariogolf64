@@ -5,6 +5,7 @@
  */
 #include "terrain.h"
 
+#include <math.h>
 #include <ultra64.h>
 
 #include "address.h"
@@ -26,7 +27,6 @@
 #include "hole_loader.h"
 #include "include_asm.h"
 #include "language.h"
-#include "libc.h"
 #include "main.h"
 #include "math_util.h"
 #include "overlay_manager.h"

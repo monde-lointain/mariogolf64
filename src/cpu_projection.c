@@ -10,7 +10,7 @@
 
 #include "compiler.h"
 #include "geometry.h"
-#include "libc.h"
+#include "math_util.h"
 #include "screen.h"
 
 /* The screen depth of the far plane over two, in a viewport's depth units */

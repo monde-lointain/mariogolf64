@@ -1,7 +1,7 @@
 #ifndef CONTROLLER_H
 #define CONTROLLER_H
 
-#include <lib/libnusys/nusys.h>
+#include <nusys.h>
 
 /*
  * The controllers are read once per game frame. Besides NuSystem's own
