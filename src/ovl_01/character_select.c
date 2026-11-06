@@ -613,9 +613,10 @@ s32 GetClubTournamentCourse(void);
  * temporary.
  *
  * Reading an imported character's character after marking it chosen and setting
- * g_GameState.unk3C gives 30 words differing, 10 in shape, but the register
- * oracle then comes no closer than 18 words, forcing 3 pseudos, against 10
- * forcing 9 here, so the code moves away from the original's.
+ * g_GameState.isImportedCharacterChosen gives 30 words differing, 10 in shape,
+ * but the register oracle then comes no closer than 18 words, forcing 3
+ * pseudos, against 10 forcing 9 here, so the code moves away from the
+ * original's.
  */
 #ifdef NON_MATCHING
 s32 UpdateCharacterSelect(
@@ -799,7 +800,7 @@ s32 UpdateCharacterSelect(
       index = character - FIRST_IMPORTED_CHARACTER;
       character = g_ImportedCharacters[index].character;
       g_ImportedCharacters[index].isChosen = TRUE;
-      g_GameState.unk3C = TRUE;
+      g_GameState.isImportedCharacterChosen = TRUE;
       g_ImportedCharacterColumns[playerIndex] =
           memory->characterColumns[playerIndex];
       if (g_ImportedCharacterColumns[playerIndex] < 0) {

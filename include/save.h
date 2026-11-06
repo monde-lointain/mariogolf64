@@ -185,9 +185,10 @@ typedef struct GameState {
   /* 0x08 */ s32 playerCount;
   /* 0x0C */ CourseIndex courseIndex;
   /* 0x10 */ s32 holeIndex;
-  /* 0x14 */ s32 unk14;
+  /* Only ever cleared, beside holeIndex as each round is set up */
+  /* 0x14 */ s32 unusedHoleValue;
   /* 0x18 */ Boolean isSuddenDeath;
-  /* 0x1C */ s32 unk1C;
+  /* 0x1C */ s32 unusedAfterSuddenDeath;
   /* 0x20 */ s32 currentPlayerIndex;
   /* 0x24 */ s32 holeSelection; /* A HOLE_SELECTION_* value */
   /* 0x28 */ s32
@@ -198,11 +199,13 @@ typedef struct GameState {
   /* 0x31 */ s8 replayKind; /* The replay that leaving the menus starts */
   /* 0x32 */ s8 betRates[BET_COUNT]; /* What each BET_* bet is worth; the
                                         menus also set one past the end */
-  /* 0x39 */ u8 unk39;
+  /* 0x39 */ u8 unusedAfterBetRates;
   /* 0x3A */ s8 isMiniGolf; /* Keeps billboards near the course's edge, and
                                tilts them less */
   /* 0x3B */ s8 isClubTournament; /* Entered with a tournament code */
-  /* 0x3C */ u8 unk3C;
+  /* Set when a player chooses a character brought over from a Game Boy;
+   * nothing reads it */
+  /* 0x3C */ u8 isImportedCharacterChosen;
   /* 0x3D */ s8 saveCount; /* Raised by one, up to 99, when the game is saved */
   /* 0x3E */ s16
       carriedPots[CARRIED_POT_COUNT]; /* The pots that tied holes carry over */

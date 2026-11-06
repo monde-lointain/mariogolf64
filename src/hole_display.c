@@ -687,7 +687,7 @@ void SetUpTitleHole(void) {
   memset(&g_GameState, 0, sizeof(GameState));
   g_GameState.holeIndex = TITLE_HOLE_INDEX;
   g_GameState.courseIndex = TITLE_COURSE_INDEX;
-  g_GameState.unk14 = 0;
+  g_GameState.unusedHoleValue = 0;
   g_GameState.gameMode = GAME_MODE_TITLE_HOLE;
   g_HoleSetup.conditions.isRaining = FALSE;
   g_HoleSetup.conditions.windSpeed =

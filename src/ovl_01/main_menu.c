@@ -906,7 +906,7 @@ void StartLoadingChosenHole(void) {
     g_GameState.holeIndex = GetFirstHoleIndex();
   }
 
-  g_GameState.unk14 = 0;
+  g_GameState.unusedHoleValue = 0;
   g_HoleSetup.conditions.isRaining = FALSE;
   g_HoleSetup.conditions.windSpeed =
       (rand() & CHOSEN_HOLE_WIND_SPEED_MASK) * CHOSEN_HOLE_WIND_SPEED_STEP;
@@ -1753,7 +1753,7 @@ void SetUpChosenGame(void) {
       LoadBestShotReplay(&save->rankedRecords[GetChosenBestShot()]);
     }
 
-    g_GameState.unk14 = 0;
+    g_GameState.unusedHoleValue = 0;
     g_GameState.playerCount = 1;
     g_GameState.step = GAME_STATE_START;
     return;
@@ -1812,7 +1812,7 @@ void SetUpChosenGame(void) {
     }
   }
 
-  g_GameState.unk14 = 0;
+  g_GameState.unusedHoleValue = 0;
   g_GameState.playerCount = g_ChosenPlayerCount;
   if (g_GameState.gameMode == GAME_MODE_GET_CHARACTER) {
     g_GameState.playerCount = 2;

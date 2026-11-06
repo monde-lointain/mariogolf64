@@ -724,7 +724,7 @@ void LoadStaffRoll(void) {
   memset(&g_GameState, 0, sizeof(g_GameState));
   g_GameState.courseIndex = COURSE_YOSHIS_ISLAND;
   g_GameState.holeIndex = STAFF_ROLL_HOLE_INDEX;
-  g_GameState.unk14 = 0;
+  g_GameState.unusedHoleValue = 0;
   g_GameState.gameMode = GAME_MODE_STAFF_ROLL;
   g_HoleSetup.conditions.isRaining = FALSE;
   g_HoleSetup.conditions.windSpeed =

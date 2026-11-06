@@ -276,7 +276,7 @@ void SetUpFlaggedRound(void) {
     case 0:
       g_GameState.courseIndex = 0;
       g_GameState.holeIndex = 0;
-      g_GameState.unk14 = 0;
+      g_GameState.unusedHoleValue = 0;
       g_GameState.playerCount =
           (IsGameFlagSet(GAME_FLAG_EXTRA_PLAYERS_HIGH_BIT) * 2) +
           IsGameFlagSet(GAME_FLAG_EXTRA_PLAYERS_LOW_BIT) + 1;
@@ -286,7 +286,7 @@ void SetUpFlaggedRound(void) {
     case 1:
       g_GameState.courseIndex = 0;
       g_GameState.holeIndex = 0;
-      g_GameState.unk14 = 0;
+      g_GameState.unusedHoleValue = 0;
       g_GameState.playerCount = 1;
       g_GameState.step = GAME_STATE_START;
       g_GameState.gameMode = GAME_MODE_TRAINING;
@@ -294,7 +294,7 @@ void SetUpFlaggedRound(void) {
     case 2:
       g_GameState.courseIndex = 0;
       g_GameState.holeIndex = 0;
-      g_GameState.unk14 = 0;
+      g_GameState.unusedHoleValue = 0;
       g_GameState.playerCount = 2;
       g_GameState.step = GAME_STATE_START;
       g_GameState.gameMode = GAME_MODE_MATCH_GAME;
@@ -306,7 +306,7 @@ void SetUpFlaggedRound(void) {
       g_GameState.playerCount = 3;
       g_GameState.courseIndex = 0;
       g_GameState.holeIndex = 0;
-      g_GameState.unk14 = 0;
+      g_GameState.unusedHoleValue = 0;
       g_GameState.step = GAME_STATE_START;
       g_GameState.gameMode = GAME_MODE_SKINS_MATCH;
       break;
@@ -318,7 +318,7 @@ void SetUpOneHole(void) {
   g_GameState.courseIndex = 0;
   g_GameState.playerCount = 1;
   g_GameState.holeIndex = 0;
-  g_GameState.unk14 = 0;
+  g_GameState.unusedHoleValue = 0;
   g_GameState.step = GAME_STATE_REPEATING_HOLE;
   if (IsGameFlagSet(GAME_FLAG_INIT_RING_SHOT)) {
     g_GameState.gameMode = GAME_MODE_RING_SHOT;
@@ -426,7 +426,7 @@ void InitPlay(PlayKind kind) {
     SetUpOneHole();
   } else if (kind == PLAY_KIND_BEST_SHOT_REPLAY) {
     LoadBestShotReplay(&f_BestShotReplayRecord);
-    g_GameState.unk14 = 0;
+    g_GameState.unusedHoleValue = 0;
     g_GameState.playerCount = 1;
     g_GameState.step = GAME_STATE_START;
     g_GameState.gameMode = GAME_MODE_STROKE;
