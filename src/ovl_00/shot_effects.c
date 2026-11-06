@@ -85,6 +85,9 @@ enum SwingTrailState {
 #define SPARK_MODEL_SCALE 0.1f
 /* Texture rectangles beyond these screen coordinates would overflow */
 #define SPARK_MAX_SCREEN_COORD 511
+/* Whether a screen coordinate lies within SPARK_MAX_SCREEN_COORD of 0 */
+#define IsSparkCoordInRange(coord) \
+  ((coord) >= -SPARK_MAX_SCREEN_COORD && (coord) <= SPARK_MAX_SCREEN_COORD)
 
 /* Counts the frames from the last impact flash, back to 0 after 100 */
 static s32 f_ImpactFrameCount = 0;
@@ -443,10 +446,8 @@ void DrawSparks(Gfx** displayListHead) {
         }
 
         if (f_SparkKinds[i] == SPARK_KIND_FLAGSTICK &&
-            burstPoints[burst][0] >= -SPARK_MAX_SCREEN_COORD &&
-            burstPoints[burst][0] <= SPARK_MAX_SCREEN_COORD &&
-            burstPoints[burst][1] >= -SPARK_MAX_SCREEN_COORD &&
-            burstPoints[burst][1] <= SPARK_MAX_SCREEN_COORD) {
+            IsSparkCoordInRange(burstPoints[burst][0]) &&
+            IsSparkCoordInRange(burstPoints[burst][1])) {
           left = (f_SparkOffsets[i][AXIS_X] * burstScales[burst]) +
               burstPoints[burst][0];
           top = (f_SparkOffsets[i][AXIS_Y] * burstScales[burst]) +
