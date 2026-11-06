@@ -2091,8 +2091,8 @@ void UpdateOpening(void) {
           TurnEditorCamera(1, 0.3807652f, 0x32);
           ZoomEditorCamera(1, 34.2068f, 0x32);
           if (f_IsDonkeyKongShown) {
-            PlaySoundWithEffects(
-                SOUND_UNK418, f_OpeningSoundChannel, SOUND_FULL_SCALE, 0, 0x3F);
+            PlaySoundWithEffects(SOUND_PEACH_LONG_HEY_MARIO,
+                f_OpeningSoundChannel, SOUND_FULL_SCALE, 0, 0x3F);
           } else {
             PlaySoundWithEffects(
                 SOUND_PEACH_HEY_MARIO, f_OpeningSoundChannel, 0x50, 0, 0x3F);

@@ -323,7 +323,8 @@ enum Sound {
   SOUND_AMBIENT_ALTERNATING_SECOND,
   /*
    * SOUND_MARIO_ITS_A_ME and SOUND_PEACH_HEY_MARIO play with the opening's
-   * Yoshi, where SOUND_HELLO_BALL and SOUND_UNK418 play with its Donkey Kong
+   * Yoshi, where SOUND_HELLO_BALL and SOUND_PEACH_LONG_HEY_MARIO play with its
+   * Donkey Kong
    */
   SOUND_MARIO_ITS_A_ME = 0x187,
   SOUND_HELLO_BALL,
@@ -341,7 +342,7 @@ enum Sound {
   SOUND_PEACH_BOGEY = 0x19F,
   SOUND_PEACH_EAGLE,
   SOUND_PEACH_HEY_MARIO,
-  SOUND_UNK418,
+  SOUND_PEACH_LONG_HEY_MARIO,
   SOUND_AMBIENT_RANDOM_FIRST, /* Also Plum's par reaction */
   SOUND_PLUM_EAGLE = 0x1AC,
   SOUND_PLUM_OPENING_VOICE = 0x1AE,
