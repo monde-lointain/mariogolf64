@@ -2067,7 +2067,8 @@ void UpdateOpening(void) {
             if (f_IsDonkeyKongShown) {
               PlaySound(SOUND_UNK392, f_OpeningSoundChannel, SOUND_FULL_SCALE);
             } else {
-              PlaySound(SOUND_UNK391, f_OpeningSoundChannel, SOUND_FULL_SCALE);
+              PlaySound(SOUND_MARIO_ITS_A_ME, f_OpeningSoundChannel,
+                  SOUND_FULL_SCALE);
             }
 
             AdvanceOpeningSoundChannel();
