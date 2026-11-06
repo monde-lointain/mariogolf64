@@ -593,30 +593,28 @@ s32 GetClubTournamentCourse(void);
 
 /*
  * Doesn't match: the original sets up the chosen character's sound with the
- * stack argument first, and keeps the cursor's column in $s4 where this keeps
- * it in $s3. Clearing the same-character count in the preview loop's
- * initializer takes 52 words differing to 46. It reads canChooseMarked as a
- * byte throughout, hence the casts; declared u8 instead, 58 words differ. The
- * permuter's best (43 words) returns from the diagonal move only when it fails,
- * so a successful move would go on to the other buttons' tests. The counts
- * before this were measured with an s8 column used for the chosen character
- * too, which gave 46 words (8 in shape); a u16 cursor column and an s8
- * chosenColumn of its own give more words, but the register oracle, forcing 9
- * pseudos' registers, leaves 10, against 24 with 7 forced before. 136 words
- * differ, 6 in shape.
+ * volume first, filling the random test's delay slot with it, where this
+ * fills it with the character. The register oracle's closest result is these
+ * 10 words with no register forced, so allocation isn't the cause. Testing
+ * for the other sound first gives 10 words, 2 in shape; the test written !=
+ * 0 or as % 2 changes nothing, and choosing the sound with ?: in one call
+ * gives 27 (19 in shape). 10 words differ, 4 in shape.
  *
- * Declaring the button as an s16 gives 75 words differing, 7 in shape, but
- * loads it with lh where the original loads it with lhu, so the button is
- * unsigned; as a u32 or s32 it gives 154, and a separate u16, u32 or s32
- * variable for the A press changes nothing. A focused permuter run's best, 23
- * words (5 in shape), copies the button through an unsigned long long
- * temporary.
+ * The grid marks of a player whose choice is undone are read into character,
+ * as the original keeps them in character's register; in gridMark, 136 words
+ * differ, and for either of the two undos alone 16. It reads canChooseMarked
+ * as a byte throughout, hence the casts; declared u8 instead, 22 words
+ * differ, 12 in shape. Clearing the same-character count before the preview
+ * loops, not in their initializers, gives 26. Declaring the button as an s16
+ * gives 63 words, 7 in shape, and as a u32 or s32 28; the original loads it
+ * with lhu, so it is unsigned. Reading an imported character's character
+ * after marking it chosen gives 18 words, 10 in shape, and the target loads
+ * it before the stores.
  *
- * Reading an imported character's character after marking it chosen and setting
- * g_GameState.isImportedCharacterChosen gives 30 words differing, 10 in shape,
- * but the register oracle then comes no closer than 18 words, forcing 3
- * pseudos, against 10 forcing 9 here, so the code moves away from the
- * original's.
+ * Permuter runs on older bases found no natural form: one best returned from
+ * the diagonal move only when it failed, so a successful move would go on to
+ * the other buttons' tests, and another copied the button through an
+ * unsigned long long temporary.
  */
 #ifdef NON_MATCHING
 s32 UpdateCharacterSelect(
@@ -629,7 +627,9 @@ s32 UpdateCharacterSelect(
   s32 index;
   s32 otherIndex;
   s16 sameCharacterCount;
-  s32 character; /* The cursor's grid mark, then the character it is */
+  /* The cursor's grid mark, then the character it is; also an undone choice's
+   * grid mark */
+  s32 character;
   s16 gridMark;
   s32 controllerIndex;
   u16 button;
@@ -1042,10 +1042,10 @@ s32 UpdateCharacterSelect(
 
       g_ChoosingControllerIndices[playerIndex] = UNCHOSEN_CONTROLLER;
       g_PlayerControllerIndices[playerIndex] = UNCHOSEN_CONTROLLER;
-      gridMark = g_CharacterGrid[memory->characterRows[playerIndex]]
-                                [memory->characterColumns[playerIndex]];
-      if (gridMark >= FIRST_IMPORTED_CHARACTER) {
-        g_ImportedCharacters[gridMark - FIRST_IMPORTED_CHARACTER].isChosen =
+      character = g_CharacterGrid[memory->characterRows[playerIndex]]
+                                 [memory->characterColumns[playerIndex]];
+      if (character >= FIRST_IMPORTED_CHARACTER) {
+        g_ImportedCharacters[character - FIRST_IMPORTED_CHARACTER].isChosen =
             FALSE;
         g_ImportedCharacterColumns[playerIndex] = NO_IMPORTED_COLUMN;
       }
@@ -1071,10 +1071,10 @@ s32 UpdateCharacterSelect(
       f_UnreadFaceToggle ^= 1;
       g_ChoosingControllerIndices[playerIndex] = UNCHOSEN_CONTROLLER;
       g_PlayerControllerIndices[playerIndex] = UNCHOSEN_CONTROLLER;
-      gridMark = g_CharacterGrid[memory->characterRows[playerIndex]]
-                                [memory->characterColumns[playerIndex]];
-      if (gridMark >= FIRST_IMPORTED_CHARACTER) {
-        g_ImportedCharacters[gridMark - FIRST_IMPORTED_CHARACTER].isChosen =
+      character = g_CharacterGrid[memory->characterRows[playerIndex]]
+                                 [memory->characterColumns[playerIndex]];
+      if (character >= FIRST_IMPORTED_CHARACTER) {
+        g_ImportedCharacters[character - FIRST_IMPORTED_CHARACTER].isChosen =
             FALSE;
         g_ImportedCharacterColumns[playerIndex] = NO_IMPORTED_COLUMN;
       }
