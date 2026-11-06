@@ -2348,6 +2348,13 @@ INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard_drawing", DrawLeaderboardPage);
  * loops' holes with a variable of their own gives 866 words (156 in
  * shape), or with j 846 (156); counting their rows and players with one
  * of their own gives 1150 (208), with a frame 16 bytes larger.
+ *
+ * The register oracle's split report finds i in $s1 up to the cell loops
+ * and in $s5 from the scores' player loop on, and j and hole the other
+ * way round. Giving the later loops variables of their own gives 1056
+ * words for i (190 in shape, with a frame 16 bytes larger), 866 for hole,
+ * 706 for j, and 862 to 1200 for the combinations, so the loops keep
+ * sharing them.
  */
 #ifdef NON_MATCHING
 void DrawScoresPage(Gfx** displayListHead) {
