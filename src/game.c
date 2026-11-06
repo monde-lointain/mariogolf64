@@ -58,10 +58,13 @@
  * match the original better that way. */
 extern volatile Boolean g_HasLoaderFinished;
 
-/* On KMC, declared volatile here, as the original reads its player index in
- * BuildHorizonDynamicTextures although the value is never used: flow deletes
- * a dead load that isn't volatile. On modern, current_shot.h declares it
- * volatile already. */
+/* The computer golfer's planning thread copies the current shot while the
+ * round's code, run from the retrace callback, changes it. current_shot.c
+ * defines it volatile, but on KMC current_shot.h declares it plain,
+ * so it is declared again here with the qualifier. That keeps the load of its
+ * player index in BuildHorizonDynamicTextures, whose value is never used, as
+ * the original has it; flow deletes a dead load that isn't volatile. On
+ * modern, current_shot.h declares it volatile already. */
 #ifdef __IS_KMC__
 extern volatile CurrentShot g_CurrentShot;
 #endif
