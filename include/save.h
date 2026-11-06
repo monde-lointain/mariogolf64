@@ -437,8 +437,9 @@ typedef struct Player {
   /* 0x1C */ s8 ballSurface; /* A SURFACE_* value */
   /* 0x1D */ s8 characterIndex; /* Also the index of the character's club set */
   /* 0x1E */ s8 isComputer; /* Played by the computer, with no controller */
-  /* 0x1F */ s8 unk1F;
-  /* 0x20 */ u8 unk20[0x22 - 0x20];
+  /* Set to -9 as the computer starts planning a shot; nothing reads it */
+  /* 0x1F */ s8 ignoredPlanMark;
+  /* 0x20 */ u8 unusedBeforeLefty[0x22 - 0x20];
   /* 0x22 */ s8 isLefty; /* Swings left-handed, so stands mirrored */
   /* 0x23 */ s8 strokeCount; /* On the current hole */
   /* 0x24 */ s8 puttCount; /* Strokes from the green on the current hole */
@@ -451,32 +452,33 @@ typedef struct Player {
   /* 0x29 */ s8 handicap; /* Gives strokes on the holes it ranks within */
   /* 0x2A */ s8 soundPan;
   /* 0x2B */ PlayerHole holes[COURSE_HOLE_COUNT];
-  /* 0x4F */ u8 unk4F[0x52 - 0x4F];
+  /* 0x4F */ u8 unusedAfterHoles[0x52 - 0x4F];
   /* 0x52 */ s16 clubs[CLUB_SLOT_COUNT]; /* Indices into g_Clubs, by bag slot */
-  /* 0x72 */ u8 unk72[0x74 - 0x72];
+  /* 0x72 */ u8 unusedAfterClubs[0x74 - 0x72];
   /* 0x74 */ s32
       stopwatchFrameCount; /* The player's time in the stopwatch modes */
   /* 0x78 */ s8 ringStates[RING_COUNT]; /* RING_STATE_* values, for Ring Shot */
   /* 0x7B */ s8 paletteIndex; /* Which of the character's palettes it wears */
   /* 0x7C */ s8 gameBoyCharacterIndex; /* For the Game Boy characters, from
                                           CHARACTER_KID on */
-  /* 0x7D */ u8 unk7D[3];
+  /* 0x7D */ u8 unusedAfterGameBoyIndex[3];
   /* 0x80 */ s32 driveDistance; /* UNMEASURED_DISTANCE, or UNCOUNTED_DISTANCE */
   /* 0x84 */ s32 pinDistance; /* UNMEASURED_DISTANCE, or UNCOUNTED_DISTANCE */
   /* 0x88 */ s32 noiseSeed; /* Added into the ball's flight noise, and kept
                                in the replay records */
   /* 0x8C */ s8 gridColor; /* GRID_COLOR_*, for the grid drawn over the green */
-  /* 0x8D */ u8 unk8D;
+  /* 0x8D */ u8 unusedAfterGridColor;
   /* 0x8E */ s16
       betTallies[BET_COUNT]; /* What the player has won on each BET_* bet */
   /* 0x9C */ s8 hasBeenInBunker; /* On the hole being played */
-  /* 0x9D */ u8 unk9D[3];
+  /* 0x9D */ u8 unusedAfterBunkerVisit[3];
   /* 0xA0 */ s32
       lastDriveDistance; /* The driveDistance that RecordDrive took */
   /* 0xA4 */ s32 points; /* Earned in the round, towards opening courses */
-  /* 0xA8 */ s16 unkA8;
+  /* Only ever cleared, as the ball is placed at rest */
+  /* 0xA8 */ s16 unusedRestValue;
   /* 0xAA */ s8 notableShotCounts[SHOT_KIND_COUNT]; /* By ShotKind */
-  /* 0xB6 */ u8 unkB6[0xB8 - 0xB6];
+  /* 0xB6 */ u8 unusedAfterShotCounts[0xB8 - 0xB6];
 } Player; /* size = 0xB8 */
 
 /* The best times kept for each course, with what was recorded alongside */

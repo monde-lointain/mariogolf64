@@ -1819,7 +1819,7 @@ void PlaceBallAtRest(s32 playerIndex, BallSimulation* simulation) {
     SetRingShotCleared(FALSE);
   }
 
-  player->unkA8 = 0;
+  player->unusedRestValue = 0;
   simulation->position[AXIS_X] = player->ballPosition[AXIS_X];
   simulation->position[AXIS_Y] = player->ballPosition[AXIS_Y];
   simulation->position[AXIS_Z] = player->ballPosition[AXIS_Z];
@@ -3413,7 +3413,7 @@ void UpdateTurns(void) {
         } else if (IsGameFlagSet(GAME_FLAG_FAST_AUTOPLAY) ||
             g_Players[playerIndex].isComputer ||
             IsGameFlagSet(GAME_FLAG_AUTOPLAY)) {
-          g_Players[playerIndex].unk1F = -9;
+          g_Players[playerIndex].ignoredPlanMark = -9;
           LoadOverlay(GetOverlayOfModule(MODULE_COMPUTER_GOLFER));
           StartShotPlan();
           g_UnusedLaunchCount = 0;
