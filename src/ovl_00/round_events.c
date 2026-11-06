@@ -1225,9 +1225,9 @@ void StartMovie(s32 movie) {
       f_Lakitu.y = LAKITU_START_Y;
       f_Lakitu.scale = LAKITU_START_SCALE;
       break;
-    case MOVIE_MONTY_MOLE_UNK2:
-    case MOVIE_MONTY_MOLE_UNK3:
-    case MOVIE_MONTY_MOLE_UNK4:
+    case MOVIE_UNUSED_MONTY_MOLE_A:
+    case MOVIE_UNUSED_MONTY_MOLE_B:
+    case MOVIE_UNUSED_MONTY_MOLE_C:
     case MOVIE_MONTY_MOLE:
       OpenAssetFile(ASSET_MONTY_MOLE_MOVIE_PALETTE, &file);
       ReadAssetFile(
