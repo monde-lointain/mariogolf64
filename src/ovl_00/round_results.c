@@ -2615,6 +2615,16 @@ enum PointsStep {
  * Keeping &g_GameState.gameMode live before the loop through empty inline
  * assembly, as a probe, loads that address into a register but still
  * reads the player count from its own address: 7 words differ.
+ *
+ * Per mips_address_cost, a register plus 4 costs 1 and the constant
+ * address 2, so cse's find_best_addr keeps the original's form wherever
+ * the address is written as a register known to hold
+ * &g_GameState.gameMode plus 4; with gameMode read into j before the
+ * loop, that register reaches the loop's entry test unused, as cse looks
+ * up related values only for a set's source, not for an address. Reading
+ * the count as an inline helper's mode[1], given &g_GameState.gameMode,
+ * keeps jump from duplicating the loop's exit test: 21 words (15 in
+ * shape), or 47 (5) with the entry test written out as an if.
  */
 #ifdef NON_MATCHING
 s32 UpdateCoursePointsResults(ControllerState* controller) {
