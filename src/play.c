@@ -1912,13 +1912,16 @@ void ClearNearbyGroundTiles(void) {
   bzero(g_IsGroundTileNearby, sizeof(g_IsGroundTileNearby));
 }
 
+/* The test ground texture repeats, mirrored, every this many units */
+#define TEST_TEXTURE_TILE_SIZE 512
+
 static inline s32 GetMirroredOffset(s16 coordinate) {
-  s32 tile = coordinate / 512;
+  s32 tile = coordinate / TEST_TEXTURE_TILE_SIZE;
   s32 offset;
 
-  offset = coordinate - (tile * 512);
+  offset = coordinate - (tile * TEST_TEXTURE_TILE_SIZE);
   if (tile % 2) {
-    offset = 512 - offset;
+    offset = TEST_TEXTURE_TILE_SIZE - offset;
   }
 
   return offset;
@@ -1952,18 +1955,18 @@ void RebuildGroundTextureCoordinates(void) {
     for (column = 0; column < GROUND_POINT_COLUMN_COUNT; column++) {
       point = GetGroundPoint(column, row)->v;
       offset = GetMirroredOffset(point.ob[AXIS_X]);
-      if (offset != 512) {
+      if (offset != TEST_TEXTURE_TILE_SIZE) {
         point.tc[TEXTURE_AXIS_S] = TexelCoordinate(offset);
       } else {
-        point.tc[TEXTURE_AXIS_S] = 0x4000;
+        point.tc[TEXTURE_AXIS_S] = TexelCoordinate(TEST_TEXTURE_TILE_SIZE);
       }
 
       point.tc[TEXTURE_AXIS_S] += 0x100;
       offset = GetMirroredOffset(point.ob[AXIS_Z]);
-      if (offset != 512) {
+      if (offset != TEST_TEXTURE_TILE_SIZE) {
         point.tc[TEXTURE_AXIS_T] = TexelCoordinate(offset);
       } else {
-        point.tc[TEXTURE_AXIS_T] = 0x4000;
+        point.tc[TEXTURE_AXIS_T] = TexelCoordinate(TEST_TEXTURE_TILE_SIZE);
       }
 
       point.tc[TEXTURE_AXIS_T] += 0x100;
