@@ -1855,7 +1855,7 @@ void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
   originZ = (shift * forwardZ) + (sideZ * centering);
   /*
    * forwardX holds the row step's x from here, to match: a stepX variable gives
-   * 387 words differing (59 in shape) against the draft's 345 (55)
+   * 342 words differing (48 in shape) against the draft's 300 (44)
    */
   forwardX = -cosf(yaw) * rowSpacing;
   stepZ = -sinf(yaw) * rowSpacing;
