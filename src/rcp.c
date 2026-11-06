@@ -9,6 +9,7 @@
 
 #include "cpu_projection.h"
 #include "game.h"
+#include "gbi_helpers.h"
 #include "screen.h"
 
 /* The farthest depth the 14-bit depth buffer holds */
@@ -64,8 +65,7 @@ void FillScreen(void) {
   gDPPipeSync(g_DisplayListHead++);
   gDPSetCycleType(g_DisplayListHead++, G_CYC_FILL);
   gDPSetFillColor(g_DisplayListHead++,
-      GPACK_RGBA5551(f_FillColor[0], f_FillColor[1], f_FillColor[2], 1) << 16 |
-          GPACK_RGBA5551(f_FillColor[0], f_FillColor[1], f_FillColor[2], 1));
+      FillColor16(f_FillColor[0], f_FillColor[1], f_FillColor[2], 1));
   gDPPipeSync(g_DisplayListHead++);
   gDPFillRectangle(g_DisplayListHead++, SCREEN_BORDER, SCREEN_BORDER,
       SCREEN_WIDTH - SCREEN_BORDER - 1, SCREEN_HEIGHT - SCREEN_BORDER - 1);
@@ -100,15 +100,13 @@ void AppendBufferClear(s32 clearMode, Gfx** displayListHead) {
   if (clearMode == BUFFER_CLEAR_BY_LINE) {
     /* Stops a line short, which the screen's border hides */
     for (line = 0; line < SCREEN_HEIGHT - 1; line++) {
-      gDPSetFillColor(
-          gfx++, GPACK_RGBA5551(0, 0, 0, 1) << 16 | GPACK_RGBA5551(0, 0, 0, 1));
+      gDPSetFillColor(gfx++, FillColor16(0, 0, 0, 1));
       gDPFillRectangle(gfx++, 0, line, SCREEN_WIDTH - 1, line);
     }
 
     gDPPipeSync(gfx++);
   } else if (clearMode == BUFFER_CLEAR_WHOLE) {
-    gDPSetFillColor(
-        gfx++, GPACK_RGBA5551(0, 0, 0, 1) << 16 | GPACK_RGBA5551(0, 0, 0, 1));
+    gDPSetFillColor(gfx++, FillColor16(0, 0, 0, 1));
     gDPPipeSync(gfx++);
     gDPFillRectangle(gfx++, 0, 0, SCREEN_WIDTH - 1, SCREEN_HEIGHT - 1);
     gDPPipeSync(gfx++);

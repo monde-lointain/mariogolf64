@@ -756,8 +756,7 @@ void DrawSpinEffect(Gfx** displayListHead, CameraView* view) {
   gDPPipeSync(gfx++);
   gDPPipeSync(gfx++);
   gDPSetCycleType(gfx++, G_CYC_FILL);
-  gDPSetFillColor(
-      gfx++, GPACK_RGBA5551(0, 0, 0, 1) << 16 | GPACK_RGBA5551(0, 0, 0, 1));
+  gDPSetFillColor(gfx++, FillColor16(0, 0, 0, 1));
   gDPFillRectangle(gfx++, 0, 0, SCREEN_WIDTH - 1, SCREEN_HEIGHT - 1);
   gDPPipeSync(gfx++);
   gDPPipeSync(gfx++);

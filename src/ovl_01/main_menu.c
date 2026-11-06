@@ -3781,8 +3781,7 @@ void DrawMenuScreen(Gfx** displayListHead) {
   gDPPipeSync(gfx++);
   gDPPipeSync(gfx++);
   gDPSetCycleType(gfx++, G_CYC_FILL);
-  gDPSetFillColor(
-      gfx++, GPACK_RGBA5551(0, 0, 0, 1) << 16 | GPACK_RGBA5551(0, 0, 0, 1));
+  gDPSetFillColor(gfx++, FillColor16(0, 0, 0, 1));
   gDPFillRectangle(gfx++, SCREEN_BORDER, SCREEN_BORDER,
       SCREEN_WIDTH - SCREEN_BORDER - 1, SCREEN_HEIGHT - SCREEN_BORDER - 1);
   gDPPipeSync(gfx++);

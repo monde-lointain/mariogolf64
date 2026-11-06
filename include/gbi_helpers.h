@@ -45,6 +45,12 @@ static inline void SetLightColor(Light* light, s32 red, s32 green, s32 blue) {
   light->l.colc[2] = blue;
 }
 
+/* A fill color for a 16-bit color image: the RGBA5551 pixel in both halves,
+ * as the RDP fills two pixels at a time */
+#define FillColor16(red, green, blue, alpha) \
+  (GPACK_RGBA5551(red, green, blue, alpha) << 16 | \
+      GPACK_RGBA5551(red, green, blue, alpha))
+
 /* The ends of an 8-bit color's alpha */
 #define TRANSPARENT_ALPHA 0
 #define OPAQUE_ALPHA 0xFF
