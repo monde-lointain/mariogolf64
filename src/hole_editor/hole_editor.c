@@ -3952,8 +3952,14 @@ void WriteHexDumpFile(u32* words, s32 byteCount, char* fileName) {
  * tileColumn, which nothing else uses. Together they take the draft from
  * 2009 words differing to 2007, 491 in shape either way, and leave the
  * oracle's closest result at 1975 words, forcing 110 pseudos; tileColumn
- * alone gives 2013 and groupTile alone 2015. 2007 words differ, 491 in
- * shape.
+ * alone gives 2013 and groupTile alone 2015.
+ *
+ * A map tile's checker color names its red and blue, set before the color
+ * command, where both were written into it. That takes the draft from 2007
+ * words differing, 491 in shape, to 1993 (489), and the oracle's closest
+ * result from 1975 words, forcing 110 pseudos, to 1968, forcing 95. Naming
+ * the blue alone gives the same 1993 words, and the red alone leaves 2007;
+ * choosing each with ?: gives 2520 (612). 1993 words differ, 489 in shape.
  */
 #ifdef NON_MATCHING
 void DrawHoleEditorGround(CameraMatrices* matrices UNUSED, s32 terrainStyle) {
@@ -4347,8 +4353,10 @@ void DrawHoleEditorGround(CameraMatrices* matrices UNUSED, s32 terrainStyle) {
           /* The maps tell each tile from its neighbors by color */
           if (IsMapTerrainStyle(terrainStyle)) {
             Boolean isOdd = (row + groupTile) & 1;
+            s32 red = isOdd * 0xFF;
+            s32 blue = 0xFF - red;
 
-            gDPSetEnvColor(gfx++, isOdd * 0xFF, 0, 0xFF - (isOdd * 0xFF), 0xFF);
+            gDPSetEnvColor(gfx++, red, 0, blue, 0xFF);
           }
 
           if (g_WorkArea.hole.tiles[tileIndex].detail == GROUND_DETAIL_FINE &&
