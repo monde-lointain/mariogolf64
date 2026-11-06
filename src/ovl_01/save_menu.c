@@ -1901,7 +1901,7 @@ void DrawSavedGames(Gfx** displayListHead) {
   s32 index;
   /*
    * Also the text slots that the controller prompt clears, to match: index
-   * for them gives 293 words differing against the draft's 255, 115 in shape
+   * for them gives 325 words differing against the draft's 287, 91 in shape
    * both
    */
   s32 stripOrTextSlotIndex;
@@ -1919,9 +1919,10 @@ void DrawSavedGames(Gfx** displayListHead) {
   s32 gameIndex;
   s32 courseIndex;
   /*
-   * Also the board and strip index in the loops, to match: a board variable
-   * for them gives 564 words differing (138 in shape) against the draft's 307
-   * (121)
+   * Also the board index in the sorting loops and the strip index in the
+   * boards' and icons' loops, to match: a board variable for the sorting
+   * loops gives 369 words differing (91 in shape), and a stripIndex for the
+   * strip loops 541 (99), against the draft's 287 (91)
    */
   s32 holeIndex;
   s32 labelX;
