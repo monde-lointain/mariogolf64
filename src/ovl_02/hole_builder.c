@@ -3382,6 +3382,10 @@ static inline u16* GetShadowedTexel(u32 column, u32 row) {
  * first, though it multiplies the height first; setting litPercent between
  * the two fractions or after both gives 61 (19), and the height first with
  * litPercent last 67.
+ *
+ * Clamping the first column in maskRow, which would give the mask's row
+ * counter a second meaning, gives 57 words, 17 in shape, but the oracle's
+ * closest is then those 57 words with nothing forced, against 55 forcing 5.
  */
 #ifdef NON_MATCHING
 void CastBillboardShadows(void) {
