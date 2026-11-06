@@ -2104,7 +2104,9 @@ void DrawHoleEditorGround(CameraMatrices* matrices, s32 terrainStyle);
  * 897, 233 in shape either way, and the register oracle's closest result
  * from 896 words to 886, forcing 70 pseudos for each. Declaring row in the
  * half's block too gives 923, and a u16 or u8 groupTileIndex now 896 words
- * but 236 in shape. 897 words differ, 233 in shape.
+ * but 236 in shape. The register oracle's split search finds j in different
+ * registers in its two loops, but a counter of its own for either gives 903
+ * words. 897 words differ, 233 in shape.
  */
 void DrawGround(CameraMatrices* matrices, s32 terrainStyle) {
   u8 snapsEdge[2][TILE_VERTEX_SEGMENT_COUNT]; /* For the current and the last
