@@ -1885,8 +1885,11 @@ void DrawSavedMiniGolfImage(Gfx** displayListHead);
  * The register oracle reports courseIndex lining up with $s1, the register
  * the original gives the shared counter, and the hole index with $s6.
  * Counting the boards and strips with courseIndex in place of holeIndex
- * gives 597 words (99 in shape). The report lists gfx, the strip counter
- * and two other values as lining up with $s1 too, so it is weak.
+ * gives 597 words (99 in shape). The report lists gfx, the strip counter and
+ * two other values as lining up with $s1 too, so it is weak. A counter of
+ * its own, declared before or after holeIndex, which then holds only the
+ * chosen game's hole, also gives 597 words (99 in shape), so holeIndex keeps
+ * both roles.
  */
 #ifdef NON_MATCHING
 void DrawSavedGames(Gfx** displayListHead) {
