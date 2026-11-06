@@ -569,7 +569,8 @@ typedef struct CourseStatFigures {
   /* 0x08 */ f32 averageScore;
   /* 0x0C */ f32 bestDrive;
   /* 0x10 */ f32 averageDrive;
-  /* 0x14 */ f32 unk14;
+  /* Only ever cleared, for a course with no rounds */
+  /* 0x14 */ f32 unusedDriveFigure;
   /* 0x18 */ f32 fairwayPercent;
   /* 0x1C */ f32 averagePutts;
   /* 0x20 */ f32 parSavePercent;

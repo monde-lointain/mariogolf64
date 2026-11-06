@@ -1898,7 +1898,7 @@ void ComputeRoundStatistics(void) {
       g_CourseStatFigures[courseIndex].averageScore = 0.0f;
       g_CourseStatFigures[courseIndex].bestDrive = 0.0f;
       g_CourseStatFigures[courseIndex].averageDrive = 0.0f;
-      g_CourseStatFigures[courseIndex].unk14 = 0.0f;
+      g_CourseStatFigures[courseIndex].unusedDriveFigure = 0.0f;
       g_CourseStatFigures[courseIndex].fairwayPercent = 0.0f;
       g_CourseStatFigures[courseIndex].averagePutts = 0.0f;
       g_CourseStatFigures[courseIndex].parOnPercent = 0.0f;
@@ -1907,7 +1907,7 @@ void ComputeRoundStatistics(void) {
       g_CourseStatFigures[courseIndex].hasPlace[SECOND_PLACE_INDEX] = FALSE;
       g_CourseStatFigures[courseIndex].hasPlace[FIRST_PLACE_INDEX] = FALSE;
     } else {
-      /* unk14 is left as it was */
+      /* unusedDriveFigure is left as it was */
       reciprocal = 1.0f / entry->roundCount;
       g_CourseStatFigures[courseIndex].bestScore = entry->bestScore;
       g_CourseStatFigures[courseIndex].averageScore =
