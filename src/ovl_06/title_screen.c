@@ -411,7 +411,7 @@ void DrawTitleScreen(Gfx** displayListHead) {
     f_PressStartPhase += DegreesToRadians(20);
     red = (sinf(f_PressStartPhase) * 127.0f) + 127.0f;
     green = (sinf(f_PressStartPhase + M_PI) * 127.0f) + 127.0f;
-    gDPSetPrimColor(gfx++, 0, 0, red, green, 64, 255);
+    gDPSetPrimColor(gfx++, 0, 0, red, green, 64, OPAQUE_ALPHA);
     gDPPipeSync(gfx++);
     gDPSetRenderMode(gfx++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
     gDPSetCombineLERP(gfx++, TEXEL0, 0, PRIMITIVE, 0, PRIMITIVE, 0, TEXEL0, 0,

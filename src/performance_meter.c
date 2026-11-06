@@ -8,6 +8,7 @@
 
 #include <lib/libnusys/nusys.h>
 
+#include "gbi_helpers.h"
 #include "heap.h"
 #include "screen.h"
 
@@ -231,7 +232,7 @@ static void DrawDigits(Gfx** gfxP, u16 x, u16 y, char* text) {
   gDPPipeSync(gfx++);
   gDPPipeSync(gfx++);
   gDPSetCycleType(gfx++, G_CYC_1CYCLE);
-  gDPSetPrimColor(gfx++, 0, 0, 255, 200, 0, 255);
+  gDPSetPrimColor(gfx++, 0, 0, 255, 200, 0, OPAQUE_ALPHA);
   gDPSetCombineMode(gfx++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
   gDPPipeSync(gfx++);
   gDPSetTexturePersp(gfx++, G_TP_NONE);

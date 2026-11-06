@@ -796,12 +796,13 @@ void DrawRingShotRecords(Gfx** displayListHead) {
         greenSwing = sinf(f_ReplayHuePhase + M_PI) * REPLAY_HUE_SWING;
         green = greenSwing + REPLAY_HUE_MIDDLE;
         if (index == memory->ringShotReplaySlot) {
-          gDPSetPrimColor(gfx++, 0, 0, red, green, blue, 255);
+          gDPSetPrimColor(gfx++, 0, 0, red, green, blue, OPAQUE_ALPHA);
           gDPSetEnvColor(gfx++, red / REPLAY_GLOW_DIVISOR,
-              green / REPLAY_GLOW_DIVISOR, blue / REPLAY_GLOW_DIVISOR, 255);
+              green / REPLAY_GLOW_DIVISOR, blue / REPLAY_GLOW_DIVISOR,
+              OPAQUE_ALPHA);
         } else {
-          gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
-          gDPSetEnvColor(gfx++, 0, 0, 0, 255);
+          gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
+          gDPSetEnvColor(gfx++, 0, 0, 0, OPAQUE_ALPHA);
         }
 
         replayCourse =
@@ -2059,7 +2060,7 @@ void DrawSavedGames(Gfx** displayListHead) {
         gDPSetCombineMode(
             gfx++, G_CC_MODULATERGBA_PRIM, G_CC_MODULATERGBA_PRIM);
         gDPSetPrimColor(gfx++, 0, 0, UNCHOSEN_BOARD_SHADE, UNCHOSEN_BOARD_SHADE,
-            UNCHOSEN_BOARD_SHADE, 255);
+            UNCHOSEN_BOARD_SHADE, OPAQUE_ALPHA);
       }
 
       gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_GameBoards[slot])));

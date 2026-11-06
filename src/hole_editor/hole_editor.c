@@ -4358,7 +4358,7 @@ void DrawHoleEditorGround(CameraMatrices* matrices UNUSED, s32 terrainStyle) {
             s32 red = isOdd * 0xFF;
             s32 blue = 0xFF - red;
 
-            gDPSetEnvColor(gfx++, red, 0, blue, 0xFF);
+            gDPSetEnvColor(gfx++, red, 0, blue, OPAQUE_ALPHA);
           }
 
           if (g_WorkArea.hole.tiles[tileIndex].detail == GROUND_DETAIL_FINE &&
@@ -4580,7 +4580,7 @@ void DrawHoleEditorGround(CameraMatrices* matrices UNUSED, s32 terrainStyle) {
                           if (!g_ShowsGroundWaves) {
                             if (terrainStyle != TERRAIN_STYLE_NORMAL) {
                               gDPSetPrimColor(
-                                  gfx++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+                                  gfx++, 0, 0, 0xFF, 0xFF, 0xFF, OPAQUE_ALPHA);
                             }
                           }
 
@@ -4593,7 +4593,7 @@ void DrawHoleEditorGround(CameraMatrices* matrices UNUSED, s32 terrainStyle) {
                             if (terrainStyle != TERRAIN_STYLE_NORMAL) {
                               gDPSetPrimColor(gfx++, 0, 0,
                                   SHADED_TRIANGLE_LEVEL, SHADED_TRIANGLE_LEVEL,
-                                  SHADED_TRIANGLE_LEVEL, 0xFF);
+                                  SHADED_TRIANGLE_LEVEL, OPAQUE_ALPHA);
                             }
                           }
 
@@ -4607,18 +4607,18 @@ void DrawHoleEditorGround(CameraMatrices* matrices UNUSED, s32 terrainStyle) {
                            * the mirrored ones darker */
                           if (terrainStyle != TERRAIN_STYLE_NORMAL) {
                             if ((cellColumn ^ cellRow) & 1) {
-                              gDPSetEnvColor(gfx++, 0xFF, 0, 0, 0xFF);
+                              gDPSetEnvColor(gfx++, 0xFF, 0, 0, OPAQUE_ALPHA);
                             } else {
-                              gDPSetEnvColor(gfx++, 0, 0, 0xFF, 0xFF);
+                              gDPSetEnvColor(gfx++, 0, 0, 0xFF, OPAQUE_ALPHA);
                             }
 
                             if (isMirrored) {
                               gDPSetPrimColor(gfx++, 0, 0, MIRRORED_CELL_LEVEL,
                                   MIRRORED_CELL_LEVEL, MIRRORED_CELL_LEVEL,
-                                  0xFF);
+                                  OPAQUE_ALPHA);
                             } else {
                               gDPSetPrimColor(gfx++, 0, 0, CELL_LEVEL,
-                                  CELL_LEVEL, CELL_LEVEL, 0xFF);
+                                  CELL_LEVEL, CELL_LEVEL, OPAQUE_ALPHA);
                             }
                           }
 

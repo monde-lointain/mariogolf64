@@ -402,7 +402,7 @@ void DrawSparks(Gfx** displayListHead) {
   gSPTexture(
       gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0, G_TX_RENDERTILE, G_ON);
   AppendSyncedRdpState(gfx, gDPSetTexturePersp, G_TP_NONE);
-  gDPSetPrimColor(gfx++, 0, 0, 255, 255, 0, 255);
+  gDPSetPrimColor(gfx++, 0, 0, 255, 255, 0, OPAQUE_ALPHA);
   gDPSetCombineLERP(gfx++, 0, 0, 0, PRIMITIVE, 0, 0, 0, TEXEL0, 0, 0, 0,
       PRIMITIVE, 0, 0, 0, TEXEL0);
   gDPPipeSync(gfx++);
@@ -471,7 +471,7 @@ void DrawSparks(Gfx** displayListHead) {
       gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0, G_TX_RENDERTILE, G_OFF);
   gSPClearGeometryMode(gfx++, ALL_GEOMETRY_MODES);
   gSPSetGeometryMode(gfx++, G_SHADE | G_SHADING_SMOOTH);
-  gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
+  gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
   gDPSetCombineLERP(gfx++, PRIMITIVE, 0, SHADE, 0, 0, 0, 0, SHADE, PRIMITIVE, 0,
       SHADE, 0, 0, 0, 0, SHADE);
   gDPPipeSync(gfx++);
@@ -759,7 +759,7 @@ void DrawSwingTrail(Gfx** displayListHead, CameraMatrices* matrices) {
   gDPSetTextureFilter(gfx++, G_TF_BILERP);
   gSPLoadGeometryMode(gfx++, 0);
   gSPSetGeometryMode(gfx++, G_ZBUFFER | G_SHADE | G_SHADING_SMOOTH);
-  gDPSetEnvColor(gfx++, 0xFF, 0x7F, 0x00, 0xFF);
+  gDPSetEnvColor(gfx++, 0xFF, 0x7F, 0x00, OPAQUE_ALPHA);
   gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0x00, f_SwingTrailAlpha);
 
   /* Draws the trail a little nearer than it is, so that the club does not hide

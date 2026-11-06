@@ -1856,7 +1856,7 @@ void DrawBringCharactersText(Gfx** displayListHead, GameBoyTransfer* transfer) {
   MessageId message;
 
   SetUpTextDrawing(&displayList);
-  gDPSetPrimColor(displayList++, 0, 0, 255, 255, 255, 255);
+  gDPSetPrimColor(displayList++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
   sprintf(g_PrintBuffer, "%3d", (int)transfer->screenStep);
   PrintDebugText(g_PrintBuffer, STEP_DEBUG_COLUMN, STEP_DEBUG_ROW);
   if (transfer->screenStep == BRING_CHOOSING_SLOT) {
@@ -1908,7 +1908,7 @@ void DrawSendExperienceText(Gfx** displayListHead, GameBoyTransfer* transfer) {
   s32 slot;
   MessageId message;
 
-  gDPSetPrimColor(displayList++, 0, 0, 255, 255, 255, 255);
+  gDPSetPrimColor(displayList++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
   BeginShadowedText(&displayList);
   for (slot = 0; slot != g_GameBoyTransfer.characterCount; slot++) {
     GameBoyCharacter* character = &g_GameBoyCharacters[slot];
@@ -1965,13 +1965,13 @@ void DrawSendStatusScreen(Gfx** displayListHead, GameBoyTransfer* transfer) {
       CONTROLLER_ICON_SIZE, CONTROLLER_ICON_SIZE * MAXCONTROLLERS, 0, 0, 0, 0,
       0, 0, 0);
   slot = 0;
-  gDPSetPrimColor(displayList++, 0, 0, 255, 255, 255, 255);
+  gDPSetPrimColor(displayList++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
   for (index = 0; index != transfer->taggedCartridgeCount; index++) {
     if (transfer->screenStep == SEND_STATUS_READY &&
         slot != transfer->chosenCartridgeIndex) {
-      gDPSetPrimColor(displayList++, 0, 0, 127, 127, 127, 255);
+      gDPSetPrimColor(displayList++, 0, 0, 127, 127, 127, OPAQUE_ALPHA);
     } else {
-      gDPSetPrimColor(displayList++, 0, 0, 255, 255, 255, 255);
+      gDPSetPrimColor(displayList++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
     }
 
     DrawTextureRect(&displayList,
@@ -1987,7 +1987,7 @@ void DrawSendStatusScreen(Gfx** displayListHead, GameBoyTransfer* transfer) {
     slot++;
   }
 
-  gDPSetPrimColor(displayList++, 0, 0, 255, 255, 255, 255);
+  gDPSetPrimColor(displayList++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
   if (transfer->taggedCartridgeCount != 0) {
     /*
      * An if-chain rather than a switch is there to match: a switch gives 8
@@ -2246,13 +2246,13 @@ void DrawSendExperienceScreen(
       CONTROLLER_ICON_SIZE, CONTROLLER_ICON_SIZE * MAXCONTROLLERS, 0, 0, 0, 0,
       0, 0, 0);
   slot = 0;
-  gDPSetPrimColor(displayList++, 0, 0, 255, 255, 255, 255);
+  gDPSetPrimColor(displayList++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
   for (index = 0; index != transfer->taggedCartridgeCount; index++) {
     if (transfer->screenStep == SEND_EXPERIENCE_SENT &&
         slot != transfer->chosenCartridgeIndex) {
-      gDPSetPrimColor(displayList++, 0, 0, 127, 127, 127, 255);
+      gDPSetPrimColor(displayList++, 0, 0, 127, 127, 127, OPAQUE_ALPHA);
     } else {
-      gDPSetPrimColor(displayList++, 0, 0, 255, 255, 255, 255);
+      gDPSetPrimColor(displayList++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
     }
 
     DrawTextureRect(&displayList,
@@ -2434,7 +2434,7 @@ void DrawTransmitMenu(Gfx** displayListHead) {
   }
 
   SetUpTextDrawing(&displayList);
-  gDPSetPrimColor(displayList++, 0, 0, 255, 255, 255, 255);
+  gDPSetPrimColor(displayList++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
   if (AreOptionsShown(transfer->screen)) {
     for (index = 0; index != MODE_OPTION_COUNT; index++) {
       option = f_ModeOptions[transfer->transferMode][index];
@@ -3592,7 +3592,7 @@ void DrawNotice(Gfx** displayListHead) {
     SetTextSlot(NOTICE_CENTER_X, NOTICE_TEXT_TOP, f_NoticeMessage,
         TEXT_SLOT_LARGE_FONT, NOTICE_TEXT_SLOT,
         TEXT_FLAG_CENTERED | TEXT_FLAG_DRAWN_BY_OWNER, 255, 255, 255, 255);
-    gDPSetPrimColor(displayList++, 0, 0, 32, 64, 255, 255);
+    gDPSetPrimColor(displayList++, 0, 0, 32, 64, 255, OPAQUE_ALPHA);
     DrawLargeTextSlot(&displayList, NOTICE_TEXT_SLOT);
   }
 

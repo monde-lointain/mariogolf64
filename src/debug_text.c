@@ -237,7 +237,7 @@ void DrawDebugText(Gfx** displayListHead) {
   }
 
   gfx = *displayListHead;
-  gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
+  gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
   gDPPipeSync(gfx++);
   for (row = 0; row < TEXT_ROW_COUNT; row++) {
     for (column = 0; column < TEXT_COLUMN_COUNT; index++, column++) {
@@ -251,9 +251,9 @@ void DrawDebugText(Gfx** displayListHead) {
         highlight = character & HIGHLIGHT_BIT;
         gDPPipeSync(gfx++);
         if (highlight) {
-          gDPSetPrimColor(gfx++, 0, 0, 255, 0, 0, 255);
+          gDPSetPrimColor(gfx++, 0, 0, 255, 0, 0, OPAQUE_ALPHA);
         } else {
-          gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
+          gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
         }
 
         gDPPipeSync(gfx++);

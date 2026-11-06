@@ -270,8 +270,6 @@ typedef enum LogoFadeStage {
 /* The club's image is drawn in six strips */
 #define LOGO_CLUB_STRIP_COUNT 6
 
-#define SHOT_BALL_OPAQUE_ALPHA 255
-
 /* A 64x64 CI8 image of a plain golf ball */
 #define ASSET_SHOT_BALL_IMAGE 0x939
 
@@ -298,7 +296,6 @@ typedef enum LogoFadeStage {
 #define LAKITU_TRAIL_START_ALPHA 220
 /* How fast the look-at point first eases, before it speeds up */
 #define LOOK_AT_START_EASE_RATE 0.05f
-#define LOGO_OPAQUE_ALPHA 0xFF
 #define LOGO_FADE_FIRST_FRAMES_LEFT 63
 #define LOGO_CLUB_MIN_SPIN_FRAMES 40
 /* Where the club starts its spiral, in pixels and degrees */
@@ -482,15 +479,15 @@ static Vtx f_LakituTrailVertices[2] = {
     {{{10, 0, 0}, 0, {3072, 0}, {0xFF, 0xFF, 0xBF, 0xFF}}}};
 static s32 f_LakituAngle = 0;
 static s32 f_BurstFrame = BURST_NOT_STARTED;
-static s32 f_ShotBallAlpha = SHOT_BALL_OPAQUE_ALPHA;
+static s32 f_ShotBallAlpha = OPAQUE_ALPHA;
 static Vtx f_ShotBallShadowVertices[4] = {
     {{{-1, 0, 1}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{-1, 0, -1}, 0, {0, 2048}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{1, 0, -1}, 0, {2048, 2048}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{1, 0, 1}, 0, {2048, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}}};
 static f32 f_LookAtEaseRate = LOOK_AT_START_EASE_RATE;
-static s32 f_LogoLettersAlpha = LOGO_OPAQUE_ALPHA;
-static s32 f_LogoClubAlpha = LOGO_OPAQUE_ALPHA;
+static s32 f_LogoLettersAlpha = OPAQUE_ALPHA;
+static s32 f_LogoClubAlpha = OPAQUE_ALPHA;
 /* Counts while the logo shines */
 static s32 f_LogoShineFrame = LOGO_SHINE_FIRST_FRAME;
 /* How long, at least, the club spins in place */
@@ -4095,7 +4092,7 @@ void DrawLakitu(Gfx** displayListHead) {
     gSPTexture(gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0,
         G_TX_RENDERTILE, G_ON);
     gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, f_LakituTrailAlpha);
-    gDPSetEnvColor(gfx++, 255, 255, 255, 255);
+    gDPSetEnvColor(gfx++, 255, 255, 255, OPAQUE_ALPHA);
     gDPSetCombineLERP(gfx++, 0, 0, 0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0, 0, 0,
         0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0);
     gDPLoadTextureBlock_4b(gfx++, TextureAddress(ImageBody(f_LakituTrailImage)),
@@ -4461,13 +4458,13 @@ void DrawOpeningShotBall(Gfx** displayListHead) {
           right = left + SHOT_BALL_DOT_SIZE;
           top = ballPoint.y - ((SHOT_BALL_STRIP_COUNT - stripIndex) * size);
           bottom = top + SHOT_BALL_DOT_SIZE;
-          f_ShotBallAlpha = SHOT_BALL_OPAQUE_ALPHA -
+          f_ShotBallAlpha = OPAQUE_ALPHA -
               ((u32)g_CameraEditor.distance * SHOT_BALL_FADE_RATE);
           if (f_ShotBallAlpha < 0) {
             f_ShotBallAlpha = 0;
           }
         } else {
-          f_ShotBallAlpha = SHOT_BALL_OPAQUE_ALPHA;
+          f_ShotBallAlpha = OPAQUE_ALPHA;
           left = ballPoint.x - ShotBallHalfWidth();
           right = ballPoint.x + ShotBallHalfWidth();
           stripHeight = ShotBallHalfWidth();
@@ -5038,7 +5035,7 @@ void DrawOpeningLogo(Gfx** displayListHead, Boolean isDrawn) {
       gDPSetAlphaDither(gfx++, G_AD_PATTERN);
       gDPPipeSync(gfx++);
       gDPSetAlphaCompare(gfx++, G_AC_NONE);
-      gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+      gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, OPAQUE_ALPHA);
       gDPPipeSync(gfx++);
       gDPSetTexturePersp(gfx++, G_TP_NONE);
       gDPLoadTextureBlock(gfx++, TextureAddress(ImageBody(f_LogoShineImage)),
@@ -5349,7 +5346,7 @@ void DrawOpeningSparks(Gfx** displayListHead) {
     gDPSetRenderMode(gfx++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
     gDPSetCombineLERP(gfx++, PRIMITIVE, 0, SHADE, 0, 0, 0, 0, SHADE, PRIMITIVE,
         0, SHADE, 0, 0, 0, 0, SHADE);
-    gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
+    gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
     gDPPipeSync(gfx++);
     gDPSetAlphaCompare(gfx++, G_AC_NONE);
     gDPPipeSync(gfx++);

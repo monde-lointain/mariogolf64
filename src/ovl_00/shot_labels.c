@@ -13,6 +13,7 @@
 #include "cpu_projection.h"
 #include "current_shot.h"
 #include "game.h"
+#include "gbi_helpers.h"
 #include "math_util.h"
 #include "overlay_manager.h"
 #include "play.h"
@@ -517,7 +518,7 @@ void DrawAimGuides(CameraMatrices* matrices) {
   gDPSetTexturePersp(g_DisplayListHead++, G_TP_NONE);
   DrawShotLabels(&g_DisplayListHead);
   gDPPipeSync(g_DisplayListHead++);
-  gDPSetPrimColor(g_DisplayListHead++, 0, 0, 255, 255, 255, 255);
+  gDPSetPrimColor(g_DisplayListHead++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
   gDPPipeSync(g_DisplayListHead++);
   if (!(club->surfaceMask & CLUB_SURFACE_GREEN) &&
       g_RoundHud.isDistanceSignShown != 0) {
@@ -599,7 +600,7 @@ void DrawAimGuides(CameraMatrices* matrices) {
           G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       /* The post is drawn opaque */
       gDPPipeSync(g_DisplayListHead++);
-      gDPSetPrimColor(g_DisplayListHead++, 0, 0, 255, 255, 255, 255);
+      gDPSetPrimColor(g_DisplayListHead++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
       gDPPipeSync(g_DisplayListHead++);
       gSPScisTextureRectangle(g_DisplayListHead++,
           QuarterPixels(point.x - (SIGN_WIDTH / 2)),
@@ -626,7 +627,7 @@ void DrawAimGuides(CameraMatrices* matrices) {
       if (g_LetterboxState != LETTERBOX_STATE_STARTING_LOOK_BACK &&
           g_LetterboxState != LETTERBOX_STATE_LOOKING_BACK) {
         gDPPipeSync(g_DisplayListHead++);
-        gDPSetPrimColor(g_DisplayListHead++, 0, 0, 255, 255, 255, 255);
+        gDPSetPrimColor(g_DisplayListHead++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
         gDPPipeSync(g_DisplayListHead++);
         DrawCenteredShadowedText(&g_DisplayListHead, point.x,
             point.y - SIGN_DISTANCE_TEXT_Y,
@@ -639,7 +640,7 @@ void DrawAimGuides(CameraMatrices* matrices) {
         gDPPipeSync(g_DisplayListHead++);
         gDPSetPrimColor(g_DisplayListHead++, 0, 0, 255,
             255 - (tintYards * TINT_PER_YARD),
-            255 - (tintYards * TINT_PER_YARD), 255);
+            255 - (tintYards * TINT_PER_YARD), OPAQUE_ALPHA);
         gDPPipeSync(g_DisplayListHead++);
         sprintf(g_PrintBuffer, "%dyUP", (int)heightYards);
       } else if (tintYards < 0) {
@@ -647,11 +648,11 @@ void DrawAimGuides(CameraMatrices* matrices) {
         gDPPipeSync(g_DisplayListHead++);
         gDPSetPrimColor(g_DisplayListHead++, 0, 0,
             255 + (tintYards * TINT_PER_YARD),
-            255 + (tintYards * TINT_PER_YARD), 255, 255);
+            255 + (tintYards * TINT_PER_YARD), 255, OPAQUE_ALPHA);
         gDPPipeSync(g_DisplayListHead++);
       } else {
         gDPPipeSync(g_DisplayListHead++);
-        gDPSetPrimColor(g_DisplayListHead++, 0, 0, 255, 255, 255, 255);
+        gDPSetPrimColor(g_DisplayListHead++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
         gDPPipeSync(g_DisplayListHead++);
         sprintf(g_PrintBuffer, "FLAT");
       }
@@ -665,7 +666,7 @@ void DrawAimGuides(CameraMatrices* matrices) {
       if (IsOutOfBoundsKind(surfaceKind)) {
         gDPPipeSync(g_DisplayListHead++);
         gDPSetPrimColor(g_DisplayListHead++, 0, 0, 255,
-            outOfBoundsGreen + OUT_OF_BOUNDS_GREEN, 0, 255);
+            outOfBoundsGreen + OUT_OF_BOUNDS_GREEN, 0, OPAQUE_ALPHA);
         gDPPipeSync(g_DisplayListHead++);
         f_OutOfBoundsPulseAngle += OUT_OF_BOUNDS_PULSE_STEP;
         DrawCenteredShadowedText(

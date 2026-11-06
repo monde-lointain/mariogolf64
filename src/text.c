@@ -400,7 +400,7 @@ void SetUpTextDrawing(Gfx** displayListHead) {
   gDPSetTextureFilter(gfx++, G_TF_POINT);
   gDPPipeSync(gfx++);
   gDPSetAlphaDither(gfx++, G_AD_DISABLE);
-  gDPSetEnvColor(gfx++, 128, 128, 255, 255);
+  gDPSetEnvColor(gfx++, 128, 128, 255, OPAQUE_ALPHA);
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_NONE);
   gDPPipeSync(gfx++);
@@ -690,19 +690,19 @@ void DrawLargeTextSlot(Gfx** displayListHead, s32 slot) {
           break;
         case MESSAGE_CODE_PALETTE_COLOR:
           gDPSetPrimColor(gfx++, 0, 0, g_TextPalette[0][0], g_TextPalette[0][1],
-              g_TextPalette[0][2], 255);
+              g_TextPalette[0][2], OPAQUE_ALPHA);
           break;
         case MESSAGE_CODE_PALETTE_COLOR + 1:
           gDPSetPrimColor(gfx++, 0, 0, g_TextPalette[1][0], g_TextPalette[1][1],
-              g_TextPalette[1][2], 255);
+              g_TextPalette[1][2], OPAQUE_ALPHA);
           break;
         case MESSAGE_CODE_PALETTE_COLOR + 2:
           gDPSetPrimColor(gfx++, 0, 0, g_TextPalette[2][0], g_TextPalette[2][1],
-              g_TextPalette[2][2], 255);
+              g_TextPalette[2][2], OPAQUE_ALPHA);
           break;
         case MESSAGE_CODE_PALETTE_COLOR + 3:
           gDPSetPrimColor(gfx++, 0, 0, g_TextPalette[3][0], g_TextPalette[3][1],
-              g_TextPalette[3][2], 255);
+              g_TextPalette[3][2], OPAQUE_ALPHA);
           break;
         case MESSAGE_CODE_VALUE:
           isPrinted = TRUE;
@@ -1116,7 +1116,7 @@ void SetUpGradientTextDrawing(Gfx** displayListHead, s32 gradient) {
   gDPSetAlphaDither(gfx++, G_AD_DISABLE);
   gDPSetCombineLERP(gfx++, ENVIRONMENT, PRIMITIVE, TEXEL1, PRIMITIVE, 0, 0, 0,
       TEXEL0, 0, 0, 0, COMBINED, 0, 0, 0, COMBINED);
-  gDPSetEnvColor(gfx++, 128, 128, 255, 255);
+  gDPSetEnvColor(gfx++, 128, 128, 255, OPAQUE_ALPHA);
   gDPSetBlendColor(gfx++, 0, 0, 0, 1);
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_NONE);
@@ -1678,7 +1678,7 @@ void SetTextColor(Gfx** displayListHead, u8 red, u8 green, u8 blue) {
   Gfx* gfx = *displayListHead;
 
   gDPPipeSync(gfx++);
-  gDPSetPrimColor(gfx++, 0, 0, red, green, blue, 255);
+  gDPSetPrimColor(gfx++, 0, 0, red, green, blue, OPAQUE_ALPHA);
   gDPPipeSync(gfx++);
   *displayListHead = gfx;
 }
@@ -2202,7 +2202,7 @@ void SetUpPerspectiveTextDrawing(Gfx** displayListHead) {
   gDPSetAlphaDither(gfx++, G_AD_DISABLE);
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_NONE);
-  gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
+  gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
   gDPPipeSync(gfx++);
   gDPSetCombineLERP(gfx++, 0, 0, 0, PRIMITIVE, 0, 0, 0, TEXEL0, 0, 0, 0,
       PRIMITIVE, 0, 0, 0, TEXEL0);
@@ -2283,9 +2283,11 @@ void DrawLargeTextWithShadow(Gfx** displayListHead, s32 x, s32 y,
   prim[2] = primColor >> 8;
   gDPPipeSync(gfx++);
   gDPSetEnvColor(gfx++, env[0] >> SHADOW_DIMMING_SHIFT,
-      env[1] >> SHADOW_DIMMING_SHIFT, env[2] >> SHADOW_DIMMING_SHIFT, 255);
+      env[1] >> SHADOW_DIMMING_SHIFT, env[2] >> SHADOW_DIMMING_SHIFT,
+      OPAQUE_ALPHA);
   gDPSetPrimColor(gfx++, 0, 0, prim[0] >> SHADOW_DIMMING_SHIFT,
-      prim[1] >> SHADOW_DIMMING_SHIFT, prim[2] >> SHADOW_DIMMING_SHIFT, 255);
+      prim[1] >> SHADOW_DIMMING_SHIFT, prim[2] >> SHADOW_DIMMING_SHIFT,
+      OPAQUE_ALPHA);
   if (flags & TEXT_FLAG_CENTERED) {
     DrawCenteredLargeText(&gfx, x + SHADOW_OFFSET, y + SHADOW_OFFSET, text);
   } else if (flags & TEXT_FLAG_FIXED_WIDTH) {
@@ -2294,8 +2296,8 @@ void DrawLargeTextWithShadow(Gfx** displayListHead, s32 x, s32 y,
     DrawLargeText(&gfx, x + SHADOW_OFFSET, y + SHADOW_OFFSET, text);
   }
 
-  gDPSetEnvColor(gfx++, env[0], env[1], env[2], 255);
-  gDPSetPrimColor(gfx++, 0, 0, prim[0], prim[1], prim[2], 255);
+  gDPSetEnvColor(gfx++, env[0], env[1], env[2], OPAQUE_ALPHA);
+  gDPSetPrimColor(gfx++, 0, 0, prim[0], prim[1], prim[2], OPAQUE_ALPHA);
   if (flags & TEXT_FLAG_CENTERED) {
     DrawCenteredLargeText(&gfx, x, y, text);
   } else if (flags & TEXT_FLAG_FIXED_WIDTH) {

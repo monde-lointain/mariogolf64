@@ -484,7 +484,7 @@ void DrawClubPanel(Gfx** displayListHead) {
   gDPPipeSync(gfx++);
   gDPPipeSync(gfx++);
   gDPSetTextureFilter(gfx++, G_TF_POINT);
-  gDPSetPrimColor(gfx++, 0, 0, 255, 255, 0, 255);
+  gDPSetPrimColor(gfx++, 0, 0, 255, 255, 0, OPAQUE_ALPHA);
   gDPSetCombineMode(gfx++, G_CC_DECALRGB, G_CC_DECALRGB);
   gDPPipeSync(gfx++);
   gDPSetRenderMode(gfx++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
@@ -530,7 +530,7 @@ void DrawClubPanel(Gfx** displayListHead) {
       PRIMITIVE, 0, TEXEL0, 0, 0, 0, 0, PRIMITIVE);
   gDPPipeSync(gfx++);
   gDPSetRenderMode(gfx++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
-  gDPSetPrimColor(gfx++, 0, 0, 191, 191, 191, 255);
+  gDPSetPrimColor(gfx++, 0, 0, 191, 191, 191, OPAQUE_ALPHA);
   gDPPipeSync(gfx++);
   gSPTextureRectangle(gfx++, QuarterPixels(GAUGE_EMPTY_X),
       QuarterPixels(
@@ -548,13 +548,13 @@ void DrawClubPanel(Gfx** displayListHead) {
   f_MarkerPulseAngle += MARKER_PULSE_STEP;
   pulse = (sinf(f_MarkerPulseAngle) * MARKER_PULSE_LEVEL) + MARKER_PULSE_LEVEL;
   gDPPipeSync(gfx++);
-  gDPSetPrimColor(gfx++, 0, 0, 191, 191, 191, 255);
+  gDPSetPrimColor(gfx++, 0, 0, 191, 191, 191, OPAQUE_ALPHA);
   if (playerState == PLAYER_STATE_AIMING ||
       playerState == PLAYER_STATE_SETTING_POWER ||
       playerState == PLAYER_STATE_SETTING_IMPACT || isPutter) {
-    gDPSetEnvColor(gfx++, 0, 0, 0, 255);
+    gDPSetEnvColor(gfx++, 0, 0, 0, OPAQUE_ALPHA);
   } else if (value == 0) {
-    gDPSetEnvColor(gfx++, pulse, pulse, pulse, 255);
+    gDPSetEnvColor(gfx++, pulse, pulse, pulse, OPAQUE_ALPHA);
   } else {
     absValue = value;
     if (absValue < 0) {
@@ -562,10 +562,10 @@ void DrawClubPanel(Gfx** displayListHead) {
     }
 
     if (absValue <= span[0] / 2) {
-      gDPSetEnvColor(gfx++, 0, 0, 0, 255);
+      gDPSetEnvColor(gfx++, 0, 0, 0, OPAQUE_ALPHA);
     } else {
-      gDPSetPrimColor(gfx++, 0, 0, 127, 127, 127, 255);
-      gDPSetEnvColor(gfx++, 0, 0, 0, 255);
+      gDPSetPrimColor(gfx++, 0, 0, 127, 127, 127, OPAQUE_ALPHA);
+      gDPSetEnvColor(gfx++, 0, 0, 0, OPAQUE_ALPHA);
     }
   }
 
@@ -586,12 +586,12 @@ void DrawClubPanel(Gfx** displayListHead) {
       break;
     default:
       if (!isPutter) {
-        gDPSetPrimColor(gfx++, 0, 0, 191, 191, 191, 255);
+        gDPSetPrimColor(gfx++, 0, 0, 191, 191, 191, OPAQUE_ALPHA);
         markerOffset = f_ChosenPowerFill * GAUGE_LENGTH / GAUGE_MAX_VALUE;
         if (f_ChosenPowerFill == GAUGE_MAX_VALUE) {
-          gDPSetEnvColor(gfx++, pulse, pulse, pulse, 255);
+          gDPSetEnvColor(gfx++, pulse, pulse, pulse, OPAQUE_ALPHA);
         } else {
-          gDPSetEnvColor(gfx++, 0, 0, 0, 255);
+          gDPSetEnvColor(gfx++, 0, 0, 0, OPAQUE_ALPHA);
         }
 
         gDPPipeSync(gfx++);

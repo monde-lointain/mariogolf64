@@ -178,8 +178,9 @@ enum SkyImageKind {
 #define SPIRAL_TILE_HEIGHT \
   ((SCREEN_HEIGHT - (2 * FRAME_MARGIN_ROWS)) / SPIRAL_GRID_SIZE)
 #define SPIRAL_FADING_TILE_COUNT 4
-#define SPIRAL_OPAQUE_ALPHA 255
-#define SPIRAL_ALPHA_STEP (SPIRAL_OPAQUE_ALPHA / (SPIRAL_FADING_TILE_COUNT + 1))
+/* The tiles are drawn white, fading by SPIRAL_ALPHA_STEP each */
+#define SPIRAL_SHADE 255
+#define SPIRAL_ALPHA_STEP (OPAQUE_ALPHA / (SPIRAL_FADING_TILE_COUNT + 1))
 
 enum SpiralDirection {
   SPIRAL_RIGHT,
@@ -853,7 +854,7 @@ void DrawLensFlare(Gfx** displayListHead) {
     gDPSetPrimColor(gfx++, 0, 0, f_LensFlares[i].color[0],
         f_LensFlares[i].color[1], f_LensFlares[i].color[2], glare);
     gDPSetEnvColor(gfx++, f_LensFlares[i].envColor[0],
-        f_LensFlares[i].envColor[1], f_LensFlares[i].envColor[2], 255);
+        f_LensFlares[i].envColor[1], f_LensFlares[i].envColor[2], OPAQUE_ALPHA);
     size = f_LensFlares[i].size * (glare + LENS_FLARE_SIZE_BIAS) *
         LENS_FLARE_SIZE_SCALE;
     texelStep = (RING_TEXTURE_SIZE << 10) / size;
@@ -1760,7 +1761,7 @@ void DrawSky(Gfx** displayListHead, f32 eyeY UNUSED, s32 unusedSetting UNUSED,
   translation[AXIS_Z] = SKY_DOME_DISTANCE;
   BuildRotationMatrix(matrix, rotation, translation);
   ConvertMatrixToFixed(matrix, &f_SkyModelMatrix);
-  gDPSetPrimColor(gfx++, 0, 0, 127, 127, 127, 255);
+  gDPSetPrimColor(gfx++, 0, 0, 127, 127, 127, OPAQUE_ALPHA);
   gDPPipeSync(gfx++);
   gDPPipeSync(gfx++);
   gDPSetCycleType(gfx++, G_CYC_1CYCLE);
@@ -1794,7 +1795,7 @@ void DrawSky(Gfx** displayListHead, f32 eyeY UNUSED, s32 unusedSetting UNUSED,
   }
 
   gDPSetEnvColor(gfx++, colors->noiseColor[0], colors->noiseColor[1],
-      colors->noiseColor[2], 255);
+      colors->noiseColor[2], OPAQUE_ALPHA);
   gDPLoadTextureBlock(gfx++, TextureAddress(g_NoiseTexels), G_IM_FMT_I,
       G_IM_SIZ_8b, SKY_NOISE_IMAGE_SIZE, SKY_NOISE_IMAGE_SIZE, 0, G_TX_WRAP,
       G_TX_WRAP, SKY_NOISE_MASK, SKY_NOISE_MASK, G_TX_NOLOD, G_TX_NOLOD);
@@ -1905,9 +1906,9 @@ void DrawSky(Gfx** displayListHead, f32 eyeY UNUSED, s32 unusedSetting UNUSED,
             0, G_TX_MIRROR, G_TX_MIRROR, SUN_GLOW_MASK, SUN_GLOW_MASK,
             G_TX_NOLOD, G_TX_NOLOD);
         gDPSetPrimColor(gfx++, 0, 0, colors->sun->primColor[0],
-            colors->sun->primColor[1], colors->sun->primColor[2], 255);
+            colors->sun->primColor[1], colors->sun->primColor[2], OPAQUE_ALPHA);
         gDPSetEnvColor(gfx++, colors->sun->envColor[0],
-            colors->sun->envColor[1], colors->sun->envColor[2], 255);
+            colors->sun->envColor[1], colors->sun->envColor[2], OPAQUE_ALPHA);
         gDPPipeSync(gfx++);
         gSPScisTextureRectangle(gfx++,
             QuarterPixels(
@@ -2377,7 +2378,7 @@ void DrawFadeAnimation(Gfx** displayListHead) {
         gDPPipeSync(gfx++);
         gDPSetRenderMode(gfx++, RM_FORCED_PASS, RM_FORCED_PASS2);
         gDPSetPrimColor(gfx++, 0, 0, NEGATIVE_BRIGHTNESS, NEGATIVE_BRIGHTNESS,
-            NEGATIVE_BRIGHTNESS, 255);
+            NEGATIVE_BRIGHTNESS, OPAQUE_ALPHA);
       } else if ((f_HudAnimation == HUD_ANIMATION_FADE_OUT) |
           (f_HudAnimation == HUD_ANIMATION_FAST_FADE_OUT)) {
         gDPPipeSync(gfx++);
@@ -2415,7 +2416,7 @@ void DrawFadeAnimation(Gfx** displayListHead) {
         gDPPipeSync(gfx++);
         gDPSetRenderMode(gfx++, RM_FORCED_PASS, RM_FORCED_PASS2);
         gDPSetCombineMode(gfx++, G_CC_DECALRGB, G_CC_DECALRGB);
-        gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
+        gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
         gDPPipeSync(gfx++);
         for (i = 0; i != BACKDROP_STRIP_COUNT; i++) {
           s32 height = StripHeight(i);
@@ -2542,7 +2543,7 @@ void DrawSpiralAnimation(Gfx** displayListHead) {
 
   if (f_HudAnimationFramesLeft > 0) {
     tileCount = f_HudAnimationFramesLeft - SPIRAL_FADING_TILE_COUNT;
-    alpha = SPIRAL_OPAQUE_ALPHA;
+    alpha = OPAQUE_ALPHA;
     bottomRow = SPIRAL_GRID_SIZE - 1;
     rightColumn = SPIRAL_GRID_SIZE - 1;
     topRow = 0;
@@ -2606,8 +2607,8 @@ void DrawSpiralAnimation(Gfx** displayListHead) {
           (tileRow * SPIRAL_TILE_HEIGHT) + SPIRAL_TILE_HEIGHT - 1, 0,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-      gDPSetPrimColor(gfx++, 0, 0, SPIRAL_OPAQUE_ALPHA, SPIRAL_OPAQUE_ALPHA,
-          SPIRAL_OPAQUE_ALPHA, alpha);
+      gDPSetPrimColor(
+          gfx++, 0, 0, SPIRAL_SHADE, SPIRAL_SHADE, SPIRAL_SHADE, alpha);
       gDPPipeSync(gfx++);
       gSPTextureRectangle(gfx++,
           QuarterPixels((tileColumn * SPIRAL_TILE_WIDTH) + FRAME_MARGIN_ROWS),
@@ -2765,7 +2766,7 @@ void DrawMenuBackdrop(Gfx** displayListHead) {
   gDPSetCombineMode(gfx++, G_CC_MODULATEI_PRIM, G_CC_MODULATEI_PRIM);
   if (f_MenuBackdrop == MENU_BACKDROP_PATTERN) {
     f_BackdropPatternScroll++;
-    gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
+    gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
     gDPPipeSync(gfx++);
     gDPLoadTextureBlock_4b(gfx++,
         TextureAddress(ImageTexels(g_BackdropPatternImage)), G_IM_FMT_CI,
@@ -2793,10 +2794,10 @@ void DrawMenuBackdrop(Gfx** displayListHead) {
   } else if ((f_MenuBackdrop == MENU_BACKDROP_STILL) |
       (f_MenuBackdrop == MENU_BACKDROP_DIMMING)) {
     if (f_MenuBackdrop == MENU_BACKDROP_STILL) {
-      gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
+      gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
     } else {
       gDPSetPrimColor(gfx++, 0, 0, (u8)f_BackdropFadeLevel,
-          (u8)f_BackdropFadeLevel, (u8)f_BackdropFadeLevel, 255);
+          (u8)f_BackdropFadeLevel, (u8)f_BackdropFadeLevel, OPAQUE_ALPHA);
     }
 
     for (strip = 0; strip != BACKDROP_STRIP_COUNT; strip++) {
@@ -2820,7 +2821,7 @@ void DrawMenuBackdrop(Gfx** displayListHead) {
     }
   } else {
     gDPSetPrimColor(gfx++, 0, 0, BACKDROP_TINT_RED, BACKDROP_TINT_GREEN,
-        BACKDROP_TINT_BLUE, 255);
+        BACKDROP_TINT_BLUE, OPAQUE_ALPHA);
     for (strip = 0; strip != BACKDROP_STRIP_COUNT; strip++) {
       height = StripHeight(strip);
       gDPLoadTextureTile(gfx++,

@@ -572,7 +572,7 @@ void DrawTableLines(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   s32 index;
 
-  gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
+  gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
   gDPPipeSync(gfx++);
   gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
   gDPSetCombineMode(gfx++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);

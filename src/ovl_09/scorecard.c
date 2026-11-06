@@ -13,6 +13,7 @@
 #include "course.h"
 #include "framebuffer.h"
 #include "game_flags.h"
+#include "gbi_helpers.h"
 #include "heap.h"
 #include "hole_display.h"
 #include "hole_loader.h"
@@ -1178,7 +1179,7 @@ void DrawScorecard(Gfx** displayListHead) {
         } else {
           gDPSetCombineMode(gfx++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
           gDPSetPrimColor(gfx++, 0, 0, UNSHOWN_PAGE_GRAY, UNSHOWN_PAGE_GRAY,
-              UNSHOWN_PAGE_GRAY, 0xFF);
+              UNSHOWN_PAGE_GRAY, OPAQUE_ALPHA);
           dropY = 1;
         }
 
@@ -1340,12 +1341,12 @@ void DrawScorecardTable(Gfx** displayListHead, s32 pageCount, s32 page) {
   LoadLargePalette(&gfx, ImageBody(g_Scorecard.tableImage));
   gDPSetCombineMode(gfx++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
   gDPSetPrimColor(
-      gfx++, 0, 0, TAB_BACK_GRAY, TAB_BACK_GRAY, TAB_BACK_GRAY, 0xFF);
+      gfx++, 0, 0, TAB_BACK_GRAY, TAB_BACK_GRAY, TAB_BACK_GRAY, OPAQUE_ALPHA);
   for (tabIndex = 0; tabIndex != pageCount; tabIndex++) {
     texelsOffset = (tabStrips[tabIndex] * TAB_HEIGHT * TABLE_WIDTH) +
         LARGE_PALETTED_TEXELS_OFFSET;
     if (tabIndex == pageCount - 1) {
-      gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+      gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, OPAQUE_ALPHA);
       dropY = 0;
     } else {
       dropY = TAB_BACK_DROP;

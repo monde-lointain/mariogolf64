@@ -1732,11 +1732,11 @@ void DrawStaffRoll(Gfx** displayListHead) {
   gDPSetTextureFilter(gfx++, G_TF_POINT);
   gDPPipeSync(gfx++);
   gDPSetAlphaDither(gfx++, G_AD_DISABLE);
-  gDPSetEnvColor(gfx++, 0x80, 0x80, 0xFF, 0xFF);
+  gDPSetEnvColor(gfx++, 0x80, 0x80, 0xFF, OPAQUE_ALPHA);
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_NONE);
   gDPPipeSync(gfx++);
-  gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
+  gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
   gDPSetCombineLERP(gfx++, 0, 0, 0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0, 0, 0, 0,
       PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0);
   if (f_IsPaintingShown) {

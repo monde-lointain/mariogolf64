@@ -701,7 +701,7 @@ void DrawClubSlots(Gfx** displayListHead) {
   gDPSetCombineMode(gfx++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
   gSPLoadGeometryMode(gfx++, 0);
   gSPSetGeometryMode(gfx++, G_SHADE | G_SHADING_SMOOTH);
-  gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, 255);
+  gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, OPAQUE_ALPHA);
   gDPPipeSync(gfx++);
   DrawTextureRect(&gfx, 96 << 2, 56 << 2, 224 << 2, 168 << 2, G_TX_RENDERTILE,
       0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
@@ -769,7 +769,7 @@ void DrawClubSlots(Gfx** displayListHead) {
   gSP2Triangles(gfx++, 4, 5, 6, 0, 4, 6, 7, 0);
   gDPPipeSync(gfx++);
   gDPSetCombineMode(gfx++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
-  gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, 255);
+  gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, OPAQUE_ALPHA);
   gDPPipeSync(gfx++);
   DrawTextureRect(&gfx, 96 << 2, 112 << 2, 224 << 2, 113 << 2, G_TX_RENDERTILE,
       0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
@@ -936,7 +936,7 @@ void DrawClubSlots(Gfx** displayListHead) {
       LoadTextureBlock(&gfx, faceImage, G_IM_FMT_CI, G_IM_SIZ_8b, FACE_SIZE,
           FACE_SIZE, 0, 0, 0, 0, 0, 0, 0);
       gDPPipeSync(gfx++);
-      gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
+      gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
       DrawTextureRect(&gfx, QuarterPixels(FACE_LEFT),
           QuarterPixels(FACE_TOP + (topOrPlayerIndex * FACE_SPACING)),
           QuarterPixels(FACE_LEFT + FACE_SIZE),
@@ -1178,7 +1178,7 @@ void DrawClubSlotsLogo(
       PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0);
   gDPPipeSync(gfx++);
   gDPSetAlphaCompare(gfx++, G_AC_NONE);
-  gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
+  gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
   LoadTextureBlock(&gfx, ImageBody(f_ShineImage), G_IM_FMT_I, G_IM_SIZ_8b,
       SHINE_SIZE, SHINE_SIZE, 0, 0, 0, 0, 0, 0, 0);
   gDPPipeSync(gfx++);

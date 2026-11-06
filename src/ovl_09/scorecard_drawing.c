@@ -643,8 +643,8 @@ void DrawMatchPage(Gfx** displayListHead) {
   }
 
   SetUpGradientTextDrawing(&gfx, 0);
-  gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0, 0xFF);
-  gDPSetPrimColor(gfx++, 0, 0, 0x30, 0xFF, 0, 0xFF);
+  gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0, OPAQUE_ALPHA);
+  gDPSetPrimColor(gfx++, 0, 0, 0x30, 0xFF, 0, OPAQUE_ALPHA);
   sprintf(g_PrintBuffer, f_CompactHoleFormat,
       g_Scorecard.content.holeIndex + g_Scorecard.isTallied);
   DrawLargeTextWithShadow(&gfx, g_Scorecard.x + STANDINGS_HOLE_LEFT,
@@ -1248,10 +1248,10 @@ void DrawBetsPage(Gfx** displayListHead) {
       frame = 0;
       if (g_GameState.betRates[i] == 0) {
         gDPSetPrimColor(gfx++, 0, 0, UNPLAYED_BET_GRAY, UNPLAYED_BET_GRAY,
-            UNPLAYED_BET_GRAY, 0xFF);
+            UNPLAYED_BET_GRAY, OPAQUE_ALPHA);
       } else {
         frame = f_BetBlinkFrame;
-        gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+        gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, OPAQUE_ALPHA);
       }
 
       LoadSmallPalette(
@@ -1274,7 +1274,7 @@ void DrawBetsPage(Gfx** displayListHead) {
     }
   }
 
-  gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+  gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, OPAQUE_ALPHA);
   LoadSmallPalette(&gfx, 0, ImageBody(g_Scorecard.totalHeadingImage));
   gDPLoadTextureTile_4b(gfx++,
       TextureAddress(ImageTexels(g_Scorecard.totalHeadingImage)), G_IM_FMT_CI,
@@ -1778,7 +1778,7 @@ void DrawLeaderboardPage(Gfx** displayListHead) {
       shade = 0xFF;
     }
 
-    gDPSetPrimColor(gfx++, 0, 0, shade, shade, shade, 0xFF);
+    gDPSetPrimColor(gfx++, 0, 0, shade, shade, shade, OPAQUE_ALPHA);
     DrawTextureRect(&gfx, QuarterPixels(g_Scorecard.x + ROW_LEFT),
         QuarterPixels(
             ((i * LEADERBOARD_ROW_SPACING) + ROW_TOP) + g_Scorecard.y),
@@ -1789,7 +1789,7 @@ void DrawLeaderboardPage(Gfx** displayListHead) {
   }
 
   LoadLargePalette(&gfx, ImageBody(g_Scorecard.flapNameImages));
-  gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+  gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, OPAQUE_ALPHA);
   for (i = 0; i != LEADERBOARD_ROW_COUNT; i++) {
     /* Until the flap has turned a radian */
     if (g_Scorecard.content.isRowFlipping[i] == TRUE &&
@@ -1895,8 +1895,8 @@ void DrawLeaderboardPage(Gfx** displayListHead) {
                 FLAP_SHADE_RANGE);
       }
 
-      gDPSetPrimColor(
-          gfx++, 0, 0, bottomFlapShade, bottomFlapShade, bottomFlapShade, 0xFF);
+      gDPSetPrimColor(gfx++, 0, 0, bottomFlapShade, bottomFlapShade,
+          bottomFlapShade, OPAQUE_ALPHA);
       DrawTextureRect(&gfx, QuarterPixels(g_Scorecard.x + ROW_LEFT),
           QuarterPixels((i * LEADERBOARD_ROW_SPACING) + ROW_TOP +
               ROW_BOTTOM_HALF_ROW + g_Scorecard.y),
@@ -1919,7 +1919,7 @@ void DrawLeaderboardPage(Gfx** displayListHead) {
                 FLAP_SHADE_RANGE);
       }
 
-      gDPSetPrimColor(gfx++, 0, 0, shade, shade, shade, 0xFF);
+      gDPSetPrimColor(gfx++, 0, 0, shade, shade, shade, OPAQUE_ALPHA);
       LoadTextureBlock(&gfx,
           g_Scorecard.flapNameImages +
               ((i * FLAP_NAME_IMAGE_WIDTH * ROW_IMAGE_HEIGHT) +
@@ -2064,14 +2064,14 @@ void DrawLeaderboardPage(Gfx** displayListHead) {
               PLAYER_CONTESTANT &&
           g_Scorecard.placeChange != PLACE_HELD) {
         if (g_Scorecard.placeChange & PLACE_FELL) {
-          gDPSetEnvColor(gfx++, 0xA0, 0xA0, 0xFF, 0xFF);
-          gDPSetPrimColor(gfx++, 0, 0, 0x00, 0x40, 0xFF, 0xFF);
+          gDPSetEnvColor(gfx++, 0xA0, 0xA0, 0xFF, OPAQUE_ALPHA);
+          gDPSetPrimColor(gfx++, 0, 0, 0x00, 0x40, 0xFF, OPAQUE_ALPHA);
           gDPPipeSync(gfx++);
           f_ArrowPulseAngle += FELL_ARROW_PULSE_STEP;
           halfSize = (ARROW_PULSE_SIZE * sinf(f_ArrowPulseAngle)) +
               FELL_ARROW_HALF_SIZE;
         } else {
-          gDPSetEnvColor(gfx++, 0xFF, 0x7F, 0x90, 0xFF);
+          gDPSetEnvColor(gfx++, 0xFF, 0x7F, 0x90, OPAQUE_ALPHA);
           gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0x40, 0x40, 0xF0);
           gDPPipeSync(gfx++);
           f_ArrowPulseAngle += ROSE_ARROW_PULSE_STEP;
@@ -2347,7 +2347,7 @@ void DrawScoresPage(Gfx** displayListHead) {
   gDPSetAlphaCompare(gfx++, G_AC_THRESHOLD);
   switch (f_ScoresStyle) {
     case SCORES_STYLE_YELLOW:
-      gDPSetEnvColor(gfx++, 0xFF, 0xF0, 0x7F, 0xFF);
+      gDPSetEnvColor(gfx++, 0xFF, 0xF0, 0x7F, OPAQUE_ALPHA);
       gDPSetBlendColor(gfx++, 0, 0, 0, 0x80);
       gDPPipeSync(gfx++);
       gDPSetRenderMode(gfx++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
@@ -2356,7 +2356,7 @@ void DrawScoresPage(Gfx** displayListHead) {
       cellAlpha = 0xFF;
       break;
     case SCORES_STYLE_FADED:
-      gDPSetEnvColor(gfx++, 0, 0x3F, 0, 0xFF);
+      gDPSetEnvColor(gfx++, 0, 0x3F, 0, OPAQUE_ALPHA);
       gDPSetBlendColor(gfx++, 0, 0, 0, 0x40);
       gDPPipeSync(gfx++);
       gDPSetRenderMode(gfx++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
@@ -2370,7 +2370,7 @@ void DrawScoresPage(Gfx** displayListHead) {
 #ifdef AVOID_UB
       cellAlpha = 0xFF;
 #endif
-      gDPSetEnvColor(gfx++, 0, 0x1F, 0, 0xFF);
+      gDPSetEnvColor(gfx++, 0, 0x1F, 0, OPAQUE_ALPHA);
       gDPSetBlendColor(gfx++, 0, 0, 0, 0x40);
       gDPPipeSync(gfx++);
       gDPSetRenderMode(gfx++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
@@ -2382,7 +2382,7 @@ void DrawScoresPage(Gfx** displayListHead) {
     default:
 #endif
     case SCORES_STYLE_TINTED:
-      gDPSetEnvColor(gfx++, 0, 0x40, 0, 0xFF);
+      gDPSetEnvColor(gfx++, 0, 0x40, 0, OPAQUE_ALPHA);
       gDPSetBlendColor(gfx++, 0, 0, 0, 0x1F);
       gDPPipeSync(gfx++);
       gDPSetRenderMode(gfx++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
@@ -3274,7 +3274,7 @@ void DrawScoresPage(Gfx** displayListHead) {
     saveData = GetSaveData();
     f_BadgeGlowAngle += BADGE_GLOW_STEP;
     glow = sinf(f_BadgeGlowAngle) * (f32)BADGE_GLOW_RANGE;
-    gDPSetPrimColor(gfx++, 0, 0, glow + 0xE0, glow + 0xC4, 0x1E, 0xFF);
+    gDPSetPrimColor(gfx++, 0, 0, glow + 0xE0, glow + 0xC4, 0x1E, OPAQUE_ALPHA);
     for (hole = 0; hole != COURSE_HOLE_COUNT; hole++) {
       if (saveData->records.awards
               .birdieBadgeCounts[g_Scorecard.content.courseIndex][hole] > 0) {

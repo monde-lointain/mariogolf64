@@ -725,8 +725,8 @@ void DrawPrompt(Gfx** displayListHead) {
   gDPSetTextureFilter(gfx++, G_TF_BILERP);
   gDPPipeSync(gfx++);
   gDPSetTexturePersp(gfx++, G_TP_NONE);
-  gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
-  gDPSetEnvColor(gfx++, 191, 191, 191, 255);
+  gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
+  gDPSetEnvColor(gfx++, 191, 191, 191, OPAQUE_ALPHA);
   gDPPipeSync(gfx++);
   gDPSetRenderMode(gfx++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
   gDPSetCombineMode(gfx++, G_CC_BLENDPEDECALA, G_CC_BLENDPEDECALA);

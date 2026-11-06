@@ -1315,7 +1315,7 @@ void DrawInsetViewFrame(void) {
   gDPSetAlphaDither(g_DisplayListHead++, G_AD_DISABLE);
   gDPPipeSync(g_DisplayListHead++);
   gDPSetTextureLUT(g_DisplayListHead++, G_TT_NONE);
-  gDPSetPrimColor(g_DisplayListHead++, 0, 0, 255, 255, 255, 255);
+  gDPSetPrimColor(g_DisplayListHead++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
   gDPSetCombineMode(g_DisplayListHead++, G_CC_MODULATEIDECALA_PRIM,
       G_CC_MODULATEIDECALA_PRIM);
   gDPLoadTextureBlock_4b(g_DisplayListHead++,
@@ -1572,7 +1572,7 @@ void DrawLandingReaction(Gfx** displayListHead) {
       }
     } else {
       SetUpTextDrawing(&gfx);
-      gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
+      gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
       DrawCenteredLargeText(
           &gfx, SCREEN_WIDTH / 2, LANDING_NAME_Y, surface->name);
       if (f_LandingReaction == LANDING_REACTION_REST && !IsOnDrivingRange()) {
@@ -2457,7 +2457,7 @@ void DrawWindSpeed(Gfx** displayListHead, f32 x, f32 y) {
   gDPSetTextureFilter(gfx++, G_TF_BILERP);
   gDPPipeSync(gfx++);
   gDPSetTexturePersp(gfx++, G_TP_NONE);
-  gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
+  gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
   gDPPipeSync(gfx++);
   gDPSetRenderMode(gfx++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
   gDPSetCombineLERP(gfx++, 0, 0, 0, PRIMITIVE, 0, 0, 0, TEXEL0, 0, 0, 0,
@@ -2494,9 +2494,9 @@ void DrawWindSpeed(Gfx** displayListHead, f32 x, f32 y) {
   gDPPipeSync(gfx++);
   gDPSetColorDither(gfx++, G_CD_DISABLE);
   gDPSetPrimColor(gfx++, 0, 0, WIND_TEXT_PRIM_RED, WIND_TEXT_PRIM_GREEN,
-      WIND_TEXT_PRIM_BLUE, 255);
-  gDPSetEnvColor(
-      gfx++, WIND_TEXT_ENV_RED, WIND_TEXT_ENV_GREEN, WIND_TEXT_ENV_BLUE, 255);
+      WIND_TEXT_PRIM_BLUE, OPAQUE_ALPHA);
+  gDPSetEnvColor(gfx++, WIND_TEXT_ENV_RED, WIND_TEXT_ENV_GREEN,
+      WIND_TEXT_ENV_BLUE, OPAQUE_ALPHA);
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
   gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(f_WindSpeedFont)));
   gDPPipeSync(gfx++);
@@ -2743,10 +2743,10 @@ void DrawShotPanelIcons(Gfx** displayListHead, CameraView* view UNUSED) {
     gDPSetTextureLUT(gfx++, G_TT_NONE);
     gDPSetCombineMode(gfx++, G_CC_MODULATERGBA_PRIM, G_CC_MODULATERGBA_PRIM);
     if (g_RoundHud.flags & HUD_FLAG_LIGHT_CLUB_HEAD) {
-      gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
+      gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
     } else {
       gDPSetPrimColor(gfx++, 0, 0, SHOT_PANEL_ICON_DIM, SHOT_PANEL_ICON_DIM,
-          SHOT_PANEL_ICON_DIM, 255);
+          SHOT_PANEL_ICON_DIM, OPAQUE_ALPHA);
     }
 
     gDPPipeSync(gfx++);
@@ -2790,10 +2790,10 @@ void DrawShotPanelIcons(Gfx** displayListHead, CameraView* view UNUSED) {
     BuildRotationMatrix(matrix, rotation, translation);
     ConvertMatrixToFixed(matrix, &f_LieIconMatrices[g_MatrixBufferIndex]);
     if (g_RoundHud.flags & HUD_FLAG_ANIMATE_OFFSET_MARKER) {
-      gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
+      gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
     } else {
       gDPSetPrimColor(gfx++, 0, 0, SHOT_PANEL_ICON_DIM, SHOT_PANEL_ICON_DIM,
-          SHOT_PANEL_ICON_DIM, 255);
+          SHOT_PANEL_ICON_DIM, OPAQUE_ALPHA);
     }
 
     gDPPipeSync(gfx++);
@@ -2845,7 +2845,7 @@ void DrawHoleFlag(Boolean isBackDrawn) {
   gDPSetTexturePersp(g_DisplayListHead++, G_TP_PERSP);
   gDPPipeSync(g_DisplayListHead++);
   gDPSetTextureFilter(g_DisplayListHead++, G_TF_BILERP);
-  gDPSetPrimColor(g_DisplayListHead++, 0, 0, 0, 0, 255, 255);
+  gDPSetPrimColor(g_DisplayListHead++, 0, 0, 0, 0, 255, OPAQUE_ALPHA);
   gDPPipeSync(g_DisplayListHead++);
   gDPSetAlphaCompare(g_DisplayListHead++, G_AC_NONE);
   gDPSetBlendColor(g_DisplayListHead++, 255, 255, 255, 1);
@@ -3057,7 +3057,7 @@ void DrawShotEffect(Gfx** displayListHead) {
         G_TX_RENDERTILE, G_OFF);
     gDPPipeSync(gfx++);
     gDPSetTextureFilter(gfx++, G_TF_BILERP);
-    gDPSetPrimColor(gfx++, 0, 0, 0, 0, 255, 255);
+    gDPSetPrimColor(gfx++, 0, 0, 0, 0, 255, OPAQUE_ALPHA);
     gDPSetCombineMode(gfx++, G_CC_SHADE, G_CC_SHADE);
     if (f_ShotEffect == SHOT_EFFECT_LONG_SHOT) {
       gDPPipeSync(gfx++);
@@ -3100,12 +3100,12 @@ void DrawShotEffect(Gfx** displayListHead) {
     gDPPipeSync(gfx++);
     gDPSetRenderMode(gfx++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
     if (contactStyle == CONTACT_STYLE_GAME_BOY_BALL_7) {
-      gDPSetEnvColor(gfx++, 255, 255, 127, 255);
+      gDPSetEnvColor(gfx++, 255, 255, 127, OPAQUE_ALPHA);
       gDPSetPrimColor(gfx++, 0, 0, guRandom() % 255, guRandom() % 255,
           guRandom() % 255, SPARK_TRAIL_ALPHA);
     } else {
       gDPSetPrimColor(gfx++, 0, 0, 191, 0, 191, SPARK_TRAIL_ALPHA);
-      gDPSetEnvColor(gfx++, 255, 255, 255, 255);
+      gDPSetEnvColor(gfx++, 255, 255, 255, OPAQUE_ALPHA);
     }
 
     gDPSetCombineLERP(gfx++, ENVIRONMENT, PRIMITIVE, TEXEL0, PRIMITIVE,
@@ -3465,7 +3465,7 @@ s32 DrawLetterbox(Gfx** gfxP, s32 height) {
       gDPSetRenderMode(
           gfx++, G_RM_XLU_SURF | ZMODE_XLU, G_RM_XLU_SURF2 | ZMODE_XLU);
       gDPSetCombineMode(gfx++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
-      gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, 255);
+      gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, OPAQUE_ALPHA);
       gDPPipeSync(gfx++);
       if (height > 0) {
         gSPScisTextureRectangle(gfx++, QuarterPixels(HUD_MARGIN),
@@ -3834,7 +3834,7 @@ void DrawRoundHud(CameraView* view) {
       if (i == g_CurrentShot.playerIndex) {
         gDPPipeSync(g_DisplayListHead++);
         gDPSetTextureFilter(g_DisplayListHead++, G_TF_POINT);
-        gDPSetPrimColor(g_DisplayListHead++, 0, 0, 255, 255, 255, 255);
+        gDPSetPrimColor(g_DisplayListHead++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
         gDPPipeSync(g_DisplayListHead++);
         gSPScisTextureRectangle(g_DisplayListHead++,
             QuarterPixels(scoreboardX - FACE_INSET_X),
@@ -4512,8 +4512,8 @@ void DrawHoleIntroText(Gfx** displayListHead) {
           STOPWATCH_ENV_COLOR, STOPWATCH_PRIM_COLOR, TEXT_FLAG_FIXED_WIDTH);
     } else {
       SetUpGradientTextDrawing(&gfx, 0);
-      gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0x00, 0x00, 0xFF);
-      gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0x00, 0xFF);
+      gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0x00, 0x00, OPAQUE_ALPHA);
+      gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0x00, OPAQUE_ALPHA);
       sprintf(
           g_PrintBuffer, "%s", g_CourseRecords[GetCourseRecordIndex()].name);
       sprintf(

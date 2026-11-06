@@ -1001,7 +1001,7 @@ void DrawGolfBalls(CameraMatrices* matrices UNUSED) {
           } else {
             gDPPipeSync(gfx++);
             gDPSetRenderMode(gfx++, G_RM_AA_ZB_TEX_EDGE, G_RM_AA_ZB_TEX_EDGE2);
-            gDPSetPrimColor(gfx++, 0, 0, 0xEF, 0xEF, 0xFF, 0xFF);
+            gDPSetPrimColor(gfx++, 0, 0, 0xEF, 0xEF, 0xFF, OPAQUE_ALPHA);
           }
 
           if (g_IsCupViewShown == TRUE) {
@@ -1097,7 +1097,7 @@ void DrawGolfBalls(CameraMatrices* matrices UNUSED) {
                 QuarterPixels(ballPoint.y), BALL_TILE_SMALL, 0, 0,
                 SMALL_BALL_TEXTURE_SIZE, SMALL_BALL_TEXTURE_SIZE);
             gDPPipeSync(gfx++);
-            gDPSetPrimColor(gfx++, 0, 0, 0xBF, 0xBF, 0xBF, 0xFF);
+            gDPSetPrimColor(gfx++, 0, 0, 0xBF, 0xBF, 0xBF, OPAQUE_ALPHA);
             gDPPipeSync(gfx++);
             gDPPipeSync(gfx++);
             gDPPipeSync(gfx++);
@@ -1129,7 +1129,7 @@ void DrawGolfBalls(CameraMatrices* matrices UNUSED) {
                 TexelStep(SMALL_BALL_TEXTURE_SIZE, (ballPoint.y - 1) << 2,
                     (ballPoint.y + 1) << 2));
             gDPPipeSync(gfx++);
-            gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, 0xFF);
+            gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, OPAQUE_ALPHA);
             gDPPipeSync(gfx++);
             spriteKind = BALL_SPRITE_FAR_DOT;
             if (isAboveGround == TRUE) {
@@ -1257,16 +1257,16 @@ void DrawGolfBalls(CameraMatrices* matrices UNUSED) {
               gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, 0);
               break;
             case 0:
-              gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0x7F, 0x7F, 0xFF);
+              gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0x7F, 0x7F, OPAQUE_ALPHA);
               break;
             case 1:
-              gDPSetPrimColor(gfx++, 0, 0, 0x7F, 0x7F, 0xFF, 0xFF);
+              gDPSetPrimColor(gfx++, 0, 0, 0x7F, 0x7F, 0xFF, OPAQUE_ALPHA);
               break;
             case 2:
-              gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0x7F, 0xFF, 0xFF);
+              gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0x7F, 0xFF, OPAQUE_ALPHA);
               break;
             case 3:
-              gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xBF, 0x7F, 0xFF);
+              gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xBF, 0x7F, OPAQUE_ALPHA);
               break;
           }
 

@@ -696,7 +696,7 @@ void DrawGameSaveMenu(Gfx** displayListHead) {
               CHOSEN_PANEL_SHADE, CHOSEN_PANEL_SHADE);
         } else {
           gDPSetPrimColor(gfx++, 0, 0, OTHER_PANEL_SHADE, OTHER_PANEL_SHADE,
-              OTHER_PANEL_SHADE, 0xFF);
+              OTHER_PANEL_SHADE, OPAQUE_ALPHA);
         }
 
         stripHeight = GAME_PANEL_STRIP_HEIGHT;
@@ -718,7 +718,7 @@ void DrawGameSaveMenu(Gfx** displayListHead) {
             CHOSEN_PANEL_SHADE, CHOSEN_PANEL_SHADE);
       } else {
         gDPSetPrimColor(gfx++, 0, 0, OTHER_PANEL_SHADE, OTHER_PANEL_SHADE,
-            OTHER_PANEL_SHADE, 0xFF);
+            OTHER_PANEL_SHADE, OPAQUE_ALPHA);
       }
 
       stripHeight = END_GAME_PANEL_STRIP_HEIGHT;
@@ -782,7 +782,7 @@ void DrawGameSaveMenu(Gfx** displayListHead) {
           titleTexelTop + TEXEL_COORDINATE_ONE, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     }
 
-    gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+    gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, OPAQUE_ALPHA);
 
     /* Each saved game's mode icon, from the image not being loaded into */
     for (row = 0; row != SAVED_GAME_COUNT; row++) {
@@ -795,7 +795,7 @@ void DrawGameSaveMenu(Gfx** displayListHead) {
               CHOSEN_PANEL_SHADE, CHOSEN_PANEL_SHADE);
         } else {
           gDPSetPrimColor(gfx++, 0, 0, OTHER_PANEL_SHADE, OTHER_PANEL_SHADE,
-              OTHER_PANEL_SHADE, 0xFF);
+              OTHER_PANEL_SHADE, OPAQUE_ALPHA);
         }
 
         gDPPipeSync(gfx++);
@@ -834,10 +834,10 @@ void DrawGameSaveMenu(Gfx** displayListHead) {
         golfersRight = GOLFERS_LEFT + CHARACTER_IMAGE_WIDTH;
         state = &save->savedGames[row].state;
         if (row == f_CursorIndex) {
-          gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+          gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, OPAQUE_ALPHA);
         } else {
           gDPSetPrimColor(gfx++, 0, 0, OTHER_PANEL_SHADE, OTHER_PANEL_SHADE,
-              OTHER_PANEL_SHADE, 0xFF);
+              OTHER_PANEL_SHADE, OPAQUE_ALPHA);
         }
 
         gDPPipeSync(gfx++);
@@ -927,10 +927,10 @@ void DrawGameSaveMenu(Gfx** displayListHead) {
     for (row = 0; row != SAVED_GAME_COUNT; row++) {
       gDPPipeSync(gfx++);
       if (row == f_CursorIndex) {
-        gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+        gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, OPAQUE_ALPHA);
       } else {
         gDPSetPrimColor(gfx++, 0, 0, OTHER_PANEL_SHADE, OTHER_PANEL_SHADE,
-            OTHER_PANEL_SHADE, 0xFF);
+            OTHER_PANEL_SHADE, OPAQUE_ALPHA);
       }
 
       gDPPipeSync(gfx++);
@@ -1021,14 +1021,14 @@ void DrawGameSaveMenu(Gfx** displayListHead) {
         DrawLargeTextWithShadow(&gfx, f_SlideOffsets[row] + MODE_TEXT_LEFT,
             COURSE_TEXT_TOP + (row * GAME_ROW_SPACING), g_PrintBuffer,
             0x00FFFF00, 0xFFFFFF00, 0);
-        gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, 0xFF);
-        gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+        gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, OPAQUE_ALPHA);
+        gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, OPAQUE_ALPHA);
         sprintf(g_PrintBuffer, "Hole%d", (int)(state->holeIndex + 1));
         DrawLargeText(&gfx, f_SlideOffsets[row] + GAME_HOLE_TEXT_LEFT,
             GAME_HOLE_TEXT_TOP + (row * GAME_ROW_SPACING), g_PrintBuffer);
       } else {
-        gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0x2C, 0xFF);
-        gDPSetPrimColor(gfx++, 0, 0, 0x40, 0xFF, 0x00, 0xFF);
+        gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0x2C, OPAQUE_ALPHA);
+        gDPSetPrimColor(gfx++, 0, 0, 0x40, 0xFF, 0x00, OPAQUE_ALPHA);
         sprintf(g_PrintBuffer, "%s", f_NoSavedGameText);
         DrawCenteredLargeText(&gfx, f_SlideOffsets[row] + (SCREEN_WIDTH / 2),
             EMPTY_GAME_TEXT_TOP + (row * GAME_ROW_SPACING), g_PrintBuffer);
@@ -1040,8 +1040,8 @@ void DrawGameSaveMenu(Gfx** displayListHead) {
         f_SlideOffsets[END_GAME_ROW] + END_GAME_TEXT_LEFT, END_GAME_TEXT_TOP,
         f_EndGameText, 0xFF571300, 0xFFDB4C00, 0);
     gDPPipeSync(gfx++);
-    gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0x00, 0xFF);
-    gDPSetEnvColor(gfx++, 0xFF, 0x68, 0x00, 0xFF);
+    gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0x00, OPAQUE_ALPHA);
+    gDPSetEnvColor(gfx++, 0xFF, 0x68, 0x00, OPAQUE_ALPHA);
     gDPPipeSync(gfx++);
     gDPPipeSync(gfx++);
     gDPSetCycleType(gfx++, G_CYC_1CYCLE);
@@ -1433,7 +1433,7 @@ void DrawReplaySaveMenu(Gfx** displayListHead) {
     gDPPipeSync(gfx++);
     gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
     gDPSetCombineMode(gfx++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
-    gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+    gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, OPAQUE_ALPHA);
     LoadLargePalette(&gfx, ImageBody(f_PanelImage));
     for (index = 0; index != PANEL_STRIP_COUNT; index++) {
       stripHeight = RECORD_PANEL_STRIP_HEIGHT;
@@ -1448,7 +1448,7 @@ void DrawReplaySaveMenu(Gfx** displayListHead) {
               CHOSEN_PANEL_SHADE, CHOSEN_PANEL_SHADE);
         } else {
           gDPSetPrimColor(gfx++, 0, 0, OTHER_PANEL_SHADE, OTHER_PANEL_SHADE,
-              OTHER_PANEL_SHADE, 0xFF);
+              OTHER_PANEL_SHADE, OPAQUE_ALPHA);
         }
 
         DrawTextureRect(&gfx, QuarterPixels(rowOffsets[row] + WIDE_PANEL_LEFT),
@@ -1468,7 +1468,7 @@ void DrawReplaySaveMenu(Gfx** displayListHead) {
             CHOSEN_PANEL_SHADE, CHOSEN_PANEL_SHADE);
       } else {
         gDPSetPrimColor(gfx++, 0, 0, OTHER_PANEL_SHADE, OTHER_PANEL_SHADE,
-            OTHER_PANEL_SHADE, 0xFF);
+            OTHER_PANEL_SHADE, OPAQUE_ALPHA);
       }
 
       DrawTextureRect(&gfx, QuarterPixels(rowOffsets[row] + NARROW_PANEL_LEFT),
@@ -1497,10 +1497,10 @@ void DrawReplaySaveMenu(Gfx** displayListHead) {
       } else {
         gDPPipeSync(gfx++);
         if (index == f_CursorIndex) {
-          gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+          gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, OPAQUE_ALPHA);
         } else {
           gDPSetPrimColor(gfx++, 0, 0, OTHER_PANEL_SHADE, OTHER_PANEL_SHADE,
-              OTHER_PANEL_SHADE, 0xFF);
+              OTHER_PANEL_SHADE, OPAQUE_ALPHA);
         }
 
         gDPPipeSync(gfx++);
@@ -1545,7 +1545,7 @@ void DrawReplaySaveMenu(Gfx** displayListHead) {
     }
 
     /* Each record's label */
-    gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+    gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, OPAQUE_ALPHA);
     for (index = 0; index != RING_SHOT_RECORD_COUNT; index++) {
       if (rowLabels[index] != NO_REPLAY_LABEL) {
         labelImage = f_ReplayLabelImages[rowLabels[index]];
@@ -1553,10 +1553,10 @@ void DrawReplaySaveMenu(Gfx** displayListHead) {
         labelHeight = labelImage[IMAGE_HEIGHT_LOW_BYTE];
         gDPPipeSync(gfx++);
         if (index == f_CursorIndex) {
-          gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+          gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, OPAQUE_ALPHA);
         } else {
           gDPSetPrimColor(gfx++, 0, 0, OTHER_PANEL_SHADE, OTHER_PANEL_SHADE,
-              OTHER_PANEL_SHADE, 0xFF);
+              OTHER_PANEL_SHADE, OPAQUE_ALPHA);
         }
 
         gDPPipeSync(gfx++);
@@ -1583,10 +1583,10 @@ void DrawReplaySaveMenu(Gfx** displayListHead) {
       if (record->scoreKind & SCORE_KIND_RECORDED) {
         gDPPipeSync(gfx++);
         if (index == f_CursorIndex) {
-          gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+          gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, OPAQUE_ALPHA);
         } else {
           gDPSetPrimColor(gfx++, 0, 0, OTHER_PANEL_SHADE, OTHER_PANEL_SHADE,
-              OTHER_PANEL_SHADE, 0xFF);
+              OTHER_PANEL_SHADE, OPAQUE_ALPHA);
         }
 
         gDPPipeSync(gfx++);
@@ -1613,7 +1613,7 @@ void DrawReplaySaveMenu(Gfx** displayListHead) {
       s32 centerX;
 
       centerX = SCREEN_WIDTH / 2;
-      gDPSetPrimColor(gfx++, 0, 0, 0x00, 0xBF, 0xFF, 0xFF);
+      gDPSetPrimColor(gfx++, 0, 0, 0x00, 0xBF, 0xFF, OPAQUE_ALPHA);
       gDPPipeSync(gfx++);
       gDPSetRenderMode(gfx++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
       gDPSetCombineMode(gfx++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
@@ -1701,17 +1701,17 @@ void DrawReplaySaveMenu(Gfx** displayListHead) {
       gDPPipeSync(gfx++);
       record = &save->ringShotRecords[index];
       if (index == f_CursorIndex) {
-        gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+        gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, OPAQUE_ALPHA);
       } else {
         gDPSetPrimColor(gfx++, 0, 0, OTHER_PANEL_SHADE, OTHER_PANEL_SHADE,
-            OTHER_PANEL_SHADE, 0xFF);
+            OTHER_PANEL_SHADE, OPAQUE_ALPHA);
       }
 
       gDPPipeSync(gfx++);
       if (!(record->scoreKind & SCORE_KIND_RECORDED)) {
         SetUpGradientTextDrawing(&gfx, 0);
-        gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0x2C, 0xFF);
-        gDPSetPrimColor(gfx++, 0, 0, 0x40, 0xFF, 0x00, 0xFF);
+        gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0x2C, OPAQUE_ALPHA);
+        gDPSetPrimColor(gfx++, 0, 0, 0x40, 0xFF, 0x00, OPAQUE_ALPHA);
 
         /* The saved-game message is printed but never drawn */
         sprintf(g_PrintBuffer, "%s", f_NoSavedGameText);

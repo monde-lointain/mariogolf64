@@ -1552,7 +1552,7 @@ void DrawGridFaces(Gfx** displayListHead, u8 isSinglePlayer) {
             g_CharacterFacePalettes[(s16)slot + MARKED_CHARACTER_OFFSET];
         gDPLoadTLUT_pal256(gfx++, TextureAddress(facePalette));
         gDPSetCombineMode(gfx++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
-        gDPSetPrimColor(gfx++, 0, 0, 10, 10, 10, 255);
+        gDPSetPrimColor(gfx++, 0, 0, 10, 10, 10, OPAQUE_ALPHA);
         gDPLoadTextureBlock(gfx++, TextureAddress(faceImage), G_IM_FMT_CI,
             G_IM_SIZ_8b, FACE_SIZE, FACE_SIZE, 0, G_TX_NOMIRROR | G_TX_WRAP,
             G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,

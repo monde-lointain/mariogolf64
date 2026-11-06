@@ -13,6 +13,7 @@
 #include "current_shot.h"
 #include "effects.h"
 #include "framebuffer.h"
+#include "gbi_helpers.h"
 #include "heap.h"
 #include "hole_display.h"
 #include "main.h"
@@ -974,7 +975,7 @@ void DrawPauseMenu(Gfx** displayListHead) {
     SetTextSlot(PAUSE_LABEL_X, PauseLabelY(i),
         message + PAUSE_OPTION_MESSAGE_BASE, TEXT_SLOT_LARGE_FONT, i,
         PAUSE_LABEL_FLAGS, red, green, blue, 0xFF);
-    gDPSetPrimColor(gfx++, 0, 0, red, green, blue, 0xFF);
+    gDPSetPrimColor(gfx++, 0, 0, red, green, blue, OPAQUE_ALPHA);
     DrawLargeTextSlot(&gfx, i);
     if (kind == PAUSE_OPTION_KIND_GRID_COLOR) {
       if (g_Players[g_CurrentShot.playerIndex].gridColor == GRID_COLOR_BLACK) {
@@ -1019,7 +1020,7 @@ void DrawPauseMenu(Gfx** displayListHead) {
       !f_IsGiveUpAllowed) {
     gDPSetCombineLERP(gfx++, TEXEL0, 0, PRIMITIVE, 0, TEXEL0, 0, PRIMITIVE, 0,
         TEXEL0, 0, PRIMITIVE, 0, TEXEL0, 0, PRIMITIVE, 0);
-    gDPSetPrimColor(gfx++, 0, 0, 0x7F, 0x7F, 0x7F, 0xFF);
+    gDPSetPrimColor(gfx++, 0, 0, 0x7F, 0x7F, 0x7F, OPAQUE_ALPHA);
   }
 
   selectedKind =
@@ -1224,11 +1225,11 @@ void DrawChoiceBox(Gfx** displayListHead) {
       for (i = 0; i != box->optionCount; i++) {
         if (i == f_ChoiceBoxSelection) {
           gDPPipeSync(gfx++);
-          gDPSetPrimColor(gfx++, 0, 0, red, green, blue, 0xFF);
+          gDPSetPrimColor(gfx++, 0, 0, red, green, blue, OPAQUE_ALPHA);
           gDPPipeSync(gfx++);
         } else {
           gDPPipeSync(gfx++);
-          gDPSetPrimColor(gfx++, 0, 0, 0x5F, 0x3F, 0xFF, 0xFF);
+          gDPSetPrimColor(gfx++, 0, 0, 0x5F, 0x3F, 0xFF, OPAQUE_ALPHA);
           gDPPipeSync(gfx++);
         }
 

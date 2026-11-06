@@ -13,6 +13,7 @@
 #include "debug_text.h"
 #include "effects.h"
 #include "game_flags.h"
+#include "gbi_helpers.h"
 #include "heap.h"
 #include "main.h"
 #include "math_util.h"
@@ -1555,7 +1556,7 @@ void DrawCourseResultsNotice(Gfx** displayListHead) {
       PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0);
   gDPPipeSync(gfx++);
   gDPSetAlphaCompare(gfx++, G_AC_NONE);
-  gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
+  gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
   LoadTextureBlock(&gfx, ImageBody(f_ResultsShineImage), G_IM_FMT_I,
       G_IM_SIZ_8b, NOTICE_SHINE_SIZE, NOTICE_SHINE_SIZE, 0, 0, 0, 0, 0, 0, 0);
   if (f_NoticeFrameCount == NOTICE_SHINE_START) {
@@ -1801,7 +1802,7 @@ void DrawCharacterResultsNotice(Gfx** displayListHead) {
         0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0);
     gDPPipeSync(gfx++);
     gDPSetAlphaCompare(gfx++, G_AC_NONE);
-    gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
+    gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
     LoadTextureBlock(&gfx, ImageBody(f_ResultsShineImage), G_IM_FMT_I,
         G_IM_SIZ_8b, NOTICE_SHINE_SIZE, NOTICE_SHINE_SIZE, 0, 0, 0, 0, 0, 0, 0);
     if (f_NoticeTime == NOTICE_CHARACTER_VOICE_FRAME) {
@@ -3646,7 +3647,7 @@ void DrawClubTournamentResults(Gfx** displayListHead) {
       CLUB_TOURNAMENT_MODE_SLOT, CLUB_TOURNAMENT_TEXT_FLAGS, 255, 63, 127, 255);
   for (i = CLUB_TOURNAMENT_NAME_SLOT; i != CLUB_TOURNAMENT_MODE_SLOT + 1; i++) {
     gDPSetPrimColor(gfx++, 0, 0, f_TextSlotColors[i - 1][0],
-        f_TextSlotColors[i - 1][1], f_TextSlotColors[i - 1][2], 255);
+        f_TextSlotColors[i - 1][1], f_TextSlotColors[i - 1][2], OPAQUE_ALPHA);
     DrawLargeTextSlot(&gfx, i);
   }
 

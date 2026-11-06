@@ -291,7 +291,7 @@ void DrawBootLogos(Gfx** displayListHead) {
   gDPSetAlphaCompare(gfx++, G_AC_NONE);
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_NONE);
-  gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
+  gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
   gDPPipeSync(gfx++);
   switch (f_BootLogoStage) {
     case BOOT_LOGO_N64:

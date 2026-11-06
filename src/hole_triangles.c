@@ -169,7 +169,7 @@ void DrawHoleTriangles(Gfx** displayListHead, CameraMatrices* matrices UNUSED,
   gDPSetCombineLERP(gfx++, TEXEL0, TEXEL1, PRIMITIVE_ALPHA, TEXEL1, 0, 0, 0,
       PRIMITIVE, PRIMITIVE, 0, COMBINED, 0, 0, 0, 0, COMBINED);
   gDPSetPrimColor(gfx++, 0, 0, 0x7F, 0x7F, 0x7F, 0xA1);
-  gDPSetEnvColor(gfx++, 0x3F, 0x7F, 0x9F, 0xFF);
+  gDPSetEnvColor(gfx++, 0x3F, 0x7F, 0x9F, OPAQUE_ALPHA);
   gSPTexture(
       gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0, G_TX_RENDERTILE, G_ON);
   f_TextureScroll++;

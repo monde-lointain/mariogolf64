@@ -444,7 +444,7 @@ void DrawBestTimeFace(Gfx** displayListHead, s32 left, s32 top,
   if (drawMode == FACE_DARKENED) {
     gDPSetCombineMode(gfx++, G_CC_MODULATERGBA_PRIM, G_CC_MODULATERGBA_PRIM);
     gDPSetPrimColor(gfx++, 0, 0, FACE_DARKENED_SHADE, FACE_DARKENED_SHADE,
-        FACE_DARKENED_SHADE, 255);
+        FACE_DARKENED_SHADE, OPAQUE_ALPHA);
   } else {
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
   }

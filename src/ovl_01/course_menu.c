@@ -1262,23 +1262,23 @@ void DrawMenuNumber(
         if (value > 0) {
           index = MENU_GLYPH_PLUS;
           gDPSetCombineMode(gfx++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
-          gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0x7F, 0x7F, 0xFF);
+          gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0x7F, 0x7F, OPAQUE_ALPHA);
         } else if (value < 0) {
           index = MENU_GLYPH_MINUS;
           gDPSetCombineMode(gfx++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
-          gDPSetPrimColor(gfx++, 0, 0, 0x7F, 0xFF, 0x7F, 0xFF);
+          gDPSetPrimColor(gfx++, 0, 0, 0x7F, 0xFF, 0x7F, OPAQUE_ALPHA);
         } else {
           index = MENU_GLYPH_PLUS_MINUS;
         }
         break;
       case MENU_NUMBER_RED_TINT:
         gDPSetCombineMode(gfx++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
-        gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0x7F, 0x7F, 0xFF);
+        gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0x7F, 0x7F, OPAQUE_ALPHA);
         index = MENU_GLYPH_TIMES;
         break;
       case MENU_NUMBER_GREEN_TINT:
         gDPSetCombineMode(gfx++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
-        gDPSetPrimColor(gfx++, 0, 0, 0x7F, 0xFF, 0x7F, 0xFF);
+        gDPSetPrimColor(gfx++, 0, 0, 0x7F, 0xFF, 0x7F, OPAQUE_ALPHA);
         index = MENU_GLYPH_TIMES;
         break;
       case MENU_NUMBER_TIMES:

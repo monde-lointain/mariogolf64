@@ -5031,7 +5031,7 @@ void DrawModeSelect(Gfx** displayListHead) {
         gDPSetCombineMode(
             gfx++, G_CC_MODULATERGBA_PRIM, G_CC_MODULATERGBA_PRIM);
         gDPSetPrimColor(gfx++, 0, 0, UNCHOSEN_MODE_BOARD_SHADE,
-            UNCHOSEN_MODE_BOARD_SHADE, UNCHOSEN_MODE_BOARD_SHADE, 255);
+            UNCHOSEN_MODE_BOARD_SHADE, UNCHOSEN_MODE_BOARD_SHADE, OPAQUE_ALPHA);
       }
 
       for (countShift = 0; countShift != MODE_ICON_STRIP_COUNT; countShift++) {
@@ -5627,8 +5627,8 @@ void DrawAnimationViewer(Gfx** displayListHead) {
   }
 
   SetUpTextDrawing(&gfx);
-  gDPSetPrimColor(gfx++, 0, 0, 0x3F, 0x7F, 0xFF, 0xFF);
-  gDPSetEnvColor(gfx++, 0x00, 0x10, 0x40, 0xFF);
+  gDPSetPrimColor(gfx++, 0, 0, 0x3F, 0x7F, 0xFF, OPAQUE_ALPHA);
+  gDPSetEnvColor(gfx++, 0x00, 0x10, 0x40, OPAQUE_ALPHA);
   sprintf(g_PrintBuffer, f_NumberedNameFormat, g_MenuMemory.viewerCharacter + 1,
       g_MenuCharacterNames[g_MenuMemory.viewerCharacter]);
   DrawLargeText(&gfx, VIEWER_NAME_X, VIEWER_NAME_Y, g_PrintBuffer);
@@ -6095,7 +6095,7 @@ void DrawCourseSelect(Gfx** displayListHead) {
             (GetOpenCourseCount() < COURSE_COUNT)) {
           gDPSetCombineMode(gfx++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
           gDPSetPrimColor(gfx++, 0, 0, LOCKED_COURSE_SHADE, LOCKED_COURSE_SHADE,
-              LOCKED_COURSE_SHADE, 255);
+              LOCKED_COURSE_SHADE, OPAQUE_ALPHA);
         } else {
           gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
         }
@@ -6201,7 +6201,8 @@ void DrawCourseSelect(Gfx** displayListHead) {
               BET_BADGE_COLOR_MIDPOINT;
           gDPSetPrimColor(gfx++, 0, 0, red, green, blue, 128);
           gDPSetEnvColor(gfx++, red / BET_BADGE_ENV_DIVISOR,
-              green / BET_BADGE_ENV_DIVISOR, blue / BET_BADGE_ENV_DIVISOR, 255);
+              green / BET_BADGE_ENV_DIVISOR, blue / BET_BADGE_ENV_DIVISOR,
+              OPAQUE_ALPHA);
           gDPSetCombineMode(gfx++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
           gDPPipeSync(gfx++);
           gDPSetRenderMode(gfx++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
@@ -6210,7 +6211,8 @@ void DrawCourseSelect(Gfx** displayListHead) {
         } else {
           gDPSetCombineMode(gfx++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
           gDPSetPrimColor(gfx++, 0, 0, UNCHOSEN_HOLES_BADGE_SHADE,
-              UNCHOSEN_HOLES_BADGE_SHADE, UNCHOSEN_HOLES_BADGE_SHADE, 255);
+              UNCHOSEN_HOLES_BADGE_SHADE, UNCHOSEN_HOLES_BADGE_SHADE,
+              OPAQUE_ALPHA);
         }
 
         gDPPipeSync(gfx++);
@@ -6329,8 +6331,8 @@ void DrawCourseSelect(Gfx** displayListHead) {
           TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       gDPPipeSync(gfx++);
       SetUpGradientTextDrawing(&gfx, TRUE);
-      gDPSetEnvColor(gfx++, 191, 191, 255, 255);
-      gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
+      gDPSetEnvColor(gfx++, 191, 191, 255, OPAQUE_ALPHA);
+      gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
       SetTextSlotValue(
           GetCoursePointsNeeded(g_MenuMemory.courseChoice) - save->coursePoints,
           0, 0);
@@ -7117,8 +7119,8 @@ void DrawOptionsScreen(Gfx** displayListHead) {
       } else {
         gDPSetCombineLERP(gfx++, PRIMITIVE, 0, TEXEL0, 0, 0, 0, 0, TEXEL0,
             PRIMITIVE, 0, TEXEL0, 0, 0, 0, 0, TEXEL0);
-        gDPSetPrimColor(
-            gfx++, 0, 0, DIMMED_COLOR, DIMMED_COLOR, DIMMED_COLOR, 255);
+        gDPSetPrimColor(gfx++, 0, 0, DIMMED_COLOR, DIMMED_COLOR, DIMMED_COLOR,
+            OPAQUE_ALPHA);
         DrawTextureRect(&gfx, QuarterPixels(VALUE_BANNER_LEFT),
             QuarterPixels(ValueStripTop(toggleIndex, firstRowStripTop) +
                 VALUE_BANNER_OFFSET_Y),
@@ -7206,10 +7208,10 @@ void DrawOptionsScreen(Gfx** displayListHead) {
         G_IM_FMT_CI, OPTION_LABEL_WIDTH, OPTION_LABEL_HEIGHT, 0, 0, 0, 0, 0, 0,
         0);
     if (g_MenuMemory.optionsChoice == loopIndex) {
-      gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
+      gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
     } else {
       gDPSetPrimColor(
-          gfx++, 0, 0, DIMMED_COLOR, DIMMED_COLOR, DIMMED_COLOR, 255);
+          gfx++, 0, 0, DIMMED_COLOR, DIMMED_COLOR, DIMMED_COLOR, OPAQUE_ALPHA);
     }
 
     DrawTextureRect(&gfx, QuarterPixels(OPTION_VALUE_LEFT),

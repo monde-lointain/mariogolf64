@@ -1715,7 +1715,7 @@ void DrawEffects(CameraMatrices* matrices, Gfx** displayListHead) {
       0, TEXEL0, 0, ENVIRONMENT, PRIMITIVE, TEXEL0, PRIMITIVE, PRIMITIVE, 0,
       TEXEL0, 0);
   color = SPARKLE_TINT;
-  gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, 0xFF);
+  gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, OPAQUE_ALPHA);
   gDPSetBlendColor(gfx++, 0xFF, 0xFF, 0xFF, SPARKLE_ALPHA_THRESHOLD);
   for (index = 0; index != EFFECT_COUNT; index++) {
     effect = &f_Effects[index];
@@ -1965,7 +1965,7 @@ void DrawDrop(Gfx** displayListHead, CameraMatrices* matrices,
   gDPPipeSync(gfx++);
   gDPSetRenderMode(gfx++, G_RM_AA_ZB_TEX_EDGE, G_RM_AA_ZB_TEX_EDGE2);
   gDPSetCombineMode(gfx++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
-  gDPSetPrimColor(gfx++, 0, 0, DROP_GRAY, DROP_GRAY, DROP_GRAY, 255);
+  gDPSetPrimColor(gfx++, 0, 0, DROP_GRAY, DROP_GRAY, DROP_GRAY, OPAQUE_ALPHA);
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_NONE);
 

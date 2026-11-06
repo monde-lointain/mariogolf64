@@ -870,7 +870,7 @@ void DrawBetSettings(
       if (memory->betStakeLevels[f_BetSetStakeSlots[g_BetSet - 1][i]] == 0) {
         gDPSetCombineMode(
             gfx++, G_CC_MODULATERGBA_PRIM, G_CC_MODULATERGBA_PRIM);
-        gDPSetPrimColor(gfx++, 0, 0, 127, 127, 127, 255);
+        gDPSetPrimColor(gfx++, 0, 0, 127, 127, 127, OPAQUE_ALPHA);
       } else {
         gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
       }
@@ -936,7 +936,7 @@ void DrawBetSettings(
           memory->betStakeLevels[f_BetSetStakeSlots[g_BetSet - 1][i]]) {
         gDPSetCombineMode(
             gfx++, G_CC_MODULATERGBA_PRIM, G_CC_MODULATERGBA_PRIM);
-        gDPSetPrimColor(gfx++, 0, 0, 127, 127, 127, 255);
+        gDPSetPrimColor(gfx++, 0, 0, 127, 127, 127, OPAQUE_ALPHA);
       } else {
         gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
       }
@@ -1432,7 +1432,7 @@ void DrawHandicaps(Gfx** displayListHead, s32 slide, u8 reverseVerticalSlide,
     } else {
       gDPSetCombineMode(gfx++, G_CC_MODULATERGBA_PRIM, G_CC_MODULATERGBA_PRIM);
       gDPSetPrimColor(gfx++, 0, 0, UNCHOSEN_COLUMN_SHADE, UNCHOSEN_COLUMN_SHADE,
-          UNCHOSEN_COLUMN_SHADE, 255);
+          UNCHOSEN_COLUMN_SHADE, OPAQUE_ALPHA);
     }
 
     for (stripIndex = 0; stripIndex != HANDICAP_COLUMN_STRIP_COUNT;
@@ -2815,7 +2815,7 @@ void DrawCharacterFace(Gfx** displayListHead, void* texels, void* palette,
   if (drawMode == FACE_DARKENED) {
     gDPSetCombineMode(gfx++, G_CC_MODULATERGBA_PRIM, G_CC_MODULATERGBA_PRIM);
     gDPSetPrimColor(gfx++, 0, 0, FACE_DARKENED_SHADE, FACE_DARKENED_SHADE,
-        FACE_DARKENED_SHADE, 255);
+        FACE_DARKENED_SHADE, OPAQUE_ALPHA);
   } else {
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
   }

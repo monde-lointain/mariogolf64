@@ -12,6 +12,7 @@
 #include "effects.h"
 #include "game.h"
 #include "game_flags.h"
+#include "gbi_helpers.h"
 #include "heap.h"
 #include "hole_display.h"
 #include "libc.h"
@@ -398,7 +399,7 @@ void DrawHoleCreatures(Gfx** displayListHead) {
       }
 
       if (creature->position[AXIS_Y] < g_TurnBallSimulation.position[AXIS_Y]) {
-        gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+        gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, OPAQUE_ALPHA);
       } else {
         s32 alpha = (g_TurnBallSimulation.position[AXIS_Y] -
                         creature->position[AXIS_Y]) *
@@ -461,7 +462,7 @@ void DrawHoleCreatures(Gfx** displayListHead) {
       scale[AXIS_Z] = 1.0f;
       BuildTransformMatrix(transform, rotation, translation, scale);
       ConvertMatrixToFixed(transform, &creature->matrices[g_MatrixBufferIndex]);
-      gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+      gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, OPAQUE_ALPHA);
       gDPPipeSync(gfx++);
       gSPMatrix(gfx++,
           PhysicalAddress(&creature->matrices[g_MatrixBufferIndex]),

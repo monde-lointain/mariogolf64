@@ -488,7 +488,7 @@ void DrawBillboards(CameraMatrices* cameraMatrices, s32 cameraIndex) {
   SortBillboardsByDepth();
 
   f_LoadedTextureIndex = NO_TEXTURE_LOADED;
-  gDPSetPrimColor(gfx++, 0, 0, 0x3F, 0xB4, 0x00, 0xFF);
+  gDPSetPrimColor(gfx++, 0, 0, 0x3F, 0xB4, 0x00, OPAQUE_ALPHA);
   gDPPipeSync(gfx++);
   gDPSetRenderMode(gfx++, G_RM_FOG_SHADE_A, G_RM_AA_ZB_TEX_EDGE2);
   gDPPipeSync(gfx++);
@@ -648,7 +648,7 @@ void DrawFadingBillboards(CameraMatrices* cameraMatrices, s32 cameraIndex) {
   }
 
   f_LoadedTextureIndex = NO_TEXTURE_LOADED;
-  gDPSetPrimColor(gfx++, 0, 0, 0x3F, 0xB4, 0x00, 0xFF);
+  gDPSetPrimColor(gfx++, 0, 0, 0x3F, 0xB4, 0x00, OPAQUE_ALPHA);
   gDPPipeSync(gfx++);
   gDPSetRenderMode(gfx++, G_RM_FOG_SHADE_A, G_RM_AA_ZB_TEX_EDGE2);
   gDPPipeSync(gfx++);

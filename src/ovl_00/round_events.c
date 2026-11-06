@@ -1170,7 +1170,7 @@ void DrawFlipMessage(Gfx** displayListHead) {
     gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
     if (f_FlipMessageFrame == FLIP_MESSAGE_OPEN_FRAME) {
       SetUpTextDrawing(&gfx);
-      gDPSetPrimColor(gfx++, 0, 0, 255, 255, 240, 255);
+      gDPSetPrimColor(gfx++, 0, 0, 255, 255, 240, OPAQUE_ALPHA);
       DrawLargeTextSlot(&gfx, FLIP_MESSAGE_TEXT_SLOT);
     } else {
       SetUpPerspectiveTextDrawing(&gfx);
@@ -1461,7 +1461,7 @@ void DrawContestWinnerMovie(Gfx** displayListHead) {
       slide = 0;
     }
 
-    gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
+    gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
     gDPSetEnvColor(gfx++, 255, 255, 255, CONTEST_COPY_ALPHA);
     if (f_MovieDrawCount == 0) {
       OpenAssetFile(g_CharacterPaletteAssets[g_Players[GetContestWinner()]
@@ -1482,10 +1482,10 @@ void DrawContestWinnerMovie(Gfx** displayListHead) {
         (sinf((f_MovieDrawCount - CONTEST_MEET_DRAW) * CONTEST_TURN_PER_FRAME) *
             CONTEST_FLASH_DEPTH);
     gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, alpha);
-    gDPSetEnvColor(gfx++, 255, 255, 255, 255);
+    gDPSetEnvColor(gfx++, 255, 255, 255, OPAQUE_ALPHA);
   } else if (f_MovieDrawCount < CONTEST_SLIDE_OUT_DRAW) {
-    gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
-    gDPSetEnvColor(gfx++, 255, 255, 255, 255);
+    gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
+    gDPSetEnvColor(gfx++, 255, 255, 255, OPAQUE_ALPHA);
   } else if (f_MovieDrawCount < CONTEST_END_DRAW) {
     slide =
         (CONTEST_SLIDE_OUT_DRAW - f_MovieDrawCount) * CONTEST_SLIDE_PER_FRAME;
@@ -1643,17 +1643,17 @@ void DrawDriveRecord(Gfx** displayListHead) {
   stripHeight = MOVIE_IMAGE_STRIP_HEIGHT;
   stripCount = height / stripHeight;
   if (f_MovieDrawCount < CAPTION_MEET_DRAW) {
-    gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
+    gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
     gDPSetEnvColor(gfx++, 255, 255, 255, CAPTION_COPY_ALPHA);
   } else if (f_MovieDrawCount < CAPTION_FLASH_END_DRAW) {
     alpha = 255.0f -
         (sinf((f_MovieDrawCount - CAPTION_MEET_DRAW) * CAPTION_TURN_PER_FRAME) *
             CAPTION_FLASH_DEPTH);
     gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, alpha);
-    gDPSetEnvColor(gfx++, 255, 255, 255, 255);
+    gDPSetEnvColor(gfx++, 255, 255, 255, OPAQUE_ALPHA);
   } else if (f_MovieDrawCount < CAPTION_GROW_DRAW) {
-    gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
-    gDPSetEnvColor(gfx++, 255, 255, 255, 255);
+    gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
+    gDPSetEnvColor(gfx++, 255, 255, 255, OPAQUE_ALPHA);
   } else if (f_MovieDrawCount < CAPTION_GROW_END_DRAW) {
     angle = (f_MovieDrawCount - CAPTION_GROW_DRAW) * CAPTION_TURN_PER_FRAME;
     fade = sinf(angle) * CAPTION_FLASH_DEPTH;
@@ -1759,17 +1759,17 @@ void DrawPuttCaption(Gfx** displayListHead) {
   }
 
   if (f_MovieDrawCount < CAPTION_MEET_DRAW) {
-    gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
+    gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
     gDPSetEnvColor(gfx++, 255, 255, 255, CAPTION_COPY_ALPHA);
   } else if (f_MovieDrawCount < CAPTION_FLASH_END_DRAW) {
     alpha = 255.0f -
         (sinf((f_MovieDrawCount - CAPTION_MEET_DRAW) * CAPTION_TURN_PER_FRAME) *
             CAPTION_FLASH_DEPTH);
     gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, alpha);
-    gDPSetEnvColor(gfx++, 255, 255, 255, 255);
+    gDPSetEnvColor(gfx++, 255, 255, 255, OPAQUE_ALPHA);
   } else if (f_MovieDrawCount < CAPTION_GROW_DRAW) {
-    gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
-    gDPSetEnvColor(gfx++, 255, 255, 255, 255);
+    gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
+    gDPSetEnvColor(gfx++, 255, 255, 255, OPAQUE_ALPHA);
   } else if (f_MovieDrawCount < CAPTION_GROW_END_DRAW) {
     angle = (f_MovieDrawCount - CAPTION_GROW_DRAW) * CAPTION_TURN_PER_FRAME;
     fade = sinf(angle) * CAPTION_FLASH_DEPTH;
@@ -1924,7 +1924,7 @@ void DrawReadyGoMovie(Gfx** displayListHead) {
   BuildTransformMatrix(matrix, rotation, translation, scale);
   ConvertMatrixToFixed(matrix, &f_ReadyGoMatrices[f_MovieBackBuffer]);
   gDPPipeSync(gfx++);
-  gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
+  gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
   gDPSetEnvColor(gfx++, 255, 255, 255, alpha);
   gDPSetCombineLERP(gfx++, 0, 0, 0, TEXEL0, ENVIRONMENT, 0, TEXEL0, 0, 0, 0, 0,
       TEXEL0, ENVIRONMENT, 0, TEXEL0, 0);
@@ -2058,8 +2058,8 @@ void DrawShrinkingMovieImage(Gfx** displayListHead) {
   }
 
   gSPDisplayList(gfx++, f_MovieImageSetupDisplayList);
-  gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
-  gDPSetEnvColor(gfx++, 255, 255, 255, 255);
+  gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
+  gDPSetEnvColor(gfx++, 255, 255, 255, OPAQUE_ALPHA);
   gDPSetCombineLERP(gfx++, TEXEL0, ENVIRONMENT, PRIMITIVE_ALPHA, ENVIRONMENT,
       ENVIRONMENT, 0, TEXEL0, 0, TEXEL0, ENVIRONMENT, PRIMITIVE_ALPHA,
       ENVIRONMENT, ENVIRONMENT, 0, TEXEL0, 0);
@@ -2773,17 +2773,17 @@ void DrawContactEffect(Gfx** displayListHead, CameraMatrices* matrices) {
         G_TX_RENDERTILE, G_ON);
     gSPClearGeometryMode(gfx++, ALL_GEOMETRY_MODES);
     gSPSetGeometryMode(gfx++, G_ZBUFFER | G_SHADE | G_SHADING_SMOOTH);
-    gDPSetEnvColor(gfx++, 255, 255, 255, 255);
+    gDPSetEnvColor(gfx++, 255, 255, 255, OPAQUE_ALPHA);
     if (f_ContactStyle == CONTACT_STYLE_WARIO) {
       gDPSetPrimColor(gfx++, 0, 0, 255, 0, 255, alpha);
     } else if (f_ContactStyle == CONTACT_STYLE_GAME_BOY_BALL_7) {
-      gDPSetEnvColor(gfx++, 255, 255, 127, 255);
+      gDPSetEnvColor(gfx++, 255, 255, 127, OPAQUE_ALPHA);
       gDPSetPrimColor(gfx++, 0, 0, guRandom() % 255, guRandom() % 255,
           guRandom() % 255, alpha);
     } else if (f_ContactStyle == CONTACT_STYLE_BOWSER) {
       gDPSetPrimColor(gfx++, 0, 0, 255, 0, 255, alpha);
       gDPSetPrimColor(gfx++, 0, 0, 255, 0, 0, alpha);
-      gDPSetEnvColor(gfx++, 255, 247, 239, 255);
+      gDPSetEnvColor(gfx++, 255, 247, 239, OPAQUE_ALPHA);
     } else if (f_ContactStyle == CONTACT_STYLE_MARIO) {
       gDPSetPrimColor(gfx++, 0, 0, 255, 0, 0, alpha);
     } else if (f_ContactStyle == CONTACT_STYLE_PLAIN ||
@@ -2792,7 +2792,7 @@ void DrawContactEffect(Gfx** displayListHead, CameraMatrices* matrices) {
       gDPSetPrimColor(gfx++, 0, 0, 0, 0, 255, alpha);
     } else if (f_ContactStyle == CONTACT_STYLE_GAME_BOY_BALL_6) {
       gDPSetPrimColor(gfx++, 0, 0, 255, 127, 0, alpha);
-      gDPSetEnvColor(gfx++, 255, 191, 63, 255);
+      gDPSetEnvColor(gfx++, 255, 191, 63, OPAQUE_ALPHA);
     } else {
       gDPSetPrimColor(gfx++, 0, 0, 191, 191, 255, alpha);
     }
@@ -3073,7 +3073,7 @@ void DrawWindFlyGuy(Gfx** displayListHead) {
   gSPTexture(
       gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0, G_TX_RENDERTILE, G_ON);
   gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, alpha);
-  gDPSetEnvColor(gfx++, 255, 255, 255, 255);
+  gDPSetEnvColor(gfx++, 255, 255, 255, OPAQUE_ALPHA);
   gDPSetCombineLERP(gfx++, 0, 0, 0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0, 0, 0, 0,
       PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0);
   LoadNibbleTextureBlock(&gfx, ImageBody(f_MovieBuffer + FLY_GUY_IMAGE_SIZE),
