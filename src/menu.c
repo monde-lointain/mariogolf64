@@ -961,6 +961,8 @@ s32 SaveOrContinueGameByMode(Boolean isContinuing) {
   Boolean hasIllegalState;
   s32 index;
 
+  /* A mode with no save slot has room for no players, so saving one with any
+   * players reports too many */
   playerCount = 0;
   switch (g_GameState.gameMode) {
     case GAME_MODE_STROKE:
