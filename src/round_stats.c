@@ -341,6 +341,10 @@ void UpdateContest(Boolean isHoleOver) {
 void RecordCourseRound(void) {
   CourseStats* record =
       &GetSaveData()->records.courseStats[g_GameState.courseIndex];
+  /*
+   * Reading g_RoundStats through a pointer is there to match: reading it
+   * directly gives 45 words differing, 13 in shape
+   */
   RoundStats* stats = &g_RoundStats;
   CourseRecord* course = &g_CourseRecords[g_GameState.courseIndex];
   Boolean isAtRoundLimit;
@@ -545,6 +549,10 @@ void RestartRoundStats(void) {
 
 /* Only the first player's holes count */
 void RecordHoleStats(void) {
+  /*
+   * Reading g_RoundStats through a pointer is there to match: reading it
+   * directly gives 64 words differing, 26 in shape
+   */
   RoundStats* stats;
 
   GetSaveData();
@@ -572,6 +580,10 @@ void RecordHoleStats(void) {
 
 /* Returns whether the drive is the longest yet */
 s32 RecordDrive(void) {
+  /*
+   * Reading g_RoundStats through a pointer is there to match: reading it
+   * directly gives 20 words differing, 14 in shape
+   */
   RoundStats* stats = &g_RoundStats;
   Club* club = GetSelectedClub();
 
