@@ -2894,10 +2894,10 @@ void DrawHoleFlag(Boolean isBackDrawn) {
                     (column * (HOLE_FLAG_TEXEL_COLUMN_STEP / 2)),
                 row * (HOLE_FLAG_TEXEL_ROW_STEP / 2)));
         gSPModifyVertex(g_DisplayListHead++, vertexIndex, G_MWO_POINT_RGBA,
-            ((2 * HOLE_FLAG_START_SHADE - vertex->v.cn[0]) << 24) |
-                ((2 * HOLE_FLAG_START_SHADE - vertex->v.cn[1]) << 16) |
-                ((2 * HOLE_FLAG_START_SHADE - vertex->v.cn[2]) << 8) |
-                HOLE_FLAG_START_SHADE);
+            RgbaColor(2 * HOLE_FLAG_START_SHADE - vertex->v.cn[0],
+                2 * HOLE_FLAG_START_SHADE - vertex->v.cn[1],
+                2 * HOLE_FLAG_START_SHADE - vertex->v.cn[2],
+                HOLE_FLAG_START_SHADE));
       }
     }
 
