@@ -124,8 +124,6 @@ static u8* f_MonkeyImage;
 /* Not static: the original left it to the linker's common block */
 HoleCreature f_HoleCreatures[HOLE_CREATURE_COUNT];
 
-void SpawnRipple(CoursePoint position);
-
 void LoadHoleCreatureImages(void) {
   EncodedAsset asset;
 

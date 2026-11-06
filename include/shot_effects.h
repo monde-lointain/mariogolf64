@@ -53,4 +53,7 @@ void StartFlagstickSparks(CoursePoint point);
 void StartSwingTrail(s32 kind);
 void DrawSwingTrail(Gfx** displayListHead, CameraMatrices* matrices);
 
+void DrawShotEffectsHud(Gfx** displayListHead);
+void DrawSparks(Gfx** displayListHead);
+
 #endif

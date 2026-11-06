@@ -557,11 +557,6 @@ enum EditorCombineMode {
     vertices += 4; \
   }
 
-s32 GetTerrainCode(s32 column, s32 row);
-void BuildAllTileMidpoints(void);
-s32 CrossProductXZ(
-    s32 originX, s32 originZ, s32 firstX, s32 firstZ, s32 secondX, s32 secondZ);
-void MarkBillboardsOnMap(void);
 /*
  * Each point of a tile's EDGE_POINT_COUNT by EDGE_POINT_COUNT grid's slot among
  * the tile's midpoints. Entries from GRID_VERTEX_SLOT_FLAG up are its grid

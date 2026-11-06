@@ -34,4 +34,8 @@ void ToggleGroundTileBorders(void);
  */
 void ShadeGround(s32 shadeVariant);
 
+void BuildGroundDisplayLists(void);
+void LoadToolCodeMap(void);
+void ToggleCodeMapCleanup(void);
+
 #endif

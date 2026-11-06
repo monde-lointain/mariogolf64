@@ -4,6 +4,7 @@
 #include <ultra64.h>
 
 #include "asset.h"
+#include "camera.h"
 #include "character.h"
 #include "course.h"
 #include "language.h"
@@ -381,5 +382,22 @@ extern void* g_ModeIconImages[7];
 
 /* Read by no routine */
 extern u8 g_UnreadMenuBuffer[0x1218];
+
+void BuildCharacterGrid(s32 playerCount, Boolean skipsImportedFaces);
+void ClearImportedCharacters(void);
+void EnterMenuAtBestShots(void);
+void EnterMenuAtBlankScreen(void);
+void EnterMenuAtCourseSelect(void);
+void EnterMenuAtModeSelect(void);
+void EnterMenuAtRingShotRecords(void);
+void EnterMenuAtTitle(void);
+s32 GetClubTournamentCourse(void);
+void InvalidateBrokenRingShotRecords(void);
+void InvalidateBrokenSavedGames(void);
+void RememberPlayedHole(void);
+void ResetMenuChoices(void);
+s32 SaveOrContinueGameByMode(Boolean isContinuing);
+void SaveRingShotRecord(s32 recordIndex, RingShotRecord* record);
+void SortIndicesDescending(s32* values, s32* order, s32 count);
 
 #endif

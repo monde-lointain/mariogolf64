@@ -95,4 +95,7 @@ void UpdateGameSaveMenu(ControllerState* controller);
 #define PAUSE_SOUND_CHANNEL 2
 #define RING_SHOT_RETRY_SOUND_CHANNEL 3
 
+void DrawChoiceBox(Gfx** displayListHead);
+void DrawPauseMenu(Gfx** displayListHead);
+
 #endif

@@ -29,8 +29,6 @@
 /* The channel of the sound for unlocking everything */
 #define UNLOCK_SOUND_CHANNEL 13
 
-void BuildCharacterGrid(s32 playerCount, Boolean skipsImportedFaces);
-
 void GrantWinsStarsAndBadges(void);
 void GrantRingShotProgressAndPoints(void);
 

@@ -16,6 +16,7 @@
 #include "course_space.h"
 #include "current_shot.h"
 #include "debug_text.h"
+#include "effects.h"
 #include "game_flags.h"
 #include "gbi_helpers.h"
 #include "geometry.h"
@@ -195,7 +196,6 @@ static u8 f_UnusedBufferAfterSpotRoughness[32] UNUSED;
 
 static s8 f_HasReactionSpot;
 
-s32 GetAnimationFrameCount(u32 slotIndex, s32 id);
 void FrameMarioReaction(u32 slotIndex, CameraView* view);
 void FrameWarioReaction(u32 slotIndex, CameraView* view);
 void FrameBabyMarioReaction(u32 slotIndex, CameraView* view);
@@ -207,9 +207,6 @@ void FrameReaction(u32 slotIndex, CameraView* view);
 void FramePeachReaction(u32 slotIndex, CameraView* view);
 void FrameSherryReaction(u32 slotIndex, CameraView* view);
 void FrameKidReaction(u32 slotIndex, CameraView* view);
-void SpawnSparkleNearPoint(u32 slotIndex, s32 pointId);
-void SpawnSpreadingCircle(u32 slotIndex, s32 pointId);
-void SpawnTear(u32 slotIndex, s32 pointId, Radians heading);
 
 /*
  * Whether the reaction views drop the eye and raise what they look at.

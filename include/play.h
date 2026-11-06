@@ -4,6 +4,7 @@
 #include <ultra64.h>
 
 #include "ball_simulation.h"
+#include "camera.h"
 #include "current_shot.h"
 #include "language.h"
 #include "math_util.h"
@@ -165,5 +166,14 @@ void InitExpansionPakFeatures(void);
 /* Sets the fog factor and fog color */
 void SetSceneFog(Gfx** displayListHead);
 void UpdatePlay(void);
+
+void DrawGround(CameraMatrices* matrices, s32 terrainStyle);
+s32 GetAimCameraGround(s32 x, s32 z);
+s32 GetGaugeFill(void);
+s32 GetRecordedScoreKind(s32 strokes);
+void LoadBestShotReplay(PlayRecord* record);
+void LoadRingShotRecord(RingShotRecord* record);
+s32 MarkUsableClubs(s32 unused, s16* clubs, s8* isUsable);
+void SetRingShotCleared(s8 isCleared);
 
 #endif

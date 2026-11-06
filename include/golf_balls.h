@@ -3,6 +3,7 @@
 
 #include <ultra64.h>
 
+#include "camera.h"
 #include "language.h"
 
 /* The wind indicator draws it while MODULE_WIND_BOO is alive */
@@ -15,5 +16,7 @@ void ResetBallRotation(void);
 void ResetGolfBalls(void);
 Boolean IsAnyBallInCup(void);
 void UpdateGolfBalls(void);
+
+void DrawGolfBalls(CameraMatrices* matrices);
 
 #endif

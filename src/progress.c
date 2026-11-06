@@ -7,6 +7,7 @@
 #include <ultra64.h>
 
 #include "course.h"
+#include "effects.h"
 #include "include_asm.h"
 #include "language.h"
 #include "round_stats.h"
@@ -20,8 +21,6 @@
 
 /* Any place past third, which no flag records */
 #define PLACE_UNPLACED 4
-
-void ShowBirdieBadgeCount(s32 badgeCount);
 
 /*
  * Counts a win or a loss in matchups[row][column], and saves. A win also sets

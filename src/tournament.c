@@ -12,6 +12,7 @@
 #include "course.h"
 #include "language.h"
 #include "math_util.h"
+#include "menu.h"
 #include "save.h"
 
 /* Standing 0 is the player's, so the computer contestants start at 1 */
@@ -235,7 +236,6 @@ char g_ContestantNames[COURSE_COUNT *
 /* Read by no routine */
 static s32 f_UnusedWordAfterContestantProfiles UNUSED = 0;
 
-void SortIndicesDescending(s32* values, s32* order, s32 count);
 void NameContestants(void);
 
 void SeedTournamentRandom(s32 seed) {

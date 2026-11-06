@@ -24,6 +24,7 @@
 #include "game_flags.h"
 #include "gbi_helpers.h"
 #include "geometry.h"
+#include "golf_balls.h"
 #include "heap.h"
 #include "hole_display.h"
 #include "hole_objects.h"
@@ -36,10 +37,12 @@
 #include "movie.h"
 #include "opening.h"
 #include "overlay_manager.h"
+#include "pause_menu.h"
 #include "performance_meter.h"
 #include "pin.h"
 #include "play.h"
 #include "rcp.h"
+#include "round_events.h"
 #include "round_hud.h"
 #include "save.h"
 #include "scene.h"
@@ -1193,33 +1196,8 @@ extern s32 _mus_cpu_worst;
 
 void MusPrintDmaUsage(void);
 s32 __MusIntMemRemaining(void);
-void DrawBillboards(CameraMatrices* matrices, s32 cameraIndex);
-void DrawFadingBillboards(CameraMatrices* matrices, s32 cameraIndex);
-void DrawGround(CameraMatrices* matrices, s32);
-void DrawEffects(CameraMatrices* matrices, Gfx** displayListHead);
-void DrawRain(Gfx** displayListHead, CameraMatrices* matrices);
-void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices);
-void DrawShotEffect(Gfx** displayListHead);
-void DrawRoundHud(CameraView* view);
-void DrawHoleIntroText(Gfx** displayListHead);
-void DrawBackdrop(Gfx** displayListHead, CameraView* view, s32 cameraIndex);
-void RewriteWord(Gfx** displayListHead);
-void DrawTitleScreen(Gfx** displayListHead);
-void DrawBootLogos(Gfx** displayListHead);
-void DrawStaffRoll(Gfx** displayListHead);
-void DrawTransmitMenu(Gfx** displayListHead);
-void DrawOpening(CameraMatrices* matrices, Gfx** displayListHead);
 void DrawRoundResults(Gfx** displayListHead);
 void DrawResultsNotice(Gfx** displayListHead);
-void DrawGolfBalls(CameraMatrices* matrices);
-void DrawOpeningLogo(Gfx** displayListHead, Boolean isDrawn);
-void DrawBanner(Gfx** displayListHead);
-void DrawFlipMessage(Gfx** displayListHead);
-void DrawContactEffect(Gfx** displayListHead, CameraMatrices* matrices);
-void DrawWindFlyGuy(Gfx** displayListHead);
-void DrawSparks(Gfx** displayListHead);
-void DrawPauseMenu(Gfx** displayListHead);
-void DrawChoiceBox(Gfx** displayListHead);
 void DrawAimGuides(CameraMatrices* matrices);
 void DrawGameSaveMenu(Gfx** displayListHead);
 void DrawReplaySaveMenu(Gfx** displayListHead);

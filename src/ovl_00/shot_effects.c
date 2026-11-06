@@ -15,6 +15,7 @@
 #include "course_space.h"
 #include "cpu_projection.h"
 #include "current_shot.h"
+#include "curve.h"
 #include "effects.h"
 #include "game.h"
 #include "gbi_helpers.h"
@@ -116,8 +117,6 @@ static Vtx f_SwingTrailVertices[2] = {
     {{{0, 0, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0x00}}},
     {{{0, 0, 0}, 0, {0, 0}, {0xC8, 0xDC, 0xC8, 0xBF}}}};
 static Mtx f_SwingTrailOrigin = IDENTITY_MTX;
-
-f32 InterpolateHermite(f32 values[], f32 position);
 
 static Mtx f_SwingTrailProjections[DRAW_BUFFER_COUNT];
 static Mtx f_SparkMatrices[DRAW_BUFFER_COUNT][SPARK_COUNT];

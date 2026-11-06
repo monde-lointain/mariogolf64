@@ -35,4 +35,6 @@ extern char g_SaveBuildDate[SAVE_BUILD_DATE_SIZE];
 void ReportFailedAssertion(
     const char* expression, const char* fileName, s32 lineNumber);
 
+void AssignCharacterBuffers(void);
+
 #endif

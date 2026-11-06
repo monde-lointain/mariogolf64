@@ -22,6 +22,7 @@
 #include "include_asm.h"
 #include "language.h"
 #include "math_util.h"
+#include "menu.h"
 #include "overlay_manager.h"
 #include "save.h"
 #include "scene.h"
@@ -498,7 +499,6 @@ void UpdateSendStatus(void);
 void UpdateSendExperience(void);
 s32 HaveAllRumblePaks(void);
 void ClearCartridgeCharacters(void);
-void EnterMenuAtTitle(void);
 void ResetSendStatus(void);
 void ResetSendExperience(void);
 s32 TagCartridges(void);

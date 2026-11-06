@@ -26,6 +26,7 @@
 #include "screen.h"
 #include "shot_camera.h"
 #include "surface.h"
+#include "turn.h"
 
 /* The players whose balls are tagged */
 enum ShotLabels {
@@ -161,7 +162,6 @@ static s32 f_PinFlagWaveFrame = 0;
 u8 g_UnusedBytesAfterFlagWaveFrame[4];
 
 void DrawShotLabels(Gfx** displayListHead);
-void DrawShotPreview(CameraMatrices* matrices);
 /*
  * Without a prototype, as the calls pass x and y as they are rather than as
  * s16s. Including text.h would bring in its prototype.

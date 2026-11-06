@@ -10,6 +10,7 @@
 #include "camera.h"
 #include "compiler.h"
 #include "course_space.h"
+#include "effects.h"
 #include "game.h"
 #include "game_flags.h"
 #include "gbi_helpers.h"
@@ -97,7 +98,6 @@ static Lights1 f_RingLights =
 static Mtx f_RingSpinMatrices[DRAW_BUFFER_COUNT];
 static Vtx f_RingVertices[RING_VERTEX_COUNT];
 
-void SpawnSparkle(s32* position);
 static void AddTestRing(void);
 static s32 BuildRingMatrices(void);
 

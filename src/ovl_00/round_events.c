@@ -575,7 +575,6 @@ Mtx f_ContactMatrices[CONTACT_MATRIX_COUNT];
 LakituFlight f_Lakitu;
 LakituVelocity f_LakituVelocity;
 
-void ResetPath(void);
 void DrawContestWinnerMovie(Gfx** displayListHead);
 void DrawDriveRecord(Gfx** displayListHead);
 void DrawPuttCaption(Gfx** displayListHead);

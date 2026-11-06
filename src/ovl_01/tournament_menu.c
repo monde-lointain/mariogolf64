@@ -155,7 +155,6 @@ enum CodeKeyResult {
 #define CLUB_CODE_INCORRECT_X 24
 #define CLUB_CODE_MESSAGE_Y 180
 
-s32 GetClubTournamentCourse(void);
 /* The first club tournament's name; g_ClubTournamentNameIndex picks the
  * tournament */
 #define MESSAGE_FIRST_CLUB_TOURNAMENT_NAME 0x16F

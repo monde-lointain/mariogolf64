@@ -3740,7 +3740,6 @@ void DrawColorTest(Gfx** displayListHead) {
 #define GAME_FLAG_SHOW_MIRROR_TEXTURE 0x70
 /* The shadowed font draws "ft" for this character */
 #define SHADOWED_FEET_GLYPH '['
-void DrawShotEffectsHud(Gfx** displayListHead);
 
 /* Loads one of the shot panel's labels, which DrawRoundHud does in each branch
  * that picks one */

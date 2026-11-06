@@ -19,6 +19,7 @@
 #include "language.h"
 #include "main.h"
 #include "math_util.h"
+#include "menu.h"
 #include "overlay_manager.h"
 #include "rcp.h"
 #include "scene.h"
@@ -103,8 +104,6 @@ typedef struct ButtonCode {
   /* 0x4 */ s32 progress; /* How many of the buttons have been pressed */
   /* 0x8 */ void (*onEntered)(void);
 } ButtonCode; /* size = 0xC */
-
-void EnterMenuAtTitle(void);
 
 void OnUnlockCodeEntered(void);
 void EnableDebug(void);

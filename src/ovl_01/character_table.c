@@ -23,8 +23,6 @@
 #include "screen.h"
 #include "sound.h"
 
-void BuildCharacterGrid(s32 playerCount, Boolean skipsImportedFaces);
-
 /* The table of screen 15: its columns and rows, and how many of each fit on the
  * screen */
 #define TABLE_COLUMN_COUNT 14

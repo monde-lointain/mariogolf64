@@ -469,8 +469,6 @@ s32 GetSideSlope(void) {
   return sideSlope;
 }
 
-s32 MarkUsableClubs(s32 unused, s16* clubs, s8* isUsable);
-
 /* f_Shot.powerGaugeFrame's range, which GetPowerGaugeFrame maps 0 to 256 onto
  */
 #define MIN_POWER_GAUGE_FRAME 3

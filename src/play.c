@@ -58,6 +58,7 @@
 #include "text.h"
 #include "tournament.h"
 #include "transfer_pak.h"
+#include "turn.h"
 #include "work_area.h"
 
 /* f_GroundNoiseTexels is a square of random bytes this many on a side */
@@ -177,11 +178,8 @@ static s32 f_GroundTimingRow = 0;
 
 static u8 f_GroundNoiseTexels[GROUND_NOISE_SIZE * GROUND_NOISE_SIZE];
 
-s32 SaveOrContinueGameByMode(Boolean isContinuing);
 void FillWaveTexels(void);
 void SetUpPlayers(void);
-void WriteBallDistancesIfEnabled(void);
-void LoadBestShotReplay(PlayRecord* record);
 
 /*
  * Whether play's hole intro, flyover and results move on without A, as under
@@ -855,26 +853,13 @@ s32 UpdateRingShotSelect(s32 pressedButtons, u32 repeatedButtons);
 void LoadUnlockNotice(s32 unlock);
 s32 UpdateUnlockNotice(void);
 void FreeUnlockNotice(void);
-void StartScorecardTally(s32 layout);
 s32 UpdateReplaySaveMenu(ControllerState* controller);
 s32 UpdateRoundResults(ControllerState* controller);
-s32 UpdateShownScorecard(u16 buttons);
 void OpenRoundResults(s32 request);
-void UpdateTurns(void);
 s32 UpdateClubSlots(void);
 s32 ArePlanksOpen(void);
 void FreeClubSlots(void);
 void LeaveReplaySaveMenu(void);
-void FreeResultCharacters(void);
-void FreeScorecard(void);
-void TallyCoursePoints(void);
-void RememberPlayedHole(void);
-void EnterMenuAtCourseSelect(void);
-void EnterMenuAtTitle(void);
-void EnterMenuAtModeSelect(void);
-void EnterMenuAtBlankScreen(void);
-void EnterMenuAtRingShotRecords(void);
-void EnterMenuAtBestShots(void);
 
 /* The choices that the Training and Ring Shot menus return */
 enum HoleMenuChoice {

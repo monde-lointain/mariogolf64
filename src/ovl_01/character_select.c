@@ -586,8 +586,6 @@ s32 GetStickDiagonal(void) {
 /* R leaves a player without a controller only among this many players */
 #define MIN_PLAYER_COUNT_WITHOUT_CONTROLLER 2
 
-s32 GetClubTournamentCourse(void);
-
 /*
  * Runs the character select for the players from firstPlayerIndex up to
  * playerCount, one at a time: the D-Pad moves the current player's cursor, A

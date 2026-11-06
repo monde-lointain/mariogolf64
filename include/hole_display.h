@@ -3,6 +3,7 @@
 
 #include <ultra64.h>
 
+#include "camera.h"
 #include "language.h"
 #include "math_util.h"
 
@@ -147,5 +148,7 @@ Boolean IsHudAnimationDone(void);
 void DrawHudAnimation(void);
 void ResetHudScissor(void);
 void InitSkyColors(void);
+
+void DrawBackdrop(Gfx** displayListHead, CameraView* view, s32 cameraIndex);
 
 #endif

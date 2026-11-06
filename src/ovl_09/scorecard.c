@@ -380,8 +380,6 @@ void OpenScorecard(CourseIndex courseIndex, s32 holeIndex) {
   ForceStopRumble();
 }
 
-void FreeScorecard(void);
-
 /*
  * Closes the scorecard: frees the images that OpenScorecard loaded for the
  * game mode and clears its text slots. It stops any rumble even if the

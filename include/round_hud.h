@@ -187,4 +187,9 @@ void StartLandingReaction(s32 reaction);
 void StartShotEffect(s32 effect);
 void DrawHoleFlag(Boolean isBackDrawn);
 
+void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices);
+void DrawHoleIntroText(Gfx** displayListHead);
+void DrawRoundHud(CameraView* view);
+void DrawShotEffect(Gfx** displayListHead);
+
 #endif

@@ -125,4 +125,8 @@ void ResetCharacterSlots(void);
 s32 GetCharacterBufferSize(void);
 void SetCharacterBuffer(s32 slotIndex, u8* buffer);
 
+s32 GetAnimationFrameCount(u32 slotIndex, s32 id);
+void SetCharacterTranslucent(u32 slotIndex, s32 value);
+void WriteBallDistancesIfEnabled(void);
+
 #endif

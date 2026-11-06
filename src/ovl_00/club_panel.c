@@ -20,6 +20,7 @@
 #include "language.h"
 #include "math_util.h"
 #include "menu.h"
+#include "play.h"
 #include "round_hud.h"
 #include "save.h"
 #include "scene.h"
@@ -360,8 +361,6 @@ Boolean IsShotModeChangeDone(void) {
 /* The markers pulse at a twelfth of a turn per frame */
 #define MARKER_PULSE_STEP (M_PI / 6)
 #define MARKER_PULSE_LEVEL 100.0
-
-s32 GetGaugeFill(void);
 
 /* Draws the power gauge, its markers, and the bar for the lie's span */
 void DrawClubPanel(Gfx** displayListHead) {

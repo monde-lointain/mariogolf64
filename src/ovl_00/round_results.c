@@ -24,6 +24,7 @@
 #include "math_util.h"
 #include "menu.h"
 #include "password.h"
+#include "progress.h"
 #include "round_hud.h"
 #include "save.h"
 #include "scene.h"
@@ -248,8 +249,6 @@ extern const char f_TimeLabel[];
 /* Computer players earn no Course Points, which shows as a dash */
 extern const char f_NoPointsText[];
 
-s32 GetClubTournamentCourse(void);
-
 void FreeRoundResults(void);
 void LoadRoundResults(void);
 void DrawCourseResultsNotice(Gfx** displayListHead);
@@ -259,7 +258,6 @@ s32 UpdateTournamentResults(ControllerState* controller);
 s32 ShowScorePassword(ControllerState* controller);
 s32 UpdateCoursePointsResults(ControllerState* controller);
 s32 UpdateMatchResults(ControllerState* controller);
-void RecordComCharacterResult(s32 row, s32 column, Boolean isWin);
 
 /* The score password shows as two lines of equal length */
 #define SCORE_PASSWORD_LINE_LENGTH (SCORE_PASSWORD_LENGTH / 2)

@@ -328,8 +328,6 @@ s32 IsMusicOffChosen(void);
 s32 IsMonoChosen(void);
 s32 IsSimpleCameraChosen(void);
 #endif
-void BuildCharacterGrid(s32 playerCount, Boolean skipsImportedFaces);
-void ClearImportedCharacters(void);
 void OnMenuResourcesLoaded(void);
 void SetUpChosenGame(void);
 void UpdateMenuTitleScreen(void);
@@ -346,16 +344,12 @@ void LeaveMenuWithWipe(void);
 void LeaveMenuWithCourseWipe(void);
 void UpdateBirdieBadges(void);
 void UpdateBlankScreen(void);
-s32 GetClubTournamentCourse(void);
 /* Defined as returning s16, but its caller here uses the whole register */
 #ifdef AVOID_UB
 s16 GetChosenBestShot(void);
 #else
 s32 GetChosenBestShot(void);
 #endif
-void LoadRingShotRecord(RingShotRecord* record);
-void LoadBestShotReplay(PlayRecord* record);
-s32 SaveOrContinueGameByMode(Boolean isContinuing);
 s32 UpdateViewerCharacter(s32 unusedSetting, s32 playerNumber);
 void DrawNarrowMenuBoard(Gfx** displayListHead);
 void DrawLargeMenuBanner(Gfx** displayListHead);

@@ -3,6 +3,7 @@
 
 #include <ultra64.h>
 
+#include "camera.h"
 #include "language.h"
 #include "math_util.h"
 #include "round_stats.h"
@@ -153,5 +154,10 @@ void OpenScorecard(CourseIndex courseIndex, s32 holeIndex);
 void SetScorecardLayout(s32 layout);
 void UpdateScorecard(u16 buttons, u16 pressedButtons);
 void DrawScorecard(Gfx** displayListHead);
+
+void FreeResultCharacters(void);
+void FreeScorecard(void);
+void StartScorecardTally(s32 layout);
+s32 UpdateShownScorecard(u16 buttons);
 
 #endif

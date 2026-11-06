@@ -10,14 +10,13 @@
 #include "game_flags.h"
 #include "language.h"
 #include "math_util.h"
+#include "menu.h"
 #include "save.h"
 #include "scene.h"
 
 #define DEBUG_ROUND_HOLE_COUNT 2
 /* Above any score, so the first player compared sets the best one */
 #define NO_BEST_SCORE 0x40000000
-
-void SortIndicesDescending(s32* values, s32* order, s32 count);
 
 s32 GetFirstHoleIndex(void) {
   return (g_GameState.holeSelection & HOLE_SELECTION_BACK_NINE) ? HOLES_PER_NINE

@@ -240,7 +240,6 @@ typedef enum LogoLetterState {
 /* f_OpeningShotDashCount's starting value, and the most it can be */
 #define OPENING_SHOT_MAX_DASH_COUNT 200
 
-void AssignCharacterBuffers(void);
 void DrawOpeningShotPath(CameraMatrices* matrices);
 void DrawNameLogos(Gfx** displayListHead);
 void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices);
@@ -248,7 +247,6 @@ void DrawOpeningImpactLines(Gfx** displayListHead);
 void DrawLakitu(Gfx** displayListHead);
 void DrawOpeningBurst(Gfx** displayListHead);
 void DrawOpeningShotBall(Gfx** displayListHead);
-void DrawOpeningLogo(Gfx** displayListHead, Boolean isDrawn);
 void DrawOpeningSparks(Gfx** displayListHead);
 
 /* The script plays most of its sounds on the next of these channels in turn,
@@ -1512,7 +1510,6 @@ s32 UpdateOpeningCharacters(void) {
 /* The first channel after the rotating ones */
 #define CLOSING_SOUND_CHANNEL ROTATING_SOUND_CHANNEL_COUNT
 
-void LaunchDrop(CoursePoint point);
 s32 StepOpeningBallSimulation(BallSimulation* simulation);
 void AnimateNameLogos(void);
 void LoadNameLogo(s32 logoIndex, s32 slot);

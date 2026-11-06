@@ -4,6 +4,7 @@
 #include <ultra64.h>
 
 #include "ball_simulation.h"
+#include "camera.h"
 
 /*
  * The kinds of notable shot that earn Course Points. Most are named after
@@ -34,5 +35,10 @@ extern BallSimulation g_TurnBallSimulation;
 void CountNotableShot(s32 playerIndex, s32 shotKind);
 void StartFreeLook(void);
 void PlaceBallAtRest(s32 playerIndex, BallSimulation* simulation);
+
+void DrawShotPreview(CameraMatrices* matrices);
+void PlaceAimCamera(void);
+s32 TallyCoursePoints(void);
+void UpdateTurns(void);
 
 #endif

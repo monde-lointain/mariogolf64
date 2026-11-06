@@ -29,6 +29,7 @@
 #include "language.h"
 #include "main.h"
 #include "math_util.h"
+#include "menu.h"
 #include "overlay_manager.h"
 #include "play.h"
 #include "round_hud.h"
@@ -280,9 +281,6 @@ static s8 f_CellSearchOffsets[GROUND_TILE_POINT_SPAN] = {0, 1, 3, 2};
 
 static s32 f_SceneMenuSelection;
 
-void ResetMenuChoices(void);
-void LoadToolCodeMap(void);
-void ToggleCodeMapCleanup(void);
 void UpdateCellEditor(void);
 void UpdateGroundPointEditor(void);
 void UpdateHolePointEditor(void);
@@ -321,10 +319,7 @@ void SetGridVertex(s32 column, s32 row, Vtx_t* point);
 #define FLAG_PANEL_TEXT_SIZE 0x10
 
 void BuildTileMidpoints(Vtx* midpoints, s32 tileColumn, s32 tileRow);
-void BuildAllTileMidpoints(void);
 s32 GetTerrainHeight(s32 x, s32 z);
-
-s32 GetTerrainCode(s32 column, s32 row);
 
 /* The byte in the terrain codes that holds a code in a block of cells */
 static inline s32 GetPackedCodeOffset(s32 column, s32 row, s32 block) {

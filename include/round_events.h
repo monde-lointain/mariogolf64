@@ -3,6 +3,7 @@
 
 #include <ultra64.h>
 
+#include "camera.h"
 #include "language.h"
 #include "save.h"
 #include "text.h"
@@ -87,5 +88,10 @@ void LoadContactImages(Player* player);
 Boolean IsContactEffectShown(void);
 void StartContactEffect(s32 effect);
 void ShowFlipMessage(MessageId messageId);
+
+void DrawBanner(Gfx** displayListHead);
+void DrawContactEffect(Gfx** displayListHead, CameraMatrices* matrices);
+void DrawFlipMessage(Gfx** displayListHead);
+void DrawWindFlyGuy(Gfx** displayListHead);
 
 #endif

@@ -467,13 +467,8 @@ static Radians f_DebugFramingPitch = 0.0f;
 /* Read by no routine */
 static s32 f_UnusedWordAfterFramingAngles UNUSED = 0;
 
-void SetCharacterTranslucent(u32 slotIndex, s32 value);
-void PlaceAimCamera(void);
 void PlaceShotCamera(void);
 void TurnAim(s32 turnsAltHeading);
-s32 GetAimCameraGround(s32 x, s32 z);
-void SetRingShotCleared(s8 isCleared);
-s32 GetRecordedScoreKind(s32 strokes);
 Boolean HasNoRingsLeft(Player* player);
 void RecordRingShotClear(s32 playerIndex);
 
@@ -1730,8 +1725,6 @@ void StartTurnTimer(void) {
 Boolean HasPlanTime(s32 timeBudget UNUSED) {
   return FALSE;
 }
-
-s32 MarkUsableClubs(s32 unused, s16* clubs, s8* isUsable);
 
 /*
  * Picks the club and the shot mode that the shot starts with. On a green, it is

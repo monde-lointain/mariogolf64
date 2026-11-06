@@ -159,8 +159,6 @@ typedef struct GridCell {
   /* 0x2 */ s16 row;
 } GridCell; /* size = 0x4 */
 
-s32 GetClubTournamentCourse(void);
-void ResetMenuChoices(void);
 s32 ReadSaveCopies(SaveData* save, u8 isInSram);
 s32 WriteSaveCopies(SaveData* save, u8 isInSram);
 void SyncSaveOptions(SaveData* save, Boolean isWrite, s32 readResult);

@@ -1847,8 +1847,6 @@ void AimCameraYaw(void) {
   }
 }
 
-void PlaceAimCamera(void);
-
 /* PlaceFlightCamera's distances are in course units unless they say otherwise;
  * y points down */
 #define CUP_FRAMING_PITCH (-0.14f)

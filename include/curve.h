@@ -26,4 +26,7 @@ void DrawNothing(Gfx** displayListHead);
 s32 StepAlongPath(
     PathPoint* points, s32 pointCount, s32 pace, PathPoint* position);
 
+f32 InterpolateHermite(f32 values[], f32 position);
+void ResetPath(void);
+
 #endif

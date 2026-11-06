@@ -3,6 +3,8 @@
 
 #include <ultra64.h>
 
+#include "camera.h"
+
 /*
  * Billboards are flat sprites that always face the camera, such as the
  * trees around a course. Each one shows one of the billboard textures.
@@ -42,5 +44,8 @@ void SortBillboardsByDepth(void);
 s32 GetBillboardSolidity(s32 textureIndex, f32 across, f32 down);
 
 extern Billboard g_Billboards[BILLBOARD_COUNT];
+
+void DrawBillboards(CameraMatrices* cameraMatrices, s32 cameraIndex);
+void DrawFadingBillboards(CameraMatrices* cameraMatrices, s32 cameraIndex);
 
 #endif
