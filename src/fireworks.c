@@ -18,17 +18,75 @@
 /* How many of them LoadFireworks sets up */
 #define FIREWORK_COUNT 1
 
-/* f_FireworkState's value while the fireworks' memory is allocated */
+/*
+ * f_FireworkState's values: loaded while the fireworks' memory is allocated,
+ * and freed after FreeFireworks, below which HaveFireworksStayedFreed counts
+ * its calls down
+ */
 #define FIREWORKS_LOADED 1
+#define FIREWORKS_FREED 0
+/* The calls of HaveFireworksStayedFreed that return FALSE before TRUE */
+#define STAYED_FREED_CALL_COUNT 2
 
 /* Frames of a firework's timer at which it plays a sound and launches */
 #define FIREWORK_SOUND_FRAME 160
 #define FIREWORK_LAUNCH_FRAME 220
 /* The fireworks' sounds play on this channel */
 #define FIREWORK_SOUND_CHANNEL 8
+/* Frames from StartFireworks to the first launch */
+#define FIREWORK_START_DELAY 70
+/* Frames between loaded fireworks' sounds; the first sounds at once */
+#define FIREWORK_SOUND_STAGGER 50
+/* The value written to a firework's ignoredLaunchValue */
+#define IGNORED_LAUNCH_VALUE 0xFF
 
 /* Below this life, a particle's life runs out five times as fast */
 #define PARTICLE_FADE_LIFE 128
+#define PARTICLE_FADE_EXTRA_LIFE_LOSS 4
+
+/* A shape's cells with this value become particles */
+#define SHAPE_PARTICLE_CELL 0
+
+/* A particle's velocity keeps this much each frame, then gravity pulls it */
+#define PARTICLE_DRAG 0.94f
+#define PARTICLE_GRAVITY 0.0005f
+/* A particle that has stopped points up, as if moving at this speed */
+#define STOPPED_PARTICLE_DIRECTION_Y 0.1f
+#define STOPPED_PARTICLE_SPEED 0.5f
+
+/*
+ * After a launch, each particle's trail stretches from nothing to four times
+ * its speed over TRAIL_STRETCH_FRAMES, shrinks back at the same rate, and from
+ * TRAIL_REGROW_FRAME grows again from TRAIL_MIN_LENGTH, whatever the speed.
+ */
+#define TRAIL_STRETCH_FRAMES 8
+#define TRAIL_STRETCH_PER_FRAME 0.5f
+#define TRAIL_MAX_STRETCH 4.0f
+#define TRAIL_REGROW_FRAME 64
+#define TRAIL_REGROWTH_PER_FRAME 0.04f
+#define TRAIL_MIN_LENGTH 1.0f
+
+/* Each particle's triangle's scale and its depth in the orthographic view */
+#define PARTICLE_SCALE 0.1f
+#define PARTICLE_DEPTH -100.0f
+
+/*
+ * The fireworks' color cycles through hues: each channel swings around the
+ * middle of its range, green and blue a fixed phase, in radians, ahead of red
+ */
+#define HUE_STEP_DEGREES 3
+#define COLOR_MIDDLE 127
+#define COLOR_SWING 64.0f
+#define GREEN_HUE_PHASE 2.0f
+#define BLUE_HUE_PHASE 4.0f
+
+/*
+ * From FADE_START_FRAME after a launch, the fireworks fade, flickering
+ * brighter on odd frames
+ */
+#define FADE_START_FRAME 40
+#define FADE_ALPHA_PER_FRAME 8
+#define FLICKER_ALPHA 0x18
 
 /* Launch positions and velocities are in the fireworks' local coordinates. */
 #define FIREWORK_LAUNCH_WIDTH 32
@@ -91,9 +149,9 @@ static u8 f_UnusedBufferAfterFireworkHue[0xC04] UNUSED = {0};
 FILE_STATIC FireworkShape* f_FireworkShape;
 FILE_STATIC Firework f_Fireworks[FIREWORK_CAPACITY];
 
-/* Makes the first firework launch in 70 frames */
+/* Makes the first firework launch in FIREWORK_START_DELAY frames */
 void StartFireworks(void) {
-  f_Fireworks[0].timer = 150;
+  f_Fireworks[0].timer = FIREWORK_LAUNCH_FRAME - FIREWORK_START_DELAY;
   f_Fireworks[0].isActive = TRUE;
 }
 
@@ -123,8 +181,9 @@ void LoadFireworks(s32 courseRecordIndex) {
   for (index = 0; index != FIREWORK_COUNT; index++) {
     f_Fireworks[index].ignoredLoadValue = 0;
     f_Fireworks[index].isActive = FALSE;
-    f_Fireworks[index].timer = 159 - (index * 50);
-    f_Fireworks[index].ignoredLaunchValue = 0xFF;
+    f_Fireworks[index].timer =
+        (FIREWORK_SOUND_FRAME - 1) - (index * FIREWORK_SOUND_STAGGER);
+    f_Fireworks[index].ignoredLaunchValue = IGNORED_LAUNCH_VALUE;
     f_Fireworks[index].particleCount = 0;
     f_Fireworks[index].shape = f_FireworkShape;
   }
@@ -137,7 +196,7 @@ void LoadFireworks(s32 courseRecordIndex) {
     for (row = 0; row != height; row++) {
       for (column = 0; column != width; column++) {
         cell = &firework->shape->cells[column + (row * width)];
-        if (*cell == 0) {
+        if (*cell == SHAPE_PARTICLE_CELL) {
           firework->particleCount++;
         }
       }
@@ -163,7 +222,7 @@ void FreeFireworks(void) {
     }
   }
 
-  f_FireworkState = 0;
+  f_FireworkState = FIREWORKS_FREED;
 }
 
 /*
@@ -171,12 +230,12 @@ void FreeFireworks(void) {
  * third call after FreeFireworks on. Nothing calls it.
  */
 s32 HaveFireworksStayedFreed(void) {
-  if (f_FireworkState > 0) {
+  if (f_FireworkState > FIREWORKS_FREED) {
     return FALSE;
   }
 
   f_FireworkState--;
-  return f_FireworkState < -2;
+  return f_FireworkState < FIREWORKS_FREED - STAYED_FREED_CALL_COUNT;
 }
 
 /*
@@ -204,7 +263,7 @@ void LaunchFirework(Firework* firework, s32 fireworkIndex UNUSED) {
   random = RandomLaunchHeightJitter();
   width = firework->shape->width;
   height = firework->shape->height;
-  firework->ignoredLaunchValue = 0xFF;
+  firework->ignoredLaunchValue = IGNORED_LAUNCH_VALUE;
   originY = random + FIREWORK_LAUNCH_HEIGHT;
   for (row = 0; row != height; row++) {
     for (column = 0; column != width; column++) {
@@ -214,7 +273,8 @@ void LaunchFirework(Firework* firework, s32 fireworkIndex UNUSED) {
        * index is added as a whole; adding the column and the row's offset
        * one at a time, 10 words differ
        */
-      if (*(firework->shape->cells + (column + (row * width))) == 0) {
+      if (*(firework->shape->cells + (column + (row * width))) ==
+          SHAPE_PARTICLE_CELL) {
         firework->particles[particleIndex].x = originX;
         firework->particles[particleIndex].y = originY;
         firework->particles[particleIndex].velocityX =
@@ -269,7 +329,7 @@ void UpdateAndDrawFireworks(Gfx** displayListHead) {
   s32 alpha;
 
   gfx = *displayListHead;
-  if (f_FireworkState <= 0) {
+  if (f_FireworkState <= FIREWORKS_FREED) {
     return;
   }
 
@@ -296,7 +356,7 @@ void UpdateAndDrawFireworks(Gfx** displayListHead) {
   transform[2][0] = 0.0f;
   transform[2][1] = 0.0f;
   transform[2][3] = 0.0f;
-  transform[2][2] = 0.1f;
+  transform[2][2] = PARTICLE_SCALE;
   transform[3][3] = 1.0f;
   for (index = 0; index != f_FireworkCount; index++) {
     if (f_Fireworks[index].isActive == TRUE) {
@@ -305,10 +365,11 @@ void UpdateAndDrawFireworks(Gfx** displayListHead) {
         if (particle->life > 0) {
           particle->x += particle->velocityX;
           particle->y += particle->velocityY;
-          particle->velocityX *= 0.94f;
-          particle->velocityY = (particle->velocityY * 0.94f) - 0.0005f;
+          particle->velocityX *= PARTICLE_DRAG;
+          particle->velocityY =
+              (particle->velocityY * PARTICLE_DRAG) - PARTICLE_GRAVITY;
           if (--particle->life < PARTICLE_FADE_LIFE) {
-            particle->life -= 4;
+            particle->life -= PARTICLE_FADE_EXTRA_LIFE_LOSS;
           }
 
           length = sqrtf((particle->velocityX * particle->velocityX) +
@@ -319,31 +380,34 @@ void UpdateAndDrawFireworks(Gfx** displayListHead) {
             directionY = particle->velocityY * inverseSpeed;
           } else {
             directionX = 0.0f;
-            directionY = 0.1f;
-            length = 0.5f;
+            directionY = STOPPED_PARTICLE_DIRECTION_Y;
+            length = STOPPED_PARTICLE_SPEED;
           }
 
           trailTimer = f_Fireworks[index].timer;
-          if (trailTimer < 8) {
-            length *= 0.5f * trailTimer;
-          } else if (trailTimer > 64) {
-            length = ((trailTimer - 64) * 0.04f) + 1.0f;
+          if (trailTimer < TRAIL_STRETCH_FRAMES) {
+            length *= TRAIL_STRETCH_PER_FRAME * trailTimer;
+          } else if (trailTimer > TRAIL_REGROW_FRAME) {
+            length =
+                ((trailTimer - TRAIL_REGROW_FRAME) * TRAIL_REGROWTH_PER_FRAME) +
+                TRAIL_MIN_LENGTH;
           } else {
-            length *= 4.0f - ((trailTimer - 8) * 0.5f);
+            length *= TRAIL_MAX_STRETCH -
+                ((trailTimer - TRAIL_STRETCH_FRAMES) * TRAIL_STRETCH_PER_FRAME);
           }
 
-          if (length < 1.0f) {
-            length = 1.0f;
+          if (length < TRAIL_MIN_LENGTH) {
+            length = TRAIL_MIN_LENGTH;
           }
 
-          transform[0][0] = -directionY * 0.1f;
-          transform[0][1] = directionX * 0.1f;
-          tailScale = length * 0.1f;
+          transform[0][0] = -directionY * PARTICLE_SCALE;
+          transform[0][1] = directionX * PARTICLE_SCALE;
+          tailScale = length * PARTICLE_SCALE;
           transform[1][0] = -directionX * tailScale;
           transform[1][1] = -directionY * tailScale;
           transform[3][0] = particle->x;
           transform[3][1] = particle->y;
-          transform[3][2] = -100.0f;
+          transform[3][2] = PARTICLE_DEPTH;
           ConvertMatrixToFixed(
               transform, &particle->matrices[g_MatrixBufferIndex]);
         }
@@ -371,31 +435,33 @@ void UpdateAndDrawFireworks(Gfx** displayListHead) {
   gDPPipeSync(gfx++);
   gSPMatrix(gfx++, PhysicalAddress(&g_ScreenOrthoMatrix),
       G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
-  f_FireworkHue += DegreesToRadians(3);
+  f_FireworkHue += DegreesToRadians(HUE_STEP_DEGREES);
 
   /* index is f_FireworkCount here, so every firework shares one color */
-  red = (s32)(sinf(f_FireworkHue + index) * 64.0f) + 127;
-  green = (s32)(sinf(f_FireworkHue + 2.0f + index) * 64.0f) + 127;
-  blue = (s32)(sinf(f_FireworkHue + 4.0f + index) * 64.0f) + 127;
+  red = (s32)(sinf(f_FireworkHue + index) * COLOR_SWING) + COLOR_MIDDLE;
+  green = (s32)(sinf(f_FireworkHue + GREEN_HUE_PHASE + index) * COLOR_SWING) +
+      COLOR_MIDDLE;
+  blue = (s32)(sinf(f_FireworkHue + BLUE_HUE_PHASE + index) * COLOR_SWING) +
+      COLOR_MIDDLE;
   for (index = 0; index != f_FireworkCount; index++) {
     if (f_Fireworks[index].isActive == TRUE) {
       fadeTimer = f_Fireworks[index].timer;
-      /* Fades out from frame 40, flickering on odd frames */
-      if (fadeTimer < 40) {
-        alpha = 0xFF;
+      if (fadeTimer < FADE_START_FRAME) {
+        alpha = OPAQUE_ALPHA;
       } else {
-        alpha = 0xFF - ((fadeTimer - 40) * 8);
+        alpha = OPAQUE_ALPHA -
+            ((fadeTimer - FADE_START_FRAME) * FADE_ALPHA_PER_FRAME);
         if (fadeTimer & 1) {
-          alpha += 0x18;
+          alpha += FLICKER_ALPHA;
         }
       }
 
-      if (alpha < 0) {
-        alpha = 0;
+      if (alpha < TRANSPARENT_ALPHA) {
+        alpha = TRANSPARENT_ALPHA;
       }
 
-      if (alpha > 0xFF) {
-        alpha = 0xFF;
+      if (alpha > OPAQUE_ALPHA) {
+        alpha = OPAQUE_ALPHA;
       }
 
       gDPSetPrimColor(gfx++, 0, 0, red, green, blue, alpha);
