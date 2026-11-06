@@ -1876,15 +1876,15 @@ void ComputeRoundStatistics(void) {
   s32 sum;
   CourseIndex courseIndex;
   Boolean hasPlayedCourse;
-  f32 sum8;
-  f32 sum18;
-  f32 sum1C;
-  f32 sum20;
-  f32 sum24;
+  f32 strokeSum;
+  f32 measuredDriveSum;
+  f32 puttSum;
+  f32 parOrBetterSum;
+  f32 parOnSum;
   f32 sandSaveSum;
   f32 sandSaveChanceSum;
-  f32 sum10;
-  s32 sum14;
+  f32 driveYardSum;
+  s32 driveCountSum;
   f32 zero;
   f32 emptyCount; /* Only ever zero */
   f32 holeCount;
@@ -1995,28 +1995,29 @@ void ComputeRoundStatistics(void) {
     }
   }
 
-  sum14 = 0;
+  driveCountSum = 0;
   sandSaveSum = 0.0f;
   sandSaveChanceSum = 0.0f;
-  sum20 = 0.0f;
-  sum18 = 0.0f;
-  sum24 = 0.0f;
-  sum1C = 0.0f;
-  sum10 = 0.0f;
-  sum8 = 0.0f;
+  parOrBetterSum = 0.0f;
+  measuredDriveSum = 0.0f;
+  parOnSum = 0.0f;
+  puttSum = 0.0f;
+  driveYardSum = 0.0f;
+  strokeSum = 0.0f;
   emptyCount = 0.0f;
   for (courseIndex = 0; courseIndex != COURSE_COUNT; courseIndex++) {
     entry = &saved[courseIndex];
     if (emptyCount < g_CourseStatFigures[courseIndex].roundCount) {
-      sum18 += entry->measuredDriveTotal;
-      sum1C += entry->puttTotal;
-      sum20 += entry->parOrBetterCount;
-      sum24 += entry->parOnCount;
-      sum8 += entry->strokeTotal;
+      measuredDriveSum += entry->measuredDriveTotal;
+      puttSum += entry->puttTotal;
+      parOrBetterSum += entry->parOrBetterCount;
+      parOnSum += entry->parOnCount;
+      strokeSum += entry->strokeTotal;
       sandSaveSum += entry->sandSaveCount;
       sandSaveChanceSum += entry->sandSaveCount + entry->missedSandSaveCount;
-      sum14 += entry->averagedDriveCount;
-      sum10 += entry->averageDrive * YARDS_PER_UNIT * entry->averagedDriveCount;
+      driveCountSum += entry->averagedDriveCount;
+      driveYardSum +=
+          entry->averageDrive * YARDS_PER_UNIT * entry->averagedDriveCount;
     }
   }
 
@@ -2029,17 +2030,18 @@ void ComputeRoundStatistics(void) {
     }
 
     holeCount = g_CourseStatFigures[COURSE_COUNT].roundCount * HOLES_PER_ROUND;
-    g_CourseStatFigures[COURSE_COUNT].averagePutts = sum1C / holeCount;
+    g_CourseStatFigures[COURSE_COUNT].averagePutts = puttSum / holeCount;
     g_CourseStatFigures[COURSE_COUNT].fairwayPercent =
-        (sum18 / holeCount) * 100.0f;
+        (measuredDriveSum / holeCount) * 100.0f;
     g_CourseStatFigures[COURSE_COUNT].parSavePercent =
-        (sum20 / holeCount) * 100.0f;
+        (parOrBetterSum / holeCount) * 100.0f;
     g_CourseStatFigures[COURSE_COUNT].parOnPercent =
-        (sum24 / holeCount) * 100.0f;
+        (parOnSum / holeCount) * 100.0f;
     g_CourseStatFigures[COURSE_COUNT].averageScore =
-        sum8 / g_CourseStatFigures[COURSE_COUNT].roundCount;
-    if (sum10 > 0.0f && sum14 > 0) {
-      g_CourseStatFigures[COURSE_COUNT].averageDrive = sum10 / sum14;
+        strokeSum / g_CourseStatFigures[COURSE_COUNT].roundCount;
+    if (driveYardSum > 0.0f && driveCountSum > 0) {
+      g_CourseStatFigures[COURSE_COUNT].averageDrive =
+          driveYardSum / driveCountSum;
     } else {
       g_CourseStatFigures[COURSE_COUNT].averageDrive = 0.0f;
     }
