@@ -4804,6 +4804,12 @@ void LoadOpeningLogo(void) {
  * speed into a new local before negating it. Multiplying the speed by -1.0f
  * or by -1, or subtracting it from 0.0f, gives the draft's 38 words (6 in
  * shape).
+ *
+ * The counts above were measured before the change below. Each pipe sync and
+ * the RDP state command after it now goes through AppendSyncedRdpState,
+ * which declares the command's pointer first, as DrawHoleTriangles does. Of
+ * the fifteen pairs, only the color dither's changes anything alone, and it
+ * or all fifteen take the draft from 38 words differing to 30, 6 in shape.
  */
 #ifdef NON_MATCHING
 void DrawOpeningLogo(Gfx** displayListHead, Boolean isDrawn) {
@@ -4973,16 +4979,14 @@ void DrawOpeningLogo(Gfx** displayListHead, Boolean isDrawn) {
     guScale(&f_LogoClubScalings[g_DrawBufferIndex], f_LogoClubScale[0],
         f_LogoClubScale[1], 1.0f);
     gDPPipeSync(gfx++);
-    gDPPipeSync(gfx++);
-    gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+    AppendSyncedRdpState(gfx, gDPSetCycleType, G_CYC_1CYCLE);
     gSPLoadGeometryMode(gfx++, 0);
     gSPSetGeometryMode(gfx++, G_ZBUFFER | G_SHADE | G_SHADING_SMOOTH);
     gDPPipeSync(gfx++);
     gDPSetDepthSource(gfx++, G_ZS_PRIM);
     gDPSetCombineLERP(gfx++, 0, 0, 0, TEXEL0, PRIMITIVE, 0, TEXEL0, 0, 0, 0, 0,
         TEXEL0, PRIMITIVE, 0, TEXEL0, 0);
-    gDPPipeSync(gfx++);
-    gDPSetAlphaCompare(gfx++, G_AC_THRESHOLD);
+    AppendSyncedRdpState(gfx, gDPSetAlphaCompare, G_AC_THRESHOLD);
     if (f_LogoFadeStage == LOGO_FADE_LOGO_OUT) {
       gDPSetBlendColor(gfx++, 0xFF, 0xFF, 0xFF, LOGO_FADING_ALPHA_THRESHOLD);
       gDPPipeSync(gfx++);
@@ -4990,24 +4994,18 @@ void DrawOpeningLogo(Gfx** displayListHead, Boolean isDrawn) {
           gfx++, G_RM_AA_ZB_XLU_SURF | Z_UPD, G_RM_AA_ZB_XLU_SURF2 | Z_UPD);
     } else {
       gDPSetBlendColor(gfx++, 0xFF, 0xFF, 0xFF, LOGO_ALPHA_THRESHOLD);
-      gDPPipeSync(gfx++);
-      gDPSetRenderMode(gfx++, G_RM_AA_ZB_TEX_EDGE, G_RM_AA_ZB_TEX_EDGE2);
+      AppendSyncedRdpState(
+          gfx, gDPSetRenderMode, G_RM_AA_ZB_TEX_EDGE, G_RM_AA_ZB_TEX_EDGE2);
     }
 
-    gDPPipeSync(gfx++);
-    gDPSetAlphaDither(gfx++, G_AD_DISABLE);
-    gDPPipeSync(gfx++);
-    gDPSetColorDither(gfx++, G_CD_MAGICSQ);
+    AppendSyncedRdpState(gfx, gDPSetAlphaDither, G_AD_DISABLE);
+    AppendSyncedRdpState(gfx, gDPSetColorDither, G_CD_MAGICSQ);
     gSPTexture(gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0,
         G_TX_RENDERTILE, G_ON);
-    gDPPipeSync(gfx++);
-    gDPSetTexturePersp(gfx++, G_TP_PERSP);
-    gDPPipeSync(gfx++);
-    gDPSetTextureFilter(gfx++, G_TF_BILERP);
-    gDPPipeSync(gfx++);
-    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-    gDPPipeSync(gfx++);
-    gDPSetTextureLOD(gfx++, G_TL_TILE);
+    AppendSyncedRdpState(gfx, gDPSetTexturePersp, G_TP_PERSP);
+    AppendSyncedRdpState(gfx, gDPSetTextureFilter, G_TF_BILERP);
+    AppendSyncedRdpState(gfx, gDPSetTextureLUT, G_TT_RGBA16);
+    AppendSyncedRdpState(gfx, gDPSetTextureLOD, G_TL_TILE);
     gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, f_LogoLettersAlpha);
     gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_LogoLetterImages)));
     gDPPipeSync(gfx++);
@@ -5118,19 +5116,15 @@ void DrawOpeningLogo(Gfx** displayListHead, Boolean isDrawn) {
 
     if (isDrawn == TRUE) {
       gDPSetPrimDepth(gfx++, LOGO_SHINE_DEPTH, 0);
-      gDPPipeSync(gfx++);
-      gDPSetRenderMode(gfx++, G_RM_ZB_XLU_SURF, G_RM_ZB_XLU_SURF2);
+      AppendSyncedRdpState(
+          gfx, gDPSetRenderMode, G_RM_ZB_XLU_SURF, G_RM_ZB_XLU_SURF2);
       gDPSetCombineLERP(gfx++, 0, 0, 0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0, 0,
           0, 0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0);
-      gDPPipeSync(gfx++);
-      gDPSetTextureLUT(gfx++, G_TT_NONE);
-      gDPPipeSync(gfx++);
-      gDPSetAlphaDither(gfx++, G_AD_PATTERN);
-      gDPPipeSync(gfx++);
-      gDPSetAlphaCompare(gfx++, G_AC_NONE);
+      AppendSyncedRdpState(gfx, gDPSetTextureLUT, G_TT_NONE);
+      AppendSyncedRdpState(gfx, gDPSetAlphaDither, G_AD_PATTERN);
+      AppendSyncedRdpState(gfx, gDPSetAlphaCompare, G_AC_NONE);
       gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, OPAQUE_ALPHA);
-      gDPPipeSync(gfx++);
-      gDPSetTexturePersp(gfx++, G_TP_NONE);
+      AppendSyncedRdpState(gfx, gDPSetTexturePersp, G_TP_NONE);
       gDPLoadTextureBlock(gfx++, TextureAddress(ImageBody(f_LogoShineImage)),
           G_IM_FMT_I, G_IM_SIZ_8b, LOGO_SHINE_IMAGE_SIZE, LOGO_SHINE_IMAGE_SIZE,
           0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
@@ -5155,8 +5149,7 @@ void DrawOpeningLogo(Gfx** displayListHead, Boolean isDrawn) {
     }
   }
 
-  gDPPipeSync(gfx++);
-  gDPSetDepthSource(gfx++, G_ZS_PIXEL);
+  AppendSyncedRdpState(gfx, gDPSetDepthSource, G_ZS_PIXEL);
   *displayListHead = gfx;
 
   for (i = 0; i < LOGO_LETTER_COUNT; i++) {
