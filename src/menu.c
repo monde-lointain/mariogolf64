@@ -438,6 +438,11 @@ static s16 f_RecordCharacters[CHARACTER_COUNT] = {CHARACTER_CHOICE_PLUM,
     CHARACTER_CHOICE_DONKEY_KONG, CHARACTER_CHOICE_BOWSER,
     CHARACTER_CHOICE_METAL_MARIO, CHARACTER_CHOICE_KID, CHARACTER_CHOICE_SHERRY,
     CHARACTER_CHOICE_AZALEA, CHARACTER_CHOICE_JOE};
+/*
+ * The grid's first columns, whose characters a game of two or more players
+ * offers without their being unlocked
+ */
+#define MULTIPLAYER_GRID_COLUMN_COUNT 5
 static s16 f_StartingCharacterGrid
     [CHARACTER_GRID_ROW_COUNT][CHARACTER_GRID_COLUMN_COUNT] = {
         {CHARACTER_CHOICE_PLUM, CHARACTER_CHOICE_PEACH, EMPTY_GRID_SLOT,
@@ -654,7 +659,7 @@ void LoadMenuResources(void) {
   PlaySong(SONG_TITLE, 0);
   SetFramebufferCount(TRIPLE_BUFFERING);
   SetScreenEffect(SCREEN_EFFECT_NONE, 0);
-  g_MenuMemory.statsCourse = 6;
+  g_MenuMemory.statsCourse = COURSE_COUNT;
   InitSram();
   TransferSaveData(save, FALSE);
 }
@@ -1448,7 +1453,7 @@ void BuildCharacterGrid(s32 playerCount, Boolean skipsImportedFaces) {
 
   if (playerCount >= 2) {
     for (row = 0; row != CHARACTER_CHOICE_ROW_COUNT; row++) {
-      for (column = 0; column != 5; column++) {
+      for (column = 0; column != MULTIPLAYER_GRID_COLUMN_COUNT; column++) {
         g_CharacterGrid[row][column] = f_EveryCharacterGrid[row][column];
       }
     }
@@ -2128,7 +2133,7 @@ void ResetMenuChoices(void) {
 
   g_MenuMemory.holesChoice = HOLES_CHOICE_ALL;
   g_GameState.holeSelection = HOLE_SELECTION_ALL;
-  g_MenuMemory.statsCourse = 6;
+  g_MenuMemory.statsCourse = COURSE_COUNT;
   g_IsRingShotWipeOpening = FALSE;
   f_UnreadMenuEntryByte = 0;
 }
