@@ -3956,8 +3956,10 @@ void DrawHoleEditorGround(CameraMatrices* matrices UNUSED, s32 terrainStyle) {
   s32 pass;
   s32 tileIndex;
   /*
-   * The fine tiles' own pass counter, to match: using pass gives 2480 words
-   * differing (512 in shape) against the draft's 2128 (488)
+   * The fine tiles' own pass counter, to match: using pass gives 2332 words
+   * differing (484 in shape) against the draft's 2037 (491), and the register
+   * oracle's closest result rises from 2001 words, forcing 112 pseudos, to
+   * the unforced 2332
    */
   s32 finePass;
   s32 middleSlot;
