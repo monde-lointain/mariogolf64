@@ -1365,7 +1365,7 @@ void UpdateTransmitMenu(void) {
             transfer->screen = TRANSMIT_SCREEN_RUMBLE_PAK_PROMPT;
             SetNoticeState(NOTICE_OPENING, INSERT_RUMBLE_PAK_MESSAGE);
           } else {
-            transfer->screen = TRANSMIT_SCREEN_LEAVING;
+            transfer->screen = TRANSMIT_SCREEN_LEAVING_FOR_TITLE;
             StartWipe(WIPE_CLOSING);
           }
         }
@@ -1376,7 +1376,7 @@ void UpdateTransmitMenu(void) {
             transfer->screen = TRANSMIT_SCREEN_RUMBLE_PAK_PROMPT;
             SetNoticeState(NOTICE_OPENING, INSERT_RUMBLE_PAK_MESSAGE);
           } else {
-            transfer->screen = TRANSMIT_SCREEN_LEAVING;
+            transfer->screen = TRANSMIT_SCREEN_LEAVING_FOR_TITLE;
             StartWipe(WIPE_CLOSING);
           }
         }
@@ -1417,9 +1417,9 @@ void UpdateTransmitMenu(void) {
         case NOTICE_HIDDEN:
           transfer->pressingHandPosition = PRESSING_HAND_HIDDEN;
           if (!transfer->isCanceled) {
-            transfer->screen = TRANSMIT_SCREEN_LEAVING;
+            transfer->screen = TRANSMIT_SCREEN_LEAVING_FOR_TITLE;
           } else {
-            transfer->screen = TRANSMIT_SCREEN_UNK6;
+            transfer->screen = TRANSMIT_SCREEN_LEAVING_FOR_MENU;
           }
 
           StartWipe(WIPE_CLOSING);
@@ -1438,7 +1438,7 @@ void UpdateTransmitMenu(void) {
       }
 
       break;
-    case TRANSMIT_SCREEN_LEAVING:
+    case TRANSMIT_SCREEN_LEAVING_FOR_TITLE:
       if (GetWipeProgress() == WIPE_CLOSED_PROGRESS) {
         StartWipe(WIPE_OPENING);
         g_Scene = SCENE_SWAPPING_MODULES;
@@ -1448,7 +1448,7 @@ void UpdateTransmitMenu(void) {
       }
 
       break;
-    case TRANSMIT_SCREEN_UNK6:
+    case TRANSMIT_SCREEN_LEAVING_FOR_MENU:
       if (GetWipeProgress() == WIPE_CLOSED_PROGRESS) {
         StartWipe(WIPE_OPENING);
         EnterMenuAtTitle();
@@ -2272,8 +2272,8 @@ void DrawPressingHand(Gfx** displayListHead);
 /* Whether DrawTransmitMenu shows the transfer mode's options on a screen */
 #define AreOptionsShown(screen) \
   ((screen) == TRANSMIT_SCREEN_OPTIONS || \
-      (screen) == TRANSMIT_SCREEN_LEAVING || \
-      (screen) == TRANSMIT_SCREEN_UNK6 || \
+      (screen) == TRANSMIT_SCREEN_LEAVING_FOR_TITLE || \
+      (screen) == TRANSMIT_SCREEN_LEAVING_FOR_MENU || \
       (screen) == TRANSMIT_SCREEN_RUMBLE_PAK_PROMPT)
 
 /* Draws the backdrop, the title, the current screen and the options, notice

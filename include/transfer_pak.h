@@ -90,8 +90,14 @@ enum TransmitScreen {
   TRANSMIT_SCREEN_BRING_CHARACTERS,
   TRANSMIT_SCREEN_SEND_STATUS,
   TRANSMIT_SCREEN_SEND_EXPERIENCE,
-  TRANSMIT_SCREEN_LEAVING,
-  TRANSMIT_SCREEN_UNK6,
+  /*
+   * Leaving closes a wipe, then swaps in the title screen, or the main menu
+   * at its title when B left the options with a Rumble Pak missing; B with
+   * every Rumble Pak in, like the options' main menu row, leaves for the title
+   * screen.
+   */
+  TRANSMIT_SCREEN_LEAVING_FOR_TITLE,
+  TRANSMIT_SCREEN_LEAVING_FOR_MENU,
   TRANSMIT_SCREEN_RUMBLE_PAK_PROMPT
 };
 
