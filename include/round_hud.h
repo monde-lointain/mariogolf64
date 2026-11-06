@@ -11,7 +11,7 @@
 enum ShotEffect {
   SHOT_EFFECT_NONE = -1,
   SHOT_EFFECT_LONG_SHOT,
-  SHOT_EFFECT_UNK1
+  SHOT_EFFECT_MAX_POWER /* Started by a maximum power impact */
 };
 
 /* The landing reactions that StartLandingReaction starts */

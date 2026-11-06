@@ -4110,7 +4110,7 @@ void UpdateTurns(void) {
           } else {
             nextState = PLAYER_STATE_SETTING_IMPACT;
             if (f_ShotLaunch.power == MAX_LAUNCH_POWER) {
-              StartShotEffect(1);
+              StartShotEffect(SHOT_EFFECT_MAX_POWER);
               sound = SOUND_IMPACT_ON_MARK;
               PlaySound(sound, g_NextSoundChannel, IMPACT_SOUND_VOLUME);
             } else {

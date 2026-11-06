@@ -2495,7 +2495,7 @@ void StartContactEffect(s32 effect) {
       f_ContactTextureT = 0x2A;
     } else if (f_ContactStyle == CONTACT_STYLE_WARIO ||
         f_ContactStyle == CONTACT_STYLE_GAME_BOY_BALL_7) {
-      StartShotEffect(0);
+      StartShotEffect(SHOT_EFFECT_LONG_SHOT);
       f_ContactVertices[0].v.ob[AXIS_X] = -120;
       f_ContactVertices[1].v.ob[AXIS_X] = 120;
       f_ContactTextureS = 0x5FF;
