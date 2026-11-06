@@ -62,7 +62,6 @@ typedef struct CharacterModel {
   /* 0x04 */ u32 romEnd;
   /* 0x08 */ u32 segmentAddresses[CHARACTER_MODEL_SEGMENT_ADDRESS_COUNT];
   /* 0x44 */ s16 shadowScale; /* Copied to CharacterSlot.shadowScale */
-  /* 0x46 */ s16 unk46;
   /* The model loads this file first, then patches it with romStart's when the
    * two differ */
   /* 0x48 */ u32 baseRomStart;
