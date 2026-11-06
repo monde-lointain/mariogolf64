@@ -128,7 +128,10 @@ typedef struct SurfaceInfo {
   /* 0x0E */ s16 bounciness;
   /* 0x10 */ s32 lieImageAsset; /* The HUD's picture of the lie */
   /* 0x14 */ s32 sinkDepth; /* A SINK_DEPTH_* value */
-  /* 0x18 */ s32 unk18;
+  /* A group of like surfaces, which nothing reads: 0 fairway, 1 rough or bare
+   * ground, 2 bunker, 3 water, 4 cart way, 5 deep rough or waste area, 6
+   * green, 7 out of bounds, 8 tee and 9 rock */
+  /* 0x18 */ s32 ignoredSurfaceGroup;
 } SurfaceInfo; /* size = 0x1C */
 
 SurfaceInfo* GetSurfaceInfo(Surface surface);
