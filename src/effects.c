@@ -489,13 +489,13 @@ void SpawnTear(u32 slotIndex, s32 pointId, Radians heading) {
         effect->velocity[AXIS_Y] = SPARKLE_FALL_SPEED;
         effect->velocity[AXIS_X] = cosf(heading) *
             ((guRandom() % TEAR_SPEED_RANGE) + (TEAR_SPEED_RANGE * 0.4)) /
-            1024.0;
+            WORLD_TO_COURSE_SCALE;
         effect->velocity[AXIS_Y] = ((-TEAR_SPEED_RANGE * 0.7) -
                                        (guRandom() % TEAR_SPEED_RANGE * 0.3f)) /
-            1024.0;
+            WORLD_TO_COURSE_SCALE;
         effect->velocity[AXIS_Z] = sinf(heading) *
             ((guRandom() % TEAR_SPEED_RANGE) + (TEAR_SPEED_RANGE * 0.4)) /
-            1024.0;
+            WORLD_TO_COURSE_SCALE;
         effect->position[AXIS_X] += effect->velocity[AXIS_X];
         effect->position[AXIS_Y] += effect->velocity[AXIS_Y];
         effect->position[AXIS_Z] += effect->velocity[AXIS_Z];
