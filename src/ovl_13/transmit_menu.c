@@ -391,7 +391,7 @@ typedef struct StatusData {
 #define RECORD_SUM_OFFSET 6
 /* A Game Boy character's data */
 #define CHARACTER_DATA_SIZE 0x800
-#define DATA_UNKB_OFFSET 0xB
+#define DATA_SAVE_KEY_OFFSET 0xB
 #define DATA_CHARACTER_OFFSET 0x10
 #define DATA_IS_LEFTY_OFFSET 0x11
 #define DATA_LEVEL_OFFSET 0x12
@@ -1483,8 +1483,8 @@ void DecodeCartridgeCharacter(
 
   character->name[(SAVE_NAME_SIZE - 1)] = '\0';
   character->saveName[(SAVE_NAME_SIZE - 1)] = '\0';
-  for (index = 0; index != SAVE_UNKB_SIZE; index++) {
-    character->saveUnkB[index] = characterData[DATA_UNKB_OFFSET + index];
+  for (index = 0; index != SAVE_KEY_SIZE; index++) {
+    character->saveKey[index] = characterData[DATA_SAVE_KEY_OFFSET + index];
   }
 
   character->character = characterData[DATA_CHARACTER_OFFSET];
@@ -1560,7 +1560,7 @@ void SkipCartridgeSave(u8* unusedData UNUSED, s32 unusedCartridgeIndex UNUSED,
     s32 unusedCompanyCode UNUSED) {}
 
 /* Whether a Game Boy character came from the save that the character data
- * belongs to, by its save name and unkB bytes */
+ * belongs to, by its save name and key */
 Boolean IsCharacterFromSave(GameBoyCharacter* character, u8* characterData) {
   s32 index;
 
@@ -1576,8 +1576,9 @@ Boolean IsCharacterFromSave(GameBoyCharacter* character, u8* characterData) {
   }
 
   osSyncPrintf("PHASE c\n");
-  for (index = 0; index != SAVE_UNKB_SIZE; index++) {
-    if (character->saveUnkB[index] != characterData[DATA_UNKB_OFFSET + index]) {
+  for (index = 0; index != SAVE_KEY_SIZE; index++) {
+    if (character->saveKey[index] !=
+        characterData[DATA_SAVE_KEY_OFFSET + index]) {
       osSyncPrintf("PHASE d\n");
       return FALSE;
     }

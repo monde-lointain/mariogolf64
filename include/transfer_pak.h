@@ -16,7 +16,8 @@
 
 /* The name at the start of a Game Boy save, with its terminator */
 #define SAVE_NAME_SIZE 11
-#define SAVE_UNKB_SIZE 5
+/* The bytes after it, which IsCharacterFromSave also compares */
+#define SAVE_KEY_SIZE 5
 
 /* The golfers of the Game Boy Color version, whose faces the transmit menu
  * shows */
@@ -65,8 +66,9 @@ typedef struct GameBoyCharacter {
   /* 0x24 */ s32 unk24;
   /* 0x28 */ s32 experience;
   /* 0x2C */ s16 driveDistance; /* Shown beside "Drive:" */
-  /* 0x2E */ u8
-      saveUnkB[SAVE_UNKB_SIZE]; /* Copied from the save's bytes at 0xB */
+  /* The save's bytes from 0xB, which with saveName tell whether a save's
+   * character was brought over */
+  /* 0x2E */ u8 saveKey[SAVE_KEY_SIZE];
   /* 0x33 */ u8 unk33;
   /* 0x34 */ s32 companyCode; /* Its cartridge header's, or -1 */
   /* 0x38 */ s32 saveIndex; /* Its save on the cartridge, or -1 */
