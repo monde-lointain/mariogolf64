@@ -115,7 +115,8 @@ enum EffectKind {
   EFFECT_KIND_DIVOT_MARK, /* Drawn with f_DivotImage's last frame */
   EFFECT_KIND_SPARKLE,
   EFFECT_KIND_RIPPLE = 0xC,
-  EFFECT_KIND_UNKE = 0xE,
+  /* A dark speckled puff, drawn with f_SpeckleImage */
+  EFFECT_KIND_SMOKE_PUFF = 0xE,
   EFFECT_KIND_SPREADING_CIRCLE = 0x13, /* Drawn with f_ArcImage */
   EFFECT_KIND_RISING_CLUMP = 0x10, /* Drawn with f_ClumpImage */
   EFFECT_KIND_TEAR = 0x14
@@ -680,8 +681,11 @@ void SpawnSparkle(CoursePoint position) {
   }
 }
 
-/* Unreferenced */
-void SpawnUnkEEffect(u32 slotIndex, s32 pointId) {
+/*
+ * Unreferenced. Spawns a smoke puff at a character's model point, rising
+ * slowly as it grows and fades
+ */
+void SpawnCharacterSmokePuff(u32 slotIndex, s32 pointId) {
   /* They pad the frame to match; without any one of them 16 words differ */
   Vec3 translation UNUSED;
   Vec3 rotation UNUSED;
@@ -708,7 +712,7 @@ void SpawnUnkEEffect(u32 slotIndex, s32 pointId) {
         effect->alphaStep = -2.0f;
         effect->scale = 2.0f;
         effect->scaleStep = 0.02f;
-        effect->kind = EFFECT_KIND_UNKE;
+        effect->kind = EFFECT_KIND_SMOKE_PUFF;
         effect->frame = 0;
         return;
       }
@@ -1292,8 +1296,8 @@ void SpawnShotDebris(
 #define LIGHT_EFFECT_VELOCITY_KEPT 0.97f
 #define HIGH_DEBRIS_VELOCITY_KEPT 0.8f
 #define OTHER_EFFECT_VELOCITY_KEPT 0.95f
-/* Kind 0xE effects feel this share of the wind */
-#define UNKE_WIND_SHARE 0.1f
+/* Smoke puffs feel this share of the wind */
+#define SMOKE_WIND_SHARE 0.1f
 /* Effects past the ground height fade this many times as fast */
 #define PAST_GROUND_FADE_SCALE 4.0f
 /* Effects spin about x and z by SPIN_PER_SPEED for each unit their fall speed
@@ -1390,10 +1394,10 @@ void UpdateEffects(void) {
         effect->velocity[AXIS_X] *= LIGHT_EFFECT_VELOCITY_KEPT;
         effect->velocity[AXIS_Z] *= LIGHT_EFFECT_VELOCITY_KEPT;
         effect->velocity[AXIS_Y] *= LIGHT_EFFECT_VELOCITY_KEPT;
-      } else if (effect->kind == EFFECT_KIND_UNKE) {
-        effect->velocity[AXIS_X] += windPushX * UNKE_WIND_SHARE;
+      } else if (effect->kind == EFFECT_KIND_SMOKE_PUFF) {
+        effect->velocity[AXIS_X] += windPushX * SMOKE_WIND_SHARE;
         effect->velocity[AXIS_Y] += 0.0f; /* The original has it */
-        effect->velocity[AXIS_Z] += windPushZ * UNKE_WIND_SHARE;
+        effect->velocity[AXIS_Z] += windPushZ * SMOKE_WIND_SHARE;
         effect->velocity[AXIS_X] *= LIGHT_EFFECT_VELOCITY_KEPT;
         effect->velocity[AXIS_Y] *= LIGHT_EFFECT_VELOCITY_KEPT;
         effect->velocity[AXIS_Z] *= LIGHT_EFFECT_VELOCITY_KEPT;
@@ -1454,7 +1458,7 @@ void UpdateEffects(void) {
           effect->kind = EFFECT_KIND_NONE;
         }
       } else if (effect->kind == EFFECT_KIND_RISING_CLUMP ||
-          effect->kind == EFFECT_KIND_UNKE) {
+          effect->kind == EFFECT_KIND_SMOKE_PUFF) {
         effect->frame = (effect->frame + 1) % CYCLING_FRAME_COUNT;
       } else {
         if (effect->velocity[AXIS_Y] < OTHER_EFFECT_FAST_RISE_SPEED) {
@@ -1539,7 +1543,7 @@ void UpdateEffects(void) {
 #define BILLBOARD_ALPHA_THRESHOLD 0x1F
 #define SPARKLE_ALPHA_THRESHOLD 0x3F
 #define RISING_CLUMP_TINT GPACK_RGBA5551(32, 248, 32, 0)
-#define UNKE_TINT GPACK_RGBA5551(0, 0, 0, 0)
+#define SMOKE_TINT GPACK_RGBA5551(0, 0, 0, 0)
 #define SPARKLE_TINT GPACK_RGBA5551(255, 255, 0, 0)
 
 void DrawBillboardEffect(Gfx** displayListHead, Effect* effect, u16 color);
@@ -1689,7 +1693,7 @@ void DrawEffects(CameraMatrices* matrices, Gfx** displayListHead) {
     }
   }
 
-  color = UNKE_TINT;
+  color = SMOKE_TINT;
   gDPPipeSync(gfx++);
   gDPSetAlphaCompare(gfx++, G_AC_THRESHOLD);
   gDPSetBlendColor(gfx++, 0xFF, 0xFF, 0xFF, BILLBOARD_ALPHA_THRESHOLD);
@@ -1697,7 +1701,7 @@ void DrawEffects(CameraMatrices* matrices, Gfx** displayListHead) {
       TEXEL0, 0, PRIMITIVE, 0, PRIMITIVE, 0, TEXEL0, 0);
   for (index = 0; index != EFFECT_COUNT; index++) {
     effect = &f_Effects[index];
-    if (effect->kind == EFFECT_KIND_UNKE) {
+    if (effect->kind == EFFECT_KIND_SMOKE_PUFF) {
       DrawBillboardEffect(&gfx, effect, color);
     }
   }
@@ -1845,7 +1849,7 @@ void DrawBillboardEffect(Gfx** displayListHead, Effect* effect, u16 color) {
             TextureAddress(ImageTexelsAt(f_DropletImage, frameOffset)),
             G_IM_FMT_CI, DROPLET_IMAGE_SIZE, DROPLET_IMAGE_SIZE, 0, G_TX_MIRROR,
             G_TX_WRAP, 4, 0, 2, 2);
-      } else if (effect->kind == EFFECT_KIND_UNKE) {
+      } else if (effect->kind == EFFECT_KIND_SMOKE_PUFF) {
         gDPLoadTextureBlock_4b(gfx++, TextureAddress(ImageBody(f_SpeckleImage)),
             G_IM_FMT_I, SPECKLE_IMAGE_SIZE, SPECKLE_IMAGE_SIZE, 0, G_TX_WRAP,
             G_TX_WRAP, 6, 6, 1, 1);
