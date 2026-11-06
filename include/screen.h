@@ -50,6 +50,11 @@
 #define RGBA16_CHANNEL_MASK 0x1F
 #define RGBA16_CHANNEL_WIDEN_SHIFT 3
 
+/* An RGBA16 pixel from its 5-bit channels and its 1-bit alpha */
+#define Rgba16(red, green, blue, alpha) \
+  (((red) << RGBA16_RED_SHIFT) | ((green) << RGBA16_GREEN_SHIFT) | \
+      ((blue) << RGBA16_BLUE_SHIFT) | (alpha))
+
 /* SetScreenEffect's effects */
 enum ScreenEffect {
   SCREEN_EFFECT_SPIN, /* Spins the saved frame away */
