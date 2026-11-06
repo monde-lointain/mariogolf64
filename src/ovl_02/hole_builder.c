@@ -3828,7 +3828,12 @@ void GetGroundLightColors(GroundLightColor* light, GroundLightColor* shade) {
  * Re-measured on the current draft, writing the fade's kept weight into its
  * three uses in place of keptWeight gives 95 words, 23 in shape, but the
  * oracle's closest result is then those 95 words with nothing forced,
- * against 88 forcing 6, so keptWeight stays. 132 words differ, 14 in shape.
+ * against 88 forcing 6, so keptWeight stays.
+ *
+ * Writing the kept weight into its uses also gives the original's 0x500-byte
+ * frame, as setting the mask local did only through the local's own slot. As
+ * the oracle still gets closer with keptWeight, it stays. 132 words differ,
+ * 14 in shape.
  */
 #ifdef NON_MATCHING
 void ShadeGroundTiles(void) {

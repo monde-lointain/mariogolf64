@@ -2115,6 +2115,17 @@ void DrawHoleEditorGround(CameraMatrices* matrices, s32 terrainStyle);
  * shape, its three odd slots 1194 (238), and the middle and bottom odd slots
  * 1212 words, 254 in shape; in DrawHoleEditorGround, which also uses it,
  * they give 2490 to 2499 words. 897 words differ, 233 in shape.
+ *
+ * Of the rewrites a search scored, the bottom odd slot's local is the only
+ * one that both cuts the words differing and gives the original's 0x260-byte
+ * frame, with the saved registers at the original's offsets; the differing
+ * lines that address the stack fall from 370 to 301. Reading the neighboring
+ * tile's detail in the group's maximum once, into a local declared for the
+ * row, gives that frame too, but 911 words (253 in shape); declared in the
+ * loop that finds the maximum, as an s32 it gives 897 words (233) and as an
+ * s8 899 (235), with the frame still 8 bytes short. So the original may keep
+ * one more value on the stack, though which one isn't shown. 897 words
+ * differ, 233 in shape.
  */
 void DrawGround(CameraMatrices* matrices, s32 terrainStyle) {
   u8 snapsEdge[2][TILE_VERTEX_SEGMENT_COUNT]; /* For the current and the last
