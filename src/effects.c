@@ -347,7 +347,7 @@ void PrepareShotEffects(BallSimulation* simulation) {
         break;
       case SURFACE_KIND_ROUGH:
       case SURFACE_KIND_ROUGH_POOR_LIE:
-      case SURFACE_KIND_ROUGH_UNK5:
+      case SURFACE_KIND_ROUGH_UNUSED_LIE:
       case SURFACE_KIND_DEEP_ROUGH:
         f_DebrisKind = DEBRIS_KIND_ROUGH;
         OpenEncodedAsset(CLUMP_IMAGE_ASSET, &asset);

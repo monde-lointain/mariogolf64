@@ -1204,7 +1204,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
           break;
         case SURFACE_KIND_ROUGH:
         case SURFACE_KIND_ROUGH_POOR_LIE:
-        case SURFACE_KIND_ROUGH_UNK5:
+        case SURFACE_KIND_ROUGH_UNUSED_LIE:
         case SURFACE_KIND_DEEP_ROUGH:
           if (simulation->purpose == LAUNCH_PURPOSE_STROKE) {
             PlaySound(SOUND_LAND_ROUGH, g_NextSoundChannel, SOUND_FULL_SCALE);
@@ -1440,7 +1440,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
           break;
         case SURFACE_KIND_ROUGH:
         case SURFACE_KIND_ROUGH_POOR_LIE:
-        case SURFACE_KIND_ROUGH_UNK5:
+        case SURFACE_KIND_ROUGH_UNUSED_LIE:
         case SURFACE_KIND_OUT_OF_BOUNDS:
         case SURFACE_KIND_CART_WAY:
         case SURFACE_KIND_TEE_GROUND:
@@ -1556,7 +1556,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
           break;
         case SURFACE_KIND_ROUGH:
         case SURFACE_KIND_ROUGH_POOR_LIE:
-        case SURFACE_KIND_ROUGH_UNK5:
+        case SURFACE_KIND_ROUGH_UNUSED_LIE:
           friction *= ((fabsf(impactSpeed) * OTHER_LANDING_FRICTION_PER_SPEED) +
               LANDING_FRICTION_BASE);
           spin = ROUGH_LANDING_SPIN;

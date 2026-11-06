@@ -55,7 +55,7 @@ enum SurfaceKind {
   SURFACE_KIND_ROUGH,
   SURFACE_KIND_ROUGH_POOR_LIE, /* Deeper in the grass */
   /* No surface has it, but the code treats it as rough */
-  SURFACE_KIND_ROUGH_UNK5,
+  SURFACE_KIND_ROUGH_UNUSED_LIE,
   SURFACE_KIND_BUNKER,
   SURFACE_KIND_BUNKER_FAIR_LIE, /* Half buried */
   SURFACE_KIND_BUNKER_POOR_LIE, /* Mostly buried */
@@ -103,7 +103,7 @@ typedef s32 SurfaceKind;
       (kind) == SURFACE_KIND_FAIRWAY_POOR_LIE)
 /*
  * Whether a surface kind is a bunker with a bunker's ratings, at any of its
- * lies. BUNKER_UNK9 is left out, having the default ratings.
+ * lies. BUNKER_UNUSED_LIE is left out, having the default ratings.
  */
 #define IsBunkerKind(kind) \
   ((kind) == SURFACE_KIND_BUNKER || (kind) == SURFACE_KIND_BUNKER_FAIR_LIE || \
