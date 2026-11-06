@@ -78,8 +78,8 @@ enum Sound {
   /* The loop played while the stick sets the impact point */
   SOUND_IMPACT_POINT = 0x26,
   /*
-   * SOUND_FALLING_WHISTLE and SOUND_UNK77 play in bursts as the opening's
-   * Lakitu flies; SOUND_UNK77 also with the opening's Yoshi or Donkey Kong
+   * SOUND_FALLING_WHISTLE and SOUND_BOING play in bursts as the opening's
+   * Lakitu flies; SOUND_BOING also with the opening's Yoshi or Donkey Kong
    */
   SOUND_FALLING_WHISTLE,
   SOUND_WIND_FLY_GUY, /* Also played in the opening */
@@ -131,7 +131,7 @@ enum Sound {
    */
   SOUND_GO,
   SOUND_CAPTION_MEET, /* Also played when the save data is erased */
-  SOUND_UNK77 = 0x4D,
+  SOUND_BOING = 0x4D,
   /*
    * A tone that falls about two and a half octaves as it fades. The opening
    * plays it in steps across the pan

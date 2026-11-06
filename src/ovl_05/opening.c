@@ -2457,7 +2457,7 @@ void UpdateOpening(void) {
               AdvanceOpeningSoundChannel();
               break;
             case 0x43:
-              PlaySound(SOUND_UNK77, f_OpeningSoundChannel, 0x28);
+              PlaySound(SOUND_BOING, f_OpeningSoundChannel, 0x28);
               AdvanceOpeningSoundChannel();
               break;
             case 0x2F:
@@ -2492,11 +2492,11 @@ void UpdateOpening(void) {
               AdvanceOpeningSoundChannel();
               break;
             case 0x3B:
-              PlaySound(SOUND_UNK77, f_OpeningSoundChannel, 0x51);
+              PlaySound(SOUND_BOING, f_OpeningSoundChannel, 0x51);
               AdvanceOpeningSoundChannel();
               break;
             case 0x22:
-              PlaySound(SOUND_UNK77, f_OpeningSoundChannel, 0x5B);
+              PlaySound(SOUND_BOING, f_OpeningSoundChannel, 0x5B);
               AdvanceOpeningSoundChannel();
               break;
             case 0x1D:
@@ -2832,7 +2832,7 @@ void UpdateOpening(void) {
           case 0x3C5:
           case 0x3C6:
           case 0x3C8:
-            PlaySound(SOUND_UNK77, f_OpeningSoundChannel, 0x60);
+            PlaySound(SOUND_BOING, f_OpeningSoundChannel, 0x60);
             AdvanceOpeningSoundChannel();
             break;
         }
