@@ -1733,6 +1733,9 @@ typedef struct GridScreenPoint {
  * the draft from 302 words differing (48 in shape) to 300 (44), and the
  * oracle's closest from 214 words to 204, forcing 26 pseudos both. 300 words
  * differ, 44 in shape.
+ *
+ * A focused permuter run's best indexes the tint's slope with acrossRowStart
+ * + drawnColumn rather than acrossPoint, which gives 330 words, 40 in shape.
  */
 void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
   f32 points[GREEN_GRID_POINT_COUNT][3];
