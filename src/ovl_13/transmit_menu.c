@@ -403,8 +403,8 @@ typedef struct StatusData {
 #define DATA_SHOT_CURVE_OFFSET 0x1D
 #define DATA_LIE_RATING_LEVEL_OFFSET 0x1E
 #define DATA_MISHIT_RESISTANCE_OFFSET 0x1F
-/* Three little-endian bytes */
-#define DATA_UNK24_OFFSET 0x26
+/* Three little-endian bytes, copied to GameBoyCharacter.ignoredValue */
+#define DATA_IGNORED_VALUE_OFFSET 0x26
 #define DATA_BALL_TYPE_OFFSET 0x3E
 /* GAME_BOY_CLUB_COUNT clubs' stats, each two little-endian halfwords and
  * two bytes */
@@ -1523,10 +1523,10 @@ void DecodeCartridgeCharacter(
   }
 
   osSyncPrintf("balltype %d\n", character->ballType);
-  character->unk24 =
-      (characterData[DATA_UNK24_OFFSET + 2] << (BITS_PER_BYTE * 2)) |
-      (characterData[DATA_UNK24_OFFSET + 1] << BITS_PER_BYTE) |
-      characterData[DATA_UNK24_OFFSET];
+  character->ignoredValue =
+      (characterData[DATA_IGNORED_VALUE_OFFSET + 2] << (BITS_PER_BYTE * 2)) |
+      (characterData[DATA_IGNORED_VALUE_OFFSET + 1] << BITS_PER_BYTE) |
+      characterData[DATA_IGNORED_VALUE_OFFSET];
   character->experience = 0;
   character->driveDistance = characterData[DATA_DRIVE_DISTANCE_OFFSET] |
       (characterData[DATA_DRIVE_DISTANCE_OFFSET + 1] << BITS_PER_BYTE);

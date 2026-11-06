@@ -63,7 +63,9 @@ typedef struct GameBoyCharacter {
   /* 0x1E */ u8 lieRatingLevel; /* As ClubSetStats' */
   /* 0x1F */ u8 mishitResistance; /* As ClubSetStats' */
   /* 0x20 */ s8 ballType; /* A GameBoyBallType */
-  /* 0x24 */ s32 unk24;
+  /* Three bytes of the Game Boy save that nothing reads; their meaning is
+   * unknown */
+  /* 0x24 */ s32 ignoredValue;
   /* 0x28 */ s32 experience;
   /* 0x2C */ s16 driveDistance; /* Shown beside "Drive:" */
   /* The save's bytes from 0xB, which with saveName tell whether a save's
