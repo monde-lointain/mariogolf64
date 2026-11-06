@@ -421,7 +421,14 @@ typedef s32 (*BillboardHitFinder)(s32 startX, s32 startY, s32 startZ, s32 endX,
  * Writing windX and windZ as scale times the wind's velocity, rather than
  * the velocity times scale, gives 235 words, 109 in shape, but the register
  * oracle's closest result rises from 118 words, forcing 31 pseudos, to 124,
- * forcing 29. 237 words differ, 109 in shape.
+ * forcing 29.
+ *
+ * The water's stop test compares the ball's height with the water's depth
+ * below it, as StepBallSimulation's matched test does, where the draft put
+ * the depth first; a permuter run pointed to it. That takes the draft from
+ * 237 words (109 in shape) to 217 (107), and the register oracle from 132
+ * words forcing 38 pseudos to 130 forcing 37. 217 words differ, 107 in
+ * shape.
  */
 #ifdef NON_MATCHING
 s32 StepOpeningBallSimulation(BallSimulation* simulation) {
@@ -899,10 +906,10 @@ s32 StepOpeningBallSimulation(BallSimulation* simulation) {
       simulation->velocity[AXIS_Z] = simulation->velocity[AXIS_Z] * WATER_DRAG;
       simulation->velocity[AXIS_Y] =
           (simulation->velocity[AXIS_Y] + (s32)GRAVITY) * WATER_DRAG;
-      if (GetGroundOrWaterHeight(
-              simulation->position[AXIS_X], simulation->position[AXIS_Z]) +
-                  OPENING_WATER_STOP_DEPTH <
-              simulation->position[AXIS_Y] ||
+      if (simulation->position[AXIS_Y] >
+              GetGroundOrWaterHeight(
+                  simulation->position[AXIS_X], simulation->position[AXIS_Z]) +
+                  OPENING_WATER_STOP_DEPTH ||
           simulation->position[AXIS_Y] >=
               GetGroundHeight(
                   simulation->position[AXIS_X], simulation->position[AXIS_Z])) {
