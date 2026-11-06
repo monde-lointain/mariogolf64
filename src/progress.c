@@ -138,7 +138,7 @@ void ReportBirdieBadgeCount(void) {
  * third or better, and saves */
 void RecordTournamentPlace(void) {
   CourseStats* stats;
-  s32* placeFlag;
+  s32* placeEntry;
   Boolean hasPlace;
   s32 place;
   s32 index;
@@ -160,25 +160,25 @@ void RecordTournamentPlace(void) {
 
     switch (place) {
       case 1:
-        placeFlag = &stats->hasPlace[FIRST_PLACE_INDEX];
+        placeEntry = &stats->hasPlace[FIRST_PLACE_INDEX];
         hasPlace = TRUE;
         break;
       case 2:
-        placeFlag = &stats->hasPlace[SECOND_PLACE_INDEX];
+        placeEntry = &stats->hasPlace[SECOND_PLACE_INDEX];
         hasPlace = TRUE;
         break;
       case 3:
-        placeFlag = &stats->hasPlace[THIRD_PLACE_INDEX];
+        placeEntry = &stats->hasPlace[THIRD_PLACE_INDEX];
         hasPlace = TRUE;
         break;
       default:
         /* Not written, since hasPlace stays FALSE */
-        placeFlag = &stats->hasPlace[THIRD_PLACE_INDEX];
+        placeEntry = &stats->hasPlace[THIRD_PLACE_INDEX];
         break;
     }
 
     if (hasPlace) {
-      *placeFlag = TRUE;
+      *placeEntry = TRUE;
     }
 
     TransferSaveData(GetSaveData(), TRUE);

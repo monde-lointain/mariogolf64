@@ -481,7 +481,7 @@ static s16 f_CharacterSlots[] = {
     0, 1, 10, 3, 4, 2, 6, 7, 8, 9, 5, 11, 12, 13, 0};
 s32 g_MenuCourseCount = 6;
 /* Cleared by ResetMenuChoices and each menu entry routine, but read by none */
-static s8 f_UnreadMenuEntryFlag = 0;
+static s8 f_UnreadMenuEntryByte = 0;
 u8 g_AreBetPagesBlocked = 0;
 /* Read by no routine */
 static s32 f_UnusedWordsAfterBetPagesFlag[2] UNUSED = {0};
@@ -2110,7 +2110,7 @@ void ResetMenuChoices(void) {
   g_GameState.holeSelection = HOLE_SELECTION_ALL;
   g_MenuMemory.statsCourse = 6;
   g_IsRingShotWipeOpening = FALSE;
-  f_UnreadMenuEntryFlag = 0;
+  f_UnreadMenuEntryByte = 0;
 }
 
 /*
@@ -2121,7 +2121,7 @@ void ResetMenuEntryFlags(void) {
   g_IsChosenHoleLoadStarted = FALSE;
   g_IsRingShotWipeOpening = TRUE;
   g_IsMenuWipeOpening = FALSE;
-  f_UnreadMenuEntryFlag = 0;
+  f_UnreadMenuEntryByte = 0;
 }
 
 /*
@@ -2175,7 +2175,7 @@ void EnterMenuAtCourseSelect(void) {
   g_IsRingShotWipeOpening = TRUE;
   g_IsMenuWipeOpening = TRUE;
   g_IsChosenHoleLoadStarted = FALSE;
-  f_UnreadMenuEntryFlag = 0;
+  f_UnreadMenuEntryByte = 0;
   g_MenuScreen = MENU_SCREEN_COURSE_SELECT;
 }
 
@@ -2186,7 +2186,7 @@ void EnterMenuAtTitle(void) {
   g_IsRingShotWipeOpening = TRUE;
   g_IsMenuWipeOpening = TRUE;
   g_IsChosenHoleLoadStarted = FALSE;
-  f_UnreadMenuEntryFlag = 0;
+  f_UnreadMenuEntryByte = 0;
   g_ImportedCharacters[0].isChosen = 0;
   g_ImportedCharacters[1].isChosen = 0;
   g_ImportedCharacters[2].isChosen = 0;
@@ -2203,7 +2203,7 @@ void EnterMenuAtRingShotExit(void) {
   g_IsRingShotWipeOpening = TRUE;
   g_IsMenuWipeOpening = TRUE;
   g_IsChosenHoleLoadStarted = FALSE;
-  f_UnreadMenuEntryFlag = 0;
+  f_UnreadMenuEntryByte = 0;
   g_MenuScreen = MENU_SCREEN_RING_SHOT_EXIT;
 }
 
@@ -2212,7 +2212,7 @@ void EnterMenuAtModeSelect(void) {
   g_IsRingShotWipeOpening = TRUE;
   g_IsMenuWipeOpening = TRUE;
   g_IsChosenHoleLoadStarted = FALSE;
-  f_UnreadMenuEntryFlag = 0;
+  f_UnreadMenuEntryByte = 0;
   g_MenuScreen = MENU_SCREEN_MODE_SELECT;
 }
 
@@ -2221,7 +2221,7 @@ void EnterMenuAtBlankScreen(void) {
   g_IsRingShotWipeOpening = TRUE;
   g_IsMenuWipeOpening = TRUE;
   g_IsChosenHoleLoadStarted = FALSE;
-  f_UnreadMenuEntryFlag = 0;
+  f_UnreadMenuEntryByte = 0;
   g_MenuScreen = MENU_SCREEN_BLANK;
 }
 
@@ -2230,7 +2230,7 @@ void EnterMenuAtRingShotRecords(void) {
   g_IsRingShotWipeOpening = TRUE;
   g_IsMenuWipeOpening = TRUE;
   g_IsChosenHoleLoadStarted = FALSE;
-  f_UnreadMenuEntryFlag = 0;
+  f_UnreadMenuEntryByte = 0;
   g_MenuScreen = MENU_SCREEN_RING_SHOT_RECORDS;
 }
 
@@ -2238,7 +2238,7 @@ void EnterMenuAtRingShotRecords(void) {
 void EnterMenuAtBestShots(void) {
   g_IsChosenHoleLoadStarted = FALSE;
   g_IsRingShotWipeOpening = TRUE;
-  f_UnreadMenuEntryFlag = 0;
+  f_UnreadMenuEntryByte = 0;
   g_IsMenuWipeOpening = TRUE;
   g_GameState.replayKind = REPLAY_KIND_NONE;
   ClearGameFlag(GAME_FLAG_LOADED_PLAY);
