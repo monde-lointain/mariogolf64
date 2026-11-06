@@ -736,7 +736,7 @@ void ShrinkMiniGolfHole(void) {
 void PrepareHoleScene(void) {
   s32 shadeVariant;
 
-  g_UnusedGroundQueryFlag = 1;
+  g_UnreadGroundQueryMarker = 1;
   switch (g_HoleSetup.conditions.sceneColorIndex) {
     case SCENE_COLOR_INDEX_ROUND_START:
       shadeVariant = 2;
@@ -756,7 +756,7 @@ void PrepareHoleScene(void) {
     ShadeGround(shadeVariant);
   }
 
-  g_UnusedGroundQueryFlag = 0;
+  g_UnreadGroundQueryMarker = 0;
   ToggleGroundTileBorders();
   SetCharacterLights();
   ShrinkMiniGolfHole();

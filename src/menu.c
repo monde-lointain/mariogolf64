@@ -484,7 +484,7 @@ s32 g_MenuCourseCount = 6;
 static s8 f_UnreadMenuEntryByte = 0;
 u8 g_AreBetPagesBlocked = 0;
 /* Read by no routine */
-static s32 f_UnusedWordsAfterBetPagesFlag[2] UNUSED = {0};
+static s32 f_UnusedWordsAfterBetPagesBlocked[2] UNUSED = {0};
 static SaveCopyLocation f_SaveCopyLocations[SAVE_COPY_COUNT] = {
     SAVE_COPY_LOCATION(0),
     SAVE_COPY_LOCATION(SAVE_COPY_SRAM_SIZE),

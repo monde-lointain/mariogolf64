@@ -332,7 +332,7 @@ static s32 f_LostTrialCount;
 static s8 f_PlanStage;
 static Boolean f_NeedsShorterClub;
 /* Read by no routine */
-static u8 f_UnusedBytesAfterShorterClubFlag[8] UNUSED;
+static u8 f_UnusedBytesAfterNeedsShorterClub[8] UNUSED;
 static CurrentShot f_Shot;
 /* The traits of the golfer whose shot is planned */
 #define ShotGolferTraits() \

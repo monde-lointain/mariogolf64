@@ -263,7 +263,7 @@ static s32 f_SceneMenuScenes[SCENE_MENU_LENGTH] = {
     SCENE_WALLS,
 };
 static Boolean f_IsFirstDebugUpdate = TRUE;
-s32 g_UnusedGroundQueryFlag = 0;
+s32 g_UnreadGroundQueryMarker = 0;
 /*
  * The order in which to search a point's cells: its own, the next, the one
  * before (3 being -1 in four), then the one across

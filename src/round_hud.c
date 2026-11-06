@@ -1852,7 +1852,7 @@ void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
     rowSpacing = GREEN_GRID_LANDING_ROW_SPACING;
     center[AXIS_Z] =
         (sinf(yaw) * worldDistance) + g_CurrentShot.ballPosition[AXIS_Z];
-    g_UnusedGroundQueryFlag = 1;
+    g_UnreadGroundQueryMarker = 1;
     center[AXIS_Y] = GetGroundHeight(center[AXIS_X], center[AXIS_Z]);
     rowCount = GREEN_GRID_LANDING_ROW_COUNT;
     columnSpacing = GREEN_GRID_LANDING_WIDTH / columnCount;
@@ -1908,7 +1908,7 @@ void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
       }
 
       if (g_RoundHud.greenGridState == GREEN_GRID_SHOWN) {
-        g_UnusedGroundQueryFlag = 1;
+        g_UnreadGroundQueryMarker = 1;
         points[rowStart + column][AXIS_Y] =
             GetGroundHeight(points[rowStart + column][AXIS_X],
                 points[rowStart + column][AXIS_Z]);
