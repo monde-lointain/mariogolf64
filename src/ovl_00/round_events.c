@@ -529,7 +529,30 @@ static Vtx f_ContactVertices[2] = {
 s32 g_ContactEffect = CONTACT_EFFECT_NONE;
 static Boolean f_IsContactEffectFading = FALSE;
 static s32 f_ContactStyle = 0;
-/* The texture coordinates of the quad's far corner, in S10.5 */
+/* RSP's vertex buffer holds this many segments; the rest of the ribbon reloads
+ * them back and forth */
+#define CONTACT_RIBBON_FIRST_SEGMENTS 16
+#define CONTACT_RIBBON_RELOAD_SEGMENTS 15
+#define CONTACT_RIBBON_RELOAD_PASSES 2
+/*
+ * The first segment of one of a pass's two runs. Each pass reloads the buffer
+ * from its end back to its start, then forward again, each run keeping the
+ * vertex pair that the last one ended on. The terms are summed one by one, as
+ * multiplying (pass * 2) + run out of one product changes the code.
+ */
+#define ContactRunStart(pass, run) \
+  (CONTACT_RIBBON_FIRST_SEGMENTS + ((run) * CONTACT_RIBBON_RELOAD_SEGMENTS) + \
+      ((pass) * 2 * CONTACT_RIBBON_RELOAD_SEGMENTS))
+#define CONTACT_RIBBON_SEGMENT_COUNT \
+  ContactRunStart(CONTACT_RIBBON_RELOAD_PASSES, 0)
+/* The T step from one segment to the next that runs the ribbon through texels
+ * of the image's height */
+#define ContactStepT(texels) \
+  (TexelCoordinate(texels) / CONTACT_RIBBON_SEGMENT_COUNT)
+/*
+ * In S10.5, the S of the quad's far side, and the step in T from one of the
+ * ribbon's segments to the next
+ */
 static s32 f_ContactTextureS = 0;
 static s32 f_ContactTextureT = 0;
 /* Read by no routine */
@@ -2525,62 +2548,64 @@ void StartContactEffect(s32 effect) {
     if (f_ContactStyle == CONTACT_STYLE_POWER_IRON) {
       f_ContactVertices[0].v.ob[AXIS_X] = -20;
       f_ContactVertices[1].v.ob[AXIS_X] = 20;
-      f_ContactTextureS = 0x3FF;
+      f_ContactTextureS = TexelCoordinate(PLAIN_CONTACT_IMAGE_WIDTH) - 1;
       f_ContactTextureT = 0xD6;
       PlaySound(SOUND_CONTACT_PLAIN, CONTACT_SOUND_CHANNEL, SOUND_FULL_SCALE);
     } else if (f_ContactStyle == CONTACT_STYLE_SHOT) {
       f_ContactVertices[0].v.ob[AXIS_X] = -10;
       f_ContactVertices[1].v.ob[AXIS_X] = 10;
-      f_ContactTextureS = 0x3FF;
+      f_ContactTextureS = TexelCoordinate(PLAIN_CONTACT_IMAGE_WIDTH) - 1;
       f_ContactTextureT = 0xD6;
     } else if (f_ContactStyle == CONTACT_STYLE_PUTT) {
       f_ContactVertices[0].v.ob[AXIS_X] = -18;
       f_ContactVertices[1].v.ob[AXIS_X] = 18;
       f_ContactVertices[0].v.ob[AXIS_Y] = CONTACT_PUTT_Y;
       f_ContactVertices[1].v.ob[AXIS_Y] = CONTACT_PUTT_Y;
-      f_ContactTextureS = 0x1FF;
-      f_ContactTextureT = 0x2A;
+      f_ContactTextureS = TexelCoordinate(PUTT_CONTACT_IMAGE_WIDTH) - 1;
+      f_ContactTextureT = ContactStepT(PUTT_CONTACT_IMAGE_HEIGHT);
     } else if (f_ContactStyle == CONTACT_STYLE_WARIO ||
         f_ContactStyle == CONTACT_STYLE_GAME_BOY_BALL_7) {
       StartShotEffect(SHOT_EFFECT_LONG_SHOT);
       f_ContactVertices[0].v.ob[AXIS_X] = -120;
       f_ContactVertices[1].v.ob[AXIS_X] = 120;
-      f_ContactTextureS = 0x5FF;
+      f_ContactTextureS = TexelCoordinate(WARIO_CONTACT_IMAGE_WIDTH) - 1;
       f_ContactTextureT = 0x7FF;
       PlaySound(
           SOUND_CONTACT_WARIO, CONTACT_STYLE_SOUND_CHANNEL, SOUND_FULL_SCALE);
     } else if (f_ContactStyle == CONTACT_STYLE_RAINBOW) {
       f_ContactVertices[0].v.ob[AXIS_X] = -60;
       f_ContactVertices[1].v.ob[AXIS_X] = 60;
-      f_ContactTextureS = 0x7FF;
+      f_ContactTextureS = TexelCoordinate(RAINBOW_CONTACT_IMAGE_WIDTH) - 1;
       f_ContactTextureT = 0;
       PlaySound(
           SOUND_CONTACT_RAINBOW, CONTACT_STYLE_SOUND_CHANNEL, SOUND_FULL_SCALE);
     } else if (f_ContactStyle == CONTACT_STYLE_BOWSER) {
       f_ContactVertices[0].v.ob[AXIS_X] = -20;
       f_ContactVertices[1].v.ob[AXIS_X] = 20;
-      f_ContactTextureS = 0x3FF;
-      f_ContactTextureT = 0x54;
+      /* Bowser's image and its mirror across, and twice along the ribbon */
+      f_ContactTextureS = TexelCoordinate(2 * BOWSER_CONTACT_IMAGE_WIDTH) - 1;
+      f_ContactTextureT = ContactStepT(2 * BOWSER_CONTACT_IMAGE_HEIGHT);
       PlaySound(
           SOUND_CONTACT_MARIO, CONTACT_STYLE_SOUND_CHANNEL, SOUND_FULL_SCALE);
     } else if (f_ContactStyle == CONTACT_STYLE_MARIO) {
       f_ContactVertices[0].v.ob[AXIS_X] = -160;
       f_ContactVertices[1].v.ob[AXIS_X] = 160;
-      f_ContactTextureS = 0x3FF;
-      f_ContactTextureT = 0x2A;
+      /* The plain style's, as no ribbon is drawn for Mario */
+      f_ContactTextureS = TexelCoordinate(PLAIN_CONTACT_IMAGE_WIDTH) - 1;
+      f_ContactTextureT = ContactStepT(PLAIN_CONTACT_IMAGE_HEIGHT);
       PlaySound(
           SOUND_CONTACT_MARIO, CONTACT_STYLE_SOUND_CHANNEL, SOUND_FULL_SCALE);
     } else if (f_ContactStyle == CONTACT_STYLE_GAME_BOY_BALL_5) {
       f_ContactVertices[0].v.ob[AXIS_X] = -30;
       f_ContactVertices[1].v.ob[AXIS_X] = 30;
-      f_ContactTextureS = 0x3FF;
-      f_ContactTextureT = 0x2A;
+      f_ContactTextureS = TexelCoordinate(PLAIN_CONTACT_IMAGE_WIDTH) - 1;
+      f_ContactTextureT = ContactStepT(PLAIN_CONTACT_IMAGE_HEIGHT);
       PlaySound(SOUND_CONTACT_PLAIN, CONTACT_SOUND_CHANNEL, SOUND_FULL_SCALE);
     } else {
       f_ContactVertices[0].v.ob[AXIS_X] = -20;
       f_ContactVertices[1].v.ob[AXIS_X] = 20;
-      f_ContactTextureS = 0x3FF;
-      f_ContactTextureT = 0x2A;
+      f_ContactTextureS = TexelCoordinate(PLAIN_CONTACT_IMAGE_WIDTH) - 1;
+      f_ContactTextureT = ContactStepT(PLAIN_CONTACT_IMAGE_HEIGHT);
       PlaySound(SOUND_CONTACT_PLAIN, CONTACT_SOUND_CHANNEL, SOUND_FULL_SCALE);
     }
   }
@@ -2632,20 +2657,6 @@ void LoadContactImages(Player* player) {
  * f_ContactTrailHead */
 #define CONTACT_TRAIL_LENGTH 80
 #define CONTACT_RIBBON_SCALE 0.1f
-/* RSP's vertex buffer holds this many segments; the rest of the ribbon reloads
- * them back and forth */
-#define CONTACT_RIBBON_FIRST_SEGMENTS 16
-#define CONTACT_RIBBON_RELOAD_SEGMENTS 15
-#define CONTACT_RIBBON_RELOAD_PASSES 2
-/*
- * The first segment of one of a pass's two runs. Each pass reloads the buffer
- * from its end back to its start, then forward again, each run keeping the
- * vertex pair that the last one ended on. The terms are summed one by one, as
- * multiplying (pass * 2) + run out of one product changes the code.
- */
-#define ContactRunStart(pass, run) \
-  (CONTACT_RIBBON_FIRST_SEGMENTS + ((run) * CONTACT_RIBBON_RELOAD_SEGMENTS) + \
-      ((pass) * 2 * CONTACT_RIBBON_RELOAD_SEGMENTS))
 #define CONTACT_PALETTE_SIZE 0x200
 #define CONTACT_IMAGE_PIXELS_OFFSET \
   (CONTACT_IMAGE_OFFSET + IMAGE_HEADER_SIZE + CONTACT_PALETTE_SIZE)
