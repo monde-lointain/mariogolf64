@@ -187,6 +187,11 @@ enum ModeName {
 #define NARROW_PANEL_LEFT 80
 #define NARROW_PANEL_WIDTH 160
 #define HOLE_OUT_PANEL_STRIP_HEIGHT 8
+/* The panels are centered on the screen; the cursor frames them */
+#define WIDE_PANEL_HALF_WIDTH (WIDE_PANEL_WIDTH / 2)
+#define NARROW_PANEL_HALF_WIDTH (NARROW_PANEL_WIDTH / 2)
+#define RECORD_PANEL_HEIGHT (RECORD_PANEL_STRIP_HEIGHT * PANEL_STRIP_COUNT)
+#define HOLE_OUT_PANEL_HEIGHT (HOLE_OUT_PANEL_STRIP_HEIGHT * PANEL_STRIP_COUNT)
 #define TITLE_PANEL_LEFT 96
 #define TITLE_PANEL_TOP 13
 #define TITLE_PANEL_WIDTH 128
@@ -870,7 +875,9 @@ void DrawGameSaveMenu(Gfx** displayListHead) {
     /* The cursor's frame around the chosen row, pulsing */
     {
       s32 rowHeights[GAME_ROW_COUNT] = {42, 42, 42, 25};
-      s32 rowHalfWidths[GAME_ROW_COUNT] = {136, 136, 136, 80};
+      s32 rowHalfWidths[GAME_ROW_COUNT] = {WIDE_PANEL_HALF_WIDTH,
+          WIDE_PANEL_HALF_WIDTH, WIDE_PANEL_HALF_WIDTH,
+          NARROW_PANEL_HALF_WIDTH};
       s32 centerX;
       s32 rowTop;
 
@@ -1616,8 +1623,12 @@ void DrawReplaySaveMenu(Gfx** displayListHead) {
 
     /* The cursor's frame around the chosen row */
     {
-      s32 rowHeights[REPLAY_ROW_COUNT] = {33, 33, 33, 33, 33, 24};
-      s32 rowHalfWidths[REPLAY_ROW_COUNT] = {136, 136, 136, 136, 136, 80};
+      s32 rowHeights[REPLAY_ROW_COUNT] = {RECORD_PANEL_HEIGHT,
+          RECORD_PANEL_HEIGHT, RECORD_PANEL_HEIGHT, RECORD_PANEL_HEIGHT,
+          RECORD_PANEL_HEIGHT, HOLE_OUT_PANEL_HEIGHT};
+      s32 rowHalfWidths[REPLAY_ROW_COUNT] = {WIDE_PANEL_HALF_WIDTH,
+          WIDE_PANEL_HALF_WIDTH, WIDE_PANEL_HALF_WIDTH, WIDE_PANEL_HALF_WIDTH,
+          WIDE_PANEL_HALF_WIDTH, NARROW_PANEL_HALF_WIDTH};
       s32 centerX;
 
       centerX = SCREEN_WIDTH / 2;
