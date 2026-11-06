@@ -1115,7 +1115,8 @@ void PlayFlightSounds(s32 step) {
   if (step == RUMBLE_REACTION_STEP && g_SimulatedShot.impactRumbles) {
     /* Plays the sound again for each player; the original has it */
     for (i = 0; i != g_GameState.playerCount; i++) {
-      PlaySound(SOUND_UNK151, FLIGHT_SOUND_CHANNEL_CALLS, SOUND_FULL_SCALE);
+      PlaySound(
+          SOUND_RUMBLING_MISHIT, FLIGHT_SOUND_CHANNEL_CALLS, SOUND_FULL_SCALE);
       if (i != g_CurrentShot.playerIndex) {
         QueueCharacterSound(g_Players[i].characterIndex, i,
             CHARACTER_SOUND_KIND_TROUBLE, SOUND_FULL_SCALE,

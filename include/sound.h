@@ -234,7 +234,8 @@ enum Sound {
   SOUND_CALL_CHIP_IN,
   SOUND_CALL_PIN_SHOT,
   SOUND_CALL_COMPLETE = 0x96,
-  SOUND_UNK151, /* Plays in a shot's flight */
+  /* Early in the flight of a mis-hit that rumbles */
+  SOUND_RUMBLING_MISHIT,
   SOUND_CALL_BOGEY,
   SOUND_DEEP_ROUGH_LANDING,
   SOUND_WASTE_AREA_LANDING,
