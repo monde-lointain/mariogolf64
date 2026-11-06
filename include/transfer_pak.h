@@ -52,7 +52,7 @@ typedef struct GameBoyCharacter {
   /* 0x0D */ u8 saveName[SAVE_NAME_SIZE]; /* As the Game Boy save spells it */
   /* 0x18 */ u8 unk18;
   /* 0x19 */ u8 character;
-  /* 0x1A */ u8 unk1A;
+  /* 0x1A */ u8 isLefty; /* Plays left-handed, as the Game Boy save says */
   /* 0x1B */ u8 level;
   /* 0x1C */ s8 unk1C;
   /* 0x1D */ s8

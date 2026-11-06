@@ -393,7 +393,7 @@ typedef struct StatusData {
 #define CHARACTER_DATA_SIZE 0x800
 #define DATA_UNKB_OFFSET 0xB
 #define DATA_CHARACTER_OFFSET 0x10
-#define DATA_UNK1A_OFFSET 0x11
+#define DATA_IS_LEFTY_OFFSET 0x11
 #define DATA_LEVEL_OFFSET 0x12
 /* A little-endian halfword */
 #define DATA_DRIVE_DISTANCE_OFFSET 0x1A
@@ -1493,9 +1493,9 @@ void DecodeCartridgeCharacter(
   }
 
   if (IsGameFlagSet(GAME_FLAG_UNK6F)) {
-    character->unk1A = 1;
+    character->isLefty = 1;
   } else {
-    character->unk1A = characterData[DATA_UNK1A_OFFSET];
+    character->isLefty = characterData[DATA_IS_LEFTY_OFFSET];
   }
 
   character->level = characterData[DATA_LEVEL_OFFSET];

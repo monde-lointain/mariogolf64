@@ -866,7 +866,7 @@ s32 UpdateCharacterSelect(
 
     if (character >= FIRST_IMPORTED_CHARACTER) {
       g_ChosenLefties[playerIndex] =
-          g_GameBoyCharacters[memory->characterColumns[playerIndex]].unk1A;
+          g_GameBoyCharacters[memory->characterColumns[playerIndex]].isLefty;
     }
 
     if (g_MenuRepeatButtons & U_CBUTTONS) {
