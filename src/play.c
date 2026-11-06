@@ -2052,7 +2052,7 @@ void DrawHoleEditorGround(CameraMatrices* matrices, s32 terrainStyle);
  * tiles go down two halves in rows of four, and a fine tile snaps the edge
  * vertices it shares with coarser neighbors so that no gaps open between them.
  *
- * Doesn't match: 909 words differ, 233 in shape. The original's frame is 8
+ * Doesn't match: 897 words differ, 233 in shape. The original's frame is 8
  * bytes larger (0x260 against 0x258; it was 0x38 when first measured), so most
  * stack offsets differ, and terrainStyle and the locals take other saved
  * registers. The original works out column + 1's parity once per half, where
@@ -2098,6 +2098,13 @@ void DrawHoleEditorGround(CameraMatrices* matrices, s32 terrainStyle);
  * middle, bottom and top, 915 words differ (237 in shape), and top, middle and
  * bottom 913 (245); stepping them after each tile in its order, middle, bottom,
  * tile index and top, gives 935 (267), and with its rewind too 937 (267).
+ *
+ * Each half declares its own nextColumnParity, the only place it is used, as
+ * a search over rewrites suggested: that takes the draft from 909 words to
+ * 897, 233 in shape either way, and the register oracle's closest result
+ * from 896 words to 886, forcing 70 pseudos for each. Declaring row in the
+ * half's block too gives 923, and a u16 or u8 groupTileIndex now 896 words
+ * but 236 in shape. 897 words differ, 233 in shape.
  */
 void DrawGround(CameraMatrices* matrices, s32 terrainStyle) {
   u8 snapsEdge[2][TILE_VERTEX_SEGMENT_COUNT]; /* For the current and the last
@@ -2122,7 +2129,6 @@ void DrawGround(CameraMatrices* matrices, s32 terrainStyle) {
   s32 segmentIndex;
   s32 row;
   s32 k;
-  u32 nextColumnParity;
   s32 groupTileIndex;
   s32 detailTileIndex;
   s32 pass;
@@ -2347,6 +2353,8 @@ void DrawGround(CameraMatrices* matrices, s32 terrainStyle) {
   gDPSetAlphaCompare(gfx++, G_AC_NONE);
   SetGroundCombineMode(0, 0);
   for (half = 0; half < GROUND_HALF_COUNT; half++) {
+    u32 nextColumnParity;
+
     previousDetail = GROUND_DETAIL_HIDDEN;
     bottomSlot = FIRST_BOTTOM_SLOT;
     topSlot = FIRST_TOP_SLOT;
