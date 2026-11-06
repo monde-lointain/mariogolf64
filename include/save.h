@@ -580,9 +580,6 @@ extern Player g_BackedUpPlayers[MAX_PLAYER_COUNT];
 
 #define HOLES_PER_ROUND 18.0f
 
-/* Applied to the save's 0x0C and 0x10 figures; what it converts is unknown */
-#define UNK_SCALE 0.00007119878f
-
 SaveData* GetSaveData(void);
 void TransferSaveData(SaveData* save, u8 isWrite);
 void ResetSaveData(void);

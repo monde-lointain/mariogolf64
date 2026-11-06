@@ -1913,9 +1913,9 @@ void ComputeRoundStatistics(void) {
       g_CourseStatFigures[courseIndex].averageScore =
           entry->strokeTotal * reciprocal;
       g_CourseStatFigures[courseIndex].bestDrive =
-          entry->longestDrive * UNK_SCALE;
+          entry->longestDrive * YARDS_PER_UNIT;
       g_CourseStatFigures[courseIndex].averageDrive =
-          entry->averageDrive * UNK_SCALE;
+          entry->averageDrive * YARDS_PER_UNIT;
       g_CourseStatFigures[courseIndex].fairwayPercent =
           entry->measuredDriveTotal * reciprocal * (100.0f / HOLES_PER_ROUND);
       g_CourseStatFigures[courseIndex].averagePutts =
@@ -2016,7 +2016,7 @@ void ComputeRoundStatistics(void) {
       sandSaveSum += entry->sandSaveCount;
       sandSaveChanceSum += entry->sandSaveCount + entry->missedSandSaveCount;
       sum14 += entry->averagedDriveCount;
-      sum10 += entry->averageDrive * UNK_SCALE * entry->averagedDriveCount;
+      sum10 += entry->averageDrive * YARDS_PER_UNIT * entry->averagedDriveCount;
     }
   }
 

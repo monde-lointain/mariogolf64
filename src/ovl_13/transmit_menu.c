@@ -3726,10 +3726,10 @@ void BuildStatusData(u8* status) {
         course->bestScore = entry->bestScore + STATUS_SCORE_BIAS;
         course->averageStrokes =
             RoundedWholePart(entry->strokeTotal * reciprocal);
-        value = RoundedWholePart(entry->longestDrive * UNK_SCALE);
+        value = RoundedWholePart(entry->longestDrive * YARDS_PER_UNIT);
         course->longestDrive[0] = value;
         course->longestDrive[1] = value >> BITS_PER_BYTE;
-        value = RoundedWholePart(entry->averageDrive * UNK_SCALE);
+        value = RoundedWholePart(entry->averageDrive * YARDS_PER_UNIT);
         course->averageDrive[0] = value;
         course->averageDrive[1] = value >> BITS_PER_BYTE;
         course->fairwayRate = RoundedWholePart(entry->measuredDriveTotal *
