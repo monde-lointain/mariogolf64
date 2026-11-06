@@ -114,7 +114,7 @@ enum BallState {
 /* How a lie rating and an impact timing change a launch */
 typedef struct ImpactEffect {
   /* 0x0 */ s8 speedChange; /* In 128ths of the speed */
-  /* 0x1 */ s8 yawChange; /* Times the club's unk0 */
+  /* 0x1 */ s8 yawChange; /* Times the club's mishitScale */
   /* 0x2 */ s8 pitchChange; /* In degrees */
   /* 0x3 */ s8 sideSpinChange;
   /* 0x4 */ s8 spinChange; /* Added to the shot's offsetY */
