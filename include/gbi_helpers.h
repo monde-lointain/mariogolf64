@@ -10,6 +10,21 @@
 #define TEXTURE_SCALE_HALF 0x8000
 #define TEXTURE_SCALE_FULL 0xFFFF
 
+/*
+ * The texture coordinate mask that wraps or mirrors a texture every size
+ * texels, the base-2 logarithm of size, for a power of two up to 256
+ */
+#define TextureMask(size) \
+  ((size) >= 256          ? 8 \
+          : (size) >= 128 ? 7 \
+          : (size) >= 64  ? 6 \
+          : (size) >= 32  ? 5 \
+          : (size) >= 16  ? 4 \
+          : (size) >= 8   ? 3 \
+          : (size) >= 4   ? 2 \
+          : (size) >= 2   ? 1 \
+                          : 0)
+
 /* Every geometry mode bit, for gSPClearGeometryMode to clear them all */
 #define ALL_GEOMETRY_MODES 0xFFFFFFFF
 

@@ -146,11 +146,14 @@ void DrawHoleTriangles(Gfx** displayListHead, CameraMatrices* matrices UNUSED,
   gDPSetBlendColor(gfx++, 0xFF, 0xFF, 0xFF, 0x3F);
   gDPLoadTextureBlock(gfx++, TextureAddress(g_BlendedTextureScrollingLayer + 8),
       G_IM_FMT_RGBA, G_IM_SIZ_16b, BLENDED_TEXTURE_SIZE, BLENDED_TEXTURE_SIZE,
-      0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, 5, 5, 15, 15);
+      0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
+      TextureMask(BLENDED_TEXTURE_SIZE), TextureMask(BLENDED_TEXTURE_SIZE), 15,
+      15);
   gDPLoadMultiBlock(gfx++, TextureAddress(g_BlendedTextureStillLayer + 8),
       SECOND_TEXTURE_TMEM, 1, G_IM_FMT_RGBA, G_IM_SIZ_16b, BLENDED_TEXTURE_SIZE,
       BLENDED_TEXTURE_SIZE, 0, G_TX_NOMIRROR | G_TX_WRAP,
-      G_TX_NOMIRROR | G_TX_WRAP, 5, 5, 15, 15);
+      G_TX_NOMIRROR | G_TX_WRAP, TextureMask(BLENDED_TEXTURE_SIZE),
+      TextureMask(BLENDED_TEXTURE_SIZE), 15, 15);
   gDPSetCombineLERP(gfx++, TEXEL0, TEXEL1, PRIMITIVE_ALPHA, TEXEL1, 0, 0, 0,
       PRIMITIVE, PRIMITIVE, 0, COMBINED, 0, 0, 0, 0, COMBINED);
   gDPSetPrimColor(gfx++, 0, 0, 0x7F, 0x7F, 0x7F, 0xA1);
@@ -336,8 +339,9 @@ void DrawRings(Gfx** displayListHead, CameraMatrices* matrices UNUSED,
   AppendSyncedRdpState(gfx, gDPSetTextureLUT, G_TT_NONE);
   gDPLoadTextureBlock(gfx++, TextureAddress(g_MirrorTexture), G_IM_FMT_RGBA,
       G_IM_SIZ_16b, DYNAMIC_TEXTURE_SIZE, DYNAMIC_TEXTURE_SIZE, 0,
-      G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, 5, 5, G_TX_NOLOD,
-      G_TX_NOLOD);
+      G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
+      TextureMask(DYNAMIC_TEXTURE_SIZE), TextureMask(DYNAMIC_TEXTURE_SIZE),
+      G_TX_NOLOD, G_TX_NOLOD);
   gSPTexture(gfx++, 0x07C0, 0x07C0, 0, G_TX_RENDERTILE, G_ON);
   if (g_PauseScreen == PAUSE_SCREEN_FREE_LOOK) {
     gDPSetCombineLERP(gfx++, PRIMITIVE, TEXEL0, ENV_ALPHA, TEXEL0, 0, 0, 0,

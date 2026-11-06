@@ -985,8 +985,9 @@ void DrawOpeningShotPath(CameraMatrices* matrices UNUSED) {
   gDPLoadTextureBlock(g_DisplayListHead++,
       TextureAddress(ImageBody(g_ShotPreviewDashImage)), G_IM_FMT_I,
       G_IM_SIZ_8b, SHOT_PREVIEW_IMAGE_SIZE, SHOT_PREVIEW_IMAGE_SIZE, 0,
-      G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, 5, 5, G_TX_NOLOD,
-      G_TX_NOLOD);
+      G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
+      TextureMask(SHOT_PREVIEW_IMAGE_SIZE),
+      TextureMask(SHOT_PREVIEW_IMAGE_SIZE), G_TX_NOLOD, G_TX_NOLOD);
   gDPSetTileSize(g_DisplayListHead++, G_TX_RENDERTILE, f_OpeningShotPathScroll,
       0,
       f_OpeningShotPathScroll +
@@ -4189,8 +4190,8 @@ void DrawLakitu(Gfx** displayListHead) {
     gDPPipeSync(gfx++);
     gDPLoadTextureBlock(gfx++, TextureAddress(LargeImageTexels(f_LakituImage)),
         G_IM_FMT_CI, G_IM_SIZ_8b, LAKITU_IMAGE_SIZE, LAKITU_IMAGE_SIZE, 0,
-        G_TX_MIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, 5, G_TX_NOMASK,
-        G_TX_NOLOD, G_TX_NOLOD);
+        G_TX_MIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
+        TextureMask(LAKITU_IMAGE_SIZE), G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(gfx++);
     gSPScisTextureRectangle(gfx++,
         QuarterPixels(f_LakituScreenPoint[0] - (LAKITU_DRAWN_SIZE / 2)),
@@ -4230,8 +4231,8 @@ void DrawLakitu(Gfx** displayListHead) {
         0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0);
     gDPLoadTextureBlock_4b(gfx++, TextureAddress(ImageBody(f_LakituTrailImage)),
         G_IM_FMT_I, LAKITU_TRAIL_IMAGE_WIDTH, LAKITU_TRAIL_IMAGE_HEIGHT, 0,
-        G_TX_MIRROR | G_TX_WRAP, G_TX_MIRROR | G_TX_WRAP, G_TX_NOMASK, 7,
-        G_TX_NOLOD, G_TX_NOLOD);
+        G_TX_MIRROR | G_TX_WRAP, G_TX_MIRROR | G_TX_WRAP, G_TX_NOMASK,
+        TextureMask(LAKITU_TRAIL_IMAGE_HEIGHT), G_TX_NOLOD, G_TX_NOLOD);
     gSPMatrix(gfx++, PhysicalAddress(&g_ScreenOrthoMatrix),
         G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
     gDPPipeSync(gfx++);

@@ -2171,8 +2171,9 @@ void DrawShotPreview(CameraMatrices* matrices) {
   gDPLoadTextureBlock(g_DisplayListHead++,
       TextureAddress(ImageBody(g_ShotPreviewDashImage)), G_IM_FMT_I,
       G_IM_SIZ_8b, SHOT_PREVIEW_IMAGE_SIZE, SHOT_PREVIEW_IMAGE_SIZE, 0,
-      G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, 5, 5, G_TX_NOLOD,
-      G_TX_NOLOD);
+      G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
+      TextureMask(SHOT_PREVIEW_IMAGE_SIZE),
+      TextureMask(SHOT_PREVIEW_IMAGE_SIZE), G_TX_NOLOD, G_TX_NOLOD);
   gDPSetTileSize(g_DisplayListHead++, G_TX_RENDERTILE, f_ShotPreviewDotScroll,
       0,
       f_ShotPreviewDotScroll +

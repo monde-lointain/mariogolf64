@@ -2705,7 +2705,7 @@ void DrawScoresPage(Gfx** displayListHead) {
   LoadSmallPalette(&gfx, 0, ImageBody(g_Scorecard.totalLabelsImage));
   LoadNibbleTextureBlock(&gfx, ImageTexels(g_Scorecard.totalLabelsImage),
       G_IM_FMT_CI, TOTAL_LABEL_WIDTH, TOTAL_LABELS_IMAGE_HEIGHT, 0, G_TX_MIRROR,
-      0, 5, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+      0, TextureMask(TOTAL_LABEL_WIDTH), G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
   if (IsMatchPlayMode()) {
     if (g_GameState.holeSelection & HOLE_SELECTION_FRONT_NINE) {
       DrawTextureRect(&gfx, QuarterPixels(g_Scorecard.x + ROUND_LABEL_LEFT),

@@ -416,7 +416,8 @@ NEXT:;
         gfx++, G_CC_MODULATEIDECALA_PRIM, G_CC_MODULATEIDECALA_PRIM);
     gDPLoadTextureBlock_4b(gfx++, TextureAddress(ImageBody(g_LeaderLineImage)),
         G_IM_FMT_I, TAG_WIDTH, TAG_HEIGHT, 0, G_TX_MIRROR | G_TX_WRAP,
-        G_TX_MIRROR | G_TX_WRAP, 4, 3, G_TX_NOLOD, G_TX_NOLOD);
+        G_TX_MIRROR | G_TX_WRAP, TextureMask(TAG_WIDTH),
+        TextureMask(TAG_HEIGHT), G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(gfx++);
     gDPSetDepthSource(gfx++, G_ZS_PRIM);
     for (i = 0; i != g_GameState.playerCount; i++) {
@@ -453,7 +454,8 @@ NEXT:;
         TEXEL0, 0, PRIMITIVE, 0, PRIMITIVE, 0, TEXEL0, 0);
     gDPLoadTextureBlock_4b(gfx++, TextureAddress(ImageBody(g_LeaderLineImage)),
         G_IM_FMT_I, TAG_WIDTH, TAG_HEIGHT, 0, G_TX_MIRROR | G_TX_WRAP,
-        G_TX_MIRROR | G_TX_WRAP, 4, 3, G_TX_NOLOD, G_TX_NOLOD);
+        G_TX_MIRROR | G_TX_WRAP, TextureMask(TAG_WIDTH),
+        TextureMask(TAG_HEIGHT), G_TX_NOLOD, G_TX_NOLOD);
     for (i = 0; i != g_GameState.playerCount; i++) {
       if (f_ShotLabels[i].corner != NO_CORNER) {
         gDPSetPrimDepth(gfx++, f_ShotLabels[i].depth, 0);

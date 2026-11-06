@@ -1597,8 +1597,9 @@ void DrawEffects(CameraMatrices* matrices, Gfx** displayListHead) {
   gDPSetTextureFilter(gfx++, G_TF_BILERP);
   gDPLoadTextureBlock_4b(gfx++, TextureAddress(ImageBody(f_RippleImage)),
       G_IM_FMT_I, RIPPLE_IMAGE_SIZE, RIPPLE_IMAGE_SIZE, 0,
-      G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMIRROR | G_TX_CLAMP, 6, 6, G_TX_NOLOD,
-      G_TX_NOLOD);
+      G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMIRROR | G_TX_CLAMP,
+      TextureMask(RIPPLE_IMAGE_SIZE), TextureMask(RIPPLE_IMAGE_SIZE),
+      G_TX_NOLOD, G_TX_NOLOD);
   for (index = 0; index != EFFECT_COUNT; index++) {
     effect = &f_Effects[index];
     if (effect->kind == EFFECT_KIND_RIPPLE) {
@@ -1608,7 +1609,8 @@ void DrawEffects(CameraMatrices* matrices, Gfx** displayListHead) {
 
   gDPLoadTextureBlock_4b(gfx++, TextureAddress(ImageBody(f_ArcImage)),
       G_IM_FMT_I, ARC_IMAGE_SIZE, ARC_IMAGE_SIZE, 0, G_TX_MIRROR | G_TX_WRAP,
-      G_TX_MIRROR | G_TX_WRAP, 6, 6, G_TX_NOLOD, G_TX_NOLOD);
+      G_TX_MIRROR | G_TX_WRAP, TextureMask(ARC_IMAGE_SIZE),
+      TextureMask(ARC_IMAGE_SIZE), G_TX_NOLOD, G_TX_NOLOD);
   gSPLoadGeometryMode(gfx++, 0);
   gSPSetGeometryMode(gfx++, G_ZBUFFER | G_SHADE | G_SHADING_SMOOTH);
   gDPPipeSync(gfx++);
@@ -1818,7 +1820,8 @@ void DrawBillboardEffect(Gfx** displayListHead, Effect* effect, u16 color) {
         gDPLoadTextureBlock(gfx++,
             TextureAddress(ImageBodyAt(f_ClumpImage, frameOffset)), G_IM_FMT_I,
             G_IM_SIZ_8b, BILLBOARD_IMAGE_SIZE, BILLBOARD_IMAGE_SIZE, 0,
-            G_TX_WRAP, G_TX_WRAP, 6, 6, G_TX_NOLOD, G_TX_NOLOD);
+            G_TX_WRAP, G_TX_WRAP, TextureMask(BILLBOARD_IMAGE_SIZE),
+            TextureMask(BILLBOARD_IMAGE_SIZE), G_TX_NOLOD, G_TX_NOLOD);
       } else if (effect->kind == EFFECT_KIND_SPARKLE) {
         s32 sparkleFrames[SPARKLE_STEP_COUNT] = {2, 1, 0, 0, 1, 1, 2};
 
@@ -1840,7 +1843,8 @@ void DrawBillboardEffect(Gfx** displayListHead, Effect* effect, u16 color) {
         gDPLoadTextureBlock_4b(gfx++,
             TextureAddress(ImageBodyAt(f_StarImage, frameOffset)), G_IM_FMT_I,
             BILLBOARD_IMAGE_SIZE, BILLBOARD_IMAGE_SIZE, 0, G_TX_WRAP, G_TX_WRAP,
-            6, 6, G_TX_NOLOD, G_TX_NOLOD);
+            TextureMask(BILLBOARD_IMAGE_SIZE),
+            TextureMask(BILLBOARD_IMAGE_SIZE), G_TX_NOLOD, G_TX_NOLOD);
       } else if (effect->kind == EFFECT_KIND_TEAR) {
         if (effect->frame < TEAR_SECOND_FRAME_START) {
           frameOffset = 0 * DROPLET_FRAME_SIZE;
@@ -1853,7 +1857,7 @@ void DrawBillboardEffect(Gfx** displayListHead, Effect* effect, u16 color) {
         gDPLoadTextureBlock_4b(gfx++,
             TextureAddress(ImageTexelsAt(f_DropletImage, frameOffset)),
             G_IM_FMT_CI, DROPLET_IMAGE_SIZE, DROPLET_IMAGE_SIZE, 0, G_TX_MIRROR,
-            G_TX_WRAP, 4, G_TX_NOMASK, 2, 2);
+            G_TX_WRAP, TextureMask(DROPLET_IMAGE_SIZE), G_TX_NOMASK, 2, 2);
       } else if (effect->kind == EFFECT_KIND_SMOKE_PUFF) {
         gDPLoadTextureBlock_4b(gfx++, TextureAddress(ImageBody(f_SpeckleImage)),
             G_IM_FMT_I, SPECKLE_IMAGE_SIZE, SPECKLE_IMAGE_SIZE, 0, G_TX_WRAP,
@@ -1862,7 +1866,8 @@ void DrawBillboardEffect(Gfx** displayListHead, Effect* effect, u16 color) {
         gDPLoadTextureBlock(gfx++,
             TextureAddress(ImageBodyAt(f_DebrisImage, frameOffset)), G_IM_FMT_I,
             G_IM_SIZ_8b, BILLBOARD_IMAGE_SIZE, BILLBOARD_IMAGE_SIZE, 0,
-            G_TX_WRAP, G_TX_WRAP, 6, 6, G_TX_NOLOD, G_TX_NOLOD);
+            G_TX_WRAP, G_TX_WRAP, TextureMask(BILLBOARD_IMAGE_SIZE),
+            TextureMask(BILLBOARD_IMAGE_SIZE), G_TX_NOLOD, G_TX_NOLOD);
       }
 
       gDPPipeSync(gfx++);

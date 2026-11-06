@@ -923,12 +923,14 @@ void BuildHorizonDynamicTextures(Gfx** displayListHead) {
   f_HorizonTextureScroll++;
   gDPLoadTextureBlock(gfx++, TextureAddress(f_NoiseTexture), G_IM_FMT_I,
       G_IM_SIZ_8b, DYNAMIC_TEXTURE_SIZE, DYNAMIC_TEXTURE_SIZE, 0,
-      G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, 5, 5, G_TX_NOLOD,
-      G_TX_NOLOD);
+      G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
+      TextureMask(DYNAMIC_TEXTURE_SIZE), TextureMask(DYNAMIC_TEXTURE_SIZE),
+      G_TX_NOLOD, G_TX_NOLOD);
   gDPLoadMultiBlock(gfx++, TextureAddress(g_MirrorTexture), SECOND_TEXTURE_TMEM,
       1, G_IM_FMT_RGBA, G_IM_SIZ_16b, DYNAMIC_TEXTURE_SIZE,
       DYNAMIC_TEXTURE_SIZE, 0, G_TX_NOMIRROR | G_TX_WRAP,
-      G_TX_NOMIRROR | G_TX_WRAP, 5, 5, G_TX_NOLOD, G_TX_NOLOD);
+      G_TX_NOMIRROR | G_TX_WRAP, TextureMask(DYNAMIC_TEXTURE_SIZE),
+      TextureMask(DYNAMIC_TEXTURE_SIZE), G_TX_NOLOD, G_TX_NOLOD);
   gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, MIRROR_NOISE_ALPHA);
   if (rowCount > 0) {
     gSPScisTextureRectangle(gfx++, 0,
@@ -945,12 +947,14 @@ void BuildHorizonDynamicTextures(Gfx** displayListHead) {
       RenderTargetAddress(osVirtualToPhysical(g_FlameTexture)));
   gDPLoadTextureBlock(gfx++, TextureAddress(f_NoiseTexture), G_IM_FMT_I,
       G_IM_SIZ_8b, DYNAMIC_TEXTURE_SIZE, DYNAMIC_TEXTURE_SIZE, 0,
-      G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, 5, 5, G_TX_NOLOD,
-      G_TX_NOLOD);
+      G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
+      TextureMask(DYNAMIC_TEXTURE_SIZE), TextureMask(DYNAMIC_TEXTURE_SIZE),
+      G_TX_NOLOD, G_TX_NOLOD);
   gDPLoadMultiBlock(gfx++, TextureAddress(f_FlameGradientTexture),
       SECOND_TEXTURE_TMEM, 1, G_IM_FMT_RGBA, G_IM_SIZ_16b, DYNAMIC_TEXTURE_SIZE,
       DYNAMIC_TEXTURE_SIZE, 0, G_TX_NOMIRROR | G_TX_WRAP,
-      G_TX_NOMIRROR | G_TX_WRAP, 5, 5, G_TX_NOLOD, G_TX_NOLOD);
+      G_TX_NOMIRROR | G_TX_WRAP, TextureMask(DYNAMIC_TEXTURE_SIZE),
+      TextureMask(DYNAMIC_TEXTURE_SIZE), G_TX_NOLOD, G_TX_NOLOD);
   gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, FLAME_NOISE_ALPHA);
   gDPSetTileSize(gfx++, G_TX_RENDERTILE, 0, f_HorizonTextureScroll, 32,
       f_HorizonTextureScroll + 32);
@@ -963,12 +967,14 @@ void BuildHorizonDynamicTextures(Gfx** displayListHead) {
   gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, BLENDED_TEXTURE_ALPHA);
   gDPLoadTextureBlock(gfx++, TextureAddress(g_BlendedTextureScrollingLayer + 8),
       G_IM_FMT_RGBA, G_IM_SIZ_16b, DYNAMIC_TEXTURE_SIZE, DYNAMIC_TEXTURE_SIZE,
-      0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, 5, 5, G_TX_NOLOD,
-      G_TX_NOLOD);
+      0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
+      TextureMask(DYNAMIC_TEXTURE_SIZE), TextureMask(DYNAMIC_TEXTURE_SIZE),
+      G_TX_NOLOD, G_TX_NOLOD);
   gDPLoadMultiBlock(gfx++, TextureAddress(g_BlendedTextureStillLayer + 8),
       SECOND_TEXTURE_TMEM, 1, G_IM_FMT_RGBA, G_IM_SIZ_16b, DYNAMIC_TEXTURE_SIZE,
       DYNAMIC_TEXTURE_SIZE, 0, G_TX_NOMIRROR | G_TX_WRAP,
-      G_TX_NOMIRROR | G_TX_WRAP, 5, 5, G_TX_NOLOD, G_TX_NOLOD);
+      G_TX_NOMIRROR | G_TX_WRAP, TextureMask(DYNAMIC_TEXTURE_SIZE),
+      TextureMask(DYNAMIC_TEXTURE_SIZE), G_TX_NOLOD, G_TX_NOLOD);
   gDPSetTileSize(gfx++, G_TX_RENDERTILE, f_HorizonTextureScroll,
       f_HorizonTextureScroll, f_HorizonTextureScroll + 32,
       f_HorizonTextureScroll + 32);
@@ -1069,12 +1075,14 @@ void BuildDynamicTextures(Gfx** displayListHead) {
       RenderTargetAddress(osVirtualToPhysical(g_FlameTexture)));
   gDPLoadTextureBlock(gfx++, TextureAddress(f_NoiseTexture), G_IM_FMT_I,
       G_IM_SIZ_8b, DYNAMIC_TEXTURE_SIZE, DYNAMIC_TEXTURE_SIZE, 0,
-      G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, 5, 5, G_TX_NOLOD,
-      G_TX_NOLOD);
+      G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
+      TextureMask(DYNAMIC_TEXTURE_SIZE), TextureMask(DYNAMIC_TEXTURE_SIZE),
+      G_TX_NOLOD, G_TX_NOLOD);
   gDPLoadMultiBlock(gfx++, TextureAddress(f_FlameGradientTexture),
       SECOND_TEXTURE_TMEM, 1, G_IM_FMT_RGBA, G_IM_SIZ_16b, DYNAMIC_TEXTURE_SIZE,
       DYNAMIC_TEXTURE_SIZE, 0, G_TX_NOMIRROR | G_TX_WRAP,
-      G_TX_NOMIRROR | G_TX_WRAP, 5, 5, G_TX_NOLOD, G_TX_NOLOD);
+      G_TX_NOMIRROR | G_TX_WRAP, TextureMask(DYNAMIC_TEXTURE_SIZE),
+      TextureMask(DYNAMIC_TEXTURE_SIZE), G_TX_NOLOD, G_TX_NOLOD);
   gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, FLAME_NOISE_ALPHA);
   gDPSetTileSize(gfx++, G_TX_RENDERTILE, 0, f_DynamicTextureScroll, 32,
       f_DynamicTextureScroll + 32);
@@ -1086,12 +1094,14 @@ void BuildDynamicTextures(Gfx** displayListHead) {
       RenderTargetAddress(osVirtualToPhysical(g_BlendedTexture)));
   gDPLoadTextureBlock(gfx++, TextureAddress(g_BlendedTextureScrollingLayer + 8),
       G_IM_FMT_RGBA, G_IM_SIZ_16b, DYNAMIC_TEXTURE_SIZE, DYNAMIC_TEXTURE_SIZE,
-      0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, 5, 5, G_TX_NOLOD,
-      G_TX_NOLOD);
+      0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
+      TextureMask(DYNAMIC_TEXTURE_SIZE), TextureMask(DYNAMIC_TEXTURE_SIZE),
+      G_TX_NOLOD, G_TX_NOLOD);
   gDPLoadMultiBlock(gfx++, TextureAddress(g_BlendedTextureStillLayer + 8),
       SECOND_TEXTURE_TMEM, 1, G_IM_FMT_RGBA, G_IM_SIZ_16b, DYNAMIC_TEXTURE_SIZE,
       DYNAMIC_TEXTURE_SIZE, 0, G_TX_NOMIRROR | G_TX_WRAP,
-      G_TX_NOMIRROR | G_TX_WRAP, 5, 5, G_TX_NOLOD, G_TX_NOLOD);
+      G_TX_NOMIRROR | G_TX_WRAP, TextureMask(DYNAMIC_TEXTURE_SIZE),
+      TextureMask(DYNAMIC_TEXTURE_SIZE), G_TX_NOLOD, G_TX_NOLOD);
   gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, BLENDED_TEXTURE_ALPHA);
   gDPSetTileSize(gfx++, G_TX_RENDERTILE, f_DynamicTextureScroll,
       f_DynamicTextureScroll, f_DynamicTextureScroll + 32,

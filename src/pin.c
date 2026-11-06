@@ -539,7 +539,8 @@ void DrawPin(
       gDPLoadTextureBlock(g_DisplayListHead++,
           TextureAddress(ImageBody(f_CupTexture)), G_IM_FMT_RGBA, G_IM_SIZ_16b,
           CUP_TEXTURE_WIDTH, CUP_TEXTURE_HEIGHT, 0, G_TX_MIRROR | G_TX_WRAP,
-          G_TX_NOMIRROR | G_TX_CLAMP, 5, 6, G_TX_NOLOD, G_TX_NOLOD);
+          G_TX_NOMIRROR | G_TX_CLAMP, TextureMask(CUP_TEXTURE_WIDTH),
+          TextureMask(CUP_TEXTURE_HEIGHT), G_TX_NOLOD, G_TX_NOLOD);
     }
 
     if (isPinOut) {
@@ -680,8 +681,8 @@ void DrawPin(
       gDPLoadTextureBlock_4b(g_DisplayListHead++,
           TextureAddress(ImageTexels(f_FlagstickTexture)), G_IM_FMT_CI,
           FLAGSTICK_TEXTURE_SIZE, FLAGSTICK_TEXTURE_SIZE, 0,
-          G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, 4,
-          G_TX_NOLOD, G_TX_NOLOD);
+          G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+          TextureMask(FLAGSTICK_TEXTURE_SIZE), G_TX_NOLOD, G_TX_NOLOD);
       gDPPipeSync(g_DisplayListHead++);
       gSP2Triangles(g_DisplayListHead++, 10, 9, 8, 0, 11, 10, 8, 0);
     }

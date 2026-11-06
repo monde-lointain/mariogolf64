@@ -2044,7 +2044,9 @@ INCLUDE_ASM("asm/nonmatchings/play", RebuildGroundTextureCoordinates);
 #define LoadNoiseTexture(shiftS, shiftT) \
   gDPLoadMultiBlock(gfx++, TextureAddress(f_GroundNoiseTexels), NOISE_TMEM, \
       G_TX_RENDERTILE, G_IM_FMT_I, G_IM_SIZ_8b, GROUND_NOISE_SIZE, \
-      GROUND_NOISE_SIZE, 0, G_TX_MIRROR, G_TX_MIRROR, 5, 5, shiftS, shiftT)
+      GROUND_NOISE_SIZE, 0, G_TX_MIRROR, G_TX_MIRROR, \
+      TextureMask(GROUND_NOISE_SIZE), TextureMask(GROUND_NOISE_SIZE), shiftS, \
+      shiftT)
 
 void DrawHoleEditorGround(CameraMatrices* matrices, s32 terrainStyle);
 

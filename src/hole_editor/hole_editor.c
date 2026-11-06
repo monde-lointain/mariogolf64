@@ -472,13 +472,16 @@ enum EditorCombineMode {
   gDPLoadMultiBlock(gfx++, TextureAddress(f_WaveTexels), WAVE_TMEM, \
       G_TX_RENDERTILE, G_IM_FMT_IA, G_IM_SIZ_8b, WAVE_TEXTURE_WIDTH, \
       WAVE_TEXTURE_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP, \
-      G_TX_NOMIRROR | G_TX_WRAP, 5, 5, 15, 15)
+      G_TX_NOMIRROR | G_TX_WRAP, TextureMask(WAVE_TEXTURE_WIDTH), \
+      TextureMask(WAVE_TEXTURE_HEIGHT), 15, 15)
 
 /* Loads the white texture where DrawGround loads its noise texture */
 #define LoadWhiteNoiseTexture(shiftS, shiftT) \
   gDPLoadMultiBlock(gfx++, TextureAddress(f_WhiteNoiseTexels), NOISE_TMEM, \
       G_TX_RENDERTILE, G_IM_FMT_I, G_IM_SIZ_8b, WHITE_TEXTURE_SIZE, \
-      WHITE_TEXTURE_SIZE, 0, G_TX_MIRROR, G_TX_MIRROR, 5, 5, shiftS, shiftT)
+      WHITE_TEXTURE_SIZE, 0, G_TX_MIRROR, G_TX_MIRROR, \
+      TextureMask(WHITE_TEXTURE_SIZE), TextureMask(WHITE_TEXTURE_SIZE), \
+      shiftS, shiftT)
 
 /*
  * Loads a tile's texture in either layout. A bordered tile picks its combiner
@@ -524,7 +527,8 @@ enum EditorCombineMode {
           TextureAddress(&g_WorkArea.hole.tiles[tileIndex]), 0, 1, \
           G_IM_FMT_RGBA, G_IM_SIZ_16b, GROUND_TILE_TEXEL_SPAN, \
           GROUND_TILE_TEXEL_SPAN, 0, G_TX_MIRROR | G_TX_WRAP, \
-          G_TX_NOMIRROR | G_TX_CLAMP, 5, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD); \
+          G_TX_NOMIRROR | G_TX_CLAMP, TextureMask(GROUND_TILE_TEXEL_SPAN), \
+          G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD); \
       gDPSetTileSize(gfx++, 1, tileS + BORDERLESS_TILE_FIRST_COORDINATE, \
           tileT + BORDERLESS_TILE_FIRST_COORDINATE, \
           tileS + BORDERLESS_TILE_LAST_COORDINATE, \
@@ -4199,7 +4203,8 @@ void DrawHoleEditorGround(CameraMatrices* matrices UNUSED, s32 terrainStyle) {
       gDPLoadMultiBlock(gfx++, TextureAddress(f_WhiteNoiseTexels), NOISE_TMEM,
           G_TX_RENDERTILE, G_IM_FMT_I, G_IM_SIZ_8b, WHITE_TEXTURE_SIZE,
           WHITE_TEXTURE_SIZE, 0, G_TX_NOMIRROR | G_TX_WRAP,
-          G_TX_NOMIRROR | G_TX_WRAP, 5, 5, 12, 12);
+          G_TX_NOMIRROR | G_TX_WRAP, TextureMask(WHITE_TEXTURE_SIZE),
+          TextureMask(WHITE_TEXTURE_SIZE), 12, 12);
       gDPSetCombineLERP(gfx++, TEXEL1, ENVIRONMENT, PRIMITIVE, ENVIRONMENT, 0,
           0, 0, TEXEL1, 0, 0, 0, COMBINED, 0, 0, 0, COMBINED);
       gDPPipeSync(gfx++);

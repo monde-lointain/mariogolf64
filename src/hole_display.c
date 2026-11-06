@@ -843,8 +843,9 @@ void DrawLensFlare(Gfx** displayListHead) {
   gDPSetColorDither(gfx++, G_CD_MAGICSQ);
   gDPLoadTextureBlock(gfx++, TextureAddress(g_RingTexels), G_IM_FMT_I,
       G_IM_SIZ_8b, RING_TEXTURE_SIZE, RING_TEXTURE_SIZE, 0,
-      G_TX_MIRROR | G_TX_WRAP, G_TX_MIRROR | G_TX_WRAP, 6, 6, G_TX_NOLOD,
-      G_TX_NOLOD);
+      G_TX_MIRROR | G_TX_WRAP, G_TX_MIRROR | G_TX_WRAP,
+      TextureMask(RING_TEXTURE_SIZE), TextureMask(RING_TEXTURE_SIZE),
+      G_TX_NOLOD, G_TX_NOLOD);
   for (i = 0; i != LENS_FLARE_COUNT; i++) {
     centerX = f_SunScreenX[0] +
         ((LENS_FLARE_AXIS_X - f_SunScreenX[0]) * f_LensFlares[i].position);
