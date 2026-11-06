@@ -3940,7 +3940,14 @@ void WriteHexDumpFile(u32* words, s32 byteCount, char* fileName) {
  * served both: that takes the draft from 2037 words to 2033 (491 in shape
  * either way), and the oracle's closest result from 2001 words to 1995,
  * forcing 112 pseudos for each. Declaring it in only one of the two loops
- * gives the same 2033 words. 2033 words differ, 491 in shape.
+ * gives the same 2033 words.
+ *
+ * Each mirrored-cell block also declares its own pointRow and pointColumn,
+ * which only those loops use. That takes the draft from 2033 words differing
+ * to 2009, 491 in shape either way, and the oracle's closest result from
+ * 1995 words, forcing 112 pseudos, to 1975, forcing 110. A pointColumn of
+ * their own alone gives 2025, in either block or both. 2009 words differ,
+ * 491 in shape.
  */
 #ifdef NON_MATCHING
 void DrawHoleEditorGround(CameraMatrices* matrices UNUSED, s32 terrainStyle) {
@@ -3981,8 +3988,6 @@ void DrawHoleEditorGround(CameraMatrices* matrices UNUSED, s32 terrainStyle) {
   s32 cellColumn;
   s32 cellRow;
   s32 vertexColumn;
-  s32 pointColumn;
-  s32 pointRow;
   Boolean isMirrored;
   Vtx* midpoints;
   s32 tileColumn;
@@ -4506,6 +4511,9 @@ void DrawHoleEditorGround(CameraMatrices* matrices UNUSED, s32 terrainStyle) {
                               << (cellColumn + (cellRow * FINE_TILE_CELL_SPAN));
                         }
                         if (isMirrored) {
+                          s32 pointColumn;
+                          s32 pointRow;
+
                           for (pointRow = 0; pointRow < FINE_TILE_BLOCK_SPAN;
                               pointRow++) {
                             for (pointColumn = 0;
@@ -4608,6 +4616,9 @@ void DrawHoleEditorGround(CameraMatrices* matrices UNUSED, s32 terrainStyle) {
 
                         /* Puts back the texture coordinates */
                         if (isMirrored) {
+                          s32 pointColumn;
+                          s32 pointRow;
+
                           for (pointRow = 0; pointRow < FINE_TILE_BLOCK_SPAN;
                               pointRow++) {
                             for (pointColumn = 0;
