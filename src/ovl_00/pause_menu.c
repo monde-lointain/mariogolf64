@@ -1150,24 +1150,10 @@ s32 UpdateChoiceBox(ControllerState* controller) {
 }
 
 /*
- * The cursor sits beside the chosen label, half that label's width left of
- * its sway: the original measures the chosen label into textWidth's register
- * and halves it there. Reading the width into labelWidth instead gives 68
- * words differing, none in shape, and the widest label's width, as the draft
- * had it, 61, 5 in shape.
- *
- * Doesn't match: the original halves the chosen label's width in textWidth's
- * register, $s1, where this halves it in $v0; the register oracle matches
- * the draft when it gives the halving's local quantity $s1. Halving
- * textWidth in place, before or after the cursor's sway, with /= or as
- * textWidth / 2, puts the halving in $s1 but schedules its first instruction
- * into the sway's multiply delay, which gives 7 words, all in shape; halving
- * the width as it is measured gives 7 too, subtracting the half within the
- * cursor's sum 9 (3), halving it into halfWidth 17 (7), while subtracting
- * textWidth /= 2 from cursorX keeps the draft's 6. 6 words differ, none in
- * shape.
+ * Draws the open choice box: a glowing cloud sized to the widest label, the
+ * labels, and for a vertical box a swaying cursor beside the chosen label,
+ * half that label's width left of its sway.
  */
-#ifdef NON_MATCHING
 void DrawChoiceBox(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   ChoiceBox* box = &f_ChoiceBoxes[f_ChoiceBoxIndex];
@@ -1175,9 +1161,10 @@ void DrawChoiceBox(Gfx** displayListHead) {
   s32 red;
   s32 green;
   s32 blue;
-  /* The widest label's width, then the chosen label's */
+  /* The widest label's width */
   s32 textWidth;
   s32 labelWidth;
+  s32 chosenWidth;
   s32 i;
   s32 cursorX;
   s32 cursorY;
@@ -1256,12 +1243,12 @@ void DrawChoiceBox(Gfx** displayListHead) {
         f_ChoiceCursorAngle -= M_PI;
       }
 
-      textWidth =
+      chosenWidth =
           MeasureText(f_ChoiceBoxLabels[box->labels[f_ChoiceBoxSelection]],
               FONT_SIZE_LARGE, MEASURE_TEXT_PROPORTIONAL);
       cursorX = (s32)(sinf(f_ChoiceCursorAngle) * CHOICE_CURSOR_SWAY) +
           CHOICE_CURSOR_X;
-      cursorX -= textWidth / 2;
+      cursorX -= chosenWidth / 2;
       LoadSmallPalette(&gfx, 0, ImageBody(f_ChoiceBoxCursorImage));
       gDPLoadTextureTile_4b(gfx++,
           TextureAddress(ImageTexels(f_ChoiceBoxCursorImage)), G_IM_FMT_CI,
@@ -1278,6 +1265,3 @@ void DrawChoiceBox(Gfx** displayListHead) {
 
   *displayListHead = gfx;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_00/pause_menu", DrawChoiceBox);
-#endif
