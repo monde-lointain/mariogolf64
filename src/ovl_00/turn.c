@@ -3718,7 +3718,7 @@ void UpdateTurns(void) {
           UpdateControlsScreen(&g_TurnController);
         } else if (g_PauseScreen == PAUSE_SCREEN_SAVE_MENU) {
           UpdateGameSaveMenu(&g_TurnController);
-        } else if (g_PauseScreen == PAUSE_SCREEN_UNK3) {
+        } else if (g_PauseScreen == PAUSE_SCREEN_UNUSED) {
         } else if (g_PauseScreen == PAUSE_SCREEN_PROMPT) {
           switch (UpdatePrompt(&g_TurnController)) {
             case PROMPT_RESULT_GIVE_UP_HOLE:
