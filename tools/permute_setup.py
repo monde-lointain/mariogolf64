@@ -562,8 +562,10 @@ def main() -> None:
     out_dir.mkdir(parents=True, exist_ok=True)
 
     if is_focused:
-        # A copy beside the original, so that its quoted includes still resolve
-        focused_path = Path(c_path).with_name(f".focus_{Path(c_path).name}")
+        # A copy beside the original, so that its quoted includes still resolve,
+        # named for the function, so that runs on the file's other functions
+        # can set up at the same time
+        focused_path = Path(c_path).with_name(f".focus_{function}_{Path(c_path).name}")
         _ = focused_path.write_text(mark_focus_regions(c_path, asm_path, function))
         try:
             write_base(str(focused_path), function, out_dir / "base.c")
