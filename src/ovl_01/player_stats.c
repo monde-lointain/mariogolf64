@@ -638,7 +638,7 @@ void ApplyBetPreset(s32 requestedPreset) {
   }
 
   memory->handicapPlayer = 0;
-  memory->unk2A = 0;
+  memory->unusedHandicapValue = 0;
 }
 
 /* The asset of the given frame of the chosen bet column's icon */

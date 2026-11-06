@@ -57,17 +57,18 @@ typedef struct MenuMemory {
       courseSpin; /* How far the courses still have to turn to reach it */
   /* 0x18 */ s8 holesChoice; /* HOLES_CHOICE_* */
   /* 0x19 */ s8 caddyChoice; /* The debug caddy select's caddy */
-  /* 0x1A */ s8 unk1A;
+  /* 0x1A */ s8 unusedAfterCaddyChoice;
   /* 0x1B */ s8 mainChoice;
   /* 0x1C */ s8 mainChoiceWithoutTransmit;
   /* 0x1D */ s8 clubhouseChoice;
   /* 0x1E */ s8 optionsChoice;
   /* 0x1F */ s8 eraseChoice; /* The erase window's yes or no */
   /* 0x20 */ s8 helpTopicIndex;
-  /* 0x21 */ u8 unk21[0x29 - 0x21];
+  /* 0x21 */ u8 unusedAfterHelpTopic[0x29 - 0x21];
   /* The player whose handicap the handicap screen is choosing */
   /* 0x29 */ s8 handicapPlayer;
-  /* 0x2A */ s8 unk2A;
+  /* Only ever cleared, with handicapPlayer */
+  /* 0x2A */ s8 unusedHandicapValue;
   /* The mini-golf course select's record of three courses */
   /* 0x2B */ s8 miniGolfRecordChoice;
   /* The mini-golf course select's course on its record's disc */
@@ -78,7 +79,7 @@ typedef struct MenuMemory {
   /* 0x2F */ s8 courseIndex; /* And its course */
   /* 0x30 */ s8 statsCourse; /* The course whose statistics show; one past the
                                 open courses totals them */
-  /* 0x31 */ u8 unk31;
+  /* 0x31 */ u8 unusedAfterStatsCourse;
   /* 0x32 */ s8
       statsSpin; /* How far the courses still have to turn to reach it */
   /* 0x33 */ s8 bestTimesCourse; /* The open course whose best times show */
