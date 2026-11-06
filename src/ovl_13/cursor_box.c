@@ -27,7 +27,9 @@ static Vtx f_CursorBoxVertices[] = {
     {{{24, -24, 0}, 0, {0xC00, 0xC00}, {0x00, 0x00, 0xFF, 0xFF}}},
     {{{24, 24, 0}, 0, {0xC00, 0}, {0xFF, 0xFF, 0x00, 0xFF}}},
 };
-static f32 f_CursorCornerPhases[] = {0.0f, 1.5707964f, 3.1415927f, 4.712389f};
+/* The corners' color pulses start a quarter turn apart */
+static f32 f_CursorCornerPhases[] = {0.0f, QUARTER_TURN_RADIANS,
+    2 * QUARTER_TURN_RADIANS, 3 * QUARTER_TURN_RADIANS};
 
 /* Read by no routine */
 static u8 f_UnusedBufferAfterCornerPhases[0x40] UNUSED;
