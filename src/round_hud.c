@@ -1741,7 +1741,7 @@ void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
   f32 points[GREEN_GRID_POINT_COUNT][3];
   GridScreenPoint screenPoints[GREEN_GRID_POINT_COUNT];
   s32 slopes[GREEN_GRID_POINT_COUNT];
-  /* Pads the frame to match; without it 541 words differ, against 345 */
+  /* Pads the frame to match; without it 496 words differ, against 300 */
   s32 unused[GREEN_GRID_POINT_COUNT * 3] UNUSED;
   CoursePoint center;
   ScreenPoint projected;

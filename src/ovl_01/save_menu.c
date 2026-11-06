@@ -1890,10 +1890,10 @@ void DrawSavedGames(Gfx** displayListHead) {
   f32 boardX[COURSE_COUNT];
   f32 boardY[COURSE_COUNT];
   f32 boardScale[COURSE_COUNT];
-  /* Pads the frame to match; without it 795 words differ, against 403 */
+  /* Pads the frame to match; without it 669 words differ, against 287 */
   s32 unusedSlots[COURSE_COUNT] UNUSED;
   s32 drawOrder[COURSE_COUNT];
-  /* Pads the frame to match; without it 785 words differ, against 403 */
+  /* Pads the frame to match; without it 659 words differ, against 287 */
   u8 unusedStack[8] UNUSED;
   SaveData* save = GetSaveData();
   MenuMemory* memory = GetMenuMemory();

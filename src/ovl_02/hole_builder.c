@@ -3789,7 +3789,7 @@ void GetGroundLightColors(GroundLightColor* light, GroundLightColor* shade) {
  */
 #ifdef NON_MATCHING
 void ShadeGroundTiles(void) {
-  /* Pads the frame to match; without it 248 words differ, against 154 */
+  /* Pads the frame to match; without it 230 words differ, against 132 */
   s32 unused[20] UNUSED;
   GroundLightColor light = {24, 22, 16};
   GroundLightColor shade;

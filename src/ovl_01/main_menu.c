@@ -4854,7 +4854,7 @@ void DrawModeSelect(Gfx** displayListHead) {
   f32 boardX[WHEEL_SLOT_LIMIT];
   f32 boardY[WHEEL_SLOT_LIMIT];
   f32 boardScale[WHEEL_SLOT_LIMIT];
-  /* Pads the frame to match; without it 773 words differ, against 175 */
+  /* Pads the frame to match; without it 688 words differ, against 86 */
   s32 unusedSlots[WHEEL_SLOT_LIMIT] UNUSED;
   s32 drawOrder[WHEEL_SLOT_LIMIT];
   s32 position[2];
@@ -5875,12 +5875,12 @@ void DrawCourseSelect(Gfx** displayListHead) {
   Gfx* gfx;
   u16 perspNorm;
   u16 wheelPerspNorm;
-  /* Pads the frame to match; without it 783 words differ, against 49 */
+  /* Pads the frame to match; without it 760 words differ, against 24 */
   u8 unusedStack[0x10] UNUSED;
   f32 iconX[COURSE_COUNT];
   f32 iconY[COURSE_COUNT];
   f32 iconScale[COURSE_COUNT];
-  /* Pads the frame to match; without it 753 words differ, against 49 */
+  /* Pads the frame to match; without it 728 words differ, against 24 */
   u8 unusedStack2[0x18] UNUSED;
   s32 drawOrder[COURSE_COUNT];
   s16 places[TOURNAMENT_PLACE_COUNT];

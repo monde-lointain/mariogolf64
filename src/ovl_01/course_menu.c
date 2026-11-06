@@ -908,7 +908,7 @@ void DrawStatsScrollArrows(Gfx** displayListHead) {
   s16 firstArrow;
   s16 arrowIndex;
   s32 top;
-  /* Pads the frame to match; without it 139 words differ, against 107 */
+  /* Pads the frame to match; without it 122 words differ, against 94 */
   s32 unused[4] UNUSED;
 
   if (hasRowsBelow) {
