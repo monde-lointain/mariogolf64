@@ -232,6 +232,14 @@ void FreeFromHeap(s32 heapIndex, void* pointerToBlock) {
  * nothing shows the sentinel to be one. The register oracle's closest
  * result is these 6 words with no register forced, so allocation isn't
  * the cause. 6 words differ.
+ *
+ * Defining AddMemoryRegion at each of the five places between the sentinel's
+ * stores, in an inner block as the compiler takes no definition after a
+ * statement, gives 13 words (11 in shape) at all of them, so where the
+ * nested function is compiled doesn't affect cse. Wrapping any run of the
+ * five stores in a do-while (0), whose loop end stops cse1's block, gives 14
+ * to 32 words; cse only drops a fixed address's stored value for a store
+ * through a varying address, and the original stores none.
  */
 #ifdef NON_MATCHING
 void InitHeapRegions(Boolean hasExpansionPak) {
