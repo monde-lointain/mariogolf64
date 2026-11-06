@@ -3809,6 +3809,11 @@ void GetGroundLightColors(GroundLightColor* light, GroundLightColor* shade) {
  * the texel's alpha by reading *texel again. As an s16, isMapEdge gives 101
  * words (17 in shape), but the register oracle's closest stays 88, forcing 6.
  * Reading *texel for the alpha leaves 132 words.
+ *
+ * Re-measured on the current draft, writing the fade's kept weight into its
+ * three uses in place of keptWeight gives 95 words, 23 in shape, but the
+ * oracle's closest result is then those 95 words with nothing forced,
+ * against 88 forcing 6, so keptWeight stays. 132 words differ, 14 in shape.
  */
 #ifdef NON_MATCHING
 void ShadeGroundTiles(void) {
