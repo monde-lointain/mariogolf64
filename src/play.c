@@ -22,6 +22,7 @@
 #include "game.h"
 #include "game_flags.h"
 #include "gbi_helpers.h"
+#include "golf_balls.h"
 #include "hole_display.h"
 #include "hole_loader.h"
 #include "hole_triangles.h"
@@ -860,7 +861,6 @@ void LeaveReplaySaveMenu(void);
 void FreeResultCharacters(void);
 void FreeScorecard(void);
 void TallyCoursePoints(void);
-void ResetGolfBalls(void);
 void RememberPlayedHole(void);
 void EnterMenuAtCourseSelect(void);
 void EnterMenuAtTitle(void);

@@ -28,6 +28,7 @@
 #include "libc.h"
 #include "main.h"
 #include "math_util.h"
+#include "menu.h"
 #include "overlay_manager.h"
 #include "rcp.h"
 #include "round_hud.h"
@@ -1505,7 +1506,6 @@ s32 UpdateOpeningCharacters(void) {
 #define CLOSING_SOUND_CHANNEL ROTATING_SOUND_CHANNEL_COUNT
 
 void LaunchDrop(CoursePoint point);
-Boolean IsDonkeyKongUnlocked(void);
 s32 StepOpeningBallSimulation(BallSimulation* simulation);
 void AnimateNameLogos(void);
 void LoadNameLogo(s32 logoIndex, s32 slot);

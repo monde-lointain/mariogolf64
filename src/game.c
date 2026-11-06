@@ -9,6 +9,7 @@
 
 #include <lib/libnusys/nusys.h>
 
+#include "animated_box.h"
 #include "billboard.h"
 #include "boot_logos.h"
 #include "camera.h"
@@ -1191,7 +1192,6 @@ void MusPrintDmaUsage(void);
 s32 __MusIntMemRemaining(void);
 void DrawBillboards(CameraMatrices* matrices, s32 cameraIndex);
 void DrawFadingBillboards(CameraMatrices* matrices, s32 cameraIndex);
-void DrawAnimatedBoxes(void);
 void DrawGround(CameraMatrices* matrices, s32);
 void DrawEffects(CameraMatrices* matrices, Gfx** displayListHead);
 void DrawRain(Gfx** displayListHead, CameraMatrices* matrices);

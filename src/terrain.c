@@ -19,6 +19,7 @@
 #include "game_flags.h"
 #include "gbi_helpers.h"
 #include "hole_builder.h"
+#include "hole_loader.h"
 #include "libc.h"
 #include "main.h"
 #include "overlay_manager.h"
@@ -273,7 +274,6 @@ static s8 f_CellSearchOffsets[GROUND_TILE_POINT_SPAN] = {0, 1, 3, 2};
 static s32 f_SceneMenuSelection;
 
 void ResetMenuChoices(void);
-void ChooseConditionsAndInitHole(void);
 void LoadToolCodeMap(void);
 void ToggleCodeMapCleanup(void);
 void UpdateCellEditor(void);

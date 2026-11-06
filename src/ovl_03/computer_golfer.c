@@ -16,6 +16,7 @@
 #include "hole_loader.h"
 #include "libc.h"
 #include "math_util.h"
+#include "play.h"
 #include "save.h"
 #include "scene.h"
 #include "surface.h"
@@ -235,7 +236,6 @@ s32 PlanCupDistance(ShotMode shotMode);
 s32 FindGreenEdgeOnLine(CoursePoint from, CoursePoint to, CoursePoint edge);
 ClubType ChooseClubForDistance(s32 distance);
 
-s32 GetGaugeFramePower(s32 value);
 s32 StepTrialShot(void);
 Boolean IsTrialShotSafe(void);
 s32 ChooseShotOffset(void);
