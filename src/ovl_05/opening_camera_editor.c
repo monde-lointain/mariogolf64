@@ -475,6 +475,12 @@ void StopEditorMoves(void) {
  * merges the tests into two mask tests: with & or && between them 298 or
  * 309 words differ (102 and 111 in shape), and with * 322. A new flag
  * variable instead of isDone gives 314, in any declaration position.
+ *
+ * The point's velocity has its own velocityX, velocityY and velocityZ, where
+ * the offsets to the target held it too, which keeps 154 words. distance
+ * also holds the velocity's length, the distance moved in an update: a speed
+ * variable for it gives 192 words (44 in shape), and 166 with the velocity's
+ * variables.
  */
 #ifdef NON_MATCHING
 void UpdateCameraEditor(void) {
@@ -545,6 +551,10 @@ void UpdateCameraEditor(void) {
         y = g_CameraEditor.targets[index][1];
         z = g_CameraEditor.targets[index][2];
       } else {
+        f32 velocityX;
+        f32 velocityY;
+        f32 velocityZ;
+
         scale = g_CameraEditor.pointAccelerations[index] / distance;
         g_CameraEditor.pointVelocities[index][0] += offsetX * scale;
         g_CameraEditor.pointVelocities[index][1] += offsetY * scale;
@@ -559,16 +569,16 @@ void UpdateCameraEditor(void) {
           }
         }
 
-        offsetX = g_CameraEditor.pointVelocities[index][0];
-        offsetY = g_CameraEditor.pointVelocities[index][1];
-        offsetZ = g_CameraEditor.pointVelocities[index][2];
-        distance = sqrtf(
-            (offsetX * offsetX) + (offsetY * offsetY) + (offsetZ * offsetZ));
+        velocityX = g_CameraEditor.pointVelocities[index][0];
+        velocityY = g_CameraEditor.pointVelocities[index][1];
+        velocityZ = g_CameraEditor.pointVelocities[index][2];
+        distance = sqrtf((velocityX * velocityX) + (velocityY * velocityY) +
+            (velocityZ * velocityZ));
         if (g_CameraEditor.pointTopSpeeds[index] < distance) {
           scale = g_CameraEditor.pointTopSpeeds[index] / distance;
-          g_CameraEditor.pointVelocities[index][0] = offsetX * scale;
-          g_CameraEditor.pointVelocities[index][1] = offsetY * scale;
-          g_CameraEditor.pointVelocities[index][2] = offsetZ * scale;
+          g_CameraEditor.pointVelocities[index][0] = velocityX * scale;
+          g_CameraEditor.pointVelocities[index][1] = velocityY * scale;
+          g_CameraEditor.pointVelocities[index][2] = velocityZ * scale;
         }
       }
     }
