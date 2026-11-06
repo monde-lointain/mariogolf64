@@ -271,17 +271,18 @@ void DrawHoleTriangles(Gfx** displayListHead, CameraMatrices* matrices UNUSED,
  * The counts in this paragraph were measured before the change below. The
  * sparkle loop has its own section counter, sparkleSection, and the next
  * side is masked to RING_SIDE_COUNT - 1 with &, as the original masks it:
- * the two together take the draft from 65 words differing (19 in shape) to
- * 16 (8). The mask alone gives 364 (14), since it shortens the outer loop so
- * that loop.c hoists one more display list command (0xDC08060A) out of it;
- * the counter alone changes nothing. Starting the counter in the loop's
- * header or before it gives the same. Before these, working out each
- * section's first vertex before the side loop gave 65 words rather than 69
- * (25), and computing the next side once, into nextSide, 69 rather than 79.
- * Masking the side inside RingVertex gave 392 words, 26 in shape, and a u32
- * side 366, 16 in shape. The permuter's best runs, 1347 and 887 (41 words,
- * 15 in shape), kept side + 1 or section + 1 in a u8, used in only some of
- * the places it is needed, which no natural form explains.
+ * the two together take the draft from 65 words differing (19 in shape)
+ * to 16 (8). The mask alone gives 364 (14), since it shortens the outer
+ * loop so that loop.c hoists one more display list command (0xDC08060A)
+ * out of it; the counter alone changes nothing. Starting the counter in
+ * the loop's header or before it gives the same. Before these, working
+ * out each section's first vertex before the side loop gave 65 words
+ * rather than 69, 25 in shape, and computing the next side once, into
+ * nextSide, 69 rather than 79. Masking the side inside RingVertex gave
+ * 392 words, 26 in shape, and a u32 side 366, 16 in shape. The permuter's
+ * best runs, 1347 and 887 (41 words, 15 in shape), kept side + 1 or
+ * section + 1 in a u8, used in only some of the places it is needed,
+ * which no natural form explains.
  *
  * Two of the display list pointers the draft saved were in each other's
  * stack slots, 0x13C and 0x144: those of the pipe sync before
