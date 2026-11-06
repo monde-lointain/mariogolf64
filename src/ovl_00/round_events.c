@@ -1873,7 +1873,7 @@ void DrawReadyGoMovie(Gfx** displayListHead) {
   s32 i;
 
   f_MovieBackBuffer ^= 1;
-  alpha = 255;
+  alpha = OPAQUE_ALPHA;
   if (f_MovieDrawCount == READY_SOUND_DRAW) {
     PlaySoundWithEffects(SOUND_READY, g_NextSoundChannel, READY_GO_SOUND_VOLUME,
         READY_GO_SOUND_REVERB, SOUND_FULL_SCALE);
@@ -1908,7 +1908,8 @@ void DrawReadyGoMovie(Gfx** displayListHead) {
     rotation[AXIS_Y] = 0.0f;
     rotation[AXIS_Z] = 0.0f;
   } else if (f_MovieDrawCount < READY_GO_END_DRAW) {
-    alpha = 255 - ((f_MovieDrawCount - GO_GROW_DRAW) * GO_FADE_PER_FRAME);
+    alpha =
+        OPAQUE_ALPHA - ((f_MovieDrawCount - GO_GROW_DRAW) * GO_FADE_PER_FRAME);
     if (alpha < 0) {
       alpha = 0;
     }
@@ -1941,7 +1942,7 @@ void DrawReadyGoMovie(Gfx** displayListHead) {
   gDPSetTexturePersp(gfx++, G_TP_PERSP);
   gSPClearGeometryMode(gfx++, ALL_GEOMETRY_MODES);
   gSPSetGeometryMode(gfx++, G_SHADE | G_SHADING_SMOOTH);
-  if (alpha == 255) {
+  if (alpha == OPAQUE_ALPHA) {
     gDPPipeSync(gfx++);
     gDPSetRenderMode(gfx++, G_RM_AA_TEX_EDGE, G_RM_AA_TEX_EDGE2);
   } else {

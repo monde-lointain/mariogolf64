@@ -428,7 +428,7 @@ void DrawWipe(Gfx** displayListHead) {
   alignment = (WIPE_ALIGNED_PROGRESS - f_WipeProgress) / WIPE_ALIGNED_PROGRESS;
   shapeOffset = alignment * -(WIPE_SQUARE_SIZE / 2);
   if (f_WipeProgress < WIPE_FADE_START_PROGRESS) {
-    alpha = 255;
+    alpha = OPAQUE_ALPHA;
   } else {
     alpha = (WIPE_OPEN_PROGRESS - f_WipeProgress) * WIPE_FADE_ALPHA_STEP;
   }

@@ -646,8 +646,8 @@ void DrawSwingTrail(Gfx** displayListHead, CameraMatrices* matrices) {
       fade = f_SwingTrailAlpha * nearness / SWING_TRAIL_SEGMENTS;
       alpha = fade * 191.0f;
       gSPModifyVertex(gfx++, step * 2, G_MWO_POINT_RGBA, 0xFFFFFF00);
-      if (alpha > 255) {
-        alpha = 255;
+      if (alpha > OPAQUE_ALPHA) {
+        alpha = OPAQUE_ALPHA;
       }
 
       gSPModifyVertex(

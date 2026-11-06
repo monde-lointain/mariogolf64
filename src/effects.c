@@ -548,7 +548,7 @@ void SpawnSparkleNearPoint(u32 slotIndex, s32 pointId) {
         effect->velocity[AXIS_Y] = SPARKLE_FALL_SPEED;
         effect->velocity[AXIS_Z] = 0;
         effect->color = 0;
-        effect->alpha = 255.0f;
+        effect->alpha = OPAQUE_ALPHA;
         effect->alphaStep = -4.0f;
         effect->scale = 6.0f;
         effect->scaleStep = -0.2f;
@@ -640,7 +640,7 @@ void LaunchDrop(CoursePoint point) {
       effect->kind = EFFECT_KIND_DROP;
       effect->alphaStep = 0;
       effect->scaleStep = 0;
-      effect->alpha = 255.0f;
+      effect->alpha = OPAQUE_ALPHA;
       effect->scale = 0.5f;
       translation[AXIS_X] = effect->position[AXIS_X];
       translation[AXIS_Y] = effect->position[AXIS_Y];
@@ -673,7 +673,7 @@ void SpawnSparkle(CoursePoint position) {
       effect->velocity[AXIS_Y] = SPARKLE_FALL_SPEED;
       effect->velocity[AXIS_Z] = 0;
       effect->color = 0;
-      effect->alpha = 255.0f;
+      effect->alpha = OPAQUE_ALPHA;
       effect->alphaStep = -4.0f;
       effect->scale = 24.0f;
       effect->scaleStep = -0.2f;
@@ -885,7 +885,7 @@ void SpawnRisingClumps(CoursePoint unusedPoint UNUSED) {
       effect->velocity[AXIS_Y] =
           ((spawnCount * 0.3f) + 0.1f + (guRandom() % 10 * 0.01f)) * -1.5f;
       effect->velocity[AXIS_Z] = 0;
-      effect->alpha = 255.0f;
+      effect->alpha = OPAQUE_ALPHA;
       effect->alphaStep = -1.0f;
       effect->scale = (guRandom() % 30 * 0.1f) + 1.0f;
       effect->scaleStep = (guRandom() % 10 * 0.001f) + 0.04;
@@ -1165,7 +1165,7 @@ void SpawnShotDebris(
       effect->kind = EFFECT_KIND_DROP;
       effect->alphaStep = 0;
       effect->scaleStep = 0;
-      effect->alpha = 255.0f;
+      effect->alpha = OPAQUE_ALPHA;
       effect->scale = SHOT_DROP_SCALE;
       translation[AXIS_X] = effect->position[AXIS_X];
       translation[AXIS_Y] = effect->position[AXIS_Y];
@@ -1206,7 +1206,7 @@ void SpawnShotDebris(
       divotEffect->kind = EFFECT_KIND_DIVOT;
       divotEffect->tilt = 0;
       divotEffect->alphaStep = 0;
-      divotEffect->alpha = 255.0f;
+      divotEffect->alpha = OPAQUE_ALPHA;
       divotEffect->velocity[AXIS_Y] = -DROP_SLOWEST_RISE_SPEED -
           (headingIndex * DROP_SPEED_STEP * COURSE_TO_WORLD_SCALE);
       divotEffect->scale = debrisAmount * DIVOT_SCALE_PER_AMOUNT;
@@ -1251,7 +1251,7 @@ void SpawnShotDebris(
       divotMarkEffect->alphaStep = 0;
       divotMarkEffect->scaleStep = 0;
       divotMarkEffect->kind = EFFECT_KIND_DIVOT_MARK;
-      divotMarkEffect->alpha = 255.0f;
+      divotMarkEffect->alpha = OPAQUE_ALPHA;
       translation[AXIS_X] = divotMarkEffect->position[AXIS_X];
       translation[AXIS_Y] = divotMarkEffect->position[AXIS_Y];
       translation[AXIS_Z] = divotMarkEffect->position[AXIS_Z];

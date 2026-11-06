@@ -2371,7 +2371,7 @@ void DrawScoresPage(Gfx** displayListHead) {
       gDPSetRenderMode(gfx++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
       gDPSetCombineLERP(gfx++, PRIMITIVE, 0, TEXEL0, 0, PRIMITIVE, 0, TEXEL0, 0,
           PRIMITIVE, 0, TEXEL0, 0, PRIMITIVE, 0, TEXEL0, 0);
-      cellAlpha = 0xFF;
+      cellAlpha = OPAQUE_ALPHA;
       break;
     case SCORES_STYLE_FADED:
       gDPSetEnvColor(gfx++, 0, 0x3F, 0, OPAQUE_ALPHA);
@@ -2386,7 +2386,7 @@ void DrawScoresPage(Gfx** displayListHead) {
     case SCORES_STYLE_OPAQUE:
       /* The cells are opaque, so the original leaves their alpha unset */
 #ifdef AVOID_UB
-      cellAlpha = 0xFF;
+      cellAlpha = OPAQUE_ALPHA;
 #endif
       gDPSetEnvColor(gfx++, 0, 0x1F, 0, OPAQUE_ALPHA);
       gDPSetBlendColor(gfx++, 0, 0, 0, 0x40);
@@ -2407,7 +2407,7 @@ void DrawScoresPage(Gfx** displayListHead) {
       gDPSetCombineLERP(gfx++, PRIMITIVE, ENVIRONMENT, TEXEL0, ENVIRONMENT,
           PRIMITIVE, 0, TEXEL0, 0, PRIMITIVE, ENVIRONMENT, TEXEL0, ENVIRONMENT,
           PRIMITIVE, 0, TEXEL0, 0);
-      cellAlpha = 0xFF;
+      cellAlpha = OPAQUE_ALPHA;
       break;
   }
 

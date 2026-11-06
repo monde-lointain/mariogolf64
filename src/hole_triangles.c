@@ -397,7 +397,7 @@ void DrawRings(Gfx** displayListHead, CameraMatrices* matrices UNUSED,
             state = RING_STATE_FADED;
           }
 
-          alpha = 0xFF - (state * RING_FADE_STEP);
+          alpha = OPAQUE_ALPHA - (state * RING_FADE_STEP);
           if (alpha < 0) {
             alpha = 0;
           }
@@ -407,7 +407,7 @@ void DrawRings(Gfx** displayListHead, CameraMatrices* matrices UNUSED,
           AppendSyncedRdpState(
               gfx, gDPSetRenderMode, G_RM_AA_ZB_XLU_SURF, G_RM_AA_ZB_XLU_SURF2);
         } else {
-          alpha = 0xFF;
+          alpha = OPAQUE_ALPHA;
           AppendSyncedRdpState(
               gfx, gDPSetRenderMode, G_RM_AA_ZB_OPA_SURF, G_RM_AA_ZB_OPA_SURF2);
         }

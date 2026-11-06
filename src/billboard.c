@@ -548,7 +548,7 @@ void DrawBillboards(CameraMatrices* cameraMatrices, s32 cameraIndex) {
 
     alpha = -viewDepth;
     if (alpha >= 0x100) {
-      alpha = 0xFF;
+      alpha = OPAQUE_ALPHA;
     }
 
     if (alpha < NEAR_BILLBOARD_ALPHA_MIN) {
@@ -556,7 +556,7 @@ void DrawBillboards(CameraMatrices* cameraMatrices, s32 cameraIndex) {
     }
 
     if (viewDepth < ballDepth) {
-      alpha = 0xFF;
+      alpha = OPAQUE_ALPHA;
     }
 
     if (IsDebugBButtonView() &&
@@ -565,7 +565,7 @@ void DrawBillboards(CameraMatrices* cameraMatrices, s32 cameraIndex) {
       continue;
     }
 
-    if (alpha < 0xFF) {
+    if (alpha < OPAQUE_ALPHA) {
       continue;
     }
 
@@ -690,7 +690,7 @@ void DrawFadingBillboards(CameraMatrices* cameraMatrices, s32 cameraIndex) {
 
     alpha = -viewDepth;
     if (alpha >= 0x100) {
-      alpha = 0xFF;
+      alpha = OPAQUE_ALPHA;
     }
 
     if (alpha < NEAR_BILLBOARD_ALPHA_MIN) {
@@ -698,20 +698,20 @@ void DrawFadingBillboards(CameraMatrices* cameraMatrices, s32 cameraIndex) {
     }
 
     if (viewDepth < ballDepth) {
-      alpha = 0xFF;
+      alpha = OPAQUE_ALPHA;
     }
 
-    if (alpha == 0xFF) {
+    if (alpha == OPAQUE_ALPHA) {
       continue;
     }
 
-    if (!hasTranslucentMode && alpha < 0xFF) {
+    if (!hasTranslucentMode && alpha < OPAQUE_ALPHA) {
       hasTranslucentMode = TRUE;
       gDPPipeSync(gfx++);
       gDPSetRenderMode(gfx++, G_RM_FOG_SHADE_A, G_RM_ZB_XLU_SURF2);
     }
 
-    if (alpha < 0xFF) {
+    if (alpha < OPAQUE_ALPHA) {
       gDPSetPrimColor(gfx++, 0, 0, 0x3F, 0xB4, 0x00, alpha);
     }
 

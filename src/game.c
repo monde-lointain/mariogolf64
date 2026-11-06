@@ -2173,8 +2173,8 @@ s32 DrawGame(void) {
       f_FadeAlpha += 8;
     }
 
-    if (f_FadeAlpha > 0xFF) {
-      f_FadeAlpha = 0xFF;
+    if (f_FadeAlpha > OPAQUE_ALPHA) {
+      f_FadeAlpha = OPAQUE_ALPHA;
     }
 
     if (f_FadeAlpha < 0) {

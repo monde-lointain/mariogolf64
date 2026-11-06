@@ -1687,8 +1687,8 @@ void DrawStaffRoll(Gfx** displayListHead) {
       fadeAlpha += 0x100;
     }
 
-    if (fadeAlpha > 255) {
-      fadeAlpha = 255;
+    if (fadeAlpha > OPAQUE_ALPHA) {
+      fadeAlpha = OPAQUE_ALPHA;
     }
 
     if (fadeAlpha < 0) {
@@ -1753,8 +1753,8 @@ void DrawStaffRoll(Gfx** displayListHead) {
     }
   } else {
     closingAlpha = (f_StaffRollFrame - CLOSING_FRAME) * CLOSING_FADE_RATE;
-    if (closingAlpha > 255) {
-      closingAlpha = 255;
+    if (closingAlpha > OPAQUE_ALPHA) {
+      closingAlpha = OPAQUE_ALPHA;
     }
   }
 

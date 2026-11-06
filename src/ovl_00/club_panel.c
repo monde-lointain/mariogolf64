@@ -408,7 +408,7 @@ void DrawClubPanel(Gfx** displayListHead) {
     gDPPipeSync(gfx++);
     gDPSetRenderMode(gfx++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
   } else {
-    alpha = 255;
+    alpha = OPAQUE_ALPHA;
     gDPPipeSync(gfx++);
     gDPSetRenderMode(gfx++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
   }
