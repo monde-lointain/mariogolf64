@@ -2158,6 +2158,10 @@ void BuildShotPreview(ShotLaunch* swing, s32 playerState) {
  * words, 12 in shape, against 56 without it. But the register oracle's
  * closest result without the block is 22 words, against 24, forcing 14
  * pseudos either way, so the block is gone. 56 words differ, 12 in shape.
+ *
+ * A focused permuter run works out dy before dx, which gives 48 words, 12 in
+ * shape, but the register oracle's closest result is then 37 words, forcing 15
+ * pseudos, against 22 forcing 14, so the gain is in the registers alone.
  */
 #ifdef NON_MATCHING
 void DrawShotPreview(CameraMatrices* matrices) {
