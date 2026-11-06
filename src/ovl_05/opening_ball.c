@@ -576,8 +576,7 @@ s32 StepOpeningBallSimulation(BallSimulation* simulation) {
         s32 hitsBillboard;
         s32 holeHit;
 
-        if ((simulation->purpose == LAUNCH_PURPOSE_STROKE ||
-                simulation->purpose == LAUNCH_PURPOSE_TRIAL) &&
+        if (IsStrokeOrTrialLaunch(simulation->purpose) &&
             FindRingHit(startX, startY, startZ, simulation->position[AXIS_X],
                 simulation->position[AXIS_Y], simulation->position[AXIS_Z],
                 &f_OpeningContactTriangle, &f_OpeningContactFraction) > 0) {

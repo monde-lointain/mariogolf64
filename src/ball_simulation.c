@@ -520,8 +520,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
         s32 holeHit;
 
         if (g_GameState.gameMode == GAME_MODE_RING_SHOT &&
-            (simulation->purpose == LAUNCH_PURPOSE_STROKE ||
-                simulation->purpose == LAUNCH_PURPOSE_TRIAL) &&
+            IsStrokeOrTrialLaunch(simulation->purpose) &&
             FindRingHit(startX, startY, startZ, simulation->position[AXIS_X],
                 simulation->position[AXIS_Y], simulation->position[AXIS_Z],
                 &hit, &hitFraction) > 0 &&

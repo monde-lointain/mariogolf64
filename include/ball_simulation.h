@@ -172,6 +172,10 @@ enum LaunchPurpose {
   LAUNCH_PURPOSE_SHOT_PREVIEW = 5
 };
 
+/* Whether a ball was launched for a stroke or for a trial of one */
+#define IsStrokeOrTrialLaunch(purpose) \
+  ((purpose) == LAUNCH_PURPOSE_STROKE || (purpose) == LAUNCH_PURPOSE_TRIAL)
+
 typedef struct BallSimulation {
   /* 0x00 */ s32 startPosition[3];
   /*
