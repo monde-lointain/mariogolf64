@@ -2701,6 +2701,10 @@ void ShowBirdieBadgeCount(s32 badgeCount) {
 #define BADGE_COUNT_RISE_FRAME 40
 #define BADGE_COUNT_ADD_FRAME 15
 #define BADGE_COUNT_SOUND 0x6B
+/* The badge drops in from above its resting place, then rises off the top */
+#define BADGE_SLIDE_PER_FRAME 4
+#define BADGE_DROP_START_OFFSET (-24)
+#define BADGE_RISEN_OFFSET (-100)
 #define COUNT_GLYPHS_HEIGHT 256
 
 /*
@@ -2722,14 +2726,16 @@ void DrawBirdieBadgeCount(Gfx** displayListHead) {
     gDPSetTextureFilter(gfx++, G_TF_POINT);
     spinFrame = f_BadgeCountFrame / 2 % BADGE_SPIN_FRAME_COUNT;
     if (f_BadgeCountFrame < BADGE_COUNT_RISE_FRAME) {
-      offsetY = (f_BadgeCountFrame * 4) - 24;
+      offsetY =
+          (f_BadgeCountFrame * BADGE_SLIDE_PER_FRAME) + BADGE_DROP_START_OFFSET;
       if (offsetY > 0) {
         offsetY = 0;
       }
     } else {
-      offsetY = (BADGE_COUNT_RISE_FRAME - f_BadgeCountFrame) * 4;
-      if (offsetY < -100) {
-        offsetY = -100;
+      offsetY =
+          (BADGE_COUNT_RISE_FRAME - f_BadgeCountFrame) * BADGE_SLIDE_PER_FRAME;
+      if (offsetY < BADGE_RISEN_OFFSET) {
+        offsetY = BADGE_RISEN_OFFSET;
       }
     }
 
