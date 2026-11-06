@@ -2977,8 +2977,8 @@ void ShowHoleOutBanner(s32 playerIndex) {
  * in place, the ball placement gave 90 words (48 in shape) against 146 (78) as
  * a helper.
  *
- * Doesn't match: 68 words differ, 36 in shape, spread through the routine's
- * states; the register oracle's closest result is 51 words with 4 pseudos
+ * Doesn't match: 51 words differ, 29 in shape, spread through the routine's
+ * states; the register oracle's closest result is 42 words with 3 pseudos
  * forced, so most of the difference is in the code. The counts in the
  * paragraphs after the next were measured when 454 words differed, 184 in
  * shape.
@@ -3116,6 +3116,18 @@ void ShowHoleOutBanner(s32 playerIndex) {
  * For the holed-out reaction, the subtraction in the switch after the != 1
  * test gives 75 (39), testing for a hole in one first without the local 71,
  * also 39 in shape, and the local with the != 1 test first 74 (36).
+ *
+ * A holed-out player's notable shot is counted from a scoreToPar of its own,
+ * worked out before the hole-in-one test as the reaction's is, as the
+ * original subtracts the par in the delay slot of that test's branch, and
+ * the birdie's case comes first in the switch. Together these take the draft
+ * from 68 words differing, 36 in shape, to 51 (29), the switch's code then
+ * matching, and the register oracle's closest result from 51 words, forcing
+ * 4 pseudos, to 42, forcing 3. The local alone gives 55 words (31 in shape),
+ * the birdie first alone 66 (34), and with the local, the birdie in the
+ * middle or last 55. With the birdie first, the local declared for the whole
+ * state gives 86 words (48 in shape), and set after the hole-in-one test 66
+ * (34). 51 words differ, 29 in shape.
  */
 #ifdef NON_MATCHING
 /* Whether the stopwatches run in a player state: from aiming to the flight */
@@ -4885,18 +4897,20 @@ void UpdateTurns(void) {
         PlaceAndViewCharacter(0);
         f_ShouldUpdateReaction = 1;
         if (g_Players[playerIndex].holeStatus == HOLE_STATUS_HOLED_OUT) {
+          s32 scoreToPar = g_Players[playerIndex].strokeCount - g_HoleSetup.par;
+
           if (g_Players[playerIndex].strokeCount == 1) {
             CountNotableShot(playerIndex, SHOT_KIND_HOLE_IN_ONE);
           } else {
-            switch (g_Players[playerIndex].strokeCount - g_HoleSetup.par) {
-              case SCORE_TO_PAR_ALBATROSS:
-                CountNotableShot(playerIndex, SHOT_KIND_ALBATROSS);
+            switch (scoreToPar) {
+              case SCORE_TO_PAR_BIRDIE:
+                CountNotableShot(playerIndex, SHOT_KIND_BIRDIE);
                 break;
               case SCORE_TO_PAR_EAGLE:
                 CountNotableShot(playerIndex, SHOT_KIND_EAGLE);
                 break;
-              case SCORE_TO_PAR_BIRDIE:
-                CountNotableShot(playerIndex, SHOT_KIND_BIRDIE);
+              case SCORE_TO_PAR_ALBATROSS:
+                CountNotableShot(playerIndex, SHOT_KIND_ALBATROSS);
                 break;
             }
           }
