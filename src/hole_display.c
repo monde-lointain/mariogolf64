@@ -2234,22 +2234,22 @@ void StartHudAnimation(s32 animation) {
       break;
     case HUD_ANIMATION_FADE_OUT:
     case HUD_ANIMATION_FAST_FADE_OUT:
-      f_HudAnimationFramesLeft = 255;
+      f_HudAnimationFramesLeft = OPAQUE_ALPHA;
       break;
     case HUD_ANIMATION_TURN_AWAY:
-      f_HudAnimationFramesLeft = 255;
+      f_HudAnimationFramesLeft = TILE_ANIMATION_FRAME_COUNT;
       break;
     case HUD_ANIMATION_SLIDE_APART:
-      f_HudAnimationFramesLeft = 160;
+      f_HudAnimationFramesLeft = SCREEN_WIDTH / 2;
       break;
     case HUD_ANIMATION_SPIRAL:
       f_HudAnimationFramesLeft = 72;
       break;
     case HUD_ANIMATION_TILES:
-      f_HudAnimationFramesLeft = 255;
+      f_HudAnimationFramesLeft = TILE_ANIMATION_FRAME_COUNT;
       break;
     case HUD_ANIMATION_SLICES:
-      f_HudAnimationFramesLeft = 64;
+      f_HudAnimationFramesLeft = SLICE_ANIMATION_FRAME_COUNT;
       break;
     case HUD_ANIMATION_NEGATIVE:
     case HUD_ANIMATION_MOTION_BLUR:
