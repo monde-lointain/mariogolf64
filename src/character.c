@@ -2233,6 +2233,17 @@ void PlaceCharacter(u32 slotIndex, CoursePoint point, Radians heading) {
  *
  * Setting the impact flash's light color through SetLightColor, which
  * works out the halved level once, gives 90 words, 68 in shape.
+ *
+ * Reading isLefty through a static inline function, so that the condition
+ * is a call, gives the general form, but each arm then loads the rotation
+ * itself: 59 words (25 in shape). A second inline function that reads the
+ * rotation into a local and picks it or its negation gives 22 words (10
+ * in shape), still negating in place, with the register oracle forcing
+ * nothing; so do the same pick written as an if that negates the local
+ * and as a ?: whose other arm reads the rotation again, and an if and an
+ * else that set a result give 53 (23). jump.c's rewrite of an if and an
+ * else into a set and a conditional set takes only integer modes, so it
+ * isn't the original's route for the float.
  */
 #ifdef NON_MATCHING
 void DrawCharacterAndShadow(
