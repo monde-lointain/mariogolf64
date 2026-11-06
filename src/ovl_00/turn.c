@@ -3096,6 +3096,14 @@ void ShowHoleOutBanner(s32 playerIndex) {
  * oracle's closest result fell from 75 words to 68, with 5 registers forced
  * for each. Testing for a hole in one first without the local gives 80 (46),
  * and the local with the != 1 test first 83 (43).
+ *
+ * At the end, the original stores the target point's truncated z with swc1
+ * and loads it back for GetGroundHeight; our cse passes the truncated value
+ * on in a register instead (mfc1), so the original's cse may not have kept
+ * the stored value between the store and the call. Declaring g_CurrentShot
+ * volatile for all of turn.c would cause that reload, but it takes this
+ * routine to 416 words (190 in shape) and stops matched routines from
+ * matching, such as AimDownRange (44 words differ) and CraneAimCamera (89).
  */
 #ifdef NON_MATCHING
 /* Whether the stopwatches run in a player state: from aiming to the flight */
