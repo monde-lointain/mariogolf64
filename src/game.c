@@ -1113,8 +1113,11 @@ void BuildDynamicTextures(Gfx** displayListHead) {
 enum DrawMode {
   DRAW_MODE_INSET_SCREEN,
   DRAW_MODE_COURSE,
-  /* DRAW_MODE_UNK2 and DRAW_MODE_OPENING are never chosen */
-  DRAW_MODE_UNK2, /* Draws as DRAW_MODE_CONFIRM_WAIT does */
+  /*
+   * DRAW_MODE_UNUSED_CLEAR and DRAW_MODE_OPENING are never chosen. The first
+   * only clears the screen, as DRAW_MODE_CONFIRM_WAIT does.
+   */
+  DRAW_MODE_UNUSED_CLEAR,
   DRAW_MODE_MAP_PERSPECTIVE,
   DRAW_MODE_MAP_ISOMETRIC,
   DRAW_MODE_MAP_MINIATURE,
@@ -1500,7 +1503,7 @@ s32 DrawGame(void) {
             MAP_MINIATURE_SCALE, MAP_MINIATURE_SCALE);
         LoadProjection();
         break;
-      case DRAW_MODE_UNK2:
+      case DRAW_MODE_UNUSED_CLEAR:
       case DRAW_MODE_CONFIRM_WAIT:
         if (viewIndex == 0) {
           ClearBuffers(BUFFER_CLEAR_WHOLE);
