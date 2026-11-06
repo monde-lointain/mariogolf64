@@ -48,6 +48,8 @@ import fncompare
 
 ORACLE_DIR = fncompare.ROOT / "build" / "oracle"
 MAX_ROUNDS = 8
+# The assembly, the C file and the function, before any forced pairs
+MIN_ARGUMENT_COUNT = 3
 # The instructions a register needs from a pseudo to count as holding it
 MIN_SPLIT_VOTES = 2
 FIRST_PSEUDO_REGISTER = blame.FIRST_PSEUDO_REGISTER
@@ -624,24 +626,50 @@ def print_allocation(compilation: Compilation, lines: dict[int, set[int]]) -> No
         print(f"  pseudo {allocno['pseudo']} {description}; lines {used}")
 
 
-def main() -> None:
-    """Search for and explain the allocation that matches the function."""
-    arguments = sys.argv[1:]
+@dataclass
+class Request:
+    """What the command line asks for."""
+
+    show_allocation: bool
+    show_splits: bool
+    asm_path: str
+    c_path: str
+    function: str
+    force: dict[int, int]
+
+
+def parse_arguments(arguments: list[str]) -> Request:
+    """Read the command line, or exit with the usage if it doesn't fit."""
     show_allocation = "--allocation" in arguments
     if show_allocation:
         arguments.remove("--allocation")
     show_splits = "--splits" in arguments
     if show_splits:
         arguments.remove("--splits")
-    asm_path, c_path, function, *pairs = fncompare.expand_function_name(arguments)
-    if not (ORACLE_DIR / "cc1.debug").exists():
-        sys.exit("run tools/build_oracle.sh first")
-    os.environ["KMC_DIR"] = str(ORACLE_DIR)
-    fncompare.KMC_DIR = ORACLE_DIR
+    arguments = fncompare.expand_function_name(arguments)
+    if len(arguments) < MIN_ARGUMENT_COUNT or any(
+        argument.startswith("-") for argument in arguments
+    ):
+        sys.exit(__doc__)
+    asm_path, c_path, function, *pairs = arguments
     force = {
         int(pseudo): parse_register(hard)
         for pseudo, hard in (pair.split("=") for pair in pairs)
     }
+    return Request(show_allocation, show_splits, asm_path, c_path, function, force)
+
+
+def main() -> None:
+    """Search for and explain the allocation that matches the function."""
+    request = parse_arguments(sys.argv[1:])
+    asm_path, c_path, function = request.asm_path, request.c_path, request.function
+    force = request.force
+    show_allocation = request.show_allocation
+    show_splits = request.show_splits
+    if not (ORACLE_DIR / "cc1.debug").exists():
+        sys.exit("run tools/build_oracle.sh first")
+    os.environ["KMC_DIR"] = str(ORACLE_DIR)
+    fncompare.KMC_DIR = ORACLE_DIR
     original = fncompare.read_original(asm_path, c_path, function)
     target = original.routine
     print(function)
