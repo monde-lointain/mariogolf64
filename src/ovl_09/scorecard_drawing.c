@@ -2011,8 +2011,9 @@ void DrawLeaderboardPage(Gfx** displayListHead) {
           PLAYER_CONTESTANT) {
         gSPDisplayList(gfx++, g_DecalTextureSetup);
         /*
-         * In its own block, as without it 150 words differ, 42 in shape,
-         * against 120 and 46
+         * In its own block, as without it 117 words differ, 35 in shape,
+         * against 87 and 39, and the register oracle's closest result rises
+         * from 60 words, forcing 12 pseudos, to 74, forcing 10
          */
         IN_OWN_BLOCK(gDPPipeSync(gfx++));
         gDPSetTextureLUT(gfx++, G_TT_RGBA16);
