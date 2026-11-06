@@ -2118,6 +2118,13 @@ INCLUDE_ASM("asm/nonmatchings/play", RebuildGroundTextureCoordinates);
  * groups' loop and the vertex segments' loop. A counter of its own for
  * the segments, declared before or after j, gives 903 words (233 in
  * shape).
+ *
+ * A natural permuter run's best, 814 words, reads column into an unsigned
+ * temporary before the middle grid row and uses it in place of the grid
+ * macros' cast at some of the later indices, for the halving at some and the
+ * parity at others. Working out the column's parity once per half, beside
+ * nextColumnParity, and passing it to GridVertexOfParity in the middle and
+ * bottom rows gives 933 to 1047 words, and declaring column a u32 leaves 897.
  */
 void DrawGround(CameraMatrices* matrices, s32 terrainStyle) {
   u8 snapsEdge[2][TILE_VERTEX_SEGMENT_COUNT]; /* For the current and the last
