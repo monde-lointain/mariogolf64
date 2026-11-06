@@ -75,7 +75,8 @@
 #define CLUBHOUSE_ROOM_CHARACTER_TABLE 4
 #define CLUBHOUSE_ROOM_BEST_TIMES 5
 
-/* The options screen's choices; game flag 0x55 adds the sound test's */
+/* The options screen's choices; GAME_FLAG_OPTIONS_SOUND_TEST adds the sound
+ * test's */
 #define OPTIONS_CHOICE_MUSIC 0
 #define OPTIONS_CHOICE_MONO 1
 #define OPTIONS_CHOICE_CAMERA 2
@@ -3407,7 +3408,7 @@ void UpdateOptionsScreen(void) {
       PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
     }
 
-    if (IsGameFlagSet(GAME_FLAG_UNK55)) {
+    if (IsGameFlagSet(GAME_FLAG_OPTIONS_SOUND_TEST)) {
       if (g_MenuMemory.optionsChoice >= OPTIONS_SOUND_TEST_CHOICE_COUNT) {
         g_MenuMemory.optionsChoice = 0;
       }
@@ -7234,7 +7235,7 @@ void DrawOptionsScreen(Gfx** displayListHead) {
     }
   }
 
-  if (IsGameFlagSet(GAME_FLAG_UNK55)) {
+  if (IsGameFlagSet(GAME_FLAG_OPTIONS_SOUND_TEST)) {
     BeginShadowedText(&gfx);
     SetTextColor(&gfx, 255, 255, 255);
     if (g_MenuMemory.optionsChoice == OPTIONS_CHOICE_SONG) {

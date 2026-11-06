@@ -1046,7 +1046,7 @@ void DrawClubSlotsLogo(
       starCount += f_ReelStrips[index][symbolIndex] == SYMBOL_STAR;
     }
 
-    if (IsGameFlagSet(GAME_FLAG_UNK55)) {
+    if (IsGameFlagSet(GAME_FLAG_OPTIONS_SOUND_TEST)) {
       starCount = LAST_REEL;
     }
   }

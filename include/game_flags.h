@@ -291,9 +291,9 @@
  */
 #define GAME_FLAG_FAST_AUTOPLAY 0x32
 #define GAME_FLAG_AUTOPLAY 0x9B
-/* A flag that Club Slots and the main menu read, whose purpose is not yet
- * known */
-#define GAME_FLAG_UNK55 0x55
+/* Adds the sound test's choices to the options screen. Club Slots' logo
+ * also reads it, but to no visible effect */
+#define GAME_FLAG_OPTIONS_SOUND_TEST 0x55
 
 /*
  * Has the computer golfers aim to hole out in no strokes, take 20 trials at
