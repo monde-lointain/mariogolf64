@@ -56,7 +56,8 @@ enum TransmitOption {
 #define BRING_BRINGING 3
 /* Whether to bring more characters */
 #define BRING_ASKING 4
-#define BRING_UNK5 5
+/* Never set; its arm does nothing */
+#define BRING_UNUSED 5
 #define BRING_BROUGHT 7
 /* The character to replace */
 #define BRING_CHOOSING_SLOT 8
@@ -884,7 +885,7 @@ void UpdateBringCharacters(void) {
       }
 
       break;
-    case BRING_UNK5: /* Does nothing */
+    case BRING_UNUSED:
       break;
   }
 }
