@@ -1076,11 +1076,8 @@ void DrawNamePlate(Gfx** displayListHead, s32 centerX, s32 centerY) {
  * oracle's closest result is 96 words, forcing 2 pseudos. 102 words
  * differ, 6 in shape.
  *
- * A focused permuter run's best, 29 words (7 in shape), sets the height's
- * half in a variable before the tile is chosen; its srl then takes the place
- * where the original loads 88 into $t3, and the original halves both sizes
- * just before the call. Set just before the call instead, the height's half,
- * the width's or both give 102 words (6).
+ * Set just before the call, the height's half, the width's or both give 102
+ * words (6).
  *
  * The first hole test reads holeIndex first and the second reads hole first,
  * as the original's bne operands show for each: written hole first, the
@@ -1090,6 +1087,16 @@ void DrawNamePlate(Gfx** displayListHead, s32 centerX, s32 centerY) {
  * oracle's closest result is still 96 words, forcing 2 pseudos, and setting
  * either half size or both just before the call gives 100 words (6). 100
  * words differ, 6 in shape.
+ *
+ * The height's half has a variable of its own, halfHeight, set once the sizes
+ * are, before the tile is chosen. That takes the draft from 100 words to 27,
+ * 6 in shape to 7, and the register oracle's closest result from 96 words,
+ * forcing 2 pseudos, to these 27 with none forced. Its srl takes the place
+ * where the original loads the stars' top, 88, into $t3; the original halves
+ * the height later, just before the call. Declared after any of the sizes, the
+ * tile or the course it gives the same; halving the width there too gives 55
+ * (15), and a top variable, set from STARS_TOP in each arm of the size test or
+ * as the top edge before the tile, 109 to 173. 27 words differ, 7 in shape.
  */
 #ifdef NON_MATCHING
 void DrawRingShotStars(
@@ -1112,6 +1119,7 @@ void DrawRingShotStars(
   s32 width;
   s32 height;
   s32 left;
+  s32 halfHeight;
   s32 tile;
   s32 course;
   /*
@@ -1163,6 +1171,7 @@ void DrawRingShotStars(
       left = (hole * STAR_SPACING) + STARS_LEFT;
     }
 
+    halfHeight = height / 2;
     course = memory->courseIndex;
     if (hole == memory->holeIndex) {
       tile = (save->records.hasRingShotStar[course][hole] == 0)
@@ -1175,9 +1184,9 @@ void DrawRingShotStars(
     }
 
     DrawTextureRect(&gfx, QuarterPixels(left - (width / 2)),
-        QuarterPixels(STARS_TOP - (height / 2)),
+        QuarterPixels(STARS_TOP - halfHeight),
         QuarterPixels(left + STAR_WIDTH + (width / 2)),
-        QuarterPixels(STARS_TOP + STAR_HEIGHT + (height / 2)), tile, 0, 0,
+        QuarterPixels(STARS_TOP + STAR_HEIGHT + halfHeight), tile, 0, 0,
         (STAR_WIDTH * TEXEL_STEP_ONE) / (width + STAR_WIDTH),
         (STAR_HEIGHT * TEXEL_STEP_ONE) / (height + STAR_HEIGHT));
     gDPPipeSync(gfx++);
