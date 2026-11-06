@@ -87,8 +87,13 @@ enum InsetViewState {
 typedef struct InsetView {
   /* 0x00 */ s32 animation; /* INSET_VIEW_* */
   /* 0x04 */ s32 step;
-  /* 0x08 */ s32 unk8;
-  /* 0x0C */ s32 unkC;
+  /*
+   * Two codes nothing reads. The source code is the same for the landing
+   * reaction's insets and differs for the flyover's; the size code is the
+   * same for the two 128-pixel insets and differs for the small landing one.
+   */
+  /* 0x08 */ s32 ignoredSourceCode;
+  /* 0x0C */ s32 ignoredSizeCode;
 } InsetView; /* size = 0x10 */
 
 extern InsetView g_InsetView;

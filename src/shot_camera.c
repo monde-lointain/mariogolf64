@@ -279,6 +279,9 @@ enum ResultSound {
 #define FLYOVER_INSET_CENTER_X 160
 #define FLYOVER_INSET_CENTER_Y 112
 #define FLYOVER_INSET_SIZE 128
+/* InsetView's ignored codes */
+#define FLYOVER_INSET_SOURCE_CODE 100
+#define FLYOVER_INSET_SIZE_CODE 101
 /*
  * The text slots that the hole's introduction blanks. The menus leave a
  * prompt in the first and a choice in the second, and the round's coin flip
@@ -1771,8 +1774,8 @@ s32 StepHoleFlyover(void) {
       g_HoleSetup.teePosition[AXIS_Y] - g_HoleSetup.cupPosition[AXIS_Y];
   offset[AXIS_Z] =
       g_HoleSetup.teePosition[AXIS_Z] - g_HoleSetup.cupPosition[AXIS_Z];
-  g_InsetView.unk8 = 100;
-  g_InsetView.unkC = 101;
+  g_InsetView.ignoredSourceCode = FLYOVER_INSET_SOURCE_CODE;
+  g_InsetView.ignoredSizeCode = FLYOVER_INSET_SIZE_CODE;
   g_Cameras[0].view.lookAt[AXIS_X] =
       (g_HoleSetup.cupPosition[AXIS_X] + (offset[AXIS_X] * approach)) *
       COURSE_TO_WORLD_SCALE;

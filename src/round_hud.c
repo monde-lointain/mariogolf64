@@ -273,9 +273,10 @@ extern char f_BlankText[];
 #define MOVIE_INSET_CENTER_X 160
 #define MOVIE_INSET_CENTER_Y 128
 #define MOVIE_INSET_SIZE 128
-#define LANDING_INSET_UNK8 77
-#define LANDING_INSET_UNKC 77
-#define MOVIE_INSET_UNKC 101
+/* InsetView's ignored codes */
+#define LANDING_INSET_SOURCE_CODE 77
+#define LANDING_INSET_SIZE_CODE 77
+#define MOVIE_INSET_SIZE_CODE 101
 
 /* The text of the landing reaction, in two glyph groups */
 enum LandingGlyphGroup {
@@ -1424,9 +1425,9 @@ void StartLandingReaction(s32 reaction) {
   switch ((u32)GetSurfaceInfo(g_TurnBallSimulation.surface)->kind) {
     case SURFACE_KIND_OUT_OF_BOUNDS:
       g_InsetView.animation = INSET_VIEW_OPENING;
-      g_InsetView.unk8 = LANDING_INSET_UNK8;
+      g_InsetView.ignoredSourceCode = LANDING_INSET_SOURCE_CODE;
       f_LandingReaction = previousReaction;
-      g_InsetView.unkC = MOVIE_INSET_UNKC;
+      g_InsetView.ignoredSizeCode = MOVIE_INSET_SIZE_CODE;
       SetInsetViewRect(MOVIE_INSET_CENTER_X, MOVIE_INSET_CENTER_Y,
           MOVIE_INSET_SIZE, MOVIE_INSET_SIZE);
       SetLandingWaitFrameCount(LANDING_WAIT_LONG_FRAME_COUNT);
@@ -1443,8 +1444,8 @@ void StartLandingReaction(s32 reaction) {
       break;
     default:
       g_InsetView.animation = INSET_VIEW_OPENING;
-      g_InsetView.unk8 = LANDING_INSET_UNK8;
-      g_InsetView.unkC = LANDING_INSET_UNKC;
+      g_InsetView.ignoredSourceCode = LANDING_INSET_SOURCE_CODE;
+      g_InsetView.ignoredSizeCode = LANDING_INSET_SIZE_CODE;
       SetLandingWaitFrameCount(LANDING_WAIT_FRAME_COUNT);
       SetInsetViewRect(LANDING_INSET_CENTER_X, LANDING_INSET_CENTER_Y,
           LANDING_INSET_WIDTH, LANDING_INSET_HEIGHT);
