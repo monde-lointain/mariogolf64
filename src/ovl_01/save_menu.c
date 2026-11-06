@@ -1776,7 +1776,7 @@ const char f_SaveMenuNameFormat[] = "%s";
 /* The backdrop layers that DrawLargeBannerBackdropLayers draws behind the saved
  * games */
 #define SAVED_GAMES_BACKDROP_LAYERS \
-  (MENU_LAYER_SCENERY | MENU_LAYER_UNK2 | MENU_LAYER_BANNER | \
+  (MENU_LAYER_SCENERY | MENU_LAYER_IGNORED | MENU_LAYER_BANNER | \
       MENU_LAYER_LARGE_BANNER)
 
 /* The numbered boards of f_GameBoards: 64x64 CI8, in two strips */

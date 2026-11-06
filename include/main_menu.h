@@ -15,11 +15,11 @@
 
 /*
  * The parts of the menu backdrop that DrawLargeBannerBackdropLayers and
- * DrawMenuBackdropLayers draw. The screens also pass MENU_LAYER_UNK2, which
- * neither tests.
+ * DrawMenuBackdropLayers draw. The screens also pass MENU_LAYER_IGNORED, which
+ * neither tests, so it draws nothing.
  */
 #define MENU_LAYER_SCENERY (1 << 0)
-#define MENU_LAYER_UNK2 (1 << 1)
+#define MENU_LAYER_IGNORED (1 << 1)
 #define MENU_LAYER_BOARD (1 << 2)
 #define MENU_LAYER_BANNER (1 << 3)
 #define MENU_LAYER_LARGE_BANNER (1 << 4)
@@ -28,7 +28,7 @@
 /* Just the scenery and the banner, behind the screens that draw their own
  * panel or model where the others have a board */
 #define PLAIN_BACKDROP_LAYERS \
-  (MENU_LAYER_SCENERY | MENU_LAYER_UNK2 | MENU_LAYER_BANNER)
+  (MENU_LAYER_SCENERY | MENU_LAYER_IGNORED | MENU_LAYER_BANNER)
 
 /* A screen's lit labels, or other images in their place, read alternately
  * into each */

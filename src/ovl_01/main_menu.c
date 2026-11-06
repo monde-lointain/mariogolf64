@@ -4672,7 +4672,7 @@ extern const char g_CaddySelectTitle[];
  * it stops turning
  */
 #define MODE_SELECT_BACKDROP_LAYERS \
-  (MENU_LAYER_SCENERY | MENU_LAYER_UNK2 | MENU_LAYER_BANNER | \
+  (MENU_LAYER_SCENERY | MENU_LAYER_IGNORED | MENU_LAYER_BANNER | \
       MENU_LAYER_LARGE_BANNER)
 #define MODE_SELECT_LIGHT_YAW 0
 #define MODE_SELECT_LIGHT_PITCH 0x3000
@@ -4764,7 +4764,7 @@ extern const char g_CaddySelectTitle[];
 /* DrawMenuBackdropLayers's layers drawn behind the course select, and in front
  * of it and of the handicap and bet settings screens */
 #define COURSE_SELECT_BACK_LAYERS MENU_LAYER_SCENERY
-#define COURSE_SELECT_FRONT_LAYERS (MENU_LAYER_UNK2 | MENU_LAYER_BANNER)
+#define COURSE_SELECT_FRONT_LAYERS (MENU_LAYER_IGNORED | MENU_LAYER_BANNER)
 /* The handicap and bet settings screens slide their pages this far, a step per
  * update */
 #define BET_SLIDE_STEP 32
