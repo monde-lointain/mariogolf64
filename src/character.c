@@ -2033,7 +2033,7 @@ void DrawCharacter(u32 slotIndex) {
 
           if (!isReactionLit) {
             /* In its own block, to match; without it 99 words differ, 15
-             * in shape */
+             * in shape, against 71 (7) */
             IN_OWN_BLOCK(gSPSetLights2(gfx++, lights[g_DrawBufferIndex]));
             SaveLights(lights[g_DrawBufferIndex]);
           }

@@ -1157,7 +1157,8 @@ Vtx* GetGroundPoint(u32 column, u32 row) {
       slotColumn = PointSlot(column);
     }
 
-    /* In its own block, to match; without it 26 words differ, 8 in shape */
+    /* In its own block, to match; without it 26 words differ, 8 in shape,
+     * against 2 (2) */
     IN_OWN_BLOCK(tileIndex = TileIndex(tileColumn, tileRow));
     return &g_WorkArea.hole
                 .midpoints[tileIndex][f_PointSlots[slotRow][slotColumn]];

@@ -546,7 +546,8 @@ void StartSwingTrail(s32 kind) {
     f_SwingTrailState = SWING_TRAIL_SHOWN;
     f_SwingTrailLength = 0;
     f_SwingTrailKind = kind;
-    /* In its own block, to match; without it 23 words differ, 21 in shape */
+    /* In its own block, to match; without it 23 words differ, 21 in shape,
+     * against 9 (5) */
     IN_OWN_BLOCK(f_SwingTrailSampleCount = SWING_TRAIL_SAMPLES);
     for (i = 0; i != f_SwingTrailSampleCount; i++) {
       GetCharacterPointPosition(0, SWING_TRAIL_OUTER_POINT, point);
