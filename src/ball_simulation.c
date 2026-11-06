@@ -315,6 +315,16 @@ void ResetBallSimulations(void) {
  * steering update. Dividing them first into direction locals gives 458
  * words (112 in shape), and the register oracle's closest result stays at
  * 240 words but forces 79 pseudos. 450 words differ, 112 in shape.
+ *
+ * The counts above were measured before the change below. The bounce's
+ * speed loss, steepness times SOFTNESS_SPEED_LOSS_SCALE times softness,
+ * is held in speedLoss, apart from keep, the share of the bounced
+ * velocity kept. The register oracle had reported keep lining up with two
+ * registers, $f10 for the loss and $f6 for the share; with its own
+ * variable the report no longer lists it, and the draft goes from 450
+ * words differing, 112 in shape, to 443 (113). The loss as one product in
+ * speedLoss, or inside keep's expression, gives 457 (117). 443 words
+ * differ, 113 in shape.
  */
 #ifdef NON_MATCHING
 s32 StepBallSimulation(BallSimulation* simulation) {
@@ -1167,6 +1177,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
       f32 bounce;
       f32 push;
       f32 keep;
+      f32 speedLoss;
 
       simulation->bounceCount++;
       GetTrianglePlane(&triangle, &plane);
@@ -1297,10 +1308,10 @@ s32 StepBallSimulation(BallSimulation* simulation) {
       bounced[AXIS_X] = velocity[AXIS_X] - (plane.normal[AXIS_X] * push);
       bounced[AXIS_Y] = velocity[AXIS_Y] - (plane.normal[AXIS_Y] * push);
       bounced[AXIS_Z] = velocity[AXIS_Z] - (plane.normal[AXIS_Z] * push);
-      keep = steepness * SOFTNESS_SPEED_LOSS_SCALE;
-      keep = softness * keep;
-      keep =
-          ((f32)THOUSANDTHS_PER_ONE - (keep * steepness)) * ONE_PER_THOUSANDTH;
+      speedLoss = steepness * SOFTNESS_SPEED_LOSS_SCALE;
+      speedLoss = softness * speedLoss;
+      keep = ((f32)THOUSANDTHS_PER_ONE - (speedLoss * steepness)) *
+          ONE_PER_THOUSANDTH;
       if (simulation->state == BALL_STATE_IN_WATER) {
         keep = 0.0f;
       }
