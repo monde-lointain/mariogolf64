@@ -1552,7 +1552,7 @@ void UpdateOpening(void) {
         g_ScreenFadeRed = 0;
         g_ScreenFadeGreen = 0;
         g_ScreenFadeBlue = 0;
-        f_OpeningSceneFramesLeft = 0xA;
+        f_OpeningSceneFramesLeft = 10;
         f_OpeningScene++;
         break;
       case OPENING_SCENE_MARIO_DRIVE + 1:
@@ -1563,7 +1563,7 @@ void UpdateOpening(void) {
         g_ScreenFadeGreen = 0;
         g_ScreenFadeBlue = 0;
         if (f_OpeningSceneFramesLeft == 0) {
-          f_OpeningSceneFramesLeft = 0x1E;
+          f_OpeningSceneFramesLeft = 30;
           LoadNameLogo(0, 0);
           f_OpeningCue = 0;
           StartScreenFadeIn(0, 0, 0, 0x1E);
@@ -1602,19 +1602,19 @@ void UpdateOpening(void) {
         }
 
         if (AreEditorMovesDone()) {
-          f_OpeningSceneFramesLeft = 0x28;
+          f_OpeningSceneFramesLeft = 40;
           f_OpeningScene++;
         }
 
         break;
       case OPENING_SCENE_MARIO_DRIVE + 3:
-        if (f_OpeningSceneFramesLeft == 0x1C) {
+        if (f_OpeningSceneFramesLeft == 28) {
           PlaySound(
               SOUND_CONTACT_PLAIN, f_OpeningSoundChannel, SOUND_FULL_SCALE);
           AdvanceOpeningSoundChannel();
         }
 
-        if (f_OpeningSceneFramesLeft == 0x18) {
+        if (f_OpeningSceneFramesLeft == 24) {
           PlaySoundWithEffects(
               SOUND_SHOT_SPARKS, f_OpeningSoundChannel, 0x4C, 0, 0xA7);
           AdvanceOpeningSoundChannel();
@@ -1622,7 +1622,7 @@ void UpdateOpening(void) {
           LaunchDrop(f_OpeningShotImpactPoint);
         }
 
-        if (f_OpeningSceneFramesLeft == 0x18) {
+        if (f_OpeningSceneFramesLeft == 24) {
           f_OpeningShotSimulation.playerIndex = 0;
           f_OpeningShotSimulation.isHoledOut = FALSE;
           f_OpeningShotSimulation.state = BALL_STATE_STOPPED;
@@ -1647,7 +1647,7 @@ void UpdateOpening(void) {
         f_IsNameSlotShown[0] = 0;
         f_OpeningShotState = 0;
         f_ShotBallScale = 0;
-        f_OpeningSceneFramesLeft = 0x1E;
+        f_OpeningSceneFramesLeft = 30;
         f_OpeningScene++;
         ClearEffects();
         break;
@@ -1683,7 +1683,7 @@ void UpdateOpening(void) {
       case OPENING_SCENE_UNREACHED:
         PlaceEditorCamera(
             1400.411f, -101.306f, 4781.043f, 1414.02f, -107.0f, 4800.41f);
-        f_OpeningSceneFramesLeft = 0xE;
+        f_OpeningSceneFramesLeft = 14;
         f_OpeningScene++;
         break;
       case OPENING_SCENE_UNREACHED + 1:
@@ -1712,11 +1712,11 @@ void UpdateOpening(void) {
         f_OpeningShotState = 1;
         f_ShotBallScale = 1;
         f_OpeningSparksState = 1;
-        f_OpeningSceneFramesLeft = 0x14;
+        f_OpeningSceneFramesLeft = 20;
         f_OpeningScene++;
         break;
       case OPENING_SCENE_MARIO_DRIVE_FLIGHT + 1:
-        if (f_OpeningSceneFramesLeft == 0xE) {
+        if (f_OpeningSceneFramesLeft == 14) {
           PlaySoundWithEffects(SOUND_LUIGI_CALL_OUT_RIGHT,
               f_OpeningSoundChannel, SOUND_FULL_SCALE, 0, SOUND_FULL_SCALE);
           AdvanceOpeningSoundChannel();
@@ -1724,7 +1724,7 @@ void UpdateOpening(void) {
 
         if (f_OpeningSceneFramesLeft == 0) {
           f_LookAtEaseMode = 1;
-          f_OpeningSceneFramesLeft = 0x32;
+          f_OpeningSceneFramesLeft = 50;
           f_OpeningScene++;
         }
 
@@ -1742,7 +1742,7 @@ void UpdateOpening(void) {
             957.619f, -131.446f, 4629.353f, 973.561f, -133.0f, 4671.789f);
         f_OpeningCue = 4;
         f_LookAtEaseMode = 0;
-        f_OpeningSceneFramesLeft = 0x64;
+        f_OpeningSceneFramesLeft = 100;
         f_OpeningShotState = 0;
         f_OpeningShotSimulation.position[AXIS_X] = 0xF1882;
         f_OpeningShotSimulation.position[AXIS_Z] = 0x48D4C4;
@@ -1761,12 +1761,12 @@ void UpdateOpening(void) {
             f_OpeningShotSimulation.position[AXIS_Z] * COURSE_TO_WORLD_SCALE;
         break;
       case OPENING_SCENE_PEACH_DRIVE + 1:
-        if (f_OpeningSceneFramesLeft == 0x18) {
+        if (f_OpeningSceneFramesLeft == 24) {
           PlaySound(SOUND_MENU_START, f_OpeningSoundChannel, SOUND_FULL_SCALE);
           AdvanceOpeningSoundChannel();
         }
 
-        if (f_OpeningSceneFramesLeft == 0x14) {
+        if (f_OpeningSceneFramesLeft == 20) {
           PlaySoundWithEffects(
               SOUND_SHOT_SPARKS, f_OpeningSoundChannel, 0x4C, 0, 0xA7);
           AdvanceOpeningSoundChannel();
@@ -1774,7 +1774,7 @@ void UpdateOpening(void) {
           LaunchDrop(f_OpeningShotImpactPoint);
         }
 
-        if (f_OpeningSceneFramesLeft == 0x16) {
+        if (f_OpeningSceneFramesLeft == 22) {
           f_OpeningShotSimulation.playerIndex = 0;
           f_OpeningShotSimulation.isHoledOut = FALSE;
           f_OpeningShotSimulation.state = BALL_STATE_STOPPED;
@@ -1784,7 +1784,7 @@ void UpdateOpening(void) {
           f_OpeningShotState = 1;
         }
 
-        if (f_OpeningSceneFramesLeft == 0x5A) {
+        if (f_OpeningSceneFramesLeft == 90) {
           f_IsNameSlotShown[0] = 1;
         }
 
@@ -1798,7 +1798,7 @@ void UpdateOpening(void) {
             726.63f, -98.049f, 5063.849f, 713.268f, -96.0f, 5094.7f);
         MoveEditorPoint(1, 713.268f, -102.0f, 5094.7f, 0x28);
         MoveEditorPoint(0, 708.085f, -98.243f, 5073.215f, 0x28);
-        f_OpeningSceneFramesLeft = 0x28;
+        f_OpeningSceneFramesLeft = 40;
         f_OpeningScene = OPENING_SCENE_PEACH_DRIVE_FLIGHT;
         f_OpeningCue = 5;
         f_IsNameSlotShown[0] = 0;
@@ -1811,24 +1811,24 @@ void UpdateOpening(void) {
         break;
       case OPENING_SCENE_PEACH_DRIVE_FLIGHT:
         switch (f_OpeningSceneFramesLeft) {
-          case 0x23:
+          case 35:
             PlaySoundWithEffects(
                 SOUND_MARIO_CALL_OUT_UP, f_OpeningSoundChannel, 0x50, 0, 0xA7);
             AdvanceOpeningSoundChannel();
             break;
-          case 0x21:
+          case 33:
             PlaySound(SOUND_PLUM_CALL_OUT_UP, f_OpeningSoundChannel,
                 SOUND_FULL_SCALE);
             AdvanceOpeningSoundChannel();
             break;
-          case 0x1F:
+          case 31:
             PlaySoundWithEffects(SOUND_LUIGI_OPENING_VOICE,
                 f_OpeningSoundChannel, 0x50, 0, 0xBB);
             AdvanceOpeningSoundChannel();
             break;
         }
 
-        if (f_OpeningSceneFramesLeft == 0x14) {
+        if (f_OpeningSceneFramesLeft == 20) {
           f_OpeningShotSimulation.position[AXIS_X] = 0xF1B96;
           f_OpeningShotSimulation.position[AXIS_Z] = 0x48CFDC;
           f_OpeningShotSimulation.position[AXIS_Y] =
@@ -1847,7 +1847,7 @@ void UpdateOpening(void) {
               973.156f, -317.049f, 3703.677f, 1276.871f, -112.538f, 4540.245f);
           f_ShotBallScale = 1;
           f_LookAtEaseMode = 1;
-          f_OpeningSceneFramesLeft = 0x46;
+          f_OpeningSceneFramesLeft = 70;
           f_OpeningScene++;
           AdvanceOpeningSoundChannel();
         }
@@ -1863,7 +1863,7 @@ void UpdateOpening(void) {
       case OPENING_SCENE_PLUM_DRIVE:
         PlaceEditorCamera(
             980.776f, -123.436f, 4636.89f, 971.837f, -133.5f, 4671.701f);
-        f_OpeningSceneFramesLeft = 0x64;
+        f_OpeningSceneFramesLeft = 100;
         f_OpeningCue = 7;
         f_OpeningScene++;
         LoadNameLogo(3, 0);
@@ -1885,12 +1885,12 @@ void UpdateOpening(void) {
             f_OpeningShotSimulation.position[AXIS_Z] * COURSE_TO_WORLD_SCALE;
         break;
       case OPENING_SCENE_PLUM_DRIVE + 1:
-        if (f_OpeningSceneFramesLeft == 0x18) {
+        if (f_OpeningSceneFramesLeft == 24) {
           PlaySound(SOUND_MENU_START, f_OpeningSoundChannel, SOUND_FULL_SCALE);
           AdvanceOpeningSoundChannel();
         }
 
-        if (f_OpeningSceneFramesLeft == 0x14) {
+        if (f_OpeningSceneFramesLeft == 20) {
           PlaySoundWithEffects(
               SOUND_SHOT_SPARKS, f_OpeningSoundChannel, 0x4C, 0, 0xA7);
           AdvanceOpeningSoundChannel();
@@ -1898,7 +1898,7 @@ void UpdateOpening(void) {
           LaunchDrop(f_OpeningShotImpactPoint);
         }
 
-        if (f_OpeningSceneFramesLeft == 0x14) {
+        if (f_OpeningSceneFramesLeft == 20) {
           f_OpeningShotSimulation.playerIndex = 0;
           f_OpeningShotSimulation.isHoledOut = FALSE;
           f_OpeningShotSimulation.state = BALL_STATE_STOPPED;
@@ -1908,7 +1908,7 @@ void UpdateOpening(void) {
           f_OpeningShotState = 1;
         }
 
-        if (f_OpeningSceneFramesLeft == 0x5A) {
+        if (f_OpeningSceneFramesLeft == 90) {
           f_IsNameSlotShown[0] = 1;
         }
 
@@ -1924,7 +1924,7 @@ void UpdateOpening(void) {
         TiltEditorCamera(1, 0.183044f, 0x32);
         TurnEditorCamera(1, 1.1519989f, 0x32);
         ZoomEditorCamera(1, 47.392056f, 0x1E);
-        f_OpeningSceneFramesLeft = 0x32;
+        f_OpeningSceneFramesLeft = 50;
         f_OpeningScene = OPENING_SCENE_MARIO_CHEER;
         f_IsNameSlotShown[0] = 0;
         f_OpeningShotState = 0;
@@ -1965,7 +1965,7 @@ void UpdateOpening(void) {
         f_OpeningCue = 9;
         f_OpeningScene++;
         LoadNameLogo(1, 0);
-        f_OpeningSceneFramesLeft = 0xA;
+        f_OpeningSceneFramesLeft = 10;
         f_OpeningShotSimulation.position[AXIS_X] = 0xF190E;
         f_OpeningShotSimulation.position[AXIS_Z] = 0x48D416;
         f_OpeningShotSimulation.position[AXIS_Y] =
@@ -1990,7 +1990,7 @@ void UpdateOpening(void) {
         if (f_OpeningSceneFramesLeft == 0) {
           f_IsNameSlotShown[0] = 1;
           f_OpeningScene = OPENING_SCENE_LUIGI_DRIVE + 1;
-          f_OpeningSceneFramesLeft = 0x37;
+          f_OpeningSceneFramesLeft = 55;
         }
 
         break;
@@ -2029,7 +2029,7 @@ void UpdateOpening(void) {
               f_OpeningShotSimulation.position[AXIS_Y] * COURSE_TO_WORLD_SCALE,
               f_OpeningShotSimulation.position[AXIS_Z] * COURSE_TO_WORLD_SCALE);
           f_LookAtEaseMode = 2;
-          f_OpeningSceneFramesLeft = 0x8C;
+          f_OpeningSceneFramesLeft = 140;
           f_IsNameSlotShown[0] = 0;
           f_OpeningScene++;
           ClearEffects();
@@ -2037,35 +2037,35 @@ void UpdateOpening(void) {
 
         break;
       case OPENING_SCENE_LUIGI_DRIVE + 3:
-        if (f_OpeningSceneFramesLeft == 0x37) {
+        if (f_OpeningSceneFramesLeft == 55) {
           PlaySoundWithEffects(
               SOUND_HIT_FOLIAGE, f_OpeningSoundChannel, 0x50, 0xA, 0x9F);
           SetSoundFrequencyOffset(f_OpeningSoundChannel, -9.0f);
           AdvanceOpeningSoundChannel();
         }
 
-        if (f_OpeningSceneFramesLeft == 0x2D) {
+        if (f_OpeningSceneFramesLeft == 45) {
           PlaySoundWithEffects(
               SOUND_HIT_FOLIAGE, f_OpeningSoundChannel, 0x50, 0x14, 0x9F);
           SetSoundFrequencyOffset(f_OpeningSoundChannel, -10.0f);
           AdvanceOpeningSoundChannel();
         }
 
-        if (f_OpeningSceneFramesLeft == 0x23) {
+        if (f_OpeningSceneFramesLeft == 35) {
           PlaySoundWithEffects(
               SOUND_HIT_FOLIAGE, f_OpeningSoundChannel, 0x50, 0x1E, 0x9F);
           SetSoundFrequencyOffset(f_OpeningSoundChannel, -11.0f);
           AdvanceOpeningSoundChannel();
         }
 
-        if (f_OpeningSceneFramesLeft == 0x19) {
+        if (f_OpeningSceneFramesLeft == 25) {
           PlaySoundWithEffects(
               SOUND_HIT_FOLIAGE, f_OpeningSoundChannel, 0x50, 0x28, 0x9F);
           SetSoundFrequencyOffset(f_OpeningSoundChannel, -12.0f);
           AdvanceOpeningSoundChannel();
         }
 
-        if (f_OpeningSceneFramesLeft == 0xF) {
+        if (f_OpeningSceneFramesLeft == 15) {
           PlaySound(SOUND_LAND_GREEN, f_OpeningSoundChannel, 0x30);
           AdvanceOpeningSoundChannel();
         }
@@ -2094,7 +2094,7 @@ void UpdateOpening(void) {
       case OPENING_SCENE_PEACH_PLUM_WALK + 1:
         PlaceEditorCamera(
             2737.741f, -364.884f, 2368.88f, 2680.325f, -248.5f, 2488.521f);
-        f_OpeningCue = 0xB;
+        f_OpeningCue = 11;
         f_OpeningBallStates[0] = 1;
         f_OpeningBallStates[1] = 1;
         f_OpeningScene++;
@@ -2125,30 +2125,30 @@ void UpdateOpening(void) {
         TiltEditorCamera(1, -0.116571f, 0x76);
         TurnEditorCamera(1, 1.366719f, 0x76);
         ZoomEditorCamera(1, 87.87598f, 0x76);
-        f_OpeningCue = 0xC;
-        f_OpeningSceneFramesLeft = 0x76;
+        f_OpeningCue = 12;
+        f_OpeningSceneFramesLeft = 118;
         f_OpeningScene++;
         break;
       case OPENING_SCENE_MARIO_LUIGI_WALK + 1:
         switch (f_OpeningSceneFramesLeft) {
-          case 0x49:
-          case 0x54:
-          case 0x5E:
-          case 0x68:
-          case 0x73:
+          case 73:
+          case 84:
+          case 94:
+          case 104:
+          case 115:
             PlaySound(SOUND_BLOOP, f_OpeningSoundChannel, 0x46);
             AdvanceOpeningSoundChannel();
             break;
-          case 0x6A:
+          case 106:
             PlaySoundWithEffects(SOUND_GOOMBA, f_OpeningSoundChannel, 0x48, -6,
                 SOUND_FULL_SCALE);
             AdvanceOpeningSoundChannel();
             break;
-          case 0x64:
+          case 100:
             PlaySound(SOUND_LONG_OH, f_OpeningSoundChannel, SOUND_FULL_SCALE);
             AdvanceOpeningSoundChannel();
             break;
-          case 0x46:
+          case 70:
             if (f_IsDonkeyKongShown) {
               PlaySound(
                   SOUND_HELLO_BALL, f_OpeningSoundChannel, SOUND_FULL_SCALE);
@@ -2163,13 +2163,13 @@ void UpdateOpening(void) {
 
         if (AreEditorMovesDone()) {
           f_OpeningScene = OPENING_SCENE_MARIO_FINDS_BALL;
-          f_OpeningSceneFramesLeft = 0x28;
+          f_OpeningSceneFramesLeft = 40;
         }
 
         break;
       case OPENING_SCENE_MARIO_FINDS_BALL:
         if (f_OpeningSceneFramesLeft == 0) {
-          f_OpeningCue = 0xD;
+          f_OpeningCue = 13;
           f_OpeningScene++;
           MoveEditorCamera(1, 2489.636f, -257.5f, 1811.529f, 0x1E);
           TiltEditorCamera(1, -0.070194006f, 0x32);
@@ -2190,7 +2190,7 @@ void UpdateOpening(void) {
       case OPENING_SCENE_MARIO_FINDS_BALL + 1:
         if (AreEditorMovesDone()) {
           f_OpeningScene = OPENING_SCENE_PEACH_WAVE;
-          f_OpeningSceneFramesLeft = 0xA;
+          f_OpeningSceneFramesLeft = 10;
         }
 
         break;
@@ -2201,8 +2201,8 @@ void UpdateOpening(void) {
               2801.815f, -255.822f, 2196.813f, 2823.524f, -256.5f, 2177.502f);
           MoveEditorPoint(1, 2855.966f, -256.5f, 2213.121f, 0x32);
           MoveEditorPoint(0, 2702.606f, -279.683f, 2250.851f, 0x32);
-          f_OpeningSceneFramesLeft = 0x5A;
-          f_OpeningCue = 0xE;
+          f_OpeningSceneFramesLeft = 90;
+          f_OpeningCue = 14;
           g_HoleSetup.conditions.lightPitch = 0x1000;
 
           /* Stored as a signed value, as the original does */
@@ -2213,27 +2213,27 @@ void UpdateOpening(void) {
         break;
       case OPENING_SCENE_PEACH_WAVE + 1:
         switch (f_OpeningSceneFramesLeft) {
-          case 0x57:
+          case 87:
             PlaySoundWithEffects(
                 SOUND_BLOOP, f_OpeningSoundChannel, 0x50, 0, 0xA7);
             AdvanceOpeningSoundChannel();
             break;
-          case 0x4D:
+          case 77:
             PlaySoundWithEffects(
                 SOUND_BLOOP, f_OpeningSoundChannel, 0x4C, 0, 0x9D);
             AdvanceOpeningSoundChannel();
             break;
-          case 0x43:
+          case 67:
             PlaySoundWithEffects(
                 SOUND_BLOOP, f_OpeningSoundChannel, 0x48, 0, 0x93);
             AdvanceOpeningSoundChannel();
             break;
-          case 0x39:
+          case 57:
             PlaySoundWithEffects(
                 SOUND_BLOOP, f_OpeningSoundChannel, 0x3A, 0, 0x89);
             AdvanceOpeningSoundChannel();
             break;
-          case 0x2A:
+          case 42:
             PlaySound(
                 SOUND_YOSHI_EAGLE_SECOND_EFFECT, f_OpeningSoundChannel, 0x46);
             SetSoundFrequencyOffset(f_OpeningSoundChannel, 7.0f);
@@ -2241,8 +2241,7 @@ void UpdateOpening(void) {
             break;
         }
 
-        if (f_OpeningSceneFramesLeft >= 0x17 &&
-            f_OpeningSceneFramesLeft < 0x2A) {
+        if (f_OpeningSceneFramesLeft >= 23 && f_OpeningSceneFramesLeft < 42) {
           GetCharacterPointPosition(2, 2, point);
           g_CurrentShot.ballPosition[AXIS_X] = (s32)point[AXIS_X] * 1024;
           g_CurrentShot.ballPosition[AXIS_Z] = (s32)point[AXIS_Z] * 1024;
@@ -2253,7 +2252,7 @@ void UpdateOpening(void) {
           SpawnRisingClumps(f_OpeningShotImpactPoint);
         }
 
-        if (f_OpeningSceneFramesLeft == 0x50) {
+        if (f_OpeningSceneFramesLeft == 80) {
           if (IsDonkeyKongUnlocked()) {
             if (!(rand() & 0x80)) {
               f_IsDonkeyKongShown = TRUE;
@@ -2267,7 +2266,7 @@ void UpdateOpening(void) {
           f_OpeningBallPositions[0][2] = 2246.086f;
         }
 
-        if (f_OpeningSceneFramesLeft == 0x32) {
+        if (f_OpeningSceneFramesLeft == 50) {
           f_OpeningBallStates[0] = 1;
         }
 
@@ -2281,7 +2280,7 @@ void UpdateOpening(void) {
         break;
       case OPENING_SCENE_PEACH_WAVE + 2:
         if (AreEditorMovesDone()) {
-          f_OpeningSceneFramesLeft = 0x14;
+          f_OpeningSceneFramesLeft = 20;
           f_OpeningScene = OPENING_SCENE_BALL_ROLLS_IN;
         }
 
@@ -2290,8 +2289,8 @@ void UpdateOpening(void) {
         if (f_OpeningSceneFramesLeft == 0) {
           PlaceEditorCamera(
               2712.031f, -270.705f, 2358.303f, 2770.045f, -250.5f, 2337.548f);
-          f_OpeningCue = 0xF;
-          f_OpeningSceneFramesLeft = 0x40;
+          f_OpeningCue = 15;
+          f_OpeningSceneFramesLeft = 64;
           f_OpeningScene = OPENING_SCENE_PEACH_APPROACH;
           f_OpeningBallPositions[0][0] = 2755.104f;
           f_OpeningBallPositions[0][2] = 2341.293f;
@@ -2300,9 +2299,9 @@ void UpdateOpening(void) {
         break;
       case OPENING_SCENE_PEACH_APPROACH:
         switch (f_OpeningSceneFramesLeft) {
-          case 0x35:
-          case 0x2A:
-          case 0x1A:
+          case 53:
+          case 42:
+          case 26:
             PlaySound(SOUND_BLOOP, f_OpeningSoundChannel, 0x30);
             AdvanceOpeningSoundChannel();
             break;
@@ -2334,7 +2333,7 @@ void UpdateOpening(void) {
       case OPENING_SCENE_PEACH_APPROACH + 1:
         if (AreEditorMovesDone()) {
           f_OpeningScene = OPENING_SCENE_BALL_INSPECTION;
-          f_OpeningSceneFramesLeft = 0x14;
+          f_OpeningSceneFramesLeft = 20;
         }
 
         break;
@@ -2342,8 +2341,8 @@ void UpdateOpening(void) {
         if (f_OpeningSceneFramesLeft == 0) {
           PlaceEditorCamera(
               2712.031f, -270.705f, 2358.303f, 2770.045f, -250.5f, 2337.548f);
-          f_OpeningCue = 0x11;
-          f_OpeningSceneFramesLeft = 0x38;
+          f_OpeningCue = 17;
+          f_OpeningSceneFramesLeft = 56;
           g_CameraEditor.fieldOfView = 45.0f;
           f_OpeningScene++;
           LoadOpeningBall(4, 0);
@@ -2356,15 +2355,15 @@ void UpdateOpening(void) {
 
         break;
       case OPENING_SCENE_BALL_INSPECTION + 1:
-        if (f_OpeningSceneFramesLeft == 0xA) {
+        if (f_OpeningSceneFramesLeft == 10) {
           PlaySoundWithEffects(SOUND_BABY_MARIO_CALL_OUT_C_DOWN,
               f_OpeningSoundChannel, 0x40, 0x14, 0xCF);
           AdvanceOpeningSoundChannel();
         }
 
         if (f_OpeningSceneFramesLeft == 0) {
-          f_OpeningCue = 0x12;
-          f_OpeningSceneFramesLeft = 0x1E;
+          f_OpeningCue = 18;
+          f_OpeningSceneFramesLeft = 30;
           f_OpeningScene++;
           LoadOpeningBall(4, 1);
           f_OpeningBallPositions[1][0] = 0.0f;
@@ -2380,7 +2379,7 @@ void UpdateOpening(void) {
         }
 
         if (f_OpeningSceneFramesLeft == 0) {
-          f_OpeningCue = 0x13;
+          f_OpeningCue = 19;
           f_OpeningScene = OPENING_SCENE_INCOMING_BALL;
         }
 
@@ -2417,8 +2416,8 @@ void UpdateOpening(void) {
         }
 
         if (AreEditorMovesDone()) {
-          f_OpeningCue = 0x14;
-          f_OpeningSceneFramesLeft = 0x78;
+          f_OpeningCue = 20;
+          f_OpeningSceneFramesLeft = 120;
           f_OpeningScene = OPENING_SCENE_BABY_MARIO_ARRIVAL;
           f_LookAtEaseMode = 3;
         }
@@ -2441,21 +2440,21 @@ void UpdateOpening(void) {
             (handPoint[AXIS_Z] - f_OpeningBallPositions[1][2]) *
             f_LogoBallFollowRate;
         switch (f_OpeningSceneFramesLeft) {
-          case 0x61:
+          case 97:
             PlaySoundWithEffects(SOUND_LAND_FAIRWAY, f_OpeningSoundChannel,
                 SOUND_FULL_SCALE, 0, 0xA7);
             AdvanceOpeningSoundChannel();
             break;
-          case 0x45:
+          case 69:
             PlaySoundWithEffects(SOUND_LAND_FAIRWAY, f_OpeningSoundChannel,
                 SOUND_FULL_SCALE, 0, 0x93);
             AdvanceOpeningSoundChannel();
             break;
-          case 0x37:
+          case 55:
             PlaySoundWithEffects(SOUND_ROLL, f_OpeningSoundChannel, 0x40, 0x7F,
                 SOUND_FULL_SCALE);
             break;
-          case 0xF:
+          case 15:
             StopSound(f_OpeningSoundChannel);
             AdvanceOpeningSoundChannel();
             break;
@@ -2467,8 +2466,8 @@ void UpdateOpening(void) {
               2878.956f, -391.282f, 2514.85f, 2431.88f, -315.0f, 992.943f);
           MoveEditorPoint(0, 2051.33f, -258.127f, 862.423f, 0x28);
           MoveEditorPoint(1, 2058.79f, -254.0f, 825.963f, 0x28);
-          f_OpeningCue = 0x15;
-          f_OpeningSceneFramesLeft = 0x14;
+          f_OpeningCue = 21;
+          f_OpeningSceneFramesLeft = 20;
           f_OpeningScene++;
           LoadNameLogo(5, 0);
           if (f_IsDonkeyKongShown) {
@@ -2488,15 +2487,15 @@ void UpdateOpening(void) {
         break;
       case OPENING_SCENE_BABY_MARIO_ARRIVAL + 1:
         if (f_OpeningSceneFramesLeft == 0) {
-          f_OpeningCue = 0x16;
-          f_OpeningSceneFramesLeft = 0x24;
+          f_OpeningCue = 22;
+          f_OpeningSceneFramesLeft = 36;
           f_OpeningScene++;
         }
 
         break;
       case OPENING_SCENE_BABY_MARIO_ARRIVAL + 2:
         if (f_IsDonkeyKongShown) {
-          if (f_OpeningSceneFramesLeft == 0x12) {
+          if (f_OpeningSceneFramesLeft == 18) {
             PlaySoundWithEffects(SOUND_DONKEY_KONG_REPEATED,
                 f_OpeningSoundChannel, SOUND_FULL_SCALE, 7, SOUND_FULL_SCALE);
             SetSoundFrequencyOffset(f_OpeningSoundChannel, -4.0f);
@@ -2504,7 +2503,7 @@ void UpdateOpening(void) {
           }
         } else {
           switch (f_OpeningSceneFramesLeft) {
-            case 0x13:
+            case 19:
             case 9:
               PlaySound(SOUND_YOSHI_REPEATED, f_OpeningSoundChannel, 0x43);
               AdvanceOpeningSoundChannel();
@@ -2526,7 +2525,7 @@ void UpdateOpening(void) {
             MoveEditorPoint(0, 2025.674f, -258.046f, 888.28f, 0x5A);
           }
 
-          f_OpeningSceneFramesLeft = 0x5A;
+          f_OpeningSceneFramesLeft = 90;
           f_OpeningScene++;
         }
 
@@ -2534,33 +2533,33 @@ void UpdateOpening(void) {
       case OPENING_SCENE_BABY_MARIO_ARRIVAL + 3:
         if (f_IsDonkeyKongShown) {
           switch (f_OpeningSceneFramesLeft) {
-            case 0x1A:
-            case 0x2E:
-            case 0x42:
-            case 0x56:
+            case 26:
+            case 46:
+            case 66:
+            case 86:
               PlaySoundWithEffects(SOUND_DONKEY_KONG_REPEATED,
                   f_OpeningSoundChannel, SOUND_FULL_SCALE, 7, SOUND_FULL_SCALE);
               SetSoundFrequencyOffset(f_OpeningSoundChannel, -4.0f);
               AdvanceOpeningSoundChannel();
               break;
-            case 0x43:
+            case 67:
               PlaySound(SOUND_BOING, f_OpeningSoundChannel, 0x28);
               AdvanceOpeningSoundChannel();
               break;
-            case 0x2F:
+            case 47:
               PlaySound(SOUND_GOOMBA, f_OpeningSoundChannel, 0x60);
               AdvanceOpeningSoundChannel();
               break;
-            case 0x1F:
+            case 31:
               PlaySound(SOUND_GOOMBA, f_OpeningSoundChannel, 0x30);
               AdvanceOpeningSoundChannel();
               break;
-            case 0xC:
+            case 12:
               PlaySoundWithEffects(SOUND_BABY_MARIO_BIRDIE,
                   f_OpeningSoundChannel, SOUND_FULL_SCALE, 0, 0x93);
               AdvanceOpeningSoundChannel();
               break;
-            case 0x8:
+            case 8:
               PlaySoundWithEffects(SOUND_DONKEY_KONG_BIRDIE,
                   f_OpeningSoundChannel, SOUND_FULL_SCALE, 0, 0x6B);
               AdvanceOpeningSoundChannel();
@@ -2568,39 +2567,39 @@ void UpdateOpening(void) {
           }
         } else {
           switch (f_OpeningSceneFramesLeft) {
-            case 0x45:
-            case 0x4F:
-            case 0x59:
+            case 69:
+            case 79:
+            case 89:
               PlaySound(SOUND_YOSHI_REPEATED, f_OpeningSoundChannel, 0x57);
               AdvanceOpeningSoundChannel();
               break;
-            case 0x2A:
+            case 42:
               PlaySound(SOUND_YOSHI_REPEATED, f_OpeningSoundChannel, 0x61);
               AdvanceOpeningSoundChannel();
               break;
-            case 0x3B:
+            case 59:
               PlaySound(SOUND_BOING, f_OpeningSoundChannel, 0x51);
               AdvanceOpeningSoundChannel();
               break;
-            case 0x22:
+            case 34:
               PlaySound(SOUND_BOING, f_OpeningSoundChannel, 0x5B);
               AdvanceOpeningSoundChannel();
               break;
-            case 0x1D:
+            case 29:
               PlaySound(SOUND_GOOMBA, f_OpeningSoundChannel, 0x6B);
               AdvanceOpeningSoundChannel();
               break;
-            case 0x27:
+            case 39:
               PlaySoundWithEffects(
                   SOUND_GOOMBA, f_OpeningSoundChannel, 0x30, 0, 0x65);
               AdvanceOpeningSoundChannel();
               break;
-            case 0x16:
+            case 22:
               PlaySoundWithEffects(
                   SOUND_GOOMBA, f_OpeningSoundChannel, 0x18, 0, 0x5B);
               AdvanceOpeningSoundChannel();
               break;
-            case 0x4:
+            case 4:
               PlaySoundWithEffects(SOUND_YOSHI_CALL_OUT_LEFT,
                   f_OpeningSoundChannel, SOUND_FULL_SCALE, 0, 0x6B);
               AdvanceOpeningSoundChannel();
@@ -2609,13 +2608,13 @@ void UpdateOpening(void) {
         }
 
         if (AreEditorMovesDone()) {
-          f_OpeningSceneFramesLeft = 0x14;
+          f_OpeningSceneFramesLeft = 20;
           f_OpeningScene = OPENING_SCENE_MARIO_PUZZLED;
         }
 
         break;
       case OPENING_SCENE_MARIO_PUZZLED:
-        if (!f_IsDonkeyKongShown && f_OpeningSceneFramesLeft == 0x10) {
+        if (!f_IsDonkeyKongShown && f_OpeningSceneFramesLeft == 16) {
           PlaySoundWithEffects(SOUND_BABY_MARIO_CALL_OUT_DOWN,
               f_OpeningSoundChannel, 0x60, 0, 0x93);
           AdvanceOpeningSoundChannel();
@@ -2624,8 +2623,8 @@ void UpdateOpening(void) {
         if (f_OpeningSceneFramesLeft == 0) {
           PlaceEditorCamera(
               2708.301f, -264.204f, 2343.526f, 2770.098f, -260.0f, 2337.539f);
-          f_OpeningCue = 0x17;
-          f_OpeningSceneFramesLeft = 0x46;
+          f_OpeningCue = 23;
+          f_OpeningSceneFramesLeft = 70;
           f_IsNameSlotShown[0] = 0;
           f_IsNameSlotShown[1] = 0;
           f_OpeningScene++;
@@ -2635,21 +2634,21 @@ void UpdateOpening(void) {
         break;
       case OPENING_SCENE_MARIO_PUZZLED + 1:
         switch (f_OpeningSceneFramesLeft) {
-          case 0x3C:
+          case 60:
             PlaySound(
                 SOUND_AMBIENT_ALTERNATING_FIRST, f_OpeningSoundChannel, 0x60);
             AdvanceOpeningSoundChannel();
 
             /* fallthrough */
-          case 0x32:
+          case 50:
             PlaySound(SOUND_AMBIENT_REPEATING, f_OpeningSoundChannel, 0x60);
             AdvanceOpeningSoundChannel();
             break;
-          case 0x28:
+          case 40:
             PlaySound(SOUND_AMBIENT_REPEATING, f_OpeningSoundChannel, 0x60);
             AdvanceOpeningSoundChannel();
             break;
-          case 0x25:
+          case 37:
             PlaySound(
                 SOUND_AMBIENT_ALTERNATING_FIRST, f_OpeningSoundChannel, 0x60);
             AdvanceOpeningSoundChannel();
@@ -2664,9 +2663,9 @@ void UpdateOpening(void) {
         break;
       case OPENING_SCENE_MARIO_PUZZLED + 2:
         if (GetWipeProgress() == WIPE_CLOSED_PROGRESS) {
-          f_OpeningSceneFramesLeft = 0x14;
+          f_OpeningSceneFramesLeft = 20;
           f_OpeningScene = OPENING_SCENE_LUIGI_SEARCH;
-          f_OpeningCue = 0x18;
+          f_OpeningCue = 24;
           f_OpeningBallStates[0] = 0;
         }
 
@@ -2676,16 +2675,16 @@ void UpdateOpening(void) {
           PlaceEditorCamera(
               1423.923f, -248.221f, 1595.031f, 1450.829f, -254.0f, 1546.087f);
           MoveEditorPoint(1, 1420.136f, -250.5f, 1551.713f, 0x32);
-          f_OpeningCue = 0x19;
+          f_OpeningCue = 25;
           f_OpeningScene++;
           StartWipe(2);
-          f_OpeningSceneFramesLeft = 0xA0;
+          f_OpeningSceneFramesLeft = 160;
           LoadOpeningImpactLines();
         }
 
         break;
       case OPENING_SCENE_LUIGI_SEARCH + 1:
-        if (f_OpeningSceneFramesLeft == 0x1E) {
+        if (f_OpeningSceneFramesLeft == 30) {
           f_AreImpactLinesShown = TRUE;
         }
 
@@ -2699,31 +2698,31 @@ void UpdateOpening(void) {
         }
 
         switch (f_OpeningSceneFramesLeft) {
-          case 0x93:
+          case 147:
             PlaySoundWithEffects(
                 SOUND_BLOOP, f_OpeningSoundChannel, 0x50, 0, 0x61);
             AdvanceOpeningSoundChannel();
             break;
-          case 0x89:
+          case 137:
             PlaySoundWithEffects(
                 SOUND_BLOOP, f_OpeningSoundChannel, 0x50, 0, 0x6B);
             AdvanceOpeningSoundChannel();
             break;
-          case 0x7F:
+          case 127:
             PlaySoundWithEffects(
                 SOUND_BLOOP, f_OpeningSoundChannel, 0x50, 0, 0x75);
             AdvanceOpeningSoundChannel();
             break;
-          case 0x74:
+          case 116:
             PlaySoundWithEffects(
                 SOUND_BLOOP, f_OpeningSoundChannel, 0x50, 0, SOUND_FULL_SCALE);
             AdvanceOpeningSoundChannel();
             break;
-          case 0x1E:
+          case 30:
             PlaySound(SOUND_CHIME, f_OpeningSoundChannel, 0x46);
             AdvanceOpeningSoundChannel();
             break;
-          case 0x1C:
+          case 28:
             if (f_IsDonkeyKongShown) {
               PlaySound(
                   SOUND_LUIGI_OH_NO, f_OpeningSoundChannel, SOUND_FULL_SCALE);
@@ -2735,7 +2734,7 @@ void UpdateOpening(void) {
 
             AdvanceOpeningSoundChannel();
             break;
-          case 0x14:
+          case 20:
             if (f_IsDonkeyKongShown) {
               StopSound(f_DonkeyKongSoundChannel);
             }
@@ -2747,8 +2746,8 @@ void UpdateOpening(void) {
       case OPENING_SCENE_OUT_OF_BOUNDS:
         PlaceEditorCamera(
             956.687f, -259.45f, 1874.671f, 933.391f, -243.5f, 1884.391f);
-        f_OpeningSceneFramesLeft = 0x14;
-        f_OpeningCue = 0x1A;
+        f_OpeningSceneFramesLeft = 20;
+        f_OpeningCue = 26;
         f_AreImpactLinesShown = FALSE;
         g_CameraEditor.fieldOfView = 18.0f;
         f_OpeningScene++;
@@ -2762,7 +2761,7 @@ void UpdateOpening(void) {
 
         if (f_OpeningSceneFramesLeft == 0) {
           MoveEditorPoint(1, 933.391f, -250.5f, 1884.391f, 0x3C);
-          f_OpeningSceneFramesLeft = 0x3C;
+          f_OpeningSceneFramesLeft = 60;
           f_OpeningScene++;
         }
 
@@ -2770,22 +2769,22 @@ void UpdateOpening(void) {
       case OPENING_SCENE_OUT_OF_BOUNDS + 2:
         g_CameraEditor.fieldOfView += 0.2666666f;
         switch (f_OpeningSceneFramesLeft) {
-          case 0x36:
+          case 54:
             PlaySoundWithEffects(
                 SOUND_FLAG_SWISH, f_OpeningSoundChannel, 0x60, 0, 0x57);
             AdvanceOpeningSoundChannel();
             break;
-          case 0xA:
+          case 10:
             PlaySound(
                 SOUND_OUT_OF_BOUNDS, f_OpeningSoundChannel, SOUND_FULL_SCALE);
             AdvanceOpeningSoundChannel();
             break;
-          case 0x24:
+          case 36:
             PlaySoundWithEffects(
                 SOUND_FLAG_SWISH, f_OpeningSoundChannel, 0x60, 0, 0xA7);
             AdvanceOpeningSoundChannel();
             break;
-          case 0x6:
+          case 6:
             PlaySoundWithEffects(
                 SOUND_FLAG_SWISH, f_OpeningSoundChannel, 0x60, 0, 0x57);
             AdvanceOpeningSoundChannel();
@@ -2794,19 +2793,19 @@ void UpdateOpening(void) {
 
         if (AreEditorMovesDone()) {
           f_OpeningScene = OPENING_SCENE_TOAD_FLAG;
-          f_OpeningSceneFramesLeft = 0x3C;
+          f_OpeningSceneFramesLeft = 60;
         }
 
         break;
       case OPENING_SCENE_TOAD_FLAG:
         switch (f_OpeningSceneFramesLeft) {
-          case 0x24:
+          case 36:
             PlaySoundWithEffects(
                 SOUND_FLAG_SWISH, f_OpeningSoundChannel, 0x60, 0, 0xA7);
             AdvanceOpeningSoundChannel();
 
             /* fallthrough */
-          case 0x6:
+          case 6:
             PlaySoundWithEffects(
                 SOUND_FLAG_SWISH, f_OpeningSoundChannel, 0x60, 0, 0x57);
             AdvanceOpeningSoundChannel();
@@ -2817,8 +2816,8 @@ void UpdateOpening(void) {
           PlaceEditorCamera(
               1423.703f, -250.799f, 1574.041f, 1420.135f, -252.0f, 1551.713f);
           f_OpeningScene = OPENING_SCENE_GATHERING;
-          f_OpeningSceneFramesLeft = 0x50;
-          f_OpeningCue = 0x1B;
+          f_OpeningSceneFramesLeft = 80;
+          f_OpeningCue = 27;
           f_OpeningBallStates[0] = 0;
           g_CameraEditor.fieldOfView = 45.0f;
           LoadOpeningBurst();
@@ -2826,18 +2825,18 @@ void UpdateOpening(void) {
 
         break;
       case OPENING_SCENE_GATHERING:
-        if (f_OpeningSceneFramesLeft == 0x2E) {
+        if (f_OpeningSceneFramesLeft == 46) {
           f_IsBurstShown = TRUE;
           PlaySound(SOUND_BURST, f_OpeningSoundChannel, 0x50);
           AdvanceOpeningSoundChannel();
         }
 
-        if (f_OpeningSceneFramesLeft == 0x1A) {
+        if (f_OpeningSceneFramesLeft == 26) {
           PlaySound(SOUND_LUIGI_OH_NO, f_OpeningSoundChannel, SOUND_FULL_SCALE);
           AdvanceOpeningSoundChannel();
         }
 
-        if (f_OpeningSceneFramesLeft == 0x14) {
+        if (f_OpeningSceneFramesLeft == 20) {
           f_AreAmbientSoundsOn = TRUE;
         }
 
@@ -2845,7 +2844,7 @@ void UpdateOpening(void) {
           MoveEditorPoint(0, 1404.737f, -250.799f, 1633.633f, 0x50);
           f_OpeningScene++;
           LoadLakitu();
-          f_OpeningSceneFramesLeft = 0x28;
+          f_OpeningSceneFramesLeft = 40;
         }
 
         break;
@@ -2856,7 +2855,7 @@ void UpdateOpening(void) {
         }
 
         if (AreEditorMovesDone()) {
-          f_OpeningSceneFramesLeft = 0x14;
+          f_OpeningSceneFramesLeft = 20;
           f_OpeningScene++;
         }
 
@@ -2869,7 +2868,7 @@ void UpdateOpening(void) {
 
         if (f_OpeningSceneFramesLeft == 0) {
           MoveEditorPoint(0, 1409.318f, -400.0f, 1609.259f, 0xDC);
-          f_OpeningSceneFramesLeft = 0x28;
+          f_OpeningSceneFramesLeft = 40;
           f_OpeningScene++;
         }
 
@@ -2897,37 +2896,37 @@ void UpdateOpening(void) {
         }
 
         switch (f_OpeningSceneFramesLeft) {
-          case 0x3C9:
-          case 0x3CA:
-          case 0x3CB:
-          case 0x3CC:
-          case 0x3E1:
-          case 0x3E2:
-          case 0x3E3:
-          case 0x3E5:
-          case 0x3E6:
+          case 969:
+          case 970:
+          case 971:
+          case 972:
+          case 993:
+          case 994:
+          case 995:
+          case 997:
+          case 998:
             PlaySound(SOUND_FALLING_WHISTLE, f_OpeningSoundChannel, 0x40);
             AdvanceOpeningSoundChannel();
             break;
         }
 
         switch (f_OpeningSceneFramesLeft) {
-          case 0x3A8:
-          case 0x3A9:
-          case 0x3AB:
-          case 0x3AC:
-          case 0x3C1:
-          case 0x3C3:
-          case 0x3C5:
-          case 0x3C6:
-          case 0x3C8:
+          case 936:
+          case 937:
+          case 939:
+          case 940:
+          case 961:
+          case 963:
+          case 965:
+          case 966:
+          case 968:
             PlaySound(SOUND_BOING, f_OpeningSoundChannel, 0x60);
             AdvanceOpeningSoundChannel();
             break;
         }
 
         PlayLogoClubSound();
-        if (f_OpeningSceneFramesLeft == 0x3CF) {
+        if (f_OpeningSceneFramesLeft == 975) {
           PlaySoundWithEffects(SOUND_OPENING_CLOSE, CLOSING_SOUND_CHANNEL,
               SOUND_FULL_SCALE, 0, SOUND_FULL_SCALE);
           f_ClosingSoundChannel = CLOSING_SOUND_CHANNEL;
