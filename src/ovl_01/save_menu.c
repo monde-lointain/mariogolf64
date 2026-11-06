@@ -115,12 +115,6 @@ void ResetSavedGameControllers(void);
 #define COURSE_WORD_OFFSET_X (-5)
 #define COURSE_DIGIT_OFFSET_X 33
 
-/* The image of each game mode that a saved game can be in */
-typedef struct {
-  /* 0x0 */ s16 unk0;
-  /* 0x2 */ AssetId assetId;
-} SaveMenuModeImage; /* size = 0x4 */
-
 /* The Ring Shot records' text slots */
 #define RING_SHOT_TEXT_SLOT_COUNT 6
 /* The row after the courses, for the saved Ring Shot replays */
@@ -196,11 +190,10 @@ static u8 f_ShownCourseBufferIndex = 0;
 /* Each saved game's save menu mode */
 static s32 f_SavedGameModes[SAVED_GAME_COUNT] = {
     NO_SAVE_MENU_MODE, NO_SAVE_MENU_MODE, NO_SAVE_MENU_MODE};
-/* The image of each save menu mode, mini golf last */
-static SaveMenuModeImage f_ModeImageAssets[SAVE_MENU_MODE_MINI_GOLF + 1] = {
-    {0, 0x0623}, {0, 0x0629}, {0, 0x0599}, {0, 0x05AF}, {0, 0x0631},
-    {0, 0x0665}, {0, 0x05B7}, {0, 0x05DD}, {0, 0x065E}, {0, 0x0599},
-    {0, 0x06FC}};
+/* The image of each save menu mode, mini golf last, held in words though asset
+ * IDs are 16 bits */
+static s32 f_ModeImageAssets[SAVE_MENU_MODE_MINI_GOLF + 1] = {0x0623, 0x0629,
+    0x0599, 0x05AF, 0x0631, 0x0665, 0x05B7, 0x05DD, 0x065E, 0x0599, 0x06FC};
 /* The game mode of each save menu mode that has an image */
 static u32 f_SaveMenuGameModes[SAVE_MENU_MODE_COUNT] = {GAME_MODE_TOURNAMENT,
     GAME_MODE_GET_CHARACTER, GAME_MODE_STROKE, GAME_MODE_SPEED_GOLF,
@@ -1309,14 +1302,6 @@ void LoadSaveMenuBuffers(void** buffers, u8 bufferKind) {
   MenuMemory* memory = GetMenuMemory();
   s32 imageIndex;
   s32 mode;
-  /*
-   * A copy of f_ModeImageAssets for each case, set in its loop, to match:
-   * reading f_ModeImageAssets directly gives 24 words differing (8 in shape),
-   * one pointer for both cases 20 (0), and setting both before the switch 15
-   * (7)
-   */
-  SaveMenuModeImage* modeImages;
-  SaveMenuModeImage* slotImages;
 
   switch (bufferKind) {
     case SAVE_MENU_BUFFER_SLOTS:
@@ -1327,8 +1312,7 @@ void LoadSaveMenuBuffers(void** buffers, u8 bufferKind) {
           mode = 0;
         }
 
-        slotImages = f_ModeImageAssets;
-        OpenEncodedAsset(slotImages[mode].assetId, &asset);
+        OpenEncodedAsset(f_ModeImageAssets[mode], &asset);
         ReadEncodedAsset(f_SavedGameModeImages[imageIndex], &asset);
       }
 
@@ -1344,8 +1328,7 @@ void LoadSaveMenuBuffers(void** buffers, u8 bufferKind) {
           mode = 0;
         }
 
-        modeImages = f_ModeImageAssets;
-        OpenEncodedAsset(modeImages[mode].assetId, &asset);
+        OpenEncodedAsset(f_ModeImageAssets[mode], &asset);
         ReadEncodedAsset(f_ChosenModeIconBuffers[imageIndex], &asset);
       }
 
