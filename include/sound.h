@@ -192,7 +192,8 @@ enum Sound {
   SOUND_PAUSE, /* Also the debug scene menu's opening */
   SOUND_THREE_STARS, /* Also a sound of the scorecard and of a shot's result */
   SOUND_UNLOCK_EVERYTHING = 0x69, /* Also as a course notice swings in */
-  SOUND_UNK106,
+  /* As the course select's brick wall slides out for the bet settings */
+  SOUND_WALL_SLIDE_OUT,
   SOUND_SKIN_COUNTED,
   SOUND_TEXT_TYPING,
   /* The swing meter's click for an impact off the mark */

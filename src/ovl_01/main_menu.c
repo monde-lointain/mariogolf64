@@ -2719,7 +2719,7 @@ void UpdateCourseSelect(void) {
     } else if ((g_MenuRepeatButtons & U_CBUTTONS) &&
         MAP_CAMERA_MODE_TOP_BYTE == isDone) {
       if (g_AreBetPagesBlocked != MAP_CAMERA_MODE_TOP_BYTE) {
-        PlaySound(SOUND_UNK106, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
+        PlaySound(SOUND_WALL_SLIDE_OUT, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
         g_BetPagesPhase = BET_PHASE_OPENING;
         g_BetPagesWallSlide = STATS_SLIDE_OUT_RIGHT;
       } else {
@@ -3001,7 +3001,7 @@ void UpdateMiniGolfCourseSelect(void) {
     } else if ((g_MenuRepeatButtons & U_CBUTTONS) &&
         MAP_CAMERA_MODE_TOP_BYTE == isDone) {
       if (g_AreBetPagesBlocked != MAP_CAMERA_MODE_TOP_BYTE) {
-        PlaySound(SOUND_UNK106, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
+        PlaySound(SOUND_WALL_SLIDE_OUT, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
         g_BetPagesPhase = BET_PHASE_OPENING;
         g_BetPagesWallSlide = STATS_SLIDE_OUT_RIGHT;
       } else {
