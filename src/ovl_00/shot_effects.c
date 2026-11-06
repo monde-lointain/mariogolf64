@@ -522,10 +522,11 @@ void DrawShotEffectsHud(Gfx** displayListHead UNUSED) {}
  * Doesn't match: the original reloads f_SwingTrailSampleCount to test the
  * sample loop on entry, where GCC knows the count. It also sets the trail's
  * state from another register. Testing i < f_SwingTrailSampleCount gives 20
- * differing words, storing the count without IN_OWN_BLOCK 23, storing it first
- * 25 and swapping the alpha and state 10. Only a volatile count reproduces the
- * reload, and the count isn't hardware. The register oracle's closest result is
- * these 9 words with no register forced, so allocation isn't the cause. 9 words
+ * differing words, storing the count without IN_OWN_BLOCK 23, storing it
+ * first 25 and swapping the alpha and state 10. Declaring the count
+ * volatile, with both blocks gone, gives 18 words, 14 in shape, and the
+ * count isn't hardware. The register oracle's closest result is these 9
+ * words with no register forced, so allocation isn't the cause. 9 words
  * differ, 5 in shape.
  */
 #ifdef NON_MATCHING
