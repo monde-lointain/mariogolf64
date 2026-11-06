@@ -405,8 +405,12 @@ typedef s32 (*BillboardHitFinder)(s32 startX, s32 startY, s32 startZ, s32 endX,
  *
  * Adding the wind's pull to the x velocity, rather than the velocity to the
  * pull, gives 235 words (109 in shape), but only two floating-point
- * registers change, and z's would then be written the other way round. 237
- * words differ, 109 in shape.
+ * registers change, and z's would then be written the other way round.
+ *
+ * Writing windX and windZ as scale times the wind's velocity, rather than
+ * the velocity times scale, gives 235 words, 109 in shape, but the register
+ * oracle's closest result rises from 118 words, forcing 31 pseudos, to 124,
+ * forcing 29. 237 words differ, 109 in shape.
  */
 #ifdef NON_MATCHING
 s32 StepOpeningBallSimulation(BallSimulation* simulation) {
