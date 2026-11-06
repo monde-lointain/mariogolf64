@@ -487,7 +487,16 @@ void StopEditorMoves(void) {
  * the target, held it too, reversed: that takes the draft from 154 words to
  * 138 (44 in shape to 40), and the register oracle's closest result from 154
  * to 138, with nothing forced. Only x's test gives 150, only z's 148, and a
- * variable of its own, shared or one for each axis, 159 (43 in shape). 138
+ * variable of its own, shared or one for each axis, 159 (43 in shape).
+ *
+ * The zoom's, turn's and tilt's speed tests read the speed first and ask
+ * whether it exceeds the top speed, as the original loads the speed before
+ * the top speed and compares the top speed's magnitude below the speed's;
+ * written top speed first, they load the top speed first. That takes the
+ * draft from 138 words to 108, 40 in shape either way, and the register
+ * oracle's closest result from 138 to 108, with nothing forced. Writing the
+ * point's top speed test or its braking test the other way round gives 108
+ * words too, and a speed variable for the velocity's length gives 120. 108
  * words differ, 40 in shape.
  */
 #ifdef NON_MATCHING
@@ -723,8 +732,8 @@ void UpdateCameraEditor(void) {
               g_CameraEditor.zoomTopSpeed, g_CameraEditor.zoomAcceleration);
         }
 
-        if (fabsf(g_CameraEditor.zoomTopSpeed) <
-            fabsf(g_CameraEditor.zoomSpeed)) {
+        if (fabsf(g_CameraEditor.zoomSpeed) >
+            fabsf(g_CameraEditor.zoomTopSpeed)) {
           g_CameraEditor.zoomSpeed = g_CameraEditor.zoomTopSpeed;
         }
       }
@@ -768,8 +777,8 @@ void UpdateCameraEditor(void) {
               g_CameraEditor.turnTopSpeed, g_CameraEditor.turnAcceleration);
         }
 
-        if (fabsf(g_CameraEditor.turnTopSpeed) <
-            fabsf(g_CameraEditor.turnSpeed)) {
+        if (fabsf(g_CameraEditor.turnSpeed) >
+            fabsf(g_CameraEditor.turnTopSpeed)) {
           g_CameraEditor.turnSpeed = g_CameraEditor.turnTopSpeed;
         }
       }
@@ -814,8 +823,8 @@ void UpdateCameraEditor(void) {
               g_CameraEditor.tiltTopSpeed, g_CameraEditor.tiltAcceleration);
         }
 
-        if (fabsf(g_CameraEditor.tiltTopSpeed) <
-            fabsf(g_CameraEditor.tiltSpeed)) {
+        if (fabsf(g_CameraEditor.tiltSpeed) >
+            fabsf(g_CameraEditor.tiltTopSpeed)) {
           g_CameraEditor.tiltSpeed = g_CameraEditor.tiltTopSpeed;
         }
       }
