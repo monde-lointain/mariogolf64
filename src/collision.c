@@ -1738,7 +1738,7 @@ void MoveBallToCupEdge(BallSimulation* simulation) {
  * in shape, where the draft's scaling already matches, so it is left out
  * too; also reading the cup's position through a pointer, as another run's
  * best did, gives the same. The half chord starts as the flagstick's radius
- * and takes the square root when the bounce speed isn't negative, which took
+ * and takes the square root when its square isn't negative, which took
  * the draft from 173 words differing to 157, 27 in shape either way; an
  * if/else either way round, or a conditional operator, gives 173 to 175. The
  * original works out the direction once, after both; setting it in each arm
@@ -1751,8 +1751,7 @@ void MoveBallToCupEdge(BallSimulation* simulation) {
  * but 26 in shape, and the register oracle then gets no closer than 107
  * words, forcing 25 pseudos, against 71 forcing 16. The original multiplies
  * the start side's terms first; the start side before the end-to-cup values
- * ties at 150. Those counts were measured with GCC's built-in fabsf. 145
- * words differ, 17 in shape.
+ * ties at 150. Those counts were measured with GCC's built-in fabsf.
  *
  * With fabsf an abs.s in volatile inline assembly, the hit fraction's abs.s
  * comes before the branch-likely as in the original, which took the draft
@@ -1760,6 +1759,11 @@ void MoveBallToCupEdge(BallSimulation* simulation) {
  * rather than comparing it with 0 gives the same 145 words, the arms swapped
  * on a test for 0 153 (25), and setting 0.0f before an if without an else
  * 154 (22).
+ *
+ * The half chord's square has a variable of its own, where it had shared
+ * bounceSpeed, which took the draft from 145 words differing to 143, 17 in
+ * shape either way; the register oracle's closest stays at 66 words forcing
+ * 16 pseudos. 143 words differ, 17 in shape.
  */
 #ifdef NON_MATCHING
 s32 FindPinHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY, s32 endZ,
@@ -1787,12 +1791,8 @@ s32 FindPinHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY, s32 endZ,
   s32 contactX;
   s32 contactZ;
   Radians angle;
-  /*
-   * Also the flagstick chord's squared half length, to match: a chordSquared
-   * variable gives 179 words differing (29 in shape) against the draft's 173
-   * (27)
-   */
   f32 bounceSpeed;
+  f32 halfChordSquared;
   s32 unused[2] UNUSED;
 
   for (; i < PIN_COUNT; i++) {
@@ -1879,10 +1879,10 @@ s32 FindPinHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY, s32 endZ,
       hitKind = PIN_HIT_FLAG;
     }
 
-    bounceSpeed = FLAGSTICK_RADIUS_SQUARED - (distance * distance);
+    halfChordSquared = FLAGSTICK_RADIUS_SQUARED - (distance * distance);
     halfChord = FLAGSTICK_RADIUS;
-    if (bounceSpeed >= 0.0f) {
-      halfChord = sqrtf(bounceSpeed);
+    if (halfChordSquared >= 0.0f) {
+      halfChord = sqrtf(halfChordSquared);
     }
 
     direction[AXIS_X] = startX - contactX;
