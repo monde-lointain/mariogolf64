@@ -1329,8 +1329,9 @@ s32 DrawGame(void) {
       drawMode = DRAW_MODE_TITLE_SCREEN;
       break;
     case SCENE_STAFF_ROLL:
-      drawMode = IsGameFlagSet(GAME_FLAG_UNK9A) ? DRAW_MODE_COURSE
-                                                : DRAW_MODE_STAFF_ROLL;
+      drawMode = IsGameFlagSet(GAME_FLAG_STAFF_ROLL_ON_COURSE)
+          ? DRAW_MODE_COURSE
+          : DRAW_MODE_STAFF_ROLL;
       break;
     case SCENE_TRANSMIT:
       drawMode = DRAW_MODE_TRANSMIT;

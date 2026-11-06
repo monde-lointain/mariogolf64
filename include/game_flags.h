@@ -277,10 +277,10 @@
 #define GAME_FLAG_UNK99 0x99
 
 /*
- * Set by the staff roll's timeline as it starts; it has SCENE_STAFF_ROLL
- * draw in DRAW_MODE_COURSE
+ * Set by the staff roll's timeline as the cast takes to the course; it has
+ * SCENE_STAFF_ROLL draw in DRAW_MODE_COURSE. The staff roll never clears it.
  */
-#define GAME_FLAG_UNK9A 0x9A
+#define GAME_FLAG_STAFF_ROLL_ON_COURSE 0x9A
 
 /*
  * Flags under which the game plays itself: outside replays, the

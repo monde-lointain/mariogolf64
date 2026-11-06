@@ -971,7 +971,7 @@ void RunStaffRollTimeline(s32 frame) {
       g_ControllerStates[PITCH_CONTROLLER].stickY * PITCH_STICK_RATE;
   SetCharacterLights();
   if (frame == 0) {
-    SetGameFlag(GAME_FLAG_UNK9A);
+    SetGameFlag(GAME_FLAG_STAFF_ROLL_ON_COURSE);
     StopFade();
     f_NearCupPoint[AXIS_X] =
         g_HoleSetup.cupPosition[AXIS_X] + NEAR_CUP_DISTANCE;
