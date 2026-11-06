@@ -22,7 +22,9 @@ typedef struct AssetFile {
  * its size once decoded (the other 24 bits)
  */
 typedef struct EncodedAsset {
-  /* 0x00 */ u8 unk0[8];
+  /* Nothing uses these bytes, but each EncodedAsset is a stack local, and
+   * without them the frames no longer match */
+  /* 0x00 */ u8 unusedBeforeMethod[8];
   /* 0x08 */ s32 method;
   /* 0x0C */ s32 encodedSize; /* The whole file's, including that word */
   /* 0x10 */ AssetFile file;
