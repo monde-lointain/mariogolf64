@@ -3920,7 +3920,7 @@ void DrawMenuScreen(Gfx** displayListHead) {
  *
  * Doesn't match: the scenery strips' 0xFD500000 and -8 swap registers, and the
  * board loop's registers differ. The original also reads g_MenuScreen for
- * MENU_LAYER_UNK20 where this drops the read. An empty case or default, an
+ * MENU_LAYER_PER_SCREEN where this drops the read. An empty case or default, an
  * empty if, a (void) read and switches of 4, 6 or 10 shared cases all dropped
  * it too before the strips' row count variable, as did 6 cases that each break.
  * A permuter run pointed to the variable. Adding the strip's offset to the
@@ -4162,7 +4162,7 @@ void DrawMenuBackdropLayers(Gfx** displayListHead, s32 layers) {
   }
 
   /* The game reads g_MenuScreen for this layer but draws nothing */
-  if (layers & MENU_LAYER_UNK20) {
+  if (layers & MENU_LAYER_PER_SCREEN) {
     switch (g_MenuScreen) {}
   }
 
@@ -4442,7 +4442,7 @@ void DrawMenuBanner(Gfx** displayListHead) {
  * the clubhouse and screen 8 */
 #define BOARD_BACKDROP_LAYERS \
   (MENU_LAYER_SCENERY | MENU_LAYER_BOARD | MENU_LAYER_BANNER | \
-      MENU_LAYER_LARGE_BANNER | MENU_LAYER_UNK20)
+      MENU_LAYER_LARGE_BANNER | MENU_LAYER_PER_SCREEN)
 
 /*
  * Doesn't match: in the lit labels' loop GCC works out labelIndex *
@@ -6874,7 +6874,7 @@ const char f_LuigisGardenName[] = "Luigi's Garden";
 /* The options draw the narrow board in place of the board */
 #define OPTIONS_BACKDROP_LAYERS \
   (MENU_LAYER_SCENERY | MENU_LAYER_BANNER | MENU_LAYER_LARGE_BANNER | \
-      MENU_LAYER_UNK20 | MENU_LAYER_TALL_NARROW_BOARD)
+      MENU_LAYER_PER_SCREEN | MENU_LAYER_TALL_NARROW_BOARD)
 
 /* The options screen's Mario and his shadow, in the menu image buffer */
 #define MARIO_WIDTH 100
