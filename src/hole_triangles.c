@@ -274,41 +274,26 @@ void DrawHoleTriangles(Gfx** displayListHead, CameraMatrices* matrices UNUSED,
  * Draws the current player's rings; one past RING_STATE_SHOWN fades out while
  * sparkles circle it
  *
- * Doesn't match: the original sets $s6, $s7 and $t5 in another order before
- * the ring loop. 8 words differ, all in shape.
- *
- * The counts in this paragraph were measured before the change below. The
- * sparkle loop has its own section counter, sparkleSection, and the next
+ * The sparkle loop has its own section counter, sparkleSection, and the next
  * side is masked to RING_SIDE_COUNT - 1 with &, as the original masks it:
- * the two together take the draft from 65 words differing (19 in shape)
- * to 16 (8). The mask alone gives 364 (14), since it shortens the outer
+ * the two together took the draft from 65 words differing (19 in shape)
+ * to 16 (8). The mask alone gave 364 (14), since it shortens the outer
  * loop so that loop.c hoists one more display list command (0xDC08060A)
- * out of it; the counter alone changes nothing. Starting the counter in
- * the loop's header or before it gives the same. Before these, working
- * out each section's first vertex before the side loop gave 65 words
- * rather than 69, 25 in shape, and computing the next side once, into
- * nextSide, 69 rather than 79. Masking the side inside RingVertex gave
- * 392 words, 26 in shape, and a u32 side 366, 16 in shape. The permuter's
- * best runs, 1347 and 887 (41 words, 15 in shape), kept side + 1 or
- * section + 1 in a u8, used in only some of the places it is needed,
- * which no natural form explains.
+ * out of it; the counter alone changed nothing.
  *
- * Two of the display list pointers the draft saved were in each other's
- * stack slots, 0x13C and 0x144: those of the pipe sync before
- * gDPSetTextureLUT, at 0x144 in the original, and of gDPSetTextureLUT, at
- * 0x13C. Neither pointer gets a register, and which slot each gets
- * follows the order the pointers are declared in. Writing the pipe sync,
- * the LUT command or both with gfx stepped after them gave 199 to 253
- * words. Each pipe sync and the RDP state command after it now goes
- * through AppendSyncedRdpState, which declares the command's pointer
- * first, as DrawHoleTriangles does; that swaps the two slots and takes
- * the draft from 16 words differing (8 in shape) to 8 (8). Of the pairs
- * alone, only the LUT command's changes anything.
+ * Each pipe sync and the RDP state command after it goes through
+ * AppendSyncedRdpState, which declares the command's pointer first, as
+ * DrawHoleTriangles does. That puts the pointers of the pipe sync before
+ * gDPSetTextureLUT and of gDPSetTextureLUT in the original's stack slots,
+ * 0x144 and 0x13C, which follow the order the pointers are declared in;
+ * it took the draft from 16 words differing (8 in shape) to 8 (8).
  *
- * The register oracle's closest result is these 8 words with no register
- * forced, so allocation isn't the cause.
+ * The ring's matrix is indexed by ringIndex. loop.c strength-reduces that
+ * index's address into a pointer of its own, which it starts after the
+ * values it hoists out of the loop, as the original does. The draft
+ * stepped a matrix pointer beside ringIndex, set before them, and 8 words
+ * differed.
  */
-#ifdef NON_MATCHING
 void DrawRings(Gfx** displayListHead, CameraMatrices* matrices UNUSED,
     Camera* camera UNUSED) {
   Gfx* gfx = *displayListHead;
@@ -320,7 +305,6 @@ void DrawRings(Gfx** displayListHead, CameraMatrices* matrices UNUSED,
   s32 red;
   s32 green;
   s32 blue;
-  Mtx* matrix;
   s32 ringIndex;
   s32 state;
   s32 section;
@@ -371,7 +355,6 @@ void DrawRings(Gfx** displayListHead, CameraMatrices* matrices UNUSED,
   }
 
   gDPSetEnvColor(gfx++, 0x78, 0x78, 0x20, 0xBF);
-  matrix = f_RingMatrices;
   f_RingAngle += RING_SPIN_SPEED;
   guRotateRPY(&f_RingSpinMatrices[g_DrawBufferIndex], 0.0f, 0.0f, f_RingAngle);
   ringIndex = 0;
@@ -387,7 +370,7 @@ void DrawRings(Gfx** displayListHead, CameraMatrices* matrices UNUSED,
         if (state != RING_STATE_SHOWN) {
           if (state < RING_STATE_FADED) {
             turn = state * RING_SPARKLE_TURN;
-            guMtxL2F(transform, matrix);
+            guMtxL2F(transform, &f_RingMatrices[ringIndex]);
             for (sparkleSection = state & (RING_SPARKLE_SPACING - 1);
                 sparkleSection < RING_SECTION_COUNT;
                 sparkleSection += RING_SPARKLE_SPACING) {
@@ -425,7 +408,8 @@ void DrawRings(Gfx** displayListHead, CameraMatrices* matrices UNUSED,
         }
 
         gDPSetPrimColor(gfx++, 0, 0, red, green, blue, alpha);
-        gSPMatrix(gfx++, matrix, G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_PUSH);
+        gSPMatrix(gfx++, &f_RingMatrices[ringIndex],
+            G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_PUSH);
         gSPMatrix(gfx++, &f_RingSpinMatrices[g_DrawBufferIndex],
             G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_NOPUSH);
         gSPVertex(gfx++, f_RingVertices, RING_VERTEX_COUNT, 0);
@@ -443,7 +427,6 @@ void DrawRings(Gfx** displayListHead, CameraMatrices* matrices UNUSED,
         gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
       }
 
-      matrix++;
       ringIndex++;
     }
   }
@@ -451,9 +434,6 @@ void DrawRings(Gfx** displayListHead, CameraMatrices* matrices UNUSED,
   gDPPipeSync(gfx++);
   *displayListHead = gfx;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/hole_triangles", DrawRings);
-#endif
 
 /* Builds the ring's vertices, with the first side of each section inside */
 static void BuildRingVertices(void) {
