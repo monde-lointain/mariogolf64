@@ -4842,6 +4842,10 @@ void DrawUpDownArrows(Gfx** displayListHead, s32 centerY);
  * words forcing 3 pseudos, so the gain is in the registers alone; stepping any
  * of the banner strips' loops or the players' first loop with slot as well
  * gives 86 or 87 words.
+ *
+ * Ending the draw-order sort's outer loop on countShift < modeCount gives 44
+ * words differing, 8 in shape, but the original ends that loop with a bne,
+ * as the draft's test does.
  */
 #ifdef NON_MATCHING
 void DrawModeSelect(Gfx** displayListHead) {
