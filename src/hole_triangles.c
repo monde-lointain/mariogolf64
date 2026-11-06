@@ -280,20 +280,23 @@ INCLUDE_ASM("asm/nonmatchings/hole_triangles", DrawHoleTriangles);
  * Draws the current player's rings; one past RING_STATE_SHOWN fades out while
  * sparkles circle it
  *
- * Doesn't match: the original also masks the side, as & 3, but doing so
- * shortens the outer loop so that loop.c hoists one more display list command
- * (0xDC08060A) out of it, which takes $t3 and shifts the other registers.
- * Working out each section's first vertex before the side loop gives 65 words
- * differing (19 in shape) rather than 69 (25); with the mask as well it gives
- * 364 (14), where the hoisted command and the register shift are the only
- * differences left. Masking the side inside RingVertex gives 392 (26). Earlier,
- * computing the next side once, into nextSide, gave 69 rather than 79; as a u8,
- * or masked with & 3, 368 to 382. A u32 side gives 366 (16), with nextSide a
- * u32 as well or not; a u32 nextSide alone changes nothing. The permuter's best
- * runs, 1347 and 887 (41 words, 15 in shape), keep side + 1 or section + 1 in a
- * u8, used in only some of the places it is needed, which no natural form
- * explains. The register oracle, forcing 5 pseudos' registers, leaves 38 words
- * at best, so the code differs too. 65 words differ, 19 in shape.
+ * Doesn't match: the original keeps two of the display list pointers it
+ * saves in each other's stack slots, 0x13C and 0x144, and sets $s6, $s7 and
+ * $t5 in another order before the ring loop; the register oracle, forcing no
+ * pseudos, also leaves 16 words. The sparkle loop has its own section
+ * counter, sparkleSection, and the next side is masked to RING_SIDE_COUNT -
+ * 1 with &, as the original masks it: the two together take the draft from
+ * 65 words differing (19 in shape) to 16 (8). The mask alone gives 364 (14),
+ * since it shortens the outer loop so that loop.c hoists one more display
+ * list command (0xDC08060A) out of it; the counter alone changes nothing.
+ * Starting the counter in the loop's header or before it gives the same.
+ * Before these, working out each section's first vertex before the side loop
+ * gave 65 words rather than 69 (25), and computing the next side once, into
+ * nextSide, 69 rather than 79. Masking the side inside RingVertex gave 392
+ * words, 26 in shape, and a u32 side 366, 16 in shape. The permuter's best
+ * runs, 1347 and 887 (41 words, 15 in shape), kept side + 1 or section + 1
+ * in a u8, used in only some of the places it is needed, which no natural
+ * form explains. 16 words differ, 8 in shape.
  */
 #ifdef NON_MATCHING
 void DrawRings(Gfx** displayListHead, CameraMatrices* matrices UNUSED,
@@ -311,6 +314,7 @@ void DrawRings(Gfx** displayListHead, CameraMatrices* matrices UNUSED,
   s32 ringIndex;
   s32 state;
   s32 section;
+  s32 sparkleSection;
   s32 side;
   s32 nextSide;
   s32 sectionFirst;
@@ -380,10 +384,10 @@ void DrawRings(Gfx** displayListHead, CameraMatrices* matrices UNUSED,
           if (state < RING_STATE_FADED) {
             turn = state * RING_SPARKLE_TURN;
             guMtxL2F(transform, matrix);
-            section = state & (RING_SPARKLE_SPACING - 1);
-            for (; section < RING_SECTION_COUNT;
-                section += RING_SPARKLE_SPACING) {
-              angle = turn + (section * RING_SECTION_ANGLE);
+            for (sparkleSection = state & (RING_SPARKLE_SPACING - 1);
+                sparkleSection < RING_SECTION_COUNT;
+                sparkleSection += RING_SPARKLE_SPACING) {
+              angle = turn + (sparkleSection * RING_SECTION_ANGLE);
               ringPoint[0] = cosf(angle) * RING_RADIUS;
               ringPoint[1] = sinf(angle) * RING_RADIUS;
               ringPoint[2] = 0;
@@ -425,7 +429,7 @@ void DrawRings(Gfx** displayListHead, CameraMatrices* matrices UNUSED,
           sectionFirst = RingVertex(section, 0);
           nextSectionFirst = RingVertex(section + 1, 0);
           for (side = 0; side < RING_SIDE_COUNT; side++) {
-            nextSide = (side + 1) % RING_SIDE_COUNT;
+            nextSide = (side + 1) & (RING_SIDE_COUNT - 1);
             gSP2Triangles(gfx++, sectionFirst + side, sectionFirst + nextSide,
                 nextSectionFirst + nextSide, 0, sectionFirst + side,
                 nextSectionFirst + nextSide, nextSectionFirst + side, 0);
