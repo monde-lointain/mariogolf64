@@ -104,19 +104,11 @@ void DimNextTranslucentTriangles(void) {
 }
 
 /*
- * Draws the hole's triangles other than the rings
+ * Draws the hole's triangles other than the rings.
  *
- * Doesn't match: reload gives the display list pointers that don't get
- * registers stack slots in pseudo order, and after each gDPPipeSync followed by
- * an othermode command the original has the pair's slots the other way round.
- * With fabsf an abs.s in volatile inline assembly, the edge test takes both
- * absolute values before adding them, as the original does, and leaves for
- * the next triangle with its branch-likely; with GCC's built-in fabsf 69
- * words differed, 17 in shape. The normalized edge's magnitude keeps its
- * if, as the original negates it in a branch; through fabsf 328 words differ
- * (38 in shape). 40 words differ, none in shape, all in those slots.
+ * The normalized edge's magnitude keeps its if, as the original negates it
+ * in a branch; through fabsf 316 words differ (38 in shape).
  */
-#ifdef NON_MATCHING
 void DrawHoleTriangles(Gfx** displayListHead, CameraMatrices* matrices UNUSED,
     Camera* camera UNUSED) {
   Gfx* gfx = *displayListHead;
@@ -138,26 +130,19 @@ void DrawHoleTriangles(Gfx** displayListHead, CameraMatrices* matrices UNUSED,
   }
 
   gDPPipeSync(gfx++);
-  gDPPipeSync(gfx++);
-  gDPSetCycleType(gfx++, G_CYC_2CYCLE);
+  AppendSyncedRdpState(gfx, gDPSetCycleType, G_CYC_2CYCLE);
   gSPClipRatio(gfx++, FRUSTRATIO_1);
-  gDPPipeSync(gfx++);
-  gDPSetColorDither(gfx++, G_CD_MAGICSQ);
+  AppendSyncedRdpState(gfx, gDPSetColorDither, G_CD_MAGICSQ);
   gSPClearGeometryMode(gfx++, ALL_GEOMETRY_MODES);
   gSPSetGeometryMode(gfx++, G_ZBUFFER | G_SHADE | G_FOG | G_SHADING_SMOOTH);
-  gDPPipeSync(gfx++);
-  gDPSetTextureFilter(gfx++, G_TF_BILERP);
-  gDPPipeSync(gfx++);
-  gDPSetTexturePersp(gfx++, G_TP_PERSP);
+  AppendSyncedRdpState(gfx, gDPSetTextureFilter, G_TF_BILERP);
+  AppendSyncedRdpState(gfx, gDPSetTexturePersp, G_TP_PERSP);
   gDPSetBlendColor(gfx++, 0xFF, 0xFF, 0xFF, 0xFE);
-  gDPPipeSync(gfx++);
-  gDPSetTextureLOD(gfx++, G_TL_TILE);
-  gDPPipeSync(gfx++);
-  gDPSetTextureLUT(gfx++, G_TT_NONE);
-  gDPPipeSync(gfx++);
-  gDPSetRenderMode(gfx++, G_RM_FOG_SHADE_A, G_RM_AA_ZB_XLU_SURF2);
-  gDPPipeSync(gfx++);
-  gDPSetAlphaCompare(gfx++, G_AC_NONE);
+  AppendSyncedRdpState(gfx, gDPSetTextureLOD, G_TL_TILE);
+  AppendSyncedRdpState(gfx, gDPSetTextureLUT, G_TT_NONE);
+  AppendSyncedRdpState(
+      gfx, gDPSetRenderMode, G_RM_FOG_SHADE_A, G_RM_AA_ZB_XLU_SURF2);
+  AppendSyncedRdpState(gfx, gDPSetAlphaCompare, G_AC_NONE);
   gDPSetBlendColor(gfx++, 0xFF, 0xFF, 0xFF, 0x3F);
   gDPLoadTextureBlock(gfx++, TextureAddress(g_BlendedTextureScrollingLayer + 8),
       G_IM_FMT_RGBA, G_IM_SIZ_16b, BLENDED_TEXTURE_SIZE, BLENDED_TEXTURE_SIZE,
@@ -243,10 +228,9 @@ void DrawHoleTriangles(Gfx** displayListHead, CameraMatrices* matrices UNUSED,
         }
 
         gSPFogPosition(gfx++, SHADED_FOG_MIN, SHADED_FOG_MAX);
-        gDPPipeSync(gfx++);
-        gDPSetAlphaDither(gfx++, G_AD_PATTERN);
-        gDPPipeSync(gfx++);
-        gDPSetRenderMode(gfx++, G_RM_PASS, G_RM_AA_ZB_XLU_INTER2);
+        AppendSyncedRdpState(gfx, gDPSetAlphaDither, G_AD_PATTERN);
+        AppendSyncedRdpState(
+            gfx, gDPSetRenderMode, G_RM_PASS, G_RM_AA_ZB_XLU_INTER2);
         if (f_DimsTranslucentTriangles) {
           gDPSetCombineLERP(gfx++, PRIMITIVE, 0, PRIMITIVE_ALPHA, 0, 0, 0, 0, 1,
               PRIMITIVE, 0, PRIMITIVE_ALPHA, 0, ENVIRONMENT, 0, SHADE, 0);
@@ -267,16 +251,12 @@ void DrawHoleTriangles(Gfx** displayListHead, CameraMatrices* matrices UNUSED,
     }
   }
 
-  gDPPipeSync(gfx++);
-  gDPSetTextureLUT(gfx++, G_TT_NONE);
+  AppendSyncedRdpState(gfx, gDPSetTextureLUT, G_TT_NONE);
   gDPPipeSync(gfx++);
   gDPPipeSync(gfx++);
   f_DimsTranslucentTriangles = FALSE;
   *displayListHead = gfx;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/hole_triangles", DrawHoleTriangles);
-#endif
 
 /*
  * Draws the current player's rings; one past RING_STATE_SHOWN fades out while
