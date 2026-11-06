@@ -358,8 +358,21 @@ s32 GetModeIconIndex(GameState* state) {
  * the pointer is declared, in the loop or in each arm, and whether it is set as
  * &f_ModeIconImages[slot][1] or f_ModeIconImages[slot] + 1, changes nothing.
  * Testing iconIndex after the validity test, with NO_MODE_ICON as its default,
- * gives 9 words (3). Doesn't match: loop.c loads the array's address into one
- * register and copies it into the pointer's, a move the original lacks. 5 words
+ * gives 9 words (3). Doesn't match: loop.c loads the pointer's first address
+ * into a temporary and copies it into the pointer's register, a move the
+ * original lacks. The register oracle matches the draft when it gives that
+ * temporary the pointer's $s1, so only local-alloc's choice differs.
+ *
+ * A pointer to the second image stepped by the loop, set before it and
+ * stepped after the icon test or with slot in the loop's step, gives 4 words
+ * differing, 0 in shape, if it is stepped before slot and 8 if after; its
+ * initial address is then set before the hoisted address of
+ * g_ModeIconAnimations, where the original sets it after, and the register
+ * oracle's closest result is these 4 words, against 0 for the draft. Setting
+ * it in the loop's initializer or before the loop, as
+ * &f_ModeIconImages[0][1], f_ModeIconImages[0] + 1 or *f_ModeIconImages + 1,
+ * changes nothing. With the pointer set in each pass, writing the first
+ * image through it, as second[-1], gives 38 words (12 in shape). 5 words
  * differ, 1 in shape.
  */
 #ifdef NON_MATCHING
