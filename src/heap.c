@@ -59,12 +59,17 @@ typedef struct Heap {
 static Heap f_Heaps[HEAP_COUNT];
 /*
  * The main memory's heap is laid out as a Heap is, but the original keeps
- * its parts in separate variables, which changes the code that uses them
+ * its parts in separate variables, which changes the code that uses them.
+ * Its sentinel is volatile, so InitHeapRegions reads the sentinel's prev
+ * back from memory to set its next, as the original does.
  */
-static MemoryBlock f_MemorySentinel;
+static volatile MemoryBlock f_MemorySentinel;
 static u32 f_FreeMemorySize;
 static u32 f_LargestFreeMemorySize; /* The largest free block, measured by
                                        the last allocation */
+
+/* The sentinel as a link in the list, whose links aren't volatile */
+#define SENTINEL_LINK ((MemoryBlock*)&f_MemorySentinel)
 
 void AddHeapRegion(s32 heapIndex, void* start, void* end) {
   MemoryBlock* block = start;
@@ -211,19 +216,17 @@ void FreeFromHeap(s32 heapIndex, void* pointerToBlock) {
  * AddMemoryRegion is nested, a GNU C extension, as in the original: the
  * calls pass a static chain that it saves but never uses.
  *
- * Doesn't match: the original loads the sentinel's prev back from memory to set
- * next, where GCC reuses the address it has just stored. Writing through a
- * MemoryBlock pointer, const or not, leaves 6 or gives 13 differing words, and
- * a chained assignment, next = prev = &f_MemorySentinel, gives 10. Clearing the
- * list in an inline helper that takes the sentinel's address, or reading or
- * writing prev through &f_MemorySentinel, leaves 6, and the helper nested 33.
- * Ending the basic block after the prev store, which empties cse's table, gives
- * 12 words (10 in shape), and after the free size's store 20 (10). Only
- * volatile accesses to the sentinel reproduce the load, and the sentinel isn't
- * hardware. The register oracle's closest result is these 6 words with no
- * register forced, so allocation isn't the cause. 6 words differ.
+ * The sentinel's prev is read back from memory to set next, because the
+ * sentinel is volatile; the functions that walk the list compile the same
+ * either way. With a plain sentinel, GCC reuses the address it has just
+ * stored and 6 words differ. Writing through a MemoryBlock pointer, const
+ * or not, leaves 6 or gives 13 differing words, and a chained assignment,
+ * next = prev = &f_MemorySentinel, gives 10. Clearing the list in an
+ * inline helper that takes the sentinel's address, or reading or writing
+ * prev through &f_MemorySentinel, leaves 6, and the helper nested 33.
+ * Ending the basic block after the prev store, which empties cse's table,
+ * gives 12 words (10 in shape), and after the free size's store 20 (10).
  */
-#ifdef NON_MATCHING
 void InitHeapRegions(Boolean hasExpansionPak) {
   void AddMemoryRegion(void* start, void* end) {
     MemoryBlock* block = start;
@@ -231,7 +234,7 @@ void InitHeapRegions(Boolean hasExpansionPak) {
 
     block->size = size;
     block->tag = BLOCK_FREE;
-    block->next = &f_MemorySentinel;
+    block->next = SENTINEL_LINK;
     block->prev = f_MemorySentinel.prev;
     f_FreeMemorySize += size;
     f_MemorySentinel.prev->next = block;
@@ -240,7 +243,7 @@ void InitHeapRegions(Boolean hasExpansionPak) {
 
   f_MemorySentinel.size = 0;
   f_MemorySentinel.tag = BLOCK_SENTINEL;
-  f_MemorySentinel.prev = &f_MemorySentinel;
+  f_MemorySentinel.prev = SENTINEL_LINK;
   f_FreeMemorySize = 0;
   f_MemorySentinel.next = f_MemorySentinel.prev;
   AddMemoryRegion((void*)MAIN_REGION_START, (void*)MAIN_REGION_END);
@@ -250,12 +253,6 @@ void InitHeapRegions(Boolean hasExpansionPak) {
 
   f_LargestFreeMemorySize = UNMEASURED_SIZE;
 }
-
-#else
-INCLUDE_ASM("asm/nonmatchings/heap", AddMemoryRegion);
-
-INCLUDE_ASM("asm/nonmatchings/heap", InitHeapRegions);
-#endif
 
 u32 GetFreeMemorySize(void) {
   return f_FreeMemorySize;
