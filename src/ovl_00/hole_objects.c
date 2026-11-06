@@ -318,7 +318,7 @@ void DrawHoleCreatures(Gfx** displayListHead) {
   f32 horizontalSpeedSquared;
   Boolean wasUnderwater;
 
-  IsGameFlagSet(GAME_FLAG_UNK5F);
+  IsGameFlagSet(GAME_FLAG_TIMING_DEBUG);
   gSPDisplayList(gfx++, g_DecalTextureSetup);
   gDPPipeSync(gfx++);
   gDPSetDepthSource(gfx++, G_ZS_PIXEL);

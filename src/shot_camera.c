@@ -3264,7 +3264,7 @@ s32 UpdateFlightCamera(Boolean isAdvancing, s32 buttons) {
     f_CameraChangeHoldCount--;
   }
 
-  if (g_IsDebugEnabled && IsGameFlagSet(GAME_FLAG_UNK5F)) {
+  if (g_IsDebugEnabled && IsGameFlagSet(GAME_FLAG_TIMING_DEBUG)) {
     sprintf(g_PrintBuffer, "C:%d F:%2d %3d %3d ", (int)f_HasFlightPhaseChanged,
         (int)f_CameraChangeHoldCount, (int)step, (int)g_BallFlightStep);
     PrintDebugText(g_PrintBuffer, 8, 2);

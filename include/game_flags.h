@@ -133,8 +133,11 @@
 /* Among other uses, makes EndHoleFlyover act as it does for a strong wind */
 #define GAME_FLAG_UNK48 0x48
 
-/* Turns the character sound queue into a delay editor, among other uses */
-#define GAME_FLAG_UNK5F 0x5F
+/*
+ * Turns the character sound queue into a delay editor, and with debugging
+ * enabled prints the flight camera's kind, phase and change timing
+ */
+#define GAME_FLAG_TIMING_DEBUG 0x5F
 
 /* Stops the noise texture from changing */
 #define GAME_FLAG_PAUSE_NOISE_TEXTURE 0x0C

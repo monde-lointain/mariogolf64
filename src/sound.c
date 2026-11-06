@@ -38,7 +38,7 @@
 #define QUEUED_CHARACTER_SOUND_COUNT 4
 #define MAX_CHARACTER_SOUND_DELAY 60
 
-/* The delay editor, on the second controller with GAME_FLAG_UNK5F set */
+/* The delay editor, on the second controller with GAME_FLAG_TIMING_DEBUG set */
 #define DELAY_EDITOR_CONTROLLER 1
 #define DELAY_EDITOR_COLUMN 19
 #define DELAY_EDITOR_FIRST_ROW 5
@@ -421,13 +421,13 @@ static void PreviewCharacterSound(CharacterId character, s32 kind) {
 
 /*
  * Plays the queued character sounds whose delays have run out. With
- * GAME_FLAG_UNK5F set, the second controller instead edits the delays of
+ * GAME_FLAG_TIMING_DEBUG set, the second controller instead edits the delays of
  * a kind of sound and plays the characters' sounds of it to try them.
  */
 static void UpdateCharacterSounds(void) {
   s32 index;
 
-  if (!IsGameFlagSet(GAME_FLAG_UNK5F)) {
+  if (!IsGameFlagSet(GAME_FLAG_TIMING_DEBUG)) {
     for (index = 0; index != QUEUED_CHARACTER_SOUND_COUNT; index++) {
       if (f_QueuedCharacterSounds[index].delay == 0) {
         PlayCharacterSound(f_QueuedCharacterSounds[index].character, index,
