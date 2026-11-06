@@ -8,7 +8,8 @@
 #include "current_shot.h"
 #include "language.h"
 #include "math_util.h"
-#include "save.h"
+#include "play_record.h"
+#include "player.h"
 
 /* g_ShotFlags's bits, which UpdateShotFlags sets for the shot being set up */
 #define SHOT_FLAG_ON_GREEN 1

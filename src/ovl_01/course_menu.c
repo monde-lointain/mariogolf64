@@ -10,6 +10,7 @@
 #include "asset.h"
 #include "compiler.h"
 #include "course.h"
+#include "course_stats.h"
 #include "cpu_projection.h"
 #include "game.h"
 #include "gbi_helpers.h"

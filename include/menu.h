@@ -9,7 +9,8 @@
 #include "course.h"
 #include "language.h"
 #include "password.h"
-#include "save.h"
+#include "play_record.h"
+#include "player.h"
 
 /* The screens that the menu overlay shows, which g_MenuScreen picks */
 enum MenuScreen {

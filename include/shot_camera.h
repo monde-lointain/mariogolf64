@@ -7,7 +7,7 @@
 #include "geometry.h"
 #include "language.h"
 #include "math_util.h"
-#include "save.h"
+#include "player.h"
 #include "surface.h"
 
 /* The fly-over's last frame, which StepHoleFlyover ends on */

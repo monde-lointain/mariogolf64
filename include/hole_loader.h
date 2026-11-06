@@ -3,9 +3,9 @@
 
 #include <ultra64.h>
 
+#include "course.h"
 #include "course_space.h"
 #include "language.h"
-#include "save.h"
 
 #define CUP_POSITION_COUNT 4
 /* Points that the computer golfer may route its shots through */

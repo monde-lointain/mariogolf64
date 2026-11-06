@@ -14,6 +14,7 @@
 #include "compiler.h"
 #include "course.h"
 #include "game_flags.h"
+#include "game_state.h"
 #include "gbi_helpers.h"
 #include "heap.h"
 #include "include_asm.h"

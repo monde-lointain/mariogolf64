@@ -9,11 +9,11 @@
 #include "address.h"
 #include "compiler.h"
 #include "game.h"
+#include "game_state.h"
 #include "gbi_helpers.h"
 #include "hole_display.h"
 #include "language.h"
 #include "play.h"
-#include "save.h"
 
 /* Each half of f_ShadedVertices is two quads; the second takes the derived
  * color */

@@ -17,6 +17,7 @@
 #include "current_shot.h"
 #include "game.h"
 #include "game_flags.h"
+#include "game_state.h"
 #include "gbi_helpers.h"
 #include "geometry.h"
 #include "heap.h"
@@ -24,7 +25,6 @@
 #include "include_asm.h"
 #include "language.h"
 #include "math_util.h"
-#include "save.h"
 #include "shot_camera.h"
 #include "terrain.h"
 

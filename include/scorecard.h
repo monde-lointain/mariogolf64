@@ -3,11 +3,13 @@
 
 #include <ultra64.h>
 
+#include "bets.h"
 #include "camera.h"
+#include "course.h"
 #include "language.h"
 #include "math_util.h"
+#include "player.h"
 #include "round_stats.h"
-#include "save.h"
 
 /* The leaderboard shows this many of the tournament's contestants at a time */
 #define LEADERBOARD_ROW_COUNT 10

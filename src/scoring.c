@@ -8,10 +8,11 @@
 
 #include "course.h"
 #include "game_flags.h"
+#include "game_state.h"
 #include "language.h"
 #include "math_util.h"
 #include "menu.h"
-#include "save.h"
+#include "player.h"
 #include "scene.h"
 
 #define DEBUG_ROUND_HOLE_COUNT 2

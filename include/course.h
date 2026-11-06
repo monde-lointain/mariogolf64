@@ -5,6 +5,12 @@
 
 #include "language.h"
 
+#define COURSE_COUNT 6
+#define COURSE_HOLE_COUNT 18
+#define HOLES_PER_NINE 9
+#define RING_SHOT_COURSE_COUNT 6
+#define RING_SHOT_HOLE_COUNT 6
+
 /*
  * The courses' layouts are kept as course records. The six main courses
  * have one each, as do the two mini-golf courses and the driving range.

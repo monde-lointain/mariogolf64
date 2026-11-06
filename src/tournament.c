@@ -10,10 +10,11 @@
 
 #include "compiler.h"
 #include "course.h"
+#include "game_state.h"
 #include "language.h"
 #include "math_util.h"
 #include "menu.h"
-#include "save.h"
+#include "player.h"
 
 /* Standing 0 is the player's, so the computer contestants start at 1 */
 #define FIRST_COMPUTER_CONTESTANT 1

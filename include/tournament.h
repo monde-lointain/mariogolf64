@@ -3,7 +3,7 @@
 
 #include <ultra64.h>
 
-#include "save.h"
+#include "course.h"
 
 /* The player and 29 computer contestants */
 #define TOURNAMENT_CONTESTANT_COUNT 30

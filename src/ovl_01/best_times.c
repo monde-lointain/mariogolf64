@@ -10,6 +10,7 @@
 #include "asset.h"
 #include "character.h"
 #include "compiler.h"
+#include "course.h"
 #include "course_menu.h"
 #include "cpu_projection.h"
 #include "frame_time.h"

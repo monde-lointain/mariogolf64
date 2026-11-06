@@ -3,8 +3,11 @@
 
 #include <ultra64.h>
 
+#include "bets.h"
+#include "character.h"
+#include "course.h"
 #include "language.h"
-#include "save.h"
+#include "player.h"
 
 /*
  * The values of betStakeLevels, which ApplyBetPreset also turns into

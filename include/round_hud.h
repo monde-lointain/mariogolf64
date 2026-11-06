@@ -4,9 +4,10 @@
 #include <ultra64.h>
 
 #include "camera.h"
+#include "character.h"
 #include "language.h"
 #include "math_util.h"
-#include "save.h"
+#include "player.h"
 
 /* The effects over a shot in flight that StartShotEffect starts */
 enum ShotEffect {

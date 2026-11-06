@@ -6,9 +6,9 @@
 
 #include "billboard.h"
 #include "course.h"
+#include "game_state.h"
 #include "language.h"
 #include "main.h"
-#include "save.h"
 #include "scene.h"
 
 /* The radius used for holes not listed in GetHoleRadius */

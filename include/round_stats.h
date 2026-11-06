@@ -3,8 +3,22 @@
 
 #include <ultra64.h>
 
+#include "bets.h"
 #include "language.h"
-#include "save.h"
+#include "player.h"
+
+/* The current round's statistics, for the course's records */
+typedef struct RoundStats {
+  /* Holes played from a bunker in par or fewer strokes, and in more */
+  /* 0x00 */ s32 sandSaveCount;
+  /* 0x04 */ s32 missedSandSaveCount;
+  /* 0x08 */ s32 measuredDriveCount;
+  /* 0x0C */ s32 longestDrive; /* Starts as the course's record */
+  /* 0x10 */ s32 averagedDriveTotal;
+  /* 0x14 */ s32 averagedDriveCount;
+  /* Whether the drive was hit with the 1W */
+  /* 0x18 */ Boolean isDriveAveraged;
+} RoundStats; /* size = 0x1C */
 
 /* What each player has won on each BET_* bet this game */
 extern s16 g_BetTallies[MAX_PLAYER_COUNT][BET_COUNT];

@@ -11,12 +11,12 @@
 #include "club.h"
 #include "compiler.h"
 #include "game.h"
+#include "game_state.h"
 #include "geometry.h"
 #include "include_asm.h"
 #include "language.h"
 #include "main.h"
 #include "math_util.h"
-#include "save.h"
 
 /* How many frames a drawn slot stays busy */
 #define BUSY_FRAME_COUNT 2

@@ -5,7 +5,7 @@
 
 #include "camera.h"
 #include "language.h"
-#include "save.h"
+#include "player.h"
 #include "text.h"
 
 /* ShowWindFlyGuy's argument that hides the Fly Guy */

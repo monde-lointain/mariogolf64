@@ -6,12 +6,17 @@
 
 #include <ultra64.h>
 
+#include "bets.h"
 #include "club.h"
 #include "compiler.h"
 #include "course.h"
+#include "course_stats.h"
 #include "debug_text.h"
+#include "game_state.h"
 #include "language.h"
+#include "player.h"
 #include "round_hud.h"
+#include "round_stats.h"
 #include "save.h"
 #include "scene.h"
 #include "scorecard.h"

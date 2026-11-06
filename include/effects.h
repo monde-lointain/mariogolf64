@@ -5,11 +5,12 @@
 
 #include "ball_simulation.h"
 #include "camera.h"
+#include "club.h"
 #include "compiler.h"
 #include "course_space.h"
 #include "geometry.h"
 #include "math_util.h"
-#include "save.h"
+#include "player.h"
 
 /* StartWeather's weathers */
 enum Weather {

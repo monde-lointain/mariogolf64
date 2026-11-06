@@ -11,9 +11,10 @@
 #include "compiler.h"
 #include "current_shot.h"
 #include "debug_text.h"
+#include "game_state.h"
 #include "geometry.h"
 #include "language.h"
-#include "save.h"
+#include "player.h"
 #include "surface.h"
 
 /* Read by no routine */

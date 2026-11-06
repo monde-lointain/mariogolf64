@@ -7,7 +7,9 @@
 #include <ultra64.h>
 
 #include "course.h"
+#include "course_stats.h"
 #include "effects.h"
+#include "game_state.h"
 #include "include_asm.h"
 #include "language.h"
 #include "round_stats.h"

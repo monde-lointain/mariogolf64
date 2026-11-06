@@ -6,6 +6,7 @@
 #include "character.h"
 #include "language.h"
 #include "menu_memory.h"
+#include "player.h"
 
 /*
  * The course select's layout, which the menus keep in the top byte of

@@ -34,9 +34,11 @@
 #include "framing.h"
 #include "game.h"
 #include "game_flags.h"
+#include "game_state.h"
 #include "gbi_helpers.h"
 #include "geometry.h"
 #include "golf_balls.h"
+#include "hole_conditions.h"
 #include "hole_display.h"
 #include "hole_intro.h"
 #include "hole_loader.h"
@@ -50,6 +52,8 @@
 #include "pause_menu.h"
 #include "pin.h"
 #include "play.h"
+#include "play_record.h"
+#include "player.h"
 #include "progress.h"
 #include "reaction.h"
 #include "round_events.h"
@@ -69,6 +73,7 @@
 #include "terrain.h"
 #include "text.h"
 #include "transfer_pak.h"
+#include "turn.h"
 
 #define IMPACT_POINT_SOUND_CHANNEL 8
 #define IMPACT_POINT_SOUND_VOLUME 60
