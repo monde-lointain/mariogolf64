@@ -1198,6 +1198,7 @@ void TurnAim(s32 turnsAltHeading) {
   s32 stickX = g_TurnController.stickX;
   SignedBinaryAngle heading = g_CurrentShot.heading;
   s32 dpad;
+  s32 heldFrameCount;
   s32 dpadSpeed;
 
   if (g_ImpactPointState != IMPACT_POINT_OFF) {
@@ -1253,10 +1254,10 @@ void TurnAim(s32 turnsAltHeading) {
     }
   }
 
-  dpad = f_AimTurnFrameCount;
-  dpadSpeed = (dpad < 0) ? -dpad : dpad;
-  g_CurrentShot.heading +=
-      dpad * ((dpadSpeed / AIM_DPAD_SPEED_DIVISOR) + AIM_DPAD_BASE_SPEED);
+  heldFrameCount = f_AimTurnFrameCount;
+  dpadSpeed = (heldFrameCount < 0) ? -heldFrameCount : heldFrameCount;
+  g_CurrentShot.heading += heldFrameCount *
+      ((dpadSpeed / AIM_DPAD_SPEED_DIVISOR) + AIM_DPAD_BASE_SPEED);
   if (!IsGameFlagSet(GAME_FLAG_RANDOM_FRAMEBUFFER_COUNT)) {
     if (g_LetterboxState == LETTERBOX_STATE_NONE ||
         g_LetterboxState == LETTERBOX_STATE_UNUSED_AIMING) {
