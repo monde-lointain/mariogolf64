@@ -38,9 +38,12 @@ enum HeightComparison {
 #define HUD_FLAG_AIMING 0x1
 /* Lights the club head icon fully, otherwise it is dimmed */
 #define HUD_FLAG_LIGHT_CLUB_HEAD 0x2
-/* Read by no routine; set while aiming on the green, without an impact
- * point, or away from LETTERBOX_STATE_NONE and LETTERBOX_STATE_UNUSED_AIMING */
-#define HUD_FLAG_UNK4 0x4
+/*
+ * Read by no routine; set while aiming without an impact point to show: on the
+ * green, for shots with SHOT_FLAG_NO_IMPACT_POINT, and in the letterbox views,
+ * where free look also turns the impact point off
+ */
+#define HUD_FLAG_NO_IMPACT_POINT 0x4
 /* Animates the shot offset marker */
 #define HUD_FLAG_ANIMATE_OFFSET_MARKER 0x8
 /* Read by no routine; set while the power is set */

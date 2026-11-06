@@ -949,7 +949,7 @@ void StartFreeLook(void) {
   g_IsAimCameraEasing = 0;
   g_ImpactPointState = IMPACT_POINT_OFF;
   g_RoundHud.flags = HUD_FLAG_AIMING | HUD_FLAG_LIGHT_CLUB_HEAD |
-      HUD_FLAG_UNK4 | HUD_FLAG_TRANSLUCENT_GAUGE;
+      HUD_FLAG_NO_IMPACT_POINT | HUD_FLAG_TRANSLUCENT_GAUGE;
   g_FreeLookHeading = g_CurrentShot.heading;
   SetMenuBackdrop(MENU_BACKDROP_PATTERN);
   g_PauseScreen = PAUSE_SCREEN_FREE_LOOK;
@@ -4010,19 +4010,19 @@ void UpdateTurns(void) {
           if (g_ShotFlags & SHOT_FLAG_ON_GREEN) {
             if (g_LetterboxState == LETTERBOX_STATE_UNUSED_AIMING ||
                 g_LetterboxState == LETTERBOX_STATE_NONE) {
-              g_RoundHud.flags = HUD_FLAG_AIMING | HUD_FLAG_UNK4;
+              g_RoundHud.flags = HUD_FLAG_AIMING | HUD_FLAG_NO_IMPACT_POINT;
             } else {
-              g_RoundHud.flags =
-                  HUD_FLAG_AIMING | HUD_FLAG_UNK4 | HUD_FLAG_TRANSLUCENT_GAUGE;
+              g_RoundHud.flags = HUD_FLAG_AIMING | HUD_FLAG_NO_IMPACT_POINT |
+                  HUD_FLAG_TRANSLUCENT_GAUGE;
             }
           } else if (g_ShotFlags & SHOT_FLAG_NO_IMPACT_POINT) {
             if (g_LetterboxState == LETTERBOX_STATE_UNUSED_AIMING ||
                 g_LetterboxState == LETTERBOX_STATE_NONE) {
-              g_RoundHud.flags =
-                  HUD_FLAG_AIMING | HUD_FLAG_LIGHT_CLUB_HEAD | HUD_FLAG_UNK4;
+              g_RoundHud.flags = HUD_FLAG_AIMING | HUD_FLAG_LIGHT_CLUB_HEAD |
+                  HUD_FLAG_NO_IMPACT_POINT;
             } else {
               g_RoundHud.flags = HUD_FLAG_AIMING | HUD_FLAG_LIGHT_CLUB_HEAD |
-                  HUD_FLAG_UNK4 | HUD_FLAG_TRANSLUCENT_GAUGE;
+                  HUD_FLAG_NO_IMPACT_POINT | HUD_FLAG_TRANSLUCENT_GAUGE;
             }
           } else {
             if (g_LetterboxState == LETTERBOX_STATE_UNUSED_AIMING) {
@@ -4032,7 +4032,7 @@ void UpdateTurns(void) {
               g_RoundHud.flags = HUD_FLAG_AIMING | HUD_FLAG_LIGHT_CLUB_HEAD;
             } else {
               g_RoundHud.flags = HUD_FLAG_AIMING | HUD_FLAG_LIGHT_CLUB_HEAD |
-                  HUD_FLAG_UNK4 | HUD_FLAG_TRANSLUCENT_GAUGE;
+                  HUD_FLAG_NO_IMPACT_POINT | HUD_FLAG_TRANSLUCENT_GAUGE;
             }
 
             if (g_ImpactPointState == IMPACT_POINT_SETTING) {
