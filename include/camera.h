@@ -44,7 +44,7 @@ typedef struct CameraView {
 } CameraView; /* size = 0x48 */
 
 typedef struct Camera {
-  /* 0x00 */ s32 unk0;
+  /* 0x00 */ s32 unusedBeforeView;
   /* 0x04 */ CameraView view;
   /* 0x4C */ s32 mode; /* A CAMERA_MODE_* value */
 } Camera; /* size = 0x50 */
