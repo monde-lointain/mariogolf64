@@ -1702,6 +1702,11 @@ void FormatLeaderboardRow(char* row, TournamentStanding* standing) {
  * rows or the name flaps as well, or for both of those instead, give the
  * same, and for either alone 102 or 101. The counts above were measured
  * before it. 87 words differ, 39 in shape.
+ *
+ * A focused permuter run's best reads the face loop's standing index into an
+ * unsigned temporary and g_Scorecard.x through a pointer. Reading the
+ * standing through standing instead, in the face loop, gives 88 words (42 in
+ * shape), in the arrows' loop 109 (39), and in both 88 (42).
  */
 #ifdef NON_MATCHING
 void DrawLeaderboardPage(Gfx** displayListHead) {
