@@ -18,6 +18,7 @@
 #include "heap.h"
 #include "hole_display.h"
 #include "math_util.h"
+#include "menu.h"
 #include "round_hud.h"
 #include "save.h"
 #include "screen.h"
@@ -156,8 +157,6 @@
 /* The first fourteen characters have their own club sets; the others use the
  * sets after them */
 #define CHARACTER_CLUB_SET_COUNT 14
-/* Players whose controllerIndex is this read the first controller */
-#define CONTROLLER_INDEX_UNK4 4
 
 #define REEL_CLICK_CHANNEL 13
 /* Each stopping reel's sound pans this much further right */
@@ -493,7 +492,8 @@ s32 UpdateClubSlots(void) {
 
       break;
     case CLUB_SLOTS_STOPPING:
-      if (player->controllerIndex == CONTROLLER_INDEX_UNK4) {
+      /* A player with no controller of their own uses the first */
+      if (player->controllerIndex == NO_CONTROLLER_INDEX) {
         controllerIndex = 0;
       } else {
         controllerIndex = player->controllerIndex;

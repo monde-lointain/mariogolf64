@@ -1851,7 +1851,7 @@ void SetUpChosenGame(void) {
               [f_MenuCharacterChoices[g_ChosenCharacters[index]]]);
     }
 
-    if (player->controllerIndex == MAXCONTROLLERS) {
+    if (player->controllerIndex == NO_CONTROLLER_INDEX) {
       g_Players[index].isComputer = TRUE;
     } else {
       g_Players[index].isComputer = FALSE;
@@ -1889,7 +1889,7 @@ void SetUpChosenGame(void) {
 
   if (g_GameState.gameMode == GAME_MODE_GET_CHARACTER) {
     g_Players[1].isComputer = TRUE;
-    g_Players[1].controllerIndex = MAXCONTROLLERS;
+    g_Players[1].controllerIndex = NO_CONTROLLER_INDEX;
   }
 }
 
