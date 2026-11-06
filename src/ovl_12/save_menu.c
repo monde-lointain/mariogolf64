@@ -348,15 +348,19 @@ s32 GetModeIconIndex(GameState* state) {
  * records (SAVE_MENU_REPLAYS), loading its images and putting the cursor on
  * the first free slot.
  *
- * Doesn't match: in the mode icon loop the original steps two pointers, one to
- * each slot's second image and one 4 bytes before it, and stores both images
- * through them; GCC steps the first image's address and an offset for the
- * second. Storing the second image as the first is stored gives 44 differing
- * words, and storing it plainly or reading it back 30. Stepping a pointer to
- * the second image gives the two pointers but swaps their registers and copies
- * one (19); pointers to the slot's row give 31 to 120. The register oracle,
- * forcing one pseudo's register, leaves 9 words at best, so the code differs
- * too. 11 words differ.
+ * Each mode icon's two images are read in both arms of the icon test, and GCC
+ * merges the arms' identical tails, as the original does. The second image is
+ * stored through a pointer to it, as the original steps one register to each
+ * slot's second image and derives the first's from it: naming both images
+ * directly gives 46 differing words, 2 in shape, as loop.c combines the two
+ * stores into one register; a pointer to the slot's row, or to the first image,
+ * 54 (12) when set before the icon test and 46 (2) when set in each arm. Where
+ * the pointer is declared, in the loop or in each arm, and whether it is set as
+ * &f_ModeIconImages[slot][1] or f_ModeIconImages[slot] + 1, changes nothing.
+ * Testing iconIndex after the validity test, with NO_MODE_ICON as its default,
+ * gives 9 words (3). Doesn't match: loop.c loads the array's address into one
+ * register and copies it into the pointer's, a move the original lacks. 5 words
+ * differ, 1 in shape.
  */
 #ifdef NON_MATCHING
 void OpenSaveMenu(s32 kind) {
@@ -369,8 +373,6 @@ void OpenSaveMenu(s32 kind) {
   RingShotRecord* record;
   Player* player;
   GameState* state;
-  u16 frameId;
-  void* picture;
   s32 fileSize;
 
   save = GetSaveData();
@@ -406,6 +408,8 @@ void OpenSaveMenu(s32 kind) {
 
   if (kind == SAVE_MENU_GAMES) {
     for (slot = 0; slot != SAVED_GAME_COUNT; slot++) {
+      void** second = &f_ModeIconImages[slot][1];
+
       if (save->savedGames[slot].isValid &&
           (iconIndex = GetModeIconIndex(&save->savedGames[slot].state)) !=
               NO_MODE_ICON) {
@@ -413,24 +417,19 @@ void OpenSaveMenu(s32 kind) {
             f_ModeIconImages[slot][0] = AllocMemory(OpenEncodedAsset(
                 g_ModeIconAnimations[iconIndex][0], &encodedAsset)),
             &encodedAsset);
-        frameId = g_ModeIconAnimations[iconIndex][1];
-        picture = AllocMemory(OpenEncodedAsset(frameId, &encodedAsset));
-        f_ModeIconImages[slot][1] = picture;
+        ReadEncodedAsset(*second = AllocMemory(OpenEncodedAsset(
+                             g_ModeIconAnimations[iconIndex][1],
+                             &encodedAsset)),
+            &encodedAsset);
       } else {
         ReadEncodedAsset(
             f_ModeIconImages[slot][0] = AllocMemory(
                 OpenEncodedAsset(g_ModeIconAnimations[0][0], &encodedAsset)),
             &encodedAsset);
-        frameId = g_ModeIconAnimations[0][1];
-        picture = AllocMemory(OpenEncodedAsset(frameId, &encodedAsset));
-        /*
-         * In its own block, as without it 17 words differ, 5 in shape, against
-         * 11 and 5
-         */
-        IN_OWN_BLOCK(f_ModeIconImages[slot][1] = picture);
+        ReadEncodedAsset(*second = AllocMemory(OpenEncodedAsset(
+                             g_ModeIconAnimations[0][1], &encodedAsset)),
+            &encodedAsset);
       }
-
-      ReadEncodedAsset(picture, &encodedAsset);
     }
   } else {
     for (slot = 0; slot != REPLAY_LABEL_COUNT; slot++) {
