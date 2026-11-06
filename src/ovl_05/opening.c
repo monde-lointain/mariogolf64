@@ -4230,6 +4230,12 @@ void LoadOpeningBurst(void) {
  * height locals, or corners held as u8, s16, u16 or u32, still fold the
  * divisions, leaving 367 words. The permuter's best, 322 words (128 in shape),
  * declares left as an unset char, so it draws from garbage.
+ *
+ * The texture rectangle shares the block that holds the pipe sync before it.
+ * That takes the draft from 367 words differing to 347, 127 in shape to 129,
+ * and the register oracle's closest result from 367 words to 347, with no
+ * register forced for either, so allocation still isn't the cause. 347 words
+ * differ, 129 in shape.
  */
 #ifdef NON_MATCHING
 void DrawOpeningBurst(Gfx** displayListHead) {
@@ -4266,15 +4272,22 @@ void DrawOpeningBurst(Gfx** displayListHead) {
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
         G_TX_NOLOD);
     /*
-     * In its own block, as without it 476 words differ, 86 in shape, against
-     * 367 and 127. With the second palette sync, 449 (91) against 364 (132),
-     * the register oracle stayed above 420 then and above 364 here.
+     * The sync and the rectangle in their own block, to match: without a
+     * block 476 words differ, 86 in shape, against 347 and 129. The sync
+     * alone in a block gives 367 (127), the rectangle alone 474 (130),
+     * and the rectangle with the sync after it 352 (132); the register
+     * oracle's closest result is the unforced count for the sync alone
+     * and for the two together. With the second palette sync, when the
+     * sync alone had its block, 449 (91) differed against 364 (132), and
+     * the register oracle stayed above 420 then and above 364 there.
      */
-    IN_OWN_BLOCK(gDPPipeSync(gfx++));
-    gSPTextureRectangle(gfx++, QuarterPixels(left), QuarterPixels(top),
-        QuarterPixels(right), QuarterPixels(bottom), G_TX_RENDERTILE, 0, 0,
-        (BURST_IMAGE_SIZE << 10) / (right - left),
-        (BURST_IMAGE_SIZE << 10) / (bottom - top));
+    IN_OWN_BLOCK({
+      gDPPipeSync(gfx++);
+      gSPTextureRectangle(gfx++, QuarterPixels(left), QuarterPixels(top),
+          QuarterPixels(right), QuarterPixels(bottom), G_TX_RENDERTILE, 0, 0,
+          (BURST_IMAGE_SIZE << 10) / (right - left),
+          (BURST_IMAGE_SIZE << 10) / (bottom - top));
+    });
     gDPPipeSync(gfx++);
     *displayListHead = gfx;
   }
