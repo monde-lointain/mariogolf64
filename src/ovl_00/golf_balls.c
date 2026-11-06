@@ -73,6 +73,23 @@
 #define BALL_MODEL_SCALE 0.05f
 /* The ball's radius in course units, at a pin scale of one */
 #define BALL_RADIUS 0x600
+/*
+ * The ball's model sits this far below its position: a fifth of its radius
+ * in world units. A double, as the original divides in double precision.
+ */
+#define BALL_MODEL_DROP_DIVISOR (WORLD_TO_COURSE_SCALE * 5.0)
+/*
+ * An afterimage is left each time the ball moves this far, in world units per
+ * course unit of the ball's radius: a tenth of the radius while fast, six
+ * tenths otherwise
+ */
+#define FAST_AFTERIMAGE_SPACING 0.00009765625f
+#define AFTERIMAGE_SPACING 0.0005859375f
+/*
+ * In the cup view, afterimages are drawn twice as far from the cup, and pulled
+ * back by half when it closes
+ */
+#define CUP_VIEW_AFTERIMAGE_UNZOOM 0.5f
 
 typedef struct GolfBall {
   /* 0x00 */ Mtx matrices[DRAW_BUFFER_COUNT];
@@ -579,7 +596,7 @@ void UpdateGolfBalls(void) {
         guMtxCatF(f_BallRotation, scaling, rotated);
         guTranslateF(translation, ball->position[AXIS_X],
             ball->position[AXIS_Y] -
-                ((g_PinVertexScale * BALL_RADIUS) / 5120.0),
+                ((g_PinVertexScale * BALL_RADIUS) / BALL_MODEL_DROP_DIVISOR),
             ball->position[AXIS_Z]);
         MultiplyMatrices(rotated, translation, scaling);
         ConvertMatrixToFixed(scaling, &ball->matrices[g_DrawBufferIndex]);
@@ -596,9 +613,12 @@ void UpdateGolfBalls(void) {
           if (afterimage->alpha != AFTERIMAGE_UNUSED) {
             s32 coursePosition[3] UNUSED;
 
-            coursePosition[AXIS_X] = afterimage->position[AXIS_X] * 1024.0f;
-            coursePosition[AXIS_Y] = afterimage->position[AXIS_Y] * 1024.0f;
-            coursePosition[AXIS_Z] = afterimage->position[AXIS_Z] * 1024.0f;
+            coursePosition[AXIS_X] =
+                afterimage->position[AXIS_X] * WORLD_TO_COURSE_SCALE;
+            coursePosition[AXIS_Y] =
+                afterimage->position[AXIS_Y] * WORLD_TO_COURSE_SCALE;
+            coursePosition[AXIS_Z] =
+                afterimage->position[AXIS_Z] * WORLD_TO_COURSE_SCALE;
             afterimage->position[AXIS_X] += afterimage->position[AXIS_X] -
                 (g_HoleSetup.cupPosition[AXIS_X] * COURSE_TO_WORLD_SCALE);
             afterimage->position[AXIS_Y] += afterimage->position[AXIS_Y] -
@@ -616,15 +636,15 @@ void UpdateGolfBalls(void) {
           pulledAfterimage->position[AXIS_X] -=
               (pulledAfterimage->position[AXIS_X] -
                   (g_HoleSetup.cupPosition[AXIS_X] * COURSE_TO_WORLD_SCALE)) *
-              0.5f;
+              CUP_VIEW_AFTERIMAGE_UNZOOM;
           pulledAfterimage->position[AXIS_Y] -=
               (pulledAfterimage->position[AXIS_Y] -
                   (g_HoleSetup.cupPosition[AXIS_Y] * COURSE_TO_WORLD_SCALE)) *
-              0.5f;
+              CUP_VIEW_AFTERIMAGE_UNZOOM;
           pulledAfterimage->position[AXIS_Z] -=
               (pulledAfterimage->position[AXIS_Z] -
                   (g_HoleSetup.cupPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE)) *
-              0.5f;
+              CUP_VIEW_AFTERIMAGE_UNZOOM;
         }
       }
     }
@@ -647,7 +667,8 @@ void UpdateGolfBalls(void) {
     }
 
     if (f_IsBallAfterimageFast == TRUE) {
-      if ((f32)(g_PinVertexScale * BALL_RADIUS) * 0.00009765625f < distance &&
+      if ((f32)(g_PinVertexScale * BALL_RADIUS) * FAST_AFTERIMAGE_SPACING <
+              distance &&
           g_BallSimulations[0].state == BALL_STATE_ROLLING) {
         head->alpha = AFTERIMAGE_FAST_ALPHA;
         head->position[AXIS_X] = ball->position[AXIS_X];
@@ -671,7 +692,8 @@ void UpdateGolfBalls(void) {
         }
       }
     } else {
-      if ((f32)(g_PinVertexScale * BALL_RADIUS) * 0.0005859375f < distance) {
+      if ((f32)(g_PinVertexScale * BALL_RADIUS) * AFTERIMAGE_SPACING <
+          distance) {
         head->alpha = AFTERIMAGE_ALPHA;
         head->position[AXIS_X] = ball->position[AXIS_X];
         head->position[AXIS_Y] = ball->position[AXIS_Y];
