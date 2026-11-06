@@ -878,6 +878,15 @@ enum BallSprite {
  * beside ball's other fields: reading it through ball, alone or with the
  * whole test in a macro taking ball, gives 522 words differing (122 in
  * shape) against 492 (100).
+ *
+ * isCurrentBallAboveGround is set to FALSE where it is declared, as the
+ * original zeroes its stack slot in the delay slot of the turn step's
+ * test, before anything else. That takes the draft from 492 words
+ * differing, 100 in shape, to 452 (78), and the register oracle's closest
+ * result from 492 words to 452, still forcing none. Setting it just
+ * before the step's test gives the same 452 words, and just after the
+ * test 454 (78). The counts above were measured before this change. 452
+ * words differ, 78 in shape.
  */
 #ifdef NON_MATCHING
 void DrawGolfBalls(CameraMatrices* matrices UNUSED) {
@@ -885,7 +894,7 @@ void DrawGolfBalls(CameraMatrices* matrices UNUSED) {
   ScreenPoint ballPoint;
   ScreenPoint shadowPoint;
   s32 i;
-  Boolean isCurrentBallAboveGround;
+  Boolean isCurrentBallAboveGround = FALSE;
   GolfBall* ball;
   BallAfterimage* afterimage;
   SurfaceInfo* surface;
@@ -962,7 +971,6 @@ void DrawGolfBalls(CameraMatrices* matrices UNUSED) {
       G_TX_NOLOD);
   gDPPipeSync(gfx++);
   gDPSetTexturePersp(gfx++, G_TP_NONE);
-  isCurrentBallAboveGround = FALSE;
   gDPPipeSync(gfx++);
   gDPSetTextureFilter(gfx++, G_TF_AVERAGE);
   gDPPipeSync(gfx++);
