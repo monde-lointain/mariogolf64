@@ -1086,7 +1086,7 @@ void UpdateMenus(void) {
       break;
 
     case MENU_SCREEN_HELP:
-      if (IsGameFlagSet(GAME_FLAG_UNK56)) {
+      if (IsGameFlagSet(GAME_FLAG_HELP_ANIMATION_VIEWER)) {
         UpdateAnimationViewer();
       } else {
         UpdateHelpBoard();
@@ -1420,7 +1420,7 @@ void UpdateMenus(void) {
         break;
 
       case MENU_SCREEN_HELP:
-        if (IsGameFlagSet(GAME_FLAG_UNK56)) {
+        if (IsGameFlagSet(GAME_FLAG_HELP_ANIMATION_VIEWER)) {
           f_MenuLabelImageIndex ^= 1;
           f_ImageSlotIndex ^= 1;
           OpenEncodedAsset(ASSET_TITLE_LABELS, &asset);
@@ -3084,7 +3084,7 @@ void UpdateMainMenu(void) {
         case MAIN_CHOICE_HELP:
           StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
           g_MenuScreen = MENU_SCREEN_HELP;
-          if (IsGameFlagSet(GAME_FLAG_UNK56)) {
+          if (IsGameFlagSet(GAME_FLAG_HELP_ANIMATION_VIEWER)) {
             g_GameState.gameMode = GAME_MODE_GET_CHARACTER;
             g_GameState.playerCount = 2;
             g_CourseSelectKind = COURSE_SELECT_KIND_COURSES;
@@ -3141,7 +3141,7 @@ void UpdateMainMenuWithoutTransmit(void) {
         case MAIN_CHOICE_HELP:
           StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
           g_MenuScreen = MENU_SCREEN_HELP;
-          if (IsGameFlagSet(GAME_FLAG_UNK56)) {
+          if (IsGameFlagSet(GAME_FLAG_HELP_ANIMATION_VIEWER)) {
             g_GameState.gameMode = GAME_MODE_GET_CHARACTER;
             g_GameState.playerCount = 2;
             g_CourseSelectKind = COURSE_SELECT_KIND_COURSES;
@@ -3827,7 +3827,7 @@ void DrawMenuScreen(Gfx** displayListHead) {
       DrawOptionsScreen(&gfx);
       break;
     case MENU_SCREEN_HELP:
-      if (IsGameFlagSet(GAME_FLAG_UNK56)) {
+      if (IsGameFlagSet(GAME_FLAG_HELP_ANIMATION_VIEWER)) {
         DrawAnimationViewer(&gfx);
       } else {
         DrawHelpBoard(&gfx);
