@@ -285,9 +285,12 @@
  * known */
 #define GAME_FLAG_UNK55 0x55
 
-/* Makes ChooseHoleStrokeTarget plan no strokes for each hole; its purpose is
- * not yet known */
-#define GAME_FLAG_UNK3C 0x3C
+/*
+ * Has the computer golfers aim to hole out in no strokes, take 20 trials at
+ * each level of PlanShot, and keep the evaluation a trial shot must reach
+ * from loosening with each trial
+ */
+#define GAME_FLAG_COMPUTER_PLAYS_BEST 0x3C
 
 /* Sets unk1A of each Game Boy character read through the Transfer Pak to 1; its
  * purpose is not yet known */

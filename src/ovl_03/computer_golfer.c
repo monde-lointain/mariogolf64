@@ -503,10 +503,10 @@ s32 MarkUsableClubs(s32 unused, s16* clubs, s8* isUsable);
 #define MIN_PLANNED_POWER_GAUGE_FRAME 2
 #define POWER_GAUGE_FRAME_BOOST 1.2f
 /* The trials taken at each level, at a level that aims at the cup, and under
- * GAME_FLAG_UNK3C */
+ * GAME_FLAG_COMPUTER_PLAYS_BEST */
 #define LEVEL_TRIAL_COUNT 4
 #define CUP_LEVEL_TRIAL_COUNT 5
-#define UNK3C_LEVEL_TRIAL_COUNT 20
+#define BEST_PLAY_LEVEL_TRIAL_COUNT 20
 /* A mis-hit is a roll below MISHIT_ROLL_RANGE divided by a golfer's divisor,
  * and the sign bit sets its direction */
 #define MISHIT_ROLL_RANGE 250
@@ -777,8 +777,8 @@ s32 PlanShot(CurrentShot* plannedShot) {
         f_LevelTrialCount = CUP_LEVEL_TRIAL_COUNT;
       }
 
-      if (IsGameFlagSet(GAME_FLAG_UNK3C)) {
-        f_LevelTrialCount = UNK3C_LEVEL_TRIAL_COUNT;
+      if (IsGameFlagSet(GAME_FLAG_COMPUTER_PLAYS_BEST)) {
+        f_LevelTrialCount = BEST_PLAY_LEVEL_TRIAL_COUNT;
       }
 
       f_NeedsNewTarget = FALSE;
@@ -1266,7 +1266,7 @@ s32 ChooseHoleStrokeTarget(void) {
   s32 strokesLeft;
 
   luckyBonus = 0;
-  if (IsGameFlagSet(GAME_FLAG_UNK3C)) {
+  if (IsGameFlagSet(GAME_FLAG_COMPUTER_PLAYS_BEST)) {
     return 0;
   }
 
@@ -2363,7 +2363,7 @@ s32 StepTrialShot(void) {
     f_TrialLaunch->playerIndex = f_Shot.playerIndex;
     f_TrialLaunch->shotMode = f_Shot.shotMode;
     f_IsPutting = GetClub(f_Shot.clubSlot)->surfaceMask & CLUB_SURFACE_GREEN;
-    if (!IsGameFlagSet(GAME_FLAG_UNK3C)) {
+    if (!IsGameFlagSet(GAME_FLAG_COMPUTER_PLAYS_BEST)) {
       if (f_IsPutting) {
         f_AcceptableEvaluation = (f_AcceptableEvaluation * 1.1f) + 0.2f;
       } else {
