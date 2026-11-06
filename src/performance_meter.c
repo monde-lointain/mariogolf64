@@ -38,6 +38,12 @@
 #define MEMORY_BOX_LEFT 250
 #define MEMORY_BOX_RIGHT 302
 #define MEMORY_DIGITS_X (MEMORY_BOX_LEFT + 2)
+/* The box's edges and its three readouts' tops, from the y the caller gives */
+#define MEMORY_BOX_TOP_OFFSET (-8)
+#define MEMORY_BOX_BOTTOM_OFFSET 20
+#define FRAMEBUFFER_COUNT_OFFSET (-7)
+#define FREE_MEMORY_OFFSET 2
+#define LARGEST_BLOCK_OFFSET 10
 
 #define DIGIT_WIDTH 5
 #define DIGIT_HEIGHT 8
@@ -589,15 +595,16 @@ void DrawMemoryMeter(u32 y, s32 taskFlags) {
   gDPSetTextureLUT(gfx++, G_TT_NONE);
   gDPPipeSync(gfx++);
   gSPTextureRectangle(gfx++, QuarterPixels(MEMORY_BOX_LEFT),
-      QuarterPixels(y - 8), QuarterPixels(MEMORY_BOX_RIGHT),
-      QuarterPixels(y + 20), G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE,
-      TEXEL_STEP_ONE);
+      QuarterPixels(y + MEMORY_BOX_TOP_OFFSET), QuarterPixels(MEMORY_BOX_RIGHT),
+      QuarterPixels(y + MEMORY_BOX_BOTTOM_OFFSET), G_TX_RENDERTILE, 0, 0,
+      TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   sprintf(f_ReadoutText, "% 8d", (int)nuGfxCfbNum);
-  DrawDigits(&gfx, MEMORY_DIGITS_X, y - 7, f_ReadoutText);
+  DrawDigits(
+      &gfx, MEMORY_DIGITS_X, y + FRAMEBUFFER_COUNT_OFFSET, f_ReadoutText);
   sprintf(f_ReadoutText, "%08d", (int)(GetFreeMemorySize()));
-  DrawDigits(&gfx, MEMORY_DIGITS_X, y + 2, f_ReadoutText);
+  DrawDigits(&gfx, MEMORY_DIGITS_X, y + FREE_MEMORY_OFFSET, f_ReadoutText);
   sprintf(f_ReadoutText, "%08d", (int)(FindLargestFreeMemorySize()));
-  DrawDigits(&gfx, MEMORY_DIGITS_X, y + 10, f_ReadoutText);
+  DrawDigits(&gfx, MEMORY_DIGITS_X, y + LARGEST_BLOCK_OFFSET, f_ReadoutText);
   gDPFullSync(gfx++);
   gSPEndDisplayList(gfx++);
   nuGfxTaskStart(f_MeterDisplayLists[f_MeterDisplayListIndex],
