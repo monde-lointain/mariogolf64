@@ -88,9 +88,10 @@ enum SendExperienceStep {
   SEND_EXPERIENCE_CHOOSING,
   SEND_EXPERIENCE_SENT = 3,
   SEND_EXPERIENCE_WRITING,
-  SEND_EXPERIENCE_UNK5,
-  SEND_EXPERIENCE_UNK6,
-  SEND_EXPERIENCE_UNK7,
+  /* Never set; each would end like a failure */
+  SEND_EXPERIENCE_UNUSED_A,
+  SEND_EXPERIENCE_UNUSED_B,
+  SEND_EXPERIENCE_UNUSED_C,
   SEND_EXPERIENCE_FAILED,
   SEND_EXPERIENCE_DONE,
   /* Asking the player to start a pak check */
@@ -1260,10 +1261,9 @@ void UpdateSendExperience(void) {
       }
 
       break;
-    /* Steps 5 to 7 end like a failure */
-    case SEND_EXPERIENCE_UNK5:
-    case SEND_EXPERIENCE_UNK6:
-    case SEND_EXPERIENCE_UNK7:
+    case SEND_EXPERIENCE_UNUSED_A:
+    case SEND_EXPERIENCE_UNUSED_B:
+    case SEND_EXPERIENCE_UNUSED_C:
     case SEND_EXPERIENCE_FAILED:
       switch (GetNoticeState()) {
         case NOTICE_HIDDEN:
