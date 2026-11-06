@@ -2537,8 +2537,9 @@ void PlaceFlightCamera(s32 step) {
         for (index = BESIDE_GOLFER_FIRST_STEP; index < BESIDE_GOLFER_STEP_LIMIT;
             index++) {
           /* Setting distance inside the x term comes closer to the original:
-           * a statement of its own before it gives 101 differing words, not
-           * 98, and 9 in shape, not 4 */
+           * a statement of its own before it gives 37 differing words, not
+           * 34, and 5 in shape, not none; a float local declared in the loop
+           * 53 (5); and the product written in both terms 52 (6) */
           f_CameraPosition[AXIS_X] =
               (cosf(yaw) * (distance = index * BESIDE_GOLFER_STEP)) +
               g_CurrentShot.ballPosition[AXIS_X];
