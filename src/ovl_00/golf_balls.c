@@ -786,6 +786,15 @@ enum BallSprite {
 /* The pika balls are drawn as models only while the current ball is nearer than
  * this */
 #define PIKA_BALL_DEPTH 20000
+/*
+ * The depths a ball is drawn at while the cup view is shown, among pin.c's for
+ * the large cup and flagstick: nearer than g_CupViewDepth, in the cup, and
+ * farther but not in it. Its shadow is drawn just behind it.
+ */
+#define CUP_VIEW_NEAR_BALL_DEPTH 0x402F
+#define CUP_VIEW_SUNK_BALL_DEPTH 0x401F
+#define CUP_VIEW_FAR_BALL_DEPTH 0x4007
+#define CUP_VIEW_SHADOW_DEPTH_STEP 4
 
 /* Like G_RM_ZB_XLU_SURF and G_RM_AA_ZB_XLU_SURF, but also updating the depth
  * buffer */
@@ -1019,9 +1028,10 @@ void DrawGolfBalls(CameraMatrices* matrices UNUSED) {
 
           if (g_IsCupViewShown == TRUE) {
             if (ballDepth < g_CupViewDepth) {
-              primDepth = 0x402F;
+              primDepth = CUP_VIEW_NEAR_BALL_DEPTH;
             } else {
-              primDepth = isAboveCup ? 0x401F : 0x4007;
+              primDepth = isAboveCup ? CUP_VIEW_SUNK_BALL_DEPTH
+                                     : CUP_VIEW_FAR_BALL_DEPTH;
             }
           } else if (ball->purpose == LAUNCH_PURPOSE_PLACED_AT_REST) {
             primDepth = ballPoint.depth;
@@ -1163,11 +1173,14 @@ void DrawGolfBalls(CameraMatrices* matrices UNUSED) {
               (0.6f * (2.0f * g_PinVertexScale)) * 0.25f);
           if (g_IsCupViewShown == TRUE) {
             if (shadowDepth < g_CupViewDepth) {
-              shadowPrimDepth = 0x4033;
+              shadowPrimDepth =
+                  CUP_VIEW_NEAR_BALL_DEPTH + CUP_VIEW_SHADOW_DEPTH_STEP;
             } else if (ball->isInCup == TRUE) {
-              shadowPrimDepth = 0x4023;
+              shadowPrimDepth =
+                  CUP_VIEW_SUNK_BALL_DEPTH + CUP_VIEW_SHADOW_DEPTH_STEP;
             } else {
-              shadowPrimDepth = 0x400B;
+              shadowPrimDepth =
+                  CUP_VIEW_FAR_BALL_DEPTH + CUP_VIEW_SHADOW_DEPTH_STEP;
             }
 
             shade = 0x7F -
@@ -1311,9 +1324,11 @@ void DrawGolfBalls(CameraMatrices* matrices UNUSED) {
           afterimage->position[AXIS_Z], &ballPoint);
       if (afterimageProjectedDepth < BALL_NEAREST_DEPTH) {
         if (g_IsCupViewShown == TRUE) {
-          afterimageDepth = 0x402F;
+          afterimageDepth = CUP_VIEW_NEAR_BALL_DEPTH;
           if (afterimageProjectedDepth >= g_CupViewDepth) {
-            afterimageDepth = afterimage->isInCup == TRUE ? 0x401F : 0x4007;
+            afterimageDepth = afterimage->isInCup == TRUE
+                ? CUP_VIEW_SUNK_BALL_DEPTH
+                : CUP_VIEW_FAR_BALL_DEPTH;
           }
 
           gDPSetPrimColor(gfx++, 0, 0, 0xA0, 0xA0, 0xFF, afterimage->alpha / 2);
