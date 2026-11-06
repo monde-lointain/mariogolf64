@@ -232,6 +232,11 @@
 
 /* Has every hole use the driving range's scene colors, without rain */
 #define GAME_FLAG_DRIVING_RANGE_COLORS 0x7C
+/*
+ * Has every hole use the round end's scene colors, without rain, overriding
+ * GAME_FLAG_DRIVING_RANGE_COLORS
+ */
+#define GAME_FLAG_ROUND_END_COLORS 0x7D
 
 /* Debug cheats that pad the first player's round points */
 #define GAME_FLAG_ADD_500_POINTS 0x66
@@ -241,7 +246,6 @@
 #define GAME_FLAG_CHOOSE_UNLOCK_NOTICE 0x6E
 #define GAME_FLAG_UNK6A 0x6A
 #define GAME_FLAG_UNK6B 0x6B
-#define GAME_FLAG_UNK7D 0x7D
 
 /* Has BuildHole read the hole's files from the host instead of its assets */
 #define GAME_FLAG_READ_HOST_HOLE 0x50

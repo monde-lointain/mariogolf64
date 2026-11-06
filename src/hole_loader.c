@@ -863,7 +863,7 @@ NO_RESULT ChooseHoleConditions(void) {
       g_HoleSetup.conditions.sceneColorIndex = SCENE_COLOR_INDEX_DRIVING_RANGE;
     }
 
-    if (IsGameFlagSet(GAME_FLAG_UNK7D)) {
+    if (IsGameFlagSet(GAME_FLAG_ROUND_END_COLORS)) {
       g_HoleSetup.conditions.isRaining = FALSE;
       g_HoleSetup.conditions.sceneColorIndex = SCENE_COLOR_INDEX_ROUND_END;
     }
