@@ -298,9 +298,9 @@
  */
 #define GAME_FLAG_COMPUTER_PLAYS_BEST 0x3C
 
-/* Sets unk1A of each Game Boy character read through the Transfer Pak to 1; its
- * purpose is not yet known */
-#define GAME_FLAG_UNK6F 0x6F
+/* Makes each Game Boy character read through the Transfer Pak left-handed,
+ * whatever its save says */
+#define GAME_FLAG_GAME_BOY_LEFTIES 0x6F
 
 /* Give Game Boy characters read through the Transfer Pak that ball type, the
  * lowest set flag winning */

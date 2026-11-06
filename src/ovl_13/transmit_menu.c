@@ -1492,7 +1492,7 @@ void DecodeCartridgeCharacter(
     character->character = GAME_BOY_GOLFER_COUNT - 1;
   }
 
-  if (IsGameFlagSet(GAME_FLAG_UNK6F)) {
+  if (IsGameFlagSet(GAME_FLAG_GAME_BOY_LEFTIES)) {
     character->isLefty = 1;
   } else {
     character->isLefty = characterData[DATA_IS_LEFTY_OFFSET];
