@@ -1496,6 +1496,9 @@ s32 GetUnusedPalette(s32 choiceIndex);
  * the other table. Testing the flag positively, with if/else or ?:, gives
  * that order but 97 words (25 in shape); opening the asset in each arm gives
  * 134 (24), or 140 (26) with the negated test. 91 words differ, 25 in shape.
+ *
+ * The register oracle's closest result is these 91 words with no register
+ * forced, so allocation isn't the cause.
  */
 #ifdef NON_MATCHING
 void DrawGridFaces(Gfx** displayListHead, u8 isSinglePlayer) {

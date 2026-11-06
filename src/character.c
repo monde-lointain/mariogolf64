@@ -2209,6 +2209,9 @@ void PlaceCharacter(u32 slotIndex, CoursePoint point, Radians heading) {
  * gives an array reference no side effects from its index; reading
  * isLefty as volatile, which nothing justifies, gives 219 words (35 in
  * shape).
+ *
+ * The register oracle's closest result is these 14 words with no register
+ * forced, so allocation isn't the cause.
  */
 #ifdef NON_MATCHING
 void DrawCharacterAndShadow(

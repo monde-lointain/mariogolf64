@@ -295,6 +295,9 @@ void DrawHoleTriangles(Gfx** displayListHead, CameraMatrices* matrices UNUSED,
  * first, as DrawHoleTriangles does; that swaps the two slots and takes
  * the draft from 16 words differing (8 in shape) to 8 (8). Of the pairs
  * alone, only the LUT command's changes anything.
+ *
+ * The register oracle's closest result is these 8 words with no register
+ * forced, so allocation isn't the cause.
  */
 #ifdef NON_MATCHING
 void DrawRings(Gfx** displayListHead, CameraMatrices* matrices UNUSED,

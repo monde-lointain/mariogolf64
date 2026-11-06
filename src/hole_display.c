@@ -1955,6 +1955,9 @@ void DrawSky(Gfx** displayListHead, f32 eyeY UNUSED, s32 unusedSetting UNUSED,
  * strip reads it unset; it is not used. The second strip loop computes the
  * word offset as the first does; keeping a byte offset in its own local gave
  * 56. 18 words differ, none in shape.
+ *
+ * The register oracle's closest result is these 18 words with no register
+ * forced, so allocation isn't the cause.
  */
 #ifdef NON_MATCHING
 void DrawBackdrop(Gfx** displayListHead, CameraView* view, s32 cameraIndex) {
