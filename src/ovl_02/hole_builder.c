@@ -2577,7 +2577,8 @@ void BuildHole(s32 course, s32 hole) {
 
   osSyncPrintf("PaintLogic%d\n", f_PaintLogic);
   if (!IsGameFlagSet(GAME_FLAG_READ_HOST_HOLE)) {
-    if (IsGameFlagSet(GAME_FLAG_UNK51) && hole == 0) {
+    if (IsGameFlagSet(GAME_FLAG_NEXT_COURSE_FIRST_HOLE) && hole == 0) {
+      /* One past the course's last hole, so the next course's first hole */
       hole = COURSE_HOLE_COUNT;
     }
 

@@ -211,9 +211,15 @@
  */
 #define GAME_FLAG_HELP_ANIMATION_VIEWER 0x56
 
+/*
+ * Replaces a round's first hole with the next course's first hole, which
+ * BuildHole reads past the end of the course's row of hole assets, and fades
+ * the high ground on it
+ */
+#define GAME_FLAG_NEXT_COURSE_FIRST_HOLE 0x51
+
 /* Flags that the hole loader reads or sets, whose purpose is not yet known */
 #define GAME_FLAG_UNK11 0x11
-#define GAME_FLAG_UNK51 0x51
 #define GAME_FLAG_UNK67 0x67
 /* Debug cheats that pad the first player's round points */
 #define GAME_FLAG_ADD_500_POINTS 0x66

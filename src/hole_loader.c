@@ -981,7 +981,8 @@ void RunLoaderThread(void) {
       osSyncPrintf("Wow! Polychar is alive\n");
     }
 
-    if (IsGameFlagSet(GAME_FLAG_UNK51) && g_GameState.holeIndex == 0) {
+    if (IsGameFlagSet(GAME_FLAG_NEXT_COURSE_FIRST_HOLE) &&
+        g_GameState.holeIndex == 0) {
       SetGameFlag(GAME_FLAG_FADE_HIGH_GROUND);
     } else {
       ClearGameFlag(GAME_FLAG_FADE_HIGH_GROUND);
