@@ -47,6 +47,8 @@
 #include "text.h"
 #include "turn.h"
 
+/* Random yaws are masked to this, in steps of a 32768th of a turn */
+#define RANDOM_YAW_MASK 0x7FFF
 #define RANDOM_YAW_TO_RADIANS (M_PI / 16384)
 
 /*
@@ -135,7 +137,6 @@ typedef s32 FlightCameraKind;
 /* Bits of f_ComingFlightEvents */
 #define FLIGHT_EVENT_BILLBOARD_HIT (1 << 0)
 #define FLIGHT_EVENT_CUP_PASS (1 << 1)
-#define RANDOM_YAW_MASK 0x7FFF
 #define SHORT_SHOT_MAX_LENGTH 0xBB7FF
 #define CAMERA_CHANGE_HOLD_COUNT 20
 #define NOISE_GRID_MASK (NOISE_GRID_SIZE - 1)
@@ -654,8 +655,6 @@ void EndFlightCamera(void) {
 Boolean IsCupPassPoint(s32 cupDistance, s32 height);
 s32 RandomBelow(s32 limit);
 
-/* Random yaws come in steps of a 32768th of a turn */
-#define RANDOM_YAW_RANGE 0x7FFF
 /* The shortest shot length that the cameras work with */
 #define MIN_SHOT_LENGTH 0x7800
 /* The path steps searched for cup passes and for path flags */
@@ -738,9 +737,9 @@ void StartFlightCamera(s32 earlierFlightCount) {
   f_IsLandingSoundPlayed = FALSE;
   f_UnusedClearedFlightWord = 0;
   f_EndReaction = END_REACTION_NONE;
-  f_CameraYaw = (f32)RandomBelow(RANDOM_YAW_RANGE) * RANDOM_YAW_TO_RADIANS;
-  f_TrailViewAngle = (f32)(rand() & RANDOM_YAW_RANGE) * RANDOM_YAW_TO_RADIANS;
-  f_CupViewYaw = (f32)(rand() & RANDOM_YAW_RANGE) * RANDOM_YAW_TO_RADIANS;
+  f_CameraYaw = (f32)RandomBelow(RANDOM_YAW_MASK) * RANDOM_YAW_TO_RADIANS;
+  f_TrailViewAngle = (f32)(rand() & RANDOM_YAW_MASK) * RANDOM_YAW_TO_RADIANS;
+  f_CupViewYaw = (f32)(rand() & RANDOM_YAW_MASK) * RANDOM_YAW_TO_RADIANS;
   if (earlierFlightCount == 0) {
     f_IsLaterFlight = FALSE;
   } else {
@@ -1537,14 +1536,14 @@ void PlaceCameraAroundShotEnd(void) {
         ((guRandom() % RANDOM_DISTANCE_STEP_COUNT) * PUTT_DISTANCE_STEP) +
         PUTT_MIN_DISTANCE;
     RandomBelow(RANDOM_YAW_MASK);
-    yawScale = M_PI / 65536;
+    yawScale = RANDOM_YAW_TO_RADIANS / 4;
     yaw = f_ShotFlightYaw - ((f32)(rand() & RANDOM_YAW_MASK) * yawScale);
   } else if (!IsSimpleCameraChosen()) {
     if (f_ShotLength <= SHORT_SHOT_MAX_LENGTH) {
       distance = SHORT_SHOT_DISTANCE;
       height = 0.0f;
       yaw = f_ShotFlightYaw + (M_PI / 8) -
-          ((f32)(rand() & RANDOM_YAW_MASK) * (M_PI / 131072));
+          ((f32)(rand() & RANDOM_YAW_MASK) * (RANDOM_YAW_TO_RADIANS / 8));
     } else {
       if (g_SimulatedShot.endsOnGreen) {
         distance =
@@ -1574,7 +1573,8 @@ void PlaceCameraAroundShotEnd(void) {
       }
 
       yaw = f_ShotFlightYaw + M_PI + (M_PI * 5 / 8) +
-          ((f32)(rand() & RANDOM_YAW_MASK) * (M_PI / 32768 * 1.225f));
+          ((f32)(rand() & RANDOM_YAW_MASK) *
+              (RANDOM_YAW_TO_RADIANS / 2 * 1.225f));
     }
   } else {
     if (f_ShotLength * DISTANCE_SPREAD_FRACTION != 0.0f) {
@@ -1601,7 +1601,7 @@ void PlaceCameraAroundShotEnd(void) {
     }
 
     yaw = f_ShotFlightYaw + M_PI + (M_PI / 2) +
-        ((f32)(rand() & RANDOM_YAW_MASK) * (M_PI / 32768));
+        ((f32)(rand() & RANDOM_YAW_MASK) * (RANDOM_YAW_TO_RADIANS / 2));
   }
 
   point[AXIS_X] = (-sinf(yaw) * distance) + f_ShotEndPosition[AXIS_X];
@@ -2170,13 +2170,13 @@ void PlaceFlightCamera(s32 step) {
         g_Cameras[0].view.fieldOfView = DEFAULT_FIELD_OF_VIEW;
         if (f_IsBehindViewFar == FALSE) {
           sideYaw = f_ShotFlightYaw + (M_PI / 4) +
-              ((f32)(rand() & RANDOM_YAW_MASK) * (M_PI / 65536));
+              ((f32)(rand() & RANDOM_YAW_MASK) * (RANDOM_YAW_TO_RADIANS / 4));
           behindDistance = (f_ShotLength * NEAR_BEHIND_VIEW_LENGTH_FRACTION) +
               NEAR_BEHIND_VIEW_DISTANCE -
               RandomBelow(f_ShotLength * BEHIND_VIEW_SPREAD_FRACTION);
         } else {
           sideYaw = f_ShotFlightYaw - (M_PI / 4) -
-              ((f32)(rand() & RANDOM_YAW_MASK) * (M_PI / 65536));
+              ((f32)(rand() & RANDOM_YAW_MASK) * (RANDOM_YAW_TO_RADIANS / 4));
           behindDistance = (f_ShotLength * FAR_BEHIND_VIEW_LENGTH_FRACTION) +
               FAR_BEHIND_VIEW_DISTANCE -
               RandomBelow(f_ShotLength * BEHIND_VIEW_SPREAD_FRACTION);
