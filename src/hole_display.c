@@ -3164,12 +3164,25 @@ INCLUDE_ASM("asm/nonmatchings/hole_display", DrawTurnAwayAnimation);
  * own 84, 20 in shape, and the register oracle's closest result falls from
  * 66 words forcing 14 pseudos to 63 forcing 11. Counting the slice copy's
  * columns with tileRow as well gives 74. The counts above were measured
- * before this. 72 words differ, 20 in shape.
+ * before this.
+ *
+ * The register oracle lined wordIndex up with one register in the tiles'
+ * copy and another in the fade and negative copies, so each of the three
+ * copies now counts its words with a wordIndex of its own, declared in its
+ * branch. That takes the draft from 72 words differing to 102, but from 20
+ * in shape to 16, and the register oracle's closest result from 63 words
+ * forcing 11 pseudos to 53 forcing 19; the differences it adds are mostly in
+ * which registers the loops use. Resetting the shared wordIndex in each
+ * branch instead gives 120 words (18 in shape), with the oracle at 63
+ * forcing 17; the fade and negative copies' own counters alone give 102
+ * (16), the negative copy's alone 89 (19), the tiles' alone 103 (21) and the
+ * fade's alone 199 (17). The slice copy's words are still best counted with
+ * gridColumnOrSliceWord: a sliceWord of their own gives 114 words, 16 in
+ * shape. 102 words differ, 16 in shape.
  */
 #ifdef NON_MATCHING
 void CaptureHudAnimationFrame(void) {
   u32* frame;
-  s32 wordIndex;
   s32 tileStart;
   s32 tileRow;
   s32 tileColumn;
@@ -3190,9 +3203,10 @@ void CaptureHudAnimationFrame(void) {
 
   frame = (u32*)nuGfxCfb_ptr;
   f_IsFrameCapturePending = FALSE;
-  wordIndex = 0;
   if (f_HudAnimation == HUD_ANIMATION_TURN_AWAY ||
       f_HudAnimation == HUD_ANIMATION_TILES) {
+    s32 wordIndex = 0;
+
     for (tileRow = 0; tileRow != FRAME_TILE_ROW_COUNT; tileRow++) {
       for (tileColumn = 0; tileColumn != FRAME_TILE_COLUMN_COUNT;
           tileColumn++) {
@@ -3234,8 +3248,8 @@ void CaptureHudAnimationFrame(void) {
         vertex->v.ob[AXIS_X] = x;
         vertex->v.ob[AXIS_Y] = TileGridRowY(gridRow);
         /*
-         * In its own block, as without it 74 words differ, 22 in shape, against
-         * 72 and 20
+         * In its own block, as without it 104 words differ, 18 in shape,
+         * against 102 and 16
          */
         IN_OWN_BLOCK(vertex->v.ob[AXIS_Z] = 0);
         nextVertex->v.ob[AXIS_X] = x;
@@ -3249,6 +3263,8 @@ void CaptureHudAnimationFrame(void) {
       f_HudAnimation == HUD_ANIMATION_FAST_FADE_OUT ||
       f_HudAnimation == HUD_ANIMATION_SLIDE_APART ||
       f_HudAnimation == HUD_ANIMATION_SPIRAL) {
+    s32 wordIndex = 0;
+
     for (row = FRAME_MARGIN_ROWS; row != SCREEN_HEIGHT - FRAME_MARGIN_ROWS;
         row++) {
       for (column = FRAME_MARGIN_WORDS;
@@ -3274,6 +3290,8 @@ void CaptureHudAnimationFrame(void) {
     }
   } else if (f_HudAnimation == HUD_ANIMATION_MOTION_BLUR) {
   } else if (f_HudAnimation == HUD_ANIMATION_NEGATIVE) {
+    s32 wordIndex = 0;
+
     for (row = FRAME_MARGIN_ROWS; row != SCREEN_HEIGHT - FRAME_MARGIN_ROWS;
         row++) {
       for (column = FRAME_MARGIN_WORDS;
