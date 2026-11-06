@@ -168,13 +168,15 @@ enum PrizeBracket {
 #define FINAL_RESULTS_TITLE_ASSET 0x69F
 #define COURSE_NOTICE_TITLE_ASSET 0x55F
 #define CHARACTER_NOTICE_TITLE_ASSET 0x560
-#define RESULTS_UNK72C_IMAGE_ASSET 0x72C
-#define RESULTS_UNK72D_PALETTE_ASSET 0x72D
-#define MATCH_PLACES_IMAGE_ASSET 0x6A2
-#define MATCH_UNK6A3_ASSET 0x6A3
+/* A 72 by 64 white glow fading to yellow, loaded but never drawn */
+#define RESULTS_GLOW_IMAGE_ASSET 0x72C
+#define RESULTS_GLOW_PALETTE_ASSET 0x72D
+#define MATCH_WIN_BANNER_ASSET 0x6A2
+#define MATCH_LOSE_BANNER_ASSET 0x6A3
 /* The words UP, DOWN and EVEN, stacked, for match play standings */
 #define MATCH_STANDING_WORDS_ASSET 0x8FE
-#define TOURNAMENT_UNK6A1_ASSET 0x6A1
+/* The digits 0 to 9, stacked */
+#define TOURNAMENT_PLACE_DIGITS_ASSET 0x6A1
 
 /* Makes DrawRank draw the rank as a place: 1st, 2nd and so on */
 #define RANK_AS_PLACE 0x1000
@@ -346,7 +348,8 @@ static u8* f_ResultsCloudImage;
 static u8* f_ResultsLabelsImage;
 static u8* f_ResultsLargeDigitsImage;
 static u8* f_ResultsPlacesImage;
-/* The banner that DrawRank draws for a rank past RANK_BANNER */
+/* In a match, the LOSE banner that DrawRank draws for a rank past RANK_BANNER;
+ * in a tournament, the digits it draws a place from the 4th with */
 static u8* f_SecondBannerImage;
 static u8* f_NameplateImage;
 static u8* f_NoticeTitleImage;
@@ -575,9 +578,9 @@ void LoadRoundResults(void) {
         AllocMemory(OpenEncodedAsset(ASSET_SHINE_IMAGE, &asset));
     ReadEncodedAsset(f_ResultsShineImage, &asset);
     f_UnusedResultsImage =
-        AllocMemory(OpenEncodedAsset(RESULTS_UNK72C_IMAGE_ASSET, &asset));
+        AllocMemory(OpenEncodedAsset(RESULTS_GLOW_IMAGE_ASSET, &asset));
     ReadEncodedAsset(f_UnusedResultsImage, &asset);
-    OpenAssetFile(RESULTS_UNK72D_PALETTE_ASSET, &file);
+    OpenAssetFile(RESULTS_GLOW_PALETTE_ASSET, &file);
     size = GetAssetFileSize(&file);
     f_UnusedResultsPalette = AllocMemory(size);
     ReadAssetFile(f_UnusedResultsPalette, size, &file);
@@ -608,10 +611,10 @@ void LoadRoundResults(void) {
   if (!g_GameState.isClubTournament) {
     if (IsOneOnOneMatchMode(g_GameState.gameMode)) {
       f_ResultsPlacesImage =
-          AllocMemory(OpenEncodedAsset(MATCH_PLACES_IMAGE_ASSET, &asset));
+          AllocMemory(OpenEncodedAsset(MATCH_WIN_BANNER_ASSET, &asset));
       ReadEncodedAsset(f_ResultsPlacesImage, &asset);
       f_SecondBannerImage =
-          AllocMemory(OpenEncodedAsset(MATCH_UNK6A3_ASSET, &asset));
+          AllocMemory(OpenEncodedAsset(MATCH_LOSE_BANNER_ASSET, &asset));
       ReadEncodedAsset(f_SecondBannerImage, &asset);
       f_NameplateImage =
           AllocMemory(OpenEncodedAsset(ASSET_WOODEN_PLAQUE, &asset));
@@ -723,8 +726,8 @@ void LoadRoundResults(void) {
         AddRoundPoints(save, k);
         break;
       case GAME_MODE_TOURNAMENT:
-        f_SecondBannerImage =
-            AllocMemory(OpenEncodedAsset(TOURNAMENT_UNK6A1_ASSET, &asset));
+        f_SecondBannerImage = AllocMemory(
+            OpenEncodedAsset(TOURNAMENT_PLACE_DIGITS_ASSET, &asset));
         ReadEncodedAsset(f_SecondBannerImage, &asset);
         f_PlayerResults[0] =
             GetNetScoreToPar(GetFirstHoleIndex() + GetRoundHoleCount(), 0);
