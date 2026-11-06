@@ -278,9 +278,6 @@ static Vtx f_SmallGlyphVertices[QUAD_VERTEX_COUNT] = {
 
 void DrawMediumTextSlot(Gfx** displayListHead, s32 slot);
 void ClearGlyphSprites(void);
-void DrawLargeText(Gfx** displayListHead, s16 x, s16 y, READ_ONLY char* text);
-void DrawShadowedText(
-    Gfx** displayListHead, s16 x, s16 y, READ_ONLY char* text);
 s32 GetTextLength(READ_ONLY char* text);
 
 char g_PrintBuffer[PRINT_BUFFER_SIZE];

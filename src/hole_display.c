@@ -931,8 +931,6 @@ void BlendSkyColors(void) {
       ((to->fogFar - from->fogFar) * f_SkyBlendStep / SKY_BLEND_STEP_COUNT);
 }
 
-void InitSkyColors(void);
-
 /*
  * Sets the sky up for the hole's scene color index: its vertices' colors, the
  * blend between times of day that BlendSkyColors steps through, and

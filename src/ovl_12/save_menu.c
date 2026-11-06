@@ -229,8 +229,6 @@ void InvalidateBrokenRingShotRecords(void);
 void SetTextSlot(s32 x, s32 y, s32 messageId, s32 fontSize, s32 slot,
     TextFlags flags, u8 red, u8 green, u8 blue, u8 alpha);
 void InvalidateBrokenSavedGames(void);
-s32 SaveOrContinueGame(s32 slotIndex, Boolean isContinuing);
-void QuitPlayToTitle(void);
 void CloseControlsScreen(void);
 void SetUpTextDrawing(Gfx** displayListHead);
 void DrawLargeTextSlot(Gfx** displayListHead, s32 slot);

@@ -60,7 +60,6 @@
 #define TIME_SEPARATOR_SHIFT_LEFT 4
 #define TIME_SEPARATOR_SPACING 6
 
-s32 GetOpenCourseCount(void);
 void DrawNarrowTwoDigitMenuNumber(
     Gfx** displayListHead, s32 x, s32 y, s32 value, u8 mark);
 void DrawCharacterFace(Gfx** displayListHead, void* texels, void* palette,

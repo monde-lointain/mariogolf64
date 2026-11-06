@@ -333,10 +333,8 @@ typedef struct StaffRollEasedView {
 extern u8 g_StaffTextRomStart[];
 
 void AssignCharacterBuffers(void);
-void FreeEffectImages(void);
 void DrawStaffLine(Gfx** displayListHead, s32 left, s32 top, s32 lineIndex);
 void DrawStaffRollPainting(Gfx** displayListHead);
-void LoadEffectImages(void);
 
 static u8 f_IsPaintingShown = TRUE;
 static s32 f_StaffRollFrame = 0;

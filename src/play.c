@@ -173,7 +173,6 @@ s32 SaveOrContinueGameByMode(Boolean isContinuing);
 void FillWaveTexels(void);
 void SetUpPlayers(void);
 void WriteBallDistancesIfEnabled(void);
-void InitExpansionPakFeatures(void);
 void LoadBestShotReplay(PlayRecord* record);
 
 /*
@@ -857,7 +856,6 @@ void UpdateTurns(void);
 s32 UpdateClubSlots(void);
 s32 ArePlanksOpen(void);
 void FreeClubSlots(void);
-void SaveReplayToSlot(void);
 void LeaveReplaySaveMenu(void);
 void FreeResultCharacters(void);
 void FreeScorecard(void);

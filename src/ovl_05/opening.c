@@ -1505,7 +1505,6 @@ s32 UpdateOpeningCharacters(void) {
 #define CLOSING_SOUND_CHANNEL ROTATING_SOUND_CHANNEL_COUNT
 
 void LaunchDrop(CoursePoint point);
-void SpawnRisingClumps(CoursePoint point);
 Boolean IsDonkeyKongUnlocked(void);
 s32 StepOpeningBallSimulation(BallSimulation* simulation);
 void AnimateNameLogos(void);

@@ -132,8 +132,6 @@ static u16 f_DrawOrder[BILLBOARD_COUNT] = {0};
 /* Read by no routine */
 static s8 f_UnusedBytesAfterDrawOrder[2] UNUSED = {1, 1};
 
-s32 GetGroundHeight(s32 x, s32 z);
-
 /* Billboards this close to the course's edges are hidden */
 #define COURSE_EDGE_MIN_X 256.0f
 #define COURSE_EDGE_MIN_Z 256.0f

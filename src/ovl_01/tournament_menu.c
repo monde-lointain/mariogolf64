@@ -329,9 +329,6 @@ static s32 f_UnusedWordsAfterCursorVertices[2] UNUSED = {0, 0};
 static f32 f_CodeCursorPhases[MENU_CURSOR_VERTEX_COUNT] = {
     0.0f, 2.0f, 4.0f, 6.0f};
 
-Boolean IsNintendoClubTournament(void);
-s32 GetClubTournamentCourseTitleMessage(void);
-s32 GetClubTournamentModeMessage(void);
 void DrawClubWindow(Gfx** displayListHead, s32 width, s32 height, s32 centerX,
     s32 centerY, s32 okTextShown, s32 chosenButton, s32 windowStyle);
 void DrawClubNumber(Gfx** displayListHead, s32 x, s32 top, s32 number);

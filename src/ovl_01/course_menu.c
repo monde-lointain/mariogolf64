@@ -144,7 +144,6 @@ typedef struct TrophyPosition {
 extern const char f_StatsStringFormat[];
 extern const char f_NumberedCourseFormat[];
 
-s32 GetOpenCourseCount(void);
 void DrawStatFigure(Gfx** displayListHead, s16 statIndex, u8 row);
 void DrawSpinningBadge(Gfx** displayListHead, void* image, s32 x, s32 y);
 void DrawThreeDigitMenuNumber(

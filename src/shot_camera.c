@@ -233,7 +233,6 @@ s32 IsSimpleCameraChosen();
 #endif
 void ChooseFlightCameraKind(void);
 void PlaceFlightCamera(s32 step);
-s32 StepHoleFlyover(void);
 void EaseLookAtBelowBall(f32 drop);
 void EaseLookAtPoint(Radians yaw);
 

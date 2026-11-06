@@ -369,7 +369,6 @@ void LoadTournamentBuffer(void* buffer, s16 bufferKind);
 void LoadCodeEntryBuffer(void* buffer, s32 bufferKind);
 void UpdateClubTournament(void);
 s32 GetClubTournamentCourse(void);
-s32 GetClubTournamentGameMode(void);
 s32 GetClubTournamentCharacter(void);
 s32 TakeClubTournamentEntry(void);
 /* Defined as returning s16, but its caller here uses the whole register */

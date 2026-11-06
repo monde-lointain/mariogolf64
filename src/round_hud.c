@@ -440,8 +440,6 @@ void DrawRingShotSelect(Gfx** displayListHead);
 
 void LoadCourseSelect(s32);
 void FreeCourseSelect(void);
-void LoadShotEffectImages(void);
-void FreeShotEffectImages(void);
 
 /* The asset loaded into an image's buffer, before any is */
 #define NO_IMAGE_ASSET (-1)
