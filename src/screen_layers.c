@@ -518,6 +518,15 @@ void StartScreenFadeIn(s32 red, s32 green, s32 blue, s32 frameCount) {
  * gives 15, putting the first pipe sync in its own block gives 196, and other
  * orders of the color loads give 12 to 34. The register oracle's closest result
  * is these 10 words with no register forced, so allocation isn't the cause.
+ *
+ * The value is the texture rectangle's step word. sched1 splits its
+ * constant, by mips.md's split for large integers, into the high half and
+ * an or of the low half into the same pseudo, which is why the original
+ * sets the bit in the slot. Both halves have priority 1, tied with the
+ * other constants; here sched1 places the or at T-32, ahead of the color
+ * loads at T-30, where the original places it after them. Holding the
+ * step in a local, passed as either or both steps, changes the code
+ * elsewhere and gives 208 to 211 words.
  */
 #ifdef NON_MATCHING
 void DrawScreenFade(Gfx** displayListHead) {
