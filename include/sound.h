@@ -78,10 +78,10 @@ enum Sound {
   /* The loop played while the stick sets the impact point */
   SOUND_IMPACT_POINT = 0x26,
   /*
-   * SOUND_UNK39 and SOUND_UNK77 play in bursts as the opening's Lakitu
-   * flies; SOUND_UNK77 also with the opening's Yoshi or Donkey Kong
+   * SOUND_FALLING_WHISTLE and SOUND_UNK77 play in bursts as the opening's
+   * Lakitu flies; SOUND_UNK77 also with the opening's Yoshi or Donkey Kong
    */
-  SOUND_UNK39,
+  SOUND_FALLING_WHISTLE,
   SOUND_WIND_FLY_GUY, /* Also played in the opening */
   SOUND_HIT_SHELL,
   SOUND_GOOMBA = 0x2A, /* Also the Monty Mole's and in the opening */

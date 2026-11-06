@@ -2817,7 +2817,7 @@ void UpdateOpening(void) {
           case 0x3E3:
           case 0x3E5:
           case 0x3E6:
-            PlaySound(SOUND_UNK39, f_OpeningSoundChannel, 0x40);
+            PlaySound(SOUND_FALLING_WHISTLE, f_OpeningSoundChannel, 0x40);
             AdvanceOpeningSoundChannel();
             break;
         }
