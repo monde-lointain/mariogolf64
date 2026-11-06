@@ -3985,6 +3985,19 @@ void LoadOpeningImpactLines(void) {
  * the rectangle; measured before the left edge, that alone gave 252 (30). The
  * register oracle's closest result is the 46 words with no register forced;
  * forcing any gives 212 or more. 46 words differ, none in shape.
+ *
+ * The counts above were measured before the change below. Each pipe sync and
+ * the RDP state command after it now goes through AppendSyncedRdpState,
+ * which declares the command's pointer first, as DrawHoleTriangles does; of
+ * the eight pairs, the cycle type's and the render mode's each take 8 words
+ * off alone, and all eight give 30 words differing, none in shape. All are
+ * in the strip loop: the original keeps the bottom edge's 88 in a register
+ * and subtracts the row's offset plus the strip height from it for the top
+ * edge, where this subtracts the offset from 56. Grouping the top edge's
+ * terms that way, or as (row + 1) strips, folds the same or gives 168 (54);
+ * the top as the bottom less the strip height gives 29 (1), and the bottom
+ * edge's 88 in a variable 46 (4) or 168 (58). 30 words differ, none in
+ * shape.
  */
 #ifdef NON_MATCHING
 void DrawOpeningImpactLines(Gfx** displayListHead) {
@@ -4006,23 +4019,17 @@ void DrawOpeningImpactLines(Gfx** displayListHead) {
         IsOutsideBlink(frame, IMPACT_LINES_SECOND_BLINK_FRAME) &&
         f_ImpactLinesFrame < IMPACT_LINES_FRAME_COUNT) {
       gDPPipeSync(gfx++);
-      gDPPipeSync(gfx++);
-      gDPSetCycleType(gfx++, G_CYC_1CYCLE);
-      gDPPipeSync(gfx++);
-      gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
+      AppendSyncedRdpState(gfx, gDPSetCycleType, G_CYC_1CYCLE);
+      AppendSyncedRdpState(
+          gfx, gDPSetRenderMode, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
       gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-      gDPPipeSync(gfx++);
-      gDPSetColorDither(gfx++, G_CD_DISABLE);
+      AppendSyncedRdpState(gfx, gDPSetColorDither, G_CD_DISABLE);
       gSPTexture(gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0,
           G_TX_RENDERTILE, G_ON);
-      gDPPipeSync(gfx++);
-      gDPSetTexturePersp(gfx++, G_TP_NONE);
-      gDPPipeSync(gfx++);
-      gDPSetTextureFilter(gfx++, G_TF_BILERP);
-      gDPPipeSync(gfx++);
-      gDPSetAlphaCompare(gfx++, G_AC_NONE);
-      gDPPipeSync(gfx++);
-      gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+      AppendSyncedRdpState(gfx, gDPSetTexturePersp, G_TP_NONE);
+      AppendSyncedRdpState(gfx, gDPSetTextureFilter, G_TF_BILERP);
+      AppendSyncedRdpState(gfx, gDPSetAlphaCompare, G_AC_NONE);
+      AppendSyncedRdpState(gfx, gDPSetTextureLUT, G_TT_RGBA16);
       gDPLoadTLUT_pal256(
           gfx++, TextureAddress(ImageBody(f_OpeningEffectImage)));
       gDPPipeSync(gfx++);
