@@ -34,6 +34,7 @@ double atan(double value);
 double atan2(double y, double x);
 double sin(double angle);
 double cos(double angle);
+double tan(double angle);
 /* Built into GCC, which compiles it to a sqrt.d instruction */
 double sqrt(double value);
 /*

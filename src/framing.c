@@ -38,7 +38,6 @@ static Radians f_FramingYaw;
 static Mat4 f_FramingRotation;
 
 void TransformPoint(Mat4 mf, Vec3 point, Vec3 result);
-double tan(double x);
 
 FILE_STATIC Vec3 f_FramedEye;
 FILE_STATIC Vec3 f_FramedLookAt;

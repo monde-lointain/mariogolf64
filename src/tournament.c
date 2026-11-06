@@ -233,7 +233,6 @@ char g_ContestantNames[COURSE_COUNT *
 static s32 f_UnusedWordAfterContestantProfiles UNUSED = 0;
 
 void SortIndicesDescending(s32* values, s32* order, s32 count);
-double sin(double angle);
 void NameContestants(void);
 
 void SeedTournamentRandom(s32 seed) {
