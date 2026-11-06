@@ -221,7 +221,7 @@ typedef struct HoleSetup {
   /* 0x18 */ HoleConditions conditions;
   /* 0x2C */ s8 par;
   /* 0x2D */ s8 nextCupIndex;
-  /* 0x2E */ u8 unk2E[0x34 - 0x2E];
+  /* 0x2E */ u8 unusedAfterNextCup[0x34 - 0x2E];
 } HoleSetup; /* size = 0x34 */
 
 /* A shot as a record keeps it, from the CurrentShot it was played with */
@@ -265,7 +265,7 @@ typedef struct PlayRecord {
   /* 0x3C */ u8 isLefty;
   /* 0x3D */ s8 paletteIndex;
   /* 0x3E */ u8 strokeCount;
-  /* 0x3F */ u8 unk3F;
+  /* 0x3F */ u8 unusedAfterStrokeCount;
   /* 0x40 */ s32 noiseSeed;
   /* 0x44 */ RecordedShot
       shots[4]; /* RecordHoleOut writes a fifth past the end */
@@ -287,7 +287,7 @@ typedef struct RingShotRecord {
   /* 0x38 */ u8 isLefty;
   /* 0x39 */ s8 paletteIndex;
   /* 0x3A */ u8 strokeCount;
-  /* 0x3B */ u8 unk3B;
+  /* 0x3B */ u8 unusedAfterStrokeCount;
   /* 0x3C */ s32 noiseSeed;
   /* RecordRingShotHole writes a sixth past the end, into the next record */
   /* 0x40 */ RecordedShot shots[5];
@@ -340,16 +340,16 @@ typedef struct CourseStats {
   /* 0x3C */ s16
       characterBestScores[CHARACTER_COUNT]; /* bestScore, by character */
   /* 0x60 */ u8 hasCharacterBestScore[CHARACTER_COUNT];
-  /* 0x72 */ u8 unk72[0x74 - 0x72];
+  /* 0x72 */ u8 unusedAfterBestScores[0x74 - 0x72];
 } CourseStats; /* size = 0x74 */
 
 typedef struct SavedGame {
   /* 0x00 */ Boolean isValid;
-  /* 0x04 */ u8 unk4[4];
+  /* 0x04 */ u8 unusedBeforeHole[4];
   /* 0x08 */ HoleSetup hole;
   /* 0x3C */ GameState state;
   /* 0x80 */ RoundStats roundStats;
-  /* 0x9C */ u8 unk9C[4];
+  /* 0x9C */ u8 unusedAfterRoundStats[4];
 } SavedGame; /* size = 0xA0 */
 
 /* PlayerHole.putts when they were not counted */
@@ -505,7 +505,7 @@ typedef struct MatchupRecord {
  * them reach them through a pointer to this; where it ends is unknown.
  */
 typedef struct Awards {
-  /* 0x000 */ u8 unk0[0xF4];
+  /* 0x000 */ u8 unusedBeforeBadges[0xF4];
   /* 0x0F4 */ s8
       birdieBadgeCounts[COURSE_COUNT]
                        [COURSE_HOLE_COUNT]; /* Nonzero holds the badge */
@@ -520,7 +520,7 @@ typedef struct SaveData {
   /* 0x0008 */ u8 invertedBuildDate[0x20]; /* The writing build's date, with
                                               each bit inverted */
   /* 0x0028 */ s8 options[SAVE_OPTION_COUNT];
-  /* 0x002C */ u8 unk2C[0x38 - 0x2C];
+  /* 0x002C */ u8 unusedAfterOptions[0x38 - 0x2C];
   /* 0x0038 */ SavedGame modeGames[MODE_GAME_COUNT];
   /* 0x0218 */ Player modePlayers[MODE_PLAYER_COUNT];
   /* 0x0720 */ PlayRecord modeRecords[MODE_RECORD_COUNT];
@@ -533,7 +533,7 @@ typedef struct SaveData {
   /* 0x0E08 */ s32 bestTimeCharacters[COURSE_COUNT][BEST_TIME_COUNT];
   /* 0x0E50 */ s32 bestTimePalettes[COURSE_COUNT][BEST_TIME_COUNT];
   /* 0x0E98 */ CourseStats courseStats[COURSE_COUNT];
-  /* 0x1150 */ u8 unk1150[0x1320 - 0x1150];
+  /* 0x1150 */ u8 unusedAfterCourseStats[0x1320 - 0x1150];
   /* 0x1320 */ s8 hasRingShotStar[RING_SHOT_COURSE_COUNT][RING_SHOT_HOLE_COUNT];
   /* 0x1344 */ s8 ringShotClearCounts[RING_SHOT_COURSE_COUNT]
                                      [RING_SHOT_HOLE_COUNT][CHARACTER_COUNT];
