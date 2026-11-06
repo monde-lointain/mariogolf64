@@ -430,7 +430,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
     hitsHoleTriangle = FALSE;
     /*
      * The goto, to match: the rest of the step in an if on the ball not having
-     * stopped gives 1241 words differing, 225 in shape, against 749 and 225.
+     * stopped gives 978 words differing, 126 in shape, against 478 and 126.
      */
     if (simulation->state == BALL_STATE_STOPPED) {
       goto SETTLE;
@@ -1259,8 +1259,8 @@ s32 StepBallSimulation(BallSimulation* simulation) {
          * Twice, to match: under -ffast-math, fold-const reassociates one
          * expression's two products into a product by 0.04f, where the
          * original multiplies by 0.2f twice. As one expression, in any order
-         * or with the drags' product grouped, 763 words differ, 227 in shape,
-         * against 749 and 225.
+         * or with the drags' product grouped, 492 words differ, 128 in shape,
+         * against 478 and 126.
          */
         velocity[AXIS_X] *= WATER_ENTRY_DRAG;
         velocity[AXIS_X] *= WATER_ENTRY_DRAG;
