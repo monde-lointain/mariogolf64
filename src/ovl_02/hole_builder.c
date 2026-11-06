@@ -2107,6 +2107,15 @@ static inline void FillCodeGap(
  * declaring the column a u16 gives 153 (31) and the row as well 237 (69), so
  * the cast doesn't stand for the column's type. 88 words differ, 12 in
  * shape.
+ *
+ * The register oracle's closest result is 37 words, forcing 22 pseudos, so
+ * the code differs too. On the current draft, indexing the buffer in
+ * GetCode, or adding the summed index to it, gives 130 words (26 in shape)
+ * with either order of the sum's terms, adding the column before the row's
+ * offset 92 (20), and passing FillCodeGap the index and a step 137 (35). In
+ * the draft and the index forms, loop.c steps the code's index alongside the
+ * column, where the original adds the column to the row's offset on each
+ * pass and steps only the neighbor rows' offsets.
  */
 #ifdef NON_MATCHING
 void CleanCodeMap(void) {
