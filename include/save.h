@@ -161,6 +161,9 @@ typedef s32 GameStateStep;
 /* Whether a game state step shows the whole hole, rather than a turn */
 #define IsHoleOverviewStep(step) \
   ((step) == GAME_STATE_HOLE_INTRO || (step) == GAME_STATE_FLYOVER)
+/* Whether a game state step has the players taking turns, on any hole */
+#define IsTurnTakingStep(step) \
+  ((step) == GAME_STATE_TAKING_TURNS || (step) == GAME_STATE_REPEATING_HOLE)
 
 /* GameState.replayKind's values: the replay that leaving the menus starts */
 enum ReplayKind {
