@@ -99,6 +99,9 @@
 /* Two quads shade the top and bottom of the reels' window */
 #define SHADE_VERTEX_COUNT 8
 #define SHADE_HALF_WIDTH 50
+/* Each quad runs from SHADE_ALPHA at the window's edge to clear inside it */
+#define SHADE_EDGE_Y 48
+#define SHADE_INNER_Y 16
 #define SHADE_Z (-10)
 #define SHADE_ALPHA 230
 
@@ -367,14 +370,14 @@ void LoadClubSlots(void) {
     f_Slots->shadeVertices[index].v.cn[3] = 0;
   }
 
-  f_Slots->shadeVertices[0].v.ob[AXIS_Y] = 48;
-  f_Slots->shadeVertices[1].v.ob[AXIS_Y] = 16;
-  f_Slots->shadeVertices[2].v.ob[AXIS_Y] = 16;
-  f_Slots->shadeVertices[3].v.ob[AXIS_Y] = 48;
-  f_Slots->shadeVertices[4].v.ob[AXIS_Y] = -16;
-  f_Slots->shadeVertices[5].v.ob[AXIS_Y] = -48;
-  f_Slots->shadeVertices[6].v.ob[AXIS_Y] = -48;
-  f_Slots->shadeVertices[7].v.ob[AXIS_Y] = -16;
+  f_Slots->shadeVertices[0].v.ob[AXIS_Y] = SHADE_EDGE_Y;
+  f_Slots->shadeVertices[1].v.ob[AXIS_Y] = SHADE_INNER_Y;
+  f_Slots->shadeVertices[2].v.ob[AXIS_Y] = SHADE_INNER_Y;
+  f_Slots->shadeVertices[3].v.ob[AXIS_Y] = SHADE_EDGE_Y;
+  f_Slots->shadeVertices[4].v.ob[AXIS_Y] = -SHADE_INNER_Y;
+  f_Slots->shadeVertices[5].v.ob[AXIS_Y] = -SHADE_EDGE_Y;
+  f_Slots->shadeVertices[6].v.ob[AXIS_Y] = -SHADE_EDGE_Y;
+  f_Slots->shadeVertices[7].v.ob[AXIS_Y] = -SHADE_INNER_Y;
   f_Slots->shadeVertices[0].v.cn[3] = SHADE_ALPHA;
   f_Slots->shadeVertices[3].v.cn[3] = SHADE_ALPHA;
   f_Slots->shadeVertices[5].v.cn[3] = SHADE_ALPHA;
