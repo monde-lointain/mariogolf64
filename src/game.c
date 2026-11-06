@@ -967,12 +967,14 @@ void BuildHorizonDynamicTextures(Gfx** displayListHead) {
   gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, DYNAMIC_TEXTURE_SIZE,
       RenderTargetAddress(osVirtualToPhysical(g_BlendedTexture)));
   gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, BLENDED_TEXTURE_ALPHA);
-  gDPLoadTextureBlock(gfx++, TextureAddress(g_BlendedTextureScrollingLayer + 8),
-      G_IM_FMT_RGBA, G_IM_SIZ_16b, DYNAMIC_TEXTURE_SIZE, DYNAMIC_TEXTURE_SIZE,
-      0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
+  gDPLoadTextureBlock(gfx++,
+      TextureAddress(ImageBody(g_BlendedTextureScrollingLayer)), G_IM_FMT_RGBA,
+      G_IM_SIZ_16b, DYNAMIC_TEXTURE_SIZE, DYNAMIC_TEXTURE_SIZE, 0,
+      G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
       TextureMask(DYNAMIC_TEXTURE_SIZE), TextureMask(DYNAMIC_TEXTURE_SIZE),
       G_TX_NOLOD, G_TX_NOLOD);
-  gDPLoadMultiBlock(gfx++, TextureAddress(g_BlendedTextureStillLayer + 8),
+  gDPLoadMultiBlock(gfx++,
+      TextureAddress(ImageBody(g_BlendedTextureStillLayer)),
       SECOND_TEXTURE_TMEM, 1, G_IM_FMT_RGBA, G_IM_SIZ_16b, DYNAMIC_TEXTURE_SIZE,
       DYNAMIC_TEXTURE_SIZE, 0, G_TX_NOMIRROR | G_TX_WRAP,
       G_TX_NOMIRROR | G_TX_WRAP, TextureMask(DYNAMIC_TEXTURE_SIZE),
@@ -1094,12 +1096,14 @@ void BuildDynamicTextures(Gfx** displayListHead) {
       TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, DYNAMIC_TEXTURE_SIZE,
       RenderTargetAddress(osVirtualToPhysical(g_BlendedTexture)));
-  gDPLoadTextureBlock(gfx++, TextureAddress(g_BlendedTextureScrollingLayer + 8),
-      G_IM_FMT_RGBA, G_IM_SIZ_16b, DYNAMIC_TEXTURE_SIZE, DYNAMIC_TEXTURE_SIZE,
-      0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
+  gDPLoadTextureBlock(gfx++,
+      TextureAddress(ImageBody(g_BlendedTextureScrollingLayer)), G_IM_FMT_RGBA,
+      G_IM_SIZ_16b, DYNAMIC_TEXTURE_SIZE, DYNAMIC_TEXTURE_SIZE, 0,
+      G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
       TextureMask(DYNAMIC_TEXTURE_SIZE), TextureMask(DYNAMIC_TEXTURE_SIZE),
       G_TX_NOLOD, G_TX_NOLOD);
-  gDPLoadMultiBlock(gfx++, TextureAddress(g_BlendedTextureStillLayer + 8),
+  gDPLoadMultiBlock(gfx++,
+      TextureAddress(ImageBody(g_BlendedTextureStillLayer)),
       SECOND_TEXTURE_TMEM, 1, G_IM_FMT_RGBA, G_IM_SIZ_16b, DYNAMIC_TEXTURE_SIZE,
       DYNAMIC_TEXTURE_SIZE, 0, G_TX_NOMIRROR | G_TX_WRAP,
       G_TX_NOMIRROR | G_TX_WRAP, TextureMask(DYNAMIC_TEXTURE_SIZE),

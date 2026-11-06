@@ -128,12 +128,14 @@ void DrawTexturePlane(Gfx** displayListHead) {
   SetSceneFog(&gfx);
   gSPLoadGeometryMode(gfx++, 0);
   gSPSetGeometryMode(gfx++, G_ZBUFFER | G_SHADE | G_FOG | G_SHADING_SMOOTH);
-  gDPLoadTextureBlock(gfx++, TextureAddress(g_BlendedTextureScrollingLayer + 8),
-      G_IM_FMT_RGBA, G_IM_SIZ_16b, DYNAMIC_TEXTURE_SIZE, DYNAMIC_TEXTURE_SIZE,
-      0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
+  gDPLoadTextureBlock(gfx++,
+      TextureAddress(ImageBody(g_BlendedTextureScrollingLayer)), G_IM_FMT_RGBA,
+      G_IM_SIZ_16b, DYNAMIC_TEXTURE_SIZE, DYNAMIC_TEXTURE_SIZE, 0,
+      G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
       TextureMask(DYNAMIC_TEXTURE_SIZE), TextureMask(DYNAMIC_TEXTURE_SIZE),
       G_TX_NOLOD, G_TX_NOLOD);
-  gDPLoadMultiBlock(gfx++, TextureAddress(g_BlendedTextureStillLayer + 8),
+  gDPLoadMultiBlock(gfx++,
+      TextureAddress(ImageBody(g_BlendedTextureStillLayer)),
       SECOND_TEXTURE_TMEM, 1, G_IM_FMT_RGBA, G_IM_SIZ_16b, DYNAMIC_TEXTURE_SIZE,
       DYNAMIC_TEXTURE_SIZE, 0, G_TX_NOMIRROR | G_TX_WRAP,
       G_TX_NOMIRROR | G_TX_WRAP, TextureMask(DYNAMIC_TEXTURE_SIZE),

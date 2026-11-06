@@ -144,12 +144,14 @@ void DrawHoleTriangles(Gfx** displayListHead, CameraMatrices* matrices UNUSED,
       gfx, gDPSetRenderMode, G_RM_FOG_SHADE_A, G_RM_AA_ZB_XLU_SURF2);
   AppendSyncedRdpState(gfx, gDPSetAlphaCompare, G_AC_NONE);
   gDPSetBlendColor(gfx++, 0xFF, 0xFF, 0xFF, 0x3F);
-  gDPLoadTextureBlock(gfx++, TextureAddress(g_BlendedTextureScrollingLayer + 8),
-      G_IM_FMT_RGBA, G_IM_SIZ_16b, BLENDED_TEXTURE_SIZE, BLENDED_TEXTURE_SIZE,
-      0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
+  gDPLoadTextureBlock(gfx++,
+      TextureAddress(ImageBody(g_BlendedTextureScrollingLayer)), G_IM_FMT_RGBA,
+      G_IM_SIZ_16b, BLENDED_TEXTURE_SIZE, BLENDED_TEXTURE_SIZE, 0,
+      G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
       TextureMask(BLENDED_TEXTURE_SIZE), TextureMask(BLENDED_TEXTURE_SIZE), 15,
       15);
-  gDPLoadMultiBlock(gfx++, TextureAddress(g_BlendedTextureStillLayer + 8),
+  gDPLoadMultiBlock(gfx++,
+      TextureAddress(ImageBody(g_BlendedTextureStillLayer)),
       SECOND_TEXTURE_TMEM, 1, G_IM_FMT_RGBA, G_IM_SIZ_16b, BLENDED_TEXTURE_SIZE,
       BLENDED_TEXTURE_SIZE, 0, G_TX_NOMIRROR | G_TX_WRAP,
       G_TX_NOMIRROR | G_TX_WRAP, TextureMask(BLENDED_TEXTURE_SIZE),
