@@ -50,13 +50,28 @@
 #define CONTACT_SECOND_IMAGE_OFFSET 0x1578
 /* A fireball */
 #define MARIO_CONTACT_IMAGE_ASSET 0x6BE
+#define MARIO_CONTACT_IMAGE_WIDTH 32
+#define MARIO_CONTACT_IMAGE_HEIGHT 32
 /* Half of a streak of flame, which the mirrored wrap completes */
 #define BOWSER_CONTACT_IMAGE_ASSET 0x6AE
+#define BOWSER_CONTACT_IMAGE_WIDTH 16
+#define BOWSER_CONTACT_IMAGE_HEIGHT 100
 /* The spark trail's first two lightning bolts */
 #define WARIO_CONTACT_IMAGE_ASSET 0x6A7
 #define WARIO_CONTACT_SECOND_IMAGE_ASSET 0x6A8
+/* Both bolts' images */
+#define WARIO_CONTACT_IMAGE_WIDTH 48
+#define WARIO_CONTACT_IMAGE_HEIGHT 128
 /* A row of spectrum colors */
 #define RAINBOW_CONTACT_IMAGE_ASSET 0x6A6
+#define RAINBOW_CONTACT_IMAGE_WIDTH 64
+#define RAINBOW_CONTACT_IMAGE_HEIGHT 8
+/* The plain and putt styles draw images that the shot effects load at the
+ * start of g_SharedEffectImages */
+#define PLAIN_CONTACT_IMAGE_WIDTH 32
+#define PLAIN_CONTACT_IMAGE_HEIGHT 100
+#define PUTT_CONTACT_IMAGE_WIDTH 16
+#define PUTT_CONTACT_IMAGE_HEIGHT 100
 
 /* A banner's letters, each an image drawn on its own square */
 #define BANNER_MAX_LETTERS 11
@@ -2825,7 +2840,8 @@ void DrawContactEffect(Gfx** displayListHead, CameraMatrices* matrices) {
               ImageBody(g_SharedEffectImages + CONTACT_IMAGE_OFFSET)));
       gDPLoadTextureBlock(gfx++,
           TextureAddress(g_SharedEffectImages + CONTACT_IMAGE_PIXELS_OFFSET),
-          G_IM_FMT_CI, G_IM_SIZ_8b, 64, 8, 0, G_TX_NOMIRROR | G_TX_WRAP,
+          G_IM_FMT_CI, G_IM_SIZ_8b, RAINBOW_CONTACT_IMAGE_WIDTH,
+          RAINBOW_CONTACT_IMAGE_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, 7, G_TX_NOLOD, G_TX_NOLOD);
     } else if (f_ContactStyle == CONTACT_STYLE_BOWSER) {
       gDPPipeSync(gfx++);
@@ -2838,33 +2854,38 @@ void DrawContactEffect(Gfx** displayListHead, CameraMatrices* matrices) {
               ImageBody(g_SharedEffectImages + CONTACT_IMAGE_OFFSET)));
       gDPLoadTextureBlock(gfx++,
           TextureAddress(g_SharedEffectImages + CONTACT_IMAGE_PIXELS_OFFSET),
-          G_IM_FMT_CI, G_IM_SIZ_8b, 16, 100, 0, G_TX_MIRROR | G_TX_WRAP,
-          G_TX_NOMIRROR | G_TX_WRAP, 4, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+          G_IM_FMT_CI, G_IM_SIZ_8b, BOWSER_CONTACT_IMAGE_WIDTH,
+          BOWSER_CONTACT_IMAGE_HEIGHT, 0, G_TX_MIRROR | G_TX_WRAP,
+          G_TX_NOMIRROR | G_TX_WRAP, TextureMask(BOWSER_CONTACT_IMAGE_WIDTH),
+          G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     } else if (f_ContactStyle == CONTACT_STYLE_WARIO ||
         f_ContactStyle == CONTACT_STYLE_GAME_BOY_BALL_7) {
       gDPLoadTextureBlock_4b(gfx++,
           TextureAddress(
               ImageBody(g_SharedEffectImages + CONTACT_IMAGE_OFFSET)),
-          G_IM_FMT_I, 48, 128, 0, G_TX_NOMIRROR | G_TX_WRAP,
-          G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, 7, G_TX_NOLOD, G_TX_NOLOD);
+          G_IM_FMT_I, WARIO_CONTACT_IMAGE_WIDTH, WARIO_CONTACT_IMAGE_HEIGHT, 0,
+          G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+          TextureMask(WARIO_CONTACT_IMAGE_HEIGHT), G_TX_NOLOD, G_TX_NOLOD);
     } else if (f_ContactStyle == CONTACT_STYLE_PLAIN ||
         f_ContactStyle == CONTACT_STYLE_GAME_BOY_BALL_6 ||
         f_ContactStyle == CONTACT_STYLE_GAME_BOY_BALL_5) {
       gDPLoadTextureBlock_4b(gfx++,
-          TextureAddress(ImageBody(g_SharedEffectImages)), G_IM_FMT_I, 32, 100,
-          0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+          TextureAddress(ImageBody(g_SharedEffectImages)), G_IM_FMT_I,
+          PLAIN_CONTACT_IMAGE_WIDTH, PLAIN_CONTACT_IMAGE_HEIGHT, 0,
+          G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     } else if (f_ContactStyle == CONTACT_STYLE_PUTT) {
       gDPLoadTextureBlock_4b(gfx++,
           TextureAddress(
               ImageBody(g_SharedEffectImages + CONTACT_PUTT_IMAGE_OFFSET)),
-          G_IM_FMT_I, 16, 100, 0, G_TX_NOMIRROR | G_TX_WRAP,
-          G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
-          G_TX_NOLOD);
+          G_IM_FMT_I, PUTT_CONTACT_IMAGE_WIDTH, PUTT_CONTACT_IMAGE_HEIGHT, 0,
+          G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+          G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     } else {
       gDPLoadTextureBlock_4b(gfx++,
-          TextureAddress(ImageBody(g_SharedEffectImages)), G_IM_FMT_I, 32, 100,
-          0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+          TextureAddress(ImageBody(g_SharedEffectImages)), G_IM_FMT_I,
+          PLAIN_CONTACT_IMAGE_WIDTH, PLAIN_CONTACT_IMAGE_HEIGHT, 0,
+          G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     }
 
@@ -2881,8 +2902,10 @@ void DrawContactEffect(Gfx** displayListHead, CameraMatrices* matrices) {
         gDPLoadTextureBlock_4b(gfx++,
             TextureAddress(
                 ImageBody(g_SharedEffectImages + CONTACT_SECOND_IMAGE_OFFSET)),
-            G_IM_FMT_I, 48, 128, 0, G_TX_NOMIRROR | G_TX_WRAP,
-            G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, 7, G_TX_NOLOD, G_TX_NOLOD);
+            G_IM_FMT_I, WARIO_CONTACT_IMAGE_WIDTH, WARIO_CONTACT_IMAGE_HEIGHT,
+            0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
+            G_TX_NOMASK, TextureMask(WARIO_CONTACT_IMAGE_HEIGHT), G_TX_NOLOD,
+            G_TX_NOLOD);
         gDPPipeSync(gfx++);
         DrawContactRibbon();
       }
@@ -2910,7 +2933,8 @@ void DrawContactEffect(Gfx** displayListHead, CameraMatrices* matrices) {
       gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, CONTACT_SPIN_ALPHA);
       gDPLoadTextureBlock(gfx++,
           TextureAddress(g_SharedEffectImages + CONTACT_IMAGE_PIXELS_OFFSET),
-          G_IM_FMT_CI, G_IM_SIZ_8b, 32, 32, 0, G_TX_NOMIRROR | G_TX_WRAP,
+          G_IM_FMT_CI, G_IM_SIZ_8b, MARIO_CONTACT_IMAGE_WIDTH,
+          MARIO_CONTACT_IMAGE_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
           G_TX_NOLOD);
       gDPSetCombineLERP(gfx++, 0, 0, 0, TEXEL0, PRIMITIVE, 0, TEXEL0, 0, 0, 0,
