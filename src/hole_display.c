@@ -68,6 +68,11 @@ enum SkyImageKind {
 #define IsNearScreen(x, y, margin) \
   ((x) > -(margin) && (x) < SCREEN_WIDTH + (margin) && (y) > -(margin) && \
       (y) < SCREEN_HEIGHT + (margin))
+/* Whether a point lies on or beyond the line inset within any of the screen's
+ * edges */
+#define IsOnOrPastInset(x, y, inset) \
+  ((x) <= (inset) || (x) >= SCREEN_WIDTH - (inset) || (y) <= (inset) || \
+      (y) >= SCREEN_HEIGHT - (inset))
 /* The z-buffer value of the sky */
 #define SUN_SKY_DEPTH 0xFFFC
 #define SUN_GLARE_FADE_STEP 0.1f
@@ -753,6 +758,11 @@ void UpdateSunGlare(void) {
  * within GLARE_BOTTOM_ROWS of it, and nothing is drawn below MIN_VISIBLE_GLARE.
  */
 #define LENS_FLARE_TOP_MARGIN 64.0f
+/* Whether a point lies further above the screen than LENS_FLARE_TOP_MARGIN, or
+ * further past its other edges than SUN_GLARE_MARGIN */
+#define IsPastLensFlareMargins(x, y) \
+  ((y) < -LENS_FLARE_TOP_MARGIN || (y) > SCREEN_HEIGHT + SUN_GLARE_MARGIN || \
+      (x) < -SUN_GLARE_MARGIN || (x) > SCREEN_WIDTH + SUN_GLARE_MARGIN)
 #define GLARE_BOTTOM_ROWS 96.0f
 #define GLARE_BASE 16.0f
 #define MIN_VISIBLE_GLARE 8.0f
@@ -788,14 +798,9 @@ void DrawLensFlare(Gfx** displayListHead) {
   gDPPipeSync(gfx++);
   gDPSetCycleType(gfx++, G_CYC_1CYCLE);
   gDPPipeSync(gfx++);
-  if (!colors->hasLensFlare || f_SunScreenX[0] <= SUN_DEPTH_MARGIN ||
-      f_SunScreenX[0] >= SCREEN_WIDTH - SUN_DEPTH_MARGIN ||
-      f_SunScreenY[0] <= SUN_DEPTH_MARGIN ||
-      f_SunScreenY[0] >= SCREEN_HEIGHT - SUN_DEPTH_MARGIN ||
-      f_SunScreenY[0] < -LENS_FLARE_TOP_MARGIN ||
-      f_SunScreenY[0] > SCREEN_HEIGHT + SUN_GLARE_MARGIN ||
-      f_SunScreenX[0] < -SUN_GLARE_MARGIN ||
-      f_SunScreenX[0] > SCREEN_WIDTH + SUN_GLARE_MARGIN ||
+  if (!colors->hasLensFlare ||
+      IsOnOrPastInset(f_SunScreenX[0], f_SunScreenY[0], SUN_DEPTH_MARGIN) ||
+      IsPastLensFlareMargins(f_SunScreenX[0], f_SunScreenY[0]) ||
       g_Cameras[INSET_CAMERA].view.drawFlags == CAMERA_DRAW_SCENE) {
     return;
   }
