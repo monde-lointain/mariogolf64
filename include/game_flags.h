@@ -224,8 +224,12 @@
  */
 #define GAME_FLAG_UNSHADED_GROUND 0x11
 
-/* Flags that the hole loader reads or sets, whose purpose is not yet known */
-#define GAME_FLAG_UNK67 0x67
+/*
+ * Lets R with A give the character select's last player to the computer even
+ * when no other player has a controller
+ */
+#define GAME_FLAG_ALLOW_ALL_COMPUTER_PLAYERS 0x67
+
 /* Debug cheats that pad the first player's round points */
 #define GAME_FLAG_ADD_500_POINTS 0x66
 #define GAME_FLAG_ADD_9999_POINTS 0x6C

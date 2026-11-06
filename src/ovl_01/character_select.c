@@ -825,7 +825,7 @@ s32 UpdateCharacterSelect(
                   (playerCount >= MIN_PLAYER_COUNT_WITHOUT_CONTROLLER) &&
               character < FIRST_IMPORTED_CHARACTER) {
             if (g_ChosenPlayerCount - 1 == playerIndex &&
-                !IsGameFlagSet(GAME_FLAG_UNK67)) {
+                !IsGameFlagSet(GAME_FLAG_ALLOW_ALL_COMPUTER_PLAYERS)) {
               for (otherIndex = 0; otherIndex != playerIndex; otherIndex++) {
                 if (g_PlayerControllerIndices[otherIndex] !=
                     NO_CONTROLLER_INDEX) {
