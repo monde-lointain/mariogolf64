@@ -6991,27 +6991,21 @@ void DrawYesNoWindow(Gfx** displayListHead, s32 width, s32 height, s32 centerX,
  * sound test's lines when game flag 0x55 is set, and the erase window while it
  * is up
  *
+ * Mario's strips, the value banners' strips, the options' rows and the
+ * arrows' passes are all counted with loopIndex. Counting Mario's strips
+ * with a counter of their own gives 134 words differing, the banners' strips
+ * 34, and both 112, all 6 in shape; the toggles counted with loopIndex in
+ * place of the banners' strips give 28.
+ *
  * Doesn't match: the original adds each value banner strip's row in both
  * branches without masking it to a byte, and keeps VALUE_BANNER_ROW_TOP in
- * the strip's induction value. A wider stripTop (s16, s32, u32), in any
- * grouping, in two statements or from a second loop variable, moves the
- * constant to the toggle's and gives 8-25 shape differences against 7.
- * Splitting loopIndex per loop, which the register oracle hints at, doesn't
- * help: the original keeps it in $s6, with each loop's other values in $s3
- * to $s5, but each of the 14 ways of splitting it among the four loops gives
- * 128 to 236 words, and a counter for each loop leaves the oracle 6 words
- * forcing 25 pseudos, against 12. The permuter's best output, 720, only
- * works out stripTop before the banner's combine mode, which gives 115 words
- * differing, 7 in shape. A later run's best, 120 words with 6 in shape,
- * works out the strip's row before loading its texture and writes three of
- * the chosen toggle's four rectangle edges from it rather than from
- * stripTop; a stripRowTop local set there gives 118 words, and set just
- * before the choice test 112, both 6 in shape. 112 words differ, 6 in shape.
- *
- * Holding OPTION_LABEL_HEIGHT in a local set on each pass gives 106 words,
- * but 8 in shape; both builds hoist 20 out of the loop the same way, and the
- * only change is that it and g_MenuLabelImages swap $21 and $22, so it only
- * renumbers the pseudos.
+ * the strip's induction value. A wider stripTop moves the constant to the
+ * toggle's: as an s32 or u32 it gives 37 words, 17 in shape, and as an s16
+ * or s8 70 (12); a u16 gives the same 6 as the u8. Grouping the constant
+ * with the toggle's row or after both gives 48 or 50 words, 33 or 142 as an
+ * s32, and working out the strip's row in a static inline helper, which fold
+ * can't regroup, 6 to 48. A second loop variable for the strip's row gives 8
+ * words at best, all in shape. 6 words differ, all in shape.
  */
 #ifdef NON_MATCHING
 void DrawOptionsScreen(Gfx** displayListHead) {
@@ -7020,10 +7014,9 @@ void DrawOptionsScreen(Gfx** displayListHead) {
   u8* mario = GetMenuImageBuffer();
   u8* arrows = (u8*)GetMenuImageBuffer() + OPTIONS_ARROWS_OFFSET;
   u8* shadow = GetMenuImageBuffer();
-  /* Counts the options' rows, then the arrows' passes */
+  /* Counts Mario's strips, the banners' strips, the rows, the arrows' passes */
   s32 loopIndex;
   s32 toggleIndex;
-  s32 stripIndex;
   u8 stripTop;
   s32 valueOffset;
   s32 shiftX;
@@ -7056,34 +7049,34 @@ void DrawOptionsScreen(Gfx** displayListHead) {
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
   LoadLargePalette(&gfx, ImageBody(mario));
-  for (stripIndex = 0; stripIndex != MARIO_STRIP_COUNT; stripIndex++) {
+  for (loopIndex = 0; loopIndex != MARIO_STRIP_COUNT; loopIndex++) {
     gDPLoadTextureTile(gfx++, TextureAddress(LargeImageTexels(mario)),
         G_IM_FMT_CI, G_IM_SIZ_8b, MARIO_WIDTH, MARIO_HEIGHT, 0,
-        stripIndex * MARIO_STRIP_HEIGHT, MARIO_WIDTH - 1,
-        (stripIndex * MARIO_STRIP_HEIGHT) + (MARIO_STRIP_HEIGHT - 1), 0,
+        loopIndex * MARIO_STRIP_HEIGHT, MARIO_WIDTH - 1,
+        (loopIndex * MARIO_STRIP_HEIGHT) + (MARIO_STRIP_HEIGHT - 1), 0,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     DrawTextureRect(&gfx, QuarterPixels(MARIO_LEFT),
-        QuarterPixels(MARIO_TOP + (stripIndex * MARIO_STRIP_HEIGHT)),
+        QuarterPixels(MARIO_TOP + (loopIndex * MARIO_STRIP_HEIGHT)),
         QuarterPixels(MARIO_LEFT + MARIO_WIDTH),
         QuarterPixels(
-            MARIO_TOP + MARIO_STRIP_HEIGHT + (stripIndex * MARIO_STRIP_HEIGHT)),
-        G_TX_RENDERTILE, 0, TexelCoordinate(stripIndex * MARIO_STRIP_HEIGHT),
+            MARIO_TOP + MARIO_STRIP_HEIGHT + (loopIndex * MARIO_STRIP_HEIGHT)),
+        G_TX_RENDERTILE, 0, TexelCoordinate(loopIndex * MARIO_STRIP_HEIGHT),
         TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   }
 
   gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(g_NamePlateImage)));
   gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, DIMMED_COLOR);
   for (toggleIndex = 0; toggleIndex != OPTION_TOGGLE_COUNT; toggleIndex++) {
-    for (stripIndex = 0; stripIndex != MENU_BANNER_STRIP_COUNT; stripIndex++) {
+    for (loopIndex = 0; loopIndex != MENU_BANNER_STRIP_COUNT; loopIndex++) {
       LoadTextureBlock(&gfx,
           LargeImageTexels(g_NamePlateImage) +
-              (stripIndex * MENU_BANNER_WIDTH * MENU_BANNER_STRIP_HEIGHT),
+              (loopIndex * MENU_BANNER_WIDTH * MENU_BANNER_STRIP_HEIGHT),
           G_IM_FMT_CI, G_IM_SIZ_8b, MENU_BANNER_WIDTH, MENU_BANNER_STRIP_HEIGHT,
           0, 0, 0, 0, 0, 0, 0);
       if (g_MenuMemory.optionsChoice == toggleIndex) {
         stripTop = (toggleIndex * OPTION_ROW_SPACING) +
-            ((stripIndex * VALUE_BANNER_STRIP_HEIGHT) + VALUE_BANNER_ROW_TOP);
+            ((loopIndex * VALUE_BANNER_STRIP_HEIGHT) + VALUE_BANNER_ROW_TOP);
         gDPSetPrimColor(gfx++, 0, 0, BANNER_SHADOW_COLOR, BANNER_SHADOW_COLOR,
             BANNER_SHADOW_COLOR, BANNER_SHADOW_ALPHA);
         gDPSetCombineLERP(gfx++, 0, 0, 0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0, 0,
@@ -7112,7 +7105,7 @@ void DrawOptionsScreen(Gfx** displayListHead) {
         gDPSetCombineLERP(gfx++, PRIMITIVE, 0, TEXEL0, 0, 0, 0, 0, TEXEL0,
             PRIMITIVE, 0, TEXEL0, 0, 0, 0, 0, TEXEL0);
         stripTop = (toggleIndex * OPTION_ROW_SPACING) +
-            ((stripIndex * VALUE_BANNER_STRIP_HEIGHT) + VALUE_BANNER_ROW_TOP);
+            ((loopIndex * VALUE_BANNER_STRIP_HEIGHT) + VALUE_BANNER_ROW_TOP);
         gDPSetPrimColor(
             gfx++, 0, 0, DIMMED_COLOR, DIMMED_COLOR, DIMMED_COLOR, 255);
         DrawTextureRect(&gfx, QuarterPixels(VALUE_BANNER_LEFT),
