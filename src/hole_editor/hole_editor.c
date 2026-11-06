@@ -3934,6 +3934,13 @@ void WriteHexDumpFile(u32* words, s32 byteCount, char* fileName) {
  * A search over merges of two variables gains words only by giving one a
  * second meaning: holding previousDetail in keepsCombineMode gives 2015
  * words, but 515 in shape.
+ *
+ * Each mirrored-cell vertex loop declares its own st beside its point, as
+ * the register oracle's split search suggested, where one st at the top
+ * served both: that takes the draft from 2037 words to 2033 (491 in shape
+ * either way), and the oracle's closest result from 2001 words to 1995,
+ * forcing 112 pseudos for each. Declaring it in only one of the two loops
+ * gives the same 2033 words. 2033 words differ, 491 in shape.
  */
 #ifdef NON_MATCHING
 void DrawHoleEditorGround(CameraMatrices* matrices UNUSED, s32 terrainStyle) {
@@ -3977,7 +3984,6 @@ void DrawHoleEditorGround(CameraMatrices* matrices UNUSED, s32 terrainStyle) {
   s32 pointColumn;
   s32 pointRow;
   Boolean isMirrored;
-  s32 st;
   Vtx* midpoints;
   s32 tileColumn;
   GroundTile* tile;
@@ -4510,6 +4516,7 @@ void DrawHoleEditorGround(CameraMatrices* matrices UNUSED, s32 terrainStyle) {
                                       cellColumn + pointColumn,
                                   (row * FINE_TILE_CELL_SPAN) + cellRow +
                                       pointRow);
+                              s32 st;
 
                               if (IsGameFlagSet(
                                       GAME_FLAG_TEST_GROUND_TEXTURE)) {
@@ -4611,9 +4618,10 @@ void DrawHoleEditorGround(CameraMatrices* matrices UNUSED, s32 terrainStyle) {
                                       cellColumn + pointColumn,
                                   (row * FINE_TILE_CELL_SPAN) + cellRow +
                                       pointRow);
-
-                              st = ((point->v.tc[TEXTURE_AXIS_S] / 2) << 16) |
+                              s32 st =
+                                  ((point->v.tc[TEXTURE_AXIS_S] / 2) << 16) |
                                   (point->v.tc[TEXTURE_AXIS_T] / 2);
+
                               if (IsGameFlagSet(
                                       GAME_FLAG_TEST_GROUND_TEXTURE)) {
                                 gDPSetTileSize(gfx++, 1, 0, 0, TEST_TILE_SIZE,
