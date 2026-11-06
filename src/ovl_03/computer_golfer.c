@@ -231,7 +231,7 @@ static ClubName f_UnusedPlanClubNames[] UNUSED = {
 };
 
 s32 PlanShot(CurrentShot* plannedShot);
-s32 PlanCupDistance(s32 arg0);
+s32 PlanCupDistance(ShotMode shotMode);
 s32 FindGreenEdgeOnLine(CoursePoint from, CoursePoint to, CoursePoint edge);
 ClubType ChooseClubForDistance(s32 distance);
 
@@ -967,7 +967,7 @@ s32 GetBallCupDistance(void) {
  * WIND_ALLOWANCE_MIN_DISTANCE out, plus a part of the ball's height above the
  * cup.
  */
-s32 PlanCupDistance(s32 unused UNUSED) {
+s32 PlanCupDistance(ShotMode shotMode UNUSED) {
   s32 distance;
   f32 cupX;
   f32 cupZ;
