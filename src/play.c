@@ -1676,6 +1676,11 @@ DIM_BACKDROP:
             switch (result) {
               case PROMPT_RESULT_SKIP_REPLAY:
                 LeaveReplaySaveMenu();
+                /*
+                 * The result, 6, is HOLE_END_STEP_RING_SHOT_FREE_SLOT. Storing
+                 * it matches: storing the step's name shares the other arms'
+                 * store and is a word shorter
+                 */
                 f_HoleEndStep = result;
                 OpenPrompt(NO_PROMPT);
                 break;
