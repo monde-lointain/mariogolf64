@@ -458,13 +458,17 @@ void OpenRoundResults(s32 request) {
   }
 
 /*
- * Doesn't match: the original keeps k in $s2 and the tally's count in $s0,
- * where ours keeps them in $s0 and $s1, which also changes which delay slots
- * are filled. The register oracle matches with 6 registers forced, so what
- * remains is allocation. The tally counts with k, which the original keeps in
- * $s2 there too though the loop crosses no call; with a counter of its own the
- * function gave 90 words, none in shape, and the oracle matched only with 14
- * forced, and with i or j 158 or 128. 89 words differ, 7 in shape.
+ * Doesn't match: in the club tournament's results loop the original keeps k
+ * in $s2 and the stepped result's address in $s1, where ours swaps them; the
+ * register oracle matches with those 2 forced, so what remains is
+ * allocation. The club tournament's results loop counts with k and the Game
+ * Boy experience loop with i: counting the results with i, with j or with a
+ * counter of their own gives 279, 191 or 175 words differing, 7 in shape,
+ * and the experience loop with k 70, none in shape, when the oracle needed 3
+ * forced. The tally counts with k, which the original keeps in $s2 there too
+ * though the loop crosses no call; with a counter of its own the function
+ * gives 90 words, none in shape, and with i or j 158 or 128. 54 words
+ * differ, none in shape.
  *
  * The match game reads the last hole into holeEnd before clearing the results,
  * as the matched scorecard_drawing.c reads its countEnd, and the original loads
@@ -644,9 +648,9 @@ void LoadRoundResults(void) {
   }
 
   if (g_GameState.isClubTournament) {
-    for (i = 0; i != g_GameState.playerCount; i++) {
-      f_PlayerResults[i] =
-          GetNetScoreToPar(GetFirstHoleIndex() + GetRoundHoleCount(), i);
+    for (k = 0; k != g_GameState.playerCount; k++) {
+      f_PlayerResults[k] =
+          GetNetScoreToPar(GetFirstHoleIndex() + GetRoundHoleCount(), k);
     }
   } else {
     switch (g_GameState.gameMode) {
@@ -790,10 +794,10 @@ void LoadRoundResults(void) {
     }
   }
 
-  for (k = 0; k != g_GameState.playerCount; k++) {
-    if (g_Players[k].characterIndex >= CHARACTER_KID && f_PlayerPoints[k] > 0) {
+  for (i = 0; i != g_GameState.playerCount; i++) {
+    if (g_Players[i].characterIndex >= CHARACTER_KID && f_PlayerPoints[i] > 0) {
       AddGameBoyExperience(
-          g_Players[k].gameBoyCharacterIndex, f_PlayerPoints[k]);
+          g_Players[i].gameBoyCharacterIndex, f_PlayerPoints[i]);
     }
   }
 
