@@ -885,26 +885,38 @@ void DrawStatsBadgeCount(Gfx** displayListHead) {
  * Draws the arrows beside the panel that show there are more statistics above
  * or below.
  * Doesn't match: 94 words differ, 20 in shape. The original picks the first
- * arrow with a branch around a copy of hasRowsBelow; GCC's jump pass makes the
- * copy branchless here, so the registers and the spills to the stack differ.
- * The first arrow is an s16, as the arrow index it is added to is; as an s32
- * 102 words differed, 22 in shape, and the register oracle got to 83 words
- * where it now gets to 77, forcing 14 pseudos either way. With it an s16, the
- * copy under "if (arrowCount == 1)", a ternary or an if/else gives 101 words
- * (23 in shape). The counts that follow were measured with the draft at 102
- * words. Copying hasRowsBelow under "if (arrowCount == 1)" gives 107 words (33
- * in shape), and copying hasRowsBelow != FALSE there 109; the same with
- * "arrowCount += hasRowsBelow" gives 99 words but 23 in shape, as the original
- * branches to count that arrow. Adding the arrows' offsets as two products
- * gives 103-113 words, 27-31 in shape. The permuter's best outputs (66 and 70
- * words) load the arrow's texture only for a lone down arrow, which changes
- * what is drawn: the original's loop sets the texture image on every pass. They
- * are left out, as are a later run's outputs of 65 and 66 words, which do the
- * same. A ternary or an if/else choosing hasRowsBelow or FALSE gives the 107
- * words (33 in shape) of the copy, and setting TRUE under nested tests 109
- * (39). A u16 arrow index gives 75 words (27 in shape), but zero-extends it
- * with andi 0xffff at both of the two places where the original sign-extends it
- * with sll and sra by 16, as the s16 does.
+ * arrow with a branch around a copy of hasRowsBelow; GCC's jump pass makes
+ * the copy branchless here, so the registers and the spills to the stack
+ * differ. The first arrow is an s16, as the arrow index it is added to is;
+ * as an s32 102 words differed, 22 in shape, and the register oracle got to
+ * 83 words where it now gets to 77, forcing 14 pseudos either way. With it
+ * an s16, the copy under "if (arrowCount == 1)", a ternary or an if/else
+ * gives 101 words (23 in shape). The counts that follow were measured with
+ * the draft at 102 words. Copying hasRowsBelow under "if (arrowCount == 1)"
+ * gives 107 words (33 in shape), and copying hasRowsBelow != FALSE there
+ * 109; the same with "arrowCount += hasRowsBelow" gives 99 words but 23 in
+ * shape, as the original branches to count that arrow. Adding the arrows'
+ * offsets as two products gives 103-113 words, 27-31 in shape. The
+ * permuter's best outputs (66 and 70 words) load the arrow's texture only
+ * for a lone down arrow, which changes what is drawn: the original's loop
+ * sets the texture image on every pass. They are left out, as are a later
+ * run's outputs of 65 and 66 words, which do the same. A ternary or an
+ * if/else choosing hasRowsBelow or FALSE gives the 107 words (33 in shape)
+ * of the copy, and setting TRUE under nested tests 109 (39). A u16 arrow
+ * index gives 75 words (27 in shape), but zero-extends it with andi 0xffff
+ * at both of the two places where the original sign-extends it with sll and
+ * sra by 16, as the s16 does.
+ *
+ * Testing "(arrowCount == 1) & firstArrow" for the lone down arrow gives 183
+ * words (63 in shape) and a frame 16 bytes larger.
+ *
+ * The original's four spill slots, 8 bytes apart, are at 0x4-0x1C, with the
+ * stack unused above them, from 0x20 to 0x37; the draft's are the same four
+ * slots above its 16 bytes of padding, and without the padding its frame is
+ * 16 bytes smaller. Reload gives spilled pseudos their slots after the
+ * locals, at higher offsets, so no local can stand for the original's unused
+ * bytes: those would follow from reload giving slots to pseudos whose stack
+ * references were later removed.
  */
 #ifdef NON_MATCHING
 void DrawStatsScrollArrows(Gfx** displayListHead) {
