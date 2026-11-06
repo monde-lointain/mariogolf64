@@ -31,8 +31,10 @@ enum ScorecardState {
   SCORECARD_SHOWN, /* The player can turn its pages */
   SCORECARD_TALLYING, /* Counting skins before it is shown */
   SCORECARD_CLOSED,
-  SCORECARD_MATCH_RESULT, /* DrawMatchResult shows who won the hole */
-  SCORECARD_UNK6
+  /* Never set: DrawMatchResult would show who won the hole */
+  SCORECARD_UNUSED_MATCH_RESULT,
+  /* Never set: nothing would be drawn */
+  SCORECARD_UNUSED_HIDDEN
 };
 
 typedef struct ScorecardContent {

@@ -1154,17 +1154,18 @@ void DrawLargeImage(Gfx** displayListHead, u8* image, s32 left, s32 top) {
 
 /*
  * Draws the scorecard: its page titles, with the other pages' grayed out, and
- * the page shown, which depends on the game mode. Draws DrawMatchResult's
- * screen instead while that is up.
+ * the page shown, which depends on the game mode. It would draw
+ * DrawMatchResult's screen instead in SCORECARD_UNUSED_MATCH_RESULT, which is
+ * never set.
  */
 void DrawScorecard(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   s32 i;
   s32 dropY;
 
-  if (g_ScorecardState == SCORECARD_MATCH_RESULT) {
+  if (g_ScorecardState == SCORECARD_UNUSED_MATCH_RESULT) {
     DrawMatchResult(&gfx);
-  } else if (g_ScorecardState != SCORECARD_UNK6) {
+  } else if (g_ScorecardState != SCORECARD_UNUSED_HIDDEN) {
     if (g_ScorecardState != SCORECARD_CLOSED) {
       DrawScorecardTable(&gfx, g_Scorecard.pageCount, g_RoundHud.scorecardPage);
       gDPSetCombineMode(gfx++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
