@@ -2106,7 +2106,15 @@ void DrawHoleEditorGround(CameraMatrices* matrices, s32 terrainStyle);
  * half's block too gives 923, and a u16 or u8 groupTileIndex now 896 words
  * but 236 in shape. The register oracle's split search finds j in different
  * registers in its two loops, but a counter of its own for either gives 903
- * words. 897 words differ, 233 in shape.
+ * words.
+ *
+ * Setting the bottom row's odd slot, bottomSlot + ODD_SLOT, into a local
+ * before DrawTileQuads gives 870 words, 224 in shape, but naming that one
+ * slot of the nine has no reason, and the natural forms do worse:
+ * DrawTileQuads setting all nine slots into locals gives 1243 words, 295 in
+ * shape, its three odd slots 1194 (238), and the middle and bottom odd slots
+ * 1212 words, 254 in shape; in DrawHoleEditorGround, which also uses it,
+ * they give 2490 to 2499 words. 897 words differ, 233 in shape.
  */
 void DrawGround(CameraMatrices* matrices, s32 terrainStyle) {
   u8 snapsEdge[2][TILE_VERTEX_SEGMENT_COUNT]; /* For the current and the last
