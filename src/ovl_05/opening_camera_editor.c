@@ -494,9 +494,9 @@ void UpdateCameraEditor(void) {
   f32 zoomTarget;
   /*
    * The point's x, then the pitch's cosine, to match: a pitchCosine variable
-   * in either of the two direction blocks alone compiles the same, but in both
-   * gives 310 words differing (80 in shape), against the draft's 278 (80),
-   * wherever it is declared
+   * in both direction blocks gives 186 words differing (44 in shape) against
+   * the draft's 154 (44), and the register oracle's closest 164 words,
+   * forcing 15 pseudos, against 154 with none forced
    */
   f32 x;
 
