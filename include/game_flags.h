@@ -218,8 +218,13 @@
  */
 #define GAME_FLAG_NEXT_COURSE_FIRST_HOLE 0x51
 
+/*
+ * Has PrepareHoleScene skip ShadeGround, leaving the ground tiles unshaded
+ * and without the billboards' shadows
+ */
+#define GAME_FLAG_UNSHADED_GROUND 0x11
+
 /* Flags that the hole loader reads or sets, whose purpose is not yet known */
-#define GAME_FLAG_UNK11 0x11
 #define GAME_FLAG_UNK67 0x67
 /* Debug cheats that pad the first player's round points */
 #define GAME_FLAG_ADD_500_POINTS 0x66

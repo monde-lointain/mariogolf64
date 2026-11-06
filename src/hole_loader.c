@@ -752,7 +752,7 @@ void PrepareHoleScene(void) {
       break;
   }
 
-  if (!IsGameFlagSet(GAME_FLAG_UNK11)) {
+  if (!IsGameFlagSet(GAME_FLAG_UNSHADED_GROUND)) {
     ShadeGround(shadeVariant);
   }
 
