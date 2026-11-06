@@ -577,7 +577,12 @@ void GetSaveDataAndMenuMemory(void) {
  * $s7 and tests it with bgtz as it does the other halves. Subtracting the
  * growth before the half height from the button's y, but not its x, gives 34
  * words with 18 in shape, but the original subtracts the half height first, as
- * here; growth first in both gives 38 words. 34 words differ, 20 in shape.
+ * here; growth first in both gives 38 words.
+ *
+ * The window's right edge is added at its use, where its left edge has a
+ * local: a windowRight local beside windowLeft, set in the strip loop or
+ * before it, gives 180 words (36 or 34 in shape). 34 words differ, 20 in
+ * shape.
  */
 #ifdef NON_MATCHING
 void DrawYesNoWindow(Gfx** displayListHead, s32 width, s32 height, s32 centerX,
