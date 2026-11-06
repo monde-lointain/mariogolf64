@@ -13,6 +13,9 @@
  */
 
 #define GAME_FLAG_COUNT 256
+/* The flags are stored packed, eight to a byte */
+#define GAME_FLAGS_PER_BYTE 8
+#define GAME_FLAG_BYTE_COUNT (GAME_FLAG_COUNT / GAME_FLAGS_PER_BYTE)
 
 /* Prints the paths that the collision tests are given */
 #define GAME_FLAG_PRINT_HIT_PATHS 0x00

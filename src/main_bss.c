@@ -214,7 +214,7 @@ volatile s32 g_MainLoopState BSS = {0};
 OSMesgQueue nuGfxMesgQ BSS ALIGNED(8) = {0};
 u8 g_IsRingShotWipeOpening BSS = {0};
 OSTime __osCurrentTime BSS = {0};
-u8 f_GameFlagBits[GAME_FLAG_COUNT / 8] BSS ALIGNED(8) = {0};
+u8 f_GameFlagBits[GAME_FLAG_BYTE_COUNT] BSS ALIGNED(8) = {0};
 u32 g_GroundDrawFrame BSS = {0};
 u16 g_MirrorTexture[DYNAMIC_TEXTURE_SIZE * DYNAMIC_TEXTURE_SIZE] BSS ALIGNED(
     8) = {0};

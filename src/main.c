@@ -140,7 +140,12 @@ char g_SaveBuildDate[SAVE_BUILD_DATE_SIZE];
 ControllerState g_TurnController;
 
 FILE_STATIC volatile s32 g_MainLoopState;
-FILE_STATIC u8 f_GameFlagBits[GAME_FLAG_COUNT / 8];
+FILE_STATIC u8 f_GameFlagBits[GAME_FLAG_BYTE_COUNT];
+/* The first flag in each byte is its top bit */
+#define GameFlagByte(flag) (f_GameFlagBits[(flag) / GAME_FLAGS_PER_BYTE])
+#define GameFlagMask(flag) (0x80 >> ((flag) % GAME_FLAGS_PER_BYTE))
+/* Every bit but the flag's, as the high byte's ones shift in above it */
+#define GameFlagClearMask(flag) (0xFF7F >> ((flag) % GAME_FLAGS_PER_BYTE))
 /* The menus' readings from the last frame */
 FILE_STATIC NUContData g_PreviousMenuControllerData[MAXCONTROLLERS];
 /* One bit for each port with a controller plugged in, from bit 0 */
@@ -178,7 +183,7 @@ void InitFramebuffers(void) {
 
 Boolean IsGameFlagSet(u32 flag) {
   if (flag < GAME_FLAG_COUNT) {
-    if (f_GameFlagBits[flag >> 3] & (0x80 >> (flag & 7))) {
+    if (GameFlagByte(flag) & GameFlagMask(flag)) {
       return TRUE;
     }
 
@@ -190,26 +195,26 @@ Boolean IsGameFlagSet(u32 flag) {
 
 void SetGameFlag(u32 flag) {
   if (flag < GAME_FLAG_COUNT) {
-    f_GameFlagBits[flag >> 3] |= 0x80 >> (flag & 7);
+    GameFlagByte(flag) |= GameFlagMask(flag);
   }
 }
 
 void ClearGameFlag(u32 flag) {
   if (flag < GAME_FLAG_COUNT) {
-    f_GameFlagBits[flag >> 3] &= 0xFF7F >> (flag & 7);
+    GameFlagByte(flag) &= GameFlagClearMask(flag);
   }
 }
 
 void ToggleGameFlag(u32 flag) {
   if (flag < GAME_FLAG_COUNT) {
-    f_GameFlagBits[flag >> 3] ^= 0x80 >> (flag & 7);
+    GameFlagByte(flag) ^= GameFlagMask(flag);
   }
 }
 
 void ClearAllGameFlags(void) {
   s32 byteIndex;
 
-  for (byteIndex = 0; byteIndex < GAME_FLAG_COUNT / 8; byteIndex++) {
+  for (byteIndex = 0; byteIndex < GAME_FLAG_BYTE_COUNT; byteIndex++) {
     f_GameFlagBits[byteIndex] = 0;
   }
 }
