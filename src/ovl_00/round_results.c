@@ -248,6 +248,7 @@ s32 GetClubTournamentCourse(void);
 void FreeRoundResults(void);
 void LoadRoundResults(void);
 void DrawCourseResultsNotice(Gfx** displayListHead);
+void DrawResultsBanner(Gfx** displayListHead);
 void DrawCharacterResultsNotice(Gfx** displayListHead);
 s32 UpdateTournamentResults(ControllerState* controller);
 s32 ShowScorePassword(ControllerState* controller);

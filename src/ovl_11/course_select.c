@@ -152,6 +152,7 @@ enum PlanksState {
 
 void DrawNamePlate(Gfx** displayListHead, s32 centerX, s32 centerY);
 void DrawRingShotStars(Gfx** displayListHead, s32 centerX, s32 centerY);
+void DrawPlanks(Gfx** displayListHead);
 
 static AssetId f_StarFrameAssets[STAR_FRAME_COUNT] = {
     0x5BE,

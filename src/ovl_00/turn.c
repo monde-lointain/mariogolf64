@@ -461,6 +461,7 @@ static s32 f_UnusedWordAfterFramingAngles UNUSED = 0;
 void SetCharacterTranslucent(u32 slotIndex, s32 value);
 void PlaceAimCamera(void);
 void PlaceShotCamera(void);
+void TurnAim(s32 turnsAltHeading);
 s32 GetAimCameraGround(s32 x, s32 z);
 void SetRingShotCleared(s8 isCleared);
 s32 GetRecordedScoreKind(s32 strokes);
