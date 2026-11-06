@@ -1161,7 +1161,8 @@ enum DrawMode {
 
 /* The course camera's clip planes, in world units */
 #define COURSE_NEAR_CLIP 10.0f
-#define COURSE_FAR_CLIP 32000.0f
+/* A double, so that DrawGame's upper clamp compares in double precision */
+#define COURSE_FAR_CLIP 32000.0
 #define CLOSE_UP_NEAR_CLIP 200.0f
 #define SHORT_FAR_CLIP 500.0f
 
@@ -1225,14 +1226,27 @@ void DrawTargetPole(CameraMatrices* matrices, Gfx** displayListHead);
 /*
  * Returns the frame count, which the caller ignores
  *
- * Doesn't match: the original keeps the far plane's dead clamp to the short far
- * plane, where flow deletes its move, which needs the clamped value live past
- * the course's far plane. The clamp as a ternary, with an empty else, as a
- * negated >= test, with the course's far plane set under if (TRUE) or after
- * END_BASIC_BLOCK() all still lose it. The clamp is dead in the original too:
- * its bc1tl branches to the very next instruction, which sets the course's far
- * plane on both paths, with the clamp's move in the delay slot, so the move
- * outlived flow there. 41 words differ, 17 in shape.
+ * The far plane is clamped between the short far plane and the course's,
+ * then set to the course's anyway, so both clamps are dead. The upper
+ * clamp keeps the lower clamp's move, as the original does, whose bc1tl
+ * branches to the very next instruction with the move in its delay slot:
+ * flow deletes the upper clamp's move as dead but keeps its branch, which
+ * still reads the clamped value, and jump2 then deletes the empty branch
+ * with its compare. Without the upper clamp, flow deleted the lower
+ * clamp's move and 41 words differed, 17 in shape; the clamps joined by
+ * else give 41 too, and the upper clamp first 49 (15).
+ *
+ * COURSE_FAR_CLIP is a double, unlike the other planes, so the upper
+ * clamp compares in double precision. As a float, the clamped value takes
+ * $f0 rather than the $f6 that the original gives it and the course's far
+ * plane: 43 words differ, 13 in shape. The target keeps no trace of the
+ * bound, and other bounds, such as 0.0f or 1000.0f, also give 31 words.
+ *
+ * Doesn't match: the loop pass hoists the view loop's two zeroed
+ * registers in the other order, and the isometric map view reloads
+ * matrices from the stack after its first-view test, where the original
+ * reloads it before. The register oracle's closest result is these 31
+ * words with no register forced. 31 words differ, 9 in shape.
  */
 #ifdef NON_MATCHING
 s32 DrawGame(void) {
@@ -1649,9 +1663,13 @@ s32 DrawGame(void) {
               nearZ = -CLOSE_UP_NEAR_CLIP;
             }
 
-            /* The clamp is dead: the far plane is always the course's */
+            /* Both clamps are dead: the far plane is always the course's */
             if (farClip < SHORT_FAR_CLIP) {
               farClip = SHORT_FAR_CLIP;
+            }
+
+            if (farClip > COURSE_FAR_CLIP) {
+              farClip = COURSE_FAR_CLIP;
             }
 
             farClip = COURSE_FAR_CLIP;
