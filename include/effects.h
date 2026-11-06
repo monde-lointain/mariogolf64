@@ -27,7 +27,7 @@ enum Weather {
 typedef struct Effect {
   /* 0x00 */ Vec3 position; /* In world units */
   /* 0x0C */ Vec3 velocity; /* In world units a frame */
-  /* 0x18 */ u8 unk18[0xC];
+  /* 0x18 */ u8 unusedAfterVelocity[0xC];
   /* 0x24 */ f32 tilt; /* An angle about x and z */
   /* 0x28 */ f32 alpha;
   /* 0x2C */ f32 alphaStep;
@@ -46,12 +46,16 @@ typedef struct Effect {
  * match, as it keeps its loads from moving above the effects' stores.
  */
 typedef struct ShotDebris {
-  /* 0x00 */ s32 unk0;
-  /* 0x04 */ s32 unk4;
-  /* 0x08 */ f32 unk8;
-  /* 0x0C */ f32 unkC;
+  /*
+   * SpawnShotDebris sets these three, with its own counts, as the debris
+   * spawns; nothing reads them
+   */
+  /* 0x00 */ s32 ignoredSpawnCount; /* Cleared */
+  /* 0x04 */ s32 unusedAfterSpawnCount;
+  /* 0x08 */ f32 ignoredNegativeSetting; /* Set to -2 */
+  /* 0x0C */ f32 ignoredPositiveSetting; /* Set to 0.5 */
   /* 0x10 */ ClubKind clubKind;
-  /* 0x14 */ s32 unk14;
+  /* 0x14 */ s32 unusedAfterClubKind;
 } ShotDebris; /* size = 0x18 */
 
 /* The falling rain's drops, and the splashes they make on landing */

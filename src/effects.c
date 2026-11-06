@@ -89,10 +89,12 @@ struct Raindrop {
 
 struct RainSplash {
   /* 0x00 */ Vec3 position;
-  /* 0x0C */ f32 unkC;
-  /* 0x10 */ u8 unk10[6];
+  /* Set to 1 as the rain starts; nothing reads it */
+  /* 0x0C */ f32 ignoredStartValue;
+  /* 0x10 */ u8 unusedAfterStartValue[6];
   /* 0x16 */ s8 frameCount;
-  /* 0x17 */ s8 unk17;
+  /* Cleared as the rain starts; nothing reads it */
+  /* 0x17 */ s8 ignoredFrameValue;
   /* 0x18 */ u8 column; /* The column of f_RainSplashImage frames it shows */
 }; /* size = 0x1C */
 
@@ -1060,9 +1062,9 @@ void SpawnShotDebris(
   divotCount = 0;
   highDebrisCount = 0;
   sinYaw = sinf(yaw);
-  f_ShotDebris.unk0 = 0;
-  f_ShotDebris.unk8 = -2.0f;
-  f_ShotDebris.unkC = 0.5f;
+  f_ShotDebris.ignoredSpawnCount = 0;
+  f_ShotDebris.ignoredNegativeSetting = -2.0f;
+  f_ShotDebris.ignoredPositiveSetting = 0.5f;
   lowDebrisCount = 0;
   divotMarkCount = 0;
   if (launchSpeed > LAUNCH_SPEED_MOST) {
@@ -2296,9 +2298,9 @@ void StartRain(void) {
 
   for (index = 0; index != RAIN_SPLASH_COUNT; index++) {
     ResetRainSplash(&f_RainSplashes[index]);
-    f_RainSplashes[index].unkC = 1.0f;
+    f_RainSplashes[index].ignoredStartValue = 1.0f;
     f_RainSplashes[index].frameCount = (index % 9) - 1;
-    f_RainSplashes[index].unk17 = 0;
+    f_RainSplashes[index].ignoredFrameValue = 0;
   }
 }
 
