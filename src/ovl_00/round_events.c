@@ -85,7 +85,7 @@
 #define CAPTION_SOUND_VOLUME 63
 
 typedef struct Banner {
-  /* 0x0 */ s16 unk0;
+  /* 0x0 */ s16 unusedBeforeImageAsset;
   /* 0x2 */ AssetId imageAsset;
   /* 0x4 */ s8 letterCount;
   /* 0x5 */ u8 letterWidth;
@@ -99,7 +99,8 @@ typedef struct BannerLetter {
   /* 0x00 */ f32 x;
   /* 0x04 */ f32 y;
   /* 0x08 */ f32 scale;
-  /* 0x0C */ s32 unkC;
+  /* Cleared by StartBanner and DrawBanner, and read by nothing */
+  /* 0x0C */ s32 unusedLetterValue;
   /* 0x10 */ Mtx matrices[2];
 } BannerLetter; /* size = 0x90 */
 
@@ -628,7 +629,7 @@ void StartBanner(s32 banner) {
       f_ActiveBannerLetters[i].x = (i * BANNER_LETTER_SPACING) -
           ((f_BannerNumberLetterCount - 1) * (BANNER_LETTER_SPACING / 2));
       f_ActiveBannerLetters[i].y = 0.0f;
-      f_ActiveBannerLetters[i].unkC = 0;
+      f_ActiveBannerLetters[i].unusedLetterValue = 0;
       f_ActiveBannerLetters[i].scale = 1.0f;
       rotation[AXIS_X] = 0;
       rotation[AXIS_Y] = 0;
@@ -657,7 +658,7 @@ void StartBanner(s32 banner) {
               f_BannerLayouts[f_CurrentBanner][BANNER_LAYOUT_FIRST_LETTER + i] +
           (f32)f_BannerLayouts[f_CurrentBanner][BANNER_LAYOUT_LEFT];
       f_ActiveBannerLetters[i].y = 0.0f;
-      f_ActiveBannerLetters[i].unkC = 0;
+      f_ActiveBannerLetters[i].unusedLetterValue = 0;
       f_ActiveBannerLetters[i].scale = 1.0f;
       rotation[AXIS_X] = 0;
       rotation[AXIS_Y] = 0;
@@ -956,7 +957,7 @@ void DrawBanner(Gfx** displayListHead) {
               (f32)f_BannerLayouts[f_CurrentBanner][BANNER_LAYOUT_LEFT]) *
           letterScale;
       f_ActiveBannerLetters[i].y = 0.0f;
-      f_ActiveBannerLetters[i].unkC = 0;
+      f_ActiveBannerLetters[i].unusedLetterValue = 0;
       f_ActiveBannerLetters[i].scale = letterScale;
       rotation[AXIS_X] = 0;
       rotation[AXIS_Y] = 0;
@@ -978,7 +979,7 @@ void DrawBanner(Gfx** displayListHead) {
               (f_BannerNumberLetterCount * (BANNER_LETTER_SPACING / 2))) *
           letterScale;
       f_ActiveBannerLetters[i].y = 0.0f;
-      f_ActiveBannerLetters[i].unkC = 0;
+      f_ActiveBannerLetters[i].unusedLetterValue = 0;
       f_ActiveBannerLetters[i].scale = letterScale;
       rotation[AXIS_X] = 0;
       rotation[AXIS_Y] = 0;
