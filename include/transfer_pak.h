@@ -30,7 +30,7 @@
 typedef struct GameBoyClubStats {
   /* 0x0 */ u16 distance; /* In yards */
   /* 0x2 */ u16 pitch;
-  /* 0x4 */ u8 unk4;
+  /* 0x4 */ u8 ignoredStat; /* Read by nothing; its meaning is unknown */
   /* 0x5 */ u8 sideSpin;
 } GameBoyClubStats; /* size = 0x6 */
 

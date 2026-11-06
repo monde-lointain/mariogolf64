@@ -84,7 +84,7 @@
 typedef struct ClubStats {
   /* 0x0 */ s16 distance; /* In yards */
   /* 0x2 */ BinaryAngle pitch;
-  /* 0x4 */ s8 unk4;
+  /* 0x4 */ s8 ignoredStat; /* GenerateClubSet skips it */
   /* 0x5 */ s8 sideSpin;
 } ClubStats; /* size = 0x6 */
 

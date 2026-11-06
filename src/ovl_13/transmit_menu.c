@@ -411,7 +411,7 @@ typedef struct StatusData {
 #define DATA_CLUBS_OFFSET 0x100
 #define DATA_CLUB_SIZE 6
 #define CLUB_DATA_PITCH_OFFSET 2
-#define CLUB_DATA_UNK4_OFFSET 4
+#define CLUB_DATA_IGNORED_STAT_OFFSET 4
 #define CLUB_DATA_SIDE_SPIN_OFFSET 5
 #define DATA_EXPERIENCE_OFFSET 0x15C
 #define DATA_UNK15E_OFFSET 0x15E
@@ -1543,8 +1543,8 @@ void DecodeCartridgeCharacter(
         (characterData[DATA_CLUBS_OFFSET + (index * DATA_CLUB_SIZE) +
              CLUB_DATA_PITCH_OFFSET + 1]
             << BITS_PER_BYTE);
-    character->clubs[index].unk4 = characterData[DATA_CLUBS_OFFSET +
-        (index * DATA_CLUB_SIZE) + CLUB_DATA_UNK4_OFFSET];
+    character->clubs[index].ignoredStat = characterData[DATA_CLUBS_OFFSET +
+        (index * DATA_CLUB_SIZE) + CLUB_DATA_IGNORED_STAT_OFFSET];
     character->clubs[index].sideSpin = characterData[DATA_CLUBS_OFFSET +
         (index * DATA_CLUB_SIZE) + CLUB_DATA_SIDE_SPIN_OFFSET];
     osSyncPrintf("%d, %d %d\n", index, character->clubs[index].distance,
