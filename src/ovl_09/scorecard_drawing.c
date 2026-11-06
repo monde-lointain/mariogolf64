@@ -2537,19 +2537,18 @@ void DrawScoresPage(Gfx** displayListHead) {
       if (j & 1) {
         if (!(g_GameState.holeSelection & HOLE_SELECTION_BACK_NINE)) {
           /*
-           * The top and bottom add the row's offset to CELL_TOP before
-           * g_Scorecard.y, to match: the top's terms added in order, or with
-           * the row's offset first, give 757 words differing (169 in shape)
-           * against the draft's 755 (167), the bottom's 755 (169), and both
-           * edges' 760 or more
+           * g_Scorecard.y comes last, to match: added first, as the front
+           * nine's cells have it, it gives 712 words differing (158 in shape)
+           * for the top, 710 (158) for the bottom and 715 (159) for both,
+           * against the draft's 710 (156), and 712 to 725 with CELL_TOP next
            */
           DrawTextureRect(&gfx,
               QuarterPixels((j * CELL_WIDTH) + CELL_LEFT + g_Scorecard.x),
-              QuarterPixels(g_Scorecard.y + (CELL_TOP + (i * CELL_HEIGHT))),
+              QuarterPixels((i * CELL_HEIGHT) + CELL_TOP + g_Scorecard.y),
               QuarterPixels(
                   (j * CELL_WIDTH) + CELL_LEFT + CELL_WIDTH + g_Scorecard.x),
               QuarterPixels(
-                  g_Scorecard.y + (CELL_TOP + (i * CELL_HEIGHT) + CELL_HEIGHT)),
+                  (i * CELL_HEIGHT) + CELL_TOP + CELL_HEIGHT + g_Scorecard.y),
               G_TX_RENDERTILE, 0, TexelCoordinate(i * CELL_HEIGHT),
               TEXEL_STEP_ONE, TEXEL_STEP_ONE);
         }
