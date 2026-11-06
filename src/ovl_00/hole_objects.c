@@ -89,9 +89,11 @@ static AssetId f_CheepCheepViewAssets[CHEEP_CHEEP_VIEW_COUNT] UNUSED = {
 static AssetId f_MonkeyFrameAssets[MONKEY_FRAME_COUNT] = {
     MONKEY_ASSET, MONKEY_ASSET + 1, MONKEY_ASSET + 2, MONKEY_ASSET + 3};
 static Boolean f_AreCheepCheepsLeaping = FALSE;
-static s32 f_CheepCheepLeapUnk38 = 0;
-static s32 f_CheepCheepLeapUnk3C = 0;
-static s32 f_CheepCheepLeapUnk40 = 0;
+/* StartCheepCheepLeap sets these, the first to its only caller's 0, and
+ * nothing reads them */
+static s32 f_UnusedLeapStartValue = 0;
+static s32 f_UnusedLeapValue = 0;
+static s32 f_OtherUnusedLeapValue = 0;
 /* Read by no routine */
 static s32 f_UnusedWordBeforeCheepCheepVertices UNUSED = 0;
 static Vtx f_CheepCheepVertices[4] = {
@@ -234,7 +236,7 @@ void ClearHoleCreatures(void) {
  * allocation isn't the cause. 2 words differ.
  */
 #ifdef NON_MATCHING
-void StartCheepCheepLeap(s32 arg0) {
+void StartCheepCheepLeap(s32 startValue) {
   EncodedAsset asset;
   Vec3 translation;
   Vec3 rotation;
@@ -244,10 +246,10 @@ void StartCheepCheepLeap(s32 arg0) {
   HoleCreature* creature;
   f32 speed;
 
-  f_CheepCheepLeapUnk38 = arg0;
+  f_UnusedLeapStartValue = startValue;
   f_AreCheepCheepsLeaping = TRUE;
-  f_CheepCheepLeapUnk3C = 0;
-  f_CheepCheepLeapUnk40 = 0;
+  f_UnusedLeapValue = 0;
+  f_OtherUnusedLeapValue = 0;
   for (i = 0; i != HOLE_CREATURE_COUNT; i++) {
     creature = &f_HoleCreatures[i];
     if (creature->state == HOLE_CREATURE_NONE) {

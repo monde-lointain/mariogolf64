@@ -271,7 +271,7 @@ static Boolean f_HasTrialShot;
 /* Where the planned shot aims */
 static CoursePoint f_PlanTarget;
 /* PlanShot clears these, and nothing in the overlay reads them */
-static s32 f_Unk658;
+static s32 f_UnusedPlanStartValue;
 /* The route points nearest the cup first, as PlanRoute orders them */
 static s8 f_RouteOrder[ROUTE_POINT_COUNT];
 /* Read by no routine */
@@ -324,7 +324,8 @@ static u8 f_UnusedBytesAfterTrialEvaluation[4] UNUSED;
 /* Where the trial's ball rests, or for a putt where it passes nearest the
  * target */
 static CoursePoint f_TrialEndPoint;
-static s8 f_Unk840;
+/* PlanShot clears it too, and nothing in the overlay reads it */
+static s8 f_OtherUnusedPlanStartValue;
 /* The count of trials that ended with the ball lost */
 static s32 f_LostTrialCount;
 /* How far PlanShot has got with the shot */
@@ -561,14 +562,14 @@ s32 PlanShot(CurrentShot* plannedShot) {
     f_HasBestEvaluation = FALSE;
     f_IsTrialLost = FALSE;
     f_LostTrialCount = 0;
-    f_Unk658 = 0;
+    f_UnusedPlanStartValue = 0;
     f_IsTrialAccepted = FALSE;
     f_AcceptableEvaluation = 0;
     f_AimChangeCount = 0;
     f_ShotOffset = SHOT_OFFSET_NONE;
     f_TrialIndex = 0;
     f_TrialLevel = 0;
-    f_Unk840 = 0;
+    f_OtherUnusedPlanStartValue = 0;
     f_AimChangeCount = 0;
     f_HasTrialShot = FALSE;
     f_TrialLaunch = &f_TrialLaunchValues;

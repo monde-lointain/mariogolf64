@@ -31,7 +31,8 @@ typedef struct RegisterFieldValue {
 } RegisterFieldValue;
 
 static OSThread* f_FaultedThread;
-static s32 f_FaultThreadUnk;
+/* RunFaultThread clears it, and nothing reads it */
+static s32 f_UnusedFaultThreadValue;
 
 /*
  * The fault thread and its stack. No routine reads them, as the thread's
@@ -59,8 +60,8 @@ FILE_STATIC char f_FaultText[FAULT_TEXT_SIZE];
 #define PrintFaultMessage(column, row) \
   PrintMessage((s8*)f_FaultText, (column), (row))
 
-/* Only cleared; nothing in the code reads it */
-static s32 f_FaultUnk = 0;
+/* PrintFaultContext clears it, and nothing reads it */
+static s32 f_UnusedFaultContextValue = 0;
 /* The debug text row of the next line of the fault report */
 static s32 f_FaultTextRow = 7;
 
@@ -88,7 +89,7 @@ void RunFaultThread(void* arg UNUSED) {
   OSMesg message;
 
   osSetEventMesg(OS_EVENT_FAULT, &f_FaultMessageQueue, (OSMesg)FAULT_MESSAGE);
-  f_FaultThreadUnk = 0;
+  f_UnusedFaultThreadValue = 0;
   while (TRUE) {
     osSyncPrintf("\n=>fp-wait for msg\n");
     osRecvMesg(&f_FaultMessageQueue, &message, OS_MESG_BLOCK);
@@ -230,7 +231,7 @@ void PrintFaultContext(OSThread* thread) {
    * In its own block, as without it 294 words differ, 6 in shape, against 278
    * and 4
    */
-  IN_OWN_BLOCK(f_FaultUnk = 0);
+  IN_OWN_BLOCK(f_UnusedFaultContextValue = 0);
   sprintf(f_FaultText, "\nFault in thread %d:\n\n", thread->id);
   PrintFaultText();
   PrintFaultMessage(FAULT_TEXT_COLUMN, FAULT_TITLE_ROW);

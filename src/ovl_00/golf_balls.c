@@ -329,7 +329,8 @@ static u8 f_BallImageHeap[BALL_IMAGE_HEAP_SIZE];
 static u16 f_PikaBallTexture[PIKA_TEXTURE_WIDTH * PIKA_TEXTURE_HEIGHT / 4];
 /* How the ball has turned as it rolled */
 static Mat4 f_BallRotation;
-static s32 f_GolfBallUnk100;
+/* ResetGolfBalls clears it, and nothing reads it */
+static s32 f_UnusedGolfBallResetValue;
 /* The ball's position when last rolled */
 static s32 f_LastRolledBallPosition[3];
 
@@ -449,7 +450,7 @@ void ResetGolfBalls(void) {
 
   ResetBallAfterimage();
   ResetBallRotation();
-  f_GolfBallUnk100 = 0;
+  f_UnusedGolfBallResetValue = 0;
 }
 
 /*
