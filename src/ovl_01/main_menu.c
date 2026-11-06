@@ -4459,7 +4459,9 @@ void DrawMenuBanner(Gfx** displayListHead) {
  * or with a named size, gives 62 to 73. A u16 labelOffset gives 27 words (17 in
  * shape), and an s16 29 (19). With the u16, loop.c steps the offset, by 0x500
  * where the original steps by 5 and shifts, but each use masks it with andi
- * 0xFFFF, which the original doesn't.
+ * 0xFFFF, which the original doesn't. Casting only the lit loop's product to
+ * u16, a permuter find, does the same in that loop alone: 6 words, 2 in shape,
+ * the andi among them.
  */
 #ifdef NON_MATCHING
 const char f_PlainMenuHeading[] = "MAIN MENU";
