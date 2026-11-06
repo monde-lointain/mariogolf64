@@ -266,8 +266,9 @@
  * Transmit menu */
 #define GAME_FLAG_ALLOW_CARTRIDGE_DUMP 0x7E
 
-/* Read by the reaction framing, whose purpose is not yet known */
-#define GAME_FLAG_UNK7F 0x7F
+/* Has the reaction views drop the eye and raise what they look at, as in
+ * sudden death */
+#define GAME_FLAG_LOW_REACTION_VIEWS 0x7F
 
 /* Keeps the staff roll from shuffling its cast */
 #define GAME_FLAG_UNK99 0x99

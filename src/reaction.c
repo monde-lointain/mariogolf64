@@ -211,7 +211,7 @@ void SpawnTear(u32 slotIndex, s32 pointId, Radians heading);
  * original.
  */
 #define IsReactionViewLow() \
-  (IsGameFlagSet(GAME_FLAG_UNK7F) || \
+  (IsGameFlagSet(GAME_FLAG_LOW_REACTION_VIEWS) || \
       ((g_Scene != SCENE_STAFF_ROLL) && (g_GameState.isSuddenDeath == TRUE)))
 
 /*
