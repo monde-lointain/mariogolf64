@@ -561,6 +561,11 @@ void UpdateRingShotRecords(void) {
  * before row or in the loop's header, change nothing; counting the empty slot's
  * dashes with listIndex, column, drop or row gives 70 to 92 words, all in
  * registers. 26 words differ.
+ *
+ * Giving the shared variables one purpose each costs words: a strip counter
+ * of its own gives 50 (14 in shape), a face mode 209, a slot index 149, all
+ * three 295; an icon draw counter 62 (0 in shape), a hole column 155, and
+ * both 247.
  */
 #ifdef NON_MATCHING
 void DrawRingShotRecords(Gfx** displayListHead) {
