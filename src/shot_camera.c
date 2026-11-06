@@ -1932,11 +1932,10 @@ void PlaceAimCamera(void);
  * Places the flight camera's eye and look-at point for f_FlightCameraKind at a
  * step of the ball's flight, then keeps the eye above the ground and over the
  * course. The kinds that test f_IsCameraKindNew do their setup once when it is
- * set, then clear it. Doesn't match: the original allocates some registers
- * differently, and orders the stores of point for FLIGHT_CAMERA_FACING_CUP
- * differently. The register oracle forced 13 pseudos and still left 22 words
- * differing when the draft gave 98. A permuter output with 96 words (2 in
- * shape) got both from a temp that it sets to point's Z only in unreachable
+ * set, then clear it. Doesn't match: the original allocates some float
+ * registers differently. The register oracle forced 13 pseudos and still left
+ * 22 words differing when the draft gave 98. A permuter output with 96 words (2
+ * in shape) got both from a temp that it sets to point's Z only in unreachable
  * code before a case label, and then reads instead of point's Z in
  * FLIGHT_CAMERA_FACING_CUP's Z ease, so the value it reads is never set.
  * Keeping the scaled Z in a local for that ease changed nothing, and scaling Z
@@ -1947,9 +1946,12 @@ void PlaceAimCamera(void);
  * as that run also did, which took the draft from 98 words differing to 66, 4
  * in shape either way; set after the eye's height, as the draft had it, or
  * anywhere before the look-at point's Y, it gives 98 to 138. With fabsf an
- * abs.s in volatile inline assembly, 64 words differ, 2 in shape, with or
- * without the x ease's test in a block of its own, which saved words with
- * GCC's built-in fabsf.
+ * abs.s in volatile inline assembly, 64 words differed, 2 in shape.
+ * FLIGHT_CAMERA_FACING_CUP's eases then kept each axis's difference from the
+ * camera in a local; writing the difference out at both its uses, as a later
+ * focused run did in the x ease, gives 34 words, none in shape, whether in the
+ * x ease alone or in all three, so all three do. 34 words differ, none in
+ * shape.
  */
 #ifdef NON_MATCHING
 void PlaceFlightCamera(s32 step) {
@@ -1965,7 +1967,6 @@ void PlaceFlightCamera(s32 step) {
   f32 height;
   f32 easeFraction;
   f32 sideDistance;
-  f32 delta;
   f32 riseDistance;
   Radians angle;
   s32 index;
@@ -2419,19 +2420,22 @@ void PlaceFlightCamera(s32 step) {
       point[AXIS_X] *= COURSE_TO_WORLD_SCALE;
       point[AXIS_Y] *= COURSE_TO_WORLD_SCALE;
       point[AXIS_Z] *= COURSE_TO_WORLD_SCALE;
-      delta = point[AXIS_X] - f_CameraPosition[AXIS_X];
-      if (fabsf(delta) > FACING_CUP_EASE_DEAD_ZONE) {
-        f_CameraPosition[AXIS_X] += delta * FACING_CUP_EASE_FRACTION;
+      if (fabsf(point[AXIS_X] - f_CameraPosition[AXIS_X]) >
+          FACING_CUP_EASE_DEAD_ZONE) {
+        f_CameraPosition[AXIS_X] += (point[AXIS_X] - f_CameraPosition[AXIS_X]) *
+            FACING_CUP_EASE_FRACTION;
       }
 
-      delta = point[AXIS_Y] - f_CameraPosition[AXIS_Y];
-      if (fabsf(delta) > FACING_CUP_EASE_DEAD_ZONE) {
-        f_CameraPosition[AXIS_Y] += delta * FACING_CUP_EASE_FRACTION;
+      if (fabsf(point[AXIS_Y] - f_CameraPosition[AXIS_Y]) >
+          FACING_CUP_EASE_DEAD_ZONE) {
+        f_CameraPosition[AXIS_Y] += (point[AXIS_Y] - f_CameraPosition[AXIS_Y]) *
+            FACING_CUP_EASE_FRACTION;
       }
 
-      delta = point[AXIS_Z] - f_CameraPosition[AXIS_Z];
-      if (fabsf(delta) > FACING_CUP_EASE_DEAD_ZONE) {
-        f_CameraPosition[AXIS_Z] += delta * FACING_CUP_EASE_FRACTION;
+      if (fabsf(point[AXIS_Z] - f_CameraPosition[AXIS_Z]) >
+          FACING_CUP_EASE_DEAD_ZONE) {
+        f_CameraPosition[AXIS_Z] += (point[AXIS_Z] - f_CameraPosition[AXIS_Z]) *
+            FACING_CUP_EASE_FRACTION;
       }
 
       EaseLookAtPoint(f_EndYawFromCup);
