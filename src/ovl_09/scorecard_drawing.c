@@ -3268,7 +3268,14 @@ static const f64 f_ScoresTenDegrees = DegreesToRadians(10);
  * player loop gives 24 words, 14 in shape; a top of its own, 25 and 15; no
  * rowOffset, 92; and rowOffset as an s16, u16 or u32, 98 to 112. The register
  * oracle's closest result is these 22 words with no register forced, so
- * allocation isn't the cause. 22 words differ, 12 in shape.
+ * allocation isn't the cause. The difference starts in the digit loops: loop.c
+ * moves BET_TALLY_TOP + rowOffset out of each, its first movable, with a saving
+ * of 1 over a lifetime of 1 against 33 insns, and the outer loop then reduces
+ * it; the original adds it at each digit while moving the bottom's sum out,
+ * which needs a larger digit loop or more moves before the top's. A top
+ * variable set in each digit loop, for the top alone or for the bottom too,
+ * gives 96 words, 18 in shape; declared in the loop, 90 (18); and a bottom
+ * variable, 114 (20). 22 words differ, 12 in shape.
  */
 #ifdef NON_MATCHING
 void DrawBetTallies(Gfx** displayListHead) {
