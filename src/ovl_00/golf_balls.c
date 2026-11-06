@@ -790,7 +790,15 @@ enum BallSprite {
  * folds into the same slti immediates the original has, and the build differs
  * from this one only in which temporaries hold display list words and in one
  * store moved by a slot, so the gain comes from the extra pseudo's numbering,
- * not from the code. 654 words differ, 90 in shape.
+ * not from the code. The draft then gave 654 words, 90 in shape.
+ *
+ * The debug route points' depth has its own local, routePointDepth, where
+ * the draft reused the shadow's depth: the register oracle lined that pseudo
+ * up with one register for the shadow and another for the route points. That
+ * takes the draft from 654 words differing to 648, 90 in shape either way,
+ * and the oracle still forces none; a screen point of their own as well
+ * gives 988 or 1002, as it moves the stack slots. 648 words differ, 90 in
+ * shape.
  */
 #ifdef NON_MATCHING
 void DrawGolfBalls(CameraMatrices* matrices UNUSED) {
@@ -810,6 +818,7 @@ void DrawGolfBalls(CameraMatrices* matrices UNUSED) {
   s32 ballDepth;
   s32 afterimageProjectedDepth;
   s32 shadowDepth;
+  s32 routePointDepth;
   s32 primDepth;
   s32 shadowPrimDepth;
   s32 size;
@@ -1304,13 +1313,13 @@ void DrawGolfBalls(CameraMatrices* matrices UNUSED) {
   if (IsGameFlagSet(GAME_FLAG_SHOW_ROUTE_POINTS)) {
     for (i = 0; i != ROUTE_POINT_COUNT; i++) {
       afterimage = &f_BallAfterimages[i];
-      shadowDepth = ProjectPoint(
+      routePointDepth = ProjectPoint(
           g_HolePoints.routePoints[i][0] * COURSE_TO_WORLD_SCALE,
           (g_HolePoints.routePoints[i][1] * COURSE_TO_WORLD_SCALE) -
               (g_PinVertexScale * 0.27f),
           g_HolePoints.routePoints[i][2] * COURSE_TO_WORLD_SCALE, &shadowPoint);
-      if (shadowDepth < BALL_NEAREST_DEPTH) {
-        if (shadowDepth < g_CupViewDepth) {
+      if (routePointDepth < BALL_NEAREST_DEPTH) {
+        if (routePointDepth < g_CupViewDepth) {
           afterimageDepth = shadowPoint.depth -
               (shadowPoint.depthStep * (10.5f * g_PinVertexScale)) + 48.0f -
               BALL_DEPTH_BIAS;
