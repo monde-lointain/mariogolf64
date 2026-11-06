@@ -2964,7 +2964,8 @@ s32 PushBallOutOfWalls(BallSimulation* simulation, s32 checksHeight) {
       osSyncPrintf("?");
       /* The original tests whether the magnitude is less than the distance,
        * a c.lt.s, and skips the wall when it isn't; testing >= gives 47
-       * differing words, fabs 52 and AbsFloat 90 */
+       * differing words (7 in shape), fabs 54 (12) and AbsFloat 86 (12),
+       * against 43 (3) */
       if (!(fabsf(side) < WALL_TOUCH_DISTANCE)) {
         continue;
       }
