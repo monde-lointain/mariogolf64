@@ -201,7 +201,7 @@
 
 /* Keeps the menus, as the exit screen leaves them, from swapping to the play
  * module; they read their resources again instead */
-#define GAME_FLAG_UNK2E 0x2E
+#define GAME_FLAG_STAY_IN_MENUS 0x2E
 
 /* How ShadeGroundTiles fades the ground above height 0 toward white */
 #define GAME_FLAG_FADE_HIGH_GROUND 0x12

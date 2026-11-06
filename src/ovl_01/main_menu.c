@@ -970,7 +970,7 @@ s32 GetChosenCourseIndex(void) {
  * chosen hole behind screens 6 and 23, circles the inset camera, and runs the
  * current screen. When the screen changes, reads the images that the new one
  * draws. The exit screen saves and starts play, swapping to the play module
- * unless GAME_FLAG_UNK2E is set.
+ * unless GAME_FLAG_STAY_IN_MENUS is set.
  */
 void UpdateMenus(void) {
   AssetFile file;
@@ -1676,7 +1676,7 @@ void UpdateMenus(void) {
     }
 
     SetGameFlag(GAME_FLAG_HOLE_LOADED);
-    if (IsGameFlagSet(GAME_FLAG_UNK2E)) {
+    if (IsGameFlagSet(GAME_FLAG_STAY_IN_MENUS)) {
       LoadMenuResources();
       OnMenuResourcesLoaded();
     } else {
