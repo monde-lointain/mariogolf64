@@ -253,13 +253,6 @@ static const char f_UnusedFloatFormat[] = "            %f";
 #define FLIGHT_SOUND_CHANNEL_CUP_IN 0xF
 #define SOUND_FADE_FRAME_COUNT 120
 
-/* f_EndReaction values: how the others reacted as the ball neared its end */
-enum EndReaction {
-  END_REACTION_NONE,
-  END_REACTION_ONLOOKERS,
-  END_REACTION_UNK2
-};
-
 /* Values of f_PendingResultSound, which plays when f_LandingWaitFrame reaches
  * RESULT_SOUND_STAGE */
 enum ResultSound {
@@ -1292,7 +1285,7 @@ void PlayFlightSounds(s32 step) {
             IsGameFlagSet(GAME_FLAG_FORCE_FLOURISHES)) {
           PlaySound(SOUND_LONG_PUTT_HOLED, FLIGHT_SOUND_CHANNEL_CALLS,
               SOUND_FULL_SCALE);
-          f_EndReaction = END_REACTION_UNK2;
+          f_EndReaction = END_REACTION_LONG_PUTT;
         }
       }
 

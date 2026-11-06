@@ -4505,7 +4505,7 @@ void UpdateTurns(void) {
             UpdateFlightCamera(TRUE, g_TurnController.buttons);
 
         if (g_TurnBallSimulation.isHoledOut) {
-          if (GetEndReaction() == 1) {
+          if (GetEndReaction() == END_REACTION_ONLOOKERS) {
             if (f_StateFrameCounts[playerIndex] == 1) {
               PlayHoleOutSong(playerIndex);
             }
@@ -4517,7 +4517,7 @@ void UpdateTurns(void) {
             if (f_StateFrameCounts[playerIndex] == 30) {
               ShowHoleOutBanner(playerIndex);
             }
-          } else if (GetEndReaction() == 2) {
+          } else if (GetEndReaction() == END_REACTION_LONG_PUTT) {
             if (f_StateFrameCounts[playerIndex] == 1) {
               PlayHoleOutSong(playerIndex);
             }

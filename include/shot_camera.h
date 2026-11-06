@@ -28,6 +28,18 @@ extern Boolean g_IsCupViewShown;
 /* An I8 texture of NOISE_GRID_SIZE x NOISE_GRID_SIZE texels */
 extern u8* g_NoiseTexels;
 
+/*
+ * GetEndReaction's values: what greeted the ball as it neared its end, which
+ * sets when UpdateTurns shows the hole-out banner
+ */
+enum EndReaction {
+  END_REACTION_NONE,
+  /* A flag shot's or chip-in's call, which queues the onlookers' sounds */
+  END_REACTION_ONLOOKERS,
+  /* SOUND_LONG_PUTT_HOLED, with no onlookers' sounds */
+  END_REACTION_LONG_PUTT
+};
+
 void ClearHoleIntroText(void);
 void EndFlightCamera(void);
 void EndHoleFlyover(void);
