@@ -1132,8 +1132,21 @@ static const char f_BlankBetName[] = " ";
  * the crossings' and 173 in the names'; an index of their own gives 79 in
  * the bet images' loop and 77 in the column lines', and a column of their
  * own 145 in the pots' loop. No other loop's index or declaration order
- * gives fewer. The oracle leaves 52 words, forcing 4. 65 words differ, 31
- * in shape.
+ * gives fewer. The oracle leaves 52 words, forcing 4.
+ *
+ * The counts above were measured before the change below. The column
+ * lines' loop now writes each x as the crossings' loop does, with
+ * GRID_COLUMN_LINE_LEFT first and the scorecard's x last, which takes the
+ * draft from 65 words to 56 (22 in shape). That order for the left edges
+ * alone gives 62 (28), whether the right edges keep the scorecard's x
+ * first or put lineLeft first, and GRID_COLUMN_LINE_LEFT +
+ * GRID_LINE_WIDTH + lineLeft + g_Scorecard.x on the right gives 56 too.
+ * Writing the crossings' outer edges the same way gives 57 (19), and
+ * setting i and left in one chained assignment changes nothing. GCC steps
+ * the crossings' row top in a register of its own, where the original
+ * adds GRID_ROW_LINE_TOP to the row's offset on each pass; four other
+ * orders and groupings of that top, alone or with the bottom grouped to
+ * match, give 80 to 90 words. 56 words differ, 22 in shape.
  */
 #ifdef NON_MATCHING
 void DrawBetsPage(Gfx** displayListHead) {
@@ -1199,26 +1212,26 @@ void DrawBetsPage(Gfx** displayListHead) {
   for (i = 0, lineLeft = 0; i != GRID_COLUMN_COUNT;
       i++, lineLeft += BET_COLUMN_SPACING) {
     DrawTextureRect(&gfx,
-        QuarterPixels(g_Scorecard.x + lineLeft + GRID_COLUMN_LINE_LEFT),
+        QuarterPixels(GRID_COLUMN_LINE_LEFT + lineLeft + g_Scorecard.x),
         QuarterPixels(g_Scorecard.y + GRID_TOP),
-        QuarterPixels(
-            g_Scorecard.x + lineLeft + GRID_COLUMN_LINE_LEFT + GRID_LINE_WIDTH),
+        QuarterPixels(GRID_COLUMN_LINE_LEFT + (GRID_LINE_WIDTH + lineLeft) +
+            g_Scorecard.x),
         QuarterPixels(g_Scorecard.y + GRID_BOTTOM), G_TX_RENDERTILE,
         TexelCoordinate(GRID_TEXEL_LINE), TexelCoordinate(GRID_TEXEL_LINE),
         TEXEL_STEP_ONE, GRID_COLUMN_STEP);
     DrawTextureRect(&gfx,
-        QuarterPixels(g_Scorecard.x + lineLeft + GRID_COLUMN_LINE_LEFT),
+        QuarterPixels(GRID_COLUMN_LINE_LEFT + lineLeft + g_Scorecard.x),
         QuarterPixels(g_Scorecard.y + GRID_TOP),
-        QuarterPixels(
-            g_Scorecard.x + lineLeft + GRID_COLUMN_LINE_LEFT + GRID_LINE_WIDTH),
+        QuarterPixels(GRID_COLUMN_LINE_LEFT + (GRID_LINE_WIDTH + lineLeft) +
+            g_Scorecard.x),
         QuarterPixels(g_Scorecard.y + GRID_TOP + GRID_LINE_WIDTH),
         G_TX_RENDERTILE, 0, TexelCoordinate(GRID_TEXEL_TOP_END), TEXEL_STEP_ONE,
         TEXEL_STEP_ONE);
     DrawTextureRect(&gfx,
-        QuarterPixels(g_Scorecard.x + lineLeft + GRID_COLUMN_LINE_LEFT),
+        QuarterPixels(GRID_COLUMN_LINE_LEFT + lineLeft + g_Scorecard.x),
         QuarterPixels(g_Scorecard.y + GRID_BOTTOM - GRID_LINE_WIDTH),
-        QuarterPixels(
-            g_Scorecard.x + lineLeft + GRID_COLUMN_LINE_LEFT + GRID_LINE_WIDTH),
+        QuarterPixels(GRID_COLUMN_LINE_LEFT + (GRID_LINE_WIDTH + lineLeft) +
+            g_Scorecard.x),
         QuarterPixels(g_Scorecard.y + GRID_BOTTOM), G_TX_RENDERTILE, 0,
         TexelCoordinate(GRID_TEXEL_BOTTOM_END), TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   }
