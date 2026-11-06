@@ -165,10 +165,11 @@ def replace_all(before: str, body: str, block: str) -> tuple[str, str] | None:
     for replacement in block.split("\n++++\n"):
         old, _, new = replacement.partition("\n----")
         new = new.removeprefix("\n")
-        warn_if_repeated(before + body, old)
         if old in body:
+            warn_if_repeated(body, old)
             body = delete_or_replace(body, old, new)
         elif old in before:
+            warn_if_repeated(before, old)
             before = delete_or_replace(before, old, new)
         else:
             return None
