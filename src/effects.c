@@ -2701,6 +2701,7 @@ void ShowBirdieBadgeCount(s32 badgeCount) {
 #define BADGE_COUNT_RISE_FRAME 40
 #define BADGE_COUNT_ADD_FRAME 15
 #define BADGE_COUNT_SOUND 0x6B
+#define BADGE_COUNT_SOUND_VOLUME 100
 /* The badge drops in from above its resting place, then rises off the top */
 #define BADGE_SLIDE_PER_FRAME 4
 #define BADGE_DROP_START_OFFSET (-24)
@@ -2764,7 +2765,8 @@ void DrawBirdieBadgeCount(Gfx** displayListHead) {
     f_BadgeCountFrame++;
     if (f_BadgeCountFrame == BADGE_COUNT_ADD_FRAME) {
       f_ShownBadgeCount++;
-      PlaySound(BADGE_COUNT_SOUND, g_NextSoundChannel, 100);
+      PlaySound(
+          BADGE_COUNT_SOUND, g_NextSoundChannel, BADGE_COUNT_SOUND_VOLUME);
     }
 
     if (f_BadgeCountFrame == BADGE_COUNT_SHOWN_FRAME_COUNT) {
