@@ -1115,8 +1115,19 @@ static const char f_BlankBetName[] = " ";
  * original adds the grid columns' left to the rest of each column line's x; of
  * five other orders of those terms, in the column loop, the crossings' or both,
  * none gives fewer words: the constant first gives 212 to 230 (24 to 30 in
- * shape), and the oracle still leaves 78 with that form in both loops. 206
- * words differ, 32 in shape.
+ * shape), and the oracle still leaves 78 with that form in both loops.
+ *
+ * The register oracle lines left and column each up with two registers, so
+ * three loops now have their own: the column lines' loop a lineLeft, the
+ * rates' loop a rateLeft, and the tallies' loop a tallyColumn and tallyLeft.
+ * The tallies' pair took the draft from 206 words to 100 (32 in shape),
+ * either alone giving 278 or 282; rateLeft took it to 86, and lineLeft to 65
+ * (31). From there, a left of their own gives 65 in the bet images' loop, 79
+ * in the subtitles', 137 shared by those two, 157 in the crossings' and 173
+ * in the names'; an index of their own gives 79 in the bet images' loop and
+ * 77 in the column lines', and a column of their own 145 in the pots' loop.
+ * No other loop's index or declaration order gives fewer. The oracle leaves
+ * 52 words, forcing 4. 65 words differ, 31 in shape.
  */
 #ifdef NON_MATCHING
 void DrawBetsPage(Gfx** displayListHead) {
@@ -1127,6 +1138,10 @@ void DrawBetsPage(Gfx** displayListHead) {
   s32 frame;
   s32 column;
   s32 total;
+  s32 rateLeft;
+  s32 tallyColumn;
+  s32 tallyLeft;
+  s32 lineLeft;
 
   if (++f_BetBlinkTime >= BET_BLINK_TIME) {
     f_BetBlinkTime = 0;
@@ -1174,29 +1189,29 @@ void DrawBetsPage(Gfx** displayListHead) {
         TEXEL_STEP_ONE);
   }
 
-  for (i = 0, left = 0; i != GRID_COLUMN_COUNT;
-      i++, left += BET_COLUMN_SPACING) {
+  for (i = 0, lineLeft = 0; i != GRID_COLUMN_COUNT;
+      i++, lineLeft += BET_COLUMN_SPACING) {
     DrawTextureRect(&gfx,
-        QuarterPixels(g_Scorecard.x + left + GRID_COLUMN_LINE_LEFT),
+        QuarterPixels(g_Scorecard.x + lineLeft + GRID_COLUMN_LINE_LEFT),
         QuarterPixels(g_Scorecard.y + GRID_TOP),
         QuarterPixels(
-            g_Scorecard.x + left + GRID_COLUMN_LINE_LEFT + GRID_LINE_WIDTH),
+            g_Scorecard.x + lineLeft + GRID_COLUMN_LINE_LEFT + GRID_LINE_WIDTH),
         QuarterPixels(g_Scorecard.y + GRID_BOTTOM), G_TX_RENDERTILE,
         TexelCoordinate(GRID_TEXEL_LINE), TexelCoordinate(GRID_TEXEL_LINE),
         TEXEL_STEP_ONE, GRID_COLUMN_STEP);
     DrawTextureRect(&gfx,
-        QuarterPixels(g_Scorecard.x + left + GRID_COLUMN_LINE_LEFT),
+        QuarterPixels(g_Scorecard.x + lineLeft + GRID_COLUMN_LINE_LEFT),
         QuarterPixels(g_Scorecard.y + GRID_TOP),
         QuarterPixels(
-            g_Scorecard.x + left + GRID_COLUMN_LINE_LEFT + GRID_LINE_WIDTH),
+            g_Scorecard.x + lineLeft + GRID_COLUMN_LINE_LEFT + GRID_LINE_WIDTH),
         QuarterPixels(g_Scorecard.y + GRID_TOP + GRID_LINE_WIDTH),
         G_TX_RENDERTILE, 0, TexelCoordinate(GRID_TEXEL_TOP_END), TEXEL_STEP_ONE,
         TEXEL_STEP_ONE);
     DrawTextureRect(&gfx,
-        QuarterPixels(g_Scorecard.x + left + GRID_COLUMN_LINE_LEFT),
+        QuarterPixels(g_Scorecard.x + lineLeft + GRID_COLUMN_LINE_LEFT),
         QuarterPixels(g_Scorecard.y + GRID_BOTTOM - GRID_LINE_WIDTH),
         QuarterPixels(
-            g_Scorecard.x + left + GRID_COLUMN_LINE_LEFT + GRID_LINE_WIDTH),
+            g_Scorecard.x + lineLeft + GRID_COLUMN_LINE_LEFT + GRID_LINE_WIDTH),
         QuarterPixels(g_Scorecard.y + GRID_BOTTOM), G_TX_RENDERTILE, 0,
         TexelCoordinate(GRID_TEXEL_BOTTOM_END), TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   }
@@ -1385,43 +1400,45 @@ void DrawBetsPage(Gfx** displayListHead) {
 
   BeginShadowedText(&gfx);
   SetTextColor(&gfx, BET_RATE_RED, BET_RATE_GREEN, 0);
-  for (i = 0, left = 0; i != BET_COUNT; i++) {
+  for (i = 0, rateLeft = 0; i != BET_COUNT; i++) {
     if (g_GameState.betRates[i] != UNSET_BET_RATE) {
       if (g_GameState.betRates[i] != 0) {
         sprintf(g_PrintBuffer, f_TwoDigitFormat, g_GameState.betRates[i]);
-        DrawCondensedShadowedText(&gfx, BET_RATE_LEFT + left + g_Scorecard.x,
+        DrawCondensedShadowedText(&gfx,
+            BET_RATE_LEFT + rateLeft + g_Scorecard.x,
             g_Scorecard.y + BET_RATE_TOP, g_PrintBuffer);
       }
 
-      left += BET_COLUMN_SPACING;
+      rateLeft += BET_COLUMN_SPACING;
     }
   }
 
   SetTextColor(&gfx, 0xFF, 0xFF, 0xFF);
   for (i = 0; i != g_GameState.playerCount; i++) {
     total = 0;
-    column = 0;
-    for (j = 0, left = 0; j != BET_COUNT; j++) {
+    tallyColumn = 0;
+    for (j = 0, tallyLeft = 0; j != BET_COUNT; j++) {
       if (g_GameState.betRates[j] == 0) {
-        DrawShadowedText(&gfx, NO_TALLY_LEFT + left + g_Scorecard.x,
+        DrawShadowedText(&gfx, NO_TALLY_LEFT + tallyLeft + g_Scorecard.x,
             (i * GRID_ROW_HEIGHT) + BETS_PAGE_TALLY_TOP + g_Scorecard.y, "-");
-        left += BET_COLUMN_SPACING;
-        column++;
+        tallyLeft += BET_COLUMN_SPACING;
+        tallyColumn++;
       } else if (g_GameState.betRates[j] != UNSET_BET_RATE) {
         total += g_BetTallies[i][j];
         sprintf(g_PrintBuffer, f_WideTotalFormat, g_BetTallies[i][j]);
-        column++;
+        tallyColumn++;
         DrawCondensedShadowedText(&gfx,
-            BETS_PAGE_TALLY_LEFT + left + g_Scorecard.x,
+            BETS_PAGE_TALLY_LEFT + tallyLeft + g_Scorecard.x,
             (i * GRID_ROW_HEIGHT) + BETS_PAGE_TALLY_TOP + g_Scorecard.y,
             g_PrintBuffer);
-        left += BET_COLUMN_SPACING;
+        tallyLeft += BET_COLUMN_SPACING;
       }
     }
 
     sprintf(g_PrintBuffer, f_WideTotalFormat, total);
     DrawCondensedShadowedText(&gfx,
-        (column * BET_COLUMN_SPACING) + BETS_PAGE_TALLY_LEFT + g_Scorecard.x,
+        (tallyColumn * BET_COLUMN_SPACING) + BETS_PAGE_TALLY_LEFT +
+            g_Scorecard.x,
         (i * GRID_ROW_HEIGHT) + BETS_PAGE_TALLY_TOP + g_Scorecard.y,
         g_PrintBuffer);
   }
