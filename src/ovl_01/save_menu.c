@@ -1881,6 +1881,12 @@ void DrawSavedMiniGolfImage(Gfx** displayListHead);
  * words, forcing 24 pseudos, to 183, forcing 28: the code comes closer to
  * the original's, though more registers differ. 287 words differ, 91 in
  * shape.
+ *
+ * The register oracle reports courseIndex lining up with $s1, the register
+ * the original gives the shared counter, and the hole index with $s6.
+ * Counting the boards and strips with courseIndex in place of holeIndex
+ * gives 597 words (99 in shape). The report lists gfx, the strip counter
+ * and two other values as lining up with $s1 too, so it is weak.
  */
 #ifdef NON_MATCHING
 void DrawSavedGames(Gfx** displayListHead) {
