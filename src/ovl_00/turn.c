@@ -1887,7 +1887,7 @@ s32 GetShotKindPoints(s32 playerIndex, s32 shotKind) {
       points = LONG_CHIP_IN_POINTS;
       break;
     case SHOT_KIND_PIN_SHOT:
-    case SHOT_KIND_UNK5:
+    case SHOT_KIND_UNUSED:
       points = PIN_SHOT_POINTS;
       break;
     case SHOT_KIND_HOLE_IN_ONE:

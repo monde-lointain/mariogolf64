@@ -17,7 +17,7 @@ enum ShotKind {
   SHOT_KIND_PIN_SHOT, /* Hits the pin */
   SHOT_KIND_CHIP_IN, /* Holed from off the green */
   SHOT_KIND_LONG_CHIP_IN, /* Holed from far off the green */
-  SHOT_KIND_UNK5,
+  SHOT_KIND_UNUSED, /* Never counted, but scored as a pin shot */
   SHOT_KIND_FLAG_SHOT, /* Hits the flag */
   SHOT_KIND_HOLE_IN_ONE,
   SHOT_KIND_ALBATROSS,
