@@ -3351,8 +3351,10 @@ static inline u16* GetShadowedTexel(u32 column, u32 row) {
  * within the width ends the shadow once one has started. Billboards with a
  * texture in f_ShadowlessTextures cast no shadow.
  *
- * Doesn't match: the registers differ throughout, and ours works out the mask
- * row's start before its row test, where the original does so after it.
+ * Doesn't match: the original loads a float constant four instructions
+ * sooner, $t8 and $t9 trade places in several spots, ours sets 100 in three
+ * places where the original does once, and a halfword load and its store add
+ * their address terms in another order.
  * Indexing the solidities as one flat array, where a row pointer into a
  * two-dimensional one gave 271 words, 45 in shape, lets SHADOW_LIGHT_DISTANCE's
  * load stay inside the billboard loop, as the original's does; indexing the
@@ -3401,9 +3403,14 @@ static inline u16* GetShadowedTexel(u32 column, u32 row) {
  * counter a second meaning, gives 57 words, 17 in shape, but the oracle's
  * closest is then those 57 words with nothing forced, against 55 forcing 5.
  *
- * An s16 rowStart gives 56 words (14 in shape), but it sign-extends the
- * row's start with an sll by 21 and an sra by 16, where the original shifts
- * once, by 5.
+ * The mask loops index the solidities with the row shifted in place, where a
+ * rowStart local set at the top of each row gave 59 words (17 in shape):
+ * that gives 53 (13), and the register oracle's closest result falls from 55
+ * words to 49, forcing 5 pseudos for each. Setting rowStart in the column
+ * loop's initializer, after the column, gives 57 (15) and the oracle 53; an
+ * s16 rowStart gave 56 (14) but sign-extended the start with an sll by 21
+ * and an sra by 16, where the original shifts once, by 5. 53 words differ,
+ * 13 in shape.
  */
 #ifdef NON_MATCHING
 void CastBillboardShadows(void) {
@@ -3478,10 +3485,8 @@ void CastBillboardShadows(void) {
 
     if (g_Billboards[index].textureIndex != lastTextureIndex) {
       for (maskRow = 0; maskRow <= BILLBOARD_MASK_SIZE; maskRow++) {
-        s32 rowStart = maskRow << SOLIDITY_ROW_SHIFT;
-
         for (maskColumn = 0; maskColumn <= BILLBOARD_MASK_SIZE; maskColumn++) {
-          solidities[rowStart + maskColumn] =
+          solidities[(maskRow << SOLIDITY_ROW_SHIFT) + maskColumn] =
               GetBillboardSolidity(g_Billboards[index].textureIndex,
                   maskColumn * (1.0f / BILLBOARD_MASK_SIZE),
                   maskRow * (1.0f / BILLBOARD_MASK_SIZE));
