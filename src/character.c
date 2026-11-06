@@ -204,7 +204,6 @@ static u8 f_UnusedBufferAfterHeadingMatrix[120] UNUSED;
 #define MODEL_SCALE 0.01f
 #define HALF_TURN_DEGREES 180
 #define BLEND_ALPHA 0x80
-#define OPAQUE_ALPHA 0xFF
 /* The models' translucent mode: like G_RM_ZB_XLU_SURF, but updating the
  * depth buffer */
 #define MODEL_RENDER_MODE_TRANSLUCENT (G_RM_ZB_XLU_SURF | Z_UPD)

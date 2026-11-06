@@ -13,6 +13,10 @@
 /* Every geometry mode bit, for gSPClearGeometryMode to clear them all */
 #define ALL_GEOMETRY_MODES 0xFFFFFFFF
 
+/* The ends of an 8-bit color's alpha */
+#define TRANSPARENT_ALPHA 0
+#define OPAQUE_ALPHA 0xFF
+
 /*
  * Appends a pipe sync followed by a single-command GBI state setter.
  * displayList must be a side-effect-free Gfx* lvalue with room for both

@@ -136,7 +136,6 @@
 #define PAINTING_SCROLL_FRAME 60
 /* Rows scrolled when the painting's bottom is shown */
 #define PAINTING_SCROLL_LIMIT 228
-#define OPAQUE_ALPHA 255
 /* Alpha per frame */
 #define CLOSING_FADE_RATE 2
 /* Alpha per frame */
