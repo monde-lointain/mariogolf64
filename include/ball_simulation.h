@@ -182,7 +182,8 @@ typedef struct BallSimulation {
   /* 0x0C */ s32 dropPosition[3];
   /* 0x18 */ s32 position[3]; /* Where the ball is, in course units */
   /* 0x24 */ s32 velocity[3];
-  /* 0x30 */ s32 unk30;
+  /* Only resetting the simulations clears it; nothing reads it */
+  /* 0x30 */ s32 unusedResetValue;
   /* The spin about the level axis across spinHeading, which the debug display
    * calls SpinX; on the ground it is the speed the spin drives the ball to */
   /* 0x34 */ s32 spinSpeed;

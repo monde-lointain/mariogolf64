@@ -213,7 +213,7 @@ static UNUSED_FUNCTION void ResetOpeningBallSimulations(void) {
     g_BallSimulations[index].velocity[AXIS_X] = rand() & RESET_BALL_SPEED_MASK;
     g_BallSimulations[index].velocity[AXIS_Y] = RESET_BALL_VELOCITY_Y;
     g_BallSimulations[index].velocity[AXIS_Z] = rand() & RESET_BALL_SPEED_MASK;
-    g_BallSimulations[index].unk30 = 0;
+    g_BallSimulations[index].unusedResetValue = 0;
     g_BallSimulations[index].state = BALL_STATE_FLYING;
   }
 }
