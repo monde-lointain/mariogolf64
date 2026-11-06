@@ -1148,11 +1148,15 @@ s32 UpdateChoiceBox(ControllerState* controller) {
  * had it, 61, 5 in shape.
  *
  * Doesn't match: the original halves the chosen label's width in textWidth's
- * register, $s1, where this halves it in $v0. Halving textWidth in place
- * before subtracting it puts the halving in $s1, but schedules it before the
- * cursor's sway, which gives 7 words, all in shape; halving the width as it
- * is measured gives 7 too, subtracting the half within the cursor's sum 9
- * (3), and halving it into halfWidth 17 (7). 6 words differ, none in shape.
+ * register, $s1, where this halves it in $v0; the register oracle matches
+ * the draft when it gives the halving's local quantity $s1. Halving
+ * textWidth in place, before or after the cursor's sway, with /= or as
+ * textWidth / 2, puts the halving in $s1 but schedules its first instruction
+ * into the sway's multiply delay, which gives 7 words, all in shape; halving
+ * the width as it is measured gives 7 too, subtracting the half within the
+ * cursor's sum 9 (3), halving it into halfWidth 17 (7), while subtracting
+ * textWidth /= 2 from cursorX keeps the draft's 6. 6 words differ, none in
+ * shape.
  */
 #ifdef NON_MATCHING
 void DrawChoiceBox(Gfx** displayListHead) {
