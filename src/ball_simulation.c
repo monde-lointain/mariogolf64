@@ -291,7 +291,14 @@ void ResetBallSimulations(void) {
  * gives 743 words (215), both 771 and spinVelocityX alone 749, and
  * spinVelocityZ in StepOpeningBallSimulation's 277. Apart from the magnitudes',
  * this note's counts were measured with GCC's built-in fabsf, which left 672
- * words differing, 206 in shape. 478 words differ, 126 in shape.
+ * words differing, 206 in shape.
+ *
+ * The curve's ratio is set to 0 in an else rather than before its test. The
+ * code at the test is the same either way, but the change takes the draft
+ * from 478 words differing (126 in shape) to 462 (112), and the register
+ * oracle's closest result from 270 words to 254, forcing 76 pseudos for
+ * each. The same form in StepOpeningBallSimulation's curve and lift ratios
+ * leaves 237 words there. 462 words differ, 112 in shape.
  */
 #ifdef NON_MATCHING
 s32 StepBallSimulation(BallSimulation* simulation) {
@@ -1976,9 +1983,10 @@ ROLLED:
         horizontalSpeed = sqrtf((relative[AXIS_X] * relative[AXIS_X]) +
             (relative[AXIS_Z] * relative[AXIS_Z]));
         sideSpinMagnitude = fabsf(sideSpin * SIDE_SPIN_SPEED_SCALE);
-        ratio = 0.0f;
         if (sideSpinMagnitude != 0.0f) {
           ratio = horizontalSpeed / sideSpinMagnitude;
+        } else {
+          ratio = 0.0f;
         }
 
         weight = 1.0f - (fabsf(ratio - 1.0f) * SIDE_SPIN_MISMATCH_FALLOFF);
