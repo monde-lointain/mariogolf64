@@ -504,6 +504,15 @@ void OpenRoundResults(s32 request) {
  * counting the ranks through a pointer to the rank 207 (45); and passing the
  * tournament's course points to CountOpenCourses through a pointer to the field
  * 162 (30).
+ *
+ * In global-alloc, k has 54 references over a live length of 121,
+ * priority 22314, and the stepped address 7 over 12, priority 11666, so k
+ * takes $s1 first. The address would win with k at 31 references or
+ * fewer, or live past 231. Giving AddRoundPoints an index of its own
+ * drops k to 33 references, but over 67, priority 24626, and gives 90
+ * words, none in shape, and the oracle then wants the macro's index in
+ * $s2, which k's sharing it explains. Counting the bet loop, the portrait
+ * loop or both with k gives 62, 60 or 68 words, none in shape.
  */
 void LoadRoundResults(void) {
   EncodedAsset asset;
