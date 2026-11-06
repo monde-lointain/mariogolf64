@@ -1968,8 +1968,8 @@ s32 LaunchOpeningBallSimulation(
         speed * ONE_PER_PERCENT;
   } else {
     /*
-     * In a local, to match: scaling by the constant itself gives 29 words
-     * differing (9 to 11 in shape), against 14
+     * In a local, to match: scaling by the constant itself gives 19 words
+     * differing (11 in shape), against 4 (0)
      */
     s32 percent = CLUB_TEST_SPEED_HALF_PERCENTS;
 
