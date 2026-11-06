@@ -642,11 +642,7 @@ s32 UpdateCharacterSelect(
    */
   u16 column;
   s8 chosenColumn;
-  /*
-   * The cursor's row, then the face's slot, to match: a u16 row variable
-   * gives 56 words differing (8 in shape), and an s8 one 62 (14), against
-   * the draft's 46 (8), measured when the column was an s8
-   */
+  u16 row;
   u16 slot;
   u16 faceCharacter;
   void* faceImage;
@@ -920,22 +916,22 @@ s32 UpdateCharacterSelect(
 
     /* Put back the first frame of the chosen face */
     column = memory->characterColumns[playerIndex];
-    slot = memory->characterRows[playerIndex];
+    row = memory->characterRows[playerIndex];
     playerIndex++;
     f_FaceFrame = 0;
     f_FaceFrameTimer = 0;
     f_UnreadFaceToggle ^= 1;
     if (playerIndex != playerCount) {
-      gridMark = g_CharacterGrid[(s16)slot][(s16)column];
-      faceCharacter = g_CharacterGrid[(s16)slot][(s16)column];
+      gridMark = g_CharacterGrid[(s16)row][(s16)column];
+      faceCharacter = g_CharacterGrid[(s16)row][(s16)column];
       if (gridMark < CHOOSABLE_MARK_LIMIT) {
         slot = faceCharacter + MARKED_CHARACTER_OFFSET;
         faceCharacter = slot;
       } else if (gridMark >= FIRST_IMPORTED_CHARACTER) {
         /*
          * Set in each branch to match: setting slot before the tests, here
-         * and in the other face load, gives 130 words differing (24 in shape)
-         * against the draft's 46 (8)
+         * and in the other face load, gives 94 words differing (20 in shape)
+         * against the draft's 10 (4)
          */
         slot = faceCharacter;
         faceCharacter =
@@ -1022,7 +1018,7 @@ s32 UpdateCharacterSelect(
 
     PlaySound(SOUND_MENU_CANCEL, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
     column = memory->characterColumns[playerIndex];
-    slot = memory->characterRows[playerIndex];
+    row = memory->characterRows[playerIndex];
     if (playerIndex == firstPlayerIndex) {
       StartHudAnimation(HUD_ANIMATION_FAST_FADE_OUT);
       if (g_MenuScreen != MENU_SCREEN_OPPONENT_SELECT) {
@@ -1085,16 +1081,16 @@ s32 UpdateCharacterSelect(
     }
 
     /* Put back the first frame of the face the cursor left */
-    gridMark = g_CharacterGrid[(s16)slot][(s16)column];
-    faceCharacter = g_CharacterGrid[(s16)slot][(s16)column];
+    gridMark = g_CharacterGrid[(s16)row][(s16)column];
+    faceCharacter = g_CharacterGrid[(s16)row][(s16)column];
     if (gridMark < CHOOSABLE_MARK_LIMIT) {
       slot = faceCharacter + MARKED_CHARACTER_OFFSET;
       faceCharacter = slot;
     } else if (gridMark >= FIRST_IMPORTED_CHARACTER) {
       /*
        * Set in each branch to match: setting slot before the tests, here
-       * and in the other face load, gives 130 words differing (24 in shape)
-       * against the draft's 46 (8)
+       * and in the other face load, gives 94 words differing (20 in shape)
+       * against the draft's 10 (4)
        */
       slot = faceCharacter;
       faceCharacter =
