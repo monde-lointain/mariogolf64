@@ -50,12 +50,13 @@
 /* Each Ring Shot course after the first opens after this many more stars */
 #define STARS_PER_RING_SHOT_COURSE 4
 
-/* Where an imported character goes in the character grid; unk0 and unk4 are
- * never read */
+/* Where an imported character goes in the character grid. Holding column and
+ * row as s32s loads them with lw where the original has lh, so the zero
+ * halves before them stay separate fields that nothing reads. */
 typedef struct ImportedCharacterCell {
-  /* 0x0 */ s16 unk0;
+  /* 0x0 */ s16 unusedBeforeColumn;
   /* 0x2 */ s16 column;
-  /* 0x4 */ s16 unk4;
+  /* 0x4 */ s16 unusedBeforeRow;
   /* 0x6 */ s16 row;
 } ImportedCharacterCell; /* size = 0x8 */
 
