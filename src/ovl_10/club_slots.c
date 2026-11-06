@@ -169,6 +169,9 @@
 #define SHINE_DELAY 5
 #define SHINE_START_TIME 16
 #define SHINE_SPEED 18
+/* The primitive depths that the logo and its shine are drawn at */
+#define LOGO_PRIM_DEPTH 0x3FFF
+#define SHINE_PRIM_DEPTH 0x4027
 /* The buffer the logo image is read into */
 #define LOGO_IMAGE_BUFFER_SIZE 0x4A20
 
@@ -1164,7 +1167,7 @@ void DrawClubSlotsLogo(
 
   gDPPipeSync(gfx++);
   gDPSetDepthSource(gfx++, G_ZS_PRIM);
-  gDPSetPrimDepth(gfx++, 16383, 0);
+  gDPSetPrimDepth(gfx++, LOGO_PRIM_DEPTH, 0);
   gDPSetCombineLERP(gfx++, 0, 0, 0, TEXEL0, 0, 1, TEXEL0, 1, 0, 0, 0, TEXEL0, 0,
       1, TEXEL0, 1);
   gDPPipeSync(gfx++);
@@ -1189,7 +1192,7 @@ void DrawClubSlotsLogo(
     gDPPipeSync(gfx++);
   }
 
-  gDPSetPrimDepth(gfx++, 16423, 0);
+  gDPSetPrimDepth(gfx++, SHINE_PRIM_DEPTH, 0);
   gDPPipeSync(gfx++);
   gDPSetRenderMode(gfx++, G_RM_ZB_XLU_SURF, G_RM_ZB_XLU_SURF2);
   gDPPipeSync(gfx++);
