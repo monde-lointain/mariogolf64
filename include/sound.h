@@ -323,10 +323,10 @@ enum Sound {
   SOUND_AMBIENT_ALTERNATING_SECOND,
   /*
    * SOUND_MARIO_ITS_A_ME and SOUND_UNK417 play with the opening's Yoshi, where
-   * SOUND_UNK392 and SOUND_UNK418 play with its Donkey Kong
+   * SOUND_HELLO_BALL and SOUND_UNK418 play with its Donkey Kong
    */
   SOUND_MARIO_ITS_A_ME = 0x187,
-  SOUND_UNK392,
+  SOUND_HELLO_BALL,
   /* SOUND_UNK393 and SOUND_UNK394 each play once in the opening */
   SOUND_UNK393,
   SOUND_UNK394,
