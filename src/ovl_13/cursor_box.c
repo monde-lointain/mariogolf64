@@ -63,10 +63,12 @@ void LoadCursorBox(void* image) {
   f_CursorBoxVertices[1].v.ob[AXIS_Y] = -height / 2;
   f_CursorBoxVertices[2].v.ob[AXIS_Y] = -height / 2;
   f_CursorBoxVertices[3].v.ob[AXIS_Y] = height / 2;
-  f_CursorBoxVertices[2].v.tc[TEXTURE_AXIS_S] = width << 6;
-  f_CursorBoxVertices[3].v.tc[TEXTURE_AXIS_S] = width << 6;
-  f_CursorBoxVertices[1].v.tc[TEXTURE_AXIS_T] = height << 6;
-  f_CursorBoxVertices[2].v.tc[TEXTURE_AXIS_T] = height << 6;
+  f_CursorBoxVertices[2].v.tc[TEXTURE_AXIS_S] = HalfScaleTexelCoordinate(width);
+  f_CursorBoxVertices[3].v.tc[TEXTURE_AXIS_S] = HalfScaleTexelCoordinate(width);
+  f_CursorBoxVertices[1].v.tc[TEXTURE_AXIS_T] =
+      HalfScaleTexelCoordinate(height);
+  f_CursorBoxVertices[2].v.tc[TEXTURE_AXIS_T] =
+      HalfScaleTexelCoordinate(height);
 }
 
 /*

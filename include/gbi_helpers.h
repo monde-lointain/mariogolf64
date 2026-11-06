@@ -9,6 +9,11 @@
  */
 #define TEXTURE_SCALE_HALF 0x8000
 #define TEXTURE_SCALE_FULL 0xFFFF
+/*
+ * A texel position as a vertex's texture coordinate, in 10.5 fixed point,
+ * doubled for TEXTURE_SCALE_HALF
+ */
+#define HalfScaleTexelCoordinate(texel) ((texel) << 6)
 
 /*
  * The texture coordinate mask that wraps or mirrors a texture every size
