@@ -1048,6 +1048,15 @@ void DrawNamePlate(Gfx** displayListHead, s32 centerX, s32 centerY) {
  * where the original loads 88 into $t3, and the original halves both sizes
  * just before the call. Set just before the call instead, the height's half,
  * the width's or both give 102 words (6).
+ *
+ * The first hole test reads holeIndex first and the second reads hole first,
+ * as the original's bne operands show for each: written hole first, the
+ * first test's bne takes its registers in the other order and the draft
+ * differs in 102 words; written holeIndex first, the second test's does and
+ * it differs in 100 words with other code than the draft's. The register
+ * oracle's closest result is still 96 words, forcing 2 pseudos, and setting
+ * either half size or both just before the call gives 100 words (6). 100
+ * words differ, 6 in shape.
  */
 #ifdef NON_MATCHING
 void DrawRingShotStars(
@@ -1111,7 +1120,7 @@ void DrawRingShotStars(
       G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
   gDPPipeSync(gfx++);
   for (hole = 0; hole < RING_SHOT_HOLE_COUNT; hole++) {
-    if (hole == memory->holeIndex) {
+    if (memory->holeIndex == hole) {
       width = STAR_GROWTH;
       height = STAR_GROWTH;
       left = (hole * STAR_SPACING) + STARS_LEFT;
