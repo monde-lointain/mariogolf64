@@ -335,7 +335,6 @@ static f32 f_CodeCursorPhases[MENU_CURSOR_VERTEX_COUNT] = {
 
 void DrawClubWindow(Gfx** displayListHead, s32 width, s32 height, s32 centerX,
     s32 centerY, s32 okTextShown, s32 chosenButton, s32 windowStyle);
-void DrawClubNumber(Gfx** displayListHead, s32 x, s32 top, s32 number);
 void DrawCodePanels(Gfx** displayListHead);
 void DrawCodeHand(Gfx** displayListHead);
 void DrawCodeKeys(Gfx** displayListHead);

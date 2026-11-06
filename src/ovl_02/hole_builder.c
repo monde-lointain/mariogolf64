@@ -633,11 +633,6 @@ static f32 f_HeightStepScales[HEIGHT_STEP_SCALE_COUNT] = {
     TEXEL_HEIGHT_ONE / 31,
 };
 
-void BuildGroundTileDisplayList(
-    s32 column, s32 row, Gfx** gfxCursor, Vtx** vertexCursor);
-
-void LoadCodeMap(char* path);
-void EncodeCodeMap(void);
 void CleanCodeMap(void);
 void PaintGroundTiles(void);
 void ClearHolePoints(void);

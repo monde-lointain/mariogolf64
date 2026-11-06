@@ -241,7 +241,6 @@ typedef enum LogoLetterState {
 /* f_OpeningShotDashCount's starting value, and the most it can be */
 #define OPENING_SHOT_MAX_DASH_COUNT 200
 
-void DrawOpeningShotPath(CameraMatrices* matrices);
 void DrawNameLogos(Gfx** displayListHead);
 void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices);
 void DrawOpeningImpactLines(Gfx** displayListHead);

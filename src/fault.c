@@ -49,7 +49,6 @@ static OSMesgQueue f_FaultMessageQueue;
 
 OSThread* __osGetCurrFaultedThread(void);
 void RunFaultThread(void* arg);
-void PrintFaultText(void);
 void PrintFaultContext(OSThread* thread);
 void PrintRegisterFields(u32 value, char* name, RegisterFieldValue* fields);
 

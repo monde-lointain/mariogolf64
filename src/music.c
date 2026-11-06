@@ -43,8 +43,6 @@ void RunAudioTask(musTask* task);
 void StartMusicPlayer(musConfig* config);
 void AllocSongBuffer(s32 size);
 void AllocSoundEffectBuffer(s32 size);
-void SetAudioEventCallback(AudioEventCallback callback);
-void HandleAudioReset(NUScMsg type, s32 frame);
 
 FILE_STATIC NUScTask f_AudioTask;
 FILE_STATIC OSMesgQueue f_TaskDoneQueue;

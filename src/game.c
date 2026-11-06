@@ -222,9 +222,6 @@ Vp g_Viewports[VIEWPORT_COUNT] = {
     QUARTER_SCREEN_VIEWPORT,
 };
 
-void DrawSpinEffect(Gfx** displayListHead, CameraView* view);
-void DrawSavedFrameEffect(Gfx** displayListHead, CameraView* view);
-
 /* Resets the model view before each view's menu backdrop and scene */
 static Mtx f_IdentityMatrix;
 

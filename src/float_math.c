@@ -33,7 +33,6 @@ typedef union {
 #define ONE_WORD 0x3F800000
 
 float atanf(float x);
-float fabsf(float x);
 
 /*
  * acos and atan2 split pi into a float and the error left over, so that

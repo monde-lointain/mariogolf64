@@ -163,7 +163,6 @@ static s32 f_PinFlagWaveFrame = 0;
 /* Not static: the original left it to the linker's common block */
 u8 g_UnusedBytesAfterFlagWaveFrame[4];
 
-void DrawShotLabels(Gfx** displayListHead);
 /*
  * Without a prototype, as the calls pass x and y as they are rather than as
  * s16s. Including text.h would bring in its prototype.

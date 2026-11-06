@@ -234,7 +234,6 @@ static Vec3 f_LastRainEye = {
 static s32 f_ShownBadgeCount = 0;
 static Boolean f_IsBadgeCountShown = FALSE;
 static s32 f_BadgeCountFrame = 0;
-void ResetRaindrop(Raindrop* drop);
 void StartRain(void);
 
 #define RIPPLE_IMAGE_ASSET 0x6B0

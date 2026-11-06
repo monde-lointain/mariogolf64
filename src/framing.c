@@ -40,8 +40,6 @@ static Radians f_FramingPitch;
 static Radians f_FramingYaw;
 static Mat4 f_FramingRotation;
 
-void TransformPoint(Mat4 mf, Vec3 point, Vec3 result);
-
 FILE_STATIC Vec3 f_FramedEye;
 FILE_STATIC Vec3 f_FramedLookAt;
 

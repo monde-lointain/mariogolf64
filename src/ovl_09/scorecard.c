@@ -81,8 +81,6 @@
 
 void DrawScorecardTable(Gfx** displayListHead, s32 pageCount, s32 page);
 
-void ScrollLeaderboard(u16 buttons);
-
 void SetScorecardState(s32 state);
 
 #define TABLE_IMAGE_ASSET 0x68F
@@ -981,8 +979,6 @@ void AnimateScorecard(void) {
       break;
   }
 }
-
-void TurnScorecardPage(u16 buttons);
 
 /*
  * Left and right on the control pad turn the pages, round from the last to the

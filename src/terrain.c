@@ -282,9 +282,6 @@ static s8 f_CellSearchOffsets[GROUND_TILE_POINT_SPAN] = {0, 1, 3, 2};
 
 static s32 f_SceneMenuSelection;
 
-void InitGridVertex(s32 column, s32 row, s32 height, u8 shade);
-void SetGridVertexHeight(s32 column, s32 row, s32 height);
-void SetGridVertex(s32 column, s32 row, Vtx_t* point);
 /* The flags panel shows FLAG_PANEL_ROW_COUNT rows of FLAG_PANEL_COLUMN_COUNT
  * flags */
 #define FLAG_PANEL_ROW_COUNT 8
@@ -309,7 +306,6 @@ void SetGridVertex(s32 column, s32 row, Vtx_t* point);
  * buffer this big */
 #define FLAG_PANEL_TEXT_SIZE 0x10
 
-void BuildTileMidpoints(Vtx* midpoints, s32 tileColumn, s32 tileRow);
 s32 GetTerrainHeight(s32 x, s32 z);
 
 /* The byte in the terrain codes that holds a code in a block of cells */

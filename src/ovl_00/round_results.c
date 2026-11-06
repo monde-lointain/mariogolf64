@@ -253,9 +253,7 @@ extern const char f_NoPointsText[];
 
 void FreeRoundResults(void);
 void LoadRoundResults(void);
-void DrawCourseResultsNotice(Gfx** displayListHead);
 void DrawResultsBanner(Gfx** displayListHead);
-void DrawCharacterResultsNotice(Gfx** displayListHead);
 s32 UpdateTournamentResults(ControllerState* controller);
 s32 ShowScorePassword(ControllerState* controller);
 s32 UpdateCoursePointsResults(ControllerState* controller);
@@ -1200,8 +1198,6 @@ void DrawPlaceIcon(Gfx** displayListHead, s32 x, s32 y, s32 place) {
       G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   *displayListHead = gfx;
 }
-
-void DrawRank(Gfx** displayListHead, s32 x, s32 y, s32 rank);
 
 /* Ranks from this one draw a banner instead */
 #define RANK_BANNER 100

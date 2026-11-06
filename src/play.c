@@ -183,8 +183,6 @@ static s32 f_GroundTimingRow = 0;
 
 static u8 f_GroundNoiseTexels[GROUND_NOISE_SIZE * GROUND_NOISE_SIZE];
 
-void SetUpPlayers(void);
-
 /*
  * Whether play's hole intro, flyover and results move on without A, as under
  * GAME_FLAG_FAST_AUTOPLAY or GAME_FLAG_AUTOPLAY

@@ -469,8 +469,6 @@ static s32 f_UnusedWordAfterFramingAngles UNUSED = 0;
 
 void PlaceShotCamera(void);
 void TurnAim(s32 turnsAltHeading);
-Boolean HasNoRingsLeft(Player* player);
-void RecordRingShotClear(s32 playerIndex);
 
 static Mtx f_PuttPreviewIdentity; /* An identity matrix for the putt preview */
 /*

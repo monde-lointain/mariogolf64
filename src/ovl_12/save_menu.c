@@ -232,7 +232,6 @@ enum ModeName {
 
 void SetTextSlot(s32 x, s32 y, s32 messageId, s32 fontSize, s32 slot,
     TextFlags flags, u8 red, u8 green, u8 blue, u8 alpha);
-void CloseControlsScreen(void);
 void SetUpTextDrawing(Gfx** displayListHead);
 void DrawLargeTextSlot(Gfx** displayListHead, s32 slot);
 void SetUpGradientTextDrawing(Gfx** displayListHead, s32);

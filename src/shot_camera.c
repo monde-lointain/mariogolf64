@@ -239,8 +239,6 @@ s32 IsSimpleCameraChosen();
 #endif
 void ChooseFlightCameraKind(void);
 void PlaceFlightCamera(s32 step);
-void EaseLookAtBelowBall(f32 drop);
-void EaseLookAtPoint(Radians yaw);
 
 /* Unused; the original has it */
 static const char f_UnusedFloatFormat[] = "            %f";

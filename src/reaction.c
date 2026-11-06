@@ -196,18 +196,6 @@ static u8 f_UnusedBufferAfterSpotRoughness[32] UNUSED;
 
 static s8 f_HasReactionSpot;
 
-void FrameMarioReaction(u32 slotIndex, CameraView* view);
-void FrameWarioReaction(u32 slotIndex, CameraView* view);
-void FrameBabyMarioReaction(u32 slotIndex, CameraView* view);
-void FrameYoshiReaction(u32 slotIndex, CameraView* view);
-void FrameBowserReaction(u32 slotIndex, CameraView* view);
-void FrameAzaleaReaction(u32 slotIndex, CameraView* view);
-void FrameDonkeyKongReaction(u32 slotIndex, CameraView* view);
-void FrameReaction(u32 slotIndex, CameraView* view);
-void FramePeachReaction(u32 slotIndex, CameraView* view);
-void FrameSherryReaction(u32 slotIndex, CameraView* view);
-void FrameKidReaction(u32 slotIndex, CameraView* view);
-
 /*
  * Whether the reaction views drop the eye and raise what they look at.
  * It is a macro, as an inline function compiles differently from the

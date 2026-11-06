@@ -219,9 +219,7 @@ enum SpiralDirection {
 #define TILE_VERTEX_COUNT 4
 
 void CaptureHudAnimationFrame(void);
-void DrawTileAnimation(void);
 void DrawSliceAnimation(void);
-void DrawSpiralAnimation(Gfx** displayListHead);
 
 /* f_SkyHorizonColor's starting value in each channel */
 #define SKY_HORIZON_LEVEL 63

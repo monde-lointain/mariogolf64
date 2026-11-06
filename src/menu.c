@@ -161,7 +161,6 @@ typedef struct GridCell {
 
 s32 ReadSaveCopies(SaveData* save, u8 isInSram);
 s32 WriteSaveCopies(SaveData* save, u8 isInSram);
-void SyncSaveOptions(SaveData* save, Boolean isWrite, s32 readResult);
 
 s8 g_LoadedMenuScreen = NO_MENU_SCREEN;
 s8 g_PlayerControllerIndices[MAX_PLAYER_COUNT] = {UNCHOSEN_CONTROLLER,

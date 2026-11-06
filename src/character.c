@@ -173,9 +173,6 @@ static inline Boolean FindUsedSlot(u32 slotIndex, CharacterSlot** slot) {
 #define VIEW_DISTANCE 61440.0f
 #define VIEW_DROP 15360.0f
 
-void AdvanceTextureAnimations(
-    u32 slotIndex, s32 unused, s32 frameLastDigit, s32 frame);
-
 /* How a slot starts out when LoadCharacter loads it */
 #define LOADED_ALPHA 0x60
 #define LOADED_RANDOM_TEXTURE_ANIMATION_DELAY 27

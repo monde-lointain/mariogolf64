@@ -153,9 +153,6 @@ s32 g_HoleTimeHundredths[COURSE_HOLE_COUNT];
 s32 g_HoleTimeMinutes[COURSE_HOLE_COUNT];
 s32 g_HoleTimeSeconds[COURSE_HOLE_COUNT];
 
-void ShrinkMiniGolfHolePoints(void);
-NO_RESULT ChooseHoleConditions(void);
-
 /*
  * Decodes the compressed words from stream->input to stream->inputEnd onto
  * the end of the output. Returns the output's size in bytes once the stream

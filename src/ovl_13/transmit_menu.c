@@ -491,13 +491,9 @@ enum ExperienceWriteResult {
  */
 extern const char f_WriteSumFormat[];
 
-void UpdateBringCharacters(void);
 s32 ReadCartridgeCharacters(void);
 void BringOverCharacter(s32 listedIndex, s32 slot);
 void ListPresentCharacters(void);
-void UpdateSendStatus(void);
-void UpdateSendExperience(void);
-s32 HaveAllRumblePaks(void);
 void ClearCartridgeCharacters(void);
 void ResetSendStatus(void);
 void ResetSendExperience(void);
@@ -542,8 +538,6 @@ s32 GetNoticeState(void);
  */
 extern void* g_PressingHandImage;
 
-void DrawCharacterStats(Gfx** displayListHead, GameBoyCharacter* character,
-    GameBoyTransfer* transfer);
 void DrawImportedFaces(Gfx** displayListHead, GameBoyTransfer* transfer);
 
 s32 OpenGameBoyPak(s32 port, OSGbpakId* header, NUContPakFile* file);

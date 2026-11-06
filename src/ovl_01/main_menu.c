@@ -350,7 +350,6 @@ s16 GetChosenBestShot(void);
 #else
 s32 GetChosenBestShot(void);
 #endif
-s32 UpdateViewerCharacter(s32 unusedSetting, s32 playerNumber);
 void DrawNarrowMenuBoard(Gfx** displayListHead);
 void DrawLargeMenuBanner(Gfx** displayListHead);
 void DrawMenuTitleScreen(Gfx** displayListHead);
