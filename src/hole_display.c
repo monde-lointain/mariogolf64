@@ -42,7 +42,6 @@
 #define TITLE_WIND_SPEED_STEP 6000
 #define TITLE_LIGHT_PITCH 0x1000
 #define TITLE_LIGHT_YAW 0x6000
-#define GAME_FLAG_UNK7 0x07
 
 /* Sun.imageKind values: which images InitSkyColors loads */
 enum SkyImageKind {
@@ -697,7 +696,7 @@ void SetUpTitleHole(void) {
   g_HoleSetup.conditions.sceneColorIndex = SCENE_COLOR_INDEX_DRIVING_RANGE;
   g_HoleSetup.conditions.lightPitch = TITLE_LIGHT_PITCH;
   g_HoleSetup.conditions.lightYaw = TITLE_LIGHT_YAW;
-  SetGameFlag(GAME_FLAG_UNK7);
+  SetGameFlag(GAME_FLAG_HOLE_LOADED);
   g_GameState.playerCount = 1;
   StopLoaderThread();
   StartLoaderThread();

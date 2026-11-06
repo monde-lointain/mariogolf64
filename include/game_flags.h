@@ -5,8 +5,8 @@
 
 /*
  * A set of 256 switches, numbered from 0, which boot clears. Game code
- * sets and clears some of them as it runs, such as 0x07 and UNK1E. A flag
- * editor in the code at 1B4A0 sets or clears any of them; the flags that
+ * sets and clears some of them as it runs, such as HOLE_LOADED and LOADED_PLAY.
+ * A flag editor in the code at 1B4A0 sets or clears any of them; the flags that
  * nothing else sets, such as HIDE_BILLBOARDS, are debugging features.
  */
 
