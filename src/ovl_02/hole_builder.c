@@ -2075,18 +2075,16 @@ static inline void SetCode(s32 column, s32 row, u8 code) {
  */
 static inline void FillCodeGap(
     s32 column, s32 row, s32 columnStep, s32 rowStep) {
-  u8 code = GetCode(column, row);
-  u8 previousCode = GetCode(column - columnStep, row - rowStep);
+  Boolean differsFromPrevious =
+      GetCode(column, row) != GetCode(column - columnStep, row - rowStep);
+  Boolean neighborsMatch = GetCode(column - columnStep, row - rowStep) ==
+      GetCode(column + columnStep, row + rowStep);
 
   /*
-   * The second read of the previous code is there to match: testing
-   * previousCode against the next code gives CleanCodeMap 118 words
-   * differing, 18 in shape, against 88, 12; also setting nextCode gives 144
+   * The original ands the two tests' results without a branch; && gives
+   * CleanCodeMap 88 words differing, 16 in shape, against 88 (12)
    */
-  u8 rereadPreviousCode = GetCode(column - columnStep, row - rowStep);
-  u8 nextCode = GetCode(column + columnStep, row + rowStep);
-
-  if (code != previousCode && rereadPreviousCode == nextCode) {
+  if (differsFromPrevious & neighborsMatch) {
     SetCode(column, row, GetCode(column + columnStep, row + rowStep));
   }
 }
