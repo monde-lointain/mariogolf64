@@ -54,10 +54,10 @@ typedef struct GameBoyCharacter {
   /* 0x19 */ u8 character;
   /* 0x1A */ u8 isLefty; /* Plays left-handed, as the Game Boy save says */
   /* 0x1B */ u8 level;
-  /* 0x1C */ s8 unk1C;
+  /* 0x1C */ s8 clubPitch; /* As ClubSetStats' pitch */
   /* 0x1D */ s8
       shotCurve; /* Positive for a draw, negative for a fade, 0 for straight */
-  /* 0x1E */ u8 unk1E;
+  /* 0x1E */ u8 lieRatingLevel; /* As ClubSetStats' */
   /* 0x1F */ u8 mishitResistance; /* As ClubSetStats' */
   /* 0x20 */ s8 ballType; /* A GameBoyBallType */
   /* 0x24 */ s32 unk24;

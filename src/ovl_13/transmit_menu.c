@@ -397,9 +397,9 @@ typedef struct StatusData {
 #define DATA_LEVEL_OFFSET 0x12
 /* A little-endian halfword */
 #define DATA_DRIVE_DISTANCE_OFFSET 0x1A
-#define DATA_UNK1C_OFFSET 0x1C
+#define DATA_CLUB_PITCH_OFFSET 0x1C
 #define DATA_SHOT_CURVE_OFFSET 0x1D
-#define DATA_UNK1E_OFFSET 0x1E
+#define DATA_LIE_RATING_LEVEL_OFFSET 0x1E
 #define DATA_MISHIT_RESISTANCE_OFFSET 0x1F
 /* Three little-endian bytes */
 #define DATA_UNK24_OFFSET 0x26
@@ -1499,9 +1499,9 @@ void DecodeCartridgeCharacter(
   }
 
   character->level = characterData[DATA_LEVEL_OFFSET];
-  character->unk1C = characterData[DATA_UNK1C_OFFSET];
+  character->clubPitch = characterData[DATA_CLUB_PITCH_OFFSET];
   character->shotCurve = characterData[DATA_SHOT_CURVE_OFFSET];
-  character->unk1E = characterData[DATA_UNK1E_OFFSET];
+  character->lieRatingLevel = characterData[DATA_LIE_RATING_LEVEL_OFFSET];
   character->mishitResistance = characterData[DATA_MISHIT_RESISTANCE_OFFSET];
   if (IsGameFlagSet(GAME_FLAG_BALL_TYPE_1)) {
     character->ballType = GAME_BOY_BALL_TYPE_MARIO;
@@ -1529,7 +1529,7 @@ void DecodeCartridgeCharacter(
   character->experience = 0;
   character->driveDistance = characterData[DATA_DRIVE_DISTANCE_OFFSET] |
       (characterData[DATA_DRIVE_DISTANCE_OFFSET + 1] << BITS_PER_BYTE);
-  osSyncPrintf("%d, %d %d\n", character->experience, character->unk1C,
+  osSyncPrintf("%d, %d %d\n", character->experience, character->clubPitch,
       character->shotCurve);
   for (index = 0; index != GAME_BOY_CHARACTER_UNK3C_COUNT; index++) {
     character->unk3C[index].unk0 =
