@@ -34,6 +34,17 @@
 /* The largest value of an 8-bit color channel */
 #define COLOR_CHANNEL_MAX 0xFF
 
+/* Sets a directional light's color and its copy to the same red, green
+ * and blue */
+static inline void SetLightColor(Light* light, s32 red, s32 green, s32 blue) {
+  light->l.col[0] = red;
+  light->l.col[1] = green;
+  light->l.col[2] = blue;
+  light->l.colc[0] = red;
+  light->l.colc[1] = green;
+  light->l.colc[2] = blue;
+}
+
 /* The ends of an 8-bit color's alpha */
 #define TRANSPARENT_ALPHA 0
 #define OPAQUE_ALPHA 0xFF

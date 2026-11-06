@@ -14,6 +14,7 @@
 #include "current_shot.h"
 #include "debug_text.h"
 #include "game_flags.h"
+#include "gbi_helpers.h"
 #include "hole_triangles.h"
 #include "libc.h"
 #include "math_util.h"
@@ -719,12 +720,7 @@ void FrameMarioReaction(u32 slotIndex, CameraView* view) {
         lightDirection[AXIS_Z] *= length;
         f_HasReactionLight = TRUE;
         SetCharacterLighting(slotIndex, CHARACTER_LIGHTING_SCENE_THIRD);
-        f_ReactionLights.l[2].l.col[0] = 0xFF;
-        f_ReactionLights.l[2].l.col[1] = 0xFF;
-        f_ReactionLights.l[2].l.col[2] = 0x7F;
-        f_ReactionLights.l[2].l.colc[0] = 0xFF;
-        f_ReactionLights.l[2].l.colc[1] = 0xFF;
-        f_ReactionLights.l[2].l.colc[2] = 0x7F;
+        SetLightColor(&f_ReactionLights.l[2], 0xFF, 0xFF, 0x7F);
         f_ReactionLights.l[2].l.dir[0] = lightDirection[AXIS_X];
         f_ReactionLights.l[2].l.dir[1] = lightDirection[AXIS_Y];
         f_ReactionLights.l[2].l.dir[2] = lightDirection[AXIS_Z];
