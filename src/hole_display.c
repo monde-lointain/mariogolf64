@@ -3137,6 +3137,11 @@ INCLUDE_ASM("asm/nonmatchings/hole_display", DrawTurnAwayAnimation);
  * adding 64 to it. Giving the copy loops of one or more of the four kinds
  * counters of their own, for the column, the row or both, gives 95 to 153
  * words, 19 in shape, in each of the 127 ways. 95 words differ, 19 in shape.
+ *
+ * Counting the slice copy's columns with tileRow, which would give it a
+ * second meaning, gives 87 words differing, 19 in shape, but the register
+ * oracle's closest rises from 66 words forcing 14 pseudos to 72 forcing 12,
+ * so the gain is in the registers alone.
  */
 #ifdef NON_MATCHING
 void CaptureHudAnimationFrame(void) {
