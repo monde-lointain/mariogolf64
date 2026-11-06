@@ -1159,6 +1159,8 @@ enum DrawMode {
 #define MAP_ORTHO_HALF_WIDTH 160.0f
 #define MAP_ORTHO_HALF_HEIGHT 120.0f
 #define MAP_ORTHO_FAR_CLIP 20000.0f
+/* How far the isometric and top-down maps push the scene into their view */
+#define MAP_ORTHO_PLACEMENT_DEPTH 1000.0f
 #define MAP_ISOMETRIC_OFFSET_X 5000.0f
 #define MAP_ISOMETRIC_OFFSET_Y 4000.0f
 #define MAP_TOP_DOWN_HEIGHT 4000.0f
@@ -1472,8 +1474,9 @@ s32 DrawGame(void) {
             eyeY - g_MapCamera.view.eye[1], eyeZ - g_MapCamera.view.eye[2]);
         guOrtho(&matrices->perspective, -MAP_ORTHO_HALF_WIDTH,
             MAP_ORTHO_HALF_WIDTH, -MAP_ORTHO_HALF_HEIGHT, MAP_ORTHO_HALF_HEIGHT,
-            10.0f, MAP_ORTHO_FAR_CLIP, 8.0f);
-        guTranslate(&matrices->placement, 0.0f, 0.0f, -1000.0f);
+            MAP_NEAR_CLIP, MAP_ORTHO_FAR_CLIP, 8.0f);
+        guTranslate(
+            &matrices->placement, 0.0f, 0.0f, -MAP_ORTHO_PLACEMENT_DEPTH);
         terrainStyle = TERRAIN_STYLE_MAP;
         ScaleMatrix(&matrices->viewing, g_MapCamera.view.zoom,
             g_MapCamera.view.zoom, 1.0f);
@@ -1503,8 +1506,9 @@ s32 DrawGame(void) {
             topDownEyeZ - g_MapCamera.view.eye[2]);
         guOrtho(&matrices->perspective, -MAP_ORTHO_HALF_WIDTH,
             MAP_ORTHO_HALF_WIDTH, -MAP_ORTHO_HALF_HEIGHT, MAP_ORTHO_HALF_HEIGHT,
-            10.0f, MAP_ORTHO_FAR_CLIP, 8.0f);
-        guTranslate(&matrices->placement, 0.0f, 0.0f, -1000.0f);
+            MAP_NEAR_CLIP, MAP_ORTHO_FAR_CLIP, 8.0f);
+        guTranslate(
+            &matrices->placement, 0.0f, 0.0f, -MAP_ORTHO_PLACEMENT_DEPTH);
         ScaleMatrix(&matrices->viewing, g_MapCamera.view.zoom,
             g_MapCamera.view.zoom, 1.0f);
         LoadProjection();
