@@ -4025,9 +4025,9 @@ void ShadeGroundTiles(void) {
             fade = *heights * HEIGHT_FADE_SCALE;
             /*
              * Each limited branch clamps the fade itself, to match: clamping
-             * once, after a test that leaves the disabled fade out, gives 135
-             * differing words against 109, and giving the disabled fade a
-             * zero limit 115
+             * once, after a test that leaves the disabled fade out, gives 160
+             * differing words (30 in shape) against 132 (14), and giving the
+             * disabled fade a zero limit 138 (20)
              */
             if (isFadeUnlimited) {
               fadeLimit = HEIGHT_FADE_FULL;
