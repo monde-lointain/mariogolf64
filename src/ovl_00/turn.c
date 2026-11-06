@@ -2999,8 +2999,8 @@ void ShowHoleOutBanner(s32 playerIndex) {
  * in place, the ball placement gave 90 words (48 in shape) against 146 (78) as
  * a helper.
  *
- * Doesn't match: 51 words differ, 29 in shape, spread through the routine's
- * states; the register oracle's closest result is 42 words with 3 pseudos
+ * Doesn't match: 41 words differ, 29 in shape, spread through the routine's
+ * states; the register oracle's closest result is 34 words with 1 pseudo
  * forced, so most of the difference is in the code. The counts in the
  * paragraphs after the next were measured when 454 words differed, 184 in
  * shape.
@@ -3150,8 +3150,14 @@ void ShowHoleOutBanner(s32 playerIndex) {
  * gives 55 words (31 in shape), the birdie first alone 66 (34), and with
  * the local, the birdie in the middle or last 55. With the birdie first,
  * the local declared for the whole state gives 86 words (48 in shape),
- * and set after the hole-in-one test 66 (34). 51 words differ, 29 in
- * shape.
+ * and set after the hole-in-one test 66 (34).
+ *
+ * The wood swing's trail test puts the event frame first, as a permuter
+ * run found, where the reaction hold's test puts the player's frame count
+ * first. That takes the draft from 51 words to 41, the 29 in shape
+ * staying, and the register oracle's closest result, with today's oracle,
+ * from 36 words with 6 pseudos forced to 34 with 1. 41 words differ, 29
+ * in shape.
  */
 #ifdef NON_MATCHING
 /* Whether the stopwatches run in a player state: from aiming to the flight */
@@ -4460,8 +4466,8 @@ void UpdateTurns(void) {
         break;
       }
       case PLAYER_STATE_SWINGING:
-        if (f_StateFrameCounts[playerIndex] ==
-                f_StateEventFrame - WOOD_SWING_TRAIL_LEAD_FRAMES &&
+        if (f_StateEventFrame - WOOD_SWING_TRAIL_LEAD_FRAMES ==
+                f_StateFrameCounts[playerIndex] &&
             GetClub(g_Players[playerIndex].clubs[g_CurrentShot.clubSlot])
                     ->kind == CLUB_KIND_WOOD) {
           if (g_CurrentShot.shotMode == SHOT_MODE_NORMAL) {
