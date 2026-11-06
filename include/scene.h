@@ -47,12 +47,18 @@ enum Scene {
   SCENE_MENU = 14,
   SCENE_TRIANGLES = 15,
   SCENE_RINGS = 16,
-  SCENE_UNK17 = 17,
-  SCENE_UNK18 = 18,
+  /*
+   * No code enters SCENE_UNUSED_BLANK_A, SCENE_UNUSED_BLANK_B,
+   * SCENE_UNUSED_UNDRAWN_A or SCENE_UNUSED_UNDRAWN_B. DrawGame alone names
+   * them, filling the screen for the blank ones and drawing nothing for the
+   * undrawn ones.
+   */
+  SCENE_UNUSED_BLANK_A = 17,
+  SCENE_UNUSED_BLANK_B = 18,
   SCENE_OPENING = 19, /* The opening movie */
-  SCENE_UNK20 = 20,
+  SCENE_UNUSED_UNDRAWN_A = 20,
   SCENE_TITLE_SCREEN = 21,
-  SCENE_UNK22 = 22,
+  SCENE_UNUSED_UNDRAWN_B = 22,
   /* The current scene while UpdateOverlays swaps the scene's modules */
   SCENE_SWAPPING_MODULES = 25,
   /* Waits for A or Start, then enters the boot logos; no code found enters it

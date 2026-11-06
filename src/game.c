@@ -1331,13 +1331,13 @@ s32 DrawGame(void) {
     case SCENE_TRANSMIT:
       drawMode = DRAW_MODE_TRANSMIT;
       break;
-    case SCENE_UNK20:
-    case SCENE_UNK22:
+    case SCENE_UNUSED_UNDRAWN_A:
+    case SCENE_UNUSED_UNDRAWN_B:
       drawMode = DRAW_MODE_NOTHING;
       break;
     case SCENE_FLAG_PANEL:
-    case SCENE_UNK17:
-    case SCENE_UNK18:
+    case SCENE_UNUSED_BLANK_A:
+    case SCENE_UNUSED_BLANK_B:
     case SCENE_SWAPPING_MODULES:
       drawMode = DRAW_MODE_BLANK;
       break;
