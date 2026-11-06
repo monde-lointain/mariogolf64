@@ -312,9 +312,9 @@ void ResetBallSimulations(void) {
  *
  * The original divides the slope's x and z by the roll speed before the
  * slope steering's dot product, where the draft divides each inside its
- * steering update. Dividing them first into direction locals gives 458 words
- * (112 in shape), and the register oracle's closest result stays at 240
- * words but forces 79 pseudos. 450 words differ, 112 in shape.
+ * steering update. Dividing them first into direction locals gives 458
+ * words (112 in shape), and the register oracle's closest result stays at
+ * 240 words but forces 79 pseudos. 450 words differ, 112 in shape.
  */
 #ifdef NON_MATCHING
 s32 StepBallSimulation(BallSimulation* simulation) {

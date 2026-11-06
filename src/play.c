@@ -247,9 +247,9 @@ s32 MarkUsableClubs(s32 unused UNUSED, s16* clubs, s8* isUsable) {
 }
 
 /*
- * The height that the aim camera keeps above at (x, z): the ground or water
- * there, or outside Mini-Golf where that is above zero, the ball's height
- * (at least zero)
+ * The height that the aim camera keeps above at (x, z): the ground or
+ * water there, or outside Mini-Golf where that is above zero, the ball's
+ * height (at least zero)
  */
 s32 GetAimCameraGround(s32 x, s32 z) {
   s32 height = GetGroundOrWaterHeight(x, z);

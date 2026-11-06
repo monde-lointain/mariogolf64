@@ -1666,9 +1666,10 @@ s32 IsChosenGameEmpty(void) {
 }
 
 /*
- * Copies the chosen slot's game from the save's mode tables into the players,
- * their records and the game state, to resume at loading the hole. It returns
- * -1 when that game is empty or has too many players. Nothing calls it.
+ * Copies the chosen slot's game from the save's mode tables into the
+ * players, their records and the game state, to resume at loading the
+ * hole. It returns -1 when that game is empty or has too many players.
+ * Nothing calls it.
  */
 s32 ContinueModeGame(void) {
   SaveData* save = GetSaveData();
@@ -1727,9 +1728,9 @@ s32 ContinueModeGame(void) {
 }
 
 /*
- * Resumes the chosen saved game with the controllers its players chose, and
- * erases it from the save unless GAME_FLAG_KEEP_SAVED_GAMES is set. It returns
- * -1 when the game can't be resumed.
+ * Resumes the chosen saved game with the controllers its players chose,
+ * and erases it from the save unless GAME_FLAG_KEEP_SAVED_GAMES is set.
+ * It returns -1 when the game can't be resumed.
  */
 s32 ContinueSavedGame(void) {
   SaveData* save = GetSaveData();

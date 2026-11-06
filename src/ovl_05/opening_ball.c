@@ -343,65 +343,67 @@ typedef s32 (*BillboardHitFinder)(s32 startX, s32 startY, s32 startZ, s32 endX,
  * addresses, which lie in the opening's BSS while it is loaded. Returns the
  * STEP_FLAG_* bits for the step.
  *
- * Doesn't match: the nested helpers match. The substep loop's hoisted 0.5f
- * now sits in $f30 as in the original; of the 552 differing lines, 216 use
- * floating-point registers. On an older base, forcing the original's
- * registers on 61 pseudos left 632 words at best, so the code differs too.
- * Reading the side spin before the drag, and adding the velocity to the
- * spin's push rather than the other way round, took it from 676 words
- * differing to 662. The water skip's last two tests are grouped, as the
- * original branches on the rolling state and then the impact speed: in one
- * chain fold_truthop ors their flags (662). Working out the horizontal speed
- * before the side spin's magnitude, as StepBallSimulation does, took it from
- * 652 words, 248 in shape, to 422 (182). Naming the lift per unit of spin,
- * as a permuter run's float temp suggested, takes it to 395 (167) wherever
- * the local is declared; scaling weight in place instead gives 412 (170).
- * The register oracle, forcing 53 pseudos' registers, leaves 188 words at
- * best, so the code differs too. The original's add.s for the x and z
- * velocities takes the velocity first and the wind's pull second, as
- * velocity + pull does, where the draft writes pull + velocity; written as
- * the original orders them, both lines gave 397 words, and the x line alone
- * 393, with the draft at 395. A billboard hit now updates the ball in
+ * Doesn't match: the nested helpers match. The substep loop's hoisted
+ * 0.5f now sits in $f30 as in the original; of the 552 differing lines,
+ * 216 use floating-point registers. On an older base, forcing the
+ * original's registers on 61 pseudos left 632 words at best, so the code
+ * differs too. Reading the side spin before the drag, and adding the
+ * velocity to the spin's push rather than the other way round, took it
+ * from 676 words differing to 662. The water skip's last two tests are
+ * grouped, as the original branches on the rolling state and then the
+ * impact speed: in one chain fold_truthop ors their flags (662). Working
+ * out the horizontal speed before the side spin's magnitude, as
+ * StepBallSimulation does, took it from 652 words, 248 in shape, to
+ * 422 (182). Naming the lift per unit of spin, as a permuter run's float
+ * temp suggested, takes it to 395 (167) wherever the local is declared;
+ * scaling weight in place instead gives 412 (170). The register oracle,
+ * forcing 53 pseudos' registers, leaves 188 words at best, so the code
+ * differs too. The original's add.s for the x and z velocities takes the
+ * velocity first and the wind's pull second, as velocity + pull does,
+ * where the draft writes pull + velocity; written as the original orders
+ * them, both lines gave 397 words, and the x line alone 393, with the
+ * draft at 395. A billboard hit now updates the ball in
  * StepBallSimulation's order: the bounce count, the position, the last
- * bounce step, then both spins, which took the draft from 395 words (167 in
- * shape) to 337 (149); of the 58 other orders of those five steps that
- * divide the spin speed before the side spin, the best gave 341 (153). With
- * that, writing the x line as velocity + pull gave 343 words, the z line as
- * pull + velocity 341, and both 345. With the draft at 247 words (111 in
- * shape), velocity + pull gave 245 words in the x line alone, 249 in the z
- * line alone and 249 in both, and with both the register oracle got no
- * closer than 128 words forcing 32, against the draft's 124 forcing 32; at
- * 237 words (109), they give 235, 239 and 239. Both bounces set the last
- * bounce step after the three velocities, as StepBallSimulation's do, which
- * took the draft from 337 words (149 in shape) to 325 (141); moving the
- * first alone gave 329 (145), the second alone 333 (145). Each substep
- * copies stepFlags to previousStepFlags after saving the start and the
- * previous velocity, as StepBallSimulation does, which took the draft from
- * 325 words (141 in shape) to 314 (138); with the start's y saved before its
- * x as well, 316 (138). The lift decays the spin after all three velocity
- * updates, as StepBallSimulation does, which took the draft from 314 words
- * (138 in shape) to 296 (126). The cup pull sets toCup in axis order, as
- * StepBallSimulation does, and a wall hit's reflection sets all three
- * velocities before clearing the spin, which took the draft from 296 words
- * (126 in shape) to 290 (122); alone, they gave 292 (124) and 294 (124). The
- * ground spin's grip clears the spin after both velocity updates, as
- * StepBallSimulation's does, which took the draft from 290 words (122 in
- * shape) to 288 (120). Holding the side spin in an s32, the field's type,
- * and testing it for the curve's sign keeps 288 words, takes the shape from
- * 120 to 114 and the register oracle from 129 words forcing 34 pseudos to
- * 127 forcing 35. Scaling the wall hit's x velocity into a local before its
- * hit position gives 278 words (106 in shape), but not for y and z: locals
- * for all three first give 328, one step local set for each axis in turn 289
- * (101), and the contact fraction in a local 288. Writing the x line as the
- * sibling writes its z, or its triangle hit's x, gives 290 and 298. The
- * floor's in-cup and rolling tests read simulation->state after
+ * bounce step, then both spins, which took the draft from 395 words (167
+ * in shape) to 337 (149); of the 58 other orders of those five steps that
+ * divide the spin speed before the side spin, the best gave 341 (153).
+ * With that, writing the x line as velocity + pull gave 343 words, the z
+ * line as pull + velocity 341, and both 345. With the draft at 247
+ * words (111 in shape), velocity + pull gave 245 words in the x line
+ * alone, 249 in the z line alone and 249 in both, and with both the
+ * register oracle got no closer than 128 words forcing 32, against the
+ * draft's 124 forcing 32; at 237 words (109), they give 235, 239 and 239.
+ * Both bounces set the last bounce step after the three velocities, as
+ * StepBallSimulation's do, which took the draft from 337 words (149 in
+ * shape) to 325 (141); moving the first alone gave 329 (145), the second
+ * alone 333 (145). Each substep copies stepFlags to previousStepFlags
+ * after saving the start and the previous velocity, as StepBallSimulation
+ * does, which took the draft from 325 words (141 in shape) to 314 (138);
+ * with the start's y saved before its x as well, 316 (138). The lift
+ * decays the spin after all three velocity updates, as StepBallSimulation
+ * does, which took the draft from 314 words (138 in shape) to 296 (126).
+ * The cup pull sets toCup in axis order, as StepBallSimulation does, and
+ * a wall hit's reflection sets all three velocities before clearing the
+ * spin, which took the draft from 296 words (126 in shape) to 290 (122);
+ * alone, they gave 292 (124) and 294 (124). The ground spin's grip clears
+ * the spin after both velocity updates, as StepBallSimulation's does,
+ * which took the draft from 290 words (122 in shape) to 288 (120).
+ * Holding the side spin in an s32, the field's type, and testing it for
+ * the curve's sign keeps 288 words, takes the shape from 120 to 114 and
+ * the register oracle from 129 words forcing 34 pseudos to 127 forcing
+ * 35. Scaling the wall hit's x velocity into a local before its hit
+ * position gives 278 words (106 in shape), but not for y and z: locals
+ * for all three first give 328, one step local set for each axis in turn
+ * 289 (101), and the contact fraction in a local 288. Writing the x line
+ * as the sibling writes its z, or its triangle hit's x, gives 290 and
+ * 298. The floor's in-cup and rolling tests read simulation->state after
  * GetGroundHeight, as StepBallSimulation's do, where a state local set
  * before the call gives 278 words (112 in shape) against 237 (109).
  *
- * The side spin's curve and the lift each weigh the ball's speed against its
- * spin, with their own ratio and weight; one ratio and one weight for both
- * gave 247 words differing (109 in shape), a weight for each takes it to 237
- * (109), and a ratio for each as well keeps 237.
+ * The side spin's curve and the lift each weigh the ball's speed against
+ * its spin, with their own ratio and weight; one ratio and one weight for
+ * both gave 247 words differing (109 in shape), a weight for each takes
+ * it to 237 (109), and a ratio for each as well keeps 237.
  *
  * Adding the wind's pull to the x velocity, rather than the velocity to the
  * pull, gives 235 words (109 in shape), but only two floating-point

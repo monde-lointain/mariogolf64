@@ -498,13 +498,13 @@ void StopEditorMoves(void) {
  * point's top speed test or its braking test the other way round gives 108
  * words too, and a speed variable for the velocity's length gives 120.
  *
- * The eight flag tests that set isDone come inside the test for a leader, as
- * the original branches on hasLeader before them. That takes the draft from
- * 108 words differing, 40 in shape, to 99 (37), and the register oracle's
- * closest result from 108 words to 99, with nothing forced. Testing
- * hasLeader && isDone after the flag tests as two nested ifs gives 104 words
- * (40 in shape), with isDone tested first 105 (41), and as isDone &&
- * hasLeader 108 (40). 99 words differ, 37 in shape.
+ * The eight flag tests that set isDone come inside the test for a leader,
+ * as the original branches on hasLeader before them. That takes the draft
+ * from 108 words differing, 40 in shape, to 99 (37), and the register
+ * oracle's closest result from 108 words to 99, with nothing forced.
+ * Testing hasLeader && isDone after the flag tests as two nested ifs
+ * gives 104 words (40 in shape), with isDone tested first 105 (41), and
+ * as isDone && hasLeader 108 (40). 99 words differ, 37 in shape.
  */
 #ifdef NON_MATCHING
 void UpdateCameraEditor(void) {

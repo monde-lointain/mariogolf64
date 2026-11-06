@@ -1,8 +1,9 @@
 /*
- * The game's copy of libultra's matrix utilities, which sits among the
- * game's code and was built at -O2 like it, where libultra is built at
- * -O3. Unlike libultra's, guMtxF2L clamps each element to between
- * MIN_FIXED_ELEMENT and MAX_FIXED_ELEMENT before converting it.
+ * The game's copy of libultra's matrix utilities, which sits among
+ * the game's code and was built at -O2 like it, where libultra is
+ * built at -O3. Unlike libultra's, guMtxF2L clamps each element to
+ * between MIN_FIXED_ELEMENT and MAX_FIXED_ELEMENT before converting
+ * it.
  */
 #include "common.h"
 

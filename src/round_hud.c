@@ -1736,8 +1736,9 @@ typedef struct GridScreenPoint {
  * oracle's closest from 214 words to 204, forcing 26 pseudos both. 300 words
  * differ, 44 in shape.
  *
- * A focused permuter run's best indexes the tint's slope with acrossRowStart
- * + drawnColumn rather than acrossPoint, which gives 330 words, 40 in shape.
+ * A focused permuter run's best indexes the tint's slope with
+ * acrossRowStart + drawnColumn rather than acrossPoint, which gives 330
+ * words, 40 in shape.
  *
  * A chained search over rewrites found 292 words (40 in shape) by giving the
  * lines across the aim a column counter of their own and writing

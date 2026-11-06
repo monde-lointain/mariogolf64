@@ -585,27 +585,28 @@ void KeepAimCameraOnCourse(void) {
  * screen, behind the ball while aiming, or looking back at it from past the
  * ball.
  *
- * Doesn't match: the original keeps g_CurrentShot's address in $s0 from the
- * heading's read across KeepAimCameraOnCourse, and reads aimCameraDistance
- * through it. Calling KeepAimCameraOnCourse first gives 151 words; only a
- * barrier around the call helps (137). On the green the look-at's height is
- * worked out after its x and z; between them, as before, gave 113 words, 43 in
- * shape. The tilt in world units gets its own local, set just before the look-
- * at's height: scaling it inside that expression gives 78 words, 20 in shape,
- * and setting it before the look-at's x or after the clamp 86 (18). The
- * permuter reached the same 67 words with a float local holding 1/1024. The
- * register oracle, forcing 12 pseudos' registers, left 31 words at best with
- * the draft at 67, so the code differs too. A focused permuter run reached 60
- * words (8 in shape) by reading aimCameraDistance through a pointer to that
- * field, set just before rise is worked out and read from there on; a
- * CurrentShot pointer used for every field in the branch instead gives 120
- * (18), so the draft keeps reading g_CurrentShot directly. A local copy of
- * aimCameraDistance, set where rise is worked out or at the branch's start,
- * gives 117 words (19 in shape) or 189 (37), measured with the draft at 59. On
- * the mini golf course, point is set in axis order, which took the draft from
- * 67 words to 59, 9 in shape either way; setting its z before its y, as the
- * draft did, gave 67. The counts above were measured with the draft at 67. 59
- * words differ, 9 in shape.
+ * Doesn't match: the original keeps g_CurrentShot's address in $s0 from
+ * the heading's read across KeepAimCameraOnCourse, and reads
+ * aimCameraDistance through it. Calling KeepAimCameraOnCourse first gives
+ * 151 words; only a barrier around the call helps (137). On the green the
+ * look-at's height is worked out after its x and z; between them, as
+ * before, gave 113 words, 43 in shape. The tilt in world units gets its
+ * own local, set just before the look- at's height: scaling it inside
+ * that expression gives 78 words, 20 in shape, and setting it before the
+ * look-at's x or after the clamp 86 (18). The permuter reached the same
+ * 67 words with a float local holding 1/1024. The register oracle,
+ * forcing 12 pseudos' registers, left 31 words at best with the draft at
+ * 67, so the code differs too. A focused permuter run reached 60 words (8
+ * in shape) by reading aimCameraDistance through a pointer to that field,
+ * set just before rise is worked out and read from there on; a
+ * CurrentShot pointer used for every field in the branch instead gives
+ * 120 (18), so the draft keeps reading g_CurrentShot directly. A local
+ * copy of aimCameraDistance, set where rise is worked out or at the
+ * branch's start, gives 117 words (19 in shape) or 189 (37), measured
+ * with the draft at 59. On the mini golf course, point is set in axis
+ * order, which took the draft from 67 words to 59, 9 in shape either way;
+ * setting its z before its y, as the draft did, gave 67. The counts above
+ * were measured with the draft at 67. 59 words differ, 9 in shape.
  *
  * Taking the current player's address with & and reading its clubs through it,
  * as CheckControllersAndSetPans sets soundPan, or adding the index to
@@ -1207,13 +1208,14 @@ void MoveAimCameraDistance(void) {
  * s16 stickX 86 (28).
  *
  * The original subtracts the aim's step from the heading it saved, sign-
- * extended, rather than reading g_CurrentShot.heading again, and the draft's
- * code does the same. Storing heading - step leaves 39 words; subtracting
- * step * speed or step in the two arms of the speed test, with -= or from
- * heading, gives 37 (9 in shape), and a ?: as g_AltHeading's step has it 35
- * (15), but the register oracle's closest result rises from 27 words,
- * forcing 3 pseudos, to 29 for both the -= arms and the ?:. A saved heading
- * of s32 or BinaryAngle gives 49 to 66 words (17 to 20 in shape).
+ * extended, rather than reading g_CurrentShot.heading again, and the
+ * draft's code does the same. Storing heading - step leaves 39 words;
+ * subtracting step * speed or step in the two arms of the speed test,
+ * with -= or from heading, gives 37 (9 in shape), and a ?: as
+ * g_AltHeading's step has it 35 (15), but the register oracle's closest
+ * result rises from 27 words, forcing 3 pseudos, to 29 for both the -=
+ * arms and the ?:. A saved heading of s32 or BinaryAngle gives 49 to 66
+ * words (17 to 20 in shape).
  *
  * Each D-pad branch counts through a pointer to f_AimTurnFrameCount of its own:
  * naming the static directly, with ++ and -- inside the tests or as statements
@@ -3064,32 +3066,33 @@ void ShowHoleOutBanner(s32 playerIndex) {
  * these 349 words with no register forced. The counts above were measured
  * before these two changes.
  *
- * The training choice box's reaction test and the frame test at the end are
- * written in place, where they were inline helpers. In place, the frame test
- * keeps 7.5f in $f22 and its buffer address in $s0 across both
- * AddFramedSphere calls, as the original does, where the helper loaded both
- * again for each call. The reaction test in place alone gives 252 words (120
- * in shape), the frame test alone 338 (116), and both 241 (111), against 349
- * (125) with both as helpers; the register oracle's closest result is these
- * 241 words with no register forced. As an inline function nested in
- * UpdateTurns, the ball placement reads playerIndex from the frame at each
- * use, as the original does, but the static chain takes the first slot of a
- * nested function's frame, which puts the buffer at 0x28 where the
- * original's is at 0x20, and 953 words differ (900 with 55 registers
- * forced). These counts were measured before the debug timing's two stores.
+ * The training choice box's reaction test and the frame test at the end
+ * are written in place, where they were inline helpers. In place, the
+ * frame test keeps 7.5f in $f22 and its buffer address in $s0 across
+ * both AddFramedSphere calls, as the original does, where the helper
+ * loaded both again for each call. The reaction test in place alone
+ * gives 252 words (120 in shape), the frame test alone 338 (116), and
+ * both 241 (111), against 349 (125) with both as helpers; the register
+ * oracle's closest result is these 241 words with no register forced. As
+ * an inline function nested in UpdateTurns, the ball placement reads
+ * playerIndex from the frame at each use, as the original does, but the
+ * static chain takes the first slot of a nested function's frame, which
+ * puts the buffer at 0x28 where the original's is at 0x20, and 953 words
+ * differ (900 with 55 registers forced). These counts were measured
+ * before the debug timing's two stores.
  *
- * The ball placement's Z_TRIG test compiles to andi and a branch, where the
- * original shifts the bit down with srl 13 and andi 1 before branching.
- * do_jump tests an & of one bit with andi; only a test expanded as a value
- * goes through do_store_flag, which shifts and masks. A Boolean local set to
- * the test gives the original's instructions, 74 words differing (42 in
- * shape) against 77 (43), as does shifting the button bits right 13 and
- * testing the low bit, but each adds a name or a shift the draft has no
- * other reason for, and a shared helper would change the eleven other tests
- * of g_ControllerData's buttons, which compile to andi and a branch as the
- * draft's does. Comparing the test with 0 or Z_TRIG, comparing that != 0 with
- * TRUE, negating it twice or choosing TRUE or FALSE with it leaves 77 words
- * (43).
+ * The ball placement's Z_TRIG test compiles to andi and a branch, where
+ * the original shifts the bit down with srl 13 and andi 1 before
+ * branching. do_jump tests an & of one bit with andi; only a test
+ * expanded as a value goes through do_store_flag, which shifts and masks.
+ * A Boolean local set to the test gives the original's instructions, 74
+ * words differing (42 in shape) against 77 (43), as does shifting the
+ * button bits right 13 and testing the low bit, but each adds a name or a
+ * shift the draft has no other reason for, and a shared helper would
+ * change the eleven other tests of g_ControllerData's buttons, which
+ * compile to andi and a branch as the draft's does. Comparing the test
+ * with 0 or Z_TRIG, comparing that != 0 with TRUE, negating it twice or
+ * choosing TRUE or FALSE with it leaves 77 words (43).
  *
  * The holed-out reaction works out the score to par before testing for a
  * hole in one, and tests for it first; the original subtracts par in the
@@ -3120,17 +3123,18 @@ void ShowHoleOutBanner(s32 playerIndex) {
  * test gives 75 (39), testing for a hole in one first without the local 71,
  * also 39 in shape, and the local with the != 1 test first 74 (36).
  *
- * A holed-out player's notable shot is counted from a scoreToPar of its own,
- * worked out before the hole-in-one test as the reaction's is, as the
- * original subtracts the par in the delay slot of that test's branch, and
- * the birdie's case comes first in the switch. Together these take the draft
- * from 68 words differing, 36 in shape, to 51 (29), the switch's code then
- * matching, and the register oracle's closest result from 51 words, forcing
- * 4 pseudos, to 42, forcing 3. The local alone gives 55 words (31 in shape),
- * the birdie first alone 66 (34), and with the local, the birdie in the
- * middle or last 55. With the birdie first, the local declared for the whole
- * state gives 86 words (48 in shape), and set after the hole-in-one test 66
- * (34). 51 words differ, 29 in shape.
+ * A holed-out player's notable shot is counted from a scoreToPar of its
+ * own, worked out before the hole-in-one test as the reaction's is, as
+ * the original subtracts the par in the delay slot of that test's branch,
+ * and the birdie's case comes first in the switch. Together these take
+ * the draft from 68 words differing, 36 in shape, to 51 (29), the
+ * switch's code then matching, and the register oracle's closest result
+ * from 51 words, forcing 4 pseudos, to 42, forcing 3. The local alone
+ * gives 55 words (31 in shape), the birdie first alone 66 (34), and with
+ * the local, the birdie in the middle or last 55. With the birdie first,
+ * the local declared for the whole state gives 86 words (48 in shape),
+ * and set after the hole-in-one test 66 (34). 51 words differ, 29 in
+ * shape.
  */
 #ifdef NON_MATCHING
 /* Whether the stopwatches run in a player state: from aiming to the flight */

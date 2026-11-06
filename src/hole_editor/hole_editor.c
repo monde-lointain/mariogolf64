@@ -3895,46 +3895,50 @@ void WriteHexDumpFile(u32* words, s32 byteCount, char* fileName) {
  * GetMidpointVertex and SetEditorCombineMode are nested functions, a GNU C
  * extension.
  *
- * Doesn't match: the original also steps column + 1 alongside half, where GCC
- * computes it in each use; most of the rest follows from the registers and
- * spill slots that changes. The frame is 0x18 bytes larger than the original's,
- * so the stack offsets differ: reload gives ours 55 spill slots of 8 bytes
- * before the caller-save area, where the original has 50 there and 2 after it,
- * and ours saves $a3 with $t0 to $t7 around the calls. Stepping the half's
- * first column beside half gives 2403 words differing, 581 in shape. Giving the
- * fine tiles' loop its own counter and setting the middle slot after the wave's
- * tile took it from 2258 words differing, 518 in shape. In the medium tiles'
- * pass loop, loop.c hoists 0xF5100000 in the original, as it does in the coarse
- * tiles' loop, but finds it not worth moving in ours (savings 3, the loop 308
- * insns against 259); with that constant also live across the calls, the
- * original's two SetEditorCombineMode calls restore it in different orders,
- * where ours have the same tail and cross-jumping merges them, so ours has 11
- * calls to the original's 12. A local for the half's first tile column, which
- * brought DrawGround's shape from 348 to 283, gives 3683 words differing here
- * (505 in shape) when declared after half, and 3709 (505) when declared first.
- * A permuter output with 2050 words (472 in shape) held TILE_COORDINATE_SPAN in
- * a variable set before the tiles and multiplied by it in seven of the eight
- * tile coordinates the texture loads work out, leaving the first expansion's S
- * as the constant; through such a local in all of them, 2236 words differed
- * (474 in shape), and in the rows' coordinates only, 2231 (483). The register
- * oracle, forcing 113 pseudos' registers, left 1763 words at best, so the code
- * differs too. Counting the tile column in tileColumn, set before a tile loop
- * and stepped with tileIndex, as DrawGround's fine tiles do, gave 2158 words
- * (480 in shape) in the medium tiles' loop, 2534 (1216) in the coarse tiles',
- * 2268 (1226) in both, 2985 (499) in the fine tiles' and 3002 (1232) in all
- * three, when the draft gave 2128 (488). The mirrored cells' S line is worked
- * out where the vertex change uses it, in a local declared there, rather than
- * once per fine tile beside tileColumn, which took the draft from 2128 words
- * differing to 2037, 488 in shape to 491; written straight into the vertex
- * change it gives the same. A u32 groupDetail gives 2026 words (488 in shape),
- * but it would rank a hidden tile's -1 above every detail level when comparing
- * it with the s32 field; it compiles 27 signed and 16 unsigned compares and 4
- * blez where the original, like the s32, has 29, 14 and 5. The medium groups
- * step their slots middle, bottom, tile index and top, and rewind them middle,
- * bottom and top: stepping them top, middle, bottom and tile index, as
- * DrawGround does, gives 2055 words (491 in shape), also with a top, middle and
- * bottom rewind; that rewind alone gives 2074 (494) and DrawGround's top,
- * bottom and middle 2086 (494). 2037 words differ, 491 in shape.
+ * Doesn't match: the original also steps column + 1 alongside half, where
+ * GCC computes it in each use; most of the rest follows from the
+ * registers and spill slots that changes. The frame is 0x18 bytes larger
+ * than the original's, so the stack offsets differ: reload gives ours 55
+ * spill slots of 8 bytes before the caller-save area, where the original
+ * has 50 there and 2 after it, and ours saves $a3 with $t0 to $t7 around
+ * the calls. Stepping the half's first column beside half gives 2403
+ * words differing, 581 in shape. Giving the fine tiles' loop its own
+ * counter and setting the middle slot after the wave's tile took it from
+ * 2258 words differing, 518 in shape. In the medium tiles' pass loop,
+ * loop.c hoists 0xF5100000 in the original, as it does in the coarse
+ * tiles' loop, but finds it not worth moving in ours (savings 3, the loop
+ * 308 insns against 259); with that constant also live across the calls,
+ * the original's two SetEditorCombineMode calls restore it in different
+ * orders, where ours have the same tail and cross-jumping merges them, so
+ * ours has 11 calls to the original's 12. A local for the half's first
+ * tile column, which brought DrawGround's shape from 348 to 283, gives
+ * 3683 words differing here (505 in shape) when declared after half, and
+ * 3709 (505) when declared first. A permuter output with 2050 words (472
+ * in shape) held TILE_COORDINATE_SPAN in a variable set before the tiles
+ * and multiplied by it in seven of the eight tile coordinates the texture
+ * loads work out, leaving the first expansion's S as the constant;
+ * through such a local in all of them, 2236 words differed (474 in
+ * shape), and in the rows' coordinates only, 2231 (483). The register
+ * oracle, forcing 113 pseudos' registers, left 1763 words at best, so the
+ * code differs too. Counting the tile column in tileColumn, set before a
+ * tile loop and stepped with tileIndex, as DrawGround's fine tiles do,
+ * gave 2158 words (480 in shape) in the medium tiles' loop, 2534 (1216)
+ * in the coarse tiles', 2268 (1226) in both, 2985 (499) in the fine
+ * tiles' and 3002 (1232) in all three, when the draft gave 2128 (488).
+ * The mirrored cells' S line is worked out where the vertex change uses
+ * it, in a local declared there, rather than once per fine tile beside
+ * tileColumn, which took the draft from 2128 words differing to 2037, 488
+ * in shape to 491; written straight into the vertex change it gives the
+ * same. A u32 groupDetail gives 2026 words (488 in shape), but it would
+ * rank a hidden tile's -1 above every detail level when comparing it with
+ * the s32 field; it compiles 27 signed and 16 unsigned compares and 4
+ * blez where the original, like the s32, has 29, 14 and 5. The medium
+ * groups step their slots middle, bottom, tile index and top, and rewind
+ * them middle, bottom and top: stepping them top, middle, bottom and tile
+ * index, as DrawGround does, gives 2055 words (491 in shape), also with a
+ * top, middle and bottom rewind; that rewind alone gives 2074 (494) and
+ * DrawGround's top, bottom and middle 2086 (494). 2037 words differ, 491
+ * in shape.
  *
  * A search over merges of two variables gains words only by giving one a
  * second meaning: holding previousDetail in keepsCombineMode gives 2015

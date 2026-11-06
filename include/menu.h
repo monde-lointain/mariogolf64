@@ -336,9 +336,9 @@ extern s16 g_ModeIconAnimations[MODE_ICON_ANIMATION_COUNT]
 #define WHEEL_ARROW_Y 94
 
 /*
- * How DrawMenuNumber marks a number: with nothing, a cross before it, its sign
- * (a plus tinted red, a minus tinted green, or plus-minus for zero), or a red
- * or green tint
+ * How DrawMenuNumber marks a number: with nothing, a cross before it, its
+ * sign (a plus tinted red, a minus tinted green, or plus-minus for zero),
+ * or a red or green tint
  */
 enum MenuNumberStyle {
   MENU_NUMBER_PLAIN,

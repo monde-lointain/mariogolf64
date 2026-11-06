@@ -1257,11 +1257,11 @@ void DrawTwoDigitMenuNumber(
  * counting the numbers with a local of their own gives 239 words, 31 in
  * shape.
  *
- * The register oracle lines the strips' counter and the arrows' up with the
- * saved register the golfers' loop counts players in. Counting the arrows in
- * stripIndex gives 223 words (31 in shape), the strips in playerIndex 416
- * (90), the arrows in it 248 (46), and all three loops in it 455 (105),
- * against 209 (31), so each loop keeps its own counter.
+ * The register oracle lines the strips' counter and the arrows' up with
+ * the saved register the golfers' loop counts players in. Counting the
+ * arrows in stripIndex gives 223 words (31 in shape), the strips in
+ * playerIndex 416 (90), the arrows in it 248 (46), and all three loops in
+ * it 455 (105), against 209 (31), so each loop keeps its own counter.
  */
 #ifdef NON_MATCHING
 void DrawHandicaps(Gfx** displayListHead, s32 slide, u8 reverseVerticalSlide,

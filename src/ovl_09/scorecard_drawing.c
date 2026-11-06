@@ -1123,17 +1123,18 @@ static const char f_BlankBetName[] = " ";
  * none gives fewer words: the constant first gives 212 to 230 (24 to 30 in
  * shape), and the oracle still leaves 78 with that form in both loops.
  *
- * The register oracle lines left and column each up with two registers, so
- * three loops now have their own: the column lines' loop a lineLeft, the
- * rates' loop a rateLeft, and the tallies' loop a tallyColumn and tallyLeft.
- * The tallies' pair took the draft from 206 words to 100 (32 in shape),
- * either alone giving 278 or 282; rateLeft took it to 86, and lineLeft to 65
- * (31). From there, a left of their own gives 65 in the bet images' loop, 79
- * in the subtitles', 137 shared by those two, 157 in the crossings' and 173
- * in the names'; an index of their own gives 79 in the bet images' loop and
- * 77 in the column lines', and a column of their own 145 in the pots' loop.
- * No other loop's index or declaration order gives fewer. The oracle leaves
- * 52 words, forcing 4. 65 words differ, 31 in shape.
+ * The register oracle lines left and column each up with two registers,
+ * so three loops now have their own: the column lines' loop a lineLeft,
+ * the rates' loop a rateLeft, and the tallies' loop a tallyColumn and
+ * tallyLeft. The tallies' pair took the draft from 206 words to 100 (32
+ * in shape), either alone giving 278 or 282; rateLeft took it to 86, and
+ * lineLeft to 65 (31). From there, a left of their own gives 65 in the
+ * bet images' loop, 79 in the subtitles', 137 shared by those two, 157 in
+ * the crossings' and 173 in the names'; an index of their own gives 79 in
+ * the bet images' loop and 77 in the column lines', and a column of their
+ * own 145 in the pots' loop. No other loop's index or declaration order
+ * gives fewer. The oracle leaves 52 words, forcing 4. 65 words differ, 31
+ * in shape.
  */
 #ifdef NON_MATCHING
 void DrawBetsPage(Gfx** displayListHead) {

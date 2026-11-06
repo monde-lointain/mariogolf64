@@ -740,23 +740,24 @@ s32 ListOffsetsByDistance(s32 span, GridOffset* offsets, s32 maxCount) {
  * their heights. A band at or past GROUND_TILE_ROW_COUNT is left untouched.
  *
  * Doesn't match: the nested DrawTriangleHeights allocates its registers
- * differently, using $s7 where the original reloads the static chain. 284 words
- * differ in it, 34 in shape. The counts that follow were measured when
- * texelColumn came from longX rather than the converted fromX, which gave 323
- * words, 45 in shape. Indexing the row, as texel[texelColumn] from texel
- * = &heights[texelRow * MAP_COLUMN_COUNT], gives 497 words but only 29 in
- * shape: the inner loop takes the original's form, and what is left is the
- * extra saved register, with span in $s1 rather than $t8, and the order of the
- * sra and mul.s around it. Indexing heights directly gives 335 words, 51 in
- * shape; texel[0] for *texel, 323 and 45. Swapping the operands of longX's sum
- * or of its product, or moving longX after shortSlopeX or before the
- * reciprocal's update, gives 490 to 511 words, 29 to 54 in shape. The register
- * oracle, forcing 52 pseudos' registers in DrawTriangleHeights, leaves 166 of
- * its 323 words at best, so its code differs too. A u32 width gives 315 words,
- * but 65 in shape, as it drops the test before negating the width and the
- * rounding of its signed division, which the original's DrawTriangleHeights
- * keeps as a bgez and a bltzl before an sra. Both signed shifts of the current
- * form still fold into the original's single shift by 16.
+ * differently, using $s7 where the original reloads the static chain. 284
+ * words differ in it, 34 in shape. The counts that follow were measured
+ * when texelColumn came from longX rather than the converted fromX, which
+ * gave 323 words, 45 in shape. Indexing the row, as texel[texelColumn]
+ * from texel = &heights[texelRow * MAP_COLUMN_COUNT], gives 497 words but
+ * only 29 in shape: the inner loop takes the original's form, and what is
+ * left is the extra saved register, with span in $s1 rather than $t8, and
+ * the order of the sra and mul.s around it. Indexing heights directly
+ * gives 335 words, 51 in shape; texel[0] for *texel, 323 and 45. Swapping
+ * the operands of longX's sum or of its product, or moving longX after
+ * shortSlopeX or before the reciprocal's update, gives 490 to 511 words,
+ * 29 to 54 in shape. The register oracle, forcing 52 pseudos' registers
+ * in DrawTriangleHeights, leaves 166 of its 323 words at best, so its
+ * code differs too. A u32 width gives 315 words, but 65 in shape, as it
+ * drops the test before negating the width and the rounding of its signed
+ * division, which the original's DrawTriangleHeights keeps as a bgez and
+ * a bltzl before an sra. Both signed shifts of the current form still
+ * fold into the original's single shift by 16.
  *
  * Each half of the triangle, upper and lower, declares its own shortSlopeX
  * and shortSlopeHeight, which only that half uses. That takes the draft from

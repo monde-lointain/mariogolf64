@@ -371,9 +371,9 @@ s32 MoveGridCursor(s32 playerNumber, u8 direction, u8 canChooseMarked) {
 }
 
 /*
- * Moves the player's grid cursor a step in the STICK_DIAGONAL_* direction, then
- * sideways only if that slot can't be chosen, as MoveGridCursor does. Returns
- * -1 if it couldn't move, otherwise 0.
+ * Moves the player's grid cursor a step in the STICK_DIAGONAL_*
+ * direction, then sideways only if that slot can't be chosen, as
+ * MoveGridCursor does. Returns -1 if it couldn't move, otherwise 0.
  */
 s32 MoveGridCursorDiagonal(s32 playerNumber, u8 diagonal, u8 canChooseMarked) {
   EncodedAsset asset;

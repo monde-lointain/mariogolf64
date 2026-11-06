@@ -1024,29 +1024,31 @@ void DrawNamePlate(Gfx** displayListHead, s32 centerX, s32 centerY) {
  * one place
  *
  * Doesn't match: the texture loads hold their constants, such as the load
- * blocks' 0x070BF400, in $t4 where this uses $t3, and a few loop words are
- * scheduled differently. The original loads the spinning star's and the
- * spinning empty star's images through one variable, which it keeps in $fp for
- * both; separate locals, as earlier drafts had, spill save and give the
- * constants callee-saved registers, which grows the frame and reorders the
- * texture loads. The one variable took the draft from 219 words differing (129
- * in shape), with the top edge then set in a variable on each pass, to 93 (15);
- * dropping that top variable, which only the split locals had needed for the
- * original's 88 to be loaded in the loop, gave 102 (6), with the original's
- * frame. Separate locals in their own blocks give 219 (129), the images read in
- * place 262 (156), and the still images loaded through the variable too 308
- * (74). Choosing the tile in one if, from course, read before it, rather than
- * overriding the still tile, took it from 280 words to 259, 142 in shape to
- * 133; a Boolean row pointer gave 275 and 145, a u8 width and height 288 and
- * 146. The original reads course in each pass of the loop, beside the hole
- * test's read of holeIndex; reading it before the loop gave 288 words (92 in
- * shape), and in each arm of the test 268 (136). Writing the stars' right and
- * bottom edges as the left or top edge plus the star's size plus half the
- * growth took the draft from 259 words to 257. These earlier figures were
- * measured before the one image variable. An earlier permuter best, 219 words
- * (9 in shape), passed the last three palette loads a Gfx** set to &gfx only
- * later, so it read garbage. The register oracle's closest result is 96 words,
- * forcing 2 pseudos. 102 words differ, 6 in shape.
+ * blocks' 0x070BF400, in $t4 where this uses $t3, and a few loop words
+ * are scheduled differently. The original loads the spinning star's and
+ * the spinning empty star's images through one variable, which it keeps
+ * in $fp for both; separate locals, as earlier drafts had, spill save and
+ * give the constants callee-saved registers, which grows the frame and
+ * reorders the texture loads. The one variable took the draft from 219
+ * words differing (129 in shape), with the top edge then set in a
+ * variable on each pass, to 93 (15); dropping that top variable, which
+ * only the split locals had needed for the original's 88 to be loaded in
+ * the loop, gave 102 (6), with the original's frame. Separate locals in
+ * their own blocks give 219 (129), the images read in place 262 (156),
+ * and the still images loaded through the variable too 308 (74). Choosing
+ * the tile in one if, from course, read before it, rather than overriding
+ * the still tile, took it from 280 words to 259, 142 in shape to 133; a
+ * Boolean row pointer gave 275 and 145, a u8 width and height 288 and
+ * 146. The original reads course in each pass of the loop, beside the
+ * hole test's read of holeIndex; reading it before the loop gave 288
+ * words (92 in shape), and in each arm of the test 268 (136). Writing the
+ * stars' right and bottom edges as the left or top edge plus the star's
+ * size plus half the growth took the draft from 259 words to 257. These
+ * earlier figures were measured before the one image variable. An earlier
+ * permuter best, 219 words (9 in shape), passed the last three palette
+ * loads a Gfx** set to &gfx only later, so it read garbage. The register
+ * oracle's closest result is 96 words, forcing 2 pseudos. 102 words
+ * differ, 6 in shape.
  *
  * A focused permuter run's best, 29 words (7 in shape), sets the height's
  * half in a variable before the tile is chosen; its srl then takes the place

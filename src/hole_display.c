@@ -2985,14 +2985,14 @@ void DrawTurnAwayAnimation(void);
  * and the upper rows' width chosen by an if/else gave 158.
  *
  * Each row's first vertex is held in rowStart, which a focused permuter
- * run's best pointed at by holding row * 6 in a temporary. In all three tile
- * loops it takes the draft from 104 words to 111 but from 30 in shape to 17,
- * and the register oracle's closest result from 49 words, forcing 17
- * pseudos, to 41, forcing 24. In one loop alone it gave 102 to 179 words (24
- * to 33 in shape); a nextRowStart for the lower corners as well, 106 to 197
- * (28 to 75), and 134 (22) in all three loops, with the oracle's closest 56;
- * the next row written as an offset from rowStart, 137 or 235; and
- * GridVertex with the row's product first, 110 (30).
+ * run's best pointed at by holding row * 6 in a temporary. In all three
+ * tile loops it takes the draft from 104 words to 111 but from 30 in
+ * shape to 17, and the register oracle's closest result from 49 words,
+ * forcing 17 pseudos, to 41, forcing 24. In one loop alone it gave 102 to
+ * 179 words (24 to 33 in shape); a nextRowStart for the lower corners as
+ * well, 106 to 197 (28 to 75), and 134 (22) in all three loops, with the
+ * oracle's closest 56; the next row written as an offset from rowStart,
+ * 137 or 235; and GridVertex with the row's product first, 110 (30).
  *
  * The upper rows' tile width is now chosen by an if/else too, which on this
  * base takes the draft from 111 words to 89, 17 in shape to 13, and the
@@ -3188,17 +3188,17 @@ INCLUDE_ASM("asm/nonmatchings/hole_display", DrawTurnAwayAnimation);
  *
  * The register oracle lined wordIndex up with one register in the tiles'
  * copy and another in the fade and negative copies, so each of the three
- * copies now counts its words with a wordIndex of its own, declared in its
- * branch. That takes the draft from 72 words differing to 102, but from 20
- * in shape to 16, and the register oracle's closest result from 63 words
- * forcing 11 pseudos to 53 forcing 19; the differences it adds are mostly in
- * which registers the loops use. Resetting the shared wordIndex in each
- * branch instead gives 120 words (18 in shape), with the oracle at 63
- * forcing 17; the fade and negative copies' own counters alone give 102
- * (16), the negative copy's alone 89 (19), the tiles' alone 103 (21) and the
- * fade's alone 199 (17). The slice copy's words are still best counted with
- * gridColumnOrSliceWord: a sliceWord of their own gives 114 words, 16 in
- * shape. 102 words differ, 16 in shape.
+ * copies now counts its words with a wordIndex of its own, declared in
+ * its branch. That takes the draft from 72 words differing to 102, but
+ * from 20 in shape to 16, and the register oracle's closest result from
+ * 63 words forcing 11 pseudos to 53 forcing 19; the differences it adds
+ * are mostly in which registers the loops use. Resetting the shared
+ * wordIndex in each branch instead gives 120 words (18 in shape), with
+ * the oracle at 63 forcing 17; the fade and negative copies' own counters
+ * alone give 102 (16), the negative copy's alone 89 (19), the tiles'
+ * alone 103 (21) and the fade's alone 199 (17). The slice copy's words
+ * are still best counted with gridColumnOrSliceWord: a sliceWord of their
+ * own gives 114 words, 16 in shape. 102 words differ, 16 in shape.
  */
 #ifdef NON_MATCHING
 void CaptureHudAnimationFrame(void) {

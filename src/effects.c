@@ -922,10 +922,10 @@ void SpawnRisingClumps(CoursePoint unusedPoint UNUSED) {
 #define RandomBelow(limit) ((limit) == 0 ? 0 : guRandom() % (limit))
 
 /*
- * Throws up the debris of a shot struck from point: a drop for a teed-up ball,
- * a divot and its mark for an iron or wedge from grass, and the low and high
- * debris that the debris kind gives. The amount of debris grows with
- * -sin(pitch). The nested spawners share the count and index.
+ * Throws up the debris of a shot struck from point: a drop for a teed-up
+ * ball, a divot and its mark for an iron or wedge from grass, and the low
+ * and high debris that the debris kind gives. The amount of debris grows
+ * with -sin(pitch). The nested spawners share the count and index.
  */
 void SpawnShotDebris(
     CoursePoint point, Radians pitch, Radians yaw, s32 launchSpeed) {

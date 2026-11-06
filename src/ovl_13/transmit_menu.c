@@ -528,11 +528,11 @@ s32 GetNoticeState(void);
 #define GAME_BOY_COMPANY_CODE 0x3031
 
 /*
- * g_GameBoyTransfer.pressingHandImage under a scalar name. Reading it as a
- * scalar is there to match: GCC keeps a struct field's constant address in a
- * register when it is used twice. In DrawPressingHand, reading the field
- * gives 24 words differing (12 in shape), and copying it to a local first 28
- * (6).
+ * g_GameBoyTransfer.pressingHandImage under a scalar name. Reading it as
+ * a scalar is there to match: GCC keeps a struct field's constant address
+ * in a register when it is used twice. In DrawPressingHand, reading the
+ * field gives 24 words differing (12 in shape), and copying it to a local
+ * first 28 (6).
  */
 extern void* g_PressingHandImage;
 

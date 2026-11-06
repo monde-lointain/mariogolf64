@@ -35,15 +35,16 @@
  * outside the alphabet. The caller passes a fourth argument that this
  * routine doesn't read.
  *
- * Doesn't match: the original never uses $a3 and keeps the index in $t0, so
- * each later value sits one register higher than here. It also advances the
- * password pointer before the index. Giving the fourth parameter another type
- * (f32, f64, s64, s16, u8, a pointer or a small struct) changes nothing, nor do
- * pointer walks or a symbol local. Returning the fourth parameter in place of
- * 0, which keeps $a3 live through the loop, gives 12 words differing, 2 in
- * shape: the registers then match except for the alphabet entry's address and
- * the pointer's step. The original returns 0, so something else keeps $a3 from
- * the loop there.
+ * Doesn't match: the original never uses $a3 and keeps the index in $t0,
+ * so each later value sits one register higher than here. It also
+ * advances the password pointer before the index. Giving the fourth
+ * parameter another type (f32, f64, s64, s16, u8, a pointer or a small
+ * struct) changes nothing, nor do pointer walks or a symbol local.
+ * Returning the fourth parameter in place of 0, which keeps $a3 live
+ * through the loop, gives 12 words differing, 2 in shape: the registers
+ * then match except for the alphabet entry's address and the pointer's
+ * step. The original returns 0, so something else keeps $a3 from the loop
+ * there.
  */
 s32 WritePasswordSymbols(
     u8* symbols, char* password, s32 symbolCount, s32 unused);

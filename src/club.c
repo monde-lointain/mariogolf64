@@ -622,9 +622,11 @@ static Club f_NoClub = {80, "0000", 0, 230, -11, 0, 14, 100, CLUB_TYPE_DRIVER,
     {0, 0, 0}, CLUB_KIND_WOOD, 0, {0, 0, 0}, ASSET_DRIVER_HEAD_IMAGE, 0};
 static ShotLaunch f_ClubTestShot = {
     STRAIGHT_ANGLE, NO_CLUB, MAX_LAUNCH_POWER, 0, 0, 0, 0, SHOT_MODE_NORMAL};
-/* A generated club's lieRatingPercent, by its set's lieRatingLevel from
- * -MAX_LIE_RATING_LEVEL to MAX_LIE_RATING_LEVEL; other levels give
- * DEFAULT_LIE_RATING_PERCENT */
+/*
+ * A generated club's lieRatingPercent, by its set's lieRatingLevel
+ * from -MAX_LIE_RATING_LEVEL to MAX_LIE_RATING_LEVEL; other levels give
+ * DEFAULT_LIE_RATING_PERCENT
+ */
 #define MAX_LIE_RATING_LEVEL 4
 #define DEFAULT_LIE_RATING_PERCENT 100
 static u8 f_LieRatingPercents[(MAX_LIE_RATING_LEVEL * 2) + 1] = {
