@@ -68,8 +68,13 @@ typedef s32 FlightPhase;
 enum FlightCameraKind {
   /* None yet, as set when the flight camera starts and ends */
   FLIGHT_CAMERA_NONE = -1,
-  FLIGHT_CAMERA_UNK0,
-  FLIGHT_CAMERA_UNK1,
+  /*
+   * The camera left as it was, which ChooseFlightCameraKind picks when no
+   * other kind applies; it loses to any kind picked later
+   */
+  FLIGHT_CAMERA_UNCHANGED,
+  /* FLIGHT_CAMERA_UNUSED_* kinds are never picked */
+  FLIGHT_CAMERA_UNUSED_A,
   /* Beside the tee, looking at it */
   FLIGHT_CAMERA_BESIDE_TEE,
   /* The aim camera, placed by PlaceAimCamera */
@@ -91,10 +96,11 @@ enum FlightCameraKind {
   /* Beyond the ball on the line from the cup, looking at the ball and the cup
    */
   FLIGHT_CAMERA_FACING_CUP,
-  FLIGHT_CAMERA_UNKE,
-  FLIGHT_CAMERA_UNKF,
-  FLIGHT_CAMERA_UNK10,
-  FLIGHT_CAMERA_UNK11,
+  FLIGHT_CAMERA_UNUSED_B,
+  FLIGHT_CAMERA_UNUSED_C,
+  /* These two only turn the camera toward the ball */
+  FLIGHT_CAMERA_UNUSED_D,
+  FLIGHT_CAMERA_UNUSED_E,
   /* Frames the path's extreme points on x and z */
   FLIGHT_CAMERA_FRAMING_PATH,
   /* Frames the cup and the ball; it keeps the putter's contact from calling
@@ -2114,8 +2120,8 @@ void PlaceFlightCamera(s32 step) {
       g_Cameras[0].view.fieldOfView = FOLLOW_FIELD_OF_VIEW;
       EaseLookAtFlyingBall();
       break;
-    case FLIGHT_CAMERA_UNK10:
-    case FLIGHT_CAMERA_UNK11:
+    case FLIGHT_CAMERA_UNUSED_D:
+    case FLIGHT_CAMERA_UNUSED_E:
       EaseLookAtFlyingBall();
       break;
     case FLIGHT_CAMERA_BESIDE_TEE:
@@ -2668,7 +2674,7 @@ void ChooseFlightCameraKind(void) {
 
   animation = HUD_ANIMATION_NONE;
   f_HasFlightPhaseChanged = FALSE;
-  kind = 0;
+  kind = FLIGHT_CAMERA_UNCHANGED;
   if (g_SimulatedShot.startsOnGreen) {
     switch (f_FlightPhase) {
       case FLIGHT_PHASE_LAUNCH:
@@ -3292,8 +3298,8 @@ s32 UpdateFlightCamera(Boolean isAdvancing, s32 buttons) {
     if (step == BALL_SOUND_EARLY_STEP) {
       osSyncPrintf("ball:%d\n", volume);
       switch (f_FlightCameraKind) {
-        case FLIGHT_CAMERA_UNK0:
-        case FLIGHT_CAMERA_UNK1:
+        case FLIGHT_CAMERA_UNCHANGED:
+        case FLIGHT_CAMERA_UNUSED_A:
         case FLIGHT_CAMERA_BESIDE_TEE:
         case FLIGHT_CAMERA_AIM_VIEW:
         case FLIGHT_CAMERA_BESIDE_GOLFER:
@@ -3314,10 +3320,10 @@ s32 UpdateFlightCamera(Boolean isAdvancing, s32 buttons) {
         case FLIGHT_CAMERA_SIDE_OF_FLIGHT:
         case FLIGHT_CAMERA_AROUND_END:
         case FLIGHT_CAMERA_FACING_CUP:
-        case FLIGHT_CAMERA_UNKE:
-        case FLIGHT_CAMERA_UNKF:
-        case FLIGHT_CAMERA_UNK10:
-        case FLIGHT_CAMERA_UNK11:
+        case FLIGHT_CAMERA_UNUSED_B:
+        case FLIGHT_CAMERA_UNUSED_C:
+        case FLIGHT_CAMERA_UNUSED_D:
+        case FLIGHT_CAMERA_UNUSED_E:
           PlaySoundWithEffects(SOUND_ECHOING_SHOT, BALL_SOUND_CHANNEL, volume,
               BALL_SOUND_REVERB, SOUND_FULL_SCALE);
           break;
