@@ -1417,6 +1417,17 @@ void DrawMovie(Gfx** displayListHead) {
  */
 #define WINNER_BLINK_FRAME 8
 
+/* Reads the contest winner's face, the given frame after their first, into
+ * the movie buffer */
+#define LoadWinnerFace(asset, frameIndex) \
+  do { \
+    OpenEncodedAsset( \
+        g_CharacterImageAssets[g_Players[GetContestWinner()].characterIndex] + \
+            (frameIndex), \
+        (asset)); \
+    ReadEncodedAsset(f_MovieBuffer + WINNER_FACE_OFFSET, (asset)); \
+  } while (0)
+
 /*
  * The caption of a longest drive or nearest pin contest, then its winner's face
  */
@@ -1488,10 +1499,7 @@ void DrawContestWinnerMovie(Gfx** displayListHead) {
           &file);
       ReadAssetFile(f_MovieBuffer + WINNER_PALETTE_OFFSET,
           GetAssetFileSize(&file), &file);
-      OpenEncodedAsset(
-          g_CharacterImageAssets[g_Players[GetContestWinner()].characterIndex],
-          &asset);
-      ReadEncodedAsset(f_MovieBuffer + WINNER_FACE_OFFSET, &asset);
+      LoadWinnerFace(&asset, 0);
       OpenEncodedAsset(ASSET_WOODEN_PLAQUE, &asset);
       ReadEncodedAsset(f_MovieBuffer + WINNER_PLAQUE_OFFSET, &asset);
     }
@@ -1543,29 +1551,13 @@ void DrawContestWinnerMovie(Gfx** displayListHead) {
       f_MovieDrawCount <= CONTEST_MEET_DRAW + WINNER_LAST_FRAME) {
     frame = f_MovieDrawCount - CONTEST_MEET_DRAW;
     if (frame == WINNER_BLINK_FRAME) {
-      OpenEncodedAsset(
-          g_CharacterImageAssets[g_Players[GetContestWinner()].characterIndex] +
-              1,
-          &asset);
-      ReadEncodedAsset(f_MovieBuffer + WINNER_FACE_OFFSET, &asset);
+      LoadWinnerFace(&asset, 1);
     } else if (frame == WINNER_BLINK_FRAME + 2) {
-      OpenEncodedAsset(
-          g_CharacterImageAssets[g_Players[GetContestWinner()].characterIndex] +
-              2,
-          &asset);
-      ReadEncodedAsset(f_MovieBuffer + WINNER_FACE_OFFSET, &asset);
+      LoadWinnerFace(&asset, 2);
     } else if (frame == WINNER_BLINK_FRAME + 4) {
-      OpenEncodedAsset(
-          g_CharacterImageAssets[g_Players[GetContestWinner()].characterIndex] +
-              3,
-          &asset);
-      ReadEncodedAsset(f_MovieBuffer + WINNER_FACE_OFFSET, &asset);
+      LoadWinnerFace(&asset, 3);
     } else if (frame == WINNER_BLINK_FRAME + 6) {
-      OpenEncodedAsset(
-          g_CharacterImageAssets[g_Players[GetContestWinner()].characterIndex] +
-              4,
-          &asset);
-      ReadEncodedAsset(f_MovieBuffer + WINNER_FACE_OFFSET, &asset);
+      LoadWinnerFace(&asset, 4);
     }
 
     if (frame == WINNER_FIRST_FRAME) {
