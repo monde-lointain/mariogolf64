@@ -3104,6 +3104,13 @@ Boolean IsLineMostlyLost(CoursePoint from, CoursePoint to) {
  * another, as StepTrialShot's draft passes &f_TrialSimulation and is compiled
  * to its state's address less 140, as in its target. The 0x28 bias is
  * unexplained.
+ *
+ * The register oracle's closest result is these 6 words with no register
+ * forced, so allocation isn't the cause. Keeping
+ * &f_TrialSimulation.velocity[AXIS_Y], the biased address, live in the
+ * loop through empty inline assembly, as a probe, loads it into a
+ * register of its own, and the loop still derives nothing from it: 8
+ * words differ, 6 in shape.
  */
 #ifdef NON_MATCHING
 Boolean IsTrialShotSafe(void) {

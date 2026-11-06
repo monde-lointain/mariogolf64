@@ -2605,6 +2605,10 @@ enum PointsStep {
  * GameState pointer set to &g_GameState gives 21 words (7) for the outer
  * loop alone, 25 (9) for both loops and 28 (10) everywhere. 5 words differ,
  * 1 in shape.
+ *
+ * Keeping &g_GameState.gameMode live before the loop through empty inline
+ * assembly, as a probe, loads that address into a register but still
+ * reads the player count from its own address: 7 words differ.
  */
 #ifdef NON_MATCHING
 s32 UpdateCoursePointsResults(ControllerState* controller) {
