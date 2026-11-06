@@ -370,6 +370,14 @@ void DrawBillboard(Gfx** gfxPtr, Billboard* billboard,
  * with the view test taking fabs of each component converted back to f32,
  * when 139 words differed, 17 in shape. With the game's fabsf there, 125
  * words differ, 13 in shape.
+ *
+ * Computing ballDepth - BALL_CLEARANCE_DEPTH into its own local before
+ * SortBillboardsByDepth gives 127 words (15 in shape) and a frame 8 bytes
+ * short, and before the far loop the draft's 125, as loop.c hoists it
+ * there anyway. A counter of the billboards drawn in the far loop that
+ * nothing reads, set to 0 in or before the loop, is deleted whole and
+ * gives the draft's 125; counting the far loop with it while orderIndex
+ * counts down gives 137 (11 in shape) and keeps the counter's increments.
  */
 #ifdef NON_MATCHING
 void DrawBillboards(CameraMatrices* cameraMatrices, s32 cameraIndex) {
