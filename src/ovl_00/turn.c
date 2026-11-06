@@ -2125,6 +2125,11 @@ void BuildShotPreview(ShotLaunch* swing, s32 playerState) {
  * original subtracts the scaled ball.x from the scaled end.x. Its other
  * change, scale * dy in place of dy * scale, and the same for dx, give 52
  * words (12).
+ *
+ * The free-look line's dy was set in a block of its own, which gave 52
+ * words, 12 in shape, against 56 without it. But the register oracle's
+ * closest result without the block is 22 words, against 24, forcing 14
+ * pseudos either way, so the block is gone. 56 words differ, 12 in shape.
  */
 #ifdef NON_MATCHING
 void DrawShotPreview(CameraMatrices* matrices) {
@@ -2193,8 +2198,7 @@ void DrawShotPreview(CameraMatrices* matrices) {
     end.x *= QUARTER_PIXELS_PER_PIXEL;
     end.y *= QUARTER_PIXELS_PER_PIXEL;
     dx = end.x - ball.x;
-    /* In its own block, to match; without it 56 words differ, 12 in shape */
-    IN_OWN_BLOCK(dy = end.y - ball.y);
+    dy = end.y - ball.y;
     if (fabsf(dx) > 1.0f || fabsf(dy) > 1.0f) {
       scale = PUTT_PREVIEW_HALF_WIDTH / sqrtf((dy * dy) + (dx * dx));
       gSPLoadGeometryMode(g_DisplayListHead++, 0);
