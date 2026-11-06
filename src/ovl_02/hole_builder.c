@@ -2088,8 +2088,8 @@ static inline void FillCodeGap(
 
 /*
  * Encodes the map as EncodeCodeMap does, then runs the clean-up passes, each
- * filling the codes that differ from two equal neighbors, along the row
- * and then down the column. There are no passes, so it only encodes the map.
+ * filling the codes that differ from two equal neighbors, along the row and
+ * then down the column. There are no passes, so it only encodes the map.
  * Doesn't match: the passes add the row's offset to the buffer before the
  * column, where the original adds the column to the row's offset first and
  * steps each neighbor's index from that sum. Before the encoding matched,
@@ -2097,7 +2097,10 @@ static inline void FillCodeGap(
  * indexing the buffer; indexing it in SetCode too 143, and passing GetCode
  * and SetCode the index, with FillCodeGap stepping it, 130 to 144. Narrowing
  * the row pass's column to an unsigned char, the permuter's best then, gave
- * 108 words, 10 in shape; the column is no byte. 88 words differ, 12 in
+ * 108 words, 10 in shape; the column is no byte. A later run's best casts
+ * the row pass's column to a u16, which gives 101 words, 5 in shape, but
+ * declaring the column a u16 gives 153 (31) and the row as well 237 (69), so
+ * the cast doesn't stand for the column's type. 88 words differ, 12 in
  * shape.
  */
 #ifdef NON_MATCHING
