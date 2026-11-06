@@ -593,23 +593,25 @@ void DrawTableLines(Gfx** displayListHead) {
  * wins against each other, first moving it to the opposite corner if it would
  * cover the cursor.
  *
- * Doesn't match: the column character, the two counts of wins and the bases
- * of the visibility and face image tables take other registers among
- * $s0-$s3. The oracle matches when those 5 pseudos are forced, so the RTL is
- * the original's up to allocation, but the original's choice puts rowWins
- * first and the column character last, against the priorities of their uses
- * and lives. A MatchupRecord pointer gives 63 words, a column index local or
- * other declaration orders change nothing, and narrower types for the wins
- * give 52 to 142. Wrapping the last four statements in a do-while (0),
- * whose loop notes weight the uses inside and stop sched1, gives 18 words
- * with only the two counts of wins swapped, and a do-while (0) macro per
- * count gives 26. Loading rowWins' raw bits and masking them in a second
- * assignment gives 40 words, none in shape, but only with the last range
- * test written "rowWins + 1 <= 1000" (or "< 1001"); with "< 1000", "<= 999"
- * or "< 999 + 1" it gives 60. The +1 alone changes nothing, and the natural
- * ways to split the load give 48 to 63: a separate raw-bits variable, both
- * counts read raw and then masked, or a MatchupRecord pointer. 48 words
- * differ, 2 in shape.
+ * Doesn't match: the column character, the two counts of wins and the bases of
+ * the visibility and face image tables take other registers among $s0-$s3. The
+ * oracle matches when those 5 pseudos are forced, so the RTL is the original's
+ * up to allocation, but the original's choice puts rowWins first and the column
+ * character last, against the priorities of their uses and lives. A
+ * MatchupRecord pointer gives 63 words, a column index local or other
+ * declaration orders change nothing, and narrower types for the wins give 52 to
+ * 142. Wrapping the last four statements in a do-while (0), whose loop notes
+ * weight the uses inside and stop sched1, gives 18 words with only the two
+ * counts of wins swapped, and a do-while (0) macro per count gives 26. Loading
+ * rowWins' raw bits and masking them in a second assignment gives 40 words,
+ * none in shape, but only with the last range test written "rowWins + 1 <=
+ * 1000" (or "< 1001"); with "< 1000", "<= 999" or "< 999 + 1" it gives 60. The
+ * +1 alone changes nothing, and the natural ways to split the load give 48 to
+ * 63: a separate raw-bits variable, both counts read raw and then masked, or a
+ * MatchupRecord pointer. A focused permuter run read the matchups through an
+ * Awards pointer set among the display list commands; an Awards pointer set at
+ * its declaration instead gives 56 words, 6 in shape, and one set just before
+ * the reads 85, 5 in shape. 48 words differ, 2 in shape.
  */
 #ifdef NON_MATCHING
 void DrawTablePopup(Gfx** displayListHead) {
