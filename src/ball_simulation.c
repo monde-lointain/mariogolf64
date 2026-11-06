@@ -298,7 +298,18 @@ void ResetBallSimulations(void) {
  * from 478 words differing (126 in shape) to 462 (112), and the register
  * oracle's closest result from 270 words to 254, forcing 76 pseudos for
  * each. The same form in StepOpeningBallSimulation's curve and lift ratios
- * leaves 237 words there. 462 words differ, 112 in shape.
+ * leaves 237 words there.
+ *
+ * The bounce's drift is scaled x first and the water skip sums the square of
+ * x's speed first, as the target converts x's drift and loads x's speed
+ * first and as StepOpeningBallSimulation's copy already scales its drift; an
+ * earlier sweep had chosen z first for both. Scaling x first takes the draft
+ * from 462 words to 454, and the register oracle's closest result from 254
+ * words to 246, forcing 76 pseudos for each; summing x first as well takes
+ * them to 450 and 240, forcing 75 pseudos, with 112 in shape throughout.
+ * That sweep's other choice, multiplying the wall and triangle hits' z steps
+ * by the fraction last, still saves 2 words each. 450 words differ, 112 in
+ * shape.
  */
 #ifdef NON_MATCHING
 s32 StepBallSimulation(BallSimulation* simulation) {
@@ -1257,8 +1268,8 @@ s32 StepBallSimulation(BallSimulation* simulation) {
           (simulation->state == BALL_STATE_ROLLING ||
               fabsf(impactSpeed) >= MAX_SKIP_IMPACT_SPEED ||
               fabsf(impactSpeed) <= MIN_SKIP_IMPACT_SPEED ||
-              sqrtf((velocity[AXIS_Z] * velocity[AXIS_Z]) +
-                  (velocity[AXIS_X] * velocity[AXIS_X])) *
+              sqrtf((velocity[AXIS_X] * velocity[AXIS_X]) +
+                  (velocity[AXIS_Z] * velocity[AXIS_Z])) *
                       SKIP_SPEED_RATIO <=
                   fabsf(impactSpeed))) {
         simulation->state = BALL_STATE_IN_WATER;
@@ -1657,8 +1668,8 @@ s32 StepBallSimulation(BallSimulation* simulation) {
         if (driftLimit < drift && impactSpeed > 1.0f) {
           f32 scale = driftLimit / drift;
 
-          driftZ = driftZ * scale;
           driftX = driftX * scale;
+          driftZ = driftZ * scale;
         }
 
         spinVelocityX *= BOUNCE_SPIN_DECAY;
