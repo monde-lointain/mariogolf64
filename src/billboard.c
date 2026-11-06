@@ -378,6 +378,15 @@ void DrawBillboard(Gfx** gfxPtr, Billboard* billboard,
  * nothing reads, set to 0 in or before the loop, is deleted whole and
  * gives the draft's 125; counting the far loop with it while orderIndex
  * counts down gives 137 (11 in shape) and keeps the counter's increments.
+ *
+ * In the second loop, a counter from 0 with orderIndex set to
+ * BILLBOARD_COUNT - 1 less it gives 136 words (12 in shape), and indexing
+ * f_DrawOrder with that difference 126 (12): loop.c then keeps the
+ * subtraction in the loop rather than reducing the address, and the
+ * counter's own test. Flags for the debug view's test, the near-ball test
+ * or the opaque test, set to FALSE and then TRUE in each pass, give 125
+ * to 129 words; none leaves the original's unread $s6 = 0 before the
+ * loop.
  */
 #ifdef NON_MATCHING
 void DrawBillboards(CameraMatrices* cameraMatrices, s32 cameraIndex) {
