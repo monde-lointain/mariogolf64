@@ -617,6 +617,11 @@ void DrawTableLines(Gfx** displayListHead) {
  * commands; an Awards pointer set at its declaration instead gives 56
  * words, 6 in shape, and one set just before the reads 85, 5 in shape. 48
  * words differ, 2 in shape.
+ *
+ * index serves the strip loop and both counts' offsets. Giving each
+ * count's offset a variable of its own, declared after index or after
+ * rowIndex, gives 118 words, 2 in shape, so the draft keeps the one
+ * variable.
  */
 #ifdef NON_MATCHING
 void DrawTablePopup(Gfx** displayListHead) {
