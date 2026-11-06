@@ -556,7 +556,7 @@ void DrawBillboards(CameraMatrices* cameraMatrices, s32 cameraIndex) {
     }
 
     alpha = -viewDepth;
-    if (alpha >= 0x100) {
+    if (alpha > OPAQUE_ALPHA) {
       alpha = OPAQUE_ALPHA;
     }
 
@@ -698,7 +698,7 @@ void DrawFadingBillboards(CameraMatrices* cameraMatrices, s32 cameraIndex) {
     }
 
     alpha = -viewDepth;
-    if (alpha >= 0x100) {
+    if (alpha > OPAQUE_ALPHA) {
       alpha = OPAQUE_ALPHA;
     }
 
