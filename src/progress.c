@@ -53,6 +53,12 @@ void ShowBirdieBadgeCount(s32 badgeCount);
  * for value and count give 5 words (3 in shape) for two bytes, 9 (5) for a
  * byte count and a wider value, and 33 (13) for any wider count. 3 words
  * differ.
+ *
+ * A focused permuter run's best made value a u16. Of the 44 combinations
+ * with a u16 or s16 among value, count and newValue, none gives fewer than 3
+ * words: a u16 or s16 newValue with byte value and count gives 3, as does a
+ * u16 value with an s32 newValue and a byte or u16 count, and the rest 4 to
+ * 37.
  */
 #ifdef NON_MATCHING
 void RecordComCharacterResult(s32 row, s32 column, Boolean isWin) {
