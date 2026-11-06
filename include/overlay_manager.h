@@ -21,8 +21,10 @@
 #define MODULE_ID_END (-1)
 
 /*
- * Module IDs. A named module is named for the overlay that f_Overlays puts
- * it in or for the code that checks it; the rest are known only by number.
+ * Module IDs. A module is named for the overlay that f_Overlays puts it in or
+ * for the code that checks it. A MODULE_UNUSED_* module shares the overlay
+ * of the module it is named after, and no code names it outside f_Overlays'
+ * lists.
  */
 enum ModuleId {
   /* Holds the golf balls and their afterimages (golf_balls.c) */
@@ -40,25 +42,25 @@ enum ModuleId {
   MODULE_HOLE_OBJECTS,
   MODULE_BOOT_LOGOS,
   MODULE_CONFIRM_WAIT,
-  MODULE_UNK14,
+  MODULE_UNUSED_SCORECARD,
   MODULE_ROUND_RESULTS,
-  MODULE_UNK16,
+  MODULE_UNUSED_OPENING_A,
   MODULE_ROUND_EVENTS,
   MODULE_SHOT_EFFECTS,
-  MODULE_UNK19,
+  MODULE_UNUSED_OPENING_B,
   MODULE_PAUSE_MENU,
   MODULE_COURSE_SELECT,
   MODULE_SAVE_MENU,
   MODULE_SHOT_LABELS,
-  MODULE_UNK24,
+  MODULE_UNUSED_PLAY,
   MODULE_CLUB_PANEL,
   MODULE_CLUB_SLOTS,
   MODULE_TRANSMIT,
-  MODULE_UNK28,
-  MODULE_UNK29,
-  MODULE_UNK30,
+  MODULE_UNUSED_HOLE_BUILDER,
+  MODULE_UNUSED_TRANSMIT_A,
+  MODULE_UNUSED_TITLE_SCREEN,
   MODULE_STAFF_ROLL,
-  MODULE_UNK32
+  MODULE_UNUSED_TRANSMIT_B
 };
 
 typedef struct Overlay {
