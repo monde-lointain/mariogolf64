@@ -2210,8 +2210,8 @@ void DrawCharacterAndShadow(
   PlaneTriangle triangle;
   TrianglePlane plane;
   Mat4 projection;
-  /* The original frame has room for this; without it 253 words differ, 19 in
-   * shape */
+  /* The original frame has room for this; without it 218 words differ, 6 in
+   * shape, against 14 */
   Mat4 unusedMatrix UNUSED;
   Gfx* gfx;
   CharacterSlot* slot;
