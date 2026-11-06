@@ -269,7 +269,11 @@ typedef struct PlayRecord {
   /* 0x40 */ s32 noiseSeed;
   /* 0x44 */ RecordedShot
       shots[4]; /* RecordHoleOut writes a fifth past the end */
-  /* 0x64 */ u8 unk64[0x68 - 0x64];
+  /*
+   * The first half of the fifth shot, whose heading and gauge frames land
+   * here; its other half lands in the next record
+   */
+  /* 0x64 */ u8 fifthShotStart[0x68 - 0x64];
 } PlayRecord; /* size = 0x68 */
 
 /* A Ring Shot hole as a player played it, kept to be replayed */
@@ -285,8 +289,8 @@ typedef struct RingShotRecord {
   /* 0x3A */ u8 strokeCount;
   /* 0x3B */ u8 unk3B;
   /* 0x3C */ s32 noiseSeed;
-  /* 0x40 */ RecordedShot shots[4]; /* RecordRingShotHole writes up to six */
-  /* 0x60 */ u8 unk60[0x68 - 0x60];
+  /* RecordRingShotHole writes a sixth past the end, into the next record */
+  /* 0x40 */ RecordedShot shots[5];
 } RingShotRecord; /* size = 0x68 */
 
 extern HoleSetup g_HoleSetup;
