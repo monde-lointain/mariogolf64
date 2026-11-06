@@ -1668,13 +1668,11 @@ void FormatLeaderboardRow(char* row, TournamentStanding* standing) {
  * no such pointer is natural here, and setting the arrow's bottom edge in a
  * local of its own, as one of them also did, changes nothing. The original
  * divides and truncates the arrow's texel step once, storing it as both of
- * DrawTextureRect's steps; writing the division into both arguments instead
- * of texelStep gives 118 words (44 in shape) but repeats it, and an f32
- * texelStep the call converts gives 120. These counts were measured when the
- * faces and arrows were drawn only once flipTime passed ROW_FLIP_TIME, which
- * it never does, and the draft gave 120 words (46 in shape); the original
- * compares it with 36, the last row's start. The draft then gave 110 words,
- * 44 in shape.
+ * DrawTextureRect's steps; an f32 texelStep the call converts gave 120
+ * words. These counts were measured when the faces and arrows were drawn
+ * only once flipTime passed ROW_FLIP_TIME, which it never does, and the
+ * draft gave 120 words (46 in shape); the original compares it with 36, the
+ * last row's start. The draft then gave 110 words, 44 in shape.
  *
  * The arrow's rect adds the row's top in place in each edge, as the
  * function's other rects do. A local for the top, set before the texel start,
@@ -1701,12 +1699,18 @@ void FormatLeaderboardRow(char* row, TournamentStanding* standing) {
  * words forcing 13 pseudos to 60 forcing 12; shades of their own for the
  * rows or the name flaps as well, or for both of those instead, give the
  * same, and for either alone 102 or 101. The counts above were measured
- * before it. 87 words differ, 39 in shape.
+ * before it.
  *
  * A focused permuter run's best reads the face loop's standing index into an
  * unsigned temporary and g_Scorecard.x through a pointer. Reading the
  * standing through standing instead, in the face loop, gives 88 words (42 in
  * shape), in the arrows' loop 109 (39), and in both 88 (42).
+ *
+ * The arrow's texel step is written into both of DrawTextureRect's steps
+ * rather than held in a texelStep local; GCC still divides and truncates it
+ * once, as the original does. That takes the draft from 87 words to 85 (39
+ * in shape to 37), and the register oracle's closest result from 60 words to
+ * 58, forcing 12 pseudos for each. 85 words differ, 37 in shape.
  */
 #ifdef NON_MATCHING
 void DrawLeaderboardPage(Gfx** displayListHead) {
@@ -1720,7 +1724,6 @@ void DrawLeaderboardPage(Gfx** displayListHead) {
   f32 halfSize;
   s32 roundedHalfSize;
   s32 texelStart;
-  s32 texelStep;
 
   gSPDisplayList(gfx++, g_DecalTextureSetup);
   gDPPipeSync(gfx++);
@@ -2062,7 +2065,6 @@ void DrawLeaderboardPage(Gfx** displayListHead) {
          * moved its edge */
         texelStart = (ARROW_IMAGE_SIZE / 2) -
             (((f32)roundedHalfSize - halfSize) * (ARROW_IMAGE_SIZE / 2));
-        texelStep = (TEXEL_STEP_ONE * ARROW_IMAGE_SIZE / 2) / halfSize;
         DrawTextureRect(&gfx,
             QuarterPixels(g_Scorecard.x - (roundedHalfSize - ARROW_CENTER_X)),
             QuarterPixels(((i * LEADERBOARD_ROW_SPACING) + ROW_HINGE_TOP +
@@ -2075,7 +2077,8 @@ void DrawLeaderboardPage(Gfx** displayListHead) {
             G_TX_RENDERTILE, texelStart,
             texelStart +
                 TexelCoordinate(g_Scorecard.placeChange * ARROW_IMAGE_SIZE),
-            texelStep, texelStep);
+            (TEXEL_STEP_ONE * ARROW_IMAGE_SIZE / 2) / halfSize,
+            (TEXEL_STEP_ONE * ARROW_IMAGE_SIZE / 2) / halfSize);
       }
     }
   }
