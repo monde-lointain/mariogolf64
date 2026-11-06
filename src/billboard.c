@@ -150,9 +150,6 @@ s32 GetGroundHeight(s32 x, s32 z);
 /* Depth given to the ball when no billboard needs to stay out of its way */
 #define VIEW_DEPTH_BALL_HIDDEN (-0xFFFF)
 
-/* Converts the fixed-point positions of objects on the course to floats */
-#define POSITION_TO_FLOAT (1.0f / 1024.0f)
-
 /* The least opacity of a billboard close to the camera */
 #define NEAR_BILLBOARD_ALPHA_MIN 0x80
 
@@ -478,9 +475,9 @@ void DrawBillboards(CameraMatrices* cameraMatrices, s32 cameraIndex) {
 
   if (g_Cameras[cameraIndex].mode == CAMERA_MODE_BEHIND_GOLFER) {
     ballDepth =
-        GetViewDepth(g_CurrentShot.ballPosition[AXIS_X] * POSITION_TO_FLOAT,
-            g_CurrentShot.ballPosition[AXIS_Y] * POSITION_TO_FLOAT,
-            g_CurrentShot.ballPosition[AXIS_Z] * POSITION_TO_FLOAT);
+        GetViewDepth(g_CurrentShot.ballPosition[AXIS_X] * COURSE_TO_WORLD_SCALE,
+            g_CurrentShot.ballPosition[AXIS_Y] * COURSE_TO_WORLD_SCALE,
+            g_CurrentShot.ballPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE);
     if (ballDepth > 0) {
       ballDepth = VIEW_DEPTH_BALL_HIDDEN;
     }
@@ -640,9 +637,9 @@ void DrawFadingBillboards(CameraMatrices* cameraMatrices, s32 cameraIndex) {
 
   if (g_Cameras[cameraIndex].mode == CAMERA_MODE_BEHIND_GOLFER) {
     ballDepth =
-        GetViewDepth(g_CurrentShot.ballPosition[AXIS_X] * POSITION_TO_FLOAT,
-            g_CurrentShot.ballPosition[AXIS_Y] * POSITION_TO_FLOAT,
-            g_CurrentShot.ballPosition[AXIS_Z] * POSITION_TO_FLOAT);
+        GetViewDepth(g_CurrentShot.ballPosition[AXIS_X] * COURSE_TO_WORLD_SCALE,
+            g_CurrentShot.ballPosition[AXIS_Y] * COURSE_TO_WORLD_SCALE,
+            g_CurrentShot.ballPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE);
     if (ballDepth > 0) {
       ballDepth = VIEW_DEPTH_BALL_HIDDEN;
     }
