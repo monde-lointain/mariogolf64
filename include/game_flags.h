@@ -25,7 +25,7 @@
 #define GAME_FLAG_TEST_AIM_TILT_AND_MOVIES 0x21
 
 /* Blanks two lines of debug text when the flight camera finishes */
-#define GAME_FLAG_UNK22 0x22
+#define GAME_FLAG_BLANK_TEXT_AFTER_FLIGHT 0x22
 
 /* Adds a ring at a fixed place, once each time the flag is set */
 #define GAME_FLAG_TEST_RING 0x25

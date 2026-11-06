@@ -3492,7 +3492,7 @@ s32 UpdateFlightCamera(Boolean isAdvancing, s32 buttons) {
       }
 
       if (++f_LandingWaitFrame >= f_LandingWaitFrameCount) {
-        if (IsGameFlagSet(GAME_FLAG_UNK22)) {
+        if (IsGameFlagSet(GAME_FLAG_BLANK_TEXT_AFTER_FLIGHT)) {
           PrintDebugText("        ", 16, 4);
           PrintDebugText("         ", 10, 2);
         }
