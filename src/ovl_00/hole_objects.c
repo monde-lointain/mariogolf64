@@ -97,7 +97,7 @@ static s32 f_UnusedLeapValue = 0;
 static s32 f_OtherUnusedLeapValue = 0;
 /* Read by no routine */
 static s32 f_UnusedWordBeforeCheepCheepVertices UNUSED = 0;
-static Vtx f_CheepCheepVertices[4] = {
+static Vtx f_CheepCheepVertices[QUAD_VERTEX_COUNT] = {
     {{{-7, -7, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{-7, 7, 0}, 0, {0, 0x7C0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{7, 7, 0}, 0, {0x7C0, 0x7C0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
@@ -421,7 +421,7 @@ void DrawHoleCreatures(Gfx** displayListHead) {
       gSPMatrix(gfx++,
           PhysicalAddress(&creature->matrices[g_MatrixBufferIndex]),
           G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
-      gSPVertex(gfx++, f_CheepCheepVertices, 4, 0);
+      gSPVertex(gfx++, f_CheepCheepVertices, QUAD_VERTEX_COUNT, 0);
       gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
       gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
     } else if (creature->state == HOLE_CREATURE_MONKEY) {

@@ -249,28 +249,28 @@ static u8 f_LargeFontWidths[CHAR_CODE_COUNT] = {
 };
 /* clang-format on */
 /* The quads glyph sprites are drawn with, centered on the sprite */
-static Vtx f_LargeGlyphVertices[4] = {
+static Vtx f_LargeGlyphVertices[QUAD_VERTEX_COUNT] = {
     {{{0, 6, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{0, -6, 0}, 0, {0, 0x2FF}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{12, -6, 0}, 0, {0x2FF, 0x2FF}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{12, 6, 0}, 0, {0x2FF, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}}};
-static Vtx f_LargeGlyphTopVertices[4] = {
+static Vtx f_LargeGlyphTopVertices[QUAD_VERTEX_COUNT] = {
     {{{0, 6, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{0, 0, 0}, 0, {0, 0x17F}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{12, 0, 0}, 0, {0x2FF, 0x17F}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{12, 6, 0}, 0, {0x2FF, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}}};
-static Vtx f_LargeGlyphBottomVertices[4] = {
+static Vtx f_LargeGlyphBottomVertices[QUAD_VERTEX_COUNT] = {
     {{{0, 0, 0}, 0, {0, 0x180}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{0, -6, 0}, 0, {0, 0x2FF}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{12, -6, 0}, 0, {0x2FF, 0x2FF}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{12, 0, 0}, 0, {0x2FF, 0x180}, {0xFF, 0xFF, 0xFF, 0xFF}}}};
-static Vtx f_MediumGlyphVertices[4] = {
+static Vtx f_MediumGlyphVertices[QUAD_VERTEX_COUNT] = {
     {{{0, 5, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{0, -5, 0}, 0, {0, 0x27F}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{10, -5, 0}, 0, {0x27F, 0x27F}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{10, 5, 0}, 0, {0x27F, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}}};
 /* The fourth vertex is 6 above the middle, though the others are 4 from it */
-static Vtx f_SmallGlyphVertices[4] = {
+static Vtx f_SmallGlyphVertices[QUAD_VERTEX_COUNT] = {
     {{{0, 4, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{0, -4, 0}, 0, {0, 0x1FF}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{8, -4, 0}, 0, {0x1FF, 0x1FF}, {0xFF, 0xFF, 0xFF, 0xFF}}},
@@ -2147,19 +2147,19 @@ void DrawGlyphGroup(Gfx** displayListHead, s32 group) {
       bottom = fontSize;
       if (fontSize == FONT_SIZE_LARGE) {
         if (g_GlyphSprites[i].flags & GLYPH_FLAG_TOP_PART) {
-          gSPVertex(gfx++, f_LargeGlyphTopVertices, 4, 0);
+          gSPVertex(gfx++, f_LargeGlyphTopVertices, QUAD_VERTEX_COUNT, 0);
           bottom = LARGE_GLYPH_PART_ROW;
         } else if (g_GlyphSprites[i].flags & GLYPH_FLAG_BOTTOM_PART) {
-          gSPVertex(gfx++, f_LargeGlyphBottomVertices, 4, 0);
+          gSPVertex(gfx++, f_LargeGlyphBottomVertices, QUAD_VERTEX_COUNT, 0);
           bottom = g_GlyphSprites[i].fontSize;
           top = LARGE_GLYPH_PART_ROW;
         } else {
-          gSPVertex(gfx++, f_LargeGlyphVertices, 4, 0);
+          gSPVertex(gfx++, f_LargeGlyphVertices, QUAD_VERTEX_COUNT, 0);
         }
       } else if (fontSize == FONT_SIZE_MEDIUM) {
-        gSPVertex(gfx++, f_MediumGlyphVertices, 4, 0);
+        gSPVertex(gfx++, f_MediumGlyphVertices, QUAD_VERTEX_COUNT, 0);
       } else {
-        gSPVertex(gfx++, f_SmallGlyphVertices, 4, 0);
+        gSPVertex(gfx++, f_SmallGlyphVertices, QUAD_VERTEX_COUNT, 0);
       }
 
       gSPModifyVertex(

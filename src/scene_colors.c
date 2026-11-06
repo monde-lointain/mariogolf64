@@ -14,7 +14,6 @@
 
 /* Each half of f_ShadedVertices is two quads; the second takes the derived
  * color */
-#define QUAD_VERTEX_COUNT 4
 #define SHADED_QUAD_START QUAD_VERTEX_COUNT
 
 #define RGB_CHANNEL_COUNT 3

@@ -305,7 +305,7 @@ static s32 f_LoadedBanner = BANNER_NONE;
 static Boolean f_IsMovieBufferAllocated = FALSE;
 /* Read by no routine */
 static s32 f_UnusedWordAfterMovieBufferFlag UNUSED = -1;
-static Vtx f_BannerLetterVertices[4] = {
+static Vtx f_BannerLetterVertices[QUAD_VERTEX_COUNT] = {
     {{{0, 32, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{0, -32, 0}, 0, {0, 0xFC0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{32, -32, 0}, 0, {0x7FF, 0xFC0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
@@ -413,7 +413,7 @@ static s32 f_FlipMessageFrame = FLIP_MESSAGE_FRAME_NONE;
 static MessageId f_FlipMessageId = 0;
 static s32 f_FlipMessageHalfWidth = 0;
 static s32 f_FlipMessageHalfHeight = 0;
-static Vtx f_FlipMessageBoardVertices[4] = {
+static Vtx f_FlipMessageBoardVertices[QUAD_VERTEX_COUNT] = {
     {{{-72, 12, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{-72, -12, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{72, -12, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
@@ -496,7 +496,7 @@ static Gfx f_MovieSetupDisplayList[] = {
     gsDPSetPrimDepth(16415, 0),
     gsSPEndDisplayList(),
 };
-static Vtx f_ContactSpinVertices[4] = {
+static Vtx f_ContactSpinVertices[QUAD_VERTEX_COUNT] = {
     {{{-25, 25, 0}, 0, {0, 0}, {0xFF, 0x7F, 0x00, 0xFF}}},
     {{{-25, -15, 0}, 0, {0, 0x7FF}, {0xFF, 0xFF, 0xBF, 0xFF}}},
     {{{15, -15, 0}, 0, {0x7FF, 0x7FF}, {0xFF, 0x7F, 0x00, 0xFF}}},
@@ -701,7 +701,7 @@ void DrawNumberBanner(Gfx** displayListHead) {
         PhysicalAddress(
             &f_ActiveBannerLetters[i].matrices[g_MatrixBufferIndex]),
         G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-    gSPVertex(gfx++, f_BannerLetterVertices, 4, 0);
+    gSPVertex(gfx++, f_BannerLetterVertices, QUAD_VERTEX_COUNT, 0);
     gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
   }
 
@@ -728,7 +728,7 @@ void DrawBannerLetters(Gfx** displayListHead) {
         PhysicalAddress(
             &f_ActiveBannerLetters[i].matrices[g_MatrixBufferIndex]),
         G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
-    gSPVertex(gfx++, f_BannerLetterVertices, 4, 0);
+    gSPVertex(gfx++, f_BannerLetterVertices, QUAD_VERTEX_COUNT, 0);
     gSP2Triangles(gfx++, 0, 1, 3, 0, 1, 2, 3, 0);
   }
 
@@ -1169,7 +1169,7 @@ void DrawFlipMessage(Gfx** displayListHead) {
     gSPMatrix(gfx++,
         PhysicalAddress(&f_FlipMessageMatrices[g_MatrixBufferIndex]),
         G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-    gSPVertex(gfx++, f_FlipMessageBoardVertices, 4, 0);
+    gSPVertex(gfx++, f_FlipMessageBoardVertices, QUAD_VERTEX_COUNT, 0);
     gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
     if (f_FlipMessageFrame == FLIP_MESSAGE_OPEN_FRAME) {
       SetUpTextDrawing(&gfx);
@@ -2922,7 +2922,7 @@ void DrawContactEffect(Gfx** displayListHead, CameraMatrices* matrices) {
       gSPMatrix(gfx++,
           PhysicalAddress(&f_ContactSpinMatrices[g_MatrixBufferIndex]),
           G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
-      gSPVertex(gfx++, f_ContactSpinVertices, 4, 0);
+      gSPVertex(gfx++, f_ContactSpinVertices, QUAD_VERTEX_COUNT, 0);
       gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
       gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
     }

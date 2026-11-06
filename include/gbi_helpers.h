@@ -25,6 +25,9 @@
           : (size) >= 2   ? 1 \
                           : 0)
 
+/* The vertices of a quad, drawn as two triangles */
+#define QUAD_VERTEX_COUNT 4
+
 /* Every geometry mode bit, for gSPClearGeometryMode to clear them all */
 #define ALL_GEOMETRY_MODES 0xFFFFFFFF
 

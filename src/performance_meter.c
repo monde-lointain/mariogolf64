@@ -95,7 +95,7 @@ static Vtx f_FrameVertices[] = {
     {{{1961, 23, 0}, 0, {0, 0}, {0x00, 0x00, 0x00, 0x80}}},
     {{{1681, 23, 0}, 0, {0, 0}, {0x00, 0x00, 0x00, 0x80}}},
 };
-static Vtx f_CpuBarVertices[] = {
+static Vtx f_CpuBarVertices[QUAD_VERTEX_COUNT] = {
     CPU_BAR_QUAD,
 };
 static Vtx f_AudioBarVertices[] = {
@@ -373,7 +373,7 @@ void DrawPerformanceMeter(u32 extraFrameCount, u32 y, u32 cpuStartTime,
         vertexIndex + 2, vertexIndex + 3, vertexIndex + 0, 0);
   }
 
-  gSPVertex(gfx++, f_CpuBarVertices, 4, 0);
+  gSPVertex(gfx++, f_CpuBarVertices, QUAD_VERTEX_COUNT, 0);
   startX = BAR_START_X;
   taskTime = cpuEndTime - cpuStartTime;
   barLength = taskTime * FRAME_WIDTH / FRAME_MICROSECONDS;

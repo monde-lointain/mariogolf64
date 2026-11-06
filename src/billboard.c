@@ -324,7 +324,8 @@ void DrawBillboard(Gfx** gfxPtr, Billboard* billboard,
   gSPMatrix(
       gfx++, &transform->scale, G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_NOPUSH);
   gDPPipeSync(gfx++);
-  gSPVertex(gfx++, f_BillboardVertices[billboard->shapeIndex], 4, 0);
+  gSPVertex(
+      gfx++, f_BillboardVertices[billboard->shapeIndex], QUAD_VERTEX_COUNT, 0);
   gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
   gDPPipeSync(gfx++);
   gSPPopMatrix(gfx++, G_MTX_MODELVIEW);

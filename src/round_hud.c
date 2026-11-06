@@ -532,7 +532,7 @@ static ArrowShape f_Arrows[ARROW_COUNT] = {
             {{{-80, 180, -60}, 0, {0, 0x400}, {0x00, 0x00, 0x00, 0x80}}},
             {{{80, 180, -60}, 0, {0, 0x400}, {0x48, 0x48, 0x48, 0x80}}},
             {{{80, 20, -60}, 0, {0, 0x200}, {0x20, 0x20, 0x20, 0x80}}}}}};
-static Vtx f_ClubHeadIconVertices[4] = {
+static Vtx f_ClubHeadIconVertices[QUAD_VERTEX_COUNT] = {
     {{{-16, 16, 0}, 0, {-0x1, -0x1}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{-16, -16, 0}, 0, {-0x1, 0x7FF}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{16, -16, 0}, 0, {0x7FF, 0x7FF}, {0xFF, 0xFF, 0xFF, 0xFF}}},
@@ -2760,7 +2760,7 @@ void DrawShotPanelIcons(Gfx** displayListHead, CameraView* view UNUSED) {
     gSPMatrix(gfx++,
         PhysicalAddress(&f_ClubHeadIconMatrices[g_MatrixBufferIndex]),
         G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-    gSPVertex(gfx++, f_ClubHeadIconVertices, 4, 0);
+    gSPVertex(gfx++, f_ClubHeadIconVertices, QUAD_VERTEX_COUNT, 0);
     gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
     gDPPipeSync(gfx++);
   }

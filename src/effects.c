@@ -188,25 +188,25 @@ FILE_STATIC s32 f_GroundCheckDropIndex;
 
 static s32 f_DebrisKind = 0;
 static s32 f_NextMatrixIndex = 0;
-static Vtx f_UprightQuadVertices[] = {
+static Vtx f_UprightQuadVertices[QUAD_VERTEX_COUNT] = {
     {{{-1, -1, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{-1, 1, 0}, 0, {0, 0x400}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{1, 1, 0}, 0, {0x400, 0x400}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{1, -1, 0}, 0, {0x400, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
 };
-static Vtx f_SmallFlatQuadVertices[] = {
+static Vtx f_SmallFlatQuadVertices[QUAD_VERTEX_COUNT] = {
     {{{-3, 0, -3}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{-3, 0, 3}, 0, {0x7FF, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{3, 0, 3}, 0, {0x7FF, 0x7FF}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{3, 0, -3}, 0, {0, 0x7FF}, {0xFF, 0xFF, 0xFF, 0xFF}}},
 };
-static Vtx f_RippleVertices[] = {
+static Vtx f_RippleVertices[QUAD_VERTEX_COUNT] = {
     {{{-7, 0, -7}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{-7, 0, 7}, 0, {0xFFF, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{7, 0, 7}, 0, {0xFFF, 0xFFF}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{7, 0, -7}, 0, {0, 0xFFF}, {0xFF, 0xFF, 0xFF, 0xFF}}},
 };
-static Vtx f_SpreadingCircleVertices[] = {
+static Vtx f_SpreadingCircleVertices[QUAD_VERTEX_COUNT] = {
     {{{-7, 0, -7}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{-7, 0, 7}, 0, {0x1FFF, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{7, 0, 7}, 0, {0x1FFF, 0x1FFF}, {0xFF, 0xFF, 0xFF, 0xFF}}},
@@ -1983,7 +1983,7 @@ void DrawDrop(Gfx** displayListHead, CameraMatrices* matrices,
       G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
   gSPMatrix(gfx++, PhysicalAddress(&matrices->billboard),
       G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
-  gSPVertex(gfx++, f_UprightQuadVertices, 4, 0);
+  gSPVertex(gfx++, f_UprightQuadVertices, QUAD_VERTEX_COUNT, 0);
   gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
   gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
   gDPPipeSync(gfx++);
@@ -2079,7 +2079,7 @@ void DrawDivotMark(Gfx** displayListHead) {
       G_TX_CLAMP, 6, 6, G_TX_NOLOD, G_TX_NOLOD);
   gSPMatrix(gfx++, PhysicalAddress(&f_DivotMarkMatrix),
       G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
-  gSPVertex(gfx++, f_SmallFlatQuadVertices, 4, 0);
+  gSPVertex(gfx++, f_SmallFlatQuadVertices, QUAD_VERTEX_COUNT, 0);
   gDPPipeSync(gfx++);
   gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
   gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
@@ -2096,7 +2096,7 @@ void DrawRipple(Gfx** displayListHead, Effect* effect) {
       gfx++, 0, 0, CIRCLE_GRAY, CIRCLE_GRAY, CIRCLE_GRAY, (u32)effect->alpha);
   gSPMatrix(gfx++, PhysicalAddress(&f_EffectMatrices[effect->matrixIndex]),
       G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
-  gSPVertex(gfx++, f_RippleVertices, 4, 0);
+  gSPVertex(gfx++, f_RippleVertices, QUAD_VERTEX_COUNT, 0);
   gDPPipeSync(gfx++);
   gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
   gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
@@ -2113,7 +2113,7 @@ void DrawSpreadingCircle(Gfx** displayListHead, Effect* effect) {
       gfx++, 0, 0, CIRCLE_GRAY, CIRCLE_GRAY, CIRCLE_GRAY, (u32)effect->alpha);
   gSPMatrix(gfx++, PhysicalAddress(&f_EffectMatrices[effect->matrixIndex]),
       G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
-  gSPVertex(gfx++, f_SpreadingCircleVertices, 4, 0);
+  gSPVertex(gfx++, f_SpreadingCircleVertices, QUAD_VERTEX_COUNT, 0);
   gDPPipeSync(gfx++);
   gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
   gSPPopMatrix(gfx++, G_MTX_MODELVIEW);

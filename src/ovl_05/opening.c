@@ -430,7 +430,7 @@ static s32 f_OpeningShotState = 0;
 /* Read by no routine; the same as f_OpeningSecondShot */
 static ShotLaunch f_UnusedSecondShotCopy UNUSED = {
     -0x2000, 0, MAX_LAUNCH_POWER, 0, 0, 0, 0, SHOT_MODE_NORMAL};
-static Vtx f_OpeningShotDashVertices[4] = {
+static Vtx f_OpeningShotDashVertices[QUAD_VERTEX_COUNT] = {
     {{{-15, 0, 0}, 0, {0, 0}, {0x00, 0xFF, 0x00, 0xFF}}},
     {{{15, 0, 0}, 0, {0, 2048}, {0x00, 0x00, 0x00, 0xFF}}},
     {{{15, 0, -1}, 0, {2048, 2048}, {0x00, 0x00, 0xFF, 0x00}}},
@@ -449,7 +449,7 @@ static s32 f_OpeningShotPathScroll = 0;
 static f32 f_UnusedStickOffsetX = 0.0f;
 static f32 f_UnusedStickOffsetY = 0.0f;
 static s32 f_OpeningFrameParity = 0;
-static Vtx f_LookAtMarkerVertices[6][4] = {
+static Vtx f_LookAtMarkerVertices[6][QUAD_VERTEX_COUNT] = {
     {{{{-50, 0, 5}, 0, {0, 0}, {0xFF, 0x00, 0x00, 0xFF}}},
         {{{-50, 0, -5}, 0, {0, 0}, {0xFF, 0x00, 0x00, 0xFF}}},
         {{{50, 0, -5}, 0, {0, 0}, {0xFF, 0x00, 0x00, 0xFF}}},
@@ -474,22 +474,23 @@ static Vtx f_LookAtMarkerVertices[6][4] = {
         {{{3, 3, -50}, 0, {0, 0}, {0x00, 0xFF, 0xFF, 0xFF}}},
         {{{3, 3, 50}, 0, {0, 0}, {0x00, 0xFF, 0xFF, 0xFF}}},
         {{{-3, -3, 50}, 0, {0, 0}, {0x00, 0xFF, 0xFF, 0xFF}}}}};
-static Vtx f_OpeningBallStripVertices[OPENING_BALL_STRIP_COUNT][4] = {
-    {{{{1, -1, 0}, 0, {0, 2048}, {0xFF, 0xFF, 0xFF, 0xFF}}},
-        {{{1, -2, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
-        {{{-1, -2, 0}, 0, {4096, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
-        {{{-1, -1, 0}, 0, {4096, 2048}, {0xFF, 0xFF, 0xFF, 0xFF}}}},
-    {{{{1, 0, 0}, 0, {0, 2048}, {0xFF, 0xFF, 0xFF, 0xFF}}},
-        {{{1, -1, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
-        {{{-1, -1, 0}, 0, {4096, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
-        {{{-1, 0, 0}, 0, {4096, 2048}, {0xFF, 0xFF, 0xFF, 0xFF}}}}};
+static Vtx
+    f_OpeningBallStripVertices[OPENING_BALL_STRIP_COUNT][QUAD_VERTEX_COUNT] = {
+        {{{{1, -1, 0}, 0, {0, 2048}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+            {{{1, -2, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+            {{{-1, -2, 0}, 0, {4096, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+            {{{-1, -1, 0}, 0, {4096, 2048}, {0xFF, 0xFF, 0xFF, 0xFF}}}},
+        {{{{1, 0, 0}, 0, {0, 2048}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+            {{{1, -1, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+            {{{-1, -1, 0}, 0, {4096, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+            {{{-1, 0, 0}, 0, {4096, 2048}, {0xFF, 0xFF, 0xFF, 0xFF}}}}};
 static Boolean f_HasLogoBallLastPosition = FALSE;
-static Vtx f_OpeningBallShadowVertices[4] = {
+static Vtx f_OpeningBallShadowVertices[QUAD_VERTEX_COUNT] = {
     {{{-1, 0, 1}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{-1, 0, -1}, 0, {0, 2048}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{1, 0, -1}, 0, {2048, 2048}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{1, 0, 1}, 0, {2048, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}}};
-static Vtx f_LogoBallMarioVertices[4] = {
+static Vtx f_LogoBallMarioVertices[QUAD_VERTEX_COUNT] = {
     {{{-1, -1, 1}, 0, {1536, 1536}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{-1, -1, -1}, 0, {0, 1536}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{-1, 1, -1}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
@@ -498,12 +499,12 @@ static Vtx f_LogoBallMarioVertices[4] = {
 static Boolean f_ShouldResetLogoBallRoll = TRUE;
 static s32 f_LogoBallFrameIndex = 0;
 static Boolean f_HasProjectedLogoBallLastPosition = FALSE;
-static Vtx f_ProjectedShadowVertices[4] = {
+static Vtx f_ProjectedShadowVertices[QUAD_VERTEX_COUNT] = {
     {{{-1, 0, 1}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{-1, 0, -1}, 0, {0, 2048}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{1, 0, -1}, 0, {2048, 2048}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{1, 0, 1}, 0, {2048, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}}};
-static Vtx f_ProjectedLogoBallMarioVertices[4] = {
+static Vtx f_ProjectedLogoBallMarioVertices[QUAD_VERTEX_COUNT] = {
     {{{-1, -1, 1}, 0, {1536, 1536}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{-1, -1, -1}, 0, {0, 1536}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{-1, 1, -1}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
@@ -519,7 +520,7 @@ static Vtx f_LakituTrailVertices[2] = {
 static s32 f_LakituAngle = 0;
 static s32 f_BurstFrame = BURST_NOT_STARTED;
 static s32 f_ShotBallAlpha = OPAQUE_ALPHA;
-static Vtx f_ShotBallShadowVertices[4] = {
+static Vtx f_ShotBallShadowVertices[QUAD_VERTEX_COUNT] = {
     {{{-1, 0, 1}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{-1, 0, -1}, 0, {0, 2048}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{1, 0, -1}, 0, {2048, 2048}, {0xFF, 0xFF, 0xFF, 0xFF}}},
@@ -545,7 +546,7 @@ static f32 f_UnusedFloatAfterClubOrbit UNUSED = 0.0f;
 static Degrees f_LogoClubUnusedAngle = LOGO_CLUB_START_UNUSED_ANGLE;
 static Degrees f_LogoClubWobbleAngle = 0.0f;
 /* The top and bottom halves of a letter */
-static Vtx f_LogoLetterVertices[2][4] = {
+static Vtx f_LogoLetterVertices[2][QUAD_VERTEX_COUNT] = {
     {{{{-24, 48, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
         {{{-24, 24, 0}, 0, {0, 1536}, {0xFF, 0xFF, 0xFF, 0xFF}}},
         {{{24, 24, 0}, 0, {3072, 1536}, {0xFF, 0xFF, 0xFF, 0xFF}}},
@@ -554,7 +555,7 @@ static Vtx f_LogoLetterVertices[2][4] = {
         {{{-24, 0, 0}, 0, {0, 1536}, {0xFF, 0xFF, 0xFF, 0xFF}}},
         {{{24, 0, 0}, 0, {3072, 1536}, {0xFF, 0xFF, 0xFF, 0xFF}}},
         {{{24, 24, 0}, 0, {3072, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}}}};
-static Vtx f_LogoClubVertices[LOGO_CLUB_STRIP_COUNT][4] = {
+static Vtx f_LogoClubVertices[LOGO_CLUB_STRIP_COUNT][QUAD_VERTEX_COUNT] = {
     {{{{-76, 39, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
         {{{-76, 26, 0}, 0, {0, 832}, {0xFF, 0xFF, 0xFF, 0xFF}}},
         {{{76, 26, 0}, 0, {9728, 832}, {0xFF, 0xFF, 0xFF, 0xFF}}},
@@ -1005,7 +1006,8 @@ void DrawOpeningShotPath(CameraMatrices* matrices UNUSED) {
     gSPMatrix(g_DisplayListHead++,
         &f_OpeningShotDashMatrices[g_DrawBufferIndex][step],
         G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
-    gSPVertex(g_DisplayListHead++, f_OpeningShotDashVertices, 4, 0);
+    gSPVertex(
+        g_DisplayListHead++, f_OpeningShotDashVertices, QUAD_VERTEX_COUNT, 0);
     gSP2Triangles(g_DisplayListHead++, 0, 1, 2, 0, 0, 2, 3, 0);
     gSPPopMatrix(g_DisplayListHead++, G_MTX_MODELVIEW);
   }
@@ -3123,17 +3125,17 @@ void DrawOpening(CameraMatrices* matrices, Gfx** displayListHead) {
         G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
     gSPMatrix(gfx++, PhysicalAddress(&f_LookAtMarkerScaling),
         G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
-    gSPVertex(gfx++, f_LookAtMarkerVertices[0], 4, 0);
+    gSPVertex(gfx++, f_LookAtMarkerVertices[0], QUAD_VERTEX_COUNT, 0);
     gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
-    gSPVertex(gfx++, f_LookAtMarkerVertices[1], 4, 0);
+    gSPVertex(gfx++, f_LookAtMarkerVertices[1], QUAD_VERTEX_COUNT, 0);
     gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
-    gSPVertex(gfx++, f_LookAtMarkerVertices[2], 4, 0);
+    gSPVertex(gfx++, f_LookAtMarkerVertices[2], QUAD_VERTEX_COUNT, 0);
     gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
-    gSPVertex(gfx++, f_LookAtMarkerVertices[3], 4, 0);
+    gSPVertex(gfx++, f_LookAtMarkerVertices[3], QUAD_VERTEX_COUNT, 0);
     gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
-    gSPVertex(gfx++, f_LookAtMarkerVertices[4], 4, 0);
+    gSPVertex(gfx++, f_LookAtMarkerVertices[4], QUAD_VERTEX_COUNT, 0);
     gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
-    gSPVertex(gfx++, f_LookAtMarkerVertices[5], 4, 0);
+    gSPVertex(gfx++, f_LookAtMarkerVertices[5], QUAD_VERTEX_COUNT, 0);
     gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
     gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
     gDPPipeSync(gfx++);
@@ -3482,7 +3484,7 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
             G_MTX_PUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
         gSPMatrix(gfx++, PhysicalAddress(&f_OpeningBallScaleMatrices[slot]),
             G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
-        gSPVertex(gfx++, f_OpeningBallShadowVertices, 4, 0);
+        gSPVertex(gfx++, f_OpeningBallShadowVertices, QUAD_VERTEX_COUNT, 0);
         gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
         gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
         gDPPipeSync(gfx++);
@@ -3553,7 +3555,8 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
           }
 
           gDPPipeSync(gfx++);
-          gSPVertex(gfx++, f_OpeningBallStripVertices[stripIndex], 4, 0);
+          gSPVertex(gfx++, f_OpeningBallStripVertices[stripIndex],
+              QUAD_VERTEX_COUNT, 0);
           gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
         }
 
@@ -3662,7 +3665,7 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
               G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
           if (f_OpeningScene >= OPENING_SCENE_LOGO_BALL_MARIO &&
               f_OpeningSceneFramesLeft < LOGO_BALL_MARIO_FRAMES_LEFT) {
-            gSPVertex(gfx++, f_LogoBallMarioVertices, 4, 0);
+            gSPVertex(gfx++, f_LogoBallMarioVertices, QUAD_VERTEX_COUNT, 0);
             gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
           }
 
@@ -3781,7 +3784,7 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
           gSPMatrix(gfx++,
               PhysicalAddress(&f_ProjectedShadowScaleMatrices[slot]),
               G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
-          gSPVertex(gfx++, f_ProjectedShadowVertices, 4, 0);
+          gSPVertex(gfx++, f_ProjectedShadowVertices, QUAD_VERTEX_COUNT, 0);
           gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
           gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
           gDPPipeSync(gfx++);
@@ -3966,7 +3969,8 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
                 G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
             gSPMatrix(gfx++, PhysicalAddress(&f_ProjectedLogoBallMarioOffset),
                 G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
-            gSPVertex(gfx++, f_ProjectedLogoBallMarioVertices, 4, 0);
+            gSPVertex(
+                gfx++, f_ProjectedLogoBallMarioVertices, QUAD_VERTEX_COUNT, 0);
             gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
             gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
             gDPPipeSync(gfx++);
@@ -4548,7 +4552,7 @@ void DrawOpeningShotBall(Gfx** displayListHead) {
           G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
       gSPMatrix(gfx++, PhysicalAddress(&f_ShotBallShadowScaling),
           G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
-      gSPVertex(gfx++, f_ShotBallShadowVertices, 4, 0);
+      gSPVertex(gfx++, f_ShotBallShadowVertices, QUAD_VERTEX_COUNT, 0);
       gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
       gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
       gDPPipeSync(gfx++);
@@ -5073,7 +5077,7 @@ void DrawOpeningLogo(Gfx** displayListHead, Boolean isDrawn) {
         gDPSetPrimDepth(
             gfx++, f_LogoLetters[i].depth + LOGO_LETTER_DEPTH_OFFSET, 0);
         gDPPipeSync(gfx++);
-        gSPVertex(gfx++, f_LogoLetterVertices[j], 4, 0);
+        gSPVertex(gfx++, f_LogoLetterVertices[j], QUAD_VERTEX_COUNT, 0);
         gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
         gDPPipeSync(gfx++);
       }
@@ -5100,7 +5104,7 @@ void DrawOpeningLogo(Gfx** displayListHead, Boolean isDrawn) {
           G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_NOPUSH);
       gDPSetPrimDepth(gfx++, LOGO_CLUB_DEPTH, 0);
       gDPPipeSync(gfx++);
-      gSPVertex(gfx++, f_LogoClubVertices[j], 4, 0);
+      gSPVertex(gfx++, f_LogoClubVertices[j], QUAD_VERTEX_COUNT, 0);
       gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
       gDPPipeSync(gfx++);
     }
@@ -5150,7 +5154,7 @@ void DrawOpeningLogo(Gfx** displayListHead, Boolean isDrawn) {
             PhysicalAddress(&f_LogoLetterScalings[i][g_DrawBufferIndex]),
             G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_NOPUSH);
         gDPPipeSync(gfx++);
-        gSPVertex(gfx++, f_LogoLetterVertices[j], 4, 0);
+        gSPVertex(gfx++, f_LogoLetterVertices[j], QUAD_VERTEX_COUNT, 0);
         gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
         gDPPipeSync(gfx++);
       }

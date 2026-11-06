@@ -91,7 +91,6 @@
 #define FLAP_BOTTOM_QUAD 1
 #define FLAP_NAME_QUAD 2
 #define FLAP_QUAD_COUNT 3
-#define QUAD_VERTEX_COUNT 4
 
 /* The page's four looks. No code changes f_ScoresStyle, so the page keeps
  * SCORES_STYLE_OPAQUE. */

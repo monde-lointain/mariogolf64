@@ -390,7 +390,7 @@ static u32 f_PlanTimeBudget = INITIAL_PLAN_TIME_BUDGET;
  * earlier count */
 static s32 f_ShotFlightCount = 0;
 /* A dash of the shot preview */
-static Vtx f_ShotPreviewDashVertices[4] = {
+static Vtx f_ShotPreviewDashVertices[QUAD_VERTEX_COUNT] = {
     {{{-1, 0, 0}, 0, {0, 0}, {0x00, 0xFF, 0x00, 0xFF}}},
     {{{1, 0, 0}, 0, {0, 0x800}, {0x00, 0x00, 0x00, 0xFF}}},
     {{{1, 0, -1}, 0, {0x800, 0x800}, {0x00, 0x00, 0xFF, 0x00}}},
@@ -404,7 +404,7 @@ static s8 f_HasShotPreviewEnded = FALSE;
 /* Scrolls the shot preview's dots */
 static s32 f_ShotPreviewDotScroll = 0;
 /* The putt preview's line, placed on screen */
-static Vtx f_PuttPreviewLineVertices[4] = {
+static Vtx f_PuttPreviewLineVertices[QUAD_VERTEX_COUNT] = {
     {{{0, 0, -100}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{0, -1, -100}, 0, {0, 0x7C0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{48, -1, -100}, 0, {0x17C0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
@@ -2231,7 +2231,8 @@ void DrawShotPreview(CameraMatrices* matrices) {
           G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
       gSPMatrix(g_DisplayListHead++, PhysicalAddress(&f_PuttPreviewIdentity),
           G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-      gSPVertex(g_DisplayListHead++, f_PuttPreviewLineVertices, 4, 0);
+      gSPVertex(
+          g_DisplayListHead++, f_PuttPreviewLineVertices, QUAD_VERTEX_COUNT, 0);
       offsetX = dy * scale;
       offsetY = dx * scale;
       gSPModifyVertex(g_DisplayListHead++, 0, G_MWO_POINT_XYSCREEN,
@@ -2271,7 +2272,8 @@ void DrawShotPreview(CameraMatrices* matrices) {
       gSPMatrix(g_DisplayListHead++,
           &f_ShotPreviewMatrices[g_DrawBufferIndex][step],
           G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
-      gSPVertex(g_DisplayListHead++, f_ShotPreviewDashVertices, 4, 0);
+      gSPVertex(
+          g_DisplayListHead++, f_ShotPreviewDashVertices, QUAD_VERTEX_COUNT, 0);
       gSP2Triangles(g_DisplayListHead++, 0, 1, 2, 0, 0, 2, 3, 0);
       gSPPopMatrix(g_DisplayListHead++, G_MTX_MODELVIEW);
     }

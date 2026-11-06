@@ -353,7 +353,6 @@ enum TriangleEdit {
 /* DrawTargetPole's pole: two crossed quads, one in the x-y plane and
  * one in the z-y plane */
 #define POLE_QUAD_COUNT 2
-#define POLE_QUAD_VERTEX_COUNT 4
 
 /* FillWaveTexels's 32x32 IA8 wave pattern */
 #define WAVE_TEXTURE_WIDTH 32
@@ -744,7 +743,7 @@ static u8 f_ScreenCaptureHeader[CAPTURE_HEADER_SIZE] =
 static u8 f_CornerCaptureHeader[CAPTURE_HEADER_SIZE] =
     BMP_HEADER(CORNER_CAPTURE_SIZE, CORNER_CAPTURE_WIDTH, CORNER_CAPTURE_HEIGHT,
         CORNER_CAPTURE_SIZE - CAPTURE_HEADER_SIZE);
-static Vtx f_PoleVertices[POLE_QUAD_COUNT][POLE_QUAD_VERTEX_COUNT] = {
+static Vtx f_PoleVertices[POLE_QUAD_COUNT][QUAD_VERTEX_COUNT] = {
     {
         {{{-8, -560, 0}, 0, {0, 0}, {0xFF, 0x00, 0x00, 0xFF}}},
         {{{8, -560, 0}, 0, {0x800, 0}, {0xFF, 0x00, 0x00, 0xFF}}},
@@ -5008,9 +5007,9 @@ void DrawTargetPole(CameraMatrices* matrices UNUSED, Gfx** displayListHead) {
   gDPSetCombineMode(gfx++, G_CC_SHADE, G_CC_SHADE);
   gSPMatrix(gfx++, PhysicalAddress(&f_PoleMatrix),
       G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
-  gSPVertex(gfx++, f_PoleVertices[0], POLE_QUAD_VERTEX_COUNT, 0);
+  gSPVertex(gfx++, f_PoleVertices[0], QUAD_VERTEX_COUNT, 0);
   gSP2Triangles(gfx++, 0, 1, 2, 0, 1, 3, 2, 0);
-  gSPVertex(gfx++, f_PoleVertices[1], POLE_QUAD_VERTEX_COUNT, 0);
+  gSPVertex(gfx++, f_PoleVertices[1], QUAD_VERTEX_COUNT, 0);
   gSP2Triangles(gfx++, 0, 1, 2, 0, 1, 3, 2, 0);
   gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
   gDPPipeSync(gfx++);
