@@ -2095,7 +2095,7 @@ void UpdateOpening(void) {
                 SOUND_UNK418, f_OpeningSoundChannel, SOUND_FULL_SCALE, 0, 0x3F);
           } else {
             PlaySoundWithEffects(
-                SOUND_UNK417, f_OpeningSoundChannel, 0x50, 0, 0x3F);
+                SOUND_PEACH_HEY_MARIO, f_OpeningSoundChannel, 0x50, 0, 0x3F);
           }
 
           AdvanceOpeningSoundChannel();
