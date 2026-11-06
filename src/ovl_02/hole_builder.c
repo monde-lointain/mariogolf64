@@ -3400,6 +3400,10 @@ static inline u16* GetShadowedTexel(u32 column, u32 row) {
  * Clamping the first column in maskRow, which would give the mask's row
  * counter a second meaning, gives 57 words, 17 in shape, but the oracle's
  * closest is then those 57 words with nothing forced, against 55 forcing 5.
+ *
+ * An s16 rowStart gives 56 words (14 in shape), but it sign-extends the
+ * row's start with an sll by 21 and an sra by 16, where the original shifts
+ * once, by 5.
  */
 #ifdef NON_MATCHING
 void CastBillboardShadows(void) {
