@@ -1659,20 +1659,21 @@ void DrawReplaySaveMenu(Gfx** displayListHead) {
     LoadLargePalette(&gfx, ImageBody(f_PanelImage));
     for (index = 0; index != PANEL_STRIP_COUNT; index++) {
       /*
-       * Unused; it is there to match: without it 8 words differ, 4 in shape
+       * The strips' tops step by the constant: stepping them by stripHeight
+       * gives 76 words differing, 6 in shape
        */
       stripHeight = TITLE_PANEL_STRIP_HEIGHT;
       LoadTextureBlock(&gfx,
           LargeImageTexels(f_PanelImage) + (index * PANEL_STRIP_SIZE),
           G_IM_FMT_CI, G_IM_SIZ_8b, PANEL_IMAGE_WIDTH, PANEL_STRIP_HEIGHT, 0,
           G_TX_MIRROR, G_TX_MIRROR, 0, 0, 0, 0);
-      titleHeight = TITLE_PANEL_STRIP_HEIGHT * PANEL_STRIP_COUNT;
+      titleHeight = stripHeight * PANEL_STRIP_COUNT;
       DrawTextureRect(&gfx, QuarterPixels(rowOffsets[1] + TITLE_PANEL_LEFT),
           QuarterPixels(
               titleBob + TITLE_PANEL_TOP + (index * TITLE_PANEL_STRIP_HEIGHT)),
           QuarterPixels(rowOffsets[1] + TITLE_PANEL_LEFT + TITLE_PANEL_WIDTH),
           QuarterPixels(titleBob + TITLE_PANEL_TOP +
-              (index * TITLE_PANEL_STRIP_HEIGHT) + TITLE_PANEL_STRIP_HEIGHT),
+              (index * TITLE_PANEL_STRIP_HEIGHT) + stripHeight),
           G_TX_RENDERTILE, 0, 0, (PANEL_IMAGE_WIDTH << 10) / TITLE_PANEL_WIDTH,
           (PANEL_IMAGE_HEIGHT << 10) / titleHeight);
     }
