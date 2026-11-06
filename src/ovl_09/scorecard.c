@@ -455,7 +455,9 @@ void FreeScorecard(void) {
      * Taken before the frees above it, to match: the original keeps this
      * address in a register and steps the face images' addresses from it.
      * Freeing g_Scorecard.tableImage in place, or taking its address after
-     * any of the frees here, gives 33 words.
+     * any of the frees here, gives 33 words (3 in shape), and taking it
+     * where it is declared or as the scorecard closes 51 (7 or 5), against
+     * 17 (3).
      */
     tableImage = &g_Scorecard.tableImage;
     FreeMemory(&g_Scorecard.totalLabelsImage);
