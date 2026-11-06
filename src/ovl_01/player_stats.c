@@ -1783,6 +1783,10 @@ void DrawBrickWallRows(Gfx** displayListHead, u8 slide) {
  * rectangle, a split assignment; its other changes, the pad in the timer's
  * block and a local for the right edge, give 25 (5) alone or together. 25 words
  * differ, 5 in shape.
+ *
+ * The register oracle's closest result, forcing 2 pseudos, swaps $v0 and
+ * $v1 in the mirrored start's shifts and leaves 15 words, so the code
+ * differs too.
  */
 #ifdef NON_MATCHING
 void DrawPageArrows(Gfx** displayListHead) {
