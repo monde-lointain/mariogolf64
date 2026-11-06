@@ -6343,9 +6343,10 @@ void DrawCourseSelect(Gfx** displayListHead) {
     }
 
     /*
-     * The wall stays still at other slides. With a case for
-     * STATS_SLIDE_CURRENT the five labels make a jump table, and with
-     * default for the slides out the tree tests differently (49 words)
+     * The wall stays still at other slides. An empty case for
+     * STATS_SLIDE_CURRENT compiles to the same tests but moves registers
+     * elsewhere (41 words, 23 in shape), and default for the slides out
+     * tests the tree differently (30, 12), against 24 (6)
      */
     switch (g_BetPagesWallSlide) {
       case STATS_SLIDE_OUT_RIGHT:
