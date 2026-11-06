@@ -611,6 +611,11 @@ void KeepAimCameraOnCourse(void) {
  * g_Players, gives 51 words differing, 9 in shape, but the register oracle's
  * closest is 31 words either way, so the gain is in the registers alone, and
  * the draft keeps indexing.
+ *
+ * The register oracle lines rise up with the saved register that the probe
+ * loop's counter takes. Working rise out in probe gives 49 words, 9 in
+ * shape, against 59 (in offset, 59), but it gives the counter a second
+ * meaning, so rise keeps its own local.
  */
 #ifdef NON_MATCHING
 void PlaceShotCamera(void) {
