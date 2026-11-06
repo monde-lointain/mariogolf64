@@ -35,6 +35,8 @@
 /* Grid vertices lie on tile corners and halfway between them */
 #define TILE_SPAN (1 << TILE_ORIGIN_SHIFT)
 #define HALF_TILE_SPAN (TILE_SPAN / 2)
+/* The span of the given number of quarter tiles */
+#define QuarterTileSpans(count) ((count) * (TILE_SPAN / 4))
 #define GRID_ROW_VERTEX_COUNT ((GROUND_TILE_COLUMN_COUNT * 2) + 1)
 #define GRID_VERTEX_COUNT \
   (GRID_ROW_VERTEX_COUNT * ((GROUND_TILE_ROW_COUNT * 2) + 1))
@@ -2932,38 +2934,38 @@ void InitTileMidpoints(void) {
   s32 tile;
   s32 i;
 
-  offsets[0][0] = 0x80;
+  offsets[0][0] = QuarterTileSpans(1);
   offsets[0][1] = 0;
-  offsets[1][0] = 0x180;
+  offsets[1][0] = QuarterTileSpans(3);
   offsets[1][1] = 0;
   offsets[2][0] = 0;
-  offsets[2][1] = 0x80;
-  offsets[3][0] = 0x200;
-  offsets[3][1] = 0x80;
+  offsets[2][1] = QuarterTileSpans(1);
+  offsets[3][0] = QuarterTileSpans(4);
+  offsets[3][1] = QuarterTileSpans(1);
   offsets[4][0] = 0;
-  offsets[4][1] = 0x180;
-  offsets[5][0] = 0x200;
-  offsets[5][1] = 0x180;
-  offsets[6][0] = 0x80;
-  offsets[6][1] = 0x200;
-  offsets[7][0] = 0x180;
-  offsets[7][1] = 0x200;
-  offsets[8][0] = 0x80;
-  offsets[8][1] = 0x80;
-  offsets[9][0] = 0x100;
-  offsets[9][1] = 0x80;
-  offsets[10][0] = 0x180;
-  offsets[10][1] = 0x80;
-  offsets[11][0] = 0x80;
-  offsets[11][1] = 0x100;
-  offsets[12][0] = 0x180;
-  offsets[12][1] = 0x100;
-  offsets[13][0] = 0x80;
-  offsets[13][1] = 0x180;
-  offsets[14][0] = 0x100;
-  offsets[14][1] = 0x180;
-  offsets[15][0] = 0x180;
-  offsets[15][1] = 0x180;
+  offsets[4][1] = QuarterTileSpans(3);
+  offsets[5][0] = QuarterTileSpans(4);
+  offsets[5][1] = QuarterTileSpans(3);
+  offsets[6][0] = QuarterTileSpans(1);
+  offsets[6][1] = QuarterTileSpans(4);
+  offsets[7][0] = QuarterTileSpans(3);
+  offsets[7][1] = QuarterTileSpans(4);
+  offsets[8][0] = QuarterTileSpans(1);
+  offsets[8][1] = QuarterTileSpans(1);
+  offsets[9][0] = QuarterTileSpans(2);
+  offsets[9][1] = QuarterTileSpans(1);
+  offsets[10][0] = QuarterTileSpans(3);
+  offsets[10][1] = QuarterTileSpans(1);
+  offsets[11][0] = QuarterTileSpans(1);
+  offsets[11][1] = QuarterTileSpans(2);
+  offsets[12][0] = QuarterTileSpans(3);
+  offsets[12][1] = QuarterTileSpans(2);
+  offsets[13][0] = QuarterTileSpans(1);
+  offsets[13][1] = QuarterTileSpans(3);
+  offsets[14][0] = QuarterTileSpans(2);
+  offsets[14][1] = QuarterTileSpans(3);
+  offsets[15][0] = QuarterTileSpans(3);
+  offsets[15][1] = QuarterTileSpans(3);
   x = 0;
   z = 0;
   for (tile = 0; tile < GROUND_TILE_COUNT; tile++) {
