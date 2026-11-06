@@ -3063,9 +3063,11 @@ void DrawTurnAwayAnimation(void) {
         gSPModifyVertex(g_DisplayListHead++, GridVertex(row + 1, column),
             G_MWO_POINT_ST, TexelCoordinate(FRAME_TILE_ROWS));
         gSPModifyVertex(g_DisplayListHead++, GridVertex(row + 1, column + 1),
-            G_MWO_POINT_ST, (width << 21) + TexelCoordinate(FRAME_TILE_ROWS));
+            G_MWO_POINT_ST,
+            TexcoordWord(
+                TexelCoordinate(width), TexelCoordinate(FRAME_TILE_ROWS)));
         gSPModifyVertex(g_DisplayListHead++, (column + 1) + rowStart,
-            G_MWO_POINT_ST, width << 21);
+            G_MWO_POINT_ST, TexcoordWord(TexelCoordinate(width), 0));
         gDPPipeSync(g_DisplayListHead++);
         gSP2Triangles(g_DisplayListHead++, column + rowStart,
             GridVertex(row + 1, column), GridVertex(row + 1, column + 1), 0,

@@ -591,15 +591,16 @@ void DrawSpinMesh(Gfx** displayListHead) {
       isLastStrip = IsLastSpinStrip(batchIndex, stripIndex);
       stripHeight = isLastStrip ? SAVED_FRAME_LAST_STRIP_HEIGHT
                                 : SAVED_FRAME_STRIP_HEIGHT;
-      gSPModifyVertex(
-          gfx++, stripIndex * 2, G_MWO_POINT_ST, SCREEN_BORDER << 21);
+      gSPModifyVertex(gfx++, stripIndex * 2, G_MWO_POINT_ST,
+          TexcoordWord(TexelCoordinate(SCREEN_BORDER), 0));
       gSPModifyVertex(gfx++, (stripIndex * 2) + 1, G_MWO_POINT_ST,
-          (SCREEN_WIDTH - SCREEN_BORDER) << 21);
+          TexcoordWord(TexelCoordinate(SCREEN_WIDTH - SCREEN_BORDER), 0));
       gSPModifyVertex(gfx++, (stripIndex * 2) + 2, G_MWO_POINT_ST,
-          (SCREEN_BORDER << 21) + TexelCoordinate(stripHeight));
+          TexcoordWord(
+              TexelCoordinate(SCREEN_BORDER), TexelCoordinate(stripHeight)));
       gSPModifyVertex(gfx++, (stripIndex * 2) + 3, G_MWO_POINT_ST,
-          ((SCREEN_WIDTH - SCREEN_BORDER) << 21) +
-              TexelCoordinate(stripHeight));
+          TexcoordWord(TexelCoordinate(SCREEN_WIDTH - SCREEN_BORDER),
+              TexelCoordinate(stripHeight)));
       gSP2Triangles(gfx++, stripIndex * 2, (stripIndex * 2) + 2,
           (stripIndex * 2) + 1, 0, (stripIndex * 2) + 1, (stripIndex * 2) + 2,
           (stripIndex * 2) + 3, 0);
