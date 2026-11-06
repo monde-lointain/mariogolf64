@@ -978,7 +978,7 @@ s16 GetChosenReplaySlot(void) {
 
 /* Tells whether the record holds a recording of the shots */
 s32 IsRingShotRecorded(RingShotRecord* record) {
-  return (u8)record->scoreKind >> 7;
+  return (record->scoreKind & SCORE_KIND_RECORDED) != 0;
 }
 
 void DrawCourseLabel(Gfx** displayListHead, s32 courseIndex, s32 left, s32 top,
