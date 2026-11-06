@@ -550,6 +550,10 @@ def find_nested_functions(source: str, function: str) -> list[str]:
     return []
 
 
+# The text of a line of preprocessed C that isn't a line marker
+NOT_LINE_MARKER_RE = re.compile(r"^(?!#)[^\n]*", re.MULTILINE)
+
+
 def isolate_functions(source: str, keep: set[str], *, prune: bool = True) -> str:
     """Return the preprocessed SOURCE with the bodies it needn't compile cut.
 
@@ -561,9 +565,10 @@ def isolate_functions(source: str, keep: set[str], *, prune: bool = True) -> str
     code stays the same, and the compile skips the rest. The assembler
     pads a function's first instruction after a hazard in the last one
     before it, so that one stays too. A builtin without its definition
-    would be expanded instead of called. A cut body leaves its newlines,
-    so the lines after it keep their numbers. With PRUNE, the declarations
-    the kept functions can't use go too.
+    would be expanded instead of called. A cut body leaves its newlines
+    and its line markers, which the preprocessor writes in place of runs
+    of blank lines, so the lines after it keep their numbers. With PRUNE,
+    the declarations the kept functions can't use go too.
     """
     definitions = find_definitions(source)
     names = "|".join(map(re.escape, keep))
@@ -583,9 +588,9 @@ def isolate_functions(source: str, keep: set[str], *, prune: bool = True) -> str
             roots.append(name)
         if holds[number] or is_before_kept or is_inline or is_builtin:
             continue
-        prototype = source[copied:start].rstrip() + ";"
-        cut_line_count = source.count("\n", copied, end) - prototype.count("\n")
-        pieces.append(prototype + "\n" * cut_line_count)
+        header = source[copied:start].rstrip()
+        cut = source[copied + len(header) : end]
+        pieces.append(header + ";" + NOT_LINE_MARKER_RE.sub("", cut))
         copied = end
     pieces.append(source[copied:])
     isolated = "".join(pieces)
