@@ -1465,7 +1465,7 @@ void UpdateTransmitMenu(void) {
 /* Fills the slot for a cartridge's save from the character data its record
  * points to */
 void DecodeCartridgeCharacter(
-    u8* characterData, s32 cartridgeIndex, s32 saveIndex, s32 unk34) {
+    u8* characterData, s32 cartridgeIndex, s32 saveIndex, s32 companyCode) {
   GameBoyCharacter* character =
       &g_GameBoyTransfer
            .cartridgeCharacters[(cartridgeIndex * CARTRIDGE_SAVE_COUNT) +
@@ -1550,14 +1550,14 @@ void DecodeCartridgeCharacter(
         character->unk3C[index].unk2);
   }
 
-  character->unk34 = unk34;
+  character->companyCode = companyCode;
   character->saveIndex = saveIndex;
 }
 
 /* Would skip a save without characters, but does nothing */
 void SkipCartridgeSave(u8* unusedData UNUSED, s32 unusedCartridgeIndex UNUSED,
     s32 unusedSaveIndex UNUSED, u8* unusedTitle UNUSED,
-    s32 unusedUnk34 UNUSED) {}
+    s32 unusedCompanyCode UNUSED) {}
 
 /* Whether a Game Boy character came from the save that the character data
  * belongs to, by its save name and unkB bytes */

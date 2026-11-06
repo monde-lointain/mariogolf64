@@ -59,7 +59,7 @@ void ResetGameBoyTransfer(s32 transferMode) {
   if (transferMode == TRANSFER_MODE_AT_BOOT) {
     for (index = 0; index != GAME_BOY_CHARACTER_COUNT; index++) {
       g_GameBoyCharacters[index].status = 0;
-      g_GameBoyCharacters[index].unk34 = -1;
+      g_GameBoyCharacters[index].companyCode = -1;
       g_GameBoyCharacters[index].saveIndex = -1;
       g_GameBoyTransfer.sourceIndices[index] = -1;
     }

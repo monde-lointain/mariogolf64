@@ -66,7 +66,7 @@ typedef struct GameBoyCharacter {
   /* 0x2E */ u8
       saveUnkB[SAVE_UNKB_SIZE]; /* Copied from the save's bytes at 0xB */
   /* 0x33 */ u8 unk33;
-  /* 0x34 */ s32 unk34;
+  /* 0x34 */ s32 companyCode; /* Its cartridge header's, or -1 */
   /* 0x38 */ s32 saveIndex; /* Its save on the cartridge, or -1 */
   /* 0x3C */ GameBoyCharacterUnk3C unk3C[GAME_BOY_CHARACTER_UNK3C_COUNT];
 } GameBoyCharacter; /* size = 0x8C */
