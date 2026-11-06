@@ -2184,6 +2184,10 @@ const CharacterModel g_OtherCharacterModels[OTHER_CHARACTER_MODEL_COUNT] = {
  * interpolation test alone, where the field is an s16 and the original loads it
  * there with lh; s16 locals for the span's frames at each of their uses in the
  * interpolation give 206 to 208 words. 206 words differ, 42 in shape.
+ *
+ * A search over merges of two variables found none with a single meaning
+ * that gains: holding the scale's frame in lengthSquared gives 198 words, 42
+ * in shape, but would give the quaternion's squared length a second meaning.
  */
 #ifdef NON_MATCHING
 void AnimateCharacterJoints(u32 slotIndex) {
