@@ -347,7 +347,12 @@ enum ResultSound {
 #define LANDING_STEP_COUNT 10
 #define LANDING_RADIUS 0x1E00
 
-#define FLIGHT_CAMERA_FLAG_UNK2 (1 << 1)
+/*
+ * Set for a shot's first flight and for half of its replays. With it, a ball
+ * passing close by the cup opens the cup view; without it, a shot from the
+ * green may instead be framed on the cup from its launch.
+ */
+#define FLIGHT_CAMERA_FLAG_CUP_VIEW_ALLOWED (1 << 1)
 
 /*
  * How near IsCupPassPoint's points are to the cup, how far below it they
@@ -680,9 +685,9 @@ void StartFlightCamera(s32 earlierFlightCount) {
    * 3 in shape
    */
   if (earlierFlightCount == 0) {
-    f_FlightCameraFlags |= FLIGHT_CAMERA_FLAG_UNK2;
+    f_FlightCameraFlags |= FLIGHT_CAMERA_FLAG_CUP_VIEW_ALLOWED;
   } else if (RandomBelow(2) == 0) {
-    f_FlightCameraFlags |= FLIGHT_CAMERA_FLAG_UNK2;
+    f_FlightCameraFlags |= FLIGHT_CAMERA_FLAG_CUP_VIEW_ALLOWED;
   }
 
   if (earlierFlightCount == 0) {
@@ -940,7 +945,7 @@ Boolean IsCupPassPoint(s32 cupDistance, s32 height) {
   if (cupDistance < CUP_PASS_RADIUS &&
       height > g_HoleSetup.cupPosition[AXIS_Y] - CUP_PASS_MAX_DEPTH &&
       f_LandingCupDistance < CUP_PASS_MAX_LANDING_DISTANCE &&
-      (f_FlightCameraFlags & FLIGHT_CAMERA_FLAG_UNK2)) {
+      (f_FlightCameraFlags & FLIGHT_CAMERA_FLAG_CUP_VIEW_ALLOWED)) {
     return TRUE;
   }
 
@@ -2667,7 +2672,7 @@ void ChooseFlightCameraKind(void) {
   if (g_SimulatedShot.startsOnGreen) {
     switch (f_FlightPhase) {
       case FLIGHT_PHASE_LAUNCH:
-        if (!(f_FlightCameraFlags & FLIGHT_CAMERA_FLAG_UNK2) &&
+        if (!(f_FlightCameraFlags & FLIGHT_CAMERA_FLAG_CUP_VIEW_ALLOWED) &&
             RandomBelow(2) == 0 && !IsPinInCup() &&
             f_StartCupDistance >= CUP_LANDING_MIN_DISTANCE &&
             f_StartCupDistance <= CUP_LANDING_MAX_DISTANCE &&
