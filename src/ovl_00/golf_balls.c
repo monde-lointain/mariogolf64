@@ -887,6 +887,15 @@ enum BallSprite {
  * before the step's test gives the same 452 words, and just after the
  * test 454 (78). The counts above were measured before this change. 452
  * words differ, 78 in shape.
+ *
+ * The original keeps BALL_DEPTH_BIAS in $f26 across the ball loop, set
+ * beside 10.5f before it, where ours loads it at each of its three
+ * subtractions there. loop.c finds its four sets, each used once, too
+ * little to move in a loop of 2119 insns: their savings and lifetime come
+ * to 4 each, where the 10.5f's 8 uses are moved. Holding the bias in a
+ * local set before the loop, which only stands in for the hoist, gives
+ * 445 words (77 in shape), so the hoist accounts for little of the
+ * difference.
  */
 #ifdef NON_MATCHING
 void DrawGolfBalls(CameraMatrices* matrices UNUSED) {
