@@ -1123,6 +1123,14 @@ void SetGridVertex(s32 column, s32 row, Vtx_t* point) {
  * The oracle matches that form when 13 pseudos are forced, so its RTL is the
  * original's up to allocation; the slot's operand order there changes
  * nothing.
+ *
+ * A static inline helper returning the tile's midpoints, given the index or
+ * the tile's column and row, gives the same 38 words as the local; one
+ * returning the midpoint's address gives 26, or 36 with tileIndex in its own
+ * block. Reading the slot into a local first, as an s32, u8 or u32, before
+ * or after tileIndex and with or without the helper, gives 34 to 42.
+ * Grouping each tile's midpoints in a struct of their own, indexed as
+ * midpoints[tileIndex].points[slot], leaves the 2.
  */
 #ifdef NON_MATCHING
 Vtx* GetGroundPoint(u32 column, u32 row) {
