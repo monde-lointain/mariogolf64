@@ -2404,8 +2404,10 @@ void DrawWindSpeed(Gfx** displayListHead, f32 x, f32 y) {
   scaledSpeed =
       (u32)g_HoleSetup.conditions.windSpeed * WIND_SPEED_TO_METERS_SCALE;
   /*
-   * The scaling ends its block, as with the pulse step in a block of its
-   * own instead 16 words differ, 6 in shape, and with no barrier 41 and 31
+   * The scaling ends its block, to match: 14 words differ, 6 in shape, as
+   * with the scaling in a block of its own. With the pulse step in a block
+   * of its own instead 16 differ (6), and with no barrier, plain braces
+   * around either statement, or the step first, 41 (31)
    */
   END_BASIC_BLOCK();
   f_WindIconPulseAngle += WIND_ICON_PULSE_STEP;
