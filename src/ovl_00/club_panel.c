@@ -447,7 +447,8 @@ void DrawClubPanel(Gfx** displayListHead) {
           QuarterPixels(GAUGE_FULL_X + GAUGE_TICK_WIDTH + x),
           QuarterPixels(
               GAUGE_BOTTOM + g_ShotPanelOffsetX + f_ClubPanelDebugValue),
-          G_TX_RENDERTILE, 0, 0, 0x400, 0x600);
+          G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE,
+          TexelRunStep(GAUGE_TICK_IMAGE_HEIGHT, GAUGE_BOTTOM - GAUGE_TOP));
     }
   }
 
@@ -459,7 +460,8 @@ void DrawClubPanel(Gfx** displayListHead) {
         QuarterPixels(GAUGE_FULL_X + GAUGE_TICK_WIDTH + x),
         QuarterPixels(
             GAUGE_BOTTOM + g_ShotPanelOffsetX + f_ClubPanelDebugValue),
-        G_TX_RENDERTILE, 0, 0, 0x400, 0x600);
+        G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE,
+        TexelRunStep(GAUGE_TICK_IMAGE_HEIGHT, GAUGE_BOTTOM - GAUGE_TOP));
   }
 
   for (group = 0; group != GAUGE_END_TICK_COUNT; group++) {
@@ -470,7 +472,7 @@ void DrawClubPanel(Gfx** displayListHead) {
         QuarterPixels(GAUGE_FULL_X + group * GAUGE_LENGTH + GAUGE_TICK_WIDTH),
         QuarterPixels(
             GAUGE_MARKER_BOTTOM + g_ShotPanelOffsetX + f_ClubPanelDebugValue),
-        G_TX_RENDERTILE, 0, 0, 0x400, 0x400);
+        G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   }
 
   for (group = 0, tick = 1; group != GAUGE_MEDIUM_TICK_COUNT; tick++, group++) {
@@ -484,7 +486,9 @@ void DrawClubPanel(Gfx** displayListHead) {
             GAUGE_TICK_WIDTH),
         QuarterPixels(GAUGE_MEDIUM_TICK_BOTTOM + g_ShotPanelOffsetX +
             f_ClubPanelDebugValue),
-        G_TX_RENDERTILE, 0, 0, 0x400, 0xC00);
+        G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE,
+        TexelRunStep(GAUGE_TICK_IMAGE_HEIGHT,
+            GAUGE_MEDIUM_TICK_BOTTOM - GAUGE_MEDIUM_TICK_TOP));
   }
 
   gDPPipeSync(gfx++);
@@ -547,7 +551,7 @@ void DrawClubPanel(Gfx** displayListHead) {
       QuarterPixels(GAUGE_EMPTY_X + GAUGE_MARKER_WIDTH),
       QuarterPixels(
           GAUGE_MARKER_BOTTOM + g_ShotPanelOffsetX + f_ClubPanelDebugValue),
-      G_TX_RENDERTILE, 0, 0, 0x400, 0x400);
+      G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   if (isPutter) {
     markerOffset = f_ChosenPowerFill * GAUGE_LENGTH / GAUGE_MAX_VALUE;
   } else {
@@ -587,7 +591,7 @@ void DrawClubPanel(Gfx** displayListHead) {
       QuarterPixels(GAUGE_EMPTY_X + GAUGE_MARKER_WIDTH - markerOffset),
       QuarterPixels(
           GAUGE_MARKER_BOTTOM + g_ShotPanelOffsetX + f_ClubPanelDebugValue),
-      G_TX_RENDERTILE, 0, 0, 0x400, 0x400);
+      G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   gDPPipeSync(gfx++);
   switch (playerState) {
     case PLAYER_STATE_AIMING:
@@ -610,7 +614,7 @@ void DrawClubPanel(Gfx** displayListHead) {
             QuarterPixels(GAUGE_EMPTY_X + GAUGE_MARKER_WIDTH - markerOffset),
             QuarterPixels(GAUGE_MARKER_BOTTOM + g_ShotPanelOffsetX +
                 f_ClubPanelDebugValue),
-            G_TX_RENDERTILE, 0, 0, 0x400, 0x400);
+            G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
         gDPPipeSync(gfx++);
       }
   }
