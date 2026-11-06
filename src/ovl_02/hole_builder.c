@@ -1134,7 +1134,7 @@ s32 PaintMainCourse(
       break;
   }
 
-  return (color << 16) | paintedCode;
+  return (color << PAINTED_COLOR_SHIFT) | paintedCode;
 }
 
 /*
@@ -1262,7 +1262,7 @@ s32 PaintPaleRoughCourse(
       break;
   }
 
-  return (color << 16) | paintedCode;
+  return (color << PAINTED_COLOR_SHIFT) | paintedCode;
 }
 #else
 INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", PaintPaleRoughCourse);
@@ -1372,7 +1372,7 @@ s32 PaintShyGuyDesert(
       break;
   }
 
-  return (color << 16) | paintedCode;
+  return (color << PAINTED_COLOR_SHIFT) | paintedCode;
 }
 
 /* The paint logic of Boo Valley: PaintMainCourse with other bunker and
@@ -1476,7 +1476,7 @@ s32 PaintBooValley(
       break;
   }
 
-  return (color << 16) | paintedCode;
+  return (color << PAINTED_COLOR_SHIFT) | paintedCode;
 }
 
 /* The paint logic of Yoshi's Island: PaintMainCourse with other colors */
@@ -1579,7 +1579,7 @@ s32 PaintYoshisIsland(
       break;
   }
 
-  return (color << 16) | paintedCode;
+  return (color << PAINTED_COLOR_SHIFT) | paintedCode;
 }
 
 /*
@@ -1686,7 +1686,7 @@ s32 PaintUnlistedCourse(
       break;
   }
 
-  return (color << 16) | paintedCode;
+  return (color << PAINTED_COLOR_SHIFT) | paintedCode;
 }
 
 /*
@@ -1741,7 +1741,7 @@ s32 PaintFirstMiniGolfCourse(
       break;
   }
 
-  return (color << 16) | paintedCode;
+  return (color << PAINTED_COLOR_SHIFT) | paintedCode;
 }
 
 /*
@@ -1794,7 +1794,7 @@ s32 PaintSecondMiniGolfCourse(
       break;
   }
 
-  return (color << 16) | paintedCode;
+  return (color << PAINTED_COLOR_SHIFT) | paintedCode;
 }
 
 /*
@@ -1843,7 +1843,7 @@ s32 PaintThirdMiniGolfCourse(
       break;
   }
 
-  return (color << 16) | paintedCode;
+  return (color << PAINTED_COLOR_SHIFT) | paintedCode;
 }
 
 /*
@@ -1937,7 +1937,7 @@ s32 PaintDrivingRange(
       break;
   }
 
-  return (color << 16) | paintedCode;
+  return (color << PAINTED_COLOR_SHIFT) | paintedCode;
 }
 
 /*
