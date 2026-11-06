@@ -559,6 +559,9 @@ def main() -> None:
         if len(arguments) >= OUT_DIR_ARGUMENT_COUNT
         else ROOT / "build" / "permuter" / function
     )
+    # Marked before OUT_DIR is made, so that a function without a definition
+    # of its own leaves no directory the permuter would stop at
+    focused_text = mark_focus_regions(c_path, asm_path, function) if is_focused else ""
     out_dir.mkdir(parents=True, exist_ok=True)
 
     if is_focused:
@@ -566,7 +569,7 @@ def main() -> None:
         # named for the function, so that runs on the file's other functions
         # can set up at the same time
         focused_path = Path(c_path).with_name(f".focus_{function}_{Path(c_path).name}")
-        _ = focused_path.write_text(mark_focus_regions(c_path, asm_path, function))
+        _ = focused_path.write_text(focused_text)
         try:
             write_base(str(focused_path), function, out_dir / "base.c")
         finally:
