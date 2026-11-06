@@ -32,6 +32,7 @@
 #include "play_record.h"
 #include "player.h"
 #include "save.h"
+#include "save_screens.h"
 #include "screen.h"
 #include "screen_layers.h"
 #include "sound.h"

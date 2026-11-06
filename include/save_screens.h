@@ -3,7 +3,14 @@
 
 #include <ultra64.h>
 
+#include "character.h"
+
 /* The Ring Shot records and the saved games, in ovl_01/save_menu.c */
+
+/* The most bytes of each character palette file that the menus keep */
+#define MENU_PALETTE_FILE_SIZE 0x200
+/* Character palette files that the menu screens read, one per slot */
+extern u8 g_MenuCharacterPalettes[CHARACTER_COUNT][MENU_PALETTE_FILE_SIZE];
 
 /* The buffers of LoadSaveGameBuffer, and what it reads into them */
 enum SaveGameBuffer {

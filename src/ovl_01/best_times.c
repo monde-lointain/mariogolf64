@@ -25,6 +25,7 @@
 #include "menu_memory.h"
 #include "menu_number.h"
 #include "save.h"
+#include "save_screens.h"
 #include "screen.h"
 #include "sound.h"
 #include "text.h"

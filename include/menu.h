@@ -151,11 +151,6 @@ extern void* g_CharacterFacePalettes[CHARACTER_COUNT];
 /* The "R: COM" icon above the "L: LEFTY" icon of the character select */
 extern void* g_ComLeftyIcons;
 
-/* The most bytes of each character palette file that the menus keep */
-#define MENU_PALETTE_FILE_SIZE 0x200
-/* Character palette files that the menu screens read, one per slot */
-extern u8 g_MenuCharacterPalettes[CHARACTER_COUNT][MENU_PALETTE_FILE_SIZE];
-
 /*
  * Loaded images: the menus load their plain labels, or other images in their
  * place, into the first two by turns, and the club panel uses the last two as
