@@ -283,7 +283,7 @@ void PlaySound(SoundId soundId, SoundChannel channel, SoundVolume volume) {
 
         SetSoundFrequencyOffset(channel, 0.0f);
       } else {
-        if (soundId == SOUND_UNK90) {
+        if (soundId == SOUND_ECHOING_SHOT) {
           SetSoundReverb(channel, ECHO_REVERB);
         } else {
           SetSoundReverb(channel, DEFAULT_REVERB);
@@ -341,7 +341,7 @@ void PlaySoundWithEffects(SoundId soundId, SoundChannel channel,
 
         SetSoundFrequencyOffset(channel, 0.0f);
       } else {
-        if (soundId == SOUND_UNK90) {
+        if (soundId == SOUND_ECHOING_SHOT) {
           SetSoundReverb(channel, ECHO_REVERB);
         } else {
           SetSoundReverb(channel, DEFAULT_REVERB);

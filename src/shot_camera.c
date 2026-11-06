@@ -3318,7 +3318,7 @@ s32 UpdateFlightCamera(Boolean isAdvancing, s32 buttons) {
         case FLIGHT_CAMERA_UNKF:
         case FLIGHT_CAMERA_UNK10:
         case FLIGHT_CAMERA_UNK11:
-          PlaySoundWithEffects(SOUND_UNK90, BALL_SOUND_CHANNEL, volume,
+          PlaySoundWithEffects(SOUND_ECHOING_SHOT, BALL_SOUND_CHANNEL, volume,
               BALL_SOUND_REVERB, SOUND_FULL_SCALE);
           break;
       }

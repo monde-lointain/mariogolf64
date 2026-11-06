@@ -151,10 +151,14 @@ enum Sound {
   SOUND_CONTACT_PUTTER,
   /*
    * As each of the opening's shots launches its sparks; also early in a
-   * long shot's flight, where SOUND_UNK90 plays later in it
+   * long shot's flight, under some of the flight cameras
    */
   SOUND_SHOT_SPARKS = 0x59,
-  SOUND_UNK90,
+  /*
+   * A little later in a long shot's flight, under the flight cameras that
+   * don't play SOUND_SHOT_SPARKS; always played with an echo
+   */
+  SOUND_ECHOING_SHOT,
   /*
    * Also played when a scorecard row flips, the club changes, and the opening
    * camera editor's snapshot cursor moves
