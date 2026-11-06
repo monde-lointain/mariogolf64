@@ -528,15 +528,15 @@ static s32 BuildRingMatrices(void) {
     corners.coordinates[2][2] = triangle->vertices[2].v.ob[AXIS_Z];
     if (corners.coordinates[0][1] | corners.coordinates[1][1] |
         corners.coordinates[2][1]) {
-      triangle->center[0] =
+      triangle->ignoredCenter[0] =
           (corners.coordinates[0][0] + corners.coordinates[0][1] +
               corners.coordinates[0][2]) /
           3;
-      triangle->center[1] =
+      triangle->ignoredCenter[1] =
           (corners.coordinates[1][0] + corners.coordinates[1][1] +
               corners.coordinates[1][2]) /
           3;
-      triangle->center[2] =
+      triangle->ignoredCenter[2] =
           (corners.coordinates[2][0] + corners.coordinates[2][1] +
               corners.coordinates[2][2]) /
           3;

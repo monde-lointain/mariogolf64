@@ -41,7 +41,8 @@ typedef struct HoleTriangle {
   /* 0x08 */ Vtx vertices[HOLE_TRIANGLE_VERTEX_COUNT];
   /* Each axis's lowest and highest corner coordinate */
   /* 0x38 */ s16 bounds[AXIS_COUNT][BOUND_END_COUNT];
-  /* 0x44 */ f32 center[AXIS_COUNT]; /* For a ring, the mean of its corners */
+  /* For a ring, the mean of its corners; nothing reads it */
+  /* 0x44 */ f32 ignoredCenter[AXIS_COUNT];
   /* Cleared by UpdateRingEditor and read by nothing */
   /* 0x50 */ s32 unusedEditorValues[3];
 } HoleTriangle; /* size = 0x60 */

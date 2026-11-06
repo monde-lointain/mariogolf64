@@ -1926,9 +1926,9 @@ void UpdateRingEditor(void) {
         .bounds[AXIS_Z][BOUND_LOWEST] = 0;
     g_WorkArea.hole.triangles[f_RingTriangleIndex]
         .bounds[AXIS_Z][BOUND_HIGHEST] = 0;
-    g_WorkArea.hole.triangles[f_RingTriangleIndex].center[AXIS_X] = 0.0f;
-    g_WorkArea.hole.triangles[f_RingTriangleIndex].center[AXIS_Y] = 0.0f;
-    g_WorkArea.hole.triangles[f_RingTriangleIndex].center[AXIS_Z] = 0.0f;
+    g_WorkArea.hole.triangles[f_RingTriangleIndex].ignoredCenter[AXIS_X] = 0.0f;
+    g_WorkArea.hole.triangles[f_RingTriangleIndex].ignoredCenter[AXIS_Y] = 0.0f;
+    g_WorkArea.hole.triangles[f_RingTriangleIndex].ignoredCenter[AXIS_Z] = 0.0f;
     g_WorkArea.hole.triangles[f_RingTriangleIndex].unusedEditorValues[0] = 0;
     g_WorkArea.hole.triangles[f_RingTriangleIndex].unusedEditorValues[1] = 0;
     g_WorkArea.hole.triangles[f_RingTriangleIndex].unusedEditorValues[2] = 0;
