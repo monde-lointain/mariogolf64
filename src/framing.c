@@ -132,29 +132,36 @@ void TransformPoint(Mat4 mf, Vec3 point, Vec3 result) {
  *
  * Doesn't match: the original's frame is 8 bytes larger, it keeps
  * horizontalEyeZ on the stack where ours keeps it in $fp, and its float
- * registers differ from the first eye distance on. The register oracle, forcing
- * 7 pseudos, still leaves 221 words. The original negates 10.0 at run time for
- * maxZ, so maxZ is set from minZ after the block that ends at bottomAngle,
- * where cse no longer knows minZ's value. Written -Z_MARGIN the negation folded
- * (282 words, 108 in shape, when the draft gave 279), as it did from minZ in
- * the same block (291, 117); setting minZ just before the block's end gave 285.
- * The permuter's best (269 words, 89 in shape) set eyeZ from horizontalEyeZ
- * before working it out. Setting eyeZ to the horizontal distance first and
- * raising it to the vertical one gave 279 to 332. The vertical distance to the
- * depth is written into the top and bottom edges' products, where a double
- * verticalFrontDistance held it, which took the draft from 279 words differing
- * to 269, 109 in shape to 113, and the oracle from 227 words, forcing 12, to
- * 225; as a float variable it gave 281, and writing frontDistance into its two
- * uses as well 282. Each sphere's radius is read from f_FramedSphereRadii at
- * each of its twelve uses, rather than through a radius local, which took the
- * draft from 269 words differing to 265, 113 in shape either way, and the
- * oracle from 225 words to 221, 7 forced either way. Computing both centers
- * after the four edges, keeping the horizontal front distance as f32, and
- * giving the right edge its own variable reduces 265 words (113 in shape) to
- * 228 (66). The original also computes the centers after its fourth tan call.
- * The front-distance subtraction is single precision before promotion in
- * either form; a double local changes which value lives across the calls.
- * Inlining that subtraction at both uses gives the same 228 words.
+ * registers differ from the first eye distance on. The register oracle comes
+ * no closer than the draft's 204 words with any pseudo forced. The original
+ * negates 10.0 at run time for maxZ, so maxZ is set from minZ after the
+ * block that ends at bottomAngle, where cse no longer knows minZ's value.
+ * Written -Z_MARGIN the negation folded (282 words, 108 in shape, when the
+ * draft gave 279), as it did from minZ in the same block (291, 117); setting
+ * minZ just before the block's end gave 285. The permuter's best (269 words,
+ * 89 in shape) set eyeZ from horizontalEyeZ before working it out. Setting
+ * eyeZ to the horizontal distance first and raising it to the vertical one
+ * gave 279 to 332. The vertical distance to the depth is written into the
+ * top and bottom edges' products, where a double verticalFrontDistance held
+ * it, which took the draft from 279 words differing to 269, 109 in shape to
+ * 113, and the oracle from 227 words, forcing 12, to 225; as a float
+ * variable it gave 281, and writing frontDistance into its two uses as well
+ * 282. Each sphere's radius is read from f_FramedSphereRadii at each of its
+ * twelve uses, rather than through a radius local, which took the draft from
+ * 269 words differing to 265, 113 in shape either way, and the oracle from
+ * 225 words to 221, 7 forced either way. Computing both centers after the
+ * four edges, keeping the horizontal front distance as f32, and giving the
+ * right edge its own variable reduces 265 words (113 in shape) to 228 (66).
+ * The original also computes the centers after its fourth tan call. The
+ * front-distance subtraction is single precision before promotion in either
+ * form; a double local changes which value lives across the calls. Inlining
+ * that subtraction at both uses gives the same 228 words, and the same 204
+ * since the next paragraph's change.
+ *
+ * The left and right edges' eye distances have their own leftDistance and
+ * rightDistance, as the top and bottom edges' do, where one distance held
+ * both; that takes the draft from 228 words differing to 204, 66 in shape
+ * either way. 204 words differ, 66 in shape.
  */
 #ifdef NON_MATCHING
 void FrameSpheres(f32 depthOffset) {
@@ -175,7 +182,8 @@ void FrameSpheres(f32 depthOffset) {
   f32 minY;
   f32 maxY;
   Radians angle;
-  f32 distance;
+  f32 leftDistance;
+  f32 rightDistance;
   f32 topDistance;
   f32 bottomDistance;
   f32 eyeX;
@@ -202,7 +210,7 @@ void FrameSpheres(f32 depthOffset) {
   leftAngle = -rightAngle;
   topAngle = rightAngle * 0.75f;
   /*
-   * In its own block, as without it 241 words differ, 69 in shape, against 228
+   * In its own block, as without it 217 words differ, 69 in shape, against 204
    * and 66
    */
   IN_OWN_BLOCK(bottomAngle = leftAngle * 0.75f);
@@ -253,12 +261,12 @@ void FrameSpheres(f32 depthOffset) {
 
   angle = FramingDegreesToRadians(rightAngle - leftAngle) -
       FramingDegreesToRadians(90);
-  distance = -minX / cosf(angle);
-  eyeX = sinf(FramingDegreesToRadians(leftAngle)) * distance;
-  horizontalEyeZ = cosf(FramingDegreesToRadians(leftAngle)) * distance;
-  distance = maxX / cosf(angle);
-  eyeX += sinf(FramingDegreesToRadians(rightAngle)) * distance;
-  horizontalEyeZ += cosf(FramingDegreesToRadians(rightAngle)) * distance;
+  leftDistance = -minX / cosf(angle);
+  eyeX = sinf(FramingDegreesToRadians(leftAngle)) * leftDistance;
+  horizontalEyeZ = cosf(FramingDegreesToRadians(leftAngle)) * leftDistance;
+  rightDistance = maxX / cosf(angle);
+  eyeX += sinf(FramingDegreesToRadians(rightAngle)) * rightDistance;
+  horizontalEyeZ += cosf(FramingDegreesToRadians(rightAngle)) * rightDistance;
 
   angle = FramingDegreesToRadians(topAngle - bottomAngle) -
       FramingDegreesToRadians(90);
