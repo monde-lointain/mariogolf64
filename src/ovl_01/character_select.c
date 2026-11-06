@@ -53,6 +53,10 @@ enum GridMove {
 /* The bytes of the first of the two images that LoadCharacterFaces reads
  * into the menu's buffer */
 #define CHARACTER_SELECT_FIRST_IMAGE_SIZE 0x628
+/* The trajectory labels Straight, Draw and Fade, and the labels L: and Drive:
+ */
+#define TRAJECTORY_LABELS_IMAGE_ASSET 0x979
+#define STAT_LABELS_IMAGE_ASSET 0x978
 
 /* DrawCharacterBoard draws f_CharacterBoard in strips, then the right half of
  * the second image */
@@ -1317,9 +1321,9 @@ void LoadCharacterFaces(void) {
   s32 slotIndex;
   AssetId faceAsset;
 
-  OpenEncodedAsset(0x979, &asset);
+  OpenEncodedAsset(TRAJECTORY_LABELS_IMAGE_ASSET, &asset);
   ReadEncodedAsset(images, &asset);
-  OpenEncodedAsset(0x978, &asset);
+  OpenEncodedAsset(STAT_LABELS_IMAGE_ASSET, &asset);
   ReadEncodedAsset(images + CHARACTER_SELECT_FIRST_IMAGE_SIZE, &asset);
   for (slotIndex = 0; slotIndex != CHARACTER_COUNT; slotIndex++) {
     void* faceImage = g_CharacterFaceImages[slotIndex];

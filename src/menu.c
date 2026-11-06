@@ -40,6 +40,17 @@
  * line */
 #define DMA_ALIGNMENT 0x10
 
+/* A brick wall, 152 by 117 */
+#define BRICK_WALL_IMAGE_ASSET 0x721
+/* A trophy, the first of the animated icons, which their buffers fit */
+#define TROPHY_ICON_IMAGE_ASSET 0x623
+/* The badges for bets and the front nine, back nine and 18 holes */
+#define HOLE_BADGES_IMAGE_ASSET 0x65D
+/* A speech bubble, 160 by 48, which the wide spare buffer starts with */
+#define SPEECH_BUBBLE_IMAGE_ASSET 0x6F7
+/* The R COM and L LEFTY button icons */
+#define COM_LEFTY_ICONS_IMAGE_ASSET 0x709
+
 #define DmaAlignedAddress(address) \
   (((u32)(address) + DMA_ALIGNMENT - 1) & ~(DMA_ALIGNMENT - 1))
 
@@ -503,7 +514,8 @@ void LoadMenuResources(void) {
   g_MenuCourseSceneryAsset =
       AllocMemory(OpenEncodedAsset(ASSET_COURSE_SCENE, &asset));
   ReadEncodedAsset(g_MenuCourseSceneryAsset, &asset);
-  g_BrickWallImage = AllocMemory(OpenEncodedAsset(0x721, &asset));
+  g_BrickWallImage =
+      AllocMemory(OpenEncodedAsset(BRICK_WALL_IMAGE_ASSET, &asset));
   ReadEncodedAsset(g_BrickWallImage, &asset);
   g_MenuBoardImages[0] =
       AllocMemory(OpenEncodedAsset(ASSET_WIDE_BOARD, &asset));
@@ -585,13 +597,14 @@ void LoadMenuResources(void) {
     ReadEncodedAsset(g_MenuArrowSizedImages[index], &asset);
   }
 
-  size = OpenEncodedAsset(0x623, &asset);
+  size = OpenEncodedAsset(TROPHY_ICON_IMAGE_ASSET, &asset);
   g_AnimatedIconImages[0] = AllocMemory(size);
   g_AnimatedIconImages[1] = AllocMemory(size);
   g_SecondAnimatedIconImages[0] = AllocMemory(size);
   g_SecondAnimatedIconImages[1] = AllocMemory(size);
   ReadEncodedAsset(g_AnimatedIconImages[0], &asset);
-  g_HoleBadgeImages = AllocMemory(OpenEncodedAsset(0x65D, &asset));
+  g_HoleBadgeImages =
+      AllocMemory(OpenEncodedAsset(HOLE_BADGES_IMAGE_ASSET, &asset));
   ReadEncodedAsset(g_HoleBadgeImages, &asset);
   g_SpinningBadgeImage =
       AllocMemory(OpenEncodedAsset(ASSET_SPINNING_BADGE, &asset));
@@ -622,9 +635,11 @@ void LoadMenuResources(void) {
   g_MenuSpareImages[1] =
       AllocMemory(OpenEncodedAsset(*f_ToadImageAssets, &asset) * 2);
   ReadEncodedAsset(g_MenuSpareImages[1], &asset);
-  g_MenuWideSpareImage = AllocMemory(OpenEncodedAsset(0x6F7, &asset) * 2);
+  g_MenuWideSpareImage =
+      AllocMemory(OpenEncodedAsset(SPEECH_BUBBLE_IMAGE_ASSET, &asset) * 2);
   ReadEncodedAsset(g_MenuWideSpareImage, &asset);
-  g_ComLeftyIcons = AllocMemory(OpenEncodedAsset(0x709, &asset));
+  g_ComLeftyIcons =
+      AllocMemory(OpenEncodedAsset(COM_LEFTY_ICONS_IMAGE_ASSET, &asset));
   ReadEncodedAsset(g_ComLeftyIcons, &asset);
   PlaySong(SONG_TITLE, 0);
   SetFramebufferCount(TRIPLE_BUFFERING);
