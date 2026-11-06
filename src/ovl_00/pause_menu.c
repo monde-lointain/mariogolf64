@@ -1141,24 +1141,18 @@ s32 UpdateChoiceBox(ControllerState* controller) {
 }
 
 /*
- * Doesn't match: the original keeps the clouds' top edge, which loop.c hoists
- * out of the cloud loop, in $fp, where this gets no register for it and reloads
- * the constant in the loop; textWidth and the label table also take other saved
- * registers. Declaration orders, splits and moves don't change the priorities.
- * Stepping the label's y beside the index gives 67 words differing, 15 in
- * shape. Working out the cursor's y before its texture load, rather than just
- * before drawing it, gives 65 words, 9 in shape. The permuter's best (53 words)
- * clears textWidth after the labels are measured, which moves the cursor;
- * clearing it just before measuring them gives 63 words, 9 in shape. The
- * register oracle, forcing 10 pseudos' registers, leaves 13 words at best, so
- * the code differs too. A u32 textWidth gives 59 words, but 11 in shape, as it
- * compares and halves the width unsigned, where the original uses slt and a
- * signed halving. 61 words differ, 5 in shape.
+ * The cursor sits beside the chosen label, half that label's width left of
+ * its sway: the original measures the chosen label into textWidth's register
+ * and halves it there. Reading the width into labelWidth instead gives 68
+ * words differing, none in shape, and the widest label's width, as the draft
+ * had it, 61, 5 in shape.
  *
- * Holding CHOICE_BOX_CLOUD_WIDTH in a local set before the cloud loop gives
- * 57 words (5 in shape), but both builds load 128 the same way, and the only
- * change is which of the loop's 0x290 and 0x2C8 stays in $fp, so it only
- * renumbers the pseudos.
+ * Doesn't match: the original halves the chosen label's width in textWidth's
+ * register, $s1, where this halves it in $v0. Halving textWidth in place
+ * before subtracting it puts the halving in $s1, but schedules it before the
+ * cursor's sway, which gives 7 words, all in shape; halving the width as it
+ * is measured gives 7 too, subtracting the half within the cursor's sum 9
+ * (3), and halving it into halfWidth 17 (7). 6 words differ, none in shape.
  */
 #ifdef NON_MATCHING
 void DrawChoiceBox(Gfx** displayListHead) {
@@ -1168,6 +1162,7 @@ void DrawChoiceBox(Gfx** displayListHead) {
   s32 red;
   s32 green;
   s32 blue;
+  /* The widest label's width, then the chosen label's */
   s32 textWidth;
   s32 labelWidth;
   s32 i;
@@ -1248,7 +1243,7 @@ void DrawChoiceBox(Gfx** displayListHead) {
         f_ChoiceCursorAngle -= M_PI;
       }
 
-      labelWidth =
+      textWidth =
           MeasureText(f_ChoiceBoxLabels[box->labels[f_ChoiceBoxSelection]],
               FONT_SIZE_LARGE, MEASURE_TEXT_PROPORTIONAL);
       cursorX = (s32)(sinf(f_ChoiceCursorAngle) * CHOICE_CURSOR_SWAY) +
