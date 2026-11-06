@@ -2968,7 +2968,7 @@ void ShowHoleOutBanner(s32 playerIndex) {
  * in place, the ball placement gave 90 words (48 in shape) against 146 (78) as
  * a helper.
  *
- * Doesn't match: 83 words differ, 45 in shape, spread through the routine's
+ * Doesn't match: 77 words differ, 43 in shape, spread through the routine's
  * states. The counts in the paragraphs after the next were measured before it,
  * when 454 words differed, 184 in shape.
  *
@@ -3075,13 +3075,14 @@ void ShowHoleOutBanner(s32 playerIndex) {
  * paragraph and the one before were measured before the debug timing's two
  * stores.
  *
- * The holed-out reaction works out the score to par before testing for a hole
- * in one, and tests for it first; the original subtracts par in the delay slot
- * of the branch taken for a hole in one. That gives 83 words differing, 45 in
- * shape, against 90 (48) with the subtraction in the switch after the != 1
- * test, and the register oracle's closest result falls from 75 words to 68,
- * with 5 registers forced for each. Testing for a hole in one first without the
- * local gives 86 (48), and the local with the != 1 test first 89 (45).
+ * The holed-out reaction works out the score to par before testing for a
+ * hole in one, and tests for it first; the original subtracts par in the
+ * delay slot of the branch taken for a hole in one. That gives 77 words
+ * differing, 43 in shape, against 84 (46) with the subtraction in the switch
+ * after the != 1 test; measured when the draft gave 83 words, the register
+ * oracle's closest result fell from 75 words to 68, with 5 registers forced
+ * for each. Testing for a hole in one first without the local gives 80 (46),
+ * and the local with the != 1 test first 83 (43).
  */
 #ifdef NON_MATCHING
 /* Whether the stopwatches run in a player state: from aiming to the flight */
@@ -3485,8 +3486,14 @@ void UpdateTurns(void) {
               PlaySong(song, SONG_FLAG_FOLLOWS_MUSIC_OPTION | SONG_FLAG_UNREAD);
             } else if (g_GameState.gameMode != GAME_MODE_SPEED_GOLF) {
               if (g_GameState.gameMode != GAME_MODE_RING_SHOT) {
+                /*
+                 * The tests below take this as the hole's score to par, one
+                 * stroke more than the count. Subtracting par less one from
+                 * the count gives 83 words differing, 45 in shape, against
+                 * 77 and 43
+                 */
                 s32 scoreToPar =
-                    g_Players[playerIndex].strokeCount - (g_HoleSetup.par - 1);
+                    (g_Players[playerIndex].strokeCount + 1) - g_HoleSetup.par;
 
                 if (scoreToPar > SCORE_TO_PAR_PAR) {
                   PlaySong(SONG_CUP_IN_OVER_PAR,
@@ -3907,8 +3914,8 @@ void UpdateTurns(void) {
              * frees the buffer's slot when the flag's test ends, so it shares
              * one slot with the other debug buffers, as in the original's
              * frame; declared in the flag's block, the frame grows from the
-             * original's 0x118 bytes to 0x1A0 and 185 words differ (45 in
-             * shape), and in a do-while 97 (45), against 83 (45).
+             * original's 0x118 bytes to 0x1A0 and 179 words differ (43 in
+             * shape), and in a do-while 91 (43), against 77 (43).
              */
             {
               char text[DEBUG_TEXT_BUFFER_SIZE];
@@ -4250,8 +4257,9 @@ void UpdateTurns(void) {
            * folds the clamp's upper test below and the second its lower
            * test, where the original loads the timing back for both. A
            * store in each arm keeps a join between the stores and the
-           * clamp until cross-jumping merges them: 83 words differ, 45 in
-           * shape, against 97 and 59.
+           * clamp until cross-jumping merges them: 77 words differ, 43 in
+           * shape, against 91 and 57, or 101 and 59 with the one store
+           * before the B test.
            */
           if (g_TurnController.pressedButtons & B_BUTTON) {
             f_ShotLaunch.power = MAX_LAUNCH_POWER;
