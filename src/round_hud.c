@@ -536,7 +536,7 @@ static Vtx f_ClubHeadIconVertices[QUAD_VERTEX_COUNT] = {
     {{{-16, -16, 0}, 0, {-0x1, 0x7FF}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{16, -16, 0}, 0, {0x7FF, 0x7FF}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{16, 16, 0}, 0, {0x7FF, -0x1}, {0xFF, 0xFF, 0xFF, 0xFF}}}};
-static Vtx f_LieIconVertices[8] = {
+static Vtx f_LieIconVertices[2 * QUAD_VERTEX_COUNT] = {
     {{{-24, 24, 0}, 0, {-0x1, -0x1}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{-24, 0, 0}, 0, {-0x1, 0x5FF}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{24, 0, 0}, 0, {0xBFF, 0x5FF}, {0xFF, 0xFF, 0xFF, 0xFF}}},
@@ -2814,7 +2814,7 @@ void DrawShotPanelIcons(Gfx** displayListHead, CameraView* view UNUSED) {
     gDPSetRenderMode(gfx++, G_RM_AA_TEX_EDGE, G_RM_AA_TEX_EDGE2);
     gSPMatrix(gfx++, PhysicalAddress(&f_LieIconMatrices[g_MatrixBufferIndex]),
         G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-    gSPVertex(gfx++, f_LieIconVertices, 8, 0);
+    gSPVertex(gfx++, f_LieIconVertices, ARRAY_COUNT(f_LieIconVertices), 0);
     gDPLoadTextureBlock(gfx++, TextureAddress(ImageBody(f_LieImage)),
         G_IM_FMT_RGBA, G_IM_SIZ_16b, LIE_IMAGE_WIDTH, LIE_IMAGE_HALF_HEIGHT, 0,
         G_TX_WRAP, G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
@@ -3121,7 +3121,8 @@ void DrawShotEffect(Gfx** displayListHead) {
     gSPMatrix(gfx++,
         PhysicalAddress(&f_ShotEffectMatrices[g_MatrixBufferIndex]),
         G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-    gSPVertex(gfx++, f_SparkTrailVertices, 16, 0);
+    gSPVertex(
+        gfx++, f_SparkTrailVertices, ARRAY_COUNT(f_SparkTrailVertices), 0);
     gDPLoadTextureBlock_4b(gfx++,
         TextureAddress(
             ImageBody(g_SharedEffectImages + SPARK_TRAIL_FRAMES_OFFSET)),
@@ -3129,8 +3130,9 @@ void DrawShotEffect(Gfx** displayListHead) {
         G_TX_WRAP, G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(gfx++);
     for (i = 0; i != SPARK_TRAIL_QUAD_COUNT; i++) {
-      gSP2Triangles(gfx++, i * 4, (i * 4) + 1, (i * 4) + 2, 0, i * 4,
-          (i * 4) + 2, (i * 4) + 3, 0);
+      gSP2Triangles(gfx++, i * QUAD_VERTEX_COUNT, (i * QUAD_VERTEX_COUNT) + 1,
+          (i * QUAD_VERTEX_COUNT) + 2, 0, i * QUAD_VERTEX_COUNT,
+          (i * QUAD_VERTEX_COUNT) + 2, (i * QUAD_VERTEX_COUNT) + 3, 0);
     }
 
     gDPPipeSync(gfx++);
@@ -3141,8 +3143,9 @@ void DrawShotEffect(Gfx** displayListHead) {
         G_TX_WRAP, G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(gfx++);
     for (i = 0; i != SPARK_TRAIL_QUAD_COUNT; i++) {
-      gSP2Triangles(gfx++, i * 4, (i * 4) + 1, (i * 4) + 2, 0, i * 4,
-          (i * 4) + 2, (i * 4) + 3, 0);
+      gSP2Triangles(gfx++, i * QUAD_VERTEX_COUNT, (i * QUAD_VERTEX_COUNT) + 1,
+          (i * QUAD_VERTEX_COUNT) + 2, 0, i * QUAD_VERTEX_COUNT,
+          (i * QUAD_VERTEX_COUNT) + 2, (i * QUAD_VERTEX_COUNT) + 3, 0);
     }
 
     gDPPipeSync(gfx++);
