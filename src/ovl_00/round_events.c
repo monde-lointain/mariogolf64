@@ -2027,6 +2027,13 @@ void DrawReadyGoMovie(Gfx** displayListHead) {
  * taking top as 104 + (i - 4) * 4, which drops the strip height. The register
  * oracle's closest result is these 54 words with no register forced, so
  * allocation isn't the cause. 54 words differ, 24 in shape.
+ *
+ * A third focused run's best, 1817 points from 2465, declares offset as a
+ * char, which would wrap the strip's offset into the image after 255 bytes,
+ * and copies the palette's address and the strip's distance from the center
+ * into new locals. Naming that distance and adding it to the center gives 54
+ * words, and taking top as i strips below the center, less 4 strips, gives
+ * 109 to 128 (27 to 34 in shape) in each order of the terms.
  */
 #ifdef NON_MATCHING
 void DrawShrinkingMovieImage(Gfx** displayListHead) {
