@@ -402,8 +402,8 @@ void FreeScorecard(void) {
   if (g_ScorecardState != SCORECARD_CLOSED) {
     g_ScorecardState = SCORECARD_CLOSED;
     g_RoundHud.scorecardPage = NO_SCORECARD_PAGE;
-    g_RoundHud.unk1 = 0;
-    g_RoundHud.unk3 = 0;
+    g_RoundHud.unusedScorecardValue = 0;
+    g_RoundHud.otherUnusedScorecardValue = 0;
 
     /* Only the bets being played have images */
     for (i = 0, imageIndex = 0; i != BET_COUNT; i++) {

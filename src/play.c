@@ -1576,7 +1576,7 @@ DIM_BACKDROP:
               g_PauseScreen = PAUSE_SCREEN_SCORECARD;
               ShowFlipMessage(-2);
               f_HoleEndStep = HOLE_END_STEP_SCORECARD;
-              g_RoundHud.unk2 = 0;
+              g_RoundHud.unusedHoleEndValue = 0;
               FreeResultCharacters();
               OpenScorecard(GetCourseRecordIndex(g_GameState.courseIndex),
                   g_GameState.holeIndex);

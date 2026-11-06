@@ -58,10 +58,13 @@ enum HeightComparison {
 /* The HUD's state for a round, which FreeScenery clears */
 typedef struct RoundHud {
   /* 0x00 */ s8 scorecardPage; /* The scorecard page that is shown */
-  /* 0x01 */ s8 unk1;
-  /* 0x02 */ s8 unk2;
-  /* 0x03 */ s8 unk3;
-  /* 0x04 */ u8 unk4;
+  /* Only ever cleared, as the scorecard closes */
+  /* 0x01 */ s8 unusedScorecardValue;
+  /* Only ever cleared, as the scorecard opens at a hole's end */
+  /* 0x02 */ s8 unusedHoleEndValue;
+  /* Only ever cleared, as the scorecard closes */
+  /* 0x03 */ s8 otherUnusedScorecardValue;
+  /* 0x04 */ u8 unusedBeforeLetterbox;
   /* 0x05 */ s8 isLetterboxShown; /* DrawLetterbox draws its bars only while
                                      this is set */
   /* Cleared as a pause screen closes, while the HUD's other parts show again;
@@ -76,14 +79,14 @@ typedef struct RoundHud {
   /* 0x0D */ s8 isProgressShown; /* The scoreboard, the distance left to
                                     the cup, the ring count and the
                                     stopwatch */
-  /* 0x0E */ u8 unkE;
+  /* 0x0E */ u8 unusedBeforeDistanceSign;
   /* 0x0F */ s8 isDistanceSignShown; /* At g_CurrentShot.targetPoint */
   /* 0x10 */ s8 greenGridState; /* Whether the grid over the ground shows; B
                                    toggles it while aiming */
-  /* 0x11 */ u8 unk11;
+  /* 0x11 */ u8 unusedAfterGreenGrid;
   /* 0x12 */ s8 isPinFlagShown;
   /* 0x13 */ s8 isShotLengthShown; /* How far the ball has flown */
-  /* 0x14 */ u8 unk14[2];
+  /* 0x14 */ u8 unusedBeforeHoleIntro[2];
   /* 0x16 */ s8
       isHoleIntroTextShown; /* Whether the course's name and the hole's number
                                show before the flyover */
@@ -95,14 +98,14 @@ typedef struct RoundHud {
   /* 0x18 */ s8 ballHeightYardsDirection;
   /* 0x19 */ s8 ballHeightMetersDirection;
   /* 0x1A */ s8 ballHeightFeetDirection;
-  /* 0x1B */ u8 unk1B;
+  /* 0x1B */ u8 unusedAfterBallHeights;
   /* 0x1C */ s32 ballHeightYards;
   /* 0x20 */ f32 ballHeightMeters;
   /* 0x24 */ f32 ballHeightFeet;
   /* 0x28 */ s32 cupDistance;
   /* 0x2C */ s32 stopwatchFrameCount; /* The Speed Golf stopwatch of the player
                                          taking a turn */
-  /* 0x30 */ u8 unk30[0x78 - 0x30];
+  /* 0x30 */ u8 unusedBeforeSkins[0x78 - 0x30];
   /* 0x78 */ s16
       skinsTotals[MAX_PLAYER_COUNT]; /* The skins each player has won, as
                                         TallySkins counts them */
