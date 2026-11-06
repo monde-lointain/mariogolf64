@@ -3136,12 +3136,15 @@ INCLUDE_ASM("asm/nonmatchings/hole_display", DrawTurnAwayAnimation);
  * greater, but the original stores the same register as both vertices' x before
  * adding 64 to it. Giving the copy loops of one or more of the four kinds
  * counters of their own, for the column, the row or both, gives 95 to 153
- * words, 19 in shape, in each of the 127 ways. 95 words differ, 19 in shape.
+ * words, 19 in shape, in each of the 127 ways. The draft then gave 95 words,
+ * 19 in shape.
  *
- * Counting the slice copy's columns with tileRow, which would give it a
- * second meaning, gives 87 words differing, 19 in shape, but the register
- * oracle's closest rises from 66 words forcing 14 pseudos to 72 forcing 12,
- * so the gain is in the registers alone.
+ * The slice copy's words are counted with the tile grid's column counter:
+ * with wordIndex, 95 words differ, 19 in shape, and with a counter of their
+ * own 84, 20 in shape, and the register oracle's closest result falls from
+ * 66 words forcing 14 pseudos to 63 forcing 11. Counting the slice copy's
+ * columns with tileRow as well gives 74. The counts above were measured
+ * before this. 72 words differ, 20 in shape.
  */
 #ifdef NON_MATCHING
 void CaptureHudAnimationFrame(void) {
@@ -3154,7 +3157,9 @@ void CaptureHudAnimationFrame(void) {
   s32 sliceRow;
   s32 gridRow;
   s32 column;
-  s32 gridColumn;
+  /* Counts the tile grid's columns, or the slice copy's words, as the
+   * original's shared register needs */
+  s32 gridColumnOrSliceWord;
   Vtx* vertex;
   Vtx* nextVertex;
   s32 x;
@@ -3188,9 +3193,9 @@ void CaptureHudAnimationFrame(void) {
     vertex = f_TileGridVertices[0];
     nextVertex = f_TileGridVertices[1];
     for (gridRow = 0; gridRow != TILE_GRID_ROW_COUNT; gridRow++) {
-      for (gridColumn = 0, x = TILE_GRID_LEFT;
-          gridColumn != TILE_GRID_COLUMN_COUNT - 1;
-          gridColumn++, x += TILE_GRID_SPACING) {
+      for (gridColumnOrSliceWord = 0, x = TILE_GRID_LEFT;
+          gridColumnOrSliceWord != TILE_GRID_COLUMN_COUNT - 1;
+          gridColumnOrSliceWord++, x += TILE_GRID_SPACING) {
         vertex->v.ob[AXIS_X] = x;
         vertex->v.ob[AXIS_Y] = TileGridRowY(gridRow);
         vertex->v.ob[AXIS_Z] = 0;
@@ -3202,9 +3207,10 @@ void CaptureHudAnimationFrame(void) {
       }
 
       /* The last column is narrower, ending inside the HUD's margin */
-      for (gridColumn = TILE_GRID_COLUMN_COUNT - 1, x = TILE_GRID_RIGHT;
-          gridColumn != TILE_GRID_COLUMN_COUNT;
-          gridColumn++, x += TILE_GRID_SPACING) {
+      for (gridColumnOrSliceWord = TILE_GRID_COLUMN_COUNT - 1,
+          x = TILE_GRID_RIGHT;
+          gridColumnOrSliceWord != TILE_GRID_COLUMN_COUNT;
+          gridColumnOrSliceWord++, x += TILE_GRID_SPACING) {
         vertex->v.ob[AXIS_X] = x;
         vertex->v.ob[AXIS_Y] = TileGridRowY(gridRow);
         /*
@@ -3233,13 +3239,14 @@ void CaptureHudAnimationFrame(void) {
     }
   } else if (f_HudAnimation == HUD_ANIMATION_SLICE_CAPTURE) {
     if (g_CapturedSliceCount < FRAME_SLICE_COUNT) {
-      wordIndex = 0;
+      gridColumnOrSliceWord = 0;
       for (sliceRow = FRAME_SLICE_TOP; sliceRow != FRAME_SLICE_BOTTOM;
           sliceRow++) {
         for (column = FRAME_SLICE_LEFT_WORD;
             column != FRAME_SLICE_RIGHT_WORD;) {
           f_CapturedFrame[(g_CapturedSliceCount * FRAME_SLICE_WORD_COUNT) +
-              wordIndex++] = frame[(sliceRow * FRAME_WORDS_PER_ROW) + column++];
+              gridColumnOrSliceWord++] =
+              frame[(sliceRow * FRAME_WORDS_PER_ROW) + column++];
         }
       }
 
