@@ -2535,7 +2535,7 @@ void ClearCartridgeCharacters(void) {
 s32 WriteExperienceToCartridge(s32 characterIndex) {
   /*
    * The transfer pointer is there to match: reaching g_GameBoyTransfer
-   * directly gives 170 words differing, 70 in shape
+   * directly gives 170 words differing, 70 in shape, against 18 (4)
    */
   GameBoyTransfer* transfer = &g_GameBoyTransfer;
   u8 characterData[CHARACTER_DATA_SIZE];
@@ -2591,7 +2591,8 @@ s32 WriteExperienceToCartridge(s32 characterIndex) {
           &transfer->pakFile, CARTRIDGE_RAM_ADDRESS, save, CARTRIDGE_SAVE_SIZE);
       /*
        * Each pak error powers off and continues, to match: jumping to the
-       * loop's last power off instead gives 189 words differing, 81 in shape
+       * loop's last power off from the five read and write errors instead
+       * gives 180 words differing, 72 in shape, against 18 (4)
        */
       if (result != 0) {
         nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
