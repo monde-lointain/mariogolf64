@@ -164,7 +164,10 @@ enum TerrainColorIndex {
   TERRAIN_COLOR_NO_DROP_GROUND,
   TERRAIN_COLOR_OUT_OF_BOUNDS,
   TERRAIN_COLOR_CART_WAY,
-  TERRAIN_COLOR_UNK7,
+  /* An olive, yellower and darker than the fairway green, that
+   * GetTerrainCodeColor never gives, but that GetColorTerrainCode reads back as
+   * fairway */
+  TERRAIN_COLOR_OLIVE_FAIRWAY,
   TERRAIN_COLOR_TEE_GROUND,
   TERRAIN_COLOR_ROCK,
   TERRAIN_COLOR_DEEP_ROUGH
@@ -227,7 +230,7 @@ static TerrainColor f_TerrainColors[TERRAIN_COLOR_COUNT] = {
     {0x00, 0x00, 0x1F, 0}, /* TERRAIN_COLOR_NO_DROP_GROUND */
     {0x0F, 0x08, 0x00, 1}, /* TERRAIN_COLOR_OUT_OF_BOUNDS */
     {0x0F, 0x0F, 0x0F, 1}, /* TERRAIN_COLOR_CART_WAY */
-    {0x08, 0x16, 0x00, 1}, /* TERRAIN_COLOR_UNK7 */
+    {0x08, 0x16, 0x00, 1}, /* TERRAIN_COLOR_OLIVE_FAIRWAY */
     {0x1F, 0x16, 0x00, 1}, /* TERRAIN_COLOR_TEE_GROUND */
     {0x05, 0x05, 0x05, 1}, /* TERRAIN_COLOR_ROCK */
     {0x00, 0x1F, 0x1F, 1}, /* TERRAIN_COLOR_DEEP_ROUGH */
@@ -466,7 +469,7 @@ s32 GetColorTerrainCode(s32 color) {
     case TERRAIN_COLOR_CART_WAY:
       return TERRAIN_CODE_CART_WAY;
     case TERRAIN_COLOR_FAIRWAY:
-    case TERRAIN_COLOR_UNK7:
+    case TERRAIN_COLOR_OLIVE_FAIRWAY:
       return TERRAIN_CODE_FAIRWAY;
     case TERRAIN_COLOR_TEE_GROUND:
       return TERRAIN_CODE_TEE_GROUND;
