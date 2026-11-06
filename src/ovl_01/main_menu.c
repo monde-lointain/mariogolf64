@@ -5855,7 +5855,14 @@ void DrawAnimationViewer(Gfx** displayListHead) {
  * icons' texels before their palette, from the texels, takes 89 words differing
  * to 24, 5 in shape to 6. The original keeps the texels in $fp and the address
  * of the local arrays on the stack in $s4, where this has them the other way
- * round. 24 words differ, 6 in shape.
+ * round. The original also reloads the choice from the stack before the mini
+ * golf test and keeps it in $a3 for the comparison with the slot, which needs a
+ * use of it in that block: copying it into a second variable just before the
+ * test gives 19 words, 1 in shape, and with the palette set first 84, none in
+ * shape, which the oracle matches with 5 registers forced. The copy anywhere
+ * else in or before the loop gives 44 (12), and a Boolean for the comparison
+ * there 27 (7). No natural form found needs the copy, so it isn't adopted. 24
+ * words differ, 6 in shape.
  */
 #ifdef NON_MATCHING
 void DrawCourseSelect(Gfx** displayListHead) {
