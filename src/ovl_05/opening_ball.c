@@ -79,7 +79,7 @@ static SurfaceInfo f_OpeningSurfaceInfo[SURFACE_COUNT] = {
     /* SURFACE_WASTE_AREA */
     {SURFACE_KIND_WASTE_AREA, "ｳｴｽﾄｴﾘｱ", 50, 80, 30, 430, 100, 0x8F1,
         SINK_DEPTH_HALF, 5},
-    /* SURFACE_UNK15 */
+    /* SURFACE_UNNAMED_ROCK */
     {SURFACE_KIND_ROCK, "            ", 98, 100, 40, 930, 500, 0x500,
         SINK_DEPTH_NONE, 9},
     /* SURFACE_BUNKER_FAIR_LIE */

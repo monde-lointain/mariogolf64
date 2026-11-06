@@ -21,7 +21,8 @@ enum Surface {
   SURFACE_DEEP_ROUGH,
   SURFACE_NO_DROP_GROUND,
   SURFACE_WASTE_AREA,
-  SURFACE_UNK15, /* A nameless rock */
+  /* A rock whose name is blank, with a lie as good as the green edge's */
+  SURFACE_UNNAMED_ROCK,
   SURFACE_BUNKER_FAIR_LIE,
   SURFACE_BUNKER_POOR_LIE,
   SURFACE_BUNKER_UNUSED_LIE,
