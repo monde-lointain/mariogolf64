@@ -364,8 +364,8 @@ void ClearAllGameFlags(void);
 #define GAME_FLAG_AUDIO_TEST 0x29
 /* Prints the swing's tempo */
 #define GAME_FLAG_SHOW_SWING_TEMPO 0x2A
-/* Prints each player's unkC */
-#define GAME_FLAG_SHOW_PLAYER_UNKC 0x2C
+/* Prints each player's state, in hex */
+#define GAME_FLAG_SHOW_PLAYER_STATES 0x2C
 /* Shows the debug log */
 #define GAME_FLAG_SHOW_DEBUG_LOG 0x39
 /* Keeps a ball out of bounds or out of course from costing a stroke */

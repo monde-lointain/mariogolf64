@@ -3299,7 +3299,7 @@ void UpdateTurns(void) {
     SetScreenEffect(SCREEN_EFFECT_NONE, 0);
   }
 
-  if (IsGameFlagSet(GAME_FLAG_SHOW_PLAYER_UNKC)) {
+  if (IsGameFlagSet(GAME_FLAG_SHOW_PLAYER_STATES)) {
     for (debugPlayerIndex = 0; debugPlayerIndex < g_GameState.playerCount;
         debugPlayerIndex++) {
       PrintDebugPaddedHex(
