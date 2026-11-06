@@ -12,6 +12,7 @@
 #include "course.h"
 #include "debug_text.h"
 #include "game_flags.h"
+#include "gbi_helpers.h"
 #include "hole_loader.h"
 #include "hole_triangles.h"
 #include "host_file.h"
@@ -245,6 +246,39 @@ typedef struct GroundLightColor {
 
 /* A ground tile has 5 by 5 points: its grid vertices and midpoints */
 #define TILE_POINT_SPAN 5
+
+/*
+ * The vertex cache slots of a ground tile's points, by each point's row and
+ * column: the corners, the inner midpoints, the edge midpoints in pairs, then
+ * those loaded one at a time
+ */
+enum TileVertexSlot {
+  TILE_SLOT_ROW0_COLUMN0,
+  TILE_SLOT_ROW0_COLUMN4,
+  TILE_SLOT_ROW4_COLUMN0,
+  TILE_SLOT_ROW4_COLUMN4,
+  TILE_SLOT_ROW1_COLUMN1,
+  TILE_SLOT_ROW1_COLUMN2,
+  TILE_SLOT_ROW1_COLUMN3,
+  TILE_SLOT_ROW2_COLUMN1,
+  TILE_SLOT_ROW2_COLUMN3,
+  TILE_SLOT_ROW3_COLUMN1,
+  TILE_SLOT_ROW3_COLUMN2,
+  TILE_SLOT_ROW3_COLUMN3,
+  TILE_SLOT_ROW0_COLUMN1,
+  TILE_SLOT_ROW0_COLUMN3,
+  TILE_SLOT_ROW1_COLUMN0,
+  TILE_SLOT_ROW3_COLUMN0,
+  TILE_SLOT_ROW1_COLUMN4,
+  TILE_SLOT_ROW3_COLUMN4,
+  TILE_SLOT_ROW4_COLUMN1,
+  TILE_SLOT_ROW4_COLUMN3,
+  TILE_SLOT_ROW0_COLUMN2,
+  TILE_SLOT_ROW2_COLUMN0,
+  TILE_SLOT_ROW2_COLUMN2,
+  TILE_SLOT_ROW2_COLUMN4,
+  TILE_SLOT_ROW4_COLUMN2
+};
 
 /* A ground tile's texture is its bordered 16-bit texels */
 #define GROUND_TEXTURE_LOAD_SIZE \
@@ -546,11 +580,16 @@ static s8 f_ShadowlessTextures[] = {0x14, 0x15, 0x16, -1};
 /* Read by no routine */
 static s32 f_UnusedWordsAfterShadowlessTextures[] UNUSED = {0, 0, 0};
 static s8 f_TileVertexSlots[TILE_POINT_SPAN][TILE_POINT_SPAN] = {
-    {0, 12, 20, 13, 1},
-    {14, 4, 5, 6, 16},
-    {21, 7, 22, 8, 23},
-    {15, 9, 10, 11, 17},
-    {2, 18, 24, 19, 3},
+    {TILE_SLOT_ROW0_COLUMN0, TILE_SLOT_ROW0_COLUMN1, TILE_SLOT_ROW0_COLUMN2,
+        TILE_SLOT_ROW0_COLUMN3, TILE_SLOT_ROW0_COLUMN4},
+    {TILE_SLOT_ROW1_COLUMN0, TILE_SLOT_ROW1_COLUMN1, TILE_SLOT_ROW1_COLUMN2,
+        TILE_SLOT_ROW1_COLUMN3, TILE_SLOT_ROW1_COLUMN4},
+    {TILE_SLOT_ROW2_COLUMN0, TILE_SLOT_ROW2_COLUMN1, TILE_SLOT_ROW2_COLUMN2,
+        TILE_SLOT_ROW2_COLUMN3, TILE_SLOT_ROW2_COLUMN4},
+    {TILE_SLOT_ROW3_COLUMN0, TILE_SLOT_ROW3_COLUMN1, TILE_SLOT_ROW3_COLUMN2,
+        TILE_SLOT_ROW3_COLUMN3, TILE_SLOT_ROW3_COLUMN4},
+    {TILE_SLOT_ROW4_COLUMN0, TILE_SLOT_ROW4_COLUMN1, TILE_SLOT_ROW4_COLUMN2,
+        TILE_SLOT_ROW4_COLUMN3, TILE_SLOT_ROW4_COLUMN4},
 };
 /* Read by no routine */
 static s32 f_UnusedWordAfterTileVertexSlots UNUSED = 0;
@@ -4483,27 +4522,27 @@ void BuildGroundTileDisplayList(
   /* The corners */
   CopyVertices(vertex, TileGridVertex(column, row, 0, 0), 2);
   CopyVertices(&vertex[2], TileGridVertex(column, row + 1, 0, 0), 2);
-  gSPVertex(gfx++, vertex, 4, 0);
-  vertex += 4;
+  gSPVertex(gfx++, vertex, QUAD_VERTEX_COUNT, TILE_SLOT_ROW0_COLUMN0);
+  vertex += QUAD_VERTEX_COUNT;
 
   /* The midpoints inside the tile, then those on its edges */
   gSPVertex(gfx++, &midpoints[TILE_FIRST_INNER_MIDPOINT],
-      TILE_INNER_MIDPOINT_COUNT, 4);
+      TILE_INNER_MIDPOINT_COUNT, TILE_SLOT_ROW1_COLUMN1);
   gSPVertex(gfx++, SegmentedVertex(1, &midpoints[TILE_MIDPOINT_ROW0_COLUMN1]),
-      TILE_SIDE_MIDPOINT_COUNT, 12);
+      TILE_SIDE_MIDPOINT_COUNT, TILE_SLOT_ROW0_COLUMN1);
   coarseOffsets[segmentIndex++] = BytesBetween(midpoints, vertex);
   SetTileVertexMidpoint(&TileGridVertex(column, row, 0, 0)->v,
       &TileGridVertex(column, row, 1, 0)->v, &vertex++->v);
   SetTileVertexMidpoint(&TileGridVertex(column, row, 1, 0)->v,
       &TileGridVertex(column, row, 2, 0)->v, &vertex++->v);
-  gSPVertex(
-      gfx++, SegmentedVertex(2, &midpoints[TILE_MIDPOINT_ROW1_COLUMN0]), 1, 14);
-  gSPVertex(
-      gfx++, SegmentedVertex(2, &midpoints[TILE_MIDPOINT_ROW3_COLUMN0]), 1, 15);
-  gSPVertex(
-      gfx++, SegmentedVertex(3, &midpoints[TILE_MIDPOINT_ROW1_COLUMN4]), 1, 16);
-  gSPVertex(
-      gfx++, SegmentedVertex(3, &midpoints[TILE_MIDPOINT_ROW3_COLUMN4]), 1, 17);
+  gSPVertex(gfx++, SegmentedVertex(2, &midpoints[TILE_MIDPOINT_ROW1_COLUMN0]),
+      1, TILE_SLOT_ROW1_COLUMN0);
+  gSPVertex(gfx++, SegmentedVertex(2, &midpoints[TILE_MIDPOINT_ROW3_COLUMN0]),
+      1, TILE_SLOT_ROW3_COLUMN0);
+  gSPVertex(gfx++, SegmentedVertex(3, &midpoints[TILE_MIDPOINT_ROW1_COLUMN4]),
+      1, TILE_SLOT_ROW1_COLUMN4);
+  gSPVertex(gfx++, SegmentedVertex(3, &midpoints[TILE_MIDPOINT_ROW3_COLUMN4]),
+      1, TILE_SLOT_ROW3_COLUMN4);
   coarseOffsets[segmentIndex++] =
       BytesBetween(&midpoints[TILE_MIDPOINT_ROW1_COLUMN0], vertex);
   SetTileVertexMidpoint(&TileGridVertex(column, row, 0, 0)->v,
@@ -4519,7 +4558,7 @@ void BuildGroundTileDisplayList(
       &TileGridVertex(column, row, 2, 2)->v, &vertex[2].v);
   vertex += 3;
   gSPVertex(gfx++, SegmentedVertex(4, &midpoints[TILE_MIDPOINT_ROW4_COLUMN1]),
-      TILE_SIDE_MIDPOINT_COUNT, 18);
+      TILE_SIDE_MIDPOINT_COUNT, TILE_SLOT_ROW4_COLUMN1);
   coarseOffsets[segmentIndex++] =
       BytesBetween(&midpoints[TILE_MIDPOINT_ROW4_COLUMN1], vertex);
   SetTileVertexMidpoint(&TileGridVertex(column, row, 0, 2)->v,
@@ -4529,28 +4568,28 @@ void BuildGroundTileDisplayList(
 
   /* The grid vertices at the middles of the edges and at the center */
   CopyVertices(vertex, TileGridVertex(column, row, 1, 0), 1);
-  gSPVertex(gfx++, SegmentedVertex(5, vertex), 1, 20);
+  gSPVertex(gfx++, SegmentedVertex(5, vertex), 1, TILE_SLOT_ROW0_COLUMN2);
   vertex++;
   coarseOffsets[segmentIndex++] = sizeof(Vtx);
   SetTileVertexMidpoint(&TileGridVertex(column, row, 0, 0)->v,
       &TileGridVertex(column, row, 2, 0)->v, &vertex++->v);
   CopyVertices(vertex, TileGridVertex(column, row, 0, 1), 1);
-  gSPVertex(gfx++, SegmentedVertex(6, vertex), 1, 21);
+  gSPVertex(gfx++, SegmentedVertex(6, vertex), 1, TILE_SLOT_ROW2_COLUMN0);
   vertex++;
   coarseOffsets[segmentIndex++] = sizeof(Vtx);
   SetTileVertexMidpoint(&TileGridVertex(column, row, 0, 0)->v,
       &TileGridVertex(column, row, 0, 2)->v, &vertex++->v);
   CopyVertices(vertex, TileGridVertex(column, row, 1, 1), 1);
-  gSPVertex(gfx++, vertex, 1, 22);
+  gSPVertex(gfx++, vertex, 1, TILE_SLOT_ROW2_COLUMN2);
   vertex++;
   CopyVertices(vertex, TileGridVertex(column, row, 2, 1), 1);
-  gSPVertex(gfx++, SegmentedVertex(7, vertex), 1, 23);
+  gSPVertex(gfx++, SegmentedVertex(7, vertex), 1, TILE_SLOT_ROW2_COLUMN4);
   vertex++;
   coarseOffsets[segmentIndex++] = sizeof(Vtx);
   SetTileVertexMidpoint(&TileGridVertex(column, row, 2, 0)->v,
       &TileGridVertex(column, row, 2, 2)->v, &vertex++->v);
   CopyVertices(vertex, TileGridVertex(column, row, 1, 2), 1);
-  gSPVertex(gfx++, SegmentedVertex(8, vertex), 1, 24);
+  gSPVertex(gfx++, SegmentedVertex(8, vertex), 1, TILE_SLOT_ROW4_COLUMN2);
   vertex++;
   coarseOffsets[segmentIndex++] = sizeof(Vtx);
   SetTileVertexMidpoint(&TileGridVertex(column, row, 0, 2)->v,
