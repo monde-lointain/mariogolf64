@@ -1073,7 +1073,7 @@ void RunStaffRollTimeline(s32 frame) {
   if (IsFairwayShotFrame(frame)) {
     ClearEffects();
     PickFramingPitch();
-    g_HoleSetup.conditions.sceneColorIndex = SCENE_COLOR_INDEX_UNK8;
+    g_HoleSetup.conditions.sceneColorIndex = SCENE_COLOR_INDEX_AFTERNOON;
     f_CastFramingYaw = ((f_CastIndex - SHOTS_PER_STAGE) * CAST_YAW_STEP) *
         DEGREES_TO_RADIANS_F;
     FreeCharacterSlot(f_CastSlot);

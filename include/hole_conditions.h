@@ -24,7 +24,10 @@ typedef struct HoleConditions {
  * end */
 #define SCENE_COLOR_INDEX_ROUND_START 0
 #define SCENE_COLOR_INDEX_DRIVING_RANGE 6
-#define SCENE_COLOR_INDEX_UNK8 8
+/* Halfway from the driving range's midday light to the round end's
+ * sunset. A round's later holes reach it, and the staff roll's fairway
+ * shots set it. */
+#define SCENE_COLOR_INDEX_AFTERNOON 8
 #define SCENE_COLOR_INDEX_ROUND_LATE 9
 #define SCENE_COLOR_INDEX_ROUND_END 10
 /* Every hole of a sudden death, whatever its place in the round */
