@@ -2060,7 +2060,7 @@ void UpdateOpening(void) {
             AdvanceOpeningSoundChannel();
             break;
           case 0x64:
-            PlaySound(SOUND_UNK394, f_OpeningSoundChannel, SOUND_FULL_SCALE);
+            PlaySound(SOUND_LONG_OH, f_OpeningSoundChannel, SOUND_FULL_SCALE);
             AdvanceOpeningSoundChannel();
             break;
           case 0x46:

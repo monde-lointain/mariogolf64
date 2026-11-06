@@ -327,9 +327,9 @@ enum Sound {
    */
   SOUND_MARIO_ITS_A_ME = 0x187,
   SOUND_HELLO_BALL,
-  /* SOUND_UH_OH and SOUND_UNK394 each play once in the opening */
+  /* SOUND_UH_OH and SOUND_LONG_OH each play once in the opening */
   SOUND_UH_OH,
-  SOUND_UNK394,
+  SOUND_LONG_OH,
   SOUND_AMBIENT_REPEATING,
   SOUND_PEACH_PAR = 0x18E,
   /* Also Peach's trouble reaction */
