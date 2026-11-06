@@ -1245,6 +1245,12 @@ void DrawTwoDigitMenuNumber(
  * banner's loop and before the arrows, where the build keeps it in a register.
  * Setting offsetY by if/else, by ?:, by negating offsetY itself, or testing
  * reverseVerticalSlide != FALSE all leave 209 words.
+ *
+ * The register oracle lines stripIndex and arrowIndex up with the saved
+ * register that the player loops' playerIndex takes in the original.
+ * Counting the strips with playerIndex gives 416 words (90 in shape), the
+ * arrows 248 (46) and both 455 (105); with playerIndex an s32 as well, 417
+ * to 465, 117 in shape.
  */
 #ifdef NON_MATCHING
 void DrawHandicaps(Gfx** displayListHead, s32 slide, u8 reverseVerticalSlide,
