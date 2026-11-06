@@ -1138,20 +1138,22 @@ void UpdatePlay(void) {
               g_GameState.step = GAME_STATE_END_INTRO;
             }
           }
-        } else if (GetWipeProgress() == WIPE_OPEN_PROGRESS &&
-            (f_PlayStateFrameCount >= HOLE_INTRO_FRAMES || IsAButtonPressed() ||
-                (IsPlayAdvancingItself() &&
-                    f_PlayStateFrameCount >= AUTO_ADVANCE_FRAMES))) {
-          if (g_GameState.gameMode == GAME_MODE_SPEED_GOLF) {
-            StartHoleFlyover();
-            EndHoleIntro();
-            g_GameState.step = GAME_STATE_TAKING_TURNS;
-            EndHoleFlyover();
-            StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
-            f_PlayStateFrameCount = 0;
-          } else {
-            StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
-            g_GameState.step = GAME_STATE_END_INTRO;
+        } else if (GetWipeProgress() == WIPE_OPEN_PROGRESS) {
+          if (f_PlayStateFrameCount >= HOLE_INTRO_FRAMES ||
+              IsAButtonPressed() ||
+              (IsPlayAdvancingItself() &&
+                  f_PlayStateFrameCount >= AUTO_ADVANCE_FRAMES)) {
+            if (g_GameState.gameMode == GAME_MODE_SPEED_GOLF) {
+              StartHoleFlyover();
+              EndHoleIntro();
+              g_GameState.step = GAME_STATE_TAKING_TURNS;
+              EndHoleFlyover();
+              StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
+              f_PlayStateFrameCount = 0;
+            } else {
+              StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
+              g_GameState.step = GAME_STATE_END_INTRO;
+            }
           }
         }
 
@@ -1677,26 +1679,27 @@ DIM_BACKDROP:
 
             break;
           case HOLE_END_STEP_SCORECARD:
-            if (UpdateShownScorecard(g_MergedController.repeatedButtons) &&
-                (IsAButtonPressed() ||
-                    (IsPlayAdvancingItself() &&
-                        f_PlayStateFrameCount > AUTO_ADVANCE_FRAMES &&
-                        f_PlayExit != PLAY_EXIT_ROUND_OVER))) {
-              if (f_PlayExit == PLAY_EXIT_ROUND_OVER) {
-                f_HoleEndStep = HOLE_END_STEP_FINAL_RESULTS;
-                TallyCoursePoints();
-                FreeScorecard();
-                SetMenuBackdrop(MENU_BACKDROP_STILL);
-                OpenRoundResults(FALSE);
-              } else {
-                f_HoleEndStep = HOLE_END_STEP_WIPE_OUT;
-                FreeScorecard();
-                SetMenuBackdrop(MENU_BACKDROP_STILL);
-                if (g_GameState.gameMode == GAME_MODE_TOURNAMENT &&
-                    g_GameState.holeIndex == TOURNAMENT_HALF_TURN_HOLE) {
-                  ShowHalfTurn();
+            if (UpdateShownScorecard(g_MergedController.repeatedButtons)) {
+              if (IsAButtonPressed() ||
+                  (IsPlayAdvancingItself() &&
+                      f_PlayStateFrameCount > AUTO_ADVANCE_FRAMES &&
+                      f_PlayExit != PLAY_EXIT_ROUND_OVER)) {
+                if (f_PlayExit == PLAY_EXIT_ROUND_OVER) {
+                  f_HoleEndStep = HOLE_END_STEP_FINAL_RESULTS;
+                  TallyCoursePoints();
+                  FreeScorecard();
+                  SetMenuBackdrop(MENU_BACKDROP_STILL);
+                  OpenRoundResults(FALSE);
                 } else {
-                  StartWipe(WIPE_CLOSING);
+                  f_HoleEndStep = HOLE_END_STEP_WIPE_OUT;
+                  FreeScorecard();
+                  SetMenuBackdrop(MENU_BACKDROP_STILL);
+                  if (g_GameState.gameMode == GAME_MODE_TOURNAMENT &&
+                      g_GameState.holeIndex == TOURNAMENT_HALF_TURN_HOLE) {
+                    ShowHalfTurn();
+                  } else {
+                    StartWipe(WIPE_CLOSING);
+                  }
                 }
               }
             }
