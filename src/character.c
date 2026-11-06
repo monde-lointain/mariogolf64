@@ -2212,6 +2212,9 @@ void PlaceCharacter(u32 slotIndex, CoursePoint point, Radians heading) {
  *
  * The register oracle's closest result is these 14 words with no register
  * forced, so allocation isn't the cause.
+ *
+ * Setting the impact flash's light color through SetLightColor, which
+ * works out the halved level once, gives 90 words, 68 in shape.
  */
 #ifdef NON_MATCHING
 void DrawCharacterAndShadow(
