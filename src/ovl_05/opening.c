@@ -987,8 +987,9 @@ enum OpeningModel {
   OPENING_MODEL_PLUM,
   OPENING_MODEL_PEACH,
   OPENING_MODEL_LUIGI,
-  /* Shown without a name logo */
-  OPENING_MODEL_UNK16 = 16
+  /* Toad, by its textures: a red spot on white, a face and a blue vest with
+   * yellow trim. Shown without a name logo. */
+  OPENING_MODEL_TOAD = 16
 };
 
 s32 ToggleOpeningCharacter(u32 slotIndex, s32 character);
@@ -1314,7 +1315,7 @@ s32 UpdateOpeningCharacters(void) {
       break;
     case 26:
       f_CueSlotIndex = 1;
-      ToggleOpeningCharacter(1, OPENING_MODEL_UNK16);
+      ToggleOpeningCharacter(1, OPENING_MODEL_TOAD);
       SetCharacterAnimation(f_CueSlotIndex, 0x10);
       PlaceCueCharacter(point25, 0xE3F2C, 0x1D98E6, 70);
       f_OpeningCue = OPENING_CUE_DONE;
