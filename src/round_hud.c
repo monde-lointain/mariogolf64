@@ -3427,8 +3427,8 @@ void DrawAnimatedIcon(Gfx** displayListHead, s32 letterboxHeight) {
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(gfx++);
-    gSPScisTextureRectangle(gfx++, (s32)f_AnimatedIconX << 2,
-        (s32)f_AnimatedIconY << 2,
+    gSPScisTextureRectangle(gfx++, QuarterPixels((s32)f_AnimatedIconX),
+        QuarterPixels((s32)f_AnimatedIconY),
         QuarterPixels((s32)f_AnimatedIconX + ANIMATED_ICON_SIZE),
         QuarterPixels((s32)f_AnimatedIconY + ANIMATED_ICON_SIZE),
         G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
@@ -3451,7 +3451,7 @@ void DrawAnimatedIcon(Gfx** displayListHead, s32 letterboxHeight) {
     gDPPipeSync(gfx++);
     gSPScisTextureRectangle(gfx++,
         QuarterPixels((s32)f_AnimatedIconX + ANIMATED_ICON_LABEL_OFFSET_X),
-        (s32)f_AnimatedIconY << 2,
+        QuarterPixels((s32)f_AnimatedIconY),
         QuarterPixels((s32)f_AnimatedIconX + ANIMATED_ICON_LABEL_OFFSET_X +
             ANIMATED_ICON_LABEL_WIDTH),
         QuarterPixels((s32)f_AnimatedIconY + ANIMATED_ICON_LABEL_HEIGHT),

@@ -724,9 +724,9 @@ void DrawPlanks(Gfx** displayListHead) {
             (stripIndex * PLANK_STRIP_HEIGHT * PLANKS_WIDTH),
         G_IM_FMT_CI, G_IM_SIZ_8b, PLANKS_WIDTH, stripHeight, 0, 0, 0,
         G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-    top = (SCREEN_BORDER + (stripIndex * PLANK_STRIP_HEIGHT)) << 2;
-    bottom = (SCREEN_BORDER + (stripIndex * PLANK_STRIP_HEIGHT) + stripHeight)
-        << 2;
+    top = QuarterPixels(SCREEN_BORDER + (stripIndex * PLANK_STRIP_HEIGHT));
+    bottom = QuarterPixels(
+        SCREEN_BORDER + (stripIndex * PLANK_STRIP_HEIGHT) + stripHeight);
     DrawTextureRect(&gfx, QuarterPixels(SCREEN_BORDER), top,
         QuarterPixels(slide), bottom, G_TX_RENDERTILE,
         TexelCoordinate(PLANKS_MIDDLE - slide), TexelCoordinate(1),

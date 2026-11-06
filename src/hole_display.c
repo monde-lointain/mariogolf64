@@ -864,9 +864,10 @@ void DrawLensFlare(Gfx** displayListHead) {
     size = f_LensFlares[i].size * (glare + LENS_FLARE_SIZE_BIAS) *
         LENS_FLARE_SIZE_SCALE;
     texelStep = TexelRunStep(RING_TEXTURE_SIZE, size);
-    gSPScisTextureRectangle(gfx++, (s32)(centerX - size) << 2,
-        (s32)(centerY - size) << 2, (s32)(centerX + size) << 2,
-        (s32)(centerY + size) << 2, G_TX_RENDERTILE, 0, 0, texelStep,
+    gSPScisTextureRectangle(gfx++, QuarterPixels((s32)(centerX - size)),
+        QuarterPixels((s32)(centerY - size)),
+        QuarterPixels((s32)(centerX + size)),
+        QuarterPixels((s32)(centerY + size)), G_TX_RENDERTILE, 0, 0, texelStep,
         texelStep);
   }
 

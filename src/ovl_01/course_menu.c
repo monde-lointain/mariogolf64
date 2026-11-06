@@ -541,10 +541,11 @@ void DrawCourseStats(Gfx** displayListHead) {
           0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
       gDPPipeSync(gfx++);
-      gSPScisTextureRectangle(gfx++, (s32)(iconX[slot] - halfSize) << 2,
+      gSPScisTextureRectangle(gfx++,
+          QuarterPixels((s32)(iconX[slot] - halfSize)),
           QuarterPixels((s32)(iconY[slot] - halfSize + (sortIndex * halfSize)) -
               WHEEL_ICON_RAISE),
-          (s32)(iconX[slot] + halfSize) << 2,
+          QuarterPixels((s32)(iconX[slot] + halfSize)),
           QuarterPixels(
               (s32)(iconY[slot] + (sortIndex * halfSize)) - WHEEL_ICON_RAISE),
           G_TX_RENDERTILE, 0, 0, step, step);

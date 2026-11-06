@@ -5043,10 +5043,11 @@ void DrawModeSelect(Gfx** displayListHead) {
             G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
         gDPPipeSync(gfx++);
         gSPScisTextureRectangle(gfx++,
-            (wheelShiftX + (s32)(boardX[slot] - halfSize)) << 2,
-            (s32)(boardY[slot] - halfSize + (countShift * halfSize) + bob) << 2,
-            (s32)(boardX[slot] + halfSize) << 2,
-            (s32)(boardY[slot] + (countShift * halfSize) + bob) << 2,
+            QuarterPixels(wheelShiftX + (s32)(boardX[slot] - halfSize)),
+            QuarterPixels(
+                (s32)(boardY[slot] - halfSize + (countShift * halfSize) + bob)),
+            QuarterPixels((s32)(boardX[slot] + halfSize)),
+            QuarterPixels((s32)(boardY[slot] + (countShift * halfSize) + bob)),
             G_TX_RENDERTILE, 0, 0, step, step);
         gDPPipeSync(gfx++);
       }
@@ -6114,11 +6115,12 @@ void DrawCourseSelect(Gfx** displayListHead) {
             G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
             G_TX_NOLOD);
         gDPPipeSync(gfx++);
-        gSPScisTextureRectangle(gfx++, (s32)(iconX[slot] - halfSize) << 2,
-            (s32)((iconY[slot] - halfSize) + stripTop + bob) << 2,
-            (s32)(iconX[slot] + halfSize) << 2,
-            (s32)(iconY[slot] + stripTop + bob) << 2, G_TX_RENDERTILE, 0, 0,
-            step, step);
+        gSPScisTextureRectangle(gfx++,
+            QuarterPixels((s32)(iconX[slot] - halfSize)),
+            QuarterPixels((s32)((iconY[slot] - halfSize) + stripTop + bob)),
+            QuarterPixels((s32)(iconX[slot] + halfSize)),
+            QuarterPixels((s32)(iconY[slot] + stripTop + bob)), G_TX_RENDERTILE,
+            0, 0, step, step);
         gDPPipeSync(gfx++);
       }
 

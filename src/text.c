@@ -594,16 +594,18 @@ void DrawLargeTextSlot(Gfx** displayListHead, s32 slot) {
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
       gDPLoadSync(gfx++);
-      gDPLoadTile(gfx++, G_TX_LOADTILE, glyphLeft << 1, glyphTop << 2,
+      gDPLoadTile(gfx++, G_TX_LOADTILE, glyphLeft << 1,
+          glyphTop << G_TEXTURE_IMAGE_FRAC,
           (glyphLeft + FONT_SIZE_LARGE - 1) << 1,
-          (glyphTop + FONT_SIZE_LARGE - 1) << 2);
+          (glyphTop + FONT_SIZE_LARGE - 1) << G_TEXTURE_IMAGE_FRAC);
       gDPPipeSync(gfx++);
       gDPSetTile(gfx++, G_IM_FMT_I, G_IM_SIZ_4b, 1, 0, G_TX_RENDERTILE, 0,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
-      gDPSetTileSize(gfx++, G_TX_RENDERTILE, glyphLeft << 2, glyphTop << 2,
-          (glyphLeft + FONT_SIZE_LARGE - 1) << 2,
-          (glyphTop + FONT_SIZE_LARGE - 1) << 2);
+      gDPSetTileSize(gfx++, G_TX_RENDERTILE, glyphLeft << G_TEXTURE_IMAGE_FRAC,
+          glyphTop << G_TEXTURE_IMAGE_FRAC,
+          (glyphLeft + FONT_SIZE_LARGE - 1) << G_TEXTURE_IMAGE_FRAC,
+          (glyphTop + FONT_SIZE_LARGE - 1) << G_TEXTURE_IMAGE_FRAC);
       gDPPipeSync(gfx++);
       if (code >= CHARACTER_CODE_MARK_FIRST &&
           code < CHARACTER_CODE_MARK_FIRST + CHARACTER_CODE_MARK_COUNT) {
@@ -757,15 +759,18 @@ void DrawLargeTextSlot(Gfx** displayListHead, s32 slot) {
               G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
           gDPLoadSync(gfx++);
           gDPLoadTile(gfx++, G_TX_LOADTILE, characterLeft << 1,
-              characterTop << 2, (characterLeft + GLYPH_TILE_WIDTH - 1) << 1,
-              (characterTop + FONT_SIZE_LARGE - 1) << 2);
+              characterTop << G_TEXTURE_IMAGE_FRAC,
+              (characterLeft + GLYPH_TILE_WIDTH - 1) << 1,
+              (characterTop + FONT_SIZE_LARGE - 1) << G_TEXTURE_IMAGE_FRAC);
           gDPPipeSync(gfx++);
           gDPSetTile(gfx++, G_IM_FMT_I, G_IM_SIZ_4b, 1, 0, G_TX_RENDERTILE, 0,
               G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD,
               G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
-          gDPSetTileSize(gfx++, G_TX_RENDERTILE, characterLeft << 2,
-              characterTop << 2, (characterLeft + GLYPH_TILE_WIDTH - 1) << 2,
-              (characterTop + FONT_SIZE_LARGE - 1) << 2);
+          gDPSetTileSize(gfx++, G_TX_RENDERTILE,
+              characterLeft << G_TEXTURE_IMAGE_FRAC,
+              characterTop << G_TEXTURE_IMAGE_FRAC,
+              (characterLeft + GLYPH_TILE_WIDTH - 1) << G_TEXTURE_IMAGE_FRAC,
+              (characterTop + FONT_SIZE_LARGE - 1) << G_TEXTURE_IMAGE_FRAC);
           gDPPipeSync(gfx++);
           if (g_PrintBuffer[index] >= CHARACTER_CODE_MARK_FIRST &&
               g_PrintBuffer[index] <
@@ -803,14 +808,16 @@ void DrawLargeTextSlot(Gfx** displayListHead, s32 slot) {
             G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD,
             G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
         gDPLoadSync(gfx++);
-        gDPLoadTile(gfx++, G_TX_LOADTILE, 0, 0, (ICON_WIDTH - 1) << 2,
-            (ICON_WIDTH - 1) << 2);
+        gDPLoadTile(gfx++, G_TX_LOADTILE, 0, 0,
+            (ICON_WIDTH - 1) << G_TEXTURE_IMAGE_FRAC,
+            (ICON_WIDTH - 1) << G_TEXTURE_IMAGE_FRAC);
         gDPPipeSync(gfx++);
         gDPSetTile(gfx++, G_IM_FMT_CI, G_IM_SIZ_8b, 2, 0, G_TX_RENDERTILE, 0,
             G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD,
             G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
-        gDPSetTileSize(gfx++, G_TX_RENDERTILE, 0, 0, (ICON_WIDTH - 1) << 2,
-            (ICON_WIDTH - 1) << 2);
+        gDPSetTileSize(gfx++, G_TX_RENDERTILE, 0, 0,
+            (ICON_WIDTH - 1) << G_TEXTURE_IMAGE_FRAC,
+            (ICON_WIDTH - 1) << G_TEXTURE_IMAGE_FRAC);
         gDPPipeSync(gfx++);
         gSPTextureRectangle(gfx++, QuarterPixels(x), QuarterPixels(y),
             QuarterPixels(x + FONT_SIZE_LARGE),
@@ -889,16 +896,18 @@ void DrawMediumTextSlot(Gfx** displayListHead, s32 slot) {
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
       gDPLoadSync(gfx++);
-      gDPLoadTile(gfx++, G_TX_LOADTILE, glyphLeft << 1, glyphTop << 2,
+      gDPLoadTile(gfx++, G_TX_LOADTILE, glyphLeft << 1,
+          glyphTop << G_TEXTURE_IMAGE_FRAC,
           (glyphLeft + FONT_SIZE_LARGE - 1) << 1,
-          (glyphTop + FONT_SIZE_LARGE - 1) << 2);
+          (glyphTop + FONT_SIZE_LARGE - 1) << G_TEXTURE_IMAGE_FRAC);
       gDPPipeSync(gfx++);
       gDPSetTile(gfx++, G_IM_FMT_I, G_IM_SIZ_4b, 1, 0, G_TX_RENDERTILE, 0,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
-      gDPSetTileSize(gfx++, G_TX_RENDERTILE, glyphLeft << 2, glyphTop << 2,
-          (glyphLeft + FONT_SIZE_LARGE - 1) << 2,
-          (glyphTop + FONT_SIZE_LARGE - 1) << 2);
+      gDPSetTileSize(gfx++, G_TX_RENDERTILE, glyphLeft << G_TEXTURE_IMAGE_FRAC,
+          glyphTop << G_TEXTURE_IMAGE_FRAC,
+          (glyphLeft + FONT_SIZE_LARGE - 1) << G_TEXTURE_IMAGE_FRAC,
+          (glyphTop + FONT_SIZE_LARGE - 1) << G_TEXTURE_IMAGE_FRAC);
       gDPPipeSync(gfx++);
       if (code >= CHARACTER_CODE_MARK_FIRST &&
           code < CHARACTER_CODE_MARK_FIRST + CHARACTER_CODE_MARK_COUNT) {
@@ -1020,15 +1029,18 @@ void DrawMediumTextSlot(Gfx** displayListHead, s32 slot) {
               G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
           gDPLoadSync(gfx++);
           gDPLoadTile(gfx++, G_TX_LOADTILE, characterLeft << 1,
-              characterTop << 2, (characterLeft + GLYPH_TILE_WIDTH - 1) << 1,
-              (characterTop + FONT_SIZE_LARGE - 1) << 2);
+              characterTop << G_TEXTURE_IMAGE_FRAC,
+              (characterLeft + GLYPH_TILE_WIDTH - 1) << 1,
+              (characterTop + FONT_SIZE_LARGE - 1) << G_TEXTURE_IMAGE_FRAC);
           gDPPipeSync(gfx++);
           gDPSetTile(gfx++, G_IM_FMT_I, G_IM_SIZ_4b, 1, 0, G_TX_RENDERTILE, 0,
               G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD,
               G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
-          gDPSetTileSize(gfx++, G_TX_RENDERTILE, characterLeft << 2,
-              characterTop << 2, (characterLeft + GLYPH_TILE_WIDTH - 1) << 2,
-              (characterTop + FONT_SIZE_LARGE - 1) << 2);
+          gDPSetTileSize(gfx++, G_TX_RENDERTILE,
+              characterLeft << G_TEXTURE_IMAGE_FRAC,
+              characterTop << G_TEXTURE_IMAGE_FRAC,
+              (characterLeft + GLYPH_TILE_WIDTH - 1) << G_TEXTURE_IMAGE_FRAC,
+              (characterTop + FONT_SIZE_LARGE - 1) << G_TEXTURE_IMAGE_FRAC);
           gDPPipeSync(gfx++);
           if (g_PrintBuffer[index] >= CHARACTER_CODE_MARK_FIRST &&
               g_PrintBuffer[index] <
@@ -1066,14 +1078,16 @@ void DrawMediumTextSlot(Gfx** displayListHead, s32 slot) {
             G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD,
             G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
         gDPLoadSync(gfx++);
-        gDPLoadTile(gfx++, G_TX_LOADTILE, 0, 0, (ICON_WIDTH - 1) << 2,
-            (ICON_WIDTH - 1) << 2);
+        gDPLoadTile(gfx++, G_TX_LOADTILE, 0, 0,
+            (ICON_WIDTH - 1) << G_TEXTURE_IMAGE_FRAC,
+            (ICON_WIDTH - 1) << G_TEXTURE_IMAGE_FRAC);
         gDPPipeSync(gfx++);
         gDPSetTile(gfx++, G_IM_FMT_CI, G_IM_SIZ_8b, 2, 0, G_TX_RENDERTILE, 0,
             G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD,
             G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
-        gDPSetTileSize(gfx++, G_TX_RENDERTILE, 0, 0, (ICON_WIDTH - 1) << 2,
-            (ICON_WIDTH - 1) << 2);
+        gDPSetTileSize(gfx++, G_TX_RENDERTILE, 0, 0,
+            (ICON_WIDTH - 1) << G_TEXTURE_IMAGE_FRAC,
+            (ICON_WIDTH - 1) << G_TEXTURE_IMAGE_FRAC);
         gDPPipeSync(gfx++);
         gSPTextureRectangle(gfx++, QuarterPixels(x), QuarterPixels(y),
             QuarterPixels(x + FONT_SIZE_MEDIUM),
@@ -1342,19 +1356,22 @@ void DrawFixedWidthLargeText(
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
       gDPLoadSync(gfx++);
-      gDPLoadTile(gfx++, G_TX_LOADTILE, glyphLeft << 1, glyphTop << 2,
+      gDPLoadTile(gfx++, G_TX_LOADTILE, glyphLeft << 1,
+          glyphTop << G_TEXTURE_IMAGE_FRAC,
           (glyphLeft + GLYPH_TILE_WIDTH - 1) << 1,
-          (glyphTop + FONT_SIZE_LARGE - 1) << 2);
+          (glyphTop + FONT_SIZE_LARGE - 1) << G_TEXTURE_IMAGE_FRAC);
       gDPPipeSync(gfx++);
       gDPSetTile(gfx++, G_IM_FMT_I, G_IM_SIZ_4b, 1, 0, G_TX_RENDERTILE, 0,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
-      gDPSetTileSize(gfx++, G_TX_RENDERTILE, glyphLeft << 2, glyphTop << 2,
-          (glyphLeft + GLYPH_TILE_WIDTH - 1) << 2,
-          (glyphTop + FONT_SIZE_LARGE - 1) << 2);
-      gDPSetTileSize(gfx++, 1, glyphLeft << 2, glyphTop << 2,
-          (glyphLeft + GLYPH_TILE_WIDTH) << 2,
-          (glyphTop + FONT_SIZE_LARGE) << 2);
+      gDPSetTileSize(gfx++, G_TX_RENDERTILE, glyphLeft << G_TEXTURE_IMAGE_FRAC,
+          glyphTop << G_TEXTURE_IMAGE_FRAC,
+          (glyphLeft + GLYPH_TILE_WIDTH - 1) << G_TEXTURE_IMAGE_FRAC,
+          (glyphTop + FONT_SIZE_LARGE - 1) << G_TEXTURE_IMAGE_FRAC);
+      gDPSetTileSize(gfx++, 1, glyphLeft << G_TEXTURE_IMAGE_FRAC,
+          glyphTop << G_TEXTURE_IMAGE_FRAC,
+          (glyphLeft + GLYPH_TILE_WIDTH) << G_TEXTURE_IMAGE_FRAC,
+          (glyphTop + FONT_SIZE_LARGE) << G_TEXTURE_IMAGE_FRAC);
       gDPPipeSync(gfx++);
       gSPTextureRectangle(gfx++, QuarterPixels(left), QuarterPixels(top),
           QuarterPixels(left + FONT_SIZE_LARGE),
@@ -1417,19 +1434,22 @@ void DrawLargeText(Gfx** displayListHead, s16 x, s16 y, READ_ONLY char* text) {
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
       gDPLoadSync(gfx++);
-      gDPLoadTile(gfx++, G_TX_LOADTILE, glyphLeft << 1, glyphTop << 2,
+      gDPLoadTile(gfx++, G_TX_LOADTILE, glyphLeft << 1,
+          glyphTop << G_TEXTURE_IMAGE_FRAC,
           (glyphLeft + GLYPH_TILE_WIDTH - 1) << 1,
-          (glyphTop + FONT_SIZE_LARGE - 1) << 2);
+          (glyphTop + FONT_SIZE_LARGE - 1) << G_TEXTURE_IMAGE_FRAC);
       gDPPipeSync(gfx++);
       gDPSetTile(gfx++, G_IM_FMT_I, G_IM_SIZ_4b, 1, 0, G_TX_RENDERTILE, 0,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
-      gDPSetTileSize(gfx++, G_TX_RENDERTILE, glyphLeft << 2, glyphTop << 2,
-          (glyphLeft + GLYPH_TILE_WIDTH - 1) << 2,
-          (glyphTop + FONT_SIZE_LARGE - 1) << 2);
-      gDPSetTileSize(gfx++, 1, glyphLeft << 2, glyphTop << 2,
-          (glyphLeft + GLYPH_TILE_WIDTH) << 2,
-          (glyphTop + FONT_SIZE_LARGE) << 2);
+      gDPSetTileSize(gfx++, G_TX_RENDERTILE, glyphLeft << G_TEXTURE_IMAGE_FRAC,
+          glyphTop << G_TEXTURE_IMAGE_FRAC,
+          (glyphLeft + GLYPH_TILE_WIDTH - 1) << G_TEXTURE_IMAGE_FRAC,
+          (glyphTop + FONT_SIZE_LARGE - 1) << G_TEXTURE_IMAGE_FRAC);
+      gDPSetTileSize(gfx++, 1, glyphLeft << G_TEXTURE_IMAGE_FRAC,
+          glyphTop << G_TEXTURE_IMAGE_FRAC,
+          (glyphLeft + GLYPH_TILE_WIDTH) << G_TEXTURE_IMAGE_FRAC,
+          (glyphTop + FONT_SIZE_LARGE) << G_TEXTURE_IMAGE_FRAC);
       gDPPipeSync(gfx++);
       gSPTextureRectangle(gfx++, QuarterPixels(left), QuarterPixels(top),
           QuarterPixels(left + FONT_SIZE_LARGE),
@@ -1497,16 +1517,18 @@ void DrawMediumText(Gfx** displayListHead, s16 x, s16 y, READ_ONLY char* text) {
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
       gDPLoadSync(gfx++);
-      gDPLoadTile(gfx++, G_TX_LOADTILE, glyphLeft << 1, glyphTop << 2,
+      gDPLoadTile(gfx++, G_TX_LOADTILE, glyphLeft << 1,
+          glyphTop << G_TEXTURE_IMAGE_FRAC,
           (glyphLeft + GLYPH_TILE_WIDTH - 1) << 1,
-          (glyphTop + FONT_SIZE_MEDIUM - 1) << 2);
+          (glyphTop + FONT_SIZE_MEDIUM - 1) << G_TEXTURE_IMAGE_FRAC);
       gDPPipeSync(gfx++);
       gDPSetTile(gfx++, G_IM_FMT_I, G_IM_SIZ_4b, 1, 0, G_TX_RENDERTILE, 0,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
-      gDPSetTileSize(gfx++, G_TX_RENDERTILE, glyphLeft << 2, glyphTop << 2,
-          (glyphLeft + GLYPH_TILE_WIDTH - 1) << 2,
-          (glyphTop + FONT_SIZE_MEDIUM - 1) << 2);
+      gDPSetTileSize(gfx++, G_TX_RENDERTILE, glyphLeft << G_TEXTURE_IMAGE_FRAC,
+          glyphTop << G_TEXTURE_IMAGE_FRAC,
+          (glyphLeft + GLYPH_TILE_WIDTH - 1) << G_TEXTURE_IMAGE_FRAC,
+          (glyphTop + FONT_SIZE_MEDIUM - 1) << G_TEXTURE_IMAGE_FRAC);
       gDPPipeSync(gfx++);
       gSPTextureRectangle(gfx++, QuarterPixels(left), QuarterPixels(top),
           QuarterPixels(left + FONT_SIZE_MEDIUM),
@@ -1572,16 +1594,18 @@ void DrawSmallText(Gfx** displayListHead, s16 x, s16 y, READ_ONLY char* text) {
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
       gDPLoadSync(gfx++);
-      gDPLoadTile(gfx++, G_TX_LOADTILE, glyphLeft << 1, glyphTop << 2,
+      gDPLoadTile(gfx++, G_TX_LOADTILE, glyphLeft << 1,
+          glyphTop << G_TEXTURE_IMAGE_FRAC,
           (glyphLeft + FONT_SIZE_SMALL - 1) << 1,
-          (glyphTop + FONT_SIZE_SMALL - 1) << 2);
+          (glyphTop + FONT_SIZE_SMALL - 1) << G_TEXTURE_IMAGE_FRAC);
       gDPPipeSync(gfx++);
       gDPSetTile(gfx++, G_IM_FMT_IA, G_IM_SIZ_4b, 1, 0, G_TX_RENDERTILE, 0,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
-      gDPSetTileSize(gfx++, G_TX_RENDERTILE, glyphLeft << 2, glyphTop << 2,
-          (glyphLeft + FONT_SIZE_SMALL - 1) << 2,
-          (glyphTop + FONT_SIZE_SMALL - 1) << 2);
+      gDPSetTileSize(gfx++, G_TX_RENDERTILE, glyphLeft << G_TEXTURE_IMAGE_FRAC,
+          glyphTop << G_TEXTURE_IMAGE_FRAC,
+          (glyphLeft + FONT_SIZE_SMALL - 1) << G_TEXTURE_IMAGE_FRAC,
+          (glyphTop + FONT_SIZE_SMALL - 1) << G_TEXTURE_IMAGE_FRAC);
       gDPPipeSync(gfx++);
       gSPTextureRectangle(gfx++, QuarterPixels(left), QuarterPixels(top),
           QuarterPixels(left + FONT_SIZE_SMALL),
@@ -2066,14 +2090,17 @@ void DrawGlyphGroup(Gfx** displayListHead, s32 group) {
             G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD,
             G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
         gDPLoadSync(gfx++);
-        gDPLoadTile(gfx++, G_TX_LOADTILE, s << 1, t << 2,
-            (s + GLYPH_TILE_WIDTH - 1) << 1, (t + FONT_SIZE_LARGE - 1) << 2);
+        gDPLoadTile(gfx++, G_TX_LOADTILE, s << 1, t << G_TEXTURE_IMAGE_FRAC,
+            (s + GLYPH_TILE_WIDTH - 1) << 1,
+            (t + FONT_SIZE_LARGE - 1) << G_TEXTURE_IMAGE_FRAC);
         gDPPipeSync(gfx++);
         gDPSetTile(gfx++, G_IM_FMT_I, G_IM_SIZ_4b, 1, 0, G_TX_RENDERTILE, 0,
             G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD,
             G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
-        gDPSetTileSize(gfx++, G_TX_RENDERTILE, s << 2, t << 2,
-            (s + GLYPH_TILE_WIDTH - 1) << 2, (t + GLYPH_TILE_WIDTH - 1) << 2);
+        gDPSetTileSize(gfx++, G_TX_RENDERTILE, s << G_TEXTURE_IMAGE_FRAC,
+            t << G_TEXTURE_IMAGE_FRAC,
+            (s + GLYPH_TILE_WIDTH - 1) << G_TEXTURE_IMAGE_FRAC,
+            (t + GLYPH_TILE_WIDTH - 1) << G_TEXTURE_IMAGE_FRAC);
       } else if (code >= MESSAGE_CODE_CONTROL) {
         switch (code) {
           case MESSAGE_CODE_A_BUTTON:
@@ -2126,14 +2153,16 @@ void DrawGlyphGroup(Gfx** displayListHead, s32 group) {
             G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD,
             G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
         gDPLoadSync(gfx++);
-        gDPLoadTile(gfx++, G_TX_LOADTILE, 0, 0, (ICON_WIDTH - 1) << 2,
-            (ICON_WIDTH - 1) << 2);
+        gDPLoadTile(gfx++, G_TX_LOADTILE, 0, 0,
+            (ICON_WIDTH - 1) << G_TEXTURE_IMAGE_FRAC,
+            (ICON_WIDTH - 1) << G_TEXTURE_IMAGE_FRAC);
         gDPPipeSync(gfx++);
         gDPSetTile(gfx++, G_IM_FMT_CI, G_IM_SIZ_8b, 2, 0, G_TX_RENDERTILE, 0,
             G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD,
             G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
-        gDPSetTileSize(gfx++, G_TX_RENDERTILE, 0, 0, (ICON_WIDTH - 1) << 2,
-            (ICON_WIDTH - 1) << 2);
+        gDPSetTileSize(gfx++, G_TX_RENDERTILE, 0, 0,
+            (ICON_WIDTH - 1) << G_TEXTURE_IMAGE_FRAC,
+            (ICON_WIDTH - 1) << G_TEXTURE_IMAGE_FRAC);
         s = 0;
         t = 0;
       }

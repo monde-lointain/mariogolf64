@@ -2082,10 +2082,12 @@ void DrawSavedGames(Gfx** displayListHead) {
             0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
             G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
         gDPPipeSync(gfx++);
-        gSPScisTextureRectangle(gfx++, (s32)(boardX[slot] - halfSize) << 2,
-            (s32)(boardY[slot] - halfSize + (holeIndex * halfSize) + bob) << 2,
-            (s32)(boardX[slot] + halfSize) << 2,
-            (s32)(boardY[slot] + (holeIndex * halfSize) + bob) << 2,
+        gSPScisTextureRectangle(gfx++,
+            QuarterPixels((s32)(boardX[slot] - halfSize)),
+            QuarterPixels(
+                (s32)(boardY[slot] - halfSize + (holeIndex * halfSize) + bob)),
+            QuarterPixels((s32)(boardX[slot] + halfSize)),
+            QuarterPixels((s32)(boardY[slot] + (holeIndex * halfSize) + bob)),
             G_TX_RENDERTILE, 0, 0, step, step);
         gDPPipeSync(gfx++);
       }
@@ -2103,11 +2105,11 @@ void DrawSavedGames(Gfx** displayListHead) {
               G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
           gDPPipeSync(gfx++);
           gSPScisTextureRectangle(gfx++,
-              (s32)(boardX[slot] - iconHalfSize) << 2,
+              QuarterPixels((s32)(boardX[slot] - iconHalfSize)),
               QuarterPixels((s32)(boardY[slot] - iconHalfSize +
                                 (holeIndex * iconHalfSize) + bob) +
                   MODE_ICON_DROP),
-              (s32)(boardX[slot] + iconHalfSize) << 2,
+              QuarterPixels((s32)(boardX[slot] + iconHalfSize)),
               QuarterPixels(
                   (s32)(boardY[slot] + (holeIndex * iconHalfSize) + bob) +
                   MODE_ICON_DROP),

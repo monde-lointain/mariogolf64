@@ -580,8 +580,8 @@ void DrawTableLines(Gfx** displayListHead) {
   for (index = 0; index != TABLE_LINE_COUNT * 2; index += 2) {
     gSPScisTextureRectangle(gfx++, QuarterPixels(f_TableLineCorners[index].x),
         QuarterPixels(f_TableLineCorners[index].y),
-        f_TableLineCorners[index + 1].x << 2,
-        f_TableLineCorners[index + 1].y << 2, G_TX_RENDERTILE, 0, 0,
+        QuarterPixels(f_TableLineCorners[index + 1].x),
+        QuarterPixels(f_TableLineCorners[index + 1].y), G_TX_RENDERTILE, 0, 0,
         TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     gDPPipeSync(gfx++);
   }

@@ -142,11 +142,13 @@ void DrawTexturePlane(Gfx** displayListHead) {
       TextureMask(DYNAMIC_TEXTURE_SIZE), G_TX_NOLOD, G_TX_NOLOD);
   gSPTexture(
       gfx++, TEXTURE_SCALE_FULL, TEXTURE_SCALE_FULL, 0, G_TX_RENDERTILE, G_ON);
-  gDPSetTileSize(
-      gfx++, G_TX_RENDERTILE, 0, 0, PLANE_TILE_SIZE << 2, PLANE_TILE_SIZE << 2);
+  gDPSetTileSize(gfx++, G_TX_RENDERTILE, 0, 0,
+      PLANE_TILE_SIZE << G_TEXTURE_IMAGE_FRAC,
+      PLANE_TILE_SIZE << G_TEXTURE_IMAGE_FRAC);
   f_PlaneTextureScroll++;
   gDPSetTileSize(gfx++, 1, f_PlaneTextureScroll, 0,
-      f_PlaneTextureScroll + (PLANE_TILE_SIZE << 2), PLANE_TILE_SIZE << 2);
+      f_PlaneTextureScroll + (PLANE_TILE_SIZE << G_TEXTURE_IMAGE_FRAC),
+      PLANE_TILE_SIZE << G_TEXTURE_IMAGE_FRAC);
   gDPPipeSync(gfx++);
   gSPVertex(
       gfx++, f_TexturePlaneVertices, ARRAY_COUNT(f_TexturePlaneVertices), 0);

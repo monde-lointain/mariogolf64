@@ -1121,9 +1121,10 @@ void DrawResultsNumber(Gfx** displayListHead, s32 x, s32 y, s32 value) {
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, \
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD); \
     gSPScisTextureRectangle((gfx)++, QuarterPixels(x), QuarterPixels(y), \
-        ((x) + PLACE_GLYPH_SIZE) << 2, QuarterPixels((y) + PLACE_GLYPH_SIZE), \
-        G_TX_RENDERTILE, 0, TexelCoordinate((glyph) * PLACE_GLYPH_SIZE), \
-        TEXEL_STEP_ONE, TEXEL_STEP_ONE); \
+        QuarterPixels((x) + PLACE_GLYPH_SIZE), \
+        QuarterPixels((y) + PLACE_GLYPH_SIZE), G_TX_RENDERTILE, 0, \
+        TexelCoordinate((glyph) * PLACE_GLYPH_SIZE), TEXEL_STEP_ONE, \
+        TEXEL_STEP_ONE); \
   }
 
 /* Draws place, as in "21st", centered on x */

@@ -3256,10 +3256,10 @@ void DrawNameLogos(Gfx** displayListHead) {
           }
 
           gSPScisTextureRectangle(gfx++, QuarterPixels(xEdges[0]),
-              yEdges[NAME_LOGO_STRIP_COUNT - 1 - strip] << 2,
+              QuarterPixels(yEdges[NAME_LOGO_STRIP_COUNT - 1 - strip]),
               QuarterPixels(xEdges[1]),
-              yEdges[NAME_LOGO_STRIP_COUNT - strip] << 2, G_TX_RENDERTILE, 0,
-              TexelCoordinate(NAME_LOGO_STRIP_ROWS),
+              QuarterPixels(yEdges[NAME_LOGO_STRIP_COUNT - strip]),
+              G_TX_RENDERTILE, 0, TexelCoordinate(NAME_LOGO_STRIP_ROWS),
               TexelRunStep(SLOT_LOGO.width, drawnWidth),
               (SLOT_LOGO.height << 8) / drawnHeight);
         } else {
@@ -3285,7 +3285,7 @@ void DrawNameLogos(Gfx** displayListHead) {
 
           gSPScisTextureRectangle(gfx++, QuarterPixels(xEdges[0]),
               QuarterPixels(yEdges[strip]), QuarterPixels(xEdges[1]),
-              yEdges[strip + 1] << 2, G_TX_RENDERTILE, 0, 0,
+              QuarterPixels(yEdges[strip + 1]), G_TX_RENDERTILE, 0, 0,
               TexelRunStep(SLOT_LOGO.width, drawnWidth),
               (SLOT_LOGO.height << 8) / drawnHeight);
         }

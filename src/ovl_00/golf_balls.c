@@ -1124,13 +1124,14 @@ void DrawGolfBalls(CameraMatrices* matrices UNUSED) {
                 gfx++, RM_ZB_XLU_SURF_UPDATE(1), RM_ZB_XLU_SURF_UPDATE(2));
             gDPSetCombineMode(gfx++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
             gDPPipeSync(gfx++);
-            gSPScisTextureRectangle(gfx++, (ballPoint.x << 2) - 4,
-                (ballPoint.y << 2) - 8, QuarterPixels(ballPoint.x),
+            gSPScisTextureRectangle(gfx++, QuarterPixels(ballPoint.x) - 4,
+                QuarterPixels(ballPoint.y) - 8, QuarterPixels(ballPoint.x),
                 QuarterPixels(ballPoint.y), BALL_TILE_SMALL, 0, 0,
-                TexelStep(SMALL_BALL_TEXTURE_SIZE, (ballPoint.x << 2) - 4,
-                    ballPoint.x << 2),
-                TexelStep(SMALL_BALL_TEXTURE_SIZE, (ballPoint.y - 1) << 2,
-                    (ballPoint.y + 1) << 2));
+                TexelStep(SMALL_BALL_TEXTURE_SIZE,
+                    QuarterPixels(ballPoint.x) - 4, QuarterPixels(ballPoint.x)),
+                TexelStep(SMALL_BALL_TEXTURE_SIZE,
+                    QuarterPixels(ballPoint.y - 1),
+                    QuarterPixels(ballPoint.y + 1)));
             gDPPipeSync(gfx++);
             gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, OPAQUE_ALPHA);
             gDPPipeSync(gfx++);
@@ -1348,18 +1349,18 @@ void DrawGolfBalls(CameraMatrices* matrices UNUSED) {
 
         if (f_IsBallAfterimageFast == TRUE) {
           gSPStretchedTextureRectangle(gfx++,
-              (ballPoint.x << 2) - halfWidth - 1,
-              (ballPoint.y << 2) - halfHeight - 1,
-              (ballPoint.x << 2) + halfWidth + 2,
-              (ballPoint.y << 2) + halfHeight + 2, BALL_TILE_AFTERIMAGE, 0,
-              (guRandom() % 3) << 9, 15, 15);
+              QuarterPixels(ballPoint.x) - halfWidth - 1,
+              QuarterPixels(ballPoint.y) - halfHeight - 1,
+              QuarterPixels(ballPoint.x) + halfWidth + 2,
+              QuarterPixels(ballPoint.y) + halfHeight + 2, BALL_TILE_AFTERIMAGE,
+              0, (guRandom() % 3) << 9, 15, 15);
         } else {
           gSPStretchedTextureRectangle(gfx++,
-              (ballPoint.x << 2) - halfWidth - 1,
-              (ballPoint.y << 2) - halfHeight - 1,
-              (ballPoint.x << 2) + halfWidth + 2,
-              (ballPoint.y << 2) + halfHeight + 2, BALL_TILE_STILL, 0, 0,
-              BALL_TEXTURE_SIZE, BALL_TEXTURE_SIZE);
+              QuarterPixels(ballPoint.x) - halfWidth - 1,
+              QuarterPixels(ballPoint.y) - halfHeight - 1,
+              QuarterPixels(ballPoint.x) + halfWidth + 2,
+              QuarterPixels(ballPoint.y) + halfHeight + 2, BALL_TILE_STILL, 0,
+              0, BALL_TEXTURE_SIZE, BALL_TEXTURE_SIZE);
         }
 
         gDPPipeSync(gfx++);
@@ -1414,18 +1415,18 @@ void DrawGolfBalls(CameraMatrices* matrices UNUSED) {
 
         if (f_IsBallAfterimageFast == TRUE) {
           gSPStretchedTextureRectangle(gfx++,
-              (shadowPoint.x << 2) - halfWidth - 1,
-              (shadowPoint.y << 2) - halfHeight - 1,
-              (shadowPoint.x << 2) + halfWidth + 2,
-              (shadowPoint.y << 2) + halfHeight + 2, BALL_TILE_AFTERIMAGE, 0,
-              (guRandom() % 3) << 9, 15, 15);
+              QuarterPixels(shadowPoint.x) - halfWidth - 1,
+              QuarterPixels(shadowPoint.y) - halfHeight - 1,
+              QuarterPixels(shadowPoint.x) + halfWidth + 2,
+              QuarterPixels(shadowPoint.y) + halfHeight + 2,
+              BALL_TILE_AFTERIMAGE, 0, (guRandom() % 3) << 9, 15, 15);
         } else {
           gSPStretchedTextureRectangle(gfx++,
-              (shadowPoint.x << 2) - halfWidth - 1,
-              (shadowPoint.y << 2) - halfHeight - 1,
-              (shadowPoint.x << 2) + halfWidth + 2,
-              (shadowPoint.y << 2) + halfHeight + 2, BALL_TILE_STILL, 0, 0,
-              BALL_TEXTURE_SIZE, BALL_TEXTURE_SIZE);
+              QuarterPixels(shadowPoint.x) - halfWidth - 1,
+              QuarterPixels(shadowPoint.y) - halfHeight - 1,
+              QuarterPixels(shadowPoint.x) + halfWidth + 2,
+              QuarterPixels(shadowPoint.y) + halfHeight + 2, BALL_TILE_STILL, 0,
+              0, BALL_TEXTURE_SIZE, BALL_TEXTURE_SIZE);
         }
 
         gDPPipeSync(gfx++);

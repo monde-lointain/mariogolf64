@@ -835,8 +835,8 @@ void DrawPauseArrows(Gfx** displayListHead, s32 x, s32 y, s32 gap) {
               PAUSE_ARROWS_FRAME_SIZE),
       G_IM_FMT_CI, PAUSE_ARROW_SIZE, PAUSE_ARROWS_FRAME_HEIGHT, 0, 0, 0,
       G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-  top = (y - (PAUSE_ARROW_SIZE / 2)) << 2;
-  bottom = (y + (PAUSE_ARROW_SIZE / 2)) << 2;
+  top = QuarterPixels(y - (PAUSE_ARROW_SIZE / 2));
+  bottom = QuarterPixels(y + (PAUSE_ARROW_SIZE / 2));
   gDPPipeSync(gfx++);
   DrawTextureRect(&gfx, QuarterPixels(x - (gap / 2) - (PAUSE_ARROW_SIZE / 2)),
       top, QuarterPixels(x - (gap / 2) + (PAUSE_ARROW_SIZE / 2)), bottom,

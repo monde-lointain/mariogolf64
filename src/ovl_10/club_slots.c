@@ -914,14 +914,13 @@ void DrawClubSlots(Gfx** displayListHead) {
           loadedStripHeight - 1, 0, G_TX_WRAP, G_TX_WRAP, G_TX_NOMASK,
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
       gDPPipeSync(gfx++);
-      gSPScisTextureRectangle(gfx++, (s32)((SCREEN_WIDTH / 2) - halfWidth) << 2,
-          (s32)(((SCREEN_HEIGHT / 2) - halfHeight) +
-              (buttonOrStartStripIndex * startStripHeight))
-              << 2,
-          (s32)(halfWidth + (SCREEN_WIDTH / 2)) << 2,
-          (s32)(((SCREEN_HEIGHT / 2) - halfHeight) +
-              (buttonOrStartStripIndex * startStripHeight) + startStripHeight)
-              << 2,
+      gSPScisTextureRectangle(gfx++,
+          QuarterPixels((s32)((SCREEN_WIDTH / 2) - halfWidth)),
+          QuarterPixels((s32)(((SCREEN_HEIGHT / 2) - halfHeight) +
+              (buttonOrStartStripIndex * startStripHeight))),
+          QuarterPixels((s32)(halfWidth + (SCREEN_WIDTH / 2))),
+          QuarterPixels((s32)(((SCREEN_HEIGHT / 2) - halfHeight) +
+              (buttonOrStartStripIndex * startStripHeight) + startStripHeight)),
           G_TX_RENDERTILE, 0, TexelCoordinate(1), dsdx, dtdy);
     }
   }
@@ -1143,12 +1142,12 @@ void DrawClubSlotsLogo(
         G_IM_FMT_CI, G_IM_SIZ_8b, LOGO_WIDTH, LOGO_STRIP_HEIGHT, 0, G_TX_WRAP,
         G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(gfx++);
-    gSPScisTextureRectangle(gfx++, (s32)(centerX - halfWidth) << 2,
-        (s32)((centerY - halfHeight) + (index * stripHeight) + f_LogoBob) << 2,
-        (s32)(centerX + halfWidth) << 2,
-        (s32)((centerY - halfHeight) + (index * stripHeight) + stripHeight +
-            f_LogoBob)
-            << 2,
+    gSPScisTextureRectangle(gfx++, QuarterPixels((s32)(centerX - halfWidth)),
+        QuarterPixels(
+            (s32)((centerY - halfHeight) + (index * stripHeight) + f_LogoBob)),
+        QuarterPixels((s32)(centerX + halfWidth)),
+        QuarterPixels((s32)((centerY - halfHeight) + (index * stripHeight) +
+            stripHeight + f_LogoBob)),
         G_TX_RENDERTILE, 0, 0, (s32)dsdx, (s32)dtdy);
     gDPPipeSync(gfx++);
   }
@@ -1170,12 +1169,12 @@ void DrawClubSlotsLogo(
         G_IM_FMT_CI, G_IM_SIZ_8b, LOGO_WIDTH, LOGO_STRIP_HEIGHT, 0, G_TX_WRAP,
         G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(gfx++);
-    gSPScisTextureRectangle(gfx++, (s32)(centerX - halfWidth) << 2,
-        (s32)((centerY - halfHeight) + (index * stripHeight) + f_LogoBob) << 2,
-        (s32)(centerX + halfWidth) << 2,
-        (s32)((centerY - halfHeight) + (index * stripHeight) + stripHeight +
-            f_LogoBob)
-            << 2,
+    gSPScisTextureRectangle(gfx++, QuarterPixels((s32)(centerX - halfWidth)),
+        QuarterPixels(
+            (s32)((centerY - halfHeight) + (index * stripHeight) + f_LogoBob)),
+        QuarterPixels((s32)(centerX + halfWidth)),
+        QuarterPixels((s32)((centerY - halfHeight) + (index * stripHeight) +
+            stripHeight + f_LogoBob)),
         G_TX_RENDERTILE, 0, 0, (s32)dsdx, (s32)dtdy);
     gDPPipeSync(gfx++);
   }
@@ -1198,10 +1197,12 @@ void DrawClubSlotsLogo(
   gDPPipeSync(gfx++);
   shineTime = f_ShineTime++;
   if (f_ShineTime >= SHINE_DELAY) {
-    gSPScisTextureRectangle(gfx++, (s32)(centerX - shineHalfWidth) << 2,
-        (s32)((centerY - shineHalfHeight) + f_LogoBob) << 2,
-        (s32)(centerX + shineHalfWidth) << 2,
-        (s32)(centerY + shineHalfHeight + f_LogoBob) << 2, G_TX_RENDERTILE,
+    gSPScisTextureRectangle(gfx++,
+        QuarterPixels((s32)(centerX - shineHalfWidth)),
+        QuarterPixels((s32)((centerY - shineHalfHeight) + f_LogoBob)),
+        QuarterPixels((s32)(centerX + shineHalfWidth)),
+        QuarterPixels((s32)(centerY + shineHalfHeight + f_LogoBob)),
+        G_TX_RENDERTILE,
         TexelCoordinate(
             SHINE_SIZE - ((shineTime + 1 - SHINE_START_TIME) * SHINE_SPEED)),
         0, (s32)shineDsdx, (s32)shineDtdy);

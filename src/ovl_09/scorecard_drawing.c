@@ -2442,8 +2442,9 @@ void DrawScoresPage(Gfx** displayListHead) {
   LoadNibbleTextureBlock(&gfx, ImageBody(g_Scorecard.scoresPanelImage),
       G_IM_FMT_I, SCORES_PANEL_IMAGE_WIDTH, SCORES_PANEL_IMAGE_HEIGHT, 0,
       G_TX_CLAMP, 0, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-  gDPSetTileSize(gfx++, G_TX_RENDERTILE, 0, 0, PANEL_TEXEL_RIGHT << 2,
-      (SCORES_PANEL_IMAGE_HEIGHT - 1) << 2);
+  gDPSetTileSize(gfx++, G_TX_RENDERTILE, 0, 0,
+      PANEL_TEXEL_RIGHT << G_TEXTURE_IMAGE_FRAC,
+      (SCORES_PANEL_IMAGE_HEIGHT - 1) << G_TEXTURE_IMAGE_FRAC);
   gDPPipeSync(gfx++);
   if (!(g_GameState.holeSelection & HOLE_SELECTION_BACK_NINE)) {
     DrawTextureRect(&gfx, QuarterPixels(g_Scorecard.x + LABEL_PANEL_LEFT),
@@ -2501,8 +2502,9 @@ void DrawScoresPage(Gfx** displayListHead) {
         G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   }
 
-  gDPSetTileSize(gfx++, G_TX_RENDERTILE, 0, 0, PANEL_EDGE_TEXEL_RIGHT << 2,
-      (SCORES_PANEL_IMAGE_HEIGHT - 1) << 2);
+  gDPSetTileSize(gfx++, G_TX_RENDERTILE, 0, 0,
+      PANEL_EDGE_TEXEL_RIGHT << G_TEXTURE_IMAGE_FRAC,
+      (SCORES_PANEL_IMAGE_HEIGHT - 1) << G_TEXTURE_IMAGE_FRAC);
   if (!(g_GameState.holeSelection & HOLE_SELECTION_BACK_NINE)) {
     DrawTextureRect(&gfx, QuarterPixels(g_Scorecard.x + LABEL_PANEL_RIGHT),
         QuarterPixels(g_Scorecard.y + LABEL_PANEL_TOP),
@@ -2653,8 +2655,9 @@ void DrawScoresPage(Gfx** displayListHead) {
       G_IM_FMT_I, SCORES_PANEL_IMAGE_WIDTH, SCORES_PANEL_IMAGE_HEIGHT, 0, 0, 0,
       G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
   gDPSetPrimColor(gfx++, 0, 0, 0x7F, 0xFF, 0x1F, cellAlpha);
-  gDPSetTileSize(gfx++, G_TX_RENDERTILE, 0, 0, PANEL_TEXEL_RIGHT << 2,
-      (SCORES_PANEL_IMAGE_HEIGHT - 1) << 2);
+  gDPSetTileSize(gfx++, G_TX_RENDERTILE, 0, 0,
+      PANEL_TEXEL_RIGHT << G_TEXTURE_IMAGE_FRAC,
+      (SCORES_PANEL_IMAGE_HEIGHT - 1) << G_TEXTURE_IMAGE_FRAC);
   gDPPipeSync(gfx++);
   if (IsMatchPlayMode() == FALSE &&
       !(g_GameState.holeSelection &
@@ -2667,8 +2670,9 @@ void DrawScoresPage(Gfx** displayListHead) {
   }
 
   gDPPipeSync(gfx++);
-  gDPSetTileSize(gfx++, G_TX_RENDERTILE, 0, 0, PANEL_EDGE_TEXEL_RIGHT << 2,
-      (SCORES_PANEL_IMAGE_HEIGHT - 1) << 2);
+  gDPSetTileSize(gfx++, G_TX_RENDERTILE, 0, 0,
+      PANEL_EDGE_TEXEL_RIGHT << G_TEXTURE_IMAGE_FRAC,
+      (SCORES_PANEL_IMAGE_HEIGHT - 1) << G_TEXTURE_IMAGE_FRAC);
   gDPPipeSync(gfx++);
   if (IsMatchPlayMode() == FALSE &&
       !(g_GameState.holeSelection &
