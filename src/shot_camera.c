@@ -1345,17 +1345,16 @@ void PlayFlightSounds(s32 step) {
     isStillPlayed = &f_IsLandingSoundPlayed;
     if (!*isStillPlayed && g_BallFlightStep > EARLY_STEP_COUNT &&
         HasHitGroundBefore(step, EARLY_STEP_COUNT) &&
-        IsShotBeyond(FULL_SHOT_FRACTION) &&
-        /* The surface is looked up only when the tests before pass, and
-         * IsFairwayKind reads its kind three times; calling inside it
-         * differs */
-        (info = GetSurfaceInfo(g_TurnBallSimulation.surface),
-            IsFairwayKind(info->kind)) &&
-        !g_GameState.isMiniGolf && f_StartCupDistance > f_LandingCupDistance &&
-        IsAlbatrossOrBetter(g_Players[g_CurrentShot.playerIndex].strokeCount)) {
-      *isStillPlayed = TRUE;
-      PlaySound(SOUND_UNDER_PAR_CHANCE, FLIGHT_SOUND_CHANNEL_LANDING,
-          FAIRWAY_SOUND_VOLUME);
+        IsShotBeyond(FULL_SHOT_FRACTION)) {
+      info = GetSurfaceInfo(g_TurnBallSimulation.surface);
+      if (IsFairwayKind(info->kind) && !g_GameState.isMiniGolf &&
+          f_StartCupDistance > f_LandingCupDistance &&
+          IsAlbatrossOrBetter(
+              g_Players[g_CurrentShot.playerIndex].strokeCount)) {
+        *isStillPlayed = TRUE;
+        PlaySound(SOUND_UNDER_PAR_CHANCE, FLIGHT_SOUND_CHANNEL_LANDING,
+            FAIRWAY_SOUND_VOLUME);
+      }
     }
   }
 
