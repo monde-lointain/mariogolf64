@@ -404,13 +404,13 @@ typedef struct StatusData {
 /* Three little-endian bytes */
 #define DATA_UNK24_OFFSET 0x26
 #define DATA_BALL_TYPE_OFFSET 0x3E
-/* GAME_BOY_CHARACTER_UNK3C_COUNT entries of two little-endian halfwords and
+/* GAME_BOY_CLUB_COUNT clubs' stats, each two little-endian halfwords and
  * two bytes */
-#define DATA_UNK3C_OFFSET 0x100
-#define DATA_UNK3C_SIZE 6
-#define UNK3C_UNK2_OFFSET 2
-#define UNK3C_UNK4_OFFSET 4
-#define UNK3C_UNK5_OFFSET 5
+#define DATA_CLUBS_OFFSET 0x100
+#define DATA_CLUB_SIZE 6
+#define CLUB_DATA_PITCH_OFFSET 2
+#define CLUB_DATA_UNK4_OFFSET 4
+#define CLUB_DATA_SIDE_SPIN_OFFSET 5
 #define DATA_EXPERIENCE_OFFSET 0x15C
 #define DATA_UNK15E_OFFSET 0x15E
 /* The experience and the byte after it */
@@ -1531,23 +1531,23 @@ void DecodeCartridgeCharacter(
       (characterData[DATA_DRIVE_DISTANCE_OFFSET + 1] << BITS_PER_BYTE);
   osSyncPrintf("%d, %d %d\n", character->experience, character->clubPitch,
       character->shotCurve);
-  for (index = 0; index != GAME_BOY_CHARACTER_UNK3C_COUNT; index++) {
-    character->unk3C[index].unk0 =
-        characterData[DATA_UNK3C_OFFSET + (index * DATA_UNK3C_SIZE)] |
-        (characterData[DATA_UNK3C_OFFSET + (index * DATA_UNK3C_SIZE) + 1]
+  for (index = 0; index != GAME_BOY_CLUB_COUNT; index++) {
+    character->clubs[index].distance =
+        characterData[DATA_CLUBS_OFFSET + (index * DATA_CLUB_SIZE)] |
+        (characterData[DATA_CLUBS_OFFSET + (index * DATA_CLUB_SIZE) + 1]
             << BITS_PER_BYTE);
-    character->unk3C[index].unk2 =
-        characterData[DATA_UNK3C_OFFSET + (index * DATA_UNK3C_SIZE) +
-            UNK3C_UNK2_OFFSET] |
-        (characterData[DATA_UNK3C_OFFSET + (index * DATA_UNK3C_SIZE) +
-             UNK3C_UNK2_OFFSET + 1]
+    character->clubs[index].pitch =
+        characterData[DATA_CLUBS_OFFSET + (index * DATA_CLUB_SIZE) +
+            CLUB_DATA_PITCH_OFFSET] |
+        (characterData[DATA_CLUBS_OFFSET + (index * DATA_CLUB_SIZE) +
+             CLUB_DATA_PITCH_OFFSET + 1]
             << BITS_PER_BYTE);
-    character->unk3C[index].unk4 = characterData[DATA_UNK3C_OFFSET +
-        (index * DATA_UNK3C_SIZE) + UNK3C_UNK4_OFFSET];
-    character->unk3C[index].unk5 = characterData[DATA_UNK3C_OFFSET +
-        (index * DATA_UNK3C_SIZE) + UNK3C_UNK5_OFFSET];
-    osSyncPrintf("%d, %d %d\n", index, character->unk3C[index].unk0,
-        character->unk3C[index].unk2);
+    character->clubs[index].unk4 = characterData[DATA_CLUBS_OFFSET +
+        (index * DATA_CLUB_SIZE) + CLUB_DATA_UNK4_OFFSET];
+    character->clubs[index].sideSpin = characterData[DATA_CLUBS_OFFSET +
+        (index * DATA_CLUB_SIZE) + CLUB_DATA_SIDE_SPIN_OFFSET];
+    osSyncPrintf("%d, %d %d\n", index, character->clubs[index].distance,
+        character->clubs[index].pitch);
   }
 
   character->companyCode = companyCode;

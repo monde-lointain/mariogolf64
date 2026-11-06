@@ -85,7 +85,7 @@ typedef struct ClubStats {
   /* 0x0 */ s16 distance; /* In yards */
   /* 0x2 */ BinaryAngle pitch;
   /* 0x4 */ s8 unk4;
-  /* 0x5 */ s8 unk5;
+  /* 0x5 */ s8 sideSpin;
 } ClubStats; /* size = 0x6 */
 
 typedef struct ClubSetStats {
@@ -1199,7 +1199,7 @@ void GenerateClubSet(s32 setIndex, ClubSetStats* stats) {
       club->pitch = STEEPEST_CLUB_PITCH;
     }
 
-    club->sideSpin = stats->clubs[type].unk5;
+    club->sideSpin = stats->clubs[type].sideSpin;
     if (club->sideSpin > MAX_CLUB_SIDE_SPIN) {
       club->sideSpin = MAX_CLUB_SIDE_SPIN;
     }

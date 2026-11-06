@@ -22,14 +22,16 @@
  * shows */
 #define GAME_BOY_GOLFER_COUNT 4
 
-#define GAME_BOY_CHARACTER_UNK3C_COUNT 13
+/* A Game Boy character has stats for every club but the putter */
+#define GAME_BOY_CLUB_COUNT 13
 
-typedef struct GameBoyCharacterUnk3C {
-  /* 0x0 */ u16 unk0;
-  /* 0x2 */ u16 unk2;
+/* A club's stats, as GenerateClubSet's ClubStats */
+typedef struct GameBoyClubStats {
+  /* 0x0 */ u16 distance; /* In yards */
+  /* 0x2 */ u16 pitch;
   /* 0x4 */ u8 unk4;
-  /* 0x5 */ u8 unk5;
-} GameBoyCharacterUnk3C; /* size = 0x6 */
+  /* 0x5 */ u8 sideSpin;
+} GameBoyClubStats; /* size = 0x6 */
 
 /* Game Boy balls 1 to 4 copy a character's contact effect, and 5 to 7 have
  * their own */
@@ -68,7 +70,7 @@ typedef struct GameBoyCharacter {
   /* 0x33 */ u8 unk33;
   /* 0x34 */ s32 companyCode; /* Its cartridge header's, or -1 */
   /* 0x38 */ s32 saveIndex; /* Its save on the cartridge, or -1 */
-  /* 0x3C */ GameBoyCharacterUnk3C unk3C[GAME_BOY_CHARACTER_UNK3C_COUNT];
+  /* 0x3C */ GameBoyClubStats clubs[GAME_BOY_CLUB_COUNT];
 } GameBoyCharacter; /* size = 0x8C */
 
 extern GameBoyCharacter g_GameBoyCharacters[GAME_BOY_CHARACTER_COUNT];
