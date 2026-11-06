@@ -1026,7 +1026,7 @@ s32 SaveOrContinueGameByMode(Boolean isContinuing) {
 
     g_GameState = game->state;
     g_GameState.step = GAME_STATE_LOAD_HOLE;
-    SetGameFlag(GAME_FLAG_UNK1E);
+    SetGameFlag(GAME_FLAG_LOADED_PLAY);
     g_HoleSetup = game->hole;
   }
 
@@ -1101,7 +1101,7 @@ s32 SaveOrContinueGame(s32 slotIndex, Boolean isContinuing) {
 
       g_GameState = game->state;
       g_GameState.step = GAME_STATE_LOAD_HOLE;
-      SetGameFlag(GAME_FLAG_UNK1E);
+      SetGameFlag(GAME_FLAG_LOADED_PLAY);
       g_HoleSetup = game->hole;
       g_RoundStats = game->roundStats;
     }
@@ -2197,7 +2197,7 @@ void EnterMenuAtBestShots(void) {
   f_UnreadMenuEntryFlag = 0;
   g_IsMenuWipeOpening = TRUE;
   g_GameState.replayKind = REPLAY_KIND_NONE;
-  ClearGameFlag(GAME_FLAG_UNK1E);
+  ClearGameFlag(GAME_FLAG_LOADED_PLAY);
   g_MenuScreen = MENU_SCREEN_BEST_SHOTS;
 }
 

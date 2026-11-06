@@ -93,8 +93,12 @@
 /* Stops the debug text grid from being drawn */
 #define GAME_FLAG_HIDE_DEBUG_TEXT 0x1D
 
-/* Set when a saved game is continued, among other places */
-#define GAME_FLAG_UNK1E 0x1E
+/*
+ * Read by no routine; set when play starts from a saved game being continued
+ * or from a Ring Shot or Best Shot replay, and cleared on entering the Best
+ * Shots screen
+ */
+#define GAME_FLAG_LOADED_PLAY 0x1E
 
 /* Makes InitClubs generate every club's parameters, then call
  * WriteClubParameters */

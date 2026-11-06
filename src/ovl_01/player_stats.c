@@ -2052,7 +2052,7 @@ void UpdateBestShots(void) {
         g_MenuScreen = MENU_SCREEN_EXIT;
         g_IsChosenHoleLoadStarted = FALSE;
         g_GameState.replayKind = REPLAY_KIND_BEST_SHOT;
-        SetGameFlag(GAME_FLAG_UNK1E);
+        SetGameFlag(GAME_FLAG_LOADED_PLAY);
         for (slot = 0; slot != STATS_TEXT_SLOT_COUNT; slot++) {
           SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, slot, 0, 0xFF,
               0xFF, 0xFF, 0xFF);

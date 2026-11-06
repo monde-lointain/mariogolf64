@@ -387,7 +387,7 @@ void UpdateRingShotRecords(void) {
 
         g_MenuScreen = MENU_SCREEN_EXIT;
         g_GameState.replayKind = REPLAY_KIND_RING_SHOT;
-        SetGameFlag(GAME_FLAG_UNK1E);
+        SetGameFlag(GAME_FLAG_LOADED_PLAY);
       }
     } else if (GetWipeKind() == WIPE_NONE || g_IsRingShotWipeOpening != TRUE) {
       if (g_MenuPressedButtons & A_BUTTON) {
@@ -1723,7 +1723,7 @@ s32 ContinueModeGame(void) {
 
   g_GameState = game->state;
   g_GameState.step = GAME_STATE_LOAD_HOLE;
-  SetGameFlag(GAME_FLAG_UNK1E);
+  SetGameFlag(GAME_FLAG_LOADED_PLAY);
   g_HoleSetup = game->hole;
   g_GameState.isRoundContinued = ROUND_CONTINUED;
   return 0;
