@@ -218,7 +218,7 @@ void UpdateBestTimes(void) {
 #define BEST_TIME_X 72
 #define BEST_TIME_FIRST_Y 148
 #define BEST_TIME_SPACING 28
-#define BEST_TIME_UNKD78_X 190
+#define BEST_TIME_SCORE_X 190
 #define BEST_TIME_FACE_X 260
 #define BEST_TIME_FIRST_FACE_Y 142
 #define UNSET_TIME_DASH_COUNT 12
@@ -381,7 +381,7 @@ void DrawBestTimes(Gfx** displayListHead) {
     if (time > 0) {
       DrawStopwatchTime(&gfx, BEST_TIME_X,
           BEST_TIME_FIRST_Y + (otherIndex * BEST_TIME_SPACING), time);
-      DrawNarrowTwoDigitMenuNumber(&gfx, BEST_TIME_UNKD78_X,
+      DrawNarrowTwoDigitMenuNumber(&gfx, BEST_TIME_SCORE_X,
           BEST_TIME_FIRST_Y + (otherIndex * BEST_TIME_SPACING),
           save->bestTimeScoresToPar[memory->bestTimesCourse][otherIndex],
           MENU_NUMBER_SIGNED);
