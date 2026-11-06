@@ -4464,6 +4464,12 @@ void DrawMenuBanner(Gfx** displayListHead) {
  * 0xFFFF, which the original doesn't. Casting only the lit loop's product to
  * u16, a permuter find, does the same in that loop alone: 6 words, 2 in shape,
  * the andi among them.
+ *
+ * Testing the New Game choice once in IsChosenTitleLabel, with ?: or with &&
+ * around its two labels, would shorten the lit loop, but gives 93 words (29
+ * in shape), and grouping only the New Game labels 88 (24), which suggests
+ * the original tests the choice in each of the three cases. Giving the lit
+ * loop its own offset or index gives 62 to 74.
  */
 #ifdef NON_MATCHING
 const char f_PlainMenuHeading[] = "MAIN MENU";
