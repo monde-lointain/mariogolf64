@@ -2314,6 +2314,12 @@ INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard_drawing", DrawLeaderboardPage);
  * 710 words, 168 in shape, and a left shared by the two faces 735 (185),
  * alone, with the back face's top, or with both tops. 710 words differ, 156
  * in shape.
+ *
+ * The register oracle lines i and hole up with each other's registers in
+ * the handicap strokes' loops, against the later loops. Counting those
+ * loops' holes with a variable of their own gives 866 words (156 in
+ * shape), or with j 846 (156); counting their rows and players with one
+ * of their own gives 1150 (208), with a frame 16 bytes larger.
  */
 #ifdef NON_MATCHING
 void DrawScoresPage(Gfx** displayListHead) {
