@@ -2202,6 +2202,13 @@ void PlaceCharacter(u32 slotIndex, CoursePoint point, Radians heading) {
  * volatile inline assembly, the view direction's stores and the shadow
  * scale's abs.s are scheduled as in the original, which took the draft from
  * 49 words differing, 19 in shape, to 14, 6 in shape, all in the two ?:s.
+ *
+ * expr.c takes the single-operand form only when the condition has no
+ * side effects. Declaring g_CurrentShot with its definition's volatile,
+ * which the planning thread justifies, changes nothing, as c-typeck.c
+ * gives an array reference no side effects from its index; reading
+ * isLefty as volatile, which nothing justifies, gives 219 words (35 in
+ * shape).
  */
 #ifdef NON_MATCHING
 void DrawCharacterAndShadow(
