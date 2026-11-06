@@ -569,6 +569,13 @@ const char f_CompactHoleFormat[] = "Hole%d";
  * 63, first or last, and is added last as in the other tiles. The register
  * oracle's closest result is these 63 words with no register forced, so
  * allocation isn't the cause. 63 words differ, 45 in shape.
+ *
+ * The original adds rowOffset to the scorecard's y plus TILE_TOP in the
+ * tiles' y. Writing rowOffset + (g_Scorecard.y + TILE_TOP), or adding
+ * rowOffset last, in every tile's top and bottom gives 149 words (39 in
+ * shape) with the frame 8 bytes smaller, rowOffset + TILE_TOP +
+ * g_Scorecard.y 85 (31), and rowOffset + g_Scorecard.y + TILE_TOP changes
+ * nothing; in the tops alone those give 126 (64) and 88 (34).
  */
 #ifdef NON_MATCHING
 void DrawMatchPage(Gfx** displayListHead) {
