@@ -2340,6 +2340,11 @@ void HandleFrameBufferSwap(void) {}
  * BACKDROP_BORDER gives 180 words, 40 in shape. A u16 or u8 height in the last
  * loop gives 147 words, 31 in shape, but adds two andi masks, 0xffff or 0xff,
  * to the original's three andi 0xffff. 147 words differ, 33 in shape.
+ *
+ * The register oracle lines frame up with $s3 where it is set and with $a3
+ * in the last loop. A pointer of the last loop's own, set to f_CapturedFrame
+ * before the loop or in its header and declared before or after frame, gives
+ * 227 words (33 in shape) all four ways, so the loops share frame.
  */
 #ifdef NON_MATCHING
 void DrawFadeAnimation(Gfx** displayListHead) {
