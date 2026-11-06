@@ -377,13 +377,14 @@ void DrawBestTimes(Gfx** displayListHead) {
     DrawPlaceLabel(&gfx, BEST_TIME_PLACE_X,
         BEST_TIME_FIRST_PLACE_Y + (otherIndex * BEST_TIME_PLACE_SPACING),
         otherIndex + 1);
-    time = save->bestTimes[memory->bestTimesCourse][otherIndex];
+    time = save->records.bestTimes[memory->bestTimesCourse][otherIndex];
     if (time > 0) {
       DrawStopwatchTime(&gfx, BEST_TIME_X,
           BEST_TIME_FIRST_Y + (otherIndex * BEST_TIME_SPACING), time);
       DrawNarrowTwoDigitMenuNumber(&gfx, BEST_TIME_SCORE_X,
           BEST_TIME_FIRST_Y + (otherIndex * BEST_TIME_SPACING),
-          save->bestTimeScoresToPar[memory->bestTimesCourse][otherIndex],
+          save->records
+              .bestTimeScoresToPar[memory->bestTimesCourse][otherIndex],
           MENU_NUMBER_SIGNED);
       gDPPipeSync(gfx++);
       gDPPipeSync(gfx++);
@@ -399,7 +400,7 @@ void DrawBestTimes(Gfx** displayListHead) {
        * with the bestTimesCourse read at the top 217 (27)
        */
       holderCourse = memory->bestTimesCourse;
-      character = save->bestTimeCharacters[holderCourse][otherIndex];
+      character = save->records.bestTimeCharacters[holderCourse][otherIndex];
       DrawCharacterFace(&gfx, g_CharacterFaceImages[character],
           g_MenuCharacterPalettes[(memory->bestTimesCourse * BEST_TIME_COUNT) +
               otherIndex],
@@ -632,7 +633,7 @@ void LoadBestTimesFaces(void) {
 
   for (courseIndex = 0; courseIndex != COURSE_COUNT; courseIndex++) {
     for (rank = 0; rank != BEST_TIME_COUNT; rank++) {
-      character = save->bestTimeCharacters[courseIndex][rank];
+      character = save->records.bestTimeCharacters[courseIndex][rank];
       if (character != -1) {
         if (character < 0) {
           character = 0;
@@ -642,7 +643,7 @@ void LoadBestTimesFaces(void) {
           character = CHARACTER_COUNT - 1;
         }
 
-        palette = save->bestTimePalettes[courseIndex][rank];
+        palette = save->records.bestTimePalettes[courseIndex][rank];
       } else {
         character = 0;
         palette = 0;

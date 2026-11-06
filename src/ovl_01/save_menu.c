@@ -1055,7 +1055,7 @@ s32 GetOpenRingShotCourseCount(void) {
 
   for (courseIndex = 0; courseIndex != RING_SHOT_COURSE_COUNT; courseIndex++) {
     for (holeIndex = 0; holeIndex != RING_SHOT_HOLE_COUNT; holeIndex++) {
-      starCount += save->hasRingShotStar[courseIndex][holeIndex] > 0;
+      starCount += save->records.hasRingShotStar[courseIndex][holeIndex] > 0;
     }
   }
 

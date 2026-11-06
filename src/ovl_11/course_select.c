@@ -260,7 +260,7 @@ s32 CountOpenRingShotCourses(void) {
 
   for (course = 0; course != RING_SHOT_COURSE_COUNT; course++) {
     for (hole = 0; hole != RING_SHOT_HOLE_COUNT; hole++) {
-      starCount += save->hasRingShotStar[course][hole] > 0;
+      starCount += save->records.hasRingShotStar[course][hole] > 0;
     }
   }
 
@@ -1120,12 +1120,13 @@ void DrawRingShotStars(
 
     course = memory->courseIndex;
     if (hole == memory->holeIndex) {
-      tile = (save->hasRingShotStar[course][hole] == 0)
+      tile = (save->records.hasRingShotStar[course][hole] == 0)
           ? TILE_SPINNING_EMPTY_STAR
           : TILE_SPINNING_STAR;
     } else {
-      tile = (save->hasRingShotStar[course][hole] == 0) ? TILE_STILL_EMPTY_STAR
-                                                        : TILE_STILL_STAR;
+      tile = (save->records.hasRingShotStar[course][hole] == 0)
+          ? TILE_STILL_EMPTY_STAR
+          : TILE_STILL_STAR;
     }
 
     DrawTextureRect(&gfx, QuarterPixels(left - (width / 2)),

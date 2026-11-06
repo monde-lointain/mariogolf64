@@ -90,21 +90,22 @@ void GrantWinsStarsAndBadges(void) {
 
   for (row = 0; row != GRANTED_WIN_ROW_COUNT; row++) {
     for (column = 0; column != CHARACTER_COUNT; column++) {
-      if (!(save->awards.matchups[row][column].winBits & WIN_COUNT_MASK)) {
-        save->awards.matchups[row][column].winBits = 1;
+      if (!(save->records.awards.matchups[row][column].winBits &
+              WIN_COUNT_MASK)) {
+        save->records.awards.matchups[row][column].winBits = 1;
       }
     }
   }
 
   for (row = 0; row != RING_SHOT_COURSE_COUNT; row++) {
     for (column = 0; column != RING_SHOT_HOLE_COUNT; column++) {
-      save->hasRingShotStar[row][column] = TRUE;
+      save->records.hasRingShotStar[row][column] = TRUE;
     }
   }
 
   for (row = 0; row != COURSE_COUNT; row++) {
     for (column = 0; column != COURSE_HOLE_COUNT; column++) {
-      save->awards.birdieBadgeCounts[row][column] = 1;
+      save->records.awards.birdieBadgeCounts[row][column] = 1;
     }
   }
 
@@ -119,7 +120,7 @@ void GrantRingShotProgressAndPoints(void) {
 
   for (courseIndex = 0; courseIndex != RING_SHOT_COURSE_COUNT; courseIndex++) {
     for (holeIndex = 0; holeIndex != RING_SHOT_HOLE_COUNT; holeIndex++) {
-      save->hasRingShotStar[courseIndex][holeIndex] = TRUE;
+      save->records.hasRingShotStar[courseIndex][holeIndex] = TRUE;
       for (index = 0; index != GRANTED_CLEAR_CHARACTER_COUNT; index++) {
         save->ringShotClearCounts[courseIndex][holeIndex][index] = 1;
       }
@@ -140,7 +141,7 @@ void GrantEveryTournamentPlace(void) {
   TransferSaveData(save, FALSE);
   for (courseIndex = 0; courseIndex != COURSE_COUNT; courseIndex++) {
     for (place = 0; place != TOURNAMENT_PLACE_COUNT; place++) {
-      save->courseStats[courseIndex].hasPlace[place] = TRUE;
+      save->records.courseStats[courseIndex].hasPlace[place] = TRUE;
     }
   }
 

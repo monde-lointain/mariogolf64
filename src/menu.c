@@ -709,9 +709,10 @@ void ResetSaveData(void) {
   save = GetSaveData();
   memset(save, 0, sizeof(SaveData));
   save->magic = SAVE_MAGIC;
-  for (row = 0; row != ARRAY_COUNT(save->bestTimes); row++) {
-    for (column = 0; column != ARRAY_COUNT(save->bestTimes[0]); column++) {
-      save->bestTimes[row][column] = -1;
+  for (row = 0; row != ARRAY_COUNT(save->records.bestTimes); row++) {
+    for (column = 0; column != ARRAY_COUNT(save->records.bestTimes[0]);
+        column++) {
+      save->records.bestTimes[row][column] = -1;
     }
   }
 
@@ -1178,7 +1179,7 @@ void InsertBestTime(s32 courseIndex, s32 time, s32 scoreToPar,
 
       count = 0;
       for (index = 0; index != BEST_TIME_COUNT; index++) {
-        count += save->bestTimes[courseIndex][index] > 0;
+        count += save->records.bestTimes[courseIndex][index] > 0;
       }
 
       /*
@@ -1187,24 +1188,24 @@ void InsertBestTime(s32 courseIndex, s32 time, s32 scoreToPar,
        */
       for (index = 0; index != count; index++) {
         for (scanIndex = index + 1; scanIndex != count; scanIndex++) {
-          if (save->bestTimes[courseIndex][index] >
-              save->bestTimes[courseIndex][scanIndex]) {
-            save->bestTimes[courseIndex][index] =
-                save->bestTimes[courseIndex][scanIndex];
-            save->bestTimeCharacters[courseIndex][index] =
-                save->bestTimeCharacters[courseIndex][scanIndex];
-            save->bestTimeScoresToPar[courseIndex][index] =
-                save->bestTimeScoresToPar[courseIndex][scanIndex];
-            save->bestTimePalettes[courseIndex][index] =
-                save->bestTimePalettes[courseIndex][scanIndex];
+          if (save->records.bestTimes[courseIndex][index] >
+              save->records.bestTimes[courseIndex][scanIndex]) {
+            save->records.bestTimes[courseIndex][index] =
+                save->records.bestTimes[courseIndex][scanIndex];
+            save->records.bestTimeCharacters[courseIndex][index] =
+                save->records.bestTimeCharacters[courseIndex][scanIndex];
+            save->records.bestTimeScoresToPar[courseIndex][index] =
+                save->records.bestTimeScoresToPar[courseIndex][scanIndex];
+            save->records.bestTimePalettes[courseIndex][index] =
+                save->records.bestTimePalettes[courseIndex][scanIndex];
           }
         }
       }
 
       for (index = 0; index != count; index++) {
         for (scanIndex = index + 1; scanIndex != count; scanIndex++) {
-          if (save->bestTimeScoresToPar[courseIndex][index] !=
-              save->bestTimeScoresToPar[courseIndex][scanIndex]) {
+          if (save->records.bestTimeScoresToPar[courseIndex][index] !=
+              save->records.bestTimeScoresToPar[courseIndex][scanIndex]) {
             break;
           }
         }
@@ -1213,16 +1214,16 @@ void InsertBestTime(s32 courseIndex, s32 time, s32 scoreToPar,
           for (runIndex = index; runIndex != scanIndex; runIndex++) {
             for (otherIndex = runIndex + 1; otherIndex != scanIndex;
                 otherIndex++) {
-              if (save->bestTimeScoresToPar[courseIndex][runIndex] >
-                  save->bestTimeScoresToPar[courseIndex][otherIndex]) {
-                save->bestTimes[courseIndex][runIndex] =
-                    save->bestTimes[courseIndex][otherIndex];
-                save->bestTimeCharacters[courseIndex][runIndex] =
-                    save->bestTimeCharacters[courseIndex][otherIndex];
-                save->bestTimeScoresToPar[courseIndex][runIndex] =
-                    save->bestTimeScoresToPar[courseIndex][otherIndex];
-                save->bestTimePalettes[courseIndex][runIndex] =
-                    save->bestTimePalettes[courseIndex][otherIndex];
+              if (save->records.bestTimeScoresToPar[courseIndex][runIndex] >
+                  save->records.bestTimeScoresToPar[courseIndex][otherIndex]) {
+                save->records.bestTimes[courseIndex][runIndex] =
+                    save->records.bestTimes[courseIndex][otherIndex];
+                save->records.bestTimeCharacters[courseIndex][runIndex] =
+                    save->records.bestTimeCharacters[courseIndex][otherIndex];
+                save->records.bestTimeScoresToPar[courseIndex][runIndex] =
+                    save->records.bestTimeScoresToPar[courseIndex][otherIndex];
+                save->records.bestTimePalettes[courseIndex][runIndex] =
+                    save->records.bestTimePalettes[courseIndex][otherIndex];
               }
             }
           }
@@ -1231,12 +1232,13 @@ void InsertBestTime(s32 courseIndex, s32 time, s32 scoreToPar,
 
       if (count > 0) {
         for (index = 0; index != count; index++) {
-          if (time < save->bestTimes[courseIndex][index]) {
+          if (time < save->records.bestTimes[courseIndex][index]) {
             break;
           }
 
-          if (time == save->bestTimes[courseIndex][index] &&
-              scoreToPar <= save->bestTimeScoresToPar[courseIndex][index]) {
+          if (time == save->records.bestTimes[courseIndex][index] &&
+              scoreToPar <=
+                  save->records.bestTimeScoresToPar[courseIndex][index]) {
             break;
           }
         }
@@ -1244,26 +1246,26 @@ void InsertBestTime(s32 courseIndex, s32 time, s32 scoreToPar,
         if (index < BEST_TIME_COUNT) {
           for (scanIndex = BEST_TIME_COUNT - 1; index < scanIndex;
               scanIndex--) {
-            save->bestTimes[courseIndex][scanIndex] =
-                save->bestTimes[courseIndex][scanIndex - 1];
-            save->bestTimeCharacters[courseIndex][scanIndex] =
-                save->bestTimeCharacters[courseIndex][scanIndex - 1];
-            save->bestTimeScoresToPar[courseIndex][scanIndex] =
-                save->bestTimeScoresToPar[courseIndex][scanIndex - 1];
-            save->bestTimePalettes[courseIndex][scanIndex] =
-                save->bestTimePalettes[courseIndex][scanIndex - 1];
+            save->records.bestTimes[courseIndex][scanIndex] =
+                save->records.bestTimes[courseIndex][scanIndex - 1];
+            save->records.bestTimeCharacters[courseIndex][scanIndex] =
+                save->records.bestTimeCharacters[courseIndex][scanIndex - 1];
+            save->records.bestTimeScoresToPar[courseIndex][scanIndex] =
+                save->records.bestTimeScoresToPar[courseIndex][scanIndex - 1];
+            save->records.bestTimePalettes[courseIndex][scanIndex] =
+                save->records.bestTimePalettes[courseIndex][scanIndex - 1];
           }
 
-          save->bestTimes[courseIndex][index] = time;
-          save->bestTimeCharacters[courseIndex][index] = character;
-          save->bestTimeScoresToPar[courseIndex][index] = scoreToPar;
-          save->bestTimePalettes[courseIndex][index] = palette;
+          save->records.bestTimes[courseIndex][index] = time;
+          save->records.bestTimeCharacters[courseIndex][index] = character;
+          save->records.bestTimeScoresToPar[courseIndex][index] = scoreToPar;
+          save->records.bestTimePalettes[courseIndex][index] = palette;
         }
       } else {
-        save->bestTimes[courseIndex][0] = time;
-        save->bestTimeCharacters[courseIndex][0] = character;
-        save->bestTimeScoresToPar[courseIndex][0] = scoreToPar;
-        save->bestTimePalettes[courseIndex][0] = palette;
+        save->records.bestTimes[courseIndex][0] = time;
+        save->records.bestTimeCharacters[courseIndex][0] = character;
+        save->records.bestTimeScoresToPar[courseIndex][0] = scoreToPar;
+        save->records.bestTimePalettes[courseIndex][0] = palette;
       }
 
       TransferSaveData(save, TRUE);
@@ -1281,7 +1283,8 @@ Boolean HasEveryRingShotStar(void) {
   starCount = 0;
   for (courseIndex = 0; courseIndex != RING_SHOT_COURSE_COUNT; courseIndex++) {
     for (holeIndex = 0; holeIndex != RING_SHOT_HOLE_COUNT; holeIndex++) {
-      starCount += save->hasRingShotStar[courseIndex][holeIndex] != FALSE;
+      starCount +=
+          save->records.hasRingShotStar[courseIndex][holeIndex] != FALSE;
     }
   }
 
@@ -1298,7 +1301,8 @@ Boolean IsDonkeyKongUnlocked(void) {
   starCount = 0;
   for (courseIndex = 0; courseIndex != RING_SHOT_COURSE_COUNT; courseIndex++) {
     for (holeIndex = 0; holeIndex != RING_SHOT_HOLE_COUNT; holeIndex++) {
-      starCount += save->hasRingShotStar[courseIndex][holeIndex] != FALSE;
+      starCount +=
+          save->records.hasRingShotStar[courseIndex][holeIndex] != FALSE;
     }
   }
 
@@ -1317,7 +1321,8 @@ s32 GetRingShotCourseOpenedAtStarCount(void) {
   starCount = 0;
   for (courseIndex = 0; courseIndex != RING_SHOT_COURSE_COUNT; courseIndex++) {
     for (holeIndex = 0; holeIndex != RING_SHOT_HOLE_COUNT; holeIndex++) {
-      starCount += save->hasRingShotStar[courseIndex][holeIndex] != FALSE;
+      starCount +=
+          save->records.hasRingShotStar[courseIndex][holeIndex] != FALSE;
     }
   }
 
@@ -1347,7 +1352,8 @@ Boolean IsMapleUnlocked(void) {
   for (courseIndex = 0; courseIndex != COURSE_COUNT; courseIndex++) {
     for (holeIndex = 0; holeIndex != COURSE_HOLE_COUNT; holeIndex++) {
       badgeCount +=
-          save->awards.birdieBadgeCounts[courseIndex][holeIndex] != FALSE;
+          save->records.awards.birdieBadgeCounts[courseIndex][holeIndex] !=
+          FALSE;
     }
   }
 
@@ -1365,7 +1371,8 @@ Boolean IsMetalMarioUnlocked(void) {
   for (courseIndex = 0; courseIndex != COURSE_COUNT; courseIndex++) {
     for (holeIndex = 0; holeIndex != COURSE_HOLE_COUNT; holeIndex++) {
       badgeCount +=
-          save->awards.birdieBadgeCounts[courseIndex][holeIndex] != FALSE;
+          save->records.awards.birdieBadgeCounts[courseIndex][holeIndex] !=
+          FALSE;
     }
   }
 
@@ -1423,7 +1430,8 @@ void BuildCharacterGrid(s32 playerCount, Boolean skipsImportedFaces) {
   for (index = 0; index != RECORD_CHARACTER_COUNT; index++) {
     for (recordIndex = 0, playerCount = 0; recordIndex != CHARACTER_COUNT;
         recordIndex++) {
-      if (save->awards.matchups[recordIndex][index].winBits & WIN_COUNT_MASK) {
+      if (save->records.awards.matchups[recordIndex][index].winBits &
+          WIN_COUNT_MASK) {
         playerCount++;
         break;
       }
@@ -1890,7 +1898,7 @@ void ComputeRoundStatistics(void) {
   f32 emptyCount; /* Only ever zero */
   f32 holeCount;
 
-  saved = GetSaveData()->courseStats;
+  saved = GetSaveData()->records.courseStats;
   for (courseIndex = 0; courseIndex != COURSE_COUNT; courseIndex++) {
     entry = &saved[courseIndex];
     g_CourseStatFigures[courseIndex].roundCount = entry->roundCount;

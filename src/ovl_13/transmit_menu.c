@@ -3644,19 +3644,6 @@ void DrawPressingHand(Gfx** displayListHead) {
   *displayListHead = displayList;
 }
 
-/* The save from its awards on, which BuildStatusData reads through a pointer
- * to the awards */
-typedef struct SaveRecords {
-  Awards awards;
-  s32 bestTimeScoresToPar[COURSE_COUNT][BEST_TIME_COUNT];
-  s32 bestTimes[COURSE_COUNT][BEST_TIME_COUNT];
-  s32 bestTimeCharacters[COURSE_COUNT][BEST_TIME_COUNT];
-  s32 bestTimePalettes[COURSE_COUNT][BEST_TIME_COUNT];
-  CourseStats courseStats[COURSE_COUNT];
-  u8 unusedAfterCourseStats[0x1320 - 0x1150];
-  s8 hasRingShotStar[RING_SHOT_COURSE_COUNT][RING_SHOT_HOLE_COUNT];
-} SaveRecords;
-
 /* Returns value rounded to tenths, times ten, up to MAX_STATUS_VALUE and nine
  * tenths */
 static inline s32 PackTenths(f32 value) {
@@ -3690,11 +3677,8 @@ void BuildStatusData(u8* status) {
   StatusCourse* course;
   StatusProgress* progress;
 
-  /*
-   * Reading the records through a pointer to the awards is there to match:
-   * reading them through save gives 181 words differing, 21 in shape
-   */
-  SaveRecords* records = (SaveRecords*)&save->awards;
+  /* Reading the records through save gives 211 words differing, 21 in shape */
+  SaveRecords* records = &save->records;
   CourseStats* entry;
   CourseStats* scores;
   f32 reciprocal;
@@ -3708,7 +3692,7 @@ void BuildStatusData(u8* status) {
 
   memset(status, 0, STATUS_CLEARED_SIZE);
   for (courseIndex = 0; courseIndex != COURSE_COUNT; courseIndex++) {
-    entry = &save->courseStats[courseIndex];
+    entry = &save->records.courseStats[courseIndex];
     course = &data->courses[courseIndex];
 
     /*
@@ -3864,7 +3848,7 @@ void BuildStatusData(u8* status) {
     course->places = 0;
     for (index = 0; index != CHARACTER_COUNT; index++) {
       for (courseIndex = 0; courseIndex != COURSE_COUNT; courseIndex++) {
-        scores = &save->courseStats[courseIndex];
+        scores = &save->records.courseStats[courseIndex];
         if (scores->hasCharacterBestScore[index] == TRUE) {
           course->characterBestScores[index] =
               scores->characterBestScores[index] + STATUS_SCORE_BIAS;
@@ -3874,7 +3858,7 @@ void BuildStatusData(u8* status) {
 
       if (courseIndex < COURSE_COUNT) {
         for (courseIndex = 0; courseIndex != COURSE_COUNT; courseIndex++) {
-          scores = &save->courseStats[courseIndex];
+          scores = &save->records.courseStats[courseIndex];
           if (scores->hasCharacterBestScore[index] == TRUE &&
               course->characterBestScores[index] >
                   scores->characterBestScores[index] + STATUS_SCORE_BIAS) {

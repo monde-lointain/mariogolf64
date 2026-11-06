@@ -513,6 +513,21 @@ typedef struct Awards {
   /* 0x160 */ MatchupRecord matchups[CHARACTER_COUNT][CHARACTER_COUNT];
 } Awards; /* size = 0x3E8 */
 
+/* The save's records, which BuildStatusData reads through a pointer to them */
+typedef struct SaveRecords {
+  /* 0x000 */ Awards awards;
+  /* Each best time's net score to par, which breaks ties between equal times */
+  /* 0x3E8 */ s32 bestTimeScoresToPar[COURSE_COUNT][BEST_TIME_COUNT];
+  /* 0x430 */ s32 bestTimes[COURSE_COUNT]
+                           [BEST_TIME_COUNT]; /* Fastest first; unset is -1 */
+  /* The character and color of each best time's golfer */
+  /* 0x478 */ s32 bestTimeCharacters[COURSE_COUNT][BEST_TIME_COUNT];
+  /* 0x4C0 */ s32 bestTimePalettes[COURSE_COUNT][BEST_TIME_COUNT];
+  /* 0x508 */ CourseStats courseStats[COURSE_COUNT];
+  /* 0x7C0 */ u8 unusedAfterCourseStats[0x990 - 0x7C0];
+  /* 0x990 */ s8 hasRingShotStar[RING_SHOT_COURSE_COUNT][RING_SHOT_HOLE_COUNT];
+} SaveRecords; /* size = 0x9B4 */
+
 typedef struct SaveData {
   /* 0x0000 */ u32 magic;
   /* 0x0004 */ u32
@@ -524,17 +539,7 @@ typedef struct SaveData {
   /* 0x0038 */ SavedGame modeGames[MODE_GAME_COUNT];
   /* 0x0218 */ Player modePlayers[MODE_PLAYER_COUNT];
   /* 0x0720 */ PlayRecord modeRecords[MODE_RECORD_COUNT];
-  /* 0x0990 */ Awards awards;
-  /* Each best time's net score to par, which breaks ties between equal times */
-  /* 0x0D78 */ s32 bestTimeScoresToPar[COURSE_COUNT][BEST_TIME_COUNT];
-  /* 0x0DC0 */ s32 bestTimes[COURSE_COUNT]
-                            [BEST_TIME_COUNT]; /* Fastest first; unset is -1 */
-  /* The character and color of each best time's golfer */
-  /* 0x0E08 */ s32 bestTimeCharacters[COURSE_COUNT][BEST_TIME_COUNT];
-  /* 0x0E50 */ s32 bestTimePalettes[COURSE_COUNT][BEST_TIME_COUNT];
-  /* 0x0E98 */ CourseStats courseStats[COURSE_COUNT];
-  /* 0x1150 */ u8 unusedAfterCourseStats[0x1320 - 0x1150];
-  /* 0x1320 */ s8 hasRingShotStar[RING_SHOT_COURSE_COUNT][RING_SHOT_HOLE_COUNT];
+  /* 0x0990 */ SaveRecords records;
   /* 0x1344 */ s8 ringShotClearCounts[RING_SHOT_COURSE_COUNT]
                                      [RING_SHOT_HOLE_COUNT][CHARACTER_COUNT];
   /* 0x15CC */ s32 coursePoints; /* Earned in total, so it never goes down */

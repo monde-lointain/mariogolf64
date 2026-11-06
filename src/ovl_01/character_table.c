@@ -427,14 +427,15 @@ void DrawCharacterTable(Gfx** displayListHead) {
             TABLE_COLUMN_FACE_Y, columnCharacter, drawMode);
       }
 
-      columnWins =
-          save->awards.matchups[rowCharacter][columnCharacter].lossCount &
+      columnWins = save->records.awards.matchups[rowCharacter][columnCharacter]
+                       .lossCount &
           WIN_COUNT_MASK;
-      rowWins = save->awards.matchups[rowCharacter][columnCharacter].winBits &
+      rowWins =
+          save->records.awards.matchups[rowCharacter][columnCharacter].winBits &
           WIN_COUNT_MASK;
       /* A pairing with the flag set shows the star, and the others show who has
        * won more */
-      if (save->awards.matchups[rowCharacter][columnCharacter].winBits &
+      if (save->records.awards.matchups[rowCharacter][columnCharacter].winBits &
           WON_UNSAVED_FLAG) {
         DrawTableStar(&gfx,
             (shownColumn * TABLE_CELL_WIDTH) + TABLE_FIRST_COLUMN_FACE_X,
@@ -677,9 +678,11 @@ void DrawTablePopup(Gfx** displayListHead) {
   rowCharacter = f_TableCharacters[rowIndex];
   columnCharacter =
       f_TableCharacters[memory->tableFirstColumn + memory->tableColumn];
-  columnWins = save->awards.matchups[rowCharacter][columnCharacter].lossCount &
+  columnWins =
+      save->records.awards.matchups[rowCharacter][columnCharacter].lossCount &
       WIN_COUNT_MASK;
-  rowWins = save->awards.matchups[rowCharacter][columnCharacter].winBits &
+  rowWins =
+      save->records.awards.matchups[rowCharacter][columnCharacter].winBits &
       WIN_COUNT_MASK;
   faceMode = FACE_DARKENED;
   if (f_TableCharacterVisibility[rowIndex] != TABLE_CHARACTER_HIDDEN) {
@@ -780,8 +783,8 @@ void MarkShownTableCharacters(void) {
     column = 0;
     recordCount = 0;
     for (; column != CHARACTER_COUNT; column++) {
-      recordCount +=
-          (save->awards.matchups[row][column].winBits & WIN_COUNT_MASK) != 0;
+      recordCount += (save->records.awards.matchups[row][column].winBits &
+                         WIN_COUNT_MASK) != 0;
     }
 
     /* The original stores these one entry early, over the grid's last character

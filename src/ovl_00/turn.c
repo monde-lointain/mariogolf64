@@ -2393,9 +2393,8 @@ Boolean AreAllRingsPassed(Player* player) {
 }
 
 void RecordRingShotClear(s32 playerIndex) {
-  s8* count =
-      &GetSaveData()
-           ->hasRingShotStar[g_GameState.courseIndex][g_GameState.holeIndex];
+  s8* count = &GetSaveData()->records.hasRingShotStar[g_GameState.courseIndex]
+                                                     [g_GameState.holeIndex];
 
   (*count)++;
   if (*count < 0) {

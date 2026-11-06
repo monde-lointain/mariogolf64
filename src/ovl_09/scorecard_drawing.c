@@ -3208,7 +3208,7 @@ void DrawScoresPage(Gfx** displayListHead) {
     glow = sinf(f_BadgeGlowAngle) * (f32)BADGE_GLOW_RANGE;
     gDPSetPrimColor(gfx++, 0, 0, glow + 0xE0, glow + 0xC4, 0x1E, 0xFF);
     for (hole = 0; hole != COURSE_HOLE_COUNT; hole++) {
-      if (saveData->awards
+      if (saveData->records.awards
               .birdieBadgeCounts[g_Scorecard.content.courseIndex][hole] > 0) {
         sprintf(g_PrintBuffer, "%c", BIRDIE_BADGE_CODE);
         if (hole < HOLES_PER_NINE) {

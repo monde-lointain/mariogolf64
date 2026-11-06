@@ -58,7 +58,7 @@ void RecordComCharacterResult(s32 row, s32 column, Boolean isWin) {
   u8 value;
   s32 newValue;
 
-  awards = &GetSaveData()->awards;
+  awards = &GetSaveData()->records.awards;
   if (isWin) {
     value = awards->matchups[row][column].winBits;
     count = value & WIN_COUNT_MASK;
@@ -91,7 +91,7 @@ INCLUDE_ASM("asm/nonmatchings/progress", RecordComCharacterResult);
 void AddBirdieBadge(void) {
   Awards* awards;
 
-  awards = &GetSaveData()->awards;
+  awards = &GetSaveData()->records.awards;
   if (g_GameState.gameMode == GAME_MODE_TOURNAMENT) {
     awards->birdieBadgeCounts[g_GameState.courseIndex][g_GameState.holeIndex]++;
     if (awards->birdieBadgeCounts[g_GameState.courseIndex]
@@ -115,7 +115,7 @@ void ReportBirdieBadgeCount(void) {
   CourseIndex courseIndex;
   s32 holeIndex;
 
-  awards = &GetSaveData()->awards;
+  awards = &GetSaveData()->records.awards;
   if (g_GameState.gameMode == GAME_MODE_TOURNAMENT &&
       awards->birdieBadgeCounts[g_GameState.courseIndex]
                                [g_GameState.holeIndex] == 0) {
@@ -141,7 +141,7 @@ void RecordTournamentPlace(void) {
   s32 index;
   TournamentStanding* standing;
 
-  stats = &GetSaveData()->courseStats[g_GameState.courseIndex];
+  stats = &GetSaveData()->records.courseStats[g_GameState.courseIndex];
   hasPlace = FALSE;
   if (g_GameState.gameMode == GAME_MODE_TOURNAMENT) {
     RankTournament(GetLastHoleIndex() + 1, 0,

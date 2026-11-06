@@ -2315,7 +2315,7 @@ s32 UpdateTournamentResults(ControllerState* controller) {
 
       switch (f_ResultsStep) {
         case TOURNAMENT_STEP_START:
-          record = &GetSaveData()->courseStats[g_GameState.courseIndex];
+          record = &GetSaveData()->records.courseStats[g_GameState.courseIndex];
           f_ResultsStep = TOURNAMENT_STEP_SHOWN;
           if (record->roundCount <= 0 ||
               record->bestScore >= f_PlayerResults[0]) {

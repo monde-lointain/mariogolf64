@@ -5202,7 +5202,8 @@ void DrawModeSelect(Gfx** displayListHead) {
     badgeCount = 0;
     for (courseIndex = 0; courseIndex != COURSE_COUNT; courseIndex++) {
       for (holeIndex = 0; holeIndex != COURSE_HOLE_COUNT; holeIndex++) {
-        if (save->awards.birdieBadgeCounts[courseIndex][holeIndex] > 0) {
+        if (save->records.awards.birdieBadgeCounts[courseIndex][holeIndex] >
+            0) {
           badgeCount++;
         }
       }
@@ -5235,7 +5236,7 @@ void DrawModeSelect(Gfx** displayListHead) {
     for (courseIndex = 0, starCount = 0; courseIndex != RING_SHOT_COURSE_COUNT;
         courseIndex++) {
       for (holeIndex = 0; holeIndex != RING_SHOT_HOLE_COUNT; holeIndex++) {
-        if (save->hasRingShotStar[courseIndex][holeIndex] > 0) {
+        if (save->records.hasRingShotStar[courseIndex][holeIndex] > 0) {
           starCount++;
         }
       }
@@ -6114,7 +6115,7 @@ void DrawCourseSelect(Gfx** displayListHead) {
     if (COURSE_SELECT_LAYOUT == COURSE_SELECT_LAYOUT_AWARDS) {
       badgeCount = 0;
       for (otherIndex = 0; otherIndex != COURSE_HOLE_COUNT; otherIndex++) {
-        if (save->awards
+        if (save->records.awards
                 .birdieBadgeCounts[g_MenuMemory.courseChoice][otherIndex]) {
           badgeCount++;
         }
@@ -6264,7 +6265,7 @@ void DrawCourseSelect(Gfx** displayListHead) {
 
       badgeCount = 0;
       for (otherIndex = 0; otherIndex != COURSE_HOLE_COUNT; otherIndex++) {
-        if (save->awards
+        if (save->records.awards
                 .birdieBadgeCounts[g_MenuMemory.courseChoice][otherIndex]) {
           badgeCount++;
         }
@@ -7555,7 +7556,8 @@ void DrawMenuRingShotStars(Gfx** displayListHead, s32 centerX, s32 centerY) {
     top += centerY - (RING_SHOT_STAR_HEIGHT / 2);
 
     /* A hole without its star draws from the silver star's tile */
-    tile = save->hasRingShotStar[g_MenuMemory.courseIndex][holeIndex] == FALSE;
+    tile = save->records.hasRingShotStar[g_MenuMemory.courseIndex][holeIndex] ==
+        FALSE;
     gSPScisTextureRectangle(gfx++, QuarterPixels(left - (growWidth / 2)),
         QuarterPixels(top - (growHeight / 2)),
         QuarterPixels(left + RING_SHOT_STAR_WIDTH + (growWidth / 2)),
