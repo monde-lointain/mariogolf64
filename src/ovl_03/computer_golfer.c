@@ -2262,9 +2262,9 @@ s32 GetPowerGaugeFrame(s32 amount) {
 
 INCLUDE_RODATA("asm/nonmatchings/ovl_03/computer_golfer", f_SimFaultText);
 
-/* What the trial costs for each step a putt takes, and for a putt at the stroke
- * limit */
-#define PUTT_STEP_EVALUATION 0x10
+/* What the trial costs for each step on which a putt lips out; one at the
+ * stroke limit costs POOR_LANDING_EVALUATION more */
+#define LIP_OUT_EVALUATION 0x10
 #define POOR_LANDING_EVALUATION 0x8000
 #define BLOCKED_CUP_EVALUATION 0x80000
 #define FAR_FROM_TARGET 0x40000000
@@ -2434,8 +2434,8 @@ s32 StepTrialShot(void) {
           f_TrialEndPoint[AXIS_Z] = f_TrialSimulation.position[AXIS_Z];
         }
 
-        if (stepFlags & 4) {
-          f_TrialEvaluation += PUTT_STEP_EVALUATION;
+        if (stepFlags & STEP_FLAG_LIPPED_OUT) {
+          f_TrialEvaluation += LIP_OUT_EVALUATION;
           if (IsStrokeLimitReached()) {
             f_TrialEvaluation += POOR_LANDING_EVALUATION;
           }
