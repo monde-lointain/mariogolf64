@@ -98,7 +98,35 @@ typedef struct OpeningNameLogo {
 #define NAME_LOGO_FLIP_UP 20
 #define NAME_LOGO_STILL 30
 
-/* f_OpeningCue's values: the cues, then the states past them */
+/*
+ * f_OpeningCue's values: the cues, each named for the characters it sets up
+ * or what it does to them, then the states past them
+ */
+#define OPENING_CUE_MARIO_TEE_SHOT 0
+#define OPENING_CUE_PEACH_CHEER 1
+#define OPENING_CUE_LUIGI_CHEER 2
+#define OPENING_CUE_PEACH_TEE_SHOT 4
+#define OPENING_CUE_PLUM_CHEER 5
+#define OPENING_CUE_PLUM_TEE_SHOT 7
+#define OPENING_CUE_MARIO_CHEER 8
+#define OPENING_CUE_LUIGI_TEE_SHOT 9
+#define OPENING_CUE_PEACH_PLUM_WALK 11
+#define OPENING_CUE_MARIO_LUIGI_WALK 12
+#define OPENING_CUE_MARIO_REACH_BALL 13
+#define OPENING_CUE_PEACH_WAVE 14
+#define OPENING_CUE_PEACH_APPROACH 15
+#define OPENING_CUE_BALL_INSPECTION 17
+#define OPENING_CUE_MARIO_LOOK_UP 18
+#define OPENING_CUE_FREEZE 19
+#define OPENING_CUE_UNFREEZE 20
+#define OPENING_CUE_BABY_MARIO_ARRIVAL 21
+#define OPENING_CUE_BABY_MARIO_RIDE 22
+#define OPENING_CUE_MARIO_PUZZLED 23
+#define OPENING_CUE_CLEAR_CHARACTERS 24
+#define OPENING_CUE_LUIGI_SEARCH 25
+#define OPENING_CUE_TOAD_FLAG 26
+#define OPENING_CUE_LUIGI_DISMAY 27
+#define OPENING_CUE_GATHERING 28
 #define OPENING_CUE_COUNT 29
 #define OPENING_CUE_INVALID 29
 #define OPENING_CUES_FINISHED 30
@@ -1050,9 +1078,10 @@ s32 ToggleOpeningCharacter(u32 slotIndex, s32 character);
  * Sets up the opening's characters for the cue that its script has given, and
  * returns whether the cues have finished.
  *
- * Cues 1 and 27 step on to the next cue instead of being marked done, which
- * sets up its characters on the next frame. When cue 1 places its character,
- * though, it steps from OPENING_CUE_DONE to an invalid cue.
+ * OPENING_CUE_PEACH_CHEER and OPENING_CUE_LUIGI_DISMAY step on to the next
+ * cue instead of being marked done, which sets up its characters on the next
+ * frame. When OPENING_CUE_PEACH_CHEER places its character, though, it steps
+ * from OPENING_CUE_DONE to an invalid cue.
  */
 s32 UpdateOpeningCharacters(void) {
   CoursePoint point0;
@@ -1087,7 +1116,7 @@ s32 UpdateOpeningCharacters(void) {
   CoursePoint point29;
 
   switch (f_OpeningCue) {
-    case 0:
+    case OPENING_CUE_MARIO_TEE_SHOT:
       SetCharacterLights();
       f_CueSlotIndex = 0;
       if (ToggleOpeningCharacter(0, OPENING_MODEL_MARIO)) {
@@ -1098,7 +1127,7 @@ s32 UpdateOpeningCharacters(void) {
 
       f_OpeningCue = OPENING_CUE_DONE;
       break;
-    case 1:
+    case OPENING_CUE_PEACH_CHEER:
       f_CueSlotIndex = 1;
       if (ToggleOpeningCharacter(1, OPENING_MODEL_PEACH)) {
         SetCharacterAnimation(f_CueSlotIndex, PEACH_CHEER_ANIMATION);
@@ -1109,7 +1138,7 @@ s32 UpdateOpeningCharacters(void) {
 
       f_OpeningCue++;
       break;
-    case 2:
+    case OPENING_CUE_LUIGI_CHEER:
       f_CueSlotIndex = 2;
       if (ToggleOpeningCharacter(2, OPENING_MODEL_LUIGI)) {
         SetCharacterAnimation(f_CueSlotIndex, LUIGI_CHEER_ANIMATION);
@@ -1119,7 +1148,7 @@ s32 UpdateOpeningCharacters(void) {
 
       f_OpeningCue = OPENING_CUE_DONE;
       break;
-    case 4:
+    case OPENING_CUE_PEACH_TEE_SHOT:
       FreeCharacterSlot(0);
       FreeCharacterSlot(1);
       FreeCharacterSlot(2);
@@ -1132,7 +1161,7 @@ s32 UpdateOpeningCharacters(void) {
 
       f_OpeningCue = OPENING_CUE_DONE;
       break;
-    case 5:
+    case OPENING_CUE_PLUM_CHEER:
       f_CueSlotIndex = 0;
       if (ToggleOpeningCharacter(0, OPENING_MODEL_PLUM)) {
         SetCharacterAnimation(f_CueSlotIndex, PLUM_CHEER_ANIMATION);
@@ -1142,7 +1171,7 @@ s32 UpdateOpeningCharacters(void) {
 
       f_OpeningCue = OPENING_CUE_DONE;
       break;
-    case 7:
+    case OPENING_CUE_PLUM_TEE_SHOT:
       FreeCharacterSlot(0);
       FreeCharacterSlot(3);
       f_CueSlotIndex = 1;
@@ -1154,7 +1183,7 @@ s32 UpdateOpeningCharacters(void) {
 
       f_OpeningCue = OPENING_CUE_DONE;
       break;
-    case 8:
+    case OPENING_CUE_MARIO_CHEER:
       f_CueSlotIndex = 2;
       if (ToggleOpeningCharacter(2, OPENING_MODEL_MARIO)) {
         SetCharacterAnimation(f_CueSlotIndex, MARIO_CHEER_ANIMATION);
@@ -1164,7 +1193,7 @@ s32 UpdateOpeningCharacters(void) {
 
       f_OpeningCue = OPENING_CUE_DONE;
       break;
-    case 9:
+    case OPENING_CUE_LUIGI_TEE_SHOT:
       FreeCharacterSlot(1);
       FreeCharacterSlot(2);
       f_CueSlotIndex = 0;
@@ -1176,7 +1205,7 @@ s32 UpdateOpeningCharacters(void) {
 
       f_OpeningCue = OPENING_CUE_DONE;
       break;
-    case 11:
+    case OPENING_CUE_PEACH_PLUM_WALK:
       FreeCharacterSlot(0);
       f_CueSlotIndex = 1;
       if (ToggleOpeningCharacter(1, OPENING_MODEL_PLUM)) {
@@ -1193,7 +1222,7 @@ s32 UpdateOpeningCharacters(void) {
 
       f_OpeningCue = OPENING_CUE_DONE;
       break;
-    case 12:
+    case OPENING_CUE_MARIO_LUIGI_WALK:
       FreeCharacterSlot(1);
       FreeCharacterSlot(2);
       f_CueSlotIndex = 0;
@@ -1211,7 +1240,7 @@ s32 UpdateOpeningCharacters(void) {
 
       f_OpeningCue = OPENING_CUE_DONE;
       break;
-    case 13:
+    case OPENING_CUE_MARIO_REACH_BALL:
       FreeCharacterSlot(0);
       f_CueSlotIndex = 1;
       if (ToggleOpeningCharacter(1, OPENING_MODEL_MARIO)) {
@@ -1221,7 +1250,7 @@ s32 UpdateOpeningCharacters(void) {
 
       f_OpeningCue = OPENING_CUE_DONE;
       break;
-    case 14:
+    case OPENING_CUE_PEACH_WAVE:
       FreeCharacterSlot(1);
       FreeCharacterSlot(3);
       f_CueSlotIndex = 0;
@@ -1239,7 +1268,7 @@ s32 UpdateOpeningCharacters(void) {
 
       f_OpeningCue = OPENING_CUE_DONE;
       break;
-    case 15:
+    case OPENING_CUE_PEACH_APPROACH:
       FreeCharacterSlot(0);
       FreeCharacterSlot(2);
       f_CueSlotIndex = 1;
@@ -1257,7 +1286,7 @@ s32 UpdateOpeningCharacters(void) {
 
       f_OpeningCue = OPENING_CUE_DONE;
       break;
-    case 17:
+    case OPENING_CUE_BALL_INSPECTION:
       FreeCharacterSlot(1);
       FreeCharacterSlot(3);
       f_CueSlotIndex = 0;
@@ -1275,7 +1304,7 @@ s32 UpdateOpeningCharacters(void) {
 
       f_OpeningCue = OPENING_CUE_DONE;
       break;
-    case 18:
+    case OPENING_CUE_MARIO_LOOK_UP:
       FreeCharacterSlot(2);
       f_CueSlotIndex = 1;
       ToggleOpeningCharacter(1, OPENING_MODEL_MARIO);
@@ -1284,17 +1313,17 @@ s32 UpdateOpeningCharacters(void) {
       f_OpeningCue = OPENING_CUE_DONE;
       f_LastPlacedSlotIndex = f_CueSlotIndex;
       break;
-    case 19:
+    case OPENING_CUE_FREEZE:
       SetAnimationSpeed(0, 0.0f);
       SetAnimationSpeed(1, 0.0f);
       f_OpeningCue = OPENING_CUE_DONE;
       break;
-    case 20:
+    case OPENING_CUE_UNFREEZE:
       SetAnimationSpeed(0, 1.0f);
       SetAnimationSpeed(1, 1.0f);
       f_OpeningCue = OPENING_CUE_DONE;
       break;
-    case 21:
+    case OPENING_CUE_BABY_MARIO_ARRIVAL:
       FreeCharacterSlot(0);
       FreeCharacterSlot(1);
       f_CueSlotIndex = 2;
@@ -1326,11 +1355,11 @@ s32 UpdateOpeningCharacters(void) {
       f_OpeningCue = OPENING_CUE_DONE;
       f_LastPlacedSlotIndex = f_CueSlotIndex;
       break;
-    case 22:
+    case OPENING_CUE_BABY_MARIO_RIDE:
       SetAnimationSpeed(2, 1.0f);
       SetAnimationSpeed(3, 1.0f);
       break;
-    case 23:
+    case OPENING_CUE_MARIO_PUZZLED:
       f_CueSlotIndex = 0;
       ToggleOpeningCharacter(0, OPENING_MODEL_PEACH);
       SetCharacterAnimation(f_CueSlotIndex, PEACH_COVER_MOUTH_ANIMATION);
@@ -1342,11 +1371,11 @@ s32 UpdateOpeningCharacters(void) {
       f_OpeningCue = OPENING_CUE_DONE;
       f_LastPlacedSlotIndex = f_CueSlotIndex;
       break;
-    case 24:
+    case OPENING_CUE_CLEAR_CHARACTERS:
       FreeAllCharacterSlots();
       f_OpeningCue = OPENING_CUE_DONE;
       break;
-    case 25:
+    case OPENING_CUE_LUIGI_SEARCH:
       f_CueSlotIndex = 0;
       ToggleOpeningCharacter(0, OPENING_MODEL_LUIGI);
       SetCharacterAnimation(f_CueSlotIndex, LUIGI_SEARCH_ANIMATION);
@@ -1354,7 +1383,7 @@ s32 UpdateOpeningCharacters(void) {
       f_OpeningCue = OPENING_CUE_DONE;
       f_LastPlacedSlotIndex = f_CueSlotIndex;
       break;
-    case 26:
+    case OPENING_CUE_TOAD_FLAG:
       f_CueSlotIndex = 1;
       ToggleOpeningCharacter(1, OPENING_MODEL_TOAD);
       SetCharacterAnimation(f_CueSlotIndex, TOAD_WAVE_FLAG_ANIMATION);
@@ -1362,7 +1391,7 @@ s32 UpdateOpeningCharacters(void) {
       f_OpeningCue = OPENING_CUE_DONE;
       f_LastPlacedSlotIndex = f_CueSlotIndex;
       break;
-    case 27:
+    case OPENING_CUE_LUIGI_DISMAY:
       FreeCharacterSlot(0);
       FreeCharacterSlot(1);
       f_CueSlotIndex = 2;
@@ -1378,7 +1407,7 @@ s32 UpdateOpeningCharacters(void) {
 
       f_OpeningCue++;
       break;
-    case 28:
+    case OPENING_CUE_GATHERING:
       f_CueSlotIndex = 0;
       if (ToggleOpeningCharacter(0, OPENING_MODEL_MARIO)) {
         SetCharacterAnimation(f_CueSlotIndex, MARIO_GATHER_ANIMATION);
@@ -1565,7 +1594,7 @@ void UpdateOpening(void) {
         if (f_OpeningSceneFramesLeft == 0) {
           f_OpeningSceneFramesLeft = 30;
           LoadNameLogo(0, 0);
-          f_OpeningCue = 0;
+          f_OpeningCue = OPENING_CUE_MARIO_TEE_SHOT;
           StartScreenFadeIn(0, 0, 0, 0x1E);
           PlaceEditorCamera(
               997.598f, -160.581f, 4594.014f, 973.0f, -130.0f, 4672.0f);
@@ -1634,7 +1663,7 @@ void UpdateOpening(void) {
         }
 
         if (f_OpeningSceneFramesLeft == 0) {
-          f_OpeningCue = 1;
+          f_OpeningCue = OPENING_CUE_PEACH_CHEER;
           f_OpeningScene = OPENING_SCENE_MARIO_DRIVE_CHEERS;
         }
 
@@ -1677,7 +1706,7 @@ void UpdateOpening(void) {
 
         break;
       case OPENING_SCENE_MARIO_DRIVE_CHEERS + 2:
-        f_OpeningCue = 2;
+        f_OpeningCue = OPENING_CUE_LUIGI_CHEER;
         f_OpeningScene = OPENING_SCENE_MARIO_DRIVE_FLIGHT;
         break;
       case OPENING_SCENE_UNREACHED:
@@ -1740,7 +1769,7 @@ void UpdateOpening(void) {
       case OPENING_SCENE_PEACH_DRIVE:
         PlaceEditorCamera(
             957.619f, -131.446f, 4629.353f, 973.561f, -133.0f, 4671.789f);
-        f_OpeningCue = 4;
+        f_OpeningCue = OPENING_CUE_PEACH_TEE_SHOT;
         f_LookAtEaseMode = 0;
         f_OpeningSceneFramesLeft = 100;
         f_OpeningShotState = 0;
@@ -1800,7 +1829,7 @@ void UpdateOpening(void) {
         MoveEditorPoint(0, 708.085f, -98.243f, 5073.215f, 0x28);
         f_OpeningSceneFramesLeft = 40;
         f_OpeningScene = OPENING_SCENE_PEACH_DRIVE_FLIGHT;
-        f_OpeningCue = 5;
+        f_OpeningCue = OPENING_CUE_PLUM_CHEER;
         f_IsNameSlotShown[0] = 0;
         f_OpeningShotState = 0;
         f_ShotBallScale = 0;
@@ -1864,7 +1893,7 @@ void UpdateOpening(void) {
         PlaceEditorCamera(
             980.776f, -123.436f, 4636.89f, 971.837f, -133.5f, 4671.701f);
         f_OpeningSceneFramesLeft = 100;
-        f_OpeningCue = 7;
+        f_OpeningCue = OPENING_CUE_PLUM_TEE_SHOT;
         f_OpeningScene++;
         LoadNameLogo(3, 0);
         f_OpeningShotState = 0;
@@ -1914,7 +1943,7 @@ void UpdateOpening(void) {
 
         if (f_OpeningSceneFramesLeft == 0) {
           f_OpeningScene = OPENING_SCENE_MARIO_CLOSE_UP;
-          f_OpeningCue = 8;
+          f_OpeningCue = OPENING_CUE_MARIO_CHEER;
         }
 
         break;
@@ -1962,7 +1991,7 @@ void UpdateOpening(void) {
             957.619f, -131.446f, 4629.353f, 973.561f, -133.0f, 4671.789f);
         TurnEditorCamera(1, 1.0471976f, 1);
         TiltEditorCamera(1, 0.34906584f, 1);
-        f_OpeningCue = 9;
+        f_OpeningCue = OPENING_CUE_LUIGI_TEE_SHOT;
         f_OpeningScene++;
         LoadNameLogo(1, 0);
         f_OpeningSceneFramesLeft = 10;
@@ -2094,7 +2123,7 @@ void UpdateOpening(void) {
       case OPENING_SCENE_PEACH_PLUM_WALK + 1:
         PlaceEditorCamera(
             2737.741f, -364.884f, 2368.88f, 2680.325f, -248.5f, 2488.521f);
-        f_OpeningCue = 11;
+        f_OpeningCue = OPENING_CUE_PEACH_PLUM_WALK;
         f_OpeningBallStates[0] = 1;
         f_OpeningBallStates[1] = 1;
         f_OpeningScene++;
@@ -2125,7 +2154,7 @@ void UpdateOpening(void) {
         TiltEditorCamera(1, -0.116571f, 0x76);
         TurnEditorCamera(1, 1.366719f, 0x76);
         ZoomEditorCamera(1, 87.87598f, 0x76);
-        f_OpeningCue = 12;
+        f_OpeningCue = OPENING_CUE_MARIO_LUIGI_WALK;
         f_OpeningSceneFramesLeft = 118;
         f_OpeningScene++;
         break;
@@ -2169,7 +2198,7 @@ void UpdateOpening(void) {
         break;
       case OPENING_SCENE_MARIO_FINDS_BALL:
         if (f_OpeningSceneFramesLeft == 0) {
-          f_OpeningCue = 13;
+          f_OpeningCue = OPENING_CUE_MARIO_REACH_BALL;
           f_OpeningScene++;
           MoveEditorCamera(1, 2489.636f, -257.5f, 1811.529f, 0x1E);
           TiltEditorCamera(1, -0.070194006f, 0x32);
@@ -2202,7 +2231,7 @@ void UpdateOpening(void) {
           MoveEditorPoint(1, 2855.966f, -256.5f, 2213.121f, 0x32);
           MoveEditorPoint(0, 2702.606f, -279.683f, 2250.851f, 0x32);
           f_OpeningSceneFramesLeft = 90;
-          f_OpeningCue = 14;
+          f_OpeningCue = OPENING_CUE_PEACH_WAVE;
           g_HoleSetup.conditions.lightPitch = 0x1000;
 
           /* Stored as a signed value, as the original does */
@@ -2289,7 +2318,7 @@ void UpdateOpening(void) {
         if (f_OpeningSceneFramesLeft == 0) {
           PlaceEditorCamera(
               2712.031f, -270.705f, 2358.303f, 2770.045f, -250.5f, 2337.548f);
-          f_OpeningCue = 15;
+          f_OpeningCue = OPENING_CUE_PEACH_APPROACH;
           f_OpeningSceneFramesLeft = 64;
           f_OpeningScene = OPENING_SCENE_PEACH_APPROACH;
           f_OpeningBallPositions[0][0] = 2755.104f;
@@ -2341,7 +2370,7 @@ void UpdateOpening(void) {
         if (f_OpeningSceneFramesLeft == 0) {
           PlaceEditorCamera(
               2712.031f, -270.705f, 2358.303f, 2770.045f, -250.5f, 2337.548f);
-          f_OpeningCue = 17;
+          f_OpeningCue = OPENING_CUE_BALL_INSPECTION;
           f_OpeningSceneFramesLeft = 56;
           g_CameraEditor.fieldOfView = 45.0f;
           f_OpeningScene++;
@@ -2362,7 +2391,7 @@ void UpdateOpening(void) {
         }
 
         if (f_OpeningSceneFramesLeft == 0) {
-          f_OpeningCue = 18;
+          f_OpeningCue = OPENING_CUE_MARIO_LOOK_UP;
           f_OpeningSceneFramesLeft = 30;
           f_OpeningScene++;
           LoadOpeningBall(4, 1);
@@ -2379,7 +2408,7 @@ void UpdateOpening(void) {
         }
 
         if (f_OpeningSceneFramesLeft == 0) {
-          f_OpeningCue = 19;
+          f_OpeningCue = OPENING_CUE_FREEZE;
           f_OpeningScene = OPENING_SCENE_INCOMING_BALL;
         }
 
@@ -2416,7 +2445,7 @@ void UpdateOpening(void) {
         }
 
         if (AreEditorMovesDone()) {
-          f_OpeningCue = 20;
+          f_OpeningCue = OPENING_CUE_UNFREEZE;
           f_OpeningSceneFramesLeft = 120;
           f_OpeningScene = OPENING_SCENE_BABY_MARIO_ARRIVAL;
           f_LookAtEaseMode = 3;
@@ -2466,7 +2495,7 @@ void UpdateOpening(void) {
               2878.956f, -391.282f, 2514.85f, 2431.88f, -315.0f, 992.943f);
           MoveEditorPoint(0, 2051.33f, -258.127f, 862.423f, 0x28);
           MoveEditorPoint(1, 2058.79f, -254.0f, 825.963f, 0x28);
-          f_OpeningCue = 21;
+          f_OpeningCue = OPENING_CUE_BABY_MARIO_ARRIVAL;
           f_OpeningSceneFramesLeft = 20;
           f_OpeningScene++;
           LoadNameLogo(5, 0);
@@ -2487,7 +2516,7 @@ void UpdateOpening(void) {
         break;
       case OPENING_SCENE_BABY_MARIO_ARRIVAL + 1:
         if (f_OpeningSceneFramesLeft == 0) {
-          f_OpeningCue = 22;
+          f_OpeningCue = OPENING_CUE_BABY_MARIO_RIDE;
           f_OpeningSceneFramesLeft = 36;
           f_OpeningScene++;
         }
@@ -2623,7 +2652,7 @@ void UpdateOpening(void) {
         if (f_OpeningSceneFramesLeft == 0) {
           PlaceEditorCamera(
               2708.301f, -264.204f, 2343.526f, 2770.098f, -260.0f, 2337.539f);
-          f_OpeningCue = 23;
+          f_OpeningCue = OPENING_CUE_MARIO_PUZZLED;
           f_OpeningSceneFramesLeft = 70;
           f_IsNameSlotShown[0] = 0;
           f_IsNameSlotShown[1] = 0;
@@ -2665,7 +2694,7 @@ void UpdateOpening(void) {
         if (GetWipeProgress() == WIPE_CLOSED_PROGRESS) {
           f_OpeningSceneFramesLeft = 20;
           f_OpeningScene = OPENING_SCENE_LUIGI_SEARCH;
-          f_OpeningCue = 24;
+          f_OpeningCue = OPENING_CUE_CLEAR_CHARACTERS;
           f_OpeningBallStates[0] = 0;
         }
 
@@ -2675,7 +2704,7 @@ void UpdateOpening(void) {
           PlaceEditorCamera(
               1423.923f, -248.221f, 1595.031f, 1450.829f, -254.0f, 1546.087f);
           MoveEditorPoint(1, 1420.136f, -250.5f, 1551.713f, 0x32);
-          f_OpeningCue = 25;
+          f_OpeningCue = OPENING_CUE_LUIGI_SEARCH;
           f_OpeningScene++;
           StartWipe(2);
           f_OpeningSceneFramesLeft = 160;
@@ -2747,7 +2776,7 @@ void UpdateOpening(void) {
         PlaceEditorCamera(
             956.687f, -259.45f, 1874.671f, 933.391f, -243.5f, 1884.391f);
         f_OpeningSceneFramesLeft = 20;
-        f_OpeningCue = 26;
+        f_OpeningCue = OPENING_CUE_TOAD_FLAG;
         f_AreImpactLinesShown = FALSE;
         g_CameraEditor.fieldOfView = 18.0f;
         f_OpeningScene++;
@@ -2817,7 +2846,7 @@ void UpdateOpening(void) {
               1423.703f, -250.799f, 1574.041f, 1420.135f, -252.0f, 1551.713f);
           f_OpeningScene = OPENING_SCENE_GATHERING;
           f_OpeningSceneFramesLeft = 80;
-          f_OpeningCue = 27;
+          f_OpeningCue = OPENING_CUE_LUIGI_DISMAY;
           f_OpeningBallStates[0] = 0;
           g_CameraEditor.fieldOfView = 45.0f;
           LoadOpeningBurst();
