@@ -589,20 +589,22 @@ void KeepAimCameraOnCourse(void) {
  * through it. Calling KeepAimCameraOnCourse first gives 151 words; only a
  * barrier around the call helps (137). On the green the look-at's height is
  * worked out after its x and z; between them, as before, gave 113 words, 43 in
- * shape. The tilt in world units gets its own local, set just before the
- * look-at's height: scaling it inside that expression gives 78 words, 20 in
- * shape, and setting it before the look-at's x or after the clamp 86 (18). The
+ * shape. The tilt in world units gets its own local, set just before the look-
+ * at's height: scaling it inside that expression gives 78 words, 20 in shape,
+ * and setting it before the look-at's x or after the clamp 86 (18). The
  * permuter reached the same 67 words with a float local holding 1/1024. The
  * register oracle, forcing 12 pseudos' registers, left 31 words at best with
  * the draft at 67, so the code differs too. A focused permuter run reached 60
  * words (8 in shape) by reading aimCameraDistance through a pointer to that
  * field, set just before rise is worked out and read from there on; a
  * CurrentShot pointer used for every field in the branch instead gives 120
- * (18), so the draft keeps reading g_CurrentShot directly. On the mini golf
- * course, point is set in axis order, which took the draft from 67 words to 59,
- * 9 in shape either way; setting its z before its y, as the draft did, gave 67.
- * The counts above were measured with the draft at 67. 59 words differ, 9 in
- * shape.
+ * (18), so the draft keeps reading g_CurrentShot directly. A local copy of
+ * aimCameraDistance, set where rise is worked out or at the branch's start,
+ * gives 117 words (19 in shape) or 189 (37), measured with the draft at 59. On
+ * the mini golf course, point is set in axis order, which took the draft from
+ * 67 words to 59, 9 in shape either way; setting its z before its y, as the
+ * draft did, gave 67. The counts above were measured with the draft at 67. 59
+ * words differ, 9 in shape.
  *
  * Taking the current player's address with & and reading its clubs through it,
  * as CheckControllersAndSetPans sets soundPan, or adding the index to
