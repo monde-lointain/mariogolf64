@@ -487,9 +487,6 @@ void UpdateBringCharacters(void);
 s32 ReadCartridgeCharacters(void);
 void BringOverCharacter(s32 listedIndex, s32 slot);
 void ListPresentCharacters(void);
-/* The character's stats from 0x1C on are laid out as GenerateClubSet takes them
- */
-void GenerateClubSet(s32 setIndex, GameBoyCharacter* stats);
 void UpdateSendStatus(void);
 void UpdateSendExperience(void);
 s32 HaveAllRumblePaks(void);

@@ -126,11 +126,14 @@ extern s8 g_ClubTestMode;
 
 /* current_shot.h includes this header, so it can't be included here */
 struct CurrentShot;
+/* Defined in transfer_pak.h */
+struct GameBoyCharacter;
 
 const ClubParameters* GetClubParameters(s32 clubIndex);
 s32 GetShotDistance(Club* club, u32 shotMode);
 s32 GetShotWorldDistance(Club* club, ShotMode shotMode);
 void GenerateClub(s32 clubIndex);
+void GenerateClubSet(s32 setIndex, struct GameBoyCharacter* character);
 void InitClubs(void);
 s32 GetPuttPower(s32 fraction, ShotMode shotMode);
 s32 GetClubPower(Club* club, ShotMode shotMode);

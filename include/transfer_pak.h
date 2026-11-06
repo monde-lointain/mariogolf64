@@ -4,6 +4,8 @@
 #include <lib/libnusys/nusys.h>
 #include <ultra64.h>
 
+#include "math_util.h"
+
 #define GAME_BOY_CHARACTER_COUNT 4
 #define GAME_BOY_CHARACTER_NAME_LENGTH 12
 /* The most experience a Game Boy character can hold */
@@ -26,12 +28,12 @@
 /* A Game Boy character has stats for every club but the putter */
 #define GAME_BOY_CLUB_COUNT 13
 
-/* A club's stats, as GenerateClubSet's ClubStats */
+/* A club's stats, from which GenerateClubSet builds the club */
 typedef struct GameBoyClubStats {
   /* 0x0 */ u16 distance; /* In yards */
-  /* 0x2 */ u16 pitch;
-  /* 0x4 */ u8 ignoredStat; /* Read by nothing; its meaning is unknown */
-  /* 0x5 */ u8 sideSpin;
+  /* 0x2 */ BinaryAngle pitch;
+  /* 0x4 */ s8 ignoredStat; /* Read by nothing; its meaning is unknown */
+  /* 0x5 */ s8 sideSpin;
 } GameBoyClubStats; /* size = 0x6 */
 
 /* Game Boy balls 1 to 4 copy a character's contact effect, and 5 to 7 have
@@ -57,11 +59,11 @@ typedef struct GameBoyCharacter {
   /* 0x19 */ u8 character;
   /* 0x1A */ u8 isLefty; /* Plays left-handed, as the Game Boy save says */
   /* 0x1B */ u8 level;
-  /* 0x1C */ s8 clubPitch; /* As ClubSetStats' pitch */
+  /* 0x1C */ s8 clubPitch; /* In degrees, added to each club's */
   /* 0x1D */ s8
       shotCurve; /* Positive for a draw, negative for a fade, 0 for straight */
-  /* 0x1E */ u8 lieRatingLevel; /* As ClubSetStats' */
-  /* 0x1F */ u8 mishitResistance; /* As ClubSetStats' */
+  /* 0x1E */ s8 lieRatingLevel; /* Picks the clubs' lieRatingPercent */
+  /* 0x1F */ s8 mishitResistance; /* Lowers the clubs' mishitScale */
   /* 0x20 */ s8 ballType; /* A GameBoyBallType */
   /* Three bytes of the Game Boy save that nothing reads; their meaning is
    * unknown */

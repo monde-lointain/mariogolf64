@@ -22,6 +22,7 @@
 #include "save.h"
 #include "sound.h"
 #include "surface.h"
+#include "transfer_pak.h"
 
 /* The direction GenerateClub measures each test shot's landing against */
 #define STRAIGHT_ANGLE 0x1000
@@ -79,25 +80,6 @@
   {(mishitScale), (name), (surfaceMask), (distance), (pitch), (offsetPitch), \
       (spin), (lieRatingPercent), (type), {0, 0, 0}, (kind), (sideSpin), \
       {0, 0, 0}, ASSET_DRIVER_HEAD_IMAGE + (type), 0}
-
-/* A club's stats, as GenerateClubSet takes them */
-typedef struct ClubStats {
-  /* 0x0 */ s16 distance; /* In yards */
-  /* 0x2 */ BinaryAngle pitch;
-  /* 0x4 */ s8 ignoredStat; /* GenerateClubSet skips it */
-  /* 0x5 */ s8 sideSpin;
-} ClubStats; /* size = 0x6 */
-
-typedef struct ClubSetStats {
-  /* 0x00 */ u8 unk0[0x1C];
-  /* 0x1C */ s8 pitch; /* In degrees, added to each club's */
-  /* 0x1D */ s8 curve; /* Positive draws, negative fades */
-  /* 0x1E */ s8 lieRatingLevel; /* Picks the clubs' lieRatingPercent */
-  /* 0x1F */ s8 mishitResistance; /* Lowers the clubs' mishitScale */
-  /* 0x20 */ u8 unk20[0x3C - 0x20];
-  /* 0x3C */ ClubStats clubs[CLUB_SET_SIZE]; /* The putter's run 4 bytes into
-                                                the next set's stats */
-} ClubSetStats; /* The sets' stats are 0x8C bytes apart */
 
 /* GetPuttPower's putter powers, by shot mode and fraction of its reach */
 static s32 f_PutterPowers[SHOT_MODE_COUNT][PUTT_STEP_COUNT] = {
@@ -1173,22 +1155,25 @@ void GenerateClub(s32 clubIndex) {
 #define MIN_MISHIT_SCALE 70
 #define MAX_MISHIT_SCALE 145
 
-/* Builds the set's clubs from the stats, then generates their parameters */
-void GenerateClubSet(s32 setIndex, ClubSetStats* stats) {
+/* Builds the set's clubs from a Game Boy character's stats, then generates
+ * their parameters */
+void GenerateClubSet(s32 setIndex, GameBoyCharacter* character) {
   s32 type;
   Club* club;
 
+  /* A Game Boy character has no putter stats, so the putter's are read from
+   * the character's last 2 bytes and the next character's first 4 */
   for (type = 0; type < CLUB_SET_SIZE; type++) {
     club = GetClub((setIndex * CLUB_SET_SIZE) + type);
-    club->distance = stats->clubs[type].distance;
+    club->distance = character->clubs[type].distance;
     if (club->distance > MAX_CLUB_DISTANCE) {
       club->distance = MAX_CLUB_DISTANCE;
     }
 
     osSyncPrintf("TargetDist %d\n", club->distance);
-    club->pitch =
-        -((stats->clubs[type].pitch * DEGREES_PER_TURN / BINARY_ANGLE_TURN) +
-            stats->pitch);
+    club->pitch = -(
+        (character->clubs[type].pitch * DEGREES_PER_TURN / BINARY_ANGLE_TURN) +
+        character->clubPitch);
     osSyncPrintf("Xang %d\n", club->pitch);
     if (club->pitch > FLATTEST_CLUB_PITCH) {
       club->pitch = FLATTEST_CLUB_PITCH;
@@ -1198,7 +1183,7 @@ void GenerateClubSet(s32 setIndex, ClubSetStats* stats) {
       club->pitch = STEEPEST_CLUB_PITCH;
     }
 
-    club->sideSpin = stats->clubs[type].sideSpin;
+    club->sideSpin = character->clubs[type].sideSpin;
     if (club->sideSpin > MAX_CLUB_SIDE_SPIN) {
       club->sideSpin = MAX_CLUB_SIDE_SPIN;
     }
@@ -1207,17 +1192,17 @@ void GenerateClubSet(s32 setIndex, ClubSetStats* stats) {
       club->sideSpin = -MAX_CLUB_SIDE_SPIN;
     }
 
-    if ((u8)(stats->lieRatingLevel + MAX_LIE_RATING_LEVEL) >=
+    if ((u8)(character->lieRatingLevel + MAX_LIE_RATING_LEVEL) >=
         ARRAY_COUNT(f_LieRatingPercents)) {
       club->lieRatingPercent = DEFAULT_LIE_RATING_PERCENT;
     } else {
       club->lieRatingPercent =
-          f_LieRatingPercents[stats->lieRatingLevel + MAX_LIE_RATING_LEVEL];
+          f_LieRatingPercents[character->lieRatingLevel + MAX_LIE_RATING_LEVEL];
     }
 
     club->mishitScale = BASE_MISHIT_SCALE -
-        (stats->mishitResistance * MISHIT_SCALE_PER_RESISTANCE);
-    club->curve = stats->curve;
+        (character->mishitResistance * MISHIT_SCALE_PER_RESISTANCE);
+    club->curve = character->shotCurve;
     if (club->curve < -MAX_CLUB_CURVE) {
       club->curve = -MAX_CLUB_CURVE;
     }
