@@ -5885,12 +5885,12 @@ void DrawCourseSelect(Gfx** displayListHead) {
   u16 perspNorm;
   u16 wheelPerspNorm;
   /* Pads the frame to match; without it 760 words differ, against 24 */
-  u8 unusedStack[0x10] UNUSED;
+  u8 unusedStackBeforeIcons[0x10] UNUSED;
   f32 iconX[COURSE_COUNT];
   f32 iconY[COURSE_COUNT];
   f32 iconScale[COURSE_COUNT];
   /* Pads the frame to match; without it 728 words differ, against 24 */
-  u8 unusedStack2[0x18] UNUSED;
+  u8 unusedStackAfterIcons[0x18] UNUSED;
   s32 drawOrder[COURSE_COUNT];
   s16 places[TOURNAMENT_PLACE_COUNT];
   SaveData* save;
