@@ -827,8 +827,9 @@ void DrawBetSettings(
   Gfx* gfx = *displayListHead;
   MenuMemory* memory = GetMenuMemory();
   /*
-   * One index for the bet columns and the banner strips, to match: a strip
-   * variable for the strips gives 57 words differing, 5 in shape
+   * One index for the bet columns and the banner strips, to match: an s16
+   * strip variable for the strips gives 48 words differing, 2 in shape, and
+   * an s32 one 346 (60), against the draft's 16 (2)
    */
   s16 i;
   s16 stakeLevel;
@@ -840,7 +841,8 @@ void DrawBetSettings(
   s32 stripTop;
   /*
    * The wide banner's strips, kept apart from stripTop to match: sharing
-   * stripTop gives 349 words differing, 41 in shape
+   * stripTop gives 340 words differing (38 in shape) against the draft's 16
+   * (2)
    */
   s32 wideStripTop;
   s8 stakeAmount;
