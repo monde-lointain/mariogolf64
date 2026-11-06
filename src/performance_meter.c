@@ -31,6 +31,10 @@
 #define READOUT_LINE_HEIGHT 8
 /* Room for the longest readout's digits and terminator */
 #define READOUT_TEXT_CAPACITY 32
+/* The memory meter's dark box, and its digits' left edge inside it */
+#define MEMORY_BOX_LEFT 250
+#define MEMORY_BOX_RIGHT 302
+#define MEMORY_DIGITS_X (MEMORY_BOX_LEFT + 2)
 
 #define DIGIT_WIDTH 5
 #define DIGIT_HEIGHT 8
@@ -581,15 +585,16 @@ void DrawMemoryMeter(u32 y, s32 taskFlags) {
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_NONE);
   gDPPipeSync(gfx++);
-  gSPTextureRectangle(gfx++, 250 << 2, QuarterPixels(y - 8), 302 << 2,
+  gSPTextureRectangle(gfx++, QuarterPixels(MEMORY_BOX_LEFT),
+      QuarterPixels(y - 8), QuarterPixels(MEMORY_BOX_RIGHT),
       QuarterPixels(y + 20), G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE,
       TEXEL_STEP_ONE);
   sprintf(f_ReadoutText, "% 8d", (int)nuGfxCfbNum);
-  DrawDigits(&gfx, 252, y - 7, f_ReadoutText);
+  DrawDigits(&gfx, MEMORY_DIGITS_X, y - 7, f_ReadoutText);
   sprintf(f_ReadoutText, "%08d", (int)(GetFreeMemorySize()));
-  DrawDigits(&gfx, 252, y + 2, f_ReadoutText);
+  DrawDigits(&gfx, MEMORY_DIGITS_X, y + 2, f_ReadoutText);
   sprintf(f_ReadoutText, "%08d", (int)(FindLargestFreeMemorySize()));
-  DrawDigits(&gfx, 252, y + 10, f_ReadoutText);
+  DrawDigits(&gfx, MEMORY_DIGITS_X, y + 10, f_ReadoutText);
   gDPFullSync(gfx++);
   gSPEndDisplayList(gfx++);
   nuGfxTaskStart(f_MeterDisplayLists[f_MeterDisplayListIndex],
