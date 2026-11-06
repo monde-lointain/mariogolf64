@@ -53,8 +53,10 @@ typedef struct GolferTraits {
   /* 0x0 */ s8 strongNine; /* STRONG_NINE_* */
   /* 0x1 */ s8 consistency; /* CONSISTENCY_*: steadier golfers mishit less */
   /* 0x2 */ s8 clubBoldness; /* BOLD_CLUB_CHOICE or less */
-  /* 0x3 */ s8 unk3;
-  /* 0x4 */ s8 unk4;
+  /* 6, or 12 when clubBoldness is above 0; nothing reads it */
+  /* 0x3 */ s8 ignoredBoldnessValue;
+  /* 0 to 2; nothing reads it */
+  /* 0x4 */ s8 ignoredTraitLevel;
   /* 0x5 */ s8
       windPlay; /* WIND_PLAY_*: which winds the golfer offsets shots for */
   /* 0x6 */ s8 powerShotEagerness; /* 0 to 2; only nonzero is tested */
