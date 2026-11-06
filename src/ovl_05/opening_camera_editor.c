@@ -481,6 +481,14 @@ void StopEditorMoves(void) {
  * also holds the velocity's length, the distance moved in an update: a speed
  * variable for it gives 192 words (44 in shape), and 166 with the velocity's
  * variables.
+ *
+ * The arrival tests work out the point's offset from its target in each
+ * case, as the y axis's test does, where offsetX and offsetZ, the offsets to
+ * the target, held it too, reversed: that takes the draft from 154 words to
+ * 138 (44 in shape to 40), and the register oracle's closest result from 154
+ * to 138, with nothing forced. Only x's test gives 150, only z's 148, and a
+ * variable of its own, shared or one for each axis, 159 (43 in shape). 138
+ * words differ, 40 in shape.
  */
 #ifdef NON_MATCHING
 void UpdateCameraEditor(void) {
@@ -591,11 +599,11 @@ void UpdateCameraEditor(void) {
     isDone = FALSE;
     switch (g_CameraEditor.moveAxes[index]) {
       case EDITOR_MOVE_AXIS_X:
-        offsetX = x - g_CameraEditor.targets[index][0];
-        if (fabsf(offsetX) < EDITOR_ARRIVAL_DISTANCE ||
+        if (fabsf(x - g_CameraEditor.targets[index][0]) <
+                EDITOR_ARRIVAL_DISTANCE ||
             (g_CameraEditor.points[index][0] -
                 g_CameraEditor.targets[index][0]) *
-                    offsetX <
+                    (x - g_CameraEditor.targets[index][0]) <
                 0.0f) {
           isDone = TRUE;
         }
@@ -614,11 +622,11 @@ void UpdateCameraEditor(void) {
 
         break;
       case EDITOR_MOVE_AXIS_Z:
-        offsetZ = z - g_CameraEditor.targets[index][2];
-        if (fabsf(offsetZ) < EDITOR_ARRIVAL_DISTANCE ||
+        if (fabsf(z - g_CameraEditor.targets[index][2]) <
+                EDITOR_ARRIVAL_DISTANCE ||
             (g_CameraEditor.points[index][2] -
                 g_CameraEditor.targets[index][2]) *
-                    offsetZ <
+                    (z - g_CameraEditor.targets[index][2]) <
                 0.0f) {
           isDone = TRUE;
         }
@@ -902,6 +910,7 @@ void UpdateCameraEditor(void) {
 
   MeasureEditorCamera();
 }
+
 #else
 INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_camera_editor", UpdateCameraEditor);
 #endif
