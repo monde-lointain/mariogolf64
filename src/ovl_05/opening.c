@@ -2290,7 +2290,7 @@ void UpdateOpening(void) {
       case 0xB6:
         if (f_OpeningFrameCount == 0x5C5) {
           PlaySoundWithEffects(
-              SOUND_UNK393, f_OpeningSoundChannel, SOUND_FULL_SCALE, 0, 0x89);
+              SOUND_UH_OH, f_OpeningSoundChannel, SOUND_FULL_SCALE, 0, 0x89);
           AdvanceOpeningSoundChannel();
         }
 

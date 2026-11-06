@@ -327,8 +327,8 @@ enum Sound {
    */
   SOUND_MARIO_ITS_A_ME = 0x187,
   SOUND_HELLO_BALL,
-  /* SOUND_UNK393 and SOUND_UNK394 each play once in the opening */
-  SOUND_UNK393,
+  /* SOUND_UH_OH and SOUND_UNK394 each play once in the opening */
+  SOUND_UH_OH,
   SOUND_UNK394,
   SOUND_AMBIENT_REPEATING,
   SOUND_PEACH_PAR = 0x18E,
