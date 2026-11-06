@@ -116,7 +116,7 @@ typedef struct GroundTile {
   /* 0x998 */ Vec3 center; /* The tile's middle grid vertex */
   /* 0x9A4 */ s32
       midpointBlockIndex; /* Negative when the tile has no midpoints */
-  /* 0x9A8 */ u8 unk9A8[0xA00 - 0x9A8];
+  /* 0x9A8 */ u8 unusedAfterMidpointBlock[0xA00 - 0x9A8];
 } GroundTile; /* size = 0xA00 */
 
 /* GroundTile.detail, how finely DrawGround draws a tile this frame */
