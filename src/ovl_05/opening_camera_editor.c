@@ -463,6 +463,12 @@ void StopEditorMoves(void) {
  * in shape. With the game's fabsf, an abs.s in volatile inline assembly, 188
  * words differ, 44 in shape.
  *
+ * The zoom, the turn and the tilt each have their own remaining amount,
+ * zoomLeft, turnLeft and tiltLeft, where one left variable served all three:
+ * that takes the draft from 188 words to 154 (44 in shape), declared in
+ * their blocks or at the top. Only the turn's own gives 172, only the zoom's
+ * 186, and only the tilt's 394.
+ *
  * The eight flag tests before letting go of the pivot each clear isDone:
  * jump.c turns each "if (test) isDone = FALSE" into an and with the negated
  * test, the original's branchless chain. Written as one expression, fold
@@ -486,7 +492,6 @@ void UpdateCameraEditor(void) {
   f32 scale;
   f32 gap;
   f32 zoomTarget;
-  f32 left;
   /*
    * The point's x, then the pitch's cosine, to match: a pitchCosine variable
    * in either of the two direction blocks alone compiles the same, but in both
@@ -676,6 +681,8 @@ void UpdateCameraEditor(void) {
   }
 
   if (g_CameraEditor.flags[index] & EDITOR_FLAG_ZOOMING) {
+    f32 zoomLeft;
+
     z = g_CameraEditor.distance;
     zoomTarget = g_CameraEditor.zoomTarget;
     /*
@@ -706,9 +713,9 @@ void UpdateCameraEditor(void) {
     }
 
     g_CameraEditor.distance += g_CameraEditor.zoomSpeed;
-    left = zoomTarget - g_CameraEditor.distance;
+    zoomLeft = zoomTarget - g_CameraEditor.distance;
     isDone = FALSE;
-    if (gap <= sqrtf(left * left)) {
+    if (gap <= sqrtf(zoomLeft * zoomLeft)) {
       isDone = TRUE;
     }
 
@@ -728,13 +735,15 @@ void UpdateCameraEditor(void) {
   }
 
   if (g_CameraEditor.flags[index] & EDITOR_FLAG_TURNING) {
-    left = g_CameraEditor.turnLeft;
-    if (left != 0.0f) {
-      if (fabsf(left) < EDITOR_ARRIVAL_ANGLE) {
-        g_CameraEditor.heading += left;
+    f32 turnLeft;
+
+    turnLeft = g_CameraEditor.turnLeft;
+    if (turnLeft != 0.0f) {
+      if (fabsf(turnLeft) < EDITOR_ARRIVAL_ANGLE) {
+        g_CameraEditor.heading += turnLeft;
       } else {
         g_CameraEditor.turnSpeed += g_CameraEditor.turnAcceleration;
-        if (fabsf(left) < fabsf(g_CameraEditor.turnBrakingAngle)) {
+        if (fabsf(turnLeft) < fabsf(g_CameraEditor.turnBrakingAngle)) {
           g_CameraEditor.turnTopSpeed -=
               g_CameraEditor.turnAcceleration * EDITOR_BRAKING_RATE;
           KeepTopSpeed(
@@ -772,13 +781,15 @@ void UpdateCameraEditor(void) {
   }
 
   if (g_CameraEditor.flags[index] & EDITOR_FLAG_TILTING) {
-    left = g_CameraEditor.tiltLeft;
-    if (left != 0.0f) {
-      if (fabsf(left) < EDITOR_ARRIVAL_ANGLE) {
-        g_CameraEditor.pitch += left;
+    f32 tiltLeft;
+
+    tiltLeft = g_CameraEditor.tiltLeft;
+    if (tiltLeft != 0.0f) {
+      if (fabsf(tiltLeft) < EDITOR_ARRIVAL_ANGLE) {
+        g_CameraEditor.pitch += tiltLeft;
       } else {
         g_CameraEditor.tiltSpeed += g_CameraEditor.tiltAcceleration;
-        if (fabsf(left) < fabsf(g_CameraEditor.tiltBrakingAngle)) {
+        if (fabsf(tiltLeft) < fabsf(g_CameraEditor.tiltBrakingAngle)) {
           g_CameraEditor.tiltTopSpeed -=
               g_CameraEditor.tiltAcceleration * EDITOR_BRAKING_RATE;
           KeepTopSpeed(
