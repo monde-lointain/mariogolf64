@@ -133,7 +133,11 @@
 
 typedef struct TrophyPosition {
   s32 x;
-  s32 y;
+  /*
+   * Unsigned: the original drops the rectangle's clamp of a negative top
+   * edge where it works out the texture's t coordinate
+   */
+  u32 y;
 } TrophyPosition;
 
 extern const char f_StatsStringFormat[];
@@ -962,17 +966,21 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/course_menu", DrawStatsScrollArrows);
  * tournament, stepping the spin's images, or on the totals the points needed to
  * open the next course.
  *
- * Doesn't match: the original loads the trophies' shift once as 0xFFEC, the low
- * half of -20, and adds it in a register, where this adds -20 to each edge, and
- * this works out the clipped top edge a second time where the original reuses
- * it. An unsigned TrophyPosition y leaves 19, but makes the rectangle macro's
- * clamp of a negative top edge dead, which -Wextra reports in the modern build.
- * Taking the offset into a local, of any type, gives 41 words or more, and an
- * unsigned x or place 20 or more. The permuter's best casts y to unsigned at
- * the rectangle's top edge, the same 19 words, 5 in shape; its fewest words, 12
- * (10 in shape), come from casting the rectangle's dtdy to a char, which makes
- * it 0. The register oracle, forcing 3 pseudos' registers, leaves 29 words at
- * best, so the code differs too. 31 words differ, 21 in shape.
+ * Doesn't match: the original loads the trophies' shift once as 0xFFEC, the
+ * low half of -20, and adds it in a register, where this adds -20 to each
+ * edge, and the load sync and tile commands' upper halves swap registers.
+ * TrophyPosition's y is unsigned: with an s32 y, 31 words differ (21 in
+ * shape), as GCC works out the clipped top edge a second time for the
+ * rectangle's t coordinate, a clamp of a negative top edge that the original
+ * lacks; the unsigned y makes that clamp dead, as -Wextra reports in the
+ * modern build, and gives 19 words (5 in shape), and the register oracle's
+ * closest result falls from 29 words to 11, forcing 3 pseudos for each. An
+ * unsigned x as well gives 20 words, the oracle's closest 14, forcing 4.
+ * Taking the offset into a local, of any type, gave 41 words or more, and an
+ * unsigned x or place 20 or more, with the s32 y. The permuter's best cast y
+ * to unsigned at the rectangle's top edge, the same 19 words, 5 in shape;
+ * its fewest words, 12 (10 in shape), came from casting the rectangle's dtdy
+ * to a char, which makes it 0. 19 words differ, 5 in shape.
  */
 #ifdef NON_MATCHING
 void DrawCourseTrophies(Gfx** displayListHead) {
