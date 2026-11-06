@@ -1384,7 +1384,7 @@ void UpdateClubTournament(void) {
       g_IsNintendoClubTournament = FALSE;
       for (index = 0; index != CLUB_TEXT_SLOT_COUNT; index++) {
         SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, index, 0, 255, 255,
-            255, 255);
+            255, OPAQUE_ALPHA);
       }
     }
   } else if (g_MenuRepeatButtons & U_JPAD) {
@@ -1454,8 +1454,8 @@ void UpdateClubWindow(void) {
 
   if (GetWipeKind() != WIPE_NONE) {
     for (index = 0; index != CLUB_TEXT_SLOT_COUNT; index++) {
-      SetTextSlot(
-          0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, index, 0, 255, 255, 255, 255);
+      SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, index, 0, 255, 255,
+          255, OPAQUE_ALPHA);
     }
 
     if (GetWipeProgress() == WIPE_CLOSED_PROGRESS) {
@@ -1479,8 +1479,8 @@ void UpdateClubWindow(void) {
   if (IsMenuWindowClosed()) {
     f_ClubWindowChoice = CLUB_CHOICE_NO;
     for (index = 0; index != CLUB_TEXT_SLOT_COUNT; index++) {
-      SetTextSlot(
-          0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, index, 0, 255, 255, 255, 255);
+      SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, index, 0, 255, 255,
+          255, OPAQUE_ALPHA);
     }
 
     f_ClubTournamentPhase = FALSE;
@@ -1530,7 +1530,7 @@ void UpdateClubWindow(void) {
 
       for (index = 0; index != CLUB_TEXT_SLOT_COUNT; index++) {
         SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, index, 0, 255, 255,
-            255, 255);
+            255, OPAQUE_ALPHA);
       }
     } else {
       PlaySound(SOUND_READY, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
@@ -1538,7 +1538,7 @@ void UpdateClubWindow(void) {
       CloseMenuWindow();
       for (index = 0; index != CLUB_TEXT_SLOT_COUNT; index++) {
         SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, index, 0, 255, 255,
-            255, 255);
+            255, OPAQUE_ALPHA);
       }
     }
   } else if (pressedButtons & B_BUTTON) {
@@ -1546,8 +1546,8 @@ void UpdateClubWindow(void) {
     f_ClubWindowChoice = CLUB_CHOICE_YES;
     f_ClubTournamentPhase = FALSE;
     for (index = 0; index != CLUB_TEXT_SLOT_COUNT; index++) {
-      SetTextSlot(
-          0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, index, 0, 255, 255, 255, 255);
+      SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, index, 0, 255, 255,
+          255, OPAQUE_ALPHA);
     }
   } else if ((pressedButtons & L_JPAD) || ((u16)pressedButtons & R_JPAD)) {
     /* The cast above stops the compiler from merging the two tests, which the
@@ -1717,13 +1717,13 @@ void DrawClubTournament(Gfx** displayListHead) {
       SetTextSlot(CLUB_TEXT_X, CLUB_NAME_Y,
           g_ClubTournamentNameIndex + MESSAGE_FIRST_CLUB_TOURNAMENT_NAME,
           TEXT_SLOT_LARGE_FONT, CLUB_NAME_SLOT, TEXT_FLAG_CENTERED, 95, 63, 255,
-          255);
+          OPAQUE_ALPHA);
       SetTextSlot(CLUB_TEXT_X, CLUB_COURSE_Y,
           GetClubTournamentCourseTitleMessage(), TEXT_SLOT_LARGE_FONT,
-          CLUB_COURSE_SLOT, TEXT_FLAG_CENTERED, 43, 255, 75, 255);
+          CLUB_COURSE_SLOT, TEXT_FLAG_CENTERED, 43, 255, 75, OPAQUE_ALPHA);
       SetTextSlot(CLUB_TEXT_X, CLUB_MODE_Y, GetClubTournamentModeMessage(),
           TEXT_SLOT_LARGE_FONT, CLUB_MODE_SLOT, TEXT_FLAG_CENTERED, 255, 63,
-          127, 255);
+          127, OPAQUE_ALPHA);
     }
   }
 
@@ -2067,7 +2067,7 @@ void DrawCodePrompt(Gfx** displayListHead) {
     gDPPipeSync(gfx++);
     SetUpTextDrawing(&gfx);
     SetTextSlot(x, CLUB_CODE_MESSAGE_Y, MESSAGE_ENTER_CODE + messageOffset,
-        TEXT_SLOT_LARGE_FONT, 0, flags, 255, 255, 255, 255);
+        TEXT_SLOT_LARGE_FONT, 0, flags, 255, 255, 255, OPAQUE_ALPHA);
     DrawLargeTextSlot(&gfx, 0);
   }
 

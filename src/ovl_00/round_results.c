@@ -3636,16 +3636,17 @@ void DrawClubTournamentResults(Gfx** displayListHead) {
       ClubTournamentTextY(detailsTop, lineHeight, CLUB_TOURNAMENT_LINE_NAME),
       GetClubTournamentNameMessage(), TEXT_SLOT_LARGE_FONT,
       CLUB_TOURNAMENT_NAME_SLOT, CLUB_TOURNAMENT_TEXT_FLAGS, 127, 191, 255,
-      255);
+      OPAQUE_ALPHA);
   SetTextSlot(f_ResultsSlide + CLUB_TOURNAMENT_DETAILS_X,
       ClubTournamentTextY(detailsTop, lineHeight, CLUB_TOURNAMENT_LINE_COURSE),
       GetClubTournamentCourseTitleMessage(), TEXT_SLOT_LARGE_FONT,
       CLUB_TOURNAMENT_COURSE_SLOT, CLUB_TOURNAMENT_TEXT_FLAGS, 43, 255, 75,
-      255);
+      OPAQUE_ALPHA);
   SetTextSlot(f_ResultsSlide + CLUB_TOURNAMENT_DETAILS_X,
       ClubTournamentTextY(detailsTop, lineHeight, CLUB_TOURNAMENT_LINE_MODE),
       GetClubTournamentModeMessage(), TEXT_SLOT_LARGE_FONT,
-      CLUB_TOURNAMENT_MODE_SLOT, CLUB_TOURNAMENT_TEXT_FLAGS, 255, 63, 127, 255);
+      CLUB_TOURNAMENT_MODE_SLOT, CLUB_TOURNAMENT_TEXT_FLAGS, 255, 63, 127,
+      OPAQUE_ALPHA);
   for (i = CLUB_TOURNAMENT_NAME_SLOT; i != CLUB_TOURNAMENT_MODE_SLOT + 1; i++) {
     gDPSetPrimColor(gfx++, 0, 0, f_TextSlotColors[i - 1][0],
         f_TextSlotColors[i - 1][1], f_TextSlotColors[i - 1][2], OPAQUE_ALPHA);

@@ -659,8 +659,8 @@ s32 UpdateCharacterSelect(
 
   if (GetWipeKind() != WIPE_NONE) {
     for (index = 0; index != CHARACTER_SELECT_TEXT_SLOT_COUNT; index++) {
-      SetTextSlot(
-          0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, index, 0, 255, 255, 255, 255);
+      SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, index, 0, 255, 255,
+          255, OPAQUE_ALPHA);
     }
 
     if (GetWipeProgress() == WIPE_CLOSED_PROGRESS) {
@@ -679,7 +679,7 @@ s32 UpdateCharacterSelect(
             playerIndex, STICK_DIAGONAL_UP_LEFT, (u8)canChooseMarked) == 0) {
       for (index = 1; index != CHARACTER_SELECT_TEXT_SLOT_COUNT; index++) {
         SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, index, 0, 255, 255,
-            255, 255);
+            255, OPAQUE_ALPHA);
       }
     }
 
@@ -692,7 +692,7 @@ s32 UpdateCharacterSelect(
             playerIndex, STICK_DIAGONAL_UP_RIGHT, (u8)canChooseMarked) == 0) {
       for (index = 1; index != CHARACTER_SELECT_TEXT_SLOT_COUNT; index++) {
         SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, index, 0, 255, 255,
-            255, 255);
+            255, OPAQUE_ALPHA);
       }
     }
 
@@ -705,7 +705,7 @@ s32 UpdateCharacterSelect(
             playerIndex, STICK_DIAGONAL_DOWN_LEFT, (u8)canChooseMarked) == 0) {
       for (index = 1; index != CHARACTER_SELECT_TEXT_SLOT_COUNT; index++) {
         SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, index, 0, 255, 255,
-            255, 255);
+            255, OPAQUE_ALPHA);
       }
     }
 
@@ -718,7 +718,7 @@ s32 UpdateCharacterSelect(
             playerIndex, STICK_DIAGONAL_DOWN_RIGHT, (u8)canChooseMarked) == 0) {
       for (index = 1; index != CHARACTER_SELECT_TEXT_SLOT_COUNT; index++) {
         SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, index, 0, 255, 255,
-            255, 255);
+            255, OPAQUE_ALPHA);
       }
     }
 
@@ -732,7 +732,7 @@ s32 UpdateCharacterSelect(
     if (MoveGridCursor(playerIndex, GRID_MOVE_UP, (u8)canChooseMarked) == 0) {
       for (index = 1; index != CHARACTER_SELECT_TEXT_SLOT_COUNT; index++) {
         SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, index, 0, 255, 255,
-            255, 255);
+            255, OPAQUE_ALPHA);
       }
     }
 
@@ -744,7 +744,7 @@ s32 UpdateCharacterSelect(
     if (MoveGridCursor(playerIndex, GRID_MOVE_DOWN, (u8)canChooseMarked) == 0) {
       for (index = 1; index != CHARACTER_SELECT_TEXT_SLOT_COUNT; index++) {
         SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, index, 0, 255, 255,
-            255, 255);
+            255, OPAQUE_ALPHA);
       }
     }
 
@@ -756,7 +756,7 @@ s32 UpdateCharacterSelect(
     if (MoveGridCursor(playerIndex, GRID_MOVE_LEFT, (u8)canChooseMarked) == 0) {
       for (index = 1; index != CHARACTER_SELECT_TEXT_SLOT_COUNT; index++) {
         SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, index, 0, 255, 255,
-            255, 255);
+            255, OPAQUE_ALPHA);
       }
     }
 
@@ -769,7 +769,7 @@ s32 UpdateCharacterSelect(
         0) {
       for (index = 1; index != CHARACTER_SELECT_TEXT_SLOT_COUNT; index++) {
         SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, index, 0, 255, 255,
-            255, 255);
+            255, OPAQUE_ALPHA);
       }
     }
 
@@ -778,8 +778,8 @@ s32 UpdateCharacterSelect(
 
   if (g_MenuPressedButtons & A_BUTTON) {
     for (index = 0; index != CHARACTER_SELECT_TEXT_SLOT_COUNT; index++) {
-      SetTextSlot(
-          0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, index, 0, 255, 255, 255, 255);
+      SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, index, 0, 255, 255,
+          255, OPAQUE_ALPHA);
     }
 
     character = g_CharacterGrid[memory->characterRows[playerIndex]]
@@ -850,7 +850,7 @@ s32 UpdateCharacterSelect(
 
         g_ChoosingControllerIndices[playerIndex] = controllerIndex;
         SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, PROMPT_TEXT_SLOT,
-            TEXT_FLAG_TYPED, 255, 255, 255, 255);
+            TEXT_FLAG_TYPED, 255, 255, 255, OPAQUE_ALPHA);
         f_IsPromptShown = FALSE;
         break;
       }
@@ -979,7 +979,7 @@ s32 UpdateCharacterSelect(
       }
 
       SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, PROMPT_TEXT_SLOT,
-          TEXT_FLAG_TYPED, 255, 255, 255, 255);
+          TEXT_FLAG_TYPED, 255, 255, 255, OPAQUE_ALPHA);
       f_IsPromptShown = FALSE;
       FreeAllCharacterSlots();
       f_UnreadSelectDoneByte = 0;
@@ -1017,8 +1017,8 @@ s32 UpdateCharacterSelect(
 
   if (g_MenuPressedButtons & B_BUTTON) {
     for (index = 0; index != CHARACTER_SELECT_TEXT_SLOT_COUNT; index++) {
-      SetTextSlot(
-          0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, index, 0, 255, 255, 255, 255);
+      SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, index, 0, 255, 255,
+          255, OPAQUE_ALPHA);
     }
 
     PlaySound(SOUND_MENU_CANCEL, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
@@ -1052,7 +1052,7 @@ s32 UpdateCharacterSelect(
       }
 
       SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, PROMPT_TEXT_SLOT,
-          TEXT_FLAG_TYPED, 255, 255, 255, 255);
+          TEXT_FLAG_TYPED, 255, 255, 255, OPAQUE_ALPHA);
       f_IsPromptShown = FALSE;
       f_FaceFrame = 0;
       f_UnreadFaceToggle = 0;
@@ -1081,7 +1081,7 @@ s32 UpdateCharacterSelect(
       }
 
       SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, PROMPT_TEXT_SLOT,
-          TEXT_FLAG_TYPED, 255, 255, 255, 255);
+          TEXT_FLAG_TYPED, 255, 255, 255, OPAQUE_ALPHA);
       f_IsPromptShown = FALSE;
     }
 
@@ -1424,7 +1424,7 @@ void DrawCharacterSelect(Gfx** displayListHead, u8 isSinglePlayer) {
   SetTextName(g_CharacterNames[choiceIndex]);
   SetTextSlot(CHARACTER_NAME_X, CHARACTER_NAME_Y,
       MESSAGE_FIRST_CHARACTER_NAME + choiceIndex, TEXT_SLOT_LARGE_FONT, 1,
-      TEXT_FLAG_CENTERED, 255, 255, 255, 255);
+      TEXT_FLAG_CENTERED, 255, 255, 255, OPAQUE_ALPHA);
   clubSet = f_ChoiceCharacters[choiceIndex];
   BeginShadowedText(&gfx);
   SetTextColor(&gfx, 255, 255, 255);
@@ -1434,7 +1434,8 @@ void DrawCharacterSelect(Gfx** displayListHead, u8 isSinglePlayer) {
   if (f_IsPromptShown == FALSE) {
     if (isSinglePlayer == TRUE) {
       SetTextSlot(PROMPT_X, PROMPT_Y, MESSAGE_CHOOSE_CHARACTER,
-          TEXT_SLOT_LARGE_FONT, 0, TEXT_FLAG_TYPED, 255, 255, 255, 255);
+          TEXT_SLOT_LARGE_FONT, 0, TEXT_FLAG_TYPED, 255, 255, 255,
+          OPAQUE_ALPHA);
     } else {
       SetTextSlotValue(g_ChoosingPlayerIndex + 1, 0, 0);
 
@@ -1456,7 +1457,8 @@ void DrawCharacterSelect(Gfx** displayListHead, u8 isSinglePlayer) {
       }
 
       SetTextSlot(PROMPT_X, PROMPT_Y, MESSAGE_CHOOSE_PLAYER_CHARACTER,
-          TEXT_SLOT_LARGE_FONT, 0, TEXT_FLAG_TYPED, 255, 255, 255, 255);
+          TEXT_SLOT_LARGE_FONT, 0, TEXT_FLAG_TYPED, 255, 255, 255,
+          OPAQUE_ALPHA);
     }
 
     f_IsPromptShown = TRUE;

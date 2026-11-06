@@ -627,7 +627,7 @@ s32 UpdatePrompt(ControllerState* controller) {
   if (f_PromptState == PROMPT_STATE_CHOOSING) {
     SetTextSlot(PROMPT_TEXT_X, PROMPT_TEXT_Y, prompt->messageId,
         TEXT_SLOT_LARGE_FONT, PROMPT_TEXT_SLOT, TEXT_FLAG_CENTERED, 0x5F, 0x3F,
-        0xFF, 0xFF);
+        0xFF, OPAQUE_ALPHA);
     if (controller->pressedButtons == A_BUTTON) {
       f_PromptState = PROMPT_STATE_CHOSEN;
       if (prompt->results[f_PromptChoice] >= 0 &&

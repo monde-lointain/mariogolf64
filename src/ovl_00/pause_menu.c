@@ -974,7 +974,7 @@ void DrawPauseMenu(Gfx** displayListHead) {
 
     SetTextSlot(PAUSE_LABEL_X, PauseLabelY(i),
         message + PAUSE_OPTION_MESSAGE_BASE, TEXT_SLOT_LARGE_FONT, i,
-        PAUSE_LABEL_FLAGS, red, green, blue, 0xFF);
+        PAUSE_LABEL_FLAGS, red, green, blue, OPAQUE_ALPHA);
     gDPSetPrimColor(gfx++, 0, 0, red, green, blue, OPAQUE_ALPHA);
     DrawLargeTextSlot(&gfx, i);
     if (kind == PAUSE_OPTION_KIND_GRID_COLOR) {

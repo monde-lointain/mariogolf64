@@ -1729,7 +1729,7 @@ void DrawReplaySaveMenu(Gfx** displayListHead) {
             HOLE_TEXT_TOP + (index * REPLAY_ROW_SPACING),
             text + RING_SHOT_TEXT_FIRST_IMAGE, TEXT_SLOT_LARGE_FONT,
             FIRST_RECORD_TEXT_SLOT + index, TEXT_FLAG_DRAWN_BY_OWNER, 0xFF,
-            0xFF, 0xFF, 0xFF);
+            0xFF, 0xFF, OPAQUE_ALPHA);
         DrawLargeTextSlot(&gfx, FIRST_RECORD_TEXT_SLOT + index);
       }
     }

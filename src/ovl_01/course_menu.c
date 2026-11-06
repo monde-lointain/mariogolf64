@@ -331,7 +331,7 @@ void UpdateCourseStats(void) {
       PlaySound(SOUND_MENU_CANCEL, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
       StartHudAnimation(HUD_ANIMATION_FAST_FADE_OUT);
       SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, 0, TEXT_FLAG_TYPED,
-          255, 255, 255, 255);
+          255, 255, 255, OPAQUE_ALPHA);
       g_MenuScreen = MENU_SCREEN_CLUBHOUSE;
       return;
     }
@@ -340,7 +340,7 @@ void UpdateCourseStats(void) {
       if (g_MenuRepeatButtons & R_JPAD) {
         PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
         SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, 0, TEXT_FLAG_TYPED,
-            255, 255, 255, 255);
+            255, 255, 255, OPAQUE_ALPHA);
         memory->statsCourse++;
         if (memory->statsCourse > courseCount) {
           memory->statsCourse = 0;
@@ -364,7 +364,7 @@ void UpdateCourseStats(void) {
       } else if (g_MenuRepeatButtons & L_JPAD) {
         PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
         SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, 0, TEXT_FLAG_TYPED,
-            255, 255, 255, 255);
+            255, 255, 255, OPAQUE_ALPHA);
         memory->statsCourse--;
         if (memory->statsCourse < 0) {
           memory->statsCourse = courseCount;
@@ -1014,11 +1014,11 @@ void DrawCourseTrophies(Gfx** displayListHead) {
           GetCoursePointsNeeded(openCourseCount) - save->coursePoints, 0, 0);
       SetTextSlot(POINTS_NEEDED_X, POINTS_NEEDED_Y,
           MESSAGE_POINTS_TO_NEXT_COURSE, TEXT_SLOT_LARGE_FONT, 0, 0, 255, 255,
-          255, 255);
+          255, OPAQUE_ALPHA);
     } else {
       SetTextSlot(ALL_COURSES_OPEN_X, ALL_COURSES_OPEN_Y,
           MESSAGE_ALL_COURSES_OPEN, TEXT_SLOT_LARGE_FONT, 0, 0, 255, 255, 255,
-          255);
+          OPAQUE_ALPHA);
     }
   } else {
     gDPPipeSync(gfx++);

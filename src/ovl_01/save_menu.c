@@ -376,7 +376,7 @@ void UpdateRingShotRecords(void) {
       if (GetWipeProgress() == WIPE_CLOSED_PROGRESS) {
         for (index = 0; index != RING_SHOT_TEXT_SLOT_COUNT; index++) {
           SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, index, 0, 0xFF,
-              0xFF, 0xFF, 0xFF);
+              0xFF, 0xFF, OPAQUE_ALPHA);
         }
 
         g_MenuScreen = MENU_SCREEN_EXIT;
@@ -405,12 +405,12 @@ void UpdateRingShotRecords(void) {
         g_MenuScreen = MENU_SCREEN_CLUBHOUSE;
         for (index = 0; index != RING_SHOT_TEXT_SLOT_COUNT; index++) {
           SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, index,
-              TEXT_FLAG_TYPED, 0xFF, 0xFF, 0xFF, 0xFF);
+              TEXT_FLAG_TYPED, 0xFF, 0xFF, 0xFF, OPAQUE_ALPHA);
         }
       } else if (g_MenuRepeatButtons & L_JPAD) {
         for (index = 1; index != RING_SHOT_TEXT_SLOT_COUNT; index++) {
           SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, index, 0, 0xFF,
-              0xFF, 0xFF, 0xFF);
+              0xFF, 0xFF, OPAQUE_ALPHA);
         }
 
         PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
@@ -426,7 +426,7 @@ void UpdateRingShotRecords(void) {
       } else if (g_MenuRepeatButtons & R_JPAD) {
         for (index = 1; index != RING_SHOT_TEXT_SLOT_COUNT; index++) {
           SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, index, 0, 0xFF,
-              0xFF, 0xFF, 0xFF);
+              0xFF, 0xFF, OPAQUE_ALPHA);
         }
 
         PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
@@ -779,7 +779,7 @@ void DrawRingShotRecords(Gfx** displayListHead) {
   SetTextColor(&gfx, 255, 255, 255);
   SetTextSlot(RING_SHOT_TITLE_X, RING_SHOT_TITLE_Y,
       MESSAGE_FIRST_RING_SHOT_TITLE + memory->ringShotRow, TEXT_SLOT_LARGE_FONT,
-      0, TEXT_FLAG_TYPED, 255, 255, 255, 255);
+      0, TEXT_FLAG_TYPED, 255, 255, 255, OPAQUE_ALPHA);
   if (memory->ringShotRow == RING_SHOT_REPLAY_ROW) {
     for (index = 0; index != SAVE_MENU_SLOT_COUNT; index++) {
       if (f_RecordedReplaySlots[index] != -1) {
@@ -815,14 +815,16 @@ void DrawRingShotRecords(Gfx** displayListHead) {
               ((replayCourse * RING_SHOT_HOLE_COUNT) +
                   MESSAGE_FIRST_RING_SHOT_HOLE) +
                   replayHole,
-              RING_SHOT_REPLAY_TEXT_FONT, index + 1, 0, red, green, blue, 255);
+              RING_SHOT_REPLAY_TEXT_FONT, index + 1, 0, red, green, blue,
+              OPAQUE_ALPHA);
         } else {
           SetTextSlot(RING_SHOT_REPLAY_TEXT_X,
               RING_SHOT_REPLAY_TEXT_Y + (index * RING_SHOT_SLOT_SPACING),
               ((replayCourse * RING_SHOT_HOLE_COUNT) +
                   MESSAGE_FIRST_RING_SHOT_HOLE) +
                   replayHole,
-              RING_SHOT_REPLAY_TEXT_FONT, index + 1, 0, 255, 255, 255, 255);
+              RING_SHOT_REPLAY_TEXT_FONT, index + 1, 0, 255, 255, 255,
+              OPAQUE_ALPHA);
         }
       }
     }
@@ -1434,8 +1436,8 @@ void UpdateSavedGames(void) {
 
   if (GetWipeKind() != WIPE_NONE) {
     for (i = 0; i != SAVED_GAME_TEXT_SLOT_COUNT; i++) {
-      SetTextSlot(
-          0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, i, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+      SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, i, 0, 0xFF, 0xFF,
+          0xFF, OPAQUE_ALPHA);
     }
 
     if (GetWipeProgress() == WIPE_CLOSED_PROGRESS) {
@@ -1444,7 +1446,7 @@ void UpdateSavedGames(void) {
       g_IsChosenHoleLoadStarted = FALSE;
       for (i = 1; i != SAVED_GAME_TEXT_SLOT_COUNT; i++) {
         SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, i, 0, 0xFF, 0xFF,
-            0xFF, 0xFF);
+            0xFF, OPAQUE_ALPHA);
       }
 
       g_MenuScreen = MENU_SCREEN_EXIT;
@@ -1471,7 +1473,7 @@ void UpdateSavedGames(void) {
         ContinueSavedGame();
         for (i = 0; i != SAVED_GAME_TEXT_SLOT_COUNT; i++) {
           SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, i, 0, 0xFF, 0xFF,
-              0xFF, 0xFF);
+              0xFF, OPAQUE_ALPHA);
         }
 
         f_AreControllersAssigned = FALSE;
@@ -1487,7 +1489,7 @@ void UpdateSavedGames(void) {
         PlaySound(SOUND_MENU_CANCEL, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
         for (i = 0; i != SAVED_GAME_TEXT_SLOT_COUNT; i++) {
           SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, i, 0, 0xFF, 0xFF,
-              0xFF, 0xFF);
+              0xFF, OPAQUE_ALPHA);
         }
 
         if (f_HumanPlayerCount == 1 || g_ControllerCount == 1) {
@@ -1498,7 +1500,7 @@ void UpdateSavedGames(void) {
 
           for (i = 0; i != SAVED_GAME_TEXT_SLOT_COUNT; i++) {
             SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, i, 0, 0xFF,
-                0xFF, 0xFF, 0xFF);
+                0xFF, 0xFF, OPAQUE_ALPHA);
           }
 
           f_IsGameChosen = FALSE;
@@ -1532,7 +1534,7 @@ void UpdateSavedGames(void) {
                 f_AreControllersAssigned = TRUE;
                 for (i = 0; i != SAVED_GAME_TEXT_SLOT_COUNT; i++) {
                   SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, i, 0,
-                      0xFF, 0xFF, 0xFF, 0xFF);
+                      0xFF, 0xFF, 0xFF, OPAQUE_ALPHA);
                 }
 
                 break;
@@ -1548,13 +1550,13 @@ void UpdateSavedGames(void) {
             f_AreControllersAssigned = TRUE;
             for (i = 0; i != SAVED_GAME_TEXT_SLOT_COUNT; i++) {
               SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, i, 0, 0xFF,
-                  0xFF, 0xFF, 0xFF);
+                  0xFF, 0xFF, OPAQUE_ALPHA);
             }
           }
 
           for (i = 0; i != SAVED_GAME_TEXT_SLOT_COUNT; i++) {
             SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, i, 0, 0xFF,
-                0xFF, 0xFF, 0xFF);
+                0xFF, 0xFF, OPAQUE_ALPHA);
           }
 
           return;
@@ -1573,7 +1575,7 @@ void UpdateSavedGames(void) {
           f_AreControllersAssigned = TRUE;
           for (i = 0; i != SAVED_GAME_TEXT_SLOT_COUNT; i++) {
             SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, i, 0, 0xFF,
-                0xFF, 0xFF, 0xFF);
+                0xFF, 0xFF, OPAQUE_ALPHA);
           }
         }
       } else {
@@ -1589,7 +1591,7 @@ void UpdateSavedGames(void) {
         StartHudAnimation(HUD_ANIMATION_FADE_OUT);
         for (i = 0; i != SAVED_GAME_TEXT_SLOT_COUNT; i++) {
           SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, i, 0, 0xFF, 0xFF,
-              0xFF, 0xFF);
+              0xFF, OPAQUE_ALPHA);
         }
 
         g_MenuScreen = MENU_SCREEN_TITLE;
@@ -1605,14 +1607,14 @@ void UpdateSavedGames(void) {
         f_IsGameChosen = FALSE;
         for (i = 0; i != SAVED_GAME_TEXT_SLOT_COUNT; i++) {
           SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, i, 0, 0xFF, 0xFF,
-              0xFF, 0xFF);
+              0xFF, OPAQUE_ALPHA);
         }
       }
     } else if (memory->savedGameTurn == 0) {
       if (g_MenuRepeatButtons & L_JPAD) {
         for (i = 0; i != SAVED_GAME_TEXT_SLOT_COUNT; i++) {
           SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, i, 0, 0xFF, 0xFF,
-              0xFF, 0xFF);
+              0xFF, OPAQUE_ALPHA);
         }
 
         PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
@@ -1628,7 +1630,7 @@ void UpdateSavedGames(void) {
       } else if (g_MenuRepeatButtons & R_JPAD) {
         for (i = 0; i != SAVED_GAME_TEXT_SLOT_COUNT; i++) {
           SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, i, 0, 0xFF, 0xFF,
-              0xFF, 0xFF);
+              0xFF, OPAQUE_ALPHA);
         }
 
         PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
@@ -2185,7 +2187,8 @@ void DrawSavedGames(Gfx** displayListHead) {
 
   if (IsChosenGameEmpty() != 0) {
     SetTextSlot(EMPTY_GAME_TEXT_X, EMPTY_GAME_TEXT_Y, MESSAGE_EMPTY_SAVED_GAME,
-        TEXT_SLOT_LARGE_FONT, 0, TEXT_FLAG_TYPED, 0xFF, 0xFF, 0xFF, 0xFF);
+        TEXT_SLOT_LARGE_FONT, 0, TEXT_FLAG_TYPED, 0xFF, 0xFF, 0xFF,
+        OPAQUE_ALPHA);
   } else if (!f_IsGameChosen) {
     gameIndex = memory->savedGameIndex;
     if (gameIndex < 0) {
@@ -2211,7 +2214,7 @@ void DrawSavedGames(Gfx** displayListHead) {
     if (CHOSEN_GAME.state.gameMode == GAME_MODE_TOURNAMENT) {
       SetTextSlot(SAVED_GAME_COURSE_X, SAVED_GAME_COURSE_Y,
           MESSAGE_FIRST_TOURNAMENT_COURSE + courseIndex, TEXT_SLOT_LARGE_FONT,
-          0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+          0, 0, 0xFF, 0xFF, 0xFF, OPAQUE_ALPHA);
     } else {
       if (CHOSEN_GAME.state.isMiniGolf == TRUE) {
         courseIndex = (courseIndex >= FIRST_PEACHS_CASTLE_MINI_GOLF_COURSE)
@@ -2227,7 +2230,7 @@ void DrawSavedGames(Gfx** displayListHead) {
 
     SetTextSlotValue(holeIndex + 1, 1, 0);
     SetTextSlot(SAVED_GAME_HOLE_X, SAVED_GAME_HOLE_Y, MESSAGE_SAVED_GAME_HOLE,
-        TEXT_SLOT_LARGE_FONT, 1, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+        TEXT_SLOT_LARGE_FONT, 1, 0, 0xFF, 0xFF, 0xFF, OPAQUE_ALPHA);
   } else if (GetWipeKind() == 0) {
     if (!f_AreControllersAssigned) {
       SetTextSlotValue(f_HumanPlayerIndices[f_AssignedHumanCount] + 1, 0, 0);
@@ -2250,16 +2253,18 @@ void DrawSavedGames(Gfx** displayListHead) {
       }
 
       SetTextSlot(CONTROLLER_PROMPT_X, PROMPT_Y, MESSAGE_CONTROLLER_PROMPT,
-          TEXT_SLOT_LARGE_FONT, 0, TEXT_FLAG_TYPED, 0xFF, 0xFF, 0xFF, 0xFF);
+          TEXT_SLOT_LARGE_FONT, 0, TEXT_FLAG_TYPED, 0xFF, 0xFF, 0xFF,
+          OPAQUE_ALPHA);
       for (stripOrTextSlotIndex = 1;
           stripOrTextSlotIndex != SAVED_GAME_TEXT_SLOT_COUNT;
           stripOrTextSlotIndex++) {
         SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT,
-            stripOrTextSlotIndex, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+            stripOrTextSlotIndex, 0, 0xFF, 0xFF, 0xFF, OPAQUE_ALPHA);
       }
     } else {
       SetTextSlot(CONTINUE_PROMPT_X, PROMPT_Y, MESSAGE_CONTINUE_PROMPT,
-          TEXT_SLOT_LARGE_FONT, 0, TEXT_FLAG_TYPED, 0xFF, 0xFF, 0xFF, 0xFF);
+          TEXT_SLOT_LARGE_FONT, 0, TEXT_FLAG_TYPED, 0xFF, 0xFF, 0xFF,
+          OPAQUE_ALPHA);
     }
   }
 

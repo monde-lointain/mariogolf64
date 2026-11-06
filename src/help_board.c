@@ -161,7 +161,7 @@ static inline void ClearHelpText(void) {
 
   for (index = 0; index != HELP_TEXT_SLOT_COUNT; index++) {
     SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, index, TEXT_FLAG_TYPED,
-        0xFF, 0xFF, 0xFF, 0xFF);
+        0xFF, 0xFF, 0xFF, OPAQUE_ALPHA);
   }
 }
 
@@ -175,18 +175,18 @@ static inline void SetHelpTextColors(void) {
 /* Shows the open topic's title and its current page */
 static inline void ShowTopicPage(void) {
   SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, HELP_TEXT_SLOT_TITLE,
-      TEXT_FLAG_TYPED, 0xFF, 0xFF, 0xFF, 0xFF);
+      TEXT_FLAG_TYPED, 0xFF, 0xFF, 0xFF, OPAQUE_ALPHA);
   SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, HELP_TEXT_SLOT_PAGE,
-      TEXT_FLAG_TYPED, 0xFF, 0xFF, 0xFF, 0xFF);
+      TEXT_FLAG_TYPED, 0xFF, 0xFF, 0xFF, OPAQUE_ALPHA);
   SetHelpTextColors();
   SetTextSlot(TOPIC_TITLE_X, TOPIC_TITLE_Y, f_TopicTitleMessages[f_OpenTopic],
       TEXT_SLOT_LARGE_FONT, HELP_TEXT_SLOT_TITLE, TEXT_FLAG_TYPING_SOUND, 0xFF,
-      0xFF, 0xFF, 0xFF);
+      0xFF, 0xFF, OPAQUE_ALPHA);
   SetHelpTextColors();
   SetTextSlot(TOPIC_PAGE_X, TOPIC_PAGE_Y,
       f_TopicTitleMessages[f_OpenTopic] + f_TopicPage, TEXT_SLOT_LARGE_FONT,
       HELP_TEXT_SLOT_PAGE, TEXT_FLAG_TYPED | TEXT_FLAG_TYPING_SOUND, 0xFF, 0xFF,
-      0xFF, 0xFF);
+      0xFF, OPAQUE_ALPHA);
 }
 
 /* Opens and pages through topics with A, closes them or leaves with B, and
@@ -416,12 +416,12 @@ void DrawHelpBoard(Gfx** displayListHead) {
         SetTextSlot(LIST_LEFT,
             f_HelpListLayout.top + (index * f_HelpListLayout.rowSpacing),
             f_TopicTitleMessages[0] + topic, TEXT_SLOT_LARGE_FONT, index,
-            TEXT_FLAG_CENTERED, red, green, blue, 0xFF);
+            TEXT_FLAG_CENTERED, red, green, blue, OPAQUE_ALPHA);
       } else {
         SetTextSlot(LIST_LEFT,
             f_HelpListLayout.top + (index * f_HelpListLayout.rowSpacing),
             f_TopicTitleMessages[f_OpenTopic] + topic, TEXT_SLOT_LARGE_FONT,
-            index, TEXT_FLAG_CENTERED, 0xFF, 0xFF, 0xFF, 0xFF);
+            index, TEXT_FLAG_CENTERED, 0xFF, 0xFF, 0xFF, OPAQUE_ALPHA);
       }
     }
   }

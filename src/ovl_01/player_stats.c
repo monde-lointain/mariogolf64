@@ -686,7 +686,7 @@ void UpdateBetSettings(void) {
     g_MenuScreen = MENU_SCREEN_HANDICAPS;
     f_IsBetHelpShown = FALSE;
     SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, 0, TEXT_FLAG_TYPED, 255,
-        255, 255, 255);
+        255, 255, OPAQUE_ALPHA);
     for (index = 0; index != BET_STAKE_SLOT_COUNT; index++) {
       if (memory->betStakeLevels[index] != NO_BET) {
         g_GameState.betRates[index] =
@@ -704,7 +704,7 @@ void UpdateBetSettings(void) {
     g_BetPagesPhase = BET_PHASE_CANCELED;
     f_IsBetHelpShown = FALSE;
     SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, 0, TEXT_FLAG_TYPED, 255,
-        255, 255, 255);
+        255, 255, OPAQUE_ALPHA);
     for (index = 0; index != BET_STAKE_SLOT_COUNT; index++) {
       if (memory->betStakeLevels[index] != NO_BET) {
         g_GameState.betRates[index] =
@@ -738,7 +738,7 @@ void UpdateBetSettings(void) {
 
     SetTextSlot(BET_HELP_X, BET_HELP_Y,
         f_BetSetBets[g_BetSet - 1][memory->betColumn] + BET_HELP_MESSAGE,
-        TEXT_SLOT_LARGE_FONT, 0, TEXT_FLAG_TYPED, 255, 255, 255, 255);
+        TEXT_SLOT_LARGE_FONT, 0, TEXT_FLAG_TYPED, 255, 255, 255, OPAQUE_ALPHA);
     OpenEncodedAsset(
         ChosenBetIconFrame(memory, g_AnimatedIconFrameIndex), &asset);
     ReadEncodedAsset(
@@ -753,7 +753,7 @@ void UpdateBetSettings(void) {
 
     SetTextSlot(BET_HELP_X, BET_HELP_Y,
         f_BetSetBets[g_BetSet - 1][memory->betColumn] + BET_HELP_MESSAGE,
-        TEXT_SLOT_LARGE_FONT, 0, TEXT_FLAG_TYPED, 255, 255, 255, 255);
+        TEXT_SLOT_LARGE_FONT, 0, TEXT_FLAG_TYPED, 255, 255, 255, OPAQUE_ALPHA);
     OpenEncodedAsset(
         ChosenBetIconFrame(memory, g_AnimatedIconFrameIndex), &asset);
     ReadEncodedAsset(
@@ -1018,7 +1018,7 @@ void DrawBetSettings(
   DrawBetLabel(&gfx, BET_LABEL_CENTER_X, bannerShift + BET_LABEL_TOP, betIndex);
   if (!f_IsBetHelpShown && isSettled == TRUE) {
     SetTextSlot(BET_HELP_X, BET_HELP_Y, betIndex + BET_HELP_MESSAGE,
-        TEXT_SLOT_LARGE_FONT, 0, TEXT_FLAG_TYPED, 255, 255, 255, 255);
+        TEXT_SLOT_LARGE_FONT, 0, TEXT_FLAG_TYPED, 255, 255, 255, OPAQUE_ALPHA);
     f_IsBetHelpShown = TRUE;
   }
 
@@ -1089,7 +1089,7 @@ NO_RESULT UpdateHandicaps(s32 firstPlayerIndex UNUSED, s32 playerCount UNUSED) {
     if (g_MenuPressedButtons & A_BUTTON) {
       PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
       SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, 0, TEXT_FLAG_TYPED,
-          0xFF, 0xFF, 0xFF, 0xFF);
+          0xFF, 0xFF, 0xFF, OPAQUE_ALPHA);
       g_CourseBannersSlide = HANDICAP_SLIDE_START;
       f_IsHandicapPromptShown = FALSE;
       g_BetPagesPhase = MENU_PHASE_CONFIRMED;
@@ -1100,7 +1100,7 @@ NO_RESULT UpdateHandicaps(s32 firstPlayerIndex UNUSED, s32 playerCount UNUSED) {
       PlaySound(SOUND_MENU_CANCEL, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
       g_MenuScreen = MENU_SCREEN_BET_SETTINGS;
       SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, 0, TEXT_FLAG_TYPED,
-          0xFF, 0xFF, 0xFF, 0xFF);
+          0xFF, 0xFF, 0xFF, OPAQUE_ALPHA);
       f_IsHandicapPromptShown = FALSE;
       g_BetPagesPhase = MENU_PHASE_CANCELED;
       return;
@@ -1584,7 +1584,7 @@ void DrawHandicaps(Gfx** displayListHead, s32 slide, u8 reverseVerticalSlide,
     }
 
     SetTextSlot(HANDICAP_PROMPT_X, HANDICAP_PROMPT_Y, HANDICAP_PROMPT_MESSAGE,
-        TEXT_SLOT_LARGE_FONT, 0, TEXT_FLAG_TYPED, 255, 255, 255, 255);
+        TEXT_SLOT_LARGE_FONT, 0, TEXT_FLAG_TYPED, 255, 255, 255, OPAQUE_ALPHA);
     f_IsHandicapPromptShown = TRUE;
   }
 
@@ -2076,7 +2076,7 @@ void UpdateBestShots(void) {
         SetGameFlag(GAME_FLAG_LOADED_PLAY);
         for (slot = 0; slot != STATS_TEXT_SLOT_COUNT; slot++) {
           SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, slot, 0, 0xFF,
-              0xFF, 0xFF, 0xFF);
+              0xFF, 0xFF, OPAQUE_ALPHA);
         }
       }
     } else if (GetWipeKind() == WIPE_NONE || g_IsMenuWipeOpening != TRUE) {
@@ -2099,7 +2099,7 @@ void UpdateBestShots(void) {
         g_MenuScreen = MENU_SCREEN_CLUBHOUSE;
         for (slot = 0; slot != STATS_TEXT_SLOT_COUNT; slot++) {
           SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, slot, 0, 0xFF,
-              0xFF, 0xFF, 0xFF);
+              0xFF, 0xFF, OPAQUE_ALPHA);
         }
       } else if (g_MenuRepeatButtons & U_JPAD) {
         moved = FindNextBestShotCell(
@@ -2344,12 +2344,13 @@ void DrawBestShots(Gfx** displayListHead) {
             1,
         1, 0);
     SetTextSlot(RECORD_DETAIL_X, RECORD_DETAIL_Y, MESSAGE_RECORD_DETAIL,
-        TEXT_SLOT_LARGE_FONT, 1, 0, 255, 255, 255, 255);
+        TEXT_SLOT_LARGE_FONT, 1, 0, 255, 255, 255, OPAQUE_ALPHA);
   }
 
   if (!f_HasBestShots) {
     SetTextSlot(NO_RECORDS_X, NO_RECORDS_Y, MESSAGE_NO_RECORDS,
-        TEXT_SLOT_LARGE_FONT, 0, TEXT_FLAG_CENTERED, 255, 255, 255, 255);
+        TEXT_SLOT_LARGE_FONT, 0, TEXT_FLAG_CENTERED, 255, 255, 255,
+        OPAQUE_ALPHA);
   }
 
   *displayListHead = gfx;

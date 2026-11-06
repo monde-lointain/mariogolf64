@@ -2258,7 +2258,7 @@ void UpdateModeSelect(void) {
 
     PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
     SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, MODE_TEXT_SLOT,
-        TEXT_FLAG_TYPED, 0xFF, 0xFF, 0xFF, 0xFF);
+        TEXT_FLAG_TYPED, 0xFF, 0xFF, 0xFF, OPAQUE_ALPHA);
     f_BetSlideOffset = 0;
     g_BetPagesPhase = MENU_PHASE_START;
     g_BetPagesWallSlide = STATS_SLIDE_CURRENT;
@@ -2486,7 +2486,7 @@ void UpdateModeSelect(void) {
     StartHudAnimation(HUD_ANIMATION_FAST_FADE_OUT);
     g_MenuMemory.modeSpin = 0;
     SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, MODE_TEXT_SLOT,
-        TEXT_FLAG_TYPED, 0xFF, 0xFF, 0xFF, 0xFF);
+        TEXT_FLAG_TYPED, 0xFF, 0xFF, 0xFF, OPAQUE_ALPHA);
     PlaySound(SOUND_MENU_CANCEL, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
     g_MenuScreen = MENU_SCREEN_CHARACTER_SELECT;
     g_ChoosingPlayerIndex--;
@@ -2570,16 +2570,16 @@ void UpdateModeSelect(void) {
       i < g_ChosenPlayerCount) {
     SetTextSlot(MODE_TEXT_X, MODE_TEXT_Y, MESSAGE_MODE_NEEDS_CONTROLLERS,
         TEXT_SLOT_LARGE_FONT, MODE_TEXT_SLOT, TEXT_FLAG_TYPED, 0xFF, 0xFF, 0xFF,
-        0xFF);
+        OPAQUE_ALPHA);
   } else if (g_ChosenPlayerCount == 1 &&
       f_ModeChoiceIcons[0][g_MenuMemory.modeChoice] == MODE_ICON_STROKE) {
     SetTextSlot(MODE_TEXT_X, MODE_TEXT_Y, MESSAGE_SOLO_STROKE,
         TEXT_SLOT_LARGE_FONT, MODE_TEXT_SLOT, TEXT_FLAG_TYPED, 0xFF, 0xFF, 0xFF,
-        0xFF);
+        OPAQUE_ALPHA);
   } else {
     SetTextSlot(MODE_TEXT_X, MODE_TEXT_Y, chosenIcon + MESSAGE_FIRST_MODE,
         TEXT_SLOT_LARGE_FONT, MODE_TEXT_SLOT, TEXT_FLAG_TYPED, 0xFF, 0xFF, 0xFF,
-        0xFF);
+        OPAQUE_ALPHA);
   }
 }
 
@@ -2654,7 +2654,7 @@ void UpdateCourseSelect(void) {
 
       for (index = 0; index != COURSE_SELECT_TEXT_SLOT_COUNT; index++) {
         SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, index, 0, 0xFF,
-            0xFF, 0xFF, 0xFF);
+            0xFF, 0xFF, OPAQUE_ALPHA);
       }
 
       g_IsMenuWipeOpening = FALSE;
@@ -2688,7 +2688,7 @@ void UpdateCourseSelect(void) {
     FreeAllCharacterSlots();
     for (index = 0; index != COURSE_SELECT_TEXT_SLOT_COUNT; index++) {
       SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, index, 0, 0xFF, 0xFF,
-          0xFF, 0xFF);
+          0xFF, OPAQUE_ALPHA);
     }
 
     return;
@@ -2704,7 +2704,7 @@ void UpdateCourseSelect(void) {
       g_MenuMemory.courseSpin = COURSE_SELECT_TURN / courseCount;
       for (index = 0; index != COURSE_SELECT_TEXT_SLOT_COUNT; index++) {
         SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, index, 0, 0xFF,
-            0xFF, 0xFF, 0xFF);
+            0xFF, 0xFF, OPAQUE_ALPHA);
       }
     } else if (g_MenuRepeatButtons & R_JPAD) {
       PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
@@ -2715,7 +2715,7 @@ void UpdateCourseSelect(void) {
       g_MenuMemory.courseSpin = -COURSE_SELECT_TURN / courseCount;
       for (index = 0; index != COURSE_SELECT_TEXT_SLOT_COUNT; index++) {
         SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, index, 0, 0xFF,
-            0xFF, 0xFF, 0xFF);
+            0xFF, 0xFF, OPAQUE_ALPHA);
       }
     } else if ((g_MenuRepeatButtons & U_CBUTTONS) &&
         COURSE_SELECT_LAYOUT == COURSE_SELECT_LAYOUT_HOLES) {
@@ -3304,7 +3304,7 @@ void UpdateOptionsScreen(void) {
     closedCheck = IsMenuWindowClosed();
     for (slot = 0; slot != OPTIONS_TEXT_SLOT_COUNT; slot++) {
       SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, slot, 0, 0xFF, 0xFF,
-          0xFF, 0xFF);
+          0xFF, OPAQUE_ALPHA);
     }
 
     if (closedCheck == MENU_WINDOW_CHECK_MOVING) {
@@ -3315,7 +3315,7 @@ void UpdateOptionsScreen(void) {
       f_IsEraseWindowUp = FALSE;
       for (slot = 0; slot != OPTIONS_TEXT_SLOT_COUNT; slot++) {
         SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, slot, 0, 0xFF, 0xFF,
-            0xFF, 0xFF);
+            0xFF, OPAQUE_ALPHA);
       }
 
       return;
@@ -3335,14 +3335,14 @@ void UpdateOptionsScreen(void) {
       CloseMenuWindow();
       for (slot = 0; slot != OPTIONS_TEXT_SLOT_COUNT; slot++) {
         SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, slot, 0, 0xFF, 0xFF,
-            0xFF, 0xFF);
+            0xFF, OPAQUE_ALPHA);
       }
     } else if (g_MenuPressedButtons & B_BUTTON) {
       PlaySound(SOUND_READY, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
       CloseMenuWindow();
       for (slot = 0; slot != OPTIONS_TEXT_SLOT_COUNT; slot++) {
         SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, slot, 0, 0xFF, 0xFF,
-            0xFF, 0xFF);
+            0xFF, OPAQUE_ALPHA);
       }
     } else if (g_MenuRepeatButtons & L_JPAD) {
       PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
@@ -3799,7 +3799,7 @@ void DrawMenuScreen(Gfx** displayListHead) {
   switch (g_MenuScreen) {
     case MENU_SCREEN_TITLE:
       SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, 0, TEXT_FLAG_TYPED,
-          255, 255, 255, 255);
+          255, 255, 255, OPAQUE_ALPHA);
       DrawMenuTitleScreen(&gfx);
       break;
     case MENU_SCREEN_CHARACTER_SELECT:
@@ -6341,7 +6341,7 @@ void DrawCourseSelect(Gfx** displayListHead) {
           0, 0);
       SetTextSlot(LOCKED_COURSE_TEXT_X, LOCKED_COURSE_TEXT_Y,
           MESSAGE_POINTS_TO_UNLOCK, TEXT_SLOT_LARGE_FONT, 0,
-          TEXT_FLAG_DRAWN_BY_OWNER, 255, 255, 255, 255);
+          TEXT_FLAG_DRAWN_BY_OWNER, 255, 255, 255, OPAQUE_ALPHA);
       DrawLargeTextSlot(&gfx, 0);
       gDPPipeSync(gfx++);
       gDPPipeSync(gfx++);
@@ -6416,7 +6416,7 @@ void DrawCourseSelect(Gfx** displayListHead) {
           f_BetSlideOffset = 0;
           f_BetSettingsSlide = 0;
           SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, 0,
-              TEXT_FLAG_TYPED, 255, 255, 255, 255);
+              TEXT_FLAG_TYPED, 255, 255, 255, OPAQUE_ALPHA);
         }
 
         break;
@@ -6642,7 +6642,8 @@ void DrawCourseSelectBanners(Gfx** displayListHead) {
     SetTextSlot(SCREEN_WIDTH / 2, slide + HOLES_CHOICE_Y,
         g_MenuMemory.holesChoice + HOLES_CHOICE_MESSAGE_BASE,
         TEXT_SLOT_LARGE_FONT, HOLES_CHOICE_TEXT_SLOT,
-        TEXT_FLAG_CENTERED | TEXT_FLAG_DRAWN_BY_OWNER, 255, 255, 255, 255);
+        TEXT_FLAG_CENTERED | TEXT_FLAG_DRAWN_BY_OWNER, 255, 255, 255,
+        OPAQUE_ALPHA);
     DrawLargeTextSlot(&gfx, HOLES_CHOICE_TEXT_SLOT);
   }
 
@@ -7365,10 +7366,11 @@ void DrawOptionsScreen(Gfx** displayListHead) {
           ERASE_MESSAGE_PALETTE_GREEN, ERASE_MESSAGE_PALETTE_BLUE, 0);
       SetTextSlot(ERASE_MESSAGE_X, ERASE_MESSAGE_Y, ERASE_MESSAGE,
           TEXT_SLOT_LARGE_FONT, ERASE_MESSAGE_SLOT, TEXT_FLAG_CENTERED,
-          ERASE_MESSAGE_RED, ERASE_MESSAGE_GREEN, ERASE_MESSAGE_BLUE, 255);
+          ERASE_MESSAGE_RED, ERASE_MESSAGE_GREEN, ERASE_MESSAGE_BLUE,
+          OPAQUE_ALPHA);
     } else {
       SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, ERASE_MESSAGE_SLOT,
-          TEXT_FLAG_TYPED, 255, 255, 255, 255);
+          TEXT_FLAG_TYPED, 255, 255, 255, OPAQUE_ALPHA);
     }
   }
 
