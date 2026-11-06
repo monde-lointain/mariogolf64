@@ -82,6 +82,13 @@
 #define SLOTS_Y 8.0f
 #define SLOTS_Z (-100.0f)
 
+/* The reels' window, in screen pixels, and the line across its middle */
+#define REEL_WINDOW_LEFT 96
+#define REEL_WINDOW_TOP 56
+#define REEL_WINDOW_RIGHT 224
+#define REEL_WINDOW_BOTTOM 168
+#define REEL_CENTER_LINE_TOP ((REEL_WINDOW_TOP + REEL_WINDOW_BOTTOM) / 2)
+
 /* Two quads shade the top and bottom of the reels' window */
 #define SHADE_VERTEX_COUNT 8
 #define SHADE_HALF_WIDTH 50
@@ -703,8 +710,10 @@ void DrawClubSlots(Gfx** displayListHead) {
   gSPSetGeometryMode(gfx++, G_SHADE | G_SHADING_SMOOTH);
   gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, OPAQUE_ALPHA);
   gDPPipeSync(gfx++);
-  DrawTextureRect(&gfx, 96 << 2, 56 << 2, 224 << 2, 168 << 2, G_TX_RENDERTILE,
-      0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+  DrawTextureRect(&gfx, QuarterPixels(REEL_WINDOW_LEFT),
+      QuarterPixels(REEL_WINDOW_TOP), QuarterPixels(REEL_WINDOW_RIGHT),
+      QuarterPixels(REEL_WINDOW_BOTTOM), G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE,
+      TEXEL_STEP_ONE);
 
   /* The reels */
   gSPTexture(
@@ -771,8 +780,10 @@ void DrawClubSlots(Gfx** displayListHead) {
   gDPSetCombineMode(gfx++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
   gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, OPAQUE_ALPHA);
   gDPPipeSync(gfx++);
-  DrawTextureRect(&gfx, 96 << 2, 112 << 2, 224 << 2, 113 << 2, G_TX_RENDERTILE,
-      0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+  DrawTextureRect(&gfx, QuarterPixels(REEL_WINDOW_LEFT),
+      QuarterPixels(REEL_CENTER_LINE_TOP), QuarterPixels(REEL_WINDOW_RIGHT),
+      QuarterPixels(REEL_CENTER_LINE_TOP + 1), G_TX_RENDERTILE, 0, 0,
+      TEXEL_STEP_ONE, TEXEL_STEP_ONE);
 
   /* The slot machine */
   gDPPipeSync(gfx++);
