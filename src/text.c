@@ -91,8 +91,8 @@ enum MessageCode {
   MESSAGE_CODE_C_DOWN,
   MESSAGE_CODE_C_LEFT,
   MESSAGE_CODE_C_RIGHT,
-  /* Drawn as nothing */
-  MESSAGE_CODE_UNK32779,
+  /* Drawn as nothing, and in no message */
+  MESSAGE_CODE_UNUSED_BLANK,
   MESSAGE_CODE_START_BUTTON,
   MESSAGE_CODE_L_BUTTON,
   MESSAGE_CODE_R_BUTTON,
