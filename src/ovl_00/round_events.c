@@ -2637,6 +2637,15 @@ void LoadContactImages(Player* player) {
 #define CONTACT_RIBBON_FIRST_SEGMENTS 16
 #define CONTACT_RIBBON_RELOAD_SEGMENTS 15
 #define CONTACT_RIBBON_RELOAD_PASSES 2
+/*
+ * The first segment of one of a pass's two runs. Each pass reloads the buffer
+ * from its end back to its start, then forward again, each run keeping the
+ * vertex pair that the last one ended on. The terms are summed one by one, as
+ * multiplying (pass * 2) + run out of one product changes the code.
+ */
+#define ContactRunStart(pass, run) \
+  (CONTACT_RIBBON_FIRST_SEGMENTS + ((run) * CONTACT_RIBBON_RELOAD_SEGMENTS) + \
+      ((pass) * 2 * CONTACT_RIBBON_RELOAD_SEGMENTS))
 #define CONTACT_PALETTE_SIZE 0x200
 #define CONTACT_IMAGE_PIXELS_OFFSET \
   (CONTACT_IMAGE_OFFSET + IMAGE_HEADER_SIZE + CONTACT_PALETTE_SIZE)
@@ -2679,12 +2688,16 @@ void LoadContactImages(Player* player) {
     DrawContactTriangles(); \
     if (f_ContactStyle != CONTACT_STYLE_SHOT) { \
       for (pass = 0; pass != CONTACT_RIBBON_RELOAD_PASSES; pass++) { \
-        for (i = (pass * 30) + 16; i != (pass * 30) + 31; i++) { \
-          DrawContactSegment(i, 28 - ((i - ((pass * 30) + 16)) * 2)); \
+        for (i = ContactRunStart(pass, 0); i != ContactRunStart(pass, 1); \
+            i++) { \
+          DrawContactSegment(i, \
+              ((CONTACT_RIBBON_RELOAD_SEGMENTS - 1) * 2) - \
+                  ((i - ContactRunStart(pass, 0)) * 2)); \
         } \
         DrawContactTriangles(); \
-        for (i = (pass * 30) + 31; i != (pass * 30) + 46; i++) { \
-          DrawContactSegment(i, ((i - ((pass * 30) + 31)) * 2) + 2); \
+        for (i = ContactRunStart(pass, 1); i != ContactRunStart(pass, 2); \
+            i++) { \
+          DrawContactSegment(i, ((i - ContactRunStart(pass, 1)) * 2) + 2); \
         } \
         DrawContactTriangles(); \
       } \
