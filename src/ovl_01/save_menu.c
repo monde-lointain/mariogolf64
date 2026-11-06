@@ -574,6 +574,12 @@ void UpdateRingShotRecords(void) {
  * The register oracle's split search finds itemIndex in different registers
  * in the face loop and the empty dashes' loop, but a counter of its own for
  * either gives 36 words differing.
+ *
+ * Stepping listIndex in the face's lookup, as
+ * f_RingShotCharacterOrder[listIndex++], gives 20 words, 4 in shape;
+ * indexing the order from listIndex plus itemIndex, with listIndex fixed,
+ * gives 115 (15), and from the row's first character plus itemIndex, with
+ * no listIndex, 53 (27).
  */
 #ifdef NON_MATCHING
 void DrawRingShotRecords(Gfx** displayListHead) {
