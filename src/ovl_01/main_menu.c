@@ -7030,7 +7030,7 @@ void DrawOptionsScreen(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   MenuMemory* memory = GetMenuMemory();
   u8* mario = GetMenuImageBuffer();
-  u8* arrows = (u8*)GetMenuImageBuffer() + OPTIONS_ARROWS_OFFSET;
+  u8* arrows = AddressPast(GetMenuImageBuffer(), OPTIONS_ARROWS_OFFSET);
   u8* shadow = GetMenuImageBuffer();
   /* Counts Mario's strips, the banners' strips, the rows, the arrows' passes */
   s32 loopIndex;

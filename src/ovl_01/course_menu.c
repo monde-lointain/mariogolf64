@@ -1690,11 +1690,11 @@ void DrawBlinkingSideArrows(Gfx** displayListHead, void* image, s32* blinkFrame,
     imageOffset =
         (SIDE_ARROW_FIRST_IMAGE + arrowIndex) * GREEN_ARROW_IMAGE_SIZE;
     gDPLoadTextureTile_4b(gfx++,
-        TextureAddress((u32)image + (imageOffset + frameOffset)), G_IM_FMT_CI,
-        GREEN_ARROW_SIZE, GREEN_ARROW_SIZE, 0, 0, GREEN_ARROW_SIZE - 1,
-        GREEN_ARROW_SIZE - 1, 0, G_TX_NOMIRROR | G_TX_WRAP,
-        G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
-        G_TX_NOLOD);
+        TextureAddress(AddressPast(image, imageOffset + frameOffset)),
+        G_IM_FMT_CI, GREEN_ARROW_SIZE, GREEN_ARROW_SIZE, 0, 0,
+        GREEN_ARROW_SIZE - 1, GREEN_ARROW_SIZE - 1, 0,
+        G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+        G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(gfx++);
     if (arrowIndex == SIDE_ARROW_RIGHT) {
       left = centerX + (width / 2);
@@ -1744,7 +1744,7 @@ void DrawGreenArrow(Gfx** displayListHead, void* image, s32 blinkFrame,
   }
 
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-  gDPLoadTLUT_pal16(gfx++, 0, TextureAddress((u32)image + headerSize));
+  gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(AddressPast(image, headerSize)));
   gDPLoadTextureTile_4b(gfx++,
       TextureAddress((u32)image +
           (direction * GREEN_ARROW_IMAGE_SIZE +
