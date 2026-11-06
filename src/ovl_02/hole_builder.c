@@ -760,8 +760,13 @@ s32 ListOffsetsByDistance(s32 span, GridOffset* offsets, s32 maxCount) {
  */
 #ifdef NON_MATCHING
 void DrawBandHeights(s16* heights, s32 band) {
-  /* corners[4] is where the corners are swapped; it is there to match, as
-   * a Vtx* of its own gives 451 differing words, 51 in shape */
+  /*
+   * corners[4] is where the corners are swapped; it is there to match, as the
+   * original stores each swapped pointer in the frame slot after corners[3],
+   * 0x20($sp). A Vtx* of its own, declared before or after corners, is also
+   * stored in the frame, but the frame is 8 bytes smaller, and 449 words
+   * differ, 51 in shape, against 321 and 45
+   */
   Vtx* corners[5];
   s32 cachedSpan;
   f32 cachedReciprocal;
