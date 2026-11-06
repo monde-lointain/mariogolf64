@@ -1803,6 +1803,16 @@ Boolean IsNintendoClubTournament(void) {
   return g_IsNintendoClubTournament != 0;
 }
 
+/* The club tournament messages: the first of the tournament names and of the
+ * course names, the stroke play and speed golf modes, and the two mini golf
+ * course titles */
+#define FIRST_TOURNAMENT_NAME_MESSAGE 0x16F
+#define FIRST_COURSE_NAME_MESSAGE 0x1EB
+#define STROKE_PLAY_MESSAGE 0x9E
+#define SPEED_GOLF_MESSAGE 0x9D
+#define FIRST_MINI_GOLF_TITLE_MESSAGE 0xC7
+#define SECOND_MINI_GOLF_TITLE_MESSAGE 0xC8
+
 s32 GetClubTournamentNameMessage(void) {
   s32 value;
 
@@ -1811,7 +1821,7 @@ s32 GetClubTournamentNameMessage(void) {
     value = 0;
   }
 
-  return value + 0x16F;
+  return value + FIRST_TOURNAMENT_NAME_MESSAGE;
 }
 
 s32 GetClubTournamentCourseMessage(void) {
@@ -1822,7 +1832,7 @@ s32 GetClubTournamentCourseMessage(void) {
     value = 0;
   }
 
-  return value + 0x1EB;
+  return value + FIRST_COURSE_NAME_MESSAGE;
 }
 
 s32 GetClubTournamentNumber(void) {
@@ -1850,10 +1860,10 @@ s32 GetClubTournamentModeMessage(void) {
   switch (g_ClubTournamentRules.isSpeedGolf) {
     case 0:
     default:
-      value = 0x9E;
+      value = STROKE_PLAY_MESSAGE;
       break;
     case 1:
-      value = 0x9D;
+      value = SPEED_GOLF_MESSAGE;
       break;
   }
 
@@ -1864,13 +1874,13 @@ s32 GetClubTournamentCourseTitleMessage(void) {
   s32 value;
 
   if (g_ClubTournamentRules.courseIndex >= MINI_GOLF_COURSE_INDEX) {
-    value = 0xC7;
+    value = FIRST_MINI_GOLF_TITLE_MESSAGE;
     if (g_ClubTournamentRules.courseIndex >=
         MINI_GOLF_COURSE_INDEX + MINI_GOLF_COURSES_PER_RECORD) {
-      value = 0xC8;
+      value = SECOND_MINI_GOLF_TITLE_MESSAGE;
     }
   } else {
-    value = g_ClubTournamentRules.courseIndex + 0x1EB;
+    value = g_ClubTournamentRules.courseIndex + FIRST_COURSE_NAME_MESSAGE;
   }
 
   return value;
