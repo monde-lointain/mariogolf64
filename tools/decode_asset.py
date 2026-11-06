@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
 """Decode an asset from the archive in the base ROM, as ReadEncodedAsset does.
 
-    decode_asset.py ASSET_ID [FORMAT OUT.png]
+    decode_asset.py ASSET_ID [[FORMAT] OUT.png]
 
-Without FORMAT, prints the decoded size and the image header that most
-image assets start with. With FORMAT (ci4, ci8, i4, i8, ia4, ia8, ia16 or
-rgba16), writes the image to OUT.png, taking its size from that header.
-CI images keep their palette after the header. The images are for
-reading the code, not for committing.
+Without OUT.png, prints the decoded size and the image header that most
+image assets start with, and the format its first halfword gives. With
+OUT.png, writes the image there, taking its size from that header. FORMAT
+(ci4, ci8, i4, i8, ia4, ia8, ia16 or rgba16) defaults to the header's;
+the header does not tell intensity from intensity-alpha, so i4 and i8
+stand for both. CI images keep their palette after the header. The
+images are for reading the code, not for committing.
 """
 
 import struct
@@ -26,7 +28,10 @@ METHOD_SHIFT = 24
 DECODED_SIZE_MASK = 0xFFFFFF
 IMAGE_HEADER_SIZE = 8
 IMAGE_SIZE_OFFSET = 2
+OUTPUT_ARGUMENT_COUNT = 3
 FORMAT_ARGUMENT_COUNT = 4
+# ImageHeader.format's codes
+HEADER_FORMATS = {0: "i4", 2: "ci4", 4: "i8", 6: "ci8", 8: "rgba16"}
 
 # Texel widths, in bits
 NIBBLE_BITS = 4
@@ -188,18 +193,29 @@ def main() -> None:
     """Print an asset's header, or write it as an image."""
     asset_id = int(sys.argv[1], 0)
     decoded = decode_asset(BASEROM.read_bytes(), asset_id)
-    if len(sys.argv) < FORMAT_ARGUMENT_COUNT:
-        header = (
-            [
-                hex(int.from_bytes(decoded[i : i + 2], "big"))
-                for i in range(0, IMAGE_HEADER_SIZE, 2)
-            ]
-            if len(decoded) >= IMAGE_HEADER_SIZE
-            else []
+    header = (
+        [
+            int.from_bytes(decoded[i : i + 2], "big")
+            for i in range(0, IMAGE_HEADER_SIZE, 2)
+        ]
+        if len(decoded) >= IMAGE_HEADER_SIZE
+        else []
+    )
+    header_format = HEADER_FORMATS.get(header[0]) if header else None
+    if len(sys.argv) < OUTPUT_ARGUMENT_COUNT:
+        shown_header = [hex(value) for value in header]
+        print(
+            f"asset {asset_id:#x}: {len(decoded):#x} bytes,",
+            f"header {shown_header}, format {header_format}",
         )
-        print(f"asset {asset_id:#x}: {len(decoded):#x} bytes, header {header}")
         return
-    convert_image(decoded, sys.argv[2]).save(sys.argv[3])
+    if len(sys.argv) >= FORMAT_ARGUMENT_COUNT:
+        image_format, output = sys.argv[2], sys.argv[3]
+    elif header_format:
+        image_format, output = header_format, sys.argv[2]
+    else:
+        sys.exit(f"asset {asset_id:#x} has no known format; give one")
+    convert_image(decoded, image_format).save(output)
 
 
 if __name__ == "__main__":
