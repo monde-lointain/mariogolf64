@@ -76,9 +76,9 @@
 /* A stock club, whose power and deflection GenerateClub fills in */
 #define CLUB_ENTRY(type, name, kind, surfaceMask, mishitScale, distance, \
     pitch, offsetPitch, spin, lieRatingPercent, sideSpin) \
-  {(mishitScale), (name), 0, {0}, (surfaceMask), (distance), (pitch), \
-      (offsetPitch), (spin), (lieRatingPercent), (type), {0, 0, 0}, (kind), \
-      (sideSpin), {0, 0, 0}, ASSET_DRIVER_HEAD_IMAGE + (type), 0, {0}}
+  {(mishitScale), (name), (surfaceMask), (distance), (pitch), (offsetPitch), \
+      (spin), (lieRatingPercent), (type), {0, 0, 0}, (kind), (sideSpin), \
+      {0, 0, 0}, ASSET_DRIVER_HEAD_IMAGE + (type), 0}
 
 /* A club's stats, as GenerateClubSet takes them */
 typedef struct ClubStats {
@@ -636,9 +636,8 @@ Club g_Clubs[CLUB_COUNT] = {
         30, 0, 10, 10, 100, 0),
 };
 /* GetClub returns this for an index past the last club */
-static Club f_NoClub = {80, "0000", 0, {0}, 0, 230, -11, 0, 14, 100,
-    CLUB_TYPE_DRIVER, {0, 0, 0}, CLUB_KIND_WOOD, 0, {0, 0, 0},
-    ASSET_DRIVER_HEAD_IMAGE, 0, {0}};
+static Club f_NoClub = {80, "0000", 0, 230, -11, 0, 14, 100, CLUB_TYPE_DRIVER,
+    {0, 0, 0}, CLUB_KIND_WOOD, 0, {0, 0, 0}, ASSET_DRIVER_HEAD_IMAGE, 0};
 static ShotLaunch f_ClubTestShot = {
     STRAIGHT_ANGLE, NO_CLUB, MAX_LAUNCH_POWER, 0, 0, 0, 0, SHOT_MODE_NORMAL};
 /* A generated club's lieRatingPercent, by its set's lieRatingLevel from

@@ -92,8 +92,6 @@ typedef struct Club {
   /* 0x00 */ u8 mishitScale; /* Scales a mishit's yaw and side spin, and the
                                impact point's side spin */
   /* 0x01 */ char name[4] NONSTRING; /* Its short name, such as "1W" or "PT" */
-  /* 0x05 */ u8 unk5;
-  /* 0x06 */ u8 unk6[2];
   /* 0x08 */ s32 surfaceMask;
   /* 0x0C */ s16 distance; /* In yards */
   /* 0x0E */ s16 pitch; /* In degrees, from -45 to -7 */
@@ -110,7 +108,6 @@ typedef struct Club {
   /* 0x2E */ AssetId headImageAsset;
   /* 0x30 */ s8
       curve; /* From -4, the strongest fade, to 4, the strongest draw */
-  /* 0x31 */ u8 unk31[3];
 } Club; /* size = 0x34 */
 
 /* Every club set, one after another */

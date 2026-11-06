@@ -161,12 +161,12 @@ static ImpactEffect
 
 /* The opening's clubs: two drivers that differ only in pitch */
 static Club f_OpeningClubs[OPENING_CLUB_COUNT] = {
-    {0, "1W", 0, {0}, DRIVER_SURFACES, 208, -15, 0, 11, 120, CLUB_TYPE_DRIVER,
+    {0, "1W", DRIVER_SURFACES, 208, -15, 0, 11, 120, CLUB_TYPE_DRIVER,
         {97608, 84651, 19335}, CLUB_KIND_WOOD, 0, {0, 0, 0},
-        ASSET_DRIVER_HEAD_IMAGE, 0, {0}},
-    {0, "1W", 0, {0}, DRIVER_SURFACES, 208, -23, 0, 11, 120, CLUB_TYPE_DRIVER,
+        ASSET_DRIVER_HEAD_IMAGE, 0},
+    {0, "1W", DRIVER_SURFACES, 208, -23, 0, 11, 120, CLUB_TYPE_DRIVER,
         {97608, 84651, 19335}, CLUB_KIND_WOOD, 0, {0, 0, 0},
-        ASSET_DRIVER_HEAD_IMAGE, 0, {0}}};
+        ASSET_DRIVER_HEAD_IMAGE, 0}};
 
 /* LaunchOpeningBallSimulation counts each launch here, and nothing else reads
  * it */
