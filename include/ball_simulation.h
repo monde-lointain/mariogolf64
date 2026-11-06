@@ -217,7 +217,6 @@ typedef struct BallSimulation {
   /* 0xB1 */ u8 previousStepFlags; /* stepFlags as the step started */
   /* 0xB2 */ u16 rollFrameCount; /* Frames since the ball began rolling */
   /* 0xB4 */ s8 isOverCup; /* The floor under the ball dips into the cup */
-  /* 0xB5 */ u8 unkB5[0xB8 - 0xB5];
 } BallSimulation; /* size = 0xB8 */
 
 /*
