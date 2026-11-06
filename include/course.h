@@ -71,7 +71,6 @@ typedef struct HoleRecord {
   /* 0x1 */ s8 handicap; /* Ranks a course's holes from 1 to 18 */
   /* 0x2 */ u16 yardages[3]; /* The three are equal in every hole */
   /* 0x8 */ u8 flags;
-  /* 0x9 */ u8 unk9;
 } HoleRecord; /* size = 0xA */
 
 typedef struct CourseRecord {

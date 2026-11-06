@@ -16,7 +16,7 @@
 
 /* A hole's record, whose yardage is the same from each of its tees */
 #define HOLE_RECORD(par, handicap, yardage, flags) \
-  {(par), (handicap), {(yardage), (yardage), (yardage)}, (flags), 0}
+  {(par), (handicap), {(yardage), (yardage), (yardage)}, (flags)}
 
 char g_TournamentNames[TOURNAMENT_NAME_COUNT][TOURNAMENT_NAME_SIZE] = {
     "Toad Tournament",
