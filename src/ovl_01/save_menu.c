@@ -569,6 +569,10 @@ void UpdateRingShotRecords(void) {
  * counter of their own 62. Giving index's other uses variables of their own
  * costs words too: a strip counter gives 92, a face mode 248 (38 in shape)
  * and a slot index 66.
+ *
+ * The register oracle's split search finds itemIndex in different registers
+ * in the face loop and the empty dashes' loop, but a counter of its own for
+ * either gives 36 words differing.
  */
 #ifdef NON_MATCHING
 void DrawRingShotRecords(Gfx** displayListHead) {
