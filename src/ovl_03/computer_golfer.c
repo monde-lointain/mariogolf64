@@ -523,6 +523,12 @@ s32 GetSideSlope(void) {
  * and the sign bit sets its direction */
 #define MISHIT_ROLL_RANGE 250
 #define MISHIT_SIGN_BIT 0x2000
+/* The divisors by the golfer's consistency, and for a shot two strokes short
+ * of the hole's target, which mis-hits by a frame at most */
+#define LOW_CONSISTENCY_MISHIT_DIVISOR 62
+#define MIDDLE_CONSISTENCY_MISHIT_DIVISOR 83
+#define HIGH_CONSISTENCY_MISHIT_DIVISOR 125
+#define NEAR_TARGET_MISHIT_DIVISOR 208
 
 /*
  * Plans the computer golfer's shot from g_CurrentShot a step at a time, and
@@ -905,18 +911,18 @@ s32 PlanShot(CurrentShot* plannedShot) {
             f_GolferTraits[g_Players[f_TrialShot.playerIndex].characterIndex]
                 .consistency) {
           case CONSISTENCY_LOW:
-            mishitDivisor = 62;
+            mishitDivisor = LOW_CONSISTENCY_MISHIT_DIVISOR;
             break;
           case CONSISTENCY_MIDDLE:
-            mishitDivisor = 83;
+            mishitDivisor = MIDDLE_CONSISTENCY_MISHIT_DIVISOR;
             break;
           case CONSISTENCY_HIGH:
           default:
-            mishitDivisor = 125;
+            mishitDivisor = HIGH_CONSISTENCY_MISHIT_DIVISOR;
             break;
         }
       } else {
-        mishitDivisor = 208;
+        mishitDivisor = NEAR_TARGET_MISHIT_DIVISOR;
       }
 
       mishit = rand() % MISHIT_ROLL_RANGE / mishitDivisor;
