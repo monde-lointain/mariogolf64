@@ -45,8 +45,19 @@
 /* The shadow texture is 32x32 I8 */
 #define SHADOW_TEXTURE_SIZE 32
 
-/* The face-printed golf balls that the opening shows, two at a time */
-#define OPENING_BALL_IMAGE_COUNT 5
+/*
+ * The golf ball images that the opening shows, two at a time, as
+ * f_OpeningBallAssets lists them
+ */
+typedef enum OpeningBallImage {
+  MARIO_FACE_BALL,
+  DONKEY_KONG_FACE_BALL,
+  YOSHI_FACE_BALL,
+  LUIGI_FACE_BALL,
+  PLAIN_BALL,
+  OPENING_BALL_IMAGE_COUNT
+} OpeningBallImage;
+
 #define OPENING_BALL_SLOT_COUNT 2
 /* A 64x64 CI8 image with its header and palette */
 #define OPENING_BALL_IMAGE_SIZE 0x1208
@@ -241,7 +252,7 @@ void LoadOpeningBurst(void);
 void LoadLakitu(void);
 void LoadOpeningImpactLines(void);
 void EaseOpeningLookAt(void);
-void LoadOpeningBall(s32 imageIndex, s32 slot);
+void LoadOpeningBall(OpeningBallImage image, s32 slot);
 
 /* The larger of the images in f_OpeningEffectImage, the 64x64 CI8 impact
  * lines with their header and palette */
@@ -2109,13 +2120,13 @@ void UpdateOpening(void) {
         if (AreEditorMovesDone()) {
           StartHudAnimation(HUD_ANIMATION_FADE_OUT);
           f_OpeningScene++;
-          LoadOpeningBall(4, 0);
-          LoadOpeningBall(4, 1);
-          f_OpeningBallPositions[0][0] = 2709.835f;
-          f_OpeningBallPositions[0][2] = 2465.858f;
+          LoadOpeningBall(PLAIN_BALL, 0);
+          LoadOpeningBall(PLAIN_BALL, 1);
+          f_OpeningBallPositions[0][AXIS_X] = 2709.835f;
+          f_OpeningBallPositions[0][AXIS_Z] = 2465.858f;
           f_OpeningBallScales[0] = 1.5f;
-          f_OpeningBallPositions[1][0] = 2653.68f;
-          f_OpeningBallPositions[1][2] = 2478.326f;
+          f_OpeningBallPositions[1][AXIS_X] = 2653.68f;
+          f_OpeningBallPositions[1][AXIS_Z] = 2478.326f;
           f_OpeningBallScales[1] = 1.5f;
         }
 
@@ -2124,8 +2135,8 @@ void UpdateOpening(void) {
         PlaceEditorCamera(
             2737.741f, -364.884f, 2368.88f, 2680.325f, -248.5f, 2488.521f);
         f_OpeningCue = OPENING_CUE_PEACH_PLUM_WALK;
-        f_OpeningBallStates[0] = 1;
-        f_OpeningBallStates[1] = 1;
+        f_OpeningBallStates[0] = OPENING_BALL_ON_GROUND;
+        f_OpeningBallStates[1] = OPENING_BALL_ON_GROUND;
         f_OpeningScene++;
         break;
       case OPENING_SCENE_PEACH_PLUM_WALK + 2:
@@ -2146,10 +2157,10 @@ void UpdateOpening(void) {
       case OPENING_SCENE_MARIO_LUIGI_WALK:
         PlaceEditorCamera(
             2413.141f, -271.41f, 1784.364f, 2503.834f, -245.0f, 1850.029f);
-        f_OpeningBallStates[1] = 0;
-        f_OpeningBallPositions[0][0] = 2483.922f;
-        f_OpeningBallPositions[0][2] = 1800.958f;
-        f_OpeningBallScales[0] = 1.0f;
+        f_OpeningBallStates[1] = OPENING_BALL_HIDDEN;
+        f_OpeningBallPositions[0][AXIS_X] = 2483.922f;
+        f_OpeningBallPositions[0][AXIS_Z] = 1800.958f;
+        f_OpeningBallScales[0] = OPENING_BALL_NORMAL_SCALE;
         MoveEditorCamera(1, 2489.032f, -255.774f, 1840.637f, 0x50);
         TiltEditorCamera(1, -0.116571f, 0x76);
         TurnEditorCamera(1, 1.366719f, 0x76);
@@ -2290,13 +2301,13 @@ void UpdateOpening(void) {
             }
           }
 
-          LoadOpeningBall(4, 0);
-          f_OpeningBallPositions[0][0] = 2723.423f;
-          f_OpeningBallPositions[0][2] = 2246.086f;
+          LoadOpeningBall(PLAIN_BALL, 0);
+          f_OpeningBallPositions[0][AXIS_X] = 2723.423f;
+          f_OpeningBallPositions[0][AXIS_Z] = 2246.086f;
         }
 
         if (f_OpeningSceneFramesLeft == 50) {
-          f_OpeningBallStates[0] = 1;
+          f_OpeningBallStates[0] = OPENING_BALL_ON_GROUND;
         }
 
         if (f_OpeningSceneFramesLeft == 0) {
@@ -2321,8 +2332,8 @@ void UpdateOpening(void) {
           f_OpeningCue = OPENING_CUE_PEACH_APPROACH;
           f_OpeningSceneFramesLeft = 64;
           f_OpeningScene = OPENING_SCENE_PEACH_APPROACH;
-          f_OpeningBallPositions[0][0] = 2755.104f;
-          f_OpeningBallPositions[0][2] = 2341.293f;
+          f_OpeningBallPositions[0][AXIS_X] = 2755.104f;
+          f_OpeningBallPositions[0][AXIS_Z] = 2341.293f;
         }
 
         break;
@@ -2346,16 +2357,16 @@ void UpdateOpening(void) {
           g_HoleSetup.conditions.lightPitch = 0x1000;
           g_HoleSetup.conditions.lightYaw = 0x6800;
           if (f_IsDonkeyKongShown) {
-            LoadOpeningBall(1, 1);
+            LoadOpeningBall(DONKEY_KONG_FACE_BALL, 1);
           } else {
-            LoadOpeningBall(2, 1);
+            LoadOpeningBall(YOSHI_FACE_BALL, 1);
           }
 
-          f_OpeningBallStates[0] = 0;
-          f_OpeningBallStates[1] = 1;
-          f_OpeningBallPositions[1][0] = 2689.998f;
-          f_OpeningBallPositions[1][2] = 2367.191f;
-          f_OpeningBallScales[1] = 3.0f;
+          f_OpeningBallStates[0] = OPENING_BALL_HIDDEN;
+          f_OpeningBallStates[1] = OPENING_BALL_ON_GROUND;
+          f_OpeningBallPositions[1][AXIS_X] = 2689.998f;
+          f_OpeningBallPositions[1][AXIS_Z] = 2367.191f;
+          f_OpeningBallScales[1] = OPENING_BALL_LARGE_SCALE;
         }
 
         break;
@@ -2374,12 +2385,12 @@ void UpdateOpening(void) {
           f_OpeningSceneFramesLeft = 56;
           g_CameraEditor.fieldOfView = 45.0f;
           f_OpeningScene++;
-          LoadOpeningBall(4, 0);
-          f_OpeningBallStates[0] = 1;
-          f_OpeningBallStates[1] = 0;
-          f_OpeningBallPositions[0][0] = 2755.104f;
-          f_OpeningBallPositions[0][2] = 2341.293f;
-          f_OpeningBallScales[0] = 1.0f;
+          LoadOpeningBall(PLAIN_BALL, 0);
+          f_OpeningBallStates[0] = OPENING_BALL_ON_GROUND;
+          f_OpeningBallStates[1] = OPENING_BALL_HIDDEN;
+          f_OpeningBallPositions[0][AXIS_X] = 2755.104f;
+          f_OpeningBallPositions[0][AXIS_Z] = 2341.293f;
+          f_OpeningBallScales[0] = OPENING_BALL_NORMAL_SCALE;
         }
 
         break;
@@ -2394,9 +2405,9 @@ void UpdateOpening(void) {
           f_OpeningCue = OPENING_CUE_MARIO_LOOK_UP;
           f_OpeningSceneFramesLeft = 30;
           f_OpeningScene++;
-          LoadOpeningBall(4, 1);
-          f_OpeningBallPositions[1][0] = 0.0f;
-          f_OpeningBallPositions[1][2] = 0.0f;
+          LoadOpeningBall(PLAIN_BALL, 1);
+          f_OpeningBallPositions[1][AXIS_X] = 0.0f;
+          f_OpeningBallPositions[1][AXIS_Z] = 0.0f;
         }
 
         break;
@@ -2415,10 +2426,10 @@ void UpdateOpening(void) {
         break;
       case OPENING_SCENE_INCOMING_BALL:
         GetCharacterPointPosition(1, 3, logoBallPoint);
-        f_OpeningBallStates[1] = 2;
-        f_OpeningBallPositions[1][0] = 2319.014f;
-        f_OpeningBallPositions[1][1] = -560.0f;
-        f_OpeningBallPositions[1][2] = 342.12f;
+        f_OpeningBallStates[1] = OPENING_BALL_IN_AIR;
+        f_OpeningBallPositions[1][AXIS_X] = 2319.014f;
+        f_OpeningBallPositions[1][AXIS_Y] = -560.0f;
+        f_OpeningBallPositions[1][AXIS_Z] = 342.12f;
         f_OpeningBallScales[1] = 2.0f;
         PlaceEditorCamera(
             2662.345f, -254.25f, 2376.081f, 2493.599f, -910.952f, 665.178f);
@@ -2430,14 +2441,14 @@ void UpdateOpening(void) {
         f_LogoBallFollowRate = 1.0f;
         break;
       case OPENING_SCENE_INCOMING_BALL + 1:
-        f_OpeningBallPositions[1][0] +=
-            (g_CameraEditor.points[1][0] - f_OpeningBallPositions[1][0]) *
+        f_OpeningBallPositions[1][AXIS_X] +=
+            (g_CameraEditor.points[1][0] - f_OpeningBallPositions[1][AXIS_X]) *
             f_LogoBallFollowRate;
-        f_OpeningBallPositions[1][1] +=
-            (g_CameraEditor.points[1][1] - f_OpeningBallPositions[1][1]) *
+        f_OpeningBallPositions[1][AXIS_Y] +=
+            (g_CameraEditor.points[1][1] - f_OpeningBallPositions[1][AXIS_Y]) *
             f_LogoBallFollowRate;
-        f_OpeningBallPositions[1][2] +=
-            (g_CameraEditor.points[1][2] - f_OpeningBallPositions[1][2]) *
+        f_OpeningBallPositions[1][AXIS_Z] +=
+            (g_CameraEditor.points[1][2] - f_OpeningBallPositions[1][AXIS_Z]) *
             f_LogoBallFollowRate;
         f_LogoBallFollowRate -= 0.02f;
         if (f_LogoBallFollowRate < 0.1f) {
@@ -2459,14 +2470,14 @@ void UpdateOpening(void) {
         }
 
         GetCharacterPointPosition(1, 3, handPoint);
-        f_OpeningBallPositions[1][0] +=
-            (handPoint[AXIS_X] - f_OpeningBallPositions[1][0]) *
+        f_OpeningBallPositions[1][AXIS_X] +=
+            (handPoint[AXIS_X] - f_OpeningBallPositions[1][AXIS_X]) *
             f_LogoBallFollowRate;
-        f_OpeningBallPositions[1][1] +=
-            (handPoint[AXIS_Y] - f_OpeningBallPositions[1][1]) *
+        f_OpeningBallPositions[1][AXIS_Y] +=
+            (handPoint[AXIS_Y] - f_OpeningBallPositions[1][AXIS_Y]) *
             f_LogoBallFollowRate;
-        f_OpeningBallPositions[1][2] +=
-            (handPoint[AXIS_Z] - f_OpeningBallPositions[1][2]) *
+        f_OpeningBallPositions[1][AXIS_Z] +=
+            (handPoint[AXIS_Z] - f_OpeningBallPositions[1][AXIS_Z]) *
             f_LogoBallFollowRate;
         switch (f_OpeningSceneFramesLeft) {
           case 97:
@@ -2505,7 +2516,7 @@ void UpdateOpening(void) {
             LoadNameLogo(4, 1);
           }
 
-          f_OpeningBallStates[1] = 0;
+          f_OpeningBallStates[1] = OPENING_BALL_HIDDEN;
           f_IsLogoBallSlot[1] = 0;
           f_ShotBallScale = 0;
           f_LookAtEaseMode = 0;
@@ -2695,7 +2706,7 @@ void UpdateOpening(void) {
           f_OpeningSceneFramesLeft = 20;
           f_OpeningScene = OPENING_SCENE_LUIGI_SEARCH;
           f_OpeningCue = OPENING_CUE_CLEAR_CHARACTERS;
-          f_OpeningBallStates[0] = 0;
+          f_OpeningBallStates[0] = OPENING_BALL_HIDDEN;
         }
 
         break;
@@ -2719,10 +2730,10 @@ void UpdateOpening(void) {
 
         if (f_OpeningSceneFramesLeft == 0) {
           f_OpeningScene = OPENING_SCENE_OUT_OF_BOUNDS;
-          LoadOpeningBall(3, 0);
-          f_OpeningBallStates[0] = 1;
-          f_OpeningBallPositions[0][0] = 932.978f;
-          f_OpeningBallPositions[0][2] = 1884.644f;
+          LoadOpeningBall(LUIGI_FACE_BALL, 0);
+          f_OpeningBallStates[0] = OPENING_BALL_ON_GROUND;
+          f_OpeningBallPositions[0][AXIS_X] = 932.978f;
+          f_OpeningBallPositions[0][AXIS_Z] = 1884.644f;
           f_OpeningBallScales[0] = 1.4f;
         }
 
@@ -2847,7 +2858,7 @@ void UpdateOpening(void) {
           f_OpeningScene = OPENING_SCENE_GATHERING;
           f_OpeningSceneFramesLeft = 80;
           f_OpeningCue = OPENING_CUE_LUIGI_DISMAY;
-          f_OpeningBallStates[0] = 0;
+          f_OpeningBallStates[0] = OPENING_BALL_HIDDEN;
           g_CameraEditor.fieldOfView = 45.0f;
           LoadOpeningBurst();
         }
@@ -3339,10 +3350,10 @@ void AnimateNameLogos(void) {
 }
 
 /* Loads ball image ballIndex into slot and resets the slot */
-void LoadOpeningBall(s32 ballIndex, s32 slot) {
+void LoadOpeningBall(OpeningBallImage image, s32 slot) {
   EncodedAsset asset;
 
-  OpenEncodedAsset(f_OpeningBallAssets[ballIndex], &asset);
+  OpenEncodedAsset(f_OpeningBallAssets[image], &asset);
   ReadEncodedAsset(f_OpeningBallImages[slot], &asset);
   f_OpeningBallStates[slot] = OPENING_BALL_HIDDEN;
   f_OpeningBallScales[slot] = OPENING_BALL_NORMAL_SCALE;
@@ -4655,15 +4666,15 @@ void EaseOpeningLookAt(void) {
       break;
     case LOOK_AT_EASE_SPEEDING_UP:
       g_CameraEditor.points[EDITOR_POINT_LOOK_AT][0] +=
-          ((f_OpeningBallPositions[1][0] + 38.1f) -
+          ((f_OpeningBallPositions[1][AXIS_X] + 38.1f) -
               g_CameraEditor.points[EDITOR_POINT_LOOK_AT][0]) *
           f_LookAtEaseRate;
       g_CameraEditor.points[EDITOR_POINT_LOOK_AT][1] +=
-          ((f_OpeningBallPositions[1][1] - 4.5f) -
+          ((f_OpeningBallPositions[1][AXIS_Y] - 4.5f) -
               g_CameraEditor.points[EDITOR_POINT_LOOK_AT][1]) *
           f_LookAtEaseRate;
       g_CameraEditor.points[EDITOR_POINT_LOOK_AT][2] +=
-          ((f_OpeningBallPositions[1][2] - 4.795f) -
+          ((f_OpeningBallPositions[1][AXIS_Z] - 4.795f) -
               g_CameraEditor.points[EDITOR_POINT_LOOK_AT][2]) *
           f_LookAtEaseRate;
       MeasureEditorCamera();
