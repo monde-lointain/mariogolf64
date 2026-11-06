@@ -2057,6 +2057,22 @@ void DrawReadyGoMovie(Gfx** displayListHead) {
  * into new locals. Naming that distance and adding it to the center gives 54
  * words, and taking top as i strips below the center, less 4 strips, gives
  * 109 to 128 (27 to 34 in shape) in each order of the terms.
+ *
+ * Per loop.c's dump (-dL), the strip loop has 51 real insns when loop.c
+ * scans it, and its threshold starts at 61, one more than MIPS's 60
+ * registers that aren't fixed, as the loop has calls. The draft's loop
+ * moves the constant 6 at 61, so the original's, which leaves that
+ * constant and CENTER_X + halfWidth in the loop but moves CENTER_X -
+ * halfWidth and (width >> 1) << 10, had at least 62. Indexing the strip
+ * as i * width, without offset, gives the original's code for the strip's
+ * address, offset stepping by width with offset * 6 unreduced, as loop.c
+ * can't fold a giv whose multiplier is a register; it gives 81 words (19
+ * in shape). Writing top as CENTER_Y + i * stripHeight less 4 strips
+ * folds back to the draft's (i - 4) * stripHeight, and setting the first
+ * sum in a statement of its own keeps stripHeight * 4 a movable of its
+ * own, but with 52 insns loop.c still moves it (113 words, 25 in shape).
+ * Routing the corners and texel steps through inline helpers adds no
+ * insns.
  */
 #ifdef NON_MATCHING
 void DrawShrinkingMovieImage(Gfx** displayListHead) {
