@@ -564,7 +564,7 @@ void StartSwingTrail(s32 kind) {
     /* Rewinds the swing to where it was. Ending the block first reloads the
      * count, as the original does, to match; negating it as a float, through
      * a cast or by subtraction, IN_OWN_BLOCK or an empty block don't.
-     * Without it 13 words differ, 7 in shape */
+     * Without it 13 words differ, 7 in shape, against 9 (5) */
     END_BASIC_BLOCK();
     SetAnimationSpeed(0, -f_SwingTrailSampleCount);
     AnimateCharacterInSameCopy(0);

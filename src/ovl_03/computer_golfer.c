@@ -2329,7 +2329,8 @@ s32 StepTrialShot(void) {
   f32 fraction;
   s32 flags;
   s32 ballState;
-  /* A copy of flags, to match: reading flags gives 45 words, 11 in shape */
+  /* A copy of flags, to match: reading flags gives 45 words, 11 in shape,
+   * against 26 (8) */
   s32 stepFlags;
   s32 velocityY;
   s32 bounceCount;
