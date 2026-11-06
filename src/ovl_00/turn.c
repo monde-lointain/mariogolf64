@@ -2037,7 +2037,7 @@ void BuildShotPreview(ShotLaunch* swing, s32 playerState) {
   simulation.position[AXIS_Y] = g_CurrentShot.ballPosition[AXIS_Y];
   simulation.position[AXIS_Z] = g_CurrentShot.ballPosition[AXIS_Z];
   simulation.surface = g_CurrentShot.surface;
-  LaunchBallSimulation(&simulation, LAUNCH_PURPOSE_UNK5, &shot);
+  LaunchBallSimulation(&simulation, LAUNCH_PURPOSE_SHOT_PREVIEW, &shot);
   f_ShotPreviewDotScroll += SHOT_PREVIEW_SCROLL_STEP;
   for (step = 0; step < f_ShotPreviewStepCount; step++) {
     isMiniGolf = &g_GameState.isMiniGolf;

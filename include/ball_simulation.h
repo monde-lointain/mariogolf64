@@ -162,7 +162,9 @@ enum LaunchPurpose {
   LAUNCH_PURPOSE_CLUB_TEST,
   LAUNCH_PURPOSE_TRIAL,
   LAUNCH_PURPOSE_UNK3,
-  LAUNCH_PURPOSE_UNK5 = 5
+  /* BuildShotPreview's path: StepBallSimulation takes one substep a step and
+   * skips the settling */
+  LAUNCH_PURPOSE_SHOT_PREVIEW = 5
 };
 
 typedef struct BallSimulation {

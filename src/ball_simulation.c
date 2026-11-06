@@ -416,7 +416,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
      * The rest of the substep in an if instead of this goto gives the same
      * code. The goto stays like the one to SETTLE below, which matching needs.
      */
-    if (substep != 0 && simulation->purpose == LAUNCH_PURPOSE_UNK5) {
+    if (substep != 0 && simulation->purpose == LAUNCH_PURPOSE_SHOT_PREVIEW) {
       goto NEXT;
     }
 
@@ -672,7 +672,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
 
           velocity[AXIS_X] = pinVelocity[AXIS_X];
           velocity[AXIS_Z] = pinVelocity[AXIS_Z];
-          if (simulation->purpose != LAUNCH_PURPOSE_UNK5) {
+          if (simulation->purpose != LAUNCH_PURPOSE_SHOT_PREVIEW) {
             f32 rest = PIN_HIT_STEP_SHARE - pinFraction;
 
             simulation->position[AXIS_X] =
@@ -2067,7 +2067,7 @@ ROLLED:
 
 SETTLE:
 
-    if (simulation->purpose != LAUNCH_PURPOSE_UNK5) {
+    if (simulation->purpose != LAUNCH_PURPOSE_SHOT_PREVIEW) {
       s32 floor;
 
       if (simulation->purpose == LAUNCH_PURPOSE_CLUB_TEST) {
