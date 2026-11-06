@@ -2972,7 +2972,7 @@ void DrawTurnAwayAnimation(void);
  * the draft from 106 words to 104, 30 in shape either way, and the register
  * oracle's best from 51 words to 49; set first and overridden for the last
  * column, as before, it gave 106, a conditional operator gives the same 104,
- * and the upper rows' width chosen by an if/else gives 158.
+ * and the upper rows' width chosen by an if/else gave 158.
  *
  * Each row's first vertex is held in rowStart, which a focused permuter
  * run's best pointed at by holding row * 6 in a temporary. In all three tile
@@ -2982,8 +2982,15 @@ void DrawTurnAwayAnimation(void);
  * to 33 in shape); a nextRowStart for the lower corners as well, 106 to 197
  * (28 to 75), and 134 (22) in all three loops, with the oracle's closest 56;
  * the next row written as an offset from rowStart, 137 or 235; and
- * GridVertex with the row's product first, 110 (30). 111 words differ, 17 in
- * shape.
+ * GridVertex with the row's product first, 110 (30).
+ *
+ * The upper rows' tile width is now chosen by an if/else too, which on this
+ * base takes the draft from 111 words to 89, 17 in shape to 13, and the
+ * register oracle's closest result from 41 words, forcing 24 pseudos, to 39,
+ * forcing 20. The loop that draws the upper rows' triangles holding its
+ * row's first vertex in a local of its own gives 88 words (16 in shape), but
+ * the oracle's closest rises to 44, forcing 21, and with both changes 95
+ * words (21) differ. 89 words differ, 13 in shape.
  */
 #ifdef NON_MATCHING
 void DrawTurnAwayAnimation(void) {
@@ -3040,9 +3047,10 @@ void DrawTurnAwayAnimation(void) {
             G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
             G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
         wordIndex += FRAME_TILE_WORD_COUNT;
-        width = FRAME_TILE_WIDTH;
         if (column == FRAME_TILE_COLUMN_COUNT - 1) {
           width = LAST_TILE_TEXEL_WIDTH;
+        } else {
+          width = FRAME_TILE_WIDTH;
         }
 
         gSPModifyVertex(
