@@ -2124,6 +2124,11 @@ static inline void FillCodeGap(
  * the draft and the index forms, loop.c steps the code's index alongside the
  * column, where the original adds the column to the row's offset on each
  * pass and steps only the neighbor rows' offsets.
+ *
+ * The register oracle's split search lines the column up with $s0 at most of
+ * its uses and with $a0 where it is passed to FillCodeGap, but a column
+ * counter of the gap-filling passes' own gives 138 words differing (12 in
+ * shape), and a row counter as well 146 (12), against 88 (12).
  */
 #ifdef NON_MATCHING
 void CleanCodeMap(void) {
