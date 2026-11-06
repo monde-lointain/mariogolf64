@@ -49,7 +49,7 @@ typedef struct ScorecardContent {
 } ScorecardContent; /* size = 0x54 */
 
 typedef struct Scorecard {
-  /* 0x00 */ u8 unk0[0xC];
+  /* 0x00 */ u8 unusedBeforeTableImage[0xC];
   /* 0x0C */ u8* tableImage;
   /* 0x10 */ u8*
       placeArrowImage; /* Beside the player's row when their place changed */
@@ -67,7 +67,7 @@ typedef struct Scorecard {
       winsNeededImage; /* The tiles of the holes a match still needs */
   /* 0x40 */ u8* winnerArrowImage; /* Rises over the hole's winner in a match */
   /* 0x44 */ u8* betImages[BET_COUNT][2];
-  /* 0x7C */ u8 unk7C[8];
+  /* 0x7C */ u8 unusedAfterBetImages[8];
   /* 0x84 */ u8* totalHeadingImage; /* Heads the bets page's column of totals */
   /* 0x88 */ u8*
       leaderboardRowImage; /* Behind each leaderboard row, and on its flaps */
@@ -88,7 +88,7 @@ typedef struct Scorecard {
   /* 0xC0 */ s32 topRow; /* The contestant at the top of the leaderboard */
   /* 0xC4 */ s32 x; /* The scorecard's offset from its place on the screen */
   /* 0xC8 */ s32 y;
-  /* 0xCC */ s32 unkCC;
+  /* 0xCC */ s32 unusedAfterOffset;
   /* 0xD0 */ s32 stateTime; /* Frames since g_ScorecardState changed */
   /* The last hole's result is already on the scorecard */
   /* 0xD4 */ Boolean isTallied;
@@ -98,7 +98,7 @@ typedef struct Scorecard {
   /* 0xE0 */ s32 pageCount;
   /* 0xE4 */ Boolean hasBets;
   /* 0xE8 */ SkinsCarryover skinsCarryover;
-  /* 0xEB */ u8 unkEB[5];
+  /* 0xEB */ u8 unusedAfterCarryover[5];
   /* 0xF0 */ ScorecardContent content;
 } Scorecard; /* size = 0x144 */
 
