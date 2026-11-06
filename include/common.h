@@ -174,12 +174,10 @@ typedef f32 Mat4[4][4];
   } while (0)
 
 /*
- * Ends a basic block between two statements, to match. Some boundaries in the
- * original's code need this empty block instead of IN_OWN_BLOCK. Two of them
- * follow an osSyncPrintf call, but the original's print isn't a do-while (0)
- * macro: wrapping every call in IN_OWN_BLOCK breaks 37 matched functions.
- * Most of them come before a fabsf test, but an inline function in place of
- * fabsf leaves those drafts as they are without the empty block.
+ * Ends a basic block between two statements, to match. Each use's note gives
+ * the words it saves. The original's osSyncPrintf isn't a do-while (0) macro
+ * that would end blocks like this: wrapping every call in IN_OWN_BLOCK breaks
+ * 37 matched functions.
  */
 #define END_BASIC_BLOCK() \
   do { \
