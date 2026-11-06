@@ -414,7 +414,13 @@ typedef struct StatusData {
 #define CLUB_DATA_IGNORED_STAT_OFFSET 4
 #define CLUB_DATA_SIDE_SPIN_OFFSET 5
 #define DATA_EXPERIENCE_OFFSET 0x15C
-#define DATA_UNK15E_OFFSET 0x15E
+/*
+ * The byte after the experience, which the transfer sets to
+ * EXPERIENCE_ADDED_MARK whenever it writes the experience back; the Game Boy
+ * version's use of it is unknown
+ */
+#define DATA_EXPERIENCE_MARK_OFFSET 0x15E
+#define EXPERIENCE_ADDED_MARK 100
 /* The experience and the byte after it */
 #define DATA_EXPERIENCE_WRITE_SIZE 3
 #define MAX_EXPERIENCE 0xFFFF
@@ -2660,7 +2666,7 @@ s32 WriteExperienceToCartridge(s32 characterIndex) {
           characterData[DATA_EXPERIENCE_OFFSET + 1] =
               experience >> BITS_PER_BYTE;
           characterData[DATA_EXPERIENCE_OFFSET] = experience;
-          characterData[DATA_UNK15E_OFFSET] = 100;
+          characterData[DATA_EXPERIENCE_MARK_OFFSET] = EXPERIENCE_ADDED_MARK;
           result = nuContGBPakFwrite(&transfer->pakFile,
               dataAddress - STATUS_ADDRESS_BIAS + DATA_EXPERIENCE_OFFSET,
               &characterData[DATA_EXPERIENCE_OFFSET],
