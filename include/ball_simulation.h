@@ -161,7 +161,12 @@ enum LaunchPurpose {
   LAUNCH_PURPOSE_STROKE,
   LAUNCH_PURPOSE_CLUB_TEST,
   LAUNCH_PURPOSE_TRIAL,
-  LAUNCH_PURPOSE_UNK3,
+  /*
+   * Not launched: PlaceBallAtRest sets it on a ball it puts at rest, which
+   * DrawGolfBalls then draws at the ball's own depth, with no near-cup bias,
+   * unless the cup view is shown
+   */
+  LAUNCH_PURPOSE_PLACED_AT_REST,
   /* BuildShotPreview's path: StepBallSimulation takes one substep a step and
    * skips the settling */
   LAUNCH_PURPOSE_SHOT_PREVIEW = 5

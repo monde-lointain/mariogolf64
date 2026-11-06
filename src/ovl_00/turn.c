@@ -1826,7 +1826,7 @@ void PlaceBallAtRest(s32 playerIndex, BallSimulation* simulation) {
   }
 
   simulation->surface = player->ballSurface;
-  simulation->purpose = LAUNCH_PURPOSE_UNK3;
+  simulation->purpose = LAUNCH_PURPOSE_PLACED_AT_REST;
   simulation->hasEnteredWater = 0;
   PrepareShotEffects(simulation);
   if (g_IsModuleAlive[MODULE_GOLF_BALLS] ||

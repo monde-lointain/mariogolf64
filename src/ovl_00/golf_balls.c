@@ -947,7 +947,7 @@ void DrawGolfBalls(CameraMatrices* matrices UNUSED) {
             } else {
               primDepth = isAboveCup ? 0x401F : 0x4007;
             }
-          } else if (ball->purpose == LAUNCH_PURPOSE_UNK3) {
+          } else if (ball->purpose == LAUNCH_PURPOSE_PLACED_AT_REST) {
             primDepth = ballPoint.depth;
           } else if (ballDepth < g_CupViewDepth) {
             if (isAboveCup == TRUE) {
@@ -1101,7 +1101,7 @@ void DrawGolfBalls(CameraMatrices* matrices UNUSED) {
               shade = 0x3F;
             }
           } else {
-            if (ball->purpose == LAUNCH_PURPOSE_UNK3) {
+            if (ball->purpose == LAUNCH_PURPOSE_PLACED_AT_REST) {
               shadowPrimDepth = ballPoint.depth;
             } else {
               f32 depth;
