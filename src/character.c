@@ -1465,10 +1465,19 @@ void AnimateCharacter(u32 slotIndex) {
  * after the slerp test's compare, where the draft loads it before the test.
  * Working out the progress before the dot product instead also gives 184
  * words (66 in shape), and working it out in each arm of the test 203 (71).
+ *
+ * The counts above were measured before the change below. The span
+ * weights, once scaled by QUATERNION_SCALE, are held in spanFactor and
+ * nextFactor rather than scaled in place: the register oracle's split
+ * report had shown each weight in one register before the scaling and
+ * another after. That takes the draft from 184 words differing, 66 in
+ * shape, to 156 (64); declaring the factors before the weights gives
+ * 172 (64), and scaling the next weight first changes nothing. 156 words
+ * differ, 64 in shape.
  */
 #ifdef NON_MATCHING
 void UpdateJointKeyframeSpans(u32 slotIndex) {
-  /* Pads the frame to match; without it 292 words differ, against 184 */
+  /* Pads the frame to match; without it 266 words differ, against 156 */
   f32 unusedMatrices[3][4][4] UNUSED;
   f32 translationMatrix[4][4];
   f32 jointMatrix[4][4];
@@ -1487,6 +1496,8 @@ void UpdateJointKeyframeSpans(u32 slotIndex) {
   Radians angle;
   f32 nextWeight;
   f32 spanWeight;
+  f32 spanFactor;
+  f32 nextFactor;
   f32 sinAngle;
   f32 lengthSquared;
   f32 scale;
@@ -1649,16 +1660,16 @@ void UpdateJointKeyframeSpans(u32 slotIndex) {
           spanWeight = sinf(angle - rotationProgress) / sinAngle;
         }
 
-        spanWeight *= QUATERNION_SCALE;
-        nextWeight *= QUATERNION_SCALE;
-        rotation[0] = (spanWeight * joint->rotations[spanIndex][0]) +
-            (nextWeight * joint->rotations[nextSpanIndex][0]);
-        rotation[1] = (spanWeight * joint->rotations[spanIndex][1]) +
-            (nextWeight * joint->rotations[nextSpanIndex][1]);
-        rotation[2] = (spanWeight * joint->rotations[spanIndex][2]) +
-            (nextWeight * joint->rotations[nextSpanIndex][2]);
-        rotation[3] = (spanWeight * joint->rotations[spanIndex][3]) +
-            (nextWeight * joint->rotations[nextSpanIndex][3]);
+        spanFactor = spanWeight * QUATERNION_SCALE;
+        nextFactor = nextWeight * QUATERNION_SCALE;
+        rotation[0] = (spanFactor * joint->rotations[spanIndex][0]) +
+            (nextFactor * joint->rotations[nextSpanIndex][0]);
+        rotation[1] = (spanFactor * joint->rotations[spanIndex][1]) +
+            (nextFactor * joint->rotations[nextSpanIndex][1]);
+        rotation[2] = (spanFactor * joint->rotations[spanIndex][2]) +
+            (nextFactor * joint->rotations[nextSpanIndex][2]);
+        rotation[3] = (spanFactor * joint->rotations[spanIndex][3]) +
+            (nextFactor * joint->rotations[nextSpanIndex][3]);
       }
     }
 
@@ -1687,8 +1698,8 @@ void UpdateJointKeyframeSpans(u32 slotIndex) {
     wy = rotation[3] * ys;
     yy = rotation[1] * ys;
     /*
-     * dot holds the z axis's square term from here, to match: a zz variable
-     * gives 191 words differing (73 in shape) against the draft's 184 (66)
+     * dot holds the z axis's square term from here: a zz variable gives
+     * 237 words differing (67 in shape) against the draft's 156 (64)
      */
     dot = rotation[2] * zs;
     xy = rotation[0] * ys;

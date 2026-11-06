@@ -2195,10 +2195,19 @@ const CharacterModel g_OtherCharacterModels[OTHER_CHARACTER_MODEL_COUNT] = {
  * frame 8 bytes smaller, reading an s16 field as unsigned. An s16 or s32
  * local for the start frame, used in the divisor alone or in both its reads,
  * and a u16 local used in both, compile as the draft does.
+ *
+ * The counts above were measured before the change below. The span
+ * weights, once scaled by QUATERNION_SCALE, are held in spanFactor and
+ * nextFactor rather than scaled in place: the register oracle's split
+ * report had shown each weight in one register before the scaling and
+ * another after. That takes the draft from 206 words differing, 42 in
+ * shape, to 180 (40); declaring the factors before the weights gives
+ * 196 (40), and scaling the next weight first changes nothing. 180 words
+ * differ, 40 in shape.
  */
 #ifdef NON_MATCHING
 void AnimateCharacterJoints(u32 slotIndex) {
-  /* Pads the frame to match; without it 282 words differ, against 206 */
+  /* Pads the frame to match; without it 256 words differ, against 180 */
   f32 unused[46] UNUSED;
   f32 translationMatrix[4][4];
   f32 jointMatrix[4][4];
@@ -2218,6 +2227,8 @@ void AnimateCharacterJoints(u32 slotIndex) {
   Radians angle;
   f32 nextWeight;
   f32 spanWeight;
+  f32 spanFactor;
+  f32 nextFactor;
   f32 sinAngle;
   f32 lengthSquared;
   f32 xs;
@@ -2380,16 +2391,16 @@ void AnimateCharacterJoints(u32 slotIndex) {
           spanWeight = sinf(angle - rotationProgress) / sinAngle;
         }
 
-        spanWeight *= QUATERNION_SCALE;
-        nextWeight *= QUATERNION_SCALE;
-        rotation[0] = (spanWeight * joint->rotations[spanIndex][0]) +
-            (nextWeight * joint->rotations[nextSpanIndex][0]);
-        rotation[1] = (spanWeight * joint->rotations[spanIndex][1]) +
-            (nextWeight * joint->rotations[nextSpanIndex][1]);
-        rotation[2] = (spanWeight * joint->rotations[spanIndex][2]) +
-            (nextWeight * joint->rotations[nextSpanIndex][2]);
-        rotation[3] = (spanWeight * joint->rotations[spanIndex][3]) +
-            (nextWeight * joint->rotations[nextSpanIndex][3]);
+        spanFactor = spanWeight * QUATERNION_SCALE;
+        nextFactor = nextWeight * QUATERNION_SCALE;
+        rotation[0] = (spanFactor * joint->rotations[spanIndex][0]) +
+            (nextFactor * joint->rotations[nextSpanIndex][0]);
+        rotation[1] = (spanFactor * joint->rotations[spanIndex][1]) +
+            (nextFactor * joint->rotations[nextSpanIndex][1]);
+        rotation[2] = (spanFactor * joint->rotations[spanIndex][2]) +
+            (nextFactor * joint->rotations[nextSpanIndex][2]);
+        rotation[3] = (spanFactor * joint->rotations[spanIndex][3]) +
+            (nextFactor * joint->rotations[nextSpanIndex][3]);
       }
     }
 
@@ -2397,11 +2408,13 @@ void AnimateCharacterJoints(u32 slotIndex) {
     lengthSquared = (rotation[2] * rotation[2]) + (rotation[3] * rotation[3]) +
         (rotation[0] * rotation[0]) + (rotation[1] * rotation[1]);
     /*
-     * dot holds the quaternion's scale from here, and progress holds the w and
-     * x term, to match: a scale variable gives 223 words differing (53 in
-     * shape), a wx variable 228 (42), and both 245 (53), against the draft's
-     * 206 (42); a static inline converter with its own locals gives 298 (50),
-     * and 318 to 374 with other pads from 30 to 52 floats
+     * dot holds the quaternion's scale from here, and progress holds the
+     * w and x term: a scale variable gives 197 words differing (51 in
+     * shape), a wx variable 202 (40), and both 219 (51), against the
+     * draft's 180 (40). Measured before the weights' factors had
+     * variables of their own, a static inline converter with its own
+     * locals gave 298 (50), and 318 to 374 with other pads from 30 to 52
+     * floats
      */
     if (lengthSquared > 0.0f) {
       dot = 2.0f / lengthSquared;
