@@ -226,7 +226,6 @@ FILE_STATIC s32 g_CurrentAnimationStartFrame;
 /* The square's texture coordinates, in s10.5, span the texture and the mirror
  * image its tile wraps to */
 #define SHADOW_QUAD_TEXEL_SPAN TexelCoordinate(SHADOW_TEXTURE_SIZE * 2)
-#define ShadowTexturePixels(texture) (TextureAddress((u32)(texture) + 8))
 #define SECOND_LIGHT_DIRECTION_LENGTH 64.0f
 /* How far from the shadow point, in model units, the ground is sampled */
 #define SHADOW_CORNER_DISTANCE 30.0f
@@ -2388,8 +2387,8 @@ void DrawCharacterAndShadow(
     gDPPipeSync(gfx++);
     gDPSetTexturePersp(gfx++, G_TP_PERSP);
     gSPSetGeometryMode(gfx++, G_ZBUFFER | G_SHADE | G_FOG | G_SHADING_SMOOTH);
-    gDPLoadTextureBlock(gfx++, ShadowTexturePixels(g_ShadowTexture), G_IM_FMT_I,
-        G_IM_SIZ_8b, SHADOW_TEXTURE_SIZE, SHADOW_TEXTURE_SIZE, 0,
+    gDPLoadTextureBlock(gfx++, TextureAddress(ImageBody(g_ShadowTexture)),
+        G_IM_FMT_I, G_IM_SIZ_8b, SHADOW_TEXTURE_SIZE, SHADOW_TEXTURE_SIZE, 0,
         G_TX_MIRROR | G_TX_WRAP, G_TX_MIRROR | G_TX_WRAP,
         SHADOW_TEXTURE_SIZE_LOG2, SHADOW_TEXTURE_SIZE_LOG2, G_TX_NOLOD,
         G_TX_NOLOD);
