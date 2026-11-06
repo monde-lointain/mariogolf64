@@ -2883,7 +2883,8 @@ void ChooseFlightCameraKind(void) {
         /*
          * The repeated store is there to match: dropping the test, keeping
          * only its call, or leaving its branch empty gives 26 words
-         * differing (22 in shape), and storing in both arms 19
+         * differing (22 in shape), and storing in both arms in place of
+         * before the test 19 (19), against 2 (none)
          */
         if (IsTroubleSurface(f_EndSurfaceInfo) ||
             f_FlightCameraKind == FLIGHT_CAMERA_FOLLOWING_PATH) {

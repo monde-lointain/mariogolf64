@@ -554,7 +554,8 @@ void DrawScreenFade(Gfx** displayListHead) {
     gDPSetAlphaDither(gfx++, G_AD_PATTERN);
     /*
      * Through bytes, to match: s32 locals give 36 words differing (12 in
-     * shape), and the globals passed straight to the macro 308
+     * shape), and the globals passed straight to the macro 308 (56),
+     * against 10 (8)
      */
     red = g_ScreenFadeRed;
     green = g_ScreenFadeGreen;
