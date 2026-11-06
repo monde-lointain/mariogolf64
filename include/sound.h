@@ -293,11 +293,11 @@ enum Sound {
    */
   SOUND_UNK321,
   /*
-   * SOUND_UNK326, SOUND_UNK374, SOUND_UNK406 and SOUND_UNK430 fall among
-   * Luigi's, Mario's, Peach's and Plum's voice sounds; the opening plays
-   * them in threes
+   * Luigi's, Mario's, Peach's and Plum's *_OPENING_VOICE sounds lie in their
+   * voice banks, each just before the character's CALL_OUT_UP sound, but no row
+   * of f_CharacterSounds lists them; only the opening plays them, in threes
    */
-  SOUND_UNK326 = 0x146,
+  SOUND_LUIGI_OPENING_VOICE = 0x146,
   /* Also Luigi's full-shot sound */
   SOUND_LUIGI_CALL_OUT_UP,
   SOUND_LUIGI_CALL_OUT_RIGHT,
@@ -309,7 +309,7 @@ enum Sound {
   SOUND_MAPLE_BIRDIE = 0x168,
   SOUND_MAPLE_PAR,
   SOUND_METAL_MARIO_BIRDIE = 0x173,
-  SOUND_UNK374 = 0x176,
+  SOUND_MARIO_OPENING_VOICE = 0x176,
   /* Also Mario's and Metal Mario's full-shot sound */
   SOUND_MARIO_CALL_OUT_UP,
   SOUND_METAL_MARIO_BOGEY = 0x17F,
@@ -332,7 +332,7 @@ enum Sound {
   /* Also Peach's trouble reaction */
   SOUND_PEACH_CALL_OUT_C_LEFT = 0x190,
   SOUND_PEACH_BIRDIE = 0x194,
-  SOUND_UNK406 = 0x196,
+  SOUND_PEACH_OPENING_VOICE = 0x196,
   /* Also Peach's full-shot sound */
   SOUND_PEACH_CALL_OUT_UP,
   SOUND_PEACH_BOGEY = 0x19F,
@@ -341,7 +341,7 @@ enum Sound {
   SOUND_UNK418,
   SOUND_AMBIENT_RANDOM_FIRST, /* Also Plum's par reaction */
   SOUND_PLUM_EAGLE = 0x1AC,
-  SOUND_UNK430 = 0x1AE,
+  SOUND_PLUM_OPENING_VOICE = 0x1AE,
   /* Also Plum's full-shot sound */
   SOUND_PLUM_CALL_OUT_UP,
   SOUND_PLUM_BOGEY = 0x1B7,

@@ -1568,12 +1568,13 @@ void UpdateOpening(void) {
       case 0x15:
         switch (f_OpeningSceneFramesLeft) {
           case 25:
-            PlaySound(SOUND_UNK406, f_OpeningSoundChannel, SOUND_FULL_SCALE);
+            PlaySound(SOUND_PEACH_OPENING_VOICE, f_OpeningSoundChannel,
+                SOUND_FULL_SCALE);
             AdvanceOpeningSoundChannel();
             break;
           case 23:
             PlaySoundWithEffects(
-                SOUND_UNK430, f_OpeningSoundChannel, 0x46, 0, 0xBB);
+                SOUND_PLUM_OPENING_VOICE, f_OpeningSoundChannel, 0x46, 0, 0xBB);
             AdvanceOpeningSoundChannel();
             break;
           case 20:
@@ -1735,8 +1736,8 @@ void UpdateOpening(void) {
             AdvanceOpeningSoundChannel();
             break;
           case 0x1F:
-            PlaySoundWithEffects(
-                SOUND_UNK326, f_OpeningSoundChannel, 0x50, 0, 0xBB);
+            PlaySoundWithEffects(SOUND_LUIGI_OPENING_VOICE,
+                f_OpeningSoundChannel, 0x50, 0, 0xBB);
             AdvanceOpeningSoundChannel();
             break;
         }
@@ -1847,7 +1848,8 @@ void UpdateOpening(void) {
       case 0x64:
         switch (f_OpeningSceneFramesLeft) {
           case 40:
-            PlaySound(SOUND_UNK374, f_OpeningSoundChannel, SOUND_FULL_SCALE);
+            PlaySound(SOUND_MARIO_OPENING_VOICE, f_OpeningSoundChannel,
+                SOUND_FULL_SCALE);
             AdvanceOpeningSoundChannel();
             break;
           case 38:
@@ -1856,8 +1858,8 @@ void UpdateOpening(void) {
             AdvanceOpeningSoundChannel();
             break;
           case 35:
-            PlaySoundWithEffects(
-                SOUND_UNK406, f_OpeningSoundChannel, 0x36, 0, 0x57);
+            PlaySoundWithEffects(SOUND_PEACH_OPENING_VOICE,
+                f_OpeningSoundChannel, 0x36, 0, 0x57);
             AdvanceOpeningSoundChannel();
             break;
         }
