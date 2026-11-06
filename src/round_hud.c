@@ -1744,6 +1744,12 @@ typedef struct GridScreenPoint {
  * sum is already an s32; without it the two changes give 306 words, 40 in
  * shape, the counter alone 310, 44 in shape, and the sum alone 330, 40 in
  * shape, against 300, 44 in shape.
+ *
+ * The register oracle lines row up with other registers in the lines
+ * along the aim, and row and rowStart with others in the projection pass.
+ * A row counter of its own for the lines along the aim, declared in any
+ * of four places, changes nothing; one for the projection pass gives 310
+ * words (46 in shape), and a row start of its own there 308 (44).
  */
 void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
   f32 points[GREEN_GRID_POINT_COUNT][3];
