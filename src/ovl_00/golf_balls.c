@@ -747,6 +747,9 @@ Boolean IsAnyBallInCup(void) {
 #define BALL_TILE_SMALL 4
 #define BALL_TILE_AFTERIMAGE 5
 #define BALL_TEXTURE_SIZE 32
+/* The afterimage texture's bursts, stacked one above the next */
+#define BALL_AFTERIMAGE_FRAME_COUNT 3
+#define BALL_AFTERIMAGE_FRAME_SIZE 16
 #define SMALL_BALL_TEXTURE_SIZE 8
 #define MARKER_TEXTURE_SIZE 16
 
@@ -1353,7 +1356,10 @@ void DrawGolfBalls(CameraMatrices* matrices UNUSED) {
               QuarterPixels(ballPoint.y) - halfHeight - 1,
               QuarterPixels(ballPoint.x) + halfWidth + 2,
               QuarterPixels(ballPoint.y) + halfHeight + 2, BALL_TILE_AFTERIMAGE,
-              0, (guRandom() % 3) << 9, 15, 15);
+              0,
+              TexelCoordinate((guRandom() % BALL_AFTERIMAGE_FRAME_COUNT) *
+                  BALL_AFTERIMAGE_FRAME_SIZE),
+              15, 15);
         } else {
           gSPStretchedTextureRectangle(gfx++,
               QuarterPixels(ballPoint.x) - halfWidth - 1,
@@ -1419,7 +1425,10 @@ void DrawGolfBalls(CameraMatrices* matrices UNUSED) {
               QuarterPixels(shadowPoint.y) - halfHeight - 1,
               QuarterPixels(shadowPoint.x) + halfWidth + 2,
               QuarterPixels(shadowPoint.y) + halfHeight + 2,
-              BALL_TILE_AFTERIMAGE, 0, (guRandom() % 3) << 9, 15, 15);
+              BALL_TILE_AFTERIMAGE, 0,
+              TexelCoordinate((guRandom() % BALL_AFTERIMAGE_FRAME_COUNT) *
+                  BALL_AFTERIMAGE_FRAME_SIZE),
+              15, 15);
         } else {
           gSPStretchedTextureRectangle(gfx++,
               QuarterPixels(shadowPoint.x) - halfWidth - 1,
