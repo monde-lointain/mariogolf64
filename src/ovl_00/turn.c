@@ -3452,7 +3452,7 @@ void UpdateTurns(void) {
             break;
         }
         {
-          SongId song = SONG_ROUND_UNK31;
+          SongId song = SONG_ROUND_REPLAY;
 
           if (g_GameState.replayKind != REPLAY_KIND_NONE) {
             PlaySong(song, SONG_FLAG_FOLLOWS_MUSIC_OPTION | SONG_FLAG_UNREAD);

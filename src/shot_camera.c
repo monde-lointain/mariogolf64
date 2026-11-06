@@ -1624,13 +1624,13 @@ void StartHoleCamerasAndSong(void) {
   g_Cameras[1].view.fieldOfView = DEFAULT_FIELD_OF_VIEW;
   if (g_GameState.replayKind != REPLAY_KIND_NONE) {
     PlaySong(
-        SONG_ROUND_UNK31, SONG_FLAG_FOLLOWS_MUSIC_OPTION | SONG_FLAG_UNREAD);
+        SONG_ROUND_REPLAY, SONG_FLAG_FOLLOWS_MUSIC_OPTION | SONG_FLAG_UNREAD);
     return;
   }
 
   switch (g_GameState.gameMode) {
     case GAME_MODE_TRAINING:
-      PlaySong(SONG_ROUND_UNK26, SONG_FLAG_UNREAD);
+      PlaySong(SONG_ROUND_TRAINING, SONG_FLAG_UNREAD);
       break;
     case GAME_MODE_MATCH_GAME:
     case GAME_MODE_GET_CHARACTER:
@@ -1653,7 +1653,7 @@ void StartHoleCamerasAndSong(void) {
       PlaySong(SONG_ROUND_TOURNAMENT, SONG_FLAG_UNREAD);
       break;
     case GAME_MODE_SPEED_GOLF:
-      PlaySong(SONG_ROUND_UNK24, SONG_FLAG_UNREAD);
+      PlaySong(SONG_ROUND_SPEED_GOLF, SONG_FLAG_UNREAD);
       break;
     case GAME_MODE_RING_SHOT:
       PlaySong(SONG_ROUND_RING_SHOT, SONG_FLAG_UNREAD);
