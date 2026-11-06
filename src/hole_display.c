@@ -3338,6 +3338,10 @@ INCLUDE_ASM("asm/nonmatchings/hole_display", CaptureHudAnimationFrame);
  * rows and multiplying them by SLICE_HEIGHT gives 62 words (6), and the
  * oracle's closest 12, but the original adds 0x78 to the slice's top when the
  * column wraps, as sliceY does here.
+ *
+ * Writing each strip's top from the strip index, rather than stepping y,
+ * gives the same 61 words, 7 in shape, and the word index from the slice and
+ * strip 161 (31).
  */
 #ifdef NON_MATCHING
 void DrawSliceAnimation(void) {
