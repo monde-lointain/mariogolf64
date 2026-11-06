@@ -2351,6 +2351,10 @@ s32 UpdateTournamentResults(ControllerState* controller) {
             f_TallySpeed = FAST_TALLY_SPEED;
           }
           {
+            /*
+             * Through a pointer, to match: naming f_PrizePoints directly
+             * gives 117 words differing, 7 in shape
+             */
             s32* points = &f_PrizePoints;
 
             *points -= f_TallySpeed;
