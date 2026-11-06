@@ -2977,8 +2977,8 @@ void ShowHoleOutBanner(s32 playerIndex) {
  * in place, the ball placement gave 90 words (48 in shape) against 146 (78) as
  * a helper.
  *
- * Doesn't match: 77 words differ, 43 in shape, spread through the routine's
- * states; the register oracle's closest result is 60 words with 4 pseudos
+ * Doesn't match: 68 words differ, 36 in shape, spread through the routine's
+ * states; the register oracle's closest result is 51 words with 4 pseudos
  * forced, so most of the difference is in the code. The counts in the
  * paragraphs after the next were measured when 454 words differed, 184 in
  * shape.
@@ -3097,17 +3097,25 @@ void ShowHoleOutBanner(s32 playerIndex) {
  * for each. Testing for a hole in one first without the local gives 80 (46),
  * and the local with the != 1 test first 83 (43).
  *
- * At the end, the original truncates the target point's z straight into the
- * field (swc1) and loads it back for GetGroundHeight; our cse passes the
- * truncated value on in a register instead (mfc1). Either the original's cse
- * didn't keep the stored value, or reload made the field stand in for a
- * pseudo given no register, which emits the original's code. In the draft,
- * the first scheduling pass moves the copy into $a1 above the store and
- * local-alloc then stores from $a1, so no such equivalence forms. Declaring
- * g_CurrentShot volatile for all of turn.c would cause the reload, but it
- * takes this routine to 416 words (190 in shape) and stops matched routines
- * from matching: AimDownRange then differs in 44 words and CraneAimCamera in
- * 89.
+ * At the end, each arm of the units test places the target point, through
+ * PlaceTargetPoint, and cross-jumping shares the arms' code after the unit's
+ * load, as in the original. Choosing the scale in the arms and placing the
+ * point once after them gave 77 words (43 in shape), and passed the
+ * truncated z to GetGroundHeight in a register (mfc1) where the original
+ * stores it into the field and loads it back; the macro takes the draft to
+ * 68 words (36) and the register oracle's closest result from 60 words to
+ * 51, with 4 pseudos forced for each, and the routine's code from there to
+ * its end matches. The same code as an inline function gives 96 words (44),
+ * and with the scale constant written into the product inside each arm, cosf
+ * coming after the length, 88 (50).
+ *
+ * Re-measured with the macro, against 68 words (36 in shape): a Boolean
+ * local set to the Z button's test compared != 0, or shifting the bits right
+ * 13, gives 65 words with 35 in shape; the local set to the test alone,
+ * comparing the test with 0 or Z_TRIG, or negating it twice leaves 68 (36).
+ * For the holed-out reaction, the subtraction in the switch after the != 1
+ * test gives 75 (39), testing for a hole in one first without the local 71,
+ * also 39 in shape, and the local with the != 1 test first 74 (36).
  */
 #ifdef NON_MATCHING
 /* Whether the stopwatches run in a player state: from aiming to the flight */
@@ -3131,6 +3139,18 @@ void ShowHoleOutBanner(s32 playerIndex) {
       IsYoshiOrDonkeyKong(g_Players[1].characterIndex) && \
       IsYoshiOrDonkeyKong(g_Players[2].characterIndex) && \
       IsYoshiOrDonkeyKong(g_Players[3].characterIndex))
+
+/* Places the target point DISTANCE units of SCALE from the ball at ANGLE */
+#define PlaceTargetPoint(angle, distance, scale) \
+  do { \
+    f32 cosine = cosf(angle); \
+    f32 length = (distance) * (scale); \
+\
+    g_CurrentShot.targetPoint[AXIS_X] = \
+        (cosine * length) + g_CurrentShot.ballPosition[AXIS_X]; \
+    g_CurrentShot.targetPoint[AXIS_Z] = \
+        (sinf(angle) * length) + g_CurrentShot.ballPosition[AXIS_Z]; \
+  } while (0)
 
 void UpdateTurns(void) {
   s32 playerIndex;
@@ -3939,8 +3959,8 @@ void UpdateTurns(void) {
              * frees the buffer's slot when the flag's test ends, so it shares
              * one slot with the other debug buffers, as in the original's
              * frame; declared in the flag's block, the frame grows from the
-             * original's 0x118 bytes to 0x1A0 and 179 words differ (43 in
-             * shape), and in a do-while 91 (43), against 77 (43).
+             * original's 0x118 bytes to 0x1A0 and 170 words differ (36 in
+             * shape), and in a do-while 82 (36), against 68 (36).
              */
             {
               char text[DEBUG_TEXT_BUFFER_SIZE];
@@ -5282,23 +5302,12 @@ void UpdateTurns(void) {
   if (g_RoundHud.isDistanceSignShown) {
     s32 distance = GetSelectedShotDistance();
     Radians angle = (u16)g_CurrentShot.heading * BINARY_ANGLE_TO_RADIANS;
-    f32 cosine;
-    f32 scale;
-    f32 length;
-
     if (GetSelectedClub()->surfaceMask & CLUB_SURFACE_GREEN) {
-      cosine = cosf(angle);
-      scale = UNITS_PER_METER;
+      PlaceTargetPoint(angle, distance, UNITS_PER_METER);
     } else {
-      cosine = cosf(angle);
-      scale = UNITS_PER_YARD;
+      PlaceTargetPoint(angle, distance, UNITS_PER_YARD);
     }
 
-    length = distance * scale;
-    g_CurrentShot.targetPoint[AXIS_X] =
-        (cosine * length) + g_CurrentShot.ballPosition[AXIS_X];
-    g_CurrentShot.targetPoint[AXIS_Z] =
-        (sinf(angle) * length) + g_CurrentShot.ballPosition[AXIS_Z];
     g_CurrentShot.targetPoint[AXIS_Y] = GetGroundHeight(
         g_CurrentShot.targetPoint[AXIS_X], g_CurrentShot.targetPoint[AXIS_Z]);
   }
