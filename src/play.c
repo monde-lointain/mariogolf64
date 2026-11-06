@@ -68,7 +68,8 @@ enum HoleEndStep {
   HOLE_END_STEP_SCORECARD,
   HOLE_END_STEP_WIPE_OUT,
   HOLE_END_STEP_LOAD_NEXT_HOLE,
-  HOLE_END_STEP_UNK5,
+  /* Never set: would wait for A, then show the scorecard */
+  HOLE_END_STEP_UNUSED_SCORECARD_WAIT,
   HOLE_END_STEP_RING_SHOT_FREE_SLOT,
   HOLE_END_STEP_RING_SHOT_RESULTS,
   HOLE_END_STEP_PROMPT,
@@ -1569,7 +1570,7 @@ DIM_BACKDROP:
             }
 
             break;
-          case HOLE_END_STEP_UNK5:
+          case HOLE_END_STEP_UNUSED_SCORECARD_WAIT:
             if (IsAButtonPressed() ||
                 (IsPlayAdvancingItself() &&
                     f_PlayStateFrameCount > AUTO_ADVANCE_RESULTS_FRAMES)) {
