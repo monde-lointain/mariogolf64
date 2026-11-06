@@ -250,8 +250,11 @@
 /* Lets the match results choose a character with the D-Pad and show its unlock
  * notice with B */
 #define GAME_FLAG_CHOOSE_UNLOCK_NOTICE 0x6E
-#define GAME_FLAG_UNK6A 0x6A
-#define GAME_FLAG_UNK6B 0x6B
+
+/* Each moves the paint logic of a hole read from the host on by one, as to
+ * a mini golf course's next */
+#define GAME_FLAG_NEXT_HOST_PAINT_LOGIC_A 0x6A
+#define GAME_FLAG_NEXT_HOST_PAINT_LOGIC_B 0x6B
 
 /* Has BuildHole read the hole's files from the host instead of its assets */
 #define GAME_FLAG_READ_HOST_HOLE 0x50

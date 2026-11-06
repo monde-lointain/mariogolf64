@@ -2564,11 +2564,11 @@ void BuildHole(s32 course, s32 hole) {
     FillGroundNoise(MINI_GOLF_GROUND_NOISE_RANGE, MINI_GOLF_GROUND_NOISE_BASE);
   } else if (IsGameFlagSet(GAME_FLAG_READ_HOST_HOLE)) {
     f_PaintLogic = f_HolePaintLogics[course - 1][hole - 1];
-    if (IsGameFlagSet(GAME_FLAG_UNK6A)) {
+    if (IsGameFlagSet(GAME_FLAG_NEXT_HOST_PAINT_LOGIC_A)) {
       f_PaintLogic++;
     }
 
-    if (IsGameFlagSet(GAME_FLAG_UNK6B)) {
+    if (IsGameFlagSet(GAME_FLAG_NEXT_HOST_PAINT_LOGIC_B)) {
       f_PaintLogic++;
     }
   } else {
