@@ -695,7 +695,10 @@ void DrawPlanks(Gfx** displayListHead) {
       /*
        * bottom holds the strip's plank group here, to match: a plankGroup
        * variable gives 70 words differing (16 in shape), against the draft's
-       * 56 (10)
+       * 56 (10), whether it is declared in this block or at the top, and 72
+       * to 80 as a u32, u8 or s16. The register oracle, though it lines the
+       * draft's bottom up with two registers, then comes no closer than
+       * those 70 words, against 38 for the draft
        */
       bottom = stripIndex / PLANK_GROUP_STRIP_COUNT;
       if (bottom > PLANK_LAST_GROUP) {
