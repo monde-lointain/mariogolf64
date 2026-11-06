@@ -246,6 +246,9 @@ void SettleLongestDrive(void) {
   }
 }
 
+/* Where the search for the nearest shot starts, beyond any measured one */
+#define FARTHER_THAN_ANY_DISTANCE 0x3FFFFFFF
+
 /* The shot nearest the pin wins the pot from each other player */
 void SettleNearestPin(void) {
   s32 nearest;
@@ -253,7 +256,7 @@ void SettleNearestPin(void) {
   s32 distance;
 
   if (g_GameState.betRates[BET_NEAREST_PIN] > 0) {
-    nearest = 0x3FFFFFFF;
+    nearest = FARTHER_THAN_ANY_DISTANCE;
     f_ContestWinner = NO_CONTEST_WINNER;
     for (player = 0; player != g_GameState.playerCount; player++) {
       distance = g_Players[player].pinDistance;
