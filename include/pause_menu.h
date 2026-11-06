@@ -5,6 +5,13 @@
 
 #include "controller.h"
 
+/* What OpenSaveMenu lists, and f_MenuKind */
+enum SaveMenuList {
+  SAVE_MENU_CLOSED,
+  SAVE_MENU_GAMES,
+  SAVE_MENU_REPLAYS
+};
+
 /*
  * What choosing a pause option does, as its PauseOption.action. Each option's
  * action is its own index, and is named for the option's label.
@@ -75,6 +82,7 @@ void CloseSaveMenu(void);
 void HideRoundHud(void);
 void LeaveGameSaveMenu(void);
 void OpenControlsScreen(void);
+/* kind is a SaveMenuList value */
 void OpenSaveMenu(s32 kind);
 void ResumeRound(void);
 void SaveGameToSlot(void);

@@ -3707,7 +3707,7 @@ void UpdateTurns(void) {
         } else if (g_PauseScreen == PAUSE_SCREEN_LOADING_SAVE_MENU) {
           if (g_IsModuleAlive[MODULE_SAVE_MENU]) {
             g_PauseScreen = PAUSE_SCREEN_SAVE_MENU;
-            OpenSaveMenu(1);
+            OpenSaveMenu(SAVE_MENU_GAMES);
           }
         } else if (g_PauseScreen == PAUSE_SCREEN_LOADING_CONTROLS) {
           if (g_IsModuleAlive[MODULE_SAVE_MENU]) {

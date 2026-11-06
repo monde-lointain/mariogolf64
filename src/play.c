@@ -880,8 +880,6 @@ enum HoleMenuChoice {
 /* What the Ring Shot results return */
 #define RING_SHOT_RESULTS_DONE 1
 #define RING_SHOT_RESULTS_SAVE 2
-/* The argument that starts the Ring Shot results */
-#define RING_SHOT_RESULTS_MODE_UNK2 2
 
 /* The notices shown when the hole unlocks something */
 #define UNLOCK_NOTICE_DONKEY_KONG 0
@@ -1625,7 +1623,7 @@ DIM_BACKDROP:
           case HOLE_END_STEP_LOAD_RING_SHOT:
             if (IsSubModuleLoaded()) {
               f_HoleEndStep = HOLE_END_STEP_RING_SHOT_FREE_SLOT;
-              OpenSaveMenu(RING_SHOT_RESULTS_MODE_UNK2);
+              OpenSaveMenu(SAVE_MENU_REPLAYS);
             }
 
             break;

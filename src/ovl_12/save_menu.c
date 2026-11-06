@@ -15,6 +15,7 @@
 #include "hole_display.h"
 #include "math_util.h"
 #include "menu.h"
+#include "pause_menu.h"
 #include "play.h"
 #include "round_hud.h"
 #include "save.h"
@@ -23,13 +24,6 @@
 #include "screen_layers.h"
 #include "sound.h"
 #include "text_format.h"
-
-/* What OpenSaveMenu lists, and f_MenuKind */
-enum SaveMenuList {
-  SAVE_MENU_CLOSED,
-  SAVE_MENU_GAMES,
-  SAVE_MENU_REPLAYS
-};
 
 /* f_MenuState values */
 enum SaveMenuState {
