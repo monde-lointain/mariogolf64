@@ -267,8 +267,11 @@ void UpdateBootLogos(void) {
  * Draws the boot logo being shown, strip by strip, faded by its frame.
  *
  * Doesn't match: GCC clamps the N64 logo's fade-in alpha after storing the
- * color command's first word, where the original clamps it first, and loads
- * the strip loops' constants into other registers in another order. Clamping
+ * color command's first word, where the original clamps it first, and
+ * reloads the display list pointer for the Nintendo logo's fade-out a few
+ * instructions early. The counts in this paragraph and the next were
+ * measured with each strip's edges stepped by hand, when the strip loops'
+ * constants also went into other registers in another order. Clamping
  * through alpha, as the Nintendo logo does, gives 60 words, not 58, as does
  * clamping into alpha with MIN. The permuter's 21 words come from moving the
  * N64 logo's bottom step out of the strip loop, so every strip would draw to
@@ -279,15 +282,24 @@ void UpdateBootLogos(void) {
  * alphas into temporaries before their color commands. Through alpha, the
  * Nintendo logo's fade-out alone gives 75 words (27 in shape); the N64
  * logo's fade-out 89 (39); both N64 fades, or its fade-in and the Nintendo
- * fade-out, 77 (21); and all three 94 (30). 58 words differ, 18 in shape.
+ * fade-out, 77 (21); and all three 94 (30). 58 words differed, 18 in shape.
+ *
+ * Writing each strip's top and bottom edges from the strip index, and
+ * leaving loop.c to step them, takes the draft from 58 words differing, 18
+ * in shape, to 8 (8) when done in all three logos, and the register oracle's
+ * closest result is those 8 words with no register forced. One edge written
+ * that way gives 56 words or more, and giving each logo stepped edges of its
+ * own 48 (18). With the edges from the index, clamping the N64 logo's
+ * fade-in through alpha, as the other two logos do, gives 10 words, 2 in
+ * shape, and the oracle's closest is also 10; a ?: clamp gives 9, 5 in
+ * shape, and also setting a fade-out through alpha 22 words or more. 8 words
+ * differ, 8 in shape.
  */
 #ifdef NON_MATCHING
 void DrawBootLogos(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   s32 alpha;
   s32 stripIndex;
-  s32 top;
-  s32 bottom;
   s32 texelOffset;
   u16* n64Texels;
 
@@ -324,18 +336,17 @@ void DrawBootLogos(Gfx** displayListHead) {
 
       gDPSetCombineLERP(gfx++, 0, 0, 0, TEXEL0, PRIMITIVE, 0, TEXEL0, 0, 0, 0,
           0, TEXEL0, PRIMITIVE, 0, TEXEL0, 0);
-      top = N64_LOGO_TOP << 2;
-      bottom = (N64_LOGO_TOP + N64_LOGO_STRIP_HEIGHT) << 2;
       for (stripIndex = 0; stripIndex != N64_LOGO_STRIP_COUNT; stripIndex++) {
         n64Texels = f_N64Logo.texels +
             stripIndex * (N64_LOGO_WIDTH * N64_LOGO_STRIP_HEIGHT);
         LoadTextureBlock(&gfx, n64Texels, G_IM_FMT_RGBA, G_IM_SIZ_16b,
             N64_LOGO_WIDTH, N64_LOGO_STRIP_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
-        DrawTextureRect(&gfx, QuarterPixels(N64_LOGO_LEFT), top,
-            QuarterPixels(N64_LOGO_LEFT + N64_LOGO_WIDTH), bottom, 0, 0, 0,
-            TEXEL_STEP_ONE, TEXEL_STEP_ONE);
-        bottom += N64_LOGO_STRIP_HEIGHT << 2;
-        top += N64_LOGO_STRIP_HEIGHT << 2;
+        DrawTextureRect(&gfx, QuarterPixels(N64_LOGO_LEFT),
+            QuarterPixels(N64_LOGO_TOP + (stripIndex * N64_LOGO_STRIP_HEIGHT)),
+            QuarterPixels(N64_LOGO_LEFT + N64_LOGO_WIDTH),
+            QuarterPixels(N64_LOGO_TOP + N64_LOGO_STRIP_HEIGHT +
+                (stripIndex * N64_LOGO_STRIP_HEIGHT)),
+            0, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       }
 
       break;
@@ -357,8 +368,6 @@ void DrawBootLogos(Gfx** displayListHead) {
 
       gDPSetCombineLERP(gfx++, 0, 0, 0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0, 0,
           0, 0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0);
-      top = NINTENDO_LOGO_TOP << 2;
-      bottom = (NINTENDO_LOGO_TOP + NINTENDO_LOGO_STRIP_HEIGHT) << 2;
       for (stripIndex = 0; stripIndex != NINTENDO_LOGO_STRIP_COUNT;
           stripIndex++) {
         texelOffset =
@@ -369,11 +378,13 @@ void DrawBootLogos(Gfx** displayListHead) {
             NINTENDO_LOGO_WIDTH - 1, NINTENDO_LOGO_STRIP_HEIGHT - 1, 0,
             G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
             G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-        DrawTextureRect(&gfx, QuarterPixels(NINTENDO_LOGO_LEFT), top,
-            QuarterPixels(NINTENDO_LOGO_LEFT + NINTENDO_LOGO_WIDTH), bottom, 0,
-            0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
-        bottom += NINTENDO_LOGO_STRIP_HEIGHT << 2;
-        top += NINTENDO_LOGO_STRIP_HEIGHT << 2;
+        DrawTextureRect(&gfx, QuarterPixels(NINTENDO_LOGO_LEFT),
+            QuarterPixels(
+                NINTENDO_LOGO_TOP + (stripIndex * NINTENDO_LOGO_STRIP_HEIGHT)),
+            QuarterPixels(NINTENDO_LOGO_LEFT + NINTENDO_LOGO_WIDTH),
+            QuarterPixels(NINTENDO_LOGO_TOP + NINTENDO_LOGO_STRIP_HEIGHT +
+                (stripIndex * NINTENDO_LOGO_STRIP_HEIGHT)),
+            0, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       }
 
       break;
@@ -394,8 +405,6 @@ void DrawBootLogos(Gfx** displayListHead) {
       gDPPipeSync(gfx++);
       gDPSetTextureLUT(gfx++, G_TT_RGBA16);
       LoadSmallPalette(&gfx, 0, f_CamelotLogo.palette);
-      top = CAMELOT_LOGO_TOP << 2;
-      bottom = (CAMELOT_LOGO_TOP + CAMELOT_LOGO_STRIP_HEIGHT) << 2;
       for (stripIndex = 0; stripIndex != CAMELOT_LOGO_STRIP_COUNT;
           stripIndex++) {
         texelOffset =
@@ -406,11 +415,13 @@ void DrawBootLogos(Gfx** displayListHead) {
             CAMELOT_LOGO_WIDTH - 1, CAMELOT_LOGO_STRIP_HEIGHT - 1, 0,
             G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
             G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-        DrawTextureRect(&gfx, QuarterPixels(CAMELOT_LOGO_LEFT), top,
-            QuarterPixels(CAMELOT_LOGO_LEFT + CAMELOT_LOGO_WIDTH), bottom, 0, 0,
-            0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
-        bottom += CAMELOT_LOGO_STRIP_HEIGHT << 2;
-        top += CAMELOT_LOGO_STRIP_HEIGHT << 2;
+        DrawTextureRect(&gfx, QuarterPixels(CAMELOT_LOGO_LEFT),
+            QuarterPixels(
+                CAMELOT_LOGO_TOP + (stripIndex * CAMELOT_LOGO_STRIP_HEIGHT)),
+            QuarterPixels(CAMELOT_LOGO_LEFT + CAMELOT_LOGO_WIDTH),
+            QuarterPixels(CAMELOT_LOGO_TOP + CAMELOT_LOGO_STRIP_HEIGHT +
+                (stripIndex * CAMELOT_LOGO_STRIP_HEIGHT)),
+            0, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
         gDPPipeSync(gfx++);
       }
 
