@@ -3127,7 +3127,9 @@ INCLUDE_ASM("asm/nonmatchings/hole_display", DrawTurnAwayAnimation);
  * z's in pairs gives 97, and the second vertex first 101. A focused permuter
  * run's best by words (93, 15 in shape) gives the second vertex an x 64
  * greater, but the original stores the same register as both vertices' x before
- * adding 64 to it. 95 words differ, 19 in shape.
+ * adding 64 to it. Giving the copy loops of one or more of the four kinds
+ * counters of their own, for the column, the row or both, gives 95 to 153
+ * words, 19 in shape, in each of the 127 ways. 95 words differ, 19 in shape.
  */
 #ifdef NON_MATCHING
 void CaptureHudAnimationFrame(void) {
