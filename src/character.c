@@ -1661,8 +1661,12 @@ void UpdateJointKeyframeSpans(u32 slotIndex) {
     /* The rotation quaternion (x, y, z, w) as a matrix */
     lengthSquared = (rotation[0] * rotation[0]) + (rotation[1] * rotation[1]) +
         (rotation[2] * rotation[2]) + (rotation[3] * rotation[3]);
-    /* Fills the matrix through a pointer, which matches more closely: writing
-     * jointMatrix itself gives 186 words differing, 72 in shape */
+    /*
+     * Fills the matrix through a pointer, which matches more closely: writing
+     * jointMatrix itself gives 186 words differing, 72 in shape, against 184
+     * and 66; the register oracle's closest result is then 133 words, forcing
+     * 30 pseudos, against 136 forcing 28
+     */
     rotationMatrix = jointMatrix;
     if (lengthSquared > 0.0f) {
       scale = 2.0f / lengthSquared;
