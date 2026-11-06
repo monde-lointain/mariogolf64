@@ -1328,11 +1328,12 @@ void DrawGolfBalls(CameraMatrices* matrices UNUSED) {
         gDPSetPrimDepth(gfx++, afterimageDepth & ~3, 0);
         gDPPipeSync(gfx++);
         halfWidth = (AbsFloat(ballPoint.scaleX) *
-                        ((0.3 / 1024) * (g_PinVertexScale * BALL_RADIUS * 2))) -
+                        ((0.3 * COURSE_TO_WORLD_SCALE) *
+                            (g_PinVertexScale * BALL_RADIUS * 2))) -
             1.0;
-        halfHeight =
-            (AbsFloat(ballPoint.scaleY) *
-                ((0.3 / 1024) * (g_PinVertexScale * BALL_RADIUS * 2))) -
+        halfHeight = (AbsFloat(ballPoint.scaleY) *
+                         ((0.3 * COURSE_TO_WORLD_SCALE) *
+                             (g_PinVertexScale * BALL_RADIUS * 2))) -
             1.0;
         if (halfWidth < 4) {
           halfWidth = 4;
@@ -1393,11 +1394,12 @@ void DrawGolfBalls(CameraMatrices* matrices UNUSED) {
         gDPSetPrimDepth(gfx++, afterimageDepth & ~3, 0);
         gDPPipeSync(gfx++);
         halfWidth = (AbsFloat(shadowPoint.scaleX) *
-                        ((0.3 / 1024) * (g_PinVertexScale * BALL_RADIUS * 2))) -
+                        ((0.3 * COURSE_TO_WORLD_SCALE) *
+                            (g_PinVertexScale * BALL_RADIUS * 2))) -
             1.0;
-        halfHeight =
-            (AbsFloat(shadowPoint.scaleY) *
-                ((0.3 / 1024) * (g_PinVertexScale * BALL_RADIUS * 2))) -
+        halfHeight = (AbsFloat(shadowPoint.scaleY) *
+                         ((0.3 * COURSE_TO_WORLD_SCALE) *
+                             (g_PinVertexScale * BALL_RADIUS * 2))) -
             1.0;
         if (halfWidth < 4) {
           halfWidth = 4;
