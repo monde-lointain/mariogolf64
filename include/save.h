@@ -237,7 +237,8 @@ typedef struct RecordedShot {
  * the low bits hold its ScoreKind
  */
 #define SCORE_KIND_MASK 0xF
-#define SCORE_KIND_UNK40 0x40
+/* Never set: GetRecordPriority would rank a birdie or eagle higher */
+#define SCORE_KIND_UNUSED_BONUS 0x40
 #define SCORE_KIND_RECORDED 0x80
 
 enum ScoreKind {

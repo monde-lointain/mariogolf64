@@ -763,14 +763,14 @@ s32 GetRecordPriority(PlayRecord* record) {
     switch (kind) {
       case SCORE_KIND_BIRDIE:
         value = 0x32;
-        if (bits & SCORE_KIND_UNK40) {
+        if (bits & SCORE_KIND_UNUSED_BONUS) {
           value = 0x3C;
         }
 
         break;
       case SCORE_KIND_EAGLE:
         value = 0x3C;
-        if (bits & SCORE_KIND_UNK40) {
+        if (bits & SCORE_KIND_UNUSED_BONUS) {
           value = 0x46;
         }
 
