@@ -343,58 +343,66 @@ typedef s32 (*BillboardHitFinder)(s32 startX, s32 startY, s32 startZ, s32 endX,
  * addresses, which lie in the opening's BSS while it is loaded. Returns the
  * STEP_FLAG_* bits for the step.
  *
- * Doesn't match: the nested helpers match. The substep loop's hoisted 0.5f now
- * sits in $f30 as in the original; of the 552 differing lines, 216 use
- * floating-point registers. On an older base, forcing the original's registers
- * on 61 pseudos left 632 words at best, so the code differs too. Reading the
- * side spin before the drag, and adding the velocity to the spin's push rather
- * than the other way round, took it from 676 words differing to 662. The water
- * skip's last two tests are grouped, as the original branches on the rolling
- * state and then the impact speed: in one chain fold_truthop ors their flags
- * (662). Working out the horizontal speed before the side spin's magnitude, as
- * StepBallSimulation does, took it from 652 words, 248 in shape, to 422 (182).
- * Naming the lift per unit of spin, as a permuter run's float temp suggested,
- * takes it to 395 (167) wherever the local is declared; scaling weight in place
- * instead gives 412 (170). The register oracle, forcing 53 pseudos' registers,
- * leaves 188 words at best, so the code differs too. The original's add.s for
- * the x and z velocities takes the velocity first and the wind's pull second,
- * as velocity + pull does, where the draft writes pull + velocity; written as
+ * Doesn't match: the nested helpers match. The substep loop's hoisted 0.5f
+ * now sits in $f30 as in the original; of the 552 differing lines, 216 use
+ * floating-point registers. On an older base, forcing the original's
+ * registers on 61 pseudos left 632 words at best, so the code differs too.
+ * Reading the side spin before the drag, and adding the velocity to the
+ * spin's push rather than the other way round, took it from 676 words
+ * differing to 662. The water skip's last two tests are grouped, as the
+ * original branches on the rolling state and then the impact speed: in one
+ * chain fold_truthop ors their flags (662). Working out the horizontal speed
+ * before the side spin's magnitude, as StepBallSimulation does, took it from
+ * 652 words, 248 in shape, to 422 (182). Naming the lift per unit of spin,
+ * as a permuter run's float temp suggested, takes it to 395 (167) wherever
+ * the local is declared; scaling weight in place instead gives 412 (170).
+ * The register oracle, forcing 53 pseudos' registers, leaves 188 words at
+ * best, so the code differs too. The original's add.s for the x and z
+ * velocities takes the velocity first and the wind's pull second, as
+ * velocity + pull does, where the draft writes pull + velocity; written as
  * the original orders them, both lines gave 397 words, and the x line alone
  * 393, with the draft at 395. A billboard hit now updates the ball in
- * StepBallSimulation's order: the bounce count, the position, the last bounce
- * step, then both spins, which took the draft from 395 words (167 in shape) to
- * 337 (149); of the 58 other orders of those five steps that divide the spin
- * speed before the side spin, the best gave 341 (153). With that, writing the x
- * line as velocity + pull gave 343 words, the z line as pull + velocity 341,
- * and both 345. On the current draft, 247 words (111 in shape), velocity + pull
- * gives 245 words in the x line alone, 249 in the z line alone and 249 in both,
- * and with both the register oracle gets no closer than 128 words forcing 32,
- * against the draft's 124 forcing 32. Both bounces set the last bounce step
- * after the three velocities, as StepBallSimulation's do, which took the draft
- * from 337 words (149 in shape) to 325 (141); moving the first alone gave 329
- * (145), the second alone 333 (145). Each substep copies stepFlags to
- * previousStepFlags after saving the start and the previous velocity, as
- * StepBallSimulation does, which took the draft from 325 words (141 in shape)
- * to 314 (138); with the start's y saved before its x as well, 316 (138). The
- * lift decays the spin after all three velocity updates, as StepBallSimulation
- * does, which took the draft from 314 words (138 in shape) to 296 (126). The
- * cup pull sets toCup in axis order, as StepBallSimulation does, and a wall
- * hit's reflection sets all three velocities before clearing the spin, which
- * took the draft from 296 words (126 in shape) to 290 (122); alone, they gave
- * 292 (124) and 294 (124). The ground spin's grip clears the spin after both
- * velocity updates, as StepBallSimulation's does, which took the draft from 290
- * words (122 in shape) to 288 (120). Holding the side spin in an s32, the
- * field's type, and testing it for the curve's sign keeps 288 words, takes the
- * shape from 120 to 114 and the register oracle from 129 words forcing 34
- * pseudos to 127 forcing 35. Scaling the wall hit's x velocity into a local
- * before its hit position gives 278 words (106 in shape), but not for y and z:
- * locals for all three first give 328, one step local set for each axis in turn
- * 289 (101), and the contact fraction in a local 288. Writing the x line as the
- * sibling writes its z, or its triangle hit's x, gives 290 and 298. The floor's
- * in-cup and rolling tests read simulation->state after GetGroundHeight, as
- * StepBallSimulation's do, where a state local set before the call gave 288
- * words (114 in shape) against 247 (111) before the stop test's cast. 247 words
- * differ, 109 in shape.
+ * StepBallSimulation's order: the bounce count, the position, the last
+ * bounce step, then both spins, which took the draft from 395 words (167 in
+ * shape) to 337 (149); of the 58 other orders of those five steps that
+ * divide the spin speed before the side spin, the best gave 341 (153). With
+ * that, writing the x line as velocity + pull gave 343 words, the z line as
+ * pull + velocity 341, and both 345. With the draft at 247 words (111 in
+ * shape), velocity + pull gave 245 words in the x line alone, 249 in the z
+ * line alone and 249 in both, and with both the register oracle got no
+ * closer than 128 words forcing 32, against the draft's 124 forcing 32; at
+ * 237 words (109), they give 235, 239 and 239. Both bounces set the last
+ * bounce step after the three velocities, as StepBallSimulation's do, which
+ * took the draft from 337 words (149 in shape) to 325 (141); moving the
+ * first alone gave 329 (145), the second alone 333 (145). Each substep
+ * copies stepFlags to previousStepFlags after saving the start and the
+ * previous velocity, as StepBallSimulation does, which took the draft from
+ * 325 words (141 in shape) to 314 (138); with the start's y saved before its
+ * x as well, 316 (138). The lift decays the spin after all three velocity
+ * updates, as StepBallSimulation does, which took the draft from 314 words
+ * (138 in shape) to 296 (126). The cup pull sets toCup in axis order, as
+ * StepBallSimulation does, and a wall hit's reflection sets all three
+ * velocities before clearing the spin, which took the draft from 296 words
+ * (126 in shape) to 290 (122); alone, they gave 292 (124) and 294 (124). The
+ * ground spin's grip clears the spin after both velocity updates, as
+ * StepBallSimulation's does, which took the draft from 290 words (122 in
+ * shape) to 288 (120). Holding the side spin in an s32, the field's type,
+ * and testing it for the curve's sign keeps 288 words, takes the shape from
+ * 120 to 114 and the register oracle from 129 words forcing 34 pseudos to
+ * 127 forcing 35. Scaling the wall hit's x velocity into a local before its
+ * hit position gives 278 words (106 in shape), but not for y and z: locals
+ * for all three first give 328, one step local set for each axis in turn 289
+ * (101), and the contact fraction in a local 288. Writing the x line as the
+ * sibling writes its z, or its triangle hit's x, gives 290 and 298. The
+ * floor's in-cup and rolling tests read simulation->state after
+ * GetGroundHeight, as StepBallSimulation's do, where a state local set
+ * before the call gives 278 words (112 in shape) against 237 (109).
+ *
+ * The side spin's curve and the lift each weigh the ball's speed against its
+ * spin, with their own ratio and weight; one ratio and one weight for both
+ * gave 247 words differing (109 in shape), a weight for each takes it to 237
+ * (109), and a ratio for each as well keeps 237. 237 words differ, 109 in
+ * shape.
  */
 #ifdef NON_MATCHING
 s32 StepOpeningBallSimulation(BallSimulation* simulation) {
@@ -1630,8 +1638,10 @@ ROLLED:
       s32 sideSpin;
       BallSpeed horizontalSpeed;
       f32 sideSpinMagnitude;
-      f32 ratio;
-      f32 weight;
+      f32 curveRatio;
+      f32 liftRatio;
+      f32 curveWeight;
+      f32 liftWeight;
       f32 liftPerSpin;
       f32 curve;
       f32 spinMagnitude;
@@ -1653,17 +1663,18 @@ ROLLED:
           MIN_AIR_DRAG;
       horizontalSpeed = GetOpeningLength2D(relative[AXIS_X], relative[AXIS_Z]);
       sideSpinMagnitude = AbsFloat(sideSpin * SIDE_SPIN_SPEED_SCALE);
-      ratio = 0.0f;
+      curveRatio = 0.0f;
       if (sideSpinMagnitude != 0.0f) {
-        ratio = horizontalSpeed / sideSpinMagnitude;
+        curveRatio = horizontalSpeed / sideSpinMagnitude;
       }
 
-      weight = 1.0f - (AbsFloat(ratio - 1.0f) * SIDE_SPIN_MISMATCH_FALLOFF);
-      if (weight < 0.0f) {
-        weight = 0.0f;
+      curveWeight =
+          1.0f - (AbsFloat(curveRatio - 1.0f) * SIDE_SPIN_MISMATCH_FALLOFF);
+      if (curveWeight < 0.0f) {
+        curveWeight = 0.0f;
       }
 
-      curve = sideSpin * (weight * CURVE_PER_SIDE_SPIN);
+      curve = sideSpin * (curveWeight * CURVE_PER_SIDE_SPIN);
       if (horizontalSpeed < AbsFloat(curve) * MAX_CURVE_SPEED_RATIO) {
         curve = horizontalSpeed * (1.0f / MAX_CURVE_SPEED_RATIO);
         if (sideSpin < 0) {
@@ -1683,17 +1694,18 @@ ROLLED:
       simulation->sideSpin = simulation->sideSpin * SIDE_SPIN_DECAY;
       spinMagnitude =
           AbsFloat(simulation->spinSpeed * OPENING_SPIN_SPEED_SCALE);
-      ratio = 0.0f;
+      liftRatio = 0.0f;
       if (spinMagnitude != 0.0f) {
-        ratio = airSpeed / spinMagnitude;
+        liftRatio = airSpeed / spinMagnitude;
       }
 
-      weight = 1.0f - (AbsFloat(ratio - 1.0f) * OPENING_SPIN_MISMATCH_FALLOFF);
-      if (weight < 0.0f) {
-        weight = 0.0f;
+      liftWeight =
+          1.0f - (AbsFloat(liftRatio - 1.0f) * OPENING_SPIN_MISMATCH_FALLOFF);
+      if (liftWeight < 0.0f) {
+        liftWeight = 0.0f;
       }
 
-      liftPerSpin = weight * OPENING_LIFT_PER_SPIN;
+      liftPerSpin = liftWeight * OPENING_LIFT_PER_SPIN;
       lift = (simulation->spinSpeed * OPENING_LIFT_SPIN_SCALE) * liftPerSpin;
       if (simulation->spinSpeed != 0 && airSpeed > MIN_LIFT_AIR_SPEED) {
         guMtxXFMF(simulation->liftRotation, relative[AXIS_X], relative[AXIS_Y],
