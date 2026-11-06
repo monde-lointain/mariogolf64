@@ -2292,8 +2292,10 @@ void PaintGroundTiles(void) {
   searchSpans = f_PaintLogics[f_PaintLogic].searchSpans;
 
   /*
-   * row is there to match: counting with column or a codeIndex of its own
-   * gives 150 words, with texelIndex 164, and with code 314
+   * row is there to match: counting with column or an s32 codeIndex of its
+   * own gives 148 words, against 132, 4 in shape each, with texelIndex 162,
+   * and with code 312; the register oracle's closest result is 22 words for
+   * both row and codeIndex, forcing 25 and 27 pseudos
    */
   for (row = 0; row < TERRAIN_CODE_COUNT; row++) {
     codePaintings[row] = paint(row, row, 0, 0, 0);
@@ -3935,7 +3937,8 @@ void ShadeGroundTiles(void) {
 
           /*
            * Indexing heightRows again is there to match: reading
-           * trailingHeights here as well gives 161 words, 35 in shape
+           * trailingHeights here as well gives 139 words, 35 in shape,
+           * against 132 and 14
            */
           slope = heightRows[(row - lightRowOffset) & HEIGHT_RING_ROW_MASK]
                             [trailingColumn] -
