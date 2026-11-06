@@ -1724,8 +1724,15 @@ typedef struct GridScreenPoint {
  * words differed, 48 in shape, at the time. Stepping the lines along the aim
  * with the quads' column counter, drawnColumn, rather than the column the first
  * two loops step, took the draft to 302 words, 48 in shape, and the oracle's
- * closest from 222 words to 214, forcing 26 pseudos both. 302 words differ, 48
- * in shape.
+ * closest from 222 words to 214, forcing 26 pseudos both. The draft then gave
+ * 302 words, 48 in shape.
+ *
+ * The lines across the aim and along it index their points through
+ * acrossPoint and alongPoint, where one point served both: the register
+ * oracle lined it up with different registers in the two loops. That takes
+ * the draft from 302 words differing (48 in shape) to 300 (44), and the
+ * oracle's closest from 214 words to 204, forcing 26 pseudos both. 300 words
+ * differ, 44 in shape.
  */
 void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
   f32 points[GREEN_GRID_POINT_COUNT][3];
@@ -1753,7 +1760,8 @@ void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
   s32 drawnColumn;
   s32 rowStart;
   s32 acrossRowStart;
-  s32 point;
+  s32 acrossPoint;
+  s32 alongPoint;
   s32 rowPosition;
   Boolean isUnscrolledRow;
   s32 neighbor;
@@ -1999,46 +2007,48 @@ void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
      */
     for (acrossRow = 0, acrossRowStart = 0; acrossRow != rowCount;) {
       for (drawnColumn = 0; drawnColumn != columnCount; drawnColumn++) {
-        point = acrossRowStart + drawnColumn;
-        if (screenPoints[point].isVisible != TRUE) {
+        acrossPoint = acrossRowStart + drawnColumn;
+        if (screenPoints[acrossPoint].isVisible != TRUE) {
           continue;
         }
 
         if (drawnColumn & 1) {
-          neighbor = point - 1;
-          dx = screenPoints[point].x - screenPoints[neighbor].x;
-          dy = screenPoints[point].y - screenPoints[neighbor].y;
+          neighbor = acrossPoint - 1;
+          dx = screenPoints[acrossPoint].x - screenPoints[neighbor].x;
+          dy = screenPoints[acrossPoint].y - screenPoints[neighbor].y;
         } else {
-          neighbor = point + 1;
-          dx = screenPoints[point].x - screenPoints[neighbor].x;
-          dy = screenPoints[point].y - screenPoints[neighbor].y;
+          neighbor = acrossPoint + 1;
+          dx = screenPoints[acrossPoint].x - screenPoints[neighbor].x;
+          dy = screenPoints[acrossPoint].y - screenPoints[neighbor].y;
         }
 
         if (dx == 0.0f && dy == 0.0f) {
-          screenPoints[point].isVisible = FALSE;
+          screenPoints[acrossPoint].isVisible = FALSE;
           continue;
         }
 
         scale = GREEN_GRID_LINE_HALF_WIDTH / sqrtf((dx * dx) + (dy * dy));
         dx *= scale;
         dy *= scale;
-        SetGreenGridTint(slopes[point]);
+        SetGreenGridTint(slopes[acrossPoint]);
         if (drawnColumn & 1) {
           gSPModifyVertex(gfx++, 2, G_MWO_POINT_XYSCREEN,
-              ScreenPointWord(screenPoints[point].x, screenPoints[point].y));
+              ScreenPointWord(
+                  screenPoints[acrossPoint].x, screenPoints[acrossPoint].y));
           gSPModifyVertex(gfx++, 3, G_MWO_POINT_XYSCREEN,
-              ScreenPointWord(screenPoints[point].x + (s32)dy,
-                  screenPoints[point].y - (s32)dx));
+              ScreenPointWord(screenPoints[acrossPoint].x + (s32)dy,
+                  screenPoints[acrossPoint].y - (s32)dx));
           gSPModifyVertex(gfx++, 2, G_MWO_POINT_RGBA,
               RgbaColor(red, green, blue, f_GreenGridAlpha));
           gSPModifyVertex(gfx++, 3, G_MWO_POINT_RGBA,
               RgbaColor(red, green, blue, f_GreenGridAlpha));
-          if (screenPoints[point - 1].isVisible == TRUE) {
+          if (screenPoints[acrossPoint - 1].isVisible == TRUE) {
             gDPPipeSync(gfx++);
-            if (screenPoints[point].depth < screenPoints[point - 1].depth) {
-              gDPSetPrimDepth(gfx++, screenPoints[point].depth, 0);
+            if (screenPoints[acrossPoint].depth <
+                screenPoints[acrossPoint - 1].depth) {
+              gDPSetPrimDepth(gfx++, screenPoints[acrossPoint].depth, 0);
             } else {
-              gDPSetPrimDepth(gfx++, screenPoints[point - 1].depth, 0);
+              gDPSetPrimDepth(gfx++, screenPoints[acrossPoint - 1].depth, 0);
             }
 
             gDPPipeSync(gfx++);
@@ -2046,20 +2056,23 @@ void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
           }
         } else {
           gSPModifyVertex(gfx++, 0, G_MWO_POINT_XYSCREEN,
-              ScreenPointWord(screenPoints[point].x, screenPoints[point].y));
+              ScreenPointWord(
+                  screenPoints[acrossPoint].x, screenPoints[acrossPoint].y));
           gSPModifyVertex(gfx++, 1, G_MWO_POINT_XYSCREEN,
-              ScreenPointWord(screenPoints[point].x + (s32)dy,
-                  screenPoints[point].y - (s32)dx));
+              ScreenPointWord(screenPoints[acrossPoint].x + (s32)dy,
+                  screenPoints[acrossPoint].y - (s32)dx));
           gSPModifyVertex(gfx++, 0, G_MWO_POINT_RGBA,
               RgbaColor(red, green, blue, f_GreenGridAlpha));
           gSPModifyVertex(gfx++, 1, G_MWO_POINT_RGBA,
               RgbaColor(red, green, blue, f_GreenGridAlpha));
-          if (drawnColumn != 0 && screenPoints[point - 1].isVisible == TRUE) {
+          if (drawnColumn != 0 &&
+              screenPoints[acrossPoint - 1].isVisible == TRUE) {
             gDPPipeSync(gfx++);
-            if (screenPoints[point].depth < screenPoints[point - 1].depth) {
-              gDPSetPrimDepth(gfx++, screenPoints[point].depth, 0);
+            if (screenPoints[acrossPoint].depth <
+                screenPoints[acrossPoint - 1].depth) {
+              gDPSetPrimDepth(gfx++, screenPoints[acrossPoint].depth, 0);
             } else {
-              gDPSetPrimDepth(gfx++, screenPoints[point - 1].depth, 0);
+              gDPSetPrimDepth(gfx++, screenPoints[acrossPoint - 1].depth, 0);
             }
 
             gDPPipeSync(gfx++);
@@ -2084,15 +2097,17 @@ void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
      */
     for (drawnColumn = 0; drawnColumn != columnCount; drawnColumn++) {
       for (row = 0; row != rowCount - 1; row++) {
-        point = (row * columnCount) + drawnColumn;
+        alongPoint = (row * columnCount) + drawnColumn;
 
-        if (screenPoints[point].isVisible != TRUE ||
-            screenPoints[point + columnCount].isVisible != TRUE) {
+        if (screenPoints[alongPoint].isVisible != TRUE ||
+            screenPoints[alongPoint + columnCount].isVisible != TRUE) {
           continue;
         }
 
-        dx = screenPoints[point].x - screenPoints[point + columnCount].x;
-        dy = screenPoints[point].y - screenPoints[point + columnCount].y;
+        dx = screenPoints[alongPoint].x -
+            screenPoints[alongPoint + columnCount].x;
+        dy = screenPoints[alongPoint].y -
+            screenPoints[alongPoint + columnCount].y;
         if (dx == 0.0f && dy == 0.0f) {
           continue;
         }
@@ -2100,32 +2115,34 @@ void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
         scale = GREEN_GRID_LINE_HALF_WIDTH / sqrtf((dx * dx) + (dy * dy));
         dx *= scale;
         dy *= scale;
-        SetGreenGridTint(slopes[point]);
+        SetGreenGridTint(slopes[alongPoint]);
         gSPModifyVertex(gfx++, 0, G_MWO_POINT_RGBA,
             RgbaColor(red, green, blue, f_GreenGridAlpha));
         gSPModifyVertex(gfx++, 1, G_MWO_POINT_RGBA,
             RgbaColor(red, green, blue, f_GreenGridAlpha));
-        SetGreenGridTint(slopes[point + columnCount]);
+        SetGreenGridTint(slopes[alongPoint + columnCount]);
         gSPModifyVertex(gfx++, 2, G_MWO_POINT_RGBA,
             RgbaColor(red, green, blue, f_GreenGridAlpha));
         gSPModifyVertex(gfx++, 3, G_MWO_POINT_RGBA,
             RgbaColor(red, green, blue, f_GreenGridAlpha));
         gSPModifyVertex(gfx++, 0, G_MWO_POINT_XYSCREEN,
-            ScreenPointWord(screenPoints[point].x, screenPoints[point].y));
+            ScreenPointWord(
+                screenPoints[alongPoint].x, screenPoints[alongPoint].y));
         gSPModifyVertex(gfx++, 1, G_MWO_POINT_XYSCREEN,
-            ScreenPointWord(screenPoints[point].x - (s32)dy,
-                screenPoints[point].y + (s32)dx));
+            ScreenPointWord(screenPoints[alongPoint].x - (s32)dy,
+                screenPoints[alongPoint].y + (s32)dx));
         gSPModifyVertex(gfx++, 2, G_MWO_POINT_XYSCREEN,
-            ScreenPointWord(screenPoints[point + columnCount].x,
-                screenPoints[point + columnCount].y));
+            ScreenPointWord(screenPoints[alongPoint + columnCount].x,
+                screenPoints[alongPoint + columnCount].y));
         gSPModifyVertex(gfx++, 3, G_MWO_POINT_XYSCREEN,
-            ScreenPointWord(screenPoints[point + columnCount].x - (s32)dy,
-                screenPoints[point + columnCount].y + (s32)dx));
-        if (screenPoints[point].depth <
-            screenPoints[point + columnCount].depth) {
-          gDPSetPrimDepth(gfx++, screenPoints[point].depth, 0);
+            ScreenPointWord(screenPoints[alongPoint + columnCount].x - (s32)dy,
+                screenPoints[alongPoint + columnCount].y + (s32)dx));
+        if (screenPoints[alongPoint].depth <
+            screenPoints[alongPoint + columnCount].depth) {
+          gDPSetPrimDepth(gfx++, screenPoints[alongPoint].depth, 0);
         } else {
-          gDPSetPrimDepth(gfx++, screenPoints[point + columnCount].depth, 0);
+          gDPSetPrimDepth(
+              gfx++, screenPoints[alongPoint + columnCount].depth, 0);
         }
 
         gDPPipeSync(gfx++);
