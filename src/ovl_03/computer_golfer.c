@@ -128,7 +128,7 @@ enum PlanStage {
   PLAN_STAGE_STARTED,
   PLAN_STAGE_TARGET_CHOSEN,
   PLAN_STAGE_TRIAL_TAKEN,
-  PLAN_STAGE_UNK4,
+  PLAN_STAGE_UNUSED, /* Never set; IsTrialStage counts it */
   PLAN_STAGE_LEVEL_FINISHED,
   PLAN_STAGE_TRIAL_RUNNING
 };
@@ -480,7 +480,7 @@ s32 MarkUsableClubs(s32 unused, s16* clubs, s8* isUsable);
       (!f_HasBestEvaluation && f_TrialLevel < MAX_TRIAL_LEVEL_COUNT))
 /* Whether a plan stage is part of a trial under way */
 #define IsTrialStage(stage) \
-  ((stage) == PLAN_STAGE_TRIAL_TAKEN || (stage) == PLAN_STAGE_UNK4 || \
+  ((stage) == PLAN_STAGE_TRIAL_TAKEN || (stage) == PLAN_STAGE_UNUSED || \
       (stage) == PLAN_STAGE_TRIAL_RUNNING)
 #define INITIAL_CARRY_SCALE 1.1f
 #define CARRY_SCALE_STEP 0.9f
