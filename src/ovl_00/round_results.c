@@ -2017,6 +2017,11 @@ void SetResultsBanner(s32 state, s32 kind) {
  * words, and the oracle's closest is then 20 with 4 forced; a helper for the
  * two identical trophy-part loops gives 207 words taking the course, or 295
  * taking its sizes' address.
+ *
+ * Other forms of the frame's wrap: a pre-increment in the test gives the same
+ * 32 words; testing against the last frame before stepping 32 (12 in shape);
+ * a >= test 36 (4); a while loop subtracting the frame count 65 (23); a
+ * conditional expression 65 (17); and a modulo 74 (16).
  */
 #ifdef NON_MATCHING
 void DrawResultsBanner(Gfx** displayListHead) {
