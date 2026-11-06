@@ -1575,8 +1575,11 @@ BillboardCell GetBillboardCell(s32 textureIndex, f32 across, f32 down) {
  * built-in fabsf it filled the branch's delay slot and 4 words differed, 2
  * in shape. Testing the sum itself rather than comparing it with 0 gives the
  * same 2 words, the arms swapped on a test for 0 gives 10 (8 in shape), and
- * setting 0.0f before an if without an else 9 (5). 2 words differ, none in
- * shape.
+ * setting 0.0f before an if without an else 9 (5).
+ *
+ * Shifting startY itself after the declarations, in place of fromY, as the
+ * original stores fromY to startY's slot, gives 28 words (16 in shape), and
+ * gives startY two meanings. 2 words differ, none in shape.
  */
 #ifdef NON_MATCHING
 s32 FindBillboardHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
