@@ -1294,6 +1294,18 @@ void InitClubs(void) {
  * The register oracle lines shotMode up with $s0 for the table and $fp for
  * the test-firing. Moving the table lookup into a static inline helper, so
  * that it gets its own copy of shotMode, gives 59 words (7 in shape).
+ *
+ * A second variable copied from shotMode before the test shot's club is
+ * set, and used for every use of the mode when test-firing, reproduces
+ * the original's copy and gives 24 words, 0 in shape; the register oracle
+ * then matches when it swaps the saved registers of shortDistance and the
+ * hoisted address of the putter's power for the mode. The copy isn't
+ * adopted: it is an alias of the parameter with no purpose of its own,
+ * and still doesn't match. Copying it after GetShotDistance gives 32
+ * words (4 in shape), and reading the mode back from f_PutterTestShot
+ * instead gives 182. GCC won't inline a function that contains a nested
+ * function, so the test-firing, which uses InterpolatePuttPower, can't
+ * move into an inline helper with its own copy of the mode.
  */
 #ifdef NON_MATCHING
 s32 GetPuttPower(s32 fraction, ShotMode shotMode) {
