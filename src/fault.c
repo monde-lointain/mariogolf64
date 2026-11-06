@@ -238,6 +238,11 @@ void PrintFaultText(void) {
  * pointer of another type, in a branch on thread being NULL there gives
  * 97 (9 in shape), with thread kept across the call in a third saved
  * register.
+ *
+ * Printing the registers in a static inline helper given &thread->context
+ * gives 294 words (6 in shape), or 282 (6) with the store in the helper;
+ * the title in a helper given thread 296 (12); context set after the title
+ * 294 (6); and everything in a helper given thread 398 (164).
  */
 #ifdef NON_MATCHING
 void PrintFaultContext(OSThread* thread) {
