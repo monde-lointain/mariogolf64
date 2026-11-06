@@ -2642,7 +2642,8 @@ void UpdateOpening(void) {
                   SOUND_LUIGI_OH_NO, f_OpeningSoundChannel, SOUND_FULL_SCALE);
               f_DonkeyKongSoundChannel = f_OpeningSoundChannel;
             } else {
-              PlaySound(SOUND_UNK338, f_OpeningSoundChannel, SOUND_FULL_SCALE);
+              PlaySound(
+                  SOUND_SHORT_OH, f_OpeningSoundChannel, SOUND_FULL_SCALE);
             }
 
             AdvanceOpeningSoundChannel();

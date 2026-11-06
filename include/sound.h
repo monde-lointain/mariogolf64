@@ -95,7 +95,7 @@ enum Sound {
   /* As the opening's burst appears */
   SOUND_BURST = 0x34,
   SOUND_YOSHI_EAGLE_SECOND_EFFECT, /* Also played in the opening */
-  /* In the opening, before SOUND_LUIGI_OH_NO or SOUND_UNK338 */
+  /* In the opening, before SOUND_LUIGI_OH_NO or SOUND_SHORT_OH */
   SOUND_CHIME,
   SOUND_METAL_MARIO_EAGLE_EFFECT = 0x38,
   SOUND_WARIO_BOGEY_EFFECT,
@@ -291,7 +291,7 @@ enum Sound {
   SOUND_LUIGI_BIRDIE = 0x13F,
   SOUND_LUIGI_BOGEY,
   /*
-   * With the opening's Donkey Kong where SOUND_UNK338 plays with Yoshi,
+   * With the opening's Donkey Kong where SOUND_SHORT_OH plays with Yoshi,
    * and as the opening's burst appears
    */
   SOUND_LUIGI_OH_NO,
@@ -306,7 +306,7 @@ enum Sound {
   SOUND_LUIGI_CALL_OUT_RIGHT,
   SOUND_LUIGI_PAR = 0x14E,
   SOUND_LUIGI_EAGLE = 0x150,
-  SOUND_UNK338 = 0x152,
+  SOUND_SHORT_OH = 0x152,
   SOUND_MAPLE_BOGEY = 0x159,
   SOUND_MAPLE_EAGLE = 0x15D,
   SOUND_MAPLE_BIRDIE = 0x168,
