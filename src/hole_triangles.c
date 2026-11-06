@@ -296,7 +296,14 @@ INCLUDE_ASM("asm/nonmatchings/hole_triangles", DrawHoleTriangles);
  * words, 26 in shape, and a u32 side 366, 16 in shape. The permuter's best
  * runs, 1347 and 887 (41 words, 15 in shape), kept side + 1 or section + 1
  * in a u8, used in only some of the places it is needed, which no natural
- * form explains. 16 words differ, 8 in shape.
+ * form explains.
+ *
+ * The two slots hold the pointers of the pipe sync before gDPSetTextureLUT,
+ * at 0x144 in the original, and of gDPSetTextureLUT, at 0x13C. Neither
+ * pointer gets a register, and reload gives such pseudos their slots in
+ * pseudo order, so the original may have numbered the LUT command's pointer
+ * first. Writing the pipe sync, the LUT command or both with gfx stepped
+ * after them gives 199 to 253 words. 16 words differ, 8 in shape.
  */
 #ifdef NON_MATCHING
 void DrawRings(Gfx** displayListHead, CameraMatrices* matrices UNUSED,
