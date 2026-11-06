@@ -1757,8 +1757,8 @@ void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
   s32 column;
   /*
    * The column in both the quads across the aim and the lines along it, to
-   * match: a column variable of the lines' own gives 308 words differing
-   * against 302, 48 in shape both
+   * match: a column variable of the lines' own gives 310 words differing
+   * against 300, 44 in shape both
    */
   s32 drawnColumn;
   s32 rowStart;
