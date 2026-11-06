@@ -222,6 +222,21 @@ void PrintFaultText(void) {
  * original calls it, 378 (54). The register oracle, forcing 2 pseudos'
  * registers, leaves 200 words at best, so the code differs too. 278 words
  * differ, 4 in shape.
+ *
+ * The second pass folds context's field addresses into thread's only
+ * while thread is unchanged since context was set. Setting thread to NULL
+ * after the first sprintf, a store that flow then deletes as dead, gives
+ * the same 276 words (2 in shape) as skipping the pass. The register
+ * oracle then matches with 2 pseudos forced: local allocation gives
+ * context, at 67 references and priority 6090, $s0 ahead of the text
+ * buffer, at 39 and 2963, where the original gives the buffer $s0. That
+ * fits context being left to global allocation, which a block boundary
+ * between its setting and its uses would do, but the original has no
+ * branch. Setting thread to NULL in a branch on context being NULL, after
+ * the first sprintf, gives 276 to 297 words; setting it to context, a
+ * pointer of another type, in a branch on thread being NULL there gives
+ * 97 (9 in shape), with thread kept across the call in a third saved
+ * register.
  */
 #ifdef NON_MATCHING
 void PrintFaultContext(OSThread* thread) {
