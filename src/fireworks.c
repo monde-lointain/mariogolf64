@@ -67,7 +67,7 @@ struct FireworkParticle {
   /* 0x84 */ f32 y;
   /* 0x88 */ f32 velocityX;
   /* 0x8C */ f32 velocityY;
-  /* 0x90 */ u8 unk90[4];
+  /* 0x90 */ u8 unusedAfterVelocity[4];
   /* 0x94 */ s16 life; /* Drawn while above 0 */
 }; /* size = 0x98 */
 
@@ -120,10 +120,10 @@ void LoadFireworks(s32 courseRecordIndex) {
           &asset));
   ReadEncodedAsset(f_FireworkShape, &asset);
   for (index = 0; index != FIREWORK_COUNT; index++) {
-    f_Fireworks[index].unk24 = 0;
+    f_Fireworks[index].ignoredLoadValue = 0;
     f_Fireworks[index].isActive = FALSE;
     f_Fireworks[index].timer = 159 - (index * 50);
-    f_Fireworks[index].unkC = 0xFF;
+    f_Fireworks[index].ignoredLaunchValue = 0xFF;
     f_Fireworks[index].particleCount = 0;
     f_Fireworks[index].shape = f_FireworkShape;
   }
@@ -203,7 +203,7 @@ void LaunchFirework(Firework* firework, s32 fireworkIndex UNUSED) {
   random = RandomLaunchHeightJitter();
   width = firework->shape->width;
   height = firework->shape->height;
-  firework->unkC = 0xFF;
+  firework->ignoredLaunchValue = 0xFF;
   originY = random + FIREWORK_LAUNCH_HEIGHT;
   for (row = 0; row != height; row++) {
     for (column = 0; column != width; column++) {

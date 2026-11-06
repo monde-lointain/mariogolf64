@@ -14,9 +14,11 @@ typedef struct Firework {
   /* 0x00 */ FireworkParticle* particles;
   /* 0x04 */ s32 particleCount;
   /* 0x08 */ s32 timer;
-  /* 0x0C */ s32 unkC;
-  /* 0x10 */ u8 unk10[0x14];
-  /* 0x24 */ u8 unk24;
+  /* Set to 0xFF as the fireworks load and at each launch; nothing reads it */
+  /* 0x0C */ s32 ignoredLaunchValue;
+  /* 0x10 */ u8 unusedAfterLaunchValue[0x14];
+  /* Cleared as the fireworks load; nothing reads it */
+  /* 0x24 */ u8 ignoredLoadValue;
   /* 0x25 */ u8 isActive;
   /* 0x28 */ FireworkShape* shape;
 } Firework; /* size = 0x2C */
