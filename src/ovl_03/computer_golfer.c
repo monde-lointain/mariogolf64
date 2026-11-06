@@ -2329,6 +2329,7 @@ s32 StepTrialShot(void) {
   f32 fraction;
   s32 flags;
   s32 ballState;
+  /* A copy of flags, to match: reading flags gives 45 words, 11 in shape */
   s32 stepFlags;
   s32 velocityY;
   s32 bounceCount;
@@ -2394,7 +2395,7 @@ s32 StepTrialShot(void) {
   if (ballState) {
     /* A loop that runs once, so that the step's checks can break out to the
      * end point's update; the original has no loop here, and jumping to a
-     * label instead gives 68 words differing, 28 in shape, against 30 (8) */
+     * label instead gives 64 words differing, 28 in shape, against 26 (8) */
     do {
       velocityY = f_TrialSimulation.velocity[AXIS_Y];
       bounceCount = f_TrialSimulation.bounceCount;
@@ -2481,11 +2482,11 @@ s32 StepTrialShot(void) {
 
       /*
        * A long putt is evaluated even if it holed out. The goto into the
-       * evaluation, to match: a flag set by an if here and tested with the
-       * holed-out one gives 118 words differing, 40 in shape; the flag assigned
-       * this test 125, 39; this test moved into the holed-out one's 107, 39;
-       * and an inline helper for the evaluation, called in both places,
-       * 151, 45.
+       * evaluation, to match: against 26 words differing, 8 in shape, a flag
+       * set by an if here and tested with the holed-out one gives 40, 16 in
+       * shape; the flag assigned this test 47, 15; and this test moved into
+       * the holed-out one's 61, 25. An inline helper for the evaluation,
+       * called in both places, gave 151, 45, on an older draft.
        */
       if (g_Players[f_Shot.playerIndex].strokeCount + 1 <
               g_HoleSetup.par + f_HoleTargetToPar &&
