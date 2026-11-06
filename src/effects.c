@@ -1881,16 +1881,16 @@ void DrawBillboardEffect(Gfx** displayListHead, Effect* effect, u16 color) {
         red += PUFF_LIGHTENING;
         green += PUFF_LIGHTENING;
         blue += PUFF_LIGHTENING;
-        if (red > 0xFF) {
-          red = 0xFF;
+        if (red > COLOR_CHANNEL_MAX) {
+          red = COLOR_CHANNEL_MAX;
         }
 
-        if (green > 0xFF) {
-          green = 0xFF;
+        if (green > COLOR_CHANNEL_MAX) {
+          green = COLOR_CHANNEL_MAX;
         }
 
-        if (blue > 0xFF) {
-          blue = 0xFF;
+        if (blue > COLOR_CHANNEL_MAX) {
+          blue = COLOR_CHANNEL_MAX;
         }
       }
 

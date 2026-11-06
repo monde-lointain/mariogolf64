@@ -329,14 +329,14 @@ void LoadClubSlots(void) {
     f_Slots->reelVertices[index * 2].v.ob[AXIS_Z] = sinf(angle) * REEL_RADIUS;
     f_Slots->reelVertices[(index * 2) + 1].v.ob[AXIS_Z] =
         sinf(angle) * REEL_RADIUS;
-    f_Slots->reelVertices[index * 2].v.cn[0] = 0xFF;
-    f_Slots->reelVertices[(index * 2) + 1].v.cn[0] = 0xFF;
-    f_Slots->reelVertices[index * 2].v.cn[1] = 0xFF;
-    f_Slots->reelVertices[(index * 2) + 1].v.cn[1] = 0xFF;
-    f_Slots->reelVertices[index * 2].v.cn[2] = 0xFF;
-    f_Slots->reelVertices[(index * 2) + 1].v.cn[2] = 0xFF;
-    f_Slots->reelVertices[index * 2].v.cn[3] = 0xFF;
-    f_Slots->reelVertices[(index * 2) + 1].v.cn[3] = 0xFF;
+    f_Slots->reelVertices[index * 2].v.cn[0] = COLOR_CHANNEL_MAX;
+    f_Slots->reelVertices[(index * 2) + 1].v.cn[0] = COLOR_CHANNEL_MAX;
+    f_Slots->reelVertices[index * 2].v.cn[1] = COLOR_CHANNEL_MAX;
+    f_Slots->reelVertices[(index * 2) + 1].v.cn[1] = COLOR_CHANNEL_MAX;
+    f_Slots->reelVertices[index * 2].v.cn[2] = COLOR_CHANNEL_MAX;
+    f_Slots->reelVertices[(index * 2) + 1].v.cn[2] = COLOR_CHANNEL_MAX;
+    f_Slots->reelVertices[index * 2].v.cn[3] = OPAQUE_ALPHA;
+    f_Slots->reelVertices[(index * 2) + 1].v.cn[3] = OPAQUE_ALPHA;
   }
 
   for (index = 0; index != SHADE_VERTEX_COUNT; index++) {

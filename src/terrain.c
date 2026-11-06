@@ -17,6 +17,7 @@
 #include "current_shot.h"
 #include "debug_text.h"
 #include "game_flags.h"
+#include "gbi_helpers.h"
 #include "hole_builder.h"
 #include "libc.h"
 #include "main.h"
@@ -1089,7 +1090,7 @@ void InitGridVertex(s32 column, s32 row, s32 height, u8 shade) {
   vertex->v.cn[0] = shade;
   vertex->v.cn[1] = shade;
   vertex->v.cn[2] = shade;
-  vertex->v.cn[3] = 0xFF;
+  vertex->v.cn[3] = OPAQUE_ALPHA;
 }
 
 void SetGridVertexHeight(s32 column, s32 row, s32 height) {

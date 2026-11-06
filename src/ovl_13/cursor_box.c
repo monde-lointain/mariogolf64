@@ -101,8 +101,8 @@ void DrawCursorBox(Gfx** displayListHead, s32 left, s32 top) {
      * against 42 (10) */
     IN_OWN_BLOCK(f_CursorCornerPhases[corner] += DegreesToRadians(15));
     red = (s32)(sinf(f_CursorCornerPhases[corner]) * 127.0f) + 127;
-    if (red > 255) {
-      red = 255;
+    if (red > COLOR_CHANNEL_MAX) {
+      red = COLOR_CHANNEL_MAX;
     }
 
     if (red < 0) {

@@ -1783,7 +1783,7 @@ void DrawLeaderboardPage(Gfx** displayListHead) {
   /* The rows behind the flaps */
   for (i = 0; i != LEADERBOARD_ROW_COUNT; i++) {
     if (i * ROW_FLIP_STAGGER < g_Scorecard.content.flipTime) {
-      shade = 0xFF;
+      shade = COLOR_CHANNEL_MAX;
       if (g_Scorecard.content.isRowFlipping[i] == TRUE &&
           !(g_Scorecard.content.rowFlipAngles[i] > FLAP_EDGE_ON_ANGLE)) {
         shade =
@@ -1791,7 +1791,7 @@ void DrawLeaderboardPage(Gfx** displayListHead) {
             FLAP_FACING_SHADE;
       }
     } else {
-      shade = 0xFF;
+      shade = COLOR_CHANNEL_MAX;
     }
 
     gDPSetPrimColor(gfx++, 0, 0, shade, shade, shade, OPAQUE_ALPHA);
@@ -1905,7 +1905,7 @@ void DrawLeaderboardPage(Gfx** displayListHead) {
     if (i * ROW_FLIP_STAGGER < g_Scorecard.content.flipTime &&
         g_Scorecard.content.isRowFlipping[i] == TRUE) {
       if (g_Scorecard.content.rowFlipAngles[i] < FLAP_EDGE_ON_ANGLE) {
-        bottomFlapShade = 0xFF;
+        bottomFlapShade = COLOR_CHANNEL_MAX;
       } else {
         bottomFlapShade = FLAP_LIT_SHADE -
             (sinf(g_Scorecard.content.rowFlipAngles[i] - FLAP_EDGE_ON_ANGLE) *
@@ -1929,7 +1929,7 @@ void DrawLeaderboardPage(Gfx** displayListHead) {
   for (i = 0; i != LEADERBOARD_ROW_COUNT; i++) {
     if (g_Scorecard.content.isRowFlipping[i] == TRUE) {
       if (g_Scorecard.content.rowFlipAngles[i] < FLAP_EDGE_ON_ANGLE) {
-        shade = 0xFF;
+        shade = COLOR_CHANNEL_MAX;
       } else {
         shade = FLAP_LIT_SHADE -
             (sinf(g_Scorecard.content.rowFlipAngles[i] - FLAP_EDGE_ON_ANGLE) *

@@ -248,7 +248,6 @@ typedef struct ArrowShape {
 #define COLOR_TEST_PRIM 0
 #define COLOR_TEST_ENV 1
 #define COLOR_TEST_STEP 4
-#define COLOR_CHANNEL_MAX 255
 #define COLOR_TEST_TEXT_COLUMN 20
 #define COLOR_TEST_TEXT_ROW 5
 /* Columns from one channel's value to the next */
@@ -1594,17 +1593,17 @@ u32 GetWarmthTint(s32 warmth, s32 alpha) {
   s32 green;
   s32 blue;
 
-  blue = 0xFF;
+  blue = COLOR_CHANNEL_MAX;
   if (warmth == 0) {
-    green = 0xFF;
-    red = 0xFF;
+    green = COLOR_CHANNEL_MAX;
+    red = COLOR_CHANNEL_MAX;
   } else if (warmth > 0) {
-    red = 0xFF;
+    red = COLOR_CHANNEL_MAX;
     blue = warmth;
     blue = red - blue;
     green = blue;
   } else {
-    green = warmth + 0xFF;
+    green = warmth + COLOR_CHANNEL_MAX;
     red = green;
   }
 
@@ -1643,7 +1642,6 @@ u32 GetWarmthTint(s32 warmth, s32 alpha) {
 /* Samples the ground and scrolls */
 #define GREEN_GRID_SHOWN 1
 #define GREEN_GRID_FADING 2
-#define TINT_CHANNEL_MAX 0xFF
 
 typedef struct GridScreenPoint {
   /* 0x00 */ s32 x; /* In quarter pixels */
@@ -1660,17 +1658,17 @@ typedef struct GridScreenPoint {
  */
 #define SetGreenGridTint(slope) \
   if (g_Players[g_CurrentShot.playerIndex].gridColor == GRID_COLOR_WHITE) { \
-    blue = TINT_CHANNEL_MAX; \
+    blue = COLOR_CHANNEL_MAX; \
     if ((slope) == 0) { \
-      green = TINT_CHANNEL_MAX; \
-      red = TINT_CHANNEL_MAX; \
+      green = COLOR_CHANNEL_MAX; \
+      red = COLOR_CHANNEL_MAX; \
     } else if ((slope) > 0) { \
-      red = TINT_CHANNEL_MAX; \
+      red = COLOR_CHANNEL_MAX; \
       blue = (slope); \
       blue = red - blue; \
       green = blue; \
     } else { \
-      green = (slope) + TINT_CHANNEL_MAX; \
+      green = (slope) + COLOR_CHANNEL_MAX; \
       red = green; \
     } \
   } else { \

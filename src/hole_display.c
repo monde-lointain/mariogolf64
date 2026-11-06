@@ -1124,7 +1124,6 @@ void InitSkyColors(void) {
 #define SKY_EDITOR_COLOR_STEP 4
 #define SKY_EDITOR_FOG_STEP 4
 #define BYTE_VALUE_COUNT 256
-#define FOG_COLOR_MAX 255
 #define FOG_DEPTH_MAX 1200
 static SkyColors* f_EditedSkyColors;
 
@@ -1277,16 +1276,16 @@ s32 UpdateSkyEditor(void) {
     }
   }
 
-  if (g_DebugFog.color[0] > FOG_COLOR_MAX) {
-    g_DebugFog.color[0] = FOG_COLOR_MAX;
+  if (g_DebugFog.color[0] > COLOR_CHANNEL_MAX) {
+    g_DebugFog.color[0] = COLOR_CHANNEL_MAX;
   }
 
-  if (g_DebugFog.color[1] > FOG_COLOR_MAX) {
-    g_DebugFog.color[1] = FOG_COLOR_MAX;
+  if (g_DebugFog.color[1] > COLOR_CHANNEL_MAX) {
+    g_DebugFog.color[1] = COLOR_CHANNEL_MAX;
   }
 
-  if (g_DebugFog.color[2] > FOG_COLOR_MAX) {
-    g_DebugFog.color[2] = FOG_COLOR_MAX;
+  if (g_DebugFog.color[2] > COLOR_CHANNEL_MAX) {
+    g_DebugFog.color[2] = COLOR_CHANNEL_MAX;
   }
 
   if (g_DebugFog.near > FOG_DEPTH_MAX) {

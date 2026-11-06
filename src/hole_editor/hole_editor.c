@@ -4363,8 +4363,8 @@ void DrawHoleEditorGround(CameraMatrices* matrices UNUSED, s32 terrainStyle) {
           /* The maps tell each tile from its neighbors by color */
           if (IsMapTerrainStyle(terrainStyle)) {
             Boolean isOdd = (row + groupTile) & 1;
-            s32 red = isOdd * 0xFF;
-            s32 blue = 0xFF - red;
+            s32 red = isOdd * COLOR_CHANNEL_MAX;
+            s32 blue = COLOR_CHANNEL_MAX - red;
 
             gDPSetEnvColor(gfx++, red, 0, blue, OPAQUE_ALPHA);
           }

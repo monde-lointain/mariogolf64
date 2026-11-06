@@ -31,6 +31,9 @@
 /* Every geometry mode bit, for gSPClearGeometryMode to clear them all */
 #define ALL_GEOMETRY_MODES 0xFFFFFFFF
 
+/* The largest value of an 8-bit color channel */
+#define COLOR_CHANNEL_MAX 0xFF
+
 /* The ends of an 8-bit color's alpha */
 #define TRANSPARENT_ALPHA 0
 #define OPAQUE_ALPHA 0xFF
