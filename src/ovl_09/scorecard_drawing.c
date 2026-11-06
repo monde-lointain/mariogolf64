@@ -2271,6 +2271,12 @@ INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard_drawing", DrawLeaderboardPage);
  * second meaning. Giving that loop a counter of its own, declared anywhere,
  * gives 706 (156), but the register oracle's closest stays at 564 words,
  * forcing 42 pseudos, so the loops keep sharing j.
+ *
+ * Setting the back nine face's top into a local before its DrawSmallFace
+ * gives 705 words but 163 in shape; a top of their own for both faces gives
+ * 710 words, 168 in shape, and a left shared by the two faces 735 (185),
+ * alone, with the back face's top, or with both tops. 710 words differ, 156
+ * in shape.
  */
 #ifdef NON_MATCHING
 void DrawScoresPage(Gfx** displayListHead) {
