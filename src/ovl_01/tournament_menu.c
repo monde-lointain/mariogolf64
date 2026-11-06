@@ -832,8 +832,8 @@ void DrawClubWindow(Gfx** displayListHead, s32 width, s32 height, s32 centerX,
   s32 growth;
   /*
    * The window's half width, then the badge's top, to match: a separate
-   * halfWidth gives 272 words differing (62 in shape) against the draft's
-   * 224 (62)
+   * halfWidth, wherever declared, gives 214 words differing (26 in shape)
+   * against the draft's 166 (26)
    */
   s32 badgeTop;
   s32 courseLeft;
