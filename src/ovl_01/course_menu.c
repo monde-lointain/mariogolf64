@@ -1009,6 +1009,11 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/course_menu", DrawStatsScrollArrows);
  * 0xFFEC as the original does, but once before the trophies' loop, where the
  * original loads it on each pass: 28 words (6 in shape), or 36 (8) for the
  * casts. 19 words differ, 5 in shape.
+ *
+ * Doesn't match either with the trophies' spacing alone in a local, place
+ * times TROPHY_SPACING, from which each edge subtracts TROPHY_SHIFT_LEFT:
+ * as an s32, 27 words differ (5 in shape), as an s16 47 (5), as a u16, as
+ * the permuter's best has it, 48 (4), and as a u32 20 (6).
  */
 #ifdef NON_MATCHING
 void DrawCourseTrophies(Gfx** displayListHead) {
