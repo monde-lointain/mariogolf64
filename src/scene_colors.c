@@ -7,6 +7,7 @@
 #include "scene_colors.h"
 
 #include "game.h"
+#include "gbi_helpers.h"
 #include "hole_display.h"
 #include "play.h"
 #include "save.h"
@@ -136,7 +137,8 @@ void DrawTexturePlane(Gfx** displayListHead) {
       SECOND_TEXTURE_TMEM, 1, G_IM_FMT_RGBA, G_IM_SIZ_16b, DYNAMIC_TEXTURE_SIZE,
       DYNAMIC_TEXTURE_SIZE, 0, G_TX_NOMIRROR | G_TX_WRAP,
       G_TX_NOMIRROR | G_TX_WRAP, 5, 5, G_TX_NOLOD, G_TX_NOLOD);
-  gSPTexture(gfx++, 0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_ON);
+  gSPTexture(
+      gfx++, TEXTURE_SCALE_FULL, TEXTURE_SCALE_FULL, 0, G_TX_RENDERTILE, G_ON);
   gDPSetTileSize(
       gfx++, G_TX_RENDERTILE, 0, 0, PLANE_TILE_SIZE << 2, PLANE_TILE_SIZE << 2);
   f_PlaneTextureScroll++;

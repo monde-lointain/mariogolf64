@@ -15,6 +15,7 @@
 #include "debug_text.h"
 #include "game.h"
 #include "game_flags.h"
+#include "gbi_helpers.h"
 #include "heap.h"
 #include "hole_loader.h"
 #include "host_file.h"
@@ -2386,7 +2387,8 @@ void DrawCharacterAndShadow(
     gDPSetTextureLOD(gfx++, G_TL_TILE);
     gDPPipeSync(gfx++);
     gDPSetAlphaDither(gfx++, G_AD_PATTERN);
-    gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+    gSPTexture(gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0,
+        G_TX_RENDERTILE, G_ON);
     gSPMatrix(gfx++, &f_ShadowMatrices[slotIndex][g_DrawBufferIndex],
         G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_PUSH);
     gSPVertex(gfx++, f_ShadowVertices, ARRAY_COUNT(f_ShadowVertices), 0);

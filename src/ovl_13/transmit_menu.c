@@ -11,6 +11,7 @@
 #include "controller.h"
 #include "debug_text.h"
 #include "game_flags.h"
+#include "gbi_helpers.h"
 #include "heap.h"
 #include "host_file.h"
 #include "libc.h"
@@ -2313,7 +2314,8 @@ void DrawTransmitMenu(Gfx** displayListHead) {
   gDPSetCombineMode(displayList++, G_CC_DECALRGBA, G_CC_DECALRGBA);
   gDPPipeSync(displayList++);
   gDPSetColorDither(displayList++, G_CD_DISABLE);
-  gSPTexture(displayList++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+  gSPTexture(displayList++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0,
+      G_TX_RENDERTILE, G_ON);
   gDPPipeSync(displayList++);
   gDPSetTexturePersp(displayList++, G_TP_NONE);
   gDPPipeSync(displayList++);

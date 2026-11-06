@@ -27,6 +27,7 @@
 #include "cpu_projection.h"
 #include "game.h"
 #include "game_flags.h"
+#include "gbi_helpers.h"
 #include "help_board.h"
 #include "hole_display.h"
 #include "hole_loader.h"
@@ -4909,7 +4910,8 @@ void DrawModeSelect(Gfx** displayListHead) {
   gDPSetTextureFilter(gfx++, G_TF_BILERP);
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-  gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+  gSPTexture(
+      gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0, G_TX_RENDERTILE, G_ON);
   gDPPipeSync(gfx++);
   gDPSetTexturePersp(gfx++, G_TP_NONE);
 
@@ -4987,7 +4989,8 @@ void DrawModeSelect(Gfx** displayListHead) {
         gDPPipeSync(gfx++);
         gDPPipeSync(gfx++);
         gDPSetCycleType(gfx++, G_CYC_1CYCLE);
-        gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+        gSPTexture(gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0,
+            G_TX_RENDERTILE, G_ON);
         gDPPipeSync(gfx++);
         gDPSetTexturePersp(gfx++, G_TP_NONE);
         gDPPipeSync(gfx++);
@@ -5009,7 +5012,8 @@ void DrawModeSelect(Gfx** displayListHead) {
           gDPPipeSync(gfx++);
           gDPPipeSync(gfx++);
           gDPSetCycleType(gfx++, G_CYC_1CYCLE);
-          gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+          gSPTexture(gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0,
+              G_TX_RENDERTILE, G_ON);
           gDPPipeSync(gfx++);
           gDPSetTexturePersp(gfx++, G_TP_NONE);
           gDPPipeSync(gfx++);
@@ -5294,7 +5298,8 @@ void DrawModeIcon(Gfx** displayListHead) {
   gDPPipeSync(gfx++);
   gDPSetCycleType(gfx++, G_CYC_1CYCLE);
   gDPPipeSync(gfx++);
-  gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+  gSPTexture(
+      gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0, G_TX_RENDERTILE, G_ON);
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
   gDPPipeSync(gfx++);
   gDPSetTexturePersp(gfx++, G_TP_NONE);
@@ -5931,7 +5936,8 @@ void DrawCourseSelect(Gfx** displayListHead) {
     gDPPipeSync(gfx++);
     gSPFogPosition(gfx++, WATER_FOG_START, WATER_FOG_END);
     gDPSetFogColor(gfx++, 255, 255, 255, 255);
-    gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+    gSPTexture(gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0,
+        G_TX_RENDERTILE, G_ON);
     gDPSetCombineMode(gfx++, G_CC_DECALRGB, G_CC_DECALRGB);
     gDPPipeSync(gfx++);
     gDPSetRenderMode(gfx++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
@@ -5996,7 +6002,8 @@ void DrawCourseSelect(Gfx** displayListHead) {
     gDPSetTextureFilter(gfx++, G_TF_BILERP);
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-    gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+    gSPTexture(gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0,
+        G_TX_RENDERTILE, G_ON);
     gDPPipeSync(gfx++);
     gDPSetTexturePersp(gfx++, G_TP_NONE);
     if (g_GameState.isMiniGolf) {

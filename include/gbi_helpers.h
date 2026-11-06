@@ -4,6 +4,13 @@
 #include <ultra64.h>
 
 /*
+ * gSPTexture's scales, in 0.16 fixed point: one half, which most of the
+ * game's display lists set, and the largest, just under one
+ */
+#define TEXTURE_SCALE_HALF 0x8000
+#define TEXTURE_SCALE_FULL 0xFFFF
+
+/*
  * Appends a pipe sync followed by a single-command GBI state setter.
  * displayList must be a side-effect-free Gfx* lvalue with room for both
  * commands; it advances twice. setState is a gDPSet... macro, followed by

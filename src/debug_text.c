@@ -9,6 +9,7 @@
 #include "debug_text.h"
 
 #include "game_flags.h"
+#include "gbi_helpers.h"
 #include "main.h"
 #include "screen.h"
 #include "text.h"
@@ -68,7 +69,8 @@ void SetUpDebugTextDrawing(Gfx** displayListHead) {
   gDPSetRenderMode(gfx++, TextRenderMode(1), TextRenderMode(2));
   gDPSetCombineMode(
       gfx++, G_CC_MODULATEIDECALA_PRIM, G_CC_MODULATEIDECALA_PRIM);
-  gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+  gSPTexture(
+      gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0, G_TX_RENDERTILE, G_ON);
   gDPPipeSync(gfx++);
   gDPSetAlphaCompare(gfx++, G_AC_NONE);
   gDPPipeSync(gfx++);

@@ -10,6 +10,7 @@
 
 #include "asset.h"
 #include "current_shot.h"
+#include "gbi_helpers.h"
 #include "heap.h"
 #include "libc.h"
 #include "round_hud.h"
@@ -388,7 +389,8 @@ void SetUpTextDrawing(Gfx** displayListHead) {
   gSPLoadGeometryMode(gfx++, 0);
   gDPPipeSync(gfx++);
   gDPSetRenderMode(gfx++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
-  gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+  gSPTexture(
+      gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0, G_TX_RENDERTILE, G_ON);
   gDPPipeSync(gfx++);
   gDPSetAlphaCompare(gfx++, G_AC_NONE);
   gDPSetBlendColor(gfx++, 0, 0, 0, 1);
@@ -1102,7 +1104,8 @@ void SetUpGradientTextDrawing(Gfx** displayListHead, s32 gradient) {
   gSPLoadGeometryMode(gfx++, 0);
   gDPPipeSync(gfx++);
   gDPSetRenderMode(gfx++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
-  gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+  gSPTexture(
+      gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0, G_TX_RENDERTILE, G_ON);
   gDPPipeSync(gfx++);
   gDPSetAlphaCompare(gfx++, G_AC_NONE);
   gDPPipeSync(gfx++);
@@ -1649,7 +1652,8 @@ void BeginShadowedText(Gfx** displayListHead) {
   gDPSetRenderMode(gfx++, TextRenderMode(1), TextRenderMode(2));
   gDPSetCombineMode(
       gfx++, G_CC_MODULATEIDECALA_PRIM, G_CC_MODULATEIDECALA_PRIM);
-  gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+  gSPTexture(
+      gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0, G_TX_RENDERTILE, G_ON);
   gDPPipeSync(gfx++);
   gDPSetAlphaCompare(gfx++, G_AC_NONE);
   gDPPipeSync(gfx++);
@@ -2185,7 +2189,8 @@ void SetUpPerspectiveTextDrawing(Gfx** displayListHead) {
   gDPSetCycleType(gfx++, G_CYC_1CYCLE);
   gDPPipeSync(gfx++);
   gDPSetRenderMode(gfx++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
-  gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+  gSPTexture(
+      gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0, G_TX_RENDERTILE, G_ON);
   gDPPipeSync(gfx++);
   gDPSetAlphaCompare(gfx++, G_AC_NONE);
   gDPSetBlendColor(gfx++, 0, 0, 0, 1);

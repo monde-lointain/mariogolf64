@@ -12,6 +12,7 @@
 #include "debug_text.h"
 #include "game.h"
 #include "game_flags.h"
+#include "gbi_helpers.h"
 #include "heap.h"
 #include "hole_builder.h"
 #include "hole_loader.h"
@@ -4241,7 +4242,8 @@ void DrawHoleEditorGround(CameraMatrices* matrices UNUSED, s32 terrainStyle) {
     gDPPipeSync(gfx++);
   }
 
-  gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+  gSPTexture(
+      gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0, G_TX_RENDERTILE, G_ON);
   g_GroundFarthestDepth = 0.0f;
   g_GroundNearDepthEighth = NO_NEAR_DEPTH;
   for (tileIndex = 0; tileIndex < GROUND_TILE_COUNT; tileIndex++) {

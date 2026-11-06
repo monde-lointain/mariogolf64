@@ -12,6 +12,7 @@
 #include "cpu_projection.h"
 #include "current_shot.h"
 #include "game.h"
+#include "gbi_helpers.h"
 #include "heap.h"
 #include "libc.h"
 #include "math_util.h"
@@ -439,7 +440,8 @@ void DrawPin(
     gDPSetAlphaCompare(g_DisplayListHead++, G_AC_NONE);
     gDPPipeSync(g_DisplayListHead++);
     gDPSetTextureLUT(g_DisplayListHead++, G_TT_NONE);
-    gSPTexture(g_DisplayListHead++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+    gSPTexture(g_DisplayListHead++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0,
+        G_TX_RENDERTILE, G_ON);
     gSPLoadGeometryMode(g_DisplayListHead++, 0);
     gSPSetGeometryMode(g_DisplayListHead++, G_SHADE | G_SHADING_SMOOTH);
     gDPPipeSync(g_DisplayListHead++);
@@ -494,7 +496,8 @@ void DrawPin(
     gDPPipeSync(g_DisplayListHead++);
     gDPPipeSync(g_DisplayListHead++);
     gDPSetTexturePersp(g_DisplayListHead++, G_TP_PERSP);
-    gSPTexture(g_DisplayListHead++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+    gSPTexture(g_DisplayListHead++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0,
+        G_TX_RENDERTILE, G_ON);
     gDPPipeSync(g_DisplayListHead++);
     gDPSetRenderMode(
         g_DisplayListHead++, G_RM_AA_ZB_TEX_EDGE, G_RM_AA_ZB_TEX_EDGE2);

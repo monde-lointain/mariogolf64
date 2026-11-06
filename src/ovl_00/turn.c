@@ -27,6 +27,7 @@
 #include "framing.h"
 #include "game.h"
 #include "game_flags.h"
+#include "gbi_helpers.h"
 #include "golf_balls.h"
 #include "hole_display.h"
 #include "hole_intro.h"
@@ -2165,7 +2166,8 @@ void DrawShotPreview(CameraMatrices* matrices) {
   gDPSetBlendColor(g_DisplayListHead++, 0xFF, 0xFF, 0xFF, 0x7F);
   gDPPipeSync(g_DisplayListHead++);
   gDPSetTexturePersp(g_DisplayListHead++, G_TP_PERSP);
-  gSPTexture(g_DisplayListHead++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+  gSPTexture(g_DisplayListHead++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0,
+      G_TX_RENDERTILE, G_ON);
   gDPLoadTextureBlock(g_DisplayListHead++,
       TextureAddress(ImageBody(g_ShotPreviewDashImage)), G_IM_FMT_I,
       G_IM_SIZ_8b, SHOT_PREVIEW_IMAGE_SIZE, SHOT_PREVIEW_IMAGE_SIZE, 0,

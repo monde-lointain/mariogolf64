@@ -832,7 +832,8 @@ void DrawLensFlare(Gfx** displayListHead) {
   gDPSetCombineLERP(gfx++, PRIMITIVE, ENVIRONMENT, TEXEL0, ENVIRONMENT,
       PRIMITIVE, 0, TEXEL0, 0, PRIMITIVE, ENVIRONMENT, TEXEL0, ENVIRONMENT,
       PRIMITIVE, 0, TEXEL0, 0);
-  gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+  gSPTexture(
+      gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0, G_TX_RENDERTILE, G_ON);
   gDPPipeSync(gfx++);
   gDPSetTextureFilter(gfx++, G_TF_BILERP);
   gDPPipeSync(gfx++);
@@ -1797,7 +1798,8 @@ void DrawSky(Gfx** displayListHead, f32 eyeY UNUSED, s32 unusedSetting UNUSED,
   gDPLoadTextureBlock(gfx++, TextureAddress(g_NoiseTexels), G_IM_FMT_I,
       G_IM_SIZ_8b, SKY_NOISE_IMAGE_SIZE, SKY_NOISE_IMAGE_SIZE, 0, G_TX_WRAP,
       G_TX_WRAP, SKY_NOISE_MASK, SKY_NOISE_MASK, G_TX_NOLOD, G_TX_NOLOD);
-  gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+  gSPTexture(
+      gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0, G_TX_RENDERTILE, G_ON);
   gDPPipeSync(gfx++);
   gSPMatrix(gfx++, PhysicalAddress(&g_ScreenEffectProjection),
       G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
@@ -1862,7 +1864,8 @@ void DrawSky(Gfx** displayListHead, f32 eyeY UNUSED, s32 unusedSetting UNUSED,
         gDPSetRenderMode(gfx++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
       }
 
-      gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+      gSPTexture(gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0,
+          G_TX_RENDERTILE, G_ON);
       if (colors->sun->imageKind == SKY_IMAGE_KIND_TWO_TEXTURES) {
         gDPPipeSync(gfx++);
         gDPSetAlphaDither(gfx++, G_AD_PATTERN);
@@ -2684,7 +2687,8 @@ void CaptureMenuBackdrop(Gfx** displayListHead, s32 unused UNUSED) {
   gDPPipeSync(gfx++);
   gDPPipeSync(gfx++);
   gDPSetColorDither(gfx++, G_CD_DISABLE);
-  gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+  gSPTexture(
+      gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0, G_TX_RENDERTILE, G_ON);
   gDPPipeSync(gfx++);
   gDPSetTexturePersp(gfx++, G_TP_NONE);
   gDPPipeSync(gfx++);

@@ -944,7 +944,8 @@ void DrawOpeningShotPath(CameraMatrices* matrices UNUSED) {
   gDPSetBlendColor(g_DisplayListHead++, 0xFF, 0xFF, 0xFF, 0x40);
   gDPPipeSync(g_DisplayListHead++);
   gDPSetTexturePersp(g_DisplayListHead++, G_TP_PERSP);
-  gSPTexture(g_DisplayListHead++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+  gSPTexture(g_DisplayListHead++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0,
+      G_TX_RENDERTILE, G_ON);
   gDPLoadTextureBlock(g_DisplayListHead++,
       TextureAddress(ImageBody(g_ShotPreviewDashImage)), G_IM_FMT_I,
       G_IM_SIZ_8b, SHOT_PREVIEW_IMAGE_SIZE, SHOT_PREVIEW_IMAGE_SIZE, 0,
@@ -3080,7 +3081,8 @@ void DrawNameLogos(Gfx** displayListHead) {
       gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
       gDPPipeSync(gfx++);
       gDPSetColorDither(gfx++, G_CD_DISABLE);
-      gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+      gSPTexture(gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0,
+          G_TX_RENDERTILE, G_ON);
       gDPPipeSync(gfx++);
       gDPSetTexturePersp(gfx++, G_TP_NONE);
       gDPPipeSync(gfx++);
@@ -3346,7 +3348,8 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
             G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
         gDPPipeSync(gfx++);
         gDPSetTextureLOD(gfx++, G_TL_TILE);
-        gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+        gSPTexture(gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0,
+            G_TX_RENDERTILE, G_ON);
         gSPLoadGeometryMode(gfx++, 0);
         gSPSetGeometryMode(gfx++, G_ZBUFFER | G_SHADE | G_SHADING_SMOOTH);
         gSPMatrix(gfx++,
@@ -3384,7 +3387,8 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
         gDPSetTextureLUT(gfx++, G_TT_RGBA16);
         gDPPipeSync(gfx++);
         gDPSetTextureLOD(gfx++, G_TL_TILE);
-        gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+        gSPTexture(gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0,
+            G_TX_RENDERTILE, G_ON);
         if (f_IsLogoBallSlot[slot]) {
           gDPLoadTLUT_pal256(
               gfx++, TextureAddress(ImageBody(f_LogoBallImages)));
@@ -3518,7 +3522,8 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
               G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
           gDPPipeSync(gfx++);
           gDPSetTextureLOD(gfx++, G_TL_TILE);
-          gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+          gSPTexture(gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0,
+              G_TX_RENDERTILE, G_ON);
           gSPLoadGeometryMode(gfx++, 0);
           gSPSetGeometryMode(gfx++, G_SHADE | G_CULL_FRONT | G_SHADING_SMOOTH);
           gSPMatrix(gfx++,
@@ -3641,7 +3646,8 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
               G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
           gDPPipeSync(gfx++);
           gDPSetTextureLOD(gfx++, G_TL_TILE);
-          gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+          gSPTexture(gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0,
+              G_TX_RENDERTILE, G_ON);
           gSPLoadGeometryMode(gfx++, 0);
           gSPSetGeometryMode(gfx++, G_ZBUFFER | G_SHADE | G_SHADING_SMOOTH);
           gSPMatrix(gfx++,
@@ -3660,7 +3666,8 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
           gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
           gDPPipeSync(gfx++);
           gDPSetColorDither(gfx++, G_CD_MAGICSQ);
-          gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+          gSPTexture(gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0,
+              G_TX_RENDERTILE, G_ON);
           gDPPipeSync(gfx++);
           gDPSetTexturePersp(gfx++, G_TP_NONE);
           gDPPipeSync(gfx++);
@@ -3818,7 +3825,8 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
                 G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
             gDPPipeSync(gfx++);
             gDPSetTextureLOD(gfx++, G_TL_TILE);
-            gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+            gSPTexture(gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0,
+                G_TX_RENDERTILE, G_ON);
             gSPLoadGeometryMode(gfx++, 0);
             gSPSetGeometryMode(
                 gfx++, G_SHADE | G_CULL_FRONT | G_SHADING_SMOOTH);
@@ -3922,7 +3930,8 @@ void DrawOpeningImpactLines(Gfx** displayListHead) {
       gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
       gDPPipeSync(gfx++);
       gDPSetColorDither(gfx++, G_CD_DISABLE);
-      gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+      gSPTexture(gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0,
+          G_TX_RENDERTILE, G_ON);
       gDPPipeSync(gfx++);
       gDPSetTexturePersp(gfx++, G_TP_NONE);
       gDPPipeSync(gfx++);
@@ -4037,7 +4046,8 @@ void DrawLakitu(Gfx** displayListHead) {
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
     gDPPipeSync(gfx++);
     gDPSetColorDither(gfx++, G_CD_DISABLE);
-    gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+    gSPTexture(gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0,
+        G_TX_RENDERTILE, G_ON);
     AppendSyncedRdpState(gfx, gDPSetTexturePersp, G_TP_NONE);
     gDPPipeSync(gfx++);
     gDPSetTextureFilter(gfx++, G_TF_BILERP);
@@ -4082,7 +4092,8 @@ void DrawLakitu(Gfx** displayListHead) {
     gDPSetTexturePersp(gfx++, G_TP_PERSP);
     gDPPipeSync(gfx++);
     gDPSetTextureFilter(gfx++, G_TF_BILERP);
-    gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+    gSPTexture(gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0,
+        G_TX_RENDERTILE, G_ON);
     gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, f_LakituTrailAlpha);
     gDPSetEnvColor(gfx++, 255, 255, 255, 255);
     gDPSetCombineLERP(gfx++, 0, 0, 0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0, 0, 0,
@@ -4254,7 +4265,8 @@ void DrawOpeningBurst(Gfx** displayListHead) {
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
     gDPPipeSync(gfx++);
     gDPSetColorDither(gfx++, G_CD_DISABLE);
-    gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+    gSPTexture(gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0,
+        G_TX_RENDERTILE, G_ON);
     gDPPipeSync(gfx++);
     gDPSetTexturePersp(gfx++, G_TP_NONE);
     gDPPipeSync(gfx++);
@@ -4393,7 +4405,8 @@ void DrawOpeningShotBall(Gfx** displayListHead) {
       AppendSyncedRdpState(gfx, gDPSetTextureLUT, G_TT_NONE);
       gDPPipeSync(gfx++);
       gDPSetTextureLOD(gfx++, G_TL_TILE);
-      gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+      gSPTexture(gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0,
+          G_TX_RENDERTILE, G_ON);
       gDPPipeSync(gfx++);
       gDPLoadTextureBlock(gfx++, TextureAddress(ImageBody(g_ShadowTexture)),
           G_IM_FMT_I, G_IM_SIZ_8b, SHADOW_TEXTURE_SIZE, SHADOW_TEXTURE_SIZE, 0,
@@ -4419,7 +4432,8 @@ void DrawOpeningShotBall(Gfx** displayListHead) {
       gDPSetAlphaCompare(gfx++, G_AC_THRESHOLD);
       gDPSetBlendColor(gfx++, 255, 255, 255, 2);
       gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, f_ShotBallAlpha);
-      gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+      gSPTexture(gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0,
+          G_TX_RENDERTILE, G_ON);
       gDPPipeSync(gfx++);
       gDPSetTexturePersp(gfx++, G_TP_NONE);
       AppendSyncedRdpState(gfx, gDPSetTextureFilter, G_TF_BILERP);
@@ -4894,7 +4908,8 @@ void DrawOpeningLogo(Gfx** displayListHead, Boolean isDrawn) {
     gDPSetAlphaDither(gfx++, G_AD_DISABLE);
     gDPPipeSync(gfx++);
     gDPSetColorDither(gfx++, G_CD_MAGICSQ);
-    gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+    gSPTexture(gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0,
+        G_TX_RENDERTILE, G_ON);
     gDPPipeSync(gfx++);
     gDPSetTexturePersp(gfx++, G_TP_PERSP);
     gDPPipeSync(gfx++);
@@ -5324,7 +5339,8 @@ void DrawOpeningSparks(Gfx** displayListHead) {
     gDPSetAlphaDither(gfx++, G_AD_DISABLE);
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_NONE);
-    gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_OFF);
+    gSPTexture(gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0,
+        G_TX_RENDERTILE, G_OFF);
     gSPLoadGeometryMode(gfx++, 0);
     gSPSetGeometryMode(gfx++, G_SHADE | G_SHADING_SMOOTH);
     gDPPipeSync(gfx++);

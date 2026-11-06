@@ -9,6 +9,7 @@
 #include "asset.h"
 #include "controller.h"
 #include "debug_text.h"
+#include "gbi_helpers.h"
 #include "heap.h"
 #include "main.h"
 #include "math_util.h"
@@ -461,7 +462,8 @@ void DrawWipe(Gfx** displayListHead) {
     gDPPipeSync(gfx++);
   } else {
     texelOffset = TexelCoordinate(shapeOffset * WIPE_SHAPE_TEXELS) / shapeSize;
-    gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+    gSPTexture(gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0,
+        G_TX_RENDERTILE, G_ON);
     gDPLoadTextureBlock_4b(gfx++, TextureAddress(ImageBody(f_WipeShapeImage)),
         G_IM_FMT_I, WIPE_SHAPE_TEXELS, WIPE_SHAPE_TEXELS, 0,
         G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMASK,

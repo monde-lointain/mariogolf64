@@ -11,6 +11,7 @@
 #include "controller.h"
 #include "course.h"
 #include "framebuffer.h"
+#include "gbi_helpers.h"
 #include "heap.h"
 #include "hole_display.h"
 #include "math_util.h"
@@ -666,7 +667,8 @@ void DrawGameSaveMenu(Gfx** displayListHead) {
 
     /* The panels, stretched from the panel image a strip at a time */
     gDPPipeSync(gfx++);
-    gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+    gSPTexture(gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0,
+        G_TX_RENDERTILE, G_ON);
     gDPPipeSync(gfx++);
     gDPSetAlphaCompare(gfx++, G_AC_NONE);
     gDPPipeSync(gfx++);
@@ -1778,7 +1780,8 @@ void DrawControlsScreen(Gfx** displayListHead) {
   gfx = *displayListHead;
   if (f_IsControlsShown == TRUE) {
     gDPPipeSync(gfx++);
-    gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+    gSPTexture(gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0,
+        G_TX_RENDERTILE, G_ON);
     gDPPipeSync(gfx++);
     gDPSetAlphaCompare(gfx++, G_AC_NONE);
     gDPPipeSync(gfx++);

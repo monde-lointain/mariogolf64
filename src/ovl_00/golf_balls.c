@@ -14,6 +14,7 @@
 #include "debug_text.h"
 #include "game.h"
 #include "game_flags.h"
+#include "gbi_helpers.h"
 #include "heap.h"
 #include "hole_loader.h"
 #include "main.h"
@@ -1417,7 +1418,8 @@ void DrawGolfBalls(CameraMatrices* matrices UNUSED) {
       PIKA_TEXTURE_WIDTH, PIKA_TEXTURE_HEIGHT, 0, G_TX_NOMIRROR | G_TX_CLAMP,
       G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
       G_TX_NOLOD);
-  gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+  gSPTexture(
+      gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0, G_TX_RENDERTILE, G_ON);
   gDPSetPrimDepth(gfx++, f_CurrentBallScreenPoint.depth - 4, 0);
   if (f_CurrentBallScreenPoint.depth < PIKA_BALL_DEPTH) {
     for (i = 0; i < GOLF_BALL_COUNT; i++) {

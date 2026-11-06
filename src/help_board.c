@@ -10,6 +10,7 @@
 
 #include "asset.h"
 #include "character_slot.h"
+#include "gbi_helpers.h"
 #include "hole_display.h"
 #include "hole_loader.h"
 #include "main_menu.h"
@@ -308,7 +309,8 @@ void DrawHelpBoard(Gfx** displayListHead) {
   gDPPipeSync(gfx++);
   gDPPipeSync(gfx++);
   gDPSetTexturePersp(gfx++, G_TP_NONE);
-  gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+  gSPTexture(
+      gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0, G_TX_RENDERTILE, G_ON);
   gDPPipeSync(gfx++);
   gDPSetTexturePersp(gfx++, G_TP_NONE);
   gDPPipeSync(gfx++);

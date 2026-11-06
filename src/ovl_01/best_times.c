@@ -8,6 +8,7 @@
 #include "character.h"
 #include "cpu_projection.h"
 #include "game.h"
+#include "gbi_helpers.h"
 #include "hole_display.h"
 #include "libc.h"
 #include "main_menu.h"
@@ -278,7 +279,8 @@ void DrawBestTimes(Gfx** displayListHead) {
   gDPSetTextureFilter(gfx++, G_TF_BILERP);
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-  gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+  gSPTexture(
+      gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0, G_TX_RENDERTILE, G_ON);
   gDPPipeSync(gfx++);
   gDPSetTexturePersp(gfx++, G_TP_NONE);
   courseCount = GetOpenCourseCount();

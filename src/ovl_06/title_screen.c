@@ -12,6 +12,7 @@
 #include "asset.h"
 #include "controller.h"
 #include "game_flags.h"
+#include "gbi_helpers.h"
 #include "hole_display.h"
 #include "main.h"
 #include "math_util.h"
@@ -370,7 +371,8 @@ void DrawTitleScreen(Gfx** displayListHead) {
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
   gDPPipeSync(gfx++);
   gDPSetColorDither(gfx++, G_CD_DISABLE);
-  gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+  gSPTexture(
+      gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0, G_TX_RENDERTILE, G_ON);
   gDPPipeSync(gfx++);
   gDPSetTexturePersp(gfx++, G_TP_NONE);
   gDPPipeSync(gfx++);

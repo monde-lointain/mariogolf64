@@ -13,6 +13,7 @@
 #include "cpu_projection.h"
 #include "game.h"
 #include "game_flags.h"
+#include "gbi_helpers.h"
 #include "hole_display.h"
 #include "hole_loader.h"
 #include "libc.h"
@@ -1971,7 +1972,8 @@ void DrawSavedGames(Gfx** displayListHead) {
   gDPPipeSync(gfx++);
   gDPPipeSync(gfx++);
   gDPSetCycleType(gfx++, G_CYC_1CYCLE);
-  gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+  gSPTexture(
+      gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0, G_TX_RENDERTILE, G_ON);
   DrawPlayerControllers(&gfx);
 
   guPerspectiveF(f_BoardProjection, &perspNorm, WHEEL_FIELD_OF_VIEW,
@@ -1989,7 +1991,8 @@ void DrawSavedGames(Gfx** displayListHead) {
   gDPSetTextureFilter(gfx++, G_TF_BILERP);
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-  gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+  gSPTexture(
+      gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0, G_TX_RENDERTILE, G_ON);
   gDPPipeSync(gfx++);
   gDPSetTexturePersp(gfx++, G_TP_NONE);
 

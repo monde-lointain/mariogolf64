@@ -15,6 +15,7 @@
 #include "framebuffer.h"
 #include "game.h"
 #include "game_flags.h"
+#include "gbi_helpers.h"
 #include "heap.h"
 #include "hole_display.h"
 #include "math_util.h"
@@ -706,7 +707,8 @@ void DrawClubSlots(Gfx** displayListHead) {
       0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
 
   /* The reels */
-  gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+  gSPTexture(
+      gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0, G_TX_RENDERTILE, G_ON);
   gDPPipeSync(gfx++);
   gDPPipeSync(gfx++);
   gDPSetCycleType(gfx++, G_CYC_1CYCLE);
@@ -777,7 +779,8 @@ void DrawClubSlots(Gfx** displayListHead) {
   gDPSetCombineMode(gfx++, G_CC_DECALRGB, G_CC_DECALRGB);
   gDPPipeSync(gfx++);
   gDPSetRenderMode(gfx++, G_RM_NOOP, G_RM_NOOP2);
-  gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+  gSPTexture(
+      gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0, G_TX_RENDERTILE, G_ON);
   gDPPipeSync(gfx++);
   gDPPipeSync(gfx++);
   gDPSetCycleType(gfx++, G_CYC_COPY);
@@ -920,7 +923,8 @@ void DrawClubSlots(Gfx** displayListHead) {
   gDPSetCombineMode(gfx++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
   gDPPipeSync(gfx++);
   gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
-  gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+  gSPTexture(
+      gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0, G_TX_RENDERTILE, G_ON);
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
   for (topOrPlayerIndex = 0; topOrPlayerIndex != g_GameState.playerCount;

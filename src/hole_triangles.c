@@ -9,6 +9,7 @@
 #include "camera.h"
 #include "game.h"
 #include "game_flags.h"
+#include "gbi_helpers.h"
 #include "math_util.h"
 #include "play.h"
 #include "save.h"
@@ -169,7 +170,8 @@ void DrawHoleTriangles(Gfx** displayListHead, CameraMatrices* matrices UNUSED,
       PRIMITIVE, PRIMITIVE, 0, COMBINED, 0, 0, 0, 0, COMBINED);
   gDPSetPrimColor(gfx++, 0, 0, 0x7F, 0x7F, 0x7F, 0xA1);
   gDPSetEnvColor(gfx++, 0x3F, 0x7F, 0x9F, 0xFF);
-  gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+  gSPTexture(
+      gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0, G_TX_RENDERTILE, G_ON);
   f_TextureScroll++;
   gDPSetTileSize(gfx++, G_TX_RENDERTILE, 0, f_TextureScroll,
       BLENDED_TEXTURE_SIZE, f_TextureScroll + BLENDED_TEXTURE_SIZE);

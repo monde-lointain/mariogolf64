@@ -22,6 +22,7 @@
 #include "fireworks.h"
 #include "game.h"
 #include "game_flags.h"
+#include "gbi_helpers.h"
 #include "golf_balls.h"
 #include "heap.h"
 #include "hole_display.h"
@@ -1301,7 +1302,8 @@ void DrawInsetViewFrame(void) {
   gDPPipeSync(g_DisplayListHead++);
   gDPPipeSync(g_DisplayListHead++);
   gDPSetRenderMode(g_DisplayListHead++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
-  gSPTexture(g_DisplayListHead++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+  gSPTexture(g_DisplayListHead++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0,
+      G_TX_RENDERTILE, G_ON);
   gDPPipeSync(g_DisplayListHead++);
   gDPSetAlphaCompare(g_DisplayListHead++, G_AC_NONE);
   gDPSetBlendColor(g_DisplayListHead++, 0, 0, 0, 1);
@@ -2581,7 +2583,8 @@ void DrawWindIndicator(Gfx** displayListHead, f32 x, f32 y) {
   gDPSetRenderMode(gfx++, G_RM_AA_OPA_SURF, G_RM_AA_OPA_SURF2);
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_NONE);
-  gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+  gSPTexture(
+      gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0, G_TX_RENDERTILE, G_ON);
   gDPPipeSync(gfx++);
   gDPSetTexturePersp(gfx++, G_TP_PERSP);
   gDPPipeSync(gfx++);
@@ -2732,7 +2735,8 @@ void DrawShotPanelIcons(Gfx** displayListHead, CameraView* view UNUSED) {
     BuildRotationMatrix(matrix, rotation, translation);
     ConvertMatrixToFixed(matrix, &f_ClubHeadIconMatrices[g_MatrixBufferIndex]);
     gDPPipeSync(gfx++);
-    gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+    gSPTexture(gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0,
+        G_TX_RENDERTILE, G_ON);
     gDPPipeSync(gfx++);
     gDPSetCycleType(gfx++, G_CYC_1CYCLE);
     gDPPipeSync(gfx++);
@@ -2793,7 +2797,8 @@ void DrawShotPanelIcons(Gfx** displayListHead, CameraView* view UNUSED) {
     }
 
     gDPPipeSync(gfx++);
-    gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+    gSPTexture(gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0,
+        G_TX_RENDERTILE, G_ON);
     gDPPipeSync(gfx++);
     gDPSetCycleType(gfx++, G_CYC_1CYCLE);
     gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(f_LieImage)));
@@ -2852,7 +2857,8 @@ void DrawHoleFlag(Boolean isBackDrawn) {
   gDPSetTexturePersp(g_DisplayListHead++, G_TP_PERSP);
   gDPPipeSync(g_DisplayListHead++);
   gDPSetTextureFilter(g_DisplayListHead++, G_TF_BILERP);
-  gSPTexture(g_DisplayListHead++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+  gSPTexture(g_DisplayListHead++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0,
+      G_TX_RENDERTILE, G_ON);
   gDPLoadTextureBlock(g_DisplayListHead++,
       TextureAddress(LargeImageTexels(f_HoleImage)), G_IM_FMT_CI, G_IM_SIZ_8b,
       HOLE_IMAGE_WIDTH, HOLE_IMAGE_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
@@ -3047,7 +3053,8 @@ void DrawShotEffect(Gfx** displayListHead) {
   gDPSetAlphaCompare(gfx++, G_AC_NONE);
   gDPSetBlendColor(gfx++, 255, 255, 255, 1);
   if (ShowsLongShotEffect(contactStyle)) {
-    gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_OFF);
+    gSPTexture(gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0,
+        G_TX_RENDERTILE, G_OFF);
     gDPPipeSync(gfx++);
     gDPSetTextureFilter(gfx++, G_TF_BILERP);
     gDPSetPrimColor(gfx++, 0, 0, 0, 0, 255, 255);
@@ -3086,7 +3093,8 @@ void DrawShotEffect(Gfx** displayListHead) {
       f_SparkTrailBufferIndex ^= 1;
     }
 
-    gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+    gSPTexture(gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0,
+        G_TX_RENDERTILE, G_ON);
     gDPPipeSync(gfx++);
     gDPSetTextureFilter(gfx++, G_TF_POINT);
     gDPPipeSync(gfx++);
@@ -3786,7 +3794,8 @@ void DrawRoundHud(CameraView* view) {
 
   gDPSetPrimColor(g_DisplayListHead++, 0, 0, 255, 255, 255, 128);
   gDPPipeSync(g_DisplayListHead++);
-  gSPTexture(g_DisplayListHead++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+  gSPTexture(g_DisplayListHead++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0,
+      G_TX_RENDERTILE, G_ON);
   gDPPipeSync(g_DisplayListHead++);
   gDPSetTexturePersp(g_DisplayListHead++, G_TP_NONE);
   gDPPipeSync(g_DisplayListHead++);

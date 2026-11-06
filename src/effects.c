@@ -18,6 +18,7 @@
 #include "cpu_projection.h"
 #include "current_shot.h"
 #include "game.h"
+#include "gbi_helpers.h"
 #include "heap.h"
 #include "hole_loader.h"
 #include "libc.h"
@@ -1570,7 +1571,8 @@ void DrawEffects(CameraMatrices* matrices, Gfx** displayListHead) {
   gDPSetTextureLUT(gfx++, G_TT_NONE);
   gSPLoadGeometryMode(gfx++, 0);
   gSPSetGeometryMode(gfx++, G_ZBUFFER | G_SHADE | G_SHADING_SMOOTH);
-  gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+  gSPTexture(
+      gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0, G_TX_RENDERTILE, G_ON);
   gDPPipeSync(gfx++);
   gDPSetTexturePersp(gfx++, G_TP_PERSP);
   gDPPipeSync(gfx++);
@@ -1638,7 +1640,8 @@ void DrawEffects(CameraMatrices* matrices, Gfx** displayListHead) {
     }
   }
 
-  gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+  gSPTexture(
+      gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0, G_TX_RENDERTILE, G_ON);
   gDPSetCombineMode(gfx++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
   gDPPipeSync(gfx++);
   gDPSetRenderMode(gfx++, G_RM_ZB_CLD_SURF, G_RM_ZB_CLD_SURF2);
@@ -2575,7 +2578,8 @@ void DrawRain(Gfx** displayListHead, CameraMatrices* matrices) {
       }
     }
 
-    gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+    gSPTexture(gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0,
+        G_TX_RENDERTILE, G_ON);
     gDPPipeSync(gfx++);
     gDPSetTexturePersp(gfx++, G_TP_NONE);
     gDPPipeSync(gfx++);
