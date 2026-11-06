@@ -3887,10 +3887,22 @@ void DrawMenuScreen(Gfx** displayListHead) {
  * words differing, 16 in shape. The register oracle's closest result is
  * these 42 words with no register forced, so allocation isn't the cause. 42
  * words differ, 10 in shape.
+ *
+ * The banner loop counts with bannerStrip, a counter of its own, and works out
+ * its strip's offset through stripWidthOffset, as a permuter run found. That
+ * takes the draft from 42 words to 26, 10 in shape to 8, and the register
+ * oracle's closest result to these 26 with none forced. Each change alone
+ * gives 612 (430 in shape) for the counter, as loop.c then hoists other
+ * constants into saved registers through the whole function, or 42 for the
+ * offset; the offset as the strip's whole texel count or its first row times
+ * the width gives 612, in any of seven declaration places. 26 words differ, 8
+ * in shape.
  */
 #ifdef NON_MATCHING
 void DrawMenuBackdropLayers(Gfx** displayListHead, s32 layers) {
   Gfx* gfx = *displayListHead;
+  s32 bannerStrip;
+  s32 stripWidthOffset;
   s32 stripIndex;
   s32 shownRowCount;
   s32 stripTop;
@@ -4098,16 +4110,22 @@ void DrawMenuBackdropLayers(Gfx** displayListHead, s32 layers) {
     image = g_MenuTitleImages[f_MenuTitleImageIndex];
     gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(image)));
 
-    for (stripIndex = 0; stripIndex != MENU_BANNER_STRIP_COUNT; stripIndex++) {
+    for (bannerStrip = 0; bannerStrip != MENU_BANNER_STRIP_COUNT;
+        bannerStrip++) {
+      /*
+       * The strip's texel offset is worked out in two steps, to match: in one
+       * expression, as the scenery and board strips do, 612 words differ
+       */
+      stripWidthOffset = bannerStrip * MENU_BANNER_WIDTH;
       gDPLoadTextureBlock(gfx++,
           TextureAddress(LargeImageTexels(image) +
-              (stripIndex * MENU_BANNER_WIDTH * MENU_BANNER_STRIP_HEIGHT)),
+              (stripWidthOffset * MENU_BANNER_STRIP_HEIGHT)),
           G_IM_FMT_CI, G_IM_SIZ_8b, MENU_BANNER_WIDTH, MENU_BANNER_STRIP_HEIGHT,
           0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
       gDPPipeSync(gfx++);
 
-      stripTop = bobOffset + (stripIndex * MENU_BANNER_STRIP_HEIGHT);
+      stripTop = bobOffset + (bannerStrip * MENU_BANNER_STRIP_HEIGHT);
       gSPScisTextureRectangle(gfx++, QuarterPixels(MENU_BANNER_LEFT),
           QuarterPixels(stripTop + MENU_BANNER_TOP),
           QuarterPixels(MENU_BANNER_LEFT + MENU_BANNER_WIDTH),
