@@ -1244,6 +1244,12 @@ void UpdateClubWindow(void);
  * shape); a u8 row gives 67 (23), and a macro in its place 68 (26). A focused
  * permuter run's best, 57 words (17 in shape), casts the stepped row to
  * unsigned short in the call, a fake. 64 words differ, 18 in shape.
+ *
+ * A later run's best, 1455 points from 1980, copies the key column into a
+ * char in the up move, also a fake. In GetCodeKey, a pointer to the key row
+ * gives 64 words (22 in shape), and a pointer to the row array or the key in
+ * a local 64 (18); *(f_CodeKeys[row] + column) and (*(f_CodeKeys +
+ * row))[column] give 76 (18).
  */
 #ifdef NON_MATCHING
 void UpdateClubTournament(void) {

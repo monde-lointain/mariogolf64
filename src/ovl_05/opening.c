@@ -4682,6 +4682,11 @@ void LoadOpeningLogo(void) {
  * and with i 138 (8 in shape). The register oracle's closest result is
  * these 38 words with no pseudo forced, so the rest differs in the code.
  * 38 words differ, 6 in shape.
+ *
+ * A focused permuter run's best, 652 points from 742, copies the L letter's
+ * speed into a new local before negating it. Multiplying the speed by -1.0f
+ * or by -1, or subtracting it from 0.0f, gives the draft's 38 words (6 in
+ * shape).
  */
 #ifdef NON_MATCHING
 void DrawOpeningLogo(Gfx** displayListHead, Boolean isDrawn) {

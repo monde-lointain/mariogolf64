@@ -2660,6 +2660,12 @@ void SetMenuBackdrop(s32 backdrop) {
  * truncated to a char. The register oracle's closest result is these 45 words
  * with no register forced, so allocation isn't the cause. 45 words differ, 11
  * in shape.
+ *
+ * A later focused permuter run's best, 535 points from 1005, holds the
+ * strip's texture address in a char copy. Naming that address in a
+ * tileTexels local, as u32, s32 or a pointer, set in its declaration or
+ * after the strip's height, gives the draft's 45 words (11 in shape) in all
+ * six forms.
  */
 #ifdef NON_MATCHING
 void CaptureMenuBackdrop(Gfx** displayListHead, s32 unused UNUSED) {
