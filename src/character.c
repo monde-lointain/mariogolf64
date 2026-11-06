@@ -1107,18 +1107,18 @@ void LoadCharacter(u32 slotIndex, s32 character, s32 kind) {
     slot->jointMatrices = g_CurrentJointMatrices;
     slot->displayList =
         (Gfx*)slot->model->segmentAddresses[CHARACTER_MODEL_DISPLAY_LIST];
-    slot->unk68[0] =
-        *(f32*)slot->model->segmentAddresses[CHARACTER_MODEL_UNK68];
-    slot->unk68[1] =
-        *(f32*)slot->model->segmentAddresses[CHARACTER_MODEL_UNK68 + 1];
-    slot->unk68[2] =
-        *(f32*)slot->model->segmentAddresses[CHARACTER_MODEL_UNK68 + 2];
-    slot->unk68[3] =
-        *(f32*)slot->model->segmentAddresses[CHARACTER_MODEL_UNK68 + 3];
-    slot->unk68[4] =
-        *(f32*)slot->model->segmentAddresses[CHARACTER_MODEL_UNK68 + 4];
-    slot->unk68[5] =
-        *(f32*)slot->model->segmentAddresses[CHARACTER_MODEL_UNK68 + 5];
+    slot->portraitCamera[0] =
+        *(f32*)slot->model->segmentAddresses[CHARACTER_MODEL_PORTRAIT_CAMERA];
+    slot->portraitCamera[1] = *(
+        f32*)slot->model->segmentAddresses[CHARACTER_MODEL_PORTRAIT_CAMERA + 1];
+    slot->portraitCamera[2] = *(
+        f32*)slot->model->segmentAddresses[CHARACTER_MODEL_PORTRAIT_CAMERA + 2];
+    slot->portraitCamera[3] = *(
+        f32*)slot->model->segmentAddresses[CHARACTER_MODEL_PORTRAIT_CAMERA + 3];
+    slot->portraitCamera[4] = *(
+        f32*)slot->model->segmentAddresses[CHARACTER_MODEL_PORTRAIT_CAMERA + 4];
+    slot->portraitCamera[5] = *(
+        f32*)slot->model->segmentAddresses[CHARACTER_MODEL_PORTRAIT_CAMERA + 5];
     slot->shadowScale = slot->model->shadowScale;
     count = 0;
     for (animation = ModelAnimations(slot->model); animation->events != NULL;

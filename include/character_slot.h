@@ -33,10 +33,14 @@
 #define CHARACTER_MODEL_ANIMATED_TRIANGLES 7
 /* AnimatedTextures */
 #define CHARACTER_MODEL_TEXTURES 8
-/* Six f32 values, one in each segment address from here, copied to a slot's
- * unk68 */
-#define CHARACTER_MODEL_UNK68 9
-#define UNK68_COUNT 6
+/*
+ * Six f32 values, one in each segment address from here, copied to a slot's
+ * portraitCamera: in 30 of the 36 character models, two points within 1.5
+ * units of the same height, the first near the vertical axis and the second
+ * several units off it. They look like a close-up camera's target and eye.
+ */
+#define CHARACTER_MODEL_PORTRAIT_CAMERA 9
+#define PORTRAIT_CAMERA_VALUE_COUNT 6
 
 #define END_OF_DISPLAY_LIST_CHOICES 0xFFFFFFFF
 /* The display list choice that draws nothing */
@@ -259,7 +263,8 @@ typedef struct CharacterSlot {
   /* 0x060 */ s8 isTranslucent;
   /* 0x061 */ u8 alpha;
   /* 0x064 */ Gfx* displayList;
-  /* 0x068 */ f32 unk68[UNK68_COUNT];
+  /* Written but never read */
+  /* 0x068 */ f32 portraitCamera[PORTRAIT_CAMERA_VALUE_COUNT];
   /* 0x080 */ s16 shadowScale; /* In units of 1/10000 */
   /* 0x082 */ s8 lighting; /* A CHARACTER_LIGHTING value */
   /* 0x083 */ s8 isLooping;
