@@ -7201,30 +7201,35 @@ void DrawAnimationViewer(Gfx **displayListHead) {
  * place loop's initializer took 51 words differing to 49. Earlier, reading the
  * slot in its own block gave 40 words differing, 10 in shape, but the register
  * oracle then needed 3 forced registers to reach 10, where read plainly 5
- * forced reached 5; no declaration order changed either. Setting the course
- * icons' texels before their palette, from the texels, takes 89 words differing
- * to 24, 5 in shape to 6. The original keeps the texels in $fp and the address
- * of the local arrays on the stack in $s4, where this has them the other way
- * round. The original also reloads the choice from the stack before the mini
- * golf test and keeps it in $a3 for the comparison with the slot, which needs a
- * use of it in that block: copying it into a second variable just before the
- * test gives 19 words, 1 in shape, and with the palette set first 84, none in
- * shape, which the oracle matches with 5 registers forced. The copy anywhere
- * else in or before the loop gives 44 (12), and a Boolean for the comparison
- * there 27 (7). No natural form found needs the copy, so it isn't adopted. 24
- * words differ, 6 in shape.
+ * forced reached 5; no declaration order changed either.
+ *
+ * The course icons' palette is set before their texels, each read from the
+ * table, as the mini golf discs' is. Setting the texels first and the palette
+ * from them gives 24 words differing, 6 in shape, against 89 and 5, but the
+ * register oracle then comes within 10 words forcing 2 pseudos, where this
+ * form comes within 5 forcing 5: the oracle sees the texels as one value
+ * there and as two here, as the original has them. The original keeps the
+ * texels in $fp and the address of the local arrays on the stack in $s4,
+ * where this has them the other way round. The original also reloads the
+ * choice from the stack before the mini golf test and keeps it in $a3 for the
+ * comparison with the slot, which needs a use of it in that block: copying it
+ * into a second variable just before the test gives 84 words, none in shape,
+ * which the oracle matches with 5 registers forced. The copy anywhere else in
+ * or before the loop gives more, and a Boolean for the comparison there too.
+ * No natural form found needs the copy, so it isn't adopted. 89 words differ,
+ * 5 in shape.
  */
 #ifdef NON_MATCHING
 void DrawCourseSelect(Gfx **displayListHead) {
     Gfx *gfx;
     u16 perspNorm;
     u16 wheelPerspNorm;
-    /* Pads the frame to match; without it 760 words differ, against 24 */
+    /* Pads the frame to match; without it 825 words differ, against 89 */
     u8 unusedStackBeforeIcons[0x10] UNUSED;
     f32 iconX[COURSE_COUNT];
     f32 iconY[COURSE_COUNT];
     f32 iconScale[COURSE_COUNT];
-    /* Pads the frame to match; without it 728 words differ, against 24 */
+    /* Pads the frame to match; without it 793 words differ, against 89 */
     u8 unusedStackAfterIcons[0x18] UNUSED;
     s32 drawOrder[COURSE_COUNT];
     s16 places[TOURNAMENT_PLACE_COUNT];
@@ -7484,7 +7489,7 @@ void DrawCourseSelect(Gfx **displayListHead) {
                 palette = g_MiniGolfDiscImages[slot];
                 /*
                  * Indexed as one row, to match: indexed by the buffer and the slot,
-                 * 43 words differ, 7 in shape, against 24 and 6
+                 * 94 words differ, 6 in shape, against 89 and 5
                  */
                 texels =
                     MENU_ICON_IMAGE_PAIRS[0]
@@ -7492,8 +7497,8 @@ void DrawCourseSelect(Gfx **displayListHead) {
                                              slot];
             }
             else {
+                palette = ImageBody(MENU_ICON_IMAGE_PAIRS[0][slot]);
                 texels = MENU_ICON_IMAGE_PAIRS[0][slot];
-                palette = ImageBody(texels);
             }
 
             gDPLoadTLUT_pal256(gfx++, TextureAddress(palette));
@@ -7876,8 +7881,8 @@ void DrawCourseSelect(Gfx **displayListHead) {
         /*
          * The wall stays still at other slides. An empty case for
          * STATS_SLIDE_CURRENT compiles to the same tests but moves registers
-         * elsewhere (41 words, 23 in shape), and default for the slides out
-         * tests the tree differently (30, 12), against 24 (6)
+         * elsewhere (106 words, 22 in shape), and default for the slides out
+         * tests the tree differently (95, 11), against 89 (5)
          */
         switch (g_BetPagesWallSlide) {
             case STATS_SLIDE_OUT_RIGHT:
