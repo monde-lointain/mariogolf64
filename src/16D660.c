@@ -1,0 +1,77 @@
+#include "common.h"
+
+extern u8 D_801B724B;
+extern s32 D_ovl16_801F89C0;
+extern s32 D_ovl16_80223804;
+extern u8 D_ovl16_802237B8;
+extern u8 D_ovl16_802237B9;
+
+void func_800560FC(s32 arg0, s32 arg1);
+s32 func_ovl16_801F5138(s32 arg0);
+s32 func_ovl16_801F5194(s32 arg0);
+
+s32 func_ovl16_801F4A40(void) {
+    return D_801B724B & 3;
+}
+
+INCLUDE_ASM("asm/nonmatchings/16D660", func_ovl16_801F4A50);
+
+INCLUDE_ASM("asm/nonmatchings/16D660", func_ovl16_801F4A88);
+
+void func_ovl16_801F4B64(s32 arg0) {
+    D_ovl16_801F89C0 = -arg0;
+    D_ovl16_80223804 = arg0;
+}
+
+void func_ovl16_801F4B7C(s32 arg0) {
+    D_ovl16_801F89C0 = arg0;
+    D_ovl16_80223804 = arg0;
+}
+
+void func_ovl16_801F4B90(void) {
+    D_ovl16_801F89C0 = 0;
+}
+
+INCLUDE_ASM("asm/nonmatchings/16D660", func_ovl16_801F4B9C);
+
+INCLUDE_ASM("asm/nonmatchings/16D660", func_ovl16_801F4E54);
+
+INCLUDE_ASM("asm/nonmatchings/16D660", func_ovl16_801F4F24);
+
+void func_ovl16_801F4F7C(void) {
+    D_ovl16_802237B8 = 0;
+    D_ovl16_802237B9 = 0;
+}
+
+INCLUDE_ASM("asm/nonmatchings/16D660", func_ovl16_801F4F90);
+
+INCLUDE_ASM("asm/nonmatchings/16D660", func_ovl16_801F5138);
+
+INCLUDE_ASM("asm/nonmatchings/16D660", func_ovl16_801F5194);
+
+void func_ovl16_801F5210(s32 arg0) {
+    func_800560FC(arg0, func_ovl16_801F5138(arg0));
+}
+
+void func_ovl16_801F5240(s32 arg0) {
+    func_800560FC(arg0, func_ovl16_801F5194(arg0));
+}
+
+INCLUDE_ASM("asm/nonmatchings/16D660", func_ovl16_801F5270);
+
+INCLUDE_ASM("asm/nonmatchings/16D660", func_ovl16_801F53F0);
+
+INCLUDE_ASM("asm/nonmatchings/16D660", func_ovl16_801F544C);
+
+INCLUDE_ASM("asm/nonmatchings/16D660", func_ovl16_801F7148);
+
+INCLUDE_ASM("asm/nonmatchings/16D660", func_ovl16_801F7554);
+
+INCLUDE_ASM("asm/nonmatchings/16D660", func_ovl16_801F803C);
+
+INCLUDE_ASM("asm/nonmatchings/16D660", func_ovl16_801F80B8);
+
+INCLUDE_ASM("asm/nonmatchings/16D660", func_ovl16_801F8438);
+
+void func_ovl16_801F898C(void) {
+}
