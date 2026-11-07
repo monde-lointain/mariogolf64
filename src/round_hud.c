@@ -1755,6 +1755,12 @@ typedef struct GridScreenPoint {
  * A row counter of its own for the lines along the aim, declared in any
  * of four places, changes nothing; one for the projection pass gives 310
  * words (46 in shape), and a row start of its own there 308 (44).
+ *
+ * Reading the shot's heading into a local before GetSelectedClub, which a
+ * permuter run's best did beside a temporary for the green channel's shift,
+ * gives 269 words but 47 in shape, and the register oracle's closest result
+ * rises from 204 words, forcing 29 pseudos, to 207, forcing 25; read just
+ * before the yaw, it changes nothing.
  */
 void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
   f32 points[GREEN_GRID_POINT_COUNT][3];
