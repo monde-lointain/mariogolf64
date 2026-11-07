@@ -2333,8 +2333,12 @@ void DrawSavedMiniGolfImage(Gfx **displayListHead);
  * than 48.0, and the register oracle's closest result rises from 183 words,
  * forcing 28 pseudos, to 195, forcing 29. A literal 120 gives 303 words (105
  * in shape). Writing the radius as the product's first factor, for x or for
- * both axes, or the x product as ProjectPoint's argument leaves 287. 287
- * words differ, 91 in shape.
+ * both axes, or the x product as ProjectPoint's argument leaves 287.
+ *
+ * The chosen game's mode label works out its x first, before its offset
+ * and texture, as a sweep moving each assignment found. That takes the draft from 287 words to 213,
+ * 91 in shape either way, and the register oracle's closest from 183 words, forcing 28 pseudos, to
+ * 183 forcing 17. 213 words differ, 91 in shape.
  */
 #ifdef NON_MATCHING
 void DrawSavedGames(Gfx **displayListHead) {
@@ -2667,6 +2671,7 @@ void DrawSavedGames(Gfx **displayListHead) {
     DrawCenteredPageArrows(&gfx, SAVED_GAME_ARROW_GAP, SAVED_GAME_ARROW_Y);
     chosenMode = &f_SavedGameModes[memory->savedGameIndex];
     if (*chosenMode != NO_SAVE_MENU_MODE) {
+        labelX = (playerCount == 1) ? SINGLE_PLAYER_GAME_MODE_LABEL_X : GAME_MODE_LABEL_X;
         labelOffset = &f_GameModeLabelOffsets[f_SaveMenuModeIcons[*chosenMode]];
         gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(f_GameModeLabels)));
         modeLabelTexels = TextureAddress(
@@ -2688,7 +2693,6 @@ void DrawSavedGames(Gfx **displayListHead) {
             G_TX_NOLOD
         );
         gDPPipeSync(gfx++);
-        labelX = (playerCount == 1) ? SINGLE_PLAYER_GAME_MODE_LABEL_X : GAME_MODE_LABEL_X;
         gSPScisTextureRectangle(
             gfx++,
             QuarterPixels(labelX - *labelOffset),
