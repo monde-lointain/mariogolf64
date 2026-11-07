@@ -1358,16 +1358,16 @@ SECTIONS
     {
         FILL(0x00000000);
         overlay_4_TEXT_START = .;
-        build/asm/128580.o(.text);
+        build/src/128580.o(.text);
         overlay_4_TEXT_END = .;
         overlay_4_TEXT_SIZE = ABSOLUTE(overlay_4_TEXT_END - overlay_4_TEXT_START);
         overlay_4_DATA_START = .;
-        build/asm/128580.o(.data);
+        build/src/128580.o(.data);
         build/asm/data/12F020.data.o(.data);
         overlay_4_DATA_END = .;
         overlay_4_DATA_SIZE = ABSOLUTE(overlay_4_DATA_END - overlay_4_DATA_START);
         overlay_4_RODATA_START = .;
-        build/asm/128580.o(.rodata);
+        build/src/128580.o(.rodata);
         overlay_4_RODATA_END = .;
         overlay_4_RODATA_SIZE = ABSOLUTE(overlay_4_RODATA_END - overlay_4_RODATA_START);
     }
@@ -1376,7 +1376,7 @@ SECTIONS
     {
         FILL(0x00000000);
         overlay_4_BSS_START = .;
-        build/asm/128580.o(.bss);
+        build/src/128580.o(.bss);
         build/asm/data/1300A0.bss.o(.bss);
         overlay_4_BSS_END = .;
         overlay_4_BSS_SIZE = ABSOLUTE(overlay_4_BSS_END - overlay_4_BSS_START);
