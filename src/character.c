@@ -1612,6 +1612,15 @@ void AnimateCharacter(u32 slotIndex) {
  * words, forcing 30 pseudos, to 80, forcing 34. Taking the 8 bytes from
  * either pad matches the frame, but leaves the oracle no closer than 198
  * words. 232 words differ, 48 in shape.
+ *
+ * Testing for nearly equal rotations into a flag after the dot product,
+ * before the rotation's progress, gives 218 words (46 in shape), but the
+ * register oracle's closest result is then 96 words, forcing 28 pseudos.
+ * A permuter run's best, 199 words (33 in shape) with the oracle at 74,
+ * adds to that the translation's or the rotation's span search reading the
+ * global frame where the other two read frame; the original loads the
+ * global twice in each of the three, and all three reading it give 258
+ * (50), so the one-sided read is left out.
  */
 #ifdef NON_MATCHING
 void UpdateJointKeyframeSpans(u32 slotIndex) {
