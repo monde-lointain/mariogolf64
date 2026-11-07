@@ -1800,18 +1800,18 @@ typedef struct GridScreenPoint {
  */
 #    define SetGreenGridTint(slope) \
         if (g_Players[g_CurrentShot.playerIndex].gridColor == GRID_COLOR_WHITE) { \
-            blue = COLOR_CHANNEL_MAX; \
             if ((slope) == 0) { \
+                blue = COLOR_CHANNEL_MAX; \
                 green = COLOR_CHANNEL_MAX; \
                 red = COLOR_CHANNEL_MAX; \
             } \
             else if ((slope) > 0) { \
                 red = COLOR_CHANNEL_MAX; \
-                blue = (slope); \
-                blue = red - blue; \
+                blue = red - (slope); \
                 green = blue; \
             } \
             else { \
+                blue = COLOR_CHANNEL_MAX; \
                 green = (slope) + COLOR_CHANNEL_MAX; \
                 red = green; \
             } \
@@ -1922,6 +1922,15 @@ typedef struct GridScreenPoint {
  * is declared, it folds the landing spacing to 38400.0f. Set just before
  * the row step, it gives the same 297 words. 297 words differ, 27 in
  * shape.
+ *
+ * The white tint sets blue in each of its branches, where GetWarmthTint
+ * sets it once before them: the original loads 255 into blue again in the
+ * falling branch at each of the three tints, and fills the slope test's
+ * delay slot from the level branch's first set. That takes the draft from
+ * 297 words differing (27 in shape) to 296 (24), and the oracle's closest
+ * result from 181 words to 176, forcing 30. The rising branch's blue is
+ * then red less the slope; through a blue set to the slope first, as
+ * GetWarmthTint has it, gives the same 296. 296 words differ, 24 in shape.
  */
 void DrawGreenGrid(Gfx **displayListHead, CameraMatrices *matrices) {
     f32 points[GREEN_GRID_POINT_COUNT][3];
