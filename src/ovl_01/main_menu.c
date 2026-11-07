@@ -4812,9 +4812,13 @@ void DrawModeSelect(Gfx** displayListHead) {
   void* image;
   /*
    * Counts the sort's passes and the icon, banner strip and player loops, and
-   * holds the chosen mode and then the won count's shift, as the original
-   * keeps all of them in $s1: a local for the shift gives 122 words differing
-   * (none in shape), and reading the chosen mode where it's used 32 (24)
+   * holds the chosen mode and then the won count's shift, to match: the
+   * original keeps all of them in $s1. A local for the shift, declared
+   * anywhere or in each won count's block, gives 122 words differing (none
+   * in shape), as without the shift i outranks index for $s0; a local for
+   * the chosen mode gives 22 (6), and reading it where it's used 32 (24).
+   * Of the 63 ways of giving some of the six roles variables of their own,
+   * none matches without forcing registers.
    */
   s32 i;
   s32 courseIndex;
