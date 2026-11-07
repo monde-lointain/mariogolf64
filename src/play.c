@@ -2083,8 +2083,11 @@ INCLUDE_ASM("asm/nonmatchings/play", RebuildGroundTextureCoordinates);
             vertices += 4; \
         }
 
-/* Loads a tile's texture, skipping its one-texel border */
-#    define LoadTileTexture(tileIndex, column, row) \
+/*
+ * Loads a tile's texture, skipping its one-texel border. The tile is the
+ * groupColumn-th from the one whose S starts at firstS.
+ */
+#    define LoadTileTexture(tileIndex, firstS, groupColumn, row) \
         { \
             gDPLoadMultiBlock( \
                 gfx++, \
@@ -2106,10 +2109,12 @@ INCLUDE_ASM("asm/nonmatchings/play", RebuildGroundTextureCoordinates);
             gDPSetTileSize( \
                 gfx++, \
                 1, \
-                ((column) * 128) + 2, \
-                ((row) * 128) + 2, \
-                ((column) * 128) + 0x86, \
-                ((row) * 128) + 0x82 \
+                (firstS) + ((groupColumn) * TILE_COORDINATE_SPAN) + \
+                    BORDERED_TILE_FIRST_COORDINATE, \
+                ((row) * TILE_COORDINATE_SPAN) + BORDERED_TILE_FIRST_COORDINATE, \
+                (firstS) + (((groupColumn) + 1) * TILE_COORDINATE_SPAN) + \
+                    BORDERED_TILE_S_PAST_NEXT, \
+                (((row) + 1) * TILE_COORDINATE_SPAN) + BORDERED_TILE_T_PAST_NEXT \
             ); \
         }
 
@@ -2138,10 +2143,9 @@ INCLUDE_ASM("asm/nonmatchings/play", RebuildGroundTextureCoordinates);
  * tiles go down two halves in rows of four, and a fine tile snaps the edge
  * vertices it shares with coarser neighbors so that no gaps open between them.
  *
- * Doesn't match: 897 words differ, 233 in shape. The original's frame is 8
- * bytes larger (0x260 against 0x258; it was 0x38 when first measured), so most
- * stack offsets differ, and terrainStyle and the locals take other saved
- * registers. The original works out column + 1's parity once per half, where
+ * Doesn't match: the original's frame is 0x10 bytes larger (0x260 against
+ * 0x250; it was 0x38 when first measured), so most stack offsets differ, and
+ * terrainStyle and the locals take other saved registers. The original works out column + 1's parity once per half, where
  * ours did at each GridVertex, with three more andi: loop.c finds moving them
  * out of the row loop not desirable, since the six invariants it moved out of
  * the inner tile loops come first and each doubles the row loop's count. A
@@ -2163,12 +2167,7 @@ INCLUDE_ASM("asm/nonmatchings/play", RebuildGroundTextureCoordinates);
  * tiles' 1131 (285) alone, and all three 1213 (277). Declaring vertices after
  * current, and column after middleSlot, then took it from 945 words to 911, 233
  * in shape either way; a greedy search over single declaration moves found no
- * further gain. In each tile loop the original steps two more registers by
- * 0x80: one starts at half << 9, the first tile's s coordinate, and the other
- * at 0x80, which it adds to that coordinate and 6 for the right edge. Ours
- * can't, as simplify_giv_expr in loop.c distributes (firstTileColumn + k) * 128
- * and gives up on an invariant times a constant, so its shift is never a giv.
- * The original sets the fine detail once, in the delay slot of the nearby
+ * further gain. The original sets the fine detail once, in the delay slot of the nearby
  * flag's branch, and that branch and the fine depth test's both go straight
  * past the medium test, as if the fine detail were the detail test's else arm.
  * Writing it as the else arm, or as a default that the medium and coarse
@@ -2228,8 +2227,22 @@ INCLUDE_ASM("asm/nonmatchings/play", RebuildGroundTextureCoordinates);
  * Each half starts its middle slot after the row log's test, beside the
  * column, as a sweep moving each assignment found. That takes the draft
  * from 897 words (233 in shape) to 893 (231), and the register oracle's
- * closest from 801 words to 797, forcing 84 pseudos either way. 893 words
- * differ, 231 in shape.
+ * closest from 801 words to 797, forcing 84 pseudos either way.
+ *
+ * In each tile loop the original steps two registers by 0x80: one starts at
+ * half << 9, which it keeps in a stack slot, and gives the tile's left S; the
+ * other starts at 0x80, and it adds the first to it and 6 for the right S. So
+ * LoadTileTexture adds the tile's place in its group to firstTileS, the half's
+ * first S, and takes the right S and the bottom T past the next tile's start.
+ * Written as (firstTileColumn + k) * 128, as the draft had it, loop.c can't
+ * make the shift a giv, since simplify_giv_expr gives up on an invariant times
+ * a constant. The new form took the draft from 893 words differing (231 in
+ * shape) to 640 (118); the right S alone gave 1022 (232), and the bottom T
+ * then 670 (122). Setting firstTileS after tileIndex gives 640 where before it
+ * gives 670. The frame is now 0x10 bytes smaller than the original's, against
+ * 8 larger before, and forcing the register oracle's pseudos only moves the
+ * spills: its closest result is the draft's own 640 words. 640 words differ,
+ * 118 in shape.
  */
 void DrawGround(CameraMatrices *matrices, s32 terrainStyle) {
     u8 snapsEdge[2][TILE_VERTEX_SEGMENT_COUNT]; /* For the current and the last
@@ -2498,12 +2511,14 @@ void DrawGround(CameraMatrices *matrices, s32 terrainStyle) {
     SetGroundCombineMode(0, 0);
     for (half = 0; half < GROUND_HALF_COUNT; half++) {
         u32 nextColumnParity;
+        s32 firstTileS;
 
         previousDetail = GROUND_DETAIL_HIDDEN;
         bottomSlot = FIRST_BOTTOM_SLOT;
         topSlot = FIRST_TOP_SLOT;
         firstTileColumn = half * GROUND_TILE_GROUP_SIZE;
         tileIndex = firstTileColumn;
+        firstTileS = firstTileColumn * TILE_COORDINATE_SPAN;
         if (IsGameFlagSet(GAME_FLAG_LOG_GROUND_ROWS)) {
             osSyncPrintf("DG[");
             if (half != 0) {
@@ -2606,7 +2621,7 @@ void DrawGround(CameraMatrices *matrices, s32 terrainStyle) {
                         gSPVertex(gfx++, GridVertex(column + (k * 2), (row * 2) + 2), 2, 6);
                         gSPVertex(gfx++, GridVertex(column + (k * 2) + 1, (row * 2) + 2), 1, 8);
                         for (mediumPass = 0; mediumPass < GROUND_TILE_MAX_PASSES; mediumPass++) {
-                            LoadTileTexture(tileIndex, tileColumn, row);
+                            LoadTileTexture(tileIndex, firstTileS, k, row);
                             DrawTileQuads(0, 2, 1, 3, 5, 4, 6, 8, 7);
                             if (g_WorkArea.hole.tiles[tileIndex].extraPassCount <= 0) {
                                 break;
@@ -2680,7 +2695,7 @@ void DrawGround(CameraMatrices *matrices, s32 terrainStyle) {
                 for (k = 0; k < GROUND_TILE_GROUP_SIZE; k++) {
                     if (g_WorkArea.hole.tiles[tileIndex].detail >= 0) {
                         for (pass = 0; pass < GROUND_TILE_MAX_PASSES; pass++) {
-                            LoadTileTexture(tileIndex, firstTileColumn + k, row);
+                            LoadTileTexture(tileIndex, firstTileS, k, row);
                             DrawTileQuads(
                                 topSlot,
                                 topSlot + ODD_SLOT,
@@ -2732,7 +2747,7 @@ void DrawGround(CameraMatrices *matrices, s32 terrainStyle) {
                     groupTileIndex++) {
                     if (g_WorkArea.hole.tiles[tileIndex].detail >= 0) {
                         for (passIndex = 0; passIndex < GROUND_TILE_MAX_PASSES; passIndex++) {
-                            LoadTileTexture(tileIndex, firstTileColumn + groupTileIndex, row);
+                            LoadTileTexture(tileIndex, firstTileS, groupTileIndex, row);
                             gSP2Triangles(
                                 gfx++,
                                 topSlot,
