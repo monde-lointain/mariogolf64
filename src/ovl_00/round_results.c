@@ -521,6 +521,15 @@ void OpenRoundResults(s32 request) {
  * words, none in shape, and the oracle then wants the macro's index in
  * $s2, which k's sharing it explains. Counting the bet loop, the portrait
  * loop or both with k gives 62, 60 or 68 words, none in shape.
+ *
+ * Counting any of the three AddRoundPoints with i instead of k gives 158
+ * words, none in shape, and the oracle then needs 7 forced: i's priority
+ * passes pseudo 78's, so i takes $s1 instead. Counting any of them with j
+ * gives 104 to 218 words, and the oracle comes no closer than 11 with 9
+ * forced. Counting the tournament's standings, the skins totals or the
+ * skins ranks with i gives the same 158 words and 7 forced; counting the
+ * club tournament's results with i or j gives 279 or 191 words, the oracle
+ * needing 17 or 26 forced.
  */
 void LoadRoundResults(void) {
   EncodedAsset asset;
