@@ -2112,41 +2112,15 @@ void DrawBrickWallRows(Gfx **displayListHead, u8 slide) {
 /*
  * Draws the animated page arrows either side of the course select screen
  *
- * Doesn't match: the original spills the display list head to 0x4($sp), the
- * second word of reload's first 8-byte slot, so the 24 bytes above it come from
- * slots reload allocates later, for pseudos it moves out of the spilled
- * registers and then gives registers again. Ours moves one pseudo out of $t3
- * and leaves an 8-byte slot; the pad stands in for the rest but sits below the
- * head's slot, at 0x14. The original also shifts the mirrored arrow's start
- * into place in two steps where combine folds them into one here, which also
- * merges two of the display list increments. Working the start out into a
- * variable, as DrawCenteredPageArrows does, avoids the branch the inline
- * comparison gives (22 words, 10 in shape); its other places and types change
- * nothing. The permuter's best output, 20 words (4 in shape), sets the column
- * to the arrow size and then multiplies it by the mirrored test again in the
- * rectangle, a split assignment; its other changes, the pad in the timer's
- * block and a local for the right edge, give 25 (5) alone or together. 25 words
- * differ, 5 in shape.
- *
- * The register oracle's closest result, forcing 2 pseudos, swaps $v0 and
- * $v1 in the mirrored start's shifts and leaves 15 words, so the code
- * differs too.
- *
- * Before those shifts the original computes left * 4, QuarterPixels(left),
- * into $v1 and never reads it, as the next insn sets $v1 again; a draft
- * that matches has to leave that dead shift behind as well. Using the
- * quarter-pixel left twice, as the right edge's QuarterPixels(left) plus
- * the size's in either order, gives 42 words (10 in shape), and keeping
- * left in quarter pixels 35 (7).
+ * Clipped to the screen as DrawCenteredPageArrows' arrows are, though both
+ * arrows lie inside it: the scissored rectangle's tests of the left edge leave
+ * the original's unread QuarterPixels(left) and its reload slots behind.
  */
-#ifdef NON_MATCHING
 void DrawPageArrows(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     s32 arrowIndex;
     s32 left;
     s32 textureColumn;
-    /* Pads the frame to match; without it 61 words differ, against 25 */
-    s32 unused[4] UNUSED;
 
     f_PageArrowTimer++;
     if (f_PageArrowTimer >= PAGE_ARROW_FRAME_DURATION) {
@@ -2210,10 +2184,14 @@ void DrawPageArrows(Gfx **displayListHead) {
             left = PAGE_ARROW_LEFT_X;
         }
 
-        /* Computed before the rectangle, as in DrawCenteredPageArrows */
+        /*
+         * Computed before the rectangle, as in DrawCenteredPageArrows, to match:
+         * computing it in the rectangle's arguments gives 12 words differing, 4 in
+         * shape
+         */
         textureColumn = MirroredArrowColumn(arrowIndex);
         gDPPipeSync(gfx++);
-        gSPTextureRectangle(
+        gSPScisTextureRectangle(
             gfx++,
             QuarterPixels(left),
             QuarterPixels(PAGE_ARROW_TOP),
@@ -2230,9 +2208,6 @@ void DrawPageArrows(Gfx **displayListHead) {
 
     *displayListHead = gfx;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", DrawPageArrows);
-#endif
 
 /*
  * Draws the animated page arrows gap apart about the screen's middle, centered
