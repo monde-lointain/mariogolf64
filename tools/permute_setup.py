@@ -8,12 +8,12 @@ assembly (a single-function splat file). Writes base.c, target.o,
 compile.sh and settings.toml into OUT_DIR (build/permuter/FUNCTION by default),
 and objdump.sh for a function holding nested functions, ready for:
 
+    permuter.py OUT_DIR -j 16
+
 --focus limits the permuter's changes to the statements around the lines that
 blame.py finds made our differing words, as PERM_RANDOMIZE regions. Without
 it, the permuter picks among all of FUNCTION's statements, though most of a
 large draft already matches.
-
-    permuter.py OUT_DIR -j 16
 
 decomp-permuter is expected at $PERMUTER_DIR (default
 ~/projects/tools/decomp-permuter-nested), on its nested-functions branch:
@@ -554,6 +554,8 @@ def main() -> None:
     is_focused = arguments[:1] == ["--focus"]
     if is_focused:
         arguments = arguments[1:]
+    if len(arguments) not in (OUT_DIR_ARGUMENT_COUNT - 1, OUT_DIR_ARGUMENT_COUNT):
+        sys.exit(__doc__)
     c_path, asm_path, function = arguments[:3]
     check_permuter_branch()
     out_dir = (
