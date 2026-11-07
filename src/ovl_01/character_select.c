@@ -592,9 +592,16 @@ s32 GetStickDiagonal(void) {
  * volume first, filling the random test's delay slot with it, where this
  * fills it with the character. The register oracle's closest result is these
  * 10 words with no register forced, so allocation isn't the cause. Testing
- * for the other sound first gives 10 words, 2 in shape; the test written !=
- * 0 or as % 2 changes nothing, and choosing the sound with ?: in one call
- * gives 27 (19 in shape). 10 words differ, 4 in shape.
+ * for the other sound first gives 10 words, 2 in shape: the slot then holds
+ * the volume, as the original's does, but the other sound's call falls
+ * through. sched1 starts both arms with the volume either way; reorg takes
+ * the character's move instead only when the chosen sound falls through.
+ * The test written != 0 or as % 2 changes nothing, a switch with case 0
+ * first gives 10 words (2 in shape) and case 1 first 16 (10), and choosing
+ * the sound with ?: in one call, or into a sound local by an if, 27 (19 in
+ * shape). The other 2 words are NO_PALETTE, stored after the face preview,
+ * which the original holds in $v0 and this in $v1. 10 words differ, 4 in
+ * shape.
  *
  * The grid marks of a player whose choice is undone are read into character,
  * as the original keeps them in character's register; in gridMark, 136 words
