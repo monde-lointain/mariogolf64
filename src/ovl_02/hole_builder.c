@@ -814,6 +814,14 @@ s32 ListOffsetsByDistance(s32 span, GridOffset* offsets, s32 maxCount) {
  * oracle, given DrawTriangleHeights, leaves 118 of its 284 words at best,
  * forcing 53 pseudos, so its code still differs. 284 words differ, 34 in
  * shape.
+ *
+ * The register oracle's split report puts six of the halves' shared
+ * positions and steps in other registers in the lower half than in the
+ * upper. Declaring any of the 511 subsets of the four positions, the four
+ * steps and z in each half, as the slopes are, gives 276 to 464 words, 34
+ * to 38 in shape; all nine give 464. The best, longX, shortHeight and
+ * shortXStep, a choice with no reason behind it, gives 276 words, and the
+ * oracle's closest is then 120 words, forcing 59 pseudos, against 118.
  */
 #ifdef NON_MATCHING
 void DrawBandHeights(s16* heights, s32 band) {
