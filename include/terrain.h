@@ -96,6 +96,15 @@ enum TileMidpointSlot {
 #define GROUND_TILE_TEXEL_SPAN 32
 #define GROUND_TILE_TEXEL_ROW_COUNT 34
 #define GROUND_TILE_TEXEL_ROW_LENGTH 36
+/*
+ * A tile's place in the tile size coordinates, in quarter texels. A bordered
+ * tile's texture starts half a texel into its place and ends past the start of
+ * the next tile's place by these many.
+ */
+#define TILE_COORDINATE_SPAN (GROUND_TILE_TEXEL_SPAN * 4)
+#define BORDERED_TILE_FIRST_COORDINATE 2
+#define BORDERED_TILE_S_PAST_NEXT 6
+#define BORDERED_TILE_T_PAST_NEXT 2
 #define GROUND_TEXEL_SHIFT 14
 #define GROUND_TEXEL_SIZE (1 << GROUND_TEXEL_SHIFT)
 

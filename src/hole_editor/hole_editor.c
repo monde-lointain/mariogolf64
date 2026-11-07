@@ -415,14 +415,11 @@ enum TriangleEdit {
 #define TILE_TRIANGLE_COUNT (FINE_TILE_CELL_SPAN * FINE_TILE_CELL_SPAN * 2)
 
 /*
- * A tile's place in the tile size coordinates, in quarter texels, and the
- * corners of its tile within it. A tile with borders starts half a texel in;
- * one without starts a texel in.
+ * The corners of a tile within its place in the tile size coordinates. A tile
+ * with borders starts half a texel in; one without starts a texel in.
  */
-#define TILE_COORDINATE_SPAN (GROUND_TILE_TEXEL_SPAN * 4)
-#define BORDERED_TILE_FIRST_COORDINATE 2
-#define BORDERED_TILE_LAST_S 0x86
-#define BORDERED_TILE_LAST_T 0x82
+#define BORDERED_TILE_LAST_S (TILE_COORDINATE_SPAN + BORDERED_TILE_S_PAST_NEXT)
+#define BORDERED_TILE_LAST_T (TILE_COORDINATE_SPAN + BORDERED_TILE_T_PAST_NEXT)
 #define BORDERLESS_TILE_FIRST_COORDINATE 4
 #define BORDERLESS_TILE_LAST_COORDINATE 0x84
 /* GAME_FLAG_TEST_GROUND_TEXTURE's fixed tile, 34 texels square */
