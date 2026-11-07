@@ -1451,6 +1451,16 @@ NO_RESULT UpdateHandicaps(s32 firstPlayerIndex UNUSED, s32 playerCount UNUSED) {
  * it as well gives the same, and setting it at the top of the strips' loop
  * instead of after the sync 191 words and an oracle closest of 87. 181
  * words differ, 23 in shape.
+ *
+ * labelSlide is set in the columns' loop, beside the label's rectangle, and
+ * loop.c hoists it into the loop's preheader, after the loop's first test,
+ * where the original adds 4 to the slide; set before the loop, the build
+ * adds it before the test. That takes the draft from 181 words differing to
+ * 179, 23 in shape to 19, and the oracle's closest from 81 words to 77,
+ * forcing 16 pseudos either way, and with offsetY forced onto the stack
+ * from 18 to 14. Set at the top of the loop's body, it gives 181 words (21
+ * in shape) and an oracle closest of 79; a local for the label's left edge
+ * instead gives 334 (94). 179 words differ, 19 in shape.
  */
 #ifdef NON_MATCHING
 void DrawHandicaps(Gfx **displayListHead, s32 slide, u8 reverseVerticalSlide, u8 canShowPrompt) {
@@ -1650,8 +1660,6 @@ void DrawHandicaps(Gfx **displayListHead, s32 slide, u8 reverseVerticalSlide, u8
         HANDICAP_LABEL_PALETTE,
         TextureAddress(ImageBody(f_StatsPlayerLabels))
     );
-    /* The original adds the label's offset to the slide once, before the loop */
-    labelSlide = slide + HANDICAP_LABEL_OFFSET_X;
     for (columnIndex = 0; columnIndex != g_ChosenPlayerCount; columnIndex++) {
         if (columnIndex == memory->handicapPlayer) {
             gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
@@ -1730,6 +1738,7 @@ void DrawHandicaps(Gfx **displayListHead, s32 slide, u8 reverseVerticalSlide, u8
             G_TX_NOLOD
         );
         gDPPipeSync(gfx++);
+        labelSlide = slide + HANDICAP_LABEL_OFFSET_X;
         gSPScisTextureRectangle(
             gfx++,
             QuarterPixels(f_HandicapColumnLefts[g_ChosenPlayerCount - 1][columnIndex] + labelSlide),
