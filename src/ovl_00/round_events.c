@@ -1448,13 +1448,13 @@ void DrawMovie(Gfx** displayListHead) {
 /* Reads the contest winner's face, the given frame after their first, into
  * the movie buffer */
 #define LoadWinnerFace(asset, frameIndex) \
-  do { \
+  { \
     OpenEncodedAsset( \
         g_CharacterImageAssets[g_Players[GetContestWinner()].characterIndex] + \
             (frameIndex), \
         (asset)); \
     ReadEncodedAsset(f_MovieBuffer + WINNER_FACE_OFFSET, (asset)); \
-  } while (0)
+  }
 
 /*
  * The caption of a longest drive or nearest pin contest, then its winner's face
