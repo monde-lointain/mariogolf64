@@ -4040,8 +4040,15 @@ void LoadOpeningImpactLines(void) {
  * edge, where this subtracts the offset from 56. Grouping the top edge's
  * terms that way, or as (row + 1) strips, folds the same or gives 168 (54);
  * the top as the bottom less the strip height gives 29 (1), and the bottom
- * edge's 88 in a variable 46 (4) or 168 (58). 30 words differ, none in
- * shape.
+ * edge's 88 in a variable 46 (4) or 168 (58).
+ *
+ * Keeping bottomEdge only for the top calculation and grouping the row
+ * offset with the strip height reduces the 30 differing words to 19, but
+ * adds one instruction: GCC subtracts the height from bottomEdge before
+ * subtracting the row offset. The original adds the height to the offset
+ * first and shares the bottom calculation's 88. Using bottomEdge for both
+ * edges gives 168 differences (58 in shape); inline helpers for the top or
+ * offset do not improve on 19. This remains a draft, not a matching routine.
  */
 #ifdef NON_MATCHING
 void DrawOpeningImpactLines(Gfx** displayListHead) {
@@ -4056,6 +4063,7 @@ void DrawOpeningImpactLines(Gfx** displayListHead) {
   s32 left;
   s32 bottom;
   s32 top;
+  s32 bottomEdge = IMPACT_LINES_BOTTOM;
 
   if (f_AreImpactLinesShown) {
     frame = f_ImpactLinesFrame++;
@@ -4089,8 +4097,8 @@ void DrawOpeningImpactLines(Gfx** displayListHead) {
          */
         left = IMPACT_LINES_LEFT;
         bottom = IMPACT_LINES_BOTTOM - (row * IMPACT_LINES_STRIP_HEIGHT);
-        top = IMPACT_LINES_BOTTOM - (row * IMPACT_LINES_STRIP_HEIGHT) -
-            IMPACT_LINES_STRIP_HEIGHT;
+        top = bottomEdge -
+            (row * IMPACT_LINES_STRIP_HEIGHT + IMPACT_LINES_STRIP_HEIGHT);
         texelOffset = LARGE_PALETTED_TEXELS_OFFSET +
             (stripIndex * IMPACT_LINES_SIZE * IMPACT_LINES_STRIP_HEIGHT);
         gDPLoadTextureBlock(gfx++,
