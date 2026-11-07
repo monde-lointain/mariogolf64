@@ -290,7 +290,7 @@ typedef struct CoursePointsTally {
 #define TROPHY_SIZE_COUNT 4
 
 /* "StrokeSpeedGolfMini-Golf", which only an unread pointer points to */
-extern char f_UnusedModeNamesText[];
+extern const char f_UnusedModeNamesText[];
 
 static Boolean f_AreResultsLoaded = FALSE;
 static s32 f_ResultsState = RESULTS_SLIDING_IN;
@@ -334,7 +334,7 @@ static s32 f_TrophyShineFrame = 0;
 static s32 f_TrophyFrame = 0;
 static CharacterId f_DebugUnlockCharacter = 0;
 /* Read by no routine */
-static void* f_UnusedModeNamesPointers[2] UNUSED = {
+static const char* f_UnusedModeNamesPointers[2] UNUSED = {
     NULL, f_UnusedModeNamesText};
 /* The text color of each text slot, from slot 1 */
 static u8 f_TextSlotColors[][3] = {{0xFF, 0xFF, 0xFF}, {0x7F, 0xBF, 0xFF},
@@ -3531,7 +3531,7 @@ void DrawMatchResults(Gfx** displayListHead) {
   *displayListHead = gfx;
 }
 
-INCLUDE_RODATA("asm/nonmatchings/ovl_00/round_results", f_UnusedModeNamesText);
+const char f_UnusedModeNamesText[] = "StrokeSpeedGolfMini-Golf";
 
 #define CLUB_TOURNAMENT_COURSE_STRIP_WIDTH 64
 #define CLUB_TOURNAMENT_COURSE_STRIP_HEIGHT 32
