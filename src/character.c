@@ -2244,6 +2244,16 @@ void PlaceCharacter(u32 slotIndex, CoursePoint point, Radians heading) {
  * else that set a result give 53 (23). jump.c's rewrite of an if and an
  * else into a set and a conditional set takes only integer modes, so it
  * isn't the original's route for the float.
+ *
+ * The original's code is the general form after reorg: $f12 takes the
+ * negation in the branch's delay slot, and the fall-through then copies the
+ * rotation over it. Reading the rotation into a local at the flash's start
+ * and testing isLefty through an inline helper, so that both are in place,
+ * gives 29 words (15 in shape), with either arm first: the local lives in
+ * $f20 across sinf, where the original loads the rotation afresh for each
+ * ?:, and the pick becomes a copy and a conditional negation. Passing
+ * the rotation to an inline helper that picks it or its negation, testing
+ * isLefty directly or through a second helper, gives 22 (10).
  */
 #ifdef NON_MATCHING
 void DrawCharacterAndShadow(
