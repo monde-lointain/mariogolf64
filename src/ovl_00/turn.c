@@ -2250,6 +2250,14 @@ void BuildShotPreview(ShotLaunch *swing, s32 playerState) {
  * before the ball is the plainest of them. But with it the register oracle
  * gets no closer than those 44, forcing none, against 16 forcing 16 for
  * this order.
+ *
+ * The original stores the four scaled coordinates after both subtractions;
+ * this stores end.x's first, because local-alloc ties its scaled value to
+ * dx's difference, where it dies, and the subu then overwrites its register
+ * (the oracle's quantity [262+256+254], in $v0). The original keeps the
+ * scaled end.x in $a2 past the subu, as though it is still live there.
+ * Calling guMtxIdent after the scalings gives 64 words (24 in shape), and
+ * after the subtractions 82 (28). 56 words differ, 12 in shape.
  */
 #ifdef NON_MATCHING
 void DrawShotPreview(CameraMatrices *matrices) {
