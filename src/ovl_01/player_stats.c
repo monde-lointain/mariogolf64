@@ -1253,29 +1253,23 @@ NO_RESULT UpdateHandicaps(s32 firstPlayerIndex UNUSED, s32 playerCount UNUSED) {
  * Setting offsetY by if/else, by ?:, by negating offsetY itself, or testing
  * reverseVerticalSlide != FALSE all leave 209 words.
  *
- * The register oracle lines stripIndex and arrowIndex up with the saved
- * register that the player loops' playerIndex takes in the original.
- * Counting the strips with playerIndex gives 416 words (90 in shape), the
- * arrows 248 (46) and both 455 (105); with playerIndex an s32 as well, 417
- * to 465, 117 in shape. It also lines columnIndex up with $t2 in the
- * players' column loop and with $s1 in the handicap numbers' loop, but
- * counting the numbers with a local of their own gives 239 words, 31 in
- * shape.
- *
- * The register oracle lines the strips' counter and the arrows' up with
- * the saved register the golfers' loop counts players in. Counting the
- * arrows in stripIndex gives 223 words (31 in shape), the strips in
- * playerIndex 416 (90), the arrows in it 248 (46), and all three loops in
- * it 455 (105), against 209 (31), so each loop keeps its own counter.
- *
  * Each banner strip syncs the pipe between its texture load and its
  * rectangle, as the original's extra G_RDPPIPESYNC shows, and its top is
  * offsetY plus the strip's own top, as the original steps the strip's top
  * from 190 without offsetY and adds offsetY at each edge. Those took the
  * draft from 209 words differing to 188, 31 in shape to 22, and the register
  * oracle's closest from 175 words, forcing 17 pseudos, to 96, forcing 15;
- * with offsetY forced onto the stack as well, it gets to 43. 188 words
- * differ, 22 in shape.
+ * with offsetY forced onto the stack as well, it got to 43.
+ *
+ * The register oracle lines the strips', arrows' and numbers' counters up
+ * with the saved register that the golfers' loop counts players in, so they
+ * share one counter, i. That takes the draft from 188 words differing to
+ * 198, 22 in shape either way, but the oracle's closest from 96 words to 88,
+ * forcing 19 pseudos, and with offsetY forced onto the stack from 43 to 35.
+ * Counting the numbers in playerIndex, which masks it as a u16, gives 238
+ * words (30 in shape); before the pipe syncs, counting the strips in
+ * playerIndex gave 416 words (90 in shape), the arrows 248 (46) and all
+ * three 455 (105). 198 words differ, 22 in shape.
  */
 #ifdef NON_MATCHING
 void DrawHandicaps(Gfx** displayListHead, s32 slide, u8 reverseVerticalSlide,
@@ -1285,9 +1279,8 @@ void DrawHandicaps(Gfx** displayListHead, s32 slide, u8 reverseVerticalSlide,
   MenuMemory* memory = GetMenuMemory();
   u16 playerIndex;
   s32 columnIndex;
-  s32 stripIndex;
+  s32 i;
   u16 textureLeft;
-  s32 arrowIndex;
   s32 labelIndex;
   s32 offsetY;
   s32 arrowX;
@@ -1416,11 +1409,10 @@ void DrawHandicaps(Gfx** displayListHead, s32 slide, u8 reverseVerticalSlide,
     offsetY = -slide;
   }
 
-  for (stripIndex = 0; stripIndex != HANDICAP_BANNER_STRIP_COUNT;
-      stripIndex++) {
+  for (i = 0; i != HANDICAP_BANNER_STRIP_COUNT; i++) {
     gDPLoadTextureBlock(gfx++,
         TextureAddress(LargeImageTexels(f_StatsNamePlate) +
-            (stripIndex * HANDICAP_BANNER_STRIP_SIZE)),
+            (i * HANDICAP_BANNER_STRIP_SIZE)),
         G_IM_FMT_CI, G_IM_SIZ_8b, HANDICAP_BANNER_WIDTH,
         HANDICAP_BANNER_STRIP_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
@@ -1428,12 +1420,10 @@ void DrawHandicaps(Gfx** displayListHead, s32 slide, u8 reverseVerticalSlide,
     gDPPipeSync(gfx++);
     gSPScisTextureRectangle(gfx++, QuarterPixels(HANDICAP_BANNER_LEFT),
         QuarterPixels(offsetY +
-            (HANDICAP_BANNER_TOP +
-                (stripIndex * HANDICAP_BANNER_STRIP_HEIGHT))),
+            (HANDICAP_BANNER_TOP + (i * HANDICAP_BANNER_STRIP_HEIGHT))),
         QuarterPixels(HANDICAP_BANNER_RIGHT),
         QuarterPixels(offsetY +
-            (HANDICAP_BANNER_TOP +
-                (stripIndex * HANDICAP_BANNER_STRIP_HEIGHT)) +
+            (HANDICAP_BANNER_TOP + (i * HANDICAP_BANNER_STRIP_HEIGHT)) +
             HANDICAP_BANNER_STRIP_HEIGHT),
 
         G_TX_RENDERTILE, 0, 0, HANDICAP_BANNER_STEP_X, TEXEL_STEP_ONE);
@@ -1454,11 +1444,10 @@ void DrawHandicaps(Gfx** displayListHead, s32 slide, u8 reverseVerticalSlide,
           UNCHOSEN_COLUMN_SHADE, OPAQUE_ALPHA);
     }
 
-    for (stripIndex = 0; stripIndex != HANDICAP_COLUMN_STRIP_COUNT;
-        stripIndex++) {
+    for (i = 0; i != HANDICAP_COLUMN_STRIP_COUNT; i++) {
       gDPLoadTextureBlock_4b(gfx++,
-          TextureAddress(ImageTexels(f_HandicapPlaque) +
-              (stripIndex * HANDICAP_COLUMN_STRIP_SIZE)),
+          TextureAddress(
+              ImageTexels(f_HandicapPlaque) + (i * HANDICAP_COLUMN_STRIP_SIZE)),
           G_IM_FMT_CI, HANDICAP_COLUMN_WIDTH, HANDICAP_COLUMN_STRIP_HEIGHT, 0,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
@@ -1467,13 +1456,13 @@ void DrawHandicaps(Gfx** displayListHead, s32 slide, u8 reverseVerticalSlide,
           QuarterPixels(
               f_HandicapColumnLefts[g_ChosenPlayerCount - 1][columnIndex] +
               slide),
-          QuarterPixels(HANDICAP_COLUMN_TOP +
-              (stripIndex * HANDICAP_COLUMN_STRIP_HEIGHT)),
+          QuarterPixels(
+              HANDICAP_COLUMN_TOP + (i * HANDICAP_COLUMN_STRIP_HEIGHT)),
           QuarterPixels(
               f_HandicapColumnLefts[g_ChosenPlayerCount - 1][columnIndex] +
               slide + HANDICAP_COLUMN_WIDTH),
           QuarterPixels(HANDICAP_COLUMN_TOP +
-              (stripIndex * HANDICAP_COLUMN_STRIP_HEIGHT) +
+              (i * HANDICAP_COLUMN_STRIP_HEIGHT) +
               HANDICAP_COLUMN_STRIP_HEIGHT),
           G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       gDPPipeSync(gfx++);
@@ -1514,8 +1503,8 @@ void DrawHandicaps(Gfx** displayListHead, s32 slide, u8 reverseVerticalSlide,
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
   gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(f_StatsGreenArrows)));
   arrowTop = offsetY + HANDICAP_COLUMN_TOP;
-  for (arrowIndex = 0; arrowIndex != MENU_ARROW_COUNT; arrowIndex++) {
-    if (arrowIndex == MENU_ARROW_LEFT) {
+  for (i = 0; i != MENU_ARROW_COUNT; i++) {
+    if (i == MENU_ARROW_LEFT) {
       gDPLoadTextureTile_4b(gfx++,
           TextureAddress(ImageTexelsAt(f_StatsGreenArrows,
               (MENU_ARROW_RIGHT * GREEN_ARROW_IMAGE_SIZE) +
@@ -1527,7 +1516,7 @@ void DrawHandicaps(Gfx** displayListHead, s32 slide, u8 reverseVerticalSlide,
     } else {
       gDPLoadTextureTile_4b(gfx++,
           TextureAddress((u32)f_StatsGreenArrows +
-              ((arrowIndex * GREEN_ARROW_IMAGE_SIZE) + PALETTED_TEXELS_OFFSET +
+              ((i * GREEN_ARROW_IMAGE_SIZE) + PALETTED_TEXELS_OFFSET +
                   (f_GreenArrowFrame * GREEN_ARROW_FRAME_SIZE))),
           G_IM_FMT_CI, GREEN_ARROW_SIZE, GREEN_ARROW_SIZE, 0, 0,
           GREEN_ARROW_SIZE - 1, GREEN_ARROW_SIZE - 1, 0,
@@ -1536,22 +1525,22 @@ void DrawHandicaps(Gfx** displayListHead, s32 slide, u8 reverseVerticalSlide,
     }
 
     gDPPipeSync(gfx++);
-    if (arrowIndex == MENU_ARROW_UP) {
+    if (i == MENU_ARROW_UP) {
       arrowX = HANDICAP_ARROW_MIDDLE_X;
       arrowY = (g_MenuRepeatButtons & U_JPAD)
           ? (HANDICAP_ARROW_UP_Y - HANDICAP_ARROW_PUSH)
           : HANDICAP_ARROW_UP_Y;
-    } else if (arrowIndex == MENU_ARROW_DOWN) {
+    } else if (i == MENU_ARROW_DOWN) {
       arrowX = HANDICAP_ARROW_MIDDLE_X;
       arrowY = (g_MenuRepeatButtons & D_JPAD)
           ? (HANDICAP_ARROW_DOWN_Y + HANDICAP_ARROW_PUSH)
           : HANDICAP_ARROW_DOWN_Y;
-    } else if (arrowIndex == MENU_ARROW_RIGHT) {
+    } else if (i == MENU_ARROW_RIGHT) {
       arrowY = HANDICAP_ARROW_MIDDLE_Y;
       arrowX = (g_MenuRepeatButtons & R_JPAD)
           ? (HANDICAP_ARROW_RIGHT_X + HANDICAP_ARROW_PUSH)
           : HANDICAP_ARROW_RIGHT_X;
-    } else if (arrowIndex == MENU_ARROW_LEFT) {
+    } else if (i == MENU_ARROW_LEFT) {
       arrowY = HANDICAP_ARROW_MIDDLE_Y;
       arrowX = (g_MenuRepeatButtons & L_JPAD)
           ? (HANDICAP_ARROW_LEFT_X - HANDICAP_ARROW_PUSH)
@@ -1560,7 +1549,7 @@ void DrawHandicaps(Gfx** displayListHead, s32 slide, u8 reverseVerticalSlide,
 
     /* The left arrow starts at the right edge of its mirrored image */
     textureLeft =
-        (arrowIndex == MENU_ARROW_LEFT) ? TexelCoordinate(GREEN_ARROW_SIZE) : 0;
+        (i == MENU_ARROW_LEFT) ? TexelCoordinate(GREEN_ARROW_SIZE) : 0;
     gSPScisTextureRectangle(gfx++,
         QuarterPixels(f_HandicapColumnLefts[g_ChosenPlayerCount - 1]
                                            [memory->handicapPlayer] +
@@ -1574,12 +1563,11 @@ void DrawHandicaps(Gfx** displayListHead, s32 slide, u8 reverseVerticalSlide,
     gDPPipeSync(gfx++);
   }
 
-  for (columnIndex = 0; columnIndex != g_ChosenPlayerCount; columnIndex++) {
+  for (i = 0; i != g_ChosenPlayerCount; i++) {
     numberOffsetX = slide + HANDICAP_NUMBER_OFFSET_X;
     DrawTwoDigitMenuNumber(&gfx,
-        f_HandicapColumnLefts[g_ChosenPlayerCount - 1][columnIndex] +
-            numberOffsetX,
-        HANDICAP_NUMBER_Y, g_ChosenHandicaps[columnIndex], MENU_NUMBER_PLAIN);
+        f_HandicapColumnLefts[g_ChosenPlayerCount - 1][i] + numberOffsetX,
+        HANDICAP_NUMBER_Y, g_ChosenHandicaps[i], MENU_NUMBER_PLAIN);
   }
 
   if ((f_IsHandicapPromptShown == FALSE) & (canShowPrompt == TRUE)) {
