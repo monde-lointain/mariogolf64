@@ -5,8 +5,8 @@
 
 C_FILE holds the current attempt at FUNCTION and TARGET_ASM its original
 assembly (a single-function splat file). Writes base.c, target.o,
-compile.sh, objdump.sh and settings.toml into OUT_DIR (build/permuter/FUNCTION by
-default), ready for:
+compile.sh and settings.toml into OUT_DIR (build/permuter/FUNCTION by default),
+and objdump.sh for a function holding nested functions, ready for:
 
 --focus limits the permuter's changes to the statements around the lines that
 blame.py finds made our differing words, as PERM_RANDOMIZE regions. Without
@@ -61,18 +61,18 @@ cd "${{TMPDIR:-/tmp}}" || exit
 COMPILER_PATH={kmc} exec {kmc}/gcc -c {flags} -x c "$@"
 """
 
-# Disassembles the function alone
-OBJDUMP_SH = """#!/bin/bash
-# Invoked by the permuter as: objdump.sh OBJECT.o
-exec mips-linux-gnu-objdump -drz -m mips:4300 --disassemble={function} "$1"
-"""
+# Disassembles the function alone. The permuter runs it for every candidate,
+# with the object's name appended, so it is the command itself: a script
+# would add a shell's start, a tenth of a small function's candidate.
+OBJDUMP_COMMAND = "mips-linux-gnu-objdump -drz -m mips:4300 --disassemble={function}"
 
 # Disassembles the nested functions the function holds, which KMC GCC names
 # NAME.N, and then the function, in a fixed order. The permuter runs this for
 # every candidate, so one objdump disassembles the whole object and awk keeps
 # the first block of each function: 10 ms for UpdateTurns' ten nested
-# functions, against 38 ms for an objdump and nm per function.
-NESTED_OBJDUMP_SH = """#!/bin/bash
+# functions, against 38 ms for an objdump and nm per function. dash starts in
+# half the time bash does.
+NESTED_OBJDUMP_SH = """#!/bin/sh
 # Invoked by the permuter as: objdump.sh OBJECT.o
 mips-linux-gnu-objdump -drz -m mips:4300 "$1" |
   awk -v nested="{nested}" -v main={function} '
@@ -337,7 +337,7 @@ def score_base(source: str, out_dir: Path, scorers: list[Scorer]) -> list[int] |
     return scores
 
 
-def prune_base(out_dir: Path, function: str) -> None:
+def prune_base(out_dir: Path, function: str, objdump_command: str) -> None:
     """Drop the declarations FUNCTION doesn't use from OUT_DIR/base.c.
 
     The compiler takes 10-12 ms per candidate to read them. The pruned file
@@ -361,7 +361,7 @@ def prune_base(out_dir: Path, function: str) -> None:
             algorithm="levenshtein",
             debug_mode=False,
             ign_branch_targets=False,
-            objdump_command=str(out_dir / "objdump.sh"),
+            objdump_command=objdump_command,
         )
         for stack_differences in (False, True)
     ]
@@ -600,17 +600,18 @@ def fill_out_dir(
 
     # The score covers the function and its nested functions alone, leaving
     # out any inline helper emitted from base.c
-    objdump_sh = out_dir / "objdump.sh"
-    template = NESTED_OBJDUMP_SH if nested else OBJDUMP_SH
-    _ = objdump_sh.write_text(
-        template.format(nested=" ".join(nested), function=function)
-    )
-    objdump_sh.chmod(SCRIPT_MODE)
-    prune_base(out_dir, function)
-    objdump = str(objdump_sh.resolve())
+    objdump_command = OBJDUMP_COMMAND.format(function=function)
+    if nested:
+        objdump_sh = out_dir / "objdump.sh"
+        _ = objdump_sh.write_text(
+            NESTED_OBJDUMP_SH.format(nested=" ".join(nested), function=function)
+        )
+        objdump_sh.chmod(SCRIPT_MODE)
+        objdump_command = str(objdump_sh.resolve())
+    prune_base(out_dir, function, objdump_command)
     settings = f"""func_name = "{function}"
 compiler_type = "gcc"
-objdump_command = "{objdump}"
+objdump_command = "{objdump_command}"
 {NATURAL_SETTINGS}"""
     _ = (out_dir / "settings.toml").write_text(settings)
 
