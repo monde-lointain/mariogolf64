@@ -3877,29 +3877,19 @@ void GetGroundLightColors(GroundLightColor* light, GroundLightColor* shade) {
  * Texels at heights below 0 are only lit. When GAME_FLAG_FADE_HIGH_GROUND is
  * set, the others also fade toward white with height: up to HEIGHT_FADE_LIMIT,
  * fully when GAME_FLAG_FADE_HIGH_GROUND_FULLY is set, or not at all when
- * GAME_FLAG_NO_HIGH_GROUND_FADE is set. Doesn't match: the original ors the
- * faded color's channels before its alpha, where ours has the alpha first,
- * since combine puts the alpha's halfword subreg before the channels'
- * register. Writing the or with its parts in other orders or groupings, or
- * as compound assignments, leaves the word or gives 4 to 30 words.
+ * GAME_FLAG_NO_HIGH_GROUND_FADE is set.
  *
  * Neither offset height row has a variable: the original indexes heightRows
  * for each, at the edge tiles and the inner ones alike, and loop hoists the
  * indexing, which computes the leading row after column is set and keeps a
  * second copy of the trailing one. Holding the rows in trailingHeights and
- * leadingHeights gave 132 words differing, 14 in shape, and dropping each
- * took it to 18 and then 8, with none in shape. Stepping trailing and leading
- * after the slope, rather than in it, gives 6, and setting color's alpha
- * before storing it, rather than in the store, 2.
- *
- * Widening the shaded color's alpha to an s32 or u32 changes its sh to
- * 0x47E($sp), and widening isFadeUnlimited or isFadeDisabled their sb to
- * 0x48F and 0x497($sp), all of which the original has. 2 words differ, 0 in
- * shape.
+ * leadingHeights gave 132 words differing, 14 in shape. The faded color is
+ * built in color, a full word like the lit one, before it becomes the texel's;
+ * built in the halfword texelColor itself, combine puts the alpha before the
+ * channels in the last or, and 2 words differ.
  */
-#ifdef NON_MATCHING
 void ShadeGroundTiles(void) {
-  /* Pads the frame to match; without it 184 words differ, against 2 */
+  /* Pads the frame to match; without it 182 words differ */
   s32 unused[20] UNUSED;
   GroundLightColor light = {24, 22, 16};
   GroundLightColor shade;
@@ -4181,7 +4171,8 @@ void ShadeGroundTiles(void) {
               fadedBlue &= TEXEL_BLUE_MASK;
             }
 
-            texelColor = fadedRed | fadedGreen | fadedBlue | shaded.alpha;
+            color = fadedRed | fadedGreen | fadedBlue | shaded.alpha;
+            texelColor = color;
           } else {
             texelColor = shaded.alpha |
                 ((shaded.red << TEXEL_RED_SHIFT) |
@@ -4195,10 +4186,6 @@ void ShadeGroundTiles(void) {
     } while (column < MAP_COLUMN_COUNT);
   }
 }
-#else
-INCLUDE_RODATA("asm/nonmatchings/ovl_02/hole_builder", f_DefaultGroundLight);
-INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", ShadeGroundTiles);
-#endif
 
 /* Shades the ground tiles, then darkens them under the billboards' shadows */
 void ShadeGround(s32 shadeVariant UNUSED) {
