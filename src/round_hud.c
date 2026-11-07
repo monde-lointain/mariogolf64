@@ -1910,6 +1910,19 @@ typedef struct GridScreenPoint {
  * gives 269 words but 47 in shape, and the register oracle's closest result
  * rises from 204 words, forcing 29 pseudos, to 207, forcing 25; read just
  * before the yaw, it changes nothing.
+ *
+ * The original divides the middle range's row spacing by 30.0f at run
+ * time, where a literal divisor folds, under -ffast-math, into a multiply
+ * by 512.0f; that branch sets maxPuttDistance as the green's does and
+ * divides by it. That takes the draft from 300 words differing (44 in
+ * shape) to 301 (37), and the register oracle's closest result from 204
+ * words to 193, forcing 29 pseudos both. The original also divides the
+ * landing width by columnCount at run time, converting an 8 loaded from
+ * its constant pool, which reload does for a constant-equivalent pseudo
+ * that cse never saw set; ours folds the quotient to 38400.0f. Setting
+ * columnCount only after the distance tests, so that the landing branch
+ * reads it unset, gives 307 words (41 in shape) and still folds it.
+ * 301 words differ, 37 in shape.
  */
 void DrawGreenGrid(Gfx **displayListHead, CameraMatrices *matrices) {
     f32 points[GREEN_GRID_POINT_COUNT][3];
@@ -2005,7 +2018,8 @@ void DrawGreenGrid(Gfx **displayListHead, CameraMatrices *matrices) {
         center[AXIS_X] = g_CurrentShot.ballPosition[AXIS_X];
         center[AXIS_Y] = g_CurrentShot.ballPosition[AXIS_Y];
         center[AXIS_Z] = g_CurrentShot.ballPosition[AXIS_Z];
-        rowSpacing = distance * GREEN_GRID_ROW_SPACING / GREEN_GRID_MAX_PUTT_DISTANCE;
+        maxPuttDistance = GREEN_GRID_MAX_PUTT_DISTANCE;
+        rowSpacing = distance * GREEN_GRID_ROW_SPACING / maxPuttDistance;
     }
     else {
         center[AXIS_X] = (cosf(yaw) * worldDistance) + g_CurrentShot.ballPosition[AXIS_X];
