@@ -1924,15 +1924,18 @@ void ClearNearbyGroundTiles(void) {
  * Doesn't match: the original copies each tile number into a second register
  * after the division, where this divides into the register it keeps it in.
  * Mirroring each coordinate in a GetMirroredOffset helper gives 40 words, but
- * the register oracle leaves 10 at best, forcing 5 pseudos; written out with
- * one tile local, as here, it leaves 6, forcing 6. Taking the coordinate in
- * an s16 or s32 local, or the tile from an inline helper, also gives 46.
+ * the register oracle leaves 10 at best, forcing 5 pseudos. Written out with
+ * one tile local and an offset local for each texture axis, as a permuter
+ * run found, it gives 30 words and leaves 6, forcing 3; with one offset
+ * local, 46 words, leaving 6 forcing 6, and with a tile local for each axis
+ * as well, 40, leaving 10. Taking the coordinate in an s16 or s32 local, or
+ * the tile from an inline helper, with one offset local, also gives 46.
  * Taking the helper's coordinate as an s32 copies the coordinate twice
  * instead (44); other helper shapes and a separate tile helper give 40-52. A
  * u16 offset gives 34 words (8 in shape against 6), but masks each offset with
  * an andi 0xffff, which the original never does. An s16 offset gives 36 words
  * (10 in shape) but sign-extends it with two pairs of 16-bit shifts the
- * original lacks, both measured with the helper. 46 words differ, 6 in shape.
+ * original lacks, both measured with the helper. 30 words differ, 6 in shape.
  */
 #ifdef NON_MATCHING
 void RebuildGroundTextureCoordinates(void) {
@@ -1940,31 +1943,34 @@ void RebuildGroundTextureCoordinates(void) {
   s32 row;
   s32 column;
   s32 tile;
-  s32 offset;
+  s32 offsetS;
+  s32 offsetT;
 
   ClearGameFlag(GAME_FLAG_HOLE_LOADED);
   for (row = 0; row < GROUND_POINT_ROW_COUNT; row++) {
     for (column = 0; column < GROUND_POINT_COLUMN_COUNT; column++) {
       point = GetGroundPoint(column, row)->v;
       tile = point.ob[AXIS_X] / TEST_TEXTURE_TILE_SIZE;
-      offset = point.ob[AXIS_X] - (tile * TEST_TEXTURE_TILE_SIZE);
+      offsetS = point.ob[AXIS_X] - (tile * TEST_TEXTURE_TILE_SIZE);
       if (tile % 2) {
-        offset = TEST_TEXTURE_TILE_SIZE - offset;
+        offsetS = TEST_TEXTURE_TILE_SIZE - offsetS;
       }
-      if (offset != TEST_TEXTURE_TILE_SIZE) {
-        point.tc[TEXTURE_AXIS_S] = TexelCoordinate(offset);
+
+      if (offsetS != TEST_TEXTURE_TILE_SIZE) {
+        point.tc[TEXTURE_AXIS_S] = TexelCoordinate(offsetS);
       } else {
         point.tc[TEXTURE_AXIS_S] = TexelCoordinate(TEST_TEXTURE_TILE_SIZE);
       }
 
       point.tc[TEXTURE_AXIS_S] += 0x100;
       tile = point.ob[AXIS_Z] / TEST_TEXTURE_TILE_SIZE;
-      offset = point.ob[AXIS_Z] - (tile * TEST_TEXTURE_TILE_SIZE);
+      offsetT = point.ob[AXIS_Z] - (tile * TEST_TEXTURE_TILE_SIZE);
       if (tile % 2) {
-        offset = TEST_TEXTURE_TILE_SIZE - offset;
+        offsetT = TEST_TEXTURE_TILE_SIZE - offsetT;
       }
-      if (offset != TEST_TEXTURE_TILE_SIZE) {
-        point.tc[TEXTURE_AXIS_T] = TexelCoordinate(offset);
+
+      if (offsetT != TEST_TEXTURE_TILE_SIZE) {
+        point.tc[TEXTURE_AXIS_T] = TexelCoordinate(offsetT);
       } else {
         point.tc[TEXTURE_AXIS_T] = TexelCoordinate(TEST_TEXTURE_TILE_SIZE);
       }
