@@ -317,8 +317,15 @@ static u8 ReverseBits(u8 bits) {
  * Inline alphabet-lookup helpers taking either the combined index or the
  * symbol and position separately leave 34 words, for char and s32 returns.
  * KMC sched.c schedules within basic blocks; the wrapper's improvement is
- * not evidence for an alphabet helper in the original. 34 words differ,
- * 2 in shape.
+ * not evidence for an alphabet helper in the original.
+ * Each of the original's registers is one later than ours because no pseudo
+ * takes $a3. In global-alloc's first pass, find_reg skips a register that a
+ * conflicting pseudo prefers, and here only a copy of the fourth parameter
+ * would prefer $a3, so the original keeps that parameter live through the
+ * loop. Returning it at the end gives the original's registers exactly, with
+ * 12 words differing (2 in shape), but copies $a3 to $v0 where the original
+ * returns 0. Reusing the parameter as the counter or as a result set to 0
+ * leaves the registers as they are. 34 words differ, 2 in shape.
  */
 #ifdef NON_MATCHING
 s32 WritePasswordSymbols(u8 *symbols, char *password, s32 symbolCount, s32 unused UNUSED) {
