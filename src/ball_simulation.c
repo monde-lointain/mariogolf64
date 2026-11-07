@@ -309,6 +309,12 @@ void ResetBallSimulations(void) {
  * test, where the original's jumps past it. The original also leaves the
  * first-bounce test's delay slot empty, where ours fills it with the
  * surface load.
+ *
+ * The hole and billboard hit flags are cleared together, before the
+ * billboard's test, as a sweep moving each assignment found. That takes
+ * the draft from 443 words (113 in shape) to 440 (114), and the register
+ * oracle's closest from 228 words to 222, forcing 123 pseudos either way.
+ * 440 words differ, 114 in shape.
  */
 #ifdef NON_MATCHING
 s32 StepBallSimulation(BallSimulation *simulation) {
@@ -587,6 +593,7 @@ s32 StepBallSimulation(BallSimulation *simulation) {
                     );
                 }
 
+                holeHit = FALSE;
                 hitsBillboard = FALSE;
                 if (simulation->state == BALL_STATE_FLYING &&
                     (simulation->lastBounceStep < 0 ||
@@ -625,7 +632,6 @@ s32 StepBallSimulation(BallSimulation *simulation) {
                     contact = 0;
                 }
 
-                holeHit = FALSE;
                 if (!simulation->hasEnteredWater) {
                     if (simulation->state == BALL_STATE_FLYING ||
                         simulation->state == BALL_STATE_ROLLING) {
