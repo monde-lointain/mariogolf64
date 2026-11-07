@@ -37,6 +37,7 @@ fncompare counts with it, are named so that each can be given as FUNCTION.
 
 import collections
 import difflib
+import functools
 import json
 import os
 import re
@@ -73,6 +74,9 @@ FPR_MEMORY_OPCODES = {0x31, 0x35, 0x39, 0x3D}  # lwc1 ldc1 swc1 sdc1
 # The COP1 formats that move between a GPR and an FPR, and that branch
 COP1_MOVE_FORMATS = {0, 2, 4, 6}
 COP1_BRANCH_FORMAT = 8
+# The modes whose values take two 32-bit registers
+DOUBLE_MODES = frozenset(["DF", "DI", "DC"])
+PSEUDO_MODE_RE = re.compile(r"\(reg(?:/\w+)?:(\w+) (\d+)\)")
 
 
 class Quantity(TypedDict):
@@ -334,21 +338,44 @@ def read_pseudo_lines(
     return lines
 
 
-def read_insn_pseudos(compilation: Compilation, index: int) -> set[int]:
+def read_insn_pseudos(compilation: Compilation, index: int) -> frozenset[int]:
     """Return the pseudos that the insn making word INDEX uses before reload."""
     insn = blame.get_insn(compilation.blamed, index)
     if insn is None:
-        return set()
-    rtl = blame.find_insn(compilation.blamed.dumps.get("lreg", ""), insn[0])
-    numbers = {int(match.group(1)) for match in blame.PSEUDO_RE.finditer(rtl)}
-    return {number for number in numbers if number >= FIRST_PSEUDO_REGISTER}
+        return frozenset()
+    lreg = compilation.blamed.dumps.get("lreg", "")
+    return index_insn_pseudos(lreg).get(insn[0], frozenset())
+
+
+@functools.cache
+def index_insn_pseudos(lreg: str) -> dict[int, frozenset[int]]:
+    """Return {insn UID: the pseudos it uses} for the insns of the LREG dump.
+
+    The dump is from before reload, and so the same for every forcing.
+    """
+    pseudos: dict[int, frozenset[int]] = {}
+    for uid, rtl in blame.index_insns(lreg).items():
+        numbers = {int(match.group(1)) for match in blame.PSEUDO_RE.finditer(rtl)}
+        pseudos[uid] = frozenset(
+            number for number in numbers if number >= FIRST_PSEUDO_REGISTER
+        )
+    return pseudos
+
+
+@functools.cache
+def index_double_pseudos(lreg: str) -> frozenset[int]:
+    """Return the pseudos of the LREG dump whose mode takes two registers."""
+    return frozenset(
+        int(match.group(2))
+        for match in PSEUDO_MODE_RE.finditer(lreg)
+        if match.group(1) in DOUBLE_MODES
+    )
 
 
 def get_register_count(compilation: Compilation, pseudo: int) -> int:
     """Return how many hard registers PSEUDO takes, from its mode's name."""
     lreg = compilation.blamed.dumps.get("lreg", "")
-    match = re.search(rf"\(reg(?:/\w+)?:(\w+) {pseudo}\)", lreg)
-    return 2 if match and match.group(1) in ("DF", "DI", "DC") else 1
+    return 2 if pseudo in index_double_pseudos(lreg) else 1
 
 
 def vote_registers(
@@ -374,6 +401,12 @@ def iterate_votes(
     """
     compiled = compilation.routine
     registers = compilation.registers
+    # The hard registers each pseudo with one holds
+    spans = {
+        pseudo: range(hard, hard + get_register_count(compilation, pseudo))
+        for pseudo, hard in registers.items()
+        if hard >= 0
+    }
     matcher = difflib.SequenceMatcher(
         None,
         [mask_registers(word) for word in target.words],
@@ -384,21 +417,19 @@ def iterate_votes(
         for offset in range(length):
             target_index = target_start + offset
             compiled_index = compiled_start + offset
-            pseudos = read_insn_pseudos(compilation, compiled_index)
+            held = [
+                (pseudo, spans[pseudo])
+                for pseudo in read_insn_pseudos(compilation, compiled_index)
+                if pseudo in spans
+            ]
+            if not held:
+                continue
             for (_, wanted), (_, ours) in zip(
                 read_register_fields(target.words[target_index]),
                 read_register_fields(compiled.words[compiled_index]),
                 strict=True,
             ):
-                holders = [
-                    pseudo
-                    for pseudo in pseudos
-                    if registers.get(pseudo, -1)
-                    <= ours
-                    < registers.get(pseudo, -1)
-                    + get_register_count(compilation, pseudo)
-                    and registers.get(pseudo, -1) >= 0
-                ]
+                holders = [pseudo for pseudo, span in held if ours in span]
                 if len(holders) == 1:
                     pseudo = holders[0]
                     yield pseudo, wanted - (ours - registers[pseudo]), compiled_index
