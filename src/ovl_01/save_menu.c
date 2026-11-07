@@ -2338,7 +2338,13 @@ void DrawSavedMiniGolfImage(Gfx **displayListHead);
  * The chosen game's mode label works out its x first, before its offset
  * and texture, as a sweep moving each assignment found. That takes the draft from 287 words to 213,
  * 91 in shape either way, and the register oracle's closest from 183 words, forcing 28 pseudos, to
- * 183 forcing 17. 213 words differ, 91 in shape.
+ * 183 forcing 17.
+ *
+ * The prompts test for a chosen game that isn't empty first, and set the
+ * empty game's text in the else, as a permuter output does. That takes the
+ * draft from 213 words (91 in shape) to 207 (89), and the register oracle's
+ * closest from 183 words to 177, forcing 17 pseudos either way. 207 words
+ * differ, 89 in shape.
  */
 #ifdef NON_MATCHING
 void DrawSavedGames(Gfx **displayListHead) {
@@ -2708,7 +2714,135 @@ void DrawSavedGames(Gfx **displayListHead) {
         gDPPipeSync(gfx++);
     }
 
-    if (IsChosenGameEmpty() != 0) {
+    if (!IsChosenGameEmpty()) {
+        if (!f_IsGameChosen) {
+            gameIndex = memory->savedGameIndex;
+            if (gameIndex < 0) {
+                gameIndex = 0;
+            }
+
+            if (gameIndex >= SAVED_GAME_COUNT) {
+                gameIndex = SAVED_GAME_COUNT - 1;
+            }
+
+            if (save->savedGames[gameIndex].isValid) {
+                if (!save->savedGames[gameIndex].state.isMiniGolf) {
+                    DrawSavedCourseImage(&gfx);
+                }
+                else {
+                    DrawSavedMiniGolfImage(&gfx);
+                }
+            }
+
+            SetUpTextDrawing(&gfx);
+            SetTextColor(&gfx, 255, 255, 255);
+            courseIndex = CHOSEN_GAME.state.courseIndex;
+            holeIndex = CHOSEN_GAME.state.holeIndex;
+            if (CHOSEN_GAME.state.gameMode == GAME_MODE_TOURNAMENT) {
+                SetTextSlot(
+                    SAVED_GAME_COURSE_X,
+                    SAVED_GAME_COURSE_Y,
+                    MESSAGE_FIRST_TOURNAMENT_COURSE + courseIndex,
+                    TEXT_SLOT_LARGE_FONT,
+                    0,
+                    0,
+                    0xFF,
+                    0xFF,
+                    0xFF,
+                    OPAQUE_ALPHA
+                );
+            }
+            else {
+                if (CHOSEN_GAME.state.isMiniGolf == TRUE) {
+                    courseIndex = (courseIndex >= FIRST_PEACHS_CASTLE_MINI_GOLF_COURSE) ?
+                        COURSE_RECORD_PEACHS_CASTLE :
+                        COURSE_RECORD_LUIGIS_GARDEN;
+                }
+
+                sprintf(g_PrintBuffer, f_SaveMenuNameFormat, g_CourseRecords[courseIndex].name);
+                DrawLargeText(&gfx, SAVED_GAME_COURSE_X, SAVED_GAME_COURSE_Y, g_PrintBuffer);
+            }
+
+            SetTextSlotValue(holeIndex + 1, 1, 0);
+            SetTextSlot(
+                SAVED_GAME_HOLE_X,
+                SAVED_GAME_HOLE_Y,
+                MESSAGE_SAVED_GAME_HOLE,
+                TEXT_SLOT_LARGE_FONT,
+                1,
+                0,
+                0xFF,
+                0xFF,
+                0xFF,
+                OPAQUE_ALPHA
+            );
+        }
+        else if (GetWipeKind() == 0) {
+            if (!f_AreControllersAssigned) {
+                SetTextSlotValue(f_HumanPlayerIndices[f_AssignedHumanCount] + 1, 0, 0);
+
+                /* The prompt names the player in the player's own color */
+                if (f_HumanPlayerIndices[f_AssignedHumanCount] == 0) {
+                    SetTextPaletteColor(255, 127, 127, 0);
+                }
+
+                if (f_HumanPlayerIndices[f_AssignedHumanCount] == 1) {
+                    SetTextPaletteColor(0, 255, 255, 0);
+                }
+
+                if (f_HumanPlayerIndices[f_AssignedHumanCount] == 2) {
+                    SetTextPaletteColor(255, 255, 0, 0);
+                }
+
+                if (f_HumanPlayerIndices[f_AssignedHumanCount] == 3) {
+                    SetTextPaletteColor(63, 255, 63, 0);
+                }
+
+                SetTextSlot(
+                    CONTROLLER_PROMPT_X,
+                    PROMPT_Y,
+                    MESSAGE_CONTROLLER_PROMPT,
+                    TEXT_SLOT_LARGE_FONT,
+                    0,
+                    TEXT_FLAG_TYPED,
+                    0xFF,
+                    0xFF,
+                    0xFF,
+                    OPAQUE_ALPHA
+                );
+                for (stripOrTextSlotIndex = 1; stripOrTextSlotIndex != SAVED_GAME_TEXT_SLOT_COUNT;
+                    stripOrTextSlotIndex++) {
+                    SetTextSlot(
+                        0,
+                        0,
+                        NO_MESSAGE,
+                        TEXT_SLOT_LARGE_FONT,
+                        stripOrTextSlotIndex,
+                        0,
+                        0xFF,
+                        0xFF,
+                        0xFF,
+                        OPAQUE_ALPHA
+                    );
+                }
+            }
+            else {
+                SetTextSlot(
+                    CONTINUE_PROMPT_X,
+                    PROMPT_Y,
+                    MESSAGE_CONTINUE_PROMPT,
+                    TEXT_SLOT_LARGE_FONT,
+                    0,
+                    TEXT_FLAG_TYPED,
+                    0xFF,
+                    0xFF,
+                    0xFF,
+                    OPAQUE_ALPHA
+                );
+            }
+        }
+    }
+    else {
         SetTextSlot(
             EMPTY_GAME_TEXT_X,
             EMPTY_GAME_TEXT_Y,
@@ -2721,132 +2855,6 @@ void DrawSavedGames(Gfx **displayListHead) {
             0xFF,
             OPAQUE_ALPHA
         );
-    }
-    else if (!f_IsGameChosen) {
-        gameIndex = memory->savedGameIndex;
-        if (gameIndex < 0) {
-            gameIndex = 0;
-        }
-
-        if (gameIndex >= SAVED_GAME_COUNT) {
-            gameIndex = SAVED_GAME_COUNT - 1;
-        }
-
-        if (save->savedGames[gameIndex].isValid) {
-            if (!save->savedGames[gameIndex].state.isMiniGolf) {
-                DrawSavedCourseImage(&gfx);
-            }
-            else {
-                DrawSavedMiniGolfImage(&gfx);
-            }
-        }
-
-        SetUpTextDrawing(&gfx);
-        SetTextColor(&gfx, 255, 255, 255);
-        courseIndex = CHOSEN_GAME.state.courseIndex;
-        holeIndex = CHOSEN_GAME.state.holeIndex;
-        if (CHOSEN_GAME.state.gameMode == GAME_MODE_TOURNAMENT) {
-            SetTextSlot(
-                SAVED_GAME_COURSE_X,
-                SAVED_GAME_COURSE_Y,
-                MESSAGE_FIRST_TOURNAMENT_COURSE + courseIndex,
-                TEXT_SLOT_LARGE_FONT,
-                0,
-                0,
-                0xFF,
-                0xFF,
-                0xFF,
-                OPAQUE_ALPHA
-            );
-        }
-        else {
-            if (CHOSEN_GAME.state.isMiniGolf == TRUE) {
-                courseIndex = (courseIndex >= FIRST_PEACHS_CASTLE_MINI_GOLF_COURSE) ?
-                    COURSE_RECORD_PEACHS_CASTLE :
-                    COURSE_RECORD_LUIGIS_GARDEN;
-            }
-
-            sprintf(g_PrintBuffer, f_SaveMenuNameFormat, g_CourseRecords[courseIndex].name);
-            DrawLargeText(&gfx, SAVED_GAME_COURSE_X, SAVED_GAME_COURSE_Y, g_PrintBuffer);
-        }
-
-        SetTextSlotValue(holeIndex + 1, 1, 0);
-        SetTextSlot(
-            SAVED_GAME_HOLE_X,
-            SAVED_GAME_HOLE_Y,
-            MESSAGE_SAVED_GAME_HOLE,
-            TEXT_SLOT_LARGE_FONT,
-            1,
-            0,
-            0xFF,
-            0xFF,
-            0xFF,
-            OPAQUE_ALPHA
-        );
-    }
-    else if (GetWipeKind() == 0) {
-        if (!f_AreControllersAssigned) {
-            SetTextSlotValue(f_HumanPlayerIndices[f_AssignedHumanCount] + 1, 0, 0);
-
-            /* The prompt names the player in the player's own color */
-            if (f_HumanPlayerIndices[f_AssignedHumanCount] == 0) {
-                SetTextPaletteColor(255, 127, 127, 0);
-            }
-
-            if (f_HumanPlayerIndices[f_AssignedHumanCount] == 1) {
-                SetTextPaletteColor(0, 255, 255, 0);
-            }
-
-            if (f_HumanPlayerIndices[f_AssignedHumanCount] == 2) {
-                SetTextPaletteColor(255, 255, 0, 0);
-            }
-
-            if (f_HumanPlayerIndices[f_AssignedHumanCount] == 3) {
-                SetTextPaletteColor(63, 255, 63, 0);
-            }
-
-            SetTextSlot(
-                CONTROLLER_PROMPT_X,
-                PROMPT_Y,
-                MESSAGE_CONTROLLER_PROMPT,
-                TEXT_SLOT_LARGE_FONT,
-                0,
-                TEXT_FLAG_TYPED,
-                0xFF,
-                0xFF,
-                0xFF,
-                OPAQUE_ALPHA
-            );
-            for (stripOrTextSlotIndex = 1; stripOrTextSlotIndex != SAVED_GAME_TEXT_SLOT_COUNT;
-                stripOrTextSlotIndex++) {
-                SetTextSlot(
-                    0,
-                    0,
-                    NO_MESSAGE,
-                    TEXT_SLOT_LARGE_FONT,
-                    stripOrTextSlotIndex,
-                    0,
-                    0xFF,
-                    0xFF,
-                    0xFF,
-                    OPAQUE_ALPHA
-                );
-            }
-        }
-        else {
-            SetTextSlot(
-                CONTINUE_PROMPT_X,
-                PROMPT_Y,
-                MESSAGE_CONTINUE_PROMPT,
-                TEXT_SLOT_LARGE_FONT,
-                0,
-                TEXT_FLAG_TYPED,
-                0xFF,
-                0xFF,
-                0xFF,
-                OPAQUE_ALPHA
-            );
-        }
     }
 
     gDPPipeSync(gfx++);
