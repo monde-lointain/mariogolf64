@@ -1469,7 +1469,12 @@ NO_RESULT UpdateHandicaps(s32 firstPlayerIndex UNUSED, s32 playerCount UNUSED) {
  * words to 75, forcing 16 pseudos either way, and with offsetY forced onto
  * the stack from 14 to 12. Adding the column's left edge to slide + 16 in
  * the call gives 187 words (19 in shape), and reading it into columnLeft
- * in the columns' loop as well 398 to 554. 177 words differ, 17 in shape.
+ * in the columns' loop as well 398 to 554. The original keeps arrowY in
+ * $s7, where the build gives it $fp and $s7 to the pipe sync's command,
+ * which the golfers' loop hoists; leaving arrowY unset at its declaration
+ * gives 176 words but 18 in shape, as it stays live from the function's
+ * entry, and ending the arrows' tests in a plain else 279 (41). 177 words
+ * differ, 17 in shape.
  */
 #ifdef NON_MATCHING
 void DrawHandicaps(Gfx **displayListHead, s32 slide, u8 reverseVerticalSlide, u8 canShowPrompt) {
