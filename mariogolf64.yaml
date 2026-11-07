@@ -119,7 +119,7 @@ segments:
       - [0x49E90, asm]
       - [0x4A5A0, asm]
       - [0x4C3D0, asm]
-      - [0x4C770, asm]
+      - [0x4C770, c]
       - [0x51900, asm]
       - [0x526B0, asm]
       - [0x52FF0, asm]
