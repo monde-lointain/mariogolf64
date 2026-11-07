@@ -268,9 +268,9 @@ typedef struct ArrowShape {
 /* Columns from one channel's value to the next */
 #define COLOR_TEST_COLUMN_WIDTH 5
 /* "Sample" in half-width katakana, then "ABCDEFG" */
-extern char f_ColorTestSampleText[];
+extern const char f_ColorTestSampleText[];
 /* Printed over a cursor to erase it */
-extern char f_BlankText[];
+extern const char f_BlankText[];
 
 #define HUD_OFFSET_TEXT_COLUMN 20
 #define HUD_OFFSET_TEXT_ROW 6
@@ -3557,9 +3557,8 @@ void DrawDistanceText(Gfx** gfxP, s32 x, s32 y, char* text) {
   *gfxP = gfx;
 }
 
-INCLUDE_RODATA("asm/nonmatchings/round_hud", f_ColorTestSampleText);
-
-INCLUDE_RODATA("asm/nonmatchings/round_hud", f_BlankText);
+const char f_ColorTestSampleText[] = "ｻﾝﾌﾟﾙABCDEFG";
+const char f_BlankText[] = " ";
 
 /* Draws the color test screen and handles its controls */
 void DrawColorTest(Gfx** displayListHead) {
