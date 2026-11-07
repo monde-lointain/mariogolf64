@@ -442,7 +442,7 @@ segments:
     subsegments:
       - [0xADD30, asm]
       - [0xADD40, asm]
-      - [0xB68F0, asm]
+      - [0xB68F0, c]
       - [0xBBD00, asm]
       - [0xC7A40, asm]
       - [0xCFE10, asm]
