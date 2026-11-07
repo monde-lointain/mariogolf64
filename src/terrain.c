@@ -666,7 +666,11 @@ f32 ConvertToFloat(s32 value) {
  * above 0 or equal to 1 gives 15 and 13, their sum for being nonzero 11,
  * their signs 12 and 13, and which half each fraction is in 41. Comparing
  * the steps plus one halved gives 44 words (10 in shape) by division and 12
- * (8) by a shift. 8 words differ, all in shape.
+ * (8) by a shift. An inline helper comparing the steps plus one, by == or
+ * by XOR, or returning the XOR itself, gives 10 words (6 in shape), as do
+ * the XOR compared == 0 and the steps' plus one from a helper; a helper
+ * returning TRUE when the steps are equal leaves 8. 8 words differ, all in
+ * shape.
  */
 #ifdef NON_MATCHING
 Surface FindSurface(s32 x, s32 z, Boolean lowersWaterLevel) {
