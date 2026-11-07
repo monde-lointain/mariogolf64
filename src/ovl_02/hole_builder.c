@@ -2327,12 +2327,11 @@ static inline void SetCellTerrainCode(u32 column, u32 row, s32 code) {
       }
 
       /*
-       * Computing the offset again is there to match: without it
-       * PaintGroundTiles gives 237 words differing, 19 in shape, against 132,
+       * The original works the offset out again; storing through cellOffset
+       * gives PaintGroundTiles 237 words differing, 19 in shape, against 134,
        * 4
        */
-      cellOffset = GetCellOffset(column, row);
-      CellAt(cellOffset) = block | TERRAIN_CODE_CELL_BLOCK;
+      CellAt(GetCellOffset(column, row)) = block | TERRAIN_CODE_CELL_BLOCK;
       SetPackedTerrainCode(block, column, row, code);
     }
   } else {
@@ -2362,10 +2361,17 @@ static inline void SetCellTerrainCode(u32 column, u32 row, s32 code) {
  * fill word rather than after, and when the blocks run out it branches to the
  * texel loop's increment, where the original's branch-likely does the increment
  * in its delay slot. The register oracle, forcing 25 pseudos' registers, leaves
- * 22 words at best, so the code differs too. Like the original, which shifts it
+ * 16 words at best, so the code differs too. Like the original, which shifts it
  * before the search loop, this works out the search's limit once in
  * searchDistance; comparing against the product in the loop gave 134 words
- * differing, 6 in shape. 132 words differ, 4 in shape.
+ * differing, 6 in shape. 134 words differ, 4 in shape.
+ *
+ * The register oracle's split report puts the cell's offset in one register
+ * where it is read and another where a new block's marker is stored, as if
+ * they were two values. Storing the marker through the offset worked out
+ * again in place, rather than set again in cellOffset, gives 134 words, 4 in
+ * shape, against 132, but the oracle's closest falls from 20 words, forcing
+ * 26 pseudos, to 16 forcing 25.
  */
 #ifdef NON_MATCHING
 void PaintGroundTiles(void) {
