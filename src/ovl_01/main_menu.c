@@ -4760,73 +4760,24 @@ void DrawSpinningStars(Gfx** displayListHead, s32 left, s32 top, u8 starCount,
  * controller icon and label, and for a single player the birdie badges or
  * stars won.
  *
- * The original adds a zero to each board's truncated left edge (addu $v0,
- * $zero, $v0, and ori $a1, $a1, 0 for the chosen board), which no other
- * function in the game does. Reload gives that for a variable set once to
- * zero that gets no register, and combine turns the chosen board's add into
- * an or, so the left edges add wheelShiftX; without it 121 words differ, 9
- * in shape, and adding it before the truncation gives 112, 52 in shape.
+ * The original adds a zero to each board's truncated left edge and to its
+ * strips' right edges (addu $v0, $zero, $v0, and ori $a1, $a1, 0 for the
+ * chosen board), which no other function in the game does. Reload gives that
+ * for a variable set once to zero that gets no register, and combine turns
+ * the chosen board's add into an or, so those edges add wheelShiftX; without
+ * it 93 words differ, 9 in shape.
  *
- * Doesn't match: the mode count and the drawn board's slot take each other's
- * saved registers, whatever order they are declared in: global-alloc ranks the
- * mode count at priority 1658 (25 references over 603 instructions, across 7
- * calls) and the slot at 1657 (10 over 181, across 2), and forcing them and one
- * player label pseudo leaves 34 words differing. The strips lack one of the
- * original's three adds of zero. Adding the bob to the chosen board's top last,
- * as here, gives 86 words against 104; adding it first or second, 102-104. The
- * permuter's best reads modeSpin through a pointer taken before the boards,
- * which gives 38 words, but the original loads g_MenuMemory.modeSpin directly,
- * so the pointer only perturbs allocation; testing modeSpin first gives 130
- * words, and == FALSE or ! leave 86. A focused run's best reads modeChoice
- * through a pointer in the boards' loop instead (38 words, 2 in shape), but the
- * original loads g_MenuMemory.modeChoice directly on each pass too. Working out
- * a board's angle and x in both arms of the mode count's test, which still
- * compiles to the target's two sinf calls, gives 74 words differing but 16 in
- * shape, and copies code for no reason. Declaring a board's turns as a u16 or
- * u8 gives 43 words (7 in shape), but turns goes negative, and the original
- * multiplies the remainder from mfhi by the angle step without masking it.
- * areCharactersDrawn is a u8, as the original masks it with andi 0xff before
- * testing it in the boards' loop; as a Boolean or s32 it gives 44 words (4 in
- * shape) without the mask, and as an s8 or s16 88 (4). A u32 angleStep gives 54
- * words (10 in shape), but converts the board's angle to a double with a bgez
- * and an add of 2^32 after the cvt.d.w, which the original lacks; a u16 gives
- * 55 (7) but adds two andi 0xffff, and a u8 also 55 (7) but adds two andi 0xff
- * and can't hold the step of 360 that one mode or none gives; an s16 or s8 key
- * gives 60 (8), but the s16 adds two sll and one sra by 16 that the original
- * lacks. Keeping the board's half size in the angle step's variable, which
- * would give one variable two meanings, gives 68 words (2 in shape), but the
- * register oracle's closest is then 40 words, forcing 3 pseudos, against 34
- * here; no declaration order of the two gives other than 86.
- *
- * Stepping the players' second loop, which draws their labels, with slot gives
- * 20 words differing, 2 in shape, but the register oracle's closest rises to
- * 12 words forcing 3 pseudos, so the gain is in the registers alone. Before
- * the loops shared i it gave 42 words, and stepping any of the banner strips'
- * loops or the players' first loop with slot as well 86 or 87.
- *
- * Ending the draw-order sort's outer loop on i < modeCount gives 44 words
- * differing, 8 in shape, but the original ends that loop with a bne, as the
- * draft's test does.
- *
- * The register oracle lines index up with $s0 in the boards' loops and with
- * $s1 in the banner strips' and players' loops, where the original keeps the
- * sort's counter, the chosen mode and the won count's shift. Counting those
- * loops in that variable, i, takes the draft from 86 words differing to 50,
- * 2 in shape either way, and the oracle's closest from 34 words, forcing 3
- * pseudos, to 2, forcing the mode count's and the slot's registers. Counters
- * of their own for the banner strips' and players' loops give 138 to 230
- * words, though the oracle's closest is then also 2, forcing 26 or 27. The 2
- * words left are the strips' missing add of zero.
- *
- * The slot outranks the mode count by a single point (3 x 10 references over
- * 181 instructions against 4 x 25 over 603), so a mode count live one
- * instruction longer would swap their registers. Setting it before any of
- * the commands ahead of the boards' loop gives 118 to 182 words, though,
- * except before the last, the texture perspective's, which gives 14 words
- * but 10 in shape, as the original loads the count after that command, and
- * an oracle closest of 12 forcing 1. 50 words differ, 2 in shape.
+ * One variable, i, counts the draw-order sort's passes and the icon strips',
+ * banner strips' and players' loops, and holds the chosen mode and the won
+ * count's shift between them, as the original keeps all of them in $s1; the
+ * register oracle lined the loops' counter up with that register.
+ * Otherwise the original's code reads plainly: the loops end on bne tests,
+ * the boards' loop loads g_MenuMemory's choice and spin directly on each
+ * pass, the bob is added to the chosen board's top last,
+ * areCharactersDrawn is a u8, which the original masks with andi 0xff
+ * before testing it, and a board's turns, which go negative, and the angle
+ * step are s32s, which the original multiplies without masking.
  */
-#ifdef NON_MATCHING
 void DrawModeSelect(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   u16 perspNorm;
@@ -4834,7 +4785,7 @@ void DrawModeSelect(Gfx** displayListHead) {
   f32 boardX[WHEEL_SLOT_LIMIT];
   f32 boardY[WHEEL_SLOT_LIMIT];
   f32 boardScale[WHEEL_SLOT_LIMIT];
-  /* Pads the frame to match; without it 688 words differ, against 86 */
+  /* Pads the frame to match; without it 604 words differ */
   s32 unusedSlots[WHEEL_SLOT_LIMIT] UNUSED;
   s32 drawOrder[WHEEL_SLOT_LIMIT];
   s32 position[2];
@@ -4862,9 +4813,8 @@ void DrawModeSelect(Gfx** displayListHead) {
   /*
    * Counts the sort's passes and the icon, banner strip and player loops, and
    * holds the chosen mode and then the won count's shift, as the original
-   * keeps all of them in $s1: a local for the shift gives 156 words differing
-   * (2 in shape), and reading the chosen mode where it's used 82 (26), against
-   * the draft's 50 (2)
+   * keeps all of them in $s1: a local for the shift gives 122 words differing
+   * (none in shape), and reading the chosen mode where it's used 32 (24)
    */
   s32 i;
   s32 courseIndex;
@@ -5025,7 +4975,7 @@ void DrawModeSelect(Gfx** displayListHead) {
             QuarterPixels(wheelShiftX + (s32)(boardX[slot] - halfSize)),
             QuarterPixels(
                 (s32)(boardY[slot] - halfSize + (i * halfSize) + bob)),
-            QuarterPixels((s32)(boardX[slot] + halfSize)),
+            QuarterPixels(wheelShiftX + (s32)(boardX[slot] + halfSize)),
             QuarterPixels((s32)(boardY[slot] + (i * halfSize) + bob)),
             G_TX_RENDERTILE, 0, 0, step, step);
         gDPPipeSync(gfx++);
@@ -5256,9 +5206,6 @@ void DrawModeSelect(Gfx** displayListHead) {
 
   *displayListHead = gfx;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", DrawModeSelect);
-#endif
 
 /*
  * Draws the chosen mode's icon at its own size in a fixed place, and steps its
