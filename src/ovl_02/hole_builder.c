@@ -1194,6 +1194,16 @@ s32 PaintMainCourse(
  * doesn't bring the zeroing back; the cart-way arms' comment gives the
  * counts for their other forms. The register oracle, forcing one pseudo's
  * register, leaves 8 words of the 12 at best, so the code differs too.
+ *
+ * A local set to 0 before the switch and used as a component of two arms'
+ * colors does bring it back, with z in $t1: as deep rough's blue and
+ * no-drop ground's red or green, only the cart-way arms' 3 words differ (3
+ * in shape). With one use the zero is folded away and the 12 stay, and as
+ * deep rough's blue and the dark green checks' blue, which a permuter run
+ * found, the checks' ternary branches the other way, for 9 (5). No one
+ * quantity is both of those components, so the local stands for nothing,
+ * but the original keeps some value known to be 0 from the start that
+ * reaches at least two arms.
  */
 #ifdef NON_MATCHING
 s32 PaintPaleRoughCourse(
