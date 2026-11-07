@@ -4824,38 +4824,20 @@ void LoadOpeningLogo(void) {
  * into place. Meanwhile the screen behind it fades to gray and then white.
  * The logo is only drawn when isDrawn is 1, but moves on every call.
  *
- * Doesn't match: in the letter loops GCC works out the texel offset before
- * stepping the display list pointer, where the original steps it first,
- * and in the falling letters' loop it derives f_LogoLetters' address from
- * another table's instead of loading it. The fade colors are set red
- * first, as the original stores them (blue first gave 166 words, 30 in
- * shape, against 146 and 30). The L letter's bounce goes through a pointer
- * to it: indexing f_LogoLetters gave 688 words (80 in shape), or 123 (19)
- * with its speed's negation in its own block, and the pointer declared at
- * the function's top 109 (21), against the draft's 104 (14) at the time.
- * While the logo shrinks, the L letter's position and scale are stepped
- * before the club's, as a focused permuter run suggested; stepping the
- * club's position between them, as the draft did, gave 104 words (14 in
- * shape), with its y step first 90 (6), and the club's position after its
- * scale 128 (22). The counts before here were measured while the club's
- * strips had a clubStripIndex of their own, which gave 80 words differing,
- * 6 in shape; stepping them with j, as the letters' halves are, gives 38,
- * and with i 138 (8 in shape). The register oracle's closest result is
- * these 38 words with no pseudo forced, so the rest differs in the code.
- * 38 words differ, 6 in shape.
+ * The fade colors are set red first, as the original stores them. Each pipe
+ * sync and the RDP state command after it go through AppendSyncedRdpState,
+ * which declares the command's pointer first, as DrawHoleTriangles does;
+ * only the color dither's pair changes the code alone. While the logo
+ * shrinks, the L letter's position and scale are stepped before the club's,
+ * as a focused permuter run suggested, and the club's strips are counted
+ * with j, as the letters' halves are.
  *
- * A focused permuter run's best, 652 points from 742, copies the L letter's
- * speed into a new local before negating it. Multiplying the speed by -1.0f
- * or by -1, or subtracting it from 0.0f, gives the draft's 38 words (6 in
- * shape).
- *
- * The counts above were measured before the change below. Each pipe sync and
- * the RDP state command after it now goes through AppendSyncedRdpState,
- * which declares the command's pointer first, as DrawHoleTriangles does. Of
- * the fifteen pairs, only the color dither's changes anything alone, and it
- * or all fifteen take the draft from 38 words differing to 30, 6 in shape.
+ * The L letter's bounce indexes the tables with i, which is LOGO_LETTER_L
+ * there, as the other letters' bounce does. Indexed with LOGO_LETTER_L,
+ * cse kept f_LogoLetterSquashFrames' entry's address in a register and
+ * derived f_LogoLetterSpeeds' from it, where the original does the reverse:
+ * 30 words differed, 6 in shape, and 5 with only the speeds indexed by i.
  */
-#ifdef NON_MATCHING
 void DrawOpeningLogo(Gfx** displayListHead, Boolean isDrawn) {
   Gfx* gfx = *displayListHead;
   s32 texelsOffset;
@@ -5215,23 +5197,19 @@ void DrawOpeningLogo(Gfx** displayListHead, Boolean isDrawn) {
             f_LogoLetterSquashFrames[i] = LOGO_LETTER_SQUASH_FRAMES;
           }
         } else {
-          LogoLetter* letterL = &f_LogoLetters[LOGO_LETTER_L];
-
-          if (letterL->y + (s32)f_LogoLetterSpeeds[LOGO_LETTER_L] >=
+          if (f_LogoLetters[i].y + (s32)f_LogoLetterSpeeds[i] >=
               LOGO_LETTER_L_GROUND_Y) {
-            f_LogoLetterSpeeds[LOGO_LETTER_L] *= LOGO_LETTER_BOUNCINESS;
-            letterL->y = LOGO_LETTER_L_GROUND_Y - 1;
-            if (f_LogoLetterSpeeds[LOGO_LETTER_L] <=
-                LOGO_LETTER_MIN_BOUNCE_SPEED) {
-              f_LogoLetterSpeeds[LOGO_LETTER_L] = 0.0f;
-              f_LogoLetterStates[LOGO_LETTER_L] = LOGO_LETTER_LANDED;
+            f_LogoLetterSpeeds[i] *= LOGO_LETTER_BOUNCINESS;
+            f_LogoLetters[i].y = LOGO_LETTER_L_GROUND_Y - 1;
+            if (f_LogoLetterSpeeds[i] <= LOGO_LETTER_MIN_BOUNCE_SPEED) {
+              f_LogoLetterSpeeds[i] = 0.0f;
+              f_LogoLetterStates[i] = LOGO_LETTER_LANDED;
               continue;
             }
 
-            f_LogoLetterSpeeds[LOGO_LETTER_L] =
-                -f_LogoLetterSpeeds[LOGO_LETTER_L];
-            f_LogoLetterStates[LOGO_LETTER_L] = LOGO_LETTER_SQUASHING;
-            f_LogoLetterSquashFrames[LOGO_LETTER_L] = LOGO_LETTER_SQUASH_FRAMES;
+            f_LogoLetterSpeeds[i] = -f_LogoLetterSpeeds[i];
+            f_LogoLetterStates[i] = LOGO_LETTER_SQUASHING;
+            f_LogoLetterSquashFrames[i] = LOGO_LETTER_SQUASH_FRAMES;
           }
         }
       }
@@ -5383,9 +5361,6 @@ void DrawOpeningLogo(Gfx** displayListHead, Boolean isDrawn) {
     }
   }
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_05/opening", DrawOpeningLogo);
-#endif
 
 /* The sparks fan out from a point and slow down over SPARK_FRAME_COUNT
  * frames */
