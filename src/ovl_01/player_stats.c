@@ -1792,6 +1792,13 @@ void DrawBrickWallRows(Gfx** displayListHead, u8 slide) {
  * The register oracle's closest result, forcing 2 pseudos, swaps $v0 and
  * $v1 in the mirrored start's shifts and leaves 15 words, so the code
  * differs too.
+ *
+ * Before those shifts the original computes left * 4, QuarterPixels(left),
+ * into $v1 and never reads it, as the next insn sets $v1 again; a draft
+ * that matches has to leave that dead shift behind as well. Using the
+ * quarter-pixel left twice, as the right edge's QuarterPixels(left) plus
+ * the size's in either order, gives 42 words (10 in shape), and keeping
+ * left in quarter pixels 35 (7).
  */
 #ifdef NON_MATCHING
 void DrawPageArrows(Gfx** displayListHead) {
