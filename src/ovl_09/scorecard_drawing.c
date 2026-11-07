@@ -3084,7 +3084,13 @@ INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard_drawing", DrawLeaderboardPage);
  * The par row's holes are counted in i too, as the routine's other
  * sequential loops are: with a counter of their own, 710 words differed
  * (156 in shape) and the register oracle's closest was 566, forcing 48
- * pseudos, against 706 and 560, forcing 47. 706 words differ, 156 in shape.
+ * pseudos, against 706 and 560, forcing 47.
+ *
+ * backPar is declared before rowSpacing, as a sweep moving each statement
+ * found: GCC numbers the pseudos in declaration order, and that takes the
+ * draft from 706 words to 698, 156 in shape either way, and the register
+ * oracle's closest from 560 words to 552, forcing 47 pseudos either way.
+ * 698 words differ, 156 in shape.
  */
 #ifdef NON_MATCHING
 void DrawScoresPage(Gfx **displayListHead) {
@@ -3099,8 +3105,8 @@ void DrawScoresPage(Gfx **displayListHead) {
     s32 pulseGreen;
     s32 pulseBlue;
     s32 cellAlpha;
-    s32 rowSpacing;
     s32 backPar = 0;
+    s32 rowSpacing;
     s32 standing;
     s32 colorIndex;
     s32 overPar;
