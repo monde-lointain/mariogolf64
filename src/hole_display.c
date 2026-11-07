@@ -4657,31 +4657,23 @@ INCLUDE_ASM("asm/nonmatchings/hole_display", CaptureHudAnimationFrame);
  * strip syncs before its rectangle and after it, as the original's twelve
  * commands a strip show.
  *
- * Doesn't match: the strip loop schedules its display-list stores in another
- * order, and the column and word index take other registers. Setting left once
- * per column, with the rectangle's right in an s16 set at each strip's start,
- * gives 17 words differing, 3 in shape, but masks the right edge with 0xFC0
- * where the original masks 0xFFF; as an s32, u16 or u32 it spills the slice
- * count and gives 94-96, and left per column alone 132. 61 words differ, 7 in
- * shape; without the sync before the rectangle, 44 and 16. The register oracle,
- * forcing 10 pseudos' registers, leaves 11 words of the 61 at best, so the code
- * differs too.
+ * The column's left edge is worked out once per slice, and the strip's right
+ * edge, in quarter pixels, at each strip's start, as the original computes
+ * both edges' rectangle words before the strip loop; with the right edge
+ * worked out in the rectangle 132 words differ, with it in pixels 90, and
+ * with the left edge set at each strip 97. Each strip's top is worked out
+ * from the strip index, as the original copies the slice's top into a
+ * register only after the column's edges; counting the slice rows and
+ * multiplying them by SLICE_HEIGHT gives 96 words.
  *
- * A focused permuter run's best, 15 words (3 in shape), works out the column's
- * left edge once per slice for the right edge alone, beside the left set at
- * each strip, two names for one value; the left once per slice for both edges
- * gives 132 words, and a right edge set once per slice 94. Counting the slice
- * rows and multiplying them by SLICE_HEIGHT gives 62 words (6), and the
- * oracle's closest 12, but the original adds 0x78 to the slice's top when the
- * column wraps, as sliceY does here.
- *
- * Each strip's top is worked out from the strip index, as the original
- * copies the slice's top into a register only after the column's edges
- * are hoisted, where a y stepped from it was copied before them. That
- * leaves the 61 words, 7 in shape, but takes the register oracle's closest
- * from 15 words to 11, forcing 10 pseudos either way. Clearing the column
- * and word index just before the slices' loop gives 85-89 words (11 in
- * shape), and the word index from the slice and strip 161 (31).
+ * Doesn't match: the original clears the slice's top after the slices'
+ * loop tests the slice count, among the strip commands' hoisted constants,
+ * and the slice index in that test's delay slot, where ours clears the
+ * index before the test, copying it into the sound test's delay slot too,
+ * and the top in the delay slot. All 240 placements and orders of the four
+ * counters' clears, before or after the sound or in the loop's
+ * initializer, give 5 words or more, and the register oracle forces
+ * nothing. 5 words differ, 3 in shape.
  */
 #ifdef NON_MATCHING
 void DrawSliceAnimation(void) {
@@ -4714,9 +4706,11 @@ void DrawSliceAnimation(void) {
     }
 
     for (slice = 0, sliceY = 0; slice != sliceCount; slice++) {
+        s32 left = column * SLICE_WIDTH;
+
         for (strip = 0; strip != SLICE_STRIP_COUNT; strip++) {
-            s32 left = column * SLICE_WIDTH;
             s32 y = sliceY + strip * SLICE_STRIP_HEIGHT;
+            s32 quarterRight = QuarterPixels(left + SLICE_WIDTH);
 
             gDPLoadTextureBlock(
                 g_DisplayListHead++,
@@ -4738,7 +4732,7 @@ void DrawSliceAnimation(void) {
                 g_DisplayListHead++,
                 QuarterPixels(left),
                 QuarterPixels(y),
-                QuarterPixels(left + SLICE_WIDTH),
+                quarterRight,
                 QuarterPixels(y + SLICE_STRIP_HEIGHT),
                 G_TX_RENDERTILE,
                 0,
