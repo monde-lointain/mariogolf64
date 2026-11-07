@@ -65,7 +65,13 @@ static f32 f_IntroCameraHeight = 0.0f;
  * help. The heading is built in two steps, as one expression gives 37 words and
  * hoisting the shared first step above the test 101; an f32 heading gives
  * 39-47. The original also builds the heading and its double precision steps in
- * $f20, where global-alloc gives the heading $f4 although it prefers $f20; the
+ * $f20, where global-alloc gives the heading $f4 although it prefers $f20, the
+ * narrowed heading's register from local-alloc. find_reg's first pass takes
+ * only registers already used, and nothing has used $f21, the pair's other
+ * half, so it settles on $f4 and the preference fails the same test. In
+ * the original, something must have used $f21 before the heading was
+ * allocated. Narrowing the heading into an f32 local after the test, or
+ * building each arm's product in it, gives 33 or 47 words (1 in shape); the
  * register oracle, forcing 8 pseudos into the original's registers, leaves 7
  * words: the Y store and the first multiply's registers. 33 words differ, 1 in
  * shape.
