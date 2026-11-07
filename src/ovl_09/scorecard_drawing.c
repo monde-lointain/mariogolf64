@@ -3096,6 +3096,17 @@ INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard_drawing", DrawLeaderboardPage);
  * draft from 706 words to 698, 156 in shape either way, and the register
  * oracle's closest from 560 words to 552, forcing 47 pseudos either way.
  * 698 words differ, 156 in shape.
+ *
+ * frontTop and backTop are constants that the build doesn't keep in a
+ * register: reload puts 57 or 137 in their place, and the original adds
+ * them as immediates where they are the sum's second operand and loads
+ * them into $t2 or $t3 where they are its first. The two-player faces'
+ * first row adds them to g_Scorecard.y, as the original's lw and addiu
+ * show; that takes the draft from 698 words differing to 688, 156 in
+ * shape to 150, and the register oracle's closest from 552 to 542,
+ * forcing 47 pseudos either way. Swapping the front or the back face
+ * alone gives 963 or 967 words (153 in shape). 688 words differ, 150 in
+ * shape.
  */
 #ifdef NON_MATCHING
 void DrawScoresPage(Gfx **displayListHead) {
@@ -3857,7 +3868,7 @@ void DrawScoresPage(Gfx **displayListHead) {
                 DrawSmallFace(
                     &gfx,
                     g_Scorecard.x + SCORES_FACE_LEFT,
-                    PLAYER_ROW_TOP - SCORES_FACE_RISE + (frontTop + g_Scorecard.y),
+                    PLAYER_ROW_TOP - SCORES_FACE_RISE + (g_Scorecard.y + frontTop),
                     0,
                     TRUE
                 );
@@ -3875,7 +3886,7 @@ void DrawScoresPage(Gfx **displayListHead) {
                 DrawSmallFace(
                     &gfx,
                     g_Scorecard.x + SCORES_FACE_LEFT,
-                    PLAYER_ROW_TOP - SCORES_FACE_RISE + (backTop + g_Scorecard.y),
+                    PLAYER_ROW_TOP - SCORES_FACE_RISE + (g_Scorecard.y + backTop),
                     0,
                     TRUE
                 );
