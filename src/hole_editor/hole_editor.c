@@ -4048,7 +4048,16 @@ void WriteHexDumpFile(u32 *words, s32 byteCount, char *fileName) {
  * tile, so that arm steps tileIndex itself and continues. That takes the draft
  * from 1791 words differing (233 in shape) to 1751 (187), and the register
  * oracle's closest result from 1359 words to 1345, forcing 26 pseudos either
- * way. 1751 words differ, 187 in shape.
+ * way. The original stores each snapped edge's segment once, its address
+ * chosen as DrawGround's ?: chooses it, but that form gives 2017 words here
+ * (189 in shape), and the oracle's closest 1924.
+ *
+ * The original lays out the hidden groups' arm last, so the coarse groups
+ * are tested for, with >=, before the hidden ones fall to the last else, as
+ * in DrawGround. That takes the draft from 1751 words differing (187 in
+ * shape) to 1665 (165), and the oracle's closest from 1345 words to 1189,
+ * forcing 26 pseudos either way; testing for them with == gives 1667 (167).
+ * 1665 words differ, 165 in shape.
  */
 #ifdef NON_MATCHING
 void DrawHoleEditorGround(CameraMatrices *matrices UNUSED, s32 terrainStyle) {
@@ -5316,11 +5325,7 @@ void DrawHoleEditorGround(CameraMatrices *matrices UNUSED, s32 terrainStyle) {
                 bottomSlot -= GROUND_TILE_GROUP_SIZE;
                 topSlot -= GROUND_TILE_GROUP_SIZE;
             }
-            else if (groupDetail < GROUND_DETAIL_COARSE) {
-                slopeIndex += GROUND_TILE_GROUP_SIZE * TILE_TRIANGLE_COUNT;
-                tileIndex += GROUND_TILE_GROUP_SIZE;
-            }
-            else {
+            else if (groupDetail >= GROUND_DETAIL_COARSE) {
                 spareSlot = middleSlot;
                 middleSlot = topSlot;
                 topSlot = bottomSlot;
@@ -5374,6 +5379,10 @@ void DrawHoleEditorGround(CameraMatrices *matrices UNUSED, s32 terrainStyle) {
 
                 topSlot -= GROUND_TILE_GROUP_SIZE;
                 bottomSlot -= GROUND_TILE_GROUP_SIZE;
+            }
+            else {
+                slopeIndex += GROUND_TILE_GROUP_SIZE * TILE_TRIANGLE_COUNT;
+                tileIndex += GROUND_TILE_GROUP_SIZE;
             }
 
             previousDetail = groupDetail;
