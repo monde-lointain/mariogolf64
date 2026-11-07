@@ -4816,8 +4816,15 @@ void DrawSpinningStars(Gfx** displayListHead, s32 left, s32 top, u8 starCount,
  * pseudos, to 2, forcing the mode count's and the slot's registers. Counters
  * of their own for the banner strips' and players' loops give 138 to 230
  * words, though the oracle's closest is then also 2, forcing 26 or 27. The 2
- * words left are the strips' missing add of zero. 50 words differ, 2 in
- * shape.
+ * words left are the strips' missing add of zero.
+ *
+ * The slot outranks the mode count by a single point (3 x 10 references over
+ * 181 instructions against 4 x 25 over 603), so a mode count live one
+ * instruction longer would swap their registers. Setting it before any of
+ * the commands ahead of the boards' loop gives 118 to 182 words, though,
+ * except before the last, the texture perspective's, which gives 14 words
+ * but 10 in shape, as the original loads the count after that command, and
+ * an oracle closest of 12 forcing 1. 50 words differ, 2 in shape.
  */
 #ifdef NON_MATCHING
 void DrawModeSelect(Gfx** displayListHead) {
