@@ -1962,35 +1962,11 @@ void DrawSky(Gfx** displayListHead, f32 eyeY UNUSED, s32 unusedSetting UNUSED,
  * Draws the sky and, below it, the course's backdrop in strips that follow the
  * camera's yaw and pitch
  *
- * Doesn't match: the original loads the view's fields for centerShift among
- * the first syncs' stores. GCC takes both to be structure accesses through
- * pointers that may alias, so here it keeps them in the source's order;
- * computing centerShift before the syncs comes closest, where after them
- * gave 87 differing words. The rest are register choices that forcing
- * pseudos didn't settle. The permuter's best, 28 words when the draft had
- * 56, clears isNibbleImage only in the nibble strips' branch, so the first
- * strip reads it unset; it is not used. The second strip loop computes the
- * word offset as the first does; keeping a byte offset in its own local gave
- * 56. 18 words differ, none in shape.
- *
- * The 18 words are centerShift's floating-point registers, $f0 and $f2
- * swapped. local-alloc ties the zoom, its product with FULL_VIEW_HEIGHT and
- * the two values after it into one quantity: 8 refs over a life of 46,
- * priority 5217, just above the 5000 of the converted viewport height (2
- * refs, life 4), so the zoom's quantity takes $f0 first. sched1 places the
- * 0.5f constant's load between that conversion and the subtraction; with the
- * conversion's life at 2, or the quantity's above 48, qty_compare would rank
- * the conversion first. Forcing the quantity into $f2 and FULL_VIEW_HEIGHT
- * and the conversion into $f0 brings the register oracle to 14 words: the
- * truncation's scratch register, which local-alloc chose before the forcing,
- * and constant loads that the forced compile places elsewhere. 0.5f written
- * first, a division by 2 or 2.0f, an explicit (f32) on the viewport height,
- * the operands of either product swapped, or a shift for the doubling still
- * give 18 words; adding the negated height to the product gives 14, 4 in
- * shape. Setting isNibbleImage before the syncs, before DrawSky or right
- * after gfx, or initializing gfx in its declaration, gives 18.
+ * Compute the center shift before the display-list writes, to match their
+ * scheduling. Initialize the scaled height, center fraction and viewport
+ * height in that order. Folding the center fraction into the expression,
+ * or making it const, swaps $f0 and $f2 in 18 instructions.
  */
-#ifdef NON_MATCHING
 void DrawBackdrop(Gfx** displayListHead, CameraView* view, s32 cameraIndex) {
   Gfx* gfx;
   Boolean isNibbleImage;
@@ -2009,9 +1985,14 @@ void DrawBackdrop(Gfx** displayListHead, CameraView* view, s32 cameraIndex) {
   f32 zoom;
 
   gfx = *displayListHead;
-  centerShift = ((view->zoom * FULL_VIEW_HEIGHT) -
-                    (view->viewportCenterY - (view->scissorY * 2))) *
-      0.5f;
+  {
+    f32 scaledHeight = view->zoom * FULL_VIEW_HEIGHT;
+    /* Center the backdrop in the height difference between the two views. */
+    f32 centerFraction = 0.5f;
+    f32 viewportHeight = view->viewportCenterY - (view->scissorY * 2);
+
+    centerShift = (scaledHeight - viewportHeight) * centerFraction;
+  }
   gDPPipeSync(gfx++);
   gDPPipeSync(gfx++);
   gDPSetColorDither(gfx++, G_CD_BAYER);
@@ -2241,9 +2222,6 @@ void DrawBackdrop(Gfx** displayListHead, CameraView* view, s32 cameraIndex) {
   gDPPipeSync(gfx++);
   *displayListHead = gfx;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/hole_display", DrawBackdrop);
-#endif
 
 /* Starts one of the HUD's animations, which lasts a given number of frames, or
  * stops it with HUD_ANIMATION_NONE */
