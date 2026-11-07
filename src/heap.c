@@ -231,7 +231,9 @@ void FreeFromHeap(s32 heapIndex, void* pointerToBlock) {
  * for variables that interrupts, other threads or callbacks change, and
  * nothing shows the sentinel to be one. The register oracle's closest
  * result is these 6 words with no register forced, so allocation isn't
- * the cause. 6 words differ.
+ * the cause. 6 words differ. Mixing a MemoryBlock pointer to the sentinel
+ * with direct accesses, as ResetHeap does, leaves 6 in all 32 combinations
+ * of the prev and next stores' sides.
  *
  * Defining AddMemoryRegion at each of the five places between the sentinel's
  * stores, in an inner block as the compiler takes no definition after a
