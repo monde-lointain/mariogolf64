@@ -125,7 +125,7 @@ segments:
       - [0x52FF0, asm]
       - [0x53D10, asm]
       - [0x5B620, asm]
-      - [0x68500, asm]
+      - [0x68500, c]
       - [0x70E10, asm]
       - [0x74890, asm]
       - [0x748B0, asm]
