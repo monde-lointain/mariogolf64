@@ -651,6 +651,18 @@ void SetPlankMotion(s32 motion) {
  * That build compares with xor against 37 held in $fp, where the original
  * uses xori 0x25, so the local only fills a saved register and isn't the
  * original's form.
+ *
+ * Another permuter output, 20 words (10 in shape), sets the right plank's
+ * texture S in a local inside the loop. A pair of locals for both planks'
+ * S, set after the edges, gives the same, with bottom kept for the edge and
+ * the group in a plankGroup; set before the texture load, 104, and before
+ * the loop 36 (16). But loop.c then hoists 0x1300 into the saved register
+ * where the original keeps the magic number, which it still loads in the
+ * loop, so the locals only fill that register too. The magic number's set
+ * is one insn before its mult, a lifetime of 1, which against the loop's
+ * 106 insns falls short of the threshold. With a plankGroup, s16, u16, u8,
+ * s8 or u32 strip indexes, or an s16 or u32 group, give 72 to 165 words,
+ * against 70 with both s32.
  */
 #ifdef NON_MATCHING
 void DrawPlanks(Gfx **displayListHead) {
