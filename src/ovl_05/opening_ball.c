@@ -525,6 +525,13 @@ typedef s32 (*BillboardHitFinder)(
  * compiles !(speed >= limit) or a return when speed >= limit, where ours
  * has c.lt.s and bc1f. Testing the state first gives 240 words (114 in
  * shape), and speed as an f32 253 (121). 210 words differ, 104 in shape.
+ *
+ * The height-scaled wind multiplies the scale by each wind axis, where the
+ * low wind multiplies each axis by its constant; a search swapping twin
+ * sums' and products' operands found it. That takes the draft from 210
+ * words to 208, 104 in shape either way, and the register oracle's closest
+ * from 125 words forcing 42 pseudos to 121 forcing 36. StepBallSimulation's
+ * copy is unchanged by it. 208 words differ, 104 in shape.
  */
 #ifdef NON_MATCHING
 s32 StepOpeningBallSimulation(BallSimulation *simulation) {
@@ -1951,8 +1958,8 @@ ROLLED:
             else {
                 f32 scale = (height * OPENING_WIND_SCALE_PER_HEIGHT) + LOW_WIND_SCALE;
 
-                windX = simulation->windVelocityX * scale;
-                windZ = simulation->windVelocityZ * scale;
+                windX = scale * simulation->windVelocityX;
+                windZ = scale * simulation->windVelocityZ;
             }
 
             simulation->velocity[AXIS_X] =
