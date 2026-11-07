@@ -3877,55 +3877,29 @@ void GetGroundLightColors(GroundLightColor* light, GroundLightColor* shade) {
  * Texels at heights below 0 are only lit. When GAME_FLAG_FADE_HIGH_GROUND is
  * set, the others also fade toward white with height: up to HEIGHT_FADE_LIMIT,
  * fully when GAME_FLAG_FADE_HIGH_GROUND_FULLY is set, or not at all when
- * GAME_FLAG_NO_HIGH_GROUND_FADE is set. Doesn't match: the original computes
- * the leading height row last and keeps a second, spilled copy of the trailing
- * one, and it reads the fade flags from the stack for each tile, where ours
- * extends isHighGroundFaded once per row and keeps it in another stack slot.
- * Holding the trailing row in trailingHeights beside the leading one, for the
- * inner tiles, gives 154 words differing, 14 in shape, against 109 and 23 for
- * indexing heightRows there; the register oracle then gets to 94 words forcing
- * 9 pseudos, where it got to 107. The permuter's best, 134 words (16 in shape),
- * sets heights inside the texel loop, which resets it for each texel and so
- * changes what is drawn. Pointing heights at each tile's first column, as
- * trailing and leading are, gives 110 words (12 in shape) at the top of the
- * tile loop and 108 (20) beside them, but the oracle then gets no closer than
- * 106 words forcing 10, and 108 forcing none, against 94 forcing 9. Writing the
- * fade's kept weight into its three uses, in place of keptWeight, gives 117
- * words, 23 in shape, but the oracle then gets no closer than 111 words,
- * forcing 10, against 94 forcing 9. Widening the shaded color's alpha to an s32
- * or u32 gives 110 words (18 in shape), and its blue 120 (22), but the original
- * stores all four channels as halfwords, with sh to 0x478-0x47E($sp). Widening
- * isFadeUnlimited or isFadeDisabled to an s32 or u32 gives 145 words (25 in
- * shape), but the original stores the three flags with sb and reloads them with
- * lbu, at 0x487, 0x48F and 0x497($sp). Setting a local to TEXEL_ALPHA_MASK on
- * each texel's pass and masking with it gives 105 words (21 in shape) and the
- * original's 0x500-byte frame, 8 bytes more than here, but only because the
- * local takes a stack slot: the build masks with and from a register where the
- * original has andi with 1 at both uses. The counts before here were measured
- * while the loop filling slopeLights stepped slope, the variable the texel loop
- * clamps; a lightSlope of that loop's own took the draft from 154 words
- * differing to 132, 14 in shape both, in each of the eight declaration places
- * tried, and the register oracle's closest from 94 words, forcing 9 pseudos, to
- * 88, forcing 6. 132 words differ, 14 in shape.
+ * GAME_FLAG_NO_HIGH_GROUND_FADE is set. Doesn't match: the original ors the
+ * faded color's channels before its alpha, where ours has the alpha first,
+ * since combine puts the alpha's halfword subreg before the channels'
+ * register. Writing the or with its parts in other orders or groupings, or
+ * as compound assignments, leaves the word or gives 4 to 30 words.
  *
- * A focused permuter run's best output declares isMapEdge as a short and keeps
- * the texel's alpha by reading *texel again. As an s16, isMapEdge gives 101
- * words (17 in shape), but the register oracle's closest stays 88, forcing 6.
- * Reading *texel for the alpha leaves 132 words.
+ * Neither offset height row has a variable: the original indexes heightRows
+ * for each, at the edge tiles and the inner ones alike, and loop hoists the
+ * indexing, which computes the leading row after column is set and keeps a
+ * second copy of the trailing one. Holding the rows in trailingHeights and
+ * leadingHeights gave 132 words differing, 14 in shape, and dropping each
+ * took it to 18 and then 8, with none in shape. Stepping trailing and leading
+ * after the slope, rather than in it, gives 6, and setting color's alpha
+ * before storing it, rather than in the store, 2.
  *
- * Re-measured on the current draft, writing the fade's kept weight into its
- * three uses in place of keptWeight gives 95 words, 23 in shape, but the
- * oracle's closest result is then those 95 words with nothing forced,
- * against 88 forcing 6, so keptWeight stays.
- *
- * Writing the kept weight into its uses also gives the original's 0x500-byte
- * frame, as setting the mask local did only through the local's own slot. As
- * the oracle still gets closer with keptWeight, it stays. 132 words differ,
- * 14 in shape.
+ * Widening the shaded color's alpha to an s32 or u32 changes its sh to
+ * 0x47E($sp), and widening isFadeUnlimited or isFadeDisabled their sb to
+ * 0x48F and 0x497($sp), all of which the original has. 2 words differ, 0 in
+ * shape.
  */
 #ifdef NON_MATCHING
 void ShadeGroundTiles(void) {
-  /* Pads the frame to match; without it 230 words differ, against 132 */
+  /* Pads the frame to match; without it 184 words differ, against 2 */
   s32 unused[20] UNUSED;
   GroundLightColor light = {24, 22, 16};
   GroundLightColor shade;
@@ -3963,8 +3937,6 @@ void ShadeGroundTiles(void) {
   s32 trailingColumn;
   s32 leadingColumn;
   s16* heights;
-  s16* leadingHeights;
-  s16* trailingHeights;
   s16* trailing;
   s16* leading;
   u16* texel;
@@ -4035,8 +4007,6 @@ void ShadeGroundTiles(void) {
     }
 
     heights = heightRows[row & HEIGHT_RING_ROW_MASK];
-    leadingHeights = heightRows[(row + lightRowOffset) & HEIGHT_RING_ROW_MASK];
-    trailingHeights = heightRows[(row - lightRowOffset) & HEIGHT_RING_ROW_MASK];
     column = 0;
     do {
       texel =
@@ -4048,8 +4018,10 @@ void ShadeGroundTiles(void) {
       isMapEdge =
           column == 0 || column == MAP_COLUMN_COUNT - GROUND_TILE_TEXEL_SPAN;
       if (!isMapEdge) {
-        trailing = &trailingHeights[column - lightColumnOffset];
-        leading = &leadingHeights[column + lightColumnOffset];
+        trailing = &heightRows[(row - lightRowOffset) & HEIGHT_RING_ROW_MASK]
+                              [column - lightColumnOffset];
+        leading = &heightRows[(row + lightRowOffset) & HEIGHT_RING_ROW_MASK]
+                             [column + lightColumnOffset];
       }
 
       for (count = GROUND_TILE_TEXEL_SPAN; count != 0;
@@ -4069,16 +4041,14 @@ void ShadeGroundTiles(void) {
             leadingColumn = MAP_COLUMN_COUNT - 1;
           }
 
-          /*
-           * Indexing heightRows again is there to match: reading
-           * trailingHeights here as well gives 139 words, 35 in shape,
-           * against 132 and 14
-           */
           slope = heightRows[(row - lightRowOffset) & HEIGHT_RING_ROW_MASK]
                             [trailingColumn] -
-              leadingHeights[leadingColumn];
+              heightRows[(row + lightRowOffset) & HEIGHT_RING_ROW_MASK]
+                        [leadingColumn];
         } else {
-          slope = *trailing++ - *leading++;
+          slope = *trailing - *leading;
+          trailing++;
+          leading++;
         }
 
         if (slope < LIGHT_SLOPE_MIN) {
@@ -4121,7 +4091,8 @@ void ShadeGroundTiles(void) {
           }
 
           color |= channel << TEXEL_BLUE_SHIFT;
-          *texel = color | (texelColor & TEXEL_ALPHA_MASK);
+          color |= texelColor & TEXEL_ALPHA_MASK;
+          *texel = color;
         } else {
           red = ((shade.red + (texelColor >> TEXEL_RED_SHIFT)) *
                     slopeLights[((slope - LIGHT_SLOPE_MIN) *
