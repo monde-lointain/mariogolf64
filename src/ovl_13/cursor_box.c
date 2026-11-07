@@ -99,7 +99,11 @@ void LoadCursorBox(void *image) {
  * words, forcing 4 pseudos; clamping the red and green gives 20 (12), and the
  * red and blue 26 (12). Set after the red and clamped, they give 171 words, as
  * the frame grows by 8 bytes. Clamping a constant has no purpose, so the draft
- * keeps the constant stores.
+ * keeps the constant stores. A helper setting a vertex's color and clamping
+ * each channel it is given, as a static inline function or a macro, with the
+ * red as a variable or an argument, gives 178 words (18 in shape) and the
+ * same 8 byte larger frame, as it too clamps the green and blue after the
+ * red is worked out.
  */
 #ifdef NON_MATCHING
 void DrawCursorBox(Gfx **displayListHead, s32 left, s32 top) {
