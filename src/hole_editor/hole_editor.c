@@ -4065,7 +4065,15 @@ void WriteHexDumpFile(u32 *words, s32 byteCount, char *fileName) {
  * gives 1209 words (141 in shape), but it compiles to an sltu that the
  * original doesn't have: the original reloads terrainStyle and branches on it
  * at each test. Set anywhere else, once or per half, row, tile or pass, the
- * flag gives 1773 to 2312 words. 1665 words differ, 165 in shape.
+ * flag gives 1773 to 2312 words.
+ *
+ * A mirrored point under the test texture works out its texture
+ * coordinates before setting the test tile's size, as a permuter run
+ * found. That takes the draft from 1665 words differing (165 in shape) to
+ * 921 (133), and the register oracle's closest result from 1189 words,
+ * forcing 26 pseudos, to these 921 with none forced, so allocation is no
+ * longer the cause. The original's scheduler interleaves the two, so its
+ * order can't be read from the code. 921 words differ, 133 in shape.
  */
 #ifdef NON_MATCHING
 void DrawHoleEditorGround(CameraMatrices *matrices UNUSED, s32 terrainStyle) {
@@ -4936,14 +4944,6 @@ void DrawHoleEditorGround(CameraMatrices *matrices UNUSED, s32 terrainStyle) {
                                                             if (IsGameFlagSet(
                                                                     GAME_FLAG_TEST_GROUND_TEXTURE
                                                                 )) {
-                                                                gDPSetTileSize(
-                                                                    gfx++,
-                                                                    1,
-                                                                    MIRRORED_TEST_FIRST_S,
-                                                                    0,
-                                                                    MIRRORED_TEST_LAST_S,
-                                                                    TEST_TILE_SIZE
-                                                                );
                                                                 st = ((
                                                                           MIRRORED_TEST_S -
                                                                           (point->v.tc
@@ -4953,6 +4953,14 @@ void DrawHoleEditorGround(CameraMatrices *matrices UNUSED, s32 terrainStyle) {
                                                                     ((point->v.tc[TEXTURE_AXIS_T] /
                                                                          2) &
                                                                         0xFFFF);
+                                                                gDPSetTileSize(
+                                                                    gfx++,
+                                                                    1,
+                                                                    MIRRORED_TEST_FIRST_S,
+                                                                    0,
+                                                                    MIRRORED_TEST_LAST_S,
+                                                                    TEST_TILE_SIZE
+                                                                );
                                                             }
                                                             else {
                                                                 s32 mirroredS =
