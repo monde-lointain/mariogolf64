@@ -2,6 +2,8 @@
 """Show where KMC GCC made each instruction that differs from the target.
 
     blame.py [--keep DIR] [ASM_FILE C_FILE] FUNCTION
+    blame.py --dump PASSES [--insn UIDS] [--pseudo PSEUDOS] [--keep DIR]
+             [ASM_FILE C_FILE] FUNCTION
 
 Without ASM_FILE and C_FILE, finds them from FUNCTION as fncompare does.
 
@@ -22,13 +24,21 @@ our insns against the dependences sched2 kept, or failing that lists the
 pairs it orders the other way and their priorities. Words are paired by
 text, so a pair it reports may be a mispairing. --keep leaves the compiler's
 work files, such as the pass dumps unit.sched and unit.sched2, in DIR.
+
+--dump prints FUNCTION's part of the dump of each pass in PASSES, in place
+of the report. PASSES is a comma-separated list of rtl, jump, cse, loop,
+cse2, flow, combine, sched, lreg, greg, sched2, jump2 and dbr. --insn and
+--pseudo, comma-separated numbers, cut each dump down to the insns with
+those UIDs or using those pseudos, and the passes' notes on the pseudos.
 """
 
+import contextlib
 import functools
 import re
 import sys
 import tempfile
 from collections import Counter
+from collections.abc import Generator
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -41,6 +51,8 @@ from fncompare import StrPath
 
 # ASM_FILE, C_FILE and FUNCTION
 EXPECTED_ARGUMENT_COUNT = 3
+# The options, each taking a value
+OPTIONS = ("--keep", "--dump", "--insn", "--pseudo")
 
 # The passes -da dumps, in the order they run
 PASSES = (
@@ -307,8 +319,11 @@ def read_insn_lines(
     }
 
 
-def compile_function(c_path: str, function: str, work: Path) -> Compilation:
-    """Compile FUNCTION of C_PATH in WORK with -dp and -da."""
+def compile_dumps(c_path: str, function: str, work: Path) -> dict[str, str]:
+    """Compile FUNCTION of C_PATH to unit.s in WORK with -dp and -da.
+
+    Returns {pass: FUNCTION's part of that pass's dump}.
+    """
     optflags = fncompare.get_optflags(c_path)
     result = fncompare.run_compiler(c_path, optflags, ["-E"])
     isolated = fncompare.isolate_functions(result.stdout, {function})
@@ -316,6 +331,13 @@ def compile_function(c_path: str, function: str, work: Path) -> Compilation:
         isolated = result.stdout
     _ = (work / "unit.i").write_text(isolated)
     run(work / "unit.i", optflags, ["-S", "-dp", "-da", "-o", "unit.s"], work)
+    return read_dumps(work, function)
+
+
+def compile_function(c_path: str, function: str, work: Path) -> Compilation:
+    """Compile FUNCTION of C_PATH in WORK with -dp and -da."""
+    optflags = fncompare.get_optflags(c_path)
+    dumps = compile_dumps(c_path, function, work)
     lines = (work / "unit.s").read_text().splitlines()
     _ = (work / "marked.s").write_text(mark_lines(lines))
     assemble = ["-c", f"-Wa,-I{fncompare.ROOT}", "-o"]
@@ -326,7 +348,6 @@ def compile_function(c_path: str, function: str, work: Path) -> Compilation:
     if fncompare.read_object_file(work / "marked.o")[function].words != routine.words:
         sys.exit("marking the lines changed the code")
     start, ends = read_line_ends(work / "marked.o", function)
-    dumps = read_dumps(work, function)
     return Compilation(
         lines,
         read_word_lines(lines, routine, start, ends),
@@ -900,25 +921,86 @@ def print_insn_reports(compilation: Compilation, uids: list[int]) -> None:
             print(f"  insn {uid} in lreg {tie}")
 
 
+def select_dump(dump: str, uids: set[int], pseudos: set[int]) -> str:
+    """Return DUMP's insns with UIDS or using PSEUDOS, and its pseudos' notes.
+
+    With neither, returns all of DUMP.
+    """
+    if not uids and not pseudos:
+        return dump
+    notes = [
+        match.group(0)
+        for pseudo in sorted(pseudos)
+        for match in re.finditer(rf"^Register {pseudo} .*$", dump, re.MULTILINE)
+    ]
+    insns = [
+        rtl
+        for uid, rtl in index_insns(dump).items()
+        if uid in uids
+        or any(int(m.group(1)) in pseudos for m in PSEUDO_RE.finditer(rtl))
+    ]
+    return "\n\n".join([*notes, *insns])
+
+
+def print_dumps(
+    c_path: str, function: str, work: Path, options: dict[str, str]
+) -> None:
+    """Print FUNCTION's part of the dumps that OPTIONS name."""
+    passes = options["--dump"].split(",")
+    unknown = [name for name in passes if name not in PASSES]
+    if unknown:
+        sys.exit(f"unknown passes {', '.join(unknown)}; known: {', '.join(PASSES)}")
+    try:
+        uids = {int(n) for n in options.get("--insn", "").split(",") if n}
+        pseudos = {int(n) for n in options.get("--pseudo", "").split(",") if n}
+    except ValueError:
+        sys.exit(__doc__)
+    dumps = compile_dumps(c_path, function, work)
+    for name in passes:
+        print(f";; {name}\n{select_dump(dumps.get(name, ''), uids, pseudos)}\n")
+
+
+@contextlib.contextmanager
+def open_work_dir(keep: Path | None) -> Generator[Path]:
+    """Yield KEEP, made if need be, or a temporary directory."""
+    if keep:
+        keep.mkdir(parents=True, exist_ok=True)
+        yield keep
+    else:
+        with tempfile.TemporaryDirectory() as work:
+            yield Path(work)
+
+
+def read_options(arguments: list[str]) -> tuple[dict[str, str], list[str]]:
+    """Split ARGUMENTS into {option: value} and the rest, or exit with usage."""
+    options: dict[str, str] = {}
+    while arguments[:1] and arguments[0] in OPTIONS:
+        value = arguments[1:2]
+        if not value:
+            sys.exit(__doc__)
+        options[arguments[0]] = value[0]
+        arguments = arguments[2:]
+    if ("--insn" in options or "--pseudo" in options) and "--dump" not in options:
+        sys.exit(__doc__)
+    return options, arguments
+
+
 def main() -> None:
     """Blame the differing instructions of the function named."""
-    arguments = sys.argv[1:]
-    keep = None
-    if arguments[:1] == ["--keep"] and len(arguments) > 1:
-        keep = Path(arguments[1])
-        arguments = arguments[2:]
+    options, arguments = read_options(sys.argv[1:])
+    keep = Path(options["--keep"]) if "--keep" in options else None
     arguments = fncompare.expand_function_name(arguments)
     if len(arguments) != EXPECTED_ARGUMENT_COUNT:
         sys.exit(__doc__)
     asm_path, c_path, function = arguments
+    if "--dump" in options:
+        with open_work_dir(keep) as work:
+            print_dumps(c_path, function, work, options)
+        return
     original = fncompare.read_original(asm_path, c_path, function)
     target = original.routine
-    if keep:
-        keep.mkdir(parents=True, exist_ok=True)
-        compilation = compile_function(c_path, function, keep)
-    else:
-        with tempfile.TemporaryDirectory() as work:
-            compilation = compile_function(c_path, function, Path(work))
+    with open_work_dir(keep) as work:
+        compilation = compile_function(c_path, function, work)
     compiled = compilation.routine
     score = fncompare.describe_original(original, compilation.functions, function)
     print(f"{function} {score}")
