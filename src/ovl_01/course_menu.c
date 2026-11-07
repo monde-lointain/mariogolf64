@@ -1092,18 +1092,24 @@ void DrawStatsBadgeCount(Gfx **displayListHead) {
  * 16 bytes smaller. Reload gives spilled pseudos their slots after the
  * locals, at higher offsets, so no local can stand for the original's unused
  * bytes: those would follow from reload giving slots to pseudos whose stack
- * references were later removed.
+ * references were later removed. *
+ * The two flags are s16s, as the arrow count they start is, which takes the
+ * draft from 94 words differing (20 in shape) to 90 (18), and the register
+ * oracle's closest result from 77 words, forcing 15 pseudos, to 65, forcing
+ * 14. Both as u8s or s8s give 93 (21); the flag for the rows below alone as a
+ * byte gives 90 (18) too, and the flag for the rows above alone 95 (19). 90
+ * words differ, 18 in shape.
  */
 #ifdef NON_MATCHING
 void DrawStatsScrollArrows(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
-    Boolean hasRowsAbove = f_FirstShownStat > 0;
+    s16 hasRowsAbove = f_FirstShownStat > 0;
     s16 arrowCount = hasRowsAbove;
-    Boolean hasRowsBelow = f_FirstShownStat + STATS_SHOWN_ROW_COUNT < STATS_COUNT;
+    s16 hasRowsBelow = f_FirstShownStat + STATS_SHOWN_ROW_COUNT < STATS_COUNT;
     s16 firstArrow;
     s16 arrowIndex;
     s32 top;
-    /* Pads the frame to match; without it 122 words differ, against 94 */
+    /* Pads the frame to match; without it 118 words differ, against 90 */
     s32 unused[4] UNUSED;
 
     if (hasRowsBelow) {
