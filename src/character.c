@@ -1997,23 +1997,17 @@ void SetCharacterLights(void) {
 /*
  * Draws the character in the slot with its lights, alpha and culling
  *
- * Doesn't match: for the reaction light's fallback, the original addresses the
- * lights' first light from the table plus 8, adding the index's offset to that,
- * where ours adds the offset to the table first. Without IN_OWN_BLOCK it's 99
- * words, 15 in shape. Choosing the table first and making one AddReactionLight
- * call gives 117 words, 21 in shape (89 and 13 with the block), and keeping a
- * pointer to the chosen lights 174 to 186. The permuter's best outputs (660 and
- * 720, from 980) read f_DryLights in place of lights, which saves the wrong
- * lights when the wet ones are chosen. The register oracle, forcing 4 pseudos'
- * registers, leaves 61 words at best, so the code differs too. 71 words differ,
- * 7 in shape.
+ * Each weather's arm calls AddReactionLight and falls back to its own lights,
+ * and jump2 merges the two arms' identical tails, as the original does. Naming
+ * each lights table in place lets fold add the first light's offset to the
+ * table's address before the index's, so cse shares table + 8 between
+ * gSPSetLights2 and SaveLights. Choosing the table into a pointer and falling
+ * back once after the test adds the offset last: 99 words differed, 15 in
+ * shape, or 71 (7) with the fallback's gSPSetLights2 in a block of its own.
  */
-#ifdef NON_MATCHING
 void DrawCharacter(u32 slotIndex) {
   CharacterSlot* slot = GetUsedCharacterSlot(slotIndex);
   Gfx* gfx = g_DisplayListHead;
-  Lights2* lights;
-  Boolean isReactionLit;
 
   f_DrawParity ^= 1;
   if (f_IsMatrixSetupPending) {
@@ -2045,23 +2039,16 @@ void DrawCharacter(u32 slotIndex) {
 
           break;
         case CHARACTER_LIGHTING_SCENE_THIRD:
-          /* With a call in each arm, whose tails jump2 merges, each arm
-           * loads the index, as the original does */
           if (g_HoleSetup.conditions.isRaining) {
-            isReactionLit =
-                AddReactionLight(&gfx, &f_RainLights[g_DrawBufferIndex]);
-            lights = f_RainLights;
+            if (!AddReactionLight(&gfx, &f_RainLights[g_DrawBufferIndex])) {
+              gSPSetLights2(gfx++, f_RainLights[g_DrawBufferIndex]);
+              SaveLights(f_RainLights[g_DrawBufferIndex]);
+            }
           } else {
-            isReactionLit =
-                AddReactionLight(&gfx, &f_DryLights[g_DrawBufferIndex]);
-            lights = f_DryLights;
-          }
-
-          if (!isReactionLit) {
-            /* In its own block, to match; without it 99 words differ, 15
-             * in shape, against 71 (7) */
-            IN_OWN_BLOCK(gSPSetLights2(gfx++, lights[g_DrawBufferIndex]));
-            SaveLights(lights[g_DrawBufferIndex]);
+            if (!AddReactionLight(&gfx, &f_DryLights[g_DrawBufferIndex])) {
+              gSPSetLights2(gfx++, f_DryLights[g_DrawBufferIndex]);
+              SaveLights(f_DryLights[g_DrawBufferIndex]);
+            }
           }
 
           break;
@@ -2129,9 +2116,6 @@ void DrawCharacter(u32 slotIndex) {
 
   g_DisplayListHead = gfx;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/character", DrawCharacter);
-#endif
 
 /* Places the character in the slot with PlaceGolferAtBall, turned to the
  * current shot's direction */
