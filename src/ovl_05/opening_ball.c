@@ -519,8 +519,12 @@ typedef s32 (*BillboardHitFinder)(
  * scaling it, where the draft read it among the relative velocity's axes;
  * a sweep moving each assignment found it. That takes the draft from 217
  * words (107 in shape) to 210 (104), and the register oracle's closest
- * from 132 words forcing 43 pseudos to 125 forcing 42. 210 words differ,
- * 104 in shape.
+ * from 132 words forcing 43 pseudos to 125 forcing 42.
+ *
+ * The original tests the lip-out speed with c.le.s and bc1t, as KMC GCC
+ * compiles !(speed >= limit) or a return when speed >= limit, where ours
+ * has c.lt.s and bc1f. Testing the state first gives 240 words (114 in
+ * shape), and speed as an f32 253 (121). 210 words differ, 104 in shape.
  */
 #ifdef NON_MATCHING
 s32 StepOpeningBallSimulation(BallSimulation *simulation) {
