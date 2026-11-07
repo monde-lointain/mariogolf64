@@ -15,41 +15,13 @@
 static s32 f_PathPointIndex = 0;
 static s32 f_PathStepIndex = 0;
 /* Read by no routine */
+/* clang-format off */
 static f32 f_UnusedFloatsAfterPathStep[33] UNUSED = {
-    10.0f,
-    20.0f,
-    30.0f,
-    50.0f,
-    60.0f,
-    70.0f,
-    90.0f,
-    100.0f,
-    120.0f,
-    130.0f,
-    150.0f,
-    30.0f,
-    50.0f,
-    60.0f,
-    80.0f,
-    90.0f,
-    120.0f,
-    150.0f,
-    190.0f,
-    100.0f,
-    50.0f,
-    30.0f,
-    3.0f,
-    5.0f,
-    6.0f,
-    8.0f,
-    9.0f,
-    12.0f,
-    15.0f,
-    19.0f,
-    10.0f,
-    5.0f,
-    3.0f,
+     10.0f,  20.0f,  30.0f,  50.0f,  60.0f,  70.0f,  90.0f, 100.0f, 120.0f, 130.0f, 150.0f,
+     30.0f,  50.0f,  60.0f,  80.0f,  90.0f, 120.0f, 150.0f, 190.0f, 100.0f,  50.0f,  30.0f,
+      3.0f,   5.0f,   6.0f,   8.0f,   9.0f,  12.0f,  15.0f,  19.0f,  10.0f,   5.0f,   3.0f,
 };
+/* clang-format on */
 static f32 f_PathPosition[AXIS_COUNT];
 
 /* The line the target runs along */
