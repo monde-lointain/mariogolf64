@@ -63,4 +63,6 @@ void alSynDelete(ALSynth *s) {
 void __freeParam(struct ALParam_s *param) {
 }
 
-INCLUDE_ASM("asm/nonmatchings/2BFF0", _freePVoice);
+/* Empty stub: PVoice (struct PVoice_s) lives in libultra's internal synthInternals.h. */
+void _freePVoice(ALSynth *drvr, struct PVoice_s *pvoice) {
+}
