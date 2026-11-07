@@ -415,13 +415,10 @@ enum TriangleEdit {
 #define TILE_TRIANGLE_COUNT (FINE_TILE_CELL_SPAN * FINE_TILE_CELL_SPAN * 2)
 
 /*
- * The corners of a tile within its place in the tile size coordinates. A tile
- * with borders starts half a texel in; one without starts a texel in.
+ * A borderless tile's texture starts a texel into its place in the tile size
+ * coordinates, and ends as far past the start of the next tile's place.
  */
-#define BORDERED_TILE_LAST_S (TILE_COORDINATE_SPAN + BORDERED_TILE_S_PAST_NEXT)
-#define BORDERED_TILE_LAST_T (TILE_COORDINATE_SPAN + BORDERED_TILE_T_PAST_NEXT)
 #define BORDERLESS_TILE_FIRST_COORDINATE 4
-#define BORDERLESS_TILE_LAST_COORDINATE 0x84
 /* GAME_FLAG_TEST_GROUND_TEXTURE's fixed tile, 34 texels square */
 #define TEST_TILE_SIZE 0x88
 
@@ -519,13 +516,11 @@ enum EditorCombineMode {
 
 /*
  * Loads a tile's texture in either layout. A bordered tile picks its combiner
- * mode for the pass, and its second pass reuses the loaded texels.
+ * mode for the pass, and its second pass reuses the loaded texels. The tile is
+ * the groupColumn-th from the one whose S starts at firstS.
  */
-#define LoadEditorTileTexture(tileIndex, tileColumn, row, pass, overlay) \
+#define LoadEditorTileTexture(tileIndex, firstS, groupColumn, row, pass, overlay) \
     { \
-        s32 tileS = (tileColumn) * TILE_COORDINATE_SPAN; \
-        s32 tileT = (row) * TILE_COORDINATE_SPAN; \
-\
         if (HasTileBorders(tileIndex)) { \
             if ((pass) == 0 || g_WorkArea.hole.tiles[tileIndex].extraPassCount <= 0) { \
                 if (g_WorkArea.hole.tiles[tileIndex].extraPassCount != 0) { \
@@ -580,10 +575,12 @@ enum EditorCombineMode {
                 gDPSetTileSize( \
                     gfx++, \
                     1, \
-                    tileS + BORDERED_TILE_FIRST_COORDINATE, \
-                    tileT + BORDERED_TILE_FIRST_COORDINATE, \
-                    tileS + BORDERED_TILE_LAST_S, \
-                    tileT + BORDERED_TILE_LAST_T \
+                    (firstS) + ((groupColumn) * TILE_COORDINATE_SPAN) + \
+                        BORDERED_TILE_FIRST_COORDINATE, \
+                    ((row) * TILE_COORDINATE_SPAN) + BORDERED_TILE_FIRST_COORDINATE, \
+                    (firstS) + (((groupColumn) + 1) * TILE_COORDINATE_SPAN) + \
+                        BORDERED_TILE_S_PAST_NEXT, \
+                    (((row) + 1) * TILE_COORDINATE_SPAN) + BORDERED_TILE_T_PAST_NEXT \
                 ); \
             } \
         } \
@@ -608,10 +605,12 @@ enum EditorCombineMode {
             gDPSetTileSize( \
                 gfx++, \
                 1, \
-                tileS + BORDERLESS_TILE_FIRST_COORDINATE, \
-                tileT + BORDERLESS_TILE_FIRST_COORDINATE, \
-                tileS + BORDERLESS_TILE_LAST_COORDINATE, \
-                tileT + BORDERLESS_TILE_LAST_COORDINATE \
+                (firstS) + ((groupColumn) * TILE_COORDINATE_SPAN) + \
+                    BORDERLESS_TILE_FIRST_COORDINATE, \
+                ((row) * TILE_COORDINATE_SPAN) + BORDERLESS_TILE_FIRST_COORDINATE, \
+                (firstS) + (((groupColumn) + 1) * TILE_COORDINATE_SPAN) + \
+                    BORDERLESS_TILE_FIRST_COORDINATE, \
+                (((row) + 1) * TILE_COORDINATE_SPAN) + BORDERLESS_TILE_FIRST_COORDINATE \
             ); \
         } \
     }
@@ -3958,23 +3957,19 @@ void WriteHexDumpFile(u32 *words, s32 byteCount, char *fileName) {
  * GetMidpointVertex and SetEditorCombineMode are nested functions, a GNU C
  * extension.
  *
- * Doesn't match: the original also steps column + 1 alongside half, where
- * GCC computes it in each use; most of the rest follows from the
- * registers and spill slots that changes. The frame is 0x18 bytes larger
- * than the original's, so the stack offsets differ: reload gives ours 55
- * spill slots of 8 bytes before the caller-save area, where the original
- * has 50 there and 2 after it, and ours saves $a3 with $t0 to $t7 around
- * the calls. Stepping the half's first column beside half gives 2403
- * words differing, 581 in shape. Giving the fine tiles' loop its own
- * counter and setting the middle slot after the wave's tile took it from
- * 2258 words differing, 518 in shape. In the medium tiles' pass loop,
- * loop.c hoists 0xF5100000 in the original, as it does in the coarse
- * tiles' loop, but finds it not worth moving in ours (savings 3, the loop
- * 308 insns against 259); with that constant also live across the calls,
- * the original's two SetEditorCombineMode calls restore it in different
- * orders, where ours have the same tail and cross-jumping merges them, so
- * ours has 11 calls to the original's 12. A local for the half's first
- * tile column, which brought DrawGround's shape from 348 to 283, gives
+ * Doesn't match: the frame is the original's size, but the registers and
+ * the spill slots differ; see the last paragraph. Stepping the half's first
+ * column beside half gives 2403 words differing, 581 in shape. Giving the
+ * fine tiles' loop its own counter and setting the middle slot after the
+ * wave's tile took it from 2258 words differing, 518 in shape. In the
+ * medium tiles' pass loop, loop.c hoists 0xF5100000 in the original, as it
+ * does in the coarse tiles' loop, but finds it not worth moving in ours
+ * (savings 3, the loop 308 insns against 259); with that constant also live
+ * across the calls, the original's two SetEditorCombineMode calls restore
+ * it in different orders, where ours have the same tail and cross-jumping
+ * merged them, so ours had 11 calls to the original's 12 until the tile S
+ * form below. A local for the half's first tile column, which brought
+ * DrawGround's shape from 348 to 283, gives
  * 3683 words differing here (505 in shape) when declared after half, and
  * 3709 (505) when declared first. A permuter output with 2050 words (472
  * in shape) held TILE_COORDINATE_SPAN in a variable set before the tiles
@@ -4031,7 +4026,23 @@ void WriteHexDumpFile(u32 *words, s32 byteCount, char *fileName) {
  * words differing, 491 in shape, to 1993 (489), and the oracle's closest
  * result from 1975 words, forcing 110 pseudos, to 1968, forcing 95. Naming
  * the blue alone gives the same 1993 words, and the red alone leaves 2007;
- * choosing each with ?: gives 2520 (612). 1993 words differ, 489 in shape.
+ * choosing each with ?: gives 2520 (612).
+ *
+ * As in DrawGround, each tile loop in the original steps the tile's left S
+ * and its place's end by 0x80, with the half's first S, half << 9, in a
+ * stack slot. So LoadEditorTileTexture adds the tile's place in its group to
+ * firstTileS, and takes the right S and the bottom T past the next tile's
+ * start. Written straight into the tile size commands, that takes the draft
+ * from 1993 words differing (489 in shape) to 1791 (233), with the
+ * original's frame and its 12 SetEditorCombineMode calls, and the register
+ * oracle's closest result from 1968 words, forcing 95 pseudos, to 1359,
+ * forcing 26. Through locals for the S and T set at the top of the macro,
+ * loop.c makes no giv of them, and the draft gives 2425 words (579 in
+ * shape); taking only the bottom T as the row's plus 0x82 then gives 2471
+ * (337), and only a borderless tile's as its own plus 0x84, 2503 (325).
+ * Setting firstTileS from half gives the same 1791 words. The original
+ * still loads 0xF5100000 6 times, where ours does 18 times. 1791 words
+ * differ, 233 in shape.
  */
 #ifdef NON_MATCHING
 void DrawHoleEditorGround(CameraMatrices *matrices UNUSED, s32 terrainStyle) {
@@ -4606,11 +4617,13 @@ void DrawHoleEditorGround(CameraMatrices *matrices UNUSED, s32 terrainStyle) {
     gSPSegment(gfx++, 8, 0);
     for (half = 0; half < GROUND_HALF_COUNT; half++) {
         s32 topSlot;
+        s32 firstTileS;
 
         previousDetail = GROUND_DETAIL_HIDDEN;
         bottomSlot = FIRST_BOTTOM_SLOT;
         topSlot = FIRST_TOP_SLOT;
         tileIndex = half * GROUND_TILE_GROUP_SIZE;
+        firstTileS = tileIndex * TILE_COORDINATE_SPAN;
         gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0, f_TriangleSlopes[slopeIndex].shade);
         gDPSetTileSize(
             gfx++,
@@ -4845,7 +4858,8 @@ void DrawHoleEditorGround(CameraMatrices *matrices UNUSED, s32 terrainStyle) {
                             for (finePass = 0; finePass < GROUND_TILE_MAX_PASSES; finePass++) {
                                 LoadEditorTileTexture(
                                     tileIndex,
-                                    tileColumn,
+                                    firstTileS,
+                                    groupTile,
                                     row,
                                     finePass,
                                     g_ShowsGroundWaves
@@ -5165,7 +5179,8 @@ void DrawHoleEditorGround(CameraMatrices *matrices UNUSED, s32 terrainStyle) {
                         for (pass = 0; pass < GROUND_TILE_MAX_PASSES; pass++) {
                             LoadEditorTileTexture(
                                 tileIndex,
-                                tileColumn,
+                                firstTileS,
+                                groupTile,
                                 row,
                                 pass,
                                 GROUND_OVERLAY_NOISE
@@ -5259,7 +5274,8 @@ void DrawHoleEditorGround(CameraMatrices *matrices UNUSED, s32 terrainStyle) {
                         for (pass = 0; pass < GROUND_TILE_MAX_PASSES; pass++) {
                             LoadEditorTileTexture(
                                 tileIndex,
-                                (half * GROUND_TILE_GROUP_SIZE) + groupTileIndex,
+                                firstTileS,
+                                groupTileIndex,
                                 row,
                                 pass,
                                 GROUND_OVERLAY_NOISE
@@ -5325,7 +5341,8 @@ void DrawHoleEditorGround(CameraMatrices *matrices UNUSED, s32 terrainStyle) {
                     for (pass = 0; pass < GROUND_TILE_MAX_PASSES; pass++) {
                         LoadEditorTileTexture(
                             tileIndex,
-                            (half * GROUND_TILE_GROUP_SIZE) + k,
+                            firstTileS,
+                            k,
                             row,
                             pass,
                             GROUND_OVERLAY_NOISE
