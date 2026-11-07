@@ -2096,6 +2096,11 @@ void DrawReadyGoMovie(Gfx** displayListHead) {
  * own, but with 52 insns loop.c still moves it (113 words, 25 in shape).
  * Routing the corners and texel steps through inline helpers adds no
  * insns.
+ *
+ * A second width variable for the texel step, copied from width or read
+ * with it before the sound test, leaves 54 words, as cse folds the copy
+ * back into width. Declaring width as u16, s16, u32 or u8 gives 73, 61, 87
+ * and 80 words, and stripCount as u16, s16 or u32 changes nothing.
  */
 #ifdef NON_MATCHING
 void DrawShrinkingMovieImage(Gfx** displayListHead) {
