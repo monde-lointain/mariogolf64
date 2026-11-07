@@ -427,8 +427,15 @@ typedef s32 (*BillboardHitFinder)(s32 startX, s32 startY, s32 startZ, s32 endX,
  * below it, as StepBallSimulation's matched test does, where the draft put
  * the depth first; a permuter run pointed to it. That takes the draft from
  * 237 words (109 in shape) to 217 (107), and the register oracle from 132
- * words forcing 38 pseudos to 130 forcing 37. 217 words differ, 107 in
- * shape.
+ * words forcing 38 pseudos to 130 forcing 37.
+ *
+ * A later permuter run's best, 205 words (99 in shape), holds the X axis's
+ * wall step and the curve's per-spin weight in locals and tests the stop
+ * depth with <= one less. The X step alone gives 207 words (99 in shape) and
+ * the oracle's closest 128 forcing 45, but holding all three axes' steps
+ * gives 887; the per-spin weight alone gives 215 (107) and 128 forcing 41,
+ * though the original multiplies in the draft's order; and its gravity test
+ * made an else-if alone changes nothing. 217 words differ, 107 in shape.
  */
 #ifdef NON_MATCHING
 s32 StepOpeningBallSimulation(BallSimulation* simulation) {
