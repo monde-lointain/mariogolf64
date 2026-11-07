@@ -11,8 +11,8 @@ known when the matching build's ELF names its symbol once; one whose symbol
 it doesn't name, such as a compiler's anonymous constant, compares equal. A
 field whose value can't be an address is compared as the constant it is.
 
-    fncompare.py [-v | -s] ASM_FILE C_FILE [FUNCTION ...]
-    fncompare.py [-v | -s] FUNCTION ...
+    fncompare.py [-v | -s | -l] ASM_FILE C_FILE [FUNCTION ...]
+    fncompare.py [-v | -s | -l] FUNCTION ...
 
 ASM_FILE is a splat assembly file holding one or more functions and C_FILE
 the C to compile, or an object file already compiled. Given only function
@@ -28,7 +28,9 @@ than ours. With -v,
 also prints the instructions that differ, with each branch's destination as
 @INDEX, and the calls one side makes more often than the other, which always
 mean the sources differ. With -s, prints instead only the instructions
-that differ in shape, which a change of registers can't explain.
+that differ in shape, which a change of registers can't explain. With -l,
+prints instead every instruction of ours, as -v shows them, for reading the
+compiled draft beside the original assembly.
 """
 
 import atexit
@@ -1568,7 +1570,10 @@ def print_shape_diff(target: Routine, compiled: Routine) -> None:
 def report(
     function: str, original: Original, compiled: Functions, *, verbosity: str
 ) -> None:
-    """Print FUNCTION's score and, given -v or -s, its diffs and its nested ones'."""
+    """Print FUNCTION's score and, given -v, -s or -l, its diffs or listings.
+
+    The nested functions' are printed too.
+    """
     print(f"{function} {describe_original(original, compiled, function)}")
     if not verbosity:
         return
@@ -1581,8 +1586,15 @@ def report(
                 print(f" {name}:")
             if verbosity == "-s":
                 print_shape_diff(original_routine, ours)
+            elif verbosity == "-l":
+                for index in range(len(ours.words)):
+                    print(f"  {index:4} {disassemble(ours, index)}")
             else:
                 print_diff(original_routine, ours)
+
+
+# The options that print more than the score
+VERBOSITIES = {"-v", "-s", "-l"}
 
 
 # What the tools' file arguments end with, which no function name does
@@ -1644,8 +1656,8 @@ def score(asm_path: str, c_path: str, names: list[str], verbosity: str) -> None:
 
 def main() -> None:
     """Score the functions named on the command line, or all of them."""
-    verbosity = next((arg for arg in sys.argv[1:] if arg in {"-v", "-s"}), "")
-    args = [arg for arg in sys.argv[1:] if arg not in {"-v", "-s"}]
+    verbosity = next((arg for arg in sys.argv[1:] if arg in VERBOSITIES), "")
+    args = [arg for arg in sys.argv[1:] if arg not in VERBOSITIES]
     if args and not args[0].endswith(PATH_SUFFIXES):
         units: dict[tuple[str, str], list[str]] = {}
         for name in args:
