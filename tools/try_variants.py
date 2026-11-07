@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """Score variants of a C file, each made by text replacements.
 
-    try_variants.py [--apply NUMBER] [ASM_FILE C_FILE] FUNCTION VARIANTS_FILE
-    try_variants.py --batch JOBS_FILE
+    try_variants.py [--apply NUMBER | --oracle] [ASM_FILE C_FILE] FUNCTION
+                    VARIANTS_FILE
+    try_variants.py [--oracle] --batch JOBS_FILE
 
 VARIANTS_FILE holds blocks separated by lines of "====". Each block is the
 text to replace, a line of "----", and the replacement, which is made in
@@ -11,7 +12,9 @@ the inline helpers and prototypes it uses. A block can make several
 replacements, such as at a change's twin sites, joined by lines of "++++".
 Prints the score of each variant, so that several guesses cost one compile
 each. With --apply, writes variant NUMBER into C_FILE instead, made the same
-way as the one that was scored.
+way as the one that was scored. With --oracle, each score is followed by the
+closest the register oracle (see oracle.py) comes, from the same compile;
+that needs tools/build_oracle.sh's compiler.
 
 Without ASM_FILE and C_FILE, finds them from FUNCTION as fncompare does.
 
@@ -35,6 +38,8 @@ import sys
 import tempfile
 from concurrent.futures import Future, ProcessPoolExecutor
 from pathlib import Path
+
+import oracle
 
 import fncompare
 
@@ -90,6 +95,57 @@ def score_body(
         return failure
     function = bodies.function
     return f"{function} {fncompare.describe_original(target, compiled, function)}"
+
+
+def score_unit(
+    units: list[str], target: fncompare.Original, function: str, optflags: list[str]
+) -> str:
+    """Trace the first of UNITS that compiles, and return its score and the oracle's.
+
+    UNITS are preprocessed files, each holding FUNCTION.
+    """
+    error = ""
+    for unit in units:
+        with tempfile.TemporaryDirectory() as work:
+            try:
+                draft = oracle.trace_function(unit, function, optflags, Path(work))
+            except oracle.CompileError as compile_error:
+                error = str(compile_error)
+                continue
+            compiled = draft.traced.blamed.functions
+            score = fncompare.describe_original(target, compiled, function)
+            search = oracle.search_forcing(target.routine, draft, {})
+            return f"{function} {score} | {oracle.summarize_search(search)}"
+    return describe_compiled(None, error, function)
+
+
+def score_body_with_oracle(
+    bodies: fncompare.BodyVariants, preprocessed: str, target: fncompare.Original
+) -> str:
+    """Score one variant's preprocessed body, and the oracle's closest."""
+    units = bodies.make_units(preprocessed)
+    return score_unit(units, target, bodies.function, bodies.optflags)
+
+
+def score_variant_with_oracle(
+    source: str,
+    c_dir: Path,
+    optflags: list[str],
+    target: fncompare.Original,
+    function: str,
+) -> str:
+    """Score one variant of the whole file, and the oracle's closest."""
+    with tempfile.NamedTemporaryFile(
+        "w", suffix=".c", dir=c_dir, delete=False
+    ) as variant:
+        _ = variant.write(source)
+    try:
+        unit = oracle.isolate_file(variant.name, function, optflags)
+    except oracle.CompileError as error:
+        return describe_compiled(None, str(error), function)
+    finally:
+        Path(variant.name).unlink()
+    return score_unit([unit], target, function, optflags)
 
 
 def get_variant_body(
@@ -244,11 +300,17 @@ def read_target(asm_path: str, c_path: str, function: str) -> fncompare.Original
     return fncompare.read_original(asm_path, c_path, function)
 
 
-def score_jobs(jobs: list[list[str]], *, prefix_names: bool) -> None:
+def score_jobs(jobs: list[list[str]], *, prefix_names: bool, with_oracle: bool) -> None:
     """Print the score of each variant of each job, in order.
 
-    A job is an ASM_FILE, C_FILE, FUNCTION and VARIANTS_FILE.
+    A job is an ASM_FILE, C_FILE, FUNCTION and VARIANTS_FILE. WITH_ORACLE
+    adds the oracle's closest to each score.
     """
+    score_body_job, score_variant_job = (
+        (score_body_with_oracle, score_variant_with_oracle)
+        if with_oracle
+        else (score_body, score_variant)
+    )
     found: list[list[str]] = []
     variants: list[list[str | None]] = []
     for job in jobs:
@@ -303,11 +365,15 @@ def score_jobs(jobs: list[list[str]], *, prefix_names: bool) -> None:
                     scores.append(None)
                 elif ready and body is not None:
                     scores.append(
-                        pool.submit(score_body, ready[0], next(preprocessed), target)
+                        pool.submit(
+                            score_body_job, ready[0], next(preprocessed), target
+                        )
                     )
                 else:
                     scores.append(
-                        pool.submit(score_variant, source, c_dir, flags, target, job[2])
+                        pool.submit(
+                            score_variant_job, source, c_dir, flags, target, job[2]
+                        )
                     )
             results.append(scores)
         for (_, _, function, _), scores in zip(jobs, results, strict=True):
@@ -320,6 +386,10 @@ def score_jobs(jobs: list[list[str]], *, prefix_names: bool) -> None:
 def main() -> None:
     """Print the score of each variant, in order, or apply one."""
     arguments = sys.argv[1:]
+    with_oracle = arguments[:1] == ["--oracle"]
+    if with_oracle:
+        oracle.use_compiler()
+        arguments = arguments[1:]
     if arguments[:1] == ["--apply"]:
         arguments[2:] = fncompare.expand_function_name(arguments[2:])
     else:
@@ -330,14 +400,18 @@ def main() -> None:
         sys.exit(__doc__)
     if arguments[0] == "--batch":
         lines = Path(arguments[1]).read_text().splitlines()
-        score_jobs([line.split() for line in lines if line.strip()], prefix_names=True)
+        score_jobs(
+            [line.split() for line in lines if line.strip()],
+            prefix_names=True,
+            with_oracle=with_oracle,
+        )
         return
     apply_number = None
     if arguments[0] == "--apply":
         apply_number = int(arguments[1])
         arguments = arguments[2:]
     if apply_number is None:
-        score_jobs([arguments], prefix_names=False)
+        score_jobs([arguments], prefix_names=False, with_oracle=with_oracle)
         return
     _, c_path, function, variants_path = arguments
     try:

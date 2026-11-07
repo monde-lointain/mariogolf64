@@ -963,24 +963,34 @@ class BodyVariants:
             preprocessed += pieces[2:-2:2]
         return preprocessed
 
-    def compile(self, preprocessed_body: str) -> tuple[Functions | None, str]:
-        """Compile the file with PREPROCESSED_BODY, as compile_functions does.
+    def make_units(self, preprocessed_body: str) -> list[str]:
+        """Return the files to compile PREPROCESSED_BODY in, in turn.
 
         The declarations were pruned for the original body, so a variant
         that names others compiles with them all, as does one that fails:
         without a pruned static inline definition, a call to it would
         compile as a call to an undeclared function.
         """
+        whole = self.whole_before + preprocessed_body + self.whole_after
+        if set(IDENTIFIER_RE.findall(preprocessed_body)) <= self.body_names:
+            return [self.before + preprocessed_body + self.after, whole]
+        return [whole]
+
+    def compile(self, preprocessed_body: str) -> tuple[Functions | None, str]:
+        """Compile the file with PREPROCESSED_BODY, as compile_functions does.
+
+        Tries each of make_units' files until one compiles.
+        """
+        compiled: Functions | None = None
+        error = ""
         with tempfile.TemporaryDirectory() as tmp:
             unit = Path(tmp) / "variant.i"
-            if set(IDENTIFIER_RE.findall(preprocessed_body)) <= self.body_names:
-                _ = unit.write_text(self.before + preprocessed_body + self.after)
+            for text in self.make_units(preprocessed_body):
+                _ = unit.write_text(text)
                 compiled, error = compile_functions(unit, self.optflags)
                 if compiled is not None:
-                    return compiled, error
-            whole = self.whole_before + preprocessed_body + self.whole_after
-            _ = unit.write_text(whole)
-            return compile_functions(unit, self.optflags)
+                    break
+        return compiled, error
 
 
 @dataclass(frozen=True)
