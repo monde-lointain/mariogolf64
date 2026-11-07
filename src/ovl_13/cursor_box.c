@@ -92,6 +92,14 @@ void LoadCursorBox(void *image) {
  * naming x too gains nothing more. The register oracle, forcing 6 pseudos'
  * registers, leaves 12 words at best, so the code differs too. 42 words differ,
  * 10 in shape.
+ *
+ * Green and blue variables set at the start of each pass, before the red, and
+ * clamped as the red is, keep their sets in the loop: clamping all three gives
+ * 38 words (8 in shape), and the register oracle's closest result is then 10
+ * words, forcing 4 pseudos; clamping the red and green gives 20 (12), and the
+ * red and blue 26 (12). Set after the red and clamped, they give 171 words, as
+ * the frame grows by 8 bytes. Clamping a constant has no purpose, so the draft
+ * keeps the constant stores.
  */
 #ifdef NON_MATCHING
 void DrawCursorBox(Gfx **displayListHead, s32 left, s32 top) {
