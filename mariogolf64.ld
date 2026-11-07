@@ -1261,7 +1261,7 @@ SECTIONS
         FILL(0x00000000);
         overlay_3_TEXT_START = .;
         build/asm/DE9B0.o(.text);
-        build/asm/DE9C0.o(.text);
+        build/src/DE9C0.o(.text);
         build/asm/F3480.o(.text);
         build/asm/F7F90.o(.text);
         build/asm/FD310.o(.text);
@@ -1273,7 +1273,7 @@ SECTIONS
         overlay_3_TEXT_SIZE = ABSOLUTE(overlay_3_TEXT_END - overlay_3_TEXT_START);
         overlay_3_DATA_START = .;
         build/asm/DE9B0.o(.data);
-        build/asm/DE9C0.o(.data);
+        build/src/DE9C0.o(.data);
         build/asm/F3480.o(.data);
         build/asm/F7F90.o(.data);
         build/asm/FD310.o(.data);
@@ -1286,7 +1286,7 @@ SECTIONS
         overlay_3_DATA_SIZE = ABSOLUTE(overlay_3_DATA_END - overlay_3_DATA_START);
         overlay_3_RODATA_START = .;
         build/asm/DE9B0.o(.rodata);
-        build/asm/DE9C0.o(.rodata);
+        build/src/DE9C0.o(.rodata);
         build/asm/F3480.o(.rodata);
         build/asm/F7F90.o(.rodata);
         build/asm/FD310.o(.rodata);
@@ -1303,7 +1303,7 @@ SECTIONS
         FILL(0x00000000);
         overlay_3_BSS_START = .;
         build/asm/DE9B0.o(.bss);
-        build/asm/DE9C0.o(.bss);
+        build/src/DE9C0.o(.bss);
         build/asm/F3480.o(.bss);
         build/asm/F7F90.o(.bss);
         build/asm/FD310.o(.bss);
