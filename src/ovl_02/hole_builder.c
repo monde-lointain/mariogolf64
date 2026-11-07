@@ -705,7 +705,12 @@ s32 ListOffsetsByDistance(s32 span, GridOffset* offsets, s32 maxCount) {
   while (row < span) {
     /* The block of their own gives the row counter its register; without it,
      * or with plain braces, 20 words differ, none in shape. A for loop storing
-     * squares[row + 1] gives 29, and one counting from 1 to span 35 to 39 */
+     * squares[row + 1] gives 29, and one counting from 1 to span 35 to 39.
+     * Without it, row and the distance loop's stepped squares pointer swap
+     * $t0 and $t1; flow.c weights each reference by its loop depth, which
+     * the block's loop notes raise. Every declaration order of row and
+     * column gives the 20, the sum's operands swapped 22, a do-while loop
+     * 37, and counting with column, i, count or nearestRow 26 to 72 */
     IN_OWN_BLOCK(row++; squares[row] = (f32)(row * row) *
             (OFFSET_DISTANCE_SCALE * OFFSET_DISTANCE_SCALE));
   }
