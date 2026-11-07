@@ -1919,10 +1919,16 @@ typedef struct GridScreenPoint {
  * words to 193, forcing 29 pseudos both. The original also divides the
  * landing width by columnCount at run time, converting an 8 loaded from
  * its constant pool, which reload does for a constant-equivalent pseudo
- * that cse never saw set; ours folds the quotient to 38400.0f. Setting
- * columnCount only after the distance tests, so that the landing branch
- * reads it unset, gives 307 words (41 in shape) and still folds it.
- * 301 words differ, 37 in shape.
+ * that cse never saw set, and it converts that 8 again for the centering.
+ * The column count is set only before the grid's loops, so both read it
+ * unset, as the original must: reload then gives each the constant from
+ * the pool. That takes the draft from 301 words differing (37 in shape) to
+ * 297 (27), and the oracle's closest result from 193 words to 181, forcing
+ * 30. Set after the distance tests but before the centering, it folds the
+ * centering to -3.5f instead and gives 307 words (41 in shape); set as it
+ * is declared, it folds the landing spacing to 38400.0f. Set just before
+ * the row step, it gives the same 297 words. 297 words differ, 27 in
+ * shape.
  */
 void DrawGreenGrid(Gfx **displayListHead, CameraMatrices *matrices) {
     f32 points[GREEN_GRID_POINT_COUNT][3];
@@ -1937,7 +1943,7 @@ void DrawGreenGrid(Gfx **displayListHead, CameraMatrices *matrices) {
     s32 distance;
     s32 worldDistance;
     s32 rowCount;
-    s32 columnCount = GREEN_GRID_COLUMN_COUNT;
+    s32 columnCount;
     s32 maxPuttDistance;
     s32 row;
     s32 acrossRow;
@@ -1979,6 +1985,13 @@ void DrawGreenGrid(Gfx **displayListHead, CameraMatrices *matrices) {
     f32 dy;
     f32 scale;
 
+    /*
+     * The original sets the column count only before the grid's loops, so
+     * the landing spacing and the centering read it unset
+     */
+#    ifdef AVOID_UB
+    columnCount = GREEN_GRID_COLUMN_COUNT;
+#    endif
     if (g_RoundHud.greenGridState == GREEN_GRID_HIDDEN ||
         g_IsCupViewShown == TRUE ||
         IsGameFlagSet(GAME_FLAG_HIDE_GREEN_GRID) ||
@@ -2061,6 +2074,7 @@ void DrawGreenGrid(Gfx **displayListHead, CameraMatrices *matrices) {
 
     scrollX = forwardX * f_GreenGridScroll;
     scrollZ = stepZ * f_GreenGridScroll;
+    columnCount = GREEN_GRID_COLUMN_COUNT;
 
     for (row = 0, rowStart = 0; row != rowCount;) {
         for (column = 0; column != columnCount; column++) {
