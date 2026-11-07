@@ -216,26 +216,23 @@ static AssetId f_MenuWindowImageAssets[MENU_WINDOW_PICTURE_COUNT] = {
     0x0958
 };
 /* Each window picture's palette files, by picture and color */
-// clang-format off
-static s16 f_MenuWindowPaletteFiles[MENU_WINDOW_PICTURE_COUNT]
-                                   [MENU_WINDOW_PALETTE_COUNT] = {
-  { 0x07B8, 0x07B9, 0x07BA, 0x07BB },
-  { 0x0748, 0x0749, 0x074A, 0x074B },
-  { 0x079C, 0x079D, 0x079E, 0x079F },
-  { 0x073A, 0x073B, 0x073C, 0x073D },
-  { 0x0780, 0x0781, 0x0782, 0x0783 },
-  { 0x07AA, 0x07AB, 0x07AC, 0x07AD },
-  { 0x07C6, 0x07C7, 0x07C8, 0x07C9 },
-  { 0x07D4, 0x07D5, 0x07D6, 0x07D7 },
-  { 0x0764, 0x0765, 0x0766, 0x0767 },
-  { 0x078E, 0x078F, 0x0790, 0x0791 },
-  { 0x07E2, 0x07E3, 0x07E4, 0x07E5 },
-  { 0x0756, 0x0757, 0x0758, 0x0759 },
-  { 0x0772, 0x0773, 0x0774, 0x0775 },
-  { 0x0980, 0x0981, 0x0982, 0x0983 },
-  { 0x0957, 0x0957, 0x0957, 0x0957 }
+static s16 f_MenuWindowPaletteFiles[MENU_WINDOW_PICTURE_COUNT][MENU_WINDOW_PALETTE_COUNT] = {
+    {0x07B8, 0x07B9, 0x07BA, 0x07BB},
+    {0x0748, 0x0749, 0x074A, 0x074B},
+    {0x079C, 0x079D, 0x079E, 0x079F},
+    {0x073A, 0x073B, 0x073C, 0x073D},
+    {0x0780, 0x0781, 0x0782, 0x0783},
+    {0x07AA, 0x07AB, 0x07AC, 0x07AD},
+    {0x07C6, 0x07C7, 0x07C8, 0x07C9},
+    {0x07D4, 0x07D5, 0x07D6, 0x07D7},
+    {0x0764, 0x0765, 0x0766, 0x0767},
+    {0x078E, 0x078F, 0x0790, 0x0791},
+    {0x07E2, 0x07E3, 0x07E4, 0x07E5},
+    {0x0756, 0x0757, 0x0758, 0x0759},
+    {0x0772, 0x0773, 0x0774, 0x0775},
+    {0x0980, 0x0981, 0x0982, 0x0983},
+    {0x0957, 0x0957, 0x0957, 0x0957}
 };
-// clang-format on
 /* Read by no routine */
 static s32 f_UnusedWordAfterPaletteFiles UNUSED = 0;
 /* Whether the Club Tournament screen was entered since TakeClubTournamentEntry
@@ -294,47 +291,44 @@ static u8 f_EnteredCode[CLUB_TOURNAMENT_CODE_LENGTH] = {
     CLUB_CODE_NO_CHAR
 };
 /* The codes, each padded with CLUB_CODE_NO_CHAR */
-// clang-format off
-static u8 f_ClubTournamentCodes[CLUB_TOURNAMENT_CODE_COUNT]
-                           [CLUB_TOURNAMENT_CODE_LENGTH] = {
-  { '0', '0', '0', '0', '0', '0', '0', '0' },
-  { 'K', 'O', 'D', 'E', 'R', 'A', CLUB_CODE_NO_CHAR, CLUB_CODE_NO_CHAR },
-  { 'T', 'A', 'K', 'A', 'M', 'A', 'T', 'U' },
-  { 'K', 'A', 'O', 'R', 'U', CLUB_CODE_NO_CHAR, CLUB_CODE_NO_CHAR, CLUB_CODE_NO_CHAR },
-  { 'M', 'U', 'R', 'A', 'I', 'S', 'H', 'I' },
-  { 'N', 'O', 'R', 'I', 'O', CLUB_CODE_NO_CHAR, CLUB_CODE_NO_CHAR, CLUB_CODE_NO_CHAR },
-  { '6', '6', '6', '6', '6', '6', '6', '6' },
-  { '7', '7', '7', '7', '7', '7', '7', '7' },
-  { '8', '8', '8', '8', '8', '8', '8', '8' },
-  { '9', '9', '9', '9', '9', '9', '9', '9' },
-  { 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A' },
-  { 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B' },
-  { 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C' },
-  { 'D', 'D', 'D', 'D', 'D', 'D', 'D', 'D' },
-  { 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E' },
-  { 'F', 'F', 'F', 'F', 'F', 'F', 'F', 'F' },
-  { 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G' },
-  { 'H', 'H', 'H', 'H', 'H', 'H', 'H', 'H' },
-  { 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I' },
-  { 'J', 'J', 'J', 'J', 'J', 'J', 'J', 'J' },
-  { 'K', 'K', 'K', 'K', 'K', 'K', 'K', 'K' },
-  { 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L' },
-  { 'M', 'M', 'M', 'M', 'M', 'M', 'M', 'M' },
-  { 'N', 'N', 'N', 'N', 'N', 'N', 'N', 'N' },
-  { 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O' },
-  { 'P', 'P', 'P', 'P', 'P', 'P', 'P', 'P' },
-  { 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q' },
-  { 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'R' },
-  { 'S', 'S', 'S', 'S', 'S', 'S', 'S', 'S' },
-  { 'T', 'T', 'T', 'T', 'T', 'T', 'T', 'T' },
-  { 'U', 'U', 'U', 'U', 'U', 'U', 'U', 'U' },
-  { 'V', 'V', 'V', 'V', 'V', 'V', 'V', 'V' },
-  { 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W' },
-  { 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X' },
-  { 'Y', 'Y', 'Y', 'Y', 'Y', 'Y', 'Y', 'Y' },
-  { 'Z', 'Z', 'Z', 'Z', 'Z', 'Z', 'Z', 'Z' }
+static u8 f_ClubTournamentCodes[CLUB_TOURNAMENT_CODE_COUNT][CLUB_TOURNAMENT_CODE_LENGTH] = {
+    {'0', '0', '0', '0', '0', '0', '0', '0'},
+    {'K', 'O', 'D', 'E', 'R', 'A', CLUB_CODE_NO_CHAR, CLUB_CODE_NO_CHAR},
+    {'T', 'A', 'K', 'A', 'M', 'A', 'T', 'U'},
+    {'K', 'A', 'O', 'R', 'U', CLUB_CODE_NO_CHAR, CLUB_CODE_NO_CHAR, CLUB_CODE_NO_CHAR},
+    {'M', 'U', 'R', 'A', 'I', 'S', 'H', 'I'},
+    {'N', 'O', 'R', 'I', 'O', CLUB_CODE_NO_CHAR, CLUB_CODE_NO_CHAR, CLUB_CODE_NO_CHAR},
+    {'6', '6', '6', '6', '6', '6', '6', '6'},
+    {'7', '7', '7', '7', '7', '7', '7', '7'},
+    {'8', '8', '8', '8', '8', '8', '8', '8'},
+    {'9', '9', '9', '9', '9', '9', '9', '9'},
+    {'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A'},
+    {'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B'},
+    {'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C'},
+    {'D', 'D', 'D', 'D', 'D', 'D', 'D', 'D'},
+    {'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E'},
+    {'F', 'F', 'F', 'F', 'F', 'F', 'F', 'F'},
+    {'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G'},
+    {'H', 'H', 'H', 'H', 'H', 'H', 'H', 'H'},
+    {'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I'},
+    {'J', 'J', 'J', 'J', 'J', 'J', 'J', 'J'},
+    {'K', 'K', 'K', 'K', 'K', 'K', 'K', 'K'},
+    {'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L'},
+    {'M', 'M', 'M', 'M', 'M', 'M', 'M', 'M'},
+    {'N', 'N', 'N', 'N', 'N', 'N', 'N', 'N'},
+    {'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O'},
+    {'P', 'P', 'P', 'P', 'P', 'P', 'P', 'P'},
+    {'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q'},
+    {'R', 'R', 'R', 'R', 'R', 'R', 'R', 'R'},
+    {'S', 'S', 'S', 'S', 'S', 'S', 'S', 'S'},
+    {'T', 'T', 'T', 'T', 'T', 'T', 'T', 'T'},
+    {'U', 'U', 'U', 'U', 'U', 'U', 'U', 'U'},
+    {'V', 'V', 'V', 'V', 'V', 'V', 'V', 'V'},
+    {'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W'},
+    {'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X'},
+    {'Y', 'Y', 'Y', 'Y', 'Y', 'Y', 'Y', 'Y'},
+    {'Z', 'Z', 'Z', 'Z', 'Z', 'Z', 'Z', 'Z'}
 };
-// clang-format on
 /* Read by no routine; f_MenuCharacterChoices' first 14 values */
 static s32 f_TournamentCharacterChoices[14] UNUSED = {
     CHARACTER_CHOICE_PLUM,

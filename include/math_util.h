@@ -44,13 +44,12 @@ typedef s16 SignedBinaryAngle;
  * An identity matrix in Mtx's fixed point: the integer halves, two to a word,
  * then the fractions
  */
-/* clang-format off */
 #define IDENTITY_MTX \
-  {{{0x10000, 0, 1, 0}, \
-    {0, 0x10000, 0, 1}, \
-    {0, 0, 0, 0}, \
-    {0, 0, 0, 0}}}
-/* clang-format on */
+    { \
+        { \
+            {0x10000, 0, 1, 0}, {0, 0x10000, 0, 1}, {0, 0, 0, 0}, {0, 0, 0, 0} \
+        } \
+    }
 
 /* The magnitude of an integer. The game's code evaluates the value once,
    into a variable of its own, as a GNU statement expression does. GCC's

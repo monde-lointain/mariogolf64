@@ -246,74 +246,59 @@ static s16 f_PageArrowTimer = 0;
 static u32 f_BetIconAssets[BET_ICON_COUNT] =
     {0x0674, 0x0678, 0x067A, 0x067E, 0x0680, 0x067C, 0x0676, 0x0672};
 /* Both frames of each bet icon, for the chosen bet's animation */
-// clang-format off
-static u32 f_BetIconFrameAssets[BET_ICON_COUNT]
-                             [BET_ICON_FRAME_COUNT] = {
-  { 0x0674, 0x0675 },
-  { 0x0678, 0x0679 },
-  { 0x067A, 0x067B },
-  { 0x067E, 0x067F },
-  { 0x0680, 0x0681 },
-  { 0x067C, 0x067D },
-  { 0x0676, 0x0677 },
-  { 0x0672, 0x0673 }
+static u32 f_BetIconFrameAssets[BET_ICON_COUNT][BET_ICON_FRAME_COUNT] = {
+    {0x0674, 0x0675},
+    {0x0678, 0x0679},
+    {0x067A, 0x067B},
+    {0x067E, 0x067F},
+    {0x0680, 0x0681},
+    {0x067C, 0x067D},
+    {0x0676, 0x0677},
+    {0x0672, 0x0673}
 };
-// clang-format on
 /* The bet whose label and icon each column of a bet set shows */
-// clang-format off
-static s16 f_BetSetBets[OFFERING_BET_SET_COUNT]
-                             [BET_SET_MAX_COLUMN_COUNT] = {
-  { 0, 1, 2, 3, 5, UNUSED_BET_COLUMN },
-  { 0, 1, 2, 3, 5, 7 },
-  { 0, 1, 6, UNUSED_BET_COLUMN, UNUSED_BET_COLUMN, UNUSED_BET_COLUMN },
-  { 0, 1, 5, UNUSED_BET_COLUMN, UNUSED_BET_COLUMN, UNUSED_BET_COLUMN },
-  { 0, 1, 5, UNUSED_BET_COLUMN, UNUSED_BET_COLUMN, UNUSED_BET_COLUMN },
-  { 2, 3, 5, UNUSED_BET_COLUMN, UNUSED_BET_COLUMN, UNUSED_BET_COLUMN },
-  { 2, 3, 5, 7, UNUSED_BET_COLUMN, UNUSED_BET_COLUMN }
+static s16 f_BetSetBets[OFFERING_BET_SET_COUNT][BET_SET_MAX_COLUMN_COUNT] = {
+    {0, 1, 2, 3, 5, UNUSED_BET_COLUMN},
+    {0, 1, 2, 3, 5, 7},
+    {0, 1, 6, UNUSED_BET_COLUMN, UNUSED_BET_COLUMN, UNUSED_BET_COLUMN},
+    {0, 1, 5, UNUSED_BET_COLUMN, UNUSED_BET_COLUMN, UNUSED_BET_COLUMN},
+    {0, 1, 5, UNUSED_BET_COLUMN, UNUSED_BET_COLUMN, UNUSED_BET_COLUMN},
+    {2, 3, 5, UNUSED_BET_COLUMN, UNUSED_BET_COLUMN, UNUSED_BET_COLUMN},
+    {2, 3, 5, 7, UNUSED_BET_COLUMN, UNUSED_BET_COLUMN}
 };
-// clang-format on
-// clang-format off
 /* Which of betStakeLevels' stakes each column of a bet set sets */
-static s16 f_BetSetStakeSlots[OFFERING_BET_SET_COUNT]
-                             [BET_SET_MAX_COLUMN_COUNT] = {
-  { 0, 1, 2, 3, 4, UNUSED_BET_COLUMN },
-  { 0, 1, 2, 3, 4, 6 },
-  { 0, 1, 5, UNUSED_BET_COLUMN, UNUSED_BET_COLUMN, UNUSED_BET_COLUMN },
-  { 0, 1, 4, UNUSED_BET_COLUMN, UNUSED_BET_COLUMN, UNUSED_BET_COLUMN },
-  { 0, 1, 4, UNUSED_BET_COLUMN, UNUSED_BET_COLUMN, UNUSED_BET_COLUMN },
-  { 2, 3, 4, UNUSED_BET_COLUMN, UNUSED_BET_COLUMN, UNUSED_BET_COLUMN },
-  { 2, 3, 4, 6, UNUSED_BET_COLUMN, UNUSED_BET_COLUMN }
+static s16 f_BetSetStakeSlots[OFFERING_BET_SET_COUNT][BET_SET_MAX_COLUMN_COUNT] = {
+    {0, 1, 2, 3, 4, UNUSED_BET_COLUMN},
+    {0, 1, 2, 3, 4, 6},
+    {0, 1, 5, UNUSED_BET_COLUMN, UNUSED_BET_COLUMN, UNUSED_BET_COLUMN},
+    {0, 1, 4, UNUSED_BET_COLUMN, UNUSED_BET_COLUMN, UNUSED_BET_COLUMN},
+    {0, 1, 4, UNUSED_BET_COLUMN, UNUSED_BET_COLUMN, UNUSED_BET_COLUMN},
+    {2, 3, 4, UNUSED_BET_COLUMN, UNUSED_BET_COLUMN, UNUSED_BET_COLUMN},
+    {2, 3, 4, 6, UNUSED_BET_COLUMN, UNUSED_BET_COLUMN}
 };
-// clang-format on
 /* How many columns each bet set uses */
 static u8 f_BetSetColumnCounts[OFFERING_BET_SET_COUNT] = {5, 6, 3, 3, 3, 3, 4};
 /* Each BET_PRESET_*'s stake level for each bet */
-// clang-format off
-static u8 f_BetPresetStakeLevels[BET_PRESET_COUNT]
-                            [BET_STAKE_SLOT_COUNT] = {
-  { 4, 4, 1, 0, 0, NO_BET, NO_BET, NO_BET },
-  { 4, 4, 0, 0, 0, NO_BET, 0, NO_BET },
-  { 4, 4, NO_BET, NO_BET, NO_BET, 1, NO_BET, NO_BET },
-  { 4, 4, NO_BET, NO_BET, 1, NO_BET, NO_BET, NO_BET },
-  { 4, 4, NO_BET, NO_BET, 1, NO_BET, NO_BET, NO_BET },
-  { NO_BET, NO_BET, 1, 0, 0, NO_BET, NO_BET, NO_BET },
-  { NO_BET, NO_BET, 0, 0, 0, NO_BET, 0, NO_BET }
+static u8 f_BetPresetStakeLevels[BET_PRESET_COUNT][BET_STAKE_SLOT_COUNT] = {
+    {4, 4, 1, 0, 0, NO_BET, NO_BET, NO_BET},
+    {4, 4, 0, 0, 0, NO_BET, 0, NO_BET},
+    {4, 4, NO_BET, NO_BET, NO_BET, 1, NO_BET, NO_BET},
+    {4, 4, NO_BET, NO_BET, 1, NO_BET, NO_BET, NO_BET},
+    {4, 4, NO_BET, NO_BET, 1, NO_BET, NO_BET, NO_BET},
+    {NO_BET, NO_BET, 1, 0, 0, NO_BET, NO_BET, NO_BET},
+    {NO_BET, NO_BET, 0, 0, 0, NO_BET, 0, NO_BET}
 };
-// clang-format on
 static u8 f_BetStakeAmounts[BET_STAKE_LEVEL_COUNT] = {0, 1, 2, 3, 5, 10};
-// clang-format off
 /* The x of each column of a bet set */
-static s32 f_BetSetColumnXs[OFFERING_BET_SET_COUNT]
-                             [BET_SET_MAX_COLUMN_COUNT] = {
-  { 68, 108, 148, 188, 228, 228 },
-  { 48, 88, 128, 168, 208, 248 },
-  { 114, 148, 184, 216, 256, 256 },
-  { 114, 148, 184, 216, 256, 256 },
-  { 114, 148, 184, 144, 144, 144 },
-  { 114, 148, 184, 216, 256, 256 },
-  { 87, 127, 167, 207, 228, 228 }
+static s32 f_BetSetColumnXs[OFFERING_BET_SET_COUNT][BET_SET_MAX_COLUMN_COUNT] = {
+    {68, 108, 148, 188, 228, 228},
+    {48, 88, 128, 168, 208, 248},
+    {114, 148, 184, 216, 256, 256},
+    {114, 148, 184, 216, 256, 256},
+    {114, 148, 184, 144, 144, 144},
+    {114, 148, 184, 216, 256, 256},
+    {87, 127, 167, 207, 228, 228}
 };
-// clang-format on
 /* Read by no routine; katakana for "Drive contest", "Near pin", "Score",
  * "Vertical", "Horizontal", "Skins", "Match" and "Doubles" */
 static char f_UnusedGameNames[8][10] UNUSED =
@@ -325,35 +310,24 @@ static s32 f_UnusedWordsAfterGolferAngles[3] UNUSED = {0, 0, 0};
 /* Each golfer's scale on the handicap screen */
 static f32 f_HandicapGolferScales[MAX_PLAYER_COUNT] = {4.2f, 4.0f, 4.2f, 4.0f};
 /* Where DrawHandicaps stands each golfer, by the player count */
-// clang-format off
-static Vec3 f_HandicapGolferPositions[MAX_PLAYER_COUNT]
-                              [MAX_PLAYER_COUNT] = {
-  {
-    { 0.0f, -44.0f, -1000.0f },
-    { 64.0f, -44.0f, -1500.0f },
-    { 64.0f, -44.0f, -1000.0f },
-    { 64.0f, -44.0f, -1500.0f }
-  },
-  {
-    { -64.0f, -44.0f, -1500.0f },
-    { 64.0f, -44.0f, -1000.0f },
-    { 64.0f, -44.0f, -1500.0f },
-    { 64.0f, -44.0f, -1000.0f }
-  },
-  {
-    { -96.0f, -44.0f, -1500.0f },
-    { 0.0f, -54.0f, -1000.0f },
-    { 96.0f, -44.0f, -1500.0f },
-    { 96.0f, -44.0f, -1000.0f }
-  },
-  {
-    { -96.0f, -44.0f, -1500.0f },
-    { -32.0f, -54.0f, -1000.0f },
-    { 32.0f, -44.0f, -1500.0f },
-    { 96.0f, -54.0f, -1000.0f }
-  }
+static Vec3 f_HandicapGolferPositions[MAX_PLAYER_COUNT][MAX_PLAYER_COUNT] = {
+    {{0.0f, -44.0f, -1000.0f},
+        {64.0f, -44.0f, -1500.0f},
+        {64.0f, -44.0f, -1000.0f},
+        {64.0f, -44.0f, -1500.0f}},
+    {{-64.0f, -44.0f, -1500.0f},
+        {64.0f, -44.0f, -1000.0f},
+        {64.0f, -44.0f, -1500.0f},
+        {64.0f, -44.0f, -1000.0f}},
+    {{-96.0f, -44.0f, -1500.0f},
+        {0.0f, -54.0f, -1000.0f},
+        {96.0f, -44.0f, -1500.0f},
+        {96.0f, -44.0f, -1000.0f}},
+    {{-96.0f, -44.0f, -1500.0f},
+        {-32.0f, -54.0f, -1000.0f},
+        {32.0f, -44.0f, -1500.0f},
+        {96.0f, -54.0f, -1000.0f}}
 };
-// clang-format on
 /* The left of each player's column, by the player count */
 static s32 f_HandicapColumnLefts[MAX_PLAYER_COUNT][MAX_PLAYER_COUNT] =
     {{128, 0, 0, 0}, {96, 160, 0, 0}, {64, 128, 192, 0}, {32, 96, 160, 224}};
@@ -366,15 +340,12 @@ static s32 f_BrickRowSpeeds[STATS_SLIDE_ROW_COUNT] = {64, 64, 64, 64, 64, 64, 64
 /* How far across the screen each row is drawn */
 static s32 f_BrickRowOffsets[STATS_SLIDE_ROW_COUNT] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
 /* Where each slide but STATS_SLIDE_CURRENT starts the rows */
-// clang-format off
-static s32 f_BrickSlideStartOffsets[STATS_SLIDE_COUNT - 1]
-                             [STATS_SLIDE_ROW_COUNT] = {
-  { 320, 320, 320, 320, 320, 320, 320, 320, 320 },
-  { -320, -320, -320, -320, -320, -320, -320, -320, -320 },
-  { 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-  { 0, 0, 0, 0, 0, 0, 0, 0, 0 }
+static s32 f_BrickSlideStartOffsets[STATS_SLIDE_COUNT - 1][STATS_SLIDE_ROW_COUNT] = {
+    {320, 320, 320, 320, 320, 320, 320, 320, 320},
+    {-320, -320, -320, -320, -320, -320, -320, -320, -320},
+    {0, 0, 0, 0, 0, 0, 0, 0, 0},
+    {0, 0, 0, 0, 0, 0, 0, 0, 0}
 };
-// clang-format on
 /* The slide that the rows were last started on */
 static u8 f_BrickWallSlide = 0;
 /* The corners of each page arrow that DrawTurnedPageArrows tilts */
@@ -412,29 +383,26 @@ AssetId g_CharacterFaceAssets[CHARACTER_COUNT] = {
     0x0819,
     0x0827
 };
-// clang-format off
-s16 g_CharacterPaletteFiles[CHARACTER_COUNT]
-                            [CHARACTER_PALETTE_COUNT] = {
-  { 0x07B8, 0x07B9, 0x07BA, 0x07BB },
-  { 0x0748, 0x0749, 0x074A, 0x074B },
-  { 0x079C, 0x079D, 0x079E, 0x079F },
-  { 0x073A, 0x073B, 0x073C, 0x073D },
-  { 0x0780, 0x0781, 0x0782, 0x0783 },
-  { 0x07AA, 0x07AB, 0x07AC, 0x07AD },
-  { 0x07C6, 0x07C7, 0x07C8, 0x07C9 },
-  { 0x07D4, 0x07D5, 0x07D6, 0x07D7 },
-  { 0x0764, 0x0765, 0x0766, 0x0767 },
-  { 0x078E, 0x078F, 0x0790, 0x0791 },
-  { 0x07E2, 0x07E3, 0x07E4, 0x07E5 },
-  { 0x0756, 0x0757, 0x0758, 0x0759 },
-  { 0x0772, 0x0773, 0x0774, 0x0775 },
-  { 0x0980, 0x0981, 0x0982, 0x0983 },
-  { 0x07F0, 0x07F1, 0x07F2, 0x07F3 },
-  { 0x07FE, 0x07FF, 0x0800, 0x0801 },
-  { 0x080C, 0x080D, 0x080E, 0x080F },
-  { 0x081A, 0x081B, 0x081C, 0x081D }
+s16 g_CharacterPaletteFiles[CHARACTER_COUNT][CHARACTER_PALETTE_COUNT] = {
+    {0x07B8, 0x07B9, 0x07BA, 0x07BB},
+    {0x0748, 0x0749, 0x074A, 0x074B},
+    {0x079C, 0x079D, 0x079E, 0x079F},
+    {0x073A, 0x073B, 0x073C, 0x073D},
+    {0x0780, 0x0781, 0x0782, 0x0783},
+    {0x07AA, 0x07AB, 0x07AC, 0x07AD},
+    {0x07C6, 0x07C7, 0x07C8, 0x07C9},
+    {0x07D4, 0x07D5, 0x07D6, 0x07D7},
+    {0x0764, 0x0765, 0x0766, 0x0767},
+    {0x078E, 0x078F, 0x0790, 0x0791},
+    {0x07E2, 0x07E3, 0x07E4, 0x07E5},
+    {0x0756, 0x0757, 0x0758, 0x0759},
+    {0x0772, 0x0773, 0x0774, 0x0775},
+    {0x0980, 0x0981, 0x0982, 0x0983},
+    {0x07F0, 0x07F1, 0x07F2, 0x07F3},
+    {0x07FE, 0x07FF, 0x0800, 0x0801},
+    {0x080C, 0x080D, 0x080E, 0x080F},
+    {0x081A, 0x081B, 0x081C, 0x081D}
 };
-// clang-format on
 /* Read by no routine; a row like the six that follow the characters' rows of
  * g_CharacterFacePaletteFiles */
 static s16 f_UnusedPaletteFileRow[4] UNUSED = {0x078E, 0x078E, 0x078E, 0x078E};

@@ -98,9 +98,7 @@ static SurfaceInfo f_SurfaceInfo[SURFACE_COUNT] = {
 /* For impactTiming values below and above the entries of f_ImpactEffects */
 static ImpactEffect f_EarlyImpactEffect = {-90, -64, -40, -10, 100, 1};
 static ImpactEffect f_LateImpactEffect = {-80, 64, 30, 10, -5, 1};
-// clang-format off
-static ImpactEffect
-    f_ImpactEffects[MAX_LIE_RATING + 1][IMPACT_TIMING_ENTRY_COUNT] = {
+static ImpactEffect f_ImpactEffects[MAX_LIE_RATING + 1][IMPACT_TIMING_ENTRY_COUNT] = {
     {
         {-90, -64, -40, -10, 100, 1},
         {-90, -64, -40, -10, 100, 1},
@@ -180,7 +178,6 @@ static ImpactEffect
         {-12, 3, -2, 10, 4, 0},
     },
 };
-// clang-format on
 
 s32 g_UnusedLaunchCount = 0;
 /* Read by no routine */

@@ -194,59 +194,58 @@ static f32 f_TableCursorPhases[MENU_CURSOR_VERTEX_COUNT] = {0.0f, 2.0f, 4.0f, 6.
  * The top-left and bottom-right corners of each line between the table's
  * cells: five one-pixel rows, then seven one-pixel columns
  */
-// clang-format off
 static TableCorner f_TableLineCorners[TABLE_LINE_COUNT * 2] = {
-  { 24, 80 }, { 300, 81 },
-  { 24, 110 }, { 300, 111 },
-  { 24, 140 }, { 300, 141 },
-  { 24, 170 }, { 300, 171 },
-  { 24, 200 }, { 300, 201 },
-  { 56, 52 }, { 57, 228 },
-  { 91, 52 }, { 92, 228 },
-  { 126, 52 }, { 127, 228 },
-  { 161, 52 }, { 162, 228 },
-  { 196, 52 }, { 197, 228 },
-  { 231, 52 }, { 232, 228 },
-  { 266, 52 }, { 267, 228 }
+    {24, 80},
+    {300, 81},
+    {24, 110},
+    {300, 111},
+    {24, 140},
+    {300, 141},
+    {24, 170},
+    {300, 171},
+    {24, 200},
+    {300, 201},
+    {56, 52},
+    {57, 228},
+    {91, 52},
+    {92, 228},
+    {126, 52},
+    {127, 228},
+    {161, 52},
+    {162, 228},
+    {196, 52},
+    {197, 228},
+    {231, 52},
+    {232, 228},
+    {266, 52},
+    {267, 228}
 };
-// clang-format on
 /* Read by no routine */
 static s32 f_UnreadTablePoint[2] UNUSED = {64, 84};
 /* Which of the cursor's shown cells each popup corner would cover */
-// clang-format off
-static u8 f_DoesTablePopupCoverCell[TABLE_POPUP_CORNER_COUNT]
-                                   [TABLE_SHOWN_ROW_COUNT]
+static u8 f_DoesTablePopupCoverCell[TABLE_POPUP_CORNER_COUNT][TABLE_SHOWN_ROW_COUNT]
                                    [TABLE_SHOWN_COLUMN_COUNT] = {
-  {
-    { TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, FALSE },
-    { TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, FALSE },
-    { FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE },
-    { FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE },
-    { FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE }
-  },
-  {
-    { FALSE, FALSE, FALSE, TRUE, TRUE, TRUE, TRUE },
-    { FALSE, FALSE, FALSE, TRUE, TRUE, TRUE, TRUE },
-    { FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE },
-    { FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE },
-    { FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE }
-  },
-  {
-    { FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE },
-    { FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE },
-    { FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE },
-    { TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, FALSE },
-    { TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, FALSE }
-  },
-  {
-    { FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE },
-    { FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE },
-    { FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE },
-    { FALSE, FALSE, FALSE, TRUE, TRUE, TRUE, TRUE },
-    { FALSE, FALSE, FALSE, TRUE, TRUE, TRUE, TRUE }
-  }
+                                       {{TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, FALSE},
+                                           {TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, FALSE},
+                                           {FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE},
+                                           {FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE},
+                                           {FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE}},
+                                       {{FALSE, FALSE, FALSE, TRUE, TRUE, TRUE, TRUE},
+                                           {FALSE, FALSE, FALSE, TRUE, TRUE, TRUE, TRUE},
+                                           {FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE},
+                                           {FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE},
+                                           {FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE}},
+                                       {{FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE},
+                                           {FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE},
+                                           {FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE},
+                                           {TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, FALSE},
+                                           {TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, FALSE}},
+                                       {{FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE},
+                                           {FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE},
+                                           {FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE},
+                                           {FALSE, FALSE, FALSE, TRUE, TRUE, TRUE, TRUE},
+                                           {FALSE, FALSE, FALSE, TRUE, TRUE, TRUE, TRUE}}
 };
-// clang-format on
 
 /* The camera and placement that DrawTableCursor draws the cursor with */
 static Mtx f_TableCursorProjection;

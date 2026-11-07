@@ -23,29 +23,19 @@
 #        define RESUME_RODATA_SECTION() __asm__("")
 #    endif
 
-/* Keep one assembler directive per line */
-/* clang-format off */
-#ifndef INCLUDE_ASM
-#define INCLUDE_ASM(FOLDER, NAME) \
-    __asm__( \
-        ASM_SECTION_ENTER(".text") \
-        "    .set noat\n" \
-        "    .set noreorder\n" \
-        "    .include \"" FOLDER "/" #NAME ".s\"\n" \
-        "    .set reorder\n" \
-        "    .set at\n" \
-        ASM_SECTION_LEAVE \
-    )
-#endif
-#ifndef INCLUDE_RODATA
-#define INCLUDE_RODATA(FOLDER, NAME) \
-    __asm__( \
-        ASM_SECTION_ENTER(".rodata") \
-        "    .include \"" FOLDER "/" #NAME ".s\"\n" \
-        ASM_SECTION_LEAVE \
-    )
-#endif
-/* clang-format on */
+#    ifndef INCLUDE_ASM
+#        define INCLUDE_ASM(FOLDER, NAME) \
+            __asm__(ASM_SECTION_ENTER(".text") "    .set noat\n" \
+                                               "    .set noreorder\n" \
+                                               "    .include \"" FOLDER "/" #NAME ".s\"\n" \
+                                               "    .set reorder\n" \
+                                               "    .set at\n" ASM_SECTION_LEAVE)
+#    endif
+#    ifndef INCLUDE_RODATA
+#        define INCLUDE_RODATA(FOLDER, NAME) \
+            __asm__(ASM_SECTION_ENTER(".rodata") "    .include \"" FOLDER "/" #NAME \
+                                                 ".s\"\n" ASM_SECTION_LEAVE)
+#    endif
 
 /*
  * Modern assemblers need macro.inc's aliases for the o32 float register
