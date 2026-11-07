@@ -2162,6 +2162,12 @@ void BuildShotPreview(ShotLaunch* swing, s32 playerState) {
  * A focused permuter run works out dy before dx, which gives 48 words, 12 in
  * shape, but the register oracle's closest result is then 37 words, forcing 15
  * pseudos, against 22 forcing 14, so the gain is in the registers alone.
+ *
+ * Of the 48 orders of the four scalings and two subtractions, five give 44
+ * words, 12 in shape, all with dy worked out first; scaling the end point
+ * before the ball is the plainest of them. But with it the register oracle
+ * gets no closer than those 44, forcing none, against 16 forcing 16 for
+ * this order.
  */
 #ifdef NON_MATCHING
 void DrawShotPreview(CameraMatrices* matrices) {
