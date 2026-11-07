@@ -1,0 +1,117 @@
+#include "common.h"
+
+extern s32 D_ovl3_80230E88;
+extern f32 D_ovl3_80230E8C;
+extern f32 D_ovl3_80230E90;
+extern s32 D_ovl3_80230E9C;
+extern s32 D_ovl3_80230EA0;
+extern u8 D_ovl3_80230F40;
+/* splat labels the byte at 0x80105DC0 as D_80105DBC + 4. */
+extern s8 D_80105DBC[];
+
+void *func_8005AF50(void);
+void *func_8005AF74(void);
+
+void func_ovl3_802266F0(void) {
+    D_ovl3_80230E88 = 0;
+    D_ovl3_80230E8C = 0.0f;
+    D_ovl3_80230E90 = 0.0f;
+    D_ovl3_80230E9C = 0;
+    D_ovl3_80230EA0 = 0;
+}
+
+void func_ovl3_8022671C(void) {
+    D_ovl3_80230E9C = 0;
+    D_ovl3_80230EA0 = 0;
+    D_ovl3_80230E88 = 1;
+    D_ovl3_80230E8C = 1.0f;
+    D_ovl3_80230E90 = 1.0f;
+}
+
+void func_ovl3_80226754(void) {
+    D_ovl3_80230E88 = 2;
+}
+
+s32 func_ovl3_80226764(void) {
+    if (D_ovl3_80230E88 != 0) {
+        return D_ovl3_80230E88 == 1;
+    }
+    return -1;
+}
+
+s32 func_ovl3_80226788(void) {
+    if (D_ovl3_80230E88 != 2) {
+        return D_ovl3_80230E88 == 3;
+    }
+    return -1;
+}
+
+INCLUDE_ASM("asm/nonmatchings/110670", func_ovl3_802267B0);
+
+INCLUDE_ASM("asm/nonmatchings/110670", func_ovl3_80226904);
+
+INCLUDE_ASM("asm/nonmatchings/110670", func_ovl3_80226958);
+
+INCLUDE_ASM("asm/nonmatchings/110670", func_ovl3_802269AC);
+
+void func_ovl3_80226A34(void) {
+    func_8005AF50();
+    func_8005AF74();
+}
+
+INCLUDE_ASM("asm/nonmatchings/110670", func_ovl3_80226A58);
+
+INCLUDE_ASM("asm/nonmatchings/110670", func_ovl3_8022747C);
+
+INCLUDE_ASM("asm/nonmatchings/110670", func_ovl3_802287EC);
+
+INCLUDE_ASM("asm/nonmatchings/110670", func_ovl3_80228A80);
+
+INCLUDE_ASM("asm/nonmatchings/110670", func_ovl3_80228B60);
+
+INCLUDE_ASM("asm/nonmatchings/110670", func_ovl3_80228C00);
+
+INCLUDE_ASM("asm/nonmatchings/110670", func_ovl3_80229278);
+
+INCLUDE_ASM("asm/nonmatchings/110670", func_ovl3_802296C4);
+
+INCLUDE_ASM("asm/nonmatchings/110670", func_ovl3_80229CB0);
+
+INCLUDE_ASM("asm/nonmatchings/110670", func_ovl3_8022A090);
+
+INCLUDE_ASM("asm/nonmatchings/110670", func_ovl3_8022A43C);
+
+INCLUDE_ASM("asm/nonmatchings/110670", func_ovl3_8022A8F4);
+
+INCLUDE_ASM("asm/nonmatchings/110670", func_ovl3_8022ADE8);
+
+INCLUDE_ASM("asm/nonmatchings/110670", func_ovl3_8022B360);
+
+INCLUDE_ASM("asm/nonmatchings/110670", func_ovl3_8022B46C);
+
+INCLUDE_ASM("asm/nonmatchings/110670", func_ovl3_8022B5E0);
+
+INCLUDE_ASM("asm/nonmatchings/110670", func_ovl3_8022B668);
+
+INCLUDE_ASM("asm/nonmatchings/110670", func_ovl3_8022B75C);
+
+INCLUDE_ASM("asm/nonmatchings/110670", func_ovl3_8022B7E0);
+
+s32 func_ovl3_8022BDB0(void) {
+    return D_80105DBC[4] == -1;
+}
+
+s32 func_ovl3_8022BDC4(void) {
+    return D_80105DBC[4];
+}
+
+s32 func_ovl3_8022BDD0(void) {
+    if (D_ovl3_80230F40 != 0) {
+        D_ovl3_80230F40 = 0;
+        return 1;
+    }
+    return 0;
+}
+
+void func_ovl3_8022BDF8(void) {
+}
