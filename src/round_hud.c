@@ -1817,8 +1817,8 @@ typedef struct GridScreenPoint {
             } \
         } \
         else { \
-            blue = 0; \
             if ((slope) == 0) { \
+                blue = 0; \
                 green = 0; \
                 red = 0; \
             } \
@@ -1931,6 +1931,12 @@ typedef struct GridScreenPoint {
  * result from 181 words to 176, forcing 30. The rising branch's blue is
  * then red less the slope; through a blue set to the slope first, as
  * GetWarmthTint has it, gives the same 296. 296 words differ, 24 in shape.
+ *
+ * The black tint sets blue in each branch too, so that every branch of
+ * both tints sets all three channels. That takes the draft from 296 words
+ * differing (24 in shape) to 275 (21); the oracle's closest result goes
+ * from 176 words, forcing 30 pseudos, to 179, forcing 27. 275 words
+ * differ, 21 in shape.
  */
 void DrawGreenGrid(Gfx **displayListHead, CameraMatrices *matrices) {
     f32 points[GREEN_GRID_POINT_COUNT][3];
