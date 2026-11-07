@@ -4085,7 +4085,14 @@ void WriteHexDumpFile(u32 *words, s32 byteCount, char *fileName) {
  * is then 1432, forcing 21 pseudos. In both, loop.c makes the column a
  * giv of its own, stepped in a slot, where the original recomputes it.
  * Setting the line from the column instead gives 1542 (114), and from it
- * with tileColumn kept, 2265 (147). 921 words differ, 133 in shape.
+ * with tileColumn kept, 2265 (147).
+ *
+ * A permuter run found 795 words, but 193 in shape, by naming the bottom row
+ * test in a Boolean set before the hole-loaded test and using it only for
+ * the bottom midpoints. Using it in both of the bottom row's tests gives 1829
+ * (245), the top and bottom rows' Booleans in all four row tests 1724 (250),
+ * and all four edges' Booleans, the columns' too, 986 (348). 921 words
+ * differ, 133 in shape.
  */
 #ifdef NON_MATCHING
 void DrawHoleEditorGround(CameraMatrices *matrices UNUSED, s32 terrainStyle) {
