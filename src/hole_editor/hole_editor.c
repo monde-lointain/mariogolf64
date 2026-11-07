@@ -4041,8 +4041,14 @@ void WriteHexDumpFile(u32 *words, s32 byteCount, char *fileName) {
  * shape); taking only the bottom T as the row's plus 0x82 then gives 2471
  * (337), and only a borderless tile's as its own plus 0x84, 2503 (325).
  * Setting firstTileS from half gives the same 1791 words. The original
- * still loads 0xF5100000 6 times, where ours does 18 times. 1791 words
- * differ, 233 in shape.
+ * still loads 0xF5100000 6 times, where ours does 18 times.
+ *
+ * As in DrawGround, the original steps the tile index and its givs at the end
+ * of a fine tile drawn from its display list, and goes from there to the next
+ * tile, so that arm steps tileIndex itself and continues. That takes the draft
+ * from 1791 words differing (233 in shape) to 1751 (187), and the register
+ * oracle's closest result from 1359 words to 1345, forcing 26 pseudos either
+ * way. 1751 words differ, 187 in shape.
  */
 #ifdef NON_MATCHING
 void DrawHoleEditorGround(CameraMatrices *matrices UNUSED, s32 terrainStyle) {
@@ -4728,6 +4734,8 @@ void DrawHoleEditorGround(CameraMatrices *matrices UNUSED, s32 terrainStyle) {
 
                             current ^= 1;
                             gSPDisplayList(gfx++, g_GroundTileDisplayLists[tileIndex]);
+                            tileIndex++;
+                            continue;
                         }
                         else {
                             /* Builds the tile's 5 by 5 points: its grid vertices, then the
