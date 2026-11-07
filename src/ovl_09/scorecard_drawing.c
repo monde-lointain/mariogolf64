@@ -2357,6 +2357,11 @@ INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard_drawing", DrawLeaderboardPage);
  * words for i (190 in shape, with a frame 16 bytes larger), 866 for hole,
  * 706 for j, and 862 to 1200 for the combinations, so the loops keep
  * sharing them.
+ *
+ * The par row's holes are counted in i too, as the routine's other
+ * sequential loops are: with a counter of their own, 710 words differed
+ * (156 in shape) and the register oracle's closest was 566, forcing 48
+ * pseudos, against 706 and 560, forcing 47. 706 words differ, 156 in shape.
  */
 #ifdef NON_MATCHING
 void DrawScoresPage(Gfx** displayListHead) {
@@ -2384,7 +2389,6 @@ void DrawScoresPage(Gfx** displayListHead) {
   s32 facePlayerIndex;
   s32 j;
   s32 cellColumn;
-  s32 parHoleIndex;
   s32 hole;
   SaveData* saveData;
   s32 glow;
@@ -2984,21 +2988,21 @@ void DrawScoresPage(Gfx** displayListHead) {
   }
 
   SetTextColor(&gfx, 0xFF, 0xFF, 0xFF);
-  for (parHoleIndex = 0; parHoleIndex != HOLES_PER_NINE; parHoleIndex++) {
+  for (i = 0; i != HOLES_PER_NINE; i++) {
     if (!(g_GameState.holeSelection & HOLE_SELECTION_BACK_NINE)) {
-      frontPar += course->holes[parHoleIndex].par;
-      sprintf(g_PrintBuffer, f_DecimalFormat, course->holes[parHoleIndex].par);
+      frontPar += course->holes[i].par;
+      sprintf(g_PrintBuffer, f_DecimalFormat, course->holes[i].par);
       DrawCondensedShadowedText(&gfx,
-          (parHoleIndex * CELL_WIDTH) + PAR_LEFT + g_Scorecard.x,
+          (i * CELL_WIDTH) + PAR_LEFT + g_Scorecard.x,
           frontTop + PAR_TOP + g_Scorecard.y, g_PrintBuffer);
     }
 
     if (!(g_GameState.holeSelection & HOLE_SELECTION_FRONT_NINE)) {
-      backPar += course->holes[parHoleIndex + HOLES_PER_NINE].par;
+      backPar += course->holes[i + HOLES_PER_NINE].par;
       sprintf(g_PrintBuffer, f_DecimalFormat,
-          course->holes[parHoleIndex + HOLES_PER_NINE].par);
+          course->holes[i + HOLES_PER_NINE].par);
       DrawCondensedShadowedText(&gfx,
-          (parHoleIndex * CELL_WIDTH) + PAR_LEFT + g_Scorecard.x,
+          (i * CELL_WIDTH) + PAR_LEFT + g_Scorecard.x,
           backTop + PAR_TOP + g_Scorecard.y, g_PrintBuffer);
     }
   }
