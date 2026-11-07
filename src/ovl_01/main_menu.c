@@ -4779,37 +4779,45 @@ void DrawSpinningStars(Gfx** displayListHead, s32 left, s32 top, u8 starCount,
  * so the pointer only perturbs allocation; testing modeSpin first gives 130
  * words, and == FALSE or ! leave 86. A focused run's best reads modeChoice
  * through a pointer in the boards' loop instead (38 words, 2 in shape), but the
- * original loads g_MenuMemory.modeChoice directly on each pass too. The
- * original holds index in s0 in the boards' loops and in s1 in the banner
- * strips' and players' loops, but counters of their own for those loops give
- * 138 to 230 words. Working out a board's angle and x in both arms of the mode
- * count's test, which still compiles to the target's two sinf calls, gives 74
- * words differing but 16 in shape, and copies code for no reason. Declaring a
- * board's turns as a u16 or u8 gives 43 words (7 in shape), but turns goes
- * negative, and the original multiplies the remainder from mfhi by the angle
- * step without masking it. areCharactersDrawn is a u8, as the original masks it
- * with andi 0xff before testing it in the boards' loop; as a Boolean or s32 it
- * gives 44 words (4 in shape) without the mask, and as an s8 or s16 88 (4). A
- * u32 angleStep gives 54 words (10 in shape), but converts the board's angle to
- * a double with a bgez and an add of 2^32 after the cvt.d.w, which the original
- * lacks; a u16 gives 55 (7) but adds two andi 0xffff, and a u8 also 55 (7) but
- * adds two andi 0xff and can't hold the step of 360 that one mode or none
- * gives; an s16 or s8 key gives 60 (8), but the s16 adds two sll and one sra by
- * 16 that the original lacks. Keeping the board's half size in the angle step's
- * variable, which would give one variable two meanings, gives 68 words (2 in
- * shape), but the register oracle's closest is then 40 words, forcing 3
- * pseudos, against 34 here; no declaration order of the two gives other than
- * 86. 86 words differ, 2 in shape.
+ * original loads g_MenuMemory.modeChoice directly on each pass too. Working out
+ * a board's angle and x in both arms of the mode count's test, which still
+ * compiles to the target's two sinf calls, gives 74 words differing but 16 in
+ * shape, and copies code for no reason. Declaring a board's turns as a u16 or
+ * u8 gives 43 words (7 in shape), but turns goes negative, and the original
+ * multiplies the remainder from mfhi by the angle step without masking it.
+ * areCharactersDrawn is a u8, as the original masks it with andi 0xff before
+ * testing it in the boards' loop; as a Boolean or s32 it gives 44 words (4 in
+ * shape) without the mask, and as an s8 or s16 88 (4). A u32 angleStep gives 54
+ * words (10 in shape), but converts the board's angle to a double with a bgez
+ * and an add of 2^32 after the cvt.d.w, which the original lacks; a u16 gives
+ * 55 (7) but adds two andi 0xffff, and a u8 also 55 (7) but adds two andi 0xff
+ * and can't hold the step of 360 that one mode or none gives; an s16 or s8 key
+ * gives 60 (8), but the s16 adds two sll and one sra by 16 that the original
+ * lacks. Keeping the board's half size in the angle step's variable, which
+ * would give one variable two meanings, gives 68 words (2 in shape), but the
+ * register oracle's closest is then 40 words, forcing 3 pseudos, against 34
+ * here; no declaration order of the two gives other than 86.
  *
  * Stepping the players' second loop, which draws their labels, with slot gives
- * 42 words differing, 2 in shape, but the register oracle's closest is still 34
- * words forcing 3 pseudos, so the gain is in the registers alone; stepping any
- * of the banner strips' loops or the players' first loop with slot as well
- * gives 86 or 87 words.
+ * 20 words differing, 2 in shape, but the register oracle's closest rises to
+ * 12 words forcing 3 pseudos, so the gain is in the registers alone. Before
+ * the loops shared i it gave 42 words, and stepping any of the banner strips'
+ * loops or the players' first loop with slot as well 86 or 87.
  *
- * Ending the draw-order sort's outer loop on countShift < modeCount gives 44
- * words differing, 8 in shape, but the original ends that loop with a bne,
- * as the draft's test does.
+ * Ending the draw-order sort's outer loop on i < modeCount gives 44 words
+ * differing, 8 in shape, but the original ends that loop with a bne, as the
+ * draft's test does.
+ *
+ * The register oracle lines index up with $s0 in the boards' loops and with
+ * $s1 in the banner strips' and players' loops, where the original keeps the
+ * sort's counter, the chosen mode and the won count's shift. Counting those
+ * loops in that variable, i, takes the draft from 86 words differing to 50,
+ * 2 in shape either way, and the oracle's closest from 34 words, forcing 3
+ * pseudos, to 2, forcing the mode count's and the slot's registers. Counters
+ * of their own for the banner strips' and players' loops give 138 to 230
+ * words, though the oracle's closest is then also 2, forcing 26 or 27. The 2
+ * words left are the strips' missing add of zero. 50 words differ, 2 in
+ * shape.
  */
 #ifdef NON_MATCHING
 void DrawModeSelect(Gfx** displayListHead) {
@@ -4845,12 +4853,13 @@ void DrawModeSelect(Gfx** displayListHead) {
   s32 labelX;
   void* image;
   /*
-   * The board and strip index in the loops, then the chosen mode, then the won
-   * count's shift, to match: an i for the loops gives 202 words differing (4 in
-   * shape), a modeChoice for the chosen mode 108 (8), and both 224 (10),
-   * against the draft's 86 (2)
+   * Counts the sort's passes and the icon, banner strip and player loops, and
+   * holds the chosen mode and then the won count's shift, as the original
+   * keeps all of them in $s1: a local for the shift gives 156 words differing
+   * (2 in shape), and reading the chosen mode where it's used 82 (26), against
+   * the draft's 50 (2)
    */
-  s32 countShift;
+  s32 i;
   s32 courseIndex;
   s32 holeIndex;
 
@@ -4909,14 +4918,14 @@ void DrawModeSelect(Gfx** displayListHead) {
     }
   }
 
-  for (countShift = 0; countShift != modeCount; countShift++) {
-    drawOrder[countShift] = countShift;
+  for (i = 0; i != modeCount; i++) {
+    drawOrder[i] = i;
   }
 
   /* Draw the farthest boards first, so the nearer ones cover them */
-  for (countShift = 1; countShift != modeCount; countShift++) {
-    key = drawOrder[countShift];
-    for (index = countShift - 1;
+  for (i = 1; i != modeCount; i++) {
+    key = drawOrder[i];
+    for (index = i - 1;
         (index >= 0) && (boardY[drawOrder[index]] > boardY[key]); index--) {
       drawOrder[index + 1] = drawOrder[index];
     }
@@ -4997,10 +5006,10 @@ void DrawModeSelect(Gfx** displayListHead) {
             UNCHOSEN_MODE_BOARD_SHADE, UNCHOSEN_MODE_BOARD_SHADE, OPAQUE_ALPHA);
       }
 
-      for (countShift = 0; countShift != MODE_ICON_STRIP_COUNT; countShift++) {
+      for (i = 0; i != MODE_ICON_STRIP_COUNT; i++) {
         gDPLoadTextureBlock(gfx++,
             TextureAddress(LargeImageTexels(g_ModeIconImages[slot]) +
-                (countShift * MODE_ICON_WIDTH * MODE_ICON_STRIP_HEIGHT)),
+                (i * MODE_ICON_WIDTH * MODE_ICON_STRIP_HEIGHT)),
             G_IM_FMT_CI, G_IM_SIZ_8b, MODE_ICON_WIDTH, MODE_ICON_STRIP_HEIGHT,
             0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
             G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
@@ -5008,9 +5017,9 @@ void DrawModeSelect(Gfx** displayListHead) {
         gSPScisTextureRectangle(gfx++,
             QuarterPixels(wheelShiftX + (s32)(boardX[slot] - halfSize)),
             QuarterPixels(
-                (s32)(boardY[slot] - halfSize + (countShift * halfSize) + bob)),
+                (s32)(boardY[slot] - halfSize + (i * halfSize) + bob)),
             QuarterPixels((s32)(boardX[slot] + halfSize)),
-            QuarterPixels((s32)(boardY[slot] + (countShift * halfSize) + bob)),
+            QuarterPixels((s32)(boardY[slot] + (i * halfSize) + bob)),
             G_TX_RENDERTILE, 0, 0, step, step);
         gDPPipeSync(gfx++);
       }
@@ -5035,20 +5044,20 @@ void DrawModeSelect(Gfx** displayListHead) {
 
   gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(g_NamePlateImage)));
   if (g_ChosenPlayerCount == 1) {
-    for (index = 0; index != MENU_BANNER_STRIP_COUNT; index++) {
+    for (i = 0; i != MENU_BANNER_STRIP_COUNT; i++) {
       gDPLoadTextureBlock(gfx++,
           TextureAddress(LargeImageTexels(g_NamePlateImage) +
-              (index * MENU_BANNER_WIDTH * MENU_BANNER_STRIP_HEIGHT)),
+              (i * MENU_BANNER_WIDTH * MENU_BANNER_STRIP_HEIGHT)),
           G_IM_FMT_CI, G_IM_SIZ_8b, MENU_BANNER_WIDTH, MENU_BANNER_STRIP_HEIGHT,
           0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
       gDPPipeSync(gfx++);
       gSPScisTextureRectangle(gfx++, QuarterPixels(MODE_BANNER_LEFT),
-          QuarterPixels(MODE_BANNER_TOP + (index * MENU_BANNER_STRIP_HEIGHT)),
+          QuarterPixels(MODE_BANNER_TOP + (i * MENU_BANNER_STRIP_HEIGHT)),
           QuarterPixels(
               MODE_BANNER_LEFT + SINGLE_PLAYER_MODE_BANNER_SHOWN_WIDTH),
           QuarterPixels(MODE_BANNER_TOP + MENU_BANNER_STRIP_HEIGHT +
-              (index * MENU_BANNER_STRIP_HEIGHT)),
+              (i * MENU_BANNER_STRIP_HEIGHT)),
           G_TX_RENDERTILE, 0, 0,
           TexelRunStep(
               MENU_BANNER_WIDTH, SINGLE_PLAYER_MODE_BANNER_SHOWN_WIDTH),
@@ -5056,19 +5065,19 @@ void DrawModeSelect(Gfx** displayListHead) {
       gDPPipeSync(gfx++);
     }
   } else {
-    for (index = 0; index != MENU_BANNER_STRIP_COUNT; index++) {
+    for (i = 0; i != MENU_BANNER_STRIP_COUNT; i++) {
       gDPLoadTextureBlock(gfx++,
           TextureAddress(LargeImageTexels(g_NamePlateImage) +
-              (index * MENU_BANNER_WIDTH * MENU_BANNER_STRIP_HEIGHT)),
+              (i * MENU_BANNER_WIDTH * MENU_BANNER_STRIP_HEIGHT)),
           G_IM_FMT_CI, G_IM_SIZ_8b, MENU_BANNER_WIDTH, MENU_BANNER_STRIP_HEIGHT,
           0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
       gDPPipeSync(gfx++);
       gSPScisTextureRectangle(gfx++, QuarterPixels(MODE_BANNER_LEFT),
-          QuarterPixels(MODE_BANNER_TOP + (index * MENU_BANNER_STRIP_HEIGHT)),
+          QuarterPixels(MODE_BANNER_TOP + (i * MENU_BANNER_STRIP_HEIGHT)),
           QuarterPixels(MODE_BANNER_LEFT + MODE_BANNER_SHOWN_WIDTH),
           QuarterPixels(MODE_BANNER_TOP + MENU_BANNER_STRIP_HEIGHT +
-              (index * MENU_BANNER_STRIP_HEIGHT)),
+              (i * MENU_BANNER_STRIP_HEIGHT)),
           G_TX_RENDERTILE, 0, 0,
           TexelRunStep(MENU_BANNER_WIDTH, MODE_BANNER_SHOWN_WIDTH),
           TEXEL_STEP_ONE);
@@ -5076,10 +5085,10 @@ void DrawModeSelect(Gfx** displayListHead) {
     }
   }
 
-  countShift = g_MenuMemory.modeChoice;
+  i = g_MenuMemory.modeChoice;
   gDPLoadTLUT_pal16(
       gfx++, 0, TextureAddress(ImageBody(g_ImageSlots[f_ImageSlotIndex])));
-  labelIndex = f_ModeChoiceIcons[g_ChosenPlayerCount - 1][countShift];
+  labelIndex = f_ModeChoiceIcons[g_ChosenPlayerCount - 1][i];
   gDPLoadTextureBlock_4b(gfx++,
       TextureAddress(ImageTexels(g_ImageSlots[f_ImageSlotIndex]) +
           (labelIndex * MODE_LABEL_IMAGE_SIZE)),
@@ -5112,18 +5121,15 @@ void DrawModeSelect(Gfx** displayListHead) {
 
   image = g_SecondAnimatedIconImages[0];
   gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(image)));
-  for (index = 0; index != g_ChosenPlayerCount; index++) {
-    if (g_PlayerControllerIndices[index] != NO_CONTROLLER_INDEX) {
+  for (i = 0; i != g_ChosenPlayerCount; i++) {
+    if (g_PlayerControllerIndices[i] != NO_CONTROLLER_INDEX) {
       position[AXIS_X] =
-          f_ModeSelectControllerIconPositions[g_ChosenPlayerCount - 1][index]
-                                             [0];
+          f_ModeSelectControllerIconPositions[g_ChosenPlayerCount - 1][i][0];
       position[AXIS_Y] =
-          f_ModeSelectControllerIconPositions[g_ChosenPlayerCount - 1][index]
-                                             [1];
+          f_ModeSelectControllerIconPositions[g_ChosenPlayerCount - 1][i][1];
       gDPLoadTextureBlock(gfx++,
           TextureAddress(LargeImageTexels(image) +
-              (g_ChoosingControllerIndices[index] *
-                  CONTROLLER_ICON_IMAGE_SIZE)),
+              (g_ChoosingControllerIndices[i] * CONTROLLER_ICON_IMAGE_SIZE)),
           G_IM_FMT_CI, G_IM_SIZ_8b, CONTROLLER_ICON_SIZE, CONTROLLER_ICON_SIZE,
           0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
@@ -5139,23 +5145,22 @@ void DrawModeSelect(Gfx** displayListHead) {
 
   image = g_SecondAnimatedIconImages[1];
   gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(image)));
-  for (index = 0; index != g_ChosenPlayerCount; index++) {
+  for (i = 0; i != g_ChosenPlayerCount; i++) {
     position[AXIS_X] =
-        f_ModeSelectControllerIconPositions[g_ChosenPlayerCount - 1][index][0];
+        f_ModeSelectControllerIconPositions[g_ChosenPlayerCount - 1][i][0];
     position[AXIS_Y] =
-        f_ModeSelectControllerIconPositions[g_ChosenPlayerCount - 1][index][1];
-    if (g_PlayerControllerIndices[index] == NO_CONTROLLER_INDEX) {
+        f_ModeSelectControllerIconPositions[g_ChosenPlayerCount - 1][i][1];
+    if (g_PlayerControllerIndices[i] == NO_CONTROLLER_INDEX) {
       gDPLoadTextureBlock_4b(gfx++,
           TextureAddress(ImageTexels(image) +
               (PLAYER_LABEL_COMPUTER_FIRST * PLAYER_LABEL_IMAGE_SIZE) +
-              (index * PLAYER_LABEL_IMAGE_SIZE)),
+              (i * PLAYER_LABEL_IMAGE_SIZE)),
           G_IM_FMT_CI, PLAYER_LABEL_WIDTH, PLAYER_LABEL_HEIGHT, 0,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     } else {
       gDPLoadTextureBlock_4b(gfx++,
-          TextureAddress(
-              ImageTexels(image) + (index * PLAYER_LABEL_IMAGE_SIZE)),
+          TextureAddress(ImageTexels(image) + (i * PLAYER_LABEL_IMAGE_SIZE)),
           G_IM_FMT_CI, PLAYER_LABEL_WIDTH, PLAYER_LABEL_HEIGHT, 0,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
@@ -5187,25 +5192,25 @@ void DrawModeSelect(Gfx** displayListHead) {
       }
     }
 
-    countShift = 0;
+    i = 0;
     if (badgeCount < MIN_TWO_DIGIT_WON_COUNT) {
-      countShift = WON_COUNT_DIGIT_WIDTH;
+      i = WON_COUNT_DIGIT_WIDTH;
     }
 
     if ((badgeCount >= MIN_TWO_DIGIT_WON_COUNT) &&
         (badgeCount < MIN_THREE_DIGIT_WON_COUNT)) {
-      countShift = 0;
+      i = 0;
     }
 
     if (badgeCount >= MIN_THREE_DIGIT_WON_COUNT) {
-      countShift = -WON_COUNT_DIGIT_WIDTH;
+      i = -WON_COUNT_DIGIT_WIDTH;
     }
 
-    DrawSpinningBadge(&gfx, g_SpinningBadgeImage, WON_COUNT_ICON_X + countShift,
-        WON_COUNT_ICON_Y);
+    DrawSpinningBadge(
+        &gfx, g_SpinningBadgeImage, WON_COUNT_ICON_X + i, WON_COUNT_ICON_Y);
     gDPPipeSync(gfx++);
-    DrawUnalignedMenuNumber(&gfx, WON_COUNT_X + countShift, WON_COUNT_Y,
-        badgeCount, MENU_NUMBER_TIMES);
+    DrawUnalignedMenuNumber(
+        &gfx, WON_COUNT_X + i, WON_COUNT_Y, badgeCount, MENU_NUMBER_TIMES);
     gDPPipeSync(gfx++);
   }
 
@@ -5220,26 +5225,25 @@ void DrawModeSelect(Gfx** displayListHead) {
       }
     }
 
-    countShift = 0;
+    i = 0;
     if (starCount < MIN_TWO_DIGIT_WON_COUNT) {
-      countShift = WON_COUNT_DIGIT_WIDTH;
+      i = WON_COUNT_DIGIT_WIDTH;
     }
 
     /* This tests the badge count, which is zero here, for the star count */
     if ((starCount >= MIN_TWO_DIGIT_WON_COUNT) &&
         (badgeCount < MIN_THREE_DIGIT_WON_COUNT)) {
-      countShift = 0;
+      i = 0;
     }
 
     if (starCount >= MIN_THREE_DIGIT_WON_COUNT) {
-      countShift = -WON_COUNT_DIGIT_WIDTH;
+      i = -WON_COUNT_DIGIT_WIDTH;
     }
 
-    DrawSpinningStars(
-        &gfx, WON_COUNT_ICON_X + countShift, WON_COUNT_ICON_Y, 1, FALSE);
+    DrawSpinningStars(&gfx, WON_COUNT_ICON_X + i, WON_COUNT_ICON_Y, 1, FALSE);
     gDPPipeSync(gfx++);
-    DrawUnalignedMenuNumber(&gfx, WON_COUNT_X + countShift, WON_COUNT_Y,
-        starCount, MENU_NUMBER_TIMES);
+    DrawUnalignedMenuNumber(
+        &gfx, WON_COUNT_X + i, WON_COUNT_Y, starCount, MENU_NUMBER_TIMES);
     gDPPipeSync(gfx++);
   }
 
