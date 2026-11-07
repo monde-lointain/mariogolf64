@@ -1272,8 +1272,15 @@ NO_RESULT UpdateHandicaps(s32 firstPlayerIndex UNUSED, s32 playerCount UNUSED) {
  * three 455 (105). Counting the arrows in a second counter, the columns'
  * one, as a permuter run found, gives 142 words (22 in shape), but the
  * oracle's closest rises to 100, forcing 10, and with offsetY on the stack
- * to 47; holding the prompt's test in a local changes nothing. 198 words
- * differ, 22 in shape.
+ * to 47; holding the prompt's test in a local changes nothing.
+ *
+ * Each strip's top, without offsetY, has a local, stripTop. That takes the
+ * draft from 198 words differing to 181, 22 in shape to 23, and the
+ * oracle's closest from 88 words, forcing 19 pseudos, to 81, forcing 16,
+ * and with offsetY forced onto the stack from 35 to 18. Holding offsetY in
+ * it as well gives the same, and setting it at the top of the strips' loop
+ * instead of after the sync 191 words and an oracle closest of 87. 181
+ * words differ, 23 in shape.
  */
 #ifdef NON_MATCHING
 void DrawHandicaps(Gfx** displayListHead, s32 slide, u8 reverseVerticalSlide,
@@ -1296,6 +1303,7 @@ void DrawHandicaps(Gfx** displayListHead, s32 slide, u8 reverseVerticalSlide,
   Mat4 transform;
   s32 numberOffsetX;
   s32 arrowTop;
+  s32 stripTop;
 
   BuildDynamicTextures(&gfx);
   gDPPipeSync(gfx++);
@@ -1422,14 +1430,10 @@ void DrawHandicaps(Gfx** displayListHead, s32 slide, u8 reverseVerticalSlide,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
         G_TX_NOLOD);
     gDPPipeSync(gfx++);
+    stripTop = HANDICAP_BANNER_TOP + (i * HANDICAP_BANNER_STRIP_HEIGHT);
     gSPScisTextureRectangle(gfx++, QuarterPixels(HANDICAP_BANNER_LEFT),
-        QuarterPixels(offsetY +
-            (HANDICAP_BANNER_TOP + (i * HANDICAP_BANNER_STRIP_HEIGHT))),
-        QuarterPixels(HANDICAP_BANNER_RIGHT),
-        QuarterPixels(offsetY +
-            (HANDICAP_BANNER_TOP + (i * HANDICAP_BANNER_STRIP_HEIGHT)) +
-            HANDICAP_BANNER_STRIP_HEIGHT),
-
+        QuarterPixels(offsetY + stripTop), QuarterPixels(HANDICAP_BANNER_RIGHT),
+        QuarterPixels(offsetY + stripTop + HANDICAP_BANNER_STRIP_HEIGHT),
         G_TX_RENDERTILE, 0, 0, HANDICAP_BANNER_STEP_X, TEXEL_STEP_ONE);
     gDPPipeSync(gfx++);
   }
