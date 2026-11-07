@@ -142,8 +142,15 @@ void TransformPoint(Mat4 mf, Vec3 point, Vec3 result) {
  * edges' eye distances have their own leftDistance and rightDistance, as
  * the top and bottom edges' do, which took it to 204 (66).
  *
- * Without the spill, every offset into the frame differs: 258 words
- * differ, 54 in shape.
+ * The eye's depth starts from the horizontal fit's once the vertical
+ * angle is known, as a sweep moving each assignment found, where the draft
+ * set it just before comparing the two fits. That takes the draft from 258
+ * words (54 in shape) to 250 (56), and the register oracle's closest from
+ * 258 to 250, with nothing forced; set right after the horizontal fit it
+ * gives 255 (63).
+ *
+ * Without the spill, every offset into the frame differs: 250 words
+ * differ, 56 in shape.
  */
 #ifdef NON_MATCHING
 void FrameSpheres(f32 depthOffset) {
@@ -249,6 +256,7 @@ void FrameSpheres(f32 depthOffset) {
     horizontalEyeZ += cosf(FramingDegreesToRadians(rightAngle)) * rightDistance;
 
     angle = FramingDegreesToRadians(topAngle - bottomAngle) - FramingDegreesToRadians(90);
+    eyeZ = horizontalEyeZ;
     bottomDistance = -minY / cosf(angle);
     eyeY = sinf(FramingDegreesToRadians(bottomAngle)) * bottomDistance;
     verticalEyeZ = cosf(FramingDegreesToRadians(bottomAngle)) * bottomDistance;
@@ -258,8 +266,6 @@ void FrameSpheres(f32 depthOffset) {
     if (g_ControllerData[1].trigger & D_CBUTTONS) {
         osSyncPrintf("xd %f yd %f xzd %f yzd %f\n", eyeX, eyeY, horizontalEyeZ, verticalEyeZ);
     }
-
-    eyeZ = horizontalEyeZ;
     if (!(verticalEyeZ <= horizontalEyeZ)) {
         eyeZ = verticalEyeZ;
     }
