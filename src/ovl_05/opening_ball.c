@@ -513,7 +513,14 @@ typedef s32 (*BillboardHitFinder)(
  * the oracle's closest 128 forcing 45, but holding all three axes' steps
  * gives 887; the per-spin weight alone gives 215 (107) and 128 forcing 41,
  * though the original multiplies in the draft's order; and its gravity test
- * made an else-if alone changes nothing. 217 words differ, 107 in shape.
+ * made an else-if alone changes nothing.
+ *
+ * The air step reads the side spin after the horizontal speed, just before
+ * scaling it, where the draft read it among the relative velocity's axes;
+ * a sweep moving each assignment found it. That takes the draft from 217
+ * words (107 in shape) to 210 (104), and the register oracle's closest
+ * from 132 words forcing 43 pseudos to 125 forcing 42. 210 words differ,
+ * 104 in shape.
  */
 #ifdef NON_MATCHING
 s32 StepOpeningBallSimulation(BallSimulation *simulation) {
@@ -1862,13 +1869,13 @@ ROLLED:
             f32 windZ;
 
             relative[AXIS_X] = simulation->velocity[AXIS_X] - simulation->windVelocityX;
-            sideSpin = simulation->sideSpin;
             relative[AXIS_Y] = simulation->velocity[AXIS_Y];
             relative[AXIS_Z] = simulation->velocity[AXIS_Z] - simulation->windVelocityZ;
             airSpeed = GetOpeningLength3D(relative[AXIS_X], relative[AXIS_Y], relative[AXIS_Z]);
             drag =
                 (sqrtf(airSpeed * AIR_DRAG_SPEED_SCALE) * AIR_DRAG_PER_ROOT_SPEED) + MIN_AIR_DRAG;
             horizontalSpeed = GetOpeningLength2D(relative[AXIS_X], relative[AXIS_Z]);
+            sideSpin = simulation->sideSpin;
             sideSpinMagnitude = AbsFloat(sideSpin * SIDE_SPIN_SPEED_SCALE);
             curveRatio = 0.0f;
             if (sideSpinMagnitude != 0.0f) {
