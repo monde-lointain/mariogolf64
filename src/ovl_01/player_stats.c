@@ -1269,7 +1269,11 @@ NO_RESULT UpdateHandicaps(s32 firstPlayerIndex UNUSED, s32 playerCount UNUSED) {
  * Counting the numbers in playerIndex, which masks it as a u16, gives 238
  * words (30 in shape); before the pipe syncs, counting the strips in
  * playerIndex gave 416 words (90 in shape), the arrows 248 (46) and all
- * three 455 (105). 198 words differ, 22 in shape.
+ * three 455 (105). Counting the arrows in a second counter, the columns'
+ * one, as a permuter run found, gives 142 words (22 in shape), but the
+ * oracle's closest rises to 100, forcing 10, and with offsetY on the stack
+ * to 47; holding the prompt's test in a local changes nothing. 198 words
+ * differ, 22 in shape.
  */
 #ifdef NON_MATCHING
 void DrawHandicaps(Gfx** displayListHead, s32 slide, u8 reverseVerticalSlide,
