@@ -146,9 +146,7 @@ enum PlanStage {
     PLAN_STAGE_TRIAL_RUNNING
 };
 
-/* The fault report of StepTrialShot and IsTrialShotSafe, which share its one
- * copy */
-extern const char f_SimFaultText[];
+static const char f_SimFaultText[];
 
 /* The traits of each character, in CHARACTER_* order */
 static GolferTraits f_GolferTraits[CHARACTER_COUNT] = {
@@ -2317,7 +2315,9 @@ s32 GetPowerGaugeFrame(s32 amount) {
 }
 #endif
 
-INCLUDE_RODATA("asm/nonmatchings/ovl_03/computer_golfer", f_SimFaultText);
+/* The fault report of StepTrialShot and IsTrialShotSafe, which share its one
+ * copy */
+static const char f_SimFaultText[] = "AI Sim Fault!";
 
 /* What the trial costs for each step on which a putt lips out; one at the
  * stroke limit costs POOR_LANDING_EVALUATION more */
