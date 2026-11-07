@@ -130,14 +130,6 @@ typedef struct ShotLabel {
 #define PIN_FLAG_HIDE_FRAME 120
 #define PIN_FLAG_FADE_STEP 32
 
-/* Draws the flag opaque, keeping the coverage of its alpha */
-#define PIN_FLAG_RENDER_MODE \
-    (AA_EN | CVG_X_ALPHA | ALPHA_CVG_SEL | FORCE_BL | \
-        GBL_c1(G_BL_CLR_IN, G_BL_0, G_BL_CLR_IN, G_BL_1))
-#define PIN_FLAG_RENDER_MODE2 \
-    (AA_EN | CVG_X_ALPHA | ALPHA_CVG_SEL | FORCE_BL | \
-        GBL_c2(G_BL_CLR_IN, G_BL_0, G_BL_CLR_IN, G_BL_1))
-
 enum SpotState {
     SPOT_HIDDEN = -1,
     SPOT_SHOWN
@@ -978,8 +970,8 @@ void DrawAimGuides(CameraMatrices *matrices) {
                     gDPPipeSync(g_DisplayListHead++);
                     gDPSetRenderMode(
                         g_DisplayListHead++,
-                        PIN_FLAG_RENDER_MODE,
-                        PIN_FLAG_RENDER_MODE2
+                        OPAQUE_ALPHA_COVERAGE_RENDER_MODE,
+                        OPAQUE_ALPHA_COVERAGE_RENDER_MODE2
                     );
                 }
                 else if (g_ShotFlags & SHOT_FLAG_ON_GREEN) {
@@ -1015,8 +1007,8 @@ void DrawAimGuides(CameraMatrices *matrices) {
                         gDPPipeSync(g_DisplayListHead++);
                         gDPSetRenderMode(
                             g_DisplayListHead++,
-                            PIN_FLAG_RENDER_MODE,
-                            PIN_FLAG_RENDER_MODE2
+                            OPAQUE_ALPHA_COVERAGE_RENDER_MODE,
+                            OPAQUE_ALPHA_COVERAGE_RENDER_MODE2
                         );
                     }
 
@@ -1029,8 +1021,8 @@ void DrawAimGuides(CameraMatrices *matrices) {
                     gDPPipeSync(g_DisplayListHead++);
                     gDPSetRenderMode(
                         g_DisplayListHead++,
-                        PIN_FLAG_RENDER_MODE,
-                        PIN_FLAG_RENDER_MODE2
+                        OPAQUE_ALPHA_COVERAGE_RENDER_MODE,
+                        OPAQUE_ALPHA_COVERAGE_RENDER_MODE2
                     );
                     point.y = PIN_FLAG_TOP_Y;
                 }

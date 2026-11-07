@@ -55,6 +55,17 @@ static inline void SetLightColor(Light *light, s32 red, s32 green, s32 blue) {
 #define FillColor16(red, green, blue, alpha) \
     (GPACK_RGBA5551(red, green, blue, alpha) << 16 | GPACK_RGBA5551(red, green, blue, alpha))
 
+/*
+ * A render mode that draws opaque, passing the color through the blender,
+ * but keeps the alpha as coverage so that antialiasing smooths the edges
+ */
+#define OPAQUE_ALPHA_COVERAGE_RENDER_MODE \
+    (AA_EN | CVG_X_ALPHA | ALPHA_CVG_SEL | FORCE_BL | \
+        GBL_c1(G_BL_CLR_IN, G_BL_0, G_BL_CLR_IN, G_BL_1))
+#define OPAQUE_ALPHA_COVERAGE_RENDER_MODE2 \
+    (AA_EN | CVG_X_ALPHA | ALPHA_CVG_SEL | FORCE_BL | \
+        GBL_c2(G_BL_CLR_IN, G_BL_0, G_BL_CLR_IN, G_BL_1))
+
 /* The ends of an 8-bit color's alpha */
 #define TRANSPARENT_ALPHA 0
 #define OPAQUE_ALPHA 0xFF

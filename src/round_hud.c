@@ -212,13 +212,6 @@ typedef struct ArrowShape {
 /* Which of the hole intro's images are loaded */
 #define HOLE_INTRO_CONTEST_IMAGE_LOADED (1 << 0)
 #define HOLE_INTRO_MATCH_IMAGE_LOADED (1 << 1)
-/* The intro images are drawn opaque, keeping the coverage of their alpha */
-#define HOLE_INTRO_IMAGE_RENDER_MODE \
-    (AA_EN | CVG_X_ALPHA | ALPHA_CVG_SEL | FORCE_BL | \
-        GBL_c1(G_BL_CLR_IN, G_BL_0, G_BL_CLR_IN, G_BL_1))
-#define HOLE_INTRO_IMAGE_RENDER_MODE2 \
-    (AA_EN | CVG_X_ALPHA | ALPHA_CVG_SEL | FORCE_BL | \
-        GBL_c2(G_BL_CLR_IN, G_BL_0, G_BL_CLR_IN, G_BL_1))
 /* The contest image is 256x64 and the match standing image 160x40, centered */
 #define CONTEST_IMAGE_WIDTH 256
 #define CONTEST_IMAGE_STRIP_HEIGHT 8
@@ -4041,7 +4034,11 @@ void DrawAnimatedIcon(Gfx **displayListHead, s32 letterboxHeight) {
             TextureAddress(ImageBody(f_AnimatedIconImages[f_AnimatedIconImageIndex]))
         );
         gDPPipeSync(gfx++);
-        gDPSetRenderMode(gfx++, HOLE_INTRO_IMAGE_RENDER_MODE, HOLE_INTRO_IMAGE_RENDER_MODE2);
+        gDPSetRenderMode(
+            gfx++,
+            OPAQUE_ALPHA_COVERAGE_RENDER_MODE,
+            OPAQUE_ALPHA_COVERAGE_RENDER_MODE2
+        );
         gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
         gDPLoadTextureBlock(
             gfx++,
@@ -5384,7 +5381,11 @@ void DrawHoleIntroImages(Gfx **displayListHead) {
             gDPPipeSync(gfx++);
             gDPSetTextureFilter(gfx++, G_TF_BILERP);
             gDPPipeSync(gfx++);
-            gDPSetRenderMode(gfx++, HOLE_INTRO_IMAGE_RENDER_MODE, HOLE_INTRO_IMAGE_RENDER_MODE2);
+            gDPSetRenderMode(
+                gfx++,
+                OPAQUE_ALPHA_COVERAGE_RENDER_MODE,
+                OPAQUE_ALPHA_COVERAGE_RENDER_MODE2
+            );
             gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
             if ((g_GameState.betRates[BET_LONGEST_DRIVE] > 0 &&
                     IsMarkedParFive(GetCourseRecordIndex(), g_GameState.holeIndex)) ||
