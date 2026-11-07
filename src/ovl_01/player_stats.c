@@ -2192,17 +2192,22 @@ void UpdateBestShots(void) {
  * Doesn't match: the original works out the chosen cell's address again after
  * checking that it holds a record, before drawing its course's image and name,
  * where GCC reuses the address from the check. Reading the cell from the menu
- * memory at each use gives 245 words, chosenRow and chosenColumn as u8 or s16
- * 107, and the record index in a local 177. The permuter's best, a u8 cast on
- * chosenRow at the name's lookup, gives 104 words, 12 in shape. The labels'
- * loop tests labelRow != STATS_GRID_ROW_COUNT, as the original's bne shows;
- * with <, which d849c579 chose for its lower count, it compiles to slti and
- * bnez, 101 words (17 in shape). 107 words differ, 13 in shape.
+ * memory at each use gives 245 words, the row and column as u8 or s16 107, and
+ * the record index in a local 177. The permuter's best, a u8 cast on the row
+ * at the name's lookup, gave 104 words, 12 in shape. The labels' loop tests
+ * its counter != STATS_GRID_ROW_COUNT, as the original's bne shows; with <,
+ * which d849c579 chose for its lower count, it compiles to slti and bnez, 101
+ * words (17 in shape).
  *
- * Counting the labels' loop with index, as the strip loops count, gives 89
- * words differing, 13 in shape, but the register oracle's closest result is 37
- * words either way, forcing 9 pseudos against 12, so the gain is in the
- * registers alone.
+ * The icon and the name each read the chosen cell into a pair of locals of
+ * their own, and the labels' loop counts with index, as the strip loops
+ * count, which a permuter run's best pointed at. Together they take the
+ * draft from 107 words differing to 83, 13 in shape either way, and the
+ * register oracle's closest result from 37 words, forcing 12 pseudos, to 27,
+ * forcing 11. One pair shared as before, with index, gives 89 words and 37 at
+ * best forcing 9; the pairs with a labelRow, 101 words and 27 forcing 14; and
+ * the name's column shared with the icon's, 95 words and 31 forcing 10. 83
+ * words differ, 13 in shape.
  */
 #ifdef NON_MATCHING
 void DrawBestShots(Gfx** displayListHead) {
@@ -2211,11 +2216,12 @@ void DrawBestShots(Gfx** displayListHead) {
   SaveData* save = GetSaveData();
   MenuMemory* memory = GetMenuMemory();
   s16 row;
-  s16 labelRow;
   s16 column;
   s16 character;
-  s32 chosenRow;
-  s32 chosenColumn;
+  s32 iconRow;
+  s32 iconColumn;
+  s32 nameRow;
+  s32 nameColumn;
 
   DrawMenuBackdropLayers(&gfx, PLAIN_BACKDROP_LAYERS);
   gDPSetPrimColor(gfx++, 0, 0, 64, 64, 64, 191);
@@ -2297,21 +2303,20 @@ void DrawBestShots(Gfx** displayListHead) {
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
   gDPPipeSync(gfx++);
-  chosenRow = memory->bestShotRow;
-  chosenColumn = memory->bestShotColumn;
-  if (f_BestShotRecords[chosenRow][chosenColumn] != STATS_CELL_EMPTY) {
+  iconRow = memory->bestShotRow;
+  iconColumn = memory->bestShotColumn;
+  if (f_BestShotRecords[iconRow][iconColumn] != STATS_CELL_EMPTY) {
     gDPLoadTLUT_pal256(gfx++,
         TextureAddress(
             (u32)f_BestShotsCourseIcons[save
-                    ->rankedRecords[f_BestShotRecords[chosenRow][chosenColumn]]
+                    ->rankedRecords[f_BestShotRecords[iconRow][iconColumn]]
                     .courseIndex] +
             IMAGE_HEADER_SIZE));
     for (index = 0; index != RECORD_COURSE_STRIP_COUNT; index++) {
       gDPLoadTextureBlock(gfx++,
           TextureAddress(
               (u32)f_BestShotsCourseIcons[save
-                      ->rankedRecords[f_BestShotRecords[chosenRow]
-                                                       [chosenColumn]]
+                      ->rankedRecords[f_BestShotRecords[iconRow][iconColumn]]
                       .courseIndex] +
               LARGE_PALETTED_TEXELS_OFFSET +
               (index * RECORD_COURSE_IMAGE_WIDTH * RECORD_COURSE_STRIP_HEIGHT)),
@@ -2337,26 +2342,25 @@ void DrawBestShots(Gfx** displayListHead) {
 
   SetUpTextDrawing(&gfx);
   SetTextColor(&gfx, 255, 255, 255);
-  for (labelRow = 0; labelRow != STATS_GRID_ROW_COUNT; labelRow++) {
-    sprintf(g_PrintBuffer, "%s", f_RecordLabels[labelRow]);
+  for (index = 0; index != STATS_GRID_ROW_COUNT; index++) {
+    sprintf(g_PrintBuffer, "%s", f_RecordLabels[index]);
     DrawLargeText(&gfx, RECORD_LABEL_X,
-        (s16)(RECORD_PLACE_Y + (labelRow * STATS_CURSOR_ROW_HEIGHT)),
+        (s16)(RECORD_PLACE_Y + (index * STATS_CURSOR_ROW_HEIGHT)),
         g_PrintBuffer);
   }
 
-  chosenRow = memory->bestShotRow;
-  chosenColumn = memory->bestShotColumn;
-  if (f_BestShotRecords[chosenRow][chosenColumn] != STATS_CELL_EMPTY) {
+  nameRow = memory->bestShotRow;
+  nameColumn = memory->bestShotColumn;
+  if (f_BestShotRecords[nameRow][nameColumn] != STATS_CELL_EMPTY) {
     sprintf(g_PrintBuffer, "%s",
         g_CourseRecords
-            [save->rankedRecords[f_BestShotRecords[chosenRow][chosenColumn]]
+            [save->rankedRecords[f_BestShotRecords[nameRow][nameColumn]]
                     .courseIndex]
                 .name);
     DrawLargeText(
         &gfx, RECORD_COURSE_NAME_X, RECORD_COURSE_NAME_Y, g_PrintBuffer);
     SetTextSlotValue(
-        save->rankedRecords[f_BestShotRecords[chosenRow][chosenColumn]]
-                .holeIndex +
+        save->rankedRecords[f_BestShotRecords[nameRow][nameColumn]].holeIndex +
             1,
         1, 0);
     SetTextSlot(RECORD_DETAIL_X, RECORD_DETAIL_Y, MESSAGE_RECORD_DETAIL,
