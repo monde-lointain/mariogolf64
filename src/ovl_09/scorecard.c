@@ -385,22 +385,21 @@ void OpenScorecard(CourseIndex courseIndex, s32 holeIndex) {
  * game mode and clears its text slots. It stops any rumble even if the
  * scorecard was already closed.
  *
- * Doesn't match: the original addresses the closing frees from totalLabelsImage
- * and derives tableImage's address from it, where this addresses them from
- * tableImage. cse's use_related_value bases a constant address on the oldest
- * related table entry that holds a register, so taking tableImage's address
- * first makes it the base. Taken where it is freed, the frees are based on
- * totalLabelsImage as in the original, but cse2 then bases the face images'
- * addresses on totalLabelsImage's too, where the original bases them on
- * tableImage's (33 words differ). The register oracle's closest result is these
- * 17 words with no register forced, so allocation isn't the cause. 17 words
- * differ, 3 in shape.
+ * Doesn't match: the original keeps tableImage's address in a register of its
+ * own, freeing it and then stepping the face images' addresses from it, where
+ * GCC folds it into the argument register and steps them from
+ * totalLabelsImage's. cse2's use_related_value bases a constant address on the
+ * oldest related table entry that holds a register, and both addresses are in
+ * its table here, totalLabelsImage's first, so in the original tableImage's
+ * entry must be older or alone. Taking its address into a local before the
+ * frees gives 17 words, 3 in shape, but bases the frees on it too, and the
+ * register oracle gets no closer; freed in place, the oracle comes within 7
+ * words with 1 register forced. 33 words differ, 3 in shape.
  */
 #ifdef NON_MATCHING
 void FreeScorecard(void) {
   s32 i;
   s32 imageIndex;
-  u8** tableImage;
 
   if (g_ScorecardState != SCORECARD_CLOSED) {
     g_ScorecardState = SCORECARD_CLOSED;
@@ -454,22 +453,13 @@ void FreeScorecard(void) {
         break;
     }
 
-    /*
-     * Taken before the frees above it, to match: the original keeps this
-     * address in a register and steps the face images' addresses from it.
-     * Freeing g_Scorecard.tableImage in place, or taking its address after
-     * any of the frees here, gives 33 words (3 in shape), and taking it
-     * where it is declared or as the scorecard closes 51 (7 or 5), against
-     * 17 (3).
-     */
-    tableImage = &g_Scorecard.tableImage;
     FreeMemory(&g_Scorecard.totalLabelsImage);
     FreeMemory(&g_Scorecard.labelsImage);
     FreeMemory(&g_Scorecard.digitsImage);
     FreeMemory(&g_Scorecard.betSubtitlesImage);
     FreeMemory(&g_Scorecard.scoresPanelImage);
     FreeMemory(&g_Scorecard.raisedPanelImage);
-    FreeMemory(tableImage);
+    FreeMemory(&g_Scorecard.tableImage);
     for (i = 0; i != g_GameState.playerCount; i++) {
       FreeMemory(&g_Scorecard.faceImages[i]);
       FreeMemory(&g_Scorecard.facePalettes[i]);
