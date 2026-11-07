@@ -2172,8 +2172,11 @@ INCLUDE_ASM("asm/nonmatchings/play", RebuildGroundTextureCoordinates);
  * past the medium test, as if the fine detail were the detail test's else arm.
  * Writing it as the else arm, or as a default that the medium and coarse
  * details override, gives those branches, but as branch-likelies, and moves the
- * tile loop's registers: 967 to 972 words, 231 to 236 in shape. Testing the
- * nearby flag and the fine depth in two else-if arms left 911. Setting the
+ * tile loop's registers: 967 to 972 words, 231 to 236 in shape. Setting the
+ * fine detail first and testing for the medium and coarse ones only when the
+ * tile is neither nearby nor fine by depth gives the original's plain
+ * branches, but takes the current draft from 580 words (94 in shape) to 636
+ * (92). Testing the nearby flag and the fine depth in two else-if arms left 911. Setting the
  * slots in DrawHoleEditorGround's order, the bottom before the top and the
  * middle after the tile index, then took it to 909; the register oracle gets to
  * 896 words forcing 70 pseudos either way. A u16 or u8 groupTileIndex gives 908
