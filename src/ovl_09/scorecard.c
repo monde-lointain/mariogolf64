@@ -394,7 +394,9 @@ void OpenScorecard(CourseIndex courseIndex, s32 holeIndex) {
  * entry must be older or alone. Taking its address into a local before the
  * frees gives 17 words, 3 in shape, but bases the frees on it too, and the
  * register oracle gets no closer; freed in place, the oracle comes within 7
- * words with 1 register forced. 33 words differ, 3 in shape.
+ * words with 1 register forced. Giving the face loop, or every loop, its own
+ * counter gives 21 words (3 in shape), but the oracle still comes within 7,
+ * now forcing 3. 33 words differ, 3 in shape.
  */
 #ifdef NON_MATCHING
 void FreeScorecard(void) {
