@@ -692,7 +692,8 @@ void SetNextTeeOrder(void) {
 
   /* The copy loop in a block of its own is there to match; without it, or in
    * plain braces, 38 words differ, none in shape, counting it with j 46 and
-   * with a counter of its own 60 */
+   * with a counter of its own 60; of every choice of i or j for the five
+   * loops, alternating them from i or from j is closest, at 34 */
   IN_OWN_BLOCK(for (i = 0; i < g_GameState.playerCount;
       i++) { g_Players[i].teeOrder = orders[i]; });
 }
