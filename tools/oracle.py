@@ -293,10 +293,10 @@ def build_function(
             del os.environ[name]
     lines = (work / "unit.s").read_text().splitlines()
     _ = (work / "marked.s").write_text(blame.mark_lines(lines))
-    assemble = ["-c", f"-Wa,-I{fncompare.ROOT}", "-o"]
-    blame.run(work / "unit.s", optflags, [*assemble, "unit.o"], work)
-    blame.run(work / "marked.s", optflags, [*assemble, "marked.o"], work)
-    functions = fncompare.read_object_file(work / "unit.o")
+    # The marks leave the code as it was, so one object gives both
+    assemble = ["-c", f"-Wa,-I{fncompare.ROOT}", "-o", "marked.o"]
+    blame.run(work / "marked.s", optflags, assemble, work)
+    functions = fncompare.read_object_file(work / "marked.o")
     routine = functions[function]
     start, ends = blame.read_line_ends(work / "marked.o", function)
     return blame.Compilation(
