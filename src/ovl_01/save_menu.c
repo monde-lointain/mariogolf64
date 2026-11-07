@@ -2343,8 +2343,11 @@ void DrawSavedMiniGolfImage(Gfx **displayListHead);
  * The prompts test for a chosen game that isn't empty first, and set the
  * empty game's text in the else, as a permuter output does. That takes the
  * draft from 213 words (91 in shape) to 207 (89), and the register oracle's
- * closest from 183 words to 177, forcing 17 pseudos either way. 207 words
- * differ, 89 in shape.
+ * closest from 183 words to 177, forcing 17 pseudos either way. Testing
+ * whether the controllers are assigned, with the continue prompt first and
+ * the assigning prompts in the else, as a sweep inverting each if found,
+ * takes it on to 199 words (81 in shape), and the closest to 169, still
+ * forcing 17. 199 words differ, 81 in shape.
  */
 #ifdef NON_MATCHING
 void DrawSavedGames(Gfx **displayListHead) {
@@ -2778,7 +2781,21 @@ void DrawSavedGames(Gfx **displayListHead) {
             );
         }
         else if (GetWipeKind() == 0) {
-            if (!f_AreControllersAssigned) {
+            if (f_AreControllersAssigned) {
+                SetTextSlot(
+                    CONTINUE_PROMPT_X,
+                    PROMPT_Y,
+                    MESSAGE_CONTINUE_PROMPT,
+                    TEXT_SLOT_LARGE_FONT,
+                    0,
+                    TEXT_FLAG_TYPED,
+                    0xFF,
+                    0xFF,
+                    0xFF,
+                    OPAQUE_ALPHA
+                );
+            }
+            else {
                 SetTextSlotValue(f_HumanPlayerIndices[f_AssignedHumanCount] + 1, 0, 0);
 
                 /* The prompt names the player in the player's own color */
@@ -2825,20 +2842,6 @@ void DrawSavedGames(Gfx **displayListHead) {
                         OPAQUE_ALPHA
                     );
                 }
-            }
-            else {
-                SetTextSlot(
-                    CONTINUE_PROMPT_X,
-                    PROMPT_Y,
-                    MESSAGE_CONTINUE_PROMPT,
-                    TEXT_SLOT_LARGE_FONT,
-                    0,
-                    TEXT_FLAG_TYPED,
-                    0xFF,
-                    0xFF,
-                    0xFF,
-                    OPAQUE_ALPHA
-                );
             }
         }
     }
