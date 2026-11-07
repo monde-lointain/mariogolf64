@@ -2250,8 +2250,14 @@ INCLUDE_ASM("asm/nonmatchings/play", RebuildGroundTextureCoordinates);
  * a fine tile drawn from its display list too, and from there goes straight
  * to the next tile, so that arm moves on to the next tile itself and
  * continues. That takes the draft from 640 words differing (118 in shape) to
- * 580 (94); stepping only the tile index there gives 585 (93). 580 words
- * differ, 94 in shape.
+ * 580 (94); stepping only the tile index there gives 585 (93).
+ *
+ * The original keeps column + 1 in a slot of its own and works out its
+ * parity with an andi, where combine folds ours to the constant 1, since
+ * column is half * 8 in the same block. Setting column before the row log's
+ * test keeps the andi and brings the frame to 8 bytes short, but gives 625
+ * words (105 in shape), and with the middle slot moved there too, before or
+ * after it, 628 (108). 580 words differ, 94 in shape.
  */
 void DrawGround(CameraMatrices *matrices, s32 terrainStyle) {
     u8 snapsEdge[2][TILE_VERTEX_SEGMENT_COUNT]; /* For the current and the last
