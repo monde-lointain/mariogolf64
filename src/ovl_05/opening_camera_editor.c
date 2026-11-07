@@ -519,7 +519,15 @@ void StopEditorMoves(void) {
  * 87 with nothing forced. But the original's three moves there write
  * $f20, $f24 and $f22 in that order, as the draft's x, y, z does, and the
  * swapped order writes the last two the other way round; only their source
- * registers come to line up. 99 words differ, 37 in shape.
+ * registers come to line up.
+ *
+ * The turn sets isDone before it reads turnLeft, where the tilt sets it
+ * after stepping: the original loads isDone's 1 once for the turn, where
+ * setting it after stepping copies the load into both of the step's arms,
+ * as the tilt's still does. That takes the draft from 99 words to 93, 37
+ * in shape to 33, and the register oracle's closest from 99 to 93, with
+ * nothing forced; the tilt's set at its start gives 341 words. 93 words
+ * differ, 33 in shape.
  */
 #ifdef NON_MATCHING
 void UpdateCameraEditor(void) {
@@ -782,6 +790,7 @@ void UpdateCameraEditor(void) {
     if (g_CameraEditor.flags[index] & EDITOR_FLAG_TURNING) {
         f32 turnLeft;
 
+        isDone = TRUE;
         turnLeft = g_CameraEditor.turnLeft;
         if (turnLeft != 0.0f) {
             if (fabsf(turnLeft) < EDITOR_ARRIVAL_ANGLE) {
@@ -800,8 +809,6 @@ void UpdateCameraEditor(void) {
                 }
             }
         }
-
-        isDone = TRUE;
         if (!(fabsf(g_CameraEditor.turnLeft) <
                 fabsf(g_CameraEditor.turnLeft - g_CameraEditor.turnSpeed))) {
             isDone = FALSE;
