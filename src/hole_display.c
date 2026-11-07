@@ -3391,7 +3391,7 @@ INCLUDE_ASM("asm/nonmatchings/hole_display", CaptureHudAnimationFrame);
  * where the original masks 0xFFF; as an s32, u16 or u32 it spills the slice
  * count and gives 94-96, and left per column alone 132. 61 words differ, 7 in
  * shape; without the sync before the rectangle, 44 and 16. The register oracle,
- * forcing 10 pseudos' registers, leaves 15 words of the 61 at best, so the code
+ * forcing 10 pseudos' registers, leaves 11 words of the 61 at best, so the code
  * differs too.
  *
  * A focused permuter run's best, 15 words (3 in shape), works out the column's
@@ -3402,9 +3402,13 @@ INCLUDE_ASM("asm/nonmatchings/hole_display", CaptureHudAnimationFrame);
  * oracle's closest 12, but the original adds 0x78 to the slice's top when the
  * column wraps, as sliceY does here.
  *
- * Writing each strip's top from the strip index, rather than stepping y,
- * gives the same 61 words, 7 in shape, and the word index from the slice and
- * strip 161 (31).
+ * Each strip's top is worked out from the strip index, as the original
+ * copies the slice's top into a register only after the column's edges
+ * are hoisted, where a y stepped from it was copied before them. That
+ * leaves the 61 words, 7 in shape, but takes the register oracle's closest
+ * from 15 words to 11, forcing 10 pseudos either way. Clearing the column
+ * and word index just before the slices' loop gives 85-89 words (11 in
+ * shape), and the word index from the slice and strip 161 (31).
  */
 #ifdef NON_MATCHING
 void DrawSliceAnimation(void) {
@@ -3415,7 +3419,6 @@ void DrawSliceAnimation(void) {
   s32 column;
   s32 wordIndex;
   s32 sliceY;
-  s32 y;
 
   if (f_HudAnimationFramesLeft <= 0) {
     return;
@@ -3439,10 +3442,9 @@ void DrawSliceAnimation(void) {
   }
 
   for (slice = 0, sliceY = 0; slice != sliceCount; slice++) {
-    strip = 0;
-    y = sliceY;
-    for (; strip != SLICE_STRIP_COUNT; strip++) {
+    for (strip = 0; strip != SLICE_STRIP_COUNT; strip++) {
       s32 left = column * SLICE_WIDTH;
+      s32 y = sliceY + strip * SLICE_STRIP_HEIGHT;
 
       gDPLoadTextureBlock(g_DisplayListHead++,
           TextureAddress(&f_CapturedFrame[wordIndex]), G_IM_FMT_RGBA,
@@ -3456,7 +3458,6 @@ void DrawSliceAnimation(void) {
           TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       wordIndex += SLICE_STRIP_WORD_COUNT;
       gDPPipeSync(g_DisplayListHead++);
-      y += SLICE_STRIP_HEIGHT;
     }
 
     column++;
