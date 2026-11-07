@@ -3377,6 +3377,12 @@ void ShowHoleOutBanner(s32 playerIndex) {
  * code. That takes the draft from 41 words to 33, 21 in shape, and the
  * register oracle's closest from 34 words to 26, forcing 1 pseudo either
  * way. 33 words differ, 21 in shape.
+ *
+ * Preparing the aim, the original sets the next state's 2 in $s3 before
+ * testing f_ShotSource and compares the source with $s3, where this
+ * compares it with the 2 both keep in $fp. Setting the next state at the
+ * top of the case, or anywhere before that test, still compares with
+ * $fp and gives 36 words, 26 in shape.
  */
 #ifdef NON_MATCHING
 /* Whether the stopwatches run in a player state: from aiming to the flight */
