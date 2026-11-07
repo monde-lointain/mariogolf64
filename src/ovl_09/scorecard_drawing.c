@@ -724,6 +724,11 @@ const char f_CompactHoleFormat[] = "Hole%d";
  * shape) with the frame 8 bytes smaller, rowOffset + TILE_TOP +
  * g_Scorecard.y 85 (31), and rowOffset + g_Scorecard.y + TILE_TOP changes
  * nothing; in the tops alone those give 126 (64) and 88 (34).
+ *
+ * Writing every tile's edges in one form, with the x sums in any of five
+ * groupings and the y sums in any of four, gives 122 words or more; the
+ * original's own grouping, j * TILE_SPACING + (g_Scorecard.x + TILE_LEFT)
+ * with rowOffset + (g_Scorecard.y + TILE_TOP), gives 199 (125).
  */
 #ifdef NON_MATCHING
 void DrawMatchPage(Gfx **displayListHead) {
