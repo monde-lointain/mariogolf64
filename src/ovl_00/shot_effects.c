@@ -530,7 +530,8 @@ void DrawShotEffectsHud(Gfx** displayListHead UNUSED) {}
  * sample loop on entry, where GCC knows the count. It also sets the trail's
  * state from another register. Testing i < f_SwingTrailSampleCount gives 20
  * differing words, storing the count without IN_OWN_BLOCK 23, storing it
- * first 25 and swapping the alpha and state 10. Declaring the count
+ * first 25 and swapping the alpha and state 10; of the 720 orders of the
+ * six stores before it, none gives fewer than these 9. Declaring the count
  * volatile, with both blocks gone, gives 18 words, 14 in shape, and the
  * count isn't hardware. The register oracle's closest result is these 9
  * words with no register forced, so allocation isn't the cause.
