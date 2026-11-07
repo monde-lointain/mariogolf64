@@ -581,8 +581,20 @@ void GetSaveDataAndMenuMemory(void) {
  *
  * The window's right edge is added at its use, where its left edge has a
  * local: a windowRight local beside windowLeft, set in the strip loop or
- * before it, gives 180 words (36 or 34 in shape). 34 words differ, 20 in
- * shape.
+ * before it, gives 180 words (36 or 34 in shape).
+ *
+ * The original spills windowTop, not the button's half height: forcing the
+ * half height into $s7 and windowTop onto the stack, the register oracle
+ * leaves 10 words. Global-alloc ranks windowTop (5 references over 110
+ * insns, priority 909) above the half height (7 over 294, 476), and
+ * windowTop would rank below it only if it lived over 210 insns or its
+ * loop used it once. Setting it anywhere among the display list commands
+ * before the loop, or in the loop beside windowLeft, gives 36 to 60 words,
+ * and after the clamps 155 (25 in shape) with a frame 8 bytes larger.
+ * Using it once, with the strip's bottom its top plus halfHeight as the
+ * original computes it, in any grouping or through a stripTop local, gives
+ * 173 to 198 words with that larger frame, the oracle leaving 59 at best.
+ * 34 words differ, 20 in shape.
  */
 #ifdef NON_MATCHING
 void DrawYesNoWindow(Gfx** displayListHead, s32 width, s32 height, s32 centerX,
