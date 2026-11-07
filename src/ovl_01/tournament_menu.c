@@ -1466,6 +1466,11 @@ void UpdateClubWindow(void);
  * gives 64 words (22 in shape), and a pointer to the row array or the key in
  * a local 64 (18); *(f_CodeKeys[row] + column) and (*(f_CodeKeys +
  * row))[column] give 76 (18).
+ *
+ * Stepping the coordinates in the calls with += 1 or as x = x + 1 leaves 64
+ * words, but the oracle then needs 17 pseudos forced. In the down move, an s8
+ * row local stepped from the field, stored and passed gives 63 (19 in shape),
+ * and the oracle no longer matches: its closest is 11 words, forcing 17.
  */
 #ifdef NON_MATCHING
 void UpdateClubTournament(void) {
