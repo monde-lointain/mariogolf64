@@ -1997,7 +1997,9 @@ void ClearNearbyGroundTiles(void) {
  * u16 offset gives 34 words (8 in shape against 6), but masks each offset with
  * an andi 0xffff, which the original never does. An s16 offset gives 36 words
  * (10 in shape) but sign-extends it with two pairs of 16-bit shifts the
- * original lacks, both measured with the helper. 30 words differ, 6 in shape.
+ * original lacks, both measured with the helper. Taking each offset as the
+ * coordinate % TEST_TEXTURE_TILE_SIZE gives 44 words (10 in shape), as the
+ * remainder is sign-extended from 16 bits. 30 words differ, 6 in shape.
  */
 #ifdef NON_MATCHING
 void RebuildGroundTextureCoordinates(void) {
