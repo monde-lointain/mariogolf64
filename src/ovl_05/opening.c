@@ -5039,37 +5039,24 @@ void LoadOpeningBurst(void) {
 /*
  * Draws a yellow burst for a few frames, stretched over the burst's corners.
  *
- * Doesn't match: the registers and a few instructions' order differ, and
- * one value. The original works out the bottom step with the height known as 26, so combine can tell
- * the quotient fits in 16 bits and ORs it into the rectangle's word
- * unmasked, where ours subtracts the top from the bottom at run time and
- * masks it. Corners declared as s16, u16 or u8 give 180 words (14 in
- * shape), a u32 top and bottom 470 (86), a height local 165 (49), width and
- * height locals 246 (60), and those locals with the corners written as
- * constants 470 (86). The register oracle's closest result is 107 words,
- * forcing 20 pseudos.
- *
- * The rectangle is a scissored one, as the original divides 0x8000 by 28
- * and 26 at run time: the clamps in gSPScisTextureRectangle read the steps
- * again, and GCC then keeps the divisions, where with gSPTextureRectangle
- * it folds them into constants and nearly every word moves. With it the
- * draft went from 327 words differing (129 in shape) to 175 (7), and the
- * frame to the original's size; the sync before it in a block of its own
- * gives 551 (377). Each pipe sync and the RDP state command after it goes
- * through AppendSyncedRdpState, as in DrawHoleTriangles: plain pairs give
- * 191 words (7 in shape). The palette's and texels' addresses are aligned
- * to 8 bytes, as TextureAddress does; without that 407 words differ (63 in
- * shape). The render mode is the opaque one that keeps alpha as coverage,
- * 0x0F0A7008; G_RM_XLU_SURF gives 179 words (7 in shape). 175 words
- * differ, 7 in shape.
+ * The rectangle is a scissored one, as the original divides 0x8000 by the
+ * width and height at run time: the clamps in gSPScisTextureRectangle read
+ * the steps again, and GCC then keeps the divisions, where with
+ * gSPTextureRectangle it folds them into constants and 470 words differ
+ * (86 in shape). The width and height are worked out only once the burst
+ * is drawn; set where they're declared, 246 words differ (60 in shape).
+ * Each pipe sync and the RDP state command after it goes through
+ * AppendSyncedRdpState, as in DrawHoleTriangles: plain pairs give 16 words
+ * (0 in shape).
  */
-#ifdef NON_MATCHING
 void DrawOpeningBurst(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     s32 left = BURST_LEFT;
     s32 top = BURST_TOP;
     s32 right = BURST_RIGHT;
     s32 bottom = BURST_BOTTOM;
+    s32 width;
+    s32 height;
 
     if (f_IsBurstShown && ++f_BurstFrame < BURST_FRAME_COUNT) {
         gDPPipeSync(gfx++);
@@ -5104,6 +5091,8 @@ void DrawOpeningBurst(Gfx **displayListHead) {
             G_TX_NOLOD
         );
         gDPPipeSync(gfx++);
+        width = right - left;
+        height = bottom - top;
         gSPScisTextureRectangle(
             gfx++,
             QuarterPixels(left),
@@ -5113,16 +5102,13 @@ void DrawOpeningBurst(Gfx **displayListHead) {
             G_TX_RENDERTILE,
             0,
             0,
-            TexelRunStep(BURST_IMAGE_SIZE, right - left),
-            TexelRunStep(BURST_IMAGE_SIZE, bottom - top)
+            TexelRunStep(BURST_IMAGE_SIZE, width),
+            TexelRunStep(BURST_IMAGE_SIZE, height)
         );
         gDPPipeSync(gfx++);
         *displayListHead = gfx;
     }
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_05/opening", DrawOpeningBurst);
-#endif
 
 /* Loads the image of the ball that the opening's shot sends flying */
 void LoadOpeningShotBall(void) {
