@@ -1267,6 +1267,15 @@ NO_RESULT UpdateHandicaps(s32 firstPlayerIndex UNUSED, s32 playerCount UNUSED) {
  * arrows in stripIndex gives 223 words (31 in shape), the strips in
  * playerIndex 416 (90), the arrows in it 248 (46), and all three loops in
  * it 455 (105), against 209 (31), so each loop keeps its own counter.
+ *
+ * Each banner strip syncs the pipe between its texture load and its
+ * rectangle, as the original's extra G_RDPPIPESYNC shows, and its top is
+ * offsetY plus the strip's own top, as the original steps the strip's top
+ * from 190 without offsetY and adds offsetY at each edge. Those took the
+ * draft from 209 words differing to 188, 31 in shape to 22, and the register
+ * oracle's closest from 175 words, forcing 17 pseudos, to 96, forcing 15;
+ * with offsetY forced onto the stack as well, it gets to 43. 188 words
+ * differ, 22 in shape.
  */
 #ifdef NON_MATCHING
 void DrawHandicaps(Gfx** displayListHead, s32 slide, u8 reverseVerticalSlide,
@@ -1416,12 +1425,17 @@ void DrawHandicaps(Gfx** displayListHead, s32 slide, u8 reverseVerticalSlide,
         HANDICAP_BANNER_STRIP_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
         G_TX_NOLOD);
+    gDPPipeSync(gfx++);
     gSPScisTextureRectangle(gfx++, QuarterPixels(HANDICAP_BANNER_LEFT),
-        QuarterPixels(offsetY + HANDICAP_BANNER_TOP +
-            (stripIndex * HANDICAP_BANNER_STRIP_HEIGHT)),
+        QuarterPixels(offsetY +
+            (HANDICAP_BANNER_TOP +
+                (stripIndex * HANDICAP_BANNER_STRIP_HEIGHT))),
         QuarterPixels(HANDICAP_BANNER_RIGHT),
-        QuarterPixels(offsetY + (stripIndex * HANDICAP_BANNER_STRIP_HEIGHT) +
-            HANDICAP_BANNER_TOP + HANDICAP_BANNER_STRIP_HEIGHT),
+        QuarterPixels(offsetY +
+            (HANDICAP_BANNER_TOP +
+                (stripIndex * HANDICAP_BANNER_STRIP_HEIGHT)) +
+            HANDICAP_BANNER_STRIP_HEIGHT),
+
         G_TX_RENDERTILE, 0, 0, HANDICAP_BANNER_STEP_X, TEXEL_STEP_ONE);
     gDPPipeSync(gfx++);
   }
