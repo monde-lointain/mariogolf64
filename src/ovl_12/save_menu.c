@@ -369,7 +369,15 @@ s32 GetModeIconIndex(GameState* state) {
  * gives 9 words (3). Doesn't match: loop.c loads the pointer's first address
  * into a temporary and copies it into the pointer's register, a move the
  * original lacks. The register oracle matches the draft when it gives that
- * temporary the pointer's $s1, so only local-alloc's choice differs.
+ * temporary the pointer's $s1. The move comes from cse2: loop hoists
+ * f_ModeIconImages + 4 and then f_ModeIconImages, for the two images'
+ * givs, ahead of the givs' initial copies, and cse2 rewrites the second
+ * constant as the first's register minus 4. That register then has two
+ * uses, so combine can't fold its constant into the pointer's copy. Had
+ * cse2 met the copy first, the pointer's longer-lived register would lead
+ * the class and take both uses, as the original's addiu $s2, $s1, -0x4
+ * suggests. Setting a first-image pointer to second - 1 in each pass gives
+ * 40 words (14 in shape), as the address is then built in the loop.
  *
  * A pointer to the second image stepped by the loop, set before it and
  * stepped after the icon test or with slot in the loop's step, gives 4 words
