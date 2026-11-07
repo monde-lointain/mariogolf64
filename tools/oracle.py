@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Find the register allocation that would make a draft match, and why.
 
-    oracle.py [--allocation | --splits] [ASM_FILE C_FILE] FUNCTION
+    oracle.py [--allocation | --splits | --spills] [ASM_FILE C_FILE] FUNCTION
               [PSEUDO=HARD ...]
 
 Without ASM_FILE and C_FILE, finds them from FUNCTION as fncompare does.
@@ -27,6 +27,10 @@ names each pseudo that lines up with two or more target registers, a sign
 that the original used a variable for each place; --splits prints only
 that, from one compile.
 
+--spills starts a search from each pseudo that global-alloc gave a
+register forced onto the stack, for an original whose frame is larger, and
+prints the closest.
+
 Only FUNCTION's own routine is compared; the functions nested in it, which
 fncompare counts with it, are named so that each can be given as FUNCTION.
 """
@@ -50,7 +54,9 @@ import fncompare
 
 ORACLE_DIR = fncompare.ROOT / "build" / "oracle"
 MAX_ROUNDS = 8
-MODE_OPTIONS = ("--allocation", "--splits")
+MODE_OPTIONS = ("--allocation", "--splits", "--spills")
+# The closest spill searches that --spills prints
+SPILL_REPORT_COUNT = 10
 # The assembly, the C file and the function, before any forced pairs
 MIN_ARGUMENT_COUNT = 3
 # The instructions a register needs from a pseudo to count as holding it
@@ -752,6 +758,33 @@ def print_search(search: Search) -> None:
         print(f"  round {number}: {forced} forced, {differences} differ")
 
 
+def scan_spills(target: fncompare.Routine, draft: Draft, force: dict[int, int]) -> None:
+    """Print the closest searches that start with a pseudo forced onto the stack.
+
+    Tries each pseudo that global-alloc gave a register, with FORCE, for an
+    original whose larger frame holds a variable that the draft does not
+    spill.
+    """
+    traced = draft.traced
+    lines = read_pseudo_lines(
+        traced, read_insn_lines(draft.c_path, draft.function, traced, draft.work)
+    )
+    start = search_forcing(target, draft, force)
+    print(f"  without a spill: {start.differences} differ")
+    results: list[tuple[int, int, int]] = []
+    for allocno in traced.allocnos:
+        pseudo = allocno["pseudo"]
+        if allocno["hard"] < 0 or pseudo in force:
+            continue
+        search = search_forcing(target, draft, force | {pseudo: NO_REGISTER})
+        results.append((search.differences, len(search.force), pseudo))
+    for differences, forced, pseudo in sorted(results)[:SPILL_REPORT_COUNT]:
+        register = register_name(traced.registers.get(pseudo, NO_REGISTER))
+        used = join_lines([pseudo], lines)
+        result = f"{differences} differ when {forced} are forced"
+        print(f"pseudo {pseudo} ({register}, lines {used}) spilled: {result}")
+
+
 def main() -> None:
     """Search for and explain the allocation that matches the function."""
     request = parse_arguments(sys.argv[1:])
@@ -770,6 +803,9 @@ def main() -> None:
         work = Path(work_name)
         traced = trace_function(c_path, function, work)
         draft = Draft(c_path, function, work, traced)
+        if request.mode == "spills":
+            scan_spills(target, draft, force)
+            return
         if request.mode == "allocation":
             compilation = compile_function(draft, force)
             print(f"  {count_differences(target, compilation)} differ")
