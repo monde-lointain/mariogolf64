@@ -5071,6 +5071,16 @@ void LoadOpeningBurst(void) {
  * the seven pairs, the cycle type's and the render mode's each take 8 words
  * off alone, and all seven take the draft from 347 words differing to 331,
  * 129 in shape.
+ *
+ * The original's render mode is the opaque one that keeps alpha as coverage,
+ * 0x0F0A7008, rather than G_RM_XLU_SURF's 0x00504240, which takes the draft
+ * from 331 words differing to 327, 129 in shape both. With it, the sync and
+ * the rectangle without their block give 470 words (86 in shape), the
+ * register oracle's closest 388 forcing 23 pseudos; the sync alone in its
+ * block 347 (127), and the rectangle alone 468 (130). Step locals, set at
+ * their declarations, at the top of the if, before the palette load or
+ * before the block, still fold the divisions, giving 327 to 337 words.
+ * 327 words differ, 129 in shape.
  */
 #ifdef NON_MATCHING
 void DrawOpeningBurst(Gfx **displayListHead) {
@@ -5083,7 +5093,12 @@ void DrawOpeningBurst(Gfx **displayListHead) {
     if (f_IsBurstShown && ++f_BurstFrame < BURST_FRAME_COUNT) {
         gDPPipeSync(gfx++);
         AppendSyncedRdpState(gfx, gDPSetCycleType, G_CYC_1CYCLE);
-        AppendSyncedRdpState(gfx, gDPSetRenderMode, G_RM_XLU_SURF, G_RM_XLU_SURF2);
+        AppendSyncedRdpState(
+            gfx,
+            gDPSetRenderMode,
+            OPAQUE_ALPHA_COVERAGE_RENDER_MODE,
+            OPAQUE_ALPHA_COVERAGE_RENDER_MODE2
+        );
         gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
         AppendSyncedRdpState(gfx, gDPSetColorDither, G_CD_DISABLE);
         gSPTexture(gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0, G_TX_RENDERTILE, G_ON);
