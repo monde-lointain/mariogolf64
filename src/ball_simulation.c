@@ -315,13 +315,14 @@ void ResetBallSimulations(void) {
  * the draft from 443 words (113 in shape) to 440 (114), and the register
  * oracle's closest from 228 words to 222, forcing 123 pseudos either way.
  *
- * The water skip's test compares the impact speed with the scaled horizontal
- * speed, and the cup pull's the horizontal speed with the scaled vertical one,
- * written the other way round from before, as a sweep swapping each operator's
- * operands found. That takes the draft from 440 words (114 in shape) to 415
- * (107), and the register oracle's closest from 222 words, forcing 123 pseudos,
- * to 215, forcing 118. The cup pull's alone gives 419 (109), and the skip's
- * alone 436 (112). 415 words differ, 107 in shape.
+ * The cup pull's test compares the horizontal speed with the scaled vertical
+ * one, written the other way round from before, as a sweep swapping each
+ * operator's operands found. That takes the draft from 440 words (114 in
+ * shape) to 419 (109), and the register oracle's closest from 222 words,
+ * forcing 123 pseudos, to 217, forcing 119. Swapping the water skip's test
+ * too gives 415 (107), but StepOpeningBallSimulation's copy of that test keeps
+ * this order, and swapping it there gains nothing. 419 words differ, 109 in
+ * shape.
  */
 #ifdef NON_MATCHING
 s32 StepBallSimulation(BallSimulation *simulation) {
@@ -1357,11 +1358,11 @@ s32 StepBallSimulation(BallSimulation *simulation) {
                 (simulation->state == BALL_STATE_ROLLING ||
                     fabsf(impactSpeed) >= MAX_SKIP_IMPACT_SPEED ||
                     fabsf(impactSpeed) <= MIN_SKIP_IMPACT_SPEED ||
-                    fabsf(impactSpeed) >=
-                        sqrtf(
-                            (velocity[AXIS_X] * velocity[AXIS_X]) +
-                            (velocity[AXIS_Z] * velocity[AXIS_Z])
-                        ) * SKIP_SPEED_RATIO)) {
+                    sqrtf(
+                        (velocity[AXIS_X] * velocity[AXIS_X]) +
+                        (velocity[AXIS_Z] * velocity[AXIS_Z])
+                    ) * SKIP_SPEED_RATIO <=
+                        fabsf(impactSpeed))) {
                 simulation->state = BALL_STATE_IN_WATER;
                 impactSpeed = 0.0f;
                 /*
