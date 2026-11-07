@@ -4057,7 +4057,10 @@ void WriteHexDumpFile(u32 *words, s32 byteCount, char *fileName) {
  * in DrawGround. That takes the draft from 1751 words differing (187 in
  * shape) to 1665 (165), and the oracle's closest from 1345 words to 1189,
  * forcing 26 pseudos either way; testing for them with == gives 1667 (167).
- * 1665 words differ, 165 in shape.
+ * Setting each half's bottom slot, tile index, top slot and previous detail
+ * in that order, as the original's stores go, gives 1661 words (159 in
+ * shape) but leaves the oracle's closest at 1189, and breaks the order
+ * DrawGround's copy sets them in. 1665 words differ, 165 in shape.
  */
 #ifdef NON_MATCHING
 void DrawHoleEditorGround(CameraMatrices *matrices UNUSED, s32 terrainStyle) {
