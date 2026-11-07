@@ -2222,6 +2222,12 @@ INCLUDE_ASM("asm/nonmatchings/play", RebuildGroundTextureCoordinates);
  * parity at others. Working out the column's parity once per half, beside
  * nextColumnParity, and passing it to GridVertexOfParity in the middle and
  * bottom rows gives 933 to 1047 words, and declaring column a u32 leaves 897.
+ *
+ * Each half starts its middle slot after the row log's test, beside the
+ * column, as a sweep moving each assignment found. That takes the draft
+ * from 897 words (233 in shape) to 893 (231), and the register oracle's
+ * closest from 801 words to 797, forcing 84 pseudos either way. 893 words
+ * differ, 231 in shape.
  */
 void DrawGround(CameraMatrices *matrices, s32 terrainStyle) {
     u8 snapsEdge[2][TILE_VERTEX_SEGMENT_COUNT]; /* For the current and the last
@@ -2496,7 +2502,6 @@ void DrawGround(CameraMatrices *matrices, s32 terrainStyle) {
         topSlot = FIRST_TOP_SLOT;
         firstTileColumn = half * GROUND_TILE_GROUP_SIZE;
         tileIndex = firstTileColumn;
-        middleSlot = FIRST_MIDDLE_SLOT;
         if (IsGameFlagSet(GAME_FLAG_LOG_GROUND_ROWS)) {
             osSyncPrintf("DG[");
             if (half != 0) {
@@ -2504,6 +2509,7 @@ void DrawGround(CameraMatrices *matrices, s32 terrainStyle) {
             }
         }
 
+        middleSlot = FIRST_MIDDLE_SLOT;
         column = half * GROUND_HALF_VERTEX_COLUMNS;
         nextColumnParity = (u32)(column + 1) & 1;
         for (row = 0; row < GROUND_TILE_ROW_COUNT; row++) {
