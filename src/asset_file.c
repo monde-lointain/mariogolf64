@@ -17,154 +17,154 @@
 #define ASSET_CHUNK_SIZE 0x2000
 
 /* Rounds a stack buffer up to the 16-byte alignment that ROM reads need */
-#define AlignedReadBuffer(buffer) ((void*)(((u32)(buffer) + 0xF) & ~0xF))
+#define AlignedReadBuffer(buffer) ((void *)(((u32)(buffer) + 0xF) & ~0xF))
 
 /* Reads the next chunk of the asset into chunk */
 #define ReadNextChunk(chunk, remaining, asset) \
-  if ((remaining) < ASSET_CHUNK_SIZE) { \
-    ReadAssetFile(chunk, remaining, &(asset)->file); \
-    (remaining) = 0; \
-  } else { \
-    ReadAssetFile(chunk, ASSET_CHUNK_SIZE, &(asset)->file); \
-    (remaining) -= ASSET_CHUNK_SIZE; \
-  }
+    if ((remaining) < ASSET_CHUNK_SIZE) { \
+        ReadAssetFile(chunk, remaining, &(asset)->file); \
+        (remaining) = 0; \
+    } \
+    else { \
+        ReadAssetFile(chunk, ASSET_CHUNK_SIZE, &(asset)->file); \
+        (remaining) -= ASSET_CHUNK_SIZE; \
+    }
 /* Moves past a byte of chunk, reading the next chunk at its end */
 #define AdvanceChunkPosition(chunk, position, remaining, asset) \
-  { \
-    (position)++; \
-    if ((remaining) != 0 && (position) == ASSET_CHUNK_SIZE) { \
-      ReadNextChunk(chunk, remaining, asset); \
-      (position) = 0; \
-    } \
-  }
+    { \
+        (position)++; \
+        if ((remaining) != 0 && (position) == ASSET_CHUNK_SIZE) { \
+            ReadNextChunk(chunk, remaining, asset); \
+            (position) = 0; \
+        } \
+    }
 
 typedef struct AssetTableEntry {
-  /* 0x0 */ s32 size;
-  /* 0x4 */ u32 offset; /* From the archive's start */
+    /* 0x0 */ s32 size;
+    /* 0x4 */ u32 offset; /* From the archive's start */
 } AssetTableEntry;
 
 /* The archive in ROM starts with a table of each asset's AssetTableEntry */
-#define ASSET_TABLE ((AssetTableEntry*)g_AssetArchiveRomStart)
+#define ASSET_TABLE ((AssetTableEntry *)g_AssetArchiveRomStart)
 static AssetFile f_AssetFilePool[ASSET_FILE_POOL_SIZE];
 /* Read by no routine */
 static u8 f_UnusedBufferAfterAssetFilePool[0x40] UNUSED;
 
-void DecodeByteRuns(u8* buffer, EncodedAsset* asset);
-void DecodeHalfwordRuns(u8* buffer, EncodedAsset* asset);
+void DecodeByteRuns(u8 *buffer, EncodedAsset *asset);
+void DecodeHalfwordRuns(u8 *buffer, EncodedAsset *asset);
 
 FILE_STATIC s32 f_LastOpenedAssetId;
 
 void InitAssetFiles(void) {
-  s32 index;
-  AssetFile* file;
+    s32 index;
+    AssetFile *file;
 
-  for (index = 0, file = f_AssetFilePool; index != ASSET_FILE_POOL_SIZE;
-      index++) {
-    file->cursor = 0;
-    file++;
-  }
+    for (index = 0, file = f_AssetFilePool; index != ASSET_FILE_POOL_SIZE; index++) {
+        file->cursor = 0;
+        file++;
+    }
 }
 
 /* Points file at the asset's bytes in the archive */
-void ReadAssetFileBounds(s32 assetId, AssetFile* file) {
-  u8 rawOffset[0x40];
-  u8 rawSize[0x40];
-  u32* offset = AlignedReadBuffer(rawOffset);
-  s32* size = AlignedReadBuffer(rawSize);
+void ReadAssetFileBounds(s32 assetId, AssetFile *file) {
+    u8 rawOffset[0x40];
+    u8 rawSize[0x40];
+    u32 *offset = AlignedReadBuffer(rawOffset);
+    s32 *size = AlignedReadBuffer(rawSize);
 
-  nuPiReadRom((u32)&ASSET_TABLE[assetId].size, size, sizeof(*size));
-  nuPiReadRom((u32)&ASSET_TABLE[assetId].offset, offset, sizeof(*offset));
-  file->romStart = (u32)g_AssetArchiveRomStart + *offset;
-  file->cursor = file->romStart;
-  file->romEnd = file->romStart + *size;
-  file->size = *size;
-  f_LastOpenedAssetId = assetId;
+    nuPiReadRom((u32)&ASSET_TABLE[assetId].size, size, sizeof(*size));
+    nuPiReadRom((u32)&ASSET_TABLE[assetId].offset, offset, sizeof(*offset));
+    file->romStart = (u32)g_AssetArchiveRomStart + *offset;
+    file->cursor = file->romStart;
+    file->romEnd = file->romStart + *size;
+    file->size = *size;
+    f_LastOpenedAssetId = assetId;
 }
 
-void OpenAssetFile(s32 assetId, AssetFile* file) {
-  ReadAssetFileBounds(assetId, file);
+void OpenAssetFile(s32 assetId, AssetFile *file) {
+    ReadAssetFileBounds(assetId, file);
 }
 
 /* Opens the asset in a free file of the pool, or returns NULL if none is free
  */
-AssetFile* OpenPooledAssetFile(s32 assetId) {
-  s32 index;
-  AssetFile* file;
+AssetFile *OpenPooledAssetFile(s32 assetId) {
+    s32 index;
+    AssetFile *file;
 
-  for (index = 0, file = f_AssetFilePool; index != ASSET_FILE_POOL_SIZE;
-      index++) {
-    if (file->cursor == 0) {
-      ReadAssetFileBounds(assetId, file);
-      return file;
+    for (index = 0, file = f_AssetFilePool; index != ASSET_FILE_POOL_SIZE; index++) {
+        if (file->cursor == 0) {
+            ReadAssetFileBounds(assetId, file);
+            return file;
+        }
+
+        file++;
     }
 
-    file++;
-  }
+    osSyncPrintf("ropen %d\n", assetId);
 
-  osSyncPrintf("ropen %d\n", assetId);
-
-  /* "File number %d failed to open." */
-  osSyncPrintf("%d番のファイルオープン失敗。\n", assetId);
-  return NULL;
+    /* "File number %d failed to open." */
+    osSyncPrintf("%d番のファイルオープン失敗。\n", assetId);
+    return NULL;
 }
 
 /* Frees the file for OpenPooledAssetFile */
-void CloseAssetFile(AssetFile* file) {
-  file->romEnd = 0;
-  file->romStart = 0;
-  file->cursor = 0;
+void CloseAssetFile(AssetFile *file) {
+    file->romEnd = 0;
+    file->romStart = 0;
+    file->cursor = 0;
 }
 
-s32 GetAssetFileSize(AssetFile* file) {
-  return file->size;
+s32 GetAssetFileSize(AssetFile *file) {
+    return file->size;
 }
 
 /* Reads the next size bytes of the file, or what remains of it if fewer */
-void ReadAssetFile(void* buffer, u32 size, AssetFile* file) {
-  if (file->romEnd < file->cursor + size) {
-    size = file->romEnd - file->cursor;
-    osSyncPrintf("size error %d \n", f_LastOpenedAssetId);
-  }
+void ReadAssetFile(void *buffer, u32 size, AssetFile *file) {
+    if (file->romEnd < file->cursor + size) {
+        size = file->romEnd - file->cursor;
+        osSyncPrintf("size error %d \n", f_LastOpenedAssetId);
+    }
 
-  nuPiReadRom(file->cursor, buffer, (size + 1) & ~1);
-  file->cursor += size;
+    nuPiReadRom(file->cursor, buffer, (size + 1) & ~1);
+    file->cursor += size;
 }
 
-s32 OpenEncodedAsset(AssetId assetId, EncodedAsset* asset) {
-  u8 rawHeader[0x80];
-  u32* header = AlignedReadBuffer(rawHeader);
+s32 OpenEncodedAsset(AssetId assetId, EncodedAsset *asset) {
+    u8 rawHeader[0x80];
+    u32 *header = AlignedReadBuffer(rawHeader);
 
-  if (IsGameFlagSet(GAME_FLAG_LOG_ENCODED_ASSETS)) {
-    osSyncPrintf("OP:%d\n", assetId);
-  }
+    if (IsGameFlagSet(GAME_FLAG_LOG_ENCODED_ASSETS)) {
+        osSyncPrintf("OP:%d\n", assetId);
+    }
 
-  OpenAssetFile(assetId, &asset->file);
-  asset->encodedSize = GetAssetFileSize(&asset->file);
-  ReadAssetFile(header, sizeof(*header), &asset->file);
-  asset->method = *(u8*)header;
-  return *header &= 0xFFFFFF;
+    OpenAssetFile(assetId, &asset->file);
+    asset->encodedSize = GetAssetFileSize(&asset->file);
+    ReadAssetFile(header, sizeof(*header), &asset->file);
+    asset->method = *(u8 *)header;
+    return *header &= 0xFFFFFF;
 }
 
-void ReadEncodedAsset(void* buffer, EncodedAsset* asset) {
-  if (asset->method == ENCODING_BYTE_RUNS) {
-    DecodeByteRuns(buffer, asset);
-  } else {
-    DecodeHalfwordRuns(buffer, asset);
-  }
+void ReadEncodedAsset(void *buffer, EncodedAsset *asset) {
+    if (asset->method == ENCODING_BYTE_RUNS) {
+        DecodeByteRuns(buffer, asset);
+    }
+    else {
+        DecodeHalfwordRuns(buffer, asset);
+    }
 }
 
 /* An encoded asset's bytes, read a chunk at a time */
 typedef struct ChunkReader {
-  /* 0x0000 */ u8 rawChunk[ASSET_CHUNK_SIZE + 0x10]; /* Aligned as chunk */
-  /* 0x2010 */ s32 position; /* In chunk */
-  /* 0x2014 */ u32 remaining; /* Unread bytes of the asset */
+    /* 0x0000 */ u8 rawChunk[ASSET_CHUNK_SIZE + 0x10]; /* Aligned as chunk */
+    /* 0x2010 */ s32 position; /* In chunk */
+    /* 0x2014 */ u32 remaining; /* Unread bytes of the asset */
 } ChunkReader;
 
 /* DecodeHalfwordRuns' buffer is 0x10 bytes larger, to match */
 typedef struct LargeChunkReader {
-  /* 0x0000 */ u8 rawChunk[ASSET_CHUNK_SIZE + 0x20];
-  /* 0x2020 */ s32 position;
-  /* 0x2024 */ u32 remaining;
+    /* 0x0000 */ u8 rawChunk[ASSET_CHUNK_SIZE + 0x20];
+    /* 0x2020 */ s32 position;
+    /* 0x2024 */ u32 remaining;
 } LargeChunkReader;
 
 /*
@@ -172,85 +172,87 @@ typedef struct LargeChunkReader {
  * count repeats the next byte that many times, a negative one copies
  * that many bytes, and zero ends the asset
  */
-void DecodeByteRuns(u8* buffer, EncodedAsset* asset) {
-  ChunkReader reader;
-  u8* chunk;
-  s32 count;
-  s32 index;
+void DecodeByteRuns(u8 *buffer, EncodedAsset *asset) {
+    ChunkReader reader;
+    u8 *chunk;
+    s32 count;
+    s32 index;
 
-  reader.remaining = asset->encodedSize - sizeof(u32);
-  chunk = AlignedReadBuffer(reader.rawChunk);
-  ReadNextChunk(chunk, reader.remaining, asset);
-  reader.position = 0;
-  while (TRUE) {
-    count = (s8)chunk[reader.position];
-    AdvanceChunkPosition(chunk, reader.position, reader.remaining, asset);
-    if (count == 0) {
-      break;
-    }
-
-    if (count > 0) {
-      for (index = 0; index != count; index++) {
-        *buffer++ = chunk[reader.position];
-      }
-
-      AdvanceChunkPosition(chunk, reader.position, reader.remaining, asset);
-    } else {
-      count = -count;
-      for (index = 0; index != count; index++) {
-        *buffer++ = chunk[reader.position];
+    reader.remaining = asset->encodedSize - sizeof(u32);
+    chunk = AlignedReadBuffer(reader.rawChunk);
+    ReadNextChunk(chunk, reader.remaining, asset);
+    reader.position = 0;
+    while (TRUE) {
+        count = (s8)chunk[reader.position];
         AdvanceChunkPosition(chunk, reader.position, reader.remaining, asset);
-      }
+        if (count == 0) {
+            break;
+        }
+
+        if (count > 0) {
+            for (index = 0; index != count; index++) {
+                *buffer++ = chunk[reader.position];
+            }
+
+            AdvanceChunkPosition(chunk, reader.position, reader.remaining, asset);
+        }
+        else {
+            count = -count;
+            for (index = 0; index != count; index++) {
+                *buffer++ = chunk[reader.position];
+                AdvanceChunkPosition(chunk, reader.position, reader.remaining, asset);
+            }
+        }
     }
-  }
 }
 
 /* Decodes runs as DecodeByteRuns does, but of two-byte units */
-void DecodeHalfwordRuns(u8* buffer, EncodedAsset* asset) {
-  LargeChunkReader reader;
-  u8* chunk;
-  s32 count;
-  s32 index;
-  s32 repeatCount;
-  u8 high;
-  u8 low;
+void DecodeHalfwordRuns(u8 *buffer, EncodedAsset *asset) {
+    LargeChunkReader reader;
+    u8 *chunk;
+    s32 count;
+    s32 index;
+    s32 repeatCount;
+    u8 high;
+    u8 low;
 
-  reader.remaining = asset->encodedSize - sizeof(u32);
-  chunk = AlignedReadBuffer(reader.rawChunk);
-  ReadNextChunk(chunk, reader.remaining, asset);
-  reader.position = 0;
-  while (TRUE) {
-    count = (s8)chunk[reader.position];
-    AdvanceChunkPosition(chunk, reader.position, reader.remaining, asset);
-    if (count == 0) {
-      break;
-    }
+    reader.remaining = asset->encodedSize - sizeof(u32);
+    chunk = AlignedReadBuffer(reader.rawChunk);
+    ReadNextChunk(chunk, reader.remaining, asset);
+    reader.position = 0;
+    while (TRUE) {
+        count = (s8)chunk[reader.position];
+        AdvanceChunkPosition(chunk, reader.position, reader.remaining, asset);
+        if (count == 0) {
+            break;
+        }
 
-    if (count > 0) {
-      high = chunk[reader.position];
-      AdvanceChunkPosition(chunk, reader.position, reader.remaining, asset);
-      low = chunk[reader.position];
-      /*
-       * Copied here, rather than count used, to match: looping to count gives
-       * 24 words differing (none in shape), and copying it after the next
-       * advance 30 (2)
-       */
-      repeatCount = count;
-      AdvanceChunkPosition(chunk, reader.position, reader.remaining, asset);
-      for (index = 0; index != repeatCount; index++) {
-        *buffer++ = high;
-        *buffer++ = low;
-      }
-    } else {
-      count = -count;
-      for (index = 0; index != count; index++) {
-        high = chunk[reader.position];
-        AdvanceChunkPosition(chunk, reader.position, reader.remaining, asset);
-        low = chunk[reader.position];
-        AdvanceChunkPosition(chunk, reader.position, reader.remaining, asset);
-        *buffer++ = high;
-        *buffer++ = low;
-      }
+        if (count > 0) {
+            high = chunk[reader.position];
+            AdvanceChunkPosition(chunk, reader.position, reader.remaining, asset);
+            low = chunk[reader.position];
+            /*
+             * Copied here, rather than count used, to match: looping to count gives
+             * 24 words differing (none in shape), and copying it after the next
+             * advance 30 (2)
+             */
+            repeatCount = count;
+            AdvanceChunkPosition(chunk, reader.position, reader.remaining, asset);
+            for (index = 0; index != repeatCount; index++) {
+                *buffer++ = high;
+                *buffer++ = low;
+            }
+        }
+        else {
+            count = -count;
+            for (index = 0; index != count; index++) {
+                high = chunk[reader.position];
+                AdvanceChunkPosition(chunk, reader.position, reader.remaining, asset);
+                low = chunk[reader.position];
+                AdvanceChunkPosition(chunk, reader.position, reader.remaining, asset);
+                *buffer++ = high;
+                *buffer++ = low;
+            }
+        }
     }
-  }
 }

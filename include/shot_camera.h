@@ -28,26 +28,26 @@ extern Boolean g_IsCupViewShown;
 
 #define NOISE_GRID_SIZE 64
 /* An I8 texture of NOISE_GRID_SIZE x NOISE_GRID_SIZE texels */
-extern u8* g_NoiseTexels;
+extern u8 *g_NoiseTexels;
 
 /*
  * GetEndReaction's values: what greeted the ball as it neared its end, which
  * sets when UpdateTurns shows the hole-out banner
  */
 enum EndReaction {
-  END_REACTION_NONE,
-  /* A flag shot's or chip-in's call, which queues the onlookers' sounds */
-  END_REACTION_ONLOOKERS,
-  /* SOUND_LONG_PUTT_HOLED, with no onlookers' sounds */
-  END_REACTION_LONG_PUTT
+    END_REACTION_NONE,
+    /* A flag shot's or chip-in's call, which queues the onlookers' sounds */
+    END_REACTION_ONLOOKERS,
+    /* SOUND_LONG_PUTT_HOLED, with no onlookers' sounds */
+    END_REACTION_LONG_PUTT
 };
 
 void ClearHoleIntroText(void);
 void EndFlightCamera(void);
 void EndHoleFlyover(void);
-SurfaceInfo* GetBallSurfaceInfo(Player* player, ShotLaunch* shot);
-SignedBinaryAngle GetAimSlopeAngle(Player* player, ShotLaunch* shot);
-SignedBinaryAngle GetCrossSlopeAngle(Player* player, ShotLaunch* shot);
+SurfaceInfo *GetBallSurfaceInfo(Player *player, ShotLaunch *shot);
+SignedBinaryAngle GetAimSlopeAngle(Player *player, ShotLaunch *shot);
+SignedBinaryAngle GetCrossSlopeAngle(Player *player, ShotLaunch *shot);
 s32 GetEndReaction(void);
 s32 RateShotLength(void);
 void StartFlightCamera(s32 earlierFlightCount);

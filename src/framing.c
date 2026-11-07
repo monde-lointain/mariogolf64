@@ -44,61 +44,62 @@ FILE_STATIC Vec3 f_FramedEye;
 FILE_STATIC Vec3 f_FramedLookAt;
 
 void GetFramedView(Vec3 eye, Vec3 lookAt) {
-  eye[AXIS_X] = f_FramedEye[0];
-  eye[AXIS_Y] = f_FramedEye[1];
-  eye[AXIS_Z] = f_FramedEye[2];
-  lookAt[AXIS_X] = f_FramedLookAt[0];
-  lookAt[AXIS_Y] = f_FramedLookAt[1];
-  lookAt[AXIS_Z] = f_FramedLookAt[2];
+    eye[AXIS_X] = f_FramedEye[0];
+    eye[AXIS_Y] = f_FramedEye[1];
+    eye[AXIS_Z] = f_FramedEye[2];
+    lookAt[AXIS_X] = f_FramedLookAt[0];
+    lookAt[AXIS_Y] = f_FramedLookAt[1];
+    lookAt[AXIS_Z] = f_FramedLookAt[2];
 }
 
 void ClearFramedSpheres(void) {
-  f_FramedSphereCount = 0;
+    f_FramedSphereCount = 0;
 }
 
 /* Adds a sphere for FrameSpheres to keep in view; extra spheres are ignored */
 void AddFramedSphere(Vec3 center, f32 radius) {
-  if (f_FramedSphereCount < FRAMED_SPHERE_CAPACITY) {
-    f_FramedSphereCenters[f_FramedSphereCount][0] = center[AXIS_X];
-    f_FramedSphereCenters[f_FramedSphereCount][1] = center[AXIS_Y];
-    f_FramedSphereCenters[f_FramedSphereCount][2] = center[AXIS_Z];
-    f_FramedSphereRadii[f_FramedSphereCount] = radius;
-    if (g_ControllerData[1].trigger & D_CBUTTONS) {
-      osSyncPrintf("ox %f ox %f oz %f\n",
-          f_FramedSphereCenters[f_FramedSphereCount][0],
-          f_FramedSphereCenters[f_FramedSphereCount][1],
-          f_FramedSphereCenters[f_FramedSphereCount][2]);
-    }
+    if (f_FramedSphereCount < FRAMED_SPHERE_CAPACITY) {
+        f_FramedSphereCenters[f_FramedSphereCount][0] = center[AXIS_X];
+        f_FramedSphereCenters[f_FramedSphereCount][1] = center[AXIS_Y];
+        f_FramedSphereCenters[f_FramedSphereCount][2] = center[AXIS_Z];
+        f_FramedSphereRadii[f_FramedSphereCount] = radius;
+        if (g_ControllerData[1].trigger & D_CBUTTONS) {
+            osSyncPrintf(
+                "ox %f ox %f oz %f\n",
+                f_FramedSphereCenters[f_FramedSphereCount][0],
+                f_FramedSphereCenters[f_FramedSphereCount][1],
+                f_FramedSphereCenters[f_FramedSphereCount][2]
+            );
+        }
 
-    f_FramedSphereCount++;
-  }
+        f_FramedSphereCount++;
+    }
 }
 
 /* Sets the direction, in radians, from which FrameSpheres looks */
 void SetFramingAngles(Radians pitch, Radians yaw) {
-  Mat4 pitchRotation;
-  Mat4 yawRotation;
+    Mat4 pitchRotation;
+    Mat4 yawRotation;
 
-  if (fabsf(cosf(pitch)) < STEEP_PITCH_COSINE) {
-    pitch += FramingDegreesToRadians(20);
-  }
+    if (fabsf(cosf(pitch)) < STEEP_PITCH_COSINE) {
+        pitch += FramingDegreesToRadians(20);
+    }
 
-  f_FramingPitch = pitch;
-  f_FramingYaw = yaw;
-  guRotateF(
-      pitchRotation, (s32)(pitch * RADIANS_TO_DEGREES), -1.0f, 0.0f, 0.0f);
-  guRotateF(yawRotation, (s32)(yaw * RADIANS_TO_DEGREES), 0.0f, -1.0f, 0.0f);
-  guMtxCatF(yawRotation, pitchRotation, f_FramingRotation);
+    f_FramingPitch = pitch;
+    f_FramingYaw = yaw;
+    guRotateF(pitchRotation, (s32)(pitch * RADIANS_TO_DEGREES), -1.0f, 0.0f, 0.0f);
+    guRotateF(yawRotation, (s32)(yaw * RADIANS_TO_DEGREES), 0.0f, -1.0f, 0.0f);
+    guMtxCatF(yawRotation, pitchRotation, f_FramingRotation);
 }
 
 void TransformPoint(Mat4 mf, Vec3 point, Vec3 result) {
-  f32 x = point[AXIS_X];
-  f32 y = point[AXIS_Y];
-  f32 z = point[AXIS_Z];
+    f32 x = point[AXIS_X];
+    f32 y = point[AXIS_Y];
+    f32 z = point[AXIS_Z];
 
-  result[AXIS_X] = (mf[0][0] * x) + (mf[1][0] * y) + (mf[2][0] * z) + mf[3][0];
-  result[AXIS_Y] = (mf[0][1] * x) + (mf[1][1] * y) + (mf[2][1] * z) + mf[3][1];
-  result[AXIS_Z] = (mf[0][2] * x) + (mf[1][2] * y) + (mf[2][2] * z) + mf[3][2];
+    result[AXIS_X] = (mf[0][0] * x) + (mf[1][0] * y) + (mf[2][0] * z) + mf[3][0];
+    result[AXIS_Y] = (mf[0][1] * x) + (mf[1][1] * y) + (mf[2][1] * z) + mf[3][1];
+    result[AXIS_Z] = (mf[0][2] * x) + (mf[1][2] * y) + (mf[2][2] * z) + mf[3][2];
 }
 
 /*
@@ -146,208 +147,212 @@ void TransformPoint(Mat4 mf, Vec3 point, Vec3 result) {
  */
 #ifdef NON_MATCHING
 void FrameSpheres(f32 depthOffset) {
-  Vec3 point;
-  Mat4 rotation;
-  Mat4 pitchRotation;
-  Mat4 yawRotation;
-  Mat4 orientation;
-  f32 horizontalEyeZ;
-  Degrees rightAngle;
-  Degrees leftAngle;
-  Degrees topAngle;
-  Degrees bottomAngle;
-  f32 minZ;
-  f32 maxZ;
-  f32 minX;
-  f32 maxX;
-  f32 minY;
-  f32 maxY;
-  Radians angle;
-  f32 leftDistance;
-  f32 rightDistance;
-  f32 topDistance;
-  f32 bottomDistance;
-  f32 eyeX;
-  f32 eyeY;
-  f32 eyeZ;
-  f32 verticalEyeZ;
-  f32 depth;
-  f32 right;
-  f32 left;
-  f32 top;
-  f32 bottom;
-  f32 centerX;
-  f32 centerY;
-  f32 frontDistance;
-  s32 i;
-  f32 rightRadians;
-  minZ = Z_MARGIN;
-  minY = FAR_EXTENT;
-  minX = minY;
-  maxY = -FAR_EXTENT;
-  maxX = maxY;
-  rightAngle = g_Cameras[0].view.fieldOfView * 0.5f;
-  leftAngle = -rightAngle;
-  topAngle = rightAngle * 0.75f;
-  /*
-   * In its own block, as without it 259 words differ, 57 in shape, against 258
-   * and 54, and 55 against 46 under the note's forcing
-   */
-  IN_OWN_BLOCK(bottomAngle = leftAngle * 0.75f);
-  maxZ = -minZ;
-  if (g_ControllerData[1].trigger & D_CBUTTONS) {
-    osSyncPrintf("forv %f\n", g_Cameras[0].view.fieldOfView);
-  }
-
-  guRotateF(rotation, rightAngle, 0.0f, 1.0f, 0.0f);
-  guMtxCatF(f_FramingRotation, rotation, rotation);
-  for (i = 0; i < f_FramedSphereCount; i++) {
-    TransformPoint(rotation, f_FramedSphereCenters[i], point);
-    if (point[AXIS_X] - f_FramedSphereRadii[i] < minX) {
-      minX = point[AXIS_X] - f_FramedSphereRadii[i];
-    }
-  }
-
-  guRotateF(rotation, leftAngle, 0.0f, 1.0f, 0.0f);
-  guMtxCatF(f_FramingRotation, rotation, rotation);
-  for (i = 0; i < f_FramedSphereCount; i++) {
-    TransformPoint(rotation, f_FramedSphereCenters[i], point);
-    if (maxX < point[AXIS_X] + f_FramedSphereRadii[i]) {
-      maxX = point[AXIS_X] + f_FramedSphereRadii[i];
-    }
-  }
-
-  guRotateF(rotation, topAngle, -1.0f, 0.0f, 0.0f);
-  guMtxCatF(f_FramingRotation, rotation, rotation);
-  for (i = 0; i < f_FramedSphereCount; i++) {
-    TransformPoint(rotation, f_FramedSphereCenters[i], point);
-    if (point[AXIS_Y] - f_FramedSphereRadii[i] < minY) {
-      minY = point[AXIS_Y] - f_FramedSphereRadii[i];
-    }
-  }
-
-  guRotateF(rotation, bottomAngle, -1.0f, 0.0f, 0.0f);
-  guMtxCatF(f_FramingRotation, rotation, rotation);
-  for (i = 0; i < f_FramedSphereCount; i++) {
-    TransformPoint(rotation, f_FramedSphereCenters[i], point);
-    if (maxY < point[AXIS_Y] + f_FramedSphereRadii[i]) {
-      maxY = point[AXIS_Y] + f_FramedSphereRadii[i];
-    }
-  }
-
-  if (g_ControllerData[1].trigger & D_CBUTTONS) {
-    osSyncPrintf("maxx %f minx %f maxy %f miny %f\n", maxX, minX, maxY, minY);
-  }
-
-  angle = FramingDegreesToRadians(rightAngle - leftAngle) -
-      FramingDegreesToRadians(90);
-  leftDistance = -minX / cosf(angle);
-  eyeX = sinf(FramingDegreesToRadians(leftAngle)) * leftDistance;
-  horizontalEyeZ = cosf(FramingDegreesToRadians(leftAngle)) * leftDistance;
-  rightDistance = maxX / cosf(angle);
-  eyeX += sinf(FramingDegreesToRadians(rightAngle)) * rightDistance;
-  horizontalEyeZ += cosf(FramingDegreesToRadians(rightAngle)) * rightDistance;
-
-  angle = FramingDegreesToRadians(topAngle - bottomAngle) -
-      FramingDegreesToRadians(90);
-  bottomDistance = -minY / cosf(angle);
-  eyeY = sinf(FramingDegreesToRadians(bottomAngle)) * bottomDistance;
-  verticalEyeZ = cosf(FramingDegreesToRadians(bottomAngle)) * bottomDistance;
-  topDistance = maxY / cosf(-angle);
-  eyeY += sinf(FramingDegreesToRadians(topAngle)) * topDistance;
-  verticalEyeZ += cosf(FramingDegreesToRadians(topAngle)) * topDistance;
-  if (g_ControllerData[1].trigger & D_CBUTTONS) {
-    osSyncPrintf("xd %f yd %f xzd %f yzd %f\n", eyeX, eyeY, horizontalEyeZ,
-        verticalEyeZ);
-  }
-
-  eyeZ = horizontalEyeZ;
-  if (!(verticalEyeZ <= horizontalEyeZ)) {
-    eyeZ = verticalEyeZ;
-  }
-
-  guTranslateF(rotation, -eyeX, -eyeY, eyeZ);
-  minY = FAR_EXTENT;
-  minX = minY;
-  maxY = -FAR_EXTENT;
-  maxX = maxY;
-  guMtxCatF(f_FramingRotation, rotation, rotation);
-  for (i = 0; i < f_FramedSphereCount; i++) {
-    TransformPoint(rotation, f_FramedSphereCenters[i], point);
+    Vec3 point;
+    Mat4 rotation;
+    Mat4 pitchRotation;
+    Mat4 yawRotation;
+    Mat4 orientation;
+    f32 horizontalEyeZ;
+    Degrees rightAngle;
+    Degrees leftAngle;
+    Degrees topAngle;
+    Degrees bottomAngle;
+    f32 minZ;
+    f32 maxZ;
+    f32 minX;
+    f32 maxX;
+    f32 minY;
+    f32 maxY;
+    Radians angle;
+    f32 leftDistance;
+    f32 rightDistance;
+    f32 topDistance;
+    f32 bottomDistance;
+    f32 eyeX;
+    f32 eyeY;
+    f32 eyeZ;
+    f32 verticalEyeZ;
+    f32 depth;
+    f32 right;
+    f32 left;
+    f32 top;
+    f32 bottom;
+    f32 centerX;
+    f32 centerY;
+    f32 frontDistance;
+    s32 i;
+    f32 rightRadians;
+    minZ = Z_MARGIN;
+    minY = FAR_EXTENT;
+    minX = minY;
+    maxY = -FAR_EXTENT;
+    maxX = maxY;
+    rightAngle = g_Cameras[0].view.fieldOfView * 0.5f;
+    leftAngle = -rightAngle;
+    topAngle = rightAngle * 0.75f;
+    /*
+     * In its own block, as without it 259 words differ, 57 in shape, against 258
+     * and 54, and 55 against 46 under the note's forcing
+     */
+    IN_OWN_BLOCK(bottomAngle = leftAngle * 0.75f);
+    maxZ = -minZ;
     if (g_ControllerData[1].trigger & D_CBUTTONS) {
-      osSyncPrintf("rZ %f\n", point[AXIS_Z]);
-    }
-    if (point[AXIS_Z] - f_FramedSphereRadii[i] < minZ) {
-      minZ = point[AXIS_Z] - f_FramedSphereRadii[i];
+        osSyncPrintf("forv %f\n", g_Cameras[0].view.fieldOfView);
     }
 
-    if (maxZ < point[AXIS_Z] + f_FramedSphereRadii[i]) {
-      maxZ = point[AXIS_Z] + f_FramedSphereRadii[i];
+    guRotateF(rotation, rightAngle, 0.0f, 1.0f, 0.0f);
+    guMtxCatF(f_FramingRotation, rotation, rotation);
+    for (i = 0; i < f_FramedSphereCount; i++) {
+        TransformPoint(rotation, f_FramedSphereCenters[i], point);
+        if (point[AXIS_X] - f_FramedSphereRadii[i] < minX) {
+            minX = point[AXIS_X] - f_FramedSphereRadii[i];
+        }
     }
 
-    if (point[AXIS_X] - f_FramedSphereRadii[i] < minX) {
-      minX = point[AXIS_X] - f_FramedSphereRadii[i];
+    guRotateF(rotation, leftAngle, 0.0f, 1.0f, 0.0f);
+    guMtxCatF(f_FramingRotation, rotation, rotation);
+    for (i = 0; i < f_FramedSphereCount; i++) {
+        TransformPoint(rotation, f_FramedSphereCenters[i], point);
+        if (maxX < point[AXIS_X] + f_FramedSphereRadii[i]) {
+            maxX = point[AXIS_X] + f_FramedSphereRadii[i];
+        }
     }
 
-    if (maxX < point[AXIS_X] + f_FramedSphereRadii[i]) {
-      maxX = point[AXIS_X] + f_FramedSphereRadii[i];
+    guRotateF(rotation, topAngle, -1.0f, 0.0f, 0.0f);
+    guMtxCatF(f_FramingRotation, rotation, rotation);
+    for (i = 0; i < f_FramedSphereCount; i++) {
+        TransformPoint(rotation, f_FramedSphereCenters[i], point);
+        if (point[AXIS_Y] - f_FramedSphereRadii[i] < minY) {
+            minY = point[AXIS_Y] - f_FramedSphereRadii[i];
+        }
     }
 
-    if (point[AXIS_Y] - f_FramedSphereRadii[i] < minY) {
-      minY = point[AXIS_Y] - f_FramedSphereRadii[i];
+    guRotateF(rotation, bottomAngle, -1.0f, 0.0f, 0.0f);
+    guMtxCatF(f_FramingRotation, rotation, rotation);
+    for (i = 0; i < f_FramedSphereCount; i++) {
+        TransformPoint(rotation, f_FramedSphereCenters[i], point);
+        if (maxY < point[AXIS_Y] + f_FramedSphereRadii[i]) {
+            maxY = point[AXIS_Y] + f_FramedSphereRadii[i];
+        }
     }
 
-    if (maxY < point[AXIS_Y] + f_FramedSphereRadii[i]) {
-      maxY = point[AXIS_Y] + f_FramedSphereRadii[i];
-    }
-  }
-
-  eyeZ += Z_MARGIN - minZ;
-  frontDistance = eyeZ - horizontalEyeZ;
-  rightRadians = FramingDegreesToRadians(rightAngle);
-  right = frontDistance * tan(rightRadians);
-  left = frontDistance * tan(FramingDegreesToRadians(leftAngle));
-  top = (eyeZ - verticalEyeZ) * tan(FramingDegreesToRadians(topAngle));
-  bottom = (eyeZ - verticalEyeZ) * tan(FramingDegreesToRadians(bottomAngle));
-  centerX = (minX + maxX) * 0.5f;
-  centerY = (minY + maxY) * 0.5f;
-  if (centerX < left) {
-    centerX = left;
-  }
-
-  if (right < centerX) {
-    centerX = right;
-  }
-
-  if (centerY < bottom) {
-    centerY = bottom;
-  }
-
-  if (top < centerY) {
-    centerY = top;
-  }
-
-  eyeX += centerX;
-  eyeY += centerY;
-
-  guRotateF(pitchRotation, (s32)(f_FramingPitch * RADIANS_TO_DEGREES), 1.0f,
-      0.0f, 0.0f);
-  guRotateF(
-      yawRotation, (s32)(f_FramingYaw * RADIANS_TO_DEGREES), 0.0f, 1.0f, 0.0f);
-  guMtxCatF(pitchRotation, yawRotation, orientation);
-  depth = depthOffset - eyeZ;
-  guMtxXFMF(orientation, eyeX, eyeY, depth, &f_FramedEye[0], &f_FramedEye[1],
-      &f_FramedEye[2]);
-  guMtxXFMF(orientation, eyeX, eyeY, depth + LOOK_DISTANCE, &f_FramedLookAt[0],
-      &f_FramedLookAt[1], &f_FramedLookAt[2]);
-  if (g_ControllerData[1].trigger & D_CBUTTONS) {
-    osSyncPrintf(
-        "px %f py %f pz %f\n", f_FramedEye[0], f_FramedEye[1], f_FramedEye[2]);
     if (g_ControllerData[1].trigger & D_CBUTTONS) {
-      osSyncPrintf("tx %f ty %f tz %f\n", f_FramedLookAt[0], f_FramedLookAt[1],
-          f_FramedLookAt[2]);
+        osSyncPrintf("maxx %f minx %f maxy %f miny %f\n", maxX, minX, maxY, minY);
     }
-  }
+
+    angle = FramingDegreesToRadians(rightAngle - leftAngle) - FramingDegreesToRadians(90);
+    leftDistance = -minX / cosf(angle);
+    eyeX = sinf(FramingDegreesToRadians(leftAngle)) * leftDistance;
+    horizontalEyeZ = cosf(FramingDegreesToRadians(leftAngle)) * leftDistance;
+    rightDistance = maxX / cosf(angle);
+    eyeX += sinf(FramingDegreesToRadians(rightAngle)) * rightDistance;
+    horizontalEyeZ += cosf(FramingDegreesToRadians(rightAngle)) * rightDistance;
+
+    angle = FramingDegreesToRadians(topAngle - bottomAngle) - FramingDegreesToRadians(90);
+    bottomDistance = -minY / cosf(angle);
+    eyeY = sinf(FramingDegreesToRadians(bottomAngle)) * bottomDistance;
+    verticalEyeZ = cosf(FramingDegreesToRadians(bottomAngle)) * bottomDistance;
+    topDistance = maxY / cosf(-angle);
+    eyeY += sinf(FramingDegreesToRadians(topAngle)) * topDistance;
+    verticalEyeZ += cosf(FramingDegreesToRadians(topAngle)) * topDistance;
+    if (g_ControllerData[1].trigger & D_CBUTTONS) {
+        osSyncPrintf("xd %f yd %f xzd %f yzd %f\n", eyeX, eyeY, horizontalEyeZ, verticalEyeZ);
+    }
+
+    eyeZ = horizontalEyeZ;
+    if (!(verticalEyeZ <= horizontalEyeZ)) {
+        eyeZ = verticalEyeZ;
+    }
+
+    guTranslateF(rotation, -eyeX, -eyeY, eyeZ);
+    minY = FAR_EXTENT;
+    minX = minY;
+    maxY = -FAR_EXTENT;
+    maxX = maxY;
+    guMtxCatF(f_FramingRotation, rotation, rotation);
+    for (i = 0; i < f_FramedSphereCount; i++) {
+        TransformPoint(rotation, f_FramedSphereCenters[i], point);
+        if (g_ControllerData[1].trigger & D_CBUTTONS) {
+            osSyncPrintf("rZ %f\n", point[AXIS_Z]);
+        }
+        if (point[AXIS_Z] - f_FramedSphereRadii[i] < minZ) {
+            minZ = point[AXIS_Z] - f_FramedSphereRadii[i];
+        }
+
+        if (maxZ < point[AXIS_Z] + f_FramedSphereRadii[i]) {
+            maxZ = point[AXIS_Z] + f_FramedSphereRadii[i];
+        }
+
+        if (point[AXIS_X] - f_FramedSphereRadii[i] < minX) {
+            minX = point[AXIS_X] - f_FramedSphereRadii[i];
+        }
+
+        if (maxX < point[AXIS_X] + f_FramedSphereRadii[i]) {
+            maxX = point[AXIS_X] + f_FramedSphereRadii[i];
+        }
+
+        if (point[AXIS_Y] - f_FramedSphereRadii[i] < minY) {
+            minY = point[AXIS_Y] - f_FramedSphereRadii[i];
+        }
+
+        if (maxY < point[AXIS_Y] + f_FramedSphereRadii[i]) {
+            maxY = point[AXIS_Y] + f_FramedSphereRadii[i];
+        }
+    }
+
+    eyeZ += Z_MARGIN - minZ;
+    frontDistance = eyeZ - horizontalEyeZ;
+    rightRadians = FramingDegreesToRadians(rightAngle);
+    right = frontDistance * tan(rightRadians);
+    left = frontDistance * tan(FramingDegreesToRadians(leftAngle));
+    top = (eyeZ - verticalEyeZ) * tan(FramingDegreesToRadians(topAngle));
+    bottom = (eyeZ - verticalEyeZ) * tan(FramingDegreesToRadians(bottomAngle));
+    centerX = (minX + maxX) * 0.5f;
+    centerY = (minY + maxY) * 0.5f;
+    if (centerX < left) {
+        centerX = left;
+    }
+
+    if (right < centerX) {
+        centerX = right;
+    }
+
+    if (centerY < bottom) {
+        centerY = bottom;
+    }
+
+    if (top < centerY) {
+        centerY = top;
+    }
+
+    eyeX += centerX;
+    eyeY += centerY;
+
+    guRotateF(pitchRotation, (s32)(f_FramingPitch * RADIANS_TO_DEGREES), 1.0f, 0.0f, 0.0f);
+    guRotateF(yawRotation, (s32)(f_FramingYaw * RADIANS_TO_DEGREES), 0.0f, 1.0f, 0.0f);
+    guMtxCatF(pitchRotation, yawRotation, orientation);
+    depth = depthOffset - eyeZ;
+    guMtxXFMF(orientation, eyeX, eyeY, depth, &f_FramedEye[0], &f_FramedEye[1], &f_FramedEye[2]);
+    guMtxXFMF(
+        orientation,
+        eyeX,
+        eyeY,
+        depth + LOOK_DISTANCE,
+        &f_FramedLookAt[0],
+        &f_FramedLookAt[1],
+        &f_FramedLookAt[2]
+    );
+    if (g_ControllerData[1].trigger & D_CBUTTONS) {
+        osSyncPrintf("px %f py %f pz %f\n", f_FramedEye[0], f_FramedEye[1], f_FramedEye[2]);
+        if (g_ControllerData[1].trigger & D_CBUTTONS) {
+            osSyncPrintf(
+                "tx %f ty %f tz %f\n",
+                f_FramedLookAt[0],
+                f_FramedLookAt[1],
+                f_FramedLookAt[2]
+            );
+        }
+    }
 }
 
 #else

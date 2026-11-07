@@ -9,6 +9,6 @@
 #define PLANNED_SHOT_UNFINISHED (-1)
 
 void StartShotPlan(void);
-s32 GetPlannedShot(CurrentShot* shot);
+s32 GetPlannedShot(CurrentShot *shot);
 
 #endif

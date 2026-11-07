@@ -58,8 +58,7 @@ s32 g_ScorecardState = SCORECARD_CLOSED;
  */
 static s32 f_ContestWinner = NO_CONTEST_WINNER;
 /* Read by no routine */
-static void* f_UnusedPositionRoutines[6] UNUSED = {
-    NULL, NULL, guPosition, NULL, NULL, NULL};
+static void *f_UnusedPositionRoutines[6] UNUSED = {NULL, NULL, guPosition, NULL, NULL, NULL};
 
 /*
  * Sums the player's net strokes over par from the round's first hole to
@@ -67,22 +66,20 @@ static void* f_UnusedPositionRoutines[6] UNUSED = {
  * player is no longer HOLE_STATUS_PLAYING
  */
 s32 GetNetScoreToPar(s32 endHole, s32 playerIndex) {
-  s32 score = 0;
-  CourseRecord* course = &g_CourseRecords[GetCourseRecordIndex()];
-  s32 hole;
+    s32 score = 0;
+    CourseRecord *course = &g_CourseRecords[GetCourseRecordIndex()];
+    s32 hole;
 
-  if (g_GameState.holeIndex == endHole) {
-    endHole += g_Players[playerIndex].holeStatus != HOLE_STATUS_PLAYING;
-  }
+    if (g_GameState.holeIndex == endHole) {
+        endHole += g_Players[playerIndex].holeStatus != HOLE_STATUS_PLAYING;
+    }
 
-  for (hole = GetFirstHoleIndex(); hole < endHole; hole++) {
-    score += g_Players[playerIndex].holes[hole].strokes -
-        course->holes[hole].par +
-        GetHandicapOffset(
-            g_GameState.courseIndex, hole, g_Players[playerIndex].handicap);
-  }
+    for (hole = GetFirstHoleIndex(); hole < endHole; hole++) {
+        score += g_Players[playerIndex].holes[hole].strokes - course->holes[hole].par +
+            GetHandicapOffset(g_GameState.courseIndex, hole, g_Players[playerIndex].handicap);
+    }
 
-  return score;
+    return score;
 }
 
 /*
@@ -92,158 +89,165 @@ s32 GetNetScoreToPar(s32 endHole, s32 playerIndex) {
  * tallied, with endHole itself once no player is HOLE_STATUS_PLAYING
  */
 void TallySkins(s32 endHole) {
-  s32 player;
-  /*
-   * Also the player whose total is cleared, to match: clearing the totals with
-   * player gives 6 words differing, none in shape
-   */
-  s32 hole;
-  /*
-   * Also whether anyone is still playing, to match: an isAnyonePlaying variable
-   * gives 12 words differing, none in shape
-   */
-  s32 winner;
-  s32 skins;
+    s32 player;
+    /*
+     * Also the player whose total is cleared, to match: clearing the totals with
+     * player gives 6 words differing, none in shape
+     */
+    s32 hole;
+    /*
+     * Also whether anyone is still playing, to match: an isAnyonePlaying variable
+     * gives 12 words differing, none in shape
+     */
+    s32 winner;
+    s32 skins;
 
-  for (hole = 0; hole != g_GameState.playerCount; hole++) {
-    g_RoundHud.skinsTotals[hole] = 0;
-  }
-
-  winner = FALSE;
-  for (player = 0; player != g_GameState.playerCount; player++) {
-    if (g_Players[player].holeStatus == HOLE_STATUS_PLAYING) {
-      winner = TRUE;
+    for (hole = 0; hole != g_GameState.playerCount; hole++) {
+        g_RoundHud.skinsTotals[hole] = 0;
     }
-  }
 
-  endHole += !winner;
-  g_Scorecard.skinsCarryover.intoLastHole = NO_LAST_HOLE_SKINS;
-  g_Scorecard.skinsCarryover.onLastHole = 0;
-  g_Scorecard.skinsCarryover.fromLastHole = 0;
-  skins = 1;
-  for (hole = GetFirstHoleIndex(); hole < endHole; hole++) {
-    winner = NO_SKINS_WINNER;
+    winner = FALSE;
     for (player = 0; player != g_GameState.playerCount; player++) {
-      if (g_Players[player].holes[hole].strokes != 0) {
-        winner = player;
-        g_Players[player].holes[hole].strokes = skins;
-      }
+        if (g_Players[player].holeStatus == HOLE_STATUS_PLAYING) {
+            winner = TRUE;
+        }
     }
 
-    if (hole == endHole - 1) {
-      g_Scorecard.skinsCarryover.intoLastHole = skins - 1;
-      g_Scorecard.skinsCarryover.onLastHole = skins;
+    endHole += !winner;
+    g_Scorecard.skinsCarryover.intoLastHole = NO_LAST_HOLE_SKINS;
+    g_Scorecard.skinsCarryover.onLastHole = 0;
+    g_Scorecard.skinsCarryover.fromLastHole = 0;
+    skins = 1;
+    for (hole = GetFirstHoleIndex(); hole < endHole; hole++) {
+        winner = NO_SKINS_WINNER;
+        for (player = 0; player != g_GameState.playerCount; player++) {
+            if (g_Players[player].holes[hole].strokes != 0) {
+                winner = player;
+                g_Players[player].holes[hole].strokes = skins;
+            }
+        }
+
+        if (hole == endHole - 1) {
+            g_Scorecard.skinsCarryover.intoLastHole = skins - 1;
+            g_Scorecard.skinsCarryover.onLastHole = skins;
+        }
+
+        if (winner == NO_SKINS_WINNER) {
+            skins++;
+            g_Scorecard.skinsCarryover.fromLastHole = skins - 1;
+        }
+        else {
+            g_RoundHud.skinsTotals[winner] += skins;
+            skins = 1;
+            g_Scorecard.skinsCarryover.fromLastHole = 0;
+        }
     }
 
-    if (winner == NO_SKINS_WINNER) {
-      skins++;
-      g_Scorecard.skinsCarryover.fromLastHole = skins - 1;
-    } else {
-      g_RoundHud.skinsTotals[winner] += skins;
-      skins = 1;
-      g_Scorecard.skinsCarryover.fromLastHole = 0;
-    }
-  }
-
-  sprintf(g_PrintBuffer, "%2d %d    ", g_Scorecard.skinsCarryover.intoLastHole,
-      g_Scorecard.skinsCarryover.onLastHole);
-  PrintDebugText(g_PrintBuffer, SKINS_DEBUG_COLUMN, SKINS_DEBUG_ROW);
+    sprintf(
+        g_PrintBuffer,
+        "%2d %d    ",
+        g_Scorecard.skinsCarryover.intoLastHole,
+        g_Scorecard.skinsCarryover.onLastHole
+    );
+    PrintDebugText(g_PrintBuffer, SKINS_DEBUG_COLUMN, SKINS_DEBUG_ROW);
 }
 
 void StartBets(void) {
-  s32 player;
-  s32 bet;
+    s32 player;
+    s32 bet;
 
-  for (player = 0; player != MAX_PLAYER_COUNT; player++) {
-    for (bet = 0; bet != BET_COUNT; bet++) {
-      g_BetTallies[player][bet] = 0;
+    for (player = 0; player != MAX_PLAYER_COUNT; player++) {
+        for (bet = 0; bet != BET_COUNT; bet++) {
+            g_BetTallies[player][bet] = 0;
+        }
     }
-  }
 
-  for (player = 0; player != MAX_PLAYER_COUNT; player++) {
-    for (bet = 0; bet != BET_COUNT; bet++) {
-      g_Players[player].betTallies[bet] = g_BetTallies[player][bet];
+    for (player = 0; player != MAX_PLAYER_COUNT; player++) {
+        for (bet = 0; bet != BET_COUNT; bet++) {
+            g_Players[player].betTallies[bet] = g_BetTallies[player][bet];
+        }
     }
-  }
 
-  f_IsContestDecided = FALSE;
-  f_ContestWinner = NO_CONTEST_WINNER;
-  g_LongestDrivePot = g_GameState.betRates[BET_LONGEST_DRIVE];
-  g_NearestPinPot = g_GameState.betRates[BET_NEAREST_PIN];
-  if (g_GameState.betRates[BET_MATCH_POT] != UNSET_BET_RATE) {
-    g_HolePot = g_GameState.betRates[BET_MATCH_POT];
-  }
+    f_IsContestDecided = FALSE;
+    f_ContestWinner = NO_CONTEST_WINNER;
+    g_LongestDrivePot = g_GameState.betRates[BET_LONGEST_DRIVE];
+    g_NearestPinPot = g_GameState.betRates[BET_NEAREST_PIN];
+    if (g_GameState.betRates[BET_MATCH_POT] != UNSET_BET_RATE) {
+        g_HolePot = g_GameState.betRates[BET_MATCH_POT];
+    }
 
-  if (g_GameState.betRates[BET_SKINS] != UNSET_BET_RATE) {
-    g_HolePot = g_GameState.betRates[BET_SKINS];
-  }
+    if (g_GameState.betRates[BET_SKINS] != UNSET_BET_RATE) {
+        g_HolePot = g_GameState.betRates[BET_SKINS];
+    }
 
-  g_GameState.carriedPots[CARRIED_POT_LONGEST_DRIVE] = g_LongestDrivePot;
-  g_GameState.carriedPots[CARRIED_POT_NEAREST_PIN] = g_NearestPinPot;
-  g_GameState.carriedPots[CARRIED_POT_HOLE] = g_HolePot;
+    g_GameState.carriedPots[CARRIED_POT_LONGEST_DRIVE] = g_LongestDrivePot;
+    g_GameState.carriedPots[CARRIED_POT_NEAREST_PIN] = g_NearestPinPot;
+    g_GameState.carriedPots[CARRIED_POT_HOLE] = g_HolePot;
 }
 
 /* Takes the tallies and pots back from a continued game */
 void ResumeBets(void) {
-  s32 player;
-  s32 bet;
+    s32 player;
+    s32 bet;
 
-  for (player = 0; player != MAX_PLAYER_COUNT; player++) {
-    for (bet = 0; bet != BET_COUNT; bet++) {
-      g_BetTallies[player][bet] = g_Players[player].betTallies[bet];
+    for (player = 0; player != MAX_PLAYER_COUNT; player++) {
+        for (bet = 0; bet != BET_COUNT; bet++) {
+            g_BetTallies[player][bet] = g_Players[player].betTallies[bet];
+        }
     }
-  }
 
-  f_IsContestDecided = FALSE;
-  f_ContestWinner = NO_CONTEST_WINNER;
-  g_LongestDrivePot = g_GameState.carriedPots[CARRIED_POT_LONGEST_DRIVE];
-  g_NearestPinPot = g_GameState.carriedPots[CARRIED_POT_NEAREST_PIN];
-  g_HolePot = g_GameState.carriedPots[CARRIED_POT_HOLE];
+    f_IsContestDecided = FALSE;
+    f_ContestWinner = NO_CONTEST_WINNER;
+    g_LongestDrivePot = g_GameState.carriedPots[CARRIED_POT_LONGEST_DRIVE];
+    g_NearestPinPot = g_GameState.carriedPots[CARRIED_POT_NEAREST_PIN];
+    g_HolePot = g_GameState.carriedPots[CARRIED_POT_HOLE];
 }
 
 s32 GetContestWinner(void) {
-  return f_ContestWinner;
+    return f_ContestWinner;
 }
 
 void SetContestWinner(s32 playerIndex) {
-  f_ContestWinner = playerIndex;
+    f_ContestWinner = playerIndex;
 }
 
 /* The longest drive wins the pot from each other player */
 void SettleLongestDrive(void) {
-  s32 longest;
-  s32 player;
-  s32 distance;
+    s32 longest;
+    s32 player;
+    s32 distance;
 
-  if (g_GameState.betRates[BET_LONGEST_DRIVE] > 0) {
-    longest = -1;
-    f_ContestWinner = NO_CONTEST_WINNER;
-    for (player = 0; player != g_GameState.playerCount; player++) {
-      if (g_Players[player].driveDistance != UNCOUNTED_DISTANCE) {
-        distance = g_Players[player].driveDistance * DRIVE_COMPARISON_SCALE;
-        if (longest < distance) {
-          f_ContestWinner = player;
-          longest = distance;
-        } else if (distance == longest) {
-          f_ContestWinner = NO_CONTEST_WINNER;
+    if (g_GameState.betRates[BET_LONGEST_DRIVE] > 0) {
+        longest = -1;
+        f_ContestWinner = NO_CONTEST_WINNER;
+        for (player = 0; player != g_GameState.playerCount; player++) {
+            if (g_Players[player].driveDistance != UNCOUNTED_DISTANCE) {
+                distance = g_Players[player].driveDistance * DRIVE_COMPARISON_SCALE;
+                if (longest < distance) {
+                    f_ContestWinner = player;
+                    longest = distance;
+                }
+                else if (distance == longest) {
+                    f_ContestWinner = NO_CONTEST_WINNER;
+                }
+            }
         }
-      }
-    }
 
-    if (f_ContestWinner == NO_CONTEST_WINNER) {
-      g_LongestDrivePot += g_GameState.betRates[BET_LONGEST_DRIVE];
-    } else {
-      g_BetTallies[f_ContestWinner][BET_LONGEST_DRIVE] +=
-          g_LongestDrivePot * (g_GameState.playerCount - 1);
-      for (player = 0; player != g_GameState.playerCount; player++) {
-        if (player != f_ContestWinner) {
-          g_BetTallies[player][BET_LONGEST_DRIVE] -= g_LongestDrivePot;
+        if (f_ContestWinner == NO_CONTEST_WINNER) {
+            g_LongestDrivePot += g_GameState.betRates[BET_LONGEST_DRIVE];
         }
-      }
+        else {
+            g_BetTallies[f_ContestWinner][BET_LONGEST_DRIVE] +=
+                g_LongestDrivePot * (g_GameState.playerCount - 1);
+            for (player = 0; player != g_GameState.playerCount; player++) {
+                if (player != f_ContestWinner) {
+                    g_BetTallies[player][BET_LONGEST_DRIVE] -= g_LongestDrivePot;
+                }
+            }
 
-      g_LongestDrivePot = g_GameState.betRates[BET_LONGEST_DRIVE];
+            g_LongestDrivePot = g_GameState.betRates[BET_LONGEST_DRIVE];
+        }
     }
-  }
 }
 
 /* Where the search for the nearest shot starts, beyond any measured one */
@@ -251,43 +255,45 @@ void SettleLongestDrive(void) {
 
 /* The shot nearest the pin wins the pot from each other player */
 void SettleNearestPin(void) {
-  s32 nearest;
-  s32 player;
-  s32 distance;
+    s32 nearest;
+    s32 player;
+    s32 distance;
 
-  if (g_GameState.betRates[BET_NEAREST_PIN] > 0) {
-    nearest = FARTHER_THAN_ANY_DISTANCE;
-    f_ContestWinner = NO_CONTEST_WINNER;
-    for (player = 0; player != g_GameState.playerCount; player++) {
-      distance = g_Players[player].pinDistance;
-      if (distance != UNCOUNTED_DISTANCE) {
-        if (distance < nearest) {
-          f_ContestWinner = player;
-          nearest = distance;
-        } else if (distance == nearest) {
-          f_ContestWinner = NO_CONTEST_WINNER;
+    if (g_GameState.betRates[BET_NEAREST_PIN] > 0) {
+        nearest = FARTHER_THAN_ANY_DISTANCE;
+        f_ContestWinner = NO_CONTEST_WINNER;
+        for (player = 0; player != g_GameState.playerCount; player++) {
+            distance = g_Players[player].pinDistance;
+            if (distance != UNCOUNTED_DISTANCE) {
+                if (distance < nearest) {
+                    f_ContestWinner = player;
+                    nearest = distance;
+                }
+                else if (distance == nearest) {
+                    f_ContestWinner = NO_CONTEST_WINNER;
+                }
+            }
         }
-      }
-    }
 
-    if (f_ContestWinner == NO_CONTEST_WINNER) {
-      g_NearestPinPot += g_GameState.betRates[BET_NEAREST_PIN];
-    } else {
-      g_BetTallies[f_ContestWinner][BET_NEAREST_PIN] +=
-          g_NearestPinPot * (g_GameState.playerCount - 1);
-      for (player = 0; player != g_GameState.playerCount; player++) {
-        if (player != f_ContestWinner) {
-          g_BetTallies[player][BET_NEAREST_PIN] -= g_NearestPinPot;
+        if (f_ContestWinner == NO_CONTEST_WINNER) {
+            g_NearestPinPot += g_GameState.betRates[BET_NEAREST_PIN];
         }
-      }
+        else {
+            g_BetTallies[f_ContestWinner][BET_NEAREST_PIN] +=
+                g_NearestPinPot * (g_GameState.playerCount - 1);
+            for (player = 0; player != g_GameState.playerCount; player++) {
+                if (player != f_ContestWinner) {
+                    g_BetTallies[player][BET_NEAREST_PIN] -= g_NearestPinPot;
+                }
+            }
 
-      g_NearestPinPot = g_GameState.betRates[BET_NEAREST_PIN];
+            g_NearestPinPot = g_GameState.betRates[BET_NEAREST_PIN];
+        }
     }
-  }
 }
 
 void ClearContestWinner(void) {
-  f_ContestWinner = NO_CONTEST_WINNER;
+    f_ContestWinner = NO_CONTEST_WINNER;
 }
 
 /*
@@ -295,51 +301,53 @@ void ClearContestWinner(void) {
  * When the hole is over, the distances still unmeasured stop counting
  */
 void UpdateContest(Boolean isHoleOver) {
-  s32 holeIndex = g_GameState.holeIndex;
-  s32 player;
-  s32 measuredCount;
+    s32 holeIndex = g_GameState.holeIndex;
+    s32 player;
+    s32 measuredCount;
 
-  if (!f_IsContestDecided) {
-    if (IsMarkedParFive(g_GameState.courseIndex, holeIndex)) {
-      if (isHoleOver == TRUE) {
-        for (player = 0; player != g_GameState.playerCount; player++) {
-          if (g_Players[player].driveDistance == UNMEASURED_DISTANCE) {
-            g_Players[player].driveDistance = UNCOUNTED_DISTANCE;
-          }
+    if (!f_IsContestDecided) {
+        if (IsMarkedParFive(g_GameState.courseIndex, holeIndex)) {
+            if (isHoleOver == TRUE) {
+                for (player = 0; player != g_GameState.playerCount; player++) {
+                    if (g_Players[player].driveDistance == UNMEASURED_DISTANCE) {
+                        g_Players[player].driveDistance = UNCOUNTED_DISTANCE;
+                    }
+                }
+            }
+
+            measuredCount = 0;
+            for (player = 0; player != g_GameState.playerCount; player++) {
+                measuredCount += g_Players[player].driveDistance != UNMEASURED_DISTANCE;
+            }
+
+            if (measuredCount == g_GameState.playerCount) {
+                SettleLongestDrive();
+                f_IsContestDecided = TRUE;
+            }
         }
-      }
+        else if (IsParThree(g_GameState.courseIndex, holeIndex)) {
+            if (isHoleOver == TRUE) {
+                for (player = 0; player != g_GameState.playerCount; player++) {
+                    if (g_Players[player].pinDistance == UNMEASURED_DISTANCE) {
+                        g_Players[player].pinDistance = UNCOUNTED_DISTANCE;
+                    }
+                }
+            }
 
-      measuredCount = 0;
-      for (player = 0; player != g_GameState.playerCount; player++) {
-        measuredCount += g_Players[player].driveDistance != UNMEASURED_DISTANCE;
-      }
+            measuredCount = 0;
+            for (player = 0; player != g_GameState.playerCount; player++) {
+                measuredCount += g_Players[player].pinDistance != UNMEASURED_DISTANCE;
+            }
 
-      if (measuredCount == g_GameState.playerCount) {
-        SettleLongestDrive();
-        f_IsContestDecided = TRUE;
-      }
-    } else if (IsParThree(g_GameState.courseIndex, holeIndex)) {
-      if (isHoleOver == TRUE) {
-        for (player = 0; player != g_GameState.playerCount; player++) {
-          if (g_Players[player].pinDistance == UNMEASURED_DISTANCE) {
-            g_Players[player].pinDistance = UNCOUNTED_DISTANCE;
-          }
+            if (measuredCount == g_GameState.playerCount) {
+                SettleNearestPin();
+                f_IsContestDecided = TRUE;
+            }
         }
-      }
-
-      measuredCount = 0;
-      for (player = 0; player != g_GameState.playerCount; player++) {
-        measuredCount += g_Players[player].pinDistance != UNMEASURED_DISTANCE;
-      }
-
-      if (measuredCount == g_GameState.playerCount) {
-        SettleNearestPin();
-        f_IsContestDecided = TRUE;
-      }
-    } else {
-      f_ContestWinner = NO_CONTEST_WINNER;
+        else {
+            f_ContestWinner = NO_CONTEST_WINNER;
+        }
     }
-  }
 }
 
 /*
@@ -349,262 +357,263 @@ void UpdateContest(Boolean isHoleOver) {
  * moving.
  */
 void RecordCourseRound(void) {
-  CourseStats* record =
-      &GetSaveData()->records.courseStats[g_GameState.courseIndex];
-  /*
-   * Reading g_RoundStats through a pointer is there to match: reading it
-   * directly gives 45 words differing, 13 in shape
-   */
-  RoundStats* stats = &g_RoundStats;
-  CourseRecord* course = &g_CourseRecords[g_GameState.courseIndex];
-  Boolean isAtRoundLimit;
-  s32 hole;
-  s64 score;
-  s64 total;
-  s32 sum;
-  s32 shotsToGreen;
+    CourseStats *record = &GetSaveData()->records.courseStats[g_GameState.courseIndex];
+    /*
+     * Reading g_RoundStats through a pointer is there to match: reading it
+     * directly gives 45 words differing, 13 in shape
+     */
+    RoundStats *stats = &g_RoundStats;
+    CourseRecord *course = &g_CourseRecords[g_GameState.courseIndex];
+    Boolean isAtRoundLimit;
+    s32 hole;
+    s64 score;
+    s64 total;
+    s32 sum;
+    s32 shotsToGreen;
 
-  if (record->roundCount <= 0) {
-    record->roundCount = 0;
-    record->bestScore = NO_BEST_SCORE;
-    record->strokeTotal = 0;
-    record->longestDrive = 0;
-    record->averageDrive = 0;
-    record->averagedDriveCount = 0;
-    record->measuredDriveTotal = 0;
-    record->puttTotal = 0;
-    record->parOrBetterCount = 0;
-    record->parOnCount = 0;
-    record->sandSaveCount = 0;
-    record->missedSandSaveCount = 0;
-  }
-
-  isAtRoundLimit = FALSE;
-  if (record->roundCount < ROUND_COUNT_LIMIT) {
-    record->roundCount++;
-  } else {
-    isAtRoundLimit = TRUE;
-  }
-
-  g_Players[0].holeStatus = HOLE_STATUS_PLAYING;
-  score = GetNetScoreToPar(COURSE_HOLE_COUNT, 0);
-  if (score < record->bestScore) {
-    record->bestScore = score;
-  }
-
-  if (record->bestScore < LOWEST_SCORE_TO_PAR) {
-    record->bestScore = LOWEST_SCORE_TO_PAR;
-  }
-
-  if (score < record->characterBestScores[g_Players[0].characterIndex]) {
-    record->characterBestScores[g_Players[0].characterIndex] = score;
-    record->hasCharacterBestScore[g_Players[0].characterIndex] = TRUE;
-    if (record->characterBestScores[g_Players[0].characterIndex] <
-        LOWEST_SCORE_TO_PAR) {
-      record->characterBestScores[g_Players[0].characterIndex] =
-          LOWEST_SCORE_TO_PAR;
+    if (record->roundCount <= 0) {
+        record->roundCount = 0;
+        record->bestScore = NO_BEST_SCORE;
+        record->strokeTotal = 0;
+        record->longestDrive = 0;
+        record->averageDrive = 0;
+        record->averagedDriveCount = 0;
+        record->measuredDriveTotal = 0;
+        record->puttTotal = 0;
+        record->parOrBetterCount = 0;
+        record->parOnCount = 0;
+        record->sandSaveCount = 0;
+        record->missedSandSaveCount = 0;
     }
-  }
 
-  total = 0;
-  for (hole = 0; hole != COURSE_HOLE_COUNT; hole++) {
-    total += g_Players[0].holes[hole].strokes;
-  }
-
-  total += record->strokeTotal;
-  if (isAtRoundLimit == TRUE) {
-    total = total * ROUND_COUNT_LIMIT / (ROUND_COUNT_LIMIT + 1);
-  }
-
-  if (total > RECORD_TOTAL_LIMIT) {
-    total = RECORD_TOTAL_LIMIT;
-  }
-
-  record->strokeTotal = total;
-
-  if (record->longestDrive < stats->longestDrive) {
-    record->longestDrive = stats->longestDrive;
-  }
-
-  if (record->averagedDriveCount == 0) {
-    if (stats->averagedDriveCount == 0) {
-      record->averageDrive = 0;
-    } else if (stats->averagedDriveCount > 0) {
-      record->averageDrive =
-          stats->averagedDriveTotal / stats->averagedDriveCount;
-      record->averagedDriveCount = 1;
-    } else {
-      record->averageDrive = 0;
+    isAtRoundLimit = FALSE;
+    if (record->roundCount < ROUND_COUNT_LIMIT) {
+        record->roundCount++;
     }
-  } else if (stats->averagedDriveCount > 0) {
-    record->averageDrive =
-        ((record->averageDrive * record->averagedDriveCount) +
-            stats->averagedDriveTotal) /
-        (record->averagedDriveCount + stats->averagedDriveCount);
-    record->averagedDriveCount += stats->averagedDriveCount;
-  }
-
-  sum = record->measuredDriveTotal + stats->measuredDriveCount;
-  if (sum > RECORD_TOTAL_LIMIT) {
-    record->measuredDriveTotal = RECORD_TOTAL_LIMIT;
-  } else {
-    record->measuredDriveTotal = sum;
-  }
-
-  if (isAtRoundLimit == TRUE) {
-    record->measuredDriveTotal = record->measuredDriveTotal *
-        ROUND_COUNT_LIMIT / (ROUND_COUNT_LIMIT + 1);
-  }
-
-  total = 0;
-  for (hole = 0; hole != COURSE_HOLE_COUNT; hole++) {
-    if (g_Players[0].holes[hole].putts != UNCOUNTED_PUTTS) {
-      total += g_Players[0].holes[hole].putts;
+    else {
+        isAtRoundLimit = TRUE;
     }
-  }
 
-  total += record->puttTotal;
-  if (isAtRoundLimit == TRUE) {
-    total = total * ROUND_COUNT_LIMIT / (ROUND_COUNT_LIMIT + 1);
-  }
-
-  if (total > RECORD_TOTAL_LIMIT) {
-    total = RECORD_TOTAL_LIMIT;
-  }
-
-  record->puttTotal = total;
-
-  for (hole = 0; hole != COURSE_HOLE_COUNT; hole++) {
-    if (g_Players[0].holes[hole].strokes <= course->holes[hole].par) {
-      if (record->parOrBetterCount < RECORD_TOTAL_LIMIT) {
-        record->parOrBetterCount++;
-      }
-
-      if (isAtRoundLimit == TRUE) {
-        record->parOrBetterCount = record->parOrBetterCount *
-            ROUND_COUNT_LIMIT / (ROUND_COUNT_LIMIT + 1);
-      }
+    g_Players[0].holeStatus = HOLE_STATUS_PLAYING;
+    score = GetNetScoreToPar(COURSE_HOLE_COUNT, 0);
+    if (score < record->bestScore) {
+        record->bestScore = score;
     }
-  }
 
-  for (hole = 0; hole != COURSE_HOLE_COUNT; hole++) {
-    shotsToGreen =
-        g_Players[0].holes[hole].strokes - g_Players[0].holes[hole].putts;
-    if (course->holes[hole].par - shotsToGreen >= PAR_ON_SPARE_STROKES) {
-      if (record->parOnCount < RECORD_TOTAL_LIMIT) {
-        record->parOnCount++;
-      }
-
-      if (isAtRoundLimit == TRUE) {
-        record->parOnCount =
-            record->parOnCount * ROUND_COUNT_LIMIT / (ROUND_COUNT_LIMIT + 1);
-      }
+    if (record->bestScore < LOWEST_SCORE_TO_PAR) {
+        record->bestScore = LOWEST_SCORE_TO_PAR;
     }
-  }
 
-  sum = record->sandSaveCount + stats->sandSaveCount;
-  if (sum > RECORD_TOTAL_LIMIT) {
-    record->sandSaveCount = RECORD_TOTAL_LIMIT;
-  } else {
-    record->sandSaveCount = sum;
-  }
+    if (score < record->characterBestScores[g_Players[0].characterIndex]) {
+        record->characterBestScores[g_Players[0].characterIndex] = score;
+        record->hasCharacterBestScore[g_Players[0].characterIndex] = TRUE;
+        if (record->characterBestScores[g_Players[0].characterIndex] < LOWEST_SCORE_TO_PAR) {
+            record->characterBestScores[g_Players[0].characterIndex] = LOWEST_SCORE_TO_PAR;
+        }
+    }
 
-  sum = record->missedSandSaveCount + stats->missedSandSaveCount;
-  if (sum > RECORD_TOTAL_LIMIT) {
-    record->missedSandSaveCount = RECORD_TOTAL_LIMIT;
-  } else {
-    record->missedSandSaveCount = sum;
-  }
+    total = 0;
+    for (hole = 0; hole != COURSE_HOLE_COUNT; hole++) {
+        total += g_Players[0].holes[hole].strokes;
+    }
 
-  WriteSaveData();
+    total += record->strokeTotal;
+    if (isAtRoundLimit == TRUE) {
+        total = total * ROUND_COUNT_LIMIT / (ROUND_COUNT_LIMIT + 1);
+    }
+
+    if (total > RECORD_TOTAL_LIMIT) {
+        total = RECORD_TOTAL_LIMIT;
+    }
+
+    record->strokeTotal = total;
+
+    if (record->longestDrive < stats->longestDrive) {
+        record->longestDrive = stats->longestDrive;
+    }
+
+    if (record->averagedDriveCount == 0) {
+        if (stats->averagedDriveCount == 0) {
+            record->averageDrive = 0;
+        }
+        else if (stats->averagedDriveCount > 0) {
+            record->averageDrive = stats->averagedDriveTotal / stats->averagedDriveCount;
+            record->averagedDriveCount = 1;
+        }
+        else {
+            record->averageDrive = 0;
+        }
+    }
+    else if (stats->averagedDriveCount > 0) {
+        record->averageDrive =
+            ((record->averageDrive * record->averagedDriveCount) + stats->averagedDriveTotal) /
+            (record->averagedDriveCount + stats->averagedDriveCount);
+        record->averagedDriveCount += stats->averagedDriveCount;
+    }
+
+    sum = record->measuredDriveTotal + stats->measuredDriveCount;
+    if (sum > RECORD_TOTAL_LIMIT) {
+        record->measuredDriveTotal = RECORD_TOTAL_LIMIT;
+    }
+    else {
+        record->measuredDriveTotal = sum;
+    }
+
+    if (isAtRoundLimit == TRUE) {
+        record->measuredDriveTotal =
+            record->measuredDriveTotal * ROUND_COUNT_LIMIT / (ROUND_COUNT_LIMIT + 1);
+    }
+
+    total = 0;
+    for (hole = 0; hole != COURSE_HOLE_COUNT; hole++) {
+        if (g_Players[0].holes[hole].putts != UNCOUNTED_PUTTS) {
+            total += g_Players[0].holes[hole].putts;
+        }
+    }
+
+    total += record->puttTotal;
+    if (isAtRoundLimit == TRUE) {
+        total = total * ROUND_COUNT_LIMIT / (ROUND_COUNT_LIMIT + 1);
+    }
+
+    if (total > RECORD_TOTAL_LIMIT) {
+        total = RECORD_TOTAL_LIMIT;
+    }
+
+    record->puttTotal = total;
+
+    for (hole = 0; hole != COURSE_HOLE_COUNT; hole++) {
+        if (g_Players[0].holes[hole].strokes <= course->holes[hole].par) {
+            if (record->parOrBetterCount < RECORD_TOTAL_LIMIT) {
+                record->parOrBetterCount++;
+            }
+
+            if (isAtRoundLimit == TRUE) {
+                record->parOrBetterCount =
+                    record->parOrBetterCount * ROUND_COUNT_LIMIT / (ROUND_COUNT_LIMIT + 1);
+            }
+        }
+    }
+
+    for (hole = 0; hole != COURSE_HOLE_COUNT; hole++) {
+        shotsToGreen = g_Players[0].holes[hole].strokes - g_Players[0].holes[hole].putts;
+        if (course->holes[hole].par - shotsToGreen >= PAR_ON_SPARE_STROKES) {
+            if (record->parOnCount < RECORD_TOTAL_LIMIT) {
+                record->parOnCount++;
+            }
+
+            if (isAtRoundLimit == TRUE) {
+                record->parOnCount =
+                    record->parOnCount * ROUND_COUNT_LIMIT / (ROUND_COUNT_LIMIT + 1);
+            }
+        }
+    }
+
+    sum = record->sandSaveCount + stats->sandSaveCount;
+    if (sum > RECORD_TOTAL_LIMIT) {
+        record->sandSaveCount = RECORD_TOTAL_LIMIT;
+    }
+    else {
+        record->sandSaveCount = sum;
+    }
+
+    sum = record->missedSandSaveCount + stats->missedSandSaveCount;
+    if (sum > RECORD_TOTAL_LIMIT) {
+        record->missedSandSaveCount = RECORD_TOTAL_LIMIT;
+    }
+    else {
+        record->missedSandSaveCount = sum;
+    }
+
+    WriteSaveData();
 }
 
 void StartRoundStats(void) {
-  SaveData* save;
+    SaveData *save;
 
-  save = GetSaveData();
-  g_RoundStats.sandSaveCount = 0;
-  g_RoundStats.missedSandSaveCount = 0;
-  g_RoundStats.measuredDriveCount = 0;
-  g_RoundStats.averagedDriveCount = 0;
+    save = GetSaveData();
+    g_RoundStats.sandSaveCount = 0;
+    g_RoundStats.missedSandSaveCount = 0;
+    g_RoundStats.measuredDriveCount = 0;
+    g_RoundStats.averagedDriveCount = 0;
 
-  /*
-   * The pointer arithmetic is there to match: indexing the course stats
-   * gives 18 words differing, none in shape
-   */
-  g_RoundStats.longestDrive =
-      (save->records.courseStats + g_GameState.courseIndex)->longestDrive;
-  g_RoundStats.averagedDriveTotal = 0;
-  g_RoundStats.isDriveAveraged = FALSE;
+    /*
+     * The pointer arithmetic is there to match: indexing the course stats
+     * gives 18 words differing, none in shape
+     */
+    g_RoundStats.longestDrive = (save->records.courseStats + g_GameState.courseIndex)->longestDrive;
+    g_RoundStats.averagedDriveTotal = 0;
+    g_RoundStats.isDriveAveraged = FALSE;
 }
 
 /* As StartRoundStats, but keeps the total of the averaged drives */
 void RestartRoundStats(void) {
-  SaveData* save;
+    SaveData *save;
 
-  save = GetSaveData();
-  g_RoundStats.sandSaveCount = 0;
-  g_RoundStats.missedSandSaveCount = 0;
-  g_RoundStats.measuredDriveCount = 0;
-  g_RoundStats.averagedDriveCount = 0;
+    save = GetSaveData();
+    g_RoundStats.sandSaveCount = 0;
+    g_RoundStats.missedSandSaveCount = 0;
+    g_RoundStats.measuredDriveCount = 0;
+    g_RoundStats.averagedDriveCount = 0;
 
-  /*
-   * The pointer arithmetic is there to match: indexing the course stats
-   * gives 18 words differing, none in shape
-   */
-  g_RoundStats.longestDrive =
-      (save->records.courseStats + g_GameState.courseIndex)->longestDrive;
-  g_RoundStats.isDriveAveraged = FALSE;
+    /*
+     * The pointer arithmetic is there to match: indexing the course stats
+     * gives 18 words differing, none in shape
+     */
+    g_RoundStats.longestDrive = (save->records.courseStats + g_GameState.courseIndex)->longestDrive;
+    g_RoundStats.isDriveAveraged = FALSE;
 }
 
 /* Only the first player's holes count */
 void RecordHoleStats(void) {
-  /*
-   * Reading g_RoundStats through a pointer is there to match: reading it
-   * directly gives 64 words differing, 26 in shape
-   */
-  RoundStats* stats;
+    /*
+     * Reading g_RoundStats through a pointer is there to match: reading it
+     * directly gives 64 words differing, 26 in shape
+     */
+    RoundStats *stats;
 
-  GetSaveData();
-  stats = &g_RoundStats;
-  if (g_Players[0].hasBeenInBunker) {
-    if (g_Players[0].strokeCount <= g_HoleSetup.par) {
-      stats->sandSaveCount++;
-    } else {
-      stats->missedSandSaveCount++;
-    }
-  }
-
-  if (g_Players[0].lastDriveDistance >= 0) {
-    stats->measuredDriveCount++;
-    if (g_Players[0].lastDriveDistance > stats->longestDrive) {
-      stats->longestDrive = g_Players[0].lastDriveDistance;
+    GetSaveData();
+    stats = &g_RoundStats;
+    if (g_Players[0].hasBeenInBunker) {
+        if (g_Players[0].strokeCount <= g_HoleSetup.par) {
+            stats->sandSaveCount++;
+        }
+        else {
+            stats->missedSandSaveCount++;
+        }
     }
 
-    if (stats->isDriveAveraged == TRUE) {
-      stats->averagedDriveCount++;
-      stats->averagedDriveTotal += g_Players[0].lastDriveDistance;
+    if (g_Players[0].lastDriveDistance >= 0) {
+        stats->measuredDriveCount++;
+        if (g_Players[0].lastDriveDistance > stats->longestDrive) {
+            stats->longestDrive = g_Players[0].lastDriveDistance;
+        }
+
+        if (stats->isDriveAveraged == TRUE) {
+            stats->averagedDriveCount++;
+            stats->averagedDriveTotal += g_Players[0].lastDriveDistance;
+        }
     }
-  }
 }
 
 /* Returns whether the drive is the longest yet */
 s32 RecordDrive(void) {
-  /*
-   * Reading g_RoundStats through a pointer is there to match: reading it
-   * directly gives 20 words differing, 14 in shape
-   */
-  RoundStats* stats = &g_RoundStats;
-  Club* club = GetSelectedClub();
+    /*
+     * Reading g_RoundStats through a pointer is there to match: reading it
+     * directly gives 20 words differing, 14 in shape
+     */
+    RoundStats *stats = &g_RoundStats;
+    Club *club = GetSelectedClub();
 
-  g_Players[0].lastDriveDistance = g_Players[0].driveDistance;
-  if (club->type == CLUB_TYPE_DRIVER && g_Players[0].driveDistance > 0) {
-    stats->isDriveAveraged = TRUE;
-  } else {
-    stats->isDriveAveraged = FALSE;
-  }
+    g_Players[0].lastDriveDistance = g_Players[0].driveDistance;
+    if (club->type == CLUB_TYPE_DRIVER && g_Players[0].driveDistance > 0) {
+        stats->isDriveAveraged = TRUE;
+    }
+    else {
+        stats->isDriveAveraged = FALSE;
+    }
 
-  return g_Players[0].lastDriveDistance > stats->longestDrive;
+    return g_Players[0].lastDriveDistance > stats->longestDrive;
 }
 
 /*
@@ -613,222 +622,227 @@ s32 RecordDrive(void) {
  * nested function, a GNU C extension.
  */
 void SettleHoleBets(void) {
-  s32 i;
-  s32 j;
-  s32 lastHole = g_GameState.holeIndex - 1;
-  s32 teamScore;
-  s32 rivalTeamScore;
-  s32 bet;
-  s32 best;
-  s32 count;
-  s32 score;
+    s32 i;
+    s32 j;
+    s32 lastHole = g_GameState.holeIndex - 1;
+    s32 teamScore;
+    s32 rivalTeamScore;
+    s32 bet;
+    s32 best;
+    s32 count;
+    s32 score;
 
-  /*
-   * The Las Vegas pointers are there to match: reading both entries directly
-   * gives 44 words differing (8 in shape), the rate alone 18 (4), the tally
-   * alone 26 (4), and the rate as a value 10 (2)
-   */
-  s8* lasVegasRate;
-  s16* lasVegasTally;
+    /*
+     * The Las Vegas pointers are there to match: reading both entries directly
+     * gives 44 words differing (8 in shape), the rate alone 18 (4), the tally
+     * alone 26 (4), and the rate as a value 10 (2)
+     */
+    s8 *lasVegasRate;
+    s16 *lasVegasTally;
 
-  /* The lower net score over the holes wins the bet from each other player */
-  void SettleNassau(s32 startHole, s32 endHole) {
-    s32 totals[MAX_PLAYER_COUNT];
+    /* The lower net score over the holes wins the bet from each other player */
+    void SettleNassau(s32 startHole, s32 endHole) {
+        s32 totals[MAX_PLAYER_COUNT];
 
-    for (i = 0; i != g_GameState.playerCount; i++) {
-      totals[i] = 0;
-      for (j = startHole; j != endHole; j++) {
-        totals[i] += g_Players[i].holes[j].strokes +
-            GetHandicapOffset(GetCourseRecordIndex(), j, g_Players[i].handicap);
-      }
-    }
-
-    for (i = 0; i != g_GameState.playerCount; i++) {
-      for (j = 0; j != g_GameState.playerCount; j++) {
-        if (i != j) {
-          if (totals[i] < totals[j]) {
-            g_BetTallies[i][BET_NASSAU] += g_GameState.betRates[BET_NASSAU];
-          } else if (totals[j] < totals[i]) {
-            g_BetTallies[i][BET_NASSAU] -= g_GameState.betRates[BET_NASSAU];
-          }
-        }
-      }
-    }
-  }
-
-  /*
-   * Declared after SettleNassau to match the stack layout: declared before it,
-   * 130 words differ, none in shape
-   */
-  s32 scores[MAX_PLAYER_COUNT];
-  /* Pads the frame to match; without it 24 words differ */
-  s32 unused[8] UNUSED;
-
-  if (g_GameState.betRates[BET_STROKES] > 0) {
-    for (i = 0; i != g_GameState.playerCount; i++) {
-      for (j = 0; j != g_GameState.playerCount; j++) {
-        /*
-         * Load the rival first without reversing the comparison, to match:
-         * testing i != j gives 6 words differing, and j != i 2, none in shape
-         */
-        s32 rivalIndex = j;
-        if (i != rivalIndex) {
-          score = g_Players[i].strokeCount +
-              GetHandicapOffset(
-                  GetCourseRecordIndex(), lastHole, g_Players[i].handicap);
-          g_BetTallies[i][BET_STROKES] +=
-              (g_Players[j].strokeCount +
-                  GetHandicapOffset(
-                      GetCourseRecordIndex(), lastHole, g_Players[j].handicap) -
-                  score) *
-              g_GameState.betRates[BET_STROKES];
-        }
-      }
-    }
-  }
-
-  lasVegasRate = &g_GameState.betRates[BET_LAS_VEGAS];
-  if (*lasVegasRate > 0) {
-    lasVegasTally = &g_BetTallies[0][BET_LAS_VEGAS];
-    teamScore = g_Players[0].strokeCount + g_Players[1].strokeCount +
-        GetHandicapOffset(
-            GetCourseRecordIndex(), lastHole, g_Players[0].handicap) +
-        GetHandicapOffset(
-            GetCourseRecordIndex(), lastHole, g_Players[1].handicap);
-    rivalTeamScore = g_Players[2].strokeCount + g_Players[3].strokeCount +
-        GetHandicapOffset(
-            GetCourseRecordIndex(), lastHole, g_Players[2].handicap) +
-        GetHandicapOffset(
-            GetCourseRecordIndex(), lastHole, g_Players[3].handicap);
-    *lasVegasTally += (rivalTeamScore - teamScore) * *lasVegasRate;
-    g_BetTallies[1][BET_LAS_VEGAS] +=
-        (rivalTeamScore - teamScore) * *lasVegasRate;
-    g_BetTallies[2][BET_LAS_VEGAS] +=
-        (teamScore - rivalTeamScore) * *lasVegasRate;
-    g_BetTallies[3][BET_LAS_VEGAS] +=
-        (teamScore - rivalTeamScore) * *lasVegasRate;
-  }
-
-  if (g_GameState.betRates[BET_NASSAU] > 0) {
-    if (g_GameState.holeIndex == FRONT_NINE_END &&
-        !(g_GameState.holeSelection & HOLE_SELECTION_BACK_NINE)) {
-      SettleNassau(0, FRONT_NINE_END);
-    }
-
-    if (g_GameState.holeIndex == BACK_NINE_END) {
-      if (!(g_GameState.holeSelection & HOLE_SELECTION_FRONT_NINE)) {
-        SettleNassau(FRONT_NINE_END, BACK_NINE_END);
-      }
-
-      if (!(g_GameState.holeSelection &
-              (HOLE_SELECTION_BACK_NINE | HOLE_SELECTION_FRONT_NINE))) {
-        SettleNassau(0, BACK_NINE_END);
-      }
-    }
-  }
-
-  if (g_GameState.betRates[BET_SKINS] != UNSET_BET_RATE ||
-      g_GameState.betRates[BET_MATCH_POT] != UNSET_BET_RATE) {
-    bet = BET_MATCH_POT;
-    if (g_GameState.betRates[BET_SKINS] != UNSET_BET_RATE) {
-      bet = BET_SKINS;
-    } else {
-      /*
-       * The store is dead, as each case that reads count sets it first, but
-       * the original has it: without it, or with it before or after the
-       * test instead, 14 words differ, 10 in shape
-       */
-      count = 0;
-    }
-
-    switch (g_GameState.gameMode) {
-      case GAME_MODE_SKINS_MATCH:
-      case GAME_MODE_CLUB_SLOTS:
-        /* A hole's strokes are zero for the players who did not win it */
-        count = 0;
         for (i = 0; i != g_GameState.playerCount; i++) {
-          count += g_Players[i].holes[g_GameState.holeIndex - 1].strokes == 0;
-        }
-
-        if (count != g_GameState.playerCount) {
-          for (i = 0; i != g_GameState.playerCount; i++) {
-            if (g_Players[i].holes[g_GameState.holeIndex - 1].strokes != 0) {
-              g_BetTallies[i][bet] += g_HolePot * (g_GameState.playerCount - 1);
-            } else {
-              g_BetTallies[i][bet] -= g_HolePot;
+            totals[i] = 0;
+            for (j = startHole; j != endHole; j++) {
+                totals[i] += g_Players[i].holes[j].strokes +
+                    GetHandicapOffset(GetCourseRecordIndex(), j, g_Players[i].handicap);
             }
-          }
-
-          g_HolePot = g_GameState.betRates[bet];
-        } else {
-          g_HolePot += g_GameState.betRates[bet];
         }
 
-        break;
-      case GAME_MODE_MATCH_GAME:
-        if (g_Players[0].holes[g_GameState.holeIndex - 1].strokes <
-            g_Players[1].holes[g_GameState.holeIndex - 1].strokes) {
-          g_BetTallies[0][bet] += g_HolePot;
-          g_BetTallies[1][bet] -= g_HolePot;
-          g_HolePot = g_GameState.betRates[bet];
-        } else if (g_Players[1].holes[g_GameState.holeIndex - 1].strokes <
-            g_Players[0].holes[g_GameState.holeIndex - 1].strokes) {
-          g_BetTallies[0][bet] -= g_HolePot;
-          g_BetTallies[1][bet] += g_HolePot;
-          g_HolePot = g_GameState.betRates[bet];
-        } else {
-          g_HolePot += g_GameState.betRates[bet];
-        }
-
-        break;
-      case GAME_MODE_STROKE:
-      case GAME_MODE_UNLISTED_STROKE:
-      case GAME_MODE_UNRECORDED_STROKE: {
         for (i = 0; i != g_GameState.playerCount; i++) {
-          scores[i] = g_Players[i].strokeCount +
-              GetHandicapOffset(g_GameState.courseIndex,
-                  g_GameState.holeIndex - 1, g_Players[i].handicap);
-        }
-
-        best = WORST_HOLE_SCORE;
-        for (i = 0; i != g_GameState.playerCount; i++) {
-          if (scores[i] < best) {
-            best = scores[i];
-          }
-        }
-
-        count = 0;
-        for (i = 0; i != g_GameState.playerCount; i++) {
-          count += best == scores[i];
-        }
-
-        if (count == 1) {
-          for (i = 0; i != g_GameState.playerCount; i++) {
-            if (best == scores[i]) {
-              g_BetTallies[i][bet] += g_HolePot * (g_GameState.playerCount - 1);
-            } else {
-              g_BetTallies[i][bet] -= g_HolePot;
+            for (j = 0; j != g_GameState.playerCount; j++) {
+                if (i != j) {
+                    if (totals[i] < totals[j]) {
+                        g_BetTallies[i][BET_NASSAU] += g_GameState.betRates[BET_NASSAU];
+                    }
+                    else if (totals[j] < totals[i]) {
+                        g_BetTallies[i][BET_NASSAU] -= g_GameState.betRates[BET_NASSAU];
+                    }
+                }
             }
-          }
+        }
+    }
 
-          g_HolePot = g_GameState.betRates[bet];
-        } else {
-          g_HolePot += g_GameState.betRates[bet];
+    /*
+     * Declared after SettleNassau to match the stack layout: declared before it,
+     * 130 words differ, none in shape
+     */
+    s32 scores[MAX_PLAYER_COUNT];
+    /* Pads the frame to match; without it 24 words differ */
+    s32 unused[8] UNUSED;
+
+    if (g_GameState.betRates[BET_STROKES] > 0) {
+        for (i = 0; i != g_GameState.playerCount; i++) {
+            for (j = 0; j != g_GameState.playerCount; j++) {
+                /*
+                 * Load the rival first without reversing the comparison, to match:
+                 * testing i != j gives 6 words differing, and j != i 2, none in shape
+                 */
+                s32 rivalIndex = j;
+                if (i != rivalIndex) {
+                    score = g_Players[i].strokeCount +
+                        GetHandicapOffset(GetCourseRecordIndex(), lastHole, g_Players[i].handicap);
+                    g_BetTallies[i][BET_STROKES] += (g_Players[j].strokeCount +
+                                                        GetHandicapOffset(
+                                                            GetCourseRecordIndex(),
+                                                            lastHole,
+                                                            g_Players[j].handicap
+                                                        ) -
+                                                        score) *
+                        g_GameState.betRates[BET_STROKES];
+                }
+            }
+        }
+    }
+
+    lasVegasRate = &g_GameState.betRates[BET_LAS_VEGAS];
+    if (*lasVegasRate > 0) {
+        lasVegasTally = &g_BetTallies[0][BET_LAS_VEGAS];
+        teamScore = g_Players[0].strokeCount + g_Players[1].strokeCount +
+            GetHandicapOffset(GetCourseRecordIndex(), lastHole, g_Players[0].handicap) +
+            GetHandicapOffset(GetCourseRecordIndex(), lastHole, g_Players[1].handicap);
+        rivalTeamScore = g_Players[2].strokeCount + g_Players[3].strokeCount +
+            GetHandicapOffset(GetCourseRecordIndex(), lastHole, g_Players[2].handicap) +
+            GetHandicapOffset(GetCourseRecordIndex(), lastHole, g_Players[3].handicap);
+        *lasVegasTally += (rivalTeamScore - teamScore) * *lasVegasRate;
+        g_BetTallies[1][BET_LAS_VEGAS] += (rivalTeamScore - teamScore) * *lasVegasRate;
+        g_BetTallies[2][BET_LAS_VEGAS] += (teamScore - rivalTeamScore) * *lasVegasRate;
+        g_BetTallies[3][BET_LAS_VEGAS] += (teamScore - rivalTeamScore) * *lasVegasRate;
+    }
+
+    if (g_GameState.betRates[BET_NASSAU] > 0) {
+        if (g_GameState.holeIndex == FRONT_NINE_END &&
+            !(g_GameState.holeSelection & HOLE_SELECTION_BACK_NINE)) {
+            SettleNassau(0, FRONT_NINE_END);
         }
 
-        break;
-      }
-    }
-  }
+        if (g_GameState.holeIndex == BACK_NINE_END) {
+            if (!(g_GameState.holeSelection & HOLE_SELECTION_FRONT_NINE)) {
+                SettleNassau(FRONT_NINE_END, BACK_NINE_END);
+            }
 
-  g_GameState.carriedPots[CARRIED_POT_LONGEST_DRIVE] = g_LongestDrivePot;
-  g_GameState.carriedPots[CARRIED_POT_NEAREST_PIN] = g_NearestPinPot;
-  g_GameState.carriedPots[CARRIED_POT_HOLE] = g_HolePot;
-  for (i = 0; i != MAX_PLAYER_COUNT; i++) {
-    for (j = 0; j != BET_COUNT; j++) {
-      g_Players[i].betTallies[j] = g_BetTallies[i][j];
+            if (!(g_GameState.holeSelection &
+                    (HOLE_SELECTION_BACK_NINE | HOLE_SELECTION_FRONT_NINE))) {
+                SettleNassau(0, BACK_NINE_END);
+            }
+        }
     }
-  }
 
-  f_IsContestDecided = FALSE;
+    if (g_GameState.betRates[BET_SKINS] != UNSET_BET_RATE ||
+        g_GameState.betRates[BET_MATCH_POT] != UNSET_BET_RATE) {
+        bet = BET_MATCH_POT;
+        if (g_GameState.betRates[BET_SKINS] != UNSET_BET_RATE) {
+            bet = BET_SKINS;
+        }
+        else {
+            /*
+             * The store is dead, as each case that reads count sets it first, but
+             * the original has it: without it, or with it before or after the
+             * test instead, 14 words differ, 10 in shape
+             */
+            count = 0;
+        }
+
+        switch (g_GameState.gameMode) {
+            case GAME_MODE_SKINS_MATCH:
+            case GAME_MODE_CLUB_SLOTS:
+                /* A hole's strokes are zero for the players who did not win it */
+                count = 0;
+                for (i = 0; i != g_GameState.playerCount; i++) {
+                    count += g_Players[i].holes[g_GameState.holeIndex - 1].strokes == 0;
+                }
+
+                if (count != g_GameState.playerCount) {
+                    for (i = 0; i != g_GameState.playerCount; i++) {
+                        if (g_Players[i].holes[g_GameState.holeIndex - 1].strokes != 0) {
+                            g_BetTallies[i][bet] += g_HolePot * (g_GameState.playerCount - 1);
+                        }
+                        else {
+                            g_BetTallies[i][bet] -= g_HolePot;
+                        }
+                    }
+
+                    g_HolePot = g_GameState.betRates[bet];
+                }
+                else {
+                    g_HolePot += g_GameState.betRates[bet];
+                }
+
+                break;
+            case GAME_MODE_MATCH_GAME:
+                if (g_Players[0].holes[g_GameState.holeIndex - 1].strokes <
+                    g_Players[1].holes[g_GameState.holeIndex - 1].strokes) {
+                    g_BetTallies[0][bet] += g_HolePot;
+                    g_BetTallies[1][bet] -= g_HolePot;
+                    g_HolePot = g_GameState.betRates[bet];
+                }
+                else if (g_Players[1].holes[g_GameState.holeIndex - 1].strokes <
+                    g_Players[0].holes[g_GameState.holeIndex - 1].strokes) {
+                    g_BetTallies[0][bet] -= g_HolePot;
+                    g_BetTallies[1][bet] += g_HolePot;
+                    g_HolePot = g_GameState.betRates[bet];
+                }
+                else {
+                    g_HolePot += g_GameState.betRates[bet];
+                }
+
+                break;
+            case GAME_MODE_STROKE:
+            case GAME_MODE_UNLISTED_STROKE:
+            case GAME_MODE_UNRECORDED_STROKE: {
+                for (i = 0; i != g_GameState.playerCount; i++) {
+                    scores[i] = g_Players[i].strokeCount +
+                        GetHandicapOffset(
+                            g_GameState.courseIndex,
+                            g_GameState.holeIndex - 1,
+                            g_Players[i].handicap
+                        );
+                }
+
+                best = WORST_HOLE_SCORE;
+                for (i = 0; i != g_GameState.playerCount; i++) {
+                    if (scores[i] < best) {
+                        best = scores[i];
+                    }
+                }
+
+                count = 0;
+                for (i = 0; i != g_GameState.playerCount; i++) {
+                    count += best == scores[i];
+                }
+
+                if (count == 1) {
+                    for (i = 0; i != g_GameState.playerCount; i++) {
+                        if (best == scores[i]) {
+                            g_BetTallies[i][bet] += g_HolePot * (g_GameState.playerCount - 1);
+                        }
+                        else {
+                            g_BetTallies[i][bet] -= g_HolePot;
+                        }
+                    }
+
+                    g_HolePot = g_GameState.betRates[bet];
+                }
+                else {
+                    g_HolePot += g_GameState.betRates[bet];
+                }
+
+                break;
+            }
+        }
+    }
+
+    g_GameState.carriedPots[CARRIED_POT_LONGEST_DRIVE] = g_LongestDrivePot;
+    g_GameState.carriedPots[CARRIED_POT_NEAREST_PIN] = g_NearestPinPot;
+    g_GameState.carriedPots[CARRIED_POT_HOLE] = g_HolePot;
+    for (i = 0; i != MAX_PLAYER_COUNT; i++) {
+        for (j = 0; j != BET_COUNT; j++) {
+            g_Players[i].betTallies[j] = g_BetTallies[i][j];
+        }
+    }
+
+    f_IsContestDecided = FALSE;
 }

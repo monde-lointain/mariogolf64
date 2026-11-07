@@ -9,6 +9,6 @@ void LoadTransmitMenu(void);
 void FreeTransmitMenu(void);
 void UpdateTransmitMenu(void);
 
-void DrawTransmitMenu(Gfx** displayListHead);
+void DrawTransmitMenu(Gfx **displayListHead);
 
 #endif

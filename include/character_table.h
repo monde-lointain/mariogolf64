@@ -7,15 +7,15 @@
 
 /* The buffers that LoadCharacterTableBuffer keeps, by its caller's kind */
 enum TableBuffer {
-  TABLE_BUFFER_CURSOR = 1,
-  TABLE_BUFFER_UNREAD,
-  TABLE_BUFFER_ARROWS,
-  TABLE_BUFFER_STAR
+    TABLE_BUFFER_CURSOR = 1,
+    TABLE_BUFFER_UNREAD,
+    TABLE_BUFFER_ARROWS,
+    TABLE_BUFFER_STAR
 };
 
-void LoadCharacterTableBuffer(void* buffer, s16 bufferKind);
+void LoadCharacterTableBuffer(void *buffer, s16 bufferKind);
 void UpdateCharacterTable(void);
-void DrawCharacterTable(Gfx** displayListHead);
+void DrawCharacterTable(Gfx **displayListHead);
 void MarkShownTableCharacters(void);
 void LoadTableFaces(void);
 

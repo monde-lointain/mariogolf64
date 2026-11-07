@@ -56,19 +56,19 @@
 #define PLAYED_DELAY (-1)
 
 typedef struct QueuedCharacterSound {
-  /* 0x00 */ CharacterId character;
-  /* 0x04 */ s32 delay; /* Frames until it plays; negative once played */
-  /* 0x08 */ s32 kind;
-  /* 0x0C */ SoundVolume volume;
-  /* 0x10 */ SoundPan pan;
+    /* 0x00 */ CharacterId character;
+    /* 0x04 */ s32 delay; /* Frames until it plays; negative once played */
+    /* 0x08 */ s32 kind;
+    /* 0x0C */ SoundVolume volume;
+    /* 0x10 */ SoundPan pan;
 } QueuedCharacterSound; /* size = 0x14 */
 
 /* A song change for UpdateAudio to make once its delay runs out */
 typedef struct SongChange {
-  /* 0x00 */ s32 state;
-  /* 0x04 */ SongId songId;
-  /* 0x08 */ s32 flags;
-  /* 0x0C */ s32 delay;
+    /* 0x00 */ s32 state;
+    /* 0x04 */ SongId songId;
+    /* 0x08 */ s32 flags;
+    /* 0x0C */ s32 delay;
 } SongChange; /* size = 0x10 */
 
 extern u8 g_SoundPointerBankRomStart[];
@@ -88,34 +88,83 @@ static f32 f_SoundVolumes[SOUND_CHANNEL_COUNT] = {0.0f};
 /* Written with the handles but never read */
 static s32 f_SongHandleCopy = NO_HANDLE;
 static s32 f_SoundHandleCopies[SOUND_CHANNEL_COUNT] = {NO_HANDLE};
-static s32 f_EchoingSoundIds[ECHOING_SOUND_COUNT] = {0x7B, 0x7C, 0x7D, 0x7E,
-    0x7F, 0x80, 0x81, 0x82, 0x83, 0x84, 0x85, 0x86, 0x87, 0x88, 0x89, 0x8A,
-    0x8B, 0x8C, 0x8D, 0x8E, 0x90, 0x91, 0x92, 0x93, 0x94, 0x95, 0x96, 0x97,
-    0x98, 0x99, 0x9A, 0x9B, 0x9C, 0x9D};
+static s32 f_EchoingSoundIds[ECHOING_SOUND_COUNT] = {
+    0x7B,
+    0x7C,
+    0x7D,
+    0x7E,
+    0x7F,
+    0x80,
+    0x81,
+    0x82,
+    0x83,
+    0x84,
+    0x85,
+    0x86,
+    0x87,
+    0x88,
+    0x89,
+    0x8A,
+    0x8B,
+    0x8C,
+    0x8D,
+    0x8E,
+    0x90,
+    0x91,
+    0x92,
+    0x93,
+    0x94,
+    0x95,
+    0x96,
+    0x97,
+    0x98,
+    0x99,
+    0x9A,
+    0x9B,
+    0x9C,
+    0x9D
+};
 /* Frames from a character sound's request until it plays, by kind and character
  */
-static u16 f_CharacterSoundDelays[CHARACTER_SOUND_KIND_COUNT][CHARACTER_COUNT] =
-    {
-        {4, 3, 4, 4, 4, 6, 4, 3, 4, 4, 7, 6, 6, 4, 4, 4, 1, 4},
+static u16 f_CharacterSoundDelays[CHARACTER_SOUND_KIND_COUNT][CHARACTER_COUNT] = {
+    {4, 3, 4, 4, 4, 6, 4, 3, 4, 4, 7, 6, 6, 4, 4, 4, 1, 4},
 };
-static s32 f_PreviewSoundDelays[CHARACTER_COUNT] = {PLAYED_DELAY, PLAYED_DELAY,
-    PLAYED_DELAY, PLAYED_DELAY, PLAYED_DELAY, PLAYED_DELAY, PLAYED_DELAY,
-    PLAYED_DELAY, PLAYED_DELAY, PLAYED_DELAY, PLAYED_DELAY, PLAYED_DELAY,
-    PLAYED_DELAY, PLAYED_DELAY, PLAYED_DELAY, PLAYED_DELAY, PLAYED_DELAY,
-    PLAYED_DELAY};
-static QueuedCharacterSound
-    f_QueuedCharacterSounds[QUEUED_CHARACTER_SOUND_COUNT] = {
-        {0, PLAYED_DELAY, 0, 0, 0},
-        {0, PLAYED_DELAY, 0, 0, 0},
-        {0, PLAYED_DELAY, 0, 0, 0},
-        {0, PLAYED_DELAY, 0, 0, 0},
+static s32 f_PreviewSoundDelays[CHARACTER_COUNT] = {
+    PLAYED_DELAY,
+    PLAYED_DELAY,
+    PLAYED_DELAY,
+    PLAYED_DELAY,
+    PLAYED_DELAY,
+    PLAYED_DELAY,
+    PLAYED_DELAY,
+    PLAYED_DELAY,
+    PLAYED_DELAY,
+    PLAYED_DELAY,
+    PLAYED_DELAY,
+    PLAYED_DELAY,
+    PLAYED_DELAY,
+    PLAYED_DELAY,
+    PLAYED_DELAY,
+    PLAYED_DELAY,
+    PLAYED_DELAY,
+    PLAYED_DELAY
+};
+static QueuedCharacterSound f_QueuedCharacterSounds[QUEUED_CHARACTER_SOUND_COUNT] = {
+    {0, PLAYED_DELAY, 0, 0, 0},
+    {0, PLAYED_DELAY, 0, 0, 0},
+    {0, PLAYED_DELAY, 0, 0, 0},
+    {0, PLAYED_DELAY, 0, 0, 0},
 };
 /* The index in each character's sound table of each kind of sound */
 static u8 f_CharacterSoundIndexes[CHARACTER_SOUND_KIND_COUNT] = {
-    CHARACTER_SOUND_FULL_SHOT, CHARACTER_SOUND_EXCELLENT,
-    CHARACTER_SOUND_CALL_OUT_RIGHT, CHARACTER_SOUND_CALL_OUT_C_UP,
-    CHARACTER_SOUND_CALL_OUT_C_DOWN, CHARACTER_SOUND_CALL_OUT_C_LEFT,
-    CHARACTER_SOUND_CALL_OUT_C_RIGHT};
+    CHARACTER_SOUND_FULL_SHOT,
+    CHARACTER_SOUND_EXCELLENT,
+    CHARACTER_SOUND_CALL_OUT_RIGHT,
+    CHARACTER_SOUND_CALL_OUT_C_UP,
+    CHARACTER_SOUND_CALL_OUT_C_DOWN,
+    CHARACTER_SOUND_CALL_OUT_C_LEFT,
+    CHARACTER_SOUND_CALL_OUT_C_RIGHT
+};
 static CharacterId f_DelayEditorCharacter = 0;
 static s32 f_DelayEditorKind = 0;
 static SongChange f_PendingSongChange = {SONG_CHANGE_NONE, 0, 0, 0};
@@ -226,8 +275,7 @@ static u32 f_SongRomBounds[(LAST_SONG_ID + 1) * 2] = {
     (u32)g_AssetArchiveRomStart,
 };
 /* Read by no routine */
-static s32 f_UnusedWordsAfterSongRomBounds[10] UNUSED = {
-    5, 0, 5, 5, 0, 5, 5, 5, 0, 0};
+static s32 f_UnusedWordsAfterSongRomBounds[10] UNUSED = {5, 0, 5, 5, 0, 5, 5, 5, 0, 0};
 static u32 f_LastAudioFrame;
 
 /* Defined as returning s8, but its caller here uses the whole register */
@@ -239,54 +287,57 @@ s32 IsMusicOffChosen(void);
 s32 ChangeCustomEffect(s32 type);
 
 void PlaySound(SoundId soundId, SoundChannel channel, SoundVolume volume) {
-  s32* handle;
-  s32 mask;
-  s32 index;
+    s32 *handle;
+    s32 mask;
+    s32 index;
 
-  if (!IsGameFlagSet(GAME_FLAG_SILENCE_SOUND_EFFECTS)) {
-    mask = osSetIntMask(OS_IM_NONE);
-    f_SoundVolumes[channel] = volume;
-    if (soundId < SOUND_COUNT) {
-      handle = &f_SoundHandles[channel];
-      if (*handle != NO_HANDLE) {
-        MusHandleStop(*handle, 0);
-        *handle = StartSoundEffect(soundId);
-        f_SoundHandleCopies[channel] = *handle;
-        MusHandleSetVolume(*handle, volume);
-        MusHandleSetFreqOffset(*handle, 0.0f);
-        MusHandleSetPan(*handle, SOUND_FULL_SCALE);
-      }
+    if (!IsGameFlagSet(GAME_FLAG_SILENCE_SOUND_EFFECTS)) {
+        mask = osSetIntMask(OS_IM_NONE);
+        f_SoundVolumes[channel] = volume;
+        if (soundId < SOUND_COUNT) {
+            handle = &f_SoundHandles[channel];
+            if (*handle != NO_HANDLE) {
+                MusHandleStop(*handle, 0);
+                *handle = StartSoundEffect(soundId);
+                f_SoundHandleCopies[channel] = *handle;
+                MusHandleSetVolume(*handle, volume);
+                MusHandleSetFreqOffset(*handle, 0.0f);
+                MusHandleSetPan(*handle, SOUND_FULL_SCALE);
+            }
 
-      if (g_NextSoundChannel == channel) {
-        g_NextSoundChannel = channel ^ 1;
-      }
+            if (g_NextSoundChannel == channel) {
+                g_NextSoundChannel = channel ^ 1;
+            }
+        }
+
+        osSetIntMask(mask);
+        if (soundId < SOUND_COUNT) {
+            for (index = 0; index != ECHOING_SOUND_COUNT; index++) {
+                if (f_EchoingSoundIds[index] == soundId) {
+                    break;
+                }
+            }
+
+            if (index < ECHOING_SOUND_COUNT) {
+                if (f_EchoingSoundIds[index] == SOUND_WASTE_AREA_LANDING) {
+                    SetSoundReverb(channel, NO_REVERB);
+                }
+                else {
+                    SetSoundReverb(channel, ECHO_REVERB);
+                }
+
+                SetSoundFrequencyOffset(channel, 0.0f);
+            }
+            else {
+                if (soundId == SOUND_ECHOING_SHOT) {
+                    SetSoundReverb(channel, ECHO_REVERB);
+                }
+                else {
+                    SetSoundReverb(channel, DEFAULT_REVERB);
+                }
+            }
+        }
     }
-
-    osSetIntMask(mask);
-    if (soundId < SOUND_COUNT) {
-      for (index = 0; index != ECHOING_SOUND_COUNT; index++) {
-        if (f_EchoingSoundIds[index] == soundId) {
-          break;
-        }
-      }
-
-      if (index < ECHOING_SOUND_COUNT) {
-        if (f_EchoingSoundIds[index] == SOUND_WASTE_AREA_LANDING) {
-          SetSoundReverb(channel, NO_REVERB);
-        } else {
-          SetSoundReverb(channel, ECHO_REVERB);
-        }
-
-        SetSoundFrequencyOffset(channel, 0.0f);
-      } else {
-        if (soundId == SOUND_ECHOING_SHOT) {
-          SetSoundReverb(channel, ECHO_REVERB);
-        } else {
-          SetSoundReverb(channel, DEFAULT_REVERB);
-        }
-      }
-    }
-  }
 }
 
 /*
@@ -294,125 +345,138 @@ void PlaySound(SoundId soundId, SoundChannel channel, SoundVolume volume) {
  * The reverb goes only to the sound being stopped; the new one gets the
  * reverb PlaySound would give it.
  */
-void PlaySoundWithEffects(SoundId soundId, SoundChannel channel,
-    SoundVolume volume, SoundReverb reverb, SoundPan pan) {
-  s32* handle;
-  s32 mask;
-  s32 index;
+void PlaySoundWithEffects(
+    SoundId soundId,
+    SoundChannel channel,
+    SoundVolume volume,
+    SoundReverb reverb,
+    SoundPan pan
+) {
+    s32 *handle;
+    s32 mask;
+    s32 index;
 
-  if (!IsGameFlagSet(GAME_FLAG_SILENCE_SOUND_EFFECTS)) {
-    mask = osSetIntMask(OS_IM_NONE);
-    f_SoundVolumes[channel] = volume;
-    if (soundId < SOUND_COUNT) {
-      handle = &f_SoundHandles[channel];
-      if (*handle != NO_HANDLE) {
-        MusHandleStop(*handle, 0);
-        MusHandleSetReverb(*handle, reverb);
-      }
+    if (!IsGameFlagSet(GAME_FLAG_SILENCE_SOUND_EFFECTS)) {
+        mask = osSetIntMask(OS_IM_NONE);
+        f_SoundVolumes[channel] = volume;
+        if (soundId < SOUND_COUNT) {
+            handle = &f_SoundHandles[channel];
+            if (*handle != NO_HANDLE) {
+                MusHandleStop(*handle, 0);
+                MusHandleSetReverb(*handle, reverb);
+            }
 
-      *handle = StartSoundEffect(soundId);
-      f_SoundHandleCopies[channel] = *handle;
-      MusHandleSetFreqOffset(*handle, 0.0f);
-      MusHandleSetVolume(*handle, volume);
-      MusHandleSetPan(*handle, pan);
-      if (g_NextSoundChannel == channel) {
-        g_NextSoundChannel = channel ^ 1;
-      }
+            *handle = StartSoundEffect(soundId);
+            f_SoundHandleCopies[channel] = *handle;
+            MusHandleSetFreqOffset(*handle, 0.0f);
+            MusHandleSetVolume(*handle, volume);
+            MusHandleSetPan(*handle, pan);
+            if (g_NextSoundChannel == channel) {
+                g_NextSoundChannel = channel ^ 1;
+            }
+        }
+
+        osSetIntMask(mask);
+        if (soundId < SOUND_COUNT) {
+            for (index = 0; index != ECHOING_SOUND_COUNT; index++) {
+                if (f_EchoingSoundIds[index] == soundId) {
+                    break;
+                }
+            }
+
+            if (index < ECHOING_SOUND_COUNT) {
+                if (f_EchoingSoundIds[index] == SOUND_WASTE_AREA_LANDING) {
+                    SetSoundReverb(channel, NO_REVERB);
+                }
+                else {
+                    SetSoundReverb(channel, ECHO_REVERB);
+                }
+
+                SetSoundFrequencyOffset(channel, 0.0f);
+            }
+            else {
+                if (soundId == SOUND_ECHOING_SHOT) {
+                    SetSoundReverb(channel, ECHO_REVERB);
+                }
+                else {
+                    SetSoundReverb(channel, DEFAULT_REVERB);
+                }
+            }
+        }
     }
-
-    osSetIntMask(mask);
-    if (soundId < SOUND_COUNT) {
-      for (index = 0; index != ECHOING_SOUND_COUNT; index++) {
-        if (f_EchoingSoundIds[index] == soundId) {
-          break;
-        }
-      }
-
-      if (index < ECHOING_SOUND_COUNT) {
-        if (f_EchoingSoundIds[index] == SOUND_WASTE_AREA_LANDING) {
-          SetSoundReverb(channel, NO_REVERB);
-        } else {
-          SetSoundReverb(channel, ECHO_REVERB);
-        }
-
-        SetSoundFrequencyOffset(channel, 0.0f);
-      } else {
-        if (soundId == SOUND_ECHOING_SHOT) {
-          SetSoundReverb(channel, ECHO_REVERB);
-        } else {
-          SetSoundReverb(channel, DEFAULT_REVERB);
-        }
-      }
-    }
-  }
 }
 
 void StopSound(SoundChannel channel) {
-  s32 mask = osSetIntMask(OS_IM_NONE);
+    s32 mask = osSetIntMask(OS_IM_NONE);
 
-  if (f_SoundHandles[channel] != NO_HANDLE) {
-    MusHandleStop(f_SoundHandles[channel], 0);
-  }
+    if (f_SoundHandles[channel] != NO_HANDLE) {
+        MusHandleStop(f_SoundHandles[channel], 0);
+    }
 
-  osSetIntMask(mask);
+    osSetIntMask(mask);
 }
 
 void SetSoundPan(SoundChannel channel, SoundPan pan) {
-  s32 mask = osSetIntMask(OS_IM_NONE);
+    s32 mask = osSetIntMask(OS_IM_NONE);
 
-  if (f_SoundHandles[channel] != NO_HANDLE) {
-    MusHandleSetPan(f_SoundHandles[channel], pan);
-  }
+    if (f_SoundHandles[channel] != NO_HANDLE) {
+        MusHandleSetPan(f_SoundHandles[channel], pan);
+    }
 
-  osSetIntMask(mask);
+    osSetIntMask(mask);
 }
 
 void SetSoundVolume(SoundChannel channel, SoundVolume volume) {
-  s32 mask = osSetIntMask(OS_IM_NONE);
+    s32 mask = osSetIntMask(OS_IM_NONE);
 
-  if (f_SoundHandles[channel] != NO_HANDLE) {
-    MusHandleSetVolume(f_SoundHandles[channel], volume);
-  }
+    if (f_SoundHandles[channel] != NO_HANDLE) {
+        MusHandleSetVolume(f_SoundHandles[channel], volume);
+    }
 
-  osSetIntMask(mask);
+    osSetIntMask(mask);
 }
 
 void SetSoundReverb(SoundChannel channel, SoundReverb reverb) {
-  s32 mask = osSetIntMask(OS_IM_NONE);
+    s32 mask = osSetIntMask(OS_IM_NONE);
 
-  if (f_SoundHandles[channel] != NO_HANDLE) {
-    MusHandleSetReverb(f_SoundHandles[channel], reverb);
-  }
+    if (f_SoundHandles[channel] != NO_HANDLE) {
+        MusHandleSetReverb(f_SoundHandles[channel], reverb);
+    }
 
-  osSetIntMask(mask);
+    osSetIntMask(mask);
 }
 
 /* UpdateAudio lowers the volume to nothing over the frames */
 void FadeOutSound(SoundChannel channel, u32 frameCount) {
-  f_SoundFadeFrameCounts[channel] = frameCount;
+    f_SoundFadeFrameCounts[channel] = frameCount;
 }
 
 void SetSoundTempo(SoundChannel channel, s32 tempo) {
-  s32 mask = osSetIntMask(OS_IM_NONE);
+    s32 mask = osSetIntMask(OS_IM_NONE);
 
-  if (f_SoundHandles[channel] != NO_HANDLE) {
-    MusHandleSetTempo(f_SoundHandles[channel], tempo);
-  }
+    if (f_SoundHandles[channel] != NO_HANDLE) {
+        MusHandleSetTempo(f_SoundHandles[channel], tempo);
+    }
 
-  osSetIntMask(mask);
+    osSetIntMask(mask);
 }
 
-void QueueCharacterSound(CharacterId character, s32 slot, s32 kind,
-    SoundVolume volume, SoundPan pan) {
-  f_QueuedCharacterSounds[slot].delay = f_CharacterSoundDelays[kind][character];
-  f_QueuedCharacterSounds[slot].character = character;
-  f_QueuedCharacterSounds[slot].kind = kind;
-  f_QueuedCharacterSounds[slot].volume = volume;
-  f_QueuedCharacterSounds[slot].pan = pan;
+void QueueCharacterSound(
+    CharacterId character,
+    s32 slot,
+    s32 kind,
+    SoundVolume volume,
+    SoundPan pan
+) {
+    f_QueuedCharacterSounds[slot].delay = f_CharacterSoundDelays[kind][character];
+    f_QueuedCharacterSounds[slot].character = character;
+    f_QueuedCharacterSounds[slot].kind = kind;
+    f_QueuedCharacterSounds[slot].volume = volume;
+    f_QueuedCharacterSounds[slot].pan = pan;
 }
 
 static void PreviewCharacterSound(CharacterId character, s32 kind) {
-  f_PreviewSoundDelays[character] = f_CharacterSoundDelays[kind][character];
+    f_PreviewSoundDelays[character] = f_CharacterSoundDelays[kind][character];
 }
 
 /*
@@ -421,119 +485,112 @@ static void PreviewCharacterSound(CharacterId character, s32 kind) {
  * a kind of sound and plays the characters' sounds of it to try them.
  */
 static void UpdateCharacterSounds(void) {
-  s32 index;
+    s32 index;
 
-  if (!IsGameFlagSet(GAME_FLAG_TIMING_DEBUG)) {
-    for (index = 0; index != QUEUED_CHARACTER_SOUND_COUNT; index++) {
-      if (f_QueuedCharacterSounds[index].delay == 0) {
-        PlayCharacterSound(f_QueuedCharacterSounds[index].character, index,
-            f_CharacterSoundIndexes[f_QueuedCharacterSounds[index].kind],
-            f_QueuedCharacterSounds[index].volume,
-            f_QueuedCharacterSounds[index].pan);
-      }
+    if (!IsGameFlagSet(GAME_FLAG_TIMING_DEBUG)) {
+        for (index = 0; index != QUEUED_CHARACTER_SOUND_COUNT; index++) {
+            if (f_QueuedCharacterSounds[index].delay == 0) {
+                PlayCharacterSound(
+                    f_QueuedCharacterSounds[index].character,
+                    index,
+                    f_CharacterSoundIndexes[f_QueuedCharacterSounds[index].kind],
+                    f_QueuedCharacterSounds[index].volume,
+                    f_QueuedCharacterSounds[index].pan
+                );
+            }
 
-      if (f_QueuedCharacterSounds[index].delay >= 0) {
-        f_QueuedCharacterSounds[index].delay--;
-      }
+            if (f_QueuedCharacterSounds[index].delay >= 0) {
+                f_QueuedCharacterSounds[index].delay--;
+            }
+        }
+
+        return;
     }
 
-    return;
-  }
+    for (index = 0; index != CHARACTER_COUNT; index++) {
+        if (f_PreviewSoundDelays[index] == 0) {
+            PlayCharacterSound(
+                index,
+                index % QUEUED_CHARACTER_SOUND_COUNT,
+                f_CharacterSoundIndexes[f_DelayEditorKind],
+                SOUND_FULL_SCALE,
+                SOUND_FULL_SCALE
+            );
+        }
 
-  for (index = 0; index != CHARACTER_COUNT; index++) {
-    if (f_PreviewSoundDelays[index] == 0) {
-      PlayCharacterSound(index, index % QUEUED_CHARACTER_SOUND_COUNT,
-          f_CharacterSoundIndexes[f_DelayEditorKind], SOUND_FULL_SCALE,
-          SOUND_FULL_SCALE);
+        if (f_PreviewSoundDelays[index] >= 0) {
+            f_PreviewSoundDelays[index]--;
+        }
     }
 
-    if (f_PreviewSoundDelays[index] >= 0) {
-      f_PreviewSoundDelays[index]--;
+    if ((g_ControllerStates[DELAY_EDITOR_CONTROLLER].pressedButtons & L_CBUTTONS) &&
+        f_DelayEditorKind > 0) {
+        f_DelayEditorKind--;
     }
-  }
 
-  if ((g_ControllerStates[DELAY_EDITOR_CONTROLLER].pressedButtons &
-          L_CBUTTONS) &&
-      f_DelayEditorKind > 0) {
-    f_DelayEditorKind--;
-  }
-
-  if ((g_ControllerStates[DELAY_EDITOR_CONTROLLER].pressedButtons &
-          R_CBUTTONS) &&
-      f_DelayEditorKind < CHARACTER_SOUND_KIND_COUNT - 1) {
-    f_DelayEditorKind++;
-  }
-
-  if (g_ControllerStates[DELAY_EDITOR_CONTROLLER].pressedButtons & R_TRIG) {
-    PreviewCharacterSound(
-        f_DelayEditorCharacter % CHARACTER_COUNT, f_DelayEditorKind);
-  }
-
-  if (g_ControllerStates[DELAY_EDITOR_CONTROLLER].pressedButtons & A_BUTTON) {
-    PreviewCharacterSound(
-        f_DelayEditorCharacter % CHARACTER_COUNT, f_DelayEditorKind);
-    PreviewCharacterSound(
-        (f_DelayEditorCharacter + 1) % CHARACTER_COUNT, f_DelayEditorKind);
-  }
-
-  if (g_ControllerStates[DELAY_EDITOR_CONTROLLER].pressedButtons & B_BUTTON) {
-    PreviewCharacterSound(
-        f_DelayEditorCharacter % CHARACTER_COUNT, f_DelayEditorKind);
-    PreviewCharacterSound(
-        (f_DelayEditorCharacter + 1) % CHARACTER_COUNT, f_DelayEditorKind);
-    PreviewCharacterSound(
-        (f_DelayEditorCharacter + 2) % CHARACTER_COUNT, f_DelayEditorKind);
-    PreviewCharacterSound(
-        (f_DelayEditorCharacter + 3) % CHARACTER_COUNT, f_DelayEditorKind);
-  }
-
-  PrintDebugText(" ", DELAY_EDITOR_COLUMN,
-      f_DelayEditorCharacter + DELAY_EDITOR_FIRST_ROW);
-  if ((g_ControllerStates[DELAY_EDITOR_CONTROLLER].repeatedButtons & U_JPAD) &&
-      f_DelayEditorCharacter > 0) {
-    f_DelayEditorCharacter--;
-  }
-
-  if ((g_ControllerStates[DELAY_EDITOR_CONTROLLER].repeatedButtons & D_JPAD) &&
-      f_DelayEditorCharacter < CHARACTER_COUNT - 1) {
-    f_DelayEditorCharacter++;
-  }
-
-  if (g_ControllerStates[DELAY_EDITOR_CONTROLLER].repeatedButtons & R_JPAD) {
-    if (f_CharacterSoundDelays[f_DelayEditorKind][f_DelayEditorCharacter] <
-        MAX_CHARACTER_SOUND_DELAY) {
-      f_CharacterSoundDelays[f_DelayEditorKind][f_DelayEditorCharacter]++;
+    if ((g_ControllerStates[DELAY_EDITOR_CONTROLLER].pressedButtons & R_CBUTTONS) &&
+        f_DelayEditorKind < CHARACTER_SOUND_KIND_COUNT - 1) {
+        f_DelayEditorKind++;
     }
-  }
 
-  if (g_ControllerStates[DELAY_EDITOR_CONTROLLER].repeatedButtons & L_JPAD) {
-    if (f_CharacterSoundDelays[f_DelayEditorKind][f_DelayEditorCharacter] !=
-        0) {
-      f_CharacterSoundDelays[f_DelayEditorKind][f_DelayEditorCharacter]--;
+    if (g_ControllerStates[DELAY_EDITOR_CONTROLLER].pressedButtons & R_TRIG) {
+        PreviewCharacterSound(f_DelayEditorCharacter % CHARACTER_COUNT, f_DelayEditorKind);
     }
-  }
 
-  sprintf(g_PrintBuffer, "NO %3d ", (int)f_DelayEditorKind);
-  PrintDebugText(g_PrintBuffer, DELAY_EDITOR_COLUMN + 1, DELAY_EDITOR_KIND_ROW);
-  for (index = 0; index != CHARACTER_COUNT; index++) {
-    sprintf(g_PrintBuffer, "%3d ",
-        f_CharacterSoundDelays[f_DelayEditorKind][index]);
-    PrintDebugText(
-        g_PrintBuffer, DELAY_EDITOR_COLUMN + 1, index + DELAY_EDITOR_FIRST_ROW);
-  }
+    if (g_ControllerStates[DELAY_EDITOR_CONTROLLER].pressedButtons & A_BUTTON) {
+        PreviewCharacterSound(f_DelayEditorCharacter % CHARACTER_COUNT, f_DelayEditorKind);
+        PreviewCharacterSound((f_DelayEditorCharacter + 1) % CHARACTER_COUNT, f_DelayEditorKind);
+    }
 
-  PrintDebugText(">", DELAY_EDITOR_COLUMN,
-      f_DelayEditorCharacter + DELAY_EDITOR_FIRST_ROW);
+    if (g_ControllerStates[DELAY_EDITOR_CONTROLLER].pressedButtons & B_BUTTON) {
+        PreviewCharacterSound(f_DelayEditorCharacter % CHARACTER_COUNT, f_DelayEditorKind);
+        PreviewCharacterSound((f_DelayEditorCharacter + 1) % CHARACTER_COUNT, f_DelayEditorKind);
+        PreviewCharacterSound((f_DelayEditorCharacter + 2) % CHARACTER_COUNT, f_DelayEditorKind);
+        PreviewCharacterSound((f_DelayEditorCharacter + 3) % CHARACTER_COUNT, f_DelayEditorKind);
+    }
+
+    PrintDebugText(" ", DELAY_EDITOR_COLUMN, f_DelayEditorCharacter + DELAY_EDITOR_FIRST_ROW);
+    if ((g_ControllerStates[DELAY_EDITOR_CONTROLLER].repeatedButtons & U_JPAD) &&
+        f_DelayEditorCharacter > 0) {
+        f_DelayEditorCharacter--;
+    }
+
+    if ((g_ControllerStates[DELAY_EDITOR_CONTROLLER].repeatedButtons & D_JPAD) &&
+        f_DelayEditorCharacter < CHARACTER_COUNT - 1) {
+        f_DelayEditorCharacter++;
+    }
+
+    if (g_ControllerStates[DELAY_EDITOR_CONTROLLER].repeatedButtons & R_JPAD) {
+        if (f_CharacterSoundDelays[f_DelayEditorKind][f_DelayEditorCharacter] <
+            MAX_CHARACTER_SOUND_DELAY) {
+            f_CharacterSoundDelays[f_DelayEditorKind][f_DelayEditorCharacter]++;
+        }
+    }
+
+    if (g_ControllerStates[DELAY_EDITOR_CONTROLLER].repeatedButtons & L_JPAD) {
+        if (f_CharacterSoundDelays[f_DelayEditorKind][f_DelayEditorCharacter] != 0) {
+            f_CharacterSoundDelays[f_DelayEditorKind][f_DelayEditorCharacter]--;
+        }
+    }
+
+    sprintf(g_PrintBuffer, "NO %3d ", (int)f_DelayEditorKind);
+    PrintDebugText(g_PrintBuffer, DELAY_EDITOR_COLUMN + 1, DELAY_EDITOR_KIND_ROW);
+    for (index = 0; index != CHARACTER_COUNT; index++) {
+        sprintf(g_PrintBuffer, "%3d ", f_CharacterSoundDelays[f_DelayEditorKind][index]);
+        PrintDebugText(g_PrintBuffer, DELAY_EDITOR_COLUMN + 1, index + DELAY_EDITOR_FIRST_ROW);
+    }
+
+    PrintDebugText(">", DELAY_EDITOR_COLUMN, f_DelayEditorCharacter + DELAY_EDITOR_FIRST_ROW);
 }
 
 void SetSoundFrequencyOffset(SoundChannel channel, f32 offset) {
-  s32 mask = osSetIntMask(OS_IM_NONE);
+    s32 mask = osSetIntMask(OS_IM_NONE);
 
-  if (f_SoundHandles[channel] != NO_HANDLE) {
-    MusHandleSetFreqOffset(f_SoundHandles[channel], offset);
-  }
+    if (f_SoundHandles[channel] != NO_HANDLE) {
+        MusHandleSetFreqOffset(f_SoundHandles[channel], offset);
+    }
 
-  osSetIntMask(mask);
+    osSetIntMask(mask);
 }
 
 /*
@@ -541,119 +598,125 @@ void SetSoundFrequencyOffset(SoundChannel channel, f32 offset) {
  * audio frame
  */
 NO_RESULT UpdateAudio(void) {
-  u32 frame;
-  u32 frameCount;
-  SoundChannel channel;
+    u32 frame;
+    u32 frameCount;
+    SoundChannel channel;
 
-  frame = MusGetFrameCount();
-  if (frame == f_LastAudioFrame) {
-    osSyncPrintf("Ouch!%d,%d,%d,%d!!!!!!!!!!!!!!!!\n",
-        f_PendingSongChange.state, f_PendingSongChange.songId,
-        f_PendingSongChange.flags, f_PendingSongChange.delay);
-    return;
-  }
-
-  f_LastAudioFrame = frame;
-  for (channel = 0; channel != SOUND_CHANNEL_COUNT; channel++) {
-    frameCount = f_SoundFadeFrameCounts[channel];
-    if (frameCount != 0) {
-      f_SoundFadeFrameCounts[channel] = frameCount - 1;
-      f_SoundVolumes[channel] =
-          f_SoundVolumes[channel] * (f32)(frameCount - 1) / (f32)frameCount;
-      SetSoundVolume(channel, f_SoundVolumes[channel]);
-    }
-  }
-
-  UpdateCharacterSounds();
-  if (f_PendingSongChange.state != SONG_CHANGE_NONE &&
-      f_PendingSongChange.delay != 0 && --f_PendingSongChange.delay == 0) {
-    if (f_PendingSongChange.state == SONG_CHANGE_SWITCH) {
-      if (f_SongHandle != NO_HANDLE) {
-        s32 mask = osSetIntMask(OS_IM_NONE);
-        MusHandleStop(f_SongHandle, 0);
-        osSetIntMask(mask);
-        f_SongHandle = NO_HANDLE;
-        f_PendingSongChange.delay = 1;
-        f_SongId = NO_SONG;
+    frame = MusGetFrameCount();
+    if (frame == f_LastAudioFrame) {
+        osSyncPrintf(
+            "Ouch!%d,%d,%d,%d!!!!!!!!!!!!!!!!\n",
+            f_PendingSongChange.state,
+            f_PendingSongChange.songId,
+            f_PendingSongChange.flags,
+            f_PendingSongChange.delay
+        );
         return;
-      }
-
-      f_PendingSongChange.state = SONG_CHANGE_NONE;
-      f_SongId = NO_SONG;
-      PlaySong(f_PendingSongChange.songId, f_PendingSongChange.flags);
-    } else if (f_PendingSongChange.state == SONG_CHANGE_STOP) {
-      if (f_SongHandle != NO_HANDLE) {
-        s32 mask = osSetIntMask(OS_IM_NONE);
-        MusHandleStop(f_SongHandle, 0);
-        osSetIntMask(mask);
-        f_SongHandle = NO_HANDLE;
-        f_PendingSongChange.delay = 0;
-      }
-
-      f_PendingSongChange.state = SONG_CHANGE_NONE;
     }
-  }
+
+    f_LastAudioFrame = frame;
+    for (channel = 0; channel != SOUND_CHANNEL_COUNT; channel++) {
+        frameCount = f_SoundFadeFrameCounts[channel];
+        if (frameCount != 0) {
+            f_SoundFadeFrameCounts[channel] = frameCount - 1;
+            f_SoundVolumes[channel] =
+                f_SoundVolumes[channel] * (f32)(frameCount - 1) / (f32)frameCount;
+            SetSoundVolume(channel, f_SoundVolumes[channel]);
+        }
+    }
+
+    UpdateCharacterSounds();
+    if (f_PendingSongChange.state != SONG_CHANGE_NONE &&
+        f_PendingSongChange.delay != 0 &&
+        --f_PendingSongChange.delay == 0) {
+        if (f_PendingSongChange.state == SONG_CHANGE_SWITCH) {
+            if (f_SongHandle != NO_HANDLE) {
+                s32 mask = osSetIntMask(OS_IM_NONE);
+                MusHandleStop(f_SongHandle, 0);
+                osSetIntMask(mask);
+                f_SongHandle = NO_HANDLE;
+                f_PendingSongChange.delay = 1;
+                f_SongId = NO_SONG;
+                return;
+            }
+
+            f_PendingSongChange.state = SONG_CHANGE_NONE;
+            f_SongId = NO_SONG;
+            PlaySong(f_PendingSongChange.songId, f_PendingSongChange.flags);
+        }
+        else if (f_PendingSongChange.state == SONG_CHANGE_STOP) {
+            if (f_SongHandle != NO_HANDLE) {
+                s32 mask = osSetIntMask(OS_IM_NONE);
+                MusHandleStop(f_SongHandle, 0);
+                osSetIntMask(mask);
+                f_SongHandle = NO_HANDLE;
+                f_PendingSongChange.delay = 0;
+            }
+
+            f_PendingSongChange.state = SONG_CHANGE_NONE;
+        }
+    }
 }
 
 void StopSong(s32 fadeFrameCount) {
-  s32 mask = osSetIntMask(OS_IM_NONE);
+    s32 mask = osSetIntMask(OS_IM_NONE);
 
-  if (f_SongHandle != NO_HANDLE) {
-    MusHandleStop(f_SongHandle, fadeFrameCount);
-  }
+    if (f_SongHandle != NO_HANDLE) {
+        MusHandleStop(f_SongHandle, fadeFrameCount);
+    }
 
-  osSetIntMask(mask);
+    osSetIntMask(mask);
 }
 
 /* Stops the song on UpdateAudio's next frame */
 void RequestSongStop(void) {
-  f_PendingSongChange.state = SONG_CHANGE_STOP;
-  f_PendingSongChange.delay = 1;
-  f_SongId = NO_SONG;
+    f_PendingSongChange.state = SONG_CHANGE_STOP;
+    f_PendingSongChange.delay = 1;
+    f_SongId = NO_SONG;
 }
 
 void SetSongVolume(SoundVolume volume) {
-  s32 mask;
+    s32 mask;
 
-  if (f_SongHandle != NO_HANDLE) {
-    mask = osSetIntMask(OS_IM_NONE);
-    MusHandleSetVolume(f_SongHandle, volume);
-    osSetIntMask(mask);
-  }
+    if (f_SongHandle != NO_HANDLE) {
+        mask = osSetIntMask(OS_IM_NONE);
+        MusHandleSetVolume(f_SongHandle, volume);
+        osSetIntMask(mask);
+    }
 }
 
 void SetSongReverb(SoundReverb reverb) {
-  s32 mask;
+    s32 mask;
 
-  if (f_SongHandle != NO_HANDLE) {
-    mask = osSetIntMask(OS_IM_NONE);
-    MusHandleSetReverb(f_SongHandle, reverb);
-    osSetIntMask(mask);
-  }
+    if (f_SongHandle != NO_HANDLE) {
+        mask = osSetIntMask(OS_IM_NONE);
+        MusHandleSetReverb(f_SongHandle, reverb);
+        osSetIntMask(mask);
+    }
 }
 
 void SetSongTempo(s32 tempo) {
-  s32 mask;
+    s32 mask;
 
-  if (f_SongHandle != NO_HANDLE) {
-    mask = osSetIntMask(OS_IM_NONE);
-    MusHandleSetTempo(f_SongHandle, tempo);
-    osSetIntMask(mask);
-  }
+    if (f_SongHandle != NO_HANDLE) {
+        mask = osSetIntMask(OS_IM_NONE);
+        MusHandleSetTempo(f_SongHandle, tempo);
+        osSetIntMask(mask);
+    }
 }
 
 void SetSongFrequencyOffset(f32 offset) {
-  s32 mask;
+    s32 mask;
 
-  if (f_SongHandle != NO_HANDLE) {
-    mask = osSetIntMask(OS_IM_NONE);
-    MusHandleSetFreqOffset(f_SongHandle, offset);
-    osSetIntMask(mask);
-  }
+    if (f_SongHandle != NO_HANDLE) {
+        mask = osSetIntMask(OS_IM_NONE);
+        MusHandleSetFreqOffset(f_SongHandle, offset);
+        osSetIntMask(mask);
+    }
 }
 
 SongId GetSongId(void) {
-  return f_SongId;
+    return f_SongId;
 }
 
 /*
@@ -661,74 +724,85 @@ SongId GetSongId(void) {
  * SONG_FLAG_RESTART, has UpdateAudio stop it and start this one instead.
  */
 void PlaySong(SongId songId, s32 flags) {
-  if (!IsGameFlagSet(GAME_FLAG_SILENCE_SONGS)) {
-    if (IsMusicOffChosen() && (flags & SONG_FLAG_FOLLOWS_MUSIC_OPTION)) {
-      RequestSongStop();
-      return;
-    }
-
-    if (f_SongHandle != NO_HANDLE) {
-      if ((flags & SONG_FLAG_RESTART) || f_SongId != songId) {
-        f_PendingSongChange.state = SONG_CHANGE_SWITCH;
-        f_PendingSongChange.songId = songId;
-        f_PendingSongChange.flags = flags;
-        f_PendingSongChange.delay = SONG_SWITCH_DELAY;
-      }
-    } else if (f_PendingSongChange.state == SONG_CHANGE_SWITCH) {
-      f_PendingSongChange.songId = songId;
-      f_PendingSongChange.flags = flags;
-    } else {
-      osSyncPrintf("SeqGo %d\n", songId);
-      if (!IsMusicOffChosen() || !(flags & SONG_FLAG_FOLLOWS_MUSIC_OPTION)) {
-        f_SongId = songId;
-        if (songId > LAST_SONG_ID) {
-          songId = LAST_SONG_ID;
+    if (!IsGameFlagSet(GAME_FLAG_SILENCE_SONGS)) {
+        if (IsMusicOffChosen() && (flags & SONG_FLAG_FOLLOWS_MUSIC_OPTION)) {
+            RequestSongStop();
+            return;
         }
 
-        LoadSong(f_SongRomBounds[songId * 2],
-            f_SongRomBounds[(songId * 2) + 1] - f_SongRomBounds[songId * 2]);
-        MusSetMasterVolume(MUSFLAG_SONGS, SONG_MASTER_VOLUME);
-        f_SongHandle = StartLoadedSong();
-        f_SongHandleCopy = f_SongHandle;
-        if (g_SoundOptionBits & OPTION_BIT_MONO) {
-          MusSetStereo(FALSE);
-        } else {
-          MusSetStereo(TRUE);
+        if (f_SongHandle != NO_HANDLE) {
+            if ((flags & SONG_FLAG_RESTART) || f_SongId != songId) {
+                f_PendingSongChange.state = SONG_CHANGE_SWITCH;
+                f_PendingSongChange.songId = songId;
+                f_PendingSongChange.flags = flags;
+                f_PendingSongChange.delay = SONG_SWITCH_DELAY;
+            }
         }
-      }
+        else if (f_PendingSongChange.state == SONG_CHANGE_SWITCH) {
+            f_PendingSongChange.songId = songId;
+            f_PendingSongChange.flags = flags;
+        }
+        else {
+            osSyncPrintf("SeqGo %d\n", songId);
+            if (!IsMusicOffChosen() || !(flags & SONG_FLAG_FOLLOWS_MUSIC_OPTION)) {
+                f_SongId = songId;
+                if (songId > LAST_SONG_ID) {
+                    songId = LAST_SONG_ID;
+                }
+
+                LoadSong(
+                    f_SongRomBounds[songId * 2],
+                    f_SongRomBounds[(songId * 2) + 1] - f_SongRomBounds[songId * 2]
+                );
+                MusSetMasterVolume(MUSFLAG_SONGS, SONG_MASTER_VOLUME);
+                f_SongHandle = StartLoadedSong();
+                f_SongHandleCopy = f_SongHandle;
+                if (g_SoundOptionBits & OPTION_BIT_MONO) {
+                    MusSetStereo(FALSE);
+                }
+                else {
+                    MusSetStereo(TRUE);
+                }
+            }
+        }
     }
-  }
 }
 
 void InitAudio(void) {
-  SoundChannel channel;
+    SoundChannel channel;
 
-  InitMusic(NULL);
-  f_PendingSongChange.state = SONG_CHANGE_NONE;
-  f_SongHandle = NO_HANDLE;
-  f_SongId = NO_SONG;
-  LoadSampleBank(g_SoundPointerBankRomStart,
-      BytesBetween(g_SoundPointerBankRomStart, g_SoundPointerBankRomEnd),
-      g_SoundWaveBankRomStart);
-  LoadSoundEffectBank(g_SoundEffectBankRomStart,
-      BytesBetween(g_SoundEffectBankRomStart, g_SoundEffectBankRomEnd));
-  for (channel = 0; channel < SOUND_CHANNEL_COUNT; channel++) {
-    f_SoundHandles[channel] = 0;
-    f_SoundFadeFrameCounts[channel] = 0;
-  }
+    InitMusic(NULL);
+    f_PendingSongChange.state = SONG_CHANGE_NONE;
+    f_SongHandle = NO_HANDLE;
+    f_SongId = NO_SONG;
+    LoadSampleBank(
+        g_SoundPointerBankRomStart,
+        BytesBetween(g_SoundPointerBankRomStart, g_SoundPointerBankRomEnd),
+        g_SoundWaveBankRomStart
+    );
+    LoadSoundEffectBank(
+        g_SoundEffectBankRomStart,
+        BytesBetween(g_SoundEffectBankRomStart, g_SoundEffectBankRomEnd)
+    );
+    for (channel = 0; channel < SOUND_CHANNEL_COUNT; channel++) {
+        f_SoundHandles[channel] = 0;
+        f_SoundFadeFrameCounts[channel] = 0;
+    }
 
-  ChangeCustomEffect(ECHO_EFFECT_INDEX);
+    ChangeCustomEffect(ECHO_EFFECT_INDEX);
 }
 
 /* Stand-ins for libaudio's synthesizer, which libmus replaces */
-void alSynNew(ALSynth* synth UNUSED, ALSynConfig* config UNUSED) {
-  osSyncPrintf("alSynNew\n");
+void alSynNew(ALSynth *synth UNUSED, ALSynConfig *config UNUSED) {
+    osSyncPrintf("alSynNew\n");
 }
 
-void alSynDelete(ALSynth* synth UNUSED) {
-  osSyncPrintf("alSynDelete\n");
+void alSynDelete(ALSynth *synth UNUSED) {
+    osSyncPrintf("alSynDelete\n");
 }
 
-void __freeParam(struct ALParam_s* param UNUSED) {}
+void __freeParam(struct ALParam_s *param UNUSED) {
+}
 
-void _freePVoice(ALSynth* synth UNUSED, struct PVoice_s* voice UNUSED) {}
+void _freePVoice(ALSynth *synth UNUSED, struct PVoice_s *voice UNUSED) {
+}

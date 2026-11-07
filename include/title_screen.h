@@ -9,6 +9,6 @@ void LoadTitleScreen(void);
 void UnloadTitleScreen(void);
 void UpdateTitleScreen(void);
 
-void DrawTitleScreen(Gfx** displayListHead);
+void DrawTitleScreen(Gfx **displayListHead);
 
 #endif

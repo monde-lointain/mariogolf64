@@ -22,16 +22,16 @@
 
 /* How InitPlay sets up the game state before play starts */
 enum PlayKind {
-  /* One player's hole of Stroke, or of Ring Shot under GAME_FLAG_INIT_RING_SHOT
-   */
-  PLAY_KIND_HOLE,
-  /* A round whose mode and players the GAME_FLAG_ROUND_KIND bits pick */
-  PLAY_KIND_FLAGGED_ROUND,
-  /* The hole of the Best Shot replay that f_BestShotReplayRecord holds */
-  PLAY_KIND_BEST_SHOT_REPLAY,
-  /* Loads no game state and skips PrepareHoleDisplay, as the menus have set
-   * them up already */
-  PLAY_KIND_WITHOUT_HOLE_DISPLAY
+    /* One player's hole of Stroke, or of Ring Shot under GAME_FLAG_INIT_RING_SHOT
+     */
+    PLAY_KIND_HOLE,
+    /* A round whose mode and players the GAME_FLAG_ROUND_KIND bits pick */
+    PLAY_KIND_FLAGGED_ROUND,
+    /* The hole of the Best Shot replay that f_BestShotReplayRecord holds */
+    PLAY_KIND_BEST_SHOT_REPLAY,
+    /* Loads no game state and skips PrepareHoleDisplay, as the menus have set
+     * them up already */
+    PLAY_KIND_WITHOUT_HOLE_DISPLAY
 };
 
 typedef s32 PlayKind;
@@ -40,46 +40,45 @@ void InitPlay(PlayKind kind);
 
 /* Which pause screen is shown over the round */
 enum PauseScreen {
-  PAUSE_SCREEN_NONE,
-  PAUSE_SCREEN_PAUSE_MENU,
-  PAUSE_SCREEN_SCORECARD,
-  /* Does nothing; nothing sets it */
-  PAUSE_SCREEN_UNUSED,
-  PAUSE_SCREEN_FREE_LOOK,
-  PAUSE_SCREEN_SAVE_MENU,
-  PAUSE_SCREEN_PROMPT,
-  /* Waits for MODULE_SCORECARD, then opens the scorecard */
-  PAUSE_SCREEN_LOADING_SCORECARD,
-  /* Waits for MODULE_SAVE_MENU, then opens the save menu */
-  PAUSE_SCREEN_LOADING_SAVE_MENU,
-  /* Waits for MODULE_SAVE_MENU, then opens the controls screen */
-  PAUSE_SCREEN_LOADING_CONTROLS,
-  PAUSE_SCREEN_CONTROLS
+    PAUSE_SCREEN_NONE,
+    PAUSE_SCREEN_PAUSE_MENU,
+    PAUSE_SCREEN_SCORECARD,
+    /* Does nothing; nothing sets it */
+    PAUSE_SCREEN_UNUSED,
+    PAUSE_SCREEN_FREE_LOOK,
+    PAUSE_SCREEN_SAVE_MENU,
+    PAUSE_SCREEN_PROMPT,
+    /* Waits for MODULE_SCORECARD, then opens the scorecard */
+    PAUSE_SCREEN_LOADING_SCORECARD,
+    /* Waits for MODULE_SAVE_MENU, then opens the save menu */
+    PAUSE_SCREEN_LOADING_SAVE_MENU,
+    /* Waits for MODULE_SAVE_MENU, then opens the controls screen */
+    PAUSE_SCREEN_LOADING_CONTROLS,
+    PAUSE_SCREEN_CONTROLS
 };
 
 /* g_LetterboxState's values: the aim camera's views, which all but the
  * aiming view letterbox */
 enum LetterboxState {
-  LETTERBOX_STATE_NONE,
-  /* The player moves the camera, or free look is on */
-  LETTERBOX_STATE_MOVING_CAMERA,
-  LETTERBOX_STATE_LOOKING_DOWN_RANGE,
-  /* The first frame of looking back at the ball from beyond the cup */
-  LETTERBOX_STATE_STARTING_LOOK_BACK,
-  LETTERBOX_STATE_LOOKING_BACK,
-  /*
-   * Nothing sets it. Every test treats it as the unletterboxed aiming view,
-   * except that off the green the HUD animates the offset marker in it rather
-   * than lighting the club head, as while the impact point is set.
-   */
-  LETTERBOX_STATE_UNUSED_AIMING
+    LETTERBOX_STATE_NONE,
+    /* The player moves the camera, or free look is on */
+    LETTERBOX_STATE_MOVING_CAMERA,
+    LETTERBOX_STATE_LOOKING_DOWN_RANGE,
+    /* The first frame of looking back at the ball from beyond the cup */
+    LETTERBOX_STATE_STARTING_LOOK_BACK,
+    LETTERBOX_STATE_LOOKING_BACK,
+    /*
+     * Nothing sets it. Every test treats it as the unletterboxed aiming view,
+     * except that off the green the HUD animates the offset marker in it rather
+     * than lighting the club head, as while the impact point is set.
+     */
+    LETTERBOX_STATE_UNUSED_AIMING
 };
 
 /* Whether a LetterboxState letterboxes the view. The original tests with &
  * rather than && */
 #define IsLetterboxState(state) \
-  (((state) != LETTERBOX_STATE_NONE) & \
-      ((state) != LETTERBOX_STATE_UNUSED_AIMING))
+    (((state) != LETTERBOX_STATE_NONE) & ((state) != LETTERBOX_STATE_UNUSED_AIMING))
 
 /*
  * The state of the black bars that grow over the top and bottom of the
@@ -120,9 +119,9 @@ extern s8 g_ReplayStrokeCount;
 
 /* The states of PlayContestMovies */
 enum ContestMovieState {
-  CONTEST_MOVIES_DONE = -1,
-  CONTEST_MOVIES_WAITING = 0,
-  CONTEST_MOVIES_PLAYING = 60
+    CONTEST_MOVIES_DONE = -1,
+    CONTEST_MOVIES_WAITING = 0,
+    CONTEST_MOVIES_PLAYING = 60
 };
 
 typedef s8 ContestMovieState;
@@ -154,7 +153,7 @@ extern u8 g_UnreadPlayBuffer[0xDEC];
 #define MAX_GROUND_NOISE_INTENSITY 0xFF
 
 void FillGroundNoise(s32 range, s32 base);
-void CopyDoublePair(f64* from, f64* to);
+void CopyDoublePair(f64 *from, f64 *to);
 s32 GetGaugeFramePower(s32 value);
 void LoadBestShotReplayInputs(s32 index);
 void LoadRingShotReplayInputs(s32 index);
@@ -165,16 +164,16 @@ void ResetShotSetup(void);
 void PlacePlayersOnTee(void);
 void InitExpansionPakFeatures(void);
 /* Sets the fog factor and fog color */
-void SetSceneFog(Gfx** displayListHead);
+void SetSceneFog(Gfx **displayListHead);
 void UpdatePlay(void);
 
-void DrawGround(CameraMatrices* matrices, s32 terrainStyle);
+void DrawGround(CameraMatrices *matrices, s32 terrainStyle);
 s32 GetAimCameraGround(s32 x, s32 z);
 s32 GetGaugeFill(void);
 s32 GetRecordedScoreKind(s32 strokes);
-void LoadBestShotReplay(PlayRecord* record);
-void LoadRingShotRecord(RingShotRecord* record);
-s32 MarkUsableClubs(s32 unused, s16* clubs, s8* isUsable);
+void LoadBestShotReplay(PlayRecord *record);
+void LoadRingShotRecord(RingShotRecord *record);
+s32 MarkUsableClubs(s32 unused, s16 *clubs, s8 *isUsable);
 void SetRingShotCleared(s8 isCleared);
 
 #endif

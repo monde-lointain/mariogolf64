@@ -25,19 +25,29 @@ static u8 f_UnusedConfirmWaitBytes[0x10] UNUSED;
  * at this address in SCENE_CONFIRM_WAIT.
  */
 void WaitForConfirmButton(void) {
-  if (g_ControllerStates[0].pressedButtons & (A_BUTTON | START_BUTTON)) {
-    StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
-    g_Scene = SCENE_SWAPPING_MODULES;
-    g_NextScene = SCENE_BOOT_LOGOS;
-    g_SceneModuleToUnload = MODULE_CONFIRM_WAIT;
-    g_SceneModuleToLoad = MODULE_BOOT_LOGOS;
-    PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
+    if (g_ControllerStates[0].pressedButtons & (A_BUTTON | START_BUTTON)) {
+        StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
+        g_Scene = SCENE_SWAPPING_MODULES;
+        g_NextScene = SCENE_BOOT_LOGOS;
+        g_SceneModuleToUnload = MODULE_CONFIRM_WAIT;
+        g_SceneModuleToLoad = MODULE_BOOT_LOGOS;
+        PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
 
-    SetTextSlot(CLEARED_TEXT_X, CLEARED_TEXT_Y, NO_MESSAGE,
-        TEXT_SLOT_LARGE_FONT, 0, 0, 0, 0, 0, 0);
-  }
+        SetTextSlot(
+            CLEARED_TEXT_X,
+            CLEARED_TEXT_Y,
+            NO_MESSAGE,
+            TEXT_SLOT_LARGE_FONT,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+        );
+    }
 }
 
-void RewriteWord(Gfx** displayListHead) {
-  *displayListHead = *displayListHead;
+void RewriteWord(Gfx **displayListHead) {
+    *displayListHead = *displayListHead;
 }

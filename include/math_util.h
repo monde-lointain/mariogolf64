@@ -57,10 +57,10 @@ typedef s16 SignedBinaryAngle;
    built-in abs compiles differently: with it, the matched code of 10 files
    changes. */
 #define Abs(value) \
-  ({ \
-    s32 absValue = (value); \
-    (absValue < 0) ? -absValue : absValue; \
-  })
+    ({ \
+        s32 absValue = (value); \
+        (absValue < 0) ? -absValue : absValue; \
+    })
 
 /*
  * The magnitude of a float, as a compare and branch where fabsf compiles to
@@ -71,17 +71,16 @@ typedef s16 SignedBinaryAngle;
  * AbsoluteValue gives it 580 too.
  */
 #define AbsFloat(value) \
-  ({ \
-    f32 absValue = (value); \
-    (absValue < 0.0f) ? -absValue : absValue; \
-  })
+    ({ \
+        f32 absValue = (value); \
+        (absValue < 0.0f) ? -absValue : absValue; \
+    })
 
 /* A float moved half a unit toward zero, as the title positions are before
  * converting them to whole pixels */
 #define HalfTowardZero(value) ((value) < 0.0f ? (value) + 0.5f : (value) - 0.5f)
 /* value rounded up to a multiple of alignment, which is a power of two */
-#define RoundUpTo(value, alignment) \
-  (((value) + (alignment) - 1) & ~((alignment) - 1))
+#define RoundUpTo(value, alignment) (((value) + (alignment) - 1) & ~((alignment) - 1))
 
 u32 IntLength3D(s32 x, s32 y, s32 z);
 u32 IntLength2D(s32 x, s32 y);
@@ -89,7 +88,7 @@ void SetRandomSeed(s32 seed);
 s32 NextRandom(void);
 f32 Length2D(f32 x, f32 y);
 f32 Length3D(f32 x, f32 y, f32 z);
-u16 ComputeCrc16(u8* data, u32 size);
+u16 ComputeCrc16(u8 *data, u32 size);
 s32 ReportDivisionError(void);
 
 /* float_math.c */
@@ -107,10 +106,10 @@ float atanf(float x);
  * of a float, which GCC narrows to one.
  */
 static inline float fabsf(float value) {
-  float magnitude;
+    float magnitude;
 
-  __asm__ volatile("abs.s %0, %1" : "=f"(magnitude) : "f"(value));
-  return magnitude;
+    __asm__ volatile("abs.s %0, %1" : "=f"(magnitude) : "f"(value));
+    return magnitude;
 }
 
 /*

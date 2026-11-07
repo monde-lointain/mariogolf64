@@ -58,8 +58,7 @@
 /* The R COM and L LEFTY button icons */
 #define COM_LEFTY_ICONS_IMAGE_ASSET 0x709
 
-#define DmaAlignedAddress(address) \
-  (((u32)(address) + DMA_ALIGNMENT - 1) & ~(DMA_ALIGNMENT - 1))
+#define DmaAlignedAddress(address) (((u32)(address) + DMA_ALIGNMENT - 1) & ~(DMA_ALIGNMENT - 1))
 
 /* The records that unlock two of the characters */
 #define DONKEY_KONG_STAR_COUNT 30
@@ -72,10 +71,10 @@
  * row as s32s loads them with lw where the original has lh, so the zero
  * halves before them stay separate fields that nothing reads. */
 typedef struct ImportedCharacterCell {
-  /* 0x0 */ s16 unusedBeforeColumn;
-  /* 0x2 */ s16 column;
-  /* 0x4 */ s16 unusedBeforeRow;
-  /* 0x6 */ s16 row;
+    /* 0x0 */ s16 unusedBeforeColumn;
+    /* 0x2 */ s16 column;
+    /* 0x4 */ s16 unusedBeforeRow;
+    /* 0x6 */ s16 row;
 } ImportedCharacterCell; /* size = 0x8 */
 
 /* Mirrors of the save data's options */
@@ -89,51 +88,51 @@ s32 g_ClubTournamentNameIndex;
 s32 g_ClubTournamentNumber;
 u8 g_TournamentCode[TOURNAMENT_CODE_SIZE];
 s16 g_LastMenuScreen;
-void* g_BrickWallImage;
-void* g_ModeIconImages[7];
-void* g_MenuIconImages[7];
-void* g_MiniGolfDiscImages[2];
-void* g_MenuBoardImages[2];
-void* g_NamePlateImage;
-void* g_MenuLabelImages[2];
-void* g_MenuTitleImages[2];
-void* g_CourseTrophyImages[2];
-void* g_HoleBadgeImages;
-void* g_SpinningBadgeImage;
-void* g_MenuWideSpareImage;
+void *g_BrickWallImage;
+void *g_ModeIconImages[7];
+void *g_MenuIconImages[7];
+void *g_MiniGolfDiscImages[2];
+void *g_MenuBoardImages[2];
+void *g_NamePlateImage;
+void *g_MenuLabelImages[2];
+void *g_MenuTitleImages[2];
+void *g_CourseTrophyImages[2];
+void *g_HoleBadgeImages;
+void *g_SpinningBadgeImage;
+void *g_MenuWideSpareImage;
 PlayRecord g_PlayRecords[MAX_PLAYER_COUNT];
 RingShotRecord g_RingShotRecords[MAX_PLAYER_COUNT];
 u8 g_UnreadMenuBuffer[0x1218];
 u8 g_IsMenuCharacterLoaded[MAXCONTROLLERS];
-void* g_AnimatedIconImages[ANIMATED_ICON_BUFFER_COUNT];
+void *g_AnimatedIconImages[ANIMATED_ICON_BUFFER_COUNT];
 BetSet g_BetSet;
-void* g_CharacterFaceImages[18];
-void* g_CharacterFacePalettes[18];
+void *g_CharacterFaceImages[18];
+void *g_CharacterFacePalettes[18];
 s32 g_ChoosingPlayerIndex;
 s32 g_ChosenCharacters[MAX_PLAYER_COUNT];
 s16 g_ChosenLabelGrowth;
 LabelGrowthDirection g_ChosenLabelGrowthDirection;
 s8 g_ChosenLefties[4];
-void* g_ComLeftyIcons;
+void *g_ComLeftyIcons;
 CourseSelectKind g_CourseSelectKind;
 CourseStatFigures g_CourseStatFigures[COURSE_COUNT + 1];
 GameState g_GameState;
-void* g_ImageSlots[IMAGE_SLOT_COUNT];
+void *g_ImageSlots[IMAGE_SLOT_COUNT];
 Boolean g_IsChosenHoleLoadStarted;
 u8 g_IsMenuWipeOpening;
 u8 g_IsRingShotWipeOpening;
-void* g_MenuArrowSizedImages[MENU_ARROW_SIZED_IMAGE_COUNT];
-void* g_MenuCourseSceneryAsset;
+void *g_MenuArrowSizedImages[MENU_ARROW_SIZED_IMAGE_COUNT];
+void *g_MenuCourseSceneryAsset;
 MenuMemory g_MenuMemory;
 s32 g_MenuScreen;
-void* g_MenuSpareImages[MENU_SPARE_IMAGE_COUNT];
-u8* g_PlayerFaceImages[MAX_PLAYER_COUNT];
-u16* g_PlayerFacePalettes[MAX_PLAYER_COUNT];
+void *g_MenuSpareImages[MENU_SPARE_IMAGE_COUNT];
+u8 *g_PlayerFaceImages[MAX_PLAYER_COUNT];
+u16 *g_PlayerFacePalettes[MAX_PLAYER_COUNT];
 Player g_Players[MAX_PLAYER_COUNT];
-void* g_SecondAnimatedIconImages[ANIMATED_ICON_BUFFER_COUNT];
+void *g_SecondAnimatedIconImages[ANIMATED_ICON_BUFFER_COUNT];
 TakenCharacters g_TakenCharacters;
-void* g_TrophyFrameBuffers[TROPHY_FRAME_BUFFER_COUNT];
-void* g_TrophyPalettes[TROPHY_PALETTE_COUNT];
+void *g_TrophyFrameBuffers[TROPHY_FRAME_BUFFER_COUNT];
+void *g_TrophyPalettes[TROPHY_PALETTE_COUNT];
 
 FILE_STATIC SaveData g_SaveData;
 
@@ -151,211 +150,697 @@ FILE_STATIC SaveData g_SaveData;
 #define SAVE_COPY_SRAM_SIZE 0x4000
 /* SRAM is mapped into the cartridge's second domain */
 #define SAVE_COPY_LOCATION(sramOffset) \
-  {NO_HOST_FILE_NAME, NO_HOST_FILE_NAME, PI_DOM2_ADDR2 + (sramOffset), \
-      PI_DOM2_ADDR2 + (sramOffset) + sizeof(SaveData)}
+    {NO_HOST_FILE_NAME, \
+        NO_HOST_FILE_NAME, \
+        PI_DOM2_ADDR2 + (sramOffset), \
+        PI_DOM2_ADDR2 + (sramOffset) + sizeof(SaveData)}
 
 void PlaceImportedCharacters(void);
 
 /* A cell of the character grid */
 typedef struct GridCell {
-  /* 0x0 */ s16 column;
-  /* 0x2 */ s16 row;
+    /* 0x0 */ s16 column;
+    /* 0x2 */ s16 row;
 } GridCell; /* size = 0x4 */
 
-s32 ReadSaveCopies(SaveData* save, u8 isInSram);
-s32 WriteSaveCopies(SaveData* save, u8 isInSram);
+s32 ReadSaveCopies(SaveData *save, u8 isInSram);
+s32 WriteSaveCopies(SaveData *save, u8 isInSram);
 
 s8 g_LoadedMenuScreen = NO_MENU_SCREEN;
-s8 g_PlayerControllerIndices[MAX_PLAYER_COUNT] = {UNCHOSEN_CONTROLLER,
-    UNCHOSEN_CONTROLLER, UNCHOSEN_CONTROLLER, UNCHOSEN_CONTROLLER};
-s8 g_ChoosingControllerIndices[MAX_PLAYER_COUNT] = {UNCHOSEN_CONTROLLER,
-    UNCHOSEN_CONTROLLER, UNCHOSEN_CONTROLLER, UNCHOSEN_CONTROLLER};
+s8 g_PlayerControllerIndices[MAX_PLAYER_COUNT] =
+    {UNCHOSEN_CONTROLLER, UNCHOSEN_CONTROLLER, UNCHOSEN_CONTROLLER, UNCHOSEN_CONTROLLER};
+s8 g_ChoosingControllerIndices[MAX_PLAYER_COUNT] =
+    {UNCHOSEN_CONTROLLER, UNCHOSEN_CONTROLLER, UNCHOSEN_CONTROLLER, UNCHOSEN_CONTROLLER};
 u8 g_SoundOptionBits = 0;
 s32 g_MenuRepeatButtons = 0;
 s32 g_MenuPressedButtons = 0;
 /* Read by no routine */
 static s32 f_UnusedWordAfterPressedButtons UNUSED = 0;
-s16 g_ImportedCharacterColumns[MAX_PLAYER_COUNT] = {NO_IMPORTED_COLUMN,
-    NO_IMPORTED_COLUMN, NO_IMPORTED_COLUMN, NO_IMPORTED_COLUMN};
+s16 g_ImportedCharacterColumns[MAX_PLAYER_COUNT] =
+    {NO_IMPORTED_COLUMN, NO_IMPORTED_COLUMN, NO_IMPORTED_COLUMN, NO_IMPORTED_COLUMN};
 /* The menus' label images, of which LoadMenuResources reads the first two */
-static AssetId f_MenuLabelAssets[] = {0x0523, 0x0524, 0x0525, 0x0526, 0x0527,
-    0x0528, 0x0529, 0x052A, 0x052B, 0x052C};
-AssetId g_MenuScreenImageAssets[MENU_SCREEN_COUNT] = {0x050E, 0x050F, 0x0510,
-    0x06F9, 0x0512, 0x0513, 0x0514, 0x0708, 0x0516, 0x0517, 0x0518, 0x0519,
-    0x051A, 0x06FB, 0x051C, 0x06E9, 0x06FA, 0x070A, 0x050E, 0x050E, 0x0670,
-    0x050E, 0x066F, 0x0513, 0x050F, 0x070A, 0x0513, 0x0940, 0x0510};
-AssetId g_CourseIconAssets[] = {
-    0x05F8, 0x05F9, 0x05FA, 0x05FC, 0x05FB, 0x05FD, 0x05FE};
-AssetId g_TournamentIconAssets[] = {0x05F8, 0x05F9, 0x05FA, 0x05FC, 0x05FB,
-    0x05FD, 0x094F, 0x0950, 0x0951, 0x0952, 0x0953, 0x0954};
-AssetId g_MiniGolfCourseIconAssets[] = {
-    0x0855, 0x085A, 0x085F, 0x0864, 0x0869, 0x086E};
-AssetId g_MiniGolfDiscFrameAssets[MINI_GOLF_COURSES_PER_RECORD *
-    MINI_GOLF_DISC_IMAGE_COUNT][MINI_GOLF_TURN_FRAME_COUNT] = {
-    {0x0853, 0x0854, 0x0855, 0x0856, 0x0857},
-    {0x0862, 0x0863, 0x0864, 0x0865, 0x0866},
-    {0x0858, 0x0859, 0x085A, 0x085B, 0x085C},
-    {0x0867, 0x0868, 0x0869, 0x086A, 0x086B},
-    {0x085D, 0x085E, 0x085F, 0x0860, 0x0861},
-    {0x086C, 0x086D, 0x086E, 0x086F, 0x0870}};
+static AssetId f_MenuLabelAssets[] =
+    {0x0523, 0x0524, 0x0525, 0x0526, 0x0527, 0x0528, 0x0529, 0x052A, 0x052B, 0x052C};
+AssetId g_MenuScreenImageAssets[MENU_SCREEN_COUNT] = {
+    0x050E,
+    0x050F,
+    0x0510,
+    0x06F9,
+    0x0512,
+    0x0513,
+    0x0514,
+    0x0708,
+    0x0516,
+    0x0517,
+    0x0518,
+    0x0519,
+    0x051A,
+    0x06FB,
+    0x051C,
+    0x06E9,
+    0x06FA,
+    0x070A,
+    0x050E,
+    0x050E,
+    0x0670,
+    0x050E,
+    0x066F,
+    0x0513,
+    0x050F,
+    0x070A,
+    0x0513,
+    0x0940,
+    0x0510
+};
+AssetId g_CourseIconAssets[] = {0x05F8, 0x05F9, 0x05FA, 0x05FC, 0x05FB, 0x05FD, 0x05FE};
+AssetId g_TournamentIconAssets[] = {
+    0x05F8,
+    0x05F9,
+    0x05FA,
+    0x05FC,
+    0x05FB,
+    0x05FD,
+    0x094F,
+    0x0950,
+    0x0951,
+    0x0952,
+    0x0953,
+    0x0954
+};
+AssetId g_MiniGolfCourseIconAssets[] = {0x0855, 0x085A, 0x085F, 0x0864, 0x0869, 0x086E};
+AssetId g_MiniGolfDiscFrameAssets[MINI_GOLF_COURSES_PER_RECORD * MINI_GOLF_DISC_IMAGE_COUNT]
+                                 [MINI_GOLF_TURN_FRAME_COUNT] = {
+                                     {0x0853, 0x0854, 0x0855, 0x0856, 0x0857},
+                                     {0x0862, 0x0863, 0x0864, 0x0865, 0x0866},
+                                     {0x0858, 0x0859, 0x085A, 0x085B, 0x085C},
+                                     {0x0867, 0x0868, 0x0869, 0x086A, 0x086B},
+                                     {0x085D, 0x085E, 0x085F, 0x0860, 0x0861},
+                                     {0x086C, 0x086D, 0x086E, 0x086F, 0x0870}
+};
 s16 g_MiniGolfDiscFiles[] = {0x0876, 0x0876, 0x0876, 0x0876, 0x0876, 0x0876};
-TrophySize g_TrophySizes[COURSE_COUNT] = {
-    {40, 48}, {40, 51}, {40, 51}, {32, 64}, {48, 42}, {36, 51}};
+TrophySize g_TrophySizes[COURSE_COUNT] =
+    {{40, 48}, {40, 51}, {40, 51}, {32, 64}, {48, 42}, {36, 51}};
 /* Read by no routine */
 static u8 f_UnusedBytesAfterTrophySizes[12] UNUSED = {0};
 AssetId g_PlayerCountIconAssets[][PLAYER_COUNT_ASSET_ROW_LENGTH] = {
-    {0x0623, 0x0629, 0x05B7, 0x05AF, 0x0599, 0x06FC, 0x05DD, 0x0000, 0x0000,
-        0x0000, 0x0000, 0x0000},
-    {0x0599, 0x0631, 0x065E, 0x0665, 0x06FC, 0x06FC, 0x06FC, 0x0000, 0x0000,
-        0x0000, 0x0000, 0x0000},
-    {0x0599, 0x065E, 0x0665, 0x06FC, 0x06FC, 0x06FC, 0x06FC, 0x0000, 0x0000,
-        0x0000, 0x0000, 0x0000},
-    {0x0599, 0x065E, 0x0665, 0x06FC, 0x06FC, 0x06FC, 0x06FC, 0x0000, 0x0000,
-        0x0000, 0x0000, 0x0000},
-    {0x0599, 0x05B7, 0x05AF, 0x06FC, 0x06FC, 0x06FC, 0x06FC, 0x0000, 0x0000,
-        0x0000, 0x0000, 0x0000},
-    {0x0599, 0x0631, 0x065E, 0x0665, 0x06FC, 0x06FC, 0x06FC, 0x0000, 0x0000,
-        0x0000, 0x0000, 0x0000},
-    {0x0599, 0x065E, 0x0665, 0x06FC, 0x06FC, 0x06FC, 0x06FC, 0x0000, 0x0000,
-        0x0000, 0x0000, 0x0000},
-    {0x0599, 0x065E, 0x0665, 0x06FC, 0x06FC, 0x06FC, 0x06FC, 0x0000, 0x0000,
-        0x0000, 0x0000, 0x0000}};
+    {0x0623,
+        0x0629,
+        0x05B7,
+        0x05AF,
+        0x0599,
+        0x06FC,
+        0x05DD,
+        0x0000,
+        0x0000,
+        0x0000,
+        0x0000,
+        0x0000},
+    {0x0599,
+        0x0631,
+        0x065E,
+        0x0665,
+        0x06FC,
+        0x06FC,
+        0x06FC,
+        0x0000,
+        0x0000,
+        0x0000,
+        0x0000,
+        0x0000},
+    {0x0599,
+        0x065E,
+        0x0665,
+        0x06FC,
+        0x06FC,
+        0x06FC,
+        0x06FC,
+        0x0000,
+        0x0000,
+        0x0000,
+        0x0000,
+        0x0000},
+    {0x0599,
+        0x065E,
+        0x0665,
+        0x06FC,
+        0x06FC,
+        0x06FC,
+        0x06FC,
+        0x0000,
+        0x0000,
+        0x0000,
+        0x0000,
+        0x0000},
+    {0x0599,
+        0x05B7,
+        0x05AF,
+        0x06FC,
+        0x06FC,
+        0x06FC,
+        0x06FC,
+        0x0000,
+        0x0000,
+        0x0000,
+        0x0000,
+        0x0000},
+    {0x0599,
+        0x0631,
+        0x065E,
+        0x0665,
+        0x06FC,
+        0x06FC,
+        0x06FC,
+        0x0000,
+        0x0000,
+        0x0000,
+        0x0000,
+        0x0000},
+    {0x0599,
+        0x065E,
+        0x0665,
+        0x06FC,
+        0x06FC,
+        0x06FC,
+        0x06FC,
+        0x0000,
+        0x0000,
+        0x0000,
+        0x0000,
+        0x0000},
+    {0x0599, 0x065E, 0x0665, 0x06FC, 0x06FC, 0x06FC, 0x06FC, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000}
+};
 AssetId g_TrophyFrameAssets[][TROPHY_FRAME_LIMIT] = {
-    {0x088D, 0x088E, 0x088F, 0x0890, 0x0891, 0x0892, 0x0893, 0x0894, 0x0895,
-        0x0896, 0x0897, 0x0898, 0x0899, 0x089A, 0x089B, 0x089C},
-    {0x08B2, 0x08B3, 0x08B4, 0x08B5, 0x08B6, 0x08B7, 0x08B8, 0x08B9, 0x08BA,
-        0x08BB, 0x08BC, 0x08BD, 0x08BE, 0x08BF, 0x08C0, 0x08C1},
-    {0x087A, 0x087B, 0x087C, 0x087D, 0x087E, 0x087F, 0x0880, 0x0881, 0x0882,
-        0x0883, 0x0884, 0x0885, 0x0886, 0x0887, 0x0888, 0x0889},
-    {0x08D8, 0x08D9, 0x08DA, 0x08DB, 0x08DC, 0x08DD, 0x08DE, 0x08DF, 0x08E0,
-        0x08E1, 0x08E2, 0x08E3, 0x08E4, 0x08E5, 0x08E6, 0x08E7},
-    {0x08C5, 0x08C6, 0x08C7, 0x08C8, 0x08C9, 0x08CA, 0x08CB, 0x08CC, 0x08CD,
-        0x08CE, 0x08CF, 0x08D0, 0x08D1, 0x08D2, 0x08D3, 0x08D4},
-    {0x08AE, 0x08AD, 0x08AC, 0x08AB, 0x08AA, 0x08A9, 0x08A8, 0x08A7, 0x08A6,
-        0x08A5, 0x08A4, 0x08A3, 0x08A2, 0x08A1, 0x08A0, TROPHY_FRAME_END}};
-s16 g_TrophyPaletteFiles[][TROPHY_PALETTE_COUNT] = {{0x088C, 0x088B, 0x088A},
-    {0x08B1, 0x08B0, 0x08AF}, {0x0879, 0x0878, 0x0877},
-    {0x08D7, 0x08D6, 0x08D5}, {0x08C4, 0x08C3, 0x08C2},
-    {0x089F, 0x089E, 0x089D}};
+    {0x088D,
+        0x088E,
+        0x088F,
+        0x0890,
+        0x0891,
+        0x0892,
+        0x0893,
+        0x0894,
+        0x0895,
+        0x0896,
+        0x0897,
+        0x0898,
+        0x0899,
+        0x089A,
+        0x089B,
+        0x089C},
+    {0x08B2,
+        0x08B3,
+        0x08B4,
+        0x08B5,
+        0x08B6,
+        0x08B7,
+        0x08B8,
+        0x08B9,
+        0x08BA,
+        0x08BB,
+        0x08BC,
+        0x08BD,
+        0x08BE,
+        0x08BF,
+        0x08C0,
+        0x08C1},
+    {0x087A,
+        0x087B,
+        0x087C,
+        0x087D,
+        0x087E,
+        0x087F,
+        0x0880,
+        0x0881,
+        0x0882,
+        0x0883,
+        0x0884,
+        0x0885,
+        0x0886,
+        0x0887,
+        0x0888,
+        0x0889},
+    {0x08D8,
+        0x08D9,
+        0x08DA,
+        0x08DB,
+        0x08DC,
+        0x08DD,
+        0x08DE,
+        0x08DF,
+        0x08E0,
+        0x08E1,
+        0x08E2,
+        0x08E3,
+        0x08E4,
+        0x08E5,
+        0x08E6,
+        0x08E7},
+    {0x08C5,
+        0x08C6,
+        0x08C7,
+        0x08C8,
+        0x08C9,
+        0x08CA,
+        0x08CB,
+        0x08CC,
+        0x08CD,
+        0x08CE,
+        0x08CF,
+        0x08D0,
+        0x08D1,
+        0x08D2,
+        0x08D3,
+        0x08D4},
+    {0x08AE,
+        0x08AD,
+        0x08AC,
+        0x08AB,
+        0x08AA,
+        0x08A9,
+        0x08A8,
+        0x08A7,
+        0x08A6,
+        0x08A5,
+        0x08A4,
+        0x08A3,
+        0x08A2,
+        0x08A1,
+        0x08A0,
+        TROPHY_FRAME_END}
+};
+s16 g_TrophyPaletteFiles[][TROPHY_PALETTE_COUNT] = {
+    {0x088C, 0x088B, 0x088A},
+    {0x08B1, 0x08B0, 0x08AF},
+    {0x0879, 0x0878, 0x0877},
+    {0x08D7, 0x08D6, 0x08D5},
+    {0x08C4, 0x08C3, 0x08C2},
+    {0x089F, 0x089E, 0x089D}
+};
 s16 g_ModeIconAnimations[MODE_ICON_ANIMATION_COUNT][MODE_ICON_FRAME_COUNT] = {
-    {0x0623, 0x0624, 0x0625, 0x0626, 0x0627, 0x0628, END_OF_ICON_FRAMES,
-        END_OF_ICON_FRAMES, END_OF_ICON_FRAMES, END_OF_ICON_FRAMES,
-        END_OF_ICON_FRAMES, END_OF_ICON_FRAMES, END_OF_ICON_FRAMES,
-        END_OF_ICON_FRAMES, END_OF_ICON_FRAMES, END_OF_ICON_FRAMES,
-        END_OF_ICON_FRAMES, END_OF_ICON_FRAMES, END_OF_ICON_FRAMES,
-        END_OF_ICON_FRAMES, END_OF_ICON_FRAMES, END_OF_ICON_FRAMES,
-        END_OF_ICON_FRAMES, END_OF_ICON_FRAMES, END_OF_ICON_FRAMES,
-        END_OF_ICON_FRAMES, END_OF_ICON_FRAMES},
-    {0x0629, 0x062A, 0x062B, 0x062C, 0x062D, 0x062E, 0x062F, 0x0630,
-        END_OF_ICON_FRAMES, END_OF_ICON_FRAMES, END_OF_ICON_FRAMES,
-        END_OF_ICON_FRAMES, END_OF_ICON_FRAMES, END_OF_ICON_FRAMES,
-        END_OF_ICON_FRAMES, END_OF_ICON_FRAMES, END_OF_ICON_FRAMES,
-        END_OF_ICON_FRAMES, END_OF_ICON_FRAMES, END_OF_ICON_FRAMES,
-        END_OF_ICON_FRAMES, END_OF_ICON_FRAMES, END_OF_ICON_FRAMES,
-        END_OF_ICON_FRAMES, END_OF_ICON_FRAMES, END_OF_ICON_FRAMES,
+    {0x0623,
+        0x0624,
+        0x0625,
+        0x0626,
+        0x0627,
+        0x0628,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
         END_OF_ICON_FRAMES},
-    {0x0598, 0x0599, 0x059A, 0x059B, 0x059C, 0x059D, END_OF_ICON_FRAMES,
-        END_OF_ICON_FRAMES, END_OF_ICON_FRAMES, END_OF_ICON_FRAMES,
-        END_OF_ICON_FRAMES, END_OF_ICON_FRAMES, END_OF_ICON_FRAMES,
-        END_OF_ICON_FRAMES, END_OF_ICON_FRAMES, END_OF_ICON_FRAMES,
-        END_OF_ICON_FRAMES, END_OF_ICON_FRAMES, END_OF_ICON_FRAMES,
-        END_OF_ICON_FRAMES, END_OF_ICON_FRAMES, END_OF_ICON_FRAMES,
-        END_OF_ICON_FRAMES, END_OF_ICON_FRAMES, END_OF_ICON_FRAMES,
-        END_OF_ICON_FRAMES, END_OF_ICON_FRAMES},
-    {0x05AF, 0x05B0, 0x05B1, 0x05B2, 0x05B3, 0x05B4, 0x05B5, 0x05B6,
-        END_OF_ICON_FRAMES, END_OF_ICON_FRAMES, END_OF_ICON_FRAMES,
-        END_OF_ICON_FRAMES, END_OF_ICON_FRAMES, END_OF_ICON_FRAMES,
-        END_OF_ICON_FRAMES, END_OF_ICON_FRAMES, END_OF_ICON_FRAMES,
-        END_OF_ICON_FRAMES, END_OF_ICON_FRAMES, END_OF_ICON_FRAMES,
-        END_OF_ICON_FRAMES, END_OF_ICON_FRAMES, END_OF_ICON_FRAMES,
-        END_OF_ICON_FRAMES, END_OF_ICON_FRAMES, END_OF_ICON_FRAMES,
+    {0x0629,
+        0x062A,
+        0x062B,
+        0x062C,
+        0x062D,
+        0x062E,
+        0x062F,
+        0x0630,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
         END_OF_ICON_FRAMES},
-    {0x05DD, 0x05DE, 0x05DF, 0x05E0, 0x05E1, 0x05E2, END_OF_ICON_FRAMES,
-        END_OF_ICON_FRAMES, END_OF_ICON_FRAMES, END_OF_ICON_FRAMES,
-        END_OF_ICON_FRAMES, END_OF_ICON_FRAMES, END_OF_ICON_FRAMES,
-        END_OF_ICON_FRAMES, END_OF_ICON_FRAMES, END_OF_ICON_FRAMES,
-        END_OF_ICON_FRAMES, END_OF_ICON_FRAMES, END_OF_ICON_FRAMES,
-        END_OF_ICON_FRAMES, END_OF_ICON_FRAMES, END_OF_ICON_FRAMES,
-        END_OF_ICON_FRAMES, END_OF_ICON_FRAMES, END_OF_ICON_FRAMES,
-        END_OF_ICON_FRAMES, END_OF_ICON_FRAMES},
-    {0x06FC, 0x06FD, 0x06FE, 0x06FF, 0x0700, 0x0701, 0x0700, 0x06FF, 0x06FE,
-        0x06FD, END_OF_ICON_FRAMES, END_OF_ICON_FRAMES, END_OF_ICON_FRAMES,
-        END_OF_ICON_FRAMES, END_OF_ICON_FRAMES, END_OF_ICON_FRAMES,
-        END_OF_ICON_FRAMES, END_OF_ICON_FRAMES, END_OF_ICON_FRAMES,
-        END_OF_ICON_FRAMES, END_OF_ICON_FRAMES, END_OF_ICON_FRAMES,
-        END_OF_ICON_FRAMES, END_OF_ICON_FRAMES, END_OF_ICON_FRAMES,
-        END_OF_ICON_FRAMES, END_OF_ICON_FRAMES},
-    {0x0631, 0x0632, 0x0633, 0x0634, 0x0635, 0x0636, 0x0637, 0x0638,
-        END_OF_ICON_FRAMES, END_OF_ICON_FRAMES, END_OF_ICON_FRAMES,
-        END_OF_ICON_FRAMES, END_OF_ICON_FRAMES, END_OF_ICON_FRAMES,
-        END_OF_ICON_FRAMES, END_OF_ICON_FRAMES, END_OF_ICON_FRAMES,
-        END_OF_ICON_FRAMES, END_OF_ICON_FRAMES, END_OF_ICON_FRAMES,
-        END_OF_ICON_FRAMES, END_OF_ICON_FRAMES, END_OF_ICON_FRAMES,
-        END_OF_ICON_FRAMES, END_OF_ICON_FRAMES, END_OF_ICON_FRAMES,
+    {0x0598,
+        0x0599,
+        0x059A,
+        0x059B,
+        0x059C,
+        0x059D,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
         END_OF_ICON_FRAMES},
-    {0x065E, 0x065F, 0x0660, 0x065F, 0x065E, 0x0661, 0x0662, 0x0661,
-        END_OF_ICON_FRAMES, END_OF_ICON_FRAMES, END_OF_ICON_FRAMES,
-        END_OF_ICON_FRAMES, END_OF_ICON_FRAMES, END_OF_ICON_FRAMES,
-        END_OF_ICON_FRAMES, END_OF_ICON_FRAMES, END_OF_ICON_FRAMES,
-        END_OF_ICON_FRAMES, END_OF_ICON_FRAMES, END_OF_ICON_FRAMES,
-        END_OF_ICON_FRAMES, END_OF_ICON_FRAMES, END_OF_ICON_FRAMES,
-        END_OF_ICON_FRAMES, END_OF_ICON_FRAMES, END_OF_ICON_FRAMES,
+    {0x05AF,
+        0x05B0,
+        0x05B1,
+        0x05B2,
+        0x05B3,
+        0x05B4,
+        0x05B5,
+        0x05B6,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
         END_OF_ICON_FRAMES},
-    {0x05B7, 0x05B8, 0x05B9, 0x05BA, 0x05BB, 0x05BC, END_OF_ICON_FRAMES,
-        END_OF_ICON_FRAMES, END_OF_ICON_FRAMES, END_OF_ICON_FRAMES,
-        END_OF_ICON_FRAMES, END_OF_ICON_FRAMES, END_OF_ICON_FRAMES,
-        END_OF_ICON_FRAMES, END_OF_ICON_FRAMES, END_OF_ICON_FRAMES,
-        END_OF_ICON_FRAMES, END_OF_ICON_FRAMES, END_OF_ICON_FRAMES,
-        END_OF_ICON_FRAMES, END_OF_ICON_FRAMES, END_OF_ICON_FRAMES,
-        END_OF_ICON_FRAMES, END_OF_ICON_FRAMES, END_OF_ICON_FRAMES,
-        END_OF_ICON_FRAMES, END_OF_ICON_FRAMES},
-    {0x05A2, 0x05A1, 0x05A0, 0x059F, 0x05A0, 0x05A1, 0x05A2, 0x05A1, 0x05A0,
-        0x059F, 0x05A0, 0x05A1, 0x05A2, 0x05F6, 0x05F5, 0x05F4, 0x05A3, 0x05F4,
-        0x05F5, 0x05F6, 0x05F5, 0x05F4, 0x05A3, 0x05F4, 0x05F5, 0x05F6,
+    {0x05DD,
+        0x05DE,
+        0x05DF,
+        0x05E0,
+        0x05E1,
+        0x05E2,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
         END_OF_ICON_FRAMES},
-    {0x0665, 0x0666, 0x0667, 0x0668, 0x0669, 0x066A, 0x066B, 0x066C, 0x066D,
-        END_OF_ICON_FRAMES, END_OF_ICON_FRAMES, END_OF_ICON_FRAMES,
-        END_OF_ICON_FRAMES, END_OF_ICON_FRAMES, END_OF_ICON_FRAMES,
-        END_OF_ICON_FRAMES, END_OF_ICON_FRAMES, END_OF_ICON_FRAMES,
-        END_OF_ICON_FRAMES, END_OF_ICON_FRAMES, END_OF_ICON_FRAMES,
-        END_OF_ICON_FRAMES, END_OF_ICON_FRAMES, END_OF_ICON_FRAMES,
-        END_OF_ICON_FRAMES, END_OF_ICON_FRAMES, END_OF_ICON_FRAMES},
-    {0x0598, 0x0599, 0x059A, 0x059B, 0x059C, 0x059D, END_OF_ICON_FRAMES,
-        END_OF_ICON_FRAMES, END_OF_ICON_FRAMES, END_OF_ICON_FRAMES,
-        END_OF_ICON_FRAMES, END_OF_ICON_FRAMES, END_OF_ICON_FRAMES,
-        END_OF_ICON_FRAMES, END_OF_ICON_FRAMES, END_OF_ICON_FRAMES,
-        END_OF_ICON_FRAMES, END_OF_ICON_FRAMES, END_OF_ICON_FRAMES,
-        END_OF_ICON_FRAMES, END_OF_ICON_FRAMES, END_OF_ICON_FRAMES,
-        END_OF_ICON_FRAMES, END_OF_ICON_FRAMES, END_OF_ICON_FRAMES,
-        END_OF_ICON_FRAMES, END_OF_ICON_FRAMES},
-    {0x0598, 0x0599, 0x059A, 0x059B, 0x059C, 0x059D, END_OF_ICON_FRAMES,
-        END_OF_ICON_FRAMES, END_OF_ICON_FRAMES, END_OF_ICON_FRAMES,
-        END_OF_ICON_FRAMES, END_OF_ICON_FRAMES, END_OF_ICON_FRAMES,
-        END_OF_ICON_FRAMES, END_OF_ICON_FRAMES, END_OF_ICON_FRAMES,
-        END_OF_ICON_FRAMES, END_OF_ICON_FRAMES, END_OF_ICON_FRAMES,
-        END_OF_ICON_FRAMES, END_OF_ICON_FRAMES, END_OF_ICON_FRAMES,
-        END_OF_ICON_FRAMES, END_OF_ICON_FRAMES, END_OF_ICON_FRAMES,
-        END_OF_ICON_FRAMES, END_OF_ICON_FRAMES},
-    {0x06FC, 0x06FD, 0x06FE, 0x06FF, 0x0700, 0x0701, 0x0700, 0x06FF, 0x06FE,
-        0x06FD, END_OF_ICON_FRAMES, END_OF_ICON_FRAMES, END_OF_ICON_FRAMES,
-        END_OF_ICON_FRAMES, END_OF_ICON_FRAMES, END_OF_ICON_FRAMES,
-        END_OF_ICON_FRAMES, END_OF_ICON_FRAMES, END_OF_ICON_FRAMES,
-        END_OF_ICON_FRAMES, END_OF_ICON_FRAMES, END_OF_ICON_FRAMES,
-        END_OF_ICON_FRAMES, END_OF_ICON_FRAMES, END_OF_ICON_FRAMES,
-        END_OF_ICON_FRAMES, END_OF_ICON_FRAMES}};
+    {0x06FC,
+        0x06FD,
+        0x06FE,
+        0x06FF,
+        0x0700,
+        0x0701,
+        0x0700,
+        0x06FF,
+        0x06FE,
+        0x06FD,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES},
+    {0x0631,
+        0x0632,
+        0x0633,
+        0x0634,
+        0x0635,
+        0x0636,
+        0x0637,
+        0x0638,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES},
+    {0x065E,
+        0x065F,
+        0x0660,
+        0x065F,
+        0x065E,
+        0x0661,
+        0x0662,
+        0x0661,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES},
+    {0x05B7,
+        0x05B8,
+        0x05B9,
+        0x05BA,
+        0x05BB,
+        0x05BC,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES},
+    {0x05A2,
+        0x05A1,
+        0x05A0,
+        0x059F,
+        0x05A0,
+        0x05A1,
+        0x05A2,
+        0x05A1,
+        0x05A0,
+        0x059F,
+        0x05A0,
+        0x05A1,
+        0x05A2,
+        0x05F6,
+        0x05F5,
+        0x05F4,
+        0x05A3,
+        0x05F4,
+        0x05F5,
+        0x05F6,
+        0x05F5,
+        0x05F4,
+        0x05A3,
+        0x05F4,
+        0x05F5,
+        0x05F6,
+        END_OF_ICON_FRAMES},
+    {0x0665,
+        0x0666,
+        0x0667,
+        0x0668,
+        0x0669,
+        0x066A,
+        0x066B,
+        0x066C,
+        0x066D,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES},
+    {0x0598,
+        0x0599,
+        0x059A,
+        0x059B,
+        0x059C,
+        0x059D,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES},
+    {0x0598,
+        0x0599,
+        0x059A,
+        0x059B,
+        0x059C,
+        0x059D,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES},
+    {0x06FC,
+        0x06FD,
+        0x06FE,
+        0x06FF,
+        0x0700,
+        0x0701,
+        0x0700,
+        0x06FF,
+        0x06FE,
+        0x06FD,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES,
+        END_OF_ICON_FRAMES}
+};
 s16 g_CharacterFacePaletteFiles[][CHARACTER_PALETTE_COUNT] = {
-    {0x07B8, 0x07B9, 0x07BA, 0x07BB}, {0x0748, 0x0749, 0x074A, 0x074B},
-    {0x07AA, 0x07AB, 0x07AC, 0x07AD}, {0x073A, 0x073B, 0x073C, 0x073D},
-    {0x0780, 0x0781, 0x0782, 0x0783}, {0x07E2, 0x07E3, 0x07E4, 0x07E5},
-    {0x07C6, 0x07C7, 0x07C8, 0x07C9}, {0x07D4, 0x07D5, 0x07D6, 0x07D7},
-    {0x0764, 0x0765, 0x0766, 0x0767}, {0x078E, 0x078F, 0x0790, 0x0791},
-    {0x079C, 0x079D, 0x079E, 0x079F}, {0x0756, 0x0757, 0x0758, 0x0759},
-    {0x0772, 0x0773, 0x0774, 0x0775}, {0x0980, 0x0981, 0x0982, 0x0983},
-    {0x07F0, 0x07F1, 0x07F2, 0x07F3}, {0x07FE, 0x07FF, 0x0800, 0x0801},
-    {0x080C, 0x080D, 0x080E, 0x080F}, {0x081A, 0x081B, 0x081C, 0x081D},
-    {0x078E, 0x078E, 0x078E, 0x078E}, {0x078E, 0x078E, 0x078E, 0x078E},
-    {0x078E, 0x078E, 0x078E, 0x078E}, {0x078E, 0x078E, 0x078E, 0x078E},
-    {0x078E, 0x078E, 0x078E, 0x078E}, {0x078E, 0x078E, 0x078E, 0x078E}};
+    {0x07B8, 0x07B9, 0x07BA, 0x07BB},
+    {0x0748, 0x0749, 0x074A, 0x074B},
+    {0x07AA, 0x07AB, 0x07AC, 0x07AD},
+    {0x073A, 0x073B, 0x073C, 0x073D},
+    {0x0780, 0x0781, 0x0782, 0x0783},
+    {0x07E2, 0x07E3, 0x07E4, 0x07E5},
+    {0x07C6, 0x07C7, 0x07C8, 0x07C9},
+    {0x07D4, 0x07D5, 0x07D6, 0x07D7},
+    {0x0764, 0x0765, 0x0766, 0x0767},
+    {0x078E, 0x078F, 0x0790, 0x0791},
+    {0x079C, 0x079D, 0x079E, 0x079F},
+    {0x0756, 0x0757, 0x0758, 0x0759},
+    {0x0772, 0x0773, 0x0774, 0x0775},
+    {0x0980, 0x0981, 0x0982, 0x0983},
+    {0x07F0, 0x07F1, 0x07F2, 0x07F3},
+    {0x07FE, 0x07FF, 0x0800, 0x0801},
+    {0x080C, 0x080D, 0x080E, 0x080F},
+    {0x081A, 0x081B, 0x081C, 0x081D},
+    {0x078E, 0x078E, 0x078E, 0x078E},
+    {0x078E, 0x078E, 0x078E, 0x078E},
+    {0x078E, 0x078E, 0x078E, 0x078E},
+    {0x078E, 0x078E, 0x078E, 0x078E},
+    {0x078E, 0x078E, 0x078E, 0x078E},
+    {0x078E, 0x078E, 0x078E, 0x078E}
+};
 AssetId g_FaceAnimationAssets[][FACE_ANIMATION_FRAME_COUNT] = {
     {0x07BC, 0x07BD, 0x07BE, 0x07BF, 0x07C0, 0x07BF, 0x07BE, 0x07BD},
     {0x074C, 0x074D, 0x074E, 0x074F, 0x0750, 0x074F, 0x074E, 0x074D},
@@ -375,7 +860,8 @@ AssetId g_FaceAnimationAssets[][FACE_ANIMATION_FRAME_COUNT] = {
     {0x0802, 0x0803, 0x0804, 0x0805, 0x0806, 0x0805, 0x0804, 0x0803},
     {0x0810, 0x0811, 0x0812, 0x0813, 0x0814, 0x0813, 0x0812, 0x0811},
     {0x081E, 0x081F, 0x0820, 0x0821, 0x0822, 0x0821, 0x0820, 0x081F},
-    {0x0792, 0x0793, 0x0794, 0x0795, 0x0796, 0x0795, 0x0794, 0x0793}};
+    {0x0792, 0x0793, 0x0794, 0x0795, 0x0796, 0x0795, 0x0794, 0x0793}
+};
 AssetId g_AlternateFaceAnimationAssets[][FACE_ANIMATION_FRAME_COUNT] = {
     {0x07BC, 0x07C1, 0x07C2, 0x07C3, 0x07C4, 0x07C3, 0x07C2, 0x07C1},
     {0x074C, 0x0751, 0x0752, 0x0753, 0x0754, 0x0753, 0x0752, 0x0751},
@@ -395,99 +881,235 @@ AssetId g_AlternateFaceAnimationAssets[][FACE_ANIMATION_FRAME_COUNT] = {
     {0x0802, 0x0807, 0x0808, 0x0809, 0x080A, 0x0809, 0x0808, 0x0807},
     {0x0810, 0x0815, 0x0816, 0x0817, 0x0818, 0x0817, 0x0816, 0x0815},
     {0x081E, 0x0823, 0x0824, 0x0825, 0x0826, 0x0825, 0x0824, 0x0823},
-    {0x0792, 0x0797, 0x0798, 0x0799, 0x079A, 0x0799, 0x0798, 0x0797}};
-static AssetId f_ToadImageAssets[] = {0x0710, 0x0711, 0x0712, 0x0713, 0x0714,
-    0x0715, 0x0716, 0x0717, 0x0718, 0x0719, 0x071A, 0x071B, 0x071C};
+    {0x0792, 0x0797, 0x0798, 0x0799, 0x079A, 0x0799, 0x0798, 0x0797}
+};
+static AssetId f_ToadImageAssets[] = {
+    0x0710,
+    0x0711,
+    0x0712,
+    0x0713,
+    0x0714,
+    0x0715,
+    0x0716,
+    0x0717,
+    0x0718,
+    0x0719,
+    0x071A,
+    0x071B,
+    0x071C
+};
 /* Read by no routine */
-static s32 f_UnusedToadAssetIds[] UNUSED = {
-    0x00000710, 0x00000711, 0x00000712, 0x00000713, 0x00000714, 0x00000715};
+static s32 f_UnusedToadAssetIds[] UNUSED =
+    {0x00000710, 0x00000711, 0x00000712, 0x00000713, 0x00000714, 0x00000715};
 s16 g_CharacterGrid[CHARACTER_GRID_ROW_COUNT][CHARACTER_GRID_COLUMN_COUNT] = {
-    {CHARACTER_CHOICE_PLUM, CHARACTER_CHOICE_PEACH, EMPTY_GRID_SLOT,
-        EMPTY_GRID_SLOT, EMPTY_GRID_SLOT, EMPTY_GRID_SLOT, EMPTY_GRID_SLOT},
-    {CHARACTER_CHOICE_CHARLIE, CHARACTER_CHOICE_BABY_MARIO, EMPTY_GRID_SLOT,
-        EMPTY_GRID_SLOT, EMPTY_GRID_SLOT, EMPTY_GRID_SLOT, EMPTY_GRID_SLOT},
-    {EMPTY_GRID_SLOT, EMPTY_GRID_SLOT, EMPTY_GRID_SLOT, EMPTY_GRID_SLOT,
-        EMPTY_GRID_SLOT, EMPTY_GRID_SLOT, EMPTY_GRID_SLOT}};
-static s16 f_EveryCharacterGrid
-    [CHARACTER_GRID_ROW_COUNT][CHARACTER_GRID_COLUMN_COUNT] = {
-        {CHARACTER_CHOICE_PLUM, CHARACTER_CHOICE_PEACH, CHARACTER_CHOICE_LUIGI,
-            CHARACTER_CHOICE_SONNY, CHARACTER_CHOICE_HARRY,
-            CHARACTER_CHOICE_MAPLE, CHARACTER_CHOICE_BOWSER},
-        {CHARACTER_CHOICE_CHARLIE, CHARACTER_CHOICE_BABY_MARIO,
-            CHARACTER_CHOICE_YOSHI, CHARACTER_CHOICE_WARIO,
-            CHARACTER_CHOICE_MARIO, CHARACTER_CHOICE_DONKEY_KONG,
-            CHARACTER_CHOICE_METAL_MARIO},
-        {CHARACTER_CHOICE_KID, CHARACTER_CHOICE_SHERRY, CHARACTER_CHOICE_AZALEA,
-            CHARACTER_CHOICE_JOE, EMPTY_GRID_SLOT, EMPTY_GRID_SLOT,
-            EMPTY_GRID_SLOT}};
+    {CHARACTER_CHOICE_PLUM,
+        CHARACTER_CHOICE_PEACH,
+        EMPTY_GRID_SLOT,
+        EMPTY_GRID_SLOT,
+        EMPTY_GRID_SLOT,
+        EMPTY_GRID_SLOT,
+        EMPTY_GRID_SLOT},
+    {CHARACTER_CHOICE_CHARLIE,
+        CHARACTER_CHOICE_BABY_MARIO,
+        EMPTY_GRID_SLOT,
+        EMPTY_GRID_SLOT,
+        EMPTY_GRID_SLOT,
+        EMPTY_GRID_SLOT,
+        EMPTY_GRID_SLOT},
+    {EMPTY_GRID_SLOT,
+        EMPTY_GRID_SLOT,
+        EMPTY_GRID_SLOT,
+        EMPTY_GRID_SLOT,
+        EMPTY_GRID_SLOT,
+        EMPTY_GRID_SLOT,
+        EMPTY_GRID_SLOT}
+};
+static s16 f_EveryCharacterGrid[CHARACTER_GRID_ROW_COUNT][CHARACTER_GRID_COLUMN_COUNT] = {
+    {CHARACTER_CHOICE_PLUM,
+        CHARACTER_CHOICE_PEACH,
+        CHARACTER_CHOICE_LUIGI,
+        CHARACTER_CHOICE_SONNY,
+        CHARACTER_CHOICE_HARRY,
+        CHARACTER_CHOICE_MAPLE,
+        CHARACTER_CHOICE_BOWSER},
+    {CHARACTER_CHOICE_CHARLIE,
+        CHARACTER_CHOICE_BABY_MARIO,
+        CHARACTER_CHOICE_YOSHI,
+        CHARACTER_CHOICE_WARIO,
+        CHARACTER_CHOICE_MARIO,
+        CHARACTER_CHOICE_DONKEY_KONG,
+        CHARACTER_CHOICE_METAL_MARIO},
+    {CHARACTER_CHOICE_KID,
+        CHARACTER_CHOICE_SHERRY,
+        CHARACTER_CHOICE_AZALEA,
+        CHARACTER_CHOICE_JOE,
+        EMPTY_GRID_SLOT,
+        EMPTY_GRID_SLOT,
+        EMPTY_GRID_SLOT}
+};
 /* The CharacterId in each slot of f_EveryCharacterGrid */
-static s16 f_RecordGrid[CHARACTER_GRID_ROW_COUNT][CHARACTER_GRID_COLUMN_COUNT] =
-    {{CHARACTER_PLUM, CHARACTER_PEACH, CHARACTER_LUIGI, CHARACTER_SONNY,
-         CHARACTER_HARRY, CHARACTER_MAPLE, CHARACTER_BOWSER},
-        {CHARACTER_CHARLIE, CHARACTER_BABY_MARIO, CHARACTER_YOSHI,
-            CHARACTER_WARIO, CHARACTER_MARIO, CHARACTER_DONKEY_KONG,
-            CHARACTER_METAL_MARIO},
-        {CHARACTER_KID, CHARACTER_SHERRY, CHARACTER_AZALEA, CHARACTER_JOE,
-            EMPTY_GRID_SLOT, EMPTY_GRID_SLOT, EMPTY_GRID_SLOT}};
+static s16 f_RecordGrid[CHARACTER_GRID_ROW_COUNT][CHARACTER_GRID_COLUMN_COUNT] = {
+    {CHARACTER_PLUM,
+        CHARACTER_PEACH,
+        CHARACTER_LUIGI,
+        CHARACTER_SONNY,
+        CHARACTER_HARRY,
+        CHARACTER_MAPLE,
+        CHARACTER_BOWSER},
+    {CHARACTER_CHARLIE,
+        CHARACTER_BABY_MARIO,
+        CHARACTER_YOSHI,
+        CHARACTER_WARIO,
+        CHARACTER_MARIO,
+        CHARACTER_DONKEY_KONG,
+        CHARACTER_METAL_MARIO},
+    {CHARACTER_KID,
+        CHARACTER_SHERRY,
+        CHARACTER_AZALEA,
+        CHARACTER_JOE,
+        EMPTY_GRID_SLOT,
+        EMPTY_GRID_SLOT,
+        EMPTY_GRID_SLOT}
+};
 /* The CharacterChoice of each CharacterId */
-static s16 f_RecordCharacters[CHARACTER_COUNT] = {CHARACTER_CHOICE_PLUM,
-    CHARACTER_CHOICE_CHARLIE, CHARACTER_CHOICE_MAPLE,
-    CHARACTER_CHOICE_BABY_MARIO, CHARACTER_CHOICE_LUIGI, CHARACTER_CHOICE_PEACH,
-    CHARACTER_CHOICE_SONNY, CHARACTER_CHOICE_WARIO, CHARACTER_CHOICE_HARRY,
-    CHARACTER_CHOICE_MARIO, CHARACTER_CHOICE_YOSHI,
-    CHARACTER_CHOICE_DONKEY_KONG, CHARACTER_CHOICE_BOWSER,
-    CHARACTER_CHOICE_METAL_MARIO, CHARACTER_CHOICE_KID, CHARACTER_CHOICE_SHERRY,
-    CHARACTER_CHOICE_AZALEA, CHARACTER_CHOICE_JOE};
+static s16 f_RecordCharacters[CHARACTER_COUNT] = {
+    CHARACTER_CHOICE_PLUM,
+    CHARACTER_CHOICE_CHARLIE,
+    CHARACTER_CHOICE_MAPLE,
+    CHARACTER_CHOICE_BABY_MARIO,
+    CHARACTER_CHOICE_LUIGI,
+    CHARACTER_CHOICE_PEACH,
+    CHARACTER_CHOICE_SONNY,
+    CHARACTER_CHOICE_WARIO,
+    CHARACTER_CHOICE_HARRY,
+    CHARACTER_CHOICE_MARIO,
+    CHARACTER_CHOICE_YOSHI,
+    CHARACTER_CHOICE_DONKEY_KONG,
+    CHARACTER_CHOICE_BOWSER,
+    CHARACTER_CHOICE_METAL_MARIO,
+    CHARACTER_CHOICE_KID,
+    CHARACTER_CHOICE_SHERRY,
+    CHARACTER_CHOICE_AZALEA,
+    CHARACTER_CHOICE_JOE
+};
 /*
  * The grid's first columns, whose characters a game of two or more players
  * offers without their being unlocked
  */
 #define MULTIPLAYER_GRID_COLUMN_COUNT 5
-static s16 f_StartingCharacterGrid
-    [CHARACTER_GRID_ROW_COUNT][CHARACTER_GRID_COLUMN_COUNT] = {
-        {CHARACTER_CHOICE_PLUM, CHARACTER_CHOICE_PEACH, EMPTY_GRID_SLOT,
-            EMPTY_GRID_SLOT, EMPTY_GRID_SLOT, EMPTY_GRID_SLOT, EMPTY_GRID_SLOT},
-        {CHARACTER_CHOICE_CHARLIE, CHARACTER_CHOICE_BABY_MARIO, EMPTY_GRID_SLOT,
-            EMPTY_GRID_SLOT, EMPTY_GRID_SLOT, EMPTY_GRID_SLOT, EMPTY_GRID_SLOT},
-        {EMPTY_GRID_SLOT, EMPTY_GRID_SLOT, EMPTY_GRID_SLOT, EMPTY_GRID_SLOT,
-            EMPTY_GRID_SLOT, EMPTY_GRID_SLOT, EMPTY_GRID_SLOT}};
-static GridCell f_SlotCells[] = {{0, 0}, {0, 1}, {1, 0}, {1, 1}, {2, 0}, {2, 1},
-    {3, 0}, {3, 1}, {4, 0}, {4, 1}, {5, 0}, {5, 1}, {6, 0}, {6, 1}, {0, 2},
-    {1, 2}, {2, 2}, {3, 2}};
-char g_CharacterNames[][IMPORTED_CHARACTER_NAME_LENGTH] = {"Plum", "Charlie",
-    "Peach", "Baby Mario", "Luigi", "Yoshi", "Sonny", "Wario", "Harry", "Mario",
-    "Maple", "DK", "Bowser", "Metal Mario"};
-static s8 f_ImportedCharacterNames[IMPORTED_CHARACTER_COUNT]
-                                  [IMPORTED_CHARACTER_NAME_LENGTH] = {
-                                      "Kid", "Sherry", "Azalea", "Joe"};
-s32 g_CourseNameEnvColors[] = {0x18A0E900, 0x0DFF1E00, 0xFFFFFF00, 0xFFFFFF00,
-    0x0DFF1E00, 0x0DFF1E00, 0xF5FF0100, 0xF5FF0100, 0xF5FF0100, 0xF5FF0100};
-s32 g_CourseNamePrimColors[] = {0x0DFF1E00, 0xE94CFB00, 0xF5FF0100, 0x18A0E900,
-    0xFF960000, 0xEF470300, 0x0DFF1E00, 0x18A0E900, 0xEF470300, 0xEF470300};
+static s16 f_StartingCharacterGrid[CHARACTER_GRID_ROW_COUNT][CHARACTER_GRID_COLUMN_COUNT] = {
+    {CHARACTER_CHOICE_PLUM,
+        CHARACTER_CHOICE_PEACH,
+        EMPTY_GRID_SLOT,
+        EMPTY_GRID_SLOT,
+        EMPTY_GRID_SLOT,
+        EMPTY_GRID_SLOT,
+        EMPTY_GRID_SLOT},
+    {CHARACTER_CHOICE_CHARLIE,
+        CHARACTER_CHOICE_BABY_MARIO,
+        EMPTY_GRID_SLOT,
+        EMPTY_GRID_SLOT,
+        EMPTY_GRID_SLOT,
+        EMPTY_GRID_SLOT,
+        EMPTY_GRID_SLOT},
+    {EMPTY_GRID_SLOT,
+        EMPTY_GRID_SLOT,
+        EMPTY_GRID_SLOT,
+        EMPTY_GRID_SLOT,
+        EMPTY_GRID_SLOT,
+        EMPTY_GRID_SLOT,
+        EMPTY_GRID_SLOT}
+};
+static GridCell f_SlotCells[] = {
+    {0, 0},
+    {0, 1},
+    {1, 0},
+    {1, 1},
+    {2, 0},
+    {2, 1},
+    {3, 0},
+    {3, 1},
+    {4, 0},
+    {4, 1},
+    {5, 0},
+    {5, 1},
+    {6, 0},
+    {6, 1},
+    {0, 2},
+    {1, 2},
+    {2, 2},
+    {3, 2}
+};
+char g_CharacterNames[][IMPORTED_CHARACTER_NAME_LENGTH] = {
+    "Plum",
+    "Charlie",
+    "Peach",
+    "Baby Mario",
+    "Luigi",
+    "Yoshi",
+    "Sonny",
+    "Wario",
+    "Harry",
+    "Mario",
+    "Maple",
+    "DK",
+    "Bowser",
+    "Metal Mario"
+};
+static s8 f_ImportedCharacterNames[IMPORTED_CHARACTER_COUNT][IMPORTED_CHARACTER_NAME_LENGTH] =
+    {"Kid", "Sherry", "Azalea", "Joe"};
+s32 g_CourseNameEnvColors[] = {
+    0x18A0E900,
+    0x0DFF1E00,
+    0xFFFFFF00,
+    0xFFFFFF00,
+    0x0DFF1E00,
+    0x0DFF1E00,
+    0xF5FF0100,
+    0xF5FF0100,
+    0xF5FF0100,
+    0xF5FF0100
+};
+s32 g_CourseNamePrimColors[] = {
+    0x0DFF1E00,
+    0xE94CFB00,
+    0xF5FF0100,
+    0x18A0E900,
+    0xFF960000,
+    0xEF470300,
+    0x0DFF1E00,
+    0x18A0E900,
+    0xEF470300,
+    0xEF470300
+};
 /* The course points needed in total to open each course */
 static s32 f_CoursePointsNeeded[COURSE_COUNT] = {0, 50, 300, 1000, 2300, 4500};
 /* The imported characters that debug flag 0x54 adds */
-static s16 f_DebugImportedCharacters[IMPORTED_CHARACTER_COUNT] = {
-    CHARACTER_KID, CHARACTER_SHERRY, CHARACTER_AZALEA, CHARACTER_JOE};
-static s16 f_DebugImportedDistances[IMPORTED_CHARACTER_COUNT] = {
-    500, 400, 300, 200};
+static s16 f_DebugImportedCharacters[IMPORTED_CHARACTER_COUNT] =
+    {CHARACTER_KID, CHARACTER_SHERRY, CHARACTER_AZALEA, CHARACTER_JOE};
+static s16 f_DebugImportedDistances[IMPORTED_CHARACTER_COUNT] = {500, 400, 300, 200};
 static s16 f_DebugImportedSpins[IMPORTED_CHARACTER_COUNT] = {40, 30, 20, 10};
-static s16 f_DebugImportedSideSpins[IMPORTED_CHARACTER_COUNT] = {
-    0, 50, -50, 10};
+static s16 f_DebugImportedSideSpins[IMPORTED_CHARACTER_COUNT] = {0, 50, -50, 10};
 /* Spelled with the top bit set on each lowercase letter */
-static char f_DebugImportedNames
-    [IMPORTED_CHARACTER_COUNT][IMPORTED_CHARACTER_NAME_LENGTH] = {
-        {'K', MARK_LOWERCASE('i'), MARK_LOWERCASE('d')},
-        {'S', MARK_LOWERCASE('h'), MARK_LOWERCASE('e'), MARK_LOWERCASE('r'),
-            MARK_LOWERCASE('r'), MARK_LOWERCASE('y')},
-        {'A', MARK_LOWERCASE('z'), MARK_LOWERCASE('a'), MARK_LOWERCASE('l'),
-            MARK_LOWERCASE('e'), MARK_LOWERCASE('a')},
-        {'J', MARK_LOWERCASE('o'), MARK_LOWERCASE('e')}};
-static ImportedCharacterCell
-    f_ImportedCharacterCells[IMPORTED_CHARACTER_COUNT] = {
-        {0, 0, 0, 2}, {0, 1, 0, 2}, {0, 2, 0, 2}, {0, 3, 0, 2}};
-static s16 f_CharacterSlots[] = {
-    0, 1, 10, 3, 4, 2, 6, 7, 8, 9, 5, 11, 12, 13, 0};
+static char f_DebugImportedNames[IMPORTED_CHARACTER_COUNT][IMPORTED_CHARACTER_NAME_LENGTH] = {
+    {'K', MARK_LOWERCASE('i'), MARK_LOWERCASE('d')},
+    {'S',
+        MARK_LOWERCASE('h'),
+        MARK_LOWERCASE('e'),
+        MARK_LOWERCASE('r'),
+        MARK_LOWERCASE('r'),
+        MARK_LOWERCASE('y')},
+    {'A',
+        MARK_LOWERCASE('z'),
+        MARK_LOWERCASE('a'),
+        MARK_LOWERCASE('l'),
+        MARK_LOWERCASE('e'),
+        MARK_LOWERCASE('a')},
+    {'J', MARK_LOWERCASE('o'), MARK_LOWERCASE('e')}
+};
+static ImportedCharacterCell f_ImportedCharacterCells[IMPORTED_CHARACTER_COUNT] =
+    {{0, 0, 0, 2}, {0, 1, 0, 2}, {0, 2, 0, 2}, {0, 3, 0, 2}};
+static s16 f_CharacterSlots[] = {0, 1, 10, 3, 4, 2, 6, 7, 8, 9, 5, 11, 12, 13, 0};
 s32 g_MenuCourseCount = 6;
 /* Cleared by ResetMenuChoices and each menu entry routine, but read by none */
 static s8 f_UnreadMenuEntryByte = 0;
@@ -512,265 +1134,254 @@ static s32 f_UnusedWordsAfterSaveCopyLocations[4] UNUSED = {0};
  * calls this as it loads.
  */
 void LoadMenuResources(void) {
-  EncodedAsset asset;
-  AssetFile file;
-  /* The original frame has room for this; without it 44 words differ */
-  s32 unused[4] UNUSED;
-  SaveData* save;
-  s32 index;
-  s32 size;
+    EncodedAsset asset;
+    AssetFile file;
+    /* The original frame has room for this; without it 44 words differ */
+    s32 unused[4] UNUSED;
+    SaveData *save;
+    s32 index;
+    s32 size;
 
-  save = GetSaveData();
-  if (g_LoadedMenuScreen != -1) {
-    osSyncPrintf("menu const error");
-    return;
-  }
-
-  g_MenuCourseSceneryAsset =
-      AllocMemory(OpenEncodedAsset(ASSET_COURSE_SCENE, &asset));
-  ReadEncodedAsset(g_MenuCourseSceneryAsset, &asset);
-  g_BrickWallImage =
-      AllocMemory(OpenEncodedAsset(BRICK_WALL_IMAGE_ASSET, &asset));
-  ReadEncodedAsset(g_BrickWallImage, &asset);
-  g_MenuBoardImages[0] =
-      AllocMemory(OpenEncodedAsset(ASSET_WIDE_BOARD, &asset));
-  ReadEncodedAsset(g_MenuBoardImages[0], &asset);
-  g_MenuBoardImages[1] =
-      AllocMemory(OpenEncodedAsset(ASSET_WIDE_BOARD, &asset));
-  ReadEncodedAsset(g_MenuBoardImages[1], &asset);
-  g_NamePlateImage = AllocMemory(OpenEncodedAsset(ASSET_NAME_PLATE, &asset));
-  ReadEncodedAsset(g_NamePlateImage, &asset);
-  g_MenuLabelImages[0] = AllocMemory(MENU_LABEL_BUFFER_SIZE);
-  g_ImageSlots[0] = AllocMemory(MENU_LABEL_BUFFER_SIZE);
-  g_MenuLabelImages[1] = AllocMemory(MENU_LABEL_BUFFER_SIZE);
-  g_ImageSlots[1] = AllocMemory(MENU_LABEL_BUFFER_SIZE);
-  OpenEncodedAsset(*f_MenuLabelAssets, &asset);
-  ReadEncodedAsset(g_MenuLabelImages[0], &asset);
-  OpenEncodedAsset(*f_MenuLabelAssets, &asset);
-  ReadEncodedAsset(g_MenuLabelImages[1], &asset);
-  if (g_MenuScreen == MENU_SCREEN_MODE_SELECT) {
-    OpenEncodedAsset(ASSET_MENU_GAME_MODES, &asset);
-    ReadEncodedAsset(g_ImageSlots[0], &asset);
-    OpenEncodedAsset(ASSET_MENU_GAME_MODES, &asset);
-    ReadEncodedAsset(g_ImageSlots[1], &asset);
-  } else {
-    OpenEncodedAsset(f_MenuLabelAssets[1], &asset);
-    ReadEncodedAsset(g_ImageSlots[0], &asset);
-    OpenEncodedAsset(f_MenuLabelAssets[1], &asset);
-    ReadEncodedAsset(g_ImageSlots[1], &asset);
-  }
-
-  g_MenuTitleImages[0] =
-      AllocMemory(OpenEncodedAsset(*g_MenuScreenImageAssets, &asset));
-  ReadEncodedAsset(g_MenuTitleImages[0], &asset);
-  g_MenuTitleImages[1] =
-      AllocMemory(OpenEncodedAsset(*g_MenuScreenImageAssets, &asset));
-  ReadEncodedAsset(g_MenuTitleImages[1], &asset);
-  for (index = 0; index != ARRAY_COUNT(g_MenuIconImages); index++) {
-    if (g_MenuScreen == MENU_SCREEN_MODE_SELECT) {
-      size = OpenEncodedAsset(
-          g_PlayerCountIconAssets[g_ChosenPlayerCount - 1][index], &asset);
-    } else {
-      size = OpenEncodedAsset(g_CourseIconAssets[index], &asset);
+    save = GetSaveData();
+    if (g_LoadedMenuScreen != -1) {
+        osSyncPrintf("menu const error");
+        return;
     }
 
-    g_MenuIconImages[index] = AllocMemory(size);
-    ReadEncodedAsset(g_MenuIconImages[index], &asset);
+    g_MenuCourseSceneryAsset = AllocMemory(OpenEncodedAsset(ASSET_COURSE_SCENE, &asset));
+    ReadEncodedAsset(g_MenuCourseSceneryAsset, &asset);
+    g_BrickWallImage = AllocMemory(OpenEncodedAsset(BRICK_WALL_IMAGE_ASSET, &asset));
+    ReadEncodedAsset(g_BrickWallImage, &asset);
+    g_MenuBoardImages[0] = AllocMemory(OpenEncodedAsset(ASSET_WIDE_BOARD, &asset));
+    ReadEncodedAsset(g_MenuBoardImages[0], &asset);
+    g_MenuBoardImages[1] = AllocMemory(OpenEncodedAsset(ASSET_WIDE_BOARD, &asset));
+    ReadEncodedAsset(g_MenuBoardImages[1], &asset);
+    g_NamePlateImage = AllocMemory(OpenEncodedAsset(ASSET_NAME_PLATE, &asset));
+    ReadEncodedAsset(g_NamePlateImage, &asset);
+    g_MenuLabelImages[0] = AllocMemory(MENU_LABEL_BUFFER_SIZE);
+    g_ImageSlots[0] = AllocMemory(MENU_LABEL_BUFFER_SIZE);
+    g_MenuLabelImages[1] = AllocMemory(MENU_LABEL_BUFFER_SIZE);
+    g_ImageSlots[1] = AllocMemory(MENU_LABEL_BUFFER_SIZE);
+    OpenEncodedAsset(*f_MenuLabelAssets, &asset);
+    ReadEncodedAsset(g_MenuLabelImages[0], &asset);
+    OpenEncodedAsset(*f_MenuLabelAssets, &asset);
+    ReadEncodedAsset(g_MenuLabelImages[1], &asset);
     if (g_MenuScreen == MENU_SCREEN_MODE_SELECT) {
-      size = OpenEncodedAsset(
-          g_PlayerCountIconAssets[g_ChosenPlayerCount - 1][index], &asset);
-    } else {
-      size = OpenEncodedAsset(g_CourseIconAssets[index], &asset);
+        OpenEncodedAsset(ASSET_MENU_GAME_MODES, &asset);
+        ReadEncodedAsset(g_ImageSlots[0], &asset);
+        OpenEncodedAsset(ASSET_MENU_GAME_MODES, &asset);
+        ReadEncodedAsset(g_ImageSlots[1], &asset);
+    }
+    else {
+        OpenEncodedAsset(f_MenuLabelAssets[1], &asset);
+        ReadEncodedAsset(g_ImageSlots[0], &asset);
+        OpenEncodedAsset(f_MenuLabelAssets[1], &asset);
+        ReadEncodedAsset(g_ImageSlots[1], &asset);
     }
 
-    g_ModeIconImages[index] = AllocMemory(size);
-    ReadEncodedAsset(g_ModeIconImages[index], &asset);
-  }
+    g_MenuTitleImages[0] = AllocMemory(OpenEncodedAsset(*g_MenuScreenImageAssets, &asset));
+    ReadEncodedAsset(g_MenuTitleImages[0], &asset);
+    g_MenuTitleImages[1] = AllocMemory(OpenEncodedAsset(*g_MenuScreenImageAssets, &asset));
+    ReadEncodedAsset(g_MenuTitleImages[1], &asset);
+    for (index = 0; index != ARRAY_COUNT(g_MenuIconImages); index++) {
+        if (g_MenuScreen == MENU_SCREEN_MODE_SELECT) {
+            size =
+                OpenEncodedAsset(g_PlayerCountIconAssets[g_ChosenPlayerCount - 1][index], &asset);
+        }
+        else {
+            size = OpenEncodedAsset(g_CourseIconAssets[index], &asset);
+        }
 
-  for (index = 0; index != ARRAY_COUNT(g_MiniGolfDiscImages); index++) {
-    OpenAssetFile(g_MiniGolfDiscFiles[index], &file);
-    size = GetAssetFileSize(&file);
-    g_MiniGolfDiscImages[index] = AllocMemory(size);
-    ReadAssetFile(g_MiniGolfDiscImages[index], size, &file);
-  }
+        g_MenuIconImages[index] = AllocMemory(size);
+        ReadEncodedAsset(g_MenuIconImages[index], &asset);
+        if (g_MenuScreen == MENU_SCREEN_MODE_SELECT) {
+            size =
+                OpenEncodedAsset(g_PlayerCountIconAssets[g_ChosenPlayerCount - 1][index], &asset);
+        }
+        else {
+            size = OpenEncodedAsset(g_CourseIconAssets[index], &asset);
+        }
 
-  OpenEncodedAsset(g_TrophyFrameAssets[0][0], &asset);
-  g_TrophyFrameBuffers[0] = AllocMemory(TROPHY_FRAME_BUFFER_SIZE);
-  ReadEncodedAsset(g_TrophyFrameBuffers[0], &asset);
-  OpenEncodedAsset(g_TrophyFrameAssets[0][0], &asset);
-  g_TrophyFrameBuffers[1] = AllocMemory(TROPHY_FRAME_BUFFER_SIZE);
-  ReadEncodedAsset(g_TrophyFrameBuffers[1], &asset);
-  for (index = 0; index != ARRAY_COUNT(g_CourseTrophyImages); index++) {
+        g_ModeIconImages[index] = AllocMemory(size);
+        ReadEncodedAsset(g_ModeIconImages[index], &asset);
+    }
+
+    for (index = 0; index != ARRAY_COUNT(g_MiniGolfDiscImages); index++) {
+        OpenAssetFile(g_MiniGolfDiscFiles[index], &file);
+        size = GetAssetFileSize(&file);
+        g_MiniGolfDiscImages[index] = AllocMemory(size);
+        ReadAssetFile(g_MiniGolfDiscImages[index], size, &file);
+    }
+
     OpenEncodedAsset(g_TrophyFrameAssets[0][0], &asset);
-    g_CourseTrophyImages[index] = AllocMemory(COURSE_TROPHY_BUFFER_SIZE);
-    ReadEncodedAsset(g_CourseTrophyImages[index], &asset);
-  }
+    g_TrophyFrameBuffers[0] = AllocMemory(TROPHY_FRAME_BUFFER_SIZE);
+    ReadEncodedAsset(g_TrophyFrameBuffers[0], &asset);
+    OpenEncodedAsset(g_TrophyFrameAssets[0][0], &asset);
+    g_TrophyFrameBuffers[1] = AllocMemory(TROPHY_FRAME_BUFFER_SIZE);
+    ReadEncodedAsset(g_TrophyFrameBuffers[1], &asset);
+    for (index = 0; index != ARRAY_COUNT(g_CourseTrophyImages); index++) {
+        OpenEncodedAsset(g_TrophyFrameAssets[0][0], &asset);
+        g_CourseTrophyImages[index] = AllocMemory(COURSE_TROPHY_BUFFER_SIZE);
+        ReadEncodedAsset(g_CourseTrophyImages[index], &asset);
+    }
 
-  for (index = 0; index != ARRAY_COUNT(g_MenuArrowSizedImages); index++) {
-    g_MenuArrowSizedImages[index] =
-        AllocMemory(OpenEncodedAsset(ASSET_GREEN_ARROWS, &asset));
-    ReadEncodedAsset(g_MenuArrowSizedImages[index], &asset);
-  }
+    for (index = 0; index != ARRAY_COUNT(g_MenuArrowSizedImages); index++) {
+        g_MenuArrowSizedImages[index] = AllocMemory(OpenEncodedAsset(ASSET_GREEN_ARROWS, &asset));
+        ReadEncodedAsset(g_MenuArrowSizedImages[index], &asset);
+    }
 
-  size = OpenEncodedAsset(TROPHY_ICON_IMAGE_ASSET, &asset);
-  g_AnimatedIconImages[0] = AllocMemory(size);
-  g_AnimatedIconImages[1] = AllocMemory(size);
-  g_SecondAnimatedIconImages[0] = AllocMemory(size);
-  g_SecondAnimatedIconImages[1] = AllocMemory(size);
-  ReadEncodedAsset(g_AnimatedIconImages[0], &asset);
-  g_HoleBadgeImages =
-      AllocMemory(OpenEncodedAsset(HOLE_BADGES_IMAGE_ASSET, &asset));
-  ReadEncodedAsset(g_HoleBadgeImages, &asset);
-  g_SpinningBadgeImage =
-      AllocMemory(OpenEncodedAsset(ASSET_SPINNING_BADGE, &asset));
-  ReadEncodedAsset(g_SpinningBadgeImage, &asset);
-  for (index = 0; index != ARRAY_COUNT(g_CharacterFaceImages); index++) {
-    g_CharacterFaceImages[index] =
-        AllocMemory(OpenEncodedAsset(g_FaceAnimationAssets[index][0], &asset));
-    ReadEncodedAsset(g_CharacterFaceImages[index], &asset);
-  }
+    size = OpenEncodedAsset(TROPHY_ICON_IMAGE_ASSET, &asset);
+    g_AnimatedIconImages[0] = AllocMemory(size);
+    g_AnimatedIconImages[1] = AllocMemory(size);
+    g_SecondAnimatedIconImages[0] = AllocMemory(size);
+    g_SecondAnimatedIconImages[1] = AllocMemory(size);
+    ReadEncodedAsset(g_AnimatedIconImages[0], &asset);
+    g_HoleBadgeImages = AllocMemory(OpenEncodedAsset(HOLE_BADGES_IMAGE_ASSET, &asset));
+    ReadEncodedAsset(g_HoleBadgeImages, &asset);
+    g_SpinningBadgeImage = AllocMemory(OpenEncodedAsset(ASSET_SPINNING_BADGE, &asset));
+    ReadEncodedAsset(g_SpinningBadgeImage, &asset);
+    for (index = 0; index != ARRAY_COUNT(g_CharacterFaceImages); index++) {
+        g_CharacterFaceImages[index] =
+            AllocMemory(OpenEncodedAsset(g_FaceAnimationAssets[index][0], &asset));
+        ReadEncodedAsset(g_CharacterFaceImages[index], &asset);
+    }
 
-  for (index = 0; index != ARRAY_COUNT(g_CharacterFacePalettes); index++) {
-    OpenAssetFile(g_CharacterFacePaletteFiles[index][0], &file);
-    size = GetAssetFileSize(&file);
-    g_CharacterFacePalettes[index] = AllocMemory(size);
-    ReadAssetFile(g_CharacterFacePalettes[index], size, &file);
-  }
+    for (index = 0; index != ARRAY_COUNT(g_CharacterFacePalettes); index++) {
+        OpenAssetFile(g_CharacterFacePaletteFiles[index][0], &file);
+        size = GetAssetFileSize(&file);
+        g_CharacterFacePalettes[index] = AllocMemory(size);
+        ReadAssetFile(g_CharacterFacePalettes[index], size, &file);
+    }
 
-  for (index = 0; index != ARRAY_COUNT(g_TrophyPalettes); index++) {
-    OpenAssetFile(g_TrophyPaletteFiles[0][index], &file);
-    size = GetAssetFileSize(&file);
-    g_TrophyPalettes[index] = AllocMemory(size);
-    ReadAssetFile(g_TrophyPalettes[index], size, &file);
-  }
+    for (index = 0; index != ARRAY_COUNT(g_TrophyPalettes); index++) {
+        OpenAssetFile(g_TrophyPaletteFiles[0][index], &file);
+        size = GetAssetFileSize(&file);
+        g_TrophyPalettes[index] = AllocMemory(size);
+        ReadAssetFile(g_TrophyPalettes[index], size, &file);
+    }
 
-  g_MenuSpareImages[0] =
-      AllocMemory(OpenEncodedAsset(*f_ToadImageAssets, &asset) * 2);
-  ReadEncodedAsset(g_MenuSpareImages[0], &asset);
-  g_MenuSpareImages[1] =
-      AllocMemory(OpenEncodedAsset(*f_ToadImageAssets, &asset) * 2);
-  ReadEncodedAsset(g_MenuSpareImages[1], &asset);
-  g_MenuWideSpareImage =
-      AllocMemory(OpenEncodedAsset(SPEECH_BUBBLE_IMAGE_ASSET, &asset) * 2);
-  ReadEncodedAsset(g_MenuWideSpareImage, &asset);
-  g_ComLeftyIcons =
-      AllocMemory(OpenEncodedAsset(COM_LEFTY_ICONS_IMAGE_ASSET, &asset));
-  ReadEncodedAsset(g_ComLeftyIcons, &asset);
-  PlaySong(SONG_TITLE, 0);
-  SetFramebufferCount(TRIPLE_BUFFERING);
-  SetScreenEffect(SCREEN_EFFECT_NONE, 0);
-  g_MenuMemory.statsCourse = COURSE_COUNT;
-  InitSram();
-  TransferSaveData(save, FALSE);
+    g_MenuSpareImages[0] = AllocMemory(OpenEncodedAsset(*f_ToadImageAssets, &asset) * 2);
+    ReadEncodedAsset(g_MenuSpareImages[0], &asset);
+    g_MenuSpareImages[1] = AllocMemory(OpenEncodedAsset(*f_ToadImageAssets, &asset) * 2);
+    ReadEncodedAsset(g_MenuSpareImages[1], &asset);
+    g_MenuWideSpareImage = AllocMemory(OpenEncodedAsset(SPEECH_BUBBLE_IMAGE_ASSET, &asset) * 2);
+    ReadEncodedAsset(g_MenuWideSpareImage, &asset);
+    g_ComLeftyIcons = AllocMemory(OpenEncodedAsset(COM_LEFTY_ICONS_IMAGE_ASSET, &asset));
+    ReadEncodedAsset(g_ComLeftyIcons, &asset);
+    PlaySong(SONG_TITLE, 0);
+    SetFramebufferCount(TRIPLE_BUFFERING);
+    SetScreenEffect(SCREEN_EFFECT_NONE, 0);
+    g_MenuMemory.statsCourse = COURSE_COUNT;
+    InitSram();
+    TransferSaveData(save, FALSE);
 }
 
 /* Frees what LoadMenuResources allocated, as overlay 3 unloads */
 void FreeMenuResources(void) {
-  s32 index;
+    s32 index;
 
-  g_LoadedMenuScreen = NO_MENU_SCREEN;
-  FreeMemory(&g_MenuCourseSceneryAsset);
-  FreeMemory(&g_BrickWallImage);
-  for (index = 0; index != ARRAY_COUNT(g_MenuIconImages); index++) {
-    FreeMemory(&g_MenuIconImages[index]);
-    FreeMemory(&g_ModeIconImages[index]);
-  }
+    g_LoadedMenuScreen = NO_MENU_SCREEN;
+    FreeMemory(&g_MenuCourseSceneryAsset);
+    FreeMemory(&g_BrickWallImage);
+    for (index = 0; index != ARRAY_COUNT(g_MenuIconImages); index++) {
+        FreeMemory(&g_MenuIconImages[index]);
+        FreeMemory(&g_ModeIconImages[index]);
+    }
 
-  FreeMemory(&g_MiniGolfDiscImages[0]);
-  FreeMemory(&g_MiniGolfDiscImages[1]);
-  FreeMemory(&g_MenuBoardImages[0]);
-  FreeMemory(&g_MenuBoardImages[1]);
-  FreeMemory(&g_NamePlateImage);
-  FreeMemory(&g_MenuLabelImages[0]);
-  FreeMemory(&g_ImageSlots[0]);
-  FreeMemory(&g_MenuLabelImages[1]);
-  FreeMemory(&g_ImageSlots[1]);
-  FreeMemory(&g_MenuTitleImages[0]);
-  FreeMemory(&g_MenuTitleImages[1]);
-  FreeMemory(&g_TrophyFrameBuffers[0]);
-  FreeMemory(&g_TrophyFrameBuffers[1]);
-  for (index = 0; index != ARRAY_COUNT(g_CourseTrophyImages); index++) {
-    FreeMemory(&g_CourseTrophyImages[index]);
-  }
+    FreeMemory(&g_MiniGolfDiscImages[0]);
+    FreeMemory(&g_MiniGolfDiscImages[1]);
+    FreeMemory(&g_MenuBoardImages[0]);
+    FreeMemory(&g_MenuBoardImages[1]);
+    FreeMemory(&g_NamePlateImage);
+    FreeMemory(&g_MenuLabelImages[0]);
+    FreeMemory(&g_ImageSlots[0]);
+    FreeMemory(&g_MenuLabelImages[1]);
+    FreeMemory(&g_ImageSlots[1]);
+    FreeMemory(&g_MenuTitleImages[0]);
+    FreeMemory(&g_MenuTitleImages[1]);
+    FreeMemory(&g_TrophyFrameBuffers[0]);
+    FreeMemory(&g_TrophyFrameBuffers[1]);
+    for (index = 0; index != ARRAY_COUNT(g_CourseTrophyImages); index++) {
+        FreeMemory(&g_CourseTrophyImages[index]);
+    }
 
-  for (index = 0; index != ARRAY_COUNT(g_TrophyPalettes); index++) {
-    FreeMemory(&g_TrophyPalettes[index]);
-  }
+    for (index = 0; index != ARRAY_COUNT(g_TrophyPalettes); index++) {
+        FreeMemory(&g_TrophyPalettes[index]);
+    }
 
-  for (index = 0; index != ARRAY_COUNT(g_MenuArrowSizedImages); index++) {
-    FreeMemory(&g_MenuArrowSizedImages[index]);
-  }
+    for (index = 0; index != ARRAY_COUNT(g_MenuArrowSizedImages); index++) {
+        FreeMemory(&g_MenuArrowSizedImages[index]);
+    }
 
-  FreeMemory(&g_AnimatedIconImages[0]);
-  FreeMemory(&g_AnimatedIconImages[1]);
-  FreeMemory(&g_SecondAnimatedIconImages[0]);
-  FreeMemory(&g_SecondAnimatedIconImages[1]);
-  FreeMemory(&g_HoleBadgeImages);
-  FreeMemory(&g_SpinningBadgeImage);
-  for (index = 0; index != ARRAY_COUNT(g_CharacterFaceImages); index++) {
-    FreeMemory(&g_CharacterFaceImages[index]);
-  }
+    FreeMemory(&g_AnimatedIconImages[0]);
+    FreeMemory(&g_AnimatedIconImages[1]);
+    FreeMemory(&g_SecondAnimatedIconImages[0]);
+    FreeMemory(&g_SecondAnimatedIconImages[1]);
+    FreeMemory(&g_HoleBadgeImages);
+    FreeMemory(&g_SpinningBadgeImage);
+    for (index = 0; index != ARRAY_COUNT(g_CharacterFaceImages); index++) {
+        FreeMemory(&g_CharacterFaceImages[index]);
+    }
 
-  for (index = 0; index != ARRAY_COUNT(g_CharacterFacePalettes); index++) {
-    FreeMemory(&g_CharacterFacePalettes[index]);
-  }
+    for (index = 0; index != ARRAY_COUNT(g_CharacterFacePalettes); index++) {
+        FreeMemory(&g_CharacterFacePalettes[index]);
+    }
 
-  FreeMemory(&g_MenuSpareImages[0]);
-  FreeMemory(&g_MenuSpareImages[1]);
-  FreeMemory(&g_MenuWideSpareImage);
-  FreeMemory(&g_ComLeftyIcons);
+    FreeMemory(&g_MenuSpareImages[0]);
+    FreeMemory(&g_MenuSpareImages[1]);
+    FreeMemory(&g_MenuWideSpareImage);
+    FreeMemory(&g_ComLeftyIcons);
 }
 
-SaveData* GetSaveData(void) {
-  GetMenuMemory();
-  return &g_SaveData;
+SaveData *GetSaveData(void) {
+    GetMenuMemory();
+    return &g_SaveData;
 }
 
 /* Returns what the menus keep between visits, for its callers to share */
-MenuMemory* GetMenuMemory(void) {
-  return &g_MenuMemory;
+MenuMemory *GetMenuMemory(void) {
+    return &g_MenuMemory;
 }
 
 void ResetSaveData(void) {
-  SaveData* save;
-  s8 row;
-  s8 column;
+    SaveData *save;
+    s8 row;
+    s8 column;
 
-  save = GetSaveData();
-  memset(save, 0, sizeof(SaveData));
-  save->magic = SAVE_MAGIC;
-  for (row = 0; row != ARRAY_COUNT(save->records.bestTimes); row++) {
-    for (column = 0; column != ARRAY_COUNT(save->records.bestTimes[0]);
-        column++) {
-      save->records.bestTimes[row][column] = -1;
+    save = GetSaveData();
+    memset(save, 0, sizeof(SaveData));
+    save->magic = SAVE_MAGIC;
+    for (row = 0; row != ARRAY_COUNT(save->records.bestTimes); row++) {
+        for (column = 0; column != ARRAY_COUNT(save->records.bestTimes[0]); column++) {
+            save->records.bestTimes[row][column] = -1;
+        }
     }
-  }
 
-  TransferSaveData(save, TRUE);
+    TransferSaveData(save, TRUE);
 }
 
 void InitSaveData(void) {
-  SaveData* save;
+    SaveData *save;
 
-  save = GetSaveData();
-  InitSram();
-  TransferSaveData(save, FALSE);
+    save = GetSaveData();
+    InitSram();
+    TransferSaveData(save, FALSE);
 }
 
 s32 CountOpenCourses(s32 coursePoints) {
-  CourseIndex courseIndex;
+    CourseIndex courseIndex;
 
-  for (courseIndex = COURSE_COUNT - 1; courseIndex != 0; courseIndex--) {
-    if (coursePoints >= f_CoursePointsNeeded[courseIndex]) {
-      break;
+    for (courseIndex = COURSE_COUNT - 1; courseIndex != 0; courseIndex--) {
+        if (coursePoints >= f_CoursePointsNeeded[courseIndex]) {
+            break;
+        }
     }
-  }
 
-  return courseIndex + 1;
+    return courseIndex + 1;
 }
 
 s32 GetCoursePointsNeeded(CourseIndex courseIndex) {
-  return f_CoursePointsNeeded[courseIndex];
+    return f_CoursePointsNeeded[courseIndex];
 }
 
 /* GetRecordPriority's ranks of Best Shot records */
@@ -789,388 +1400,388 @@ s32 GetCoursePointsNeeded(CourseIndex courseIndex) {
  * under par 5. A hole in one on a par 4 or 5 ranks as an albatross. A record
  * not worth keeping, or a par, ranks 0.
  */
-s32 GetRecordPriority(PlayRecord* record) {
-  s32 priority;
-  s32 bits;
-  s32 par;
-  s32 kind;
-  s32 maxPriority;
+s32 GetRecordPriority(PlayRecord *record) {
+    s32 priority;
+    s32 bits;
+    s32 par;
+    s32 kind;
+    s32 maxPriority;
 
-  bits = record->scoreKind;
-  kind = bits & SCORE_KIND_MASK;
-  priority = 0;
-  par = record->hole.par;
-  /*
-   * Kept in a variable, which the original's register choices need: the
-   * constant in its place swaps registers in 16 words, as do also initializing
-   * priority in its declaration, declaring bits, kind, par and priority in
-   * that order, clearing priority first or switching on the masked bits
-   */
-  maxPriority = ALBATROSS_PRIORITY;
-  if (bits & SCORE_KIND_RECORDED) {
-    switch (kind) {
-      case SCORE_KIND_BIRDIE:
-        priority = BIRDIE_PRIORITY;
-        if (bits & SCORE_KIND_UNUSED_BONUS) {
-          priority = BONUS_BIRDIE_PRIORITY;
+    bits = record->scoreKind;
+    kind = bits & SCORE_KIND_MASK;
+    priority = 0;
+    par = record->hole.par;
+    /*
+     * Kept in a variable, which the original's register choices need: the
+     * constant in its place swaps registers in 16 words, as do also initializing
+     * priority in its declaration, declaring bits, kind, par and priority in
+     * that order, clearing priority first or switching on the masked bits
+     */
+    maxPriority = ALBATROSS_PRIORITY;
+    if (bits & SCORE_KIND_RECORDED) {
+        switch (kind) {
+            case SCORE_KIND_BIRDIE:
+                priority = BIRDIE_PRIORITY;
+                if (bits & SCORE_KIND_UNUSED_BONUS) {
+                    priority = BONUS_BIRDIE_PRIORITY;
+                }
+
+                break;
+            case SCORE_KIND_EAGLE:
+                priority = EAGLE_PRIORITY;
+                if (bits & SCORE_KIND_UNUSED_BONUS) {
+                    priority = BONUS_EAGLE_PRIORITY;
+                }
+
+                if (par < PAR_FIVE) {
+                    priority += SHORT_HOLE_EAGLE_BONUS;
+                }
+
+                break;
+            case SCORE_KIND_HOLE_IN_ONE:
+                priority = HOLE_IN_ONE_PRIORITY;
+                if (par < PAR_FOUR) {
+                    break;
+                }
+
+                /* fallthrough */
+            case SCORE_KIND_ALBATROSS:
+                priority = maxPriority;
+                break;
         }
-
-        break;
-      case SCORE_KIND_EAGLE:
-        priority = EAGLE_PRIORITY;
-        if (bits & SCORE_KIND_UNUSED_BONUS) {
-          priority = BONUS_EAGLE_PRIORITY;
-        }
-
-        if (par < PAR_FIVE) {
-          priority += SHORT_HOLE_EAGLE_BONUS;
-        }
-
-        break;
-      case SCORE_KIND_HOLE_IN_ONE:
-        priority = HOLE_IN_ONE_PRIORITY;
-        if (par < PAR_FOUR) {
-          break;
-        }
-
-        /* fallthrough */
-      case SCORE_KIND_ALBATROSS:
-        priority = maxPriority;
-        break;
     }
-  }
 
-  return priority;
+    return priority;
 }
 
 /* Fills order with the indices of values from the largest value down, keeping
  * ties in order */
-void SortIndicesDescending(s32* values, s32* order, s32 count) {
-  s32 sortedValues[count];
-  s32 index;
-  s32 searchIndex;
-  s32 shiftIndex;
-  s32 value;
-  s32 valueIndex;
+void SortIndicesDescending(s32 *values, s32 *order, s32 count) {
+    s32 sortedValues[count];
+    s32 index;
+    s32 searchIndex;
+    s32 shiftIndex;
+    s32 value;
+    s32 valueIndex;
 
-  for (index = 0; index < count; index++) {
-    order[index] = index;
-  }
-
-  for (index = 0; index < count; index++) {
-    sortedValues[index] = values[index];
-  }
-
-  for (index = 0; index < count; index++) {
-    value = sortedValues[index];
-    valueIndex = order[index];
-    for (searchIndex = index - 1; searchIndex >= 0; searchIndex--) {
-      if (sortedValues[searchIndex] >= value) {
-        break;
-      }
+    for (index = 0; index < count; index++) {
+        order[index] = index;
     }
 
-    if (searchIndex < index - 1) {
-      for (shiftIndex = index; searchIndex + 1 < shiftIndex; shiftIndex--) {
-        sortedValues[shiftIndex] = sortedValues[shiftIndex - 1];
-        order[shiftIndex] = order[shiftIndex - 1];
-      }
-
-      sortedValues[shiftIndex] = value;
-      order[shiftIndex] = valueIndex;
+    for (index = 0; index < count; index++) {
+        sortedValues[index] = values[index];
     }
-  }
+
+    for (index = 0; index < count; index++) {
+        value = sortedValues[index];
+        valueIndex = order[index];
+        for (searchIndex = index - 1; searchIndex >= 0; searchIndex--) {
+            if (sortedValues[searchIndex] >= value) {
+                break;
+            }
+        }
+
+        if (searchIndex < index - 1) {
+            for (shiftIndex = index; searchIndex + 1 < shiftIndex; shiftIndex--) {
+                sortedValues[shiftIndex] = sortedValues[shiftIndex - 1];
+                order[shiftIndex] = order[shiftIndex - 1];
+            }
+
+            sortedValues[shiftIndex] = value;
+            order[shiftIndex] = valueIndex;
+        }
+    }
 }
 
 /* Keeps a Ring Shot hole's record in a save slot, writing the save at once */
-void SaveRingShotRecord(s32 recordIndex, RingShotRecord* record) {
-  g_SaveData.ringShotRecords[recordIndex] = *record;
-  TransferSaveData(GetSaveData(), TRUE);
+void SaveRingShotRecord(s32 recordIndex, RingShotRecord *record) {
+    g_SaveData.ringShotRecords[recordIndex] = *record;
+    TransferSaveData(GetSaveData(), TRUE);
 }
 
 /* The save keeps the highest-priority records of each kind, this many each */
 #define RANKED_GROUP_LENGTH 5
 
-void InsertRankedRecord(PlayRecord* record) {
-  s32 priorities[RANKED_RECORD_COUNT];
-  s32 order[RANKED_RECORD_COUNT];
-  PlayRecord copies[RANKED_RECORD_COUNT];
-  s32 newPriority;
-  PlayRecord* records;
-  s32 firstIndex;
-  s32 lowestPriority;
-  s32 lowestIndex;
-  s32 index;
-  s32 groupLength;
+void InsertRankedRecord(PlayRecord *record) {
+    s32 priorities[RANKED_RECORD_COUNT];
+    s32 order[RANKED_RECORD_COUNT];
+    PlayRecord copies[RANKED_RECORD_COUNT];
+    s32 newPriority;
+    PlayRecord *records;
+    s32 firstIndex;
+    s32 lowestPriority;
+    s32 lowestIndex;
+    s32 index;
+    s32 groupLength;
 
-  osSyncPrintf("Checking SuperShot");
-  if ((s8)record->scoreKind & SCORE_KIND_RECORDED) {
-    records = g_SaveData.rankedRecords;
-    newPriority = GetRecordPriority(record);
-    lowestPriority = 0x40000000; /* Above any priority */
-    lowestIndex = 0;
+    osSyncPrintf("Checking SuperShot");
+    if ((s8)record->scoreKind & SCORE_KIND_RECORDED) {
+        records = g_SaveData.rankedRecords;
+        newPriority = GetRecordPriority(record);
+        lowestPriority = 0x40000000; /* Above any priority */
+        lowestIndex = 0;
 
-    /*
-     * Every case sets the length, which the original needs to match: setting
-     * it once after the switch gives 113 words differing (1 in shape), once
-     * before it 71 (7), and using RANKED_GROUP_LENGTH in the loops 219 (31)
-     */
-    switch (record->scoreKind & SCORE_KIND_MASK) {
-      case SCORE_KIND_BIRDIE:
-        firstIndex = 0 * RANKED_GROUP_LENGTH;
-        groupLength = RANKED_GROUP_LENGTH;
-        break;
-      case SCORE_KIND_EAGLE:
-        firstIndex = 1 * RANKED_GROUP_LENGTH;
-        groupLength = RANKED_GROUP_LENGTH;
-        break;
-      case SCORE_KIND_HOLE_IN_ONE:
-        firstIndex = 2 * RANKED_GROUP_LENGTH;
-        groupLength = RANKED_GROUP_LENGTH;
-        break;
-      case SCORE_KIND_ALBATROSS:
-      default:
-        firstIndex = 3 * RANKED_GROUP_LENGTH;
-        groupLength = RANKED_GROUP_LENGTH;
-        break;
+        /*
+         * Every case sets the length, which the original needs to match: setting
+         * it once after the switch gives 113 words differing (1 in shape), once
+         * before it 71 (7), and using RANKED_GROUP_LENGTH in the loops 219 (31)
+         */
+        switch (record->scoreKind & SCORE_KIND_MASK) {
+            case SCORE_KIND_BIRDIE:
+                firstIndex = 0 * RANKED_GROUP_LENGTH;
+                groupLength = RANKED_GROUP_LENGTH;
+                break;
+            case SCORE_KIND_EAGLE:
+                firstIndex = 1 * RANKED_GROUP_LENGTH;
+                groupLength = RANKED_GROUP_LENGTH;
+                break;
+            case SCORE_KIND_HOLE_IN_ONE:
+                firstIndex = 2 * RANKED_GROUP_LENGTH;
+                groupLength = RANKED_GROUP_LENGTH;
+                break;
+            case SCORE_KIND_ALBATROSS:
+            default:
+                firstIndex = 3 * RANKED_GROUP_LENGTH;
+                groupLength = RANKED_GROUP_LENGTH;
+                break;
+        }
+
+        osSyncPrintf("1:prior=%d:", newPriority);
+        for (index = 0; index < groupLength; index++) {
+            priorities[index] = GetRecordPriority(&records[firstIndex + index]);
+        }
+
+        for (index = 0; index < groupLength; index++) {
+            if (lowestPriority >= priorities[index]) {
+                lowestIndex = index;
+                lowestPriority = priorities[index];
+            }
+        }
+
+        if (newPriority >= lowestPriority) {
+            /*
+             * Rank the group with its lowest entry dropped into slots 1 on,
+             * put the new record in slot 0, then rank all of them again
+             */
+            osSyncPrintf("2");
+            priorities[lowestIndex] = 0;
+            SortIndicesDescending(priorities, order, groupLength);
+            for (index = 0; index < groupLength; index++) {
+                copies[index] = records[firstIndex + index];
+            }
+
+            for (index = 0; index < groupLength - 1; index++) {
+                records[firstIndex + index + 1] = copies[order[index]];
+                priorities[index + 1] = GetRecordPriority(&records[firstIndex + index + 1]);
+            }
+
+            priorities[0] = newPriority;
+            records[firstIndex] = *record;
+            SortIndicesDescending(priorities, order, groupLength);
+            for (index = 0; index < groupLength; index++) {
+                copies[index] = records[firstIndex + index];
+            }
+
+            for (index = 0; index < groupLength; index++) {
+                records[firstIndex + index] = copies[order[index]];
+            }
+
+            TransferSaveData(GetSaveData(), TRUE);
+        }
     }
 
-    osSyncPrintf("1:prior=%d:", newPriority);
-    for (index = 0; index < groupLength; index++) {
-      priorities[index] = GetRecordPriority(&records[firstIndex + index]);
-    }
-
-    for (index = 0; index < groupLength; index++) {
-      if (lowestPriority >= priorities[index]) {
-        lowestIndex = index;
-        lowestPriority = priorities[index];
-      }
-    }
-
-    if (newPriority >= lowestPriority) {
-      /*
-       * Rank the group with its lowest entry dropped into slots 1 on,
-       * put the new record in slot 0, then rank all of them again
-       */
-      osSyncPrintf("2");
-      priorities[lowestIndex] = 0;
-      SortIndicesDescending(priorities, order, groupLength);
-      for (index = 0; index < groupLength; index++) {
-        copies[index] = records[firstIndex + index];
-      }
-
-      for (index = 0; index < groupLength - 1; index++) {
-        records[firstIndex + index + 1] = copies[order[index]];
-        priorities[index + 1] =
-            GetRecordPriority(&records[firstIndex + index + 1]);
-      }
-
-      priorities[0] = newPriority;
-      records[firstIndex] = *record;
-      SortIndicesDescending(priorities, order, groupLength);
-      for (index = 0; index < groupLength; index++) {
-        copies[index] = records[firstIndex + index];
-      }
-
-      for (index = 0; index < groupLength; index++) {
-        records[firstIndex + index] = copies[order[index]];
-      }
-
-      TransferSaveData(GetSaveData(), TRUE);
-    }
-  }
-
-  osSyncPrintf("\n");
+    osSyncPrintf("\n");
 }
 
 s32 SaveOrContinueGameByMode(Boolean isContinuing) {
-  Player* players;
-  PlayRecord* records;
-  SavedGame* game;
-  s32 playerCount;
-  Boolean hasIllegalState;
-  s32 index;
+    Player *players;
+    PlayRecord *records;
+    SavedGame *game;
+    s32 playerCount;
+    Boolean hasIllegalState;
+    s32 index;
 
-  /* A mode with no save slot has room for no players, so saving one with any
-   * players reports too many */
-  playerCount = 0;
-  switch (g_GameState.gameMode) {
-    case GAME_MODE_STROKE:
-    case GAME_MODE_UNRECORDED_STROKE:
-    case GAME_MODE_SKINS_MATCH:
-      players = &g_SaveData.modePlayers[MODE0_PLAYER_INDEX];
-      records = &g_SaveData.modeRecords[MODE0_RECORD_INDEX];
-      game = &g_SaveData.modeGames[MODE0_GAME_INDEX];
-      playerCount = MODE0_PLAYER_COUNT;
-      break;
-    case GAME_MODE_TOURNAMENT:
-      players = &g_SaveData.modePlayers[MODE5_PLAYER_INDEX];
-      records = &g_SaveData.modeRecords[MODE5_RECORD_INDEX];
-      game = &g_SaveData.modeGames[MODE5_GAME_INDEX];
-      osSyncPrintf("Record/Play -Tour-/\n");
-      playerCount = MODE5_PLAYER_COUNT;
-      break;
-    case GAME_MODE_GET_CHARACTER:
-      players = &g_SaveData.modePlayers[MODE4_PLAYER_INDEX];
-      records = &g_SaveData.modeRecords[MODE4_RECORD_INDEX];
-      game = &g_SaveData.modeGames[MODE4_GAME_INDEX];
-      playerCount = MODE4_PLAYER_COUNT;
-      break;
+    /* A mode with no save slot has room for no players, so saving one with any
+     * players reports too many */
+    playerCount = 0;
+    switch (g_GameState.gameMode) {
+        case GAME_MODE_STROKE:
+        case GAME_MODE_UNRECORDED_STROKE:
+        case GAME_MODE_SKINS_MATCH:
+            players = &g_SaveData.modePlayers[MODE0_PLAYER_INDEX];
+            records = &g_SaveData.modeRecords[MODE0_RECORD_INDEX];
+            game = &g_SaveData.modeGames[MODE0_GAME_INDEX];
+            playerCount = MODE0_PLAYER_COUNT;
+            break;
+        case GAME_MODE_TOURNAMENT:
+            players = &g_SaveData.modePlayers[MODE5_PLAYER_INDEX];
+            records = &g_SaveData.modeRecords[MODE5_RECORD_INDEX];
+            game = &g_SaveData.modeGames[MODE5_GAME_INDEX];
+            osSyncPrintf("Record/Play -Tour-/\n");
+            playerCount = MODE5_PLAYER_COUNT;
+            break;
+        case GAME_MODE_GET_CHARACTER:
+            players = &g_SaveData.modePlayers[MODE4_PLAYER_INDEX];
+            records = &g_SaveData.modeRecords[MODE4_RECORD_INDEX];
+            game = &g_SaveData.modeGames[MODE4_GAME_INDEX];
+            playerCount = MODE4_PLAYER_COUNT;
+            break;
 #ifdef AVOID_UB
-    default:
-      return -1;
-#endif
-  }
-
-  if (!isContinuing) {
-    hasIllegalState = FALSE;
-    if (g_GameState.playerCount > playerCount) {
-      osSyncPrintf("Too Many Players\n");
-      return -1;
-    }
-
-    playerCount = g_GameState.playerCount;
-    game->isValid = FALSE;
-    for (index = 0; index < playerCount; index++) {
-      players[index] = g_Players[index];
-      switch (players[index].state) {
-        case PLAYER_STATE_STARTING_TURN:
-        case PLAYER_STATE_AIMING:
-        case PLAYER_STATE_UNUSED_AIMING:
-        case PLAYER_STATE_PREPARING_AIM:
-          players[index].state = PLAYER_STATE_STARTING_TURN;
-          break;
         default:
-          osSyncPrintf("Illegal PlayerState\n");
-          hasIllegalState = TRUE;
-          break;
-        case PLAYER_STATE_WAITING:
-        case PLAYER_STATE_HOLE_DONE:
-          break;
-      }
-
-      records[index] = g_PlayRecords[index];
+            return -1;
+#endif
     }
 
-    game->state = g_GameState;
-    game->hole = g_HoleSetup;
-    if (!hasIllegalState) {
-      game->isValid = TRUE;
-      return 0;
+    if (!isContinuing) {
+        hasIllegalState = FALSE;
+        if (g_GameState.playerCount > playerCount) {
+            osSyncPrintf("Too Many Players\n");
+            return -1;
+        }
+
+        playerCount = g_GameState.playerCount;
+        game->isValid = FALSE;
+        for (index = 0; index < playerCount; index++) {
+            players[index] = g_Players[index];
+            switch (players[index].state) {
+                case PLAYER_STATE_STARTING_TURN:
+                case PLAYER_STATE_AIMING:
+                case PLAYER_STATE_UNUSED_AIMING:
+                case PLAYER_STATE_PREPARING_AIM:
+                    players[index].state = PLAYER_STATE_STARTING_TURN;
+                    break;
+                default:
+                    osSyncPrintf("Illegal PlayerState\n");
+                    hasIllegalState = TRUE;
+                    break;
+                case PLAYER_STATE_WAITING:
+                case PLAYER_STATE_HOLE_DONE:
+                    break;
+            }
+
+            records[index] = g_PlayRecords[index];
+        }
+
+        game->state = g_GameState;
+        game->hole = g_HoleSetup;
+        if (!hasIllegalState) {
+            game->isValid = TRUE;
+            return 0;
+        }
+
+        return -1;
     }
 
-    return -1;
-  }
+    if (game->isValid == TRUE) {
+        if (game->state.playerCount > playerCount) {
+            osSyncPrintf("Too Many Players\n");
+            return -1;
+        }
 
-  if (game->isValid == TRUE) {
-    if (game->state.playerCount > playerCount) {
-      osSyncPrintf("Too Many Players\n");
-      return -1;
+        playerCount = game->state.playerCount;
+        for (index = 0; index < playerCount; index++) {
+            g_Players[index] = players[index];
+            g_PlayRecords[index] = records[index];
+        }
+
+        g_GameState = game->state;
+        g_GameState.step = GAME_STATE_LOAD_HOLE;
+        SetGameFlag(GAME_FLAG_LOADED_PLAY);
+        g_HoleSetup = game->hole;
     }
 
-    playerCount = game->state.playerCount;
-    for (index = 0; index < playerCount; index++) {
-      g_Players[index] = players[index];
-      g_PlayRecords[index] = records[index];
-    }
-
-    g_GameState = game->state;
-    g_GameState.step = GAME_STATE_LOAD_HOLE;
-    SetGameFlag(GAME_FLAG_LOADED_PLAY);
-    g_HoleSetup = game->hole;
-  }
-
-  g_GameState.isRoundContinued = ROUND_CONTINUED;
-  osSyncPrintf("Go Continue\n");
-  return 0;
+    g_GameState.isRoundContinued = ROUND_CONTINUED;
+    osSyncPrintf("Go Continue\n");
+    return 0;
 }
 
 #define MAX_SAVE_COUNT 99
 
 s32 SaveOrContinueGame(s32 slotIndex, Boolean isContinuing) {
-  Player* players;
-  SavedGame* game;
-  s32 playerCount;
-  Boolean hasIllegalState;
-  s32 index;
+    Player *players;
+    SavedGame *game;
+    s32 playerCount;
+    Boolean hasIllegalState;
+    s32 index;
 
-  playerCount = MAX_PLAYER_COUNT; /* The limit, until the count is known */
-  players = g_SaveData.savedPlayers[slotIndex];
-  game = &g_SaveData.savedGames[slotIndex];
-  if (!isContinuing) {
-    hasIllegalState = FALSE;
-    if (g_GameState.playerCount > playerCount) {
-      osSyncPrintf("Too Many Players\n");
-      return -1;
+    playerCount = MAX_PLAYER_COUNT; /* The limit, until the count is known */
+    players = g_SaveData.savedPlayers[slotIndex];
+    game = &g_SaveData.savedGames[slotIndex];
+    if (!isContinuing) {
+        hasIllegalState = FALSE;
+        if (g_GameState.playerCount > playerCount) {
+            osSyncPrintf("Too Many Players\n");
+            return -1;
+        }
+
+        playerCount = g_GameState.playerCount;
+        game->isValid = FALSE;
+        for (index = 0; index < playerCount; index++) {
+            players[index] = g_BackedUpPlayers[index];
+            switch (players[index].state) {
+                case PLAYER_STATE_STARTING_TURN:
+                case PLAYER_STATE_AIMING:
+                case PLAYER_STATE_UNUSED_AIMING:
+                case PLAYER_STATE_PREPARING_AIM:
+                    players[index].state = PLAYER_STATE_STARTING_TURN;
+                    break;
+                default:
+                    osSyncPrintf("Illegal PlayerState\n");
+                    hasIllegalState = TRUE;
+                    break;
+                case PLAYER_STATE_WAITING:
+                case PLAYER_STATE_HOLE_DONE:
+                    break;
+            }
+        }
+
+        game->state = g_BackedUpGameState;
+        if (game->state.saveCount < MAX_SAVE_COUNT) {
+            game->state.saveCount++;
+        }
+
+        game->hole = g_HoleSetup;
+        game->roundStats = g_RoundStats;
+        if (hasIllegalState) {
+            return -1;
+        }
+
+        game->isValid = TRUE;
+    }
+    else {
+        if (game->isValid == TRUE) {
+            if (game->state.playerCount > playerCount) {
+                osSyncPrintf("Too Many Players\n");
+                return -1;
+            }
+
+            playerCount = game->state.playerCount;
+            for (index = 0; index < playerCount; index++) {
+                g_Players[index] = players[index];
+            }
+
+            g_GameState = game->state;
+            g_GameState.step = GAME_STATE_LOAD_HOLE;
+            SetGameFlag(GAME_FLAG_LOADED_PLAY);
+            g_HoleSetup = game->hole;
+            g_RoundStats = game->roundStats;
+        }
+
+        g_GameState.isRoundContinued = ROUND_CONTINUED;
+        osSyncPrintf("Go Continue\n");
     }
 
-    playerCount = g_GameState.playerCount;
-    game->isValid = FALSE;
-    for (index = 0; index < playerCount; index++) {
-      players[index] = g_BackedUpPlayers[index];
-      switch (players[index].state) {
-        case PLAYER_STATE_STARTING_TURN:
-        case PLAYER_STATE_AIMING:
-        case PLAYER_STATE_UNUSED_AIMING:
-        case PLAYER_STATE_PREPARING_AIM:
-          players[index].state = PLAYER_STATE_STARTING_TURN;
-          break;
-        default:
-          osSyncPrintf("Illegal PlayerState\n");
-          hasIllegalState = TRUE;
-          break;
-        case PLAYER_STATE_WAITING:
-        case PLAYER_STATE_HOLE_DONE:
-          break;
-      }
+    if (!isContinuing) {
+        TransferSaveData(GetSaveData(), TRUE);
     }
 
-    game->state = g_BackedUpGameState;
-    if (game->state.saveCount < MAX_SAVE_COUNT) {
-      game->state.saveCount++;
-    }
-
-    game->hole = g_HoleSetup;
-    game->roundStats = g_RoundStats;
-    if (hasIllegalState) {
-      return -1;
-    }
-
-    game->isValid = TRUE;
-  } else {
-    if (game->isValid == TRUE) {
-      if (game->state.playerCount > playerCount) {
-        osSyncPrintf("Too Many Players\n");
-        return -1;
-      }
-
-      playerCount = game->state.playerCount;
-      for (index = 0; index < playerCount; index++) {
-        g_Players[index] = players[index];
-      }
-
-      g_GameState = game->state;
-      g_GameState.step = GAME_STATE_LOAD_HOLE;
-      SetGameFlag(GAME_FLAG_LOADED_PLAY);
-      g_HoleSetup = game->hole;
-      g_RoundStats = game->roundStats;
-    }
-
-    g_GameState.isRoundContinued = ROUND_CONTINUED;
-    osSyncPrintf("Go Continue\n");
-  }
-
-  if (!isContinuing) {
-    TransferSaveData(GetSaveData(), TRUE);
-  }
-
-  return 0;
+    return 0;
 }
 
 void RecordDisplayListLength(u32 commandCount) {
-  if (g_SaveData.longestDisplayListLength < commandCount) {
-    g_SaveData.longestDisplayListLength = commandCount;
-  }
+    if (g_SaveData.longestDisplayListLength < commandCount) {
+        g_SaveData.longestDisplayListLength = commandCount;
+    }
 }
 
 /*
@@ -1178,237 +1789,231 @@ void RecordDisplayListLength(u32 commandCount) {
  * enough, with its golfer's character and color and its net score to par,
  * which orders equal times, and saves
  */
-void InsertBestTime(s32 courseIndex, s32 time, s32 scoreToPar,
-    CharacterId character, s32 palette) {
-  SaveData* save;
-  s32 count;
-  s32 index;
-  s32 runIndex;
-  s32 scanIndex;
-  s32 otherIndex;
-  /* The original frame has room for this; without it 64 words differ, none in
-   * shape */
-  s32 unused[4] UNUSED;
+void InsertBestTime(s32 courseIndex, s32 time, s32 scoreToPar, CharacterId character, s32 palette) {
+    SaveData *save;
+    s32 count;
+    s32 index;
+    s32 runIndex;
+    s32 scanIndex;
+    s32 otherIndex;
+    /* The original frame has room for this; without it 64 words differ, none in
+     * shape */
+    s32 unused[4] UNUSED;
 
-  save = GetSaveData();
-  if (courseIndex < 0) {
-    courseIndex = 0;
-  }
-
-  if (courseIndex >= COURSE_COUNT) {
-    courseIndex = COURSE_COUNT - 1;
-  }
-
-  if (time >= 0) {
-    if (time <= STOPWATCH_MAX_FRAMES) {
-      if (palette < 0) {
-        palette = 0;
-      }
-
-      if (palette > CHARACTER_PALETTE_COUNT - 1) {
-        palette = CHARACTER_PALETTE_COUNT - 1;
-      }
-
-      count = 0;
-      for (index = 0; index != BEST_TIME_COUNT; index++) {
-        count += save->records.bestTimes[courseIndex][index] > 0;
-      }
-
-      /*
-       * Both sorts copy the smaller entry over the larger one instead
-       * of swapping them, so the larger one is lost.
-       */
-      for (index = 0; index != count; index++) {
-        for (scanIndex = index + 1; scanIndex != count; scanIndex++) {
-          if (save->records.bestTimes[courseIndex][index] >
-              save->records.bestTimes[courseIndex][scanIndex]) {
-            save->records.bestTimes[courseIndex][index] =
-                save->records.bestTimes[courseIndex][scanIndex];
-            save->records.bestTimeCharacters[courseIndex][index] =
-                save->records.bestTimeCharacters[courseIndex][scanIndex];
-            save->records.bestTimeScoresToPar[courseIndex][index] =
-                save->records.bestTimeScoresToPar[courseIndex][scanIndex];
-            save->records.bestTimePalettes[courseIndex][index] =
-                save->records.bestTimePalettes[courseIndex][scanIndex];
-          }
-        }
-      }
-
-      for (index = 0; index != count; index++) {
-        for (scanIndex = index + 1; scanIndex != count; scanIndex++) {
-          if (save->records.bestTimeScoresToPar[courseIndex][index] !=
-              save->records.bestTimeScoresToPar[courseIndex][scanIndex]) {
-            break;
-          }
-        }
-
-        if (index + 1 < scanIndex) {
-          for (runIndex = index; runIndex != scanIndex; runIndex++) {
-            for (otherIndex = runIndex + 1; otherIndex != scanIndex;
-                otherIndex++) {
-              if (save->records.bestTimeScoresToPar[courseIndex][runIndex] >
-                  save->records.bestTimeScoresToPar[courseIndex][otherIndex]) {
-                save->records.bestTimes[courseIndex][runIndex] =
-                    save->records.bestTimes[courseIndex][otherIndex];
-                save->records.bestTimeCharacters[courseIndex][runIndex] =
-                    save->records.bestTimeCharacters[courseIndex][otherIndex];
-                save->records.bestTimeScoresToPar[courseIndex][runIndex] =
-                    save->records.bestTimeScoresToPar[courseIndex][otherIndex];
-                save->records.bestTimePalettes[courseIndex][runIndex] =
-                    save->records.bestTimePalettes[courseIndex][otherIndex];
-              }
-            }
-          }
-        }
-      }
-
-      if (count > 0) {
-        for (index = 0; index != count; index++) {
-          if (time < save->records.bestTimes[courseIndex][index]) {
-            break;
-          }
-
-          if (time == save->records.bestTimes[courseIndex][index] &&
-              scoreToPar <=
-                  save->records.bestTimeScoresToPar[courseIndex][index]) {
-            break;
-          }
-        }
-
-        if (index < BEST_TIME_COUNT) {
-          for (scanIndex = BEST_TIME_COUNT - 1; index < scanIndex;
-              scanIndex--) {
-            save->records.bestTimes[courseIndex][scanIndex] =
-                save->records.bestTimes[courseIndex][scanIndex - 1];
-            save->records.bestTimeCharacters[courseIndex][scanIndex] =
-                save->records.bestTimeCharacters[courseIndex][scanIndex - 1];
-            save->records.bestTimeScoresToPar[courseIndex][scanIndex] =
-                save->records.bestTimeScoresToPar[courseIndex][scanIndex - 1];
-            save->records.bestTimePalettes[courseIndex][scanIndex] =
-                save->records.bestTimePalettes[courseIndex][scanIndex - 1];
-          }
-
-          save->records.bestTimes[courseIndex][index] = time;
-          save->records.bestTimeCharacters[courseIndex][index] = character;
-          save->records.bestTimeScoresToPar[courseIndex][index] = scoreToPar;
-          save->records.bestTimePalettes[courseIndex][index] = palette;
-        }
-      } else {
-        save->records.bestTimes[courseIndex][0] = time;
-        save->records.bestTimeCharacters[courseIndex][0] = character;
-        save->records.bestTimeScoresToPar[courseIndex][0] = scoreToPar;
-        save->records.bestTimePalettes[courseIndex][0] = palette;
-      }
-
-      TransferSaveData(save, TRUE);
+    save = GetSaveData();
+    if (courseIndex < 0) {
+        courseIndex = 0;
     }
-  }
+
+    if (courseIndex >= COURSE_COUNT) {
+        courseIndex = COURSE_COUNT - 1;
+    }
+
+    if (time >= 0) {
+        if (time <= STOPWATCH_MAX_FRAMES) {
+            if (palette < 0) {
+                palette = 0;
+            }
+
+            if (palette > CHARACTER_PALETTE_COUNT - 1) {
+                palette = CHARACTER_PALETTE_COUNT - 1;
+            }
+
+            count = 0;
+            for (index = 0; index != BEST_TIME_COUNT; index++) {
+                count += save->records.bestTimes[courseIndex][index] > 0;
+            }
+
+            /*
+             * Both sorts copy the smaller entry over the larger one instead
+             * of swapping them, so the larger one is lost.
+             */
+            for (index = 0; index != count; index++) {
+                for (scanIndex = index + 1; scanIndex != count; scanIndex++) {
+                    if (save->records.bestTimes[courseIndex][index] >
+                        save->records.bestTimes[courseIndex][scanIndex]) {
+                        save->records.bestTimes[courseIndex][index] =
+                            save->records.bestTimes[courseIndex][scanIndex];
+                        save->records.bestTimeCharacters[courseIndex][index] =
+                            save->records.bestTimeCharacters[courseIndex][scanIndex];
+                        save->records.bestTimeScoresToPar[courseIndex][index] =
+                            save->records.bestTimeScoresToPar[courseIndex][scanIndex];
+                        save->records.bestTimePalettes[courseIndex][index] =
+                            save->records.bestTimePalettes[courseIndex][scanIndex];
+                    }
+                }
+            }
+
+            for (index = 0; index != count; index++) {
+                for (scanIndex = index + 1; scanIndex != count; scanIndex++) {
+                    if (save->records.bestTimeScoresToPar[courseIndex][index] !=
+                        save->records.bestTimeScoresToPar[courseIndex][scanIndex]) {
+                        break;
+                    }
+                }
+
+                if (index + 1 < scanIndex) {
+                    for (runIndex = index; runIndex != scanIndex; runIndex++) {
+                        for (otherIndex = runIndex + 1; otherIndex != scanIndex; otherIndex++) {
+                            if (save->records.bestTimeScoresToPar[courseIndex][runIndex] >
+                                save->records.bestTimeScoresToPar[courseIndex][otherIndex]) {
+                                save->records.bestTimes[courseIndex][runIndex] =
+                                    save->records.bestTimes[courseIndex][otherIndex];
+                                save->records.bestTimeCharacters[courseIndex][runIndex] =
+                                    save->records.bestTimeCharacters[courseIndex][otherIndex];
+                                save->records.bestTimeScoresToPar[courseIndex][runIndex] =
+                                    save->records.bestTimeScoresToPar[courseIndex][otherIndex];
+                                save->records.bestTimePalettes[courseIndex][runIndex] =
+                                    save->records.bestTimePalettes[courseIndex][otherIndex];
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (count > 0) {
+                for (index = 0; index != count; index++) {
+                    if (time < save->records.bestTimes[courseIndex][index]) {
+                        break;
+                    }
+
+                    if (time == save->records.bestTimes[courseIndex][index] &&
+                        scoreToPar <= save->records.bestTimeScoresToPar[courseIndex][index]) {
+                        break;
+                    }
+                }
+
+                if (index < BEST_TIME_COUNT) {
+                    for (scanIndex = BEST_TIME_COUNT - 1; index < scanIndex; scanIndex--) {
+                        save->records.bestTimes[courseIndex][scanIndex] =
+                            save->records.bestTimes[courseIndex][scanIndex - 1];
+                        save->records.bestTimeCharacters[courseIndex][scanIndex] =
+                            save->records.bestTimeCharacters[courseIndex][scanIndex - 1];
+                        save->records.bestTimeScoresToPar[courseIndex][scanIndex] =
+                            save->records.bestTimeScoresToPar[courseIndex][scanIndex - 1];
+                        save->records.bestTimePalettes[courseIndex][scanIndex] =
+                            save->records.bestTimePalettes[courseIndex][scanIndex - 1];
+                    }
+
+                    save->records.bestTimes[courseIndex][index] = time;
+                    save->records.bestTimeCharacters[courseIndex][index] = character;
+                    save->records.bestTimeScoresToPar[courseIndex][index] = scoreToPar;
+                    save->records.bestTimePalettes[courseIndex][index] = palette;
+                }
+            }
+            else {
+                save->records.bestTimes[courseIndex][0] = time;
+                save->records.bestTimeCharacters[courseIndex][0] = character;
+                save->records.bestTimeScoresToPar[courseIndex][0] = scoreToPar;
+                save->records.bestTimePalettes[courseIndex][0] = palette;
+            }
+
+            TransferSaveData(save, TRUE);
+        }
+    }
 }
 
 Boolean HasEveryRingShotStar(void) {
-  SaveData* save;
-  s32 starCount;
-  CourseIndex courseIndex;
-  s32 holeIndex;
+    SaveData *save;
+    s32 starCount;
+    CourseIndex courseIndex;
+    s32 holeIndex;
 
-  save = GetSaveData();
-  starCount = 0;
-  for (courseIndex = 0; courseIndex != RING_SHOT_COURSE_COUNT; courseIndex++) {
-    for (holeIndex = 0; holeIndex != RING_SHOT_HOLE_COUNT; holeIndex++) {
-      starCount +=
-          save->records.hasRingShotStar[courseIndex][holeIndex] != FALSE;
+    save = GetSaveData();
+    starCount = 0;
+    for (courseIndex = 0; courseIndex != RING_SHOT_COURSE_COUNT; courseIndex++) {
+        for (holeIndex = 0; holeIndex != RING_SHOT_HOLE_COUNT; holeIndex++) {
+            starCount += save->records.hasRingShotStar[courseIndex][holeIndex] != FALSE;
+        }
     }
-  }
 
-  return starCount == RING_SHOT_COURSE_COUNT * RING_SHOT_HOLE_COUNT;
+    return starCount == RING_SHOT_COURSE_COUNT * RING_SHOT_HOLE_COUNT;
 }
 
 Boolean IsDonkeyKongUnlocked(void) {
-  SaveData* save;
-  s32 starCount;
-  CourseIndex courseIndex;
-  s32 holeIndex;
+    SaveData *save;
+    s32 starCount;
+    CourseIndex courseIndex;
+    s32 holeIndex;
 
-  save = GetSaveData();
-  starCount = 0;
-  for (courseIndex = 0; courseIndex != RING_SHOT_COURSE_COUNT; courseIndex++) {
-    for (holeIndex = 0; holeIndex != RING_SHOT_HOLE_COUNT; holeIndex++) {
-      starCount +=
-          save->records.hasRingShotStar[courseIndex][holeIndex] != FALSE;
+    save = GetSaveData();
+    starCount = 0;
+    for (courseIndex = 0; courseIndex != RING_SHOT_COURSE_COUNT; courseIndex++) {
+        for (holeIndex = 0; holeIndex != RING_SHOT_HOLE_COUNT; holeIndex++) {
+            starCount += save->records.hasRingShotStar[courseIndex][holeIndex] != FALSE;
+        }
     }
-  }
 
-  return starCount >= DONKEY_KONG_STAR_COUNT;
+    return starCount >= DONKEY_KONG_STAR_COUNT;
 }
 
 /* The Ring Shot course that opens at exactly the stars earned so far, or 0 for
  * none */
 s32 GetRingShotCourseOpenedAtStarCount(void) {
-  SaveData* save;
-  s32 starCount;
-  CourseIndex courseIndex;
-  s32 holeIndex;
+    SaveData *save;
+    s32 starCount;
+    CourseIndex courseIndex;
+    s32 holeIndex;
 
-  save = GetSaveData();
-  starCount = 0;
-  for (courseIndex = 0; courseIndex != RING_SHOT_COURSE_COUNT; courseIndex++) {
-    for (holeIndex = 0; holeIndex != RING_SHOT_HOLE_COUNT; holeIndex++) {
-      starCount +=
-          save->records.hasRingShotStar[courseIndex][holeIndex] != FALSE;
+    save = GetSaveData();
+    starCount = 0;
+    for (courseIndex = 0; courseIndex != RING_SHOT_COURSE_COUNT; courseIndex++) {
+        for (holeIndex = 0; holeIndex != RING_SHOT_HOLE_COUNT; holeIndex++) {
+            starCount += save->records.hasRingShotStar[courseIndex][holeIndex] != FALSE;
+        }
     }
-  }
 
-  if (starCount == STARS_PER_RING_SHOT_COURSE * 1) {
-    return 1;
-  } else if (starCount == STARS_PER_RING_SHOT_COURSE * 2) {
-    return 2;
-  } else if (starCount == STARS_PER_RING_SHOT_COURSE * 3) {
-    return 3;
-  } else if (starCount == STARS_PER_RING_SHOT_COURSE * 4) {
-    return 4;
-  } else if (starCount == STARS_PER_RING_SHOT_COURSE * 5) {
-    return 5;
-  }
+    if (starCount == STARS_PER_RING_SHOT_COURSE * 1) {
+        return 1;
+    }
+    else if (starCount == STARS_PER_RING_SHOT_COURSE * 2) {
+        return 2;
+    }
+    else if (starCount == STARS_PER_RING_SHOT_COURSE * 3) {
+        return 3;
+    }
+    else if (starCount == STARS_PER_RING_SHOT_COURSE * 4) {
+        return 4;
+    }
+    else if (starCount == STARS_PER_RING_SHOT_COURSE * 5) {
+        return 5;
+    }
 
-  return 0;
+    return 0;
 }
 
 Boolean IsMapleUnlocked(void) {
-  SaveData* save;
-  s32 badgeCount;
-  CourseIndex courseIndex;
-  s32 holeIndex;
+    SaveData *save;
+    s32 badgeCount;
+    CourseIndex courseIndex;
+    s32 holeIndex;
 
-  save = GetSaveData();
-  badgeCount = 0;
-  for (courseIndex = 0; courseIndex != COURSE_COUNT; courseIndex++) {
-    for (holeIndex = 0; holeIndex != COURSE_HOLE_COUNT; holeIndex++) {
-      badgeCount +=
-          save->records.awards.birdieBadgeCounts[courseIndex][holeIndex] !=
-          FALSE;
+    save = GetSaveData();
+    badgeCount = 0;
+    for (courseIndex = 0; courseIndex != COURSE_COUNT; courseIndex++) {
+        for (holeIndex = 0; holeIndex != COURSE_HOLE_COUNT; holeIndex++) {
+            badgeCount += save->records.awards.birdieBadgeCounts[courseIndex][holeIndex] != FALSE;
+        }
     }
-  }
 
-  return badgeCount >= MAPLE_BADGE_COUNT;
+    return badgeCount >= MAPLE_BADGE_COUNT;
 }
 
 Boolean IsMetalMarioUnlocked(void) {
-  SaveData* save;
-  s32 badgeCount;
-  CourseIndex courseIndex;
-  s32 holeIndex;
+    SaveData *save;
+    s32 badgeCount;
+    CourseIndex courseIndex;
+    s32 holeIndex;
 
-  save = GetSaveData();
-  badgeCount = 0;
-  for (courseIndex = 0; courseIndex != COURSE_COUNT; courseIndex++) {
-    for (holeIndex = 0; holeIndex != COURSE_HOLE_COUNT; holeIndex++) {
-      badgeCount +=
-          save->records.awards.birdieBadgeCounts[courseIndex][holeIndex] !=
-          FALSE;
+    save = GetSaveData();
+    badgeCount = 0;
+    for (courseIndex = 0; courseIndex != COURSE_COUNT; courseIndex++) {
+        for (holeIndex = 0; holeIndex != COURSE_HOLE_COUNT; holeIndex++) {
+            badgeCount += save->records.awards.birdieBadgeCounts[courseIndex][holeIndex] != FALSE;
+        }
     }
-  }
 
-  return badgeCount == COURSE_COUNT * COURSE_HOLE_COUNT;
+    return badgeCount == COURSE_COUNT * COURSE_HOLE_COUNT;
 }
 
 /*
@@ -1421,107 +2026,107 @@ Boolean IsMetalMarioUnlocked(void) {
  * in shape), and a character variable 4 (0).
  */
 void BuildCharacterGrid(s32 playerCount, Boolean skipsImportedFaces) {
-  EncodedAsset asset;
-  AssetFile file;
-  SaveData* save;
-  s32 row;
-  s32 column;
-  s32 index;
-  /*
-   * Also holds a grid entry at the end, to match: a gridEntry variable gives 4
-   * words differing, none in shape
-   */
-  s32 recordIndex;
+    EncodedAsset asset;
+    AssetFile file;
+    SaveData *save;
+    s32 row;
+    s32 column;
+    s32 index;
+    /*
+     * Also holds a grid entry at the end, to match: a gridEntry variable gives 4
+     * words differing, none in shape
+     */
+    s32 recordIndex;
 
-  save = GetSaveData();
-  for (row = 0; row != CHARACTER_GRID_ROW_COUNT; row++) {
-    for (column = 0; column != CHARACTER_GRID_COLUMN_COUNT; column++) {
-      g_CharacterGrid[row][column] = f_StartingCharacterGrid[row][column];
+    save = GetSaveData();
+    for (row = 0; row != CHARACTER_GRID_ROW_COUNT; row++) {
+        for (column = 0; column != CHARACTER_GRID_COLUMN_COUNT; column++) {
+            g_CharacterGrid[row][column] = f_StartingCharacterGrid[row][column];
+        }
     }
-  }
 
-  if (IsGameFlagSet(GAME_FLAG_ALL_CHARACTERS)) {
-    for (row = 0; row != CHARACTER_CHOICE_ROW_COUNT; row++) {
-      for (column = 0; column != CHARACTER_GRID_COLUMN_COUNT; column++) {
-        g_CharacterGrid[row][column] = f_EveryCharacterGrid[row][column];
-      }
+    if (IsGameFlagSet(GAME_FLAG_ALL_CHARACTERS)) {
+        for (row = 0; row != CHARACTER_CHOICE_ROW_COUNT; row++) {
+            for (column = 0; column != CHARACTER_GRID_COLUMN_COUNT; column++) {
+                g_CharacterGrid[row][column] = f_EveryCharacterGrid[row][column];
+            }
+        }
+
+        PlaceImportedCharacters();
+        return;
+    }
+
+    if (playerCount >= 2) {
+        for (row = 0; row != CHARACTER_CHOICE_ROW_COUNT; row++) {
+            for (column = 0; column != MULTIPLAYER_GRID_COLUMN_COUNT; column++) {
+                g_CharacterGrid[row][column] = f_EveryCharacterGrid[row][column];
+            }
+        }
+    }
+
+    for (index = 0; index != RECORD_CHARACTER_COUNT; index++) {
+        for (recordIndex = 0, playerCount = 0; recordIndex != CHARACTER_COUNT; recordIndex++) {
+            if (save->records.awards.matchups[recordIndex][index].winBits & WIN_COUNT_MASK) {
+                playerCount++;
+                break;
+            }
+        }
+
+        if (playerCount > 0) {
+            for (row = 0; row != CHARACTER_CHOICE_ROW_COUNT; row++) {
+                for (column = 0; column != CHARACTER_GRID_COLUMN_COUNT; column++) {
+                    if (f_RecordGrid[row][column] == index) {
+                        g_CharacterGrid[row][column] = f_RecordCharacters[index];
+                    }
+                }
+            }
+        }
+    }
+
+    if (IsMapleUnlocked()) {
+        g_CharacterGrid[0][5] = CHARACTER_CHOICE_MAPLE;
+    }
+
+    if (IsDonkeyKongUnlocked()) {
+        g_CharacterGrid[1][5] = CHARACTER_CHOICE_DONKEY_KONG;
+    }
+
+    if (IsMetalMarioUnlocked()) {
+        g_CharacterGrid[1][6] = CHARACTER_CHOICE_METAL_MARIO;
     }
 
     PlaceImportedCharacters();
-    return;
-  }
-
-  if (playerCount >= 2) {
-    for (row = 0; row != CHARACTER_CHOICE_ROW_COUNT; row++) {
-      for (column = 0; column != MULTIPLAYER_GRID_COLUMN_COUNT; column++) {
-        g_CharacterGrid[row][column] = f_EveryCharacterGrid[row][column];
-      }
-    }
-  }
-
-  for (index = 0; index != RECORD_CHARACTER_COUNT; index++) {
-    for (recordIndex = 0, playerCount = 0; recordIndex != CHARACTER_COUNT;
-        recordIndex++) {
-      if (save->records.awards.matchups[recordIndex][index].winBits &
-          WIN_COUNT_MASK) {
-        playerCount++;
-        break;
-      }
-    }
-
-    if (playerCount > 0) {
-      for (row = 0; row != CHARACTER_CHOICE_ROW_COUNT; row++) {
-        for (column = 0; column != CHARACTER_GRID_COLUMN_COUNT; column++) {
-          if (f_RecordGrid[row][column] == index) {
-            g_CharacterGrid[row][column] = f_RecordCharacters[index];
-          }
+    for (index = 0; index != MARKABLE_CHARACTER_COUNT; index++) {
+        row = f_SlotCells[index].row;
+        column = f_SlotCells[index].column;
+        if (g_CharacterGrid[row][column] < 0) {
+            g_CharacterGrid[row][column] = index - MARKED_CHARACTER_OFFSET;
+            break;
         }
-      }
     }
-  }
 
-  if (IsMapleUnlocked()) {
-    g_CharacterGrid[0][5] = CHARACTER_CHOICE_MAPLE;
-  }
-
-  if (IsDonkeyKongUnlocked()) {
-    g_CharacterGrid[1][5] = CHARACTER_CHOICE_DONKEY_KONG;
-  }
-
-  if (IsMetalMarioUnlocked()) {
-    g_CharacterGrid[1][6] = CHARACTER_CHOICE_METAL_MARIO;
-  }
-
-  PlaceImportedCharacters();
-  for (index = 0; index != MARKABLE_CHARACTER_COUNT; index++) {
-    row = f_SlotCells[index].row;
-    column = f_SlotCells[index].column;
-    if (g_CharacterGrid[row][column] < 0) {
-      g_CharacterGrid[row][column] = index - MARKED_CHARACTER_OFFSET;
-      break;
+    if (index == MARKABLE_CHARACTER_COUNT) {
+        if (g_CharacterGrid[0][6] != CHARACTER_CHOICE_BOWSER) {
+            g_CharacterGrid[0][6] = CHARACTER_CHOICE_BOWSER - MARKED_CHARACTER_OFFSET;
+        }
     }
-  }
 
-  if (index == MARKABLE_CHARACTER_COUNT) {
-    if (g_CharacterGrid[0][6] != CHARACTER_CHOICE_BOWSER) {
-      g_CharacterGrid[0][6] = CHARACTER_CHOICE_BOWSER - MARKED_CHARACTER_OFFSET;
+    if ((u8)skipsImportedFaces != TRUE) {
+        for (index = 0; index != ARRAY_COUNT(g_ImportedCharacters); index++) {
+            recordIndex = g_CharacterGrid[2][index];
+            if (recordIndex >= 0) {
+                playerCount = g_ImportedCharacters[index].character;
+                OpenEncodedAsset(g_FaceAnimationAssets[playerCount][0], &asset);
+                ReadEncodedAsset(g_CharacterFaceImages[FIRST_IMPORTED_CHARACTER + index], &asset);
+                OpenAssetFile(g_CharacterFacePaletteFiles[playerCount][0], &file);
+                ReadAssetFile(
+                    g_CharacterFacePalettes[FIRST_IMPORTED_CHARACTER + index],
+                    GetAssetFileSize(&file),
+                    &file
+                );
+            }
+        }
     }
-  }
-
-  if ((u8)skipsImportedFaces != TRUE) {
-    for (index = 0; index != ARRAY_COUNT(g_ImportedCharacters); index++) {
-      recordIndex = g_CharacterGrid[2][index];
-      if (recordIndex >= 0) {
-        playerCount = g_ImportedCharacters[index].character;
-        OpenEncodedAsset(g_FaceAnimationAssets[playerCount][0], &asset);
-        ReadEncodedAsset(
-            g_CharacterFaceImages[FIRST_IMPORTED_CHARACTER + index], &asset);
-        OpenAssetFile(g_CharacterFacePaletteFiles[playerCount][0], &file);
-        ReadAssetFile(g_CharacterFacePalettes[FIRST_IMPORTED_CHARACTER + index],
-            GetAssetFileSize(&file), &file);
-      }
-    }
-  }
 }
 
 /*
@@ -1530,94 +2135,89 @@ void BuildCharacterGrid(s32 playerCount, Boolean skipsImportedFaces) {
  * and first clubs
  */
 void PlaceImportedCharacters(void) {
-  s16 index;
-  s16 byteIndex;
-  /*
-   * Also the byte index of the first loops, to match: clearing the names with
-   * byteIndex gives 43 words differing, 3 in shape
-   */
-  s16 count;
-  char* name;
-  u8 letter;
+    s16 index;
+    s16 byteIndex;
+    /*
+     * Also the byte index of the first loops, to match: clearing the names with
+     * byteIndex gives 43 words differing, 3 in shape
+     */
+    s16 count;
+    char *name;
+    u8 letter;
 
-  for (index = 0; index != IMPORTED_CHARACTER_COUNT; index++) {
-    g_ImportedCharacters[index].character = 0;
-    g_ImportedCharacters[index].clubDistance = 0;
-    g_ImportedCharacters[index].clubSpin = 0;
-    g_ImportedCharacters[index].clubSideSpin = 0;
-    for (count = 0; count != IMPORTED_CHARACTER_NAME_LENGTH; count++) {
-      g_ImportedCharacters[index].name[count] = 0;
-    }
-  }
-
-  for (index = 0; index != IMPORTED_CHARACTER_COUNT; index++) {
-    for (count = 0; count != IMPORTED_CHARACTER_NAME_LENGTH; count++) {
-      f_ImportedCharacterNames[index][count] = 0;
-    }
-  }
-
-  count = 0;
-  for (index = 0; index != IMPORTED_CHARACTER_COUNT; index++) {
-    if (g_GameBoyCharacters[index].status ==
-        GAME_BOY_CHARACTER_STATUS_PRESENT) {
-      count++;
-    }
-  }
-
-  if (IsGameFlagSet(GAME_FLAG_ALL_CHARACTERS)) {
-    count = IMPORTED_CHARACTER_COUNT;
-  }
-
-  if (count > 0) {
-    if (count > IMPORTED_CHARACTER_COUNT) {
-      count = IMPORTED_CHARACTER_COUNT;
+    for (index = 0; index != IMPORTED_CHARACTER_COUNT; index++) {
+        g_ImportedCharacters[index].character = 0;
+        g_ImportedCharacters[index].clubDistance = 0;
+        g_ImportedCharacters[index].clubSpin = 0;
+        g_ImportedCharacters[index].clubSideSpin = 0;
+        for (count = 0; count != IMPORTED_CHARACTER_NAME_LENGTH; count++) {
+            g_ImportedCharacters[index].name[count] = 0;
+        }
     }
 
-    for (index = 0; index != count; index++) {
-      if (IsGameFlagSet(GAME_FLAG_ALL_CHARACTERS)) {
-        name = f_DebugImportedNames[index];
-      } else {
-        name = g_GameBoyCharacters[index].name;
-      }
-
-      for (byteIndex = 0; byteIndex != IMPORTED_CHARACTER_NAME_LENGTH;
-          byteIndex++) {
-        letter = *name++;
-        f_ImportedCharacterNames[index][byteIndex] = letter;
-        g_ImportedCharacters[index].name[byteIndex] = letter;
-      }
-
-      g_CharacterGrid[f_ImportedCharacterCells[index].row]
-                     [f_ImportedCharacterCells[index].column] =
-                         FIRST_IMPORTED_CHARACTER + index;
-      if (IsGameFlagSet(GAME_FLAG_ALL_CHARACTERS)) {
-        g_ImportedCharacters[index].character =
-            f_DebugImportedCharacters[index];
-        g_ImportedCharacters[index].clubDistance =
-            f_DebugImportedDistances[index];
-        g_ImportedCharacters[index].clubSpin = f_DebugImportedSpins[index];
-        g_ImportedCharacters[index].clubSideSpin =
-            f_DebugImportedSideSpins[index];
-        g_Clubs[(FIRST_IMPORTED_CHARACTER + index) * CLUB_SET_SIZE].distance =
-            f_DebugImportedDistances[index];
-        g_Clubs[(FIRST_IMPORTED_CHARACTER + index) * CLUB_SET_SIZE].spin =
-            f_DebugImportedSpins[index];
-        g_Clubs[(FIRST_IMPORTED_CHARACTER + index) * CLUB_SET_SIZE].sideSpin =
-            f_DebugImportedSideSpins[index];
-      } else {
-        g_ImportedCharacters[index].character =
-            g_GameBoyCharacters[index].character + FIRST_IMPORTED_CHARACTER;
-        g_ImportedCharacters[index].clubDistance =
-            g_Clubs[(FIRST_IMPORTED_CHARACTER + index) * CLUB_SET_SIZE]
-                .distance;
-        g_ImportedCharacters[index].clubSpin =
-            g_Clubs[(FIRST_IMPORTED_CHARACTER + index) * CLUB_SET_SIZE].spin;
-        g_ImportedCharacters[index].clubSideSpin =
-            g_Clubs[(FIRST_IMPORTED_CHARACTER + index) * CLUB_SET_SIZE]
-                .sideSpin;
-      }
+    for (index = 0; index != IMPORTED_CHARACTER_COUNT; index++) {
+        for (count = 0; count != IMPORTED_CHARACTER_NAME_LENGTH; count++) {
+            f_ImportedCharacterNames[index][count] = 0;
+        }
     }
-  }
+
+    count = 0;
+    for (index = 0; index != IMPORTED_CHARACTER_COUNT; index++) {
+        if (g_GameBoyCharacters[index].status == GAME_BOY_CHARACTER_STATUS_PRESENT) {
+            count++;
+        }
+    }
+
+    if (IsGameFlagSet(GAME_FLAG_ALL_CHARACTERS)) {
+        count = IMPORTED_CHARACTER_COUNT;
+    }
+
+    if (count > 0) {
+        if (count > IMPORTED_CHARACTER_COUNT) {
+            count = IMPORTED_CHARACTER_COUNT;
+        }
+
+        for (index = 0; index != count; index++) {
+            if (IsGameFlagSet(GAME_FLAG_ALL_CHARACTERS)) {
+                name = f_DebugImportedNames[index];
+            }
+            else {
+                name = g_GameBoyCharacters[index].name;
+            }
+
+            for (byteIndex = 0; byteIndex != IMPORTED_CHARACTER_NAME_LENGTH; byteIndex++) {
+                letter = *name++;
+                f_ImportedCharacterNames[index][byteIndex] = letter;
+                g_ImportedCharacters[index].name[byteIndex] = letter;
+            }
+
+            g_CharacterGrid[f_ImportedCharacterCells[index].row]
+                           [f_ImportedCharacterCells[index].column] =
+                               FIRST_IMPORTED_CHARACTER + index;
+            if (IsGameFlagSet(GAME_FLAG_ALL_CHARACTERS)) {
+                g_ImportedCharacters[index].character = f_DebugImportedCharacters[index];
+                g_ImportedCharacters[index].clubDistance = f_DebugImportedDistances[index];
+                g_ImportedCharacters[index].clubSpin = f_DebugImportedSpins[index];
+                g_ImportedCharacters[index].clubSideSpin = f_DebugImportedSideSpins[index];
+                g_Clubs[(FIRST_IMPORTED_CHARACTER + index) * CLUB_SET_SIZE].distance =
+                    f_DebugImportedDistances[index];
+                g_Clubs[(FIRST_IMPORTED_CHARACTER + index) * CLUB_SET_SIZE].spin =
+                    f_DebugImportedSpins[index];
+                g_Clubs[(FIRST_IMPORTED_CHARACTER + index) * CLUB_SET_SIZE].sideSpin =
+                    f_DebugImportedSideSpins[index];
+            }
+            else {
+                g_ImportedCharacters[index].character =
+                    g_GameBoyCharacters[index].character + FIRST_IMPORTED_CHARACTER;
+                g_ImportedCharacters[index].clubDistance =
+                    g_Clubs[(FIRST_IMPORTED_CHARACTER + index) * CLUB_SET_SIZE].distance;
+                g_ImportedCharacters[index].clubSpin =
+                    g_Clubs[(FIRST_IMPORTED_CHARACTER + index) * CLUB_SET_SIZE].spin;
+                g_ImportedCharacters[index].clubSideSpin =
+                    g_Clubs[(FIRST_IMPORTED_CHARACTER + index) * CLUB_SET_SIZE].sideSpin;
+            }
+        }
+    }
 }
 
 /*
@@ -1625,95 +2225,93 @@ void PlaceImportedCharacters(void) {
  * on it (a GridSearchResult), which it lacks while it is locked
  */
 s32 FindCharacterOnGrid(CharacterId character) {
-  s32 slot;
-  s32 row;
-  s32 column;
+    s32 slot;
+    s32 row;
+    s32 column;
 
-  if (character < 0) {
-    return CHARACTER_OFF_GRID;
-  }
+    if (character < 0) {
+        return CHARACTER_OFF_GRID;
+    }
 
-  if (character >= ARRAY_COUNT(f_CharacterSlots)) {
-    return CHARACTER_OFF_GRID;
-  }
+    if (character >= ARRAY_COUNT(f_CharacterSlots)) {
+        return CHARACTER_OFF_GRID;
+    }
 
-  BuildCharacterGrid(1, TRUE);
-  slot = f_CharacterSlots[character];
-  row = f_SlotCells[slot].row;
-  column = f_SlotCells[slot].column;
-  return g_CharacterGrid[row][column] < 0 ? CHARACTER_OFF_GRID
-                                          : CHARACTER_ON_GRID;
+    BuildCharacterGrid(1, TRUE);
+    slot = f_CharacterSlots[character];
+    row = f_SlotCells[slot].row;
+    column = f_SlotCells[slot].column;
+    return g_CharacterGrid[row][column] < 0 ? CHARACTER_OFF_GRID : CHARACTER_ON_GRID;
 }
 
 /* Marks saved games whose settings or players are out of range as no longer
  * valid */
 void InvalidateBrokenSavedGames(void) {
-  SaveData* save;
-  Boolean isInvalid[SAVED_GAME_COUNT];
-  s32 index;
-  s32 entryIndex;
-  SavedGame* unk;
-  GameState* sub;
-  Player* player;
+    SaveData *save;
+    Boolean isInvalid[SAVED_GAME_COUNT];
+    s32 index;
+    s32 entryIndex;
+    SavedGame *unk;
+    GameState *sub;
+    Player *player;
 
-  save = GetSaveData();
-  for (index = 0; index != SAVED_GAME_COUNT; index++) {
-    isInvalid[index] = FALSE;
-  }
-
-  for (index = 0; index != SAVED_GAME_COUNT; index++) {
-    if (!save->savedGames[index].isValid) {
-      continue;
+    save = GetSaveData();
+    for (index = 0; index != SAVED_GAME_COUNT; index++) {
+        isInvalid[index] = FALSE;
     }
 
-    unk = &save->savedGames[index];
-    sub = &unk->state;
-    if (sub->isMiniGolf == FALSE) {
-      switch (sub->gameMode) {
-        case GAME_MODE_STROKE:
-        case GAME_MODE_MATCH_GAME:
-        case GAME_MODE_GET_CHARACTER:
-        case GAME_MODE_TOURNAMENT:
-        case GAME_MODE_SKINS_MATCH:
-        case GAME_MODE_CLUB_SLOTS:
-          break;
-        default:
-          isInvalid[index] = TRUE;
-          break;
-      }
+    for (index = 0; index != SAVED_GAME_COUNT; index++) {
+        if (!save->savedGames[index].isValid) {
+            continue;
+        }
+
+        unk = &save->savedGames[index];
+        sub = &unk->state;
+        if (sub->isMiniGolf == FALSE) {
+            switch (sub->gameMode) {
+                case GAME_MODE_STROKE:
+                case GAME_MODE_MATCH_GAME:
+                case GAME_MODE_GET_CHARACTER:
+                case GAME_MODE_TOURNAMENT:
+                case GAME_MODE_SKINS_MATCH:
+                case GAME_MODE_CLUB_SLOTS:
+                    break;
+                default:
+                    isInvalid[index] = TRUE;
+                    break;
+            }
+        }
+
+        if (sub->playerCount < 1 || sub->playerCount > MAX_PLAYER_COUNT) {
+            isInvalid[index] = TRUE;
+        }
+
+        if (sub->courseIndex < 0 || sub->courseIndex >= DRIVING_RANGE_COURSE_INDEX) {
+            isInvalid[index] = TRUE;
+        }
+
+        if (sub->holeIndex < 0 || sub->holeIndex >= COURSE_HOLE_COUNT) {
+            isInvalid[index] = TRUE;
+        }
+
+        for (entryIndex = 0; entryIndex != sub->playerCount; entryIndex++) {
+            player = &save->savedPlayers[index][entryIndex];
+            /* The unsigned tests also catch negative indices */
+            if ((u8)player->characterIndex >= CHARACTER_COUNT) {
+                isInvalid[index] = TRUE;
+            }
+
+            if ((u8)player->paletteIndex >= CHARACTER_PALETTE_COUNT) {
+                isInvalid[index] = TRUE;
+            }
+        }
     }
 
-    if (sub->playerCount < 1 || sub->playerCount > MAX_PLAYER_COUNT) {
-      isInvalid[index] = TRUE;
+    for (index = 0; index != SAVED_GAME_COUNT; index++) {
+        if (isInvalid[index] == TRUE) {
+            save->savedGames[index].isValid = FALSE;
+        }
     }
-
-    if (sub->courseIndex < 0 ||
-        sub->courseIndex >= DRIVING_RANGE_COURSE_INDEX) {
-      isInvalid[index] = TRUE;
-    }
-
-    if (sub->holeIndex < 0 || sub->holeIndex >= COURSE_HOLE_COUNT) {
-      isInvalid[index] = TRUE;
-    }
-
-    for (entryIndex = 0; entryIndex != sub->playerCount; entryIndex++) {
-      player = &save->savedPlayers[index][entryIndex];
-      /* The unsigned tests also catch negative indices */
-      if ((u8)player->characterIndex >= CHARACTER_COUNT) {
-        isInvalid[index] = TRUE;
-      }
-
-      if ((u8)player->paletteIndex >= CHARACTER_PALETTE_COUNT) {
-        isInvalid[index] = TRUE;
-      }
-    }
-  }
-
-  for (index = 0; index != SAVED_GAME_COUNT; index++) {
-    if (isInvalid[index] == TRUE) {
-      save->savedGames[index].isValid = FALSE;
-    }
-  }
 }
 
 /*
@@ -1721,101 +2319,101 @@ void InvalidateBrokenSavedGames(void) {
  * palette, course or hole is out of range.
  */
 void InvalidateBrokenRingShotRecords(void) {
-  SaveData* save;
-  Boolean isInvalid[RING_SHOT_RECORD_COUNT];
-  s32 recordIndex;
-  s32 kind;
-  s32 scoreKind;
-  /* The original frame has room for this; without it 8 words differ */
-  s32 unused[2] UNUSED;
+    SaveData *save;
+    Boolean isInvalid[RING_SHOT_RECORD_COUNT];
+    s32 recordIndex;
+    s32 kind;
+    s32 scoreKind;
+    /* The original frame has room for this; without it 8 words differ */
+    s32 unused[2] UNUSED;
 
-  save = GetSaveData();
-  for (recordIndex = 0; recordIndex != RING_SHOT_RECORD_COUNT; recordIndex++) {
-    isInvalid[recordIndex] = FALSE;
-  }
-
-  for (recordIndex = 0; recordIndex != RING_SHOT_RECORD_COUNT; recordIndex++) {
-    RingShotRecord* record = &save->ringShotRecords[recordIndex];
-
-    scoreKind = record->scoreKind;
-    kind = scoreKind;
-    /*
-     * Masked in place, so that the test reads the loaded kind and the bounds
-     * read its copy, to match: testing scoreKind & SCORE_KIND_RECORDED gives 5
-     * words differing, 1 in shape
-     */
-    scoreKind &= SCORE_KIND_RECORDED;
-    if (scoreKind) {
-      /*
-       * Masking within the test keeps GCC from merging the two bounds into
-       * one unsigned test, to match: masking before the test gives 4 words
-       * differing, 4 in shape
-       */
-      if ((kind &= SCORE_KIND_MASK) >= SCORE_KIND_COUNT || kind < 0) {
-        isInvalid[recordIndex] = TRUE;
-      }
+    save = GetSaveData();
+    for (recordIndex = 0; recordIndex != RING_SHOT_RECORD_COUNT; recordIndex++) {
+        isInvalid[recordIndex] = FALSE;
     }
 
-    /* The unsigned tests also catch negative indices */
-    if ((u8)record->characterIndex >= CHARACTER_COUNT) {
-      isInvalid[recordIndex] = TRUE;
+    for (recordIndex = 0; recordIndex != RING_SHOT_RECORD_COUNT; recordIndex++) {
+        RingShotRecord *record = &save->ringShotRecords[recordIndex];
+
+        scoreKind = record->scoreKind;
+        kind = scoreKind;
+        /*
+         * Masked in place, so that the test reads the loaded kind and the bounds
+         * read its copy, to match: testing scoreKind & SCORE_KIND_RECORDED gives 5
+         * words differing, 1 in shape
+         */
+        scoreKind &= SCORE_KIND_RECORDED;
+        if (scoreKind) {
+            /*
+             * Masking within the test keeps GCC from merging the two bounds into
+             * one unsigned test, to match: masking before the test gives 4 words
+             * differing, 4 in shape
+             */
+            if ((kind &= SCORE_KIND_MASK) >= SCORE_KIND_COUNT || kind < 0) {
+                isInvalid[recordIndex] = TRUE;
+            }
+        }
+
+        /* The unsigned tests also catch negative indices */
+        if ((u8)record->characterIndex >= CHARACTER_COUNT) {
+            isInvalid[recordIndex] = TRUE;
+        }
+
+        if ((u8)record->paletteIndex >= CHARACTER_PALETTE_COUNT) {
+            isInvalid[recordIndex] = TRUE;
+        }
+
+        if ((u8)record->courseIndex >= RING_SHOT_COURSE_COUNT) {
+            isInvalid[recordIndex] = TRUE;
+        }
+
+        if ((u8)record->holeIndex >= RING_SHOT_HOLE_COUNT) {
+            isInvalid[recordIndex] = TRUE;
+        }
     }
 
-    if ((u8)record->paletteIndex >= CHARACTER_PALETTE_COUNT) {
-      isInvalid[recordIndex] = TRUE;
-    }
+    /* Toggling rather than clearing sets the flag on records that fail with it
+     * clear */
+    for (recordIndex = 0; recordIndex != RING_SHOT_RECORD_COUNT; recordIndex++) {
+        RingShotRecord *record = &save->ringShotRecords[recordIndex];
 
-    if ((u8)record->courseIndex >= RING_SHOT_COURSE_COUNT) {
-      isInvalid[recordIndex] = TRUE;
+        if (isInvalid[recordIndex] == TRUE) {
+            record->scoreKind ^= SCORE_KIND_RECORDED;
+        }
     }
-
-    if ((u8)record->holeIndex >= RING_SHOT_HOLE_COUNT) {
-      isInvalid[recordIndex] = TRUE;
-    }
-  }
-
-  /* Toggling rather than clearing sets the flag on records that fail with it
-   * clear */
-  for (recordIndex = 0; recordIndex != RING_SHOT_RECORD_COUNT; recordIndex++) {
-    RingShotRecord* record = &save->ringShotRecords[recordIndex];
-
-    if (isInvalid[recordIndex] == TRUE) {
-      record->scoreKind ^= SCORE_KIND_RECORDED;
-    }
-  }
 }
 
 /* Keeps the hole and course being played in the menu memory */
 void RememberPlayedHole(void) {
-  MenuMemory* memory;
+    MenuMemory *memory;
 
-  memory = GetMenuMemory();
-  memory->holeIndex = g_GameState.holeIndex;
-  memory->courseIndex = g_GameState.courseIndex;
+    memory = GetMenuMemory();
+    memory->holeIndex = g_GameState.holeIndex;
+    memory->courseIndex = g_GameState.courseIndex;
 }
 
 s32 GetClubTournamentGameMode(void) {
-  s32 gameMode;
+    s32 gameMode;
 
-  switch (g_ClubTournamentRules.isSpeedGolf) {
-    case FALSE:
-    default:
-      gameMode = GAME_MODE_STROKE;
-      break;
-    case TRUE:
-      gameMode = GAME_MODE_SPEED_GOLF;
-      break;
-  }
+    switch (g_ClubTournamentRules.isSpeedGolf) {
+        case FALSE:
+        default:
+            gameMode = GAME_MODE_STROKE;
+            break;
+        case TRUE:
+            gameMode = GAME_MODE_SPEED_GOLF;
+            break;
+    }
 
-  return gameMode;
+    return gameMode;
 }
 
 s32 GetClubTournamentCourse(void) {
-  return g_ClubTournamentRules.courseIndex;
+    return g_ClubTournamentRules.courseIndex;
 }
 
 Boolean IsNintendoClubTournament(void) {
-  return g_IsNintendoClubTournament != 0;
+    return g_IsNintendoClubTournament != 0;
 }
 
 /* The club tournament messages: the first of the tournament names and of the
@@ -1829,274 +2427,267 @@ Boolean IsNintendoClubTournament(void) {
 #define SECOND_MINI_GOLF_TITLE_MESSAGE 0xC8
 
 s32 GetClubTournamentNameMessage(void) {
-  s32 value;
+    s32 value;
 
-  value = g_ClubTournamentNameIndex;
-  if (value < 0) {
-    value = 0;
-  }
+    value = g_ClubTournamentNameIndex;
+    if (value < 0) {
+        value = 0;
+    }
 
-  return value + FIRST_TOURNAMENT_NAME_MESSAGE;
+    return value + FIRST_TOURNAMENT_NAME_MESSAGE;
 }
 
 s32 GetClubTournamentCourseMessage(void) {
-  s32 value;
+    s32 value;
 
-  value = GetClubTournamentCourse();
-  if (value < 0) {
-    value = 0;
-  }
+    value = GetClubTournamentCourse();
+    if (value < 0) {
+        value = 0;
+    }
 
-  return value + FIRST_COURSE_NAME_MESSAGE;
+    return value + FIRST_COURSE_NAME_MESSAGE;
 }
 
 s32 GetClubTournamentNumber(void) {
-  s32 value;
+    s32 value;
 
-  value = g_ClubTournamentNumber;
-  if (value <= 0) {
-    value = 1;
-  }
+    value = g_ClubTournamentNumber;
+    if (value <= 0) {
+        value = 1;
+    }
 
-  return value;
+    return value;
 }
 
-void CopyTournamentCode(u8* destination) {
-  s32 index;
+void CopyTournamentCode(u8 *destination) {
+    s32 index;
 
-  for (index = 0; index != ARRAY_COUNT(g_TournamentCode); index++) {
-    *destination++ = g_TournamentCode[index];
-  }
+    for (index = 0; index != ARRAY_COUNT(g_TournamentCode); index++) {
+        *destination++ = g_TournamentCode[index];
+    }
 }
 
 s32 GetClubTournamentModeMessage(void) {
-  s32 value;
+    s32 value;
 
-  switch (g_ClubTournamentRules.isSpeedGolf) {
-    case 0:
-    default:
-      value = STROKE_PLAY_MESSAGE;
-      break;
-    case 1:
-      value = SPEED_GOLF_MESSAGE;
-      break;
-  }
+    switch (g_ClubTournamentRules.isSpeedGolf) {
+        case 0:
+        default:
+            value = STROKE_PLAY_MESSAGE;
+            break;
+        case 1:
+            value = SPEED_GOLF_MESSAGE;
+            break;
+    }
 
-  return value;
+    return value;
 }
 
 s32 GetClubTournamentCourseTitleMessage(void) {
-  s32 value;
+    s32 value;
 
-  if (g_ClubTournamentRules.courseIndex >= MINI_GOLF_COURSE_INDEX) {
-    value = FIRST_MINI_GOLF_TITLE_MESSAGE;
-    if (g_ClubTournamentRules.courseIndex >=
-        MINI_GOLF_COURSE_INDEX + MINI_GOLF_COURSES_PER_RECORD) {
-      value = SECOND_MINI_GOLF_TITLE_MESSAGE;
+    if (g_ClubTournamentRules.courseIndex >= MINI_GOLF_COURSE_INDEX) {
+        value = FIRST_MINI_GOLF_TITLE_MESSAGE;
+        if (g_ClubTournamentRules.courseIndex >=
+            MINI_GOLF_COURSE_INDEX + MINI_GOLF_COURSES_PER_RECORD) {
+            value = SECOND_MINI_GOLF_TITLE_MESSAGE;
+        }
     }
-  } else {
-    value = g_ClubTournamentRules.courseIndex + FIRST_COURSE_NAME_MESSAGE;
-  }
+    else {
+        value = g_ClubTournamentRules.courseIndex + FIRST_COURSE_NAME_MESSAGE;
+    }
 
-  return value;
+    return value;
 }
 
 /* Empties the slots of the characters imported from the Game Boy Color game */
 void ClearImportedCharacters(void) {
-  s32 index;
-  s32 byteIndex;
+    s32 index;
+    s32 byteIndex;
 
-  for (index = 0; index != ARRAY_COUNT(g_ImportedCharacters); index++) {
-    g_ImportedCharacters[index].character = 0;
-    g_ImportedCharacters[index].clubDistance = 0;
-    g_ImportedCharacters[index].clubSpin = 0;
-    g_ImportedCharacters[index].clubSideSpin = 0;
-    for (byteIndex = 0; byteIndex != IMPORTED_CHARACTER_NAME_LENGTH;
-        byteIndex++) {
-      g_ImportedCharacters[index].name[byteIndex] = 0;
+    for (index = 0; index != ARRAY_COUNT(g_ImportedCharacters); index++) {
+        g_ImportedCharacters[index].character = 0;
+        g_ImportedCharacters[index].clubDistance = 0;
+        g_ImportedCharacters[index].clubSpin = 0;
+        g_ImportedCharacters[index].clubSideSpin = 0;
+        for (byteIndex = 0; byteIndex != IMPORTED_CHARACTER_NAME_LENGTH; byteIndex++) {
+            g_ImportedCharacters[index].name[byteIndex] = 0;
+        }
+
+        g_ImportedCharacters[index].isChosen = 0;
     }
-
-    g_ImportedCharacters[index].isChosen = 0;
-  }
 }
 
 void ComputeRoundStatistics(void) {
-  CourseStats* saved;
-  CourseStats* entry;
-  f32 reciprocal;
-  s32 sum;
-  CourseIndex courseIndex;
-  Boolean hasPlayedCourse;
-  f32 strokeSum;
-  f32 measuredDriveSum;
-  f32 puttSum;
-  f32 parOrBetterSum;
-  f32 parOnSum;
-  f32 sandSaveSum;
-  f32 sandSaveChanceSum;
-  f32 driveYardSum;
-  s32 driveCountSum;
-  f32 zero;
-  f32 emptyCount; /* Only ever zero */
-  f32 holeCount;
+    CourseStats *saved;
+    CourseStats *entry;
+    f32 reciprocal;
+    s32 sum;
+    CourseIndex courseIndex;
+    Boolean hasPlayedCourse;
+    f32 strokeSum;
+    f32 measuredDriveSum;
+    f32 puttSum;
+    f32 parOrBetterSum;
+    f32 parOnSum;
+    f32 sandSaveSum;
+    f32 sandSaveChanceSum;
+    f32 driveYardSum;
+    s32 driveCountSum;
+    f32 zero;
+    f32 emptyCount; /* Only ever zero */
+    f32 holeCount;
 
-  saved = GetSaveData()->records.courseStats;
-  for (courseIndex = 0; courseIndex != COURSE_COUNT; courseIndex++) {
-    entry = &saved[courseIndex];
-    g_CourseStatFigures[courseIndex].roundCount = entry->roundCount;
-    if (g_CourseStatFigures[courseIndex].roundCount == 0.0f) {
-      g_CourseStatFigures[courseIndex].bestScore = 0.0f;
-      g_CourseStatFigures[courseIndex].averageScore = 0.0f;
-      g_CourseStatFigures[courseIndex].bestDrive = 0.0f;
-      g_CourseStatFigures[courseIndex].averageDrive = 0.0f;
-      g_CourseStatFigures[courseIndex].unusedDriveFigure = 0.0f;
-      g_CourseStatFigures[courseIndex].fairwayPercent = 0.0f;
-      g_CourseStatFigures[courseIndex].averagePutts = 0.0f;
-      g_CourseStatFigures[courseIndex].parOnPercent = 0.0f;
-      g_CourseStatFigures[courseIndex].parSavePercent = 0.0f;
-      g_CourseStatFigures[courseIndex].hasPlace[THIRD_PLACE_INDEX] = FALSE;
-      g_CourseStatFigures[courseIndex].hasPlace[SECOND_PLACE_INDEX] = FALSE;
-      g_CourseStatFigures[courseIndex].hasPlace[FIRST_PLACE_INDEX] = FALSE;
-    } else {
-      /* unusedDriveFigure is left as it was */
-      reciprocal = 1.0f / entry->roundCount;
-      g_CourseStatFigures[courseIndex].bestScore = entry->bestScore;
-      g_CourseStatFigures[courseIndex].averageScore =
-          entry->strokeTotal * reciprocal;
-      g_CourseStatFigures[courseIndex].bestDrive =
-          entry->longestDrive * YARDS_PER_UNIT;
-      g_CourseStatFigures[courseIndex].averageDrive =
-          entry->averageDrive * YARDS_PER_UNIT;
-      g_CourseStatFigures[courseIndex].fairwayPercent =
-          entry->measuredDriveTotal * reciprocal * (100.0f / HOLES_PER_ROUND);
-      g_CourseStatFigures[courseIndex].averagePutts =
-          entry->puttTotal * reciprocal * (1.0f / HOLES_PER_ROUND);
-      g_CourseStatFigures[courseIndex].parSavePercent =
-          entry->parOrBetterCount * reciprocal * (100.0f / HOLES_PER_ROUND);
-      g_CourseStatFigures[courseIndex].parOnPercent =
-          entry->parOnCount * reciprocal * (100.0f / HOLES_PER_ROUND);
-      sum = entry->sandSaveCount + entry->missedSandSaveCount;
-      if (sum <= 0) {
-        g_CourseStatFigures[courseIndex].sandSavePercent = 0.0f;
-      } else {
-        g_CourseStatFigures[courseIndex].sandSavePercent =
-            ((f32)entry->sandSaveCount / (f32)sum) * 100.0f;
-      }
+    saved = GetSaveData()->records.courseStats;
+    for (courseIndex = 0; courseIndex != COURSE_COUNT; courseIndex++) {
+        entry = &saved[courseIndex];
+        g_CourseStatFigures[courseIndex].roundCount = entry->roundCount;
+        if (g_CourseStatFigures[courseIndex].roundCount == 0.0f) {
+            g_CourseStatFigures[courseIndex].bestScore = 0.0f;
+            g_CourseStatFigures[courseIndex].averageScore = 0.0f;
+            g_CourseStatFigures[courseIndex].bestDrive = 0.0f;
+            g_CourseStatFigures[courseIndex].averageDrive = 0.0f;
+            g_CourseStatFigures[courseIndex].unusedDriveFigure = 0.0f;
+            g_CourseStatFigures[courseIndex].fairwayPercent = 0.0f;
+            g_CourseStatFigures[courseIndex].averagePutts = 0.0f;
+            g_CourseStatFigures[courseIndex].parOnPercent = 0.0f;
+            g_CourseStatFigures[courseIndex].parSavePercent = 0.0f;
+            g_CourseStatFigures[courseIndex].hasPlace[THIRD_PLACE_INDEX] = FALSE;
+            g_CourseStatFigures[courseIndex].hasPlace[SECOND_PLACE_INDEX] = FALSE;
+            g_CourseStatFigures[courseIndex].hasPlace[FIRST_PLACE_INDEX] = FALSE;
+        }
+        else {
+            /* unusedDriveFigure is left as it was */
+            reciprocal = 1.0f / entry->roundCount;
+            g_CourseStatFigures[courseIndex].bestScore = entry->bestScore;
+            g_CourseStatFigures[courseIndex].averageScore = entry->strokeTotal * reciprocal;
+            g_CourseStatFigures[courseIndex].bestDrive = entry->longestDrive * YARDS_PER_UNIT;
+            g_CourseStatFigures[courseIndex].averageDrive = entry->averageDrive * YARDS_PER_UNIT;
+            g_CourseStatFigures[courseIndex].fairwayPercent =
+                entry->measuredDriveTotal * reciprocal * (100.0f / HOLES_PER_ROUND);
+            g_CourseStatFigures[courseIndex].averagePutts =
+                entry->puttTotal * reciprocal * (1.0f / HOLES_PER_ROUND);
+            g_CourseStatFigures[courseIndex].parSavePercent =
+                entry->parOrBetterCount * reciprocal * (100.0f / HOLES_PER_ROUND);
+            g_CourseStatFigures[courseIndex].parOnPercent =
+                entry->parOnCount * reciprocal * (100.0f / HOLES_PER_ROUND);
+            sum = entry->sandSaveCount + entry->missedSandSaveCount;
+            if (sum <= 0) {
+                g_CourseStatFigures[courseIndex].sandSavePercent = 0.0f;
+            }
+            else {
+                g_CourseStatFigures[courseIndex].sandSavePercent =
+                    ((f32)entry->sandSaveCount / (f32)sum) * 100.0f;
+            }
 
-      g_CourseStatFigures[courseIndex].hasPlace[THIRD_PLACE_INDEX] =
-          entry->hasPlace[THIRD_PLACE_INDEX];
-      g_CourseStatFigures[courseIndex].hasPlace[SECOND_PLACE_INDEX] =
-          entry->hasPlace[SECOND_PLACE_INDEX];
-      g_CourseStatFigures[courseIndex].hasPlace[FIRST_PLACE_INDEX] =
-          entry->hasPlace[FIRST_PLACE_INDEX];
-    }
-  }
-
-  /*
-   * Zeroed this early to match: zeroing it after the flag, or in the loop's
-   * for, gives 2 words differing
-   */
-  courseIndex = 0;
-  hasPlayedCourse = FALSE;
-  g_CourseStatFigures[COURSE_COUNT].roundCount = 0.0f;
-  g_CourseStatFigures[COURSE_COUNT].bestScore = 0.0f;
-  g_CourseStatFigures[COURSE_COUNT].averageScore = 0.0f;
-  g_CourseStatFigures[COURSE_COUNT].bestDrive = 0.0f;
-  g_CourseStatFigures[COURSE_COUNT].averageDrive = 0.0f;
-  g_CourseStatFigures[COURSE_COUNT].fairwayPercent = 0.0f;
-  g_CourseStatFigures[COURSE_COUNT].averagePutts = 0.0f;
-  g_CourseStatFigures[COURSE_COUNT].parSavePercent = 0.0f;
-  g_CourseStatFigures[COURSE_COUNT].parOnPercent = 0.0f;
-  g_CourseStatFigures[COURSE_COUNT].sandSavePercent = 0.0f;
-  g_CourseStatFigures[COURSE_COUNT].hasPlace[THIRD_PLACE_INDEX] = FALSE;
-  g_CourseStatFigures[COURSE_COUNT].hasPlace[SECOND_PLACE_INDEX] = FALSE;
-  g_CourseStatFigures[COURSE_COUNT].hasPlace[FIRST_PLACE_INDEX] = FALSE;
-  g_CourseStatFigures[COURSE_COUNT].bestScore = 0.0f;
-  g_CourseStatFigures[COURSE_COUNT].bestDrive = 0.0f;
-  g_CourseStatFigures[COURSE_COUNT].bestScore =
-      g_CourseStatFigures[0].bestScore;
-  g_CourseStatFigures[COURSE_COUNT].bestDrive =
-      g_CourseStatFigures[0].bestDrive;
-  zero = g_CourseStatFigures[COURSE_COUNT]
-             .roundCount; /* Read back after being zeroed */
-  for (; courseIndex != COURSE_COUNT; courseIndex++) {
-    if (zero < g_CourseStatFigures[courseIndex].roundCount) {
-      if (!hasPlayedCourse) {
-        g_CourseStatFigures[COURSE_COUNT].bestScore =
-            g_CourseStatFigures[courseIndex].bestScore;
-        hasPlayedCourse = TRUE;
-        g_CourseStatFigures[COURSE_COUNT].bestDrive =
-            g_CourseStatFigures[courseIndex].bestDrive;
-      }
-
-      if (g_CourseStatFigures[COURSE_COUNT].bestScore >
-          g_CourseStatFigures[courseIndex].bestScore) {
-        g_CourseStatFigures[COURSE_COUNT].bestScore =
-            g_CourseStatFigures[courseIndex].bestScore;
-      }
-
-      if (g_CourseStatFigures[COURSE_COUNT].bestDrive <
-          g_CourseStatFigures[courseIndex].bestDrive) {
-        g_CourseStatFigures[COURSE_COUNT].bestDrive =
-            g_CourseStatFigures[courseIndex].bestDrive;
-      }
-
-      g_CourseStatFigures[COURSE_COUNT].roundCount +=
-          g_CourseStatFigures[courseIndex].roundCount;
-    }
-  }
-
-  driveCountSum = 0;
-  sandSaveSum = 0.0f;
-  sandSaveChanceSum = 0.0f;
-  parOrBetterSum = 0.0f;
-  measuredDriveSum = 0.0f;
-  parOnSum = 0.0f;
-  puttSum = 0.0f;
-  driveYardSum = 0.0f;
-  strokeSum = 0.0f;
-  emptyCount = 0.0f;
-  for (courseIndex = 0; courseIndex != COURSE_COUNT; courseIndex++) {
-    entry = &saved[courseIndex];
-    if (emptyCount < g_CourseStatFigures[courseIndex].roundCount) {
-      measuredDriveSum += entry->measuredDriveTotal;
-      puttSum += entry->puttTotal;
-      parOrBetterSum += entry->parOrBetterCount;
-      parOnSum += entry->parOnCount;
-      strokeSum += entry->strokeTotal;
-      sandSaveSum += entry->sandSaveCount;
-      sandSaveChanceSum += entry->sandSaveCount + entry->missedSandSaveCount;
-      driveCountSum += entry->averagedDriveCount;
-      driveYardSum +=
-          entry->averageDrive * YARDS_PER_UNIT * entry->averagedDriveCount;
-    }
-  }
-
-  if (g_CourseStatFigures[COURSE_COUNT].roundCount > 0.0f) {
-    if (sandSaveChanceSum <= 0.0f) {
-      g_CourseStatFigures[COURSE_COUNT].sandSavePercent = 0.0f;
-    } else {
-      g_CourseStatFigures[COURSE_COUNT].sandSavePercent =
-          (sandSaveSum / sandSaveChanceSum) * 100.0f;
+            g_CourseStatFigures[courseIndex].hasPlace[THIRD_PLACE_INDEX] =
+                entry->hasPlace[THIRD_PLACE_INDEX];
+            g_CourseStatFigures[courseIndex].hasPlace[SECOND_PLACE_INDEX] =
+                entry->hasPlace[SECOND_PLACE_INDEX];
+            g_CourseStatFigures[courseIndex].hasPlace[FIRST_PLACE_INDEX] =
+                entry->hasPlace[FIRST_PLACE_INDEX];
+        }
     }
 
-    holeCount = g_CourseStatFigures[COURSE_COUNT].roundCount * HOLES_PER_ROUND;
-    g_CourseStatFigures[COURSE_COUNT].averagePutts = puttSum / holeCount;
-    g_CourseStatFigures[COURSE_COUNT].fairwayPercent =
-        (measuredDriveSum / holeCount) * 100.0f;
-    g_CourseStatFigures[COURSE_COUNT].parSavePercent =
-        (parOrBetterSum / holeCount) * 100.0f;
-    g_CourseStatFigures[COURSE_COUNT].parOnPercent =
-        (parOnSum / holeCount) * 100.0f;
-    g_CourseStatFigures[COURSE_COUNT].averageScore =
-        strokeSum / g_CourseStatFigures[COURSE_COUNT].roundCount;
-    if (driveYardSum > 0.0f && driveCountSum > 0) {
-      g_CourseStatFigures[COURSE_COUNT].averageDrive =
-          driveYardSum / driveCountSum;
-    } else {
-      g_CourseStatFigures[COURSE_COUNT].averageDrive = 0.0f;
+    /*
+     * Zeroed this early to match: zeroing it after the flag, or in the loop's
+     * for, gives 2 words differing
+     */
+    courseIndex = 0;
+    hasPlayedCourse = FALSE;
+    g_CourseStatFigures[COURSE_COUNT].roundCount = 0.0f;
+    g_CourseStatFigures[COURSE_COUNT].bestScore = 0.0f;
+    g_CourseStatFigures[COURSE_COUNT].averageScore = 0.0f;
+    g_CourseStatFigures[COURSE_COUNT].bestDrive = 0.0f;
+    g_CourseStatFigures[COURSE_COUNT].averageDrive = 0.0f;
+    g_CourseStatFigures[COURSE_COUNT].fairwayPercent = 0.0f;
+    g_CourseStatFigures[COURSE_COUNT].averagePutts = 0.0f;
+    g_CourseStatFigures[COURSE_COUNT].parSavePercent = 0.0f;
+    g_CourseStatFigures[COURSE_COUNT].parOnPercent = 0.0f;
+    g_CourseStatFigures[COURSE_COUNT].sandSavePercent = 0.0f;
+    g_CourseStatFigures[COURSE_COUNT].hasPlace[THIRD_PLACE_INDEX] = FALSE;
+    g_CourseStatFigures[COURSE_COUNT].hasPlace[SECOND_PLACE_INDEX] = FALSE;
+    g_CourseStatFigures[COURSE_COUNT].hasPlace[FIRST_PLACE_INDEX] = FALSE;
+    g_CourseStatFigures[COURSE_COUNT].bestScore = 0.0f;
+    g_CourseStatFigures[COURSE_COUNT].bestDrive = 0.0f;
+    g_CourseStatFigures[COURSE_COUNT].bestScore = g_CourseStatFigures[0].bestScore;
+    g_CourseStatFigures[COURSE_COUNT].bestDrive = g_CourseStatFigures[0].bestDrive;
+    zero = g_CourseStatFigures[COURSE_COUNT].roundCount; /* Read back after being zeroed */
+    for (; courseIndex != COURSE_COUNT; courseIndex++) {
+        if (zero < g_CourseStatFigures[courseIndex].roundCount) {
+            if (!hasPlayedCourse) {
+                g_CourseStatFigures[COURSE_COUNT].bestScore =
+                    g_CourseStatFigures[courseIndex].bestScore;
+                hasPlayedCourse = TRUE;
+                g_CourseStatFigures[COURSE_COUNT].bestDrive =
+                    g_CourseStatFigures[courseIndex].bestDrive;
+            }
+
+            if (g_CourseStatFigures[COURSE_COUNT].bestScore >
+                g_CourseStatFigures[courseIndex].bestScore) {
+                g_CourseStatFigures[COURSE_COUNT].bestScore =
+                    g_CourseStatFigures[courseIndex].bestScore;
+            }
+
+            if (g_CourseStatFigures[COURSE_COUNT].bestDrive <
+                g_CourseStatFigures[courseIndex].bestDrive) {
+                g_CourseStatFigures[COURSE_COUNT].bestDrive =
+                    g_CourseStatFigures[courseIndex].bestDrive;
+            }
+
+            g_CourseStatFigures[COURSE_COUNT].roundCount +=
+                g_CourseStatFigures[courseIndex].roundCount;
+        }
     }
-  }
+
+    driveCountSum = 0;
+    sandSaveSum = 0.0f;
+    sandSaveChanceSum = 0.0f;
+    parOrBetterSum = 0.0f;
+    measuredDriveSum = 0.0f;
+    parOnSum = 0.0f;
+    puttSum = 0.0f;
+    driveYardSum = 0.0f;
+    strokeSum = 0.0f;
+    emptyCount = 0.0f;
+    for (courseIndex = 0; courseIndex != COURSE_COUNT; courseIndex++) {
+        entry = &saved[courseIndex];
+        if (emptyCount < g_CourseStatFigures[courseIndex].roundCount) {
+            measuredDriveSum += entry->measuredDriveTotal;
+            puttSum += entry->puttTotal;
+            parOrBetterSum += entry->parOrBetterCount;
+            parOnSum += entry->parOnCount;
+            strokeSum += entry->strokeTotal;
+            sandSaveSum += entry->sandSaveCount;
+            sandSaveChanceSum += entry->sandSaveCount + entry->missedSandSaveCount;
+            driveCountSum += entry->averagedDriveCount;
+            driveYardSum += entry->averageDrive * YARDS_PER_UNIT * entry->averagedDriveCount;
+        }
+    }
+
+    if (g_CourseStatFigures[COURSE_COUNT].roundCount > 0.0f) {
+        if (sandSaveChanceSum <= 0.0f) {
+            g_CourseStatFigures[COURSE_COUNT].sandSavePercent = 0.0f;
+        }
+        else {
+            g_CourseStatFigures[COURSE_COUNT].sandSavePercent =
+                (sandSaveSum / sandSaveChanceSum) * 100.0f;
+        }
+
+        holeCount = g_CourseStatFigures[COURSE_COUNT].roundCount * HOLES_PER_ROUND;
+        g_CourseStatFigures[COURSE_COUNT].averagePutts = puttSum / holeCount;
+        g_CourseStatFigures[COURSE_COUNT].fairwayPercent = (measuredDriveSum / holeCount) * 100.0f;
+        g_CourseStatFigures[COURSE_COUNT].parSavePercent = (parOrBetterSum / holeCount) * 100.0f;
+        g_CourseStatFigures[COURSE_COUNT].parOnPercent = (parOnSum / holeCount) * 100.0f;
+        g_CourseStatFigures[COURSE_COUNT].averageScore =
+            strokeSum / g_CourseStatFigures[COURSE_COUNT].roundCount;
+        if (driveYardSum > 0.0f && driveCountSum > 0) {
+            g_CourseStatFigures[COURSE_COUNT].averageDrive = driveYardSum / driveCountSum;
+        }
+        else {
+            g_CourseStatFigures[COURSE_COUNT].averageDrive = 0.0f;
+        }
+    }
 }
 
 /*
@@ -2104,38 +2695,38 @@ void ComputeRoundStatistics(void) {
  * the title, as when the debug scene menu picks the menu
  */
 void ResetMenuChoices(void) {
-  s8 index;
+    s8 index;
 
-  g_MenuCourseCount = 6;
-  g_IsChosenHoleLoadStarted = FALSE;
-  g_MenuScreen = MENU_SCREEN_TITLE;
-  g_ChosenPlayerCount = 0;
-  g_ChoosingPlayerIndex = 0;
-  g_ChosenCharacters[0] = NO_CHOSEN_CHARACTER;
-  g_ChosenCharacters[1] = NO_CHOSEN_CHARACTER;
-  g_ChosenCharacters[2] = NO_CHOSEN_CHARACTER;
-  g_ChosenCharacters[3] = NO_CHOSEN_CHARACTER;
-  g_IsMenuCharacterLoaded[0] = FALSE;
-  g_IsMenuCharacterLoaded[1] = FALSE;
-  g_IsMenuCharacterLoaded[2] = FALSE;
-  g_IsMenuCharacterLoaded[3] = FALSE;
-  memset(&g_MenuMemory, 0, sizeof(g_MenuMemory));
-  g_TakenCharacters.unusedMenuValue = 0;
-  g_LastMenuScreen = 0;
-  g_LastMenuPlayerCountChoice = 0;
-  g_ChosenLabelGrowthDirection = LABEL_GROWING;
-  g_ChosenLabelGrowth = 0;
-  g_CourseSelectKind = COURSE_SELECT_KIND_NONE;
-  COURSE_SELECT_LAYOUT = COURSE_SELECT_LAYOUT_AWARDS;
-  for (index = 0; index != ARRAY_COUNT(g_ChosenLefties); index++) {
-    g_ChosenLefties[index] = 0;
-  }
+    g_MenuCourseCount = 6;
+    g_IsChosenHoleLoadStarted = FALSE;
+    g_MenuScreen = MENU_SCREEN_TITLE;
+    g_ChosenPlayerCount = 0;
+    g_ChoosingPlayerIndex = 0;
+    g_ChosenCharacters[0] = NO_CHOSEN_CHARACTER;
+    g_ChosenCharacters[1] = NO_CHOSEN_CHARACTER;
+    g_ChosenCharacters[2] = NO_CHOSEN_CHARACTER;
+    g_ChosenCharacters[3] = NO_CHOSEN_CHARACTER;
+    g_IsMenuCharacterLoaded[0] = FALSE;
+    g_IsMenuCharacterLoaded[1] = FALSE;
+    g_IsMenuCharacterLoaded[2] = FALSE;
+    g_IsMenuCharacterLoaded[3] = FALSE;
+    memset(&g_MenuMemory, 0, sizeof(g_MenuMemory));
+    g_TakenCharacters.unusedMenuValue = 0;
+    g_LastMenuScreen = 0;
+    g_LastMenuPlayerCountChoice = 0;
+    g_ChosenLabelGrowthDirection = LABEL_GROWING;
+    g_ChosenLabelGrowth = 0;
+    g_CourseSelectKind = COURSE_SELECT_KIND_NONE;
+    COURSE_SELECT_LAYOUT = COURSE_SELECT_LAYOUT_AWARDS;
+    for (index = 0; index != ARRAY_COUNT(g_ChosenLefties); index++) {
+        g_ChosenLefties[index] = 0;
+    }
 
-  g_MenuMemory.holesChoice = HOLES_CHOICE_ALL;
-  g_GameState.holeSelection = HOLE_SELECTION_ALL;
-  g_MenuMemory.statsCourse = COURSE_COUNT;
-  g_IsRingShotWipeOpening = FALSE;
-  f_UnreadMenuEntryByte = 0;
+    g_MenuMemory.holesChoice = HOLES_CHOICE_ALL;
+    g_GameState.holeSelection = HOLE_SELECTION_ALL;
+    g_MenuMemory.statsCourse = COURSE_COUNT;
+    g_IsRingShotWipeOpening = FALSE;
+    f_UnreadMenuEntryByte = 0;
 }
 
 /*
@@ -2143,10 +2734,10 @@ void ResetMenuChoices(void) {
  * picking a screen; no routine calls it
  */
 void ResetMenuEntryFlags(void) {
-  g_IsChosenHoleLoadStarted = FALSE;
-  g_IsRingShotWipeOpening = TRUE;
-  g_IsMenuWipeOpening = FALSE;
-  f_UnreadMenuEntryByte = 0;
+    g_IsChosenHoleLoadStarted = FALSE;
+    g_IsRingShotWipeOpening = TRUE;
+    g_IsMenuWipeOpening = FALSE;
+    f_UnreadMenuEntryByte = 0;
 }
 
 /*
@@ -2154,294 +2745,297 @@ void ResetMenuEntryFlags(void) {
  * the mode just played
  */
 void EnterMenuAtCourseSelect(void) {
-  switch (g_GameState.gameMode) {
-    case GAME_MODE_TOURNAMENT:
-      g_CourseSelectKind = COURSE_SELECT_KIND_TOURNAMENTS;
-      COURSE_SELECT_LAYOUT = COURSE_SELECT_LAYOUT_AWARDS;
-      g_BetSet = BET_SET_NONE;
-      break;
-    case GAME_MODE_STROKE:
-      g_CourseSelectKind = COURSE_SELECT_KIND_COURSES;
-      COURSE_SELECT_LAYOUT = COURSE_SELECT_LAYOUT_HOLES;
-      if (g_ChosenPlayerCount == 4) {
-        g_BetSet = BET_SET_STROKE_FOUR_PLAYER;
-      } else {
-        g_BetSet = BET_SET_STROKE;
-      }
+    switch (g_GameState.gameMode) {
+        case GAME_MODE_TOURNAMENT:
+            g_CourseSelectKind = COURSE_SELECT_KIND_TOURNAMENTS;
+            COURSE_SELECT_LAYOUT = COURSE_SELECT_LAYOUT_AWARDS;
+            g_BetSet = BET_SET_NONE;
+            break;
+        case GAME_MODE_STROKE:
+            g_CourseSelectKind = COURSE_SELECT_KIND_COURSES;
+            COURSE_SELECT_LAYOUT = COURSE_SELECT_LAYOUT_HOLES;
+            if (g_ChosenPlayerCount == 4) {
+                g_BetSet = BET_SET_STROKE_FOUR_PLAYER;
+            }
+            else {
+                g_BetSet = BET_SET_STROKE;
+            }
 
-      g_AreBetPagesBlocked = 1;
-      break;
-    case GAME_MODE_MATCH_GAME:
-      g_CourseSelectKind = COURSE_SELECT_KIND_COURSES;
-      COURSE_SELECT_LAYOUT = COURSE_SELECT_LAYOUT_HOLES;
-      g_BetSet = BET_SET_MATCH_GAME;
-      break;
-    case GAME_MODE_SKINS_MATCH:
-      g_CourseSelectKind = COURSE_SELECT_KIND_COURSES;
-      COURSE_SELECT_LAYOUT = COURSE_SELECT_LAYOUT_HOLES;
-      g_BetSet = BET_SET_SKINS_MATCH;
-      break;
-    case GAME_MODE_TRAINING:
-    case GAME_MODE_GET_CHARACTER:
-    case GAME_MODE_UNRECORDED_STROKE:
-    case GAME_MODE_SPEED_GOLF:
-    case GAME_MODE_RING_SHOT:
-      g_CourseSelectKind = COURSE_SELECT_KIND_COURSES;
-      COURSE_SELECT_LAYOUT = COURSE_SELECT_LAYOUT_PLAIN;
-      g_BetSet = BET_SET_NONE;
-      break;
-    case GAME_MODE_CLUB_SLOTS:
-      g_CourseSelectKind = COURSE_SELECT_KIND_COURSES;
-      COURSE_SELECT_LAYOUT = COURSE_SELECT_LAYOUT_HOLES;
-      g_BetSet = BET_SET_CLUB_SLOTS;
-      break;
-  }
+            g_AreBetPagesBlocked = 1;
+            break;
+        case GAME_MODE_MATCH_GAME:
+            g_CourseSelectKind = COURSE_SELECT_KIND_COURSES;
+            COURSE_SELECT_LAYOUT = COURSE_SELECT_LAYOUT_HOLES;
+            g_BetSet = BET_SET_MATCH_GAME;
+            break;
+        case GAME_MODE_SKINS_MATCH:
+            g_CourseSelectKind = COURSE_SELECT_KIND_COURSES;
+            COURSE_SELECT_LAYOUT = COURSE_SELECT_LAYOUT_HOLES;
+            g_BetSet = BET_SET_SKINS_MATCH;
+            break;
+        case GAME_MODE_TRAINING:
+        case GAME_MODE_GET_CHARACTER:
+        case GAME_MODE_UNRECORDED_STROKE:
+        case GAME_MODE_SPEED_GOLF:
+        case GAME_MODE_RING_SHOT:
+            g_CourseSelectKind = COURSE_SELECT_KIND_COURSES;
+            COURSE_SELECT_LAYOUT = COURSE_SELECT_LAYOUT_PLAIN;
+            g_BetSet = BET_SET_NONE;
+            break;
+        case GAME_MODE_CLUB_SLOTS:
+            g_CourseSelectKind = COURSE_SELECT_KIND_COURSES;
+            COURSE_SELECT_LAYOUT = COURSE_SELECT_LAYOUT_HOLES;
+            g_BetSet = BET_SET_CLUB_SLOTS;
+            break;
+    }
 
-  g_IsRingShotWipeOpening = TRUE;
-  g_IsMenuWipeOpening = TRUE;
-  g_IsChosenHoleLoadStarted = FALSE;
-  f_UnreadMenuEntryByte = 0;
-  g_MenuScreen = MENU_SCREEN_COURSE_SELECT;
+    g_IsRingShotWipeOpening = TRUE;
+    g_IsMenuWipeOpening = TRUE;
+    g_IsChosenHoleLoadStarted = FALSE;
+    f_UnreadMenuEntryByte = 0;
+    g_MenuScreen = MENU_SCREEN_COURSE_SELECT;
 }
 
 /* Enters the menu at the title with every choice, import and controller
  * assignment cleared */
 void EnterMenuAtTitle(void) {
-  ResetMenuChoices();
-  g_IsRingShotWipeOpening = TRUE;
-  g_IsMenuWipeOpening = TRUE;
-  g_IsChosenHoleLoadStarted = FALSE;
-  f_UnreadMenuEntryByte = 0;
-  g_ImportedCharacters[0].isChosen = 0;
-  g_ImportedCharacters[1].isChosen = 0;
-  g_ImportedCharacters[2].isChosen = 0;
-  g_ImportedCharacters[3].isChosen = 0;
-  g_PlayerControllerIndices[0] = UNCHOSEN_CONTROLLER;
-  g_PlayerControllerIndices[1] = UNCHOSEN_CONTROLLER;
-  g_PlayerControllerIndices[2] = UNCHOSEN_CONTROLLER;
-  g_PlayerControllerIndices[3] = UNCHOSEN_CONTROLLER;
-  g_MenuScreen = MENU_SCREEN_TITLE;
+    ResetMenuChoices();
+    g_IsRingShotWipeOpening = TRUE;
+    g_IsMenuWipeOpening = TRUE;
+    g_IsChosenHoleLoadStarted = FALSE;
+    f_UnreadMenuEntryByte = 0;
+    g_ImportedCharacters[0].isChosen = 0;
+    g_ImportedCharacters[1].isChosen = 0;
+    g_ImportedCharacters[2].isChosen = 0;
+    g_ImportedCharacters[3].isChosen = 0;
+    g_PlayerControllerIndices[0] = UNCHOSEN_CONTROLLER;
+    g_PlayerControllerIndices[1] = UNCHOSEN_CONTROLLER;
+    g_PlayerControllerIndices[2] = UNCHOSEN_CONTROLLER;
+    g_PlayerControllerIndices[3] = UNCHOSEN_CONTROLLER;
+    g_MenuScreen = MENU_SCREEN_TITLE;
 }
 
 /* Enters the menu at the Ring Shot exit; no routine calls it */
 void EnterMenuAtRingShotExit(void) {
-  g_IsRingShotWipeOpening = TRUE;
-  g_IsMenuWipeOpening = TRUE;
-  g_IsChosenHoleLoadStarted = FALSE;
-  f_UnreadMenuEntryByte = 0;
-  g_MenuScreen = MENU_SCREEN_RING_SHOT_EXIT;
+    g_IsRingShotWipeOpening = TRUE;
+    g_IsMenuWipeOpening = TRUE;
+    g_IsChosenHoleLoadStarted = FALSE;
+    f_UnreadMenuEntryByte = 0;
+    g_MenuScreen = MENU_SCREEN_RING_SHOT_EXIT;
 }
 
 /* Enters the menu at the mode select, as quitting a round does */
 void EnterMenuAtModeSelect(void) {
-  g_IsRingShotWipeOpening = TRUE;
-  g_IsMenuWipeOpening = TRUE;
-  g_IsChosenHoleLoadStarted = FALSE;
-  f_UnreadMenuEntryByte = 0;
-  g_MenuScreen = MENU_SCREEN_MODE_SELECT;
+    g_IsRingShotWipeOpening = TRUE;
+    g_IsMenuWipeOpening = TRUE;
+    g_IsChosenHoleLoadStarted = FALSE;
+    f_UnreadMenuEntryByte = 0;
+    g_MenuScreen = MENU_SCREEN_MODE_SELECT;
 }
 
 /* Enters the menu at the blank screen, which waits for A to go to the title */
 void EnterMenuAtBlankScreen(void) {
-  g_IsRingShotWipeOpening = TRUE;
-  g_IsMenuWipeOpening = TRUE;
-  g_IsChosenHoleLoadStarted = FALSE;
-  f_UnreadMenuEntryByte = 0;
-  g_MenuScreen = MENU_SCREEN_BLANK;
+    g_IsRingShotWipeOpening = TRUE;
+    g_IsMenuWipeOpening = TRUE;
+    g_IsChosenHoleLoadStarted = FALSE;
+    f_UnreadMenuEntryByte = 0;
+    g_MenuScreen = MENU_SCREEN_BLANK;
 }
 
 /* Enters the menu at the Ring Shot records, as leaving Ring Shot does */
 void EnterMenuAtRingShotRecords(void) {
-  g_IsRingShotWipeOpening = TRUE;
-  g_IsMenuWipeOpening = TRUE;
-  g_IsChosenHoleLoadStarted = FALSE;
-  f_UnreadMenuEntryByte = 0;
-  g_MenuScreen = MENU_SCREEN_RING_SHOT_RECORDS;
+    g_IsRingShotWipeOpening = TRUE;
+    g_IsMenuWipeOpening = TRUE;
+    g_IsChosenHoleLoadStarted = FALSE;
+    f_UnreadMenuEntryByte = 0;
+    g_MenuScreen = MENU_SCREEN_RING_SHOT_RECORDS;
 }
 
 /* Enters the menu at the Best Shots, ending the replay that it started */
 void EnterMenuAtBestShots(void) {
-  g_IsChosenHoleLoadStarted = FALSE;
-  g_IsRingShotWipeOpening = TRUE;
-  f_UnreadMenuEntryByte = 0;
-  g_IsMenuWipeOpening = TRUE;
-  g_GameState.replayKind = REPLAY_KIND_NONE;
-  ClearGameFlag(GAME_FLAG_LOADED_PLAY);
-  g_MenuScreen = MENU_SCREEN_BEST_SHOTS;
+    g_IsChosenHoleLoadStarted = FALSE;
+    g_IsRingShotWipeOpening = TRUE;
+    f_UnreadMenuEntryByte = 0;
+    g_IsMenuWipeOpening = TRUE;
+    g_GameState.replayKind = REPLAY_KIND_NONE;
+    ClearGameFlag(GAME_FLAG_LOADED_PLAY);
+    g_MenuScreen = MENU_SCREEN_BEST_SHOTS;
 }
 
 /* Returns whether the music is turned off in the options */
 s8 IsMusicOffChosen(void) {
-  return GetSaveData()->options[SAVE_OPTION_MUSIC_OFF];
+    return GetSaveData()->options[SAVE_OPTION_MUSIC_OFF];
 }
 
 /* Returns whether mono sound is chosen in the options */
 s8 IsMonoChosen(void) {
-  return GetSaveData()->options[SAVE_OPTION_MONO];
+    return GetSaveData()->options[SAVE_OPTION_MONO];
 }
 
 /* Returns whether the simple flight camera is chosen in the options */
 s8 IsSimpleCameraChosen(void) {
-  return GetSaveData()->options[SAVE_OPTION_SIMPLE_CAMERA];
+    return GetSaveData()->options[SAVE_OPTION_SIMPLE_CAMERA];
 }
 
 void WriteSaveData(void) {
-  TransferSaveData(GetSaveData(), TRUE);
+    TransferSaveData(GetSaveData(), TRUE);
 }
 
 /* Copies the options between the save data and g_MenuMemory's option bits, in
  * the direction of the transfer */
-void SyncSaveOptions(SaveData* save, Boolean isWrite, s32 readResult) {
-  u8* bits;
-  s8* options;
+void SyncSaveOptions(SaveData *save, Boolean isWrite, s32 readResult) {
+    u8 *bits;
+    s8 *options;
 
-  options = save->options;
-  if (!isWrite) {
-    bits = &g_MenuMemory.optionBits;
-    *bits = 0;
-    if (readResult > 0) {
-      if (options[SAVE_OPTION_MUSIC_OFF]) {
-        *bits = OPTION_BIT_MUSIC_OFF;
-      }
+    options = save->options;
+    if (!isWrite) {
+        bits = &g_MenuMemory.optionBits;
+        *bits = 0;
+        if (readResult > 0) {
+            if (options[SAVE_OPTION_MUSIC_OFF]) {
+                *bits = OPTION_BIT_MUSIC_OFF;
+            }
 
-      if (options[SAVE_OPTION_MONO]) {
-        *bits |= OPTION_BIT_MONO;
-        g_SoundOptionBits = *bits;
-      }
+            if (options[SAVE_OPTION_MONO]) {
+                *bits |= OPTION_BIT_MONO;
+                g_SoundOptionBits = *bits;
+            }
 
-      if (options[SAVE_OPTION_SIMPLE_CAMERA]) {
-        *bits |= OPTION_BIT_SIMPLE_CAMERA;
-      }
+            if (options[SAVE_OPTION_SIMPLE_CAMERA]) {
+                *bits |= OPTION_BIT_SIMPLE_CAMERA;
+            }
+        }
     }
-  } else {
-    if (g_MenuMemory.optionBits & OPTION_BIT_MUSIC_OFF) {
-      options[SAVE_OPTION_MUSIC_OFF] = TRUE;
-    } else {
-      options[SAVE_OPTION_MUSIC_OFF] = FALSE;
-    }
+    else {
+        if (g_MenuMemory.optionBits & OPTION_BIT_MUSIC_OFF) {
+            options[SAVE_OPTION_MUSIC_OFF] = TRUE;
+        }
+        else {
+            options[SAVE_OPTION_MUSIC_OFF] = FALSE;
+        }
 
-    if (g_MenuMemory.optionBits & OPTION_BIT_MONO) {
-      options[SAVE_OPTION_MONO] = TRUE;
-    } else {
-      options[SAVE_OPTION_MONO] = FALSE;
-    }
+        if (g_MenuMemory.optionBits & OPTION_BIT_MONO) {
+            options[SAVE_OPTION_MONO] = TRUE;
+        }
+        else {
+            options[SAVE_OPTION_MONO] = FALSE;
+        }
 
-    if (g_MenuMemory.optionBits & OPTION_BIT_SIMPLE_CAMERA) {
-      options[SAVE_OPTION_SIMPLE_CAMERA] = TRUE;
-    } else {
-      options[SAVE_OPTION_SIMPLE_CAMERA] = FALSE;
+        if (g_MenuMemory.optionBits & OPTION_BIT_SIMPLE_CAMERA) {
+            options[SAVE_OPTION_SIMPLE_CAMERA] = TRUE;
+        }
+        else {
+            options[SAVE_OPTION_SIMPLE_CAMERA] = FALSE;
+        }
     }
-  }
 }
 
-void TransferSaveData(SaveData* save, u8 isWrite) {
-  u8 isSramSelected;
-  u8 isInSram;
-  s32 readResult;
+void TransferSaveData(SaveData *save, u8 isWrite) {
+    u8 isSramSelected;
+    u8 isInSram;
+    s32 readResult;
 
-  isSramSelected = !IsGameFlagSet(GAME_FLAG_SAVE_TO_HOST);
-  isInSram = isSramSelected;
-  if (!isWrite) {
-    readResult = ReadSaveCopies(save, isInSram);
-    SyncSaveOptions(save, FALSE, readResult);
-  } else {
-    /* readResult is never set on this path, but SyncSaveOptions ignores it when
-     * writing */
+    isSramSelected = !IsGameFlagSet(GAME_FLAG_SAVE_TO_HOST);
+    isInSram = isSramSelected;
+    if (!isWrite) {
+        readResult = ReadSaveCopies(save, isInSram);
+        SyncSaveOptions(save, FALSE, readResult);
+    }
+    else {
+        /* readResult is never set on this path, but SyncSaveOptions ignores it when
+         * writing */
 #ifdef AVOID_UB
-    readResult = SAVE_READ_FAILED;
+        readResult = SAVE_READ_FAILED;
 #endif
-    SyncSaveOptions(save, TRUE, readResult);
-    WriteSaveCopies(save, isInSram);
-  }
+        SyncSaveOptions(save, TRUE, readResult);
+        WriteSaveCopies(save, isInSram);
+    }
 }
 
 /* Reads the first intact copy; if neither is, the save data starts over */
-s32 ReadSaveCopies(SaveData* save, u8 isInSram) {
-  /* Only takes up stack; without it 52 words differ */
-  u8 unusedBuffer[0x90] UNUSED;
-  u8 checkBuffer[0x40];
-  SaveCheck* check;
-  u32 size;
-  s32 unmarkedCount;
-  s32 copyIndex;
-  u16 crc;
+s32 ReadSaveCopies(SaveData *save, u8 isInSram) {
+    /* Only takes up stack; without it 52 words differ */
+    u8 unusedBuffer[0x90] UNUSED;
+    u8 checkBuffer[0x40];
+    SaveCheck *check;
+    u32 size;
+    s32 unmarkedCount;
+    s32 copyIndex;
+    u16 crc;
 
-  check = (SaveCheck*)DmaAlignedAddress(checkBuffer);
-  unmarkedCount = 0;
-  for (copyIndex = 0; copyIndex < SAVE_COPY_COUNT; copyIndex++) {
-    if (!isInSram) {
-      if (ReadHostFile(f_SaveCopyLocations[copyIndex].dataFileName, &size) !=
-              HOST_FILE_OK ||
-          size != sizeof(SaveData)) {
-        continue;
-      }
+    check = (SaveCheck *)DmaAlignedAddress(checkBuffer);
+    unmarkedCount = 0;
+    for (copyIndex = 0; copyIndex < SAVE_COPY_COUNT; copyIndex++) {
+        if (!isInSram) {
+            if (ReadHostFile(f_SaveCopyLocations[copyIndex].dataFileName, &size) != HOST_FILE_OK ||
+                size != sizeof(SaveData)) {
+                continue;
+            }
 
-      if (ReadHostFile(f_SaveCopyLocations[copyIndex].checkFileName, &size) !=
-              HOST_FILE_OK ||
-          size != sizeof(SaveCheck)) {
-        continue;
-      }
-    } else {
-      nuPiReadSram(f_SaveCopyLocations[copyIndex].dataSramAddress, save,
-          sizeof(SaveData));
-      nuPiReadSram(f_SaveCopyLocations[copyIndex].checkSramAddress, check,
-          sizeof(SaveCheck));
+            if (ReadHostFile(f_SaveCopyLocations[copyIndex].checkFileName, &size) != HOST_FILE_OK ||
+                size != sizeof(SaveCheck)) {
+                continue;
+            }
+        }
+        else {
+            nuPiReadSram(f_SaveCopyLocations[copyIndex].dataSramAddress, save, sizeof(SaveData));
+            nuPiReadSram(f_SaveCopyLocations[copyIndex].checkSramAddress, check, sizeof(SaveCheck));
+        }
+
+        if (save->magic != SAVE_MAGIC) {
+            unmarkedCount++;
+            continue;
+        }
+
+        crc = check->keyedCrc ^ check->key;
+        if (crc == ComputeCrc16((u8 *)save, sizeof(SaveData))) {
+            break;
+        }
     }
 
-    if (save->magic != SAVE_MAGIC) {
-      unmarkedCount++;
-      continue;
+    if (copyIndex == 0) {
+        return SAVE_READ_FIRST_COPY;
     }
 
-    crc = check->keyedCrc ^ check->key;
-    if (crc == ComputeCrc16((u8*)save, sizeof(SaveData))) {
-      break;
+    if (copyIndex == 1) {
+        return SAVE_READ_SECOND_COPY;
     }
-  }
 
-  if (copyIndex == 0) {
-    return SAVE_READ_FIRST_COPY;
-  }
-
-  if (copyIndex == 1) {
-    return SAVE_READ_SECOND_COPY;
-  }
-
-  ResetSaveData();
-  return (unmarkedCount == SAVE_COPY_COUNT) ? SAVE_READ_NEVER_WRITTEN
-                                            : SAVE_READ_FAILED;
+    ResetSaveData();
+    return (unmarkedCount == SAVE_COPY_COUNT) ? SAVE_READ_NEVER_WRITTEN : SAVE_READ_FAILED;
 }
 
-s32 WriteSaveCopies(SaveData* save, u8 isInSram) {
-  u8 checkBuffer[0xC0];
-  SaveCheck* check;
-  u16 crc;
-  s32 dateIndex;
-  s32 copyIndex;
+s32 WriteSaveCopies(SaveData *save, u8 isInSram) {
+    u8 checkBuffer[0xC0];
+    SaveCheck *check;
+    u16 crc;
+    s32 dateIndex;
+    s32 copyIndex;
 
-  check = (SaveCheck*)DmaAlignedAddress(checkBuffer);
-  for (dateIndex = 0; dateIndex < ARRAY_COUNT(save->invertedBuildDate);
-      dateIndex++) {
-    save->invertedBuildDate[dateIndex] = ~g_RomBuildDate[dateIndex];
-  }
-
-  crc = ComputeCrc16((u8*)save, sizeof(SaveData));
-  for (copyIndex = 0; copyIndex < SAVE_COPY_COUNT; copyIndex++) {
-    check->key = rand();
-    check->keyedCrc = check->key ^ crc;
-    if (!isInSram) {
-      if (WriteHostFile(f_SaveCopyLocations[copyIndex].dataFileName,
-              sizeof(SaveData)) == HOST_FILE_OK) {
-        WriteHostFile(
-            f_SaveCopyLocations[copyIndex].checkFileName, sizeof(SaveCheck));
-      }
-    } else {
-      nuPiWriteSram(f_SaveCopyLocations[copyIndex].dataSramAddress, save,
-          sizeof(SaveData));
-      nuPiWriteSram(f_SaveCopyLocations[copyIndex].checkSramAddress, check,
-          sizeof(SaveCheck));
+    check = (SaveCheck *)DmaAlignedAddress(checkBuffer);
+    for (dateIndex = 0; dateIndex < ARRAY_COUNT(save->invertedBuildDate); dateIndex++) {
+        save->invertedBuildDate[dateIndex] = ~g_RomBuildDate[dateIndex];
     }
-  }
 
-  return TRUE;
+    crc = ComputeCrc16((u8 *)save, sizeof(SaveData));
+    for (copyIndex = 0; copyIndex < SAVE_COPY_COUNT; copyIndex++) {
+        check->key = rand();
+        check->keyedCrc = check->key ^ crc;
+        if (!isInSram) {
+            if (WriteHostFile(f_SaveCopyLocations[copyIndex].dataFileName, sizeof(SaveData)) ==
+                HOST_FILE_OK) {
+                WriteHostFile(f_SaveCopyLocations[copyIndex].checkFileName, sizeof(SaveCheck));
+            }
+        }
+        else {
+            nuPiWriteSram(f_SaveCopyLocations[copyIndex].dataSramAddress, save, sizeof(SaveData));
+            nuPiWriteSram(
+                f_SaveCopyLocations[copyIndex].checkSramAddress,
+                check,
+                sizeof(SaveCheck)
+            );
+        }
+    }
+
+    return TRUE;
 }

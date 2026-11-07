@@ -7,6 +7,6 @@
 
 void WaitForConfirmButton(void);
 
-void RewriteWord(Gfx** displayListHead);
+void RewriteWord(Gfx **displayListHead);
 
 #endif

@@ -45,18 +45,18 @@
 #define HOST_FILE_NAME_SIZE_MAX 0x100
 
 typedef struct BillboardTexture {
-  /* 0x0 */ s32 assetId;
-  /* 0x4 */ s16 type;
-  /* 0x6 */ s16 width;
-  /* 0x8 */ s16 height;
-  /* 0xC */ u16* pixels;
+    /* 0x0 */ s32 assetId;
+    /* 0x4 */ s16 type;
+    /* 0x6 */ s16 width;
+    /* 0x8 */ s16 height;
+    /* 0xC */ u16 *pixels;
 } BillboardTexture; /* size = 0x10 */
 
 /* A color for the billboards' combiner, a channel to a word */
 typedef struct BillboardColor {
-  /* 0x0 */ s32 red;
-  /* 0x4 */ s32 green;
-  /* 0x8 */ s32 blue;
+    /* 0x0 */ s32 red;
+    /* 0x4 */ s32 green;
+    /* 0x8 */ s32 blue;
 } BillboardColor; /* size = 0xC */
 
 /* The size of every billboard texture, in texels */
@@ -65,8 +65,7 @@ typedef struct BillboardColor {
 
 /* A texture read from an asset when first drawn */
 #define BILLBOARD_TEXTURE(assetId) \
-  {(assetId), TEXTURE_LOADED_ON_DEMAND, BILLBOARD_TEXTURE_WIDTH, \
-      BILLBOARD_TEXTURE_HEIGHT, NULL}
+    {(assetId), TEXTURE_LOADED_ON_DEMAND, BILLBOARD_TEXTURE_WIDTH, BILLBOARD_TEXTURE_HEIGHT, NULL}
 
 Billboard g_Billboards[BILLBOARD_COUNT];
 
@@ -132,8 +131,8 @@ static BillboardTexture f_BillboardTextures[BILLBOARD_TEXTURE_COUNT] = {
     BILLBOARD_TEXTURE(0x913),
 };
 static s8 f_IsHeapReady = FALSE;
-static u8* f_HeapStart = NULL;
-static u8* f_HeapEnd = NULL;
+static u8 *f_HeapStart = NULL;
+static u8 *f_HeapEnd = NULL;
 static u16 f_DrawOrder[BILLBOARD_COUNT] = {0};
 /* Read by no routine */
 static s8 f_UnusedBytesAfterDrawOrder[2] UNUSED = {1, 1};
@@ -168,36 +167,34 @@ static s8 f_UnusedBytesAfterDrawOrder[2] UNUSED = {1, 1};
 #define VIEW_DEPTH_FAR 0x40000000
 
 void DestroyBillboardManager(void) {
-  u32 offset;
+    u32 offset;
 
-  osSyncPrintf("DestBillMan\n");
-  for (offset = 0; offset < sizeof(f_BillboardTextures);
-      offset += sizeof(BillboardTexture)) {
-    ((BillboardTexture*)AddressPast(f_BillboardTextures, offset))->pixels =
-        NULL;
-  }
+    osSyncPrintf("DestBillMan\n");
+    for (offset = 0; offset < sizeof(f_BillboardTextures); offset += sizeof(BillboardTexture)) {
+        ((BillboardTexture *)AddressPast(f_BillboardTextures, offset))->pixels = NULL;
+    }
 
-  ResetHeap(HEAP_BILLBOARD);
-  f_IsHeapReady = FALSE;
+    ResetHeap(HEAP_BILLBOARD);
+    f_IsHeapReady = FALSE;
 }
 
-void InitBillboardManager(void* heapStart, s32 heapSize) {
-  u8* heapEnd;
+void InitBillboardManager(void *heapStart, s32 heapSize) {
+    u8 *heapEnd;
 
-  osSyncPrintf("InitBillMan\n");
-  heapEnd = AddressPast(heapStart, heapSize);
-  DestroyBillboardManager();
-  f_HeapStart = heapStart;
-  f_HeapEnd = heapEnd;
-  AddHeapRegion(HEAP_BILLBOARD, heapStart, heapEnd);
-  f_IsHeapReady = TRUE;
+    osSyncPrintf("InitBillMan\n");
+    heapEnd = AddressPast(heapStart, heapSize);
+    DestroyBillboardManager();
+    f_HeapStart = heapStart;
+    f_HeapEnd = heapEnd;
+    AddHeapRegion(HEAP_BILLBOARD, heapStart, heapEnd);
+    f_IsHeapReady = TRUE;
 }
 
 void RevertBillboardManager(void) {
-  osSyncPrintf("RevertBillMan\n");
-  DestroyBillboardManager();
-  AddHeapRegion(HEAP_BILLBOARD, f_HeapStart, f_HeapEnd);
-  f_IsHeapReady = TRUE;
+    osSyncPrintf("RevertBillMan\n");
+    DestroyBillboardManager();
+    AddHeapRegion(HEAP_BILLBOARD, f_HeapStart, f_HeapEnd);
+    f_IsHeapReady = TRUE;
 }
 
 /*
@@ -213,66 +210,74 @@ const BillboardColor g_BillboardEnvColor = {128, 64, 32};
  * differently from the original.
  */
 #define IsNearCourseEdge(x, z) \
-  (!g_GameState.isMiniGolf && \
-      (((x) <= COURSE_EDGE_MIN_X) || ((z) <= COURSE_EDGE_MIN_Z) || \
-          ((x) >= COURSE_EDGE_MAX_X) || ((z) >= COURSE_EDGE_MAX_Z)))
+    (!g_GameState.isMiniGolf && \
+        (((x) <= COURSE_EDGE_MIN_X) || \
+            ((z) <= COURSE_EDGE_MIN_Z) || \
+            ((x) >= COURSE_EDGE_MAX_X) || \
+            ((z) >= COURSE_EDGE_MAX_Z)))
 
 void PlaceBillboards(void) {
-  s32 i;
-  f32 x;
-  f32 z;
-  f32 y;
+    s32 i;
+    f32 x;
+    f32 z;
+    f32 y;
 
-  for (i = 0; i != BILLBOARD_COUNT; i++) {
-    f_DrawOrder[i] = i;
-  }
-
-  for (i = 0; i < BILLBOARD_COUNT; i++) {
-    if (g_Billboards[i].textureIndex >= 0) {
-      x = g_Billboards[i].x;
-      z = g_Billboards[i].z;
-      if (IsNearCourseEdge(x, z)) {
-        g_Billboards[i].isNearCourseEdge = TRUE;
-      } else {
-        g_Billboards[i].isNearCourseEdge = FALSE;
-      }
-
-      y = GetGroundHeight(x * GROUND_HEIGHT_SCALE, z * GROUND_HEIGHT_SCALE) /
-          GROUND_HEIGHT_SCALE;
-      g_Billboards[i].y = y;
-      guTranslate(&g_BillboardTransforms[i].translation, x, y, z);
-      guScale(&g_BillboardTransforms[i].scale, g_Billboards[i].width,
-          g_Billboards[i].height, 1.0f);
+    for (i = 0; i != BILLBOARD_COUNT; i++) {
+        f_DrawOrder[i] = i;
     }
-  }
+
+    for (i = 0; i < BILLBOARD_COUNT; i++) {
+        if (g_Billboards[i].textureIndex >= 0) {
+            x = g_Billboards[i].x;
+            z = g_Billboards[i].z;
+            if (IsNearCourseEdge(x, z)) {
+                g_Billboards[i].isNearCourseEdge = TRUE;
+            }
+            else {
+                g_Billboards[i].isNearCourseEdge = FALSE;
+            }
+
+            y = GetGroundHeight(x * GROUND_HEIGHT_SCALE, z * GROUND_HEIGHT_SCALE) /
+                GROUND_HEIGHT_SCALE;
+            g_Billboards[i].y = y;
+            guTranslate(&g_BillboardTransforms[i].translation, x, y, z);
+            guScale(
+                &g_BillboardTransforms[i].scale,
+                g_Billboards[i].width,
+                g_Billboards[i].height,
+                1.0f
+            );
+        }
+    }
 }
 
 void SortBillboardsByDepth(void) {
-  s32 i;
-  s32 sortedIndex;
-  u16 insertedIndex;
+    s32 i;
+    s32 sortedIndex;
+    u16 insertedIndex;
 
-  for (i = 0; i != BILLBOARD_COUNT; i++) {
-    if (g_Billboards[i].textureIndex < 0) {
-      g_BillboardTransforms[i].viewDepth = VIEW_DEPTH_FAR;
-    } else {
-      g_BillboardTransforms[i].viewDepth =
-          GetViewDepth(g_Billboards[i].x, g_Billboards[i].y, g_Billboards[i].z);
-    }
-  }
-
-  /* Insertion sort, farthest first */
-  for (i = 1; i != BILLBOARD_COUNT; i++) {
-    insertedIndex = f_DrawOrder[i];
-    for (sortedIndex = i - 1; sortedIndex >= 0 &&
-        g_BillboardTransforms[f_DrawOrder[sortedIndex]].viewDepth <
-            g_BillboardTransforms[insertedIndex].viewDepth;
-        sortedIndex--) {
-      f_DrawOrder[sortedIndex + 1] = f_DrawOrder[sortedIndex];
+    for (i = 0; i != BILLBOARD_COUNT; i++) {
+        if (g_Billboards[i].textureIndex < 0) {
+            g_BillboardTransforms[i].viewDepth = VIEW_DEPTH_FAR;
+        }
+        else {
+            g_BillboardTransforms[i].viewDepth =
+                GetViewDepth(g_Billboards[i].x, g_Billboards[i].y, g_Billboards[i].z);
+        }
     }
 
-    f_DrawOrder[sortedIndex + 1] = insertedIndex;
-  }
+    /* Insertion sort, farthest first */
+    for (i = 1; i != BILLBOARD_COUNT; i++) {
+        insertedIndex = f_DrawOrder[i];
+        for (sortedIndex = i - 1; sortedIndex >= 0 &&
+            g_BillboardTransforms[f_DrawOrder[sortedIndex]].viewDepth <
+                g_BillboardTransforms[insertedIndex].viewDepth;
+            sortedIndex--) {
+            f_DrawOrder[sortedIndex + 1] = f_DrawOrder[sortedIndex];
+        }
+
+        f_DrawOrder[sortedIndex + 1] = insertedIndex;
+    }
 }
 
 /*
@@ -281,57 +286,83 @@ void SortBillboardsByDepth(void) {
  * compiles differently from the original.
  */
 #define NeedsTextureLoad(billboard, textureIndex) \
-  (((billboard)->textureIndex != f_LoadedTextureIndex) && \
-      (f_BillboardTextures[textureIndex].type == TEXTURE_LOADED_ON_DEMAND) && \
-      (f_BillboardTextures[textureIndex].pixels != NULL))
+    (((billboard)->textureIndex != f_LoadedTextureIndex) && \
+        (f_BillboardTextures[textureIndex].type == TEXTURE_LOADED_ON_DEMAND) && \
+        (f_BillboardTextures[textureIndex].pixels != NULL))
 
-void DrawBillboard(Gfx** gfxPtr, Billboard* billboard,
-    BillboardTransform* transform, s32 textureIndex,
-    CameraMatrices* cameraMatrices) {
-  Gfx* gfx = *gfxPtr;
-  AssetFile file;
-  s32 texelSize;
+void DrawBillboard(
+    Gfx **gfxPtr,
+    Billboard *billboard,
+    BillboardTransform *transform,
+    s32 textureIndex,
+    CameraMatrices *cameraMatrices
+) {
+    Gfx *gfx = *gfxPtr;
+    AssetFile file;
+    s32 texelSize;
 
-  if (f_BillboardTextures[textureIndex].pixels == NULL &&
-      f_BillboardTextures[textureIndex].type == TEXTURE_LOADED_ON_DEMAND) {
-    texelSize = f_BillboardTextures[textureIndex].width *
-        f_BillboardTextures[textureIndex].height * sizeof(u16);
-    f_BillboardTextures[textureIndex].pixels =
-        AllocFromHeap(HEAP_BILLBOARD, texelSize + TEXTURE_HEADER_SIZE);
-    if (f_BillboardTextures[textureIndex].pixels != NULL) {
-      OpenAssetFile(f_BillboardTextures[textureIndex].assetId, &file);
-      ReadAssetFile(
-          f_BillboardTextures[textureIndex].pixels, TEXTURE_HEADER_SIZE, &file);
-      ReadAssetFile(f_BillboardTextures[textureIndex].pixels, texelSize, &file);
+    if (f_BillboardTextures[textureIndex].pixels == NULL &&
+        f_BillboardTextures[textureIndex].type == TEXTURE_LOADED_ON_DEMAND) {
+        texelSize = f_BillboardTextures[textureIndex].width *
+            f_BillboardTextures[textureIndex].height * sizeof(u16);
+        f_BillboardTextures[textureIndex].pixels =
+            AllocFromHeap(HEAP_BILLBOARD, texelSize + TEXTURE_HEADER_SIZE);
+        if (f_BillboardTextures[textureIndex].pixels != NULL) {
+            OpenAssetFile(f_BillboardTextures[textureIndex].assetId, &file);
+            ReadAssetFile(f_BillboardTextures[textureIndex].pixels, TEXTURE_HEADER_SIZE, &file);
+            ReadAssetFile(f_BillboardTextures[textureIndex].pixels, texelSize, &file);
+        }
     }
-  }
 
-  if (NeedsTextureLoad(billboard, textureIndex)) {
-    gDPLoadTextureBlock(gfx++,
-        TextureAddress(f_BillboardTextures[textureIndex].pixels), G_IM_FMT_RGBA,
-        G_IM_SIZ_16b, f_BillboardTextures[textureIndex].width,
-        f_BillboardTextures[textureIndex].height, 0, G_TX_NOMIRROR | G_TX_WRAP,
-        G_TX_MIRROR | G_TX_WRAP, 5, 6, 2, G_TX_NOLOD);
+    if (NeedsTextureLoad(billboard, textureIndex)) {
+        gDPLoadTextureBlock(
+            gfx++,
+            TextureAddress(f_BillboardTextures[textureIndex].pixels),
+            G_IM_FMT_RGBA,
+            G_IM_SIZ_16b,
+            f_BillboardTextures[textureIndex].width,
+            f_BillboardTextures[textureIndex].height,
+            0,
+            G_TX_NOMIRROR | G_TX_WRAP,
+            G_TX_MIRROR | G_TX_WRAP,
+            5,
+            6,
+            2,
+            G_TX_NOLOD
+        );
+        gDPPipeSync(gfx++);
+        gDPSetTextureLUT(gfx++, G_TT_NONE);
+        gDPSetCombineLERP(
+            gfx++,
+            ENVIRONMENT,
+            TEXEL0,
+            ENV_ALPHA,
+            TEXEL0,
+            PRIMITIVE,
+            0,
+            TEXEL0,
+            0,
+            SHADE,
+            0,
+            COMBINED,
+            0,
+            0,
+            0,
+            0,
+            COMBINED
+        );
+    }
+
+    gSPMatrix(gfx++, &transform->translation, G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_PUSH);
+    gSPMatrix(gfx++, &cameraMatrices->billboard, G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_NOPUSH);
+    gSPMatrix(gfx++, &transform->scale, G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_NOPUSH);
     gDPPipeSync(gfx++);
-    gDPSetTextureLUT(gfx++, G_TT_NONE);
-    gDPSetCombineLERP(gfx++, ENVIRONMENT, TEXEL0, ENV_ALPHA, TEXEL0, PRIMITIVE,
-        0, TEXEL0, 0, SHADE, 0, COMBINED, 0, 0, 0, 0, COMBINED);
-  }
-
-  gSPMatrix(
-      gfx++, &transform->translation, G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_PUSH);
-  gSPMatrix(gfx++, &cameraMatrices->billboard,
-      G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_NOPUSH);
-  gSPMatrix(
-      gfx++, &transform->scale, G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_NOPUSH);
-  gDPPipeSync(gfx++);
-  gSPVertex(
-      gfx++, f_BillboardVertices[billboard->shapeIndex], QUAD_VERTEX_COUNT, 0);
-  gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
-  gDPPipeSync(gfx++);
-  gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
-  f_LoadedTextureIndex = billboard->textureIndex;
-  *gfxPtr = gfx;
+    gSPVertex(gfx++, f_BillboardVertices[billboard->shapeIndex], QUAD_VERTEX_COUNT, 0);
+    gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
+    gDPPipeSync(gfx++);
+    gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
+    f_LoadedTextureIndex = billboard->textureIndex;
+    *gfxPtr = gfx;
 }
 
 /*
@@ -389,216 +420,228 @@ void DrawBillboard(Gfx** gfxPtr, Billboard* billboard,
  * loop.
  */
 #ifdef NON_MATCHING
-void DrawBillboards(CameraMatrices* cameraMatrices, s32 cameraIndex) {
-  Gfx* gfx = g_DisplayListHead;
-  BillboardColor lightColor UNUSED = g_BillboardLightColor;
-  BillboardColor envColor = g_BillboardEnvColor;
-  Vec3 viewDir;
-  Vec3 lightDir;
-  /* Pads the frame to match; without it 227 words differ, against 125 */
-  Vec3 unusedVector UNUSED;
-  Radians lightPitch;
-  Radians lightYaw;
-  f32 alignment;
-  f32 lightHeight;
-  f32 leftAlignment;
-  f32 rightAlignment;
-  s32 ballDepth;
-  s32 orderIndex;
-  s32 billboardIndex;
+void DrawBillboards(CameraMatrices *cameraMatrices, s32 cameraIndex) {
+    Gfx *gfx = g_DisplayListHead;
+    BillboardColor lightColor UNUSED = g_BillboardLightColor;
+    BillboardColor envColor = g_BillboardEnvColor;
+    Vec3 viewDir;
+    Vec3 lightDir;
+    /* Pads the frame to match; without it 227 words differ, against 125 */
+    Vec3 unusedVector UNUSED;
+    Radians lightPitch;
+    Radians lightYaw;
+    f32 alignment;
+    f32 lightHeight;
+    f32 leftAlignment;
+    f32 rightAlignment;
+    s32 ballDepth;
+    s32 orderIndex;
+    s32 billboardIndex;
 
-  if (IsGameFlagSet(GAME_FLAG_HIDE_BILLBOARDS) || !f_IsHeapReady) {
-    return;
-  }
-
-  gDPPipeSync(gfx++);
-  gDPPipeSync(gfx++);
-  gDPSetCycleType(gfx++, G_CYC_2CYCLE);
-  gDPPipeSync(gfx++);
-  gDPSetEnvColor(gfx++, envColor.red, envColor.green, envColor.blue, 0x20);
-
-  lightYaw = g_HoleSetup.conditions.lightYaw * BINARY_ANGLE_TO_RADIANS;
-  lightPitch = g_HoleSetup.conditions.lightPitch * BINARY_ANGLE_TO_RADIANS;
-  viewDir[AXIS_X] = g_Cameras[0].view.lookAt[0] - g_Cameras[0].view.eye[0];
-  viewDir[AXIS_Y] = 0.0f;
-  viewDir[AXIS_Z] = g_Cameras[0].view.lookAt[2] - g_Cameras[0].view.eye[2];
-  lightDir[AXIS_X] = cosf(lightPitch) * cosf(lightYaw);
-  lightDir[AXIS_Z] = cosf(lightPitch) * sinf(lightYaw);
-  lightDir[AXIS_Y] = sinf(lightPitch);
-  if (fabsf(viewDir[AXIS_X]) + fabsf(viewDir[AXIS_Z]) >= 1.0f) {
-    guNormalize(&viewDir[AXIS_X], &viewDir[AXIS_Y], &viewDir[AXIS_Z]);
-    guNormalize(&lightDir[AXIS_X], &lightDir[AXIS_Y], &lightDir[AXIS_Z]);
-    alignment = (viewDir[AXIS_X] * lightDir[AXIS_X]) +
-        (viewDir[AXIS_Z] * lightDir[AXIS_Z]);
-    lightHeight = cosf(lightPitch);
-    if (lightHeight >= LIGHT_HEIGHT_MIN) {
-      leftAlignment = alignment;
-      if (leftAlignment > lightHeight) {
-        leftAlignment = lightHeight;
-      }
-
-      if (leftAlignment < -lightHeight) {
-        leftAlignment = -lightHeight;
-      }
-
-      rightAlignment = alignment;
-      if (rightAlignment > lightHeight) {
-        rightAlignment = lightHeight;
-      }
-
-      if (rightAlignment < -lightHeight) {
-        rightAlignment = -lightHeight;
-      }
-
-      f_BillboardVertices[0][0].v.cn[0] =
-          (((-lightHeight * 0.5f) + (leftAlignment * 0.5f)) * 127.0f) + 255.0f;
-      f_BillboardVertices[0][0].v.cn[1] =
-          (((-lightHeight * 0.5f) + (leftAlignment * 0.5f)) * 127.0f) + 255.0f;
-      f_BillboardVertices[0][0].v.cn[2] =
-          (((-lightHeight * 0.5f) + (leftAlignment * 0.5f)) * 127.0f) + 255.0f;
-      f_BillboardVertices[0][1].v.cn[0] =
-          (((-lightHeight * 0.5f) + (rightAlignment * 0.5f)) * 127.0f) + 255.0f;
-      f_BillboardVertices[0][1].v.cn[1] =
-          (((-lightHeight * 0.5f) + (rightAlignment * 0.5f)) * 127.0f) + 255.0f;
-      f_BillboardVertices[0][1].v.cn[2] =
-          (((-lightHeight * 0.5f) + (rightAlignment * 0.5f)) * 127.0f) + 255.0f;
-      f_BillboardVertices[0][2].v.cn[0] =
-          (((-lightHeight * 0.5f) + (rightAlignment * 0.5f)) * 255.0f) + 255.0f;
-      f_BillboardVertices[0][2].v.cn[1] =
-          (((-lightHeight * 0.5f) + (rightAlignment * 0.5f)) * 255.0f) + 255.0f;
-      f_BillboardVertices[0][2].v.cn[2] =
-          (((-lightHeight * 0.5f) + (rightAlignment * 0.5f)) * 255.0f) + 255.0f;
-      f_BillboardVertices[0][3].v.cn[0] =
-          (((-lightHeight * 0.5f) + (leftAlignment * 0.5f)) * 255.0f) + 255.0f;
-      f_BillboardVertices[0][3].v.cn[1] =
-          (((-lightHeight * 0.5f) + (leftAlignment * 0.5f)) * 255.0f) + 255.0f;
-      f_BillboardVertices[0][3].v.cn[2] =
-          (((-lightHeight * 0.5f) + (leftAlignment * 0.5f)) * 255.0f) + 255.0f;
+    if (IsGameFlagSet(GAME_FLAG_HIDE_BILLBOARDS) || !f_IsHeapReady) {
+        return;
     }
-  }
 
-  gSPClipRatio(gfx++, FRUSTRATIO_1);
-  gDPPipeSync(gfx++);
-  gDPSetColorDither(gfx++, G_CD_MAGICSQ);
-  gSPLoadGeometryMode(gfx++, 0);
-  gSPSetGeometryMode(gfx++, G_ZBUFFER | G_SHADE | G_FOG | G_SHADING_SMOOTH);
-  gDPPipeSync(gfx++);
-  gDPSetTextureFilter(gfx++, G_TF_BILERP);
-  gDPPipeSync(gfx++);
-  gDPSetTexturePersp(gfx++, G_TP_PERSP);
-  gDPSetBlendColor(gfx++, 0xFF, 0xFF, 0xFF, 0xFE);
-  gDPPipeSync(gfx++);
-  gDPSetTextureLOD(gfx++, G_TL_TILE);
-  gDPPipeSync(gfx++);
-  gDPSetAlphaDither(gfx++, G_AD_PATTERN);
-  gSPTexture(
-      gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0, G_TX_RENDERTILE, G_ON);
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetCycleType(gfx++, G_CYC_2CYCLE);
+    gDPPipeSync(gfx++);
+    gDPSetEnvColor(gfx++, envColor.red, envColor.green, envColor.blue, 0x20);
 
-  if (g_Cameras[cameraIndex].mode == CAMERA_MODE_BEHIND_GOLFER) {
-    ballDepth =
-        GetViewDepth(g_CurrentShot.ballPosition[AXIS_X] * COURSE_TO_WORLD_SCALE,
+    lightYaw = g_HoleSetup.conditions.lightYaw * BINARY_ANGLE_TO_RADIANS;
+    lightPitch = g_HoleSetup.conditions.lightPitch * BINARY_ANGLE_TO_RADIANS;
+    viewDir[AXIS_X] = g_Cameras[0].view.lookAt[0] - g_Cameras[0].view.eye[0];
+    viewDir[AXIS_Y] = 0.0f;
+    viewDir[AXIS_Z] = g_Cameras[0].view.lookAt[2] - g_Cameras[0].view.eye[2];
+    lightDir[AXIS_X] = cosf(lightPitch) * cosf(lightYaw);
+    lightDir[AXIS_Z] = cosf(lightPitch) * sinf(lightYaw);
+    lightDir[AXIS_Y] = sinf(lightPitch);
+    if (fabsf(viewDir[AXIS_X]) + fabsf(viewDir[AXIS_Z]) >= 1.0f) {
+        guNormalize(&viewDir[AXIS_X], &viewDir[AXIS_Y], &viewDir[AXIS_Z]);
+        guNormalize(&lightDir[AXIS_X], &lightDir[AXIS_Y], &lightDir[AXIS_Z]);
+        alignment = (viewDir[AXIS_X] * lightDir[AXIS_X]) + (viewDir[AXIS_Z] * lightDir[AXIS_Z]);
+        lightHeight = cosf(lightPitch);
+        if (lightHeight >= LIGHT_HEIGHT_MIN) {
+            leftAlignment = alignment;
+            if (leftAlignment > lightHeight) {
+                leftAlignment = lightHeight;
+            }
+
+            if (leftAlignment < -lightHeight) {
+                leftAlignment = -lightHeight;
+            }
+
+            rightAlignment = alignment;
+            if (rightAlignment > lightHeight) {
+                rightAlignment = lightHeight;
+            }
+
+            if (rightAlignment < -lightHeight) {
+                rightAlignment = -lightHeight;
+            }
+
+            f_BillboardVertices[0][0].v.cn[0] =
+                (((-lightHeight * 0.5f) + (leftAlignment * 0.5f)) * 127.0f) + 255.0f;
+            f_BillboardVertices[0][0].v.cn[1] =
+                (((-lightHeight * 0.5f) + (leftAlignment * 0.5f)) * 127.0f) + 255.0f;
+            f_BillboardVertices[0][0].v.cn[2] =
+                (((-lightHeight * 0.5f) + (leftAlignment * 0.5f)) * 127.0f) + 255.0f;
+            f_BillboardVertices[0][1].v.cn[0] =
+                (((-lightHeight * 0.5f) + (rightAlignment * 0.5f)) * 127.0f) + 255.0f;
+            f_BillboardVertices[0][1].v.cn[1] =
+                (((-lightHeight * 0.5f) + (rightAlignment * 0.5f)) * 127.0f) + 255.0f;
+            f_BillboardVertices[0][1].v.cn[2] =
+                (((-lightHeight * 0.5f) + (rightAlignment * 0.5f)) * 127.0f) + 255.0f;
+            f_BillboardVertices[0][2].v.cn[0] =
+                (((-lightHeight * 0.5f) + (rightAlignment * 0.5f)) * 255.0f) + 255.0f;
+            f_BillboardVertices[0][2].v.cn[1] =
+                (((-lightHeight * 0.5f) + (rightAlignment * 0.5f)) * 255.0f) + 255.0f;
+            f_BillboardVertices[0][2].v.cn[2] =
+                (((-lightHeight * 0.5f) + (rightAlignment * 0.5f)) * 255.0f) + 255.0f;
+            f_BillboardVertices[0][3].v.cn[0] =
+                (((-lightHeight * 0.5f) + (leftAlignment * 0.5f)) * 255.0f) + 255.0f;
+            f_BillboardVertices[0][3].v.cn[1] =
+                (((-lightHeight * 0.5f) + (leftAlignment * 0.5f)) * 255.0f) + 255.0f;
+            f_BillboardVertices[0][3].v.cn[2] =
+                (((-lightHeight * 0.5f) + (leftAlignment * 0.5f)) * 255.0f) + 255.0f;
+        }
+    }
+
+    gSPClipRatio(gfx++, FRUSTRATIO_1);
+    gDPPipeSync(gfx++);
+    gDPSetColorDither(gfx++, G_CD_MAGICSQ);
+    gSPLoadGeometryMode(gfx++, 0);
+    gSPSetGeometryMode(gfx++, G_ZBUFFER | G_SHADE | G_FOG | G_SHADING_SMOOTH);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_BILERP);
+    gDPPipeSync(gfx++);
+    gDPSetTexturePersp(gfx++, G_TP_PERSP);
+    gDPSetBlendColor(gfx++, 0xFF, 0xFF, 0xFF, 0xFE);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLOD(gfx++, G_TL_TILE);
+    gDPPipeSync(gfx++);
+    gDPSetAlphaDither(gfx++, G_AD_PATTERN);
+    gSPTexture(gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0, G_TX_RENDERTILE, G_ON);
+
+    if (g_Cameras[cameraIndex].mode == CAMERA_MODE_BEHIND_GOLFER) {
+        ballDepth = GetViewDepth(
+            g_CurrentShot.ballPosition[AXIS_X] * COURSE_TO_WORLD_SCALE,
             g_CurrentShot.ballPosition[AXIS_Y] * COURSE_TO_WORLD_SCALE,
-            g_CurrentShot.ballPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE);
-    if (ballDepth > 0) {
-      ballDepth = VIEW_DEPTH_BALL_HIDDEN;
+            g_CurrentShot.ballPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE
+        );
+        if (ballDepth > 0) {
+            ballDepth = VIEW_DEPTH_BALL_HIDDEN;
+        }
     }
-  } else {
-    ballDepth = VIEW_DEPTH_BALL_HIDDEN;
-  }
-
-  SortBillboardsByDepth();
-
-  f_LoadedTextureIndex = NO_TEXTURE_LOADED;
-  gDPSetPrimColor(gfx++, 0, 0, 0x3F, 0xB4, 0x00, OPAQUE_ALPHA);
-  gDPPipeSync(gfx++);
-  gDPSetRenderMode(gfx++, G_RM_FOG_SHADE_A, G_RM_AA_ZB_TEX_EDGE2);
-  gDPPipeSync(gfx++);
-  gDPSetAlphaCompare(gfx++, G_AC_NONE);
-  for (orderIndex = 0; orderIndex < BILLBOARD_COUNT; orderIndex++) {
-    s32 textureIndex;
-
-    billboardIndex = f_DrawOrder[orderIndex];
-    textureIndex = g_Billboards[billboardIndex].textureIndex;
-    if (g_Billboards[billboardIndex].isNearCourseEdge) {
-      continue;
+    else {
+        ballDepth = VIEW_DEPTH_BALL_HIDDEN;
     }
 
-    if (textureIndex < 0) {
-      continue;
+    SortBillboardsByDepth();
+
+    f_LoadedTextureIndex = NO_TEXTURE_LOADED;
+    gDPSetPrimColor(gfx++, 0, 0, 0x3F, 0xB4, 0x00, OPAQUE_ALPHA);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_FOG_SHADE_A, G_RM_AA_ZB_TEX_EDGE2);
+    gDPPipeSync(gfx++);
+    gDPSetAlphaCompare(gfx++, G_AC_NONE);
+    for (orderIndex = 0; orderIndex < BILLBOARD_COUNT; orderIndex++) {
+        s32 textureIndex;
+
+        billboardIndex = f_DrawOrder[orderIndex];
+        textureIndex = g_Billboards[billboardIndex].textureIndex;
+        if (g_Billboards[billboardIndex].isNearCourseEdge) {
+            continue;
+        }
+
+        if (textureIndex < 0) {
+            continue;
+        }
+
+        if (g_BillboardTransforms[billboardIndex].viewDepth < VIEW_DEPTH_NEAR) {
+            DrawBillboard(
+                &gfx,
+                &g_Billboards[billboardIndex],
+                &g_BillboardTransforms[billboardIndex],
+                textureIndex,
+                cameraMatrices
+            );
+        }
     }
 
-    if (g_BillboardTransforms[billboardIndex].viewDepth < VIEW_DEPTH_NEAR) {
-      DrawBillboard(&gfx, &g_Billboards[billboardIndex],
-          &g_BillboardTransforms[billboardIndex], textureIndex, cameraMatrices);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(
+        gfx++,
+        G_RM_FOG_SHADE_A,
+        Z_CMP | Z_UPD | IM_RD | CVG_DST_FULL | ZMODE_XLU | FORCE_BL |
+            GBL_c2(G_BL_CLR_IN, G_BL_A_IN, G_BL_CLR_MEM, G_BL_1MA)
+    );
+    gDPPipeSync(gfx++);
+    gDPSetAlphaCompare(gfx++, G_AC_THRESHOLD);
+    gDPSetBlendColor(gfx++, 0xFF, 0xFF, 0xFF, 0x3F);
+    for (orderIndex = BILLBOARD_COUNT - 1; orderIndex >= 0; orderIndex--) {
+        s32 textureIndex;
+        s32 viewDepth;
+        s32 alpha;
+
+        billboardIndex = f_DrawOrder[orderIndex];
+        if (g_Billboards[billboardIndex].isNearCourseEdge) {
+            continue;
+        }
+
+        textureIndex = g_Billboards[billboardIndex].textureIndex;
+        if (textureIndex < 0) {
+            continue;
+        }
+
+        viewDepth = g_BillboardTransforms[billboardIndex].viewDepth;
+        if (viewDepth < VIEW_DEPTH_NEAR) {
+            continue;
+        }
+
+        if (viewDepth >= 0) {
+            continue;
+        }
+
+        alpha = -viewDepth;
+        if (alpha > OPAQUE_ALPHA) {
+            alpha = OPAQUE_ALPHA;
+        }
+
+        if (alpha < NEAR_BILLBOARD_ALPHA_MIN) {
+            alpha = NEAR_BILLBOARD_ALPHA_MIN;
+        }
+
+        if (viewDepth < ballDepth) {
+            alpha = OPAQUE_ALPHA;
+        }
+
+        if (IsDebugBButtonView() &&
+            g_BillboardTransforms[billboardIndex].viewDepth > ballDepth - BALL_CLEARANCE_DEPTH) {
+            continue;
+        }
+
+        if (alpha < OPAQUE_ALPHA) {
+            continue;
+        }
+
+        DrawBillboard(
+            &gfx,
+            &g_Billboards[billboardIndex],
+            &g_BillboardTransforms[billboardIndex],
+            textureIndex,
+            cameraMatrices
+        );
     }
-  }
 
-  gDPPipeSync(gfx++);
-  gDPSetRenderMode(gfx++, G_RM_FOG_SHADE_A,
-      Z_CMP | Z_UPD | IM_RD | CVG_DST_FULL | ZMODE_XLU | FORCE_BL |
-          GBL_c2(G_BL_CLR_IN, G_BL_A_IN, G_BL_CLR_MEM, G_BL_1MA));
-  gDPPipeSync(gfx++);
-  gDPSetAlphaCompare(gfx++, G_AC_THRESHOLD);
-  gDPSetBlendColor(gfx++, 0xFF, 0xFF, 0xFF, 0x3F);
-  for (orderIndex = BILLBOARD_COUNT - 1; orderIndex >= 0; orderIndex--) {
-    s32 textureIndex;
-    s32 viewDepth;
-    s32 alpha;
-
-    billboardIndex = f_DrawOrder[orderIndex];
-    if (g_Billboards[billboardIndex].isNearCourseEdge) {
-      continue;
-    }
-
-    textureIndex = g_Billboards[billboardIndex].textureIndex;
-    if (textureIndex < 0) {
-      continue;
-    }
-
-    viewDepth = g_BillboardTransforms[billboardIndex].viewDepth;
-    if (viewDepth < VIEW_DEPTH_NEAR) {
-      continue;
-    }
-
-    if (viewDepth >= 0) {
-      continue;
-    }
-
-    alpha = -viewDepth;
-    if (alpha > OPAQUE_ALPHA) {
-      alpha = OPAQUE_ALPHA;
-    }
-
-    if (alpha < NEAR_BILLBOARD_ALPHA_MIN) {
-      alpha = NEAR_BILLBOARD_ALPHA_MIN;
-    }
-
-    if (viewDepth < ballDepth) {
-      alpha = OPAQUE_ALPHA;
-    }
-
-    if (IsDebugBButtonView() &&
-        g_BillboardTransforms[billboardIndex].viewDepth >
-            ballDepth - BALL_CLEARANCE_DEPTH) {
-      continue;
-    }
-
-    if (alpha < OPAQUE_ALPHA) {
-      continue;
-    }
-
-    DrawBillboard(&gfx, &g_Billboards[billboardIndex],
-        &g_BillboardTransforms[billboardIndex], textureIndex, cameraMatrices);
-  }
-
-  gDPPipeSync(gfx++);
-  gDPSetAlphaCompare(gfx++, G_AC_NONE);
-  gDPPipeSync(gfx++);
-  gDPSetTextureLUT(gfx++, G_TT_NONE);
-  gDPPipeSync(gfx++);
-  gDPSetRenderMode(gfx++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
-  gDPPipeSync(gfx++);
-  g_DisplayListHead = gfx;
+    gDPPipeSync(gfx++);
+    gDPSetAlphaCompare(gfx++, G_AC_NONE);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_NONE);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
+    gDPPipeSync(gfx++);
+    g_DisplayListHead = gfx;
 }
 #else
 INCLUDE_ASM("asm/nonmatchings/billboard", DrawBillboards);
@@ -610,141 +653,149 @@ INCLUDE_ASM("asm/nonmatchings/billboard", DrawBillboards);
  * function compiles differently from the original.
  */
 #define AreBillboardsHidden() \
-  (IsGameFlagSet(GAME_FLAG_HIDE_BILLBOARDS) || !f_IsHeapReady || \
-      IsDebugBButtonView())
+    (IsGameFlagSet(GAME_FLAG_HIDE_BILLBOARDS) || !f_IsHeapReady || IsDebugBButtonView())
 
 /*
  * Draws the billboards close to the camera, translucent so that the camera
  * can see through them, from the farthest to the nearest. Those farther
  * than the ball stay opaque.
  */
-void DrawFadingBillboards(CameraMatrices* cameraMatrices, s32 cameraIndex) {
-  Gfx* gfx = g_DisplayListHead;
-  BillboardColor lightColor UNUSED = g_BillboardLightColor;
-  BillboardColor envColor = g_BillboardEnvColor;
-  Boolean hasTranslucentMode;
-  s32 ballDepth;
-  s32 orderIndex;
-  s32 billboardIndex;
-  s32 textureIndex;
-  s32 viewDepth;
-  s32 alpha;
+void DrawFadingBillboards(CameraMatrices *cameraMatrices, s32 cameraIndex) {
+    Gfx *gfx = g_DisplayListHead;
+    BillboardColor lightColor UNUSED = g_BillboardLightColor;
+    BillboardColor envColor = g_BillboardEnvColor;
+    Boolean hasTranslucentMode;
+    s32 ballDepth;
+    s32 orderIndex;
+    s32 billboardIndex;
+    s32 textureIndex;
+    s32 viewDepth;
+    s32 alpha;
 
-  if (AreBillboardsHidden()) {
-    return;
-  }
+    if (AreBillboardsHidden()) {
+        return;
+    }
 
-  gDPPipeSync(gfx++);
-  gDPPipeSync(gfx++);
-  gDPSetCycleType(gfx++, G_CYC_2CYCLE);
-  gDPPipeSync(gfx++);
-  gDPSetEnvColor(gfx++, envColor.red, envColor.green, envColor.blue, 0x20);
-  gSPClipRatio(gfx++, FRUSTRATIO_1);
-  gDPPipeSync(gfx++);
-  gDPSetColorDither(gfx++, G_CD_MAGICSQ);
-  gSPLoadGeometryMode(gfx++, 0);
-  gSPSetGeometryMode(gfx++, G_ZBUFFER | G_SHADE | G_FOG | G_SHADING_SMOOTH);
-  gDPPipeSync(gfx++);
-  gDPSetTextureFilter(gfx++, G_TF_BILERP);
-  gDPPipeSync(gfx++);
-  gDPSetTexturePersp(gfx++, G_TP_PERSP);
-  gDPSetBlendColor(gfx++, 0xFF, 0xFF, 0xFF, 0xFE);
-  gDPPipeSync(gfx++);
-  gDPSetTextureLOD(gfx++, G_TL_TILE);
-  gDPPipeSync(gfx++);
-  gDPSetAlphaDither(gfx++, G_AD_PATTERN);
-  gSPTexture(
-      gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0, G_TX_RENDERTILE, G_ON);
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetCycleType(gfx++, G_CYC_2CYCLE);
+    gDPPipeSync(gfx++);
+    gDPSetEnvColor(gfx++, envColor.red, envColor.green, envColor.blue, 0x20);
+    gSPClipRatio(gfx++, FRUSTRATIO_1);
+    gDPPipeSync(gfx++);
+    gDPSetColorDither(gfx++, G_CD_MAGICSQ);
+    gSPLoadGeometryMode(gfx++, 0);
+    gSPSetGeometryMode(gfx++, G_ZBUFFER | G_SHADE | G_FOG | G_SHADING_SMOOTH);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_BILERP);
+    gDPPipeSync(gfx++);
+    gDPSetTexturePersp(gfx++, G_TP_PERSP);
+    gDPSetBlendColor(gfx++, 0xFF, 0xFF, 0xFF, 0xFE);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLOD(gfx++, G_TL_TILE);
+    gDPPipeSync(gfx++);
+    gDPSetAlphaDither(gfx++, G_AD_PATTERN);
+    gSPTexture(gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0, G_TX_RENDERTILE, G_ON);
 
-  if (g_Cameras[cameraIndex].mode == CAMERA_MODE_BEHIND_GOLFER) {
-    ballDepth =
-        GetViewDepth(g_CurrentShot.ballPosition[AXIS_X] * COURSE_TO_WORLD_SCALE,
+    if (g_Cameras[cameraIndex].mode == CAMERA_MODE_BEHIND_GOLFER) {
+        ballDepth = GetViewDepth(
+            g_CurrentShot.ballPosition[AXIS_X] * COURSE_TO_WORLD_SCALE,
             g_CurrentShot.ballPosition[AXIS_Y] * COURSE_TO_WORLD_SCALE,
-            g_CurrentShot.ballPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE);
-    if (ballDepth > 0) {
-      ballDepth = VIEW_DEPTH_BALL_HIDDEN;
+            g_CurrentShot.ballPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE
+        );
+        if (ballDepth > 0) {
+            ballDepth = VIEW_DEPTH_BALL_HIDDEN;
+        }
     }
-  } else {
-    ballDepth = VIEW_DEPTH_BALL_HIDDEN;
-  }
-
-  f_LoadedTextureIndex = NO_TEXTURE_LOADED;
-  gDPSetPrimColor(gfx++, 0, 0, 0x3F, 0xB4, 0x00, OPAQUE_ALPHA);
-  gDPPipeSync(gfx++);
-  gDPSetRenderMode(gfx++, G_RM_FOG_SHADE_A, G_RM_AA_ZB_TEX_EDGE2);
-  gDPPipeSync(gfx++);
-  gDPSetAlphaCompare(gfx++, G_AC_NONE);
-  gDPPipeSync(gfx++);
-
-  /* The blended mode set here is not the translucent surface mode that the
-   * loop switches to */
-  hasTranslucentMode = FALSE;
-  gDPSetRenderMode(gfx++, G_RM_FOG_SHADE_A,
-      Z_CMP | Z_UPD | IM_RD | CVG_DST_FULL | ZMODE_XLU | FORCE_BL |
-          GBL_c2(G_BL_CLR_IN, G_BL_A_IN, G_BL_CLR_MEM, G_BL_1MA));
-  gDPPipeSync(gfx++);
-  gDPSetAlphaCompare(gfx++, G_AC_THRESHOLD);
-  gDPSetBlendColor(gfx++, 0xFF, 0xFF, 0xFF, 0x3F);
-
-  for (orderIndex = BILLBOARD_COUNT - 1; orderIndex >= 0; orderIndex--) {
-    billboardIndex = f_DrawOrder[orderIndex];
-    if (g_Billboards[billboardIndex].isNearCourseEdge) {
-      continue;
+    else {
+        ballDepth = VIEW_DEPTH_BALL_HIDDEN;
     }
 
-    textureIndex = g_Billboards[billboardIndex].textureIndex;
-    if (textureIndex < 0) {
-      continue;
+    f_LoadedTextureIndex = NO_TEXTURE_LOADED;
+    gDPSetPrimColor(gfx++, 0, 0, 0x3F, 0xB4, 0x00, OPAQUE_ALPHA);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_FOG_SHADE_A, G_RM_AA_ZB_TEX_EDGE2);
+    gDPPipeSync(gfx++);
+    gDPSetAlphaCompare(gfx++, G_AC_NONE);
+    gDPPipeSync(gfx++);
+
+    /* The blended mode set here is not the translucent surface mode that the
+     * loop switches to */
+    hasTranslucentMode = FALSE;
+    gDPSetRenderMode(
+        gfx++,
+        G_RM_FOG_SHADE_A,
+        Z_CMP | Z_UPD | IM_RD | CVG_DST_FULL | ZMODE_XLU | FORCE_BL |
+            GBL_c2(G_BL_CLR_IN, G_BL_A_IN, G_BL_CLR_MEM, G_BL_1MA)
+    );
+    gDPPipeSync(gfx++);
+    gDPSetAlphaCompare(gfx++, G_AC_THRESHOLD);
+    gDPSetBlendColor(gfx++, 0xFF, 0xFF, 0xFF, 0x3F);
+
+    for (orderIndex = BILLBOARD_COUNT - 1; orderIndex >= 0; orderIndex--) {
+        billboardIndex = f_DrawOrder[orderIndex];
+        if (g_Billboards[billboardIndex].isNearCourseEdge) {
+            continue;
+        }
+
+        textureIndex = g_Billboards[billboardIndex].textureIndex;
+        if (textureIndex < 0) {
+            continue;
+        }
+
+        viewDepth = g_BillboardTransforms[billboardIndex].viewDepth;
+        if (viewDepth < VIEW_DEPTH_NEAR) {
+            continue;
+        }
+
+        if (viewDepth >= 0) {
+            continue;
+        }
+
+        alpha = -viewDepth;
+        if (alpha > OPAQUE_ALPHA) {
+            alpha = OPAQUE_ALPHA;
+        }
+
+        if (alpha < NEAR_BILLBOARD_ALPHA_MIN) {
+            alpha = NEAR_BILLBOARD_ALPHA_MIN;
+        }
+
+        if (viewDepth < ballDepth) {
+            alpha = OPAQUE_ALPHA;
+        }
+
+        if (alpha == OPAQUE_ALPHA) {
+            continue;
+        }
+
+        if (!hasTranslucentMode && alpha < OPAQUE_ALPHA) {
+            hasTranslucentMode = TRUE;
+            gDPPipeSync(gfx++);
+            gDPSetRenderMode(gfx++, G_RM_FOG_SHADE_A, G_RM_ZB_XLU_SURF2);
+        }
+
+        if (alpha < OPAQUE_ALPHA) {
+            gDPSetPrimColor(gfx++, 0, 0, 0x3F, 0xB4, 0x00, alpha);
+        }
+
+        DrawBillboard(
+            &gfx,
+            &g_Billboards[billboardIndex],
+            &g_BillboardTransforms[billboardIndex],
+            textureIndex,
+            cameraMatrices
+        );
     }
 
-    viewDepth = g_BillboardTransforms[billboardIndex].viewDepth;
-    if (viewDepth < VIEW_DEPTH_NEAR) {
-      continue;
-    }
-
-    if (viewDepth >= 0) {
-      continue;
-    }
-
-    alpha = -viewDepth;
-    if (alpha > OPAQUE_ALPHA) {
-      alpha = OPAQUE_ALPHA;
-    }
-
-    if (alpha < NEAR_BILLBOARD_ALPHA_MIN) {
-      alpha = NEAR_BILLBOARD_ALPHA_MIN;
-    }
-
-    if (viewDepth < ballDepth) {
-      alpha = OPAQUE_ALPHA;
-    }
-
-    if (alpha == OPAQUE_ALPHA) {
-      continue;
-    }
-
-    if (!hasTranslucentMode && alpha < OPAQUE_ALPHA) {
-      hasTranslucentMode = TRUE;
-      gDPPipeSync(gfx++);
-      gDPSetRenderMode(gfx++, G_RM_FOG_SHADE_A, G_RM_ZB_XLU_SURF2);
-    }
-
-    if (alpha < OPAQUE_ALPHA) {
-      gDPSetPrimColor(gfx++, 0, 0, 0x3F, 0xB4, 0x00, alpha);
-    }
-
-    DrawBillboard(&gfx, &g_Billboards[billboardIndex],
-        &g_BillboardTransforms[billboardIndex], textureIndex, cameraMatrices);
-  }
-
-  gDPPipeSync(gfx++);
-  gDPSetAlphaCompare(gfx++, G_AC_NONE);
-  gDPPipeSync(gfx++);
-  gDPSetTextureLUT(gfx++, G_TT_NONE);
-  gDPPipeSync(gfx++);
-  gDPSetRenderMode(gfx++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
-  gDPPipeSync(gfx++);
-  g_DisplayListHead = gfx;
+    gDPPipeSync(gfx++);
+    gDPSetAlphaCompare(gfx++, G_AC_NONE);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_NONE);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
+    gDPPipeSync(gfx++);
+    g_DisplayListHead = gfx;
 }
 
 /*
@@ -753,78 +804,79 @@ void DrawFadingBillboards(CameraMatrices* cameraMatrices, s32 cameraIndex) {
  */
 
 enum HostCommand {
-  HOST_COMMAND_WRITE_FILE = 10,
-  HOST_COMMAND_READ_FILE
+    HOST_COMMAND_WRITE_FILE = 10,
+    HOST_COMMAND_READ_FILE
 };
 
-s32 WriteHostFile(const char* fileName, u32 size) {
-  u32* command;
-  char* nameBuffer;
-  u32 nameSize;
-  s32 result;
+s32 WriteHostFile(const char *fileName, u32 size) {
+    u32 *command;
+    char *nameBuffer;
+    u32 nameSize;
+    s32 result;
 
-  if (size == 0) {
-    /* "The transfer size is too small." */
-    osSyncPrintf("転送サイズが小さいです。");
-    return HOST_FILE_SIZE_TOO_SMALL;
-  }
+    if (size == 0) {
+        /* "The transfer size is too small." */
+        osSyncPrintf("転送サイズが小さいです。");
+        return HOST_FILE_SIZE_TOO_SMALL;
+    }
 
-  nameSize = strlen(fileName);
-  if (nameSize == 0) {
-    /* "The file name is too short" */
-    osSyncPrintf("ファイル名が短すぎます");
-    return HOST_FILE_NAME_TOO_SHORT;
-  }
+    nameSize = strlen(fileName);
+    if (nameSize == 0) {
+        /* "The file name is too short" */
+        osSyncPrintf("ファイル名が短すぎます");
+        return HOST_FILE_NAME_TOO_SHORT;
+    }
 
-  nameSize = (nameSize + 3) & ~3;
-  if (nameSize < HOST_FILE_NAME_SIZE_MAX) {
+    nameSize = (nameSize + 3) & ~3;
+    if (nameSize < HOST_FILE_NAME_SIZE_MAX) {
+        command = AllocMemory(sizeof(u32));
+        nameBuffer = AllocMemory(nameSize);
+        memcpy(nameBuffer, fileName, nameSize);
+        *command = HOST_COMMAND_WRITE_FILE;
+        *command = nameSize;
+        *command = size;
+        FreeMemory(&command);
+        FreeMemory(&nameBuffer);
+        result = HOST_FILE_OK;
+    }
+    else {
+        /* "The file name is too long" */
+        osSyncPrintf("ファイル名が長すぎます");
+        result = HOST_FILE_NAME_TOO_LONG;
+    }
+
+    return result;
+}
+
+s32 ReadHostFile(const char *fileName, u32 *size) {
+    u32 *command;
+    char *nameBuffer;
+    u32 nameSize;
+
+    nameSize = strlen(fileName);
+    if (nameSize == 0) {
+        osSyncPrintf("ファイル名が短すぎます");
+        return HOST_FILE_NAME_TOO_SHORT;
+    }
+
+    nameSize = (nameSize + 3) & ~3;
+    if (nameSize >= HOST_FILE_NAME_SIZE_MAX) {
+        osSyncPrintf("ファイル名が長すぎます");
+        return HOST_FILE_NAME_TOO_LONG;
+    }
+
     command = AllocMemory(sizeof(u32));
     nameBuffer = AllocMemory(nameSize);
     memcpy(nameBuffer, fileName, nameSize);
-    *command = HOST_COMMAND_WRITE_FILE;
+    *command = HOST_COMMAND_READ_FILE;
     *command = nameSize;
-    *command = size;
+    if (*command == 0) {
+        *size = 0;
+        /* "The file has no data." */
+        osSyncPrintf("ファイルにデータがありません。");
+    }
+
     FreeMemory(&command);
     FreeMemory(&nameBuffer);
-    result = HOST_FILE_OK;
-  } else {
-    /* "The file name is too long" */
-    osSyncPrintf("ファイル名が長すぎます");
-    result = HOST_FILE_NAME_TOO_LONG;
-  }
-
-  return result;
-}
-
-s32 ReadHostFile(const char* fileName, u32* size) {
-  u32* command;
-  char* nameBuffer;
-  u32 nameSize;
-
-  nameSize = strlen(fileName);
-  if (nameSize == 0) {
-    osSyncPrintf("ファイル名が短すぎます");
-    return HOST_FILE_NAME_TOO_SHORT;
-  }
-
-  nameSize = (nameSize + 3) & ~3;
-  if (nameSize >= HOST_FILE_NAME_SIZE_MAX) {
-    osSyncPrintf("ファイル名が長すぎます");
-    return HOST_FILE_NAME_TOO_LONG;
-  }
-
-  command = AllocMemory(sizeof(u32));
-  nameBuffer = AllocMemory(nameSize);
-  memcpy(nameBuffer, fileName, nameSize);
-  *command = HOST_COMMAND_READ_FILE;
-  *command = nameSize;
-  if (*command == 0) {
-    *size = 0;
-    /* "The file has no data." */
-    osSyncPrintf("ファイルにデータがありません。");
-  }
-
-  FreeMemory(&command);
-  FreeMemory(&nameBuffer);
-  return 1;
+    return 1;
 }

@@ -9,8 +9,8 @@
 
 void CaptureFrame(void);
 void CaptureMapImage(void);
-void DrawHoleEditorGround(CameraMatrices* matrices, s32 terrainStyle);
-void DrawTargetPole(CameraMatrices* matrices, Gfx** displayListHead);
+void DrawHoleEditorGround(CameraMatrices *matrices, s32 terrainStyle);
+void DrawTargetPole(CameraMatrices *matrices, Gfx **displayListHead);
 void FillWaveTexels(void);
 void UpdateCellEditor(void);
 void UpdateGroundPointEditor(void);

@@ -18,6 +18,6 @@ void FreePinTextures(void);
 void TakePinOut(void);
 void SkipNextPinDraw(void);
 Boolean IsPinInCup(void);
-void DrawPin(CameraMatrices* matrices, CameraView* view, s32 cameraIndex);
+void DrawPin(CameraMatrices *matrices, CameraView *view, s32 cameraIndex);
 
 #endif

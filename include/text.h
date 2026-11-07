@@ -19,8 +19,8 @@
  * It is a macro, as it pastes the cycle number into the blender macro.
  */
 #define TextRenderMode(cycle) \
-  (IM_RD | CLR_ON_CVG | CVG_DST_CLAMP | ZMODE_OPA | CVG_X_ALPHA | \
-      GBL_c##cycle(G_BL_CLR_IN, G_BL_A_IN, G_BL_CLR_MEM, G_BL_A_MEM))
+    (IM_RD | CLR_ON_CVG | CVG_DST_CLAMP | ZMODE_OPA | CVG_X_ALPHA | \
+        GBL_c##cycle(G_BL_CLR_IN, G_BL_A_IN, G_BL_CLR_MEM, G_BL_A_MEM))
 
 #define TEXT_SLOT_COUNT 12
 #define TEXT_SLOT_VALUE_COUNT 4
@@ -54,11 +54,11 @@ typedef s32 MessageId;
  * time. Glyphs are placed in groups.
  */
 typedef struct GlyphSprite {
-  /* 0x00 */ Mtx matrix;
-  /* 0x40 */ u16 code;
-  /* 0x42 */ u8 fontSize;
-  /* 0x43 */ s8 group; /* NO_GLYPH_GROUP when the sprite is free */
-  /* 0x44 */ u8 flags;
+    /* 0x00 */ Mtx matrix;
+    /* 0x40 */ u16 code;
+    /* 0x42 */ u8 fontSize;
+    /* 0x43 */ s8 group; /* NO_GLYPH_GROUP when the sprite is free */
+    /* 0x44 */ u8 flags;
 } GlyphSprite; /* size = 0x48 */
 
 #define GLYPH_SPRITE_COUNT 300
@@ -66,17 +66,17 @@ typedef struct GlyphSprite {
 #define GLYPH_GROUP_COUNT 20
 
 typedef struct TextSlot {
-  /* 0x00 */ s32 x;
-  /* 0x04 */ s32 y;
-  /* 0x08 */ s32 fontSize;
-  /* 0x0C */ s32 shownCount;
-  /* 0x10 */ TextFlags flags;
-  /* 0x14 */ MessageId messageId;
-  /* 0x18 */ u8 red;
-  /* 0x19 */ u8 green;
-  /* 0x1A */ u8 blue;
-  /* 0x1B */ u8 alpha;
-  /* 0x1C */ s32 values[TEXT_SLOT_VALUE_COUNT];
+    /* 0x00 */ s32 x;
+    /* 0x04 */ s32 y;
+    /* 0x08 */ s32 fontSize;
+    /* 0x0C */ s32 shownCount;
+    /* 0x10 */ TextFlags flags;
+    /* 0x14 */ MessageId messageId;
+    /* 0x18 */ u8 red;
+    /* 0x19 */ u8 green;
+    /* 0x1A */ u8 blue;
+    /* 0x1B */ u8 alpha;
+    /* 0x1C */ s32 values[TEXT_SLOT_VALUE_COUNT];
 } TextSlot; /* size = 0x2C */
 
 /* The base of the decimal numbers the game shows */
@@ -111,10 +111,10 @@ typedef struct TextSlot {
 
 /* The suffixes that end a place's number */
 enum PlaceSuffix {
-  PLACE_SUFFIX_ST,
-  PLACE_SUFFIX_ND,
-  PLACE_SUFFIX_RD,
-  PLACE_SUFFIX_TH
+    PLACE_SUFFIX_ST,
+    PLACE_SUFFIX_ND,
+    PLACE_SUFFIX_RD,
+    PLACE_SUFFIX_TH
 };
 
 /* Places past 100 lose their hundreds; "th" covers the 4th to the 20th */
@@ -130,7 +130,7 @@ enum PlaceSuffix {
 #define NO_FONT_SIZE (-1)
 
 /* The font that DrawShadowedText and its kin draw */
-extern void* g_ShadowedFontImage;
+extern void *g_ShadowedFontImage;
 
 /* Formatted text on its way to the screen. No routine checks the length
  * against this room, which is all there is before the next object. */
@@ -140,11 +140,10 @@ extern char g_PrintBuffer[PRINT_BUFFER_SIZE];
 void LoadTextAssets(void);
 void FreeTextAssets(void);
 void ClearTextSlots(void);
-void PlaceGlyphGroup(s32 group, s32 fontSize, TextFlags flags, s32 x, s32 y,
-    READ_ONLY char* text);
+void PlaceGlyphGroup(s32 group, s32 fontSize, TextFlags flags, s32 x, s32 y, READ_ONLY char *text);
 void SetTextPaletteColor(s32 red, s32 green, s32 blue, s32 colorIndex);
 void SetTextSlotValue(s32 value, s32 slot, s32 valueIndex);
-void SetTextName(char* name);
+void SetTextName(char *name);
 /*
  * SetTextSlot reads only each color's low byte, but its callers pass the
  * colors as ints without narrowing them. text.c, which defines it with u8
@@ -154,56 +153,73 @@ void SetTextName(char* name);
  * rather than 26 (0).
  */
 #if defined(AVOID_UB) || defined(DEFINES_SET_TEXT_SLOT)
-void SetTextSlot(s32 x, s32 y, MessageId messageId, s32 fontSize, s32 slot,
-    TextFlags flags, u8 red, u8 green, u8 blue, u8 alpha);
+void SetTextSlot(
+    s32 x,
+    s32 y,
+    MessageId messageId,
+    s32 fontSize,
+    s32 slot,
+    TextFlags flags,
+    u8 red,
+    u8 green,
+    u8 blue,
+    u8 alpha
+);
 #else
-void SetTextSlot(s32 x, s32 y, MessageId messageId, s32 fontSize, s32 slot,
-    TextFlags flags, s32 red, s32 green, s32 blue, s32 alpha);
+void SetTextSlot(
+    s32 x,
+    s32 y,
+    MessageId messageId,
+    s32 fontSize,
+    s32 slot,
+    TextFlags flags,
+    s32 red,
+    s32 green,
+    s32 blue,
+    s32 alpha
+);
 #endif
-void SetUpTextDrawing(Gfx** displayListHead);
-void SetTextColor(Gfx** displayListHead, u8 red, u8 green, u8 blue);
-void SetUpGradientTextDrawing(Gfx** displayListHead, s32 gradient);
-void DrawTextSlots(Gfx** displayListHead);
-void DrawLargeTextSlot(Gfx** displayListHead, s32 slot);
-void DrawLargeText(Gfx** displayListHead, s16 x, s16 y, READ_ONLY char* text);
-void DrawTextStub(Gfx** displayListHead, s16 x, s16 y, READ_ONLY char* text);
-void DrawFixedWidthLargeText(
-    Gfx** displayListHead, s16 x, s16 y, READ_ONLY char* text);
-void DrawMediumText(Gfx** displayListHead, s16 x, s16 y, READ_ONLY char* text);
-void DrawCenteredLargeText(
-    Gfx** displayListHead, s16 x, s16 y, READ_ONLY char* text);
-void DrawCenteredMediumText(
-    Gfx** displayListHead, s16 x, s16 y, READ_ONLY char* text);
-void DrawGlyphGroup(Gfx** displayListHead, s32 group);
-void SetUpPerspectiveTextDrawing(Gfx** displayListHead);
+void SetUpTextDrawing(Gfx **displayListHead);
+void SetTextColor(Gfx **displayListHead, u8 red, u8 green, u8 blue);
+void SetUpGradientTextDrawing(Gfx **displayListHead, s32 gradient);
+void DrawTextSlots(Gfx **displayListHead);
+void DrawLargeTextSlot(Gfx **displayListHead, s32 slot);
+void DrawLargeText(Gfx **displayListHead, s16 x, s16 y, READ_ONLY char *text);
+void DrawTextStub(Gfx **displayListHead, s16 x, s16 y, READ_ONLY char *text);
+void DrawFixedWidthLargeText(Gfx **displayListHead, s16 x, s16 y, READ_ONLY char *text);
+void DrawMediumText(Gfx **displayListHead, s16 x, s16 y, READ_ONLY char *text);
+void DrawCenteredLargeText(Gfx **displayListHead, s16 x, s16 y, READ_ONLY char *text);
+void DrawCenteredMediumText(Gfx **displayListHead, s16 x, s16 y, READ_ONLY char *text);
+void DrawGlyphGroup(Gfx **displayListHead, s32 group);
+void SetUpPerspectiveTextDrawing(Gfx **displayListHead);
 void RevealTextSlot(s32 slot);
 Boolean IsTextSlotRevealed(s32 slot);
-s32 MeasureText(READ_ONLY char* text, s32 fontSize, TextFlags flags);
-void MeasureMessage(
-    MessageId messageId, s32 fontSize, s32* width, s32* height, s32 slot);
-void DrawSmallText(Gfx** displayListHead, s16 x, s16 y, READ_ONLY char* text);
-void BeginShadowedText(Gfx** displayListHead);
-void DrawCenteredSmallText(
-    Gfx** displayListHead, s16 x, s16 y, READ_ONLY char* text);
-void DrawShadowedText(
-    Gfx** displayListHead, s16 x, s16 y, READ_ONLY char* text);
-void DrawCondensedShadowedText(
-    Gfx** displayListHead, s16 x, s16 y, READ_ONLY char* text);
-void DrawCenteredNarrowText(
-    Gfx** displayListHead, s16 x, s16 y, READ_ONLY char* text);
-void DrawCenteredShadowedText(
-    Gfx** displayListHead, s16 x, s16 y, READ_ONLY char* text);
+s32 MeasureText(READ_ONLY char *text, s32 fontSize, TextFlags flags);
+void MeasureMessage(MessageId messageId, s32 fontSize, s32 *width, s32 *height, s32 slot);
+void DrawSmallText(Gfx **displayListHead, s16 x, s16 y, READ_ONLY char *text);
+void BeginShadowedText(Gfx **displayListHead);
+void DrawCenteredSmallText(Gfx **displayListHead, s16 x, s16 y, READ_ONLY char *text);
+void DrawShadowedText(Gfx **displayListHead, s16 x, s16 y, READ_ONLY char *text);
+void DrawCondensedShadowedText(Gfx **displayListHead, s16 x, s16 y, READ_ONLY char *text);
+void DrawCenteredNarrowText(Gfx **displayListHead, s16 x, s16 y, READ_ONLY char *text);
+void DrawCenteredShadowedText(Gfx **displayListHead, s16 x, s16 y, READ_ONLY char *text);
 s32 GetDigitGlyphTop(char code);
-void DrawDigitText(Gfx** displayListHead, s32 x, s32 y, READ_ONLY char* text);
-void DrawLargeTextWithShadow(Gfx** displayListHead, s32 x, s32 y,
-    READ_ONLY char* text, s32 envColor, s32 primColor, TextFlags flags);
+void DrawDigitText(Gfx **displayListHead, s32 x, s32 y, READ_ONLY char *text);
+void DrawLargeTextWithShadow(
+    Gfx **displayListHead,
+    s32 x,
+    s32 y,
+    READ_ONLY char *text,
+    s32 envColor,
+    s32 primColor,
+    TextFlags flags
+);
 /* PlaceMessageGlyphGroup's result: half the message's width in the high
  * halfword and half its height in the low one */
 #define PackHalfSize(halfWidth, halfHeight) (((halfWidth) << 16) | (halfHeight))
 #define HalfSizeWidth(halfSize) ((u32)(halfSize) >> 16)
 #define HalfSizeHeight(halfSize) ((halfSize) & 0xFFFF)
 
-s32 PlaceMessageGlyphGroup(
-    s32 group, s32 fontSize, s32 x, s32 y, MessageId messageId);
+s32 PlaceMessageGlyphGroup(s32 group, s32 fontSize, s32 x, s32 y, MessageId messageId);
 
 #endif

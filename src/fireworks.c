@@ -105,9 +105,8 @@
 
 /* A random per-axis velocity offset. */
 #define RandomParticleVelocityJitter() \
-  (((guRandom() % PARTICLE_VELOCITY_JITTER_STEPS) - \
-       (PARTICLE_VELOCITY_JITTER_STEPS / 2)) * \
-      PARTICLE_VELOCITY_JITTER_STEP)
+    (((guRandom() % PARTICLE_VELOCITY_JITTER_STEPS) - (PARTICLE_VELOCITY_JITTER_STEPS / 2)) * \
+        PARTICLE_VELOCITY_JITTER_STEP)
 
 /*
  * An image whose zero cells each become a particle of a firework. It begins
@@ -115,23 +114,23 @@
  * a time: only the low bytes of the width and height are read.
  */
 struct FireworkShape {
-  /* 0x0 */ u16 format;
-  /* 0x2 */ u8 widthHighByte;
-  /* 0x3 */ u8 width;
-  /* 0x4 */ u8 heightHighByte;
-  /* 0x5 */ u8 height;
-  /* 0x6 */ u16 unusedAfterHeight;
-  /* 0x8 */ u8 cells[TRAILING_ARRAY_LENGTH]; /* width * height, by rows */
+    /* 0x0 */ u16 format;
+    /* 0x2 */ u8 widthHighByte;
+    /* 0x3 */ u8 width;
+    /* 0x4 */ u8 heightHighByte;
+    /* 0x5 */ u8 height;
+    /* 0x6 */ u16 unusedAfterHeight;
+    /* 0x8 */ u8 cells[TRAILING_ARRAY_LENGTH]; /* width * height, by rows */
 };
 
 struct FireworkParticle {
-  /* 0x00 */ Mtx matrices[MATRIX_BUFFER_COUNT];
-  /* 0x80 */ f32 x;
-  /* 0x84 */ f32 y;
-  /* 0x88 */ f32 velocityX;
-  /* 0x8C */ f32 velocityY;
-  /* 0x90 */ u8 unusedAfterVelocity[4];
-  /* 0x94 */ s16 life; /* Drawn while above 0 */
+    /* 0x00 */ Mtx matrices[MATRIX_BUFFER_COUNT];
+    /* 0x80 */ f32 x;
+    /* 0x84 */ f32 y;
+    /* 0x88 */ f32 velocityX;
+    /* 0x8C */ f32 velocityY;
+    /* 0x90 */ u8 unusedAfterVelocity[4];
+    /* 0x94 */ s16 life; /* Drawn while above 0 */
 }; /* size = 0x98 */
 
 static s32 f_FireworkCount = 0;
@@ -139,28 +138,29 @@ static s32 f_FireworkState = 0;
 static Vtx f_FireworkParticleVertices[3] = {
     {{{0, 32, 0}, 0, {0, 0}, {0xFF, 0x7F, 0x00, 0x7F}}},
     {{{-10, 0, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xBF, 0xBF}}},
-    {{{10, 0, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xBF, 0xBF}}}};
+    {{{10, 0, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xBF, 0xBF}}}
+};
 /*
  * The shapes, by course record index: outlines of Toad, a Koopa Troopa, a Shy
  * Guy, Yoshi, a Boo, Wario, Mario and Peach
  */
-static AssetId f_FireworkShapeAssetIds[8] = {
-    0x95F, 0x960, 0x961, 0x962, 0x963, 0x964, 0x965, 0x966};
+static AssetId f_FireworkShapeAssetIds[8] =
+    {0x95F, 0x960, 0x961, 0x962, 0x963, 0x964, 0x965, 0x966};
 static f32 f_FireworkHue = 0.0f;
 /* Read by no routine */
 static u8 f_UnusedBufferAfterFireworkHue[0xC04] UNUSED = {0};
 
-FILE_STATIC FireworkShape* f_FireworkShape;
+FILE_STATIC FireworkShape *f_FireworkShape;
 FILE_STATIC Firework f_Fireworks[FIREWORK_CAPACITY];
 
 /* Makes the first firework launch in FIREWORK_START_DELAY frames */
 void StartFireworks(void) {
-  f_Fireworks[0].timer = FIREWORK_LAUNCH_FRAME - FIREWORK_START_DELAY;
-  f_Fireworks[0].isActive = TRUE;
+    f_Fireworks[0].timer = FIREWORK_LAUNCH_FRAME - FIREWORK_START_DELAY;
+    f_Fireworks[0].isActive = TRUE;
 }
 
 void StopFireworks(void) {
-  f_Fireworks[0].isActive = FALSE;
+    f_Fireworks[0].isActive = FALSE;
 }
 
 /*
@@ -168,65 +168,63 @@ void StopFireworks(void) {
  * the fireworks' particles
  */
 void LoadFireworks(s32 courseRecordIndex) {
-  EncodedAsset asset;
-  s32 index;
-  Firework* firework;
-  s32 width;
-  s32 height;
-  s32 row;
-  s32 column;
-  u8* cell;
+    EncodedAsset asset;
+    s32 index;
+    Firework *firework;
+    s32 width;
+    s32 height;
+    s32 row;
+    s32 column;
+    u8 *cell;
 
-  f_FireworkShape =
-      AllocMemory(OpenEncodedAsset(f_FireworkShapeAssetIds[courseRecordIndex %
-                                       ARRAY_COUNT(f_FireworkShapeAssetIds)],
-          &asset));
-  ReadEncodedAsset(f_FireworkShape, &asset);
-  for (index = 0; index != FIREWORK_COUNT; index++) {
-    f_Fireworks[index].ignoredLoadValue = 0;
-    f_Fireworks[index].isActive = FALSE;
-    f_Fireworks[index].timer =
-        (FIREWORK_SOUND_FRAME - 1) - (index * FIREWORK_SOUND_STAGGER);
-    f_Fireworks[index].ignoredLaunchValue = IGNORED_LAUNCH_VALUE;
-    f_Fireworks[index].particleCount = 0;
-    f_Fireworks[index].shape = f_FireworkShape;
-  }
+    f_FireworkShape = AllocMemory(OpenEncodedAsset(
+        f_FireworkShapeAssetIds[courseRecordIndex % ARRAY_COUNT(f_FireworkShapeAssetIds)],
+        &asset
+    ));
+    ReadEncodedAsset(f_FireworkShape, &asset);
+    for (index = 0; index != FIREWORK_COUNT; index++) {
+        f_Fireworks[index].ignoredLoadValue = 0;
+        f_Fireworks[index].isActive = FALSE;
+        f_Fireworks[index].timer = (FIREWORK_SOUND_FRAME - 1) - (index * FIREWORK_SOUND_STAGGER);
+        f_Fireworks[index].ignoredLaunchValue = IGNORED_LAUNCH_VALUE;
+        f_Fireworks[index].particleCount = 0;
+        f_Fireworks[index].shape = f_FireworkShape;
+    }
 
-  f_FireworkCount = index;
-  for (index = 0; index != f_FireworkCount; index++) {
-    firework = &f_Fireworks[index];
-    width = firework->shape->width;
-    height = firework->shape->height;
-    for (row = 0; row != height; row++) {
-      for (column = 0; column != width; column++) {
-        cell = &firework->shape->cells[column + (row * width)];
-        if (*cell == SHAPE_PARTICLE_CELL) {
-          firework->particleCount++;
+    f_FireworkCount = index;
+    for (index = 0; index != f_FireworkCount; index++) {
+        firework = &f_Fireworks[index];
+        width = firework->shape->width;
+        height = firework->shape->height;
+        for (row = 0; row != height; row++) {
+            for (column = 0; column != width; column++) {
+                cell = &firework->shape->cells[column + (row * width)];
+                if (*cell == SHAPE_PARTICLE_CELL) {
+                    firework->particleCount++;
+                }
+            }
         }
-      }
+
+        firework->particles = AllocMemory(firework->particleCount * sizeof(FireworkParticle));
+        for (row = 0; row != firework->particleCount; row++) {
+            firework->particles[row].life = 0;
+        }
     }
 
-    firework->particles =
-        AllocMemory(firework->particleCount * sizeof(FireworkParticle));
-    for (row = 0; row != firework->particleCount; row++) {
-      firework->particles[row].life = 0;
-    }
-  }
-
-  f_FireworkState = FIREWORKS_LOADED;
+    f_FireworkState = FIREWORKS_LOADED;
 }
 
 void FreeFireworks(void) {
-  s32 index;
+    s32 index;
 
-  if (f_FireworkState == FIREWORKS_LOADED) {
-    FreeMemory(&f_FireworkShape);
-    for (index = 0; index != f_FireworkCount; index++) {
-      FreeMemory(&f_Fireworks[index].particles);
+    if (f_FireworkState == FIREWORKS_LOADED) {
+        FreeMemory(&f_FireworkShape);
+        for (index = 0; index != f_FireworkCount; index++) {
+            FreeMemory(&f_Fireworks[index].particles);
+        }
     }
-  }
 
-  f_FireworkState = FIREWORKS_FREED;
+    f_FireworkState = FIREWORKS_FREED;
 }
 
 /*
@@ -234,12 +232,12 @@ void FreeFireworks(void) {
  * third call after FreeFireworks on. Nothing calls it.
  */
 s32 HaveFireworksStayedFreed(void) {
-  if (f_FireworkState > FIREWORKS_FREED) {
-    return FALSE;
-  }
+    if (f_FireworkState > FIREWORKS_FREED) {
+        return FALSE;
+    }
 
-  f_FireworkState--;
-  return f_FireworkState < FIREWORKS_FREED - STAYED_FREED_CALL_COUNT;
+    f_FireworkState--;
+    return f_FireworkState < FIREWORKS_FREED - STAYED_FREED_CALL_COUNT;
 }
 
 /*
@@ -248,241 +246,264 @@ s32 HaveFireworksStayedFreed(void) {
  * with it, 69 with guRandom() % 4 written in place, and 68 with & 3.
  */
 static inline s32 RandomLaunchHeightJitter(void) {
-  return guRandom() % FIREWORK_LAUNCH_HEIGHT_JITTER;
+    return guRandom() % FIREWORK_LAUNCH_HEIGHT_JITTER;
 }
 
 /* Sends every particle of the firework out from one random point */
-void LaunchFirework(Firework* firework, s32 fireworkIndex UNUSED) {
-  s32 particleIndex;
-  f32 originX;
-  s32 random;
-  f32 originY;
-  s32 width;
-  s32 height;
-  s32 row;
-  s32 column;
+void LaunchFirework(Firework *firework, s32 fireworkIndex UNUSED) {
+    s32 particleIndex;
+    f32 originX;
+    s32 random;
+    f32 originY;
+    s32 width;
+    s32 height;
+    s32 row;
+    s32 column;
 
-  particleIndex = 0;
-  originX = guRandom() % FIREWORK_LAUNCH_WIDTH;
-  random = RandomLaunchHeightJitter();
-  width = firework->shape->width;
-  height = firework->shape->height;
-  firework->ignoredLaunchValue = IGNORED_LAUNCH_VALUE;
-  originY = random + FIREWORK_LAUNCH_HEIGHT;
-  for (row = 0; row != height; row++) {
-    for (column = 0; column != width; column++) {
-      /*
-       * Through the cells' address, not by indexing them: GCC builds the
-       * index as an array reference instead, and 92 words differ. The cell's
-       * index is added as a whole; adding the column and the row's offset
-       * one at a time, 10 words differ
-       */
-      if (*(firework->shape->cells + (column + (row * width))) ==
-          SHAPE_PARTICLE_CELL) {
-        firework->particles[particleIndex].x = originX;
-        firework->particles[particleIndex].y = originY;
-        firework->particles[particleIndex].velocityX =
-            ((column - (width / 2)) * PARTICLE_SPEED_PER_CELL) +
-            RandomParticleVelocityJitter();
-        firework->particles[particleIndex].velocityY =
-            (((height / 2) - row) * PARTICLE_SPEED_PER_CELL) -
-            PARTICLE_LAUNCH_DOWNWARD_SPEED + RandomParticleVelocityJitter();
-        firework->particles[particleIndex].life =
-            (guRandom() % PARTICLE_LIFE_JITTER) + PARTICLE_MIN_LIFE;
-        particleIndex++;
-      }
+    particleIndex = 0;
+    originX = guRandom() % FIREWORK_LAUNCH_WIDTH;
+    random = RandomLaunchHeightJitter();
+    width = firework->shape->width;
+    height = firework->shape->height;
+    firework->ignoredLaunchValue = IGNORED_LAUNCH_VALUE;
+    originY = random + FIREWORK_LAUNCH_HEIGHT;
+    for (row = 0; row != height; row++) {
+        for (column = 0; column != width; column++) {
+            /*
+             * Through the cells' address, not by indexing them: GCC builds the
+             * index as an array reference instead, and 92 words differ. The cell's
+             * index is added as a whole; adding the column and the row's offset
+             * one at a time, 10 words differ
+             */
+            if (*(firework->shape->cells + (column + (row * width))) == SHAPE_PARTICLE_CELL) {
+                firework->particles[particleIndex].x = originX;
+                firework->particles[particleIndex].y = originY;
+                firework->particles[particleIndex].velocityX =
+                    ((column - (width / 2)) * PARTICLE_SPEED_PER_CELL) +
+                    RandomParticleVelocityJitter();
+                firework->particles[particleIndex].velocityY =
+                    (((height / 2) - row) * PARTICLE_SPEED_PER_CELL) -
+                    PARTICLE_LAUNCH_DOWNWARD_SPEED + RandomParticleVelocityJitter();
+                firework->particles[particleIndex].life =
+                    (guRandom() % PARTICLE_LIFE_JITTER) + PARTICLE_MIN_LIFE;
+                particleIndex++;
+            }
+        }
     }
-  }
 }
 
 /*
  * Moves the active fireworks' particles and draws each as a triangle along its
  * path
  */
-void UpdateAndDrawFireworks(Gfx** displayListHead) {
-  Gfx* gfx;
-  /* The original frame has room for this; without it 136 words differ */
-  s32 unused[12] UNUSED;
-  Mat4 transform;
-  /* The original frame has room for this too; without it 100 words differ */
-  s32 unusedAfter[6] UNUSED;
-  /*
-   * One index for the fireworks and the particles, to match: a particleIndex
-   * for the particles gives 34 words differing, and for the updated particles
-   * alone 62, none in shape
-   */
-  s32 i;
-  s32 index;
-  FireworkParticle* particle;
-  FireworkParticle* drawnParticle;
-  f32 directionX;
-  f32 directionY;
-  f32 inverseSpeed;
-  /*
-   * The particle's speed, until it scales into its trail's length, to match:
-   * a separate speed variable gives 30 words differing, none in shape
-   */
-  f32 length;
-  f32 tailScale;
-  s32 timer;
-  s32 fadeTimer;
-  s32 trailTimer;
-  s32 red;
-  s32 green;
-  s32 blue;
-  s32 alpha;
+void UpdateAndDrawFireworks(Gfx **displayListHead) {
+    Gfx *gfx;
+    /* The original frame has room for this; without it 136 words differ */
+    s32 unused[12] UNUSED;
+    Mat4 transform;
+    /* The original frame has room for this too; without it 100 words differ */
+    s32 unusedAfter[6] UNUSED;
+    /*
+     * One index for the fireworks and the particles, to match: a particleIndex
+     * for the particles gives 34 words differing, and for the updated particles
+     * alone 62, none in shape
+     */
+    s32 i;
+    s32 index;
+    FireworkParticle *particle;
+    FireworkParticle *drawnParticle;
+    f32 directionX;
+    f32 directionY;
+    f32 inverseSpeed;
+    /*
+     * The particle's speed, until it scales into its trail's length, to match:
+     * a separate speed variable gives 30 words differing, none in shape
+     */
+    f32 length;
+    f32 tailScale;
+    s32 timer;
+    s32 fadeTimer;
+    s32 trailTimer;
+    s32 red;
+    s32 green;
+    s32 blue;
+    s32 alpha;
 
-  gfx = *displayListHead;
-  if (f_FireworkState <= FIREWORKS_FREED) {
-    return;
-  }
-
-  for (i = 0; i != f_FireworkCount; i++) {
-    if (f_Fireworks[i].isActive == TRUE) {
-      timer = f_Fireworks[i].timer + 1;
-      f_Fireworks[i].timer = timer;
-      if (timer == FIREWORK_SOUND_FRAME) {
-        PlaySound(
-            SOUND_FIREWORK_LEAD_IN, FIREWORK_SOUND_CHANNEL, SOUND_FULL_SCALE);
-      } else if (timer == FIREWORK_LAUNCH_FRAME) {
-        f_Fireworks[i].timer = 0;
-        LaunchFirework(&f_Fireworks[i], i);
-        PlaySound(
-            SOUND_FIREWORK_LAUNCH, FIREWORK_SOUND_CHANNEL, SOUND_FULL_SCALE);
-      }
+    gfx = *displayListHead;
+    if (f_FireworkState <= FIREWORKS_FREED) {
+        return;
     }
-  }
 
-  transform[0][2] = 0.0f;
-  transform[0][3] = 0.0f;
-  transform[1][2] = 0.0f;
-  transform[1][3] = 0.0f;
-  transform[2][0] = 0.0f;
-  transform[2][1] = 0.0f;
-  transform[2][3] = 0.0f;
-  transform[2][2] = PARTICLE_SCALE;
-  transform[3][3] = 1.0f;
-  for (index = 0; index != f_FireworkCount; index++) {
-    if (f_Fireworks[index].isActive == TRUE) {
-      for (i = 0; i != f_Fireworks[index].particleCount; i++) {
-        particle = &f_Fireworks[index].particles[i];
-        if (particle->life > 0) {
-          particle->x += particle->velocityX;
-          particle->y += particle->velocityY;
-          particle->velocityX *= PARTICLE_DRAG;
-          particle->velocityY =
-              (particle->velocityY * PARTICLE_DRAG) - PARTICLE_GRAVITY;
-          if (--particle->life < PARTICLE_FADE_LIFE) {
-            particle->life -= PARTICLE_FADE_EXTRA_LIFE_LOSS;
-          }
-
-          length = sqrtf((particle->velocityX * particle->velocityX) +
-              (particle->velocityY * particle->velocityY));
-          if (length != 0.0f) {
-            inverseSpeed = 1.0f / length;
-            directionX = particle->velocityX * inverseSpeed;
-            directionY = particle->velocityY * inverseSpeed;
-          } else {
-            directionX = 0.0f;
-            directionY = STOPPED_PARTICLE_DIRECTION_Y;
-            length = STOPPED_PARTICLE_SPEED;
-          }
-
-          trailTimer = f_Fireworks[index].timer;
-          if (trailTimer < TRAIL_STRETCH_FRAMES) {
-            length *= TRAIL_STRETCH_PER_FRAME * trailTimer;
-          } else if (trailTimer > TRAIL_REGROW_FRAME) {
-            length =
-                ((trailTimer - TRAIL_REGROW_FRAME) * TRAIL_REGROWTH_PER_FRAME) +
-                TRAIL_MIN_LENGTH;
-          } else {
-            length *= TRAIL_MAX_STRETCH -
-                ((trailTimer - TRAIL_STRETCH_FRAMES) * TRAIL_STRETCH_PER_FRAME);
-          }
-
-          if (length < TRAIL_MIN_LENGTH) {
-            length = TRAIL_MIN_LENGTH;
-          }
-
-          transform[0][0] = -directionY * PARTICLE_SCALE;
-          transform[0][1] = directionX * PARTICLE_SCALE;
-          tailScale = length * PARTICLE_SCALE;
-          transform[1][0] = -directionX * tailScale;
-          transform[1][1] = -directionY * tailScale;
-          transform[3][0] = particle->x;
-          transform[3][1] = particle->y;
-          transform[3][2] = PARTICLE_DEPTH;
-          ConvertMatrixToFixed(
-              transform, &particle->matrices[g_MatrixBufferIndex]);
+    for (i = 0; i != f_FireworkCount; i++) {
+        if (f_Fireworks[i].isActive == TRUE) {
+            timer = f_Fireworks[i].timer + 1;
+            f_Fireworks[i].timer = timer;
+            if (timer == FIREWORK_SOUND_FRAME) {
+                PlaySound(SOUND_FIREWORK_LEAD_IN, FIREWORK_SOUND_CHANNEL, SOUND_FULL_SCALE);
+            }
+            else if (timer == FIREWORK_LAUNCH_FRAME) {
+                f_Fireworks[i].timer = 0;
+                LaunchFirework(&f_Fireworks[i], i);
+                PlaySound(SOUND_FIREWORK_LAUNCH, FIREWORK_SOUND_CHANNEL, SOUND_FULL_SCALE);
+            }
         }
-      }
     }
-  }
 
-  gDPPipeSync(gfx++);
-  gDPPipeSync(gfx++);
-  gDPSetCycleType(gfx++, G_CYC_1CYCLE);
-  gDPPipeSync(gfx++);
-  gDPSetRenderMode(gfx++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
-  gDPPipeSync(gfx++);
-  gDPSetAlphaCompare(gfx++, G_AC_NONE);
-  gSPTexture(
-      gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0, G_TX_RENDERTILE, G_OFF);
-  gSPClearGeometryMode(gfx++, ALL_GEOMETRY_MODES);
-  gSPSetGeometryMode(gfx++, G_SHADE | G_SHADING_SMOOTH);
-  gDPPipeSync(gfx++);
-  gDPSetTextureLUT(gfx++, G_TT_NONE);
-  gDPPipeSync(gfx++);
-  gDPSetAlphaDither(gfx++, G_AD_PATTERN);
-  gDPSetCombineLERP(gfx++, PRIMITIVE, 0, SHADE, 0, PRIMITIVE, 0, SHADE, 0,
-      PRIMITIVE, 0, SHADE, 0, PRIMITIVE, 0, SHADE, 0);
-  gDPPipeSync(gfx++);
-  gSPMatrix(gfx++, PhysicalAddress(&g_ScreenOrthoMatrix),
-      G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
-  f_FireworkHue += DegreesToRadians(HUE_STEP_DEGREES);
+    transform[0][2] = 0.0f;
+    transform[0][3] = 0.0f;
+    transform[1][2] = 0.0f;
+    transform[1][3] = 0.0f;
+    transform[2][0] = 0.0f;
+    transform[2][1] = 0.0f;
+    transform[2][3] = 0.0f;
+    transform[2][2] = PARTICLE_SCALE;
+    transform[3][3] = 1.0f;
+    for (index = 0; index != f_FireworkCount; index++) {
+        if (f_Fireworks[index].isActive == TRUE) {
+            for (i = 0; i != f_Fireworks[index].particleCount; i++) {
+                particle = &f_Fireworks[index].particles[i];
+                if (particle->life > 0) {
+                    particle->x += particle->velocityX;
+                    particle->y += particle->velocityY;
+                    particle->velocityX *= PARTICLE_DRAG;
+                    particle->velocityY = (particle->velocityY * PARTICLE_DRAG) - PARTICLE_GRAVITY;
+                    if (--particle->life < PARTICLE_FADE_LIFE) {
+                        particle->life -= PARTICLE_FADE_EXTRA_LIFE_LOSS;
+                    }
 
-  /* index is f_FireworkCount here, so every firework shares one color */
-  red = (s32)(sinf(f_FireworkHue + index) * COLOR_SWING) + COLOR_MIDDLE;
-  green = (s32)(sinf(f_FireworkHue + GREEN_HUE_PHASE + index) * COLOR_SWING) +
-      COLOR_MIDDLE;
-  blue = (s32)(sinf(f_FireworkHue + BLUE_HUE_PHASE + index) * COLOR_SWING) +
-      COLOR_MIDDLE;
-  for (index = 0; index != f_FireworkCount; index++) {
-    if (f_Fireworks[index].isActive == TRUE) {
-      fadeTimer = f_Fireworks[index].timer;
-      if (fadeTimer < FADE_START_FRAME) {
-        alpha = OPAQUE_ALPHA;
-      } else {
-        alpha = OPAQUE_ALPHA -
-            ((fadeTimer - FADE_START_FRAME) * FADE_ALPHA_PER_FRAME);
-        if (fadeTimer & 1) {
-          alpha += FLICKER_ALPHA;
+                    length = sqrtf(
+                        (particle->velocityX * particle->velocityX) +
+                        (particle->velocityY * particle->velocityY)
+                    );
+                    if (length != 0.0f) {
+                        inverseSpeed = 1.0f / length;
+                        directionX = particle->velocityX * inverseSpeed;
+                        directionY = particle->velocityY * inverseSpeed;
+                    }
+                    else {
+                        directionX = 0.0f;
+                        directionY = STOPPED_PARTICLE_DIRECTION_Y;
+                        length = STOPPED_PARTICLE_SPEED;
+                    }
+
+                    trailTimer = f_Fireworks[index].timer;
+                    if (trailTimer < TRAIL_STRETCH_FRAMES) {
+                        length *= TRAIL_STRETCH_PER_FRAME * trailTimer;
+                    }
+                    else if (trailTimer > TRAIL_REGROW_FRAME) {
+                        length = ((trailTimer - TRAIL_REGROW_FRAME) * TRAIL_REGROWTH_PER_FRAME) +
+                            TRAIL_MIN_LENGTH;
+                    }
+                    else {
+                        length *= TRAIL_MAX_STRETCH -
+                            ((trailTimer - TRAIL_STRETCH_FRAMES) * TRAIL_STRETCH_PER_FRAME);
+                    }
+
+                    if (length < TRAIL_MIN_LENGTH) {
+                        length = TRAIL_MIN_LENGTH;
+                    }
+
+                    transform[0][0] = -directionY * PARTICLE_SCALE;
+                    transform[0][1] = directionX * PARTICLE_SCALE;
+                    tailScale = length * PARTICLE_SCALE;
+                    transform[1][0] = -directionX * tailScale;
+                    transform[1][1] = -directionY * tailScale;
+                    transform[3][0] = particle->x;
+                    transform[3][1] = particle->y;
+                    transform[3][2] = PARTICLE_DEPTH;
+                    ConvertMatrixToFixed(transform, &particle->matrices[g_MatrixBufferIndex]);
+                }
+            }
         }
-      }
-
-      if (alpha < TRANSPARENT_ALPHA) {
-        alpha = TRANSPARENT_ALPHA;
-      }
-
-      if (alpha > OPAQUE_ALPHA) {
-        alpha = OPAQUE_ALPHA;
-      }
-
-      gDPSetPrimColor(gfx++, 0, 0, red, green, blue, alpha);
-      for (i = 0; i != f_Fireworks[index].particleCount; i++) {
-        drawnParticle = &f_Fireworks[index].particles[i];
-        if (drawnParticle->life > 0) {
-          gDPPipeSync(gfx++);
-          gSPMatrix(gfx++,
-              PhysicalAddress(&drawnParticle->matrices[g_MatrixBufferIndex]),
-              G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-          gSPVertex(gfx++, f_FireworkParticleVertices,
-              ARRAY_COUNT(f_FireworkParticleVertices), 0);
-          gSP1Triangle(gfx++, 0, 1, 2, 0);
-        }
-      }
     }
-  }
 
-  *displayListHead = gfx;
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
+    gDPPipeSync(gfx++);
+    gDPSetAlphaCompare(gfx++, G_AC_NONE);
+    gSPTexture(gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0, G_TX_RENDERTILE, G_OFF);
+    gSPClearGeometryMode(gfx++, ALL_GEOMETRY_MODES);
+    gSPSetGeometryMode(gfx++, G_SHADE | G_SHADING_SMOOTH);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_NONE);
+    gDPPipeSync(gfx++);
+    gDPSetAlphaDither(gfx++, G_AD_PATTERN);
+    gDPSetCombineLERP(
+        gfx++,
+        PRIMITIVE,
+        0,
+        SHADE,
+        0,
+        PRIMITIVE,
+        0,
+        SHADE,
+        0,
+        PRIMITIVE,
+        0,
+        SHADE,
+        0,
+        PRIMITIVE,
+        0,
+        SHADE,
+        0
+    );
+    gDPPipeSync(gfx++);
+    gSPMatrix(
+        gfx++,
+        PhysicalAddress(&g_ScreenOrthoMatrix),
+        G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION
+    );
+    f_FireworkHue += DegreesToRadians(HUE_STEP_DEGREES);
+
+    /* index is f_FireworkCount here, so every firework shares one color */
+    red = (s32)(sinf(f_FireworkHue + index) * COLOR_SWING) + COLOR_MIDDLE;
+    green = (s32)(sinf(f_FireworkHue + GREEN_HUE_PHASE + index) * COLOR_SWING) + COLOR_MIDDLE;
+    blue = (s32)(sinf(f_FireworkHue + BLUE_HUE_PHASE + index) * COLOR_SWING) + COLOR_MIDDLE;
+    for (index = 0; index != f_FireworkCount; index++) {
+        if (f_Fireworks[index].isActive == TRUE) {
+            fadeTimer = f_Fireworks[index].timer;
+            if (fadeTimer < FADE_START_FRAME) {
+                alpha = OPAQUE_ALPHA;
+            }
+            else {
+                alpha = OPAQUE_ALPHA - ((fadeTimer - FADE_START_FRAME) * FADE_ALPHA_PER_FRAME);
+                if (fadeTimer & 1) {
+                    alpha += FLICKER_ALPHA;
+                }
+            }
+
+            if (alpha < TRANSPARENT_ALPHA) {
+                alpha = TRANSPARENT_ALPHA;
+            }
+
+            if (alpha > OPAQUE_ALPHA) {
+                alpha = OPAQUE_ALPHA;
+            }
+
+            gDPSetPrimColor(gfx++, 0, 0, red, green, blue, alpha);
+            for (i = 0; i != f_Fireworks[index].particleCount; i++) {
+                drawnParticle = &f_Fireworks[index].particles[i];
+                if (drawnParticle->life > 0) {
+                    gDPPipeSync(gfx++);
+                    gSPMatrix(
+                        gfx++,
+                        PhysicalAddress(&drawnParticle->matrices[g_MatrixBufferIndex]),
+                        G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW
+                    );
+                    gSPVertex(
+                        gfx++,
+                        f_FireworkParticleVertices,
+                        ARRAY_COUNT(f_FireworkParticleVertices),
+                        0
+                    );
+                    gSP1Triangle(gfx++, 0, 1, 2, 0);
+                }
+            }
+        }
+    }
+
+    *displayListHead = gfx;
 }

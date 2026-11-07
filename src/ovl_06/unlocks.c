@@ -66,86 +66,85 @@ static s32 f_UnusedCodeEntered[UNUSED_CODE_LENGTH] = {
 static s32 f_UnusedCodeLength = 0;
 
 void UnlockEverything(void) {
-  SaveData* save = GetSaveData();
+    SaveData *save = GetSaveData();
 
-  PlaySound(SOUND_UNLOCK_EVERYTHING, UNLOCK_SOUND_CHANNEL, MENU_VOLUME_SOFT);
-  InitSram();
-  TransferSaveData(save, FALSE);
-  GrantWinsStarsAndBadges();
-  GrantRingShotProgressAndPoints();
-  TransferSaveData(save, TRUE);
+    PlaySound(SOUND_UNLOCK_EVERYTHING, UNLOCK_SOUND_CHANNEL, MENU_VOLUME_SOFT);
+    InitSram();
+    TransferSaveData(save, FALSE);
+    GrantWinsStarsAndBadges();
+    GrantRingShotProgressAndPoints();
+    TransferSaveData(save, TRUE);
 }
 
 /* Ends with BuildCharacterGrid, which refills the grid from the save */
 void GrantWinsStarsAndBadges(void) {
-  SaveData* save = GetSaveData();
+    SaveData *save = GetSaveData();
 
-  /*
-   * The star and badge loops reuse these for the course and the hole, to
-   * match: a courseIndex and hole of their own, declared before or after
-   * these, give 34 words differing, none in shape
-   */
-  s32 row;
-  s32 column;
+    /*
+     * The star and badge loops reuse these for the course and the hole, to
+     * match: a courseIndex and hole of their own, declared before or after
+     * these, give 34 words differing, none in shape
+     */
+    s32 row;
+    s32 column;
 
-  for (row = 0; row != GRANTED_WIN_ROW_COUNT; row++) {
-    for (column = 0; column != CHARACTER_COUNT; column++) {
-      if (!(save->records.awards.matchups[row][column].winBits &
-              WIN_COUNT_MASK)) {
-        save->records.awards.matchups[row][column].winBits = 1;
-      }
+    for (row = 0; row != GRANTED_WIN_ROW_COUNT; row++) {
+        for (column = 0; column != CHARACTER_COUNT; column++) {
+            if (!(save->records.awards.matchups[row][column].winBits & WIN_COUNT_MASK)) {
+                save->records.awards.matchups[row][column].winBits = 1;
+            }
+        }
     }
-  }
 
-  for (row = 0; row != RING_SHOT_COURSE_COUNT; row++) {
-    for (column = 0; column != RING_SHOT_HOLE_COUNT; column++) {
-      save->records.hasRingShotStar[row][column] = TRUE;
+    for (row = 0; row != RING_SHOT_COURSE_COUNT; row++) {
+        for (column = 0; column != RING_SHOT_HOLE_COUNT; column++) {
+            save->records.hasRingShotStar[row][column] = TRUE;
+        }
     }
-  }
 
-  for (row = 0; row != COURSE_COUNT; row++) {
-    for (column = 0; column != COURSE_HOLE_COUNT; column++) {
-      save->records.awards.birdieBadgeCounts[row][column] = 1;
+    for (row = 0; row != COURSE_COUNT; row++) {
+        for (column = 0; column != COURSE_HOLE_COUNT; column++) {
+            save->records.awards.birdieBadgeCounts[row][column] = 1;
+        }
     }
-  }
 
-  BuildCharacterGrid(1, TRUE);
+    BuildCharacterGrid(1, TRUE);
 }
 
 void GrantRingShotProgressAndPoints(void) {
-  SaveData* save = GetSaveData();
-  CourseIndex courseIndex;
-  s32 holeIndex;
-  s32 index;
+    SaveData *save = GetSaveData();
+    CourseIndex courseIndex;
+    s32 holeIndex;
+    s32 index;
 
-  for (courseIndex = 0; courseIndex != RING_SHOT_COURSE_COUNT; courseIndex++) {
-    for (holeIndex = 0; holeIndex != RING_SHOT_HOLE_COUNT; holeIndex++) {
-      save->records.hasRingShotStar[courseIndex][holeIndex] = TRUE;
-      for (index = 0; index != GRANTED_CLEAR_CHARACTER_COUNT; index++) {
-        save->ringShotClearCounts[courseIndex][holeIndex][index] = 1;
-      }
+    for (courseIndex = 0; courseIndex != RING_SHOT_COURSE_COUNT; courseIndex++) {
+        for (holeIndex = 0; holeIndex != RING_SHOT_HOLE_COUNT; holeIndex++) {
+            save->records.hasRingShotStar[courseIndex][holeIndex] = TRUE;
+            for (index = 0; index != GRANTED_CLEAR_CHARACTER_COUNT; index++) {
+                save->ringShotClearCounts[courseIndex][holeIndex][index] = 1;
+            }
+        }
     }
-  }
 
-  if (save->coursePoints < GRANTED_COURSE_POINTS) {
-    save->coursePoints = GRANTED_COURSE_POINTS;
-  }
+    if (save->coursePoints < GRANTED_COURSE_POINTS) {
+        save->coursePoints = GRANTED_COURSE_POINTS;
+    }
 }
 
 void GrantEveryTournamentPlace(void) {
-  SaveData* save = GetSaveData();
-  CourseIndex courseIndex;
-  s32 place;
+    SaveData *save = GetSaveData();
+    CourseIndex courseIndex;
+    s32 place;
 
-  InitSram();
-  TransferSaveData(save, FALSE);
-  for (courseIndex = 0; courseIndex != COURSE_COUNT; courseIndex++) {
-    for (place = 0; place != TOURNAMENT_PLACE_COUNT; place++) {
-      save->records.courseStats[courseIndex].hasPlace[place] = TRUE;
+    InitSram();
+    TransferSaveData(save, FALSE);
+    for (courseIndex = 0; courseIndex != COURSE_COUNT; courseIndex++) {
+        for (place = 0; place != TOURNAMENT_PLACE_COUNT; place++) {
+            save->records.courseStats[courseIndex].hasPlace[place] = TRUE;
+        }
     }
-  }
 
-  TransferSaveData(save, TRUE);
+    TransferSaveData(save, TRUE);
 }
 
 /*
@@ -154,37 +153,37 @@ void GrantEveryTournamentPlace(void) {
  * is unlocked as by UnlockEverything.
  */
 void UpdateUnusedButtonCode(void) {
-  s32 index;
+    s32 index;
 
-  index = 0;
-  if (g_MenuRepeatButtons > 0) {
-    if (f_UnusedCodeLength < UNUSED_CODE_LENGTH) {
-      f_UnusedCodeEntered[f_UnusedCodeLength] = g_MenuRepeatButtons;
-      f_UnusedCodeLength++;
-    }
-
-    for (; index != f_UnusedCodeLength; index++) {
-      if (f_UnusedCodeButtons[index] != f_UnusedCodeEntered[index]) {
-        break;
-      }
-    }
-
-    if (index == f_UnusedCodeLength) {
-      if (f_UnusedCodeLength == UNUSED_CODE_LENGTH) {
-        f_UnusedCodeLength = 0;
-        for (index = 0; index != UNUSED_CODE_LENGTH; index++) {
-          f_UnusedCodeEntered[index] = NO_BUTTONS;
+    index = 0;
+    if (g_MenuRepeatButtons > 0) {
+        if (f_UnusedCodeLength < UNUSED_CODE_LENGTH) {
+            f_UnusedCodeEntered[f_UnusedCodeLength] = g_MenuRepeatButtons;
+            f_UnusedCodeLength++;
         }
 
-        PlaySound(
-            SOUND_UNLOCK_EVERYTHING, UNLOCK_SOUND_CHANNEL, MENU_VOLUME_SOFT);
-        UnlockEverything();
-      }
-    } else {
-      f_UnusedCodeLength = 0;
-      for (index = 0; index != UNUSED_CODE_LENGTH; index++) {
-        f_UnusedCodeEntered[index] = NO_BUTTONS;
-      }
+        for (; index != f_UnusedCodeLength; index++) {
+            if (f_UnusedCodeButtons[index] != f_UnusedCodeEntered[index]) {
+                break;
+            }
+        }
+
+        if (index == f_UnusedCodeLength) {
+            if (f_UnusedCodeLength == UNUSED_CODE_LENGTH) {
+                f_UnusedCodeLength = 0;
+                for (index = 0; index != UNUSED_CODE_LENGTH; index++) {
+                    f_UnusedCodeEntered[index] = NO_BUTTONS;
+                }
+
+                PlaySound(SOUND_UNLOCK_EVERYTHING, UNLOCK_SOUND_CHANNEL, MENU_VOLUME_SOFT);
+                UnlockEverything();
+            }
+        }
+        else {
+            f_UnusedCodeLength = 0;
+            for (index = 0; index != UNUSED_CODE_LENGTH; index++) {
+                f_UnusedCodeEntered[index] = NO_BUTTONS;
+            }
+        }
     }
-  }
 }

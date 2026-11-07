@@ -30,101 +30,94 @@
 
 /* What holesChoice holds once the C buttons choose the holes to play */
 enum HolesChoice {
-  /* Never stored, only cleared: ResetMenuChoices sets HOLES_CHOICE_ALL right
-   * after clearing g_MenuMemory, and SetUpChosenGame reads it as all holes */
-  HOLES_CHOICE_UNUSED,
-  HOLES_CHOICE_FRONT_NINE,
-  HOLES_CHOICE_BACK_NINE,
-  HOLES_CHOICE_ALL
+    /* Never stored, only cleared: ResetMenuChoices sets HOLES_CHOICE_ALL right
+     * after clearing g_MenuMemory, and SetUpChosenGame reads it as all holes */
+    HOLES_CHOICE_UNUSED,
+    HOLES_CHOICE_FRONT_NINE,
+    HOLES_CHOICE_BACK_NINE,
+    HOLES_CHOICE_ALL
 };
 
 /* What the menus keep between visits, such as the last choices made */
 typedef struct MenuMemory {
-  /* 0x00 */ s8
-      playerCountChoice; /* The title screen's player count, less one */
-  /* 0x01 */ s8 titleChoice; /* The title screen's row: a new game, the saved
-                                games or the menus */
-  /* 0x02 */ s8 viewerCharacter; /* The animation viewer's character */
-  /* 0x03 */ s8 characterColumns[MAX_PLAYER_COUNT]; /* Each player's character
-                                                       select cursor column */
-  /* 0x07 */ s8 characterRows[MAX_PLAYER_COUNT]; /* And row */
-  /* 0x0B */ s8 modeChoice; /* The mode select cursor's place in the player
-                               count's modes */
-  /* 0x0C */ s8 modeSpin; /* How far the modes still have to turn to reach it */
-  /* The bet settings screen's chosen column of the bet set */
-  /* 0x0D */ s8 betColumn;
-  /* 0x0E */ s8 betStakeLevels[BET_STAKE_SLOT_COUNT]; /* Set from one of
-                                                    ApplyBetPreset's presets */
-  /* 0x16 */ s8 courseChoice; /* The course select's course: an open one, or the
-                                 next one still shut */
-  /* 0x17 */ s8
-      courseSpin; /* How far the courses still have to turn to reach it */
-  /* 0x18 */ s8 holesChoice; /* HOLES_CHOICE_* */
-  /* 0x19 */ s8 caddyChoice; /* The debug caddy select's caddy */
-  /* 0x1A */ s8 unusedAfterCaddyChoice;
-  /* 0x1B */ s8 mainChoice;
-  /* 0x1C */ s8 mainChoiceWithoutTransmit;
-  /* 0x1D */ s8 clubhouseChoice;
-  /* 0x1E */ s8 optionsChoice;
-  /* 0x1F */ s8 eraseChoice; /* The erase window's yes or no */
-  /* 0x20 */ s8 helpTopicIndex;
-  /* 0x21 */ u8 unusedAfterHelpTopic[0x29 - 0x21];
-  /* The player whose handicap the handicap screen is choosing */
-  /* 0x29 */ s8 handicapPlayer;
-  /* Only ever cleared, with handicapPlayer */
-  /* 0x2A */ s8 unusedHandicapValue;
-  /* The mini-golf course select's record of three courses */
-  /* 0x2B */ s8 miniGolfRecordChoice;
-  /* The mini-golf course select's course on its record's disc */
-  /* 0x2C */ s8 miniGolfCourseChoice;
-  /* How far the mini-golf course select still has to slide to the record */
-  /* 0x2D */ s8 miniGolfRecordSlide;
-  /* 0x2E */ s8 holeIndex; /* The hole the Ring Shot select points at */
-  /* 0x2F */ s8 courseIndex; /* And its course */
-  /* 0x30 */ s8 statsCourse; /* The course whose statistics show; one past the
-                                open courses totals them */
-  /* 0x31 */ u8 unusedAfterStatsCourse;
-  /* 0x32 */ s8
-      statsSpin; /* How far the courses still have to turn to reach it */
-  /* 0x33 */ s8 bestTimesCourse; /* The open course whose best times show */
-  /* 0x34 */ s8
-      bestTimesSpin; /* How far the courses still have to turn to reach it */
-  /* 0x35 */ s8
-      tableColumn; /* The cursor's place among a table's shown columns */
-  /* 0x36 */ s8 tableRow; /* And among its shown rows */
-  /* 0x37 */ s8 tableFirstColumn; /* The first column shown of a table wider
-                                     than the screen */
-  /* 0x38 */ s8 tableFirstRow; /* And the first row shown of one taller */
-  /* 0x39 */ s8 bestShotColumn; /* The Best Shots cursor's cell */
-  /* 0x3A */ s8 bestShotRow;
-  /* 0x3B */ s8 ringShotRow; /* The Ring Shot records' row: a course, or the
-                                replays after them */
-  /* 0x3C */ s8
-      ringShotFirstCharacters[RING_SHOT_COURSE_COUNT]; /* Each course's first
-                                                          character shown */
-  /* 0x42 */ s8 ringShotReplaySlot; /* The Ring Shot replay chosen */
-  /* 0x43 */ s8 savedGameIndex;
-  /* 0x44 */ s8 savedGameTurn; /* Updates left of the saved games' boards
-                                 turning, negative when turning right */
-  /* 0x45 */ u8 optionBits; /* Each OPTION_BIT_* mirrors a saved option */
-  /* 0x46 */ u8 isTransmitShown; /* The menus were entered with the transmit
-                                  buttons, so the main menu offers it */
-  /* 0x47 */ s8
-      codeKeyColumn; /* The club tournament code keyboard's chosen key */
-  /* 0x48 */ s8 codeKeyRow;
+    /* 0x00 */ s8 playerCountChoice; /* The title screen's player count, less one */
+    /* 0x01 */ s8 titleChoice; /* The title screen's row: a new game, the saved
+                                  games or the menus */
+    /* 0x02 */ s8 viewerCharacter; /* The animation viewer's character */
+    /* 0x03 */ s8 characterColumns[MAX_PLAYER_COUNT]; /* Each player's character
+                                                         select cursor column */
+    /* 0x07 */ s8 characterRows[MAX_PLAYER_COUNT]; /* And row */
+    /* 0x0B */ s8 modeChoice; /* The mode select cursor's place in the player
+                                 count's modes */
+    /* 0x0C */ s8 modeSpin; /* How far the modes still have to turn to reach it */
+    /* The bet settings screen's chosen column of the bet set */
+    /* 0x0D */ s8 betColumn;
+    /* 0x0E */ s8 betStakeLevels[BET_STAKE_SLOT_COUNT]; /* Set from one of
+                                                      ApplyBetPreset's presets */
+    /* 0x16 */ s8 courseChoice; /* The course select's course: an open one, or the
+                                   next one still shut */
+    /* 0x17 */ s8 courseSpin; /* How far the courses still have to turn to reach it */
+    /* 0x18 */ s8 holesChoice; /* HOLES_CHOICE_* */
+    /* 0x19 */ s8 caddyChoice; /* The debug caddy select's caddy */
+    /* 0x1A */ s8 unusedAfterCaddyChoice;
+    /* 0x1B */ s8 mainChoice;
+    /* 0x1C */ s8 mainChoiceWithoutTransmit;
+    /* 0x1D */ s8 clubhouseChoice;
+    /* 0x1E */ s8 optionsChoice;
+    /* 0x1F */ s8 eraseChoice; /* The erase window's yes or no */
+    /* 0x20 */ s8 helpTopicIndex;
+    /* 0x21 */ u8 unusedAfterHelpTopic[0x29 - 0x21];
+    /* The player whose handicap the handicap screen is choosing */
+    /* 0x29 */ s8 handicapPlayer;
+    /* Only ever cleared, with handicapPlayer */
+    /* 0x2A */ s8 unusedHandicapValue;
+    /* The mini-golf course select's record of three courses */
+    /* 0x2B */ s8 miniGolfRecordChoice;
+    /* The mini-golf course select's course on its record's disc */
+    /* 0x2C */ s8 miniGolfCourseChoice;
+    /* How far the mini-golf course select still has to slide to the record */
+    /* 0x2D */ s8 miniGolfRecordSlide;
+    /* 0x2E */ s8 holeIndex; /* The hole the Ring Shot select points at */
+    /* 0x2F */ s8 courseIndex; /* And its course */
+    /* 0x30 */ s8 statsCourse; /* The course whose statistics show; one past the
+                                  open courses totals them */
+    /* 0x31 */ u8 unusedAfterStatsCourse;
+    /* 0x32 */ s8 statsSpin; /* How far the courses still have to turn to reach it */
+    /* 0x33 */ s8 bestTimesCourse; /* The open course whose best times show */
+    /* 0x34 */ s8 bestTimesSpin; /* How far the courses still have to turn to reach it */
+    /* 0x35 */ s8 tableColumn; /* The cursor's place among a table's shown columns */
+    /* 0x36 */ s8 tableRow; /* And among its shown rows */
+    /* 0x37 */ s8 tableFirstColumn; /* The first column shown of a table wider
+                                       than the screen */
+    /* 0x38 */ s8 tableFirstRow; /* And the first row shown of one taller */
+    /* 0x39 */ s8 bestShotColumn; /* The Best Shots cursor's cell */
+    /* 0x3A */ s8 bestShotRow;
+    /* 0x3B */ s8 ringShotRow; /* The Ring Shot records' row: a course, or the
+                                  replays after them */
+    /* 0x3C */ s8 ringShotFirstCharacters[RING_SHOT_COURSE_COUNT]; /* Each course's first
+                                                                      character shown */
+    /* 0x42 */ s8 ringShotReplaySlot; /* The Ring Shot replay chosen */
+    /* 0x43 */ s8 savedGameIndex;
+    /* 0x44 */ s8 savedGameTurn; /* Updates left of the saved games' boards
+                                   turning, negative when turning right */
+    /* 0x45 */ u8 optionBits; /* Each OPTION_BIT_* mirrors a saved option */
+    /* 0x46 */ u8 isTransmitShown; /* The menus were entered with the transmit
+                                    buttons, so the main menu offers it */
+    /* 0x47 */ s8 codeKeyColumn; /* The club tournament code keyboard's chosen key */
+    /* 0x48 */ s8 codeKeyRow;
 } MenuMemory;
 
-MenuMemory* GetMenuMemory(void);
+MenuMemory *GetMenuMemory(void);
 
 extern MenuMemory g_MenuMemory;
 
 /* The character select's record of which characters are taken */
 typedef struct TakenCharacters {
-  /* Only ever cleared, as the menu choices reset and with modeChoice */
-  /* 0x00 */ s16 unusedMenuValue;
-  /* 0x02 */ u8 unusedBeforeTakenCharacters[0x8 - 0x2];
-  /* 0x08 */ Boolean isCharacterTaken[CHARACTER_COUNT];
-  /* 0x50 */ u8 unusedAfterTakenCharacters[0x54 - 0x50];
+    /* Only ever cleared, as the menu choices reset and with modeChoice */
+    /* 0x00 */ s16 unusedMenuValue;
+    /* 0x02 */ u8 unusedBeforeTakenCharacters[0x8 - 0x2];
+    /* 0x08 */ Boolean isCharacterTaken[CHARACTER_COUNT];
+    /* 0x50 */ u8 unusedAfterTakenCharacters[0x54 - 0x50];
 } TakenCharacters; /* size = 0x54 */
 
 extern TakenCharacters g_TakenCharacters;

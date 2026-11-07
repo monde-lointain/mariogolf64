@@ -6,26 +6,28 @@
 #include <ultra64.h>
 
 typedef union {
-  f32 value;
-  s32 word;
+    f32 value;
+    s32 word;
 } FloatShape;
 
 /* As in fdlibm, these are do-while (0) loops, which the original needs: as
  * plain blocks, fabsf gives 2 words differing, 2 in shape, and acosf 18, 2 in
  * shape */
 #define GET_FLOAT_WORD(destination, source) \
-  do { \
-    FloatShape shape; \
-    shape.value = (source); \
-    (destination) = shape.word; \
-  } while (0)
+    do { \
+        FloatShape shape; \
+        shape.value = (source); \
+        (destination) = shape.word; \
+    } \
+    while (0)
 
 #define SET_FLOAT_WORD(destination, source) \
-  do { \
-    FloatShape shape; \
-    shape.word = (source); \
-    (destination) = shape.value; \
-  } while (0)
+    do { \
+        FloatShape shape; \
+        shape.word = (source); \
+        (destination) = shape.value; \
+    } \
+    while (0)
 
 #define SIGN_MASK 0x80000000
 #define MAGNITUDE_MASK 0x7FFFFFFF
@@ -55,98 +57,87 @@ static const float f_AsinQ3 = -6.8828397989e-01f;
 static const float f_AsinQ4 = 7.7038154006e-02f;
 
 float fabsf(float x) {
-  s32 word;
+    s32 word;
 
-  GET_FLOAT_WORD(word, x);
-  SET_FLOAT_WORD(x, word & MAGNITUDE_MASK);
-  return x;
+    GET_FLOAT_WORD(word, x);
+    SET_FLOAT_WORD(x, word & MAGNITUDE_MASK);
+    return x;
 }
 
 float acosf(float x) {
-  float z;
-  float p;
-  float q;
-  float r;
-  float w;
-  float s;
-  float c;
-  float sqrtHigh;
-  s32 word;
-  s32 magnitude;
+    float z;
+    float p;
+    float q;
+    float r;
+    float w;
+    float s;
+    float c;
+    float sqrtHigh;
+    s32 word;
+    s32 magnitude;
 
-  GET_FLOAT_WORD(word, x);
-  magnitude = word & MAGNITUDE_MASK;
-  if (magnitude == ONE_WORD) {
-    if (word > 0) {
-      return 0.0f;
-    } else {
-      return f_Pi + (2.0f * f_HalfPiLow);
+    GET_FLOAT_WORD(word, x);
+    magnitude = word & MAGNITUDE_MASK;
+    if (magnitude == ONE_WORD) {
+        if (word > 0) {
+            return 0.0f;
+        }
+        else {
+            return f_Pi + (2.0f * f_HalfPiLow);
+        }
     }
-  } else if (magnitude > ONE_WORD) {
-    /* NaN without fast math; the game's flags fold this to 0 */
-    return (x - x) / (x - x);
-  }
-
-  if (magnitude < 0x3F000000) { /* |x| < 0.5 */
-    if (magnitude <= 0x23000000) { /* |x| <= 2^-57 */
-      return f_HalfPiHigh + f_HalfPiLow;
+    else if (magnitude > ONE_WORD) {
+        /* NaN without fast math; the game's flags fold this to 0 */
+        return (x - x) / (x - x);
     }
 
-    z = x * x;
-    p = z *
-        (f_AsinP0 +
-            (z *
-                (f_AsinP1 +
-                    (z *
-                        (f_AsinP2 +
-                            (z *
-                                (f_AsinP3 +
-                                    (z * (f_AsinP4 + (z * f_AsinP5))))))))));
-    q = f_One +
-        (z * (f_AsinQ1 + (z * (f_AsinQ2 + (z * (f_AsinQ3 + (z * f_AsinQ4)))))));
-    r = p / q;
-    return f_HalfPiHigh - (x - (f_HalfPiLow - (x * r)));
-  } else if (word < 0) {
-    z = (f_One + x) * 0.5f;
-    p = z *
-        (f_AsinP0 +
-            (z *
-                (f_AsinP1 +
-                    (z *
-                        (f_AsinP2 +
-                            (z *
-                                (f_AsinP3 +
-                                    (z * (f_AsinP4 + (z * f_AsinP5))))))))));
-    q = f_One +
-        (z * (f_AsinQ1 + (z * (f_AsinQ2 + (z * (f_AsinQ3 + (z * f_AsinQ4)))))));
-    s = sqrtf(z);
-    r = p / q;
-    w = (r * s) - f_HalfPiLow;
-    return f_Pi - (2.0f * (s + w));
-  } else {
-    s32 sqrtHighWord;
+    if (magnitude < 0x3F000000) { /* |x| < 0.5 */
+        if (magnitude <= 0x23000000) { /* |x| <= 2^-57 */
+            return f_HalfPiHigh + f_HalfPiLow;
+        }
 
-    z = (f_One - x) * 0.5f;
-    s = sqrtf(z);
-    sqrtHigh = s;
-    GET_FLOAT_WORD(sqrtHighWord, sqrtHigh);
-    SET_FLOAT_WORD(sqrtHigh, sqrtHighWord & 0xFFFFF000);
-    c = (z - (sqrtHigh * sqrtHigh)) / (s + sqrtHigh);
-    p = z *
-        (f_AsinP0 +
-            (z *
-                (f_AsinP1 +
-                    (z *
-                        (f_AsinP2 +
-                            (z *
-                                (f_AsinP3 +
-                                    (z * (f_AsinP4 + (z * f_AsinP5))))))))));
-    q = f_One +
-        (z * (f_AsinQ1 + (z * (f_AsinQ2 + (z * (f_AsinQ3 + (z * f_AsinQ4)))))));
-    r = p / q;
-    w = (r * s) + c;
-    return 2.0f * (sqrtHigh + w);
-  }
+        z = x * x;
+        p = z *
+            (f_AsinP0 +
+                (z *
+                    (f_AsinP1 +
+                        (z * (f_AsinP2 + (z * (f_AsinP3 + (z * (f_AsinP4 + (z * f_AsinP5))))))))));
+        q = f_One + (z * (f_AsinQ1 + (z * (f_AsinQ2 + (z * (f_AsinQ3 + (z * f_AsinQ4)))))));
+        r = p / q;
+        return f_HalfPiHigh - (x - (f_HalfPiLow - (x * r)));
+    }
+    else if (word < 0) {
+        z = (f_One + x) * 0.5f;
+        p = z *
+            (f_AsinP0 +
+                (z *
+                    (f_AsinP1 +
+                        (z * (f_AsinP2 + (z * (f_AsinP3 + (z * (f_AsinP4 + (z * f_AsinP5))))))))));
+        q = f_One + (z * (f_AsinQ1 + (z * (f_AsinQ2 + (z * (f_AsinQ3 + (z * f_AsinQ4)))))));
+        s = sqrtf(z);
+        r = p / q;
+        w = (r * s) - f_HalfPiLow;
+        return f_Pi - (2.0f * (s + w));
+    }
+    else {
+        s32 sqrtHighWord;
+
+        z = (f_One - x) * 0.5f;
+        s = sqrtf(z);
+        sqrtHigh = s;
+        GET_FLOAT_WORD(sqrtHighWord, sqrtHigh);
+        SET_FLOAT_WORD(sqrtHigh, sqrtHighWord & 0xFFFFF000);
+        c = (z - (sqrtHigh * sqrtHigh)) / (s + sqrtHigh);
+        p = z *
+            (f_AsinP0 +
+                (z *
+                    (f_AsinP1 +
+                        (z * (f_AsinP2 + (z * (f_AsinP3 + (z * (f_AsinP4 + (z * f_AsinP5))))))))));
+        q = f_One + (z * (f_AsinQ1 + (z * (f_AsinQ2 + (z * (f_AsinQ3 + (z * f_AsinQ4)))))));
+        r = p / q;
+        w = (r * s) + c;
+        return 2.0f * (sqrtHigh + w);
+    }
 }
 
 /*
@@ -160,99 +151,102 @@ static const float f_HalfPi = 1.5707963705e+00f;
 static const float f_PiLow = 1.5099578832e-07f;
 
 float atan2f(float y, float x) {
-  float z;
-  s32 exponentDifference;
-  s32 quadrant;
-  s32 xWord;
-  s32 yWord;
-  s32 xMagnitude;
-  s32 yMagnitude;
+    float z;
+    s32 exponentDifference;
+    s32 quadrant;
+    s32 xWord;
+    s32 yWord;
+    s32 xMagnitude;
+    s32 yMagnitude;
 
-  GET_FLOAT_WORD(xWord, x);
-  xMagnitude = xWord & MAGNITUDE_MASK;
-  GET_FLOAT_WORD(yWord, y);
-  yMagnitude = yWord & MAGNITUDE_MASK;
-  if ((xMagnitude > INFINITY_WORD) || (yMagnitude > INFINITY_WORD)) {
-    return x + y;
-  }
-
-  if (xWord == ONE_WORD) {
-    return atanf(y);
-  }
-
-  /* Bit 0 is the sign of y and bit 1 the sign of x */
-  quadrant = ((yWord >> 31) & 1) | ((xWord >> 30) & 2);
-
-  if (yMagnitude == 0) {
-    switch (quadrant) {
-      case 0:
-      case 1:
-        return y;
-      case 2:
-        return f_Pi + f_Tiny;
-      case 3:
-        return -f_Pi - f_Tiny;
+    GET_FLOAT_WORD(xWord, x);
+    xMagnitude = xWord & MAGNITUDE_MASK;
+    GET_FLOAT_WORD(yWord, y);
+    yMagnitude = yWord & MAGNITUDE_MASK;
+    if ((xMagnitude > INFINITY_WORD) || (yMagnitude > INFINITY_WORD)) {
+        return x + y;
     }
-  }
 
-  if (xMagnitude == 0) {
-    return (yWord < 0) ? -f_HalfPi - f_Tiny : f_HalfPi + f_Tiny;
-  }
+    if (xWord == ONE_WORD) {
+        return atanf(y);
+    }
 
-  if (xMagnitude == INFINITY_WORD) {
+    /* Bit 0 is the sign of y and bit 1 the sign of x */
+    quadrant = ((yWord >> 31) & 1) | ((xWord >> 30) & 2);
+
+    if (yMagnitude == 0) {
+        switch (quadrant) {
+            case 0:
+            case 1:
+                return y;
+            case 2:
+                return f_Pi + f_Tiny;
+            case 3:
+                return -f_Pi - f_Tiny;
+        }
+    }
+
+    if (xMagnitude == 0) {
+        return (yWord < 0) ? -f_HalfPi - f_Tiny : f_HalfPi + f_Tiny;
+    }
+
+    if (xMagnitude == INFINITY_WORD) {
+        if (yMagnitude == INFINITY_WORD) {
+            switch (quadrant) {
+                case 0:
+                    return f_QuarterPi + f_Tiny;
+                case 1:
+                    return -f_QuarterPi - f_Tiny;
+                case 2:
+                    return (3.0f * f_QuarterPi) + f_Tiny;
+                case 3:
+                    return (-3.0f * f_QuarterPi) - f_Tiny;
+            }
+        }
+        else {
+            switch (quadrant) {
+                case 0:
+                    return f_Zero;
+                case 1:
+                    return -f_Zero;
+                case 2:
+                    return f_Pi + f_Tiny;
+                case 3:
+                    return -f_Pi - f_Tiny;
+            }
+        }
+    }
+
     if (yMagnitude == INFINITY_WORD) {
-      switch (quadrant) {
-        case 0:
-          return f_QuarterPi + f_Tiny;
-        case 1:
-          return -f_QuarterPi - f_Tiny;
-        case 2:
-          return (3.0f * f_QuarterPi) + f_Tiny;
-        case 3:
-          return (-3.0f * f_QuarterPi) - f_Tiny;
-      }
-    } else {
-      switch (quadrant) {
-        case 0:
-          return f_Zero;
-        case 1:
-          return -f_Zero;
-        case 2:
-          return f_Pi + f_Tiny;
-        case 3:
-          return -f_Pi - f_Tiny;
-      }
+        return (yWord < 0) ? -f_HalfPi - f_Tiny : f_HalfPi + f_Tiny;
     }
-  }
 
-  if (yMagnitude == INFINITY_WORD) {
-    return (yWord < 0) ? -f_HalfPi - f_Tiny : f_HalfPi + f_Tiny;
-  }
-
-  exponentDifference = (yMagnitude - xMagnitude) >> 23;
-  if (exponentDifference > 60) {
-    z = f_HalfPi + (0.5f * f_PiLow);
-  } else if (xWord < 0 && exponentDifference < -60) {
-    z = 0.0f;
-  } else {
-    z = atanf(fabsf(y / x));
-  }
-
-  switch (quadrant) {
-    case 0:
-      return z;
-    case 1: {
-      u32 zWord;
-
-      GET_FLOAT_WORD(zWord, z);
-      SET_FLOAT_WORD(z, zWord ^ SIGN_MASK);
+    exponentDifference = (yMagnitude - xMagnitude) >> 23;
+    if (exponentDifference > 60) {
+        z = f_HalfPi + (0.5f * f_PiLow);
     }
-      return z;
-    case 2:
-      return f_Pi - (z - f_PiLow);
-    default:
-      return (z - f_PiLow) - f_Pi;
-  }
+    else if (xWord < 0 && exponentDifference < -60) {
+        z = 0.0f;
+    }
+    else {
+        z = atanf(fabsf(y / x));
+    }
+
+    switch (quadrant) {
+        case 0:
+            return z;
+        case 1: {
+            u32 zWord;
+
+            GET_FLOAT_WORD(zWord, z);
+            SET_FLOAT_WORD(z, zWord ^ SIGN_MASK);
+        }
+            return z;
+        case 2:
+            return f_Pi - (z - f_PiLow);
+        default:
+            return (z - f_PiLow) - f_Pi;
+    }
 }
 
 /* atan of 0.5, 1, 1.5 and infinity, split into a float and the error left over
@@ -286,82 +280,84 @@ static const float f_AtanTerms[] = {
 static const float f_Huge = 1.0e30f;
 
 float atanf(float x) {
-  float w;
-  float oddSum;
-  float evenSum;
-  float z;
-  s32 magnitude;
-  s32 word;
-  s32 reductionIndex;
+    float w;
+    float oddSum;
+    float evenSum;
+    float z;
+    s32 magnitude;
+    s32 word;
+    s32 reductionIndex;
 
-  GET_FLOAT_WORD(word, x);
-  magnitude = word & MAGNITUDE_MASK;
-  if (magnitude >= 0x50800000) { /* |x| >= 2^34 */
-    if (magnitude > INFINITY_WORD) {
-      return x + x;
+    GET_FLOAT_WORD(word, x);
+    magnitude = word & MAGNITUDE_MASK;
+    if (magnitude >= 0x50800000) { /* |x| >= 2^34 */
+        if (magnitude > INFINITY_WORD) {
+            return x + x;
+        }
+
+        if (word > 0) {
+            return f_AtanHigh[3] + f_AtanLow[3];
+        }
+        else {
+            return -f_AtanHigh[3] - f_AtanLow[3];
+        }
     }
 
-    if (word > 0) {
-      return f_AtanHigh[3] + f_AtanLow[3];
-    } else {
-      return -f_AtanHigh[3] - f_AtanLow[3];
-    }
-  }
+    if (magnitude < 0x3EE00000) { /* |x| < 7/16 */
+        if (magnitude < 0x31000000) { /* |x| < 2^-29 */
+            if (f_Huge + x > f_One) {
+                return x;
+            }
+        }
 
-  if (magnitude < 0x3EE00000) { /* |x| < 7/16 */
-    if (magnitude < 0x31000000) { /* |x| < 2^-29 */
-      if (f_Huge + x > f_One) {
-        return x;
-      }
+        reductionIndex = -1;
+    }
+    else {
+        x = fabsf(x);
+        if (magnitude < 0x3F980000) { /* |x| < 19/16 */
+            if (magnitude < 0x3F300000) { /* |x| < 11/16 */
+                reductionIndex = 0;
+                x = ((2.0f * x) - f_One) / (2.0f + x);
+            }
+            else {
+                reductionIndex = 1;
+                x = (x - f_One) / (x + f_One);
+            }
+        }
+        else {
+            if (magnitude < 0x401C0000) { /* |x| < 39/16 */
+                reductionIndex = 2;
+                x = (x - 1.5f) / (f_One + (1.5f * x));
+            }
+            else {
+                reductionIndex = 3;
+                x = -1.0f / x;
+            }
+        }
     }
 
-    reductionIndex = -1;
-  } else {
-    x = fabsf(x);
-    if (magnitude < 0x3F980000) { /* |x| < 19/16 */
-      if (magnitude < 0x3F300000) { /* |x| < 11/16 */
-        reductionIndex = 0;
-        x = ((2.0f * x) - f_One) / (2.0f + x);
-      } else {
-        reductionIndex = 1;
-        x = (x - f_One) / (x + f_One);
-      }
-    } else {
-      if (magnitude < 0x401C0000) { /* |x| < 39/16 */
-        reductionIndex = 2;
-        x = (x - 1.5f) / (f_One + (1.5f * x));
-      } else {
-        reductionIndex = 3;
-        x = -1.0f / x;
-      }
+    z = x * x;
+    w = z * z;
+    oddSum = z *
+        (f_AtanTerms[0] +
+            (w *
+                (f_AtanTerms[2] +
+                    (w *
+                        (f_AtanTerms[4] +
+                            (w *
+                                (f_AtanTerms[6] +
+                                    (w * (f_AtanTerms[8] + (w * f_AtanTerms[10]))))))))));
+    evenSum = w *
+        (f_AtanTerms[1] +
+            (w *
+                (f_AtanTerms[3] +
+                    (w * (f_AtanTerms[5] + (w * (f_AtanTerms[7] + (w * f_AtanTerms[9]))))))));
+    if (reductionIndex < 0) {
+        return x - (x * (oddSum + evenSum));
     }
-  }
-
-  z = x * x;
-  w = z * z;
-  oddSum = z *
-      (f_AtanTerms[0] +
-          (w *
-              (f_AtanTerms[2] +
-                  (w *
-                      (f_AtanTerms[4] +
-                          (w *
-                              (f_AtanTerms[6] +
-                                  (w *
-                                      (f_AtanTerms[8] +
-                                          (w * f_AtanTerms[10]))))))))));
-  evenSum = w *
-      (f_AtanTerms[1] +
-          (w *
-              (f_AtanTerms[3] +
-                  (w *
-                      (f_AtanTerms[5] +
-                          (w * (f_AtanTerms[7] + (w * f_AtanTerms[9]))))))));
-  if (reductionIndex < 0) {
-    return x - (x * (oddSum + evenSum));
-  } else {
-    z = f_AtanHigh[reductionIndex] -
-        (((x * (oddSum + evenSum)) - f_AtanLow[reductionIndex]) - x);
-    return (word < 0) ? -z : z;
-  }
+    else {
+        z = f_AtanHigh[reductionIndex] -
+            (((x * (oddSum + evenSum)) - f_AtanLow[reductionIndex]) - x);
+        return (word < 0) ? -z : z;
+    }
 }

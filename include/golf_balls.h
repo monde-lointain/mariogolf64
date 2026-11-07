@@ -17,6 +17,6 @@ void ResetGolfBalls(void);
 Boolean IsAnyBallInCup(void);
 void UpdateGolfBalls(void);
 
-void DrawGolfBalls(CameraMatrices* matrices);
+void DrawGolfBalls(CameraMatrices *matrices);
 
 #endif

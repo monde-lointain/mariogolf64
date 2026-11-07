@@ -47,45 +47,45 @@
 
 /* f_ResultsState values */
 enum ResultsState {
-  RESULTS_SLIDING_IN,
-  RESULTS_SHOWN,
-  RESULTS_CLOSING /* Saves and frees them */
+    RESULTS_SLIDING_IN,
+    RESULTS_SHOWN,
+    RESULTS_CLOSING /* Saves and frees them */
 };
 
 /* f_BannerKind values: what the results banner shows */
 enum BannerKind {
-  BANNER_KIND_NONE, /* Set with BANNER_HIDDEN as the results load */
-  BANNER_KIND_TOURNAMENT_PLACE,
-  /* BANNER_KIND_UNUSED_* kinds are never set */
-  BANNER_KIND_UNUSED_A,
-  BANNER_KIND_POINTS,
-  BANNER_KIND_UNUSED_B,
-  /* Would show MESSAGE_UNUSED_BANNER */
-  BANNER_KIND_UNUSED_MESSAGE
+    BANNER_KIND_NONE, /* Set with BANNER_HIDDEN as the results load */
+    BANNER_KIND_TOURNAMENT_PLACE,
+    /* BANNER_KIND_UNUSED_* kinds are never set */
+    BANNER_KIND_UNUSED_A,
+    BANNER_KIND_POINTS,
+    BANNER_KIND_UNUSED_B,
+    /* Would show MESSAGE_UNUSED_BANNER */
+    BANNER_KIND_UNUSED_MESSAGE
 };
 
 /* f_BannerState values */
 enum BannerState {
-  BANNER_UNSET = -1, /* Until the results first load */
-  BANNER_SLIDING_IN,
-  BANNER_SHOWN,
-  BANNER_HIDDEN = 3,
-  BANNER_SLIDING_OUT
+    BANNER_UNSET = -1, /* Until the results first load */
+    BANNER_SLIDING_IN,
+    BANNER_SHOWN,
+    BANNER_HIDDEN = 3,
+    BANNER_SLIDING_OUT
 };
 
 /* LoadUnlockNotice's unlocks */
 enum UnlockNotice {
-  UNLOCK_NOTICE_DONKEY_KONG,
-  UNLOCK_NOTICE_MAPLE,
-  UNLOCK_NOTICE_METAL_MARIO,
-  UNLOCK_NOTICE_COURSES /* The first of the courses' unlocks */
+    UNLOCK_NOTICE_DONKEY_KONG,
+    UNLOCK_NOTICE_MAPLE,
+    UNLOCK_NOTICE_METAL_MARIO,
+    UNLOCK_NOTICE_COURSES /* The first of the courses' unlocks */
 };
 
 /* f_UnlockNoticeKind values */
 enum UnlockNoticeKind {
-  UNLOCK_NOTICE_KIND_NONE,
-  UNLOCK_NOTICE_KIND_COURSE,
-  UNLOCK_NOTICE_KIND_CHARACTER
+    UNLOCK_NOTICE_KIND_NONE,
+    UNLOCK_NOTICE_KIND_COURSE,
+    UNLOCK_NOTICE_KIND_CHARACTER
 };
 
 /* f_TallySpeed normally, and while A is held */
@@ -109,8 +109,8 @@ enum UnlockNoticeKind {
  * ranked below another.
  */
 enum PortraitAnimation {
-  PORTRAIT_ANIMATION_PLEASED = 1,
-  PORTRAIT_ANIMATION_BEATEN = 4
+    PORTRAIT_ANIMATION_PLEASED = 1,
+    PORTRAIT_ANIMATION_BEATEN = 4
 };
 
 /*
@@ -166,13 +166,13 @@ enum PortraitAnimation {
 /* The columns of f_TournamentPrizes: a prize for each trophy place, then one
  * for each wider bracket of places */
 enum PrizeBracket {
-  PRIZE_BRACKET_FIRST,
-  PRIZE_BRACKET_SECOND,
-  PRIZE_BRACKET_THIRD,
-  PRIZE_BRACKET_TOP_TEN,
-  PRIZE_BRACKET_TOP_TWENTY,
-  PRIZE_BRACKET_REST,
-  PRIZE_BRACKET_COUNT
+    PRIZE_BRACKET_FIRST,
+    PRIZE_BRACKET_SECOND,
+    PRIZE_BRACKET_THIRD,
+    PRIZE_BRACKET_TOP_TEN,
+    PRIZE_BRACKET_TOP_TWENTY,
+    PRIZE_BRACKET_REST,
+    PRIZE_BRACKET_COUNT
 };
 
 /* The results' images. g_GameState.isClubTournament swaps in another set. */
@@ -257,20 +257,20 @@ extern const char f_NoPointsText[];
 
 void FreeRoundResults(void);
 void LoadRoundResults(void);
-void DrawResultsBanner(Gfx** displayListHead);
-s32 UpdateTournamentResults(ControllerState* controller);
-s32 ShowScorePassword(ControllerState* controller);
-s32 UpdateCoursePointsResults(ControllerState* controller);
-s32 UpdateMatchResults(ControllerState* controller);
+void DrawResultsBanner(Gfx **displayListHead);
+s32 UpdateTournamentResults(ControllerState *controller);
+s32 ShowScorePassword(ControllerState *controller);
+s32 UpdateCoursePointsResults(ControllerState *controller);
+s32 UpdateMatchResults(ControllerState *controller);
 
 /* The score password shows as two lines of equal length */
 #define SCORE_PASSWORD_LINE_LENGTH (SCORE_PASSWORD_LENGTH / 2)
 
 /* The images of the trophy a course's tournament gives its top three */
 typedef struct TrophyAssets {
-  /* 0x0 */ s32 palette; /* For first place; second and third follow */
-  /* 0x4 */ s32 image;
-  /* 0x8 */ s32 frameCount; /* Of image, as the trophy turns */
+    /* 0x0 */ s32 palette; /* For first place; second and third follow */
+    /* 0x4 */ s32 image;
+    /* 0x8 */ s32 frameCount; /* Of image, as the trophy turns */
 } TrophyAssets; /* size = 0xC */
 
 /*
@@ -278,8 +278,8 @@ typedef struct TrophyAssets {
  * them to the save, and shown keeps the total for the banner
  */
 typedef struct CoursePointsTally {
-  s32 earned;
-  s32 shown;
+    s32 earned;
+    s32 shown;
 } CoursePointsTally; /* size = 0x8 */
 
 /* Each course's trophy image's sizes, indexed by these */
@@ -308,17 +308,25 @@ static Boolean f_IsAwaitingConfirm = FALSE;
  * place, then up to PRIZE_TOP_TEN, PRIZE_TOP_TWENTY and the rest
  */
 static s32 f_TournamentPrizes[COURSE_COUNT][PRIZE_BRACKET_COUNT] = {
-    {50, 25, 12, 8, 5, 3}, {200, 100, 50, 20, 10, 6},
-    {600, 300, 150, 75, 35, 17}, {1200, 600, 300, 100, 50, 25},
-    {2000, 1000, 500, 200, 100, 50}, {2000, 1000, 500, 200, 100, 50}};
-static f32 f_CoursePointRates[] = {
-    1.0f, 1.5f, 2.0f, 2.5f, 3.5f, 3.5f, 1.0f, 1.0f};
+    {50, 25, 12, 8, 5, 3},
+    {200, 100, 50, 20, 10, 6},
+    {600, 300, 150, 75, 35, 17},
+    {1200, 600, 300, 100, 50, 25},
+    {2000, 1000, 500, 200, 100, 50},
+    {2000, 1000, 500, 200, 100, 50}
+};
+static f32 f_CoursePointRates[] = {1.0f, 1.5f, 2.0f, 2.5f, 3.5f, 3.5f, 1.0f, 1.0f};
 static s32 f_OpenCourseCount = 1;
 static s32 f_TournamentOpenCourseCount = 1;
 static s32 f_PointsToNextCourse = 0;
-static TrophyAssets f_TrophyAssets[COURSE_COUNT] = {{0x88A, 0x88D, 16},
-    {0x8AF, 0x8B2, 16}, {0x877, 0x87A, 16}, {0x8D5, 0x8D8, 16},
-    {0x8C2, 0x8C5, 16}, {0x89D, 0x8A0, 15}};
+static TrophyAssets f_TrophyAssets[COURSE_COUNT] = {
+    {0x88A, 0x88D, 16},
+    {0x8AF, 0x8B2, 16},
+    {0x877, 0x87A, 16},
+    {0x8D5, 0x8D8, 16},
+    {0x8C2, 0x8C5, 16},
+    {0x89D, 0x8A0, 15}
+};
 static s32 f_BannerState = BANNER_UNSET;
 static s32 f_BannerKind = BANNER_KIND_NONE;
 static s32 f_BannerX = SCREEN_WIDTH;
@@ -327,18 +335,27 @@ static s32 f_CourseNoticeAssets[] = {0x96C, 0x96D, 0x96E, 0x96F, 0x970};
 static s32 f_TallySoundCount = 0;
 /* Read by no routine */
 static s32 f_UnusedPingPongFrames[6] UNUSED = {0, 1, 2, 3, 2, 1};
-static s32 f_TrophySizes[COURSE_COUNT][TROPHY_SIZE_COUNT] = {{40, 24, 24, 38},
-    {40, 40, 11, 40}, {40, 40, 11, 50}, {32, 32, 32, 64}, {48, 22, 20, 21},
-    {36, 40, 11, 40}};
+static s32 f_TrophySizes[COURSE_COUNT][TROPHY_SIZE_COUNT] = {
+    {40, 24, 24, 38},
+    {40, 40, 11, 40},
+    {40, 40, 11, 50},
+    {32, 32, 32, 64},
+    {48, 22, 20, 21},
+    {36, 40, 11, 40}
+};
 static s32 f_TrophyShineFrame = 0;
 static s32 f_TrophyFrame = 0;
 static CharacterId f_DebugUnlockCharacter = 0;
 /* Read by no routine */
-static const char* f_UnusedModeNamesPointers[2] UNUSED = {
-    NULL, f_UnusedModeNamesText};
+static const char *f_UnusedModeNamesPointers[2] UNUSED = {NULL, f_UnusedModeNamesText};
 /* The text color of each text slot, from slot 1 */
-static u8 f_TextSlotColors[][3] = {{0xFF, 0xFF, 0xFF}, {0x7F, 0xBF, 0xFF},
-    {0x7F, 0xBF, 0xFF}, {0x7F, 0xFF, 0x4B}, {0xFF, 0x7F, 0x9F}};
+static u8 f_TextSlotColors[][3] = {
+    {0xFF, 0xFF, 0xFF},
+    {0x7F, 0xBF, 0xFF},
+    {0x7F, 0xBF, 0xFF},
+    {0x7F, 0xFF, 0x4B},
+    {0xFF, 0x7F, 0x9F}
+};
 /* Counts up through the pressing hand's frames, HAND_FRAME_DRAWS draws to a
  * frame */
 static s32 f_HandFrame = 0;
@@ -346,33 +363,33 @@ static Radians f_TitleBobAngle = 0.0f;
 
 /* Read by no routine */
 static u8 f_UnusedBufferBeforeBackdrop[0x10] UNUSED;
-static u8* f_ResultsBackdropImage;
-static u8* f_FinalResultsTitleImage;
-static u8* f_ResultsCourseImage;
-static u8* f_PortraitImage;
-static u8* f_PortraitPalette;
-static u8* f_PlayerPortraitImages[MAX_PLAYER_COUNT];
-static u8* f_PlayerPortraitPalettes[MAX_PLAYER_COUNT];
-static u8* f_ResultsCloudImage;
-static u8* f_ResultsLabelsImage;
-static u8* f_ResultsLargeDigitsImage;
-static u8* f_ResultsPlacesImage;
+static u8 *f_ResultsBackdropImage;
+static u8 *f_FinalResultsTitleImage;
+static u8 *f_ResultsCourseImage;
+static u8 *f_PortraitImage;
+static u8 *f_PortraitPalette;
+static u8 *f_PlayerPortraitImages[MAX_PLAYER_COUNT];
+static u8 *f_PlayerPortraitPalettes[MAX_PLAYER_COUNT];
+static u8 *f_ResultsCloudImage;
+static u8 *f_ResultsLabelsImage;
+static u8 *f_ResultsLargeDigitsImage;
+static u8 *f_ResultsPlacesImage;
 /* In a match, the LOSE banner that DrawRank draws for a rank past RANK_BANNER;
  * in a tournament, the digits it draws a place from the 4th with */
-static u8* f_SecondBannerImage;
-static u8* f_NameplateImage;
-static u8* f_NoticeTitleImage;
-static u8* f_ResultsShineImage;
+static u8 *f_SecondBannerImage;
+static u8 *f_NameplateImage;
+static u8 *f_NoticeTitleImage;
+static u8 *f_ResultsShineImage;
 /* An image and palette that are loaded and freed, but never drawn */
-static u8* f_UnusedResultsImage;
-static u8* f_UnusedResultsPalette;
-static u8* f_TrophyImage;
-static u8* f_TrophyPalette;
-static u8* f_ResultsHandImage;
-static u8* f_MatchStandingWordsImage;
-static u8* f_NintendoBadgeImage;
-static u8* f_DigitsImage;
-static u8* f_PlaceDigitsImage;
+static u8 *f_UnusedResultsImage;
+static u8 *f_UnusedResultsPalette;
+static u8 *f_TrophyImage;
+static u8 *f_TrophyPalette;
+static u8 *f_ResultsHandImage;
+static u8 *f_MatchStandingWordsImage;
+static u8 *f_NintendoBadgeImage;
+static u8 *f_DigitsImage;
+static u8 *f_PlaceDigitsImage;
 static s32 f_UnlockNoticeKind;
 static Boolean f_HasBets;
 static CharacterId f_PortraitCharacterIndex;
@@ -403,27 +420,27 @@ static s32 f_PortraitTimers[MAX_PLAYER_COUNT];
 
 /* The course points that open the courses up to courseIndex, together */
 s32 SumCoursePointsNeeded(CourseIndex courseIndex) {
-  s32 total = 0;
-  s32 i;
+    s32 total = 0;
+    s32 i;
 
-  for (i = 1; i < courseIndex + 1; i++) {
-    total += GetCoursePointsNeeded(i);
-  }
+    for (i = 1; i < courseIndex + 1; i++) {
+        total += GetCoursePointsNeeded(i);
+    }
 
-  return total;
+    return total;
 }
 
 /* Loads the results and slides them in, or with CLOSE_ROUND_RESULTS frees them
  */
 void OpenRoundResults(s32 request) {
-  if (request == CLOSE_ROUND_RESULTS) {
-    FreeRoundResults();
-    return;
-  }
+    if (request == CLOSE_ROUND_RESULTS) {
+        FreeRoundResults();
+        return;
+    }
 
-  LoadRoundResults();
-  f_ResultsSlide = SCREEN_WIDTH;
-  f_ResultsState = RESULTS_SLIDING_IN;
+    LoadRoundResults();
+    f_ResultsSlide = SCREEN_WIDTH;
+    f_ResultsState = RESULTS_SLIDING_IN;
 }
 
 #ifdef NON_MATCHING
@@ -432,39 +449,39 @@ void OpenRoundResults(s32 request) {
  * scaled by the course's rate, counting them with index. A macro, since the
  * original repeats it for each mode.
  */
-#define AddRoundPoints(save, index) \
-  { \
-    s32 counted_; \
-    s32 total_; \
+#    define AddRoundPoints(save, index) \
+        { \
+            s32 counted_; \
+            s32 total_; \
 \
-    f_OpenCourseCount = CountOpenCourses((save)->coursePoints); \
-    if (f_OpenCourseCount < COURSE_COUNT) { \
-      counted_ = 0; \
-      f_PointsToNextCourse = \
-          GetCoursePointsNeeded(f_OpenCourseCount) - (save)->coursePoints; \
-      f_CoursePointsTally.earned = 0; \
-      for ((index) = 0; (index) != g_GameState.playerCount; (index)++) { \
-        if (f_PlayerPoints[(index)] >= 0) { \
-          counted_++; \
-          f_CoursePointsTally.earned += f_PlayerPoints[(index)]; \
-        } \
-      } \
-      if (counted_ == 0) { \
-        counted_ = 1; \
-      } \
-      f_CoursePointsTally.earned = f_CoursePointsTally.earned * \
-          f_CoursePointRates[GetCourseRecordIndex(g_GameState.courseIndex)] / \
-          counted_; \
-      f_CoursePointsTally.shown = f_CoursePointsTally.earned; \
-      f_PointsToNextCourse -= f_CoursePointsTally.earned; \
-    } \
-    total_ = (save)->coursePoints + f_CoursePointsTally.earned; \
-    if (total_ > MAX_COURSE_POINTS) { \
-      (save)->coursePoints = MAX_COURSE_POINTS; \
-    } else { \
-      (save)->coursePoints = total_; \
-    } \
-  }
+            f_OpenCourseCount = CountOpenCourses((save)->coursePoints); \
+            if (f_OpenCourseCount < COURSE_COUNT) { \
+                counted_ = 0; \
+                f_PointsToNextCourse = \
+                    GetCoursePointsNeeded(f_OpenCourseCount) - (save)->coursePoints; \
+                f_CoursePointsTally.earned = 0; \
+                for ((index) = 0; (index) != g_GameState.playerCount; (index)++) { \
+                    if (f_PlayerPoints[(index)] >= 0) { \
+                        counted_++; \
+                        f_CoursePointsTally.earned += f_PlayerPoints[(index)]; \
+                    } \
+                } \
+                if (counted_ == 0) { \
+                    counted_ = 1; \
+                } \
+                f_CoursePointsTally.earned = f_CoursePointsTally.earned * \
+                    f_CoursePointRates[GetCourseRecordIndex(g_GameState.courseIndex)] / counted_; \
+                f_CoursePointsTally.shown = f_CoursePointsTally.earned; \
+                f_PointsToNextCourse -= f_CoursePointsTally.earned; \
+            } \
+            total_ = (save)->coursePoints + f_CoursePointsTally.earned; \
+            if (total_ > MAX_COURSE_POINTS) { \
+                (save)->coursePoints = MAX_COURSE_POINTS; \
+            } \
+            else { \
+                (save)->coursePoints = total_; \
+            } \
+        }
 
 /*
  * Doesn't match: in the club tournament's results loop the original keeps k
@@ -532,323 +549,320 @@ void OpenRoundResults(s32 request) {
  * needing 17 or 26 forced.
  */
 void LoadRoundResults(void) {
-  EncodedAsset asset;
-  AssetFile file;
-  SaveData* save;
-  s32 i;
-  s32 j;
-  s32 k;
-  s32 holeEnd;
-  void* palette;
-  u32 size;
+    EncodedAsset asset;
+    AssetFile file;
+    SaveData *save;
+    s32 i;
+    s32 j;
+    s32 k;
+    s32 holeEnd;
+    void *palette;
+    u32 size;
 
-  save = GetSaveData();
-  if (f_AreResultsLoaded == TRUE) {
-    return;
-  }
-
-  StopSound(RAIN_SOUND_CHANNEL);
-  f_AreResultsLoaded = TRUE;
-  f_UnlockNoticeKind = UNLOCK_NOTICE_KIND_NONE;
-  f_BannerState = BANNER_HIDDEN;
-  f_BannerKind = BANNER_KIND_NONE;
-  f_TallySpeed = NORMAL_TALLY_SPEED;
-  f_IsAwaitingConfirm = FALSE;
-  if (IsGameFlagSet(GAME_FLAG_ADD_500_POINTS)) {
-    g_Players[0].points += SMALL_DEBUG_POINTS_BONUS;
-  }
-
-  if (IsGameFlagSet(GAME_FLAG_ADD_9999_POINTS)) {
-    g_Players[0].points += LARGE_DEBUG_POINTS_BONUS;
-  }
-
-  if (g_GameState.isClubTournament) {
-    f_ResultsBackdropImage =
-        AllocMemory(OpenEncodedAsset(CLUB_TOURNAMENT_BACKDROP_ASSET, &asset));
-    ReadEncodedAsset(f_ResultsBackdropImage, &asset);
-  } else {
-    f_ResultsBackdropImage =
-        AllocMemory(OpenEncodedAsset(RESULTS_BACKDROP_ASSET, &asset));
-    ReadEncodedAsset(f_ResultsBackdropImage, &asset);
-  }
-  f_ResultsHandImage =
-      AllocMemory(OpenEncodedAsset(ASSET_PRESSING_HAND, &asset));
-  ReadEncodedAsset(f_ResultsHandImage, &asset);
-  f_DigitsImage = AllocMemory(OpenEncodedAsset(ASSET_DISTANCE_DIGITS, &asset));
-  ReadEncodedAsset(f_DigitsImage, &asset);
-  f_PlaceDigitsImage =
-      AllocMemory(OpenEncodedAsset(ASSET_PLACE_DIGITS, &asset));
-  ReadEncodedAsset(f_PlaceDigitsImage, &asset);
-  if (g_GameState.isClubTournament) {
-    f_NintendoBadgeImage =
-        AllocMemory(OpenEncodedAsset(ASSET_NINTENDO_BADGE, &asset));
-    ReadEncodedAsset(f_NintendoBadgeImage, &asset);
-    f_ResultsCourseImage = AllocMemory(OpenEncodedAsset(
-        g_TournamentIconAssets[GetClubTournamentCourse()], &asset));
-    ReadEncodedAsset(f_ResultsCourseImage, &asset);
-  } else {
-    f_FinalResultsTitleImage =
-        AllocMemory(OpenEncodedAsset(FINAL_RESULTS_TITLE_ASSET, &asset));
-    ReadEncodedAsset(f_FinalResultsTitleImage, &asset);
-    f_ResultsLabelsImage =
-        AllocMemory(OpenEncodedAsset(ASSET_SCORE_LABELS, &asset));
-    ReadEncodedAsset(f_ResultsLabelsImage, &asset);
-    f_ResultsLargeDigitsImage =
-        AllocMemory(OpenEncodedAsset(ASSET_LARGE_DIGITS, &asset));
-    ReadEncodedAsset(f_ResultsLargeDigitsImage, &asset);
-    f_ResultsCloudImage =
-        AllocMemory(OpenEncodedAsset(ASSET_WIDE_CLOUD, &asset));
-    ReadEncodedAsset(f_ResultsCloudImage, &asset);
-    f_ResultsCourseImage =
-        AllocMemory(OpenEncodedAsset(g_TournamentIconAssets[0], &asset));
-    ReadEncodedAsset(f_ResultsCourseImage, &asset);
-    f_NoticeTitleImage =
-        AllocMemory(OpenEncodedAsset(COURSE_NOTICE_TITLE_ASSET, &asset));
-    ReadEncodedAsset(f_NoticeTitleImage, &asset);
-    f_ResultsShineImage =
-        AllocMemory(OpenEncodedAsset(ASSET_SHINE_IMAGE, &asset));
-    ReadEncodedAsset(f_ResultsShineImage, &asset);
-    f_UnusedResultsImage =
-        AllocMemory(OpenEncodedAsset(RESULTS_GLOW_IMAGE_ASSET, &asset));
-    ReadEncodedAsset(f_UnusedResultsImage, &asset);
-    OpenAssetFile(RESULTS_GLOW_PALETTE_ASSET, &file);
-    size = GetAssetFileSize(&file);
-    f_UnusedResultsPalette = AllocMemory(size);
-    ReadAssetFile(f_UnusedResultsPalette, size, &file);
-  }
-
-  for (i = 0; i != g_GameState.playerCount; i++) {
-    f_PlayerPortraitImages[i] = AllocMemory(OpenEncodedAsset(
-        g_CharacterImageAssets[g_Players[i].characterIndex], &asset));
-    ReadEncodedAsset(f_PlayerPortraitImages[i], &asset);
-    OpenAssetFile(g_CharacterPaletteAssets[g_Players[i].characterIndex] +
-            g_Players[i].paletteIndex,
-        &file);
-    size = GetAssetFileSize(&file);
-    palette = AllocMemory(size);
-    f_PlayerPortraitPalettes[i] = palette;
-    ReadAssetFile(palette, size, &file);
-    if (g_Players[i].isComputer) {
-      f_PlayerPoints[i] = -1;
-    } else {
-      f_PlayerPoints[i] = g_Players[i].points;
+    save = GetSaveData();
+    if (f_AreResultsLoaded == TRUE) {
+        return;
     }
-    f_PlayerBetTotals[i] = 0;
-    for (j = 0; j != BET_COUNT; j++) {
-      f_PlayerBetTotals[i] += g_Players[i].betTallies[j];
+
+    StopSound(RAIN_SOUND_CHANNEL);
+    f_AreResultsLoaded = TRUE;
+    f_UnlockNoticeKind = UNLOCK_NOTICE_KIND_NONE;
+    f_BannerState = BANNER_HIDDEN;
+    f_BannerKind = BANNER_KIND_NONE;
+    f_TallySpeed = NORMAL_TALLY_SPEED;
+    f_IsAwaitingConfirm = FALSE;
+    if (IsGameFlagSet(GAME_FLAG_ADD_500_POINTS)) {
+        g_Players[0].points += SMALL_DEBUG_POINTS_BONUS;
     }
-  }
 
-  if (!g_GameState.isClubTournament) {
-    if (IsOneOnOneMatchMode(g_GameState.gameMode)) {
-      f_ResultsPlacesImage =
-          AllocMemory(OpenEncodedAsset(MATCH_WIN_BANNER_ASSET, &asset));
-      ReadEncodedAsset(f_ResultsPlacesImage, &asset);
-      f_SecondBannerImage =
-          AllocMemory(OpenEncodedAsset(MATCH_LOSE_BANNER_ASSET, &asset));
-      ReadEncodedAsset(f_SecondBannerImage, &asset);
-      f_NameplateImage =
-          AllocMemory(OpenEncodedAsset(ASSET_WOODEN_PLAQUE, &asset));
-      ReadEncodedAsset(f_NameplateImage, &asset);
-      f_MatchStandingWordsImage =
-          AllocMemory(OpenEncodedAsset(MATCH_STANDING_WORDS_ASSET, &asset));
-      ReadEncodedAsset(f_MatchStandingWordsImage, &asset);
-      f_PortraitCharacterIndex = g_Players[1].characterIndex;
-    } else {
-      f_ResultsPlacesImage =
-          AllocMemory(OpenEncodedAsset(ASSET_PLACES, &asset));
-      ReadEncodedAsset(f_ResultsPlacesImage, &asset);
+    if (IsGameFlagSet(GAME_FLAG_ADD_9999_POINTS)) {
+        g_Players[0].points += LARGE_DEBUG_POINTS_BONUS;
     }
-  }
 
-  f_HasBets = FALSE;
-  for (i = 0; i != BET_COUNT; i++) {
-    if (g_GameState.betRates[i] > 0) {
-      f_HasBets = TRUE;
+    if (g_GameState.isClubTournament) {
+        f_ResultsBackdropImage =
+            AllocMemory(OpenEncodedAsset(CLUB_TOURNAMENT_BACKDROP_ASSET, &asset));
+        ReadEncodedAsset(f_ResultsBackdropImage, &asset);
     }
-  }
-
-  for (i = 0; i != g_GameState.playerCount; i++) {
-    f_PortraitAnimations[i] = 0;
-    f_PortraitFrames[i] = -1;
-    f_PortraitTimers[i] = 0;
-  }
-
-  if (g_GameState.isClubTournament) {
-    for (k = 0; k != g_GameState.playerCount; k++) {
-      f_PlayerResults[k] =
-          GetNetScoreToPar(GetFirstHoleIndex() + GetRoundHoleCount(), k);
+    else {
+        f_ResultsBackdropImage = AllocMemory(OpenEncodedAsset(RESULTS_BACKDROP_ASSET, &asset));
+        ReadEncodedAsset(f_ResultsBackdropImage, &asset);
     }
-  } else {
-    switch (g_GameState.gameMode) {
-      case GAME_MODE_STROKE:
-      case GAME_MODE_SPEED_GOLF:
-        for (i = 0; i != g_GameState.playerCount; i++) {
-          f_PlayerResults[i] =
-              GetNetScoreToPar(GetFirstHoleIndex() + GetRoundHoleCount(), i);
-        }
-
-        for (i = 0; i != g_GameState.playerCount; i++) {
-          f_PlayerRanks[i] = 0;
-          for (j = 0; j != g_GameState.playerCount; j++) {
-            if (i != j && f_PlayerResults[i] > f_PlayerResults[j]) {
-              f_PlayerRanks[i]++;
-            }
-          }
-        }
-
-        AddRoundPoints(save, k);
-        break;
-      case GAME_MODE_MATCH_GAME:
-      case GAME_MODE_GET_CHARACTER:
-        holeEnd = g_GameState.holeIndex;
-        f_PlayerResults[0] = f_PlayerResults[1] = 0;
-        for (i = GetFirstHoleIndex(); i != holeEnd; i++) {
-          if (g_Players[0].holes[i].strokes < g_Players[1].holes[i].strokes) {
-            f_PlayerResults[0]++;
-            f_PlayerResults[1]--;
-          } else if (g_Players[1].holes[i].strokes <
-              g_Players[0].holes[i].strokes) {
-            f_PlayerResults[0]--;
-            f_PlayerResults[1]++;
-          }
-        }
-
-        if (f_PlayerResults[0] > f_PlayerResults[1]) {
-          f_PlayerRanks[0] = MATCH_RANK_WON;
-          f_PlayerRanks[1] = MATCH_RANK_LOST;
-        } else {
-          f_PlayerRanks[0] = MATCH_RANK_LOST;
-          f_PlayerRanks[1] = MATCH_RANK_WON;
-        }
-
-        f_PortraitImage = AllocMemory(OpenEncodedAsset(
-            g_CharacterImageAssets[g_Players[1].characterIndex], &asset));
-        ReadEncodedAsset(f_PortraitImage, &asset);
-        OpenAssetFile(g_CharacterPaletteAssets[g_Players[1].characterIndex] +
-                g_Players[1].paletteIndex,
-            &file);
+    f_ResultsHandImage = AllocMemory(OpenEncodedAsset(ASSET_PRESSING_HAND, &asset));
+    ReadEncodedAsset(f_ResultsHandImage, &asset);
+    f_DigitsImage = AllocMemory(OpenEncodedAsset(ASSET_DISTANCE_DIGITS, &asset));
+    ReadEncodedAsset(f_DigitsImage, &asset);
+    f_PlaceDigitsImage = AllocMemory(OpenEncodedAsset(ASSET_PLACE_DIGITS, &asset));
+    ReadEncodedAsset(f_PlaceDigitsImage, &asset);
+    if (g_GameState.isClubTournament) {
+        f_NintendoBadgeImage = AllocMemory(OpenEncodedAsset(ASSET_NINTENDO_BADGE, &asset));
+        ReadEncodedAsset(f_NintendoBadgeImage, &asset);
+        f_ResultsCourseImage = AllocMemory(
+            OpenEncodedAsset(g_TournamentIconAssets[GetClubTournamentCourse()], &asset)
+        );
+        ReadEncodedAsset(f_ResultsCourseImage, &asset);
+    }
+    else {
+        f_FinalResultsTitleImage = AllocMemory(OpenEncodedAsset(FINAL_RESULTS_TITLE_ASSET, &asset));
+        ReadEncodedAsset(f_FinalResultsTitleImage, &asset);
+        f_ResultsLabelsImage = AllocMemory(OpenEncodedAsset(ASSET_SCORE_LABELS, &asset));
+        ReadEncodedAsset(f_ResultsLabelsImage, &asset);
+        f_ResultsLargeDigitsImage = AllocMemory(OpenEncodedAsset(ASSET_LARGE_DIGITS, &asset));
+        ReadEncodedAsset(f_ResultsLargeDigitsImage, &asset);
+        f_ResultsCloudImage = AllocMemory(OpenEncodedAsset(ASSET_WIDE_CLOUD, &asset));
+        ReadEncodedAsset(f_ResultsCloudImage, &asset);
+        f_ResultsCourseImage = AllocMemory(OpenEncodedAsset(g_TournamentIconAssets[0], &asset));
+        ReadEncodedAsset(f_ResultsCourseImage, &asset);
+        f_NoticeTitleImage = AllocMemory(OpenEncodedAsset(COURSE_NOTICE_TITLE_ASSET, &asset));
+        ReadEncodedAsset(f_NoticeTitleImage, &asset);
+        f_ResultsShineImage = AllocMemory(OpenEncodedAsset(ASSET_SHINE_IMAGE, &asset));
+        ReadEncodedAsset(f_ResultsShineImage, &asset);
+        f_UnusedResultsImage = AllocMemory(OpenEncodedAsset(RESULTS_GLOW_IMAGE_ASSET, &asset));
+        ReadEncodedAsset(f_UnusedResultsImage, &asset);
+        OpenAssetFile(RESULTS_GLOW_PALETTE_ASSET, &file);
         size = GetAssetFileSize(&file);
-        f_PortraitPalette = AllocMemory(size);
-        ReadAssetFile(f_PortraitPalette, size, &file);
-        AddRoundPoints(save, k);
-        break;
-      case GAME_MODE_UNLISTED_STROKE:
-      case GAME_MODE_TRAINING:
-      case GAME_MODE_UNRECORDED_STROKE:
-      case GAME_MODE_RECORD_REPLAY:
-      case GAME_MODE_RING_SHOT:
-      case GAME_MODE_SKINS_MATCH:
-      case GAME_MODE_CLUB_SLOTS:
-        TallySkins(GetFirstHoleIndex() + GetRoundHoleCount());
-        for (k = 0; k != g_GameState.playerCount; k++) {
-          f_PlayerResults[k] = g_RoundHud.skinsTotals[k];
+        f_UnusedResultsPalette = AllocMemory(size);
+        ReadAssetFile(f_UnusedResultsPalette, size, &file);
+    }
+
+    for (i = 0; i != g_GameState.playerCount; i++) {
+        f_PlayerPortraitImages[i] = AllocMemory(
+            OpenEncodedAsset(g_CharacterImageAssets[g_Players[i].characterIndex], &asset)
+        );
+        ReadEncodedAsset(f_PlayerPortraitImages[i], &asset);
+        OpenAssetFile(
+            g_CharacterPaletteAssets[g_Players[i].characterIndex] + g_Players[i].paletteIndex,
+            &file
+        );
+        size = GetAssetFileSize(&file);
+        palette = AllocMemory(size);
+        f_PlayerPortraitPalettes[i] = palette;
+        ReadAssetFile(palette, size, &file);
+        if (g_Players[i].isComputer) {
+            f_PlayerPoints[i] = -1;
         }
-
-        for (k = 0; k != g_GameState.playerCount; k++) {
-          f_PlayerRanks[k] = 0;
-          for (j = 0; j != g_GameState.playerCount; j++) {
-            if (k != j && f_PlayerResults[k] < f_PlayerResults[j]) {
-              f_PlayerRanks[k]++;
-            }
-          }
+        else {
+            f_PlayerPoints[i] = g_Players[i].points;
         }
+        f_PlayerBetTotals[i] = 0;
+        for (j = 0; j != BET_COUNT; j++) {
+            f_PlayerBetTotals[i] += g_Players[i].betTallies[j];
+        }
+    }
 
-        AddRoundPoints(save, k);
-        break;
-      case GAME_MODE_TOURNAMENT:
-        f_SecondBannerImage = AllocMemory(
-            OpenEncodedAsset(TOURNAMENT_PLACE_DIGITS_ASSET, &asset));
-        ReadEncodedAsset(f_SecondBannerImage, &asset);
-        f_PlayerResults[0] =
-            GetNetScoreToPar(GetFirstHoleIndex() + GetRoundHoleCount(), 0);
-        RankTournament(
-            COURSE_HOLE_COUNT, 0, f_PlayerResults[0], g_GameState.roundSeed);
-        for (k = 0; k != TOURNAMENT_CONTESTANT_COUNT; k++) {
-          TournamentStanding* standing = &g_TournamentStandings[k];
+    if (!g_GameState.isClubTournament) {
+        if (IsOneOnOneMatchMode(g_GameState.gameMode)) {
+            f_ResultsPlacesImage = AllocMemory(OpenEncodedAsset(MATCH_WIN_BANNER_ASSET, &asset));
+            ReadEncodedAsset(f_ResultsPlacesImage, &asset);
+            f_SecondBannerImage = AllocMemory(OpenEncodedAsset(MATCH_LOSE_BANNER_ASSET, &asset));
+            ReadEncodedAsset(f_SecondBannerImage, &asset);
+            f_NameplateImage = AllocMemory(OpenEncodedAsset(ASSET_WOODEN_PLAQUE, &asset));
+            ReadEncodedAsset(f_NameplateImage, &asset);
+            f_MatchStandingWordsImage =
+                AllocMemory(OpenEncodedAsset(MATCH_STANDING_WORDS_ASSET, &asset));
+            ReadEncodedAsset(f_MatchStandingWordsImage, &asset);
+            f_PortraitCharacterIndex = g_Players[1].characterIndex;
+        }
+        else {
+            f_ResultsPlacesImage = AllocMemory(OpenEncodedAsset(ASSET_PLACES, &asset));
+            ReadEncodedAsset(f_ResultsPlacesImage, &asset);
+        }
+    }
 
-          if (standing->contestantId == -1) {
-            f_PlayerRanks[0] = standing->place & PLACE_MASK;
+    f_HasBets = FALSE;
+    for (i = 0; i != BET_COUNT; i++) {
+        if (g_GameState.betRates[i] > 0) {
+            f_HasBets = TRUE;
+        }
+    }
+
+    for (i = 0; i != g_GameState.playerCount; i++) {
+        f_PortraitAnimations[i] = 0;
+        f_PortraitFrames[i] = -1;
+        f_PortraitTimers[i] = 0;
+    }
+
+    if (g_GameState.isClubTournament) {
+        for (k = 0; k != g_GameState.playerCount; k++) {
+            f_PlayerResults[k] = GetNetScoreToPar(GetFirstHoleIndex() + GetRoundHoleCount(), k);
+        }
+    }
+    else {
+        switch (g_GameState.gameMode) {
+            case GAME_MODE_STROKE:
+            case GAME_MODE_SPEED_GOLF:
+                for (i = 0; i != g_GameState.playerCount; i++) {
+                    f_PlayerResults[i] =
+                        GetNetScoreToPar(GetFirstHoleIndex() + GetRoundHoleCount(), i);
+                }
+
+                for (i = 0; i != g_GameState.playerCount; i++) {
+                    f_PlayerRanks[i] = 0;
+                    for (j = 0; j != g_GameState.playerCount; j++) {
+                        if (i != j && f_PlayerResults[i] > f_PlayerResults[j]) {
+                            f_PlayerRanks[i]++;
+                        }
+                    }
+                }
+
+                AddRoundPoints(save, k);
+                break;
+            case GAME_MODE_MATCH_GAME:
+            case GAME_MODE_GET_CHARACTER:
+                holeEnd = g_GameState.holeIndex;
+                f_PlayerResults[0] = f_PlayerResults[1] = 0;
+                for (i = GetFirstHoleIndex(); i != holeEnd; i++) {
+                    if (g_Players[0].holes[i].strokes < g_Players[1].holes[i].strokes) {
+                        f_PlayerResults[0]++;
+                        f_PlayerResults[1]--;
+                    }
+                    else if (g_Players[1].holes[i].strokes < g_Players[0].holes[i].strokes) {
+                        f_PlayerResults[0]--;
+                        f_PlayerResults[1]++;
+                    }
+                }
+
+                if (f_PlayerResults[0] > f_PlayerResults[1]) {
+                    f_PlayerRanks[0] = MATCH_RANK_WON;
+                    f_PlayerRanks[1] = MATCH_RANK_LOST;
+                }
+                else {
+                    f_PlayerRanks[0] = MATCH_RANK_LOST;
+                    f_PlayerRanks[1] = MATCH_RANK_WON;
+                }
+
+                f_PortraitImage = AllocMemory(
+                    OpenEncodedAsset(g_CharacterImageAssets[g_Players[1].characterIndex], &asset)
+                );
+                ReadEncodedAsset(f_PortraitImage, &asset);
+                OpenAssetFile(
+                    g_CharacterPaletteAssets[g_Players[1].characterIndex] +
+                        g_Players[1].paletteIndex,
+                    &file
+                );
+                size = GetAssetFileSize(&file);
+                f_PortraitPalette = AllocMemory(size);
+                ReadAssetFile(f_PortraitPalette, size, &file);
+                AddRoundPoints(save, k);
+                break;
+            case GAME_MODE_UNLISTED_STROKE:
+            case GAME_MODE_TRAINING:
+            case GAME_MODE_UNRECORDED_STROKE:
+            case GAME_MODE_RECORD_REPLAY:
+            case GAME_MODE_RING_SHOT:
+            case GAME_MODE_SKINS_MATCH:
+            case GAME_MODE_CLUB_SLOTS:
+                TallySkins(GetFirstHoleIndex() + GetRoundHoleCount());
+                for (k = 0; k != g_GameState.playerCount; k++) {
+                    f_PlayerResults[k] = g_RoundHud.skinsTotals[k];
+                }
+
+                for (k = 0; k != g_GameState.playerCount; k++) {
+                    f_PlayerRanks[k] = 0;
+                    for (j = 0; j != g_GameState.playerCount; j++) {
+                        if (k != j && f_PlayerResults[k] < f_PlayerResults[j]) {
+                            f_PlayerRanks[k]++;
+                        }
+                    }
+                }
+
+                AddRoundPoints(save, k);
+                break;
+            case GAME_MODE_TOURNAMENT:
+                f_SecondBannerImage =
+                    AllocMemory(OpenEncodedAsset(TOURNAMENT_PLACE_DIGITS_ASSET, &asset));
+                ReadEncodedAsset(f_SecondBannerImage, &asset);
+                f_PlayerResults[0] = GetNetScoreToPar(GetFirstHoleIndex() + GetRoundHoleCount(), 0);
+                RankTournament(COURSE_HOLE_COUNT, 0, f_PlayerResults[0], g_GameState.roundSeed);
+                for (k = 0; k != TOURNAMENT_CONTESTANT_COUNT; k++) {
+                    TournamentStanding *standing = &g_TournamentStandings[k];
+
+                    if (standing->contestantId == -1) {
+                        f_PlayerRanks[0] = standing->place & PLACE_MASK;
+                        break;
+                    }
+                }
+
+                if (f_PlayerRanks[0] <= TROPHY_PLACE_COUNT) {
+                    f_PrizePoints =
+                        f_TournamentPrizes[g_GameState.courseIndex][f_PlayerRanks[0] - 1];
+                }
+                else if (f_PlayerRanks[0] <= PRIZE_TOP_TEN) {
+                    f_PrizePoints =
+                        f_TournamentPrizes[g_GameState.courseIndex][PRIZE_BRACKET_TOP_TEN];
+                }
+                else if (f_PlayerRanks[0] <= PRIZE_TOP_TWENTY) {
+                    f_PrizePoints =
+                        f_TournamentPrizes[g_GameState.courseIndex][PRIZE_BRACKET_TOP_TWENTY];
+                }
+                else {
+                    f_PrizePoints = f_TournamentPrizes[g_GameState.courseIndex][PRIZE_BRACKET_REST];
+                }
+
+                f_PrizeShown = f_PrizePoints;
+                if (f_PlayerRanks[0] <= TROPHY_PLACE_COUNT) {
+                    f_TrophyImage = AllocMemory(
+                        OpenEncodedAsset(f_TrophyAssets[g_GameState.courseIndex].image, &asset)
+                    );
+                    ReadEncodedAsset(f_TrophyImage, &asset);
+                    OpenAssetFile(
+                        f_TrophyAssets[g_GameState.courseIndex].palette + f_PlayerRanks[0] - 1,
+                        &file
+                    );
+                    size = GetAssetFileSize(&file);
+                    f_TrophyPalette = AllocMemory(size);
+                    ReadAssetFile(f_TrophyPalette, size, &file);
+                }
+
+                f_CoursePointsTally.earned =
+                    f_PlayerPoints[0] * f_CoursePointRates[g_GameState.courseIndex];
+                f_CoursePointsTally.shown = f_CoursePointsTally.earned;
+                f_TournamentOpenCourseCount = CountOpenCourses(save->coursePoints);
+                f_OpenCourseCount = f_TournamentOpenCourseCount;
+                if (f_OpenCourseCount < COURSE_COUNT) {
+                    f_PointsToNextCourse = GetCoursePointsNeeded(f_OpenCourseCount) -
+                        save->coursePoints - f_PrizePoints - f_CoursePointsTally.earned;
+                }
+
+                if (save->coursePoints + f_PrizePoints + f_CoursePointsTally.earned >
+                    MAX_COURSE_POINTS) {
+                    save->coursePoints = MAX_COURSE_POINTS;
+                }
+                else {
+                    save->coursePoints += f_PrizePoints + f_CoursePointsTally.earned;
+                }
+
+                break;
+        }
+    }
+
+    for (i = 0; i != g_GameState.playerCount; i++) {
+        if (g_Players[i].characterIndex >= CHARACTER_KID && f_PlayerPoints[i] > 0) {
+            AddGameBoyExperience(g_Players[i].gameBoyCharacterIndex, f_PlayerPoints[i]);
+        }
+    }
+
+    switch (g_GameState.gameMode) {
+        case GAME_MODE_STROKE:
+            PlaySong(SONG_RESULTS, 0);
             break;
-          }
-        }
-
-        if (f_PlayerRanks[0] <= TROPHY_PLACE_COUNT) {
-          f_PrizePoints =
-              f_TournamentPrizes[g_GameState.courseIndex][f_PlayerRanks[0] - 1];
-        } else if (f_PlayerRanks[0] <= PRIZE_TOP_TEN) {
-          f_PrizePoints = f_TournamentPrizes[g_GameState.courseIndex]
-                                            [PRIZE_BRACKET_TOP_TEN];
-        } else if (f_PlayerRanks[0] <= PRIZE_TOP_TWENTY) {
-          f_PrizePoints = f_TournamentPrizes[g_GameState.courseIndex]
-                                            [PRIZE_BRACKET_TOP_TWENTY];
-        } else {
-          f_PrizePoints =
-              f_TournamentPrizes[g_GameState.courseIndex][PRIZE_BRACKET_REST];
-        }
-
-        f_PrizeShown = f_PrizePoints;
-        if (f_PlayerRanks[0] <= TROPHY_PLACE_COUNT) {
-          f_TrophyImage = AllocMemory(OpenEncodedAsset(
-              f_TrophyAssets[g_GameState.courseIndex].image, &asset));
-          ReadEncodedAsset(f_TrophyImage, &asset);
-          OpenAssetFile(f_TrophyAssets[g_GameState.courseIndex].palette +
-                  f_PlayerRanks[0] - 1,
-              &file);
-          size = GetAssetFileSize(&file);
-          f_TrophyPalette = AllocMemory(size);
-          ReadAssetFile(f_TrophyPalette, size, &file);
-        }
-
-        f_CoursePointsTally.earned =
-            f_PlayerPoints[0] * f_CoursePointRates[g_GameState.courseIndex];
-        f_CoursePointsTally.shown = f_CoursePointsTally.earned;
-        f_TournamentOpenCourseCount = CountOpenCourses(save->coursePoints);
-        f_OpenCourseCount = f_TournamentOpenCourseCount;
-        if (f_OpenCourseCount < COURSE_COUNT) {
-          f_PointsToNextCourse = GetCoursePointsNeeded(f_OpenCourseCount) -
-              save->coursePoints - f_PrizePoints - f_CoursePointsTally.earned;
-        }
-
-        if (save->coursePoints + f_PrizePoints + f_CoursePointsTally.earned >
-            MAX_COURSE_POINTS) {
-          save->coursePoints = MAX_COURSE_POINTS;
-        } else {
-          save->coursePoints += f_PrizePoints + f_CoursePointsTally.earned;
-        }
-
-        break;
+        case GAME_MODE_SPEED_GOLF:
+            PlaySong(SONG_RESULTS, 0);
+            break;
+        case GAME_MODE_MATCH_GAME:
+            PlaySong(SONG_RESULTS, 0);
+            break;
+        case GAME_MODE_GET_CHARACTER:
+            PlaySong(SONG_RESULTS, 0);
+            break;
+        case GAME_MODE_SKINS_MATCH:
+        case GAME_MODE_CLUB_SLOTS:
+            PlaySong(SONG_RESULTS, 0);
+            break;
+        case GAME_MODE_TOURNAMENT:
+            PlaySong(SONG_TOURNAMENT_RESULTS, 0);
+            break;
     }
-  }
-
-  for (i = 0; i != g_GameState.playerCount; i++) {
-    if (g_Players[i].characterIndex >= CHARACTER_KID && f_PlayerPoints[i] > 0) {
-      AddGameBoyExperience(
-          g_Players[i].gameBoyCharacterIndex, f_PlayerPoints[i]);
-    }
-  }
-
-  switch (g_GameState.gameMode) {
-    case GAME_MODE_STROKE:
-      PlaySong(SONG_RESULTS, 0);
-      break;
-    case GAME_MODE_SPEED_GOLF:
-      PlaySong(SONG_RESULTS, 0);
-      break;
-    case GAME_MODE_MATCH_GAME:
-      PlaySong(SONG_RESULTS, 0);
-      break;
-    case GAME_MODE_GET_CHARACTER:
-      PlaySong(SONG_RESULTS, 0);
-      break;
-    case GAME_MODE_SKINS_MATCH:
-    case GAME_MODE_CLUB_SLOTS:
-      PlaySong(SONG_RESULTS, 0);
-      break;
-    case GAME_MODE_TOURNAMENT:
-      PlaySong(SONG_TOURNAMENT_RESULTS, 0);
-      break;
-  }
 }
 
 #else
@@ -861,344 +875,403 @@ INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", LoadRoundResults);
  * UNLOCK_NOTICE_COURSES on.
  */
 void LoadUnlockNotice(s32 unlock) {
-  EncodedAsset asset;
-  AssetFile file;
-  CourseIndex courseIndex;
-  u32 size;
+    EncodedAsset asset;
+    AssetFile file;
+    CourseIndex courseIndex;
+    u32 size;
 
-  GetSaveData();
-  f_IsNoticeHeld = FALSE;
-  f_NoticeTime = 0;
-  f_NoticeFaceIndex = 0;
-  f_NoticeLift = 0;
-  f_CharacterNoticeShift = 0;
-  f_NoticeFrameCount = 0;
-  f_NoticeStage = 0;
-  f_NoticeSwing = 0;
-  f_CourseNoticeShift = 0;
-  f_NoticeAngle = 0;
-  courseIndex = 0;
-  if (unlock == UNLOCK_NOTICE_DONKEY_KONG) {
-    f_PortraitCharacterIndex = CHARACTER_DONKEY_KONG;
-    f_UnlockNoticeKind = UNLOCK_NOTICE_KIND_CHARACTER;
-  } else if (unlock == UNLOCK_NOTICE_MAPLE) {
-    f_PortraitCharacterIndex = CHARACTER_MAPLE;
-    f_UnlockNoticeKind = UNLOCK_NOTICE_KIND_CHARACTER;
-  } else if (unlock == UNLOCK_NOTICE_METAL_MARIO) {
-    f_PortraitCharacterIndex = CHARACTER_METAL_MARIO;
-    f_UnlockNoticeKind = UNLOCK_NOTICE_KIND_CHARACTER;
-  } else {
-    courseIndex = unlock - UNLOCK_NOTICE_COURSES;
-    f_UnlockNoticeKind = UNLOCK_NOTICE_KIND_COURSE;
-  }
+    GetSaveData();
+    f_IsNoticeHeld = FALSE;
+    f_NoticeTime = 0;
+    f_NoticeFaceIndex = 0;
+    f_NoticeLift = 0;
+    f_CharacterNoticeShift = 0;
+    f_NoticeFrameCount = 0;
+    f_NoticeStage = 0;
+    f_NoticeSwing = 0;
+    f_CourseNoticeShift = 0;
+    f_NoticeAngle = 0;
+    courseIndex = 0;
+    if (unlock == UNLOCK_NOTICE_DONKEY_KONG) {
+        f_PortraitCharacterIndex = CHARACTER_DONKEY_KONG;
+        f_UnlockNoticeKind = UNLOCK_NOTICE_KIND_CHARACTER;
+    }
+    else if (unlock == UNLOCK_NOTICE_MAPLE) {
+        f_PortraitCharacterIndex = CHARACTER_MAPLE;
+        f_UnlockNoticeKind = UNLOCK_NOTICE_KIND_CHARACTER;
+    }
+    else if (unlock == UNLOCK_NOTICE_METAL_MARIO) {
+        f_PortraitCharacterIndex = CHARACTER_METAL_MARIO;
+        f_UnlockNoticeKind = UNLOCK_NOTICE_KIND_CHARACTER;
+    }
+    else {
+        courseIndex = unlock - UNLOCK_NOTICE_COURSES;
+        f_UnlockNoticeKind = UNLOCK_NOTICE_KIND_COURSE;
+    }
 
-  f_ResultsShineImage =
-      AllocMemory(OpenEncodedAsset(ASSET_SHINE_IMAGE, &asset));
-  ReadEncodedAsset(f_ResultsShineImage, &asset);
-  if (f_UnlockNoticeKind == UNLOCK_NOTICE_KIND_COURSE) {
-    f_NoticeTitleImage =
-        AllocMemory(OpenEncodedAsset(COURSE_NOTICE_TITLE_ASSET, &asset));
-    ReadEncodedAsset(f_NoticeTitleImage, &asset);
-    f_ResultsCourseImage = AllocMemory(
-        OpenEncodedAsset(f_CourseNoticeAssets[courseIndex], &asset));
-    ReadEncodedAsset(f_ResultsCourseImage, &asset);
-  }
+    f_ResultsShineImage = AllocMemory(OpenEncodedAsset(ASSET_SHINE_IMAGE, &asset));
+    ReadEncodedAsset(f_ResultsShineImage, &asset);
+    if (f_UnlockNoticeKind == UNLOCK_NOTICE_KIND_COURSE) {
+        f_NoticeTitleImage = AllocMemory(OpenEncodedAsset(COURSE_NOTICE_TITLE_ASSET, &asset));
+        ReadEncodedAsset(f_NoticeTitleImage, &asset);
+        f_ResultsCourseImage =
+            AllocMemory(OpenEncodedAsset(f_CourseNoticeAssets[courseIndex], &asset));
+        ReadEncodedAsset(f_ResultsCourseImage, &asset);
+    }
 
-  if (f_UnlockNoticeKind == UNLOCK_NOTICE_KIND_CHARACTER) {
-    f_NoticeTitleImage =
-        AllocMemory(OpenEncodedAsset(CHARACTER_NOTICE_TITLE_ASSET, &asset));
-    ReadEncodedAsset(f_NoticeTitleImage, &asset);
-    f_NameplateImage =
-        AllocMemory(OpenEncodedAsset(ASSET_WOODEN_PLAQUE, &asset));
-    ReadEncodedAsset(f_NameplateImage, &asset);
-    f_PortraitImage = AllocMemory(OpenEncodedAsset(
-        g_CharacterImageAssets[f_PortraitCharacterIndex], &asset));
-    ReadEncodedAsset(f_PortraitImage, &asset);
-    OpenAssetFile(g_CharacterPaletteAssets[f_PortraitCharacterIndex], &file);
-    size = GetAssetFileSize(&file);
-    f_PortraitPalette = AllocMemory(size);
-    ReadAssetFile(f_PortraitPalette, size, &file);
-  }
+    if (f_UnlockNoticeKind == UNLOCK_NOTICE_KIND_CHARACTER) {
+        f_NoticeTitleImage = AllocMemory(OpenEncodedAsset(CHARACTER_NOTICE_TITLE_ASSET, &asset));
+        ReadEncodedAsset(f_NoticeTitleImage, &asset);
+        f_NameplateImage = AllocMemory(OpenEncodedAsset(ASSET_WOODEN_PLAQUE, &asset));
+        ReadEncodedAsset(f_NameplateImage, &asset);
+        f_PortraitImage =
+            AllocMemory(OpenEncodedAsset(g_CharacterImageAssets[f_PortraitCharacterIndex], &asset));
+        ReadEncodedAsset(f_PortraitImage, &asset);
+        OpenAssetFile(g_CharacterPaletteAssets[f_PortraitCharacterIndex], &file);
+        size = GetAssetFileSize(&file);
+        f_PortraitPalette = AllocMemory(size);
+        ReadAssetFile(f_PortraitPalette, size, &file);
+    }
 }
 
 void FreeUnlockNotice(void) {
-  FreeMemory(&f_NoticeTitleImage);
-  FreeMemory(&f_ResultsShineImage);
-  if (f_UnlockNoticeKind == UNLOCK_NOTICE_KIND_COURSE) {
-    FreeMemory(&f_ResultsCourseImage);
-  }
+    FreeMemory(&f_NoticeTitleImage);
+    FreeMemory(&f_ResultsShineImage);
+    if (f_UnlockNoticeKind == UNLOCK_NOTICE_KIND_COURSE) {
+        FreeMemory(&f_ResultsCourseImage);
+    }
 
-  if (f_UnlockNoticeKind == UNLOCK_NOTICE_KIND_CHARACTER) {
-    FreeMemory(&f_NameplateImage);
-    FreeMemory(&f_PortraitImage);
-    FreeMemory(&f_PortraitPalette);
-  }
+    if (f_UnlockNoticeKind == UNLOCK_NOTICE_KIND_CHARACTER) {
+        FreeMemory(&f_NameplateImage);
+        FreeMemory(&f_PortraitImage);
+        FreeMemory(&f_PortraitPalette);
+    }
 
-  f_UnlockNoticeKind = UNLOCK_NOTICE_KIND_NONE;
+    f_UnlockNoticeKind = UNLOCK_NOTICE_KIND_NONE;
 }
 
 /* Swings the course in, or raises the character's face; returns whether the
  * notice is done */
 s32 UpdateUnlockNotice(void) {
-  EncodedAsset asset;
+    EncodedAsset asset;
 
-  if (f_UnlockNoticeKind == UNLOCK_NOTICE_KIND_COURSE) {
-    f_NoticeFrameCount++;
-    switch (f_NoticeStage) {
-      case 0:
-        f_NoticeSwing = -sinf(f_NoticeAngle) * NOTICE_SWING_HEIGHT;
-        f_CourseNoticeShift = 0;
-        f_NoticeAngle += NOTICE_SWING_STEP;
-        if (f_NoticeAngle > M_PI) {
-          f_NoticeAngle = M_PI;
+    if (f_UnlockNoticeKind == UNLOCK_NOTICE_KIND_COURSE) {
+        f_NoticeFrameCount++;
+        switch (f_NoticeStage) {
+            case 0:
+                f_NoticeSwing = -sinf(f_NoticeAngle) * NOTICE_SWING_HEIGHT;
+                f_CourseNoticeShift = 0;
+                f_NoticeAngle += NOTICE_SWING_STEP;
+                if (f_NoticeAngle > M_PI) {
+                    f_NoticeAngle = M_PI;
+                }
+
+                if (f_NoticeFrameCount >= NOTICE_SWING_FRAMES) {
+                    f_NoticeStage = 1;
+                }
+
+                break;
+            case 1:
+                f_NoticeSwing = -sinf(f_NoticeAngle) * NOTICE_SWING_HEIGHT;
+                f_NoticeAngle += NOTICE_SWING_STEP;
+                if (f_NoticeFrameCount < NOTICE_DONE_FRAME) {
+                    break;
+                }
+
+                return TRUE;
+        }
+    }
+    else {
+        f_NoticeTime++;
+        if (f_IsNoticeHeld) {
+            return FALSE;
         }
 
-        if (f_NoticeFrameCount >= NOTICE_SWING_FRAMES) {
-          f_NoticeStage = 1;
+        if (f_NoticeTime > NOTICE_FACE_DELAY &&
+            !(f_NoticeTime & NOTICE_FACE_INTERVAL_MASK) &&
+            f_NoticeFaceIndex < NOTICE_LAST_FACE) {
+            f_NoticeFaceIndex++;
+            OpenEncodedAsset(
+                g_CharacterImageAssets[f_PortraitCharacterIndex] + f_NoticeFaceIndex,
+                &asset
+            );
+            ReadEncodedAsset(f_PortraitImage, &asset);
         }
 
-        break;
-      case 1:
-        f_NoticeSwing = -sinf(f_NoticeAngle) * NOTICE_SWING_HEIGHT;
-        f_NoticeAngle += NOTICE_SWING_STEP;
-        if (f_NoticeFrameCount < NOTICE_DONE_FRAME) {
-          break;
+        if (f_NoticeTime > NOTICE_LIFT_DELAY) {
+            if (f_NoticeLift > NOTICE_LIFT_START_LIMIT) {
+                f_NoticeLift -= NOTICE_LIFT_START_SPEED;
+            }
+            else {
+                f_NoticeLift +=
+                    f_NoticeLift * NOTICE_LIFT_GROWTH_NUMERATOR / NOTICE_LIFT_GROWTH_DENOMINATOR;
+            }
+
+            if (f_NoticeLift < NOTICE_LIFT_EXIT) {
+                return TRUE;
+            }
         }
-
-        return TRUE;
-    }
-  } else {
-    f_NoticeTime++;
-    if (f_IsNoticeHeld) {
-      return FALSE;
     }
 
-    if (f_NoticeTime > NOTICE_FACE_DELAY &&
-        !(f_NoticeTime & NOTICE_FACE_INTERVAL_MASK) &&
-        f_NoticeFaceIndex < NOTICE_LAST_FACE) {
-      f_NoticeFaceIndex++;
-      OpenEncodedAsset(
-          g_CharacterImageAssets[f_PortraitCharacterIndex] + f_NoticeFaceIndex,
-          &asset);
-      ReadEncodedAsset(f_PortraitImage, &asset);
-    }
-
-    if (f_NoticeTime > NOTICE_LIFT_DELAY) {
-      if (f_NoticeLift > NOTICE_LIFT_START_LIMIT) {
-        f_NoticeLift -= NOTICE_LIFT_START_SPEED;
-      } else {
-        f_NoticeLift += f_NoticeLift * NOTICE_LIFT_GROWTH_NUMERATOR /
-            NOTICE_LIFT_GROWTH_DENOMINATOR;
-      }
-
-      if (f_NoticeLift < NOTICE_LIFT_EXIT) {
-        return TRUE;
-      }
-    }
-  }
-
-  return FALSE;
+    return FALSE;
 }
 
 void FreeRoundResults(void) {
-  s32 i;
+    s32 i;
 
-  if (f_AreResultsLoaded) {
-    f_AreResultsLoaded = FALSE;
-    FreeMemory(&f_ResultsBackdropImage);
-    FreeMemory(&f_ResultsHandImage);
-    FreeMemory(&f_DigitsImage);
-    FreeMemory(&f_PlaceDigitsImage);
-    if (g_GameState.isClubTournament) {
-      FreeMemory(&f_NintendoBadgeImage);
-      FreeMemory(&f_ResultsCourseImage);
-    } else {
-      FreeMemory(&f_FinalResultsTitleImage);
-      FreeMemory(&f_ResultsLabelsImage);
-      FreeMemory(&f_ResultsLargeDigitsImage);
-      FreeMemory(&f_ResultsCloudImage);
-      FreeMemory(&f_ResultsCourseImage);
-      FreeMemory(&f_NoticeTitleImage);
-      FreeMemory(&f_ResultsShineImage);
-      FreeMemory(&f_UnusedResultsImage);
-      FreeMemory(&f_UnusedResultsPalette);
+    if (f_AreResultsLoaded) {
+        f_AreResultsLoaded = FALSE;
+        FreeMemory(&f_ResultsBackdropImage);
+        FreeMemory(&f_ResultsHandImage);
+        FreeMemory(&f_DigitsImage);
+        FreeMemory(&f_PlaceDigitsImage);
+        if (g_GameState.isClubTournament) {
+            FreeMemory(&f_NintendoBadgeImage);
+            FreeMemory(&f_ResultsCourseImage);
+        }
+        else {
+            FreeMemory(&f_FinalResultsTitleImage);
+            FreeMemory(&f_ResultsLabelsImage);
+            FreeMemory(&f_ResultsLargeDigitsImage);
+            FreeMemory(&f_ResultsCloudImage);
+            FreeMemory(&f_ResultsCourseImage);
+            FreeMemory(&f_NoticeTitleImage);
+            FreeMemory(&f_ResultsShineImage);
+            FreeMemory(&f_UnusedResultsImage);
+            FreeMemory(&f_UnusedResultsPalette);
+        }
+
+        for (i = 0; i != g_GameState.playerCount; i++) {
+            FreeMemory(&f_PlayerPortraitImages[i]);
+            FreeMemory(&f_PlayerPortraitPalettes[i]);
+        }
+
+        if (!g_GameState.isClubTournament) {
+            if (IsOneOnOneMatchMode(g_GameState.gameMode)) {
+                FreeMemory(&f_ResultsPlacesImage);
+                FreeMemory(&f_SecondBannerImage);
+                FreeMemory(&f_NameplateImage);
+                FreeMemory(&f_MatchStandingWordsImage);
+            }
+            else {
+                FreeMemory(&f_ResultsPlacesImage);
+            }
+
+            switch (g_GameState.gameMode) {
+                case GAME_MODE_STROKE:
+                case GAME_MODE_UNLISTED_STROKE:
+                case GAME_MODE_TRAINING:
+                case GAME_MODE_UNRECORDED_STROKE:
+                case GAME_MODE_SPEED_GOLF:
+                case GAME_MODE_RECORD_REPLAY:
+                case GAME_MODE_RING_SHOT:
+                case GAME_MODE_SKINS_MATCH:
+                case GAME_MODE_CLUB_SLOTS:
+                    break;
+                case GAME_MODE_MATCH_GAME:
+                case GAME_MODE_GET_CHARACTER:
+                    FreeMemory(&f_PortraitImage);
+                    FreeMemory(&f_PortraitPalette);
+                    break;
+                case GAME_MODE_TOURNAMENT:
+                    FreeMemory(&f_SecondBannerImage);
+                    if (f_PlayerRanks[0] <= TROPHY_PLACE_COUNT) {
+                        FreeMemory(&f_TrophyImage);
+                        FreeMemory(&f_TrophyPalette);
+                    }
+
+                    break;
+            }
+        }
     }
-
-    for (i = 0; i != g_GameState.playerCount; i++) {
-      FreeMemory(&f_PlayerPortraitImages[i]);
-      FreeMemory(&f_PlayerPortraitPalettes[i]);
-    }
-
-    if (!g_GameState.isClubTournament) {
-      if (IsOneOnOneMatchMode(g_GameState.gameMode)) {
-        FreeMemory(&f_ResultsPlacesImage);
-        FreeMemory(&f_SecondBannerImage);
-        FreeMemory(&f_NameplateImage);
-        FreeMemory(&f_MatchStandingWordsImage);
-      } else {
-        FreeMemory(&f_ResultsPlacesImage);
-      }
-
-      switch (g_GameState.gameMode) {
-        case GAME_MODE_STROKE:
-        case GAME_MODE_UNLISTED_STROKE:
-        case GAME_MODE_TRAINING:
-        case GAME_MODE_UNRECORDED_STROKE:
-        case GAME_MODE_SPEED_GOLF:
-        case GAME_MODE_RECORD_REPLAY:
-        case GAME_MODE_RING_SHOT:
-        case GAME_MODE_SKINS_MATCH:
-        case GAME_MODE_CLUB_SLOTS:
-          break;
-        case GAME_MODE_MATCH_GAME:
-        case GAME_MODE_GET_CHARACTER:
-          FreeMemory(&f_PortraitImage);
-          FreeMemory(&f_PortraitPalette);
-          break;
-        case GAME_MODE_TOURNAMENT:
-          FreeMemory(&f_SecondBannerImage);
-          if (f_PlayerRanks[0] <= TROPHY_PLACE_COUNT) {
-            FreeMemory(&f_TrophyImage);
-            FreeMemory(&f_TrophyPalette);
-          }
-
-          break;
-      }
-    }
-  }
 }
 
 void StartPortraitAnimation(s32 animation, s32 playerIndex) {
-  f_PortraitAnimations[playerIndex] = animation;
-  f_PortraitFrames[playerIndex] = 0;
-  f_PortraitTimers[playerIndex] = 0;
+    f_PortraitAnimations[playerIndex] = animation;
+    f_PortraitFrames[playerIndex] = 0;
+    f_PortraitTimers[playerIndex] = 0;
 }
 
 /* Ticks as the points count up, on every fourth call at the normal speed */
 void PlayTallySound(void) {
-  f_TallySoundCount++;
-  if (f_TallySpeed != NORMAL_TALLY_SPEED ||
-      !(f_TallySoundCount & TALLY_SOUND_INTERVAL_MASK)) {
-    PlaySound(SOUND_TICK, g_NextSoundChannel, SOUND_FULL_SCALE);
-  }
+    f_TallySoundCount++;
+    if (f_TallySpeed != NORMAL_TALLY_SPEED || !(f_TallySoundCount & TALLY_SOUND_INTERVAL_MASK)) {
+        PlaySound(SOUND_TICK, g_NextSoundChannel, SOUND_FULL_SCALE);
+    }
 }
 
 /* Draws value right-aligned in four of the 8 by 12 digits of f_DigitsImage */
-void DrawResultsNumber(Gfx** displayListHead, s32 x, s32 y, s32 value) {
-  Gfx* gfx = *displayListHead;
-  u8* c;
-  u8 ch;
-  s32 offset;
+void DrawResultsNumber(Gfx **displayListHead, s32 x, s32 y, s32 value) {
+    Gfx *gfx = *displayListHead;
+    u8 *c;
+    u8 ch;
+    s32 offset;
 
-  sprintf(g_PrintBuffer, f_NumberFormat, value);
-  LoadSmallPalette(&gfx, 0, ImageBody(f_DigitsImage));
-  gDPPipeSync(gfx++);
-  gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-  gDPLoadTextureBlock_4b(gfx++, TextureAddress(ImageTexels(f_DigitsImage)),
-      G_IM_FMT_CI, DISTANCE_FONT_WIDTH, DISTANCE_GLYPH_HEIGHT, 0,
-      G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
-      G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-  offset = 0;
-  for (c = (u8*)g_PrintBuffer; (ch = *c) != '\0';
-      c++, offset += DISTANCE_DIGIT_WIDTH) {
-    if (ch != ' ') {
-      gSPScisTextureRectangle(gfx++, QuarterPixels(x + offset),
-          QuarterPixels(y), QuarterPixels(x + offset + DISTANCE_DIGIT_WIDTH),
-          QuarterPixels(y + DISTANCE_GLYPH_HEIGHT), G_TX_RENDERTILE,
-          TexelCoordinate((ch - '0') * DISTANCE_DIGIT_WIDTH), 0, TEXEL_STEP_ONE,
-          TEXEL_STEP_ONE);
+    sprintf(g_PrintBuffer, f_NumberFormat, value);
+    LoadSmallPalette(&gfx, 0, ImageBody(f_DigitsImage));
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+    gDPLoadTextureBlock_4b(
+        gfx++,
+        TextureAddress(ImageTexels(f_DigitsImage)),
+        G_IM_FMT_CI,
+        DISTANCE_FONT_WIDTH,
+        DISTANCE_GLYPH_HEIGHT,
+        0,
+        G_TX_NOMIRROR | G_TX_WRAP,
+        G_TX_NOMIRROR | G_TX_WRAP,
+        G_TX_NOMASK,
+        G_TX_NOMASK,
+        G_TX_NOLOD,
+        G_TX_NOLOD
+    );
+    offset = 0;
+    for (c = (u8 *)g_PrintBuffer; (ch = *c) != '\0'; c++, offset += DISTANCE_DIGIT_WIDTH) {
+        if (ch != ' ') {
+            gSPScisTextureRectangle(
+                gfx++,
+                QuarterPixels(x + offset),
+                QuarterPixels(y),
+                QuarterPixels(x + offset + DISTANCE_DIGIT_WIDTH),
+                QuarterPixels(y + DISTANCE_GLYPH_HEIGHT),
+                G_TX_RENDERTILE,
+                TexelCoordinate((ch - '0') * DISTANCE_DIGIT_WIDTH),
+                0,
+                TEXEL_STEP_ONE,
+                TEXEL_STEP_ONE
+            );
+        }
     }
-  }
 
-  *displayListHead = gfx;
+    *displayListHead = gfx;
 }
 
 #define PLACE_NUMBER_X_OFFSET (-12)
 
 /* Loads glyph from f_PlaceDigitsImage and draws it at x, y */
 #define DrawPlaceGlyph(gfx, x, y, glyph) \
-  { \
-    gDPLoadTextureTile((gfx)++, \
-        TextureAddress(LargeImageTexels(f_PlaceDigitsImage)), G_IM_FMT_CI, \
-        G_IM_SIZ_8b, PLACE_GLYPH_SIZE, 0, 0, (glyph) * PLACE_GLYPH_SIZE, \
-        PLACE_GLYPH_SIZE - 1, \
-        ((glyph) * PLACE_GLYPH_SIZE) + PLACE_GLYPH_SIZE - 1, 0, \
-        G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, \
-        G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD); \
-    gSPScisTextureRectangle((gfx)++, QuarterPixels(x), QuarterPixels(y), \
-        QuarterPixels((x) + PLACE_GLYPH_SIZE), \
-        QuarterPixels((y) + PLACE_GLYPH_SIZE), G_TX_RENDERTILE, 0, \
-        TexelCoordinate((glyph) * PLACE_GLYPH_SIZE), TEXEL_STEP_ONE, \
-        TEXEL_STEP_ONE); \
-  }
+    { \
+        gDPLoadTextureTile( \
+            (gfx)++, \
+            TextureAddress(LargeImageTexels(f_PlaceDigitsImage)), \
+            G_IM_FMT_CI, \
+            G_IM_SIZ_8b, \
+            PLACE_GLYPH_SIZE, \
+            0, \
+            0, \
+            (glyph) * PLACE_GLYPH_SIZE, \
+            PLACE_GLYPH_SIZE - 1, \
+            ((glyph) * PLACE_GLYPH_SIZE) + PLACE_GLYPH_SIZE - 1, \
+            0, \
+            G_TX_NOMIRROR | G_TX_WRAP, \
+            G_TX_NOMIRROR | G_TX_WRAP, \
+            G_TX_NOMASK, \
+            G_TX_NOMASK, \
+            G_TX_NOLOD, \
+            G_TX_NOLOD \
+        ); \
+        gSPScisTextureRectangle( \
+            (gfx)++, \
+            QuarterPixels(x), \
+            QuarterPixels(y), \
+            QuarterPixels((x) + PLACE_GLYPH_SIZE), \
+            QuarterPixels((y) + PLACE_GLYPH_SIZE), \
+            G_TX_RENDERTILE, \
+            0, \
+            TexelCoordinate((glyph) * PLACE_GLYPH_SIZE), \
+            TEXEL_STEP_ONE, \
+            TEXEL_STEP_ONE \
+        ); \
+    }
 
 /* Draws place, as in "21st", centered on x */
-void DrawPlaceNumber(Gfx** displayListHead, s32 x, s32 y, s32 place) {
-  Gfx* gfx = *displayListHead;
-  char* c;
-  s32 width;
-  s32 suffix;
-  s32 lastDigit;
-  u8 character;
-  s32 glyph;
+void DrawPlaceNumber(Gfx **displayListHead, s32 x, s32 y, s32 place) {
+    Gfx *gfx = *displayListHead;
+    char *c;
+    s32 width;
+    s32 suffix;
+    s32 lastDigit;
+    u8 character;
+    s32 glyph;
 
-  sprintf(g_PrintBuffer, f_PlaceNumberFormat, place);
-  gDPPipeSync(gfx++);
-  gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-  LoadLargePalette(&gfx, ImageBody(f_PlaceDigitsImage));
-  width = 0;
-  for (c = g_PrintBuffer; *c != '\0'; c++) {
-    width += PLACE_GLYPH_SPACING;
-  }
-
-  x += PLACE_NUMBER_X_OFFSET - (width / 2);
-  width = 0;
-  for (c = g_PrintBuffer; *c != '\0'; c++, width += PLACE_GLYPH_SPACING) {
-    character = *c;
-    if (character == ' ') {
-      continue;
+    sprintf(g_PrintBuffer, f_PlaceNumberFormat, place);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+    LoadLargePalette(&gfx, ImageBody(f_PlaceDigitsImage));
+    width = 0;
+    for (c = g_PrintBuffer; *c != '\0'; c++) {
+        width += PLACE_GLYPH_SPACING;
     }
-    glyph = character - '0';
-    DrawPlaceGlyph(gfx, x + width, y, glyph);
-  }
 
-  suffix = place;
-  if (suffix > PLACES_PER_HUNDRED) {
-    suffix %= PLACES_PER_HUNDRED;
-  }
-
-  suffix--;
-  if (suffix > PLACE_SUFFIX_TH - 1) {
-    if (suffix < PLACE_TEENS_END) {
-      suffix = PLACE_SUFFIX_TH;
-    } else if (suffix < PLACES_PER_HUNDRED) {
-      lastDigit = suffix % DECIMAL_BASE;
-      if (lastDigit < PLACE_SUFFIX_TH) {
-        suffix = lastDigit;
-      } else {
-        suffix = PLACE_SUFFIX_TH;
-      }
+    x += PLACE_NUMBER_X_OFFSET - (width / 2);
+    width = 0;
+    for (c = g_PrintBuffer; *c != '\0'; c++, width += PLACE_GLYPH_SPACING) {
+        character = *c;
+        if (character == ' ') {
+            continue;
+        }
+        glyph = character - '0';
+        DrawPlaceGlyph(gfx, x + width, y, glyph);
     }
-  }
 
-  DrawPlaceGlyph(gfx, x + width, y, suffix + PLACE_SUFFIX_GLYPH_FIRST);
-  *displayListHead = gfx;
+    suffix = place;
+    if (suffix > PLACES_PER_HUNDRED) {
+        suffix %= PLACES_PER_HUNDRED;
+    }
+
+    suffix--;
+    if (suffix > PLACE_SUFFIX_TH - 1) {
+        if (suffix < PLACE_TEENS_END) {
+            suffix = PLACE_SUFFIX_TH;
+        }
+        else if (suffix < PLACES_PER_HUNDRED) {
+            lastDigit = suffix % DECIMAL_BASE;
+            if (lastDigit < PLACE_SUFFIX_TH) {
+                suffix = lastDigit;
+            }
+            else {
+                suffix = PLACE_SUFFIX_TH;
+            }
+        }
+    }
+
+    DrawPlaceGlyph(gfx, x + width, y, suffix + PLACE_SUFFIX_GLYPH_FIRST);
+    *displayListHead = gfx;
 }
 
-void DrawPlaceIcon(Gfx** displayListHead, s32 x, s32 y, s32 place) {
-  Gfx* gfx = *displayListHead;
+void DrawPlaceIcon(Gfx **displayListHead, s32 x, s32 y, s32 place) {
+    Gfx *gfx = *displayListHead;
 
-  LoadLargePalette(&gfx, ImageBody(f_ResultsPlacesImage));
-  LoadTextureBlock(&gfx,
-      f_ResultsPlacesImage +
-          ((place * PLACE_ICON_SIZE * PLACE_ICON_SIZE) +
-              LARGE_PALETTED_TEXELS_OFFSET),
-      G_IM_FMT_CI, G_IM_SIZ_8b, PLACE_ICON_SIZE, PLACE_ICON_SIZE, 0, 0, 0,
-      G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-  DrawTextureRect(&gfx, QuarterPixels(x), QuarterPixels(y),
-      QuarterPixels(x + PLACE_ICON_SIZE), QuarterPixels(y + PLACE_ICON_SIZE),
-      G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
-  *displayListHead = gfx;
+    LoadLargePalette(&gfx, ImageBody(f_ResultsPlacesImage));
+    LoadTextureBlock(
+        &gfx,
+        f_ResultsPlacesImage +
+            ((place * PLACE_ICON_SIZE * PLACE_ICON_SIZE) + LARGE_PALETTED_TEXELS_OFFSET),
+        G_IM_FMT_CI,
+        G_IM_SIZ_8b,
+        PLACE_ICON_SIZE,
+        PLACE_ICON_SIZE,
+        0,
+        0,
+        0,
+        G_TX_NOMASK,
+        G_TX_NOMASK,
+        G_TX_NOLOD,
+        G_TX_NOLOD
+    );
+    DrawTextureRect(
+        &gfx,
+        QuarterPixels(x),
+        QuarterPixels(y),
+        QuarterPixels(x + PLACE_ICON_SIZE),
+        QuarterPixels(y + PLACE_ICON_SIZE),
+        G_TX_RENDERTILE,
+        0,
+        0,
+        TEXEL_STEP_ONE,
+        TEXEL_STEP_ONE
+    );
+    *displayListHead = gfx;
 }
 
 /* Ranks from this one draw a banner instead */
@@ -1228,168 +1301,285 @@ void DrawPlaceIcon(Gfx** displayListHead, s32 x, s32 y, s32 place) {
  * Draws the place icon for a rank. With RANK_AS_PLACE, places past 3rd
  * are written as digits followed by a suffix.
  */
-void DrawRank(Gfx** displayListHead, s32 x, s32 y, s32 rank) {
-  Gfx* gfx = *displayListHead;
-  s32 suffix;
-  s32 digitX;
-  s32 digit;
-  u8* image;
-  s32 i;
-  s32 stripY;
-  s32 offset;
+void DrawRank(Gfx **displayListHead, s32 x, s32 y, s32 rank) {
+    Gfx *gfx = *displayListHead;
+    s32 suffix;
+    s32 digitX;
+    s32 digit;
+    u8 *image;
+    s32 i;
+    s32 stripY;
+    s32 offset;
 
-  if (rank & RANK_AS_PLACE) {
-    rank &= ~RANK_AS_PLACE;
-    suffix = rank;
-    if (rank >= RANK_FOURTH) {
-      if (rank < RANK_TWENTY_FIRST) {
-        suffix = PLACE_SUFFIX_TH;
-      } else if (rank < RANK_TWENTY_FOURTH) {
-        suffix = rank - RANK_TWENTY_FIRST;
-      } else {
-        suffix = PLACE_SUFFIX_TH;
-      }
+    if (rank & RANK_AS_PLACE) {
+        rank &= ~RANK_AS_PLACE;
+        suffix = rank;
+        if (rank >= RANK_FOURTH) {
+            if (rank < RANK_TWENTY_FIRST) {
+                suffix = PLACE_SUFFIX_TH;
+            }
+            else if (rank < RANK_TWENTY_FOURTH) {
+                suffix = rank - RANK_TWENTY_FIRST;
+            }
+            else {
+                suffix = PLACE_SUFFIX_TH;
+            }
+        }
+
+        LoadLargePalette(&gfx, ImageBody(f_ResultsPlacesImage));
+        LoadTextureBlock(
+            &gfx,
+            f_ResultsPlacesImage +
+                ((suffix * PLACE_ICON_SIZE * PLACE_ICON_SIZE) + LARGE_PALETTED_TEXELS_OFFSET +
+                    (PLACE_SUFFIX_ICON_FIRST * PLACE_ICON_SIZE * PLACE_ICON_SIZE)),
+            G_IM_FMT_CI,
+            G_IM_SIZ_8b,
+            PLACE_ICON_SIZE,
+            PLACE_ICON_SIZE,
+            0,
+            0,
+            0,
+            G_TX_NOMASK,
+            G_TX_NOMASK,
+            G_TX_NOLOD,
+            G_TX_NOLOD
+        );
+        DrawTextureRect(
+            &gfx,
+            QuarterPixels(x + PLACE_DIGIT_WIDTH),
+            QuarterPixels(y),
+            QuarterPixels(x + PLACE_DIGIT_WIDTH + PLACE_ICON_SIZE),
+            QuarterPixels(y + PLACE_ICON_SIZE),
+            G_TX_RENDERTILE,
+            0,
+            0,
+            TEXEL_STEP_ONE,
+            TEXEL_STEP_ONE
+        );
+        if (rank >= RANK_FOURTH) {
+            sprintf(g_PrintBuffer, f_PlaceNumberFormat, rank + 1);
+            LoadSmallPalette(&gfx, 0, ImageBody(f_SecondBannerImage));
+            if (rank >= RANK_TENTH) {
+                x -= PLACE_TWO_DIGIT_SHIFT;
+            }
+
+            for (i = 0; g_PrintBuffer[i] != '\0'; i++) {
+                digit = g_PrintBuffer[i] - '0';
+                digitX = (i * PLACE_DIGIT_SPACING) + PLACE_DIGIT_X;
+                gDPLoadTextureTile_4b(
+                    gfx++,
+                    TextureAddress(ImageTexels(f_SecondBannerImage)),
+                    G_IM_FMT_CI,
+                    PLACE_DIGIT_WIDTH,
+                    0,
+                    0,
+                    digit * PLACE_DIGIT_WIDTH,
+                    PLACE_DIGIT_WIDTH - 1,
+                    digit * PLACE_DIGIT_WIDTH + PLACE_DIGIT_WIDTH - 1,
+                    0,
+                    G_TX_NOMIRROR | G_TX_WRAP,
+                    G_TX_NOMIRROR | G_TX_WRAP,
+                    G_TX_NOMASK,
+                    G_TX_NOMASK,
+                    G_TX_NOLOD,
+                    G_TX_NOLOD
+                );
+                DrawTextureRect(
+                    &gfx,
+                    QuarterPixels(x + digitX),
+                    QuarterPixels(y + PLACE_DIGIT_Y),
+                    QuarterPixels(x + digitX + PLACE_DIGIT_WIDTH),
+                    QuarterPixels(y + PLACE_DIGIT_Y + PLACE_DIGIT_WIDTH),
+                    G_TX_RENDERTILE,
+                    0,
+                    TexelCoordinate(digit * PLACE_DIGIT_WIDTH),
+                    TEXEL_STEP_ONE,
+                    TEXEL_STEP_ONE
+                );
+            }
+        }
+        else {
+            DrawPlaceIcon(&gfx, x, y, rank);
+        }
+    }
+    else if (rank >= RANK_BANNER) {
+        if (rank == RANK_BANNER) {
+            image = f_ResultsPlacesImage;
+        }
+        else {
+            image = f_SecondBannerImage;
+        }
+
+        LoadLargePalette(&gfx, ImageBody(image));
+        for (i = 0; i != RANK_BANNER_STRIP_COUNT; i++) {
+            offset =
+                LARGE_PALETTED_TEXELS_OFFSET + (i * RANK_BANNER_WIDTH * RANK_BANNER_STRIP_HEIGHT);
+            stripY = y + (i * RANK_BANNER_STRIP_HEIGHT);
+            LoadTextureBlock(
+                &gfx,
+                image + offset,
+                G_IM_FMT_CI,
+                G_IM_SIZ_8b,
+                RANK_BANNER_WIDTH,
+                RANK_BANNER_STRIP_HEIGHT,
+                0,
+                0,
+                0,
+                G_TX_NOMASK,
+                G_TX_NOMASK,
+                G_TX_NOLOD,
+                G_TX_NOLOD
+            );
+            DrawTextureRect(
+                &gfx,
+                QuarterPixels(x + RANK_BANNER_X_OFFSET),
+                QuarterPixels(stripY),
+                QuarterPixels(x + RANK_BANNER_X_OFFSET + RANK_BANNER_WIDTH),
+                QuarterPixels(stripY + RANK_BANNER_STRIP_HEIGHT),
+                G_TX_RENDERTILE,
+                0,
+                0,
+                TEXEL_STEP_ONE,
+                TEXEL_STEP_ONE
+            );
+        }
+    }
+    else {
+        LoadLargePalette(&gfx, ImageBody(f_ResultsPlacesImage));
+        LoadTextureBlock(
+            &gfx,
+            f_ResultsPlacesImage +
+                ((rank * PLACE_ICON_SIZE * PLACE_ICON_SIZE) + LARGE_PALETTED_TEXELS_OFFSET +
+                    (PLACE_SUFFIX_ICON_FIRST * PLACE_ICON_SIZE * PLACE_ICON_SIZE)),
+            G_IM_FMT_CI,
+            G_IM_SIZ_8b,
+            PLACE_ICON_SIZE,
+            PLACE_ICON_SIZE,
+            0,
+            0,
+            0,
+            G_TX_NOMASK,
+            G_TX_NOMASK,
+            G_TX_NOLOD,
+            G_TX_NOLOD
+        );
+        DrawTextureRect(
+            &gfx,
+            QuarterPixels(x + PLACE_DIGIT_WIDTH),
+            QuarterPixels(y),
+            QuarterPixels(x + PLACE_DIGIT_WIDTH + PLACE_ICON_SIZE),
+            QuarterPixels(y + PLACE_ICON_SIZE),
+            G_TX_RENDERTILE,
+            0,
+            0,
+            TEXEL_STEP_ONE,
+            TEXEL_STEP_ONE
+        );
+        DrawPlaceIcon(&gfx, x, y, rank);
     }
 
-    LoadLargePalette(&gfx, ImageBody(f_ResultsPlacesImage));
-    LoadTextureBlock(&gfx,
-        f_ResultsPlacesImage +
-            ((suffix * PLACE_ICON_SIZE * PLACE_ICON_SIZE) +
-                LARGE_PALETTED_TEXELS_OFFSET +
-                (PLACE_SUFFIX_ICON_FIRST * PLACE_ICON_SIZE * PLACE_ICON_SIZE)),
-        G_IM_FMT_CI, G_IM_SIZ_8b, PLACE_ICON_SIZE, PLACE_ICON_SIZE, 0, 0, 0,
-        G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-    DrawTextureRect(&gfx, QuarterPixels(x + PLACE_DIGIT_WIDTH),
-        QuarterPixels(y),
-        QuarterPixels(x + PLACE_DIGIT_WIDTH + PLACE_ICON_SIZE),
-        QuarterPixels(y + PLACE_ICON_SIZE), G_TX_RENDERTILE, 0, 0,
-        TEXEL_STEP_ONE, TEXEL_STEP_ONE);
-    if (rank >= RANK_FOURTH) {
-      sprintf(g_PrintBuffer, f_PlaceNumberFormat, rank + 1);
-      LoadSmallPalette(&gfx, 0, ImageBody(f_SecondBannerImage));
-      if (rank >= RANK_TENTH) {
-        x -= PLACE_TWO_DIGIT_SHIFT;
-      }
-
-      for (i = 0; g_PrintBuffer[i] != '\0'; i++) {
-        digit = g_PrintBuffer[i] - '0';
-        digitX = (i * PLACE_DIGIT_SPACING) + PLACE_DIGIT_X;
-        gDPLoadTextureTile_4b(gfx++,
-            TextureAddress(ImageTexels(f_SecondBannerImage)), G_IM_FMT_CI,
-            PLACE_DIGIT_WIDTH, 0, 0, digit * PLACE_DIGIT_WIDTH,
-            PLACE_DIGIT_WIDTH - 1,
-            digit * PLACE_DIGIT_WIDTH + PLACE_DIGIT_WIDTH - 1, 0,
-            G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
-            G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-        DrawTextureRect(&gfx, QuarterPixels(x + digitX),
-            QuarterPixels(y + PLACE_DIGIT_Y),
-            QuarterPixels(x + digitX + PLACE_DIGIT_WIDTH),
-            QuarterPixels(y + PLACE_DIGIT_Y + PLACE_DIGIT_WIDTH),
-            G_TX_RENDERTILE, 0, TexelCoordinate(digit * PLACE_DIGIT_WIDTH),
-            TEXEL_STEP_ONE, TEXEL_STEP_ONE);
-      }
-    } else {
-      DrawPlaceIcon(&gfx, x, y, rank);
-    }
-  } else if (rank >= RANK_BANNER) {
-    if (rank == RANK_BANNER) {
-      image = f_ResultsPlacesImage;
-    } else {
-      image = f_SecondBannerImage;
-    }
-
-    LoadLargePalette(&gfx, ImageBody(image));
-    for (i = 0; i != RANK_BANNER_STRIP_COUNT; i++) {
-      offset = LARGE_PALETTED_TEXELS_OFFSET +
-          (i * RANK_BANNER_WIDTH * RANK_BANNER_STRIP_HEIGHT);
-      stripY = y + (i * RANK_BANNER_STRIP_HEIGHT);
-      LoadTextureBlock(&gfx, image + offset, G_IM_FMT_CI, G_IM_SIZ_8b,
-          RANK_BANNER_WIDTH, RANK_BANNER_STRIP_HEIGHT, 0, 0, 0, G_TX_NOMASK,
-          G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-      DrawTextureRect(&gfx, QuarterPixels(x + RANK_BANNER_X_OFFSET),
-          QuarterPixels(stripY),
-          QuarterPixels(x + RANK_BANNER_X_OFFSET + RANK_BANNER_WIDTH),
-          QuarterPixels(stripY + RANK_BANNER_STRIP_HEIGHT), G_TX_RENDERTILE, 0,
-          0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
-    }
-  } else {
-    LoadLargePalette(&gfx, ImageBody(f_ResultsPlacesImage));
-    LoadTextureBlock(&gfx,
-        f_ResultsPlacesImage +
-            ((rank * PLACE_ICON_SIZE * PLACE_ICON_SIZE) +
-                LARGE_PALETTED_TEXELS_OFFSET +
-                (PLACE_SUFFIX_ICON_FIRST * PLACE_ICON_SIZE * PLACE_ICON_SIZE)),
-        G_IM_FMT_CI, G_IM_SIZ_8b, PLACE_ICON_SIZE, PLACE_ICON_SIZE, 0, 0, 0,
-        G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-    DrawTextureRect(&gfx, QuarterPixels(x + PLACE_DIGIT_WIDTH),
-        QuarterPixels(y),
-        QuarterPixels(x + PLACE_DIGIT_WIDTH + PLACE_ICON_SIZE),
-        QuarterPixels(y + PLACE_ICON_SIZE), G_TX_RENDERTILE, 0, 0,
-        TEXEL_STEP_ONE, TEXEL_STEP_ONE);
-    DrawPlaceIcon(&gfx, x, y, rank);
-  }
-
-  *displayListHead = gfx;
+    *displayListHead = gfx;
 }
 
-void DrawResultsLabel(Gfx** displayListHead, s32 x, s32 y, s32 label) {
-  Gfx* gfx = *displayListHead;
+void DrawResultsLabel(Gfx **displayListHead, s32 x, s32 y, s32 label) {
+    Gfx *gfx = *displayListHead;
 
-  LoadSmallPalette(&gfx, 0, ImageBody(f_ResultsLabelsImage));
-  gDPLoadTextureTile_4b(gfx++,
-      TextureAddress(f_ResultsLabelsImage +
-          ((label * (RESULTS_LABEL_STORED_WIDTH * RESULTS_LABEL_HEIGHT / 2)) +
-              PALETTED_TEXELS_OFFSET)),
-      G_IM_FMT_CI, RESULTS_LABEL_STORED_WIDTH, 0, 0, 0, RESULTS_LABEL_WIDTH - 1,
-      RESULTS_LABEL_HEIGHT - 1, 0, G_TX_NOMIRROR | G_TX_WRAP,
-      G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
-      G_TX_NOLOD);
-  DrawTextureRect(&gfx, QuarterPixels(x), QuarterPixels(y),
-      QuarterPixels(x + RESULTS_LABEL_WIDTH),
-      QuarterPixels(y + RESULTS_LABEL_HEIGHT), G_TX_RENDERTILE, 0, 0,
-      TEXEL_STEP_ONE, TEXEL_STEP_ONE);
-  *displayListHead = gfx;
+    LoadSmallPalette(&gfx, 0, ImageBody(f_ResultsLabelsImage));
+    gDPLoadTextureTile_4b(
+        gfx++,
+        TextureAddress(
+            f_ResultsLabelsImage +
+            ((label * (RESULTS_LABEL_STORED_WIDTH * RESULTS_LABEL_HEIGHT / 2)) +
+                PALETTED_TEXELS_OFFSET)
+        ),
+        G_IM_FMT_CI,
+        RESULTS_LABEL_STORED_WIDTH,
+        0,
+        0,
+        0,
+        RESULTS_LABEL_WIDTH - 1,
+        RESULTS_LABEL_HEIGHT - 1,
+        0,
+        G_TX_NOMIRROR | G_TX_WRAP,
+        G_TX_NOMIRROR | G_TX_WRAP,
+        G_TX_NOMASK,
+        G_TX_NOMASK,
+        G_TX_NOLOD,
+        G_TX_NOLOD
+    );
+    DrawTextureRect(
+        &gfx,
+        QuarterPixels(x),
+        QuarterPixels(y),
+        QuarterPixels(x + RESULTS_LABEL_WIDTH),
+        QuarterPixels(y + RESULTS_LABEL_HEIGHT),
+        G_TX_RENDERTILE,
+        0,
+        0,
+        TEXEL_STEP_ONE,
+        TEXEL_STEP_ONE
+    );
+    *displayListHead = gfx;
 }
 
 /*
  * isMirrored starts the texture a width in (S10.5 texels), where its
  * mirrored wrap flips it
  */
-void DrawPlayerPortrait(
-    Gfx** displayListHead, s32 x, s32 y, s32 playerIndex, Boolean isMirrored) {
-  Gfx* gfx = *displayListHead;
+void DrawPlayerPortrait(Gfx **displayListHead, s32 x, s32 y, s32 playerIndex, Boolean isMirrored) {
+    Gfx *gfx = *displayListHead;
 
-  LoadLargePalette(&gfx, f_PlayerPortraitPalettes[playerIndex]);
-  LoadTextureBlock(&gfx, f_PlayerPortraitImages[playerIndex], G_IM_FMT_CI,
-      G_IM_SIZ_8b, PORTRAIT_SIZE, PORTRAIT_SIZE, 0, G_TX_MIRROR, G_TX_NOMIRROR,
-      PORTRAIT_SIZE_LOG2, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-  DrawTextureRect(&gfx, QuarterPixels(x), QuarterPixels(y),
-      QuarterPixels(x + PORTRAIT_SIZE), QuarterPixels(y + PORTRAIT_SIZE),
-      G_TX_RENDERTILE, isMirrored * TexelCoordinate(PORTRAIT_SIZE), 0,
-      TEXEL_STEP_ONE, TEXEL_STEP_ONE);
-  *displayListHead = gfx;
+    LoadLargePalette(&gfx, f_PlayerPortraitPalettes[playerIndex]);
+    LoadTextureBlock(
+        &gfx,
+        f_PlayerPortraitImages[playerIndex],
+        G_IM_FMT_CI,
+        G_IM_SIZ_8b,
+        PORTRAIT_SIZE,
+        PORTRAIT_SIZE,
+        0,
+        G_TX_MIRROR,
+        G_TX_NOMIRROR,
+        PORTRAIT_SIZE_LOG2,
+        G_TX_NOMASK,
+        G_TX_NOLOD,
+        G_TX_NOLOD
+    );
+    DrawTextureRect(
+        &gfx,
+        QuarterPixels(x),
+        QuarterPixels(y),
+        QuarterPixels(x + PORTRAIT_SIZE),
+        QuarterPixels(y + PORTRAIT_SIZE),
+        G_TX_RENDERTILE,
+        isMirrored * TexelCoordinate(PORTRAIT_SIZE),
+        0,
+        TEXEL_STEP_ONE,
+        TEXEL_STEP_ONE
+    );
+    *displayListHead = gfx;
 }
 
 void StartResultsNotice(s32 kind) {
-  f_UnlockNoticeKind = kind;
-  switch (kind) {
-    case UNLOCK_NOTICE_KIND_NONE:
-      break;
-    case UNLOCK_NOTICE_KIND_COURSE:
-      f_NoticeStage = 0;
-      f_NoticeFrameCount = 0;
-      f_NoticeSwing = SCREEN_WIDTH;
-      f_CourseNoticeShift = 0;
-      f_NoticeAngle = NOTICE_SWING_START_ANGLE;
-      break;
-    case UNLOCK_NOTICE_KIND_CHARACTER:
-      f_IsNoticeHeld = FALSE;
-      f_NoticeTime = 0;
-      f_NoticeFaceIndex = 0;
-      f_NoticeLift = 0;
-      f_CharacterNoticeShift = 0;
-      break;
-  }
+    f_UnlockNoticeKind = kind;
+    switch (kind) {
+        case UNLOCK_NOTICE_KIND_NONE:
+            break;
+        case UNLOCK_NOTICE_KIND_COURSE:
+            f_NoticeStage = 0;
+            f_NoticeFrameCount = 0;
+            f_NoticeSwing = SCREEN_WIDTH;
+            f_CourseNoticeShift = 0;
+            f_NoticeAngle = NOTICE_SWING_START_ANGLE;
+            break;
+        case UNLOCK_NOTICE_KIND_CHARACTER:
+            f_IsNoticeHeld = FALSE;
+            f_NoticeTime = 0;
+            f_NoticeFaceIndex = 0;
+            f_NoticeLift = 0;
+            f_CharacterNoticeShift = 0;
+            break;
+    }
 }
 
 const char f_NumberFormat[] = "%4d";
@@ -1397,37 +1587,37 @@ const char f_PlaceNumberFormat[] = "%d";
 
 /* Swings the notice in, then counts the course it opened */
 void UpdateCourseResultsNotice(void) {
-  SaveData* save = GetSaveData();
+    SaveData *save = GetSaveData();
 
-  f_NoticeFrameCount++;
-  switch (f_NoticeStage) {
-    case 0:
-      f_NoticeSwing = -sinf(f_NoticeAngle) * NOTICE_SWING_HEIGHT;
-      f_CourseNoticeShift = 0;
-      f_NoticeAngle += NOTICE_SWING_STEP;
-      if (f_NoticeAngle > M_PI) {
-        f_NoticeAngle = M_PI;
-      }
+    f_NoticeFrameCount++;
+    switch (f_NoticeStage) {
+        case 0:
+            f_NoticeSwing = -sinf(f_NoticeAngle) * NOTICE_SWING_HEIGHT;
+            f_CourseNoticeShift = 0;
+            f_NoticeAngle += NOTICE_SWING_STEP;
+            if (f_NoticeAngle > M_PI) {
+                f_NoticeAngle = M_PI;
+            }
 
-      if (f_NoticeFrameCount >= NOTICE_SWING_FRAMES) {
-        f_NoticeStage = 1;
-      }
+            if (f_NoticeFrameCount >= NOTICE_SWING_FRAMES) {
+                f_NoticeStage = 1;
+            }
 
-      break;
-    case 1:
-      f_NoticeSwing = -sinf(f_NoticeAngle) * NOTICE_SWING_HEIGHT;
-      f_NoticeAngle += NOTICE_SWING_STEP;
-      if (f_NoticeFrameCount >= NOTICE_DONE_FRAME) {
-        StartResultsNotice(UNLOCK_NOTICE_KIND_NONE);
-        f_OpenCourseCount++;
-        if (f_OpenCourseCount < COURSE_COUNT) {
-          f_PointsToNextCourse =
-              GetCoursePointsNeeded(f_OpenCourseCount) - save->coursePoints;
-        }
-      }
+            break;
+        case 1:
+            f_NoticeSwing = -sinf(f_NoticeAngle) * NOTICE_SWING_HEIGHT;
+            f_NoticeAngle += NOTICE_SWING_STEP;
+            if (f_NoticeFrameCount >= NOTICE_DONE_FRAME) {
+                StartResultsNotice(UNLOCK_NOTICE_KIND_NONE);
+                f_OpenCourseCount++;
+                if (f_OpenCourseCount < COURSE_COUNT) {
+                    f_PointsToNextCourse =
+                        GetCoursePointsNeeded(f_OpenCourseCount) - save->coursePoints;
+                }
+            }
 
-      break;
-  }
+            break;
+    }
 }
 
 /* The course image is two strips of 64x32 that shrink from twice their size to
@@ -1443,12 +1633,10 @@ void UpdateCourseResultsNotice(void) {
 #define NOTICE_TITLE_LEFT 80
 #define NOTICE_TITLE_TOP 56
 /* The top of the title's strip I, lifted by LIFT */
-#define TitleStripTop(lift, i) \
-  ((lift) + NOTICE_TITLE_TOP + ((i) * NOTICE_TITLE_STRIP_HEIGHT))
+#define TitleStripTop(lift, i) ((lift) + NOTICE_TITLE_TOP + ((i) * NOTICE_TITLE_STRIP_HEIGHT))
 #define NOTICE_TITLE_LIFT 96.0f
 /* Wider than the shine texture, so that it sweeps across the title */
-#define NOTICE_SHINE_DSDX \
-  TexelRunStep(NOTICE_SHINE_SIZE, NOTICE_TITLE_STRIP_WIDTH)
+#define NOTICE_SHINE_DSDX TexelRunStep(NOTICE_SHINE_SIZE, NOTICE_TITLE_STRIP_WIDTH)
 #define NOTICE_PAN_START 3
 #define NOTICE_PAN_END 60
 #define NOTICE_PAN_MAX 255
@@ -1460,206 +1648,300 @@ void UpdateCourseResultsNotice(void) {
  * The notice that a course has opened: its picture and title swing in, then a
  * shine sweeps the title
  */
-void DrawCourseResultsNotice(Gfx** displayListHead) {
-  Gfx* gfx = *displayListHead;
-  s32 size;
-  s32 step;
-  s32 lift;
-  s32 shineLift;
-  s32 depthLift;
-  SoundPan pan;
-  s32 centerX;
-  s32 i;
-  s32 shineTexelX;
-  s32 stripBottomOffset;
+void DrawCourseResultsNotice(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
+    s32 size;
+    s32 step;
+    s32 lift;
+    s32 shineLift;
+    s32 depthLift;
+    SoundPan pan;
+    s32 centerX;
+    s32 i;
+    s32 shineTexelX;
+    s32 stripBottomOffset;
 
-  gSPDisplayList(gfx++, g_DecalTextureSetup);
-  gDPPipeSync(gfx++);
-  gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-  gDPPipeSync(gfx++);
-  gDPSetTextureFilter(gfx++, G_TF_POINT);
-  gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-
-  /* Once the swing settles the picture is drawn at full size, where point
-   * sampling is sharper */
-  if (f_NoticeAngle == M_PI) {
+    gSPDisplayList(gfx++, g_DecalTextureSetup);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
     gDPPipeSync(gfx++);
     gDPSetTextureFilter(gfx++, G_TF_POINT);
-  } else {
+    gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+
+    /* Once the swing settles the picture is drawn at full size, where point
+     * sampling is sharper */
+    if (f_NoticeAngle == M_PI) {
+        gDPPipeSync(gfx++);
+        gDPSetTextureFilter(gfx++, G_TF_POINT);
+    }
+    else {
+        gDPPipeSync(gfx++);
+        gDPSetTextureFilter(gfx++, G_TF_BILERP);
+    }
+
+    LoadLargePalette(&gfx, ImageBody(f_ResultsCourseImage));
+    for (i = 0; i != NOTICE_COURSE_STRIP_COUNT; i++) {
+        s32 top;
+        size = (cosf(f_NoticeAngle) + NOTICE_COURSE_SCALE_BIAS) * NOTICE_COURSE_STRIP_HEIGHT;
+        step = TexelRunStep(NOTICE_COURSE_STRIP_HEIGHT, size);
+        LoadTextureBlock(
+            &gfx,
+            LargeImageTexels(f_ResultsCourseImage) +
+                (i * NOTICE_COURSE_STRIP_WIDTH * NOTICE_COURSE_STRIP_HEIGHT),
+            G_IM_FMT_CI,
+            G_IM_SIZ_8b,
+            NOTICE_COURSE_STRIP_WIDTH,
+            NOTICE_COURSE_STRIP_HEIGHT,
+            0,
+            0,
+            0,
+            G_TX_NOMASK,
+            G_TX_NOMASK,
+            G_TX_NOLOD,
+            G_TX_NOLOD
+        );
+        top = NOTICE_COURSE_CENTER_Y - size + (i * size);
+        centerX = f_NoticeSwing + NOTICE_COURSE_CENTER_X;
+        DrawTextureRect(
+            &gfx,
+            QuarterPixels(centerX - size),
+            QuarterPixels(top + f_CourseNoticeShift),
+            QuarterPixels(size + centerX),
+            QuarterPixels(top + size + f_CourseNoticeShift),
+            G_TX_RENDERTILE,
+            0,
+            0,
+            step,
+            step
+        );
+    }
+
+    LoadLargePalette(&gfx, ImageBody(f_NoticeTitleImage));
+    for (i = 0; i != NOTICE_TITLE_STRIP_COUNT; i++) {
+        s32 top;
+        lift = -(s32)(cosf(f_NoticeAngle) * NOTICE_TITLE_LIFT) - (s32)NOTICE_TITLE_LIFT;
+        LoadTextureBlock(
+            &gfx,
+            LargeImageTexels(f_NoticeTitleImage) +
+                (i * NOTICE_TITLE_STRIP_WIDTH * NOTICE_TITLE_STRIP_HEIGHT),
+            G_IM_FMT_CI,
+            G_IM_SIZ_8b,
+            NOTICE_TITLE_STRIP_WIDTH,
+            NOTICE_TITLE_STRIP_HEIGHT,
+            0,
+            0,
+            0,
+            G_TX_NOMASK,
+            G_TX_NOMASK,
+            G_TX_NOLOD,
+            G_TX_NOLOD
+        );
+        top = TitleStripTop(lift, i);
+        DrawTextureRect(
+            &gfx,
+            QuarterPixels(f_NoticeSwing + NOTICE_TITLE_LEFT),
+            QuarterPixels(top + f_CourseNoticeShift),
+            QuarterPixels(f_NoticeSwing + NOTICE_TITLE_LEFT + NOTICE_TITLE_STRIP_WIDTH),
+            QuarterPixels(top + NOTICE_TITLE_STRIP_HEIGHT + f_CourseNoticeShift),
+            G_TX_RENDERTILE,
+            0,
+            0,
+            TEXEL_STEP_ONE,
+            TEXEL_STEP_ONE
+        );
+    }
+
+    /* The title again, into the depth buffer alone */
     gDPPipeSync(gfx++);
-    gDPSetTextureFilter(gfx++, G_TF_BILERP);
-  }
-
-  LoadLargePalette(&gfx, ImageBody(f_ResultsCourseImage));
-  for (i = 0; i != NOTICE_COURSE_STRIP_COUNT; i++) {
-    s32 top;
-    size = (cosf(f_NoticeAngle) + NOTICE_COURSE_SCALE_BIAS) *
-        NOTICE_COURSE_STRIP_HEIGHT;
-    step = TexelRunStep(NOTICE_COURSE_STRIP_HEIGHT, size);
-    LoadTextureBlock(&gfx,
-        LargeImageTexels(f_ResultsCourseImage) +
-            (i * NOTICE_COURSE_STRIP_WIDTH * NOTICE_COURSE_STRIP_HEIGHT),
-        G_IM_FMT_CI, G_IM_SIZ_8b, NOTICE_COURSE_STRIP_WIDTH,
-        NOTICE_COURSE_STRIP_HEIGHT, 0, 0, 0, G_TX_NOMASK, G_TX_NOMASK,
-        G_TX_NOLOD, G_TX_NOLOD);
-    top = NOTICE_COURSE_CENTER_Y - size + (i * size);
-    centerX = f_NoticeSwing + NOTICE_COURSE_CENTER_X;
-    DrawTextureRect(&gfx, QuarterPixels(centerX - size),
-        QuarterPixels(top + f_CourseNoticeShift), QuarterPixels(size + centerX),
-        QuarterPixels(top + size + f_CourseNoticeShift), G_TX_RENDERTILE, 0, 0,
-        step, step);
-  }
-
-  LoadLargePalette(&gfx, ImageBody(f_NoticeTitleImage));
-  for (i = 0; i != NOTICE_TITLE_STRIP_COUNT; i++) {
-    s32 top;
-    lift = -(s32)(cosf(f_NoticeAngle) * NOTICE_TITLE_LIFT) -
-        (s32)NOTICE_TITLE_LIFT;
-    LoadTextureBlock(&gfx,
-        LargeImageTexels(f_NoticeTitleImage) +
-            (i * NOTICE_TITLE_STRIP_WIDTH * NOTICE_TITLE_STRIP_HEIGHT),
-        G_IM_FMT_CI, G_IM_SIZ_8b, NOTICE_TITLE_STRIP_WIDTH,
-        NOTICE_TITLE_STRIP_HEIGHT, 0, 0, 0, G_TX_NOMASK, G_TX_NOMASK,
-        G_TX_NOLOD, G_TX_NOLOD);
-    top = TitleStripTop(lift, i);
-    DrawTextureRect(&gfx, QuarterPixels(f_NoticeSwing + NOTICE_TITLE_LEFT),
-        QuarterPixels(top + f_CourseNoticeShift),
-        QuarterPixels(
-            f_NoticeSwing + NOTICE_TITLE_LEFT + NOTICE_TITLE_STRIP_WIDTH),
-        QuarterPixels(top + NOTICE_TITLE_STRIP_HEIGHT + f_CourseNoticeShift),
-        G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
-  }
-
-  /* The title again, into the depth buffer alone */
-  gDPPipeSync(gfx++);
-  gDPSetDepthSource(gfx++, G_ZS_PRIM);
-  gDPSetPrimDepth(gfx++, NOTICE_TITLE_DEPTH, 0);
-  gDPSetCombineLERP(gfx++, 0, 0, 0, TEXEL0, 0, 1, TEXEL0, 1, 0, 0, 0, TEXEL0, 0,
-      1, TEXEL0, 1);
-  gDPPipeSync(gfx++);
-  gDPSetRenderMode(gfx++,
-      GBL_c1(G_BL_CLR_MEM, G_BL_A_IN, G_BL_CLR_MEM, G_BL_A_MEM),
-      G_RM_AA_ZB_TEX_EDGE2);
-  LoadLargePalette(&gfx, ImageBody(f_NoticeTitleImage));
-  for (i = 0; i != NOTICE_TITLE_STRIP_COUNT; i++) {
-    depthLift = -(s32)(cosf(f_NoticeAngle) * NOTICE_TITLE_LIFT) -
-        (s32)NOTICE_TITLE_LIFT;
-    LoadTextureBlock(&gfx,
-        LargeImageTexels(f_NoticeTitleImage) +
-            (i * NOTICE_TITLE_STRIP_WIDTH * NOTICE_TITLE_STRIP_HEIGHT),
-        G_IM_FMT_CI, G_IM_SIZ_8b, NOTICE_TITLE_STRIP_WIDTH,
-        NOTICE_TITLE_STRIP_HEIGHT, 0, 0, 0, G_TX_NOMASK, G_TX_NOMASK,
-        G_TX_NOLOD, G_TX_NOLOD);
-    /*
-     * The top is written out and the bottom's offset kept in a local, unlike
-     * the colored title's, to match: writing the bottom out too gives 35
-     * words differing, 5 in shape
-     */
-    stripBottomOffset = f_CourseNoticeShift + NOTICE_TITLE_STRIP_HEIGHT;
-    DrawTextureRect(&gfx, QuarterPixels(f_NoticeSwing + NOTICE_TITLE_LEFT),
-        QuarterPixels(TitleStripTop(depthLift, i) + f_CourseNoticeShift),
-        QuarterPixels(
-            f_NoticeSwing + NOTICE_TITLE_LEFT + NOTICE_TITLE_STRIP_WIDTH),
-        QuarterPixels(TitleStripTop(depthLift, i) + stripBottomOffset),
-        G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
-  }
-
-  gDPSetPrimDepth(gfx++, NOTICE_SHINE_DEPTH, 0);
-  gDPPipeSync(gfx++);
-  gDPSetRenderMode(gfx++, G_RM_ZB_XLU_SURF, G_RM_ZB_XLU_SURF2);
-  gDPPipeSync(gfx++);
-  gDPSetTextureLUT(gfx++, G_TT_NONE);
-  gDPPipeSync(gfx++);
-  gDPSetAlphaDither(gfx++, G_AD_PATTERN);
-  gDPSetCombineLERP(gfx++, 0, 0, 0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0, 0, 0, 0,
-      PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0);
-  gDPPipeSync(gfx++);
-  gDPSetAlphaCompare(gfx++, G_AC_NONE);
-  gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
-  LoadTextureBlock(&gfx, ImageBody(f_ResultsShineImage), G_IM_FMT_I,
-      G_IM_SIZ_8b, NOTICE_SHINE_SIZE, NOTICE_SHINE_SIZE, 0, 0, 0, G_TX_NOMASK,
-      G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-  if (f_NoticeFrameCount == NOTICE_SHINE_START) {
-    PlaySoundWithEffects(SOUND_SHRINKING_IMAGE, NOTICE_SHINE_SOUND_CHANNEL,
-        NOTICE_SHINE_SOUND_VOLUME, 0, SOUND_FULL_SCALE);
-  }
-
-  if (f_NoticeFrameCount == 2) {
-    PlaySoundWithEffects(SOUND_UNLOCK_EVERYTHING, NOTICE_SWING_SOUND_CHANNEL,
-        NOTICE_SWING_SOUND_VOLUME, 0, NOTICE_SOUND_PAN_RIGHT);
-    PlaySound(SOUND_COURSE_NOTICE_CHEER, NOTICE_CHEER_SOUND_CHANNEL,
-        SOUND_FULL_SCALE);
-  }
-
-  /* The swing sound follows the notice across the screen */
-  if (f_NoticeFrameCount >= NOTICE_PAN_START &&
-      f_NoticeFrameCount < NOTICE_PAN_END) {
-    pan = (f_NoticeSwing + NOTICE_COURSE_CENTER_X) * NOTICE_PAN_RANGE /
-        NOTICE_COURSE_CENTER_X;
-    if (pan < 0) {
-      pan = 0;
+    gDPSetDepthSource(gfx++, G_ZS_PRIM);
+    gDPSetPrimDepth(gfx++, NOTICE_TITLE_DEPTH, 0);
+    gDPSetCombineLERP(gfx++, 0, 0, 0, TEXEL0, 0, 1, TEXEL0, 1, 0, 0, 0, TEXEL0, 0, 1, TEXEL0, 1);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(
+        gfx++,
+        GBL_c1(G_BL_CLR_MEM, G_BL_A_IN, G_BL_CLR_MEM, G_BL_A_MEM),
+        G_RM_AA_ZB_TEX_EDGE2
+    );
+    LoadLargePalette(&gfx, ImageBody(f_NoticeTitleImage));
+    for (i = 0; i != NOTICE_TITLE_STRIP_COUNT; i++) {
+        depthLift = -(s32)(cosf(f_NoticeAngle) * NOTICE_TITLE_LIFT) - (s32)NOTICE_TITLE_LIFT;
+        LoadTextureBlock(
+            &gfx,
+            LargeImageTexels(f_NoticeTitleImage) +
+                (i * NOTICE_TITLE_STRIP_WIDTH * NOTICE_TITLE_STRIP_HEIGHT),
+            G_IM_FMT_CI,
+            G_IM_SIZ_8b,
+            NOTICE_TITLE_STRIP_WIDTH,
+            NOTICE_TITLE_STRIP_HEIGHT,
+            0,
+            0,
+            0,
+            G_TX_NOMASK,
+            G_TX_NOMASK,
+            G_TX_NOLOD,
+            G_TX_NOLOD
+        );
+        /*
+         * The top is written out and the bottom's offset kept in a local, unlike
+         * the colored title's, to match: writing the bottom out too gives 35
+         * words differing, 5 in shape
+         */
+        stripBottomOffset = f_CourseNoticeShift + NOTICE_TITLE_STRIP_HEIGHT;
+        DrawTextureRect(
+            &gfx,
+            QuarterPixels(f_NoticeSwing + NOTICE_TITLE_LEFT),
+            QuarterPixels(TitleStripTop(depthLift, i) + f_CourseNoticeShift),
+            QuarterPixels(f_NoticeSwing + NOTICE_TITLE_LEFT + NOTICE_TITLE_STRIP_WIDTH),
+            QuarterPixels(TitleStripTop(depthLift, i) + stripBottomOffset),
+            G_TX_RENDERTILE,
+            0,
+            0,
+            TEXEL_STEP_ONE,
+            TEXEL_STEP_ONE
+        );
     }
 
-    if (pan > NOTICE_PAN_MAX) {
-      pan = NOTICE_PAN_MAX;
+    gDPSetPrimDepth(gfx++, NOTICE_SHINE_DEPTH, 0);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_ZB_XLU_SURF, G_RM_ZB_XLU_SURF2);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_NONE);
+    gDPPipeSync(gfx++);
+    gDPSetAlphaDither(gfx++, G_AD_PATTERN);
+    gDPSetCombineLERP(
+        gfx++,
+        0,
+        0,
+        0,
+        PRIMITIVE,
+        PRIMITIVE,
+        0,
+        TEXEL0,
+        0,
+        0,
+        0,
+        0,
+        PRIMITIVE,
+        PRIMITIVE,
+        0,
+        TEXEL0,
+        0
+    );
+    gDPPipeSync(gfx++);
+    gDPSetAlphaCompare(gfx++, G_AC_NONE);
+    gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
+    LoadTextureBlock(
+        &gfx,
+        ImageBody(f_ResultsShineImage),
+        G_IM_FMT_I,
+        G_IM_SIZ_8b,
+        NOTICE_SHINE_SIZE,
+        NOTICE_SHINE_SIZE,
+        0,
+        0,
+        0,
+        G_TX_NOMASK,
+        G_TX_NOMASK,
+        G_TX_NOLOD,
+        G_TX_NOLOD
+    );
+    if (f_NoticeFrameCount == NOTICE_SHINE_START) {
+        PlaySoundWithEffects(
+            SOUND_SHRINKING_IMAGE,
+            NOTICE_SHINE_SOUND_CHANNEL,
+            NOTICE_SHINE_SOUND_VOLUME,
+            0,
+            SOUND_FULL_SCALE
+        );
     }
 
-    SetSoundPan(NOTICE_SWING_SOUND_CHANNEL, pan);
-  }
-
-  shineLift =
-      -(s32)(cosf(f_NoticeAngle) * NOTICE_TITLE_LIFT) - (s32)NOTICE_TITLE_LIFT;
-  if (f_NoticeFrameCount >= NOTICE_SHINE_START) {
-    if (f_NoticeFrameCount < NOTICE_SHINE_END) {
-      shineTexelX = TexelCoordinate(NOTICE_SHINE_SIZE -
-          ((f_NoticeFrameCount - NOTICE_SHINE_START) * NOTICE_SHINE_STEP));
-      DrawTextureRect(&gfx, QuarterPixels(f_NoticeSwing + NOTICE_TITLE_LEFT),
-          QuarterPixels(NOTICE_TITLE_TOP + shineLift + f_CourseNoticeShift),
-          QuarterPixels(
-              f_NoticeSwing + NOTICE_TITLE_LEFT + NOTICE_TITLE_STRIP_WIDTH),
-          QuarterPixels(NOTICE_TITLE_TOP + shineLift + NOTICE_SHINE_SIZE +
-              f_CourseNoticeShift),
-          G_TX_RENDERTILE, shineTexelX, 0, NOTICE_SHINE_DSDX, TEXEL_STEP_ONE);
+    if (f_NoticeFrameCount == 2) {
+        PlaySoundWithEffects(
+            SOUND_UNLOCK_EVERYTHING,
+            NOTICE_SWING_SOUND_CHANNEL,
+            NOTICE_SWING_SOUND_VOLUME,
+            0,
+            NOTICE_SOUND_PAN_RIGHT
+        );
+        PlaySound(SOUND_COURSE_NOTICE_CHEER, NOTICE_CHEER_SOUND_CHANNEL, SOUND_FULL_SCALE);
     }
-  }
 
-  gDPPipeSync(gfx++);
-  gDPSetDepthSource(gfx++, G_ZS_PIXEL);
-  *displayListHead = gfx;
+    /* The swing sound follows the notice across the screen */
+    if (f_NoticeFrameCount >= NOTICE_PAN_START && f_NoticeFrameCount < NOTICE_PAN_END) {
+        pan = (f_NoticeSwing + NOTICE_COURSE_CENTER_X) * NOTICE_PAN_RANGE / NOTICE_COURSE_CENTER_X;
+        if (pan < 0) {
+            pan = 0;
+        }
+
+        if (pan > NOTICE_PAN_MAX) {
+            pan = NOTICE_PAN_MAX;
+        }
+
+        SetSoundPan(NOTICE_SWING_SOUND_CHANNEL, pan);
+    }
+
+    shineLift = -(s32)(cosf(f_NoticeAngle) * NOTICE_TITLE_LIFT) - (s32)NOTICE_TITLE_LIFT;
+    if (f_NoticeFrameCount >= NOTICE_SHINE_START) {
+        if (f_NoticeFrameCount < NOTICE_SHINE_END) {
+            shineTexelX = TexelCoordinate(
+                NOTICE_SHINE_SIZE - ((f_NoticeFrameCount - NOTICE_SHINE_START) * NOTICE_SHINE_STEP)
+            );
+            DrawTextureRect(
+                &gfx,
+                QuarterPixels(f_NoticeSwing + NOTICE_TITLE_LEFT),
+                QuarterPixels(NOTICE_TITLE_TOP + shineLift + f_CourseNoticeShift),
+                QuarterPixels(f_NoticeSwing + NOTICE_TITLE_LEFT + NOTICE_TITLE_STRIP_WIDTH),
+                QuarterPixels(
+                    NOTICE_TITLE_TOP + shineLift + NOTICE_SHINE_SIZE + f_CourseNoticeShift
+                ),
+                G_TX_RENDERTILE,
+                shineTexelX,
+                0,
+                NOTICE_SHINE_DSDX,
+                TEXEL_STEP_ONE
+            );
+        }
+    }
+
+    gDPPipeSync(gfx++);
+    gDPSetDepthSource(gfx++, G_ZS_PIXEL);
+    *displayListHead = gfx;
 }
 
 /* Changes the beaten character's face, then lifts the notice away */
 void UpdateCharacterResultsNotice(void) {
-  EncodedAsset asset;
+    EncodedAsset asset;
 
-  GetSaveData();
-  f_NoticeTime++;
-  if (f_IsNoticeHeld) {
-    return;
-  }
-
-  if (f_NoticeTime > NOTICE_FACE_DELAY &&
-      !(f_NoticeTime & NOTICE_FACE_INTERVAL_MASK) &&
-      f_NoticeFaceIndex < NOTICE_LAST_FACE) {
-    f_NoticeFaceIndex++;
-    OpenEncodedAsset(
-        g_CharacterImageAssets[g_Players[1].characterIndex] + f_NoticeFaceIndex,
-        &asset);
-    ReadEncodedAsset(f_PortraitImage, &asset);
-  }
-
-  if (f_NoticeTime > NOTICE_LIFT_DELAY) {
-    if (f_NoticeLift > NOTICE_LIFT_START_LIMIT) {
-      f_NoticeLift -= NOTICE_LIFT_START_SPEED;
-    } else {
-      f_NoticeLift += f_NoticeLift * NOTICE_LIFT_GROWTH_NUMERATOR /
-          NOTICE_LIFT_GROWTH_DENOMINATOR;
+    GetSaveData();
+    f_NoticeTime++;
+    if (f_IsNoticeHeld) {
+        return;
     }
 
-    if (f_NoticeLift < NOTICE_LIFT_EXIT) {
-      StartResultsNotice(UNLOCK_NOTICE_KIND_NONE);
+    if (f_NoticeTime > NOTICE_FACE_DELAY &&
+        !(f_NoticeTime & NOTICE_FACE_INTERVAL_MASK) &&
+        f_NoticeFaceIndex < NOTICE_LAST_FACE) {
+        f_NoticeFaceIndex++;
+        OpenEncodedAsset(
+            g_CharacterImageAssets[g_Players[1].characterIndex] + f_NoticeFaceIndex,
+            &asset
+        );
+        ReadEncodedAsset(f_PortraitImage, &asset);
     }
-  }
+
+    if (f_NoticeTime > NOTICE_LIFT_DELAY) {
+        if (f_NoticeLift > NOTICE_LIFT_START_LIMIT) {
+            f_NoticeLift -= NOTICE_LIFT_START_SPEED;
+        }
+        else {
+            f_NoticeLift +=
+                f_NoticeLift * NOTICE_LIFT_GROWTH_NUMERATOR / NOTICE_LIFT_GROWTH_DENOMINATOR;
+        }
+
+        if (f_NoticeLift < NOTICE_LIFT_EXIT) {
+            StartResultsNotice(UNLOCK_NOTICE_KIND_NONE);
+        }
+    }
 }
 
 /* The character notice pops open past its full size, then settles at
@@ -1681,15 +1963,13 @@ void UpdateCharacterResultsNotice(void) {
 /* The top of a title strip, while the strips are height tall. It isn't kept
  * in a variable, which would change the loops' code. */
 #define CharacterTitleStripTop(strip, height) \
-  (NOTICE_CHARACTER_TITLE_TOP - \
-      ((height) * NOTICE_CHARACTER_TITLE_STRIP_COUNT / 2) + \
-      ((strip) * (height)))
+    (NOTICE_CHARACTER_TITLE_TOP - ((height) * NOTICE_CHARACTER_TITLE_STRIP_COUNT / 2) + \
+        ((strip) * (height)))
 #define NOTICE_CHARACTER_SHINE_LEFT 88
 #define NOTICE_CHARACTER_SHINE_TOP 52
 #define NOTICE_CHARACTER_SHINE_HEIGHT 56
 #define NOTICE_CHARACTER_SHINE_DSDX TexelRunStep(NOTICE_SHINE_SIZE, 128)
-#define NOTICE_CHARACTER_SHINE_DTDY \
-  TexelRunStep(NOTICE_SHINE_SIZE, NOTICE_CHARACTER_SHINE_HEIGHT)
+#define NOTICE_CHARACTER_SHINE_DTDY TexelRunStep(NOTICE_SHINE_SIZE, NOTICE_CHARACTER_SHINE_HEIGHT)
 #define NOTICE_CHARACTER_VOICE_FRAME 14
 #define NOTICE_CHARACTER_VOICE_SLOT 1
 
@@ -1697,242 +1977,380 @@ void UpdateCharacterResultsNotice(void) {
  * The notice that a character has been beaten: their nameplate, face and title
  * pop open, then a shine sweeps the title
  */
-void DrawCharacterResultsNotice(Gfx** displayListHead) {
-  Gfx* gfx = *displayListHead;
-  Radians angle;
-  f32 pop;
-  s32 size;
-  s32 step;
-  s32 width;
-  s32 height;
-  s32 titleCenterX;
-  s32 i;
-  s32 liftFromCenter;
-  s32 shineTexelX;
+void DrawCharacterResultsNotice(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
+    Radians angle;
+    f32 pop;
+    s32 size;
+    s32 step;
+    s32 width;
+    s32 height;
+    s32 titleCenterX;
+    s32 i;
+    s32 liftFromCenter;
+    s32 shineTexelX;
 
-  if (f_NoticeTime < NOTICE_POP_FRAMES) {
-    angle = f_NoticeTime * NOTICE_POP_STEP * (M_PI / 2);
-  } else {
-    angle = NOTICE_POP_SETTLE_ANGLE;
-  }
-
-  pop = sinf(angle);
-  gSPDisplayList(gfx++, g_DecalTextureSetup);
-  gDPPipeSync(gfx++);
-  gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-  gDPPipeSync(gfx++);
-  gDPSetTextureFilter(gfx++, G_TF_BILERP);
-  gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-  size = pop * NOTICE_NAMEPLATE_POP_SIZE;
-  if (size > 0) {
-    s32 centerX;
-    s32 centerY;
-
-    LoadSmallPalette(&gfx, 0, ImageBody(f_NameplateImage));
-    LoadNibbleTextureBlock(&gfx, ImageTexels(f_NameplateImage), G_IM_FMT_CI,
-        NOTICE_NAMEPLATE_SIZE, NOTICE_NAMEPLATE_SIZE, 0, 0, 0, G_TX_NOMASK,
-        G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-    centerX = f_NoticeLift + NOTICE_CENTER_X;
-    centerY = f_CharacterNoticeShift + NOTICE_CENTER_Y;
-    DrawTextureRect(&gfx, QuarterPixels(centerX - size),
-        QuarterPixels(centerY - size), QuarterPixels(size + centerX),
-        QuarterPixels(size + centerY), G_TX_RENDERTILE, 0, 0,
-        TexelRunStep(NOTICE_NAMEPLATE_SIZE / 2, size),
-        TexelRunStep(NOTICE_NAMEPLATE_SIZE / 2, size));
-  }
-
-  size = pop * NOTICE_PORTRAIT_POP_SIZE;
-  if (size > 0) {
-    s32 centerX;
-    s32 centerY;
-
-    LoadLargePalette(&gfx, f_PortraitPalette);
-    LoadTextureBlock(&gfx, f_PortraitImage, G_IM_FMT_CI, G_IM_SIZ_8b,
-        NOTICE_PORTRAIT_SIZE, NOTICE_PORTRAIT_SIZE, 0, 0, 0, G_TX_NOMASK,
-        G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-    step = TexelRunStep(NOTICE_PORTRAIT_SIZE / 2, size);
-    centerX = f_NoticeLift + NOTICE_CENTER_X;
-    centerY = f_CharacterNoticeShift + NOTICE_CENTER_Y;
-    DrawTextureRect(&gfx, QuarterPixels(centerX - size),
-        QuarterPixels(centerY - size), QuarterPixels(size + centerX),
-        QuarterPixels(size + centerY), G_TX_RENDERTILE, 0, 0, step, step);
-  }
-
-  gDPPipeSync(gfx++);
-  gDPSetTextureFilter(gfx++, G_TF_POINT);
-  height = pop * NOTICE_CHARACTER_TITLE_POP_HEIGHT;
-  width = pop * NOTICE_CHARACTER_TITLE_POP_WIDTH;
-  if (width > 0 && height > 0) {
-    LoadLargePalette(&gfx, ImageBody(f_NoticeTitleImage));
-    for (i = 0; i != NOTICE_CHARACTER_TITLE_STRIP_COUNT; i++) {
-      LoadTextureBlock(&gfx,
-          LargeImageTexels(f_NoticeTitleImage) +
-              (i * NOTICE_CHARACTER_TITLE_WIDTH * NOTICE_TITLE_STRIP_HEIGHT),
-          G_IM_FMT_CI, G_IM_SIZ_8b, NOTICE_CHARACTER_TITLE_WIDTH,
-          NOTICE_TITLE_STRIP_HEIGHT, 0, 0, 0, G_TX_NOMASK, G_TX_NOMASK,
-          G_TX_NOLOD, G_TX_NOLOD);
-      /* This pass mirrors the slide, unlike the depth pass and the shine */
-      liftFromCenter = f_NoticeLift - NOTICE_CENTER_X;
-      DrawTextureRect(&gfx,
-          QuarterPixels(NOTICE_CENTER_X - width - f_NoticeLift),
-          QuarterPixels(
-              CharacterTitleStripTop(i, height) + f_CharacterNoticeShift),
-          QuarterPixels(width - liftFromCenter),
-          QuarterPixels(CharacterTitleStripTop(i, height) + height +
-              f_CharacterNoticeShift),
-          G_TX_RENDERTILE, 0, 0,
-          TexelRunStep((NOTICE_CHARACTER_TITLE_WIDTH / 2), width),
-          TexelRunStep(NOTICE_TITLE_STRIP_HEIGHT, height));
+    if (f_NoticeTime < NOTICE_POP_FRAMES) {
+        angle = f_NoticeTime * NOTICE_POP_STEP * (M_PI / 2);
+    }
+    else {
+        angle = NOTICE_POP_SETTLE_ANGLE;
     }
 
-    /* The title again, into the depth buffer alone, so that the shine behind it
-     * only lights the letters */
+    pop = sinf(angle);
+    gSPDisplayList(gfx++, g_DecalTextureSetup);
     gDPPipeSync(gfx++);
-    gDPSetDepthSource(gfx++, G_ZS_PRIM);
-    gDPSetPrimDepth(gfx++, NOTICE_TITLE_DEPTH, 0);
-    gDPSetCombineLERP(gfx++, 0, 0, 0, TEXEL0, 0, 1, TEXEL0, 1, 0, 0, 0, TEXEL0,
-        0, 1, TEXEL0, 1);
+    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
     gDPPipeSync(gfx++);
-    gDPSetRenderMode(gfx++,
-        GBL_c1(G_BL_CLR_MEM, G_BL_A_IN, G_BL_CLR_MEM, G_BL_A_MEM),
-        G_RM_AA_ZB_TEX_EDGE2);
-    for (i = 0; i != NOTICE_CHARACTER_TITLE_STRIP_COUNT; i++) {
-      LoadTextureBlock(&gfx,
-          LargeImageTexels(f_NoticeTitleImage) +
-              (i * NOTICE_CHARACTER_TITLE_WIDTH * NOTICE_TITLE_STRIP_HEIGHT),
-          G_IM_FMT_CI, G_IM_SIZ_8b, NOTICE_CHARACTER_TITLE_WIDTH,
-          NOTICE_TITLE_STRIP_HEIGHT, 0, 0, 0, G_TX_NOMASK, G_TX_NOMASK,
-          G_TX_NOLOD, G_TX_NOLOD);
-      titleCenterX = f_NoticeLift + NOTICE_CENTER_X;
-      DrawTextureRect(&gfx, QuarterPixels(titleCenterX - width),
-          QuarterPixels(
-              CharacterTitleStripTop(i, height) + f_CharacterNoticeShift),
-          QuarterPixels(width + titleCenterX),
-          QuarterPixels(CharacterTitleStripTop(i, height) + height +
-              f_CharacterNoticeShift),
-          G_TX_RENDERTILE, 0, 0,
-          TexelRunStep((NOTICE_CHARACTER_TITLE_WIDTH / 2), width),
-          TexelRunStep(NOTICE_TITLE_STRIP_HEIGHT, height));
+    gDPSetTextureFilter(gfx++, G_TF_BILERP);
+    gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+    size = pop * NOTICE_NAMEPLATE_POP_SIZE;
+    if (size > 0) {
+        s32 centerX;
+        s32 centerY;
+
+        LoadSmallPalette(&gfx, 0, ImageBody(f_NameplateImage));
+        LoadNibbleTextureBlock(
+            &gfx,
+            ImageTexels(f_NameplateImage),
+            G_IM_FMT_CI,
+            NOTICE_NAMEPLATE_SIZE,
+            NOTICE_NAMEPLATE_SIZE,
+            0,
+            0,
+            0,
+            G_TX_NOMASK,
+            G_TX_NOMASK,
+            G_TX_NOLOD,
+            G_TX_NOLOD
+        );
+        centerX = f_NoticeLift + NOTICE_CENTER_X;
+        centerY = f_CharacterNoticeShift + NOTICE_CENTER_Y;
+        DrawTextureRect(
+            &gfx,
+            QuarterPixels(centerX - size),
+            QuarterPixels(centerY - size),
+            QuarterPixels(size + centerX),
+            QuarterPixels(size + centerY),
+            G_TX_RENDERTILE,
+            0,
+            0,
+            TexelRunStep(NOTICE_NAMEPLATE_SIZE / 2, size),
+            TexelRunStep(NOTICE_NAMEPLATE_SIZE / 2, size)
+        );
     }
 
-    gDPSetPrimDepth(gfx++, NOTICE_SHINE_DEPTH, 0);
-    gDPPipeSync(gfx++);
-    gDPSetRenderMode(gfx++, G_RM_ZB_XLU_SURF, G_RM_ZB_XLU_SURF2);
-    gDPPipeSync(gfx++);
-    gDPSetTextureLUT(gfx++, G_TT_NONE);
-    gDPPipeSync(gfx++);
-    gDPSetAlphaDither(gfx++, G_AD_PATTERN);
-    gDPSetCombineLERP(gfx++, 0, 0, 0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0, 0, 0,
-        0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0);
-    gDPPipeSync(gfx++);
-    gDPSetAlphaCompare(gfx++, G_AC_NONE);
-    gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
-    LoadTextureBlock(&gfx, ImageBody(f_ResultsShineImage), G_IM_FMT_I,
-        G_IM_SIZ_8b, NOTICE_SHINE_SIZE, NOTICE_SHINE_SIZE, 0, 0, 0, G_TX_NOMASK,
-        G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-    if (f_NoticeTime == NOTICE_CHARACTER_VOICE_FRAME) {
-      PlayCharacterSound(f_PortraitCharacterIndex, NOTICE_CHARACTER_VOICE_SLOT,
-          CHARACTER_SOUND_NOTICE, SOUND_FULL_SCALE, SOUND_FULL_SCALE);
-    }
+    size = pop * NOTICE_PORTRAIT_POP_SIZE;
+    if (size > 0) {
+        s32 centerX;
+        s32 centerY;
 
-    if (f_NoticeTime == NOTICE_SHINE_START) {
-      PlaySoundWithEffects(SOUND_SHRINKING_IMAGE, NOTICE_SHINE_SOUND_CHANNEL,
-          NOTICE_SHINE_SOUND_VOLUME, 0, SOUND_FULL_SCALE);
-    }
-
-    if (f_NoticeTime == 2) {
-      PlaySoundWithEffects(SOUND_UNLOCK_EVERYTHING, NOTICE_SWING_SOUND_CHANNEL,
-          NOTICE_SWING_SOUND_VOLUME, 0, SOUND_FULL_SCALE);
-    }
-
-    if (f_NoticeTime >= NOTICE_SHINE_START) {
-      if (f_NoticeTime < NOTICE_SHINE_END) {
-        shineTexelX = TexelCoordinate(NOTICE_SHINE_SIZE -
-            ((f_NoticeTime - NOTICE_SHINE_START) * NOTICE_SHINE_STEP));
-        DrawTextureRect(&gfx,
-            QuarterPixels(f_NoticeLift + NOTICE_CHARACTER_SHINE_LEFT),
-            QuarterPixels(f_CharacterNoticeShift + NOTICE_CHARACTER_SHINE_TOP),
-            QuarterPixels(f_NoticeLift + NOTICE_CHARACTER_SHINE_LEFT +
-                NOTICE_CHARACTER_TITLE_WIDTH),
-            QuarterPixels(f_CharacterNoticeShift + NOTICE_CHARACTER_SHINE_TOP +
-                NOTICE_CHARACTER_SHINE_HEIGHT),
-            G_TX_RENDERTILE, shineTexelX, 0, NOTICE_CHARACTER_SHINE_DSDX,
-            NOTICE_CHARACTER_SHINE_DTDY);
-      }
+        LoadLargePalette(&gfx, f_PortraitPalette);
+        LoadTextureBlock(
+            &gfx,
+            f_PortraitImage,
+            G_IM_FMT_CI,
+            G_IM_SIZ_8b,
+            NOTICE_PORTRAIT_SIZE,
+            NOTICE_PORTRAIT_SIZE,
+            0,
+            0,
+            0,
+            G_TX_NOMASK,
+            G_TX_NOMASK,
+            G_TX_NOLOD,
+            G_TX_NOLOD
+        );
+        step = TexelRunStep(NOTICE_PORTRAIT_SIZE / 2, size);
+        centerX = f_NoticeLift + NOTICE_CENTER_X;
+        centerY = f_CharacterNoticeShift + NOTICE_CENTER_Y;
+        DrawTextureRect(
+            &gfx,
+            QuarterPixels(centerX - size),
+            QuarterPixels(centerY - size),
+            QuarterPixels(size + centerX),
+            QuarterPixels(size + centerY),
+            G_TX_RENDERTILE,
+            0,
+            0,
+            step,
+            step
+        );
     }
 
     gDPPipeSync(gfx++);
-    gDPSetDepthSource(gfx++, G_ZS_PIXEL);
-  }
+    gDPSetTextureFilter(gfx++, G_TF_POINT);
+    height = pop * NOTICE_CHARACTER_TITLE_POP_HEIGHT;
+    width = pop * NOTICE_CHARACTER_TITLE_POP_WIDTH;
+    if (width > 0 && height > 0) {
+        LoadLargePalette(&gfx, ImageBody(f_NoticeTitleImage));
+        for (i = 0; i != NOTICE_CHARACTER_TITLE_STRIP_COUNT; i++) {
+            LoadTextureBlock(
+                &gfx,
+                LargeImageTexels(f_NoticeTitleImage) +
+                    (i * NOTICE_CHARACTER_TITLE_WIDTH * NOTICE_TITLE_STRIP_HEIGHT),
+                G_IM_FMT_CI,
+                G_IM_SIZ_8b,
+                NOTICE_CHARACTER_TITLE_WIDTH,
+                NOTICE_TITLE_STRIP_HEIGHT,
+                0,
+                0,
+                0,
+                G_TX_NOMASK,
+                G_TX_NOMASK,
+                G_TX_NOLOD,
+                G_TX_NOLOD
+            );
+            /* This pass mirrors the slide, unlike the depth pass and the shine */
+            liftFromCenter = f_NoticeLift - NOTICE_CENTER_X;
+            DrawTextureRect(
+                &gfx,
+                QuarterPixels(NOTICE_CENTER_X - width - f_NoticeLift),
+                QuarterPixels(CharacterTitleStripTop(i, height) + f_CharacterNoticeShift),
+                QuarterPixels(width - liftFromCenter),
+                QuarterPixels(CharacterTitleStripTop(i, height) + height + f_CharacterNoticeShift),
+                G_TX_RENDERTILE,
+                0,
+                0,
+                TexelRunStep((NOTICE_CHARACTER_TITLE_WIDTH / 2), width),
+                TexelRunStep(NOTICE_TITLE_STRIP_HEIGHT, height)
+            );
+        }
 
-  *displayListHead = gfx;
+        /* The title again, into the depth buffer alone, so that the shine behind it
+         * only lights the letters */
+        gDPPipeSync(gfx++);
+        gDPSetDepthSource(gfx++, G_ZS_PRIM);
+        gDPSetPrimDepth(gfx++, NOTICE_TITLE_DEPTH, 0);
+        gDPSetCombineLERP(
+            gfx++,
+            0,
+            0,
+            0,
+            TEXEL0,
+            0,
+            1,
+            TEXEL0,
+            1,
+            0,
+            0,
+            0,
+            TEXEL0,
+            0,
+            1,
+            TEXEL0,
+            1
+        );
+        gDPPipeSync(gfx++);
+        gDPSetRenderMode(
+            gfx++,
+            GBL_c1(G_BL_CLR_MEM, G_BL_A_IN, G_BL_CLR_MEM, G_BL_A_MEM),
+            G_RM_AA_ZB_TEX_EDGE2
+        );
+        for (i = 0; i != NOTICE_CHARACTER_TITLE_STRIP_COUNT; i++) {
+            LoadTextureBlock(
+                &gfx,
+                LargeImageTexels(f_NoticeTitleImage) +
+                    (i * NOTICE_CHARACTER_TITLE_WIDTH * NOTICE_TITLE_STRIP_HEIGHT),
+                G_IM_FMT_CI,
+                G_IM_SIZ_8b,
+                NOTICE_CHARACTER_TITLE_WIDTH,
+                NOTICE_TITLE_STRIP_HEIGHT,
+                0,
+                0,
+                0,
+                G_TX_NOMASK,
+                G_TX_NOMASK,
+                G_TX_NOLOD,
+                G_TX_NOLOD
+            );
+            titleCenterX = f_NoticeLift + NOTICE_CENTER_X;
+            DrawTextureRect(
+                &gfx,
+                QuarterPixels(titleCenterX - width),
+                QuarterPixels(CharacterTitleStripTop(i, height) + f_CharacterNoticeShift),
+                QuarterPixels(width + titleCenterX),
+                QuarterPixels(CharacterTitleStripTop(i, height) + height + f_CharacterNoticeShift),
+                G_TX_RENDERTILE,
+                0,
+                0,
+                TexelRunStep((NOTICE_CHARACTER_TITLE_WIDTH / 2), width),
+                TexelRunStep(NOTICE_TITLE_STRIP_HEIGHT, height)
+            );
+        }
+
+        gDPSetPrimDepth(gfx++, NOTICE_SHINE_DEPTH, 0);
+        gDPPipeSync(gfx++);
+        gDPSetRenderMode(gfx++, G_RM_ZB_XLU_SURF, G_RM_ZB_XLU_SURF2);
+        gDPPipeSync(gfx++);
+        gDPSetTextureLUT(gfx++, G_TT_NONE);
+        gDPPipeSync(gfx++);
+        gDPSetAlphaDither(gfx++, G_AD_PATTERN);
+        gDPSetCombineLERP(
+            gfx++,
+            0,
+            0,
+            0,
+            PRIMITIVE,
+            PRIMITIVE,
+            0,
+            TEXEL0,
+            0,
+            0,
+            0,
+            0,
+            PRIMITIVE,
+            PRIMITIVE,
+            0,
+            TEXEL0,
+            0
+        );
+        gDPPipeSync(gfx++);
+        gDPSetAlphaCompare(gfx++, G_AC_NONE);
+        gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
+        LoadTextureBlock(
+            &gfx,
+            ImageBody(f_ResultsShineImage),
+            G_IM_FMT_I,
+            G_IM_SIZ_8b,
+            NOTICE_SHINE_SIZE,
+            NOTICE_SHINE_SIZE,
+            0,
+            0,
+            0,
+            G_TX_NOMASK,
+            G_TX_NOMASK,
+            G_TX_NOLOD,
+            G_TX_NOLOD
+        );
+        if (f_NoticeTime == NOTICE_CHARACTER_VOICE_FRAME) {
+            PlayCharacterSound(
+                f_PortraitCharacterIndex,
+                NOTICE_CHARACTER_VOICE_SLOT,
+                CHARACTER_SOUND_NOTICE,
+                SOUND_FULL_SCALE,
+                SOUND_FULL_SCALE
+            );
+        }
+
+        if (f_NoticeTime == NOTICE_SHINE_START) {
+            PlaySoundWithEffects(
+                SOUND_SHRINKING_IMAGE,
+                NOTICE_SHINE_SOUND_CHANNEL,
+                NOTICE_SHINE_SOUND_VOLUME,
+                0,
+                SOUND_FULL_SCALE
+            );
+        }
+
+        if (f_NoticeTime == 2) {
+            PlaySoundWithEffects(
+                SOUND_UNLOCK_EVERYTHING,
+                NOTICE_SWING_SOUND_CHANNEL,
+                NOTICE_SWING_SOUND_VOLUME,
+                0,
+                SOUND_FULL_SCALE
+            );
+        }
+
+        if (f_NoticeTime >= NOTICE_SHINE_START) {
+            if (f_NoticeTime < NOTICE_SHINE_END) {
+                shineTexelX = TexelCoordinate(
+                    NOTICE_SHINE_SIZE - ((f_NoticeTime - NOTICE_SHINE_START) * NOTICE_SHINE_STEP)
+                );
+                DrawTextureRect(
+                    &gfx,
+                    QuarterPixels(f_NoticeLift + NOTICE_CHARACTER_SHINE_LEFT),
+                    QuarterPixels(f_CharacterNoticeShift + NOTICE_CHARACTER_SHINE_TOP),
+                    QuarterPixels(
+                        f_NoticeLift + NOTICE_CHARACTER_SHINE_LEFT + NOTICE_CHARACTER_TITLE_WIDTH
+                    ),
+                    QuarterPixels(
+                        f_CharacterNoticeShift + NOTICE_CHARACTER_SHINE_TOP +
+                        NOTICE_CHARACTER_SHINE_HEIGHT
+                    ),
+                    G_TX_RENDERTILE,
+                    shineTexelX,
+                    0,
+                    NOTICE_CHARACTER_SHINE_DSDX,
+                    NOTICE_CHARACTER_SHINE_DTDY
+                );
+            }
+        }
+
+        gDPPipeSync(gfx++);
+        gDPSetDepthSource(gfx++, G_ZS_PIXEL);
+    }
+
+    *displayListHead = gfx;
 }
 
 /* Returns TRUE once the results have been saved and freed */
-s32 UpdateRoundResults(ControllerState* controller) {
-  Boolean isDone;
+s32 UpdateRoundResults(ControllerState *controller) {
+    Boolean isDone;
 
-  switch (f_ResultsState) {
-    case RESULTS_SLIDING_IN:
-      if (f_ResultsSlide == 1) {
-        f_ResultsState = RESULTS_SHOWN;
-        f_ResultsSlide = 0;
-        f_ResultsStep = 0;
-        f_ResultsStepTime = 0;
-        break;
-      }
+    switch (f_ResultsState) {
+        case RESULTS_SLIDING_IN:
+            if (f_ResultsSlide == 1) {
+                f_ResultsState = RESULTS_SHOWN;
+                f_ResultsSlide = 0;
+                f_ResultsStep = 0;
+                f_ResultsStepTime = 0;
+                break;
+            }
 
-      f_ResultsSlide += -f_ResultsSlide / 2;
-      break;
-    case RESULTS_SHOWN:
-      if (g_GameState.isClubTournament) {
-        isDone = ShowScorePassword(controller);
-      } else {
-        switch (g_GameState.gameMode) {
-          case GAME_MODE_STROKE:
-          case GAME_MODE_UNRECORDED_STROKE:
-          case GAME_MODE_SPEED_GOLF:
-          case GAME_MODE_SKINS_MATCH:
-          case GAME_MODE_CLUB_SLOTS:
-            isDone = UpdateCoursePointsResults(controller);
+            f_ResultsSlide += -f_ResultsSlide / 2;
             break;
-          case GAME_MODE_MATCH_GAME:
-          case GAME_MODE_GET_CHARACTER:
-            isDone = UpdateMatchResults(controller);
+        case RESULTS_SHOWN:
+            if (g_GameState.isClubTournament) {
+                isDone = ShowScorePassword(controller);
+            }
+            else {
+                switch (g_GameState.gameMode) {
+                    case GAME_MODE_STROKE:
+                    case GAME_MODE_UNRECORDED_STROKE:
+                    case GAME_MODE_SPEED_GOLF:
+                    case GAME_MODE_SKINS_MATCH:
+                    case GAME_MODE_CLUB_SLOTS:
+                        isDone = UpdateCoursePointsResults(controller);
+                        break;
+                    case GAME_MODE_MATCH_GAME:
+                    case GAME_MODE_GET_CHARACTER:
+                        isDone = UpdateMatchResults(controller);
+                        break;
+                    case GAME_MODE_TOURNAMENT:
+                        isDone = UpdateTournamentResults(controller);
+                        break;
+                    default:
+                        return FALSE;
+                }
+            }
+
+            if (isDone) {
+                f_ResultsState = RESULTS_CLOSING;
+            }
+
             break;
-          case GAME_MODE_TOURNAMENT:
-            isDone = UpdateTournamentResults(controller);
-            break;
-          default:
-            return FALSE;
-        }
-      }
+        case RESULTS_CLOSING:
+            WriteSaveData();
+            OpenRoundResults(CLOSE_ROUND_RESULTS);
+            return TRUE;
+    }
 
-      if (isDone) {
-        f_ResultsState = RESULTS_CLOSING;
-      }
-
-      break;
-    case RESULTS_CLOSING:
-      WriteSaveData();
-      OpenRoundResults(CLOSE_ROUND_RESULTS);
-      return TRUE;
-  }
-
-  return FALSE;
+    return FALSE;
 }
 
 s32 GetBannerState(void) {
-  return f_BannerState;
+    return f_BannerState;
 }
 
 void SetResultsBanner(s32 state, s32 kind) {
-  f_BannerState = state;
-  f_BannerKind = kind;
-  if (state == BANNER_SLIDING_IN) {
-    f_BannerX = SCREEN_WIDTH;
-    f_BannerY = 0;
-  }
+    f_BannerState = state;
+    f_BannerKind = kind;
+    if (state == BANNER_SLIDING_IN) {
+        f_BannerX = SCREEN_WIDTH;
+        f_BannerY = 0;
+    }
 }
 
 /* The trophy is drawn in two parts, as each must fit in texture memory */
@@ -2022,279 +2440,491 @@ void SetResultsBanner(s32 state, s32 kind) {
  * conditional expression 65 (17); and a modulo 74 (16).
  */
 #ifdef NON_MATCHING
-void DrawResultsBanner(Gfx** displayListHead) {
-  Gfx* gfx;
-  s32 i;
-  s32 rank;
-  s32 place;
-  s32 course;
-  s32 top;
-  s32 trophyHeight;
+void DrawResultsBanner(Gfx **displayListHead) {
+    Gfx *gfx;
+    s32 i;
+    s32 rank;
+    s32 place;
+    s32 course;
+    s32 top;
+    s32 trophyHeight;
 
-  gfx = *displayListHead;
+    gfx = *displayListHead;
 
-  switch (f_BannerState) {
-    case BANNER_SHOWN:
-    case BANNER_HIDDEN:
-      break;
-    case BANNER_SLIDING_IN:
-      if (f_BannerX == 1) {
-        f_BannerState = BANNER_SHOWN;
-      } else {
-        f_BannerX += -f_BannerX / 2;
-      }
+    switch (f_BannerState) {
+        case BANNER_SHOWN:
+        case BANNER_HIDDEN:
+            break;
+        case BANNER_SLIDING_IN:
+            if (f_BannerX == 1) {
+                f_BannerState = BANNER_SHOWN;
+            }
+            else {
+                f_BannerX += -f_BannerX / 2;
+            }
 
-      break;
-    case BANNER_SLIDING_OUT:
-      if (f_BannerX >= -1) {
-        f_BannerX -= BANNER_SLIDE_OUT_SPEED;
-      } else {
-        f_BannerX += f_BannerX / 2;
-      }
+            break;
+        case BANNER_SLIDING_OUT:
+            if (f_BannerX >= -1) {
+                f_BannerX -= BANNER_SLIDE_OUT_SPEED;
+            }
+            else {
+                f_BannerX += f_BannerX / 2;
+            }
 
-      if (f_BannerX < BANNER_GONE_X) {
-        f_BannerState = BANNER_HIDDEN;
-      }
+            if (f_BannerX < BANNER_GONE_X) {
+                f_BannerState = BANNER_HIDDEN;
+            }
 
-      break;
-  }
-
-  switch (f_BannerKind) {
-    case BANNER_KIND_UNUSED_A:
-    case BANNER_KIND_UNUSED_B:
-      break;
-    case BANNER_KIND_POINTS:
-      SetTextSlotValue(f_CoursePointsTally.shown, BANNER_TEXT_SLOT, 0);
-      SetTextSlot(f_BannerX + BANNER_TEXT_X, f_BannerY + BANNER_TEXT_Y,
-          MESSAGE_POINTS_EARNED, TEXT_SLOT_LARGE_FONT, BANNER_TEXT_SLOT,
-          TEXT_FLAG_DRAWN_BY_OWNER | TEXT_FLAG_CENTERED, BANNER_TEXT_RED,
-          BANNER_TEXT_GREEN, BANNER_TEXT_BLUE, BANNER_TEXT_ALPHA);
-      break;
-    case BANNER_KIND_TOURNAMENT_PLACE:
-      rank = f_PlayerRanks[0];
-      place = rank - 1;
-      if (f_TournamentOpenCourseCount < COURSE_COUNT) {
-        if (place < TROPHY_PLACE_COUNT) {
-          SetTextSlotValue(f_PrizeShown, BANNER_TEXT_SLOT, 0);
-          SetTextSlot(f_BannerX + PRIZE_TEXT_X, f_BannerY + PRIZE_TEXT_Y,
-              rank + MESSAGE_TROPHY_PRIZE, TEXT_SLOT_LARGE_FONT,
-              BANNER_TEXT_SLOT, TEXT_FLAG_DRAWN_BY_OWNER, BANNER_TEXT_RED,
-              BANNER_TEXT_GREEN, BANNER_TEXT_BLUE, BANNER_TEXT_ALPHA);
-        } else {
-          if (rank < PLACE_TWENTY_FIRST || rank > PLACE_TWENTY_THIRD) {
-            sprintf(g_PrintBuffer, "%dth", rank);
-          } else if (rank == PLACE_TWENTY_FIRST) {
-            sprintf(g_PrintBuffer, "%dst", rank);
-          } else if (rank == PLACE_TWENTY_SECOND) {
-            sprintf(g_PrintBuffer, "%dnd", rank);
-          } else if (rank == PLACE_TWENTY_THIRD) {
-            sprintf(g_PrintBuffer, "%drd", rank);
-          }
-
-          SetTextName(g_PrintBuffer);
-          SetTextSlotValue(f_PrizeShown, BANNER_TEXT_SLOT, 1);
-          SetTextSlot(f_BannerX + PRIZE_TEXT_X, f_BannerY + PRIZE_TEXT_Y,
-              MESSAGE_PLACE_PRIZE, TEXT_SLOT_LARGE_FONT, BANNER_TEXT_SLOT,
-              TEXT_FLAG_DRAWN_BY_OWNER, BANNER_TEXT_RED, BANNER_TEXT_GREEN,
-              BANNER_TEXT_BLUE, BANNER_TEXT_ALPHA);
-        }
-      } else if (place < TROPHY_PLACE_COUNT) {
-        SetTextSlot(f_BannerX + BANNER_TEXT_X, f_BannerY + BANNER_TEXT_Y,
-            rank + MESSAGE_TROPHY_PLACE, TEXT_SLOT_LARGE_FONT, BANNER_TEXT_SLOT,
-            TEXT_FLAG_DRAWN_BY_OWNER | TEXT_FLAG_CENTERED, BANNER_TEXT_RED,
-            BANNER_TEXT_GREEN, BANNER_TEXT_BLUE, BANNER_TEXT_ALPHA);
-      } else {
-        SetTextSlotValue(rank, BANNER_TEXT_SLOT, 0);
-        SetTextSlot(f_BannerX + BANNER_TEXT_X, f_BannerY + BANNER_TEXT_Y,
-            MESSAGE_PLACE, TEXT_SLOT_LARGE_FONT, BANNER_TEXT_SLOT,
-            TEXT_FLAG_DRAWN_BY_OWNER | TEXT_FLAG_CENTERED, BANNER_TEXT_RED,
-            BANNER_TEXT_GREEN, BANNER_TEXT_BLUE, BANNER_TEXT_ALPHA);
-      }
-
-      break;
-    case BANNER_KIND_UNUSED_MESSAGE:
-      SetTextSlot(f_BannerX + BANNER_TEXT_X, f_BannerY + BANNER_TEXT_Y,
-          MESSAGE_UNUSED_BANNER, TEXT_SLOT_LARGE_FONT, BANNER_TEXT_SLOT,
-          TEXT_FLAG_DRAWN_BY_OWNER | TEXT_FLAG_CENTERED, BANNER_TEXT_RED,
-          BANNER_TEXT_GREEN, BANNER_TEXT_BLUE, BANNER_TEXT_ALPHA);
-      break;
-  }
-
-  if (f_BannerState == BANNER_HIDDEN) {
-    return;
-  }
-
-  gDPPipeSync(gfx++);
-  gDPPipeSync(gfx++);
-  gDPSetTextureLUT(gfx++, G_TT_NONE);
-  gDPPipeSync(gfx++);
-  gDPSetAlphaDither(gfx++, G_AD_PATTERN);
-  gDPPipeSync(gfx++);
-  gDPSetTextureFilter(gfx++, G_TF_BILERP);
-  gDPPipeSync(gfx++);
-  gDPSetRenderMode(gfx++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
-  gDPSetCombineLERP(gfx++, 0, 0, 0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0, 0, 0, 0,
-      PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0);
-  gDPPipeSync(gfx++);
-  gDPSetAlphaCompare(gfx++, G_AC_NONE);
-  gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, BANNER_CLOUD_ALPHA);
-  for (i = 0; i != BANNER_CLOUD_STRIP_COUNT; i++) {
-    LoadNibbleTextureBlock(&gfx,
-        ImageBody(f_ResultsCloudImage) + (i * BANNER_CLOUD_STRIP_SIZE),
-        G_IM_FMT_I, BANNER_CLOUD_WIDTH, BANNER_CLOUD_HEIGHT, 0, G_TX_CLAMP,
-        G_TX_CLAMP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-    if (f_BannerKind == BANNER_KIND_POINTS) {
-      DrawTextureRect(&gfx, QuarterPixels(f_BannerX + BANNER_CLOUD_LEFT),
-          QuarterPixels(f_BannerY + TALL_BANNER_CLOUD_TOP +
-              (i * TALL_BANNER_CLOUD_HEIGHT)),
-          QuarterPixels(f_BannerX + BANNER_CLOUD_RIGHT),
-          QuarterPixels(f_BannerY + TALL_BANNER_CLOUD_TOP +
-              (i * TALL_BANNER_CLOUD_HEIGHT) + TALL_BANNER_CLOUD_HEIGHT),
-          G_TX_RENDERTILE, 0, 0, BANNER_CLOUD_DSDX, TALL_BANNER_CLOUD_DTDY);
-    } else {
-      DrawTextureRect(&gfx, QuarterPixels(f_BannerX + BANNER_CLOUD_LEFT),
-          QuarterPixels(
-              f_BannerY + BANNER_CLOUD_TOP + (i * BANNER_CLOUD_HEIGHT)),
-          QuarterPixels(f_BannerX + BANNER_CLOUD_RIGHT),
-          QuarterPixels(f_BannerY + BANNER_CLOUD_TOP +
-              (i * BANNER_CLOUD_HEIGHT) + BANNER_CLOUD_HEIGHT),
-          G_TX_RENDERTILE, 0, 0, BANNER_CLOUD_DSDX, TEXEL_STEP_ONE);
+            break;
     }
-  }
 
-  SetUpTextDrawing(&gfx);
-  gDPSetPrimColor(gfx++, 0, 0, BANNER_TEXT_RED, BANNER_TEXT_GREEN,
-      BANNER_TEXT_BLUE, BANNER_TEXT_ALPHA);
-  DrawLargeTextSlot(&gfx, BANNER_TEXT_SLOT);
-  if (f_BannerKind == BANNER_KIND_TOURNAMENT_PLACE) {
-    course = g_GameState.courseIndex;
-    if (f_PlayerRanks[0] <= TROPHY_PLACE_COUNT) {
-      f_TrophyShineFrame = (f_TrophyShineFrame + 1) % TROPHY_SHINE_CYCLE;
-      if (f_TallySpeed == FAST_TALLY_SPEED ||
-          f_TrophyShineFrame % TROPHY_FRAME_TICKS == 0) {
-        EncodedAsset asset;
+    switch (f_BannerKind) {
+        case BANNER_KIND_UNUSED_A:
+        case BANNER_KIND_UNUSED_B:
+            break;
+        case BANNER_KIND_POINTS:
+            SetTextSlotValue(f_CoursePointsTally.shown, BANNER_TEXT_SLOT, 0);
+            SetTextSlot(
+                f_BannerX + BANNER_TEXT_X,
+                f_BannerY + BANNER_TEXT_Y,
+                MESSAGE_POINTS_EARNED,
+                TEXT_SLOT_LARGE_FONT,
+                BANNER_TEXT_SLOT,
+                TEXT_FLAG_DRAWN_BY_OWNER | TEXT_FLAG_CENTERED,
+                BANNER_TEXT_RED,
+                BANNER_TEXT_GREEN,
+                BANNER_TEXT_BLUE,
+                BANNER_TEXT_ALPHA
+            );
+            break;
+        case BANNER_KIND_TOURNAMENT_PLACE:
+            rank = f_PlayerRanks[0];
+            place = rank - 1;
+            if (f_TournamentOpenCourseCount < COURSE_COUNT) {
+                if (place < TROPHY_PLACE_COUNT) {
+                    SetTextSlotValue(f_PrizeShown, BANNER_TEXT_SLOT, 0);
+                    SetTextSlot(
+                        f_BannerX + PRIZE_TEXT_X,
+                        f_BannerY + PRIZE_TEXT_Y,
+                        rank + MESSAGE_TROPHY_PRIZE,
+                        TEXT_SLOT_LARGE_FONT,
+                        BANNER_TEXT_SLOT,
+                        TEXT_FLAG_DRAWN_BY_OWNER,
+                        BANNER_TEXT_RED,
+                        BANNER_TEXT_GREEN,
+                        BANNER_TEXT_BLUE,
+                        BANNER_TEXT_ALPHA
+                    );
+                }
+                else {
+                    if (rank < PLACE_TWENTY_FIRST || rank > PLACE_TWENTY_THIRD) {
+                        sprintf(g_PrintBuffer, "%dth", rank);
+                    }
+                    else if (rank == PLACE_TWENTY_FIRST) {
+                        sprintf(g_PrintBuffer, "%dst", rank);
+                    }
+                    else if (rank == PLACE_TWENTY_SECOND) {
+                        sprintf(g_PrintBuffer, "%dnd", rank);
+                    }
+                    else if (rank == PLACE_TWENTY_THIRD) {
+                        sprintf(g_PrintBuffer, "%drd", rank);
+                    }
 
-        f_TrophyFrame++;
-        if (f_TrophyFrame == f_TrophyAssets[course].frameCount) {
-          f_TrophyFrame = 0;
-        }
+                    SetTextName(g_PrintBuffer);
+                    SetTextSlotValue(f_PrizeShown, BANNER_TEXT_SLOT, 1);
+                    SetTextSlot(
+                        f_BannerX + PRIZE_TEXT_X,
+                        f_BannerY + PRIZE_TEXT_Y,
+                        MESSAGE_PLACE_PRIZE,
+                        TEXT_SLOT_LARGE_FONT,
+                        BANNER_TEXT_SLOT,
+                        TEXT_FLAG_DRAWN_BY_OWNER,
+                        BANNER_TEXT_RED,
+                        BANNER_TEXT_GREEN,
+                        BANNER_TEXT_BLUE,
+                        BANNER_TEXT_ALPHA
+                    );
+                }
+            }
+            else if (place < TROPHY_PLACE_COUNT) {
+                SetTextSlot(
+                    f_BannerX + BANNER_TEXT_X,
+                    f_BannerY + BANNER_TEXT_Y,
+                    rank + MESSAGE_TROPHY_PLACE,
+                    TEXT_SLOT_LARGE_FONT,
+                    BANNER_TEXT_SLOT,
+                    TEXT_FLAG_DRAWN_BY_OWNER | TEXT_FLAG_CENTERED,
+                    BANNER_TEXT_RED,
+                    BANNER_TEXT_GREEN,
+                    BANNER_TEXT_BLUE,
+                    BANNER_TEXT_ALPHA
+                );
+            }
+            else {
+                SetTextSlotValue(rank, BANNER_TEXT_SLOT, 0);
+                SetTextSlot(
+                    f_BannerX + BANNER_TEXT_X,
+                    f_BannerY + BANNER_TEXT_Y,
+                    MESSAGE_PLACE,
+                    TEXT_SLOT_LARGE_FONT,
+                    BANNER_TEXT_SLOT,
+                    TEXT_FLAG_DRAWN_BY_OWNER | TEXT_FLAG_CENTERED,
+                    BANNER_TEXT_RED,
+                    BANNER_TEXT_GREEN,
+                    BANNER_TEXT_BLUE,
+                    BANNER_TEXT_ALPHA
+                );
+            }
 
-        OpenEncodedAsset(f_TrophyAssets[course].image + f_TrophyFrame, &asset);
-        ReadEncodedAsset(f_TrophyImage, &asset);
-      }
-
-      gSPDisplayList(gfx++, g_DecalTextureSetup);
-      gDPPipeSync(gfx++);
-      gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-      gDPPipeSync(gfx++);
-      gDPSetTextureFilter(gfx++, G_TF_POINT);
-      LoadLargePalette(&gfx, f_TrophyPalette);
-      top = -f_TrophySizes[course][TROPHY_PART_HEIGHTS] -
-          f_TrophySizes[course][TROPHY_PART_HEIGHTS + 1];
-      for (i = 0; i != TROPHY_PART_COUNT; i++) {
-        gDPLoadTextureTile(gfx++,
-            TextureAddress((u32)f_TrophyImage +
-                (i * f_TrophySizes[course][TROPHY_WIDTH] *
-                    f_TrophySizes[course][TROPHY_PART_HEIGHTS])),
-            G_IM_FMT_CI, G_IM_SIZ_8b, f_TrophySizes[course][TROPHY_WIDTH],
-            f_TrophySizes[course][TROPHY_PART_HEIGHTS + i], 0, 0,
-            f_TrophySizes[course][TROPHY_WIDTH] - 1,
-            f_TrophySizes[course][TROPHY_PART_HEIGHTS + i] - 1, 0, 0, 0,
-            G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-        DrawTextureRect(&gfx,
-            QuarterPixels(TROPHY_CENTER_X + f_BannerX -
-                (f_TrophySizes[course][TROPHY_WIDTH] / 2)),
-            QuarterPixels(top + TROPHY_BOTTOM),
-            QuarterPixels(TROPHY_CENTER_X + f_BannerX +
-                (f_TrophySizes[course][TROPHY_WIDTH] / 2)),
-            QuarterPixels(TROPHY_BOTTOM + top +
-                f_TrophySizes[course][TROPHY_PART_HEIGHTS + i]),
-            G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
-        top += f_TrophySizes[course][TROPHY_PART_HEIGHTS + i];
-      }
-
-      /* The trophy again, into the depth buffer alone */
-      gDPPipeSync(gfx++);
-      gDPSetDepthSource(gfx++, G_ZS_PRIM);
-      gDPSetPrimDepth(gfx++, NOTICE_TITLE_DEPTH, 0);
-      gDPSetCombineLERP(gfx++, 0, 0, 0, TEXEL0, 0, 1, TEXEL0, 1, 0, 0, 0,
-          TEXEL0, 0, 1, TEXEL0, 1);
-      gDPPipeSync(gfx++);
-      gDPSetRenderMode(gfx++,
-          GBL_c1(G_BL_CLR_MEM, G_BL_A_IN, G_BL_CLR_MEM, G_BL_A_MEM),
-          G_RM_AA_ZB_TEX_EDGE2);
-      top = -f_TrophySizes[course][TROPHY_PART_HEIGHTS] -
-          f_TrophySizes[course][TROPHY_PART_HEIGHTS + 1];
-      for (i = 0; i != TROPHY_PART_COUNT; i++) {
-        gDPLoadTextureTile(gfx++,
-            TextureAddress((u32)f_TrophyImage +
-                (i * f_TrophySizes[course][TROPHY_WIDTH] *
-                    f_TrophySizes[course][TROPHY_PART_HEIGHTS])),
-            G_IM_FMT_CI, G_IM_SIZ_8b, f_TrophySizes[course][TROPHY_WIDTH],
-            f_TrophySizes[course][TROPHY_PART_HEIGHTS + i], 0, 0,
-            f_TrophySizes[course][TROPHY_WIDTH] - 1,
-            f_TrophySizes[course][TROPHY_PART_HEIGHTS + i] - 1, 0, 0, 0,
-            G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-        DrawTextureRect(&gfx,
-            QuarterPixels(TROPHY_CENTER_X + f_BannerX -
-                (f_TrophySizes[course][TROPHY_WIDTH] / 2)),
-            QuarterPixels(top + TROPHY_BOTTOM),
-            QuarterPixels(TROPHY_CENTER_X + f_BannerX +
-                (f_TrophySizes[course][TROPHY_WIDTH] / 2)),
-            QuarterPixels(TROPHY_BOTTOM + top +
-                f_TrophySizes[course][TROPHY_PART_HEIGHTS + i]),
-            G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
-        top += f_TrophySizes[course][TROPHY_PART_HEIGHTS + i];
-      }
-
-      gDPSetPrimDepth(gfx++, NOTICE_SHINE_DEPTH, 0);
-      gDPPipeSync(gfx++);
-      gDPSetRenderMode(gfx++, G_RM_ZB_XLU_SURF, G_RM_ZB_XLU_SURF2);
-      gDPPipeSync(gfx++);
-      gDPSetTextureLUT(gfx++, G_TT_NONE);
-      gDPPipeSync(gfx++);
-      gDPSetAlphaDither(gfx++, G_AD_PATTERN);
-      gDPSetCombineLERP(gfx++, 0, 0, 0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0, 0,
-          0, 0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0);
-      gDPPipeSync(gfx++);
-      gDPSetAlphaCompare(gfx++, G_AC_NONE);
-      gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, TROPHY_SHINE_TEXT_ALPHA);
-      LoadTextureBlock(&gfx, ImageBody(f_ResultsShineImage), G_IM_FMT_I,
-          G_IM_SIZ_8b, NOTICE_SHINE_SIZE, NOTICE_SHINE_SIZE, 0, 0, 0,
-          G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-      if (f_TrophyShineFrame == TROPHY_SHINE_SOUND_FRAME) {
-        PlaySoundWithEffects(SOUND_SHRINKING_IMAGE, TROPHY_SHINE_SOUND_CHANNEL,
-            TROPHY_SHINE_SOUND_VOLUME, TROPHY_SHINE_SOUND_REVERB,
-            TROPHY_SHINE_SOUND_PAN);
-      }
-
-      if (f_TrophyShineFrame >= TROPHY_SHINE_START) {
-        if (f_TrophyShineFrame < TROPHY_SHINE_CYCLE) {
-          /* The trophy's height, its two parts stacked */
-          trophyHeight = f_TrophySizes[course][TROPHY_PART_HEIGHTS] +
-              f_TrophySizes[course][TROPHY_PART_HEIGHTS + 1];
-          DrawTextureRect(&gfx,
-              QuarterPixels(TROPHY_CENTER_X + f_BannerX -
-                  (f_TrophySizes[course][TROPHY_WIDTH] / 2)),
-              QuarterPixels(TROPHY_BOTTOM - trophyHeight),
-              QuarterPixels(TROPHY_CENTER_X + f_BannerX +
-                  (f_TrophySizes[course][TROPHY_WIDTH] / 2)),
-              QuarterPixels(TROPHY_BOTTOM - trophyHeight +
-                  f_TrophySizes[course][TROPHY_SHINE_HEIGHT]),
-              G_TX_RENDERTILE,
-              TexelCoordinate(NOTICE_SHINE_SIZE -
-                  ((f_TrophyShineFrame - TROPHY_SHINE_START) *
-                      TROPHY_SHINE_SPEED)),
-              0, TROPHY_SHINE_DSDX, TEXEL_STEP_ONE);
-        }
-      }
-
-      gDPPipeSync(gfx++);
-      gDPSetDepthSource(gfx++, G_ZS_PIXEL);
+            break;
+        case BANNER_KIND_UNUSED_MESSAGE:
+            SetTextSlot(
+                f_BannerX + BANNER_TEXT_X,
+                f_BannerY + BANNER_TEXT_Y,
+                MESSAGE_UNUSED_BANNER,
+                TEXT_SLOT_LARGE_FONT,
+                BANNER_TEXT_SLOT,
+                TEXT_FLAG_DRAWN_BY_OWNER | TEXT_FLAG_CENTERED,
+                BANNER_TEXT_RED,
+                BANNER_TEXT_GREEN,
+                BANNER_TEXT_BLUE,
+                BANNER_TEXT_ALPHA
+            );
+            break;
     }
-  }
 
-  *displayListHead = gfx;
+    if (f_BannerState == BANNER_HIDDEN) {
+        return;
+    }
+
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_NONE);
+    gDPPipeSync(gfx++);
+    gDPSetAlphaDither(gfx++, G_AD_PATTERN);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_BILERP);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
+    gDPSetCombineLERP(
+        gfx++,
+        0,
+        0,
+        0,
+        PRIMITIVE,
+        PRIMITIVE,
+        0,
+        TEXEL0,
+        0,
+        0,
+        0,
+        0,
+        PRIMITIVE,
+        PRIMITIVE,
+        0,
+        TEXEL0,
+        0
+    );
+    gDPPipeSync(gfx++);
+    gDPSetAlphaCompare(gfx++, G_AC_NONE);
+    gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, BANNER_CLOUD_ALPHA);
+    for (i = 0; i != BANNER_CLOUD_STRIP_COUNT; i++) {
+        LoadNibbleTextureBlock(
+            &gfx,
+            ImageBody(f_ResultsCloudImage) + (i * BANNER_CLOUD_STRIP_SIZE),
+            G_IM_FMT_I,
+            BANNER_CLOUD_WIDTH,
+            BANNER_CLOUD_HEIGHT,
+            0,
+            G_TX_CLAMP,
+            G_TX_CLAMP,
+            G_TX_NOMASK,
+            G_TX_NOMASK,
+            G_TX_NOLOD,
+            G_TX_NOLOD
+        );
+        if (f_BannerKind == BANNER_KIND_POINTS) {
+            DrawTextureRect(
+                &gfx,
+                QuarterPixels(f_BannerX + BANNER_CLOUD_LEFT),
+                QuarterPixels(f_BannerY + TALL_BANNER_CLOUD_TOP + (i * TALL_BANNER_CLOUD_HEIGHT)),
+                QuarterPixels(f_BannerX + BANNER_CLOUD_RIGHT),
+                QuarterPixels(
+                    f_BannerY + TALL_BANNER_CLOUD_TOP + (i * TALL_BANNER_CLOUD_HEIGHT) +
+                    TALL_BANNER_CLOUD_HEIGHT
+                ),
+                G_TX_RENDERTILE,
+                0,
+                0,
+                BANNER_CLOUD_DSDX,
+                TALL_BANNER_CLOUD_DTDY
+            );
+        }
+        else {
+            DrawTextureRect(
+                &gfx,
+                QuarterPixels(f_BannerX + BANNER_CLOUD_LEFT),
+                QuarterPixels(f_BannerY + BANNER_CLOUD_TOP + (i * BANNER_CLOUD_HEIGHT)),
+                QuarterPixels(f_BannerX + BANNER_CLOUD_RIGHT),
+                QuarterPixels(
+                    f_BannerY + BANNER_CLOUD_TOP + (i * BANNER_CLOUD_HEIGHT) + BANNER_CLOUD_HEIGHT
+                ),
+                G_TX_RENDERTILE,
+                0,
+                0,
+                BANNER_CLOUD_DSDX,
+                TEXEL_STEP_ONE
+            );
+        }
+    }
+
+    SetUpTextDrawing(&gfx);
+    gDPSetPrimColor(
+        gfx++,
+        0,
+        0,
+        BANNER_TEXT_RED,
+        BANNER_TEXT_GREEN,
+        BANNER_TEXT_BLUE,
+        BANNER_TEXT_ALPHA
+    );
+    DrawLargeTextSlot(&gfx, BANNER_TEXT_SLOT);
+    if (f_BannerKind == BANNER_KIND_TOURNAMENT_PLACE) {
+        course = g_GameState.courseIndex;
+        if (f_PlayerRanks[0] <= TROPHY_PLACE_COUNT) {
+            f_TrophyShineFrame = (f_TrophyShineFrame + 1) % TROPHY_SHINE_CYCLE;
+            if (f_TallySpeed == FAST_TALLY_SPEED || f_TrophyShineFrame % TROPHY_FRAME_TICKS == 0) {
+                EncodedAsset asset;
+
+                f_TrophyFrame++;
+                if (f_TrophyFrame == f_TrophyAssets[course].frameCount) {
+                    f_TrophyFrame = 0;
+                }
+
+                OpenEncodedAsset(f_TrophyAssets[course].image + f_TrophyFrame, &asset);
+                ReadEncodedAsset(f_TrophyImage, &asset);
+            }
+
+            gSPDisplayList(gfx++, g_DecalTextureSetup);
+            gDPPipeSync(gfx++);
+            gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+            gDPPipeSync(gfx++);
+            gDPSetTextureFilter(gfx++, G_TF_POINT);
+            LoadLargePalette(&gfx, f_TrophyPalette);
+            top = -f_TrophySizes[course][TROPHY_PART_HEIGHTS] -
+                f_TrophySizes[course][TROPHY_PART_HEIGHTS + 1];
+            for (i = 0; i != TROPHY_PART_COUNT; i++) {
+                gDPLoadTextureTile(
+                    gfx++,
+                    TextureAddress(
+                        (u32)f_TrophyImage +
+                        (i * f_TrophySizes[course][TROPHY_WIDTH] *
+                            f_TrophySizes[course][TROPHY_PART_HEIGHTS])
+                    ),
+                    G_IM_FMT_CI,
+                    G_IM_SIZ_8b,
+                    f_TrophySizes[course][TROPHY_WIDTH],
+                    f_TrophySizes[course][TROPHY_PART_HEIGHTS + i],
+                    0,
+                    0,
+                    f_TrophySizes[course][TROPHY_WIDTH] - 1,
+                    f_TrophySizes[course][TROPHY_PART_HEIGHTS + i] - 1,
+                    0,
+                    0,
+                    0,
+                    G_TX_NOMASK,
+                    G_TX_NOMASK,
+                    G_TX_NOLOD,
+                    G_TX_NOLOD
+                );
+                DrawTextureRect(
+                    &gfx,
+                    QuarterPixels(
+                        TROPHY_CENTER_X + f_BannerX - (f_TrophySizes[course][TROPHY_WIDTH] / 2)
+                    ),
+                    QuarterPixels(top + TROPHY_BOTTOM),
+                    QuarterPixels(
+                        TROPHY_CENTER_X + f_BannerX + (f_TrophySizes[course][TROPHY_WIDTH] / 2)
+                    ),
+                    QuarterPixels(
+                        TROPHY_BOTTOM + top + f_TrophySizes[course][TROPHY_PART_HEIGHTS + i]
+                    ),
+                    G_TX_RENDERTILE,
+                    0,
+                    0,
+                    TEXEL_STEP_ONE,
+                    TEXEL_STEP_ONE
+                );
+                top += f_TrophySizes[course][TROPHY_PART_HEIGHTS + i];
+            }
+
+            /* The trophy again, into the depth buffer alone */
+            gDPPipeSync(gfx++);
+            gDPSetDepthSource(gfx++, G_ZS_PRIM);
+            gDPSetPrimDepth(gfx++, NOTICE_TITLE_DEPTH, 0);
+            gDPSetCombineLERP(
+                gfx++,
+                0,
+                0,
+                0,
+                TEXEL0,
+                0,
+                1,
+                TEXEL0,
+                1,
+                0,
+                0,
+                0,
+                TEXEL0,
+                0,
+                1,
+                TEXEL0,
+                1
+            );
+            gDPPipeSync(gfx++);
+            gDPSetRenderMode(
+                gfx++,
+                GBL_c1(G_BL_CLR_MEM, G_BL_A_IN, G_BL_CLR_MEM, G_BL_A_MEM),
+                G_RM_AA_ZB_TEX_EDGE2
+            );
+            top = -f_TrophySizes[course][TROPHY_PART_HEIGHTS] -
+                f_TrophySizes[course][TROPHY_PART_HEIGHTS + 1];
+            for (i = 0; i != TROPHY_PART_COUNT; i++) {
+                gDPLoadTextureTile(
+                    gfx++,
+                    TextureAddress(
+                        (u32)f_TrophyImage +
+                        (i * f_TrophySizes[course][TROPHY_WIDTH] *
+                            f_TrophySizes[course][TROPHY_PART_HEIGHTS])
+                    ),
+                    G_IM_FMT_CI,
+                    G_IM_SIZ_8b,
+                    f_TrophySizes[course][TROPHY_WIDTH],
+                    f_TrophySizes[course][TROPHY_PART_HEIGHTS + i],
+                    0,
+                    0,
+                    f_TrophySizes[course][TROPHY_WIDTH] - 1,
+                    f_TrophySizes[course][TROPHY_PART_HEIGHTS + i] - 1,
+                    0,
+                    0,
+                    0,
+                    G_TX_NOMASK,
+                    G_TX_NOMASK,
+                    G_TX_NOLOD,
+                    G_TX_NOLOD
+                );
+                DrawTextureRect(
+                    &gfx,
+                    QuarterPixels(
+                        TROPHY_CENTER_X + f_BannerX - (f_TrophySizes[course][TROPHY_WIDTH] / 2)
+                    ),
+                    QuarterPixels(top + TROPHY_BOTTOM),
+                    QuarterPixels(
+                        TROPHY_CENTER_X + f_BannerX + (f_TrophySizes[course][TROPHY_WIDTH] / 2)
+                    ),
+                    QuarterPixels(
+                        TROPHY_BOTTOM + top + f_TrophySizes[course][TROPHY_PART_HEIGHTS + i]
+                    ),
+                    G_TX_RENDERTILE,
+                    0,
+                    0,
+                    TEXEL_STEP_ONE,
+                    TEXEL_STEP_ONE
+                );
+                top += f_TrophySizes[course][TROPHY_PART_HEIGHTS + i];
+            }
+
+            gDPSetPrimDepth(gfx++, NOTICE_SHINE_DEPTH, 0);
+            gDPPipeSync(gfx++);
+            gDPSetRenderMode(gfx++, G_RM_ZB_XLU_SURF, G_RM_ZB_XLU_SURF2);
+            gDPPipeSync(gfx++);
+            gDPSetTextureLUT(gfx++, G_TT_NONE);
+            gDPPipeSync(gfx++);
+            gDPSetAlphaDither(gfx++, G_AD_PATTERN);
+            gDPSetCombineLERP(
+                gfx++,
+                0,
+                0,
+                0,
+                PRIMITIVE,
+                PRIMITIVE,
+                0,
+                TEXEL0,
+                0,
+                0,
+                0,
+                0,
+                PRIMITIVE,
+                PRIMITIVE,
+                0,
+                TEXEL0,
+                0
+            );
+            gDPPipeSync(gfx++);
+            gDPSetAlphaCompare(gfx++, G_AC_NONE);
+            gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, TROPHY_SHINE_TEXT_ALPHA);
+            LoadTextureBlock(
+                &gfx,
+                ImageBody(f_ResultsShineImage),
+                G_IM_FMT_I,
+                G_IM_SIZ_8b,
+                NOTICE_SHINE_SIZE,
+                NOTICE_SHINE_SIZE,
+                0,
+                0,
+                0,
+                G_TX_NOMASK,
+                G_TX_NOMASK,
+                G_TX_NOLOD,
+                G_TX_NOLOD
+            );
+            if (f_TrophyShineFrame == TROPHY_SHINE_SOUND_FRAME) {
+                PlaySoundWithEffects(
+                    SOUND_SHRINKING_IMAGE,
+                    TROPHY_SHINE_SOUND_CHANNEL,
+                    TROPHY_SHINE_SOUND_VOLUME,
+                    TROPHY_SHINE_SOUND_REVERB,
+                    TROPHY_SHINE_SOUND_PAN
+                );
+            }
+
+            if (f_TrophyShineFrame >= TROPHY_SHINE_START) {
+                if (f_TrophyShineFrame < TROPHY_SHINE_CYCLE) {
+                    /* The trophy's height, its two parts stacked */
+                    trophyHeight = f_TrophySizes[course][TROPHY_PART_HEIGHTS] +
+                        f_TrophySizes[course][TROPHY_PART_HEIGHTS + 1];
+                    DrawTextureRect(
+                        &gfx,
+                        QuarterPixels(
+                            TROPHY_CENTER_X + f_BannerX - (f_TrophySizes[course][TROPHY_WIDTH] / 2)
+                        ),
+                        QuarterPixels(TROPHY_BOTTOM - trophyHeight),
+                        QuarterPixels(
+                            TROPHY_CENTER_X + f_BannerX + (f_TrophySizes[course][TROPHY_WIDTH] / 2)
+                        ),
+                        QuarterPixels(
+                            TROPHY_BOTTOM - trophyHeight +
+                            f_TrophySizes[course][TROPHY_SHINE_HEIGHT]
+                        ),
+                        G_TX_RENDERTILE,
+                        TexelCoordinate(
+                            NOTICE_SHINE_SIZE -
+                            ((f_TrophyShineFrame - TROPHY_SHINE_START) * TROPHY_SHINE_SPEED)
+                        ),
+                        0,
+                        TROPHY_SHINE_DSDX,
+                        TEXEL_STEP_ONE
+                    );
+                }
+            }
+
+            gDPPipeSync(gfx++);
+            gDPSetDepthSource(gfx++, G_ZS_PIXEL);
+        }
+    }
+
+    *displayListHead = gfx;
 }
 #else
 INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", DrawResultsBanner);
@@ -2302,18 +2932,18 @@ INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", DrawResultsBanner);
 
 /* f_ResultsStep values while UpdateTournamentResults runs */
 enum TournamentStep {
-  TOURNAMENT_STEP_START,
-  TOURNAMENT_STEP_SLIDING_IN_PRIZE,
-  TOURNAMENT_STEP_TALLYING_PRIZE,
-  TOURNAMENT_STEP_PRIZE_TALLIED,
-  TOURNAMENT_STEP_SLIDE_OUT_PRIZE,
-  TOURNAMENT_STEP_SLIDING_OUT_PRIZE,
-  TOURNAMENT_STEP_SLIDING_IN_POINTS,
-  TOURNAMENT_STEP_TALLYING_POINTS,
-  TOURNAMENT_STEP_POINTS_TALLIED,
-  TOURNAMENT_STEP_SLIDING_OUT_POINTS,
-  TOURNAMENT_STEP_WAITING,
-  TOURNAMENT_STEP_SHOWN
+    TOURNAMENT_STEP_START,
+    TOURNAMENT_STEP_SLIDING_IN_PRIZE,
+    TOURNAMENT_STEP_TALLYING_PRIZE,
+    TOURNAMENT_STEP_PRIZE_TALLIED,
+    TOURNAMENT_STEP_SLIDE_OUT_PRIZE,
+    TOURNAMENT_STEP_SLIDING_OUT_PRIZE,
+    TOURNAMENT_STEP_SLIDING_IN_POINTS,
+    TOURNAMENT_STEP_TALLYING_POINTS,
+    TOURNAMENT_STEP_POINTS_TALLIED,
+    TOURNAMENT_STEP_SLIDING_OUT_POINTS,
+    TOURNAMENT_STEP_WAITING,
+    TOURNAMENT_STEP_SHOWN
 };
 
 #define NEW_BEST_SCORE_SOUND_CHANNEL 3
@@ -2323,280 +2953,278 @@ enum TournamentStep {
  * Counts the tournament prize, then the earned course points, into the save,
  * showing a notice when they open a course, then returns TRUE once A is pressed
  */
-s32 UpdateTournamentResults(ControllerState* controller) {
-  EncodedAsset asset;
-  CourseStats* record;
-  s32 overshoot;
+s32 UpdateTournamentResults(ControllerState *controller) {
+    EncodedAsset asset;
+    CourseStats *record;
+    s32 overshoot;
 
-  GetSaveData();
-  switch (f_UnlockNoticeKind) {
-    case UNLOCK_NOTICE_KIND_COURSE:
-      UpdateCourseResultsNotice();
-      break;
-    case UNLOCK_NOTICE_KIND_CHARACTER:
-      break;
-    case UNLOCK_NOTICE_KIND_NONE:
-      if (f_OpenCourseCount < COURSE_COUNT &&
-          f_PointsToNextCourse + f_PrizePoints + f_CoursePointsTally.earned ==
-              0) {
-        StartPortraitAnimation(PORTRAIT_ANIMATION_PLEASED, 0);
-        StartResultsNotice(UNLOCK_NOTICE_KIND_COURSE);
-        OpenEncodedAsset(g_TournamentIconAssets[f_OpenCourseCount], &asset);
-        ReadEncodedAsset(f_ResultsCourseImage, &asset);
-        OpenEncodedAsset(COURSE_NOTICE_TITLE_ASSET, &asset);
-        ReadEncodedAsset(f_NoticeTitleImage, &asset);
-        return FALSE;
-      }
-
-      switch (f_ResultsStep) {
-        case TOURNAMENT_STEP_START:
-          record = &GetSaveData()->records.courseStats[g_GameState.courseIndex];
-          f_ResultsStep = TOURNAMENT_STEP_SHOWN;
-          if (record->roundCount <= 0 ||
-              record->bestScore >= f_PlayerResults[0]) {
-            PlaySound(SOUND_NEW_BEST_SCORE, NEW_BEST_SCORE_SOUND_CHANNEL,
-                SOUND_FULL_SCALE);
-          }
-
-          f_IsAwaitingConfirm = TRUE;
-          break;
-        case TOURNAMENT_STEP_SHOWN:
-          if (controller->buttons & A_BUTTON) {
-            f_IsAwaitingConfirm = FALSE;
-            SetResultsBanner(BANNER_SLIDING_IN, BANNER_KIND_TOURNAMENT_PLACE);
-            PlaySound(SOUND_MENU_CONFIRM, CONFIRM_SOUND_CHANNEL,
-                CONFIRM_SOUND_VOLUME);
-            f_ResultsStep = TOURNAMENT_STEP_SLIDING_IN_PRIZE;
-          }
-
-          break;
-        case TOURNAMENT_STEP_SLIDING_IN_PRIZE:
-          if (GetBannerState() == BANNER_SHOWN) {
-            f_ResultsStep = TOURNAMENT_STEP_TALLYING_PRIZE;
-            if (f_PlayerRanks[0] == 1) {
-              StartPortraitAnimation(PORTRAIT_ANIMATION_PLEASED, 0);
-              PlayCharacterSound(g_Players[0].characterIndex, 0,
-                  CHARACTER_SOUND_WIN, SOUND_FULL_SCALE, WIN_SOUND_PAN);
-            }
-          }
-
-          break;
-        case TOURNAMENT_STEP_TALLYING_PRIZE:
-          if (controller->buttons & A_BUTTON) {
-            f_TallySpeed = FAST_TALLY_SPEED;
-          }
-          {
-            /*
-             * Through a pointer, to match: naming f_PrizePoints directly
-             * gives 117 words differing, 7 in shape
-             */
-            s32* points = &f_PrizePoints;
-
-            *points -= f_TallySpeed;
-            if (*points > 0) {
-              PlayTallySound();
+    GetSaveData();
+    switch (f_UnlockNoticeKind) {
+        case UNLOCK_NOTICE_KIND_COURSE:
+            UpdateCourseResultsNotice();
+            break;
+        case UNLOCK_NOTICE_KIND_CHARACTER:
+            break;
+        case UNLOCK_NOTICE_KIND_NONE:
+            if (f_OpenCourseCount < COURSE_COUNT &&
+                f_PointsToNextCourse + f_PrizePoints + f_CoursePointsTally.earned == 0) {
+                StartPortraitAnimation(PORTRAIT_ANIMATION_PLEASED, 0);
+                StartResultsNotice(UNLOCK_NOTICE_KIND_COURSE);
+                OpenEncodedAsset(g_TournamentIconAssets[f_OpenCourseCount], &asset);
+                ReadEncodedAsset(f_ResultsCourseImage, &asset);
+                OpenEncodedAsset(COURSE_NOTICE_TITLE_ASSET, &asset);
+                ReadEncodedAsset(f_NoticeTitleImage, &asset);
+                return FALSE;
             }
 
-            if (f_OpenCourseCount == COURSE_COUNT) {
-              *points = 0;
-              f_ResultsStep = TOURNAMENT_STEP_PRIZE_TALLIED;
-              if (f_TournamentOpenCourseCount < COURSE_COUNT) {
-                PlaySound(
-                    SOUND_TALLY_DONE, g_NextSoundChannel, SOUND_FULL_SCALE);
-              }
+            switch (f_ResultsStep) {
+                case TOURNAMENT_STEP_START:
+                    record = &GetSaveData()->records.courseStats[g_GameState.courseIndex];
+                    f_ResultsStep = TOURNAMENT_STEP_SHOWN;
+                    if (record->roundCount <= 0 || record->bestScore >= f_PlayerResults[0]) {
+                        PlaySound(
+                            SOUND_NEW_BEST_SCORE,
+                            NEW_BEST_SCORE_SOUND_CHANNEL,
+                            SOUND_FULL_SCALE
+                        );
+                    }
 
-              break;
+                    f_IsAwaitingConfirm = TRUE;
+                    break;
+                case TOURNAMENT_STEP_SHOWN:
+                    if (controller->buttons & A_BUTTON) {
+                        f_IsAwaitingConfirm = FALSE;
+                        SetResultsBanner(BANNER_SLIDING_IN, BANNER_KIND_TOURNAMENT_PLACE);
+                        PlaySound(SOUND_MENU_CONFIRM, CONFIRM_SOUND_CHANNEL, CONFIRM_SOUND_VOLUME);
+                        f_ResultsStep = TOURNAMENT_STEP_SLIDING_IN_PRIZE;
+                    }
+
+                    break;
+                case TOURNAMENT_STEP_SLIDING_IN_PRIZE:
+                    if (GetBannerState() == BANNER_SHOWN) {
+                        f_ResultsStep = TOURNAMENT_STEP_TALLYING_PRIZE;
+                        if (f_PlayerRanks[0] == 1) {
+                            StartPortraitAnimation(PORTRAIT_ANIMATION_PLEASED, 0);
+                            PlayCharacterSound(
+                                g_Players[0].characterIndex,
+                                0,
+                                CHARACTER_SOUND_WIN,
+                                SOUND_FULL_SCALE,
+                                WIN_SOUND_PAN
+                            );
+                        }
+                    }
+
+                    break;
+                case TOURNAMENT_STEP_TALLYING_PRIZE:
+                    if (controller->buttons & A_BUTTON) {
+                        f_TallySpeed = FAST_TALLY_SPEED;
+                    }
+                    {
+                        /*
+                         * Through a pointer, to match: naming f_PrizePoints directly
+                         * gives 117 words differing, 7 in shape
+                         */
+                        s32 *points = &f_PrizePoints;
+
+                        *points -= f_TallySpeed;
+                        if (*points > 0) {
+                            PlayTallySound();
+                        }
+
+                        if (f_OpenCourseCount == COURSE_COUNT) {
+                            *points = 0;
+                            f_ResultsStep = TOURNAMENT_STEP_PRIZE_TALLIED;
+                            if (f_TournamentOpenCourseCount < COURSE_COUNT) {
+                                PlaySound(SOUND_TALLY_DONE, g_NextSoundChannel, SOUND_FULL_SCALE);
+                            }
+
+                            break;
+                        }
+
+                        /* Stop on the points that open the next course, so that its notice
+                         * shows */
+                        overshoot = f_PointsToNextCourse + *points + f_CoursePointsTally.earned;
+                        if (overshoot < 0) {
+                            *points -= overshoot;
+                        }
+
+                        if (*points < 0) {
+                            f_ResultsStep = TOURNAMENT_STEP_PRIZE_TALLIED;
+                            *points = 0;
+                            f_IsAwaitingConfirm = TRUE;
+                            if (f_TournamentOpenCourseCount < COURSE_COUNT) {
+                                PlaySound(SOUND_TALLY_DONE, g_NextSoundChannel, SOUND_FULL_SCALE);
+                            }
+                        }
+                    }
+
+                    break;
+                case TOURNAMENT_STEP_PRIZE_TALLIED:
+                    if (controller->buttons & A_BUTTON) {
+                        PlaySound(SOUND_MENU_CONFIRM, CONFIRM_SOUND_CHANNEL, CONFIRM_SOUND_VOLUME);
+                        f_TallySpeed = NORMAL_TALLY_SPEED;
+                        f_IsAwaitingConfirm = FALSE;
+                        f_ResultsStep = TOURNAMENT_STEP_SLIDE_OUT_PRIZE;
+                    }
+
+                    /* A debugging shortcut to the course notice */
+                    if ((controller->pressedButtons & B_BUTTON) && g_IsDebugEnabled) {
+                        StartResultsNotice(UNLOCK_NOTICE_KIND_COURSE);
+                    }
+
+                    break;
+                case TOURNAMENT_STEP_SLIDE_OUT_PRIZE:
+                    SetResultsBanner(BANNER_SLIDING_OUT, BANNER_KIND_TOURNAMENT_PLACE);
+                    f_ResultsStep = TOURNAMENT_STEP_SLIDING_OUT_PRIZE;
+                    break;
+                case TOURNAMENT_STEP_SLIDING_OUT_PRIZE:
+                    if (GetBannerState() == BANNER_HIDDEN) {
+                        if (f_CoursePointsTally.earned > 0 && f_OpenCourseCount < COURSE_COUNT) {
+                            f_ResultsStep = TOURNAMENT_STEP_SLIDING_IN_POINTS;
+                            SetResultsBanner(BANNER_SLIDING_IN, BANNER_KIND_POINTS);
+                        }
+                        else {
+                            f_ResultsStep = TOURNAMENT_STEP_WAITING;
+                        }
+                    }
+
+                    break;
+                case TOURNAMENT_STEP_SLIDING_IN_POINTS:
+                    if (GetBannerState() == BANNER_SHOWN) {
+                        f_ResultsStep = TOURNAMENT_STEP_TALLYING_POINTS;
+                    }
+
+                    break;
+                case TOURNAMENT_STEP_TALLYING_POINTS:
+                    if (controller->buttons & A_BUTTON) {
+                        f_TallySpeed = FAST_TALLY_SPEED;
+                    }
+                    if (f_CoursePointsTally.earned > 0) {
+                        PlayTallySound();
+                    }
+
+                    f_CoursePointsTally.earned -= f_TallySpeed;
+                    if (f_CoursePointsTally.earned < 0) {
+                        f_CoursePointsTally.earned = 0;
+                    }
+
+                    if (f_OpenCourseCount == COURSE_COUNT) {
+                        f_CoursePointsTally.earned = 0;
+                    }
+                    else {
+                        overshoot =
+                            f_PointsToNextCourse + f_PrizePoints + f_CoursePointsTally.earned;
+                        if (overshoot < 0) {
+                            f_CoursePointsTally.earned -= overshoot;
+                        }
+                    }
+
+                    if (f_CoursePointsTally.earned == 0) {
+                        PlaySound(SOUND_TALLY_DONE, g_NextSoundChannel, SOUND_FULL_SCALE);
+                        f_ResultsStep = TOURNAMENT_STEP_POINTS_TALLIED;
+                        f_IsAwaitingConfirm = TRUE;
+                    }
+
+                    break;
+                case TOURNAMENT_STEP_POINTS_TALLIED:
+                    if (controller->buttons & A_BUTTON) {
+                        PlaySound(SOUND_MENU_CONFIRM, CONFIRM_SOUND_CHANNEL, CONFIRM_SOUND_VOLUME);
+                        SetResultsBanner(BANNER_SLIDING_OUT, BANNER_KIND_POINTS);
+                        f_ResultsStep = TOURNAMENT_STEP_SLIDING_OUT_POINTS;
+                    }
+
+                    break;
+                case TOURNAMENT_STEP_SLIDING_OUT_POINTS:
+                    if (GetBannerState() == BANNER_HIDDEN) {
+                        f_IsAwaitingConfirm = TRUE;
+                        f_ResultsStep = TOURNAMENT_STEP_WAITING;
+                    }
+
+                    break;
+                case TOURNAMENT_STEP_WAITING:
+                    f_IsAwaitingConfirm = TRUE;
+                    if (controller->buttons & A_BUTTON) {
+                        PlaySound(SOUND_MENU_CONFIRM, CONFIRM_SOUND_CHANNEL, CONFIRM_SOUND_VOLUME);
+                        return TRUE;
+                    }
+
+                    break;
             }
 
-            /* Stop on the points that open the next course, so that its notice
-             * shows */
-            overshoot =
-                f_PointsToNextCourse + *points + f_CoursePointsTally.earned;
-            if (overshoot < 0) {
-              *points -= overshoot;
-            }
+            break;
+    }
 
-            if (*points < 0) {
-              f_ResultsStep = TOURNAMENT_STEP_PRIZE_TALLIED;
-              *points = 0;
-              f_IsAwaitingConfirm = TRUE;
-              if (f_TournamentOpenCourseCount < COURSE_COUNT) {
-                PlaySound(
-                    SOUND_TALLY_DONE, g_NextSoundChannel, SOUND_FULL_SCALE);
-              }
-            }
-          }
-
-          break;
-        case TOURNAMENT_STEP_PRIZE_TALLIED:
-          if (controller->buttons & A_BUTTON) {
-            PlaySound(SOUND_MENU_CONFIRM, CONFIRM_SOUND_CHANNEL,
-                CONFIRM_SOUND_VOLUME);
-            f_TallySpeed = NORMAL_TALLY_SPEED;
-            f_IsAwaitingConfirm = FALSE;
-            f_ResultsStep = TOURNAMENT_STEP_SLIDE_OUT_PRIZE;
-          }
-
-          /* A debugging shortcut to the course notice */
-          if ((controller->pressedButtons & B_BUTTON) && g_IsDebugEnabled) {
-            StartResultsNotice(UNLOCK_NOTICE_KIND_COURSE);
-          }
-
-          break;
-        case TOURNAMENT_STEP_SLIDE_OUT_PRIZE:
-          SetResultsBanner(BANNER_SLIDING_OUT, BANNER_KIND_TOURNAMENT_PLACE);
-          f_ResultsStep = TOURNAMENT_STEP_SLIDING_OUT_PRIZE;
-          break;
-        case TOURNAMENT_STEP_SLIDING_OUT_PRIZE:
-          if (GetBannerState() == BANNER_HIDDEN) {
-            if (f_CoursePointsTally.earned > 0 &&
-                f_OpenCourseCount < COURSE_COUNT) {
-              f_ResultsStep = TOURNAMENT_STEP_SLIDING_IN_POINTS;
-              SetResultsBanner(BANNER_SLIDING_IN, BANNER_KIND_POINTS);
-            } else {
-              f_ResultsStep = TOURNAMENT_STEP_WAITING;
-            }
-          }
-
-          break;
-        case TOURNAMENT_STEP_SLIDING_IN_POINTS:
-          if (GetBannerState() == BANNER_SHOWN) {
-            f_ResultsStep = TOURNAMENT_STEP_TALLYING_POINTS;
-          }
-
-          break;
-        case TOURNAMENT_STEP_TALLYING_POINTS:
-          if (controller->buttons & A_BUTTON) {
-            f_TallySpeed = FAST_TALLY_SPEED;
-          }
-          if (f_CoursePointsTally.earned > 0) {
-            PlayTallySound();
-          }
-
-          f_CoursePointsTally.earned -= f_TallySpeed;
-          if (f_CoursePointsTally.earned < 0) {
-            f_CoursePointsTally.earned = 0;
-          }
-
-          if (f_OpenCourseCount == COURSE_COUNT) {
-            f_CoursePointsTally.earned = 0;
-          } else {
-            overshoot = f_PointsToNextCourse + f_PrizePoints +
-                f_CoursePointsTally.earned;
-            if (overshoot < 0) {
-              f_CoursePointsTally.earned -= overshoot;
-            }
-          }
-
-          if (f_CoursePointsTally.earned == 0) {
-            PlaySound(SOUND_TALLY_DONE, g_NextSoundChannel, SOUND_FULL_SCALE);
-            f_ResultsStep = TOURNAMENT_STEP_POINTS_TALLIED;
-            f_IsAwaitingConfirm = TRUE;
-          }
-
-          break;
-        case TOURNAMENT_STEP_POINTS_TALLIED:
-          if (controller->buttons & A_BUTTON) {
-            PlaySound(SOUND_MENU_CONFIRM, CONFIRM_SOUND_CHANNEL,
-                CONFIRM_SOUND_VOLUME);
-            SetResultsBanner(BANNER_SLIDING_OUT, BANNER_KIND_POINTS);
-            f_ResultsStep = TOURNAMENT_STEP_SLIDING_OUT_POINTS;
-          }
-
-          break;
-        case TOURNAMENT_STEP_SLIDING_OUT_POINTS:
-          if (GetBannerState() == BANNER_HIDDEN) {
-            f_IsAwaitingConfirm = TRUE;
-            f_ResultsStep = TOURNAMENT_STEP_WAITING;
-          }
-
-          break;
-        case TOURNAMENT_STEP_WAITING:
-          f_IsAwaitingConfirm = TRUE;
-          if (controller->buttons & A_BUTTON) {
-            PlaySound(SOUND_MENU_CONFIRM, CONFIRM_SOUND_CHANNEL,
-                CONFIRM_SOUND_VOLUME);
-            return TRUE;
-          }
-
-          break;
-      }
-
-      break;
-  }
-
-  return FALSE;
+    return FALSE;
 }
 
 /* The steps of ShowScorePassword, in f_ResultsStep */
 enum ScorePasswordStep {
-  SCORE_PASSWORD_STEP_START,
-  SCORE_PASSWORD_STEP_SHOWN,
-  SCORE_PASSWORD_STEP_ASKING,
-  SCORE_PASSWORD_STEP_DONE
+    SCORE_PASSWORD_STEP_START,
+    SCORE_PASSWORD_STEP_SHOWN,
+    SCORE_PASSWORD_STEP_ASKING,
+    SCORE_PASSWORD_STEP_DONE
 };
 
 /* Shows the round's score password until the player says they have it. Returns
  * TRUE then. */
-s32 ShowScorePassword(ControllerState* controller) {
-  ScoreReport report;
-  /* Pads the frame to match; without it 16 words differ */
-  s32 unused[2] UNUSED;
+s32 ShowScorePassword(ControllerState *controller) {
+    ScoreReport report;
+    /* Pads the frame to match; without it 16 words differ */
+    s32 unused[2] UNUSED;
 
-  GetSaveData();
-  f_ResultsStepTime++;
-  switch (f_ResultsStep) {
-    case SCORE_PASSWORD_STEP_START:
-      f_ResultsStep = SCORE_PASSWORD_STEP_SHOWN;
-      StartPortraitAnimation(PORTRAIT_ANIMATION_PLEASED, 0);
-      CopyTournamentCode(report.tournamentCode);
-      report.characterIndex = g_Players[0].characterIndex;
-      report.score = f_PlayerResults[0];
-      report.time = g_GameState.stopwatchFrameCount;
-      report.gameBoyLevel =
-          g_GameBoyCharacters[g_Players[0].gameBoyCharacterIndex].level;
-      EncodeScorePassword(&report, f_ScorePassword);
-      f_IsAwaitingConfirm = TRUE;
-      break;
-    case SCORE_PASSWORD_STEP_SHOWN:
-      if (controller->buttons & A_BUTTON) {
-        f_IsAwaitingConfirm = FALSE;
-        f_ResultsStep = SCORE_PASSWORD_STEP_ASKING;
-        OpenPrompt(PROMPT_SCORE_PASSWORD);
-        PlaySound(
-            SOUND_MENU_CONFIRM, CONFIRM_SOUND_CHANNEL, CONFIRM_SOUND_VOLUME);
-      }
+    GetSaveData();
+    f_ResultsStepTime++;
+    switch (f_ResultsStep) {
+        case SCORE_PASSWORD_STEP_START:
+            f_ResultsStep = SCORE_PASSWORD_STEP_SHOWN;
+            StartPortraitAnimation(PORTRAIT_ANIMATION_PLEASED, 0);
+            CopyTournamentCode(report.tournamentCode);
+            report.characterIndex = g_Players[0].characterIndex;
+            report.score = f_PlayerResults[0];
+            report.time = g_GameState.stopwatchFrameCount;
+            report.gameBoyLevel = g_GameBoyCharacters[g_Players[0].gameBoyCharacterIndex].level;
+            EncodeScorePassword(&report, f_ScorePassword);
+            f_IsAwaitingConfirm = TRUE;
+            break;
+        case SCORE_PASSWORD_STEP_SHOWN:
+            if (controller->buttons & A_BUTTON) {
+                f_IsAwaitingConfirm = FALSE;
+                f_ResultsStep = SCORE_PASSWORD_STEP_ASKING;
+                OpenPrompt(PROMPT_SCORE_PASSWORD);
+                PlaySound(SOUND_MENU_CONFIRM, CONFIRM_SOUND_CHANNEL, CONFIRM_SOUND_VOLUME);
+            }
 
-      break;
-    case SCORE_PASSWORD_STEP_ASKING:
-      switch (UpdatePrompt(controller)) {
-        case PROMPT_RESULT_YES:
-          f_ResultsStep = SCORE_PASSWORD_STEP_DONE;
-          break;
-        case PROMPT_RESULT_NO:
-          f_ResultsStep = SCORE_PASSWORD_STEP_SHOWN;
-          f_IsAwaitingConfirm = TRUE;
-          break;
-      }
+            break;
+        case SCORE_PASSWORD_STEP_ASKING:
+            switch (UpdatePrompt(controller)) {
+                case PROMPT_RESULT_YES:
+                    f_ResultsStep = SCORE_PASSWORD_STEP_DONE;
+                    break;
+                case PROMPT_RESULT_NO:
+                    f_ResultsStep = SCORE_PASSWORD_STEP_SHOWN;
+                    f_IsAwaitingConfirm = TRUE;
+                    break;
+            }
 
-      break;
-    case SCORE_PASSWORD_STEP_DONE:
-      f_IsAwaitingConfirm = FALSE;
-      return TRUE;
-  }
+            break;
+        case SCORE_PASSWORD_STEP_DONE:
+            f_IsAwaitingConfirm = FALSE;
+            return TRUE;
+    }
 
-  return FALSE;
+    return FALSE;
 }
 
 /* f_ResultsStep values while UpdateCoursePointsResults runs */
 enum PointsStep {
-  POINTS_STEP_SHOWN,
-  POINTS_STEP_SLIDING_IN_TALLY,
-  POINTS_STEP_TALLIED,
-  POINTS_STEP_SLIDING_OUT_TALLY,
-  POINTS_STEP_WAITING,
-  POINTS_STEP_TALLYING,
-  POINTS_STEP_START_TALLY
+    POINTS_STEP_SHOWN,
+    POINTS_STEP_SLIDING_IN_TALLY,
+    POINTS_STEP_TALLIED,
+    POINTS_STEP_SLIDING_OUT_TALLY,
+    POINTS_STEP_WAITING,
+    POINTS_STEP_TALLYING,
+    POINTS_STEP_START_TALLY
 };
 
 /*
@@ -2630,134 +3258,133 @@ enum PointsStep {
  * shape), or 47 (5) with the entry test written out as an if.
  */
 #ifdef NON_MATCHING
-s32 UpdateCoursePointsResults(ControllerState* controller) {
-  EncodedAsset asset;
-  s32 i;
-  s32 j;
-  s32 overshoot;
+s32 UpdateCoursePointsResults(ControllerState *controller) {
+    EncodedAsset asset;
+    s32 i;
+    s32 j;
+    s32 overshoot;
 
-  GetSaveData();
-  f_ResultsStepTime++;
-  switch (f_UnlockNoticeKind) {
-    case UNLOCK_NOTICE_KIND_COURSE:
-      UpdateCourseResultsNotice();
-      break;
-    case UNLOCK_NOTICE_KIND_CHARACTER:
-      break;
+    GetSaveData();
+    f_ResultsStepTime++;
+    switch (f_UnlockNoticeKind) {
+        case UNLOCK_NOTICE_KIND_COURSE:
+            UpdateCourseResultsNotice();
+            break;
+        case UNLOCK_NOTICE_KIND_CHARACTER:
+            break;
 
-    case UNLOCK_NOTICE_KIND_NONE:
-      if (f_OpenCourseCount < COURSE_COUNT &&
-          f_PointsToNextCourse + f_CoursePointsTally.earned == 0) {
-        for (i = 0; i != g_GameState.playerCount; i++) {
-          StartPortraitAnimation(PORTRAIT_ANIMATION_PLEASED, i);
-        }
+        case UNLOCK_NOTICE_KIND_NONE:
+            if (f_OpenCourseCount < COURSE_COUNT &&
+                f_PointsToNextCourse + f_CoursePointsTally.earned == 0) {
+                for (i = 0; i != g_GameState.playerCount; i++) {
+                    StartPortraitAnimation(PORTRAIT_ANIMATION_PLEASED, i);
+                }
 
-        StartResultsNotice(UNLOCK_NOTICE_KIND_COURSE);
-        OpenEncodedAsset(g_TournamentIconAssets[f_OpenCourseCount], &asset);
-        ReadEncodedAsset(f_ResultsCourseImage, &asset);
-        OpenEncodedAsset(COURSE_NOTICE_TITLE_ASSET, &asset);
-        ReadEncodedAsset(f_NoticeTitleImage, &asset);
-        return FALSE;
-      }
-
-      switch (f_ResultsStep) {
-        case POINTS_STEP_SHOWN:
-          f_IsAwaitingConfirm = TRUE;
-          if (controller->buttons & A_BUTTON) {
-            f_IsAwaitingConfirm = FALSE;
-            f_ResultsStep = POINTS_STEP_START_TALLY;
-            PlaySound(SOUND_MENU_CONFIRM, CONFIRM_SOUND_CHANNEL,
-                CONFIRM_SOUND_VOLUME);
-          }
-
-          break;
-        case POINTS_STEP_START_TALLY:
-          if (f_CoursePointsTally.earned > 0 &&
-              f_OpenCourseCount < COURSE_COUNT) {
-            f_ResultsStep = POINTS_STEP_SLIDING_IN_TALLY;
-            SetResultsBanner(BANNER_SLIDING_IN, BANNER_KIND_POINTS);
-          } else {
-            f_ResultsStep = POINTS_STEP_WAITING;
-          }
-
-          for (i = 0; i != g_GameState.playerCount; i++) {
-            StartPortraitAnimation(PORTRAIT_ANIMATION_PLEASED, i);
-            for (j = 0; j != g_GameState.playerCount; j++) {
-              if (i != j && f_PlayerRanks[i] > f_PlayerRanks[j]) {
-                StartPortraitAnimation(PORTRAIT_ANIMATION_BEATEN, i);
-              }
+                StartResultsNotice(UNLOCK_NOTICE_KIND_COURSE);
+                OpenEncodedAsset(g_TournamentIconAssets[f_OpenCourseCount], &asset);
+                ReadEncodedAsset(f_ResultsCourseImage, &asset);
+                OpenEncodedAsset(COURSE_NOTICE_TITLE_ASSET, &asset);
+                ReadEncodedAsset(f_NoticeTitleImage, &asset);
+                return FALSE;
             }
-          }
 
-          break;
-        case POINTS_STEP_SLIDING_IN_TALLY:
-          if (GetBannerState() == BANNER_SHOWN) {
-            f_ResultsStep = POINTS_STEP_TALLYING;
-          }
+            switch (f_ResultsStep) {
+                case POINTS_STEP_SHOWN:
+                    f_IsAwaitingConfirm = TRUE;
+                    if (controller->buttons & A_BUTTON) {
+                        f_IsAwaitingConfirm = FALSE;
+                        f_ResultsStep = POINTS_STEP_START_TALLY;
+                        PlaySound(SOUND_MENU_CONFIRM, CONFIRM_SOUND_CHANNEL, CONFIRM_SOUND_VOLUME);
+                    }
 
-          break;
-        case POINTS_STEP_TALLYING:
-          if (controller->buttons & A_BUTTON) {
-            f_TallySpeed = FAST_TALLY_SPEED;
-          }
-          if (f_CoursePointsTally.earned > 0) {
-            PlayTallySound();
-          }
+                    break;
+                case POINTS_STEP_START_TALLY:
+                    if (f_CoursePointsTally.earned > 0 && f_OpenCourseCount < COURSE_COUNT) {
+                        f_ResultsStep = POINTS_STEP_SLIDING_IN_TALLY;
+                        SetResultsBanner(BANNER_SLIDING_IN, BANNER_KIND_POINTS);
+                    }
+                    else {
+                        f_ResultsStep = POINTS_STEP_WAITING;
+                    }
 
-          f_CoursePointsTally.earned -= f_TallySpeed;
-          if (f_CoursePointsTally.earned < 0) {
-            f_CoursePointsTally.earned = 0;
-          }
+                    for (i = 0; i != g_GameState.playerCount; i++) {
+                        StartPortraitAnimation(PORTRAIT_ANIMATION_PLEASED, i);
+                        for (j = 0; j != g_GameState.playerCount; j++) {
+                            if (i != j && f_PlayerRanks[i] > f_PlayerRanks[j]) {
+                                StartPortraitAnimation(PORTRAIT_ANIMATION_BEATEN, i);
+                            }
+                        }
+                    }
 
-          if (f_OpenCourseCount == COURSE_COUNT) {
-            f_CoursePointsTally.earned = 0;
-          } else {
-            /* Stop on the points that open the next course, so that its
-             * notice shows */
-            overshoot = f_PointsToNextCourse + f_CoursePointsTally.earned;
-            if (overshoot < 0) {
-              f_CoursePointsTally.earned -= overshoot;
+                    break;
+                case POINTS_STEP_SLIDING_IN_TALLY:
+                    if (GetBannerState() == BANNER_SHOWN) {
+                        f_ResultsStep = POINTS_STEP_TALLYING;
+                    }
+
+                    break;
+                case POINTS_STEP_TALLYING:
+                    if (controller->buttons & A_BUTTON) {
+                        f_TallySpeed = FAST_TALLY_SPEED;
+                    }
+                    if (f_CoursePointsTally.earned > 0) {
+                        PlayTallySound();
+                    }
+
+                    f_CoursePointsTally.earned -= f_TallySpeed;
+                    if (f_CoursePointsTally.earned < 0) {
+                        f_CoursePointsTally.earned = 0;
+                    }
+
+                    if (f_OpenCourseCount == COURSE_COUNT) {
+                        f_CoursePointsTally.earned = 0;
+                    }
+                    else {
+                        /* Stop on the points that open the next course, so that its
+                         * notice shows */
+                        overshoot = f_PointsToNextCourse + f_CoursePointsTally.earned;
+                        if (overshoot < 0) {
+                            f_CoursePointsTally.earned -= overshoot;
+                        }
+                    }
+
+                    if (f_CoursePointsTally.earned == 0) {
+                        f_ResultsStepTime = 0;
+                        PlaySound(SOUND_TALLY_DONE, g_NextSoundChannel, SOUND_FULL_SCALE);
+                        f_ResultsStep = POINTS_STEP_TALLIED;
+                        f_IsAwaitingConfirm = TRUE;
+                    }
+
+                    break;
+                case POINTS_STEP_TALLIED:
+                    if (controller->buttons & A_BUTTON) {
+                        SetResultsBanner(BANNER_SLIDING_OUT, BANNER_KIND_POINTS);
+                        f_ResultsStep = POINTS_STEP_SLIDING_OUT_TALLY;
+                        f_IsAwaitingConfirm = FALSE;
+                    }
+
+                    break;
+                case POINTS_STEP_SLIDING_OUT_TALLY:
+                    if (GetBannerState() == BANNER_HIDDEN) {
+                        f_ResultsStep = POINTS_STEP_WAITING;
+                    }
+
+                    break;
+                case POINTS_STEP_WAITING:
+                    f_IsAwaitingConfirm = TRUE;
+                    if (controller->pressedButtons & A_BUTTON) {
+                        PlaySound(SOUND_MENU_CONFIRM, CONFIRM_SOUND_CHANNEL, CONFIRM_SOUND_VOLUME);
+                        f_IsAwaitingConfirm = FALSE;
+                        return TRUE;
+                    }
+
+                    break;
             }
-          }
 
-          if (f_CoursePointsTally.earned == 0) {
-            f_ResultsStepTime = 0;
-            PlaySound(SOUND_TALLY_DONE, g_NextSoundChannel, SOUND_FULL_SCALE);
-            f_ResultsStep = POINTS_STEP_TALLIED;
-            f_IsAwaitingConfirm = TRUE;
-          }
+            break;
+    }
 
-          break;
-        case POINTS_STEP_TALLIED:
-          if (controller->buttons & A_BUTTON) {
-            SetResultsBanner(BANNER_SLIDING_OUT, BANNER_KIND_POINTS);
-            f_ResultsStep = POINTS_STEP_SLIDING_OUT_TALLY;
-            f_IsAwaitingConfirm = FALSE;
-          }
-
-          break;
-        case POINTS_STEP_SLIDING_OUT_TALLY:
-          if (GetBannerState() == BANNER_HIDDEN) {
-            f_ResultsStep = POINTS_STEP_WAITING;
-          }
-
-          break;
-        case POINTS_STEP_WAITING:
-          f_IsAwaitingConfirm = TRUE;
-          if (controller->pressedButtons & A_BUTTON) {
-            PlaySound(SOUND_MENU_CONFIRM, CONFIRM_SOUND_CHANNEL,
-                CONFIRM_SOUND_VOLUME);
-            f_IsAwaitingConfirm = FALSE;
-            return TRUE;
-          }
-
-          break;
-      }
-
-      break;
-  }
-
-  return FALSE;
+    return FALSE;
 }
 #else
 INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", UpdateCoursePointsResults);
@@ -2765,17 +3392,17 @@ INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", UpdateCoursePointsResults);
 
 /* f_ResultsStep values while UpdateMatchResults runs */
 enum MatchStep {
-  MATCH_STEP_SHOWN,
-  MATCH_STEP_SLIDING_IN_TALLY,
-  MATCH_STEP_TALLYING,
-  MATCH_STEP_TALLIED,
-  MATCH_STEP_SLIDING_OUT_TALLY,
-  MATCH_STEP_RECORD_RESULT,
-  MATCH_STEP_WAITING,
-  MATCH_STEP_SHOW_CHARACTER_NOTICE,
-  MATCH_STEP_START_NOTICE_WAIT,
-  MATCH_STEP_NOTICE_WAIT,
-  MATCH_STEP_START_TALLY
+    MATCH_STEP_SHOWN,
+    MATCH_STEP_SLIDING_IN_TALLY,
+    MATCH_STEP_TALLYING,
+    MATCH_STEP_TALLIED,
+    MATCH_STEP_SLIDING_OUT_TALLY,
+    MATCH_STEP_RECORD_RESULT,
+    MATCH_STEP_WAITING,
+    MATCH_STEP_SHOW_CHARACTER_NOTICE,
+    MATCH_STEP_START_NOTICE_WAIT,
+    MATCH_STEP_NOTICE_WAIT,
+    MATCH_STEP_START_TALLY
 };
 
 #define CHARACTER_NOTICE_WAIT_FRAMES 8
@@ -2784,218 +3411,227 @@ enum MatchStep {
  * unlock the rest
  */
 #define IsUnlockedByBeating(character) \
-  ((character) != CHARACTER_PLUM && (character) != CHARACTER_CHARLIE && \
-      (character) != CHARACTER_MAPLE && (character) != CHARACTER_BABY_MARIO && \
-      (character) != CHARACTER_PEACH && \
-      (character) != CHARACTER_DONKEY_KONG && \
-      (character) < CHARACTER_METAL_MARIO)
+    ((character) != CHARACTER_PLUM && \
+        (character) != CHARACTER_CHARLIE && \
+        (character) != CHARACTER_MAPLE && \
+        (character) != CHARACTER_BABY_MARIO && \
+        (character) != CHARACTER_PEACH && \
+        (character) != CHARACTER_DONKEY_KONG && \
+        (character) < CHARACTER_METAL_MARIO)
 
 /*
  * Counts the earned course points into the save, then in Get Character
  * records the match and unlocks a beaten opponent, returning TRUE once
  * A is pressed
  */
-s32 UpdateMatchResults(ControllerState* controller) {
-  EncodedAsset asset;
-  s32 i;
-  s32 overshoot;
+s32 UpdateMatchResults(ControllerState *controller) {
+    EncodedAsset asset;
+    s32 i;
+    s32 overshoot;
 
-  GetSaveData();
-  f_ResultsStepTime++;
-  switch (f_UnlockNoticeKind) {
-    case UNLOCK_NOTICE_KIND_COURSE:
-      UpdateCourseResultsNotice();
-      break;
-    case UNLOCK_NOTICE_KIND_CHARACTER:
-      UpdateCharacterResultsNotice();
-      break;
-    case UNLOCK_NOTICE_KIND_NONE:
-      if (f_OpenCourseCount < COURSE_COUNT &&
-          f_PointsToNextCourse + f_CoursePointsTally.earned == 0) {
-        for (i = 0; i != g_GameState.playerCount; i++) {
-          StartPortraitAnimation(PORTRAIT_ANIMATION_PLEASED, i);
-        }
+    GetSaveData();
+    f_ResultsStepTime++;
+    switch (f_UnlockNoticeKind) {
+        case UNLOCK_NOTICE_KIND_COURSE:
+            UpdateCourseResultsNotice();
+            break;
+        case UNLOCK_NOTICE_KIND_CHARACTER:
+            UpdateCharacterResultsNotice();
+            break;
+        case UNLOCK_NOTICE_KIND_NONE:
+            if (f_OpenCourseCount < COURSE_COUNT &&
+                f_PointsToNextCourse + f_CoursePointsTally.earned == 0) {
+                for (i = 0; i != g_GameState.playerCount; i++) {
+                    StartPortraitAnimation(PORTRAIT_ANIMATION_PLEASED, i);
+                }
 
-        StartResultsNotice(UNLOCK_NOTICE_KIND_COURSE);
-        OpenEncodedAsset(g_TournamentIconAssets[f_OpenCourseCount], &asset);
-        ReadEncodedAsset(f_ResultsCourseImage, &asset);
-        OpenEncodedAsset(COURSE_NOTICE_TITLE_ASSET, &asset);
-        ReadEncodedAsset(f_NoticeTitleImage, &asset);
-        return FALSE;
-      }
-
-      switch (f_ResultsStep) {
-        case MATCH_STEP_SHOWN:
-          f_IsAwaitingConfirm = TRUE;
-          if (controller->buttons & A_BUTTON) {
-            f_IsAwaitingConfirm = FALSE;
-            f_ResultsStep = MATCH_STEP_START_TALLY;
-            PlaySound(SOUND_MENU_CONFIRM, CONFIRM_SOUND_CHANNEL,
-                CONFIRM_SOUND_VOLUME);
-          }
-
-          break;
-        case MATCH_STEP_START_TALLY:
-          if (f_CoursePointsTally.earned > 0 &&
-              f_OpenCourseCount < COURSE_COUNT) {
-            f_ResultsStep = MATCH_STEP_SLIDING_IN_TALLY;
-            SetResultsBanner(BANNER_SLIDING_IN, BANNER_KIND_POINTS);
-          } else {
-            f_ResultsStep = MATCH_STEP_RECORD_RESULT;
-          }
-
-          if (f_PlayerRanks[0] == MATCH_RANK_WON) {
-            StartPortraitAnimation(PORTRAIT_ANIMATION_PLEASED, 0);
-            StartPortraitAnimation(PORTRAIT_ANIMATION_BEATEN, 1);
-          } else {
-            StartPortraitAnimation(PORTRAIT_ANIMATION_PLEASED, 1);
-            StartPortraitAnimation(PORTRAIT_ANIMATION_BEATEN, 0);
-          }
-
-          break;
-        case MATCH_STEP_SLIDING_IN_TALLY:
-          if (GetBannerState() == BANNER_SHOWN) {
-            f_ResultsStep = MATCH_STEP_TALLYING;
-          }
-
-          break;
-        case MATCH_STEP_TALLYING:
-          if (controller->buttons & A_BUTTON) {
-            f_TallySpeed = FAST_TALLY_SPEED;
-          }
-          if (f_CoursePointsTally.earned > 0) {
-            PlayTallySound();
-          }
-
-          f_CoursePointsTally.earned -= f_TallySpeed;
-          if (f_CoursePointsTally.earned < 0) {
-            f_CoursePointsTally.earned = 0;
-          }
-
-          if (f_OpenCourseCount == COURSE_COUNT) {
-            f_CoursePointsTally.earned = 0;
-          } else {
-            /* Stop on the points that open the next course, so that its
-             * notice shows */
-            overshoot = f_PointsToNextCourse + f_CoursePointsTally.earned;
-            if (overshoot < 0) {
-              f_CoursePointsTally.earned -= overshoot;
-            }
-          }
-
-          if (f_CoursePointsTally.earned == 0) {
-            f_ResultsStep = MATCH_STEP_TALLIED;
-            PlaySound(SOUND_TALLY_DONE, g_NextSoundChannel, SOUND_FULL_SCALE);
-          }
-
-          break;
-        case MATCH_STEP_TALLIED:
-          f_IsAwaitingConfirm = TRUE;
-          if (controller->buttons & A_BUTTON) {
-            SetResultsBanner(BANNER_SLIDING_OUT, BANNER_KIND_POINTS);
-            f_ResultsStep = MATCH_STEP_SLIDING_OUT_TALLY;
-            f_IsAwaitingConfirm = FALSE;
-          }
-
-          break;
-        case MATCH_STEP_SLIDING_OUT_TALLY:
-          if (GetBannerState() == BANNER_HIDDEN) {
-            f_ResultsStep = MATCH_STEP_RECORD_RESULT;
-          }
-
-          break;
-        case MATCH_STEP_RECORD_RESULT:
-          f_ResultsStep = MATCH_STEP_WAITING;
-          f_ResultsStepTime = 0;
-          if (g_GameState.gameMode == GAME_MODE_GET_CHARACTER) {
-            /* Beating a still locked opponent unlocks them */
-            if (f_PlayerRanks[0] == MATCH_RANK_WON &&
-                FindCharacterOnGrid(g_Players[1].characterIndex) ==
-                    CHARACTER_OFF_GRID &&
-                IsUnlockedByBeating(g_Players[1].characterIndex)) {
-              f_ResultsStep = MATCH_STEP_SHOW_CHARACTER_NOTICE;
+                StartResultsNotice(UNLOCK_NOTICE_KIND_COURSE);
+                OpenEncodedAsset(g_TournamentIconAssets[f_OpenCourseCount], &asset);
+                ReadEncodedAsset(f_ResultsCourseImage, &asset);
+                OpenEncodedAsset(COURSE_NOTICE_TITLE_ASSET, &asset);
+                ReadEncodedAsset(f_NoticeTitleImage, &asset);
+                return FALSE;
             }
 
-            RecordComCharacterResult(g_Players[0].characterIndex,
-                g_Players[1].characterIndex,
-                GetMatchWinner(0, 1) == MATCH_SIDE_PLAYER);
-          }
+            switch (f_ResultsStep) {
+                case MATCH_STEP_SHOWN:
+                    f_IsAwaitingConfirm = TRUE;
+                    if (controller->buttons & A_BUTTON) {
+                        f_IsAwaitingConfirm = FALSE;
+                        f_ResultsStep = MATCH_STEP_START_TALLY;
+                        PlaySound(SOUND_MENU_CONFIRM, CONFIRM_SOUND_CHANNEL, CONFIRM_SOUND_VOLUME);
+                    }
 
-          break;
-        case MATCH_STEP_SHOW_CHARACTER_NOTICE: {
-          EncodedAsset titleAsset;
+                    break;
+                case MATCH_STEP_START_TALLY:
+                    if (f_CoursePointsTally.earned > 0 && f_OpenCourseCount < COURSE_COUNT) {
+                        f_ResultsStep = MATCH_STEP_SLIDING_IN_TALLY;
+                        SetResultsBanner(BANNER_SLIDING_IN, BANNER_KIND_POINTS);
+                    }
+                    else {
+                        f_ResultsStep = MATCH_STEP_RECORD_RESULT;
+                    }
 
-          StartResultsNotice(UNLOCK_NOTICE_KIND_CHARACTER);
-          OpenEncodedAsset(CHARACTER_NOTICE_TITLE_ASSET, &titleAsset);
-          ReadEncodedAsset(f_NoticeTitleImage, &titleAsset);
-          f_ResultsStep = MATCH_STEP_START_NOTICE_WAIT;
-          break;
-        }
-        case MATCH_STEP_START_NOTICE_WAIT:
-          f_ResultsStep = MATCH_STEP_NOTICE_WAIT;
-          f_ResultsStepTime = 0;
-          break;
-        case MATCH_STEP_NOTICE_WAIT:
-          if (f_ResultsStepTime == CHARACTER_NOTICE_WAIT_FRAMES) {
-            f_ResultsStep = MATCH_STEP_WAITING;
-          }
+                    if (f_PlayerRanks[0] == MATCH_RANK_WON) {
+                        StartPortraitAnimation(PORTRAIT_ANIMATION_PLEASED, 0);
+                        StartPortraitAnimation(PORTRAIT_ANIMATION_BEATEN, 1);
+                    }
+                    else {
+                        StartPortraitAnimation(PORTRAIT_ANIMATION_PLEASED, 1);
+                        StartPortraitAnimation(PORTRAIT_ANIMATION_BEATEN, 0);
+                    }
 
-          break;
-        case MATCH_STEP_WAITING:
-          f_IsAwaitingConfirm = TRUE;
+                    break;
+                case MATCH_STEP_SLIDING_IN_TALLY:
+                    if (GetBannerState() == BANNER_SHOWN) {
+                        f_ResultsStep = MATCH_STEP_TALLYING;
+                    }
 
-          /* A debugging aid: up and down choose a character, and B shows its
-           * notice */
-          if (IsGameFlagSet(GAME_FLAG_CHOOSE_UNLOCK_NOTICE)) {
-            if ((g_ControllerStates[0].repeatedButtons & U_JPAD) &&
-                f_DebugUnlockCharacter > 0) {
-              f_DebugUnlockCharacter--;
+                    break;
+                case MATCH_STEP_TALLYING:
+                    if (controller->buttons & A_BUTTON) {
+                        f_TallySpeed = FAST_TALLY_SPEED;
+                    }
+                    if (f_CoursePointsTally.earned > 0) {
+                        PlayTallySound();
+                    }
+
+                    f_CoursePointsTally.earned -= f_TallySpeed;
+                    if (f_CoursePointsTally.earned < 0) {
+                        f_CoursePointsTally.earned = 0;
+                    }
+
+                    if (f_OpenCourseCount == COURSE_COUNT) {
+                        f_CoursePointsTally.earned = 0;
+                    }
+                    else {
+                        /* Stop on the points that open the next course, so that its
+                         * notice shows */
+                        overshoot = f_PointsToNextCourse + f_CoursePointsTally.earned;
+                        if (overshoot < 0) {
+                            f_CoursePointsTally.earned -= overshoot;
+                        }
+                    }
+
+                    if (f_CoursePointsTally.earned == 0) {
+                        f_ResultsStep = MATCH_STEP_TALLIED;
+                        PlaySound(SOUND_TALLY_DONE, g_NextSoundChannel, SOUND_FULL_SCALE);
+                    }
+
+                    break;
+                case MATCH_STEP_TALLIED:
+                    f_IsAwaitingConfirm = TRUE;
+                    if (controller->buttons & A_BUTTON) {
+                        SetResultsBanner(BANNER_SLIDING_OUT, BANNER_KIND_POINTS);
+                        f_ResultsStep = MATCH_STEP_SLIDING_OUT_TALLY;
+                        f_IsAwaitingConfirm = FALSE;
+                    }
+
+                    break;
+                case MATCH_STEP_SLIDING_OUT_TALLY:
+                    if (GetBannerState() == BANNER_HIDDEN) {
+                        f_ResultsStep = MATCH_STEP_RECORD_RESULT;
+                    }
+
+                    break;
+                case MATCH_STEP_RECORD_RESULT:
+                    f_ResultsStep = MATCH_STEP_WAITING;
+                    f_ResultsStepTime = 0;
+                    if (g_GameState.gameMode == GAME_MODE_GET_CHARACTER) {
+                        /* Beating a still locked opponent unlocks them */
+                        if (f_PlayerRanks[0] == MATCH_RANK_WON &&
+                            FindCharacterOnGrid(g_Players[1].characterIndex) ==
+                                CHARACTER_OFF_GRID &&
+                            IsUnlockedByBeating(g_Players[1].characterIndex)) {
+                            f_ResultsStep = MATCH_STEP_SHOW_CHARACTER_NOTICE;
+                        }
+
+                        RecordComCharacterResult(
+                            g_Players[0].characterIndex,
+                            g_Players[1].characterIndex,
+                            GetMatchWinner(0, 1) == MATCH_SIDE_PLAYER
+                        );
+                    }
+
+                    break;
+                case MATCH_STEP_SHOW_CHARACTER_NOTICE: {
+                    EncodedAsset titleAsset;
+
+                    StartResultsNotice(UNLOCK_NOTICE_KIND_CHARACTER);
+                    OpenEncodedAsset(CHARACTER_NOTICE_TITLE_ASSET, &titleAsset);
+                    ReadEncodedAsset(f_NoticeTitleImage, &titleAsset);
+                    f_ResultsStep = MATCH_STEP_START_NOTICE_WAIT;
+                    break;
+                }
+                case MATCH_STEP_START_NOTICE_WAIT:
+                    f_ResultsStep = MATCH_STEP_NOTICE_WAIT;
+                    f_ResultsStepTime = 0;
+                    break;
+                case MATCH_STEP_NOTICE_WAIT:
+                    if (f_ResultsStepTime == CHARACTER_NOTICE_WAIT_FRAMES) {
+                        f_ResultsStep = MATCH_STEP_WAITING;
+                    }
+
+                    break;
+                case MATCH_STEP_WAITING:
+                    f_IsAwaitingConfirm = TRUE;
+
+                    /* A debugging aid: up and down choose a character, and B shows its
+                     * notice */
+                    if (IsGameFlagSet(GAME_FLAG_CHOOSE_UNLOCK_NOTICE)) {
+                        if ((g_ControllerStates[0].repeatedButtons & U_JPAD) &&
+                            f_DebugUnlockCharacter > 0) {
+                            f_DebugUnlockCharacter--;
+                        }
+
+                        if ((g_ControllerStates[0].repeatedButtons & D_JPAD) &&
+                            f_DebugUnlockCharacter < CHARACTER_COUNT - 1) {
+                            f_DebugUnlockCharacter++;
+                        }
+
+                        sprintf(g_PrintBuffer, "CHARA:%2d", (int)f_DebugUnlockCharacter);
+                        PrintDebugText(
+                            g_PrintBuffer,
+                            DEBUG_UNLOCK_CHOICE_COLUMN,
+                            DEBUG_UNLOCK_CHOICE_ROW
+                        );
+                        if (controller->pressedButtons & B_BUTTON) {
+                            EncodedAsset portraitAsset;
+                            AssetFile file;
+
+                            StartResultsNotice(UNLOCK_NOTICE_KIND_CHARACTER);
+                            g_Players[1].characterIndex = f_DebugUnlockCharacter;
+                            f_PortraitCharacterIndex = (s8)f_DebugUnlockCharacter;
+                            OpenEncodedAsset(
+                                g_CharacterImageAssets[(s8)f_DebugUnlockCharacter],
+                                &portraitAsset
+                            );
+                            ReadEncodedAsset(f_PortraitImage, &portraitAsset);
+                            OpenAssetFile(
+                                g_CharacterPaletteAssets[g_Players[1].characterIndex] +
+                                    g_Players[1].paletteIndex,
+                                &file
+                            );
+                            ReadAssetFile(f_PortraitPalette, GetAssetFileSize(&file), &file);
+                            OpenEncodedAsset(CHARACTER_NOTICE_TITLE_ASSET, &portraitAsset);
+                            ReadEncodedAsset(f_NoticeTitleImage, &portraitAsset);
+                            f_ResultsStep = MATCH_STEP_SLIDING_OUT_TALLY;
+                        }
+                    }
+
+                    if (controller->buttons & A_BUTTON) {
+                        PlaySound(SOUND_MENU_CONFIRM, CONFIRM_SOUND_CHANNEL, CONFIRM_SOUND_VOLUME);
+                        f_IsAwaitingConfirm = FALSE;
+                        return TRUE;
+                    }
+
+                    break;
             }
 
-            if ((g_ControllerStates[0].repeatedButtons & D_JPAD) &&
-                f_DebugUnlockCharacter < CHARACTER_COUNT - 1) {
-              f_DebugUnlockCharacter++;
-            }
+            break;
+    }
 
-            sprintf(g_PrintBuffer, "CHARA:%2d", (int)f_DebugUnlockCharacter);
-            PrintDebugText(g_PrintBuffer, DEBUG_UNLOCK_CHOICE_COLUMN,
-                DEBUG_UNLOCK_CHOICE_ROW);
-            if (controller->pressedButtons & B_BUTTON) {
-              EncodedAsset portraitAsset;
-              AssetFile file;
-
-              StartResultsNotice(UNLOCK_NOTICE_KIND_CHARACTER);
-              g_Players[1].characterIndex = f_DebugUnlockCharacter;
-              f_PortraitCharacterIndex = (s8)f_DebugUnlockCharacter;
-              OpenEncodedAsset(
-                  g_CharacterImageAssets[(s8)f_DebugUnlockCharacter],
-                  &portraitAsset);
-              ReadEncodedAsset(f_PortraitImage, &portraitAsset);
-              OpenAssetFile(
-                  g_CharacterPaletteAssets[g_Players[1].characterIndex] +
-                      g_Players[1].paletteIndex,
-                  &file);
-              ReadAssetFile(f_PortraitPalette, GetAssetFileSize(&file), &file);
-              OpenEncodedAsset(CHARACTER_NOTICE_TITLE_ASSET, &portraitAsset);
-              ReadEncodedAsset(f_NoticeTitleImage, &portraitAsset);
-              f_ResultsStep = MATCH_STEP_SLIDING_OUT_TALLY;
-            }
-          }
-
-          if (controller->buttons & A_BUTTON) {
-            PlaySound(SOUND_MENU_CONFIRM, CONFIRM_SOUND_CHANNEL,
-                CONFIRM_SOUND_VOLUME);
-            f_IsAwaitingConfirm = FALSE;
-            return TRUE;
-          }
-
-          break;
-      }
-
-      break;
-  }
-
-  return FALSE;
+    return FALSE;
 }
 
 /* Where the tournament results draw their parts */
@@ -3011,51 +3647,109 @@ s32 UpdateMatchResults(ControllerState* controller) {
 
 /* The tournament results: place, portrait, score, Course Points and the points
  * to the next course */
-void DrawTournamentResults(Gfx** displayListHead) {
-  Gfx* gfx = *displayListHead;
+void DrawTournamentResults(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
 
-  gDPPipeSync(gfx++);
-  gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-  gDPPipeSync(gfx++);
-  gDPSetTextureFilter(gfx++, G_TF_POINT);
-  DrawRank(&gfx, f_ResultsSlide + TOURNAMENT_PLACE_X,
-      f_ResultsTop + TOURNAMENT_ICON_Y, (f_PlayerRanks[0] - 1) | RANK_AS_PLACE);
-  DrawPlayerPortrait(&gfx, f_ResultsSlide + TOURNAMENT_PORTRAIT_X,
-      f_ResultsTop + TOURNAMENT_ICON_Y, 0, FALSE);
-  DrawResultsLabel(&gfx, f_ResultsSlide + TOURNAMENT_SCORE_LABEL_X,
-      f_ResultsTop + TOURNAMENT_LABEL_Y, RESULTS_LABEL_SCORE);
-  DrawResultsLabel(&gfx, f_ResultsSlide + TOURNAMENT_POINTS_LABEL_X,
-      f_ResultsTop + TOURNAMENT_LABEL_Y, RESULTS_LABEL_POINTS);
-  if (f_OpenCourseCount == COURSE_COUNT) {
-    SetTextSlot(f_ResultsSlide + ALL_COURSES_OPEN_X,
-        f_ResultsTop + SOLO_ALL_COURSES_OPEN_Y, MESSAGE_ALL_COURSES_OPEN,
-        TEXT_SLOT_LARGE_FONT, RESULTS_TEXT_SLOT, 0, RESULTS_TEXT_RED,
-        RESULTS_TEXT_GREEN, RESULTS_TEXT_BLUE, RESULTS_TEXT_ALPHA);
-  } else {
-    DrawResultsNumber(&gfx, f_ResultsSlide + POINTS_TOTAL_X, POINTS_TOTAL_Y,
-        f_PointsToNextCourse + f_PrizePoints + f_CoursePointsTally.earned);
-    SetTextSlot(f_ResultsSlide + POINTS_TO_NEXT_COURSE_X,
-        f_ResultsTop + POINTS_TO_NEXT_COURSE_Y, MESSAGE_POINTS_TO_NEXT_COURSE,
-        TEXT_SLOT_LARGE_FONT, RESULTS_TEXT_SLOT, 0, RESULTS_TEXT_RED,
-        RESULTS_TEXT_GREEN, RESULTS_TEXT_BLUE, RESULTS_TEXT_ALPHA);
-  }
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_POINT);
+    DrawRank(
+        &gfx,
+        f_ResultsSlide + TOURNAMENT_PLACE_X,
+        f_ResultsTop + TOURNAMENT_ICON_Y,
+        (f_PlayerRanks[0] - 1) | RANK_AS_PLACE
+    );
+    DrawPlayerPortrait(
+        &gfx,
+        f_ResultsSlide + TOURNAMENT_PORTRAIT_X,
+        f_ResultsTop + TOURNAMENT_ICON_Y,
+        0,
+        FALSE
+    );
+    DrawResultsLabel(
+        &gfx,
+        f_ResultsSlide + TOURNAMENT_SCORE_LABEL_X,
+        f_ResultsTop + TOURNAMENT_LABEL_Y,
+        RESULTS_LABEL_SCORE
+    );
+    DrawResultsLabel(
+        &gfx,
+        f_ResultsSlide + TOURNAMENT_POINTS_LABEL_X,
+        f_ResultsTop + TOURNAMENT_LABEL_Y,
+        RESULTS_LABEL_POINTS
+    );
+    if (f_OpenCourseCount == COURSE_COUNT) {
+        SetTextSlot(
+            f_ResultsSlide + ALL_COURSES_OPEN_X,
+            f_ResultsTop + SOLO_ALL_COURSES_OPEN_Y,
+            MESSAGE_ALL_COURSES_OPEN,
+            TEXT_SLOT_LARGE_FONT,
+            RESULTS_TEXT_SLOT,
+            0,
+            RESULTS_TEXT_RED,
+            RESULTS_TEXT_GREEN,
+            RESULTS_TEXT_BLUE,
+            RESULTS_TEXT_ALPHA
+        );
+    }
+    else {
+        DrawResultsNumber(
+            &gfx,
+            f_ResultsSlide + POINTS_TOTAL_X,
+            POINTS_TOTAL_Y,
+            f_PointsToNextCourse + f_PrizePoints + f_CoursePointsTally.earned
+        );
+        SetTextSlot(
+            f_ResultsSlide + POINTS_TO_NEXT_COURSE_X,
+            f_ResultsTop + POINTS_TO_NEXT_COURSE_Y,
+            MESSAGE_POINTS_TO_NEXT_COURSE,
+            TEXT_SLOT_LARGE_FONT,
+            RESULTS_TEXT_SLOT,
+            0,
+            RESULTS_TEXT_RED,
+            RESULTS_TEXT_GREEN,
+            RESULTS_TEXT_BLUE,
+            RESULTS_TEXT_ALPHA
+        );
+    }
 
-  LoadSmallPalette(&gfx, 0, ImageBody(f_ResultsLargeDigitsImage));
-  LoadNibbleTextureBlock(&gfx, ImageTexels(f_ResultsLargeDigitsImage),
-      G_IM_FMT_CI, LARGE_DIGIT_WIDTH, LARGE_DIGITS_HEIGHT, 0, 0, 0, G_TX_NOMASK,
-      G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-  if (f_PlayerResults[0] == 0) {
-    sprintf(g_PrintBuffer, f_EvenScoreFormat, 0);
-  } else {
-    sprintf(g_PrintBuffer, f_ScoreFormat, f_PlayerResults[0]);
-  }
+    LoadSmallPalette(&gfx, 0, ImageBody(f_ResultsLargeDigitsImage));
+    LoadNibbleTextureBlock(
+        &gfx,
+        ImageTexels(f_ResultsLargeDigitsImage),
+        G_IM_FMT_CI,
+        LARGE_DIGIT_WIDTH,
+        LARGE_DIGITS_HEIGHT,
+        0,
+        0,
+        0,
+        G_TX_NOMASK,
+        G_TX_NOMASK,
+        G_TX_NOLOD,
+        G_TX_NOLOD
+    );
+    if (f_PlayerResults[0] == 0) {
+        sprintf(g_PrintBuffer, f_EvenScoreFormat, 0);
+    }
+    else {
+        sprintf(g_PrintBuffer, f_ScoreFormat, f_PlayerResults[0]);
+    }
 
-  DrawDigitText(&gfx, f_ResultsSlide + TOURNAMENT_SCORE_X,
-      f_ResultsTop + TOURNAMENT_NUMBER_Y, g_PrintBuffer);
-  sprintf(g_PrintBuffer, f_PointsFormat, f_PlayerPoints[0]);
-  DrawDigitText(&gfx, f_ResultsSlide + TOURNAMENT_POINTS_X,
-      f_ResultsTop + TOURNAMENT_NUMBER_Y, g_PrintBuffer);
-  *displayListHead = gfx;
+    DrawDigitText(
+        &gfx,
+        f_ResultsSlide + TOURNAMENT_SCORE_X,
+        f_ResultsTop + TOURNAMENT_NUMBER_Y,
+        g_PrintBuffer
+    );
+    sprintf(g_PrintBuffer, f_PointsFormat, f_PlayerPoints[0]);
+    DrawDigitText(
+        &gfx,
+        f_ResultsSlide + TOURNAMENT_POINTS_X,
+        f_ResultsTop + TOURNAMENT_NUMBER_Y,
+        g_PrintBuffer
+    );
+    *displayListHead = gfx;
 }
 
 const char f_EvenScoreFormat[] = " #0";
@@ -3087,73 +3781,147 @@ const char f_TimeLabel[] = "Time";
 
 /* The Speed Golf results: portrait, time, strokes, Course Points and the points
  * to the next course */
-void DrawSpeedGolfResults(Gfx** displayListHead) {
-  Gfx* gfx = *displayListHead;
-  s32 seconds;
-  s32 hundredths;
+void DrawSpeedGolfResults(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
+    s32 seconds;
+    s32 hundredths;
 
-  gDPPipeSync(gfx++);
-  gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-  gDPPipeSync(gfx++);
-  gDPSetTextureFilter(gfx++, G_TF_POINT);
-  DrawPlayerPortrait(&gfx, f_ResultsSlide + SPEED_GOLF_PORTRAIT_X,
-      f_ResultsTop + SPEED_GOLF_PORTRAIT_Y, 0, FALSE);
-  DrawResultsLabel(&gfx, f_ResultsSlide + SPEED_GOLF_SCORE_LABEL_X,
-      f_ResultsTop + SPEED_GOLF_LABEL_Y, RESULTS_LABEL_SCORE);
-  DrawResultsLabel(&gfx, f_ResultsSlide + SPEED_GOLF_POINTS_LABEL_X,
-      f_ResultsTop + SPEED_GOLF_LABEL_Y, RESULTS_LABEL_POINTS);
-  if (f_OpenCourseCount == COURSE_COUNT) {
-    SetTextSlot(f_ResultsSlide + ALL_COURSES_OPEN_X,
-        f_ResultsTop + SOLO_ALL_COURSES_OPEN_Y, MESSAGE_ALL_COURSES_OPEN,
-        TEXT_SLOT_LARGE_FONT, RESULTS_TEXT_SLOT, 0, RESULTS_TEXT_RED,
-        RESULTS_TEXT_GREEN, RESULTS_TEXT_BLUE, RESULTS_TEXT_ALPHA);
-  } else {
-    DrawResultsNumber(&gfx, f_ResultsSlide + POINTS_TOTAL_X, POINTS_TOTAL_Y,
-        f_PointsToNextCourse + f_PrizePoints + f_CoursePointsTally.earned);
-    SetTextSlot(f_ResultsSlide + POINTS_TO_NEXT_COURSE_X,
-        f_ResultsTop + POINTS_TO_NEXT_COURSE_Y, MESSAGE_POINTS_TO_NEXT_COURSE,
-        TEXT_SLOT_LARGE_FONT, RESULTS_TEXT_SLOT, 0, RESULTS_TEXT_RED,
-        RESULTS_TEXT_GREEN, RESULTS_TEXT_BLUE, RESULTS_TEXT_ALPHA);
-  }
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_POINT);
+    DrawPlayerPortrait(
+        &gfx,
+        f_ResultsSlide + SPEED_GOLF_PORTRAIT_X,
+        f_ResultsTop + SPEED_GOLF_PORTRAIT_Y,
+        0,
+        FALSE
+    );
+    DrawResultsLabel(
+        &gfx,
+        f_ResultsSlide + SPEED_GOLF_SCORE_LABEL_X,
+        f_ResultsTop + SPEED_GOLF_LABEL_Y,
+        RESULTS_LABEL_SCORE
+    );
+    DrawResultsLabel(
+        &gfx,
+        f_ResultsSlide + SPEED_GOLF_POINTS_LABEL_X,
+        f_ResultsTop + SPEED_GOLF_LABEL_Y,
+        RESULTS_LABEL_POINTS
+    );
+    if (f_OpenCourseCount == COURSE_COUNT) {
+        SetTextSlot(
+            f_ResultsSlide + ALL_COURSES_OPEN_X,
+            f_ResultsTop + SOLO_ALL_COURSES_OPEN_Y,
+            MESSAGE_ALL_COURSES_OPEN,
+            TEXT_SLOT_LARGE_FONT,
+            RESULTS_TEXT_SLOT,
+            0,
+            RESULTS_TEXT_RED,
+            RESULTS_TEXT_GREEN,
+            RESULTS_TEXT_BLUE,
+            RESULTS_TEXT_ALPHA
+        );
+    }
+    else {
+        DrawResultsNumber(
+            &gfx,
+            f_ResultsSlide + POINTS_TOTAL_X,
+            POINTS_TOTAL_Y,
+            f_PointsToNextCourse + f_PrizePoints + f_CoursePointsTally.earned
+        );
+        SetTextSlot(
+            f_ResultsSlide + POINTS_TO_NEXT_COURSE_X,
+            f_ResultsTop + POINTS_TO_NEXT_COURSE_Y,
+            MESSAGE_POINTS_TO_NEXT_COURSE,
+            TEXT_SLOT_LARGE_FONT,
+            RESULTS_TEXT_SLOT,
+            0,
+            RESULTS_TEXT_RED,
+            RESULTS_TEXT_GREEN,
+            RESULTS_TEXT_BLUE,
+            RESULTS_TEXT_ALPHA
+        );
+    }
 
-  LoadSmallPalette(&gfx, 0, ImageBody(f_ResultsLargeDigitsImage));
-  LoadNibbleTextureBlock(&gfx, ImageTexels(f_ResultsLargeDigitsImage),
-      G_IM_FMT_CI, LARGE_DIGIT_WIDTH, LARGE_DIGITS_HEIGHT, 0, 0, 0, G_TX_NOMASK,
-      G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-  if (f_PlayerResults[0] == 0) {
-    sprintf(g_PrintBuffer, f_EvenScoreFormat, 0);
-  } else {
-    sprintf(g_PrintBuffer, f_ScoreFormat, f_PlayerResults[0]);
-  }
+    LoadSmallPalette(&gfx, 0, ImageBody(f_ResultsLargeDigitsImage));
+    LoadNibbleTextureBlock(
+        &gfx,
+        ImageTexels(f_ResultsLargeDigitsImage),
+        G_IM_FMT_CI,
+        LARGE_DIGIT_WIDTH,
+        LARGE_DIGITS_HEIGHT,
+        0,
+        0,
+        0,
+        G_TX_NOMASK,
+        G_TX_NOMASK,
+        G_TX_NOLOD,
+        G_TX_NOLOD
+    );
+    if (f_PlayerResults[0] == 0) {
+        sprintf(g_PrintBuffer, f_EvenScoreFormat, 0);
+    }
+    else {
+        sprintf(g_PrintBuffer, f_ScoreFormat, f_PlayerResults[0]);
+    }
 
-  DrawDigitText(&gfx, f_ResultsSlide + SPEED_GOLF_VALUE_X,
-      f_ResultsTop + SPEED_GOLF_SCORE_Y, g_PrintBuffer);
-  seconds = g_GameState.stopwatchFrameCount / FRAMES_PER_SECOND;
-  hundredths = (s32)(g_GameState.stopwatchFrameCount *
-                   ((f32)HUNDREDTHS_PER_SECOND / FRAMES_PER_SECOND)) %
-      HUNDREDTHS_PER_SECOND;
-  sprintf(g_PrintBuffer, f_TimeFormat,
-      seconds / SECONDS_PER_MINUTE % SHOWN_MINUTES_LIMIT,
-      seconds % SECONDS_PER_MINUTE, hundredths);
-  DrawDigitText(&gfx, f_ResultsSlide + SPEED_GOLF_VALUE_X,
-      f_ResultsTop + SPEED_GOLF_TIME_Y, g_PrintBuffer);
-  sprintf(g_PrintBuffer, f_PointsFormat, f_PlayerPoints[0]);
-  DrawDigitText(&gfx, f_ResultsSlide + SPEED_GOLF_POINTS_X,
-      f_ResultsTop + SPEED_GOLF_POINTS_Y, g_PrintBuffer);
-  SetUpGradientTextDrawing(&gfx, 0);
-  sprintf(g_PrintBuffer, f_TimeLabel);
-  DrawLargeTextWithShadow(&gfx, f_ResultsSlide + SPEED_GOLF_HEADING_X,
-      f_ResultsTop + SPEED_GOLF_TIME_HEADING_Y, g_PrintBuffer,
-      RESULTS_HEADING_ENV_COLOR, RESULTS_HEADING_PRIM_COLOR, 0);
-  sprintf(g_PrintBuffer, "Stroke");
-  DrawLargeTextWithShadow(&gfx, f_ResultsSlide + SPEED_GOLF_HEADING_X,
-      f_ResultsTop + SPEED_GOLF_STROKE_HEADING_Y, g_PrintBuffer,
-      RESULTS_HEADING_ENV_COLOR, RESULTS_HEADING_PRIM_COLOR, 0);
-  gDPPipeSync(gfx++);
-  gDPPipeSync(gfx++);
-  gDPSetCycleType(gfx++, G_CYC_1CYCLE);
-  gDPPipeSync(gfx++);
-  *displayListHead = gfx;
+    DrawDigitText(
+        &gfx,
+        f_ResultsSlide + SPEED_GOLF_VALUE_X,
+        f_ResultsTop + SPEED_GOLF_SCORE_Y,
+        g_PrintBuffer
+    );
+    seconds = g_GameState.stopwatchFrameCount / FRAMES_PER_SECOND;
+    hundredths =
+        (s32)(g_GameState.stopwatchFrameCount * ((f32)HUNDREDTHS_PER_SECOND / FRAMES_PER_SECOND)) %
+        HUNDREDTHS_PER_SECOND;
+    sprintf(
+        g_PrintBuffer,
+        f_TimeFormat,
+        seconds / SECONDS_PER_MINUTE % SHOWN_MINUTES_LIMIT,
+        seconds % SECONDS_PER_MINUTE,
+        hundredths
+    );
+    DrawDigitText(
+        &gfx,
+        f_ResultsSlide + SPEED_GOLF_VALUE_X,
+        f_ResultsTop + SPEED_GOLF_TIME_Y,
+        g_PrintBuffer
+    );
+    sprintf(g_PrintBuffer, f_PointsFormat, f_PlayerPoints[0]);
+    DrawDigitText(
+        &gfx,
+        f_ResultsSlide + SPEED_GOLF_POINTS_X,
+        f_ResultsTop + SPEED_GOLF_POINTS_Y,
+        g_PrintBuffer
+    );
+    SetUpGradientTextDrawing(&gfx, 0);
+    sprintf(g_PrintBuffer, f_TimeLabel);
+    DrawLargeTextWithShadow(
+        &gfx,
+        f_ResultsSlide + SPEED_GOLF_HEADING_X,
+        f_ResultsTop + SPEED_GOLF_TIME_HEADING_Y,
+        g_PrintBuffer,
+        RESULTS_HEADING_ENV_COLOR,
+        RESULTS_HEADING_PRIM_COLOR,
+        0
+    );
+    sprintf(g_PrintBuffer, "Stroke");
+    DrawLargeTextWithShadow(
+        &gfx,
+        f_ResultsSlide + SPEED_GOLF_HEADING_X,
+        f_ResultsTop + SPEED_GOLF_STROKE_HEADING_Y,
+        g_PrintBuffer,
+        RESULTS_HEADING_ENV_COLOR,
+        RESULTS_HEADING_PRIM_COLOR,
+        0
+    );
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+    gDPPipeSync(gfx++);
+    *displayListHead = gfx;
 }
 
 #define RESULTS_ROW_HEIGHT 32
@@ -3180,135 +3948,223 @@ void DrawSpeedGolfResults(Gfx** displayListHead) {
 
 /* The results of several players: place, portrait, score, any bet totals and
  * Course Points */
-void DrawPlayersResults(Gfx** displayListHead) {
-  Gfx* gfx = *displayListHead;
-  s32 betShift = FOUR_DIGIT_BET_SHIFT;
-  s32 i;
+void DrawPlayersResults(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
+    s32 betShift = FOUR_DIGIT_BET_SHIFT;
+    s32 i;
 
-  for (i = 0; i != g_GameState.playerCount; i++) {
-    if (f_PlayerBetTotals[i] > FOUR_DIGIT_BET_MAX) {
-      betShift = 0;
-    }
-
-    if (f_PlayerBetTotals[i] < FOUR_DIGIT_BET_MIN) {
-      betShift = 0;
-    }
-  }
-
-  gDPPipeSync(gfx++);
-  gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-  gDPPipeSync(gfx++);
-  gDPSetTextureFilter(gfx++, G_TF_POINT);
-  if (f_HasBets) {
-    DrawResultsLabel(&gfx, f_ResultsSlide + BETTING_RESULTS_SCORE_LABEL_X,
-        f_ResultsTop + RESULTS_HEADING_Y, RESULTS_LABEL_SCORE);
-    DrawResultsLabel(&gfx, f_ResultsSlide + BETTING_RESULTS_BETS_LABEL_X,
-        f_ResultsTop + RESULTS_HEADING_Y, RESULTS_LABEL_BETS);
-    DrawResultsLabel(&gfx, f_ResultsSlide + BETTING_RESULTS_POINTS_LABEL_X,
-        f_ResultsTop + RESULTS_HEADING_Y, RESULTS_LABEL_POINTS);
     for (i = 0; i != g_GameState.playerCount; i++) {
-      if (g_GameState.playerCount >= 2) {
-        DrawPlaceIcon(&gfx, f_ResultsSlide + BETTING_RESULTS_PLACE_X,
-            f_ResultsTop + RESULTS_ICON_ROW_Y + (i * RESULTS_ROW_HEIGHT),
-            f_PlayerRanks[i]);
-      }
+        if (f_PlayerBetTotals[i] > FOUR_DIGIT_BET_MAX) {
+            betShift = 0;
+        }
 
-      DrawPlayerPortrait(&gfx, f_ResultsSlide + BETTING_RESULTS_PORTRAIT_X,
-          f_ResultsTop + RESULTS_ICON_ROW_Y + (i * RESULTS_ROW_HEIGHT), i,
-          FALSE);
+        if (f_PlayerBetTotals[i] < FOUR_DIGIT_BET_MIN) {
+            betShift = 0;
+        }
     }
-  } else {
-    DrawResultsLabel(&gfx, f_ResultsSlide + PLAIN_RESULTS_SCORE_LABEL_X,
-        f_ResultsTop + RESULTS_HEADING_Y, RESULTS_LABEL_SCORE);
-    DrawResultsLabel(&gfx, f_ResultsSlide + PLAIN_RESULTS_POINTS_LABEL_X,
-        f_ResultsTop + RESULTS_HEADING_Y, RESULTS_LABEL_POINTS);
-    for (i = 0; i != g_GameState.playerCount; i++) {
-      if (g_GameState.playerCount >= 2) {
-        DrawRank(&gfx, f_ResultsSlide + PLAIN_RESULTS_RANK_X,
-            f_ResultsTop + RESULTS_ICON_ROW_Y + (i * RESULTS_ROW_HEIGHT),
-            f_PlayerRanks[i]);
-      }
 
-      DrawPlayerPortrait(&gfx, f_ResultsSlide + PLAIN_RESULTS_PORTRAIT_X,
-          f_ResultsTop + RESULTS_ICON_ROW_Y + (i * RESULTS_ROW_HEIGHT), i,
-          FALSE);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_POINT);
+    if (f_HasBets) {
+        DrawResultsLabel(
+            &gfx,
+            f_ResultsSlide + BETTING_RESULTS_SCORE_LABEL_X,
+            f_ResultsTop + RESULTS_HEADING_Y,
+            RESULTS_LABEL_SCORE
+        );
+        DrawResultsLabel(
+            &gfx,
+            f_ResultsSlide + BETTING_RESULTS_BETS_LABEL_X,
+            f_ResultsTop + RESULTS_HEADING_Y,
+            RESULTS_LABEL_BETS
+        );
+        DrawResultsLabel(
+            &gfx,
+            f_ResultsSlide + BETTING_RESULTS_POINTS_LABEL_X,
+            f_ResultsTop + RESULTS_HEADING_Y,
+            RESULTS_LABEL_POINTS
+        );
+        for (i = 0; i != g_GameState.playerCount; i++) {
+            if (g_GameState.playerCount >= 2) {
+                DrawPlaceIcon(
+                    &gfx,
+                    f_ResultsSlide + BETTING_RESULTS_PLACE_X,
+                    f_ResultsTop + RESULTS_ICON_ROW_Y + (i * RESULTS_ROW_HEIGHT),
+                    f_PlayerRanks[i]
+                );
+            }
+
+            DrawPlayerPortrait(
+                &gfx,
+                f_ResultsSlide + BETTING_RESULTS_PORTRAIT_X,
+                f_ResultsTop + RESULTS_ICON_ROW_Y + (i * RESULTS_ROW_HEIGHT),
+                i,
+                FALSE
+            );
+        }
     }
-  }
+    else {
+        DrawResultsLabel(
+            &gfx,
+            f_ResultsSlide + PLAIN_RESULTS_SCORE_LABEL_X,
+            f_ResultsTop + RESULTS_HEADING_Y,
+            RESULTS_LABEL_SCORE
+        );
+        DrawResultsLabel(
+            &gfx,
+            f_ResultsSlide + PLAIN_RESULTS_POINTS_LABEL_X,
+            f_ResultsTop + RESULTS_HEADING_Y,
+            RESULTS_LABEL_POINTS
+        );
+        for (i = 0; i != g_GameState.playerCount; i++) {
+            if (g_GameState.playerCount >= 2) {
+                DrawRank(
+                    &gfx,
+                    f_ResultsSlide + PLAIN_RESULTS_RANK_X,
+                    f_ResultsTop + RESULTS_ICON_ROW_Y + (i * RESULTS_ROW_HEIGHT),
+                    f_PlayerRanks[i]
+                );
+            }
 
-  LoadSmallPalette(&gfx, 0, ImageBody(f_ResultsLargeDigitsImage));
-  LoadNibbleTextureBlock(&gfx, ImageTexels(f_ResultsLargeDigitsImage),
-      G_IM_FMT_CI, LARGE_DIGIT_WIDTH, LARGE_DIGITS_HEIGHT, 0, 0, 0, G_TX_NOMASK,
-      G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-  if (f_HasBets) {
-    for (i = 0; i != g_GameState.playerCount; i++) {
-      if (g_GameState.gameMode == GAME_MODE_SKINS_MATCH ||
-          g_GameState.gameMode == GAME_MODE_CLUB_SLOTS) {
-        sprintf(g_PrintBuffer, f_PointsFormat, f_PlayerResults[i]);
-      } else if (f_PlayerResults[i] == 0) {
-        sprintf(g_PrintBuffer, f_EvenScoreFormat, 0);
-      } else {
-        sprintf(g_PrintBuffer, f_ScoreFormat, f_PlayerResults[i]);
-      }
-
-      DrawDigitText(&gfx, f_ResultsSlide + BETTING_RESULTS_SCORE_X,
-          f_ResultsTop + RESULTS_TEXT_ROW_Y + (i * RESULTS_ROW_HEIGHT),
-          g_PrintBuffer);
-      sprintf(g_PrintBuffer, "%5d", (int)f_PlayerBetTotals[i]);
-      DrawDigitText(&gfx,
-          f_ResultsSlide + BETTING_RESULTS_BET_TOTAL_X + betShift,
-          f_ResultsTop + RESULTS_TEXT_ROW_Y + (i * RESULTS_ROW_HEIGHT),
-          g_PrintBuffer);
-      if (f_PlayerPoints[i] < 0) {
-        sprintf(g_PrintBuffer, f_NoPointsText, f_PlayerPoints[i]);
-      } else {
-        sprintf(g_PrintBuffer, f_PointsFormat, f_PlayerPoints[i]);
-      }
-
-      DrawDigitText(&gfx, f_ResultsSlide + BETTING_RESULTS_POINTS_X,
-          f_ResultsTop + RESULTS_TEXT_ROW_Y + (i * RESULTS_ROW_HEIGHT),
-          g_PrintBuffer);
+            DrawPlayerPortrait(
+                &gfx,
+                f_ResultsSlide + PLAIN_RESULTS_PORTRAIT_X,
+                f_ResultsTop + RESULTS_ICON_ROW_Y + (i * RESULTS_ROW_HEIGHT),
+                i,
+                FALSE
+            );
+        }
     }
-  } else {
-    for (i = 0; i != g_GameState.playerCount; i++) {
-      if (g_GameState.gameMode == GAME_MODE_SKINS_MATCH ||
-          g_GameState.gameMode == GAME_MODE_CLUB_SLOTS) {
-        sprintf(g_PrintBuffer, f_PointsFormat, f_PlayerResults[i]);
-      } else if (f_PlayerResults[i] == 0) {
-        sprintf(g_PrintBuffer, f_EvenScoreFormat, 0);
-      } else {
-        sprintf(g_PrintBuffer, f_ScoreFormat, f_PlayerResults[i]);
-      }
 
-      DrawDigitText(&gfx, f_ResultsSlide + PLAIN_RESULTS_SCORE_X,
-          f_ResultsTop + RESULTS_TEXT_ROW_Y + (i * RESULTS_ROW_HEIGHT),
-          g_PrintBuffer);
-      if (f_PlayerPoints[i] < 0) {
-        sprintf(g_PrintBuffer, f_NoPointsText, f_PlayerPoints[i]);
-      } else {
-        sprintf(g_PrintBuffer, f_PointsFormat, f_PlayerPoints[i]);
-      }
+    LoadSmallPalette(&gfx, 0, ImageBody(f_ResultsLargeDigitsImage));
+    LoadNibbleTextureBlock(
+        &gfx,
+        ImageTexels(f_ResultsLargeDigitsImage),
+        G_IM_FMT_CI,
+        LARGE_DIGIT_WIDTH,
+        LARGE_DIGITS_HEIGHT,
+        0,
+        0,
+        0,
+        G_TX_NOMASK,
+        G_TX_NOMASK,
+        G_TX_NOLOD,
+        G_TX_NOLOD
+    );
+    if (f_HasBets) {
+        for (i = 0; i != g_GameState.playerCount; i++) {
+            if (g_GameState.gameMode == GAME_MODE_SKINS_MATCH ||
+                g_GameState.gameMode == GAME_MODE_CLUB_SLOTS) {
+                sprintf(g_PrintBuffer, f_PointsFormat, f_PlayerResults[i]);
+            }
+            else if (f_PlayerResults[i] == 0) {
+                sprintf(g_PrintBuffer, f_EvenScoreFormat, 0);
+            }
+            else {
+                sprintf(g_PrintBuffer, f_ScoreFormat, f_PlayerResults[i]);
+            }
 
-      DrawDigitText(&gfx, f_ResultsSlide + PLAIN_RESULTS_POINTS_X,
-          f_ResultsTop + RESULTS_TEXT_ROW_Y + (i * RESULTS_ROW_HEIGHT),
-          g_PrintBuffer);
+            DrawDigitText(
+                &gfx,
+                f_ResultsSlide + BETTING_RESULTS_SCORE_X,
+                f_ResultsTop + RESULTS_TEXT_ROW_Y + (i * RESULTS_ROW_HEIGHT),
+                g_PrintBuffer
+            );
+            sprintf(g_PrintBuffer, "%5d", (int)f_PlayerBetTotals[i]);
+            DrawDigitText(
+                &gfx,
+                f_ResultsSlide + BETTING_RESULTS_BET_TOTAL_X + betShift,
+                f_ResultsTop + RESULTS_TEXT_ROW_Y + (i * RESULTS_ROW_HEIGHT),
+                g_PrintBuffer
+            );
+            if (f_PlayerPoints[i] < 0) {
+                sprintf(g_PrintBuffer, f_NoPointsText, f_PlayerPoints[i]);
+            }
+            else {
+                sprintf(g_PrintBuffer, f_PointsFormat, f_PlayerPoints[i]);
+            }
+
+            DrawDigitText(
+                &gfx,
+                f_ResultsSlide + BETTING_RESULTS_POINTS_X,
+                f_ResultsTop + RESULTS_TEXT_ROW_Y + (i * RESULTS_ROW_HEIGHT),
+                g_PrintBuffer
+            );
+        }
     }
-  }
+    else {
+        for (i = 0; i != g_GameState.playerCount; i++) {
+            if (g_GameState.gameMode == GAME_MODE_SKINS_MATCH ||
+                g_GameState.gameMode == GAME_MODE_CLUB_SLOTS) {
+                sprintf(g_PrintBuffer, f_PointsFormat, f_PlayerResults[i]);
+            }
+            else if (f_PlayerResults[i] == 0) {
+                sprintf(g_PrintBuffer, f_EvenScoreFormat, 0);
+            }
+            else {
+                sprintf(g_PrintBuffer, f_ScoreFormat, f_PlayerResults[i]);
+            }
 
-  if (f_OpenCourseCount == COURSE_COUNT) {
-    SetTextSlot(f_ResultsSlide + ALL_COURSES_OPEN_X,
-        f_ResultsTop + PLAYERS_ALL_COURSES_OPEN_Y, MESSAGE_ALL_COURSES_OPEN,
-        TEXT_SLOT_LARGE_FONT, RESULTS_TEXT_SLOT, 0, RESULTS_TEXT_RED,
-        RESULTS_TEXT_GREEN, RESULTS_TEXT_BLUE, RESULTS_TEXT_ALPHA);
-  } else {
-    DrawResultsNumber(&gfx, f_ResultsSlide + POINTS_TOTAL_X, POINTS_TOTAL_Y,
-        f_PointsToNextCourse + f_CoursePointsTally.earned);
-    SetTextSlot(f_ResultsSlide + POINTS_TO_NEXT_COURSE_X,
-        f_ResultsTop + POINTS_TO_NEXT_COURSE_Y, MESSAGE_POINTS_TO_NEXT_COURSE,
-        TEXT_SLOT_LARGE_FONT, RESULTS_TEXT_SLOT, 0, RESULTS_TEXT_RED,
-        RESULTS_TEXT_GREEN, RESULTS_TEXT_BLUE, RESULTS_TEXT_ALPHA);
-  }
+            DrawDigitText(
+                &gfx,
+                f_ResultsSlide + PLAIN_RESULTS_SCORE_X,
+                f_ResultsTop + RESULTS_TEXT_ROW_Y + (i * RESULTS_ROW_HEIGHT),
+                g_PrintBuffer
+            );
+            if (f_PlayerPoints[i] < 0) {
+                sprintf(g_PrintBuffer, f_NoPointsText, f_PlayerPoints[i]);
+            }
+            else {
+                sprintf(g_PrintBuffer, f_PointsFormat, f_PlayerPoints[i]);
+            }
 
-  *displayListHead = gfx;
+            DrawDigitText(
+                &gfx,
+                f_ResultsSlide + PLAIN_RESULTS_POINTS_X,
+                f_ResultsTop + RESULTS_TEXT_ROW_Y + (i * RESULTS_ROW_HEIGHT),
+                g_PrintBuffer
+            );
+        }
+    }
+
+    if (f_OpenCourseCount == COURSE_COUNT) {
+        SetTextSlot(
+            f_ResultsSlide + ALL_COURSES_OPEN_X,
+            f_ResultsTop + PLAYERS_ALL_COURSES_OPEN_Y,
+            MESSAGE_ALL_COURSES_OPEN,
+            TEXT_SLOT_LARGE_FONT,
+            RESULTS_TEXT_SLOT,
+            0,
+            RESULTS_TEXT_RED,
+            RESULTS_TEXT_GREEN,
+            RESULTS_TEXT_BLUE,
+            RESULTS_TEXT_ALPHA
+        );
+    }
+    else {
+        DrawResultsNumber(
+            &gfx,
+            f_ResultsSlide + POINTS_TOTAL_X,
+            POINTS_TOTAL_Y,
+            f_PointsToNextCourse + f_CoursePointsTally.earned
+        );
+        SetTextSlot(
+            f_ResultsSlide + POINTS_TO_NEXT_COURSE_X,
+            f_ResultsTop + POINTS_TO_NEXT_COURSE_Y,
+            MESSAGE_POINTS_TO_NEXT_COURSE,
+            TEXT_SLOT_LARGE_FONT,
+            RESULTS_TEXT_SLOT,
+            0,
+            RESULTS_TEXT_RED,
+            RESULTS_TEXT_GREEN,
+            RESULTS_TEXT_BLUE,
+            RESULTS_TEXT_ALPHA
+        );
+    }
+
+    *displayListHead = gfx;
 }
 
 const char f_NoPointsText[] = "  -";
@@ -3357,187 +4213,312 @@ const char f_NoPointsText[] = "  -";
  * The match play results of two players: place, portrait, holes up or down,
  * any bets and Course Points.
  */
-void DrawMatchResults(Gfx** displayListHead) {
-  Gfx* gfx = *displayListHead;
-  /* Pads the frame to match; without it 110 words differ */
-  s32 unused[4] UNUSED;
-  s32 standingShift[MATCH_PLAYER_COUNT];
-  s32 betShift = FOUR_DIGIT_BET_SHIFT;
-  s32 standingRow;
-  s32 holeCount;
-  s32 i;
+void DrawMatchResults(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
+    /* Pads the frame to match; without it 110 words differ */
+    s32 unused[4] UNUSED;
+    s32 standingShift[MATCH_PLAYER_COUNT];
+    s32 betShift = FOUR_DIGIT_BET_SHIFT;
+    s32 standingRow;
+    s32 holeCount;
+    s32 i;
 
-  for (i = 0; i != g_GameState.playerCount; i++) {
-    if (f_PlayerBetTotals[i] > FOUR_DIGIT_BET_MAX) {
-      betShift = 0;
-    }
-
-    if (f_PlayerBetTotals[i] < FOUR_DIGIT_BET_MIN) {
-      betShift = 0;
-    }
-  }
-
-  gDPPipeSync(gfx++);
-  gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-  gDPPipeSync(gfx++);
-  gDPSetTextureFilter(gfx++, G_TF_POINT);
-  if (f_HasBets) {
-    DrawResultsLabel(&gfx, f_ResultsSlide + BETTING_MATCH_BETS_LABEL_X,
-        f_ResultsTop + MATCH_HEADING_Y, RESULTS_LABEL_BETS);
-    DrawResultsLabel(&gfx, f_ResultsSlide + BETTING_MATCH_POINTS_LABEL_X,
-        f_ResultsTop + MATCH_HEADING_Y, RESULTS_LABEL_POINTS);
-    DrawRank(&gfx, f_ResultsSlide + BETTING_MATCH_RANK_X,
-        f_ResultsTop + MATCH_RANK_Y, f_PlayerRanks[0]);
-    DrawRank(&gfx, f_ResultsSlide + BETTING_MATCH_RANK_X,
-        f_ResultsTop + MATCH_RANK_Y + MATCH_ROW_HEIGHT, f_PlayerRanks[1]);
-    DrawPlayerPortrait(&gfx, f_ResultsSlide + BETTING_MATCH_PORTRAIT_X,
-        f_ResultsTop + MATCH_PORTRAIT_Y, 0, FALSE);
-    DrawPlayerPortrait(&gfx, f_ResultsSlide + BETTING_MATCH_PORTRAIT_X,
-        f_ResultsTop + MATCH_PORTRAIT_Y + MATCH_ROW_HEIGHT, 1, FALSE);
-  } else {
-    DrawResultsLabel(&gfx, f_ResultsSlide + PLAIN_MATCH_POINTS_LABEL_X,
-        f_ResultsTop + MATCH_HEADING_Y, RESULTS_LABEL_POINTS);
-    DrawRank(&gfx, f_ResultsSlide + PLAIN_MATCH_RANK_X,
-        f_ResultsTop + MATCH_RANK_Y, f_PlayerRanks[0]);
-    DrawRank(&gfx, f_ResultsSlide + PLAIN_MATCH_RANK_X,
-        f_ResultsTop + MATCH_RANK_Y + MATCH_ROW_HEIGHT, f_PlayerRanks[1]);
-    DrawPlayerPortrait(&gfx, f_ResultsSlide + PLAIN_MATCH_PORTRAIT_X,
-        f_ResultsTop + MATCH_PORTRAIT_Y, 0, FALSE);
-    DrawPlayerPortrait(&gfx, f_ResultsSlide + PLAIN_MATCH_PORTRAIT_X,
-        f_ResultsTop + MATCH_PORTRAIT_Y + MATCH_ROW_HEIGHT, 1, FALSE);
-  }
-
-  LoadSmallPalette(&gfx, 0, ImageBody(f_MatchStandingWordsImage));
-  LoadNibbleTextureBlock(&gfx, ImageTexels(f_MatchStandingWordsImage),
-      G_IM_FMT_CI, STANDING_WORDS_SIZE, STANDING_WORDS_SIZE, 0, 0, 0,
-      G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-  for (i = 0; i != g_GameState.playerCount; i++) {
-    if (f_PlayerResults[i] > 0) {
-      if (f_PlayerResults[i] >= MIN_TWO_DIGIT_HOLE_COUNT) {
-        standingShift[i] = 0;
-      } else {
-        standingShift[i] = STANDING_ONE_DIGIT_UP_SHIFT;
-      }
-    } else if (f_PlayerResults[i] < 0) {
-      if (f_PlayerResults[i] <= -MIN_TWO_DIGIT_HOLE_COUNT) {
-        standingShift[i] = STANDING_TWO_DIGIT_DOWN_SHIFT;
-      } else {
-        standingShift[i] = STANDING_ONE_DIGIT_DOWN_SHIFT;
-      }
-    }
-  }
-
-  for (i = 0; i != g_GameState.playerCount; i++) {
-    if (f_PlayerResults[i] > 0) {
-      standingRow = STANDING_WORD_UP_ROW;
-    } else if (f_PlayerResults[i] < 0) {
-      standingRow = STANDING_WORD_DOWN_ROW;
-    } else {
-      standingRow = STANDING_WORD_EVEN_ROW;
-    }
-
-    if (f_HasBets) {
-      DrawTextureRect(&gfx,
-          QuarterPixels(
-              BETTING_MATCH_STANDING_X + f_ResultsSlide + standingShift[i]),
-          QuarterPixels(
-              f_ResultsTop + MATCH_STANDING_Y + (i * MATCH_ROW_HEIGHT)),
-          QuarterPixels(BETTING_MATCH_STANDING_X +
-              (f_ResultsSlide + STANDING_WORD_WIDTH) + standingShift[i]),
-          QuarterPixels(f_ResultsTop + MATCH_STANDING_Y +
-              (i * MATCH_ROW_HEIGHT) + STANDING_WORD_HEIGHT),
-          G_TX_RENDERTILE, 0, TexelCoordinate(standingRow), TEXEL_STEP_ONE,
-          TEXEL_STEP_ONE);
-    } else {
-      DrawTextureRect(&gfx,
-          QuarterPixels(
-              PLAIN_MATCH_STANDING_X + f_ResultsSlide + standingShift[i]),
-          QuarterPixels(
-              f_ResultsTop + MATCH_STANDING_Y + (i * MATCH_ROW_HEIGHT)),
-          QuarterPixels(PLAIN_MATCH_STANDING_X +
-              (f_ResultsSlide + STANDING_WORD_WIDTH) + standingShift[i]),
-          QuarterPixels(f_ResultsTop + MATCH_STANDING_Y +
-              (i * MATCH_ROW_HEIGHT) + STANDING_WORD_HEIGHT),
-          G_TX_RENDERTILE, 0, TexelCoordinate(standingRow), TEXEL_STEP_ONE,
-          TEXEL_STEP_ONE);
-    }
-  }
-
-  LoadSmallPalette(&gfx, 0, ImageBody(f_ResultsLargeDigitsImage));
-  LoadNibbleTextureBlock(&gfx, ImageTexels(f_ResultsLargeDigitsImage),
-      G_IM_FMT_CI, LARGE_DIGIT_WIDTH, LARGE_DIGITS_HEIGHT, 0, 0, 0, G_TX_NOMASK,
-      G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-  for (i = 0; i != g_GameState.playerCount; i++) {
-    if (f_HasBets) {
-      /* An even match draws only the word */
-      if (f_PlayerResults[0] != 0) {
-        holeCount = f_PlayerResults[i];
-        if (holeCount < 0) {
-          holeCount = -holeCount;
+    for (i = 0; i != g_GameState.playerCount; i++) {
+        if (f_PlayerBetTotals[i] > FOUR_DIGIT_BET_MAX) {
+            betShift = 0;
         }
 
-        sprintf(g_PrintBuffer, "%2d", holeCount);
-        DrawDigitText(&gfx,
-            (f_ResultsSlide + BETTING_MATCH_HOLE_COUNT_X) + standingShift[i],
-            f_ResultsTop + MATCH_STANDING_Y + (i * MATCH_ROW_HEIGHT),
-            g_PrintBuffer);
-      }
+        if (f_PlayerBetTotals[i] < FOUR_DIGIT_BET_MIN) {
+            betShift = 0;
+        }
+    }
 
-      sprintf(g_PrintBuffer, f_NumberFormat, f_PlayerBetTotals[i]);
-      DrawDigitText(&gfx,
-          (BETTING_MATCH_BET_TOTAL_X + f_ResultsSlide) + betShift,
-          f_ResultsTop + MATCH_NUMBER_Y + (i * MATCH_ROW_HEIGHT),
-          g_PrintBuffer);
-      if (f_PlayerPoints[i] < 0) {
-        sprintf(g_PrintBuffer, f_NoPointsText, f_PlayerPoints[i]);
-      } else {
-        sprintf(g_PrintBuffer, f_PointsFormat, f_PlayerPoints[i]);
-      }
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_POINT);
+    if (f_HasBets) {
+        DrawResultsLabel(
+            &gfx,
+            f_ResultsSlide + BETTING_MATCH_BETS_LABEL_X,
+            f_ResultsTop + MATCH_HEADING_Y,
+            RESULTS_LABEL_BETS
+        );
+        DrawResultsLabel(
+            &gfx,
+            f_ResultsSlide + BETTING_MATCH_POINTS_LABEL_X,
+            f_ResultsTop + MATCH_HEADING_Y,
+            RESULTS_LABEL_POINTS
+        );
+        DrawRank(
+            &gfx,
+            f_ResultsSlide + BETTING_MATCH_RANK_X,
+            f_ResultsTop + MATCH_RANK_Y,
+            f_PlayerRanks[0]
+        );
+        DrawRank(
+            &gfx,
+            f_ResultsSlide + BETTING_MATCH_RANK_X,
+            f_ResultsTop + MATCH_RANK_Y + MATCH_ROW_HEIGHT,
+            f_PlayerRanks[1]
+        );
+        DrawPlayerPortrait(
+            &gfx,
+            f_ResultsSlide + BETTING_MATCH_PORTRAIT_X,
+            f_ResultsTop + MATCH_PORTRAIT_Y,
+            0,
+            FALSE
+        );
+        DrawPlayerPortrait(
+            &gfx,
+            f_ResultsSlide + BETTING_MATCH_PORTRAIT_X,
+            f_ResultsTop + MATCH_PORTRAIT_Y + MATCH_ROW_HEIGHT,
+            1,
+            FALSE
+        );
+    }
+    else {
+        DrawResultsLabel(
+            &gfx,
+            f_ResultsSlide + PLAIN_MATCH_POINTS_LABEL_X,
+            f_ResultsTop + MATCH_HEADING_Y,
+            RESULTS_LABEL_POINTS
+        );
+        DrawRank(
+            &gfx,
+            f_ResultsSlide + PLAIN_MATCH_RANK_X,
+            f_ResultsTop + MATCH_RANK_Y,
+            f_PlayerRanks[0]
+        );
+        DrawRank(
+            &gfx,
+            f_ResultsSlide + PLAIN_MATCH_RANK_X,
+            f_ResultsTop + MATCH_RANK_Y + MATCH_ROW_HEIGHT,
+            f_PlayerRanks[1]
+        );
+        DrawPlayerPortrait(
+            &gfx,
+            f_ResultsSlide + PLAIN_MATCH_PORTRAIT_X,
+            f_ResultsTop + MATCH_PORTRAIT_Y,
+            0,
+            FALSE
+        );
+        DrawPlayerPortrait(
+            &gfx,
+            f_ResultsSlide + PLAIN_MATCH_PORTRAIT_X,
+            f_ResultsTop + MATCH_PORTRAIT_Y + MATCH_ROW_HEIGHT,
+            1,
+            FALSE
+        );
+    }
 
-      DrawDigitText(&gfx, f_ResultsSlide + BETTING_MATCH_POINTS_X,
-          f_ResultsTop + MATCH_NUMBER_Y + (i * MATCH_ROW_HEIGHT),
-          g_PrintBuffer);
-    } else {
-      if (f_PlayerResults[0] != 0) {
-        holeCount = f_PlayerResults[i];
-        if (holeCount < 0) {
-          holeCount = -holeCount;
+    LoadSmallPalette(&gfx, 0, ImageBody(f_MatchStandingWordsImage));
+    LoadNibbleTextureBlock(
+        &gfx,
+        ImageTexels(f_MatchStandingWordsImage),
+        G_IM_FMT_CI,
+        STANDING_WORDS_SIZE,
+        STANDING_WORDS_SIZE,
+        0,
+        0,
+        0,
+        G_TX_NOMASK,
+        G_TX_NOMASK,
+        G_TX_NOLOD,
+        G_TX_NOLOD
+    );
+    for (i = 0; i != g_GameState.playerCount; i++) {
+        if (f_PlayerResults[i] > 0) {
+            if (f_PlayerResults[i] >= MIN_TWO_DIGIT_HOLE_COUNT) {
+                standingShift[i] = 0;
+            }
+            else {
+                standingShift[i] = STANDING_ONE_DIGIT_UP_SHIFT;
+            }
+        }
+        else if (f_PlayerResults[i] < 0) {
+            if (f_PlayerResults[i] <= -MIN_TWO_DIGIT_HOLE_COUNT) {
+                standingShift[i] = STANDING_TWO_DIGIT_DOWN_SHIFT;
+            }
+            else {
+                standingShift[i] = STANDING_ONE_DIGIT_DOWN_SHIFT;
+            }
+        }
+    }
+
+    for (i = 0; i != g_GameState.playerCount; i++) {
+        if (f_PlayerResults[i] > 0) {
+            standingRow = STANDING_WORD_UP_ROW;
+        }
+        else if (f_PlayerResults[i] < 0) {
+            standingRow = STANDING_WORD_DOWN_ROW;
+        }
+        else {
+            standingRow = STANDING_WORD_EVEN_ROW;
         }
 
-        sprintf(g_PrintBuffer, "%2d", holeCount);
-        DrawDigitText(&gfx,
-            (f_ResultsSlide + PLAIN_MATCH_HOLE_COUNT_X) + standingShift[i],
-            f_ResultsTop + MATCH_STANDING_Y + (i * MATCH_ROW_HEIGHT),
-            g_PrintBuffer);
-      }
-
-      if (f_PlayerPoints[i] < 0) {
-        sprintf(g_PrintBuffer, f_NoPointsText, f_PlayerPoints[i]);
-      } else {
-        sprintf(g_PrintBuffer, f_PointsFormat, f_PlayerPoints[i]);
-      }
-
-      DrawDigitText(&gfx, f_ResultsSlide + PLAIN_MATCH_POINTS_X,
-          f_ResultsTop + MATCH_NUMBER_Y + (i * PLAIN_MATCH_POINTS_ROW_HEIGHT),
-          g_PrintBuffer);
+        if (f_HasBets) {
+            DrawTextureRect(
+                &gfx,
+                QuarterPixels(BETTING_MATCH_STANDING_X + f_ResultsSlide + standingShift[i]),
+                QuarterPixels(f_ResultsTop + MATCH_STANDING_Y + (i * MATCH_ROW_HEIGHT)),
+                QuarterPixels(
+                    BETTING_MATCH_STANDING_X + (f_ResultsSlide + STANDING_WORD_WIDTH) +
+                    standingShift[i]
+                ),
+                QuarterPixels(
+                    f_ResultsTop + MATCH_STANDING_Y + (i * MATCH_ROW_HEIGHT) + STANDING_WORD_HEIGHT
+                ),
+                G_TX_RENDERTILE,
+                0,
+                TexelCoordinate(standingRow),
+                TEXEL_STEP_ONE,
+                TEXEL_STEP_ONE
+            );
+        }
+        else {
+            DrawTextureRect(
+                &gfx,
+                QuarterPixels(PLAIN_MATCH_STANDING_X + f_ResultsSlide + standingShift[i]),
+                QuarterPixels(f_ResultsTop + MATCH_STANDING_Y + (i * MATCH_ROW_HEIGHT)),
+                QuarterPixels(
+                    PLAIN_MATCH_STANDING_X + (f_ResultsSlide + STANDING_WORD_WIDTH) +
+                    standingShift[i]
+                ),
+                QuarterPixels(
+                    f_ResultsTop + MATCH_STANDING_Y + (i * MATCH_ROW_HEIGHT) + STANDING_WORD_HEIGHT
+                ),
+                G_TX_RENDERTILE,
+                0,
+                TexelCoordinate(standingRow),
+                TEXEL_STEP_ONE,
+                TEXEL_STEP_ONE
+            );
+        }
     }
-  }
 
-  if (f_OpenCourseCount == COURSE_COUNT) {
-    SetTextSlot(f_ResultsSlide + ALL_COURSES_OPEN_X,
-        f_ResultsTop + MATCH_ALL_COURSES_OPEN_Y, MESSAGE_ALL_COURSES_OPEN,
-        TEXT_SLOT_LARGE_FONT, RESULTS_TEXT_SLOT, 0, RESULTS_TEXT_RED,
-        RESULTS_TEXT_GREEN, RESULTS_TEXT_BLUE, RESULTS_TEXT_ALPHA);
-  } else {
-    DrawResultsNumber(&gfx, f_ResultsSlide + POINTS_TOTAL_X, POINTS_TOTAL_Y,
-        f_PointsToNextCourse + f_CoursePointsTally.earned);
-    SetTextSlot(f_ResultsSlide + POINTS_TO_NEXT_COURSE_X,
-        f_ResultsTop + POINTS_TO_NEXT_COURSE_Y, MESSAGE_POINTS_TO_NEXT_COURSE,
-        TEXT_SLOT_LARGE_FONT, RESULTS_TEXT_SLOT, 0, RESULTS_TEXT_RED,
-        RESULTS_TEXT_GREEN, RESULTS_TEXT_BLUE, RESULTS_TEXT_ALPHA);
-  }
+    LoadSmallPalette(&gfx, 0, ImageBody(f_ResultsLargeDigitsImage));
+    LoadNibbleTextureBlock(
+        &gfx,
+        ImageTexels(f_ResultsLargeDigitsImage),
+        G_IM_FMT_CI,
+        LARGE_DIGIT_WIDTH,
+        LARGE_DIGITS_HEIGHT,
+        0,
+        0,
+        0,
+        G_TX_NOMASK,
+        G_TX_NOMASK,
+        G_TX_NOLOD,
+        G_TX_NOLOD
+    );
+    for (i = 0; i != g_GameState.playerCount; i++) {
+        if (f_HasBets) {
+            /* An even match draws only the word */
+            if (f_PlayerResults[0] != 0) {
+                holeCount = f_PlayerResults[i];
+                if (holeCount < 0) {
+                    holeCount = -holeCount;
+                }
 
-  *displayListHead = gfx;
+                sprintf(g_PrintBuffer, "%2d", holeCount);
+                DrawDigitText(
+                    &gfx,
+                    (f_ResultsSlide + BETTING_MATCH_HOLE_COUNT_X) + standingShift[i],
+                    f_ResultsTop + MATCH_STANDING_Y + (i * MATCH_ROW_HEIGHT),
+                    g_PrintBuffer
+                );
+            }
+
+            sprintf(g_PrintBuffer, f_NumberFormat, f_PlayerBetTotals[i]);
+            DrawDigitText(
+                &gfx,
+                (BETTING_MATCH_BET_TOTAL_X + f_ResultsSlide) + betShift,
+                f_ResultsTop + MATCH_NUMBER_Y + (i * MATCH_ROW_HEIGHT),
+                g_PrintBuffer
+            );
+            if (f_PlayerPoints[i] < 0) {
+                sprintf(g_PrintBuffer, f_NoPointsText, f_PlayerPoints[i]);
+            }
+            else {
+                sprintf(g_PrintBuffer, f_PointsFormat, f_PlayerPoints[i]);
+            }
+
+            DrawDigitText(
+                &gfx,
+                f_ResultsSlide + BETTING_MATCH_POINTS_X,
+                f_ResultsTop + MATCH_NUMBER_Y + (i * MATCH_ROW_HEIGHT),
+                g_PrintBuffer
+            );
+        }
+        else {
+            if (f_PlayerResults[0] != 0) {
+                holeCount = f_PlayerResults[i];
+                if (holeCount < 0) {
+                    holeCount = -holeCount;
+                }
+
+                sprintf(g_PrintBuffer, "%2d", holeCount);
+                DrawDigitText(
+                    &gfx,
+                    (f_ResultsSlide + PLAIN_MATCH_HOLE_COUNT_X) + standingShift[i],
+                    f_ResultsTop + MATCH_STANDING_Y + (i * MATCH_ROW_HEIGHT),
+                    g_PrintBuffer
+                );
+            }
+
+            if (f_PlayerPoints[i] < 0) {
+                sprintf(g_PrintBuffer, f_NoPointsText, f_PlayerPoints[i]);
+            }
+            else {
+                sprintf(g_PrintBuffer, f_PointsFormat, f_PlayerPoints[i]);
+            }
+
+            DrawDigitText(
+                &gfx,
+                f_ResultsSlide + PLAIN_MATCH_POINTS_X,
+                f_ResultsTop + MATCH_NUMBER_Y + (i * PLAIN_MATCH_POINTS_ROW_HEIGHT),
+                g_PrintBuffer
+            );
+        }
+    }
+
+    if (f_OpenCourseCount == COURSE_COUNT) {
+        SetTextSlot(
+            f_ResultsSlide + ALL_COURSES_OPEN_X,
+            f_ResultsTop + MATCH_ALL_COURSES_OPEN_Y,
+            MESSAGE_ALL_COURSES_OPEN,
+            TEXT_SLOT_LARGE_FONT,
+            RESULTS_TEXT_SLOT,
+            0,
+            RESULTS_TEXT_RED,
+            RESULTS_TEXT_GREEN,
+            RESULTS_TEXT_BLUE,
+            RESULTS_TEXT_ALPHA
+        );
+    }
+    else {
+        DrawResultsNumber(
+            &gfx,
+            f_ResultsSlide + POINTS_TOTAL_X,
+            POINTS_TOTAL_Y,
+            f_PointsToNextCourse + f_CoursePointsTally.earned
+        );
+        SetTextSlot(
+            f_ResultsSlide + POINTS_TO_NEXT_COURSE_X,
+            f_ResultsTop + POINTS_TO_NEXT_COURSE_Y,
+            MESSAGE_POINTS_TO_NEXT_COURSE,
+            TEXT_SLOT_LARGE_FONT,
+            RESULTS_TEXT_SLOT,
+            0,
+            RESULTS_TEXT_RED,
+            RESULTS_TEXT_GREEN,
+            RESULTS_TEXT_BLUE,
+            RESULTS_TEXT_ALPHA
+        );
+    }
+
+    *displayListHead = gfx;
 }
 
 const char f_UnusedModeNamesText[] = "StrokeSpeedGolfMini-Golf";
@@ -3556,8 +4537,7 @@ const char f_UnusedModeNamesText[] = "StrokeSpeedGolfMini-Golf";
 #define CLUB_TOURNAMENT_NAME_SLOT 3
 #define CLUB_TOURNAMENT_COURSE_SLOT 4
 #define CLUB_TOURNAMENT_MODE_SLOT 5
-#define CLUB_TOURNAMENT_TEXT_FLAGS \
-  (TEXT_FLAG_CENTERED | TEXT_FLAG_DRAWN_BY_OWNER)
+#define CLUB_TOURNAMENT_TEXT_FLAGS (TEXT_FLAG_CENTERED | TEXT_FLAG_DRAWN_BY_OWNER)
 /* Where the club tournament results draw their parts */
 #define CLUB_TOURNAMENT_COURSE_X 28
 #define CLUB_TOURNAMENT_COURSE_Y 104
@@ -3577,18 +4557,17 @@ const char f_UnusedModeNamesText[] = "StrokeSpeedGolfMini-Golf";
 
 /* The club tournament details' lines, from the tournament's number down */
 enum ClubTournamentLine {
-  CLUB_TOURNAMENT_LINE_NUMBER,
-  CLUB_TOURNAMENT_LINE_NAME,
-  CLUB_TOURNAMENT_LINE_COURSE,
-  CLUB_TOURNAMENT_LINE_MODE,
-  CLUB_TOURNAMENT_LINE_SCORE,
-  CLUB_TOURNAMENT_LINE_TIME
+    CLUB_TOURNAMENT_LINE_NUMBER,
+    CLUB_TOURNAMENT_LINE_NAME,
+    CLUB_TOURNAMENT_LINE_COURSE,
+    CLUB_TOURNAMENT_LINE_MODE,
+    CLUB_TOURNAMENT_LINE_SCORE,
+    CLUB_TOURNAMENT_LINE_TIME
 };
 
 /* The top of a club tournament details' text line */
 #define ClubTournamentTextY(detailsTop, lineHeight, line) \
-  (f_ResultsTop + (detailsTop) + ((lineHeight) * (line)) + \
-      CLUB_TOURNAMENT_TEXT_DROP)
+    (f_ResultsTop + (detailsTop) + ((lineHeight) * (line)) + CLUB_TOURNAMENT_TEXT_DROP)
 
 /* DrawLargeTextWithShadow ignores this flag */
 #define CLUB_TOURNAMENT_LABEL_FLAGS 4
@@ -3601,162 +4580,265 @@ enum ClubTournamentLine {
  * The results of a club tournament: its course, number, name and mode, the
  * score and the password to send in.
  */
-void DrawClubTournamentResults(Gfx** displayListHead) {
-  Gfx* gfx = *displayListHead;
-  s32 width;
-  s32 height;
-  s32 gameMode;
-  Boolean isNintendo;
-  s32 detailsTop;
-  s32 lineHeight;
-  s32 seconds;
-  s32 minutes;
-  s32 hundredths;
-  s32 i;
-  s32 firstStripBottom;
+void DrawClubTournamentResults(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
+    s32 width;
+    s32 height;
+    s32 gameMode;
+    Boolean isNintendo;
+    s32 detailsTop;
+    s32 lineHeight;
+    s32 seconds;
+    s32 minutes;
+    s32 hundredths;
+    s32 i;
+    s32 firstStripBottom;
 
-  isNintendo = IsNintendoClubTournament();
-  gDPPipeSync(gfx++);
-  gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-  gDPPipeSync(gfx++);
-  gDPSetTextureFilter(gfx++, G_TF_POINT);
-  gameMode = GetClubTournamentGameMode();
-  LoadLargePalette(&gfx, ImageBody(f_ResultsCourseImage));
-  for (i = 0; i != CLUB_TOURNAMENT_COURSE_STRIP_COUNT; i++) {
-    LoadTextureBlock(&gfx,
-        LargeImageTexels(f_ResultsCourseImage) +
-            (i * CLUB_TOURNAMENT_COURSE_STRIP_WIDTH *
-                CLUB_TOURNAMENT_COURSE_STRIP_HEIGHT),
-        G_IM_FMT_CI, G_IM_SIZ_8b, CLUB_TOURNAMENT_COURSE_STRIP_WIDTH,
-        CLUB_TOURNAMENT_COURSE_STRIP_HEIGHT, 0, 0, 0, G_TX_NOMASK, G_TX_NOMASK,
-        G_TX_NOLOD, G_TX_NOLOD);
-    firstStripBottom = f_ResultsTop + CLUB_TOURNAMENT_COURSE_Y +
-        CLUB_TOURNAMENT_COURSE_STRIP_HEIGHT;
-    DrawTextureRect(&gfx,
-        QuarterPixels(f_ResultsSlide + CLUB_TOURNAMENT_COURSE_X),
-        QuarterPixels((i * CLUB_TOURNAMENT_COURSE_STRIP_HEIGHT) +
-            CLUB_TOURNAMENT_COURSE_Y + f_ResultsTop),
-        QuarterPixels(f_ResultsSlide + CLUB_TOURNAMENT_COURSE_X +
-            CLUB_TOURNAMENT_COURSE_STRIP_WIDTH),
-        QuarterPixels(
-            (i * CLUB_TOURNAMENT_COURSE_STRIP_HEIGHT) + firstStripBottom),
-        G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
-  }
-
-  detailsTop = CLUB_TOURNAMENT_DETAILS_TOP;
-  if (isNintendo) {
-    lineHeight = CLUB_TOURNAMENT_LINE_HEIGHT;
-    DrawPlayerPortrait(&gfx, f_ResultsSlide + CLUB_TOURNAMENT_PORTRAIT_X,
-        f_ResultsTop + BADGED_PORTRAIT_Y, 0, TRUE);
-    LoadLargePalette(&gfx, ImageBody(f_NintendoBadgeImage));
-    for (i = 0; i != NINTENDO_BADGE_STRIP_COUNT; i++) {
-      LoadTextureBlock(&gfx,
-          LargeImageTexels(f_NintendoBadgeImage) +
-              (i * NINTENDO_BADGE_STRIP_WIDTH * NINTENDO_BADGE_STRIP_HEIGHT),
-          G_IM_FMT_CI, G_IM_SIZ_8b, NINTENDO_BADGE_STRIP_WIDTH,
-          NINTENDO_BADGE_STRIP_HEIGHT, 0, G_TX_MIRROR, 0, G_TX_NOMASK,
-          G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-      DrawTextureRect(&gfx, QuarterPixels(f_ResultsSlide + NINTENDO_BADGE_X),
-          QuarterPixels(f_ResultsTop + NINTENDO_BADGE_Y +
-              (i * NINTENDO_BADGE_STRIP_HEIGHT)),
-          QuarterPixels(
-              f_ResultsSlide + NINTENDO_BADGE_X + NINTENDO_BADGE_STRIP_WIDTH),
-          QuarterPixels(f_ResultsTop + NINTENDO_BADGE_Y +
-              (i * NINTENDO_BADGE_STRIP_HEIGHT) + NINTENDO_BADGE_STRIP_HEIGHT),
-          G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+    isNintendo = IsNintendoClubTournament();
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_POINT);
+    gameMode = GetClubTournamentGameMode();
+    LoadLargePalette(&gfx, ImageBody(f_ResultsCourseImage));
+    for (i = 0; i != CLUB_TOURNAMENT_COURSE_STRIP_COUNT; i++) {
+        LoadTextureBlock(
+            &gfx,
+            LargeImageTexels(f_ResultsCourseImage) +
+                (i * CLUB_TOURNAMENT_COURSE_STRIP_WIDTH * CLUB_TOURNAMENT_COURSE_STRIP_HEIGHT),
+            G_IM_FMT_CI,
+            G_IM_SIZ_8b,
+            CLUB_TOURNAMENT_COURSE_STRIP_WIDTH,
+            CLUB_TOURNAMENT_COURSE_STRIP_HEIGHT,
+            0,
+            0,
+            0,
+            G_TX_NOMASK,
+            G_TX_NOMASK,
+            G_TX_NOLOD,
+            G_TX_NOLOD
+        );
+        firstStripBottom =
+            f_ResultsTop + CLUB_TOURNAMENT_COURSE_Y + CLUB_TOURNAMENT_COURSE_STRIP_HEIGHT;
+        DrawTextureRect(
+            &gfx,
+            QuarterPixels(f_ResultsSlide + CLUB_TOURNAMENT_COURSE_X),
+            QuarterPixels(
+                (i * CLUB_TOURNAMENT_COURSE_STRIP_HEIGHT) + CLUB_TOURNAMENT_COURSE_Y + f_ResultsTop
+            ),
+            QuarterPixels(
+                f_ResultsSlide + CLUB_TOURNAMENT_COURSE_X + CLUB_TOURNAMENT_COURSE_STRIP_WIDTH
+            ),
+            QuarterPixels((i * CLUB_TOURNAMENT_COURSE_STRIP_HEIGHT) + firstStripBottom),
+            G_TX_RENDERTILE,
+            0,
+            0,
+            TEXEL_STEP_ONE,
+            TEXEL_STEP_ONE
+        );
     }
-  } else {
-    detailsTop = CLUB_TOURNAMENT_UNBADGED_DETAILS_TOP;
-    lineHeight = CLUB_TOURNAMENT_UNBADGED_LINE_HEIGHT;
-    DrawPlayerPortrait(&gfx, f_ResultsSlide + CLUB_TOURNAMENT_PORTRAIT_X,
-        f_ResultsTop + UNBADGED_PORTRAIT_Y, 0, TRUE);
-  }
 
-  DrawPlaceNumber(&gfx, f_ResultsSlide + CLUB_TOURNAMENT_DETAILS_X,
-      f_ResultsTop + detailsTop, GetClubTournamentNumber());
-  SetUpTextDrawing(&gfx);
-  MeasureMessage(
-      GetClubTournamentNameMessage(), FONT_SIZE_LARGE, &width, &height, 0);
-  MeasureMessage(GetClubTournamentCourseTitleMessage(), FONT_SIZE_LARGE, &width,
-      &height, 0);
-  MeasureMessage(
-      GetClubTournamentModeMessage(), FONT_SIZE_LARGE, &width, &height, 0);
-  SetTextSlot(f_ResultsSlide + CLUB_TOURNAMENT_DETAILS_X,
-      ClubTournamentTextY(detailsTop, lineHeight, CLUB_TOURNAMENT_LINE_NAME),
-      GetClubTournamentNameMessage(), TEXT_SLOT_LARGE_FONT,
-      CLUB_TOURNAMENT_NAME_SLOT, CLUB_TOURNAMENT_TEXT_FLAGS, 127, 191, 255,
-      OPAQUE_ALPHA);
-  SetTextSlot(f_ResultsSlide + CLUB_TOURNAMENT_DETAILS_X,
-      ClubTournamentTextY(detailsTop, lineHeight, CLUB_TOURNAMENT_LINE_COURSE),
-      GetClubTournamentCourseTitleMessage(), TEXT_SLOT_LARGE_FONT,
-      CLUB_TOURNAMENT_COURSE_SLOT, CLUB_TOURNAMENT_TEXT_FLAGS, 43, 255, 75,
-      OPAQUE_ALPHA);
-  SetTextSlot(f_ResultsSlide + CLUB_TOURNAMENT_DETAILS_X,
-      ClubTournamentTextY(detailsTop, lineHeight, CLUB_TOURNAMENT_LINE_MODE),
-      GetClubTournamentModeMessage(), TEXT_SLOT_LARGE_FONT,
-      CLUB_TOURNAMENT_MODE_SLOT, CLUB_TOURNAMENT_TEXT_FLAGS, 255, 63, 127,
-      OPAQUE_ALPHA);
-  for (i = CLUB_TOURNAMENT_NAME_SLOT; i != CLUB_TOURNAMENT_MODE_SLOT + 1; i++) {
-    gDPSetPrimColor(gfx++, 0, 0, f_TextSlotColors[i - 1][0],
-        f_TextSlotColors[i - 1][1], f_TextSlotColors[i - 1][2], OPAQUE_ALPHA);
-    DrawLargeTextSlot(&gfx, i);
-  }
+    detailsTop = CLUB_TOURNAMENT_DETAILS_TOP;
+    if (isNintendo) {
+        lineHeight = CLUB_TOURNAMENT_LINE_HEIGHT;
+        DrawPlayerPortrait(
+            &gfx,
+            f_ResultsSlide + CLUB_TOURNAMENT_PORTRAIT_X,
+            f_ResultsTop + BADGED_PORTRAIT_Y,
+            0,
+            TRUE
+        );
+        LoadLargePalette(&gfx, ImageBody(f_NintendoBadgeImage));
+        for (i = 0; i != NINTENDO_BADGE_STRIP_COUNT; i++) {
+            LoadTextureBlock(
+                &gfx,
+                LargeImageTexels(f_NintendoBadgeImage) +
+                    (i * NINTENDO_BADGE_STRIP_WIDTH * NINTENDO_BADGE_STRIP_HEIGHT),
+                G_IM_FMT_CI,
+                G_IM_SIZ_8b,
+                NINTENDO_BADGE_STRIP_WIDTH,
+                NINTENDO_BADGE_STRIP_HEIGHT,
+                0,
+                G_TX_MIRROR,
+                0,
+                G_TX_NOMASK,
+                G_TX_NOMASK,
+                G_TX_NOLOD,
+                G_TX_NOLOD
+            );
+            DrawTextureRect(
+                &gfx,
+                QuarterPixels(f_ResultsSlide + NINTENDO_BADGE_X),
+                QuarterPixels(f_ResultsTop + NINTENDO_BADGE_Y + (i * NINTENDO_BADGE_STRIP_HEIGHT)),
+                QuarterPixels(f_ResultsSlide + NINTENDO_BADGE_X + NINTENDO_BADGE_STRIP_WIDTH),
+                QuarterPixels(
+                    f_ResultsTop + NINTENDO_BADGE_Y + (i * NINTENDO_BADGE_STRIP_HEIGHT) +
+                    NINTENDO_BADGE_STRIP_HEIGHT
+                ),
+                G_TX_RENDERTILE,
+                0,
+                0,
+                TEXEL_STEP_ONE,
+                TEXEL_STEP_ONE
+            );
+        }
+    }
+    else {
+        detailsTop = CLUB_TOURNAMENT_UNBADGED_DETAILS_TOP;
+        lineHeight = CLUB_TOURNAMENT_UNBADGED_LINE_HEIGHT;
+        DrawPlayerPortrait(
+            &gfx,
+            f_ResultsSlide + CLUB_TOURNAMENT_PORTRAIT_X,
+            f_ResultsTop + UNBADGED_PORTRAIT_Y,
+            0,
+            TRUE
+        );
+    }
 
-  SetUpGradientTextDrawing(&gfx, 0);
-  sprintf(g_PrintBuffer, "Score");
-  DrawLargeTextWithShadow(&gfx, f_ResultsSlide + CLUB_TOURNAMENT_LABEL_X,
-      ClubTournamentTextY(detailsTop, lineHeight, CLUB_TOURNAMENT_LINE_SCORE),
-      g_PrintBuffer, CLUB_TOURNAMENT_LABEL_ENV_COLOR,
-      CLUB_TOURNAMENT_LABEL_PRIM_COLOR, CLUB_TOURNAMENT_LABEL_FLAGS);
-  if (f_PlayerResults[0] == 0) {
-    sprintf(g_PrintBuffer, "#0", 0);
-  } else {
-    sprintf(g_PrintBuffer, "%+d", f_PlayerResults[0]);
-  }
+    DrawPlaceNumber(
+        &gfx,
+        f_ResultsSlide + CLUB_TOURNAMENT_DETAILS_X,
+        f_ResultsTop + detailsTop,
+        GetClubTournamentNumber()
+    );
+    SetUpTextDrawing(&gfx);
+    MeasureMessage(GetClubTournamentNameMessage(), FONT_SIZE_LARGE, &width, &height, 0);
+    MeasureMessage(GetClubTournamentCourseTitleMessage(), FONT_SIZE_LARGE, &width, &height, 0);
+    MeasureMessage(GetClubTournamentModeMessage(), FONT_SIZE_LARGE, &width, &height, 0);
+    SetTextSlot(
+        f_ResultsSlide + CLUB_TOURNAMENT_DETAILS_X,
+        ClubTournamentTextY(detailsTop, lineHeight, CLUB_TOURNAMENT_LINE_NAME),
+        GetClubTournamentNameMessage(),
+        TEXT_SLOT_LARGE_FONT,
+        CLUB_TOURNAMENT_NAME_SLOT,
+        CLUB_TOURNAMENT_TEXT_FLAGS,
+        127,
+        191,
+        255,
+        OPAQUE_ALPHA
+    );
+    SetTextSlot(
+        f_ResultsSlide + CLUB_TOURNAMENT_DETAILS_X,
+        ClubTournamentTextY(detailsTop, lineHeight, CLUB_TOURNAMENT_LINE_COURSE),
+        GetClubTournamentCourseTitleMessage(),
+        TEXT_SLOT_LARGE_FONT,
+        CLUB_TOURNAMENT_COURSE_SLOT,
+        CLUB_TOURNAMENT_TEXT_FLAGS,
+        43,
+        255,
+        75,
+        OPAQUE_ALPHA
+    );
+    SetTextSlot(
+        f_ResultsSlide + CLUB_TOURNAMENT_DETAILS_X,
+        ClubTournamentTextY(detailsTop, lineHeight, CLUB_TOURNAMENT_LINE_MODE),
+        GetClubTournamentModeMessage(),
+        TEXT_SLOT_LARGE_FONT,
+        CLUB_TOURNAMENT_MODE_SLOT,
+        CLUB_TOURNAMENT_TEXT_FLAGS,
+        255,
+        63,
+        127,
+        OPAQUE_ALPHA
+    );
+    for (i = CLUB_TOURNAMENT_NAME_SLOT; i != CLUB_TOURNAMENT_MODE_SLOT + 1; i++) {
+        gDPSetPrimColor(
+            gfx++,
+            0,
+            0,
+            f_TextSlotColors[i - 1][0],
+            f_TextSlotColors[i - 1][1],
+            f_TextSlotColors[i - 1][2],
+            OPAQUE_ALPHA
+        );
+        DrawLargeTextSlot(&gfx, i);
+    }
 
-  DrawLargeTextWithShadow(&gfx, f_ResultsSlide + CLUB_TOURNAMENT_VALUE_X,
-      ClubTournamentTextY(detailsTop, lineHeight, CLUB_TOURNAMENT_LINE_SCORE),
-      g_PrintBuffer, CLUB_TOURNAMENT_LABEL_ENV_COLOR,
-      CLUB_TOURNAMENT_LABEL_PRIM_COLOR, TEXT_FLAG_FIXED_WIDTH);
-  if (gameMode == GAME_MODE_SPEED_GOLF) {
-    hundredths = (s32)(g_GameState.stopwatchFrameCount *
-                     ((f32)HUNDREDTHS_PER_SECOND / FRAMES_PER_SECOND)) %
-        HUNDREDTHS_PER_SECOND;
-    seconds = g_GameState.stopwatchFrameCount / FRAMES_PER_SECOND %
-        SECONDS_PER_MINUTE;
-    minutes = g_GameState.stopwatchFrameCount / FRAMES_PER_SECOND /
-        SECONDS_PER_MINUTE % SHOWN_MINUTES_LIMIT;
-    sprintf(g_PrintBuffer, f_TimeLabel);
-    DrawLargeTextWithShadow(&gfx, f_ResultsSlide + CLUB_TOURNAMENT_LABEL_X,
-        ClubTournamentTextY(detailsTop, lineHeight, CLUB_TOURNAMENT_LINE_TIME),
-        g_PrintBuffer, CLUB_TOURNAMENT_LABEL_ENV_COLOR,
-        CLUB_TOURNAMENT_LABEL_PRIM_COLOR, CLUB_TOURNAMENT_LABEL_FLAGS);
-    sprintf(g_PrintBuffer, f_TimeFormat, minutes, seconds, hundredths);
-    DrawLargeTextWithShadow(&gfx, f_ResultsSlide + CLUB_TOURNAMENT_VALUE_X,
-        ClubTournamentTextY(detailsTop, lineHeight, CLUB_TOURNAMENT_LINE_TIME),
-        g_PrintBuffer, CLUB_TOURNAMENT_LABEL_ENV_COLOR,
-        CLUB_TOURNAMENT_LABEL_PRIM_COLOR, TEXT_FLAG_FIXED_WIDTH);
-  }
+    SetUpGradientTextDrawing(&gfx, 0);
+    sprintf(g_PrintBuffer, "Score");
+    DrawLargeTextWithShadow(
+        &gfx,
+        f_ResultsSlide + CLUB_TOURNAMENT_LABEL_X,
+        ClubTournamentTextY(detailsTop, lineHeight, CLUB_TOURNAMENT_LINE_SCORE),
+        g_PrintBuffer,
+        CLUB_TOURNAMENT_LABEL_ENV_COLOR,
+        CLUB_TOURNAMENT_LABEL_PRIM_COLOR,
+        CLUB_TOURNAMENT_LABEL_FLAGS
+    );
+    if (f_PlayerResults[0] == 0) {
+        sprintf(g_PrintBuffer, "#0", 0);
+    }
+    else {
+        sprintf(g_PrintBuffer, "%+d", f_PlayerResults[0]);
+    }
 
-  for (i = 0; i != SCORE_PASSWORD_LINE_LENGTH; i++) {
-    g_PrintBuffer[i] = f_ScorePassword[i];
-  }
+    DrawLargeTextWithShadow(
+        &gfx,
+        f_ResultsSlide + CLUB_TOURNAMENT_VALUE_X,
+        ClubTournamentTextY(detailsTop, lineHeight, CLUB_TOURNAMENT_LINE_SCORE),
+        g_PrintBuffer,
+        CLUB_TOURNAMENT_LABEL_ENV_COLOR,
+        CLUB_TOURNAMENT_LABEL_PRIM_COLOR,
+        TEXT_FLAG_FIXED_WIDTH
+    );
+    if (gameMode == GAME_MODE_SPEED_GOLF) {
+        hundredths = (s32)(g_GameState.stopwatchFrameCount *
+                         ((f32)HUNDREDTHS_PER_SECOND / FRAMES_PER_SECOND)) %
+            HUNDREDTHS_PER_SECOND;
+        seconds = g_GameState.stopwatchFrameCount / FRAMES_PER_SECOND % SECONDS_PER_MINUTE;
+        minutes = g_GameState.stopwatchFrameCount / FRAMES_PER_SECOND / SECONDS_PER_MINUTE %
+            SHOWN_MINUTES_LIMIT;
+        sprintf(g_PrintBuffer, f_TimeLabel);
+        DrawLargeTextWithShadow(
+            &gfx,
+            f_ResultsSlide + CLUB_TOURNAMENT_LABEL_X,
+            ClubTournamentTextY(detailsTop, lineHeight, CLUB_TOURNAMENT_LINE_TIME),
+            g_PrintBuffer,
+            CLUB_TOURNAMENT_LABEL_ENV_COLOR,
+            CLUB_TOURNAMENT_LABEL_PRIM_COLOR,
+            CLUB_TOURNAMENT_LABEL_FLAGS
+        );
+        sprintf(g_PrintBuffer, f_TimeFormat, minutes, seconds, hundredths);
+        DrawLargeTextWithShadow(
+            &gfx,
+            f_ResultsSlide + CLUB_TOURNAMENT_VALUE_X,
+            ClubTournamentTextY(detailsTop, lineHeight, CLUB_TOURNAMENT_LINE_TIME),
+            g_PrintBuffer,
+            CLUB_TOURNAMENT_LABEL_ENV_COLOR,
+            CLUB_TOURNAMENT_LABEL_PRIM_COLOR,
+            TEXT_FLAG_FIXED_WIDTH
+        );
+    }
 
-  g_PrintBuffer[SCORE_PASSWORD_LINE_LENGTH] = '\0';
-  DrawLargeTextWithShadow(&gfx, f_ResultsSlide + SCORE_PASSWORD_X,
-      f_ResultsTop + SCORE_PASSWORD_FIRST_Y, g_PrintBuffer,
-      SCORE_PASSWORD_ENV_COLOR, SCORE_PASSWORD_PRIM_COLOR,
-      TEXT_FLAG_FIXED_WIDTH);
-  for (i = 0; i != SCORE_PASSWORD_LINE_LENGTH; i++) {
-    g_PrintBuffer[i] = f_ScorePassword[SCORE_PASSWORD_LINE_LENGTH + i];
-  }
+    for (i = 0; i != SCORE_PASSWORD_LINE_LENGTH; i++) {
+        g_PrintBuffer[i] = f_ScorePassword[i];
+    }
 
-  g_PrintBuffer[SCORE_PASSWORD_LINE_LENGTH] = '\0';
-  DrawLargeTextWithShadow(&gfx, f_ResultsSlide + SCORE_PASSWORD_X,
-      f_ResultsTop + SCORE_PASSWORD_SECOND_Y, g_PrintBuffer,
-      SCORE_PASSWORD_ENV_COLOR, SCORE_PASSWORD_PRIM_COLOR,
-      TEXT_FLAG_FIXED_WIDTH);
-  *displayListHead = gfx;
+    g_PrintBuffer[SCORE_PASSWORD_LINE_LENGTH] = '\0';
+    DrawLargeTextWithShadow(
+        &gfx,
+        f_ResultsSlide + SCORE_PASSWORD_X,
+        f_ResultsTop + SCORE_PASSWORD_FIRST_Y,
+        g_PrintBuffer,
+        SCORE_PASSWORD_ENV_COLOR,
+        SCORE_PASSWORD_PRIM_COLOR,
+        TEXT_FLAG_FIXED_WIDTH
+    );
+    for (i = 0; i != SCORE_PASSWORD_LINE_LENGTH; i++) {
+        g_PrintBuffer[i] = f_ScorePassword[SCORE_PASSWORD_LINE_LENGTH + i];
+    }
+
+    g_PrintBuffer[SCORE_PASSWORD_LINE_LENGTH] = '\0';
+    DrawLargeTextWithShadow(
+        &gfx,
+        f_ResultsSlide + SCORE_PASSWORD_X,
+        f_ResultsTop + SCORE_PASSWORD_SECOND_Y,
+        g_PrintBuffer,
+        SCORE_PASSWORD_ENV_COLOR,
+        SCORE_PASSWORD_PRIM_COLOR,
+        TEXT_FLAG_FIXED_WIDTH
+    );
+    *displayListHead = gfx;
 }
 
 #define BACKDROP_X 16
@@ -3806,219 +4888,294 @@ void DrawClubTournamentResults(Gfx** displayListHead) {
  * the row before the rectangle 4, where the original doubles the T offset in
  * a call's delay slot.
  */
-void DrawRoundResults(Gfx** displayListHead) {
-  Gfx* gfx = *displayListHead;
-  f32 titleX;
-  f32 titleY;
-  s32 left;
-  s32 top;
-  s32 right;
-  s32 stripHeight;
-  s32 titleSubtexelS;
-  s32 titleSubtexelT;
-  s32 textureS;
-  s32 textureT;
-  s32 i;
+void DrawRoundResults(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
+    f32 titleX;
+    f32 titleY;
+    s32 left;
+    s32 top;
+    s32 right;
+    s32 stripHeight;
+    s32 titleSubtexelS;
+    s32 titleSubtexelT;
+    s32 textureS;
+    s32 textureT;
+    s32 i;
 
-  if (!f_AreResultsLoaded) {
-    return;
-  }
-
-  gSPDisplayList(gfx++, g_DecalTextureSetup);
-  gDPPipeSync(gfx++);
-  gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-  gDPPipeSync(gfx++);
-  gDPSetTextureFilter(gfx++, G_TF_POINT);
-  LoadLargePalette(&gfx, ImageBody(f_ResultsBackdropImage));
-  gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-  if (g_GameState.isClubTournament) {
-    for (i = 0; i != CLUB_TOURNAMENT_BACKDROP_STRIP_COUNT; i++) {
-      LoadTextureBlock(&gfx,
-          LargeImageTexels(f_ResultsBackdropImage) +
-              (i * BACKDROP_STRIP_WIDTH *
-                  CLUB_TOURNAMENT_BACKDROP_STRIP_HEIGHT),
-          G_IM_FMT_CI, G_IM_SIZ_8b, BACKDROP_STRIP_WIDTH,
-          CLUB_TOURNAMENT_BACKDROP_STRIP_HEIGHT, 0, 0, 0, G_TX_NOMASK,
-          G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-      DrawTextureRect(&gfx, QuarterPixels(f_ResultsSlide + BACKDROP_X),
-          QuarterPixels((i * CLUB_TOURNAMENT_BACKDROP_STRIP_HEIGHT) +
-              CLUB_TOURNAMENT_BACKDROP_Y + f_ResultsTop),
-          QuarterPixels(f_ResultsSlide + BACKDROP_X + BACKDROP_STRIP_WIDTH),
-          QuarterPixels((i * CLUB_TOURNAMENT_BACKDROP_STRIP_HEIGHT) +
-              CLUB_TOURNAMENT_BACKDROP_Y +
-              CLUB_TOURNAMENT_BACKDROP_STRIP_HEIGHT + f_ResultsTop),
-          G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+    if (!f_AreResultsLoaded) {
+        return;
     }
-  } else {
-    for (i = 0; i != BACKDROP_STRIP_COUNT; i++) {
-      LoadTextureBlock(&gfx,
-          LargeImageTexels(f_ResultsBackdropImage) +
-              (i * BACKDROP_STRIP_WIDTH * BACKDROP_STRIP_HEIGHT),
-          G_IM_FMT_CI, G_IM_SIZ_8b, BACKDROP_STRIP_WIDTH, BACKDROP_STRIP_HEIGHT,
-          0, 0, 0, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-      DrawTextureRect(&gfx, QuarterPixels(f_ResultsSlide + BACKDROP_X),
-          QuarterPixels(
-              (i * BACKDROP_STRIP_HEIGHT) + BACKDROP_Y + f_ResultsTop),
-          QuarterPixels(f_ResultsSlide + BACKDROP_X + BACKDROP_STRIP_WIDTH),
-          QuarterPixels((i * BACKDROP_STRIP_HEIGHT) + BACKDROP_Y +
-              BACKDROP_STRIP_HEIGHT + f_ResultsTop),
-          G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
-    }
-  }
 
-  if (f_IsAwaitingConfirm == TRUE) {
-    f_HandFrame = (f_HandFrame + 1) % (HAND_FRAME_COUNT * HAND_FRAME_DRAWS);
-    LoadLargePalette(&gfx, ImageBody(f_ResultsHandImage));
-    LoadTextureBlock(&gfx,
-        LargeImageTexels(f_ResultsHandImage) +
-            (f_HandFrame / HAND_FRAME_DRAWS * HAND_SIZE * HAND_SIZE),
-        G_IM_FMT_CI, G_IM_SIZ_8b, HAND_SIZE, HAND_SIZE, 0, 0, 0, G_TX_NOMASK,
-        G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-    DrawTextureRect(&gfx, QuarterPixels(f_ResultsSlide + HAND_X),
-        QuarterPixels(f_ResultsTop + HAND_Y),
-        QuarterPixels(f_ResultsSlide + HAND_X + HAND_SIZE),
-        QuarterPixels(f_ResultsTop + HAND_Y + HAND_SIZE), G_TX_RENDERTILE, 0, 0,
-        TEXEL_STEP_ONE, TEXEL_STEP_ONE);
-  }
-
-  if (g_GameState.isClubTournament) {
-    DrawClubTournamentResults(&gfx);
-  } else {
-    switch (g_GameState.gameMode) {
-      case GAME_MODE_SPEED_GOLF:
-        DrawSpeedGolfResults(&gfx);
-        break;
-      case GAME_MODE_STROKE:
-      case GAME_MODE_UNLISTED_STROKE:
-      case GAME_MODE_TRAINING:
-      case GAME_MODE_UNRECORDED_STROKE:
-      case GAME_MODE_RECORD_REPLAY:
-      case GAME_MODE_RING_SHOT:
-      case GAME_MODE_SKINS_MATCH:
-      case GAME_MODE_CLUB_SLOTS:
-        DrawPlayersResults(&gfx);
-        break;
-      case GAME_MODE_MATCH_GAME:
-      case GAME_MODE_GET_CHARACTER:
-        DrawMatchResults(&gfx);
-        break;
-      case GAME_MODE_TOURNAMENT:
-        DrawTournamentResults(&gfx);
-        break;
-    }
-  }
-
-  if (!g_GameState.isClubTournament) {
-    titleX = (cosf(f_TitleBobAngle * 0.5f) * FINAL_RESULTS_TITLE_BOB) +
-        FINAL_RESULTS_TITLE_X;
-    titleY = (sinf(f_TitleBobAngle) * FINAL_RESULTS_TITLE_BOB) +
-        FINAL_RESULTS_TITLE_Y;
-    left = HalfTowardZero(titleX);
-    top = HalfTowardZero(titleY);
     gSPDisplayList(gfx++, g_DecalTextureSetup);
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
     gDPPipeSync(gfx++);
-    gDPSetTextureFilter(gfx++, G_TF_AVERAGE);
-    titleSubtexelS = (s32)(SUBTEXEL_STEPS - ((titleX - left) * SUBTEXEL_STEPS));
-    titleSubtexelT = (s32)(SUBTEXEL_STEPS - ((titleY - top) * SUBTEXEL_STEPS));
-    textureS = titleSubtexelS * 2;
-    textureT = titleSubtexelT * 2;
-    f_TitleBobAngle += FINAL_RESULTS_TITLE_BOB_STEP;
-    LoadLargePalette(&gfx, ImageBody(f_FinalResultsTitleImage));
-    for (i = 0; i != FINAL_RESULTS_TITLE_STRIP_COUNT; i++) {
-      /*
-       * Setting the usual height first and the last strip's in an if, or
-       * testing for not the last strip, gives 10 words differing, 6 in shape
-       */
-      if (i == FINAL_RESULTS_TITLE_STRIP_COUNT - 1) {
-        stripHeight = FINAL_RESULTS_TITLE_LAST_STRIP_HEIGHT;
-      } else {
-        stripHeight = FINAL_RESULTS_TITLE_STRIP_HEIGHT;
-      }
-
-      right = left + FINAL_RESULTS_TITLE_WIDTH;
-      LoadTextureBlock(&gfx,
-          LargeImageTexels(f_FinalResultsTitleImage) +
-              (i * FINAL_RESULTS_TITLE_WIDTH *
-                  FINAL_RESULTS_TITLE_STRIP_HEIGHT),
-          G_IM_FMT_CI, G_IM_SIZ_8b, FINAL_RESULTS_TITLE_WIDTH,
-          FINAL_RESULTS_TITLE_LOADED_HEIGHT, 0, 0, 0, G_TX_NOMASK, G_TX_NOMASK,
-          G_TX_NOLOD, G_TX_NOLOD);
-      gSPTextureRectangle(gfx++, QuarterPixels(left - f_ResultsSlide),
-          QuarterPixels(
-              i * FINAL_RESULTS_TITLE_STRIP_HEIGHT + f_ResultsTop + top),
-          QuarterPixels(right - f_ResultsSlide),
-          QuarterPixels(i * FINAL_RESULTS_TITLE_STRIP_HEIGHT + stripHeight +
-              f_ResultsTop + top),
-          G_TX_RENDERTILE, textureS, textureT + TEXEL_UNITS, TEXEL_STEP_ONE,
-          TEXEL_STEP_ONE);
-    }
-  }
-
-  for (i = 0; i != g_GameState.playerCount; i++) {
-    EncodedAsset asset;
-
-    if (f_PortraitFrames[i] != NO_PORTRAIT_FRAME) {
-      if (!(f_PortraitTimers[i] & PORTRAIT_FRAME_DRAWS_MASK)) {
-        switch (f_PortraitAnimations[i]) {
-          case PORTRAIT_ANIMATION_REST:
-            OpenEncodedAsset(
-                g_CharacterImageAssets[g_Players[i].characterIndex], &asset);
-            ReadEncodedAsset(f_PlayerPortraitImages[i], &asset);
-            f_PortraitFrames[i] = NO_PORTRAIT_FRAME;
-            break;
-          case PORTRAIT_ANIMATION_PLEASED:
-            OpenEncodedAsset(
-                g_CharacterImageAssets[g_Players[i].characterIndex] +
-                    f_PortraitFrames[i],
-                &asset);
-            ReadEncodedAsset(f_PlayerPortraitImages[i], &asset);
-            f_PortraitFrames[i]++;
-            if (f_PortraitFrames[i] == PORTRAIT_ANIMATION_FRAME_COUNT) {
-              f_PortraitFrames[i] = NO_PORTRAIT_FRAME;
-            }
-
-            break;
-          case PORTRAIT_ANIMATION_BEATEN: {
-            s32 beatenFaces[PORTRAIT_ANIMATION_FRAME_COUNT] = {0, 5, 6, 7, 8};
-
-            OpenEncodedAsset(
-                g_CharacterImageAssets[g_Players[i].characterIndex] +
-                    beatenFaces[f_PortraitFrames[i]],
-                &asset);
-            ReadEncodedAsset(f_PlayerPortraitImages[i], &asset);
-            f_PortraitFrames[i]++;
-            if (f_PortraitFrames[i] == PORTRAIT_ANIMATION_FRAME_COUNT) {
-              f_PortraitFrames[i] = NO_PORTRAIT_FRAME;
-            }
-
-            break;
-          }
+    gDPSetTextureFilter(gfx++, G_TF_POINT);
+    LoadLargePalette(&gfx, ImageBody(f_ResultsBackdropImage));
+    gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+    if (g_GameState.isClubTournament) {
+        for (i = 0; i != CLUB_TOURNAMENT_BACKDROP_STRIP_COUNT; i++) {
+            LoadTextureBlock(
+                &gfx,
+                LargeImageTexels(f_ResultsBackdropImage) +
+                    (i * BACKDROP_STRIP_WIDTH * CLUB_TOURNAMENT_BACKDROP_STRIP_HEIGHT),
+                G_IM_FMT_CI,
+                G_IM_SIZ_8b,
+                BACKDROP_STRIP_WIDTH,
+                CLUB_TOURNAMENT_BACKDROP_STRIP_HEIGHT,
+                0,
+                0,
+                0,
+                G_TX_NOMASK,
+                G_TX_NOMASK,
+                G_TX_NOLOD,
+                G_TX_NOLOD
+            );
+            DrawTextureRect(
+                &gfx,
+                QuarterPixels(f_ResultsSlide + BACKDROP_X),
+                QuarterPixels(
+                    (i * CLUB_TOURNAMENT_BACKDROP_STRIP_HEIGHT) + CLUB_TOURNAMENT_BACKDROP_Y +
+                    f_ResultsTop
+                ),
+                QuarterPixels(f_ResultsSlide + BACKDROP_X + BACKDROP_STRIP_WIDTH),
+                QuarterPixels(
+                    (i * CLUB_TOURNAMENT_BACKDROP_STRIP_HEIGHT) + CLUB_TOURNAMENT_BACKDROP_Y +
+                    CLUB_TOURNAMENT_BACKDROP_STRIP_HEIGHT + f_ResultsTop
+                ),
+                G_TX_RENDERTILE,
+                0,
+                0,
+                TEXEL_STEP_ONE,
+                TEXEL_STEP_ONE
+            );
         }
-      }
-
-      f_PortraitTimers[i]++;
     }
-  }
+    else {
+        for (i = 0; i != BACKDROP_STRIP_COUNT; i++) {
+            LoadTextureBlock(
+                &gfx,
+                LargeImageTexels(f_ResultsBackdropImage) +
+                    (i * BACKDROP_STRIP_WIDTH * BACKDROP_STRIP_HEIGHT),
+                G_IM_FMT_CI,
+                G_IM_SIZ_8b,
+                BACKDROP_STRIP_WIDTH,
+                BACKDROP_STRIP_HEIGHT,
+                0,
+                0,
+                0,
+                G_TX_NOMASK,
+                G_TX_NOMASK,
+                G_TX_NOLOD,
+                G_TX_NOLOD
+            );
+            DrawTextureRect(
+                &gfx,
+                QuarterPixels(f_ResultsSlide + BACKDROP_X),
+                QuarterPixels((i * BACKDROP_STRIP_HEIGHT) + BACKDROP_Y + f_ResultsTop),
+                QuarterPixels(f_ResultsSlide + BACKDROP_X + BACKDROP_STRIP_WIDTH),
+                QuarterPixels(
+                    (i * BACKDROP_STRIP_HEIGHT) + BACKDROP_Y + BACKDROP_STRIP_HEIGHT + f_ResultsTop
+                ),
+                G_TX_RENDERTILE,
+                0,
+                0,
+                TEXEL_STEP_ONE,
+                TEXEL_STEP_ONE
+            );
+        }
+    }
 
-  DrawResultsBanner(&gfx);
-  *displayListHead = gfx;
+    if (f_IsAwaitingConfirm == TRUE) {
+        f_HandFrame = (f_HandFrame + 1) % (HAND_FRAME_COUNT * HAND_FRAME_DRAWS);
+        LoadLargePalette(&gfx, ImageBody(f_ResultsHandImage));
+        LoadTextureBlock(
+            &gfx,
+            LargeImageTexels(f_ResultsHandImage) +
+                (f_HandFrame / HAND_FRAME_DRAWS * HAND_SIZE * HAND_SIZE),
+            G_IM_FMT_CI,
+            G_IM_SIZ_8b,
+            HAND_SIZE,
+            HAND_SIZE,
+            0,
+            0,
+            0,
+            G_TX_NOMASK,
+            G_TX_NOMASK,
+            G_TX_NOLOD,
+            G_TX_NOLOD
+        );
+        DrawTextureRect(
+            &gfx,
+            QuarterPixels(f_ResultsSlide + HAND_X),
+            QuarterPixels(f_ResultsTop + HAND_Y),
+            QuarterPixels(f_ResultsSlide + HAND_X + HAND_SIZE),
+            QuarterPixels(f_ResultsTop + HAND_Y + HAND_SIZE),
+            G_TX_RENDERTILE,
+            0,
+            0,
+            TEXEL_STEP_ONE,
+            TEXEL_STEP_ONE
+        );
+    }
+
+    if (g_GameState.isClubTournament) {
+        DrawClubTournamentResults(&gfx);
+    }
+    else {
+        switch (g_GameState.gameMode) {
+            case GAME_MODE_SPEED_GOLF:
+                DrawSpeedGolfResults(&gfx);
+                break;
+            case GAME_MODE_STROKE:
+            case GAME_MODE_UNLISTED_STROKE:
+            case GAME_MODE_TRAINING:
+            case GAME_MODE_UNRECORDED_STROKE:
+            case GAME_MODE_RECORD_REPLAY:
+            case GAME_MODE_RING_SHOT:
+            case GAME_MODE_SKINS_MATCH:
+            case GAME_MODE_CLUB_SLOTS:
+                DrawPlayersResults(&gfx);
+                break;
+            case GAME_MODE_MATCH_GAME:
+            case GAME_MODE_GET_CHARACTER:
+                DrawMatchResults(&gfx);
+                break;
+            case GAME_MODE_TOURNAMENT:
+                DrawTournamentResults(&gfx);
+                break;
+        }
+    }
+
+    if (!g_GameState.isClubTournament) {
+        titleX = (cosf(f_TitleBobAngle * 0.5f) * FINAL_RESULTS_TITLE_BOB) + FINAL_RESULTS_TITLE_X;
+        titleY = (sinf(f_TitleBobAngle) * FINAL_RESULTS_TITLE_BOB) + FINAL_RESULTS_TITLE_Y;
+        left = HalfTowardZero(titleX);
+        top = HalfTowardZero(titleY);
+        gSPDisplayList(gfx++, g_DecalTextureSetup);
+        gDPPipeSync(gfx++);
+        gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+        gDPPipeSync(gfx++);
+        gDPSetTextureFilter(gfx++, G_TF_AVERAGE);
+        titleSubtexelS = (s32)(SUBTEXEL_STEPS - ((titleX - left) * SUBTEXEL_STEPS));
+        titleSubtexelT = (s32)(SUBTEXEL_STEPS - ((titleY - top) * SUBTEXEL_STEPS));
+        textureS = titleSubtexelS * 2;
+        textureT = titleSubtexelT * 2;
+        f_TitleBobAngle += FINAL_RESULTS_TITLE_BOB_STEP;
+        LoadLargePalette(&gfx, ImageBody(f_FinalResultsTitleImage));
+        for (i = 0; i != FINAL_RESULTS_TITLE_STRIP_COUNT; i++) {
+            /*
+             * Setting the usual height first and the last strip's in an if, or
+             * testing for not the last strip, gives 10 words differing, 6 in shape
+             */
+            if (i == FINAL_RESULTS_TITLE_STRIP_COUNT - 1) {
+                stripHeight = FINAL_RESULTS_TITLE_LAST_STRIP_HEIGHT;
+            }
+            else {
+                stripHeight = FINAL_RESULTS_TITLE_STRIP_HEIGHT;
+            }
+
+            right = left + FINAL_RESULTS_TITLE_WIDTH;
+            LoadTextureBlock(
+                &gfx,
+                LargeImageTexels(f_FinalResultsTitleImage) +
+                    (i * FINAL_RESULTS_TITLE_WIDTH * FINAL_RESULTS_TITLE_STRIP_HEIGHT),
+                G_IM_FMT_CI,
+                G_IM_SIZ_8b,
+                FINAL_RESULTS_TITLE_WIDTH,
+                FINAL_RESULTS_TITLE_LOADED_HEIGHT,
+                0,
+                0,
+                0,
+                G_TX_NOMASK,
+                G_TX_NOMASK,
+                G_TX_NOLOD,
+                G_TX_NOLOD
+            );
+            gSPTextureRectangle(
+                gfx++,
+                QuarterPixels(left - f_ResultsSlide),
+                QuarterPixels(i * FINAL_RESULTS_TITLE_STRIP_HEIGHT + f_ResultsTop + top),
+                QuarterPixels(right - f_ResultsSlide),
+                QuarterPixels(
+                    i * FINAL_RESULTS_TITLE_STRIP_HEIGHT + stripHeight + f_ResultsTop + top
+                ),
+                G_TX_RENDERTILE,
+                textureS,
+                textureT + TEXEL_UNITS,
+                TEXEL_STEP_ONE,
+                TEXEL_STEP_ONE
+            );
+        }
+    }
+
+    for (i = 0; i != g_GameState.playerCount; i++) {
+        EncodedAsset asset;
+
+        if (f_PortraitFrames[i] != NO_PORTRAIT_FRAME) {
+            if (!(f_PortraitTimers[i] & PORTRAIT_FRAME_DRAWS_MASK)) {
+                switch (f_PortraitAnimations[i]) {
+                    case PORTRAIT_ANIMATION_REST:
+                        OpenEncodedAsset(
+                            g_CharacterImageAssets[g_Players[i].characterIndex],
+                            &asset
+                        );
+                        ReadEncodedAsset(f_PlayerPortraitImages[i], &asset);
+                        f_PortraitFrames[i] = NO_PORTRAIT_FRAME;
+                        break;
+                    case PORTRAIT_ANIMATION_PLEASED:
+                        OpenEncodedAsset(
+                            g_CharacterImageAssets[g_Players[i].characterIndex] +
+                                f_PortraitFrames[i],
+                            &asset
+                        );
+                        ReadEncodedAsset(f_PlayerPortraitImages[i], &asset);
+                        f_PortraitFrames[i]++;
+                        if (f_PortraitFrames[i] == PORTRAIT_ANIMATION_FRAME_COUNT) {
+                            f_PortraitFrames[i] = NO_PORTRAIT_FRAME;
+                        }
+
+                        break;
+                    case PORTRAIT_ANIMATION_BEATEN: {
+                        s32 beatenFaces[PORTRAIT_ANIMATION_FRAME_COUNT] = {0, 5, 6, 7, 8};
+
+                        OpenEncodedAsset(
+                            g_CharacterImageAssets[g_Players[i].characterIndex] +
+                                beatenFaces[f_PortraitFrames[i]],
+                            &asset
+                        );
+                        ReadEncodedAsset(f_PlayerPortraitImages[i], &asset);
+                        f_PortraitFrames[i]++;
+                        if (f_PortraitFrames[i] == PORTRAIT_ANIMATION_FRAME_COUNT) {
+                            f_PortraitFrames[i] = NO_PORTRAIT_FRAME;
+                        }
+
+                        break;
+                    }
+                }
+            }
+
+            f_PortraitTimers[i]++;
+        }
+    }
+
+    DrawResultsBanner(&gfx);
+    *displayListHead = gfx;
 }
 
-void DrawResultsNotice(Gfx** displayListHead) {
-  Gfx* gfx = *displayListHead;
+void DrawResultsNotice(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
 
-  switch (f_UnlockNoticeKind) {
-    case UNLOCK_NOTICE_KIND_NONE:
-      break;
-    case UNLOCK_NOTICE_KIND_COURSE:
-      DrawCourseResultsNotice(&gfx);
-      break;
-    case UNLOCK_NOTICE_KIND_CHARACTER:
-      DrawCharacterResultsNotice(&gfx);
-      break;
-  }
+    switch (f_UnlockNoticeKind) {
+        case UNLOCK_NOTICE_KIND_NONE:
+            break;
+        case UNLOCK_NOTICE_KIND_COURSE:
+            DrawCourseResultsNotice(&gfx);
+            break;
+        case UNLOCK_NOTICE_KIND_CHARACTER:
+            DrawCharacterResultsNotice(&gfx);
+            break;
+    }
 
-  *displayListHead = gfx;
+    *displayListHead = gfx;
 }

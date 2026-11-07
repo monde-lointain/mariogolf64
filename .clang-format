@@ -1,27 +1,102 @@
-BasedOnStyle: Google
+# Layout shows the code's logical structure: every construct indents by the
+# same standard amount, and nothing is aligned to the end of a previous line,
+# so renaming a routine or variable never moves the lines around it.
+#
+# Based on WebKit. WebKit already supplies the 4-space indent and continuation
+# indent, no tabs, no alignment of operands, arguments, assignments,
+# declarations or trailing comments, at most one blank line kept, and the
+# default spacing. Only the differences from WebKit are listed below.
+---
+Language: Cpp
+BasedOnStyle: WebKit
+LineEnding: LF
+InsertNewlineAtEOF: true
+
+# One standard increment of 4 for every construct, braced initializers and
+# nested preprocessor directives included
+BracedInitializerIndentWidth: 4
+PPIndentWidth: 4
+# Matching the original code fixes how deeply some of it nests, so 100 columns
+# leave the deepest bodies room for an argument or a cast on one line rather
+# than broken inside it
+ColumnLimit: 100
+
 # splat reads the function or symbol name from each INCLUDE_ASM and
 # INCLUDE_RODATA call, and doesn't expect it on a line of its own
 WhitespaceSensitiveMacros: [INCLUDE_ASM, INCLUDE_RODATA]
-# Code Complete's style 2: every if and loop body is a braced block on lines
-# of its own, so a statement added to it can't fall outside the block
+
+# Pure blocks: the { ends the control line or routine header, the } lines up
+# with the statement it closes, and else and while start a line of their own
+BreakBeforeBraces: Custom
+BraceWrapping:
+  AfterFunction: false
+  BeforeElse: true
+  BeforeWhile: true
+
+# Every body is a braced block on lines of its own, so a statement added to it
+# can't fall outside the block, and each line holds one statement
 InsertBraces: true
-AllowShortIfStatementsOnASingleLine: Never
-AllowShortLoopsOnASingleLine: false
-AllowShortFunctionsOnASingleLine: Empty
+AllowShortBlocksOnASingleLine: Never
 AllowShortEnumsOnASingleLine: false
-# Code Complete's chapter 31 indents continuation lines a standard amount
-# rather than aligning them under an open bracket or the first operand, so
-# renaming a routine doesn't move every line of its argument list
-AlignAfterOpenBracket: false
-AlignOperands: DontAlign
-# Nor does it line up endline comments or a macro's backslashes in a column,
-# which a longer line would move
-AlignTrailingComments:
-  Kind: Never
-AlignEscapedNewlines: DontAlign
-# Chapter 31 also outdents goto labels to the margin, where they stand out
+AllowShortFunctionsOnASingleLine: None
+AllowShortRecordOnASingleLine: Never
+
+# Case labels indent under their switch like any other subordinate statement.
+# goto labels are outdented to the margin, where they stand out.
+IndentCaseLabels: true
 IndentGotoLabels: NoIndent
-# Exactly one blank line between definitions, which the user asked for
-# in place of chapter 31's two or three
+# Nested preprocessor conditionals indent after the '#' (include guards
+# excepted), keeping '#' in column 0
+IndentPPDirectives: AfterHash
+
+# The asterisk belongs to the declarator: int *p, *q
+PointerAlignment: Right
+
+# Braced initializers are laid out like a call's argument list, with no padding
+# inside the braces: {0, 42}. One that doesn't fit breaks the same way, after
+# the "{" and before the "}".
+Cpp11BracedListStyle: FunctionCall
+BreakAfterOpenBracketBracedList: true
+BreakBeforeCloseBracketBracedList: true
+
+# A macro's continuation backslashes follow its lines rather than a column
+AlignEscapedNewlines: DontAlign
+
+# Once a parameter or argument list doesn't fit, it breaks after the "(", one
+# item per line indented the standard amount, with the ")" on a line of its own
+BreakAfterOpenBracketFunction: true
+BreakBeforeCloseBracketFunction: true
+PackParameters:
+  BinPack: OnePerLine
+PackArguments:
+  BinPack: OnePerLine
+AllowAllParametersOfDeclarationOnNextLine: false
+AllowAllArgumentsOnNextLine: false
+# Keeps "Type Name(" together rather than breaking after the return type to
+# put off breaking the parameters
+PenaltyReturnTypeOnItsOwnLine: 1000
+
+# The operator ends a broken line, which shows the statement isn't complete
+BreakBeforeBinaryOperators: None
+BreakBeforeTernaryOperators: false
+# Each condition of a long && or || chain takes a line of its own
+BreakBinaryOperations:
+  PerOperator:
+    - Operators: ['&&', '||']
+      Style: OnePerLine
+
+# One blank line separates paragraphs of code and every definition
+KeepEmptyLines:
+  AtStartOfBlock: false
+  AtStartOfFile: false
 SeparateDefinitionBlocks: Always
-MaxEmptyLinesToKeep: 1
+
+# The SDK's headers come first, so a project header can use the SDK's types
+# without including them, then the project's own, each group sorted
+IncludeBlocks: Regroup
+IncludeCategories:
+  - Regex: '^<'
+    Priority: 1
+  - Regex: '^"'
+    Priority: 2
+...

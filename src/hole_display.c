@@ -53,11 +53,11 @@
 
 /* Sun.imageKind values: which images InitSkyColors loads */
 enum SkyImageKind {
-  SKY_IMAGE_KIND_0, /* ASSET_SKY_IMAGE_0 */
-  SKY_IMAGE_KIND_1, /* ASSET_SKY_IMAGE_1 */
-  /* The two halves of ASSET_SKY_IMAGE_2_*, which DrawSky draws as
-   * two textures */
-  SKY_IMAGE_KIND_TWO_TEXTURES
+    SKY_IMAGE_KIND_0, /* ASSET_SKY_IMAGE_0 */
+    SKY_IMAGE_KIND_1, /* ASSET_SKY_IMAGE_1 */
+    /* The two halves of ASSET_SKY_IMAGE_2_*, which DrawSky draws as
+     * two textures */
+    SKY_IMAGE_KIND_TWO_TEXTURES
 };
 
 /*
@@ -70,17 +70,23 @@ enum SkyImageKind {
 #define SUN_GLARE_MARGIN 120.0f
 /* Whether a point lies at least inset within each of the screen's edges */
 #define IsInsetOnScreen(x, y, inset) \
-  ((x) >= (inset) && (x) <= SCREEN_WIDTH - (inset) && (y) >= (inset) && \
-      (y) <= SCREEN_HEIGHT - (inset))
+    ((x) >= (inset) && \
+        (x) <= SCREEN_WIDTH - (inset) && \
+        (y) >= (inset) && \
+        (y) <= SCREEN_HEIGHT - (inset))
 /* Whether a point lies less than margin beyond each of the screen's edges */
 #define IsNearScreen(x, y, margin) \
-  ((x) > -(margin) && (x) < SCREEN_WIDTH + (margin) && (y) > -(margin) && \
-      (y) < SCREEN_HEIGHT + (margin))
+    ((x) > -(margin) && \
+        (x) < SCREEN_WIDTH + (margin) && \
+        (y) > -(margin) && \
+        (y) < SCREEN_HEIGHT + (margin))
 /* Whether a point lies on or beyond the line inset within any of the screen's
  * edges */
 #define IsOnOrPastInset(x, y, inset) \
-  ((x) <= (inset) || (x) >= SCREEN_WIDTH - (inset) || (y) <= (inset) || \
-      (y) >= SCREEN_HEIGHT - (inset))
+    ((x) <= (inset) || \
+        (x) >= SCREEN_WIDTH - (inset) || \
+        (y) <= (inset) || \
+        (y) >= SCREEN_HEIGHT - (inset))
 /* The z-buffer value of the sky */
 #define SUN_SKY_DEPTH 0xFFFC
 #define SUN_GLARE_FADE_STEP 0.1f
@@ -127,8 +133,7 @@ enum SkyImageKind {
 #define FRAME_SLICE_LEFT_WORD 40
 #define FRAME_SLICE_RIGHT_WORD 80
 #define FRAME_SLICE_WORD_COUNT \
-  ((FRAME_SLICE_BOTTOM - FRAME_SLICE_TOP) * \
-      (FRAME_SLICE_RIGHT_WORD - FRAME_SLICE_LEFT_WORD))
+    ((FRAME_SLICE_BOTTOM - FRAME_SLICE_TOP) * (FRAME_SLICE_RIGHT_WORD - FRAME_SLICE_LEFT_WORD))
 
 /*
  * The slices that the slice animation copied fill the screen, a column of
@@ -170,10 +175,10 @@ enum SkyImageKind {
 /* Written with | because the target computes it without a branch, and + or a
  * plain ?: branches */
 #define StripHeight(strip) \
-  (BACKDROP_LAST_STRIP_HEIGHT | \
-      ((strip) != BACKDROP_STRIP_COUNT - 1 \
-              ? BACKDROP_STRIP_HEIGHT - BACKDROP_LAST_STRIP_HEIGHT \
-              : 0))
+    (BACKDROP_LAST_STRIP_HEIGHT | \
+        ((strip) != BACKDROP_STRIP_COUNT - 1 ? \
+                BACKDROP_STRIP_HEIGHT - BACKDROP_LAST_STRIP_HEIGHT : \
+                0))
 #define BACKDROP_START_FADE_LEVEL 255
 /* Each frame the fade level steps down until it is at most
  * BACKDROP_LAST_FADE_LEVEL */
@@ -188,8 +193,7 @@ enum SkyImageKind {
 #define SPIRAL_TILE_COUNT (SPIRAL_GRID_SIZE * SPIRAL_GRID_SIZE)
 #define SPIRAL_FRAME_WIDTH (SCREEN_WIDTH - (2 * FRAME_MARGIN_ROWS))
 #define SPIRAL_TILE_WIDTH (SPIRAL_FRAME_WIDTH / SPIRAL_GRID_SIZE)
-#define SPIRAL_TILE_HEIGHT \
-  ((SCREEN_HEIGHT - (2 * FRAME_MARGIN_ROWS)) / SPIRAL_GRID_SIZE)
+#define SPIRAL_TILE_HEIGHT ((SCREEN_HEIGHT - (2 * FRAME_MARGIN_ROWS)) / SPIRAL_GRID_SIZE)
 #define SPIRAL_FADING_TILE_COUNT 4
 /* The tiles are drawn white, fading by SPIRAL_ALPHA_STEP each */
 #define SPIRAL_SHADE 255
@@ -198,14 +202,13 @@ enum SkyImageKind {
  * The count of tiles left drops by SPIRAL_FADING_TILE_COUNT each frame, from
  * this start that keeps the whole grid opaque for two frames
  */
-#define SPIRAL_START_TILE_COUNT \
-  (SPIRAL_TILE_COUNT + (2 * SPIRAL_FADING_TILE_COUNT))
+#define SPIRAL_START_TILE_COUNT (SPIRAL_TILE_COUNT + (2 * SPIRAL_FADING_TILE_COUNT))
 
 enum SpiralDirection {
-  SPIRAL_RIGHT,
-  SPIRAL_DOWN,
-  SPIRAL_LEFT,
-  SPIRAL_UP
+    SPIRAL_RIGHT,
+    SPIRAL_DOWN,
+    SPIRAL_LEFT,
+    SPIRAL_UP
 };
 
 /*
@@ -243,18 +246,16 @@ void DrawSliceAnimation(void);
 #define LENS_FLARE_COUNT 8
 
 typedef struct LensFlare {
-  /* 0x00 */ u8 color[3]; /* Where the ring texture is brightest */
-  /* 0x03 */ u8
-      envColor[3]; /* Where it is darkest, and the texels blend between them */
-  /* 0x08 */ s32 size;
-  /* Nothing reads it. Each is about 0x10000 over a size from 8 to 64, though
-   * not always this flare's size. */
-  /* 0x0C */ s32 ignoredScaleValue;
-  /* 0x10 */ f32
-      position; /* Along the line, 0 at the sun and 1 at its axis point */
+    /* 0x00 */ u8 color[3]; /* Where the ring texture is brightest */
+    /* 0x03 */ u8 envColor[3]; /* Where it is darkest, and the texels blend between them */
+    /* 0x08 */ s32 size;
+    /* Nothing reads it. Each is about 0x10000 over a size from 8 to 64, though
+     * not always this flare's size. */
+    /* 0x0C */ s32 ignoredScaleValue;
+    /* 0x10 */ f32 position; /* Along the line, 0 at the sun and 1 at its axis point */
 } LensFlare; /* size = 0x14 */
 
-static u32* f_CapturedFrame = (u32*)MAIN_REGION_END;
+static u32 *f_CapturedFrame = (u32 *)MAIN_REGION_END;
 static s32 f_HudAnimationFramesLeft = 0;
 static s32 f_HudAnimation = HUD_ANIMATION_UNUSED;
 static s32 f_SkyTimeIndex = 0;
@@ -264,245 +265,799 @@ static s32 f_SkyBlendStepCount = 0;
 static Boolean f_IsPrimitiveDepthSet = FALSE;
 static s8 f_SceneSkyBlendTimes[] = {0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2};
 static s8 f_SceneSkyColorTimes[] = {0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 3};
-static s8 f_SceneSkyBlendPercents[] = {
-    0, 80, 0, 0, 0, 0, 0, 20, 50, 75, 100, 100};
+static s8 f_SceneSkyBlendPercents[] = {0, 80, 0, 0, 0, 0, 0, 20, 50, 75, 100, 100};
 static f32 f_SunScreenX[SKY_VIEW_COUNT] = {0.0f, 0.0f}; /* For each view */
 static f32 f_SunScreenY[SKY_VIEW_COUNT] = {0.0f, 0.0f};
 /* The sky's suns, which g_SkyColors points to; none points to the fourth or
  * the sixth */
 static Sun f_Suns[7] = {
-    {{0, 0, 0, 0}, 24, {0xFF, 0xEF, 0xBF}, {0xFF, 0xFF, 0x7F}, 64, 0, 0x400,
-        64.0f, SKY_IMAGE_KIND_1},
-    {{0, 0, 0, 0}, 192, {0xFF, 0xEF, 0xE0}, {0xFF, 0xEF, 0xE0}, 32, 0, 0x400,
-        96.0f, SKY_IMAGE_KIND_0},
-    {{0, 0, 0, 0}, 128, {0xFF, 0xEF, 0xE0}, {0xFF, 0xBF, 0xFF}, 32, 0, 0x400,
-        96.0f, SKY_IMAGE_KIND_0},
-    {{0, 0, 0, 0}, 24, {0xF7, 0xFF, 0xBF}, {0xFF, 0xBF, 0x7F}, 96, 0, 0x2AB,
-        64.0f, SKY_IMAGE_KIND_1},
-    {{0, 0, 0, 0}, 24, {0xFF, 0x40, 0x00}, {0xFF, 0xEF, 0x7F}, 96, 0, 0x2AB,
-        64.0f, SKY_IMAGE_KIND_1},
-    {{0, 0, 0, 0}, 24, {0xFF, 0xCF, 0x00}, {0xFF, 0xEF, 0x7F}, 96, 0, 0x2AB,
-        64.0f, SKY_IMAGE_KIND_1},
-    {{0, 0, 0, 0}, 64, {0xFF, 0xCF, 0x00}, {0xFF, 0xEF, 0x7F}, 48, 0, 0x155,
-        0.0f, SKY_IMAGE_KIND_TWO_TEXTURES}};
+    {{0, 0, 0, 0},
+        24,
+        {0xFF, 0xEF, 0xBF},
+        {0xFF, 0xFF, 0x7F},
+        64,
+        0,
+        0x400,
+        64.0f,
+        SKY_IMAGE_KIND_1},
+    {{0, 0, 0, 0},
+        192,
+        {0xFF, 0xEF, 0xE0},
+        {0xFF, 0xEF, 0xE0},
+        32,
+        0,
+        0x400,
+        96.0f,
+        SKY_IMAGE_KIND_0},
+    {{0, 0, 0, 0},
+        128,
+        {0xFF, 0xEF, 0xE0},
+        {0xFF, 0xBF, 0xFF},
+        32,
+        0,
+        0x400,
+        96.0f,
+        SKY_IMAGE_KIND_0},
+    {{0, 0, 0, 0},
+        24,
+        {0xF7, 0xFF, 0xBF},
+        {0xFF, 0xBF, 0x7F},
+        96,
+        0,
+        0x2AB,
+        64.0f,
+        SKY_IMAGE_KIND_1},
+    {{0, 0, 0, 0},
+        24,
+        {0xFF, 0x40, 0x00},
+        {0xFF, 0xEF, 0x7F},
+        96,
+        0,
+        0x2AB,
+        64.0f,
+        SKY_IMAGE_KIND_1},
+    {{0, 0, 0, 0},
+        24,
+        {0xFF, 0xCF, 0x00},
+        {0xFF, 0xEF, 0x7F},
+        96,
+        0,
+        0x2AB,
+        64.0f,
+        SKY_IMAGE_KIND_1},
+    {{0, 0, 0, 0},
+        64,
+        {0xFF, 0xCF, 0x00},
+        {0xFF, 0xEF, 0x7F},
+        48,
+        0,
+        0x155,
+        0.0f,
+        SKY_IMAGE_KIND_TWO_TEXTURES}
+};
 /* By course record, then the times of day when dry, then in the rain */
-SkyColors g_SkyColors[COURSE_RECORD_COUNT][SKY_WEATHER_COUNT * SKY_TIME_COUNT] =
-    {{{0, {0x0A, 0xC8, 0xFF}, {0xE6, 0xFF, 0xC8}, {0xFF, 0xFF, 0xFF},
-          {0x19, 0x19, 0x19, 55}, TRUE, &f_Suns[0], {0xBE, 0xDC, 0xBE}, 974,
-          1100},
-         {0, {0x32, 0x64, 0xFF}, {0x64, 0xFF, 0xFF}, {0xFF, 0xFF, 0xFF},
-             {0x19, 0x19, 0x19, 30}, TRUE, &f_Suns[1], {0xB4, 0xBE, 0xB4}, 974,
-             1100},
-         {0, {0xFF, 0x3C, 0x64}, {0xFF, 0xFF, 0x00}, {0xFF, 0xC8, 0x64},
-             {0x19, 0x0A, 0x00, 50}, TRUE, &f_Suns[4], {0xE6, 0xAA, 0x96}, 975,
-             1100},
-         {0, {0x00, 0x00, 0x64}, {0x00, 0x00, 0xFF}, {0x00, 0x00, 0xC8},
-             {0x00, 0x00, 0x0A, 70}, FALSE, &f_Suns[6], {0x00, 0x00, 0x7F}, 970,
-             1100},
-         {0, {0x96, 0x96, 0x96}, {0xFF, 0xFF, 0xFF}, {0x96, 0x96, 0x96},
-             {0x19, 0x19, 0x19, 65}, FALSE, &f_Suns[0], {0xC8, 0xE6, 0xC8}, 970,
-             1060},
-         {0, {0xB0, 0xB4, 0xCB}, {0xAF, 0xAB, 0xAB}, {0x3F, 0x3F, 0x57},
-             {0x14, 0x14, 0x18, 60}, FALSE, &f_Suns[1], {0x80, 0x7A, 0xBC}, 970,
-             1080},
-         {0, {0x96, 0x96, 0x96}, {0xFF, 0xFF, 0xC8}, {0x96, 0x96, 0x96},
-             {0x19, 0x14, 0x14, 60}, FALSE, &f_Suns[2], {0xC8, 0xE6, 0xC8}, 970,
-             1080},
-         {0, {0x20, 0x20, 0x2F}, {0x50, 0x50, 0x50}, {0x64, 0x68, 0x50},
-             {0x06, 0x06, 0x08, 90}, FALSE, &f_Suns[6], {0xC8, 0xE6, 0xC8}, 970,
-             1080}},
-        {{0, {0x32, 0x96, 0xFF}, {0xFF, 0xFF, 0xD7}, {0xFF, 0xFF, 0xFF},
-             {0x19, 0x19, 0x19, 55}, TRUE, &f_Suns[0], {0xC8, 0xE8, 0xC8}, 970,
-             1080},
-            {0, {0x32, 0x32, 0xFF}, {0x64, 0xFF, 0xFF}, {0xFF, 0xFF, 0xFF},
-                {0x19, 0x19, 0x19, 30}, TRUE, &f_Suns[1], {0xC8, 0xE6, 0xC8},
-                974, 1120},
-            {0, {0xFF, 0x3C, 0x64}, {0xFF, 0xFF, 0x00}, {0x97, 0x1F, 0x00},
-                {0x19, 0x05, 0x01, 50}, TRUE, &f_Suns[4], {0xFA, 0x57, 0x50},
-                942, 1144},
-            {0, {0x00, 0x00, 0x28}, {0x00, 0x00, 0xC8}, {0x00, 0x97, 0x14},
-                {0x00, 0x00, 0x0A, 85}, FALSE, &f_Suns[6], {0x00, 0x00, 0x7F},
-                970, 1110},
-            {0, {0xA0, 0x96, 0x96}, {0xFF, 0xFF, 0xD7}, {0x96, 0x96, 0x96},
-                {0x16, 0x16, 0x13, 65}, FALSE, &f_Suns[0], {0xC8, 0xE6, 0xC8},
-                970, 1060},
-            {0, {0xAC, 0xB4, 0xCB}, {0xAF, 0xAB, 0xAB}, {0x96, 0x96, 0x96},
-                {0x14, 0x14, 0x16, 60}, FALSE, &f_Suns[1], {0x80, 0x7A, 0xA8},
-                970, 1080},
-            {0, {0x96, 0x96, 0x96}, {0xFF, 0xFF, 0xC8}, {0x96, 0x96, 0x64},
-                {0x16, 0x12, 0x12, 60}, FALSE, &f_Suns[2], {0xC8, 0xE6, 0xC8},
-                970, 1080},
-            {0, {0x20, 0x20, 0x2F}, {0x64, 0x64, 0x64}, {0x50, 0x50, 0x64},
-                {0x06, 0x06, 0x08, 85}, FALSE, &f_Suns[6], {0xC8, 0xE6, 0xC8},
-                970, 1080}},
-        {{0, {0x1F, 0x1F, 0xFF}, {0xFF, 0xE7, 0x3F}, {0xDF, 0xBF, 0xDF},
-             {0x17, 0x14, 0x11, 50}, TRUE, &f_Suns[0], {0xC8, 0xE6, 0xC8}, 970,
-             1100},
-            {0, {0x00, 0x1F, 0xFF}, {0xFF, 0xFF, 0xFF}, {0xBF, 0xBF, 0xFF},
-                {0x0F, 0x0F, 0x0F, 35}, TRUE, &f_Suns[1], {0xB4, 0xC8, 0xB4},
-                974, 1110},
-            {0, {0xFF, 0x3F, 0x00}, {0xBF, 0xFF, 0x8F}, {0xFF, 0xBF, 0x00},
-                {0x0A, 0x05, 0x01, 50}, TRUE, &f_Suns[4], {0xFF, 0x96, 0x3C},
-                970, 1110},
-            {0, {0x00, 0x00, 0x32}, {0x00, 0x00, 0xFF}, {0x00, 0x00, 0x96},
-                {0x00, 0x00, 0x0F, 80}, FALSE, &f_Suns[6], {0x00, 0x00, 0x7F},
-                970, 1100},
-            {0, {0x96, 0x96, 0xC8}, {0xFF, 0xFF, 0xFF}, {0x96, 0x96, 0x96},
-                {0x19, 0x19, 0x19, 65}, FALSE, &f_Suns[0], {0xC8, 0xE6, 0xC8},
-                970, 1060},
-            {0, {0xB4, 0xB4, 0xC8}, {0xAF, 0xAF, 0xA0}, {0x96, 0x96, 0x96},
-                {0x14, 0x14, 0x16, 60}, FALSE, &f_Suns[1], {0xC8, 0xE6, 0xC8},
-                970, 1080},
-            {0, {0x96, 0x96, 0x96}, {0xC8, 0x64, 0x96}, {0x50, 0x50, 0x64},
-                {0x12, 0x0C, 0x12, 60}, FALSE, &f_Suns[2], {0xC8, 0xE6, 0xC8},
-                970, 1080},
-            {0, {0x20, 0x03, 0x20}, {0x64, 0x64, 0x64}, {0x50, 0x50, 0x64},
-                {0x06, 0x05, 0x08, 90}, FALSE, &f_Suns[6], {0xC8, 0xE6, 0xC8},
-                970, 1080}},
-        {{0, {0x97, 0x64, 0xFF}, {0xF3, 0xEF, 0x83}, {0xC8, 0xC8, 0xC8},
-             {0x14, 0x14, 0x14, 55}, TRUE, &f_Suns[0], {0xC8, 0xE6, 0xC8}, 970,
-             1080},
-            {0, {0x64, 0xB4, 0xEF}, {0xC8, 0xEF, 0xB4}, {0xC8, 0xC8, 0xC8},
-                {0x14, 0x14, 0x14, 35}, TRUE, &f_Suns[1], {0xC8, 0xE6, 0xC8},
-                974, 1100},
-            {0, {0x90, 0x32, 0xC8}, {0xFF, 0xC8, 0x50}, {0xFF, 0x64, 0x64},
-                {0x14, 0x05, 0x0A, 50}, TRUE, &f_Suns[4], {0xFA, 0x64, 0x64},
-                970, 1100},
-            {0, {0x00, 0x00, 0x64}, {0x00, 0x00, 0xFF}, {0x00, 0x00, 0x8B},
-                {0x00, 0x02, 0x08, 80}, FALSE, &f_Suns[6], {0x00, 0x00, 0x7F},
-                970, 1100},
-            {0, {0x6F, 0x64, 0xAB}, {0xAF, 0xBF, 0xC8}, {0x64, 0x64, 0x64},
-                {0x10, 0x10, 0x10, 65}, FALSE, &f_Suns[0], {0xC8, 0xE6, 0xC8},
-                970, 1060},
-            {0, {0x9B, 0x9B, 0xDF}, {0xAF, 0xBF, 0xC8}, {0x64, 0x64, 0x64},
-                {0x12, 0x12, 0x12, 55}, FALSE, &f_Suns[1], {0xC8, 0xE6, 0xC8},
-                966, 1080},
-            {0, {0xB7, 0x64, 0xAB}, {0xBF, 0xBF, 0x9F}, {0x50, 0x50, 0x50},
-                {0x10, 0x0C, 0x0C, 55}, FALSE, &f_Suns[2], {0xC8, 0xE6, 0xC8},
-                970, 1080},
-            {0, {0x32, 0x32, 0x32}, {0x4B, 0x4B, 0x4B}, {0x00, 0x9F, 0x8B},
-                {0x05, 0x05, 0x07, 90}, FALSE, &f_Suns[6], {0xC8, 0xE6, 0xC8},
-                970, 1080}},
-        {{0, {0x32, 0x96, 0xC8}, {0xFF, 0xEB, 0xC8}, {0x96, 0x96, 0xFF},
-             {0x0F, 0x0F, 0x0F, 50}, TRUE, &f_Suns[0], {0xC8, 0xE6, 0xC8}, 970,
-             1080},
-            {0, {0x00, 0x64, 0xFF}, {0xC8, 0xEB, 0xFF}, {0xC8, 0xC8, 0xFF},
-                {0x0F, 0x0F, 0x0F, 40}, TRUE, &f_Suns[1], {0xC8, 0xE6, 0xC8},
-                970, 1100},
-            {0, {0xC8, 0x32, 0xC8}, {0xFF, 0xEB, 0x64}, {0xC8, 0xC8, 0xFF},
-                {0x19, 0x05, 0x0A, 50}, TRUE, &f_Suns[4], {0xC8, 0xE6, 0xC8},
-                970, 1100},
-            {0, {0x00, 0x00, 0x64}, {0x00, 0x1F, 0xFF}, {0x00, 0x00, 0x96},
-                {0x00, 0x02, 0x0F, 80}, FALSE, &f_Suns[6], {0x20, 0x20, 0xBF},
-                970, 1100},
-            {0, {0x64, 0x96, 0x96}, {0xFF, 0xEB, 0xC8}, {0x64, 0x64, 0x64},
-                {0x14, 0x14, 0x14, 60}, FALSE, &f_Suns[0], {0xC8, 0xE6, 0xC8},
-                970, 1060},
-            {0, {0x96, 0x96, 0x96}, {0xEB, 0xEB, 0xEB}, {0x64, 0x64, 0x96},
-                {0x14, 0x14, 0x14, 60}, FALSE, &f_Suns[1], {0xC8, 0xE6, 0xC8},
-                970, 1080},
-            {0, {0x96, 0x64, 0x96}, {0xFF, 0xEB, 0xC8}, {0x64, 0x64, 0x64},
-                {0x12, 0x0F, 0x12, 60}, FALSE, &f_Suns[2], {0xC8, 0xE6, 0xC8},
-                970, 1080},
-            {0, {0x32, 0x20, 0x32}, {0x50, 0x50, 0x50}, {0x64, 0x64, 0x64},
-                {0x08, 0x06, 0x08, 90}, FALSE, &f_Suns[6], {0xC8, 0xE6, 0xC8},
-                970, 1080}},
-        {{0, {0x7B, 0x93, 0xFF}, {0xFF, 0xBF, 0xA3}, {0xDF, 0xFF, 0xE7},
-             {0x14, 0x14, 0x14, 55}, TRUE, &f_Suns[0], {0xA0, 0xB6, 0xC8}, 962,
-             1024},
-            {0, {0x74, 0x1F, 0xFF}, {0xB7, 0xFF, 0xFF}, {0xFF, 0xFF, 0xFF},
-                {0x12, 0x12, 0x12, 40}, TRUE, &f_Suns[1], {0xC8, 0xE6, 0xC8},
-                970, 1100},
-            {0, {0xDF, 0x1F, 0xFF}, {0xFF, 0xCF, 0x4B}, {0x77, 0x0B, 0xBF},
-                {0x14, 0x0A, 0x08, 50}, TRUE, &f_Suns[4], {0xFF, 0x62, 0xB4},
-                970, 1048},
-            {0, {0x3F, 0x03, 0x74}, {0x1B, 0x07, 0x9B}, {0x67, 0x77, 0xC8},
-                {0x00, 0x00, 0x09, 80}, FALSE, &f_Suns[6], {0x08, 0x00, 0xB4},
-                954, 1024},
-            {0, {0x93, 0x93, 0x93}, {0xB7, 0xB7, 0x9B}, {0x64, 0x73, 0x97},
-                {0x0C, 0x0C, 0x0E, 65}, FALSE, &f_Suns[0], {0x94, 0xA6, 0xBC},
-                954, 1016},
-            {0, {0x7B, 0x93, 0x9B}, {0xAB, 0xAB, 0xAB}, {0x4B, 0x73, 0x64},
-                {0x0A, 0x0E, 0x0E, 60}, FALSE, &f_Suns[1], {0xC8, 0xE6, 0xC8},
-                970, 1048},
-            {0, {0x7B, 0x93, 0xA3}, {0xC8, 0x83, 0x7B}, {0x37, 0x73, 0x37},
-                {0x0A, 0x0A, 0x08, 60}, FALSE, &f_Suns[2], {0x8F, 0x72, 0xB7},
-                962, 1040},
-            {0, {0x27, 0x33, 0x4C}, {0x37, 0x27, 0x2F}, {0x6F, 0x3F, 0x9C},
-                {0x02, 0x03, 0x07, 80}, FALSE, &f_Suns[6], {0x10, 0x34, 0x7C},
-                954, 1012}},
-        {{0, {0x00, 0x00, 0x9F}, {0xBF, 0xBF, 0xFF}, {0x00, 0x00, 0xB7},
-             {0x17, 0x14, 0x11, 0}, TRUE, &f_Suns[0], {0xFF, 0xFF, 0xFF}, 1070,
-             1128},
-            {0, {0x00, 0x00, 0xFF}, {0xBF, 0xEF, 0xFF}, {0xBF, 0xFF, 0xFF},
-                {0x0F, 0x0F, 0x0F, 0}, TRUE, &f_Suns[1], {0xFF, 0xFF, 0xFF},
-                1070, 1128},
-            {0, {0x8F, 0x5F, 0xCF}, {0xFF, 0xDF, 0x00}, {0xFF, 0x3F, 0x00},
-                {0x0A, 0x05, 0x01, 0}, TRUE, &f_Suns[4], {0xFF, 0xFF, 0xFF},
-                1070, 1128},
-            {0, {0x00, 0x00, 0x7F}, {0x00, 0x00, 0x3F}, {0x7F, 0x7F, 0x7F},
-                {0x0A, 0x05, 0x01, 0}, FALSE, &f_Suns[6], {0xFF, 0xFF, 0xFF},
-                1070, 1128},
-            {0, {0xA0, 0xC4, 0xAF}, {0x0F, 0x2F, 0x4B}, {0xFF, 0xDB, 0xBB},
-                {0x0F, 0x0F, 0x0F, 60}, FALSE, &f_Suns[0], {0xFF, 0xFF, 0xFF},
-                1070, 1128},
-            {0, {0x6F, 0x6F, 0x7F}, {0x7F, 0x7F, 0x5F}, {0x40, 0x40, 0x40},
-                {0x1E, 0x1E, 0x1E, 50}, FALSE, &f_Suns[1], {0xFF, 0xFF, 0xFF},
-                1070, 1128},
-            {0, {0xDF, 0xBF, 0xFF}, {0xFF, 0xEF, 0x3F}, {0x5F, 0x3F, 0x1F},
-                {0x14, 0x0F, 0x0A, 70}, FALSE, &f_Suns[2], {0xFF, 0xFF, 0xFF},
-                1070, 1128},
-            {0, {0x00, 0x00, 0x7F}, {0x00, 0x00, 0x3F}, {0x7F, 0x7F, 0x7F},
-                {0x0A, 0x05, 0x01, 0}, FALSE, &f_Suns[6], {0xFF, 0xFF, 0xFF},
-                1070, 1128}},
-        {{0, {0x00, 0x00, 0x9F}, {0xBF, 0xBF, 0xFF}, {0x00, 0x00, 0xB7},
-             {0x17, 0x14, 0x11, 0}, TRUE, &f_Suns[0], {0xFF, 0xFF, 0xFF}, 1070,
-             1128},
-            {0, {0x00, 0x00, 0xFF}, {0xBF, 0xEF, 0xFF}, {0xBF, 0xFF, 0xFF},
-                {0x0F, 0x0F, 0x0F, 0}, TRUE, &f_Suns[1], {0xFF, 0xFF, 0xFF},
-                1070, 1128},
-            {0, {0x8F, 0x5F, 0xCF}, {0xFF, 0xDF, 0x00}, {0xFF, 0x3F, 0x00},
-                {0x0A, 0x05, 0x01, 0}, TRUE, &f_Suns[4], {0xFF, 0xFF, 0xFF},
-                1070, 1128},
-            {0, {0x00, 0x00, 0x7F}, {0x00, 0x00, 0x3F}, {0x7F, 0x7F, 0x7F},
-                {0x0A, 0x05, 0x01, 0}, FALSE, &f_Suns[6], {0xFF, 0xFF, 0xFF},
-                1070, 1128},
-            {0, {0xA0, 0xC4, 0xAF}, {0x0F, 0x2F, 0x4B}, {0xFF, 0xDB, 0xBB},
-                {0x0F, 0x0F, 0x0F, 60}, FALSE, &f_Suns[0], {0xFF, 0xFF, 0xFF},
-                1070, 1128},
-            {0, {0x6F, 0x6F, 0x7F}, {0x7F, 0x7F, 0x5F}, {0x40, 0x40, 0x40},
-                {0x1E, 0x1E, 0x1E, 50}, FALSE, &f_Suns[1], {0xFF, 0xFF, 0xFF},
-                1070, 1128},
-            {0, {0xDF, 0xBF, 0xFF}, {0xFF, 0xEF, 0x3F}, {0x5F, 0x3F, 0x1F},
-                {0x14, 0x0F, 0x0A, 70}, FALSE, &f_Suns[2], {0xFF, 0xFF, 0xFF},
-                1070, 1128},
-            {0, {0x00, 0x00, 0x7F}, {0x00, 0x00, 0x3F}, {0x7F, 0x7F, 0x7F},
-                {0x0A, 0x05, 0x01, 0}, FALSE, &f_Suns[6], {0xFF, 0xFF, 0xFF},
-                1070, 1128}},
-        {{0, {0x32, 0x64, 0xFF}, {0x64, 0xFF, 0xFF}, {0xFF, 0xFF, 0xFF},
-             {0x19, 0x19, 0x19, 35}, TRUE, &f_Suns[1], {0xC8, 0xE6, 0xC8}, 970,
-             1100},
-            {0, {0x32, 0x64, 0xFF}, {0x64, 0xFF, 0xFF}, {0xFF, 0xFF, 0xFF},
-                {0x19, 0x19, 0x19, 35}, TRUE, &f_Suns[1], {0xC8, 0xE6, 0xC8},
-                970, 1100},
-            {0, {0x32, 0x64, 0xFF}, {0x64, 0xFF, 0xFF}, {0xFF, 0xFF, 0xFF},
-                {0x19, 0x19, 0x19, 35}, TRUE, &f_Suns[1], {0xC8, 0xE6, 0xC8},
-                970, 1100},
-            {0, {0x00, 0x00, 0x64}, {0x00, 0x00, 0xFF}, {0x00, 0x00, 0xC8},
-                {0x00, 0x00, 0x0F, 90}, FALSE, &f_Suns[6], {0xC8, 0xE6, 0xC8},
-                970, 1100},
-            {0, {0x96, 0x96, 0x96}, {0xFF, 0xFF, 0xFF}, {0x96, 0x96, 0x96},
-                {0x19, 0x19, 0x19, 65}, FALSE, &f_Suns[0], {0xC8, 0xE6, 0xC8},
-                970, 1060},
-            {0, {0xB0, 0xB4, 0xCB}, {0xAF, 0xAB, 0xAB}, {0x3F, 0x3F, 0x57},
-                {0x14, 0x14, 0x18, 60}, FALSE, &f_Suns[1], {0x80, 0x7A, 0xBC},
-                970, 1080},
-            {0, {0x96, 0x96, 0x96}, {0xFF, 0xFF, 0xC8}, {0x96, 0x96, 0x96},
-                {0x19, 0x14, 0x14, 60}, FALSE, &f_Suns[2], {0xC8, 0xE6, 0xC8},
-                970, 1080},
-            {0, {0x20, 0x20, 0x2F}, {0x50, 0x50, 0x50}, {0x64, 0x68, 0x50},
-                {0x06, 0x06, 0x08, 90}, FALSE, &f_Suns[6], {0xC8, 0xE6, 0xC8},
-                970, 1080}}};
+SkyColors g_SkyColors[COURSE_RECORD_COUNT][SKY_WEATHER_COUNT * SKY_TIME_COUNT] = {
+    {{0,
+         {0x0A, 0xC8, 0xFF},
+         {0xE6, 0xFF, 0xC8},
+         {0xFF, 0xFF, 0xFF},
+         {0x19, 0x19, 0x19, 55},
+         TRUE,
+         &f_Suns[0],
+         {0xBE, 0xDC, 0xBE},
+         974,
+         1100},
+        {0,
+            {0x32, 0x64, 0xFF},
+            {0x64, 0xFF, 0xFF},
+            {0xFF, 0xFF, 0xFF},
+            {0x19, 0x19, 0x19, 30},
+            TRUE,
+            &f_Suns[1],
+            {0xB4, 0xBE, 0xB4},
+            974,
+            1100},
+        {0,
+            {0xFF, 0x3C, 0x64},
+            {0xFF, 0xFF, 0x00},
+            {0xFF, 0xC8, 0x64},
+            {0x19, 0x0A, 0x00, 50},
+            TRUE,
+            &f_Suns[4],
+            {0xE6, 0xAA, 0x96},
+            975,
+            1100},
+        {0,
+            {0x00, 0x00, 0x64},
+            {0x00, 0x00, 0xFF},
+            {0x00, 0x00, 0xC8},
+            {0x00, 0x00, 0x0A, 70},
+            FALSE,
+            &f_Suns[6],
+            {0x00, 0x00, 0x7F},
+            970,
+            1100},
+        {0,
+            {0x96, 0x96, 0x96},
+            {0xFF, 0xFF, 0xFF},
+            {0x96, 0x96, 0x96},
+            {0x19, 0x19, 0x19, 65},
+            FALSE,
+            &f_Suns[0],
+            {0xC8, 0xE6, 0xC8},
+            970,
+            1060},
+        {0,
+            {0xB0, 0xB4, 0xCB},
+            {0xAF, 0xAB, 0xAB},
+            {0x3F, 0x3F, 0x57},
+            {0x14, 0x14, 0x18, 60},
+            FALSE,
+            &f_Suns[1],
+            {0x80, 0x7A, 0xBC},
+            970,
+            1080},
+        {0,
+            {0x96, 0x96, 0x96},
+            {0xFF, 0xFF, 0xC8},
+            {0x96, 0x96, 0x96},
+            {0x19, 0x14, 0x14, 60},
+            FALSE,
+            &f_Suns[2],
+            {0xC8, 0xE6, 0xC8},
+            970,
+            1080},
+        {0,
+            {0x20, 0x20, 0x2F},
+            {0x50, 0x50, 0x50},
+            {0x64, 0x68, 0x50},
+            {0x06, 0x06, 0x08, 90},
+            FALSE,
+            &f_Suns[6],
+            {0xC8, 0xE6, 0xC8},
+            970,
+            1080}},
+    {{0,
+         {0x32, 0x96, 0xFF},
+         {0xFF, 0xFF, 0xD7},
+         {0xFF, 0xFF, 0xFF},
+         {0x19, 0x19, 0x19, 55},
+         TRUE,
+         &f_Suns[0],
+         {0xC8, 0xE8, 0xC8},
+         970,
+         1080},
+        {0,
+            {0x32, 0x32, 0xFF},
+            {0x64, 0xFF, 0xFF},
+            {0xFF, 0xFF, 0xFF},
+            {0x19, 0x19, 0x19, 30},
+            TRUE,
+            &f_Suns[1],
+            {0xC8, 0xE6, 0xC8},
+            974,
+            1120},
+        {0,
+            {0xFF, 0x3C, 0x64},
+            {0xFF, 0xFF, 0x00},
+            {0x97, 0x1F, 0x00},
+            {0x19, 0x05, 0x01, 50},
+            TRUE,
+            &f_Suns[4],
+            {0xFA, 0x57, 0x50},
+            942,
+            1144},
+        {0,
+            {0x00, 0x00, 0x28},
+            {0x00, 0x00, 0xC8},
+            {0x00, 0x97, 0x14},
+            {0x00, 0x00, 0x0A, 85},
+            FALSE,
+            &f_Suns[6],
+            {0x00, 0x00, 0x7F},
+            970,
+            1110},
+        {0,
+            {0xA0, 0x96, 0x96},
+            {0xFF, 0xFF, 0xD7},
+            {0x96, 0x96, 0x96},
+            {0x16, 0x16, 0x13, 65},
+            FALSE,
+            &f_Suns[0],
+            {0xC8, 0xE6, 0xC8},
+            970,
+            1060},
+        {0,
+            {0xAC, 0xB4, 0xCB},
+            {0xAF, 0xAB, 0xAB},
+            {0x96, 0x96, 0x96},
+            {0x14, 0x14, 0x16, 60},
+            FALSE,
+            &f_Suns[1],
+            {0x80, 0x7A, 0xA8},
+            970,
+            1080},
+        {0,
+            {0x96, 0x96, 0x96},
+            {0xFF, 0xFF, 0xC8},
+            {0x96, 0x96, 0x64},
+            {0x16, 0x12, 0x12, 60},
+            FALSE,
+            &f_Suns[2],
+            {0xC8, 0xE6, 0xC8},
+            970,
+            1080},
+        {0,
+            {0x20, 0x20, 0x2F},
+            {0x64, 0x64, 0x64},
+            {0x50, 0x50, 0x64},
+            {0x06, 0x06, 0x08, 85},
+            FALSE,
+            &f_Suns[6],
+            {0xC8, 0xE6, 0xC8},
+            970,
+            1080}},
+    {{0,
+         {0x1F, 0x1F, 0xFF},
+         {0xFF, 0xE7, 0x3F},
+         {0xDF, 0xBF, 0xDF},
+         {0x17, 0x14, 0x11, 50},
+         TRUE,
+         &f_Suns[0],
+         {0xC8, 0xE6, 0xC8},
+         970,
+         1100},
+        {0,
+            {0x00, 0x1F, 0xFF},
+            {0xFF, 0xFF, 0xFF},
+            {0xBF, 0xBF, 0xFF},
+            {0x0F, 0x0F, 0x0F, 35},
+            TRUE,
+            &f_Suns[1],
+            {0xB4, 0xC8, 0xB4},
+            974,
+            1110},
+        {0,
+            {0xFF, 0x3F, 0x00},
+            {0xBF, 0xFF, 0x8F},
+            {0xFF, 0xBF, 0x00},
+            {0x0A, 0x05, 0x01, 50},
+            TRUE,
+            &f_Suns[4],
+            {0xFF, 0x96, 0x3C},
+            970,
+            1110},
+        {0,
+            {0x00, 0x00, 0x32},
+            {0x00, 0x00, 0xFF},
+            {0x00, 0x00, 0x96},
+            {0x00, 0x00, 0x0F, 80},
+            FALSE,
+            &f_Suns[6],
+            {0x00, 0x00, 0x7F},
+            970,
+            1100},
+        {0,
+            {0x96, 0x96, 0xC8},
+            {0xFF, 0xFF, 0xFF},
+            {0x96, 0x96, 0x96},
+            {0x19, 0x19, 0x19, 65},
+            FALSE,
+            &f_Suns[0],
+            {0xC8, 0xE6, 0xC8},
+            970,
+            1060},
+        {0,
+            {0xB4, 0xB4, 0xC8},
+            {0xAF, 0xAF, 0xA0},
+            {0x96, 0x96, 0x96},
+            {0x14, 0x14, 0x16, 60},
+            FALSE,
+            &f_Suns[1],
+            {0xC8, 0xE6, 0xC8},
+            970,
+            1080},
+        {0,
+            {0x96, 0x96, 0x96},
+            {0xC8, 0x64, 0x96},
+            {0x50, 0x50, 0x64},
+            {0x12, 0x0C, 0x12, 60},
+            FALSE,
+            &f_Suns[2],
+            {0xC8, 0xE6, 0xC8},
+            970,
+            1080},
+        {0,
+            {0x20, 0x03, 0x20},
+            {0x64, 0x64, 0x64},
+            {0x50, 0x50, 0x64},
+            {0x06, 0x05, 0x08, 90},
+            FALSE,
+            &f_Suns[6],
+            {0xC8, 0xE6, 0xC8},
+            970,
+            1080}},
+    {{0,
+         {0x97, 0x64, 0xFF},
+         {0xF3, 0xEF, 0x83},
+         {0xC8, 0xC8, 0xC8},
+         {0x14, 0x14, 0x14, 55},
+         TRUE,
+         &f_Suns[0],
+         {0xC8, 0xE6, 0xC8},
+         970,
+         1080},
+        {0,
+            {0x64, 0xB4, 0xEF},
+            {0xC8, 0xEF, 0xB4},
+            {0xC8, 0xC8, 0xC8},
+            {0x14, 0x14, 0x14, 35},
+            TRUE,
+            &f_Suns[1],
+            {0xC8, 0xE6, 0xC8},
+            974,
+            1100},
+        {0,
+            {0x90, 0x32, 0xC8},
+            {0xFF, 0xC8, 0x50},
+            {0xFF, 0x64, 0x64},
+            {0x14, 0x05, 0x0A, 50},
+            TRUE,
+            &f_Suns[4],
+            {0xFA, 0x64, 0x64},
+            970,
+            1100},
+        {0,
+            {0x00, 0x00, 0x64},
+            {0x00, 0x00, 0xFF},
+            {0x00, 0x00, 0x8B},
+            {0x00, 0x02, 0x08, 80},
+            FALSE,
+            &f_Suns[6],
+            {0x00, 0x00, 0x7F},
+            970,
+            1100},
+        {0,
+            {0x6F, 0x64, 0xAB},
+            {0xAF, 0xBF, 0xC8},
+            {0x64, 0x64, 0x64},
+            {0x10, 0x10, 0x10, 65},
+            FALSE,
+            &f_Suns[0],
+            {0xC8, 0xE6, 0xC8},
+            970,
+            1060},
+        {0,
+            {0x9B, 0x9B, 0xDF},
+            {0xAF, 0xBF, 0xC8},
+            {0x64, 0x64, 0x64},
+            {0x12, 0x12, 0x12, 55},
+            FALSE,
+            &f_Suns[1],
+            {0xC8, 0xE6, 0xC8},
+            966,
+            1080},
+        {0,
+            {0xB7, 0x64, 0xAB},
+            {0xBF, 0xBF, 0x9F},
+            {0x50, 0x50, 0x50},
+            {0x10, 0x0C, 0x0C, 55},
+            FALSE,
+            &f_Suns[2],
+            {0xC8, 0xE6, 0xC8},
+            970,
+            1080},
+        {0,
+            {0x32, 0x32, 0x32},
+            {0x4B, 0x4B, 0x4B},
+            {0x00, 0x9F, 0x8B},
+            {0x05, 0x05, 0x07, 90},
+            FALSE,
+            &f_Suns[6],
+            {0xC8, 0xE6, 0xC8},
+            970,
+            1080}},
+    {{0,
+         {0x32, 0x96, 0xC8},
+         {0xFF, 0xEB, 0xC8},
+         {0x96, 0x96, 0xFF},
+         {0x0F, 0x0F, 0x0F, 50},
+         TRUE,
+         &f_Suns[0],
+         {0xC8, 0xE6, 0xC8},
+         970,
+         1080},
+        {0,
+            {0x00, 0x64, 0xFF},
+            {0xC8, 0xEB, 0xFF},
+            {0xC8, 0xC8, 0xFF},
+            {0x0F, 0x0F, 0x0F, 40},
+            TRUE,
+            &f_Suns[1],
+            {0xC8, 0xE6, 0xC8},
+            970,
+            1100},
+        {0,
+            {0xC8, 0x32, 0xC8},
+            {0xFF, 0xEB, 0x64},
+            {0xC8, 0xC8, 0xFF},
+            {0x19, 0x05, 0x0A, 50},
+            TRUE,
+            &f_Suns[4],
+            {0xC8, 0xE6, 0xC8},
+            970,
+            1100},
+        {0,
+            {0x00, 0x00, 0x64},
+            {0x00, 0x1F, 0xFF},
+            {0x00, 0x00, 0x96},
+            {0x00, 0x02, 0x0F, 80},
+            FALSE,
+            &f_Suns[6],
+            {0x20, 0x20, 0xBF},
+            970,
+            1100},
+        {0,
+            {0x64, 0x96, 0x96},
+            {0xFF, 0xEB, 0xC8},
+            {0x64, 0x64, 0x64},
+            {0x14, 0x14, 0x14, 60},
+            FALSE,
+            &f_Suns[0],
+            {0xC8, 0xE6, 0xC8},
+            970,
+            1060},
+        {0,
+            {0x96, 0x96, 0x96},
+            {0xEB, 0xEB, 0xEB},
+            {0x64, 0x64, 0x96},
+            {0x14, 0x14, 0x14, 60},
+            FALSE,
+            &f_Suns[1],
+            {0xC8, 0xE6, 0xC8},
+            970,
+            1080},
+        {0,
+            {0x96, 0x64, 0x96},
+            {0xFF, 0xEB, 0xC8},
+            {0x64, 0x64, 0x64},
+            {0x12, 0x0F, 0x12, 60},
+            FALSE,
+            &f_Suns[2],
+            {0xC8, 0xE6, 0xC8},
+            970,
+            1080},
+        {0,
+            {0x32, 0x20, 0x32},
+            {0x50, 0x50, 0x50},
+            {0x64, 0x64, 0x64},
+            {0x08, 0x06, 0x08, 90},
+            FALSE,
+            &f_Suns[6],
+            {0xC8, 0xE6, 0xC8},
+            970,
+            1080}},
+    {{0,
+         {0x7B, 0x93, 0xFF},
+         {0xFF, 0xBF, 0xA3},
+         {0xDF, 0xFF, 0xE7},
+         {0x14, 0x14, 0x14, 55},
+         TRUE,
+         &f_Suns[0],
+         {0xA0, 0xB6, 0xC8},
+         962,
+         1024},
+        {0,
+            {0x74, 0x1F, 0xFF},
+            {0xB7, 0xFF, 0xFF},
+            {0xFF, 0xFF, 0xFF},
+            {0x12, 0x12, 0x12, 40},
+            TRUE,
+            &f_Suns[1],
+            {0xC8, 0xE6, 0xC8},
+            970,
+            1100},
+        {0,
+            {0xDF, 0x1F, 0xFF},
+            {0xFF, 0xCF, 0x4B},
+            {0x77, 0x0B, 0xBF},
+            {0x14, 0x0A, 0x08, 50},
+            TRUE,
+            &f_Suns[4],
+            {0xFF, 0x62, 0xB4},
+            970,
+            1048},
+        {0,
+            {0x3F, 0x03, 0x74},
+            {0x1B, 0x07, 0x9B},
+            {0x67, 0x77, 0xC8},
+            {0x00, 0x00, 0x09, 80},
+            FALSE,
+            &f_Suns[6],
+            {0x08, 0x00, 0xB4},
+            954,
+            1024},
+        {0,
+            {0x93, 0x93, 0x93},
+            {0xB7, 0xB7, 0x9B},
+            {0x64, 0x73, 0x97},
+            {0x0C, 0x0C, 0x0E, 65},
+            FALSE,
+            &f_Suns[0],
+            {0x94, 0xA6, 0xBC},
+            954,
+            1016},
+        {0,
+            {0x7B, 0x93, 0x9B},
+            {0xAB, 0xAB, 0xAB},
+            {0x4B, 0x73, 0x64},
+            {0x0A, 0x0E, 0x0E, 60},
+            FALSE,
+            &f_Suns[1],
+            {0xC8, 0xE6, 0xC8},
+            970,
+            1048},
+        {0,
+            {0x7B, 0x93, 0xA3},
+            {0xC8, 0x83, 0x7B},
+            {0x37, 0x73, 0x37},
+            {0x0A, 0x0A, 0x08, 60},
+            FALSE,
+            &f_Suns[2],
+            {0x8F, 0x72, 0xB7},
+            962,
+            1040},
+        {0,
+            {0x27, 0x33, 0x4C},
+            {0x37, 0x27, 0x2F},
+            {0x6F, 0x3F, 0x9C},
+            {0x02, 0x03, 0x07, 80},
+            FALSE,
+            &f_Suns[6],
+            {0x10, 0x34, 0x7C},
+            954,
+            1012}},
+    {{0,
+         {0x00, 0x00, 0x9F},
+         {0xBF, 0xBF, 0xFF},
+         {0x00, 0x00, 0xB7},
+         {0x17, 0x14, 0x11, 0},
+         TRUE,
+         &f_Suns[0],
+         {0xFF, 0xFF, 0xFF},
+         1070,
+         1128},
+        {0,
+            {0x00, 0x00, 0xFF},
+            {0xBF, 0xEF, 0xFF},
+            {0xBF, 0xFF, 0xFF},
+            {0x0F, 0x0F, 0x0F, 0},
+            TRUE,
+            &f_Suns[1],
+            {0xFF, 0xFF, 0xFF},
+            1070,
+            1128},
+        {0,
+            {0x8F, 0x5F, 0xCF},
+            {0xFF, 0xDF, 0x00},
+            {0xFF, 0x3F, 0x00},
+            {0x0A, 0x05, 0x01, 0},
+            TRUE,
+            &f_Suns[4],
+            {0xFF, 0xFF, 0xFF},
+            1070,
+            1128},
+        {0,
+            {0x00, 0x00, 0x7F},
+            {0x00, 0x00, 0x3F},
+            {0x7F, 0x7F, 0x7F},
+            {0x0A, 0x05, 0x01, 0},
+            FALSE,
+            &f_Suns[6],
+            {0xFF, 0xFF, 0xFF},
+            1070,
+            1128},
+        {0,
+            {0xA0, 0xC4, 0xAF},
+            {0x0F, 0x2F, 0x4B},
+            {0xFF, 0xDB, 0xBB},
+            {0x0F, 0x0F, 0x0F, 60},
+            FALSE,
+            &f_Suns[0],
+            {0xFF, 0xFF, 0xFF},
+            1070,
+            1128},
+        {0,
+            {0x6F, 0x6F, 0x7F},
+            {0x7F, 0x7F, 0x5F},
+            {0x40, 0x40, 0x40},
+            {0x1E, 0x1E, 0x1E, 50},
+            FALSE,
+            &f_Suns[1],
+            {0xFF, 0xFF, 0xFF},
+            1070,
+            1128},
+        {0,
+            {0xDF, 0xBF, 0xFF},
+            {0xFF, 0xEF, 0x3F},
+            {0x5F, 0x3F, 0x1F},
+            {0x14, 0x0F, 0x0A, 70},
+            FALSE,
+            &f_Suns[2],
+            {0xFF, 0xFF, 0xFF},
+            1070,
+            1128},
+        {0,
+            {0x00, 0x00, 0x7F},
+            {0x00, 0x00, 0x3F},
+            {0x7F, 0x7F, 0x7F},
+            {0x0A, 0x05, 0x01, 0},
+            FALSE,
+            &f_Suns[6],
+            {0xFF, 0xFF, 0xFF},
+            1070,
+            1128}},
+    {{0,
+         {0x00, 0x00, 0x9F},
+         {0xBF, 0xBF, 0xFF},
+         {0x00, 0x00, 0xB7},
+         {0x17, 0x14, 0x11, 0},
+         TRUE,
+         &f_Suns[0],
+         {0xFF, 0xFF, 0xFF},
+         1070,
+         1128},
+        {0,
+            {0x00, 0x00, 0xFF},
+            {0xBF, 0xEF, 0xFF},
+            {0xBF, 0xFF, 0xFF},
+            {0x0F, 0x0F, 0x0F, 0},
+            TRUE,
+            &f_Suns[1],
+            {0xFF, 0xFF, 0xFF},
+            1070,
+            1128},
+        {0,
+            {0x8F, 0x5F, 0xCF},
+            {0xFF, 0xDF, 0x00},
+            {0xFF, 0x3F, 0x00},
+            {0x0A, 0x05, 0x01, 0},
+            TRUE,
+            &f_Suns[4],
+            {0xFF, 0xFF, 0xFF},
+            1070,
+            1128},
+        {0,
+            {0x00, 0x00, 0x7F},
+            {0x00, 0x00, 0x3F},
+            {0x7F, 0x7F, 0x7F},
+            {0x0A, 0x05, 0x01, 0},
+            FALSE,
+            &f_Suns[6],
+            {0xFF, 0xFF, 0xFF},
+            1070,
+            1128},
+        {0,
+            {0xA0, 0xC4, 0xAF},
+            {0x0F, 0x2F, 0x4B},
+            {0xFF, 0xDB, 0xBB},
+            {0x0F, 0x0F, 0x0F, 60},
+            FALSE,
+            &f_Suns[0],
+            {0xFF, 0xFF, 0xFF},
+            1070,
+            1128},
+        {0,
+            {0x6F, 0x6F, 0x7F},
+            {0x7F, 0x7F, 0x5F},
+            {0x40, 0x40, 0x40},
+            {0x1E, 0x1E, 0x1E, 50},
+            FALSE,
+            &f_Suns[1],
+            {0xFF, 0xFF, 0xFF},
+            1070,
+            1128},
+        {0,
+            {0xDF, 0xBF, 0xFF},
+            {0xFF, 0xEF, 0x3F},
+            {0x5F, 0x3F, 0x1F},
+            {0x14, 0x0F, 0x0A, 70},
+            FALSE,
+            &f_Suns[2],
+            {0xFF, 0xFF, 0xFF},
+            1070,
+            1128},
+        {0,
+            {0x00, 0x00, 0x7F},
+            {0x00, 0x00, 0x3F},
+            {0x7F, 0x7F, 0x7F},
+            {0x0A, 0x05, 0x01, 0},
+            FALSE,
+            &f_Suns[6],
+            {0xFF, 0xFF, 0xFF},
+            1070,
+            1128}},
+    {{0,
+         {0x32, 0x64, 0xFF},
+         {0x64, 0xFF, 0xFF},
+         {0xFF, 0xFF, 0xFF},
+         {0x19, 0x19, 0x19, 35},
+         TRUE,
+         &f_Suns[1],
+         {0xC8, 0xE6, 0xC8},
+         970,
+         1100},
+        {0,
+            {0x32, 0x64, 0xFF},
+            {0x64, 0xFF, 0xFF},
+            {0xFF, 0xFF, 0xFF},
+            {0x19, 0x19, 0x19, 35},
+            TRUE,
+            &f_Suns[1],
+            {0xC8, 0xE6, 0xC8},
+            970,
+            1100},
+        {0,
+            {0x32, 0x64, 0xFF},
+            {0x64, 0xFF, 0xFF},
+            {0xFF, 0xFF, 0xFF},
+            {0x19, 0x19, 0x19, 35},
+            TRUE,
+            &f_Suns[1],
+            {0xC8, 0xE6, 0xC8},
+            970,
+            1100},
+        {0,
+            {0x00, 0x00, 0x64},
+            {0x00, 0x00, 0xFF},
+            {0x00, 0x00, 0xC8},
+            {0x00, 0x00, 0x0F, 90},
+            FALSE,
+            &f_Suns[6],
+            {0xC8, 0xE6, 0xC8},
+            970,
+            1100},
+        {0,
+            {0x96, 0x96, 0x96},
+            {0xFF, 0xFF, 0xFF},
+            {0x96, 0x96, 0x96},
+            {0x19, 0x19, 0x19, 65},
+            FALSE,
+            &f_Suns[0],
+            {0xC8, 0xE6, 0xC8},
+            970,
+            1060},
+        {0,
+            {0xB0, 0xB4, 0xCB},
+            {0xAF, 0xAB, 0xAB},
+            {0x3F, 0x3F, 0x57},
+            {0x14, 0x14, 0x18, 60},
+            FALSE,
+            &f_Suns[1],
+            {0x80, 0x7A, 0xBC},
+            970,
+            1080},
+        {0,
+            {0x96, 0x96, 0x96},
+            {0xFF, 0xFF, 0xC8},
+            {0x96, 0x96, 0x96},
+            {0x19, 0x14, 0x14, 60},
+            FALSE,
+            &f_Suns[2],
+            {0xC8, 0xE6, 0xC8},
+            970,
+            1080},
+        {0,
+            {0x20, 0x20, 0x2F},
+            {0x50, 0x50, 0x50},
+            {0x64, 0x68, 0x50},
+            {0x06, 0x06, 0x08, 90},
+            FALSE,
+            &f_Suns[6],
+            {0xC8, 0xE6, 0xC8},
+            970,
+            1080}}
+};
 static u16 f_SunDepth = 0;
 static Boolean f_IsSunGlareSettled = FALSE;
 static f32 f_SunGlareStrength = 0.0f;
@@ -514,9 +1069,9 @@ static LensFlare f_LensFlares[LENS_FLARE_COUNT] = {
     {{0xFF, 0xFF, 0xBF}, {0xFF, 0xFF, 0xFF}, 16, 2728, 0.8f},
     {{0xBF, 0xFF, 0xBF}, {0xFF, 0xFF, 0xFF}, 8, 2048, 1.0f},
     {{0xDF, 0xFF, 0xDF}, {0xFF, 0xFF, 0xFF}, 48, 1024, 1.3f},
-    {{0xBF, 0xFF, 0xBF}, {0xFF, 0x00, 0x00}, 32, 2728, 1.7f}};
-static Vtx f_SkyVertices[SKY_VIEW_COUNT *
-    MATRIX_BUFFER_COUNT][SKY_VERTEX_COUNT] = {
+    {{0xBF, 0xFF, 0xBF}, {0xFF, 0x00, 0x00}, 32, 2728, 1.7f}
+};
+static Vtx f_SkyVertices[SKY_VIEW_COUNT * MATRIX_BUFFER_COUNT][SKY_VERTEX_COUNT] = {
     {{{{-1200, 0, 0}, 0, {0, 0}, {0xFF, 0xE7, 0x90, 0xFF}}},
         {{{-1200, -160, -2048}, 0, {0, 0x3C00}, {0xC0, 0x40, 0x00, 0xFF}}},
         {{{1200, -160, -2048}, 0, {0x5000, 0x3C00}, {0xC0, 0x40, 0x00, 0xFF}}},
@@ -556,124 +1111,126 @@ static Vtx f_SkyVertices[SKY_VIEW_COUNT *
         {{{-1200, -160, -2048}, 0, {0, 0x3C00}, {0xC0, 0x40, 0x00, 0xFF}}},
         {{{1200, -160, -2048}, 0, {0x5000, 0x3C00}, {0xC0, 0x40, 0x00, 0xFF}}},
         {{{1200, -320, 0}, 0, {0x5000, 0}, {0xFF, 0xE7, 0x90, 0xFF}}},
-        {{{0, -320, 0}, 0, {0x2800, 0}, {0xFF, 0xE7, 0x90, 0xFF}}}}};
+        {{{0, -320, 0}, 0, {0x2800, 0}, {0xFF, 0xE7, 0x90, 0xFF}}}}
+};
 static s32 f_BackdropStripCount = INITIAL_BACKDROP_STRIP_COUNT;
 static s32 f_BackdropStripHeight = INITIAL_BACKDROP_STRIP_HEIGHT;
 static s32 f_BackdropImageWidth = INITIAL_BACKDROP_IMAGE_WIDTH;
 static s32 f_BackdropWidthMask = BACKDROP_IMAGE_WIDTH_MASK;
-static s32 f_CourseSkyImageAssets[COURSE_RECORD_COUNT] = {
-    0x4BA, 0x4BB, 0x4BC, 0x4BE, 0x4BD, 0x4BF, 0x4C0, 0x4C1, 0x4BA};
+static s32 f_CourseSkyImageAssets[COURSE_RECORD_COUNT] =
+    {0x4BA, 0x4BB, 0x4BC, 0x4BE, 0x4BD, 0x4BF, 0x4C0, 0x4C1, 0x4BA};
 Fog g_SceneFog = {{0, 0, 0}, 970, 1024};
 /* Read by no routine */
 static s32 f_UnusedWordsAfterSceneFog[3] UNUSED = {0, 0, 1};
-static s32 f_SkyHorizonColor[RGB_CHANNEL_COUNT] = {
-    SKY_HORIZON_LEVEL, SKY_HORIZON_LEVEL, SKY_HORIZON_LEVEL};
+static s32 f_SkyHorizonColor[RGB_CHANNEL_COUNT] =
+    {SKY_HORIZON_LEVEL, SKY_HORIZON_LEVEL, SKY_HORIZON_LEVEL};
 /* Read by no routine */
-static f32 f_UnusedPlaneCornerPoints[12] UNUSED = {0.0f, 0.0f, 0.0f, 4096.0f,
-    0.0f, 0.0f, 0.0f, 0.0f, 8192.0f, 4096.0f, 0.0f, 8192.0f};
+static f32 f_UnusedPlaneCornerPoints[12] UNUSED =
+    {0.0f, 0.0f, 0.0f, 4096.0f, 0.0f, 0.0f, 0.0f, 0.0f, 8192.0f, 4096.0f, 0.0f, 8192.0f};
 /* The fog SetSceneFog draws while GAME_FLAG_SKY_EDITOR is set */
 Fog g_DebugFog = {{200, 230, 200}, 970, 1100};
 static s32 f_SkyEditorColumn = 0;
 static s32 f_SkyEditorRow = 0;
 /* Read by no routine */
 static s32 f_UnusedWordsAfterSkyEditorRow[3] UNUSED = {0};
-static Vtx f_TileGridVertices[2][TILE_GRID_ROW_COUNT * TILE_GRID_COLUMN_COUNT] =
-    {{{{{-152, 104, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
-         {{{-88, 104, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
-         {{{-24, 104, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
-         {{{40, 104, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
-         {{{104, 104, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
-         {{{168, 104, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
-         {{{-152, 72, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
-         {{{-88, 72, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
-         {{{-24, 72, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
-         {{{40, 72, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
-         {{{104, 72, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
-         {{{168, 72, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
-         {{{-152, 40, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
-         {{{-88, 40, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
-         {{{-24, 40, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
-         {{{40, 40, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
-         {{{104, 40, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
-         {{{168, 40, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
-         {{{-152, 8, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
-         {{{-88, 8, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
-         {{{-24, 8, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
-         {{{40, 8, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
-         {{{104, 8, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
-         {{{168, 8, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
-         {{{-152, -24, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
-         {{{-88, -24, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
-         {{{-24, -24, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
-         {{{40, -24, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
-         {{{104, -24, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
-         {{{168, -24, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
-         {{{-152, -56, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
-         {{{-88, -56, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
-         {{{-24, -56, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
-         {{{40, -56, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
-         {{{104, -56, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
-         {{{168, -56, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
-         {{{-152, -88, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
-         {{{-88, -88, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
-         {{{-24, -88, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
-         {{{40, -88, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
-         {{{104, -88, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
-         {{{168, -88, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
-         {{{-152, -120, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
-         {{{-88, -120, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
-         {{{-24, -120, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
-         {{{40, -120, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
-         {{{104, -120, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
-         {{{168, -120, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}}},
-        {{{{-152, 104, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
-            {{{-88, 104, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
-            {{{-24, 104, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
-            {{{40, 104, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
-            {{{104, 104, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
-            {{{168, 104, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
-            {{{-152, 72, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
-            {{{-88, 72, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
-            {{{-24, 72, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
-            {{{40, 72, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
-            {{{104, 72, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
-            {{{168, 72, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
-            {{{-152, 40, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
-            {{{-88, 40, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
-            {{{-24, 40, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
-            {{{40, 40, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
-            {{{104, 40, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
-            {{{168, 40, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
-            {{{-152, 8, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
-            {{{-88, 8, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
-            {{{-24, 8, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
-            {{{40, 8, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
-            {{{104, 8, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
-            {{{168, 8, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
-            {{{-152, -24, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
-            {{{-88, -24, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
-            {{{-24, -24, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
-            {{{40, -24, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
-            {{{104, -24, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
-            {{{168, -24, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
-            {{{-152, -56, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
-            {{{-88, -56, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
-            {{{-24, -56, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
-            {{{40, -56, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
-            {{{104, -56, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
-            {{{168, -56, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
-            {{{-152, -88, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
-            {{{-88, -88, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
-            {{{-24, -88, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
-            {{{40, -88, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
-            {{{104, -88, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
-            {{{168, -88, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
-            {{{-152, -120, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
-            {{{-88, -120, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
-            {{{-24, -120, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
-            {{{40, -120, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
-            {{{104, -120, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
-            {{{168, -120, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}}}};
+static Vtx f_TileGridVertices[2][TILE_GRID_ROW_COUNT * TILE_GRID_COLUMN_COUNT] = {
+    {{{{-152, 104, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
+        {{{-88, 104, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
+        {{{-24, 104, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
+        {{{40, 104, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
+        {{{104, 104, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
+        {{{168, 104, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
+        {{{-152, 72, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
+        {{{-88, 72, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
+        {{{-24, 72, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
+        {{{40, 72, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
+        {{{104, 72, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
+        {{{168, 72, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
+        {{{-152, 40, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
+        {{{-88, 40, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
+        {{{-24, 40, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
+        {{{40, 40, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
+        {{{104, 40, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
+        {{{168, 40, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
+        {{{-152, 8, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
+        {{{-88, 8, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
+        {{{-24, 8, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
+        {{{40, 8, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
+        {{{104, 8, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
+        {{{168, 8, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
+        {{{-152, -24, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
+        {{{-88, -24, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
+        {{{-24, -24, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
+        {{{40, -24, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
+        {{{104, -24, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
+        {{{168, -24, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
+        {{{-152, -56, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
+        {{{-88, -56, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
+        {{{-24, -56, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
+        {{{40, -56, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
+        {{{104, -56, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
+        {{{168, -56, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
+        {{{-152, -88, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
+        {{{-88, -88, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
+        {{{-24, -88, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
+        {{{40, -88, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
+        {{{104, -88, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
+        {{{168, -88, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
+        {{{-152, -120, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
+        {{{-88, -120, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
+        {{{-24, -120, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
+        {{{40, -120, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
+        {{{104, -120, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
+        {{{168, -120, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}}},
+    {{{{-152, 104, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
+        {{{-88, 104, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
+        {{{-24, 104, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
+        {{{40, 104, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
+        {{{104, 104, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
+        {{{168, 104, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
+        {{{-152, 72, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
+        {{{-88, 72, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
+        {{{-24, 72, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
+        {{{40, 72, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
+        {{{104, 72, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
+        {{{168, 72, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
+        {{{-152, 40, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
+        {{{-88, 40, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
+        {{{-24, 40, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
+        {{{40, 40, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
+        {{{104, 40, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
+        {{{168, 40, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
+        {{{-152, 8, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
+        {{{-88, 8, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
+        {{{-24, 8, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
+        {{{40, 8, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
+        {{{104, 8, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
+        {{{168, 8, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
+        {{{-152, -24, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
+        {{{-88, -24, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
+        {{{-24, -24, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
+        {{{40, -24, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
+        {{{104, -24, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
+        {{{168, -24, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
+        {{{-152, -56, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
+        {{{-88, -56, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
+        {{{-24, -56, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
+        {{{40, -56, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
+        {{{104, -56, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
+        {{{168, -56, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
+        {{{-152, -88, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
+        {{{-88, -88, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
+        {{{-24, -88, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
+        {{{40, -88, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
+        {{{104, -88, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
+        {{{168, -88, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
+        {{{-152, -120, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
+        {{{-88, -120, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
+        {{{-24, -120, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
+        {{{40, -120, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
+        {{{104, -120, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}},
+        {{{168, -120, 0}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0xFF}}}}
+};
 static Boolean f_IsFrameCapturePending = FALSE;
 static s32 f_HudAnimationFrame = 0;
 s32 g_CapturedSliceCount = 0;
@@ -687,79 +1244,82 @@ static Vtx f_TileVertices[TILE_VERTEX_COUNT] = {
     {{{-32, 16, 0}, 0, {0, 0}, {0xFF, 0x00, 0x00, 0xFF}}},
     {{{-32, -16, 0}, 0, {0, 0x800}, {0xFF, 0x00, 0x00, 0xFF}}},
     {{{32, -16, 0}, 0, {0x1000, 0x800}, {0xFF, 0x00, 0x00, 0xFF}}},
-    {{{32, 16, 0}, 0, {0x1000, 0}, {0xFF, 0x00, 0x00, 0xFF}}}};
+    {{{32, 16, 0}, 0, {0x1000, 0}, {0xFF, 0x00, 0x00, 0xFF}}}
+};
 static Vtx f_LastColumnTileVertices[TILE_VERTEX_COUNT] = {
     {{{-32, 16, 0}, 0, {0, 0}, {0xFF, 0x00, 0x00, 0xFF}}},
     {{{-32, -16, 0}, 0, {0, 0x800}, {0xFF, 0x00, 0x00, 0xFF}}},
     {{{16, -16, 0}, 0, {0xBC0, 0x800}, {0xFF, 0x00, 0x00, 0xFF}}},
-    {{{16, 16, 0}, 0, {0xBC0, 0}, {0xFF, 0x00, 0x00, 0xFF}}}};
+    {{{16, 16, 0}, 0, {0xBC0, 0}, {0xFF, 0x00, 0x00, 0xFF}}}
+};
 
-void* g_BackdropPatternImage;
-u8* g_CourseSkyImage;
-u8* g_SkyImage;
+void *g_BackdropPatternImage;
+u8 *g_CourseSkyImage;
+u8 *g_SkyImage;
 SkyState g_SkyState;
 
 /* The frame buffer of the last frame, kept for the next frame's captures */
-FILE_STATIC u16* f_LastFrameBuffer;
+FILE_STATIC u16 *f_LastFrameBuffer;
 
 /* Sets up a single-player game of the hole behind the title screen */
 void SetUpTitleHole(void) {
-  memset(&g_GameState, 0, sizeof(GameState));
-  g_GameState.holeIndex = TITLE_HOLE_INDEX;
-  g_GameState.courseIndex = TITLE_COURSE_INDEX;
-  g_GameState.unusedHoleValue = 0;
-  g_GameState.gameMode = GAME_MODE_TITLE_HOLE;
-  g_HoleSetup.conditions.isRaining = FALSE;
-  g_HoleSetup.conditions.windSpeed =
-      (rand() & TITLE_WIND_SPEED_MASK) * TITLE_WIND_SPEED_STEP;
-  g_HoleSetup.conditions.windDirection = rand();
-  g_HoleSetup.conditions.sceneColorIndex = SCENE_COLOR_INDEX_DRIVING_RANGE;
-  g_HoleSetup.conditions.lightPitch = TITLE_LIGHT_PITCH;
-  g_HoleSetup.conditions.lightYaw = TITLE_LIGHT_YAW;
-  SetGameFlag(GAME_FLAG_HOLE_LOADED);
-  g_GameState.playerCount = 1;
-  StopLoaderThread();
-  StartLoaderThread();
-  SetFramebufferCount(DOUBLE_BUFFERING);
+    memset(&g_GameState, 0, sizeof(GameState));
+    g_GameState.holeIndex = TITLE_HOLE_INDEX;
+    g_GameState.courseIndex = TITLE_COURSE_INDEX;
+    g_GameState.unusedHoleValue = 0;
+    g_GameState.gameMode = GAME_MODE_TITLE_HOLE;
+    g_HoleSetup.conditions.isRaining = FALSE;
+    g_HoleSetup.conditions.windSpeed = (rand() & TITLE_WIND_SPEED_MASK) * TITLE_WIND_SPEED_STEP;
+    g_HoleSetup.conditions.windDirection = rand();
+    g_HoleSetup.conditions.sceneColorIndex = SCENE_COLOR_INDEX_DRIVING_RANGE;
+    g_HoleSetup.conditions.lightPitch = TITLE_LIGHT_PITCH;
+    g_HoleSetup.conditions.lightYaw = TITLE_LIGHT_YAW;
+    SetGameFlag(GAME_FLAG_HOLE_LOADED);
+    g_GameState.playerCount = 1;
+    StopLoaderThread();
+    StartLoaderThread();
+    SetFramebufferCount(DOUBLE_BUFFERING);
 }
 
 /* Grows the sun's glare until it flares, then holds it at full strength */
 static inline void GrowSunGlare(void) {
-  if (!f_IsSunGlareSettled) {
-    f_SunGlareStrength += SUN_GLARE_GROWTH_STEP;
-  }
+    if (!f_IsSunGlareSettled) {
+        f_SunGlareStrength += SUN_GLARE_GROWTH_STEP;
+    }
 
-  if (f_SunGlareStrength > SUN_GLARE_FLARE_STRENGTH && !f_IsSunGlareSettled) {
-    f_IsSunGlareSettled = TRUE;
-    f_SunGlareStrength = SUN_GLARE_FULL_STRENGTH;
-  }
+    if (f_SunGlareStrength > SUN_GLARE_FLARE_STRENGTH && !f_IsSunGlareSettled) {
+        f_IsSunGlareSettled = TRUE;
+        f_SunGlareStrength = SUN_GLARE_FULL_STRENGTH;
+    }
 }
 
 /* Grows or fades the sun's glare by whether the z-buffer shows anything in
  * front of the sun */
 void UpdateSunGlare(void) {
-  u16* zBuffer;
+    u16 *zBuffer;
 
-  if (IsInsetOnScreen(f_SunScreenX[0], f_SunScreenY[0], SUN_DEPTH_MARGIN)) {
-    zBuffer = nuGfxZBuffer;
-    f_SunDepth =
-        zBuffer[((s32)f_SunScreenY[0] * SCREEN_WIDTH) + (s32)f_SunScreenX[0]];
-    if (f_SunDepth >= SUN_SKY_DEPTH) {
-      GrowSunGlare();
-    } else {
-      f_IsSunGlareSettled = FALSE;
-      f_SunGlareStrength -= SUN_GLARE_FADE_STEP;
-      if (f_SunGlareStrength < 0.0f) {
-        f_SunGlareStrength = 0.0f;
-      }
+    if (IsInsetOnScreen(f_SunScreenX[0], f_SunScreenY[0], SUN_DEPTH_MARGIN)) {
+        zBuffer = nuGfxZBuffer;
+        f_SunDepth = zBuffer[((s32)f_SunScreenY[0] * SCREEN_WIDTH) + (s32)f_SunScreenX[0]];
+        if (f_SunDepth >= SUN_SKY_DEPTH) {
+            GrowSunGlare();
+        }
+        else {
+            f_IsSunGlareSettled = FALSE;
+            f_SunGlareStrength -= SUN_GLARE_FADE_STEP;
+            if (f_SunGlareStrength < 0.0f) {
+                f_SunGlareStrength = 0.0f;
+            }
+        }
     }
-  } else if (IsNearScreen(f_SunScreenX[0], f_SunScreenY[0], SUN_GLARE_MARGIN)) {
-    GrowSunGlare();
-  } else {
-    f_SunDepth = 0;
-    f_IsSunGlareSettled = FALSE;
-    f_SunGlareStrength = 0.0f;
-  }
+    else if (IsNearScreen(f_SunScreenX[0], f_SunScreenY[0], SUN_GLARE_MARGIN)) {
+        GrowSunGlare();
+    }
+    else {
+        f_SunDepth = 0;
+        f_IsSunGlareSettled = FALSE;
+        f_SunGlareStrength = 0.0f;
+    }
 }
 
 /*
@@ -773,8 +1333,10 @@ void UpdateSunGlare(void) {
 /* Whether a point lies further above the screen than LENS_FLARE_TOP_MARGIN, or
  * further past its other edges than SUN_GLARE_MARGIN */
 #define IsPastLensFlareMargins(x, y) \
-  ((y) < -LENS_FLARE_TOP_MARGIN || (y) > SCREEN_HEIGHT + SUN_GLARE_MARGIN || \
-      (x) < -SUN_GLARE_MARGIN || (x) > SCREEN_WIDTH + SUN_GLARE_MARGIN)
+    ((y) < -LENS_FLARE_TOP_MARGIN || \
+        (y) > SCREEN_HEIGHT + SUN_GLARE_MARGIN || \
+        (x) < -SUN_GLARE_MARGIN || \
+        (x) > SCREEN_WIDTH + SUN_GLARE_MARGIN)
 #define GLARE_BOTTOM_ROWS 96.0f
 #define GLARE_BASE 16.0f
 #define MIN_VISIBLE_GLARE 8.0f
@@ -791,104 +1353,146 @@ void UpdateSunGlare(void) {
 /*
  * Draws the sun's lens flare, as rings along a line through the sun.
  */
-void DrawLensFlare(Gfx** displayListHead) {
-  Gfx* gfx = *displayListHead;
-  SkyColors* colors =
-      &g_SkyColors[GetCourseRecordIndex()]
-                  [(g_HoleSetup.conditions.isRaining * SKY_TIME_COUNT) +
-                      f_SkyColorTimeIndex];
-  f32 edgeDistanceX;
-  f32 edgeDistanceY;
-  f32 glare;
-  f32 centerX;
-  f32 centerY;
-  s32 size;
-  s32 texelStep;
-  s32 i;
+void DrawLensFlare(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
+    SkyColors *colors =
+        &g_SkyColors[GetCourseRecordIndex()]
+                    [(g_HoleSetup.conditions.isRaining * SKY_TIME_COUNT) + f_SkyColorTimeIndex];
+    f32 edgeDistanceX;
+    f32 edgeDistanceY;
+    f32 glare;
+    f32 centerX;
+    f32 centerY;
+    s32 size;
+    s32 texelStep;
+    s32 i;
 
-  gDPPipeSync(gfx++);
-  gDPPipeSync(gfx++);
-  gDPSetCycleType(gfx++, G_CYC_1CYCLE);
-  gDPPipeSync(gfx++);
-  if (!colors->hasLensFlare ||
-      IsOnOrPastInset(f_SunScreenX[0], f_SunScreenY[0], SUN_DEPTH_MARGIN) ||
-      IsPastLensFlareMargins(f_SunScreenX[0], f_SunScreenY[0]) ||
-      g_Cameras[INSET_CAMERA].view.drawFlags == CAMERA_DRAW_SCENE) {
-    return;
-  }
-
-  edgeDistanceX = SCREEN_WIDTH - f_SunScreenX[0];
-  if (edgeDistanceX > SCREEN_WIDTH / 2) {
-    edgeDistanceX = SCREEN_WIDTH - edgeDistanceX;
-  }
-
-  edgeDistanceY = SCREEN_HEIGHT - f_SunScreenY[0];
-  if (edgeDistanceY > GLARE_BOTTOM_ROWS) {
-    edgeDistanceY = SCREEN_HEIGHT - edgeDistanceY;
-  }
-
-  glare = (edgeDistanceX + edgeDistanceY + GLARE_BASE) * f_SunGlareStrength;
-  if (glare < MIN_VISIBLE_GLARE) {
-    return;
-  }
-
-  if (glare > colors->sun->maxGlare) {
-    glare = colors->sun->maxGlare;
-  }
-
-  gDPPipeSync(gfx++);
-  AppendSyncedRdpState(gfx, gDPSetTexturePersp, G_TP_NONE);
-  AppendSyncedRdpState(gfx, gDPSetTextureLUT, G_TT_NONE);
-  gDPPipeSync(gfx++);
-  gDPSetAlphaCompare(gfx++, G_AC_THRESHOLD);
-  gDPSetBlendColor(gfx++, 255, 255, 255, LENS_FLARE_ALPHA_THRESHOLD);
-  gDPPipeSync(gfx++);
-  gDPPipeSync(gfx++);
-  gDPSetCycleType(gfx++, G_CYC_1CYCLE);
-  gDPPipeSync(gfx++);
-  gDPSetRenderMode(gfx++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
-  gDPSetCombineLERP(gfx++, PRIMITIVE, ENVIRONMENT, TEXEL0, ENVIRONMENT,
-      PRIMITIVE, 0, TEXEL0, 0, PRIMITIVE, ENVIRONMENT, TEXEL0, ENVIRONMENT,
-      PRIMITIVE, 0, TEXEL0, 0);
-  gSPTexture(
-      gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0, G_TX_RENDERTILE, G_ON);
-  gDPPipeSync(gfx++);
-  gDPSetTextureFilter(gfx++, G_TF_BILERP);
-  gDPPipeSync(gfx++);
-  gDPSetAlphaDither(gfx++, G_AD_PATTERN);
-  gDPPipeSync(gfx++);
-  gDPSetColorDither(gfx++, G_CD_MAGICSQ);
-  gDPLoadTextureBlock(gfx++, TextureAddress(g_RingTexels), G_IM_FMT_I,
-      G_IM_SIZ_8b, RING_TEXTURE_SIZE, RING_TEXTURE_SIZE, 0,
-      G_TX_MIRROR | G_TX_WRAP, G_TX_MIRROR | G_TX_WRAP,
-      TextureMask(RING_TEXTURE_SIZE), TextureMask(RING_TEXTURE_SIZE),
-      G_TX_NOLOD, G_TX_NOLOD);
-  for (i = 0; i != LENS_FLARE_COUNT; i++) {
-    centerX = f_SunScreenX[0] +
-        ((LENS_FLARE_AXIS_X - f_SunScreenX[0]) * f_LensFlares[i].position);
-    centerY = f_SunScreenY[0] +
-        ((LENS_FLARE_AXIS_Y - f_SunScreenY[0]) * f_LensFlares[i].position);
     gDPPipeSync(gfx++);
-    gDPSetPrimColor(gfx++, 0, 0, f_LensFlares[i].color[0],
-        f_LensFlares[i].color[1], f_LensFlares[i].color[2], glare);
-    gDPSetEnvColor(gfx++, f_LensFlares[i].envColor[0],
-        f_LensFlares[i].envColor[1], f_LensFlares[i].envColor[2], OPAQUE_ALPHA);
-    size = f_LensFlares[i].size * (glare + LENS_FLARE_SIZE_BIAS) *
-        LENS_FLARE_SIZE_SCALE;
-    texelStep = TexelRunStep(RING_TEXTURE_SIZE, size);
-    gSPScisTextureRectangle(gfx++, QuarterPixels((s32)(centerX - size)),
-        QuarterPixels((s32)(centerY - size)),
-        QuarterPixels((s32)(centerX + size)),
-        QuarterPixels((s32)(centerY + size)), G_TX_RENDERTILE, 0, 0, texelStep,
-        texelStep);
-  }
+    gDPPipeSync(gfx++);
+    gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+    gDPPipeSync(gfx++);
+    if (!colors->hasLensFlare ||
+        IsOnOrPastInset(f_SunScreenX[0], f_SunScreenY[0], SUN_DEPTH_MARGIN) ||
+        IsPastLensFlareMargins(f_SunScreenX[0], f_SunScreenY[0]) ||
+        g_Cameras[INSET_CAMERA].view.drawFlags == CAMERA_DRAW_SCENE) {
+        return;
+    }
 
-  gDPPipeSync(gfx++);
-  gDPSetAlphaDither(gfx++, G_AD_PATTERN);
-  gDPPipeSync(gfx++);
-  gDPSetColorDither(gfx++, G_CD_DISABLE);
-  gDPPipeSync(gfx++);
-  *displayListHead = gfx;
+    edgeDistanceX = SCREEN_WIDTH - f_SunScreenX[0];
+    if (edgeDistanceX > SCREEN_WIDTH / 2) {
+        edgeDistanceX = SCREEN_WIDTH - edgeDistanceX;
+    }
+
+    edgeDistanceY = SCREEN_HEIGHT - f_SunScreenY[0];
+    if (edgeDistanceY > GLARE_BOTTOM_ROWS) {
+        edgeDistanceY = SCREEN_HEIGHT - edgeDistanceY;
+    }
+
+    glare = (edgeDistanceX + edgeDistanceY + GLARE_BASE) * f_SunGlareStrength;
+    if (glare < MIN_VISIBLE_GLARE) {
+        return;
+    }
+
+    if (glare > colors->sun->maxGlare) {
+        glare = colors->sun->maxGlare;
+    }
+
+    gDPPipeSync(gfx++);
+    AppendSyncedRdpState(gfx, gDPSetTexturePersp, G_TP_NONE);
+    AppendSyncedRdpState(gfx, gDPSetTextureLUT, G_TT_NONE);
+    gDPPipeSync(gfx++);
+    gDPSetAlphaCompare(gfx++, G_AC_THRESHOLD);
+    gDPSetBlendColor(gfx++, 255, 255, 255, LENS_FLARE_ALPHA_THRESHOLD);
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
+    gDPSetCombineLERP(
+        gfx++,
+        PRIMITIVE,
+        ENVIRONMENT,
+        TEXEL0,
+        ENVIRONMENT,
+        PRIMITIVE,
+        0,
+        TEXEL0,
+        0,
+        PRIMITIVE,
+        ENVIRONMENT,
+        TEXEL0,
+        ENVIRONMENT,
+        PRIMITIVE,
+        0,
+        TEXEL0,
+        0
+    );
+    gSPTexture(gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0, G_TX_RENDERTILE, G_ON);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_BILERP);
+    gDPPipeSync(gfx++);
+    gDPSetAlphaDither(gfx++, G_AD_PATTERN);
+    gDPPipeSync(gfx++);
+    gDPSetColorDither(gfx++, G_CD_MAGICSQ);
+    gDPLoadTextureBlock(
+        gfx++,
+        TextureAddress(g_RingTexels),
+        G_IM_FMT_I,
+        G_IM_SIZ_8b,
+        RING_TEXTURE_SIZE,
+        RING_TEXTURE_SIZE,
+        0,
+        G_TX_MIRROR | G_TX_WRAP,
+        G_TX_MIRROR | G_TX_WRAP,
+        TextureMask(RING_TEXTURE_SIZE),
+        TextureMask(RING_TEXTURE_SIZE),
+        G_TX_NOLOD,
+        G_TX_NOLOD
+    );
+    for (i = 0; i != LENS_FLARE_COUNT; i++) {
+        centerX =
+            f_SunScreenX[0] + ((LENS_FLARE_AXIS_X - f_SunScreenX[0]) * f_LensFlares[i].position);
+        centerY =
+            f_SunScreenY[0] + ((LENS_FLARE_AXIS_Y - f_SunScreenY[0]) * f_LensFlares[i].position);
+        gDPPipeSync(gfx++);
+        gDPSetPrimColor(
+            gfx++,
+            0,
+            0,
+            f_LensFlares[i].color[0],
+            f_LensFlares[i].color[1],
+            f_LensFlares[i].color[2],
+            glare
+        );
+        gDPSetEnvColor(
+            gfx++,
+            f_LensFlares[i].envColor[0],
+            f_LensFlares[i].envColor[1],
+            f_LensFlares[i].envColor[2],
+            OPAQUE_ALPHA
+        );
+        size = f_LensFlares[i].size * (glare + LENS_FLARE_SIZE_BIAS) * LENS_FLARE_SIZE_SCALE;
+        texelStep = TexelRunStep(RING_TEXTURE_SIZE, size);
+        gSPScisTextureRectangle(
+            gfx++,
+            QuarterPixels((s32)(centerX - size)),
+            QuarterPixels((s32)(centerY - size)),
+            QuarterPixels((s32)(centerX + size)),
+            QuarterPixels((s32)(centerY + size)),
+            G_TX_RENDERTILE,
+            0,
+            0,
+            texelStep,
+            texelStep
+        );
+    }
+
+    gDPPipeSync(gfx++);
+    gDPSetAlphaDither(gfx++, G_AD_PATTERN);
+    gDPPipeSync(gfx++);
+    gDPSetColorDither(gfx++, G_CD_DISABLE);
+    gDPPipeSync(gfx++);
+    *displayListHead = gfx;
 }
 
 /*
@@ -896,51 +1500,49 @@ void DrawLensFlare(Gfx** displayListHead) {
  * day towards those of the next
  */
 void BlendSkyColors(void) {
-  SkyColors* from;
-  SkyColors* to;
-  s32 group;
-  s32 channel;
+    SkyColors *from;
+    SkyColors *to;
+    s32 group;
+    s32 channel;
 
-  if (f_SkyBlendStep < f_SkyBlendStepCount) {
-    f_SkyBlendStep++;
-  }
-
-  from = &g_SkyColors[GetCourseRecordIndex()]
-                     [(g_HoleSetup.conditions.isRaining * SKY_TIME_COUNT) +
-                         f_SkyTimeIndex];
-  to = &g_SkyColors[GetCourseRecordIndex()]
-                   [(g_HoleSetup.conditions.isRaining * SKY_TIME_COUNT) +
-                       f_SkyTimeIndex + 1];
-  for (group = 0; group != SKY_VIEW_COUNT * MATRIX_BUFFER_COUNT; group++) {
-    for (channel = 0; channel != 3; channel++) {
-      f_SkyVertices[group][0].v.cn[channel] = from->topColor[channel] +
-          ((to->topColor[channel] - from->topColor[channel]) * f_SkyBlendStep /
-              SKY_BLEND_STEP_COUNT);
-      f_SkyVertices[group][1].v.cn[channel] = from->horizonColor[channel] +
-          ((to->horizonColor[channel] - from->horizonColor[channel]) *
-              f_SkyBlendStep / SKY_BLEND_STEP_COUNT);
-      f_SkyVertices[group][2].v.cn[channel] = from->horizonColor[channel] +
-          ((to->horizonColor[channel] - from->horizonColor[channel]) *
-              f_SkyBlendStep / SKY_BLEND_STEP_COUNT);
-      f_SkyVertices[group][3].v.cn[channel] = from->topColor[channel] +
-          ((to->topColor[channel] - from->topColor[channel]) * f_SkyBlendStep /
-              SKY_BLEND_STEP_COUNT);
-      f_SkyVertices[group][4].v.cn[channel] = from->topColor[channel] +
-          ((to->topColor[channel] - from->topColor[channel]) * f_SkyBlendStep /
-              SKY_BLEND_STEP_COUNT);
+    if (f_SkyBlendStep < f_SkyBlendStepCount) {
+        f_SkyBlendStep++;
     }
-  }
 
-  for (channel = 0; channel != 3; channel++) {
-    g_SceneFog.color[channel] = from->fogColor[channel] +
-        ((to->fogColor[channel] - from->fogColor[channel]) * f_SkyBlendStep /
-            SKY_BLEND_STEP_COUNT);
-  }
+    from = &g_SkyColors[GetCourseRecordIndex()]
+                       [(g_HoleSetup.conditions.isRaining * SKY_TIME_COUNT) + f_SkyTimeIndex];
+    to = &g_SkyColors[GetCourseRecordIndex()]
+                     [(g_HoleSetup.conditions.isRaining * SKY_TIME_COUNT) + f_SkyTimeIndex + 1];
+    for (group = 0; group != SKY_VIEW_COUNT * MATRIX_BUFFER_COUNT; group++) {
+        for (channel = 0; channel != 3; channel++) {
+            f_SkyVertices[group][0].v.cn[channel] = from->topColor[channel] +
+                ((to->topColor[channel] - from->topColor[channel]) * f_SkyBlendStep /
+                    SKY_BLEND_STEP_COUNT);
+            f_SkyVertices[group][1].v.cn[channel] = from->horizonColor[channel] +
+                ((to->horizonColor[channel] - from->horizonColor[channel]) * f_SkyBlendStep /
+                    SKY_BLEND_STEP_COUNT);
+            f_SkyVertices[group][2].v.cn[channel] = from->horizonColor[channel] +
+                ((to->horizonColor[channel] - from->horizonColor[channel]) * f_SkyBlendStep /
+                    SKY_BLEND_STEP_COUNT);
+            f_SkyVertices[group][3].v.cn[channel] = from->topColor[channel] +
+                ((to->topColor[channel] - from->topColor[channel]) * f_SkyBlendStep /
+                    SKY_BLEND_STEP_COUNT);
+            f_SkyVertices[group][4].v.cn[channel] = from->topColor[channel] +
+                ((to->topColor[channel] - from->topColor[channel]) * f_SkyBlendStep /
+                    SKY_BLEND_STEP_COUNT);
+        }
+    }
 
-  g_SceneFog.near = from->fogNear +
-      ((to->fogNear - from->fogNear) * f_SkyBlendStep / SKY_BLEND_STEP_COUNT);
-  g_SceneFog.far = from->fogFar +
-      ((to->fogFar - from->fogFar) * f_SkyBlendStep / SKY_BLEND_STEP_COUNT);
+    for (channel = 0; channel != 3; channel++) {
+        g_SceneFog.color[channel] = from->fogColor[channel] +
+            ((to->fogColor[channel] - from->fogColor[channel]) * f_SkyBlendStep /
+                SKY_BLEND_STEP_COUNT);
+    }
+
+    g_SceneFog.near =
+        from->fogNear + ((to->fogNear - from->fogNear) * f_SkyBlendStep / SKY_BLEND_STEP_COUNT);
+    g_SceneFog.far =
+        from->fogFar + ((to->fogFar - from->fogFar) * f_SkyBlendStep / SKY_BLEND_STEP_COUNT);
 }
 
 /*
@@ -949,172 +1551,158 @@ void BlendSkyColors(void) {
  * g_SkyImage and g_CourseSkyImage, recolored to match
  */
 void InitSkyColors(void) {
-  EncodedAsset asset;
-  /* Pads the frame to the target's size; without it 58 words differ */
-  u8 unused[0x10] UNUSED;
-  s32 blended[RGB_CHANNEL_COUNT];
-  SkyColors* colors;
-  SkyColors* from;
-  SkyColors* to;
-  /*
-   * One index for the vertex groups and the palette colors, to match: an
-   * index of its own for the palette gives 106 differing words
-   */
-  s32 i;
-  s32 channel;
-  u16 color;
-  s32 red;
-  s32 green;
-  s32 blue;
-  s32 alpha;
-  s32 outerMix;
-  s32 innerMix;
+    EncodedAsset asset;
+    /* Pads the frame to the target's size; without it 58 words differ */
+    u8 unused[0x10] UNUSED;
+    s32 blended[RGB_CHANNEL_COUNT];
+    SkyColors *colors;
+    SkyColors *from;
+    SkyColors *to;
+    /*
+     * One index for the vertex groups and the palette colors, to match: an
+     * index of its own for the palette gives 106 differing words
+     */
+    s32 i;
+    s32 channel;
+    u16 color;
+    s32 red;
+    s32 green;
+    s32 blue;
+    s32 alpha;
+    s32 outerMix;
+    s32 innerMix;
 
-  f_SkyColorTimeIndex =
-      f_SceneSkyColorTimes[g_HoleSetup.conditions.sceneColorIndex];
-  f_SkyTimeIndex = f_SceneSkyBlendTimes[g_HoleSetup.conditions.sceneColorIndex];
-  f_SkyBlendStep =
-      f_SceneSkyBlendPercents[g_HoleSetup.conditions.sceneColorIndex] *
-      SKY_PERCENT_TO_STEPS;
-  f_SkyBlendStepCount =
-      f_SceneSkyBlendPercents[g_HoleSetup.conditions.sceneColorIndex + 1] *
-      SKY_PERCENT_TO_STEPS;
-  if (f_SkyBlendStepCount == 0 &&
-      f_SceneSkyBlendTimes[g_HoleSetup.conditions.sceneColorIndex] !=
-          f_SceneSkyBlendTimes[g_HoleSetup.conditions.sceneColorIndex + 1]) {
-    f_SkyBlendStepCount = SKY_BLEND_STEP_COUNT;
-  }
-
-  colors = &g_SkyColors[GetCourseRecordIndex()]
-                       [(g_HoleSetup.conditions.isRaining * SKY_TIME_COUNT) +
-                           f_SkyColorTimeIndex];
-  from = &g_SkyColors[GetCourseRecordIndex()]
-                     [(g_HoleSetup.conditions.isRaining * SKY_TIME_COUNT) +
-                         f_SkyTimeIndex];
-  to = &g_SkyColors[GetCourseRecordIndex()]
-                   [(g_HoleSetup.conditions.isRaining * SKY_TIME_COUNT) +
-                       f_SkyTimeIndex + 1];
-  /*
-   * Unused. Defined here, after the color lookups, since a nested function
-   * defined before them changes how GCC keeps the lookups' addresses, and only
-   * a block can hold a definition after statements.
-   */
-  {
-    UNUSED_FUNCTION s32 Lerp(s32 start, s32 end, f32 fraction) {
-      return start * (1.0f - fraction) + end * fraction;
-    }
-  }
-
-  g_SkyState.scrollX = 0.0f;
-  g_SkyState.scrollY = 0.0f;
-  for (i = 0; i != SKY_VIEW_COUNT * MATRIX_BUFFER_COUNT; i++) {
-    for (channel = 0; channel != RGB_CHANNEL_COUNT; channel++) {
-      f_SkyVertices[i][0].v.cn[channel] = colors->topColor[channel];
-      f_SkyVertices[i][1].v.cn[channel] = colors->horizonColor[channel];
-      f_SkyVertices[i][2].v.cn[channel] = colors->horizonColor[channel];
-      f_SkyVertices[i][3].v.cn[channel] = colors->topColor[channel];
-      f_SkyVertices[i][4].v.cn[channel] = colors->topColor[channel];
-      outerMix =
-          (colors->topColor[channel] + f_SkyHorizonColor[channel]) * 0.5f;
-      innerMix =
-          (colors->horizonColor[channel] + colors->topColor[channel]) * 0.5f;
-      innerMix = (innerMix + f_SkyHorizonColor[channel]) * 0.5f;
-      f_SkyVertices[i][5].v.cn[channel] = outerMix;
-      f_SkyVertices[i][6].v.cn[channel] = innerMix;
-      f_SkyVertices[i][7].v.cn[channel] = innerMix;
-      f_SkyVertices[i][8].v.cn[channel] = outerMix;
-      f_SkyVertices[i][9].v.cn[channel] = outerMix;
-    }
-  }
-
-  if (colors->sun->imageKind == SKY_IMAGE_KIND_0) {
-    OpenEncodedAsset(ASSET_SKY_IMAGE_0, &asset);
-    ReadEncodedAsset(g_SkyImage, &asset);
-  } else if (colors->sun->imageKind == SKY_IMAGE_KIND_1) {
-    OpenEncodedAsset(ASSET_SKY_IMAGE_1, &asset);
-    ReadEncodedAsset(g_SkyImage, &asset);
-  } else {
-    OpenEncodedAsset(ASSET_SKY_IMAGE_2_FIRST_HALF, &asset);
-    ReadEncodedAsset(g_SkyImage, &asset);
-    OpenEncodedAsset(ASSET_SKY_IMAGE_2_SECOND_HALF, &asset);
-    ReadEncodedAsset(g_SkyImage + SKY_IMAGE_HALF_OFFSET, &asset);
-  }
-
-  OpenEncodedAsset(f_CourseSkyImageAssets[GetCourseRecordIndex()], &asset);
-  ReadEncodedAsset(g_CourseSkyImage, &asset);
-  for (i = 0; i != LARGE_PALETTE_COLOR_COUNT; i++) {
-    color = ((u16*)g_CourseSkyImage)[PALETTE_START + i];
-    red = (color >> 11) & SKY_IMAGE_CHANNEL_MAX;
-    green = (color >> 6) & SKY_IMAGE_CHANNEL_MAX;
-    blue = (color >> 1) & SKY_IMAGE_CHANNEL_MAX;
-    alpha = color & 1;
-    if (!alpha) {
-      red = ((colors->horizonColor[0] * SKY_IMAGE_HORIZON_PARTS) +
-                colors->topColor[0]) /
-          SKY_IMAGE_DIVISOR;
-      green = ((colors->horizonColor[1] * SKY_IMAGE_HORIZON_PARTS) +
-                  colors->topColor[1]) /
-          SKY_IMAGE_DIVISOR;
-      blue = ((colors->horizonColor[2] * SKY_IMAGE_HORIZON_PARTS) +
-                 colors->topColor[2]) /
-          SKY_IMAGE_DIVISOR;
-    } else {
-      blended[0] = from->backgroundColor[0] +
-          ((to->backgroundColor[0] - from->backgroundColor[0]) *
-              f_SkyBlendStep / SKY_BLEND_STEP_COUNT);
-      blended[1] = from->backgroundColor[1] +
-          ((to->backgroundColor[1] - from->backgroundColor[1]) *
-              f_SkyBlendStep / SKY_BLEND_STEP_COUNT);
-      blended[2] = from->backgroundColor[2] +
-          ((to->backgroundColor[2] - from->backgroundColor[2]) *
-              f_SkyBlendStep / SKY_BLEND_STEP_COUNT);
-      red = ((red *
-                 (PERCENT_COUNT -
-                     colors->backgroundColor[SKY_BACKGROUND_ALPHA])) +
-                (blended[0] * colors->backgroundColor[SKY_BACKGROUND_ALPHA])) /
-          PERCENT_COUNT;
-      green =
-          ((green *
-               (PERCENT_COUNT -
-                   colors->backgroundColor[SKY_BACKGROUND_ALPHA])) +
-              (blended[1] * colors->backgroundColor[SKY_BACKGROUND_ALPHA])) /
-          PERCENT_COUNT;
-      blue = ((blue *
-                  (PERCENT_COUNT -
-                      colors->backgroundColor[SKY_BACKGROUND_ALPHA])) +
-                 (blended[2] * colors->backgroundColor[SKY_BACKGROUND_ALPHA])) /
-          PERCENT_COUNT;
+    f_SkyColorTimeIndex = f_SceneSkyColorTimes[g_HoleSetup.conditions.sceneColorIndex];
+    f_SkyTimeIndex = f_SceneSkyBlendTimes[g_HoleSetup.conditions.sceneColorIndex];
+    f_SkyBlendStep =
+        f_SceneSkyBlendPercents[g_HoleSetup.conditions.sceneColorIndex] * SKY_PERCENT_TO_STEPS;
+    f_SkyBlendStepCount =
+        f_SceneSkyBlendPercents[g_HoleSetup.conditions.sceneColorIndex + 1] * SKY_PERCENT_TO_STEPS;
+    if (f_SkyBlendStepCount == 0 &&
+        f_SceneSkyBlendTimes[g_HoleSetup.conditions.sceneColorIndex] !=
+            f_SceneSkyBlendTimes[g_HoleSetup.conditions.sceneColorIndex + 1]) {
+        f_SkyBlendStepCount = SKY_BLEND_STEP_COUNT;
     }
 
-    if (red < 0) {
-      red = 0;
+    colors =
+        &g_SkyColors[GetCourseRecordIndex()]
+                    [(g_HoleSetup.conditions.isRaining * SKY_TIME_COUNT) + f_SkyColorTimeIndex];
+    from = &g_SkyColors[GetCourseRecordIndex()]
+                       [(g_HoleSetup.conditions.isRaining * SKY_TIME_COUNT) + f_SkyTimeIndex];
+    to = &g_SkyColors[GetCourseRecordIndex()]
+                     [(g_HoleSetup.conditions.isRaining * SKY_TIME_COUNT) + f_SkyTimeIndex + 1];
+    /*
+     * Unused. Defined here, after the color lookups, since a nested function
+     * defined before them changes how GCC keeps the lookups' addresses, and only
+     * a block can hold a definition after statements.
+     */
+    {
+        UNUSED_FUNCTION s32 Lerp(s32 start, s32 end, f32 fraction) {
+            return start * (1.0f - fraction) + end * fraction;
+        }
     }
 
-    if (green < 0) {
-      green = 0;
+    g_SkyState.scrollX = 0.0f;
+    g_SkyState.scrollY = 0.0f;
+    for (i = 0; i != SKY_VIEW_COUNT * MATRIX_BUFFER_COUNT; i++) {
+        for (channel = 0; channel != RGB_CHANNEL_COUNT; channel++) {
+            f_SkyVertices[i][0].v.cn[channel] = colors->topColor[channel];
+            f_SkyVertices[i][1].v.cn[channel] = colors->horizonColor[channel];
+            f_SkyVertices[i][2].v.cn[channel] = colors->horizonColor[channel];
+            f_SkyVertices[i][3].v.cn[channel] = colors->topColor[channel];
+            f_SkyVertices[i][4].v.cn[channel] = colors->topColor[channel];
+            outerMix = (colors->topColor[channel] + f_SkyHorizonColor[channel]) * 0.5f;
+            innerMix = (colors->horizonColor[channel] + colors->topColor[channel]) * 0.5f;
+            innerMix = (innerMix + f_SkyHorizonColor[channel]) * 0.5f;
+            f_SkyVertices[i][5].v.cn[channel] = outerMix;
+            f_SkyVertices[i][6].v.cn[channel] = innerMix;
+            f_SkyVertices[i][7].v.cn[channel] = innerMix;
+            f_SkyVertices[i][8].v.cn[channel] = outerMix;
+            f_SkyVertices[i][9].v.cn[channel] = outerMix;
+        }
     }
 
-    if (blue < 0) {
-      blue = 0;
+    if (colors->sun->imageKind == SKY_IMAGE_KIND_0) {
+        OpenEncodedAsset(ASSET_SKY_IMAGE_0, &asset);
+        ReadEncodedAsset(g_SkyImage, &asset);
+    }
+    else if (colors->sun->imageKind == SKY_IMAGE_KIND_1) {
+        OpenEncodedAsset(ASSET_SKY_IMAGE_1, &asset);
+        ReadEncodedAsset(g_SkyImage, &asset);
+    }
+    else {
+        OpenEncodedAsset(ASSET_SKY_IMAGE_2_FIRST_HALF, &asset);
+        ReadEncodedAsset(g_SkyImage, &asset);
+        OpenEncodedAsset(ASSET_SKY_IMAGE_2_SECOND_HALF, &asset);
+        ReadEncodedAsset(g_SkyImage + SKY_IMAGE_HALF_OFFSET, &asset);
     }
 
-    if (red > SKY_IMAGE_CHANNEL_MAX) {
-      red = SKY_IMAGE_CHANNEL_MAX;
+    OpenEncodedAsset(f_CourseSkyImageAssets[GetCourseRecordIndex()], &asset);
+    ReadEncodedAsset(g_CourseSkyImage, &asset);
+    for (i = 0; i != LARGE_PALETTE_COLOR_COUNT; i++) {
+        color = ((u16 *)g_CourseSkyImage)[PALETTE_START + i];
+        red = (color >> 11) & SKY_IMAGE_CHANNEL_MAX;
+        green = (color >> 6) & SKY_IMAGE_CHANNEL_MAX;
+        blue = (color >> 1) & SKY_IMAGE_CHANNEL_MAX;
+        alpha = color & 1;
+        if (!alpha) {
+            red = ((colors->horizonColor[0] * SKY_IMAGE_HORIZON_PARTS) + colors->topColor[0]) /
+                SKY_IMAGE_DIVISOR;
+            green = ((colors->horizonColor[1] * SKY_IMAGE_HORIZON_PARTS) + colors->topColor[1]) /
+                SKY_IMAGE_DIVISOR;
+            blue = ((colors->horizonColor[2] * SKY_IMAGE_HORIZON_PARTS) + colors->topColor[2]) /
+                SKY_IMAGE_DIVISOR;
+        }
+        else {
+            blended[0] = from->backgroundColor[0] +
+                ((to->backgroundColor[0] - from->backgroundColor[0]) * f_SkyBlendStep /
+                    SKY_BLEND_STEP_COUNT);
+            blended[1] = from->backgroundColor[1] +
+                ((to->backgroundColor[1] - from->backgroundColor[1]) * f_SkyBlendStep /
+                    SKY_BLEND_STEP_COUNT);
+            blended[2] = from->backgroundColor[2] +
+                ((to->backgroundColor[2] - from->backgroundColor[2]) * f_SkyBlendStep /
+                    SKY_BLEND_STEP_COUNT);
+            red = ((red * (PERCENT_COUNT - colors->backgroundColor[SKY_BACKGROUND_ALPHA])) +
+                      (blended[0] * colors->backgroundColor[SKY_BACKGROUND_ALPHA])) /
+                PERCENT_COUNT;
+            green = ((green * (PERCENT_COUNT - colors->backgroundColor[SKY_BACKGROUND_ALPHA])) +
+                        (blended[1] * colors->backgroundColor[SKY_BACKGROUND_ALPHA])) /
+                PERCENT_COUNT;
+            blue = ((blue * (PERCENT_COUNT - colors->backgroundColor[SKY_BACKGROUND_ALPHA])) +
+                       (blended[2] * colors->backgroundColor[SKY_BACKGROUND_ALPHA])) /
+                PERCENT_COUNT;
+        }
+
+        if (red < 0) {
+            red = 0;
+        }
+
+        if (green < 0) {
+            green = 0;
+        }
+
+        if (blue < 0) {
+            blue = 0;
+        }
+
+        if (red > SKY_IMAGE_CHANNEL_MAX) {
+            red = SKY_IMAGE_CHANNEL_MAX;
+        }
+
+        if (green > SKY_IMAGE_CHANNEL_MAX) {
+            green = SKY_IMAGE_CHANNEL_MAX;
+        }
+
+        if (blue > SKY_IMAGE_CHANNEL_MAX) {
+            blue = SKY_IMAGE_CHANNEL_MAX;
+        }
+
+        ((u16 *)g_CourseSkyImage)[PALETTE_START + i] = (red << RGBA16_RED_SHIFT) |
+            (green << RGBA16_GREEN_SHIFT) | (blue << RGBA16_BLUE_SHIFT) | alpha;
     }
 
-    if (green > SKY_IMAGE_CHANNEL_MAX) {
-      green = SKY_IMAGE_CHANNEL_MAX;
-    }
-
-    if (blue > SKY_IMAGE_CHANNEL_MAX) {
-      blue = SKY_IMAGE_CHANNEL_MAX;
-    }
-
-    ((u16*)g_CourseSkyImage)[PALETTE_START + i] = (red << RGBA16_RED_SHIFT) |
-        (green << RGBA16_GREEN_SHIFT) | (blue << RGBA16_BLUE_SHIFT) | alpha;
-  }
-
-  DeriveSceneColors();
+    DeriveSceneColors();
 }
 
 /* The sky editor's table, in debug text cells */
@@ -1141,7 +1729,7 @@ void InitSkyColors(void) {
 #define SKY_EDITOR_FOG_STEP 4
 #define BYTE_VALUE_COUNT 256
 #define FOG_DEPTH_MAX 1200
-static SkyColors* f_EditedSkyColors;
+static SkyColors *f_EditedSkyColors;
 
 /*
  * While GAME_FLAG_SKY_EDITOR is set, lets controller 2 edit the current sky
@@ -1150,327 +1738,327 @@ static SkyColors* f_EditedSkyColors;
  * under it.
  */
 s32 UpdateSkyEditor(void) {
-  EncodedAsset asset;
-  Boolean isImageChanged;
-  s32 index; /* Counts the vertex groups, then the palette colors */
-  s32 channel;
-  u16 color;
-  s32 red;
-  s32 green;
-  s32 blue;
-  s32 alpha;
-  s32 outerMix;
-  s32 innerMix;
-  u16 pressedButtons;
+    EncodedAsset asset;
+    Boolean isImageChanged;
+    s32 index; /* Counts the vertex groups, then the palette colors */
+    s32 channel;
+    u16 color;
+    s32 red;
+    s32 green;
+    s32 blue;
+    s32 alpha;
+    s32 outerMix;
+    s32 innerMix;
+    u16 pressedButtons;
 
-  isImageChanged = FALSE;
-  if (!IsGameFlagSet(GAME_FLAG_SKY_EDITOR)) {
-    return FALSE;
-  }
-
-  PrintDebugText(" ",
-      (f_SkyEditorColumn * SKY_EDITOR_COLUMN_WIDTH) + SKY_EDITOR_ERASE_COLUMN,
-      f_SkyEditorRow + SKY_EDITOR_ERASE_ROW);
-  f_EditedSkyColors =
-      &g_SkyColors[GetCourseRecordIndex()]
-                  [(g_HoleSetup.conditions.isRaining * SKY_TIME_COUNT) +
-                      f_SkyColorTimeIndex];
-  if ((g_ControllerStates[SKY_EDITOR_CONTROLLER].pressedButtons &
-          (L_JPAD | L_CBUTTONS)) &&
-      f_SkyEditorColumn > 0) {
-    f_SkyEditorColumn--;
-  }
-
-  if ((g_ControllerStates[SKY_EDITOR_CONTROLLER].pressedButtons &
-          (R_JPAD | R_CBUTTONS)) &&
-      f_SkyEditorColumn < SKY_EDITOR_FOG) {
-    f_SkyEditorColumn++;
-  }
-
-  pressedButtons = g_ControllerStates[SKY_EDITOR_CONTROLLER].pressedButtons;
-  if (pressedButtons & (U_JPAD | U_CBUTTONS)) {
-    f_SkyEditorRow--;
-  }
-
-  if (pressedButtons & (D_JPAD | D_CBUTTONS)) {
-    f_SkyEditorRow++;
-  }
-
-  if (f_SkyEditorRow < 0) {
-    f_SkyEditorRow = 0;
-  }
-
-  if (f_SkyEditorColumn == SKY_EDITOR_BACKGROUND) {
-    if (f_SkyEditorRow > SKY_EDITOR_ALPHA_ROW) {
-      f_SkyEditorRow = SKY_EDITOR_ALPHA_ROW;
+    isImageChanged = FALSE;
+    if (!IsGameFlagSet(GAME_FLAG_SKY_EDITOR)) {
+        return FALSE;
     }
-  } else if (f_SkyEditorColumn == SKY_EDITOR_FOG) {
-    if (f_SkyEditorRow > SKY_EDITOR_FAR_ROW) {
-      f_SkyEditorRow = SKY_EDITOR_FAR_ROW;
+
+    PrintDebugText(
+        " ",
+        (f_SkyEditorColumn * SKY_EDITOR_COLUMN_WIDTH) + SKY_EDITOR_ERASE_COLUMN,
+        f_SkyEditorRow + SKY_EDITOR_ERASE_ROW
+    );
+    f_EditedSkyColors =
+        &g_SkyColors[GetCourseRecordIndex()]
+                    [(g_HoleSetup.conditions.isRaining * SKY_TIME_COUNT) + f_SkyColorTimeIndex];
+    if ((g_ControllerStates[SKY_EDITOR_CONTROLLER].pressedButtons & (L_JPAD | L_CBUTTONS)) &&
+        f_SkyEditorColumn > 0) {
+        f_SkyEditorColumn--;
     }
-  } else if (f_SkyEditorRow > SKY_EDITOR_LAST_COLOR_ROW) {
-    f_SkyEditorRow = SKY_EDITOR_LAST_COLOR_ROW;
-  }
 
-  /* The rows of the fog column run past g_DebugFog.color into near and far */
-  if (g_ControllerStates[SKY_EDITOR_CONTROLLER].buttons & A_BUTTON) {
-    switch (f_SkyEditorColumn) {
-      case SKY_EDITOR_TOP:
-        f_EditedSkyColors->topColor[f_SkyEditorRow] += SKY_EDITOR_COLOR_STEP;
-        f_EditedSkyColors->topColor[f_SkyEditorRow] %= BYTE_VALUE_COUNT;
-        break;
-      case SKY_EDITOR_HORIZON:
-        f_EditedSkyColors->horizonColor[f_SkyEditorRow] +=
-            SKY_EDITOR_COLOR_STEP;
-        f_EditedSkyColors->horizonColor[f_SkyEditorRow] %= BYTE_VALUE_COUNT;
-        break;
-      case SKY_EDITOR_NOISE:
-        f_EditedSkyColors->noiseColor[f_SkyEditorRow] += SKY_EDITOR_COLOR_STEP;
-        f_EditedSkyColors->noiseColor[f_SkyEditorRow] %= BYTE_VALUE_COUNT;
-        break;
-      case SKY_EDITOR_BACKGROUND:
-        f_EditedSkyColors->backgroundColor[f_SkyEditorRow]++;
-        isImageChanged = TRUE;
-        if (f_SkyEditorRow == SKY_EDITOR_ALPHA_ROW) {
-          /* Wraps the percent past either end */
-          if (f_EditedSkyColors->backgroundColor[f_SkyEditorRow] ==
-              PERCENT_COUNT + 1) {
-            f_EditedSkyColors->backgroundColor[f_SkyEditorRow] = 0;
-          }
+    if ((g_ControllerStates[SKY_EDITOR_CONTROLLER].pressedButtons & (R_JPAD | R_CBUTTONS)) &&
+        f_SkyEditorColumn < SKY_EDITOR_FOG) {
+        f_SkyEditorColumn++;
+    }
 
-          if (f_EditedSkyColors->backgroundColor[f_SkyEditorRow] >
-              PERCENT_COUNT + 1) {
-            f_EditedSkyColors->backgroundColor[f_SkyEditorRow] = PERCENT_COUNT;
-          }
-        } else {
-          f_EditedSkyColors->backgroundColor[f_SkyEditorRow] &=
-              SKY_IMAGE_CHANNEL_MAX;
+    pressedButtons = g_ControllerStates[SKY_EDITOR_CONTROLLER].pressedButtons;
+    if (pressedButtons & (U_JPAD | U_CBUTTONS)) {
+        f_SkyEditorRow--;
+    }
+
+    if (pressedButtons & (D_JPAD | D_CBUTTONS)) {
+        f_SkyEditorRow++;
+    }
+
+    if (f_SkyEditorRow < 0) {
+        f_SkyEditorRow = 0;
+    }
+
+    if (f_SkyEditorColumn == SKY_EDITOR_BACKGROUND) {
+        if (f_SkyEditorRow > SKY_EDITOR_ALPHA_ROW) {
+            f_SkyEditorRow = SKY_EDITOR_ALPHA_ROW;
         }
-
-        break;
-      case SKY_EDITOR_FOG:
-        g_DebugFog.color[f_SkyEditorRow] += SKY_EDITOR_FOG_STEP;
-        break;
     }
-  } else if (g_ControllerStates[SKY_EDITOR_CONTROLLER].buttons & B_BUTTON) {
-    switch (f_SkyEditorColumn) {
-      case SKY_EDITOR_TOP:
-        f_EditedSkyColors->topColor[f_SkyEditorRow] -= SKY_EDITOR_COLOR_STEP;
-        f_EditedSkyColors->topColor[f_SkyEditorRow] %= BYTE_VALUE_COUNT;
-        break;
-      case SKY_EDITOR_HORIZON:
-        f_EditedSkyColors->horizonColor[f_SkyEditorRow] -=
-            SKY_EDITOR_COLOR_STEP;
-        f_EditedSkyColors->horizonColor[f_SkyEditorRow] %= BYTE_VALUE_COUNT;
-        break;
-      case SKY_EDITOR_NOISE:
-        f_EditedSkyColors->noiseColor[f_SkyEditorRow] -= SKY_EDITOR_COLOR_STEP;
-        f_EditedSkyColors->noiseColor[f_SkyEditorRow] %= BYTE_VALUE_COUNT;
-        break;
-      case SKY_EDITOR_BACKGROUND:
-        f_EditedSkyColors->backgroundColor[f_SkyEditorRow]--;
-        isImageChanged = TRUE;
-        if (f_SkyEditorRow == SKY_EDITOR_ALPHA_ROW) {
-          if (f_EditedSkyColors->backgroundColor[f_SkyEditorRow] ==
-              PERCENT_COUNT + 1) {
-            f_EditedSkyColors->backgroundColor[f_SkyEditorRow] = 0;
-          }
-
-          if (f_EditedSkyColors->backgroundColor[f_SkyEditorRow] >
-              PERCENT_COUNT + 1) {
-            f_EditedSkyColors->backgroundColor[f_SkyEditorRow] = PERCENT_COUNT;
-          }
-        } else {
-          f_EditedSkyColors->backgroundColor[f_SkyEditorRow] &=
-              SKY_IMAGE_CHANNEL_MAX;
+    else if (f_SkyEditorColumn == SKY_EDITOR_FOG) {
+        if (f_SkyEditorRow > SKY_EDITOR_FAR_ROW) {
+            f_SkyEditorRow = SKY_EDITOR_FAR_ROW;
         }
-
-        break;
-      case SKY_EDITOR_FOG:
-        g_DebugFog.color[f_SkyEditorRow] -= SKY_EDITOR_FOG_STEP;
-        break;
     }
-  }
-
-  if (g_DebugFog.color[0] > COLOR_CHANNEL_MAX) {
-    g_DebugFog.color[0] = COLOR_CHANNEL_MAX;
-  }
-
-  if (g_DebugFog.color[1] > COLOR_CHANNEL_MAX) {
-    g_DebugFog.color[1] = COLOR_CHANNEL_MAX;
-  }
-
-  if (g_DebugFog.color[2] > COLOR_CHANNEL_MAX) {
-    g_DebugFog.color[2] = COLOR_CHANNEL_MAX;
-  }
-
-  if (g_DebugFog.near > FOG_DEPTH_MAX) {
-    g_DebugFog.near = FOG_DEPTH_MAX;
-  }
-
-  if (g_DebugFog.far > FOG_DEPTH_MAX) {
-    g_DebugFog.far = FOG_DEPTH_MAX;
-  }
-
-  if (g_DebugFog.color[0] < 0) {
-    g_DebugFog.color[0] = 0;
-  }
-
-  if (g_DebugFog.color[1] < 0) {
-    g_DebugFog.color[1] = 0;
-  }
-
-  if (g_DebugFog.color[2] < 0) {
-    g_DebugFog.color[2] = 0;
-  }
-
-  if (g_DebugFog.near < 0) {
-    g_DebugFog.near = 0;
-  }
-
-  if (g_DebugFog.far < 0) {
-    g_DebugFog.far = 0;
-  }
-
-  for (index = 0; index != SKY_VIEW_COUNT * MATRIX_BUFFER_COUNT; index++) {
-    for (channel = 0; channel != RGB_CHANNEL_COUNT; channel++) {
-      f_SkyVertices[index][0].v.cn[channel] =
-          f_EditedSkyColors->topColor[channel];
-      f_SkyVertices[index][1].v.cn[channel] =
-          f_EditedSkyColors->horizonColor[channel];
-      f_SkyVertices[index][2].v.cn[channel] =
-          f_EditedSkyColors->horizonColor[channel];
-      f_SkyVertices[index][3].v.cn[channel] =
-          f_EditedSkyColors->topColor[channel];
-      f_SkyVertices[index][4].v.cn[channel] =
-          f_EditedSkyColors->topColor[channel];
-      innerMix = (u16)(f_EditedSkyColors->topColor[channel] +
-                     f_EditedSkyColors->horizonColor[channel]) *
-          0.5f;
-      outerMix =
-          (f_EditedSkyColors->topColor[channel] + SKY_HORIZON_LEVEL) * 0.5f;
-      innerMix = (innerMix + SKY_HORIZON_LEVEL) * 0.5f;
-      f_SkyVertices[index][5].v.cn[channel] = outerMix;
-      f_SkyVertices[index][6].v.cn[channel] = innerMix;
-      f_SkyVertices[index][7].v.cn[channel] = innerMix;
-      f_SkyVertices[index][8].v.cn[channel] = outerMix;
-      f_SkyVertices[index][9].v.cn[channel] = outerMix;
+    else if (f_SkyEditorRow > SKY_EDITOR_LAST_COLOR_ROW) {
+        f_SkyEditorRow = SKY_EDITOR_LAST_COLOR_ROW;
     }
-  }
 
-  if (isImageChanged) {
-    OpenEncodedAsset(f_CourseSkyImageAssets[GetCourseRecordIndex()], &asset);
-    ReadEncodedAsset(g_CourseSkyImage, &asset);
-    for (index = 0; index != LARGE_PALETTE_COLOR_COUNT; index++) {
-      color = ((u16*)g_CourseSkyImage)[PALETTE_START + index];
-      red = (color >> 11) & SKY_IMAGE_CHANNEL_MAX;
-      green = (color >> 6) & SKY_IMAGE_CHANNEL_MAX;
-      blue = (color >> 1) & SKY_IMAGE_CHANNEL_MAX;
-      alpha = color & 1;
-      if (!alpha) {
-        red = ((f_EditedSkyColors->horizonColor[0] * SKY_IMAGE_HORIZON_PARTS) +
-                  f_EditedSkyColors->topColor[0]) /
-            SKY_IMAGE_DIVISOR;
-        green =
-            ((f_EditedSkyColors->horizonColor[1] * SKY_IMAGE_HORIZON_PARTS) +
-                f_EditedSkyColors->topColor[1]) /
-            SKY_IMAGE_DIVISOR;
-        blue = ((f_EditedSkyColors->horizonColor[2] * SKY_IMAGE_HORIZON_PARTS) +
-                   f_EditedSkyColors->topColor[2]) /
-            SKY_IMAGE_DIVISOR;
-      } else {
-        red =
-            ((red *
-                 (PERCENT_COUNT -
-                     f_EditedSkyColors
-                         ->backgroundColor[SKY_BACKGROUND_ALPHA])) +
-                (f_EditedSkyColors->backgroundColor[0] *
-                    f_EditedSkyColors->backgroundColor[SKY_BACKGROUND_ALPHA])) /
-            PERCENT_COUNT;
-        green =
-            ((green *
-                 (PERCENT_COUNT -
-                     f_EditedSkyColors
-                         ->backgroundColor[SKY_BACKGROUND_ALPHA])) +
-                (f_EditedSkyColors->backgroundColor[1] *
-                    f_EditedSkyColors->backgroundColor[SKY_BACKGROUND_ALPHA])) /
-            PERCENT_COUNT;
-        blue =
-            ((blue *
-                 (PERCENT_COUNT -
-                     f_EditedSkyColors
-                         ->backgroundColor[SKY_BACKGROUND_ALPHA])) +
-                (f_EditedSkyColors->backgroundColor[2] *
-                    f_EditedSkyColors->backgroundColor[SKY_BACKGROUND_ALPHA])) /
-            PERCENT_COUNT;
-      }
+    /* The rows of the fog column run past g_DebugFog.color into near and far */
+    if (g_ControllerStates[SKY_EDITOR_CONTROLLER].buttons & A_BUTTON) {
+        switch (f_SkyEditorColumn) {
+            case SKY_EDITOR_TOP:
+                f_EditedSkyColors->topColor[f_SkyEditorRow] += SKY_EDITOR_COLOR_STEP;
+                f_EditedSkyColors->topColor[f_SkyEditorRow] %= BYTE_VALUE_COUNT;
+                break;
+            case SKY_EDITOR_HORIZON:
+                f_EditedSkyColors->horizonColor[f_SkyEditorRow] += SKY_EDITOR_COLOR_STEP;
+                f_EditedSkyColors->horizonColor[f_SkyEditorRow] %= BYTE_VALUE_COUNT;
+                break;
+            case SKY_EDITOR_NOISE:
+                f_EditedSkyColors->noiseColor[f_SkyEditorRow] += SKY_EDITOR_COLOR_STEP;
+                f_EditedSkyColors->noiseColor[f_SkyEditorRow] %= BYTE_VALUE_COUNT;
+                break;
+            case SKY_EDITOR_BACKGROUND:
+                f_EditedSkyColors->backgroundColor[f_SkyEditorRow]++;
+                isImageChanged = TRUE;
+                if (f_SkyEditorRow == SKY_EDITOR_ALPHA_ROW) {
+                    /* Wraps the percent past either end */
+                    if (f_EditedSkyColors->backgroundColor[f_SkyEditorRow] == PERCENT_COUNT + 1) {
+                        f_EditedSkyColors->backgroundColor[f_SkyEditorRow] = 0;
+                    }
 
-      if (red < 0) {
-        red = 0;
-      }
+                    if (f_EditedSkyColors->backgroundColor[f_SkyEditorRow] > PERCENT_COUNT + 1) {
+                        f_EditedSkyColors->backgroundColor[f_SkyEditorRow] = PERCENT_COUNT;
+                    }
+                }
+                else {
+                    f_EditedSkyColors->backgroundColor[f_SkyEditorRow] &= SKY_IMAGE_CHANNEL_MAX;
+                }
 
-      if (green < 0) {
-        green = 0;
-      }
-
-      if (blue < 0) {
-        blue = 0;
-      }
-
-      if (red > SKY_IMAGE_CHANNEL_MAX) {
-        red = SKY_IMAGE_CHANNEL_MAX;
-      }
-
-      if (green > SKY_IMAGE_CHANNEL_MAX) {
-        green = SKY_IMAGE_CHANNEL_MAX;
-      }
-
-      if (blue > SKY_IMAGE_CHANNEL_MAX) {
-        blue = SKY_IMAGE_CHANNEL_MAX;
-      }
-
-      ((u16*)g_CourseSkyImage)[PALETTE_START + index] =
-          (red << RGBA16_RED_SHIFT) | (green << RGBA16_GREEN_SHIFT) |
-          (blue << RGBA16_BLUE_SHIFT) | alpha;
+                break;
+            case SKY_EDITOR_FOG:
+                g_DebugFog.color[f_SkyEditorRow] += SKY_EDITOR_FOG_STEP;
+                break;
+        }
     }
-  }
+    else if (g_ControllerStates[SKY_EDITOR_CONTROLLER].buttons & B_BUTTON) {
+        switch (f_SkyEditorColumn) {
+            case SKY_EDITOR_TOP:
+                f_EditedSkyColors->topColor[f_SkyEditorRow] -= SKY_EDITOR_COLOR_STEP;
+                f_EditedSkyColors->topColor[f_SkyEditorRow] %= BYTE_VALUE_COUNT;
+                break;
+            case SKY_EDITOR_HORIZON:
+                f_EditedSkyColors->horizonColor[f_SkyEditorRow] -= SKY_EDITOR_COLOR_STEP;
+                f_EditedSkyColors->horizonColor[f_SkyEditorRow] %= BYTE_VALUE_COUNT;
+                break;
+            case SKY_EDITOR_NOISE:
+                f_EditedSkyColors->noiseColor[f_SkyEditorRow] -= SKY_EDITOR_COLOR_STEP;
+                f_EditedSkyColors->noiseColor[f_SkyEditorRow] %= BYTE_VALUE_COUNT;
+                break;
+            case SKY_EDITOR_BACKGROUND:
+                f_EditedSkyColors->backgroundColor[f_SkyEditorRow]--;
+                isImageChanged = TRUE;
+                if (f_SkyEditorRow == SKY_EDITOR_ALPHA_ROW) {
+                    if (f_EditedSkyColors->backgroundColor[f_SkyEditorRow] == PERCENT_COUNT + 1) {
+                        f_EditedSkyColors->backgroundColor[f_SkyEditorRow] = 0;
+                    }
 
-  PrintDebugText(
-      "   T   B   C   BG  FOG", SKY_EDITOR_TEXT_COLUMN, SKY_EDITOR_TEXT_ROW);
-  sprintf(g_PrintBuffer, "R: %3d %3d %3d %3d %4d  ",
-      f_EditedSkyColors->topColor[0], f_EditedSkyColors->horizonColor[0],
-      f_EditedSkyColors->noiseColor[0], f_EditedSkyColors->backgroundColor[0],
-      (int)g_DebugFog.color[0]);
-  PrintDebugText(
-      g_PrintBuffer, SKY_EDITOR_TEXT_COLUMN, SKY_EDITOR_TEXT_ROW + 1);
-  sprintf(g_PrintBuffer, "G: %3d %3d %3d %3d %4d  ",
-      f_EditedSkyColors->topColor[1], f_EditedSkyColors->horizonColor[1],
-      f_EditedSkyColors->noiseColor[1], f_EditedSkyColors->backgroundColor[1],
-      (int)g_DebugFog.color[1]);
-  PrintDebugText(
-      g_PrintBuffer, SKY_EDITOR_TEXT_COLUMN, SKY_EDITOR_TEXT_ROW + 2);
-  sprintf(g_PrintBuffer, "B: %3d %3d %3d %3d %4d  ",
-      f_EditedSkyColors->topColor[2], f_EditedSkyColors->horizonColor[2],
-      f_EditedSkyColors->noiseColor[2], f_EditedSkyColors->backgroundColor[2],
-      (int)g_DebugFog.color[2]);
-  PrintDebugText(
-      g_PrintBuffer, SKY_EDITOR_TEXT_COLUMN, SKY_EDITOR_TEXT_ROW + 3);
-  sprintf(g_PrintBuffer, "A:             %3d %4d  ",
-      f_EditedSkyColors->backgroundColor[SKY_BACKGROUND_ALPHA],
-      (int)g_DebugFog.near);
-  PrintDebugText(
-      g_PrintBuffer, SKY_EDITOR_TEXT_COLUMN, SKY_EDITOR_TEXT_ROW + 4);
-  sprintf(g_PrintBuffer, "CC:%d               %4d  ",
-      (int)f_EditedSkyColors->addsNoise, (int)g_DebugFog.far);
-  PrintDebugText(
-      g_PrintBuffer, SKY_EDITOR_TEXT_COLUMN, SKY_EDITOR_TEXT_ROW + 5);
-  PrintDebugText(">",
-      (f_SkyEditorColumn * SKY_EDITOR_COLUMN_WIDTH) + SKY_EDITOR_TEXT_COLUMN +
-          2,
-      f_SkyEditorRow + SKY_EDITOR_TEXT_ROW + 1);
-  SetFramebufferCount(TRIPLE_BUFFERING);
-  SetScreenEffect(SCREEN_EFFECT_NONE, 0);
-  return TRUE;
+                    if (f_EditedSkyColors->backgroundColor[f_SkyEditorRow] > PERCENT_COUNT + 1) {
+                        f_EditedSkyColors->backgroundColor[f_SkyEditorRow] = PERCENT_COUNT;
+                    }
+                }
+                else {
+                    f_EditedSkyColors->backgroundColor[f_SkyEditorRow] &= SKY_IMAGE_CHANNEL_MAX;
+                }
+
+                break;
+            case SKY_EDITOR_FOG:
+                g_DebugFog.color[f_SkyEditorRow] -= SKY_EDITOR_FOG_STEP;
+                break;
+        }
+    }
+
+    if (g_DebugFog.color[0] > COLOR_CHANNEL_MAX) {
+        g_DebugFog.color[0] = COLOR_CHANNEL_MAX;
+    }
+
+    if (g_DebugFog.color[1] > COLOR_CHANNEL_MAX) {
+        g_DebugFog.color[1] = COLOR_CHANNEL_MAX;
+    }
+
+    if (g_DebugFog.color[2] > COLOR_CHANNEL_MAX) {
+        g_DebugFog.color[2] = COLOR_CHANNEL_MAX;
+    }
+
+    if (g_DebugFog.near > FOG_DEPTH_MAX) {
+        g_DebugFog.near = FOG_DEPTH_MAX;
+    }
+
+    if (g_DebugFog.far > FOG_DEPTH_MAX) {
+        g_DebugFog.far = FOG_DEPTH_MAX;
+    }
+
+    if (g_DebugFog.color[0] < 0) {
+        g_DebugFog.color[0] = 0;
+    }
+
+    if (g_DebugFog.color[1] < 0) {
+        g_DebugFog.color[1] = 0;
+    }
+
+    if (g_DebugFog.color[2] < 0) {
+        g_DebugFog.color[2] = 0;
+    }
+
+    if (g_DebugFog.near < 0) {
+        g_DebugFog.near = 0;
+    }
+
+    if (g_DebugFog.far < 0) {
+        g_DebugFog.far = 0;
+    }
+
+    for (index = 0; index != SKY_VIEW_COUNT * MATRIX_BUFFER_COUNT; index++) {
+        for (channel = 0; channel != RGB_CHANNEL_COUNT; channel++) {
+            f_SkyVertices[index][0].v.cn[channel] = f_EditedSkyColors->topColor[channel];
+            f_SkyVertices[index][1].v.cn[channel] = f_EditedSkyColors->horizonColor[channel];
+            f_SkyVertices[index][2].v.cn[channel] = f_EditedSkyColors->horizonColor[channel];
+            f_SkyVertices[index][3].v.cn[channel] = f_EditedSkyColors->topColor[channel];
+            f_SkyVertices[index][4].v.cn[channel] = f_EditedSkyColors->topColor[channel];
+            innerMix = (u16)(f_EditedSkyColors->topColor[channel] +
+                           f_EditedSkyColors->horizonColor[channel]) *
+                0.5f;
+            outerMix = (f_EditedSkyColors->topColor[channel] + SKY_HORIZON_LEVEL) * 0.5f;
+            innerMix = (innerMix + SKY_HORIZON_LEVEL) * 0.5f;
+            f_SkyVertices[index][5].v.cn[channel] = outerMix;
+            f_SkyVertices[index][6].v.cn[channel] = innerMix;
+            f_SkyVertices[index][7].v.cn[channel] = innerMix;
+            f_SkyVertices[index][8].v.cn[channel] = outerMix;
+            f_SkyVertices[index][9].v.cn[channel] = outerMix;
+        }
+    }
+
+    if (isImageChanged) {
+        OpenEncodedAsset(f_CourseSkyImageAssets[GetCourseRecordIndex()], &asset);
+        ReadEncodedAsset(g_CourseSkyImage, &asset);
+        for (index = 0; index != LARGE_PALETTE_COLOR_COUNT; index++) {
+            color = ((u16 *)g_CourseSkyImage)[PALETTE_START + index];
+            red = (color >> 11) & SKY_IMAGE_CHANNEL_MAX;
+            green = (color >> 6) & SKY_IMAGE_CHANNEL_MAX;
+            blue = (color >> 1) & SKY_IMAGE_CHANNEL_MAX;
+            alpha = color & 1;
+            if (!alpha) {
+                red = ((f_EditedSkyColors->horizonColor[0] * SKY_IMAGE_HORIZON_PARTS) +
+                          f_EditedSkyColors->topColor[0]) /
+                    SKY_IMAGE_DIVISOR;
+                green = ((f_EditedSkyColors->horizonColor[1] * SKY_IMAGE_HORIZON_PARTS) +
+                            f_EditedSkyColors->topColor[1]) /
+                    SKY_IMAGE_DIVISOR;
+                blue = ((f_EditedSkyColors->horizonColor[2] * SKY_IMAGE_HORIZON_PARTS) +
+                           f_EditedSkyColors->topColor[2]) /
+                    SKY_IMAGE_DIVISOR;
+            }
+            else {
+                red = ((red *
+                           (PERCENT_COUNT -
+                               f_EditedSkyColors->backgroundColor[SKY_BACKGROUND_ALPHA])) +
+                          (f_EditedSkyColors->backgroundColor[0] *
+                              f_EditedSkyColors->backgroundColor[SKY_BACKGROUND_ALPHA])) /
+                    PERCENT_COUNT;
+                green = ((green *
+                             (PERCENT_COUNT -
+                                 f_EditedSkyColors->backgroundColor[SKY_BACKGROUND_ALPHA])) +
+                            (f_EditedSkyColors->backgroundColor[1] *
+                                f_EditedSkyColors->backgroundColor[SKY_BACKGROUND_ALPHA])) /
+                    PERCENT_COUNT;
+                blue = ((blue *
+                            (PERCENT_COUNT -
+                                f_EditedSkyColors->backgroundColor[SKY_BACKGROUND_ALPHA])) +
+                           (f_EditedSkyColors->backgroundColor[2] *
+                               f_EditedSkyColors->backgroundColor[SKY_BACKGROUND_ALPHA])) /
+                    PERCENT_COUNT;
+            }
+
+            if (red < 0) {
+                red = 0;
+            }
+
+            if (green < 0) {
+                green = 0;
+            }
+
+            if (blue < 0) {
+                blue = 0;
+            }
+
+            if (red > SKY_IMAGE_CHANNEL_MAX) {
+                red = SKY_IMAGE_CHANNEL_MAX;
+            }
+
+            if (green > SKY_IMAGE_CHANNEL_MAX) {
+                green = SKY_IMAGE_CHANNEL_MAX;
+            }
+
+            if (blue > SKY_IMAGE_CHANNEL_MAX) {
+                blue = SKY_IMAGE_CHANNEL_MAX;
+            }
+
+            ((u16 *)g_CourseSkyImage)[PALETTE_START + index] = (red << RGBA16_RED_SHIFT) |
+                (green << RGBA16_GREEN_SHIFT) | (blue << RGBA16_BLUE_SHIFT) | alpha;
+        }
+    }
+
+    PrintDebugText("   T   B   C   BG  FOG", SKY_EDITOR_TEXT_COLUMN, SKY_EDITOR_TEXT_ROW);
+    sprintf(
+        g_PrintBuffer,
+        "R: %3d %3d %3d %3d %4d  ",
+        f_EditedSkyColors->topColor[0],
+        f_EditedSkyColors->horizonColor[0],
+        f_EditedSkyColors->noiseColor[0],
+        f_EditedSkyColors->backgroundColor[0],
+        (int)g_DebugFog.color[0]
+    );
+    PrintDebugText(g_PrintBuffer, SKY_EDITOR_TEXT_COLUMN, SKY_EDITOR_TEXT_ROW + 1);
+    sprintf(
+        g_PrintBuffer,
+        "G: %3d %3d %3d %3d %4d  ",
+        f_EditedSkyColors->topColor[1],
+        f_EditedSkyColors->horizonColor[1],
+        f_EditedSkyColors->noiseColor[1],
+        f_EditedSkyColors->backgroundColor[1],
+        (int)g_DebugFog.color[1]
+    );
+    PrintDebugText(g_PrintBuffer, SKY_EDITOR_TEXT_COLUMN, SKY_EDITOR_TEXT_ROW + 2);
+    sprintf(
+        g_PrintBuffer,
+        "B: %3d %3d %3d %3d %4d  ",
+        f_EditedSkyColors->topColor[2],
+        f_EditedSkyColors->horizonColor[2],
+        f_EditedSkyColors->noiseColor[2],
+        f_EditedSkyColors->backgroundColor[2],
+        (int)g_DebugFog.color[2]
+    );
+    PrintDebugText(g_PrintBuffer, SKY_EDITOR_TEXT_COLUMN, SKY_EDITOR_TEXT_ROW + 3);
+    sprintf(
+        g_PrintBuffer,
+        "A:             %3d %4d  ",
+        f_EditedSkyColors->backgroundColor[SKY_BACKGROUND_ALPHA],
+        (int)g_DebugFog.near
+    );
+    PrintDebugText(g_PrintBuffer, SKY_EDITOR_TEXT_COLUMN, SKY_EDITOR_TEXT_ROW + 4);
+    sprintf(
+        g_PrintBuffer,
+        "CC:%d               %4d  ",
+        (int)f_EditedSkyColors->addsNoise,
+        (int)g_DebugFog.far
+    );
+    PrintDebugText(g_PrintBuffer, SKY_EDITOR_TEXT_COLUMN, SKY_EDITOR_TEXT_ROW + 5);
+    PrintDebugText(
+        ">",
+        (f_SkyEditorColumn * SKY_EDITOR_COLUMN_WIDTH) + SKY_EDITOR_TEXT_COLUMN + 2,
+        f_SkyEditorRow + SKY_EDITOR_TEXT_ROW + 1
+    );
+    SetFramebufferCount(TRIPLE_BUFFERING);
+    SetScreenEffect(SCREEN_EFFECT_NONE, 0);
+    return TRUE;
 }
 
 /* UpdateSky's limits and scales */
@@ -1502,223 +2090,203 @@ s32 UpdateSkyEditor(void) {
  * the wind. The first view also blends the sky's colors, unless the sky
  * editor is open.
  */
-void UpdateSky(CameraView* view, s32 viewIndex) {
-  Radians* pitches;
-  f32 pitchScale; /* Narrower fields of view move the horizon further for each
-                     radian of pitch */
-  Vec3 direction;
-  /* The original frame has room for this; without it 48 words differ */
-  s32 unused[8] UNUSED;
-  Vtx* vertices;
-  f32 slope;
-  f32 scroll;
-  s32 clippedHeight;
-  f32 sine;
-  f32 cosine;
-  s32 distance;
-  f32 coordinate;
-  f32 horizonHalfWidth;
+void UpdateSky(CameraView *view, s32 viewIndex) {
+    Radians *pitches;
+    f32 pitchScale; /* Narrower fields of view move the horizon further for each
+                       radian of pitch */
+    Vec3 direction;
+    /* The original frame has room for this; without it 48 words differ */
+    s32 unused[8] UNUSED;
+    Vtx *vertices;
+    f32 slope;
+    f32 scroll;
+    s32 clippedHeight;
+    f32 sine;
+    f32 cosine;
+    s32 distance;
+    f32 coordinate;
+    f32 horizonHalfWidth;
 
-  if (!UpdateSkyEditor() && viewIndex == 0) {
-    BlendSkyColors();
-  }
-
-  direction[AXIS_X] = view->lookAt[0] - view->eye[0];
-  direction[AXIS_Y] = view->lookAt[1] - view->eye[1];
-  direction[AXIS_Z] = view->lookAt[2] - view->eye[2];
-  vertices =
-      f_SkyVertices[g_MatrixBufferIndex + (viewIndex * MATRIX_BUFFER_COUNT)];
-  g_SkyState.yaws[viewIndex] = atan2(direction[AXIS_X], direction[AXIS_Z]);
-  g_SkyState.pitches[viewIndex] = -atan2(direction[AXIS_Y],
-      sqrtf((direction[AXIS_X] * direction[AXIS_X]) +
-          (direction[AXIS_Z] * direction[AXIS_Z])));
-  if (g_SkyState.pitches[viewIndex] < -SKY_PITCH_LIMIT) {
-    g_SkyState.pitches[viewIndex] = -SKY_PITCH_LIMIT;
-  }
-
-  if (g_SkyState.pitches[viewIndex] > SKY_PITCH_LIMIT) {
-    g_SkyState.pitches[viewIndex] = SKY_PITCH_LIMIT;
-  }
-
-  slope = (view->lookAt[1] - view->eye[1]) *
-      (SKY_SLOPE_DISTANCE /
-          sqrtf((direction[AXIS_X] * direction[AXIS_X]) +
-              (direction[AXIS_Z] * direction[AXIS_Z])));
-  pitchScale = SKY_REFERENCE_FIELD_OF_VIEW / view->fieldOfView * SCREEN_HEIGHT;
-  g_SkyState.horizonLevels[viewIndex] =
-      (-g_SkyState.pitches[viewIndex] * pitchScale) +
-      (view->eye[1] * SKY_EYE_HEIGHT_SCALE);
-  if (g_SkyState.horizonLevels[viewIndex] < SKY_HORIZON_LEVEL_MIN) {
-    g_SkyState.horizonLevels[viewIndex] = SKY_HORIZON_LEVEL_MIN;
-  }
-
-  g_SkyState.screenHeights[viewIndex] = SCREEN_HEIGHT;
-  g_SkyState.lookAtLevels[viewIndex] = g_SkyState.horizonLevels[viewIndex] -
-      (((view->lookAt[1] * slope) - view->eye[1]) * SKY_EYE_HEIGHT_SCALE);
-
-  if (IsGameFlagSet(GAME_FLAG_CYCLE_SKY_CONDITIONS)) {
-    if (g_ControllerStates[0].pressedButtons & U_CBUTTONS) {
-      g_HoleSetup.conditions.isRaining =
-          (u32)(g_HoleSetup.conditions.isRaining + 1) % SKY_DEBUG_CYCLE_LENGTH;
-      InitSkyColors();
+    if (!UpdateSkyEditor() && viewIndex == 0) {
+        BlendSkyColors();
     }
 
-    if (g_ControllerStates[0].pressedButtons & D_CBUTTONS) {
-      g_HoleSetup.conditions.sceneColorIndex =
-          (g_HoleSetup.conditions.sceneColorIndex + 1) % SKY_DEBUG_CYCLE_LENGTH;
-      InitSkyColors();
+    direction[AXIS_X] = view->lookAt[0] - view->eye[0];
+    direction[AXIS_Y] = view->lookAt[1] - view->eye[1];
+    direction[AXIS_Z] = view->lookAt[2] - view->eye[2];
+    vertices = f_SkyVertices[g_MatrixBufferIndex + (viewIndex * MATRIX_BUFFER_COUNT)];
+    g_SkyState.yaws[viewIndex] = atan2(direction[AXIS_X], direction[AXIS_Z]);
+    g_SkyState.pitches[viewIndex] = -atan2(
+        direction[AXIS_Y],
+        sqrtf((direction[AXIS_X] * direction[AXIS_X]) + (direction[AXIS_Z] * direction[AXIS_Z]))
+    );
+    if (g_SkyState.pitches[viewIndex] < -SKY_PITCH_LIMIT) {
+        g_SkyState.pitches[viewIndex] = -SKY_PITCH_LIMIT;
     }
-  }
 
-  clippedHeight = 0;
-  scroll = -(f32)(g_HoleSetup.conditions.windSpeed / WIND_SPEED_UNIT) *
-      SKY_SCROLL_PER_WIND_SPEED;
-  if (g_ScreenEffect != SCREEN_EFFECT_SAVED_FRAME) {
-    g_SkyState.scrollY += scroll;
-  }
-
-  if (g_SkyState.scrollX > SKY_SCROLL_X_WRAP) {
-    g_SkyState.scrollX -= SKY_SCROLL_X_WRAP;
-  }
-
-  if (g_SkyState.scrollX < -SKY_SCROLL_X_WRAP) {
-    g_SkyState.scrollX += SKY_SCROLL_X_WRAP;
-  }
-
-  if (scroll > 0.0f) {
-    if (g_SkyState.scrollY > SKY_SCROLL_Y_WRAP) {
-      g_SkyState.scrollY -= SKY_SCROLL_Y_PERIOD;
+    if (g_SkyState.pitches[viewIndex] > SKY_PITCH_LIMIT) {
+        g_SkyState.pitches[viewIndex] = SKY_PITCH_LIMIT;
     }
-  } else if (g_SkyState.scrollY < -SKY_SCROLL_Y_WRAP) {
-    g_SkyState.scrollY += SKY_SCROLL_Y_PERIOD;
-  }
 
-  /* Vertices 1, 2, 6 and 7 follow the horizon level; 0, 3 and 4 follow the
-   * pitch alone */
-  if (g_SkyState.pitches[viewIndex] < 0.0f) {
-    vertices[0].v.ob[AXIS_Y] = (SCREEN_HEIGHT / 2) -
-        (g_SkyState.pitches[viewIndex] * (SCREEN_HEIGHT / 2));
-    vertices[3].v.ob[AXIS_Y] = (SCREEN_HEIGHT / 2) -
-        (g_SkyState.pitches[viewIndex] * (SCREEN_HEIGHT / 2));
-    vertices[4].v.ob[AXIS_Y] = (SCREEN_HEIGHT / 2) -
-        (g_SkyState.pitches[viewIndex] * (SCREEN_HEIGHT / 2));
-  } else {
-    vertices[0].v.ob[AXIS_Y] = SCREEN_HEIGHT / 2;
-    vertices[3].v.ob[AXIS_Y] = SCREEN_HEIGHT / 2;
-    vertices[4].v.ob[AXIS_Y] = SCREEN_HEIGHT / 2;
-  }
+    slope = (view->lookAt[1] - view->eye[1]) *
+        (SKY_SLOPE_DISTANCE /
+            sqrtf(
+                (direction[AXIS_X] * direction[AXIS_X]) + (direction[AXIS_Z] * direction[AXIS_Z])
+            ));
+    pitchScale = SKY_REFERENCE_FIELD_OF_VIEW / view->fieldOfView * SCREEN_HEIGHT;
+    g_SkyState.horizonLevels[viewIndex] =
+        (-g_SkyState.pitches[viewIndex] * pitchScale) + (view->eye[1] * SKY_EYE_HEIGHT_SCALE);
+    if (g_SkyState.horizonLevels[viewIndex] < SKY_HORIZON_LEVEL_MIN) {
+        g_SkyState.horizonLevels[viewIndex] = SKY_HORIZON_LEVEL_MIN;
+    }
 
-  vertices[1].v.ob[AXIS_Y] =
-      (g_SkyState.horizonLevels[viewIndex] + SKY_HORIZON_BIAS) *
-      SKY_HORIZON_TO_HEIGHT;
-  vertices[2].v.ob[AXIS_Y] =
-      (g_SkyState.horizonLevels[viewIndex] + SKY_HORIZON_BIAS) *
-      SKY_HORIZON_TO_HEIGHT;
-  vertices[1].v.ob[AXIS_Z] =
-      SKY_TOP_DEPTH - (g_SkyState.pitches[viewIndex] * SKY_PITCH_TO_DEPTH);
-  vertices[2].v.ob[AXIS_Z] =
-      SKY_TOP_DEPTH - (g_SkyState.pitches[viewIndex] * SKY_PITCH_TO_DEPTH);
-  vertices[6].v.ob[AXIS_Z] =
-      SKY_TOP_DEPTH - (-g_SkyState.pitches[viewIndex] * SKY_PITCH_TO_DEPTH);
-  vertices[7].v.ob[AXIS_Z] =
-      SKY_TOP_DEPTH - (-g_SkyState.pitches[viewIndex] * SKY_PITCH_TO_DEPTH);
-  if (vertices[1].v.ob[AXIS_Y] < -SKY_HEIGHT_LIMIT) {
-    clippedHeight = (vertices[1].v.ob[AXIS_Y] + SKY_HEIGHT_LIMIT) /
-        (1 << SKY_CLIPPED_HEIGHT_SHIFT);
-    vertices[1].v.ob[AXIS_Y] = -SKY_HEIGHT_LIMIT;
-  }
+    g_SkyState.screenHeights[viewIndex] = SCREEN_HEIGHT;
+    g_SkyState.lookAtLevels[viewIndex] = g_SkyState.horizonLevels[viewIndex] -
+        (((view->lookAt[1] * slope) - view->eye[1]) * SKY_EYE_HEIGHT_SCALE);
 
-  if (vertices[2].v.ob[AXIS_Y] < -SKY_HEIGHT_LIMIT) {
-    vertices[2].v.ob[AXIS_Y] = -SKY_HEIGHT_LIMIT;
-  }
+    if (IsGameFlagSet(GAME_FLAG_CYCLE_SKY_CONDITIONS)) {
+        if (g_ControllerStates[0].pressedButtons & U_CBUTTONS) {
+            g_HoleSetup.conditions.isRaining =
+                (u32)(g_HoleSetup.conditions.isRaining + 1) % SKY_DEBUG_CYCLE_LENGTH;
+            InitSkyColors();
+        }
 
-  if (vertices[1].v.ob[AXIS_Y] > SKY_HEIGHT_LIMIT) {
-    vertices[1].v.ob[AXIS_Y] = SKY_HEIGHT_LIMIT;
-  }
+        if (g_ControllerStates[0].pressedButtons & D_CBUTTONS) {
+            g_HoleSetup.conditions.sceneColorIndex =
+                (g_HoleSetup.conditions.sceneColorIndex + 1) % SKY_DEBUG_CYCLE_LENGTH;
+            InitSkyColors();
+        }
+    }
 
-  if (vertices[2].v.ob[AXIS_Y] > SKY_HEIGHT_LIMIT) {
-    vertices[2].v.ob[AXIS_Y] = SKY_HEIGHT_LIMIT;
-  }
+    clippedHeight = 0;
+    scroll = -(f32)(g_HoleSetup.conditions.windSpeed / WIND_SPEED_UNIT) * SKY_SCROLL_PER_WIND_SPEED;
+    if (g_ScreenEffect != SCREEN_EFFECT_SAVED_FRAME) {
+        g_SkyState.scrollY += scroll;
+    }
 
-  vertices[6].v.ob[AXIS_Y] = vertices[1].v.ob[AXIS_Y];
-  vertices[7].v.ob[AXIS_Y] = vertices[2].v.ob[AXIS_Y];
+    if (g_SkyState.scrollX > SKY_SCROLL_X_WRAP) {
+        g_SkyState.scrollX -= SKY_SCROLL_X_WRAP;
+    }
 
-  /* Each row of texture coordinates lies at a distance along the viewed wind
-   * direction */
-  sine = sinf(g_SkyState.viewedWindAngles[viewIndex]);
-  cosine = cosf(g_SkyState.viewedWindAngles[viewIndex]);
-  distance = clippedHeight + SKY_TEXTURE_FAR_DISTANCE;
-  coordinate = (sine * distance) - (cosine * SKY_TEXTURE_HALF_WIDTH);
-  vertices[1].v.tc[TEXTURE_AXIS_S] =
-      ((s32)coordinate * SKY_TEXTURE_SCALE) + g_SkyState.scrollX;
-  coordinate = (cosine * distance) + (sine * SKY_TEXTURE_HALF_WIDTH);
-  vertices[1].v.tc[TEXTURE_AXIS_T] =
-      ((s32)coordinate * SKY_TEXTURE_SCALE) + g_SkyState.scrollY;
-  coordinate = (sine * distance) + (cosine * SKY_TEXTURE_HALF_WIDTH);
-  vertices[2].v.tc[TEXTURE_AXIS_S] =
-      ((s32)coordinate * SKY_TEXTURE_SCALE) + g_SkyState.scrollX;
-  coordinate = (cosine * distance) - (sine * SKY_TEXTURE_HALF_WIDTH);
-  pitches = g_SkyState.pitches;
-  vertices[2].v.tc[TEXTURE_AXIS_T] =
-      ((s32)coordinate * SKY_TEXTURE_SCALE) + g_SkyState.scrollY;
-  horizonHalfWidth = SCREEN_WIDTH;
-  distance = SKY_TEXTURE_NEAR_DISTANCE -
-      (pitches[viewIndex] * horizonHalfWidth * (2 / M_PI)) + clippedHeight;
-  coordinate = (sine * distance) - (cosine * SKY_TEXTURE_HALF_WIDTH);
-  vertices[0].v.tc[TEXTURE_AXIS_S] =
-      ((s32)coordinate * SKY_TEXTURE_SCALE) + g_SkyState.scrollX;
-  coordinate = (cosine * distance) + (sine * SKY_TEXTURE_HALF_WIDTH);
-  vertices[0].v.tc[TEXTURE_AXIS_T] =
-      ((s32)coordinate * SKY_TEXTURE_SCALE) + g_SkyState.scrollY;
-  coordinate = (sine * distance) + (cosine * SKY_TEXTURE_HALF_WIDTH);
-  vertices[3].v.tc[TEXTURE_AXIS_S] =
-      ((s32)coordinate * SKY_TEXTURE_SCALE) + g_SkyState.scrollX;
-  coordinate = (cosine * distance) - (sine * SKY_TEXTURE_HALF_WIDTH);
-  vertices[3].v.tc[TEXTURE_AXIS_T] =
-      ((s32)coordinate * SKY_TEXTURE_SCALE) + g_SkyState.scrollY;
-  vertices[4].v.tc[TEXTURE_AXIS_S] =
-      ((s32)(sine * distance) * SKY_TEXTURE_SCALE) + g_SkyState.scrollX;
-  vertices[4].v.tc[TEXTURE_AXIS_T] =
-      ((s32)(cosine * distance) * SKY_TEXTURE_SCALE) + g_SkyState.scrollY;
-  distance = (SKY_TEXTURE_HORIZON_DISTANCE -
-                 (-pitches[viewIndex] * horizonHalfWidth * (2 / M_PI))) *
-      horizonHalfWidth / SCREEN_WIDTH;
-  coordinate = (sine * distance) - (cosine * horizonHalfWidth);
-  vertices[6].v.tc[TEXTURE_AXIS_S] =
-      ((s32)coordinate * SKY_TEXTURE_SCALE) + g_SkyState.scrollX;
-  coordinate = (cosine * distance) + (sine * horizonHalfWidth);
-  vertices[6].v.tc[TEXTURE_AXIS_T] =
-      ((s32)coordinate * SKY_TEXTURE_SCALE) + g_SkyState.scrollY;
-  coordinate = (sine * distance) + (cosine * horizonHalfWidth);
-  vertices[7].v.tc[TEXTURE_AXIS_S] =
-      ((s32)coordinate * SKY_TEXTURE_SCALE) + g_SkyState.scrollX;
-  coordinate = (cosine * distance) - (sine * horizonHalfWidth);
-  vertices[7].v.tc[TEXTURE_AXIS_T] =
-      ((s32)coordinate * SKY_TEXTURE_SCALE) + g_SkyState.scrollY;
-  distance = (SKY_TEXTURE_NEAR_DISTANCE -
-                 (-pitches[viewIndex] * horizonHalfWidth * (2 / M_PI))) *
-      horizonHalfWidth / SCREEN_WIDTH;
-  coordinate = (sine * distance) - (cosine * horizonHalfWidth);
-  vertices[5].v.tc[TEXTURE_AXIS_S] =
-      ((s32)coordinate * SKY_TEXTURE_SCALE) + g_SkyState.scrollX;
-  coordinate = (cosine * distance) + (sine * horizonHalfWidth);
-  vertices[5].v.tc[TEXTURE_AXIS_T] =
-      ((s32)coordinate * SKY_TEXTURE_SCALE) + g_SkyState.scrollY;
-  coordinate = (sine * distance) + (cosine * horizonHalfWidth);
-  vertices[8].v.tc[TEXTURE_AXIS_S] =
-      ((s32)coordinate * SKY_TEXTURE_SCALE) + g_SkyState.scrollX;
-  coordinate = (cosine * distance) - (sine * horizonHalfWidth);
-  vertices[8].v.tc[TEXTURE_AXIS_T] =
-      ((s32)coordinate * SKY_TEXTURE_SCALE) + g_SkyState.scrollY;
-  vertices[9].v.tc[TEXTURE_AXIS_S] =
-      ((s32)(sine * distance) * SKY_TEXTURE_SCALE) + g_SkyState.scrollX;
-  vertices[9].v.tc[TEXTURE_AXIS_T] =
-      ((s32)(cosine * distance) * SKY_TEXTURE_SCALE) + g_SkyState.scrollY;
+    if (g_SkyState.scrollX < -SKY_SCROLL_X_WRAP) {
+        g_SkyState.scrollX += SKY_SCROLL_X_WRAP;
+    }
+
+    if (scroll > 0.0f) {
+        if (g_SkyState.scrollY > SKY_SCROLL_Y_WRAP) {
+            g_SkyState.scrollY -= SKY_SCROLL_Y_PERIOD;
+        }
+    }
+    else if (g_SkyState.scrollY < -SKY_SCROLL_Y_WRAP) {
+        g_SkyState.scrollY += SKY_SCROLL_Y_PERIOD;
+    }
+
+    /* Vertices 1, 2, 6 and 7 follow the horizon level; 0, 3 and 4 follow the
+     * pitch alone */
+    if (g_SkyState.pitches[viewIndex] < 0.0f) {
+        vertices[0].v.ob[AXIS_Y] =
+            (SCREEN_HEIGHT / 2) - (g_SkyState.pitches[viewIndex] * (SCREEN_HEIGHT / 2));
+        vertices[3].v.ob[AXIS_Y] =
+            (SCREEN_HEIGHT / 2) - (g_SkyState.pitches[viewIndex] * (SCREEN_HEIGHT / 2));
+        vertices[4].v.ob[AXIS_Y] =
+            (SCREEN_HEIGHT / 2) - (g_SkyState.pitches[viewIndex] * (SCREEN_HEIGHT / 2));
+    }
+    else {
+        vertices[0].v.ob[AXIS_Y] = SCREEN_HEIGHT / 2;
+        vertices[3].v.ob[AXIS_Y] = SCREEN_HEIGHT / 2;
+        vertices[4].v.ob[AXIS_Y] = SCREEN_HEIGHT / 2;
+    }
+
+    vertices[1].v.ob[AXIS_Y] =
+        (g_SkyState.horizonLevels[viewIndex] + SKY_HORIZON_BIAS) * SKY_HORIZON_TO_HEIGHT;
+    vertices[2].v.ob[AXIS_Y] =
+        (g_SkyState.horizonLevels[viewIndex] + SKY_HORIZON_BIAS) * SKY_HORIZON_TO_HEIGHT;
+    vertices[1].v.ob[AXIS_Z] = SKY_TOP_DEPTH - (g_SkyState.pitches[viewIndex] * SKY_PITCH_TO_DEPTH);
+    vertices[2].v.ob[AXIS_Z] = SKY_TOP_DEPTH - (g_SkyState.pitches[viewIndex] * SKY_PITCH_TO_DEPTH);
+    vertices[6].v.ob[AXIS_Z] =
+        SKY_TOP_DEPTH - (-g_SkyState.pitches[viewIndex] * SKY_PITCH_TO_DEPTH);
+    vertices[7].v.ob[AXIS_Z] =
+        SKY_TOP_DEPTH - (-g_SkyState.pitches[viewIndex] * SKY_PITCH_TO_DEPTH);
+    if (vertices[1].v.ob[AXIS_Y] < -SKY_HEIGHT_LIMIT) {
+        clippedHeight =
+            (vertices[1].v.ob[AXIS_Y] + SKY_HEIGHT_LIMIT) / (1 << SKY_CLIPPED_HEIGHT_SHIFT);
+        vertices[1].v.ob[AXIS_Y] = -SKY_HEIGHT_LIMIT;
+    }
+
+    if (vertices[2].v.ob[AXIS_Y] < -SKY_HEIGHT_LIMIT) {
+        vertices[2].v.ob[AXIS_Y] = -SKY_HEIGHT_LIMIT;
+    }
+
+    if (vertices[1].v.ob[AXIS_Y] > SKY_HEIGHT_LIMIT) {
+        vertices[1].v.ob[AXIS_Y] = SKY_HEIGHT_LIMIT;
+    }
+
+    if (vertices[2].v.ob[AXIS_Y] > SKY_HEIGHT_LIMIT) {
+        vertices[2].v.ob[AXIS_Y] = SKY_HEIGHT_LIMIT;
+    }
+
+    vertices[6].v.ob[AXIS_Y] = vertices[1].v.ob[AXIS_Y];
+    vertices[7].v.ob[AXIS_Y] = vertices[2].v.ob[AXIS_Y];
+
+    /* Each row of texture coordinates lies at a distance along the viewed wind
+     * direction */
+    sine = sinf(g_SkyState.viewedWindAngles[viewIndex]);
+    cosine = cosf(g_SkyState.viewedWindAngles[viewIndex]);
+    distance = clippedHeight + SKY_TEXTURE_FAR_DISTANCE;
+    coordinate = (sine * distance) - (cosine * SKY_TEXTURE_HALF_WIDTH);
+    vertices[1].v.tc[TEXTURE_AXIS_S] = ((s32)coordinate * SKY_TEXTURE_SCALE) + g_SkyState.scrollX;
+    coordinate = (cosine * distance) + (sine * SKY_TEXTURE_HALF_WIDTH);
+    vertices[1].v.tc[TEXTURE_AXIS_T] = ((s32)coordinate * SKY_TEXTURE_SCALE) + g_SkyState.scrollY;
+    coordinate = (sine * distance) + (cosine * SKY_TEXTURE_HALF_WIDTH);
+    vertices[2].v.tc[TEXTURE_AXIS_S] = ((s32)coordinate * SKY_TEXTURE_SCALE) + g_SkyState.scrollX;
+    coordinate = (cosine * distance) - (sine * SKY_TEXTURE_HALF_WIDTH);
+    pitches = g_SkyState.pitches;
+    vertices[2].v.tc[TEXTURE_AXIS_T] = ((s32)coordinate * SKY_TEXTURE_SCALE) + g_SkyState.scrollY;
+    horizonHalfWidth = SCREEN_WIDTH;
+    distance = SKY_TEXTURE_NEAR_DISTANCE - (pitches[viewIndex] * horizonHalfWidth * (2 / M_PI)) +
+        clippedHeight;
+    coordinate = (sine * distance) - (cosine * SKY_TEXTURE_HALF_WIDTH);
+    vertices[0].v.tc[TEXTURE_AXIS_S] = ((s32)coordinate * SKY_TEXTURE_SCALE) + g_SkyState.scrollX;
+    coordinate = (cosine * distance) + (sine * SKY_TEXTURE_HALF_WIDTH);
+    vertices[0].v.tc[TEXTURE_AXIS_T] = ((s32)coordinate * SKY_TEXTURE_SCALE) + g_SkyState.scrollY;
+    coordinate = (sine * distance) + (cosine * SKY_TEXTURE_HALF_WIDTH);
+    vertices[3].v.tc[TEXTURE_AXIS_S] = ((s32)coordinate * SKY_TEXTURE_SCALE) + g_SkyState.scrollX;
+    coordinate = (cosine * distance) - (sine * SKY_TEXTURE_HALF_WIDTH);
+    vertices[3].v.tc[TEXTURE_AXIS_T] = ((s32)coordinate * SKY_TEXTURE_SCALE) + g_SkyState.scrollY;
+    vertices[4].v.tc[TEXTURE_AXIS_S] =
+        ((s32)(sine * distance) * SKY_TEXTURE_SCALE) + g_SkyState.scrollX;
+    vertices[4].v.tc[TEXTURE_AXIS_T] =
+        ((s32)(cosine * distance) * SKY_TEXTURE_SCALE) + g_SkyState.scrollY;
+    distance =
+        (SKY_TEXTURE_HORIZON_DISTANCE - (-pitches[viewIndex] * horizonHalfWidth * (2 / M_PI))) *
+        horizonHalfWidth / SCREEN_WIDTH;
+    coordinate = (sine * distance) - (cosine * horizonHalfWidth);
+    vertices[6].v.tc[TEXTURE_AXIS_S] = ((s32)coordinate * SKY_TEXTURE_SCALE) + g_SkyState.scrollX;
+    coordinate = (cosine * distance) + (sine * horizonHalfWidth);
+    vertices[6].v.tc[TEXTURE_AXIS_T] = ((s32)coordinate * SKY_TEXTURE_SCALE) + g_SkyState.scrollY;
+    coordinate = (sine * distance) + (cosine * horizonHalfWidth);
+    vertices[7].v.tc[TEXTURE_AXIS_S] = ((s32)coordinate * SKY_TEXTURE_SCALE) + g_SkyState.scrollX;
+    coordinate = (cosine * distance) - (sine * horizonHalfWidth);
+    vertices[7].v.tc[TEXTURE_AXIS_T] = ((s32)coordinate * SKY_TEXTURE_SCALE) + g_SkyState.scrollY;
+    distance = (SKY_TEXTURE_NEAR_DISTANCE - (-pitches[viewIndex] * horizonHalfWidth * (2 / M_PI))) *
+        horizonHalfWidth / SCREEN_WIDTH;
+    coordinate = (sine * distance) - (cosine * horizonHalfWidth);
+    vertices[5].v.tc[TEXTURE_AXIS_S] = ((s32)coordinate * SKY_TEXTURE_SCALE) + g_SkyState.scrollX;
+    coordinate = (cosine * distance) + (sine * horizonHalfWidth);
+    vertices[5].v.tc[TEXTURE_AXIS_T] = ((s32)coordinate * SKY_TEXTURE_SCALE) + g_SkyState.scrollY;
+    coordinate = (sine * distance) + (cosine * horizonHalfWidth);
+    vertices[8].v.tc[TEXTURE_AXIS_S] = ((s32)coordinate * SKY_TEXTURE_SCALE) + g_SkyState.scrollX;
+    coordinate = (cosine * distance) - (sine * horizonHalfWidth);
+    vertices[8].v.tc[TEXTURE_AXIS_T] = ((s32)coordinate * SKY_TEXTURE_SCALE) + g_SkyState.scrollY;
+    vertices[9].v.tc[TEXTURE_AXIS_S] =
+        ((s32)(sine * distance) * SKY_TEXTURE_SCALE) + g_SkyState.scrollX;
+    vertices[9].v.tc[TEXTURE_AXIS_T] =
+        ((s32)(cosine * distance) * SKY_TEXTURE_SCALE) + g_SkyState.scrollY;
 }
 
 /* Sets whether the course's drawing gives its primitives a fixed depth */
 void UsePrimitiveDepth(Boolean isPrimitiveDepthSet) {
-  f_IsPrimitiveDepthSet = isPrimitiveDepthSet;
+    f_IsPrimitiveDepthSet = isPrimitiveDepthSet;
 }
 
 /* The sky dome is drawn this far in front of the camera */
@@ -1750,198 +2318,340 @@ static Mtx f_TileMatrices[MATRIX_BUFFER_COUNT][FRAME_TILE_COUNT];
  * The sun is a textured rectangle placed from the camera's yaw against the
  * light's, and the dome's height above the horizon.
  */
-void DrawSky(Gfx** displayListHead, f32 eyeY UNUSED, s32 unusedSetting UNUSED,
-    s32 cameraIndex) {
-  Gfx* gfx = *displayListHead;
-  SkyColors* colors;
-  Mat4 matrix;
-  /* The original frame has room for this; without it 194 words differ, none
-   * in shape */
-  s32 unused[16] UNUSED;
-  Vec3 rotation;
-  Vec3 translation;
-  Radians angle;
+void DrawSky(Gfx **displayListHead, f32 eyeY UNUSED, s32 unusedSetting UNUSED, s32 cameraIndex) {
+    Gfx *gfx = *displayListHead;
+    SkyColors *colors;
+    Mat4 matrix;
+    /* The original frame has room for this; without it 194 words differ, none
+     * in shape */
+    s32 unused[16] UNUSED;
+    Vec3 rotation;
+    Vec3 translation;
+    Radians angle;
 
-  UpdateSky(&g_Cameras[cameraIndex].view, cameraIndex);
+    UpdateSky(&g_Cameras[cameraIndex].view, cameraIndex);
 
-  /* Unlike the other lookups of g_SkyColors, this steps by three times, not
-   * SKY_TIME_COUNT, in the rain */
-  colors = &g_SkyColors[GetCourseRecordIndex()]
-                       [(g_HoleSetup.conditions.isRaining * 3) +
-                           f_SkyColorTimeIndex];
-  translation[AXIS_X] = 0.0f;
-  translation[AXIS_Y] = 0.0f;
-  rotation[AXIS_X] = 0.0f;
-  rotation[AXIS_Y] = 0.0f;
-  rotation[AXIS_Z] = 0.0f;
-  translation[AXIS_Z] = SKY_DOME_DISTANCE;
-  BuildRotationMatrix(matrix, rotation, translation);
-  ConvertMatrixToFixed(matrix, &f_SkyModelMatrix);
-  gDPSetPrimColor(gfx++, 0, 0, 127, 127, 127, OPAQUE_ALPHA);
-  gDPPipeSync(gfx++);
-  gDPPipeSync(gfx++);
-  gDPSetCycleType(gfx++, G_CYC_1CYCLE);
-  if (f_IsPrimitiveDepthSet) {
+    /* Unlike the other lookups of g_SkyColors, this steps by three times, not
+     * SKY_TIME_COUNT, in the rain */
+    colors = &g_SkyColors[GetCourseRecordIndex()]
+                         [(g_HoleSetup.conditions.isRaining * 3) + f_SkyColorTimeIndex];
+    translation[AXIS_X] = 0.0f;
+    translation[AXIS_Y] = 0.0f;
+    rotation[AXIS_X] = 0.0f;
+    rotation[AXIS_Y] = 0.0f;
+    rotation[AXIS_Z] = 0.0f;
+    translation[AXIS_Z] = SKY_DOME_DISTANCE;
+    BuildRotationMatrix(matrix, rotation, translation);
+    ConvertMatrixToFixed(matrix, &f_SkyModelMatrix);
+    gDPSetPrimColor(gfx++, 0, 0, 127, 127, 127, OPAQUE_ALPHA);
     gDPPipeSync(gfx++);
-    gDPSetRenderMode(gfx++, G_RM_ZB_OPA_SURF, G_RM_ZB_OPA_SURF2);
     gDPPipeSync(gfx++);
-    gDPSetDepthSource(gfx++, G_ZS_PRIM);
-    gDPSetPrimDepth(gfx++, SKY_DEPTH, 0);
-  } else {
+    gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+    if (f_IsPrimitiveDepthSet) {
+        gDPPipeSync(gfx++);
+        gDPSetRenderMode(gfx++, G_RM_ZB_OPA_SURF, G_RM_ZB_OPA_SURF2);
+        gDPPipeSync(gfx++);
+        gDPSetDepthSource(gfx++, G_ZS_PRIM);
+        gDPSetPrimDepth(gfx++, SKY_DEPTH, 0);
+    }
+    else {
+        gDPPipeSync(gfx++);
+        gDPSetRenderMode(gfx++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
+    }
+
     gDPPipeSync(gfx++);
-    gDPSetRenderMode(gfx++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
-  }
-
-  gDPPipeSync(gfx++);
-  gDPSetTextureLUT(gfx++, G_TT_NONE);
-  gDPPipeSync(gfx++);
-  gDPSetTexturePersp(gfx++, G_TP_PERSP);
-  gDPPipeSync(gfx++);
-  gDPSetTextureFilter(gfx++, G_TF_BILERP);
-  gDPPipeSync(gfx++);
-  gDPSetAlphaCompare(gfx++, G_AC_NONE);
-  gSPClearGeometryMode(gfx++, ALL_GEOMETRY_MODES);
-  gSPSetGeometryMode(gfx++, G_SHADE | G_CULL_BACK | G_SHADING_SMOOTH);
-  if (colors->addsNoise == 0) {
-    gDPSetCombineLERP(gfx++, ENVIRONMENT, SHADE, TEXEL0, SHADE, 0, 0, 0, TEXEL0,
-        ENVIRONMENT, SHADE, TEXEL0, SHADE, 0, 0, 0, TEXEL0);
-  } else {
-    gDPSetCombineLERP(gfx++, TEXEL0, 0, ENVIRONMENT, SHADE, 0, 0, 0, TEXEL0,
-        TEXEL0, 0, ENVIRONMENT, SHADE, 0, 0, 0, TEXEL0);
-  }
-
-  gDPSetEnvColor(gfx++, colors->noiseColor[0], colors->noiseColor[1],
-      colors->noiseColor[2], OPAQUE_ALPHA);
-  gDPLoadTextureBlock(gfx++, TextureAddress(g_NoiseTexels), G_IM_FMT_I,
-      G_IM_SIZ_8b, SKY_NOISE_IMAGE_SIZE, SKY_NOISE_IMAGE_SIZE, 0, G_TX_WRAP,
-      G_TX_WRAP, SKY_NOISE_MASK, SKY_NOISE_MASK, G_TX_NOLOD, G_TX_NOLOD);
-  gSPTexture(
-      gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0, G_TX_RENDERTILE, G_ON);
-  gDPPipeSync(gfx++);
-  gSPMatrix(gfx++, PhysicalAddress(&g_ScreenEffectProjection),
-      G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
-  gSPMatrix(gfx++, PhysicalAddress(&f_SkyModelMatrix),
-      G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
-  gSPPerspNormalize(gfx++, g_ScreenEffectPerspNorm);
-  gSPVertex(gfx++,
-      f_SkyVertices[g_MatrixBufferIndex + (cameraIndex * MATRIX_BUFFER_COUNT)],
-      SKY_VERTEX_COUNT, 0);
-  gDPPipeSync(gfx++);
-  gSP1Triangle(gfx++, 0, 1, 4, 0);
-  gSP1Triangle(gfx++, 1, 2, 4, 0);
-  gSP1Triangle(gfx++, 4, 2, 3, 0);
-  gDPPipeSync(gfx++);
-  if (colors->hasLensFlare == TRUE) {
-    angle = -g_SkyState.yaws[cameraIndex] - SUN_YAW_OFFSET -
-        (g_HoleSetup.conditions.lightYaw * LIGHT_YAW_TO_RADIANS);
-    if (angle > FULL_TURN_RADIANS) {
-      angle -= FULL_TURN_RADIANS;
+    gDPSetTextureLUT(gfx++, G_TT_NONE);
+    gDPPipeSync(gfx++);
+    gDPSetTexturePersp(gfx++, G_TP_PERSP);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_BILERP);
+    gDPPipeSync(gfx++);
+    gDPSetAlphaCompare(gfx++, G_AC_NONE);
+    gSPClearGeometryMode(gfx++, ALL_GEOMETRY_MODES);
+    gSPSetGeometryMode(gfx++, G_SHADE | G_CULL_BACK | G_SHADING_SMOOTH);
+    if (colors->addsNoise == 0) {
+        gDPSetCombineLERP(
+            gfx++,
+            ENVIRONMENT,
+            SHADE,
+            TEXEL0,
+            SHADE,
+            0,
+            0,
+            0,
+            TEXEL0,
+            ENVIRONMENT,
+            SHADE,
+            TEXEL0,
+            SHADE,
+            0,
+            0,
+            0,
+            TEXEL0
+        );
+    }
+    else {
+        gDPSetCombineLERP(
+            gfx++,
+            TEXEL0,
+            0,
+            ENVIRONMENT,
+            SHADE,
+            0,
+            0,
+            0,
+            TEXEL0,
+            TEXEL0,
+            0,
+            ENVIRONMENT,
+            SHADE,
+            0,
+            0,
+            0,
+            TEXEL0
+        );
     }
 
-    if (angle < 0.0f) {
-      angle += FULL_TURN_RADIANS;
+    gDPSetEnvColor(
+        gfx++,
+        colors->noiseColor[0],
+        colors->noiseColor[1],
+        colors->noiseColor[2],
+        OPAQUE_ALPHA
+    );
+    gDPLoadTextureBlock(
+        gfx++,
+        TextureAddress(g_NoiseTexels),
+        G_IM_FMT_I,
+        G_IM_SIZ_8b,
+        SKY_NOISE_IMAGE_SIZE,
+        SKY_NOISE_IMAGE_SIZE,
+        0,
+        G_TX_WRAP,
+        G_TX_WRAP,
+        SKY_NOISE_MASK,
+        SKY_NOISE_MASK,
+        G_TX_NOLOD,
+        G_TX_NOLOD
+    );
+    gSPTexture(gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0, G_TX_RENDERTILE, G_ON);
+    gDPPipeSync(gfx++);
+    gSPMatrix(
+        gfx++,
+        PhysicalAddress(&g_ScreenEffectProjection),
+        G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH
+    );
+    gSPMatrix(
+        gfx++,
+        PhysicalAddress(&f_SkyModelMatrix),
+        G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH
+    );
+    gSPPerspNormalize(gfx++, g_ScreenEffectPerspNorm);
+    gSPVertex(
+        gfx++,
+        f_SkyVertices[g_MatrixBufferIndex + (cameraIndex * MATRIX_BUFFER_COUNT)],
+        SKY_VERTEX_COUNT,
+        0
+    );
+    gDPPipeSync(gfx++);
+    gSP1Triangle(gfx++, 0, 1, 4, 0);
+    gSP1Triangle(gfx++, 1, 2, 4, 0);
+    gSP1Triangle(gfx++, 4, 2, 3, 0);
+    gDPPipeSync(gfx++);
+    if (colors->hasLensFlare == TRUE) {
+        angle = -g_SkyState.yaws[cameraIndex] - SUN_YAW_OFFSET -
+            (g_HoleSetup.conditions.lightYaw * LIGHT_YAW_TO_RADIANS);
+        if (angle > FULL_TURN_RADIANS) {
+            angle -= FULL_TURN_RADIANS;
+        }
+
+        if (angle < 0.0f) {
+            angle += FULL_TURN_RADIANS;
+        }
+
+        if (angle > FULL_TURN_RADIANS) {
+            angle -= FULL_TURN_RADIANS;
+        }
+
+        if (angle < 0.0f) {
+            angle += FULL_TURN_RADIANS;
+        }
+
+        f_SunScreenX[cameraIndex] = angle * SUN_TURN_WIDTH * (1 / FULL_TURN_RADIANS);
+        f_SunScreenY[cameraIndex] =
+            -g_SkyState.horizonLevels[cameraIndex] - colors->sun->height + SUN_HORIZON_Y;
+        if (f_SunScreenX[cameraIndex] > SUN_TURN_WIDTH / 2) {
+            f_SunScreenX[cameraIndex] -= SUN_TURN_WIDTH;
+        }
+
+        if (IsNearScreen(f_SunScreenX[cameraIndex], f_SunScreenY[cameraIndex], SUN_CULL_MARGIN)) {
+            gDPPipeSync(gfx++);
+            gDPSetAlphaCompare(gfx++, G_AC_NONE);
+            gDPPipeSync(gfx++);
+            gDPSetTexturePersp(gfx++, G_TP_NONE);
+            gDPPipeSync(gfx++);
+            gDPSetTextureLUT(gfx++, G_TT_NONE);
+            gDPPipeSync(gfx++);
+            gDPPipeSync(gfx++);
+            gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+            gDPPipeSync(gfx++);
+            gDPSetTextureFilter(gfx++, G_TF_AVERAGE);
+            gDPPipeSync(gfx++);
+            gDPSetColorDither(gfx++, G_CD_MAGICSQ);
+            if (f_IsPrimitiveDepthSet) {
+                gDPPipeSync(gfx++);
+                gDPSetRenderMode(gfx++, G_RM_ZB_XLU_SURF | Z_UPD, G_RM_ZB_XLU_SURF2);
+                gDPSetPrimDepth(gfx++, SUN_DEPTH, 0);
+            }
+            else {
+                gDPPipeSync(gfx++);
+                gDPSetRenderMode(gfx++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
+            }
+
+            gSPTexture(gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0, G_TX_RENDERTILE, G_ON);
+            if (colors->sun->imageKind == SKY_IMAGE_KIND_TWO_TEXTURES) {
+                gDPPipeSync(gfx++);
+                gDPSetAlphaDither(gfx++, G_AD_PATTERN);
+                gDPPipeSync(gfx++);
+                gDPPipeSync(gfx++);
+                gDPSetCycleType(gfx++, G_CYC_2CYCLE);
+                gDPSetCombineLERP(
+                    gfx++,
+                    TEXEL1,
+                    0,
+                    TEXEL0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    TEXEL1,
+                    TEXEL1,
+                    0,
+                    COMBINED,
+                    0,
+                    0,
+                    0,
+                    0,
+                    COMBINED
+                );
+                gDPLoadTextureBlock(
+                    gfx++,
+                    TextureAddress(ImageBody(g_SkyImage)),
+                    G_IM_FMT_RGBA,
+                    G_IM_SIZ_16b,
+                    SUN_IMAGE_SIZE,
+                    SUN_IMAGE_SIZE,
+                    0,
+                    G_TX_WRAP,
+                    G_TX_WRAP,
+                    G_TX_NOMASK,
+                    G_TX_NOMASK,
+                    G_TX_NOLOD,
+                    G_TX_NOLOD
+                );
+                gDPLoadMultiBlock_4b(
+                    gfx++,
+                    TextureAddress(ImageBody(g_SkyImage + SKY_IMAGE_HALF_OFFSET)),
+                    SUN_MASK_TMEM,
+                    1,
+                    G_IM_FMT_I,
+                    SUN_IMAGE_SIZE,
+                    SUN_IMAGE_SIZE,
+                    0,
+                    G_TX_WRAP,
+                    G_TX_WRAP,
+                    G_TX_NOMASK,
+                    G_TX_NOMASK,
+                    G_TX_NOLOD,
+                    G_TX_NOLOD
+                );
+                gDPPipeSync(gfx++);
+                gSPScisTextureRectangle(
+                    gfx++,
+                    QuarterPixels((s32)f_SunScreenX[cameraIndex] - colors->sun->radius + 1),
+                    QuarterPixels((s32)f_SunScreenY[cameraIndex] - colors->sun->radius + 1),
+                    QuarterPixels((s32)f_SunScreenX[cameraIndex] + colors->sun->radius),
+                    QuarterPixels((s32)f_SunScreenY[cameraIndex] + colors->sun->radius),
+                    G_TX_RENDERTILE,
+                    0,
+                    0,
+                    colors->sun->texelStep,
+                    colors->sun->texelStep
+                );
+                gDPPipeSync(gfx++);
+            }
+            else {
+                gDPPipeSync(gfx++);
+                gDPSetAlphaDither(gfx++, G_AD_NOISE);
+                gDPSetCombineLERP(
+                    gfx++,
+                    PRIMITIVE,
+                    ENVIRONMENT,
+                    TEXEL0,
+                    ENVIRONMENT,
+                    0,
+                    0,
+                    0,
+                    TEXEL0,
+                    PRIMITIVE,
+                    ENVIRONMENT,
+                    TEXEL0,
+                    ENVIRONMENT,
+                    0,
+                    0,
+                    0,
+                    TEXEL0
+                );
+                gDPLoadTextureBlock(
+                    gfx++,
+                    TextureAddress(ImageBody(g_SkyImage)),
+                    G_IM_FMT_I,
+                    G_IM_SIZ_8b,
+                    SUN_GLOW_IMAGE_SIZE,
+                    SUN_GLOW_IMAGE_SIZE,
+                    0,
+                    G_TX_MIRROR,
+                    G_TX_MIRROR,
+                    SUN_GLOW_MASK,
+                    SUN_GLOW_MASK,
+                    G_TX_NOLOD,
+                    G_TX_NOLOD
+                );
+                gDPSetPrimColor(
+                    gfx++,
+                    0,
+                    0,
+                    colors->sun->primColor[0],
+                    colors->sun->primColor[1],
+                    colors->sun->primColor[2],
+                    OPAQUE_ALPHA
+                );
+                gDPSetEnvColor(
+                    gfx++,
+                    colors->sun->envColor[0],
+                    colors->sun->envColor[1],
+                    colors->sun->envColor[2],
+                    OPAQUE_ALPHA
+                );
+                gDPPipeSync(gfx++);
+                gSPScisTextureRectangle(
+                    gfx++,
+                    QuarterPixels((s32)f_SunScreenX[cameraIndex] - colors->sun->radius + 1),
+                    QuarterPixels((s32)f_SunScreenY[cameraIndex] - colors->sun->radius + 1),
+                    QuarterPixels((s32)f_SunScreenX[cameraIndex] + colors->sun->radius),
+                    QuarterPixels((s32)f_SunScreenY[cameraIndex] + colors->sun->radius),
+                    G_TX_RENDERTILE,
+                    0,
+                    0,
+                    colors->sun->texelStep,
+                    colors->sun->texelStep
+                );
+                gDPPipeSync(gfx++);
+            }
+        }
     }
 
-    if (angle > FULL_TURN_RADIANS) {
-      angle -= FULL_TURN_RADIANS;
-    }
-
-    if (angle < 0.0f) {
-      angle += FULL_TURN_RADIANS;
-    }
-
-    f_SunScreenX[cameraIndex] =
-        angle * SUN_TURN_WIDTH * (1 / FULL_TURN_RADIANS);
-    f_SunScreenY[cameraIndex] = -g_SkyState.horizonLevels[cameraIndex] -
-        colors->sun->height + SUN_HORIZON_Y;
-    if (f_SunScreenX[cameraIndex] > SUN_TURN_WIDTH / 2) {
-      f_SunScreenX[cameraIndex] -= SUN_TURN_WIDTH;
-    }
-
-    if (IsNearScreen(f_SunScreenX[cameraIndex], f_SunScreenY[cameraIndex],
-            SUN_CULL_MARGIN)) {
-      gDPPipeSync(gfx++);
-      gDPSetAlphaCompare(gfx++, G_AC_NONE);
-      gDPPipeSync(gfx++);
-      gDPSetTexturePersp(gfx++, G_TP_NONE);
-      gDPPipeSync(gfx++);
-      gDPSetTextureLUT(gfx++, G_TT_NONE);
-      gDPPipeSync(gfx++);
-      gDPPipeSync(gfx++);
-      gDPSetCycleType(gfx++, G_CYC_1CYCLE);
-      gDPPipeSync(gfx++);
-      gDPSetTextureFilter(gfx++, G_TF_AVERAGE);
-      gDPPipeSync(gfx++);
-      gDPSetColorDither(gfx++, G_CD_MAGICSQ);
-      if (f_IsPrimitiveDepthSet) {
-        gDPPipeSync(gfx++);
-        gDPSetRenderMode(gfx++, G_RM_ZB_XLU_SURF | Z_UPD, G_RM_ZB_XLU_SURF2);
-        gDPSetPrimDepth(gfx++, SUN_DEPTH, 0);
-      } else {
-        gDPPipeSync(gfx++);
-        gDPSetRenderMode(gfx++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
-      }
-
-      gSPTexture(gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0,
-          G_TX_RENDERTILE, G_ON);
-      if (colors->sun->imageKind == SKY_IMAGE_KIND_TWO_TEXTURES) {
-        gDPPipeSync(gfx++);
-        gDPSetAlphaDither(gfx++, G_AD_PATTERN);
-        gDPPipeSync(gfx++);
-        gDPPipeSync(gfx++);
-        gDPSetCycleType(gfx++, G_CYC_2CYCLE);
-        gDPSetCombineLERP(gfx++, TEXEL1, 0, TEXEL0, 0, 0, 0, 0, TEXEL1, TEXEL1,
-            0, COMBINED, 0, 0, 0, 0, COMBINED);
-        gDPLoadTextureBlock(gfx++, TextureAddress(ImageBody(g_SkyImage)),
-            G_IM_FMT_RGBA, G_IM_SIZ_16b, SUN_IMAGE_SIZE, SUN_IMAGE_SIZE, 0,
-            G_TX_WRAP, G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
-            G_TX_NOLOD);
-        gDPLoadMultiBlock_4b(gfx++,
-            TextureAddress(ImageBody(g_SkyImage + SKY_IMAGE_HALF_OFFSET)),
-            SUN_MASK_TMEM, 1, G_IM_FMT_I, SUN_IMAGE_SIZE, SUN_IMAGE_SIZE, 0,
-            G_TX_WRAP, G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
-            G_TX_NOLOD);
-        gDPPipeSync(gfx++);
-        gSPScisTextureRectangle(gfx++,
-            QuarterPixels(
-                (s32)f_SunScreenX[cameraIndex] - colors->sun->radius + 1),
-            QuarterPixels(
-                (s32)f_SunScreenY[cameraIndex] - colors->sun->radius + 1),
-            QuarterPixels((s32)f_SunScreenX[cameraIndex] + colors->sun->radius),
-            QuarterPixels((s32)f_SunScreenY[cameraIndex] + colors->sun->radius),
-            G_TX_RENDERTILE, 0, 0, colors->sun->texelStep,
-            colors->sun->texelStep);
-        gDPPipeSync(gfx++);
-      } else {
-        gDPPipeSync(gfx++);
-        gDPSetAlphaDither(gfx++, G_AD_NOISE);
-        gDPSetCombineLERP(gfx++, PRIMITIVE, ENVIRONMENT, TEXEL0, ENVIRONMENT, 0,
-            0, 0, TEXEL0, PRIMITIVE, ENVIRONMENT, TEXEL0, ENVIRONMENT, 0, 0, 0,
-            TEXEL0);
-        gDPLoadTextureBlock(gfx++, TextureAddress(ImageBody(g_SkyImage)),
-            G_IM_FMT_I, G_IM_SIZ_8b, SUN_GLOW_IMAGE_SIZE, SUN_GLOW_IMAGE_SIZE,
-            0, G_TX_MIRROR, G_TX_MIRROR, SUN_GLOW_MASK, SUN_GLOW_MASK,
-            G_TX_NOLOD, G_TX_NOLOD);
-        gDPSetPrimColor(gfx++, 0, 0, colors->sun->primColor[0],
-            colors->sun->primColor[1], colors->sun->primColor[2], OPAQUE_ALPHA);
-        gDPSetEnvColor(gfx++, colors->sun->envColor[0],
-            colors->sun->envColor[1], colors->sun->envColor[2], OPAQUE_ALPHA);
-        gDPPipeSync(gfx++);
-        gSPScisTextureRectangle(gfx++,
-            QuarterPixels(
-                (s32)f_SunScreenX[cameraIndex] - colors->sun->radius + 1),
-            QuarterPixels(
-                (s32)f_SunScreenY[cameraIndex] - colors->sun->radius + 1),
-            QuarterPixels((s32)f_SunScreenX[cameraIndex] + colors->sun->radius),
-            QuarterPixels((s32)f_SunScreenY[cameraIndex] + colors->sun->radius),
-            G_TX_RENDERTILE, 0, 0, colors->sun->texelStep,
-            colors->sun->texelStep);
-        gDPPipeSync(gfx++);
-      }
-    }
-  }
-
-  *displayListHead = gfx;
+    *displayListHead = gfx;
 }
 
 /* The course's backdrop image, drawn behind the course in strips from the
@@ -1967,313 +2677,400 @@ void DrawSky(Gfx** displayListHead, f32 eyeY UNUSED, s32 unusedSetting UNUSED,
  * height in that order. Folding the center fraction into the expression,
  * or making it const, swaps $f0 and $f2 in 18 instructions.
  */
-void DrawBackdrop(Gfx** displayListHead, CameraView* view, s32 cameraIndex) {
-  Gfx* gfx;
-  Boolean isNibbleImage;
-  s32 centerShift;
-  s32 yawOffset;
-  s32 y;
-  s32 row;
-  s32 imageRow;
-  s32 texelWord;
-  s32 bottom;
-  s32 top;
-  s32 texelStepX;
-  s32 texelStepY;
-  s32 textureX;
-  f32 inverseZoom;
-  f32 zoom;
-
-  gfx = *displayListHead;
-  {
-    f32 scaledHeight = view->zoom * FULL_VIEW_HEIGHT;
-    /* Center the backdrop in the height difference between the two views. */
-    f32 centerFraction = 0.5f;
-    f32 viewportHeight = view->viewportCenterY - (view->scissorY * 2);
-
-    centerShift = (scaledHeight - viewportHeight) * centerFraction;
-  }
-  gDPPipeSync(gfx++);
-  gDPPipeSync(gfx++);
-  gDPSetColorDither(gfx++, G_CD_BAYER);
-  DrawSky(&gfx, view->eye[1], 1, cameraIndex);
-  isNibbleImage = FALSE;
-  gDPPipeSync(gfx++);
-  gDPSetColorDither(gfx++, G_CD_DISABLE);
-  if (cameraIndex == 0) {
-    UpdateAndDrawFireworks(&gfx);
-  }
-
-  yawOffset = g_SkyState.yaws[cameraIndex] * BACKDROP_YAW_TEXELS *
-      (1 / FULL_TURN_RADIANS);
-  if (g_Scene == SCENE_STAFF_ROLL) {
-    y = (s32)((BACKDROP_HORIZON_LEVEL - g_SkyState.horizonLevels[cameraIndex]) *
-            view->zoom) -
-        STAFF_ROLL_BACKDROP_RISE;
-  } else {
-    y = (BACKDROP_HORIZON_LEVEL - g_SkyState.horizonLevels[cameraIndex]) *
-        view->zoom;
-    if (cameraIndex == 0) {
-      g_HorizonRow = y;
-    }
-  }
-
-  gDPPipeSync(gfx++);
-  gDPSetTexturePersp(gfx++, G_TP_NONE);
-  gDPPipeSync(gfx++);
-  gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-  gDPPipeSync(gfx++);
-  gDPSetRenderMode(gfx++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
-  gDPPipeSync(gfx++);
-  gDPSetTextureFilter(gfx++, G_TF_BILERP);
-  gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(g_CourseSkyImage)));
-  f_BackdropStripCount = COURSE_BACKDROP_STRIP_COUNT;
-  f_BackdropStripHeight = COURSE_BACKDROP_STRIP_HEIGHT;
-  f_BackdropImageWidth = BACKDROP_IMAGE_WIDTH;
-  f_BackdropWidthMask = BACKDROP_IMAGE_WIDTH_MASK;
-  if (view->scissorWidth == FULL_VIEW_WIDTH &&
-      view->scissorHeight == FULL_VIEW_HEIGHT) {
+void DrawBackdrop(Gfx **displayListHead, CameraView *view, s32 cameraIndex) {
+    Gfx *gfx;
+    Boolean isNibbleImage;
+    s32 centerShift;
+    s32 yawOffset;
+    s32 y;
+    s32 row;
     s32 imageRow;
+    s32 texelWord;
     s32 bottom;
+    s32 top;
+    s32 texelStepX;
+    s32 texelStepY;
+    s32 textureX;
+    f32 inverseZoom;
+    f32 zoom;
 
-    /* The full screen copies the strips unscaled */
+    gfx = *displayListHead;
+    {
+        f32 scaledHeight = view->zoom * FULL_VIEW_HEIGHT;
+        /* Center the backdrop in the height difference between the two views. */
+        f32 centerFraction = 0.5f;
+        f32 viewportHeight = view->viewportCenterY - (view->scissorY * 2);
+
+        centerShift = (scaledHeight - viewportHeight) * centerFraction;
+    }
     gDPPipeSync(gfx++);
-    gDPSetCombineMode(gfx++, G_CC_DECALRGB, G_CC_DECALRGB);
     gDPPipeSync(gfx++);
-    gDPSetAlphaCompare(gfx++, G_AC_THRESHOLD);
-    gDPSetBlendColor(gfx++, 255, 255, 255, 1);
+    gDPSetColorDither(gfx++, G_CD_BAYER);
+    DrawSky(&gfx, view->eye[1], 1, cameraIndex);
+    isNibbleImage = FALSE;
     gDPPipeSync(gfx++);
-    gDPSetRenderMode(gfx++, 0, 0);
-    gDPPipeSync(gfx++);
-    gDPPipeSync(gfx++);
-    gDPSetCycleType(gfx++, G_CYC_COPY);
-    for (row = 0;; row++, y += f_BackdropStripHeight) {
-      s32 clip;
+    gDPSetColorDither(gfx++, G_CD_DISABLE);
+    if (cameraIndex == 0) {
+        UpdateAndDrawFireworks(&gfx);
+    }
 
-      if (y >= BACKDROP_FIRST_CULLED_ROW) {
-        break;
-      }
-
-      if (y < -f_BackdropStripHeight - BACKDROP_ABOVE_SCREEN) {
-        continue;
-      }
-
-      if (row < f_BackdropStripCount - 1) {
-        imageRow = row;
-        texelWord = ((f_BackdropImageWidth * row * f_BackdropStripHeight) +
-                        (LARGE_PALETTE_COLOR_COUNT * PALETTE_COLOR_SIZE)) /
-            2;
-      } else {
-        texelWord = ((f_BackdropImageWidth * (f_BackdropStripCount - 1) *
-                         f_BackdropStripHeight) +
-                        (LARGE_PALETTE_COLOR_COUNT * PALETTE_COLOR_SIZE)) /
-            2;
-        imageRow = f_BackdropStripCount - 1;
-      }
-
-      if (!isNibbleImage) {
-        gDPLoadTextureBlock(gfx++,
-            TextureAddress((u16*)g_CourseSkyImage + PALETTE_START + texelWord),
-            G_IM_FMT_CI, G_IM_SIZ_8b, f_BackdropImageWidth,
-            f_BackdropStripHeight, 0, G_TX_WRAP, G_TX_WRAP, f_BackdropWidthMask,
-            G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-      } else {
-        gDPSetTextureImage(gfx++, G_IM_FMT_CI, G_IM_SIZ_16b, 1,
-            TextureAddress((u16*)g_CourseSkyImage + texelWord));
-        gDPLoadSync(gfx++);
-        gDPLoadBlock(gfx++, G_TX_LOADTILE, 0, 0,
-            (((f_BackdropImageWidth * f_BackdropStripHeight) + 3) >> 2) - 1,
-            CALC_DXT_4b(f_BackdropImageWidth));
-        gDPPipeSync(gfx++);
-        gDPSetTile(gfx++, G_IM_FMT_CI, G_IM_SIZ_4b,
-            ((f_BackdropImageWidth >> 1) + 7) >> 3, 0, G_TX_RENDERTILE,
-            imageRow, G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD, G_TX_WRAP,
-            f_BackdropWidthMask, G_TX_NOLOD);
-      }
-
-      if (y >= 0) {
-        clip = 0;
-      } else {
-        clip = -y;
-      }
-
-      if (row < f_BackdropStripCount - 1) {
-        bottom = f_BackdropStripHeight + y + SCREEN_BORDER - 1;
-        if (bottom > SCREEN_HEIGHT - SCREEN_BORDER) {
-          bottom = SCREEN_HEIGHT - SCREEN_BORDER;
+    yawOffset = g_SkyState.yaws[cameraIndex] * BACKDROP_YAW_TEXELS * (1 / FULL_TURN_RADIANS);
+    if (g_Scene == SCENE_STAFF_ROLL) {
+        y = (s32)((BACKDROP_HORIZON_LEVEL - g_SkyState.horizonLevels[cameraIndex]) * view->zoom) -
+            STAFF_ROLL_BACKDROP_RISE;
+    }
+    else {
+        y = (BACKDROP_HORIZON_LEVEL - g_SkyState.horizonLevels[cameraIndex]) * view->zoom;
+        if (cameraIndex == 0) {
+            g_HorizonRow = y;
         }
-
-        gSPTextureRectangle(gfx++, QuarterPixels(SCREEN_BORDER),
-            QuarterPixels(SCREEN_BORDER + y + clip),
-            QuarterPixels(SCREEN_WIDTH - SCREEN_BORDER - 1),
-            QuarterPixels(bottom), G_TX_RENDERTILE, yawOffset,
-            TexelCoordinate(clip), COPY_MODE_TEXEL_STEP, TEXEL_STEP_ONE);
-      } else {
-        /* The last strip stretches to the bottom of the screen */
-        gSPTextureRectangle(gfx++, QuarterPixels(SCREEN_BORDER),
-            QuarterPixels(SCREEN_BORDER + y + clip),
-            QuarterPixels(SCREEN_WIDTH - SCREEN_BORDER - 1),
-            QuarterPixels(SCREEN_HEIGHT - SCREEN_BORDER), G_TX_RENDERTILE,
-            yawOffset, TexelCoordinate(clip), COPY_MODE_TEXEL_STEP,
-            TEXEL_STEP_ONE);
-        break;
-      }
-    }
-  } else {
-    /* A smaller view scales the strips by its zoom */
-    inverseZoom = 1.0f / view->zoom;
-    texelStepX = inverseZoom * 1024.0f;
-    texelStepY = inverseZoom * 2048.0f;
-    if (f_IsPrimitiveDepthSet) {
-      gDPSetPrimDepth(gfx++, 0x7FF3, 0);
-      gDPPipeSync(gfx++);
-      gDPSetRenderMode(gfx++, G_RM_AA_ZB_TEX_EDGE, G_RM_AA_ZB_TEX_EDGE2);
-    } else {
-      gDPPipeSync(gfx++);
-      gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
     }
 
+    gDPPipeSync(gfx++);
+    gDPSetTexturePersp(gfx++, G_TP_NONE);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
     gDPPipeSync(gfx++);
     gDPSetTextureFilter(gfx++, G_TF_BILERP);
-    gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-    gDPPipeSync(gfx++);
-    gDPSetAlphaCompare(gfx++, G_AC_NONE);
-    gDPPipeSync(gfx++);
-    gDPPipeSync(gfx++);
-    gDPSetCycleType(gfx++, G_CYC_1CYCLE);
-    zoom = view->zoom;
-    textureX = yawOffset +
-        (s32)(((zoom * FULL_VIEW_WIDTH) - view->scissorWidth) * 16.0f / zoom);
-    top = y + view->scissorY - centerShift;
-    bottom =
-        (f32)y + (f_BackdropStripHeight * zoom) + view->scissorY - centerShift;
-    for (row = 0;; row++) {
-      /* A skipped strip steps on to the next by itself */
-      if (top < view->scissorY - (f_BackdropStripHeight * view->zoom)) {
-        top = bottom;
-        bottom = bottom + (f_BackdropStripHeight * view->zoom);
-        continue;
-      }
+    gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(g_CourseSkyImage)));
+    f_BackdropStripCount = COURSE_BACKDROP_STRIP_COUNT;
+    f_BackdropStripHeight = COURSE_BACKDROP_STRIP_HEIGHT;
+    f_BackdropImageWidth = BACKDROP_IMAGE_WIDTH;
+    f_BackdropWidthMask = BACKDROP_IMAGE_WIDTH_MASK;
+    if (view->scissorWidth == FULL_VIEW_WIDTH && view->scissorHeight == FULL_VIEW_HEIGHT) {
+        s32 imageRow;
+        s32 bottom;
 
-      if (row < f_BackdropStripCount - 1) {
-        imageRow = row;
-        texelWord = ((f_BackdropImageWidth * row * f_BackdropStripHeight) +
-                        (LARGE_PALETTE_COLOR_COUNT * PALETTE_COLOR_SIZE)) /
-            2;
-      } else {
-        texelWord = ((f_BackdropImageWidth * (f_BackdropStripCount - 1) *
-                         f_BackdropStripHeight) +
-                        (LARGE_PALETTE_COLOR_COUNT * PALETTE_COLOR_SIZE)) /
-            2;
-        imageRow = f_BackdropStripCount - 1;
-      }
-
-      if (!isNibbleImage) {
-        gDPLoadTextureBlock(gfx++,
-            TextureAddress((u16*)g_CourseSkyImage + texelWord), G_IM_FMT_CI,
-            G_IM_SIZ_8b, f_BackdropImageWidth, f_BackdropStripHeight, 0,
-            G_TX_WRAP, G_TX_WRAP, f_BackdropWidthMask, G_TX_NOMASK, G_TX_NOLOD,
-            G_TX_NOLOD);
-      } else {
-        gDPSetTextureImage(gfx++, G_IM_FMT_CI, G_IM_SIZ_16b, 1,
-            TextureAddress((u16*)g_CourseSkyImage + texelWord));
-        gDPLoadSync(gfx++);
-        gDPLoadBlock(gfx++, G_TX_LOADTILE, 0, 0,
-            (((f_BackdropImageWidth * f_BackdropStripHeight) + 3) >> 2) - 1,
-            CALC_DXT_4b(f_BackdropImageWidth));
+        /* The full screen copies the strips unscaled */
         gDPPipeSync(gfx++);
-        gDPSetTile(gfx++, G_IM_FMT_CI, G_IM_SIZ_4b,
-            ((f_BackdropImageWidth >> 1) + 7) >> 3, 0, G_TX_RENDERTILE,
-            imageRow, G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD, G_TX_WRAP,
-            f_BackdropWidthMask, G_TX_NOLOD);
-      }
+        gDPSetCombineMode(gfx++, G_CC_DECALRGB, G_CC_DECALRGB);
+        gDPPipeSync(gfx++);
+        gDPSetAlphaCompare(gfx++, G_AC_THRESHOLD);
+        gDPSetBlendColor(gfx++, 255, 255, 255, 1);
+        gDPPipeSync(gfx++);
+        gDPSetRenderMode(gfx++, 0, 0);
+        gDPPipeSync(gfx++);
+        gDPPipeSync(gfx++);
+        gDPSetCycleType(gfx++, G_CYC_COPY);
+        for (row = 0;; row++, y += f_BackdropStripHeight) {
+            s32 clip;
 
-      if (row < f_BackdropStripCount - 1) {
-        if (bottom > view->scissorY + view->scissorHeight) {
-          bottom = view->scissorY + view->scissorHeight;
+            if (y >= BACKDROP_FIRST_CULLED_ROW) {
+                break;
+            }
+
+            if (y < -f_BackdropStripHeight - BACKDROP_ABOVE_SCREEN) {
+                continue;
+            }
+
+            if (row < f_BackdropStripCount - 1) {
+                imageRow = row;
+                texelWord = ((f_BackdropImageWidth * row * f_BackdropStripHeight) +
+                                (LARGE_PALETTE_COLOR_COUNT * PALETTE_COLOR_SIZE)) /
+                    2;
+            }
+            else {
+                texelWord =
+                    ((f_BackdropImageWidth * (f_BackdropStripCount - 1) * f_BackdropStripHeight) +
+                        (LARGE_PALETTE_COLOR_COUNT * PALETTE_COLOR_SIZE)) /
+                    2;
+                imageRow = f_BackdropStripCount - 1;
+            }
+
+            if (!isNibbleImage) {
+                gDPLoadTextureBlock(
+                    gfx++,
+                    TextureAddress((u16 *)g_CourseSkyImage + PALETTE_START + texelWord),
+                    G_IM_FMT_CI,
+                    G_IM_SIZ_8b,
+                    f_BackdropImageWidth,
+                    f_BackdropStripHeight,
+                    0,
+                    G_TX_WRAP,
+                    G_TX_WRAP,
+                    f_BackdropWidthMask,
+                    G_TX_NOMASK,
+                    G_TX_NOLOD,
+                    G_TX_NOLOD
+                );
+            }
+            else {
+                gDPSetTextureImage(
+                    gfx++,
+                    G_IM_FMT_CI,
+                    G_IM_SIZ_16b,
+                    1,
+                    TextureAddress((u16 *)g_CourseSkyImage + texelWord)
+                );
+                gDPLoadSync(gfx++);
+                gDPLoadBlock(
+                    gfx++,
+                    G_TX_LOADTILE,
+                    0,
+                    0,
+                    (((f_BackdropImageWidth * f_BackdropStripHeight) + 3) >> 2) - 1,
+                    CALC_DXT_4b(f_BackdropImageWidth)
+                );
+                gDPPipeSync(gfx++);
+                gDPSetTile(
+                    gfx++,
+                    G_IM_FMT_CI,
+                    G_IM_SIZ_4b,
+                    ((f_BackdropImageWidth >> 1) + 7) >> 3,
+                    0,
+                    G_TX_RENDERTILE,
+                    imageRow,
+                    G_TX_WRAP,
+                    G_TX_NOMASK,
+                    G_TX_NOLOD,
+                    G_TX_WRAP,
+                    f_BackdropWidthMask,
+                    G_TX_NOLOD
+                );
+            }
+
+            if (y >= 0) {
+                clip = 0;
+            }
+            else {
+                clip = -y;
+            }
+
+            if (row < f_BackdropStripCount - 1) {
+                bottom = f_BackdropStripHeight + y + SCREEN_BORDER - 1;
+                if (bottom > SCREEN_HEIGHT - SCREEN_BORDER) {
+                    bottom = SCREEN_HEIGHT - SCREEN_BORDER;
+                }
+
+                gSPTextureRectangle(
+                    gfx++,
+                    QuarterPixels(SCREEN_BORDER),
+                    QuarterPixels(SCREEN_BORDER + y + clip),
+                    QuarterPixels(SCREEN_WIDTH - SCREEN_BORDER - 1),
+                    QuarterPixels(bottom),
+                    G_TX_RENDERTILE,
+                    yawOffset,
+                    TexelCoordinate(clip),
+                    COPY_MODE_TEXEL_STEP,
+                    TEXEL_STEP_ONE
+                );
+            }
+            else {
+                /* The last strip stretches to the bottom of the screen */
+                gSPTextureRectangle(
+                    gfx++,
+                    QuarterPixels(SCREEN_BORDER),
+                    QuarterPixels(SCREEN_BORDER + y + clip),
+                    QuarterPixels(SCREEN_WIDTH - SCREEN_BORDER - 1),
+                    QuarterPixels(SCREEN_HEIGHT - SCREEN_BORDER),
+                    G_TX_RENDERTILE,
+                    yawOffset,
+                    TexelCoordinate(clip),
+                    COPY_MODE_TEXEL_STEP,
+                    TEXEL_STEP_ONE
+                );
+                break;
+            }
         }
-      } else {
-        bottom = view->scissorY + view->scissorHeight;
-      }
-
-      if (bottom > view->scissorY + view->scissorHeight) {
-        bottom = view->scissorY + view->scissorHeight;
-      }
-
-      gSPTextureRectangle(gfx++, QuarterPixels(view->scissorX),
-          QuarterPixels(top),
-          QuarterPixels(view->scissorX + view->scissorWidth),
-          QuarterPixels(bottom), G_TX_RENDERTILE, textureX, 0, texelStepX,
-          texelStepY);
-      top = bottom;
-      if (bottom == view->scissorY + view->scissorHeight) {
-        break;
-      }
-
-      bottom = bottom + (f_BackdropStripHeight * view->zoom);
     }
-  }
+    else {
+        /* A smaller view scales the strips by its zoom */
+        inverseZoom = 1.0f / view->zoom;
+        texelStepX = inverseZoom * 1024.0f;
+        texelStepY = inverseZoom * 2048.0f;
+        if (f_IsPrimitiveDepthSet) {
+            gDPSetPrimDepth(gfx++, 0x7FF3, 0);
+            gDPPipeSync(gfx++);
+            gDPSetRenderMode(gfx++, G_RM_AA_ZB_TEX_EDGE, G_RM_AA_ZB_TEX_EDGE2);
+        }
+        else {
+            gDPPipeSync(gfx++);
+            gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
+        }
 
-  gDPPipeSync(gfx++);
-  gDPPipeSync(gfx++);
-  gDPSetTextureLUT(gfx++, G_TT_NONE);
-  gDPPipeSync(gfx++);
-  gDPSetDepthSource(gfx++, G_ZS_PIXEL);
-  gDPPipeSync(gfx++);
-  *displayListHead = gfx;
+        gDPPipeSync(gfx++);
+        gDPSetTextureFilter(gfx++, G_TF_BILERP);
+        gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+        gDPPipeSync(gfx++);
+        gDPSetAlphaCompare(gfx++, G_AC_NONE);
+        gDPPipeSync(gfx++);
+        gDPPipeSync(gfx++);
+        gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+        zoom = view->zoom;
+        textureX =
+            yawOffset + (s32)(((zoom * FULL_VIEW_WIDTH) - view->scissorWidth) * 16.0f / zoom);
+        top = y + view->scissorY - centerShift;
+        bottom = (f32)y + (f_BackdropStripHeight * zoom) + view->scissorY - centerShift;
+        for (row = 0;; row++) {
+            /* A skipped strip steps on to the next by itself */
+            if (top < view->scissorY - (f_BackdropStripHeight * view->zoom)) {
+                top = bottom;
+                bottom = bottom + (f_BackdropStripHeight * view->zoom);
+                continue;
+            }
+
+            if (row < f_BackdropStripCount - 1) {
+                imageRow = row;
+                texelWord = ((f_BackdropImageWidth * row * f_BackdropStripHeight) +
+                                (LARGE_PALETTE_COLOR_COUNT * PALETTE_COLOR_SIZE)) /
+                    2;
+            }
+            else {
+                texelWord =
+                    ((f_BackdropImageWidth * (f_BackdropStripCount - 1) * f_BackdropStripHeight) +
+                        (LARGE_PALETTE_COLOR_COUNT * PALETTE_COLOR_SIZE)) /
+                    2;
+                imageRow = f_BackdropStripCount - 1;
+            }
+
+            if (!isNibbleImage) {
+                gDPLoadTextureBlock(
+                    gfx++,
+                    TextureAddress((u16 *)g_CourseSkyImage + texelWord),
+                    G_IM_FMT_CI,
+                    G_IM_SIZ_8b,
+                    f_BackdropImageWidth,
+                    f_BackdropStripHeight,
+                    0,
+                    G_TX_WRAP,
+                    G_TX_WRAP,
+                    f_BackdropWidthMask,
+                    G_TX_NOMASK,
+                    G_TX_NOLOD,
+                    G_TX_NOLOD
+                );
+            }
+            else {
+                gDPSetTextureImage(
+                    gfx++,
+                    G_IM_FMT_CI,
+                    G_IM_SIZ_16b,
+                    1,
+                    TextureAddress((u16 *)g_CourseSkyImage + texelWord)
+                );
+                gDPLoadSync(gfx++);
+                gDPLoadBlock(
+                    gfx++,
+                    G_TX_LOADTILE,
+                    0,
+                    0,
+                    (((f_BackdropImageWidth * f_BackdropStripHeight) + 3) >> 2) - 1,
+                    CALC_DXT_4b(f_BackdropImageWidth)
+                );
+                gDPPipeSync(gfx++);
+                gDPSetTile(
+                    gfx++,
+                    G_IM_FMT_CI,
+                    G_IM_SIZ_4b,
+                    ((f_BackdropImageWidth >> 1) + 7) >> 3,
+                    0,
+                    G_TX_RENDERTILE,
+                    imageRow,
+                    G_TX_WRAP,
+                    G_TX_NOMASK,
+                    G_TX_NOLOD,
+                    G_TX_WRAP,
+                    f_BackdropWidthMask,
+                    G_TX_NOLOD
+                );
+            }
+
+            if (row < f_BackdropStripCount - 1) {
+                if (bottom > view->scissorY + view->scissorHeight) {
+                    bottom = view->scissorY + view->scissorHeight;
+                }
+            }
+            else {
+                bottom = view->scissorY + view->scissorHeight;
+            }
+
+            if (bottom > view->scissorY + view->scissorHeight) {
+                bottom = view->scissorY + view->scissorHeight;
+            }
+
+            gSPTextureRectangle(
+                gfx++,
+                QuarterPixels(view->scissorX),
+                QuarterPixels(top),
+                QuarterPixels(view->scissorX + view->scissorWidth),
+                QuarterPixels(bottom),
+                G_TX_RENDERTILE,
+                textureX,
+                0,
+                texelStepX,
+                texelStepY
+            );
+            top = bottom;
+            if (bottom == view->scissorY + view->scissorHeight) {
+                break;
+            }
+
+            bottom = bottom + (f_BackdropStripHeight * view->zoom);
+        }
+    }
+
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_NONE);
+    gDPPipeSync(gfx++);
+    gDPSetDepthSource(gfx++, G_ZS_PIXEL);
+    gDPPipeSync(gfx++);
+    *displayListHead = gfx;
 }
 
 /* Starts one of the HUD's animations, which lasts a given number of frames, or
  * stops it with HUD_ANIMATION_NONE */
 void StartHudAnimation(s32 animation) {
-  if (animation == HUD_ANIMATION_NONE) {
-    f_IsFrameCapturePending = FALSE;
-    f_HudAnimationFramesLeft = 0;
-    return;
-  }
+    if (animation == HUD_ANIMATION_NONE) {
+        f_IsFrameCapturePending = FALSE;
+        f_HudAnimationFramesLeft = 0;
+        return;
+    }
 
-  if (animation != HUD_ANIMATION_SLICE_CAPTURE &&
-      animation != HUD_ANIMATION_SLICES) {
-    g_CapturedSliceCount = 0;
-  }
+    if (animation != HUD_ANIMATION_SLICE_CAPTURE && animation != HUD_ANIMATION_SLICES) {
+        g_CapturedSliceCount = 0;
+    }
 
-  switch (animation) {
-    case HUD_ANIMATION_UNUSED:
-      f_HudAnimationFramesLeft = 352;
-      break;
-    case HUD_ANIMATION_FADE_OUT:
-    case HUD_ANIMATION_FAST_FADE_OUT:
-      f_HudAnimationFramesLeft = OPAQUE_ALPHA;
-      break;
-    case HUD_ANIMATION_TURN_AWAY:
-      f_HudAnimationFramesLeft = TILE_ANIMATION_FRAME_COUNT;
-      break;
-    case HUD_ANIMATION_SLIDE_APART:
-      f_HudAnimationFramesLeft = SCREEN_WIDTH / 2;
-      break;
-    case HUD_ANIMATION_SPIRAL:
-      f_HudAnimationFramesLeft = SPIRAL_START_TILE_COUNT;
-      break;
-    case HUD_ANIMATION_TILES:
-      f_HudAnimationFramesLeft = TILE_ANIMATION_FRAME_COUNT;
-      break;
-    case HUD_ANIMATION_SLICES:
-      f_HudAnimationFramesLeft = SLICE_ANIMATION_FRAME_COUNT;
-      break;
-    case HUD_ANIMATION_NEGATIVE:
-    case HUD_ANIMATION_MOTION_BLUR:
-      f_HudAnimationFramesLeft = 32;
-      break;
-  }
+    switch (animation) {
+        case HUD_ANIMATION_UNUSED:
+            f_HudAnimationFramesLeft = 352;
+            break;
+        case HUD_ANIMATION_FADE_OUT:
+        case HUD_ANIMATION_FAST_FADE_OUT:
+            f_HudAnimationFramesLeft = OPAQUE_ALPHA;
+            break;
+        case HUD_ANIMATION_TURN_AWAY:
+            f_HudAnimationFramesLeft = TILE_ANIMATION_FRAME_COUNT;
+            break;
+        case HUD_ANIMATION_SLIDE_APART:
+            f_HudAnimationFramesLeft = SCREEN_WIDTH / 2;
+            break;
+        case HUD_ANIMATION_SPIRAL:
+            f_HudAnimationFramesLeft = SPIRAL_START_TILE_COUNT;
+            break;
+        case HUD_ANIMATION_TILES:
+            f_HudAnimationFramesLeft = TILE_ANIMATION_FRAME_COUNT;
+            break;
+        case HUD_ANIMATION_SLICES:
+            f_HudAnimationFramesLeft = SLICE_ANIMATION_FRAME_COUNT;
+            break;
+        case HUD_ANIMATION_NEGATIVE:
+        case HUD_ANIMATION_MOTION_BLUR:
+            f_HudAnimationFramesLeft = 32;
+            break;
+    }
 
-  f_HudAnimation = animation;
-  f_IsFrameCapturePending = TRUE;
-  f_HudAnimationFrame = 0;
+    f_HudAnimation = animation;
+    f_IsFrameCapturePending = TRUE;
+    f_HudAnimationFrame = 0;
 }
 
-void DrawFadeAnimation(Gfx** displayListHead);
+void DrawFadeAnimation(Gfx **displayListHead);
 
-void HandleFrameBufferSwap(void) {}
+void HandleFrameBufferSwap(void) {
+}
 
 /*
  * The fading animations draw f_CapturedFrame, which holds the frame inside
@@ -2287,41 +3084,78 @@ void HandleFrameBufferSwap(void) {}
 #define NEGATIVE_BRIGHTNESS 127
 #define MOTION_BLUR_ALPHA 95
 /* Blends nothing, but forces blending on */
-#define RM_FORCED_PASS \
-  GBL_c1(G_BL_CLR_IN, G_BL_0, G_BL_CLR_IN, G_BL_1) | FORCE_BL
+#define RM_FORCED_PASS GBL_c1(G_BL_CLR_IN, G_BL_0, G_BL_CLR_IN, G_BL_1) | FORCE_BL
 #define RM_FORCED_PASS2 GBL_c2(G_BL_CLR_IN, G_BL_0, G_BL_CLR_IN, G_BL_1)
 #define FADE_COUNT_PERIOD 8
 
 #define LoadFadeFrameStrip(gfx, texels, height, isTileSet) \
-  { \
-    if (!(isTileSet)) { \
-      gDPSetTextureImage( \
-          (gfx)++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, TextureAddress(texels)); \
-      gDPSetTile((gfx)++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 0, 0, G_TX_LOADTILE, 0, \
-          0, G_TX_NOMASK, G_TX_NOLOD, 0, G_TX_NOMASK, G_TX_NOLOD); \
-      gDPLoadSync((gfx)++); \
-      gDPLoadBlock((gfx)++, G_TX_LOADTILE, 0, 0, \
-          ((height) * FADE_FRAME_WIDTH) - 1, \
-          CALC_DXT(FADE_FRAME_WIDTH, G_IM_SIZ_16b_BYTES)); \
-      gDPPipeSync((gfx)++); \
-      gDPSetTile((gfx)++, G_IM_FMT_RGBA, G_IM_SIZ_16b, \
-          ((FADE_FRAME_WIDTH * G_IM_SIZ_16b_BYTES) + 7) >> 3, 0, \
-          G_TX_RENDERTILE, 0, 0, G_TX_NOMASK, G_TX_NOLOD, 0, G_TX_NOMASK, \
-          G_TX_NOLOD); \
-      gDPSetTileSize((gfx)++, G_TX_RENDERTILE, 0, 0, \
-          (FADE_FRAME_WIDTH - 1) << G_TEXTURE_IMAGE_FRAC, \
-          ((height) - 1) << G_TEXTURE_IMAGE_FRAC); \
-      (isTileSet) = TRUE; \
-    } else { \
-      gDPSetTextureImage( \
-          (gfx)++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, TextureAddress(texels)); \
-      gDPLoadSync((gfx)++); \
-      gDPLoadBlock((gfx)++, G_TX_LOADTILE, 0, 0, \
-          ((height) * FADE_FRAME_WIDTH) - 1, \
-          CALC_DXT(FADE_FRAME_WIDTH, G_IM_SIZ_16b_BYTES)); \
-      gDPPipeSync((gfx)++); \
-    } \
-  }
+    { \
+        if (!(isTileSet)) { \
+            gDPSetTextureImage((gfx)++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, TextureAddress(texels)); \
+            gDPSetTile( \
+                (gfx)++, \
+                G_IM_FMT_RGBA, \
+                G_IM_SIZ_16b, \
+                0, \
+                0, \
+                G_TX_LOADTILE, \
+                0, \
+                0, \
+                G_TX_NOMASK, \
+                G_TX_NOLOD, \
+                0, \
+                G_TX_NOMASK, \
+                G_TX_NOLOD \
+            ); \
+            gDPLoadSync((gfx)++); \
+            gDPLoadBlock( \
+                (gfx)++, \
+                G_TX_LOADTILE, \
+                0, \
+                0, \
+                ((height) * FADE_FRAME_WIDTH) - 1, \
+                CALC_DXT(FADE_FRAME_WIDTH, G_IM_SIZ_16b_BYTES) \
+            ); \
+            gDPPipeSync((gfx)++); \
+            gDPSetTile( \
+                (gfx)++, \
+                G_IM_FMT_RGBA, \
+                G_IM_SIZ_16b, \
+                ((FADE_FRAME_WIDTH * G_IM_SIZ_16b_BYTES) + 7) >> 3, \
+                0, \
+                G_TX_RENDERTILE, \
+                0, \
+                0, \
+                G_TX_NOMASK, \
+                G_TX_NOLOD, \
+                0, \
+                G_TX_NOMASK, \
+                G_TX_NOLOD \
+            ); \
+            gDPSetTileSize( \
+                (gfx)++, \
+                G_TX_RENDERTILE, \
+                0, \
+                0, \
+                (FADE_FRAME_WIDTH - 1) << G_TEXTURE_IMAGE_FRAC, \
+                ((height) - 1) << G_TEXTURE_IMAGE_FRAC \
+            ); \
+            (isTileSet) = TRUE; \
+        } \
+        else { \
+            gDPSetTextureImage((gfx)++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, TextureAddress(texels)); \
+            gDPLoadSync((gfx)++); \
+            gDPLoadBlock( \
+                (gfx)++, \
+                G_TX_LOADTILE, \
+                0, \
+                0, \
+                ((height) * FADE_FRAME_WIDTH) - 1, \
+                CALC_DXT(FADE_FRAME_WIDTH, G_IM_SIZ_16b_BYTES) \
+            ); \
+            gDPPipeSync((gfx)++); \
+        } \
+    }
 
 /*
  * Draws the HUD animations that show the whole frame: fading it out,
@@ -2374,134 +3208,183 @@ void HandleFrameBufferSwap(void) {}
  * offset plus the border, 160 (48).
  */
 #ifdef NON_MATCHING
-void DrawFadeAnimation(Gfx** displayListHead) {
-  u32* frame = f_CapturedFrame;
-  Gfx* gfx = *displayListHead;
-  Boolean isTileSet;
-  /*
-   * One index for the strips and the rows, to match: a separate row or strip
-   * variable gives 183 words differing against the draft's 147, 33 in shape
-   * both
-   */
-  s32 i;
+void DrawFadeAnimation(Gfx **displayListHead) {
+    u32 *frame = f_CapturedFrame;
+    Gfx *gfx = *displayListHead;
+    Boolean isTileSet;
+    /*
+     * One index for the strips and the rows, to match: a separate row or strip
+     * variable gives 183 words differing against the draft's 147, 33 in shape
+     * both
+     */
+    s32 i;
 
-  if (f_HudAnimationFramesLeft > 0) {
-    isTileSet = FALSE;
-    gDPPipeSync(gfx++);
-    gDPPipeSync(gfx++);
-    gDPSetAlphaCompare(gfx++, G_AC_NONE);
-    gDPPipeSync(gfx++);
-    gDPSetTexturePersp(gfx++, G_TP_NONE);
-    gDPPipeSync(gfx++);
-    gDPPipeSync(gfx++);
-    gDPSetCycleType(gfx++, G_CYC_1CYCLE);
-    gDPPipeSync(gfx++);
-    if (g_MenuBackdropState == MENU_BACKDROP_STATE_NONE) {
-      if (f_HudAnimation == HUD_ANIMATION_NEGATIVE) {
+    if (f_HudAnimationFramesLeft > 0) {
+        isTileSet = FALSE;
         gDPPipeSync(gfx++);
-        gDPSetRenderMode(gfx++, RM_FORCED_PASS, RM_FORCED_PASS2);
-        gDPSetPrimColor(gfx++, 0, 0, NEGATIVE_BRIGHTNESS, NEGATIVE_BRIGHTNESS,
-            NEGATIVE_BRIGHTNESS, OPAQUE_ALPHA);
-      } else if ((f_HudAnimation == HUD_ANIMATION_FADE_OUT) |
-          (f_HudAnimation == HUD_ANIMATION_FAST_FADE_OUT)) {
         gDPPipeSync(gfx++);
-        gDPSetRenderMode(gfx++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
-        gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, f_HudAnimationFramesLeft);
-      } else if (f_HudAnimation == HUD_ANIMATION_MOTION_BLUR) {
-        gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, MOTION_BLUR_ALPHA);
+        gDPSetAlphaCompare(gfx++, G_AC_NONE);
         gDPPipeSync(gfx++);
-        gDPSetRenderMode(gfx++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
+        gDPSetTexturePersp(gfx++, G_TP_NONE);
+        gDPPipeSync(gfx++);
+        gDPPipeSync(gfx++);
+        gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+        gDPPipeSync(gfx++);
+        if (g_MenuBackdropState == MENU_BACKDROP_STATE_NONE) {
+            if (f_HudAnimation == HUD_ANIMATION_NEGATIVE) {
+                gDPPipeSync(gfx++);
+                gDPSetRenderMode(gfx++, RM_FORCED_PASS, RM_FORCED_PASS2);
+                gDPSetPrimColor(
+                    gfx++,
+                    0,
+                    0,
+                    NEGATIVE_BRIGHTNESS,
+                    NEGATIVE_BRIGHTNESS,
+                    NEGATIVE_BRIGHTNESS,
+                    OPAQUE_ALPHA
+                );
+            }
+            else if ((f_HudAnimation == HUD_ANIMATION_FADE_OUT) |
+                (f_HudAnimation == HUD_ANIMATION_FAST_FADE_OUT)) {
+                gDPPipeSync(gfx++);
+                gDPSetRenderMode(gfx++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
+                gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, f_HudAnimationFramesLeft);
+            }
+            else if (f_HudAnimation == HUD_ANIMATION_MOTION_BLUR) {
+                gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, MOTION_BLUR_ALPHA);
+                gDPPipeSync(gfx++);
+                gDPSetRenderMode(gfx++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
+                gDPSetCombineMode(gfx++, G_CC_MODULATEI_PRIM, G_CC_MODULATEI_PRIM);
+                for (i = 0; i != BACKDROP_STRIP_COUNT; i++) {
+                    s32 height = StripHeight(i);
+
+                    gDPLoadTextureTile(
+                        gfx++,
+                        TextureAddress(&f_LastFrameBuffer[i * BACKDROP_STRIP_STEP * SCREEN_WIDTH]),
+                        G_IM_FMT_RGBA,
+                        G_IM_SIZ_16b,
+                        SCREEN_WIDTH,
+                        0,
+                        BACKDROP_BORDER,
+                        BACKDROP_BORDER,
+                        BACKDROP_RIGHT,
+                        BACKDROP_BORDER + height - 1,
+                        0,
+                        G_TX_NOMIRROR | G_TX_WRAP,
+                        G_TX_NOMIRROR | G_TX_WRAP,
+                        G_TX_NOMASK,
+                        G_TX_NOMASK,
+                        G_TX_NOLOD,
+                        G_TX_NOLOD
+                    );
+                    gSPScisTextureRectangle(
+                        gfx++,
+                        QuarterPixels(BACKDROP_BORDER),
+                        QuarterPixels(i * BACKDROP_STRIP_STEP + BACKDROP_BORDER),
+                        QuarterPixels(BACKDROP_RIGHT + 1),
+                        QuarterPixels(i * BACKDROP_STRIP_STEP + BACKDROP_BORDER + height),
+                        G_TX_RENDERTILE,
+                        TexelCoordinate(BACKDROP_BORDER),
+                        TexelCoordinate(BACKDROP_BORDER),
+                        TEXEL_STEP_ONE,
+                        TEXEL_STEP_ONE
+                    );
+                }
+
+                *displayListHead = gfx;
+                return;
+            }
+            else if ((f_HudAnimation == HUD_ANIMATION_SLIDE_APART) |
+                (f_HudAnimation == HUD_ANIMATION_SPIRAL)) {
+                /* DrawHudAnimation draws HUD_ANIMATION_SPIRAL with DrawSpiralAnimation
+                 * instead */
+                gDPPipeSync(gfx++);
+                gDPSetRenderMode(gfx++, RM_FORCED_PASS, RM_FORCED_PASS2);
+                gDPSetCombineMode(gfx++, G_CC_DECALRGB, G_CC_DECALRGB);
+                gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
+                gDPPipeSync(gfx++);
+                for (i = 0; i != BACKDROP_STRIP_COUNT; i++) {
+                    s32 height = StripHeight(i);
+
+                    LoadFadeFrameStrip(
+                        gfx,
+                        &frame[i * BACKDROP_STRIP_STEP * FADE_FRAME_WORDS_PER_ROW],
+                        height,
+                        isTileSet
+                    );
+                    gDPPipeSync(gfx++);
+                    gSPScisTextureRectangle(
+                        gfx++,
+                        QuarterPixels(BACKDROP_BORDER),
+                        QuarterPixels(i * BACKDROP_STRIP_STEP + BACKDROP_BORDER),
+                        QuarterPixels(f_HudAnimationFramesLeft),
+                        QuarterPixels(i * BACKDROP_STRIP_STEP + BACKDROP_BORDER + height),
+                        G_TX_RENDERTILE,
+                        TexelCoordinate((SCREEN_WIDTH / 2) - f_HudAnimationFramesLeft),
+                        0,
+                        TEXEL_STEP_ONE,
+                        TEXEL_STEP_ONE
+                    );
+                    gSPScisTextureRectangle(
+                        gfx++,
+                        QuarterPixels(SCREEN_WIDTH - f_HudAnimationFramesLeft),
+                        QuarterPixels(i * BACKDROP_STRIP_STEP + BACKDROP_BORDER),
+                        QuarterPixels(BACKDROP_RIGHT + 1),
+                        QuarterPixels(i * BACKDROP_STRIP_STEP + BACKDROP_BORDER + height),
+                        G_TX_RENDERTILE,
+                        TexelCoordinate(FADE_FRAME_WIDTH / 2),
+                        0,
+                        TEXEL_STEP_ONE,
+                        TEXEL_STEP_ONE
+                    );
+                    gDPPipeSync(gfx++);
+                }
+
+                f_HudAnimationFramesLeft -= FADE_STEP;
+                *displayListHead = gfx;
+                return;
+            }
+        }
+
         gDPSetCombineMode(gfx++, G_CC_MODULATEI_PRIM, G_CC_MODULATEI_PRIM);
-        for (i = 0; i != BACKDROP_STRIP_COUNT; i++) {
-          s32 height = StripHeight(i);
+        gDPPipeSync(gfx++);
+        for (i = BACKDROP_BORDER; i < SCREEN_HEIGHT - BACKDROP_BORDER; i += BACKDROP_STRIP_STEP) {
+            /* Written with | for the reason StripHeight is */
+            s16 height = BACKDROP_LAST_STRIP_HEIGHT |
+                ((i + BACKDROP_STRIP_STEP <= SCREEN_HEIGHT - BACKDROP_BORDER) ?
+                        (BACKDROP_STRIP_HEIGHT - BACKDROP_LAST_STRIP_HEIGHT) :
+                        0);
+            s32 bottom = i + height;
 
-          gDPLoadTextureTile(gfx++,
-              TextureAddress(
-                  &f_LastFrameBuffer[i * BACKDROP_STRIP_STEP * SCREEN_WIDTH]),
-              G_IM_FMT_RGBA, G_IM_SIZ_16b, SCREEN_WIDTH, 0, BACKDROP_BORDER,
-              BACKDROP_BORDER, BACKDROP_RIGHT, BACKDROP_BORDER + height - 1, 0,
-              G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
-              G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-          gSPScisTextureRectangle(gfx++, QuarterPixels(BACKDROP_BORDER),
-              QuarterPixels(i * BACKDROP_STRIP_STEP + BACKDROP_BORDER),
-              QuarterPixels(BACKDROP_RIGHT + 1),
-              QuarterPixels(i * BACKDROP_STRIP_STEP + BACKDROP_BORDER + height),
-              G_TX_RENDERTILE, TexelCoordinate(BACKDROP_BORDER),
-              TexelCoordinate(BACKDROP_BORDER), TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+            LoadFadeFrameStrip(gfx, frame, height, isTileSet);
+            gSPTextureRectangle(
+                gfx++,
+                QuarterPixels(BACKDROP_BORDER),
+                QuarterPixels(i),
+                QuarterPixels(BACKDROP_RIGHT + 1),
+                QuarterPixels(bottom),
+                G_TX_RENDERTILE,
+                0,
+                0,
+                TEXEL_STEP_ONE,
+                TEXEL_STEP_ONE
+            );
+            frame += BACKDROP_STRIP_STEP * FADE_FRAME_WORDS_PER_ROW;
         }
 
-        *displayListHead = gfx;
-        return;
-      } else if ((f_HudAnimation == HUD_ANIMATION_SLIDE_APART) |
-          (f_HudAnimation == HUD_ANIMATION_SPIRAL)) {
-        /* DrawHudAnimation draws HUD_ANIMATION_SPIRAL with DrawSpiralAnimation
-         * instead */
-        gDPPipeSync(gfx++);
-        gDPSetRenderMode(gfx++, RM_FORCED_PASS, RM_FORCED_PASS2);
-        gDPSetCombineMode(gfx++, G_CC_DECALRGB, G_CC_DECALRGB);
-        gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
-        gDPPipeSync(gfx++);
-        for (i = 0; i != BACKDROP_STRIP_COUNT; i++) {
-          s32 height = StripHeight(i);
-
-          LoadFadeFrameStrip(gfx,
-              &frame[i * BACKDROP_STRIP_STEP * FADE_FRAME_WORDS_PER_ROW],
-              height, isTileSet);
-          gDPPipeSync(gfx++);
-          gSPScisTextureRectangle(gfx++, QuarterPixels(BACKDROP_BORDER),
-              QuarterPixels(i * BACKDROP_STRIP_STEP + BACKDROP_BORDER),
-              QuarterPixels(f_HudAnimationFramesLeft),
-              QuarterPixels(i * BACKDROP_STRIP_STEP + BACKDROP_BORDER + height),
-              G_TX_RENDERTILE,
-              TexelCoordinate((SCREEN_WIDTH / 2) - f_HudAnimationFramesLeft), 0,
-              TEXEL_STEP_ONE, TEXEL_STEP_ONE);
-          gSPScisTextureRectangle(gfx++,
-              QuarterPixels(SCREEN_WIDTH - f_HudAnimationFramesLeft),
-              QuarterPixels(i * BACKDROP_STRIP_STEP + BACKDROP_BORDER),
-              QuarterPixels(BACKDROP_RIGHT + 1),
-              QuarterPixels(i * BACKDROP_STRIP_STEP + BACKDROP_BORDER + height),
-              G_TX_RENDERTILE, TexelCoordinate(FADE_FRAME_WIDTH / 2), 0,
-              TEXEL_STEP_ONE, TEXEL_STEP_ONE);
-          gDPPipeSync(gfx++);
+        if (f_HudAnimation == HUD_ANIMATION_FAST_FADE_OUT) {
+            f_HudAnimationFramesLeft -= FAST_FADE_STEP;
+        }
+        else {
+            f_HudAnimationFramesLeft -= FADE_STEP;
         }
 
-        f_HudAnimationFramesLeft -= FADE_STEP;
-        *displayListHead = gfx;
-        return;
-      }
+        if (f_HudAnimationFramesLeft < 0) {
+            f_UnusedFadeEndCount = (f_UnusedFadeEndCount + 1) % FADE_COUNT_PERIOD;
+        }
     }
 
-    gDPSetCombineMode(gfx++, G_CC_MODULATEI_PRIM, G_CC_MODULATEI_PRIM);
-    gDPPipeSync(gfx++);
-    for (i = BACKDROP_BORDER; i < SCREEN_HEIGHT - BACKDROP_BORDER;
-        i += BACKDROP_STRIP_STEP) {
-      /* Written with | for the reason StripHeight is */
-      s16 height = BACKDROP_LAST_STRIP_HEIGHT |
-          ((i + BACKDROP_STRIP_STEP <= SCREEN_HEIGHT - BACKDROP_BORDER)
-                  ? (BACKDROP_STRIP_HEIGHT - BACKDROP_LAST_STRIP_HEIGHT)
-                  : 0);
-      s32 bottom = i + height;
-
-      LoadFadeFrameStrip(gfx, frame, height, isTileSet);
-      gSPTextureRectangle(gfx++, QuarterPixels(BACKDROP_BORDER),
-          QuarterPixels(i), QuarterPixels(BACKDROP_RIGHT + 1),
-          QuarterPixels(bottom), G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE,
-          TEXEL_STEP_ONE);
-      frame += BACKDROP_STRIP_STEP * FADE_FRAME_WORDS_PER_ROW;
-    }
-
-    if (f_HudAnimation == HUD_ANIMATION_FAST_FADE_OUT) {
-      f_HudAnimationFramesLeft -= FAST_FADE_STEP;
-    } else {
-      f_HudAnimationFramesLeft -= FADE_STEP;
-    }
-
-    if (f_HudAnimationFramesLeft < 0) {
-      f_UnusedFadeEndCount = (f_UnusedFadeEndCount + 1) % FADE_COUNT_PERIOD;
-    }
-  }
-
-  *displayListHead = gfx;
+    *displayListHead = gfx;
 }
 #else
 INCLUDE_ASM("asm/nonmatchings/hole_display", DrawFadeAnimation);
@@ -2513,164 +3396,216 @@ INCLUDE_ASM("asm/nonmatchings/hole_display", DrawFadeAnimation);
  * fewer of them each frame, so the frame disappears from the center out. The
  * few tiles after the opaque ones fade, more the further in they are.
  */
-void DrawSpiralAnimation(Gfx** displayListHead) {
-  s32 tileColumn;
-  s32 rightColumn;
-  s32 topRow;
-  s32 direction;
-  s32 tileRow;
-  s32 bottomRow;
-  s32 leftColumn;
-  Gfx* gfx = *displayListHead;
-  u32* frame = f_CapturedFrame;
-  s32 tileCount;
-  s32 tileIndex;
-  s32 alpha;
+void DrawSpiralAnimation(Gfx **displayListHead) {
+    s32 tileColumn;
+    s32 rightColumn;
+    s32 topRow;
+    s32 direction;
+    s32 tileRow;
+    s32 bottomRow;
+    s32 leftColumn;
+    Gfx *gfx = *displayListHead;
+    u32 *frame = f_CapturedFrame;
+    s32 tileCount;
+    s32 tileIndex;
+    s32 alpha;
 
-  /* Steps to the next tile of the spiral, turning at each edge and moving the
-   * edge in */
-  void StepSpiral(void) {
-    switch (direction) {
-      case SPIRAL_RIGHT:
-        tileColumn++;
-        if (tileColumn == rightColumn) {
-          topRow++;
-          direction++;
+    /* Steps to the next tile of the spiral, turning at each edge and moving the
+     * edge in */
+    void StepSpiral(void) {
+        switch (direction) {
+            case SPIRAL_RIGHT:
+                tileColumn++;
+                if (tileColumn == rightColumn) {
+                    topRow++;
+                    direction++;
+                }
+
+                break;
+            case SPIRAL_DOWN:
+                tileRow++;
+                if (tileRow == bottomRow) {
+                    rightColumn--;
+                    direction++;
+                }
+
+                break;
+            case SPIRAL_LEFT:
+                tileColumn--;
+                if (tileColumn == leftColumn) {
+                    bottomRow--;
+                    direction++;
+                }
+
+                break;
+            case SPIRAL_UP:
+                tileRow--;
+                if (tileRow == topRow) {
+                    direction = SPIRAL_RIGHT;
+                    leftColumn++;
+                }
+
+                break;
+        }
+    }
+
+    if (f_HudAnimationFramesLeft > 0) {
+        tileCount = f_HudAnimationFramesLeft - SPIRAL_FADING_TILE_COUNT;
+        alpha = OPAQUE_ALPHA;
+        bottomRow = SPIRAL_GRID_SIZE - 1;
+        rightColumn = SPIRAL_GRID_SIZE - 1;
+        topRow = 0;
+        leftColumn = 0;
+        direction = SPIRAL_RIGHT;
+        tileColumn = 0;
+        tileRow = 0;
+        gDPPipeSync(gfx++);
+        gDPPipeSync(gfx++);
+        gDPSetAlphaCompare(gfx++, G_AC_NONE);
+        gDPPipeSync(gfx++);
+        gDPSetTexturePersp(gfx++, G_TP_NONE);
+        gDPPipeSync(gfx++);
+        gDPPipeSync(gfx++);
+        gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+        gDPPipeSync(gfx++);
+        gDPSetRenderMode(gfx++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
+        gDPSetCombineMode(gfx++, G_CC_DECALRGB, G_CC_DECALRGB);
+        if (tileCount > SPIRAL_TILE_COUNT) {
+            tileCount = SPIRAL_TILE_COUNT;
         }
 
-        break;
-      case SPIRAL_DOWN:
-        tileRow++;
-        if (tileRow == bottomRow) {
-          rightColumn--;
-          direction++;
+        for (tileIndex = 0; tileIndex != tileCount; tileIndex++) {
+            gDPLoadTextureTile(
+                gfx++,
+                TextureAddress(frame),
+                G_IM_FMT_RGBA,
+                G_IM_SIZ_16b,
+                SPIRAL_FRAME_WIDTH,
+                0,
+                tileColumn * SPIRAL_TILE_WIDTH,
+                tileRow * SPIRAL_TILE_HEIGHT,
+                (tileColumn * SPIRAL_TILE_WIDTH) + SPIRAL_TILE_WIDTH - 1,
+                (tileRow * SPIRAL_TILE_HEIGHT) + SPIRAL_TILE_HEIGHT - 1,
+                0,
+                G_TX_NOMIRROR | G_TX_WRAP,
+                G_TX_NOMIRROR | G_TX_WRAP,
+                G_TX_NOMASK,
+                G_TX_NOMASK,
+                G_TX_NOLOD,
+                G_TX_NOLOD
+            );
+            gDPPipeSync(gfx++);
+            gSPTextureRectangle(
+                gfx++,
+                QuarterPixels((tileColumn * SPIRAL_TILE_WIDTH) + FRAME_MARGIN_ROWS),
+                QuarterPixels((tileRow * SPIRAL_TILE_HEIGHT) + FRAME_MARGIN_ROWS),
+                QuarterPixels(
+                    (tileColumn * SPIRAL_TILE_WIDTH) + FRAME_MARGIN_ROWS + SPIRAL_TILE_WIDTH
+                ),
+                QuarterPixels(
+                    (tileRow * SPIRAL_TILE_HEIGHT) + FRAME_MARGIN_ROWS + SPIRAL_TILE_HEIGHT
+                ),
+                G_TX_RENDERTILE,
+                TexelCoordinate(tileColumn * SPIRAL_TILE_WIDTH),
+                TexelCoordinate(tileRow * SPIRAL_TILE_HEIGHT),
+                TEXEL_STEP_ONE,
+                TEXEL_STEP_ONE
+            );
+            gDPPipeSync(gfx++);
+            StepSpiral();
         }
 
-        break;
-      case SPIRAL_LEFT:
-        tileColumn--;
-        if (tileColumn == leftColumn) {
-          bottomRow--;
-          direction++;
+        gDPPipeSync(gfx++);
+        gDPSetRenderMode(gfx++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
+        gDPSetCombineLERP(
+            gfx++,
+            0,
+            0,
+            0,
+            TEXEL0,
+            0,
+            0,
+            0,
+            PRIMITIVE,
+            0,
+            0,
+            0,
+            TEXEL0,
+            0,
+            0,
+            0,
+            PRIMITIVE
+        );
+        tileCount += SPIRAL_FADING_TILE_COUNT;
+        if (tileCount > SPIRAL_TILE_COUNT) {
+            tileCount = SPIRAL_TILE_COUNT;
         }
 
-        break;
-      case SPIRAL_UP:
-        tileRow--;
-        if (tileRow == topRow) {
-          direction = SPIRAL_RIGHT;
-          leftColumn++;
+        for (; tileIndex != tileCount; tileIndex++) {
+            alpha -= SPIRAL_ALPHA_STEP;
+            gDPLoadTextureTile(
+                gfx++,
+                TextureAddress(frame),
+                G_IM_FMT_RGBA,
+                G_IM_SIZ_16b,
+                SPIRAL_FRAME_WIDTH,
+                0,
+                tileColumn * SPIRAL_TILE_WIDTH,
+                tileRow * SPIRAL_TILE_HEIGHT,
+                (tileColumn * SPIRAL_TILE_WIDTH) + SPIRAL_TILE_WIDTH - 1,
+                (tileRow * SPIRAL_TILE_HEIGHT) + SPIRAL_TILE_HEIGHT - 1,
+                0,
+                G_TX_NOMIRROR | G_TX_WRAP,
+                G_TX_NOMIRROR | G_TX_WRAP,
+                G_TX_NOMASK,
+                G_TX_NOMASK,
+                G_TX_NOLOD,
+                G_TX_NOLOD
+            );
+            gDPSetPrimColor(gfx++, 0, 0, SPIRAL_SHADE, SPIRAL_SHADE, SPIRAL_SHADE, alpha);
+            gDPPipeSync(gfx++);
+            gSPTextureRectangle(
+                gfx++,
+                QuarterPixels((tileColumn * SPIRAL_TILE_WIDTH) + FRAME_MARGIN_ROWS),
+                QuarterPixels((tileRow * SPIRAL_TILE_HEIGHT) + FRAME_MARGIN_ROWS),
+                QuarterPixels(
+                    (tileColumn * SPIRAL_TILE_WIDTH) + FRAME_MARGIN_ROWS + SPIRAL_TILE_WIDTH
+                ),
+                QuarterPixels(
+                    (tileRow * SPIRAL_TILE_HEIGHT) + FRAME_MARGIN_ROWS + SPIRAL_TILE_HEIGHT
+                ),
+                G_TX_RENDERTILE,
+                TexelCoordinate(tileColumn * SPIRAL_TILE_WIDTH),
+                TexelCoordinate(tileRow * SPIRAL_TILE_HEIGHT),
+                TEXEL_STEP_ONE,
+                TEXEL_STEP_ONE
+            );
+            gDPPipeSync(gfx++);
+            StepSpiral();
         }
 
-        break;
-    }
-  }
-
-  if (f_HudAnimationFramesLeft > 0) {
-    tileCount = f_HudAnimationFramesLeft - SPIRAL_FADING_TILE_COUNT;
-    alpha = OPAQUE_ALPHA;
-    bottomRow = SPIRAL_GRID_SIZE - 1;
-    rightColumn = SPIRAL_GRID_SIZE - 1;
-    topRow = 0;
-    leftColumn = 0;
-    direction = SPIRAL_RIGHT;
-    tileColumn = 0;
-    tileRow = 0;
-    gDPPipeSync(gfx++);
-    gDPPipeSync(gfx++);
-    gDPSetAlphaCompare(gfx++, G_AC_NONE);
-    gDPPipeSync(gfx++);
-    gDPSetTexturePersp(gfx++, G_TP_NONE);
-    gDPPipeSync(gfx++);
-    gDPPipeSync(gfx++);
-    gDPSetCycleType(gfx++, G_CYC_1CYCLE);
-    gDPPipeSync(gfx++);
-    gDPSetRenderMode(gfx++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
-    gDPSetCombineMode(gfx++, G_CC_DECALRGB, G_CC_DECALRGB);
-    if (tileCount > SPIRAL_TILE_COUNT) {
-      tileCount = SPIRAL_TILE_COUNT;
+        f_HudAnimationFramesLeft -= SPIRAL_FADING_TILE_COUNT;
     }
 
-    for (tileIndex = 0; tileIndex != tileCount; tileIndex++) {
-      gDPLoadTextureTile(gfx++, TextureAddress(frame), G_IM_FMT_RGBA,
-          G_IM_SIZ_16b, SPIRAL_FRAME_WIDTH, 0, tileColumn * SPIRAL_TILE_WIDTH,
-          tileRow * SPIRAL_TILE_HEIGHT,
-          (tileColumn * SPIRAL_TILE_WIDTH) + SPIRAL_TILE_WIDTH - 1,
-          (tileRow * SPIRAL_TILE_HEIGHT) + SPIRAL_TILE_HEIGHT - 1, 0,
-          G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
-          G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-      gDPPipeSync(gfx++);
-      gSPTextureRectangle(gfx++,
-          QuarterPixels((tileColumn * SPIRAL_TILE_WIDTH) + FRAME_MARGIN_ROWS),
-          QuarterPixels((tileRow * SPIRAL_TILE_HEIGHT) + FRAME_MARGIN_ROWS),
-          QuarterPixels((tileColumn * SPIRAL_TILE_WIDTH) + FRAME_MARGIN_ROWS +
-              SPIRAL_TILE_WIDTH),
-          QuarterPixels((tileRow * SPIRAL_TILE_HEIGHT) + FRAME_MARGIN_ROWS +
-              SPIRAL_TILE_HEIGHT),
-          G_TX_RENDERTILE, TexelCoordinate(tileColumn * SPIRAL_TILE_WIDTH),
-          TexelCoordinate(tileRow * SPIRAL_TILE_HEIGHT), TEXEL_STEP_ONE,
-          TEXEL_STEP_ONE);
-      gDPPipeSync(gfx++);
-      StepSpiral();
-    }
-
-    gDPPipeSync(gfx++);
-    gDPSetRenderMode(gfx++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
-    gDPSetCombineLERP(gfx++, 0, 0, 0, TEXEL0, 0, 0, 0, PRIMITIVE, 0, 0, 0,
-        TEXEL0, 0, 0, 0, PRIMITIVE);
-    tileCount += SPIRAL_FADING_TILE_COUNT;
-    if (tileCount > SPIRAL_TILE_COUNT) {
-      tileCount = SPIRAL_TILE_COUNT;
-    }
-
-    for (; tileIndex != tileCount; tileIndex++) {
-      alpha -= SPIRAL_ALPHA_STEP;
-      gDPLoadTextureTile(gfx++, TextureAddress(frame), G_IM_FMT_RGBA,
-          G_IM_SIZ_16b, SPIRAL_FRAME_WIDTH, 0, tileColumn * SPIRAL_TILE_WIDTH,
-          tileRow * SPIRAL_TILE_HEIGHT,
-          (tileColumn * SPIRAL_TILE_WIDTH) + SPIRAL_TILE_WIDTH - 1,
-          (tileRow * SPIRAL_TILE_HEIGHT) + SPIRAL_TILE_HEIGHT - 1, 0,
-          G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
-          G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-      gDPSetPrimColor(
-          gfx++, 0, 0, SPIRAL_SHADE, SPIRAL_SHADE, SPIRAL_SHADE, alpha);
-      gDPPipeSync(gfx++);
-      gSPTextureRectangle(gfx++,
-          QuarterPixels((tileColumn * SPIRAL_TILE_WIDTH) + FRAME_MARGIN_ROWS),
-          QuarterPixels((tileRow * SPIRAL_TILE_HEIGHT) + FRAME_MARGIN_ROWS),
-          QuarterPixels((tileColumn * SPIRAL_TILE_WIDTH) + FRAME_MARGIN_ROWS +
-              SPIRAL_TILE_WIDTH),
-          QuarterPixels((tileRow * SPIRAL_TILE_HEIGHT) + FRAME_MARGIN_ROWS +
-              SPIRAL_TILE_HEIGHT),
-          G_TX_RENDERTILE, TexelCoordinate(tileColumn * SPIRAL_TILE_WIDTH),
-          TexelCoordinate(tileRow * SPIRAL_TILE_HEIGHT), TEXEL_STEP_ONE,
-          TEXEL_STEP_ONE);
-      gDPPipeSync(gfx++);
-      StepSpiral();
-    }
-
-    f_HudAnimationFramesLeft -= SPIRAL_FADING_TILE_COUNT;
-  }
-
-  *displayListHead = gfx;
+    *displayListHead = gfx;
 }
 
 /* Shows a menu's backdrop in place of the course, or MENU_BACKDROP_NONE to show
  * the course again */
 void SetMenuBackdrop(s32 backdrop) {
-  if (backdrop == MENU_BACKDROP_NONE) {
-    g_MenuBackdropState = MENU_BACKDROP_STATE_NONE;
-    return;
-  }
+    if (backdrop == MENU_BACKDROP_NONE) {
+        g_MenuBackdropState = MENU_BACKDROP_STATE_NONE;
+        return;
+    }
 
-  if (backdrop == MENU_BACKDROP_PATTERN) {
+    if (backdrop == MENU_BACKDROP_PATTERN) {
+        f_MenuBackdrop = backdrop;
+        g_MenuBackdropState = MENU_BACKDROP_STATE_SHOWN;
+        return;
+    }
+
+    g_MenuBackdropState = MENU_BACKDROP_STATE_CAPTURING;
     f_MenuBackdrop = backdrop;
-    g_MenuBackdropState = MENU_BACKDROP_STATE_SHOWN;
-    return;
-  }
-
-  g_MenuBackdropState = MENU_BACKDROP_STATE_CAPTURING;
-  f_MenuBackdrop = backdrop;
 }
 
 /*
@@ -2697,66 +3632,93 @@ void SetMenuBackdrop(s32 backdrop) {
  * six forms.
  */
 #ifdef NON_MATCHING
-void CaptureMenuBackdrop(Gfx** displayListHead, s32 unused UNUSED) {
-  Gfx* gfx = *displayListHead;
-  s32 strip;
-  s16 height;
-  u16* source;
+void CaptureMenuBackdrop(Gfx **displayListHead, s32 unused UNUSED) {
+    Gfx *gfx = *displayListHead;
+    s32 strip;
+    s16 height;
+    u16 *source;
 
-  gDPPipeSync(gfx++);
-  gDPPipeSync(gfx++);
-  gDPSetRenderMode(gfx++, G_RM_NOOP, G_RM_NOOP2);
-  gDPSetCombineMode(gfx++, G_CC_DECALRGB, G_CC_DECALRGB);
-  gDPPipeSync(gfx++);
-  gDPPipeSync(gfx++);
-  gDPSetCycleType(gfx++, G_CYC_COPY);
-  gDPPipeSync(gfx++);
-  gDPPipeSync(gfx++);
-  gDPSetColorDither(gfx++, G_CD_DISABLE);
-  gSPTexture(
-      gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0, G_TX_RENDERTILE, G_ON);
-  gDPPipeSync(gfx++);
-  gDPSetTexturePersp(gfx++, G_TP_NONE);
-  gDPPipeSync(gfx++);
-  gDPSetTextureFilter(gfx++, G_TF_BILERP);
-  gDPPipeSync(gfx++);
-  gDPSetAlphaCompare(gfx++, G_AC_NONE);
-  gDPPipeSync(gfx++);
-  gDPSetTextureLUT(gfx++, G_TT_NONE);
-  if (g_MenuBackdropState == MENU_BACKDROP_STATE_CAPTURING) {
-    g_MenuBackdropState = MENU_BACKDROP_STATE_SHOWN;
-    f_BackdropFadeLevel = BACKDROP_START_FADE_LEVEL;
     gDPPipeSync(gfx++);
-    gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, SCREEN_WIDTH,
-        RenderTargetAddress(PhysicalAddress(f_CapturedFrame)));
     gDPPipeSync(gfx++);
-    source = f_LastFrameBuffer;
-    for (strip = 0; strip != BACKDROP_STRIP_COUNT; strip++) {
-      height = StripHeight(strip);
-      gDPLoadTextureTile(gfx++, TextureAddress(source), G_IM_FMT_RGBA,
-          G_IM_SIZ_16b, SCREEN_WIDTH, 0, BACKDROP_BORDER, BACKDROP_BORDER,
-          BACKDROP_RIGHT, BACKDROP_BORDER + height - 1, 0,
-          G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
-          G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-      gDPPipeSync(gfx++);
-      gSPScisTextureRectangle(gfx++, QuarterPixels(BACKDROP_BORDER),
-          QuarterPixels(strip * BACKDROP_STRIP_STEP + BACKDROP_BORDER),
-          QuarterPixels(BACKDROP_RIGHT),
-          QuarterPixels(
-              strip * BACKDROP_STRIP_STEP + BACKDROP_BORDER + height - 1),
-          G_TX_RENDERTILE, TexelCoordinate(BACKDROP_BORDER),
-          TexelCoordinate(BACKDROP_BORDER), COPY_MODE_TEXEL_STEP,
-          TEXEL_STEP_ONE);
-      gDPPipeSync(gfx++);
-      source += BACKDROP_STRIP_STEP * SCREEN_WIDTH;
+    gDPSetRenderMode(gfx++, G_RM_NOOP, G_RM_NOOP2);
+    gDPSetCombineMode(gfx++, G_CC_DECALRGB, G_CC_DECALRGB);
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetCycleType(gfx++, G_CYC_COPY);
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetColorDither(gfx++, G_CD_DISABLE);
+    gSPTexture(gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0, G_TX_RENDERTILE, G_ON);
+    gDPPipeSync(gfx++);
+    gDPSetTexturePersp(gfx++, G_TP_NONE);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_BILERP);
+    gDPPipeSync(gfx++);
+    gDPSetAlphaCompare(gfx++, G_AC_NONE);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_NONE);
+    if (g_MenuBackdropState == MENU_BACKDROP_STATE_CAPTURING) {
+        g_MenuBackdropState = MENU_BACKDROP_STATE_SHOWN;
+        f_BackdropFadeLevel = BACKDROP_START_FADE_LEVEL;
+        gDPPipeSync(gfx++);
+        gDPSetColorImage(
+            gfx++,
+            G_IM_FMT_RGBA,
+            G_IM_SIZ_16b,
+            SCREEN_WIDTH,
+            RenderTargetAddress(PhysicalAddress(f_CapturedFrame))
+        );
+        gDPPipeSync(gfx++);
+        source = f_LastFrameBuffer;
+        for (strip = 0; strip != BACKDROP_STRIP_COUNT; strip++) {
+            height = StripHeight(strip);
+            gDPLoadTextureTile(
+                gfx++,
+                TextureAddress(source),
+                G_IM_FMT_RGBA,
+                G_IM_SIZ_16b,
+                SCREEN_WIDTH,
+                0,
+                BACKDROP_BORDER,
+                BACKDROP_BORDER,
+                BACKDROP_RIGHT,
+                BACKDROP_BORDER + height - 1,
+                0,
+                G_TX_NOMIRROR | G_TX_WRAP,
+                G_TX_NOMIRROR | G_TX_WRAP,
+                G_TX_NOMASK,
+                G_TX_NOMASK,
+                G_TX_NOLOD,
+                G_TX_NOLOD
+            );
+            gDPPipeSync(gfx++);
+            gSPScisTextureRectangle(
+                gfx++,
+                QuarterPixels(BACKDROP_BORDER),
+                QuarterPixels(strip * BACKDROP_STRIP_STEP + BACKDROP_BORDER),
+                QuarterPixels(BACKDROP_RIGHT),
+                QuarterPixels(strip * BACKDROP_STRIP_STEP + BACKDROP_BORDER + height - 1),
+                G_TX_RENDERTILE,
+                TexelCoordinate(BACKDROP_BORDER),
+                TexelCoordinate(BACKDROP_BORDER),
+                COPY_MODE_TEXEL_STEP,
+                TEXEL_STEP_ONE
+            );
+            gDPPipeSync(gfx++);
+            source += BACKDROP_STRIP_STEP * SCREEN_WIDTH;
+        }
+
+        gDPPipeSync(gfx++);
+        gDPSetColorImage(
+            gfx++,
+            G_IM_FMT_RGBA,
+            G_IM_SIZ_16b,
+            SCREEN_WIDTH,
+            RenderTargetAddress(PhysicalAddress(nuGfxCfb_ptr))
+        );
     }
 
-    gDPPipeSync(gfx++);
-    gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, SCREEN_WIDTH,
-        RenderTargetAddress(PhysicalAddress(nuGfxCfb_ptr)));
-  }
-
-  *displayListHead = gfx;
+    *displayListHead = gfx;
 }
 #else
 INCLUDE_ASM("asm/nonmatchings/hole_display", CaptureMenuBackdrop);
@@ -2775,190 +3737,266 @@ INCLUDE_ASM("asm/nonmatchings/hole_display", CaptureMenuBackdrop);
  * Draws the menu backdrop that SetMenuBackdrop chose, inside the backdrop's
  * border.
  */
-void DrawMenuBackdrop(Gfx** displayListHead) {
-  Gfx* gfx = *displayListHead;
-  s32 strip;
-  s16 height;
+void DrawMenuBackdrop(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
+    s32 strip;
+    s16 height;
 
-  if (f_BackdropFadeLevel > BACKDROP_LAST_FADE_LEVEL) {
-    f_BackdropFadeLevel -= BACKDROP_FADE_STEP;
-  }
+    if (f_BackdropFadeLevel > BACKDROP_LAST_FADE_LEVEL) {
+        f_BackdropFadeLevel -= BACKDROP_FADE_STEP;
+    }
 
-  gDPPipeSync(gfx++);
-  gDPPipeSync(gfx++);
-  gDPSetCycleType(gfx++, G_CYC_1CYCLE);
-  gDPPipeSync(gfx++);
-  gDPSetCombineMode(gfx++, G_CC_MODULATEI_PRIM, G_CC_MODULATEI_PRIM);
-  if (f_MenuBackdrop == MENU_BACKDROP_PATTERN) {
-    f_BackdropPatternScroll++;
-    gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
-    gDPPipeSync(gfx++);
-    gDPLoadTextureBlock_4b(gfx++,
-        TextureAddress(ImageTexels(g_BackdropPatternImage)), G_IM_FMT_CI,
-        BACKDROP_PATTERN_SIZE, BACKDROP_PATTERN_SIZE, 0,
-        G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
-        BACKDROP_PATTERN_MASK, BACKDROP_PATTERN_MASK, G_TX_NOLOD, G_TX_NOLOD);
-    gDPPipeSync(gfx++);
-    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-    gDPLoadTLUT_pal16(
-        gfx++, 0, TextureAddress(ImageBody(g_BackdropPatternImage)));
-    gDPPipeSync(gfx++);
-    gSPTextureRectangle(gfx++, QuarterPixels(BACKDROP_BORDER),
-        QuarterPixels(BACKDROP_BORDER),
-        QuarterPixels(SCREEN_WIDTH - BACKDROP_BORDER),
-        QuarterPixels(SCREEN_HEIGHT - BACKDROP_BORDER), G_TX_RENDERTILE,
-        TexelCoordinate(f_BackdropPatternScroll),
-        TexelCoordinate(f_BackdropPatternScroll), TEXEL_STEP_ONE,
-        TEXEL_STEP_ONE);
     gDPPipeSync(gfx++);
     gDPPipeSync(gfx++);
     gDPSetCycleType(gfx++, G_CYC_1CYCLE);
     gDPPipeSync(gfx++);
-    gDPSetTextureLUT(gfx++, G_TT_NONE);
-    gDPPipeSync(gfx++);
-  } else if ((f_MenuBackdrop == MENU_BACKDROP_STILL) |
-      (f_MenuBackdrop == MENU_BACKDROP_DIMMING)) {
-    if (f_MenuBackdrop == MENU_BACKDROP_STILL) {
-      gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
-    } else {
-      gDPSetPrimColor(gfx++, 0, 0, (u8)f_BackdropFadeLevel,
-          (u8)f_BackdropFadeLevel, (u8)f_BackdropFadeLevel, OPAQUE_ALPHA);
+    gDPSetCombineMode(gfx++, G_CC_MODULATEI_PRIM, G_CC_MODULATEI_PRIM);
+    if (f_MenuBackdrop == MENU_BACKDROP_PATTERN) {
+        f_BackdropPatternScroll++;
+        gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
+        gDPPipeSync(gfx++);
+        gDPLoadTextureBlock_4b(
+            gfx++,
+            TextureAddress(ImageTexels(g_BackdropPatternImage)),
+            G_IM_FMT_CI,
+            BACKDROP_PATTERN_SIZE,
+            BACKDROP_PATTERN_SIZE,
+            0,
+            G_TX_NOMIRROR | G_TX_WRAP,
+            G_TX_NOMIRROR | G_TX_WRAP,
+            BACKDROP_PATTERN_MASK,
+            BACKDROP_PATTERN_MASK,
+            G_TX_NOLOD,
+            G_TX_NOLOD
+        );
+        gDPPipeSync(gfx++);
+        gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+        gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(g_BackdropPatternImage)));
+        gDPPipeSync(gfx++);
+        gSPTextureRectangle(
+            gfx++,
+            QuarterPixels(BACKDROP_BORDER),
+            QuarterPixels(BACKDROP_BORDER),
+            QuarterPixels(SCREEN_WIDTH - BACKDROP_BORDER),
+            QuarterPixels(SCREEN_HEIGHT - BACKDROP_BORDER),
+            G_TX_RENDERTILE,
+            TexelCoordinate(f_BackdropPatternScroll),
+            TexelCoordinate(f_BackdropPatternScroll),
+            TEXEL_STEP_ONE,
+            TEXEL_STEP_ONE
+        );
+        gDPPipeSync(gfx++);
+        gDPPipeSync(gfx++);
+        gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+        gDPPipeSync(gfx++);
+        gDPSetTextureLUT(gfx++, G_TT_NONE);
+        gDPPipeSync(gfx++);
+    }
+    else if ((f_MenuBackdrop == MENU_BACKDROP_STILL) | (f_MenuBackdrop == MENU_BACKDROP_DIMMING)) {
+        if (f_MenuBackdrop == MENU_BACKDROP_STILL) {
+            gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
+        }
+        else {
+            gDPSetPrimColor(
+                gfx++,
+                0,
+                0,
+                (u8)f_BackdropFadeLevel,
+                (u8)f_BackdropFadeLevel,
+                (u8)f_BackdropFadeLevel,
+                OPAQUE_ALPHA
+            );
+        }
+
+        for (strip = 0; strip != BACKDROP_STRIP_COUNT; strip++) {
+            height = StripHeight(strip);
+            gDPLoadTextureTile(
+                gfx++,
+                (u32)&f_CapturedFrame[strip * BACKDROP_STRIP_STEP * FRAME_WORDS_PER_ROW] & ~7,
+                G_IM_FMT_RGBA,
+                G_IM_SIZ_16b,
+                SCREEN_WIDTH,
+                0,
+                BACKDROP_BORDER,
+                BACKDROP_BORDER,
+                BACKDROP_RIGHT,
+                BACKDROP_BORDER + height - 1,
+                0,
+                G_TX_NOMIRROR | G_TX_WRAP,
+                G_TX_NOMIRROR | G_TX_WRAP,
+                G_TX_NOMASK,
+                G_TX_NOMASK,
+                G_TX_NOLOD,
+                G_TX_NOLOD
+            );
+            gDPPipeSync(gfx++);
+            gSPScisTextureRectangle(
+                gfx++,
+                QuarterPixels(BACKDROP_BORDER),
+                QuarterPixels(strip * BACKDROP_STRIP_STEP + BACKDROP_BORDER),
+                QuarterPixels(BACKDROP_RIGHT + 1),
+                QuarterPixels(strip * BACKDROP_STRIP_STEP + BACKDROP_BORDER + height),
+                G_TX_RENDERTILE,
+                TexelCoordinate(BACKDROP_BORDER),
+                TexelCoordinate(BACKDROP_BORDER),
+                TEXEL_STEP_ONE,
+                TEXEL_STEP_ONE
+            );
+            gDPPipeSync(gfx++);
+        }
+    }
+    else {
+        gDPSetPrimColor(
+            gfx++,
+            0,
+            0,
+            BACKDROP_TINT_RED,
+            BACKDROP_TINT_GREEN,
+            BACKDROP_TINT_BLUE,
+            OPAQUE_ALPHA
+        );
+        for (strip = 0; strip != BACKDROP_STRIP_COUNT; strip++) {
+            height = StripHeight(strip);
+            gDPLoadTextureTile(
+                gfx++,
+                (u32)&f_CapturedFrame[strip * BACKDROP_STRIP_STEP * FRAME_WORDS_PER_ROW] & ~7,
+                G_IM_FMT_IA,
+                G_IM_SIZ_16b,
+                SCREEN_WIDTH,
+                0,
+                BACKDROP_BORDER,
+                BACKDROP_BORDER,
+                BACKDROP_RIGHT,
+                BACKDROP_BORDER + height - 1,
+                0,
+                G_TX_NOMIRROR | G_TX_WRAP,
+                G_TX_NOMIRROR | G_TX_WRAP,
+                G_TX_NOMASK,
+                G_TX_NOMASK,
+                G_TX_NOLOD,
+                G_TX_NOLOD
+            );
+            gDPPipeSync(gfx++);
+            gSPScisTextureRectangle(
+                gfx++,
+                QuarterPixels(BACKDROP_BORDER),
+                QuarterPixels(strip * BACKDROP_STRIP_STEP + BACKDROP_BORDER),
+                QuarterPixels(BACKDROP_RIGHT + 1),
+                QuarterPixels(strip * BACKDROP_STRIP_STEP + BACKDROP_BORDER + height),
+                G_TX_RENDERTILE,
+                TexelCoordinate(BACKDROP_BORDER),
+                TexelCoordinate(BACKDROP_BORDER),
+                TEXEL_STEP_ONE,
+                TEXEL_STEP_ONE
+            );
+            gDPPipeSync(gfx++);
+        }
     }
 
-    for (strip = 0; strip != BACKDROP_STRIP_COUNT; strip++) {
-      height = StripHeight(strip);
-      gDPLoadTextureTile(gfx++,
-          (u32)&f_CapturedFrame[strip * BACKDROP_STRIP_STEP *
-              FRAME_WORDS_PER_ROW] &
-              ~7,
-          G_IM_FMT_RGBA, G_IM_SIZ_16b, SCREEN_WIDTH, 0, BACKDROP_BORDER,
-          BACKDROP_BORDER, BACKDROP_RIGHT, BACKDROP_BORDER + height - 1, 0,
-          G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
-          G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-      gDPPipeSync(gfx++);
-      gSPScisTextureRectangle(gfx++, QuarterPixels(BACKDROP_BORDER),
-          QuarterPixels(strip * BACKDROP_STRIP_STEP + BACKDROP_BORDER),
-          QuarterPixels(BACKDROP_RIGHT + 1),
-          QuarterPixels(strip * BACKDROP_STRIP_STEP + BACKDROP_BORDER + height),
-          G_TX_RENDERTILE, TexelCoordinate(BACKDROP_BORDER),
-          TexelCoordinate(BACKDROP_BORDER), TEXEL_STEP_ONE, TEXEL_STEP_ONE);
-      gDPPipeSync(gfx++);
-    }
-  } else {
-    gDPSetPrimColor(gfx++, 0, 0, BACKDROP_TINT_RED, BACKDROP_TINT_GREEN,
-        BACKDROP_TINT_BLUE, OPAQUE_ALPHA);
-    for (strip = 0; strip != BACKDROP_STRIP_COUNT; strip++) {
-      height = StripHeight(strip);
-      gDPLoadTextureTile(gfx++,
-          (u32)&f_CapturedFrame[strip * BACKDROP_STRIP_STEP *
-              FRAME_WORDS_PER_ROW] &
-              ~7,
-          G_IM_FMT_IA, G_IM_SIZ_16b, SCREEN_WIDTH, 0, BACKDROP_BORDER,
-          BACKDROP_BORDER, BACKDROP_RIGHT, BACKDROP_BORDER + height - 1, 0,
-          G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
-          G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-      gDPPipeSync(gfx++);
-      gSPScisTextureRectangle(gfx++, QuarterPixels(BACKDROP_BORDER),
-          QuarterPixels(strip * BACKDROP_STRIP_STEP + BACKDROP_BORDER),
-          QuarterPixels(BACKDROP_RIGHT + 1),
-          QuarterPixels(strip * BACKDROP_STRIP_STEP + BACKDROP_BORDER + height),
-          G_TX_RENDERTILE, TexelCoordinate(BACKDROP_BORDER),
-          TexelCoordinate(BACKDROP_BORDER), TEXEL_STEP_ONE, TEXEL_STEP_ONE);
-      gDPPipeSync(gfx++);
-    }
-  }
-
-  *displayListHead = gfx;
+    *displayListHead = gfx;
 }
 
 /*
  * Draws HUD_ANIMATION_TILES, where the frame's tiles turn over and fly apart
  */
 void DrawTileAnimation(void) {
-  Vec3 rotation;
-  Vec3 translation;
-  Mat4 matrix;
-  Radians angle;
-  f32 unusedSine UNUSED;
-  f32 unusedCosine UNUSED;
-  s32 progress;
-  s32 tileRow;
-  s32 tileColumn;
-  s32 wordIndex;
+    Vec3 rotation;
+    Vec3 translation;
+    Mat4 matrix;
+    Radians angle;
+    f32 unusedSine UNUSED;
+    f32 unusedCosine UNUSED;
+    s32 progress;
+    s32 tileRow;
+    s32 tileColumn;
+    s32 wordIndex;
 
-  if (f_HudAnimationFramesLeft > 0) {
-    angle = (f32)((M_PI / 2) -
-                (f_HudAnimationFramesLeft *
-                    (M_PI / 2 / TILE_ANIMATION_FRAME_COUNT))) +
-        TILE_ANIMATION_UNUSED_ANGLE_OFFSET;
-    unusedSine = sinf(angle);
-    unusedCosine = cosf(angle);
-    gDPPipeSync(g_DisplayListHead++);
-    gDPPipeSync(g_DisplayListHead++);
-    gDPSetCycleType(g_DisplayListHead++, G_CYC_1CYCLE);
-    gDPPipeSync(g_DisplayListHead++);
-    gSPClearGeometryMode(g_DisplayListHead++, ALL_GEOMETRY_MODES);
-    gSPSetGeometryMode(
-        g_DisplayListHead++, G_SHADE | G_CULL_BACK | G_SHADING_SMOOTH);
-    gDPPipeSync(g_DisplayListHead++);
-    gDPSetRenderMode(g_DisplayListHead++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
-    gSPPerspNormalize(g_DisplayListHead++, g_ScreenEffectPerspNorm);
-    gDPPipeSync(g_DisplayListHead++);
-    gDPSetTexturePersp(g_DisplayListHead++, G_TP_PERSP);
-    gDPSetCombineMode(g_DisplayListHead++, G_CC_DECALRGB, G_CC_DECALRGB);
-    gDPPipeSync(g_DisplayListHead++);
-    gDPSetTextureFilter(g_DisplayListHead++, G_TF_BILERP);
-    gSPMatrix(g_DisplayListHead++, PhysicalAddress(&g_ScreenEffectProjection),
-        G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
-    gDPPipeSync(g_DisplayListHead++);
-    rotation[AXIS_X] = 0.0f;
-    rotation[AXIS_Y] = (M_PI / 2) -
-        (f_HudAnimationFramesLeft * (M_PI / 2 / TILE_ANIMATION_FRAME_COUNT));
-    rotation[AXIS_Z] = rotation[AXIS_Y];
-    wordIndex = 0;
-    for (tileRow = 0; tileRow != FRAME_TILE_ROW_COUNT; tileRow++) {
-      for (tileColumn = 0; tileColumn != FRAME_TILE_COLUMN_COUNT;
-          tileColumn++) {
-        progress = TILE_ANIMATION_FRAME_COUNT - f_HudAnimationFramesLeft;
-        translation[AXIS_X] =
-            ((progress + TILE_ANIMATION_GAP_X) *
-                (tileColumn - (FRAME_TILE_COLUMN_COUNT / 2))) +
-            TILE_ANIMATION_OFFSET_X;
-        translation[AXIS_Y] = -(progress + TILE_ANIMATION_GAP_Y) *
-            (tileRow - (FRAME_TILE_ROW_COUNT / 2));
-        translation[AXIS_Z] =
-            TILE_ANIMATION_DEPTH - (progress * TILE_ANIMATION_SPEED_Z);
-        BuildRotationMatrix(matrix, rotation, translation);
-        ConvertMatrixToFixed(matrix,
-            &f_TileMatrices[g_MatrixBufferIndex]
-                           [(tileRow * FRAME_TILE_COLUMN_COUNT) + tileColumn]);
-        gSPMatrix(g_DisplayListHead++,
-            PhysicalAddress(&f_TileMatrices[g_MatrixBufferIndex]
-                                           [tileRow * FRAME_TILE_COLUMN_COUNT +
-                                               tileColumn]),
-            G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-        if (tileColumn == FRAME_TILE_COLUMN_COUNT - 1) {
-          gSPVertex(g_DisplayListHead++, f_LastColumnTileVertices,
-              TILE_VERTEX_COUNT, 0);
-        } else {
-          gSPVertex(g_DisplayListHead++, f_TileVertices, TILE_VERTEX_COUNT, 0);
+    if (f_HudAnimationFramesLeft > 0) {
+        angle = (f32)((M_PI / 2) -
+                    (f_HudAnimationFramesLeft * (M_PI / 2 / TILE_ANIMATION_FRAME_COUNT))) +
+            TILE_ANIMATION_UNUSED_ANGLE_OFFSET;
+        unusedSine = sinf(angle);
+        unusedCosine = cosf(angle);
+        gDPPipeSync(g_DisplayListHead++);
+        gDPPipeSync(g_DisplayListHead++);
+        gDPSetCycleType(g_DisplayListHead++, G_CYC_1CYCLE);
+        gDPPipeSync(g_DisplayListHead++);
+        gSPClearGeometryMode(g_DisplayListHead++, ALL_GEOMETRY_MODES);
+        gSPSetGeometryMode(g_DisplayListHead++, G_SHADE | G_CULL_BACK | G_SHADING_SMOOTH);
+        gDPPipeSync(g_DisplayListHead++);
+        gDPSetRenderMode(g_DisplayListHead++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
+        gSPPerspNormalize(g_DisplayListHead++, g_ScreenEffectPerspNorm);
+        gDPPipeSync(g_DisplayListHead++);
+        gDPSetTexturePersp(g_DisplayListHead++, G_TP_PERSP);
+        gDPSetCombineMode(g_DisplayListHead++, G_CC_DECALRGB, G_CC_DECALRGB);
+        gDPPipeSync(g_DisplayListHead++);
+        gDPSetTextureFilter(g_DisplayListHead++, G_TF_BILERP);
+        gSPMatrix(
+            g_DisplayListHead++,
+            PhysicalAddress(&g_ScreenEffectProjection),
+            G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION
+        );
+        gDPPipeSync(g_DisplayListHead++);
+        rotation[AXIS_X] = 0.0f;
+        rotation[AXIS_Y] =
+            (M_PI / 2) - (f_HudAnimationFramesLeft * (M_PI / 2 / TILE_ANIMATION_FRAME_COUNT));
+        rotation[AXIS_Z] = rotation[AXIS_Y];
+        wordIndex = 0;
+        for (tileRow = 0; tileRow != FRAME_TILE_ROW_COUNT; tileRow++) {
+            for (tileColumn = 0; tileColumn != FRAME_TILE_COLUMN_COUNT; tileColumn++) {
+                progress = TILE_ANIMATION_FRAME_COUNT - f_HudAnimationFramesLeft;
+                translation[AXIS_X] = ((progress + TILE_ANIMATION_GAP_X) *
+                                          (tileColumn - (FRAME_TILE_COLUMN_COUNT / 2))) +
+                    TILE_ANIMATION_OFFSET_X;
+                translation[AXIS_Y] =
+                    -(progress + TILE_ANIMATION_GAP_Y) * (tileRow - (FRAME_TILE_ROW_COUNT / 2));
+                translation[AXIS_Z] = TILE_ANIMATION_DEPTH - (progress * TILE_ANIMATION_SPEED_Z);
+                BuildRotationMatrix(matrix, rotation, translation);
+                ConvertMatrixToFixed(
+                    matrix,
+                    &f_TileMatrices[g_MatrixBufferIndex]
+                                   [(tileRow * FRAME_TILE_COLUMN_COUNT) + tileColumn]
+                );
+                gSPMatrix(
+                    g_DisplayListHead++,
+                    PhysicalAddress(
+                        &f_TileMatrices[g_MatrixBufferIndex]
+                                       [tileRow * FRAME_TILE_COLUMN_COUNT + tileColumn]
+                    ),
+                    G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW
+                );
+                if (tileColumn == FRAME_TILE_COLUMN_COUNT - 1) {
+                    gSPVertex(g_DisplayListHead++, f_LastColumnTileVertices, TILE_VERTEX_COUNT, 0);
+                }
+                else {
+                    gSPVertex(g_DisplayListHead++, f_TileVertices, TILE_VERTEX_COUNT, 0);
+                }
+
+                gDPLoadTextureBlock(
+                    g_DisplayListHead++,
+                    TextureAddress(&f_CapturedFrame[wordIndex]),
+                    G_IM_FMT_RGBA,
+                    G_IM_SIZ_16b,
+                    FRAME_TILE_WIDTH,
+                    FRAME_TILE_ROWS,
+                    0,
+                    G_TX_NOMIRROR | G_TX_WRAP,
+                    G_TX_NOMIRROR | G_TX_WRAP,
+                    G_TX_NOMASK,
+                    G_TX_NOMASK,
+                    G_TX_NOLOD,
+                    G_TX_NOLOD
+                );
+                gDPPipeSync(g_DisplayListHead++);
+                wordIndex += FRAME_TILE_WORD_COUNT;
+                gSP2Triangles(g_DisplayListHead++, 0, 1, 2, 0, 0, 2, 3, 0);
+                gDPPipeSync(g_DisplayListHead++);
+            }
         }
 
-        gDPLoadTextureBlock(g_DisplayListHead++,
-            TextureAddress(&f_CapturedFrame[wordIndex]), G_IM_FMT_RGBA,
-            G_IM_SIZ_16b, FRAME_TILE_WIDTH, FRAME_TILE_ROWS, 0,
-            G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
-            G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
         gDPPipeSync(g_DisplayListHead++);
-        wordIndex += FRAME_TILE_WORD_COUNT;
-        gSP2Triangles(g_DisplayListHead++, 0, 1, 2, 0, 0, 2, 3, 0);
-        gDPPipeSync(g_DisplayListHead++);
-      }
+        f_HudAnimationFramesLeft -= TILE_ANIMATION_STEP;
     }
-
-    gDPPipeSync(g_DisplayListHead++);
-    f_HudAnimationFramesLeft -= TILE_ANIMATION_STEP;
-  }
 }
 
 /*
@@ -2968,8 +4006,7 @@ void DrawTileAnimation(void) {
  * only the upper rows have a back, drawn in their shade.
  */
 #define TURN_AWAY_UPPER_ROW_COUNT 4
-#define TURN_AWAY_LOWER_ROW_COUNT \
-  (FRAME_TILE_ROW_COUNT - TURN_AWAY_UPPER_ROW_COUNT)
+#define TURN_AWAY_LOWER_ROW_COUNT (FRAME_TILE_ROW_COUNT - TURN_AWAY_UPPER_ROW_COUNT)
 /* The last column's texture coordinates span this many texels */
 #define LAST_TILE_TEXEL_WIDTH 47
 /* The lower rows' texture coordinates stop a quarter texel short, in 10.5 fixed
@@ -3034,145 +4071,219 @@ void DrawTurnAwayAnimation(void);
  */
 #ifdef NON_MATCHING
 void DrawTurnAwayAnimation(void) {
-  Vec3 rotation;
-  Vec3 translation;
-  Mat4 matrix;
-  s32 wordIndex;
-  s32 row;
-  s32 column;
-  s32 width;
-  s32 rowStart;
-  s32 lowerRight;
+    Vec3 rotation;
+    Vec3 translation;
+    Mat4 matrix;
+    s32 wordIndex;
+    s32 row;
+    s32 column;
+    s32 width;
+    s32 rowStart;
+    s32 lowerRight;
 
-  if (f_HudAnimationFramesLeft > 0) {
-    rotation[AXIS_X] = 0.0f;
-    rotation[AXIS_Y] = (M_PI / 2) -
-        (f_HudAnimationFramesLeft * (M_PI / 2 / TILE_ANIMATION_FRAME_COUNT));
-    rotation[AXIS_Z] = rotation[AXIS_Y];
-    translation[AXIS_X] = 0.0f;
-    translation[AXIS_Y] = 0.0f;
-    translation[AXIS_Z] = TILE_ANIMATION_DEPTH -
-        (TILE_ANIMATION_FRAME_COUNT - f_HudAnimationFramesLeft);
-    BuildRotationMatrix(matrix, rotation, translation);
-    ConvertMatrixToFixed(matrix, &f_TurnAwayMatrices[g_MatrixBufferIndex]);
-    gDPPipeSync(g_DisplayListHead++);
-    gDPPipeSync(g_DisplayListHead++);
-    gDPSetCycleType(g_DisplayListHead++, G_CYC_1CYCLE);
-    gDPPipeSync(g_DisplayListHead++);
-    gSPClearGeometryMode(g_DisplayListHead++, ALL_GEOMETRY_MODES);
-    gSPSetGeometryMode(
-        g_DisplayListHead++, G_SHADE | G_CULL_BACK | G_SHADING_SMOOTH);
-    gDPPipeSync(g_DisplayListHead++);
-    gDPSetRenderMode(g_DisplayListHead++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
-    gSPPerspNormalize(g_DisplayListHead++, g_ScreenEffectPerspNorm);
-    gDPPipeSync(g_DisplayListHead++);
-    gDPSetTexturePersp(g_DisplayListHead++, G_TP_PERSP);
-    gDPPipeSync(g_DisplayListHead++);
-    gDPSetTextureFilter(g_DisplayListHead++, G_TF_BILERP);
-    gSPMatrix(g_DisplayListHead++, PhysicalAddress(&g_ScreenEffectProjection),
-        G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
-    gSPMatrix(g_DisplayListHead++,
-        PhysicalAddress(&f_TurnAwayMatrices[g_MatrixBufferIndex]),
-        G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-    gSPVertex(g_DisplayListHead++, f_TileGridVertices[g_MatrixBufferIndex],
-        (TURN_AWAY_UPPER_ROW_COUNT + 1) * TILE_GRID_COLUMN_COUNT, 0);
-    wordIndex = 0;
-    gDPSetCombineMode(g_DisplayListHead++, G_CC_DECALRGB, G_CC_DECALRGB);
-    gDPPipeSync(g_DisplayListHead++);
-    for (row = 0; row != TURN_AWAY_UPPER_ROW_COUNT; row++) {
-      rowStart = GridVertex(row, 0);
-      for (column = 0; column != FRAME_TILE_COLUMN_COUNT; column++) {
-        gDPLoadTextureBlock(g_DisplayListHead++,
-            TextureAddress(&f_CapturedFrame[wordIndex]), G_IM_FMT_RGBA,
-            G_IM_SIZ_16b, FRAME_TILE_WIDTH, FRAME_TILE_ROWS, 0,
-            G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
-            G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-        wordIndex += FRAME_TILE_WORD_COUNT;
-        if (column == FRAME_TILE_COLUMN_COUNT - 1) {
-          width = LAST_TILE_TEXEL_WIDTH;
-        } else {
-          width = FRAME_TILE_WIDTH;
+    if (f_HudAnimationFramesLeft > 0) {
+        rotation[AXIS_X] = 0.0f;
+        rotation[AXIS_Y] =
+            (M_PI / 2) - (f_HudAnimationFramesLeft * (M_PI / 2 / TILE_ANIMATION_FRAME_COUNT));
+        rotation[AXIS_Z] = rotation[AXIS_Y];
+        translation[AXIS_X] = 0.0f;
+        translation[AXIS_Y] = 0.0f;
+        translation[AXIS_Z] =
+            TILE_ANIMATION_DEPTH - (TILE_ANIMATION_FRAME_COUNT - f_HudAnimationFramesLeft);
+        BuildRotationMatrix(matrix, rotation, translation);
+        ConvertMatrixToFixed(matrix, &f_TurnAwayMatrices[g_MatrixBufferIndex]);
+        gDPPipeSync(g_DisplayListHead++);
+        gDPPipeSync(g_DisplayListHead++);
+        gDPSetCycleType(g_DisplayListHead++, G_CYC_1CYCLE);
+        gDPPipeSync(g_DisplayListHead++);
+        gSPClearGeometryMode(g_DisplayListHead++, ALL_GEOMETRY_MODES);
+        gSPSetGeometryMode(g_DisplayListHead++, G_SHADE | G_CULL_BACK | G_SHADING_SMOOTH);
+        gDPPipeSync(g_DisplayListHead++);
+        gDPSetRenderMode(g_DisplayListHead++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
+        gSPPerspNormalize(g_DisplayListHead++, g_ScreenEffectPerspNorm);
+        gDPPipeSync(g_DisplayListHead++);
+        gDPSetTexturePersp(g_DisplayListHead++, G_TP_PERSP);
+        gDPPipeSync(g_DisplayListHead++);
+        gDPSetTextureFilter(g_DisplayListHead++, G_TF_BILERP);
+        gSPMatrix(
+            g_DisplayListHead++,
+            PhysicalAddress(&g_ScreenEffectProjection),
+            G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION
+        );
+        gSPMatrix(
+            g_DisplayListHead++,
+            PhysicalAddress(&f_TurnAwayMatrices[g_MatrixBufferIndex]),
+            G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW
+        );
+        gSPVertex(
+            g_DisplayListHead++,
+            f_TileGridVertices[g_MatrixBufferIndex],
+            (TURN_AWAY_UPPER_ROW_COUNT + 1) * TILE_GRID_COLUMN_COUNT,
+            0
+        );
+        wordIndex = 0;
+        gDPSetCombineMode(g_DisplayListHead++, G_CC_DECALRGB, G_CC_DECALRGB);
+        gDPPipeSync(g_DisplayListHead++);
+        for (row = 0; row != TURN_AWAY_UPPER_ROW_COUNT; row++) {
+            rowStart = GridVertex(row, 0);
+            for (column = 0; column != FRAME_TILE_COLUMN_COUNT; column++) {
+                gDPLoadTextureBlock(
+                    g_DisplayListHead++,
+                    TextureAddress(&f_CapturedFrame[wordIndex]),
+                    G_IM_FMT_RGBA,
+                    G_IM_SIZ_16b,
+                    FRAME_TILE_WIDTH,
+                    FRAME_TILE_ROWS,
+                    0,
+                    G_TX_NOMIRROR | G_TX_WRAP,
+                    G_TX_NOMIRROR | G_TX_WRAP,
+                    G_TX_NOMASK,
+                    G_TX_NOMASK,
+                    G_TX_NOLOD,
+                    G_TX_NOLOD
+                );
+                wordIndex += FRAME_TILE_WORD_COUNT;
+                if (column == FRAME_TILE_COLUMN_COUNT - 1) {
+                    width = LAST_TILE_TEXEL_WIDTH;
+                }
+                else {
+                    width = FRAME_TILE_WIDTH;
+                }
+
+                gSPModifyVertex(g_DisplayListHead++, column + rowStart, G_MWO_POINT_ST, 0);
+                lowerRight = GridVertex(row + 1, column + 1);
+                gSPModifyVertex(
+                    g_DisplayListHead++,
+                    GridVertex(row + 1, column),
+                    G_MWO_POINT_ST,
+                    TexelCoordinate(FRAME_TILE_ROWS)
+                );
+                gSPModifyVertex(
+                    g_DisplayListHead++,
+                    lowerRight,
+                    G_MWO_POINT_ST,
+                    TexcoordWord(TexelCoordinate(width), TexelCoordinate(FRAME_TILE_ROWS))
+                );
+                gSPModifyVertex(
+                    g_DisplayListHead++,
+                    (column + 1) + rowStart,
+                    G_MWO_POINT_ST,
+                    TexcoordWord(TexelCoordinate(width), 0)
+                );
+                gDPPipeSync(g_DisplayListHead++);
+                gSP2Triangles(
+                    g_DisplayListHead++,
+                    column + rowStart,
+                    GridVertex(row + 1, column),
+                    lowerRight,
+                    0,
+                    column + rowStart,
+                    lowerRight,
+                    (column + 1) + rowStart,
+                    0
+                );
+                gDPPipeSync(g_DisplayListHead++);
+            }
         }
 
-        gSPModifyVertex(
-            g_DisplayListHead++, column + rowStart, G_MWO_POINT_ST, 0);
-        lowerRight = GridVertex(row + 1, column + 1);
-        gSPModifyVertex(g_DisplayListHead++, GridVertex(row + 1, column),
-            G_MWO_POINT_ST, TexelCoordinate(FRAME_TILE_ROWS));
-        gSPModifyVertex(g_DisplayListHead++, lowerRight, G_MWO_POINT_ST,
-            TexcoordWord(
-                TexelCoordinate(width), TexelCoordinate(FRAME_TILE_ROWS)));
-        gSPModifyVertex(g_DisplayListHead++, (column + 1) + rowStart,
-            G_MWO_POINT_ST, TexcoordWord(TexelCoordinate(width), 0));
         gDPPipeSync(g_DisplayListHead++);
-        gSP2Triangles(g_DisplayListHead++, column + rowStart,
-            GridVertex(row + 1, column), lowerRight, 0, column + rowStart,
-            lowerRight, (column + 1) + rowStart, 0);
+        gDPSetCombineMode(g_DisplayListHead++, G_CC_SHADE, G_CC_SHADE);
         gDPPipeSync(g_DisplayListHead++);
-      }
-    }
-
-    gDPPipeSync(g_DisplayListHead++);
-    gDPSetCombineMode(g_DisplayListHead++, G_CC_SHADE, G_CC_SHADE);
-    gDPPipeSync(g_DisplayListHead++);
-    for (row = 0; row != TURN_AWAY_UPPER_ROW_COUNT; row++) {
-      for (column = 0; column != FRAME_TILE_COLUMN_COUNT; column++) {
-        gSP2Triangles(g_DisplayListHead++, GridVertex(row + 1, column + 1),
-            GridVertex(row + 1, column), GridVertex(row, column), 0,
-            GridVertex(row, column + 1), GridVertex(row + 1, column + 1),
-            GridVertex(row, column), 0);
-      }
-    }
-
-    gDPPipeSync(g_DisplayListHead++);
-    gDPSetCombineMode(g_DisplayListHead++, G_CC_DECALRGB, G_CC_DECALRGB);
-    gDPPipeSync(g_DisplayListHead++);
-    gSPVertex(g_DisplayListHead++,
-        &f_TileGridVertices[g_MatrixBufferIndex]
-                           [TURN_AWAY_UPPER_ROW_COUNT * TILE_GRID_COLUMN_COUNT],
-        (TURN_AWAY_LOWER_ROW_COUNT + 1) * TILE_GRID_COLUMN_COUNT, 0);
-    for (row = 0; row != TURN_AWAY_LOWER_ROW_COUNT; row++) {
-      rowStart = GridVertex(row, 0);
-      for (column = 0; column != FRAME_TILE_COLUMN_COUNT; column++) {
-        gDPLoadTextureBlock(g_DisplayListHead++,
-            TextureAddress(&f_CapturedFrame[wordIndex]), G_IM_FMT_RGBA,
-            G_IM_SIZ_16b, FRAME_TILE_WIDTH, FRAME_TILE_ROWS, 0,
-            G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
-            G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-        wordIndex += FRAME_TILE_WORD_COUNT;
-        if (column == FRAME_TILE_COLUMN_COUNT - 1) {
-          width = LAST_TILE_TEXEL_WIDTH;
-        } else {
-          width = FRAME_TILE_WIDTH;
+        for (row = 0; row != TURN_AWAY_UPPER_ROW_COUNT; row++) {
+            for (column = 0; column != FRAME_TILE_COLUMN_COUNT; column++) {
+                gSP2Triangles(
+                    g_DisplayListHead++,
+                    GridVertex(row + 1, column + 1),
+                    GridVertex(row + 1, column),
+                    GridVertex(row, column),
+                    0,
+                    GridVertex(row, column + 1),
+                    GridVertex(row + 1, column + 1),
+                    GridVertex(row, column),
+                    0
+                );
+            }
         }
 
         gDPPipeSync(g_DisplayListHead++);
-        gSPModifyVertex(
-            g_DisplayListHead++, column + rowStart, G_MWO_POINT_ST, 0);
-        gSPModifyVertex(g_DisplayListHead++, GridVertex(row + 1, column),
-            G_MWO_POINT_ST,
-            TexelCoordinate(FRAME_TILE_ROWS) - LOWER_TILE_TEXCOORD_INSET);
-        gSPModifyVertex(g_DisplayListHead++, GridVertex(row + 1, column + 1),
-            G_MWO_POINT_ST,
-            TexcoordWord(TexelCoordinate(width) - LOWER_TILE_TEXCOORD_INSET,
-                TexelCoordinate(FRAME_TILE_ROWS) - LOWER_TILE_TEXCOORD_INSET));
-        gSPModifyVertex(g_DisplayListHead++, (column + 1) + rowStart,
-            G_MWO_POINT_ST,
-            TexcoordWord(
-                TexelCoordinate(width) - LOWER_TILE_TEXCOORD_INSET, 0));
-        gSP2Triangles(g_DisplayListHead++, column + rowStart,
-            GridVertex(row + 1, column), GridVertex(row + 1, column + 1), 0,
-            column + rowStart, GridVertex(row + 1, column + 1),
-            (column + 1) + rowStart, 0);
+        gDPSetCombineMode(g_DisplayListHead++, G_CC_DECALRGB, G_CC_DECALRGB);
         gDPPipeSync(g_DisplayListHead++);
-      }
-    }
+        gSPVertex(
+            g_DisplayListHead++,
+            &f_TileGridVertices[g_MatrixBufferIndex]
+                               [TURN_AWAY_UPPER_ROW_COUNT * TILE_GRID_COLUMN_COUNT],
+            (TURN_AWAY_LOWER_ROW_COUNT + 1) * TILE_GRID_COLUMN_COUNT,
+            0
+        );
+        for (row = 0; row != TURN_AWAY_LOWER_ROW_COUNT; row++) {
+            rowStart = GridVertex(row, 0);
+            for (column = 0; column != FRAME_TILE_COLUMN_COUNT; column++) {
+                gDPLoadTextureBlock(
+                    g_DisplayListHead++,
+                    TextureAddress(&f_CapturedFrame[wordIndex]),
+                    G_IM_FMT_RGBA,
+                    G_IM_SIZ_16b,
+                    FRAME_TILE_WIDTH,
+                    FRAME_TILE_ROWS,
+                    0,
+                    G_TX_NOMIRROR | G_TX_WRAP,
+                    G_TX_NOMIRROR | G_TX_WRAP,
+                    G_TX_NOMASK,
+                    G_TX_NOMASK,
+                    G_TX_NOLOD,
+                    G_TX_NOLOD
+                );
+                wordIndex += FRAME_TILE_WORD_COUNT;
+                if (column == FRAME_TILE_COLUMN_COUNT - 1) {
+                    width = LAST_TILE_TEXEL_WIDTH;
+                }
+                else {
+                    width = FRAME_TILE_WIDTH;
+                }
 
-    gDPPipeSync(g_DisplayListHead++);
-    gDPSetCombineMode(g_DisplayListHead++, G_CC_SHADE, G_CC_SHADE);
-    gDPPipeSync(g_DisplayListHead++);
-    f_HudAnimationFramesLeft -= TILE_ANIMATION_STEP;
-  }
+                gDPPipeSync(g_DisplayListHead++);
+                gSPModifyVertex(g_DisplayListHead++, column + rowStart, G_MWO_POINT_ST, 0);
+                gSPModifyVertex(
+                    g_DisplayListHead++,
+                    GridVertex(row + 1, column),
+                    G_MWO_POINT_ST,
+                    TexelCoordinate(FRAME_TILE_ROWS) - LOWER_TILE_TEXCOORD_INSET
+                );
+                gSPModifyVertex(
+                    g_DisplayListHead++,
+                    GridVertex(row + 1, column + 1),
+                    G_MWO_POINT_ST,
+                    TexcoordWord(
+                        TexelCoordinate(width) - LOWER_TILE_TEXCOORD_INSET,
+                        TexelCoordinate(FRAME_TILE_ROWS) - LOWER_TILE_TEXCOORD_INSET
+                    )
+                );
+                gSPModifyVertex(
+                    g_DisplayListHead++,
+                    (column + 1) + rowStart,
+                    G_MWO_POINT_ST,
+                    TexcoordWord(TexelCoordinate(width) - LOWER_TILE_TEXCOORD_INSET, 0)
+                );
+                gSP2Triangles(
+                    g_DisplayListHead++,
+                    column + rowStart,
+                    GridVertex(row + 1, column),
+                    GridVertex(row + 1, column + 1),
+                    0,
+                    column + rowStart,
+                    GridVertex(row + 1, column + 1),
+                    (column + 1) + rowStart,
+                    0
+                );
+                gDPPipeSync(g_DisplayListHead++);
+            }
+        }
+
+        gDPPipeSync(g_DisplayListHead++);
+        gDPSetCombineMode(g_DisplayListHead++, G_CC_SHADE, G_CC_SHADE);
+        gDPPipeSync(g_DisplayListHead++);
+        f_HudAnimationFramesLeft -= TILE_ANIMATION_STEP;
+    }
 }
 
 #else
@@ -3231,127 +4342,123 @@ INCLUDE_ASM("asm/nonmatchings/hole_display", DrawTurnAwayAnimation);
  */
 #ifdef NON_MATCHING
 void CaptureHudAnimationFrame(void) {
-  u32* frame;
-  s32 tileStart;
-  s32 tileRow;
-  s32 tileColumn;
-  s32 row;
-  s32 sliceRow;
-  s32 gridRow;
-  s32 column;
-  /* Counts the tile grid's columns, or the slice copy's words, as the
-   * original's shared register needs */
-  s32 gridColumnOrSliceWord;
-  Vtx* vertex;
-  Vtx* nextVertex;
-  s32 x;
+    u32 *frame;
+    s32 tileStart;
+    s32 tileRow;
+    s32 tileColumn;
+    s32 row;
+    s32 sliceRow;
+    s32 gridRow;
+    s32 column;
+    /* Counts the tile grid's columns, or the slice copy's words, as the
+     * original's shared register needs */
+    s32 gridColumnOrSliceWord;
+    Vtx *vertex;
+    Vtx *nextVertex;
+    s32 x;
 
-  if (!f_IsFrameCapturePending) {
-    return;
-  }
+    if (!f_IsFrameCapturePending) {
+        return;
+    }
 
-  frame = (u32*)nuGfxCfb_ptr;
-  f_IsFrameCapturePending = FALSE;
-  if (f_HudAnimation == HUD_ANIMATION_TURN_AWAY ||
-      f_HudAnimation == HUD_ANIMATION_TILES) {
-    s32 wordIndex = 0;
+    frame = (u32 *)nuGfxCfb_ptr;
+    f_IsFrameCapturePending = FALSE;
+    if (f_HudAnimation == HUD_ANIMATION_TURN_AWAY || f_HudAnimation == HUD_ANIMATION_TILES) {
+        s32 wordIndex = 0;
 
-    for (tileRow = 0; tileRow != FRAME_TILE_ROW_COUNT; tileRow++) {
-      for (tileColumn = 0; tileColumn != FRAME_TILE_COLUMN_COUNT;
-          tileColumn++) {
-        /* The word the tile's rows count from */
-        tileStart = (tileRow * FRAME_TILE_ROWS * FRAME_WORDS_PER_ROW) +
-            (tileColumn * FRAME_TILE_WORDS);
-        for (row = FRAME_MARGIN_ROWS;
-            row != FRAME_MARGIN_ROWS + FRAME_TILE_ROWS; row++) {
-          for (column = FRAME_MARGIN_WORDS;
-              column != FRAME_MARGIN_WORDS + FRAME_TILE_WORDS; column++) {
-            f_CapturedFrame[wordIndex++] =
-                frame[(row * FRAME_WORDS_PER_ROW) + (tileStart + column)];
-          }
+        for (tileRow = 0; tileRow != FRAME_TILE_ROW_COUNT; tileRow++) {
+            for (tileColumn = 0; tileColumn != FRAME_TILE_COLUMN_COUNT; tileColumn++) {
+                /* The word the tile's rows count from */
+                tileStart = (tileRow * FRAME_TILE_ROWS * FRAME_WORDS_PER_ROW) +
+                    (tileColumn * FRAME_TILE_WORDS);
+                for (row = FRAME_MARGIN_ROWS; row != FRAME_MARGIN_ROWS + FRAME_TILE_ROWS; row++) {
+                    for (column = FRAME_MARGIN_WORDS;
+                        column != FRAME_MARGIN_WORDS + FRAME_TILE_WORDS;
+                        column++) {
+                        f_CapturedFrame[wordIndex++] =
+                            frame[(row * FRAME_WORDS_PER_ROW) + (tileStart + column)];
+                    }
+                }
+            }
         }
-      }
-    }
 
-    vertex = f_TileGridVertices[0];
-    nextVertex = f_TileGridVertices[1];
-    for (gridRow = 0; gridRow != TILE_GRID_ROW_COUNT; gridRow++) {
-      for (gridColumnOrSliceWord = 0, x = TILE_GRID_LEFT;
-          gridColumnOrSliceWord != TILE_GRID_COLUMN_COUNT - 1;
-          gridColumnOrSliceWord++, x += TILE_GRID_SPACING) {
-        vertex->v.ob[AXIS_X] = x;
-        vertex->v.ob[AXIS_Y] = TileGridRowY(gridRow);
-        vertex->v.ob[AXIS_Z] = 0;
-        nextVertex->v.ob[AXIS_X] = x;
-        nextVertex->v.ob[AXIS_Y] = TileGridRowY(gridRow);
-        nextVertex->v.ob[AXIS_Z] = 0;
-        vertex++;
-        nextVertex++;
-      }
+        vertex = f_TileGridVertices[0];
+        nextVertex = f_TileGridVertices[1];
+        for (gridRow = 0; gridRow != TILE_GRID_ROW_COUNT; gridRow++) {
+            for (gridColumnOrSliceWord = 0, x = TILE_GRID_LEFT;
+                gridColumnOrSliceWord != TILE_GRID_COLUMN_COUNT - 1;
+                gridColumnOrSliceWord++, x += TILE_GRID_SPACING) {
+                vertex->v.ob[AXIS_X] = x;
+                vertex->v.ob[AXIS_Y] = TileGridRowY(gridRow);
+                vertex->v.ob[AXIS_Z] = 0;
+                nextVertex->v.ob[AXIS_X] = x;
+                nextVertex->v.ob[AXIS_Y] = TileGridRowY(gridRow);
+                nextVertex->v.ob[AXIS_Z] = 0;
+                vertex++;
+                nextVertex++;
+            }
 
-      /* The last column is narrower, ending inside the HUD's margin */
-      for (gridColumnOrSliceWord = TILE_GRID_COLUMN_COUNT - 1,
-          x = TILE_GRID_RIGHT;
-          gridColumnOrSliceWord != TILE_GRID_COLUMN_COUNT;
-          gridColumnOrSliceWord++, x += TILE_GRID_SPACING) {
-        vertex->v.ob[AXIS_X] = x;
-        vertex->v.ob[AXIS_Y] = TileGridRowY(gridRow);
-        /*
-         * In its own block, as without it 104 words differ, 18 in shape,
-         * against 102 and 16
-         */
-        IN_OWN_BLOCK(vertex->v.ob[AXIS_Z] = 0);
-        nextVertex->v.ob[AXIS_X] = x;
-        nextVertex->v.ob[AXIS_Y] = TileGridRowY(gridRow);
-        nextVertex->v.ob[AXIS_Z] = 0;
-        vertex++;
-        nextVertex++;
-      }
-    }
-  } else if (f_HudAnimation == HUD_ANIMATION_FADE_OUT ||
-      f_HudAnimation == HUD_ANIMATION_FAST_FADE_OUT ||
-      f_HudAnimation == HUD_ANIMATION_SLIDE_APART ||
-      f_HudAnimation == HUD_ANIMATION_SPIRAL) {
-    s32 wordIndex = 0;
-
-    for (row = FRAME_MARGIN_ROWS; row != SCREEN_HEIGHT - FRAME_MARGIN_ROWS;
-        row++) {
-      for (column = FRAME_MARGIN_WORDS;
-          column != FRAME_WORDS_PER_ROW - FRAME_MARGIN_WORDS; column++) {
-        f_CapturedFrame[wordIndex++] =
-            frame[(row * FRAME_WORDS_PER_ROW) + column];
-      }
-    }
-  } else if (f_HudAnimation == HUD_ANIMATION_SLICE_CAPTURE) {
-    if (g_CapturedSliceCount < FRAME_SLICE_COUNT) {
-      gridColumnOrSliceWord = 0;
-      for (sliceRow = FRAME_SLICE_TOP; sliceRow != FRAME_SLICE_BOTTOM;
-          sliceRow++) {
-        for (column = FRAME_SLICE_LEFT_WORD;
-            column != FRAME_SLICE_RIGHT_WORD;) {
-          f_CapturedFrame[(g_CapturedSliceCount * FRAME_SLICE_WORD_COUNT) +
-              gridColumnOrSliceWord++] =
-              frame[(sliceRow * FRAME_WORDS_PER_ROW) + column++];
+            /* The last column is narrower, ending inside the HUD's margin */
+            for (gridColumnOrSliceWord = TILE_GRID_COLUMN_COUNT - 1, x = TILE_GRID_RIGHT;
+                gridColumnOrSliceWord != TILE_GRID_COLUMN_COUNT;
+                gridColumnOrSliceWord++, x += TILE_GRID_SPACING) {
+                vertex->v.ob[AXIS_X] = x;
+                vertex->v.ob[AXIS_Y] = TileGridRowY(gridRow);
+                /*
+                 * In its own block, as without it 104 words differ, 18 in shape,
+                 * against 102 and 16
+                 */
+                IN_OWN_BLOCK(vertex->v.ob[AXIS_Z] = 0);
+                nextVertex->v.ob[AXIS_X] = x;
+                nextVertex->v.ob[AXIS_Y] = TileGridRowY(gridRow);
+                nextVertex->v.ob[AXIS_Z] = 0;
+                vertex++;
+                nextVertex++;
+            }
         }
-      }
-
-      g_CapturedSliceCount++;
     }
-  } else if (f_HudAnimation == HUD_ANIMATION_MOTION_BLUR) {
-  } else if (f_HudAnimation == HUD_ANIMATION_NEGATIVE) {
-    s32 wordIndex = 0;
+    else if (f_HudAnimation == HUD_ANIMATION_FADE_OUT ||
+        f_HudAnimation == HUD_ANIMATION_FAST_FADE_OUT ||
+        f_HudAnimation == HUD_ANIMATION_SLIDE_APART ||
+        f_HudAnimation == HUD_ANIMATION_SPIRAL) {
+        s32 wordIndex = 0;
 
-    for (row = FRAME_MARGIN_ROWS; row != SCREEN_HEIGHT - FRAME_MARGIN_ROWS;
-        row++) {
-      for (column = FRAME_MARGIN_WORDS;
-          column != FRAME_WORDS_PER_ROW - FRAME_MARGIN_WORDS; column++) {
-        f_CapturedFrame[wordIndex++] =
-            ~frame[(row * FRAME_WORDS_PER_ROW) + column];
-      }
+        for (row = FRAME_MARGIN_ROWS; row != SCREEN_HEIGHT - FRAME_MARGIN_ROWS; row++) {
+            for (column = FRAME_MARGIN_WORDS; column != FRAME_WORDS_PER_ROW - FRAME_MARGIN_WORDS;
+                column++) {
+                f_CapturedFrame[wordIndex++] = frame[(row * FRAME_WORDS_PER_ROW) + column];
+            }
+        }
     }
-  }
+    else if (f_HudAnimation == HUD_ANIMATION_SLICE_CAPTURE) {
+        if (g_CapturedSliceCount < FRAME_SLICE_COUNT) {
+            gridColumnOrSliceWord = 0;
+            for (sliceRow = FRAME_SLICE_TOP; sliceRow != FRAME_SLICE_BOTTOM; sliceRow++) {
+                for (column = FRAME_SLICE_LEFT_WORD; column != FRAME_SLICE_RIGHT_WORD;) {
+                    f_CapturedFrame
+                        [(g_CapturedSliceCount * FRAME_SLICE_WORD_COUNT) +
+                            gridColumnOrSliceWord++] =
+                            frame[(sliceRow * FRAME_WORDS_PER_ROW) + column++];
+                }
+            }
 
-  f_HudAnimationFrame = 1;
+            g_CapturedSliceCount++;
+        }
+    }
+    else if (f_HudAnimation == HUD_ANIMATION_MOTION_BLUR) {
+    }
+    else if (f_HudAnimation == HUD_ANIMATION_NEGATIVE) {
+        s32 wordIndex = 0;
+
+        for (row = FRAME_MARGIN_ROWS; row != SCREEN_HEIGHT - FRAME_MARGIN_ROWS; row++) {
+            for (column = FRAME_MARGIN_WORDS; column != FRAME_WORDS_PER_ROW - FRAME_MARGIN_WORDS;
+                column++) {
+                f_CapturedFrame[wordIndex++] = ~frame[(row * FRAME_WORDS_PER_ROW) + column];
+            }
+        }
+    }
+
+    f_HudAnimationFrame = 1;
 }
 #else
 INCLUDE_ASM("asm/nonmatchings/hole_display", CaptureHudAnimationFrame);
@@ -3390,62 +4497,79 @@ INCLUDE_ASM("asm/nonmatchings/hole_display", CaptureHudAnimationFrame);
  */
 #ifdef NON_MATCHING
 void DrawSliceAnimation(void) {
-  s32 frame;
-  s32 sliceCount;
-  s32 slice;
-  s32 strip;
-  s32 column;
-  s32 wordIndex;
-  s32 sliceY;
+    s32 frame;
+    s32 sliceCount;
+    s32 slice;
+    s32 strip;
+    s32 column;
+    s32 wordIndex;
+    s32 sliceY;
 
-  if (f_HudAnimationFramesLeft <= 0) {
-    return;
-  }
-
-  gDPPipeSync(g_DisplayListHead++);
-  gDPPipeSync(g_DisplayListHead++);
-  gDPSetCycleType(g_DisplayListHead++, G_CYC_1CYCLE);
-  gDPPipeSync(g_DisplayListHead++);
-  gDPPipeSync(g_DisplayListHead++);
-  gDPSetTexturePersp(g_DisplayListHead++, G_TP_NONE);
-  gDPSetCombineMode(
-      g_DisplayListHead++, G_CC_MODULATEI_PRIM, G_CC_MODULATEI_PRIM);
-  gDPPipeSync(g_DisplayListHead++);
-  column = 0;
-  wordIndex = 0;
-  frame = SLICE_ANIMATION_FRAME_COUNT - f_HudAnimationFramesLeft;
-  sliceCount = (frame / SLICE_FRAME_COUNT) + 1;
-  if (frame % SLICE_FRAME_COUNT == 0) {
-    PlaySound(SOUND_SLICE, SLICE_SOUND_CHANNEL, SOUND_FULL_SCALE);
-  }
-
-  for (slice = 0, sliceY = 0; slice != sliceCount; slice++) {
-    for (strip = 0; strip != SLICE_STRIP_COUNT; strip++) {
-      s32 left = column * SLICE_WIDTH;
-      s32 y = sliceY + strip * SLICE_STRIP_HEIGHT;
-
-      gDPLoadTextureBlock(g_DisplayListHead++,
-          TextureAddress(&f_CapturedFrame[wordIndex]), G_IM_FMT_RGBA,
-          G_IM_SIZ_16b, SLICE_WIDTH, SLICE_STRIP_HEIGHT, 0,
-          G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
-          G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-      gDPPipeSync(g_DisplayListHead++);
-      gSPTextureRectangle(g_DisplayListHead++, QuarterPixels(left),
-          QuarterPixels(y), QuarterPixels(left + SLICE_WIDTH),
-          QuarterPixels(y + SLICE_STRIP_HEIGHT), G_TX_RENDERTILE, 0, 0,
-          TEXEL_STEP_ONE, TEXEL_STEP_ONE);
-      wordIndex += SLICE_STRIP_WORD_COUNT;
-      gDPPipeSync(g_DisplayListHead++);
+    if (f_HudAnimationFramesLeft <= 0) {
+        return;
     }
 
-    column++;
-    if (column == SLICE_COLUMN_COUNT) {
-      column = 0;
-      sliceY += SLICE_HEIGHT;
+    gDPPipeSync(g_DisplayListHead++);
+    gDPPipeSync(g_DisplayListHead++);
+    gDPSetCycleType(g_DisplayListHead++, G_CYC_1CYCLE);
+    gDPPipeSync(g_DisplayListHead++);
+    gDPPipeSync(g_DisplayListHead++);
+    gDPSetTexturePersp(g_DisplayListHead++, G_TP_NONE);
+    gDPSetCombineMode(g_DisplayListHead++, G_CC_MODULATEI_PRIM, G_CC_MODULATEI_PRIM);
+    gDPPipeSync(g_DisplayListHead++);
+    column = 0;
+    wordIndex = 0;
+    frame = SLICE_ANIMATION_FRAME_COUNT - f_HudAnimationFramesLeft;
+    sliceCount = (frame / SLICE_FRAME_COUNT) + 1;
+    if (frame % SLICE_FRAME_COUNT == 0) {
+        PlaySound(SOUND_SLICE, SLICE_SOUND_CHANNEL, SOUND_FULL_SCALE);
     }
-  }
 
-  f_HudAnimationFramesLeft--;
+    for (slice = 0, sliceY = 0; slice != sliceCount; slice++) {
+        for (strip = 0; strip != SLICE_STRIP_COUNT; strip++) {
+            s32 left = column * SLICE_WIDTH;
+            s32 y = sliceY + strip * SLICE_STRIP_HEIGHT;
+
+            gDPLoadTextureBlock(
+                g_DisplayListHead++,
+                TextureAddress(&f_CapturedFrame[wordIndex]),
+                G_IM_FMT_RGBA,
+                G_IM_SIZ_16b,
+                SLICE_WIDTH,
+                SLICE_STRIP_HEIGHT,
+                0,
+                G_TX_NOMIRROR | G_TX_WRAP,
+                G_TX_NOMIRROR | G_TX_WRAP,
+                G_TX_NOMASK,
+                G_TX_NOMASK,
+                G_TX_NOLOD,
+                G_TX_NOLOD
+            );
+            gDPPipeSync(g_DisplayListHead++);
+            gSPTextureRectangle(
+                g_DisplayListHead++,
+                QuarterPixels(left),
+                QuarterPixels(y),
+                QuarterPixels(left + SLICE_WIDTH),
+                QuarterPixels(y + SLICE_STRIP_HEIGHT),
+                G_TX_RENDERTILE,
+                0,
+                0,
+                TEXEL_STEP_ONE,
+                TEXEL_STEP_ONE
+            );
+            wordIndex += SLICE_STRIP_WORD_COUNT;
+            gDPPipeSync(g_DisplayListHead++);
+        }
+
+        column++;
+        if (column == SLICE_COLUMN_COUNT) {
+            column = 0;
+            sliceY += SLICE_HEIGHT;
+        }
+    }
+
+    f_HudAnimationFramesLeft--;
 }
 #else
 INCLUDE_ASM("asm/nonmatchings/hole_display", DrawSliceAnimation);
@@ -3453,46 +4577,52 @@ INCLUDE_ASM("asm/nonmatchings/hole_display", DrawSliceAnimation);
 
 /* Draws the animation that StartHudAnimation started over the frame */
 void DrawHudAnimation(void) {
-  CaptureHudAnimationFrame();
-  gDPPipeSync(g_DisplayListHead++);
-  gDPSetColorDither(g_DisplayListHead++, G_CD_DISABLE);
-  switch (f_HudAnimation) {
-    case HUD_ANIMATION_FADE_OUT:
-    case HUD_ANIMATION_NEGATIVE:
-    case HUD_ANIMATION_MOTION_BLUR:
-    case HUD_ANIMATION_SLIDE_APART:
-    case HUD_ANIMATION_FAST_FADE_OUT:
-      DrawFadeAnimation(&g_DisplayListHead);
-      break;
-    case HUD_ANIMATION_TURN_AWAY:
-      DrawTurnAwayAnimation();
-      break;
-    case HUD_ANIMATION_TILES:
-      DrawTileAnimation();
-      break;
-    case HUD_ANIMATION_SLICES:
-      DrawSliceAnimation();
-      break;
-    case HUD_ANIMATION_SPIRAL:
-      DrawSpiralAnimation(&g_DisplayListHead);
-      break;
-  }
+    CaptureHudAnimationFrame();
+    gDPPipeSync(g_DisplayListHead++);
+    gDPSetColorDither(g_DisplayListHead++, G_CD_DISABLE);
+    switch (f_HudAnimation) {
+        case HUD_ANIMATION_FADE_OUT:
+        case HUD_ANIMATION_NEGATIVE:
+        case HUD_ANIMATION_MOTION_BLUR:
+        case HUD_ANIMATION_SLIDE_APART:
+        case HUD_ANIMATION_FAST_FADE_OUT:
+            DrawFadeAnimation(&g_DisplayListHead);
+            break;
+        case HUD_ANIMATION_TURN_AWAY:
+            DrawTurnAwayAnimation();
+            break;
+        case HUD_ANIMATION_TILES:
+            DrawTileAnimation();
+            break;
+        case HUD_ANIMATION_SLICES:
+            DrawSliceAnimation();
+            break;
+        case HUD_ANIMATION_SPIRAL:
+            DrawSpiralAnimation(&g_DisplayListHead);
+            break;
+    }
 
-  f_LastFrameBuffer = nuGfxCfb_ptr;
+    f_LastFrameBuffer = nuGfxCfb_ptr;
 }
 
 /* Lets the HUD draw over the whole screen again */
 void ResetHudScissor(void) {
-  g_HudScissor.left = 0;
-  g_HudScissor.right = SCREEN_WIDTH;
-  g_HudScissor.bottom = SCREEN_HEIGHT;
-  g_HudScissor.top = 0;
-  gDPPipeSync(g_DisplayListHead++);
-  gDPSetScissor(g_DisplayListHead++, G_SC_NON_INTERLACE, g_HudScissor.left,
-      g_HudScissor.top, g_HudScissor.right, g_HudScissor.bottom);
+    g_HudScissor.left = 0;
+    g_HudScissor.right = SCREEN_WIDTH;
+    g_HudScissor.bottom = SCREEN_HEIGHT;
+    g_HudScissor.top = 0;
+    gDPPipeSync(g_DisplayListHead++);
+    gDPSetScissor(
+        g_DisplayListHead++,
+        G_SC_NON_INTERLACE,
+        g_HudScissor.left,
+        g_HudScissor.top,
+        g_HudScissor.right,
+        g_HudScissor.bottom
+    );
 }
 
 /* Whether the animation that StartHudAnimation started has finished */
 Boolean IsHudAnimationDone(void) {
-  return f_HudAnimationFramesLeft <= 0;
+    return f_HudAnimationFramesLeft <= 0;
 }

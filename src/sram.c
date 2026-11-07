@@ -7,5 +7,5 @@
 #include <ultra64.h>
 
 void InitSram(void) {
-  nuPiInitSram();
+    nuPiInitSram();
 }

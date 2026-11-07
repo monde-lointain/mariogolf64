@@ -8,6 +8,6 @@
 void LoadBootLogos(void);
 void UpdateBootLogos(void);
 
-void DrawBootLogos(Gfx** displayListHead);
+void DrawBootLogos(Gfx **displayListHead);
 
 #endif

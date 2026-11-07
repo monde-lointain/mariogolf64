@@ -15,7 +15,7 @@ typedef s32 Boolean;
 #define ARRAY_COUNT(array) (s32)(sizeof(array) / sizeof((array)[0]))
 
 /* The size of a struct member, without an instance to apply sizeof to */
-#define MemberSize(type, member) (s32)sizeof(((type*)0)->member)
+#define MemberSize(type, member) (s32)sizeof(((type *)0)->member)
 
 #define BITS_PER_BYTE 8
 

@@ -8,10 +8,10 @@ typedef u16 AssetId;
 
 /* An open file of the asset archive in ROM, read from front to back */
 typedef struct AssetFile {
-  /* 0x0 */ u32 cursor;
-  /* 0x4 */ s32 size;
-  /* 0x8 */ u32 romStart;
-  /* 0xC */ u32 romEnd;
+    /* 0x0 */ u32 cursor;
+    /* 0x4 */ s32 size;
+    /* 0x8 */ u32 romStart;
+    /* 0xC */ u32 romEnd;
 } AssetFile; /* size = 0x10 */
 
 /* EncodedAsset methods; any other is read as halfword runs */
@@ -22,26 +22,26 @@ typedef struct AssetFile {
  * its size once decoded (the other 24 bits)
  */
 typedef struct EncodedAsset {
-  /* Nothing uses these bytes, but each EncodedAsset is a stack local, and
-   * without them the frames no longer match */
-  /* 0x00 */ u8 unusedBeforeMethod[8];
-  /* 0x08 */ s32 method;
-  /* 0x0C */ s32 encodedSize; /* The whole file's, including that word */
-  /* 0x10 */ AssetFile file;
+    /* Nothing uses these bytes, but each EncodedAsset is a stack local, and
+     * without them the frames no longer match */
+    /* 0x00 */ u8 unusedBeforeMethod[8];
+    /* 0x08 */ s32 method;
+    /* 0x0C */ s32 encodedSize; /* The whole file's, including that word */
+    /* 0x10 */ AssetFile file;
 } EncodedAsset; /* size = 0x20 */
 
 /* The boot logos, among other image assets, begin with this before their texels
  */
 typedef struct ImageHeader {
-  /*
-   * How the texels are stored: 0 for four-bit ones with no palette, 2 for
-   * four-bit indices into a 16-color palette, 4 for eight-bit ones with no
-   * palette, 6 for eight-bit indices into a 256-color palette and 8 for RGBA16
-   */
-  /* 0x0 */ u16 format;
-  /* 0x2 */ u16 width;
-  /* 0x4 */ u16 height;
-  /* 0x6 */ u16 unusedAfterHeight;
+    /*
+     * How the texels are stored: 0 for four-bit ones with no palette, 2 for
+     * four-bit indices into a 16-color palette, 4 for eight-bit ones with no
+     * palette, 6 for eight-bit indices into a 256-color palette and 8 for RGBA16
+     */
+    /* 0x0 */ u16 format;
+    /* 0x2 */ u16 width;
+    /* 0x4 */ u16 height;
+    /* 0x6 */ u16 unusedAfterHeight;
 } ImageHeader; /* size = 0x8 */
 
 /* Where ImageHeader's width and height start, for reading them a byte at a time
@@ -54,17 +54,15 @@ typedef struct ImageHeader {
 #define IMAGE_HEIGHT_LOW_BYTE 5
 /* An image's width and height, read from its header a byte at a time */
 #define ReadImageWidth(image) \
-  ((((u8*)(image))[IMAGE_WIDTH_OFFSET] << 8) | \
-      ((u8*)(image))[IMAGE_WIDTH_LOW_BYTE])
+    ((((u8 *)(image))[IMAGE_WIDTH_OFFSET] << 8) | ((u8 *)(image))[IMAGE_WIDTH_LOW_BYTE])
 #define ReadImageHeight(image) \
-  ((((u8*)(image))[IMAGE_HEIGHT_OFFSET] << 8) | \
-      ((u8*)(image))[IMAGE_HEIGHT_LOW_BYTE])
+    ((((u8 *)(image))[IMAGE_HEIGHT_OFFSET] << 8) | ((u8 *)(image))[IMAGE_HEIGHT_LOW_BYTE])
 
-void OpenAssetFile(s32 assetId, AssetFile* file);
-AssetFile* OpenPooledAssetFile(s32 assetId);
-void CloseAssetFile(AssetFile* file);
-s32 GetAssetFileSize(AssetFile* file);
-void ReadAssetFile(void* buffer, u32 size, AssetFile* file);
+void OpenAssetFile(s32 assetId, AssetFile *file);
+AssetFile *OpenPooledAssetFile(s32 assetId);
+void CloseAssetFile(AssetFile *file);
+s32 GetAssetFileSize(AssetFile *file);
+void ReadAssetFile(void *buffer, u32 size, AssetFile *file);
 /* Encoded images start with a header, then a CI palette, then texels */
 #define IMAGE_HEADER_SIZE 8
 /* Each palette color is one RGBA16 value */
@@ -73,28 +71,26 @@ void ReadAssetFile(void* buffer, u32 size, AssetFile* file);
 #define LARGE_PALETTE_COLOR_COUNT 256
 /* Where a four-bit image's texels start, after its header and palette */
 #define PALETTED_TEXELS_OFFSET \
-  (IMAGE_HEADER_SIZE + (SMALL_PALETTE_COLOR_COUNT * PALETTE_COLOR_SIZE))
+    (IMAGE_HEADER_SIZE + (SMALL_PALETTE_COLOR_COUNT * PALETTE_COLOR_SIZE))
 /* Where an eight-bit image's texels start, after its header and palette */
 #define LARGE_PALETTED_TEXELS_OFFSET \
-  (IMAGE_HEADER_SIZE + (LARGE_PALETTE_COLOR_COUNT * PALETTE_COLOR_SIZE))
+    (IMAGE_HEADER_SIZE + (LARGE_PALETTE_COLOR_COUNT * PALETTE_COLOR_SIZE))
 /* The image that starts offset bytes into a buffer holding several */
-#define ImageAt(buffer, offset) ((u8*)(buffer) + (offset))
+#define ImageAt(buffer, offset) ((u8 *)(buffer) + (offset))
 /* What follows an image's header: a CI image's palette, any other's texels */
-#define ImageBody(image) ((u8*)(image) + IMAGE_HEADER_SIZE)
+#define ImageBody(image) ((u8 *)(image) + IMAGE_HEADER_SIZE)
 /* A four-bit CI image's texels */
-#define ImageTexels(image) ((u8*)(image) + PALETTED_TEXELS_OFFSET)
+#define ImageTexels(image) ((u8 *)(image) + PALETTED_TEXELS_OFFSET)
 /* An eight-bit CI image's texels */
-#define LargeImageTexels(image) ((u8*)(image) + LARGE_PALETTED_TEXELS_OFFSET)
+#define LargeImageTexels(image) ((u8 *)(image) + LARGE_PALETTED_TEXELS_OFFSET)
 /*
  * The same, offset bytes in, as for a frame of an image that holds several.
  * They add the two offsets first, as the original does.
  */
-#define ImageBodyAt(image, offset) \
-  ((u8*)(image) + ((offset) + IMAGE_HEADER_SIZE))
-#define ImageTexelsAt(image, offset) \
-  ((u8*)(image) + ((offset) + PALETTED_TEXELS_OFFSET))
+#define ImageBodyAt(image, offset) ((u8 *)(image) + ((offset) + IMAGE_HEADER_SIZE))
+#define ImageTexelsAt(image, offset) ((u8 *)(image) + ((offset) + PALETTED_TEXELS_OFFSET))
 #define LargeImageTexelsAt(image, offset) \
-  ((u8*)(image) + ((offset) + LARGE_PALETTED_TEXELS_OFFSET))
+    ((u8 *)(image) + ((offset) + LARGE_PALETTED_TEXELS_OFFSET))
 
 /* The assets that more than one overlay loads */
 #define ASSET_SHADOW_TEXTURE 0x4C3
@@ -146,11 +142,11 @@ void ReadAssetFile(void* buffer, u32 size, AssetFile* file);
  * 16 arrows, four bits a texel, in MenuArrow order.
  */
 enum MenuArrow {
-  MENU_ARROW_UP,
-  MENU_ARROW_DOWN,
-  MENU_ARROW_RIGHT,
-  MENU_ARROW_LEFT,
-  MENU_ARROW_COUNT
+    MENU_ARROW_UP,
+    MENU_ARROW_DOWN,
+    MENU_ARROW_RIGHT,
+    MENU_ARROW_LEFT,
+    MENU_ARROW_COUNT
 };
 
 #define GREEN_ARROW_SIZE 16
@@ -189,8 +185,8 @@ enum MenuArrow {
 /* Where the asset archive starts in ROM, just after the last song */
 extern u8 g_AssetArchiveRomStart[];
 
-s32 OpenEncodedAsset(AssetId assetId, EncodedAsset* asset);
-void ReadEncodedAsset(void* buffer, EncodedAsset* asset);
+s32 OpenEncodedAsset(AssetId assetId, EncodedAsset *asset);
+void ReadEncodedAsset(void *buffer, EncodedAsset *asset);
 void InitAssetFiles(void);
 
 #endif

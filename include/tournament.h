@@ -16,10 +16,10 @@
 #define PLACE_TIED 0x80
 
 typedef struct TournamentStanding {
-  /* 0x0 */ s8 contestantId;
-  /* 0x2 */ s16 score; /* Strokes over par, so lower ranks higher */
-  /* 0x4 */ s8 holeCount;
-  /* 0x5 */ u8 place;
+    /* 0x0 */ s8 contestantId;
+    /* 0x2 */ s16 score; /* Strokes over par, so lower ranks higher */
+    /* 0x4 */ s8 holeCount;
+    /* 0x5 */ u8 place;
 } TournamentStanding; /* size = 0x6 */
 
 /* Each course's tournament draws its computer contestants from its own block of
@@ -30,8 +30,7 @@ typedef struct TournamentStanding {
 /* From best to worst once RankTournament has run */
 extern TournamentStanding g_TournamentStandings[TOURNAMENT_CONTESTANT_COUNT];
 
-extern char g_ContestantNames[COURSE_COUNT * NAMES_PER_COURSE]
-                             [CONTESTANT_NAME_LENGTH];
+extern char g_ContestantNames[COURSE_COUNT * NAMES_PER_COURSE][CONTESTANT_NAME_LENGTH];
 /* Into g_ContestantNames, for the computer contestants */
 extern s16 g_ContestantNameIndices[TOURNAMENT_CONTESTANT_COUNT - 1];
 

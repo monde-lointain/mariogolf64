@@ -20,9 +20,9 @@
  * original's linker did; other builds make them static.
  */
 #ifdef __IS_KMC__
-#define FILE_STATIC
+#    define FILE_STATIC
 #else
-#define FILE_STATIC static
+#    define FILE_STATIC static
 #endif
 
 /*
@@ -33,9 +33,9 @@
  * initialized variable.
  */
 #ifdef __IS_KMC__
-#define ORDERED_BSS __attribute__((section(".bss")))
+#    define ORDERED_BSS __attribute__((section(".bss")))
 #else
-#define ORDERED_BSS
+#    define ORDERED_BSS
 #endif
 
 /*
@@ -45,9 +45,9 @@
  * builds declare it void, so that nothing can use the value it never set.
  */
 #ifdef __IS_KMC__
-#define NO_RESULT s32
+#    define NO_RESULT s32
 #else
-#define NO_RESULT void
+#    define NO_RESULT void
 #endif
 
 /*
@@ -56,9 +56,9 @@
  * GCC's code; other builds return 0.
  */
 #ifdef __IS_KMC__
-#define UNSET_RESULT
+#    define UNSET_RESULT
 #else
-#define UNSET_RESULT 0
+#    define UNSET_RESULT 0
 #endif
 
 /*
@@ -66,9 +66,9 @@
  * NUL, which KMC GCC has no attribute for
  */
 #ifdef __IS_KMC__
-#define NONSTRING
+#    define NONSTRING
 #else
-#define NONSTRING __attribute__((nonstring))
+#    define NONSTRING __attribute__((nonstring))
 #endif
 
 /*
@@ -78,11 +78,11 @@
  * zero-length array.
  */
 #ifndef AVOID_UB
-#define TRAILING_ARRAY_LENGTH 1
+#    define TRAILING_ARRAY_LENGTH 1
 #elif defined(__IS_KMC__)
-#define TRAILING_ARRAY_LENGTH 0
+#    define TRAILING_ARRAY_LENGTH 0
 #else
-#define TRAILING_ARRAY_LENGTH
+#    define TRAILING_ARRAY_LENGTH
 #endif
 
 /*
@@ -90,9 +90,9 @@
  * in front of a definition.
  */
 #ifdef __IS_KMC__
-#define UNUSED_FUNCTION
+#    define UNUSED_FUNCTION
 #else
-#define UNUSED_FUNCTION UNUSED
+#    define UNUSED_FUNCTION UNUSED
 #endif
 
 /*
@@ -101,9 +101,9 @@
  * routine differently, so its pointer stays plain.
  */
 #ifdef __IS_KMC__
-#define READ_ONLY
+#    define READ_ONLY
 #else
-#define READ_ONLY const
+#    define READ_ONLY const
 #endif
 
 /*
@@ -113,9 +113,10 @@
  * source has none that survives; a loop that runs once gives them back.
  */
 #define IN_OWN_BLOCK(statements) \
-  do { \
-    statements; \
-  } while (0)
+    do { \
+        statements; \
+    } \
+    while (0)
 
 /*
  * Ends a basic block between two statements, to match. Each use's note gives
@@ -124,8 +125,9 @@
  * 37 matched functions.
  */
 #define END_BASIC_BLOCK() \
-  do { \
-  } while (0)
+    do { \
+    } \
+    while (0)
 
 /*
  * The stack pointer's current value. The asm is volatile, as a read of the
@@ -133,10 +135,10 @@
  * original's code shows none that moved.
  */
 #define GetStackPointer() \
-  ({ \
-    void* stackPointer; \
-    __asm__ volatile("move %0, $sp" : "=r"(stackPointer)); \
-    stackPointer; \
-  })
+    ({ \
+        void *stackPointer; \
+        __asm__ volatile("move %0, $sp" : "=r"(stackPointer)); \
+        stackPointer; \
+    })
 
 #endif

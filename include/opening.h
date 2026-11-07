@@ -12,7 +12,7 @@ void LoadOpening(void);
 void FreeOpening(void);
 void UpdateOpening(void);
 
-void DrawOpening(CameraMatrices* matrices, Gfx** displayListHead);
-void DrawOpeningLogo(Gfx** displayListHead, Boolean isDrawn);
+void DrawOpening(CameraMatrices *matrices, Gfx **displayListHead);
+void DrawOpeningLogo(Gfx **displayListHead, Boolean isDrawn);
 
 #endif

@@ -68,10 +68,10 @@
 
 /* f_SceneryState values */
 enum SceneryState {
-  SCENERY_UNLOADED,
-  SCENERY_BILLBOARDS_READY, /* The billboard heap is set up */
-  /* The images of the hole's scenery are loaded too */
-  SCENERY_LOADED
+    SCENERY_UNLOADED,
+    SCENERY_BILLBOARDS_READY, /* The billboard heap is set up */
+    /* The images of the hole's scenery are loaded too */
+    SCENERY_LOADED
 };
 
 /* Bytes of the billboard manager's heap */
@@ -129,10 +129,8 @@ enum SceneryState {
 #define HOLE_FLAG_BACK_TEXEL_START 0xC00
 #define HOLE_FLAG_START_SHADE 0xB7
 #define HOLE_FLAG_VERTEX(row, column) \
-  f_HoleFlagVertices[0][g_MatrixBufferIndex] \
-                    [((row) * HOLE_FLAG_COLUMN_COUNT) + (column)]
-#define HOLE_FLAG_SHADE(row, column) \
-  f_HoleFlagShades[((row) * HOLE_FLAG_COLUMN_COUNT) + (column)]
+    f_HoleFlagVertices[0][g_MatrixBufferIndex][((row) * HOLE_FLAG_COLUMN_COUNT) + (column)]
+#define HOLE_FLAG_SHADE(row, column) f_HoleFlagShades[((row) * HOLE_FLAG_COLUMN_COUNT) + (column)]
 
 /* The flag can be skewed by HOLE_FLAG_SKEW per column, but it is zero */
 #define HOLE_FLAG_SKEW 0.0f
@@ -181,8 +179,8 @@ enum SceneryState {
 #define TEXEL_COORDINATE_SHIFT 5
 
 typedef struct ArrowShape {
-  /* 0x000 */ Vtx body[ARROW_VERTEX_COUNT];
-  /* 0x0E0 */ Vtx outline[ARROW_VERTEX_COUNT];
+    /* 0x000 */ Vtx body[ARROW_VERTEX_COUNT];
+    /* 0x0E0 */ Vtx outline[ARROW_VERTEX_COUNT];
 } ArrowShape; /* size = 0x1C0 */
 
 /*
@@ -200,8 +198,7 @@ typedef struct ArrowShape {
  */
 #define SHOT_OFFSET_MARKER_SIZE 16
 #define SHOT_OFFSET_MARKER_FRAME_COUNT 11
-#define SHOT_OFFSET_MARKER_FRAME_SIZE \
-  (SHOT_OFFSET_MARKER_SIZE * SHOT_OFFSET_MARKER_SIZE / 2)
+#define SHOT_OFFSET_MARKER_FRAME_SIZE (SHOT_OFFSET_MARKER_SIZE * SHOT_OFFSET_MARKER_SIZE / 2)
 #define SHOT_OFFSET_MARKER_STILL_FRAME SHOT_OFFSET_MARKER_FRAME_COUNT
 #define SHOT_OFFSET_MARKER_X 264
 #define SHOT_OFFSET_MARKER_Y 174
@@ -217,11 +214,11 @@ typedef struct ArrowShape {
 #define HOLE_INTRO_MATCH_IMAGE_LOADED (1 << 1)
 /* The intro images are drawn opaque, keeping the coverage of their alpha */
 #define HOLE_INTRO_IMAGE_RENDER_MODE \
-  (AA_EN | CVG_X_ALPHA | ALPHA_CVG_SEL | FORCE_BL | \
-      GBL_c1(G_BL_CLR_IN, G_BL_0, G_BL_CLR_IN, G_BL_1))
+    (AA_EN | CVG_X_ALPHA | ALPHA_CVG_SEL | FORCE_BL | \
+        GBL_c1(G_BL_CLR_IN, G_BL_0, G_BL_CLR_IN, G_BL_1))
 #define HOLE_INTRO_IMAGE_RENDER_MODE2 \
-  (AA_EN | CVG_X_ALPHA | ALPHA_CVG_SEL | FORCE_BL | \
-      GBL_c2(G_BL_CLR_IN, G_BL_0, G_BL_CLR_IN, G_BL_1))
+    (AA_EN | CVG_X_ALPHA | ALPHA_CVG_SEL | FORCE_BL | \
+        GBL_c2(G_BL_CLR_IN, G_BL_0, G_BL_CLR_IN, G_BL_1))
 /* The contest image is 256x64 and the match standing image 160x40, centered */
 #define CONTEST_IMAGE_WIDTH 256
 #define CONTEST_IMAGE_STRIP_HEIGHT 8
@@ -295,8 +292,8 @@ extern const char f_BlankText[];
 
 /* The text of the landing reaction, in two glyph groups */
 enum LandingGlyphGroup {
-  LANDING_GLYPH_GROUP_FIRST,
-  LANDING_GLYPH_GROUP_SECOND
+    LANDING_GLYPH_GROUP_FIRST,
+    LANDING_GLYPH_GROUP_SECOND
 };
 
 /* The reaction stops counting its frames here */
@@ -360,15 +357,15 @@ enum LandingGlyphGroup {
 #define DISTANCE_POINT_S 112
 #define DISTANCE_POINT_WIDTH 4
 
-u8* g_ClubPanelImage;
-void* g_DistanceSignImage;
-void* g_LeaderLineImage;
-void* g_PinFlagImages;
-void* g_PlayerTagImages;
-u8* g_RingTexels;
+u8 *g_ClubPanelImage;
+void *g_DistanceSignImage;
+void *g_LeaderLineImage;
+void *g_PinFlagImages;
+void *g_PlayerTagImages;
+u8 *g_RingTexels;
 RoundHud g_RoundHud;
-u8* g_SharedEffectImages;
-void* g_ShotPreviewDashImage;
+u8 *g_SharedEffectImages;
+void *g_ShotPreviewDashImage;
 
 FILE_STATIC Mtx f_UnusedNarrowProjection;
 
@@ -420,11 +417,9 @@ FILE_STATIC Mtx f_UnusedNarrowProjection;
 #define WIND_METERS_GLYPH_WIDTH 14
 #define WIND_TEXT_RAISE 1
 #define WIND_TEXT_RENDER_MODE \
-  (IM_RD | CLR_ON_CVG | CVG_X_ALPHA | \
-      GBL_c1(G_BL_CLR_IN, G_BL_A_IN, G_BL_CLR_MEM, G_BL_A_MEM))
+    (IM_RD | CLR_ON_CVG | CVG_X_ALPHA | GBL_c1(G_BL_CLR_IN, G_BL_A_IN, G_BL_CLR_MEM, G_BL_A_MEM))
 #define WIND_TEXT_RENDER_MODE2 \
-  (IM_RD | CLR_ON_CVG | CVG_X_ALPHA | \
-      GBL_c2(G_BL_CLR_IN, G_BL_A_IN, G_BL_CLR_MEM, G_BL_A_MEM))
+    (IM_RD | CLR_ON_CVG | CVG_X_ALPHA | GBL_c2(G_BL_CLR_IN, G_BL_A_IN, G_BL_CLR_MEM, G_BL_A_MEM))
 #define WIND_TEXT_PRIM_RED 0x3F
 #define WIND_TEXT_PRIM_GREEN 0x3F
 #define WIND_TEXT_PRIM_BLUE 0xFF
@@ -432,7 +427,7 @@ FILE_STATIC Mtx f_UnusedNarrowProjection;
 #define WIND_TEXT_ENV_GREEN 0x20
 #define WIND_TEXT_ENV_BLUE 0x7F
 
-void DrawWindSpeed(Gfx** displayListHead, f32 x, f32 y);
+void DrawWindSpeed(Gfx **displayListHead, f32 x, f32 y);
 
 /* Heights in meters or feet nearer zero than this */
 #define LEVEL_HEIGHT 0.01f
@@ -463,21 +458,55 @@ void DrawWindSpeed(Gfx** displayListHead, f32 x, f32 y);
  * frames */
 #define ANIMATED_ICON_FRAME_COUNT 8
 
-static void* f_SceneryBillboardHeap = NULL;
+static void *f_SceneryBillboardHeap = NULL;
 static s32 f_ClubNameImageIndex = 0;
 /* Cleared by InitRoundHud, and read by no routine */
 static s32 f_UnusedHudInitWord = 0;
-AssetId g_CharacterImageAssets[CHARACTER_COUNT] = {0x7BC, 0x74C, 0x7A0, 0x73E,
-    0x784, 0x7AE, 0x7CA, 0x7D8, 0x768, 0x792, 0x7E6, 0x75A, 0x776, 0x984, 0x7F4,
-    0x802, 0x810, 0x81E};
-s16 g_CharacterPaletteAssets[CHARACTER_COUNT] = {0x7B8, 0x748, 0x79C, 0x73A,
-    0x780, 0x7AA, 0x7C6, 0x7D4, 0x764, 0x78E, 0x7E2, 0x756, 0x772, 0x980, 0x7F0,
-    0x7FE, 0x80C, 0x81A};
+AssetId g_CharacterImageAssets[CHARACTER_COUNT] = {
+    0x7BC,
+    0x74C,
+    0x7A0,
+    0x73E,
+    0x784,
+    0x7AE,
+    0x7CA,
+    0x7D8,
+    0x768,
+    0x792,
+    0x7E6,
+    0x75A,
+    0x776,
+    0x984,
+    0x7F4,
+    0x802,
+    0x810,
+    0x81E
+};
+s16 g_CharacterPaletteAssets[CHARACTER_COUNT] = {
+    0x7B8,
+    0x748,
+    0x79C,
+    0x73A,
+    0x780,
+    0x7AA,
+    0x7C6,
+    0x7D4,
+    0x764,
+    0x78E,
+    0x7E2,
+    0x756,
+    0x772,
+    0x980,
+    0x7F0,
+    0x7FE,
+    0x80C,
+    0x81A
+};
 static s32 f_ShotPanelOffsetY = 0;
 s32 g_ShotPanelOffsetX = 0;
 /* The first asset of each course record's hole images, one per hole */
-static AssetId f_HoleImageAssets[COURSE_RECORD_COUNT] = {
-    0x420, 0x432, 0x444, 0x468, 0x456, 0x47A, 0x48C, 0x49E, 0x8F0};
+static AssetId f_HoleImageAssets[COURSE_RECORD_COUNT] =
+    {0x420, 0x432, 0x444, 0x468, 0x456, 0x47A, 0x48C, 0x49E, 0x8F0};
 s32 g_MatrixBufferIndex = 0;
 static ArrowShape f_Arrows[ARROW_COUNT] = {
     {{{{{0, -160, 40}, 0, {0, 0}, {0x7F, 0x7F, 0x7F, 0x80}}},
@@ -535,12 +564,14 @@ static ArrowShape f_Arrows[ARROW_COUNT] = {
             {{{-80, 20, -60}, 0, {0, 0x200}, {0x10, 0x10, 0x10, 0x80}}},
             {{{-80, 180, -60}, 0, {0, 0x400}, {0x00, 0x00, 0x00, 0x80}}},
             {{{80, 180, -60}, 0, {0, 0x400}, {0x48, 0x48, 0x48, 0x80}}},
-            {{{80, 20, -60}, 0, {0, 0x200}, {0x20, 0x20, 0x20, 0x80}}}}}};
+            {{{80, 20, -60}, 0, {0, 0x200}, {0x20, 0x20, 0x20, 0x80}}}}}
+};
 static Vtx f_ClubHeadIconVertices[QUAD_VERTEX_COUNT] = {
     {{{-16, 16, 0}, 0, {-0x1, -0x1}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{-16, -16, 0}, 0, {-0x1, 0x7FF}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{16, -16, 0}, 0, {0x7FF, 0x7FF}, {0xFF, 0xFF, 0xFF, 0xFF}}},
-    {{{16, 16, 0}, 0, {0x7FF, -0x1}, {0xFF, 0xFF, 0xFF, 0xFF}}}};
+    {{{16, 16, 0}, 0, {0x7FF, -0x1}, {0xFF, 0xFF, 0xFF, 0xFF}}}
+};
 static Vtx f_LieIconVertices[2 * QUAD_VERTEX_COUNT] = {
     {{{-24, 24, 0}, 0, {-0x1, -0x1}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{-24, 0, 0}, 0, {-0x1, 0x5FF}, {0xFF, 0xFF, 0xFF, 0xFF}}},
@@ -549,7 +580,8 @@ static Vtx f_LieIconVertices[2 * QUAD_VERTEX_COUNT] = {
     {{{-24, 0, 0}, 0, {-0x1, -0x1}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{-24, -24, 0}, 0, {-0x1, 0x5FF}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{24, -24, 0}, 0, {0xBFF, 0x5FF}, {0xFF, 0xFF, 0xFF, 0xFF}}},
-    {{{24, 0, 0}, 0, {0xBFF, -0x1}, {0xFF, 0xFF, 0xFF, 0xFF}}}};
+    {{{24, 0, 0}, 0, {0xBFF, -0x1}, {0xFF, 0xFF, 0xFF, 0xFF}}}
+};
 /*
  * Read by no routine. Two display lists of the same triangles, over vertices
  * 0 to 13 and then 14 to 27, where an ArrowShape has its body and its outline
@@ -600,7 +632,8 @@ static Vtx f_LandingPanelVertices[4] = {
     {{{-72, 20, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{-72, -20, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{72, -20, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
-    {{{72, 20, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}}};
+    {{{72, 20, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}}
+};
 static s32 f_GreenGridAlpha = GREEN_GRID_ALPHA;
 /* The quad that each segment of the ball trail, and of the green grid, moves
  * into place on the screen */
@@ -608,19 +641,33 @@ static Vtx f_BallTrailVertices[4] = {
     {{{0, 0, -100}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0x7F}}},
     {{{0, -1, -100}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0x7F}}},
     {{{48, -1, -100}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0x7F}}},
-    {{{48, 0, -100}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0x7F}}}};
+    {{{48, 0, -100}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0x7F}}}
+};
 /* Read by no routine */
 static s32 f_UnusedWordBeforeGridScroll UNUSED = 0;
 static f32 f_GreenGridScroll = 0.0f;
 static s32 f_BallTrailHead = 0; /* The latest position */
 BallTrailState g_BallTrailState = BALL_TRAIL_OFF;
 static Radians f_WindIconPulseAngle = 0.0f;
-static Lights1 f_WindArrowLights =
-    gdSPDefLights1(0x80, 0x80, 0x80, 0xFF, 0xFF, 0xFF, 80, -80, 73);
+static Lights1 f_WindArrowLights = gdSPDefLights1(0x80, 0x80, 0x80, 0xFF, 0xFF, 0xFF, 80, -80, 73);
 static s32 f_HudOffsetY = INITIAL_HUD_OFFSET_Y;
 /* The name image of each club slot */
-static AssetId f_ClubNameAssets[CLUB_SET_SIZE] = {0x4F1, 0x4F2, 0x4F3, 0x4F4,
-    0x4F5, 0x4F6, 0x4F7, 0x4F8, 0x4F9, 0x4FA, 0x4FB, 0x4FC, 0x4FD, 0x4FE};
+static AssetId f_ClubNameAssets[CLUB_SET_SIZE] = {
+    0x4F1,
+    0x4F2,
+    0x4F3,
+    0x4F4,
+    0x4F5,
+    0x4F6,
+    0x4F7,
+    0x4F8,
+    0x4F9,
+    0x4FA,
+    0x4FB,
+    0x4FC,
+    0x4FD,
+    0x4FE
+};
 static Vtx f_SparkTrailVertices[16] = {
     {{{-32, -512, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0x80}}},
     {{{-32, 0, 0}, 0, {0, 0x2000}, {0xFF, 0xFF, 0xFF, 0x80}}},
@@ -637,7 +684,8 @@ static Vtx f_SparkTrailVertices[16] = {
     {{{512, 32, 0}, 0, {0xC00, 0}, {0xFF, 0xFF, 0xFF, 0x80}}},
     {{{512, -32, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0x80}}},
     {{{0, -32, 0}, 0, {0, 0x2000}, {0xFF, 0xFF, 0xFF, 0x80}}},
-    {{{0, 32, 0}, 0, {0xC00, 0x2000}, {0xFF, 0xFF, 0xFF, 0x80}}}};
+    {{{0, 32, 0}, 0, {0xC00, 0x2000}, {0xFF, 0xFF, 0xFF, 0x80}}}
+};
 /* Four groups of eight vertices, each three pairs of triangles */
 static Vtx f_LongShotVertices[LONG_SHOT_GROUP_COUNT * 8] = {
     {{{-3, 0, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0x80}}},
@@ -671,11 +719,12 @@ static Vtx f_LongShotVertices[LONG_SHOT_GROUP_COUNT * 8] = {
     {{{-96, 1, 0}, 0, {0, 0}, {0x7F, 0xFF, 0x00, 0x40}}},
     {{{-96, -1, 0}, 0, {0, 0}, {0x7F, 0xFF, 0x00, 0x40}}},
     {{{-192, 0, 0}, 0, {0, 0}, {0xFF, 0x00, 0x00, 0x20}}},
-    {{{-192, 0, 0}, 0, {0, 0}, {0xFF, 0x00, 0x00, 0x20}}}};
+    {{{-192, 0, 0}, 0, {0, 0}, {0xFF, 0x00, 0x00, 0x20}}}
+};
 static f32 f_ShotEffectTime = SHOT_EFFECT_TIME_OFF;
 static s32 f_ShotEffect = SHOT_EFFECT_LONG_SHOT;
-static s32 f_SparkTrailFrameAssets[SPARK_TRAIL_FRAME_COUNT] = {
-    0x6A7, 0x6A8, 0x6A9, 0x6AA, 0x6AB, 0x6AC};
+static s32 f_SparkTrailFrameAssets[SPARK_TRAIL_FRAME_COUNT] =
+    {0x6A7, 0x6A8, 0x6A9, 0x6AA, 0x6AB, 0x6AC};
 static s32 f_SparkTrailFrame = 1;
 static s32 f_SparkTrailFrameTimer = 0;
 /* The two frame buffers in g_SharedEffectImages, each loaded in turn and both
@@ -685,8 +734,8 @@ static s32 f_SparkTrailBufferIndex = 0;
 static s32 f_UnusedWordAfterSparkTrailIndex UNUSED = 0;
 static f32 f_HoleFlagWavePhase = 0.0f;
 static s32 f_ShotOffsetMarkerFrame = 0;
-static u32 f_AnimatedIconFrameAssets[ANIMATED_ICON_FRAME_COUNT] = {
-    0x648, 0x649, 0x64A, 0x64B, 0x64C, 0x64B, 0x64A, 0x649};
+static u32 f_AnimatedIconFrameAssets[ANIMATED_ICON_FRAME_COUNT] =
+    {0x648, 0x649, 0x64A, 0x64B, 0x64C, 0x64B, 0x64A, 0x649};
 static s32 f_AnimatedIconFrameTime = 0;
 static s32 f_AnimatedIconFrame = 0;
 /* Read by no routine */
@@ -696,7 +745,8 @@ static f32 f_AnimatedIconX = 0.0f;
 static f32 f_AnimatedIconY = 0.0f;
 static s32 f_TestColors[COLOR_TEST_COLOR_COUNT][COLOR_TEST_CHANNEL_COUNT] = {
     {COLOR_CHANNEL_MAX, COLOR_CHANNEL_MAX, COLOR_CHANNEL_MAX},
-    {COLOR_CHANNEL_MAX, COLOR_CHANNEL_MAX, COLOR_CHANNEL_MAX}};
+    {COLOR_CHANNEL_MAX, COLOR_CHANNEL_MAX, COLOR_CHANNEL_MAX}
+};
 static s32 f_TestTextX = SCREEN_WIDTH / 2;
 static s32 f_TestTextY = SCREEN_HEIGHT / 2;
 static s32 f_TestChannelIndex = 0;
@@ -726,14 +776,13 @@ static s32 f_LoadedHoleIntroImages = 0;
  */
 #define GREEN_GRID_COLUMN_COUNT 8
 #define GREEN_GRID_MAX_ROW_COUNT 32
-#define GREEN_GRID_POINT_COUNT \
-  (GREEN_GRID_MAX_ROW_COUNT * GREEN_GRID_COLUMN_COUNT)
+#define GREEN_GRID_POINT_COUNT (GREEN_GRID_MAX_ROW_COUNT * GREEN_GRID_COLUMN_COUNT)
 
 /* A point of the ball's trail on the screen, in quarter pixels */
 typedef struct TrailPoint {
-  /* 0x00 */ s32 x;
-  /* 0x04 */ s32 y;
-  /* 0x08 */ s32 depth;
+    /* 0x00 */ s32 x;
+    /* 0x04 */ s32 y;
+    /* 0x08 */ s32 depth;
 } TrailPoint; /* size = 0x0C */
 
 static Mtx f_LandingPanelMatrices[MATRIX_BUFFER_COUNT];
@@ -748,65 +797,64 @@ static Vec3 f_ShotEffectTranslation;
 static Vec3 f_ShotEffectScale;
 static Vec3 f_ShotEffectRotation;
 static s32 f_ShotOffsetMarkerTexelOffset;
-static void* f_LieImage;
+static void *f_LieImage;
 
 /* Read by no routine */
 static u8 f_UnusedBytesBeforeClubHead[4] UNUSED;
 
-static void* f_ClubHeadImage;
+static void *f_ClubHeadImage;
 /* The selected club's name image, loaded into each buffer in turn as
  * f_ClubNameImageIndex alternates */
-static void* f_ClubNameImages[2];
+static void *f_ClubNameImages[2];
 /* The images of the animated icon's labels and of the icon; see
  * DrawAnimatedIcon */
-static void* f_AnimatedIconLabelImages[ANIMATED_ICON_LABEL_COUNT];
-static void* f_AnimatedIconImages[2];
-static void* f_DistanceFont;
-static void* f_WindSpeedFont;
-static void* f_RingImages;
-static void* f_RestLabelImage;
-static void* f_FlatLabelImage;
-static void* f_DownLabelImage;
+static void *f_AnimatedIconLabelImages[ANIMATED_ICON_LABEL_COUNT];
+static void *f_AnimatedIconImages[2];
+static void *f_DistanceFont;
+static void *f_WindSpeedFont;
+static void *f_RingImages;
+static void *f_RestLabelImage;
+static void *f_FlatLabelImage;
+static void *f_DownLabelImage;
 /* Loaded and freed with the HUD's images, but never drawn */
-static void* f_UnusedRoundImage;
-static void* f_UpLabelImage;
-static void* f_ParImage;
-static void* f_ShotOffsetMarkerImage;
-static void* f_WindIconImage;
+static void *f_UnusedRoundImage;
+static void *f_UpLabelImage;
+static void *f_ParImage;
+static void *f_ShotOffsetMarkerImage;
+static void *f_WindIconImage;
 static s32 f_ShotOffsetMarkerXs[SHOT_OFFSET_MARKER_COUNT];
 static s32 f_ShotOffsetMarkerYs[SHOT_OFFSET_MARKER_COUNT];
 /* Cleared by InitRoundHud as it sets the scissor, and read by no routine */
 static s32 f_UnusedHudScissorWord;
-static void* f_HoleImage;
-static Vtx f_HoleFlagVertices[HOLE_FLAG_SIDE_COUNT][MATRIX_BUFFER_COUNT]
-                             [HOLE_FLAG_VERTEX_COUNT];
+static void *f_HoleImage;
+static Vtx f_HoleFlagVertices[HOLE_FLAG_SIDE_COUNT][MATRIX_BUFFER_COUNT][HOLE_FLAG_VERTEX_COUNT];
 /* s8 because WaveHoleFlag loads them as signed bytes when it spreads them */
 static s8 f_HoleFlagShades[HOLE_FLAG_VERTEX_COUNT];
 static s32 f_GreenGridHeights[GREEN_GRID_POINT_COUNT];
 static TrailPoint f_BallTrailPoints[BALL_TRAIL_LENGTH];
 /* The ball's recent world positions, which its trail is drawn through */
 static f32 f_BallTrail[BALL_TRAIL_LENGTH][3];
-static void* f_HoleContestImage;
-static void* f_MatchStandingImage;
+static void *f_HoleContestImage;
+static void *f_MatchStandingImage;
 
 /* Sets up what the hole's drawing needs before its first frame */
 void PrepareHoleDisplay(void) {
-  s32 i;
+    s32 i;
 
-  g_MatrixBufferIndex = 0;
-  for (i = 0; i != ARROW_VERTEX_COUNT; i++) {
-    f_Arrows[0].body[i].v.tc[TEXTURE_AXIS_T] =
-        ((f_Arrows[0].body[i].v.ob[AXIS_Y] / ARROW_UNITS_PER_TEXEL_ROW) +
-            ARROW_CENTER_TEXEL_ROW)
-        << TEXEL_COORDINATE_SHIFT;
-    f_Arrows[1].body[i].v.tc[TEXTURE_AXIS_T] =
-        ((f_Arrows[1].body[i].v.ob[AXIS_Y] / ARROW_UNITS_PER_TEXEL_ROW) +
-            ARROW_CENTER_TEXEL_ROW)
-        << TEXEL_COORDINATE_SHIFT;
-  }
+    g_MatrixBufferIndex = 0;
+    for (i = 0; i != ARROW_VERTEX_COUNT; i++) {
+        f_Arrows[0].body[i].v.tc[TEXTURE_AXIS_T] =
+            ((f_Arrows[0].body[i].v.ob[AXIS_Y] / ARROW_UNITS_PER_TEXEL_ROW) +
+                ARROW_CENTER_TEXEL_ROW)
+            << TEXEL_COORDINATE_SHIFT;
+        f_Arrows[1].body[i].v.tc[TEXTURE_AXIS_T] =
+            ((f_Arrows[1].body[i].v.ob[AXIS_Y] / ARROW_UNITS_PER_TEXEL_ROW) +
+                ARROW_CENTER_TEXEL_ROW)
+            << TEXEL_COORDINATE_SHIFT;
+    }
 
-  BuildPinShadow();
-  InitSkyColors();
+    BuildPinShadow();
+    InitSkyColors();
 }
 
 /*
@@ -815,312 +863,311 @@ void PrepareHoleDisplay(void) {
  * modern build splits the index into a side and a buffer.
  */
 #ifdef AVOID_UB
-#define HoleFlagGridVertices(grid) \
-  (f_HoleFlagVertices[(grid) / MATRIX_BUFFER_COUNT] \
-                     [(grid) % MATRIX_BUFFER_COUNT])
+#    define HoleFlagGridVertices(grid) \
+        (f_HoleFlagVertices[(grid) / MATRIX_BUFFER_COUNT][(grid) % MATRIX_BUFFER_COUNT])
 #else
-#define HoleFlagGridVertices(grid) (f_HoleFlagVertices[0][grid])
+#    define HoleFlagGridVertices(grid) (f_HoleFlagVertices[0][grid])
 #endif
 
 /*
  * Lays out the wind flag and builds the projections the HUD draws with
  */
 void InitRoundHud(void) {
-  s32 grid;
-  /*
-   * Also the back grids' rows and the shades' index, to match: a backRow for
-   * the back grids gives 20 words differing, and counting the shades with
-   * column 48, with a vertexIndex of their own 50 and with grid 88, all in
-   * registers only
-   */
-  s32 row;
-  s32 column;
+    s32 grid;
+    /*
+     * Also the back grids' rows and the shades' index, to match: a backRow for
+     * the back grids gives 20 words differing, and counting the shades with
+     * column 48, with a vertexIndex of their own 50 and with grid 88, all in
+     * registers only
+     */
+    s32 row;
+    s32 column;
 
-  f_UnusedHudInitWord = 0;
-  for (grid = 0; grid != HOLE_FLAG_SIDE_COUNT * MATRIX_BUFFER_COUNT; grid++) {
-    Vtx* vertex = HoleFlagGridVertices(grid);
+    f_UnusedHudInitWord = 0;
+    for (grid = 0; grid != HOLE_FLAG_SIDE_COUNT * MATRIX_BUFFER_COUNT; grid++) {
+        Vtx *vertex = HoleFlagGridVertices(grid);
 
-    for (row = 0; row != HOLE_FLAG_ROW_COUNT; row++) {
-      for (column = 0; column != HOLE_FLAG_COLUMN_COUNT; column++, vertex++) {
-        vertex->v.ob[AXIS_X] = column * HOLE_FLAG_CELL_SIZE;
-        vertex->v.ob[AXIS_Y] = -row * HOLE_FLAG_CELL_SIZE;
-        vertex->v.ob[AXIS_Z] = 0;
-        vertex->v.tc[TEXTURE_AXIS_S] = column * HOLE_FLAG_TEXEL_COLUMN_STEP;
-        vertex->v.tc[TEXTURE_AXIS_T] = row * HOLE_FLAG_TEXEL_ROW_STEP;
-        vertex->v.cn[0] = HOLE_FLAG_START_SHADE;
-        vertex->v.cn[1] = HOLE_FLAG_START_SHADE;
-        vertex->v.cn[2] = HOLE_FLAG_START_SHADE;
-        vertex->v.cn[3] = HOLE_FLAG_START_SHADE;
-      }
+        for (row = 0; row != HOLE_FLAG_ROW_COUNT; row++) {
+            for (column = 0; column != HOLE_FLAG_COLUMN_COUNT; column++, vertex++) {
+                vertex->v.ob[AXIS_X] = column * HOLE_FLAG_CELL_SIZE;
+                vertex->v.ob[AXIS_Y] = -row * HOLE_FLAG_CELL_SIZE;
+                vertex->v.ob[AXIS_Z] = 0;
+                vertex->v.tc[TEXTURE_AXIS_S] = column * HOLE_FLAG_TEXEL_COLUMN_STEP;
+                vertex->v.tc[TEXTURE_AXIS_T] = row * HOLE_FLAG_TEXEL_ROW_STEP;
+                vertex->v.cn[0] = HOLE_FLAG_START_SHADE;
+                vertex->v.cn[1] = HOLE_FLAG_START_SHADE;
+                vertex->v.cn[2] = HOLE_FLAG_START_SHADE;
+                vertex->v.cn[3] = HOLE_FLAG_START_SHADE;
+            }
+        }
     }
-  }
 
-  for (grid = MATRIX_BUFFER_COUNT;
-      grid != HOLE_FLAG_SIDE_COUNT * MATRIX_BUFFER_COUNT; grid++) {
-    Vtx* vertex = HoleFlagGridVertices(grid);
+    for (grid = MATRIX_BUFFER_COUNT; grid != HOLE_FLAG_SIDE_COUNT * MATRIX_BUFFER_COUNT; grid++) {
+        Vtx *vertex = HoleFlagGridVertices(grid);
 
-    for (row = 0; row != HOLE_FLAG_ROW_COUNT; row++) {
-      for (column = 0; column != HOLE_FLAG_COLUMN_COUNT; column++, vertex++) {
-        vertex->v.tc[TEXTURE_AXIS_S] =
-            HOLE_FLAG_BACK_TEXEL_START - (column * HOLE_FLAG_TEXEL_COLUMN_STEP);
-      }
+        for (row = 0; row != HOLE_FLAG_ROW_COUNT; row++) {
+            for (column = 0; column != HOLE_FLAG_COLUMN_COUNT; column++, vertex++) {
+                vertex->v.tc[TEXTURE_AXIS_S] =
+                    HOLE_FLAG_BACK_TEXEL_START - (column * HOLE_FLAG_TEXEL_COLUMN_STEP);
+            }
+        }
     }
-  }
 
-  for (row = 0; row != HOLE_FLAG_VERTEX_COUNT; row++) {
-    f_HoleFlagShades[row] = HOLE_FLAG_START_SHADE;
-  }
+    for (row = 0; row != HOLE_FLAG_VERTEX_COUNT; row++) {
+        f_HoleFlagShades[row] = HOLE_FLAG_START_SHADE;
+    }
 
-  guOrtho(&g_ScreenOrthoMatrix, -SCREEN_WIDTH / 2, SCREEN_WIDTH / 2,
-      -SCREEN_HEIGHT / 2, SCREEN_HEIGHT / 2, SCREEN_ORTHO_NEAR,
-      SCREEN_ORTHO_FAR, 1.0f);
-  guPerspective(&f_UnusedNarrowProjection, &g_ScreenEffectPerspNorm,
-      NARROW_FIELD_OF_VIEW, SCREEN_ASPECT_RATIO, SCREEN_EFFECT_NEAR_PLANE,
-      NARROW_FAR_PLANE, 1.0f);
-  guPerspective(&g_ScreenEffectProjection, &g_ScreenEffectPerspNorm,
-      SCREEN_EFFECT_FIELD_OF_VIEW, SCREEN_ASPECT_RATIO,
-      SCREEN_EFFECT_NEAR_PLANE, SCREEN_EFFECT_FAR_PLANE, 1.0f);
-  g_SkyState.viewedWindAngles[0] = 0.0f;
-  g_SkyState.horizonLevels[0] = 0.0f;
-  g_SkyState.lookAtLevels[0] = 0.0f;
-  g_SkyState.pitches[0] = 0.0f;
-  g_SkyState.yaws[0] = 0.0f;
-  g_SkyState.screenHeights[0] = 0.0f;
-  g_SkyState.viewedWindAngles[1] = 0.0f;
-  g_SkyState.horizonLevels[1] = 0.0f;
-  g_SkyState.lookAtLevels[1] = 0.0f;
-  g_SkyState.pitches[1] = 0.0f;
-  g_SkyState.yaws[1] = 0.0f;
-  g_SkyState.screenHeights[1] = 0.0f;
-  g_InsetView.animation = INSET_VIEW_STILL;
-  g_InsetView.step = 0;
+    guOrtho(
+        &g_ScreenOrthoMatrix,
+        -SCREEN_WIDTH / 2,
+        SCREEN_WIDTH / 2,
+        -SCREEN_HEIGHT / 2,
+        SCREEN_HEIGHT / 2,
+        SCREEN_ORTHO_NEAR,
+        SCREEN_ORTHO_FAR,
+        1.0f
+    );
+    guPerspective(
+        &f_UnusedNarrowProjection,
+        &g_ScreenEffectPerspNorm,
+        NARROW_FIELD_OF_VIEW,
+        SCREEN_ASPECT_RATIO,
+        SCREEN_EFFECT_NEAR_PLANE,
+        NARROW_FAR_PLANE,
+        1.0f
+    );
+    guPerspective(
+        &g_ScreenEffectProjection,
+        &g_ScreenEffectPerspNorm,
+        SCREEN_EFFECT_FIELD_OF_VIEW,
+        SCREEN_ASPECT_RATIO,
+        SCREEN_EFFECT_NEAR_PLANE,
+        SCREEN_EFFECT_FAR_PLANE,
+        1.0f
+    );
+    g_SkyState.viewedWindAngles[0] = 0.0f;
+    g_SkyState.horizonLevels[0] = 0.0f;
+    g_SkyState.lookAtLevels[0] = 0.0f;
+    g_SkyState.pitches[0] = 0.0f;
+    g_SkyState.yaws[0] = 0.0f;
+    g_SkyState.screenHeights[0] = 0.0f;
+    g_SkyState.viewedWindAngles[1] = 0.0f;
+    g_SkyState.horizonLevels[1] = 0.0f;
+    g_SkyState.lookAtLevels[1] = 0.0f;
+    g_SkyState.pitches[1] = 0.0f;
+    g_SkyState.yaws[1] = 0.0f;
+    g_SkyState.screenHeights[1] = 0.0f;
+    g_InsetView.animation = INSET_VIEW_STILL;
+    g_InsetView.step = 0;
 }
 
 /* Loads the face of a player's character in the colors of the given palette */
 void LoadPlayerFace(s32 playerIndex, CharacterId character, s32 paletteIndex) {
-  EncodedAsset asset;
-  AssetFile file;
+    EncodedAsset asset;
+    AssetFile file;
 
-  OpenEncodedAsset(
-      g_CharacterImageAssets[character] + CHARACTER_FACE_IMAGE_OFFSET, &asset);
-  ReadEncodedAsset(g_PlayerFaceImages[playerIndex], &asset);
-  OpenAssetFile(g_CharacterPaletteAssets[character] + paletteIndex, &file);
-  ReadAssetFile(
-      g_PlayerFacePalettes[playerIndex], GetAssetFileSize(&file), &file);
+    OpenEncodedAsset(g_CharacterImageAssets[character] + CHARACTER_FACE_IMAGE_OFFSET, &asset);
+    ReadEncodedAsset(g_PlayerFaceImages[playerIndex], &asset);
+    OpenAssetFile(g_CharacterPaletteAssets[character] + paletteIndex, &file);
+    ReadAssetFile(g_PlayerFacePalettes[playerIndex], GetAssetFileSize(&file), &file);
 }
 
 /* Frees the previous hole's mode images and loads the scenery images if they
  * are not loaded */
 void EndHoleIntro(void) {
-  if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
-    if (f_IsCourseSelectLoaded == TRUE) {
-      f_IsCourseSelectLoaded = FALSE;
-      FreeCourseSelect();
+    if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
+        if (f_IsCourseSelectLoaded == TRUE) {
+            f_IsCourseSelectLoaded = FALSE;
+            FreeCourseSelect();
+        }
     }
-  } else if (g_GameState.gameMode == GAME_MODE_TRAINING) {
-    if (f_IsCourseSelectLoaded == TRUE) {
-      f_IsCourseSelectLoaded = FALSE;
-      FreeCourseSelect();
+    else if (g_GameState.gameMode == GAME_MODE_TRAINING) {
+        if (f_IsCourseSelectLoaded == TRUE) {
+            f_IsCourseSelectLoaded = FALSE;
+            FreeCourseSelect();
+        }
     }
-  } else {
-    FreeHoleIntroImages();
-  }
+    else {
+        FreeHoleIntroImages();
+    }
 
-  if (f_SceneryState == SCENERY_BILLBOARDS_READY) {
-    LoadSceneryImages();
-  }
+    if (f_SceneryState == SCENERY_BILLBOARDS_READY) {
+        LoadSceneryImages();
+    }
 }
 
 /* Starts the hole's weather and loads the images of the hole and its par */
 void StartHoleIntro(void) {
-  EncodedAsset asset;
+    EncodedAsset asset;
 
-  EndWeather();
-  StartWeather(WEATHER_RAIN);
-  if (g_HoleSetup.conditions.isRaining == TRUE) {
-    PlaySound(RAIN_SOUND, RAIN_SOUND_CHANNEL, RAIN_SOUND_START_VOLUME);
-    g_RainSoundVolume = RAIN_SOUND_START_VOLUME;
-  } else {
-    StopSound(RAIN_SOUND_CHANNEL);
-  }
-
-  RevertBillboardManager();
-  OpenEncodedAsset(
-      f_HoleImageAssets[GetCourseRecordIndex()] + GetHoleIndexInRecord(),
-      &asset);
-  ReadEncodedAsset(f_HoleImage, &asset);
-  switch (
-      g_CourseRecords[GetCourseRecordIndex()].holes[GetHoleRecordIndex()].par) {
-    case PAR_THREE:
-      OpenEncodedAsset(ASSET_PAR_THREE_IMAGE, &asset);
-      break;
-    case PAR_FOUR:
-      OpenEncodedAsset(ASSET_PAR_FOUR_IMAGE, &asset);
-      break;
-    case PAR_FIVE:
-      OpenEncodedAsset(ASSET_PAR_FIVE_IMAGE, &asset);
-      break;
-  }
-
-  ReadEncodedAsset(f_ParImage, &asset);
-  if (f_SceneryState == SCENERY_LOADED) {
-    FreeSceneryImages();
-  }
-
-  if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
-    if (f_IsCourseSelectLoaded == FALSE) {
-      f_IsCourseSelectLoaded = TRUE;
-      LoadCourseSelect(0);
+    EndWeather();
+    StartWeather(WEATHER_RAIN);
+    if (g_HoleSetup.conditions.isRaining == TRUE) {
+        PlaySound(RAIN_SOUND, RAIN_SOUND_CHANNEL, RAIN_SOUND_START_VOLUME);
+        g_RainSoundVolume = RAIN_SOUND_START_VOLUME;
     }
-  } else if (g_GameState.gameMode == GAME_MODE_TRAINING) {
-    if (f_IsCourseSelectLoaded == FALSE) {
-      f_IsCourseSelectLoaded = TRUE;
-      LoadCourseSelect(1);
+    else {
+        StopSound(RAIN_SOUND_CHANNEL);
     }
-  } else {
-    LoadHoleIntroImages();
-  }
+
+    RevertBillboardManager();
+    OpenEncodedAsset(f_HoleImageAssets[GetCourseRecordIndex()] + GetHoleIndexInRecord(), &asset);
+    ReadEncodedAsset(f_HoleImage, &asset);
+    switch (g_CourseRecords[GetCourseRecordIndex()].holes[GetHoleRecordIndex()].par) {
+        case PAR_THREE:
+            OpenEncodedAsset(ASSET_PAR_THREE_IMAGE, &asset);
+            break;
+        case PAR_FOUR:
+            OpenEncodedAsset(ASSET_PAR_FOUR_IMAGE, &asset);
+            break;
+        case PAR_FIVE:
+            OpenEncodedAsset(ASSET_PAR_FIVE_IMAGE, &asset);
+            break;
+    }
+
+    ReadEncodedAsset(f_ParImage, &asset);
+    if (f_SceneryState == SCENERY_LOADED) {
+        FreeSceneryImages();
+    }
+
+    if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
+        if (f_IsCourseSelectLoaded == FALSE) {
+            f_IsCourseSelectLoaded = TRUE;
+            LoadCourseSelect(0);
+        }
+    }
+    else if (g_GameState.gameMode == GAME_MODE_TRAINING) {
+        if (f_IsCourseSelectLoaded == FALSE) {
+            f_IsCourseSelectLoaded = TRUE;
+            LoadCourseSelect(1);
+        }
+    }
+    else {
+        LoadHoleIntroImages();
+    }
 }
 
 /* Loads the images the round's scenery, effects and HUD are drawn with */
 void LoadSceneryImages(void) {
-  EncodedAsset asset;
+    EncodedAsset asset;
 
-  f_SceneryState = SCENERY_LOADED;
-  LoadGolfBallImages();
-  LoadEffectImages();
-  LoadHoleCreatureImages();
-  LoadShotEffectImages();
-  AllocMovieBuffer();
-  LoadClubPanelImages();
-  g_PinFlagImages =
-      AllocMemory(OpenEncodedAsset(ASSET_PIN_FLAG_IMAGES, &asset));
-  ReadEncodedAsset(g_PinFlagImages, &asset);
-  f_WindIconImage =
-      AllocMemory(OpenEncodedAsset(ASSET_WIND_ICON_IMAGE, &asset));
-  ReadEncodedAsset(f_WindIconImage, &asset);
-  g_PlayerTagImages =
-      AllocMemory(OpenEncodedAsset(ASSET_PLAYER_LABELS, &asset));
-  ReadEncodedAsset(g_PlayerTagImages, &asset);
-  g_LeaderLineImage =
-      AllocMemory(OpenEncodedAsset(ASSET_LEADER_LINE_IMAGE, &asset));
-  ReadEncodedAsset(g_LeaderLineImage, &asset);
-  g_BackdropPatternImage =
-      AllocMemory(OpenEncodedAsset(ASSET_BACKDROP_PATTERN_IMAGE, &asset));
-  ReadEncodedAsset(g_BackdropPatternImage, &asset);
-  g_ShotPreviewDashImage =
-      AllocMemory(OpenEncodedAsset(ASSET_SHOT_PREVIEW_DASH_IMAGE, &asset));
-  ReadEncodedAsset(g_ShotPreviewDashImage, &asset);
-  g_ShadowTexture = AllocMemory(OpenEncodedAsset(ASSET_SHADOW_TEXTURE, &asset));
-  ReadEncodedAsset(g_ShadowTexture, &asset);
-  f_ClubHeadImageAsset = NO_IMAGE_ASSET;
-  f_ClubHeadImage =
-      AllocMemory(OpenEncodedAsset(ASSET_DRIVER_HEAD_IMAGE, &asset));
-  ReadEncodedAsset(f_ClubHeadImage, &asset);
-  f_ClubNameImages[0] = AllocMemory(SCENERY_BUFFER_A_SIZE);
-  f_ClubNameImages[1] = AllocMemory(SCENERY_BUFFER_A_SIZE);
-  f_LieImageAsset = NO_IMAGE_ASSET;
-  f_LieImage = AllocMemory(LIE_IMAGE_SIZE);
-  f_AnimatedIconImages[0] =
-      AllocMemory(OpenEncodedAsset(ASSET_LAKITU_ICON, &asset));
-  ReadEncodedAsset(f_AnimatedIconImages[0], &asset);
-  f_AnimatedIconLabelImages[0] =
-      AllocMemory(OpenEncodedAsset(ASSET_JUMP_LABEL, &asset));
-  ReadEncodedAsset(f_AnimatedIconLabelImages[0], &asset);
-  f_AnimatedIconLabelImages[1] =
-      AllocMemory(OpenEncodedAsset(ASSET_MODE_LABEL, &asset));
-  ReadEncodedAsset(f_AnimatedIconLabelImages[1], &asset);
-  f_AnimatedIconLabelImages[2] =
-      AllocMemory(OpenEncodedAsset(ASSET_CUP_LABEL, &asset));
-  ReadEncodedAsset(f_AnimatedIconLabelImages[2], &asset);
-  f_ShotOffsetMarkerImage =
-      AllocMemory(OpenEncodedAsset(ASSET_SHOT_OFFSET_MARKER_IMAGE, &asset));
-  ReadEncodedAsset(f_ShotOffsetMarkerImage, &asset);
-  f_WindSpeedFont =
-      AllocMemory(OpenEncodedAsset(ASSET_WIND_SPEED_FONT, &asset));
-  ReadEncodedAsset(f_WindSpeedFont, &asset);
-  f_RingImages = AllocMemory(OpenEncodedAsset(ASSET_ROUND_IMAGE_725, &asset));
-  ReadEncodedAsset(f_RingImages, &asset);
-  f_RestLabelImage =
-      AllocMemory(OpenEncodedAsset(ASSET_ROUND_IMAGE_568, &asset));
-  ReadEncodedAsset(f_RestLabelImage, &asset);
-  f_FlatLabelImage =
-      AllocMemory(OpenEncodedAsset(ASSET_ROUND_IMAGE_56B, &asset));
-  ReadEncodedAsset(f_FlatLabelImage, &asset);
-  f_DownLabelImage =
-      AllocMemory(OpenEncodedAsset(ASSET_ROUND_IMAGE_56A, &asset));
-  ReadEncodedAsset(f_DownLabelImage, &asset);
-  f_UpLabelImage = AllocMemory(OpenEncodedAsset(ASSET_ROUND_IMAGE_569, &asset));
-  ReadEncodedAsset(f_UpLabelImage, &asset);
-  f_UnusedRoundImage =
-      AllocMemory(OpenEncodedAsset(ASSET_ROUND_IMAGE_723, &asset));
-  ReadEncodedAsset(f_UnusedRoundImage, &asset);
-  g_DistanceSignImage =
-      AllocMemory(OpenEncodedAsset(ASSET_DISTANCE_SIGN_IMAGE, &asset));
-  ReadEncodedAsset(g_DistanceSignImage, &asset);
-  LoadFireworks(GetCourseRecordIndex());
+    f_SceneryState = SCENERY_LOADED;
+    LoadGolfBallImages();
+    LoadEffectImages();
+    LoadHoleCreatureImages();
+    LoadShotEffectImages();
+    AllocMovieBuffer();
+    LoadClubPanelImages();
+    g_PinFlagImages = AllocMemory(OpenEncodedAsset(ASSET_PIN_FLAG_IMAGES, &asset));
+    ReadEncodedAsset(g_PinFlagImages, &asset);
+    f_WindIconImage = AllocMemory(OpenEncodedAsset(ASSET_WIND_ICON_IMAGE, &asset));
+    ReadEncodedAsset(f_WindIconImage, &asset);
+    g_PlayerTagImages = AllocMemory(OpenEncodedAsset(ASSET_PLAYER_LABELS, &asset));
+    ReadEncodedAsset(g_PlayerTagImages, &asset);
+    g_LeaderLineImage = AllocMemory(OpenEncodedAsset(ASSET_LEADER_LINE_IMAGE, &asset));
+    ReadEncodedAsset(g_LeaderLineImage, &asset);
+    g_BackdropPatternImage = AllocMemory(OpenEncodedAsset(ASSET_BACKDROP_PATTERN_IMAGE, &asset));
+    ReadEncodedAsset(g_BackdropPatternImage, &asset);
+    g_ShotPreviewDashImage = AllocMemory(OpenEncodedAsset(ASSET_SHOT_PREVIEW_DASH_IMAGE, &asset));
+    ReadEncodedAsset(g_ShotPreviewDashImage, &asset);
+    g_ShadowTexture = AllocMemory(OpenEncodedAsset(ASSET_SHADOW_TEXTURE, &asset));
+    ReadEncodedAsset(g_ShadowTexture, &asset);
+    f_ClubHeadImageAsset = NO_IMAGE_ASSET;
+    f_ClubHeadImage = AllocMemory(OpenEncodedAsset(ASSET_DRIVER_HEAD_IMAGE, &asset));
+    ReadEncodedAsset(f_ClubHeadImage, &asset);
+    f_ClubNameImages[0] = AllocMemory(SCENERY_BUFFER_A_SIZE);
+    f_ClubNameImages[1] = AllocMemory(SCENERY_BUFFER_A_SIZE);
+    f_LieImageAsset = NO_IMAGE_ASSET;
+    f_LieImage = AllocMemory(LIE_IMAGE_SIZE);
+    f_AnimatedIconImages[0] = AllocMemory(OpenEncodedAsset(ASSET_LAKITU_ICON, &asset));
+    ReadEncodedAsset(f_AnimatedIconImages[0], &asset);
+    f_AnimatedIconLabelImages[0] = AllocMemory(OpenEncodedAsset(ASSET_JUMP_LABEL, &asset));
+    ReadEncodedAsset(f_AnimatedIconLabelImages[0], &asset);
+    f_AnimatedIconLabelImages[1] = AllocMemory(OpenEncodedAsset(ASSET_MODE_LABEL, &asset));
+    ReadEncodedAsset(f_AnimatedIconLabelImages[1], &asset);
+    f_AnimatedIconLabelImages[2] = AllocMemory(OpenEncodedAsset(ASSET_CUP_LABEL, &asset));
+    ReadEncodedAsset(f_AnimatedIconLabelImages[2], &asset);
+    f_ShotOffsetMarkerImage = AllocMemory(OpenEncodedAsset(ASSET_SHOT_OFFSET_MARKER_IMAGE, &asset));
+    ReadEncodedAsset(f_ShotOffsetMarkerImage, &asset);
+    f_WindSpeedFont = AllocMemory(OpenEncodedAsset(ASSET_WIND_SPEED_FONT, &asset));
+    ReadEncodedAsset(f_WindSpeedFont, &asset);
+    f_RingImages = AllocMemory(OpenEncodedAsset(ASSET_ROUND_IMAGE_725, &asset));
+    ReadEncodedAsset(f_RingImages, &asset);
+    f_RestLabelImage = AllocMemory(OpenEncodedAsset(ASSET_ROUND_IMAGE_568, &asset));
+    ReadEncodedAsset(f_RestLabelImage, &asset);
+    f_FlatLabelImage = AllocMemory(OpenEncodedAsset(ASSET_ROUND_IMAGE_56B, &asset));
+    ReadEncodedAsset(f_FlatLabelImage, &asset);
+    f_DownLabelImage = AllocMemory(OpenEncodedAsset(ASSET_ROUND_IMAGE_56A, &asset));
+    ReadEncodedAsset(f_DownLabelImage, &asset);
+    f_UpLabelImage = AllocMemory(OpenEncodedAsset(ASSET_ROUND_IMAGE_569, &asset));
+    ReadEncodedAsset(f_UpLabelImage, &asset);
+    f_UnusedRoundImage = AllocMemory(OpenEncodedAsset(ASSET_ROUND_IMAGE_723, &asset));
+    ReadEncodedAsset(f_UnusedRoundImage, &asset);
+    g_DistanceSignImage = AllocMemory(OpenEncodedAsset(ASSET_DISTANCE_SIGN_IMAGE, &asset));
+    ReadEncodedAsset(g_DistanceSignImage, &asset);
+    LoadFireworks(GetCourseRecordIndex());
 }
 
 /* Frees what LoadSceneryImages loaded */
 void FreeSceneryImages(void) {
-  if (f_SceneryState == SCENERY_LOADED) {
-    f_SceneryState = SCENERY_BILLBOARDS_READY;
-    FreeEffectImages();
-    FreeHoleCreatureImages();
-    FreeShotEffectImages();
-    FreeMovieBuffer();
-    FreeClubPanelImages();
-    FreeMemory(&g_PinFlagImages);
-    FreeMemory(&f_WindIconImage);
-    FreeMemory(&g_PlayerTagImages);
-    FreeMemory(&g_LeaderLineImage);
-    FreeMemory(&g_BackdropPatternImage);
-    FreeMemory(&g_ShotPreviewDashImage);
-    FreeMemory(&g_ShadowTexture);
-    FreeMemory(&f_ClubHeadImage);
-    FreeMemory(&f_ClubNameImages[0]);
-    FreeMemory(&f_ClubNameImages[1]);
-    FreeMemory(&f_LieImage);
-    FreeMemory(&f_AnimatedIconImages[0]);
-    FreeMemory(&f_AnimatedIconLabelImages[0]);
-    FreeMemory(&f_AnimatedIconLabelImages[1]);
-    FreeMemory(&f_AnimatedIconLabelImages[2]);
-    FreeMemory(&f_ShotOffsetMarkerImage);
-    FreeMemory(&f_WindSpeedFont);
-    FreeMemory(&f_RingImages);
-    FreeMemory(&f_RestLabelImage);
-    FreeMemory(&f_FlatLabelImage);
-    FreeMemory(&f_DownLabelImage);
-    FreeMemory(&f_UpLabelImage);
-    FreeMemory(&f_UnusedRoundImage);
-    FreeMemory(&g_DistanceSignImage);
-    FreeFireworks();
-  }
+    if (f_SceneryState == SCENERY_LOADED) {
+        f_SceneryState = SCENERY_BILLBOARDS_READY;
+        FreeEffectImages();
+        FreeHoleCreatureImages();
+        FreeShotEffectImages();
+        FreeMovieBuffer();
+        FreeClubPanelImages();
+        FreeMemory(&g_PinFlagImages);
+        FreeMemory(&f_WindIconImage);
+        FreeMemory(&g_PlayerTagImages);
+        FreeMemory(&g_LeaderLineImage);
+        FreeMemory(&g_BackdropPatternImage);
+        FreeMemory(&g_ShotPreviewDashImage);
+        FreeMemory(&g_ShadowTexture);
+        FreeMemory(&f_ClubHeadImage);
+        FreeMemory(&f_ClubNameImages[0]);
+        FreeMemory(&f_ClubNameImages[1]);
+        FreeMemory(&f_LieImage);
+        FreeMemory(&f_AnimatedIconImages[0]);
+        FreeMemory(&f_AnimatedIconLabelImages[0]);
+        FreeMemory(&f_AnimatedIconLabelImages[1]);
+        FreeMemory(&f_AnimatedIconLabelImages[2]);
+        FreeMemory(&f_ShotOffsetMarkerImage);
+        FreeMemory(&f_WindSpeedFont);
+        FreeMemory(&f_RingImages);
+        FreeMemory(&f_RestLabelImage);
+        FreeMemory(&f_FlatLabelImage);
+        FreeMemory(&f_DownLabelImage);
+        FreeMemory(&f_UpLabelImage);
+        FreeMemory(&f_UnusedRoundImage);
+        FreeMemory(&g_DistanceSignImage);
+        FreeFireworks();
+    }
 }
 
 /* Sets up the billboard manager's heap, once per round */
 void InitScenery(void) {
-  /* Left from code that loaded assets here; without it 8 words differ */
-  EncodedAsset unusedAsset UNUSED;
+    /* Left from code that loaded assets here; without it 8 words differ */
+    EncodedAsset unusedAsset UNUSED;
 
-  if (f_SceneryState == SCENERY_UNLOADED) {
-    f_SceneryBillboardHeap = AllocMemory(BILLBOARD_HEAP_SIZE);
-    InitBillboardManager(f_SceneryBillboardHeap, BILLBOARD_HEAP_SIZE);
-    f_SceneryState = SCENERY_BILLBOARDS_READY;
-  }
+    if (f_SceneryState == SCENERY_UNLOADED) {
+        f_SceneryBillboardHeap = AllocMemory(BILLBOARD_HEAP_SIZE);
+        InitBillboardManager(f_SceneryBillboardHeap, BILLBOARD_HEAP_SIZE);
+        f_SceneryState = SCENERY_BILLBOARDS_READY;
+    }
 }
 
 /* Frees everything the round's scenery holds, when its overlay is unloaded */
 void FreeScenery(void) {
-  if (f_SceneryState != SCENERY_UNLOADED) {
-    DestroyBillboardManager();
-    FreeMemory(&f_SceneryBillboardHeap);
-    EndWeather();
-    ClearShotEffects(CLEAR_KIND_ALL);
-    FreeSceneryImages();
-    f_SceneryState = SCENERY_UNLOADED;
-    memset(&g_RoundHud, 0, sizeof(g_RoundHud));
-  }
+    if (f_SceneryState != SCENERY_UNLOADED) {
+        DestroyBillboardManager();
+        FreeMemory(&f_SceneryBillboardHeap);
+        EndWeather();
+        ClearShotEffects(CLEAR_KIND_ALL);
+        FreeSceneryImages();
+        f_SceneryState = SCENERY_UNLOADED;
+        memset(&g_RoundHud, 0, sizeof(g_RoundHud));
+    }
 }
 
 /*
@@ -1128,100 +1175,106 @@ void FreeScenery(void) {
  * distance from it, the lie's image, and the scores that the game mode shows.
  */
 void StartShotPanel(void) {
-  /* Pads the frame to match; without it 25 words differ */
-  u8 unusedStack[0x20] UNUSED;
-  EncodedAsset asset;
-  s32 height;
-  s32 playerIndex;
-  s32 holeIndex;
+    /* Pads the frame to match; without it 25 words differ */
+    u8 unusedStack[0x20] UNUSED;
+    EncodedAsset asset;
+    s32 height;
+    s32 playerIndex;
+    s32 holeIndex;
 
-  height = g_CurrentShot.ballPosition[AXIS_Y] - g_HoleSetup.cupPosition[AXIS_Y];
-  g_RoundHud.ballHeightYards = height * YARDS_PER_UNIT;
-  g_RoundHud.ballHeightMeters = height * METERS_PER_UNIT;
-  g_RoundHud.ballHeightFeet = (height * FEET_PER_YARD) * YARDS_PER_UNIT;
-  if (g_RoundHud.ballHeightYards == 0) {
-    g_RoundHud.ballHeightYardsDirection = HEIGHT_LEVEL;
-  } else if (g_RoundHud.ballHeightYards > 0) {
-    g_RoundHud.ballHeightYardsDirection = HEIGHT_ABOVE;
-  } else {
-    g_RoundHud.ballHeightYardsDirection = HEIGHT_BELOW;
-  }
-
-  if (g_RoundHud.ballHeightMeters < LEVEL_HEIGHT &&
-      g_RoundHud.ballHeightMeters > -LEVEL_HEIGHT) {
-    g_RoundHud.ballHeightMetersDirection = HEIGHT_LEVEL;
-  } else if (g_RoundHud.ballHeightMeters > 0.0f) {
-    g_RoundHud.ballHeightMetersDirection = HEIGHT_ABOVE;
-  } else {
-    g_RoundHud.ballHeightMetersDirection = HEIGHT_BELOW;
-  }
-
-  /* The direction in feet is taken from the height in meters */
-  if (g_RoundHud.ballHeightFeet < LEVEL_HEIGHT &&
-      g_RoundHud.ballHeightFeet > -LEVEL_HEIGHT) {
-    g_RoundHud.ballHeightFeetDirection = HEIGHT_LEVEL;
-  } else if (g_RoundHud.ballHeightMeters > 0.0f) {
-    g_RoundHud.ballHeightFeetDirection = HEIGHT_ABOVE;
-  } else {
-    g_RoundHud.ballHeightFeetDirection = HEIGHT_BELOW;
-  }
-
-  g_RoundHud.cupDistance = (f32)GetCupDistance(
-      g_CurrentShot.ballPosition[AXIS_X] - g_HoleSetup.cupPosition[AXIS_X],
-      g_CurrentShot.ballPosition[AXIS_Z] - g_HoleSetup.cupPosition[AXIS_Z]);
-  if (GetSurfaceInfo(g_CurrentShot.surface)->lieImageAsset != f_LieImageAsset) {
-    f_LieImageAsset = GetSurfaceInfo(g_CurrentShot.surface)->lieImageAsset;
-    if (GetSurfaceInfo(g_CurrentShot.surface)->kind ==
-        SURFACE_KIND_TEE_GROUND) {
-      f_ShotPanelOffsetY = TEE_GROUND_PANEL_OFFSET_Y;
-    } else {
-      f_ShotPanelOffsetY = 0;
+    height = g_CurrentShot.ballPosition[AXIS_Y] - g_HoleSetup.cupPosition[AXIS_Y];
+    g_RoundHud.ballHeightYards = height * YARDS_PER_UNIT;
+    g_RoundHud.ballHeightMeters = height * METERS_PER_UNIT;
+    g_RoundHud.ballHeightFeet = (height * FEET_PER_YARD) * YARDS_PER_UNIT;
+    if (g_RoundHud.ballHeightYards == 0) {
+        g_RoundHud.ballHeightYardsDirection = HEIGHT_LEVEL;
+    }
+    else if (g_RoundHud.ballHeightYards > 0) {
+        g_RoundHud.ballHeightYardsDirection = HEIGHT_ABOVE;
+    }
+    else {
+        g_RoundHud.ballHeightYardsDirection = HEIGHT_BELOW;
     }
 
-    OpenEncodedAsset(f_LieImageAsset, &asset);
-    ReadEncodedAsset(f_LieImage, &asset);
-  }
+    if (g_RoundHud.ballHeightMeters < LEVEL_HEIGHT && g_RoundHud.ballHeightMeters > -LEVEL_HEIGHT) {
+        g_RoundHud.ballHeightMetersDirection = HEIGHT_LEVEL;
+    }
+    else if (g_RoundHud.ballHeightMeters > 0.0f) {
+        g_RoundHud.ballHeightMetersDirection = HEIGHT_ABOVE;
+    }
+    else {
+        g_RoundHud.ballHeightMetersDirection = HEIGHT_BELOW;
+    }
 
-  if (g_GameState.replayKind != REPLAY_KIND_NONE) {
-    g_RoundHud.skinsTotals[0] = 0;
-  } else {
-    switch (g_GameState.gameMode) {
-      case GAME_MODE_STROKE:
-      case GAME_MODE_UNLISTED_STROKE:
-      case GAME_MODE_TOURNAMENT:
-      case GAME_MODE_SPEED_GOLF:
-        for (playerIndex = 0; playerIndex < g_GameState.playerCount;
-            playerIndex++) {
-          g_RoundHud.skinsTotals[playerIndex] =
-              GetNetScoreToPar(g_GameState.holeIndex, playerIndex);
+    /* The direction in feet is taken from the height in meters */
+    if (g_RoundHud.ballHeightFeet < LEVEL_HEIGHT && g_RoundHud.ballHeightFeet > -LEVEL_HEIGHT) {
+        g_RoundHud.ballHeightFeetDirection = HEIGHT_LEVEL;
+    }
+    else if (g_RoundHud.ballHeightMeters > 0.0f) {
+        g_RoundHud.ballHeightFeetDirection = HEIGHT_ABOVE;
+    }
+    else {
+        g_RoundHud.ballHeightFeetDirection = HEIGHT_BELOW;
+    }
+
+    g_RoundHud.cupDistance = (f32)GetCupDistance(
+        g_CurrentShot.ballPosition[AXIS_X] - g_HoleSetup.cupPosition[AXIS_X],
+        g_CurrentShot.ballPosition[AXIS_Z] - g_HoleSetup.cupPosition[AXIS_Z]
+    );
+    if (GetSurfaceInfo(g_CurrentShot.surface)->lieImageAsset != f_LieImageAsset) {
+        f_LieImageAsset = GetSurfaceInfo(g_CurrentShot.surface)->lieImageAsset;
+        if (GetSurfaceInfo(g_CurrentShot.surface)->kind == SURFACE_KIND_TEE_GROUND) {
+            f_ShotPanelOffsetY = TEE_GROUND_PANEL_OFFSET_Y;
+        }
+        else {
+            f_ShotPanelOffsetY = 0;
         }
 
-        break;
-      case GAME_MODE_MATCH_GAME:
-      case GAME_MODE_GET_CHARACTER:
+        OpenEncodedAsset(f_LieImageAsset, &asset);
+        ReadEncodedAsset(f_LieImage, &asset);
+    }
+
+    if (g_GameState.replayKind != REPLAY_KIND_NONE) {
         g_RoundHud.skinsTotals[0] = 0;
-        for (holeIndex = 0; holeIndex != g_GameState.holeIndex; holeIndex++) {
-          if (g_Players[0].holes[holeIndex].strokes <
-              g_Players[1].holes[holeIndex].strokes) {
-            g_RoundHud.skinsTotals[0]--;
-          } else if (g_Players[1].holes[holeIndex].strokes <
-              g_Players[0].holes[holeIndex].strokes) {
-            g_RoundHud.skinsTotals[0]++;
-          }
-        }
-
-        g_RoundHud.skinsTotals[1] = -g_RoundHud.skinsTotals[0];
-        break;
-      case GAME_MODE_SKINS_MATCH:
-      case GAME_MODE_CLUB_SLOTS:
-        TallySkins(GetHoleRecordIndex());
-        break;
     }
-  }
+    else {
+        switch (g_GameState.gameMode) {
+            case GAME_MODE_STROKE:
+            case GAME_MODE_UNLISTED_STROKE:
+            case GAME_MODE_TOURNAMENT:
+            case GAME_MODE_SPEED_GOLF:
+                for (playerIndex = 0; playerIndex < g_GameState.playerCount; playerIndex++) {
+                    g_RoundHud.skinsTotals[playerIndex] =
+                        GetNetScoreToPar(g_GameState.holeIndex, playerIndex);
+                }
 
-  g_ShotPanelOffsetX = SHOT_PANEL_START_OFFSET_X;
-  ResetShotModeChange();
-  LoadContactImages(&g_Players[g_RoundHud.shooterIndex]);
+                break;
+            case GAME_MODE_MATCH_GAME:
+            case GAME_MODE_GET_CHARACTER:
+                g_RoundHud.skinsTotals[0] = 0;
+                for (holeIndex = 0; holeIndex != g_GameState.holeIndex; holeIndex++) {
+                    if (g_Players[0].holes[holeIndex].strokes <
+                        g_Players[1].holes[holeIndex].strokes) {
+                        g_RoundHud.skinsTotals[0]--;
+                    }
+                    else if (g_Players[1].holes[holeIndex].strokes <
+                        g_Players[0].holes[holeIndex].strokes) {
+                        g_RoundHud.skinsTotals[0]++;
+                    }
+                }
+
+                g_RoundHud.skinsTotals[1] = -g_RoundHud.skinsTotals[0];
+                break;
+            case GAME_MODE_SKINS_MATCH:
+            case GAME_MODE_CLUB_SLOTS:
+                TallySkins(GetHoleRecordIndex());
+                break;
+        }
+    }
+
+    g_ShotPanelOffsetX = SHOT_PANEL_START_OFFSET_X;
+    ResetShotModeChange();
+    LoadContactImages(&g_Players[g_RoundHud.shooterIndex]);
 }
 
 /*
@@ -1230,60 +1283,59 @@ void StartShotPanel(void) {
  * read theirs into the same buffers.
  */
 void LoadRoundHud(void) {
-  AssetFile file;
-  EncodedAsset asset;
-  s32 i;
-  u32 paletteSize;
+    AssetFile file;
+    EncodedAsset asset;
+    s32 i;
+    u32 paletteSize;
 
-  g_CourseSkyImage =
-      AllocMemory(OpenEncodedAsset(ASSET_COURSE_SKY_IMAGE_0, &asset));
-  ReadEncodedAsset(g_CourseSkyImage, &asset);
-  g_SkyImage = AllocMemory(OpenEncodedAsset(ASSET_SKY_IMAGE_0, &asset));
-  ReadEncodedAsset(g_SkyImage, &asset);
-  f_HoleImage = AllocMemory(OpenEncodedAsset(f_HoleImageAssets[0], &asset));
-  ReadEncodedAsset(f_HoleImage, &asset);
-  f_ParImage = AllocMemory(OpenEncodedAsset(ASSET_PAR_FIVE_IMAGE, &asset));
-  ReadEncodedAsset(f_ParImage, &asset);
-  f_DistanceFont = AllocMemory(OpenEncodedAsset(ASSET_DISTANCE_DIGITS, &asset));
-  ReadEncodedAsset(f_DistanceFont, &asset);
-  g_RingTexels = AllocMemory(RING_TEXTURE_SIZE * RING_TEXTURE_SIZE);
-  BuildRingTexels(g_RingTexels, RING_TEXTURE_SIZE, RING_TEXTURE_SIZE,
-      RING_TEXTURE_OUTER_RADIUS);
-  for (i = 0; i != SHOT_OFFSET_MARKER_COUNT; i++) {
-    f_ShotOffsetMarkerXs[i] = 0;
-    f_ShotOffsetMarkerYs[i] = 0;
-  }
+    g_CourseSkyImage = AllocMemory(OpenEncodedAsset(ASSET_COURSE_SKY_IMAGE_0, &asset));
+    ReadEncodedAsset(g_CourseSkyImage, &asset);
+    g_SkyImage = AllocMemory(OpenEncodedAsset(ASSET_SKY_IMAGE_0, &asset));
+    ReadEncodedAsset(g_SkyImage, &asset);
+    f_HoleImage = AllocMemory(OpenEncodedAsset(f_HoleImageAssets[0], &asset));
+    ReadEncodedAsset(f_HoleImage, &asset);
+    f_ParImage = AllocMemory(OpenEncodedAsset(ASSET_PAR_FIVE_IMAGE, &asset));
+    ReadEncodedAsset(f_ParImage, &asset);
+    f_DistanceFont = AllocMemory(OpenEncodedAsset(ASSET_DISTANCE_DIGITS, &asset));
+    ReadEncodedAsset(f_DistanceFont, &asset);
+    g_RingTexels = AllocMemory(RING_TEXTURE_SIZE * RING_TEXTURE_SIZE);
+    BuildRingTexels(g_RingTexels, RING_TEXTURE_SIZE, RING_TEXTURE_SIZE, RING_TEXTURE_OUTER_RADIUS);
+    for (i = 0; i != SHOT_OFFSET_MARKER_COUNT; i++) {
+        f_ShotOffsetMarkerXs[i] = 0;
+        f_ShotOffsetMarkerYs[i] = 0;
+    }
 
-  g_HudScissor.left = HUD_MARGIN;
-  g_HudScissor.top = HUD_MARGIN;
-  g_HudScissor.right = SCREEN_WIDTH - HUD_MARGIN;
-  f_UnusedHudScissorWord = 0;
-  g_HudScissor.bottom = SCREEN_HEIGHT - HUD_MARGIN;
-  g_NoiseTexels = AllocMemory(NOISE_GRID_SIZE * NOISE_GRID_SIZE);
-  g_BlendedTextureScrollingLayer = AllocMemory(
-      OpenEncodedAsset(ASSET_BLENDED_TEXTURE_SCROLLING_LAYER, &asset));
-  ReadEncodedAsset(g_BlendedTextureScrollingLayer, &asset);
-  g_BlendedTextureStillLayer =
-      AllocMemory(OpenEncodedAsset(ASSET_BLENDED_TEXTURE_STILL_LAYER, &asset));
-  ReadEncodedAsset(g_BlendedTextureStillLayer, &asset);
-  for (i = 0; i != MAX_PLAYER_COUNT; i++) {
-    g_PlayerFaceImages[i] = AllocMemory(OpenEncodedAsset(
-        g_CharacterImageAssets[i] + CHARACTER_FACE_IMAGE_OFFSET, &asset));
-    ReadEncodedAsset(g_PlayerFaceImages[i], &asset);
-    OpenAssetFile(g_CharacterPaletteAssets[i], &file);
-    paletteSize = GetAssetFileSize(&file);
-    g_PlayerFacePalettes[i] = AllocMemory(paletteSize);
-    ReadAssetFile(g_PlayerFacePalettes[i], paletteSize, &file);
-  }
+    g_HudScissor.left = HUD_MARGIN;
+    g_HudScissor.top = HUD_MARGIN;
+    g_HudScissor.right = SCREEN_WIDTH - HUD_MARGIN;
+    f_UnusedHudScissorWord = 0;
+    g_HudScissor.bottom = SCREEN_HEIGHT - HUD_MARGIN;
+    g_NoiseTexels = AllocMemory(NOISE_GRID_SIZE * NOISE_GRID_SIZE);
+    g_BlendedTextureScrollingLayer =
+        AllocMemory(OpenEncodedAsset(ASSET_BLENDED_TEXTURE_SCROLLING_LAYER, &asset));
+    ReadEncodedAsset(g_BlendedTextureScrollingLayer, &asset);
+    g_BlendedTextureStillLayer =
+        AllocMemory(OpenEncodedAsset(ASSET_BLENDED_TEXTURE_STILL_LAYER, &asset));
+    ReadEncodedAsset(g_BlendedTextureStillLayer, &asset);
+    for (i = 0; i != MAX_PLAYER_COUNT; i++) {
+        g_PlayerFaceImages[i] = AllocMemory(
+            OpenEncodedAsset(g_CharacterImageAssets[i] + CHARACTER_FACE_IMAGE_OFFSET, &asset)
+        );
+        ReadEncodedAsset(g_PlayerFaceImages[i], &asset);
+        OpenAssetFile(g_CharacterPaletteAssets[i], &file);
+        paletteSize = GetAssetFileSize(&file);
+        g_PlayerFacePalettes[i] = AllocMemory(paletteSize);
+        ReadAssetFile(g_PlayerFacePalettes[i], paletteSize, &file);
+    }
 
-  InitScreenLayers();
-  LoadPinTextures();
-  ClearEffects();
+    InitScreenLayers();
+    LoadPinTextures();
+    ClearEffects();
 }
 
 /* Frees what the round HUD loaded for the round */
 void FreeRoundHudTextures(void) {
-  FreePinTextures();
+    FreePinTextures();
 }
 
 /* The inset view's frame is a 16x3 I4 texture, wrapped along its lines */
@@ -1299,110 +1351,157 @@ void FreeRoundHudTextures(void) {
 
 /* Draws the frame around the inset view */
 void DrawInsetViewFrame(void) {
-  SetUpTextDrawing(&g_DisplayListHead);
-  gDPPipeSync(g_DisplayListHead++);
-  gDPPipeSync(g_DisplayListHead++);
-  gDPSetCycleType(g_DisplayListHead++, G_CYC_1CYCLE);
-  gDPPipeSync(g_DisplayListHead++);
-  gDPPipeSync(g_DisplayListHead++);
-  gDPSetRenderMode(g_DisplayListHead++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
-  gSPTexture(g_DisplayListHead++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0,
-      G_TX_RENDERTILE, G_ON);
-  gDPPipeSync(g_DisplayListHead++);
-  gDPSetAlphaCompare(g_DisplayListHead++, G_AC_NONE);
-  gDPSetBlendColor(g_DisplayListHead++, 0, 0, 0, 1);
-  gDPPipeSync(g_DisplayListHead++);
-  gDPSetTexturePersp(g_DisplayListHead++, G_TP_NONE);
-  gDPPipeSync(g_DisplayListHead++);
-  gDPSetTextureFilter(g_DisplayListHead++, G_TF_POINT);
-  gDPPipeSync(g_DisplayListHead++);
-  gDPSetAlphaDither(g_DisplayListHead++, G_AD_DISABLE);
-  gDPPipeSync(g_DisplayListHead++);
-  gDPSetTextureLUT(g_DisplayListHead++, G_TT_NONE);
-  gDPSetPrimColor(g_DisplayListHead++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
-  gDPSetCombineMode(g_DisplayListHead++, G_CC_MODULATEIDECALA_PRIM,
-      G_CC_MODULATEIDECALA_PRIM);
-  gDPLoadTextureBlock_4b(g_DisplayListHead++,
-      TextureAddress(f_InsetFrameTexture), G_IM_FMT_I,
-      INSET_FRAME_TEXTURE_WIDTH, INSET_FRAME_TEXTURE_HEIGHT, 0,
-      G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMIRROR | G_TX_CLAMP,
-      INSET_FRAME_TEXTURE_MASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-  gDPPipeSync(g_DisplayListHead++);
-  if (g_Cameras[INSET_CAMERA].view.scissorWidth > 0) {
-    gSPTextureRectangle(g_DisplayListHead++,
-        QuarterPixels(g_Cameras[INSET_CAMERA].view.scissorX),
-        QuarterPixels(
-            g_Cameras[INSET_CAMERA].view.scissorY - INSET_FRAME_BORDER_OUTSIDE),
-        QuarterPixels(g_Cameras[INSET_CAMERA].view.scissorX +
-            g_Cameras[INSET_CAMERA].view.scissorWidth),
-        QuarterPixels(
-            g_Cameras[INSET_CAMERA].view.scissorY + INSET_FRAME_BORDER_INSIDE),
-        G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
-    gSPTextureRectangle(g_DisplayListHead++,
-        QuarterPixels(g_Cameras[INSET_CAMERA].view.scissorX),
-        QuarterPixels(g_Cameras[INSET_CAMERA].view.scissorY +
-            g_Cameras[INSET_CAMERA].view.scissorHeight -
-            INSET_FRAME_BORDER_INSIDE),
-        QuarterPixels(g_Cameras[INSET_CAMERA].view.scissorX +
-            g_Cameras[INSET_CAMERA].view.scissorWidth),
-        QuarterPixels(g_Cameras[INSET_CAMERA].view.scissorY +
-            g_Cameras[INSET_CAMERA].view.scissorHeight +
-            INSET_FRAME_BORDER_OUTSIDE),
-        G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
-  }
+    SetUpTextDrawing(&g_DisplayListHead);
+    gDPPipeSync(g_DisplayListHead++);
+    gDPPipeSync(g_DisplayListHead++);
+    gDPSetCycleType(g_DisplayListHead++, G_CYC_1CYCLE);
+    gDPPipeSync(g_DisplayListHead++);
+    gDPPipeSync(g_DisplayListHead++);
+    gDPSetRenderMode(g_DisplayListHead++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
+    gSPTexture(
+        g_DisplayListHead++,
+        TEXTURE_SCALE_HALF,
+        TEXTURE_SCALE_HALF,
+        0,
+        G_TX_RENDERTILE,
+        G_ON
+    );
+    gDPPipeSync(g_DisplayListHead++);
+    gDPSetAlphaCompare(g_DisplayListHead++, G_AC_NONE);
+    gDPSetBlendColor(g_DisplayListHead++, 0, 0, 0, 1);
+    gDPPipeSync(g_DisplayListHead++);
+    gDPSetTexturePersp(g_DisplayListHead++, G_TP_NONE);
+    gDPPipeSync(g_DisplayListHead++);
+    gDPSetTextureFilter(g_DisplayListHead++, G_TF_POINT);
+    gDPPipeSync(g_DisplayListHead++);
+    gDPSetAlphaDither(g_DisplayListHead++, G_AD_DISABLE);
+    gDPPipeSync(g_DisplayListHead++);
+    gDPSetTextureLUT(g_DisplayListHead++, G_TT_NONE);
+    gDPSetPrimColor(g_DisplayListHead++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
+    gDPSetCombineMode(g_DisplayListHead++, G_CC_MODULATEIDECALA_PRIM, G_CC_MODULATEIDECALA_PRIM);
+    gDPLoadTextureBlock_4b(
+        g_DisplayListHead++,
+        TextureAddress(f_InsetFrameTexture),
+        G_IM_FMT_I,
+        INSET_FRAME_TEXTURE_WIDTH,
+        INSET_FRAME_TEXTURE_HEIGHT,
+        0,
+        G_TX_NOMIRROR | G_TX_CLAMP,
+        G_TX_NOMIRROR | G_TX_CLAMP,
+        INSET_FRAME_TEXTURE_MASK,
+        G_TX_NOMASK,
+        G_TX_NOLOD,
+        G_TX_NOLOD
+    );
+    gDPPipeSync(g_DisplayListHead++);
+    if (g_Cameras[INSET_CAMERA].view.scissorWidth > 0) {
+        gSPTextureRectangle(
+            g_DisplayListHead++,
+            QuarterPixels(g_Cameras[INSET_CAMERA].view.scissorX),
+            QuarterPixels(g_Cameras[INSET_CAMERA].view.scissorY - INSET_FRAME_BORDER_OUTSIDE),
+            QuarterPixels(
+                g_Cameras[INSET_CAMERA].view.scissorX + g_Cameras[INSET_CAMERA].view.scissorWidth
+            ),
+            QuarterPixels(g_Cameras[INSET_CAMERA].view.scissorY + INSET_FRAME_BORDER_INSIDE),
+            G_TX_RENDERTILE,
+            0,
+            0,
+            TEXEL_STEP_ONE,
+            TEXEL_STEP_ONE
+        );
+        gSPTextureRectangle(
+            g_DisplayListHead++,
+            QuarterPixels(g_Cameras[INSET_CAMERA].view.scissorX),
+            QuarterPixels(
+                g_Cameras[INSET_CAMERA].view.scissorY + g_Cameras[INSET_CAMERA].view.scissorHeight -
+                INSET_FRAME_BORDER_INSIDE
+            ),
+            QuarterPixels(
+                g_Cameras[INSET_CAMERA].view.scissorX + g_Cameras[INSET_CAMERA].view.scissorWidth
+            ),
+            QuarterPixels(
+                g_Cameras[INSET_CAMERA].view.scissorY + g_Cameras[INSET_CAMERA].view.scissorHeight +
+                INSET_FRAME_BORDER_OUTSIDE
+            ),
+            G_TX_RENDERTILE,
+            0,
+            0,
+            TEXEL_STEP_ONE,
+            TEXEL_STEP_ONE
+        );
+    }
 
-  gDPPipeSync(g_DisplayListHead++);
-  gDPLoadTextureBlock_4b(g_DisplayListHead++,
-      TextureAddress(f_InsetFrameTexture), G_IM_FMT_I,
-      INSET_FRAME_TEXTURE_WIDTH, INSET_FRAME_SIDE_TEXTURE_HEIGHT, 0,
-      G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMASK,
-      INSET_FRAME_TEXTURE_MASK, G_TX_NOLOD, G_TX_NOLOD);
-  gDPPipeSync(g_DisplayListHead++);
-  if (g_Cameras[INSET_CAMERA].view.scissorHeight > 0) {
-    gSPTextureRectangle(g_DisplayListHead++,
-        QuarterPixels(g_Cameras[INSET_CAMERA].view.scissorX -
-            INSET_FRAME_SIDE_HALF_WIDTH),
-        QuarterPixels(g_Cameras[INSET_CAMERA].view.scissorY),
-        QuarterPixels(g_Cameras[INSET_CAMERA].view.scissorX +
-            INSET_FRAME_SIDE_HALF_WIDTH),
-        QuarterPixels(g_Cameras[INSET_CAMERA].view.scissorY +
-            g_Cameras[INSET_CAMERA].view.scissorHeight),
-        G_TX_RENDERTILE, TexelCoordinate(INSET_FRAME_SIDE_TEXEL), 0,
-        TEXEL_STEP_ONE, TEXEL_STEP_ONE);
-    gSPTextureRectangle(g_DisplayListHead++,
-        QuarterPixels(g_Cameras[INSET_CAMERA].view.scissorX +
-            g_Cameras[INSET_CAMERA].view.scissorWidth -
-            INSET_FRAME_SIDE_HALF_WIDTH),
-        QuarterPixels(g_Cameras[INSET_CAMERA].view.scissorY),
-        QuarterPixels(g_Cameras[INSET_CAMERA].view.scissorX +
-            g_Cameras[INSET_CAMERA].view.scissorWidth +
-            INSET_FRAME_SIDE_HALF_WIDTH),
-        QuarterPixels(g_Cameras[INSET_CAMERA].view.scissorY +
-            g_Cameras[INSET_CAMERA].view.scissorHeight),
-        G_TX_RENDERTILE, TexelCoordinate(INSET_FRAME_SIDE_TEXEL), 0,
-        TEXEL_STEP_ONE, TEXEL_STEP_ONE);
-  }
+    gDPPipeSync(g_DisplayListHead++);
+    gDPLoadTextureBlock_4b(
+        g_DisplayListHead++,
+        TextureAddress(f_InsetFrameTexture),
+        G_IM_FMT_I,
+        INSET_FRAME_TEXTURE_WIDTH,
+        INSET_FRAME_SIDE_TEXTURE_HEIGHT,
+        0,
+        G_TX_NOMIRROR | G_TX_CLAMP,
+        G_TX_NOMIRROR | G_TX_CLAMP,
+        G_TX_NOMASK,
+        INSET_FRAME_TEXTURE_MASK,
+        G_TX_NOLOD,
+        G_TX_NOLOD
+    );
+    gDPPipeSync(g_DisplayListHead++);
+    if (g_Cameras[INSET_CAMERA].view.scissorHeight > 0) {
+        gSPTextureRectangle(
+            g_DisplayListHead++,
+            QuarterPixels(g_Cameras[INSET_CAMERA].view.scissorX - INSET_FRAME_SIDE_HALF_WIDTH),
+            QuarterPixels(g_Cameras[INSET_CAMERA].view.scissorY),
+            QuarterPixels(g_Cameras[INSET_CAMERA].view.scissorX + INSET_FRAME_SIDE_HALF_WIDTH),
+            QuarterPixels(
+                g_Cameras[INSET_CAMERA].view.scissorY + g_Cameras[INSET_CAMERA].view.scissorHeight
+            ),
+            G_TX_RENDERTILE,
+            TexelCoordinate(INSET_FRAME_SIDE_TEXEL),
+            0,
+            TEXEL_STEP_ONE,
+            TEXEL_STEP_ONE
+        );
+        gSPTextureRectangle(
+            g_DisplayListHead++,
+            QuarterPixels(
+                g_Cameras[INSET_CAMERA].view.scissorX + g_Cameras[INSET_CAMERA].view.scissorWidth -
+                INSET_FRAME_SIDE_HALF_WIDTH
+            ),
+            QuarterPixels(g_Cameras[INSET_CAMERA].view.scissorY),
+            QuarterPixels(
+                g_Cameras[INSET_CAMERA].view.scissorX + g_Cameras[INSET_CAMERA].view.scissorWidth +
+                INSET_FRAME_SIDE_HALF_WIDTH
+            ),
+            QuarterPixels(
+                g_Cameras[INSET_CAMERA].view.scissorY + g_Cameras[INSET_CAMERA].view.scissorHeight
+            ),
+            G_TX_RENDERTILE,
+            TexelCoordinate(INSET_FRAME_SIDE_TEXEL),
+            0,
+            TEXEL_STEP_ONE,
+            TEXEL_STEP_ONE
+        );
+    }
 
-  gDPPipeSync(g_DisplayListHead++);
+    gDPPipeSync(g_DisplayListHead++);
 }
 
 /* Scrolls the wind arrow's texture along it, faster in stronger wind */
 void ScrollWindArrow(void) {
-  s32 step =
-      g_HoleSetup.conditions.windSpeed / WIND_SPEED_PER_ARROW_SCROLL_STEP;
-  s32 i;
+    s32 step = g_HoleSetup.conditions.windSpeed / WIND_SPEED_PER_ARROW_SCROLL_STEP;
+    s32 i;
 
-  for (i = 0; i != ARROW_VERTEX_COUNT; i++) {
-    f_Arrows[g_MatrixBufferIndex].body[i].v.tc[TEXTURE_AXIS_T] += step;
-  }
-
-  if (f_Arrows[g_MatrixBufferIndex].body[0].v.tc[TEXTURE_AXIS_T] >
-      ARROW_TEXTURE_COORDINATE_LIMIT) {
     for (i = 0; i != ARROW_VERTEX_COUNT; i++) {
-      f_Arrows[g_MatrixBufferIndex].body[i].v.tc[TEXTURE_AXIS_T] -=
-          ARROW_TEXTURE_PERIOD;
+        f_Arrows[g_MatrixBufferIndex].body[i].v.tc[TEXTURE_AXIS_T] += step;
     }
-  }
+
+    if (f_Arrows[g_MatrixBufferIndex].body[0].v.tc[TEXTURE_AXIS_T] >
+        ARROW_TEXTURE_COORDINATE_LIMIT) {
+        for (i = 0; i != ARROW_VERTEX_COUNT; i++) {
+            f_Arrows[g_MatrixBufferIndex].body[i].v.tc[TEXTURE_AXIS_T] -= ARROW_TEXTURE_PERIOD;
+        }
+    }
 }
 
 /*
@@ -1411,52 +1510,60 @@ void ScrollWindArrow(void) {
  * in place of a reaction; elsewhere the inset view shows the ball.
  */
 void StartLandingReaction(s32 reaction) {
-  s32 previousReaction;
+    s32 previousReaction;
 
-  f_LandingReactionFrame = 0;
-  if (reaction == LANDING_REACTION_NONE) {
+    f_LandingReactionFrame = 0;
+    if (reaction == LANDING_REACTION_NONE) {
+        f_LandingReaction = reaction;
+        PlaceGlyphGroup(LANDING_GLYPH_GROUP_FIRST, NO_FONT_SIZE, 0, 0, 0, NULL);
+        PlaceGlyphGroup(LANDING_GLYPH_GROUP_SECOND, NO_FONT_SIZE, 0, 0, 0, NULL);
+        StartMovie(MOVIE_NONE);
+        return;
+    }
+
+    previousReaction = f_LandingReaction;
+    if (previousReaction != LANDING_REACTION_NONE) {
+        return;
+    }
+
     f_LandingReaction = reaction;
-    PlaceGlyphGroup(LANDING_GLYPH_GROUP_FIRST, NO_FONT_SIZE, 0, 0, 0, NULL);
-    PlaceGlyphGroup(LANDING_GLYPH_GROUP_SECOND, NO_FONT_SIZE, 0, 0, 0, NULL);
-    StartMovie(MOVIE_NONE);
-    return;
-  }
-
-  previousReaction = f_LandingReaction;
-  if (previousReaction != LANDING_REACTION_NONE) {
-    return;
-  }
-
-  f_LandingReaction = reaction;
-  switch ((u32)GetSurfaceInfo(g_TurnBallSimulation.surface)->kind) {
-    case SURFACE_KIND_OUT_OF_BOUNDS:
-      g_InsetView.animation = INSET_VIEW_OPENING;
-      g_InsetView.ignoredSourceCode = LANDING_INSET_SOURCE_CODE;
-      f_LandingReaction = previousReaction;
-      g_InsetView.ignoredSizeCode = MOVIE_INSET_SIZE_CODE;
-      SetInsetViewRect(MOVIE_INSET_CENTER_X, MOVIE_INSET_CENTER_Y,
-          MOVIE_INSET_SIZE, MOVIE_INSET_SIZE);
-      SetLandingWaitFrameCount(LANDING_WAIT_LONG_FRAME_COUNT);
-      StartMovie(MOVIE_TOAD_OUT_OF_BOUNDS);
-      osSyncPrintf("MOVIE KINOP \n");
-      break;
-    case SURFACE_KIND_OUT_OF_COURSE:
-    case SURFACE_KIND_WATER_HAZARD:
-      f_LandingReaction = LANDING_REACTION_SURFACE_ONLY;
-      SetLandingWaitFrameCount(LANDING_WAIT_LONG_FRAME_COUNT);
-      break;
-    case SURFACE_KIND_GREEN:
-      SetLandingWaitFrameCount(LANDING_WAIT_FRAME_COUNT);
-      break;
-    default:
-      g_InsetView.animation = INSET_VIEW_OPENING;
-      g_InsetView.ignoredSourceCode = LANDING_INSET_SOURCE_CODE;
-      g_InsetView.ignoredSizeCode = LANDING_INSET_SIZE_CODE;
-      SetLandingWaitFrameCount(LANDING_WAIT_FRAME_COUNT);
-      SetInsetViewRect(LANDING_INSET_CENTER_X, LANDING_INSET_CENTER_Y,
-          LANDING_INSET_WIDTH, LANDING_INSET_HEIGHT);
-      break;
-  }
+    switch ((u32)GetSurfaceInfo(g_TurnBallSimulation.surface)->kind) {
+        case SURFACE_KIND_OUT_OF_BOUNDS:
+            g_InsetView.animation = INSET_VIEW_OPENING;
+            g_InsetView.ignoredSourceCode = LANDING_INSET_SOURCE_CODE;
+            f_LandingReaction = previousReaction;
+            g_InsetView.ignoredSizeCode = MOVIE_INSET_SIZE_CODE;
+            SetInsetViewRect(
+                MOVIE_INSET_CENTER_X,
+                MOVIE_INSET_CENTER_Y,
+                MOVIE_INSET_SIZE,
+                MOVIE_INSET_SIZE
+            );
+            SetLandingWaitFrameCount(LANDING_WAIT_LONG_FRAME_COUNT);
+            StartMovie(MOVIE_TOAD_OUT_OF_BOUNDS);
+            osSyncPrintf("MOVIE KINOP \n");
+            break;
+        case SURFACE_KIND_OUT_OF_COURSE:
+        case SURFACE_KIND_WATER_HAZARD:
+            f_LandingReaction = LANDING_REACTION_SURFACE_ONLY;
+            SetLandingWaitFrameCount(LANDING_WAIT_LONG_FRAME_COUNT);
+            break;
+        case SURFACE_KIND_GREEN:
+            SetLandingWaitFrameCount(LANDING_WAIT_FRAME_COUNT);
+            break;
+        default:
+            g_InsetView.animation = INSET_VIEW_OPENING;
+            g_InsetView.ignoredSourceCode = LANDING_INSET_SOURCE_CODE;
+            g_InsetView.ignoredSizeCode = LANDING_INSET_SIZE_CODE;
+            SetLandingWaitFrameCount(LANDING_WAIT_FRAME_COUNT);
+            SetInsetViewRect(
+                LANDING_INSET_CENTER_X,
+                LANDING_INSET_CENTER_Y,
+                LANDING_INSET_WIDTH,
+                LANDING_INSET_HEIGHT
+            );
+            break;
+    }
 }
 
 /*
@@ -1466,127 +1573,150 @@ void StartLandingReaction(s32 reaction) {
  * is drawn as glyph groups in its perspective; after that the text is drawn
  * flat.
  */
-void DrawLandingReaction(Gfx** displayListHead) {
-  Gfx* gfx = *displayListHead;
-  Vec3 scale;
-  Vec3 translation;
-  Vec3 rotation;
-  Mat4 matrix;
-  Mat4 offset;
-  SurfaceInfo* surface;
-  s32 distance;
+void DrawLandingReaction(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
+    Vec3 scale;
+    Vec3 translation;
+    Vec3 rotation;
+    Mat4 matrix;
+    Mat4 offset;
+    SurfaceInfo *surface;
+    s32 distance;
 
-  Radians angle;
-  f32 size;
+    Radians angle;
+    f32 size;
 
-  if (f_LandingReaction != LANDING_REACTION_NONE) {
-    surface = GetSurfaceInfo(g_TurnBallSimulation.surface);
-    if (f_LandingReactionFrame == 1) {
-      PlaceGlyphGroup(LANDING_GLYPH_GROUP_FIRST, FONT_SIZE_LARGE, 0, 0,
-          LANDING_NAME_GLYPH_Y, surface->name);
+    if (f_LandingReaction != LANDING_REACTION_NONE) {
+        surface = GetSurfaceInfo(g_TurnBallSimulation.surface);
+        if (f_LandingReactionFrame == 1) {
+            PlaceGlyphGroup(
+                LANDING_GLYPH_GROUP_FIRST,
+                FONT_SIZE_LARGE,
+                0,
+                0,
+                LANDING_NAME_GLYPH_Y,
+                surface->name
+            );
+        }
+
+        if (f_LandingReaction == LANDING_REACTION_REST && !IsOnDrivingRange()) {
+            distance = GetCupDistance(
+                g_TurnBallSimulation.position[AXIS_X] - g_HoleSetup.cupPosition[AXIS_X],
+                g_TurnBallSimulation.position[AXIS_Z] - g_HoleSetup.cupPosition[AXIS_Z]
+            );
+            /* Mini golf and the green measure in feet */
+            if (g_GameState.isMiniGolf || surface->kind == SURFACE_KIND_GREEN) {
+                /*
+                 * One per branch, so each is allocated within its block, to match: one
+                 * declared at the top gives 22 words differing, none in shape
+                 */
+                s32 hundredths = distance * (FEET_PER_YARD * HUNDREDTHS_PER_UNIT) * YARDS_PER_UNIT;
+
+                sprintf(
+                    g_PrintBuffer,
+                    "%2d.%02d%c REST",
+                    hundredths / HUNDREDTHS_PER_UNIT,
+                    hundredths % HUNDREDTHS_PER_UNIT,
+                    FEET_GLYPH
+                );
+            }
+            else {
+                s32 hundredths = distance * HUNDREDTHS_PER_UNIT * YARDS_PER_UNIT;
+
+                sprintf(
+                    g_PrintBuffer,
+                    "%3d.%02d%c REST",
+                    hundredths / HUNDREDTHS_PER_UNIT,
+                    hundredths % HUNDREDTHS_PER_UNIT,
+                    YARDS_GLYPH
+                );
+            }
+
+            if (f_LandingReactionFrame == 1) {
+                PlaceGlyphGroup(
+                    LANDING_GLYPH_GROUP_SECOND,
+                    FONT_SIZE_MEDIUM,
+                    0,
+                    0,
+                    LANDING_DISTANCE_GLYPH_Y,
+                    g_PrintBuffer
+                );
+            }
+        }
+
+        if (f_LandingReactionFrame < LANDING_REACTION_FRAME_COUNT) {
+            f_LandingReactionFrame++;
+        }
+
+        gDPPipeSync(gfx++);
+        gDPPipeSync(gfx++);
+        gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+        gSPClearGeometryMode(gfx++, ALL_GEOMETRY_MODES);
+        gSPSetGeometryMode(gfx++, G_SHADE | G_SHADING_SMOOTH);
+        gDPPipeSync(gfx++);
+        gDPSetTexturePersp(gfx++, G_TP_PERSP);
+        gDPPipeSync(gfx++);
+        gDPSetRenderMode(gfx++, G_RM_AA_XLU_SURF, G_RM_AA_XLU_SURF2);
+        gDPSetCombineMode(gfx++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
+        gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, LANDING_PANEL_ALPHA);
+        gDPPipeSync(gfx++);
+        angle = DegreesToRadians(
+            (f_LandingReactionFrame * LANDING_PANEL_DEGREES_PER_FRAME) + LANDING_PANEL_START_DEGREES
+        );
+        if (angle > FULL_TURN_RADIANS) {
+            angle = FULL_TURN_RADIANS;
+        }
+
+        size = f_LandingReactionFrame * LANDING_PANEL_GROWTH_PER_FRAME;
+        if (size > 1.0f) {
+            size = 1.0f;
+        }
+
+        rotation[AXIS_X] = 0.0f;
+        rotation[AXIS_Y] = 0.0f;
+        scale[AXIS_X] = size;
+        scale[AXIS_Y] = size;
+        scale[AXIS_Z] = size;
+        rotation[AXIS_Z] = -angle;
+        translation[AXIS_X] = LANDING_PANEL_X;
+        translation[AXIS_Y] = LANDING_PANEL_Y;
+        translation[AXIS_Z] = LANDING_PANEL_Z;
+        BuildTransformMatrix(matrix, rotation, translation, scale);
+
+        /* Spins the panel around a point away from its center */
+        guTranslateF(offset, LANDING_PANEL_PIVOT_X, LANDING_PANEL_PIVOT_Y, 0.0f);
+        guMtxCatF(offset, matrix, matrix);
+        ConvertMatrixToFixed(matrix, &f_LandingPanelMatrices[g_MatrixBufferIndex]);
+        gSPMatrix(
+            gfx++,
+            PhysicalAddress(&g_ScreenOrthoMatrix),
+            G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION
+        );
+        gSPMatrix(
+            gfx++,
+            PhysicalAddress(&f_LandingPanelMatrices[g_MatrixBufferIndex]),
+            G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW
+        );
+        gSPVertex(gfx++, f_LandingPanelVertices, ARRAY_COUNT(f_LandingPanelVertices), 0);
+        gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
+        if (f_LandingReactionFrame < LANDING_PANEL_GROWTH_FRAME_COUNT) {
+            SetUpPerspectiveTextDrawing(&gfx);
+            DrawGlyphGroup(&gfx, LANDING_GLYPH_GROUP_FIRST);
+            if (f_LandingReaction == LANDING_REACTION_REST) {
+                DrawGlyphGroup(&gfx, LANDING_GLYPH_GROUP_SECOND);
+            }
+        }
+        else {
+            SetUpTextDrawing(&gfx);
+            gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
+            DrawCenteredLargeText(&gfx, SCREEN_WIDTH / 2, LANDING_NAME_Y, surface->name);
+            if (f_LandingReaction == LANDING_REACTION_REST && !IsOnDrivingRange()) {
+                DrawCenteredMediumText(&gfx, SCREEN_WIDTH / 2, LANDING_DISTANCE_Y, g_PrintBuffer);
+            }
+        }
     }
 
-    if (f_LandingReaction == LANDING_REACTION_REST && !IsOnDrivingRange()) {
-      distance = GetCupDistance(g_TurnBallSimulation.position[AXIS_X] -
-              g_HoleSetup.cupPosition[AXIS_X],
-          g_TurnBallSimulation.position[AXIS_Z] -
-              g_HoleSetup.cupPosition[AXIS_Z]);
-      /* Mini golf and the green measure in feet */
-      if (g_GameState.isMiniGolf || surface->kind == SURFACE_KIND_GREEN) {
-        /*
-         * One per branch, so each is allocated within its block, to match: one
-         * declared at the top gives 22 words differing, none in shape
-         */
-        s32 hundredths =
-            distance * (FEET_PER_YARD * HUNDREDTHS_PER_UNIT) * YARDS_PER_UNIT;
-
-        sprintf(g_PrintBuffer, "%2d.%02d%c REST",
-            hundredths / HUNDREDTHS_PER_UNIT, hundredths % HUNDREDTHS_PER_UNIT,
-            FEET_GLYPH);
-      } else {
-        s32 hundredths = distance * HUNDREDTHS_PER_UNIT * YARDS_PER_UNIT;
-
-        sprintf(g_PrintBuffer, "%3d.%02d%c REST",
-            hundredths / HUNDREDTHS_PER_UNIT, hundredths % HUNDREDTHS_PER_UNIT,
-            YARDS_GLYPH);
-      }
-
-      if (f_LandingReactionFrame == 1) {
-        PlaceGlyphGroup(LANDING_GLYPH_GROUP_SECOND, FONT_SIZE_MEDIUM, 0, 0,
-            LANDING_DISTANCE_GLYPH_Y, g_PrintBuffer);
-      }
-    }
-
-    if (f_LandingReactionFrame < LANDING_REACTION_FRAME_COUNT) {
-      f_LandingReactionFrame++;
-    }
-
-    gDPPipeSync(gfx++);
-    gDPPipeSync(gfx++);
-    gDPSetCycleType(gfx++, G_CYC_1CYCLE);
-    gSPClearGeometryMode(gfx++, ALL_GEOMETRY_MODES);
-    gSPSetGeometryMode(gfx++, G_SHADE | G_SHADING_SMOOTH);
-    gDPPipeSync(gfx++);
-    gDPSetTexturePersp(gfx++, G_TP_PERSP);
-    gDPPipeSync(gfx++);
-    gDPSetRenderMode(gfx++, G_RM_AA_XLU_SURF, G_RM_AA_XLU_SURF2);
-    gDPSetCombineMode(gfx++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
-    gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, LANDING_PANEL_ALPHA);
-    gDPPipeSync(gfx++);
-    angle = DegreesToRadians(
-        (f_LandingReactionFrame * LANDING_PANEL_DEGREES_PER_FRAME) +
-        LANDING_PANEL_START_DEGREES);
-    if (angle > FULL_TURN_RADIANS) {
-      angle = FULL_TURN_RADIANS;
-    }
-
-    size = f_LandingReactionFrame * LANDING_PANEL_GROWTH_PER_FRAME;
-    if (size > 1.0f) {
-      size = 1.0f;
-    }
-
-    rotation[AXIS_X] = 0.0f;
-    rotation[AXIS_Y] = 0.0f;
-    scale[AXIS_X] = size;
-    scale[AXIS_Y] = size;
-    scale[AXIS_Z] = size;
-    rotation[AXIS_Z] = -angle;
-    translation[AXIS_X] = LANDING_PANEL_X;
-    translation[AXIS_Y] = LANDING_PANEL_Y;
-    translation[AXIS_Z] = LANDING_PANEL_Z;
-    BuildTransformMatrix(matrix, rotation, translation, scale);
-
-    /* Spins the panel around a point away from its center */
-    guTranslateF(offset, LANDING_PANEL_PIVOT_X, LANDING_PANEL_PIVOT_Y, 0.0f);
-    guMtxCatF(offset, matrix, matrix);
-    ConvertMatrixToFixed(matrix, &f_LandingPanelMatrices[g_MatrixBufferIndex]);
-    gSPMatrix(gfx++, PhysicalAddress(&g_ScreenOrthoMatrix),
-        G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
-    gSPMatrix(gfx++,
-        PhysicalAddress(&f_LandingPanelMatrices[g_MatrixBufferIndex]),
-        G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-    gSPVertex(
-        gfx++, f_LandingPanelVertices, ARRAY_COUNT(f_LandingPanelVertices), 0);
-    gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
-    if (f_LandingReactionFrame < LANDING_PANEL_GROWTH_FRAME_COUNT) {
-      SetUpPerspectiveTextDrawing(&gfx);
-      DrawGlyphGroup(&gfx, LANDING_GLYPH_GROUP_FIRST);
-      if (f_LandingReaction == LANDING_REACTION_REST) {
-        DrawGlyphGroup(&gfx, LANDING_GLYPH_GROUP_SECOND);
-      }
-    } else {
-      SetUpTextDrawing(&gfx);
-      gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
-      DrawCenteredLargeText(
-          &gfx, SCREEN_WIDTH / 2, LANDING_NAME_Y, surface->name);
-      if (f_LandingReaction == LANDING_REACTION_REST && !IsOnDrivingRange()) {
-        DrawCenteredMediumText(
-            &gfx, SCREEN_WIDTH / 2, LANDING_DISTANCE_Y, g_PrintBuffer);
-      }
-    }
-  }
-
-  *displayListHead = gfx;
+    *displayListHead = gfx;
 }
 
 /*
@@ -1594,25 +1724,27 @@ void DrawLandingReaction(Gfx** displayListHead) {
  * negative one, as an RGBA color with the given alpha. Nothing calls it.
  */
 u32 GetWarmthTint(s32 warmth, s32 alpha) {
-  s32 red;
-  s32 green;
-  s32 blue;
+    s32 red;
+    s32 green;
+    s32 blue;
 
-  blue = COLOR_CHANNEL_MAX;
-  if (warmth == 0) {
-    green = COLOR_CHANNEL_MAX;
-    red = COLOR_CHANNEL_MAX;
-  } else if (warmth > 0) {
-    red = COLOR_CHANNEL_MAX;
-    blue = warmth;
-    blue = red - blue;
-    green = blue;
-  } else {
-    green = warmth + COLOR_CHANNEL_MAX;
-    red = green;
-  }
+    blue = COLOR_CHANNEL_MAX;
+    if (warmth == 0) {
+        green = COLOR_CHANNEL_MAX;
+        red = COLOR_CHANNEL_MAX;
+    }
+    else if (warmth > 0) {
+        red = COLOR_CHANNEL_MAX;
+        blue = warmth;
+        blue = red - blue;
+        green = blue;
+    }
+    else {
+        green = warmth + COLOR_CHANNEL_MAX;
+        red = green;
+    }
 
-  return RgbaColor(red, green, blue, alpha & 0xFF);
+    return RgbaColor(red, green, blue, alpha & 0xFF);
 }
 
 /* For the longest putt */
@@ -1649,10 +1781,10 @@ u32 GetWarmthTint(s32 warmth, s32 alpha) {
 #define GREEN_GRID_FADING 2
 
 typedef struct GridScreenPoint {
-  /* 0x00 */ s32 x; /* In quarter pixels */
-  /* 0x04 */ s32 y;
-  /* 0x08 */ Boolean isVisible;
-  /* 0x0C */ s32 depth;
+    /* 0x00 */ s32 x; /* In quarter pixels */
+    /* 0x04 */ s32 y;
+    /* 0x08 */ Boolean isVisible;
+    /* 0x0C */ s32 depth;
 } GridScreenPoint; /* size = 0x10 */
 
 #ifdef NON_MATCHING
@@ -1661,36 +1793,41 @@ typedef struct GridScreenPoint {
  * lines warm towards red where the ground rises and cool towards blue where
  * it falls; black lines turn red or blue.
  */
-#define SetGreenGridTint(slope) \
-  if (g_Players[g_CurrentShot.playerIndex].gridColor == GRID_COLOR_WHITE) { \
-    blue = COLOR_CHANNEL_MAX; \
-    if ((slope) == 0) { \
-      green = COLOR_CHANNEL_MAX; \
-      red = COLOR_CHANNEL_MAX; \
-    } else if ((slope) > 0) { \
-      red = COLOR_CHANNEL_MAX; \
-      blue = (slope); \
-      blue = red - blue; \
-      green = blue; \
-    } else { \
-      green = (slope) + COLOR_CHANNEL_MAX; \
-      red = green; \
-    } \
-  } else { \
-    blue = 0; \
-    if ((slope) == 0) { \
-      green = 0; \
-      red = 0; \
-    } else if ((slope) > 0) { \
-      red = (slope); \
-      blue = 0; \
-      green = 0; \
-    } else { \
-      blue = -(slope); \
-      green = 0; \
-      red = 0; \
-    } \
-  }
+#    define SetGreenGridTint(slope) \
+        if (g_Players[g_CurrentShot.playerIndex].gridColor == GRID_COLOR_WHITE) { \
+            blue = COLOR_CHANNEL_MAX; \
+            if ((slope) == 0) { \
+                green = COLOR_CHANNEL_MAX; \
+                red = COLOR_CHANNEL_MAX; \
+            } \
+            else if ((slope) > 0) { \
+                red = COLOR_CHANNEL_MAX; \
+                blue = (slope); \
+                blue = red - blue; \
+                green = blue; \
+            } \
+            else { \
+                green = (slope) + COLOR_CHANNEL_MAX; \
+                red = green; \
+            } \
+        } \
+        else { \
+            blue = 0; \
+            if ((slope) == 0) { \
+                green = 0; \
+                red = 0; \
+            } \
+            else if ((slope) > 0) { \
+                red = (slope); \
+                blue = 0; \
+                green = 0; \
+            } \
+            else { \
+                blue = -(slope); \
+                green = 0; \
+                red = 0; \
+            } \
+        }
 
 /*
  * Doesn't match: the club and the shot's distance take each other's saved
@@ -1762,429 +1899,519 @@ typedef struct GridScreenPoint {
  * rises from 204 words, forcing 29 pseudos, to 207, forcing 25; read just
  * before the yaw, it changes nothing.
  */
-void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
-  f32 points[GREEN_GRID_POINT_COUNT][3];
-  GridScreenPoint screenPoints[GREEN_GRID_POINT_COUNT];
-  s32 slopes[GREEN_GRID_POINT_COUNT];
-  /* Pads the frame to match; without it 496 words differ, against 300 */
-  s32 unused[GREEN_GRID_POINT_COUNT * 3] UNUSED;
-  CoursePoint center;
-  ScreenPoint projected;
-  Gfx* gfx = *displayListHead;
-  Club* club;
-  s32 distance;
-  s32 worldDistance;
-  s32 rowCount;
-  s32 columnCount = GREEN_GRID_COLUMN_COUNT;
-  s32 maxPuttDistance;
-  s32 row;
-  s32 acrossRow;
-  s32 column;
-  /*
-   * The column in both the quads across the aim and the lines along it, to
-   * match: a column variable of the lines' own gives 310 words differing
-   * against 300, 44 in shape both
-   */
-  s32 drawnColumn;
-  s32 rowStart;
-  s32 acrossRowStart;
-  s32 acrossPoint;
-  s32 alongPoint;
-  s32 rowPosition;
-  Boolean isUnscrolledRow;
-  s32 neighbor;
-  s32 red;
-  s32 green;
-  s32 blue;
-  Radians yaw;
-  Radians sideAngle;
-  f32 rowShift;
-  f32 columnSpacing;
-  f32 rowSpacing;
-  f32 forwardX;
-  f32 forwardZ;
-  f32 sideX;
-  f32 sideZ;
-  f32 shift;
-  f32 centering;
-  f32 originX;
-  f32 originZ;
-  f32 stepZ;
-  f32 scrollX;
-  f32 scrollZ;
-  f32 height;
-  f32 dx;
-  f32 dy;
-  f32 scale;
+void DrawGreenGrid(Gfx **displayListHead, CameraMatrices *matrices) {
+    f32 points[GREEN_GRID_POINT_COUNT][3];
+    GridScreenPoint screenPoints[GREEN_GRID_POINT_COUNT];
+    s32 slopes[GREEN_GRID_POINT_COUNT];
+    /* Pads the frame to match; without it 496 words differ, against 300 */
+    s32 unused[GREEN_GRID_POINT_COUNT * 3] UNUSED;
+    CoursePoint center;
+    ScreenPoint projected;
+    Gfx *gfx = *displayListHead;
+    Club *club;
+    s32 distance;
+    s32 worldDistance;
+    s32 rowCount;
+    s32 columnCount = GREEN_GRID_COLUMN_COUNT;
+    s32 maxPuttDistance;
+    s32 row;
+    s32 acrossRow;
+    s32 column;
+    /*
+     * The column in both the quads across the aim and the lines along it, to
+     * match: a column variable of the lines' own gives 310 words differing
+     * against 300, 44 in shape both
+     */
+    s32 drawnColumn;
+    s32 rowStart;
+    s32 acrossRowStart;
+    s32 acrossPoint;
+    s32 alongPoint;
+    s32 rowPosition;
+    Boolean isUnscrolledRow;
+    s32 neighbor;
+    s32 red;
+    s32 green;
+    s32 blue;
+    Radians yaw;
+    Radians sideAngle;
+    f32 rowShift;
+    f32 columnSpacing;
+    f32 rowSpacing;
+    f32 forwardX;
+    f32 forwardZ;
+    f32 sideX;
+    f32 sideZ;
+    f32 shift;
+    f32 centering;
+    f32 originX;
+    f32 originZ;
+    f32 stepZ;
+    f32 scrollX;
+    f32 scrollZ;
+    f32 height;
+    f32 dx;
+    f32 dy;
+    f32 scale;
 
-  if (g_RoundHud.greenGridState == GREEN_GRID_HIDDEN ||
-      g_IsCupViewShown == TRUE || IsGameFlagSet(GAME_FLAG_HIDE_GREEN_GRID) ||
-      !IsTurnTakingStep(g_GameState.step)) {
-    return;
-  }
-
-  club = GetSelectedClub();
-  yaw = (u16)g_CurrentShot.heading * BINARY_ANGLE_TO_RADIANS;
-  distance = GetSelectedShotDistance();
-  worldDistance = GetSelectedShotWorldDistance();
-  if (club->surfaceMask & CLUB_SURFACE_GREEN) {
-    maxPuttDistance = GREEN_GRID_MAX_PUTT_DISTANCE;
-    if (distance == maxPuttDistance) {
-      rowShift = GREEN_GRID_PUTT_ROW_SHIFT;
-      columnSpacing = GREEN_GRID_PUTT_COLUMN_SPACING;
-      rowSpacing = GREEN_GRID_SHORT_ROW_SPACING;
-      rowCount = GREEN_GRID_SHORT_ROW_COUNT;
-      center[AXIS_X] = g_CurrentShot.ballPosition[AXIS_X];
-      center[AXIS_Y] = g_CurrentShot.ballPosition[AXIS_Y];
-      center[AXIS_Z] = g_CurrentShot.ballPosition[AXIS_Z];
-    } else {
-      rowShift = GREEN_GRID_PUTT_ROW_SHIFT;
-      columnSpacing = GREEN_GRID_PUTT_COLUMN_SPACING;
-      rowCount = GREEN_GRID_MAX_ROW_COUNT;
-      center[AXIS_X] = g_CurrentShot.ballPosition[AXIS_X];
-      center[AXIS_Y] = g_CurrentShot.ballPosition[AXIS_Y];
-      center[AXIS_Z] = g_CurrentShot.ballPosition[AXIS_Z];
-      rowSpacing = distance * GREEN_GRID_PUTT_ROW_SPACING / maxPuttDistance;
+    if (g_RoundHud.greenGridState == GREEN_GRID_HIDDEN ||
+        g_IsCupViewShown == TRUE ||
+        IsGameFlagSet(GAME_FLAG_HIDE_GREEN_GRID) ||
+        !IsTurnTakingStep(g_GameState.step)) {
+        return;
     }
-  } else if (distance < GREEN_GRID_LANDING_DISTANCE) {
-    rowShift = GREEN_GRID_PUTT_ROW_SHIFT;
-    columnSpacing = GREEN_GRID_PUTT_COLUMN_SPACING;
-    rowCount = GREEN_GRID_MAX_ROW_COUNT;
-    center[AXIS_X] = g_CurrentShot.ballPosition[AXIS_X];
-    center[AXIS_Y] = g_CurrentShot.ballPosition[AXIS_Y];
-    center[AXIS_Z] = g_CurrentShot.ballPosition[AXIS_Z];
-    rowSpacing =
-        distance * GREEN_GRID_ROW_SPACING / GREEN_GRID_MAX_PUTT_DISTANCE;
-  } else {
-    center[AXIS_X] =
-        (cosf(yaw) * worldDistance) + g_CurrentShot.ballPosition[AXIS_X];
-    rowShift = GREEN_GRID_LANDING_ROW_SHIFT;
-    rowSpacing = GREEN_GRID_LANDING_ROW_SPACING;
-    center[AXIS_Z] =
-        (sinf(yaw) * worldDistance) + g_CurrentShot.ballPosition[AXIS_Z];
-    g_UnreadGroundQueryMarker = 1;
-    center[AXIS_Y] = GetGroundHeight(center[AXIS_X], center[AXIS_Z]);
-    rowCount = GREEN_GRID_LANDING_ROW_COUNT;
-    columnSpacing = GREEN_GRID_LANDING_WIDTH / columnCount;
-  }
 
-  forwardX = -cosf(yaw);
-  forwardZ = -sinf(yaw);
-  sideAngle = yaw + (M_PI / 2);
-  sideX = -cosf(sideAngle) * columnSpacing;
-  sideZ = -sinf(sideAngle) * columnSpacing;
-  shift = (rowShift - rowCount) * rowSpacing;
-  centering = 0.5f - (columnCount * 0.5f);
-  originX = (shift * forwardX) + (sideX * centering);
-  originZ = (shift * forwardZ) + (sideZ * centering);
-  /*
-   * forwardX holds the row step's x from here, to match: a stepX variable gives
-   * 342 words differing (48 in shape) against the draft's 300 (44)
-   */
-  forwardX = -cosf(yaw) * rowSpacing;
-  stepZ = -sinf(yaw) * rowSpacing;
-  if (g_RoundHud.greenGridState == GREEN_GRID_SHOWN) {
-    f_GreenGridScroll -= GREEN_GRID_SCROLL_STEP;
-    if (rowCount != GREEN_GRID_MAX_ROW_COUNT) {
-      if (f_GreenGridScroll < 0.0f) {
-        f_GreenGridScroll += 1.0f;
-      }
-    } else if (f_GreenGridScroll < -1.0f) {
-      f_GreenGridScroll += 2.0f;
+    club = GetSelectedClub();
+    yaw = (u16)g_CurrentShot.heading * BINARY_ANGLE_TO_RADIANS;
+    distance = GetSelectedShotDistance();
+    worldDistance = GetSelectedShotWorldDistance();
+    if (club->surfaceMask & CLUB_SURFACE_GREEN) {
+        maxPuttDistance = GREEN_GRID_MAX_PUTT_DISTANCE;
+        if (distance == maxPuttDistance) {
+            rowShift = GREEN_GRID_PUTT_ROW_SHIFT;
+            columnSpacing = GREEN_GRID_PUTT_COLUMN_SPACING;
+            rowSpacing = GREEN_GRID_SHORT_ROW_SPACING;
+            rowCount = GREEN_GRID_SHORT_ROW_COUNT;
+            center[AXIS_X] = g_CurrentShot.ballPosition[AXIS_X];
+            center[AXIS_Y] = g_CurrentShot.ballPosition[AXIS_Y];
+            center[AXIS_Z] = g_CurrentShot.ballPosition[AXIS_Z];
+        }
+        else {
+            rowShift = GREEN_GRID_PUTT_ROW_SHIFT;
+            columnSpacing = GREEN_GRID_PUTT_COLUMN_SPACING;
+            rowCount = GREEN_GRID_MAX_ROW_COUNT;
+            center[AXIS_X] = g_CurrentShot.ballPosition[AXIS_X];
+            center[AXIS_Y] = g_CurrentShot.ballPosition[AXIS_Y];
+            center[AXIS_Z] = g_CurrentShot.ballPosition[AXIS_Z];
+            rowSpacing = distance * GREEN_GRID_PUTT_ROW_SPACING / maxPuttDistance;
+        }
     }
-  }
-
-  scrollX = forwardX * f_GreenGridScroll;
-  scrollZ = stepZ * f_GreenGridScroll;
-
-  for (row = 0, rowStart = 0; row != rowCount;) {
-    for (column = 0; column != columnCount; column++) {
-      isUnscrolledRow = row == rowCount - 1 || row == 0;
-      rowPosition = row;
-      if (row != 0) {
-        rowPosition = row - 1;
-      }
-
-      if (isUnscrolledRow || (f_GreenGridScroll < 0.0f && row == 1)) {
-        points[rowStart + column][AXIS_X] = center[AXIS_X] + originX +
-            (forwardX * rowPosition) + (sideX * column);
-        points[rowStart + column][AXIS_Z] =
-            center[AXIS_Z] + originZ + (stepZ * rowPosition) + (sideZ * column);
-      } else {
-        points[rowStart + column][AXIS_X] = center[AXIS_X] + originX +
-            (forwardX * rowPosition) + (sideX * column) + scrollX;
-        points[rowStart + column][AXIS_Z] = center[AXIS_Z] + originZ +
-            (stepZ * rowPosition) + (sideZ * column) + scrollZ;
-      }
-
-      if (g_RoundHud.greenGridState == GREEN_GRID_SHOWN) {
+    else if (distance < GREEN_GRID_LANDING_DISTANCE) {
+        rowShift = GREEN_GRID_PUTT_ROW_SHIFT;
+        columnSpacing = GREEN_GRID_PUTT_COLUMN_SPACING;
+        rowCount = GREEN_GRID_MAX_ROW_COUNT;
+        center[AXIS_X] = g_CurrentShot.ballPosition[AXIS_X];
+        center[AXIS_Y] = g_CurrentShot.ballPosition[AXIS_Y];
+        center[AXIS_Z] = g_CurrentShot.ballPosition[AXIS_Z];
+        rowSpacing = distance * GREEN_GRID_ROW_SPACING / GREEN_GRID_MAX_PUTT_DISTANCE;
+    }
+    else {
+        center[AXIS_X] = (cosf(yaw) * worldDistance) + g_CurrentShot.ballPosition[AXIS_X];
+        rowShift = GREEN_GRID_LANDING_ROW_SHIFT;
+        rowSpacing = GREEN_GRID_LANDING_ROW_SPACING;
+        center[AXIS_Z] = (sinf(yaw) * worldDistance) + g_CurrentShot.ballPosition[AXIS_Z];
         g_UnreadGroundQueryMarker = 1;
-        points[rowStart + column][AXIS_Y] =
-            GetGroundHeight(points[rowStart + column][AXIS_X],
-                points[rowStart + column][AXIS_Z]);
-        f_GreenGridHeights[rowStart + column] =
-            points[rowStart + column][AXIS_Y];
-      } else {
-        points[rowStart + column][AXIS_Y] =
-            f_GreenGridHeights[rowStart + column];
-      }
+        center[AXIS_Y] = GetGroundHeight(center[AXIS_X], center[AXIS_Z]);
+        rowCount = GREEN_GRID_LANDING_ROW_COUNT;
+        columnSpacing = GREEN_GRID_LANDING_WIDTH / columnCount;
     }
 
-    if (rowCount != GREEN_GRID_MAX_ROW_COUNT) {
-      rowStart += columnCount;
-      row++;
-    } else if (row >= GREEN_GRID_FIRST_FULL_ROW) {
-      rowStart += columnCount;
-      row++;
-    } else {
-      rowStart += columnCount * 2;
-      row += 2;
-    }
-  }
-
-  /* Fills in the rows that were skipped from their neighbors */
-  if (rowCount == GREEN_GRID_MAX_ROW_COUNT) {
-    for (row = 1; row != rowCount - 1; row += 2) {
-      for (column = 0; column != columnCount; column++) {
-        points[(row * columnCount) + column][AXIS_X] =
-            (points[((row - 1) * columnCount) + column][AXIS_X] +
-                points[((row + 1) * columnCount) + column][AXIS_X]) *
-            0.5f;
-        points[(row * columnCount) + column][AXIS_Y] =
-            (points[((row - 1) * columnCount) + column][AXIS_Y] +
-                points[((row + 1) * columnCount) + column][AXIS_Y]) *
-            0.5f;
-        points[(row * columnCount) + column][AXIS_Z] =
-            (points[((row - 1) * columnCount) + column][AXIS_Z] +
-                points[((row + 1) * columnCount) + column][AXIS_Z]) *
-            0.5f;
-      }
-    }
-  }
-
-  for (row = 0, rowStart = 0; row != rowCount; row++, rowStart += columnCount) {
-    for (column = 0; column != columnCount; column++) {
-      if (ProjectPoint(
-              points[rowStart + column][AXIS_X] * COURSE_TO_WORLD_SCALE,
-              points[rowStart + column][AXIS_Y] * COURSE_TO_WORLD_SCALE,
-              points[rowStart + column][AXIS_Z] * COURSE_TO_WORLD_SCALE,
-              &projected) < 0) {
-        screenPoints[rowStart + column].x =
-            projected.x * QUARTER_PIXELS_PER_PIXEL;
-        screenPoints[rowStart + column].y =
-            projected.y * QUARTER_PIXELS_PER_PIXEL;
-        screenPoints[rowStart + column].isVisible = TRUE;
-        screenPoints[rowStart + column].depth =
-            projected.depth - (projected.depthStep * GREEN_GRID_DEPTH_BIAS);
-      } else {
-        screenPoints[rowStart + column].isVisible = FALSE;
-      }
-
-      height = points[rowStart + column][AXIS_Y] - center[AXIS_Y];
-      if (height < 0.0f) {
-        slopes[rowStart + column] = sqrtf(-height) * GREEN_GRID_SLOPE_SCALE;
-      } else if (height > 0.0f) {
-        slopes[rowStart + column] = -sqrtf(height) * GREEN_GRID_SLOPE_SCALE;
-      } else {
-        slopes[rowStart + column] = 0;
-      }
-
-      if (slopes[rowStart + column] > GREEN_GRID_MAX_SLOPE) {
-        slopes[rowStart + column] = GREEN_GRID_MAX_SLOPE;
-      }
-
-      if (slopes[rowStart + column] < -GREEN_GRID_MAX_SLOPE) {
-        slopes[rowStart + column] = -GREEN_GRID_MAX_SLOPE;
-      }
-    }
-  }
-
-  guMtxIdent(&f_GreenGridMatrix);
-  gDPPipeSync(gfx++);
-  gDPPipeSync(gfx++);
-  gDPSetCycleType(gfx++, G_CYC_1CYCLE);
-  gSPClearGeometryMode(gfx++, ALL_GEOMETRY_MODES);
-  gSPSetGeometryMode(gfx++, G_SHADE | G_CULL_BACK | G_SHADING_SMOOTH);
-  gDPPipeSync(gfx++);
-  gDPSetTexturePersp(gfx++, G_TP_PERSP);
-  gDPPipeSync(gfx++);
-  gDPSetTextureFilter(gfx++, G_TF_BILERP);
-  gDPSetCombineMode(gfx++, G_CC_SHADE, G_CC_SHADE);
-  gDPPipeSync(gfx++);
-  gDPSetRenderMode(gfx++, G_RM_ZB_CLD_SURF, G_RM_ZB_CLD_SURF2);
-  gDPPipeSync(gfx++);
-  gDPSetDepthSource(gfx++, G_ZS_PRIM);
-  gSPMatrix(gfx++, PhysicalAddress(&g_ScreenOrthoMatrix),
-      G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
-  gSPMatrix(gfx++, PhysicalAddress(&f_GreenGridMatrix),
-      G_MTX_PUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-  gSPVertex(gfx++, f_BallTrailVertices, ARRAY_COUNT(f_BallTrailVertices), 0);
-  if (g_PauseScreen == PAUSE_SCREEN_FREE_LOOK) {
-    f_GreenGridAlpha = GREEN_GRID_DIM_ALPHA;
-  } else if (g_RoundHud.greenGridState != GREEN_GRID_FADING) {
-    f_GreenGridAlpha = GREEN_GRID_ALPHA;
-  } else if (f_GreenGridAlpha < GREEN_GRID_FADE_END_ALPHA) {
-    f_GreenGridAlpha = GREEN_GRID_DIM_ALPHA;
-  } else {
-    f_GreenGridAlpha -= GREEN_GRID_FADE_STEP;
-  }
-
-  if (g_RoundHud.greenGridState != GREEN_GRID_HIDDEN) {
-    /* The lines across the aim, one quad between each pair of points in a row
+    forwardX = -cosf(yaw);
+    forwardZ = -sinf(yaw);
+    sideAngle = yaw + (M_PI / 2);
+    sideX = -cosf(sideAngle) * columnSpacing;
+    sideZ = -sinf(sideAngle) * columnSpacing;
+    shift = (rowShift - rowCount) * rowSpacing;
+    centering = 0.5f - (columnCount * 0.5f);
+    originX = (shift * forwardX) + (sideX * centering);
+    originZ = (shift * forwardZ) + (sideZ * centering);
+    /*
+     * forwardX holds the row step's x from here, to match: a stepX variable gives
+     * 342 words differing (48 in shape) against the draft's 300 (44)
      */
-    for (acrossRow = 0, acrossRowStart = 0; acrossRow != rowCount;) {
-      for (drawnColumn = 0; drawnColumn != columnCount; drawnColumn++) {
-        acrossPoint = acrossRowStart + drawnColumn;
-        if (screenPoints[acrossPoint].isVisible != TRUE) {
-          continue;
+    forwardX = -cosf(yaw) * rowSpacing;
+    stepZ = -sinf(yaw) * rowSpacing;
+    if (g_RoundHud.greenGridState == GREEN_GRID_SHOWN) {
+        f_GreenGridScroll -= GREEN_GRID_SCROLL_STEP;
+        if (rowCount != GREEN_GRID_MAX_ROW_COUNT) {
+            if (f_GreenGridScroll < 0.0f) {
+                f_GreenGridScroll += 1.0f;
+            }
         }
-
-        if (drawnColumn & 1) {
-          neighbor = acrossPoint - 1;
-          dx = screenPoints[acrossPoint].x - screenPoints[neighbor].x;
-          dy = screenPoints[acrossPoint].y - screenPoints[neighbor].y;
-        } else {
-          neighbor = acrossPoint + 1;
-          dx = screenPoints[acrossPoint].x - screenPoints[neighbor].x;
-          dy = screenPoints[acrossPoint].y - screenPoints[neighbor].y;
+        else if (f_GreenGridScroll < -1.0f) {
+            f_GreenGridScroll += 2.0f;
         }
+    }
 
-        if (dx == 0.0f && dy == 0.0f) {
-          screenPoints[acrossPoint].isVisible = FALSE;
-          continue;
-        }
+    scrollX = forwardX * f_GreenGridScroll;
+    scrollZ = stepZ * f_GreenGridScroll;
 
-        scale = GREEN_GRID_LINE_HALF_WIDTH / sqrtf((dx * dx) + (dy * dy));
-        dx *= scale;
-        dy *= scale;
-        SetGreenGridTint(slopes[acrossPoint]);
-        if (drawnColumn & 1) {
-          gSPModifyVertex(gfx++, 2, G_MWO_POINT_XYSCREEN,
-              ScreenPointWord(
-                  screenPoints[acrossPoint].x, screenPoints[acrossPoint].y));
-          gSPModifyVertex(gfx++, 3, G_MWO_POINT_XYSCREEN,
-              ScreenPointWord(screenPoints[acrossPoint].x + (s32)dy,
-                  screenPoints[acrossPoint].y - (s32)dx));
-          gSPModifyVertex(gfx++, 2, G_MWO_POINT_RGBA,
-              RgbaColor(red, green, blue, f_GreenGridAlpha));
-          gSPModifyVertex(gfx++, 3, G_MWO_POINT_RGBA,
-              RgbaColor(red, green, blue, f_GreenGridAlpha));
-          if (screenPoints[acrossPoint - 1].isVisible == TRUE) {
-            gDPPipeSync(gfx++);
-            if (screenPoints[acrossPoint].depth <
-                screenPoints[acrossPoint - 1].depth) {
-              gDPSetPrimDepth(gfx++, screenPoints[acrossPoint].depth, 0);
-            } else {
-              gDPSetPrimDepth(gfx++, screenPoints[acrossPoint - 1].depth, 0);
+    for (row = 0, rowStart = 0; row != rowCount;) {
+        for (column = 0; column != columnCount; column++) {
+            isUnscrolledRow = row == rowCount - 1 || row == 0;
+            rowPosition = row;
+            if (row != 0) {
+                rowPosition = row - 1;
             }
 
-            gDPPipeSync(gfx++);
-            gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
-          }
-        } else {
-          gSPModifyVertex(gfx++, 0, G_MWO_POINT_XYSCREEN,
-              ScreenPointWord(
-                  screenPoints[acrossPoint].x, screenPoints[acrossPoint].y));
-          gSPModifyVertex(gfx++, 1, G_MWO_POINT_XYSCREEN,
-              ScreenPointWord(screenPoints[acrossPoint].x + (s32)dy,
-                  screenPoints[acrossPoint].y - (s32)dx));
-          gSPModifyVertex(gfx++, 0, G_MWO_POINT_RGBA,
-              RgbaColor(red, green, blue, f_GreenGridAlpha));
-          gSPModifyVertex(gfx++, 1, G_MWO_POINT_RGBA,
-              RgbaColor(red, green, blue, f_GreenGridAlpha));
-          if (drawnColumn != 0 &&
-              screenPoints[acrossPoint - 1].isVisible == TRUE) {
-            gDPPipeSync(gfx++);
-            if (screenPoints[acrossPoint].depth <
-                screenPoints[acrossPoint - 1].depth) {
-              gDPSetPrimDepth(gfx++, screenPoints[acrossPoint].depth, 0);
-            } else {
-              gDPSetPrimDepth(gfx++, screenPoints[acrossPoint - 1].depth, 0);
+            if (isUnscrolledRow || (f_GreenGridScroll < 0.0f && row == 1)) {
+                points[rowStart + column][AXIS_X] =
+                    center[AXIS_X] + originX + (forwardX * rowPosition) + (sideX * column);
+                points[rowStart + column][AXIS_Z] =
+                    center[AXIS_Z] + originZ + (stepZ * rowPosition) + (sideZ * column);
+            }
+            else {
+                points[rowStart + column][AXIS_X] = center[AXIS_X] + originX +
+                    (forwardX * rowPosition) + (sideX * column) + scrollX;
+                points[rowStart + column][AXIS_Z] =
+                    center[AXIS_Z] + originZ + (stepZ * rowPosition) + (sideZ * column) + scrollZ;
             }
 
-            gDPPipeSync(gfx++);
-            gSP2Triangles(gfx++, 2, 1, 0, 0, 3, 2, 0, 0);
-          }
+            if (g_RoundHud.greenGridState == GREEN_GRID_SHOWN) {
+                g_UnreadGroundQueryMarker = 1;
+                points[rowStart + column][AXIS_Y] = GetGroundHeight(
+                    points[rowStart + column][AXIS_X],
+                    points[rowStart + column][AXIS_Z]
+                );
+                f_GreenGridHeights[rowStart + column] = points[rowStart + column][AXIS_Y];
+            }
+            else {
+                points[rowStart + column][AXIS_Y] = f_GreenGridHeights[rowStart + column];
+            }
         }
-      }
 
-      if (rowCount != GREEN_GRID_MAX_ROW_COUNT) {
-        acrossRowStart += columnCount;
-        acrossRow++;
-      } else if (acrossRow >= GREEN_GRID_FIRST_FULL_ROW) {
-        acrossRowStart += columnCount;
-        acrossRow++;
-      } else {
-        acrossRowStart += columnCount * 2;
-        acrossRow += 2;
-      }
+        if (rowCount != GREEN_GRID_MAX_ROW_COUNT) {
+            rowStart += columnCount;
+            row++;
+        }
+        else if (row >= GREEN_GRID_FIRST_FULL_ROW) {
+            rowStart += columnCount;
+            row++;
+        }
+        else {
+            rowStart += columnCount * 2;
+            row += 2;
+        }
     }
 
-    /* The lines along the aim, one quad between each pair of points in a column
-     */
-    for (drawnColumn = 0; drawnColumn != columnCount; drawnColumn++) {
-      for (row = 0; row != rowCount - 1; row++) {
-        alongPoint = (row * columnCount) + drawnColumn;
-
-        if (screenPoints[alongPoint].isVisible != TRUE ||
-            screenPoints[alongPoint + columnCount].isVisible != TRUE) {
-          continue;
+    /* Fills in the rows that were skipped from their neighbors */
+    if (rowCount == GREEN_GRID_MAX_ROW_COUNT) {
+        for (row = 1; row != rowCount - 1; row += 2) {
+            for (column = 0; column != columnCount; column++) {
+                points[(row * columnCount) + column][AXIS_X] =
+                    (points[((row - 1) * columnCount) + column][AXIS_X] +
+                        points[((row + 1) * columnCount) + column][AXIS_X]) *
+                    0.5f;
+                points[(row * columnCount) + column][AXIS_Y] =
+                    (points[((row - 1) * columnCount) + column][AXIS_Y] +
+                        points[((row + 1) * columnCount) + column][AXIS_Y]) *
+                    0.5f;
+                points[(row * columnCount) + column][AXIS_Z] =
+                    (points[((row - 1) * columnCount) + column][AXIS_Z] +
+                        points[((row + 1) * columnCount) + column][AXIS_Z]) *
+                    0.5f;
+            }
         }
-
-        dx = screenPoints[alongPoint].x -
-            screenPoints[alongPoint + columnCount].x;
-        dy = screenPoints[alongPoint].y -
-            screenPoints[alongPoint + columnCount].y;
-        if (dx == 0.0f && dy == 0.0f) {
-          continue;
-        }
-
-        scale = GREEN_GRID_LINE_HALF_WIDTH / sqrtf((dx * dx) + (dy * dy));
-        dx *= scale;
-        dy *= scale;
-        SetGreenGridTint(slopes[alongPoint]);
-        gSPModifyVertex(gfx++, 0, G_MWO_POINT_RGBA,
-            RgbaColor(red, green, blue, f_GreenGridAlpha));
-        gSPModifyVertex(gfx++, 1, G_MWO_POINT_RGBA,
-            RgbaColor(red, green, blue, f_GreenGridAlpha));
-        SetGreenGridTint(slopes[alongPoint + columnCount]);
-        gSPModifyVertex(gfx++, 2, G_MWO_POINT_RGBA,
-            RgbaColor(red, green, blue, f_GreenGridAlpha));
-        gSPModifyVertex(gfx++, 3, G_MWO_POINT_RGBA,
-            RgbaColor(red, green, blue, f_GreenGridAlpha));
-        gSPModifyVertex(gfx++, 0, G_MWO_POINT_XYSCREEN,
-            ScreenPointWord(
-                screenPoints[alongPoint].x, screenPoints[alongPoint].y));
-        gSPModifyVertex(gfx++, 1, G_MWO_POINT_XYSCREEN,
-            ScreenPointWord(screenPoints[alongPoint].x - (s32)dy,
-                screenPoints[alongPoint].y + (s32)dx));
-        gSPModifyVertex(gfx++, 2, G_MWO_POINT_XYSCREEN,
-            ScreenPointWord(screenPoints[alongPoint + columnCount].x,
-                screenPoints[alongPoint + columnCount].y));
-        gSPModifyVertex(gfx++, 3, G_MWO_POINT_XYSCREEN,
-            ScreenPointWord(screenPoints[alongPoint + columnCount].x - (s32)dy,
-                screenPoints[alongPoint + columnCount].y + (s32)dx));
-        if (screenPoints[alongPoint].depth <
-            screenPoints[alongPoint + columnCount].depth) {
-          gDPSetPrimDepth(gfx++, screenPoints[alongPoint].depth, 0);
-        } else {
-          gDPSetPrimDepth(
-              gfx++, screenPoints[alongPoint + columnCount].depth, 0);
-        }
-
-        gDPPipeSync(gfx++);
-        gSP2Triangles(gfx++, 1, 0, 2, 0, 1, 2, 3, 0);
-        gDPPipeSync(gfx++);
-      }
     }
-  }
 
-  gDPPipeSync(gfx++);
-  gDPSetDepthSource(gfx++, G_ZS_PIXEL);
-  gSPMatrix(gfx++, PhysicalAddress(&matrices->projection),
-      G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
-  gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
-  *displayListHead = gfx;
+    for (row = 0, rowStart = 0; row != rowCount; row++, rowStart += columnCount) {
+        for (column = 0; column != columnCount; column++) {
+            if (ProjectPoint(
+                    points[rowStart + column][AXIS_X] * COURSE_TO_WORLD_SCALE,
+                    points[rowStart + column][AXIS_Y] * COURSE_TO_WORLD_SCALE,
+                    points[rowStart + column][AXIS_Z] * COURSE_TO_WORLD_SCALE,
+                    &projected
+                ) < 0) {
+                screenPoints[rowStart + column].x = projected.x * QUARTER_PIXELS_PER_PIXEL;
+                screenPoints[rowStart + column].y = projected.y * QUARTER_PIXELS_PER_PIXEL;
+                screenPoints[rowStart + column].isVisible = TRUE;
+                screenPoints[rowStart + column].depth =
+                    projected.depth - (projected.depthStep * GREEN_GRID_DEPTH_BIAS);
+            }
+            else {
+                screenPoints[rowStart + column].isVisible = FALSE;
+            }
+
+            height = points[rowStart + column][AXIS_Y] - center[AXIS_Y];
+            if (height < 0.0f) {
+                slopes[rowStart + column] = sqrtf(-height) * GREEN_GRID_SLOPE_SCALE;
+            }
+            else if (height > 0.0f) {
+                slopes[rowStart + column] = -sqrtf(height) * GREEN_GRID_SLOPE_SCALE;
+            }
+            else {
+                slopes[rowStart + column] = 0;
+            }
+
+            if (slopes[rowStart + column] > GREEN_GRID_MAX_SLOPE) {
+                slopes[rowStart + column] = GREEN_GRID_MAX_SLOPE;
+            }
+
+            if (slopes[rowStart + column] < -GREEN_GRID_MAX_SLOPE) {
+                slopes[rowStart + column] = -GREEN_GRID_MAX_SLOPE;
+            }
+        }
+    }
+
+    guMtxIdent(&f_GreenGridMatrix);
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+    gSPClearGeometryMode(gfx++, ALL_GEOMETRY_MODES);
+    gSPSetGeometryMode(gfx++, G_SHADE | G_CULL_BACK | G_SHADING_SMOOTH);
+    gDPPipeSync(gfx++);
+    gDPSetTexturePersp(gfx++, G_TP_PERSP);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_BILERP);
+    gDPSetCombineMode(gfx++, G_CC_SHADE, G_CC_SHADE);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_ZB_CLD_SURF, G_RM_ZB_CLD_SURF2);
+    gDPPipeSync(gfx++);
+    gDPSetDepthSource(gfx++, G_ZS_PRIM);
+    gSPMatrix(
+        gfx++,
+        PhysicalAddress(&g_ScreenOrthoMatrix),
+        G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION
+    );
+    gSPMatrix(
+        gfx++,
+        PhysicalAddress(&f_GreenGridMatrix),
+        G_MTX_PUSH | G_MTX_LOAD | G_MTX_MODELVIEW
+    );
+    gSPVertex(gfx++, f_BallTrailVertices, ARRAY_COUNT(f_BallTrailVertices), 0);
+    if (g_PauseScreen == PAUSE_SCREEN_FREE_LOOK) {
+        f_GreenGridAlpha = GREEN_GRID_DIM_ALPHA;
+    }
+    else if (g_RoundHud.greenGridState != GREEN_GRID_FADING) {
+        f_GreenGridAlpha = GREEN_GRID_ALPHA;
+    }
+    else if (f_GreenGridAlpha < GREEN_GRID_FADE_END_ALPHA) {
+        f_GreenGridAlpha = GREEN_GRID_DIM_ALPHA;
+    }
+    else {
+        f_GreenGridAlpha -= GREEN_GRID_FADE_STEP;
+    }
+
+    if (g_RoundHud.greenGridState != GREEN_GRID_HIDDEN) {
+        /* The lines across the aim, one quad between each pair of points in a row
+         */
+        for (acrossRow = 0, acrossRowStart = 0; acrossRow != rowCount;) {
+            for (drawnColumn = 0; drawnColumn != columnCount; drawnColumn++) {
+                acrossPoint = acrossRowStart + drawnColumn;
+                if (screenPoints[acrossPoint].isVisible != TRUE) {
+                    continue;
+                }
+
+                if (drawnColumn & 1) {
+                    neighbor = acrossPoint - 1;
+                    dx = screenPoints[acrossPoint].x - screenPoints[neighbor].x;
+                    dy = screenPoints[acrossPoint].y - screenPoints[neighbor].y;
+                }
+                else {
+                    neighbor = acrossPoint + 1;
+                    dx = screenPoints[acrossPoint].x - screenPoints[neighbor].x;
+                    dy = screenPoints[acrossPoint].y - screenPoints[neighbor].y;
+                }
+
+                if (dx == 0.0f && dy == 0.0f) {
+                    screenPoints[acrossPoint].isVisible = FALSE;
+                    continue;
+                }
+
+                scale = GREEN_GRID_LINE_HALF_WIDTH / sqrtf((dx * dx) + (dy * dy));
+                dx *= scale;
+                dy *= scale;
+                SetGreenGridTint(slopes[acrossPoint]);
+                if (drawnColumn & 1) {
+                    gSPModifyVertex(
+                        gfx++,
+                        2,
+                        G_MWO_POINT_XYSCREEN,
+                        ScreenPointWord(screenPoints[acrossPoint].x, screenPoints[acrossPoint].y)
+                    );
+                    gSPModifyVertex(
+                        gfx++,
+                        3,
+                        G_MWO_POINT_XYSCREEN,
+                        ScreenPointWord(
+                            screenPoints[acrossPoint].x + (s32)dy,
+                            screenPoints[acrossPoint].y - (s32)dx
+                        )
+                    );
+                    gSPModifyVertex(
+                        gfx++,
+                        2,
+                        G_MWO_POINT_RGBA,
+                        RgbaColor(red, green, blue, f_GreenGridAlpha)
+                    );
+                    gSPModifyVertex(
+                        gfx++,
+                        3,
+                        G_MWO_POINT_RGBA,
+                        RgbaColor(red, green, blue, f_GreenGridAlpha)
+                    );
+                    if (screenPoints[acrossPoint - 1].isVisible == TRUE) {
+                        gDPPipeSync(gfx++);
+                        if (screenPoints[acrossPoint].depth < screenPoints[acrossPoint - 1].depth) {
+                            gDPSetPrimDepth(gfx++, screenPoints[acrossPoint].depth, 0);
+                        }
+                        else {
+                            gDPSetPrimDepth(gfx++, screenPoints[acrossPoint - 1].depth, 0);
+                        }
+
+                        gDPPipeSync(gfx++);
+                        gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
+                    }
+                }
+                else {
+                    gSPModifyVertex(
+                        gfx++,
+                        0,
+                        G_MWO_POINT_XYSCREEN,
+                        ScreenPointWord(screenPoints[acrossPoint].x, screenPoints[acrossPoint].y)
+                    );
+                    gSPModifyVertex(
+                        gfx++,
+                        1,
+                        G_MWO_POINT_XYSCREEN,
+                        ScreenPointWord(
+                            screenPoints[acrossPoint].x + (s32)dy,
+                            screenPoints[acrossPoint].y - (s32)dx
+                        )
+                    );
+                    gSPModifyVertex(
+                        gfx++,
+                        0,
+                        G_MWO_POINT_RGBA,
+                        RgbaColor(red, green, blue, f_GreenGridAlpha)
+                    );
+                    gSPModifyVertex(
+                        gfx++,
+                        1,
+                        G_MWO_POINT_RGBA,
+                        RgbaColor(red, green, blue, f_GreenGridAlpha)
+                    );
+                    if (drawnColumn != 0 && screenPoints[acrossPoint - 1].isVisible == TRUE) {
+                        gDPPipeSync(gfx++);
+                        if (screenPoints[acrossPoint].depth < screenPoints[acrossPoint - 1].depth) {
+                            gDPSetPrimDepth(gfx++, screenPoints[acrossPoint].depth, 0);
+                        }
+                        else {
+                            gDPSetPrimDepth(gfx++, screenPoints[acrossPoint - 1].depth, 0);
+                        }
+
+                        gDPPipeSync(gfx++);
+                        gSP2Triangles(gfx++, 2, 1, 0, 0, 3, 2, 0, 0);
+                    }
+                }
+            }
+
+            if (rowCount != GREEN_GRID_MAX_ROW_COUNT) {
+                acrossRowStart += columnCount;
+                acrossRow++;
+            }
+            else if (acrossRow >= GREEN_GRID_FIRST_FULL_ROW) {
+                acrossRowStart += columnCount;
+                acrossRow++;
+            }
+            else {
+                acrossRowStart += columnCount * 2;
+                acrossRow += 2;
+            }
+        }
+
+        /* The lines along the aim, one quad between each pair of points in a column
+         */
+        for (drawnColumn = 0; drawnColumn != columnCount; drawnColumn++) {
+            for (row = 0; row != rowCount - 1; row++) {
+                alongPoint = (row * columnCount) + drawnColumn;
+
+                if (screenPoints[alongPoint].isVisible != TRUE ||
+                    screenPoints[alongPoint + columnCount].isVisible != TRUE) {
+                    continue;
+                }
+
+                dx = screenPoints[alongPoint].x - screenPoints[alongPoint + columnCount].x;
+                dy = screenPoints[alongPoint].y - screenPoints[alongPoint + columnCount].y;
+                if (dx == 0.0f && dy == 0.0f) {
+                    continue;
+                }
+
+                scale = GREEN_GRID_LINE_HALF_WIDTH / sqrtf((dx * dx) + (dy * dy));
+                dx *= scale;
+                dy *= scale;
+                SetGreenGridTint(slopes[alongPoint]);
+                gSPModifyVertex(
+                    gfx++,
+                    0,
+                    G_MWO_POINT_RGBA,
+                    RgbaColor(red, green, blue, f_GreenGridAlpha)
+                );
+                gSPModifyVertex(
+                    gfx++,
+                    1,
+                    G_MWO_POINT_RGBA,
+                    RgbaColor(red, green, blue, f_GreenGridAlpha)
+                );
+                SetGreenGridTint(slopes[alongPoint + columnCount]);
+                gSPModifyVertex(
+                    gfx++,
+                    2,
+                    G_MWO_POINT_RGBA,
+                    RgbaColor(red, green, blue, f_GreenGridAlpha)
+                );
+                gSPModifyVertex(
+                    gfx++,
+                    3,
+                    G_MWO_POINT_RGBA,
+                    RgbaColor(red, green, blue, f_GreenGridAlpha)
+                );
+                gSPModifyVertex(
+                    gfx++,
+                    0,
+                    G_MWO_POINT_XYSCREEN,
+                    ScreenPointWord(screenPoints[alongPoint].x, screenPoints[alongPoint].y)
+                );
+                gSPModifyVertex(
+                    gfx++,
+                    1,
+                    G_MWO_POINT_XYSCREEN,
+                    ScreenPointWord(
+                        screenPoints[alongPoint].x - (s32)dy,
+                        screenPoints[alongPoint].y + (s32)dx
+                    )
+                );
+                gSPModifyVertex(
+                    gfx++,
+                    2,
+                    G_MWO_POINT_XYSCREEN,
+                    ScreenPointWord(
+                        screenPoints[alongPoint + columnCount].x,
+                        screenPoints[alongPoint + columnCount].y
+                    )
+                );
+                gSPModifyVertex(
+                    gfx++,
+                    3,
+                    G_MWO_POINT_XYSCREEN,
+                    ScreenPointWord(
+                        screenPoints[alongPoint + columnCount].x - (s32)dy,
+                        screenPoints[alongPoint + columnCount].y + (s32)dx
+                    )
+                );
+                if (screenPoints[alongPoint].depth < screenPoints[alongPoint + columnCount].depth) {
+                    gDPSetPrimDepth(gfx++, screenPoints[alongPoint].depth, 0);
+                }
+                else {
+                    gDPSetPrimDepth(gfx++, screenPoints[alongPoint + columnCount].depth, 0);
+                }
+
+                gDPPipeSync(gfx++);
+                gSP2Triangles(gfx++, 1, 0, 2, 0, 1, 2, 3, 0);
+                gDPPipeSync(gfx++);
+            }
+        }
+    }
+
+    gDPPipeSync(gfx++);
+    gDPSetDepthSource(gfx++, G_ZS_PIXEL);
+    gSPMatrix(
+        gfx++,
+        PhysicalAddress(&matrices->projection),
+        G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION
+    );
+    gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
+    *displayListHead = gfx;
 }
 #else
 INCLUDE_RODATA("asm/nonmatchings/round_hud", f_GreenGridLandingColumnCount);
@@ -2194,17 +2421,14 @@ INCLUDE_ASM("asm/nonmatchings/round_hud", DrawGreenGrid);
 
 /* Gathers the whole ball trail at the ball, so it starts out empty */
 void ResetBallTrail(void) {
-  s32 i;
+    s32 i;
 
-  f_BallTrailHead = 0;
-  for (i = 0; i != BALL_TRAIL_LENGTH; i++) {
-    f_BallTrail[i][AXIS_X] =
-        g_TurnBallSimulation.position[AXIS_X] * COURSE_TO_WORLD_SCALE;
-    f_BallTrail[i][AXIS_Y] =
-        g_TurnBallSimulation.position[AXIS_Y] * COURSE_TO_WORLD_SCALE;
-    f_BallTrail[i][AXIS_Z] =
-        g_TurnBallSimulation.position[AXIS_Z] * COURSE_TO_WORLD_SCALE;
-  }
+    f_BallTrailHead = 0;
+    for (i = 0; i != BALL_TRAIL_LENGTH; i++) {
+        f_BallTrail[i][AXIS_X] = g_TurnBallSimulation.position[AXIS_X] * COURSE_TO_WORLD_SCALE;
+        f_BallTrail[i][AXIS_Y] = g_TurnBallSimulation.position[AXIS_Y] * COURSE_TO_WORLD_SCALE;
+        f_BallTrail[i][AXIS_Z] = g_TurnBallSimulation.position[AXIS_Z] * COURSE_TO_WORLD_SCALE;
+    }
 }
 
 /* The trail is drawn this far below the ball's center, scaled like the pin */
@@ -2221,145 +2445,177 @@ void ResetBallTrail(void) {
 #define BALL_TRAIL_ALPHA 64
 #define BALL_TRAIL_SEGMENTS_PER_FADE 4
 #define BallTrailSegmentColor(segment) \
-  ((BALL_TRAIL_ALPHA - ((segment) / BALL_TRAIL_SEGMENTS_PER_FADE)) | \
-      BALL_TRAIL_COLOR)
+    ((BALL_TRAIL_ALPHA - ((segment) / BALL_TRAIL_SEGMENTS_PER_FADE)) | BALL_TRAIL_COLOR)
 
 /*
  * Draws the ball's trail through its recent positions as screen-space quads
  * that fade out with age. While g_BallTrailState is BALL_TRAIL_RECORDING it
  * also adds the ball's current position.
  */
-void DrawBallTrail(Gfx** displayListHead, CameraMatrices* matrices) {
-  Gfx* gfx = *displayListHead;
-  ScreenPoint point;
-  s32 i;
-  s32 index;
-  f32 deltaX;
-  f32 deltaY;
-  f32 scale;
-  Gfx* cycleTypeCommand;
+void DrawBallTrail(Gfx **displayListHead, CameraMatrices *matrices) {
+    Gfx *gfx = *displayListHead;
+    ScreenPoint point;
+    s32 i;
+    s32 index;
+    f32 deltaX;
+    f32 deltaY;
+    f32 scale;
+    Gfx *cycleTypeCommand;
 
-  if (g_BallTrailState != BALL_TRAIL_OFF && g_RoundHud.isBallTrailShown) {
-    if (g_BallTrailState == BALL_TRAIL_RECORDING) {
-      if (++f_BallTrailHead == BALL_TRAIL_LENGTH) {
-        f_BallTrailHead = 0;
-      }
+    if (g_BallTrailState != BALL_TRAIL_OFF && g_RoundHud.isBallTrailShown) {
+        if (g_BallTrailState == BALL_TRAIL_RECORDING) {
+            if (++f_BallTrailHead == BALL_TRAIL_LENGTH) {
+                f_BallTrailHead = 0;
+            }
 
-      f_BallTrail[f_BallTrailHead][AXIS_X] =
-          g_TurnBallSimulation.position[AXIS_X] * COURSE_TO_WORLD_SCALE;
-      f_BallTrail[f_BallTrailHead][AXIS_Y] =
-          (g_TurnBallSimulation.position[AXIS_Y] * COURSE_TO_WORLD_SCALE) -
-          (g_PinVertexScale * BALL_TRAIL_DROP);
-      f_BallTrail[f_BallTrailHead][AXIS_Z] =
-          g_TurnBallSimulation.position[AXIS_Z] * COURSE_TO_WORLD_SCALE;
-    }
-
-    if (g_IsCupViewShown != TRUE) {
-      /* Projects the trail from its newest position back */
-      index = f_BallTrailHead;
-      for (i = 0; i != BALL_TRAIL_LENGTH; i++, index--) {
-        if (index == -1) {
-          index = BALL_TRAIL_LENGTH - 1;
+            f_BallTrail[f_BallTrailHead][AXIS_X] =
+                g_TurnBallSimulation.position[AXIS_X] * COURSE_TO_WORLD_SCALE;
+            f_BallTrail[f_BallTrailHead][AXIS_Y] =
+                (g_TurnBallSimulation.position[AXIS_Y] * COURSE_TO_WORLD_SCALE) -
+                (g_PinVertexScale * BALL_TRAIL_DROP);
+            f_BallTrail[f_BallTrailHead][AXIS_Z] =
+                g_TurnBallSimulation.position[AXIS_Z] * COURSE_TO_WORLD_SCALE;
         }
 
-        if (ProjectPoint(f_BallTrail[index][AXIS_X], f_BallTrail[index][AXIS_Y],
-                f_BallTrail[index][AXIS_Z], &point) < 0) {
-          f_BallTrailPoints[i].x = point.x * QUARTER_PIXELS_PER_PIXEL;
-          f_BallTrailPoints[i].y = point.y * QUARTER_PIXELS_PER_PIXEL;
-          f_BallTrailPoints[i].depth = point.depth -
-              (point.depthStep * (g_PinVertexScale * BALL_TRAIL_DEPTH_BIAS));
-        } else {
-          f_BallTrailPoints[i].depth = BALL_TRAIL_HIDDEN;
-        }
-      }
+        if (g_IsCupViewShown != TRUE) {
+            /* Projects the trail from its newest position back */
+            index = f_BallTrailHead;
+            for (i = 0; i != BALL_TRAIL_LENGTH; i++, index--) {
+                if (index == -1) {
+                    index = BALL_TRAIL_LENGTH - 1;
+                }
 
-      guMtxIdent(&f_BallTrailMatrix);
-      gDPPipeSync(gfx++);
-      gDPPipeSync(gfx++);
-      /*
-       * Through a pointer of its own, to match: gfx++ in the macro gives 8
-       * words differing, none in shape
-       */
-      cycleTypeCommand = gfx++;
-      gDPSetCycleType(cycleTypeCommand, G_CYC_1CYCLE);
-      gSPClearGeometryMode(gfx++, ALL_GEOMETRY_MODES);
-      gSPSetGeometryMode(
-          gfx++, G_ZBUFFER | G_SHADE | G_CULL_BACK | G_SHADING_SMOOTH);
-      gDPPipeSync(gfx++);
-      gDPSetTexturePersp(gfx++, G_TP_PERSP);
-      gDPPipeSync(gfx++);
-      gDPSetTextureFilter(gfx++, G_TF_BILERP);
-      gDPSetCombineMode(gfx++, G_CC_SHADE, G_CC_SHADE);
-      gDPPipeSync(gfx++);
-      gDPSetDepthSource(gfx++, G_ZS_PRIM);
-      gDPPipeSync(gfx++);
-      gDPSetAlphaCompare(gfx++, G_AC_NONE);
-      gDPPipeSync(gfx++);
-      gDPSetRenderMode(gfx++, G_RM_AA_ZB_XLU_SURF, G_RM_AA_ZB_XLU_SURF2);
-      gDPPipeSync(gfx++);
-      gSPMatrix(gfx++, PhysicalAddress(&g_ScreenOrthoMatrix),
-          G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
-      gSPMatrix(gfx++, PhysicalAddress(&f_BallTrailMatrix),
-          G_MTX_PUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-      gSPVertex(
-          gfx++, f_BallTrailVertices, ARRAY_COUNT(f_BallTrailVertices), 0);
-      for (i = 0; i != BALL_TRAIL_LENGTH - 1; i++) {
-        if (f_BallTrailPoints[i].depth != BALL_TRAIL_HIDDEN &&
-            f_BallTrailPoints[i + 1].depth != BALL_TRAIL_HIDDEN) {
-          deltaX = f_BallTrailPoints[i].x - f_BallTrailPoints[i + 1].x;
-          deltaY = f_BallTrailPoints[i].y - f_BallTrailPoints[i + 1].y;
+                if (ProjectPoint(
+                        f_BallTrail[index][AXIS_X],
+                        f_BallTrail[index][AXIS_Y],
+                        f_BallTrail[index][AXIS_Z],
+                        &point
+                    ) < 0) {
+                    f_BallTrailPoints[i].x = point.x * QUARTER_PIXELS_PER_PIXEL;
+                    f_BallTrailPoints[i].y = point.y * QUARTER_PIXELS_PER_PIXEL;
+                    f_BallTrailPoints[i].depth = point.depth -
+                        (point.depthStep * (g_PinVertexScale * BALL_TRAIL_DEPTH_BIAS));
+                }
+                else {
+                    f_BallTrailPoints[i].depth = BALL_TRAIL_HIDDEN;
+                }
+            }
 
-          /*
-           * The empty branch for a segment of no length is there to match:
-           * testing for a nonzero delta with ||, or negating the test, gives 11
-           * words differing, all in shape; | doesn't match either
-           */
-          if (deltaX == 0.0f && deltaY == 0.0f) {
-          } else {
-            scale = BALL_TRAIL_HALF_WIDTH /
-                sqrtf((deltaX * deltaX) + (deltaY * deltaY));
-            /* The delta, scaled to the trail's half width and turned a
-             * quarter, offsets the segment's corners */
-            deltaX *= scale;
-            deltaY *= scale;
+            guMtxIdent(&f_BallTrailMatrix);
             gDPPipeSync(gfx++);
-            gDPSetPrimDepth(gfx++, f_BallTrailPoints[i].depth, 0);
             gDPPipeSync(gfx++);
-            gSPModifyVertex(
-                gfx++, 0, G_MWO_POINT_RGBA, BallTrailSegmentColor(i));
-            gSPModifyVertex(
-                gfx++, 1, G_MWO_POINT_RGBA, BallTrailSegmentColor(i));
-            gSPModifyVertex(
-                gfx++, 2, G_MWO_POINT_RGBA, BallTrailSegmentColor(i));
-            gSPModifyVertex(
-                gfx++, 3, G_MWO_POINT_RGBA, BallTrailSegmentColor(i));
-            gSPModifyVertex(gfx++, 0, G_MWO_POINT_XYSCREEN,
-                ScreenPointWord(f_BallTrailPoints[i].x + (s32)deltaY,
-                    f_BallTrailPoints[i].y - (s32)deltaX));
-            gSPModifyVertex(gfx++, 1, G_MWO_POINT_XYSCREEN,
-                ScreenPointWord(f_BallTrailPoints[i].x - (s32)deltaY,
-                    f_BallTrailPoints[i].y + (s32)deltaX));
-            gSPModifyVertex(gfx++, 2, G_MWO_POINT_XYSCREEN,
-                ScreenPointWord(f_BallTrailPoints[i + 1].x + (s32)deltaY,
-                    f_BallTrailPoints[i + 1].y - (s32)deltaX));
-            gSPModifyVertex(gfx++, 3, G_MWO_POINT_XYSCREEN,
-                ScreenPointWord(f_BallTrailPoints[i + 1].x - (s32)deltaY,
-                    f_BallTrailPoints[i + 1].y + (s32)deltaX));
-            gSP2Triangles(gfx++, 1, 0, 2, 0, 1, 2, 3, 0);
-          }
-        }
-      }
+            /*
+             * Through a pointer of its own, to match: gfx++ in the macro gives 8
+             * words differing, none in shape
+             */
+            cycleTypeCommand = gfx++;
+            gDPSetCycleType(cycleTypeCommand, G_CYC_1CYCLE);
+            gSPClearGeometryMode(gfx++, ALL_GEOMETRY_MODES);
+            gSPSetGeometryMode(gfx++, G_ZBUFFER | G_SHADE | G_CULL_BACK | G_SHADING_SMOOTH);
+            gDPPipeSync(gfx++);
+            gDPSetTexturePersp(gfx++, G_TP_PERSP);
+            gDPPipeSync(gfx++);
+            gDPSetTextureFilter(gfx++, G_TF_BILERP);
+            gDPSetCombineMode(gfx++, G_CC_SHADE, G_CC_SHADE);
+            gDPPipeSync(gfx++);
+            gDPSetDepthSource(gfx++, G_ZS_PRIM);
+            gDPPipeSync(gfx++);
+            gDPSetAlphaCompare(gfx++, G_AC_NONE);
+            gDPPipeSync(gfx++);
+            gDPSetRenderMode(gfx++, G_RM_AA_ZB_XLU_SURF, G_RM_AA_ZB_XLU_SURF2);
+            gDPPipeSync(gfx++);
+            gSPMatrix(
+                gfx++,
+                PhysicalAddress(&g_ScreenOrthoMatrix),
+                G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION
+            );
+            gSPMatrix(
+                gfx++,
+                PhysicalAddress(&f_BallTrailMatrix),
+                G_MTX_PUSH | G_MTX_LOAD | G_MTX_MODELVIEW
+            );
+            gSPVertex(gfx++, f_BallTrailVertices, ARRAY_COUNT(f_BallTrailVertices), 0);
+            for (i = 0; i != BALL_TRAIL_LENGTH - 1; i++) {
+                if (f_BallTrailPoints[i].depth != BALL_TRAIL_HIDDEN &&
+                    f_BallTrailPoints[i + 1].depth != BALL_TRAIL_HIDDEN) {
+                    deltaX = f_BallTrailPoints[i].x - f_BallTrailPoints[i + 1].x;
+                    deltaY = f_BallTrailPoints[i].y - f_BallTrailPoints[i + 1].y;
 
-      gDPPipeSync(gfx++);
-      gSPMatrix(gfx++, PhysicalAddress(&matrices->projection),
-          G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
-      gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
-      gDPPipeSync(gfx++);
-      gDPSetDepthSource(gfx++, G_ZS_PIXEL);
-      gDPPipeSync(gfx++);
-      *displayListHead = gfx;
+                    /*
+                     * The empty branch for a segment of no length is there to match:
+                     * testing for a nonzero delta with ||, or negating the test, gives 11
+                     * words differing, all in shape; | doesn't match either
+                     */
+                    if (deltaX == 0.0f && deltaY == 0.0f) {
+                    }
+                    else {
+                        scale =
+                            BALL_TRAIL_HALF_WIDTH / sqrtf((deltaX * deltaX) + (deltaY * deltaY));
+                        /* The delta, scaled to the trail's half width and turned a
+                         * quarter, offsets the segment's corners */
+                        deltaX *= scale;
+                        deltaY *= scale;
+                        gDPPipeSync(gfx++);
+                        gDPSetPrimDepth(gfx++, f_BallTrailPoints[i].depth, 0);
+                        gDPPipeSync(gfx++);
+                        gSPModifyVertex(gfx++, 0, G_MWO_POINT_RGBA, BallTrailSegmentColor(i));
+                        gSPModifyVertex(gfx++, 1, G_MWO_POINT_RGBA, BallTrailSegmentColor(i));
+                        gSPModifyVertex(gfx++, 2, G_MWO_POINT_RGBA, BallTrailSegmentColor(i));
+                        gSPModifyVertex(gfx++, 3, G_MWO_POINT_RGBA, BallTrailSegmentColor(i));
+                        gSPModifyVertex(
+                            gfx++,
+                            0,
+                            G_MWO_POINT_XYSCREEN,
+                            ScreenPointWord(
+                                f_BallTrailPoints[i].x + (s32)deltaY,
+                                f_BallTrailPoints[i].y - (s32)deltaX
+                            )
+                        );
+                        gSPModifyVertex(
+                            gfx++,
+                            1,
+                            G_MWO_POINT_XYSCREEN,
+                            ScreenPointWord(
+                                f_BallTrailPoints[i].x - (s32)deltaY,
+                                f_BallTrailPoints[i].y + (s32)deltaX
+                            )
+                        );
+                        gSPModifyVertex(
+                            gfx++,
+                            2,
+                            G_MWO_POINT_XYSCREEN,
+                            ScreenPointWord(
+                                f_BallTrailPoints[i + 1].x + (s32)deltaY,
+                                f_BallTrailPoints[i + 1].y - (s32)deltaX
+                            )
+                        );
+                        gSPModifyVertex(
+                            gfx++,
+                            3,
+                            G_MWO_POINT_XYSCREEN,
+                            ScreenPointWord(
+                                f_BallTrailPoints[i + 1].x - (s32)deltaY,
+                                f_BallTrailPoints[i + 1].y + (s32)deltaX
+                            )
+                        );
+                        gSP2Triangles(gfx++, 1, 0, 2, 0, 1, 2, 3, 0);
+                    }
+                }
+            }
+
+            gDPPipeSync(gfx++);
+            gSPMatrix(
+                gfx++,
+                PhysicalAddress(&matrices->projection),
+                G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION
+            );
+            gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
+            gDPPipeSync(gfx++);
+            gDPSetDepthSource(gfx++, G_ZS_PIXEL);
+            gDPPipeSync(gfx++);
+            *displayListHead = gfx;
+        }
     }
-  }
 }
 
 /*
@@ -2384,169 +2640,238 @@ void DrawBallTrail(Gfx** displayListHead, CameraMatrices* matrices) {
  * before DrawWindSpeedText, all give 41 words, as with no barrier.
  */
 #ifdef NON_MATCHING
-void DrawWindSpeed(Gfx** displayListHead, f32 x, f32 y) {
-  Gfx* gfx = *displayListHead;
-  s32 halfWidthRounded;
-  s32 halfHeightRounded;
-  s32 textureS;
-  s32 textureT;
-  s32 dsdx;
-  s32 dtdy;
-  s32 speed;
-  u32 scaledSpeed;
-  f32 halfWidth;
-  f32 halfHeight;
-  f32 centerX;
-  f32 centerY;
-  s32 roundedCenterX;
-  s32 roundedCenterY;
+void DrawWindSpeed(Gfx **displayListHead, f32 x, f32 y) {
+    Gfx *gfx = *displayListHead;
+    s32 halfWidthRounded;
+    s32 halfHeightRounded;
+    s32 textureS;
+    s32 textureT;
+    s32 dsdx;
+    s32 dtdy;
+    s32 speed;
+    u32 scaledSpeed;
+    f32 halfWidth;
+    f32 halfHeight;
+    f32 centerX;
+    f32 centerY;
+    s32 roundedCenterX;
+    s32 roundedCenterY;
 
-  /* Draws text of digits, spaces and 'm' from the wind speed font, with its top
-   * left at the given point */
-  void DrawWindSpeedText(s32 textX, s32 textY, char* text) {
-    s32 offsetX;
-    s32 glyphS;
-    s32 glyphWidth;
+    /* Draws text of digits, spaces and 'm' from the wind speed font, with its top
+     * left at the given point */
+    void DrawWindSpeedText(s32 textX, s32 textY, char *text) {
+        s32 offsetX;
+        s32 glyphS;
+        s32 glyphWidth;
 
-    for (offsetX = 0; *text != '\0'; text++, offsetX += WIND_DIGIT_WIDTH) {
-      if (*text == ' ') {
-        continue;
-      }
+        for (offsetX = 0; *text != '\0'; text++, offsetX += WIND_DIGIT_WIDTH) {
+            if (*text == ' ') {
+                continue;
+            }
 
-      if (*text == 'm') {
-        glyphS = WIND_METERS_GLYPH_S;
-        glyphWidth = WIND_METERS_GLYPH_WIDTH;
-      } else {
-        glyphS = (*text - '0') * WIND_DIGIT_WIDTH;
-        glyphWidth = WIND_DIGIT_WIDTH;
-      }
+            if (*text == 'm') {
+                glyphS = WIND_METERS_GLYPH_S;
+                glyphWidth = WIND_METERS_GLYPH_WIDTH;
+            }
+            else {
+                glyphS = (*text - '0') * WIND_DIGIT_WIDTH;
+                glyphWidth = WIND_DIGIT_WIDTH;
+            }
 
-      gSPScisTextureRectangle(gfx++, QuarterPixels(textX + offsetX),
-          QuarterPixels(textY - WIND_TEXT_RAISE),
-          QuarterPixels(textX + offsetX + glyphWidth),
-          QuarterPixels(textY - WIND_TEXT_RAISE + WIND_FONT_HEIGHT),
-          G_TX_RENDERTILE, TexelCoordinate(glyphS), 0, TEXEL_STEP_ONE,
-          TEXEL_STEP_ONE);
+            gSPScisTextureRectangle(
+                gfx++,
+                QuarterPixels(textX + offsetX),
+                QuarterPixels(textY - WIND_TEXT_RAISE),
+                QuarterPixels(textX + offsetX + glyphWidth),
+                QuarterPixels(textY - WIND_TEXT_RAISE + WIND_FONT_HEIGHT),
+                G_TX_RENDERTILE,
+                TexelCoordinate(glyphS),
+                0,
+                TEXEL_STEP_ONE,
+                TEXEL_STEP_ONE
+            );
+        }
     }
-  }
 
-  scaledSpeed =
-      (u32)g_HoleSetup.conditions.windSpeed * WIND_SPEED_TO_METERS_SCALE;
-  /*
-   * The scaling ends its block, to match: 14 words differ, 6 in shape, as
-   * with the scaling in a block of its own. With the pulse step in a block
-   * of its own instead 16 differ (6), and with no barrier, plain braces
-   * around either statement, or the step first, 41 (31)
-   */
-  END_BASIC_BLOCK();
-  f_WindIconPulseAngle += WIND_ICON_PULSE_STEP;
-  speed = scaledSpeed / WIND_SPEED_TO_METERS_DIVISOR;
-  if (speed >= WIND_SPEED_TWO_DIGITS) {
-    halfWidth = sinf(f_WindIconPulseAngle) + WIND_ICON_WIDE_HALF_WIDTH;
-  } else {
-    halfWidth = sinf(f_WindIconPulseAngle) + WIND_ICON_NARROW_HALF_WIDTH;
-  }
-
-  halfHeight = sinf(f_WindIconPulseAngle) + WIND_ICON_HALF_HEIGHT;
-  halfWidthRounded = halfWidth + 0.5f;
-  halfHeightRounded = halfHeight + 0.5f;
-  dsdx = TexelRunStep(WIND_ICON_TEXTURE_WIDTH / 2, halfWidth);
-  dtdy = TexelRunStep(WIND_ICON_TEXTURE_HEIGHT / 2, halfHeight);
-
-  /* Moves the texture by the rounding, in 10.5 fixed point, from half a texel
-   * in */
-  textureS = HALF_TEXEL - ((halfWidthRounded - halfWidth) * HALF_TEXEL);
-  textureT = HALF_TEXEL - ((halfHeightRounded - halfHeight) * HALF_TEXEL);
-
-  /* The centers are kept positive by WIND_POSITIVE_BIAS, so rounding by
-   * truncation works */
-  if (speed >= WIND_SPEED_TWO_DIGITS) {
-    centerX = (-sinf(g_SkyState.viewedWindAngles[0]) * WIND_WIDE_LEAN_X) +
-        (x + WIND_OFFSET_X) + WIND_POSITIVE_BIAS;
-  } else {
-    centerX = (-sinf(g_SkyState.viewedWindAngles[0]) * WIND_NARROW_LEAN_X) +
-        (x + WIND_OFFSET_X) + WIND_POSITIVE_BIAS;
-  }
-
-  centerY = (-cosf(g_SkyState.viewedWindAngles[0]) * WIND_LEAN_Y) +
-      ((SCREEN_HEIGHT / 2) - y) - WIND_OFFSET_Y + WIND_POSITIVE_BIAS;
-  gDPPipeSync(gfx++);
-  gDPPipeSync(gfx++);
-  gDPSetTextureLUT(gfx++, G_TT_NONE);
-  gDPPipeSync(gfx++);
-  gDPSetTextureFilter(gfx++, G_TF_BILERP);
-  gDPPipeSync(gfx++);
-  gDPSetTexturePersp(gfx++, G_TP_NONE);
-  gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
-  gDPPipeSync(gfx++);
-  gDPSetRenderMode(gfx++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
-  gDPSetCombineLERP(gfx++, 0, 0, 0, PRIMITIVE, 0, 0, 0, TEXEL0, 0, 0, 0,
-      PRIMITIVE, 0, 0, 0, TEXEL0);
-  gDPLoadTextureBlock_4b(gfx++, TextureAddress(ImageBody(f_WindIconImage)),
-      G_IM_FMT_I, WIND_ICON_TEXTURE_WIDTH, WIND_ICON_TEXTURE_HEIGHT, 0,
-      G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
-      G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-  gDPPipeSync(gfx++);
-  roundedCenterX = centerX + 0.5f;
-  roundedCenterY = centerY + 0.5f;
-  gSPScisTextureRectangle(gfx++,
-      QuarterPixels(roundedCenterX - WIND_POSITIVE_BIAS + WIND_ICON_OFFSET_X -
-          halfWidthRounded),
-      QuarterPixels(roundedCenterY - WIND_POSITIVE_BIAS + WIND_ICON_OFFSET_Y -
-          halfHeightRounded),
-      QuarterPixels(roundedCenterX - WIND_POSITIVE_BIAS + WIND_ICON_OFFSET_X +
-          halfWidthRounded),
-      QuarterPixels(roundedCenterY - WIND_POSITIVE_BIAS + WIND_ICON_OFFSET_Y +
-          halfHeightRounded),
-      G_TX_RENDERTILE, textureS, textureT, dsdx, dtdy);
-  gDPPipeSync(gfx++);
-  SetUpTextDrawing(&gfx);
-  gDPPipeSync(gfx++);
-  gDPSetAlphaCompare(gfx++, G_AC_NONE);
-  gDPPipeSync(gfx++);
-  gDPSetTextureFilter(gfx++, G_TF_POINT);
-  gDPPipeSync(gfx++);
-  gDPSetRenderMode(gfx++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
-  gDPPipeSync(gfx++);
-  gDPSetRenderMode(gfx++, WIND_TEXT_RENDER_MODE, WIND_TEXT_RENDER_MODE2);
-  gDPPipeSync(gfx++);
-  gDPSetAlphaDither(gfx++, G_AD_DISABLE);
-  gDPPipeSync(gfx++);
-  gDPSetColorDither(gfx++, G_CD_DISABLE);
-  gDPSetPrimColor(gfx++, 0, 0, WIND_TEXT_PRIM_RED, WIND_TEXT_PRIM_GREEN,
-      WIND_TEXT_PRIM_BLUE, OPAQUE_ALPHA);
-  gDPSetEnvColor(gfx++, WIND_TEXT_ENV_RED, WIND_TEXT_ENV_GREEN,
-      WIND_TEXT_ENV_BLUE, OPAQUE_ALPHA);
-  gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-  gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(f_WindSpeedFont)));
-  gDPPipeSync(gfx++);
-  gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-  gDPLoadTextureBlock_4b(gfx++, TextureAddress(ImageTexels(f_WindSpeedFont)),
-      G_IM_FMT_CI, WIND_FONT_WIDTH, WIND_FONT_HEIGHT, 0,
-      G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
-      G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-  sprintf(g_PrintBuffer, "%dm", speed);
-  if (speed >= WIND_SPEED_TWO_DIGITS) {
-    DrawWindSpeedText(centerX - WIND_POSITIVE_BIAS - WIND_WIDE_TEXT_SHIFT_X,
-        centerY - WIND_POSITIVE_BIAS, g_PrintBuffer);
-  } else {
-    DrawWindSpeedText(centerX - WIND_POSITIVE_BIAS,
-        centerY - WIND_POSITIVE_BIAS, g_PrintBuffer);
-  }
-
-  gDPPipeSync(gfx++);
-  gDPSetTexturePersp(gfx++, G_TP_PERSP);
-  if (g_RoundHud.areWindSpeedArrowsShown == TRUE) {
-    if (speed != 0) {
-      DrawPauseArrows(&gfx, centerX - WIND_ARROWS_OFFSET_X,
-          centerY - WIND_ARROWS_OFFSET_Y, WIND_ARROWS_WIDE_GAP);
-    } else {
-      DrawPauseArrows(&gfx, centerX - WIND_ARROWS_OFFSET_X,
-          centerY - WIND_ARROWS_OFFSET_Y, WIND_ARROWS_NARROW_GAP);
+    scaledSpeed = (u32)g_HoleSetup.conditions.windSpeed * WIND_SPEED_TO_METERS_SCALE;
+    /*
+     * The scaling ends its block, to match: 14 words differ, 6 in shape, as
+     * with the scaling in a block of its own. With the pulse step in a block
+     * of its own instead 16 differ (6), and with no barrier, plain braces
+     * around either statement, or the step first, 41 (31)
+     */
+    END_BASIC_BLOCK();
+    f_WindIconPulseAngle += WIND_ICON_PULSE_STEP;
+    speed = scaledSpeed / WIND_SPEED_TO_METERS_DIVISOR;
+    if (speed >= WIND_SPEED_TWO_DIGITS) {
+        halfWidth = sinf(f_WindIconPulseAngle) + WIND_ICON_WIDE_HALF_WIDTH;
     }
-  }
+    else {
+        halfWidth = sinf(f_WindIconPulseAngle) + WIND_ICON_NARROW_HALF_WIDTH;
+    }
 
-  *displayListHead = gfx;
+    halfHeight = sinf(f_WindIconPulseAngle) + WIND_ICON_HALF_HEIGHT;
+    halfWidthRounded = halfWidth + 0.5f;
+    halfHeightRounded = halfHeight + 0.5f;
+    dsdx = TexelRunStep(WIND_ICON_TEXTURE_WIDTH / 2, halfWidth);
+    dtdy = TexelRunStep(WIND_ICON_TEXTURE_HEIGHT / 2, halfHeight);
+
+    /* Moves the texture by the rounding, in 10.5 fixed point, from half a texel
+     * in */
+    textureS = HALF_TEXEL - ((halfWidthRounded - halfWidth) * HALF_TEXEL);
+    textureT = HALF_TEXEL - ((halfHeightRounded - halfHeight) * HALF_TEXEL);
+
+    /* The centers are kept positive by WIND_POSITIVE_BIAS, so rounding by
+     * truncation works */
+    if (speed >= WIND_SPEED_TWO_DIGITS) {
+        centerX = (-sinf(g_SkyState.viewedWindAngles[0]) * WIND_WIDE_LEAN_X) + (x + WIND_OFFSET_X) +
+            WIND_POSITIVE_BIAS;
+    }
+    else {
+        centerX = (-sinf(g_SkyState.viewedWindAngles[0]) * WIND_NARROW_LEAN_X) +
+            (x + WIND_OFFSET_X) + WIND_POSITIVE_BIAS;
+    }
+
+    centerY = (-cosf(g_SkyState.viewedWindAngles[0]) * WIND_LEAN_Y) + ((SCREEN_HEIGHT / 2) - y) -
+        WIND_OFFSET_Y + WIND_POSITIVE_BIAS;
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_NONE);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_BILERP);
+    gDPPipeSync(gfx++);
+    gDPSetTexturePersp(gfx++, G_TP_NONE);
+    gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
+    gDPSetCombineLERP(
+        gfx++,
+        0,
+        0,
+        0,
+        PRIMITIVE,
+        0,
+        0,
+        0,
+        TEXEL0,
+        0,
+        0,
+        0,
+        PRIMITIVE,
+        0,
+        0,
+        0,
+        TEXEL0
+    );
+    gDPLoadTextureBlock_4b(
+        gfx++,
+        TextureAddress(ImageBody(f_WindIconImage)),
+        G_IM_FMT_I,
+        WIND_ICON_TEXTURE_WIDTH,
+        WIND_ICON_TEXTURE_HEIGHT,
+        0,
+        G_TX_NOMIRROR | G_TX_WRAP,
+        G_TX_NOMIRROR | G_TX_WRAP,
+        G_TX_NOMASK,
+        G_TX_NOMASK,
+        G_TX_NOLOD,
+        G_TX_NOLOD
+    );
+    gDPPipeSync(gfx++);
+    roundedCenterX = centerX + 0.5f;
+    roundedCenterY = centerY + 0.5f;
+    gSPScisTextureRectangle(
+        gfx++,
+        QuarterPixels(roundedCenterX - WIND_POSITIVE_BIAS + WIND_ICON_OFFSET_X - halfWidthRounded),
+        QuarterPixels(roundedCenterY - WIND_POSITIVE_BIAS + WIND_ICON_OFFSET_Y - halfHeightRounded),
+        QuarterPixels(roundedCenterX - WIND_POSITIVE_BIAS + WIND_ICON_OFFSET_X + halfWidthRounded),
+        QuarterPixels(roundedCenterY - WIND_POSITIVE_BIAS + WIND_ICON_OFFSET_Y + halfHeightRounded),
+        G_TX_RENDERTILE,
+        textureS,
+        textureT,
+        dsdx,
+        dtdy
+    );
+    gDPPipeSync(gfx++);
+    SetUpTextDrawing(&gfx);
+    gDPPipeSync(gfx++);
+    gDPSetAlphaCompare(gfx++, G_AC_NONE);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_POINT);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, WIND_TEXT_RENDER_MODE, WIND_TEXT_RENDER_MODE2);
+    gDPPipeSync(gfx++);
+    gDPSetAlphaDither(gfx++, G_AD_DISABLE);
+    gDPPipeSync(gfx++);
+    gDPSetColorDither(gfx++, G_CD_DISABLE);
+    gDPSetPrimColor(
+        gfx++,
+        0,
+        0,
+        WIND_TEXT_PRIM_RED,
+        WIND_TEXT_PRIM_GREEN,
+        WIND_TEXT_PRIM_BLUE,
+        OPAQUE_ALPHA
+    );
+    gDPSetEnvColor(gfx++, WIND_TEXT_ENV_RED, WIND_TEXT_ENV_GREEN, WIND_TEXT_ENV_BLUE, OPAQUE_ALPHA);
+    gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+    gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(f_WindSpeedFont)));
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+    gDPLoadTextureBlock_4b(
+        gfx++,
+        TextureAddress(ImageTexels(f_WindSpeedFont)),
+        G_IM_FMT_CI,
+        WIND_FONT_WIDTH,
+        WIND_FONT_HEIGHT,
+        0,
+        G_TX_NOMIRROR | G_TX_WRAP,
+        G_TX_NOMIRROR | G_TX_WRAP,
+        G_TX_NOMASK,
+        G_TX_NOMASK,
+        G_TX_NOLOD,
+        G_TX_NOLOD
+    );
+    sprintf(g_PrintBuffer, "%dm", speed);
+    if (speed >= WIND_SPEED_TWO_DIGITS) {
+        DrawWindSpeedText(
+            centerX - WIND_POSITIVE_BIAS - WIND_WIDE_TEXT_SHIFT_X,
+            centerY - WIND_POSITIVE_BIAS,
+            g_PrintBuffer
+        );
+    }
+    else {
+        DrawWindSpeedText(
+            centerX - WIND_POSITIVE_BIAS,
+            centerY - WIND_POSITIVE_BIAS,
+            g_PrintBuffer
+        );
+    }
+
+    gDPPipeSync(gfx++);
+    gDPSetTexturePersp(gfx++, G_TP_PERSP);
+    if (g_RoundHud.areWindSpeedArrowsShown == TRUE) {
+        if (speed != 0) {
+            DrawPauseArrows(
+                &gfx,
+                centerX - WIND_ARROWS_OFFSET_X,
+                centerY - WIND_ARROWS_OFFSET_Y,
+                WIND_ARROWS_WIDE_GAP
+            );
+        }
+        else {
+            DrawPauseArrows(
+                &gfx,
+                centerX - WIND_ARROWS_OFFSET_X,
+                centerY - WIND_ARROWS_OFFSET_Y,
+                WIND_ARROWS_NARROW_GAP
+            );
+        }
+    }
+
+    *displayListHead = gfx;
 }
 #else
 INCLUDE_ASM("asm/nonmatchings/round_hud", DrawWindSpeedText);
@@ -2559,88 +2884,91 @@ INCLUDE_ASM("asm/nonmatchings/round_hud", DrawWindSpeed);
  * after the model while the viewed wind angle is between a quarter and three
  * quarters of a turn, and before it otherwise.
  */
-void DrawWindIndicator(Gfx** displayListHead, f32 x, f32 y) {
-  Vec3 viewDirection;
-  Vec3 rotation;
-  Vec3 translation;
-  /* Pads the frame to match; without it 72 words differ */
-  Vec3 unusedScale UNUSED;
-  Mat4 matrix;
-  Mat4 transform;
-  Gfx* gfx = *displayListHead;
+void DrawWindIndicator(Gfx **displayListHead, f32 x, f32 y) {
+    Vec3 viewDirection;
+    Vec3 rotation;
+    Vec3 translation;
+    /* Pads the frame to match; without it 72 words differ */
+    Vec3 unusedScale UNUSED;
+    Mat4 matrix;
+    Mat4 transform;
+    Gfx *gfx = *displayListHead;
 
-  viewDirection[AXIS_X] =
-      g_Cameras[0].view.lookAt[AXIS_X] - g_Cameras[0].view.eye[AXIS_X];
-  viewDirection[AXIS_Z] =
-      g_Cameras[0].view.lookAt[AXIS_Z] - g_Cameras[0].view.eye[AXIS_Z];
-  viewDirection[AXIS_Y] =
-      g_Cameras[0].view.lookAt[AXIS_Y] - g_Cameras[0].view.eye[AXIS_Y];
-  rotation[AXIS_X] = atan2(viewDirection[AXIS_Y],
-                         sqrtf((viewDirection[AXIS_X] * viewDirection[AXIS_X]) +
-                             (viewDirection[AXIS_Z] * viewDirection[AXIS_Z]))) +
-      M_PI + WIND_INDICATOR_TILT;
-  rotation[AXIS_Y] = 0.0f;
-  rotation[AXIS_Z] = 0.0f;
-  translation[AXIS_X] = x;
-  translation[AXIS_Y] = y;
-  translation[AXIS_Z] = WIND_INDICATOR_DEPTH;
-  BuildRotationMatrix(matrix, rotation, translation);
-  guRotateRPYF(transform, 0.0f,
-      WIND_INDICATOR_FACING_DEGREES -
-          (g_SkyState.viewedWindAngles[0] * DEGREES_PER_TURN *
-              (1.0 / FULL_TURN_RADIANS)),
-      0.0f);
-  guMtxCatF(transform, matrix, matrix);
-  guScaleF(transform, WIND_INDICATOR_SCALE, WIND_INDICATOR_SCALE,
-      WIND_INDICATOR_SCALE);
-  guMtxCatF(transform, matrix, matrix);
-  guMtxF2L(matrix, &f_WindIndicatorMatrices[g_MatrixBufferIndex]);
-  if (!(g_SkyState.viewedWindAngles[0] > M_PI / 2 &&
-          g_SkyState.viewedWindAngles[0] < 3 * M_PI / 2)) {
-    DrawWindSpeed(&gfx, x, y);
-  }
+    viewDirection[AXIS_X] = g_Cameras[0].view.lookAt[AXIS_X] - g_Cameras[0].view.eye[AXIS_X];
+    viewDirection[AXIS_Z] = g_Cameras[0].view.lookAt[AXIS_Z] - g_Cameras[0].view.eye[AXIS_Z];
+    viewDirection[AXIS_Y] = g_Cameras[0].view.lookAt[AXIS_Y] - g_Cameras[0].view.eye[AXIS_Y];
+    rotation[AXIS_X] = atan2(
+                           viewDirection[AXIS_Y],
+                           sqrtf(
+                               (viewDirection[AXIS_X] * viewDirection[AXIS_X]) +
+                               (viewDirection[AXIS_Z] * viewDirection[AXIS_Z])
+                           )
+                       ) +
+        M_PI + WIND_INDICATOR_TILT;
+    rotation[AXIS_Y] = 0.0f;
+    rotation[AXIS_Z] = 0.0f;
+    translation[AXIS_X] = x;
+    translation[AXIS_Y] = y;
+    translation[AXIS_Z] = WIND_INDICATOR_DEPTH;
+    BuildRotationMatrix(matrix, rotation, translation);
+    guRotateRPYF(
+        transform,
+        0.0f,
+        WIND_INDICATOR_FACING_DEGREES -
+            (g_SkyState.viewedWindAngles[0] * DEGREES_PER_TURN * (1.0 / FULL_TURN_RADIANS)),
+        0.0f
+    );
+    guMtxCatF(transform, matrix, matrix);
+    guScaleF(transform, WIND_INDICATOR_SCALE, WIND_INDICATOR_SCALE, WIND_INDICATOR_SCALE);
+    guMtxCatF(transform, matrix, matrix);
+    guMtxF2L(matrix, &f_WindIndicatorMatrices[g_MatrixBufferIndex]);
+    if (!(g_SkyState.viewedWindAngles[0] > M_PI / 2 &&
+            g_SkyState.viewedWindAngles[0] < 3 * M_PI / 2)) {
+        DrawWindSpeed(&gfx, x, y);
+    }
 
-  gDPPipeSync(gfx++);
-  gDPSetRenderMode(gfx++, G_RM_AA_OPA_SURF, G_RM_AA_OPA_SURF2);
-  gDPPipeSync(gfx++);
-  gDPSetTextureLUT(gfx++, G_TT_NONE);
-  gSPTexture(
-      gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0, G_TX_RENDERTILE, G_ON);
-  gDPPipeSync(gfx++);
-  gDPSetTexturePersp(gfx++, G_TP_PERSP);
-  gDPPipeSync(gfx++);
-  gSPMatrix(gfx++,
-      PhysicalAddress(&f_WindIndicatorMatrices[g_MatrixBufferIndex]),
-      G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-  gSPSetLights1(gfx++, f_WindArrowLights);
-  if (g_IsModuleAlive[MODULE_WIND_BOO]) {
-    g_ModuleRdpRequestFrames[MODULE_WIND_BOO] = g_FrameCount;
-    gSPDisplayList(gfx++, g_BooDisplayList);
-  }
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_AA_OPA_SURF, G_RM_AA_OPA_SURF2);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_NONE);
+    gSPTexture(gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0, G_TX_RENDERTILE, G_ON);
+    gDPPipeSync(gfx++);
+    gDPSetTexturePersp(gfx++, G_TP_PERSP);
+    gDPPipeSync(gfx++);
+    gSPMatrix(
+        gfx++,
+        PhysicalAddress(&f_WindIndicatorMatrices[g_MatrixBufferIndex]),
+        G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW
+    );
+    gSPSetLights1(gfx++, f_WindArrowLights);
+    if (g_IsModuleAlive[MODULE_WIND_BOO]) {
+        g_ModuleRdpRequestFrames[MODULE_WIND_BOO] = g_FrameCount;
+        gSPDisplayList(gfx++, g_BooDisplayList);
+    }
 
-  if (g_SkyState.viewedWindAngles[0] > M_PI / 2 &&
-      g_SkyState.viewedWindAngles[0] < 3 * M_PI / 2) {
-    DrawWindSpeed(&gfx, x, y);
-  }
+    if (g_SkyState.viewedWindAngles[0] > M_PI / 2 &&
+        g_SkyState.viewedWindAngles[0] < 3 * M_PI / 2) {
+        DrawWindSpeed(&gfx, x, y);
+    }
 
-  *displayListHead = gfx;
+    *displayListHead = gfx;
 }
 
 /* Lets the second controller's C buttons nudge the HUD up and down, and prints
  * the offset */
 void AdjustHudOffset(void) {
-  if (IsGameFlagSet(GAME_FLAG_ADJUST_HUD_OFFSET)) {
-    if (g_ControllerStates[HUD_OFFSET_CONTROLLER].pressedButtons & U_CBUTTONS) {
-      f_HudOffsetY--;
-    }
+    if (IsGameFlagSet(GAME_FLAG_ADJUST_HUD_OFFSET)) {
+        if (g_ControllerStates[HUD_OFFSET_CONTROLLER].pressedButtons & U_CBUTTONS) {
+            f_HudOffsetY--;
+        }
 
-    if (g_ControllerStates[HUD_OFFSET_CONTROLLER].pressedButtons & D_CBUTTONS) {
-      f_HudOffsetY++;
-    }
+        if (g_ControllerStates[HUD_OFFSET_CONTROLLER].pressedButtons & D_CBUTTONS) {
+            f_HudOffsetY++;
+        }
 
-    sprintf(g_PrintBuffer, "%3d", (int)f_HudOffsetY);
-    PrintDebugText(g_PrintBuffer, HUD_OFFSET_TEXT_COLUMN, HUD_OFFSET_TEXT_ROW);
-  }
+        sprintf(g_PrintBuffer, "%3d", (int)f_HudOffsetY);
+        PrintDebugText(g_PrintBuffer, HUD_OFFSET_TEXT_COLUMN, HUD_OFFSET_TEXT_ROW);
+    }
 }
 
 /* Where the shot panel's wind indicator sits, unless the shot is on the green,
@@ -2652,9 +2980,10 @@ void AdjustHudOffset(void) {
  * the indicator isn't hidden, off the green and outside the cup view
  */
 #define IsWindIndicatorDrawn() \
-  (g_HoleSetup.conditions.windSpeed != 0 && g_RoundHud.isWindIndicatorShown && \
-      GetSurfaceInfo(g_CurrentShot.surface)->kind != SURFACE_KIND_GREEN && \
-      !g_IsCupViewShown)
+    (g_HoleSetup.conditions.windSpeed != 0 && \
+        g_RoundHud.isWindIndicatorShown && \
+        GetSurfaceInfo(g_CurrentShot.surface)->kind != SURFACE_KIND_GREEN && \
+        !g_IsCupViewShown)
 /* The arrows beside a pause menu panel; they take screen coordinates, while the
  * panels sit in the centered view */
 #define PAUSE_PANEL_ARROWS_GAP 64
@@ -2678,174 +3007,241 @@ void AdjustHudOffset(void) {
  * Draws the shot panel's wind indicator, club head and lie, or the wind
  * and lie panels beside the pause menu while it sets them
  */
-void DrawShotPanelIcons(Gfx** displayListHead, CameraView* view UNUSED) {
-  Vec3 rotation;
-  Vec3 translation;
-  /* Pads the frame to match; without it 222 words differ */
-  Vec3 unusedScale UNUSED;
-  Mat4 matrix;
-  /* Pads the frame to match; without it 218 words differ */
-  s32 unused[18] UNUSED;
-  Gfx* gfx;
-  Club* club;
-  Radians clubHeadAngle;
-  Radians lieAngle;
+void DrawShotPanelIcons(Gfx **displayListHead, CameraView *view UNUSED) {
+    Vec3 rotation;
+    Vec3 translation;
+    /* Pads the frame to match; without it 222 words differ */
+    Vec3 unusedScale UNUSED;
+    Mat4 matrix;
+    /* Pads the frame to match; without it 218 words differ */
+    s32 unused[18] UNUSED;
+    Gfx *gfx;
+    Club *club;
+    Radians clubHeadAngle;
+    Radians lieAngle;
 
-  gfx = *displayListHead;
-  gSPMatrix(gfx++, PhysicalAddress(&g_ScreenOrthoMatrix),
-      G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
-  gDPPipeSync(gfx++);
-  gDPPipeSync(gfx++);
-  gDPSetCycleType(gfx++, G_CYC_1CYCLE);
-  gDPPipeSync(gfx++);
-  gDPSetTexturePersp(gfx++, G_TP_PERSP);
-  gDPPipeSync(gfx++);
-  gDPSetTextureFilter(gfx++, G_TF_BILERP);
-  gSPClearGeometryMode(gfx++, ALL_GEOMETRY_MODES);
-  gSPSetGeometryMode(gfx++, G_SHADE | G_CULL_BACK);
-  if (g_RoundHud.areWindSpeedArrowsShown == TRUE ||
-      g_RoundHud.areWindDirectionArrowsShown == TRUE) {
-    if (g_IsModuleAlive[MODULE_PAUSE_MENU]) {
-      DrawWindIndicator(
-          &gfx, g_WindPanelPosition[AXIS_X], g_WindPanelPosition[AXIS_Y]);
-      if (g_RoundHud.areWindDirectionArrowsShown == TRUE) {
-        DrawPauseArrows(&gfx, g_WindPanelPosition[AXIS_X] + (SCREEN_WIDTH / 2),
-            (SCREEN_HEIGHT / 2) - g_WindPanelPosition[AXIS_Y],
-            PAUSE_PANEL_ARROWS_GAP);
-      }
-    }
-  } else if (IsWindIndicatorDrawn()) {
-    DrawWindIndicator(&gfx, g_ShotPanelOffsetX + SHOT_PANEL_WIND_INDICATOR_X,
-        SHOT_PANEL_WIND_INDICATOR_Y);
-  }
-
-  gSPMatrix(gfx++, PhysicalAddress(&g_ScreenOrthoMatrix),
-      G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
-  gDPPipeSync(gfx++);
-  gSPClearGeometryMode(gfx++, ALL_GEOMETRY_MODES);
-  gSPSetGeometryMode(gfx++, G_SHADE | G_SHADING_SMOOTH | G_CULL_BACK);
-  if (!g_IsCupViewShown && g_IsModuleAlive[MODULE_CLUB_PANEL]) {
-    DrawClubPanelIfShown(&gfx);
-  }
-
-  if (g_RoundHud.isClubHeadIconShown && !g_IsCupViewShown) {
-    club = GetClub(
-        g_Players[g_CurrentShot.playerIndex].clubs[g_CurrentShot.clubSlot]);
-    if (club->headImageAsset != f_ClubHeadImageAsset) {
-      EncodedAsset asset;
-
-      f_ClubHeadImageAsset = club->headImageAsset;
-      OpenEncodedAsset(club->headImageAsset, &asset);
-      ReadEncodedAsset(f_ClubHeadImage, &asset);
-      f_ClubNameImageIndex ^= 1;
-      OpenEncodedAsset(f_ClubNameAssets[g_CurrentShot.clubSlot], &asset);
-      ReadEncodedAsset(f_ClubNameImages[f_ClubNameImageIndex], &asset);
-    }
-
-    clubHeadAngle = g_RoundHud.clubHeadTilt * BINARY_ANGLE_TO_RADIANS;
-    if (clubHeadAngle > M_PI) {
-      clubHeadAngle -= FULL_TURN_RADIANS;
-    }
-
-    rotation[AXIS_X] = 0;
-    rotation[AXIS_Y] = 0;
-    rotation[AXIS_Z] = -clubHeadAngle * SHOT_PANEL_ICON_TILT;
-    translation[AXIS_X] = CLUB_HEAD_ICON_X - g_ShotPanelOffsetX;
-    translation[AXIS_Y] = CLUB_HEAD_ICON_Y - f_HudOffsetY;
-    translation[AXIS_Z] = SHOT_PANEL_ICON_Z;
-    BuildRotationMatrix(matrix, rotation, translation);
-    ConvertMatrixToFixed(matrix, &f_ClubHeadIconMatrices[g_MatrixBufferIndex]);
+    gfx = *displayListHead;
+    gSPMatrix(
+        gfx++,
+        PhysicalAddress(&g_ScreenOrthoMatrix),
+        G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION
+    );
     gDPPipeSync(gfx++);
-    gSPTexture(gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0,
-        G_TX_RENDERTILE, G_ON);
     gDPPipeSync(gfx++);
     gDPSetCycleType(gfx++, G_CYC_1CYCLE);
     gDPPipeSync(gfx++);
-    gDPSetTextureLUT(gfx++, G_TT_NONE);
-    gDPSetCombineMode(gfx++, G_CC_MODULATERGBA_PRIM, G_CC_MODULATERGBA_PRIM);
-    if (g_RoundHud.flags & HUD_FLAG_LIGHT_CLUB_HEAD) {
-      gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
-    } else {
-      gDPSetPrimColor(gfx++, 0, 0, SHOT_PANEL_ICON_DIM, SHOT_PANEL_ICON_DIM,
-          SHOT_PANEL_ICON_DIM, OPAQUE_ALPHA);
+    gDPSetTexturePersp(gfx++, G_TP_PERSP);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_BILERP);
+    gSPClearGeometryMode(gfx++, ALL_GEOMETRY_MODES);
+    gSPSetGeometryMode(gfx++, G_SHADE | G_CULL_BACK);
+    if (g_RoundHud.areWindSpeedArrowsShown == TRUE ||
+        g_RoundHud.areWindDirectionArrowsShown == TRUE) {
+        if (g_IsModuleAlive[MODULE_PAUSE_MENU]) {
+            DrawWindIndicator(&gfx, g_WindPanelPosition[AXIS_X], g_WindPanelPosition[AXIS_Y]);
+            if (g_RoundHud.areWindDirectionArrowsShown == TRUE) {
+                DrawPauseArrows(
+                    &gfx,
+                    g_WindPanelPosition[AXIS_X] + (SCREEN_WIDTH / 2),
+                    (SCREEN_HEIGHT / 2) - g_WindPanelPosition[AXIS_Y],
+                    PAUSE_PANEL_ARROWS_GAP
+                );
+            }
+        }
+    }
+    else if (IsWindIndicatorDrawn()) {
+        DrawWindIndicator(
+            &gfx,
+            g_ShotPanelOffsetX + SHOT_PANEL_WIND_INDICATOR_X,
+            SHOT_PANEL_WIND_INDICATOR_Y
+        );
     }
 
+    gSPMatrix(
+        gfx++,
+        PhysicalAddress(&g_ScreenOrthoMatrix),
+        G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION
+    );
     gDPPipeSync(gfx++);
-    gDPSetRenderMode(gfx++, G_RM_AA_TEX_EDGE, G_RM_AA_TEX_EDGE2);
-    gDPLoadTextureBlock(gfx++, TextureAddress(ImageBody(f_ClubHeadImage)),
-        G_IM_FMT_RGBA, G_IM_SIZ_16b, CLUB_HEAD_IMAGE_SIZE, CLUB_HEAD_IMAGE_SIZE,
-        0, G_TX_WRAP, G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
-        G_TX_NOLOD);
-    gDPPipeSync(gfx++);
-    gSPMatrix(gfx++,
-        PhysicalAddress(&f_ClubHeadIconMatrices[g_MatrixBufferIndex]),
-        G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-    gSPVertex(gfx++, f_ClubHeadIconVertices, QUAD_VERTEX_COUNT, 0);
-    gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
-    gDPPipeSync(gfx++);
-  }
-
-  if ((g_RoundHud.isLieIconShown || g_RoundHud.areLieArrowsShown) &&
-      !g_IsCupViewShown) {
-    lieAngle = g_RoundHud.lieTilt * BINARY_ANGLE_TO_RADIANS;
-    if (lieAngle > M_PI) {
-      lieAngle -= FULL_TURN_RADIANS;
+    gSPClearGeometryMode(gfx++, ALL_GEOMETRY_MODES);
+    gSPSetGeometryMode(gfx++, G_SHADE | G_SHADING_SMOOTH | G_CULL_BACK);
+    if (!g_IsCupViewShown && g_IsModuleAlive[MODULE_CLUB_PANEL]) {
+        DrawClubPanelIfShown(&gfx);
     }
 
-    rotation[AXIS_X] = 0;
-    rotation[AXIS_Y] = 0;
-    rotation[AXIS_Z] = lieAngle * SHOT_PANEL_ICON_TILT;
-    if (g_RoundHud.isLieIconShown) {
-      translation[AXIS_X] = g_ShotPanelOffsetX + LIE_ICON_X;
-      translation[AXIS_Y] = LIE_ICON_Y - f_HudOffsetY;
-      translation[AXIS_Z] = SHOT_PANEL_ICON_Z;
-    } else if (g_IsModuleAlive[MODULE_PAUSE_MENU]) {
-      translation[AXIS_X] = g_LiePanelPosition[AXIS_X];
-      translation[AXIS_Y] = g_LiePanelPosition[AXIS_Y];
-      translation[AXIS_Z] = SHOT_PANEL_ICON_Z;
-      DrawPauseArrows(&gfx, g_LiePanelPosition[AXIS_X] + (SCREEN_WIDTH / 2),
-          (SCREEN_HEIGHT / 2) - g_LiePanelPosition[AXIS_Y],
-          PAUSE_PANEL_ARROWS_GAP);
+    if (g_RoundHud.isClubHeadIconShown && !g_IsCupViewShown) {
+        club = GetClub(g_Players[g_CurrentShot.playerIndex].clubs[g_CurrentShot.clubSlot]);
+        if (club->headImageAsset != f_ClubHeadImageAsset) {
+            EncodedAsset asset;
+
+            f_ClubHeadImageAsset = club->headImageAsset;
+            OpenEncodedAsset(club->headImageAsset, &asset);
+            ReadEncodedAsset(f_ClubHeadImage, &asset);
+            f_ClubNameImageIndex ^= 1;
+            OpenEncodedAsset(f_ClubNameAssets[g_CurrentShot.clubSlot], &asset);
+            ReadEncodedAsset(f_ClubNameImages[f_ClubNameImageIndex], &asset);
+        }
+
+        clubHeadAngle = g_RoundHud.clubHeadTilt * BINARY_ANGLE_TO_RADIANS;
+        if (clubHeadAngle > M_PI) {
+            clubHeadAngle -= FULL_TURN_RADIANS;
+        }
+
+        rotation[AXIS_X] = 0;
+        rotation[AXIS_Y] = 0;
+        rotation[AXIS_Z] = -clubHeadAngle * SHOT_PANEL_ICON_TILT;
+        translation[AXIS_X] = CLUB_HEAD_ICON_X - g_ShotPanelOffsetX;
+        translation[AXIS_Y] = CLUB_HEAD_ICON_Y - f_HudOffsetY;
+        translation[AXIS_Z] = SHOT_PANEL_ICON_Z;
+        BuildRotationMatrix(matrix, rotation, translation);
+        ConvertMatrixToFixed(matrix, &f_ClubHeadIconMatrices[g_MatrixBufferIndex]);
+        gDPPipeSync(gfx++);
+        gSPTexture(gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0, G_TX_RENDERTILE, G_ON);
+        gDPPipeSync(gfx++);
+        gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+        gDPPipeSync(gfx++);
+        gDPSetTextureLUT(gfx++, G_TT_NONE);
+        gDPSetCombineMode(gfx++, G_CC_MODULATERGBA_PRIM, G_CC_MODULATERGBA_PRIM);
+        if (g_RoundHud.flags & HUD_FLAG_LIGHT_CLUB_HEAD) {
+            gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
+        }
+        else {
+            gDPSetPrimColor(
+                gfx++,
+                0,
+                0,
+                SHOT_PANEL_ICON_DIM,
+                SHOT_PANEL_ICON_DIM,
+                SHOT_PANEL_ICON_DIM,
+                OPAQUE_ALPHA
+            );
+        }
+
+        gDPPipeSync(gfx++);
+        gDPSetRenderMode(gfx++, G_RM_AA_TEX_EDGE, G_RM_AA_TEX_EDGE2);
+        gDPLoadTextureBlock(
+            gfx++,
+            TextureAddress(ImageBody(f_ClubHeadImage)),
+            G_IM_FMT_RGBA,
+            G_IM_SIZ_16b,
+            CLUB_HEAD_IMAGE_SIZE,
+            CLUB_HEAD_IMAGE_SIZE,
+            0,
+            G_TX_WRAP,
+            G_TX_WRAP,
+            G_TX_NOMASK,
+            G_TX_NOMASK,
+            G_TX_NOLOD,
+            G_TX_NOLOD
+        );
+        gDPPipeSync(gfx++);
+        gSPMatrix(
+            gfx++,
+            PhysicalAddress(&f_ClubHeadIconMatrices[g_MatrixBufferIndex]),
+            G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW
+        );
+        gSPVertex(gfx++, f_ClubHeadIconVertices, QUAD_VERTEX_COUNT, 0);
+        gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
+        gDPPipeSync(gfx++);
     }
 
-    BuildRotationMatrix(matrix, rotation, translation);
-    ConvertMatrixToFixed(matrix, &f_LieIconMatrices[g_MatrixBufferIndex]);
-    if (g_RoundHud.flags & HUD_FLAG_ANIMATE_OFFSET_MARKER) {
-      gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
-    } else {
-      gDPSetPrimColor(gfx++, 0, 0, SHOT_PANEL_ICON_DIM, SHOT_PANEL_ICON_DIM,
-          SHOT_PANEL_ICON_DIM, OPAQUE_ALPHA);
+    if ((g_RoundHud.isLieIconShown || g_RoundHud.areLieArrowsShown) && !g_IsCupViewShown) {
+        lieAngle = g_RoundHud.lieTilt * BINARY_ANGLE_TO_RADIANS;
+        if (lieAngle > M_PI) {
+            lieAngle -= FULL_TURN_RADIANS;
+        }
+
+        rotation[AXIS_X] = 0;
+        rotation[AXIS_Y] = 0;
+        rotation[AXIS_Z] = lieAngle * SHOT_PANEL_ICON_TILT;
+        if (g_RoundHud.isLieIconShown) {
+            translation[AXIS_X] = g_ShotPanelOffsetX + LIE_ICON_X;
+            translation[AXIS_Y] = LIE_ICON_Y - f_HudOffsetY;
+            translation[AXIS_Z] = SHOT_PANEL_ICON_Z;
+        }
+        else if (g_IsModuleAlive[MODULE_PAUSE_MENU]) {
+            translation[AXIS_X] = g_LiePanelPosition[AXIS_X];
+            translation[AXIS_Y] = g_LiePanelPosition[AXIS_Y];
+            translation[AXIS_Z] = SHOT_PANEL_ICON_Z;
+            DrawPauseArrows(
+                &gfx,
+                g_LiePanelPosition[AXIS_X] + (SCREEN_WIDTH / 2),
+                (SCREEN_HEIGHT / 2) - g_LiePanelPosition[AXIS_Y],
+                PAUSE_PANEL_ARROWS_GAP
+            );
+        }
+
+        BuildRotationMatrix(matrix, rotation, translation);
+        ConvertMatrixToFixed(matrix, &f_LieIconMatrices[g_MatrixBufferIndex]);
+        if (g_RoundHud.flags & HUD_FLAG_ANIMATE_OFFSET_MARKER) {
+            gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
+        }
+        else {
+            gDPSetPrimColor(
+                gfx++,
+                0,
+                0,
+                SHOT_PANEL_ICON_DIM,
+                SHOT_PANEL_ICON_DIM,
+                SHOT_PANEL_ICON_DIM,
+                OPAQUE_ALPHA
+            );
+        }
+
+        gDPPipeSync(gfx++);
+        gSPTexture(gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0, G_TX_RENDERTILE, G_ON);
+        gDPPipeSync(gfx++);
+        gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+        gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(f_LieImage)));
+        gDPPipeSync(gfx++);
+        gDPSetTextureLUT(gfx++, G_TT_NONE);
+        gDPSetCombineMode(gfx++, G_CC_MODULATERGBA_PRIM, G_CC_MODULATERGBA_PRIM);
+        gDPPipeSync(gfx++);
+        gDPSetRenderMode(gfx++, G_RM_AA_TEX_EDGE, G_RM_AA_TEX_EDGE2);
+        gSPMatrix(
+            gfx++,
+            PhysicalAddress(&f_LieIconMatrices[g_MatrixBufferIndex]),
+            G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW
+        );
+        gSPVertex(gfx++, f_LieIconVertices, ARRAY_COUNT(f_LieIconVertices), 0);
+        gDPLoadTextureBlock(
+            gfx++,
+            TextureAddress(ImageBody(f_LieImage)),
+            G_IM_FMT_RGBA,
+            G_IM_SIZ_16b,
+            LIE_IMAGE_WIDTH,
+            LIE_IMAGE_HALF_HEIGHT,
+            0,
+            G_TX_WRAP,
+            G_TX_WRAP,
+            G_TX_NOMASK,
+            G_TX_NOMASK,
+            G_TX_NOLOD,
+            G_TX_NOLOD
+        );
+        gDPPipeSync(gfx++);
+        gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
+        gDPLoadTextureBlock(
+            gfx++,
+            TextureAddress(ImageBody(f_LieImage) + LIE_IMAGE_HALF_SIZE),
+            G_IM_FMT_RGBA,
+            G_IM_SIZ_16b,
+            LIE_IMAGE_WIDTH,
+            LIE_IMAGE_HALF_HEIGHT,
+            0,
+            G_TX_WRAP,
+            G_TX_WRAP,
+            G_TX_NOMASK,
+            G_TX_NOMASK,
+            G_TX_NOLOD,
+            G_TX_NOLOD
+        );
+        gDPPipeSync(gfx++);
+        gSP2Triangles(gfx++, 4, 5, 6, 0, 4, 6, 7, 0);
+        gDPPipeSync(gfx++);
     }
 
-    gDPPipeSync(gfx++);
-    gSPTexture(gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0,
-        G_TX_RENDERTILE, G_ON);
-    gDPPipeSync(gfx++);
-    gDPSetCycleType(gfx++, G_CYC_1CYCLE);
-    gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(f_LieImage)));
-    gDPPipeSync(gfx++);
-    gDPSetTextureLUT(gfx++, G_TT_NONE);
-    gDPSetCombineMode(gfx++, G_CC_MODULATERGBA_PRIM, G_CC_MODULATERGBA_PRIM);
-    gDPPipeSync(gfx++);
-    gDPSetRenderMode(gfx++, G_RM_AA_TEX_EDGE, G_RM_AA_TEX_EDGE2);
-    gSPMatrix(gfx++, PhysicalAddress(&f_LieIconMatrices[g_MatrixBufferIndex]),
-        G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-    gSPVertex(gfx++, f_LieIconVertices, ARRAY_COUNT(f_LieIconVertices), 0);
-    gDPLoadTextureBlock(gfx++, TextureAddress(ImageBody(f_LieImage)),
-        G_IM_FMT_RGBA, G_IM_SIZ_16b, LIE_IMAGE_WIDTH, LIE_IMAGE_HALF_HEIGHT, 0,
-        G_TX_WRAP, G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-    gDPPipeSync(gfx++);
-    gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
-    gDPLoadTextureBlock(gfx++,
-        TextureAddress(ImageBody(f_LieImage) + LIE_IMAGE_HALF_SIZE),
-        G_IM_FMT_RGBA, G_IM_SIZ_16b, LIE_IMAGE_WIDTH, LIE_IMAGE_HALF_HEIGHT, 0,
-        G_TX_WRAP, G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-    gDPPipeSync(gfx++);
-    gSP2Triangles(gfx++, 4, 5, 6, 0, 4, 6, 7, 0);
-    gDPPipeSync(gfx++);
-  }
-
-  *displayListHead = gfx;
+    *displayListHead = gfx;
 }
 
 /*
@@ -2854,140 +3250,202 @@ void DrawShotPanelIcons(Gfx** displayListHead, CameraView* view UNUSED) {
  * back's and mirroring its shades around HOLE_FLAG_START_SHADE.
  */
 void DrawHoleFlag(Boolean isBackDrawn) {
-  s32 row;
-  s32 column;
-  s32 index;
-  Vtx* vertex;
-  s32 vertexIndex;
+    s32 row;
+    s32 column;
+    s32 index;
+    Vtx *vertex;
+    s32 vertexIndex;
 
-  gDPPipeSync(g_DisplayListHead++);
-  gDPSetCombineMode(g_DisplayListHead++, G_CC_MODULATERGBA, G_CC_MODULATERGBA);
-  gDPPipeSync(g_DisplayListHead++);
-  gDPSetTexturePersp(g_DisplayListHead++, G_TP_PERSP);
-  gDPPipeSync(g_DisplayListHead++);
-  gDPSetTextureFilter(g_DisplayListHead++, G_TF_BILERP);
-  gDPSetPrimColor(g_DisplayListHead++, 0, 0, 0, 0, 255, OPAQUE_ALPHA);
-  gDPPipeSync(g_DisplayListHead++);
-  gDPSetAlphaCompare(g_DisplayListHead++, G_AC_NONE);
-  gDPSetBlendColor(g_DisplayListHead++, 255, 255, 255, 1);
-  gDPLoadTLUT_pal256(
-      g_DisplayListHead++, TextureAddress(ImageBody(f_HoleImage)));
-  gDPPipeSync(g_DisplayListHead++);
-  gDPSetTextureLUT(g_DisplayListHead++, G_TT_RGBA16);
-  gDPPipeSync(g_DisplayListHead++);
-  gDPSetTexturePersp(g_DisplayListHead++, G_TP_PERSP);
-  gDPPipeSync(g_DisplayListHead++);
-  gDPSetTextureFilter(g_DisplayListHead++, G_TF_BILERP);
-  gSPTexture(g_DisplayListHead++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0,
-      G_TX_RENDERTILE, G_ON);
-  gDPLoadTextureBlock(g_DisplayListHead++,
-      TextureAddress(LargeImageTexels(f_HoleImage)), G_IM_FMT_CI, G_IM_SIZ_8b,
-      HOLE_IMAGE_WIDTH, HOLE_IMAGE_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
-      G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
-      G_TX_NOLOD);
-  gDPPipeSync(g_DisplayListHead++);
-  gSPVertex(g_DisplayListHead++, f_HoleFlagVertices[0][g_MatrixBufferIndex],
-      HOLE_FLAG_VERTEX_COUNT, 0);
-  for (row = 0; row != HOLE_FLAG_ROW_COUNT - 1; row++) {
-    for (column = 0; column != HOLE_FLAG_COLUMN_COUNT - 1; column++) {
-      index = (row * HOLE_FLAG_COLUMN_COUNT) + column;
-      gSP2Triangles(g_DisplayListHead++, index, index + HOLE_FLAG_COLUMN_COUNT,
-          index + HOLE_FLAG_COLUMN_COUNT + 1, 0, index,
-          index + HOLE_FLAG_COLUMN_COUNT + 1, index + 1, 0);
-    }
-  }
-
-  if (isBackDrawn == TRUE) {
-    vertexIndex = 0;
-    vertex = f_HoleFlagVertices[0][g_MatrixBufferIndex];
-    for (row = 0; row != HOLE_FLAG_ROW_COUNT; row++) {
-      for (column = 0; column != HOLE_FLAG_COLUMN_COUNT;
-          column++, vertexIndex++, vertex++) {
-        /* These texture coordinates are after the gSPTexture scale, which
-         * halves them */
-        gSPModifyVertex(g_DisplayListHead++, vertexIndex, G_MWO_POINT_ST,
-            TexcoordWord((HOLE_FLAG_BACK_TEXEL_START / 2) -
-                    (column * (HOLE_FLAG_TEXEL_COLUMN_STEP / 2)),
-                row * (HOLE_FLAG_TEXEL_ROW_STEP / 2)));
-        gSPModifyVertex(g_DisplayListHead++, vertexIndex, G_MWO_POINT_RGBA,
-            RgbaColor(2 * HOLE_FLAG_START_SHADE - vertex->v.cn[0],
-                2 * HOLE_FLAG_START_SHADE - vertex->v.cn[1],
-                2 * HOLE_FLAG_START_SHADE - vertex->v.cn[2],
-                HOLE_FLAG_START_SHADE));
-      }
-    }
-
+    gDPPipeSync(g_DisplayListHead++);
+    gDPSetCombineMode(g_DisplayListHead++, G_CC_MODULATERGBA, G_CC_MODULATERGBA);
+    gDPPipeSync(g_DisplayListHead++);
+    gDPSetTexturePersp(g_DisplayListHead++, G_TP_PERSP);
+    gDPPipeSync(g_DisplayListHead++);
+    gDPSetTextureFilter(g_DisplayListHead++, G_TF_BILERP);
+    gDPSetPrimColor(g_DisplayListHead++, 0, 0, 0, 0, 255, OPAQUE_ALPHA);
+    gDPPipeSync(g_DisplayListHead++);
+    gDPSetAlphaCompare(g_DisplayListHead++, G_AC_NONE);
+    gDPSetBlendColor(g_DisplayListHead++, 255, 255, 255, 1);
+    gDPLoadTLUT_pal256(g_DisplayListHead++, TextureAddress(ImageBody(f_HoleImage)));
+    gDPPipeSync(g_DisplayListHead++);
+    gDPSetTextureLUT(g_DisplayListHead++, G_TT_RGBA16);
+    gDPPipeSync(g_DisplayListHead++);
+    gDPSetTexturePersp(g_DisplayListHead++, G_TP_PERSP);
+    gDPPipeSync(g_DisplayListHead++);
+    gDPSetTextureFilter(g_DisplayListHead++, G_TF_BILERP);
+    gSPTexture(
+        g_DisplayListHead++,
+        TEXTURE_SCALE_HALF,
+        TEXTURE_SCALE_HALF,
+        0,
+        G_TX_RENDERTILE,
+        G_ON
+    );
+    gDPLoadTextureBlock(
+        g_DisplayListHead++,
+        TextureAddress(LargeImageTexels(f_HoleImage)),
+        G_IM_FMT_CI,
+        G_IM_SIZ_8b,
+        HOLE_IMAGE_WIDTH,
+        HOLE_IMAGE_HEIGHT,
+        0,
+        G_TX_NOMIRROR | G_TX_WRAP,
+        G_TX_NOMIRROR | G_TX_WRAP,
+        G_TX_NOMASK,
+        G_TX_NOMASK,
+        G_TX_NOLOD,
+        G_TX_NOLOD
+    );
+    gDPPipeSync(g_DisplayListHead++);
+    gSPVertex(
+        g_DisplayListHead++,
+        f_HoleFlagVertices[0][g_MatrixBufferIndex],
+        HOLE_FLAG_VERTEX_COUNT,
+        0
+    );
     for (row = 0; row != HOLE_FLAG_ROW_COUNT - 1; row++) {
-      for (column = 0; column != HOLE_FLAG_COLUMN_COUNT - 1; column++) {
-        index = (row * HOLE_FLAG_COLUMN_COUNT) + column;
-        gSP2Triangles(g_DisplayListHead++, index,
-            index + HOLE_FLAG_COLUMN_COUNT + 1, index + HOLE_FLAG_COLUMN_COUNT,
-            0, index, index + 1, index + HOLE_FLAG_COLUMN_COUNT + 1, 0);
-      }
+        for (column = 0; column != HOLE_FLAG_COLUMN_COUNT - 1; column++) {
+            index = (row * HOLE_FLAG_COLUMN_COUNT) + column;
+            gSP2Triangles(
+                g_DisplayListHead++,
+                index,
+                index + HOLE_FLAG_COLUMN_COUNT,
+                index + HOLE_FLAG_COLUMN_COUNT + 1,
+                0,
+                index,
+                index + HOLE_FLAG_COLUMN_COUNT + 1,
+                index + 1,
+                0
+            );
+        }
     }
-  }
+
+    if (isBackDrawn == TRUE) {
+        vertexIndex = 0;
+        vertex = f_HoleFlagVertices[0][g_MatrixBufferIndex];
+        for (row = 0; row != HOLE_FLAG_ROW_COUNT; row++) {
+            for (column = 0; column != HOLE_FLAG_COLUMN_COUNT; column++, vertexIndex++, vertex++) {
+                /* These texture coordinates are after the gSPTexture scale, which
+                 * halves them */
+                gSPModifyVertex(
+                    g_DisplayListHead++,
+                    vertexIndex,
+                    G_MWO_POINT_ST,
+                    TexcoordWord(
+                        (HOLE_FLAG_BACK_TEXEL_START / 2) -
+                            (column * (HOLE_FLAG_TEXEL_COLUMN_STEP / 2)),
+                        row * (HOLE_FLAG_TEXEL_ROW_STEP / 2)
+                    )
+                );
+                gSPModifyVertex(
+                    g_DisplayListHead++,
+                    vertexIndex,
+                    G_MWO_POINT_RGBA,
+                    RgbaColor(
+                        2 * HOLE_FLAG_START_SHADE - vertex->v.cn[0],
+                        2 * HOLE_FLAG_START_SHADE - vertex->v.cn[1],
+                        2 * HOLE_FLAG_START_SHADE - vertex->v.cn[2],
+                        HOLE_FLAG_START_SHADE
+                    )
+                );
+            }
+        }
+
+        for (row = 0; row != HOLE_FLAG_ROW_COUNT - 1; row++) {
+            for (column = 0; column != HOLE_FLAG_COLUMN_COUNT - 1; column++) {
+                index = (row * HOLE_FLAG_COLUMN_COUNT) + column;
+                gSP2Triangles(
+                    g_DisplayListHead++,
+                    index,
+                    index + HOLE_FLAG_COLUMN_COUNT + 1,
+                    index + HOLE_FLAG_COLUMN_COUNT,
+                    0,
+                    index,
+                    index + 1,
+                    index + HOLE_FLAG_COLUMN_COUNT + 1,
+                    0
+                );
+            }
+        }
+    }
 }
 
 /* Draws the hole image as a model in the perspective of the screen effects */
 void DrawHoleImageModel(void) {
-  Vec3 translation;
-  Vec3 scale;
-  Vec3 rotation;
-  Mat4 matrix;
+    Vec3 translation;
+    Vec3 scale;
+    Vec3 rotation;
+    Mat4 matrix;
 
-  rotation[AXIS_X] = 0.0f;
-  rotation[AXIS_Y] = 0.0f;
-  rotation[AXIS_Z] = 0.0f;
-  translation[AXIS_X] = HOLE_IMAGE_MODEL_X;
-  translation[AXIS_Y] = HOLE_IMAGE_MODEL_Y;
-  translation[AXIS_Z] = HOLE_IMAGE_MODEL_Z;
-  scale[AXIS_X] = HOLE_IMAGE_MODEL_SCALE;
-  scale[AXIS_Y] = HOLE_IMAGE_MODEL_SCALE;
-  scale[AXIS_Z] = HOLE_IMAGE_MODEL_SCALE;
-  BuildTransformMatrix(matrix, rotation, translation, scale);
-  ConvertMatrixToFixed(matrix, &f_HoleImageMatrix);
-  gDPPipeSync(g_DisplayListHead++);
-  gDPPipeSync(g_DisplayListHead++);
-  gDPSetCycleType(g_DisplayListHead++, G_CYC_1CYCLE);
-  gSPClearGeometryMode(g_DisplayListHead++, ALL_GEOMETRY_MODES);
-  gSPSetGeometryMode(
-      g_DisplayListHead++, G_SHADE | G_CULL_BACK | G_SHADING_SMOOTH);
-  gDPPipeSync(g_DisplayListHead++);
-  gDPSetRenderMode(g_DisplayListHead++, G_RM_AA_OPA_SURF, G_RM_AA_OPA_SURF2);
-  gSPPerspNormalize(g_DisplayListHead++, g_ScreenEffectPerspNorm);
-  gDPPipeSync(g_DisplayListHead++);
-  gDPSetTexturePersp(g_DisplayListHead++, G_TP_PERSP);
-  gSPMatrix(g_DisplayListHead++, PhysicalAddress(&g_ScreenEffectProjection),
-      G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
-  gSPMatrix(g_DisplayListHead++, PhysicalAddress(&f_HoleImageMatrix),
-      G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-  DrawHoleFlag(FALSE);
-  gDPPipeSync(g_DisplayListHead++);
+    rotation[AXIS_X] = 0.0f;
+    rotation[AXIS_Y] = 0.0f;
+    rotation[AXIS_Z] = 0.0f;
+    translation[AXIS_X] = HOLE_IMAGE_MODEL_X;
+    translation[AXIS_Y] = HOLE_IMAGE_MODEL_Y;
+    translation[AXIS_Z] = HOLE_IMAGE_MODEL_Z;
+    scale[AXIS_X] = HOLE_IMAGE_MODEL_SCALE;
+    scale[AXIS_Y] = HOLE_IMAGE_MODEL_SCALE;
+    scale[AXIS_Z] = HOLE_IMAGE_MODEL_SCALE;
+    BuildTransformMatrix(matrix, rotation, translation, scale);
+    ConvertMatrixToFixed(matrix, &f_HoleImageMatrix);
+    gDPPipeSync(g_DisplayListHead++);
+    gDPPipeSync(g_DisplayListHead++);
+    gDPSetCycleType(g_DisplayListHead++, G_CYC_1CYCLE);
+    gSPClearGeometryMode(g_DisplayListHead++, ALL_GEOMETRY_MODES);
+    gSPSetGeometryMode(g_DisplayListHead++, G_SHADE | G_CULL_BACK | G_SHADING_SMOOTH);
+    gDPPipeSync(g_DisplayListHead++);
+    gDPSetRenderMode(g_DisplayListHead++, G_RM_AA_OPA_SURF, G_RM_AA_OPA_SURF2);
+    gSPPerspNormalize(g_DisplayListHead++, g_ScreenEffectPerspNorm);
+    gDPPipeSync(g_DisplayListHead++);
+    gDPSetTexturePersp(g_DisplayListHead++, G_TP_PERSP);
+    gSPMatrix(
+        g_DisplayListHead++,
+        PhysicalAddress(&g_ScreenEffectProjection),
+        G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION
+    );
+    gSPMatrix(
+        g_DisplayListHead++,
+        PhysicalAddress(&f_HoleImageMatrix),
+        G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW
+    );
+    DrawHoleFlag(FALSE);
+    gDPPipeSync(g_DisplayListHead++);
 }
 
 /* Starts one of the effects over a shot in flight, or stops it with
  * SHOT_EFFECT_NONE */
 void StartShotEffect(s32 effect) {
-  s32 contactStyle;
+    s32 contactStyle;
 
-  if (effect == SHOT_EFFECT_NONE) {
-    f_ShotEffectTime = SHOT_EFFECT_TIME_OFF;
-    return;
-  }
-
-  if (effect == SHOT_EFFECT_LONG_SHOT) {
-    contactStyle = GetContactStyle(&g_Players[g_RoundHud.shooterIndex]);
-    if (ShowsLongShotEffect(contactStyle)) {
-      PlaySoundWithEffects(SOUND_LONG_SHOT, LONG_SHOT_SOUND_CHANNEL,
-          LONG_SHOT_SOUND_VOLUME, LONG_SHOT_SOUND_REVERB, SOUND_FULL_SCALE);
-    } else {
-      PlaySoundWithEffects(SOUND_SPARK_TRAIL, LONG_SHOT_SOUND_CHANNEL,
-          SPARK_TRAIL_SOUND_VOLUME, LONG_SHOT_SOUND_REVERB, SOUND_FULL_SCALE);
+    if (effect == SHOT_EFFECT_NONE) {
+        f_ShotEffectTime = SHOT_EFFECT_TIME_OFF;
+        return;
     }
-  }
 
-  f_ShotEffect = effect;
-  f_ShotEffectTime = 0.0f;
+    if (effect == SHOT_EFFECT_LONG_SHOT) {
+        contactStyle = GetContactStyle(&g_Players[g_RoundHud.shooterIndex]);
+        if (ShowsLongShotEffect(contactStyle)) {
+            PlaySoundWithEffects(
+                SOUND_LONG_SHOT,
+                LONG_SHOT_SOUND_CHANNEL,
+                LONG_SHOT_SOUND_VOLUME,
+                LONG_SHOT_SOUND_REVERB,
+                SOUND_FULL_SCALE
+            );
+        }
+        else {
+            PlaySoundWithEffects(
+                SOUND_SPARK_TRAIL,
+                LONG_SHOT_SOUND_CHANNEL,
+                SPARK_TRAIL_SOUND_VOLUME,
+                LONG_SHOT_SOUND_REVERB,
+                SOUND_FULL_SCALE
+            );
+        }
+    }
+
+    f_ShotEffect = effect;
+    f_ShotEffectTime = 0.0f;
 }
 
 /* The effect grows and shrinks over half a turn of its time */
@@ -3009,167 +3467,265 @@ void StartShotEffect(s32 effect) {
 
 /* Draws the effect that StartShotEffect started at the ball, until its time
  * runs out */
-void DrawShotEffect(Gfx** displayListHead) {
-  Mat4 matrix;
-  ScreenPoint point;
-  EncodedAsset asset;
-  Gfx* gfx = *displayListHead;
-  s32 contactStyle;
-  f32 scale;
-  s32 i;
+void DrawShotEffect(Gfx **displayListHead) {
+    Mat4 matrix;
+    ScreenPoint point;
+    EncodedAsset asset;
+    Gfx *gfx = *displayListHead;
+    s32 contactStyle;
+    f32 scale;
+    s32 i;
 
-  if (f_ShotEffectTime < 0.0f) {
-    return;
-  }
+    if (f_ShotEffectTime < 0.0f) {
+        return;
+    }
 
-  f_ShotEffectTime += SHOT_EFFECT_TIME_STEP;
-  if (f_ShotEffectTime > M_PI) {
-    f_ShotEffectTime = SHOT_EFFECT_TIME_OFF;
-    return;
-  }
+    f_ShotEffectTime += SHOT_EFFECT_TIME_STEP;
+    if (f_ShotEffectTime > M_PI) {
+        f_ShotEffectTime = SHOT_EFFECT_TIME_OFF;
+        return;
+    }
 
-  if (ProjectPoint(
-          g_TurnBallSimulation.position[AXIS_X] * COURSE_TO_WORLD_SCALE,
-          g_TurnBallSimulation.position[AXIS_Y] * COURSE_TO_WORLD_SCALE,
-          g_TurnBallSimulation.position[AXIS_Z] * COURSE_TO_WORLD_SCALE,
-          &point) >= 0) {
-    return;
-  }
+    if (ProjectPoint(
+            g_TurnBallSimulation.position[AXIS_X] * COURSE_TO_WORLD_SCALE,
+            g_TurnBallSimulation.position[AXIS_Y] * COURSE_TO_WORLD_SCALE,
+            g_TurnBallSimulation.position[AXIS_Z] * COURSE_TO_WORLD_SCALE,
+            &point
+        ) >= 0) {
+        return;
+    }
 
-  contactStyle = GetContactStyle(&g_Players[g_RoundHud.shooterIndex]);
-  if (ShowsLongShotEffect(contactStyle)) {
-    scale = sinf(f_ShotEffectTime) * SHOT_EFFECT_SCALE;
-    f_ShotEffectRotation[AXIS_X] = 0.0f;
-    f_ShotEffectRotation[AXIS_Y] = 0.0f;
-    f_ShotEffectRotation[AXIS_Z] =
-        (f_ShotEffectTime + SHOT_EFFECT_SPIN_START) * SHOT_EFFECT_SPIN_RATE;
-  } else {
-    scale = sinf(f_ShotEffectTime) * SPARK_TRAIL_SCALE;
-    f_ShotEffectRotation[AXIS_X] = 0.0f;
-    f_ShotEffectRotation[AXIS_Y] = 0.0f;
-    f_ShotEffectRotation[AXIS_Z] =
-        DegreesToRadians(guRandom() % DEGREES_PER_TURN);
-  }
+    contactStyle = GetContactStyle(&g_Players[g_RoundHud.shooterIndex]);
+    if (ShowsLongShotEffect(contactStyle)) {
+        scale = sinf(f_ShotEffectTime) * SHOT_EFFECT_SCALE;
+        f_ShotEffectRotation[AXIS_X] = 0.0f;
+        f_ShotEffectRotation[AXIS_Y] = 0.0f;
+        f_ShotEffectRotation[AXIS_Z] =
+            (f_ShotEffectTime + SHOT_EFFECT_SPIN_START) * SHOT_EFFECT_SPIN_RATE;
+    }
+    else {
+        scale = sinf(f_ShotEffectTime) * SPARK_TRAIL_SCALE;
+        f_ShotEffectRotation[AXIS_X] = 0.0f;
+        f_ShotEffectRotation[AXIS_Y] = 0.0f;
+        f_ShotEffectRotation[AXIS_Z] = DegreesToRadians(guRandom() % DEGREES_PER_TURN);
+    }
 
-  f_ShotEffectScale[AXIS_X] = scale;
-  f_ShotEffectScale[AXIS_Y] = scale;
-  f_ShotEffectScale[AXIS_Z] = scale;
-  f_ShotEffectTranslation[AXIS_X] = point.x - (SCREEN_WIDTH / 2);
-  f_ShotEffectTranslation[AXIS_Y] = -point.y + (SCREEN_HEIGHT / 2);
-  f_ShotEffectTranslation[AXIS_Z] = SHOT_EFFECT_Z;
-  BuildTransformMatrix(
-      matrix, f_ShotEffectRotation, f_ShotEffectTranslation, f_ShotEffectScale);
-  ConvertMatrixToFixed(matrix, &f_ShotEffectMatrices[g_MatrixBufferIndex]);
-  gDPPipeSync(gfx++);
-  gDPPipeSync(gfx++);
-  gDPSetCycleType(gfx++, G_CYC_1CYCLE);
-  gSPClearGeometryMode(gfx++, ALL_GEOMETRY_MODES);
-  gSPSetGeometryMode(gfx++, G_SHADE | G_SHADING_SMOOTH);
-  gDPPipeSync(gfx++);
-  gDPSetTextureLUT(gfx++, G_TT_NONE);
-  gDPPipeSync(gfx++);
-  gDPSetAlphaDither(gfx++, G_AD_DISABLE);
-  gDPPipeSync(gfx++);
-  gDPSetTexturePersp(gfx++, G_TP_PERSP);
-  gDPPipeSync(gfx++);
-  gDPSetAlphaCompare(gfx++, G_AC_NONE);
-  gDPSetBlendColor(gfx++, 255, 255, 255, 1);
-  if (ShowsLongShotEffect(contactStyle)) {
-    gSPTexture(gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0,
-        G_TX_RENDERTILE, G_OFF);
+    f_ShotEffectScale[AXIS_X] = scale;
+    f_ShotEffectScale[AXIS_Y] = scale;
+    f_ShotEffectScale[AXIS_Z] = scale;
+    f_ShotEffectTranslation[AXIS_X] = point.x - (SCREEN_WIDTH / 2);
+    f_ShotEffectTranslation[AXIS_Y] = -point.y + (SCREEN_HEIGHT / 2);
+    f_ShotEffectTranslation[AXIS_Z] = SHOT_EFFECT_Z;
+    BuildTransformMatrix(matrix, f_ShotEffectRotation, f_ShotEffectTranslation, f_ShotEffectScale);
+    ConvertMatrixToFixed(matrix, &f_ShotEffectMatrices[g_MatrixBufferIndex]);
     gDPPipeSync(gfx++);
-    gDPSetTextureFilter(gfx++, G_TF_BILERP);
-    gDPSetPrimColor(gfx++, 0, 0, 0, 0, 255, OPAQUE_ALPHA);
-    gDPSetCombineMode(gfx++, G_CC_SHADE, G_CC_SHADE);
-    if (f_ShotEffect == SHOT_EFFECT_LONG_SHOT) {
-      gDPPipeSync(gfx++);
-      gDPSetRenderMode(gfx++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
-    } else {
-      gDPPipeSync(gfx++);
-      gDPSetRenderMode(gfx++, G_RM_AA_XLU_SURF, G_RM_AA_XLU_SURF2);
+    gDPPipeSync(gfx++);
+    gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+    gSPClearGeometryMode(gfx++, ALL_GEOMETRY_MODES);
+    gSPSetGeometryMode(gfx++, G_SHADE | G_SHADING_SMOOTH);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_NONE);
+    gDPPipeSync(gfx++);
+    gDPSetAlphaDither(gfx++, G_AD_DISABLE);
+    gDPPipeSync(gfx++);
+    gDPSetTexturePersp(gfx++, G_TP_PERSP);
+    gDPPipeSync(gfx++);
+    gDPSetAlphaCompare(gfx++, G_AC_NONE);
+    gDPSetBlendColor(gfx++, 255, 255, 255, 1);
+    if (ShowsLongShotEffect(contactStyle)) {
+        gSPTexture(gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0, G_TX_RENDERTILE, G_OFF);
+        gDPPipeSync(gfx++);
+        gDPSetTextureFilter(gfx++, G_TF_BILERP);
+        gDPSetPrimColor(gfx++, 0, 0, 0, 0, 255, OPAQUE_ALPHA);
+        gDPSetCombineMode(gfx++, G_CC_SHADE, G_CC_SHADE);
+        if (f_ShotEffect == SHOT_EFFECT_LONG_SHOT) {
+            gDPPipeSync(gfx++);
+            gDPSetRenderMode(gfx++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
+        }
+        else {
+            gDPPipeSync(gfx++);
+            gDPSetRenderMode(gfx++, G_RM_AA_XLU_SURF, G_RM_AA_XLU_SURF2);
+        }
+
+        gDPPipeSync(gfx++);
+        gSPMatrix(
+            gfx++,
+            PhysicalAddress(&g_ScreenOrthoMatrix),
+            G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION
+        );
+        gSPMatrix(
+            gfx++,
+            PhysicalAddress(&f_ShotEffectMatrices[g_MatrixBufferIndex]),
+            G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW
+        );
+        gSPVertex(gfx++, f_LongShotVertices, LONG_SHOT_GROUP_COUNT * 8, 0);
+        for (i = 0; i != LONG_SHOT_GROUP_COUNT; i++) {
+            gSP2Triangles(
+                gfx++,
+                i * 8,
+                (i * 8) + 1,
+                (i * 8) + 2,
+                0,
+                i * 8,
+                (i * 8) + 2,
+                (i * 8) + 3,
+                0
+            );
+            gSP2Triangles(
+                gfx++,
+                (i * 8) + 1,
+                (i * 8) + 4,
+                (i * 8) + 5,
+                0,
+                (i * 8) + 1,
+                (i * 8) + 5,
+                (i * 8) + 2,
+                0
+            );
+            gSP2Triangles(
+                gfx++,
+                (i * 8) + 4,
+                (i * 8) + 6,
+                (i * 8) + 7,
+                0,
+                (i * 8) + 4,
+                (i * 8) + 7,
+                (i * 8) + 5,
+                0
+            );
+        }
+    }
+    else {
+        if (++f_SparkTrailFrameTimer == SPARK_TRAIL_FRAME_TICKS) {
+            f_SparkTrailFrameTimer = 0;
+            f_SparkTrailFrame = (f_SparkTrailFrame + 1) % SPARK_TRAIL_FRAME_COUNT;
+            OpenEncodedAsset(f_SparkTrailFrameAssets[f_SparkTrailFrame], &asset);
+            ReadEncodedAsset(
+                g_SharedEffectImages + SPARK_TRAIL_FRAMES_OFFSET +
+                    (f_SparkTrailBufferIndex * SPARK_TRAIL_FRAME_SIZE),
+                &asset
+            );
+            f_SparkTrailBufferIndex ^= 1;
+        }
+
+        gSPTexture(gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0, G_TX_RENDERTILE, G_ON);
+        gDPPipeSync(gfx++);
+        gDPSetTextureFilter(gfx++, G_TF_POINT);
+        gDPPipeSync(gfx++);
+        gDPSetRenderMode(gfx++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
+        if (contactStyle == CONTACT_STYLE_GAME_BOY_BALL_7) {
+            gDPSetEnvColor(gfx++, 255, 255, 127, OPAQUE_ALPHA);
+            gDPSetPrimColor(
+                gfx++,
+                0,
+                0,
+                guRandom() % 255,
+                guRandom() % 255,
+                guRandom() % 255,
+                SPARK_TRAIL_ALPHA
+            );
+        }
+        else {
+            gDPSetPrimColor(gfx++, 0, 0, 191, 0, 191, SPARK_TRAIL_ALPHA);
+            gDPSetEnvColor(gfx++, 255, 255, 255, OPAQUE_ALPHA);
+        }
+
+        gDPSetCombineLERP(
+            gfx++,
+            ENVIRONMENT,
+            PRIMITIVE,
+            TEXEL0,
+            PRIMITIVE,
+            PRIMITIVE,
+            0,
+            TEXEL0,
+            0,
+            ENVIRONMENT,
+            PRIMITIVE,
+            TEXEL0,
+            PRIMITIVE,
+            PRIMITIVE,
+            0,
+            TEXEL0,
+            0
+        );
+        gSPMatrix(
+            gfx++,
+            PhysicalAddress(&g_ScreenOrthoMatrix),
+            G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION
+        );
+        gSPMatrix(
+            gfx++,
+            PhysicalAddress(&f_ShotEffectMatrices[g_MatrixBufferIndex]),
+            G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW
+        );
+        gSPVertex(gfx++, f_SparkTrailVertices, ARRAY_COUNT(f_SparkTrailVertices), 0);
+        gDPLoadTextureBlock_4b(
+            gfx++,
+            TextureAddress(ImageBody(g_SharedEffectImages + SPARK_TRAIL_FRAMES_OFFSET)),
+            G_IM_FMT_I,
+            SPARK_TRAIL_FRAME_WIDTH,
+            SPARK_TRAIL_FRAME_HEIGHT,
+            0,
+            G_TX_WRAP,
+            G_TX_WRAP,
+            G_TX_NOMASK,
+            G_TX_NOMASK,
+            G_TX_NOLOD,
+            G_TX_NOLOD
+        );
+        gDPPipeSync(gfx++);
+        for (i = 0; i != SPARK_TRAIL_QUAD_COUNT; i++) {
+            gSP2Triangles(
+                gfx++,
+                i * QUAD_VERTEX_COUNT,
+                (i * QUAD_VERTEX_COUNT) + 1,
+                (i * QUAD_VERTEX_COUNT) + 2,
+                0,
+                i * QUAD_VERTEX_COUNT,
+                (i * QUAD_VERTEX_COUNT) + 2,
+                (i * QUAD_VERTEX_COUNT) + 3,
+                0
+            );
+        }
+
+        gDPPipeSync(gfx++);
+        gDPLoadTextureBlock_4b(
+            gfx++,
+            TextureAddress(
+                ImageBody(g_SharedEffectImages + SPARK_TRAIL_FRAMES_OFFSET + SPARK_TRAIL_FRAME_SIZE)
+            ),
+            G_IM_FMT_I,
+            SPARK_TRAIL_FRAME_WIDTH,
+            SPARK_TRAIL_FRAME_HEIGHT,
+            0,
+            G_TX_WRAP,
+            G_TX_WRAP,
+            G_TX_NOMASK,
+            G_TX_NOMASK,
+            G_TX_NOLOD,
+            G_TX_NOLOD
+        );
+        gDPPipeSync(gfx++);
+        for (i = 0; i != SPARK_TRAIL_QUAD_COUNT; i++) {
+            gSP2Triangles(
+                gfx++,
+                i * QUAD_VERTEX_COUNT,
+                (i * QUAD_VERTEX_COUNT) + 1,
+                (i * QUAD_VERTEX_COUNT) + 2,
+                0,
+                i * QUAD_VERTEX_COUNT,
+                (i * QUAD_VERTEX_COUNT) + 2,
+                (i * QUAD_VERTEX_COUNT) + 3,
+                0
+            );
+        }
+
+        gDPPipeSync(gfx++);
     }
 
     gDPPipeSync(gfx++);
-    gSPMatrix(gfx++, PhysicalAddress(&g_ScreenOrthoMatrix),
-        G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
-    gSPMatrix(gfx++,
-        PhysicalAddress(&f_ShotEffectMatrices[g_MatrixBufferIndex]),
-        G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-    gSPVertex(gfx++, f_LongShotVertices, LONG_SHOT_GROUP_COUNT * 8, 0);
-    for (i = 0; i != LONG_SHOT_GROUP_COUNT; i++) {
-      gSP2Triangles(gfx++, i * 8, (i * 8) + 1, (i * 8) + 2, 0, i * 8,
-          (i * 8) + 2, (i * 8) + 3, 0);
-      gSP2Triangles(gfx++, (i * 8) + 1, (i * 8) + 4, (i * 8) + 5, 0,
-          (i * 8) + 1, (i * 8) + 5, (i * 8) + 2, 0);
-      gSP2Triangles(gfx++, (i * 8) + 4, (i * 8) + 6, (i * 8) + 7, 0,
-          (i * 8) + 4, (i * 8) + 7, (i * 8) + 5, 0);
-    }
-  } else {
-    if (++f_SparkTrailFrameTimer == SPARK_TRAIL_FRAME_TICKS) {
-      f_SparkTrailFrameTimer = 0;
-      f_SparkTrailFrame = (f_SparkTrailFrame + 1) % SPARK_TRAIL_FRAME_COUNT;
-      OpenEncodedAsset(f_SparkTrailFrameAssets[f_SparkTrailFrame], &asset);
-      ReadEncodedAsset(g_SharedEffectImages + SPARK_TRAIL_FRAMES_OFFSET +
-              (f_SparkTrailBufferIndex * SPARK_TRAIL_FRAME_SIZE),
-          &asset);
-      f_SparkTrailBufferIndex ^= 1;
-    }
-
-    gSPTexture(gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0,
-        G_TX_RENDERTILE, G_ON);
-    gDPPipeSync(gfx++);
-    gDPSetTextureFilter(gfx++, G_TF_POINT);
-    gDPPipeSync(gfx++);
-    gDPSetRenderMode(gfx++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
-    if (contactStyle == CONTACT_STYLE_GAME_BOY_BALL_7) {
-      gDPSetEnvColor(gfx++, 255, 255, 127, OPAQUE_ALPHA);
-      gDPSetPrimColor(gfx++, 0, 0, guRandom() % 255, guRandom() % 255,
-          guRandom() % 255, SPARK_TRAIL_ALPHA);
-    } else {
-      gDPSetPrimColor(gfx++, 0, 0, 191, 0, 191, SPARK_TRAIL_ALPHA);
-      gDPSetEnvColor(gfx++, 255, 255, 255, OPAQUE_ALPHA);
-    }
-
-    gDPSetCombineLERP(gfx++, ENVIRONMENT, PRIMITIVE, TEXEL0, PRIMITIVE,
-        PRIMITIVE, 0, TEXEL0, 0, ENVIRONMENT, PRIMITIVE, TEXEL0, PRIMITIVE,
-        PRIMITIVE, 0, TEXEL0, 0);
-    gSPMatrix(gfx++, PhysicalAddress(&g_ScreenOrthoMatrix),
-        G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
-    gSPMatrix(gfx++,
-        PhysicalAddress(&f_ShotEffectMatrices[g_MatrixBufferIndex]),
-        G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-    gSPVertex(
-        gfx++, f_SparkTrailVertices, ARRAY_COUNT(f_SparkTrailVertices), 0);
-    gDPLoadTextureBlock_4b(gfx++,
-        TextureAddress(
-            ImageBody(g_SharedEffectImages + SPARK_TRAIL_FRAMES_OFFSET)),
-        G_IM_FMT_I, SPARK_TRAIL_FRAME_WIDTH, SPARK_TRAIL_FRAME_HEIGHT, 0,
-        G_TX_WRAP, G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-    gDPPipeSync(gfx++);
-    for (i = 0; i != SPARK_TRAIL_QUAD_COUNT; i++) {
-      gSP2Triangles(gfx++, i * QUAD_VERTEX_COUNT, (i * QUAD_VERTEX_COUNT) + 1,
-          (i * QUAD_VERTEX_COUNT) + 2, 0, i * QUAD_VERTEX_COUNT,
-          (i * QUAD_VERTEX_COUNT) + 2, (i * QUAD_VERTEX_COUNT) + 3, 0);
-    }
-
-    gDPPipeSync(gfx++);
-    gDPLoadTextureBlock_4b(gfx++,
-        TextureAddress(ImageBody(g_SharedEffectImages +
-            SPARK_TRAIL_FRAMES_OFFSET + SPARK_TRAIL_FRAME_SIZE)),
-        G_IM_FMT_I, SPARK_TRAIL_FRAME_WIDTH, SPARK_TRAIL_FRAME_HEIGHT, 0,
-        G_TX_WRAP, G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-    gDPPipeSync(gfx++);
-    for (i = 0; i != SPARK_TRAIL_QUAD_COUNT; i++) {
-      gSP2Triangles(gfx++, i * QUAD_VERTEX_COUNT, (i * QUAD_VERTEX_COUNT) + 1,
-          (i * QUAD_VERTEX_COUNT) + 2, 0, i * QUAD_VERTEX_COUNT,
-          (i * QUAD_VERTEX_COUNT) + 2, (i * QUAD_VERTEX_COUNT) + 3, 0);
-    }
-
-    gDPPipeSync(gfx++);
-  }
-
-  gDPPipeSync(gfx++);
-  *displayListHead = gfx;
+    *displayListHead = gfx;
 }
 
 /*
@@ -3184,139 +3740,135 @@ void DrawShotEffect(Gfx** displayListHead) {
  * in factor's register first, as the original does.
  */
 void WaveHoleFlag(void) {
-  s32 row;
-  s32 column;
-  s32 shade;
-  s32 rowShade;
-  s32 depth;
-  s32 pull;
-  f32 windSpeed;
-  f32 factor;
-  f32 otherFactor;
-  f32 bulge;
-  f32 calmOwnShare;
+    s32 row;
+    s32 column;
+    s32 shade;
+    s32 rowShade;
+    s32 depth;
+    s32 pull;
+    f32 windSpeed;
+    f32 factor;
+    f32 otherFactor;
+    f32 bulge;
+    f32 calmOwnShare;
 
-  ScrollWindArrow();
-  windSpeed = g_HoleSetup.conditions.windSpeed / WIND_SPEED_UNIT;
-  factor = HOLE_FLAG_SKEW;
-  calmOwnShare = 1.0f - HOLE_FLAG_CALM_SPREAD;
-  otherFactor = factor;
-  for (row = 0; row != HOLE_FLAG_ROW_COUNT; row++) {
-    for (column = 1; column != HOLE_FLAG_COLUMN_COUNT; column++) {
-      HOLE_FLAG_VERTEX(row, column).v.ob[AXIS_X] =
-          (s16)((column * HOLE_FLAG_CELL_SIZE) - (column * factor)) -
-          (row * otherFactor * HOLE_FLAG_ROW_SKEW_SCALE);
-      if (HOLE_FLAG_VERTEX(row, column).v.ob[AXIS_X] < column * otherFactor) {
-        HOLE_FLAG_VERTEX(row, column).v.ob[AXIS_X] = column * otherFactor;
-      }
-
-      HOLE_FLAG_VERTEX(row, column).v.ob[AXIS_Y] =
-          (-row * HOLE_FLAG_CELL_SIZE) - (column * factor);
-    }
-  }
-
-  if (windSpeed > 0.0f && windSpeed < HOLE_FLAG_MIN_WIND_SPEED) {
-    windSpeed = HOLE_FLAG_MIN_WIND_SPEED;
-  }
-
-  /* factor is how much of its neighbor's shade a vertex takes; otherFactor is
-   * how much of its own it keeps */
-  if (windSpeed < 1.0f) {
-    factor = HOLE_FLAG_CALM_SPREAD;
-    otherFactor = calmOwnShare;
-  } else if (windSpeed > HOLE_FLAG_GALE_WIND_SPEED) {
-    factor = 1.0f;
-    otherFactor = 0.0f;
-  } else {
-    factor = (windSpeed * HOLE_FLAG_SPREAD_STEP) + HOLE_FLAG_SPREAD_STEP;
-    otherFactor =
-        ((HOLE_FLAG_SPREAD_STEP_COUNT - windSpeed) * HOLE_FLAG_SPREAD_STEP) -
-        HOLE_FLAG_SPREAD_STEP;
-  }
-
-  for (column = HOLE_FLAG_COLUMN_COUNT - 1; column != 0; column--) {
+    ScrollWindArrow();
+    windSpeed = g_HoleSetup.conditions.windSpeed / WIND_SPEED_UNIT;
+    factor = HOLE_FLAG_SKEW;
+    calmOwnShare = 1.0f - HOLE_FLAG_CALM_SPREAD;
+    otherFactor = factor;
     for (row = 0; row != HOLE_FLAG_ROW_COUNT; row++) {
-      /* Indexing the left neighbor as HOLE_FLAG_SHADE(row, column - 1) changes
-       * the code */
-      shade = (f_HoleFlagShades[(row * HOLE_FLAG_COLUMN_COUNT) + column - 1] *
-                  factor) +
-          (HOLE_FLAG_SHADE(row, column) * otherFactor);
-      HOLE_FLAG_SHADE(row, column) = shade;
-    }
-  }
+        for (column = 1; column != HOLE_FLAG_COLUMN_COUNT; column++) {
+            HOLE_FLAG_VERTEX(row, column).v.ob[AXIS_X] =
+                (s16)((column * HOLE_FLAG_CELL_SIZE) - (column * factor)) -
+                (row * otherFactor * HOLE_FLAG_ROW_SKEW_SCALE);
+            if (HOLE_FLAG_VERTEX(row, column).v.ob[AXIS_X] < column * otherFactor) {
+                HOLE_FLAG_VERTEX(row, column).v.ob[AXIS_X] = column * otherFactor;
+            }
 
-  f_HoleFlagWavePhase += ((HOLE_FLAG_SWING_DEGREES_PER_SPEED * windSpeed) +
-                             HOLE_FLAG_MIN_SWING_DEGREES) *
-      DegreesToRadians(1);
-  if (f_HoleFlagWavePhase > FULL_TURN_RADIANS) {
-    f_HoleFlagWavePhase -= FULL_TURN_RADIANS;
-  }
-
-  if (f_HoleFlagWavePhase < 0.0f) {
-    f_HoleFlagWavePhase += FULL_TURN_RADIANS;
-  }
-
-  /* factor is the swing's amplitude here */
-  factor = windSpeed + (rand() % HOLE_FLAG_SWING_JITTER_RANGE);
-  shade = (s32)(sinf(f_HoleFlagWavePhase) * factor) + HOLE_FLAG_START_SHADE;
-  for (row = 0; row != HOLE_FLAG_ROW_COUNT; row++) {
-    if ((s32)windSpeed == 0) {
-      rowShade = shade;
-    } else {
-      rowShade =
-          (f32)(shade +
-              (rand() % (s32)(windSpeed * HOLE_FLAG_ROW_JITTER_PER_SPEED))) -
-          (HOLE_FLAG_ROW_JITTER_PER_SPEED / 2 * windSpeed);
+            HOLE_FLAG_VERTEX(row, column).v.ob[AXIS_Y] =
+                (-row * HOLE_FLAG_CELL_SIZE) - (column * factor);
+        }
     }
 
-    HOLE_FLAG_SHADE(row, 0) = rowShade;
-  }
-
-  for (row = 0; row != HOLE_FLAG_ROW_COUNT; row++) {
-    for (column = 1; column != HOLE_FLAG_COLUMN_COUNT; column++) {
-      HOLE_FLAG_VERTEX(row, column).v.cn[0] = HOLE_FLAG_SHADE(row, column);
-      HOLE_FLAG_VERTEX(row, column).v.cn[1] = HOLE_FLAG_SHADE(row, column);
-      HOLE_FLAG_VERTEX(row, column).v.cn[2] = HOLE_FLAG_SHADE(row, column);
+    if (windSpeed > 0.0f && windSpeed < HOLE_FLAG_MIN_WIND_SPEED) {
+        windSpeed = HOLE_FLAG_MIN_WIND_SPEED;
     }
-  }
 
-  /* Bulges are deeper toward the flag's free edge and its top */
-  factor = (windSpeed * HOLE_FLAG_BULGE_PER_SPEED) + HOLE_FLAG_MIN_BULGE;
-  for (row = 0; row != HOLE_FLAG_ROW_COUNT; row++) {
-    for (column = 1; column != HOLE_FLAG_COLUMN_COUNT; column++) {
-      bulge =
-          (f32)(HOLE_FLAG_VERTEX(row, column).v.cn[0] - HOLE_FLAG_START_SHADE) /
-          (f32)(HOLE_FLAG_BULGE_COLUMN_BASE - column) * factor;
-      otherFactor = HOLE_FLAG_BULGE_SCALE;
-      HOLE_FLAG_VERTEX(row, column).v.ob[AXIS_Z] = bulge * otherFactor *
-          (f32)(HOLE_FLAG_BULGE_ROW_BASE - row) * HOLE_FLAG_BULGE_ROW_SCALE;
+    /* factor is how much of its neighbor's shade a vertex takes; otherFactor is
+     * how much of its own it keeps */
+    if (windSpeed < 1.0f) {
+        factor = HOLE_FLAG_CALM_SPREAD;
+        otherFactor = calmOwnShare;
     }
-  }
-
-  for (row = 0; row != HOLE_FLAG_ROW_COUNT; row++) {
-    pull = 0;
-    for (column = HOLE_FLAG_FIRST_PULLED_COLUMN;
-        column != HOLE_FLAG_COLUMN_COUNT; column++) {
-      depth = HOLE_FLAG_VERTEX(row, column).v.ob[AXIS_Z];
-      if (depth < 0) {
-        depth = -depth;
-      }
-
-      pull += depth / HOLE_FLAG_DEPTH_PER_PULL;
-      HOLE_FLAG_VERTEX(row, column).v.ob[AXIS_X] =
-          (column * HOLE_FLAG_CELL_SIZE) - pull;
+    else if (windSpeed > HOLE_FLAG_GALE_WIND_SPEED) {
+        factor = 1.0f;
+        otherFactor = 0.0f;
     }
-  }
+    else {
+        factor = (windSpeed * HOLE_FLAG_SPREAD_STEP) + HOLE_FLAG_SPREAD_STEP;
+        otherFactor = ((HOLE_FLAG_SPREAD_STEP_COUNT - windSpeed) * HOLE_FLAG_SPREAD_STEP) -
+            HOLE_FLAG_SPREAD_STEP;
+    }
+
+    for (column = HOLE_FLAG_COLUMN_COUNT - 1; column != 0; column--) {
+        for (row = 0; row != HOLE_FLAG_ROW_COUNT; row++) {
+            /* Indexing the left neighbor as HOLE_FLAG_SHADE(row, column - 1) changes
+             * the code */
+            shade = (f_HoleFlagShades[(row * HOLE_FLAG_COLUMN_COUNT) + column - 1] * factor) +
+                (HOLE_FLAG_SHADE(row, column) * otherFactor);
+            HOLE_FLAG_SHADE(row, column) = shade;
+        }
+    }
+
+    f_HoleFlagWavePhase +=
+        ((HOLE_FLAG_SWING_DEGREES_PER_SPEED * windSpeed) + HOLE_FLAG_MIN_SWING_DEGREES) *
+        DegreesToRadians(1);
+    if (f_HoleFlagWavePhase > FULL_TURN_RADIANS) {
+        f_HoleFlagWavePhase -= FULL_TURN_RADIANS;
+    }
+
+    if (f_HoleFlagWavePhase < 0.0f) {
+        f_HoleFlagWavePhase += FULL_TURN_RADIANS;
+    }
+
+    /* factor is the swing's amplitude here */
+    factor = windSpeed + (rand() % HOLE_FLAG_SWING_JITTER_RANGE);
+    shade = (s32)(sinf(f_HoleFlagWavePhase) * factor) + HOLE_FLAG_START_SHADE;
+    for (row = 0; row != HOLE_FLAG_ROW_COUNT; row++) {
+        if ((s32)windSpeed == 0) {
+            rowShade = shade;
+        }
+        else {
+            rowShade = (f32)(shade + (rand() % (s32)(windSpeed * HOLE_FLAG_ROW_JITTER_PER_SPEED))) -
+                (HOLE_FLAG_ROW_JITTER_PER_SPEED / 2 * windSpeed);
+        }
+
+        HOLE_FLAG_SHADE(row, 0) = rowShade;
+    }
+
+    for (row = 0; row != HOLE_FLAG_ROW_COUNT; row++) {
+        for (column = 1; column != HOLE_FLAG_COLUMN_COUNT; column++) {
+            HOLE_FLAG_VERTEX(row, column).v.cn[0] = HOLE_FLAG_SHADE(row, column);
+            HOLE_FLAG_VERTEX(row, column).v.cn[1] = HOLE_FLAG_SHADE(row, column);
+            HOLE_FLAG_VERTEX(row, column).v.cn[2] = HOLE_FLAG_SHADE(row, column);
+        }
+    }
+
+    /* Bulges are deeper toward the flag's free edge and its top */
+    factor = (windSpeed * HOLE_FLAG_BULGE_PER_SPEED) + HOLE_FLAG_MIN_BULGE;
+    for (row = 0; row != HOLE_FLAG_ROW_COUNT; row++) {
+        for (column = 1; column != HOLE_FLAG_COLUMN_COUNT; column++) {
+            bulge = (f32)(HOLE_FLAG_VERTEX(row, column).v.cn[0] - HOLE_FLAG_START_SHADE) /
+                (f32)(HOLE_FLAG_BULGE_COLUMN_BASE - column) * factor;
+            otherFactor = HOLE_FLAG_BULGE_SCALE;
+            HOLE_FLAG_VERTEX(row, column).v.ob[AXIS_Z] = bulge * otherFactor *
+                (f32)(HOLE_FLAG_BULGE_ROW_BASE - row) * HOLE_FLAG_BULGE_ROW_SCALE;
+        }
+    }
+
+    for (row = 0; row != HOLE_FLAG_ROW_COUNT; row++) {
+        pull = 0;
+        for (column = HOLE_FLAG_FIRST_PULLED_COLUMN; column != HOLE_FLAG_COLUMN_COUNT; column++) {
+            depth = HOLE_FLAG_VERTEX(row, column).v.ob[AXIS_Z];
+            if (depth < 0) {
+                depth = -depth;
+            }
+
+            pull += depth / HOLE_FLAG_DEPTH_PER_PULL;
+            HOLE_FLAG_VERTEX(row, column).v.ob[AXIS_X] = (column * HOLE_FLAG_CELL_SIZE) - pull;
+        }
+    }
 }
 
 /* Moves the shot offset marker and its trail back to the center */
 void ResetShotOffsetMarker(void) {
-  s32 i;
+    s32 i;
 
-  for (i = 0; i != SHOT_OFFSET_MARKER_COUNT; i++) {
-    f_ShotOffsetMarkerXs[i] = 0;
-    f_ShotOffsetMarkerYs[i] = 0;
-  }
+    for (i = 0; i != SHOT_OFFSET_MARKER_COUNT; i++) {
+        f_ShotOffsetMarkerXs[i] = 0;
+        f_ShotOffsetMarkerYs[i] = 0;
+    }
 }
 
 /*
@@ -3325,23 +3877,24 @@ void ResetShotOffsetMarker(void) {
  * clamped to SHOT_OFFSET_MAX_RADIUS.
  */
 void SetShotOffsetMarker(s32 x, s32 y) {
-  f32 length;
-  f32 scale;
+    f32 length;
+    f32 scale;
 
-  if (x == 0 && y == 0) {
-    length = sqrtf((x * x) + (y * y));
-  } else {
-    length = 0.0f;
-  }
+    if (x == 0 && y == 0) {
+        length = sqrtf((x * x) + (y * y));
+    }
+    else {
+        length = 0.0f;
+    }
 
-  if (length > SHOT_OFFSET_MAX_RADIUS) {
-    scale = SHOT_OFFSET_MAX_RADIUS / length;
-    x = x * scale;
-    y = y * scale;
-  }
+    if (length > SHOT_OFFSET_MAX_RADIUS) {
+        scale = SHOT_OFFSET_MAX_RADIUS / length;
+        x = x * scale;
+        y = y * scale;
+    }
 
-  f_ShotOffsetMarkerXs[0] = x / SHOT_OFFSET_UNITS_PER_PIXEL;
-  f_ShotOffsetMarkerYs[0] = -y / SHOT_OFFSET_UNITS_PER_PIXEL;
+    f_ShotOffsetMarkerXs[0] = x / SHOT_OFFSET_UNITS_PER_PIXEL;
+    f_ShotOffsetMarkerYs[0] = -y / SHOT_OFFSET_UNITS_PER_PIXEL;
 }
 
 /*
@@ -3349,36 +3902,52 @@ void SetShotOffsetMarker(s32 x, s32 y) {
  * is set
  */
 void DrawShotOffsetMarker(void) {
-  gDPPipeSync(g_DisplayListHead++);
-  gDPLoadTLUT_pal16(g_DisplayListHead++, 0,
-      TextureAddress(ImageBody(f_ShotOffsetMarkerImage)));
-  f_ShotOffsetMarkerFrame =
-      (f_ShotOffsetMarkerFrame + 1) % SHOT_OFFSET_MARKER_FRAME_COUNT;
-  if (g_RoundHud.flags & HUD_FLAG_ANIMATE_OFFSET_MARKER) {
-    f_ShotOffsetMarkerTexelOffset =
-        f_ShotOffsetMarkerFrame * SHOT_OFFSET_MARKER_FRAME_SIZE;
-  } else {
-    f_ShotOffsetMarkerTexelOffset =
-        SHOT_OFFSET_MARKER_STILL_FRAME * SHOT_OFFSET_MARKER_FRAME_SIZE;
-  }
+    gDPPipeSync(g_DisplayListHead++);
+    gDPLoadTLUT_pal16(g_DisplayListHead++, 0, TextureAddress(ImageBody(f_ShotOffsetMarkerImage)));
+    f_ShotOffsetMarkerFrame = (f_ShotOffsetMarkerFrame + 1) % SHOT_OFFSET_MARKER_FRAME_COUNT;
+    if (g_RoundHud.flags & HUD_FLAG_ANIMATE_OFFSET_MARKER) {
+        f_ShotOffsetMarkerTexelOffset = f_ShotOffsetMarkerFrame * SHOT_OFFSET_MARKER_FRAME_SIZE;
+    }
+    else {
+        f_ShotOffsetMarkerTexelOffset =
+            SHOT_OFFSET_MARKER_STILL_FRAME * SHOT_OFFSET_MARKER_FRAME_SIZE;
+    }
 
-  gDPLoadTextureBlock_4b(g_DisplayListHead++,
-      TextureAddress(
-          ImageTexels(f_ShotOffsetMarkerImage) + f_ShotOffsetMarkerTexelOffset),
-      G_IM_FMT_CI, SHOT_OFFSET_MARKER_SIZE, SHOT_OFFSET_MARKER_SIZE, 0,
-      G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
-      G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-  gDPPipeSync(g_DisplayListHead++);
-  gSPScisTextureRectangle(g_DisplayListHead++,
-      QuarterPixels(
-          SHOT_OFFSET_MARKER_X + f_ShotOffsetMarkerXs[0] + g_ShotPanelOffsetX),
-      QuarterPixels(SHOT_OFFSET_MARKER_Y + f_ShotOffsetMarkerYs[0] +
-          f_ShotPanelOffsetY + f_HudOffsetY),
-      QuarterPixels(SHOT_OFFSET_MARKER_X + SHOT_OFFSET_MARKER_SIZE +
-          f_ShotOffsetMarkerXs[0] + g_ShotPanelOffsetX),
-      QuarterPixels(SHOT_OFFSET_MARKER_Y + SHOT_OFFSET_MARKER_SIZE +
-          f_ShotOffsetMarkerYs[0] + f_ShotPanelOffsetY + f_HudOffsetY),
-      G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+    gDPLoadTextureBlock_4b(
+        g_DisplayListHead++,
+        TextureAddress(ImageTexels(f_ShotOffsetMarkerImage) + f_ShotOffsetMarkerTexelOffset),
+        G_IM_FMT_CI,
+        SHOT_OFFSET_MARKER_SIZE,
+        SHOT_OFFSET_MARKER_SIZE,
+        0,
+        G_TX_NOMIRROR | G_TX_WRAP,
+        G_TX_NOMIRROR | G_TX_WRAP,
+        G_TX_NOMASK,
+        G_TX_NOMASK,
+        G_TX_NOLOD,
+        G_TX_NOLOD
+    );
+    gDPPipeSync(g_DisplayListHead++);
+    gSPScisTextureRectangle(
+        g_DisplayListHead++,
+        QuarterPixels(SHOT_OFFSET_MARKER_X + f_ShotOffsetMarkerXs[0] + g_ShotPanelOffsetX),
+        QuarterPixels(
+            SHOT_OFFSET_MARKER_Y + f_ShotOffsetMarkerYs[0] + f_ShotPanelOffsetY + f_HudOffsetY
+        ),
+        QuarterPixels(
+            SHOT_OFFSET_MARKER_X + SHOT_OFFSET_MARKER_SIZE + f_ShotOffsetMarkerXs[0] +
+            g_ShotPanelOffsetX
+        ),
+        QuarterPixels(
+            SHOT_OFFSET_MARKER_Y + SHOT_OFFSET_MARKER_SIZE + f_ShotOffsetMarkerYs[0] +
+            f_ShotPanelOffsetY + f_HudOffsetY
+        ),
+        G_TX_RENDERTILE,
+        0,
+        0,
+        TEXEL_STEP_ONE,
+        TEXEL_STEP_ONE
+    );
 }
 
 /* A new image of the icon every ANIMATED_ICON_FRAME_LENGTH frames */
@@ -3402,261 +3971,333 @@ void DrawShotOffsetMarker(void) {
  * "JUMP" looking down the range and "CUP" otherwise. Each new frame of the icon
  * is read into the same image.
  */
-void DrawAnimatedIcon(Gfx** displayListHead, s32 letterboxHeight) {
-  Gfx* gfx = *displayListHead;
-  EncodedAsset asset;
-  s32 label;
+void DrawAnimatedIcon(Gfx **displayListHead, s32 letterboxHeight) {
+    Gfx *gfx = *displayListHead;
+    EncodedAsset asset;
+    s32 label;
 
-  if (f_SceneryState == SCENERY_LOADED) {
-    /* On the letterbox's first frame the icon starts again from the corner */
-    if (letterboxHeight == LETTERBOX_GROWTH_STEP) {
-      f_AnimatedIconX = 0.0f;
-      f_AnimatedIconY = 0.0f;
-    } else {
-      f_AnimatedIconX +=
-          (ANIMATED_ICON_X - f_AnimatedIconX) * ANIMATED_ICON_EASING;
-      f_AnimatedIconY +=
-          (ANIMATED_ICON_Y - f_AnimatedIconY) * ANIMATED_ICON_EASING;
+    if (f_SceneryState == SCENERY_LOADED) {
+        /* On the letterbox's first frame the icon starts again from the corner */
+        if (letterboxHeight == LETTERBOX_GROWTH_STEP) {
+            f_AnimatedIconX = 0.0f;
+            f_AnimatedIconY = 0.0f;
+        }
+        else {
+            f_AnimatedIconX += (ANIMATED_ICON_X - f_AnimatedIconX) * ANIMATED_ICON_EASING;
+            f_AnimatedIconY += (ANIMATED_ICON_Y - f_AnimatedIconY) * ANIMATED_ICON_EASING;
+        }
+
+        if (++f_AnimatedIconFrameTime == ANIMATED_ICON_FRAME_LENGTH) {
+            f_AnimatedIconFrameTime = 0;
+            f_AnimatedIconFrame = (f_AnimatedIconFrame + 1) % ANIMATED_ICON_FRAME_COUNT;
+            OpenEncodedAsset(f_AnimatedIconFrameAssets[f_AnimatedIconFrame], &asset);
+            ReadEncodedAsset(f_AnimatedIconImages[f_AnimatedIconImageIndex], &asset);
+        }
+
+        gDPPipeSync(gfx++);
+        gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+        gDPLoadTLUT_pal256(
+            gfx++,
+            TextureAddress(ImageBody(f_AnimatedIconImages[f_AnimatedIconImageIndex]))
+        );
+        gDPPipeSync(gfx++);
+        gDPSetRenderMode(gfx++, HOLE_INTRO_IMAGE_RENDER_MODE, HOLE_INTRO_IMAGE_RENDER_MODE2);
+        gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+        gDPLoadTextureBlock(
+            gfx++,
+            TextureAddress(LargeImageTexels(f_AnimatedIconImages[f_AnimatedIconImageIndex])),
+            G_IM_FMT_CI,
+            G_IM_SIZ_8b,
+            ANIMATED_ICON_SIZE,
+            ANIMATED_ICON_SIZE,
+            0,
+            G_TX_NOMIRROR | G_TX_WRAP,
+            G_TX_NOMIRROR | G_TX_WRAP,
+            G_TX_NOMASK,
+            G_TX_NOMASK,
+            G_TX_NOLOD,
+            G_TX_NOLOD
+        );
+        gDPPipeSync(gfx++);
+        gSPScisTextureRectangle(
+            gfx++,
+            QuarterPixels((s32)f_AnimatedIconX),
+            QuarterPixels((s32)f_AnimatedIconY),
+            QuarterPixels((s32)f_AnimatedIconX + ANIMATED_ICON_SIZE),
+            QuarterPixels((s32)f_AnimatedIconY + ANIMATED_ICON_SIZE),
+            G_TX_RENDERTILE,
+            0,
+            0,
+            TEXEL_STEP_ONE,
+            TEXEL_STEP_ONE
+        );
+        gDPPipeSync(gfx++);
+        if (g_LetterboxState == LETTERBOX_STATE_MOVING_CAMERA) {
+            label = ANIMATED_ICON_LABEL_MODE;
+        }
+        else if (g_LetterboxState == LETTERBOX_STATE_LOOKING_DOWN_RANGE) {
+            label = ANIMATED_ICON_LABEL_JUMP;
+        }
+        else {
+            label = ANIMATED_ICON_LABEL_CUP;
+        }
+
+        gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(f_AnimatedIconLabelImages[label])));
+        gDPLoadTextureBlock_4b(
+            gfx++,
+            TextureAddress(ImageTexels(f_AnimatedIconLabelImages[label])),
+            G_IM_FMT_CI,
+            ANIMATED_ICON_LABEL_WIDTH,
+            ANIMATED_ICON_LABEL_HEIGHT,
+            0,
+            G_TX_NOMIRROR | G_TX_WRAP,
+            G_TX_NOMIRROR | G_TX_WRAP,
+            G_TX_NOMASK,
+            G_TX_NOMASK,
+            G_TX_NOLOD,
+            G_TX_NOLOD
+        );
+        gDPPipeSync(gfx++);
+        gSPScisTextureRectangle(
+            gfx++,
+            QuarterPixels((s32)f_AnimatedIconX + ANIMATED_ICON_LABEL_OFFSET_X),
+            QuarterPixels((s32)f_AnimatedIconY),
+            QuarterPixels(
+                (s32)f_AnimatedIconX + ANIMATED_ICON_LABEL_OFFSET_X + ANIMATED_ICON_LABEL_WIDTH
+            ),
+            QuarterPixels((s32)f_AnimatedIconY + ANIMATED_ICON_LABEL_HEIGHT),
+            G_TX_RENDERTILE,
+            0,
+            0,
+            TEXEL_STEP_ONE,
+            TEXEL_STEP_ONE
+        );
+        *displayListHead = gfx;
     }
-
-    if (++f_AnimatedIconFrameTime == ANIMATED_ICON_FRAME_LENGTH) {
-      f_AnimatedIconFrameTime = 0;
-      f_AnimatedIconFrame =
-          (f_AnimatedIconFrame + 1) % ANIMATED_ICON_FRAME_COUNT;
-      OpenEncodedAsset(f_AnimatedIconFrameAssets[f_AnimatedIconFrame], &asset);
-      ReadEncodedAsset(f_AnimatedIconImages[f_AnimatedIconImageIndex], &asset);
-    }
-
-    gDPPipeSync(gfx++);
-    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-    gDPLoadTLUT_pal256(gfx++,
-        TextureAddress(
-            ImageBody(f_AnimatedIconImages[f_AnimatedIconImageIndex])));
-    gDPPipeSync(gfx++);
-    gDPSetRenderMode(
-        gfx++, HOLE_INTRO_IMAGE_RENDER_MODE, HOLE_INTRO_IMAGE_RENDER_MODE2);
-    gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-    gDPLoadTextureBlock(gfx++,
-        TextureAddress(
-            LargeImageTexels(f_AnimatedIconImages[f_AnimatedIconImageIndex])),
-        G_IM_FMT_CI, G_IM_SIZ_8b, ANIMATED_ICON_SIZE, ANIMATED_ICON_SIZE, 0,
-        G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
-        G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-    gDPPipeSync(gfx++);
-    gSPScisTextureRectangle(gfx++, QuarterPixels((s32)f_AnimatedIconX),
-        QuarterPixels((s32)f_AnimatedIconY),
-        QuarterPixels((s32)f_AnimatedIconX + ANIMATED_ICON_SIZE),
-        QuarterPixels((s32)f_AnimatedIconY + ANIMATED_ICON_SIZE),
-        G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
-    gDPPipeSync(gfx++);
-    if (g_LetterboxState == LETTERBOX_STATE_MOVING_CAMERA) {
-      label = ANIMATED_ICON_LABEL_MODE;
-    } else if (g_LetterboxState == LETTERBOX_STATE_LOOKING_DOWN_RANGE) {
-      label = ANIMATED_ICON_LABEL_JUMP;
-    } else {
-      label = ANIMATED_ICON_LABEL_CUP;
-    }
-
-    gDPLoadTLUT_pal16(
-        gfx++, 0, TextureAddress(ImageBody(f_AnimatedIconLabelImages[label])));
-    gDPLoadTextureBlock_4b(gfx++,
-        TextureAddress(ImageTexels(f_AnimatedIconLabelImages[label])),
-        G_IM_FMT_CI, ANIMATED_ICON_LABEL_WIDTH, ANIMATED_ICON_LABEL_HEIGHT, 0,
-        G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
-        G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-    gDPPipeSync(gfx++);
-    gSPScisTextureRectangle(gfx++,
-        QuarterPixels((s32)f_AnimatedIconX + ANIMATED_ICON_LABEL_OFFSET_X),
-        QuarterPixels((s32)f_AnimatedIconY),
-        QuarterPixels((s32)f_AnimatedIconX + ANIMATED_ICON_LABEL_OFFSET_X +
-            ANIMATED_ICON_LABEL_WIDTH),
-        QuarterPixels((s32)f_AnimatedIconY + ANIMATED_ICON_LABEL_HEIGHT),
-        G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
-    *displayListHead = gfx;
-  }
 }
 
 /*
  * Draws black bars at the top and bottom of the HUD's area, growing them each
  * frame up to LETTERBOX_MAX_HEIGHT. Returns their new height.
  */
-s32 DrawLetterbox(Gfx** gfxP, s32 height) {
-  Gfx* gfx = *gfxP;
+s32 DrawLetterbox(Gfx **gfxP, s32 height) {
+    Gfx *gfx = *gfxP;
 
-  if (g_RoundHud.isLetterboxShown) {
-    if (IsLetterboxState(g_LetterboxState)) {
-      gDPPipeSync(gfx++);
-      gDPPipeSync(gfx++);
-      gDPSetRenderMode(
-          gfx++, G_RM_XLU_SURF | ZMODE_XLU, G_RM_XLU_SURF2 | ZMODE_XLU);
-      gDPSetCombineMode(gfx++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
-      gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, OPAQUE_ALPHA);
-      gDPPipeSync(gfx++);
-      if (height > 0) {
-        gSPScisTextureRectangle(gfx++, QuarterPixels(HUD_MARGIN),
-            QuarterPixels(HUD_MARGIN), QuarterPixels(SCREEN_WIDTH - HUD_MARGIN),
-            QuarterPixels(HUD_MARGIN + height), G_TX_RENDERTILE, 0, 0,
-            TEXEL_STEP_ONE, TEXEL_STEP_ONE);
-        gSPScisTextureRectangle(gfx++, QuarterPixels(HUD_MARGIN),
-            QuarterPixels(SCREEN_HEIGHT - HUD_MARGIN - height),
-            QuarterPixels(SCREEN_WIDTH - HUD_MARGIN),
-            QuarterPixels(SCREEN_HEIGHT - HUD_MARGIN), G_TX_RENDERTILE, 0, 0,
-            TEXEL_STEP_ONE, TEXEL_STEP_ONE);
-      }
+    if (g_RoundHud.isLetterboxShown) {
+        if (IsLetterboxState(g_LetterboxState)) {
+            gDPPipeSync(gfx++);
+            gDPPipeSync(gfx++);
+            gDPSetRenderMode(gfx++, G_RM_XLU_SURF | ZMODE_XLU, G_RM_XLU_SURF2 | ZMODE_XLU);
+            gDPSetCombineMode(gfx++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
+            gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, OPAQUE_ALPHA);
+            gDPPipeSync(gfx++);
+            if (height > 0) {
+                gSPScisTextureRectangle(
+                    gfx++,
+                    QuarterPixels(HUD_MARGIN),
+                    QuarterPixels(HUD_MARGIN),
+                    QuarterPixels(SCREEN_WIDTH - HUD_MARGIN),
+                    QuarterPixels(HUD_MARGIN + height),
+                    G_TX_RENDERTILE,
+                    0,
+                    0,
+                    TEXEL_STEP_ONE,
+                    TEXEL_STEP_ONE
+                );
+                gSPScisTextureRectangle(
+                    gfx++,
+                    QuarterPixels(HUD_MARGIN),
+                    QuarterPixels(SCREEN_HEIGHT - HUD_MARGIN - height),
+                    QuarterPixels(SCREEN_WIDTH - HUD_MARGIN),
+                    QuarterPixels(SCREEN_HEIGHT - HUD_MARGIN),
+                    G_TX_RENDERTILE,
+                    0,
+                    0,
+                    TEXEL_STEP_ONE,
+                    TEXEL_STEP_ONE
+                );
+            }
 
-      gDPPipeSync(gfx++);
-      height += LETTERBOX_GROWTH_STEP;
-      if (height > LETTERBOX_MAX_HEIGHT) {
-        height = LETTERBOX_MAX_HEIGHT;
-      }
-    } else {
-      height = 0;
+            gDPPipeSync(gfx++);
+            height += LETTERBOX_GROWTH_STEP;
+            if (height > LETTERBOX_MAX_HEIGHT) {
+                height = LETTERBOX_MAX_HEIGHT;
+            }
+        }
+        else {
+            height = 0;
+        }
     }
-  }
 
-  *gfxP = gfx;
-  return height;
+    *gfxP = gfx;
+    return height;
 }
 
 /*
  * Draws a distance such as "12.5m" with the loaded distance glyphs, from its
  * top left corner. Spaces are skipped without advancing.
  */
-void DrawDistanceText(Gfx** gfxP, s32 x, s32 y, char* text) {
-  s32 width;
-  s32 glyphS;
-  Gfx* gfx = *gfxP;
+void DrawDistanceText(Gfx **gfxP, s32 x, s32 y, char *text) {
+    s32 width;
+    s32 glyphS;
+    Gfx *gfx = *gfxP;
 
-  for (; *text != '\0'; text++) {
-    switch (*text) {
-      case ' ':
-        continue;
-      case '.':
-        width = DISTANCE_POINT_WIDTH;
-        glyphS = DISTANCE_POINT_S;
-        break;
-      case 'm':
-        width = DISTANCE_DIGIT_WIDTH;
-        glyphS = DISTANCE_METERS_S;
-        break;
-      case 'y':
-        width = DISTANCE_DIGIT_WIDTH;
-        glyphS = DISTANCE_YARDS_S;
-        break;
-      case 'f':
-        width = DISTANCE_FEET_WIDTH;
-        glyphS = DISTANCE_FEET_S;
-        break;
-      default:
-        width = DISTANCE_DIGIT_WIDTH;
-        glyphS = (*text - '0') * DISTANCE_DIGIT_WIDTH;
-        break;
+    for (; *text != '\0'; text++) {
+        switch (*text) {
+            case ' ':
+                continue;
+            case '.':
+                width = DISTANCE_POINT_WIDTH;
+                glyphS = DISTANCE_POINT_S;
+                break;
+            case 'm':
+                width = DISTANCE_DIGIT_WIDTH;
+                glyphS = DISTANCE_METERS_S;
+                break;
+            case 'y':
+                width = DISTANCE_DIGIT_WIDTH;
+                glyphS = DISTANCE_YARDS_S;
+                break;
+            case 'f':
+                width = DISTANCE_FEET_WIDTH;
+                glyphS = DISTANCE_FEET_S;
+                break;
+            default:
+                width = DISTANCE_DIGIT_WIDTH;
+                glyphS = (*text - '0') * DISTANCE_DIGIT_WIDTH;
+                break;
+        }
+
+        gSPTextureRectangle(
+            gfx++,
+            QuarterPixels(x),
+            QuarterPixels(y),
+            QuarterPixels(x + width),
+            QuarterPixels(y + DISTANCE_GLYPH_HEIGHT),
+            G_TX_RENDERTILE,
+            TexelCoordinate(glyphS),
+            0,
+            TEXEL_STEP_ONE,
+            TEXEL_STEP_ONE
+        );
+        x += width;
     }
 
-    gSPTextureRectangle(gfx++, QuarterPixels(x), QuarterPixels(y),
-        QuarterPixels(x + width), QuarterPixels(y + DISTANCE_GLYPH_HEIGHT),
-        G_TX_RENDERTILE, TexelCoordinate(glyphS), 0, TEXEL_STEP_ONE,
-        TEXEL_STEP_ONE);
-    x += width;
-  }
-
-  *gfxP = gfx;
+    *gfxP = gfx;
 }
 
 const char f_ColorTestSampleText[] = "ｻﾝﾌﾟﾙABCDEFG";
 const char f_BlankText[] = " ";
 
 /* Draws the color test screen and handles its controls */
-void DrawColorTest(Gfx** displayListHead) {
-  Gfx* gfx = *displayListHead;
+void DrawColorTest(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
 
-  SetUpGradientTextDrawing(&gfx, f_IsTestGradientShown);
-  gDPSetPrimColor(gfx++, 0, 0, f_TestColors[COLOR_TEST_PRIM][0],
-      f_TestColors[COLOR_TEST_PRIM][1], f_TestColors[COLOR_TEST_PRIM][2],
-      COLOR_CHANNEL_MAX);
-  gDPSetEnvColor(gfx++, f_TestColors[COLOR_TEST_ENV][0],
-      f_TestColors[COLOR_TEST_ENV][1], f_TestColors[COLOR_TEST_ENV][2],
-      COLOR_CHANNEL_MAX);
-  gDPPipeSync(gfx++);
+    SetUpGradientTextDrawing(&gfx, f_IsTestGradientShown);
+    gDPSetPrimColor(
+        gfx++,
+        0,
+        0,
+        f_TestColors[COLOR_TEST_PRIM][0],
+        f_TestColors[COLOR_TEST_PRIM][1],
+        f_TestColors[COLOR_TEST_PRIM][2],
+        COLOR_CHANNEL_MAX
+    );
+    gDPSetEnvColor(
+        gfx++,
+        f_TestColors[COLOR_TEST_ENV][0],
+        f_TestColors[COLOR_TEST_ENV][1],
+        f_TestColors[COLOR_TEST_ENV][2],
+        COLOR_CHANNEL_MAX
+    );
+    gDPPipeSync(gfx++);
 
-  /* The casts read only the low halves, as the target does */
-  DrawCenteredLargeText(&gfx, f_TestTextX, f_TestTextY, f_ColorTestSampleText);
-  gDPPipeSync(gfx++);
-  PrintDebugText(f_BlankText,
-      (f_TestChannelIndex * COLOR_TEST_COLUMN_WIDTH) + COLOR_TEST_TEXT_COLUMN -
-          1,
-      f_TestColorIndex + COLOR_TEST_TEXT_ROW);
-  if (g_ControllerStates[COLOR_TEST_CONTROLLER].repeatedButtons & U_CBUTTONS) {
-    f_TestColorIndex ^= 1;
-  }
+    /* The casts read only the low halves, as the target does */
+    DrawCenteredLargeText(&gfx, f_TestTextX, f_TestTextY, f_ColorTestSampleText);
+    gDPPipeSync(gfx++);
+    PrintDebugText(
+        f_BlankText,
+        (f_TestChannelIndex * COLOR_TEST_COLUMN_WIDTH) + COLOR_TEST_TEXT_COLUMN - 1,
+        f_TestColorIndex + COLOR_TEST_TEXT_ROW
+    );
+    if (g_ControllerStates[COLOR_TEST_CONTROLLER].repeatedButtons & U_CBUTTONS) {
+        f_TestColorIndex ^= 1;
+    }
 
-  if (g_ControllerStates[COLOR_TEST_CONTROLLER].repeatedButtons & D_CBUTTONS) {
-    f_TestColorIndex ^= 1;
-  }
+    if (g_ControllerStates[COLOR_TEST_CONTROLLER].repeatedButtons & D_CBUTTONS) {
+        f_TestColorIndex ^= 1;
+    }
 
-  if (g_ControllerStates[COLOR_TEST_CONTROLLER].repeatedButtons & L_CBUTTONS) {
-    f_TestChannelIndex = (f_TestChannelIndex + COLOR_TEST_CHANNEL_COUNT - 1) %
-        COLOR_TEST_CHANNEL_COUNT;
-  }
+    if (g_ControllerStates[COLOR_TEST_CONTROLLER].repeatedButtons & L_CBUTTONS) {
+        f_TestChannelIndex =
+            (f_TestChannelIndex + COLOR_TEST_CHANNEL_COUNT - 1) % COLOR_TEST_CHANNEL_COUNT;
+    }
 
-  if (g_ControllerStates[COLOR_TEST_CONTROLLER].repeatedButtons & R_CBUTTONS) {
-    f_TestChannelIndex = (f_TestChannelIndex + 1) % COLOR_TEST_CHANNEL_COUNT;
-  }
+    if (g_ControllerStates[COLOR_TEST_CONTROLLER].repeatedButtons & R_CBUTTONS) {
+        f_TestChannelIndex = (f_TestChannelIndex + 1) % COLOR_TEST_CHANNEL_COUNT;
+    }
 
-  if (g_ControllerStates[COLOR_TEST_CONTROLLER].buttons & A_BUTTON) {
-    f_TestColors[f_TestColorIndex][f_TestChannelIndex] += COLOR_TEST_STEP;
-  }
+    if (g_ControllerStates[COLOR_TEST_CONTROLLER].buttons & A_BUTTON) {
+        f_TestColors[f_TestColorIndex][f_TestChannelIndex] += COLOR_TEST_STEP;
+    }
 
-  if (g_ControllerStates[COLOR_TEST_CONTROLLER].buttons & B_BUTTON) {
-    f_TestColors[f_TestColorIndex][f_TestChannelIndex] -= COLOR_TEST_STEP;
-  }
+    if (g_ControllerStates[COLOR_TEST_CONTROLLER].buttons & B_BUTTON) {
+        f_TestColors[f_TestColorIndex][f_TestChannelIndex] -= COLOR_TEST_STEP;
+    }
 
-  if (g_ControllerStates[COLOR_TEST_CONTROLLER].pressedButtons & R_TRIG) {
-    f_IsTestGradientShown ^= 1;
-  }
+    if (g_ControllerStates[COLOR_TEST_CONTROLLER].pressedButtons & R_TRIG) {
+        f_IsTestGradientShown ^= 1;
+    }
 
-  if (g_ControllerStates[COLOR_TEST_CONTROLLER].buttons & U_JPAD) {
-    f_TestTextY -= COLOR_TEST_STEP;
-  }
+    if (g_ControllerStates[COLOR_TEST_CONTROLLER].buttons & U_JPAD) {
+        f_TestTextY -= COLOR_TEST_STEP;
+    }
 
-  if (g_ControllerStates[COLOR_TEST_CONTROLLER].buttons & D_JPAD) {
-    f_TestTextY += COLOR_TEST_STEP;
-  }
+    if (g_ControllerStates[COLOR_TEST_CONTROLLER].buttons & D_JPAD) {
+        f_TestTextY += COLOR_TEST_STEP;
+    }
 
-  if (g_ControllerStates[COLOR_TEST_CONTROLLER].buttons & L_JPAD) {
-    f_TestTextX -= COLOR_TEST_STEP;
-  }
+    if (g_ControllerStates[COLOR_TEST_CONTROLLER].buttons & L_JPAD) {
+        f_TestTextX -= COLOR_TEST_STEP;
+    }
 
-  if (g_ControllerStates[COLOR_TEST_CONTROLLER].buttons & R_JPAD) {
-    f_TestTextX += COLOR_TEST_STEP;
-  }
+    if (g_ControllerStates[COLOR_TEST_CONTROLLER].buttons & R_JPAD) {
+        f_TestTextX += COLOR_TEST_STEP;
+    }
 
-  if (f_TestColors[f_TestColorIndex][f_TestChannelIndex] > COLOR_CHANNEL_MAX) {
-    f_TestColors[f_TestColorIndex][f_TestChannelIndex] = COLOR_CHANNEL_MAX;
-  }
+    if (f_TestColors[f_TestColorIndex][f_TestChannelIndex] > COLOR_CHANNEL_MAX) {
+        f_TestColors[f_TestColorIndex][f_TestChannelIndex] = COLOR_CHANNEL_MAX;
+    }
 
-  if (f_TestColors[f_TestColorIndex][f_TestChannelIndex] < 0) {
-    f_TestColors[f_TestColorIndex][f_TestChannelIndex] = 0;
-  }
+    if (f_TestColors[f_TestColorIndex][f_TestChannelIndex] < 0) {
+        f_TestColors[f_TestColorIndex][f_TestChannelIndex] = 0;
+    }
 
-  sprintf(g_PrintBuffer, "%3d  %3d  %3d", (int)f_TestColors[COLOR_TEST_PRIM][0],
-      (int)f_TestColors[COLOR_TEST_PRIM][1],
-      (int)f_TestColors[COLOR_TEST_PRIM][2]);
-  PrintDebugText(g_PrintBuffer, COLOR_TEST_TEXT_COLUMN,
-      COLOR_TEST_TEXT_ROW + COLOR_TEST_PRIM);
-  sprintf(g_PrintBuffer, "%3d  %3d  %3d", (int)f_TestColors[COLOR_TEST_ENV][0],
-      (int)f_TestColors[COLOR_TEST_ENV][1],
-      (int)f_TestColors[COLOR_TEST_ENV][2]);
-  PrintDebugText(g_PrintBuffer, COLOR_TEST_TEXT_COLUMN,
-      COLOR_TEST_TEXT_ROW + COLOR_TEST_ENV);
-  PrintDebugText(">",
-      (f_TestChannelIndex * COLOR_TEST_COLUMN_WIDTH) + COLOR_TEST_TEXT_COLUMN -
-          1,
-      f_TestColorIndex + COLOR_TEST_TEXT_ROW);
-  gDPPipeSync(gfx++);
-  gDPPipeSync(gfx++);
-  gDPSetCycleType(gfx++, G_CYC_1CYCLE);
-  *displayListHead = gfx;
+    sprintf(
+        g_PrintBuffer,
+        "%3d  %3d  %3d",
+        (int)f_TestColors[COLOR_TEST_PRIM][0],
+        (int)f_TestColors[COLOR_TEST_PRIM][1],
+        (int)f_TestColors[COLOR_TEST_PRIM][2]
+    );
+    PrintDebugText(g_PrintBuffer, COLOR_TEST_TEXT_COLUMN, COLOR_TEST_TEXT_ROW + COLOR_TEST_PRIM);
+    sprintf(
+        g_PrintBuffer,
+        "%3d  %3d  %3d",
+        (int)f_TestColors[COLOR_TEST_ENV][0],
+        (int)f_TestColors[COLOR_TEST_ENV][1],
+        (int)f_TestColors[COLOR_TEST_ENV][2]
+    );
+    PrintDebugText(g_PrintBuffer, COLOR_TEST_TEXT_COLUMN, COLOR_TEST_TEXT_ROW + COLOR_TEST_ENV);
+    PrintDebugText(
+        ">",
+        (f_TestChannelIndex * COLOR_TEST_COLUMN_WIDTH) + COLOR_TEST_TEXT_COLUMN - 1,
+        f_TestColorIndex + COLOR_TEST_TEXT_ROW
+    );
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+    *displayListHead = gfx;
 }
 
 /* The shot panel slides in from the left by this much a frame */
@@ -3752,813 +4393,1133 @@ void DrawColorTest(Gfx** displayListHead) {
 /* Loads one of the shot panel's labels, which DrawRoundHud does in each branch
  * that picks one */
 #define LoadShotPanelLabel(image) \
-  { \
-    gDPLoadTLUT_pal16(g_DisplayListHead++, 0, \
-        TextureAddress((u32)(image) + IMAGE_HEADER_SIZE)); \
-    gDPLoadTextureBlock_4b(g_DisplayListHead++, \
-        TextureAddress((u32)(image) + PALETTED_TEXELS_OFFSET), G_IM_FMT_CI, \
-        SHOT_PANEL_LABEL_WIDTH, SHOT_PANEL_LABEL_HEIGHT, 0, \
-        G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, \
-        G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD); \
-  }
+    { \
+        gDPLoadTLUT_pal16( \
+            g_DisplayListHead++, \
+            0, \
+            TextureAddress((u32)(image) + IMAGE_HEADER_SIZE) \
+        ); \
+        gDPLoadTextureBlock_4b( \
+            g_DisplayListHead++, \
+            TextureAddress((u32)(image) + PALETTED_TEXELS_OFFSET), \
+            G_IM_FMT_CI, \
+            SHOT_PANEL_LABEL_WIDTH, \
+            SHOT_PANEL_LABEL_HEIGHT, \
+            0, \
+            G_TX_NOMIRROR | G_TX_WRAP, \
+            G_TX_NOMIRROR | G_TX_WRAP, \
+            G_TX_NOMASK, \
+            G_TX_NOMASK, \
+            G_TX_NOLOD, \
+            G_TX_NOLOD \
+        ); \
+    }
 
 /*
  * Draws the round's HUD over the course: the letterbox, the players' faces
  * and scores, the shot panel's labels, distances and club, and the debugging
  * aids that game flags turn on
  */
-void DrawRoundHud(CameraView* view) {
-  /* Pads the frame to match; without it 126 words differ */
-  s32 unused[2] UNUSED;
-  s32 percentRange[2];
-  Club* club;
-  s32 scoreboardX;
-  /* Declared after scoreboardX so that its spill slot follows; declared
-   * first, 40 words differ */
-  Boolean hasHandicap;
-  s32 i;
-  s32 ringCount;
-  s32 height;
-  Player* shooter;
-  Club* selectedClub;
-  SurfaceInfo* surface;
-  f32 shotLength;
-  s32 contestDistance;
-  s32 totalSeconds;
+void DrawRoundHud(CameraView *view) {
+    /* Pads the frame to match; without it 126 words differ */
+    s32 unused[2] UNUSED;
+    s32 percentRange[2];
+    Club *club;
+    s32 scoreboardX;
+    /* Declared after scoreboardX so that its spill slot follows; declared
+     * first, 40 words differ */
+    Boolean hasHandicap;
+    s32 i;
+    s32 ringCount;
+    s32 height;
+    Player *shooter;
+    Club *selectedClub;
+    SurfaceInfo *surface;
+    f32 shotLength;
+    s32 contestDistance;
+    s32 totalSeconds;
 
-  club = GetClub(
-      g_Players[g_CurrentShot.playerIndex].clubs[g_CurrentShot.clubSlot]);
-  hasHandicap = FALSE;
-  if (g_ShotPanelOffsetX > 0) {
-    g_ShotPanelOffsetX -= SHOT_PANEL_SLIDE_STEP;
-  }
-
-  WaveHoleFlag();
-  gDPPipeSync(g_DisplayListHead++);
-  gDPPipeSync(g_DisplayListHead++);
-  gDPSetCycleType(g_DisplayListHead++, G_CYC_1CYCLE);
-  gDPPipeSync(g_DisplayListHead++);
-  gDPPipeSync(g_DisplayListHead++);
-  gDPSetAlphaDither(g_DisplayListHead++, G_AD_DISABLE);
-  gDPPipeSync(g_DisplayListHead++);
-  gDPSetColorDither(g_DisplayListHead++, G_CD_MAGICSQ);
-  f_LetterboxHeight = DrawLetterbox(&g_DisplayListHead, f_LetterboxHeight);
-
-  /* The faces move out of the letterbox's way */
-  scoreboardX = (f_LetterboxHeight * SCOREBOARD_LETTERBOX_SHIFT) +
-      SCOREBOARD_X + g_ShotPanelOffsetX;
-  for (i = 0; i != g_GameState.playerCount; i++) {
-    if (g_Players[i].handicap > 0) {
-      hasHandicap = TRUE;
-      scoreboardX -= SCOREBOARD_HANDICAP_SHIFT;
-      break;
+    club = GetClub(g_Players[g_CurrentShot.playerIndex].clubs[g_CurrentShot.clubSlot]);
+    hasHandicap = FALSE;
+    if (g_ShotPanelOffsetX > 0) {
+        g_ShotPanelOffsetX -= SHOT_PANEL_SLIDE_STEP;
     }
-  }
 
-  gDPSetPrimColor(g_DisplayListHead++, 0, 0, 255, 255, 255, 128);
-  gDPPipeSync(g_DisplayListHead++);
-  gSPTexture(g_DisplayListHead++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0,
-      G_TX_RENDERTILE, G_ON);
-  gDPPipeSync(g_DisplayListHead++);
-  gDPSetTexturePersp(g_DisplayListHead++, G_TP_NONE);
-  gDPPipeSync(g_DisplayListHead++);
-  gDPSetTextureFilter(g_DisplayListHead++, G_TF_POINT);
-  gDPPipeSync(g_DisplayListHead++);
-  gDPPipeSync(g_DisplayListHead++);
-  gDPSetCycleType(g_DisplayListHead++, G_CYC_1CYCLE);
-  gDPPipeSync(g_DisplayListHead++);
-  gDPSetAlphaCompare(g_DisplayListHead++, G_AC_NONE);
-  gDPPipeSync(g_DisplayListHead++);
-  gDPSetTextureLUT(g_DisplayListHead++, G_TT_NONE);
-  gDPSetBlendColor(g_DisplayListHead++, 255, 255, 255, 1);
-  gDPPipeSync(g_DisplayListHead++);
-  gDPSetRenderMode(g_DisplayListHead++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
-  gDPPipeSync(g_DisplayListHead++);
-  if (g_RoundHud.isProgressShown && !g_IsCupViewShown && !IsOnDrivingRange()) {
+    WaveHoleFlag();
     gDPPipeSync(g_DisplayListHead++);
-    gDPSetTextureLUT(g_DisplayListHead++, G_TT_NONE);
     gDPPipeSync(g_DisplayListHead++);
-    gDPSetTextureFilter(g_DisplayListHead++, G_TF_BILERP);
+    gDPSetCycleType(g_DisplayListHead++, G_CYC_1CYCLE);
     gDPPipeSync(g_DisplayListHead++);
-    gDPSetRenderMode(g_DisplayListHead++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
     gDPPipeSync(g_DisplayListHead++);
-    gDPSetTextureLUT(g_DisplayListHead++, G_TT_RGBA16);
-    gDPSetCombineMode(g_DisplayListHead++, G_CC_MODULATEIDECALA_PRIM,
-        G_CC_MODULATEIDECALA_PRIM);
+    gDPSetAlphaDither(g_DisplayListHead++, G_AD_DISABLE);
+    gDPPipeSync(g_DisplayListHead++);
+    gDPSetColorDither(g_DisplayListHead++, G_CD_MAGICSQ);
+    f_LetterboxHeight = DrawLetterbox(&g_DisplayListHead, f_LetterboxHeight);
+
+    /* The faces move out of the letterbox's way */
+    scoreboardX =
+        (f_LetterboxHeight * SCOREBOARD_LETTERBOX_SHIFT) + SCOREBOARD_X + g_ShotPanelOffsetX;
     for (i = 0; i != g_GameState.playerCount; i++) {
-      gDPLoadTLUT_pal256(
-          g_DisplayListHead++, TextureAddress(g_PlayerFacePalettes[i]));
-      gDPLoadTextureBlock(g_DisplayListHead++,
-          TextureAddress(g_PlayerFaceImages[i]), G_IM_FMT_CI, G_IM_SIZ_8b,
-          FACE_WIDTH, FACE_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
-          G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
-          G_TX_NOLOD);
-      /* The face of the player whose turn it is shows full size and bright */
-      if (i == g_CurrentShot.playerIndex) {
-        gDPPipeSync(g_DisplayListHead++);
-        gDPSetTextureFilter(g_DisplayListHead++, G_TF_POINT);
-        gDPSetPrimColor(g_DisplayListHead++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
-        gDPPipeSync(g_DisplayListHead++);
-        gSPScisTextureRectangle(g_DisplayListHead++,
-            QuarterPixels(scoreboardX - FACE_INSET_X),
-            QuarterPixels(
-                SCOREBOARD_Y - FACE_INSET_Y + i * SCOREBOARD_ROW_HEIGHT),
-            QuarterPixels(scoreboardX - FACE_INSET_X + FACE_WIDTH),
-            QuarterPixels(SCOREBOARD_Y - FACE_INSET_Y + FACE_HEIGHT +
-                i * SCOREBOARD_ROW_HEIGHT),
-            G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
-      } else {
-        gDPPipeSync(g_DisplayListHead++);
-        gDPSetTextureFilter(g_DisplayListHead++, G_TF_BILERP);
-        gDPSetPrimColor(g_DisplayListHead++, 0, 0, 127, 127, 127, 127);
-        gDPPipeSync(g_DisplayListHead++);
-        gSPScisTextureRectangle(g_DisplayListHead++, QuarterPixels(scoreboardX),
-            QuarterPixels(SCOREBOARD_Y + i * SCOREBOARD_ROW_HEIGHT),
-            QuarterPixels(scoreboardX + SMALL_FACE_WIDTH),
-            QuarterPixels(
-                SCOREBOARD_Y + SMALL_FACE_HEIGHT + i * SCOREBOARD_ROW_HEIGHT),
-            G_TX_RENDERTILE, 0, 0, SMALL_FACE_STEP, SMALL_FACE_STEP);
-      }
-    }
-
-    gDPPipeSync(g_DisplayListHead++);
-  }
-
-  if (g_RoundHud.isHoleInfoShown && !g_IsCupViewShown) {
-    DrawHoleImageModel();
-  }
-
-  DrawShotPanelIcons(&g_DisplayListHead, view);
-  DrawLandingReaction(&g_DisplayListHead);
-  gDPPipeSync(g_DisplayListHead++);
-  gDPPipeSync(g_DisplayListHead++);
-  gDPSetRenderMode(g_DisplayListHead++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
-  gDPSetCombineMode(g_DisplayListHead++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-  gDPPipeSync(g_DisplayListHead++);
-  gDPSetTexturePersp(g_DisplayListHead++, G_TP_NONE);
-  gDPPipeSync(g_DisplayListHead++);
-  gDPSetTextureFilter(g_DisplayListHead++, G_TF_POINT);
-  gDPPipeSync(g_DisplayListHead++);
-  gDPSetTextureLUT(g_DisplayListHead++, G_TT_RGBA16);
-  if (g_RoundHud.isLieIconShown && !g_IsCupViewShown &&
-      !(club->surfaceMask & CLUB_SURFACE_GREEN)) {
-    DrawShotOffsetMarker();
-  }
-
-  if (g_RoundHud.isProgressShown && !g_IsCupViewShown && !IsOnDrivingRange()) {
-    f_PinFlagTime = (f_PinFlagTime + 1) & (PIN_FLAG_TIME_COUNT - 1);
-    gDPPipeSync(g_DisplayListHead++);
-    gDPLoadTLUT_pal16(
-        g_DisplayListHead++, 0, TextureAddress(ImageBody(g_PinFlagImages)));
-    gDPLoadTextureBlock_4b(g_DisplayListHead++,
-        TextureAddress(ImageTexels(g_PinFlagImages)), G_IM_FMT_CI,
-        PIN_FLAG_IMAGE_SIZE, PIN_FLAG_IMAGE_SIZE, 0, G_TX_NOMIRROR | G_TX_WRAP,
-        G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
-        G_TX_NOLOD);
-    gDPPipeSync(g_DisplayListHead++);
-    gSPScisTextureRectangle(g_DisplayListHead++,
-        QuarterPixels(PIN_FLAG_X - g_ShotPanelOffsetX),
-        QuarterPixels(PIN_FLAG_Y),
-        QuarterPixels(PIN_FLAG_X + PIN_FLAG_WIDTH - g_ShotPanelOffsetX),
-        QuarterPixels(PIN_FLAG_Y + PIN_FLAG_HEIGHT), G_TX_RENDERTILE,
-        (f_PinFlagTime / PIN_FLAG_FRAME_LENGTH) *
-            TexelCoordinate(PIN_FLAG_WIDTH),
-        TexelCoordinate(PIN_FLAG_IMAGE_T), TEXEL_STEP_ONE, TEXEL_STEP_ONE);
-    gDPPipeSync(g_DisplayListHead++);
-    gDPLoadTLUT_pal16(
-        g_DisplayListHead++, 0, TextureAddress(ImageBody(f_RestLabelImage)));
-    gDPLoadTextureBlock_4b(g_DisplayListHead++,
-        TextureAddress(ImageTexels(f_RestLabelImage)), G_IM_FMT_CI,
-        SHOT_PANEL_LABEL_WIDTH, SHOT_PANEL_LABEL_HEIGHT, 0,
-        G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
-        G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-    gDPPipeSync(g_DisplayListHead++);
-    gSPScisTextureRectangle(g_DisplayListHead++,
-        QuarterPixels(SHOT_PANEL_LABEL_X - g_ShotPanelOffsetX),
-        QuarterPixels(REST_LABEL_Y),
-        QuarterPixels(
-            SHOT_PANEL_LABEL_X + SHOT_PANEL_LABEL_WIDTH - g_ShotPanelOffsetX),
-        QuarterPixels(REST_LABEL_Y + SHOT_PANEL_LABEL_HEIGHT), G_TX_RENDERTILE,
-        0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
-    gDPPipeSync(g_DisplayListHead++);
-
-    /* A putt's height is labeled by its height in meters, which the feet are
-     * measured from */
-    if ((club->surfaceMask & CLUB_SURFACE_GREEN)
-            ? g_RoundHud.ballHeightMetersDirection == HEIGHT_LEVEL
-            : g_RoundHud.ballHeightYardsDirection == HEIGHT_LEVEL) {
-      LoadShotPanelLabel(f_FlatLabelImage);
-    } else if (g_RoundHud.ballHeightMetersDirection == HEIGHT_ABOVE) {
-      LoadShotPanelLabel(f_UpLabelImage);
-    } else {
-      LoadShotPanelLabel(f_DownLabelImage);
-    }
-
-    gDPPipeSync(g_DisplayListHead++);
-    gSPScisTextureRectangle(g_DisplayListHead++,
-        QuarterPixels(SHOT_PANEL_LABEL_X - g_ShotPanelOffsetX),
-        QuarterPixels(HEIGHT_LABEL_Y),
-        QuarterPixels(
-            SHOT_PANEL_LABEL_X + SHOT_PANEL_LABEL_WIDTH - g_ShotPanelOffsetX),
-        QuarterPixels(HEIGHT_LABEL_Y + SHOT_PANEL_LABEL_HEIGHT),
-        G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
-    gDPPipeSync(g_DisplayListHead++);
-    if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
-      if (f_RingFrameTime++ % RING_FRAME_LENGTH == 0) {
-        f_RingFrame = (f_RingFrame + 1) % RING_FRAME_COUNT;
-      }
-
-      gDPPipeSync(g_DisplayListHead++);
-      gDPSetRenderMode(
-          g_DisplayListHead++, G_RM_AA_ZB_TEX_EDGE, G_RM_AA_ZB_TEX_EDGE2);
-      gDPLoadTLUT_pal16(
-          g_DisplayListHead++, 0, TextureAddress(ImageBody(f_RingImages)));
-      gDPLoadTextureBlock_4b(g_DisplayListHead++,
-          TextureAddress(
-              ImageTexels(f_RingImages) + f_RingFrame * RING_FRAME_SIZE),
-          G_IM_FMT_CI, RING_IMAGE_SIZE, RING_IMAGE_SIZE, 0,
-          G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
-          G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-      gDPPipeSync(g_DisplayListHead++);
-      gSPScisTextureRectangle(g_DisplayListHead++,
-          QuarterPixels(RING_ICON_X - g_ShotPanelOffsetX),
-          QuarterPixels(RING_ICON_Y),
-          QuarterPixels(RING_ICON_X + RING_IMAGE_SIZE - g_ShotPanelOffsetX),
-          QuarterPixels(RING_ICON_Y + RING_IMAGE_SIZE), G_TX_RENDERTILE, 0, 0,
-          TEXEL_STEP_ONE, TEXEL_STEP_ONE);
-      gDPPipeSync(g_DisplayListHead++);
-      gDPPipeSync(g_DisplayListHead++);
-      gDPSetRenderMode(g_DisplayListHead++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
-    }
-  }
-
-  gDPLoadTLUT_pal16(
-      g_DisplayListHead++, 0, TextureAddress(ImageBody(f_DistanceFont)));
-  gDPLoadTextureBlock_4b(g_DisplayListHead++,
-      TextureAddress(ImageTexels(f_DistanceFont)), G_IM_FMT_CI,
-      DISTANCE_FONT_WIDTH, DISTANCE_GLYPH_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
-      G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
-      G_TX_NOLOD);
-  if (g_RoundHud.isHoleInfoShown && !g_IsCupViewShown && !IsOnDrivingRange() &&
-      !g_GameState.isMiniGolf) {
-    sprintf(g_PrintBuffer, "%3dy",
-        (s16)g_CourseRecords[GetCourseRecordIndex()]
-            .holes[GetHoleRecordIndex()]
-            .yardages[0]);
-    DrawDistanceText(&g_DisplayListHead, HOLE_YARDAGE_X - g_ShotPanelOffsetX,
-        HOLE_YARDAGE_Y, g_PrintBuffer);
-  }
-
-  if (g_RoundHud.isProgressShown && !g_IsCupViewShown && !IsOnDrivingRange()) {
-    /* The shot panel's distances are white, rather than the font's yellow */
-    gDPLoadTLUT_pal16(
-        g_DisplayListHead++, 0, TextureAddress(f_WhiteDistancePalette));
-    ringCount = 0;
-    if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
-      shooter = &g_Players[g_RoundHud.shooterIndex];
-      for (i = 0; i != RING_COUNT; i++) {
-        ringCount += shooter->ringStates[i] == RING_STATE_SHOWN;
-      }
-
-      sprintf(g_PrintBuffer, "%d", ringCount);
-      DrawDistanceText(&g_DisplayListHead, RING_COUNT_X - g_ShotPanelOffsetX,
-          RING_COUNT_Y, g_PrintBuffer);
-    }
-
-    if (g_IsDebugEnabled &&
-        (g_ControllerStates[HUD_OFFSET_CONTROLLER].pressedButtons &
-            D_CBUTTONS)) {
-      shooter = &g_Players[g_RoundHud.shooterIndex];
-      for (i = 0; i != RING_COUNT; i++) {
-        shooter->ringStates[i] = RING_STATE_NONE;
-      }
-    }
-
-    if (club->surfaceMask & CLUB_SURFACE_GREEN) {
-      s32 restHundredths = g_RoundHud.cupDistance *
-          (FEET_PER_YARD * HUNDREDTHS_PER_UNIT) * YARDS_PER_UNIT;
-
-      sprintf(g_PrintBuffer, "%3d.%02df", restHundredths / HUNDREDTHS_PER_UNIT,
-          restHundredths % HUNDREDTHS_PER_UNIT);
-      DrawDistanceText(&g_DisplayListHead,
-          SHOT_PANEL_DISTANCE_X - g_ShotPanelOffsetX, REST_LABEL_Y,
-          g_PrintBuffer);
-      if (g_RoundHud.ballHeightMetersDirection != HEIGHT_LEVEL) {
-        sprintf(g_PrintBuffer, "%6.2ff", fabsf(g_RoundHud.ballHeightFeet));
-        DrawDistanceText(&g_DisplayListHead,
-            SHOT_PANEL_DISTANCE_X - g_ShotPanelOffsetX, HEIGHT_LABEL_Y,
-            g_PrintBuffer);
-      }
-    } else if (SHOWS_METERS) {
-      s32 restHundredths =
-          g_RoundHud.cupDistance * HUNDREDTHS_PER_UNIT * METERS_PER_UNIT;
-
-      sprintf(g_PrintBuffer, "%2d.%02dm", restHundredths / HUNDREDTHS_PER_UNIT,
-          restHundredths % HUNDREDTHS_PER_UNIT);
-      DrawDistanceText(&g_DisplayListHead,
-          SHOT_PANEL_DISTANCE_X - g_ShotPanelOffsetX, REST_LABEL_Y,
-          g_PrintBuffer);
-      if (g_RoundHud.ballHeightMetersDirection != HEIGHT_LEVEL) {
-        sprintf(g_PrintBuffer, "%6.2fm", fabsf(g_RoundHud.ballHeightMeters));
-        DrawDistanceText(&g_DisplayListHead,
-            SHOT_PANEL_DISTANCE_X - g_ShotPanelOffsetX, HEIGHT_LABEL_Y,
-            g_PrintBuffer);
-      }
-    } else {
-      sprintf(g_PrintBuffer, "%3dy",
-          (s32)(g_RoundHud.cupDistance * YARDS_PER_UNIT));
-      DrawDistanceText(&g_DisplayListHead,
-          SHOT_PANEL_DISTANCE_X - g_ShotPanelOffsetX, REST_LABEL_Y,
-          g_PrintBuffer);
-      if (g_RoundHud.ballHeightYardsDirection != HEIGHT_LEVEL) {
-        height = g_RoundHud.ballHeightYards;
-        if (height < 0) {
-          height = -height;
+        if (g_Players[i].handicap > 0) {
+            hasHandicap = TRUE;
+            scoreboardX -= SCOREBOARD_HANDICAP_SHIFT;
+            break;
         }
-
-        sprintf(g_PrintBuffer, "%3dy", height);
-        DrawDistanceText(&g_DisplayListHead,
-            SHOT_PANEL_DISTANCE_X - g_ShotPanelOffsetX, HEIGHT_LABEL_Y,
-            g_PrintBuffer);
-      }
     }
-  }
 
-  if (g_RoundHud.isClubHeadIconShown && !g_IsCupViewShown) {
+    gDPSetPrimColor(g_DisplayListHead++, 0, 0, 255, 255, 255, 128);
     gDPPipeSync(g_DisplayListHead++);
-    gDPSetRenderMode(g_DisplayListHead++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
-    gDPSetCombineMode(g_DisplayListHead++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-    gDPPipeSync(g_DisplayListHead++);
-    gDPSetTextureLUT(g_DisplayListHead++, G_TT_RGBA16);
+    gSPTexture(
+        g_DisplayListHead++,
+        TEXTURE_SCALE_HALF,
+        TEXTURE_SCALE_HALF,
+        0,
+        G_TX_RENDERTILE,
+        G_ON
+    );
     gDPPipeSync(g_DisplayListHead++);
     gDPSetTexturePersp(g_DisplayListHead++, G_TP_NONE);
     gDPPipeSync(g_DisplayListHead++);
     gDPSetTextureFilter(g_DisplayListHead++, G_TF_POINT);
-    if (g_IsModuleAlive[MODULE_CLUB_PANEL]) {
-      UpdateClubPanelImages();
-    }
-
-    gDPLoadTLUT_pal256(
-        g_DisplayListHead++, TextureAddress(ImageBody(g_ClubPanelImage)));
-    gDPLoadTextureBlock(g_DisplayListHead++,
-        TextureAddress(LargeImageTexels(g_ClubPanelImage)), G_IM_FMT_CI,
-        G_IM_SIZ_8b, CLUB_PANEL_WIDTH, CLUB_PANEL_HEIGHT, 0,
-        G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
-        G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(g_DisplayListHead++);
-    gSPScisTextureRectangle(g_DisplayListHead++,
-        QuarterPixels(CLUB_PANEL_X - g_ShotPanelOffsetX),
-        QuarterPixels(f_HudOffsetY + CLUB_PANEL_Y),
-        QuarterPixels(CLUB_PANEL_X + CLUB_PANEL_WIDTH - g_ShotPanelOffsetX),
-        QuarterPixels(f_HudOffsetY + CLUB_PANEL_Y + CLUB_PANEL_HEIGHT),
-        G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     gDPPipeSync(g_DisplayListHead++);
-    gDPLoadTLUT_pal16(g_DisplayListHead++, 0,
-        TextureAddress(ImageBody(f_ClubNameImages[f_ClubNameImageIndex])));
-    gDPLoadTextureBlock_4b(g_DisplayListHead++,
-        TextureAddress(ImageTexels(f_ClubNameImages[f_ClubNameImageIndex])),
-        G_IM_FMT_CI, CLUB_NAME_WIDTH, CLUB_NAME_HEIGHT, 0,
-        G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
-        G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+    gDPSetCycleType(g_DisplayListHead++, G_CYC_1CYCLE);
     gDPPipeSync(g_DisplayListHead++);
-    gSPScisTextureRectangle(g_DisplayListHead++,
-        QuarterPixels(CLUB_NAME_X - g_ShotPanelOffsetX),
-        QuarterPixels(f_HudOffsetY + CLUB_NAME_Y),
-        QuarterPixels(CLUB_NAME_X + CLUB_NAME_WIDTH - g_ShotPanelOffsetX),
-        QuarterPixels(f_HudOffsetY + CLUB_NAME_Y + CLUB_NAME_HEIGHT),
-        G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
-    gDPPipeSync(g_DisplayListHead++);
-  }
-
-  if (g_RoundHud.isHoleInfoShown && !g_IsCupViewShown && !IsOnDrivingRange()) {
-    gDPLoadTLUT_pal16(
-        g_DisplayListHead++, 0, TextureAddress(ImageBody(f_ParImage)));
-    gDPLoadTextureBlock_4b(g_DisplayListHead++,
-        TextureAddress(ImageTexels(f_ParImage)), G_IM_FMT_CI,
-        SHOT_PANEL_LABEL_WIDTH, SHOT_PANEL_LABEL_HEIGHT, 0,
-        G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
-        G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-    gDPPipeSync(g_DisplayListHead++);
-    gSPScisTextureRectangle(g_DisplayListHead++,
-        QuarterPixels(PAR_IMAGE_X - g_ShotPanelOffsetX),
-        QuarterPixels(PAR_IMAGE_Y),
-        QuarterPixels(
-            PAR_IMAGE_X + SHOT_PANEL_LABEL_WIDTH - g_ShotPanelOffsetX),
-        QuarterPixels(PAR_IMAGE_Y + SHOT_PANEL_LABEL_HEIGHT), G_TX_RENDERTILE,
-        0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
-    gDPPipeSync(g_DisplayListHead++);
-  }
-
-  if (IsLetterboxState(g_LetterboxState) && g_RoundHud.isLetterboxShown) {
-    DrawAnimatedIcon(&g_DisplayListHead, f_LetterboxHeight);
-  }
-
-  BeginShadowedText(&g_DisplayListHead);
-  SetTextColor(&g_DisplayListHead, 255, 255, 255);
-  SetTextColor(&g_DisplayListHead, 255, 255, 255);
-  if (g_RoundHud.isLieIconShown && !g_IsCupViewShown) {
-    surface = GetSurfaceInfo(g_CurrentShot.surface);
-    GetSurfacePercentRange(surface, GetSelectedClub(), percentRange);
-    sprintf(g_PrintBuffer, "%3d-%3d", percentRange[0], percentRange[1]);
-    DrawShadowedText(&g_DisplayListHead, g_ShotPanelOffsetX + LIE_PERCENT_X,
-        f_HudOffsetY + SHOT_PANEL_TEXT_Y, g_PrintBuffer);
-  }
-
-  if (g_RoundHud.isClubHeadIconShown && !g_IsCupViewShown) {
-    Player* player;
-
-    selectedClub = GetSelectedClub();
-    player = &g_Players[g_RoundHud.shooterIndex];
-    if (selectedClub->surfaceMask & CLUB_SURFACE_GREEN) {
-      sprintf(g_PrintBuffer, "%3d%c", GetSelectedShotDistance(),
-          SHADOWED_FEET_GLYPH);
-    } else if (SHOWS_METERS) {
-      sprintf(g_PrintBuffer, "%3dm",
-          (s32)(GetSelectedShotDistance() *
-              (METERS_PER_UNIT / YARDS_PER_UNIT)));
-    } else {
-      sprintf(g_PrintBuffer, "%3dy", GetSelectedShotDistance());
-    }
-
-    DrawShadowedText(&g_DisplayListHead, CLUB_DISTANCE_X - g_ShotPanelOffsetX,
-        f_HudOffsetY + SHOT_PANEL_TEXT_Y, g_PrintBuffer);
-    if (g_CurrentShot.shotMode == SHOT_MODE_POWER &&
-        !(selectedClub->surfaceMask & CLUB_SURFACE_GREEN)) {
-      if (g_IsModuleAlive[MODULE_CLUB_PANEL] && IsShotModeChangeDone() &&
-          player->powerShotCount != POWER_SHOTS_UNLIMITED) {
-        sprintf(g_PrintBuffer, "%d", player->powerShotCount);
-        DrawShadowedText(&g_DisplayListHead,
-            POWER_SHOT_COUNT_X - g_ShotPanelOffsetX,
-            f_HudOffsetY + POWER_SHOT_COUNT_Y, g_PrintBuffer);
-      }
-    }
-  }
-
-  if (g_RoundHud.isShotLengthShown && !g_IsCupViewShown) {
-    Player* player;
-
-    player = &g_Players[g_RoundHud.shooterIndex];
-    shotLength = IntLength2D(g_CurrentShot.ballPosition[AXIS_X] -
-            g_TurnBallSimulation.position[AXIS_X],
-        g_CurrentShot.ballPosition[AXIS_Z] -
-            g_TurnBallSimulation.position[AXIS_Z]);
-    SetTextColor(&g_DisplayListHead, 255, 255, 63);
-    if (GetClub(player->clubs[g_CurrentShot.clubSlot])->surfaceMask &
-        CLUB_SURFACE_GREEN) {
-      sprintf(g_PrintBuffer, "%5.2f%c",
-          shotLength * (FEET_PER_YARD * YARDS_PER_UNIT), SHADOWED_FEET_GLYPH);
-    } else if (SHOWS_METERS) {
-      sprintf(g_PrintBuffer, "%5.2fm", shotLength * METERS_PER_UNIT);
-    } else {
-      sprintf(g_PrintBuffer, "%5.2fy", shotLength * YARDS_PER_UNIT);
-    }
-
-    DrawShadowedText(
-        &g_DisplayListHead, SHOT_LENGTH_X, SHOT_LENGTH_Y, g_PrintBuffer);
-  }
-
-  if (g_RoundHud.isProgressShown && !g_IsCupViewShown && !IsOnDrivingRange()) {
-    for (i = 0; i != g_GameState.playerCount; i++) {
-      SetTextColor(&g_DisplayListHead, 255, 255, 255);
-      sprintf(g_PrintBuffer, "%d", g_Players[i].strokeCount);
-      DrawShadowedText(&g_DisplayListHead, scoreboardX + SCOREBOARD_TEXT_X,
-          SCOREBOARD_Y + (i * SCOREBOARD_ROW_HEIGHT), g_PrintBuffer);
-      if (hasHandicap) {
-        DrawShadowedText(&g_DisplayListHead, scoreboardX + HANDICAP_COLON_X,
-            SCOREBOARD_Y + (i * SCOREBOARD_ROW_HEIGHT), ":");
-        sprintf(g_PrintBuffer, "%2d",
-            GetHandicapOffset(GetCourseRecordIndex(), g_GameState.holeIndex,
-                g_Players[i].handicap));
-        DrawShadowedText(&g_DisplayListHead, scoreboardX + HANDICAP_X,
-            SCOREBOARD_Y + (i * SCOREBOARD_ROW_HEIGHT), g_PrintBuffer);
-      }
-
-      SetTextColor(&g_DisplayListHead, 255, 230, 0);
-      if (g_GameState.replayKind != REPLAY_KIND_NONE) {
-        sprintf(g_PrintBuffer, f_BlankText);
-      } else {
-        switch (g_GameState.gameMode) {
-          case GAME_MODE_STROKE:
-          case GAME_MODE_UNLISTED_STROKE:
-          case GAME_MODE_TOURNAMENT:
-          case GAME_MODE_SPEED_GOLF:
-            if (g_RoundHud.skinsTotals[i] == 0) {
-              sprintf(g_PrintBuffer, "#0");
-            } else {
-              sprintf(g_PrintBuffer, "%+d", g_RoundHud.skinsTotals[i]);
-            }
-
-            break;
-          case GAME_MODE_MATCH_GAME:
-          case GAME_MODE_GET_CHARACTER:
-            if (g_RoundHud.skinsTotals[i] == 0) {
-              sprintf(g_PrintBuffer, "EVEN");
-            } else if (g_RoundHud.skinsTotals[i] < 0) {
-              sprintf(g_PrintBuffer, "%dUP", -g_RoundHud.skinsTotals[i]);
-            } else {
-              sprintf(g_PrintBuffer, "%dDW", g_RoundHud.skinsTotals[i]);
-            }
-
-            break;
-          case GAME_MODE_SKINS_MATCH:
-          case GAME_MODE_CLUB_SLOTS:
-            sprintf(g_PrintBuffer, "%dP", g_RoundHud.skinsTotals[i]);
-            break;
-          case GAME_MODE_TRAINING:
-          case GAME_MODE_RECORD_REPLAY:
-          case GAME_MODE_RING_SHOT:
-            sprintf(g_PrintBuffer, f_BlankText);
-            break;
-        }
-      }
-
-      DrawShadowedText(&g_DisplayListHead, scoreboardX + SCOREBOARD_TEXT_X,
-          SCOREBOARD_SCORE_Y + (i * SCOREBOARD_ROW_HEIGHT), g_PrintBuffer);
-      SetTextColor(&g_DisplayListHead, 255, 255, 255);
-      if (g_GameState.betRates[BET_LONGEST_DRIVE] != UNSET_BET_RATE &&
-          IsMarkedParFive(GetCourseRecordIndex(), g_GameState.holeIndex)) {
-        contestDistance = g_Players[i].driveDistance;
-        if (contestDistance != UNMEASURED_DISTANCE) {
-          if (contestDistance == UNCOUNTED_DISTANCE) {
-            sprintf(g_PrintBuffer, "miss");
-          } else {
-            sprintf(
-                g_PrintBuffer, "%3dy", (s32)(contestDistance * YARDS_PER_UNIT));
-          }
-
-          DrawShadowedText(&g_DisplayListHead, scoreboardX + DRIVE_DISTANCE_X,
-              SCOREBOARD_CONTEST_Y + (i * SCOREBOARD_ROW_HEIGHT),
-              g_PrintBuffer);
-        }
-      }
-
-      if (g_GameState.betRates[BET_NEAREST_PIN] != UNSET_BET_RATE &&
-          IsParThree(GetCourseRecordIndex(), g_GameState.holeIndex)) {
-        contestDistance = g_Players[i].pinDistance;
-        if (contestDistance != UNMEASURED_DISTANCE) {
-          if (contestDistance == UNCOUNTED_DISTANCE) {
-            sprintf(g_PrintBuffer, "miss");
-          } else {
-            s32 pinHundredths = contestDistance *
-                (FEET_PER_YARD * HUNDREDTHS_PER_UNIT) * YARDS_PER_UNIT;
-
-            sprintf(g_PrintBuffer, "%2d.%02d%c",
-                pinHundredths / HUNDREDTHS_PER_UNIT,
-                pinHundredths % HUNDREDTHS_PER_UNIT, SHADOWED_FEET_GLYPH);
-          }
-
-          DrawShadowedText(&g_DisplayListHead, scoreboardX + PIN_DISTANCE_X,
-              SCOREBOARD_CONTEST_Y + (i * SCOREBOARD_ROW_HEIGHT),
-              g_PrintBuffer);
-        }
-      }
-    }
-  }
-
-  if (g_RoundHud.isProgressShown && !IsOnDrivingRange() &&
-      g_GameState.gameMode == GAME_MODE_SPEED_GOLF &&
-      g_GameState.replayKind == REPLAY_KIND_NONE) {
-    s32 hundredths = (s32)(g_GameState.stopwatchFrameCount *
-                         ((f32)HUNDREDTHS_PER_SECOND / FRAMES_PER_SECOND)) %
-        HUNDREDTHS_PER_SECOND;
-
-    totalSeconds = g_GameState.stopwatchFrameCount / FRAMES_PER_SECOND;
-    sprintf(g_PrintBuffer, "%02d:%02d:%02d", totalSeconds / SECONDS_PER_MINUTE,
-        totalSeconds % SECONDS_PER_MINUTE, hundredths);
-    DrawShadowedText(&g_DisplayListHead, PANEL_STOPWATCH_X - g_ShotPanelOffsetX,
-        PANEL_STOPWATCH_Y, g_PrintBuffer);
-  }
-
-  DrawNothing(&g_DisplayListHead);
-  SetUpTextDrawing(&g_DisplayListHead);
-  DrawBirdieBadgeCount(&g_DisplayListHead);
-  if (IsGameFlagSet(GAME_FLAG_SHOW_MIRROR_TEXTURE)) {
+    gDPSetAlphaCompare(g_DisplayListHead++, G_AC_NONE);
     gDPPipeSync(g_DisplayListHead++);
     gDPSetTextureLUT(g_DisplayListHead++, G_TT_NONE);
+    gDPSetBlendColor(g_DisplayListHead++, 255, 255, 255, 1);
+    gDPPipeSync(g_DisplayListHead++);
+    gDPSetRenderMode(g_DisplayListHead++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
+    gDPPipeSync(g_DisplayListHead++);
+    if (g_RoundHud.isProgressShown && !g_IsCupViewShown && !IsOnDrivingRange()) {
+        gDPPipeSync(g_DisplayListHead++);
+        gDPSetTextureLUT(g_DisplayListHead++, G_TT_NONE);
+        gDPPipeSync(g_DisplayListHead++);
+        gDPSetTextureFilter(g_DisplayListHead++, G_TF_BILERP);
+        gDPPipeSync(g_DisplayListHead++);
+        gDPSetRenderMode(g_DisplayListHead++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
+        gDPPipeSync(g_DisplayListHead++);
+        gDPSetTextureLUT(g_DisplayListHead++, G_TT_RGBA16);
+        gDPSetCombineMode(
+            g_DisplayListHead++,
+            G_CC_MODULATEIDECALA_PRIM,
+            G_CC_MODULATEIDECALA_PRIM
+        );
+        for (i = 0; i != g_GameState.playerCount; i++) {
+            gDPLoadTLUT_pal256(g_DisplayListHead++, TextureAddress(g_PlayerFacePalettes[i]));
+            gDPLoadTextureBlock(
+                g_DisplayListHead++,
+                TextureAddress(g_PlayerFaceImages[i]),
+                G_IM_FMT_CI,
+                G_IM_SIZ_8b,
+                FACE_WIDTH,
+                FACE_HEIGHT,
+                0,
+                G_TX_NOMIRROR | G_TX_WRAP,
+                G_TX_NOMIRROR | G_TX_WRAP,
+                G_TX_NOMASK,
+                G_TX_NOMASK,
+                G_TX_NOLOD,
+                G_TX_NOLOD
+            );
+            /* The face of the player whose turn it is shows full size and bright */
+            if (i == g_CurrentShot.playerIndex) {
+                gDPPipeSync(g_DisplayListHead++);
+                gDPSetTextureFilter(g_DisplayListHead++, G_TF_POINT);
+                gDPSetPrimColor(g_DisplayListHead++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
+                gDPPipeSync(g_DisplayListHead++);
+                gSPScisTextureRectangle(
+                    g_DisplayListHead++,
+                    QuarterPixels(scoreboardX - FACE_INSET_X),
+                    QuarterPixels(SCOREBOARD_Y - FACE_INSET_Y + i * SCOREBOARD_ROW_HEIGHT),
+                    QuarterPixels(scoreboardX - FACE_INSET_X + FACE_WIDTH),
+                    QuarterPixels(
+                        SCOREBOARD_Y - FACE_INSET_Y + FACE_HEIGHT + i * SCOREBOARD_ROW_HEIGHT
+                    ),
+                    G_TX_RENDERTILE,
+                    0,
+                    0,
+                    TEXEL_STEP_ONE,
+                    TEXEL_STEP_ONE
+                );
+            }
+            else {
+                gDPPipeSync(g_DisplayListHead++);
+                gDPSetTextureFilter(g_DisplayListHead++, G_TF_BILERP);
+                gDPSetPrimColor(g_DisplayListHead++, 0, 0, 127, 127, 127, 127);
+                gDPPipeSync(g_DisplayListHead++);
+                gSPScisTextureRectangle(
+                    g_DisplayListHead++,
+                    QuarterPixels(scoreboardX),
+                    QuarterPixels(SCOREBOARD_Y + i * SCOREBOARD_ROW_HEIGHT),
+                    QuarterPixels(scoreboardX + SMALL_FACE_WIDTH),
+                    QuarterPixels(SCOREBOARD_Y + SMALL_FACE_HEIGHT + i * SCOREBOARD_ROW_HEIGHT),
+                    G_TX_RENDERTILE,
+                    0,
+                    0,
+                    SMALL_FACE_STEP,
+                    SMALL_FACE_STEP
+                );
+            }
+        }
+
+        gDPPipeSync(g_DisplayListHead++);
+    }
+
+    if (g_RoundHud.isHoleInfoShown && !g_IsCupViewShown) {
+        DrawHoleImageModel();
+    }
+
+    DrawShotPanelIcons(&g_DisplayListHead, view);
+    DrawLandingReaction(&g_DisplayListHead);
+    gDPPipeSync(g_DisplayListHead++);
+    gDPPipeSync(g_DisplayListHead++);
+    gDPSetRenderMode(g_DisplayListHead++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
+    gDPSetCombineMode(g_DisplayListHead++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+    gDPPipeSync(g_DisplayListHead++);
+    gDPSetTexturePersp(g_DisplayListHead++, G_TP_NONE);
     gDPPipeSync(g_DisplayListHead++);
     gDPSetTextureFilter(g_DisplayListHead++, G_TF_POINT);
     gDPPipeSync(g_DisplayListHead++);
-    gDPSetRenderMode(g_DisplayListHead++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
-    gDPSetCombineMode(g_DisplayListHead++, G_CC_DECALRGB, G_CC_DECALRGB);
-    gDPLoadTextureBlock(g_DisplayListHead++, TextureAddress(g_MirrorTexture),
-        G_IM_FMT_RGBA, G_IM_SIZ_16b, MIRROR_TEXTURE_SIZE, MIRROR_TEXTURE_SIZE,
-        0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_MIRROR | G_TX_WRAP, G_TX_NOMASK,
-        MIRROR_TEXTURE_SIZE_LOG2, G_TX_NOLOD, G_TX_NOLOD);
-    gSPScisTextureRectangle(g_DisplayListHead++,
-        QuarterPixels(MIRROR_TEXTURE_X), QuarterPixels(MIRROR_TEXTURE_Y),
-        QuarterPixels(MIRROR_TEXTURE_X + MIRROR_TEXTURE_SIZE),
-        QuarterPixels(MIRROR_TEXTURE_Y + MIRROR_TEXTURE_SIZE), G_TX_RENDERTILE,
-        0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
-    gDPPipeSync(g_DisplayListHead++);
-  }
-
-  if (g_IsModuleAlive[MODULE_SHOT_EFFECTS]) {
-    DrawShotEffectsHud(&g_DisplayListHead);
-  }
-
-  /* A debugging aid: B changes the first player's character, and A plays the
-   * contest winner's movie */
-  if (IsGameFlagSet(GAME_FLAG_ADJUST_HUD_OFFSET)) {
-    if (g_ControllerStates[HUD_OFFSET_CONTROLLER].pressedButtons & B_BUTTON) {
-      g_Players[0].characterIndex =
-          (g_Players[0].characterIndex + 1) % CHARACTER_COUNT;
+    gDPSetTextureLUT(g_DisplayListHead++, G_TT_RGBA16);
+    if (g_RoundHud.isLieIconShown &&
+        !g_IsCupViewShown &&
+        !(club->surfaceMask & CLUB_SURFACE_GREEN)) {
+        DrawShotOffsetMarker();
     }
 
-    if (g_ControllerStates[HUD_OFFSET_CONTROLLER].pressedButtons & A_BUTTON) {
-      SetContestWinner(0);
-      StartMovie(MOVIE_LONGEST_DRIVE);
-    }
-  }
+    if (g_RoundHud.isProgressShown && !g_IsCupViewShown && !IsOnDrivingRange()) {
+        f_PinFlagTime = (f_PinFlagTime + 1) & (PIN_FLAG_TIME_COUNT - 1);
+        gDPPipeSync(g_DisplayListHead++);
+        gDPLoadTLUT_pal16(g_DisplayListHead++, 0, TextureAddress(ImageBody(g_PinFlagImages)));
+        gDPLoadTextureBlock_4b(
+            g_DisplayListHead++,
+            TextureAddress(ImageTexels(g_PinFlagImages)),
+            G_IM_FMT_CI,
+            PIN_FLAG_IMAGE_SIZE,
+            PIN_FLAG_IMAGE_SIZE,
+            0,
+            G_TX_NOMIRROR | G_TX_WRAP,
+            G_TX_NOMIRROR | G_TX_WRAP,
+            G_TX_NOMASK,
+            G_TX_NOMASK,
+            G_TX_NOLOD,
+            G_TX_NOLOD
+        );
+        gDPPipeSync(g_DisplayListHead++);
+        gSPScisTextureRectangle(
+            g_DisplayListHead++,
+            QuarterPixels(PIN_FLAG_X - g_ShotPanelOffsetX),
+            QuarterPixels(PIN_FLAG_Y),
+            QuarterPixels(PIN_FLAG_X + PIN_FLAG_WIDTH - g_ShotPanelOffsetX),
+            QuarterPixels(PIN_FLAG_Y + PIN_FLAG_HEIGHT),
+            G_TX_RENDERTILE,
+            (f_PinFlagTime / PIN_FLAG_FRAME_LENGTH) * TexelCoordinate(PIN_FLAG_WIDTH),
+            TexelCoordinate(PIN_FLAG_IMAGE_T),
+            TEXEL_STEP_ONE,
+            TEXEL_STEP_ONE
+        );
+        gDPPipeSync(g_DisplayListHead++);
+        gDPLoadTLUT_pal16(g_DisplayListHead++, 0, TextureAddress(ImageBody(f_RestLabelImage)));
+        gDPLoadTextureBlock_4b(
+            g_DisplayListHead++,
+            TextureAddress(ImageTexels(f_RestLabelImage)),
+            G_IM_FMT_CI,
+            SHOT_PANEL_LABEL_WIDTH,
+            SHOT_PANEL_LABEL_HEIGHT,
+            0,
+            G_TX_NOMIRROR | G_TX_WRAP,
+            G_TX_NOMIRROR | G_TX_WRAP,
+            G_TX_NOMASK,
+            G_TX_NOMASK,
+            G_TX_NOLOD,
+            G_TX_NOLOD
+        );
+        gDPPipeSync(g_DisplayListHead++);
+        gSPScisTextureRectangle(
+            g_DisplayListHead++,
+            QuarterPixels(SHOT_PANEL_LABEL_X - g_ShotPanelOffsetX),
+            QuarterPixels(REST_LABEL_Y),
+            QuarterPixels(SHOT_PANEL_LABEL_X + SHOT_PANEL_LABEL_WIDTH - g_ShotPanelOffsetX),
+            QuarterPixels(REST_LABEL_Y + SHOT_PANEL_LABEL_HEIGHT),
+            G_TX_RENDERTILE,
+            0,
+            0,
+            TEXEL_STEP_ONE,
+            TEXEL_STEP_ONE
+        );
+        gDPPipeSync(g_DisplayListHead++);
 
-  AdjustHudOffset();
+        /* A putt's height is labeled by its height in meters, which the feet are
+         * measured from */
+        if ((club->surfaceMask & CLUB_SURFACE_GREEN) ?
+                g_RoundHud.ballHeightMetersDirection == HEIGHT_LEVEL :
+                g_RoundHud.ballHeightYardsDirection == HEIGHT_LEVEL) {
+            LoadShotPanelLabel(f_FlatLabelImage);
+        }
+        else if (g_RoundHud.ballHeightMetersDirection == HEIGHT_ABOVE) {
+            LoadShotPanelLabel(f_UpLabelImage);
+        }
+        else {
+            LoadShotPanelLabel(f_DownLabelImage);
+        }
+
+        gDPPipeSync(g_DisplayListHead++);
+        gSPScisTextureRectangle(
+            g_DisplayListHead++,
+            QuarterPixels(SHOT_PANEL_LABEL_X - g_ShotPanelOffsetX),
+            QuarterPixels(HEIGHT_LABEL_Y),
+            QuarterPixels(SHOT_PANEL_LABEL_X + SHOT_PANEL_LABEL_WIDTH - g_ShotPanelOffsetX),
+            QuarterPixels(HEIGHT_LABEL_Y + SHOT_PANEL_LABEL_HEIGHT),
+            G_TX_RENDERTILE,
+            0,
+            0,
+            TEXEL_STEP_ONE,
+            TEXEL_STEP_ONE
+        );
+        gDPPipeSync(g_DisplayListHead++);
+        if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
+            if (f_RingFrameTime++ % RING_FRAME_LENGTH == 0) {
+                f_RingFrame = (f_RingFrame + 1) % RING_FRAME_COUNT;
+            }
+
+            gDPPipeSync(g_DisplayListHead++);
+            gDPSetRenderMode(g_DisplayListHead++, G_RM_AA_ZB_TEX_EDGE, G_RM_AA_ZB_TEX_EDGE2);
+            gDPLoadTLUT_pal16(g_DisplayListHead++, 0, TextureAddress(ImageBody(f_RingImages)));
+            gDPLoadTextureBlock_4b(
+                g_DisplayListHead++,
+                TextureAddress(ImageTexels(f_RingImages) + f_RingFrame * RING_FRAME_SIZE),
+                G_IM_FMT_CI,
+                RING_IMAGE_SIZE,
+                RING_IMAGE_SIZE,
+                0,
+                G_TX_NOMIRROR | G_TX_WRAP,
+                G_TX_NOMIRROR | G_TX_WRAP,
+                G_TX_NOMASK,
+                G_TX_NOMASK,
+                G_TX_NOLOD,
+                G_TX_NOLOD
+            );
+            gDPPipeSync(g_DisplayListHead++);
+            gSPScisTextureRectangle(
+                g_DisplayListHead++,
+                QuarterPixels(RING_ICON_X - g_ShotPanelOffsetX),
+                QuarterPixels(RING_ICON_Y),
+                QuarterPixels(RING_ICON_X + RING_IMAGE_SIZE - g_ShotPanelOffsetX),
+                QuarterPixels(RING_ICON_Y + RING_IMAGE_SIZE),
+                G_TX_RENDERTILE,
+                0,
+                0,
+                TEXEL_STEP_ONE,
+                TEXEL_STEP_ONE
+            );
+            gDPPipeSync(g_DisplayListHead++);
+            gDPPipeSync(g_DisplayListHead++);
+            gDPSetRenderMode(g_DisplayListHead++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
+        }
+    }
+
+    gDPLoadTLUT_pal16(g_DisplayListHead++, 0, TextureAddress(ImageBody(f_DistanceFont)));
+    gDPLoadTextureBlock_4b(
+        g_DisplayListHead++,
+        TextureAddress(ImageTexels(f_DistanceFont)),
+        G_IM_FMT_CI,
+        DISTANCE_FONT_WIDTH,
+        DISTANCE_GLYPH_HEIGHT,
+        0,
+        G_TX_NOMIRROR | G_TX_WRAP,
+        G_TX_NOMIRROR | G_TX_WRAP,
+        G_TX_NOMASK,
+        G_TX_NOMASK,
+        G_TX_NOLOD,
+        G_TX_NOLOD
+    );
+    if (g_RoundHud.isHoleInfoShown &&
+        !g_IsCupViewShown &&
+        !IsOnDrivingRange() &&
+        !g_GameState.isMiniGolf) {
+        sprintf(
+            g_PrintBuffer,
+            "%3dy",
+            (s16)g_CourseRecords[GetCourseRecordIndex()].holes[GetHoleRecordIndex()].yardages[0]
+        );
+        DrawDistanceText(
+            &g_DisplayListHead,
+            HOLE_YARDAGE_X - g_ShotPanelOffsetX,
+            HOLE_YARDAGE_Y,
+            g_PrintBuffer
+        );
+    }
+
+    if (g_RoundHud.isProgressShown && !g_IsCupViewShown && !IsOnDrivingRange()) {
+        /* The shot panel's distances are white, rather than the font's yellow */
+        gDPLoadTLUT_pal16(g_DisplayListHead++, 0, TextureAddress(f_WhiteDistancePalette));
+        ringCount = 0;
+        if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
+            shooter = &g_Players[g_RoundHud.shooterIndex];
+            for (i = 0; i != RING_COUNT; i++) {
+                ringCount += shooter->ringStates[i] == RING_STATE_SHOWN;
+            }
+
+            sprintf(g_PrintBuffer, "%d", ringCount);
+            DrawDistanceText(
+                &g_DisplayListHead,
+                RING_COUNT_X - g_ShotPanelOffsetX,
+                RING_COUNT_Y,
+                g_PrintBuffer
+            );
+        }
+
+        if (g_IsDebugEnabled &&
+            (g_ControllerStates[HUD_OFFSET_CONTROLLER].pressedButtons & D_CBUTTONS)) {
+            shooter = &g_Players[g_RoundHud.shooterIndex];
+            for (i = 0; i != RING_COUNT; i++) {
+                shooter->ringStates[i] = RING_STATE_NONE;
+            }
+        }
+
+        if (club->surfaceMask & CLUB_SURFACE_GREEN) {
+            s32 restHundredths =
+                g_RoundHud.cupDistance * (FEET_PER_YARD * HUNDREDTHS_PER_UNIT) * YARDS_PER_UNIT;
+
+            sprintf(
+                g_PrintBuffer,
+                "%3d.%02df",
+                restHundredths / HUNDREDTHS_PER_UNIT,
+                restHundredths % HUNDREDTHS_PER_UNIT
+            );
+            DrawDistanceText(
+                &g_DisplayListHead,
+                SHOT_PANEL_DISTANCE_X - g_ShotPanelOffsetX,
+                REST_LABEL_Y,
+                g_PrintBuffer
+            );
+            if (g_RoundHud.ballHeightMetersDirection != HEIGHT_LEVEL) {
+                sprintf(g_PrintBuffer, "%6.2ff", fabsf(g_RoundHud.ballHeightFeet));
+                DrawDistanceText(
+                    &g_DisplayListHead,
+                    SHOT_PANEL_DISTANCE_X - g_ShotPanelOffsetX,
+                    HEIGHT_LABEL_Y,
+                    g_PrintBuffer
+                );
+            }
+        }
+        else if (SHOWS_METERS) {
+            s32 restHundredths = g_RoundHud.cupDistance * HUNDREDTHS_PER_UNIT * METERS_PER_UNIT;
+
+            sprintf(
+                g_PrintBuffer,
+                "%2d.%02dm",
+                restHundredths / HUNDREDTHS_PER_UNIT,
+                restHundredths % HUNDREDTHS_PER_UNIT
+            );
+            DrawDistanceText(
+                &g_DisplayListHead,
+                SHOT_PANEL_DISTANCE_X - g_ShotPanelOffsetX,
+                REST_LABEL_Y,
+                g_PrintBuffer
+            );
+            if (g_RoundHud.ballHeightMetersDirection != HEIGHT_LEVEL) {
+                sprintf(g_PrintBuffer, "%6.2fm", fabsf(g_RoundHud.ballHeightMeters));
+                DrawDistanceText(
+                    &g_DisplayListHead,
+                    SHOT_PANEL_DISTANCE_X - g_ShotPanelOffsetX,
+                    HEIGHT_LABEL_Y,
+                    g_PrintBuffer
+                );
+            }
+        }
+        else {
+            sprintf(g_PrintBuffer, "%3dy", (s32)(g_RoundHud.cupDistance * YARDS_PER_UNIT));
+            DrawDistanceText(
+                &g_DisplayListHead,
+                SHOT_PANEL_DISTANCE_X - g_ShotPanelOffsetX,
+                REST_LABEL_Y,
+                g_PrintBuffer
+            );
+            if (g_RoundHud.ballHeightYardsDirection != HEIGHT_LEVEL) {
+                height = g_RoundHud.ballHeightYards;
+                if (height < 0) {
+                    height = -height;
+                }
+
+                sprintf(g_PrintBuffer, "%3dy", height);
+                DrawDistanceText(
+                    &g_DisplayListHead,
+                    SHOT_PANEL_DISTANCE_X - g_ShotPanelOffsetX,
+                    HEIGHT_LABEL_Y,
+                    g_PrintBuffer
+                );
+            }
+        }
+    }
+
+    if (g_RoundHud.isClubHeadIconShown && !g_IsCupViewShown) {
+        gDPPipeSync(g_DisplayListHead++);
+        gDPSetRenderMode(g_DisplayListHead++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
+        gDPSetCombineMode(g_DisplayListHead++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+        gDPPipeSync(g_DisplayListHead++);
+        gDPSetTextureLUT(g_DisplayListHead++, G_TT_RGBA16);
+        gDPPipeSync(g_DisplayListHead++);
+        gDPSetTexturePersp(g_DisplayListHead++, G_TP_NONE);
+        gDPPipeSync(g_DisplayListHead++);
+        gDPSetTextureFilter(g_DisplayListHead++, G_TF_POINT);
+        if (g_IsModuleAlive[MODULE_CLUB_PANEL]) {
+            UpdateClubPanelImages();
+        }
+
+        gDPLoadTLUT_pal256(g_DisplayListHead++, TextureAddress(ImageBody(g_ClubPanelImage)));
+        gDPLoadTextureBlock(
+            g_DisplayListHead++,
+            TextureAddress(LargeImageTexels(g_ClubPanelImage)),
+            G_IM_FMT_CI,
+            G_IM_SIZ_8b,
+            CLUB_PANEL_WIDTH,
+            CLUB_PANEL_HEIGHT,
+            0,
+            G_TX_NOMIRROR | G_TX_WRAP,
+            G_TX_NOMIRROR | G_TX_WRAP,
+            G_TX_NOMASK,
+            G_TX_NOMASK,
+            G_TX_NOLOD,
+            G_TX_NOLOD
+        );
+        gDPPipeSync(g_DisplayListHead++);
+        gSPScisTextureRectangle(
+            g_DisplayListHead++,
+            QuarterPixels(CLUB_PANEL_X - g_ShotPanelOffsetX),
+            QuarterPixels(f_HudOffsetY + CLUB_PANEL_Y),
+            QuarterPixels(CLUB_PANEL_X + CLUB_PANEL_WIDTH - g_ShotPanelOffsetX),
+            QuarterPixels(f_HudOffsetY + CLUB_PANEL_Y + CLUB_PANEL_HEIGHT),
+            G_TX_RENDERTILE,
+            0,
+            0,
+            TEXEL_STEP_ONE,
+            TEXEL_STEP_ONE
+        );
+        gDPPipeSync(g_DisplayListHead++);
+        gDPLoadTLUT_pal16(
+            g_DisplayListHead++,
+            0,
+            TextureAddress(ImageBody(f_ClubNameImages[f_ClubNameImageIndex]))
+        );
+        gDPLoadTextureBlock_4b(
+            g_DisplayListHead++,
+            TextureAddress(ImageTexels(f_ClubNameImages[f_ClubNameImageIndex])),
+            G_IM_FMT_CI,
+            CLUB_NAME_WIDTH,
+            CLUB_NAME_HEIGHT,
+            0,
+            G_TX_NOMIRROR | G_TX_WRAP,
+            G_TX_NOMIRROR | G_TX_WRAP,
+            G_TX_NOMASK,
+            G_TX_NOMASK,
+            G_TX_NOLOD,
+            G_TX_NOLOD
+        );
+        gDPPipeSync(g_DisplayListHead++);
+        gSPScisTextureRectangle(
+            g_DisplayListHead++,
+            QuarterPixels(CLUB_NAME_X - g_ShotPanelOffsetX),
+            QuarterPixels(f_HudOffsetY + CLUB_NAME_Y),
+            QuarterPixels(CLUB_NAME_X + CLUB_NAME_WIDTH - g_ShotPanelOffsetX),
+            QuarterPixels(f_HudOffsetY + CLUB_NAME_Y + CLUB_NAME_HEIGHT),
+            G_TX_RENDERTILE,
+            0,
+            0,
+            TEXEL_STEP_ONE,
+            TEXEL_STEP_ONE
+        );
+        gDPPipeSync(g_DisplayListHead++);
+    }
+
+    if (g_RoundHud.isHoleInfoShown && !g_IsCupViewShown && !IsOnDrivingRange()) {
+        gDPLoadTLUT_pal16(g_DisplayListHead++, 0, TextureAddress(ImageBody(f_ParImage)));
+        gDPLoadTextureBlock_4b(
+            g_DisplayListHead++,
+            TextureAddress(ImageTexels(f_ParImage)),
+            G_IM_FMT_CI,
+            SHOT_PANEL_LABEL_WIDTH,
+            SHOT_PANEL_LABEL_HEIGHT,
+            0,
+            G_TX_NOMIRROR | G_TX_WRAP,
+            G_TX_NOMIRROR | G_TX_WRAP,
+            G_TX_NOMASK,
+            G_TX_NOMASK,
+            G_TX_NOLOD,
+            G_TX_NOLOD
+        );
+        gDPPipeSync(g_DisplayListHead++);
+        gSPScisTextureRectangle(
+            g_DisplayListHead++,
+            QuarterPixels(PAR_IMAGE_X - g_ShotPanelOffsetX),
+            QuarterPixels(PAR_IMAGE_Y),
+            QuarterPixels(PAR_IMAGE_X + SHOT_PANEL_LABEL_WIDTH - g_ShotPanelOffsetX),
+            QuarterPixels(PAR_IMAGE_Y + SHOT_PANEL_LABEL_HEIGHT),
+            G_TX_RENDERTILE,
+            0,
+            0,
+            TEXEL_STEP_ONE,
+            TEXEL_STEP_ONE
+        );
+        gDPPipeSync(g_DisplayListHead++);
+    }
+
+    if (IsLetterboxState(g_LetterboxState) && g_RoundHud.isLetterboxShown) {
+        DrawAnimatedIcon(&g_DisplayListHead, f_LetterboxHeight);
+    }
+
+    BeginShadowedText(&g_DisplayListHead);
+    SetTextColor(&g_DisplayListHead, 255, 255, 255);
+    SetTextColor(&g_DisplayListHead, 255, 255, 255);
+    if (g_RoundHud.isLieIconShown && !g_IsCupViewShown) {
+        surface = GetSurfaceInfo(g_CurrentShot.surface);
+        GetSurfacePercentRange(surface, GetSelectedClub(), percentRange);
+        sprintf(g_PrintBuffer, "%3d-%3d", percentRange[0], percentRange[1]);
+        DrawShadowedText(
+            &g_DisplayListHead,
+            g_ShotPanelOffsetX + LIE_PERCENT_X,
+            f_HudOffsetY + SHOT_PANEL_TEXT_Y,
+            g_PrintBuffer
+        );
+    }
+
+    if (g_RoundHud.isClubHeadIconShown && !g_IsCupViewShown) {
+        Player *player;
+
+        selectedClub = GetSelectedClub();
+        player = &g_Players[g_RoundHud.shooterIndex];
+        if (selectedClub->surfaceMask & CLUB_SURFACE_GREEN) {
+            sprintf(g_PrintBuffer, "%3d%c", GetSelectedShotDistance(), SHADOWED_FEET_GLYPH);
+        }
+        else if (SHOWS_METERS) {
+            sprintf(
+                g_PrintBuffer,
+                "%3dm",
+                (s32)(GetSelectedShotDistance() * (METERS_PER_UNIT / YARDS_PER_UNIT))
+            );
+        }
+        else {
+            sprintf(g_PrintBuffer, "%3dy", GetSelectedShotDistance());
+        }
+
+        DrawShadowedText(
+            &g_DisplayListHead,
+            CLUB_DISTANCE_X - g_ShotPanelOffsetX,
+            f_HudOffsetY + SHOT_PANEL_TEXT_Y,
+            g_PrintBuffer
+        );
+        if (g_CurrentShot.shotMode == SHOT_MODE_POWER &&
+            !(selectedClub->surfaceMask & CLUB_SURFACE_GREEN)) {
+            if (g_IsModuleAlive[MODULE_CLUB_PANEL] &&
+                IsShotModeChangeDone() &&
+                player->powerShotCount != POWER_SHOTS_UNLIMITED) {
+                sprintf(g_PrintBuffer, "%d", player->powerShotCount);
+                DrawShadowedText(
+                    &g_DisplayListHead,
+                    POWER_SHOT_COUNT_X - g_ShotPanelOffsetX,
+                    f_HudOffsetY + POWER_SHOT_COUNT_Y,
+                    g_PrintBuffer
+                );
+            }
+        }
+    }
+
+    if (g_RoundHud.isShotLengthShown && !g_IsCupViewShown) {
+        Player *player;
+
+        player = &g_Players[g_RoundHud.shooterIndex];
+        shotLength = IntLength2D(
+            g_CurrentShot.ballPosition[AXIS_X] - g_TurnBallSimulation.position[AXIS_X],
+            g_CurrentShot.ballPosition[AXIS_Z] - g_TurnBallSimulation.position[AXIS_Z]
+        );
+        SetTextColor(&g_DisplayListHead, 255, 255, 63);
+        if (GetClub(player->clubs[g_CurrentShot.clubSlot])->surfaceMask & CLUB_SURFACE_GREEN) {
+            sprintf(
+                g_PrintBuffer,
+                "%5.2f%c",
+                shotLength * (FEET_PER_YARD * YARDS_PER_UNIT),
+                SHADOWED_FEET_GLYPH
+            );
+        }
+        else if (SHOWS_METERS) {
+            sprintf(g_PrintBuffer, "%5.2fm", shotLength * METERS_PER_UNIT);
+        }
+        else {
+            sprintf(g_PrintBuffer, "%5.2fy", shotLength * YARDS_PER_UNIT);
+        }
+
+        DrawShadowedText(&g_DisplayListHead, SHOT_LENGTH_X, SHOT_LENGTH_Y, g_PrintBuffer);
+    }
+
+    if (g_RoundHud.isProgressShown && !g_IsCupViewShown && !IsOnDrivingRange()) {
+        for (i = 0; i != g_GameState.playerCount; i++) {
+            SetTextColor(&g_DisplayListHead, 255, 255, 255);
+            sprintf(g_PrintBuffer, "%d", g_Players[i].strokeCount);
+            DrawShadowedText(
+                &g_DisplayListHead,
+                scoreboardX + SCOREBOARD_TEXT_X,
+                SCOREBOARD_Y + (i * SCOREBOARD_ROW_HEIGHT),
+                g_PrintBuffer
+            );
+            if (hasHandicap) {
+                DrawShadowedText(
+                    &g_DisplayListHead,
+                    scoreboardX + HANDICAP_COLON_X,
+                    SCOREBOARD_Y + (i * SCOREBOARD_ROW_HEIGHT),
+                    ":"
+                );
+                sprintf(
+                    g_PrintBuffer,
+                    "%2d",
+                    GetHandicapOffset(
+                        GetCourseRecordIndex(),
+                        g_GameState.holeIndex,
+                        g_Players[i].handicap
+                    )
+                );
+                DrawShadowedText(
+                    &g_DisplayListHead,
+                    scoreboardX + HANDICAP_X,
+                    SCOREBOARD_Y + (i * SCOREBOARD_ROW_HEIGHT),
+                    g_PrintBuffer
+                );
+            }
+
+            SetTextColor(&g_DisplayListHead, 255, 230, 0);
+            if (g_GameState.replayKind != REPLAY_KIND_NONE) {
+                sprintf(g_PrintBuffer, f_BlankText);
+            }
+            else {
+                switch (g_GameState.gameMode) {
+                    case GAME_MODE_STROKE:
+                    case GAME_MODE_UNLISTED_STROKE:
+                    case GAME_MODE_TOURNAMENT:
+                    case GAME_MODE_SPEED_GOLF:
+                        if (g_RoundHud.skinsTotals[i] == 0) {
+                            sprintf(g_PrintBuffer, "#0");
+                        }
+                        else {
+                            sprintf(g_PrintBuffer, "%+d", g_RoundHud.skinsTotals[i]);
+                        }
+
+                        break;
+                    case GAME_MODE_MATCH_GAME:
+                    case GAME_MODE_GET_CHARACTER:
+                        if (g_RoundHud.skinsTotals[i] == 0) {
+                            sprintf(g_PrintBuffer, "EVEN");
+                        }
+                        else if (g_RoundHud.skinsTotals[i] < 0) {
+                            sprintf(g_PrintBuffer, "%dUP", -g_RoundHud.skinsTotals[i]);
+                        }
+                        else {
+                            sprintf(g_PrintBuffer, "%dDW", g_RoundHud.skinsTotals[i]);
+                        }
+
+                        break;
+                    case GAME_MODE_SKINS_MATCH:
+                    case GAME_MODE_CLUB_SLOTS:
+                        sprintf(g_PrintBuffer, "%dP", g_RoundHud.skinsTotals[i]);
+                        break;
+                    case GAME_MODE_TRAINING:
+                    case GAME_MODE_RECORD_REPLAY:
+                    case GAME_MODE_RING_SHOT:
+                        sprintf(g_PrintBuffer, f_BlankText);
+                        break;
+                }
+            }
+
+            DrawShadowedText(
+                &g_DisplayListHead,
+                scoreboardX + SCOREBOARD_TEXT_X,
+                SCOREBOARD_SCORE_Y + (i * SCOREBOARD_ROW_HEIGHT),
+                g_PrintBuffer
+            );
+            SetTextColor(&g_DisplayListHead, 255, 255, 255);
+            if (g_GameState.betRates[BET_LONGEST_DRIVE] != UNSET_BET_RATE &&
+                IsMarkedParFive(GetCourseRecordIndex(), g_GameState.holeIndex)) {
+                contestDistance = g_Players[i].driveDistance;
+                if (contestDistance != UNMEASURED_DISTANCE) {
+                    if (contestDistance == UNCOUNTED_DISTANCE) {
+                        sprintf(g_PrintBuffer, "miss");
+                    }
+                    else {
+                        sprintf(g_PrintBuffer, "%3dy", (s32)(contestDistance * YARDS_PER_UNIT));
+                    }
+
+                    DrawShadowedText(
+                        &g_DisplayListHead,
+                        scoreboardX + DRIVE_DISTANCE_X,
+                        SCOREBOARD_CONTEST_Y + (i * SCOREBOARD_ROW_HEIGHT),
+                        g_PrintBuffer
+                    );
+                }
+            }
+
+            if (g_GameState.betRates[BET_NEAREST_PIN] != UNSET_BET_RATE &&
+                IsParThree(GetCourseRecordIndex(), g_GameState.holeIndex)) {
+                contestDistance = g_Players[i].pinDistance;
+                if (contestDistance != UNMEASURED_DISTANCE) {
+                    if (contestDistance == UNCOUNTED_DISTANCE) {
+                        sprintf(g_PrintBuffer, "miss");
+                    }
+                    else {
+                        s32 pinHundredths = contestDistance *
+                            (FEET_PER_YARD * HUNDREDTHS_PER_UNIT) * YARDS_PER_UNIT;
+
+                        sprintf(
+                            g_PrintBuffer,
+                            "%2d.%02d%c",
+                            pinHundredths / HUNDREDTHS_PER_UNIT,
+                            pinHundredths % HUNDREDTHS_PER_UNIT,
+                            SHADOWED_FEET_GLYPH
+                        );
+                    }
+
+                    DrawShadowedText(
+                        &g_DisplayListHead,
+                        scoreboardX + PIN_DISTANCE_X,
+                        SCOREBOARD_CONTEST_Y + (i * SCOREBOARD_ROW_HEIGHT),
+                        g_PrintBuffer
+                    );
+                }
+            }
+        }
+    }
+
+    if (g_RoundHud.isProgressShown &&
+        !IsOnDrivingRange() &&
+        g_GameState.gameMode == GAME_MODE_SPEED_GOLF &&
+        g_GameState.replayKind == REPLAY_KIND_NONE) {
+        s32 hundredths = (s32)(g_GameState.stopwatchFrameCount *
+                             ((f32)HUNDREDTHS_PER_SECOND / FRAMES_PER_SECOND)) %
+            HUNDREDTHS_PER_SECOND;
+
+        totalSeconds = g_GameState.stopwatchFrameCount / FRAMES_PER_SECOND;
+        sprintf(
+            g_PrintBuffer,
+            "%02d:%02d:%02d",
+            totalSeconds / SECONDS_PER_MINUTE,
+            totalSeconds % SECONDS_PER_MINUTE,
+            hundredths
+        );
+        DrawShadowedText(
+            &g_DisplayListHead,
+            PANEL_STOPWATCH_X - g_ShotPanelOffsetX,
+            PANEL_STOPWATCH_Y,
+            g_PrintBuffer
+        );
+    }
+
+    DrawNothing(&g_DisplayListHead);
+    SetUpTextDrawing(&g_DisplayListHead);
+    DrawBirdieBadgeCount(&g_DisplayListHead);
+    if (IsGameFlagSet(GAME_FLAG_SHOW_MIRROR_TEXTURE)) {
+        gDPPipeSync(g_DisplayListHead++);
+        gDPSetTextureLUT(g_DisplayListHead++, G_TT_NONE);
+        gDPPipeSync(g_DisplayListHead++);
+        gDPSetTextureFilter(g_DisplayListHead++, G_TF_POINT);
+        gDPPipeSync(g_DisplayListHead++);
+        gDPSetRenderMode(g_DisplayListHead++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
+        gDPSetCombineMode(g_DisplayListHead++, G_CC_DECALRGB, G_CC_DECALRGB);
+        gDPLoadTextureBlock(
+            g_DisplayListHead++,
+            TextureAddress(g_MirrorTexture),
+            G_IM_FMT_RGBA,
+            G_IM_SIZ_16b,
+            MIRROR_TEXTURE_SIZE,
+            MIRROR_TEXTURE_SIZE,
+            0,
+            G_TX_NOMIRROR | G_TX_WRAP,
+            G_TX_MIRROR | G_TX_WRAP,
+            G_TX_NOMASK,
+            MIRROR_TEXTURE_SIZE_LOG2,
+            G_TX_NOLOD,
+            G_TX_NOLOD
+        );
+        gSPScisTextureRectangle(
+            g_DisplayListHead++,
+            QuarterPixels(MIRROR_TEXTURE_X),
+            QuarterPixels(MIRROR_TEXTURE_Y),
+            QuarterPixels(MIRROR_TEXTURE_X + MIRROR_TEXTURE_SIZE),
+            QuarterPixels(MIRROR_TEXTURE_Y + MIRROR_TEXTURE_SIZE),
+            G_TX_RENDERTILE,
+            0,
+            0,
+            TEXEL_STEP_ONE,
+            TEXEL_STEP_ONE
+        );
+        gDPPipeSync(g_DisplayListHead++);
+    }
+
+    if (g_IsModuleAlive[MODULE_SHOT_EFFECTS]) {
+        DrawShotEffectsHud(&g_DisplayListHead);
+    }
+
+    /* A debugging aid: B changes the first player's character, and A plays the
+     * contest winner's movie */
+    if (IsGameFlagSet(GAME_FLAG_ADJUST_HUD_OFFSET)) {
+        if (g_ControllerStates[HUD_OFFSET_CONTROLLER].pressedButtons & B_BUTTON) {
+            g_Players[0].characterIndex = (g_Players[0].characterIndex + 1) % CHARACTER_COUNT;
+        }
+
+        if (g_ControllerStates[HUD_OFFSET_CONTROLLER].pressedButtons & A_BUTTON) {
+            SetContestWinner(0);
+            StartMovie(MOVIE_LONGEST_DRIVE);
+        }
+    }
+
+    AdjustHudOffset();
 }
 
 /* Loads the images that the hole's intro shows for its contest bet and the
  * match standing */
 void LoadHoleIntroImages(void) {
-  EncodedAsset asset;
-  s32 standing;
+    EncodedAsset asset;
+    s32 standing;
 
-  f_LoadedHoleIntroImages = 0;
-  if (g_GameState.betRates[BET_LONGEST_DRIVE] != UNSET_BET_RATE &&
-      IsMarkedParFive(g_GameState.courseIndex, g_GameState.holeIndex)) {
-    f_HoleContestImage =
-        AllocMemory(OpenEncodedAsset(ASSET_LONGEST_DRIVE_IMAGE, &asset));
-    ReadEncodedAsset(f_HoleContestImage, &asset);
-    f_LoadedHoleIntroImages |= HOLE_INTRO_CONTEST_IMAGE_LOADED;
-  } else if (g_GameState.betRates[BET_NEAREST_PIN] != UNSET_BET_RATE &&
-      IsParThree(g_GameState.courseIndex, g_GameState.holeIndex)) {
-    f_HoleContestImage =
-        AllocMemory(OpenEncodedAsset(ASSET_NEAREST_PIN_IMAGE, &asset));
-    ReadEncodedAsset(f_HoleContestImage, &asset);
-    f_LoadedHoleIntroImages |= HOLE_INTRO_CONTEST_IMAGE_LOADED;
-  }
-
-  if (IsOneOnOneMatchMode(g_GameState.gameMode)) {
-    if (g_GameState.isSuddenDeath) {
-      f_MatchStandingImage =
-          AllocMemory(OpenEncodedAsset(ASSET_SUDDEN_DEATH_IMAGE, &asset));
-      ReadEncodedAsset(f_MatchStandingImage, &asset);
-      f_LoadedHoleIntroImages |= HOLE_INTRO_MATCH_IMAGE_LOADED;
-    } else {
-      standing = GetMatchStanding(0, 1);
-      if (standing == MATCH_STANDING_PLAYER_DORMIE ||
-          standing == MATCH_STANDING_OPPONENT_DORMIE) {
-        f_MatchStandingImage =
-            AllocMemory(OpenEncodedAsset(ASSET_DORMIE_IMAGE, &asset));
-        ReadEncodedAsset(f_MatchStandingImage, &asset);
-        f_LoadedHoleIntroImages |= HOLE_INTRO_MATCH_IMAGE_LOADED;
-      }
+    f_LoadedHoleIntroImages = 0;
+    if (g_GameState.betRates[BET_LONGEST_DRIVE] != UNSET_BET_RATE &&
+        IsMarkedParFive(g_GameState.courseIndex, g_GameState.holeIndex)) {
+        f_HoleContestImage = AllocMemory(OpenEncodedAsset(ASSET_LONGEST_DRIVE_IMAGE, &asset));
+        ReadEncodedAsset(f_HoleContestImage, &asset);
+        f_LoadedHoleIntroImages |= HOLE_INTRO_CONTEST_IMAGE_LOADED;
     }
-  }
+    else if (g_GameState.betRates[BET_NEAREST_PIN] != UNSET_BET_RATE &&
+        IsParThree(g_GameState.courseIndex, g_GameState.holeIndex)) {
+        f_HoleContestImage = AllocMemory(OpenEncodedAsset(ASSET_NEAREST_PIN_IMAGE, &asset));
+        ReadEncodedAsset(f_HoleContestImage, &asset);
+        f_LoadedHoleIntroImages |= HOLE_INTRO_CONTEST_IMAGE_LOADED;
+    }
+
+    if (IsOneOnOneMatchMode(g_GameState.gameMode)) {
+        if (g_GameState.isSuddenDeath) {
+            f_MatchStandingImage = AllocMemory(OpenEncodedAsset(ASSET_SUDDEN_DEATH_IMAGE, &asset));
+            ReadEncodedAsset(f_MatchStandingImage, &asset);
+            f_LoadedHoleIntroImages |= HOLE_INTRO_MATCH_IMAGE_LOADED;
+        }
+        else {
+            standing = GetMatchStanding(0, 1);
+            if (standing == MATCH_STANDING_PLAYER_DORMIE ||
+                standing == MATCH_STANDING_OPPONENT_DORMIE) {
+                f_MatchStandingImage = AllocMemory(OpenEncodedAsset(ASSET_DORMIE_IMAGE, &asset));
+                ReadEncodedAsset(f_MatchStandingImage, &asset);
+                f_LoadedHoleIntroImages |= HOLE_INTRO_MATCH_IMAGE_LOADED;
+            }
+        }
+    }
 }
 
 /* Frees the images that LoadHoleIntroImages loaded */
 void FreeHoleIntroImages(void) {
-  if (f_LoadedHoleIntroImages & HOLE_INTRO_CONTEST_IMAGE_LOADED) {
-    FreeMemory(&f_HoleContestImage);
-  }
+    if (f_LoadedHoleIntroImages & HOLE_INTRO_CONTEST_IMAGE_LOADED) {
+        FreeMemory(&f_HoleContestImage);
+    }
 
-  if (f_LoadedHoleIntroImages & HOLE_INTRO_MATCH_IMAGE_LOADED) {
-    FreeMemory(&f_MatchStandingImage);
-  }
+    if (f_LoadedHoleIntroImages & HOLE_INTRO_MATCH_IMAGE_LOADED) {
+        FreeMemory(&f_MatchStandingImage);
+    }
 
-  f_LoadedHoleIntroImages = 0;
+    f_LoadedHoleIntroImages = 0;
 }
 
 /*
  * Draws the images that LoadHoleIntroImages loaded, a strip at a time, while
  * the hole's intro text is shown. Ring shot draws its own intro instead.
  */
-void DrawHoleIntroImages(Gfx** displayListHead) {
-  Gfx* gfx = *displayListHead;
-  s32 strip;
+void DrawHoleIntroImages(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
+    s32 strip;
 
-  if (g_RoundHud.isHoleIntroTextShown == TRUE) {
-    if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
-      if (g_IsModuleAlive[MODULE_COURSE_SELECT]) {
-        DrawRingShotSelect(&gfx);
-      }
-    } else {
-      gDPPipeSync(gfx++);
-      gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-      gDPPipeSync(gfx++);
-      gDPSetTextureFilter(gfx++, G_TF_BILERP);
-      gDPPipeSync(gfx++);
-      gDPSetRenderMode(
-          gfx++, HOLE_INTRO_IMAGE_RENDER_MODE, HOLE_INTRO_IMAGE_RENDER_MODE2);
-      gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-      if ((g_GameState.betRates[BET_LONGEST_DRIVE] > 0 &&
-              IsMarkedParFive(GetCourseRecordIndex(), g_GameState.holeIndex)) ||
-          (g_GameState.betRates[BET_NEAREST_PIN] > 0 &&
-              IsParThree(GetCourseRecordIndex(), g_GameState.holeIndex))) {
-        gDPLoadTLUT_pal256(
-            gfx++, TextureAddress(ImageBody(f_HoleContestImage)));
-        for (strip = 0; strip != CONTEST_IMAGE_STRIP_COUNT; strip++) {
-          gDPLoadTextureBlock(gfx++,
-              TextureAddress(LargeImageTexels(f_HoleContestImage) +
-                  (strip * (CONTEST_IMAGE_WIDTH * CONTEST_IMAGE_STRIP_HEIGHT))),
-              G_IM_FMT_CI, G_IM_SIZ_8b, CONTEST_IMAGE_WIDTH,
-              CONTEST_IMAGE_STRIP_HEIGHT, 0, G_TX_MIRROR, G_TX_MIRROR,
-              G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-          gDPPipeSync(gfx++);
-          gSPScisTextureRectangle(gfx++, QuarterPixels(CONTEST_IMAGE_X),
-              QuarterPixels(
-                  CONTEST_IMAGE_Y + strip * CONTEST_IMAGE_STRIP_HEIGHT),
-              QuarterPixels(CONTEST_IMAGE_X + CONTEST_IMAGE_WIDTH),
-              QuarterPixels(CONTEST_IMAGE_Y + CONTEST_IMAGE_STRIP_HEIGHT +
-                  strip * CONTEST_IMAGE_STRIP_HEIGHT),
-              G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
-          gDPPipeSync(gfx++);
+    if (g_RoundHud.isHoleIntroTextShown == TRUE) {
+        if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
+            if (g_IsModuleAlive[MODULE_COURSE_SELECT]) {
+                DrawRingShotSelect(&gfx);
+            }
         }
-      }
+        else {
+            gDPPipeSync(gfx++);
+            gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+            gDPPipeSync(gfx++);
+            gDPSetTextureFilter(gfx++, G_TF_BILERP);
+            gDPPipeSync(gfx++);
+            gDPSetRenderMode(gfx++, HOLE_INTRO_IMAGE_RENDER_MODE, HOLE_INTRO_IMAGE_RENDER_MODE2);
+            gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+            if ((g_GameState.betRates[BET_LONGEST_DRIVE] > 0 &&
+                    IsMarkedParFive(GetCourseRecordIndex(), g_GameState.holeIndex)) ||
+                (g_GameState.betRates[BET_NEAREST_PIN] > 0 &&
+                    IsParThree(GetCourseRecordIndex(), g_GameState.holeIndex))) {
+                gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_HoleContestImage)));
+                for (strip = 0; strip != CONTEST_IMAGE_STRIP_COUNT; strip++) {
+                    gDPLoadTextureBlock(
+                        gfx++,
+                        TextureAddress(
+                            LargeImageTexels(f_HoleContestImage) +
+                            (strip * (CONTEST_IMAGE_WIDTH * CONTEST_IMAGE_STRIP_HEIGHT))
+                        ),
+                        G_IM_FMT_CI,
+                        G_IM_SIZ_8b,
+                        CONTEST_IMAGE_WIDTH,
+                        CONTEST_IMAGE_STRIP_HEIGHT,
+                        0,
+                        G_TX_MIRROR,
+                        G_TX_MIRROR,
+                        G_TX_NOMASK,
+                        G_TX_NOMASK,
+                        G_TX_NOLOD,
+                        G_TX_NOLOD
+                    );
+                    gDPPipeSync(gfx++);
+                    gSPScisTextureRectangle(
+                        gfx++,
+                        QuarterPixels(CONTEST_IMAGE_X),
+                        QuarterPixels(CONTEST_IMAGE_Y + strip * CONTEST_IMAGE_STRIP_HEIGHT),
+                        QuarterPixels(CONTEST_IMAGE_X + CONTEST_IMAGE_WIDTH),
+                        QuarterPixels(
+                            CONTEST_IMAGE_Y + CONTEST_IMAGE_STRIP_HEIGHT +
+                            strip * CONTEST_IMAGE_STRIP_HEIGHT
+                        ),
+                        G_TX_RENDERTILE,
+                        0,
+                        0,
+                        TEXEL_STEP_ONE,
+                        TEXEL_STEP_ONE
+                    );
+                    gDPPipeSync(gfx++);
+                }
+            }
 
-      if (IsOneOnOneMatchMode(g_GameState.gameMode) &&
-          (f_LoadedHoleIntroImages & HOLE_INTRO_MATCH_IMAGE_LOADED)) {
-        gDPLoadTLUT_pal256(
-            gfx++, TextureAddress(ImageBody(f_MatchStandingImage)));
-        for (strip = 0; strip != MATCH_IMAGE_STRIP_COUNT; strip++) {
-          gDPLoadTextureTile(gfx++,
-              TextureAddress(LargeImageTexels(f_MatchStandingImage) +
-                  (strip * (MATCH_IMAGE_WIDTH * MATCH_IMAGE_STRIP_HEIGHT))),
-              G_IM_FMT_CI, G_IM_SIZ_8b, MATCH_IMAGE_WIDTH,
-              MATCH_IMAGE_STRIP_HEIGHT, 0, 0, MATCH_IMAGE_WIDTH - 1,
-              MATCH_IMAGE_STRIP_HEIGHT - 1, 0, G_TX_MIRROR, G_TX_MIRROR,
-              G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-          gDPPipeSync(gfx++);
-          gSPScisTextureRectangle(gfx++, QuarterPixels(MATCH_IMAGE_X),
-              QuarterPixels(MATCH_IMAGE_Y + strip * MATCH_IMAGE_STRIP_HEIGHT),
-              QuarterPixels(MATCH_IMAGE_X + MATCH_IMAGE_WIDTH),
-              QuarterPixels(MATCH_IMAGE_Y + MATCH_IMAGE_STRIP_HEIGHT +
-                  strip * MATCH_IMAGE_STRIP_HEIGHT),
-              G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
-          gDPPipeSync(gfx++);
+            if (IsOneOnOneMatchMode(g_GameState.gameMode) &&
+                (f_LoadedHoleIntroImages & HOLE_INTRO_MATCH_IMAGE_LOADED)) {
+                gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_MatchStandingImage)));
+                for (strip = 0; strip != MATCH_IMAGE_STRIP_COUNT; strip++) {
+                    gDPLoadTextureTile(
+                        gfx++,
+                        TextureAddress(
+                            LargeImageTexels(f_MatchStandingImage) +
+                            (strip * (MATCH_IMAGE_WIDTH * MATCH_IMAGE_STRIP_HEIGHT))
+                        ),
+                        G_IM_FMT_CI,
+                        G_IM_SIZ_8b,
+                        MATCH_IMAGE_WIDTH,
+                        MATCH_IMAGE_STRIP_HEIGHT,
+                        0,
+                        0,
+                        MATCH_IMAGE_WIDTH - 1,
+                        MATCH_IMAGE_STRIP_HEIGHT - 1,
+                        0,
+                        G_TX_MIRROR,
+                        G_TX_MIRROR,
+                        G_TX_NOMASK,
+                        G_TX_NOMASK,
+                        G_TX_NOLOD,
+                        G_TX_NOLOD
+                    );
+                    gDPPipeSync(gfx++);
+                    gSPScisTextureRectangle(
+                        gfx++,
+                        QuarterPixels(MATCH_IMAGE_X),
+                        QuarterPixels(MATCH_IMAGE_Y + strip * MATCH_IMAGE_STRIP_HEIGHT),
+                        QuarterPixels(MATCH_IMAGE_X + MATCH_IMAGE_WIDTH),
+                        QuarterPixels(
+                            MATCH_IMAGE_Y + MATCH_IMAGE_STRIP_HEIGHT +
+                            strip * MATCH_IMAGE_STRIP_HEIGHT
+                        ),
+                        G_TX_RENDERTILE,
+                        0,
+                        0,
+                        TEXEL_STEP_ONE,
+                        TEXEL_STEP_ONE
+                    );
+                    gDPPipeSync(gfx++);
+                }
+            }
         }
-      }
     }
-  }
 
-  *displayListHead = gfx;
+    *displayListHead = gfx;
 }
 
 /*
  * Draws the course's name and the hole's number, or in the timed modes a
  * stopwatch, before the hole starts.
  */
-void DrawHoleIntroText(Gfx** displayListHead) {
-  Gfx* gfx = *displayListHead;
-  s32 hundredths;
-  s32 minutes;
-  s32 seconds;
-  s32 totalSeconds;
+void DrawHoleIntroText(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
+    s32 hundredths;
+    s32 minutes;
+    s32 seconds;
+    s32 totalSeconds;
 
-  if (g_RoundHud.isHoleIntroTextShown == TRUE) {
-    if (g_GameState.gameMode == GAME_MODE_CLUB_SLOTS) {
-      if (g_IsModuleAlive[MODULE_CLUB_SLOTS] && GetClubSlotsState()) {
-        DrawClubSlots(&gfx);
-      }
-    } else if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
-    } else if (g_GameState.gameMode == GAME_MODE_TRAINING) {
-      if (g_IsModuleAlive[MODULE_COURSE_SELECT]) {
-        DrawHoleSelect(&gfx);
-      }
-    } else if (g_GameState.gameMode == GAME_MODE_SPEED_GOLF &&
-        g_GameState.replayKind == REPLAY_KIND_NONE) {
-      hundredths = (s32)(g_GameState.stopwatchFrameCount *
-                       ((f32)HUNDREDTHS_PER_SECOND / FRAMES_PER_SECOND)) %
-          HUNDREDTHS_PER_SECOND;
-      totalSeconds = g_GameState.stopwatchFrameCount / FRAMES_PER_SECOND;
-      seconds = totalSeconds % SECONDS_PER_MINUTE;
-      minutes = totalSeconds / SECONDS_PER_MINUTE;
-      SetUpGradientTextDrawing(&gfx, 0);
-      sprintf(g_PrintBuffer, "%02d:%02d:%02d", minutes, seconds, hundredths);
-      DrawLargeTextWithShadow(&gfx, STOPWATCH_X, STOPWATCH_Y, g_PrintBuffer,
-          STOPWATCH_ENV_COLOR, STOPWATCH_PRIM_COLOR, TEXT_FLAG_FIXED_WIDTH);
-    } else {
-      SetUpGradientTextDrawing(&gfx, 0);
-      gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0x00, 0x00, OPAQUE_ALPHA);
-      gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0x00, OPAQUE_ALPHA);
-      sprintf(
-          g_PrintBuffer, "%s", g_CourseRecords[GetCourseRecordIndex()].name);
-      sprintf(
-          g_PrintBuffer, "%s", g_CourseRecords[GetCourseRecordIndex()].name);
-      DrawLargeTextWithShadow(&gfx, HOLE_TITLE_X, COURSE_NAME_Y, g_PrintBuffer,
-          g_CourseNameEnvColors[g_GameState.courseIndex],
-          g_CourseNamePrimColors[g_GameState.courseIndex], TEXT_FLAG_CENTERED);
-      sprintf(g_PrintBuffer, "Hole %d", (int)(g_GameState.holeIndex + 1));
-      DrawLargeTextWithShadow(&gfx, HOLE_TITLE_X, HOLE_NUMBER_Y, g_PrintBuffer,
-          g_CourseNameEnvColors[g_GameState.courseIndex],
-          g_CourseNamePrimColors[g_GameState.courseIndex], TEXT_FLAG_CENTERED);
-      gDPPipeSync(gfx++);
-      gDPPipeSync(gfx++);
-      gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+    if (g_RoundHud.isHoleIntroTextShown == TRUE) {
+        if (g_GameState.gameMode == GAME_MODE_CLUB_SLOTS) {
+            if (g_IsModuleAlive[MODULE_CLUB_SLOTS] && GetClubSlotsState()) {
+                DrawClubSlots(&gfx);
+            }
+        }
+        else if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
+        }
+        else if (g_GameState.gameMode == GAME_MODE_TRAINING) {
+            if (g_IsModuleAlive[MODULE_COURSE_SELECT]) {
+                DrawHoleSelect(&gfx);
+            }
+        }
+        else if (g_GameState.gameMode == GAME_MODE_SPEED_GOLF &&
+            g_GameState.replayKind == REPLAY_KIND_NONE) {
+            hundredths = (s32)(g_GameState.stopwatchFrameCount *
+                             ((f32)HUNDREDTHS_PER_SECOND / FRAMES_PER_SECOND)) %
+                HUNDREDTHS_PER_SECOND;
+            totalSeconds = g_GameState.stopwatchFrameCount / FRAMES_PER_SECOND;
+            seconds = totalSeconds % SECONDS_PER_MINUTE;
+            minutes = totalSeconds / SECONDS_PER_MINUTE;
+            SetUpGradientTextDrawing(&gfx, 0);
+            sprintf(g_PrintBuffer, "%02d:%02d:%02d", minutes, seconds, hundredths);
+            DrawLargeTextWithShadow(
+                &gfx,
+                STOPWATCH_X,
+                STOPWATCH_Y,
+                g_PrintBuffer,
+                STOPWATCH_ENV_COLOR,
+                STOPWATCH_PRIM_COLOR,
+                TEXT_FLAG_FIXED_WIDTH
+            );
+        }
+        else {
+            SetUpGradientTextDrawing(&gfx, 0);
+            gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0x00, 0x00, OPAQUE_ALPHA);
+            gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0x00, OPAQUE_ALPHA);
+            sprintf(g_PrintBuffer, "%s", g_CourseRecords[GetCourseRecordIndex()].name);
+            sprintf(g_PrintBuffer, "%s", g_CourseRecords[GetCourseRecordIndex()].name);
+            DrawLargeTextWithShadow(
+                &gfx,
+                HOLE_TITLE_X,
+                COURSE_NAME_Y,
+                g_PrintBuffer,
+                g_CourseNameEnvColors[g_GameState.courseIndex],
+                g_CourseNamePrimColors[g_GameState.courseIndex],
+                TEXT_FLAG_CENTERED
+            );
+            sprintf(g_PrintBuffer, "Hole %d", (int)(g_GameState.holeIndex + 1));
+            DrawLargeTextWithShadow(
+                &gfx,
+                HOLE_TITLE_X,
+                HOLE_NUMBER_Y,
+                g_PrintBuffer,
+                g_CourseNameEnvColors[g_GameState.courseIndex],
+                g_CourseNamePrimColors[g_GameState.courseIndex],
+                TEXT_FLAG_CENTERED
+            );
+            gDPPipeSync(gfx++);
+            gDPPipeSync(gfx++);
+            gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+        }
     }
-  }
 
-  *displayListHead = gfx;
+    *displayListHead = gfx;
 }
 
 /* Switches to the other matrix buffer, which the RSP is not reading */
 void SwapMatrixBuffers(void) {
-  g_MatrixBufferIndex ^= 1;
+    g_MatrixBufferIndex ^= 1;
 }

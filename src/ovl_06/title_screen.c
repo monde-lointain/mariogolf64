@@ -31,9 +31,9 @@
 
 /* f_TitleStage values */
 enum TitleState {
-  TITLE_SHOWING,
-  TITLE_SWAPPING_MODULES,
-  TITLE_GOING_TO_LOGOS
+    TITLE_SHOWING,
+    TITLE_SWAPPING_MODULES,
+    TITLE_GOING_TO_LOGOS
 };
 
 /* After this many frames, the title screen goes back to the logos */
@@ -61,8 +61,8 @@ enum TitleState {
 #define TITLE_LAST_STRIP_HEIGHT 2
 
 typedef struct TitleImage {
-  /* 0x0 */ ImageHeader header;
-  /* 0x8 */ u16 texels[TITLE_IMAGE_WIDTH * TITLE_IMAGE_HEIGHT];
+    /* 0x0 */ ImageHeader header;
+    /* 0x8 */ u16 texels[TITLE_IMAGE_WIDTH * TITLE_IMAGE_HEIGHT];
 } TitleImage; /* size = 0x21408 */
 
 /* マリオゴルフ64 ("Mario Golf 64"), 288 by 80 RGBA16 texels; read in, but never
@@ -71,8 +71,8 @@ typedef struct TitleImage {
 #define JAPANESE_LOGO_HEIGHT 80
 
 typedef struct JapaneseLogo {
-  /* 0x0 */ ImageHeader header;
-  /* 0x8 */ u16 texels[JAPANESE_LOGO_WIDTH * JAPANESE_LOGO_HEIGHT];
+    /* 0x0 */ ImageHeader header;
+    /* 0x8 */ u16 texels[JAPANESE_LOGO_WIDTH * JAPANESE_LOGO_HEIGHT];
 } JapaneseLogo; /* size = 0xB408 */
 
 /* "PRESS START", 120 by 12 four-bit intensities */
@@ -82,8 +82,8 @@ typedef struct JapaneseLogo {
 #define PRESS_START_TOP 188
 
 typedef struct PressStartText {
-  /* 0x0 */ ImageHeader header;
-  /* 0x8 */ u8 texels[PRESS_START_WIDTH * PRESS_START_HEIGHT / 2];
+    /* 0x0 */ ImageHeader header;
+    /* 0x8 */ u8 texels[PRESS_START_WIDTH * PRESS_START_HEIGHT / 2];
 } PressStartText; /* size = 0x2E0 */
 
 /* ButtonCode.progress once the code has been entered, after which it is ignored
@@ -99,10 +99,9 @@ typedef struct PressStartText {
  * pressed starts the sequence over.
  */
 typedef struct ButtonCode {
-  /* 0x0 */ char*
-      sequence; /* One letter for each button; see UpdateButtonCodes */
-  /* 0x4 */ s32 progress; /* How many of the buttons have been pressed */
-  /* 0x8 */ void (*onEntered)(void);
+    /* 0x0 */ char *sequence; /* One letter for each button; see UpdateButtonCodes */
+    /* 0x4 */ s32 progress; /* How many of the buttons have been pressed */
+    /* 0x8 */ void (*onEntered)(void);
 } ButtonCode; /* size = 0xC */
 
 void OnUnlockCodeEntered(void);
@@ -137,25 +136,25 @@ static u8 f_UnusedBytesAfterJapaneseLogo[8] UNUSED;
 static PressStartText f_PressStartText;
 
 void OnUnlockCodeEntered(void) {
-  UnlockEverything();
+    UnlockEverything();
 }
 
 void EnableDebug(void) {
-  g_IsDebugEnabled = TRUE;
+    g_IsDebugEnabled = TRUE;
 }
 
 /* Ends the round after the hole with the staff roll. No code calls this */
 void ShowStaffRollAfterHole(void) {
-  SetGameFlag(GAME_FLAG_END_ROUND_AFTER_HOLE);
-  SetGameFlag(GAME_FLAG_SHOW_STAFF_ROLL);
+    SetGameFlag(GAME_FLAG_END_ROUND_AFTER_HOLE);
+    SetGameFlag(GAME_FLAG_SHOW_STAFF_ROLL);
 }
 
 void ResetButtonCodes(void) {
-  u32 codeIndex;
+    u32 codeIndex;
 
-  for (codeIndex = 0; codeIndex < ARRAY_COUNT(f_ButtonCodes); codeIndex++) {
-    f_ButtonCodes[codeIndex].progress = 0;
-  }
+    for (codeIndex = 0; codeIndex < ARRAY_COUNT(f_ButtonCodes); codeIndex++) {
+        f_ButtonCodes[codeIndex].progress = 0;
+    }
 }
 
 /*
@@ -164,127 +163,127 @@ void ResetButtonCodes(void) {
  * the B button, the same as 'B'; A itself starts the game.
  */
 void UpdateButtonCodes(void) {
-  u32 codeIndex;
-  s32 progress;
-  Boolean isMatched;
+    u32 codeIndex;
+    s32 progress;
+    Boolean isMatched;
 
-  for (codeIndex = 0; codeIndex < ARRAY_COUNT(f_ButtonCodes); codeIndex++) {
-    progress = f_ButtonCodes[codeIndex].progress;
-    isMatched = FALSE;
-    if (progress == CODE_ENTERED) {
-      continue;
+    for (codeIndex = 0; codeIndex < ARRAY_COUNT(f_ButtonCodes); codeIndex++) {
+        progress = f_ButtonCodes[codeIndex].progress;
+        isMatched = FALSE;
+        if (progress == CODE_ENTERED) {
+            continue;
+        }
+
+        if ((g_ControllerData[0].button & DEBUG_CODE_HELD_BUTTONS) != DEBUG_CODE_HELD_BUTTONS) {
+            if (codeIndex == DEBUG_CODE_INDEX) {
+                continue;
+            }
+        }
+
+        switch (f_ButtonCodes[codeIndex].sequence[progress]) {
+            case 'A':
+                if (g_ControllerStates[0].pressedButtons & B_BUTTON) {
+                    isMatched = TRUE;
+                }
+
+                break;
+            case 'B':
+                if (g_ControllerStates[0].pressedButtons & B_BUTTON) {
+                    isMatched = TRUE;
+                }
+
+                break;
+            case 'L':
+                if (g_ControllerStates[0].pressedButtons & L_JPAD) {
+                    isMatched = TRUE;
+                }
+
+                break;
+            case 'R':
+                if (g_ControllerStates[0].pressedButtons & R_JPAD) {
+                    isMatched = TRUE;
+                }
+
+                break;
+            case 'U':
+                if (g_ControllerStates[0].pressedButtons & U_JPAD) {
+                    isMatched = TRUE;
+                }
+
+                break;
+            case 'D':
+                if (g_ControllerStates[0].pressedButtons & D_JPAD) {
+                    isMatched = TRUE;
+                }
+
+                break;
+            case 'l':
+                if (g_ControllerStates[0].pressedButtons & L_CBUTTONS) {
+                    isMatched = TRUE;
+                }
+
+                break;
+            case 'r':
+                if (g_ControllerStates[0].pressedButtons & R_CBUTTONS) {
+                    isMatched = TRUE;
+                }
+
+                break;
+            case 'u':
+                if (g_ControllerStates[0].pressedButtons & U_CBUTTONS) {
+                    isMatched = TRUE;
+                }
+
+                break;
+            case 'd':
+                if (g_ControllerStates[0].pressedButtons & D_CBUTTONS) {
+                    isMatched = TRUE;
+                }
+
+                break;
+        }
+
+        if (g_ControllerStates[0].pressedButtons != 0 && !isMatched) {
+            progress = 0;
+        }
+
+        progress += isMatched;
+        if (f_ButtonCodes[codeIndex].sequence[progress] == '\0') {
+            progress = CODE_ENTERED;
+            f_ButtonCodes[codeIndex].onEntered();
+        }
+
+        f_ButtonCodes[codeIndex].progress = progress;
     }
-
-    if ((g_ControllerData[0].button & DEBUG_CODE_HELD_BUTTONS) !=
-        DEBUG_CODE_HELD_BUTTONS) {
-      if (codeIndex == DEBUG_CODE_INDEX) {
-        continue;
-      }
-    }
-
-    switch (f_ButtonCodes[codeIndex].sequence[progress]) {
-      case 'A':
-        if (g_ControllerStates[0].pressedButtons & B_BUTTON) {
-          isMatched = TRUE;
-        }
-
-        break;
-      case 'B':
-        if (g_ControllerStates[0].pressedButtons & B_BUTTON) {
-          isMatched = TRUE;
-        }
-
-        break;
-      case 'L':
-        if (g_ControllerStates[0].pressedButtons & L_JPAD) {
-          isMatched = TRUE;
-        }
-
-        break;
-      case 'R':
-        if (g_ControllerStates[0].pressedButtons & R_JPAD) {
-          isMatched = TRUE;
-        }
-
-        break;
-      case 'U':
-        if (g_ControllerStates[0].pressedButtons & U_JPAD) {
-          isMatched = TRUE;
-        }
-
-        break;
-      case 'D':
-        if (g_ControllerStates[0].pressedButtons & D_JPAD) {
-          isMatched = TRUE;
-        }
-
-        break;
-      case 'l':
-        if (g_ControllerStates[0].pressedButtons & L_CBUTTONS) {
-          isMatched = TRUE;
-        }
-
-        break;
-      case 'r':
-        if (g_ControllerStates[0].pressedButtons & R_CBUTTONS) {
-          isMatched = TRUE;
-        }
-
-        break;
-      case 'u':
-        if (g_ControllerStates[0].pressedButtons & U_CBUTTONS) {
-          isMatched = TRUE;
-        }
-
-        break;
-      case 'd':
-        if (g_ControllerStates[0].pressedButtons & D_CBUTTONS) {
-          isMatched = TRUE;
-        }
-
-        break;
-    }
-
-    if (g_ControllerStates[0].pressedButtons != 0 && !isMatched) {
-      progress = 0;
-    }
-
-    progress += isMatched;
-    if (f_ButtonCodes[codeIndex].sequence[progress] == '\0') {
-      progress = CODE_ENTERED;
-      f_ButtonCodes[codeIndex].onEntered();
-    }
-
-    f_ButtonCodes[codeIndex].progress = progress;
-  }
 }
 
 void LoadTitleScreen(void) {
-  EncodedAsset asset;
+    EncodedAsset asset;
 
-  ResetButtonCodes();
-  ForceStopRumble();
-  EnterMenuAtTitle();
-  if (g_ControllerCount == 0) {
-    OpenEncodedAsset(NO_CONTROLLER_IMAGE_ASSET, &asset);
-    ReadEncodedAsset(&f_TitleImage, &asset);
-    PlaySong(SONG_HOLE_OUT_OVER_BOGEY, SONG_FLAG_RESTART);
-  } else {
-    OpenEncodedAsset(TITLE_IMAGE_ASSET, &asset);
-    ReadEncodedAsset(&f_TitleImage, &asset);
-    PlaySong(SONG_ATTRACT_TITLE, SONG_FLAG_RESTART);
-  }
+    ResetButtonCodes();
+    ForceStopRumble();
+    EnterMenuAtTitle();
+    if (g_ControllerCount == 0) {
+        OpenEncodedAsset(NO_CONTROLLER_IMAGE_ASSET, &asset);
+        ReadEncodedAsset(&f_TitleImage, &asset);
+        PlaySong(SONG_HOLE_OUT_OVER_BOGEY, SONG_FLAG_RESTART);
+    }
+    else {
+        OpenEncodedAsset(TITLE_IMAGE_ASSET, &asset);
+        ReadEncodedAsset(&f_TitleImage, &asset);
+        PlaySong(SONG_ATTRACT_TITLE, SONG_FLAG_RESTART);
+    }
 
-  OpenEncodedAsset(JAPANESE_LOGO_ASSET, &asset);
-  ReadEncodedAsset(&f_JapaneseLogo, &asset);
-  OpenEncodedAsset(PRESS_START_TEXT_ASSET, &asset);
-  ReadEncodedAsset(&f_PressStartText, &asset);
-  f_TitleStage = TITLE_SHOWING;
+    OpenEncodedAsset(JAPANESE_LOGO_ASSET, &asset);
+    ReadEncodedAsset(&f_JapaneseLogo, &asset);
+    OpenEncodedAsset(PRESS_START_TEXT_ASSET, &asset);
+    ReadEncodedAsset(&f_PressStartText, &asset);
+    f_TitleStage = TITLE_SHOWING;
 }
 
 void UnloadTitleScreen(void) {
-  ForceStopRumble();
-  SetFillColor(0, 0, 0);
+    ForceStopRumble();
+    SetFillColor(0, 0, 0);
 }
 
 /*
@@ -293,143 +292,196 @@ void UnloadTitleScreen(void) {
  * function compiles differently from the original.
  */
 #define IsLeavingForLogos(pressedButtons) \
-  ((((pressedButtons) & B_BUTTON) && g_IsDebugEnabled) || \
-      (f_TitleFrame == TITLE_IDLE_FRAME_COUNT))
+    ((((pressedButtons) & B_BUTTON) && g_IsDebugEnabled) || \
+        (f_TitleFrame == TITLE_IDLE_FRAME_COUNT))
 
 /* With g_IsDebugEnabled set, B also starts going back to the logos */
 void UpdateTitleScreen(void) {
-  s32 pressedButtons;
-  s32 controllerIndex;
+    s32 pressedButtons;
+    s32 controllerIndex;
 
-  if (g_ControllerCount == 0) {
-    return;
-  }
-
-  UpdateButtonCodes();
-  if (f_TitleFrame == 0) {
-    if (g_TitleScreenEntrance == TITLE_ENTRANCE_FROM_OPENING) {
-      StartScreenFadeIn(255, 255, 255, TITLE_ENTERING_COUNTDOWN);
-    } else {
-      StartScreenFadeIn(0, 0, 0, TITLE_ENTERING_COUNTDOWN);
+    if (g_ControllerCount == 0) {
+        return;
     }
 
-    g_TitleScreenEntrance = TITLE_ENTRANCE_SHOWN;
-  }
-
-  switch (f_TitleStage) {
-    case TITLE_SHOWING:
-      if (HasScreenFadeEnded() && IsHudAnimationDone()) {
-        pressedButtons = 0;
-        for (controllerIndex = 0; controllerIndex != g_ControllerCount;
-            controllerIndex++) {
-          pressedButtons |= g_ControllerStates[controllerIndex].pressedButtons;
+    UpdateButtonCodes();
+    if (f_TitleFrame == 0) {
+        if (g_TitleScreenEntrance == TITLE_ENTRANCE_FROM_OPENING) {
+            StartScreenFadeIn(255, 255, 255, TITLE_ENTERING_COUNTDOWN);
+        }
+        else {
+            StartScreenFadeIn(0, 0, 0, TITLE_ENTERING_COUNTDOWN);
         }
 
-        if (pressedButtons & (A_BUTTON | START_BUTTON)) {
-          StartHudAnimation(HUD_ANIMATION_SPIRAL);
-          g_Scene = SCENE_SWAPPING_MODULES;
-          g_NextScene = SCENE_MENU;
-          g_SceneModuleToUnload = MODULE_TITLE_SCREEN;
-          g_SceneModuleToLoad = MODULE_MENU;
-          f_TitleFrame = 0;
-          f_TitleStage = TITLE_SWAPPING_MODULES;
-          PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
-        } else if (IsLeavingForLogos(pressedButtons)) {
-          f_TitleStage = TITLE_GOING_TO_LOGOS;
-          StartScreenFadeOut(0, 0, 0, LEAVING_COUNTDOWN);
-        }
-      }
+        g_TitleScreenEntrance = TITLE_ENTRANCE_SHOWN;
+    }
 
-      break;
-    case TITLE_GOING_TO_LOGOS:
-      if (HasScreenFadeEnded()) {
-        g_Scene = SCENE_SWAPPING_MODULES;
-        g_NextScene = SCENE_BOOT_LOGOS;
-        g_SceneModuleToUnload = MODULE_TITLE_SCREEN;
-        g_SceneModuleToLoad = MODULE_BOOT_LOGOS;
-        f_TitleFrame = 0;
-      }
+    switch (f_TitleStage) {
+        case TITLE_SHOWING:
+            if (HasScreenFadeEnded() && IsHudAnimationDone()) {
+                pressedButtons = 0;
+                for (controllerIndex = 0; controllerIndex != g_ControllerCount; controllerIndex++) {
+                    pressedButtons |= g_ControllerStates[controllerIndex].pressedButtons;
+                }
 
-      break;
-  }
+                if (pressedButtons & (A_BUTTON | START_BUTTON)) {
+                    StartHudAnimation(HUD_ANIMATION_SPIRAL);
+                    g_Scene = SCENE_SWAPPING_MODULES;
+                    g_NextScene = SCENE_MENU;
+                    g_SceneModuleToUnload = MODULE_TITLE_SCREEN;
+                    g_SceneModuleToLoad = MODULE_MENU;
+                    f_TitleFrame = 0;
+                    f_TitleStage = TITLE_SWAPPING_MODULES;
+                    PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
+                }
+                else if (IsLeavingForLogos(pressedButtons)) {
+                    f_TitleStage = TITLE_GOING_TO_LOGOS;
+                    StartScreenFadeOut(0, 0, 0, LEAVING_COUNTDOWN);
+                }
+            }
 
-  if (f_TitleFrame < TITLE_FRAME_LIMIT) {
-    f_TitleFrame++;
-  }
+            break;
+        case TITLE_GOING_TO_LOGOS:
+            if (HasScreenFadeEnded()) {
+                g_Scene = SCENE_SWAPPING_MODULES;
+                g_NextScene = SCENE_BOOT_LOGOS;
+                g_SceneModuleToUnload = MODULE_TITLE_SCREEN;
+                g_SceneModuleToLoad = MODULE_BOOT_LOGOS;
+                f_TitleFrame = 0;
+            }
+
+            break;
+    }
+
+    if (f_TitleFrame < TITLE_FRAME_LIMIT) {
+        f_TitleFrame++;
+    }
 }
 
-void DrawTitleScreen(Gfx** displayListHead) {
-  Gfx* gfx = *displayListHead;
-  s32 stripIndex;
-  s32 stripHeight;
-  s32 red;
-  s32 green;
+void DrawTitleScreen(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
+    s32 stripIndex;
+    s32 stripHeight;
+    s32 red;
+    s32 green;
 
-  gDPPipeSync(gfx++);
-  gDPPipeSync(gfx++);
-  gDPSetCycleType(gfx++, G_CYC_1CYCLE);
-  gDPPipeSync(gfx++);
-  gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
-  gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-  gDPPipeSync(gfx++);
-  gDPSetColorDither(gfx++, G_CD_DISABLE);
-  gSPTexture(
-      gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0, G_TX_RENDERTILE, G_ON);
-  gDPPipeSync(gfx++);
-  gDPSetTexturePersp(gfx++, G_TP_NONE);
-  gDPPipeSync(gfx++);
-  gDPSetTextureFilter(gfx++, G_TF_BILERP);
-  gDPPipeSync(gfx++);
-  gDPSetAlphaCompare(gfx++, G_AC_NONE);
-  gDPPipeSync(gfx++);
-  gDPSetTextureLUT(gfx++, G_TT_NONE);
-  gDPPipeSync(gfx++);
-  gDPSetAlphaCompare(gfx++, G_AC_THRESHOLD);
-  gDPSetBlendColor(gfx++, 255, 255, 255, 1);
-  gDPPipeSync(gfx++);
-  for (stripIndex = 0; stripIndex != TITLE_STRIP_COUNT; stripIndex++) {
-    stripHeight = (stripIndex == TITLE_STRIP_COUNT - 1)
-        ? TITLE_LAST_STRIP_HEIGHT
-        : TITLE_STRIP_HEIGHT;
-    gDPLoadTextureTile(gfx++,
-        (u32)&f_TitleImage
-                .texels[stripIndex * TITLE_STRIP_HEIGHT * TITLE_IMAGE_WIDTH] &
-            ~7,
-        G_IM_FMT_RGBA, G_IM_SIZ_16b, TITLE_IMAGE_WIDTH, 0, 0, 0,
-        TITLE_IMAGE_WIDTH - 1, stripHeight - 1, 0, G_TX_NOMIRROR | G_TX_WRAP,
-        G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
-        G_TX_NOLOD);
     gDPPipeSync(gfx++);
-    gSPScisTextureRectangle(gfx++, QuarterPixels(SCREEN_BORDER),
-        QuarterPixels(SCREEN_BORDER + (stripIndex * TITLE_STRIP_HEIGHT)),
-        QuarterPixels(SCREEN_BORDER + TITLE_IMAGE_WIDTH),
-        QuarterPixels(
-            SCREEN_BORDER + (stripIndex * TITLE_STRIP_HEIGHT) + stripHeight),
-        G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     gDPPipeSync(gfx++);
-  }
+    gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
+    gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+    gDPPipeSync(gfx++);
+    gDPSetColorDither(gfx++, G_CD_DISABLE);
+    gSPTexture(gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0, G_TX_RENDERTILE, G_ON);
+    gDPPipeSync(gfx++);
+    gDPSetTexturePersp(gfx++, G_TP_NONE);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_BILERP);
+    gDPPipeSync(gfx++);
+    gDPSetAlphaCompare(gfx++, G_AC_NONE);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_NONE);
+    gDPPipeSync(gfx++);
+    gDPSetAlphaCompare(gfx++, G_AC_THRESHOLD);
+    gDPSetBlendColor(gfx++, 255, 255, 255, 1);
+    gDPPipeSync(gfx++);
+    for (stripIndex = 0; stripIndex != TITLE_STRIP_COUNT; stripIndex++) {
+        stripHeight =
+            (stripIndex == TITLE_STRIP_COUNT - 1) ? TITLE_LAST_STRIP_HEIGHT : TITLE_STRIP_HEIGHT;
+        gDPLoadTextureTile(
+            gfx++,
+            (u32)&f_TitleImage.texels[stripIndex * TITLE_STRIP_HEIGHT * TITLE_IMAGE_WIDTH] & ~7,
+            G_IM_FMT_RGBA,
+            G_IM_SIZ_16b,
+            TITLE_IMAGE_WIDTH,
+            0,
+            0,
+            0,
+            TITLE_IMAGE_WIDTH - 1,
+            stripHeight - 1,
+            0,
+            G_TX_NOMIRROR | G_TX_WRAP,
+            G_TX_NOMIRROR | G_TX_WRAP,
+            G_TX_NOMASK,
+            G_TX_NOMASK,
+            G_TX_NOLOD,
+            G_TX_NOLOD
+        );
+        gDPPipeSync(gfx++);
+        gSPScisTextureRectangle(
+            gfx++,
+            QuarterPixels(SCREEN_BORDER),
+            QuarterPixels(SCREEN_BORDER + (stripIndex * TITLE_STRIP_HEIGHT)),
+            QuarterPixels(SCREEN_BORDER + TITLE_IMAGE_WIDTH),
+            QuarterPixels(SCREEN_BORDER + (stripIndex * TITLE_STRIP_HEIGHT) + stripHeight),
+            G_TX_RENDERTILE,
+            0,
+            0,
+            TEXEL_STEP_ONE,
+            TEXEL_STEP_ONE
+        );
+        gDPPipeSync(gfx++);
+    }
 
-  if (g_ControllerCount != 0) {
-    f_PressStartPhase += DegreesToRadians(20);
-    red = (sinf(f_PressStartPhase) * 127.0f) + 127.0f;
-    green = (sinf(f_PressStartPhase + M_PI) * 127.0f) + 127.0f;
-    gDPSetPrimColor(gfx++, 0, 0, red, green, 64, OPAQUE_ALPHA);
-    gDPPipeSync(gfx++);
-    gDPSetRenderMode(gfx++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
-    gDPSetCombineLERP(gfx++, TEXEL0, 0, PRIMITIVE, 0, PRIMITIVE, 0, TEXEL0, 0,
-        TEXEL0, 0, PRIMITIVE, 0, PRIMITIVE, 0, TEXEL0, 0);
-    gDPLoadTextureTile_4b(gfx++, TextureAddress(f_PressStartText.texels),
-        G_IM_FMT_I, PRESS_START_WIDTH, PRESS_START_HEIGHT, 0, 0,
-        PRESS_START_WIDTH - 1, PRESS_START_HEIGHT - 1, 0,
-        G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
-        G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-    gDPPipeSync(gfx++);
-    DrawTextureRect(&gfx, QuarterPixels(PRESS_START_LEFT),
-        QuarterPixels(PRESS_START_TOP),
-        QuarterPixels(PRESS_START_LEFT + PRESS_START_WIDTH),
-        QuarterPixels(PRESS_START_TOP + PRESS_START_HEIGHT), G_TX_RENDERTILE, 0,
-        0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
-  }
+    if (g_ControllerCount != 0) {
+        f_PressStartPhase += DegreesToRadians(20);
+        red = (sinf(f_PressStartPhase) * 127.0f) + 127.0f;
+        green = (sinf(f_PressStartPhase + M_PI) * 127.0f) + 127.0f;
+        gDPSetPrimColor(gfx++, 0, 0, red, green, 64, OPAQUE_ALPHA);
+        gDPPipeSync(gfx++);
+        gDPSetRenderMode(gfx++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
+        gDPSetCombineLERP(
+            gfx++,
+            TEXEL0,
+            0,
+            PRIMITIVE,
+            0,
+            PRIMITIVE,
+            0,
+            TEXEL0,
+            0,
+            TEXEL0,
+            0,
+            PRIMITIVE,
+            0,
+            PRIMITIVE,
+            0,
+            TEXEL0,
+            0
+        );
+        gDPLoadTextureTile_4b(
+            gfx++,
+            TextureAddress(f_PressStartText.texels),
+            G_IM_FMT_I,
+            PRESS_START_WIDTH,
+            PRESS_START_HEIGHT,
+            0,
+            0,
+            PRESS_START_WIDTH - 1,
+            PRESS_START_HEIGHT - 1,
+            0,
+            G_TX_NOMIRROR | G_TX_WRAP,
+            G_TX_NOMIRROR | G_TX_WRAP,
+            G_TX_NOMASK,
+            G_TX_NOMASK,
+            G_TX_NOLOD,
+            G_TX_NOLOD
+        );
+        gDPPipeSync(gfx++);
+        DrawTextureRect(
+            &gfx,
+            QuarterPixels(PRESS_START_LEFT),
+            QuarterPixels(PRESS_START_TOP),
+            QuarterPixels(PRESS_START_LEFT + PRESS_START_WIDTH),
+            QuarterPixels(PRESS_START_TOP + PRESS_START_HEIGHT),
+            G_TX_RENDERTILE,
+            0,
+            0,
+            TEXEL_STEP_ONE,
+            TEXEL_STEP_ONE
+        );
+    }
 
-  *displayListHead = gfx;
+    *displayListHead = gfx;
 }

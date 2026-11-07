@@ -7,10 +7,10 @@
 
 /* The pause screens' save menu and Controls screen */
 
-void DrawControlsScreen(Gfx** displayListHead);
-void DrawGameSaveMenu(Gfx** displayListHead);
-void DrawReplaySaveMenu(Gfx** displayListHead);
+void DrawControlsScreen(Gfx **displayListHead);
+void DrawGameSaveMenu(Gfx **displayListHead);
+void DrawReplaySaveMenu(Gfx **displayListHead);
 void LeaveReplaySaveMenu(void);
-s32 UpdateReplaySaveMenu(ControllerState* controller);
+s32 UpdateReplaySaveMenu(ControllerState *controller);
 
 #endif

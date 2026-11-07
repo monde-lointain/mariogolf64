@@ -5,7 +5,7 @@
 
 /* The cursor box drawn around a point */
 
-void DrawCursorBox(Gfx** displayListHead, s32 left, s32 top);
-void LoadCursorBox(void* image);
+void DrawCursorBox(Gfx **displayListHead, s32 left, s32 top);
+void LoadCursorBox(void *image);
 
 #endif

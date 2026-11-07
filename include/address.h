@@ -16,9 +16,9 @@
  * a number, which KMC GCC compiles differently.
  */
 #ifdef __IS_KMC__
-#define PhysicalAddress(address) OS_K0_TO_PHYSICAL(address)
+#    define PhysicalAddress(address) OS_K0_TO_PHYSICAL(address)
 #else
-#define PhysicalAddress(address) ((u32)(address) - K0BASE)
+#    define PhysicalAddress(address) ((u32)(address) - K0BASE)
 #endif
 
 /*
@@ -28,7 +28,7 @@
  */
 #define BytesBetween(start, end) ((u32)(end) - (u32)(start))
 /* The address byteCount bytes past pointer, whatever it points at */
-#define AddressPast(pointer, byteCount) ((u8*)(pointer) + (byteCount))
+#define AddressPast(pointer, byteCount) ((u8 *)(pointer) + (byteCount))
 
 /* The RDP loads textures from 8-byte boundaries */
 #define TextureAddress(address) ((u32)(address) & ~7)

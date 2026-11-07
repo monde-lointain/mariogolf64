@@ -16,16 +16,16 @@
  * have one each, as do the two mini-golf courses and the driving range.
  */
 enum CourseRecordIndex {
-  COURSE_RECORD_TOAD_HIGHLANDS,
-  COURSE_RECORD_KOOPA_PARK,
-  COURSE_RECORD_SHY_GUY_DESERT,
-  COURSE_RECORD_YOSHIS_ISLAND,
-  COURSE_RECORD_BOO_VALLEY,
-  COURSE_RECORD_MARIOS_STAR,
-  COURSE_RECORD_LUIGIS_GARDEN,
-  COURSE_RECORD_PEACHS_CASTLE,
-  COURSE_RECORD_DRIVING_RANGE,
-  COURSE_RECORD_COUNT
+    COURSE_RECORD_TOAD_HIGHLANDS,
+    COURSE_RECORD_KOOPA_PARK,
+    COURSE_RECORD_SHY_GUY_DESERT,
+    COURSE_RECORD_YOSHIS_ISLAND,
+    COURSE_RECORD_BOO_VALLEY,
+    COURSE_RECORD_MARIOS_STAR,
+    COURSE_RECORD_LUIGIS_GARDEN,
+    COURSE_RECORD_PEACHS_CASTLE,
+    COURSE_RECORD_DRIVING_RANGE,
+    COURSE_RECORD_COUNT
 };
 
 /* An enum CourseRecordIndex value */
@@ -47,12 +47,12 @@ typedef s32 CourseIndex;
 
 /* The main courses, which keep their records' order */
 enum Course {
-  COURSE_TOAD_HIGHLANDS,
-  COURSE_KOOPA_PARK,
-  COURSE_SHY_GUY_DESERT,
-  COURSE_YOSHIS_ISLAND,
-  COURSE_BOO_VALLEY,
-  COURSE_MARIOS_STAR
+    COURSE_TOAD_HIGHLANDS,
+    COURSE_KOOPA_PARK,
+    COURSE_SHY_GUY_DESERT,
+    COURSE_YOSHIS_ISLAND,
+    COURSE_BOO_VALLEY,
+    COURSE_MARIOS_STAR
 };
 
 /* The colors of each course's name, which gradients from the first to the
@@ -75,21 +75,21 @@ extern s32 g_CourseNamePrimColors[];
 #define TOURNAMENT_NAME_SIZE 25
 
 typedef struct HoleRecord {
-  /* 0x0 */ s8 par;
-  /* 0x1 */ s8 handicap; /* Ranks a course's holes from 1 to 18 */
-  /* 0x2 */ u16 yardages[3]; /* The three are equal in every hole */
-  /* 0x8 */ u8 flags;
+    /* 0x0 */ s8 par;
+    /* 0x1 */ s8 handicap; /* Ranks a course's holes from 1 to 18 */
+    /* 0x2 */ u16 yardages[3]; /* The three are equal in every hole */
+    /* 0x8 */ u8 flags;
 } HoleRecord; /* size = 0xA */
 
 typedef struct CourseRecord {
-  /* 0x00 */ char name[20];
-  /* 0x14 */ HoleRecord holes[18];
+    /* 0x00 */ char name[20];
+    /* 0x14 */ HoleRecord holes[18];
 } CourseRecord; /* size = 0xC8 */
 
 /* A Ring Shot hole is one of the holes of a course record */
 typedef struct RingShotHole {
-  /* 0x0 */ u8 courseRecordIndex;
-  /* 0x1 */ u8 holeIndex;
+    /* 0x0 */ u8 courseRecordIndex;
+    /* 0x1 */ u8 holeIndex;
 } RingShotHole; /* size = 0x2 */
 
 extern CourseRecord g_CourseRecords[COURSE_RECORD_COUNT];

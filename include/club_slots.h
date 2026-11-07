@@ -5,7 +5,7 @@
 
 /* Club Slots, the slot machine that fills each player's bag before play */
 
-void DrawClubSlots(Gfx** displayListHead);
+void DrawClubSlots(Gfx **displayListHead);
 void FreeClubSlots(void);
 s32 GetClubSlotsState(void);
 void LoadClubSlots(void);

@@ -77,35 +77,36 @@
  */
 #ifdef NON_MATCHING
 void RecordComCharacterResult(s32 row, s32 column, Boolean isWin) {
-  Awards* awards;
-  u8 count;
-  u8 value;
-  s32 newValue;
+    Awards *awards;
+    u8 count;
+    u8 value;
+    s32 newValue;
 
-  awards = &GetSaveData()->records.awards;
-  if (isWin) {
-    value = awards->matchups[row][column].winBits;
-    count = value & WIN_COUNT_MASK;
-    if (count < MAX_SAVED_COUNT) {
-      count = (value & WIN_COUNT_MASK) + 1;
+    awards = &GetSaveData()->records.awards;
+    if (isWin) {
+        value = awards->matchups[row][column].winBits;
+        count = value & WIN_COUNT_MASK;
+        if (count < MAX_SAVED_COUNT) {
+            count = (value & WIN_COUNT_MASK) + 1;
+        }
+
+        value = count | (value & WON_UNSAVED_FLAG);
+        if (!g_GameState.saveCount) {
+            value |= WON_UNSAVED_FLAG;
+        }
+
+        newValue = value;
+        awards->matchups[row][column].winBits = newValue;
+        osSyncPrintf("Win Com Chara[%d]\n", newValue);
+    }
+    else {
+        awards->matchups[row][column].lossCount++;
+        if (awards->matchups[row][column].lossCount > MAX_SAVED_COUNT) {
+            awards->matchups[row][column].lossCount = MAX_SAVED_COUNT;
+        }
     }
 
-    value = count | (value & WON_UNSAVED_FLAG);
-    if (!g_GameState.saveCount) {
-      value |= WON_UNSAVED_FLAG;
-    }
-
-    newValue = value;
-    awards->matchups[row][column].winBits = newValue;
-    osSyncPrintf("Win Com Chara[%d]\n", newValue);
-  } else {
-    awards->matchups[row][column].lossCount++;
-    if (awards->matchups[row][column].lossCount > MAX_SAVED_COUNT) {
-      awards->matchups[row][column].lossCount = MAX_SAVED_COUNT;
-    }
-  }
-
-  TransferSaveData(GetSaveData(), TRUE);
+    TransferSaveData(GetSaveData(), TRUE);
 }
 #else
 INCLUDE_ASM("asm/nonmatchings/progress", RecordComCharacterResult);
@@ -113,20 +114,19 @@ INCLUDE_ASM("asm/nonmatchings/progress", RecordComCharacterResult);
 
 /* Adds a birdie badge on the current hole of a tournament, and saves */
 void AddBirdieBadge(void) {
-  Awards* awards;
+    Awards *awards;
 
-  awards = &GetSaveData()->records.awards;
-  if (g_GameState.gameMode == GAME_MODE_TOURNAMENT) {
-    awards->birdieBadgeCounts[g_GameState.courseIndex][g_GameState.holeIndex]++;
-    if (awards->birdieBadgeCounts[g_GameState.courseIndex]
-                                 [g_GameState.holeIndex] > MAX_SAVED_COUNT) {
-      awards
-          ->birdieBadgeCounts[g_GameState.courseIndex][g_GameState.holeIndex] =
-          MAX_SAVED_COUNT;
+    awards = &GetSaveData()->records.awards;
+    if (g_GameState.gameMode == GAME_MODE_TOURNAMENT) {
+        awards->birdieBadgeCounts[g_GameState.courseIndex][g_GameState.holeIndex]++;
+        if (awards->birdieBadgeCounts[g_GameState.courseIndex][g_GameState.holeIndex] >
+            MAX_SAVED_COUNT) {
+            awards->birdieBadgeCounts[g_GameState.courseIndex][g_GameState.holeIndex] =
+                MAX_SAVED_COUNT;
+        }
+
+        TransferSaveData(GetSaveData(), TRUE);
     }
-
-    TransferSaveData(GetSaveData(), TRUE);
-  }
 }
 
 /*
@@ -134,74 +134,76 @@ void AddBirdieBadge(void) {
  * a tournament and the current hole has none yet
  */
 void ReportBirdieBadgeCount(void) {
-  Awards* awards;
-  s32 badgeCount;
-  CourseIndex courseIndex;
-  s32 holeIndex;
+    Awards *awards;
+    s32 badgeCount;
+    CourseIndex courseIndex;
+    s32 holeIndex;
 
-  awards = &GetSaveData()->records.awards;
-  if (g_GameState.gameMode == GAME_MODE_TOURNAMENT &&
-      awards->birdieBadgeCounts[g_GameState.courseIndex]
-                               [g_GameState.holeIndex] == 0) {
-    badgeCount = 0;
-    for (courseIndex = 0; courseIndex != COURSE_COUNT; courseIndex++) {
-      for (holeIndex = 0; holeIndex != COURSE_HOLE_COUNT; holeIndex++) {
-        badgeCount +=
-            awards->birdieBadgeCounts[courseIndex][holeIndex] != FALSE;
-      }
+    awards = &GetSaveData()->records.awards;
+    if (g_GameState.gameMode == GAME_MODE_TOURNAMENT &&
+        awards->birdieBadgeCounts[g_GameState.courseIndex][g_GameState.holeIndex] == 0) {
+        badgeCount = 0;
+        for (courseIndex = 0; courseIndex != COURSE_COUNT; courseIndex++) {
+            for (holeIndex = 0; holeIndex != COURSE_HOLE_COUNT; holeIndex++) {
+                badgeCount += awards->birdieBadgeCounts[courseIndex][holeIndex] != FALSE;
+            }
+        }
+
+        ShowBirdieBadgeCount(badgeCount);
     }
-
-    ShowBirdieBadgeCount(badgeCount);
-  }
 }
 
 /* Flags the course's statistics with the player's place in the tournament, if
  * third or better, and saves */
 void RecordTournamentPlace(void) {
-  CourseStats* stats;
-  s32* placeEntry;
-  Boolean hasPlace;
-  s32 place;
-  s32 index;
-  TournamentStanding* standing;
+    CourseStats *stats;
+    s32 *placeEntry;
+    Boolean hasPlace;
+    s32 place;
+    s32 index;
+    TournamentStanding *standing;
 
-  stats = &GetSaveData()->records.courseStats[g_GameState.courseIndex];
-  hasPlace = FALSE;
-  if (g_GameState.gameMode == GAME_MODE_TOURNAMENT) {
-    RankTournament(GetLastHoleIndex() + 1, 0,
-        GetNetScoreToPar(GetLastHoleIndex() + 1, 0), g_GameState.roundSeed);
-    place = PLACE_UNPLACED;
-    for (index = 0; index != TOURNAMENT_CONTESTANT_COUNT; index++) {
-      standing = &g_TournamentStandings[index];
-      if (standing->contestantId == PLAYER_CONTESTANT) {
-        place = standing->place & PLACE_MASK;
-        break;
-      }
+    stats = &GetSaveData()->records.courseStats[g_GameState.courseIndex];
+    hasPlace = FALSE;
+    if (g_GameState.gameMode == GAME_MODE_TOURNAMENT) {
+        RankTournament(
+            GetLastHoleIndex() + 1,
+            0,
+            GetNetScoreToPar(GetLastHoleIndex() + 1, 0),
+            g_GameState.roundSeed
+        );
+        place = PLACE_UNPLACED;
+        for (index = 0; index != TOURNAMENT_CONTESTANT_COUNT; index++) {
+            standing = &g_TournamentStandings[index];
+            if (standing->contestantId == PLAYER_CONTESTANT) {
+                place = standing->place & PLACE_MASK;
+                break;
+            }
+        }
+
+        switch (place) {
+            case 1:
+                placeEntry = &stats->hasPlace[FIRST_PLACE_INDEX];
+                hasPlace = TRUE;
+                break;
+            case 2:
+                placeEntry = &stats->hasPlace[SECOND_PLACE_INDEX];
+                hasPlace = TRUE;
+                break;
+            case 3:
+                placeEntry = &stats->hasPlace[THIRD_PLACE_INDEX];
+                hasPlace = TRUE;
+                break;
+            default:
+                /* Not written, since hasPlace stays FALSE */
+                placeEntry = &stats->hasPlace[THIRD_PLACE_INDEX];
+                break;
+        }
+
+        if (hasPlace) {
+            *placeEntry = TRUE;
+        }
+
+        TransferSaveData(GetSaveData(), TRUE);
     }
-
-    switch (place) {
-      case 1:
-        placeEntry = &stats->hasPlace[FIRST_PLACE_INDEX];
-        hasPlace = TRUE;
-        break;
-      case 2:
-        placeEntry = &stats->hasPlace[SECOND_PLACE_INDEX];
-        hasPlace = TRUE;
-        break;
-      case 3:
-        placeEntry = &stats->hasPlace[THIRD_PLACE_INDEX];
-        hasPlace = TRUE;
-        break;
-      default:
-        /* Not written, since hasPlace stays FALSE */
-        placeEntry = &stats->hasPlace[THIRD_PLACE_INDEX];
-        break;
-    }
-
-    if (hasPlace) {
-      *placeEntry = TRUE;
-    }
-
-    TransferSaveData(GetSaveData(), TRUE);
-  }
 }

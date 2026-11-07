@@ -59,8 +59,8 @@
 
 /* SAVE_OPTION_GRID_COLOR values */
 enum GridColor {
-  GRID_COLOR_WHITE,
-  GRID_COLOR_BLACK
+    GRID_COLOR_WHITE,
+    GRID_COLOR_BLACK
 };
 
 /* Bits of MenuMemory's optionBits, each mirroring one of the saved options */
@@ -73,19 +73,19 @@ extern u8 g_SoundOptionBits;
 
 /* Results of reading the save data */
 enum SaveReadResult {
-  SAVE_READ_NEVER_WRITTEN = -2, /* Neither copy has the magic number */
-  SAVE_READ_FAILED,
-  SAVE_READ_FIRST_COPY = 1,
-  SAVE_READ_SECOND_COPY
+    SAVE_READ_NEVER_WRITTEN = -2, /* Neither copy has the magic number */
+    SAVE_READ_FAILED,
+    SAVE_READ_FIRST_COPY = 1,
+    SAVE_READ_SECOND_COPY
 };
 
 typedef struct SavedGame {
-  /* 0x00 */ Boolean isValid;
-  /* 0x04 */ u8 unusedBeforeHole[4];
-  /* 0x08 */ HoleSetup hole;
-  /* 0x3C */ GameState state;
-  /* 0x80 */ RoundStats roundStats;
-  /* 0x9C */ u8 unusedAfterRoundStats[4];
+    /* 0x00 */ Boolean isValid;
+    /* 0x04 */ u8 unusedBeforeHole[4];
+    /* 0x08 */ HoleSetup hole;
+    /* 0x3C */ GameState state;
+    /* 0x80 */ RoundStats roundStats;
+    /* 0x9C */ u8 unusedAfterRoundStats[4];
 } SavedGame; /* size = 0xA0 */
 
 /* The best times kept for each course, with what was recorded alongside */
@@ -99,8 +99,8 @@ typedef struct SavedGame {
 
 /* A character's record against a computer character in Get Character */
 typedef struct MatchupRecord {
-  /* 0x0 */ u8 lossCount;
-  /* 0x1 */ u8 winBits; /* The win count, and WON_UNSAVED_FLAG */
+    /* 0x0 */ u8 lossCount;
+    /* 0x1 */ u8 winBits; /* The win count, and WON_UNSAVED_FLAG */
 } MatchupRecord; /* size = 0x2 */
 
 /*
@@ -108,66 +108,62 @@ typedef struct MatchupRecord {
  * them reach them through a pointer to this; where it ends is unknown.
  */
 typedef struct Awards {
-  /* 0x000 */ u8 unusedBeforeBadges[0xF4];
-  /* 0x0F4 */ s8
-      birdieBadgeCounts[COURSE_COUNT]
-                       [COURSE_HOLE_COUNT]; /* Nonzero holds the badge */
-  /* By the player's character, then the computer's */
-  /* 0x160 */ MatchupRecord matchups[CHARACTER_COUNT][CHARACTER_COUNT];
+    /* 0x000 */ u8 unusedBeforeBadges[0xF4];
+    /* 0x0F4 */ s8 birdieBadgeCounts[COURSE_COUNT][COURSE_HOLE_COUNT]; /* Nonzero holds the badge */
+    /* By the player's character, then the computer's */
+    /* 0x160 */ MatchupRecord matchups[CHARACTER_COUNT][CHARACTER_COUNT];
 } Awards; /* size = 0x3E8 */
 
 /* The save's records, which BuildStatusData reads through a pointer to them */
 typedef struct SaveRecords {
-  /* 0x000 */ Awards awards;
-  /* Each best time's net score to par, which breaks ties between equal times */
-  /* 0x3E8 */ s32 bestTimeScoresToPar[COURSE_COUNT][BEST_TIME_COUNT];
-  /* 0x430 */ s32 bestTimes[COURSE_COUNT]
-                           [BEST_TIME_COUNT]; /* Fastest first; unset is -1 */
-  /* The character and color of each best time's golfer */
-  /* 0x478 */ s32 bestTimeCharacters[COURSE_COUNT][BEST_TIME_COUNT];
-  /* 0x4C0 */ s32 bestTimePalettes[COURSE_COUNT][BEST_TIME_COUNT];
-  /* 0x508 */ CourseStats courseStats[COURSE_COUNT];
-  /* 0x7C0 */ u8 unusedAfterCourseStats[0x990 - 0x7C0];
-  /* 0x990 */ s8 hasRingShotStar[RING_SHOT_COURSE_COUNT][RING_SHOT_HOLE_COUNT];
+    /* 0x000 */ Awards awards;
+    /* Each best time's net score to par, which breaks ties between equal times */
+    /* 0x3E8 */ s32 bestTimeScoresToPar[COURSE_COUNT][BEST_TIME_COUNT];
+    /* 0x430 */ s32 bestTimes[COURSE_COUNT][BEST_TIME_COUNT]; /* Fastest first; unset is -1 */
+    /* The character and color of each best time's golfer */
+    /* 0x478 */ s32 bestTimeCharacters[COURSE_COUNT][BEST_TIME_COUNT];
+    /* 0x4C0 */ s32 bestTimePalettes[COURSE_COUNT][BEST_TIME_COUNT];
+    /* 0x508 */ CourseStats courseStats[COURSE_COUNT];
+    /* 0x7C0 */ u8 unusedAfterCourseStats[0x990 - 0x7C0];
+    /* 0x990 */ s8 hasRingShotStar[RING_SHOT_COURSE_COUNT][RING_SHOT_HOLE_COUNT];
 } SaveRecords; /* size = 0x9B4 */
 
 typedef struct SaveData {
-  /* 0x0000 */ u32 magic;
-  /* 0x0004 */ u32
-      longestDisplayListLength; /* In commands, over every frame drawn */
-  /* 0x0008 */ u8 invertedBuildDate[0x20]; /* The writing build's date, with
-                                              each bit inverted */
-  /* 0x0028 */ s8 options[SAVE_OPTION_COUNT];
-  /* 0x002C */ u8 unusedAfterOptions[0x38 - 0x2C];
-  /* 0x0038 */ SavedGame modeGames[MODE_GAME_COUNT];
-  /* 0x0218 */ Player modePlayers[MODE_PLAYER_COUNT];
-  /* 0x0720 */ PlayRecord modeRecords[MODE_RECORD_COUNT];
-  /* 0x0990 */ SaveRecords records;
-  /* 0x1344 */ s8 ringShotClearCounts[RING_SHOT_COURSE_COUNT]
-                                     [RING_SHOT_HOLE_COUNT][CHARACTER_COUNT];
-  /* 0x15CC */ s32 coursePoints; /* Earned in total, so it never goes down */
-  /* 0x15D0 */ PlayRecord rankedRecords[RANKED_RECORD_COUNT];
-  /* 0x1DF0 */ RingShotRecord ringShotRecords[RING_SHOT_RECORD_COUNT];
-  /* 0x1FF8 */ SavedGame savedGames[SAVED_GAME_COUNT];
-  /* 0x21D8 */ Player savedPlayers[SAVED_GAME_COUNT][MAX_PLAYER_COUNT];
+    /* 0x0000 */ u32 magic;
+    /* 0x0004 */ u32 longestDisplayListLength; /* In commands, over every frame drawn */
+    /* 0x0008 */ u8 invertedBuildDate[0x20]; /* The writing build's date, with
+                                                each bit inverted */
+    /* 0x0028 */ s8 options[SAVE_OPTION_COUNT];
+    /* 0x002C */ u8 unusedAfterOptions[0x38 - 0x2C];
+    /* 0x0038 */ SavedGame modeGames[MODE_GAME_COUNT];
+    /* 0x0218 */ Player modePlayers[MODE_PLAYER_COUNT];
+    /* 0x0720 */ PlayRecord modeRecords[MODE_RECORD_COUNT];
+    /* 0x0990 */ SaveRecords records;
+    /* 0x1344 */ s8 ringShotClearCounts[RING_SHOT_COURSE_COUNT][RING_SHOT_HOLE_COUNT]
+                                       [CHARACTER_COUNT];
+    /* 0x15CC */ s32 coursePoints; /* Earned in total, so it never goes down */
+    /* 0x15D0 */ PlayRecord rankedRecords[RANKED_RECORD_COUNT];
+    /* 0x1DF0 */ RingShotRecord ringShotRecords[RING_SHOT_RECORD_COUNT];
+    /* 0x1FF8 */ SavedGame savedGames[SAVED_GAME_COUNT];
+    /* 0x21D8 */ Player savedPlayers[SAVED_GAME_COUNT][MAX_PLAYER_COUNT];
 } SaveData; /* size = 0x2A78 */
 
 /* Each copy is stored with this, to check that it was read back intact */
 typedef struct SaveCheck {
-  /* 0x0 */ u16 key; /* Random */
-  /* 0x2 */ u16 keyedCrc; /* The data's CRC-16 exclusive-ored with the key */
+    /* 0x0 */ u16 key; /* Random */
+    /* 0x2 */ u16 keyedCrc; /* The data's CRC-16 exclusive-ored with the key */
 } SaveCheck;
 
 /* Where a copy of the save data and its check are kept */
 typedef struct SaveCopyLocation {
-  /* 0x0 */ const char* dataFileName; /* On the development host */
-  /* 0x4 */ const char* checkFileName; /* On the development host */
-  /* 0x8 */ u32 dataSramAddress;
-  /* 0xC */ u32 checkSramAddress;
+    /* 0x0 */ const char *dataFileName; /* On the development host */
+    /* 0x4 */ const char *checkFileName; /* On the development host */
+    /* 0x8 */ u32 dataSramAddress;
+    /* 0xC */ u32 checkSramAddress;
 } SaveCopyLocation;
 
-SaveData* GetSaveData(void);
-void TransferSaveData(SaveData* save, u8 isWrite);
+SaveData *GetSaveData(void);
+void TransferSaveData(SaveData *save, u8 isWrite);
 void ResetSaveData(void);
 void InitSaveData(void);
 void RecordDisplayListLength(u32 commandCount);

@@ -26,9 +26,9 @@
 #define RADIANS_PER_HOLE ((f64)(3.1416f / COURSE_HOLE_COUNT))
 
 typedef struct ContestantProfile {
-  /* 0x0 */ s8 baseScore; /* Final strokes over par on the first course */
-  /* 0x1 */ u8 unusedBeforeHoleOffset[2];
-  /* 0x3 */ s8 holeOffset; /* Holes played ahead of the player */
+    /* 0x0 */ s8 baseScore; /* Final strokes over par on the first course */
+    /* 0x1 */ u8 unusedBeforeHoleOffset[2];
+    /* 0x3 */ s8 holeOffset; /* Holes played ahead of the player */
 } ContestantProfile; /* size = 0x4 */
 
 s16 g_ContestantNameIndices[TOURNAMENT_CONTESTANT_COUNT - 1];
@@ -36,22 +36,43 @@ TournamentStanding g_TournamentStandings[TOURNAMENT_CONTESTANT_COUNT];
 
 static s32 f_TournamentSeed = 0;
 /* The computer contestants', from the most strokes over par to the fewest */
-static ContestantProfile f_ContestantProfiles[TOURNAMENT_CONTESTANT_COUNT - 1] =
-    {{17, {0, 0}, 7}, {16, {0, 0}, 7}, {16, {0, 0}, 7}, {15, {0, 0}, 7},
-        {15, {0, 0}, 6}, {14, {0, 0}, 6}, {14, {0, 0}, 6}, {13, {0, 0}, 6},
-        {13, {0, 0}, 5}, {12, {0, 0}, 5}, {12, {0, 0}, 5}, {11, {0, 0}, 5},
-        {11, {0, 0}, 4}, {10, {0, 0}, 4}, {10, {0, 0}, 4}, {9, {0, 0}, 4},
-        {9, {0, 0}, 3}, {8, {0, 0}, 3}, {8, {0, 0}, 3}, {7, {0, 0}, 3},
-        {7, {0, 0}, 2}, {6, {0, 0}, 2}, {6, {0, 0}, 2}, {5, {0, 0}, 2},
-        {5, {0, 0}, 1}, {3, {0, 0}, 1}, {3, {0, 0}, 1}, {1, {0, 0}, 1},
-        {1, {0, 0}, 0}};
+static ContestantProfile f_ContestantProfiles[TOURNAMENT_CONTESTANT_COUNT - 1] = {
+    {17, {0, 0}, 7},
+    {16, {0, 0}, 7},
+    {16, {0, 0}, 7},
+    {15, {0, 0}, 7},
+    {15, {0, 0}, 6},
+    {14, {0, 0}, 6},
+    {14, {0, 0}, 6},
+    {13, {0, 0}, 6},
+    {13, {0, 0}, 5},
+    {12, {0, 0}, 5},
+    {12, {0, 0}, 5},
+    {11, {0, 0}, 5},
+    {11, {0, 0}, 4},
+    {10, {0, 0}, 4},
+    {10, {0, 0}, 4},
+    {9, {0, 0}, 4},
+    {9, {0, 0}, 3},
+    {8, {0, 0}, 3},
+    {8, {0, 0}, 3},
+    {7, {0, 0}, 3},
+    {7, {0, 0}, 2},
+    {6, {0, 0}, 2},
+    {6, {0, 0}, 2},
+    {5, {0, 0}, 2},
+    {5, {0, 0}, 1},
+    {3, {0, 0}, 1},
+    {3, {0, 0}, 1},
+    {1, {0, 0}, 1},
+    {1, {0, 0}, 0}
+};
 /*
  * NAMES_PER_COURSE names for each course in turn, spelled with the top bit set
  * on each lowercase letter. A name breaks into two strings where a capital
  * that is also a hex digit follows an escape, which would otherwise absorb it.
  */
-char g_ContestantNames[COURSE_COUNT *
-    NAMES_PER_COURSE][CONTESTANT_NAME_LENGTH] = {
+char g_ContestantNames[COURSE_COUNT * NAMES_PER_COURSE][CONTESTANT_NAME_LENGTH] = {
     "T\xEF\xE1\xE4", /* Toad */
     "K\xE5\xEE", /* Ken */
     "K\xEF\xE2\xE5", /* Kobe */
@@ -240,11 +261,11 @@ static s32 f_UnusedWordAfterContestantProfiles UNUSED = 0;
 void NameContestants(void);
 
 void SeedTournamentRandom(s32 seed) {
-  f_TournamentSeed = seed;
+    f_TournamentSeed = seed;
 }
 
 u32 NextTournamentRandom(void) {
-  return f_TournamentSeed = NextRandomSeed(f_TournamentSeed);
+    return f_TournamentSeed = NextRandomSeed(f_TournamentSeed);
 }
 
 /*
@@ -252,10 +273,10 @@ u32 NextTournamentRandom(void) {
  * holes: evenly, or swinging above or below the even line along a sine
  */
 enum ScoreShape {
-  SCORE_SHAPE_EVEN,
-  SCORE_SHAPE_SWING_ABOVE,
-  SCORE_SHAPE_SWING_BELOW,
-  SCORE_SHAPE_COUNT
+    SCORE_SHAPE_EVEN,
+    SCORE_SHAPE_SWING_ABOVE,
+    SCORE_SHAPE_SWING_BELOW,
+    SCORE_SHAPE_COUNT
 };
 
 /*
@@ -263,133 +284,141 @@ enum ScoreShape {
  * player's holeCount holes; those up to lastAheadIndex, or all of them if it
  * is negative, are a hole further on. playerScore goes unused.
  */
-NO_RESULT SimulateScores(s32 holeCount, s32 lastAheadIndex, s32 firstIndex,
-    s32 endIndex, s32 playerScore UNUSED) {
-  s32 index;
-  s32 shape;
-  s32 swing;
-  s32 holesPlayed;
-  s32 finalScore;
-  s32 jitter;
-  s32 otherJitter;
-  s32 score;
+NO_RESULT SimulateScores(
+    s32 holeCount,
+    s32 lastAheadIndex,
+    s32 firstIndex,
+    s32 endIndex,
+    s32 playerScore UNUSED
+) {
+    s32 index;
+    s32 shape;
+    s32 swing;
+    s32 holesPlayed;
+    s32 finalScore;
+    s32 jitter;
+    s32 otherJitter;
+    s32 score;
 
-  if (holeCount > COURSE_HOLE_COUNT) {
-    holeCount = COURSE_HOLE_COUNT;
-  }
-
-  for (index = firstIndex; index < endIndex; index++) {
-    shape = index % SCORE_SHAPE_COUNT;
-    swing = index % 10;
-    if (g_GameState.courseIndex < COURSE_SHY_GUY_DESERT) {
-      swing = 13 - swing;
-      if (swing >= 10) {
-        swing = 9;
-      }
+    if (holeCount > COURSE_HOLE_COUNT) {
+        holeCount = COURSE_HOLE_COUNT;
     }
 
-    holesPlayed = holeCount +
-        (f_ContestantProfiles[index - 1].holeOffset +
-            ((lastAheadIndex < 0) | (lastAheadIndex >= index)));
-    if (holesPlayed > COURSE_HOLE_COUNT) {
-      holesPlayed = COURSE_HOLE_COUNT;
-    }
+    for (index = firstIndex; index < endIndex; index++) {
+        shape = index % SCORE_SHAPE_COUNT;
+        swing = index % 10;
+        if (g_GameState.courseIndex < COURSE_SHY_GUY_DESERT) {
+            swing = 13 - swing;
+            if (swing >= 10) {
+                swing = 9;
+            }
+        }
 
-    finalScore = f_ContestantProfiles[index - 1].baseScore -
-        (g_GameState.courseIndex * 2);
-    jitter = ((NextTournamentRandom() >> 28) & 5) - 2;
-    otherJitter = ((NextTournamentRandom() >> 28) & 5) - 2;
-    finalScore += (jitter + otherJitter) / 2;
-    if (holesPlayed == COURSE_HOLE_COUNT &&
-        finalScore <= -(g_GameState.courseIndex * 2) + 1) {
-      finalScore = -(g_GameState.courseIndex * 2) + 1;
-    }
+        holesPlayed = holeCount +
+            (f_ContestantProfiles[index - 1].holeOffset +
+                ((lastAheadIndex < 0) | (lastAheadIndex >= index)));
+        if (holesPlayed > COURSE_HOLE_COUNT) {
+            holesPlayed = COURSE_HOLE_COUNT;
+        }
 
-    if (finalScore < -SCORE_LIMIT) {
-      finalScore = -SCORE_LIMIT;
-    } else if (finalScore > SCORE_LIMIT) {
-      finalScore = SCORE_LIMIT;
-    }
+        finalScore = f_ContestantProfiles[index - 1].baseScore - (g_GameState.courseIndex * 2);
+        jitter = ((NextTournamentRandom() >> 28) & 5) - 2;
+        otherJitter = ((NextTournamentRandom() >> 28) & 5) - 2;
+        finalScore += (jitter + otherJitter) / 2;
+        if (holesPlayed == COURSE_HOLE_COUNT && finalScore <= -(g_GameState.courseIndex * 2) + 1) {
+            finalScore = -(g_GameState.courseIndex * 2) + 1;
+        }
 
-    switch (shape) {
+        if (finalScore < -SCORE_LIMIT) {
+            finalScore = -SCORE_LIMIT;
+        }
+        else if (finalScore > SCORE_LIMIT) {
+            finalScore = SCORE_LIMIT;
+        }
+
+        switch (shape) {
 #ifdef AVOID_UB
-      default:
+            default:
 #endif
-      case SCORE_SHAPE_EVEN:
-        score = finalScore * holesPlayed / COURSE_HOLE_COUNT;
-        break;
-      case SCORE_SHAPE_SWING_ABOVE:
-        score = (finalScore * holesPlayed / COURSE_HOLE_COUNT) +
-            (sin(holesPlayed * RADIANS_PER_HOLE) * swing);
-        break;
-      case SCORE_SHAPE_SWING_BELOW:
-        score = (finalScore * holesPlayed / COURSE_HOLE_COUNT) -
-            (sin(holesPlayed * RADIANS_PER_HOLE) * swing);
-        break;
-    }
+            case SCORE_SHAPE_EVEN:
+                score = finalScore * holesPlayed / COURSE_HOLE_COUNT;
+                break;
+            case SCORE_SHAPE_SWING_ABOVE:
+                score = (finalScore * holesPlayed / COURSE_HOLE_COUNT) +
+                    (sin(holesPlayed * RADIANS_PER_HOLE) * swing);
+                break;
+            case SCORE_SHAPE_SWING_BELOW:
+                score = (finalScore * holesPlayed / COURSE_HOLE_COUNT) -
+                    (sin(holesPlayed * RADIANS_PER_HOLE) * swing);
+                break;
+        }
 
-    g_TournamentStandings[index].contestantId = index - 1;
-    g_TournamentStandings[index].score = score;
-    g_TournamentStandings[index].holeCount = holesPlayed;
-  }
+        g_TournamentStandings[index].contestantId = index - 1;
+        g_TournamentStandings[index].score = score;
+        g_TournamentStandings[index].holeCount = holesPlayed;
+    }
 }
 
 /*
  * Simulates the computer contestants, ranks everyone by score and returns
  * the player's place
  */
-u8 RankTournament(
-    s32 holeCount, s32 lastAheadIndex, s32 playerScore, s32 seed) {
-  s32 keys[TOURNAMENT_CONTESTANT_COUNT];
-  s32 order[TOURNAMENT_CONTESTANT_COUNT];
-  TournamentStanding unsorted[TOURNAMENT_CONTESTANT_COUNT];
-  s32 index;
-  s32 otherIndex;
-  s32 place;
-  u8 tieBit;
-  u8 playerPlace;
+u8 RankTournament(s32 holeCount, s32 lastAheadIndex, s32 playerScore, s32 seed) {
+    s32 keys[TOURNAMENT_CONTESTANT_COUNT];
+    s32 order[TOURNAMENT_CONTESTANT_COUNT];
+    TournamentStanding unsorted[TOURNAMENT_CONTESTANT_COUNT];
+    s32 index;
+    s32 otherIndex;
+    s32 place;
+    u8 tieBit;
+    u8 playerPlace;
 
-  playerPlace = 1;
-  SeedTournamentRandom(seed);
-  SimulateScores(holeCount, lastAheadIndex, FIRST_COMPUTER_CONTESTANT,
-      TOURNAMENT_CONTESTANT_COUNT, playerScore);
-  NameContestants();
-  g_TournamentStandings[0].score = playerScore;
-  g_TournamentStandings[0].contestantId = PLAYER_CONTESTANT;
-  g_TournamentStandings[0].holeCount = holeCount;
-  for (index = 0; index < TOURNAMENT_CONTESTANT_COUNT; index++) {
-    keys[index] = -g_TournamentStandings[index].score;
-  }
-
-  SortIndicesDescending(keys, order, TOURNAMENT_CONTESTANT_COUNT);
-  for (index = 0; index < TOURNAMENT_CONTESTANT_COUNT; index++) {
-    unsorted[index] = g_TournamentStandings[index];
-  }
-
-  for (index = 0; index < TOURNAMENT_CONTESTANT_COUNT; index++) {
-    g_TournamentStandings[index] = unsorted[order[index]];
-  }
-
-  for (index = 0; index < TOURNAMENT_CONTESTANT_COUNT; index++) {
-    place = 1;
-    tieBit = 0;
-    for (otherIndex = 0; otherIndex < index; otherIndex++) {
-      if (g_TournamentStandings[index].score >
-          g_TournamentStandings[otherIndex].score) {
-        place++;
-      } else {
-        tieBit = PLACE_TIED;
-        g_TournamentStandings[otherIndex].place |= PLACE_TIED;
-      }
+    playerPlace = 1;
+    SeedTournamentRandom(seed);
+    SimulateScores(
+        holeCount,
+        lastAheadIndex,
+        FIRST_COMPUTER_CONTESTANT,
+        TOURNAMENT_CONTESTANT_COUNT,
+        playerScore
+    );
+    NameContestants();
+    g_TournamentStandings[0].score = playerScore;
+    g_TournamentStandings[0].contestantId = PLAYER_CONTESTANT;
+    g_TournamentStandings[0].holeCount = holeCount;
+    for (index = 0; index < TOURNAMENT_CONTESTANT_COUNT; index++) {
+        keys[index] = -g_TournamentStandings[index].score;
     }
 
-    g_TournamentStandings[index].place = tieBit | place;
-    if (g_TournamentStandings[index].contestantId == PLAYER_CONTESTANT) {
-      playerPlace = tieBit | place;
+    SortIndicesDescending(keys, order, TOURNAMENT_CONTESTANT_COUNT);
+    for (index = 0; index < TOURNAMENT_CONTESTANT_COUNT; index++) {
+        unsorted[index] = g_TournamentStandings[index];
     }
-  }
 
-  return playerPlace;
+    for (index = 0; index < TOURNAMENT_CONTESTANT_COUNT; index++) {
+        g_TournamentStandings[index] = unsorted[order[index]];
+    }
+
+    for (index = 0; index < TOURNAMENT_CONTESTANT_COUNT; index++) {
+        place = 1;
+        tieBit = 0;
+        for (otherIndex = 0; otherIndex < index; otherIndex++) {
+            if (g_TournamentStandings[index].score > g_TournamentStandings[otherIndex].score) {
+                place++;
+            }
+            else {
+                tieBit = PLACE_TIED;
+                g_TournamentStandings[otherIndex].place |= PLACE_TIED;
+            }
+        }
+
+        g_TournamentStandings[index].place = tieBit | place;
+        if (g_TournamentStandings[index].contestantId == PLAYER_CONTESTANT) {
+            playerPlace = tieBit | place;
+        }
+    }
+
+    return playerPlace;
 }
 
 /*
@@ -398,32 +427,32 @@ u8 RankTournament(
  * its place
  */
 void NameContestants(void) {
-  s32 index;
-  s32 nameOffset;
-  s32 lastName;
-  Boolean hasSkipped;
-  u32 isFirstName;
-  s32 blockEnd;
+    s32 index;
+    s32 nameOffset;
+    s32 lastName;
+    Boolean hasSkipped;
+    u32 isFirstName;
+    s32 blockEnd;
 
-  index = TOURNAMENT_CONTESTANT_COUNT - 2;
-  nameOffset = index;
-  hasSkipped = FALSE;
-  blockEnd = (g_GameState.courseIndex + 1) * NAMES_PER_COURSE;
-  lastName = blockEnd - 2;
-  for (; index >= 0; index--) {
-    if (!hasSkipped &&
-        strcmp(g_Players[0].name, g_ContestantNames[lastName - nameOffset]) ==
-            0) {
-      hasSkipped = TRUE;
-      nameOffset--;
-    }
+    index = TOURNAMENT_CONTESTANT_COUNT - 2;
+    nameOffset = index;
+    hasSkipped = FALSE;
+    blockEnd = (g_GameState.courseIndex + 1) * NAMES_PER_COURSE;
+    lastName = blockEnd - 2;
+    for (; index >= 0; index--) {
+        if (!hasSkipped &&
+            strcmp(g_Players[0].name, g_ContestantNames[lastName - nameOffset]) == 0) {
+            hasSkipped = TRUE;
+            nameOffset--;
+        }
 
-    isFirstName = index == 0;
-    if (hasSkipped & isFirstName) {
-      g_ContestantNameIndices[index] = blockEnd - 1;
-    } else {
-      g_ContestantNameIndices[index] = lastName - nameOffset;
-      nameOffset--;
+        isFirstName = index == 0;
+        if (hasSkipped & isFirstName) {
+            g_ContestantNameIndices[index] = blockEnd - 1;
+        }
+        else {
+            g_ContestantNameIndices[index] = lastName - nameOffset;
+            nameOffset--;
+        }
     }
-  }
 }

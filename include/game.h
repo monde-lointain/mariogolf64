@@ -9,8 +9,8 @@
 
 /* Values of g_FramePacingMode, which the second controller's Start cycles */
 enum PacingMode {
-  PACING_MODE_NORMAL,
-  PACING_MODE_PERFORMANCE_METER /* The other modes print debug text */
+    PACING_MODE_NORMAL,
+    PACING_MODE_PERFORMANCE_METER /* The other modes print debug text */
 };
 
 #define PACING_MODE_COUNT 4
@@ -32,9 +32,9 @@ extern s32 g_HorizonRow;
  * fits the second pair to the inset view every frame.
  */
 enum ViewportKind {
-  VIEWPORT_FULL_SCREEN,
-  VIEWPORT_INSET = 2,
-  VIEWPORT_STAFF_ROLL = 4
+    VIEWPORT_FULL_SCREEN,
+    VIEWPORT_INSET = 2,
+    VIEWPORT_STAFF_ROLL = 4
 };
 
 #define VIEWPORT_COUNT 6
@@ -44,10 +44,10 @@ extern Vp g_Viewports[VIEWPORT_COUNT];
 extern s32 g_UnreadDebugSwitch;
 
 /* The next free command of the display list being built this frame */
-extern Gfx* g_DisplayListHead;
+extern Gfx *g_DisplayListHead;
 
 /* The depth buffer, which the screen effects also use to hold a saved frame */
-extern u16* g_DepthBuffer;
+extern u16 *g_DepthBuffer;
 
 #define DRAW_BUFFER_COUNT 2
 
@@ -63,19 +63,19 @@ extern u16 g_ScreenEffectPerspNorm;
  * through RSP segments, each DYNAMIC_TEXTURE_SIZE pixels square
  */
 #define DYNAMIC_TEXTURE_SIZE 32
-extern u16 g_MirrorTexture[DYNAMIC_TEXTURE_SIZE *
-    DYNAMIC_TEXTURE_SIZE]; /* Part of the frame, upside down */
-extern u16 g_FlameTexture[DYNAMIC_TEXTURE_SIZE *
-    DYNAMIC_TEXTURE_SIZE]; /* Noise scrolling over a flame gradient */
-extern u16 g_BlendedTexture[DYNAMIC_TEXTURE_SIZE *
-    DYNAMIC_TEXTURE_SIZE]; /* Two loaded textures, one scrolling */
+extern u16 g_MirrorTexture[DYNAMIC_TEXTURE_SIZE * DYNAMIC_TEXTURE_SIZE]; /* Part of the frame,
+                                                                            upside down */
+extern u16 g_FlameTexture[DYNAMIC_TEXTURE_SIZE * DYNAMIC_TEXTURE_SIZE]; /* Noise scrolling over a
+                                                                           flame gradient */
+extern u16 g_BlendedTexture[DYNAMIC_TEXTURE_SIZE * DYNAMIC_TEXTURE_SIZE]; /* Two loaded textures,
+                                                                             one scrolling */
 
 /* The texture memory that the second texture of a two-texture blend uses */
 #define SECOND_TEXTURE_TMEM 0x100
 
 /* The loaded textures that g_BlendedTexture blends, after 8-byte headers */
-extern u8* g_BlendedTextureScrollingLayer;
-extern u8* g_BlendedTextureStillLayer;
+extern u8 *g_BlendedTextureScrollingLayer;
+extern u8 *g_BlendedTextureStillLayer;
 /* Indexed by view, then by draw buffer */
 extern CameraMatrices f_CameraMatrices[2 * 2];
 
@@ -84,6 +84,6 @@ void UpdateGame(void);
 s32 DrawGame(void);
 void DrawResetFade(void);
 /* Draws the textures the course model reads through RSP segments */
-void BuildDynamicTextures(Gfx** displayListHead);
+void BuildDynamicTextures(Gfx **displayListHead);
 
 #endif

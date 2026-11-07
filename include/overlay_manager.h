@@ -29,53 +29,53 @@
  * lists.
  */
 enum ModuleId {
-  /* Holds the golf balls and their afterimages (golf_balls.c) */
-  MODULE_GOLF_BALLS = 0x01,
-  MODULE_MENU,
-  MODULE_OPENING,
-  MODULE_TITLE_SCREEN,
-  MODULE_SCORECARD,
-  MODULE_HOLE_BUILDER,
-  MODULE_COMPUTER_GOLFER,
-  MODULE_SHOT_SIMULATION,
-  /* Holds the Boo that the wind indicator draws (golf_balls.c's data) */
-  MODULE_WIND_BOO,
-  MODULE_PLAY,
-  MODULE_HOLE_OBJECTS,
-  MODULE_BOOT_LOGOS,
-  MODULE_CONFIRM_WAIT,
-  MODULE_UNUSED_SCORECARD,
-  MODULE_ROUND_RESULTS,
-  MODULE_UNUSED_OPENING_A,
-  MODULE_ROUND_EVENTS,
-  MODULE_SHOT_EFFECTS,
-  MODULE_UNUSED_OPENING_B,
-  MODULE_PAUSE_MENU,
-  MODULE_COURSE_SELECT,
-  MODULE_SAVE_MENU,
-  MODULE_SHOT_LABELS,
-  MODULE_UNUSED_PLAY,
-  MODULE_CLUB_PANEL,
-  MODULE_CLUB_SLOTS,
-  MODULE_TRANSMIT,
-  MODULE_UNUSED_HOLE_BUILDER,
-  MODULE_UNUSED_TRANSMIT_A,
-  MODULE_UNUSED_TITLE_SCREEN,
-  MODULE_STAFF_ROLL,
-  MODULE_UNUSED_TRANSMIT_B
+    /* Holds the golf balls and their afterimages (golf_balls.c) */
+    MODULE_GOLF_BALLS = 0x01,
+    MODULE_MENU,
+    MODULE_OPENING,
+    MODULE_TITLE_SCREEN,
+    MODULE_SCORECARD,
+    MODULE_HOLE_BUILDER,
+    MODULE_COMPUTER_GOLFER,
+    MODULE_SHOT_SIMULATION,
+    /* Holds the Boo that the wind indicator draws (golf_balls.c's data) */
+    MODULE_WIND_BOO,
+    MODULE_PLAY,
+    MODULE_HOLE_OBJECTS,
+    MODULE_BOOT_LOGOS,
+    MODULE_CONFIRM_WAIT,
+    MODULE_UNUSED_SCORECARD,
+    MODULE_ROUND_RESULTS,
+    MODULE_UNUSED_OPENING_A,
+    MODULE_ROUND_EVENTS,
+    MODULE_SHOT_EFFECTS,
+    MODULE_UNUSED_OPENING_B,
+    MODULE_PAUSE_MENU,
+    MODULE_COURSE_SELECT,
+    MODULE_SAVE_MENU,
+    MODULE_SHOT_LABELS,
+    MODULE_UNUSED_PLAY,
+    MODULE_CLUB_PANEL,
+    MODULE_CLUB_SLOTS,
+    MODULE_TRANSMIT,
+    MODULE_UNUSED_HOLE_BUILDER,
+    MODULE_UNUSED_TRANSMIT_A,
+    MODULE_UNUSED_TITLE_SCREEN,
+    MODULE_STAFF_ROLL,
+    MODULE_UNUSED_TRANSMIT_B
 };
 
 typedef struct Overlay {
-  /* 0x00 */ s8 isLoaded;
-  /* 0x04 */ s8* moduleIds; /* Terminated by MODULE_ID_END */
-  /* 0x08 */ u32 romStart;
-  /* 0x0C */ u32 romEnd;
-  /* 0x10 */ u8* vramStart;
-  /* 0x14 */ u8* textEnd;
-  /* 0x18 */ u8* bssStart;
-  /* 0x1C */ u8* bssEnd;
-  /* 0x20 */ void (*onLoad)(void);
-  /* 0x24 */ void (*onUnload)(void);
+    /* 0x00 */ s8 isLoaded;
+    /* 0x04 */ s8 *moduleIds; /* Terminated by MODULE_ID_END */
+    /* 0x08 */ u32 romStart;
+    /* 0x0C */ u32 romEnd;
+    /* 0x10 */ u8 *vramStart;
+    /* 0x14 */ u8 *textEnd;
+    /* 0x18 */ u8 *bssStart;
+    /* 0x1C */ u8 *bssEnd;
+    /* 0x20 */ void (*onLoad)(void);
+    /* 0x24 */ void (*onUnload)(void);
 } Overlay; /* size = 0x28 */
 
 void OnLoadOverlay2(void);

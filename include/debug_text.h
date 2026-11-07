@@ -10,23 +10,23 @@
  * The framebuffer that DrawMessageCharacter last drew a message into, which
  * the main loop keeps on screen once set
  */
-extern u16* g_MessageFramebuffer;
+extern u16 *g_MessageFramebuffer;
 
 /* The size of the buffers that lines of debug text are formatted into */
 #define DEBUG_TEXT_BUFFER_SIZE 128
 
-void SetUpDebugTextDrawing(Gfx** displayListHead);
-void DrawTextIntoTexture(READ_ONLY char* text, s32 length, u16* texture);
-void PrintMessage(s8* text, u32 column, u32 row);
+void SetUpDebugTextDrawing(Gfx **displayListHead);
+void DrawTextIntoTexture(READ_ONLY char *text, s32 length, u16 *texture);
+void PrintMessage(s8 *text, u32 column, u32 row);
 void DrawMessageCharacter(s8 character, u32 column, u32 row);
 void ClearDebugText(void);
-void DrawDebugText(Gfx** displayListHead);
+void DrawDebugText(Gfx **displayListHead);
 void SetDebugTextHighlight(Boolean isHighlighted);
-void PutDebugText(s8* text, s32 column, s32 row);
-void PrintDebugText(const char* text, s32 column, s32 row);
+void PutDebugText(s8 *text, s32 column, s32 row);
+void PrintDebugText(const char *text, s32 column, s32 row);
 void PrintDebugHex(u32 value, s32 column, s32 row);
 void PrintDebugPaddedHex(u32 value, s32 column, s32 row);
-void AddToDebugLog(char* text);
+void AddToDebugLog(char *text);
 void ShowDebugLog(void);
 
 #endif

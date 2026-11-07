@@ -14,16 +14,16 @@
  * whole camera lets the compiler move the read past display list words, as
  * the original does.
  */
-#define COURSE_SELECT_LAYOUT (*(u8*)&g_MapCamera.mode)
+#define COURSE_SELECT_LAYOUT (*(u8 *)&g_MapCamera.mode)
 
 enum CourseSelectLayout {
-  /* Each course's birdie badge count and tournament trophies; also set on
-   * leaving the course select */
-  COURSE_SELECT_LAYOUT_AWARDS,
-  /* The holes choice, and the bet settings on C-up */
-  COURSE_SELECT_LAYOUT_HOLES,
-  /* Neither, for modes without bets or a holes choice */
-  COURSE_SELECT_LAYOUT_PLAIN
+    /* Each course's birdie badge count and tournament trophies; also set on
+     * leaving the course select */
+    COURSE_SELECT_LAYOUT_AWARDS,
+    /* The holes choice, and the bet settings on C-up */
+    COURSE_SELECT_LAYOUT_HOLES,
+    /* Neither, for modes without bets or a holes choice */
+    COURSE_SELECT_LAYOUT_PLAIN
 };
 
 /*
@@ -42,12 +42,11 @@ enum CourseSelectLayout {
 #define MENU_LAYER_TALL_NARROW_BOARD (1 << 7)
 /* Just the scenery and the banner, behind the screens that draw their own
  * panel or model where the others have a board */
-#define PLAIN_BACKDROP_LAYERS \
-  (MENU_LAYER_SCENERY | MENU_LAYER_IGNORED | MENU_LAYER_BANNER)
+#define PLAIN_BACKDROP_LAYERS (MENU_LAYER_SCENERY | MENU_LAYER_IGNORED | MENU_LAYER_BANNER)
 
 /* A screen's lit labels, or other images in their place, read alternately
  * into each */
-extern void* g_MenuLabelImages[2];
+extern void *g_MenuLabelImages[2];
 /* How many pixels wider and taller than its size the chosen label is drawn */
 extern s16 g_ChosenLabelGrowth;
 /*
@@ -57,8 +56,8 @@ extern s16 g_ChosenLabelGrowth;
 extern s32 g_IsHoleShownInMenuInset;
 
 enum LabelGrowthDirection {
-  LABEL_GROWING,
-  LABEL_SHRINKING
+    LABEL_GROWING,
+    LABEL_SHRINKING
 };
 
 typedef u8 LabelGrowthDirection;
@@ -66,7 +65,7 @@ typedef u8 LabelGrowthDirection;
 /* Whether the chosen label is growing or shrinking */
 extern LabelGrowthDirection g_ChosenLabelGrowthDirection;
 
-extern void* g_NamePlateImage;
+extern void *g_NamePlateImage;
 /* The player count chosen on the title screen, which the saved games, the
  * menus and the club tournament set to 1 */
 extern s32 g_ChosenPlayerCount;
@@ -99,9 +98,9 @@ extern s16 g_ChosenHandicaps[MAX_PLAYER_COUNT];
 
 /* What the course select names the courses by */
 enum CourseSelectKind {
-  COURSE_SELECT_KIND_NONE,
-  COURSE_SELECT_KIND_COURSES,
-  COURSE_SELECT_KIND_TOURNAMENTS
+    COURSE_SELECT_KIND_NONE,
+    COURSE_SELECT_KIND_COURSES,
+    COURSE_SELECT_KIND_TOURNAMENTS
 };
 
 typedef u8 CourseSelectKind;
@@ -115,8 +114,7 @@ extern u8 g_IsRingShotWipeOpening;
 extern Boolean g_IsChosenHoleLoadStarted;
 extern s32 g_ChoosingPlayerIndex;
 /* Each character's name, coded, in CharacterChoice order */
-extern char g_MenuCharacterNames[CHARACTER_COUNT]
-                                [IMPORTED_CHARACTER_NAME_LENGTH];
+extern char g_MenuCharacterNames[CHARACTER_COUNT][IMPORTED_CHARACTER_NAME_LENGTH];
 
 /*
  * The menu banners, 256 color images such as asset 0x521, drawn in strips
@@ -129,14 +127,14 @@ extern char g_MenuCharacterNames[CHARACTER_COUNT]
 
 s32 GetOpenCourseCount(void);
 void CheckControllersAndSetPans(void);
-void DrawMenuBackdropLayers(Gfx** displayListHead, s32 layers);
-void DrawLargeBannerBackdropLayers(Gfx** displayListHead, s32 layers);
+void DrawMenuBackdropLayers(Gfx **displayListHead, s32 layers);
+void DrawLargeBannerBackdropLayers(Gfx **displayListHead, s32 layers);
 void UpdateMenus(void);
-void* GetMenuImageBuffer(void);
+void *GetMenuImageBuffer(void);
 void StartLoadingChosenHole(void);
-void DrawMenuScreen(Gfx** displayListHead);
-void DrawMenuScenery(Gfx** displayListHead);
-void DrawMenuBanner(Gfx** displayListHead);
-void DrawSpinningBadge(Gfx** displayListHead, void* image, s32 x, s32 y);
+void DrawMenuScreen(Gfx **displayListHead);
+void DrawMenuScenery(Gfx **displayListHead);
+void DrawMenuBanner(Gfx **displayListHead);
+void DrawSpinningBadge(Gfx **displayListHead, void *image, s32 x, s32 y);
 
 #endif

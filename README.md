@@ -38,7 +38,9 @@ copy of a tool kept elsewhere with this project's settings, draws them.
 
 ## Formatting
 
-The sources follow the Google style through clang-format 23. Run
+The sources follow the style in `.clang-format`, based on WebKit's, through
+clang-format 23: a 4-space indent, braces that end the line they open on,
+no alignment to the end of a previous line, and a 100-column limit. Run
 `make format` before committing. The SDK sources in `lib/` keep their
 own formatting.
 

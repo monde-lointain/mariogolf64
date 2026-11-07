@@ -31,8 +31,7 @@
 #define LAST_GLYPH 'z'
 /* The font is 4 bits per pixel, so each u16 holds 4 pixels */
 #define PIXELS_PER_FONT_WORD 4
-#define FONT_ROW_WORD_COUNT \
-  (GLYPHS_PER_FONT_ROW * GLYPH_SIZE / PIXELS_PER_FONT_WORD)
+#define FONT_ROW_WORD_COUNT (GLYPHS_PER_FONT_ROW * GLYPH_SIZE / PIXELS_PER_FONT_WORD)
 #define FONT_WIDTH 256
 #define FONT_HEIGHT 24
 /* The pixel value that is drawn as ink in messages */
@@ -54,7 +53,7 @@
 static u16 f_DebugFont[FONT_WIDTH * FONT_HEIGHT / 2] = {
 #include "assets/debug_text/debug_font.ia4.inc.c"
 };
-u16* g_MessageFramebuffer = NULL;
+u16 *g_MessageFramebuffer = NULL;
 static s8 f_DebugTextHighlight = 0;
 static s32 f_DebugLogShownLineCount = LOG_SHOWN_LINE_COUNT;
 
@@ -62,105 +61,112 @@ static u8 f_DebugText[TEXT_ROW_COUNT * TEXT_COLUMN_COUNT];
 static u8 f_DebugLog[LOG_LINE_COUNT * TEXT_COLUMN_COUNT];
 static s32 f_DebugLogCursor;
 
-void SetUpDebugTextDrawing(Gfx** displayListHead) {
-  Gfx* gfx = *displayListHead;
+void SetUpDebugTextDrawing(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
 
-  gDPPipeSync(gfx++);
-  gDPPipeSync(gfx++);
-  gDPSetCycleType(gfx++, G_CYC_1CYCLE);
-  gDPPipeSync(gfx++);
-  gDPSetRenderMode(gfx++, TextRenderMode(1), TextRenderMode(2));
-  gDPSetCombineMode(
-      gfx++, G_CC_MODULATEIDECALA_PRIM, G_CC_MODULATEIDECALA_PRIM);
-  gSPTexture(
-      gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0, G_TX_RENDERTILE, G_ON);
-  gDPPipeSync(gfx++);
-  gDPSetAlphaCompare(gfx++, G_AC_NONE);
-  gDPPipeSync(gfx++);
-  gDPSetTexturePersp(gfx++, G_TP_NONE);
-  gDPPipeSync(gfx++);
-  gDPSetTextureFilter(gfx++, G_TF_POINT);
-  gDPPipeSync(gfx++);
-  gDPSetAlphaDither(gfx++, G_AD_DISABLE);
-  gDPPipeSync(gfx++);
-  gDPSetTextureLUT(gfx++, G_TT_NONE);
-  gDPPipeSync(gfx++);
-  gDPLoadTextureBlock_4b(gfx++, TextureAddress(f_DebugFont), G_IM_FMT_IA,
-      FONT_WIDTH, FONT_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
-      G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
-      G_TX_NOLOD);
-  gDPPipeSync(gfx++);
-  *displayListHead = gfx;
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, TextRenderMode(1), TextRenderMode(2));
+    gDPSetCombineMode(gfx++, G_CC_MODULATEIDECALA_PRIM, G_CC_MODULATEIDECALA_PRIM);
+    gSPTexture(gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0, G_TX_RENDERTILE, G_ON);
+    gDPPipeSync(gfx++);
+    gDPSetAlphaCompare(gfx++, G_AC_NONE);
+    gDPPipeSync(gfx++);
+    gDPSetTexturePersp(gfx++, G_TP_NONE);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_POINT);
+    gDPPipeSync(gfx++);
+    gDPSetAlphaDither(gfx++, G_AD_DISABLE);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_NONE);
+    gDPPipeSync(gfx++);
+    gDPLoadTextureBlock_4b(
+        gfx++,
+        TextureAddress(f_DebugFont),
+        G_IM_FMT_IA,
+        FONT_WIDTH,
+        FONT_HEIGHT,
+        0,
+        G_TX_NOMIRROR | G_TX_WRAP,
+        G_TX_NOMIRROR | G_TX_WRAP,
+        G_TX_NOMASK,
+        G_TX_NOMASK,
+        G_TX_NOLOD,
+        G_TX_NOLOD
+    );
+    gDPPipeSync(gfx++);
+    *displayListHead = gfx;
 }
 
 /*
  * Draws the glyphs of text into a 4-bit texture one glyph tall and length
  * glyphs wide.
  */
-void DrawTextIntoTexture(READ_ONLY char* text, s32 length, u16* texture) {
-  s32 index;
-  s32 rowFontIndex;
-  s32 y;
-  s32 x;
-  s32 rowIndex;
-  s32 fontIndex;
-  s32 textureIndex;
-  s32 character;
-  /*
-   * The glyph's first word in the font, copied to fontIndex to match:
-   * computing fontIndex directly gives 14 words differing, 2 in shape
-   */
-  s32 glyphFontIndex;
-
-  for (index = 0; index < length; index++, text++) {
+void DrawTextIntoTexture(READ_ONLY char *text, s32 length, u16 *texture) {
+    s32 index;
+    s32 rowFontIndex;
+    s32 y;
+    s32 x;
+    s32 rowIndex;
+    s32 fontIndex;
+    s32 textureIndex;
+    s32 character;
     /*
-     * Signed to match; either way a byte past 0x7F is drawn as FIRST_GLYPH.
-     * Reading it unsigned, by cast or as the plain char, gives 2 words
-     * differing, both in shape.
+     * The glyph's first word in the font, copied to fontIndex to match:
+     * computing fontIndex directly gives 14 words differing, 2 in shape
      */
-    character = (s8)*text;
-    if (character == '\0') {
-      break;
-    }
+    s32 glyphFontIndex;
 
-    if (character < FIRST_GLYPH) {
-      character = FIRST_GLYPH;
-    }
+    for (index = 0; index < length; index++, text++) {
+        /*
+         * Signed to match; either way a byte past 0x7F is drawn as FIRST_GLYPH.
+         * Reading it unsigned, by cast or as the plain char, gives 2 words
+         * differing, both in shape.
+         */
+        character = (s8)*text;
+        if (character == '\0') {
+            break;
+        }
 
-    if (character > LAST_GLYPH) {
-      character = FIRST_GLYPH;
-    }
+        if (character < FIRST_GLYPH) {
+            character = FIRST_GLYPH;
+        }
 
-    character -= FIRST_GLYPH;
-    glyphFontIndex = ((character & (GLYPHS_PER_FONT_ROW - 1)) *
-                         (GLYPH_SIZE / PIXELS_PER_FONT_WORD)) |
-        ((character / GLYPHS_PER_FONT_ROW) *
-            (GLYPH_SIZE * FONT_ROW_WORD_COUNT));
-    y = 0;
-    fontIndex = glyphFontIndex;
-    textureIndex = index;
-    for (; y < GLYPH_SIZE; y++) {
-      x = 0;
-      rowIndex = textureIndex * 2;
-      rowFontIndex = fontIndex;
-      for (; x < GLYPH_SIZE / PIXELS_PER_FONT_WORD; x++) {
-        texture[rowIndex + x] = f_DebugFont[rowFontIndex + x];
-      }
+        if (character > LAST_GLYPH) {
+            character = FIRST_GLYPH;
+        }
 
-      fontIndex += FONT_ROW_WORD_COUNT;
-      textureIndex += length;
+        character -= FIRST_GLYPH;
+        glyphFontIndex =
+            ((character & (GLYPHS_PER_FONT_ROW - 1)) * (GLYPH_SIZE / PIXELS_PER_FONT_WORD)) |
+            ((character / GLYPHS_PER_FONT_ROW) * (GLYPH_SIZE * FONT_ROW_WORD_COUNT));
+        y = 0;
+        fontIndex = glyphFontIndex;
+        textureIndex = index;
+        for (; y < GLYPH_SIZE; y++) {
+            x = 0;
+            rowIndex = textureIndex * 2;
+            rowFontIndex = fontIndex;
+            for (; x < GLYPH_SIZE / PIXELS_PER_FONT_WORD; x++) {
+                texture[rowIndex + x] = f_DebugFont[rowFontIndex + x];
+            }
+
+            fontIndex += FONT_ROW_WORD_COUNT;
+            textureIndex += length;
+        }
     }
-  }
 }
 
 /* Puts text in the grid and draws it into the framebuffers at once */
-void PrintMessage(s8* text, u32 column, u32 row) {
-  PutDebugText(text, column, row);
-  while (*text != '\0') {
-    DrawMessageCharacter(*text, column, row);
-    text++;
-    column++;
-  }
+void PrintMessage(s8 *text, u32 column, u32 row) {
+    PutDebugText(text, column, row);
+    while (*text != '\0') {
+        DrawMessageCharacter(*text, column, row);
+        text++;
+        column++;
+    }
 }
 
 /*
@@ -168,245 +174,251 @@ void PrintMessage(s8* text, u32 column, u32 row) {
  * column and row of the message grid, and turns the screen back on.
  */
 void DrawMessageCharacter(s8 character, u32 column, u32 row) {
-  u16* currentFramebuffer =
-      (u16*)(osVirtualToPhysical(osViGetCurrentFramebuffer()) + K1BASE);
-  u16* nextFramebuffer =
-      (u16*)(osVirtualToPhysical(osViGetNextFramebuffer()) + K1BASE);
-  s32 glyphStart;
-  s32 y;
-  s32 x;
-  s32 pixelIndex;
-  u16 color;
+    u16 *currentFramebuffer = (u16 *)(osVirtualToPhysical(osViGetCurrentFramebuffer()) + K1BASE);
+    u16 *nextFramebuffer = (u16 *)(osVirtualToPhysical(osViGetNextFramebuffer()) + K1BASE);
+    s32 glyphStart;
+    s32 y;
+    s32 x;
+    s32 pixelIndex;
+    u16 color;
 
-  /* The main loop shows this framebuffer from now on */
-  g_MessageFramebuffer = currentFramebuffer;
-  if (character < FIRST_GLYPH) {
-    character = FIRST_GLYPH;
-  }
-
-  if (character > LAST_GLYPH) {
-    character = FIRST_GLYPH;
-  }
-
-  character -= FIRST_GLYPH;
-  glyphStart = ((character & (GLYPHS_PER_FONT_ROW - 1)) *
-                   (GLYPH_SIZE / PIXELS_PER_FONT_WORD)) +
-      ((character / GLYPHS_PER_FONT_ROW) * (GLYPH_SIZE * FONT_ROW_WORD_COUNT));
-  y = 0;
-  if (column >= TEXT_COLUMN_COUNT || row >= TEXT_ROW_COUNT) {
-    return;
-  }
-
-  for (; y < GLYPH_SIZE; y++) {
-    for (x = 0; x < GLYPH_SIZE; x++) {
-      color = ((f_DebugFont[glyphStart + (y * FONT_ROW_WORD_COUNT) +
-                    (x / PIXELS_PER_FONT_WORD)] >>
-                   ((3 - (x & 3)) * 4)) &
-                  0xF) == FONT_INK
-          ? MESSAGE_INK_COLOR
-          : MESSAGE_PAPER_COLOR;
-      pixelIndex = (((row * GLYPH_SIZE) + y) * MESSAGE_SCREEN_WIDTH) +
-          ((column * GLYPH_SIZE) + x);
-      currentFramebuffer[pixelIndex] = color;
-      nextFramebuffer[pixelIndex] = color;
+    /* The main loop shows this framebuffer from now on */
+    g_MessageFramebuffer = currentFramebuffer;
+    if (character < FIRST_GLYPH) {
+        character = FIRST_GLYPH;
     }
-  }
 
-  osViBlack(FALSE);
+    if (character > LAST_GLYPH) {
+        character = FIRST_GLYPH;
+    }
+
+    character -= FIRST_GLYPH;
+    glyphStart = ((character & (GLYPHS_PER_FONT_ROW - 1)) * (GLYPH_SIZE / PIXELS_PER_FONT_WORD)) +
+        ((character / GLYPHS_PER_FONT_ROW) * (GLYPH_SIZE * FONT_ROW_WORD_COUNT));
+    y = 0;
+    if (column >= TEXT_COLUMN_COUNT || row >= TEXT_ROW_COUNT) {
+        return;
+    }
+
+    for (; y < GLYPH_SIZE; y++) {
+        for (x = 0; x < GLYPH_SIZE; x++) {
+            color =
+                ((f_DebugFont
+                         [glyphStart + (y * FONT_ROW_WORD_COUNT) + (x / PIXELS_PER_FONT_WORD)] >>
+                     ((3 - (x & 3)) * 4)) &
+                    0xF) == FONT_INK ?
+                MESSAGE_INK_COLOR :
+                MESSAGE_PAPER_COLOR;
+            pixelIndex =
+                (((row * GLYPH_SIZE) + y) * MESSAGE_SCREEN_WIDTH) + ((column * GLYPH_SIZE) + x);
+            currentFramebuffer[pixelIndex] = color;
+            nextFramebuffer[pixelIndex] = color;
+        }
+    }
+
+    osViBlack(FALSE);
 }
 
 void ClearDebugText(void) {
-  s32 index;
-  u8* cell;
+    s32 index;
+    u8 *cell;
 
-  for (index = ARRAY_COUNT(f_DebugText) - 1, cell = &f_DebugText[index];
-      index >= 0; index--) {
-    *cell-- = 0;
-  }
+    for (index = ARRAY_COUNT(f_DebugText) - 1, cell = &f_DebugText[index]; index >= 0; index--) {
+        *cell-- = 0;
+    }
 }
 
-void DrawDebugText(Gfx** displayListHead) {
-  s32 index = 0;
-  u32 highlight = 0;
-  s32 row;
-  s32 column;
-  u8 character;
-  s32 glyph;
-  Gfx* gfx;
+void DrawDebugText(Gfx **displayListHead) {
+    s32 index = 0;
+    u32 highlight = 0;
+    s32 row;
+    s32 column;
+    u8 character;
+    s32 glyph;
+    Gfx *gfx;
 
-  SetUpDebugTextDrawing(displayListHead);
-  if (IsGameFlagSet(GAME_FLAG_HIDE_DEBUG_TEXT)) {
-    return;
-  }
-
-  gfx = *displayListHead;
-  gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
-  gDPPipeSync(gfx++);
-  for (row = 0; row < TEXT_ROW_COUNT; row++) {
-    for (column = 0; column < TEXT_COLUMN_COUNT; index++, column++) {
-      character = f_DebugText[index];
-      if (character <= ' ') {
-        continue;
-      }
-
-      glyph = (character & CHARACTER_MASK) - FIRST_GLYPH;
-      if ((character & HIGHLIGHT_BIT) != highlight) {
-        highlight = character & HIGHLIGHT_BIT;
-        gDPPipeSync(gfx++);
-        if (highlight) {
-          gDPSetPrimColor(gfx++, 0, 0, 255, 0, 0, OPAQUE_ALPHA);
-        } else {
-          gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
-        }
-
-        gDPPipeSync(gfx++);
-      }
-
-      gSPTextureRectangle(gfx++, QuarterPixels(column * GLYPH_SIZE),
-          QuarterPixels(row * GLYPH_SIZE),
-          QuarterPixels((column * GLYPH_SIZE) + GLYPH_SIZE),
-          QuarterPixels((row * GLYPH_SIZE) + GLYPH_SIZE), G_TX_RENDERTILE,
-          TexelCoordinate((glyph & 0x1F) * GLYPH_SIZE),
-          TexelCoordinate((glyph >> 5) * GLYPH_SIZE), TEXEL_STEP_ONE,
-          TEXEL_STEP_ONE);
+    SetUpDebugTextDrawing(displayListHead);
+    if (IsGameFlagSet(GAME_FLAG_HIDE_DEBUG_TEXT)) {
+        return;
     }
-  }
 
-  gDPPipeSync(gfx++);
-  *displayListHead = gfx;
+    gfx = *displayListHead;
+    gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
+    gDPPipeSync(gfx++);
+    for (row = 0; row < TEXT_ROW_COUNT; row++) {
+        for (column = 0; column < TEXT_COLUMN_COUNT; index++, column++) {
+            character = f_DebugText[index];
+            if (character <= ' ') {
+                continue;
+            }
+
+            glyph = (character & CHARACTER_MASK) - FIRST_GLYPH;
+            if ((character & HIGHLIGHT_BIT) != highlight) {
+                highlight = character & HIGHLIGHT_BIT;
+                gDPPipeSync(gfx++);
+                if (highlight) {
+                    gDPSetPrimColor(gfx++, 0, 0, 255, 0, 0, OPAQUE_ALPHA);
+                }
+                else {
+                    gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
+                }
+
+                gDPPipeSync(gfx++);
+            }
+
+            gSPTextureRectangle(
+                gfx++,
+                QuarterPixels(column * GLYPH_SIZE),
+                QuarterPixels(row * GLYPH_SIZE),
+                QuarterPixels((column * GLYPH_SIZE) + GLYPH_SIZE),
+                QuarterPixels((row * GLYPH_SIZE) + GLYPH_SIZE),
+                G_TX_RENDERTILE,
+                TexelCoordinate((glyph & 0x1F) * GLYPH_SIZE),
+                TexelCoordinate((glyph >> 5) * GLYPH_SIZE),
+                TEXEL_STEP_ONE,
+                TEXEL_STEP_ONE
+            );
+        }
+    }
+
+    gDPPipeSync(gfx++);
+    *displayListHead = gfx;
 }
 
 /* Highlights the next text put in the grid */
 void SetDebugTextHighlight(Boolean isHighlighted) {
-  if (isHighlighted) {
-    f_DebugTextHighlight = HIGHLIGHT_BIT;
-  } else {
+    if (isHighlighted) {
+        f_DebugTextHighlight = HIGHLIGHT_BIT;
+    }
+    else {
+        f_DebugTextHighlight = 0;
+    }
+}
+
+void PutDebugText(s8 *text, s32 column, s32 row) {
+    s8 highlight = f_DebugTextHighlight;
+    u8 *cell = &f_DebugText[(row * TEXT_COLUMN_COUNT) + column];
+    s32 character;
+
+    while (TRUE) {
+        character = *text++;
+        if (character == '\0') {
+            break;
+        }
+
+        if (cell >= f_DebugText && cell < f_DebugText + ARRAY_COUNT(f_DebugText)) {
+            *cell = highlight | character;
+        }
+
+        cell++;
+    }
+
     f_DebugTextHighlight = 0;
-  }
 }
 
-void PutDebugText(s8* text, s32 column, s32 row) {
-  s8 highlight = f_DebugTextHighlight;
-  u8* cell = &f_DebugText[(row * TEXT_COLUMN_COUNT) + column];
-  s32 character;
-
-  while (TRUE) {
-    character = *text++;
-    if (character == '\0') {
-      break;
+void PrintDebugText(const char *text, s32 column, s32 row) {
+    if (g_IsDebugEnabled) {
+        PutDebugText((s8 *)text, column, row);
     }
-
-    if (cell >= f_DebugText && cell < f_DebugText + ARRAY_COUNT(f_DebugText)) {
-      *cell = highlight | character;
-    }
-
-    cell++;
-  }
-
-  f_DebugTextHighlight = 0;
-}
-
-void PrintDebugText(const char* text, s32 column, s32 row) {
-  if (g_IsDebugEnabled) {
-    PutDebugText((s8*)text, column, row);
-  }
 }
 
 /* Prints value in hex, right-aligned so its last digit is 7 columns right of
  * column */
 void PrintDebugHex(u32 value, s32 column, s32 row) {
-  char digits[HEX_DIGIT_COUNT + 1];
-  char* digit = &digits[HEX_DIGIT_COUNT];
-  s32 nibble;
-  s32 character;
+    char digits[HEX_DIGIT_COUNT + 1];
+    char *digit = &digits[HEX_DIGIT_COUNT];
+    s32 nibble;
+    s32 character;
 
-  column += HEX_DIGIT_COUNT;
-  *digit = '\0';
-  do {
-    nibble = value & 0xF;
-    character = nibble + '0';
-    if (character > '9') {
-      character = nibble + 'A' - 10;
+    column += HEX_DIGIT_COUNT;
+    *digit = '\0';
+    do {
+        nibble = value & 0xF;
+        character = nibble + '0';
+        if (character > '9') {
+            character = nibble + 'A' - 10;
+        }
+
+        *--digit = character;
+        value >>= 4;
+        column--;
     }
-
-    *--digit = character;
-    value >>= 4;
-    column--;
-  } while (value != 0);
-  PrintDebugText(digit, column, row);
+    while (value != 0);
+    PrintDebugText(digit, column, row);
 }
 
 /* Prints all 8 hex digits of value */
 void PrintDebugPaddedHex(u32 value, s32 column, s32 row) {
-  char digits[HEX_DIGIT_COUNT + 1];
-  char* digit = &digits[HEX_DIGIT_COUNT];
-  s32 nibble;
-  s32 character;
+    char digits[HEX_DIGIT_COUNT + 1];
+    char *digit = &digits[HEX_DIGIT_COUNT];
+    s32 nibble;
+    s32 character;
 
-  column += HEX_DIGIT_COUNT;
-  *digit = '\0';
-  do {
-    nibble = value & 0xF;
-    character = nibble + '0';
-    if (character > '9') {
-      character = nibble + 'A' - 10;
+    column += HEX_DIGIT_COUNT;
+    *digit = '\0';
+    do {
+        nibble = value & 0xF;
+        character = nibble + '0';
+        if (character > '9') {
+            character = nibble + 'A' - 10;
+        }
+
+        *--digit = character;
+        column--;
+        value >>= 4;
     }
-
-    *--digit = character;
-    column--;
-    value >>= 4;
-  } while (digit != digits);
-  PrintDebugText(digit, column, row);
+    while (digit != digits);
+    PrintDebugText(digit, column, row);
 }
 
-void AddToDebugLog(char* text) {
-  s32 count;
-  s8 character;
+void AddToDebugLog(char *text) {
+    s32 count;
+    s8 character;
 
-  while (TRUE) {
-    character = *text++;
-    if (character == '\0') {
-      break;
+    while (TRUE) {
+        character = *text++;
+        if (character == '\0') {
+            break;
+        }
+
+        if (character == '\r' || character == '\n') {
+            f_DebugLogCursor =
+                (((f_DebugLogCursor / TEXT_COLUMN_COUNT) * TEXT_COLUMN_COUNT) + TEXT_COLUMN_COUNT) %
+                ARRAY_COUNT(f_DebugLog);
+            for (count = TEXT_COLUMN_COUNT; count != 0; count--) {
+                f_DebugLog[f_DebugLogCursor++] = ' ';
+            }
+
+            f_DebugLogCursor -= TEXT_COLUMN_COUNT;
+        }
+        else {
+            f_DebugLog[f_DebugLogCursor++] = character;
+        }
+
+        f_DebugLogCursor %= ARRAY_COUNT(f_DebugLog);
     }
-
-    if (character == '\r' || character == '\n') {
-      f_DebugLogCursor =
-          (((f_DebugLogCursor / TEXT_COLUMN_COUNT) * TEXT_COLUMN_COUNT) +
-              TEXT_COLUMN_COUNT) %
-          ARRAY_COUNT(f_DebugLog);
-      for (count = TEXT_COLUMN_COUNT; count != 0; count--) {
-        f_DebugLog[f_DebugLogCursor++] = ' ';
-      }
-
-      f_DebugLogCursor -= TEXT_COLUMN_COUNT;
-    } else {
-      f_DebugLog[f_DebugLogCursor++] = character;
-    }
-
-    f_DebugLogCursor %= ARRAY_COUNT(f_DebugLog);
-  }
 }
 
 /* Copies the last lines of the log into the grid */
 void ShowDebugLog(void) {
-  s32 textIndex = ARRAY_COUNT(f_DebugText) -
-      ((f_DebugLogShownLineCount + LOG_BOTTOM_MARGIN) * TEXT_COLUMN_COUNT);
-  /*
-   * The line is reused for the cursor's line, to match: a cursorLine local,
-   * or the division written into logIndex, gives 30 words differing, 2 in
-   * shape
-   */
-  s32 line = f_DebugLogCursor / TEXT_COLUMN_COUNT;
-  s32 logIndex = (((line - f_DebugLogShownLineCount) * TEXT_COLUMN_COUNT) +
-                     ARRAY_COUNT(f_DebugLog)) %
-      ARRAY_COUNT(f_DebugLog);
-  s32 column;
+    s32 textIndex = ARRAY_COUNT(f_DebugText) -
+        ((f_DebugLogShownLineCount + LOG_BOTTOM_MARGIN) * TEXT_COLUMN_COUNT);
+    /*
+     * The line is reused for the cursor's line, to match: a cursorLine local,
+     * or the division written into logIndex, gives 30 words differing, 2 in
+     * shape
+     */
+    s32 line = f_DebugLogCursor / TEXT_COLUMN_COUNT;
+    s32 logIndex =
+        (((line - f_DebugLogShownLineCount) * TEXT_COLUMN_COUNT) + ARRAY_COUNT(f_DebugLog)) %
+        ARRAY_COUNT(f_DebugLog);
+    s32 column;
 
-  for (line = 0; line < f_DebugLogShownLineCount; line++) {
-    for (column = 0; column < TEXT_COLUMN_COUNT; column++) {
-      f_DebugText[textIndex++] = f_DebugLog[logIndex++];
+    for (line = 0; line < f_DebugLogShownLineCount; line++) {
+        for (column = 0; column < TEXT_COLUMN_COUNT; column++) {
+            f_DebugText[textIndex++] = f_DebugLog[logIndex++];
+        }
+
+        logIndex %= ARRAY_COUNT(f_DebugLog);
     }
-
-    logIndex %= ARRAY_COUNT(f_DebugLog);
-  }
 }

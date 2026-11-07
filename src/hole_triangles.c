@@ -55,7 +55,7 @@
 
 /* The index of the vertex on SIDE of SECTION, which wraps around the ring */
 #define RingVertex(section, side) \
-  ((((section) & (RING_SECTION_COUNT - 1)) * RING_SIDE_COUNT) + (side))
+    ((((section) & (RING_SECTION_COUNT - 1)) * RING_SIDE_COUNT) + (side))
 
 /* A ring's corners give its center, its facing and, in the third's x, its scale
  */
@@ -66,9 +66,9 @@
  * them are never used; they keep the original's stack layout.
  */
 typedef struct RingCorners {
-  /* 0x00 */ s32 unusedBeforeCoordinates;
-  /* 0x04 */ s16 coordinates[3][HOLE_TRIANGLE_VERTEX_COUNT];
-  /* 0x16 */ s16 unusedAfterCoordinates[(0x2C - 0x16) / 2];
+    /* 0x00 */ s32 unusedBeforeCoordinates;
+    /* 0x04 */ s16 coordinates[3][HOLE_TRIANGLE_VERTEX_COUNT];
+    /* 0x16 */ s16 unusedAfterCoordinates[(0x2C - 0x16) / 2];
 } RingCorners; /* size = 0x2C */
 
 /* Degrees that the rings spin by each frame */
@@ -95,8 +95,7 @@ static s32 f_TextureScroll = 0;
 static Degrees f_RingAngle = 0.0f;
 /* Read by no routine */
 static s32 f_UnusedWordAfterRingAngle UNUSED = 0;
-static Lights1 f_RingLights =
-    gdSPDefLights1(0x7F, 0x7F, 0x7F, 0xFF, 0xFF, 0xFF, -73, 73, 73);
+static Lights1 f_RingLights = gdSPDefLights1(0x7F, 0x7F, 0x7F, 0xFF, 0xFF, 0xFF, -73, 73, 73);
 static Mtx f_RingSpinMatrices[DRAW_BUFFER_COUNT];
 static Vtx f_RingVertices[RING_VERTEX_COUNT];
 
@@ -107,7 +106,7 @@ FILE_STATIC Mtx f_RingMatrices[RING_COUNT];
 
 /* Makes the shaded triangles more see-through for the next frame */
 void DimNextTranslucentTriangles(void) {
-  f_DimsTranslucentTriangles = TRUE;
+    f_DimsTranslucentTriangles = TRUE;
 }
 
 /*
@@ -116,158 +115,237 @@ void DimNextTranslucentTriangles(void) {
  * The normalized edge's magnitude keeps its if, as the original negates it
  * in a branch; through fabsf 316 words differ (38 in shape).
  */
-void DrawHoleTriangles(Gfx** displayListHead, CameraMatrices* matrices UNUSED,
-    Camera* camera UNUSED) {
-  Gfx* gfx = *displayListHead;
-  s32 index;
-  s32 vertexIndex;
-  f32 edgeX;
-  f32 edgeY;
-  f32 edgeZ;
-  f32 along;
-  s32 alpha;
+void DrawHoleTriangles(
+    Gfx **displayListHead,
+    CameraMatrices *matrices UNUSED,
+    Camera *camera UNUSED
+) {
+    Gfx *gfx = *displayListHead;
+    s32 index;
+    s32 vertexIndex;
+    f32 edgeX;
+    f32 edgeY;
+    f32 edgeZ;
+    f32 along;
+    s32 alpha;
 
-  if (IsGameFlagSet(GAME_FLAG_TEST_RING)) {
-    if (!f_HasTestRing) {
-      AddTestRing();
-      f_HasTestRing = TRUE;
+    if (IsGameFlagSet(GAME_FLAG_TEST_RING)) {
+        if (!f_HasTestRing) {
+            AddTestRing();
+            f_HasTestRing = TRUE;
+        }
     }
-  } else {
-    f_HasTestRing = FALSE;
-  }
-
-  gDPPipeSync(gfx++);
-  AppendSyncedRdpState(gfx, gDPSetCycleType, G_CYC_2CYCLE);
-  gSPClipRatio(gfx++, FRUSTRATIO_1);
-  AppendSyncedRdpState(gfx, gDPSetColorDither, G_CD_MAGICSQ);
-  gSPClearGeometryMode(gfx++, ALL_GEOMETRY_MODES);
-  gSPSetGeometryMode(gfx++, G_ZBUFFER | G_SHADE | G_FOG | G_SHADING_SMOOTH);
-  AppendSyncedRdpState(gfx, gDPSetTextureFilter, G_TF_BILERP);
-  AppendSyncedRdpState(gfx, gDPSetTexturePersp, G_TP_PERSP);
-  gDPSetBlendColor(gfx++, 0xFF, 0xFF, 0xFF, 0xFE);
-  AppendSyncedRdpState(gfx, gDPSetTextureLOD, G_TL_TILE);
-  AppendSyncedRdpState(gfx, gDPSetTextureLUT, G_TT_NONE);
-  AppendSyncedRdpState(
-      gfx, gDPSetRenderMode, G_RM_FOG_SHADE_A, G_RM_AA_ZB_XLU_SURF2);
-  AppendSyncedRdpState(gfx, gDPSetAlphaCompare, G_AC_NONE);
-  gDPSetBlendColor(gfx++, 0xFF, 0xFF, 0xFF, 0x3F);
-  gDPLoadTextureBlock(gfx++,
-      TextureAddress(ImageBody(g_BlendedTextureScrollingLayer)), G_IM_FMT_RGBA,
-      G_IM_SIZ_16b, BLENDED_TEXTURE_SIZE, BLENDED_TEXTURE_SIZE, 0,
-      G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
-      TextureMask(BLENDED_TEXTURE_SIZE), TextureMask(BLENDED_TEXTURE_SIZE), 15,
-      15);
-  gDPLoadMultiBlock(gfx++,
-      TextureAddress(ImageBody(g_BlendedTextureStillLayer)),
-      SECOND_TEXTURE_TMEM, 1, G_IM_FMT_RGBA, G_IM_SIZ_16b, BLENDED_TEXTURE_SIZE,
-      BLENDED_TEXTURE_SIZE, 0, G_TX_NOMIRROR | G_TX_WRAP,
-      G_TX_NOMIRROR | G_TX_WRAP, TextureMask(BLENDED_TEXTURE_SIZE),
-      TextureMask(BLENDED_TEXTURE_SIZE), 15, 15);
-  gDPSetCombineLERP(gfx++, TEXEL0, TEXEL1, PRIMITIVE_ALPHA, TEXEL1, 0, 0, 0,
-      PRIMITIVE, PRIMITIVE, 0, COMBINED, 0, 0, 0, 0, COMBINED);
-  gDPSetPrimColor(gfx++, 0, 0, 0x7F, 0x7F, 0x7F, 0xA1);
-  gDPSetEnvColor(gfx++, 0x3F, 0x7F, 0x9F, OPAQUE_ALPHA);
-  gSPTexture(
-      gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0, G_TX_RENDERTILE, G_ON);
-  f_TextureScroll++;
-  gDPSetTileSize(gfx++, G_TX_RENDERTILE, 0, f_TextureScroll,
-      BLENDED_TEXTURE_SIZE, f_TextureScroll + BLENDED_TEXTURE_SIZE);
-  gDPSetTileSize(gfx++, 1, f_TextureScroll, 0,
-      f_TextureScroll + BLENDED_TEXTURE_SIZE, BLENDED_TEXTURE_SIZE);
-  for (index = 0; index < HOLE_TRIANGLE_COUNT; index++) {
-    switch (f_HoleTriangles[index].kind) {
-      case HOLE_TRIANGLE_KIND_FLAT:
-        for (vertexIndex = 0; vertexIndex < HOLE_TRIANGLE_VERTEX_COUNT;
-            vertexIndex++) {
-          f_HoleTriangles[index].vertices[vertexIndex].v.tc[TEXTURE_AXIS_S] =
-              f_HoleTriangles[index].vertices[vertexIndex].v.ob[AXIS_X] *
-              TEXTURE_COORDINATE_SCALE;
-          f_HoleTriangles[index].vertices[vertexIndex].v.tc[TEXTURE_AXIS_T] =
-              (f_HoleTriangles[index].vertices[vertexIndex].v.ob[AXIS_Z] +
-                  f_HoleTriangles[index].vertices[vertexIndex].v.ob[AXIS_Y]) *
-              TEXTURE_COORDINATE_SCALE;
-        }
-
-        gSPVertex(gfx++, f_HoleTriangles[index].vertices,
-            HOLE_TRIANGLE_VERTEX_COUNT, 0);
-        gSP1Triangle(gfx++, 0, 1, 2, 0);
-        break;
-      case HOLE_TRIANGLE_KIND_UPRIGHT:
-        for (vertexIndex = 0; vertexIndex < HOLE_TRIANGLE_VERTEX_COUNT;
-            vertexIndex++) {
-          f_HoleTriangles[index].vertices[vertexIndex].v.tc[TEXTURE_AXIS_S] =
-              (f_HoleTriangles[index].vertices[vertexIndex].v.ob[AXIS_X] +
-                  f_HoleTriangles[index].vertices[vertexIndex].v.ob[AXIS_Z]) *
-              TEXTURE_COORDINATE_SCALE;
-          f_HoleTriangles[index].vertices[vertexIndex].v.tc[TEXTURE_AXIS_T] =
-              f_HoleTriangles[index].vertices[vertexIndex].v.ob[AXIS_Y] *
-              TEXTURE_COORDINATE_SCALE;
-        }
-
-        gDPSetPrimColor(gfx++, 0, 0, 0x3F, 0xB4, 0xFF, 0x40);
-        gDPSetEnvColor(gfx++, 0x80, 0xBE, 0xFF, 0x10);
-        gSPVertex(gfx++, f_HoleTriangles[index].vertices,
-            HOLE_TRIANGLE_VERTEX_COUNT, 0);
-        gSP1Triangle(gfx++, 0, 1, 2, 0);
-        break;
-      case HOLE_TRIANGLE_KIND_SHADED:
-        if (g_IsCupViewShown) {
-          break;
-        }
-
-        edgeY = 0.0f;
-        edgeX = f_HoleTriangles[index].vertices[1].v.ob[AXIS_X] -
-            f_HoleTriangles[index].vertices[2].v.ob[AXIS_X];
-        edgeZ = f_HoleTriangles[index].vertices[1].v.ob[AXIS_Z] -
-            f_HoleTriangles[index].vertices[2].v.ob[AXIS_Z];
-        if (fabsf(edgeX) + fabsf(edgeZ) < MIN_SHADED_EDGE_LENGTH) {
-          break;
-        }
-
-        guNormalize(&edgeX, &edgeY, &edgeZ);
-        along = edgeZ;
-        if (along < 0.0f) {
-          along = -along;
-        }
-
-        alpha = (along * SHADED_ALPHA_SCALE) + SHADED_ALPHA_BASE;
-        if (alpha > MAX_SHADED_ALPHA) {
-          alpha = MAX_SHADED_ALPHA;
-        }
-
-        if (alpha < 0) {
-          alpha = DEFAULT_SHADED_ALPHA;
-        }
-
-        gSPFogPosition(gfx++, SHADED_FOG_MIN, SHADED_FOG_MAX);
-        AppendSyncedRdpState(gfx, gDPSetAlphaDither, G_AD_PATTERN);
-        AppendSyncedRdpState(
-            gfx, gDPSetRenderMode, G_RM_PASS, G_RM_AA_ZB_XLU_INTER2);
-        if (f_DimsTranslucentTriangles) {
-          gDPSetCombineLERP(gfx++, PRIMITIVE, 0, PRIMITIVE_ALPHA, 0, 0, 0, 0, 1,
-              PRIMITIVE, 0, PRIMITIVE_ALPHA, 0, ENVIRONMENT, 0, SHADE, 0);
-        } else {
-          gDPSetCombineLERP(gfx++, PRIMITIVE, 0, PRIMITIVE_ALPHA, 0, 0, 0, 0, 1,
-              PRIMITIVE, 0, PRIMITIVE_ALPHA, 0, 1, ENVIRONMENT, SHADE,
-              ENVIRONMENT);
-        }
-
-        gDPSetPrimColor(gfx++, 0, 0, 0xE0, 0xE0, 0x00, alpha);
-        gDPSetEnvColor(gfx++, 0xE0, 0xE0, 0x00, 0x40);
-        gDPPipeSync(gfx++);
-        gSPVertex(gfx++, f_HoleTriangles[index].vertices,
-            HOLE_TRIANGLE_VERTEX_COUNT, 0);
-        gSP1Triangle(gfx++, 0, 1, 2, 0);
-        gDPPipeSync(gfx++);
-        break;
+    else {
+        f_HasTestRing = FALSE;
     }
-  }
 
-  AppendSyncedRdpState(gfx, gDPSetTextureLUT, G_TT_NONE);
-  gDPPipeSync(gfx++);
-  gDPPipeSync(gfx++);
-  f_DimsTranslucentTriangles = FALSE;
-  *displayListHead = gfx;
+    gDPPipeSync(gfx++);
+    AppendSyncedRdpState(gfx, gDPSetCycleType, G_CYC_2CYCLE);
+    gSPClipRatio(gfx++, FRUSTRATIO_1);
+    AppendSyncedRdpState(gfx, gDPSetColorDither, G_CD_MAGICSQ);
+    gSPClearGeometryMode(gfx++, ALL_GEOMETRY_MODES);
+    gSPSetGeometryMode(gfx++, G_ZBUFFER | G_SHADE | G_FOG | G_SHADING_SMOOTH);
+    AppendSyncedRdpState(gfx, gDPSetTextureFilter, G_TF_BILERP);
+    AppendSyncedRdpState(gfx, gDPSetTexturePersp, G_TP_PERSP);
+    gDPSetBlendColor(gfx++, 0xFF, 0xFF, 0xFF, 0xFE);
+    AppendSyncedRdpState(gfx, gDPSetTextureLOD, G_TL_TILE);
+    AppendSyncedRdpState(gfx, gDPSetTextureLUT, G_TT_NONE);
+    AppendSyncedRdpState(gfx, gDPSetRenderMode, G_RM_FOG_SHADE_A, G_RM_AA_ZB_XLU_SURF2);
+    AppendSyncedRdpState(gfx, gDPSetAlphaCompare, G_AC_NONE);
+    gDPSetBlendColor(gfx++, 0xFF, 0xFF, 0xFF, 0x3F);
+    gDPLoadTextureBlock(
+        gfx++,
+        TextureAddress(ImageBody(g_BlendedTextureScrollingLayer)),
+        G_IM_FMT_RGBA,
+        G_IM_SIZ_16b,
+        BLENDED_TEXTURE_SIZE,
+        BLENDED_TEXTURE_SIZE,
+        0,
+        G_TX_NOMIRROR | G_TX_WRAP,
+        G_TX_NOMIRROR | G_TX_WRAP,
+        TextureMask(BLENDED_TEXTURE_SIZE),
+        TextureMask(BLENDED_TEXTURE_SIZE),
+        15,
+        15
+    );
+    gDPLoadMultiBlock(
+        gfx++,
+        TextureAddress(ImageBody(g_BlendedTextureStillLayer)),
+        SECOND_TEXTURE_TMEM,
+        1,
+        G_IM_FMT_RGBA,
+        G_IM_SIZ_16b,
+        BLENDED_TEXTURE_SIZE,
+        BLENDED_TEXTURE_SIZE,
+        0,
+        G_TX_NOMIRROR | G_TX_WRAP,
+        G_TX_NOMIRROR | G_TX_WRAP,
+        TextureMask(BLENDED_TEXTURE_SIZE),
+        TextureMask(BLENDED_TEXTURE_SIZE),
+        15,
+        15
+    );
+    gDPSetCombineLERP(
+        gfx++,
+        TEXEL0,
+        TEXEL1,
+        PRIMITIVE_ALPHA,
+        TEXEL1,
+        0,
+        0,
+        0,
+        PRIMITIVE,
+        PRIMITIVE,
+        0,
+        COMBINED,
+        0,
+        0,
+        0,
+        0,
+        COMBINED
+    );
+    gDPSetPrimColor(gfx++, 0, 0, 0x7F, 0x7F, 0x7F, 0xA1);
+    gDPSetEnvColor(gfx++, 0x3F, 0x7F, 0x9F, OPAQUE_ALPHA);
+    gSPTexture(gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0, G_TX_RENDERTILE, G_ON);
+    f_TextureScroll++;
+    gDPSetTileSize(
+        gfx++,
+        G_TX_RENDERTILE,
+        0,
+        f_TextureScroll,
+        BLENDED_TEXTURE_SIZE,
+        f_TextureScroll + BLENDED_TEXTURE_SIZE
+    );
+    gDPSetTileSize(
+        gfx++,
+        1,
+        f_TextureScroll,
+        0,
+        f_TextureScroll + BLENDED_TEXTURE_SIZE,
+        BLENDED_TEXTURE_SIZE
+    );
+    for (index = 0; index < HOLE_TRIANGLE_COUNT; index++) {
+        switch (f_HoleTriangles[index].kind) {
+            case HOLE_TRIANGLE_KIND_FLAT:
+                for (vertexIndex = 0; vertexIndex < HOLE_TRIANGLE_VERTEX_COUNT; vertexIndex++) {
+                    f_HoleTriangles[index].vertices[vertexIndex].v.tc[TEXTURE_AXIS_S] =
+                        f_HoleTriangles[index].vertices[vertexIndex].v.ob[AXIS_X] *
+                        TEXTURE_COORDINATE_SCALE;
+                    f_HoleTriangles[index].vertices[vertexIndex].v.tc[TEXTURE_AXIS_T] =
+                        (f_HoleTriangles[index].vertices[vertexIndex].v.ob[AXIS_Z] +
+                            f_HoleTriangles[index].vertices[vertexIndex].v.ob[AXIS_Y]) *
+                        TEXTURE_COORDINATE_SCALE;
+                }
+
+                gSPVertex(gfx++, f_HoleTriangles[index].vertices, HOLE_TRIANGLE_VERTEX_COUNT, 0);
+                gSP1Triangle(gfx++, 0, 1, 2, 0);
+                break;
+            case HOLE_TRIANGLE_KIND_UPRIGHT:
+                for (vertexIndex = 0; vertexIndex < HOLE_TRIANGLE_VERTEX_COUNT; vertexIndex++) {
+                    f_HoleTriangles[index].vertices[vertexIndex].v.tc[TEXTURE_AXIS_S] =
+                        (f_HoleTriangles[index].vertices[vertexIndex].v.ob[AXIS_X] +
+                            f_HoleTriangles[index].vertices[vertexIndex].v.ob[AXIS_Z]) *
+                        TEXTURE_COORDINATE_SCALE;
+                    f_HoleTriangles[index].vertices[vertexIndex].v.tc[TEXTURE_AXIS_T] =
+                        f_HoleTriangles[index].vertices[vertexIndex].v.ob[AXIS_Y] *
+                        TEXTURE_COORDINATE_SCALE;
+                }
+
+                gDPSetPrimColor(gfx++, 0, 0, 0x3F, 0xB4, 0xFF, 0x40);
+                gDPSetEnvColor(gfx++, 0x80, 0xBE, 0xFF, 0x10);
+                gSPVertex(gfx++, f_HoleTriangles[index].vertices, HOLE_TRIANGLE_VERTEX_COUNT, 0);
+                gSP1Triangle(gfx++, 0, 1, 2, 0);
+                break;
+            case HOLE_TRIANGLE_KIND_SHADED:
+                if (g_IsCupViewShown) {
+                    break;
+                }
+
+                edgeY = 0.0f;
+                edgeX = f_HoleTriangles[index].vertices[1].v.ob[AXIS_X] -
+                    f_HoleTriangles[index].vertices[2].v.ob[AXIS_X];
+                edgeZ = f_HoleTriangles[index].vertices[1].v.ob[AXIS_Z] -
+                    f_HoleTriangles[index].vertices[2].v.ob[AXIS_Z];
+                if (fabsf(edgeX) + fabsf(edgeZ) < MIN_SHADED_EDGE_LENGTH) {
+                    break;
+                }
+
+                guNormalize(&edgeX, &edgeY, &edgeZ);
+                along = edgeZ;
+                if (along < 0.0f) {
+                    along = -along;
+                }
+
+                alpha = (along * SHADED_ALPHA_SCALE) + SHADED_ALPHA_BASE;
+                if (alpha > MAX_SHADED_ALPHA) {
+                    alpha = MAX_SHADED_ALPHA;
+                }
+
+                if (alpha < 0) {
+                    alpha = DEFAULT_SHADED_ALPHA;
+                }
+
+                gSPFogPosition(gfx++, SHADED_FOG_MIN, SHADED_FOG_MAX);
+                AppendSyncedRdpState(gfx, gDPSetAlphaDither, G_AD_PATTERN);
+                AppendSyncedRdpState(gfx, gDPSetRenderMode, G_RM_PASS, G_RM_AA_ZB_XLU_INTER2);
+                if (f_DimsTranslucentTriangles) {
+                    gDPSetCombineLERP(
+                        gfx++,
+                        PRIMITIVE,
+                        0,
+                        PRIMITIVE_ALPHA,
+                        0,
+                        0,
+                        0,
+                        0,
+                        1,
+                        PRIMITIVE,
+                        0,
+                        PRIMITIVE_ALPHA,
+                        0,
+                        ENVIRONMENT,
+                        0,
+                        SHADE,
+                        0
+                    );
+                }
+                else {
+                    gDPSetCombineLERP(
+                        gfx++,
+                        PRIMITIVE,
+                        0,
+                        PRIMITIVE_ALPHA,
+                        0,
+                        0,
+                        0,
+                        0,
+                        1,
+                        PRIMITIVE,
+                        0,
+                        PRIMITIVE_ALPHA,
+                        0,
+                        1,
+                        ENVIRONMENT,
+                        SHADE,
+                        ENVIRONMENT
+                    );
+                }
+
+                gDPSetPrimColor(gfx++, 0, 0, 0xE0, 0xE0, 0x00, alpha);
+                gDPSetEnvColor(gfx++, 0xE0, 0xE0, 0x00, 0x40);
+                gDPPipeSync(gfx++);
+                gSPVertex(gfx++, f_HoleTriangles[index].vertices, HOLE_TRIANGLE_VERTEX_COUNT, 0);
+                gSP1Triangle(gfx++, 0, 1, 2, 0);
+                gDPPipeSync(gfx++);
+                break;
+        }
+    }
+
+    AppendSyncedRdpState(gfx, gDPSetTextureLUT, G_TT_NONE);
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    f_DimsTranslucentTriangles = FALSE;
+    *displayListHead = gfx;
 }
 
 /*
@@ -294,194 +372,267 @@ void DrawHoleTriangles(Gfx** displayListHead, CameraMatrices* matrices UNUSED,
  * stepped a matrix pointer beside ringIndex, set before them, and 8 words
  * differed.
  */
-void DrawRings(Gfx** displayListHead, CameraMatrices* matrices UNUSED,
-    Camera* camera UNUSED) {
-  Gfx* gfx = *displayListHead;
-  f32 transform[4][4];
-  f32 ringPoint[3];
-  f32 worldPoint[3];
-  s32 position[3];
-  s32 triangleIndex;
-  s32 red;
-  s32 green;
-  s32 blue;
-  s32 ringIndex;
-  s32 state;
-  s32 section;
-  s32 sparkleSection;
-  s32 side;
-  s32 nextSide;
-  s32 sectionFirst;
-  s32 nextSectionFirst;
-  s32 alpha;
-  Radians angle;
-  f32 turn;
+void DrawRings(Gfx **displayListHead, CameraMatrices *matrices UNUSED, Camera *camera UNUSED) {
+    Gfx *gfx = *displayListHead;
+    f32 transform[4][4];
+    f32 ringPoint[3];
+    f32 worldPoint[3];
+    s32 position[3];
+    s32 triangleIndex;
+    s32 red;
+    s32 green;
+    s32 blue;
+    s32 ringIndex;
+    s32 state;
+    s32 section;
+    s32 sparkleSection;
+    s32 side;
+    s32 nextSide;
+    s32 sectionFirst;
+    s32 nextSectionFirst;
+    s32 alpha;
+    Radians angle;
+    f32 turn;
 
-  gDPPipeSync(gfx++);
-  gSPSetLights1(gfx++, f_RingLights);
-  gDPPipeSync(gfx++);
-  AppendSyncedRdpState(gfx, gDPSetCycleType, G_CYC_1CYCLE);
-  gSPClipRatio(gfx++, FRUSTRATIO_1);
-  AppendSyncedRdpState(gfx, gDPSetColorDither, G_CD_MAGICSQ);
-  gSPClearGeometryMode(gfx++, ALL_GEOMETRY_MODES);
-  gSPSetGeometryMode(gfx++,
-      G_ZBUFFER | G_SHADE | G_CULL_BACK | G_FOG | G_LIGHTING | G_TEXTURE_GEN |
-          G_SHADING_SMOOTH);
-  AppendSyncedRdpState(gfx, gDPSetTextureFilter, G_TF_BILERP);
-  AppendSyncedRdpState(gfx, gDPSetTexturePersp, G_TP_PERSP);
-  AppendSyncedRdpState(gfx, gDPSetAlphaCompare, G_AC_NONE);
-  gDPSetBlendColor(gfx++, 0xFF, 0xFF, 0xFF, 0xFE);
-  AppendSyncedRdpState(gfx, gDPSetTextureLOD, G_TL_TILE);
-  gDPSetBlendColor(gfx++, 0xFF, 0xFF, 0xFF, 0x3F);
-  AppendSyncedRdpState(gfx, gDPSetTextureLUT, G_TT_NONE);
-  gDPLoadTextureBlock(gfx++, TextureAddress(g_MirrorTexture), G_IM_FMT_RGBA,
-      G_IM_SIZ_16b, DYNAMIC_TEXTURE_SIZE, DYNAMIC_TEXTURE_SIZE, 0,
-      G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
-      TextureMask(DYNAMIC_TEXTURE_SIZE), TextureMask(DYNAMIC_TEXTURE_SIZE),
-      G_TX_NOLOD, G_TX_NOLOD);
-  gSPTexture(gfx++, 0x07C0, 0x07C0, 0, G_TX_RENDERTILE, G_ON);
-  if (g_PauseScreen == PAUSE_SCREEN_FREE_LOOK) {
-    gDPSetCombineLERP(gfx++, PRIMITIVE, TEXEL0, ENV_ALPHA, TEXEL0, 0, 0, 0,
-        PRIMITIVE, PRIMITIVE, TEXEL0, ENV_ALPHA, TEXEL0, 0, 0, 0, PRIMITIVE);
-    red = RING_MODE_FOUR_RED;
-    green = RING_MODE_FOUR_GREEN;
-    blue = RING_MODE_FOUR_BLUE;
-  } else {
-    gDPSetCombineLERP(gfx++, PRIMITIVE, 0, TEXEL0, 0, 0, 0, 0, PRIMITIVE,
-        PRIMITIVE, 0, TEXEL0, 0, 0, 0, 0, PRIMITIVE);
-    red = RING_RED;
-    green = RING_GREEN;
-    blue = RING_BLUE;
-  }
-
-  gDPSetEnvColor(gfx++, 0x78, 0x78, 0x20, 0xBF);
-  f_RingAngle += RING_SPIN_SPEED;
-  guRotateRPY(&f_RingSpinMatrices[g_DrawBufferIndex], 0.0f, 0.0f, f_RingAngle);
-  ringIndex = 0;
-  for (triangleIndex = 0; triangleIndex < HOLE_TRIANGLE_COUNT;
-      triangleIndex++) {
-    if (ringIndex >= RING_COUNT) {
-      break;
+    gDPPipeSync(gfx++);
+    gSPSetLights1(gfx++, f_RingLights);
+    gDPPipeSync(gfx++);
+    AppendSyncedRdpState(gfx, gDPSetCycleType, G_CYC_1CYCLE);
+    gSPClipRatio(gfx++, FRUSTRATIO_1);
+    AppendSyncedRdpState(gfx, gDPSetColorDither, G_CD_MAGICSQ);
+    gSPClearGeometryMode(gfx++, ALL_GEOMETRY_MODES);
+    gSPSetGeometryMode(
+        gfx++,
+        G_ZBUFFER | G_SHADE | G_CULL_BACK | G_FOG | G_LIGHTING | G_TEXTURE_GEN | G_SHADING_SMOOTH
+    );
+    AppendSyncedRdpState(gfx, gDPSetTextureFilter, G_TF_BILERP);
+    AppendSyncedRdpState(gfx, gDPSetTexturePersp, G_TP_PERSP);
+    AppendSyncedRdpState(gfx, gDPSetAlphaCompare, G_AC_NONE);
+    gDPSetBlendColor(gfx++, 0xFF, 0xFF, 0xFF, 0xFE);
+    AppendSyncedRdpState(gfx, gDPSetTextureLOD, G_TL_TILE);
+    gDPSetBlendColor(gfx++, 0xFF, 0xFF, 0xFF, 0x3F);
+    AppendSyncedRdpState(gfx, gDPSetTextureLUT, G_TT_NONE);
+    gDPLoadTextureBlock(
+        gfx++,
+        TextureAddress(g_MirrorTexture),
+        G_IM_FMT_RGBA,
+        G_IM_SIZ_16b,
+        DYNAMIC_TEXTURE_SIZE,
+        DYNAMIC_TEXTURE_SIZE,
+        0,
+        G_TX_NOMIRROR | G_TX_WRAP,
+        G_TX_NOMIRROR | G_TX_WRAP,
+        TextureMask(DYNAMIC_TEXTURE_SIZE),
+        TextureMask(DYNAMIC_TEXTURE_SIZE),
+        G_TX_NOLOD,
+        G_TX_NOLOD
+    );
+    gSPTexture(gfx++, 0x07C0, 0x07C0, 0, G_TX_RENDERTILE, G_ON);
+    if (g_PauseScreen == PAUSE_SCREEN_FREE_LOOK) {
+        gDPSetCombineLERP(
+            gfx++,
+            PRIMITIVE,
+            TEXEL0,
+            ENV_ALPHA,
+            TEXEL0,
+            0,
+            0,
+            0,
+            PRIMITIVE,
+            PRIMITIVE,
+            TEXEL0,
+            ENV_ALPHA,
+            TEXEL0,
+            0,
+            0,
+            0,
+            PRIMITIVE
+        );
+        red = RING_MODE_FOUR_RED;
+        green = RING_MODE_FOUR_GREEN;
+        blue = RING_MODE_FOUR_BLUE;
+    }
+    else {
+        gDPSetCombineLERP(
+            gfx++,
+            PRIMITIVE,
+            0,
+            TEXEL0,
+            0,
+            0,
+            0,
+            0,
+            PRIMITIVE,
+            PRIMITIVE,
+            0,
+            TEXEL0,
+            0,
+            0,
+            0,
+            0,
+            PRIMITIVE
+        );
+        red = RING_RED;
+        green = RING_GREEN;
+        blue = RING_BLUE;
     }
 
-    if (f_HoleTriangles[triangleIndex].kind == HOLE_TRIANGLE_KIND_RING) {
-      state = g_Players[g_GameState.currentPlayerIndex].ringStates[ringIndex];
-      if (state > RING_STATE_NONE) {
-        if (state != RING_STATE_SHOWN) {
-          if (state < RING_STATE_FADED) {
-            turn = state * RING_SPARKLE_TURN;
-            guMtxL2F(transform, &f_RingMatrices[ringIndex]);
-            for (sparkleSection = state & (RING_SPARKLE_SPACING - 1);
-                sparkleSection < RING_SECTION_COUNT;
-                sparkleSection += RING_SPARKLE_SPACING) {
-              angle = turn + (sparkleSection * RING_SECTION_ANGLE);
-              ringPoint[0] = cosf(angle) * RING_RADIUS;
-              ringPoint[1] = sinf(angle) * RING_RADIUS;
-              ringPoint[2] = 0;
-              guMtxXFMF(transform, ringPoint[0], ringPoint[1], ringPoint[2],
-                  &worldPoint[0], &worldPoint[1], &worldPoint[2]);
-              position[AXIS_X] = worldPoint[0] * WORLD_TO_COURSE_SCALE;
-              position[AXIS_Y] = worldPoint[1] * WORLD_TO_COURSE_SCALE;
-              position[AXIS_Z] = worldPoint[2] * WORLD_TO_COURSE_SCALE;
-              SpawnSparkle(position);
+    gDPSetEnvColor(gfx++, 0x78, 0x78, 0x20, 0xBF);
+    f_RingAngle += RING_SPIN_SPEED;
+    guRotateRPY(&f_RingSpinMatrices[g_DrawBufferIndex], 0.0f, 0.0f, f_RingAngle);
+    ringIndex = 0;
+    for (triangleIndex = 0; triangleIndex < HOLE_TRIANGLE_COUNT; triangleIndex++) {
+        if (ringIndex >= RING_COUNT) {
+            break;
+        }
+
+        if (f_HoleTriangles[triangleIndex].kind == HOLE_TRIANGLE_KIND_RING) {
+            state = g_Players[g_GameState.currentPlayerIndex].ringStates[ringIndex];
+            if (state > RING_STATE_NONE) {
+                if (state != RING_STATE_SHOWN) {
+                    if (state < RING_STATE_FADED) {
+                        turn = state * RING_SPARKLE_TURN;
+                        guMtxL2F(transform, &f_RingMatrices[ringIndex]);
+                        for (sparkleSection = state & (RING_SPARKLE_SPACING - 1);
+                            sparkleSection < RING_SECTION_COUNT;
+                            sparkleSection += RING_SPARKLE_SPACING) {
+                            angle = turn + (sparkleSection * RING_SECTION_ANGLE);
+                            ringPoint[0] = cosf(angle) * RING_RADIUS;
+                            ringPoint[1] = sinf(angle) * RING_RADIUS;
+                            ringPoint[2] = 0;
+                            guMtxXFMF(
+                                transform,
+                                ringPoint[0],
+                                ringPoint[1],
+                                ringPoint[2],
+                                &worldPoint[0],
+                                &worldPoint[1],
+                                &worldPoint[2]
+                            );
+                            position[AXIS_X] = worldPoint[0] * WORLD_TO_COURSE_SCALE;
+                            position[AXIS_Y] = worldPoint[1] * WORLD_TO_COURSE_SCALE;
+                            position[AXIS_Z] = worldPoint[2] * WORLD_TO_COURSE_SCALE;
+                            SpawnSparkle(position);
+                        }
+                    }
+
+                    state++;
+                    if (state > RING_STATE_FADED) {
+                        state = RING_STATE_FADED;
+                    }
+
+                    alpha = OPAQUE_ALPHA - (state * RING_FADE_STEP);
+                    if (alpha < 0) {
+                        alpha = 0;
+                    }
+
+                    g_Players[g_GameState.currentPlayerIndex].ringStates[ringIndex] = state;
+                    AppendSyncedRdpState(
+                        gfx,
+                        gDPSetRenderMode,
+                        G_RM_AA_ZB_XLU_SURF,
+                        G_RM_AA_ZB_XLU_SURF2
+                    );
+                }
+                else {
+                    alpha = OPAQUE_ALPHA;
+                    AppendSyncedRdpState(
+                        gfx,
+                        gDPSetRenderMode,
+                        G_RM_AA_ZB_OPA_SURF,
+                        G_RM_AA_ZB_OPA_SURF2
+                    );
+                }
+
+                gDPSetPrimColor(gfx++, 0, 0, red, green, blue, alpha);
+                gSPMatrix(
+                    gfx++,
+                    &f_RingMatrices[ringIndex],
+                    G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_PUSH
+                );
+                gSPMatrix(
+                    gfx++,
+                    &f_RingSpinMatrices[g_DrawBufferIndex],
+                    G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_NOPUSH
+                );
+                gSPVertex(gfx++, f_RingVertices, RING_VERTEX_COUNT, 0);
+                for (section = 0; section < RING_SECTION_COUNT; section++) {
+                    sectionFirst = RingVertex(section, 0);
+                    nextSectionFirst = RingVertex(section + 1, 0);
+                    for (side = 0; side < RING_SIDE_COUNT; side++) {
+                        nextSide = (side + 1) & (RING_SIDE_COUNT - 1);
+                        gSP2Triangles(
+                            gfx++,
+                            sectionFirst + side,
+                            sectionFirst + nextSide,
+                            nextSectionFirst + nextSide,
+                            0,
+                            sectionFirst + side,
+                            nextSectionFirst + nextSide,
+                            nextSectionFirst + side,
+                            0
+                        );
+                    }
+                }
+
+                gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
             }
-          }
 
-          state++;
-          if (state > RING_STATE_FADED) {
-            state = RING_STATE_FADED;
-          }
-
-          alpha = OPAQUE_ALPHA - (state * RING_FADE_STEP);
-          if (alpha < 0) {
-            alpha = 0;
-          }
-
-          g_Players[g_GameState.currentPlayerIndex].ringStates[ringIndex] =
-              state;
-          AppendSyncedRdpState(
-              gfx, gDPSetRenderMode, G_RM_AA_ZB_XLU_SURF, G_RM_AA_ZB_XLU_SURF2);
-        } else {
-          alpha = OPAQUE_ALPHA;
-          AppendSyncedRdpState(
-              gfx, gDPSetRenderMode, G_RM_AA_ZB_OPA_SURF, G_RM_AA_ZB_OPA_SURF2);
+            ringIndex++;
         }
-
-        gDPSetPrimColor(gfx++, 0, 0, red, green, blue, alpha);
-        gSPMatrix(gfx++, &f_RingMatrices[ringIndex],
-            G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_PUSH);
-        gSPMatrix(gfx++, &f_RingSpinMatrices[g_DrawBufferIndex],
-            G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_NOPUSH);
-        gSPVertex(gfx++, f_RingVertices, RING_VERTEX_COUNT, 0);
-        for (section = 0; section < RING_SECTION_COUNT; section++) {
-          sectionFirst = RingVertex(section, 0);
-          nextSectionFirst = RingVertex(section + 1, 0);
-          for (side = 0; side < RING_SIDE_COUNT; side++) {
-            nextSide = (side + 1) & (RING_SIDE_COUNT - 1);
-            gSP2Triangles(gfx++, sectionFirst + side, sectionFirst + nextSide,
-                nextSectionFirst + nextSide, 0, sectionFirst + side,
-                nextSectionFirst + nextSide, nextSectionFirst + side, 0);
-          }
-        }
-
-        gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
-      }
-
-      ringIndex++;
     }
-  }
 
-  gDPPipeSync(gfx++);
-  *displayListHead = gfx;
+    gDPPipeSync(gfx++);
+    *displayListHead = gfx;
 }
 
 /* Builds the ring's vertices, with the first side of each section inside */
 static void BuildRingVertices(void) {
-  s32 index;
-  Vtx* vertex;
-  Boolean isOuter;
-  Boolean isRaised;
-  Radians angle;
-  f32 offsetX;
-  f32 offsetY;
-  f32 offsetZ;
-  f32 x;
-  f32 y;
+    s32 index;
+    Vtx *vertex;
+    Boolean isOuter;
+    Boolean isRaised;
+    Radians angle;
+    f32 offsetX;
+    f32 offsetY;
+    f32 offsetZ;
+    f32 x;
+    f32 y;
 
-  for (index = 0; index < RING_VERTEX_COUNT; index++) {
-    vertex = &f_RingVertices[index];
-    isOuter = (index & 2) >> 1;
-    isRaised = (index & 1) ^ isOuter;
-    angle = (index / RING_SIDE_COUNT) * RING_SECTION_ANGLE;
-    offsetX = cosf(angle) * (isOuter - 0.5f) * RING_THICKNESS;
-    offsetZ = sinf(angle) * (isOuter - 0.5f) * RING_THICKNESS;
-    x = (cosf(angle) * RING_RADIUS) + offsetX;
-    y = (sinf(angle) * RING_RADIUS) + offsetZ;
-    offsetY = (isRaised - 0.5f) * RING_THICKNESS;
-    vertex->n.ob[AXIS_X] = x;
-    vertex->n.ob[AXIS_Y] = y;
-    vertex->n.ob[AXIS_Z] = offsetY;
-    guNormalize(&offsetX, &offsetY, &offsetZ);
-    vertex->n.n[0] = offsetX * RING_NORMAL_SCALE;
-    vertex->n.n[1] = offsetZ * RING_NORMAL_SCALE;
-    vertex->n.n[2] = offsetY * RING_NORMAL_SCALE;
-    vertex->n.a = RING_VERTEX_ALPHA;
-  }
+    for (index = 0; index < RING_VERTEX_COUNT; index++) {
+        vertex = &f_RingVertices[index];
+        isOuter = (index & 2) >> 1;
+        isRaised = (index & 1) ^ isOuter;
+        angle = (index / RING_SIDE_COUNT) * RING_SECTION_ANGLE;
+        offsetX = cosf(angle) * (isOuter - 0.5f) * RING_THICKNESS;
+        offsetZ = sinf(angle) * (isOuter - 0.5f) * RING_THICKNESS;
+        x = (cosf(angle) * RING_RADIUS) + offsetX;
+        y = (sinf(angle) * RING_RADIUS) + offsetZ;
+        offsetY = (isRaised - 0.5f) * RING_THICKNESS;
+        vertex->n.ob[AXIS_X] = x;
+        vertex->n.ob[AXIS_Y] = y;
+        vertex->n.ob[AXIS_Z] = offsetY;
+        guNormalize(&offsetX, &offsetY, &offsetZ);
+        vertex->n.n[0] = offsetX * RING_NORMAL_SCALE;
+        vertex->n.n[1] = offsetZ * RING_NORMAL_SCALE;
+        vertex->n.n[2] = offsetY * RING_NORMAL_SCALE;
+        vertex->n.a = RING_VERTEX_ALPHA;
+    }
 }
 
 /* Puts a ring at a fixed place in the first triangle */
 static void AddTestRing(void) {
-  f_HoleTriangles[0].kind = HOLE_TRIANGLE_KIND_RING;
-  f_HoleTriangles[0].vertices[0].v.ob[AXIS_X] = 0x800;
-  f_HoleTriangles[0].vertices[0].v.ob[AXIS_Y] = -0x100;
-  f_HoleTriangles[0].vertices[0].v.ob[AXIS_Z] = 0x1000;
-  f_HoleTriangles[0].vertices[1].v.ob[AXIS_X] = 0x800;
-  f_HoleTriangles[0].vertices[1].v.ob[AXIS_Y] = -0x100;
-  f_HoleTriangles[0].vertices[1].v.ob[AXIS_Z] = 0xF00;
-  f_HoleTriangles[0].vertices[2].v.ob[AXIS_X] = 0x700;
-  f_HoleTriangles[0].vertices[2].v.ob[AXIS_Y] = -0x100;
-  f_HoleTriangles[0].vertices[2].v.ob[AXIS_Z] = 0xF00;
-  InitRings();
+    f_HoleTriangles[0].kind = HOLE_TRIANGLE_KIND_RING;
+    f_HoleTriangles[0].vertices[0].v.ob[AXIS_X] = 0x800;
+    f_HoleTriangles[0].vertices[0].v.ob[AXIS_Y] = -0x100;
+    f_HoleTriangles[0].vertices[0].v.ob[AXIS_Z] = 0x1000;
+    f_HoleTriangles[0].vertices[1].v.ob[AXIS_X] = 0x800;
+    f_HoleTriangles[0].vertices[1].v.ob[AXIS_Y] = -0x100;
+    f_HoleTriangles[0].vertices[1].v.ob[AXIS_Z] = 0xF00;
+    f_HoleTriangles[0].vertices[2].v.ob[AXIS_X] = 0x700;
+    f_HoleTriangles[0].vertices[2].v.ob[AXIS_Y] = -0x100;
+    f_HoleTriangles[0].vertices[2].v.ob[AXIS_Z] = 0xF00;
+    InitRings();
 }
 
 /*
@@ -490,83 +641,89 @@ static void AddTestRing(void) {
  * third's x. Returns the number of rings.
  */
 static s32 BuildRingMatrices(void) {
-  f32 rotation[4][4];
-  f32 transform[4][4];
-  RingCorners corners;
-  f32 up[3];
-  f32 scale;
-  s32 ringCount = 0;
-  s32 index;
-  HoleTriangle* triangle;
+    f32 rotation[4][4];
+    f32 transform[4][4];
+    RingCorners corners;
+    f32 up[3];
+    f32 scale;
+    s32 ringCount = 0;
+    s32 index;
+    HoleTriangle *triangle;
 
-  for (index = 0; index < HOLE_TRIANGLE_COUNT; index++) {
-    triangle = &f_HoleTriangles[index];
-    if (triangle->kind != HOLE_TRIANGLE_KIND_RING) {
-      continue;
+    for (index = 0; index < HOLE_TRIANGLE_COUNT; index++) {
+        triangle = &f_HoleTriangles[index];
+        if (triangle->kind != HOLE_TRIANGLE_KIND_RING) {
+            continue;
+        }
+
+        corners.coordinates[0][0] = triangle->vertices[0].v.ob[AXIS_X];
+        corners.coordinates[0][1] = triangle->vertices[1].v.ob[AXIS_X];
+        corners.coordinates[0][2] = triangle->vertices[2].v.ob[AXIS_X];
+        corners.coordinates[1][0] = triangle->vertices[0].v.ob[AXIS_Y];
+        corners.coordinates[1][1] = triangle->vertices[1].v.ob[AXIS_Y];
+        corners.coordinates[1][2] = triangle->vertices[2].v.ob[AXIS_Y];
+        corners.coordinates[2][0] = triangle->vertices[0].v.ob[AXIS_Z];
+        corners.coordinates[2][1] = triangle->vertices[1].v.ob[AXIS_Z];
+        corners.coordinates[2][2] = triangle->vertices[2].v.ob[AXIS_Z];
+        if (corners.coordinates[0][1] | corners.coordinates[1][1] | corners.coordinates[2][1]) {
+            triangle->ignoredCenter[0] = (corners.coordinates[0][0] + corners.coordinates[0][1] +
+                                             corners.coordinates[0][2]) /
+                3;
+            triangle->ignoredCenter[1] = (corners.coordinates[1][0] + corners.coordinates[1][1] +
+                                             corners.coordinates[1][2]) /
+                3;
+            triangle->ignoredCenter[2] = (corners.coordinates[2][0] + corners.coordinates[2][1] +
+                                             corners.coordinates[2][2]) /
+                3;
+            /* Never read; the stores match */
+            up[0] = up[2] = 0.0f;
+            up[1] = -1.0f;
+            guAlignF(
+                rotation,
+                0.0f,
+                corners.coordinates[0][1],
+                corners.coordinates[1][1],
+                corners.coordinates[2][1]
+            );
+            scale = corners.coordinates[0][2] / RING_SCALE_ONE;
+            guScaleF(transform, scale, scale, scale);
+            guMtxCatF(transform, rotation, rotation);
+            guTranslateF(
+                transform,
+                corners.coordinates[0][0],
+                corners.coordinates[1][0],
+                corners.coordinates[2][0]
+            );
+            guMtxCatF(rotation, transform, rotation);
+        }
+        else {
+            guMtxIdentF(rotation);
+        }
+
+        guMtxF2L(rotation, &f_RingMatrices[ringCount]);
+        ringCount++;
     }
 
-    corners.coordinates[0][0] = triangle->vertices[0].v.ob[AXIS_X];
-    corners.coordinates[0][1] = triangle->vertices[1].v.ob[AXIS_X];
-    corners.coordinates[0][2] = triangle->vertices[2].v.ob[AXIS_X];
-    corners.coordinates[1][0] = triangle->vertices[0].v.ob[AXIS_Y];
-    corners.coordinates[1][1] = triangle->vertices[1].v.ob[AXIS_Y];
-    corners.coordinates[1][2] = triangle->vertices[2].v.ob[AXIS_Y];
-    corners.coordinates[2][0] = triangle->vertices[0].v.ob[AXIS_Z];
-    corners.coordinates[2][1] = triangle->vertices[1].v.ob[AXIS_Z];
-    corners.coordinates[2][2] = triangle->vertices[2].v.ob[AXIS_Z];
-    if (corners.coordinates[0][1] | corners.coordinates[1][1] |
-        corners.coordinates[2][1]) {
-      triangle->ignoredCenter[0] =
-          (corners.coordinates[0][0] + corners.coordinates[0][1] +
-              corners.coordinates[0][2]) /
-          3;
-      triangle->ignoredCenter[1] =
-          (corners.coordinates[1][0] + corners.coordinates[1][1] +
-              corners.coordinates[1][2]) /
-          3;
-      triangle->ignoredCenter[2] =
-          (corners.coordinates[2][0] + corners.coordinates[2][1] +
-              corners.coordinates[2][2]) /
-          3;
-      /* Never read; the stores match */
-      up[0] = up[2] = 0.0f;
-      up[1] = -1.0f;
-      guAlignF(rotation, 0.0f, corners.coordinates[0][1],
-          corners.coordinates[1][1], corners.coordinates[2][1]);
-      scale = corners.coordinates[0][2] / RING_SCALE_ONE;
-      guScaleF(transform, scale, scale, scale);
-      guMtxCatF(transform, rotation, rotation);
-      guTranslateF(transform, corners.coordinates[0][0],
-          corners.coordinates[1][0], corners.coordinates[2][0]);
-      guMtxCatF(rotation, transform, rotation);
-    } else {
-      guMtxIdentF(rotation);
-    }
-
-    guMtxF2L(rotation, &f_RingMatrices[ringCount]);
-    ringCount++;
-  }
-
-  return ringCount;
+    return ringCount;
 }
 
 /* Builds the rings and shows as many of each player's as the hole has */
 void InitRings(void) {
-  s32 ringCount;
-  s32 playerIndex;
-  s32 ringIndex;
+    s32 ringCount;
+    s32 playerIndex;
+    s32 ringIndex;
 
-  BuildRingVertices();
-  ringCount = BuildRingMatrices();
-  if (ringCount >= RING_COUNT) {
-    ringCount = RING_COUNT;
-  }
-
-  if (g_GameState.isRoundContinued != ROUND_CONTINUED) {
-    for (playerIndex = 0; playerIndex < MAX_PLAYER_COUNT; playerIndex++) {
-      for (ringIndex = 0; ringIndex < RING_COUNT; ringIndex++) {
-        g_Players[playerIndex].ringStates[ringIndex] = ringIndex < ringCount;
-      }
+    BuildRingVertices();
+    ringCount = BuildRingMatrices();
+    if (ringCount >= RING_COUNT) {
+        ringCount = RING_COUNT;
     }
-  }
+
+    if (g_GameState.isRoundContinued != ROUND_CONTINUED) {
+        for (playerIndex = 0; playerIndex < MAX_PLAYER_COUNT; playerIndex++) {
+            for (ringIndex = 0; ringIndex < RING_COUNT; ringIndex++) {
+                g_Players[playerIndex].ringStates[ringIndex] = ringIndex < ringCount;
+            }
+        }
+    }
 }

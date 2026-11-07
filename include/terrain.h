@@ -39,28 +39,27 @@
  * edges' first, then the inner ones, which are drawn as one run
  */
 enum TileMidpointSlot {
-  TILE_MIDPOINT_ROW0_COLUMN1,
-  TILE_MIDPOINT_ROW0_COLUMN3,
-  TILE_MIDPOINT_ROW1_COLUMN0,
-  TILE_MIDPOINT_ROW1_COLUMN4,
-  TILE_MIDPOINT_ROW3_COLUMN0,
-  TILE_MIDPOINT_ROW3_COLUMN4,
-  TILE_MIDPOINT_ROW4_COLUMN1,
-  TILE_MIDPOINT_ROW4_COLUMN3,
-  TILE_MIDPOINT_ROW1_COLUMN1,
-  TILE_MIDPOINT_ROW1_COLUMN2,
-  TILE_MIDPOINT_ROW1_COLUMN3,
-  TILE_MIDPOINT_ROW2_COLUMN1,
-  TILE_MIDPOINT_ROW2_COLUMN3,
-  TILE_MIDPOINT_ROW3_COLUMN1,
-  TILE_MIDPOINT_ROW3_COLUMN2,
-  TILE_MIDPOINT_ROW3_COLUMN3
+    TILE_MIDPOINT_ROW0_COLUMN1,
+    TILE_MIDPOINT_ROW0_COLUMN3,
+    TILE_MIDPOINT_ROW1_COLUMN0,
+    TILE_MIDPOINT_ROW1_COLUMN4,
+    TILE_MIDPOINT_ROW3_COLUMN0,
+    TILE_MIDPOINT_ROW3_COLUMN4,
+    TILE_MIDPOINT_ROW4_COLUMN1,
+    TILE_MIDPOINT_ROW4_COLUMN3,
+    TILE_MIDPOINT_ROW1_COLUMN1,
+    TILE_MIDPOINT_ROW1_COLUMN2,
+    TILE_MIDPOINT_ROW1_COLUMN3,
+    TILE_MIDPOINT_ROW2_COLUMN1,
+    TILE_MIDPOINT_ROW2_COLUMN3,
+    TILE_MIDPOINT_ROW3_COLUMN1,
+    TILE_MIDPOINT_ROW3_COLUMN2,
+    TILE_MIDPOINT_ROW3_COLUMN3
 };
 
 /* The inner midpoints' run */
 #define TILE_FIRST_INNER_MIDPOINT TILE_MIDPOINT_ROW1_COLUMN1
-#define TILE_INNER_MIDPOINT_COUNT \
-  (TILE_MIDPOINT_COUNT - TILE_FIRST_INNER_MIDPOINT)
+#define TILE_INNER_MIDPOINT_COUNT (TILE_MIDPOINT_COUNT - TILE_FIRST_INNER_MIDPOINT)
 /* Each side of a tile has a midpoint between each pair of its grid vertices */
 #define TILE_SIDE_MIDPOINT_COUNT GROUND_TILE_GRID_SPAN
 /*
@@ -80,8 +79,10 @@ enum TileMidpointSlot {
 #define EDGE_WEIGHT_MAX 16
 /* The grid vertex at a grid column and row within a tile */
 #define TileGridVertex(tileColumn, tileRow, gridColumn, gridRow) \
-  GetGridVertex(((tileColumn) * GROUND_TILE_GRID_SPAN) + (gridColumn), \
-      ((tileRow) * GROUND_TILE_GRID_SPAN) + (gridRow))
+    GetGridVertex( \
+        ((tileColumn) * GROUND_TILE_GRID_SPAN) + (gridColumn), \
+        ((tileRow) * GROUND_TILE_GRID_SPAN) + (gridRow) \
+    )
 /* Grid vertices kept, with room for one more column and row than the grid has
  */
 #define GROUND_GRID_VERTEX_COLUMN_COUNT 18
@@ -99,53 +100,51 @@ enum TileMidpointSlot {
 #define GROUND_TEXEL_SIZE (1 << GROUND_TEXEL_SHIFT)
 
 typedef struct TerrainColor {
-  /* 0x0 */ s8 red;
-  /* 0x1 */ s8 green;
-  /* 0x2 */ s8 blue;
-  /* 0x3 */ s8 alpha;
+    /* 0x0 */ s8 red;
+    /* 0x1 */ s8 green;
+    /* 0x2 */ s8 blue;
+    /* 0x3 */ s8 alpha;
 } TerrainColor; /* size = 0x4 */
 
 typedef struct GroundTile {
-  /* 0x000 */ u16 texels[GROUND_TILE_TEXEL_ROW_COUNT]
-                        [GROUND_TILE_TEXEL_ROW_LENGTH]; /* RGBA16 */
-  /* 0x990 */ s16 extraPassCount; /* Positive to draw the tile again over
-                                     itself; the game only clears it */
-  /* 0x992 */ u16 mirroredCells; /* A bit for each of the tile's cells, row by
-                                   row, set when the cell is drawn mirrored */
-  /* 0x994 */ s32 detail; /* How finely the tile is drawn this frame, negative
-                             when hidden */
-  /* 0x998 */ Vec3 center; /* The tile's middle grid vertex */
-  /* 0x9A4 */ s32
-      midpointBlockIndex; /* Negative when the tile has no midpoints */
-  /* 0x9A8 */ u8 unusedAfterMidpointBlock[0xA00 - 0x9A8];
+    /* 0x000 */ u16 texels[GROUND_TILE_TEXEL_ROW_COUNT][GROUND_TILE_TEXEL_ROW_LENGTH]; /* RGBA16 */
+    /* 0x990 */ s16 extraPassCount; /* Positive to draw the tile again over
+                                       itself; the game only clears it */
+    /* 0x992 */ u16 mirroredCells; /* A bit for each of the tile's cells, row by
+                                     row, set when the cell is drawn mirrored */
+    /* 0x994 */ s32 detail; /* How finely the tile is drawn this frame, negative
+                               when hidden */
+    /* 0x998 */ Vec3 center; /* The tile's middle grid vertex */
+    /* 0x9A4 */ s32 midpointBlockIndex; /* Negative when the tile has no midpoints */
+    /* 0x9A8 */ u8 unusedAfterMidpointBlock[0xA00 - 0x9A8];
 } GroundTile; /* size = 0xA00 */
 
 /* GroundTile.detail, how finely DrawGround draws a tile this frame */
 enum GroundDetail {
-  GROUND_DETAIL_HIDDEN = -1,
-  GROUND_DETAIL_COARSE, /* Two triangles between the tile's corners */
-  GROUND_DETAIL_MEDIUM, /* Eight triangles between its grid vertices */
-  GROUND_DETAIL_FINE /* Its own display list, midpoints and all */
+    GROUND_DETAIL_HIDDEN = -1,
+    GROUND_DETAIL_COARSE, /* Two triangles between the tile's corners */
+    GROUND_DETAIL_MEDIUM, /* Eight triangles between its grid vertices */
+    GROUND_DETAIL_FINE /* Its own display list, midpoints and all */
 };
 
 /* The terrain codes that GetTerrainCode reads from the hole */
 enum TerrainCode {
-  TERRAIN_CODE_FAIRWAY,
-  TERRAIN_CODE_ROUGH,
-  TERRAIN_CODE_BUNKER,
-  /* Bare ground that never becomes the point where a ball in a water hazard
-   * is dropped; read as SURFACE_NO_DROP_GROUND */
-  TERRAIN_CODE_NO_DROP_GROUND,
-  TERRAIN_CODE_CART_WAY,
-  TERRAIN_CODE_DEEP_ROUGH,
-  TERRAIN_CODE_GREEN,
-  TERRAIN_CODE_OUT_OF_BOUNDS,
-  TERRAIN_CODE_TEE_GROUND,
-  TERRAIN_CODE_ROCK,
-  TERRAIN_CODE_GREEN_EDGE,
-  TERRAIN_CODE_SEMI_ROUGH,
-  TERRAIN_CODE_BARE_GROUND,
-  TERRAIN_CODE_WASTE_AREA = 14
+    TERRAIN_CODE_FAIRWAY,
+    TERRAIN_CODE_ROUGH,
+    TERRAIN_CODE_BUNKER,
+    /* Bare ground that never becomes the point where a ball in a water hazard
+     * is dropped; read as SURFACE_NO_DROP_GROUND */
+    TERRAIN_CODE_NO_DROP_GROUND,
+    TERRAIN_CODE_CART_WAY,
+    TERRAIN_CODE_DEEP_ROUGH,
+    TERRAIN_CODE_GREEN,
+    TERRAIN_CODE_OUT_OF_BOUNDS,
+    TERRAIN_CODE_TEE_GROUND,
+    TERRAIN_CODE_ROCK,
+    TERRAIN_CODE_GREEN_EDGE,
+    TERRAIN_CODE_SEMI_ROUGH,
+    TERRAIN_CODE_BARE_GROUND,
+    TERRAIN_CODE_WASTE_AREA = 14
 };
 
 #define TERRAIN_CODE_COUNT 16
@@ -162,29 +161,24 @@ extern u16 g_TerrainCodeColors[TERRAIN_CODE_COUNT];
 #define TERRAIN_CODE_CELL_COLUMN_COUNT 16
 /* The size of a terrain code cell, and of a row of them */
 #define TERRAIN_CODE_CELL_SIZE 2
-#define TERRAIN_CODE_CELL_ROW_SIZE \
-  (TERRAIN_CODE_CELL_COLUMN_COUNT * TERRAIN_CODE_CELL_SIZE)
+#define TERRAIN_CODE_CELL_ROW_SIZE (TERRAIN_CODE_CELL_COLUMN_COUNT * TERRAIN_CODE_CELL_SIZE)
 /* The map texels a terrain code cell covers each way */
 #define TERRAIN_CODE_CELL_SPAN 16
 /* The terrain code grid's columns and rows */
-#define CODE_GRID_COLUMN_COUNT \
-  (TERRAIN_CODE_CELL_COLUMN_COUNT * TERRAIN_CODE_CELL_SPAN)
-#define CODE_GRID_ROW_COUNT \
-  (TERRAIN_CODE_CELL_ROW_COUNT * TERRAIN_CODE_CELL_SPAN)
+#define CODE_GRID_COLUMN_COUNT (TERRAIN_CODE_CELL_COLUMN_COUNT * TERRAIN_CODE_CELL_SPAN)
+#define CODE_GRID_ROW_COUNT (TERRAIN_CODE_CELL_ROW_COUNT * TERRAIN_CODE_CELL_SPAN)
 /* Marks a cell with no terrain code */
 #define NO_CELL_TERRAIN_CODE (-1)
 /* Marks a cell whose codes are in a block, with the block's index */
 #define TERRAIN_CODE_CELL_BLOCK 0x8000
 /* The size of a block of packed codes, two to a byte, and how many there are */
-#define TERRAIN_CODE_BLOCK_SIZE \
-  (TERRAIN_CODE_CELL_SPAN * TERRAIN_CODE_CELL_SPAN / 2)
+#define TERRAIN_CODE_BLOCK_SIZE (TERRAIN_CODE_CELL_SPAN * TERRAIN_CODE_CELL_SPAN / 2)
 #define TERRAIN_CODE_BLOCK_COUNT 0x180
 /* The bits of a packed terrain code, and the bits of the even column's code */
 #define TERRAIN_CODE_BITS 4
 #define TERRAIN_CODE_MASK 0xF
 #define EVEN_COLUMN_CODE_MASK (TERRAIN_CODE_MASK << TERRAIN_CODE_BITS)
-extern s16 g_TerrainCodeCells[TERRAIN_CODE_CELL_ROW_COUNT]
-                             [TERRAIN_CODE_CELL_COLUMN_COUNT];
+extern s16 g_TerrainCodeCells[TERRAIN_CODE_CELL_ROW_COUNT][TERRAIN_CODE_CELL_COLUMN_COUNT];
 
 /* Each ground tile's height range, which also serves as the radius of its
  * bounding sphere */
@@ -204,7 +198,7 @@ extern s32 g_UnreadGroundQueryMarker;
  */
 #define TILE_VERTEX_SEGMENT_COUNT 8
 
-extern Gfx* g_GroundTileDisplayLists[GROUND_TILE_COUNT];
+extern Gfx *g_GroundTileDisplayLists[GROUND_TILE_COUNT];
 extern s32 g_CoarseVertexOffsets[GROUND_TILE_COUNT][TILE_VERTEX_SEGMENT_COUNT];
 
 /*
@@ -215,9 +209,9 @@ extern s32 g_CoarseVertexOffsets[GROUND_TILE_COUNT][TILE_VERTEX_SEGMENT_COUNT];
 #define INTEGER_PLANE_UNIT (1 << INTEGER_PLANE_SHIFT)
 
 typedef struct IntegerPlane {
-  /* 0x00 */ s32 normal[AXIS_COUNT];
-  /* 0x0C */ s32 distance;
-  /* 0x10 */ s32 normalLength; /* Always INTEGER_PLANE_UNIT */
+    /* 0x00 */ s32 normal[AXIS_COUNT];
+    /* 0x0C */ s32 distance;
+    /* 0x10 */ s32 normalLength; /* Always INTEGER_PLANE_UNIT */
 } IntegerPlane; /* size = 0x14 */
 
 /* Drawing the ground, which DrawGround and the hole editor's copy share */
@@ -247,14 +241,14 @@ typedef struct IntegerPlane {
 
 /* DrawGround's terrainStyle: the round's view, or one of the map views */
 enum TerrainStyle {
-  TERRAIN_STYLE_NORMAL,
-  TERRAIN_STYLE_MAP = 2,
-  TERRAIN_STYLE_TOP_DOWN_MAP
+    TERRAIN_STYLE_NORMAL,
+    TERRAIN_STYLE_MAP = 2,
+    TERRAIN_STYLE_TOP_DOWN_MAP
 };
 
 /* Whether a terrain style is one of the map views */
 #define IsMapTerrainStyle(style) \
-  ((style) == TERRAIN_STYLE_MAP || (style) == TERRAIN_STYLE_TOP_DOWN_MAP)
+    ((style) == TERRAIN_STYLE_MAP || (style) == TERRAIN_STYLE_TOP_DOWN_MAP)
 
 /* The vertex cache slots of a row's three vertex rows, which rotate from row to
  * row */
@@ -270,8 +264,7 @@ enum TerrainStyle {
 /* The noise texture sits in TMEM after a tile's texels, and is blended in by
  * this */
 #define NOISE_TMEM \
-  (GROUND_TILE_TEXEL_ROW_COUNT * GROUND_TILE_TEXEL_ROW_LENGTH * \
-      G_IM_SIZ_16b_BYTES / 8)
+    (GROUND_TILE_TEXEL_ROW_COUNT * GROUND_TILE_TEXEL_ROW_LENGTH * G_IM_SIZ_16b_BYTES / 8)
 #define NOISE_BLEND_ALPHA 110
 
 #define CLIP_RATIO_COUNT 6
@@ -287,33 +280,27 @@ enum TerrainStyle {
 /* The grid vertex at a vertex column, given the column's parity, and row: each
  * row holds its even columns' vertices and then its odd columns' */
 #define GridVertexOfParity(column, parity, row) \
-  (&g_WorkArea.hole.gridVertices[((row) * GROUND_GRID_COLUMN_COUNT) + \
-      ((u32)(column) >> 1) + ((parity) * GROUND_GRID_EVEN_COLUMN_COUNT)])
+    (&g_WorkArea.hole.gridVertices \
+            [((row) * GROUND_GRID_COLUMN_COUNT) + ((u32)(column) >> 1) + \
+                ((parity) * GROUND_GRID_EVEN_COLUMN_COUNT)])
 
 /* The grid vertex at a vertex column and row, as GetGridVertex finds it */
-#define GridVertex(column, row) \
-  GridVertexOfParity(column, (u32)(column) & 1, row)
+#define GridVertex(column, row) GridVertexOfParity(column, (u32)(column) & 1, row)
 
 /* Whether a fine tile's neighbor makes it snap the vertices of their shared
  * edge's middle */
-#define IsCoarse(tileIndex) \
-  (g_WorkArea.hole.tiles[tileIndex].detail == GROUND_DETAIL_COARSE)
+#define IsCoarse(tileIndex) (g_WorkArea.hole.tiles[tileIndex].detail == GROUND_DETAIL_COARSE)
 
 /* Draws a tile's 2 by 2 quads from the cache slots of its three vertex rows */
-#define DrawTileQuads( \
-    top, topOdd, top1, middle, middleOdd, middle1, bottom, bottomOdd, bottom1) \
-  { \
-    gSP2Triangles( \
-        gfx++, top, topOdd, middle, 0, topOdd, middleOdd, middle, 0); \
-    gSP2Triangles( \
-        gfx++, middle, middleOdd, bottom, 0, middleOdd, bottomOdd, bottom, 0); \
-    gSP2Triangles( \
-        gfx++, topOdd, top1, middleOdd, 0, top1, middle1, middleOdd, 0); \
-    gSP2Triangles(gfx++, middleOdd, middle1, bottomOdd, 0, middle1, bottom1, \
-        bottomOdd, 0); \
-  }
+#define DrawTileQuads(top, topOdd, top1, middle, middleOdd, middle1, bottom, bottomOdd, bottom1) \
+    { \
+        gSP2Triangles(gfx++, top, topOdd, middle, 0, topOdd, middleOdd, middle, 0); \
+        gSP2Triangles(gfx++, middle, middleOdd, bottom, 0, middleOdd, bottomOdd, bottom, 0); \
+        gSP2Triangles(gfx++, topOdd, top1, middleOdd, 0, top1, middle1, middleOdd, 0); \
+        gSP2Triangles(gfx++, middleOdd, middle1, bottomOdd, 0, middle1, bottom1, bottomOdd, 0); \
+    }
 
-extern Vtx* g_VertexListHead;
+extern Vtx *g_VertexListHead;
 extern s8 g_ShowsGroundWaves;
 extern f32 g_GroundFarthestDepth;
 extern f32 g_GroundNearDepthEighth;
@@ -323,39 +310,39 @@ extern f32 g_GroundNearDepthEighth;
 /* A triangle as GetTrianglePlane takes it: each axis's coordinates, by corner
  */
 typedef struct PlaneTriangle {
-  /*
-   * What was hit: the HOLE_TRIANGLE_KIND_* of a hole triangle, the ring's
-   * index from FindRingHit, or the BILLBOARD_CELL_* that FindBillboardHit
-   * writes here
-   */
-  /* 0x00 */ s32 tag;
-  /* 0x04 */ s16 corners[AXIS_COUNT][TRIANGLE_CORNER_COUNT];
+    /*
+     * What was hit: the HOLE_TRIANGLE_KIND_* of a hole triangle, the ring's
+     * index from FindRingHit, or the BILLBOARD_CELL_* that FindBillboardHit
+     * writes here
+     */
+    /* 0x00 */ s32 tag;
+    /* 0x04 */ s16 corners[AXIS_COUNT][TRIANGLE_CORNER_COUNT];
 } PlaneTriangle; /* size = 0x18 */
 
 /* The plane through a triangle: normal . point + distance = 0, with the
  * normal's y at least 0 */
 typedef struct TrianglePlane {
-  /* 0x00 */ f32 normal[AXIS_COUNT];
-  /* 0x0C */ f32 distance;
-  /* 0x10 */ f32 normalLength; /* Always 1 */
+    /* 0x00 */ f32 normal[AXIS_COUNT];
+    /* 0x0C */ f32 distance;
+    /* 0x10 */ f32 normalLength; /* Always 1 */
 } TrianglePlane; /* size = 0x14 */
 
 /* Returns 0, or -1 for a triangle without area, whose plane is then level */
-s32 GetTrianglePlane(PlaneTriangle* triangle, TrianglePlane* plane);
+s32 GetTrianglePlane(PlaneTriangle *triangle, TrianglePlane *plane);
 
-Vtx* GetGroundPoint(u32 column, u32 row);
-Vtx* GetGridVertex(u32 column, u32 row);
-NO_RESULT SetGroundPoint(s32 column, s32 row, Vtx_t* point);
+Vtx *GetGroundPoint(u32 column, u32 row);
+Vtx *GetGridVertex(u32 column, u32 row);
+NO_RESULT SetGroundPoint(s32 column, s32 row, Vtx_t *point);
 void PrepareHoleTriangles(void);
 Boolean IsOverlayInExpansionMemory(void);
 void UpdateDebugScenes(void);
 s32 GetTerrainCodeColor(s32 code);
-s32 GetTriangleIntegerPlane(PlaneTriangle* triangle, IntegerPlane* plane);
+s32 GetTriangleIntegerPlane(PlaneTriangle *triangle, IntegerPlane *plane);
 s32 GetColorTerrainCode(s32 color);
 s32 BlendSurfaceMapColor(s32 x, s32 z, Surface surface);
 Surface FindSurface(s32 x, s32 z, Boolean lowersWaterLevel);
 Surface GetSurface(s32 x, s32 z);
-s32 FindGroundTriangle(s32 x, s32 z, PlaneTriangle* triangle);
+s32 FindGroundTriangle(s32 x, s32 z, PlaneTriangle *triangle);
 s32 GetGroundOrWaterHeight(s32 x, s32 z);
 void InitTerrainTextures(void);
 /*
@@ -365,8 +352,7 @@ void InitTerrainTextures(void);
 s32 GetGroundHeight(s32 x, s32 z);
 
 void BuildAllTileMidpoints(void);
-s32 CrossProductXZ(
-    s32 originX, s32 originZ, s32 firstX, s32 firstZ, s32 secondX, s32 secondZ);
+s32 CrossProductXZ(s32 originX, s32 originZ, s32 firstX, s32 firstZ, s32 secondX, s32 secondZ);
 s32 GetTerrainCode(s32 column, s32 row);
 void MarkBillboardsOnMap(void);
 

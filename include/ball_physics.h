@@ -198,9 +198,9 @@
 
 /* How deep a ball that lands in a bunker is buried */
 enum BunkerBurial {
-  BUNKER_BURIAL_NONE,
-  BUNKER_BURIAL_HALF, /* SURFACE_BUNKER_FAIR_LIE */
-  BUNKER_BURIAL_MOSTLY /* SURFACE_BUNKER_POOR_LIE */
+    BUNKER_BURIAL_NONE,
+    BUNKER_BURIAL_HALF, /* SURFACE_BUNKER_FAIR_LIE */
+    BUNKER_BURIAL_MOSTLY /* SURFACE_BUNKER_POOR_LIE */
 };
 
 /* An enum BunkerBurial value */
@@ -326,8 +326,7 @@ typedef s32 BunkerBurial;
  */
 #define SLOW_ROLL_SPEED 307.2f
 #define MIN_SLOW_ROLL_SLOPE_SCALE 0.125f
-#define SLOW_ROLL_SLOPE_SCALE_PER_SPEED \
-  ((1.0f - MIN_SLOW_ROLL_SLOPE_SCALE) / SLOW_ROLL_SPEED)
+#define SLOW_ROLL_SLOPE_SCALE_PER_SPEED ((1.0f - MIN_SLOW_ROLL_SLOPE_SCALE) / SLOW_ROLL_SPEED)
 /* On a gentle slope, a simulation that runs long keeps less of the speed */
 #define LONG_ROLL_STEP_COUNT 150
 #define LONGER_ROLL_STEP_COUNT 400
@@ -423,8 +422,7 @@ typedef s32 BunkerBurial;
  * The cup's sounds grow louder with the ball's speed, to their loudest at
  * 1 km/h, which is slower than any speed that plays them
  */
-#define CUP_SOUND_VOLUME_PER_SPEED \
-  ((SOUND_FULL_SCALE - 1) / KilometersPerHour(1))
+#define CUP_SOUND_VOLUME_PER_SPEED ((SOUND_FULL_SCALE - 1) / KilometersPerHour(1))
 /* The flagstick's sound grows ten times as fast, written to fewer places */
 #define FLAGSTICK_SOUND_VOLUME_PER_SPEED 8.858665f
 /* The wall's and flagstick's sounds play no louder than this */
@@ -497,15 +495,15 @@ typedef s32 BunkerBurial;
 
 /* The rows of the launch values that GAME_FLAG_SHOW_LAUNCH_VALUES prints */
 enum LaunchValueRow {
-  LAUNCH_VALUE_ROW_YAW = 6,
-  LAUNCH_VALUE_ROW_PITCH,
-  LAUNCH_VALUE_ROW_SPEED,
-  LAUNCH_VALUE_ROW_SIDE_SPIN,
-  LAUNCH_VALUE_ROW_SPIN,
-  LAUNCH_VALUE_ROW_SPIN_RPM,
-  LAUNCH_VALUE_ROW_SPIN_HEADING,
-  LAUNCH_VALUE_ROW_SPIN_SPEED,
-  LAUNCH_VALUE_ROW_SIDE_SPIN_SPEED
+    LAUNCH_VALUE_ROW_YAW = 6,
+    LAUNCH_VALUE_ROW_PITCH,
+    LAUNCH_VALUE_ROW_SPEED,
+    LAUNCH_VALUE_ROW_SIDE_SPIN,
+    LAUNCH_VALUE_ROW_SPIN,
+    LAUNCH_VALUE_ROW_SPIN_RPM,
+    LAUNCH_VALUE_ROW_SPIN_HEADING,
+    LAUNCH_VALUE_ROW_SPIN_SPEED,
+    LAUNCH_VALUE_ROW_SIDE_SPIN_SPEED
 };
 
 #define LAUNCH_VALUE_COLUMN 3

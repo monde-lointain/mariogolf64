@@ -61,12 +61,12 @@
  * f_OpeningBallAssets lists them
  */
 typedef enum OpeningBallImage {
-  MARIO_FACE_BALL,
-  DONKEY_KONG_FACE_BALL,
-  YOSHI_FACE_BALL,
-  LUIGI_FACE_BALL,
-  PLAIN_BALL,
-  OPENING_BALL_IMAGE_COUNT
+    MARIO_FACE_BALL,
+    DONKEY_KONG_FACE_BALL,
+    YOSHI_FACE_BALL,
+    LUIGI_FACE_BALL,
+    PLAIN_BALL,
+    OPENING_BALL_IMAGE_COUNT
 } OpeningBallImage;
 
 #define OPENING_BALL_SLOT_COUNT 2
@@ -76,8 +76,7 @@ typedef enum OpeningBallImage {
 /* A ball image is drawn in strips that fit in texture memory */
 #define OPENING_BALL_STRIP_HEIGHT 32
 #define OPENING_BALL_STRIP_COUNT 2
-#define OPENING_BALL_STRIP_SIZE \
-  (OPENING_BALL_IMAGE_WIDTH * OPENING_BALL_STRIP_HEIGHT)
+#define OPENING_BALL_STRIP_SIZE (OPENING_BALL_IMAGE_WIDTH * OPENING_BALL_STRIP_HEIGHT)
 /* The scale that a slot starts at */
 #define OPENING_BALL_NORMAL_SCALE 1.0f
 /* A ball at this scale sits a little higher, with its shadow lower */
@@ -90,9 +89,9 @@ typedef enum OpeningBallImage {
 
 /* What an opening ball slot shows */
 typedef enum OpeningBallState {
-  OPENING_BALL_HIDDEN,
-  OPENING_BALL_ON_GROUND,
-  OPENING_BALL_IN_AIR /* At its own height, rather than the ground's */
+    OPENING_BALL_HIDDEN,
+    OPENING_BALL_ON_GROUND,
+    OPENING_BALL_IN_AIR /* At its own height, rather than the ground's */
 } OpeningBallState;
 
 /* The character name logos that the opening shows, two at a time */
@@ -102,13 +101,13 @@ typedef enum OpeningBallState {
 #define OPENING_NAME_LOGO_SIZE 0x2208
 
 typedef struct OpeningNameLogo {
-  /* 0x00 */ s32 assetId;
-  /* 0x04 */ s32 width;
-  /* 0x08 */ s32 height;
-  /* 0x0C */ s32 x;
-  /* 0x10 */ s32 y;
-  /* 0x14 */ s32 shownWidth; /* As the logo unfolds and flips */
-  /* 0x18 */ s32 shownHeight;
+    /* 0x00 */ s32 assetId;
+    /* 0x04 */ s32 width;
+    /* 0x08 */ s32 height;
+    /* 0x0C */ s32 x;
+    /* 0x10 */ s32 y;
+    /* 0x14 */ s32 shownWidth; /* As the logo unfolds and flips */
+    /* 0x18 */ s32 shownHeight;
 } OpeningNameLogo; /* size = 0x1C */
 
 /* The steps that a name logo's animation starts each phase at */
@@ -179,15 +178,15 @@ typedef struct OpeningNameLogo {
 
 /* The letters of "MARIO GOLF", left to right */
 typedef enum LogoLetterIndex {
-  LOGO_LETTER_M,
-  LOGO_LETTER_A,
-  LOGO_LETTER_R,
-  LOGO_LETTER_I,
-  LOGO_LETTER_FIRST_O,
-  LOGO_LETTER_G,
-  LOGO_LETTER_SECOND_O,
-  LOGO_LETTER_L,
-  LOGO_LETTER_F
+    LOGO_LETTER_M,
+    LOGO_LETTER_A,
+    LOGO_LETTER_R,
+    LOGO_LETTER_I,
+    LOGO_LETTER_FIRST_O,
+    LOGO_LETTER_G,
+    LOGO_LETTER_SECOND_O,
+    LOGO_LETTER_L,
+    LOGO_LETTER_F
 } LogoLetterIndex;
 
 /* Where a letter starts, off the screen */
@@ -225,31 +224,31 @@ typedef enum LogoLetterIndex {
 #define LOGO_F_DEPTH 44
 
 typedef struct LogoLetter {
-  s32 x; /* On the screen, from the left */
-  s32 y; /* On the screen, from the top */
-  s32 depth; /* Nearer letters are drawn over farther ones */
+    s32 x; /* On the screen, from the left */
+    s32 y; /* On the screen, from the top */
+    s32 depth; /* Nearer letters are drawn over farther ones */
 } LogoLetter; /* size = 0xC */
 
 /* What a logo letter is doing */
 typedef enum LogoLetterState {
-  LOGO_LETTER_WAITING, /* For Lakitu to drop it */
-  LOGO_LETTER_FALLING, /* Or rising after a bounce, and growing */
-  LOGO_LETTER_SQUASHING, /* Flattening against the ground */
-  LOGO_LETTER_SQUASHED, /* Holding flat */
-  LOGO_LETTER_STRETCHING, /* Springing back up */
-  LOGO_LETTER_LANDED = 9
+    LOGO_LETTER_WAITING, /* For Lakitu to drop it */
+    LOGO_LETTER_FALLING, /* Or rising after a bounce, and growing */
+    LOGO_LETTER_SQUASHING, /* Flattening against the ground */
+    LOGO_LETTER_SQUASHED, /* Holding flat */
+    LOGO_LETTER_STRETCHING, /* Springing back up */
+    LOGO_LETTER_LANDED = 9
 } LogoLetterState;
 
 /* f_OpeningShotDashCount's starting value, and the most it can be */
 #define OPENING_SHOT_MAX_DASH_COUNT 200
 
-void DrawNameLogos(Gfx** displayListHead);
-void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices);
-void DrawOpeningImpactLines(Gfx** displayListHead);
-void DrawLakitu(Gfx** displayListHead);
-void DrawOpeningBurst(Gfx** displayListHead);
-void DrawOpeningShotBall(Gfx** displayListHead);
-void DrawOpeningSparks(Gfx** displayListHead);
+void DrawNameLogos(Gfx **displayListHead);
+void DrawOpeningBalls(Gfx **displayListHead, CameraMatrices *matrices);
+void DrawOpeningImpactLines(Gfx **displayListHead);
+void DrawLakitu(Gfx **displayListHead);
+void DrawOpeningBurst(Gfx **displayListHead);
+void DrawOpeningShotBall(Gfx **displayListHead);
+void DrawOpeningSparks(Gfx **displayListHead);
 
 /* The script plays most of its sounds on the next of these channels in turn,
  * so that each can overlap the last few */
@@ -271,38 +270,38 @@ void LoadOpeningBall(OpeningBallImage image, s32 slot);
 
 /* Which of a pair of sounds is playing, or none */
 typedef enum AmbientSoundChoice {
-  AMBIENT_SOUND_NONE,
-  AMBIENT_SOUND_FIRST,
-  AMBIENT_SOUND_SECOND
+    AMBIENT_SOUND_NONE,
+    AMBIENT_SOUND_FIRST,
+    AMBIENT_SOUND_SECOND
 } AmbientSoundChoice;
 
 /* What the sparks are doing */
 typedef enum SparksState {
-  SPARKS_HIDDEN,
-  SPARKS_STARTING, /* Set elsewhere to start the sparks */
-  SPARKS_FLYING
+    SPARKS_HIDDEN,
+    SPARKS_STARTING, /* Set elsewhere to start the sparks */
+    SPARKS_FLYING
 } SparksState;
 
 /* What the title logo as a whole is doing */
 typedef enum LogoState {
-  LOGO_DROPPING_LETTERS,
-  LOGO_CLUB_STARTING, /* The last letter has been dropped */
-  LOGO_CLUB_CIRCLING, /* Spiraling in to the letters, spinning */
-  LOGO_CLUB_SPINNING, /* In place, until it turns upright */
-  LOGO_SHINING,
-  LOGO_SHRINK_STARTING,
-  LOGO_SHRINKING,
-  LOGO_SHRUNK
+    LOGO_DROPPING_LETTERS,
+    LOGO_CLUB_STARTING, /* The last letter has been dropped */
+    LOGO_CLUB_CIRCLING, /* Spiraling in to the letters, spinning */
+    LOGO_CLUB_SPINNING, /* In place, until it turns upright */
+    LOGO_SHINING,
+    LOGO_SHRINK_STARTING,
+    LOGO_SHRINKING,
+    LOGO_SHRUNK
 } LogoState;
 
 /* How the screen fade behind the logo follows the logo */
 typedef enum LogoFadeStage {
-  LOGO_FADE_NONE,
-  LOGO_FADE_GRAYING, /* Starts as the first letter is dropped */
-  LOGO_FADE_GRAY, /* Until the shine starts */
-  LOGO_FADE_WHITENING,
-  LOGO_FADE_WHITE, /* Until the logo shrinks */
-  LOGO_FADE_LOGO_OUT
+    LOGO_FADE_NONE,
+    LOGO_FADE_GRAYING, /* Starts as the first letter is dropped */
+    LOGO_FADE_GRAY, /* Until the shine starts */
+    LOGO_FADE_WHITENING,
+    LOGO_FADE_WHITE, /* Until the logo shrinks */
+    LOGO_FADE_LOGO_OUT
 } LogoFadeStage;
 
 /*
@@ -388,7 +387,8 @@ static OpeningNameLogo f_OpeningNameLogos[OPENING_NAME_LOGO_COUNT] = {
     {ASSET_PLUM_NAME_LOGO, 160, 32, 88, 208, 1, 32},
     {ASSET_YOSHI_NAME_LOGO, 160, 32, 88, 208, 1, 32},
     {ASSET_BABY_MARIO_NAME_LOGO, 216, 32, 196, 32, 1, 32},
-    {ASSET_DONKEY_KONG_NAME_LOGO, 256, 32, 136, 208, 1, 32}};
+    {ASSET_DONKEY_KONG_NAME_LOGO, 256, 32, 136, 208, 1, 32}
+};
 static Boolean f_AreImpactLinesShown = FALSE;
 static Boolean f_IsBurstShown = FALSE;
 static s32 f_ShotBallScale = 0;
@@ -396,14 +396,22 @@ static s32 f_LookAtEaseMode = 0;
 /* Read by no routine */
 static s32 f_UnusedWordAfterEaseMode UNUSED = 0;
 static s32 f_OpeningBallStates[OPENING_BALL_SLOT_COUNT] = {
-    OPENING_BALL_HIDDEN, OPENING_BALL_HIDDEN};
+    OPENING_BALL_HIDDEN,
+    OPENING_BALL_HIDDEN
+};
 /* Read by no routine */
 static s32 f_UnusedWordsAfterBallStates[2] UNUSED = {0, 0};
 static f32 f_OpeningBallScales[OPENING_BALL_SLOT_COUNT] = {
-    OPENING_BALL_NORMAL_SCALE, OPENING_BALL_NORMAL_SCALE};
+    OPENING_BALL_NORMAL_SCALE,
+    OPENING_BALL_NORMAL_SCALE
+};
 static s32 f_OpeningBallAssets[OPENING_BALL_IMAGE_COUNT] = {
-    ASSET_MARIO_BALL_IMAGE, ASSET_DONKEY_KONG_BALL_IMAGE,
-    ASSET_YOSHI_BALL_IMAGE, ASSET_LUIGI_BALL_IMAGE, ASSET_SHOT_BALL_IMAGE};
+    ASSET_MARIO_BALL_IMAGE,
+    ASSET_DONKEY_KONG_BALL_IMAGE,
+    ASSET_YOSHI_BALL_IMAGE,
+    ASSET_LUIGI_BALL_IMAGE,
+    ASSET_SHOT_BALL_IMAGE
+};
 /* Whether Donkey Kong stands in for Yoshi, once he is unlocked */
 static Boolean f_IsDonkeyKongShown = FALSE;
 static s32 f_LakituScreenPoint[2] = {0, 230};
@@ -418,14 +426,11 @@ static s32 f_UnusedWordAfterTrailIndex UNUSED = 0;
  */
 static u8 f_IsLogoBallSlot[OPENING_BALL_SLOT_COUNT] = {FALSE, FALSE};
 /* The opening's shots, each starting with its yaw as a binary angle */
-static ShotLaunch f_OpeningFirstShot = {
-    -0x3400, 0, 280, 0, 40, -15, 0, SHOT_MODE_NORMAL};
-static ShotLaunch f_OpeningSecondShot = {
-    -0x2000, 0, MAX_LAUNCH_POWER, 0, 0, 0, 0, SHOT_MODE_NORMAL};
-static ShotLaunch f_OpeningThirdShot = {
-    -0x2300, 0, 240, 0, 0, 20, 0, SHOT_MODE_NORMAL};
-static ShotLaunch f_OpeningFourthShot = {
-    -0x2B00, 1, 400, 0, -180, -720, 0, SHOT_MODE_NORMAL};
+static ShotLaunch f_OpeningFirstShot = {-0x3400, 0, 280, 0, 40, -15, 0, SHOT_MODE_NORMAL};
+static ShotLaunch f_OpeningSecondShot =
+    {-0x2000, 0, MAX_LAUNCH_POWER, 0, 0, 0, 0, SHOT_MODE_NORMAL};
+static ShotLaunch f_OpeningThirdShot = {-0x2300, 0, 240, 0, 0, 20, 0, SHOT_MODE_NORMAL};
+static ShotLaunch f_OpeningFourthShot = {-0x2B00, 1, 400, 0, -180, -720, 0, SHOT_MODE_NORMAL};
 static s32 f_OpeningSparksState = SPARKS_HIDDEN;
 f32 g_LookAtMarkerScale = 1.0f;
 static Boolean f_IsLookAtMarkerShown = FALSE;
@@ -436,13 +441,14 @@ static Boolean f_IsLookAtMarkerShown = FALSE;
  */
 static s32 f_OpeningShotState = 0;
 /* Read by no routine; the same as f_OpeningSecondShot */
-static ShotLaunch f_UnusedSecondShotCopy UNUSED = {
-    -0x2000, 0, MAX_LAUNCH_POWER, 0, 0, 0, 0, SHOT_MODE_NORMAL};
+static ShotLaunch f_UnusedSecondShotCopy
+    UNUSED = {-0x2000, 0, MAX_LAUNCH_POWER, 0, 0, 0, 0, SHOT_MODE_NORMAL};
 static Vtx f_OpeningShotDashVertices[QUAD_VERTEX_COUNT] = {
     {{{-15, 0, 0}, 0, {0, 0}, {0x00, 0xFF, 0x00, 0xFF}}},
     {{{15, 0, 0}, 0, {0, 2048}, {0x00, 0x00, 0x00, 0xFF}}},
     {{{15, 0, -1}, 0, {2048, 2048}, {0x00, 0x00, 0xFF, 0x00}}},
-    {{{-15, 0, -1}, 0, {2048, 0}, {0xFF, 0x00, 0x00, 0x00}}}};
+    {{{-15, 0, -1}, 0, {2048, 0}, {0xFF, 0x00, 0x00, 0x00}}}
+};
 /*
  * The opening's shot path is drawn as the turn's shot preview is, but
  * nothing in the opening sets f_IsOpeningShotPathShown, so it never shows
@@ -481,28 +487,31 @@ static Vtx f_LookAtMarkerVertices[6][QUAD_VERTEX_COUNT] = {
     {{{{-3, -3, -50}, 0, {0, 0}, {0x00, 0xFF, 0xFF, 0xFF}}},
         {{{3, 3, -50}, 0, {0, 0}, {0x00, 0xFF, 0xFF, 0xFF}}},
         {{{3, 3, 50}, 0, {0, 0}, {0x00, 0xFF, 0xFF, 0xFF}}},
-        {{{-3, -3, 50}, 0, {0, 0}, {0x00, 0xFF, 0xFF, 0xFF}}}}};
-static Vtx
-    f_OpeningBallStripVertices[OPENING_BALL_STRIP_COUNT][QUAD_VERTEX_COUNT] = {
-        {{{{1, -1, 0}, 0, {0, 2048}, {0xFF, 0xFF, 0xFF, 0xFF}}},
-            {{{1, -2, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
-            {{{-1, -2, 0}, 0, {4096, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
-            {{{-1, -1, 0}, 0, {4096, 2048}, {0xFF, 0xFF, 0xFF, 0xFF}}}},
-        {{{{1, 0, 0}, 0, {0, 2048}, {0xFF, 0xFF, 0xFF, 0xFF}}},
-            {{{1, -1, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
-            {{{-1, -1, 0}, 0, {4096, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
-            {{{-1, 0, 0}, 0, {4096, 2048}, {0xFF, 0xFF, 0xFF, 0xFF}}}}};
+        {{{-3, -3, 50}, 0, {0, 0}, {0x00, 0xFF, 0xFF, 0xFF}}}}
+};
+static Vtx f_OpeningBallStripVertices[OPENING_BALL_STRIP_COUNT][QUAD_VERTEX_COUNT] = {
+    {{{{1, -1, 0}, 0, {0, 2048}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+        {{{1, -2, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+        {{{-1, -2, 0}, 0, {4096, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+        {{{-1, -1, 0}, 0, {4096, 2048}, {0xFF, 0xFF, 0xFF, 0xFF}}}},
+    {{{{1, 0, 0}, 0, {0, 2048}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+        {{{1, -1, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+        {{{-1, -1, 0}, 0, {4096, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+        {{{-1, 0, 0}, 0, {4096, 2048}, {0xFF, 0xFF, 0xFF, 0xFF}}}}
+};
 static Boolean f_HasLogoBallLastPosition = FALSE;
 static Vtx f_OpeningBallShadowVertices[QUAD_VERTEX_COUNT] = {
     {{{-1, 0, 1}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{-1, 0, -1}, 0, {0, 2048}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{1, 0, -1}, 0, {2048, 2048}, {0xFF, 0xFF, 0xFF, 0xFF}}},
-    {{{1, 0, 1}, 0, {2048, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}}};
+    {{{1, 0, 1}, 0, {2048, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}}
+};
 static Vtx f_LogoBallMarioVertices[QUAD_VERTEX_COUNT] = {
     {{{-1, -1, 1}, 0, {1536, 1536}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{-1, -1, -1}, 0, {0, 1536}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{-1, 1, -1}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
-    {{{-1, 1, 1}, 0, {1536, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}}};
+    {{{-1, 1, 1}, 0, {1536, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}}
+};
 /* The logo ball's roll, from its position's change each frame */
 static Boolean f_ShouldResetLogoBallRoll = TRUE;
 static s32 f_LogoBallFrameIndex = 0;
@@ -511,12 +520,14 @@ static Vtx f_ProjectedShadowVertices[QUAD_VERTEX_COUNT] = {
     {{{-1, 0, 1}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{-1, 0, -1}, 0, {0, 2048}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{1, 0, -1}, 0, {2048, 2048}, {0xFF, 0xFF, 0xFF, 0xFF}}},
-    {{{1, 0, 1}, 0, {2048, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}}};
+    {{{1, 0, 1}, 0, {2048, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}}
+};
 static Vtx f_ProjectedLogoBallMarioVertices[QUAD_VERTEX_COUNT] = {
     {{{-1, -1, 1}, 0, {1536, 1536}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{-1, -1, -1}, 0, {0, 1536}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{-1, 1, -1}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
-    {{{-1, 1, 1}, 0, {1536, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}}};
+    {{{-1, 1, 1}, 0, {1536, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}}
+};
 /* The same as the logo ball's roll, kept apart for the projected logo ball */
 static Boolean f_ShouldResetProjectedLogoBallRoll = TRUE;
 static s32 f_ProjectedLogoBallFrameIndex = 0;
@@ -524,7 +535,8 @@ static s32 f_ImpactLinesFrame = 0;
 static s32 f_LakituTrailAlpha = LAKITU_TRAIL_START_ALPHA;
 static Vtx f_LakituTrailVertices[2] = {
     {{{-10, 0, 0}, 0, {0, 0}, {0xFF, 0x7F, 0x00, 0xFF}}},
-    {{{10, 0, 0}, 0, {3072, 0}, {0xFF, 0xFF, 0xBF, 0xFF}}}};
+    {{{10, 0, 0}, 0, {3072, 0}, {0xFF, 0xFF, 0xBF, 0xFF}}}
+};
 static s32 f_LakituAngle = 0;
 static s32 f_BurstFrame = BURST_NOT_STARTED;
 static s32 f_ShotBallAlpha = OPAQUE_ALPHA;
@@ -532,7 +544,8 @@ static Vtx f_ShotBallShadowVertices[QUAD_VERTEX_COUNT] = {
     {{{-1, 0, 1}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{-1, 0, -1}, 0, {0, 2048}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{1, 0, -1}, 0, {2048, 2048}, {0xFF, 0xFF, 0xFF, 0xFF}}},
-    {{{1, 0, 1}, 0, {2048, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}}};
+    {{{1, 0, 1}, 0, {2048, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}}
+};
 static f32 f_LookAtEaseRate = LOOK_AT_START_EASE_RATE;
 static s32 f_LogoLettersAlpha = OPAQUE_ALPHA;
 static s32 f_LogoClubAlpha = OPAQUE_ALPHA;
@@ -562,7 +575,8 @@ static Vtx f_LogoLetterVertices[2][QUAD_VERTEX_COUNT] = {
     {{{{-24, 24, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
         {{{-24, 0, 0}, 0, {0, 1536}, {0xFF, 0xFF, 0xFF, 0xFF}}},
         {{{24, 0, 0}, 0, {3072, 1536}, {0xFF, 0xFF, 0xFF, 0xFF}}},
-        {{{24, 24, 0}, 0, {3072, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}}}};
+        {{{24, 24, 0}, 0, {3072, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}}}
+};
 static Vtx f_LogoClubVertices[LOGO_CLUB_STRIP_COUNT][QUAD_VERTEX_COUNT] = {
     {{{{-76, 39, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
         {{{-76, 26, 0}, 0, {0, 832}, {0xFF, 0xFF, 0xFF, 0xFF}}},
@@ -587,11 +601,13 @@ static Vtx f_LogoClubVertices[LOGO_CLUB_STRIP_COUNT][QUAD_VERTEX_COUNT] = {
     {{{{-76, -26, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
         {{{-76, -39, 0}, 0, {0, 832}, {0xFF, 0xFF, 0xFF, 0xFF}}},
         {{{76, -39, 0}, 0, {9728, 832}, {0xFF, 0xFF, 0xFF, 0xFF}}},
-        {{{76, -26, 0}, 0, {9728, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}}}};
+        {{{76, -26, 0}, 0, {9728, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}}}
+};
 static Vtx f_OpeningSparkVertices[3] = {
     {{{0, 16, 0}, 0, {0, 0}, {0xFF, 0x7F, 0x00, 0xFF}}},
     {{{-1, -48, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xBF, 0xFF}}},
-    {{{1, -48, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xBF, 0xFF}}}};
+    {{{1, -48, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xBF, 0xFF}}}
+};
 
 /* Read by no routine */
 static u8 f_UnusedBufferBeforeCueSlot[0x10] UNUSED;
@@ -605,8 +621,7 @@ static Mtx f_LookAtMarkerTranslation;
 static Mtx f_LookAtMarkerScaling;
 static Mtx f_OpeningBallMatrices[OPENING_BALL_SLOT_COUNT][DRAW_BUFFER_COUNT];
 static Mtx f_OpeningBallScaleMatrices[OPENING_BALL_SLOT_COUNT];
-static Mtx f_OpeningBallShadowMatrices[OPENING_BALL_SLOT_COUNT]
-                                      [DRAW_BUFFER_COUNT];
+static Mtx f_OpeningBallShadowMatrices[OPENING_BALL_SLOT_COUNT][DRAW_BUFFER_COUNT];
 static Vec3 f_LogoBallLastPosition;
 static Mtx f_LogoBallMarioTranslations[DRAW_BUFFER_COUNT];
 static Mtx f_LogoBallMarioRolls[DRAW_BUFFER_COUNT];
@@ -625,8 +640,7 @@ static s32 f_ProjectedBallRight;
 static s32 f_ProjectedBallBottom;
 static s32 f_ProjectedBallTexelStep;
 static Vec3 f_ProjectedLogoBallLastPosition;
-static Mtx f_ProjectedShadowMatrices[DRAW_BUFFER_COUNT]
-                                    [OPENING_BALL_SLOT_COUNT];
+static Mtx f_ProjectedShadowMatrices[DRAW_BUFFER_COUNT][OPENING_BALL_SLOT_COUNT];
 static Mtx f_ProjectedShadowScaleMatrices[OPENING_BALL_SLOT_COUNT];
 static Mtx f_ProjectedLogoBallMarioTranslations[DRAW_BUFFER_COUNT];
 static Mtx f_ProjectedLogoBallMarioRolls[DRAW_BUFFER_COUNT];
@@ -708,12 +722,11 @@ static Vec3 f_OpeningSparksOrigin;
 /* Read by no routine */
 static u8 f_UnusedBufferAfterSparksOrigin[12] UNUSED;
 /* The buffers of character slots 1 and 2 */
-static u8* f_OpeningCharacterBuffers[2];
+static u8 *f_OpeningCharacterBuffers[2];
 /* Read by no routine */
 static u8 f_UnusedBytesAfterCharacterBuffers[4] UNUSED;
-static void* f_OpeningBillboardHeap;
-static Mtx f_OpeningShotDashMatrices[DRAW_BUFFER_COUNT]
-                                    [OPENING_SHOT_MAX_DASH_COUNT];
+static void *f_OpeningBillboardHeap;
+static Mtx f_OpeningShotDashMatrices[DRAW_BUFFER_COUNT][OPENING_SHOT_MAX_DASH_COUNT];
 
 /* Not static: the original left these to the linker's common block */
 CameraEditor g_CameraEditor;
@@ -727,10 +740,10 @@ BallSimulation f_OpeningShotSimulation;
 
 /* Moves f_OpeningSoundChannel on to the next of the rotating channels */
 void AdvanceOpeningSoundChannel(void) {
-  f_OpeningSoundChannel++;
-  if (f_OpeningSoundChannel == ROTATING_SOUND_CHANNEL_COUNT) {
-    f_OpeningSoundChannel = 0;
-  }
+    f_OpeningSoundChannel++;
+    if (f_OpeningSoundChannel == ROTATING_SOUND_CHANNEL_COUNT) {
+        f_OpeningSoundChannel = 0;
+    }
 }
 
 #define LOGO_CLUB_SOUND_CHANNEL 12
@@ -743,15 +756,17 @@ void AdvanceOpeningSoundChannel(void) {
 
 /* Plays the title logo's club striking while it swings round */
 void PlayLogoClubSound(void) {
-  if (f_IsLogoClubSwinging) {
-    PlaySoundWithEffects(SOUND_CONTACT_PLAIN, LOGO_CLUB_SOUND_CHANNEL,
-        LOGO_CLUB_SOUND_LOUDEST_VOLUME -
-            (s32)(f_LogoClubOrbitRadius * LOGO_CLUB_SOUND_FADE_RATE),
-        0,
-        SOUND_FULL_SCALE -
-            ((f_LogoClubPosition[AXIS_X] - (SCREEN_WIDTH / 2)) /
-                LOGO_CLUB_PIXELS_PER_PAN_STEP));
-  }
+    if (f_IsLogoClubSwinging) {
+        PlaySoundWithEffects(
+            SOUND_CONTACT_PLAIN,
+            LOGO_CLUB_SOUND_CHANNEL,
+            LOGO_CLUB_SOUND_LOUDEST_VOLUME -
+                (s32)(f_LogoClubOrbitRadius * LOGO_CLUB_SOUND_FADE_RATE),
+            0,
+            SOUND_FULL_SCALE -
+                ((f_LogoClubPosition[AXIS_X] - (SCREEN_WIDTH / 2)) / LOGO_CLUB_PIXELS_PER_PAN_STEP)
+        );
+    }
 }
 
 /* The channel and pan of each of the opening's ambient sounds */
@@ -778,148 +793,162 @@ void PlayLogoClubSound(void) {
  * then counts down for the length of the sound that started.
  */
 void PlayOpeningAmbientSounds(void) {
-  if (f_AreAmbientSoundsOn == TRUE) {
-    if ((u32)(g_CameraEditor.distance * AMBIENT_SOUND_FADE_RATE) <
-        SOUND_FULL_SCALE) {
-      if (f_AlternatingSoundTimer == 0 &&
-          (rand() & AMBIENT_SOUND_CHANCE_MASK) < AMBIENT_SOUND_CHANCE) {
-        if (f_AlternatingSound == AMBIENT_SOUND_SECOND) {
-          f_AlternatingSound = AMBIENT_SOUND_FIRST;
-          f_AlternatingSoundTimer = f_AlternatingSoundFirstLength;
-        } else {
-          f_AlternatingSound = AMBIENT_SOUND_SECOND;
-          f_AlternatingSoundTimer = f_AlternatingSoundSecondLength;
+    if (f_AreAmbientSoundsOn == TRUE) {
+        if ((u32)(g_CameraEditor.distance * AMBIENT_SOUND_FADE_RATE) < SOUND_FULL_SCALE) {
+            if (f_AlternatingSoundTimer == 0 &&
+                (rand() & AMBIENT_SOUND_CHANCE_MASK) < AMBIENT_SOUND_CHANCE) {
+                if (f_AlternatingSound == AMBIENT_SOUND_SECOND) {
+                    f_AlternatingSound = AMBIENT_SOUND_FIRST;
+                    f_AlternatingSoundTimer = f_AlternatingSoundFirstLength;
+                }
+                else {
+                    f_AlternatingSound = AMBIENT_SOUND_SECOND;
+                    f_AlternatingSoundTimer = f_AlternatingSoundSecondLength;
+                }
+            }
+
+            if (f_RepeatingSoundTimer == 0 &&
+                (rand() & AMBIENT_SOUND_CHANCE_MASK) < AMBIENT_SOUND_CHANCE) {
+                f_RepeatingSoundTimer = f_RepeatingSoundLength;
+            }
+
+            if (f_RandomSoundTimer == 0 &&
+                (rand() & AMBIENT_SOUND_CHANCE_MASK) < AMBIENT_SOUND_CHANCE) {
+                switch (rand() & RANDOM_SOUND_CHOICE_MASK) {
+                    case 0:
+                        f_RandomSound = AMBIENT_SOUND_FIRST;
+                        f_RandomSoundTimer = f_RandomSoundFirstLength;
+                        break;
+                    case 1:
+                        f_RandomSound = AMBIENT_SOUND_SECOND;
+                        f_RandomSoundTimer = f_RandomSoundSecondLength;
+                        break;
+                }
+            }
         }
-      }
 
-      if (f_RepeatingSoundTimer == 0 &&
-          (rand() & AMBIENT_SOUND_CHANCE_MASK) < AMBIENT_SOUND_CHANCE) {
-        f_RepeatingSoundTimer = f_RepeatingSoundLength;
-      }
+        if (f_AlternatingSoundTimer != 0) {
+            if (f_AlternatingSound == AMBIENT_SOUND_FIRST &&
+                f_AlternatingSoundTimer == f_AlternatingSoundFirstLength) {
+                PlaySoundWithEffects(
+                    SOUND_AMBIENT_ALTERNATING_FIRST,
+                    ALTERNATING_SOUND_CHANNEL,
+                    SOUND_FULL_SCALE - (u32)(g_CameraEditor.distance * AMBIENT_SOUND_FADE_RATE),
+                    0,
+                    ALTERNATING_SOUND_PAN
+                );
+            }
 
-      if (f_RandomSoundTimer == 0 &&
-          (rand() & AMBIENT_SOUND_CHANCE_MASK) < AMBIENT_SOUND_CHANCE) {
-        switch (rand() & RANDOM_SOUND_CHOICE_MASK) {
-          case 0:
-            f_RandomSound = AMBIENT_SOUND_FIRST;
-            f_RandomSoundTimer = f_RandomSoundFirstLength;
-            break;
-          case 1:
-            f_RandomSound = AMBIENT_SOUND_SECOND;
-            f_RandomSoundTimer = f_RandomSoundSecondLength;
-            break;
+            if (f_AlternatingSound == AMBIENT_SOUND_SECOND &&
+                f_AlternatingSoundTimer == f_AlternatingSoundSecondLength) {
+                PlaySoundWithEffects(
+                    SOUND_AMBIENT_ALTERNATING_SECOND,
+                    ALTERNATING_SOUND_CHANNEL,
+                    SOUND_FULL_SCALE - (u32)(g_CameraEditor.distance * AMBIENT_SOUND_FADE_RATE),
+                    0,
+                    ALTERNATING_SOUND_PAN
+                );
+            }
+
+            f_AlternatingSoundTimer--;
         }
-      }
+
+        if (f_RepeatingSoundTimer != 0) {
+            if (f_RepeatingSoundTimer == f_RepeatingSoundLength) {
+                PlaySoundWithEffects(
+                    SOUND_AMBIENT_REPEATING,
+                    REPEATING_SOUND_CHANNEL,
+                    SOUND_FULL_SCALE - (u32)(g_CameraEditor.distance * AMBIENT_SOUND_FADE_RATE),
+                    0,
+                    REPEATING_SOUND_PAN
+                );
+            }
+
+            f_RepeatingSoundTimer--;
+        }
+
+        if (f_RandomSoundTimer != 0) {
+            if (f_RandomSound == AMBIENT_SOUND_FIRST &&
+                f_RandomSoundTimer == f_RandomSoundFirstLength) {
+                PlaySoundWithEffects(
+                    SOUND_AMBIENT_RANDOM_FIRST,
+                    RANDOM_SOUND_CHANNEL,
+                    SOUND_FULL_SCALE - (u32)(g_CameraEditor.distance * AMBIENT_SOUND_FADE_RATE),
+                    0,
+                    RANDOM_SOUND_PAN
+                );
+            }
+
+            if (f_RandomSound == AMBIENT_SOUND_SECOND &&
+                f_RandomSoundTimer == f_RandomSoundSecondLength) {
+                PlaySoundWithEffects(
+                    SOUND_AMBIENT_RANDOM_SECOND,
+                    RANDOM_SOUND_CHANNEL,
+                    SOUND_FULL_SCALE - (u32)(g_CameraEditor.distance * AMBIENT_SOUND_FADE_RATE),
+                    0,
+                    RANDOM_SOUND_PAN
+                );
+            }
+
+            if (--f_RandomSoundTimer == 0) {
+                f_RandomSound = AMBIENT_SOUND_NONE;
+            }
+        }
     }
-
-    if (f_AlternatingSoundTimer != 0) {
-      if (f_AlternatingSound == AMBIENT_SOUND_FIRST &&
-          f_AlternatingSoundTimer == f_AlternatingSoundFirstLength) {
-        PlaySoundWithEffects(SOUND_AMBIENT_ALTERNATING_FIRST,
-            ALTERNATING_SOUND_CHANNEL,
-            SOUND_FULL_SCALE -
-                (u32)(g_CameraEditor.distance * AMBIENT_SOUND_FADE_RATE),
-            0, ALTERNATING_SOUND_PAN);
-      }
-
-      if (f_AlternatingSound == AMBIENT_SOUND_SECOND &&
-          f_AlternatingSoundTimer == f_AlternatingSoundSecondLength) {
-        PlaySoundWithEffects(SOUND_AMBIENT_ALTERNATING_SECOND,
-            ALTERNATING_SOUND_CHANNEL,
-            SOUND_FULL_SCALE -
-                (u32)(g_CameraEditor.distance * AMBIENT_SOUND_FADE_RATE),
-            0, ALTERNATING_SOUND_PAN);
-      }
-
-      f_AlternatingSoundTimer--;
-    }
-
-    if (f_RepeatingSoundTimer != 0) {
-      if (f_RepeatingSoundTimer == f_RepeatingSoundLength) {
-        PlaySoundWithEffects(SOUND_AMBIENT_REPEATING, REPEATING_SOUND_CHANNEL,
-            SOUND_FULL_SCALE -
-                (u32)(g_CameraEditor.distance * AMBIENT_SOUND_FADE_RATE),
-            0, REPEATING_SOUND_PAN);
-      }
-
-      f_RepeatingSoundTimer--;
-    }
-
-    if (f_RandomSoundTimer != 0) {
-      if (f_RandomSound == AMBIENT_SOUND_FIRST &&
-          f_RandomSoundTimer == f_RandomSoundFirstLength) {
-        PlaySoundWithEffects(SOUND_AMBIENT_RANDOM_FIRST, RANDOM_SOUND_CHANNEL,
-            SOUND_FULL_SCALE -
-                (u32)(g_CameraEditor.distance * AMBIENT_SOUND_FADE_RATE),
-            0, RANDOM_SOUND_PAN);
-      }
-
-      if (f_RandomSound == AMBIENT_SOUND_SECOND &&
-          f_RandomSoundTimer == f_RandomSoundSecondLength) {
-        PlaySoundWithEffects(SOUND_AMBIENT_RANDOM_SECOND, RANDOM_SOUND_CHANNEL,
-            SOUND_FULL_SCALE -
-                (u32)(g_CameraEditor.distance * AMBIENT_SOUND_FADE_RATE),
-            0, RANDOM_SOUND_PAN);
-      }
-
-      if (--f_RandomSoundTimer == 0) {
-        f_RandomSound = AMBIENT_SOUND_NONE;
-      }
-    }
-  }
 }
 
 void LoadOpeningLogo(void);
 
 void LoadOpening(void) {
-  EncodedAsset asset;
-  s32 bufferIndex;
+    EncodedAsset asset;
+    s32 bufferIndex;
 
-  osSyncPrintf("ConstOpening\n");
-  f_OpeningBillboardHeap = AllocMemory(OPENING_BILLBOARD_HEAP_SIZE);
-  InitBillboardManager(f_OpeningBillboardHeap, OPENING_BILLBOARD_HEAP_SIZE);
-  f_OpeningCue = OPENING_CUE_DONE;
-  for (bufferIndex = 0; bufferIndex < ARRAY_COUNT(f_OpeningCharacterBuffers);
-      bufferIndex++) {
-    f_OpeningCharacterBuffers[bufferIndex] =
-        AllocMemory(GetCharacterBufferSize());
-    SetCharacterBuffer(bufferIndex + 1, f_OpeningCharacterBuffers[bufferIndex]);
-  }
+    osSyncPrintf("ConstOpening\n");
+    f_OpeningBillboardHeap = AllocMemory(OPENING_BILLBOARD_HEAP_SIZE);
+    InitBillboardManager(f_OpeningBillboardHeap, OPENING_BILLBOARD_HEAP_SIZE);
+    f_OpeningCue = OPENING_CUE_DONE;
+    for (bufferIndex = 0; bufferIndex < ARRAY_COUNT(f_OpeningCharacterBuffers); bufferIndex++) {
+        f_OpeningCharacterBuffers[bufferIndex] = AllocMemory(GetCharacterBufferSize());
+        SetCharacterBuffer(bufferIndex + 1, f_OpeningCharacterBuffers[bufferIndex]);
+    }
 
-  SetCharacterBuffer(3, (u8*)g_DepthBuffer);
-  g_ShadowTexture = AllocMemory(OpenEncodedAsset(ASSET_SHADOW_TEXTURE, &asset));
-  ReadEncodedAsset(g_ShadowTexture, &asset);
-  f_AreAmbientSoundsOn = FALSE;
-  LoadEffectImages();
-  LoadOpeningLogo();
+    SetCharacterBuffer(3, (u8 *)g_DepthBuffer);
+    g_ShadowTexture = AllocMemory(OpenEncodedAsset(ASSET_SHADOW_TEXTURE, &asset));
+    ReadEncodedAsset(g_ShadowTexture, &asset);
+    f_AreAmbientSoundsOn = FALSE;
+    LoadEffectImages();
+    LoadOpeningLogo();
 }
 
 void FreeOpening(void) {
-  s32 bufferIndex;
+    s32 bufferIndex;
 
-  FreeMemory(&g_ShadowTexture);
-  for (bufferIndex = 0; bufferIndex < ARRAY_COUNT(f_OpeningCharacterBuffers);
-      bufferIndex++) {
-    FreeMemory(&f_OpeningCharacterBuffers[bufferIndex]);
-  }
+    FreeMemory(&g_ShadowTexture);
+    for (bufferIndex = 0; bufferIndex < ARRAY_COUNT(f_OpeningCharacterBuffers); bufferIndex++) {
+        FreeMemory(&f_OpeningCharacterBuffers[bufferIndex]);
+    }
 
-  AssignCharacterBuffers();
-  FreeMemory(&f_OpeningBillboardHeap);
-  SetFillColor(255, 255, 255);
-  FreeEffectImages();
+    AssignCharacterBuffers();
+    FreeMemory(&f_OpeningBillboardHeap);
+    SetFillColor(255, 255, 255);
+    FreeEffectImages();
 }
 
 /* The caller passes the frame parity too, which goes unused */
 void DrawOpeningCharacters(
-    CameraMatrices* matrices, Gfx** displayListHead, s32 frameParity UNUSED) {
-  s32 slotIndex = 0;
+    CameraMatrices *matrices,
+    Gfx **displayListHead,
+    s32 frameParity UNUSED
+) {
+    s32 slotIndex = 0;
 
-  g_DisplayListHead = *displayListHead;
-  do {
-    DrawCharacterAndShadow(matrices, OPENING_CAMERA, slotIndex);
-    slotIndex++;
-  } while (slotIndex < CHARACTER_SLOT_COUNT);
-  *displayListHead = g_DisplayListHead;
+    g_DisplayListHead = *displayListHead;
+    do {
+        DrawCharacterAndShadow(matrices, OPENING_CAMERA, slotIndex);
+        slotIndex++;
+    }
+    while (slotIndex < CHARACTER_SLOT_COUNT);
+    *displayListHead = g_DisplayListHead;
 }
 
 /*
@@ -927,100 +956,144 @@ void DrawOpeningCharacters(
  * and stretches a dash between each pair of positions along its path
  */
 void BuildOpeningShotPath(void) {
-  CoursePoint start;
-  Mat4 dash;
-  Mat4 transform;
-  s32 step;
-  s32 length;
+    CoursePoint start;
+    Mat4 dash;
+    Mat4 transform;
+    s32 step;
+    s32 length;
 
-  for (step = 0; step < f_OpeningShotDashCount; step++) {
-    start[AXIS_X] = f_OpeningShotSimulation.position[AXIS_X];
-    start[AXIS_Y] = f_OpeningShotSimulation.position[AXIS_Y];
-    start[AXIS_Z] = f_OpeningShotSimulation.position[AXIS_Z];
-    StepBallSimulation(&f_OpeningShotSimulation);
-    length =
-        IntLength3D(f_OpeningShotSimulation.position[AXIS_X] - start[AXIS_X],
+    for (step = 0; step < f_OpeningShotDashCount; step++) {
+        start[AXIS_X] = f_OpeningShotSimulation.position[AXIS_X];
+        start[AXIS_Y] = f_OpeningShotSimulation.position[AXIS_Y];
+        start[AXIS_Z] = f_OpeningShotSimulation.position[AXIS_Z];
+        StepBallSimulation(&f_OpeningShotSimulation);
+        length = IntLength3D(
+            f_OpeningShotSimulation.position[AXIS_X] - start[AXIS_X],
             f_OpeningShotSimulation.position[AXIS_Y] - start[AXIS_Y],
-            f_OpeningShotSimulation.position[AXIS_Z] - start[AXIS_Z]);
-    guTranslateF(dash, start[AXIS_X] * COURSE_TO_WORLD_SCALE,
-        (start[AXIS_Y] - SHOT_PREVIEW_DROP) * COURSE_TO_WORLD_SCALE,
-        start[AXIS_Z] * COURSE_TO_WORLD_SCALE);
-    if (length != 0 && length <= SHOT_PREVIEW_MAX_DASH_LENGTH) {
-      guScaleF(dash, 1.0f, 1.0f, length * COURSE_TO_WORLD_SCALE);
-      guAlignF(transform, 0.0f,
-          f_OpeningShotSimulation.position[AXIS_X] - start[AXIS_X],
-          f_OpeningShotSimulation.position[AXIS_Y] - start[AXIS_Y],
-          f_OpeningShotSimulation.position[AXIS_Z] - start[AXIS_Z]);
-      guMtxCatF(dash, transform, dash);
-      guTranslateF(transform, start[AXIS_X] * COURSE_TO_WORLD_SCALE,
-          start[AXIS_Y] * COURSE_TO_WORLD_SCALE,
-          start[AXIS_Z] * COURSE_TO_WORLD_SCALE);
-      guMtxCatF(dash, transform, dash);
-    }
+            f_OpeningShotSimulation.position[AXIS_Z] - start[AXIS_Z]
+        );
+        guTranslateF(
+            dash,
+            start[AXIS_X] * COURSE_TO_WORLD_SCALE,
+            (start[AXIS_Y] - SHOT_PREVIEW_DROP) * COURSE_TO_WORLD_SCALE,
+            start[AXIS_Z] * COURSE_TO_WORLD_SCALE
+        );
+        if (length != 0 && length <= SHOT_PREVIEW_MAX_DASH_LENGTH) {
+            guScaleF(dash, 1.0f, 1.0f, length * COURSE_TO_WORLD_SCALE);
+            guAlignF(
+                transform,
+                0.0f,
+                f_OpeningShotSimulation.position[AXIS_X] - start[AXIS_X],
+                f_OpeningShotSimulation.position[AXIS_Y] - start[AXIS_Y],
+                f_OpeningShotSimulation.position[AXIS_Z] - start[AXIS_Z]
+            );
+            guMtxCatF(dash, transform, dash);
+            guTranslateF(
+                transform,
+                start[AXIS_X] * COURSE_TO_WORLD_SCALE,
+                start[AXIS_Y] * COURSE_TO_WORLD_SCALE,
+                start[AXIS_Z] * COURSE_TO_WORLD_SCALE
+            );
+            guMtxCatF(dash, transform, dash);
+        }
 
-    guMtxF2L(dash, &f_OpeningShotDashMatrices[g_DrawBufferIndex][step]);
-  }
+        guMtxF2L(dash, &f_OpeningShotDashMatrices[g_DrawBufferIndex][step]);
+    }
 }
 
 /* Draws the dashes that BuildOpeningShotPath placed along the shot's path */
-void DrawOpeningShotPath(CameraMatrices* matrices UNUSED) {
-  s32 step;
+void DrawOpeningShotPath(CameraMatrices *matrices UNUSED) {
+    s32 step;
 
-  if (!f_IsOpeningShotPathShown) {
-    return;
-  }
+    if (!f_IsOpeningShotPathShown) {
+        return;
+    }
 
-  gDPPipeSync(g_DisplayListHead++);
-  gDPPipeSync(g_DisplayListHead++);
-  gDPSetCycleType(g_DisplayListHead++, G_CYC_1CYCLE);
-  gDPPipeSync(g_DisplayListHead++);
-  gDPSetRenderMode(
-      g_DisplayListHead++, G_RM_AA_ZB_XLU_SURF, G_RM_AA_ZB_XLU_SURF2);
-  gSPLoadGeometryMode(g_DisplayListHead++, 0);
-  gSPSetGeometryMode(
-      g_DisplayListHead++, G_ZBUFFER | G_SHADE | G_SHADING_SMOOTH);
-  gDPSetCombineLERP(g_DisplayListHead++, PRIMITIVE, ENVIRONMENT, TEXEL0,
-      ENVIRONMENT, PRIMITIVE, 0, TEXEL0, 0, PRIMITIVE, ENVIRONMENT, TEXEL0,
-      ENVIRONMENT, PRIMITIVE, 0, TEXEL0, 0);
-  gDPPipeSync(g_DisplayListHead++);
-  gDPSetTextureFilter(g_DisplayListHead++, G_TF_BILERP);
-  gDPPipeSync(g_DisplayListHead++);
-  gDPSetAlphaCompare(g_DisplayListHead++, G_AC_THRESHOLD);
-  gDPSetBlendColor(g_DisplayListHead++, 0xFF, 0xFF, 0xFF, 0x40);
-  gDPPipeSync(g_DisplayListHead++);
-  gDPSetTexturePersp(g_DisplayListHead++, G_TP_PERSP);
-  gSPTexture(g_DisplayListHead++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0,
-      G_TX_RENDERTILE, G_ON);
-  gDPLoadTextureBlock(g_DisplayListHead++,
-      TextureAddress(ImageBody(g_ShotPreviewDashImage)), G_IM_FMT_I,
-      G_IM_SIZ_8b, SHOT_PREVIEW_IMAGE_SIZE, SHOT_PREVIEW_IMAGE_SIZE, 0,
-      G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
-      TextureMask(SHOT_PREVIEW_IMAGE_SIZE),
-      TextureMask(SHOT_PREVIEW_IMAGE_SIZE), G_TX_NOLOD, G_TX_NOLOD);
-  gDPSetTileSize(g_DisplayListHead++, G_TX_RENDERTILE, f_OpeningShotPathScroll,
-      0,
-      f_OpeningShotPathScroll +
-          (SHOT_PREVIEW_IMAGE_SIZE << G_TEXTURE_IMAGE_FRAC),
-      SHOT_PREVIEW_IMAGE_SIZE << G_TEXTURE_IMAGE_FRAC);
-  gDPSetCombineMode(g_DisplayListHead++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
-  if (f_IsOpeningShotPathRed) {
-    gDPSetPrimColor(g_DisplayListHead++, 0, 0, 0xFF, 0x00, 0x00, 0xC8);
-  } else {
-    gDPSetPrimColor(g_DisplayListHead++, 0, 0, 0xFF, 0xFF, 0xFF, 0x80);
-  }
+    gDPPipeSync(g_DisplayListHead++);
+    gDPPipeSync(g_DisplayListHead++);
+    gDPSetCycleType(g_DisplayListHead++, G_CYC_1CYCLE);
+    gDPPipeSync(g_DisplayListHead++);
+    gDPSetRenderMode(g_DisplayListHead++, G_RM_AA_ZB_XLU_SURF, G_RM_AA_ZB_XLU_SURF2);
+    gSPLoadGeometryMode(g_DisplayListHead++, 0);
+    gSPSetGeometryMode(g_DisplayListHead++, G_ZBUFFER | G_SHADE | G_SHADING_SMOOTH);
+    gDPSetCombineLERP(
+        g_DisplayListHead++,
+        PRIMITIVE,
+        ENVIRONMENT,
+        TEXEL0,
+        ENVIRONMENT,
+        PRIMITIVE,
+        0,
+        TEXEL0,
+        0,
+        PRIMITIVE,
+        ENVIRONMENT,
+        TEXEL0,
+        ENVIRONMENT,
+        PRIMITIVE,
+        0,
+        TEXEL0,
+        0
+    );
+    gDPPipeSync(g_DisplayListHead++);
+    gDPSetTextureFilter(g_DisplayListHead++, G_TF_BILERP);
+    gDPPipeSync(g_DisplayListHead++);
+    gDPSetAlphaCompare(g_DisplayListHead++, G_AC_THRESHOLD);
+    gDPSetBlendColor(g_DisplayListHead++, 0xFF, 0xFF, 0xFF, 0x40);
+    gDPPipeSync(g_DisplayListHead++);
+    gDPSetTexturePersp(g_DisplayListHead++, G_TP_PERSP);
+    gSPTexture(
+        g_DisplayListHead++,
+        TEXTURE_SCALE_HALF,
+        TEXTURE_SCALE_HALF,
+        0,
+        G_TX_RENDERTILE,
+        G_ON
+    );
+    gDPLoadTextureBlock(
+        g_DisplayListHead++,
+        TextureAddress(ImageBody(g_ShotPreviewDashImage)),
+        G_IM_FMT_I,
+        G_IM_SIZ_8b,
+        SHOT_PREVIEW_IMAGE_SIZE,
+        SHOT_PREVIEW_IMAGE_SIZE,
+        0,
+        G_TX_NOMIRROR | G_TX_WRAP,
+        G_TX_NOMIRROR | G_TX_WRAP,
+        TextureMask(SHOT_PREVIEW_IMAGE_SIZE),
+        TextureMask(SHOT_PREVIEW_IMAGE_SIZE),
+        G_TX_NOLOD,
+        G_TX_NOLOD
+    );
+    gDPSetTileSize(
+        g_DisplayListHead++,
+        G_TX_RENDERTILE,
+        f_OpeningShotPathScroll,
+        0,
+        f_OpeningShotPathScroll + (SHOT_PREVIEW_IMAGE_SIZE << G_TEXTURE_IMAGE_FRAC),
+        SHOT_PREVIEW_IMAGE_SIZE << G_TEXTURE_IMAGE_FRAC
+    );
+    gDPSetCombineMode(g_DisplayListHead++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
+    if (f_IsOpeningShotPathRed) {
+        gDPSetPrimColor(g_DisplayListHead++, 0, 0, 0xFF, 0x00, 0x00, 0xC8);
+    }
+    else {
+        gDPSetPrimColor(g_DisplayListHead++, 0, 0, 0xFF, 0xFF, 0xFF, 0x80);
+    }
 
-  gDPPipeSync(g_DisplayListHead++);
-  for (step = 0; step < f_OpeningShotPathDashCount; step++) {
-    gSPMatrix(g_DisplayListHead++,
-        &f_OpeningShotDashMatrices[g_DrawBufferIndex][step],
-        G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
-    gSPVertex(
-        g_DisplayListHead++, f_OpeningShotDashVertices, QUAD_VERTEX_COUNT, 0);
-    gSP2Triangles(g_DisplayListHead++, 0, 1, 2, 0, 0, 2, 3, 0);
-    gSPPopMatrix(g_DisplayListHead++, G_MTX_MODELVIEW);
-  }
+    gDPPipeSync(g_DisplayListHead++);
+    for (step = 0; step < f_OpeningShotPathDashCount; step++) {
+        gSPMatrix(
+            g_DisplayListHead++,
+            &f_OpeningShotDashMatrices[g_DrawBufferIndex][step],
+            G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW
+        );
+        gSPVertex(g_DisplayListHead++, f_OpeningShotDashVertices, QUAD_VERTEX_COUNT, 0);
+        gSP2Triangles(g_DisplayListHead++, 0, 1, 2, 0, 0, 2, 3, 0);
+        gSPPopMatrix(g_DisplayListHead++, G_MTX_MODELVIEW);
+    }
 
-  gDPPipeSync(g_DisplayListHead++);
+    gDPPipeSync(g_DisplayListHead++);
 }
 
 /*
@@ -1028,16 +1101,16 @@ void DrawOpeningShotPath(CameraMatrices* matrices UNUSED) {
  * placed on the tee as the name logo of its character is shown.
  */
 enum OpeningModel {
-  OPENING_MODEL_MARIO = 3,
-  OPENING_MODEL_YOSHI = 9,
-  OPENING_MODEL_BABY_MARIO,
-  OPENING_MODEL_DONKEY_KONG,
-  OPENING_MODEL_PLUM,
-  OPENING_MODEL_PEACH,
-  OPENING_MODEL_LUIGI,
-  /* Toad, by its textures: a red spot on white, a face and a blue vest with
-   * yellow trim. Shown without a name logo. */
-  OPENING_MODEL_TOAD = 16
+    OPENING_MODEL_MARIO = 3,
+    OPENING_MODEL_YOSHI = 9,
+    OPENING_MODEL_BABY_MARIO,
+    OPENING_MODEL_DONKEY_KONG,
+    OPENING_MODEL_PLUM,
+    OPENING_MODEL_PEACH,
+    OPENING_MODEL_LUIGI,
+    /* Toad, by its textures: a red spot on white, a face and a blue vest with
+     * yellow trim. Shown without a name logo. */
+    OPENING_MODEL_TOAD = 16
 };
 
 /* The animations the opening plays on its characters, numbered per model */
@@ -1088,11 +1161,11 @@ enum OpeningModel {
  * UpdateOpeningCharacters has 28 words differing, 10 in shape.
  */
 #define PlaceCueCharacter(point, x, z, heading) \
-  { \
-    (point)[0] = (x); \
-    (point)[2] = (z); \
-    PlaceCharacter(f_CueSlotIndex, (point), DegreesToRadians(heading)); \
-  }
+    { \
+        (point)[0] = (x); \
+        (point)[2] = (z); \
+        PlaceCharacter(f_CueSlotIndex, (point), DegreesToRadians(heading)); \
+    }
 
 /*
  * Sets up the opening's characters for the cue that its script has given, and
@@ -1104,351 +1177,353 @@ enum OpeningModel {
  * from OPENING_CUE_DONE to an invalid cue.
  */
 s32 UpdateOpeningCharacters(void) {
-  CoursePoint point0;
-  CoursePoint point1;
-  CoursePoint point2;
-  CoursePoint point3;
-  CoursePoint point4;
-  CoursePoint point5;
-  CoursePoint point6;
-  CoursePoint point7;
-  CoursePoint point8;
-  CoursePoint point9;
-  CoursePoint point10;
-  CoursePoint point11;
-  CoursePoint point12;
-  CoursePoint point13;
-  CoursePoint point14;
-  CoursePoint point15;
-  CoursePoint point16;
-  CoursePoint point17;
-  CoursePoint point18;
-  CoursePoint point19;
-  CoursePoint point20;
-  CoursePoint point21;
-  CoursePoint point22;
-  CoursePoint point23;
-  CoursePoint point24;
-  CoursePoint point25;
-  CoursePoint point26;
-  CoursePoint point27;
-  CoursePoint point28;
-  CoursePoint point29;
+    CoursePoint point0;
+    CoursePoint point1;
+    CoursePoint point2;
+    CoursePoint point3;
+    CoursePoint point4;
+    CoursePoint point5;
+    CoursePoint point6;
+    CoursePoint point7;
+    CoursePoint point8;
+    CoursePoint point9;
+    CoursePoint point10;
+    CoursePoint point11;
+    CoursePoint point12;
+    CoursePoint point13;
+    CoursePoint point14;
+    CoursePoint point15;
+    CoursePoint point16;
+    CoursePoint point17;
+    CoursePoint point18;
+    CoursePoint point19;
+    CoursePoint point20;
+    CoursePoint point21;
+    CoursePoint point22;
+    CoursePoint point23;
+    CoursePoint point24;
+    CoursePoint point25;
+    CoursePoint point26;
+    CoursePoint point27;
+    CoursePoint point28;
+    CoursePoint point29;
 
-  switch (f_OpeningCue) {
-    case OPENING_CUE_MARIO_TEE_SHOT:
-      SetCharacterLights();
-      f_CueSlotIndex = 0;
-      if (ToggleOpeningCharacter(0, OPENING_MODEL_MARIO)) {
-        SetCharacterAnimation(f_CueSlotIndex, MARIO_TEE_SHOT_ANIMATION);
-        PlaceCueCharacter(point0, 0xF3400, 0x490000, -30);
-        f_LastPlacedSlotIndex = f_CueSlotIndex;
-      }
+    switch (f_OpeningCue) {
+        case OPENING_CUE_MARIO_TEE_SHOT:
+            SetCharacterLights();
+            f_CueSlotIndex = 0;
+            if (ToggleOpeningCharacter(0, OPENING_MODEL_MARIO)) {
+                SetCharacterAnimation(f_CueSlotIndex, MARIO_TEE_SHOT_ANIMATION);
+                PlaceCueCharacter(point0, 0xF3400, 0x490000, -30);
+                f_LastPlacedSlotIndex = f_CueSlotIndex;
+            }
 
-      f_OpeningCue = OPENING_CUE_DONE;
-      break;
-    case OPENING_CUE_PEACH_CHEER:
-      f_CueSlotIndex = 1;
-      if (ToggleOpeningCharacter(1, OPENING_MODEL_PEACH)) {
-        SetCharacterAnimation(f_CueSlotIndex, PEACH_CHEER_ANIMATION);
-        PlaceCueCharacter(point1, 0xA0B58, 0x4A28BF, 80);
-        f_OpeningCue = OPENING_CUE_DONE;
-        f_LastPlacedSlotIndex = f_CueSlotIndex;
-      }
+            f_OpeningCue = OPENING_CUE_DONE;
+            break;
+        case OPENING_CUE_PEACH_CHEER:
+            f_CueSlotIndex = 1;
+            if (ToggleOpeningCharacter(1, OPENING_MODEL_PEACH)) {
+                SetCharacterAnimation(f_CueSlotIndex, PEACH_CHEER_ANIMATION);
+                PlaceCueCharacter(point1, 0xA0B58, 0x4A28BF, 80);
+                f_OpeningCue = OPENING_CUE_DONE;
+                f_LastPlacedSlotIndex = f_CueSlotIndex;
+            }
 
-      f_OpeningCue++;
-      break;
-    case OPENING_CUE_LUIGI_CHEER:
-      f_CueSlotIndex = 2;
-      if (ToggleOpeningCharacter(2, OPENING_MODEL_LUIGI)) {
-        SetCharacterAnimation(f_CueSlotIndex, LUIGI_CHEER_ANIMATION);
-        PlaceCueCharacter(point2, 0x1368A0, 0x49D208, 0);
-        f_LastPlacedSlotIndex = f_CueSlotIndex;
-      }
+            f_OpeningCue++;
+            break;
+        case OPENING_CUE_LUIGI_CHEER:
+            f_CueSlotIndex = 2;
+            if (ToggleOpeningCharacter(2, OPENING_MODEL_LUIGI)) {
+                SetCharacterAnimation(f_CueSlotIndex, LUIGI_CHEER_ANIMATION);
+                PlaceCueCharacter(point2, 0x1368A0, 0x49D208, 0);
+                f_LastPlacedSlotIndex = f_CueSlotIndex;
+            }
 
-      f_OpeningCue = OPENING_CUE_DONE;
-      break;
-    case OPENING_CUE_PEACH_TEE_SHOT:
-      FreeCharacterSlot(0);
-      FreeCharacterSlot(1);
-      FreeCharacterSlot(2);
-      f_CueSlotIndex = 3;
-      if (ToggleOpeningCharacter(3, OPENING_MODEL_PEACH)) {
-        SetCharacterAnimation(f_CueSlotIndex, PEACH_TEE_SHOT_ANIMATION);
-        PlaceCueCharacter(point3, 0xF3400, 0x490000, -30);
-        f_LastPlacedSlotIndex = f_CueSlotIndex;
-      }
+            f_OpeningCue = OPENING_CUE_DONE;
+            break;
+        case OPENING_CUE_PEACH_TEE_SHOT:
+            FreeCharacterSlot(0);
+            FreeCharacterSlot(1);
+            FreeCharacterSlot(2);
+            f_CueSlotIndex = 3;
+            if (ToggleOpeningCharacter(3, OPENING_MODEL_PEACH)) {
+                SetCharacterAnimation(f_CueSlotIndex, PEACH_TEE_SHOT_ANIMATION);
+                PlaceCueCharacter(point3, 0xF3400, 0x490000, -30);
+                f_LastPlacedSlotIndex = f_CueSlotIndex;
+            }
 
-      f_OpeningCue = OPENING_CUE_DONE;
-      break;
-    case OPENING_CUE_PLUM_CHEER:
-      f_CueSlotIndex = 0;
-      if (ToggleOpeningCharacter(0, OPENING_MODEL_PLUM)) {
-        SetCharacterAnimation(f_CueSlotIndex, PLUM_CHEER_ANIMATION);
-        PlaceCueCharacter(point4, 0xB2A34, 0x4F9800, 10);
-        f_LastPlacedSlotIndex = f_CueSlotIndex;
-      }
+            f_OpeningCue = OPENING_CUE_DONE;
+            break;
+        case OPENING_CUE_PLUM_CHEER:
+            f_CueSlotIndex = 0;
+            if (ToggleOpeningCharacter(0, OPENING_MODEL_PLUM)) {
+                SetCharacterAnimation(f_CueSlotIndex, PLUM_CHEER_ANIMATION);
+                PlaceCueCharacter(point4, 0xB2A34, 0x4F9800, 10);
+                f_LastPlacedSlotIndex = f_CueSlotIndex;
+            }
 
-      f_OpeningCue = OPENING_CUE_DONE;
-      break;
-    case OPENING_CUE_PLUM_TEE_SHOT:
-      FreeCharacterSlot(0);
-      FreeCharacterSlot(3);
-      f_CueSlotIndex = 1;
-      if (ToggleOpeningCharacter(1, OPENING_MODEL_PLUM)) {
-        SetCharacterAnimation(f_CueSlotIndex, PLUM_TEE_SHOT_ANIMATION);
-        PlaceCueCharacter(point5, 0xF3400, 0x490000, 0);
-        f_LastPlacedSlotIndex = f_CueSlotIndex;
-      }
+            f_OpeningCue = OPENING_CUE_DONE;
+            break;
+        case OPENING_CUE_PLUM_TEE_SHOT:
+            FreeCharacterSlot(0);
+            FreeCharacterSlot(3);
+            f_CueSlotIndex = 1;
+            if (ToggleOpeningCharacter(1, OPENING_MODEL_PLUM)) {
+                SetCharacterAnimation(f_CueSlotIndex, PLUM_TEE_SHOT_ANIMATION);
+                PlaceCueCharacter(point5, 0xF3400, 0x490000, 0);
+                f_LastPlacedSlotIndex = f_CueSlotIndex;
+            }
 
-      f_OpeningCue = OPENING_CUE_DONE;
-      break;
-    case OPENING_CUE_MARIO_CHEER:
-      f_CueSlotIndex = 2;
-      if (ToggleOpeningCharacter(2, OPENING_MODEL_MARIO)) {
-        SetCharacterAnimation(f_CueSlotIndex, MARIO_CHEER_ANIMATION);
-        PlaceCueCharacter(point6, 0x1610CF, 0x4AFA34, 0);
-        f_LastPlacedSlotIndex = f_CueSlotIndex;
-      }
+            f_OpeningCue = OPENING_CUE_DONE;
+            break;
+        case OPENING_CUE_MARIO_CHEER:
+            f_CueSlotIndex = 2;
+            if (ToggleOpeningCharacter(2, OPENING_MODEL_MARIO)) {
+                SetCharacterAnimation(f_CueSlotIndex, MARIO_CHEER_ANIMATION);
+                PlaceCueCharacter(point6, 0x1610CF, 0x4AFA34, 0);
+                f_LastPlacedSlotIndex = f_CueSlotIndex;
+            }
 
-      f_OpeningCue = OPENING_CUE_DONE;
-      break;
-    case OPENING_CUE_LUIGI_TEE_SHOT:
-      FreeCharacterSlot(1);
-      FreeCharacterSlot(2);
-      f_CueSlotIndex = 0;
-      if (ToggleOpeningCharacter(0, OPENING_MODEL_LUIGI)) {
-        SetCharacterAnimation(f_CueSlotIndex, LUIGI_TEE_SHOT_ANIMATION);
-        PlaceCueCharacter(point7, 0xF3400, 0x490000, -45);
-        f_LastPlacedSlotIndex = f_CueSlotIndex;
-      }
+            f_OpeningCue = OPENING_CUE_DONE;
+            break;
+        case OPENING_CUE_LUIGI_TEE_SHOT:
+            FreeCharacterSlot(1);
+            FreeCharacterSlot(2);
+            f_CueSlotIndex = 0;
+            if (ToggleOpeningCharacter(0, OPENING_MODEL_LUIGI)) {
+                SetCharacterAnimation(f_CueSlotIndex, LUIGI_TEE_SHOT_ANIMATION);
+                PlaceCueCharacter(point7, 0xF3400, 0x490000, -45);
+                f_LastPlacedSlotIndex = f_CueSlotIndex;
+            }
 
-      f_OpeningCue = OPENING_CUE_DONE;
-      break;
-    case OPENING_CUE_PEACH_PLUM_WALK:
-      FreeCharacterSlot(0);
-      f_CueSlotIndex = 1;
-      if (ToggleOpeningCharacter(1, OPENING_MODEL_PLUM)) {
-        SetCharacterAnimation(f_CueSlotIndex, PLUM_WALK_ANIMATION);
-        PlaceCueCharacter(point8, 0x29EB94, 0x26DDDA, 0);
-      }
+            f_OpeningCue = OPENING_CUE_DONE;
+            break;
+        case OPENING_CUE_PEACH_PLUM_WALK:
+            FreeCharacterSlot(0);
+            f_CueSlotIndex = 1;
+            if (ToggleOpeningCharacter(1, OPENING_MODEL_PLUM)) {
+                SetCharacterAnimation(f_CueSlotIndex, PLUM_WALK_ANIMATION);
+                PlaceCueCharacter(point8, 0x29EB94, 0x26DDDA, 0);
+            }
 
-      f_CueSlotIndex = 2;
-      if (ToggleOpeningCharacter(2, OPENING_MODEL_PEACH)) {
-        SetCharacterAnimation(f_CueSlotIndex, PEACH_WALK_ANIMATION);
-        PlaceCueCharacter(point9, 0x29EB94, 0x26DDDA, 0);
-        f_LastPlacedSlotIndex = f_CueSlotIndex;
-      }
+            f_CueSlotIndex = 2;
+            if (ToggleOpeningCharacter(2, OPENING_MODEL_PEACH)) {
+                SetCharacterAnimation(f_CueSlotIndex, PEACH_WALK_ANIMATION);
+                PlaceCueCharacter(point9, 0x29EB94, 0x26DDDA, 0);
+                f_LastPlacedSlotIndex = f_CueSlotIndex;
+            }
 
-      f_OpeningCue = OPENING_CUE_DONE;
-      break;
-    case OPENING_CUE_MARIO_LUIGI_WALK:
-      FreeCharacterSlot(1);
-      FreeCharacterSlot(2);
-      f_CueSlotIndex = 0;
-      if (ToggleOpeningCharacter(0, OPENING_MODEL_MARIO)) {
-        SetCharacterAnimation(f_CueSlotIndex, MARIO_WALK_ANIMATION);
-        PlaceCueCharacter(point10, 0x2709F8, 0x1CF4B4, 10);
-      }
+            f_OpeningCue = OPENING_CUE_DONE;
+            break;
+        case OPENING_CUE_MARIO_LUIGI_WALK:
+            FreeCharacterSlot(1);
+            FreeCharacterSlot(2);
+            f_CueSlotIndex = 0;
+            if (ToggleOpeningCharacter(0, OPENING_MODEL_MARIO)) {
+                SetCharacterAnimation(f_CueSlotIndex, MARIO_WALK_ANIMATION);
+                PlaceCueCharacter(point10, 0x2709F8, 0x1CF4B4, 10);
+            }
 
-      f_CueSlotIndex = 3;
-      if (ToggleOpeningCharacter(3, OPENING_MODEL_LUIGI)) {
-        SetCharacterAnimation(f_CueSlotIndex, LUIGI_WALK_ANIMATION);
-        PlaceCueCharacter(point11, 0x2709F8, 0x1CF4B4, 55);
-        f_LastPlacedSlotIndex = f_CueSlotIndex;
-      }
+            f_CueSlotIndex = 3;
+            if (ToggleOpeningCharacter(3, OPENING_MODEL_LUIGI)) {
+                SetCharacterAnimation(f_CueSlotIndex, LUIGI_WALK_ANIMATION);
+                PlaceCueCharacter(point11, 0x2709F8, 0x1CF4B4, 55);
+                f_LastPlacedSlotIndex = f_CueSlotIndex;
+            }
 
-      f_OpeningCue = OPENING_CUE_DONE;
-      break;
-    case OPENING_CUE_MARIO_REACH_BALL:
-      FreeCharacterSlot(0);
-      f_CueSlotIndex = 1;
-      if (ToggleOpeningCharacter(1, OPENING_MODEL_MARIO)) {
-        SetCharacterAnimation(f_CueSlotIndex, MARIO_REACH_BALL_ANIMATION);
-        PlaceCueCharacter(point12, 0x2709F8, 0x1CF4B4, 10);
-      }
+            f_OpeningCue = OPENING_CUE_DONE;
+            break;
+        case OPENING_CUE_MARIO_REACH_BALL:
+            FreeCharacterSlot(0);
+            f_CueSlotIndex = 1;
+            if (ToggleOpeningCharacter(1, OPENING_MODEL_MARIO)) {
+                SetCharacterAnimation(f_CueSlotIndex, MARIO_REACH_BALL_ANIMATION);
+                PlaceCueCharacter(point12, 0x2709F8, 0x1CF4B4, 10);
+            }
 
-      f_OpeningCue = OPENING_CUE_DONE;
-      break;
-    case OPENING_CUE_PEACH_WAVE:
-      FreeCharacterSlot(1);
-      FreeCharacterSlot(3);
-      f_CueSlotIndex = 0;
-      if (ToggleOpeningCharacter(0, OPENING_MODEL_PEACH)) {
-        SetCharacterAnimation(f_CueSlotIndex, PEACH_WAVE_ANIMATION);
-        PlaceCueCharacter(point13, 0x2CA5D3, 0x22A928, -98);
-      }
+            f_OpeningCue = OPENING_CUE_DONE;
+            break;
+        case OPENING_CUE_PEACH_WAVE:
+            FreeCharacterSlot(1);
+            FreeCharacterSlot(3);
+            f_CueSlotIndex = 0;
+            if (ToggleOpeningCharacter(0, OPENING_MODEL_PEACH)) {
+                SetCharacterAnimation(f_CueSlotIndex, PEACH_WAVE_ANIMATION);
+                PlaceCueCharacter(point13, 0x2CA5D3, 0x22A928, -98);
+            }
 
-      f_CueSlotIndex = 2;
-      if (ToggleOpeningCharacter(2, OPENING_MODEL_MARIO)) {
-        SetCharacterAnimation(f_CueSlotIndex, MARIO_RUN_ANIMATION);
-        PlaceCueCharacter(point14, 0x2C42D6, 0x22A832, -98);
-        f_LastPlacedSlotIndex = f_CueSlotIndex;
-      }
+            f_CueSlotIndex = 2;
+            if (ToggleOpeningCharacter(2, OPENING_MODEL_MARIO)) {
+                SetCharacterAnimation(f_CueSlotIndex, MARIO_RUN_ANIMATION);
+                PlaceCueCharacter(point14, 0x2C42D6, 0x22A832, -98);
+                f_LastPlacedSlotIndex = f_CueSlotIndex;
+            }
 
-      f_OpeningCue = OPENING_CUE_DONE;
-      break;
-    case OPENING_CUE_PEACH_APPROACH:
-      FreeCharacterSlot(0);
-      FreeCharacterSlot(2);
-      f_CueSlotIndex = 1;
-      if (ToggleOpeningCharacter(1, OPENING_MODEL_PEACH)) {
-        SetCharacterAnimation(f_CueSlotIndex, PEACH_APPROACH_ANIMATION);
-        PlaceCueCharacter(point15, 0x2B1194, 0x249320, -98);
-      }
+            f_OpeningCue = OPENING_CUE_DONE;
+            break;
+        case OPENING_CUE_PEACH_APPROACH:
+            FreeCharacterSlot(0);
+            FreeCharacterSlot(2);
+            f_CueSlotIndex = 1;
+            if (ToggleOpeningCharacter(1, OPENING_MODEL_PEACH)) {
+                SetCharacterAnimation(f_CueSlotIndex, PEACH_APPROACH_ANIMATION);
+                PlaceCueCharacter(point15, 0x2B1194, 0x249320, -98);
+            }
 
-      f_CueSlotIndex = 3;
-      if (ToggleOpeningCharacter(3, OPENING_MODEL_MARIO)) {
-        SetCharacterAnimation(f_CueSlotIndex, MARIO_INSPECT_BALL_ANIMATION);
-        PlaceCueCharacter(point16, 0x2B1194, 0x249320, -98);
-        f_LastPlacedSlotIndex = f_CueSlotIndex;
-      }
+            f_CueSlotIndex = 3;
+            if (ToggleOpeningCharacter(3, OPENING_MODEL_MARIO)) {
+                SetCharacterAnimation(f_CueSlotIndex, MARIO_INSPECT_BALL_ANIMATION);
+                PlaceCueCharacter(point16, 0x2B1194, 0x249320, -98);
+                f_LastPlacedSlotIndex = f_CueSlotIndex;
+            }
 
-      f_OpeningCue = OPENING_CUE_DONE;
-      break;
-    case OPENING_CUE_BALL_INSPECTION:
-      FreeCharacterSlot(1);
-      FreeCharacterSlot(3);
-      f_CueSlotIndex = 0;
-      if (ToggleOpeningCharacter(0, OPENING_MODEL_PEACH)) {
-        SetCharacterAnimation(f_CueSlotIndex, PEACH_INSPECT_BALL_ANIMATION);
-        PlaceCueCharacter(point17, 0x2B1194, 0x249320, -98);
-      }
+            f_OpeningCue = OPENING_CUE_DONE;
+            break;
+        case OPENING_CUE_BALL_INSPECTION:
+            FreeCharacterSlot(1);
+            FreeCharacterSlot(3);
+            f_CueSlotIndex = 0;
+            if (ToggleOpeningCharacter(0, OPENING_MODEL_PEACH)) {
+                SetCharacterAnimation(f_CueSlotIndex, PEACH_INSPECT_BALL_ANIMATION);
+                PlaceCueCharacter(point17, 0x2B1194, 0x249320, -98);
+            }
 
-      f_CueSlotIndex = 2;
-      if (ToggleOpeningCharacter(2, OPENING_MODEL_MARIO)) {
-        SetCharacterAnimation(f_CueSlotIndex, MARIO_STAND_AT_BALL_ANIMATION);
-        PlaceCueCharacter(point18, 0x2B1194, 0x249320, -98);
-        f_LastPlacedSlotIndex = f_CueSlotIndex;
-      }
+            f_CueSlotIndex = 2;
+            if (ToggleOpeningCharacter(2, OPENING_MODEL_MARIO)) {
+                SetCharacterAnimation(f_CueSlotIndex, MARIO_STAND_AT_BALL_ANIMATION);
+                PlaceCueCharacter(point18, 0x2B1194, 0x249320, -98);
+                f_LastPlacedSlotIndex = f_CueSlotIndex;
+            }
 
-      f_OpeningCue = OPENING_CUE_DONE;
-      break;
-    case OPENING_CUE_MARIO_LOOK_UP:
-      FreeCharacterSlot(2);
-      f_CueSlotIndex = 1;
-      ToggleOpeningCharacter(1, OPENING_MODEL_MARIO);
-      SetCharacterAnimation(f_CueSlotIndex, MARIO_LOOK_UP_ANIMATION);
-      PlaceCueCharacter(point19, 0x2B1194, 0x249320, -98);
-      f_OpeningCue = OPENING_CUE_DONE;
-      f_LastPlacedSlotIndex = f_CueSlotIndex;
-      break;
-    case OPENING_CUE_FREEZE:
-      SetAnimationSpeed(0, 0.0f);
-      SetAnimationSpeed(1, 0.0f);
-      f_OpeningCue = OPENING_CUE_DONE;
-      break;
-    case OPENING_CUE_UNFREEZE:
-      SetAnimationSpeed(0, 1.0f);
-      SetAnimationSpeed(1, 1.0f);
-      f_OpeningCue = OPENING_CUE_DONE;
-      break;
-    case OPENING_CUE_BABY_MARIO_ARRIVAL:
-      FreeCharacterSlot(0);
-      FreeCharacterSlot(1);
-      f_CueSlotIndex = 2;
-      if (f_IsDonkeyKongShown) {
-        ToggleOpeningCharacter(2, OPENING_MODEL_DONKEY_KONG);
-      } else {
-        ToggleOpeningCharacter(2, OPENING_MODEL_YOSHI);
-      }
+            f_OpeningCue = OPENING_CUE_DONE;
+            break;
+        case OPENING_CUE_MARIO_LOOK_UP:
+            FreeCharacterSlot(2);
+            f_CueSlotIndex = 1;
+            ToggleOpeningCharacter(1, OPENING_MODEL_MARIO);
+            SetCharacterAnimation(f_CueSlotIndex, MARIO_LOOK_UP_ANIMATION);
+            PlaceCueCharacter(point19, 0x2B1194, 0x249320, -98);
+            f_OpeningCue = OPENING_CUE_DONE;
+            f_LastPlacedSlotIndex = f_CueSlotIndex;
+            break;
+        case OPENING_CUE_FREEZE:
+            SetAnimationSpeed(0, 0.0f);
+            SetAnimationSpeed(1, 0.0f);
+            f_OpeningCue = OPENING_CUE_DONE;
+            break;
+        case OPENING_CUE_UNFREEZE:
+            SetAnimationSpeed(0, 1.0f);
+            SetAnimationSpeed(1, 1.0f);
+            f_OpeningCue = OPENING_CUE_DONE;
+            break;
+        case OPENING_CUE_BABY_MARIO_ARRIVAL:
+            FreeCharacterSlot(0);
+            FreeCharacterSlot(1);
+            f_CueSlotIndex = 2;
+            if (f_IsDonkeyKongShown) {
+                ToggleOpeningCharacter(2, OPENING_MODEL_DONKEY_KONG);
+            }
+            else {
+                ToggleOpeningCharacter(2, OPENING_MODEL_YOSHI);
+            }
 
-      SetAnimationSpeed(2, 0.0f);
-      if (f_IsDonkeyKongShown) {
-        SetCharacterAnimation(f_CueSlotIndex, DONKEY_KONG_CARRY_ANIMATION);
-      } else {
-        SetCharacterAnimation(f_CueSlotIndex, YOSHI_CARRY_ANIMATION);
-      }
+            SetAnimationSpeed(2, 0.0f);
+            if (f_IsDonkeyKongShown) {
+                SetCharacterAnimation(f_CueSlotIndex, DONKEY_KONG_CARRY_ANIMATION);
+            }
+            else {
+                SetCharacterAnimation(f_CueSlotIndex, YOSHI_CARRY_ANIMATION);
+            }
 
-      PlaceCueCharacter(point20, 0x202B29, 0xCE7DA, -165);
-      f_CueSlotIndex = 3;
-      ToggleOpeningCharacter(3, OPENING_MODEL_BABY_MARIO);
-      SetAnimationSpeed(3, 0.0f);
-      if (f_IsDonkeyKongShown) {
-        SetCharacterAnimation(
-            f_CueSlotIndex, BABY_MARIO_RIDE_DONKEY_KONG_ANIMATION);
-      } else {
-        SetCharacterAnimation(f_CueSlotIndex, BABY_MARIO_RIDE_YOSHI_ANIMATION);
-      }
+            PlaceCueCharacter(point20, 0x202B29, 0xCE7DA, -165);
+            f_CueSlotIndex = 3;
+            ToggleOpeningCharacter(3, OPENING_MODEL_BABY_MARIO);
+            SetAnimationSpeed(3, 0.0f);
+            if (f_IsDonkeyKongShown) {
+                SetCharacterAnimation(f_CueSlotIndex, BABY_MARIO_RIDE_DONKEY_KONG_ANIMATION);
+            }
+            else {
+                SetCharacterAnimation(f_CueSlotIndex, BABY_MARIO_RIDE_YOSHI_ANIMATION);
+            }
 
-      PlaceCueCharacter(point21, 0x202B29, 0xCE7DA, -165);
-      f_OpeningCue = OPENING_CUE_DONE;
-      f_LastPlacedSlotIndex = f_CueSlotIndex;
-      break;
-    case OPENING_CUE_BABY_MARIO_RIDE:
-      SetAnimationSpeed(2, 1.0f);
-      SetAnimationSpeed(3, 1.0f);
-      break;
-    case OPENING_CUE_MARIO_PUZZLED:
-      f_CueSlotIndex = 0;
-      ToggleOpeningCharacter(0, OPENING_MODEL_PEACH);
-      SetCharacterAnimation(f_CueSlotIndex, PEACH_COVER_MOUTH_ANIMATION);
-      PlaceCueCharacter(point22, 0x2B1194, 0x249320, -98);
-      f_CueSlotIndex = 1;
-      ToggleOpeningCharacter(1, OPENING_MODEL_MARIO);
-      SetCharacterAnimation(f_CueSlotIndex, MARIO_SCRATCH_HEAD_ANIMATION);
-      PlaceCueCharacter(point23, 0x2B1194, 0x249320, -98);
-      f_OpeningCue = OPENING_CUE_DONE;
-      f_LastPlacedSlotIndex = f_CueSlotIndex;
-      break;
-    case OPENING_CUE_CLEAR_CHARACTERS:
-      FreeAllCharacterSlots();
-      f_OpeningCue = OPENING_CUE_DONE;
-      break;
-    case OPENING_CUE_LUIGI_SEARCH:
-      f_CueSlotIndex = 0;
-      ToggleOpeningCharacter(0, OPENING_MODEL_LUIGI);
-      SetCharacterAnimation(f_CueSlotIndex, LUIGI_SEARCH_ANIMATION);
-      PlaceCueCharacter(point24, 0x16308C, 0x183EDA, 170);
-      f_OpeningCue = OPENING_CUE_DONE;
-      f_LastPlacedSlotIndex = f_CueSlotIndex;
-      break;
-    case OPENING_CUE_TOAD_FLAG:
-      f_CueSlotIndex = 1;
-      ToggleOpeningCharacter(1, OPENING_MODEL_TOAD);
-      SetCharacterAnimation(f_CueSlotIndex, TOAD_WAVE_FLAG_ANIMATION);
-      PlaceCueCharacter(point25, 0xE3F2C, 0x1D98E6, 70);
-      f_OpeningCue = OPENING_CUE_DONE;
-      f_LastPlacedSlotIndex = f_CueSlotIndex;
-      break;
-    case OPENING_CUE_LUIGI_DISMAY:
-      FreeCharacterSlot(0);
-      FreeCharacterSlot(1);
-      f_CueSlotIndex = 2;
-      ToggleOpeningCharacter(2, OPENING_MODEL_LUIGI);
-      SetCharacterAnimation(f_CueSlotIndex, LUIGI_DISMAY_ANIMATION);
-      PlaceCueCharacter(point26, 0x16308C, 0x183EDA, 185);
-      f_LastPlacedSlotIndex = f_CueSlotIndex;
-      f_CueSlotIndex = 3;
-      if (ToggleOpeningCharacter(3, OPENING_MODEL_PEACH)) {
-        SetCharacterAnimation(f_CueSlotIndex, PEACH_GATHER_ANIMATION);
-        PlaceCueCharacter(point27, 0x16806D, 0x17E632, 200);
-      }
+            PlaceCueCharacter(point21, 0x202B29, 0xCE7DA, -165);
+            f_OpeningCue = OPENING_CUE_DONE;
+            f_LastPlacedSlotIndex = f_CueSlotIndex;
+            break;
+        case OPENING_CUE_BABY_MARIO_RIDE:
+            SetAnimationSpeed(2, 1.0f);
+            SetAnimationSpeed(3, 1.0f);
+            break;
+        case OPENING_CUE_MARIO_PUZZLED:
+            f_CueSlotIndex = 0;
+            ToggleOpeningCharacter(0, OPENING_MODEL_PEACH);
+            SetCharacterAnimation(f_CueSlotIndex, PEACH_COVER_MOUTH_ANIMATION);
+            PlaceCueCharacter(point22, 0x2B1194, 0x249320, -98);
+            f_CueSlotIndex = 1;
+            ToggleOpeningCharacter(1, OPENING_MODEL_MARIO);
+            SetCharacterAnimation(f_CueSlotIndex, MARIO_SCRATCH_HEAD_ANIMATION);
+            PlaceCueCharacter(point23, 0x2B1194, 0x249320, -98);
+            f_OpeningCue = OPENING_CUE_DONE;
+            f_LastPlacedSlotIndex = f_CueSlotIndex;
+            break;
+        case OPENING_CUE_CLEAR_CHARACTERS:
+            FreeAllCharacterSlots();
+            f_OpeningCue = OPENING_CUE_DONE;
+            break;
+        case OPENING_CUE_LUIGI_SEARCH:
+            f_CueSlotIndex = 0;
+            ToggleOpeningCharacter(0, OPENING_MODEL_LUIGI);
+            SetCharacterAnimation(f_CueSlotIndex, LUIGI_SEARCH_ANIMATION);
+            PlaceCueCharacter(point24, 0x16308C, 0x183EDA, 170);
+            f_OpeningCue = OPENING_CUE_DONE;
+            f_LastPlacedSlotIndex = f_CueSlotIndex;
+            break;
+        case OPENING_CUE_TOAD_FLAG:
+            f_CueSlotIndex = 1;
+            ToggleOpeningCharacter(1, OPENING_MODEL_TOAD);
+            SetCharacterAnimation(f_CueSlotIndex, TOAD_WAVE_FLAG_ANIMATION);
+            PlaceCueCharacter(point25, 0xE3F2C, 0x1D98E6, 70);
+            f_OpeningCue = OPENING_CUE_DONE;
+            f_LastPlacedSlotIndex = f_CueSlotIndex;
+            break;
+        case OPENING_CUE_LUIGI_DISMAY:
+            FreeCharacterSlot(0);
+            FreeCharacterSlot(1);
+            f_CueSlotIndex = 2;
+            ToggleOpeningCharacter(2, OPENING_MODEL_LUIGI);
+            SetCharacterAnimation(f_CueSlotIndex, LUIGI_DISMAY_ANIMATION);
+            PlaceCueCharacter(point26, 0x16308C, 0x183EDA, 185);
+            f_LastPlacedSlotIndex = f_CueSlotIndex;
+            f_CueSlotIndex = 3;
+            if (ToggleOpeningCharacter(3, OPENING_MODEL_PEACH)) {
+                SetCharacterAnimation(f_CueSlotIndex, PEACH_GATHER_ANIMATION);
+                PlaceCueCharacter(point27, 0x16806D, 0x17E632, 200);
+            }
 
-      f_OpeningCue++;
-      break;
-    case OPENING_CUE_GATHERING:
-      f_CueSlotIndex = 0;
-      if (ToggleOpeningCharacter(0, OPENING_MODEL_MARIO)) {
-        SetCharacterAnimation(f_CueSlotIndex, MARIO_GATHER_ANIMATION);
-        PlaceCueCharacter(point28, 0x15E14D, 0x18155C, 170);
-      }
+            f_OpeningCue++;
+            break;
+        case OPENING_CUE_GATHERING:
+            f_CueSlotIndex = 0;
+            if (ToggleOpeningCharacter(0, OPENING_MODEL_MARIO)) {
+                SetCharacterAnimation(f_CueSlotIndex, MARIO_GATHER_ANIMATION);
+                PlaceCueCharacter(point28, 0x15E14D, 0x18155C, 170);
+            }
 
-      f_CueSlotIndex = 1;
-      if (ToggleOpeningCharacter(1, OPENING_MODEL_PLUM)) {
-        SetCharacterAnimation(f_CueSlotIndex, PLUM_GATHER_ANIMATION);
-        PlaceCueCharacter(point29, 0x166EDF, 0x1838C7, 200);
-        f_LastPlacedSlotIndex = f_CueSlotIndex;
-      }
+            f_CueSlotIndex = 1;
+            if (ToggleOpeningCharacter(1, OPENING_MODEL_PLUM)) {
+                SetCharacterAnimation(f_CueSlotIndex, PLUM_GATHER_ANIMATION);
+                PlaceCueCharacter(point29, 0x166EDF, 0x1838C7, 200);
+                f_LastPlacedSlotIndex = f_CueSlotIndex;
+            }
 
-      f_OpeningCue = OPENING_CUE_DONE;
-      break;
-    default:
-      f_OpeningCue = OPENING_CUE_INVALID;
-      break;
-  }
+            f_OpeningCue = OPENING_CUE_DONE;
+            break;
+        default:
+            f_OpeningCue = OPENING_CUE_INVALID;
+            break;
+    }
 
-  return f_OpeningCue == OPENING_CUES_FINISHED;
+    return f_OpeningCue == OPENING_CUES_FINISHED;
 }
 
 /*
@@ -1547,1628 +1622,1835 @@ void MoveLakitu(void);
  * camera.
  */
 void UpdateOpening(void) {
-  Vec3 point;
-  Vec3 logoBallPoint;
-  Vec3 handPoint;
-  s32 slot;
-  SoundChannel channel;
-  s32 i;
-  s32 pressedButtons;
-  s32 skipButtons;
+    Vec3 point;
+    Vec3 logoBallPoint;
+    Vec3 handPoint;
+    s32 slot;
+    SoundChannel channel;
+    s32 i;
+    s32 pressedButtons;
+    s32 skipButtons;
 
-  if (IsGameFlagSet(GAME_FLAG_EDIT_OPENING_CAMERA)) {
-    EditOpeningCamera();
-    if (g_ControllerStates[OPENING_EDITOR_CONTROLLER].pressedButtons &
-        B_BUTTON) {
-      PlaySound(
-          SOUND_MENU_BLOCKED, OPENING_MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
-      ClearGameFlag(GAME_FLAG_EDIT_OPENING_CAMERA);
-      f_IsLookAtMarkerShown = FALSE;
-      ClearDebugText();
+    if (IsGameFlagSet(GAME_FLAG_EDIT_OPENING_CAMERA)) {
+        EditOpeningCamera();
+        if (g_ControllerStates[OPENING_EDITOR_CONTROLLER].pressedButtons & B_BUTTON) {
+            PlaySound(SOUND_MENU_BLOCKED, OPENING_MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
+            ClearGameFlag(GAME_FLAG_EDIT_OPENING_CAMERA);
+            f_IsLookAtMarkerShown = FALSE;
+            ClearDebugText();
+        }
     }
-  } else {
-    if (f_OpeningFrameCount < OPENING_FRAME_LIMIT) {
-      f_OpeningFrameCount++;
-    } else {
-      f_OpeningScene = OPENING_SCENE_END;
+    else {
+        if (f_OpeningFrameCount < OPENING_FRAME_LIMIT) {
+            f_OpeningFrameCount++;
+        }
+        else {
+            f_OpeningScene = OPENING_SCENE_END;
+        }
+
+        if (g_IsDebugEnabled) {
+            sprintf(g_PrintBuffer, "%04d", (int)f_OpeningFrameCount);
+            PrintDebugText(g_PrintBuffer, FRAME_COUNT_TEXT_COLUMN, FRAME_COUNT_TEXT_ROW);
+            sprintf(g_PrintBuffer, "CAMERA:%d    ", (int)f_OpeningScene);
+            PrintDebugText(g_PrintBuffer, SCENE_TEXT_COLUMN, SCENE_TEXT_ROW);
+            sprintf(g_PrintBuffer, "(%d)    ", (int)f_OpeningSceneFramesLeft);
+            PrintDebugText(g_PrintBuffer, FRAMES_LEFT_TEXT_COLUMN, SCENE_TEXT_ROW);
+        }
+
+        switch (f_OpeningScene) {
+            case OPENING_SCENE_MARIO_DRIVE:
+                g_ScreenFadeDuration = 1;
+                g_ScreenFadeFramesLeft = 1;
+                g_ScreenFadeKind = 1;
+                g_ScreenFadeRed = 0;
+                g_ScreenFadeGreen = 0;
+                g_ScreenFadeBlue = 0;
+                f_OpeningSceneFramesLeft = 10;
+                f_OpeningScene++;
+                break;
+            case OPENING_SCENE_MARIO_DRIVE + 1:
+                g_ScreenFadeDuration = 1;
+                g_ScreenFadeFramesLeft = 1;
+                g_ScreenFadeKind = 1;
+                g_ScreenFadeRed = 0;
+                g_ScreenFadeGreen = 0;
+                g_ScreenFadeBlue = 0;
+                if (f_OpeningSceneFramesLeft == 0) {
+                    f_OpeningSceneFramesLeft = 30;
+                    LoadNameLogo(0, 0);
+                    f_OpeningCue = OPENING_CUE_MARIO_TEE_SHOT;
+                    StartScreenFadeIn(0, 0, 0, 0x1E);
+                    PlaceEditorCamera(997.598f, -160.581f, 4594.014f, 973.0f, -130.0f, 4672.0f);
+                    ZoomEditorCamera(1, 38.01875f, 0x3C);
+                    TurnEditorCamera(1, -0.8528241f, 0x28);
+                    TiltEditorCamera(1, -0.324127f, 0x28);
+                    f_OpeningScene++;
+                    LoadOpeningShotBall();
+                    f_OpeningShotSimulation.position[AXIS_X] = 0xF1B96;
+                    f_OpeningShotSimulation.position[AXIS_Z] = 0x48CFDC;
+                    f_OpeningShotSimulation.position[AXIS_Y] = GetGroundHeight(0xF1B96, 0x48CFDC);
+                    f_ShotBallScale = 2;
+                    f_OpeningSparksOrigin[0] =
+                        f_OpeningShotSimulation.position[AXIS_X] * COURSE_TO_WORLD_SCALE;
+                    f_OpeningSparksOrigin[1] =
+                        f_OpeningShotSimulation.position[AXIS_Y] * COURSE_TO_WORLD_SCALE;
+                    f_OpeningSparksOrigin[2] =
+                        f_OpeningShotSimulation.position[AXIS_Z] * COURSE_TO_WORLD_SCALE;
+                    ClearEffects();
+                    f_OpeningShotImpactPoint[0] = f_OpeningShotSimulation.position[AXIS_X];
+                    f_OpeningShotImpactPoint[1] = f_OpeningShotSimulation.position[AXIS_Y];
+                    f_OpeningShotImpactPoint[2] = f_OpeningShotSimulation.position[AXIS_Z];
+                }
+
+                break;
+            case OPENING_SCENE_MARIO_DRIVE + 2:
+                if (f_OpeningSceneFramesLeft == 0) {
+                    f_IsNameSlotShown[0] = 1;
+                    PlaySong(SONG_OPENING, 0);
+                }
+
+                if (AreEditorMovesDone()) {
+                    f_OpeningSceneFramesLeft = 40;
+                    f_OpeningScene++;
+                }
+
+                break;
+            case OPENING_SCENE_MARIO_DRIVE + 3:
+                if (f_OpeningSceneFramesLeft == 28) {
+                    PlaySound(SOUND_CONTACT_PLAIN, f_OpeningSoundChannel, SOUND_FULL_SCALE);
+                    AdvanceOpeningSoundChannel();
+                }
+
+                if (f_OpeningSceneFramesLeft == 24) {
+                    PlaySoundWithEffects(SOUND_SHOT_SPARKS, f_OpeningSoundChannel, 0x4C, 0, 0xA7);
+                    AdvanceOpeningSoundChannel();
+                    f_OpeningSparksState = 1;
+                    LaunchDrop(f_OpeningShotImpactPoint);
+                }
+
+                if (f_OpeningSceneFramesLeft == 24) {
+                    f_OpeningShotSimulation.playerIndex = 0;
+                    f_OpeningShotSimulation.isHoledOut = FALSE;
+                    f_OpeningShotSimulation.state = BALL_STATE_STOPPED;
+                    f_OpeningShotSimulation.surface = SURFACE_TEE_UP;
+                    LaunchOpeningBallSimulation(&f_OpeningShotSimulation, 0, &f_OpeningFirstShot);
+                    f_OpeningShotState = 1;
+                    f_ShotBallScale = 1;
+                }
+
+                if (f_OpeningSceneFramesLeft == 0) {
+                    f_OpeningCue = OPENING_CUE_PEACH_CHEER;
+                    f_OpeningScene = OPENING_SCENE_MARIO_DRIVE_CHEERS;
+                }
+
+                break;
+            case OPENING_SCENE_MARIO_DRIVE_CHEERS:
+                PlaceEditorCamera(679.6445f, -98.28f, 4736.7f, 642.835f, -99.0f, 4746.187f);
+                ZoomEditorCamera(1, 18.469883f, 0x1E);
+                MoveEditorCamera(1, 642.835f, -100.5f, 4746.187f, 0x1E);
+                f_IsNameSlotShown[0] = 0;
+                f_OpeningShotState = 0;
+                f_ShotBallScale = 0;
+                f_OpeningSceneFramesLeft = 30;
+                f_OpeningScene++;
+                ClearEffects();
+                break;
+            case OPENING_SCENE_MARIO_DRIVE_CHEERS + 1:
+                switch (f_OpeningSceneFramesLeft) {
+                    case 25:
+                        PlaySound(
+                            SOUND_PEACH_OPENING_VOICE,
+                            f_OpeningSoundChannel,
+                            SOUND_FULL_SCALE
+                        );
+                        AdvanceOpeningSoundChannel();
+                        break;
+                    case 23:
+                        PlaySoundWithEffects(
+                            SOUND_PLUM_OPENING_VOICE,
+                            f_OpeningSoundChannel,
+                            0x46,
+                            0,
+                            0xBB
+                        );
+                        AdvanceOpeningSoundChannel();
+                        break;
+                    case 20:
+                        PlaySoundWithEffects(
+                            SOUND_MARIO_CALL_OUT_UP,
+                            f_OpeningSoundChannel,
+                            0x46,
+                            0,
+                            0x57
+                        );
+                        AdvanceOpeningSoundChannel();
+                        break;
+                }
+
+                if (AreEditorMovesDone()) {
+                    StopEditorMoves();
+                    f_OpeningScene++;
+                }
+
+                break;
+            case OPENING_SCENE_MARIO_DRIVE_CHEERS + 2:
+                f_OpeningCue = OPENING_CUE_LUIGI_CHEER;
+                f_OpeningScene = OPENING_SCENE_MARIO_DRIVE_FLIGHT;
+                break;
+            case OPENING_SCENE_UNREACHED:
+                PlaceEditorCamera(1400.411f, -101.306f, 4781.043f, 1414.02f, -107.0f, 4800.41f);
+                f_OpeningSceneFramesLeft = 14;
+                f_OpeningScene++;
+                break;
+            case OPENING_SCENE_UNREACHED + 1:
+                if (f_OpeningSceneFramesLeft == 8) {
+                    SetAnimationSpeed(2, 0.0f);
+                }
+
+                if (f_OpeningSceneFramesLeft == 0) {
+                    f_OpeningScene = OPENING_SCENE_MARIO_DRIVE_FLIGHT;
+                }
+
+                break;
+            case OPENING_SCENE_MARIO_DRIVE_FLIGHT:
+                PlaceEditorCamera(1269.768f, -127.806f, 4719.564f, 1179.989f, -111.987f, 4715.451f);
+                f_OpeningShotSimulation.position[AXIS_X] = 0xF1B96;
+                f_OpeningShotSimulation.position[AXIS_Z] = 0x48CFDC;
+                f_OpeningShotSimulation.position[AXIS_Y] = GetGroundHeight(0xF1B96, 0x48CFDC);
+                f_OpeningShotSimulation.playerIndex = 0;
+                f_OpeningShotSimulation.isHoledOut = FALSE;
+                f_OpeningShotSimulation.state = BALL_STATE_STOPPED;
+                f_OpeningShotSimulation.surface = SURFACE_TEE_UP;
+                LaunchOpeningBallSimulation(&f_OpeningShotSimulation, 0, &f_OpeningFirstShot);
+                f_OpeningShotState = 1;
+                f_ShotBallScale = 1;
+                f_OpeningSparksState = 1;
+                f_OpeningSceneFramesLeft = 20;
+                f_OpeningScene++;
+                break;
+            case OPENING_SCENE_MARIO_DRIVE_FLIGHT + 1:
+                if (f_OpeningSceneFramesLeft == 14) {
+                    PlaySoundWithEffects(
+                        SOUND_LUIGI_CALL_OUT_RIGHT,
+                        f_OpeningSoundChannel,
+                        SOUND_FULL_SCALE,
+                        0,
+                        SOUND_FULL_SCALE
+                    );
+                    AdvanceOpeningSoundChannel();
+                }
+
+                if (f_OpeningSceneFramesLeft == 0) {
+                    f_LookAtEaseMode = 1;
+                    f_OpeningSceneFramesLeft = 50;
+                    f_OpeningScene++;
+                }
+
+                break;
+            case OPENING_SCENE_MARIO_DRIVE_FLIGHT + 2:
+                if (f_OpeningSceneFramesLeft == 0) {
+                    StartHudAnimation(HUD_ANIMATION_FAST_FADE_OUT);
+                    f_OpeningScene = OPENING_SCENE_PEACH_DRIVE;
+                    LoadNameLogo(2, 0);
+                }
+
+                break;
+            case OPENING_SCENE_PEACH_DRIVE:
+                PlaceEditorCamera(957.619f, -131.446f, 4629.353f, 973.561f, -133.0f, 4671.789f);
+                f_OpeningCue = OPENING_CUE_PEACH_TEE_SHOT;
+                f_LookAtEaseMode = 0;
+                f_OpeningSceneFramesLeft = 100;
+                f_OpeningShotState = 0;
+                f_OpeningShotSimulation.position[AXIS_X] = 0xF1882;
+                f_OpeningShotSimulation.position[AXIS_Z] = 0x48D4C4;
+                f_OpeningScene++;
+                f_OpeningShotSimulation.position[AXIS_Y] = GetGroundHeight(0xF1882, 0x48D4C4);
+                f_ShotBallScale = 2;
+                f_OpeningShotImpactPoint[0] = f_OpeningShotSimulation.position[AXIS_X];
+                f_OpeningShotImpactPoint[1] = f_OpeningShotSimulation.position[AXIS_Y];
+                f_OpeningShotImpactPoint[2] = f_OpeningShotSimulation.position[AXIS_Z];
+                f_OpeningSparksOrigin[0] =
+                    f_OpeningShotSimulation.position[AXIS_X] * COURSE_TO_WORLD_SCALE;
+                f_OpeningSparksOrigin[1] =
+                    f_OpeningShotSimulation.position[AXIS_Y] * COURSE_TO_WORLD_SCALE;
+                f_OpeningSparksOrigin[2] =
+                    f_OpeningShotSimulation.position[AXIS_Z] * COURSE_TO_WORLD_SCALE;
+                break;
+            case OPENING_SCENE_PEACH_DRIVE + 1:
+                if (f_OpeningSceneFramesLeft == 24) {
+                    PlaySound(SOUND_MENU_START, f_OpeningSoundChannel, SOUND_FULL_SCALE);
+                    AdvanceOpeningSoundChannel();
+                }
+
+                if (f_OpeningSceneFramesLeft == 20) {
+                    PlaySoundWithEffects(SOUND_SHOT_SPARKS, f_OpeningSoundChannel, 0x4C, 0, 0xA7);
+                    AdvanceOpeningSoundChannel();
+                    f_OpeningSparksState = 1;
+                    LaunchDrop(f_OpeningShotImpactPoint);
+                }
+
+                if (f_OpeningSceneFramesLeft == 22) {
+                    f_OpeningShotSimulation.playerIndex = 0;
+                    f_OpeningShotSimulation.isHoledOut = FALSE;
+                    f_OpeningShotSimulation.state = BALL_STATE_STOPPED;
+                    f_OpeningShotSimulation.surface = SURFACE_TEE_UP;
+                    LaunchOpeningBallSimulation(&f_OpeningShotSimulation, 0, &f_OpeningSecondShot);
+                    f_OpeningShotState = 1;
+                }
+
+                if (f_OpeningSceneFramesLeft == 90) {
+                    f_IsNameSlotShown[0] = 1;
+                }
+
+                if (f_OpeningSceneFramesLeft == 0) {
+                    f_OpeningScene = OPENING_SCENE_PLUM_CHEER;
+                }
+
+                break;
+            case OPENING_SCENE_PLUM_CHEER:
+                PlaceEditorCamera(726.63f, -98.049f, 5063.849f, 713.268f, -96.0f, 5094.7f);
+                MoveEditorPoint(1, 713.268f, -102.0f, 5094.7f, 0x28);
+                MoveEditorPoint(0, 708.085f, -98.243f, 5073.215f, 0x28);
+                f_OpeningSceneFramesLeft = 40;
+                f_OpeningScene = OPENING_SCENE_PEACH_DRIVE_FLIGHT;
+                f_OpeningCue = OPENING_CUE_PLUM_CHEER;
+                f_IsNameSlotShown[0] = 0;
+                f_OpeningShotState = 0;
+                f_ShotBallScale = 0;
+                PlaySoundWithEffects(SOUND_PEACH_CALL_OUT_UP, f_OpeningSoundChannel, 0x32, 0, 0x2F);
+                AdvanceOpeningSoundChannel();
+                ClearEffects();
+                break;
+            case OPENING_SCENE_PEACH_DRIVE_FLIGHT:
+                switch (f_OpeningSceneFramesLeft) {
+                    case 35:
+                        PlaySoundWithEffects(
+                            SOUND_MARIO_CALL_OUT_UP,
+                            f_OpeningSoundChannel,
+                            0x50,
+                            0,
+                            0xA7
+                        );
+                        AdvanceOpeningSoundChannel();
+                        break;
+                    case 33:
+                        PlaySound(SOUND_PLUM_CALL_OUT_UP, f_OpeningSoundChannel, SOUND_FULL_SCALE);
+                        AdvanceOpeningSoundChannel();
+                        break;
+                    case 31:
+                        PlaySoundWithEffects(
+                            SOUND_LUIGI_OPENING_VOICE,
+                            f_OpeningSoundChannel,
+                            0x50,
+                            0,
+                            0xBB
+                        );
+                        AdvanceOpeningSoundChannel();
+                        break;
+                }
+
+                if (f_OpeningSceneFramesLeft == 20) {
+                    f_OpeningShotSimulation.position[AXIS_X] = 0xF1B96;
+                    f_OpeningShotSimulation.position[AXIS_Z] = 0x48CFDC;
+                    f_OpeningShotSimulation.position[AXIS_Y] = GetGroundHeight(0xF1B96, 0x48CFDC);
+                    f_OpeningShotSimulation.playerIndex = 0;
+                    f_OpeningShotSimulation.isHoledOut = FALSE;
+                    f_OpeningShotSimulation.state = BALL_STATE_STOPPED;
+                    f_OpeningShotSimulation.surface = SURFACE_TEE_UP;
+                    LaunchOpeningBallSimulation(&f_OpeningShotSimulation, 0, &f_OpeningSecondShot);
+                    f_OpeningShotState = 1;
+                }
+
+                if (AreEditorMovesDone()) {
+                    PlaceEditorCamera(
+                        973.156f,
+                        -317.049f,
+                        3703.677f,
+                        1276.871f,
+                        -112.538f,
+                        4540.245f
+                    );
+                    f_ShotBallScale = 1;
+                    f_LookAtEaseMode = 1;
+                    f_OpeningSceneFramesLeft = 70;
+                    f_OpeningScene++;
+                    AdvanceOpeningSoundChannel();
+                }
+
+                break;
+            case OPENING_SCENE_PEACH_DRIVE_FLIGHT + 1:
+                if (f_OpeningSceneFramesLeft == 0) {
+                    f_OpeningScene = OPENING_SCENE_PLUM_DRIVE;
+                    StartHudAnimation(HUD_ANIMATION_FAST_FADE_OUT);
+                }
+
+                break;
+            case OPENING_SCENE_PLUM_DRIVE:
+                PlaceEditorCamera(980.776f, -123.436f, 4636.89f, 971.837f, -133.5f, 4671.701f);
+                f_OpeningSceneFramesLeft = 100;
+                f_OpeningCue = OPENING_CUE_PLUM_TEE_SHOT;
+                f_OpeningScene++;
+                LoadNameLogo(3, 0);
+                f_OpeningShotState = 0;
+                f_LookAtEaseMode = 0;
+                f_OpeningShotSimulation.position[AXIS_X] = 0xF3930;
+                f_OpeningShotSimulation.position[AXIS_Z] = 0x48D1D1;
+                f_OpeningShotSimulation.position[AXIS_Y] = GetGroundHeight(0xF3930, 0x48D1D1);
+                f_ShotBallScale = 2;
+                f_OpeningShotImpactPoint[0] = f_OpeningShotSimulation.position[AXIS_X];
+                f_OpeningShotImpactPoint[1] = f_OpeningShotSimulation.position[AXIS_Y];
+                f_OpeningShotImpactPoint[2] = f_OpeningShotSimulation.position[AXIS_Z];
+                f_OpeningSparksOrigin[0] =
+                    f_OpeningShotSimulation.position[AXIS_X] * COURSE_TO_WORLD_SCALE;
+                f_OpeningSparksOrigin[1] =
+                    f_OpeningShotSimulation.position[AXIS_Y] * COURSE_TO_WORLD_SCALE;
+                f_OpeningSparksOrigin[2] =
+                    f_OpeningShotSimulation.position[AXIS_Z] * COURSE_TO_WORLD_SCALE;
+                break;
+            case OPENING_SCENE_PLUM_DRIVE + 1:
+                if (f_OpeningSceneFramesLeft == 24) {
+                    PlaySound(SOUND_MENU_START, f_OpeningSoundChannel, SOUND_FULL_SCALE);
+                    AdvanceOpeningSoundChannel();
+                }
+
+                if (f_OpeningSceneFramesLeft == 20) {
+                    PlaySoundWithEffects(SOUND_SHOT_SPARKS, f_OpeningSoundChannel, 0x4C, 0, 0xA7);
+                    AdvanceOpeningSoundChannel();
+                    f_OpeningSparksState = 1;
+                    LaunchDrop(f_OpeningShotImpactPoint);
+                }
+
+                if (f_OpeningSceneFramesLeft == 20) {
+                    f_OpeningShotSimulation.playerIndex = 0;
+                    f_OpeningShotSimulation.isHoledOut = FALSE;
+                    f_OpeningShotSimulation.state = BALL_STATE_STOPPED;
+                    f_OpeningShotSimulation.surface = SURFACE_TEE_UP;
+                    LaunchOpeningBallSimulation(&f_OpeningShotSimulation, 0, &f_OpeningThirdShot);
+                    f_OpeningShotState = 1;
+                }
+
+                if (f_OpeningSceneFramesLeft == 90) {
+                    f_IsNameSlotShown[0] = 1;
+                }
+
+                if (f_OpeningSceneFramesLeft == 0) {
+                    f_OpeningScene = OPENING_SCENE_MARIO_CLOSE_UP;
+                    f_OpeningCue = OPENING_CUE_MARIO_CHEER;
+                }
+
+                break;
+            case OPENING_SCENE_MARIO_CLOSE_UP:
+                PlaceEditorCamera(1402.165f, -101.306f, 4774.711f, 1412.049f, -107.0f, 4798.309f);
+                TiltEditorCamera(1, 0.183044f, 0x32);
+                TurnEditorCamera(1, 1.1519989f, 0x32);
+                ZoomEditorCamera(1, 47.392056f, 0x1E);
+                f_OpeningSceneFramesLeft = 50;
+                f_OpeningScene = OPENING_SCENE_MARIO_CHEER;
+                f_IsNameSlotShown[0] = 0;
+                f_OpeningShotState = 0;
+                f_ShotBallScale = 0;
+                ClearEffects();
+                break;
+            case OPENING_SCENE_MARIO_CHEER:
+                switch (f_OpeningSceneFramesLeft) {
+                    case 40:
+                        PlaySound(
+                            SOUND_MARIO_OPENING_VOICE,
+                            f_OpeningSoundChannel,
+                            SOUND_FULL_SCALE
+                        );
+                        AdvanceOpeningSoundChannel();
+                        break;
+                    case 38:
+                        PlaySoundWithEffects(
+                            SOUND_LUIGI_CALL_OUT_UP,
+                            f_OpeningSoundChannel,
+                            0x46,
+                            0,
+                            0xBB
+                        );
+                        AdvanceOpeningSoundChannel();
+                        break;
+                    case 35:
+                        PlaySoundWithEffects(
+                            SOUND_PEACH_OPENING_VOICE,
+                            f_OpeningSoundChannel,
+                            0x36,
+                            0,
+                            0x57
+                        );
+                        AdvanceOpeningSoundChannel();
+                        break;
+                }
+
+                if (f_OpeningSceneFramesLeft == 0) {
+                    StopEditorMoves();
+                    StartHudAnimation(HUD_ANIMATION_FAST_FADE_OUT);
+                    f_OpeningScene++;
+                }
+
+                break;
+            case OPENING_SCENE_MARIO_CHEER + 1:
+                PlaceEditorCamera(957.619f, -131.446f, 4629.353f, 973.561f, -133.0f, 4671.789f);
+                TurnEditorCamera(1, 1.0471976f, 1);
+                TiltEditorCamera(1, 0.34906584f, 1);
+                f_OpeningCue = OPENING_CUE_LUIGI_TEE_SHOT;
+                f_OpeningScene++;
+                LoadNameLogo(1, 0);
+                f_OpeningSceneFramesLeft = 10;
+                f_OpeningShotSimulation.position[AXIS_X] = 0xF190E;
+                f_OpeningShotSimulation.position[AXIS_Z] = 0x48D416;
+                f_OpeningShotSimulation.position[AXIS_Y] = GetGroundHeight(0xF190E, 0x48D416);
+                f_ShotBallScale = 2;
+                f_OpeningShotImpactPoint[0] = f_OpeningShotSimulation.position[AXIS_X];
+                f_OpeningShotImpactPoint[1] = f_OpeningShotSimulation.position[AXIS_Y];
+                f_OpeningShotImpactPoint[2] = f_OpeningShotSimulation.position[AXIS_Z];
+                f_OpeningSparksOrigin[0] =
+                    f_OpeningShotSimulation.position[AXIS_X] * COURSE_TO_WORLD_SCALE;
+                f_OpeningSparksOrigin[1] =
+                    f_OpeningShotSimulation.position[AXIS_Y] * COURSE_TO_WORLD_SCALE;
+                f_OpeningSparksOrigin[2] =
+                    f_OpeningShotSimulation.position[AXIS_Z] * COURSE_TO_WORLD_SCALE;
+                break;
+            case OPENING_SCENE_MARIO_CHEER + 2:
+                TurnEditorCamera(1, -1.0471976f, 0x50);
+                TiltEditorCamera(1, -0.34906584f, 0x50);
+                f_OpeningScene = OPENING_SCENE_LUIGI_DRIVE;
+                break;
+            case OPENING_SCENE_LUIGI_DRIVE:
+                if (f_OpeningSceneFramesLeft == 0) {
+                    f_IsNameSlotShown[0] = 1;
+                    f_OpeningScene = OPENING_SCENE_LUIGI_DRIVE + 1;
+                    f_OpeningSceneFramesLeft = 55;
+                }
+
+                break;
+            case OPENING_SCENE_LUIGI_DRIVE + 1:
+                if (f_OpeningSceneFramesLeft == 4) {
+                    PlaySound(SOUND_CONTACT_PLAIN, f_OpeningSoundChannel, SOUND_FULL_SCALE);
+                    AdvanceOpeningSoundChannel();
+                }
+
+                if (f_OpeningSceneFramesLeft == 0) {
+                    f_OpeningShotSimulation.playerIndex = 0;
+                    f_OpeningShotSimulation.isHoledOut = FALSE;
+                    f_OpeningShotSimulation.state = BALL_STATE_STOPPED;
+                    f_OpeningShotSimulation.surface = SURFACE_TEE_UP;
+                    LaunchOpeningBallSimulation(&f_OpeningShotSimulation, 0, &f_OpeningFourthShot);
+                    f_OpeningShotState = 1;
+                    f_ShotBallScale = 1;
+                    ZoomEditorCamera(1, 33.056084f, 0x28);
+                    f_OpeningSceneFramesLeft = 5;
+                    f_OpeningScene++;
+                    PlaySoundWithEffects(SOUND_SHOT_SPARKS, f_OpeningSoundChannel, 0x4C, 0, 0xA7);
+                    AdvanceOpeningSoundChannel();
+                    f_OpeningSparksState = 1;
+                    LaunchDrop(f_OpeningShotImpactPoint);
+                }
+
+                break;
+            case OPENING_SCENE_LUIGI_DRIVE + 2:
+                StepOpeningBallSimulation(&f_OpeningShotSimulation);
+                if (AreEditorMovesDone()) {
+                    PlaceEditorCamera(
+                        934.786f,
+                        -128.501f,
+                        4716.105f,
+                        f_OpeningShotSimulation.position[AXIS_X] * COURSE_TO_WORLD_SCALE,
+                        f_OpeningShotSimulation.position[AXIS_Y] * COURSE_TO_WORLD_SCALE,
+                        f_OpeningShotSimulation.position[AXIS_Z] * COURSE_TO_WORLD_SCALE
+                    );
+                    f_LookAtEaseMode = 2;
+                    f_OpeningSceneFramesLeft = 140;
+                    f_IsNameSlotShown[0] = 0;
+                    f_OpeningScene++;
+                    ClearEffects();
+                }
+
+                break;
+            case OPENING_SCENE_LUIGI_DRIVE + 3:
+                if (f_OpeningSceneFramesLeft == 55) {
+                    PlaySoundWithEffects(SOUND_HIT_FOLIAGE, f_OpeningSoundChannel, 0x50, 0xA, 0x9F);
+                    SetSoundFrequencyOffset(f_OpeningSoundChannel, -9.0f);
+                    AdvanceOpeningSoundChannel();
+                }
+
+                if (f_OpeningSceneFramesLeft == 45) {
+                    PlaySoundWithEffects(
+                        SOUND_HIT_FOLIAGE,
+                        f_OpeningSoundChannel,
+                        0x50,
+                        0x14,
+                        0x9F
+                    );
+                    SetSoundFrequencyOffset(f_OpeningSoundChannel, -10.0f);
+                    AdvanceOpeningSoundChannel();
+                }
+
+                if (f_OpeningSceneFramesLeft == 35) {
+                    PlaySoundWithEffects(
+                        SOUND_HIT_FOLIAGE,
+                        f_OpeningSoundChannel,
+                        0x50,
+                        0x1E,
+                        0x9F
+                    );
+                    SetSoundFrequencyOffset(f_OpeningSoundChannel, -11.0f);
+                    AdvanceOpeningSoundChannel();
+                }
+
+                if (f_OpeningSceneFramesLeft == 25) {
+                    PlaySoundWithEffects(
+                        SOUND_HIT_FOLIAGE,
+                        f_OpeningSoundChannel,
+                        0x50,
+                        0x28,
+                        0x9F
+                    );
+                    SetSoundFrequencyOffset(f_OpeningSoundChannel, -12.0f);
+                    AdvanceOpeningSoundChannel();
+                }
+
+                if (f_OpeningSceneFramesLeft == 15) {
+                    PlaySound(SOUND_LAND_GREEN, f_OpeningSoundChannel, 0x30);
+                    AdvanceOpeningSoundChannel();
+                }
+
+                if (f_OpeningSceneFramesLeft == 0) {
+                    f_OpeningScene = OPENING_SCENE_PEACH_PLUM_WALK;
+                    f_LookAtEaseMode = 0;
+                }
+
+                break;
+            case OPENING_SCENE_PEACH_PLUM_WALK:
+                if (AreEditorMovesDone()) {
+                    StartHudAnimation(HUD_ANIMATION_FADE_OUT);
+                    f_OpeningScene++;
+                    LoadOpeningBall(PLAIN_BALL, 0);
+                    LoadOpeningBall(PLAIN_BALL, 1);
+                    f_OpeningBallPositions[0][AXIS_X] = 2709.835f;
+                    f_OpeningBallPositions[0][AXIS_Z] = 2465.858f;
+                    f_OpeningBallScales[0] = 1.5f;
+                    f_OpeningBallPositions[1][AXIS_X] = 2653.68f;
+                    f_OpeningBallPositions[1][AXIS_Z] = 2478.326f;
+                    f_OpeningBallScales[1] = 1.5f;
+                }
+
+                break;
+            case OPENING_SCENE_PEACH_PLUM_WALK + 1:
+                PlaceEditorCamera(2737.741f, -364.884f, 2368.88f, 2680.325f, -248.5f, 2488.521f);
+                f_OpeningCue = OPENING_CUE_PEACH_PLUM_WALK;
+                f_OpeningBallStates[0] = OPENING_BALL_ON_GROUND;
+                f_OpeningBallStates[1] = OPENING_BALL_ON_GROUND;
+                f_OpeningScene++;
+                break;
+            case OPENING_SCENE_PEACH_PLUM_WALK + 2:
+                TiltEditorCamera(1, -0.22654298f, 0x5A);
+                f_OpeningScene++;
+                break;
+            case OPENING_SCENE_PEACH_PLUM_WALK + 3:
+                if (AreEditorMovesDone()) {
+                    f_OpeningScene = OPENING_SCENE_MARIO_LUIGI_WALK;
+                }
+
+                if (f_OpeningFrameCount == 0x375) {
+                    PlaySound(SOUND_YOSHI_REPEATED, f_OpeningSoundChannel, 0x3C);
+                    AdvanceOpeningSoundChannel();
+                }
+
+                break;
+            case OPENING_SCENE_MARIO_LUIGI_WALK:
+                PlaceEditorCamera(2413.141f, -271.41f, 1784.364f, 2503.834f, -245.0f, 1850.029f);
+                f_OpeningBallStates[1] = OPENING_BALL_HIDDEN;
+                f_OpeningBallPositions[0][AXIS_X] = 2483.922f;
+                f_OpeningBallPositions[0][AXIS_Z] = 1800.958f;
+                f_OpeningBallScales[0] = OPENING_BALL_NORMAL_SCALE;
+                MoveEditorCamera(1, 2489.032f, -255.774f, 1840.637f, 0x50);
+                TiltEditorCamera(1, -0.116571f, 0x76);
+                TurnEditorCamera(1, 1.366719f, 0x76);
+                ZoomEditorCamera(1, 87.87598f, 0x76);
+                f_OpeningCue = OPENING_CUE_MARIO_LUIGI_WALK;
+                f_OpeningSceneFramesLeft = 118;
+                f_OpeningScene++;
+                break;
+            case OPENING_SCENE_MARIO_LUIGI_WALK + 1:
+                switch (f_OpeningSceneFramesLeft) {
+                    case 73:
+                    case 84:
+                    case 94:
+                    case 104:
+                    case 115:
+                        PlaySound(SOUND_BLOOP, f_OpeningSoundChannel, 0x46);
+                        AdvanceOpeningSoundChannel();
+                        break;
+                    case 106:
+                        PlaySoundWithEffects(
+                            SOUND_GOOMBA,
+                            f_OpeningSoundChannel,
+                            0x48,
+                            -6,
+                            SOUND_FULL_SCALE
+                        );
+                        AdvanceOpeningSoundChannel();
+                        break;
+                    case 100:
+                        PlaySound(SOUND_LONG_OH, f_OpeningSoundChannel, SOUND_FULL_SCALE);
+                        AdvanceOpeningSoundChannel();
+                        break;
+                    case 70:
+                        if (f_IsDonkeyKongShown) {
+                            PlaySound(SOUND_HELLO_BALL, f_OpeningSoundChannel, SOUND_FULL_SCALE);
+                        }
+                        else {
+                            PlaySound(
+                                SOUND_MARIO_ITS_A_ME,
+                                f_OpeningSoundChannel,
+                                SOUND_FULL_SCALE
+                            );
+                        }
+
+                        AdvanceOpeningSoundChannel();
+                        break;
+                }
+
+                if (AreEditorMovesDone()) {
+                    f_OpeningScene = OPENING_SCENE_MARIO_FINDS_BALL;
+                    f_OpeningSceneFramesLeft = 40;
+                }
+
+                break;
+            case OPENING_SCENE_MARIO_FINDS_BALL:
+                if (f_OpeningSceneFramesLeft == 0) {
+                    f_OpeningCue = OPENING_CUE_MARIO_REACH_BALL;
+                    f_OpeningScene++;
+                    MoveEditorCamera(1, 2489.636f, -257.5f, 1811.529f, 0x1E);
+                    TiltEditorCamera(1, -0.070194006f, 0x32);
+                    TurnEditorCamera(1, 0.3807652f, 0x32);
+                    ZoomEditorCamera(1, 34.2068f, 0x32);
+                    if (f_IsDonkeyKongShown) {
+                        PlaySoundWithEffects(
+                            SOUND_PEACH_LONG_HEY_MARIO,
+                            f_OpeningSoundChannel,
+                            SOUND_FULL_SCALE,
+                            0,
+                            0x3F
+                        );
+                    }
+                    else {
+                        PlaySoundWithEffects(
+                            SOUND_PEACH_HEY_MARIO,
+                            f_OpeningSoundChannel,
+                            0x50,
+                            0,
+                            0x3F
+                        );
+                    }
+
+                    AdvanceOpeningSoundChannel();
+                }
+
+                break;
+            case OPENING_SCENE_MARIO_FINDS_BALL + 1:
+                if (AreEditorMovesDone()) {
+                    f_OpeningScene = OPENING_SCENE_PEACH_WAVE;
+                    f_OpeningSceneFramesLeft = 10;
+                }
+
+                break;
+            case OPENING_SCENE_PEACH_WAVE:
+                if (f_OpeningSceneFramesLeft == 0) {
+                    StartHudAnimation(HUD_ANIMATION_FAST_FADE_OUT);
+                    PlaceEditorCamera(
+                        2801.815f,
+                        -255.822f,
+                        2196.813f,
+                        2823.524f,
+                        -256.5f,
+                        2177.502f
+                    );
+                    MoveEditorPoint(1, 2855.966f, -256.5f, 2213.121f, 0x32);
+                    MoveEditorPoint(0, 2702.606f, -279.683f, 2250.851f, 0x32);
+                    f_OpeningSceneFramesLeft = 90;
+                    f_OpeningCue = OPENING_CUE_PEACH_WAVE;
+                    g_HoleSetup.conditions.lightPitch = 0x1000;
+
+                    /* Stored as a signed value, as the original does */
+                    *(s16 *)&g_HoleSetup.conditions.lightYaw = -0x7800;
+                    f_OpeningScene++;
+                }
+
+                break;
+            case OPENING_SCENE_PEACH_WAVE + 1:
+                switch (f_OpeningSceneFramesLeft) {
+                    case 87:
+                        PlaySoundWithEffects(SOUND_BLOOP, f_OpeningSoundChannel, 0x50, 0, 0xA7);
+                        AdvanceOpeningSoundChannel();
+                        break;
+                    case 77:
+                        PlaySoundWithEffects(SOUND_BLOOP, f_OpeningSoundChannel, 0x4C, 0, 0x9D);
+                        AdvanceOpeningSoundChannel();
+                        break;
+                    case 67:
+                        PlaySoundWithEffects(SOUND_BLOOP, f_OpeningSoundChannel, 0x48, 0, 0x93);
+                        AdvanceOpeningSoundChannel();
+                        break;
+                    case 57:
+                        PlaySoundWithEffects(SOUND_BLOOP, f_OpeningSoundChannel, 0x3A, 0, 0x89);
+                        AdvanceOpeningSoundChannel();
+                        break;
+                    case 42:
+                        PlaySound(SOUND_YOSHI_EAGLE_SECOND_EFFECT, f_OpeningSoundChannel, 0x46);
+                        SetSoundFrequencyOffset(f_OpeningSoundChannel, 7.0f);
+                        AdvanceOpeningSoundChannel();
+                        break;
+                }
+
+                if (f_OpeningSceneFramesLeft >= 23 && f_OpeningSceneFramesLeft < 42) {
+                    GetCharacterPointPosition(2, 2, point);
+                    g_CurrentShot.ballPosition[AXIS_X] = (s32)point[AXIS_X]
+                        << WORLD_TO_COURSE_SHIFT;
+                    g_CurrentShot.ballPosition[AXIS_Z] = (s32)point[AXIS_Z]
+                        << WORLD_TO_COURSE_SHIFT;
+                    g_CurrentShot.ballPosition[AXIS_Y] = GetGroundHeight(
+                                                             g_CurrentShot.ballPosition[AXIS_X],
+                                                             g_CurrentShot.ballPosition[AXIS_Z]
+                                                         ) +
+                        15360.0f;
+                    SpawnRisingClumps(f_OpeningShotImpactPoint);
+                }
+
+                if (f_OpeningSceneFramesLeft == 80) {
+                    if (IsDonkeyKongUnlocked()) {
+                        if (!(rand() & 0x80)) {
+                            f_IsDonkeyKongShown = TRUE;
+                        }
+                        else {
+                            f_IsDonkeyKongShown = FALSE;
+                        }
+                    }
+
+                    LoadOpeningBall(PLAIN_BALL, 0);
+                    f_OpeningBallPositions[0][AXIS_X] = 2723.423f;
+                    f_OpeningBallPositions[0][AXIS_Z] = 2246.086f;
+                }
+
+                if (f_OpeningSceneFramesLeft == 50) {
+                    f_OpeningBallStates[0] = OPENING_BALL_ON_GROUND;
+                }
+
+                if (f_OpeningSceneFramesLeft == 0) {
+                    TiltEditorCamera(1, -0.166897f, 0x32);
+                    f_OpeningScene++;
+                    PlaySound(SOUND_LOOK_AT_CUP, f_OpeningSoundChannel, 0x32);
+                    AdvanceOpeningSoundChannel();
+                }
+
+                break;
+            case OPENING_SCENE_PEACH_WAVE + 2:
+                if (AreEditorMovesDone()) {
+                    f_OpeningSceneFramesLeft = 20;
+                    f_OpeningScene = OPENING_SCENE_BALL_ROLLS_IN;
+                }
+
+                break;
+            case OPENING_SCENE_BALL_ROLLS_IN:
+                if (f_OpeningSceneFramesLeft == 0) {
+                    PlaceEditorCamera(
+                        2712.031f,
+                        -270.705f,
+                        2358.303f,
+                        2770.045f,
+                        -250.5f,
+                        2337.548f
+                    );
+                    f_OpeningCue = OPENING_CUE_PEACH_APPROACH;
+                    f_OpeningSceneFramesLeft = 64;
+                    f_OpeningScene = OPENING_SCENE_PEACH_APPROACH;
+                    f_OpeningBallPositions[0][AXIS_X] = 2755.104f;
+                    f_OpeningBallPositions[0][AXIS_Z] = 2341.293f;
+                }
+
+                break;
+            case OPENING_SCENE_PEACH_APPROACH:
+                switch (f_OpeningSceneFramesLeft) {
+                    case 53:
+                    case 42:
+                    case 26:
+                        PlaySound(SOUND_BLOOP, f_OpeningSoundChannel, 0x30);
+                        AdvanceOpeningSoundChannel();
+                        break;
+                }
+
+                if (f_OpeningSceneFramesLeft == 0) {
+                    PlaceEditorCamera(
+                        2670.074f,
+                        -270.531f,
+                        2375.225f,
+                        2692.222f,
+                        -248.0f,
+                        2366.292f
+                    );
+                    ZoomEditorCamera(1, 16.721228f, 0x28);
+                    f_OpeningScene++;
+                    PlaySound(SOUND_LOOK_AT_CUP, f_OpeningSoundChannel, 0x3C);
+                    AdvanceOpeningSoundChannel();
+                    g_HoleSetup.conditions.lightPitch = 0x1000;
+                    g_HoleSetup.conditions.lightYaw = 0x6800;
+                    if (f_IsDonkeyKongShown) {
+                        LoadOpeningBall(DONKEY_KONG_FACE_BALL, 1);
+                    }
+                    else {
+                        LoadOpeningBall(YOSHI_FACE_BALL, 1);
+                    }
+
+                    f_OpeningBallStates[0] = OPENING_BALL_HIDDEN;
+                    f_OpeningBallStates[1] = OPENING_BALL_ON_GROUND;
+                    f_OpeningBallPositions[1][AXIS_X] = 2689.998f;
+                    f_OpeningBallPositions[1][AXIS_Z] = 2367.191f;
+                    f_OpeningBallScales[1] = OPENING_BALL_LARGE_SCALE;
+                }
+
+                break;
+            case OPENING_SCENE_PEACH_APPROACH + 1:
+                if (AreEditorMovesDone()) {
+                    f_OpeningScene = OPENING_SCENE_BALL_INSPECTION;
+                    f_OpeningSceneFramesLeft = 20;
+                }
+
+                break;
+            case OPENING_SCENE_BALL_INSPECTION:
+                if (f_OpeningSceneFramesLeft == 0) {
+                    PlaceEditorCamera(
+                        2712.031f,
+                        -270.705f,
+                        2358.303f,
+                        2770.045f,
+                        -250.5f,
+                        2337.548f
+                    );
+                    f_OpeningCue = OPENING_CUE_BALL_INSPECTION;
+                    f_OpeningSceneFramesLeft = 56;
+                    g_CameraEditor.fieldOfView = 45.0f;
+                    f_OpeningScene++;
+                    LoadOpeningBall(PLAIN_BALL, 0);
+                    f_OpeningBallStates[0] = OPENING_BALL_ON_GROUND;
+                    f_OpeningBallStates[1] = OPENING_BALL_HIDDEN;
+                    f_OpeningBallPositions[0][AXIS_X] = 2755.104f;
+                    f_OpeningBallPositions[0][AXIS_Z] = 2341.293f;
+                    f_OpeningBallScales[0] = OPENING_BALL_NORMAL_SCALE;
+                }
+
+                break;
+            case OPENING_SCENE_BALL_INSPECTION + 1:
+                if (f_OpeningSceneFramesLeft == 10) {
+                    PlaySoundWithEffects(
+                        SOUND_BABY_MARIO_CALL_OUT_C_DOWN,
+                        f_OpeningSoundChannel,
+                        0x40,
+                        0x14,
+                        0xCF
+                    );
+                    AdvanceOpeningSoundChannel();
+                }
+
+                if (f_OpeningSceneFramesLeft == 0) {
+                    f_OpeningCue = OPENING_CUE_MARIO_LOOK_UP;
+                    f_OpeningSceneFramesLeft = 30;
+                    f_OpeningScene++;
+                    LoadOpeningBall(PLAIN_BALL, 1);
+                    f_OpeningBallPositions[1][AXIS_X] = 0.0f;
+                    f_OpeningBallPositions[1][AXIS_Z] = 0.0f;
+                }
+
+                break;
+            case OPENING_SCENE_BALL_INSPECTION + 2:
+                if (f_OpeningFrameCount == 0x5C5) {
+                    PlaySoundWithEffects(
+                        SOUND_UH_OH,
+                        f_OpeningSoundChannel,
+                        SOUND_FULL_SCALE,
+                        0,
+                        0x89
+                    );
+                    AdvanceOpeningSoundChannel();
+                }
+
+                if (f_OpeningSceneFramesLeft == 0) {
+                    f_OpeningCue = OPENING_CUE_FREEZE;
+                    f_OpeningScene = OPENING_SCENE_INCOMING_BALL;
+                }
+
+                break;
+            case OPENING_SCENE_INCOMING_BALL:
+                GetCharacterPointPosition(1, 3, logoBallPoint);
+                f_OpeningBallStates[1] = OPENING_BALL_IN_AIR;
+                f_OpeningBallPositions[1][AXIS_X] = 2319.014f;
+                f_OpeningBallPositions[1][AXIS_Y] = -560.0f;
+                f_OpeningBallPositions[1][AXIS_Z] = 342.12f;
+                f_OpeningBallScales[1] = 2.0f;
+                PlaceEditorCamera(2662.345f, -254.25f, 2376.081f, 2493.599f, -910.952f, 665.178f);
+                MoveEditorPoint(0, 2671.388f, -257.489f, 2351.288f, 0x28);
+                MoveEditorPoint(
+                    1,
+                    logoBallPoint[AXIS_X],
+                    logoBallPoint[AXIS_Y] - 4.5f,
+                    logoBallPoint[AXIS_Z],
+                    0x28
+                );
+                f_IsLogoBallSlot[1] = 1;
+                f_OpeningScene++;
+                f_LogoBallFollowRate = 1.0f;
+                break;
+            case OPENING_SCENE_INCOMING_BALL + 1:
+                f_OpeningBallPositions[1][AXIS_X] +=
+                    (g_CameraEditor.points[1][0] - f_OpeningBallPositions[1][AXIS_X]) *
+                    f_LogoBallFollowRate;
+                f_OpeningBallPositions[1][AXIS_Y] +=
+                    (g_CameraEditor.points[1][1] - f_OpeningBallPositions[1][AXIS_Y]) *
+                    f_LogoBallFollowRate;
+                f_OpeningBallPositions[1][AXIS_Z] +=
+                    (g_CameraEditor.points[1][2] - f_OpeningBallPositions[1][AXIS_Z]) *
+                    f_LogoBallFollowRate;
+                f_LogoBallFollowRate -= 0.02f;
+                if (f_LogoBallFollowRate < 0.1f) {
+                    f_LogoBallFollowRate = 0.1f;
+                }
+
+                if (AreEditorMovesDone()) {
+                    f_OpeningCue = OPENING_CUE_UNFREEZE;
+                    f_OpeningSceneFramesLeft = 120;
+                    f_OpeningScene = OPENING_SCENE_BABY_MARIO_ARRIVAL;
+                    f_LookAtEaseMode = 3;
+                }
+
+                break;
+            case OPENING_SCENE_BABY_MARIO_ARRIVAL:
+                f_LogoBallFollowRate += 0.02f;
+                if (f_LogoBallFollowRate > 1.0f) {
+                    f_LogoBallFollowRate = 1.0f;
+                }
+
+                GetCharacterPointPosition(1, 3, handPoint);
+                f_OpeningBallPositions[1][AXIS_X] +=
+                    (handPoint[AXIS_X] - f_OpeningBallPositions[1][AXIS_X]) * f_LogoBallFollowRate;
+                f_OpeningBallPositions[1][AXIS_Y] +=
+                    (handPoint[AXIS_Y] - f_OpeningBallPositions[1][AXIS_Y]) * f_LogoBallFollowRate;
+                f_OpeningBallPositions[1][AXIS_Z] +=
+                    (handPoint[AXIS_Z] - f_OpeningBallPositions[1][AXIS_Z]) * f_LogoBallFollowRate;
+                switch (f_OpeningSceneFramesLeft) {
+                    case 97:
+                        PlaySoundWithEffects(
+                            SOUND_LAND_FAIRWAY,
+                            f_OpeningSoundChannel,
+                            SOUND_FULL_SCALE,
+                            0,
+                            0xA7
+                        );
+                        AdvanceOpeningSoundChannel();
+                        break;
+                    case 69:
+                        PlaySoundWithEffects(
+                            SOUND_LAND_FAIRWAY,
+                            f_OpeningSoundChannel,
+                            SOUND_FULL_SCALE,
+                            0,
+                            0x93
+                        );
+                        AdvanceOpeningSoundChannel();
+                        break;
+                    case 55:
+                        PlaySoundWithEffects(
+                            SOUND_ROLL,
+                            f_OpeningSoundChannel,
+                            0x40,
+                            0x7F,
+                            SOUND_FULL_SCALE
+                        );
+                        break;
+                    case 15:
+                        StopSound(f_OpeningSoundChannel);
+                        AdvanceOpeningSoundChannel();
+                        break;
+                }
+
+                if (f_OpeningSceneFramesLeft == 0) {
+                    StartHudAnimation(HUD_ANIMATION_FAST_FADE_OUT);
+                    PlaceEditorCamera(2878.956f, -391.282f, 2514.85f, 2431.88f, -315.0f, 992.943f);
+                    MoveEditorPoint(0, 2051.33f, -258.127f, 862.423f, 0x28);
+                    MoveEditorPoint(1, 2058.79f, -254.0f, 825.963f, 0x28);
+                    f_OpeningCue = OPENING_CUE_BABY_MARIO_ARRIVAL;
+                    f_OpeningSceneFramesLeft = 20;
+                    f_OpeningScene++;
+                    LoadNameLogo(5, 0);
+                    if (f_IsDonkeyKongShown) {
+                        LoadNameLogo(6, 1);
+                    }
+                    else {
+                        LoadNameLogo(4, 1);
+                    }
+
+                    f_OpeningBallStates[1] = OPENING_BALL_HIDDEN;
+                    f_IsLogoBallSlot[1] = 0;
+                    f_ShotBallScale = 0;
+                    f_LookAtEaseMode = 0;
+                    PlaySound(SOUND_LOOK_AT_CUP, f_OpeningSoundChannel, 0x50);
+                    AdvanceOpeningSoundChannel();
+                }
+
+                break;
+            case OPENING_SCENE_BABY_MARIO_ARRIVAL + 1:
+                if (f_OpeningSceneFramesLeft == 0) {
+                    f_OpeningCue = OPENING_CUE_BABY_MARIO_RIDE;
+                    f_OpeningSceneFramesLeft = 36;
+                    f_OpeningScene++;
+                }
+
+                break;
+            case OPENING_SCENE_BABY_MARIO_ARRIVAL + 2:
+                if (f_IsDonkeyKongShown) {
+                    if (f_OpeningSceneFramesLeft == 18) {
+                        PlaySoundWithEffects(
+                            SOUND_DONKEY_KONG_REPEATED,
+                            f_OpeningSoundChannel,
+                            SOUND_FULL_SCALE,
+                            7,
+                            SOUND_FULL_SCALE
+                        );
+                        SetSoundFrequencyOffset(f_OpeningSoundChannel, -4.0f);
+                        AdvanceOpeningSoundChannel();
+                    }
+                }
+                else {
+                    switch (f_OpeningSceneFramesLeft) {
+                        case 19:
+                        case 9:
+                            PlaySound(SOUND_YOSHI_REPEATED, f_OpeningSoundChannel, 0x43);
+                            AdvanceOpeningSoundChannel();
+                            break;
+                    }
+                }
+
+                if (AreEditorMovesDone()) {
+                    f_IsNameSlotShown[0] = 1;
+                    f_IsNameSlotShown[1] = 1;
+                }
+
+                if (f_OpeningSceneFramesLeft == 0) {
+                    if (f_IsDonkeyKongShown) {
+                        MoveEditorPoint(1, 2043.766f, -256.5f, 851.89f, 0x5A);
+                        MoveEditorPoint(0, 2032.192f, -262.337f, 875.169f, 0x5A);
+                    }
+                    else {
+                        MoveEditorPoint(1, 2043.767f, -250.0f, 851.891f, 0x5A);
+                        MoveEditorPoint(0, 2025.674f, -258.046f, 888.28f, 0x5A);
+                    }
+
+                    f_OpeningSceneFramesLeft = 90;
+                    f_OpeningScene++;
+                }
+
+                break;
+            case OPENING_SCENE_BABY_MARIO_ARRIVAL + 3:
+                if (f_IsDonkeyKongShown) {
+                    switch (f_OpeningSceneFramesLeft) {
+                        case 26:
+                        case 46:
+                        case 66:
+                        case 86:
+                            PlaySoundWithEffects(
+                                SOUND_DONKEY_KONG_REPEATED,
+                                f_OpeningSoundChannel,
+                                SOUND_FULL_SCALE,
+                                7,
+                                SOUND_FULL_SCALE
+                            );
+                            SetSoundFrequencyOffset(f_OpeningSoundChannel, -4.0f);
+                            AdvanceOpeningSoundChannel();
+                            break;
+                        case 67:
+                            PlaySound(SOUND_BOING, f_OpeningSoundChannel, 0x28);
+                            AdvanceOpeningSoundChannel();
+                            break;
+                        case 47:
+                            PlaySound(SOUND_GOOMBA, f_OpeningSoundChannel, 0x60);
+                            AdvanceOpeningSoundChannel();
+                            break;
+                        case 31:
+                            PlaySound(SOUND_GOOMBA, f_OpeningSoundChannel, 0x30);
+                            AdvanceOpeningSoundChannel();
+                            break;
+                        case 12:
+                            PlaySoundWithEffects(
+                                SOUND_BABY_MARIO_BIRDIE,
+                                f_OpeningSoundChannel,
+                                SOUND_FULL_SCALE,
+                                0,
+                                0x93
+                            );
+                            AdvanceOpeningSoundChannel();
+                            break;
+                        case 8:
+                            PlaySoundWithEffects(
+                                SOUND_DONKEY_KONG_BIRDIE,
+                                f_OpeningSoundChannel,
+                                SOUND_FULL_SCALE,
+                                0,
+                                0x6B
+                            );
+                            AdvanceOpeningSoundChannel();
+                            break;
+                    }
+                }
+                else {
+                    switch (f_OpeningSceneFramesLeft) {
+                        case 69:
+                        case 79:
+                        case 89:
+                            PlaySound(SOUND_YOSHI_REPEATED, f_OpeningSoundChannel, 0x57);
+                            AdvanceOpeningSoundChannel();
+                            break;
+                        case 42:
+                            PlaySound(SOUND_YOSHI_REPEATED, f_OpeningSoundChannel, 0x61);
+                            AdvanceOpeningSoundChannel();
+                            break;
+                        case 59:
+                            PlaySound(SOUND_BOING, f_OpeningSoundChannel, 0x51);
+                            AdvanceOpeningSoundChannel();
+                            break;
+                        case 34:
+                            PlaySound(SOUND_BOING, f_OpeningSoundChannel, 0x5B);
+                            AdvanceOpeningSoundChannel();
+                            break;
+                        case 29:
+                            PlaySound(SOUND_GOOMBA, f_OpeningSoundChannel, 0x6B);
+                            AdvanceOpeningSoundChannel();
+                            break;
+                        case 39:
+                            PlaySoundWithEffects(
+                                SOUND_GOOMBA,
+                                f_OpeningSoundChannel,
+                                0x30,
+                                0,
+                                0x65
+                            );
+                            AdvanceOpeningSoundChannel();
+                            break;
+                        case 22:
+                            PlaySoundWithEffects(
+                                SOUND_GOOMBA,
+                                f_OpeningSoundChannel,
+                                0x18,
+                                0,
+                                0x5B
+                            );
+                            AdvanceOpeningSoundChannel();
+                            break;
+                        case 4:
+                            PlaySoundWithEffects(
+                                SOUND_YOSHI_CALL_OUT_LEFT,
+                                f_OpeningSoundChannel,
+                                SOUND_FULL_SCALE,
+                                0,
+                                0x6B
+                            );
+                            AdvanceOpeningSoundChannel();
+                            break;
+                    }
+                }
+
+                if (AreEditorMovesDone()) {
+                    f_OpeningSceneFramesLeft = 20;
+                    f_OpeningScene = OPENING_SCENE_MARIO_PUZZLED;
+                }
+
+                break;
+            case OPENING_SCENE_MARIO_PUZZLED:
+                if (!f_IsDonkeyKongShown && f_OpeningSceneFramesLeft == 16) {
+                    PlaySoundWithEffects(
+                        SOUND_BABY_MARIO_CALL_OUT_DOWN,
+                        f_OpeningSoundChannel,
+                        0x60,
+                        0,
+                        0x93
+                    );
+                    AdvanceOpeningSoundChannel();
+                }
+
+                if (f_OpeningSceneFramesLeft == 0) {
+                    PlaceEditorCamera(
+                        2708.301f,
+                        -264.204f,
+                        2343.526f,
+                        2770.098f,
+                        -260.0f,
+                        2337.539f
+                    );
+                    f_OpeningCue = OPENING_CUE_MARIO_PUZZLED;
+                    f_OpeningSceneFramesLeft = 70;
+                    f_IsNameSlotShown[0] = 0;
+                    f_IsNameSlotShown[1] = 0;
+                    f_OpeningScene++;
+                    LoadWipeShape(0xC);
+                }
+
+                break;
+            case OPENING_SCENE_MARIO_PUZZLED + 1:
+                switch (f_OpeningSceneFramesLeft) {
+                    case 60:
+                        PlaySound(SOUND_AMBIENT_ALTERNATING_FIRST, f_OpeningSoundChannel, 0x60);
+                        AdvanceOpeningSoundChannel();
+
+                        /* fallthrough */
+                    case 50:
+                        PlaySound(SOUND_AMBIENT_REPEATING, f_OpeningSoundChannel, 0x60);
+                        AdvanceOpeningSoundChannel();
+                        break;
+                    case 40:
+                        PlaySound(SOUND_AMBIENT_REPEATING, f_OpeningSoundChannel, 0x60);
+                        AdvanceOpeningSoundChannel();
+                        break;
+                    case 37:
+                        PlaySound(SOUND_AMBIENT_ALTERNATING_FIRST, f_OpeningSoundChannel, 0x60);
+                        AdvanceOpeningSoundChannel();
+                        break;
+                }
+
+                if (f_OpeningSceneFramesLeft == 0) {
+                    StartWipe(1);
+                    f_OpeningScene++;
+                }
+
+                break;
+            case OPENING_SCENE_MARIO_PUZZLED + 2:
+                if (GetWipeProgress() == WIPE_CLOSED_PROGRESS) {
+                    f_OpeningSceneFramesLeft = 20;
+                    f_OpeningScene = OPENING_SCENE_LUIGI_SEARCH;
+                    f_OpeningCue = OPENING_CUE_CLEAR_CHARACTERS;
+                    f_OpeningBallStates[0] = OPENING_BALL_HIDDEN;
+                }
+
+                break;
+            case OPENING_SCENE_LUIGI_SEARCH:
+                if (f_OpeningSceneFramesLeft == 0) {
+                    PlaceEditorCamera(
+                        1423.923f,
+                        -248.221f,
+                        1595.031f,
+                        1450.829f,
+                        -254.0f,
+                        1546.087f
+                    );
+                    MoveEditorPoint(1, 1420.136f, -250.5f, 1551.713f, 0x32);
+                    f_OpeningCue = OPENING_CUE_LUIGI_SEARCH;
+                    f_OpeningScene++;
+                    StartWipe(2);
+                    f_OpeningSceneFramesLeft = 160;
+                    LoadOpeningImpactLines();
+                }
+
+                break;
+            case OPENING_SCENE_LUIGI_SEARCH + 1:
+                if (f_OpeningSceneFramesLeft == 30) {
+                    f_AreImpactLinesShown = TRUE;
+                }
+
+                if (f_OpeningSceneFramesLeft == 0) {
+                    f_OpeningScene = OPENING_SCENE_OUT_OF_BOUNDS;
+                    LoadOpeningBall(LUIGI_FACE_BALL, 0);
+                    f_OpeningBallStates[0] = OPENING_BALL_ON_GROUND;
+                    f_OpeningBallPositions[0][AXIS_X] = 932.978f;
+                    f_OpeningBallPositions[0][AXIS_Z] = 1884.644f;
+                    f_OpeningBallScales[0] = 1.4f;
+                }
+
+                switch (f_OpeningSceneFramesLeft) {
+                    case 147:
+                        PlaySoundWithEffects(SOUND_BLOOP, f_OpeningSoundChannel, 0x50, 0, 0x61);
+                        AdvanceOpeningSoundChannel();
+                        break;
+                    case 137:
+                        PlaySoundWithEffects(SOUND_BLOOP, f_OpeningSoundChannel, 0x50, 0, 0x6B);
+                        AdvanceOpeningSoundChannel();
+                        break;
+                    case 127:
+                        PlaySoundWithEffects(SOUND_BLOOP, f_OpeningSoundChannel, 0x50, 0, 0x75);
+                        AdvanceOpeningSoundChannel();
+                        break;
+                    case 116:
+                        PlaySoundWithEffects(
+                            SOUND_BLOOP,
+                            f_OpeningSoundChannel,
+                            0x50,
+                            0,
+                            SOUND_FULL_SCALE
+                        );
+                        AdvanceOpeningSoundChannel();
+                        break;
+                    case 30:
+                        PlaySound(SOUND_CHIME, f_OpeningSoundChannel, 0x46);
+                        AdvanceOpeningSoundChannel();
+                        break;
+                    case 28:
+                        if (f_IsDonkeyKongShown) {
+                            PlaySound(SOUND_LUIGI_OH_NO, f_OpeningSoundChannel, SOUND_FULL_SCALE);
+                            f_DonkeyKongSoundChannel = f_OpeningSoundChannel;
+                        }
+                        else {
+                            PlaySound(SOUND_SHORT_OH, f_OpeningSoundChannel, SOUND_FULL_SCALE);
+                        }
+
+                        AdvanceOpeningSoundChannel();
+                        break;
+                    case 20:
+                        if (f_IsDonkeyKongShown) {
+                            StopSound(f_DonkeyKongSoundChannel);
+                        }
+
+                        break;
+                }
+
+                break;
+            case OPENING_SCENE_OUT_OF_BOUNDS:
+                PlaceEditorCamera(956.687f, -259.45f, 1874.671f, 933.391f, -243.5f, 1884.391f);
+                f_OpeningSceneFramesLeft = 20;
+                f_OpeningCue = OPENING_CUE_TOAD_FLAG;
+                f_AreImpactLinesShown = FALSE;
+                g_CameraEditor.fieldOfView = 18.0f;
+                f_OpeningScene++;
+                break;
+            case OPENING_SCENE_OUT_OF_BOUNDS + 1:
+                if (f_OpeningSceneFramesLeft == 6) {
+                    PlaySoundWithEffects(SOUND_FLAG_SWISH, f_OpeningSoundChannel, 0x60, 0, 0xA7);
+                    AdvanceOpeningSoundChannel();
+                }
+
+                if (f_OpeningSceneFramesLeft == 0) {
+                    MoveEditorPoint(1, 933.391f, -250.5f, 1884.391f, 0x3C);
+                    f_OpeningSceneFramesLeft = 60;
+                    f_OpeningScene++;
+                }
+
+                break;
+            case OPENING_SCENE_OUT_OF_BOUNDS + 2:
+                g_CameraEditor.fieldOfView += 0.2666666f;
+                switch (f_OpeningSceneFramesLeft) {
+                    case 54:
+                        PlaySoundWithEffects(
+                            SOUND_FLAG_SWISH,
+                            f_OpeningSoundChannel,
+                            0x60,
+                            0,
+                            0x57
+                        );
+                        AdvanceOpeningSoundChannel();
+                        break;
+                    case 10:
+                        PlaySound(SOUND_OUT_OF_BOUNDS, f_OpeningSoundChannel, SOUND_FULL_SCALE);
+                        AdvanceOpeningSoundChannel();
+                        break;
+                    case 36:
+                        PlaySoundWithEffects(
+                            SOUND_FLAG_SWISH,
+                            f_OpeningSoundChannel,
+                            0x60,
+                            0,
+                            0xA7
+                        );
+                        AdvanceOpeningSoundChannel();
+                        break;
+                    case 6:
+                        PlaySoundWithEffects(
+                            SOUND_FLAG_SWISH,
+                            f_OpeningSoundChannel,
+                            0x60,
+                            0,
+                            0x57
+                        );
+                        AdvanceOpeningSoundChannel();
+                        break;
+                }
+
+                if (AreEditorMovesDone()) {
+                    f_OpeningScene = OPENING_SCENE_TOAD_FLAG;
+                    f_OpeningSceneFramesLeft = 60;
+                }
+
+                break;
+            case OPENING_SCENE_TOAD_FLAG:
+                switch (f_OpeningSceneFramesLeft) {
+                    case 36:
+                        PlaySoundWithEffects(
+                            SOUND_FLAG_SWISH,
+                            f_OpeningSoundChannel,
+                            0x60,
+                            0,
+                            0xA7
+                        );
+                        AdvanceOpeningSoundChannel();
+
+                        /* fallthrough */
+                    case 6:
+                        PlaySoundWithEffects(
+                            SOUND_FLAG_SWISH,
+                            f_OpeningSoundChannel,
+                            0x60,
+                            0,
+                            0x57
+                        );
+                        AdvanceOpeningSoundChannel();
+                        break;
+                }
+
+                if (f_OpeningSceneFramesLeft == 0) {
+                    PlaceEditorCamera(
+                        1423.703f,
+                        -250.799f,
+                        1574.041f,
+                        1420.135f,
+                        -252.0f,
+                        1551.713f
+                    );
+                    f_OpeningScene = OPENING_SCENE_GATHERING;
+                    f_OpeningSceneFramesLeft = 80;
+                    f_OpeningCue = OPENING_CUE_LUIGI_DISMAY;
+                    f_OpeningBallStates[0] = OPENING_BALL_HIDDEN;
+                    g_CameraEditor.fieldOfView = 45.0f;
+                    LoadOpeningBurst();
+                }
+
+                break;
+            case OPENING_SCENE_GATHERING:
+                if (f_OpeningSceneFramesLeft == 46) {
+                    f_IsBurstShown = TRUE;
+                    PlaySound(SOUND_BURST, f_OpeningSoundChannel, 0x50);
+                    AdvanceOpeningSoundChannel();
+                }
+
+                if (f_OpeningSceneFramesLeft == 26) {
+                    PlaySound(SOUND_LUIGI_OH_NO, f_OpeningSoundChannel, SOUND_FULL_SCALE);
+                    AdvanceOpeningSoundChannel();
+                }
+
+                if (f_OpeningSceneFramesLeft == 20) {
+                    f_AreAmbientSoundsOn = TRUE;
+                }
+
+                if (f_OpeningSceneFramesLeft == 0) {
+                    MoveEditorPoint(0, 1404.737f, -250.799f, 1633.633f, 0x50);
+                    f_OpeningScene++;
+                    LoadLakitu();
+                    f_OpeningSceneFramesLeft = 40;
+                }
+
+                break;
+            case OPENING_SCENE_GATHERING + 1:
+                g_CameraEditor.fieldOfView += 0.2f;
+                if (g_CameraEditor.fieldOfView > 100.0f) {
+                    g_CameraEditor.fieldOfView = 100.0f;
+                }
+
+                if (AreEditorMovesDone()) {
+                    f_OpeningSceneFramesLeft = 20;
+                    f_OpeningScene++;
+                }
+
+                break;
+            case OPENING_SCENE_GATHERING + 2:
+                g_CameraEditor.fieldOfView += 0.2f;
+                if (g_CameraEditor.fieldOfView > 100.0f) {
+                    g_CameraEditor.fieldOfView = 100.0f;
+                }
+
+                if (f_OpeningSceneFramesLeft == 0) {
+                    MoveEditorPoint(0, 1409.318f, -400.0f, 1609.259f, 0xDC);
+                    f_OpeningSceneFramesLeft = 40;
+                    f_OpeningScene++;
+                }
+
+                break;
+            case OPENING_SCENE_GATHERING + 3:
+                g_CameraEditor.fieldOfView += 0.2f;
+                if (g_CameraEditor.fieldOfView > 100.0f) {
+                    g_CameraEditor.fieldOfView = 100.0f;
+                }
+
+                if (f_OpeningSceneFramesLeft == 0) {
+                    f_IsLakituFlying = TRUE;
+                    f_OpeningSceneFramesLeft = 1000;
+                    f_OpeningScene++;
+                    PlaySound(SOUND_WIND_FLY_GUY, f_OpeningSoundChannel, 0x3F);
+                    AdvanceOpeningSoundChannel();
+                    f_AreAmbientSoundsOn = FALSE;
+                }
+
+                break;
+            case OPENING_SCENE_GATHERING + 4:
+                g_CameraEditor.fieldOfView += 0.2f;
+                if (g_CameraEditor.fieldOfView > 100.0f) {
+                    g_CameraEditor.fieldOfView = 100.0f;
+                }
+
+                switch (f_OpeningSceneFramesLeft) {
+                    case 969:
+                    case 970:
+                    case 971:
+                    case 972:
+                    case 993:
+                    case 994:
+                    case 995:
+                    case 997:
+                    case 998:
+                        PlaySound(SOUND_FALLING_WHISTLE, f_OpeningSoundChannel, 0x40);
+                        AdvanceOpeningSoundChannel();
+                        break;
+                }
+
+                switch (f_OpeningSceneFramesLeft) {
+                    case 936:
+                    case 937:
+                    case 939:
+                    case 940:
+                    case 961:
+                    case 963:
+                    case 965:
+                    case 966:
+                    case 968:
+                        PlaySound(SOUND_BOING, f_OpeningSoundChannel, 0x60);
+                        AdvanceOpeningSoundChannel();
+                        break;
+                }
+
+                PlayLogoClubSound();
+                if (f_OpeningSceneFramesLeft == 975) {
+                    PlaySoundWithEffects(
+                        SOUND_OPENING_CLOSE,
+                        CLOSING_SOUND_CHANNEL,
+                        SOUND_FULL_SCALE,
+                        0,
+                        SOUND_FULL_SCALE
+                    );
+                    f_ClosingSoundChannel = CLOSING_SOUND_CHANNEL;
+                }
+
+                break;
+            case OPENING_SCENE_SKIPPED:
+                StartScreenFadeOut(
+                    SKIP_FADE_WHITE_LEVEL,
+                    SKIP_FADE_WHITE_LEVEL,
+                    SKIP_FADE_WHITE_LEVEL,
+                    SKIP_FADE_FRAME_COUNT
+                );
+                f_OpeningScene = OPENING_SCENE_END;
+                break;
+            case OPENING_SCENE_END:
+                if (HasScreenFadeEnded()) {
+                    StopEditorMoves();
+                    g_TitleScreenEntrance = TITLE_ENTRANCE_FROM_OPENING;
+                    g_Scene = SCENE_SWAPPING_MODULES;
+                    g_NextScene = SCENE_TITLE_SCREEN;
+                    g_SceneModuleToUnload = MODULE_OPENING;
+                    g_SceneModuleToLoad = MODULE_TITLE_SCREEN;
+                    ClearDebugText();
+                    StopWipe();
+                    FreeAllCharacterSlots();
+                    for (channel = 0; channel < SCRIPT_SOUND_CHANNEL_COUNT; channel++) {
+                        if (g_TitleScreenEntrance != TITLE_ENTRANCE_FROM_OPENING ||
+                            (channel != f_DonkeyKongSoundChannel &&
+                                channel != f_ClosingSoundChannel)) {
+                            StopSound(channel);
+                        }
+                    }
+
+                    if (!f_HasLogoStarted) {
+                        PlaySound(SOUND_MENU_CONFIRM, OPENING_MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
+                    }
+
+                    SetTextSlot(
+                        CLEARED_TEXT_X,
+                        CLEARED_TEXT_Y,
+                        NO_MESSAGE,
+                        TEXT_SLOT_LARGE_FONT,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0
+                    );
+                    return;
+                }
+
+                break;
+        }
     }
 
-    if (g_IsDebugEnabled) {
-      sprintf(g_PrintBuffer, "%04d", (int)f_OpeningFrameCount);
-      PrintDebugText(
-          g_PrintBuffer, FRAME_COUNT_TEXT_COLUMN, FRAME_COUNT_TEXT_ROW);
-      sprintf(g_PrintBuffer, "CAMERA:%d    ", (int)f_OpeningScene);
-      PrintDebugText(g_PrintBuffer, SCENE_TEXT_COLUMN, SCENE_TEXT_ROW);
-      sprintf(g_PrintBuffer, "(%d)    ", (int)f_OpeningSceneFramesLeft);
-      PrintDebugText(g_PrintBuffer, FRAMES_LEFT_TEXT_COLUMN, SCENE_TEXT_ROW);
+    if (f_OpeningSceneFramesLeft > 0) {
+        f_OpeningSceneFramesLeft--;
     }
 
-    switch (f_OpeningScene) {
-      case OPENING_SCENE_MARIO_DRIVE:
-        g_ScreenFadeDuration = 1;
-        g_ScreenFadeFramesLeft = 1;
-        g_ScreenFadeKind = 1;
-        g_ScreenFadeRed = 0;
-        g_ScreenFadeGreen = 0;
-        g_ScreenFadeBlue = 0;
-        f_OpeningSceneFramesLeft = 10;
-        f_OpeningScene++;
-        break;
-      case OPENING_SCENE_MARIO_DRIVE + 1:
-        g_ScreenFadeDuration = 1;
-        g_ScreenFadeFramesLeft = 1;
-        g_ScreenFadeKind = 1;
-        g_ScreenFadeRed = 0;
-        g_ScreenFadeGreen = 0;
-        g_ScreenFadeBlue = 0;
-        if (f_OpeningSceneFramesLeft == 0) {
-          f_OpeningSceneFramesLeft = 30;
-          LoadNameLogo(0, 0);
-          f_OpeningCue = OPENING_CUE_MARIO_TEE_SHOT;
-          StartScreenFadeIn(0, 0, 0, 0x1E);
-          PlaceEditorCamera(
-              997.598f, -160.581f, 4594.014f, 973.0f, -130.0f, 4672.0f);
-          ZoomEditorCamera(1, 38.01875f, 0x3C);
-          TurnEditorCamera(1, -0.8528241f, 0x28);
-          TiltEditorCamera(1, -0.324127f, 0x28);
-          f_OpeningScene++;
-          LoadOpeningShotBall();
-          f_OpeningShotSimulation.position[AXIS_X] = 0xF1B96;
-          f_OpeningShotSimulation.position[AXIS_Z] = 0x48CFDC;
-          f_OpeningShotSimulation.position[AXIS_Y] =
-              GetGroundHeight(0xF1B96, 0x48CFDC);
-          f_ShotBallScale = 2;
-          f_OpeningSparksOrigin[0] =
-              f_OpeningShotSimulation.position[AXIS_X] * COURSE_TO_WORLD_SCALE;
-          f_OpeningSparksOrigin[1] =
-              f_OpeningShotSimulation.position[AXIS_Y] * COURSE_TO_WORLD_SCALE;
-          f_OpeningSparksOrigin[2] =
-              f_OpeningShotSimulation.position[AXIS_Z] * COURSE_TO_WORLD_SCALE;
-          ClearEffects();
-          f_OpeningShotImpactPoint[0] =
-              f_OpeningShotSimulation.position[AXIS_X];
-          f_OpeningShotImpactPoint[1] =
-              f_OpeningShotSimulation.position[AXIS_Y];
-          f_OpeningShotImpactPoint[2] =
-              f_OpeningShotSimulation.position[AXIS_Z];
+    UpdateCameraEditor();
+    EaseOpeningLookAt();
+    g_Cameras[0].mode = CAMERA_MODE_BEHIND_GOLFER;
+    g_Cameras[0].view.eye[0] = g_CameraEditor.points[0][0];
+    g_Cameras[0].view.eye[1] = g_CameraEditor.points[0][1];
+    g_Cameras[0].view.eye[2] = g_CameraEditor.points[0][2];
+    g_Cameras[0].view.lookAt[0] = g_CameraEditor.points[1][0];
+    g_Cameras[0].view.lookAt[1] = g_CameraEditor.points[1][1];
+    g_Cameras[0].view.lookAt[2] = g_CameraEditor.points[1][2];
+    g_Cameras[0].view.fieldOfView = g_CameraEditor.fieldOfView;
+    if (f_OpeningShotState == 1) {
+        f_UnusedStickOffsetX += g_ControllerStates[1].stickX * 0.002f;
+        f_UnusedStickOffsetY += g_ControllerStates[1].stickY * 0.002f;
+        for (slot = 0; slot < 4; slot++) {
+            if (IsCharacterSlotBusy(slot)) {
+                GetCharacterPointPosition(slot, 1, point);
+            }
         }
 
-        break;
-      case OPENING_SCENE_MARIO_DRIVE + 2:
-        if (f_OpeningSceneFramesLeft == 0) {
-          f_IsNameSlotShown[0] = 1;
-          PlaySong(SONG_OPENING, 0);
-        }
-
-        if (AreEditorMovesDone()) {
-          f_OpeningSceneFramesLeft = 40;
-          f_OpeningScene++;
-        }
-
-        break;
-      case OPENING_SCENE_MARIO_DRIVE + 3:
-        if (f_OpeningSceneFramesLeft == 28) {
-          PlaySound(
-              SOUND_CONTACT_PLAIN, f_OpeningSoundChannel, SOUND_FULL_SCALE);
-          AdvanceOpeningSoundChannel();
-        }
-
-        if (f_OpeningSceneFramesLeft == 24) {
-          PlaySoundWithEffects(
-              SOUND_SHOT_SPARKS, f_OpeningSoundChannel, 0x4C, 0, 0xA7);
-          AdvanceOpeningSoundChannel();
-          f_OpeningSparksState = 1;
-          LaunchDrop(f_OpeningShotImpactPoint);
-        }
-
-        if (f_OpeningSceneFramesLeft == 24) {
-          f_OpeningShotSimulation.playerIndex = 0;
-          f_OpeningShotSimulation.isHoledOut = FALSE;
-          f_OpeningShotSimulation.state = BALL_STATE_STOPPED;
-          f_OpeningShotSimulation.surface = SURFACE_TEE_UP;
-          LaunchOpeningBallSimulation(
-              &f_OpeningShotSimulation, 0, &f_OpeningFirstShot);
-          f_OpeningShotState = 1;
-          f_ShotBallScale = 1;
-        }
-
-        if (f_OpeningSceneFramesLeft == 0) {
-          f_OpeningCue = OPENING_CUE_PEACH_CHEER;
-          f_OpeningScene = OPENING_SCENE_MARIO_DRIVE_CHEERS;
-        }
-
-        break;
-      case OPENING_SCENE_MARIO_DRIVE_CHEERS:
-        PlaceEditorCamera(
-            679.6445f, -98.28f, 4736.7f, 642.835f, -99.0f, 4746.187f);
-        ZoomEditorCamera(1, 18.469883f, 0x1E);
-        MoveEditorCamera(1, 642.835f, -100.5f, 4746.187f, 0x1E);
-        f_IsNameSlotShown[0] = 0;
-        f_OpeningShotState = 0;
-        f_ShotBallScale = 0;
-        f_OpeningSceneFramesLeft = 30;
-        f_OpeningScene++;
-        ClearEffects();
-        break;
-      case OPENING_SCENE_MARIO_DRIVE_CHEERS + 1:
-        switch (f_OpeningSceneFramesLeft) {
-          case 25:
-            PlaySound(SOUND_PEACH_OPENING_VOICE, f_OpeningSoundChannel,
-                SOUND_FULL_SCALE);
-            AdvanceOpeningSoundChannel();
-            break;
-          case 23:
-            PlaySoundWithEffects(
-                SOUND_PLUM_OPENING_VOICE, f_OpeningSoundChannel, 0x46, 0, 0xBB);
-            AdvanceOpeningSoundChannel();
-            break;
-          case 20:
-            PlaySoundWithEffects(
-                SOUND_MARIO_CALL_OUT_UP, f_OpeningSoundChannel, 0x46, 0, 0x57);
-            AdvanceOpeningSoundChannel();
-            break;
-        }
-
-        if (AreEditorMovesDone()) {
-          StopEditorMoves();
-          f_OpeningScene++;
-        }
-
-        break;
-      case OPENING_SCENE_MARIO_DRIVE_CHEERS + 2:
-        f_OpeningCue = OPENING_CUE_LUIGI_CHEER;
-        f_OpeningScene = OPENING_SCENE_MARIO_DRIVE_FLIGHT;
-        break;
-      case OPENING_SCENE_UNREACHED:
-        PlaceEditorCamera(
-            1400.411f, -101.306f, 4781.043f, 1414.02f, -107.0f, 4800.41f);
-        f_OpeningSceneFramesLeft = 14;
-        f_OpeningScene++;
-        break;
-      case OPENING_SCENE_UNREACHED + 1:
-        if (f_OpeningSceneFramesLeft == 8) {
-          SetAnimationSpeed(2, 0.0f);
-        }
-
-        if (f_OpeningSceneFramesLeft == 0) {
-          f_OpeningScene = OPENING_SCENE_MARIO_DRIVE_FLIGHT;
-        }
-
-        break;
-      case OPENING_SCENE_MARIO_DRIVE_FLIGHT:
-        PlaceEditorCamera(
-            1269.768f, -127.806f, 4719.564f, 1179.989f, -111.987f, 4715.451f);
-        f_OpeningShotSimulation.position[AXIS_X] = 0xF1B96;
-        f_OpeningShotSimulation.position[AXIS_Z] = 0x48CFDC;
-        f_OpeningShotSimulation.position[AXIS_Y] =
-            GetGroundHeight(0xF1B96, 0x48CFDC);
-        f_OpeningShotSimulation.playerIndex = 0;
-        f_OpeningShotSimulation.isHoledOut = FALSE;
-        f_OpeningShotSimulation.state = BALL_STATE_STOPPED;
-        f_OpeningShotSimulation.surface = SURFACE_TEE_UP;
-        LaunchOpeningBallSimulation(
-            &f_OpeningShotSimulation, 0, &f_OpeningFirstShot);
-        f_OpeningShotState = 1;
-        f_ShotBallScale = 1;
-        f_OpeningSparksState = 1;
-        f_OpeningSceneFramesLeft = 20;
-        f_OpeningScene++;
-        break;
-      case OPENING_SCENE_MARIO_DRIVE_FLIGHT + 1:
-        if (f_OpeningSceneFramesLeft == 14) {
-          PlaySoundWithEffects(SOUND_LUIGI_CALL_OUT_RIGHT,
-              f_OpeningSoundChannel, SOUND_FULL_SCALE, 0, SOUND_FULL_SCALE);
-          AdvanceOpeningSoundChannel();
-        }
-
-        if (f_OpeningSceneFramesLeft == 0) {
-          f_LookAtEaseMode = 1;
-          f_OpeningSceneFramesLeft = 50;
-          f_OpeningScene++;
-        }
-
-        break;
-      case OPENING_SCENE_MARIO_DRIVE_FLIGHT + 2:
-        if (f_OpeningSceneFramesLeft == 0) {
-          StartHudAnimation(HUD_ANIMATION_FAST_FADE_OUT);
-          f_OpeningScene = OPENING_SCENE_PEACH_DRIVE;
-          LoadNameLogo(2, 0);
-        }
-
-        break;
-      case OPENING_SCENE_PEACH_DRIVE:
-        PlaceEditorCamera(
-            957.619f, -131.446f, 4629.353f, 973.561f, -133.0f, 4671.789f);
-        f_OpeningCue = OPENING_CUE_PEACH_TEE_SHOT;
-        f_LookAtEaseMode = 0;
-        f_OpeningSceneFramesLeft = 100;
-        f_OpeningShotState = 0;
-        f_OpeningShotSimulation.position[AXIS_X] = 0xF1882;
-        f_OpeningShotSimulation.position[AXIS_Z] = 0x48D4C4;
-        f_OpeningScene++;
-        f_OpeningShotSimulation.position[AXIS_Y] =
-            GetGroundHeight(0xF1882, 0x48D4C4);
-        f_ShotBallScale = 2;
-        f_OpeningShotImpactPoint[0] = f_OpeningShotSimulation.position[AXIS_X];
-        f_OpeningShotImpactPoint[1] = f_OpeningShotSimulation.position[AXIS_Y];
-        f_OpeningShotImpactPoint[2] = f_OpeningShotSimulation.position[AXIS_Z];
-        f_OpeningSparksOrigin[0] =
-            f_OpeningShotSimulation.position[AXIS_X] * COURSE_TO_WORLD_SCALE;
-        f_OpeningSparksOrigin[1] =
-            f_OpeningShotSimulation.position[AXIS_Y] * COURSE_TO_WORLD_SCALE;
-        f_OpeningSparksOrigin[2] =
-            f_OpeningShotSimulation.position[AXIS_Z] * COURSE_TO_WORLD_SCALE;
-        break;
-      case OPENING_SCENE_PEACH_DRIVE + 1:
-        if (f_OpeningSceneFramesLeft == 24) {
-          PlaySound(SOUND_MENU_START, f_OpeningSoundChannel, SOUND_FULL_SCALE);
-          AdvanceOpeningSoundChannel();
-        }
-
-        if (f_OpeningSceneFramesLeft == 20) {
-          PlaySoundWithEffects(
-              SOUND_SHOT_SPARKS, f_OpeningSoundChannel, 0x4C, 0, 0xA7);
-          AdvanceOpeningSoundChannel();
-          f_OpeningSparksState = 1;
-          LaunchDrop(f_OpeningShotImpactPoint);
-        }
-
-        if (f_OpeningSceneFramesLeft == 22) {
-          f_OpeningShotSimulation.playerIndex = 0;
-          f_OpeningShotSimulation.isHoledOut = FALSE;
-          f_OpeningShotSimulation.state = BALL_STATE_STOPPED;
-          f_OpeningShotSimulation.surface = SURFACE_TEE_UP;
-          LaunchOpeningBallSimulation(
-              &f_OpeningShotSimulation, 0, &f_OpeningSecondShot);
-          f_OpeningShotState = 1;
-        }
-
-        if (f_OpeningSceneFramesLeft == 90) {
-          f_IsNameSlotShown[0] = 1;
-        }
-
-        if (f_OpeningSceneFramesLeft == 0) {
-          f_OpeningScene = OPENING_SCENE_PLUM_CHEER;
-        }
-
-        break;
-      case OPENING_SCENE_PLUM_CHEER:
-        PlaceEditorCamera(
-            726.63f, -98.049f, 5063.849f, 713.268f, -96.0f, 5094.7f);
-        MoveEditorPoint(1, 713.268f, -102.0f, 5094.7f, 0x28);
-        MoveEditorPoint(0, 708.085f, -98.243f, 5073.215f, 0x28);
-        f_OpeningSceneFramesLeft = 40;
-        f_OpeningScene = OPENING_SCENE_PEACH_DRIVE_FLIGHT;
-        f_OpeningCue = OPENING_CUE_PLUM_CHEER;
-        f_IsNameSlotShown[0] = 0;
-        f_OpeningShotState = 0;
-        f_ShotBallScale = 0;
-        PlaySoundWithEffects(
-            SOUND_PEACH_CALL_OUT_UP, f_OpeningSoundChannel, 0x32, 0, 0x2F);
-        AdvanceOpeningSoundChannel();
-        ClearEffects();
-        break;
-      case OPENING_SCENE_PEACH_DRIVE_FLIGHT:
-        switch (f_OpeningSceneFramesLeft) {
-          case 35:
-            PlaySoundWithEffects(
-                SOUND_MARIO_CALL_OUT_UP, f_OpeningSoundChannel, 0x50, 0, 0xA7);
-            AdvanceOpeningSoundChannel();
-            break;
-          case 33:
-            PlaySound(SOUND_PLUM_CALL_OUT_UP, f_OpeningSoundChannel,
-                SOUND_FULL_SCALE);
-            AdvanceOpeningSoundChannel();
-            break;
-          case 31:
-            PlaySoundWithEffects(SOUND_LUIGI_OPENING_VOICE,
-                f_OpeningSoundChannel, 0x50, 0, 0xBB);
-            AdvanceOpeningSoundChannel();
-            break;
-        }
-
-        if (f_OpeningSceneFramesLeft == 20) {
-          f_OpeningShotSimulation.position[AXIS_X] = 0xF1B96;
-          f_OpeningShotSimulation.position[AXIS_Z] = 0x48CFDC;
-          f_OpeningShotSimulation.position[AXIS_Y] =
-              GetGroundHeight(0xF1B96, 0x48CFDC);
-          f_OpeningShotSimulation.playerIndex = 0;
-          f_OpeningShotSimulation.isHoledOut = FALSE;
-          f_OpeningShotSimulation.state = BALL_STATE_STOPPED;
-          f_OpeningShotSimulation.surface = SURFACE_TEE_UP;
-          LaunchOpeningBallSimulation(
-              &f_OpeningShotSimulation, 0, &f_OpeningSecondShot);
-          f_OpeningShotState = 1;
-        }
-
-        if (AreEditorMovesDone()) {
-          PlaceEditorCamera(
-              973.156f, -317.049f, 3703.677f, 1276.871f, -112.538f, 4540.245f);
-          f_ShotBallScale = 1;
-          f_LookAtEaseMode = 1;
-          f_OpeningSceneFramesLeft = 70;
-          f_OpeningScene++;
-          AdvanceOpeningSoundChannel();
-        }
-
-        break;
-      case OPENING_SCENE_PEACH_DRIVE_FLIGHT + 1:
-        if (f_OpeningSceneFramesLeft == 0) {
-          f_OpeningScene = OPENING_SCENE_PLUM_DRIVE;
-          StartHudAnimation(HUD_ANIMATION_FAST_FADE_OUT);
-        }
-
-        break;
-      case OPENING_SCENE_PLUM_DRIVE:
-        PlaceEditorCamera(
-            980.776f, -123.436f, 4636.89f, 971.837f, -133.5f, 4671.701f);
-        f_OpeningSceneFramesLeft = 100;
-        f_OpeningCue = OPENING_CUE_PLUM_TEE_SHOT;
-        f_OpeningScene++;
-        LoadNameLogo(3, 0);
-        f_OpeningShotState = 0;
-        f_LookAtEaseMode = 0;
-        f_OpeningShotSimulation.position[AXIS_X] = 0xF3930;
-        f_OpeningShotSimulation.position[AXIS_Z] = 0x48D1D1;
-        f_OpeningShotSimulation.position[AXIS_Y] =
-            GetGroundHeight(0xF3930, 0x48D1D1);
-        f_ShotBallScale = 2;
-        f_OpeningShotImpactPoint[0] = f_OpeningShotSimulation.position[AXIS_X];
-        f_OpeningShotImpactPoint[1] = f_OpeningShotSimulation.position[AXIS_Y];
-        f_OpeningShotImpactPoint[2] = f_OpeningShotSimulation.position[AXIS_Z];
-        f_OpeningSparksOrigin[0] =
-            f_OpeningShotSimulation.position[AXIS_X] * COURSE_TO_WORLD_SCALE;
-        f_OpeningSparksOrigin[1] =
-            f_OpeningShotSimulation.position[AXIS_Y] * COURSE_TO_WORLD_SCALE;
-        f_OpeningSparksOrigin[2] =
-            f_OpeningShotSimulation.position[AXIS_Z] * COURSE_TO_WORLD_SCALE;
-        break;
-      case OPENING_SCENE_PLUM_DRIVE + 1:
-        if (f_OpeningSceneFramesLeft == 24) {
-          PlaySound(SOUND_MENU_START, f_OpeningSoundChannel, SOUND_FULL_SCALE);
-          AdvanceOpeningSoundChannel();
-        }
-
-        if (f_OpeningSceneFramesLeft == 20) {
-          PlaySoundWithEffects(
-              SOUND_SHOT_SPARKS, f_OpeningSoundChannel, 0x4C, 0, 0xA7);
-          AdvanceOpeningSoundChannel();
-          f_OpeningSparksState = 1;
-          LaunchDrop(f_OpeningShotImpactPoint);
-        }
-
-        if (f_OpeningSceneFramesLeft == 20) {
-          f_OpeningShotSimulation.playerIndex = 0;
-          f_OpeningShotSimulation.isHoledOut = FALSE;
-          f_OpeningShotSimulation.state = BALL_STATE_STOPPED;
-          f_OpeningShotSimulation.surface = SURFACE_TEE_UP;
-          LaunchOpeningBallSimulation(
-              &f_OpeningShotSimulation, 0, &f_OpeningThirdShot);
-          f_OpeningShotState = 1;
-        }
-
-        if (f_OpeningSceneFramesLeft == 90) {
-          f_IsNameSlotShown[0] = 1;
-        }
-
-        if (f_OpeningSceneFramesLeft == 0) {
-          f_OpeningScene = OPENING_SCENE_MARIO_CLOSE_UP;
-          f_OpeningCue = OPENING_CUE_MARIO_CHEER;
-        }
-
-        break;
-      case OPENING_SCENE_MARIO_CLOSE_UP:
-        PlaceEditorCamera(
-            1402.165f, -101.306f, 4774.711f, 1412.049f, -107.0f, 4798.309f);
-        TiltEditorCamera(1, 0.183044f, 0x32);
-        TurnEditorCamera(1, 1.1519989f, 0x32);
-        ZoomEditorCamera(1, 47.392056f, 0x1E);
-        f_OpeningSceneFramesLeft = 50;
-        f_OpeningScene = OPENING_SCENE_MARIO_CHEER;
-        f_IsNameSlotShown[0] = 0;
-        f_OpeningShotState = 0;
-        f_ShotBallScale = 0;
-        ClearEffects();
-        break;
-      case OPENING_SCENE_MARIO_CHEER:
-        switch (f_OpeningSceneFramesLeft) {
-          case 40:
-            PlaySound(SOUND_MARIO_OPENING_VOICE, f_OpeningSoundChannel,
-                SOUND_FULL_SCALE);
-            AdvanceOpeningSoundChannel();
-            break;
-          case 38:
-            PlaySoundWithEffects(
-                SOUND_LUIGI_CALL_OUT_UP, f_OpeningSoundChannel, 0x46, 0, 0xBB);
-            AdvanceOpeningSoundChannel();
-            break;
-          case 35:
-            PlaySoundWithEffects(SOUND_PEACH_OPENING_VOICE,
-                f_OpeningSoundChannel, 0x36, 0, 0x57);
-            AdvanceOpeningSoundChannel();
-            break;
-        }
-
-        if (f_OpeningSceneFramesLeft == 0) {
-          StopEditorMoves();
-          StartHudAnimation(HUD_ANIMATION_FAST_FADE_OUT);
-          f_OpeningScene++;
-        }
-
-        break;
-      case OPENING_SCENE_MARIO_CHEER + 1:
-        PlaceEditorCamera(
-            957.619f, -131.446f, 4629.353f, 973.561f, -133.0f, 4671.789f);
-        TurnEditorCamera(1, 1.0471976f, 1);
-        TiltEditorCamera(1, 0.34906584f, 1);
-        f_OpeningCue = OPENING_CUE_LUIGI_TEE_SHOT;
-        f_OpeningScene++;
-        LoadNameLogo(1, 0);
-        f_OpeningSceneFramesLeft = 10;
-        f_OpeningShotSimulation.position[AXIS_X] = 0xF190E;
-        f_OpeningShotSimulation.position[AXIS_Z] = 0x48D416;
-        f_OpeningShotSimulation.position[AXIS_Y] =
-            GetGroundHeight(0xF190E, 0x48D416);
-        f_ShotBallScale = 2;
-        f_OpeningShotImpactPoint[0] = f_OpeningShotSimulation.position[AXIS_X];
-        f_OpeningShotImpactPoint[1] = f_OpeningShotSimulation.position[AXIS_Y];
-        f_OpeningShotImpactPoint[2] = f_OpeningShotSimulation.position[AXIS_Z];
-        f_OpeningSparksOrigin[0] =
-            f_OpeningShotSimulation.position[AXIS_X] * COURSE_TO_WORLD_SCALE;
-        f_OpeningSparksOrigin[1] =
-            f_OpeningShotSimulation.position[AXIS_Y] * COURSE_TO_WORLD_SCALE;
-        f_OpeningSparksOrigin[2] =
-            f_OpeningShotSimulation.position[AXIS_Z] * COURSE_TO_WORLD_SCALE;
-        break;
-      case OPENING_SCENE_MARIO_CHEER + 2:
-        TurnEditorCamera(1, -1.0471976f, 0x50);
-        TiltEditorCamera(1, -0.34906584f, 0x50);
-        f_OpeningScene = OPENING_SCENE_LUIGI_DRIVE;
-        break;
-      case OPENING_SCENE_LUIGI_DRIVE:
-        if (f_OpeningSceneFramesLeft == 0) {
-          f_IsNameSlotShown[0] = 1;
-          f_OpeningScene = OPENING_SCENE_LUIGI_DRIVE + 1;
-          f_OpeningSceneFramesLeft = 55;
-        }
-
-        break;
-      case OPENING_SCENE_LUIGI_DRIVE + 1:
-        if (f_OpeningSceneFramesLeft == 4) {
-          PlaySound(
-              SOUND_CONTACT_PLAIN, f_OpeningSoundChannel, SOUND_FULL_SCALE);
-          AdvanceOpeningSoundChannel();
-        }
-
-        if (f_OpeningSceneFramesLeft == 0) {
-          f_OpeningShotSimulation.playerIndex = 0;
-          f_OpeningShotSimulation.isHoledOut = FALSE;
-          f_OpeningShotSimulation.state = BALL_STATE_STOPPED;
-          f_OpeningShotSimulation.surface = SURFACE_TEE_UP;
-          LaunchOpeningBallSimulation(
-              &f_OpeningShotSimulation, 0, &f_OpeningFourthShot);
-          f_OpeningShotState = 1;
-          f_ShotBallScale = 1;
-          ZoomEditorCamera(1, 33.056084f, 0x28);
-          f_OpeningSceneFramesLeft = 5;
-          f_OpeningScene++;
-          PlaySoundWithEffects(
-              SOUND_SHOT_SPARKS, f_OpeningSoundChannel, 0x4C, 0, 0xA7);
-          AdvanceOpeningSoundChannel();
-          f_OpeningSparksState = 1;
-          LaunchDrop(f_OpeningShotImpactPoint);
-        }
-
-        break;
-      case OPENING_SCENE_LUIGI_DRIVE + 2:
+        point[AXIS_X] = f_OpeningShotSimulation.position[AXIS_X] * COURSE_TO_WORLD_SCALE;
+        point[AXIS_Y] = f_OpeningShotSimulation.position[AXIS_Y] * COURSE_TO_WORLD_SCALE;
+        point[AXIS_Z] = f_OpeningShotSimulation.position[AXIS_Z] * COURSE_TO_WORLD_SCALE;
         StepOpeningBallSimulation(&f_OpeningShotSimulation);
-        if (AreEditorMovesDone()) {
-          PlaceEditorCamera(934.786f, -128.501f, 4716.105f,
-              f_OpeningShotSimulation.position[AXIS_X] * COURSE_TO_WORLD_SCALE,
-              f_OpeningShotSimulation.position[AXIS_Y] * COURSE_TO_WORLD_SCALE,
-              f_OpeningShotSimulation.position[AXIS_Z] * COURSE_TO_WORLD_SCALE);
-          f_LookAtEaseMode = 2;
-          f_OpeningSceneFramesLeft = 140;
-          f_IsNameSlotShown[0] = 0;
-          f_OpeningScene++;
-          ClearEffects();
-        }
+    }
+    else if (f_OpeningShotState == 2) {
+        StepOpeningBallSimulation(&f_OpeningShotSimulation);
+    }
 
-        break;
-      case OPENING_SCENE_LUIGI_DRIVE + 3:
-        if (f_OpeningSceneFramesLeft == 55) {
-          PlaySoundWithEffects(
-              SOUND_HIT_FOLIAGE, f_OpeningSoundChannel, 0x50, 0xA, 0x9F);
-          SetSoundFrequencyOffset(f_OpeningSoundChannel, -9.0f);
-          AdvanceOpeningSoundChannel();
-        }
-
-        if (f_OpeningSceneFramesLeft == 45) {
-          PlaySoundWithEffects(
-              SOUND_HIT_FOLIAGE, f_OpeningSoundChannel, 0x50, 0x14, 0x9F);
-          SetSoundFrequencyOffset(f_OpeningSoundChannel, -10.0f);
-          AdvanceOpeningSoundChannel();
-        }
-
-        if (f_OpeningSceneFramesLeft == 35) {
-          PlaySoundWithEffects(
-              SOUND_HIT_FOLIAGE, f_OpeningSoundChannel, 0x50, 0x1E, 0x9F);
-          SetSoundFrequencyOffset(f_OpeningSoundChannel, -11.0f);
-          AdvanceOpeningSoundChannel();
-        }
-
-        if (f_OpeningSceneFramesLeft == 25) {
-          PlaySoundWithEffects(
-              SOUND_HIT_FOLIAGE, f_OpeningSoundChannel, 0x50, 0x28, 0x9F);
-          SetSoundFrequencyOffset(f_OpeningSoundChannel, -12.0f);
-          AdvanceOpeningSoundChannel();
-        }
-
-        if (f_OpeningSceneFramesLeft == 15) {
-          PlaySound(SOUND_LAND_GREEN, f_OpeningSoundChannel, 0x30);
-          AdvanceOpeningSoundChannel();
-        }
-
-        if (f_OpeningSceneFramesLeft == 0) {
-          f_OpeningScene = OPENING_SCENE_PEACH_PLUM_WALK;
-          f_LookAtEaseMode = 0;
-        }
-
-        break;
-      case OPENING_SCENE_PEACH_PLUM_WALK:
-        if (AreEditorMovesDone()) {
-          StartHudAnimation(HUD_ANIMATION_FADE_OUT);
-          f_OpeningScene++;
-          LoadOpeningBall(PLAIN_BALL, 0);
-          LoadOpeningBall(PLAIN_BALL, 1);
-          f_OpeningBallPositions[0][AXIS_X] = 2709.835f;
-          f_OpeningBallPositions[0][AXIS_Z] = 2465.858f;
-          f_OpeningBallScales[0] = 1.5f;
-          f_OpeningBallPositions[1][AXIS_X] = 2653.68f;
-          f_OpeningBallPositions[1][AXIS_Z] = 2478.326f;
-          f_OpeningBallScales[1] = 1.5f;
-        }
-
-        break;
-      case OPENING_SCENE_PEACH_PLUM_WALK + 1:
-        PlaceEditorCamera(
-            2737.741f, -364.884f, 2368.88f, 2680.325f, -248.5f, 2488.521f);
-        f_OpeningCue = OPENING_CUE_PEACH_PLUM_WALK;
-        f_OpeningBallStates[0] = OPENING_BALL_ON_GROUND;
-        f_OpeningBallStates[1] = OPENING_BALL_ON_GROUND;
-        f_OpeningScene++;
-        break;
-      case OPENING_SCENE_PEACH_PLUM_WALK + 2:
-        TiltEditorCamera(1, -0.22654298f, 0x5A);
-        f_OpeningScene++;
-        break;
-      case OPENING_SCENE_PEACH_PLUM_WALK + 3:
-        if (AreEditorMovesDone()) {
-          f_OpeningScene = OPENING_SCENE_MARIO_LUIGI_WALK;
-        }
-
-        if (f_OpeningFrameCount == 0x375) {
-          PlaySound(SOUND_YOSHI_REPEATED, f_OpeningSoundChannel, 0x3C);
-          AdvanceOpeningSoundChannel();
-        }
-
-        break;
-      case OPENING_SCENE_MARIO_LUIGI_WALK:
-        PlaceEditorCamera(
-            2413.141f, -271.41f, 1784.364f, 2503.834f, -245.0f, 1850.029f);
-        f_OpeningBallStates[1] = OPENING_BALL_HIDDEN;
-        f_OpeningBallPositions[0][AXIS_X] = 2483.922f;
-        f_OpeningBallPositions[0][AXIS_Z] = 1800.958f;
-        f_OpeningBallScales[0] = OPENING_BALL_NORMAL_SCALE;
-        MoveEditorCamera(1, 2489.032f, -255.774f, 1840.637f, 0x50);
-        TiltEditorCamera(1, -0.116571f, 0x76);
-        TurnEditorCamera(1, 1.366719f, 0x76);
-        ZoomEditorCamera(1, 87.87598f, 0x76);
-        f_OpeningCue = OPENING_CUE_MARIO_LUIGI_WALK;
-        f_OpeningSceneFramesLeft = 118;
-        f_OpeningScene++;
-        break;
-      case OPENING_SCENE_MARIO_LUIGI_WALK + 1:
-        switch (f_OpeningSceneFramesLeft) {
-          case 73:
-          case 84:
-          case 94:
-          case 104:
-          case 115:
-            PlaySound(SOUND_BLOOP, f_OpeningSoundChannel, 0x46);
-            AdvanceOpeningSoundChannel();
-            break;
-          case 106:
-            PlaySoundWithEffects(SOUND_GOOMBA, f_OpeningSoundChannel, 0x48, -6,
-                SOUND_FULL_SCALE);
-            AdvanceOpeningSoundChannel();
-            break;
-          case 100:
-            PlaySound(SOUND_LONG_OH, f_OpeningSoundChannel, SOUND_FULL_SCALE);
-            AdvanceOpeningSoundChannel();
-            break;
-          case 70:
-            if (f_IsDonkeyKongShown) {
-              PlaySound(
-                  SOUND_HELLO_BALL, f_OpeningSoundChannel, SOUND_FULL_SCALE);
-            } else {
-              PlaySound(SOUND_MARIO_ITS_A_ME, f_OpeningSoundChannel,
-                  SOUND_FULL_SCALE);
+    if (f_OpeningScene != OPENING_SCENE_END &&
+        !f_HasLogoStarted &&
+        !IsGameFlagSet(GAME_FLAG_EDIT_OPENING_CAMERA)) {
+        if (f_OpeningScene != OPENING_SCENE_SKIPPED) {
+            pressedButtons = 0;
+            for (i = 0; i != g_ControllerCount; i++) {
+                pressedButtons |= g_ControllerStates[i].pressedButtons;
             }
 
-            AdvanceOpeningSoundChannel();
-            break;
-        }
-
-        if (AreEditorMovesDone()) {
-          f_OpeningScene = OPENING_SCENE_MARIO_FINDS_BALL;
-          f_OpeningSceneFramesLeft = 40;
-        }
-
-        break;
-      case OPENING_SCENE_MARIO_FINDS_BALL:
-        if (f_OpeningSceneFramesLeft == 0) {
-          f_OpeningCue = OPENING_CUE_MARIO_REACH_BALL;
-          f_OpeningScene++;
-          MoveEditorCamera(1, 2489.636f, -257.5f, 1811.529f, 0x1E);
-          TiltEditorCamera(1, -0.070194006f, 0x32);
-          TurnEditorCamera(1, 0.3807652f, 0x32);
-          ZoomEditorCamera(1, 34.2068f, 0x32);
-          if (f_IsDonkeyKongShown) {
-            PlaySoundWithEffects(SOUND_PEACH_LONG_HEY_MARIO,
-                f_OpeningSoundChannel, SOUND_FULL_SCALE, 0, 0x3F);
-          } else {
-            PlaySoundWithEffects(
-                SOUND_PEACH_HEY_MARIO, f_OpeningSoundChannel, 0x50, 0, 0x3F);
-          }
-
-          AdvanceOpeningSoundChannel();
-        }
-
-        break;
-      case OPENING_SCENE_MARIO_FINDS_BALL + 1:
-        if (AreEditorMovesDone()) {
-          f_OpeningScene = OPENING_SCENE_PEACH_WAVE;
-          f_OpeningSceneFramesLeft = 10;
-        }
-
-        break;
-      case OPENING_SCENE_PEACH_WAVE:
-        if (f_OpeningSceneFramesLeft == 0) {
-          StartHudAnimation(HUD_ANIMATION_FAST_FADE_OUT);
-          PlaceEditorCamera(
-              2801.815f, -255.822f, 2196.813f, 2823.524f, -256.5f, 2177.502f);
-          MoveEditorPoint(1, 2855.966f, -256.5f, 2213.121f, 0x32);
-          MoveEditorPoint(0, 2702.606f, -279.683f, 2250.851f, 0x32);
-          f_OpeningSceneFramesLeft = 90;
-          f_OpeningCue = OPENING_CUE_PEACH_WAVE;
-          g_HoleSetup.conditions.lightPitch = 0x1000;
-
-          /* Stored as a signed value, as the original does */
-          *(s16*)&g_HoleSetup.conditions.lightYaw = -0x7800;
-          f_OpeningScene++;
-        }
-
-        break;
-      case OPENING_SCENE_PEACH_WAVE + 1:
-        switch (f_OpeningSceneFramesLeft) {
-          case 87:
-            PlaySoundWithEffects(
-                SOUND_BLOOP, f_OpeningSoundChannel, 0x50, 0, 0xA7);
-            AdvanceOpeningSoundChannel();
-            break;
-          case 77:
-            PlaySoundWithEffects(
-                SOUND_BLOOP, f_OpeningSoundChannel, 0x4C, 0, 0x9D);
-            AdvanceOpeningSoundChannel();
-            break;
-          case 67:
-            PlaySoundWithEffects(
-                SOUND_BLOOP, f_OpeningSoundChannel, 0x48, 0, 0x93);
-            AdvanceOpeningSoundChannel();
-            break;
-          case 57:
-            PlaySoundWithEffects(
-                SOUND_BLOOP, f_OpeningSoundChannel, 0x3A, 0, 0x89);
-            AdvanceOpeningSoundChannel();
-            break;
-          case 42:
-            PlaySound(
-                SOUND_YOSHI_EAGLE_SECOND_EFFECT, f_OpeningSoundChannel, 0x46);
-            SetSoundFrequencyOffset(f_OpeningSoundChannel, 7.0f);
-            AdvanceOpeningSoundChannel();
-            break;
-        }
-
-        if (f_OpeningSceneFramesLeft >= 23 && f_OpeningSceneFramesLeft < 42) {
-          GetCharacterPointPosition(2, 2, point);
-          g_CurrentShot.ballPosition[AXIS_X] = (s32)point[AXIS_X]
-              << WORLD_TO_COURSE_SHIFT;
-          g_CurrentShot.ballPosition[AXIS_Z] = (s32)point[AXIS_Z]
-              << WORLD_TO_COURSE_SHIFT;
-          g_CurrentShot.ballPosition[AXIS_Y] =
-              GetGroundHeight(g_CurrentShot.ballPosition[AXIS_X],
-                  g_CurrentShot.ballPosition[AXIS_Z]) +
-              15360.0f;
-          SpawnRisingClumps(f_OpeningShotImpactPoint);
-        }
-
-        if (f_OpeningSceneFramesLeft == 80) {
-          if (IsDonkeyKongUnlocked()) {
-            if (!(rand() & 0x80)) {
-              f_IsDonkeyKongShown = TRUE;
-            } else {
-              f_IsDonkeyKongShown = FALSE;
+            if (g_IsDebugEnabled) {
+                skipButtons = g_ControllerStates[OPENING_DEBUG_SKIP_CONTROLLER].pressedButtons &
+                    DEBUG_SKIP_BUTTONS;
             }
-          }
-
-          LoadOpeningBall(PLAIN_BALL, 0);
-          f_OpeningBallPositions[0][AXIS_X] = 2723.423f;
-          f_OpeningBallPositions[0][AXIS_Z] = 2246.086f;
-        }
-
-        if (f_OpeningSceneFramesLeft == 50) {
-          f_OpeningBallStates[0] = OPENING_BALL_ON_GROUND;
-        }
-
-        if (f_OpeningSceneFramesLeft == 0) {
-          TiltEditorCamera(1, -0.166897f, 0x32);
-          f_OpeningScene++;
-          PlaySound(SOUND_LOOK_AT_CUP, f_OpeningSoundChannel, 0x32);
-          AdvanceOpeningSoundChannel();
-        }
-
-        break;
-      case OPENING_SCENE_PEACH_WAVE + 2:
-        if (AreEditorMovesDone()) {
-          f_OpeningSceneFramesLeft = 20;
-          f_OpeningScene = OPENING_SCENE_BALL_ROLLS_IN;
-        }
-
-        break;
-      case OPENING_SCENE_BALL_ROLLS_IN:
-        if (f_OpeningSceneFramesLeft == 0) {
-          PlaceEditorCamera(
-              2712.031f, -270.705f, 2358.303f, 2770.045f, -250.5f, 2337.548f);
-          f_OpeningCue = OPENING_CUE_PEACH_APPROACH;
-          f_OpeningSceneFramesLeft = 64;
-          f_OpeningScene = OPENING_SCENE_PEACH_APPROACH;
-          f_OpeningBallPositions[0][AXIS_X] = 2755.104f;
-          f_OpeningBallPositions[0][AXIS_Z] = 2341.293f;
-        }
-
-        break;
-      case OPENING_SCENE_PEACH_APPROACH:
-        switch (f_OpeningSceneFramesLeft) {
-          case 53:
-          case 42:
-          case 26:
-            PlaySound(SOUND_BLOOP, f_OpeningSoundChannel, 0x30);
-            AdvanceOpeningSoundChannel();
-            break;
-        }
-
-        if (f_OpeningSceneFramesLeft == 0) {
-          PlaceEditorCamera(
-              2670.074f, -270.531f, 2375.225f, 2692.222f, -248.0f, 2366.292f);
-          ZoomEditorCamera(1, 16.721228f, 0x28);
-          f_OpeningScene++;
-          PlaySound(SOUND_LOOK_AT_CUP, f_OpeningSoundChannel, 0x3C);
-          AdvanceOpeningSoundChannel();
-          g_HoleSetup.conditions.lightPitch = 0x1000;
-          g_HoleSetup.conditions.lightYaw = 0x6800;
-          if (f_IsDonkeyKongShown) {
-            LoadOpeningBall(DONKEY_KONG_FACE_BALL, 1);
-          } else {
-            LoadOpeningBall(YOSHI_FACE_BALL, 1);
-          }
-
-          f_OpeningBallStates[0] = OPENING_BALL_HIDDEN;
-          f_OpeningBallStates[1] = OPENING_BALL_ON_GROUND;
-          f_OpeningBallPositions[1][AXIS_X] = 2689.998f;
-          f_OpeningBallPositions[1][AXIS_Z] = 2367.191f;
-          f_OpeningBallScales[1] = OPENING_BALL_LARGE_SCALE;
-        }
-
-        break;
-      case OPENING_SCENE_PEACH_APPROACH + 1:
-        if (AreEditorMovesDone()) {
-          f_OpeningScene = OPENING_SCENE_BALL_INSPECTION;
-          f_OpeningSceneFramesLeft = 20;
-        }
-
-        break;
-      case OPENING_SCENE_BALL_INSPECTION:
-        if (f_OpeningSceneFramesLeft == 0) {
-          PlaceEditorCamera(
-              2712.031f, -270.705f, 2358.303f, 2770.045f, -250.5f, 2337.548f);
-          f_OpeningCue = OPENING_CUE_BALL_INSPECTION;
-          f_OpeningSceneFramesLeft = 56;
-          g_CameraEditor.fieldOfView = 45.0f;
-          f_OpeningScene++;
-          LoadOpeningBall(PLAIN_BALL, 0);
-          f_OpeningBallStates[0] = OPENING_BALL_ON_GROUND;
-          f_OpeningBallStates[1] = OPENING_BALL_HIDDEN;
-          f_OpeningBallPositions[0][AXIS_X] = 2755.104f;
-          f_OpeningBallPositions[0][AXIS_Z] = 2341.293f;
-          f_OpeningBallScales[0] = OPENING_BALL_NORMAL_SCALE;
-        }
-
-        break;
-      case OPENING_SCENE_BALL_INSPECTION + 1:
-        if (f_OpeningSceneFramesLeft == 10) {
-          PlaySoundWithEffects(SOUND_BABY_MARIO_CALL_OUT_C_DOWN,
-              f_OpeningSoundChannel, 0x40, 0x14, 0xCF);
-          AdvanceOpeningSoundChannel();
-        }
-
-        if (f_OpeningSceneFramesLeft == 0) {
-          f_OpeningCue = OPENING_CUE_MARIO_LOOK_UP;
-          f_OpeningSceneFramesLeft = 30;
-          f_OpeningScene++;
-          LoadOpeningBall(PLAIN_BALL, 1);
-          f_OpeningBallPositions[1][AXIS_X] = 0.0f;
-          f_OpeningBallPositions[1][AXIS_Z] = 0.0f;
-        }
-
-        break;
-      case OPENING_SCENE_BALL_INSPECTION + 2:
-        if (f_OpeningFrameCount == 0x5C5) {
-          PlaySoundWithEffects(
-              SOUND_UH_OH, f_OpeningSoundChannel, SOUND_FULL_SCALE, 0, 0x89);
-          AdvanceOpeningSoundChannel();
-        }
-
-        if (f_OpeningSceneFramesLeft == 0) {
-          f_OpeningCue = OPENING_CUE_FREEZE;
-          f_OpeningScene = OPENING_SCENE_INCOMING_BALL;
-        }
-
-        break;
-      case OPENING_SCENE_INCOMING_BALL:
-        GetCharacterPointPosition(1, 3, logoBallPoint);
-        f_OpeningBallStates[1] = OPENING_BALL_IN_AIR;
-        f_OpeningBallPositions[1][AXIS_X] = 2319.014f;
-        f_OpeningBallPositions[1][AXIS_Y] = -560.0f;
-        f_OpeningBallPositions[1][AXIS_Z] = 342.12f;
-        f_OpeningBallScales[1] = 2.0f;
-        PlaceEditorCamera(
-            2662.345f, -254.25f, 2376.081f, 2493.599f, -910.952f, 665.178f);
-        MoveEditorPoint(0, 2671.388f, -257.489f, 2351.288f, 0x28);
-        MoveEditorPoint(1, logoBallPoint[AXIS_X], logoBallPoint[AXIS_Y] - 4.5f,
-            logoBallPoint[AXIS_Z], 0x28);
-        f_IsLogoBallSlot[1] = 1;
-        f_OpeningScene++;
-        f_LogoBallFollowRate = 1.0f;
-        break;
-      case OPENING_SCENE_INCOMING_BALL + 1:
-        f_OpeningBallPositions[1][AXIS_X] +=
-            (g_CameraEditor.points[1][0] - f_OpeningBallPositions[1][AXIS_X]) *
-            f_LogoBallFollowRate;
-        f_OpeningBallPositions[1][AXIS_Y] +=
-            (g_CameraEditor.points[1][1] - f_OpeningBallPositions[1][AXIS_Y]) *
-            f_LogoBallFollowRate;
-        f_OpeningBallPositions[1][AXIS_Z] +=
-            (g_CameraEditor.points[1][2] - f_OpeningBallPositions[1][AXIS_Z]) *
-            f_LogoBallFollowRate;
-        f_LogoBallFollowRate -= 0.02f;
-        if (f_LogoBallFollowRate < 0.1f) {
-          f_LogoBallFollowRate = 0.1f;
-        }
-
-        if (AreEditorMovesDone()) {
-          f_OpeningCue = OPENING_CUE_UNFREEZE;
-          f_OpeningSceneFramesLeft = 120;
-          f_OpeningScene = OPENING_SCENE_BABY_MARIO_ARRIVAL;
-          f_LookAtEaseMode = 3;
-        }
-
-        break;
-      case OPENING_SCENE_BABY_MARIO_ARRIVAL:
-        f_LogoBallFollowRate += 0.02f;
-        if (f_LogoBallFollowRate > 1.0f) {
-          f_LogoBallFollowRate = 1.0f;
-        }
-
-        GetCharacterPointPosition(1, 3, handPoint);
-        f_OpeningBallPositions[1][AXIS_X] +=
-            (handPoint[AXIS_X] - f_OpeningBallPositions[1][AXIS_X]) *
-            f_LogoBallFollowRate;
-        f_OpeningBallPositions[1][AXIS_Y] +=
-            (handPoint[AXIS_Y] - f_OpeningBallPositions[1][AXIS_Y]) *
-            f_LogoBallFollowRate;
-        f_OpeningBallPositions[1][AXIS_Z] +=
-            (handPoint[AXIS_Z] - f_OpeningBallPositions[1][AXIS_Z]) *
-            f_LogoBallFollowRate;
-        switch (f_OpeningSceneFramesLeft) {
-          case 97:
-            PlaySoundWithEffects(SOUND_LAND_FAIRWAY, f_OpeningSoundChannel,
-                SOUND_FULL_SCALE, 0, 0xA7);
-            AdvanceOpeningSoundChannel();
-            break;
-          case 69:
-            PlaySoundWithEffects(SOUND_LAND_FAIRWAY, f_OpeningSoundChannel,
-                SOUND_FULL_SCALE, 0, 0x93);
-            AdvanceOpeningSoundChannel();
-            break;
-          case 55:
-            PlaySoundWithEffects(SOUND_ROLL, f_OpeningSoundChannel, 0x40, 0x7F,
-                SOUND_FULL_SCALE);
-            break;
-          case 15:
-            StopSound(f_OpeningSoundChannel);
-            AdvanceOpeningSoundChannel();
-            break;
-        }
-
-        if (f_OpeningSceneFramesLeft == 0) {
-          StartHudAnimation(HUD_ANIMATION_FAST_FADE_OUT);
-          PlaceEditorCamera(
-              2878.956f, -391.282f, 2514.85f, 2431.88f, -315.0f, 992.943f);
-          MoveEditorPoint(0, 2051.33f, -258.127f, 862.423f, 0x28);
-          MoveEditorPoint(1, 2058.79f, -254.0f, 825.963f, 0x28);
-          f_OpeningCue = OPENING_CUE_BABY_MARIO_ARRIVAL;
-          f_OpeningSceneFramesLeft = 20;
-          f_OpeningScene++;
-          LoadNameLogo(5, 0);
-          if (f_IsDonkeyKongShown) {
-            LoadNameLogo(6, 1);
-          } else {
-            LoadNameLogo(4, 1);
-          }
-
-          f_OpeningBallStates[1] = OPENING_BALL_HIDDEN;
-          f_IsLogoBallSlot[1] = 0;
-          f_ShotBallScale = 0;
-          f_LookAtEaseMode = 0;
-          PlaySound(SOUND_LOOK_AT_CUP, f_OpeningSoundChannel, 0x50);
-          AdvanceOpeningSoundChannel();
-        }
-
-        break;
-      case OPENING_SCENE_BABY_MARIO_ARRIVAL + 1:
-        if (f_OpeningSceneFramesLeft == 0) {
-          f_OpeningCue = OPENING_CUE_BABY_MARIO_RIDE;
-          f_OpeningSceneFramesLeft = 36;
-          f_OpeningScene++;
-        }
-
-        break;
-      case OPENING_SCENE_BABY_MARIO_ARRIVAL + 2:
-        if (f_IsDonkeyKongShown) {
-          if (f_OpeningSceneFramesLeft == 18) {
-            PlaySoundWithEffects(SOUND_DONKEY_KONG_REPEATED,
-                f_OpeningSoundChannel, SOUND_FULL_SCALE, 7, SOUND_FULL_SCALE);
-            SetSoundFrequencyOffset(f_OpeningSoundChannel, -4.0f);
-            AdvanceOpeningSoundChannel();
-          }
-        } else {
-          switch (f_OpeningSceneFramesLeft) {
-            case 19:
-            case 9:
-              PlaySound(SOUND_YOSHI_REPEATED, f_OpeningSoundChannel, 0x43);
-              AdvanceOpeningSoundChannel();
-              break;
-          }
-        }
-
-        if (AreEditorMovesDone()) {
-          f_IsNameSlotShown[0] = 1;
-          f_IsNameSlotShown[1] = 1;
-        }
-
-        if (f_OpeningSceneFramesLeft == 0) {
-          if (f_IsDonkeyKongShown) {
-            MoveEditorPoint(1, 2043.766f, -256.5f, 851.89f, 0x5A);
-            MoveEditorPoint(0, 2032.192f, -262.337f, 875.169f, 0x5A);
-          } else {
-            MoveEditorPoint(1, 2043.767f, -250.0f, 851.891f, 0x5A);
-            MoveEditorPoint(0, 2025.674f, -258.046f, 888.28f, 0x5A);
-          }
-
-          f_OpeningSceneFramesLeft = 90;
-          f_OpeningScene++;
-        }
-
-        break;
-      case OPENING_SCENE_BABY_MARIO_ARRIVAL + 3:
-        if (f_IsDonkeyKongShown) {
-          switch (f_OpeningSceneFramesLeft) {
-            case 26:
-            case 46:
-            case 66:
-            case 86:
-              PlaySoundWithEffects(SOUND_DONKEY_KONG_REPEATED,
-                  f_OpeningSoundChannel, SOUND_FULL_SCALE, 7, SOUND_FULL_SCALE);
-              SetSoundFrequencyOffset(f_OpeningSoundChannel, -4.0f);
-              AdvanceOpeningSoundChannel();
-              break;
-            case 67:
-              PlaySound(SOUND_BOING, f_OpeningSoundChannel, 0x28);
-              AdvanceOpeningSoundChannel();
-              break;
-            case 47:
-              PlaySound(SOUND_GOOMBA, f_OpeningSoundChannel, 0x60);
-              AdvanceOpeningSoundChannel();
-              break;
-            case 31:
-              PlaySound(SOUND_GOOMBA, f_OpeningSoundChannel, 0x30);
-              AdvanceOpeningSoundChannel();
-              break;
-            case 12:
-              PlaySoundWithEffects(SOUND_BABY_MARIO_BIRDIE,
-                  f_OpeningSoundChannel, SOUND_FULL_SCALE, 0, 0x93);
-              AdvanceOpeningSoundChannel();
-              break;
-            case 8:
-              PlaySoundWithEffects(SOUND_DONKEY_KONG_BIRDIE,
-                  f_OpeningSoundChannel, SOUND_FULL_SCALE, 0, 0x6B);
-              AdvanceOpeningSoundChannel();
-              break;
-          }
-        } else {
-          switch (f_OpeningSceneFramesLeft) {
-            case 69:
-            case 79:
-            case 89:
-              PlaySound(SOUND_YOSHI_REPEATED, f_OpeningSoundChannel, 0x57);
-              AdvanceOpeningSoundChannel();
-              break;
-            case 42:
-              PlaySound(SOUND_YOSHI_REPEATED, f_OpeningSoundChannel, 0x61);
-              AdvanceOpeningSoundChannel();
-              break;
-            case 59:
-              PlaySound(SOUND_BOING, f_OpeningSoundChannel, 0x51);
-              AdvanceOpeningSoundChannel();
-              break;
-            case 34:
-              PlaySound(SOUND_BOING, f_OpeningSoundChannel, 0x5B);
-              AdvanceOpeningSoundChannel();
-              break;
-            case 29:
-              PlaySound(SOUND_GOOMBA, f_OpeningSoundChannel, 0x6B);
-              AdvanceOpeningSoundChannel();
-              break;
-            case 39:
-              PlaySoundWithEffects(
-                  SOUND_GOOMBA, f_OpeningSoundChannel, 0x30, 0, 0x65);
-              AdvanceOpeningSoundChannel();
-              break;
-            case 22:
-              PlaySoundWithEffects(
-                  SOUND_GOOMBA, f_OpeningSoundChannel, 0x18, 0, 0x5B);
-              AdvanceOpeningSoundChannel();
-              break;
-            case 4:
-              PlaySoundWithEffects(SOUND_YOSHI_CALL_OUT_LEFT,
-                  f_OpeningSoundChannel, SOUND_FULL_SCALE, 0, 0x6B);
-              AdvanceOpeningSoundChannel();
-              break;
-          }
-        }
-
-        if (AreEditorMovesDone()) {
-          f_OpeningSceneFramesLeft = 20;
-          f_OpeningScene = OPENING_SCENE_MARIO_PUZZLED;
-        }
-
-        break;
-      case OPENING_SCENE_MARIO_PUZZLED:
-        if (!f_IsDonkeyKongShown && f_OpeningSceneFramesLeft == 16) {
-          PlaySoundWithEffects(SOUND_BABY_MARIO_CALL_OUT_DOWN,
-              f_OpeningSoundChannel, 0x60, 0, 0x93);
-          AdvanceOpeningSoundChannel();
-        }
-
-        if (f_OpeningSceneFramesLeft == 0) {
-          PlaceEditorCamera(
-              2708.301f, -264.204f, 2343.526f, 2770.098f, -260.0f, 2337.539f);
-          f_OpeningCue = OPENING_CUE_MARIO_PUZZLED;
-          f_OpeningSceneFramesLeft = 70;
-          f_IsNameSlotShown[0] = 0;
-          f_IsNameSlotShown[1] = 0;
-          f_OpeningScene++;
-          LoadWipeShape(0xC);
-        }
-
-        break;
-      case OPENING_SCENE_MARIO_PUZZLED + 1:
-        switch (f_OpeningSceneFramesLeft) {
-          case 60:
-            PlaySound(
-                SOUND_AMBIENT_ALTERNATING_FIRST, f_OpeningSoundChannel, 0x60);
-            AdvanceOpeningSoundChannel();
-
-            /* fallthrough */
-          case 50:
-            PlaySound(SOUND_AMBIENT_REPEATING, f_OpeningSoundChannel, 0x60);
-            AdvanceOpeningSoundChannel();
-            break;
-          case 40:
-            PlaySound(SOUND_AMBIENT_REPEATING, f_OpeningSoundChannel, 0x60);
-            AdvanceOpeningSoundChannel();
-            break;
-          case 37:
-            PlaySound(
-                SOUND_AMBIENT_ALTERNATING_FIRST, f_OpeningSoundChannel, 0x60);
-            AdvanceOpeningSoundChannel();
-            break;
-        }
-
-        if (f_OpeningSceneFramesLeft == 0) {
-          StartWipe(1);
-          f_OpeningScene++;
-        }
-
-        break;
-      case OPENING_SCENE_MARIO_PUZZLED + 2:
-        if (GetWipeProgress() == WIPE_CLOSED_PROGRESS) {
-          f_OpeningSceneFramesLeft = 20;
-          f_OpeningScene = OPENING_SCENE_LUIGI_SEARCH;
-          f_OpeningCue = OPENING_CUE_CLEAR_CHARACTERS;
-          f_OpeningBallStates[0] = OPENING_BALL_HIDDEN;
-        }
-
-        break;
-      case OPENING_SCENE_LUIGI_SEARCH:
-        if (f_OpeningSceneFramesLeft == 0) {
-          PlaceEditorCamera(
-              1423.923f, -248.221f, 1595.031f, 1450.829f, -254.0f, 1546.087f);
-          MoveEditorPoint(1, 1420.136f, -250.5f, 1551.713f, 0x32);
-          f_OpeningCue = OPENING_CUE_LUIGI_SEARCH;
-          f_OpeningScene++;
-          StartWipe(2);
-          f_OpeningSceneFramesLeft = 160;
-          LoadOpeningImpactLines();
-        }
-
-        break;
-      case OPENING_SCENE_LUIGI_SEARCH + 1:
-        if (f_OpeningSceneFramesLeft == 30) {
-          f_AreImpactLinesShown = TRUE;
-        }
-
-        if (f_OpeningSceneFramesLeft == 0) {
-          f_OpeningScene = OPENING_SCENE_OUT_OF_BOUNDS;
-          LoadOpeningBall(LUIGI_FACE_BALL, 0);
-          f_OpeningBallStates[0] = OPENING_BALL_ON_GROUND;
-          f_OpeningBallPositions[0][AXIS_X] = 932.978f;
-          f_OpeningBallPositions[0][AXIS_Z] = 1884.644f;
-          f_OpeningBallScales[0] = 1.4f;
-        }
-
-        switch (f_OpeningSceneFramesLeft) {
-          case 147:
-            PlaySoundWithEffects(
-                SOUND_BLOOP, f_OpeningSoundChannel, 0x50, 0, 0x61);
-            AdvanceOpeningSoundChannel();
-            break;
-          case 137:
-            PlaySoundWithEffects(
-                SOUND_BLOOP, f_OpeningSoundChannel, 0x50, 0, 0x6B);
-            AdvanceOpeningSoundChannel();
-            break;
-          case 127:
-            PlaySoundWithEffects(
-                SOUND_BLOOP, f_OpeningSoundChannel, 0x50, 0, 0x75);
-            AdvanceOpeningSoundChannel();
-            break;
-          case 116:
-            PlaySoundWithEffects(
-                SOUND_BLOOP, f_OpeningSoundChannel, 0x50, 0, SOUND_FULL_SCALE);
-            AdvanceOpeningSoundChannel();
-            break;
-          case 30:
-            PlaySound(SOUND_CHIME, f_OpeningSoundChannel, 0x46);
-            AdvanceOpeningSoundChannel();
-            break;
-          case 28:
-            if (f_IsDonkeyKongShown) {
-              PlaySound(
-                  SOUND_LUIGI_OH_NO, f_OpeningSoundChannel, SOUND_FULL_SCALE);
-              f_DonkeyKongSoundChannel = f_OpeningSoundChannel;
-            } else {
-              PlaySound(
-                  SOUND_SHORT_OH, f_OpeningSoundChannel, SOUND_FULL_SCALE);
+            else {
+                skipButtons = pressedButtons & SKIP_BUTTONS;
             }
 
-            AdvanceOpeningSoundChannel();
-            break;
-          case 20:
-            if (f_IsDonkeyKongShown) {
-              StopSound(f_DonkeyKongSoundChannel);
+            if (skipButtons) {
+                f_OpeningScene = OPENING_SCENE_SKIPPED;
+            }
+        }
+
+        if (g_IsDebugEnabled) {
+            if (g_ControllerStates[OPENING_EDITOR_CONTROLLER].pressedButtons & A_BUTTON) {
+                PlaySound(SOUND_MENU_CONFIRM, OPENING_MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
+                SetGameFlag(GAME_FLAG_EDIT_OPENING_CAMERA);
+                f_IsLookAtMarkerShown = TRUE;
+                f_LookAtEaseMode = 0;
             }
 
-            break;
+            if (g_IsDebugEnabled &&
+                (g_ControllerStates[OPENING_SCENE_CONTROLLER].pressedButtons & R_TRIG)) {
+                f_OpeningSceneFramesLeft = 0;
+                StopEditorMoves();
+            }
         }
+    }
 
-        break;
-      case OPENING_SCENE_OUT_OF_BOUNDS:
-        PlaceEditorCamera(
-            956.687f, -259.45f, 1874.671f, 933.391f, -243.5f, 1884.391f);
-        f_OpeningSceneFramesLeft = 20;
-        f_OpeningCue = OPENING_CUE_TOAD_FLAG;
-        f_AreImpactLinesShown = FALSE;
-        g_CameraEditor.fieldOfView = 18.0f;
-        f_OpeningScene++;
-        break;
-      case OPENING_SCENE_OUT_OF_BOUNDS + 1:
-        if (f_OpeningSceneFramesLeft == 6) {
-          PlaySoundWithEffects(
-              SOUND_FLAG_SWISH, f_OpeningSoundChannel, 0x60, 0, 0xA7);
-          AdvanceOpeningSoundChannel();
-        }
-
-        if (f_OpeningSceneFramesLeft == 0) {
-          MoveEditorPoint(1, 933.391f, -250.5f, 1884.391f, 0x3C);
-          f_OpeningSceneFramesLeft = 60;
-          f_OpeningScene++;
-        }
-
-        break;
-      case OPENING_SCENE_OUT_OF_BOUNDS + 2:
-        g_CameraEditor.fieldOfView += 0.2666666f;
-        switch (f_OpeningSceneFramesLeft) {
-          case 54:
-            PlaySoundWithEffects(
-                SOUND_FLAG_SWISH, f_OpeningSoundChannel, 0x60, 0, 0x57);
-            AdvanceOpeningSoundChannel();
-            break;
-          case 10:
-            PlaySound(
-                SOUND_OUT_OF_BOUNDS, f_OpeningSoundChannel, SOUND_FULL_SCALE);
-            AdvanceOpeningSoundChannel();
-            break;
-          case 36:
-            PlaySoundWithEffects(
-                SOUND_FLAG_SWISH, f_OpeningSoundChannel, 0x60, 0, 0xA7);
-            AdvanceOpeningSoundChannel();
-            break;
-          case 6:
-            PlaySoundWithEffects(
-                SOUND_FLAG_SWISH, f_OpeningSoundChannel, 0x60, 0, 0x57);
-            AdvanceOpeningSoundChannel();
-            break;
-        }
-
-        if (AreEditorMovesDone()) {
-          f_OpeningScene = OPENING_SCENE_TOAD_FLAG;
-          f_OpeningSceneFramesLeft = 60;
-        }
-
-        break;
-      case OPENING_SCENE_TOAD_FLAG:
-        switch (f_OpeningSceneFramesLeft) {
-          case 36:
-            PlaySoundWithEffects(
-                SOUND_FLAG_SWISH, f_OpeningSoundChannel, 0x60, 0, 0xA7);
-            AdvanceOpeningSoundChannel();
-
-            /* fallthrough */
-          case 6:
-            PlaySoundWithEffects(
-                SOUND_FLAG_SWISH, f_OpeningSoundChannel, 0x60, 0, 0x57);
-            AdvanceOpeningSoundChannel();
-            break;
-        }
-
-        if (f_OpeningSceneFramesLeft == 0) {
-          PlaceEditorCamera(
-              1423.703f, -250.799f, 1574.041f, 1420.135f, -252.0f, 1551.713f);
-          f_OpeningScene = OPENING_SCENE_GATHERING;
-          f_OpeningSceneFramesLeft = 80;
-          f_OpeningCue = OPENING_CUE_LUIGI_DISMAY;
-          f_OpeningBallStates[0] = OPENING_BALL_HIDDEN;
-          g_CameraEditor.fieldOfView = 45.0f;
-          LoadOpeningBurst();
-        }
-
-        break;
-      case OPENING_SCENE_GATHERING:
-        if (f_OpeningSceneFramesLeft == 46) {
-          f_IsBurstShown = TRUE;
-          PlaySound(SOUND_BURST, f_OpeningSoundChannel, 0x50);
-          AdvanceOpeningSoundChannel();
-        }
-
-        if (f_OpeningSceneFramesLeft == 26) {
-          PlaySound(SOUND_LUIGI_OH_NO, f_OpeningSoundChannel, SOUND_FULL_SCALE);
-          AdvanceOpeningSoundChannel();
-        }
-
-        if (f_OpeningSceneFramesLeft == 20) {
-          f_AreAmbientSoundsOn = TRUE;
-        }
-
-        if (f_OpeningSceneFramesLeft == 0) {
-          MoveEditorPoint(0, 1404.737f, -250.799f, 1633.633f, 0x50);
-          f_OpeningScene++;
-          LoadLakitu();
-          f_OpeningSceneFramesLeft = 40;
-        }
-
-        break;
-      case OPENING_SCENE_GATHERING + 1:
-        g_CameraEditor.fieldOfView += 0.2f;
-        if (g_CameraEditor.fieldOfView > 100.0f) {
-          g_CameraEditor.fieldOfView = 100.0f;
-        }
-
-        if (AreEditorMovesDone()) {
-          f_OpeningSceneFramesLeft = 20;
-          f_OpeningScene++;
-        }
-
-        break;
-      case OPENING_SCENE_GATHERING + 2:
-        g_CameraEditor.fieldOfView += 0.2f;
-        if (g_CameraEditor.fieldOfView > 100.0f) {
-          g_CameraEditor.fieldOfView = 100.0f;
-        }
-
-        if (f_OpeningSceneFramesLeft == 0) {
-          MoveEditorPoint(0, 1409.318f, -400.0f, 1609.259f, 0xDC);
-          f_OpeningSceneFramesLeft = 40;
-          f_OpeningScene++;
-        }
-
-        break;
-      case OPENING_SCENE_GATHERING + 3:
-        g_CameraEditor.fieldOfView += 0.2f;
-        if (g_CameraEditor.fieldOfView > 100.0f) {
-          g_CameraEditor.fieldOfView = 100.0f;
-        }
-
-        if (f_OpeningSceneFramesLeft == 0) {
-          f_IsLakituFlying = TRUE;
-          f_OpeningSceneFramesLeft = 1000;
-          f_OpeningScene++;
-          PlaySound(SOUND_WIND_FLY_GUY, f_OpeningSoundChannel, 0x3F);
-          AdvanceOpeningSoundChannel();
-          f_AreAmbientSoundsOn = FALSE;
-        }
-
-        break;
-      case OPENING_SCENE_GATHERING + 4:
-        g_CameraEditor.fieldOfView += 0.2f;
-        if (g_CameraEditor.fieldOfView > 100.0f) {
-          g_CameraEditor.fieldOfView = 100.0f;
-        }
-
-        switch (f_OpeningSceneFramesLeft) {
-          case 969:
-          case 970:
-          case 971:
-          case 972:
-          case 993:
-          case 994:
-          case 995:
-          case 997:
-          case 998:
-            PlaySound(SOUND_FALLING_WHISTLE, f_OpeningSoundChannel, 0x40);
-            AdvanceOpeningSoundChannel();
-            break;
-        }
-
-        switch (f_OpeningSceneFramesLeft) {
-          case 936:
-          case 937:
-          case 939:
-          case 940:
-          case 961:
-          case 963:
-          case 965:
-          case 966:
-          case 968:
-            PlaySound(SOUND_BOING, f_OpeningSoundChannel, 0x60);
-            AdvanceOpeningSoundChannel();
-            break;
-        }
-
-        PlayLogoClubSound();
-        if (f_OpeningSceneFramesLeft == 975) {
-          PlaySoundWithEffects(SOUND_OPENING_CLOSE, CLOSING_SOUND_CHANNEL,
-              SOUND_FULL_SCALE, 0, SOUND_FULL_SCALE);
-          f_ClosingSoundChannel = CLOSING_SOUND_CHANNEL;
-        }
-
-        break;
-      case OPENING_SCENE_SKIPPED:
-        StartScreenFadeOut(SKIP_FADE_WHITE_LEVEL, SKIP_FADE_WHITE_LEVEL,
-            SKIP_FADE_WHITE_LEVEL, SKIP_FADE_FRAME_COUNT);
+    if (UpdateOpeningCharacters()) {
         f_OpeningScene = OPENING_SCENE_END;
-        break;
-      case OPENING_SCENE_END:
-        if (HasScreenFadeEnded()) {
-          StopEditorMoves();
-          g_TitleScreenEntrance = TITLE_ENTRANCE_FROM_OPENING;
-          g_Scene = SCENE_SWAPPING_MODULES;
-          g_NextScene = SCENE_TITLE_SCREEN;
-          g_SceneModuleToUnload = MODULE_OPENING;
-          g_SceneModuleToLoad = MODULE_TITLE_SCREEN;
-          ClearDebugText();
-          StopWipe();
-          FreeAllCharacterSlots();
-          for (channel = 0; channel < SCRIPT_SOUND_CHANNEL_COUNT; channel++) {
-            if (g_TitleScreenEntrance != TITLE_ENTRANCE_FROM_OPENING ||
-                (channel != f_DonkeyKongSoundChannel &&
-                    channel != f_ClosingSoundChannel)) {
-              StopSound(channel);
-            }
-          }
-
-          if (!f_HasLogoStarted) {
-            PlaySound(SOUND_MENU_CONFIRM, OPENING_MENU_SOUND_CHANNEL,
-                SOUND_FULL_SCALE);
-          }
-
-          SetTextSlot(CLEARED_TEXT_X, CLEARED_TEXT_Y, NO_MESSAGE,
-              TEXT_SLOT_LARGE_FONT, 0, 0, 0, 0, 0, 0);
-          return;
-        }
-
-        break;
-    }
-  }
-
-  if (f_OpeningSceneFramesLeft > 0) {
-    f_OpeningSceneFramesLeft--;
-  }
-
-  UpdateCameraEditor();
-  EaseOpeningLookAt();
-  g_Cameras[0].mode = CAMERA_MODE_BEHIND_GOLFER;
-  g_Cameras[0].view.eye[0] = g_CameraEditor.points[0][0];
-  g_Cameras[0].view.eye[1] = g_CameraEditor.points[0][1];
-  g_Cameras[0].view.eye[2] = g_CameraEditor.points[0][2];
-  g_Cameras[0].view.lookAt[0] = g_CameraEditor.points[1][0];
-  g_Cameras[0].view.lookAt[1] = g_CameraEditor.points[1][1];
-  g_Cameras[0].view.lookAt[2] = g_CameraEditor.points[1][2];
-  g_Cameras[0].view.fieldOfView = g_CameraEditor.fieldOfView;
-  if (f_OpeningShotState == 1) {
-    f_UnusedStickOffsetX += g_ControllerStates[1].stickX * 0.002f;
-    f_UnusedStickOffsetY += g_ControllerStates[1].stickY * 0.002f;
-    for (slot = 0; slot < 4; slot++) {
-      if (IsCharacterSlotBusy(slot)) {
-        GetCharacterPointPosition(slot, 1, point);
-      }
     }
 
-    point[AXIS_X] =
-        f_OpeningShotSimulation.position[AXIS_X] * COURSE_TO_WORLD_SCALE;
-    point[AXIS_Y] =
-        f_OpeningShotSimulation.position[AXIS_Y] * COURSE_TO_WORLD_SCALE;
-    point[AXIS_Z] =
-        f_OpeningShotSimulation.position[AXIS_Z] * COURSE_TO_WORLD_SCALE;
-    StepOpeningBallSimulation(&f_OpeningShotSimulation);
-  } else if (f_OpeningShotState == 2) {
-    StepOpeningBallSimulation(&f_OpeningShotSimulation);
-  }
-
-  if (f_OpeningScene != OPENING_SCENE_END && !f_HasLogoStarted &&
-      !IsGameFlagSet(GAME_FLAG_EDIT_OPENING_CAMERA)) {
-    if (f_OpeningScene != OPENING_SCENE_SKIPPED) {
-      pressedButtons = 0;
-      for (i = 0; i != g_ControllerCount; i++) {
-        pressedButtons |= g_ControllerStates[i].pressedButtons;
-      }
-
-      if (g_IsDebugEnabled) {
-        skipButtons =
-            g_ControllerStates[OPENING_DEBUG_SKIP_CONTROLLER].pressedButtons &
-            DEBUG_SKIP_BUTTONS;
-      } else {
-        skipButtons = pressedButtons & SKIP_BUTTONS;
-      }
-
-      if (skipButtons) {
-        f_OpeningScene = OPENING_SCENE_SKIPPED;
-      }
-    }
-
-    if (g_IsDebugEnabled) {
-      if (g_ControllerStates[OPENING_EDITOR_CONTROLLER].pressedButtons &
-          A_BUTTON) {
-        PlaySound(
-            SOUND_MENU_CONFIRM, OPENING_MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
-        SetGameFlag(GAME_FLAG_EDIT_OPENING_CAMERA);
-        f_IsLookAtMarkerShown = TRUE;
-        f_LookAtEaseMode = 0;
-      }
-
-      if (g_IsDebugEnabled &&
-          (g_ControllerStates[OPENING_SCENE_CONTROLLER].pressedButtons &
-              R_TRIG)) {
-        f_OpeningSceneFramesLeft = 0;
-        StopEditorMoves();
-      }
-    }
-  }
-
-  if (UpdateOpeningCharacters()) {
-    f_OpeningScene = OPENING_SCENE_END;
-  }
-
-  AnimateAllCharacters();
-  AnimateNameLogos();
-  MoveLakitu();
-  PlayOpeningAmbientSounds();
+    AnimateAllCharacters();
+    AnimateNameLogos();
+    MoveLakitu();
+    PlayOpeningAmbientSounds();
 }
 
 /* Draws the camera editor's look-at marker, the characters and the opening's
  * overlays */
-void DrawOpening(CameraMatrices* matrices, Gfx** displayListHead) {
-  /* Unused; they give the stack frame the original's size; without any one of
-   * them 80 words differ */
-  Mat4 unusedMatrix UNUSED;
-  Vec3 unusedPoints[4] UNUSED;
-  Gfx* gfx = *displayListHead;
+void DrawOpening(CameraMatrices *matrices, Gfx **displayListHead) {
+    /* Unused; they give the stack frame the original's size; without any one of
+     * them 80 words differ */
+    Mat4 unusedMatrix UNUSED;
+    Vec3 unusedPoints[4] UNUSED;
+    Gfx *gfx = *displayListHead;
 
-  f_OpeningFrameParity ^= 1;
-  if (f_IsLookAtMarkerShown) {
-    guTranslate(&f_LookAtMarkerTranslation, g_Cameras[0].view.lookAt[0],
-        g_Cameras[0].view.lookAt[1], g_Cameras[0].view.lookAt[2]);
-    guScale(&f_LookAtMarkerScaling, g_LookAtMarkerScale, g_LookAtMarkerScale,
-        g_LookAtMarkerScale);
-    gDPPipeSync(gfx++);
-    gDPPipeSync(gfx++);
-    gDPSetCycleType(gfx++, G_CYC_1CYCLE);
-    gDPPipeSync(gfx++);
-    gDPSetRenderMode(gfx++, G_RM_ZB_OPA_SURF, G_RM_ZB_OPA_SURF2);
-    gSPLoadGeometryMode(gfx++, 0);
-    gSPSetGeometryMode(gfx++, G_ZBUFFER | G_SHADE | G_SHADING_SMOOTH);
-    gDPSetCombineMode(gfx++, G_CC_SHADE, G_CC_SHADE);
-    gSPMatrix(gfx++, PhysicalAddress(&f_LookAtMarkerTranslation),
-        G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
-    gSPMatrix(gfx++, PhysicalAddress(&f_LookAtMarkerScaling),
-        G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
-    gSPVertex(gfx++, f_LookAtMarkerVertices[0], QUAD_VERTEX_COUNT, 0);
-    gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
-    gSPVertex(gfx++, f_LookAtMarkerVertices[1], QUAD_VERTEX_COUNT, 0);
-    gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
-    gSPVertex(gfx++, f_LookAtMarkerVertices[2], QUAD_VERTEX_COUNT, 0);
-    gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
-    gSPVertex(gfx++, f_LookAtMarkerVertices[3], QUAD_VERTEX_COUNT, 0);
-    gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
-    gSPVertex(gfx++, f_LookAtMarkerVertices[4], QUAD_VERTEX_COUNT, 0);
-    gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
-    gSPVertex(gfx++, f_LookAtMarkerVertices[5], QUAD_VERTEX_COUNT, 0);
-    gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
-    gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
-    gDPPipeSync(gfx++);
-  }
+    f_OpeningFrameParity ^= 1;
+    if (f_IsLookAtMarkerShown) {
+        guTranslate(
+            &f_LookAtMarkerTranslation,
+            g_Cameras[0].view.lookAt[0],
+            g_Cameras[0].view.lookAt[1],
+            g_Cameras[0].view.lookAt[2]
+        );
+        guScale(
+            &f_LookAtMarkerScaling,
+            g_LookAtMarkerScale,
+            g_LookAtMarkerScale,
+            g_LookAtMarkerScale
+        );
+        gDPPipeSync(gfx++);
+        gDPPipeSync(gfx++);
+        gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+        gDPPipeSync(gfx++);
+        gDPSetRenderMode(gfx++, G_RM_ZB_OPA_SURF, G_RM_ZB_OPA_SURF2);
+        gSPLoadGeometryMode(gfx++, 0);
+        gSPSetGeometryMode(gfx++, G_ZBUFFER | G_SHADE | G_SHADING_SMOOTH);
+        gDPSetCombineMode(gfx++, G_CC_SHADE, G_CC_SHADE);
+        gSPMatrix(
+            gfx++,
+            PhysicalAddress(&f_LookAtMarkerTranslation),
+            G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW
+        );
+        gSPMatrix(
+            gfx++,
+            PhysicalAddress(&f_LookAtMarkerScaling),
+            G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW
+        );
+        gSPVertex(gfx++, f_LookAtMarkerVertices[0], QUAD_VERTEX_COUNT, 0);
+        gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
+        gSPVertex(gfx++, f_LookAtMarkerVertices[1], QUAD_VERTEX_COUNT, 0);
+        gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
+        gSPVertex(gfx++, f_LookAtMarkerVertices[2], QUAD_VERTEX_COUNT, 0);
+        gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
+        gSPVertex(gfx++, f_LookAtMarkerVertices[3], QUAD_VERTEX_COUNT, 0);
+        gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
+        gSPVertex(gfx++, f_LookAtMarkerVertices[4], QUAD_VERTEX_COUNT, 0);
+        gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
+        gSPVertex(gfx++, f_LookAtMarkerVertices[5], QUAD_VERTEX_COUNT, 0);
+        gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
+        gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
+        gDPPipeSync(gfx++);
+    }
 
-  DrawOpeningCharacters(matrices, &gfx, f_OpeningFrameParity);
-  /*
-   * DrawOpeningShotPath draws through g_DisplayListHead, so the list goes to
-   * it through that global rather than through displayListHead. This works
-   * because DrawGame, its only caller, passes &g_DisplayListHead.
-   */
-  g_DisplayListHead = gfx;
-  DrawOpeningShotPath(matrices);
-  gfx = g_DisplayListHead;
-  DrawLensFlare(&gfx);
-  DrawOpeningImpactLines(&gfx);
-  DrawOpeningBurst(&gfx);
-  DrawLakitu(&gfx);
-  DrawOpeningBalls(&gfx, matrices);
-  DrawOpeningShotBall(&gfx);
-  DrawOpeningSparks(&gfx);
-  DrawNameLogos(&gfx);
-  DrawOpeningLogo(&gfx, 0);
-  *displayListHead = gfx;
+    DrawOpeningCharacters(matrices, &gfx, f_OpeningFrameParity);
+    /*
+     * DrawOpeningShotPath draws through g_DisplayListHead, so the list goes to
+     * it through that global rather than through displayListHead. This works
+     * because DrawGame, its only caller, passes &g_DisplayListHead.
+     */
+    g_DisplayListHead = gfx;
+    DrawOpeningShotPath(matrices);
+    gfx = g_DisplayListHead;
+    DrawLensFlare(&gfx);
+    DrawOpeningImpactLines(&gfx);
+    DrawOpeningBurst(&gfx);
+    DrawLakitu(&gfx);
+    DrawOpeningBalls(&gfx, matrices);
+    DrawOpeningShotBall(&gfx);
+    DrawOpeningSparks(&gfx);
+    DrawNameLogos(&gfx);
+    DrawOpeningLogo(&gfx, 0);
+    *displayListHead = gfx;
 }
 
 /* Loads name logo logoIndex into slot and resets the slot */
 void LoadNameLogo(s32 logoIndex, s32 slot) {
-  EncodedAsset asset;
+    EncodedAsset asset;
 
-  OpenEncodedAsset(f_OpeningNameLogos[logoIndex].assetId, &asset);
-  ReadEncodedAsset(f_NameSlotImages[slot], &asset);
-  f_NameSlotLogoIndices[slot] = logoIndex;
-  f_NameSlotSteps[slot] = 0;
-  f_IsNameSlotShown[slot] = 0;
+    OpenEncodedAsset(f_OpeningNameLogos[logoIndex].assetId, &asset);
+    ReadEncodedAsset(f_NameSlotImages[slot], &asset);
+    f_NameSlotLogoIndices[slot] = logoIndex;
+    f_NameSlotSteps[slot] = 0;
+    f_IsNameSlotShown[slot] = 0;
 }
 
 /* The logo shown in the name slot SLOT */
@@ -3183,187 +3465,218 @@ void LoadNameLogo(s32 logoIndex, s32 slot) {
  * its strips are drawn in reverse order with their rows mirrored, which turns
  * it upside down.
  */
-void DrawNameLogos(Gfx** displayListHead) {
-  Gfx* gfx = *displayListHead;
-  s32 xEdges[2]; /* Left and right */
-  s32 yEdges[NAME_LOGO_STRIP_COUNT + 1]; /* Top to bottom of each strip */
-  s32 strip;
-  s32 slot;
-  Gfx* cycleTypeCommand;
-  s32 stripHeight;
-  s32 texelsOffset;
+void DrawNameLogos(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
+    s32 xEdges[2]; /* Left and right */
+    s32 yEdges[NAME_LOGO_STRIP_COUNT + 1]; /* Top to bottom of each strip */
+    s32 strip;
+    s32 slot;
+    Gfx *cycleTypeCommand;
+    s32 stripHeight;
+    s32 texelsOffset;
 
-  for (slot = 0; slot != OPENING_NAME_SLOT_COUNT; slot++) {
-    if (f_IsNameSlotShown[slot]) {
-      gDPPipeSync(gfx++);
-      gDPPipeSync(gfx++);
-      /* The original takes the command's slot first, which orders the stack */
-      cycleTypeCommand = gfx++;
-      gDPSetCycleType(cycleTypeCommand, G_CYC_1CYCLE);
-      gDPPipeSync(gfx++);
-      gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
-      gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-      gDPPipeSync(gfx++);
-      gDPSetColorDither(gfx++, G_CD_DISABLE);
-      gSPTexture(gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0,
-          G_TX_RENDERTILE, G_ON);
-      gDPPipeSync(gfx++);
-      gDPSetTexturePersp(gfx++, G_TP_NONE);
-      gDPPipeSync(gfx++);
-      gDPSetTextureFilter(gfx++, G_TF_BILERP);
-      gDPPipeSync(gfx++);
-      gDPSetAlphaCompare(gfx++, G_AC_NONE);
-      gDPPipeSync(gfx++);
-      gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-      gDPLoadTLUT_pal256(
-          gfx++, TextureAddress(ImageBody(f_NameSlotImages[slot])));
-      gDPPipeSync(gfx++);
-      for (strip = 0; strip != NAME_LOGO_STRIP_COUNT; strip++) {
-        texelsOffset = LARGE_PALETTED_TEXELS_OFFSET +
-            (strip * SLOT_LOGO.width * NAME_LOGO_STRIP_ROWS);
-        stripHeight = SLOT_LOGO.shownHeight / NAME_LOGO_STRIP_COUNT;
-        xEdges[0] = SLOT_LOGO.x - (SLOT_LOGO.shownWidth / 2);
-        xEdges[1] = SLOT_LOGO.x + (SLOT_LOGO.shownWidth / 2);
-        yEdges[0] = SLOT_LOGO.y - (SLOT_LOGO.shownHeight / 2);
-        yEdges[1] = yEdges[0] + stripHeight;
-        yEdges[2] = yEdges[1] + stripHeight;
-        yEdges[3] = yEdges[2] + stripHeight;
-        yEdges[4] = yEdges[3] + stripHeight;
-        if (f_NameSlotSteps[slot] < NAME_LOGO_FLIP_UP) {
-          s32 drawnWidth;
-          s32 drawnHeight;
+    for (slot = 0; slot != OPENING_NAME_SLOT_COUNT; slot++) {
+        if (f_IsNameSlotShown[slot]) {
+            gDPPipeSync(gfx++);
+            gDPPipeSync(gfx++);
+            /* The original takes the command's slot first, which orders the stack */
+            cycleTypeCommand = gfx++;
+            gDPSetCycleType(cycleTypeCommand, G_CYC_1CYCLE);
+            gDPPipeSync(gfx++);
+            gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
+            gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+            gDPPipeSync(gfx++);
+            gDPSetColorDither(gfx++, G_CD_DISABLE);
+            gSPTexture(gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0, G_TX_RENDERTILE, G_ON);
+            gDPPipeSync(gfx++);
+            gDPSetTexturePersp(gfx++, G_TP_NONE);
+            gDPPipeSync(gfx++);
+            gDPSetTextureFilter(gfx++, G_TF_BILERP);
+            gDPPipeSync(gfx++);
+            gDPSetAlphaCompare(gfx++, G_AC_NONE);
+            gDPPipeSync(gfx++);
+            gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+            gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_NameSlotImages[slot])));
+            gDPPipeSync(gfx++);
+            for (strip = 0; strip != NAME_LOGO_STRIP_COUNT; strip++) {
+                texelsOffset =
+                    LARGE_PALETTED_TEXELS_OFFSET + (strip * SLOT_LOGO.width * NAME_LOGO_STRIP_ROWS);
+                stripHeight = SLOT_LOGO.shownHeight / NAME_LOGO_STRIP_COUNT;
+                xEdges[0] = SLOT_LOGO.x - (SLOT_LOGO.shownWidth / 2);
+                xEdges[1] = SLOT_LOGO.x + (SLOT_LOGO.shownWidth / 2);
+                yEdges[0] = SLOT_LOGO.y - (SLOT_LOGO.shownHeight / 2);
+                yEdges[1] = yEdges[0] + stripHeight;
+                yEdges[2] = yEdges[1] + stripHeight;
+                yEdges[3] = yEdges[2] + stripHeight;
+                yEdges[4] = yEdges[3] + stripHeight;
+                if (f_NameSlotSteps[slot] < NAME_LOGO_FLIP_UP) {
+                    s32 drawnWidth;
+                    s32 drawnHeight;
 
-          gDPLoadTextureBlock(gfx++,
-              TextureAddress(f_NameSlotImages[slot] + texelsOffset),
-              G_IM_FMT_CI, G_IM_SIZ_8b, SLOT_LOGO.width,
-              SLOT_LOGO.height / NAME_LOGO_STRIP_COUNT, 0,
-              G_TX_NOMIRROR | G_TX_WRAP, G_TX_MIRROR | G_TX_WRAP, G_TX_NOMASK,
-              NAME_LOGO_STRIP_ROWS_SHIFT, G_TX_NOLOD, G_TX_NOLOD);
-          gDPPipeSync(gfx++);
-          drawnWidth = xEdges[1] - xEdges[0];
-          if (drawnWidth <= 0) {
-            drawnWidth = 1;
-          }
+                    gDPLoadTextureBlock(
+                        gfx++,
+                        TextureAddress(f_NameSlotImages[slot] + texelsOffset),
+                        G_IM_FMT_CI,
+                        G_IM_SIZ_8b,
+                        SLOT_LOGO.width,
+                        SLOT_LOGO.height / NAME_LOGO_STRIP_COUNT,
+                        0,
+                        G_TX_NOMIRROR | G_TX_WRAP,
+                        G_TX_MIRROR | G_TX_WRAP,
+                        G_TX_NOMASK,
+                        NAME_LOGO_STRIP_ROWS_SHIFT,
+                        G_TX_NOLOD,
+                        G_TX_NOLOD
+                    );
+                    gDPPipeSync(gfx++);
+                    drawnWidth = xEdges[1] - xEdges[0];
+                    if (drawnWidth <= 0) {
+                        drawnWidth = 1;
+                    }
 
-          drawnHeight = yEdges[NAME_LOGO_STRIP_COUNT - strip] -
-              yEdges[NAME_LOGO_STRIP_COUNT - 1 - strip];
-          if (drawnHeight <= 0) {
-            drawnHeight = 1;
-          }
+                    drawnHeight = yEdges[NAME_LOGO_STRIP_COUNT - strip] -
+                        yEdges[NAME_LOGO_STRIP_COUNT - 1 - strip];
+                    if (drawnHeight <= 0) {
+                        drawnHeight = 1;
+                    }
 
-          gSPScisTextureRectangle(gfx++, QuarterPixels(xEdges[0]),
-              QuarterPixels(yEdges[NAME_LOGO_STRIP_COUNT - 1 - strip]),
-              QuarterPixels(xEdges[1]),
-              QuarterPixels(yEdges[NAME_LOGO_STRIP_COUNT - strip]),
-              G_TX_RENDERTILE, 0, TexelCoordinate(NAME_LOGO_STRIP_ROWS),
-              TexelRunStep(SLOT_LOGO.width, drawnWidth),
-              (SLOT_LOGO.height << 8) / drawnHeight);
-        } else {
-          s32 drawnWidth;
-          s32 drawnHeight;
+                    gSPScisTextureRectangle(
+                        gfx++,
+                        QuarterPixels(xEdges[0]),
+                        QuarterPixels(yEdges[NAME_LOGO_STRIP_COUNT - 1 - strip]),
+                        QuarterPixels(xEdges[1]),
+                        QuarterPixels(yEdges[NAME_LOGO_STRIP_COUNT - strip]),
+                        G_TX_RENDERTILE,
+                        0,
+                        TexelCoordinate(NAME_LOGO_STRIP_ROWS),
+                        TexelRunStep(SLOT_LOGO.width, drawnWidth),
+                        (SLOT_LOGO.height << 8) / drawnHeight
+                    );
+                }
+                else {
+                    s32 drawnWidth;
+                    s32 drawnHeight;
 
-          gDPLoadTextureBlock(gfx++,
-              TextureAddress(f_NameSlotImages[slot] + texelsOffset),
-              G_IM_FMT_CI, G_IM_SIZ_8b, SLOT_LOGO.width,
-              SLOT_LOGO.height / NAME_LOGO_STRIP_COUNT, 0,
-              G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
-              G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-          gDPPipeSync(gfx++);
-          drawnWidth = xEdges[1] - xEdges[0];
-          if (drawnWidth <= 0) {
-            drawnWidth = 1;
-          }
+                    gDPLoadTextureBlock(
+                        gfx++,
+                        TextureAddress(f_NameSlotImages[slot] + texelsOffset),
+                        G_IM_FMT_CI,
+                        G_IM_SIZ_8b,
+                        SLOT_LOGO.width,
+                        SLOT_LOGO.height / NAME_LOGO_STRIP_COUNT,
+                        0,
+                        G_TX_NOMIRROR | G_TX_WRAP,
+                        G_TX_NOMIRROR | G_TX_WRAP,
+                        G_TX_NOMASK,
+                        G_TX_NOMASK,
+                        G_TX_NOLOD,
+                        G_TX_NOLOD
+                    );
+                    gDPPipeSync(gfx++);
+                    drawnWidth = xEdges[1] - xEdges[0];
+                    if (drawnWidth <= 0) {
+                        drawnWidth = 1;
+                    }
 
-          drawnHeight = yEdges[strip + 1] - yEdges[strip];
-          if (drawnHeight <= 0) {
-            drawnHeight = 1;
-          }
+                    drawnHeight = yEdges[strip + 1] - yEdges[strip];
+                    if (drawnHeight <= 0) {
+                        drawnHeight = 1;
+                    }
 
-          gSPScisTextureRectangle(gfx++, QuarterPixels(xEdges[0]),
-              QuarterPixels(yEdges[strip]), QuarterPixels(xEdges[1]),
-              QuarterPixels(yEdges[strip + 1]), G_TX_RENDERTILE, 0, 0,
-              TexelRunStep(SLOT_LOGO.width, drawnWidth),
-              (SLOT_LOGO.height << 8) / drawnHeight);
+                    gSPScisTextureRectangle(
+                        gfx++,
+                        QuarterPixels(xEdges[0]),
+                        QuarterPixels(yEdges[strip]),
+                        QuarterPixels(xEdges[1]),
+                        QuarterPixels(yEdges[strip + 1]),
+                        G_TX_RENDERTILE,
+                        0,
+                        0,
+                        TexelRunStep(SLOT_LOGO.width, drawnWidth),
+                        (SLOT_LOGO.height << 8) / drawnHeight
+                    );
+                }
+
+                gDPPipeSync(gfx++);
+            }
         }
-
-        gDPPipeSync(gfx++);
-      }
     }
-  }
 
-  *displayListHead = gfx;
+    *displayListHead = gfx;
 }
 
 /* Steps the shown name logos' animations: each unfolds, flips over, then
  * stays */
 void AnimateNameLogos(void) {
-  s32 slot;
+    s32 slot;
 
-  for (slot = 0; slot != OPENING_NAME_SLOT_COUNT; slot++) {
-    if (!f_IsNameSlotShown[slot]) {
-      continue;
+    for (slot = 0; slot != OPENING_NAME_SLOT_COUNT; slot++) {
+        if (!f_IsNameSlotShown[slot]) {
+            continue;
+        }
+
+        if (f_NameSlotSteps[slot] < NAME_LOGO_FLIP_DOWN) {
+            f_OpeningNameLogos[f_NameSlotLogoIndices[slot]].shownWidth +=
+                f_OpeningNameLogos[f_NameSlotLogoIndices[slot]].width / 8;
+            f_NameSlotSteps[slot]++;
+            if (f_OpeningNameLogos[f_NameSlotLogoIndices[slot]].shownWidth >
+                f_OpeningNameLogos[f_NameSlotLogoIndices[slot]].width) {
+                f_OpeningNameLogos[f_NameSlotLogoIndices[slot]].shownWidth =
+                    f_OpeningNameLogos[f_NameSlotLogoIndices[slot]].width;
+            }
+
+            if (f_NameSlotSteps[slot] == NAME_LOGO_UNFOLD + 8) {
+                f_NameSlotSteps[slot] = NAME_LOGO_FLIP_DOWN;
+            }
+        }
+        else if (f_NameSlotSteps[slot] < NAME_LOGO_FLIP_UP) {
+            f_OpeningNameLogos[f_NameSlotLogoIndices[slot]].shownHeight -=
+                f_OpeningNameLogos[f_NameSlotLogoIndices[slot]].height / 4;
+            f_NameSlotSteps[slot]++;
+            if (f_OpeningNameLogos[f_NameSlotLogoIndices[slot]].shownHeight <= 0) {
+                f_OpeningNameLogos[f_NameSlotLogoIndices[slot]].shownHeight = 1;
+            }
+
+            if (f_NameSlotSteps[slot] == NAME_LOGO_FLIP_DOWN + 4) {
+                f_NameSlotSteps[slot] = NAME_LOGO_FLIP_UP;
+            }
+        }
+        else if (f_NameSlotSteps[slot] < NAME_LOGO_STILL) {
+            f_OpeningNameLogos[f_NameSlotLogoIndices[slot]].shownHeight +=
+                f_OpeningNameLogos[f_NameSlotLogoIndices[slot]].height / 4;
+            f_NameSlotSteps[slot]++;
+            if (f_OpeningNameLogos[f_NameSlotLogoIndices[slot]].shownHeight >
+                f_OpeningNameLogos[f_NameSlotLogoIndices[slot]].height) {
+                f_OpeningNameLogos[f_NameSlotLogoIndices[slot]].shownHeight =
+                    f_OpeningNameLogos[f_NameSlotLogoIndices[slot]].height;
+            }
+
+            if (f_NameSlotSteps[slot] == NAME_LOGO_FLIP_UP + 4) {
+                f_NameSlotSteps[slot] = NAME_LOGO_STILL;
+            }
+        }
+        else {
+            f_OpeningNameLogos[f_NameSlotLogoIndices[slot]].shownWidth =
+                f_OpeningNameLogos[f_NameSlotLogoIndices[slot]].width;
+            f_OpeningNameLogos[f_NameSlotLogoIndices[slot]].shownHeight =
+                f_OpeningNameLogos[f_NameSlotLogoIndices[slot]].height;
+        }
     }
-
-    if (f_NameSlotSteps[slot] < NAME_LOGO_FLIP_DOWN) {
-      f_OpeningNameLogos[f_NameSlotLogoIndices[slot]].shownWidth +=
-          f_OpeningNameLogos[f_NameSlotLogoIndices[slot]].width / 8;
-      f_NameSlotSteps[slot]++;
-      if (f_OpeningNameLogos[f_NameSlotLogoIndices[slot]].shownWidth >
-          f_OpeningNameLogos[f_NameSlotLogoIndices[slot]].width) {
-        f_OpeningNameLogos[f_NameSlotLogoIndices[slot]].shownWidth =
-            f_OpeningNameLogos[f_NameSlotLogoIndices[slot]].width;
-      }
-
-      if (f_NameSlotSteps[slot] == NAME_LOGO_UNFOLD + 8) {
-        f_NameSlotSteps[slot] = NAME_LOGO_FLIP_DOWN;
-      }
-    } else if (f_NameSlotSteps[slot] < NAME_LOGO_FLIP_UP) {
-      f_OpeningNameLogos[f_NameSlotLogoIndices[slot]].shownHeight -=
-          f_OpeningNameLogos[f_NameSlotLogoIndices[slot]].height / 4;
-      f_NameSlotSteps[slot]++;
-      if (f_OpeningNameLogos[f_NameSlotLogoIndices[slot]].shownHeight <= 0) {
-        f_OpeningNameLogos[f_NameSlotLogoIndices[slot]].shownHeight = 1;
-      }
-
-      if (f_NameSlotSteps[slot] == NAME_LOGO_FLIP_DOWN + 4) {
-        f_NameSlotSteps[slot] = NAME_LOGO_FLIP_UP;
-      }
-    } else if (f_NameSlotSteps[slot] < NAME_LOGO_STILL) {
-      f_OpeningNameLogos[f_NameSlotLogoIndices[slot]].shownHeight +=
-          f_OpeningNameLogos[f_NameSlotLogoIndices[slot]].height / 4;
-      f_NameSlotSteps[slot]++;
-      if (f_OpeningNameLogos[f_NameSlotLogoIndices[slot]].shownHeight >
-          f_OpeningNameLogos[f_NameSlotLogoIndices[slot]].height) {
-        f_OpeningNameLogos[f_NameSlotLogoIndices[slot]].shownHeight =
-            f_OpeningNameLogos[f_NameSlotLogoIndices[slot]].height;
-      }
-
-      if (f_NameSlotSteps[slot] == NAME_LOGO_FLIP_UP + 4) {
-        f_NameSlotSteps[slot] = NAME_LOGO_STILL;
-      }
-    } else {
-      f_OpeningNameLogos[f_NameSlotLogoIndices[slot]].shownWidth =
-          f_OpeningNameLogos[f_NameSlotLogoIndices[slot]].width;
-      f_OpeningNameLogos[f_NameSlotLogoIndices[slot]].shownHeight =
-          f_OpeningNameLogos[f_NameSlotLogoIndices[slot]].height;
-    }
-  }
 }
 
 /* Loads ball image ballIndex into slot and resets the slot */
 void LoadOpeningBall(OpeningBallImage image, s32 slot) {
-  EncodedAsset asset;
+    EncodedAsset asset;
 
-  OpenEncodedAsset(f_OpeningBallAssets[image], &asset);
-  ReadEncodedAsset(f_OpeningBallImages[slot], &asset);
-  f_OpeningBallStates[slot] = OPENING_BALL_HIDDEN;
-  f_OpeningBallScales[slot] = OPENING_BALL_NORMAL_SCALE;
+    OpenEncodedAsset(f_OpeningBallAssets[image], &asset);
+    ReadEncodedAsset(f_OpeningBallImages[slot], &asset);
+    f_OpeningBallStates[slot] = OPENING_BALL_HIDDEN;
+    f_OpeningBallScales[slot] = OPENING_BALL_NORMAL_SCALE;
 }
 
 /* f_LogoBallImages holds three 64x64 frames of the ball rolling */
 #define LOGO_BALL_FRAME_COUNT 3
-#define LOGO_BALL_FRAME_SIZE \
-  (OPENING_BALL_IMAGE_WIDTH * OPENING_BALL_IMAGE_WIDTH)
+#define LOGO_BALL_FRAME_SIZE (OPENING_BALL_IMAGE_WIDTH * OPENING_BALL_IMAGE_WIDTH)
 /* The logo ball shows its next frame each time it rolls further than this */
 #define LOGO_BALL_FRAME_ANGLE 4.0f
 /* The logo ball's starting turn, in degrees */
@@ -3405,590 +3718,835 @@ void LoadOpeningBall(OpeningBallImage image, s32 slot) {
  * drawn as texture rectangles. The logo ball rolls with its movement, with
  * the Mario image turning on it.
  */
-void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
-  Vec3 movement;
-  Mat4 turn;
-  Vec3 position;
-  ScreenPoint ballPoint;
-  Mat4 projectedTurn;
-  Gfx* gfx;
-  s32 slot;
-  s32 stripIndex;
-  s32 halfSize;
-  f32 screenScale;
-  f32 rollAngle;
-
-  if (f_IsLogoBallSlot[LOGO_BALL_SLOT] == 0) {
-    gfx = *displayListHead;
-    for (slot = 0; slot < OPENING_BALL_SLOT_COUNT; slot++) {
-      if (f_OpeningBallStates[slot] != OPENING_BALL_HIDDEN) {
-        position[AXIS_X] = f_OpeningBallPositions[slot][0];
-        position[AXIS_Z] = f_OpeningBallPositions[slot][2];
-        position[AXIS_Y] =
-            GetGroundHeight(position[AXIS_X] * WORLD_TO_COURSE_SCALE,
-                position[AXIS_Z] * WORLD_TO_COURSE_SCALE) *
-            COURSE_TO_WORLD_SCALE;
-        gDPPipeSync(gfx++);
-        gDPPipeSync(gfx++);
-        gDPSetCycleType(gfx++, G_CYC_1CYCLE);
-        if (f_OpeningBallStates[slot] == OPENING_BALL_IN_AIR) {
-          guTranslate(&f_OpeningBallShadowMatrices[slot][g_DrawBufferIndex],
-              position[AXIS_X],
-              position[AXIS_Y] - OPENING_BALL_IN_AIR_SHADOW_DROP,
-              position[AXIS_Z]);
-        } else if (f_OpeningBallScales[slot] == OPENING_BALL_LARGE_SCALE) {
-          guTranslate(&f_OpeningBallShadowMatrices[slot][g_DrawBufferIndex],
-              position[AXIS_X],
-              position[AXIS_Y] - OPENING_BALL_LARGE_SHADOW_DROP,
-              position[AXIS_Z]);
-        } else {
-          guTranslate(&f_OpeningBallShadowMatrices[slot][g_DrawBufferIndex],
-              position[AXIS_X], position[AXIS_Y], position[AXIS_Z]);
-        }
-
-        guScale(&f_OpeningBallScaleMatrices[slot],
-            f_OpeningBallScales[slot] * OPENING_BALL_MODEL_SCALE,
-            f_OpeningBallScales[slot] * OPENING_BALL_MODEL_SCALE,
-            f_OpeningBallScales[slot] * OPENING_BALL_MODEL_SCALE);
-        gDPPipeSync(gfx++);
-        gDPSetRenderMode(gfx++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
-        gDPSetCombineLERP(gfx++, 0, 0, 0, 0, TEXEL0, 0, PRIMITIVE, 0, 0, 0, 0,
-            0, TEXEL0, 0, PRIMITIVE, 0);
-        gDPPipeSync(gfx++);
-        gDPSetAlphaCompare(gfx++, G_AC_THRESHOLD);
-        gDPSetBlendColor(gfx++, 255, 255, 255, 16);
-        gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, 127);
-        gDPPipeSync(gfx++);
-        gDPSetAlphaDither(gfx++, G_AD_PATTERN);
-        gDPPipeSync(gfx++);
-        gDPSetColorDither(gfx++, G_CD_MAGICSQ);
-        gDPPipeSync(gfx++);
-        gDPSetTexturePersp(gfx++, G_TP_PERSP);
-        gDPPipeSync(gfx++);
-        gDPSetTextureLUT(gfx++, G_TT_NONE);
-        gDPLoadTextureBlock(gfx++, TextureAddress(ImageBody(g_ShadowTexture)),
-            G_IM_FMT_I, G_IM_SIZ_8b, SHADOW_TEXTURE_SIZE, SHADOW_TEXTURE_SIZE,
-            0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
-            G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-        gDPPipeSync(gfx++);
-        gDPSetTextureLOD(gfx++, G_TL_TILE);
-        gSPTexture(gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0,
-            G_TX_RENDERTILE, G_ON);
-        gSPLoadGeometryMode(gfx++, 0);
-        gSPSetGeometryMode(gfx++, G_ZBUFFER | G_SHADE | G_SHADING_SMOOTH);
-        gSPMatrix(gfx++,
-            PhysicalAddress(
-                &f_OpeningBallShadowMatrices[slot][g_DrawBufferIndex]),
-            G_MTX_PUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-        gSPMatrix(gfx++, PhysicalAddress(&f_OpeningBallScaleMatrices[slot]),
-            G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
-        gSPVertex(gfx++, f_OpeningBallShadowVertices, QUAD_VERTEX_COUNT, 0);
-        gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
-        gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
-        gDPPipeSync(gfx++);
-        if (f_OpeningBallStates[slot] == OPENING_BALL_IN_AIR) {
-          position[AXIS_Y] = f_OpeningBallPositions[slot][1];
-        }
-
-        if (f_OpeningBallScales[slot] == OPENING_BALL_LARGE_SCALE) {
-          position[AXIS_Y] += OPENING_BALL_LARGE_LIFT;
-        }
-
-        guTranslate(&f_OpeningBallMatrices[slot][g_DrawBufferIndex],
-            position[AXIS_X], position[AXIS_Y], position[AXIS_Z]);
-        gDPPipeSync(gfx++);
-        gDPSetRenderMode(gfx++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
-        gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-        gDPPipeSync(gfx++);
-        gDPSetAlphaDither(gfx++, G_AD_PATTERN);
-        gDPPipeSync(gfx++);
-        gDPSetColorDither(gfx++, G_CD_MAGICSQ);
-        gDPPipeSync(gfx++);
-        gDPSetTexturePersp(gfx++, G_TP_PERSP);
-        gDPPipeSync(gfx++);
-        gDPSetTextureFilter(gfx++, G_TF_BILERP);
-        gDPPipeSync(gfx++);
-        gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-        gDPPipeSync(gfx++);
-        gDPSetTextureLOD(gfx++, G_TL_TILE);
-        gSPTexture(gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0,
-            G_TX_RENDERTILE, G_ON);
-        if (f_IsLogoBallSlot[slot]) {
-          gDPLoadTLUT_pal256(
-              gfx++, TextureAddress(ImageBody(f_LogoBallImages)));
-        } else {
-          gDPLoadTLUT_pal256(
-              gfx++, TextureAddress(ImageBody(f_OpeningBallImages[slot])));
-        }
-
-        for (stripIndex = 0; stripIndex < OPENING_BALL_STRIP_COUNT;
-            stripIndex++) {
-          gDPPipeSync(gfx++);
-          gSPLoadGeometryMode(gfx++, 0);
-          gSPSetGeometryMode(gfx++, G_ZBUFFER | G_SHADE | G_SHADING_SMOOTH);
-          gSPMatrix(gfx++,
-              PhysicalAddress(&f_OpeningBallMatrices[slot][g_DrawBufferIndex]),
-              G_MTX_PUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-          gSPMatrix(gfx++, PhysicalAddress(&matrices->billboard),
-              G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
-          gSPMatrix(gfx++, PhysicalAddress(&f_OpeningBallScaleMatrices[slot]),
-              G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
-          if (f_IsLogoBallSlot[slot]) {
-            gDPLoadTextureBlock(gfx++,
-                TextureAddress(LargeImageTexels(f_LogoBallImages) +
-                    ((stripIndex * OPENING_BALL_STRIP_SIZE) +
-                        (f_LogoBallFrameIndex * LOGO_BALL_FRAME_SIZE))),
-                G_IM_FMT_CI, G_IM_SIZ_8b, OPENING_BALL_IMAGE_WIDTH,
-                OPENING_BALL_STRIP_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
-                G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
-                G_TX_NOLOD);
-          } else {
-            gDPLoadTextureBlock(gfx++,
-                TextureAddress(LargeImageTexels(f_OpeningBallImages[slot]) +
-                    (stripIndex * OPENING_BALL_STRIP_SIZE)),
-                G_IM_FMT_CI, G_IM_SIZ_8b, OPENING_BALL_IMAGE_WIDTH,
-                OPENING_BALL_STRIP_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
-                G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
-                G_TX_NOLOD);
-          }
-
-          gDPPipeSync(gfx++);
-          gSPVertex(gfx++, f_OpeningBallStripVertices[stripIndex],
-              QUAD_VERTEX_COUNT, 0);
-          gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
-        }
-
-        if (f_IsLogoBallSlot[slot]) {
-          Gfx* cycleTypeCommand;
-
-          if (f_ShouldResetLogoBallRoll) {
-            guMtxIdentF(f_LogoBallRoll);
-            f_ShouldResetLogoBallRoll = 0;
-            guRotateRPYF(f_LogoBallRoll, LOGO_BALL_START_ROLL,
-                LOGO_BALL_START_PITCH, LOGO_BALL_START_YAW);
-          }
-
-          if (f_HasLogoBallLastPosition) {
-            movement[AXIS_X] = f_OpeningBallPositions[slot][0] -
-                f_LogoBallLastPosition[AXIS_X];
-            movement[AXIS_Y] = f_OpeningBallPositions[slot][1] -
-                f_LogoBallLastPosition[AXIS_Y];
-            movement[AXIS_Z] = f_OpeningBallPositions[slot][2] -
-                f_LogoBallLastPosition[AXIS_Z];
-          } else {
-            f_HasLogoBallLastPosition = TRUE;
-            movement[AXIS_X] = 0.0f;
-            movement[AXIS_Y] = 0.0f;
-            movement[AXIS_Z] = 0.0f;
-          }
-
-          rollAngle = sqrtf((movement[AXIS_X] * movement[AXIS_X]) +
-              (movement[AXIS_Y] * movement[AXIS_Y]) +
-              (movement[AXIS_Z] * movement[AXIS_Z]));
-          rollAngle *= (f32)RADIANS_TO_DEGREES;
-          f_LogoBallLastPosition[AXIS_X] = f_OpeningBallPositions[slot][0];
-          f_LogoBallLastPosition[AXIS_Y] = f_OpeningBallPositions[slot][1];
-          f_LogoBallLastPosition[AXIS_Z] = f_OpeningBallPositions[slot][2];
-          /* fabs, in double precision, which GCC narrows to abs.s; fabsf
-           * here and below gives 44 differing words */
-          rollAngle = fabs(rollAngle);
-          if (rollAngle > LOGO_BALL_FRAME_ANGLE) {
-            f_LogoBallFrameIndex++;
-            if (f_LogoBallFrameIndex == LOGO_BALL_FRAME_COUNT) {
-              f_LogoBallFrameIndex = 0;
-            }
-          }
-
-          guScale(&f_LogoBallMarioScale, LOGO_BALL_MARIO_SCALE,
-              LOGO_BALL_MARIO_SCALE, LOGO_BALL_MARIO_SCALE);
-          if (movement[AXIS_Z] != 0.0f || movement[AXIS_X] != 0.0f) {
-            guRotateF(
-                turn, rollAngle, -movement[AXIS_Z], 0.0f, movement[AXIS_X]);
-            guMtxCatF(f_LogoBallRoll, turn, f_LogoBallRoll);
-            ConvertMatrixToFixed(
-                f_LogoBallRoll, &f_LogoBallMarioRolls[g_DrawBufferIndex]);
-          }
-
-          guTranslate(
-              &f_LogoBallMarioOffset, 0.0f, LOGO_BALL_MARIO_OFFSET_Y, 0.0f);
-          guTranslate(&f_LogoBallMarioTranslations[g_DrawBufferIndex],
-              f_OpeningBallPositions[slot][0],
-              f_OpeningBallPositions[slot][1] - LOGO_BALL_MARIO_DROP,
-              f_OpeningBallPositions[slot][2]);
-          gDPPipeSync(gfx++);
-          /*
-           * The original takes these two commands' slots in locals of their
-           * own, which orders the spilled pointers' stack slots
-           */
-          cycleTypeCommand = gfx++;
-          gDPSetCycleType(cycleTypeCommand, G_CYC_1CYCLE);
-          {
-            Gfx* renderModeCommand;
-
-            gDPPipeSync(gfx++);
-            renderModeCommand = gfx++;
-            gDPSetRenderMode(renderModeCommand, G_RM_XLU_SURF, G_RM_XLU_SURF2);
-          }
-          gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-          gDPPipeSync(gfx++);
-          gDPSetAlphaDither(gfx++, G_AD_PATTERN);
-          gDPPipeSync(gfx++);
-          gDPSetColorDither(gfx++, G_CD_MAGICSQ);
-          gDPPipeSync(gfx++);
-          gDPSetTexturePersp(gfx++, G_TP_PERSP);
-          gDPPipeSync(gfx++);
-          gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-          gDPLoadTLUT_pal256(
-              gfx++, TextureAddress(ImageBody(f_LogoMarioImage)));
-          gDPLoadTextureBlock(gfx++,
-              TextureAddress(LargeImageTexels(f_LogoMarioImage)), G_IM_FMT_CI,
-              G_IM_SIZ_8b, LOGO_MARIO_IMAGE_SIZE, LOGO_MARIO_IMAGE_SIZE, 0,
-              G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
-              G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-          gDPPipeSync(gfx++);
-          gDPSetTextureLOD(gfx++, G_TL_TILE);
-          gSPTexture(gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0,
-              G_TX_RENDERTILE, G_ON);
-          gSPLoadGeometryMode(gfx++, 0);
-          gSPSetGeometryMode(gfx++, G_SHADE | G_CULL_FRONT | G_SHADING_SMOOTH);
-          gSPMatrix(gfx++,
-              PhysicalAddress(&f_LogoBallMarioTranslations[g_DrawBufferIndex]),
-              G_MTX_PUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-          gSPMatrix(gfx++,
-              PhysicalAddress(&f_LogoBallMarioRolls[g_DrawBufferIndex]),
-              G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
-          gSPMatrix(gfx++, PhysicalAddress(&f_LogoBallMarioScale),
-              G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
-          gSPMatrix(gfx++, PhysicalAddress(&f_LogoBallMarioOffset),
-              G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
-          if (f_OpeningScene >= OPENING_SCENE_LOGO_BALL_MARIO &&
-              f_OpeningSceneFramesLeft < LOGO_BALL_MARIO_FRAMES_LEFT) {
-            gSPVertex(gfx++, f_LogoBallMarioVertices, QUAD_VERTEX_COUNT, 0);
-            gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
-          }
-
-          gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
-          gDPPipeSync(gfx++);
-        }
-
-        gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
-        gDPPipeSync(gfx++);
-      }
-    }
-
-    *displayListHead = gfx;
-  } else {
-    Gfx* gfx;
+void DrawOpeningBalls(Gfx **displayListHead, CameraMatrices *matrices) {
+    Vec3 movement;
+    Mat4 turn;
+    Vec3 position;
+    ScreenPoint ballPoint;
+    Mat4 projectedTurn;
+    Gfx *gfx;
+    s32 slot;
     s32 stripIndex;
+    s32 halfSize;
+    f32 screenScale;
+    f32 rollAngle;
 
-    gfx = *displayListHead;
-    for (slot = 0; slot != OPENING_BALL_SLOT_COUNT; slot++) {
-      if (f_OpeningBallStates[slot] != OPENING_BALL_HIDDEN) {
-        f_ProjectedBallPosition[AXIS_X] = f_OpeningBallPositions[slot][0];
-        f_ProjectedBallPosition[AXIS_Z] = f_OpeningBallPositions[slot][2];
-        if (f_OpeningBallStates[slot] == OPENING_BALL_IN_AIR) {
-          f_ProjectedBallPosition[AXIS_Y] = f_OpeningBallPositions[slot][1];
-        } else {
-          f_ProjectedBallPosition[AXIS_Y] =
-              GetGroundHeight(
-                  f_ProjectedBallPosition[AXIS_X] * WORLD_TO_COURSE_SCALE,
-                  f_ProjectedBallPosition[AXIS_Z] * WORLD_TO_COURSE_SCALE) *
-              COURSE_TO_WORLD_SCALE;
+    if (f_IsLogoBallSlot[LOGO_BALL_SLOT] == 0) {
+        gfx = *displayListHead;
+        for (slot = 0; slot < OPENING_BALL_SLOT_COUNT; slot++) {
+            if (f_OpeningBallStates[slot] != OPENING_BALL_HIDDEN) {
+                position[AXIS_X] = f_OpeningBallPositions[slot][0];
+                position[AXIS_Z] = f_OpeningBallPositions[slot][2];
+                position[AXIS_Y] = GetGroundHeight(
+                                       position[AXIS_X] * WORLD_TO_COURSE_SCALE,
+                                       position[AXIS_Z] * WORLD_TO_COURSE_SCALE
+                                   ) *
+                    COURSE_TO_WORLD_SCALE;
+                gDPPipeSync(gfx++);
+                gDPPipeSync(gfx++);
+                gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+                if (f_OpeningBallStates[slot] == OPENING_BALL_IN_AIR) {
+                    guTranslate(
+                        &f_OpeningBallShadowMatrices[slot][g_DrawBufferIndex],
+                        position[AXIS_X],
+                        position[AXIS_Y] - OPENING_BALL_IN_AIR_SHADOW_DROP,
+                        position[AXIS_Z]
+                    );
+                }
+                else if (f_OpeningBallScales[slot] == OPENING_BALL_LARGE_SCALE) {
+                    guTranslate(
+                        &f_OpeningBallShadowMatrices[slot][g_DrawBufferIndex],
+                        position[AXIS_X],
+                        position[AXIS_Y] - OPENING_BALL_LARGE_SHADOW_DROP,
+                        position[AXIS_Z]
+                    );
+                }
+                else {
+                    guTranslate(
+                        &f_OpeningBallShadowMatrices[slot][g_DrawBufferIndex],
+                        position[AXIS_X],
+                        position[AXIS_Y],
+                        position[AXIS_Z]
+                    );
+                }
+
+                guScale(
+                    &f_OpeningBallScaleMatrices[slot],
+                    f_OpeningBallScales[slot] * OPENING_BALL_MODEL_SCALE,
+                    f_OpeningBallScales[slot] * OPENING_BALL_MODEL_SCALE,
+                    f_OpeningBallScales[slot] * OPENING_BALL_MODEL_SCALE
+                );
+                gDPPipeSync(gfx++);
+                gDPSetRenderMode(gfx++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
+                gDPSetCombineLERP(
+                    gfx++,
+                    0,
+                    0,
+                    0,
+                    0,
+                    TEXEL0,
+                    0,
+                    PRIMITIVE,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    TEXEL0,
+                    0,
+                    PRIMITIVE,
+                    0
+                );
+                gDPPipeSync(gfx++);
+                gDPSetAlphaCompare(gfx++, G_AC_THRESHOLD);
+                gDPSetBlendColor(gfx++, 255, 255, 255, 16);
+                gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, 127);
+                gDPPipeSync(gfx++);
+                gDPSetAlphaDither(gfx++, G_AD_PATTERN);
+                gDPPipeSync(gfx++);
+                gDPSetColorDither(gfx++, G_CD_MAGICSQ);
+                gDPPipeSync(gfx++);
+                gDPSetTexturePersp(gfx++, G_TP_PERSP);
+                gDPPipeSync(gfx++);
+                gDPSetTextureLUT(gfx++, G_TT_NONE);
+                gDPLoadTextureBlock(
+                    gfx++,
+                    TextureAddress(ImageBody(g_ShadowTexture)),
+                    G_IM_FMT_I,
+                    G_IM_SIZ_8b,
+                    SHADOW_TEXTURE_SIZE,
+                    SHADOW_TEXTURE_SIZE,
+                    0,
+                    G_TX_NOMIRROR | G_TX_WRAP,
+                    G_TX_NOMIRROR | G_TX_WRAP,
+                    G_TX_NOMASK,
+                    G_TX_NOMASK,
+                    G_TX_NOLOD,
+                    G_TX_NOLOD
+                );
+                gDPPipeSync(gfx++);
+                gDPSetTextureLOD(gfx++, G_TL_TILE);
+                gSPTexture(gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0, G_TX_RENDERTILE, G_ON);
+                gSPLoadGeometryMode(gfx++, 0);
+                gSPSetGeometryMode(gfx++, G_ZBUFFER | G_SHADE | G_SHADING_SMOOTH);
+                gSPMatrix(
+                    gfx++,
+                    PhysicalAddress(&f_OpeningBallShadowMatrices[slot][g_DrawBufferIndex]),
+                    G_MTX_PUSH | G_MTX_LOAD | G_MTX_MODELVIEW
+                );
+                gSPMatrix(
+                    gfx++,
+                    PhysicalAddress(&f_OpeningBallScaleMatrices[slot]),
+                    G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW
+                );
+                gSPVertex(gfx++, f_OpeningBallShadowVertices, QUAD_VERTEX_COUNT, 0);
+                gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
+                gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
+                gDPPipeSync(gfx++);
+                if (f_OpeningBallStates[slot] == OPENING_BALL_IN_AIR) {
+                    position[AXIS_Y] = f_OpeningBallPositions[slot][1];
+                }
+
+                if (f_OpeningBallScales[slot] == OPENING_BALL_LARGE_SCALE) {
+                    position[AXIS_Y] += OPENING_BALL_LARGE_LIFT;
+                }
+
+                guTranslate(
+                    &f_OpeningBallMatrices[slot][g_DrawBufferIndex],
+                    position[AXIS_X],
+                    position[AXIS_Y],
+                    position[AXIS_Z]
+                );
+                gDPPipeSync(gfx++);
+                gDPSetRenderMode(gfx++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
+                gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+                gDPPipeSync(gfx++);
+                gDPSetAlphaDither(gfx++, G_AD_PATTERN);
+                gDPPipeSync(gfx++);
+                gDPSetColorDither(gfx++, G_CD_MAGICSQ);
+                gDPPipeSync(gfx++);
+                gDPSetTexturePersp(gfx++, G_TP_PERSP);
+                gDPPipeSync(gfx++);
+                gDPSetTextureFilter(gfx++, G_TF_BILERP);
+                gDPPipeSync(gfx++);
+                gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+                gDPPipeSync(gfx++);
+                gDPSetTextureLOD(gfx++, G_TL_TILE);
+                gSPTexture(gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0, G_TX_RENDERTILE, G_ON);
+                if (f_IsLogoBallSlot[slot]) {
+                    gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_LogoBallImages)));
+                }
+                else {
+                    gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_OpeningBallImages[slot])));
+                }
+
+                for (stripIndex = 0; stripIndex < OPENING_BALL_STRIP_COUNT; stripIndex++) {
+                    gDPPipeSync(gfx++);
+                    gSPLoadGeometryMode(gfx++, 0);
+                    gSPSetGeometryMode(gfx++, G_ZBUFFER | G_SHADE | G_SHADING_SMOOTH);
+                    gSPMatrix(
+                        gfx++,
+                        PhysicalAddress(&f_OpeningBallMatrices[slot][g_DrawBufferIndex]),
+                        G_MTX_PUSH | G_MTX_LOAD | G_MTX_MODELVIEW
+                    );
+                    gSPMatrix(
+                        gfx++,
+                        PhysicalAddress(&matrices->billboard),
+                        G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW
+                    );
+                    gSPMatrix(
+                        gfx++,
+                        PhysicalAddress(&f_OpeningBallScaleMatrices[slot]),
+                        G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW
+                    );
+                    if (f_IsLogoBallSlot[slot]) {
+                        gDPLoadTextureBlock(
+                            gfx++,
+                            TextureAddress(
+                                LargeImageTexels(f_LogoBallImages) +
+                                ((stripIndex * OPENING_BALL_STRIP_SIZE) +
+                                    (f_LogoBallFrameIndex * LOGO_BALL_FRAME_SIZE))
+                            ),
+                            G_IM_FMT_CI,
+                            G_IM_SIZ_8b,
+                            OPENING_BALL_IMAGE_WIDTH,
+                            OPENING_BALL_STRIP_HEIGHT,
+                            0,
+                            G_TX_NOMIRROR | G_TX_WRAP,
+                            G_TX_NOMIRROR | G_TX_WRAP,
+                            G_TX_NOMASK,
+                            G_TX_NOMASK,
+                            G_TX_NOLOD,
+                            G_TX_NOLOD
+                        );
+                    }
+                    else {
+                        gDPLoadTextureBlock(
+                            gfx++,
+                            TextureAddress(
+                                LargeImageTexels(f_OpeningBallImages[slot]) +
+                                (stripIndex * OPENING_BALL_STRIP_SIZE)
+                            ),
+                            G_IM_FMT_CI,
+                            G_IM_SIZ_8b,
+                            OPENING_BALL_IMAGE_WIDTH,
+                            OPENING_BALL_STRIP_HEIGHT,
+                            0,
+                            G_TX_NOMIRROR | G_TX_WRAP,
+                            G_TX_NOMIRROR | G_TX_WRAP,
+                            G_TX_NOMASK,
+                            G_TX_NOMASK,
+                            G_TX_NOLOD,
+                            G_TX_NOLOD
+                        );
+                    }
+
+                    gDPPipeSync(gfx++);
+                    gSPVertex(gfx++, f_OpeningBallStripVertices[stripIndex], QUAD_VERTEX_COUNT, 0);
+                    gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
+                }
+
+                if (f_IsLogoBallSlot[slot]) {
+                    Gfx *cycleTypeCommand;
+
+                    if (f_ShouldResetLogoBallRoll) {
+                        guMtxIdentF(f_LogoBallRoll);
+                        f_ShouldResetLogoBallRoll = 0;
+                        guRotateRPYF(
+                            f_LogoBallRoll,
+                            LOGO_BALL_START_ROLL,
+                            LOGO_BALL_START_PITCH,
+                            LOGO_BALL_START_YAW
+                        );
+                    }
+
+                    if (f_HasLogoBallLastPosition) {
+                        movement[AXIS_X] =
+                            f_OpeningBallPositions[slot][0] - f_LogoBallLastPosition[AXIS_X];
+                        movement[AXIS_Y] =
+                            f_OpeningBallPositions[slot][1] - f_LogoBallLastPosition[AXIS_Y];
+                        movement[AXIS_Z] =
+                            f_OpeningBallPositions[slot][2] - f_LogoBallLastPosition[AXIS_Z];
+                    }
+                    else {
+                        f_HasLogoBallLastPosition = TRUE;
+                        movement[AXIS_X] = 0.0f;
+                        movement[AXIS_Y] = 0.0f;
+                        movement[AXIS_Z] = 0.0f;
+                    }
+
+                    rollAngle = sqrtf(
+                        (movement[AXIS_X] * movement[AXIS_X]) +
+                        (movement[AXIS_Y] * movement[AXIS_Y]) +
+                        (movement[AXIS_Z] * movement[AXIS_Z])
+                    );
+                    rollAngle *= (f32)RADIANS_TO_DEGREES;
+                    f_LogoBallLastPosition[AXIS_X] = f_OpeningBallPositions[slot][0];
+                    f_LogoBallLastPosition[AXIS_Y] = f_OpeningBallPositions[slot][1];
+                    f_LogoBallLastPosition[AXIS_Z] = f_OpeningBallPositions[slot][2];
+                    /* fabs, in double precision, which GCC narrows to abs.s; fabsf
+                     * here and below gives 44 differing words */
+                    rollAngle = fabs(rollAngle);
+                    if (rollAngle > LOGO_BALL_FRAME_ANGLE) {
+                        f_LogoBallFrameIndex++;
+                        if (f_LogoBallFrameIndex == LOGO_BALL_FRAME_COUNT) {
+                            f_LogoBallFrameIndex = 0;
+                        }
+                    }
+
+                    guScale(
+                        &f_LogoBallMarioScale,
+                        LOGO_BALL_MARIO_SCALE,
+                        LOGO_BALL_MARIO_SCALE,
+                        LOGO_BALL_MARIO_SCALE
+                    );
+                    if (movement[AXIS_Z] != 0.0f || movement[AXIS_X] != 0.0f) {
+                        guRotateF(turn, rollAngle, -movement[AXIS_Z], 0.0f, movement[AXIS_X]);
+                        guMtxCatF(f_LogoBallRoll, turn, f_LogoBallRoll);
+                        ConvertMatrixToFixed(
+                            f_LogoBallRoll,
+                            &f_LogoBallMarioRolls[g_DrawBufferIndex]
+                        );
+                    }
+
+                    guTranslate(&f_LogoBallMarioOffset, 0.0f, LOGO_BALL_MARIO_OFFSET_Y, 0.0f);
+                    guTranslate(
+                        &f_LogoBallMarioTranslations[g_DrawBufferIndex],
+                        f_OpeningBallPositions[slot][0],
+                        f_OpeningBallPositions[slot][1] - LOGO_BALL_MARIO_DROP,
+                        f_OpeningBallPositions[slot][2]
+                    );
+                    gDPPipeSync(gfx++);
+                    /*
+                     * The original takes these two commands' slots in locals of their
+                     * own, which orders the spilled pointers' stack slots
+                     */
+                    cycleTypeCommand = gfx++;
+                    gDPSetCycleType(cycleTypeCommand, G_CYC_1CYCLE);
+                    {
+                        Gfx *renderModeCommand;
+
+                        gDPPipeSync(gfx++);
+                        renderModeCommand = gfx++;
+                        gDPSetRenderMode(renderModeCommand, G_RM_XLU_SURF, G_RM_XLU_SURF2);
+                    }
+                    gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+                    gDPPipeSync(gfx++);
+                    gDPSetAlphaDither(gfx++, G_AD_PATTERN);
+                    gDPPipeSync(gfx++);
+                    gDPSetColorDither(gfx++, G_CD_MAGICSQ);
+                    gDPPipeSync(gfx++);
+                    gDPSetTexturePersp(gfx++, G_TP_PERSP);
+                    gDPPipeSync(gfx++);
+                    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+                    gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_LogoMarioImage)));
+                    gDPLoadTextureBlock(
+                        gfx++,
+                        TextureAddress(LargeImageTexels(f_LogoMarioImage)),
+                        G_IM_FMT_CI,
+                        G_IM_SIZ_8b,
+                        LOGO_MARIO_IMAGE_SIZE,
+                        LOGO_MARIO_IMAGE_SIZE,
+                        0,
+                        G_TX_NOMIRROR | G_TX_WRAP,
+                        G_TX_NOMIRROR | G_TX_WRAP,
+                        G_TX_NOMASK,
+                        G_TX_NOMASK,
+                        G_TX_NOLOD,
+                        G_TX_NOLOD
+                    );
+                    gDPPipeSync(gfx++);
+                    gDPSetTextureLOD(gfx++, G_TL_TILE);
+                    gSPTexture(
+                        gfx++,
+                        TEXTURE_SCALE_HALF,
+                        TEXTURE_SCALE_HALF,
+                        0,
+                        G_TX_RENDERTILE,
+                        G_ON
+                    );
+                    gSPLoadGeometryMode(gfx++, 0);
+                    gSPSetGeometryMode(gfx++, G_SHADE | G_CULL_FRONT | G_SHADING_SMOOTH);
+                    gSPMatrix(
+                        gfx++,
+                        PhysicalAddress(&f_LogoBallMarioTranslations[g_DrawBufferIndex]),
+                        G_MTX_PUSH | G_MTX_LOAD | G_MTX_MODELVIEW
+                    );
+                    gSPMatrix(
+                        gfx++,
+                        PhysicalAddress(&f_LogoBallMarioRolls[g_DrawBufferIndex]),
+                        G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW
+                    );
+                    gSPMatrix(
+                        gfx++,
+                        PhysicalAddress(&f_LogoBallMarioScale),
+                        G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW
+                    );
+                    gSPMatrix(
+                        gfx++,
+                        PhysicalAddress(&f_LogoBallMarioOffset),
+                        G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW
+                    );
+                    if (f_OpeningScene >= OPENING_SCENE_LOGO_BALL_MARIO &&
+                        f_OpeningSceneFramesLeft < LOGO_BALL_MARIO_FRAMES_LEFT) {
+                        gSPVertex(gfx++, f_LogoBallMarioVertices, QUAD_VERTEX_COUNT, 0);
+                        gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
+                    }
+
+                    gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
+                    gDPPipeSync(gfx++);
+                }
+
+                gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
+                gDPPipeSync(gfx++);
+            }
         }
 
-        if (ProjectPoint(f_ProjectedBallPosition[AXIS_X],
-                f_ProjectedBallPosition[AXIS_Y],
-                f_ProjectedBallPosition[AXIS_Z], &ballPoint) < 0) {
-          screenScale = ballPoint.scaleX;
-          if (screenScale < 0.0f) {
-            screenScale = -screenScale;
-          }
-
-          halfSize = screenScale *
-              (PROJECTED_BALL_WIDTH_PER_SCALE * f_OpeningBallScales[slot]);
-          if (halfSize & 1) {
-            f_ProjectedBallExtraPixel = 1;
-          } else {
-            f_ProjectedBallExtraPixel = 0;
-          }
-
-          halfSize /= 2;
-          f_ProjectedBallLeft = ballPoint.x - halfSize;
-          f_ProjectedBallRight = ballPoint.x + halfSize;
-          if (f_OpeningBallStates[slot] == OPENING_BALL_IN_AIR) {
-            if (halfSize < PROJECTED_BALL_MIN_HALF_SIZE) {
-              halfSize = PROJECTED_BALL_MIN_HALF_SIZE;
-            }
-          }
-
-          f_ProjectedBallPosition[AXIS_Y] =
-              GetGroundHeight(
-                  f_ProjectedBallPosition[AXIS_X] * WORLD_TO_COURSE_SCALE,
-                  f_ProjectedBallPosition[AXIS_Z] * WORLD_TO_COURSE_SCALE) *
-              COURSE_TO_WORLD_SCALE;
-          if (f_OpeningBallScales[slot] == OPENING_BALL_LARGE_SCALE) {
-            f_ProjectedBallPosition[AXIS_Y] -= PROJECTED_BALL_LARGE_SHADOW_DROP;
-          }
-
-          if (f_OpeningBallStates[slot] == OPENING_BALL_IN_AIR) {
-            guTranslate(&f_ProjectedShadowMatrices[g_DrawBufferIndex][slot],
-                f_ProjectedBallPosition[AXIS_X],
-                f_ProjectedBallPosition[AXIS_Y] -
-                    OPENING_BALL_IN_AIR_SHADOW_DROP,
-                f_ProjectedBallPosition[AXIS_Z]);
-          } else {
-            guTranslate(&f_ProjectedShadowMatrices[g_DrawBufferIndex][slot],
-                f_ProjectedBallPosition[AXIS_X],
-                f_ProjectedBallPosition[AXIS_Y],
-                f_ProjectedBallPosition[AXIS_Z]);
-          }
-
-          guScale(&f_ProjectedShadowScaleMatrices[slot],
-              f_OpeningBallScales[slot], f_OpeningBallScales[slot],
-              f_OpeningBallScales[slot]);
-          gDPPipeSync(gfx++);
-          gDPPipeSync(gfx++);
-          gDPSetCycleType(gfx++, G_CYC_1CYCLE);
-          gDPPipeSync(gfx++);
-          gDPSetRenderMode(gfx++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
-          gDPSetCombineLERP(gfx++, 0, 0, 0, 0, TEXEL0, 0, PRIMITIVE, 0, 0, 0, 0,
-              0, TEXEL0, 0, PRIMITIVE, 0);
-          gDPPipeSync(gfx++);
-          gDPSetAlphaCompare(gfx++, G_AC_THRESHOLD);
-          gDPSetBlendColor(gfx++, 255, 255, 255, 16);
-          gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, 127);
-          gDPPipeSync(gfx++);
-          gDPSetAlphaDither(gfx++, G_AD_PATTERN);
-          gDPPipeSync(gfx++);
-          gDPSetColorDither(gfx++, G_CD_MAGICSQ);
-          gDPPipeSync(gfx++);
-          gDPSetTexturePersp(gfx++, G_TP_PERSP);
-          gDPPipeSync(gfx++);
-          gDPSetTextureLUT(gfx++, G_TT_NONE);
-          gDPLoadTextureBlock(gfx++, TextureAddress(ImageBody(g_ShadowTexture)),
-              G_IM_FMT_I, G_IM_SIZ_8b, SHADOW_TEXTURE_SIZE, SHADOW_TEXTURE_SIZE,
-              0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
-              G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-          gDPPipeSync(gfx++);
-          gDPSetTextureLOD(gfx++, G_TL_TILE);
-          gSPTexture(gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0,
-              G_TX_RENDERTILE, G_ON);
-          gSPLoadGeometryMode(gfx++, 0);
-          gSPSetGeometryMode(gfx++, G_ZBUFFER | G_SHADE | G_SHADING_SMOOTH);
-          gSPMatrix(gfx++,
-              PhysicalAddress(
-                  &f_ProjectedShadowMatrices[g_DrawBufferIndex][slot]),
-              G_MTX_PUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-          gSPMatrix(gfx++,
-              PhysicalAddress(&f_ProjectedShadowScaleMatrices[slot]),
-              G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
-          gSPVertex(gfx++, f_ProjectedShadowVertices, QUAD_VERTEX_COUNT, 0);
-          gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
-          gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
-          gDPPipeSync(gfx++);
-          gDPPipeSync(gfx++);
-          gDPSetRenderMode(gfx++, G_RM_AA_TEX_EDGE, G_RM_AA_TEX_EDGE2);
-          gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-          gDPPipeSync(gfx++);
-          gDPSetColorDither(gfx++, G_CD_MAGICSQ);
-          gSPTexture(gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0,
-              G_TX_RENDERTILE, G_ON);
-          gDPPipeSync(gfx++);
-          gDPSetTexturePersp(gfx++, G_TP_NONE);
-          gDPPipeSync(gfx++);
-          gDPSetTextureFilter(gfx++, G_TF_BILERP);
-          gDPPipeSync(gfx++);
-          gDPSetAlphaCompare(gfx++, G_AC_NONE);
-          gDPPipeSync(gfx++);
-          gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-          if (f_IsLogoBallSlot[slot]) {
-            gDPLoadTLUT_pal256(
-                gfx++, TextureAddress(ImageBody(f_LogoBallImages)));
-          } else {
-            gDPLoadTLUT_pal256(
-                gfx++, TextureAddress(ImageBody(f_OpeningBallImages[slot])));
-          }
-
-          gDPPipeSync(gfx++);
-          for (stripIndex = 0; stripIndex != OPENING_BALL_STRIP_COUNT;
-              stripIndex++) {
-            if (f_IsLogoBallSlot[slot]) {
-              gDPLoadTextureBlock(gfx++,
-                  TextureAddress(LargeImageTexels(f_LogoBallImages) +
-                      ((stripIndex * OPENING_BALL_STRIP_SIZE) +
-                          (f_ProjectedLogoBallFrameIndex *
-                              LOGO_BALL_FRAME_SIZE))),
-                  G_IM_FMT_CI, G_IM_SIZ_8b, OPENING_BALL_IMAGE_WIDTH,
-                  OPENING_BALL_STRIP_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
-                  G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK,
-                  G_TX_NOLOD, G_TX_NOLOD);
-            } else {
-              gDPLoadTextureBlock(gfx++,
-                  TextureAddress(LargeImageTexels(f_OpeningBallImages[slot]) +
-                      (stripIndex * OPENING_BALL_STRIP_SIZE)),
-                  G_IM_FMT_CI, G_IM_SIZ_8b, OPENING_BALL_IMAGE_WIDTH,
-                  OPENING_BALL_STRIP_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
-                  G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK,
-                  G_TX_NOLOD, G_TX_NOLOD);
-            }
-
-            gDPPipeSync(gfx++);
-            gDPPipeSync(gfx++);
-            if (halfSize > 0 && halfSize < PROJECTED_BALL_HALF_SIZE_LIMIT) {
-              if (f_IsLogoBallSlot[slot]) {
-                f_ProjectedBallLeft =
-                    ballPoint.x - halfSize - f_ProjectedBallExtraPixel;
-                f_ProjectedBallRight = ballPoint.x + halfSize;
-                f_ProjectedBallTop = ballPoint.y -
-                    (halfSize * (OPENING_BALL_STRIP_COUNT - stripIndex)) -
-                    f_ProjectedBallExtraPixel;
-                f_ProjectedBallBottom =
-                    ballPoint.y + (stripIndex * halfSize) - halfSize;
-              } else {
-                f_ProjectedBallLeft =
-                    ballPoint.x - halfSize - f_ProjectedBallExtraPixel;
-                f_ProjectedBallRight = ballPoint.x + halfSize;
-                f_ProjectedBallTop = ballPoint.y -
-                    (halfSize * (OPENING_BALL_STRIP_COUNT - stripIndex)) -
-                    f_ProjectedBallExtraPixel + PROJECTED_BALL_DROP;
-                f_ProjectedBallBottom = ballPoint.y + (stripIndex * halfSize) -
-                    halfSize + PROJECTED_BALL_DROP;
-              }
-
-              f_ProjectedBallTexelStep = OPENING_BALL_STRIP_HEIGHT *
-                  TEXEL_STEP_ONE / (halfSize + f_ProjectedBallExtraPixel);
-              gSPScisTextureRectangle(gfx++, QuarterPixels(f_ProjectedBallLeft),
-                  QuarterPixels(f_ProjectedBallTop),
-                  QuarterPixels(f_ProjectedBallRight),
-                  QuarterPixels(f_ProjectedBallBottom), G_TX_RENDERTILE, 0, 0,
-                  f_ProjectedBallTexelStep, f_ProjectedBallTexelStep);
-            }
-
-            gDPPipeSync(gfx++);
-          }
-
-          if (f_IsLogoBallSlot[slot]) {
-            if (f_ShouldResetProjectedLogoBallRoll) {
-              guMtxIdentF(f_ProjectedLogoBallRoll);
-              f_ShouldResetProjectedLogoBallRoll = 0;
-              guRotateRPYF(f_ProjectedLogoBallRoll, LOGO_BALL_START_ROLL,
-                  LOGO_BALL_START_PITCH, LOGO_BALL_START_YAW);
-            }
-
-            if (f_HasProjectedLogoBallLastPosition) {
-              movement[AXIS_X] = f_OpeningBallPositions[slot][0] -
-                  f_ProjectedLogoBallLastPosition[AXIS_X];
-              movement[AXIS_Y] = f_OpeningBallPositions[slot][1] -
-                  f_ProjectedLogoBallLastPosition[AXIS_Y];
-              movement[AXIS_Z] = f_OpeningBallPositions[slot][2] -
-                  f_ProjectedLogoBallLastPosition[AXIS_Z];
-            } else {
-              f_HasProjectedLogoBallLastPosition = TRUE;
-              movement[AXIS_X] = 0.0f;
-              movement[AXIS_Y] = 0.0f;
-              movement[AXIS_Z] = 0.0f;
-            }
-
-            rollAngle = sqrtf((movement[AXIS_X] * movement[AXIS_X]) +
-                (movement[AXIS_Y] * movement[AXIS_Y]) +
-                (movement[AXIS_Z] * movement[AXIS_Z]));
-            rollAngle *= (f32)RADIANS_TO_DEGREES;
-            f_ProjectedLogoBallLastPosition[AXIS_X] =
-                f_OpeningBallPositions[slot][0];
-            f_ProjectedLogoBallLastPosition[AXIS_Y] =
-                f_OpeningBallPositions[slot][1];
-            f_ProjectedLogoBallLastPosition[AXIS_Z] =
-                f_OpeningBallPositions[slot][2];
-            rollAngle = fabs(rollAngle);
-            if (rollAngle > LOGO_BALL_FRAME_ANGLE) {
-              f_ProjectedLogoBallFrameIndex++;
-              if (f_ProjectedLogoBallFrameIndex == LOGO_BALL_FRAME_COUNT) {
-                f_ProjectedLogoBallFrameIndex = 0;
-              }
-            }
-
-            guScale(&f_ProjectedLogoBallMarioScale,
-                PROJECTED_LOGO_BALL_MARIO_SCALE,
-                PROJECTED_LOGO_BALL_MARIO_SCALE,
-                PROJECTED_LOGO_BALL_MARIO_SCALE);
-            if (movement[AXIS_Z] != 0.0f || movement[AXIS_X] != 0.0f) {
-              guRotateF(projectedTurn, rollAngle, -movement[AXIS_Z], 0.0f,
-                  movement[AXIS_X]);
-              guMtxCatF(f_ProjectedLogoBallRoll, projectedTurn,
-                  f_ProjectedLogoBallRoll);
-              ConvertMatrixToFixed(f_ProjectedLogoBallRoll,
-                  &f_ProjectedLogoBallMarioRolls[g_DrawBufferIndex]);
-            }
-
-            guTranslate(&f_ProjectedLogoBallMarioOffset, 0.0f,
-                PROJECTED_LOGO_BALL_MARIO_OFFSET_Y, 0.0f);
-            guTranslate(
-                &f_ProjectedLogoBallMarioTranslations[g_DrawBufferIndex],
-                f_OpeningBallPositions[slot][0],
-                f_OpeningBallPositions[slot][1] -
-                    PROJECTED_LOGO_BALL_MARIO_DROP,
-                f_OpeningBallPositions[slot][2]);
-            gDPPipeSync(gfx++);
-            gDPSetCycleType(gfx++, G_CYC_1CYCLE);
-            gDPPipeSync(gfx++);
-            gDPSetRenderMode(gfx++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
-            gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-            gDPPipeSync(gfx++);
-            gDPSetAlphaDither(gfx++, G_AD_PATTERN);
-            gDPPipeSync(gfx++);
-            gDPSetColorDither(gfx++, G_CD_MAGICSQ);
-            gDPPipeSync(gfx++);
-            gDPSetTexturePersp(gfx++, G_TP_PERSP);
-            gDPPipeSync(gfx++);
-            gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-            gDPLoadTLUT_pal256(
-                gfx++, TextureAddress(ImageBody(f_LogoMarioImage)));
-            gDPLoadTextureBlock(gfx++,
-                TextureAddress(LargeImageTexels(f_LogoMarioImage)), G_IM_FMT_CI,
-                G_IM_SIZ_8b, LOGO_MARIO_IMAGE_SIZE, LOGO_MARIO_IMAGE_SIZE, 0,
-                G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
-                G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-            gDPPipeSync(gfx++);
-            gDPSetTextureLOD(gfx++, G_TL_TILE);
-            gSPTexture(gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0,
-                G_TX_RENDERTILE, G_ON);
-            gSPLoadGeometryMode(gfx++, 0);
-            gSPSetGeometryMode(
-                gfx++, G_SHADE | G_CULL_FRONT | G_SHADING_SMOOTH);
-            gSPMatrix(gfx++,
-                PhysicalAddress(
-                    &f_ProjectedLogoBallMarioTranslations[g_DrawBufferIndex]),
-                G_MTX_PUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-            gSPMatrix(gfx++,
-                PhysicalAddress(
-                    &f_ProjectedLogoBallMarioRolls[g_DrawBufferIndex]),
-                G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
-            gSPMatrix(gfx++, PhysicalAddress(&f_ProjectedLogoBallMarioScale),
-                G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
-            gSPMatrix(gfx++, PhysicalAddress(&f_ProjectedLogoBallMarioOffset),
-                G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
-            gSPVertex(
-                gfx++, f_ProjectedLogoBallMarioVertices, QUAD_VERTEX_COUNT, 0);
-            gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
-            gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
-            gDPPipeSync(gfx++);
-          }
-        }
-      }
+        *displayListHead = gfx;
     }
+    else {
+        Gfx *gfx;
+        s32 stripIndex;
 
-    *displayListHead = gfx;
-  }
+        gfx = *displayListHead;
+        for (slot = 0; slot != OPENING_BALL_SLOT_COUNT; slot++) {
+            if (f_OpeningBallStates[slot] != OPENING_BALL_HIDDEN) {
+                f_ProjectedBallPosition[AXIS_X] = f_OpeningBallPositions[slot][0];
+                f_ProjectedBallPosition[AXIS_Z] = f_OpeningBallPositions[slot][2];
+                if (f_OpeningBallStates[slot] == OPENING_BALL_IN_AIR) {
+                    f_ProjectedBallPosition[AXIS_Y] = f_OpeningBallPositions[slot][1];
+                }
+                else {
+                    f_ProjectedBallPosition[AXIS_Y] =
+                        GetGroundHeight(
+                            f_ProjectedBallPosition[AXIS_X] * WORLD_TO_COURSE_SCALE,
+                            f_ProjectedBallPosition[AXIS_Z] * WORLD_TO_COURSE_SCALE
+                        ) *
+                        COURSE_TO_WORLD_SCALE;
+                }
+
+                if (ProjectPoint(
+                        f_ProjectedBallPosition[AXIS_X],
+                        f_ProjectedBallPosition[AXIS_Y],
+                        f_ProjectedBallPosition[AXIS_Z],
+                        &ballPoint
+                    ) < 0) {
+                    screenScale = ballPoint.scaleX;
+                    if (screenScale < 0.0f) {
+                        screenScale = -screenScale;
+                    }
+
+                    halfSize =
+                        screenScale * (PROJECTED_BALL_WIDTH_PER_SCALE * f_OpeningBallScales[slot]);
+                    if (halfSize & 1) {
+                        f_ProjectedBallExtraPixel = 1;
+                    }
+                    else {
+                        f_ProjectedBallExtraPixel = 0;
+                    }
+
+                    halfSize /= 2;
+                    f_ProjectedBallLeft = ballPoint.x - halfSize;
+                    f_ProjectedBallRight = ballPoint.x + halfSize;
+                    if (f_OpeningBallStates[slot] == OPENING_BALL_IN_AIR) {
+                        if (halfSize < PROJECTED_BALL_MIN_HALF_SIZE) {
+                            halfSize = PROJECTED_BALL_MIN_HALF_SIZE;
+                        }
+                    }
+
+                    f_ProjectedBallPosition[AXIS_Y] =
+                        GetGroundHeight(
+                            f_ProjectedBallPosition[AXIS_X] * WORLD_TO_COURSE_SCALE,
+                            f_ProjectedBallPosition[AXIS_Z] * WORLD_TO_COURSE_SCALE
+                        ) *
+                        COURSE_TO_WORLD_SCALE;
+                    if (f_OpeningBallScales[slot] == OPENING_BALL_LARGE_SCALE) {
+                        f_ProjectedBallPosition[AXIS_Y] -= PROJECTED_BALL_LARGE_SHADOW_DROP;
+                    }
+
+                    if (f_OpeningBallStates[slot] == OPENING_BALL_IN_AIR) {
+                        guTranslate(
+                            &f_ProjectedShadowMatrices[g_DrawBufferIndex][slot],
+                            f_ProjectedBallPosition[AXIS_X],
+                            f_ProjectedBallPosition[AXIS_Y] - OPENING_BALL_IN_AIR_SHADOW_DROP,
+                            f_ProjectedBallPosition[AXIS_Z]
+                        );
+                    }
+                    else {
+                        guTranslate(
+                            &f_ProjectedShadowMatrices[g_DrawBufferIndex][slot],
+                            f_ProjectedBallPosition[AXIS_X],
+                            f_ProjectedBallPosition[AXIS_Y],
+                            f_ProjectedBallPosition[AXIS_Z]
+                        );
+                    }
+
+                    guScale(
+                        &f_ProjectedShadowScaleMatrices[slot],
+                        f_OpeningBallScales[slot],
+                        f_OpeningBallScales[slot],
+                        f_OpeningBallScales[slot]
+                    );
+                    gDPPipeSync(gfx++);
+                    gDPPipeSync(gfx++);
+                    gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+                    gDPPipeSync(gfx++);
+                    gDPSetRenderMode(gfx++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
+                    gDPSetCombineLERP(
+                        gfx++,
+                        0,
+                        0,
+                        0,
+                        0,
+                        TEXEL0,
+                        0,
+                        PRIMITIVE,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        TEXEL0,
+                        0,
+                        PRIMITIVE,
+                        0
+                    );
+                    gDPPipeSync(gfx++);
+                    gDPSetAlphaCompare(gfx++, G_AC_THRESHOLD);
+                    gDPSetBlendColor(gfx++, 255, 255, 255, 16);
+                    gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, 127);
+                    gDPPipeSync(gfx++);
+                    gDPSetAlphaDither(gfx++, G_AD_PATTERN);
+                    gDPPipeSync(gfx++);
+                    gDPSetColorDither(gfx++, G_CD_MAGICSQ);
+                    gDPPipeSync(gfx++);
+                    gDPSetTexturePersp(gfx++, G_TP_PERSP);
+                    gDPPipeSync(gfx++);
+                    gDPSetTextureLUT(gfx++, G_TT_NONE);
+                    gDPLoadTextureBlock(
+                        gfx++,
+                        TextureAddress(ImageBody(g_ShadowTexture)),
+                        G_IM_FMT_I,
+                        G_IM_SIZ_8b,
+                        SHADOW_TEXTURE_SIZE,
+                        SHADOW_TEXTURE_SIZE,
+                        0,
+                        G_TX_NOMIRROR | G_TX_WRAP,
+                        G_TX_NOMIRROR | G_TX_WRAP,
+                        G_TX_NOMASK,
+                        G_TX_NOMASK,
+                        G_TX_NOLOD,
+                        G_TX_NOLOD
+                    );
+                    gDPPipeSync(gfx++);
+                    gDPSetTextureLOD(gfx++, G_TL_TILE);
+                    gSPTexture(
+                        gfx++,
+                        TEXTURE_SCALE_HALF,
+                        TEXTURE_SCALE_HALF,
+                        0,
+                        G_TX_RENDERTILE,
+                        G_ON
+                    );
+                    gSPLoadGeometryMode(gfx++, 0);
+                    gSPSetGeometryMode(gfx++, G_ZBUFFER | G_SHADE | G_SHADING_SMOOTH);
+                    gSPMatrix(
+                        gfx++,
+                        PhysicalAddress(&f_ProjectedShadowMatrices[g_DrawBufferIndex][slot]),
+                        G_MTX_PUSH | G_MTX_LOAD | G_MTX_MODELVIEW
+                    );
+                    gSPMatrix(
+                        gfx++,
+                        PhysicalAddress(&f_ProjectedShadowScaleMatrices[slot]),
+                        G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW
+                    );
+                    gSPVertex(gfx++, f_ProjectedShadowVertices, QUAD_VERTEX_COUNT, 0);
+                    gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
+                    gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
+                    gDPPipeSync(gfx++);
+                    gDPPipeSync(gfx++);
+                    gDPSetRenderMode(gfx++, G_RM_AA_TEX_EDGE, G_RM_AA_TEX_EDGE2);
+                    gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+                    gDPPipeSync(gfx++);
+                    gDPSetColorDither(gfx++, G_CD_MAGICSQ);
+                    gSPTexture(
+                        gfx++,
+                        TEXTURE_SCALE_HALF,
+                        TEXTURE_SCALE_HALF,
+                        0,
+                        G_TX_RENDERTILE,
+                        G_ON
+                    );
+                    gDPPipeSync(gfx++);
+                    gDPSetTexturePersp(gfx++, G_TP_NONE);
+                    gDPPipeSync(gfx++);
+                    gDPSetTextureFilter(gfx++, G_TF_BILERP);
+                    gDPPipeSync(gfx++);
+                    gDPSetAlphaCompare(gfx++, G_AC_NONE);
+                    gDPPipeSync(gfx++);
+                    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+                    if (f_IsLogoBallSlot[slot]) {
+                        gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_LogoBallImages)));
+                    }
+                    else {
+                        gDPLoadTLUT_pal256(
+                            gfx++,
+                            TextureAddress(ImageBody(f_OpeningBallImages[slot]))
+                        );
+                    }
+
+                    gDPPipeSync(gfx++);
+                    for (stripIndex = 0; stripIndex != OPENING_BALL_STRIP_COUNT; stripIndex++) {
+                        if (f_IsLogoBallSlot[slot]) {
+                            gDPLoadTextureBlock(
+                                gfx++,
+                                TextureAddress(
+                                    LargeImageTexels(f_LogoBallImages) +
+                                    ((stripIndex * OPENING_BALL_STRIP_SIZE) +
+                                        (f_ProjectedLogoBallFrameIndex * LOGO_BALL_FRAME_SIZE))
+                                ),
+                                G_IM_FMT_CI,
+                                G_IM_SIZ_8b,
+                                OPENING_BALL_IMAGE_WIDTH,
+                                OPENING_BALL_STRIP_HEIGHT,
+                                0,
+                                G_TX_NOMIRROR | G_TX_WRAP,
+                                G_TX_NOMIRROR | G_TX_WRAP,
+                                G_TX_NOMASK,
+                                G_TX_NOMASK,
+                                G_TX_NOLOD,
+                                G_TX_NOLOD
+                            );
+                        }
+                        else {
+                            gDPLoadTextureBlock(
+                                gfx++,
+                                TextureAddress(
+                                    LargeImageTexels(f_OpeningBallImages[slot]) +
+                                    (stripIndex * OPENING_BALL_STRIP_SIZE)
+                                ),
+                                G_IM_FMT_CI,
+                                G_IM_SIZ_8b,
+                                OPENING_BALL_IMAGE_WIDTH,
+                                OPENING_BALL_STRIP_HEIGHT,
+                                0,
+                                G_TX_NOMIRROR | G_TX_WRAP,
+                                G_TX_NOMIRROR | G_TX_WRAP,
+                                G_TX_NOMASK,
+                                G_TX_NOMASK,
+                                G_TX_NOLOD,
+                                G_TX_NOLOD
+                            );
+                        }
+
+                        gDPPipeSync(gfx++);
+                        gDPPipeSync(gfx++);
+                        if (halfSize > 0 && halfSize < PROJECTED_BALL_HALF_SIZE_LIMIT) {
+                            if (f_IsLogoBallSlot[slot]) {
+                                f_ProjectedBallLeft =
+                                    ballPoint.x - halfSize - f_ProjectedBallExtraPixel;
+                                f_ProjectedBallRight = ballPoint.x + halfSize;
+                                f_ProjectedBallTop = ballPoint.y -
+                                    (halfSize * (OPENING_BALL_STRIP_COUNT - stripIndex)) -
+                                    f_ProjectedBallExtraPixel;
+                                f_ProjectedBallBottom =
+                                    ballPoint.y + (stripIndex * halfSize) - halfSize;
+                            }
+                            else {
+                                f_ProjectedBallLeft =
+                                    ballPoint.x - halfSize - f_ProjectedBallExtraPixel;
+                                f_ProjectedBallRight = ballPoint.x + halfSize;
+                                f_ProjectedBallTop = ballPoint.y -
+                                    (halfSize * (OPENING_BALL_STRIP_COUNT - stripIndex)) -
+                                    f_ProjectedBallExtraPixel + PROJECTED_BALL_DROP;
+                                f_ProjectedBallBottom = ballPoint.y + (stripIndex * halfSize) -
+                                    halfSize + PROJECTED_BALL_DROP;
+                            }
+
+                            f_ProjectedBallTexelStep = OPENING_BALL_STRIP_HEIGHT * TEXEL_STEP_ONE /
+                                (halfSize + f_ProjectedBallExtraPixel);
+                            gSPScisTextureRectangle(
+                                gfx++,
+                                QuarterPixels(f_ProjectedBallLeft),
+                                QuarterPixels(f_ProjectedBallTop),
+                                QuarterPixels(f_ProjectedBallRight),
+                                QuarterPixels(f_ProjectedBallBottom),
+                                G_TX_RENDERTILE,
+                                0,
+                                0,
+                                f_ProjectedBallTexelStep,
+                                f_ProjectedBallTexelStep
+                            );
+                        }
+
+                        gDPPipeSync(gfx++);
+                    }
+
+                    if (f_IsLogoBallSlot[slot]) {
+                        if (f_ShouldResetProjectedLogoBallRoll) {
+                            guMtxIdentF(f_ProjectedLogoBallRoll);
+                            f_ShouldResetProjectedLogoBallRoll = 0;
+                            guRotateRPYF(
+                                f_ProjectedLogoBallRoll,
+                                LOGO_BALL_START_ROLL,
+                                LOGO_BALL_START_PITCH,
+                                LOGO_BALL_START_YAW
+                            );
+                        }
+
+                        if (f_HasProjectedLogoBallLastPosition) {
+                            movement[AXIS_X] = f_OpeningBallPositions[slot][0] -
+                                f_ProjectedLogoBallLastPosition[AXIS_X];
+                            movement[AXIS_Y] = f_OpeningBallPositions[slot][1] -
+                                f_ProjectedLogoBallLastPosition[AXIS_Y];
+                            movement[AXIS_Z] = f_OpeningBallPositions[slot][2] -
+                                f_ProjectedLogoBallLastPosition[AXIS_Z];
+                        }
+                        else {
+                            f_HasProjectedLogoBallLastPosition = TRUE;
+                            movement[AXIS_X] = 0.0f;
+                            movement[AXIS_Y] = 0.0f;
+                            movement[AXIS_Z] = 0.0f;
+                        }
+
+                        rollAngle = sqrtf(
+                            (movement[AXIS_X] * movement[AXIS_X]) +
+                            (movement[AXIS_Y] * movement[AXIS_Y]) +
+                            (movement[AXIS_Z] * movement[AXIS_Z])
+                        );
+                        rollAngle *= (f32)RADIANS_TO_DEGREES;
+                        f_ProjectedLogoBallLastPosition[AXIS_X] = f_OpeningBallPositions[slot][0];
+                        f_ProjectedLogoBallLastPosition[AXIS_Y] = f_OpeningBallPositions[slot][1];
+                        f_ProjectedLogoBallLastPosition[AXIS_Z] = f_OpeningBallPositions[slot][2];
+                        rollAngle = fabs(rollAngle);
+                        if (rollAngle > LOGO_BALL_FRAME_ANGLE) {
+                            f_ProjectedLogoBallFrameIndex++;
+                            if (f_ProjectedLogoBallFrameIndex == LOGO_BALL_FRAME_COUNT) {
+                                f_ProjectedLogoBallFrameIndex = 0;
+                            }
+                        }
+
+                        guScale(
+                            &f_ProjectedLogoBallMarioScale,
+                            PROJECTED_LOGO_BALL_MARIO_SCALE,
+                            PROJECTED_LOGO_BALL_MARIO_SCALE,
+                            PROJECTED_LOGO_BALL_MARIO_SCALE
+                        );
+                        if (movement[AXIS_Z] != 0.0f || movement[AXIS_X] != 0.0f) {
+                            guRotateF(
+                                projectedTurn,
+                                rollAngle,
+                                -movement[AXIS_Z],
+                                0.0f,
+                                movement[AXIS_X]
+                            );
+                            guMtxCatF(
+                                f_ProjectedLogoBallRoll,
+                                projectedTurn,
+                                f_ProjectedLogoBallRoll
+                            );
+                            ConvertMatrixToFixed(
+                                f_ProjectedLogoBallRoll,
+                                &f_ProjectedLogoBallMarioRolls[g_DrawBufferIndex]
+                            );
+                        }
+
+                        guTranslate(
+                            &f_ProjectedLogoBallMarioOffset,
+                            0.0f,
+                            PROJECTED_LOGO_BALL_MARIO_OFFSET_Y,
+                            0.0f
+                        );
+                        guTranslate(
+                            &f_ProjectedLogoBallMarioTranslations[g_DrawBufferIndex],
+                            f_OpeningBallPositions[slot][0],
+                            f_OpeningBallPositions[slot][1] - PROJECTED_LOGO_BALL_MARIO_DROP,
+                            f_OpeningBallPositions[slot][2]
+                        );
+                        gDPPipeSync(gfx++);
+                        gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+                        gDPPipeSync(gfx++);
+                        gDPSetRenderMode(gfx++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
+                        gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+                        gDPPipeSync(gfx++);
+                        gDPSetAlphaDither(gfx++, G_AD_PATTERN);
+                        gDPPipeSync(gfx++);
+                        gDPSetColorDither(gfx++, G_CD_MAGICSQ);
+                        gDPPipeSync(gfx++);
+                        gDPSetTexturePersp(gfx++, G_TP_PERSP);
+                        gDPPipeSync(gfx++);
+                        gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+                        gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_LogoMarioImage)));
+                        gDPLoadTextureBlock(
+                            gfx++,
+                            TextureAddress(LargeImageTexels(f_LogoMarioImage)),
+                            G_IM_FMT_CI,
+                            G_IM_SIZ_8b,
+                            LOGO_MARIO_IMAGE_SIZE,
+                            LOGO_MARIO_IMAGE_SIZE,
+                            0,
+                            G_TX_NOMIRROR | G_TX_WRAP,
+                            G_TX_NOMIRROR | G_TX_WRAP,
+                            G_TX_NOMASK,
+                            G_TX_NOMASK,
+                            G_TX_NOLOD,
+                            G_TX_NOLOD
+                        );
+                        gDPPipeSync(gfx++);
+                        gDPSetTextureLOD(gfx++, G_TL_TILE);
+                        gSPTexture(
+                            gfx++,
+                            TEXTURE_SCALE_HALF,
+                            TEXTURE_SCALE_HALF,
+                            0,
+                            G_TX_RENDERTILE,
+                            G_ON
+                        );
+                        gSPLoadGeometryMode(gfx++, 0);
+                        gSPSetGeometryMode(gfx++, G_SHADE | G_CULL_FRONT | G_SHADING_SMOOTH);
+                        gSPMatrix(
+                            gfx++,
+                            PhysicalAddress(
+                                &f_ProjectedLogoBallMarioTranslations[g_DrawBufferIndex]
+                            ),
+                            G_MTX_PUSH | G_MTX_LOAD | G_MTX_MODELVIEW
+                        );
+                        gSPMatrix(
+                            gfx++,
+                            PhysicalAddress(&f_ProjectedLogoBallMarioRolls[g_DrawBufferIndex]),
+                            G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW
+                        );
+                        gSPMatrix(
+                            gfx++,
+                            PhysicalAddress(&f_ProjectedLogoBallMarioScale),
+                            G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW
+                        );
+                        gSPMatrix(
+                            gfx++,
+                            PhysicalAddress(&f_ProjectedLogoBallMarioOffset),
+                            G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW
+                        );
+                        gSPVertex(gfx++, f_ProjectedLogoBallMarioVertices, QUAD_VERTEX_COUNT, 0);
+                        gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
+                        gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
+                        gDPPipeSync(gfx++);
+                    }
+                }
+            }
+        }
+
+        *displayListHead = gfx;
+    }
 }
 
 /* A 64x64 CI8 image of yellow and green lines bursting outwards */
 #define ASSET_IMPACT_LINES_IMAGE 0x908
 
 void LoadOpeningImpactLines(void) {
-  EncodedAsset asset;
+    EncodedAsset asset;
 
-  OpenEncodedAsset(ASSET_IMPACT_LINES_IMAGE, &asset);
-  ReadEncodedAsset(f_OpeningEffectImage, &asset);
+    OpenEncodedAsset(ASSET_IMPACT_LINES_IMAGE, &asset);
+    ReadEncodedAsset(f_OpeningEffectImage, &asset);
 }
 
 /* The impact lines' left and bottom edges on the screen, in pixels */
@@ -4005,8 +4563,7 @@ void LoadOpeningImpactLines(void) {
 #define IMPACT_LINES_FRAME_COUNT 19
 /* Whether a frame is outside the blink that starts on blinkFrame */
 #define IsOutsideBlink(frame, blinkFrame) \
-  ((frame) < (blinkFrame) || \
-      (frame) >= (blinkFrame) + IMPACT_LINES_BLINK_FRAME_COUNT)
+    ((frame) < (blinkFrame) || (frame) >= (blinkFrame) + IMPACT_LINES_BLINK_FRAME_COUNT)
 
 /*
  * Draws blinking impact lines around the burst for a few frames, once
@@ -4051,72 +4608,88 @@ void LoadOpeningImpactLines(void) {
  * offset do not improve on 19. This remains a draft, not a matching routine.
  */
 #ifdef NON_MATCHING
-void DrawOpeningImpactLines(Gfx** displayListHead) {
-  Gfx* gfx = *displayListHead;
-  s32 frame;
-  s32 stripIndex;
-  s32 texelOffset;
-  s32 row;
+void DrawOpeningImpactLines(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
+    s32 frame;
+    s32 stripIndex;
+    s32 texelOffset;
+    s32 row;
 
-  /* A variable, so GCC does not fold the right edge into the command */
-  s32 width = IMPACT_LINES_SIZE;
-  s32 left;
-  s32 bottom;
-  s32 top;
-  s32 bottomEdge = IMPACT_LINES_BOTTOM;
+    /* A variable, so GCC does not fold the right edge into the command */
+    s32 width = IMPACT_LINES_SIZE;
+    s32 left;
+    s32 bottom;
+    s32 top;
+    s32 bottomEdge = IMPACT_LINES_BOTTOM;
 
-  if (f_AreImpactLinesShown) {
-    frame = f_ImpactLinesFrame++;
-    if (IsOutsideBlink(frame, IMPACT_LINES_FIRST_BLINK_FRAME) &&
-        IsOutsideBlink(frame, IMPACT_LINES_SECOND_BLINK_FRAME) &&
-        f_ImpactLinesFrame < IMPACT_LINES_FRAME_COUNT) {
-      gDPPipeSync(gfx++);
-      AppendSyncedRdpState(gfx, gDPSetCycleType, G_CYC_1CYCLE);
-      AppendSyncedRdpState(
-          gfx, gDPSetRenderMode, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
-      gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-      AppendSyncedRdpState(gfx, gDPSetColorDither, G_CD_DISABLE);
-      gSPTexture(gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0,
-          G_TX_RENDERTILE, G_ON);
-      AppendSyncedRdpState(gfx, gDPSetTexturePersp, G_TP_NONE);
-      AppendSyncedRdpState(gfx, gDPSetTextureFilter, G_TF_BILERP);
-      AppendSyncedRdpState(gfx, gDPSetAlphaCompare, G_AC_NONE);
-      AppendSyncedRdpState(gfx, gDPSetTextureLUT, G_TT_RGBA16);
-      gDPLoadTLUT_pal256(
-          gfx++, TextureAddress(ImageBody(f_OpeningEffectImage)));
-      gDPPipeSync(gfx++);
+    if (f_AreImpactLinesShown) {
+        frame = f_ImpactLinesFrame++;
+        if (IsOutsideBlink(frame, IMPACT_LINES_FIRST_BLINK_FRAME) &&
+            IsOutsideBlink(frame, IMPACT_LINES_SECOND_BLINK_FRAME) &&
+            f_ImpactLinesFrame < IMPACT_LINES_FRAME_COUNT) {
+            gDPPipeSync(gfx++);
+            AppendSyncedRdpState(gfx, gDPSetCycleType, G_CYC_1CYCLE);
+            AppendSyncedRdpState(gfx, gDPSetRenderMode, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
+            gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+            AppendSyncedRdpState(gfx, gDPSetColorDither, G_CD_DISABLE);
+            gSPTexture(gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0, G_TX_RENDERTILE, G_ON);
+            AppendSyncedRdpState(gfx, gDPSetTexturePersp, G_TP_NONE);
+            AppendSyncedRdpState(gfx, gDPSetTextureFilter, G_TF_BILERP);
+            AppendSyncedRdpState(gfx, gDPSetAlphaCompare, G_AC_NONE);
+            AppendSyncedRdpState(gfx, gDPSetTextureLUT, G_TT_RGBA16);
+            gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_OpeningEffectImage)));
+            gDPPipeSync(gfx++);
 
-      /* The rows count up from the bottom, so the top strip is row 1 */
-      for (stripIndex = 0, row = IMPACT_LINES_STRIP_COUNT - 1;
-          stripIndex != IMPACT_LINES_STRIP_COUNT; stripIndex++) {
-        /*
-         * Set on each pass, as the original works out the rectangle's shifted
-         * left and right edges once, outside the loop, and keeps them on the
-         * stack; written as the constant, the edges fold into the commands,
-         * 253 words differing (19 in shape) against 46 (none)
-         */
-        left = IMPACT_LINES_LEFT;
-        bottom = IMPACT_LINES_BOTTOM - (row * IMPACT_LINES_STRIP_HEIGHT);
-        top = bottomEdge -
-            (row * IMPACT_LINES_STRIP_HEIGHT + IMPACT_LINES_STRIP_HEIGHT);
-        texelOffset = LARGE_PALETTED_TEXELS_OFFSET +
-            (stripIndex * IMPACT_LINES_SIZE * IMPACT_LINES_STRIP_HEIGHT);
-        gDPLoadTextureBlock(gfx++,
-            TextureAddress(f_OpeningEffectImage + texelOffset), G_IM_FMT_I,
-            G_IM_SIZ_8b, IMPACT_LINES_SIZE, IMPACT_LINES_STRIP_HEIGHT, 0,
-            G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
-            G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-        gDPPipeSync(gfx++);
-        gSPScisTextureRectangle(gfx++, QuarterPixels(left), QuarterPixels(top),
-            QuarterPixels(left + width), QuarterPixels(bottom), G_TX_RENDERTILE,
-            0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
-        gDPPipeSync(gfx++);
-        row--;
-      }
+            /* The rows count up from the bottom, so the top strip is row 1 */
+            for (stripIndex = 0, row = IMPACT_LINES_STRIP_COUNT - 1;
+                stripIndex != IMPACT_LINES_STRIP_COUNT;
+                stripIndex++) {
+                /*
+                 * Set on each pass, as the original works out the rectangle's shifted
+                 * left and right edges once, outside the loop, and keeps them on the
+                 * stack; written as the constant, the edges fold into the commands,
+                 * 253 words differing (19 in shape) against 46 (none)
+                 */
+                left = IMPACT_LINES_LEFT;
+                bottom = IMPACT_LINES_BOTTOM - (row * IMPACT_LINES_STRIP_HEIGHT);
+                top = bottomEdge - (row * IMPACT_LINES_STRIP_HEIGHT + IMPACT_LINES_STRIP_HEIGHT);
+                texelOffset = LARGE_PALETTED_TEXELS_OFFSET +
+                    (stripIndex * IMPACT_LINES_SIZE * IMPACT_LINES_STRIP_HEIGHT);
+                gDPLoadTextureBlock(
+                    gfx++,
+                    TextureAddress(f_OpeningEffectImage + texelOffset),
+                    G_IM_FMT_I,
+                    G_IM_SIZ_8b,
+                    IMPACT_LINES_SIZE,
+                    IMPACT_LINES_STRIP_HEIGHT,
+                    0,
+                    G_TX_NOMIRROR | G_TX_WRAP,
+                    G_TX_NOMIRROR | G_TX_WRAP,
+                    G_TX_NOMASK,
+                    G_TX_NOMASK,
+                    G_TX_NOLOD,
+                    G_TX_NOLOD
+                );
+                gDPPipeSync(gfx++);
+                gSPScisTextureRectangle(
+                    gfx++,
+                    QuarterPixels(left),
+                    QuarterPixels(top),
+                    QuarterPixels(left + width),
+                    QuarterPixels(bottom),
+                    G_TX_RENDERTILE,
+                    0,
+                    0,
+                    TEXEL_STEP_ONE,
+                    TEXEL_STEP_ONE
+                );
+                gDPPipeSync(gfx++);
+                row--;
+            }
 
-      *displayListHead = gfx;
+            *displayListHead = gfx;
+        }
     }
-  }
 }
 #else
 INCLUDE_ASM("asm/nonmatchings/ovl_05/opening", DrawOpeningImpactLines);
@@ -4126,27 +4699,29 @@ INCLUDE_ASM("asm/nonmatchings/ovl_05/opening", DrawOpeningImpactLines);
 
 /* Loads Lakitu's images and gathers his trail behind him */
 void LoadLakitu(void) {
-  EncodedAsset asset;
-  s32 pass;
-  s32 segmentIndex;
+    EncodedAsset asset;
+    s32 pass;
+    s32 segmentIndex;
 
-  OpenEncodedAsset(ASSET_LAKITU_IMAGE, &asset);
-  ReadEncodedAsset(f_LakituImage, &asset);
-  OpenEncodedAsset(ASSET_STREAK_IMAGE, &asset);
-  ReadEncodedAsset(f_LakituTrailImage, &asset);
+    OpenEncodedAsset(ASSET_LAKITU_IMAGE, &asset);
+    ReadEncodedAsset(f_LakituImage, &asset);
+    OpenEncodedAsset(ASSET_STREAK_IMAGE, &asset);
+    ReadEncodedAsset(f_LakituTrailImage, &asset);
 
-  /* The game places the trail twice over */
-  for (pass = 0; pass < 2; pass++) {
-    for (segmentIndex = 0; segmentIndex < LAKITU_TRAIL_SEGMENT_COUNT;
-        segmentIndex++) {
-      guTranslate(&f_LakituTrailMatrices[segmentIndex],
-          f_LakituScreenPoint[0] - (SCREEN_WIDTH / 2),
-          (SCREEN_HEIGHT / 2) - f_LakituScreenPoint[1], -LAKITU_TRAIL_DEPTH);
+    /* The game places the trail twice over */
+    for (pass = 0; pass < 2; pass++) {
+        for (segmentIndex = 0; segmentIndex < LAKITU_TRAIL_SEGMENT_COUNT; segmentIndex++) {
+            guTranslate(
+                &f_LakituTrailMatrices[segmentIndex],
+                f_LakituScreenPoint[0] - (SCREEN_WIDTH / 2),
+                (SCREEN_HEIGHT / 2) - f_LakituScreenPoint[1],
+                -LAKITU_TRAIL_DEPTH
+            );
+        }
     }
-  }
 
-  f_LakituTrailStart[0] = f_LakituScreenPoint[0] - SCREEN_WIDTH;
-  f_LakituTrailStart[1] = (SCREEN_HEIGHT / 2) - f_LakituScreenPoint[1];
+    f_LakituTrailStart[0] = f_LakituScreenPoint[0] - SCREEN_WIDTH;
+    f_LakituTrailStart[1] = (SCREEN_HEIGHT / 2) - f_LakituScreenPoint[1];
 }
 
 #define LAKITU_IMAGE_SIZE 32
@@ -4161,156 +4736,226 @@ void LoadLakitu(void) {
 #define LAKITU_TRAIL_ROWS_PER_SEGMENT 8
 /* Texture coordinates, in 10.5, of the trail's right edge and of a segment */
 #define LAKITU_TRAIL_RIGHT_S (TexelCoordinate(LAKITU_TRAIL_IMAGE_WIDTH) - 1)
-#define LakituTrailT(segment) \
-  TexelCoordinate((segment) * LAKITU_TRAIL_ROWS_PER_SEGMENT)
+#define LakituTrailT(segment) TexelCoordinate((segment) * LAKITU_TRAIL_ROWS_PER_SEGMENT)
 /* First vertex buffer slot of a segment in the second batch */
 #define LakituTrailSecondBatchSlot(segment) \
-  (((LAKITU_TRAIL_BATCH_SEGMENT_COUNT - 2) * 2) - \
-      (((segment) - LAKITU_TRAIL_BATCH_SEGMENT_COUNT) * 2))
+    (((LAKITU_TRAIL_BATCH_SEGMENT_COUNT - 2) * 2) - \
+        (((segment) - LAKITU_TRAIL_BATCH_SEGMENT_COUNT) * 2))
 #define LAKITU_TRAIL_FADE_STEP 4
 
 /*
  * Draws Lakitu while he flies, with a fading trail of the places he has been.
  */
-void DrawLakitu(Gfx** displayListHead) {
-  Gfx* gfx = *displayListHead;
-  Vec3 translation;
-  Vec3 rotation;
-  Mat4 matrix;
-  s32 segmentIndex;
-  s32 drawnIndex;
+void DrawLakitu(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
+    Vec3 translation;
+    Vec3 rotation;
+    Mat4 matrix;
+    s32 segmentIndex;
+    s32 drawnIndex;
 
-  if (f_IsLakituFlying) {
-    gDPPipeSync(gfx++);
-    AppendSyncedRdpState(gfx, gDPSetCycleType, G_CYC_1CYCLE);
-    AppendSyncedRdpState(
-        gfx, gDPSetRenderMode, G_RM_AA_ZB_TEX_EDGE, G_RM_AA_ZB_TEX_EDGE2);
-    gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-    gDPPipeSync(gfx++);
-    gDPSetColorDither(gfx++, G_CD_DISABLE);
-    gSPTexture(gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0,
-        G_TX_RENDERTILE, G_ON);
-    AppendSyncedRdpState(gfx, gDPSetTexturePersp, G_TP_NONE);
-    gDPPipeSync(gfx++);
-    gDPSetTextureFilter(gfx++, G_TF_BILERP);
-    gDPPipeSync(gfx++);
-    gDPSetAlphaCompare(gfx++, G_AC_NONE);
-    gDPPipeSync(gfx++);
-    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-    gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_LakituImage)));
-    gDPPipeSync(gfx++);
-    gDPLoadTextureBlock(gfx++, TextureAddress(LargeImageTexels(f_LakituImage)),
-        G_IM_FMT_CI, G_IM_SIZ_8b, LAKITU_IMAGE_SIZE, LAKITU_IMAGE_SIZE, 0,
-        G_TX_MIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
-        TextureMask(LAKITU_IMAGE_SIZE), G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-    gDPPipeSync(gfx++);
-    gSPScisTextureRectangle(gfx++,
-        QuarterPixels(f_LakituScreenPoint[0] - (LAKITU_DRAWN_SIZE / 2)),
-        QuarterPixels(f_LakituScreenPoint[1] - (LAKITU_DRAWN_SIZE / 2)),
-        QuarterPixels(f_LakituScreenPoint[0] + (LAKITU_DRAWN_SIZE / 2)),
-        QuarterPixels(f_LakituScreenPoint[1] + (LAKITU_DRAWN_SIZE / 2)),
-        G_TX_RENDERTILE, TexelCoordinate(LAKITU_IMAGE_SIZE), 0, LAKITU_SCALE,
-        LAKITU_SCALE);
-    gDPPipeSync(gfx++);
-    rotation[AXIS_X] = 0.0f;
-    rotation[AXIS_Y] = 0.0f;
-    rotation[AXIS_Z] = atan2(f_LakituTrailStart[0] -
-            (f32)(f_LakituScreenPoint[0] - (SCREEN_WIDTH / 2)),
-        f_LakituTrailStart[1] -
-            (f32)((SCREEN_HEIGHT / 2) - f_LakituScreenPoint[1]));
-    translation[AXIS_X] = f_LakituScreenPoint[0] - (SCREEN_WIDTH / 2);
-    translation[AXIS_Y] = (SCREEN_HEIGHT / 2) - f_LakituScreenPoint[1];
-    translation[AXIS_Z] = -LAKITU_TRAIL_DEPTH;
-    BuildRotationMatrix(matrix, rotation, translation);
-    ConvertMatrixToFixed(
-        matrix, &f_LakituTrailMatrices[f_LakituTrailNewestIndex]);
-    f_LakituTrailStart[0] = f_LakituScreenPoint[0] - (SCREEN_WIDTH / 2);
-    f_LakituTrailStart[1] = (SCREEN_HEIGHT / 2) - f_LakituScreenPoint[1];
-    gSPLoadGeometryMode(gfx++, 0);
-    gSPSetGeometryMode(gfx++, G_SHADE | G_SHADING_SMOOTH);
-    AppendSyncedRdpState(gfx, gDPSetRenderMode, G_RM_CLD_SURF, G_RM_CLD_SURF2);
-    AppendSyncedRdpState(gfx, gDPSetTextureLUT, G_TT_NONE);
-    gDPPipeSync(gfx++);
-    gDPSetTexturePersp(gfx++, G_TP_PERSP);
-    gDPPipeSync(gfx++);
-    gDPSetTextureFilter(gfx++, G_TF_BILERP);
-    gSPTexture(gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0,
-        G_TX_RENDERTILE, G_ON);
-    gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, f_LakituTrailAlpha);
-    gDPSetEnvColor(gfx++, 255, 255, 255, OPAQUE_ALPHA);
-    gDPSetCombineLERP(gfx++, 0, 0, 0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0, 0, 0,
-        0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0);
-    gDPLoadTextureBlock_4b(gfx++, TextureAddress(ImageBody(f_LakituTrailImage)),
-        G_IM_FMT_I, LAKITU_TRAIL_IMAGE_WIDTH, LAKITU_TRAIL_IMAGE_HEIGHT, 0,
-        G_TX_MIRROR | G_TX_WRAP, G_TX_MIRROR | G_TX_WRAP, G_TX_NOMASK,
-        TextureMask(LAKITU_TRAIL_IMAGE_HEIGHT), G_TX_NOLOD, G_TX_NOLOD);
-    gSPMatrix(gfx++, PhysicalAddress(&g_ScreenOrthoMatrix),
-        G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
-    gDPPipeSync(gfx++);
-    segmentIndex = f_LakituTrailNewestIndex;
-    for (drawnIndex = 0; drawnIndex != LAKITU_TRAIL_BATCH_SEGMENT_COUNT;
-        drawnIndex++) {
-      gSPMatrix(gfx++, PhysicalAddress(&f_LakituTrailMatrices[segmentIndex]),
-          G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-      gSPVertex(gfx++, f_LakituTrailVertices, 2, drawnIndex * 2);
-      gSPModifyVertex(
-          gfx++, drawnIndex * 2, G_MWO_POINT_ST, LakituTrailT(drawnIndex));
-      gSPModifyVertex(gfx++, (drawnIndex * 2) + 1, G_MWO_POINT_ST,
-          TexcoordWord(LAKITU_TRAIL_RIGHT_S, LakituTrailT(drawnIndex)));
-      segmentIndex--;
-      if (segmentIndex < 0) {
-        segmentIndex = LAKITU_TRAIL_SEGMENT_COUNT - 1;
-      }
+    if (f_IsLakituFlying) {
+        gDPPipeSync(gfx++);
+        AppendSyncedRdpState(gfx, gDPSetCycleType, G_CYC_1CYCLE);
+        AppendSyncedRdpState(gfx, gDPSetRenderMode, G_RM_AA_ZB_TEX_EDGE, G_RM_AA_ZB_TEX_EDGE2);
+        gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+        gDPPipeSync(gfx++);
+        gDPSetColorDither(gfx++, G_CD_DISABLE);
+        gSPTexture(gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0, G_TX_RENDERTILE, G_ON);
+        AppendSyncedRdpState(gfx, gDPSetTexturePersp, G_TP_NONE);
+        gDPPipeSync(gfx++);
+        gDPSetTextureFilter(gfx++, G_TF_BILERP);
+        gDPPipeSync(gfx++);
+        gDPSetAlphaCompare(gfx++, G_AC_NONE);
+        gDPPipeSync(gfx++);
+        gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+        gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_LakituImage)));
+        gDPPipeSync(gfx++);
+        gDPLoadTextureBlock(
+            gfx++,
+            TextureAddress(LargeImageTexels(f_LakituImage)),
+            G_IM_FMT_CI,
+            G_IM_SIZ_8b,
+            LAKITU_IMAGE_SIZE,
+            LAKITU_IMAGE_SIZE,
+            0,
+            G_TX_MIRROR | G_TX_WRAP,
+            G_TX_NOMIRROR | G_TX_WRAP,
+            TextureMask(LAKITU_IMAGE_SIZE),
+            G_TX_NOMASK,
+            G_TX_NOLOD,
+            G_TX_NOLOD
+        );
+        gDPPipeSync(gfx++);
+        gSPScisTextureRectangle(
+            gfx++,
+            QuarterPixels(f_LakituScreenPoint[0] - (LAKITU_DRAWN_SIZE / 2)),
+            QuarterPixels(f_LakituScreenPoint[1] - (LAKITU_DRAWN_SIZE / 2)),
+            QuarterPixels(f_LakituScreenPoint[0] + (LAKITU_DRAWN_SIZE / 2)),
+            QuarterPixels(f_LakituScreenPoint[1] + (LAKITU_DRAWN_SIZE / 2)),
+            G_TX_RENDERTILE,
+            TexelCoordinate(LAKITU_IMAGE_SIZE),
+            0,
+            LAKITU_SCALE,
+            LAKITU_SCALE
+        );
+        gDPPipeSync(gfx++);
+        rotation[AXIS_X] = 0.0f;
+        rotation[AXIS_Y] = 0.0f;
+        rotation[AXIS_Z] = atan2(
+            f_LakituTrailStart[0] - (f32)(f_LakituScreenPoint[0] - (SCREEN_WIDTH / 2)),
+            f_LakituTrailStart[1] - (f32)((SCREEN_HEIGHT / 2) - f_LakituScreenPoint[1])
+        );
+        translation[AXIS_X] = f_LakituScreenPoint[0] - (SCREEN_WIDTH / 2);
+        translation[AXIS_Y] = (SCREEN_HEIGHT / 2) - f_LakituScreenPoint[1];
+        translation[AXIS_Z] = -LAKITU_TRAIL_DEPTH;
+        BuildRotationMatrix(matrix, rotation, translation);
+        ConvertMatrixToFixed(matrix, &f_LakituTrailMatrices[f_LakituTrailNewestIndex]);
+        f_LakituTrailStart[0] = f_LakituScreenPoint[0] - (SCREEN_WIDTH / 2);
+        f_LakituTrailStart[1] = (SCREEN_HEIGHT / 2) - f_LakituScreenPoint[1];
+        gSPLoadGeometryMode(gfx++, 0);
+        gSPSetGeometryMode(gfx++, G_SHADE | G_SHADING_SMOOTH);
+        AppendSyncedRdpState(gfx, gDPSetRenderMode, G_RM_CLD_SURF, G_RM_CLD_SURF2);
+        AppendSyncedRdpState(gfx, gDPSetTextureLUT, G_TT_NONE);
+        gDPPipeSync(gfx++);
+        gDPSetTexturePersp(gfx++, G_TP_PERSP);
+        gDPPipeSync(gfx++);
+        gDPSetTextureFilter(gfx++, G_TF_BILERP);
+        gSPTexture(gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0, G_TX_RENDERTILE, G_ON);
+        gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, f_LakituTrailAlpha);
+        gDPSetEnvColor(gfx++, 255, 255, 255, OPAQUE_ALPHA);
+        gDPSetCombineLERP(
+            gfx++,
+            0,
+            0,
+            0,
+            PRIMITIVE,
+            PRIMITIVE,
+            0,
+            TEXEL0,
+            0,
+            0,
+            0,
+            0,
+            PRIMITIVE,
+            PRIMITIVE,
+            0,
+            TEXEL0,
+            0
+        );
+        gDPLoadTextureBlock_4b(
+            gfx++,
+            TextureAddress(ImageBody(f_LakituTrailImage)),
+            G_IM_FMT_I,
+            LAKITU_TRAIL_IMAGE_WIDTH,
+            LAKITU_TRAIL_IMAGE_HEIGHT,
+            0,
+            G_TX_MIRROR | G_TX_WRAP,
+            G_TX_MIRROR | G_TX_WRAP,
+            G_TX_NOMASK,
+            TextureMask(LAKITU_TRAIL_IMAGE_HEIGHT),
+            G_TX_NOLOD,
+            G_TX_NOLOD
+        );
+        gSPMatrix(
+            gfx++,
+            PhysicalAddress(&g_ScreenOrthoMatrix),
+            G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION
+        );
+        gDPPipeSync(gfx++);
+        segmentIndex = f_LakituTrailNewestIndex;
+        for (drawnIndex = 0; drawnIndex != LAKITU_TRAIL_BATCH_SEGMENT_COUNT; drawnIndex++) {
+            gSPMatrix(
+                gfx++,
+                PhysicalAddress(&f_LakituTrailMatrices[segmentIndex]),
+                G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW
+            );
+            gSPVertex(gfx++, f_LakituTrailVertices, 2, drawnIndex * 2);
+            gSPModifyVertex(gfx++, drawnIndex * 2, G_MWO_POINT_ST, LakituTrailT(drawnIndex));
+            gSPModifyVertex(
+                gfx++,
+                (drawnIndex * 2) + 1,
+                G_MWO_POINT_ST,
+                TexcoordWord(LAKITU_TRAIL_RIGHT_S, LakituTrailT(drawnIndex))
+            );
+            segmentIndex--;
+            if (segmentIndex < 0) {
+                segmentIndex = LAKITU_TRAIL_SEGMENT_COUNT - 1;
+            }
+        }
+
+        for (drawnIndex = 0; drawnIndex != LAKITU_TRAIL_BATCH_SEGMENT_COUNT - 1; drawnIndex++) {
+            gSP2Triangles(
+                gfx++,
+                (drawnIndex * 2) + 1,
+                drawnIndex * 2,
+                (drawnIndex * 2) + 2,
+                0,
+                (drawnIndex * 2) + 1,
+                (drawnIndex * 2) + 2,
+                (drawnIndex * 2) + 3,
+                0
+            );
+        }
+
+        /*
+         * The second batch fills the vertex buffer from the end, keeping the
+         * last pair of the first batch in its slots, so the same triangles join
+         * up the rest of the trail.
+         */
+        for (drawnIndex = LAKITU_TRAIL_BATCH_SEGMENT_COUNT;
+            drawnIndex != LAKITU_TRAIL_DRAWN_SEGMENT_COUNT;
+            drawnIndex++) {
+            gSPMatrix(
+                gfx++,
+                PhysicalAddress(&f_LakituTrailMatrices[segmentIndex]),
+                G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW
+            );
+            gSPVertex(gfx++, f_LakituTrailVertices, 2, LakituTrailSecondBatchSlot(drawnIndex));
+            gSPModifyVertex(
+                gfx++,
+                LakituTrailSecondBatchSlot(drawnIndex),
+                G_MWO_POINT_ST,
+                LakituTrailT(drawnIndex)
+            );
+            gSPModifyVertex(
+                gfx++,
+                LakituTrailSecondBatchSlot(drawnIndex) + 1,
+                G_MWO_POINT_ST,
+                TexcoordWord(LAKITU_TRAIL_RIGHT_S, LakituTrailT(drawnIndex))
+            );
+            segmentIndex--;
+            if (segmentIndex < 0) {
+                segmentIndex = LAKITU_TRAIL_SEGMENT_COUNT - 1;
+            }
+        }
+
+        for (drawnIndex = 0; drawnIndex != LAKITU_TRAIL_BATCH_SEGMENT_COUNT - 1; drawnIndex++) {
+            gSP2Triangles(
+                gfx++,
+                (drawnIndex * 2) + 1,
+                drawnIndex * 2,
+                (drawnIndex * 2) + 2,
+                0,
+                (drawnIndex * 2) + 1,
+                (drawnIndex * 2) + 2,
+                (drawnIndex * 2) + 3,
+                0
+            );
+        }
+
+        gDPPipeSync(gfx++);
+        if (++f_LakituTrailNewestIndex >= LAKITU_TRAIL_SEGMENT_COUNT) {
+            f_LakituTrailNewestIndex = 0;
+        }
+
+        f_LakituTrailAlpha -= LAKITU_TRAIL_FADE_STEP;
+        if (f_LakituTrailAlpha < 0) {
+            f_LakituTrailAlpha = 0;
+        }
+
+        *displayListHead = gfx;
     }
-
-    for (drawnIndex = 0; drawnIndex != LAKITU_TRAIL_BATCH_SEGMENT_COUNT - 1;
-        drawnIndex++) {
-      gSP2Triangles(gfx++, (drawnIndex * 2) + 1, drawnIndex * 2,
-          (drawnIndex * 2) + 2, 0, (drawnIndex * 2) + 1, (drawnIndex * 2) + 2,
-          (drawnIndex * 2) + 3, 0);
-    }
-
-    /*
-     * The second batch fills the vertex buffer from the end, keeping the
-     * last pair of the first batch in its slots, so the same triangles join
-     * up the rest of the trail.
-     */
-    for (drawnIndex = LAKITU_TRAIL_BATCH_SEGMENT_COUNT;
-        drawnIndex != LAKITU_TRAIL_DRAWN_SEGMENT_COUNT; drawnIndex++) {
-      gSPMatrix(gfx++, PhysicalAddress(&f_LakituTrailMatrices[segmentIndex]),
-          G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-      gSPVertex(gfx++, f_LakituTrailVertices, 2,
-          LakituTrailSecondBatchSlot(drawnIndex));
-      gSPModifyVertex(gfx++, LakituTrailSecondBatchSlot(drawnIndex),
-          G_MWO_POINT_ST, LakituTrailT(drawnIndex));
-      gSPModifyVertex(gfx++, LakituTrailSecondBatchSlot(drawnIndex) + 1,
-          G_MWO_POINT_ST,
-          TexcoordWord(LAKITU_TRAIL_RIGHT_S, LakituTrailT(drawnIndex)));
-      segmentIndex--;
-      if (segmentIndex < 0) {
-        segmentIndex = LAKITU_TRAIL_SEGMENT_COUNT - 1;
-      }
-    }
-
-    for (drawnIndex = 0; drawnIndex != LAKITU_TRAIL_BATCH_SEGMENT_COUNT - 1;
-        drawnIndex++) {
-      gSP2Triangles(gfx++, (drawnIndex * 2) + 1, drawnIndex * 2,
-          (drawnIndex * 2) + 2, 0, (drawnIndex * 2) + 1, (drawnIndex * 2) + 2,
-          (drawnIndex * 2) + 3, 0);
-    }
-
-    gDPPipeSync(gfx++);
-    if (++f_LakituTrailNewestIndex >= LAKITU_TRAIL_SEGMENT_COUNT) {
-      f_LakituTrailNewestIndex = 0;
-    }
-
-    f_LakituTrailAlpha -= LAKITU_TRAIL_FADE_STEP;
-    if (f_LakituTrailAlpha < 0) {
-      f_LakituTrailAlpha = 0;
-    }
-
-    *displayListHead = gfx;
-  }
 }
 
 /* Flies Lakitu across the screen in loops until it has turned through 540
@@ -4326,30 +4971,28 @@ void DrawLakitu(Gfx** displayListHead) {
 #define LAKITU_LOOP_RADIUS_Y 16.0
 
 void MoveLakitu(void) {
-  Radians angle;
+    Radians angle;
 
-  if (f_IsLakituFlying) {
-    angle = DegreesToRadians(f_LakituAngle);
-    f_LakituAngle += LAKITU_TURN_STEP;
-    if (f_LakituAngle > LAKITU_LAST_ANGLE) {
-      f_IsLakituFlying = FALSE;
+    if (f_IsLakituFlying) {
+        angle = DegreesToRadians(f_LakituAngle);
+        f_LakituAngle += LAKITU_TURN_STEP;
+        if (f_LakituAngle > LAKITU_LAST_ANGLE) {
+            f_IsLakituFlying = FALSE;
+        }
+
+        f_LakituScreenPoint[0] += LAKITU_DRIFT_X + (s32)(cos(angle) * LAKITU_LOOP_RADIUS_X);
+        f_LakituScreenPoint[1] -= LAKITU_DRIFT_Y + (s32)(sin(angle) * LAKITU_LOOP_RADIUS_Y);
     }
-
-    f_LakituScreenPoint[0] +=
-        LAKITU_DRIFT_X + (s32)(cos(angle) * LAKITU_LOOP_RADIUS_X);
-    f_LakituScreenPoint[1] -=
-        LAKITU_DRIFT_Y + (s32)(sin(angle) * LAKITU_LOOP_RADIUS_Y);
-  }
 }
 
 /* A 32x32 CI4 image of a yellow burst */
 #define ASSET_BURST_IMAGE 0x93D
 
 void LoadOpeningBurst(void) {
-  EncodedAsset asset;
+    EncodedAsset asset;
 
-  OpenEncodedAsset(ASSET_BURST_IMAGE, &asset);
-  ReadEncodedAsset(f_OpeningEffectImage, &asset);
+    OpenEncodedAsset(ASSET_BURST_IMAGE, &asset);
+    ReadEncodedAsset(f_OpeningEffectImage, &asset);
 }
 
 /* The burst's corners on the screen, in pixels */
@@ -4398,53 +5041,68 @@ void LoadOpeningBurst(void) {
  * 129 in shape.
  */
 #ifdef NON_MATCHING
-void DrawOpeningBurst(Gfx** displayListHead) {
-  Gfx* gfx = *displayListHead;
-  s32 left = BURST_LEFT;
-  s32 top = BURST_TOP;
-  s32 right = BURST_RIGHT;
-  s32 bottom = BURST_BOTTOM;
+void DrawOpeningBurst(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
+    s32 left = BURST_LEFT;
+    s32 top = BURST_TOP;
+    s32 right = BURST_RIGHT;
+    s32 bottom = BURST_BOTTOM;
 
-  if (f_IsBurstShown && ++f_BurstFrame < BURST_FRAME_COUNT) {
-    gDPPipeSync(gfx++);
-    AppendSyncedRdpState(gfx, gDPSetCycleType, G_CYC_1CYCLE);
-    AppendSyncedRdpState(gfx, gDPSetRenderMode, G_RM_XLU_SURF, G_RM_XLU_SURF2);
-    gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-    AppendSyncedRdpState(gfx, gDPSetColorDither, G_CD_DISABLE);
-    gSPTexture(gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0,
-        G_TX_RENDERTILE, G_ON);
-    AppendSyncedRdpState(gfx, gDPSetTexturePersp, G_TP_NONE);
-    AppendSyncedRdpState(gfx, gDPSetTextureFilter, G_TF_BILERP);
-    AppendSyncedRdpState(gfx, gDPSetAlphaCompare, G_AC_NONE);
-    AppendSyncedRdpState(gfx, gDPSetTextureLUT, G_TT_RGBA16);
-    gDPLoadTLUT_pal16(
-        gfx++, 0, TextureAddress(ImageBody(f_OpeningEffectImage)));
-    gDPPipeSync(gfx++);
-    gDPLoadTextureBlock_4b(gfx++,
-        TextureAddress(ImageTexels(f_OpeningEffectImage)), G_IM_FMT_CI,
-        BURST_IMAGE_SIZE, BURST_IMAGE_SIZE, 0, G_TX_NOMIRROR | G_TX_WRAP,
-        G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
-        G_TX_NOLOD);
-    /*
-     * The sync and the rectangle in their own block, to match: without a
-     * block 476 words differ, 86 in shape, against 347 and 129. The sync
-     * alone in a block gives 367 (127), the rectangle alone 474 (130),
-     * and the rectangle with the sync after it 352 (132); the register
-     * oracle's closest result is the unforced count for the sync alone
-     * and for the two together. With the second palette sync, when the
-     * sync alone had its block, 449 (91) differed against 364 (132), and
-     * the register oracle stayed above 420 then and above 364 there.
-     */
-    IN_OWN_BLOCK({
-      gDPPipeSync(gfx++);
-      gSPTextureRectangle(gfx++, QuarterPixels(left), QuarterPixels(top),
-          QuarterPixels(right), QuarterPixels(bottom), G_TX_RENDERTILE, 0, 0,
-          TexelRunStep(BURST_IMAGE_SIZE, right - left),
-          TexelRunStep(BURST_IMAGE_SIZE, bottom - top));
-    });
-    gDPPipeSync(gfx++);
-    *displayListHead = gfx;
-  }
+    if (f_IsBurstShown && ++f_BurstFrame < BURST_FRAME_COUNT) {
+        gDPPipeSync(gfx++);
+        AppendSyncedRdpState(gfx, gDPSetCycleType, G_CYC_1CYCLE);
+        AppendSyncedRdpState(gfx, gDPSetRenderMode, G_RM_XLU_SURF, G_RM_XLU_SURF2);
+        gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+        AppendSyncedRdpState(gfx, gDPSetColorDither, G_CD_DISABLE);
+        gSPTexture(gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0, G_TX_RENDERTILE, G_ON);
+        AppendSyncedRdpState(gfx, gDPSetTexturePersp, G_TP_NONE);
+        AppendSyncedRdpState(gfx, gDPSetTextureFilter, G_TF_BILERP);
+        AppendSyncedRdpState(gfx, gDPSetAlphaCompare, G_AC_NONE);
+        AppendSyncedRdpState(gfx, gDPSetTextureLUT, G_TT_RGBA16);
+        gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(f_OpeningEffectImage)));
+        gDPPipeSync(gfx++);
+        gDPLoadTextureBlock_4b(
+            gfx++,
+            TextureAddress(ImageTexels(f_OpeningEffectImage)),
+            G_IM_FMT_CI,
+            BURST_IMAGE_SIZE,
+            BURST_IMAGE_SIZE,
+            0,
+            G_TX_NOMIRROR | G_TX_WRAP,
+            G_TX_NOMIRROR | G_TX_WRAP,
+            G_TX_NOMASK,
+            G_TX_NOMASK,
+            G_TX_NOLOD,
+            G_TX_NOLOD
+        );
+        /*
+         * The sync and the rectangle in their own block, to match: without a
+         * block 476 words differ, 86 in shape, against 347 and 129. The sync
+         * alone in a block gives 367 (127), the rectangle alone 474 (130),
+         * and the rectangle with the sync after it 352 (132); the register
+         * oracle's closest result is the unforced count for the sync alone
+         * and for the two together. With the second palette sync, when the
+         * sync alone had its block, 449 (91) differed against 364 (132), and
+         * the register oracle stayed above 420 then and above 364 there.
+         */
+        IN_OWN_BLOCK({
+            gDPPipeSync(gfx++);
+            gSPTextureRectangle(
+                gfx++,
+                QuarterPixels(left),
+                QuarterPixels(top),
+                QuarterPixels(right),
+                QuarterPixels(bottom),
+                G_TX_RENDERTILE,
+                0,
+                0,
+                TexelRunStep(BURST_IMAGE_SIZE, right - left),
+                TexelRunStep(BURST_IMAGE_SIZE, bottom - top)
+            );
+        });
+        gDPPipeSync(gfx++);
+        *displayListHead = gfx;
+    }
 }
 #else
 INCLUDE_ASM("asm/nonmatchings/ovl_05/opening", DrawOpeningBurst);
@@ -4452,10 +5110,10 @@ INCLUDE_ASM("asm/nonmatchings/ovl_05/opening", DrawOpeningBurst);
 
 /* Loads the image of the ball that the opening's shot sends flying */
 void LoadOpeningShotBall(void) {
-  EncodedAsset asset;
+    EncodedAsset asset;
 
-  OpenEncodedAsset(ASSET_SHOT_BALL_IMAGE, &asset);
-  ReadEncodedAsset(f_ShotBallImage, &asset);
+    OpenEncodedAsset(ASSET_SHOT_BALL_IMAGE, &asset);
+    ReadEncodedAsset(f_ShotBallImage, &asset);
 }
 
 /* The ball image is drawn in strips that fit in texture memory */
@@ -4487,152 +5145,229 @@ void LoadOpeningShotBall(void) {
  * strips, at f_ShotBallScale times the image's size. When the camera is far
  * away, the ball is instead a dot that fades with distance.
  */
-void DrawOpeningShotBall(Gfx** displayListHead) {
-  Gfx* gfx = *displayListHead;
-  ScreenPoint ballPoint;
-  s32 stripIndex;
-  s32 size;
-  s32 left;
-  s32 top;
-  s32 right;
-  s32 bottom;
-  s32 stripHeight;
-  Gfx* renderModeCommand;
+void DrawOpeningShotBall(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
+    ScreenPoint ballPoint;
+    s32 stripIndex;
+    s32 size;
+    s32 left;
+    s32 top;
+    s32 right;
+    s32 bottom;
+    s32 stripHeight;
+    Gfx *renderModeCommand;
 
-  if (f_ShotBallScale != 0) {
-    f_ShotBallPosition[AXIS_X] =
-        f_OpeningShotSimulation.position[AXIS_X] * COURSE_TO_WORLD_SCALE;
-    f_ShotBallPosition[AXIS_Z] =
-        f_OpeningShotSimulation.position[AXIS_Z] * COURSE_TO_WORLD_SCALE;
-    f_ShotBallPosition[AXIS_Y] =
-        (f_OpeningShotSimulation.position[AXIS_Y] * COURSE_TO_WORLD_SCALE) +
-        SHOT_BALL_LIFT;
-    gDPPipeSync(gfx++);
-    gDPPipeSync(gfx++);
-    gDPSetCycleType(gfx++, G_CYC_1CYCLE);
-    gSPLoadGeometryMode(gfx++, 0);
-    gSPSetGeometryMode(gfx++, G_ZBUFFER | G_SHADE | G_SHADING_SMOOTH);
-    gDPPipeSync(gfx++);
-    if (ProjectPoint(f_ShotBallPosition[AXIS_X], f_ShotBallPosition[AXIS_Y],
-            f_ShotBallPosition[AXIS_Z], &ballPoint) < 0) {
-      gDPPipeSync(gfx++);
-      gDPSetDepthSource(gfx++, G_ZS_PRIM);
-      gDPSetPrimDepth(gfx++, ballPoint.depth, 0);
-      gDPPipeSync(gfx++);
-      gDPPipeSync(gfx++);
-      f_ShotBallPosition[AXIS_Y] =
-          GetGroundHeight(f_ShotBallPosition[AXIS_X] * WORLD_TO_COURSE_SCALE,
-              f_ShotBallPosition[AXIS_Z] * WORLD_TO_COURSE_SCALE) *
-          COURSE_TO_WORLD_SCALE;
-      guTranslate(&f_ShotBallShadowTranslation, f_ShotBallPosition[AXIS_X],
-          f_ShotBallPosition[AXIS_Y], f_ShotBallPosition[AXIS_Z]);
-      guScale(&f_ShotBallShadowScaling,
-          f_ShotBallScale * SHOT_BALL_SHADOW_SCALE,
-          f_ShotBallScale * (f32)SHOT_BALL_SHADOW_SCALE,
-          f_ShotBallScale * (f32)SHOT_BALL_SHADOW_SCALE);
-      gDPPipeSync(gfx++);
-      /* The original takes the command's slot first, which orders the stack */
-      renderModeCommand = gfx++;
-      gDPSetRenderMode(renderModeCommand, G_RM_CLD_SURF, G_RM_CLD_SURF2);
-      gDPSetCombineLERP(gfx++, 0, 0, 0, PRIMITIVE, TEXEL0, 0, PRIMITIVE, 0, 0,
-          0, 0, PRIMITIVE, TEXEL0, 0, PRIMITIVE, 0);
-      gDPPipeSync(gfx++);
-      gDPPipeSync(gfx++);
-      gDPSetAlphaCompare(gfx++, G_AC_THRESHOLD);
-      gDPSetBlendColor(gfx++, 255, 255, 255, 16);
-      gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, 127);
-      AppendSyncedRdpState(gfx, gDPSetAlphaDither, G_AD_PATTERN);
-      AppendSyncedRdpState(gfx, gDPSetColorDither, G_CD_MAGICSQ);
-      AppendSyncedRdpState(gfx, gDPSetTexturePersp, G_TP_PERSP);
-      AppendSyncedRdpState(gfx, gDPSetTextureLUT, G_TT_NONE);
-      gDPPipeSync(gfx++);
-      gDPSetTextureLOD(gfx++, G_TL_TILE);
-      gSPTexture(gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0,
-          G_TX_RENDERTILE, G_ON);
-      gDPPipeSync(gfx++);
-      gDPLoadTextureBlock(gfx++, TextureAddress(ImageBody(g_ShadowTexture)),
-          G_IM_FMT_I, G_IM_SIZ_8b, SHADOW_TEXTURE_SIZE, SHADOW_TEXTURE_SIZE, 0,
-          G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
-          G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-      gSPMatrix(gfx++, PhysicalAddress(&f_ShotBallShadowTranslation),
-          G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
-      gSPMatrix(gfx++, PhysicalAddress(&f_ShotBallShadowScaling),
-          G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
-      gSPVertex(gfx++, f_ShotBallShadowVertices, QUAD_VERTEX_COUNT, 0);
-      gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
-      gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
-      gDPPipeSync(gfx++);
-      gDPPipeSync(gfx++);
-      AppendSyncedRdpState(
-          gfx, gDPSetRenderMode, G_RM_AA_ZB_XLU_SURF, G_RM_AA_ZB_XLU_SURF2);
-      gDPSetCombineLERP(gfx++, 0, 0, 0, TEXEL0, PRIMITIVE, 0, TEXEL0, 0, 0, 0,
-          0, TEXEL0, PRIMITIVE, 0, TEXEL0, 0);
-      gDPPipeSync(gfx++);
-      gDPSetColorDither(gfx++, G_CD_DISABLE);
-      gDPPipeSync(gfx++);
-      gDPPipeSync(gfx++);
-      gDPSetAlphaCompare(gfx++, G_AC_THRESHOLD);
-      gDPSetBlendColor(gfx++, 255, 255, 255, 2);
-      gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, f_ShotBallAlpha);
-      gSPTexture(gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0,
-          G_TX_RENDERTILE, G_ON);
-      gDPPipeSync(gfx++);
-      gDPSetTexturePersp(gfx++, G_TP_NONE);
-      AppendSyncedRdpState(gfx, gDPSetTextureFilter, G_TF_BILERP);
-      AppendSyncedRdpState(gfx, gDPSetAlphaCompare, G_AC_NONE);
-      gDPPipeSync(gfx++);
-      gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-      gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_ShotBallImage)));
-      gDPPipeSync(gfx++);
-      for (stripIndex = 0; stripIndex != SHOT_BALL_STRIP_COUNT; stripIndex++) {
-        gDPLoadTextureBlock(gfx++,
-            TextureAddress(LargeImageTexels(f_ShotBallImage) +
-                (stripIndex * SHOT_BALL_IMAGE_SIZE * SHOT_BALL_STRIP_HEIGHT)),
-            G_IM_FMT_CI, G_IM_SIZ_8b, SHOT_BALL_IMAGE_SIZE,
-            SHOT_BALL_STRIP_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
-            G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
-            G_TX_NOLOD);
-        if (g_CameraEditor.distance > SHOT_BALL_FAR_DISTANCE) {
-          /*
-           * Kept in a local, unlike the near branch's, to match:
-           * ShotBallHalfWidth at each use gives 33 words differing (1 in
-           * shape), and stripHeight as the local 41 (1)
-           */
-          size = ShotBallHalfWidth();
-          left = ballPoint.x - size;
-          right = left + SHOT_BALL_DOT_SIZE;
-          top = ballPoint.y - ((SHOT_BALL_STRIP_COUNT - stripIndex) * size);
-          bottom = top + SHOT_BALL_DOT_SIZE;
-          f_ShotBallAlpha = OPAQUE_ALPHA -
-              ((u32)g_CameraEditor.distance * SHOT_BALL_FADE_RATE);
-          if (f_ShotBallAlpha < 0) {
-            f_ShotBallAlpha = 0;
-          }
-        } else {
-          f_ShotBallAlpha = OPAQUE_ALPHA;
-          left = ballPoint.x - ShotBallHalfWidth();
-          right = ballPoint.x + ShotBallHalfWidth();
-          stripHeight = ShotBallHalfWidth();
-          top = ballPoint.y -
-              ((SHOT_BALL_STRIP_COUNT - stripIndex) * stripHeight);
-          bottom = ballPoint.y + (stripIndex * stripHeight) - stripHeight;
+    if (f_ShotBallScale != 0) {
+        f_ShotBallPosition[AXIS_X] =
+            f_OpeningShotSimulation.position[AXIS_X] * COURSE_TO_WORLD_SCALE;
+        f_ShotBallPosition[AXIS_Z] =
+            f_OpeningShotSimulation.position[AXIS_Z] * COURSE_TO_WORLD_SCALE;
+        f_ShotBallPosition[AXIS_Y] =
+            (f_OpeningShotSimulation.position[AXIS_Y] * COURSE_TO_WORLD_SCALE) + SHOT_BALL_LIFT;
+        gDPPipeSync(gfx++);
+        gDPPipeSync(gfx++);
+        gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+        gSPLoadGeometryMode(gfx++, 0);
+        gSPSetGeometryMode(gfx++, G_ZBUFFER | G_SHADE | G_SHADING_SMOOTH);
+        gDPPipeSync(gfx++);
+        if (ProjectPoint(
+                f_ShotBallPosition[AXIS_X],
+                f_ShotBallPosition[AXIS_Y],
+                f_ShotBallPosition[AXIS_Z],
+                &ballPoint
+            ) < 0) {
+            gDPPipeSync(gfx++);
+            gDPSetDepthSource(gfx++, G_ZS_PRIM);
+            gDPSetPrimDepth(gfx++, ballPoint.depth, 0);
+            gDPPipeSync(gfx++);
+            gDPPipeSync(gfx++);
+            f_ShotBallPosition[AXIS_Y] = GetGroundHeight(
+                                             f_ShotBallPosition[AXIS_X] * WORLD_TO_COURSE_SCALE,
+                                             f_ShotBallPosition[AXIS_Z] * WORLD_TO_COURSE_SCALE
+                                         ) *
+                COURSE_TO_WORLD_SCALE;
+            guTranslate(
+                &f_ShotBallShadowTranslation,
+                f_ShotBallPosition[AXIS_X],
+                f_ShotBallPosition[AXIS_Y],
+                f_ShotBallPosition[AXIS_Z]
+            );
+            guScale(
+                &f_ShotBallShadowScaling,
+                f_ShotBallScale * SHOT_BALL_SHADOW_SCALE,
+                f_ShotBallScale * (f32)SHOT_BALL_SHADOW_SCALE,
+                f_ShotBallScale * (f32)SHOT_BALL_SHADOW_SCALE
+            );
+            gDPPipeSync(gfx++);
+            /* The original takes the command's slot first, which orders the stack */
+            renderModeCommand = gfx++;
+            gDPSetRenderMode(renderModeCommand, G_RM_CLD_SURF, G_RM_CLD_SURF2);
+            gDPSetCombineLERP(
+                gfx++,
+                0,
+                0,
+                0,
+                PRIMITIVE,
+                TEXEL0,
+                0,
+                PRIMITIVE,
+                0,
+                0,
+                0,
+                0,
+                PRIMITIVE,
+                TEXEL0,
+                0,
+                PRIMITIVE,
+                0
+            );
+            gDPPipeSync(gfx++);
+            gDPPipeSync(gfx++);
+            gDPSetAlphaCompare(gfx++, G_AC_THRESHOLD);
+            gDPSetBlendColor(gfx++, 255, 255, 255, 16);
+            gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, 127);
+            AppendSyncedRdpState(gfx, gDPSetAlphaDither, G_AD_PATTERN);
+            AppendSyncedRdpState(gfx, gDPSetColorDither, G_CD_MAGICSQ);
+            AppendSyncedRdpState(gfx, gDPSetTexturePersp, G_TP_PERSP);
+            AppendSyncedRdpState(gfx, gDPSetTextureLUT, G_TT_NONE);
+            gDPPipeSync(gfx++);
+            gDPSetTextureLOD(gfx++, G_TL_TILE);
+            gSPTexture(gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0, G_TX_RENDERTILE, G_ON);
+            gDPPipeSync(gfx++);
+            gDPLoadTextureBlock(
+                gfx++,
+                TextureAddress(ImageBody(g_ShadowTexture)),
+                G_IM_FMT_I,
+                G_IM_SIZ_8b,
+                SHADOW_TEXTURE_SIZE,
+                SHADOW_TEXTURE_SIZE,
+                0,
+                G_TX_NOMIRROR | G_TX_WRAP,
+                G_TX_NOMIRROR | G_TX_WRAP,
+                G_TX_NOMASK,
+                G_TX_NOMASK,
+                G_TX_NOLOD,
+                G_TX_NOLOD
+            );
+            gSPMatrix(
+                gfx++,
+                PhysicalAddress(&f_ShotBallShadowTranslation),
+                G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW
+            );
+            gSPMatrix(
+                gfx++,
+                PhysicalAddress(&f_ShotBallShadowScaling),
+                G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW
+            );
+            gSPVertex(gfx++, f_ShotBallShadowVertices, QUAD_VERTEX_COUNT, 0);
+            gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
+            gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
+            gDPPipeSync(gfx++);
+            gDPPipeSync(gfx++);
+            AppendSyncedRdpState(gfx, gDPSetRenderMode, G_RM_AA_ZB_XLU_SURF, G_RM_AA_ZB_XLU_SURF2);
+            gDPSetCombineLERP(
+                gfx++,
+                0,
+                0,
+                0,
+                TEXEL0,
+                PRIMITIVE,
+                0,
+                TEXEL0,
+                0,
+                0,
+                0,
+                0,
+                TEXEL0,
+                PRIMITIVE,
+                0,
+                TEXEL0,
+                0
+            );
+            gDPPipeSync(gfx++);
+            gDPSetColorDither(gfx++, G_CD_DISABLE);
+            gDPPipeSync(gfx++);
+            gDPPipeSync(gfx++);
+            gDPSetAlphaCompare(gfx++, G_AC_THRESHOLD);
+            gDPSetBlendColor(gfx++, 255, 255, 255, 2);
+            gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, f_ShotBallAlpha);
+            gSPTexture(gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0, G_TX_RENDERTILE, G_ON);
+            gDPPipeSync(gfx++);
+            gDPSetTexturePersp(gfx++, G_TP_NONE);
+            AppendSyncedRdpState(gfx, gDPSetTextureFilter, G_TF_BILERP);
+            AppendSyncedRdpState(gfx, gDPSetAlphaCompare, G_AC_NONE);
+            gDPPipeSync(gfx++);
+            gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+            gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_ShotBallImage)));
+            gDPPipeSync(gfx++);
+            for (stripIndex = 0; stripIndex != SHOT_BALL_STRIP_COUNT; stripIndex++) {
+                gDPLoadTextureBlock(
+                    gfx++,
+                    TextureAddress(
+                        LargeImageTexels(f_ShotBallImage) +
+                        (stripIndex * SHOT_BALL_IMAGE_SIZE * SHOT_BALL_STRIP_HEIGHT)
+                    ),
+                    G_IM_FMT_CI,
+                    G_IM_SIZ_8b,
+                    SHOT_BALL_IMAGE_SIZE,
+                    SHOT_BALL_STRIP_HEIGHT,
+                    0,
+                    G_TX_NOMIRROR | G_TX_WRAP,
+                    G_TX_NOMIRROR | G_TX_WRAP,
+                    G_TX_NOMASK,
+                    G_TX_NOMASK,
+                    G_TX_NOLOD,
+                    G_TX_NOLOD
+                );
+                if (g_CameraEditor.distance > SHOT_BALL_FAR_DISTANCE) {
+                    /*
+                     * Kept in a local, unlike the near branch's, to match:
+                     * ShotBallHalfWidth at each use gives 33 words differing (1 in
+                     * shape), and stripHeight as the local 41 (1)
+                     */
+                    size = ShotBallHalfWidth();
+                    left = ballPoint.x - size;
+                    right = left + SHOT_BALL_DOT_SIZE;
+                    top = ballPoint.y - ((SHOT_BALL_STRIP_COUNT - stripIndex) * size);
+                    bottom = top + SHOT_BALL_DOT_SIZE;
+                    f_ShotBallAlpha =
+                        OPAQUE_ALPHA - ((u32)g_CameraEditor.distance * SHOT_BALL_FADE_RATE);
+                    if (f_ShotBallAlpha < 0) {
+                        f_ShotBallAlpha = 0;
+                    }
+                }
+                else {
+                    f_ShotBallAlpha = OPAQUE_ALPHA;
+                    left = ballPoint.x - ShotBallHalfWidth();
+                    right = ballPoint.x + ShotBallHalfWidth();
+                    stripHeight = ShotBallHalfWidth();
+                    top = ballPoint.y - ((SHOT_BALL_STRIP_COUNT - stripIndex) * stripHeight);
+                    bottom = ballPoint.y + (stripIndex * stripHeight) - stripHeight;
+                }
+
+                gSPTextureRectangle(
+                    gfx++,
+                    QuarterPixels(left),
+                    QuarterPixels(top),
+                    QuarterPixels(right),
+                    QuarterPixels(bottom),
+                    G_TX_RENDERTILE,
+                    0,
+                    0,
+                    TexelRunStep(SHOT_BALL_IMAGE_SIZE, right - left),
+                    SHOT_BALL_STRIP_ROWS_FIXED / (bottom - top)
+                );
+                gDPPipeSync(gfx++);
+            }
+
+            gDPPipeSync(gfx++);
+            gDPPipeSync(gfx++);
+            gDPSetDepthSource(gfx++, G_ZS_PIXEL);
+            gDPPipeSync(gfx++);
         }
 
-        gSPTextureRectangle(gfx++, QuarterPixels(left), QuarterPixels(top),
-            QuarterPixels(right), QuarterPixels(bottom), G_TX_RENDERTILE, 0, 0,
-            TexelRunStep(SHOT_BALL_IMAGE_SIZE, right - left),
-            SHOT_BALL_STRIP_ROWS_FIXED / (bottom - top));
-        gDPPipeSync(gfx++);
-      }
-
-      gDPPipeSync(gfx++);
-      gDPPipeSync(gfx++);
-      gDPSetDepthSource(gfx++, G_ZS_PIXEL);
-      gDPPipeSync(gfx++);
+        *displayListHead = gfx;
     }
-
-    *displayListHead = gfx;
-  }
 }
 
 /* f_LookAtEaseMode values: how EaseOpeningLookAt moves the look-at point */
@@ -4645,94 +5380,94 @@ void DrawOpeningShotBall(Gfx** displayListHead) {
 
 /* Eases the camera's look-at point as f_LookAtEaseMode says */
 void EaseOpeningLookAt(void) {
-  switch (f_LookAtEaseMode) {
-    case LOOK_AT_EASE_FAST:
-      g_CameraEditor.points[EDITOR_POINT_LOOK_AT][0] +=
-          ((f_OpeningShotSimulation.position[AXIS_X] * COURSE_TO_WORLD_SCALE) -
-              g_CameraEditor.points[EDITOR_POINT_LOOK_AT][0]) *
-          0.1f;
-      g_CameraEditor.points[EDITOR_POINT_LOOK_AT][1] +=
-          ((f_OpeningShotSimulation.position[AXIS_Y] * COURSE_TO_WORLD_SCALE) -
-              g_CameraEditor.points[EDITOR_POINT_LOOK_AT][1]) *
-          0.1f;
-      g_CameraEditor.points[EDITOR_POINT_LOOK_AT][2] +=
-          ((f_OpeningShotSimulation.position[AXIS_Z] * COURSE_TO_WORLD_SCALE) -
-              g_CameraEditor.points[EDITOR_POINT_LOOK_AT][2]) *
-          0.1f;
-      MeasureEditorCamera();
-      break;
-    case LOOK_AT_EASE_SLOW:
-      g_CameraEditor.points[EDITOR_POINT_LOOK_AT][0] +=
-          ((f_OpeningShotSimulation.position[AXIS_X] * COURSE_TO_WORLD_SCALE) -
-              g_CameraEditor.points[EDITOR_POINT_LOOK_AT][0]) *
-          0.01f;
-      g_CameraEditor.points[EDITOR_POINT_LOOK_AT][1] +=
-          ((f_OpeningShotSimulation.position[AXIS_Y] * COURSE_TO_WORLD_SCALE) -
-              g_CameraEditor.points[EDITOR_POINT_LOOK_AT][1]) *
-          0.01f;
-      g_CameraEditor.points[EDITOR_POINT_LOOK_AT][2] +=
-          ((f_OpeningShotSimulation.position[AXIS_Z] * COURSE_TO_WORLD_SCALE) -
-              g_CameraEditor.points[EDITOR_POINT_LOOK_AT][2]) *
-          0.01f;
-      MeasureEditorCamera();
-      break;
-    case LOOK_AT_EASE_SPEEDING_UP:
-      g_CameraEditor.points[EDITOR_POINT_LOOK_AT][0] +=
-          ((f_OpeningBallPositions[1][AXIS_X] + 38.1f) -
-              g_CameraEditor.points[EDITOR_POINT_LOOK_AT][0]) *
-          f_LookAtEaseRate;
-      g_CameraEditor.points[EDITOR_POINT_LOOK_AT][1] +=
-          ((f_OpeningBallPositions[1][AXIS_Y] - 4.5f) -
-              g_CameraEditor.points[EDITOR_POINT_LOOK_AT][1]) *
-          f_LookAtEaseRate;
-      g_CameraEditor.points[EDITOR_POINT_LOOK_AT][2] +=
-          ((f_OpeningBallPositions[1][AXIS_Z] - 4.795f) -
-              g_CameraEditor.points[EDITOR_POINT_LOOK_AT][2]) *
-          f_LookAtEaseRate;
-      MeasureEditorCamera();
-      f_LookAtEaseRate += 0.002f;
-      if (f_LookAtEaseRate > 0.1f) {
-        f_LookAtEaseRate = 0.1f;
-      }
+    switch (f_LookAtEaseMode) {
+        case LOOK_AT_EASE_FAST:
+            g_CameraEditor.points[EDITOR_POINT_LOOK_AT][0] +=
+                ((f_OpeningShotSimulation.position[AXIS_X] * COURSE_TO_WORLD_SCALE) -
+                    g_CameraEditor.points[EDITOR_POINT_LOOK_AT][0]) *
+                0.1f;
+            g_CameraEditor.points[EDITOR_POINT_LOOK_AT][1] +=
+                ((f_OpeningShotSimulation.position[AXIS_Y] * COURSE_TO_WORLD_SCALE) -
+                    g_CameraEditor.points[EDITOR_POINT_LOOK_AT][1]) *
+                0.1f;
+            g_CameraEditor.points[EDITOR_POINT_LOOK_AT][2] +=
+                ((f_OpeningShotSimulation.position[AXIS_Z] * COURSE_TO_WORLD_SCALE) -
+                    g_CameraEditor.points[EDITOR_POINT_LOOK_AT][2]) *
+                0.1f;
+            MeasureEditorCamera();
+            break;
+        case LOOK_AT_EASE_SLOW:
+            g_CameraEditor.points[EDITOR_POINT_LOOK_AT][0] +=
+                ((f_OpeningShotSimulation.position[AXIS_X] * COURSE_TO_WORLD_SCALE) -
+                    g_CameraEditor.points[EDITOR_POINT_LOOK_AT][0]) *
+                0.01f;
+            g_CameraEditor.points[EDITOR_POINT_LOOK_AT][1] +=
+                ((f_OpeningShotSimulation.position[AXIS_Y] * COURSE_TO_WORLD_SCALE) -
+                    g_CameraEditor.points[EDITOR_POINT_LOOK_AT][1]) *
+                0.01f;
+            g_CameraEditor.points[EDITOR_POINT_LOOK_AT][2] +=
+                ((f_OpeningShotSimulation.position[AXIS_Z] * COURSE_TO_WORLD_SCALE) -
+                    g_CameraEditor.points[EDITOR_POINT_LOOK_AT][2]) *
+                0.01f;
+            MeasureEditorCamera();
+            break;
+        case LOOK_AT_EASE_SPEEDING_UP:
+            g_CameraEditor.points[EDITOR_POINT_LOOK_AT][0] +=
+                ((f_OpeningBallPositions[1][AXIS_X] + 38.1f) -
+                    g_CameraEditor.points[EDITOR_POINT_LOOK_AT][0]) *
+                f_LookAtEaseRate;
+            g_CameraEditor.points[EDITOR_POINT_LOOK_AT][1] +=
+                ((f_OpeningBallPositions[1][AXIS_Y] - 4.5f) -
+                    g_CameraEditor.points[EDITOR_POINT_LOOK_AT][1]) *
+                f_LookAtEaseRate;
+            g_CameraEditor.points[EDITOR_POINT_LOOK_AT][2] +=
+                ((f_OpeningBallPositions[1][AXIS_Z] - 4.795f) -
+                    g_CameraEditor.points[EDITOR_POINT_LOOK_AT][2]) *
+                f_LookAtEaseRate;
+            MeasureEditorCamera();
+            f_LookAtEaseRate += 0.002f;
+            if (f_LookAtEaseRate > 0.1f) {
+                f_LookAtEaseRate = 0.1f;
+            }
 
-      break;
-  }
+            break;
+    }
 }
 
 /* Loads the title logo's images and lines its letters up, off the screen */
 void LoadOpeningLogo(void) {
-  EncodedAsset asset;
-  s32 letterIndex;
+    EncodedAsset asset;
+    s32 letterIndex;
 
-  OpenEncodedAsset(ASSET_LOGO_LETTER_IMAGES, &asset);
-  ReadEncodedAsset(f_LogoLetterImages, &asset);
-  OpenEncodedAsset(ASSET_LOGO_CLUB_IMAGE, &asset);
-  ReadEncodedAsset(f_LogoClubImage, &asset);
-  for (letterIndex = 0; letterIndex < LOGO_LETTER_COUNT; letterIndex++) {
-    f_LogoLetterStates[letterIndex] = LOGO_LETTER_WAITING;
-    f_LogoLetterSpeeds[letterIndex] = -14.0f;
-    f_LogoLetters[letterIndex].x = LOGO_LETTER_HIDDEN;
-    f_LogoLetters[letterIndex].y = LOGO_LETTER_HIDDEN;
-    f_LogoLetterScales[letterIndex][AXIS_X] = 0.1f;
-    f_LogoLetterScales[letterIndex][AXIS_Y] = 0.1f;
-    f_LogoLetterSquashFrames[letterIndex] = 0;
-  }
+    OpenEncodedAsset(ASSET_LOGO_LETTER_IMAGES, &asset);
+    ReadEncodedAsset(f_LogoLetterImages, &asset);
+    OpenEncodedAsset(ASSET_LOGO_CLUB_IMAGE, &asset);
+    ReadEncodedAsset(f_LogoClubImage, &asset);
+    for (letterIndex = 0; letterIndex < LOGO_LETTER_COUNT; letterIndex++) {
+        f_LogoLetterStates[letterIndex] = LOGO_LETTER_WAITING;
+        f_LogoLetterSpeeds[letterIndex] = -14.0f;
+        f_LogoLetters[letterIndex].x = LOGO_LETTER_HIDDEN;
+        f_LogoLetters[letterIndex].y = LOGO_LETTER_HIDDEN;
+        f_LogoLetterScales[letterIndex][AXIS_X] = 0.1f;
+        f_LogoLetterScales[letterIndex][AXIS_Y] = 0.1f;
+        f_LogoLetterSquashFrames[letterIndex] = 0;
+    }
 
-  f_LogoLetters[LOGO_LETTER_M].depth = LOGO_M_DEPTH;
-  f_LogoLetters[LOGO_LETTER_A].depth = LOGO_A_DEPTH;
-  f_LogoLetters[LOGO_LETTER_R].depth = LOGO_R_DEPTH;
-  f_LogoLetters[LOGO_LETTER_I].depth = LOGO_I_DEPTH;
-  f_LogoLetters[LOGO_LETTER_FIRST_O].depth = LOGO_FIRST_O_DEPTH;
-  f_LogoLetters[LOGO_LETTER_G].depth = LOGO_G_DEPTH;
-  f_LogoLetters[LOGO_LETTER_SECOND_O].depth = LOGO_SECOND_O_DEPTH;
-  f_LogoLetters[LOGO_LETTER_L].depth = LOGO_L_DEPTH;
-  f_LogoLetters[LOGO_LETTER_F].depth = LOGO_F_DEPTH;
-  OpenEncodedAsset(ASSET_LOGO_MARIO_IMAGE, &asset);
-  ReadEncodedAsset(f_LogoMarioImage, &asset);
-  OpenEncodedAsset(ASSET_LOGO_BALL_IMAGES, &asset);
-  ReadEncodedAsset(f_LogoBallImages, &asset);
-  OpenEncodedAsset(ASSET_SHINE_IMAGE, &asset);
-  ReadEncodedAsset(f_LogoShineImage, &asset);
+    f_LogoLetters[LOGO_LETTER_M].depth = LOGO_M_DEPTH;
+    f_LogoLetters[LOGO_LETTER_A].depth = LOGO_A_DEPTH;
+    f_LogoLetters[LOGO_LETTER_R].depth = LOGO_R_DEPTH;
+    f_LogoLetters[LOGO_LETTER_I].depth = LOGO_I_DEPTH;
+    f_LogoLetters[LOGO_LETTER_FIRST_O].depth = LOGO_FIRST_O_DEPTH;
+    f_LogoLetters[LOGO_LETTER_G].depth = LOGO_G_DEPTH;
+    f_LogoLetters[LOGO_LETTER_SECOND_O].depth = LOGO_SECOND_O_DEPTH;
+    f_LogoLetters[LOGO_LETTER_L].depth = LOGO_L_DEPTH;
+    f_LogoLetters[LOGO_LETTER_F].depth = LOGO_F_DEPTH;
+    OpenEncodedAsset(ASSET_LOGO_MARIO_IMAGE, &asset);
+    ReadEncodedAsset(f_LogoMarioImage, &asset);
+    OpenEncodedAsset(ASSET_LOGO_BALL_IMAGES, &asset);
+    ReadEncodedAsset(f_LogoBallImages, &asset);
+    OpenEncodedAsset(ASSET_SHINE_IMAGE, &asset);
+    ReadEncodedAsset(f_LogoShineImage, &asset);
 }
 
 /* The gray the screen fades to while the letters fall */
@@ -4846,528 +5581,645 @@ void LoadOpeningLogo(void) {
  * derived f_LogoLetterSpeeds' from it, where the original does the reverse:
  * 30 words differed, 6 in shape, and 5 with only the speeds indexed by i.
  */
-void DrawOpeningLogo(Gfx** displayListHead, Boolean isDrawn) {
-  Gfx* gfx = *displayListHead;
-  s32 texelsOffset;
-  /*
-   * Kept apart, unlike the shine pass's, to match: sharing texelsOffset gives
-   * 50 words differing (14 in shape) against the draft's 38 (6)
-   */
-  s32 letterTexelsOffset;
-  s32 i;
-  s32 letterIndex;
-  s32 j;
-  Radians angle;
-  Radians orbitAngle;
-  f32 wobble;
+void DrawOpeningLogo(Gfx **displayListHead, Boolean isDrawn) {
+    Gfx *gfx = *displayListHead;
+    s32 texelsOffset;
+    /*
+     * Kept apart, unlike the shine pass's, to match: sharing texelsOffset gives
+     * 50 words differing (14 in shape) against the draft's 38 (6)
+     */
+    s32 letterTexelsOffset;
+    s32 i;
+    s32 letterIndex;
+    s32 j;
+    Radians angle;
+    Radians orbitAngle;
+    f32 wobble;
 
-  switch (f_LogoFadeStage) {
-    case LOGO_FADE_GRAYING:
-      g_ScreenFadeFramesLeft = f_LogoFadeFramesLeft;
-      f_LogoFadeFramesLeft--;
-      if (f_LogoFadeFramesLeft == LOGO_FADE_WHITENING_FRAMES) {
-        f_LogoFadeStage++;
-      }
+    switch (f_LogoFadeStage) {
+        case LOGO_FADE_GRAYING:
+            g_ScreenFadeFramesLeft = f_LogoFadeFramesLeft;
+            f_LogoFadeFramesLeft--;
+            if (f_LogoFadeFramesLeft == LOGO_FADE_WHITENING_FRAMES) {
+                f_LogoFadeStage++;
+            }
 
-      break;
-    case LOGO_FADE_GRAY:
-      g_ScreenFadeFramesLeft = f_LogoFadeFramesLeft;
-      if (f_LogoShineFrame > LOGO_SHINE_FIRST_FRAME) {
-        f_LogoFadeStage++;
-      }
+            break;
+        case LOGO_FADE_GRAY:
+            g_ScreenFadeFramesLeft = f_LogoFadeFramesLeft;
+            if (f_LogoShineFrame > LOGO_SHINE_FIRST_FRAME) {
+                f_LogoFadeStage++;
+            }
 
-      break;
-    case LOGO_FADE_WHITENING:
-      g_ScreenFadeFramesLeft = f_LogoFadeFramesLeft;
-      g_ScreenFadeRed =
-          (s32)((LOGO_FADE_WHITENING_FRAMES - f_LogoFadeFramesLeft) *
-              LOGO_FADE_WHITENING_STEP) +
-          LOGO_FADE_GRAY_LEVEL;
-      g_ScreenFadeGreen = g_ScreenFadeRed;
-      g_ScreenFadeBlue = g_ScreenFadeGreen;
-      f_LogoFadeFramesLeft--;
-      if (f_LogoFadeFramesLeft == 0) {
-        f_LogoFadeStage++;
-      }
+            break;
+        case LOGO_FADE_WHITENING:
+            g_ScreenFadeFramesLeft = f_LogoFadeFramesLeft;
+            g_ScreenFadeRed = (s32)((LOGO_FADE_WHITENING_FRAMES - f_LogoFadeFramesLeft) *
+                                  LOGO_FADE_WHITENING_STEP) +
+                LOGO_FADE_GRAY_LEVEL;
+            g_ScreenFadeGreen = g_ScreenFadeRed;
+            g_ScreenFadeBlue = g_ScreenFadeGreen;
+            f_LogoFadeFramesLeft--;
+            if (f_LogoFadeFramesLeft == 0) {
+                f_LogoFadeStage++;
+            }
 
-      break;
-    case LOGO_FADE_WHITE:
-      g_ScreenFadeDuration = LOGO_FADE_WHITE_DURATION;
-      g_ScreenFadeRed = LOGO_FADE_WHITE_LEVEL;
-      g_ScreenFadeGreen = g_ScreenFadeRed;
-      g_ScreenFadeBlue = g_ScreenFadeGreen;
-      g_ScreenFadeKind = FADE_OUT;
-      g_ScreenFadeFramesLeft = 0;
-      if (f_LogoState == LOGO_SHRINKING) {
-        f_LogoFadeStage++;
-      }
+            break;
+        case LOGO_FADE_WHITE:
+            g_ScreenFadeDuration = LOGO_FADE_WHITE_DURATION;
+            g_ScreenFadeRed = LOGO_FADE_WHITE_LEVEL;
+            g_ScreenFadeGreen = g_ScreenFadeRed;
+            g_ScreenFadeBlue = g_ScreenFadeGreen;
+            g_ScreenFadeKind = FADE_OUT;
+            g_ScreenFadeFramesLeft = 0;
+            if (f_LogoState == LOGO_SHRINKING) {
+                f_LogoFadeStage++;
+            }
 
-      break;
-    case LOGO_FADE_LOGO_OUT:
-      g_ScreenFadeDuration = LOGO_FADE_WHITE_DURATION;
-      g_ScreenFadeKind = FADE_OUT;
-      g_ScreenFadeFramesLeft = 0;
-      g_ScreenFadeRed = LOGO_FADE_WHITE_LEVEL;
-      g_ScreenFadeGreen = g_ScreenFadeRed;
-      g_ScreenFadeBlue = g_ScreenFadeGreen;
-      f_LogoLettersAlpha -= LOGO_FADE_OUT_STEP;
-      f_LogoClubAlpha -= LOGO_FADE_OUT_STEP;
-      if (f_LogoLettersAlpha < 0) {
-        f_LogoLettersAlpha = 0;
-        f_LogoClubAlpha = 0;
-        f_OpeningScene = OPENING_SCENE_END;
-      }
+            break;
+        case LOGO_FADE_LOGO_OUT:
+            g_ScreenFadeDuration = LOGO_FADE_WHITE_DURATION;
+            g_ScreenFadeKind = FADE_OUT;
+            g_ScreenFadeFramesLeft = 0;
+            g_ScreenFadeRed = LOGO_FADE_WHITE_LEVEL;
+            g_ScreenFadeGreen = g_ScreenFadeRed;
+            g_ScreenFadeBlue = g_ScreenFadeGreen;
+            f_LogoLettersAlpha -= LOGO_FADE_OUT_STEP;
+            f_LogoClubAlpha -= LOGO_FADE_OUT_STEP;
+            if (f_LogoLettersAlpha < 0) {
+                f_LogoLettersAlpha = 0;
+                f_LogoClubAlpha = 0;
+                f_OpeningScene = OPENING_SCENE_END;
+            }
 
-      break;
-  }
-
-  /* Lakitu drops each letter as he passes where it lands */
-  if (f_LogoLetterStates[LOGO_LETTER_M] == LOGO_LETTER_WAITING &&
-      f_LakituScreenPoint[0] > LOGO_M_DROP_X) {
-    f_LogoLetters[LOGO_LETTER_M].x = LOGO_M_DROP_X;
-    f_LogoLetters[LOGO_LETTER_M].y = f_LakituScreenPoint[1];
-    f_LogoLetterStates[LOGO_LETTER_M] = LOGO_LETTER_FALLING;
-    g_ScreenFadeDuration = LOGO_GRAYING_DURATION;
-    g_ScreenFadeFramesLeft = g_ScreenFadeDuration;
-    g_ScreenFadeKind = FADE_OUT;
-    g_ScreenFadeRed = LOGO_FADE_GRAY_LEVEL;
-    g_ScreenFadeGreen = g_ScreenFadeRed;
-    g_ScreenFadeBlue = g_ScreenFadeGreen;
-    f_LogoFadeStage = LOGO_FADE_GRAYING;
-    f_HasLogoStarted = TRUE;
-  }
-
-  if (f_LogoLetterStates[LOGO_LETTER_A] == LOGO_LETTER_WAITING &&
-      f_LakituScreenPoint[0] > LOGO_A_DROP_X) {
-    f_LogoLetters[LOGO_LETTER_A].x = LOGO_A_DROP_X;
-    f_LogoLetters[LOGO_LETTER_A].y = f_LakituScreenPoint[1];
-    f_LogoLetterStates[LOGO_LETTER_A] = LOGO_LETTER_FALLING;
-  }
-
-  if (f_LogoLetterStates[LOGO_LETTER_R] == LOGO_LETTER_WAITING &&
-      f_LakituScreenPoint[0] > LOGO_R_DROP_X) {
-    f_LogoLetters[LOGO_LETTER_R].x = LOGO_R_DROP_X;
-    f_LogoLetters[LOGO_LETTER_R].y = f_LakituScreenPoint[1];
-    f_LogoLetterStates[LOGO_LETTER_R] = LOGO_LETTER_FALLING;
-  }
-
-  if (f_LogoLetterStates[LOGO_LETTER_I] == LOGO_LETTER_WAITING &&
-      f_LakituScreenPoint[0] > LOGO_I_DROP_X) {
-    f_LogoLetters[LOGO_LETTER_I].x = LOGO_I_DROP_X;
-    f_LogoLetters[LOGO_LETTER_I].y = f_LakituScreenPoint[1];
-    f_LogoLetterStates[LOGO_LETTER_I] = LOGO_LETTER_FALLING;
-  }
-
-  if (f_LogoLetterStates[LOGO_LETTER_FIRST_O] == LOGO_LETTER_WAITING &&
-      f_LakituScreenPoint[0] > LOGO_FIRST_O_DROP_X) {
-    f_LogoLetters[LOGO_LETTER_FIRST_O].x = LOGO_FIRST_O_DROP_X;
-    f_LogoLetters[LOGO_LETTER_FIRST_O].y = f_LakituScreenPoint[1];
-    f_LogoLetterStates[LOGO_LETTER_FIRST_O] = LOGO_LETTER_FALLING;
-  }
-
-  if (f_LogoLetterStates[LOGO_LETTER_G] == LOGO_LETTER_WAITING &&
-      f_LakituScreenPoint[0] > LOGO_G_DROP_X) {
-    f_LogoLetters[LOGO_LETTER_G].x = LOGO_G_DROP_X;
-    f_LogoLetters[LOGO_LETTER_G].y = f_LakituScreenPoint[1];
-    f_LogoLetterStates[LOGO_LETTER_G] = LOGO_LETTER_FALLING;
-  }
-
-  if (f_LogoLetterStates[LOGO_LETTER_SECOND_O] == LOGO_LETTER_WAITING &&
-      f_LakituScreenPoint[0] > LOGO_SECOND_O_DROP_X) {
-    f_LogoLetters[LOGO_LETTER_SECOND_O].x = LOGO_SECOND_O_DROP_X;
-    f_LogoLetters[LOGO_LETTER_SECOND_O].y = f_LakituScreenPoint[1];
-    f_LogoLetterStates[LOGO_LETTER_SECOND_O] = LOGO_LETTER_FALLING;
-  }
-
-  if (f_LogoLetterStates[LOGO_LETTER_L] == LOGO_LETTER_WAITING &&
-      f_LakituScreenPoint[0] > LOGO_L_DROP_X) {
-    f_LogoLetters[LOGO_LETTER_L].x = LOGO_L_DROP_X;
-    f_LogoLetters[LOGO_LETTER_L].y = f_LakituScreenPoint[1];
-    f_LogoLetterStates[LOGO_LETTER_L] = LOGO_LETTER_FALLING;
-  }
-
-  if (f_LogoLetterStates[LOGO_LETTER_F] == LOGO_LETTER_WAITING &&
-      f_LakituScreenPoint[0] > LOGO_F_DROP_X) {
-    f_LogoLetters[LOGO_LETTER_F].x = LOGO_F_DROP_X;
-    f_LogoLetters[LOGO_LETTER_F].y = f_LakituScreenPoint[1];
-    f_LogoLetterStates[LOGO_LETTER_F] = LOGO_LETTER_FALLING;
-    f_LogoState = LOGO_CLUB_STARTING;
-  }
-
-  if (isDrawn == TRUE) {
-    for (i = 0; i < LOGO_LETTER_COUNT; i++) {
-      guTranslate(&f_LogoLetterTranslations[i][g_DrawBufferIndex],
-          f_LogoLetters[i].x - (SCREEN_WIDTH / 2.0f),
-          (SCREEN_HEIGHT - f_LogoLetters[i].y) - (SCREEN_HEIGHT / 2.0f),
-          f_LogoLetters[i].depth + LOGO_Z);
-      guScale(&f_LogoLetterScalings[i][g_DrawBufferIndex],
-          f_LogoLetterScales[i][AXIS_X], f_LogoLetterScales[i][AXIS_Y], 1.0f);
+            break;
     }
 
-    guTranslate(&f_LogoClubTranslations[g_DrawBufferIndex],
-        f_LogoClubPosition[AXIS_X] - (SCREEN_WIDTH / 2.0f),
-        f_LogoClubPosition[AXIS_Y] - (SCREEN_HEIGHT / 2.0f),
-        f_LogoClubPosition[AXIS_Z] + LOGO_Z);
-    guRotate(&f_LogoClubRotations[g_DrawBufferIndex], f_LogoClubAngle, 0.0f,
-        0.0f, 1.0f);
-    guScale(&f_LogoClubScalings[g_DrawBufferIndex], f_LogoClubScale[0],
-        f_LogoClubScale[1], 1.0f);
-    gDPPipeSync(gfx++);
-    AppendSyncedRdpState(gfx, gDPSetCycleType, G_CYC_1CYCLE);
-    gSPLoadGeometryMode(gfx++, 0);
-    gSPSetGeometryMode(gfx++, G_ZBUFFER | G_SHADE | G_SHADING_SMOOTH);
-    gDPPipeSync(gfx++);
-    gDPSetDepthSource(gfx++, G_ZS_PRIM);
-    gDPSetCombineLERP(gfx++, 0, 0, 0, TEXEL0, PRIMITIVE, 0, TEXEL0, 0, 0, 0, 0,
-        TEXEL0, PRIMITIVE, 0, TEXEL0, 0);
-    AppendSyncedRdpState(gfx, gDPSetAlphaCompare, G_AC_THRESHOLD);
-    if (f_LogoFadeStage == LOGO_FADE_LOGO_OUT) {
-      gDPSetBlendColor(gfx++, 0xFF, 0xFF, 0xFF, LOGO_FADING_ALPHA_THRESHOLD);
-      gDPPipeSync(gfx++);
-      gDPSetRenderMode(
-          gfx++, G_RM_AA_ZB_XLU_SURF | Z_UPD, G_RM_AA_ZB_XLU_SURF2 | Z_UPD);
-    } else {
-      gDPSetBlendColor(gfx++, 0xFF, 0xFF, 0xFF, LOGO_ALPHA_THRESHOLD);
-      AppendSyncedRdpState(
-          gfx, gDPSetRenderMode, G_RM_AA_ZB_TEX_EDGE, G_RM_AA_ZB_TEX_EDGE2);
+    /* Lakitu drops each letter as he passes where it lands */
+    if (f_LogoLetterStates[LOGO_LETTER_M] == LOGO_LETTER_WAITING &&
+        f_LakituScreenPoint[0] > LOGO_M_DROP_X) {
+        f_LogoLetters[LOGO_LETTER_M].x = LOGO_M_DROP_X;
+        f_LogoLetters[LOGO_LETTER_M].y = f_LakituScreenPoint[1];
+        f_LogoLetterStates[LOGO_LETTER_M] = LOGO_LETTER_FALLING;
+        g_ScreenFadeDuration = LOGO_GRAYING_DURATION;
+        g_ScreenFadeFramesLeft = g_ScreenFadeDuration;
+        g_ScreenFadeKind = FADE_OUT;
+        g_ScreenFadeRed = LOGO_FADE_GRAY_LEVEL;
+        g_ScreenFadeGreen = g_ScreenFadeRed;
+        g_ScreenFadeBlue = g_ScreenFadeGreen;
+        f_LogoFadeStage = LOGO_FADE_GRAYING;
+        f_HasLogoStarted = TRUE;
     }
 
-    AppendSyncedRdpState(gfx, gDPSetAlphaDither, G_AD_DISABLE);
-    AppendSyncedRdpState(gfx, gDPSetColorDither, G_CD_MAGICSQ);
-    gSPTexture(gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0,
-        G_TX_RENDERTILE, G_ON);
-    AppendSyncedRdpState(gfx, gDPSetTexturePersp, G_TP_PERSP);
-    AppendSyncedRdpState(gfx, gDPSetTextureFilter, G_TF_BILERP);
-    AppendSyncedRdpState(gfx, gDPSetTextureLUT, G_TT_RGBA16);
-    AppendSyncedRdpState(gfx, gDPSetTextureLOD, G_TL_TILE);
-    gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, f_LogoLettersAlpha);
-    gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_LogoLetterImages)));
-    gDPPipeSync(gfx++);
-    for (i = 0; i < LOGO_LETTER_COUNT; i++) {
-      for (j = 0; j < LOGO_LETTER_HALF_COUNT; j++) {
-        letterTexelsOffset = ((j + (i * LOGO_LETTER_HALF_COUNT)) *
-                                 LOGO_LETTER_WIDTH * LOGO_LETTER_HALF_HEIGHT) +
-            LARGE_PALETTED_TEXELS_OFFSET;
-        gDPLoadTextureBlock(gfx++,
-            TextureAddress(f_LogoLetterImages + letterTexelsOffset),
-            G_IM_FMT_CI, G_IM_SIZ_8b, LOGO_LETTER_WIDTH,
-            LOGO_LETTER_HALF_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
-            G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
-            G_TX_NOLOD);
-        gSPMatrix(gfx++, PhysicalAddress(&g_ScreenOrthoMatrix),
-            G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
-        gSPMatrix(gfx++,
-            PhysicalAddress(&f_LogoLetterTranslations[i][g_DrawBufferIndex]),
-            G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
-        gSPMatrix(gfx++,
-            PhysicalAddress(&f_LogoLetterScalings[i][g_DrawBufferIndex]),
-            G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_NOPUSH);
-        gDPSetPrimDepth(
-            gfx++, f_LogoLetters[i].depth + LOGO_LETTER_DEPTH_OFFSET, 0);
-        gDPPipeSync(gfx++);
-        gSPVertex(gfx++, f_LogoLetterVertices[j], QUAD_VERTEX_COUNT, 0);
-        gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
-        gDPPipeSync(gfx++);
-      }
+    if (f_LogoLetterStates[LOGO_LETTER_A] == LOGO_LETTER_WAITING &&
+        f_LakituScreenPoint[0] > LOGO_A_DROP_X) {
+        f_LogoLetters[LOGO_LETTER_A].x = LOGO_A_DROP_X;
+        f_LogoLetters[LOGO_LETTER_A].y = f_LakituScreenPoint[1];
+        f_LogoLetterStates[LOGO_LETTER_A] = LOGO_LETTER_FALLING;
     }
 
-    gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, f_LogoClubAlpha);
-    gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_LogoClubImage)));
-    gDPPipeSync(gfx++);
-    for (j = 0; j < LOGO_CLUB_STRIP_COUNT; j++) {
-      texelsOffset = (j * LOGO_CLUB_WIDTH * LOGO_CLUB_STRIP_HEIGHT) +
-          LARGE_PALETTED_TEXELS_OFFSET;
-      gDPLoadTextureBlock(gfx++, TextureAddress(f_LogoClubImage + texelsOffset),
-          G_IM_FMT_CI, G_IM_SIZ_8b, LOGO_CLUB_WIDTH, LOGO_CLUB_STRIP_HEIGHT, 0,
-          G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
-          G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-      gSPMatrix(gfx++, PhysicalAddress(&g_ScreenOrthoMatrix),
-          G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
-      gSPMatrix(gfx++,
-          PhysicalAddress(&f_LogoClubTranslations[g_DrawBufferIndex]),
-          G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
-      gSPMatrix(gfx++, PhysicalAddress(&f_LogoClubRotations[g_DrawBufferIndex]),
-          G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_NOPUSH);
-      gSPMatrix(gfx++, PhysicalAddress(&f_LogoClubScalings[g_DrawBufferIndex]),
-          G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_NOPUSH);
-      gDPSetPrimDepth(gfx++, LOGO_CLUB_DEPTH, 0);
-      gDPPipeSync(gfx++);
-      gSPVertex(gfx++, f_LogoClubVertices[j], QUAD_VERTEX_COUNT, 0);
-      gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
-      gDPPipeSync(gfx++);
+    if (f_LogoLetterStates[LOGO_LETTER_R] == LOGO_LETTER_WAITING &&
+        f_LakituScreenPoint[0] > LOGO_R_DROP_X) {
+        f_LogoLetters[LOGO_LETTER_R].x = LOGO_R_DROP_X;
+        f_LogoLetters[LOGO_LETTER_R].y = f_LakituScreenPoint[1];
+        f_LogoLetterStates[LOGO_LETTER_R] = LOGO_LETTER_FALLING;
     }
-  }
 
-  if ((f_LogoState == LOGO_SHINING) & (isDrawn == TRUE)) {
-    gDPPipeSync(gfx++);
-    gDPSetDepthSource(gfx++, G_ZS_PRIM);
-    gDPSetPrimDepth(gfx++, LOGO_SHINE_MASK_DEPTH, 0);
-    gDPSetCombineLERP(gfx++, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1);
-    gDPPipeSync(gfx++);
-    gDPSetRenderMode(gfx++,
-        GBL_c1(G_BL_CLR_MEM, G_BL_A_IN, G_BL_CLR_MEM, G_BL_A_MEM),
-        G_RM_AA_ZB_OPA_SURF2);
-    gSPTextureRectangle(gfx++, QuarterPixels(LOGO_SHINE_MASK_LEFT),
-        QuarterPixels(LOGO_SHINE_TOP), QuarterPixels(LOGO_SHINE_MASK_RIGHT),
-        QuarterPixels(LOGO_SHINE_BOTTOM), G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE,
-        TEXEL_STEP_ONE);
-    gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-    gDPSetPrimDepth(gfx++, LOGO_SHINE_LETTER_DEPTH, 0);
-    gDPPipeSync(gfx++);
-    gDPSetRenderMode(gfx++,
-        AA_EN | Z_UPD | IM_RD | CVG_DST_CLAMP | ZMODE_OPA | CVG_X_ALPHA |
-            ALPHA_CVG_SEL |
-            GBL_c1(G_BL_CLR_MEM, G_BL_A_IN, G_BL_CLR_MEM, G_BL_A_MEM),
-        AA_EN | Z_UPD | IM_RD | CVG_DST_CLAMP | ZMODE_OPA | CVG_X_ALPHA |
-            ALPHA_CVG_SEL |
-            GBL_c2(G_BL_CLR_IN, G_BL_A_IN, G_BL_CLR_MEM, G_BL_A_MEM));
-    gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_LogoLetterImages)));
-    for (i = 0; i < LOGO_LETTER_COUNT; i++) {
-      for (j = 0; j < LOGO_LETTER_HALF_COUNT; j++) {
-        texelsOffset = ((j + (i * LOGO_LETTER_HALF_COUNT)) * LOGO_LETTER_WIDTH *
-                           LOGO_LETTER_HALF_HEIGHT) +
-            LARGE_PALETTED_TEXELS_OFFSET;
-        gDPLoadTextureBlock(gfx++,
-            TextureAddress(f_LogoLetterImages + texelsOffset), G_IM_FMT_CI,
-            G_IM_SIZ_8b, LOGO_LETTER_WIDTH, LOGO_LETTER_HALF_HEIGHT, 0,
-            G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
-            G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-        gDPPipeSync(gfx++);
-        gSPMatrix(gfx++, PhysicalAddress(&g_ScreenOrthoMatrix),
-            G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
-        gSPMatrix(gfx++,
-            PhysicalAddress(&f_LogoLetterTranslations[i][g_DrawBufferIndex]),
-            G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
-        gSPMatrix(gfx++,
-            PhysicalAddress(&f_LogoLetterScalings[i][g_DrawBufferIndex]),
-            G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_NOPUSH);
-        gDPPipeSync(gfx++);
-        gSPVertex(gfx++, f_LogoLetterVertices[j], QUAD_VERTEX_COUNT, 0);
-        gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
-        gDPPipeSync(gfx++);
-      }
+    if (f_LogoLetterStates[LOGO_LETTER_I] == LOGO_LETTER_WAITING &&
+        f_LakituScreenPoint[0] > LOGO_I_DROP_X) {
+        f_LogoLetters[LOGO_LETTER_I].x = LOGO_I_DROP_X;
+        f_LogoLetters[LOGO_LETTER_I].y = f_LakituScreenPoint[1];
+        f_LogoLetterStates[LOGO_LETTER_I] = LOGO_LETTER_FALLING;
+    }
+
+    if (f_LogoLetterStates[LOGO_LETTER_FIRST_O] == LOGO_LETTER_WAITING &&
+        f_LakituScreenPoint[0] > LOGO_FIRST_O_DROP_X) {
+        f_LogoLetters[LOGO_LETTER_FIRST_O].x = LOGO_FIRST_O_DROP_X;
+        f_LogoLetters[LOGO_LETTER_FIRST_O].y = f_LakituScreenPoint[1];
+        f_LogoLetterStates[LOGO_LETTER_FIRST_O] = LOGO_LETTER_FALLING;
+    }
+
+    if (f_LogoLetterStates[LOGO_LETTER_G] == LOGO_LETTER_WAITING &&
+        f_LakituScreenPoint[0] > LOGO_G_DROP_X) {
+        f_LogoLetters[LOGO_LETTER_G].x = LOGO_G_DROP_X;
+        f_LogoLetters[LOGO_LETTER_G].y = f_LakituScreenPoint[1];
+        f_LogoLetterStates[LOGO_LETTER_G] = LOGO_LETTER_FALLING;
+    }
+
+    if (f_LogoLetterStates[LOGO_LETTER_SECOND_O] == LOGO_LETTER_WAITING &&
+        f_LakituScreenPoint[0] > LOGO_SECOND_O_DROP_X) {
+        f_LogoLetters[LOGO_LETTER_SECOND_O].x = LOGO_SECOND_O_DROP_X;
+        f_LogoLetters[LOGO_LETTER_SECOND_O].y = f_LakituScreenPoint[1];
+        f_LogoLetterStates[LOGO_LETTER_SECOND_O] = LOGO_LETTER_FALLING;
+    }
+
+    if (f_LogoLetterStates[LOGO_LETTER_L] == LOGO_LETTER_WAITING &&
+        f_LakituScreenPoint[0] > LOGO_L_DROP_X) {
+        f_LogoLetters[LOGO_LETTER_L].x = LOGO_L_DROP_X;
+        f_LogoLetters[LOGO_LETTER_L].y = f_LakituScreenPoint[1];
+        f_LogoLetterStates[LOGO_LETTER_L] = LOGO_LETTER_FALLING;
+    }
+
+    if (f_LogoLetterStates[LOGO_LETTER_F] == LOGO_LETTER_WAITING &&
+        f_LakituScreenPoint[0] > LOGO_F_DROP_X) {
+        f_LogoLetters[LOGO_LETTER_F].x = LOGO_F_DROP_X;
+        f_LogoLetters[LOGO_LETTER_F].y = f_LakituScreenPoint[1];
+        f_LogoLetterStates[LOGO_LETTER_F] = LOGO_LETTER_FALLING;
+        f_LogoState = LOGO_CLUB_STARTING;
     }
 
     if (isDrawn == TRUE) {
-      gDPSetPrimDepth(gfx++, LOGO_SHINE_DEPTH, 0);
-      AppendSyncedRdpState(
-          gfx, gDPSetRenderMode, G_RM_ZB_XLU_SURF, G_RM_ZB_XLU_SURF2);
-      gDPSetCombineLERP(gfx++, 0, 0, 0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0, 0,
-          0, 0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0);
-      AppendSyncedRdpState(gfx, gDPSetTextureLUT, G_TT_NONE);
-      AppendSyncedRdpState(gfx, gDPSetAlphaDither, G_AD_PATTERN);
-      AppendSyncedRdpState(gfx, gDPSetAlphaCompare, G_AC_NONE);
-      gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, OPAQUE_ALPHA);
-      AppendSyncedRdpState(gfx, gDPSetTexturePersp, G_TP_NONE);
-      gDPLoadTextureBlock(gfx++, TextureAddress(ImageBody(f_LogoShineImage)),
-          G_IM_FMT_I, G_IM_SIZ_8b, LOGO_SHINE_IMAGE_SIZE, LOGO_SHINE_IMAGE_SIZE,
-          0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
-          G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-      gDPPipeSync(gfx++);
-    }
-
-    f_LogoShineFrame++;
-    if (f_LogoShineFrame > LOGO_SHINE_LAST_FRAME) {
-      f_LogoState = LOGO_SHRINK_STARTING;
-    }
-
-    if (isDrawn == TRUE && f_LogoShineFrame > LOGO_SHINE_FIRST_SHOWN_FRAME &&
-        f_LogoShineFrame < LOGO_SHINE_LAST_SHOWN_FRAME) {
-      gSPTextureRectangle(gfx++, QuarterPixels(LOGO_SHINE_LEFT),
-          QuarterPixels(LOGO_SHINE_TOP), QuarterPixels(LOGO_SHINE_RIGHT),
-          QuarterPixels(LOGO_SHINE_BOTTOM), G_TX_RENDERTILE,
-          TexelCoordinate(LOGO_SHINE_ORIGIN_TEXEL -
-              (f_LogoShineFrame - LOGO_SHINE_ORIGIN_FRAME) * LOGO_SHINE_SPEED),
-          0, LOGO_SHINE_TEXEL_STEP, LOGO_SHINE_TEXEL_STEP);
-      gDPPipeSync(gfx++);
-    }
-  }
-
-  AppendSyncedRdpState(gfx, gDPSetDepthSource, G_ZS_PIXEL);
-  *displayListHead = gfx;
-
-  for (i = 0; i < LOGO_LETTER_COUNT; i++) {
-    if (f_LogoLetterStates[i] == LOGO_LETTER_FALLING) {
-      if (f_LogoLetterSpeeds[i] > 0.0f) {
-        if (i != LOGO_LETTER_L) {
-          if (f_LogoLetters[i].y + (s32)f_LogoLetterSpeeds[i] >=
-              LOGO_LETTER_GROUND_Y) {
-            f_LogoLetterSpeeds[i] *= LOGO_LETTER_BOUNCINESS;
-            f_LogoLetters[i].y = LOGO_LETTER_GROUND_Y - 1;
-            if (f_LogoLetterSpeeds[i] <= LOGO_LETTER_MIN_BOUNCE_SPEED) {
-              f_LogoLetterSpeeds[i] = 0.0f;
-              f_LogoLetterStates[i] = LOGO_LETTER_LANDED;
-              continue;
-            }
-
-            f_LogoLetterSpeeds[i] = -f_LogoLetterSpeeds[i];
-            f_LogoLetterStates[i] = LOGO_LETTER_SQUASHING;
-            f_LogoLetterSquashFrames[i] = LOGO_LETTER_SQUASH_FRAMES;
-          }
-        } else {
-          if (f_LogoLetters[i].y + (s32)f_LogoLetterSpeeds[i] >=
-              LOGO_LETTER_L_GROUND_Y) {
-            f_LogoLetterSpeeds[i] *= LOGO_LETTER_BOUNCINESS;
-            f_LogoLetters[i].y = LOGO_LETTER_L_GROUND_Y - 1;
-            if (f_LogoLetterSpeeds[i] <= LOGO_LETTER_MIN_BOUNCE_SPEED) {
-              f_LogoLetterSpeeds[i] = 0.0f;
-              f_LogoLetterStates[i] = LOGO_LETTER_LANDED;
-              continue;
-            }
-
-            f_LogoLetterSpeeds[i] = -f_LogoLetterSpeeds[i];
-            f_LogoLetterStates[i] = LOGO_LETTER_SQUASHING;
-            f_LogoLetterSquashFrames[i] = LOGO_LETTER_SQUASH_FRAMES;
-          }
+        for (i = 0; i < LOGO_LETTER_COUNT; i++) {
+            guTranslate(
+                &f_LogoLetterTranslations[i][g_DrawBufferIndex],
+                f_LogoLetters[i].x - (SCREEN_WIDTH / 2.0f),
+                (SCREEN_HEIGHT - f_LogoLetters[i].y) - (SCREEN_HEIGHT / 2.0f),
+                f_LogoLetters[i].depth + LOGO_Z
+            );
+            guScale(
+                &f_LogoLetterScalings[i][g_DrawBufferIndex],
+                f_LogoLetterScales[i][AXIS_X],
+                f_LogoLetterScales[i][AXIS_Y],
+                1.0f
+            );
         }
-      }
 
-      f_LogoLetters[i].y += (s32)f_LogoLetterSpeeds[i];
-      f_LogoLetterSpeeds[i] += LOGO_LETTER_GRAVITY;
-      f_LogoLetterScales[i][AXIS_X] += LOGO_LETTER_GROWTH;
-      f_LogoLetterScales[i][AXIS_Y] += LOGO_LETTER_GROWTH;
-      if (f_LogoLetterScales[i][AXIS_X] > 1.0f) {
-        f_LogoLetterScales[i][AXIS_X] = 1.0f;
-      }
+        guTranslate(
+            &f_LogoClubTranslations[g_DrawBufferIndex],
+            f_LogoClubPosition[AXIS_X] - (SCREEN_WIDTH / 2.0f),
+            f_LogoClubPosition[AXIS_Y] - (SCREEN_HEIGHT / 2.0f),
+            f_LogoClubPosition[AXIS_Z] + LOGO_Z
+        );
+        guRotate(&f_LogoClubRotations[g_DrawBufferIndex], f_LogoClubAngle, 0.0f, 0.0f, 1.0f);
+        guScale(
+            &f_LogoClubScalings[g_DrawBufferIndex],
+            f_LogoClubScale[0],
+            f_LogoClubScale[1],
+            1.0f
+        );
+        gDPPipeSync(gfx++);
+        AppendSyncedRdpState(gfx, gDPSetCycleType, G_CYC_1CYCLE);
+        gSPLoadGeometryMode(gfx++, 0);
+        gSPSetGeometryMode(gfx++, G_ZBUFFER | G_SHADE | G_SHADING_SMOOTH);
+        gDPPipeSync(gfx++);
+        gDPSetDepthSource(gfx++, G_ZS_PRIM);
+        gDPSetCombineLERP(
+            gfx++,
+            0,
+            0,
+            0,
+            TEXEL0,
+            PRIMITIVE,
+            0,
+            TEXEL0,
+            0,
+            0,
+            0,
+            0,
+            TEXEL0,
+            PRIMITIVE,
+            0,
+            TEXEL0,
+            0
+        );
+        AppendSyncedRdpState(gfx, gDPSetAlphaCompare, G_AC_THRESHOLD);
+        if (f_LogoFadeStage == LOGO_FADE_LOGO_OUT) {
+            gDPSetBlendColor(gfx++, 0xFF, 0xFF, 0xFF, LOGO_FADING_ALPHA_THRESHOLD);
+            gDPPipeSync(gfx++);
+            gDPSetRenderMode(gfx++, G_RM_AA_ZB_XLU_SURF | Z_UPD, G_RM_AA_ZB_XLU_SURF2 | Z_UPD);
+        }
+        else {
+            gDPSetBlendColor(gfx++, 0xFF, 0xFF, 0xFF, LOGO_ALPHA_THRESHOLD);
+            AppendSyncedRdpState(gfx, gDPSetRenderMode, G_RM_AA_ZB_TEX_EDGE, G_RM_AA_ZB_TEX_EDGE2);
+        }
 
-      if (f_LogoLetterScales[i][AXIS_Y] > 1.0f) {
-        f_LogoLetterScales[i][AXIS_Y] = 1.0f;
-      }
-    } else if (f_LogoLetterStates[i] == LOGO_LETTER_SQUASHING) {
-      f_LogoLetterScales[i][AXIS_X] += LOGO_LETTER_SQUASH_STEP;
-      f_LogoLetterScales[i][AXIS_Y] -= LOGO_LETTER_SQUASH_STEP;
-      f_LogoLetterSquashFrames[i]--;
-      if (f_LogoLetterSquashFrames[i] == 0) {
-        f_LogoLetterStates[i] = LOGO_LETTER_SQUASHED;
-        f_LogoLetterSquashFrames[i] = LOGO_LETTER_SQUASHED_FRAMES;
-      }
-    } else if (f_LogoLetterStates[i] == LOGO_LETTER_SQUASHED) {
-      f_LogoLetterSquashFrames[i]--;
-      if (f_LogoLetterSquashFrames[i] == 0) {
-        f_LogoLetterStates[i] = LOGO_LETTER_STRETCHING;
-        f_LogoLetterSquashFrames[i] = LOGO_LETTER_STRETCH_FRAMES;
-      }
-    } else if (f_LogoLetterStates[i] == LOGO_LETTER_STRETCHING) {
-      f_LogoLetterScales[i][AXIS_X] -= LOGO_LETTER_STRETCH_STEP;
-      f_LogoLetterScales[i][AXIS_Y] += LOGO_LETTER_STRETCH_STEP;
-      f_LogoLetterSquashFrames[i]--;
-      if (f_LogoLetterSquashFrames[i] == 0) {
-        f_LogoLetterStates[i] = LOGO_LETTER_FALLING;
-      }
+        AppendSyncedRdpState(gfx, gDPSetAlphaDither, G_AD_DISABLE);
+        AppendSyncedRdpState(gfx, gDPSetColorDither, G_CD_MAGICSQ);
+        gSPTexture(gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0, G_TX_RENDERTILE, G_ON);
+        AppendSyncedRdpState(gfx, gDPSetTexturePersp, G_TP_PERSP);
+        AppendSyncedRdpState(gfx, gDPSetTextureFilter, G_TF_BILERP);
+        AppendSyncedRdpState(gfx, gDPSetTextureLUT, G_TT_RGBA16);
+        AppendSyncedRdpState(gfx, gDPSetTextureLOD, G_TL_TILE);
+        gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, f_LogoLettersAlpha);
+        gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_LogoLetterImages)));
+        gDPPipeSync(gfx++);
+        for (i = 0; i < LOGO_LETTER_COUNT; i++) {
+            for (j = 0; j < LOGO_LETTER_HALF_COUNT; j++) {
+                letterTexelsOffset = ((j + (i * LOGO_LETTER_HALF_COUNT)) * LOGO_LETTER_WIDTH *
+                                         LOGO_LETTER_HALF_HEIGHT) +
+                    LARGE_PALETTED_TEXELS_OFFSET;
+                gDPLoadTextureBlock(
+                    gfx++,
+                    TextureAddress(f_LogoLetterImages + letterTexelsOffset),
+                    G_IM_FMT_CI,
+                    G_IM_SIZ_8b,
+                    LOGO_LETTER_WIDTH,
+                    LOGO_LETTER_HALF_HEIGHT,
+                    0,
+                    G_TX_NOMIRROR | G_TX_WRAP,
+                    G_TX_NOMIRROR | G_TX_WRAP,
+                    G_TX_NOMASK,
+                    G_TX_NOMASK,
+                    G_TX_NOLOD,
+                    G_TX_NOLOD
+                );
+                gSPMatrix(
+                    gfx++,
+                    PhysicalAddress(&g_ScreenOrthoMatrix),
+                    G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH
+                );
+                gSPMatrix(
+                    gfx++,
+                    PhysicalAddress(&f_LogoLetterTranslations[i][g_DrawBufferIndex]),
+                    G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH
+                );
+                gSPMatrix(
+                    gfx++,
+                    PhysicalAddress(&f_LogoLetterScalings[i][g_DrawBufferIndex]),
+                    G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_NOPUSH
+                );
+                gDPSetPrimDepth(gfx++, f_LogoLetters[i].depth + LOGO_LETTER_DEPTH_OFFSET, 0);
+                gDPPipeSync(gfx++);
+                gSPVertex(gfx++, f_LogoLetterVertices[j], QUAD_VERTEX_COUNT, 0);
+                gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
+                gDPPipeSync(gfx++);
+            }
+        }
+
+        gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, f_LogoClubAlpha);
+        gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_LogoClubImage)));
+        gDPPipeSync(gfx++);
+        for (j = 0; j < LOGO_CLUB_STRIP_COUNT; j++) {
+            texelsOffset =
+                (j * LOGO_CLUB_WIDTH * LOGO_CLUB_STRIP_HEIGHT) + LARGE_PALETTED_TEXELS_OFFSET;
+            gDPLoadTextureBlock(
+                gfx++,
+                TextureAddress(f_LogoClubImage + texelsOffset),
+                G_IM_FMT_CI,
+                G_IM_SIZ_8b,
+                LOGO_CLUB_WIDTH,
+                LOGO_CLUB_STRIP_HEIGHT,
+                0,
+                G_TX_NOMIRROR | G_TX_WRAP,
+                G_TX_NOMIRROR | G_TX_WRAP,
+                G_TX_NOMASK,
+                G_TX_NOMASK,
+                G_TX_NOLOD,
+                G_TX_NOLOD
+            );
+            gSPMatrix(
+                gfx++,
+                PhysicalAddress(&g_ScreenOrthoMatrix),
+                G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH
+            );
+            gSPMatrix(
+                gfx++,
+                PhysicalAddress(&f_LogoClubTranslations[g_DrawBufferIndex]),
+                G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH
+            );
+            gSPMatrix(
+                gfx++,
+                PhysicalAddress(&f_LogoClubRotations[g_DrawBufferIndex]),
+                G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_NOPUSH
+            );
+            gSPMatrix(
+                gfx++,
+                PhysicalAddress(&f_LogoClubScalings[g_DrawBufferIndex]),
+                G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_NOPUSH
+            );
+            gDPSetPrimDepth(gfx++, LOGO_CLUB_DEPTH, 0);
+            gDPPipeSync(gfx++);
+            gSPVertex(gfx++, f_LogoClubVertices[j], QUAD_VERTEX_COUNT, 0);
+            gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
+            gDPPipeSync(gfx++);
+        }
     }
-  }
 
-  if (f_LogoState == LOGO_CLUB_STARTING) {
-    f32 wobble;
+    if ((f_LogoState == LOGO_SHINING) & (isDrawn == TRUE)) {
+        gDPPipeSync(gfx++);
+        gDPSetDepthSource(gfx++, G_ZS_PRIM);
+        gDPSetPrimDepth(gfx++, LOGO_SHINE_MASK_DEPTH, 0);
+        gDPSetCombineLERP(gfx++, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1);
+        gDPPipeSync(gfx++);
+        gDPSetRenderMode(
+            gfx++,
+            GBL_c1(G_BL_CLR_MEM, G_BL_A_IN, G_BL_CLR_MEM, G_BL_A_MEM),
+            G_RM_AA_ZB_OPA_SURF2
+        );
+        gSPTextureRectangle(
+            gfx++,
+            QuarterPixels(LOGO_SHINE_MASK_LEFT),
+            QuarterPixels(LOGO_SHINE_TOP),
+            QuarterPixels(LOGO_SHINE_MASK_RIGHT),
+            QuarterPixels(LOGO_SHINE_BOTTOM),
+            G_TX_RENDERTILE,
+            0,
+            0,
+            TEXEL_STEP_ONE,
+            TEXEL_STEP_ONE
+        );
+        gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+        gDPSetPrimDepth(gfx++, LOGO_SHINE_LETTER_DEPTH, 0);
+        gDPPipeSync(gfx++);
+        gDPSetRenderMode(
+            gfx++,
+            AA_EN | Z_UPD | IM_RD | CVG_DST_CLAMP | ZMODE_OPA | CVG_X_ALPHA | ALPHA_CVG_SEL |
+                GBL_c1(G_BL_CLR_MEM, G_BL_A_IN, G_BL_CLR_MEM, G_BL_A_MEM),
+            AA_EN | Z_UPD | IM_RD | CVG_DST_CLAMP | ZMODE_OPA | CVG_X_ALPHA | ALPHA_CVG_SEL |
+                GBL_c2(G_BL_CLR_IN, G_BL_A_IN, G_BL_CLR_MEM, G_BL_A_MEM)
+        );
+        gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_LogoLetterImages)));
+        for (i = 0; i < LOGO_LETTER_COUNT; i++) {
+            for (j = 0; j < LOGO_LETTER_HALF_COUNT; j++) {
+                texelsOffset = ((j + (i * LOGO_LETTER_HALF_COUNT)) * LOGO_LETTER_WIDTH *
+                                   LOGO_LETTER_HALF_HEIGHT) +
+                    LARGE_PALETTED_TEXELS_OFFSET;
+                gDPLoadTextureBlock(
+                    gfx++,
+                    TextureAddress(f_LogoLetterImages + texelsOffset),
+                    G_IM_FMT_CI,
+                    G_IM_SIZ_8b,
+                    LOGO_LETTER_WIDTH,
+                    LOGO_LETTER_HALF_HEIGHT,
+                    0,
+                    G_TX_NOMIRROR | G_TX_WRAP,
+                    G_TX_NOMIRROR | G_TX_WRAP,
+                    G_TX_NOMASK,
+                    G_TX_NOMASK,
+                    G_TX_NOLOD,
+                    G_TX_NOLOD
+                );
+                gDPPipeSync(gfx++);
+                gSPMatrix(
+                    gfx++,
+                    PhysicalAddress(&g_ScreenOrthoMatrix),
+                    G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH
+                );
+                gSPMatrix(
+                    gfx++,
+                    PhysicalAddress(&f_LogoLetterTranslations[i][g_DrawBufferIndex]),
+                    G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH
+                );
+                gSPMatrix(
+                    gfx++,
+                    PhysicalAddress(&f_LogoLetterScalings[i][g_DrawBufferIndex]),
+                    G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_NOPUSH
+                );
+                gDPPipeSync(gfx++);
+                gSPVertex(gfx++, f_LogoLetterVertices[j], QUAD_VERTEX_COUNT, 0);
+                gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
+                gDPPipeSync(gfx++);
+            }
+        }
 
-    angle = f_LogoClubOrbitAngle * DEGREES_TO_RADIANS;
-    sinf(f_LogoClubUnusedAngle * DEGREES_TO_RADIANS);
-    wobble = -sinf(f_LogoClubWobbleAngle * DEGREES_TO_RADIANS) *
-        LOGO_CLUB_FIRST_WOBBLE;
-    f_LogoState = LOGO_CLUB_CIRCLING;
-    f_LogoClubPosition[AXIS_X] =
-        (s32)(-cosf(angle) * (f_LogoClubOrbitRadius + wobble)) +
-        LOGO_CLUB_ORBIT_CENTER_X;
-    f_LogoClubPosition[AXIS_Y] =
-        (s32)(-sinf(angle) * (f_LogoClubOrbitRadius + wobble)) +
-        LOGO_CLUB_ORBIT_CENTER_Y;
-    f_IsLogoClubSwinging = TRUE;
-  }
+        if (isDrawn == TRUE) {
+            gDPSetPrimDepth(gfx++, LOGO_SHINE_DEPTH, 0);
+            AppendSyncedRdpState(gfx, gDPSetRenderMode, G_RM_ZB_XLU_SURF, G_RM_ZB_XLU_SURF2);
+            gDPSetCombineLERP(
+                gfx++,
+                0,
+                0,
+                0,
+                PRIMITIVE,
+                PRIMITIVE,
+                0,
+                TEXEL0,
+                0,
+                0,
+                0,
+                0,
+                PRIMITIVE,
+                PRIMITIVE,
+                0,
+                TEXEL0,
+                0
+            );
+            AppendSyncedRdpState(gfx, gDPSetTextureLUT, G_TT_NONE);
+            AppendSyncedRdpState(gfx, gDPSetAlphaDither, G_AD_PATTERN);
+            AppendSyncedRdpState(gfx, gDPSetAlphaCompare, G_AC_NONE);
+            gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, OPAQUE_ALPHA);
+            AppendSyncedRdpState(gfx, gDPSetTexturePersp, G_TP_NONE);
+            gDPLoadTextureBlock(
+                gfx++,
+                TextureAddress(ImageBody(f_LogoShineImage)),
+                G_IM_FMT_I,
+                G_IM_SIZ_8b,
+                LOGO_SHINE_IMAGE_SIZE,
+                LOGO_SHINE_IMAGE_SIZE,
+                0,
+                G_TX_NOMIRROR | G_TX_WRAP,
+                G_TX_NOMIRROR | G_TX_WRAP,
+                G_TX_NOMASK,
+                G_TX_NOMASK,
+                G_TX_NOLOD,
+                G_TX_NOLOD
+            );
+            gDPPipeSync(gfx++);
+        }
 
-  if (f_LogoState == LOGO_CLUB_CIRCLING) {
-    orbitAngle = f_LogoClubOrbitAngle * DEGREES_TO_RADIANS;
-    sinf(f_LogoClubUnusedAngle * DEGREES_TO_RADIANS);
-    wobble =
-        -sinf(f_LogoClubWobbleAngle * DEGREES_TO_RADIANS) * LOGO_CLUB_WOBBLE;
-    f_LogoClubPosition[AXIS_X] =
-        (s32)(-cosf(orbitAngle) * (f_LogoClubOrbitRadius + wobble)) +
-        LOGO_CLUB_ORBIT_CENTER_X;
-    f_LogoClubPosition[AXIS_Y] =
-        (s32)(-sinf(orbitAngle) * (f_LogoClubOrbitRadius + wobble)) +
-        LOGO_CLUB_ORBIT_CENTER_Y;
-    f_LogoClubOrbitRadius -= LOGO_CLUB_ORBIT_RADIUS_STEP;
-    f_LogoClubOrbitAngle += LOGO_CLUB_ORBIT_ANGLE_STEP;
-    f_LogoClubAngle -= LOGO_CLUB_SPIN_STEP;
-    f_LogoClubUnusedAngle += LOGO_CLUB_UNUSED_ANGLE_STEP;
-    f_LogoClubWobbleAngle += LOGO_CLUB_WOBBLE_ANGLE_STEP;
-    if (f_LogoClubOrbitRadius < 0.0f) {
-      f_LogoClubOrbitRadius = 0.0f;
-      f_LogoState = LOGO_CLUB_SPINNING;
+        f_LogoShineFrame++;
+        if (f_LogoShineFrame > LOGO_SHINE_LAST_FRAME) {
+            f_LogoState = LOGO_SHRINK_STARTING;
+        }
+
+        if (isDrawn == TRUE &&
+            f_LogoShineFrame > LOGO_SHINE_FIRST_SHOWN_FRAME &&
+            f_LogoShineFrame < LOGO_SHINE_LAST_SHOWN_FRAME) {
+            gSPTextureRectangle(
+                gfx++,
+                QuarterPixels(LOGO_SHINE_LEFT),
+                QuarterPixels(LOGO_SHINE_TOP),
+                QuarterPixels(LOGO_SHINE_RIGHT),
+                QuarterPixels(LOGO_SHINE_BOTTOM),
+                G_TX_RENDERTILE,
+                TexelCoordinate(
+                    LOGO_SHINE_ORIGIN_TEXEL -
+                    (f_LogoShineFrame - LOGO_SHINE_ORIGIN_FRAME) * LOGO_SHINE_SPEED
+                ),
+                0,
+                LOGO_SHINE_TEXEL_STEP,
+                LOGO_SHINE_TEXEL_STEP
+            );
+            gDPPipeSync(gfx++);
+        }
     }
-  }
 
-  if (f_LogoState == LOGO_CLUB_SPINNING) {
-    f_LogoClubAngle -= LOGO_CLUB_SPIN_STEP;
-    f_LogoClubSpinFramesLeft--;
-    if (f_LogoClubSpinFramesLeft < 0) {
-      f_LogoClubSpinFramesLeft = 0;
-      if (f_LogoClubAngle < 0.0f) {
-        f_LogoClubAngle = 0.0f;
-        f_LogoState = LOGO_SHINING;
-        f_IsLogoClubSwinging = FALSE;
-      }
+    AppendSyncedRdpState(gfx, gDPSetDepthSource, G_ZS_PIXEL);
+    *displayListHead = gfx;
+
+    for (i = 0; i < LOGO_LETTER_COUNT; i++) {
+        if (f_LogoLetterStates[i] == LOGO_LETTER_FALLING) {
+            if (f_LogoLetterSpeeds[i] > 0.0f) {
+                if (i != LOGO_LETTER_L) {
+                    if (f_LogoLetters[i].y + (s32)f_LogoLetterSpeeds[i] >= LOGO_LETTER_GROUND_Y) {
+                        f_LogoLetterSpeeds[i] *= LOGO_LETTER_BOUNCINESS;
+                        f_LogoLetters[i].y = LOGO_LETTER_GROUND_Y - 1;
+                        if (f_LogoLetterSpeeds[i] <= LOGO_LETTER_MIN_BOUNCE_SPEED) {
+                            f_LogoLetterSpeeds[i] = 0.0f;
+                            f_LogoLetterStates[i] = LOGO_LETTER_LANDED;
+                            continue;
+                        }
+
+                        f_LogoLetterSpeeds[i] = -f_LogoLetterSpeeds[i];
+                        f_LogoLetterStates[i] = LOGO_LETTER_SQUASHING;
+                        f_LogoLetterSquashFrames[i] = LOGO_LETTER_SQUASH_FRAMES;
+                    }
+                }
+                else {
+                    if (f_LogoLetters[i].y + (s32)f_LogoLetterSpeeds[i] >= LOGO_LETTER_L_GROUND_Y) {
+                        f_LogoLetterSpeeds[i] *= LOGO_LETTER_BOUNCINESS;
+                        f_LogoLetters[i].y = LOGO_LETTER_L_GROUND_Y - 1;
+                        if (f_LogoLetterSpeeds[i] <= LOGO_LETTER_MIN_BOUNCE_SPEED) {
+                            f_LogoLetterSpeeds[i] = 0.0f;
+                            f_LogoLetterStates[i] = LOGO_LETTER_LANDED;
+                            continue;
+                        }
+
+                        f_LogoLetterSpeeds[i] = -f_LogoLetterSpeeds[i];
+                        f_LogoLetterStates[i] = LOGO_LETTER_SQUASHING;
+                        f_LogoLetterSquashFrames[i] = LOGO_LETTER_SQUASH_FRAMES;
+                    }
+                }
+            }
+
+            f_LogoLetters[i].y += (s32)f_LogoLetterSpeeds[i];
+            f_LogoLetterSpeeds[i] += LOGO_LETTER_GRAVITY;
+            f_LogoLetterScales[i][AXIS_X] += LOGO_LETTER_GROWTH;
+            f_LogoLetterScales[i][AXIS_Y] += LOGO_LETTER_GROWTH;
+            if (f_LogoLetterScales[i][AXIS_X] > 1.0f) {
+                f_LogoLetterScales[i][AXIS_X] = 1.0f;
+            }
+
+            if (f_LogoLetterScales[i][AXIS_Y] > 1.0f) {
+                f_LogoLetterScales[i][AXIS_Y] = 1.0f;
+            }
+        }
+        else if (f_LogoLetterStates[i] == LOGO_LETTER_SQUASHING) {
+            f_LogoLetterScales[i][AXIS_X] += LOGO_LETTER_SQUASH_STEP;
+            f_LogoLetterScales[i][AXIS_Y] -= LOGO_LETTER_SQUASH_STEP;
+            f_LogoLetterSquashFrames[i]--;
+            if (f_LogoLetterSquashFrames[i] == 0) {
+                f_LogoLetterStates[i] = LOGO_LETTER_SQUASHED;
+                f_LogoLetterSquashFrames[i] = LOGO_LETTER_SQUASHED_FRAMES;
+            }
+        }
+        else if (f_LogoLetterStates[i] == LOGO_LETTER_SQUASHED) {
+            f_LogoLetterSquashFrames[i]--;
+            if (f_LogoLetterSquashFrames[i] == 0) {
+                f_LogoLetterStates[i] = LOGO_LETTER_STRETCHING;
+                f_LogoLetterSquashFrames[i] = LOGO_LETTER_STRETCH_FRAMES;
+            }
+        }
+        else if (f_LogoLetterStates[i] == LOGO_LETTER_STRETCHING) {
+            f_LogoLetterScales[i][AXIS_X] -= LOGO_LETTER_STRETCH_STEP;
+            f_LogoLetterScales[i][AXIS_Y] += LOGO_LETTER_STRETCH_STEP;
+            f_LogoLetterSquashFrames[i]--;
+            if (f_LogoLetterSquashFrames[i] == 0) {
+                f_LogoLetterStates[i] = LOGO_LETTER_FALLING;
+            }
+        }
     }
-  }
 
-  if (f_LogoState == LOGO_SHRINK_STARTING) {
-    f_LogoState = LOGO_SHRINKING;
+    if (f_LogoState == LOGO_CLUB_STARTING) {
+        f32 wobble;
 
-    /* The letters' shrunk x positions */
-    f_LogoLetterSteps[LOGO_LETTER_M] =
-        (LOGO_M_SHRUNK_X - f_LogoLetters[LOGO_LETTER_M].x) / LOGO_SHRINK_FRAMES;
-    f_LogoLetterSteps[LOGO_LETTER_A] =
-        (LOGO_A_SHRUNK_X - f_LogoLetters[LOGO_LETTER_A].x) / LOGO_SHRINK_FRAMES;
-    f_LogoLetterSteps[LOGO_LETTER_R] =
-        (LOGO_R_SHRUNK_X - f_LogoLetters[LOGO_LETTER_R].x) / LOGO_SHRINK_FRAMES;
-    f_LogoLetterSteps[LOGO_LETTER_I] =
-        (LOGO_I_SHRUNK_X - f_LogoLetters[LOGO_LETTER_I].x) / LOGO_SHRINK_FRAMES;
-    f_LogoLetterSteps[LOGO_LETTER_FIRST_O] =
-        (LOGO_FIRST_O_SHRUNK_X - f_LogoLetters[LOGO_LETTER_FIRST_O].x) /
-        LOGO_SHRINK_FRAMES;
-    f_LogoLetterSteps[LOGO_LETTER_G] =
-        (LOGO_G_SHRUNK_X - f_LogoLetters[LOGO_LETTER_G].x) / LOGO_SHRINK_FRAMES;
-    f_LogoLetterSteps[LOGO_LETTER_SECOND_O] =
-        (LOGO_SECOND_O_SHRUNK_X - f_LogoLetters[LOGO_LETTER_SECOND_O].x) /
-        LOGO_SHRINK_FRAMES;
-    f_LogoLetterSteps[LOGO_LETTER_L] =
-        (LOGO_L_SHRUNK_X - f_LogoLetters[LOGO_LETTER_L].x) / LOGO_SHRINK_FRAMES;
-    f_LogoLetterSteps[LOGO_LETTER_F] =
-        (LOGO_F_SHRUNK_X - f_LogoLetters[LOGO_LETTER_F].x) / LOGO_SHRINK_FRAMES;
-    f_LogoLetterRises[LOGO_LETTER_M] =
-        (LOGO_SHRUNK_Y - f_LogoLetters[LOGO_LETTER_M].y) / LOGO_SHRINK_FRAMES;
-    f_LogoLetterRises[LOGO_LETTER_A] =
-        (LOGO_SHRUNK_L_Y - f_LogoLetters[LOGO_LETTER_L].y) / LOGO_SHRINK_FRAMES;
-    f_LogoScaleStep =
-        (LOGO_SHRUNK_SCALE - f_LogoLetterScales[LOGO_LETTER_M][AXIS_X]) *
-        (1.0f / LOGO_SHRINK_FRAMES);
-    f_LogoClubStepX =
-        (LOGO_SHRUNK_CLUB_X - f_LogoClubPosition[AXIS_X]) / LOGO_SHRINK_FRAMES;
-    f_LogoClubStepY =
-        (LOGO_SHRUNK_CLUB_Y - f_LogoClubPosition[AXIS_Y]) / LOGO_SHRINK_FRAMES;
-  }
-
-  if (f_LogoState == LOGO_SHRINKING) {
-    for (letterIndex = 0; letterIndex < LOGO_LETTER_COUNT; letterIndex++) {
-      if (letterIndex != LOGO_LETTER_L) {
-        f_LogoLetters[letterIndex].x += f_LogoLetterSteps[letterIndex];
-        f_LogoLetters[letterIndex].y += f_LogoLetterRises[LOGO_LETTER_M];
-        f_LogoLetterScales[letterIndex][AXIS_X] += f_LogoScaleStep;
-        f_LogoLetterScales[letterIndex][AXIS_Y] += f_LogoScaleStep;
-      }
+        angle = f_LogoClubOrbitAngle * DEGREES_TO_RADIANS;
+        sinf(f_LogoClubUnusedAngle * DEGREES_TO_RADIANS);
+        wobble = -sinf(f_LogoClubWobbleAngle * DEGREES_TO_RADIANS) * LOGO_CLUB_FIRST_WOBBLE;
+        f_LogoState = LOGO_CLUB_CIRCLING;
+        f_LogoClubPosition[AXIS_X] =
+            (s32)(-cosf(angle) * (f_LogoClubOrbitRadius + wobble)) + LOGO_CLUB_ORBIT_CENTER_X;
+        f_LogoClubPosition[AXIS_Y] =
+            (s32)(-sinf(angle) * (f_LogoClubOrbitRadius + wobble)) + LOGO_CLUB_ORBIT_CENTER_Y;
+        f_IsLogoClubSwinging = TRUE;
     }
 
-    f_LogoLetters[LOGO_LETTER_L].x += f_LogoLetterSteps[LOGO_LETTER_L];
-    f_LogoLetters[LOGO_LETTER_L].y += f_LogoLetterRises[LOGO_LETTER_A];
-    f_LogoLetterScales[LOGO_LETTER_L][AXIS_X] += f_LogoScaleStep;
-    f_LogoLetterScales[LOGO_LETTER_L][AXIS_Y] += f_LogoScaleStep;
-    f_LogoClubPosition[AXIS_X] += f_LogoClubStepX;
-    f_LogoClubPosition[AXIS_Y] += f_LogoClubStepY;
-    f_LogoClubScale[0] += f_LogoScaleStep;
-    f_LogoClubScale[1] += f_LogoScaleStep;
-    if (f_LogoLetterScales[LOGO_LETTER_M][AXIS_X] < LOGO_SHRUNK_SCALE) {
-      f_LogoState = LOGO_SHRUNK;
+    if (f_LogoState == LOGO_CLUB_CIRCLING) {
+        orbitAngle = f_LogoClubOrbitAngle * DEGREES_TO_RADIANS;
+        sinf(f_LogoClubUnusedAngle * DEGREES_TO_RADIANS);
+        wobble = -sinf(f_LogoClubWobbleAngle * DEGREES_TO_RADIANS) * LOGO_CLUB_WOBBLE;
+        f_LogoClubPosition[AXIS_X] =
+            (s32)(-cosf(orbitAngle) * (f_LogoClubOrbitRadius + wobble)) + LOGO_CLUB_ORBIT_CENTER_X;
+        f_LogoClubPosition[AXIS_Y] =
+            (s32)(-sinf(orbitAngle) * (f_LogoClubOrbitRadius + wobble)) + LOGO_CLUB_ORBIT_CENTER_Y;
+        f_LogoClubOrbitRadius -= LOGO_CLUB_ORBIT_RADIUS_STEP;
+        f_LogoClubOrbitAngle += LOGO_CLUB_ORBIT_ANGLE_STEP;
+        f_LogoClubAngle -= LOGO_CLUB_SPIN_STEP;
+        f_LogoClubUnusedAngle += LOGO_CLUB_UNUSED_ANGLE_STEP;
+        f_LogoClubWobbleAngle += LOGO_CLUB_WOBBLE_ANGLE_STEP;
+        if (f_LogoClubOrbitRadius < 0.0f) {
+            f_LogoClubOrbitRadius = 0.0f;
+            f_LogoState = LOGO_CLUB_SPINNING;
+        }
     }
-  }
+
+    if (f_LogoState == LOGO_CLUB_SPINNING) {
+        f_LogoClubAngle -= LOGO_CLUB_SPIN_STEP;
+        f_LogoClubSpinFramesLeft--;
+        if (f_LogoClubSpinFramesLeft < 0) {
+            f_LogoClubSpinFramesLeft = 0;
+            if (f_LogoClubAngle < 0.0f) {
+                f_LogoClubAngle = 0.0f;
+                f_LogoState = LOGO_SHINING;
+                f_IsLogoClubSwinging = FALSE;
+            }
+        }
+    }
+
+    if (f_LogoState == LOGO_SHRINK_STARTING) {
+        f_LogoState = LOGO_SHRINKING;
+
+        /* The letters' shrunk x positions */
+        f_LogoLetterSteps[LOGO_LETTER_M] =
+            (LOGO_M_SHRUNK_X - f_LogoLetters[LOGO_LETTER_M].x) / LOGO_SHRINK_FRAMES;
+        f_LogoLetterSteps[LOGO_LETTER_A] =
+            (LOGO_A_SHRUNK_X - f_LogoLetters[LOGO_LETTER_A].x) / LOGO_SHRINK_FRAMES;
+        f_LogoLetterSteps[LOGO_LETTER_R] =
+            (LOGO_R_SHRUNK_X - f_LogoLetters[LOGO_LETTER_R].x) / LOGO_SHRINK_FRAMES;
+        f_LogoLetterSteps[LOGO_LETTER_I] =
+            (LOGO_I_SHRUNK_X - f_LogoLetters[LOGO_LETTER_I].x) / LOGO_SHRINK_FRAMES;
+        f_LogoLetterSteps[LOGO_LETTER_FIRST_O] =
+            (LOGO_FIRST_O_SHRUNK_X - f_LogoLetters[LOGO_LETTER_FIRST_O].x) / LOGO_SHRINK_FRAMES;
+        f_LogoLetterSteps[LOGO_LETTER_G] =
+            (LOGO_G_SHRUNK_X - f_LogoLetters[LOGO_LETTER_G].x) / LOGO_SHRINK_FRAMES;
+        f_LogoLetterSteps[LOGO_LETTER_SECOND_O] =
+            (LOGO_SECOND_O_SHRUNK_X - f_LogoLetters[LOGO_LETTER_SECOND_O].x) / LOGO_SHRINK_FRAMES;
+        f_LogoLetterSteps[LOGO_LETTER_L] =
+            (LOGO_L_SHRUNK_X - f_LogoLetters[LOGO_LETTER_L].x) / LOGO_SHRINK_FRAMES;
+        f_LogoLetterSteps[LOGO_LETTER_F] =
+            (LOGO_F_SHRUNK_X - f_LogoLetters[LOGO_LETTER_F].x) / LOGO_SHRINK_FRAMES;
+        f_LogoLetterRises[LOGO_LETTER_M] =
+            (LOGO_SHRUNK_Y - f_LogoLetters[LOGO_LETTER_M].y) / LOGO_SHRINK_FRAMES;
+        f_LogoLetterRises[LOGO_LETTER_A] =
+            (LOGO_SHRUNK_L_Y - f_LogoLetters[LOGO_LETTER_L].y) / LOGO_SHRINK_FRAMES;
+        f_LogoScaleStep = (LOGO_SHRUNK_SCALE - f_LogoLetterScales[LOGO_LETTER_M][AXIS_X]) *
+            (1.0f / LOGO_SHRINK_FRAMES);
+        f_LogoClubStepX = (LOGO_SHRUNK_CLUB_X - f_LogoClubPosition[AXIS_X]) / LOGO_SHRINK_FRAMES;
+        f_LogoClubStepY = (LOGO_SHRUNK_CLUB_Y - f_LogoClubPosition[AXIS_Y]) / LOGO_SHRINK_FRAMES;
+    }
+
+    if (f_LogoState == LOGO_SHRINKING) {
+        for (letterIndex = 0; letterIndex < LOGO_LETTER_COUNT; letterIndex++) {
+            if (letterIndex != LOGO_LETTER_L) {
+                f_LogoLetters[letterIndex].x += f_LogoLetterSteps[letterIndex];
+                f_LogoLetters[letterIndex].y += f_LogoLetterRises[LOGO_LETTER_M];
+                f_LogoLetterScales[letterIndex][AXIS_X] += f_LogoScaleStep;
+                f_LogoLetterScales[letterIndex][AXIS_Y] += f_LogoScaleStep;
+            }
+        }
+
+        f_LogoLetters[LOGO_LETTER_L].x += f_LogoLetterSteps[LOGO_LETTER_L];
+        f_LogoLetters[LOGO_LETTER_L].y += f_LogoLetterRises[LOGO_LETTER_A];
+        f_LogoLetterScales[LOGO_LETTER_L][AXIS_X] += f_LogoScaleStep;
+        f_LogoLetterScales[LOGO_LETTER_L][AXIS_Y] += f_LogoScaleStep;
+        f_LogoClubPosition[AXIS_X] += f_LogoClubStepX;
+        f_LogoClubPosition[AXIS_Y] += f_LogoClubStepY;
+        f_LogoClubScale[0] += f_LogoScaleStep;
+        f_LogoClubScale[1] += f_LogoScaleStep;
+        if (f_LogoLetterScales[LOGO_LETTER_M][AXIS_X] < LOGO_SHRUNK_SCALE) {
+            f_LogoState = LOGO_SHRUNK;
+        }
+    }
 }
 
 /* The sparks fan out from a point and slow down over SPARK_FRAME_COUNT
@@ -5391,111 +6243,130 @@ void DrawOpeningLogo(Gfx** displayListHead, Boolean isDrawn) {
  * SPARKS_STARTING. The point is projected to the screen, and the sparks
  * are scaled down the further away it is.
  */
-void DrawOpeningSparks(Gfx** displayListHead) {
-  Gfx* gfx = *displayListHead;
-  ScreenPoint origin;
-  Vec3 translation;
-  Vec3 rotation;
-  Vec3 scale;
-  Mat4 matrix;
-  s32 depth;
-  s32 sparkIndex;
-  f32 speed;
-  Gfx* syncCommand;
-  Gfx* cycleTypeCommand;
+void DrawOpeningSparks(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
+    ScreenPoint origin;
+    Vec3 translation;
+    Vec3 rotation;
+    Vec3 scale;
+    Mat4 matrix;
+    s32 depth;
+    s32 sparkIndex;
+    f32 speed;
+    Gfx *syncCommand;
+    Gfx *cycleTypeCommand;
 
-  if (f_OpeningSparksState == SPARKS_STARTING) {
-    depth = ProjectPoint(f_OpeningSparksOrigin[0], f_OpeningSparksOrigin[1],
-        f_OpeningSparksOrigin[2], &origin);
-    if (depth < 0) {
-      f_OpeningSparkScale = SPARK_SCALE_DEPTH / (f32)-depth;
-      for (sparkIndex = 0; sparkIndex < SPARK_COUNT; sparkIndex++) {
-        f_OpeningSparkPositions[sparkIndex][AXIS_X] =
-            origin.x - (SCREEN_WIDTH / 2);
-        f_OpeningSparkPositions[sparkIndex][AXIS_Y] =
-            (SCREEN_HEIGHT / 2) - origin.y;
-        f_OpeningSparkAngles[sparkIndex] =
-            ((f32)sparkIndex * SPARK_ANGLE_STEP) +
-            (f32)DegreesToRadians((guRandom() % SPARK_ANGLE_JITTER_RANGE) -
-                (SPARK_ANGLE_JITTER_RANGE / 2));
-        speed = ((guRandom() % SPARK_SPEED_RANGE) * f_OpeningSparkScale) +
-            SPARK_MIN_SPEED;
-        f_OpeningSparkVelocities[sparkIndex][AXIS_X] =
-            sinf(f_OpeningSparkAngles[sparkIndex]) * speed *
-            f_OpeningSparkScale;
-        f_OpeningSparkVelocities[sparkIndex][AXIS_Y] =
-            -cosf(f_OpeningSparkAngles[sparkIndex]) * speed *
-            f_OpeningSparkScale;
-        f_OpeningSparksState = SPARKS_FLYING;
-      }
+    if (f_OpeningSparksState == SPARKS_STARTING) {
+        depth = ProjectPoint(
+            f_OpeningSparksOrigin[0],
+            f_OpeningSparksOrigin[1],
+            f_OpeningSparksOrigin[2],
+            &origin
+        );
+        if (depth < 0) {
+            f_OpeningSparkScale = SPARK_SCALE_DEPTH / (f32)-depth;
+            for (sparkIndex = 0; sparkIndex < SPARK_COUNT; sparkIndex++) {
+                f_OpeningSparkPositions[sparkIndex][AXIS_X] = origin.x - (SCREEN_WIDTH / 2);
+                f_OpeningSparkPositions[sparkIndex][AXIS_Y] = (SCREEN_HEIGHT / 2) - origin.y;
+                f_OpeningSparkAngles[sparkIndex] = ((f32)sparkIndex * SPARK_ANGLE_STEP) +
+                    (f32)DegreesToRadians(
+                        (guRandom() % SPARK_ANGLE_JITTER_RANGE) - (SPARK_ANGLE_JITTER_RANGE / 2)
+                    );
+                speed = ((guRandom() % SPARK_SPEED_RANGE) * f_OpeningSparkScale) + SPARK_MIN_SPEED;
+                f_OpeningSparkVelocities[sparkIndex][AXIS_X] =
+                    sinf(f_OpeningSparkAngles[sparkIndex]) * speed * f_OpeningSparkScale;
+                f_OpeningSparkVelocities[sparkIndex][AXIS_Y] =
+                    -cosf(f_OpeningSparkAngles[sparkIndex]) * speed * f_OpeningSparkScale;
+                f_OpeningSparksState = SPARKS_FLYING;
+            }
 
-      f_OpeningSparkFramesLeft = SPARK_FRAME_COUNT;
-    } else {
-      f_OpeningSparksState = SPARKS_HIDDEN;
-    }
-  }
-
-  if (f_OpeningSparksState == SPARKS_FLYING) {
-    /*
-     * The original takes these two commands' slots in locals of their own,
-     * which orders the spilled pointers' stack slots
-     */
-    syncCommand = gfx++;
-    gDPPipeSync(syncCommand);
-    gDPPipeSync(gfx++);
-    cycleTypeCommand = gfx++;
-    gDPSetCycleType(cycleTypeCommand, G_CYC_1CYCLE);
-    gDPPipeSync(gfx++);
-    gDPSetAlphaDither(gfx++, G_AD_DISABLE);
-    gDPPipeSync(gfx++);
-    gDPSetTextureLUT(gfx++, G_TT_NONE);
-    gSPTexture(gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0,
-        G_TX_RENDERTILE, G_OFF);
-    gSPLoadGeometryMode(gfx++, 0);
-    gSPSetGeometryMode(gfx++, G_SHADE | G_SHADING_SMOOTH);
-    gDPPipeSync(gfx++);
-    gDPSetTexturePersp(gfx++, G_TP_NONE);
-    gDPPipeSync(gfx++);
-    gDPSetRenderMode(gfx++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
-    gDPSetCombineLERP(gfx++, PRIMITIVE, 0, SHADE, 0, 0, 0, 0, SHADE, PRIMITIVE,
-        0, SHADE, 0, 0, 0, 0, SHADE);
-    gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
-    gDPPipeSync(gfx++);
-    gDPSetAlphaCompare(gfx++, G_AC_NONE);
-    gDPPipeSync(gfx++);
-    gSPMatrix(gfx++, PhysicalAddress(&g_ScreenOrthoMatrix),
-        G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
-    for (sparkIndex = 0; sparkIndex < SPARK_COUNT; sparkIndex++) {
-      f_OpeningSparkPositions[sparkIndex][AXIS_X] +=
-          f_OpeningSparkVelocities[sparkIndex][AXIS_X];
-      f_OpeningSparkPositions[sparkIndex][AXIS_Y] +=
-          f_OpeningSparkVelocities[sparkIndex][AXIS_Y];
-      f_OpeningSparkVelocities[sparkIndex][AXIS_X] *= SPARK_DRAG;
-      f_OpeningSparkVelocities[sparkIndex][AXIS_Y] *= SPARK_DRAG;
-      translation[AXIS_X] = f_OpeningSparkPositions[sparkIndex][AXIS_X];
-      translation[AXIS_Y] = f_OpeningSparkPositions[sparkIndex][AXIS_Y];
-      translation[AXIS_Z] = SPARK_DEPTH;
-      rotation[AXIS_X] = 0.0f;
-      rotation[AXIS_Y] = 0.0f;
-      rotation[AXIS_Z] = f_OpeningSparkAngles[sparkIndex];
-      scale[AXIS_X] = f_OpeningSparkScale;
-      scale[AXIS_Y] = f_OpeningSparkScale;
-      scale[AXIS_Z] = f_OpeningSparkScale;
-      BuildTransformMatrix(matrix, rotation, translation, scale);
-      ConvertMatrixToFixed(
-          matrix, &f_OpeningSparkMatrices[g_DrawBufferIndex][sparkIndex]);
-      gSPMatrix(gfx++,
-          PhysicalAddress(
-              &f_OpeningSparkMatrices[g_DrawBufferIndex][sparkIndex]),
-          G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-      gSPVertex(gfx++, f_OpeningSparkVertices, 3, 0);
-      gSP1Triangle(gfx++, 0, 1, 2, 0);
+            f_OpeningSparkFramesLeft = SPARK_FRAME_COUNT;
+        }
+        else {
+            f_OpeningSparksState = SPARKS_HIDDEN;
+        }
     }
 
-    if (--f_OpeningSparkFramesLeft == 0) {
-      f_OpeningSparksState = SPARKS_HIDDEN;
-    }
-  }
+    if (f_OpeningSparksState == SPARKS_FLYING) {
+        /*
+         * The original takes these two commands' slots in locals of their own,
+         * which orders the spilled pointers' stack slots
+         */
+        syncCommand = gfx++;
+        gDPPipeSync(syncCommand);
+        gDPPipeSync(gfx++);
+        cycleTypeCommand = gfx++;
+        gDPSetCycleType(cycleTypeCommand, G_CYC_1CYCLE);
+        gDPPipeSync(gfx++);
+        gDPSetAlphaDither(gfx++, G_AD_DISABLE);
+        gDPPipeSync(gfx++);
+        gDPSetTextureLUT(gfx++, G_TT_NONE);
+        gSPTexture(gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0, G_TX_RENDERTILE, G_OFF);
+        gSPLoadGeometryMode(gfx++, 0);
+        gSPSetGeometryMode(gfx++, G_SHADE | G_SHADING_SMOOTH);
+        gDPPipeSync(gfx++);
+        gDPSetTexturePersp(gfx++, G_TP_NONE);
+        gDPPipeSync(gfx++);
+        gDPSetRenderMode(gfx++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
+        gDPSetCombineLERP(
+            gfx++,
+            PRIMITIVE,
+            0,
+            SHADE,
+            0,
+            0,
+            0,
+            0,
+            SHADE,
+            PRIMITIVE,
+            0,
+            SHADE,
+            0,
+            0,
+            0,
+            0,
+            SHADE
+        );
+        gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
+        gDPPipeSync(gfx++);
+        gDPSetAlphaCompare(gfx++, G_AC_NONE);
+        gDPPipeSync(gfx++);
+        gSPMatrix(
+            gfx++,
+            PhysicalAddress(&g_ScreenOrthoMatrix),
+            G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION
+        );
+        for (sparkIndex = 0; sparkIndex < SPARK_COUNT; sparkIndex++) {
+            f_OpeningSparkPositions[sparkIndex][AXIS_X] +=
+                f_OpeningSparkVelocities[sparkIndex][AXIS_X];
+            f_OpeningSparkPositions[sparkIndex][AXIS_Y] +=
+                f_OpeningSparkVelocities[sparkIndex][AXIS_Y];
+            f_OpeningSparkVelocities[sparkIndex][AXIS_X] *= SPARK_DRAG;
+            f_OpeningSparkVelocities[sparkIndex][AXIS_Y] *= SPARK_DRAG;
+            translation[AXIS_X] = f_OpeningSparkPositions[sparkIndex][AXIS_X];
+            translation[AXIS_Y] = f_OpeningSparkPositions[sparkIndex][AXIS_Y];
+            translation[AXIS_Z] = SPARK_DEPTH;
+            rotation[AXIS_X] = 0.0f;
+            rotation[AXIS_Y] = 0.0f;
+            rotation[AXIS_Z] = f_OpeningSparkAngles[sparkIndex];
+            scale[AXIS_X] = f_OpeningSparkScale;
+            scale[AXIS_Y] = f_OpeningSparkScale;
+            scale[AXIS_Z] = f_OpeningSparkScale;
+            BuildTransformMatrix(matrix, rotation, translation, scale);
+            ConvertMatrixToFixed(matrix, &f_OpeningSparkMatrices[g_DrawBufferIndex][sparkIndex]);
+            gSPMatrix(
+                gfx++,
+                PhysicalAddress(&f_OpeningSparkMatrices[g_DrawBufferIndex][sparkIndex]),
+                G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW
+            );
+            gSPVertex(gfx++, f_OpeningSparkVertices, 3, 0);
+            gSP1Triangle(gfx++, 0, 1, 2, 0);
+        }
 
-  *displayListHead = gfx;
+        if (--f_OpeningSparkFramesLeft == 0) {
+            f_OpeningSparksState = SPARKS_HIDDEN;
+        }
+    }
+
+    *displayListHead = gfx;
 }

@@ -40,8 +40,8 @@ typedef f32 BallSpeed;
 #define MINI_GOLF_ROLL_GRAVITY (GRAVITY * 2)
 
 #define KilometersPerHour(kmh) \
-  ((BallSpeed)((kmh) * METERS_PER_SECOND_PER_KILOMETER_PER_HOUR * \
-      SPEED_UNITS_PER_METER_PER_SECOND))
+    ((BallSpeed)((kmh) * METERS_PER_SECOND_PER_KILOMETER_PER_HOUR * \
+        SPEED_UNITS_PER_METER_PER_SECOND))
 
 /*
  * The launch debug displays turn speeds into kilometers per hour with this:
@@ -55,8 +55,8 @@ typedef f32 BallSpeed;
 /* Turns a spin speed, the speed of the ball's surface, into revolutions per
  * minute */
 #define RPM_PER_SPIN_SPEED_UNIT \
-  ((f32)(SECONDS_PER_MINUTE / \
-      (SPEED_UNITS_PER_METER_PER_SECOND * (f32)M_PI * BALL_DIAMETER_METERS)))
+    ((f32)(SECONDS_PER_MINUTE / \
+        (SPEED_UNITS_PER_METER_PER_SECOND * (f32)M_PI * BALL_DIAMETER_METERS)))
 
 /* A simulation still going after this many steps is given up on */
 #define MAX_STEP_COUNT 1801
@@ -73,11 +73,11 @@ typedef f32 BallSpeed;
 
 /* Values of a BallSimulation's state */
 enum BallState {
-  BALL_STATE_STOPPED,
-  BALL_STATE_FLYING,
-  BALL_STATE_ROLLING,
-  BALL_STATE_IN_CUP,
-  BALL_STATE_IN_WATER
+    BALL_STATE_STOPPED,
+    BALL_STATE_FLYING,
+    BALL_STATE_ROLLING,
+    BALL_STATE_IN_CUP,
+    BALL_STATE_IN_WATER
 };
 
 #define BALL_SIMULATION_COUNT 1
@@ -102,25 +102,24 @@ enum BallState {
 #define DROP_MAX_SLOPE_SQUARED 0.25f
 /* Whether dropPosition may be on a surface kind */
 #define IsDropKind(kind) \
-  ((kind) != SURFACE_KIND_WATER_HAZARD && \
-      (kind) != SURFACE_KIND_OUT_OF_BOUNDS && \
-      (kind) != SURFACE_KIND_NO_DROP_GROUND && \
-      (kind) != SURFACE_KIND_OUT_OF_COURSE)
+    ((kind) != SURFACE_KIND_WATER_HAZARD && \
+        (kind) != SURFACE_KIND_OUT_OF_BOUNDS && \
+        (kind) != SURFACE_KIND_NO_DROP_GROUND && \
+        (kind) != SURFACE_KIND_OUT_OF_COURSE)
 /* Whether a ground plane is gentle enough for dropPosition */
 #define IsDropSlope(plane) \
-  (((plane).normal[AXIS_X] * (plane).normal[AXIS_X]) + \
-          ((plane).normal[AXIS_Z] * (plane).normal[AXIS_Z]) < \
-      (plane).normal[AXIS_Y] * (plane).normal[AXIS_Y] * \
-          DROP_MAX_SLOPE_SQUARED)
+    (((plane).normal[AXIS_X] * (plane).normal[AXIS_X]) + \
+            ((plane).normal[AXIS_Z] * (plane).normal[AXIS_Z]) < \
+        (plane).normal[AXIS_Y] * (plane).normal[AXIS_Y] * DROP_MAX_SLOPE_SQUARED)
 
 /* How a lie rating and an impact timing change a launch */
 typedef struct ImpactEffect {
-  /* 0x0 */ s8 speedChange; /* In 128ths of the speed */
-  /* 0x1 */ s8 yawChange; /* Times the club's mishitScale */
-  /* 0x2 */ s8 pitchChange; /* In degrees */
-  /* 0x3 */ s8 sideSpinChange;
-  /* 0x4 */ s8 spinChange; /* Added to the shot's offsetY */
-  /* 0x5 */ s8 rumbles; /* Whether the mishit rumbles */
+    /* 0x0 */ s8 speedChange; /* In 128ths of the speed */
+    /* 0x1 */ s8 yawChange; /* Times the club's mishitScale */
+    /* 0x2 */ s8 pitchChange; /* In degrees */
+    /* 0x3 */ s8 sideSpinChange;
+    /* 0x4 */ s8 spinChange; /* Added to the shot's offsetY */
+    /* 0x5 */ s8 rumbles; /* Whether the mishit rumbles */
 } ImpactEffect; /* size = 0x6 */
 
 /* The largest launch power a club can give */
@@ -128,14 +127,14 @@ typedef struct ImpactEffect {
 
 /* How a shot is launched: the swing that the ball simulation starts from */
 typedef struct ShotLaunch {
-  /* 0x00 */ SignedBinaryAngle heading;
-  /* 0x04 */ s32 clubIndex;
-  /* 0x08 */ s32 power; /* Out of MAX_LAUNCH_POWER */
-  /* 0x0C */ s32 impactTiming; /* Gauge frames past the impact mark */
-  /* 0x10 */ s32 offsetX; /* CurrentShot's offsetX and offsetY */
-  /* 0x14 */ s32 offsetY;
-  /* 0x18 */ s32 playerIndex;
-  /* 0x1C */ ShotMode shotMode;
+    /* 0x00 */ SignedBinaryAngle heading;
+    /* 0x04 */ s32 clubIndex;
+    /* 0x08 */ s32 power; /* Out of MAX_LAUNCH_POWER */
+    /* 0x0C */ s32 impactTiming; /* Gauge frames past the impact mark */
+    /* 0x10 */ s32 offsetX; /* CurrentShot's offsetX and offsetY */
+    /* 0x14 */ s32 offsetY;
+    /* 0x18 */ s32 playerIndex;
+    /* 0x1C */ ShotMode shotMode;
 } ShotLaunch; /* size = 0x20 */
 
 /* BallSimulation's lastBounceStep before the ball's first bounce */
@@ -160,70 +159,70 @@ typedef struct ShotLaunch {
 
 /* What LaunchBallSimulation is called for */
 enum LaunchPurpose {
-  LAUNCH_PURPOSE_STROKE,
-  LAUNCH_PURPOSE_CLUB_TEST,
-  LAUNCH_PURPOSE_TRIAL,
-  /*
-   * Not launched: PlaceBallAtRest sets it on a ball it puts at rest, which
-   * DrawGolfBalls then draws at the ball's own depth, with no near-cup bias,
-   * unless the cup view is shown
-   */
-  LAUNCH_PURPOSE_PLACED_AT_REST,
-  /* BuildShotPreview's path: StepBallSimulation takes one substep a step and
-   * skips the settling */
-  LAUNCH_PURPOSE_SHOT_PREVIEW = 5
+    LAUNCH_PURPOSE_STROKE,
+    LAUNCH_PURPOSE_CLUB_TEST,
+    LAUNCH_PURPOSE_TRIAL,
+    /*
+     * Not launched: PlaceBallAtRest sets it on a ball it puts at rest, which
+     * DrawGolfBalls then draws at the ball's own depth, with no near-cup bias,
+     * unless the cup view is shown
+     */
+    LAUNCH_PURPOSE_PLACED_AT_REST,
+    /* BuildShotPreview's path: StepBallSimulation takes one substep a step and
+     * skips the settling */
+    LAUNCH_PURPOSE_SHOT_PREVIEW = 5
 };
 
 /* Whether a ball was launched for a stroke or for a trial of one */
 #define IsStrokeOrTrialLaunch(purpose) \
-  ((purpose) == LAUNCH_PURPOSE_STROKE || (purpose) == LAUNCH_PURPOSE_TRIAL)
+    ((purpose) == LAUNCH_PURPOSE_STROKE || (purpose) == LAUNCH_PURPOSE_TRIAL)
 
 typedef struct BallSimulation {
-  /* 0x00 */ s32 startPosition[3];
-  /*
-   * The last point the ball crossed over gently sloping ground that is not
-   * lost (IsLostBallKind) or SURFACE_KIND_NO_DROP_GROUND; a ball in a
-   * water hazard is dropped there. Launching sets it to the start.
-   */
-  /* 0x0C */ s32 dropPosition[3];
-  /* 0x18 */ s32 position[3]; /* Where the ball is, in course units */
-  /* 0x24 */ s32 velocity[3];
-  /* Only resetting the simulations clears it; nothing reads it */
-  /* 0x30 */ s32 unusedResetValue;
-  /* The spin about the level axis across spinHeading, which the debug display
-   * calls SpinX; on the ground it is the speed the spin drives the ball to */
-  /* 0x34 */ s32 spinSpeed;
-  /* Curves the ball in flight; the debug display calls it SpinY */
-  /* 0x38 */ s32 sideSpin;
-  /* 0x3C */ Radians spinHeading; /* Launching sets it to the yaw */
-  /* 0x40 */ f32 spinSize; /* Set at launch; read by no routine */
-  /* Turns the ball's velocity through the air into its lift's direction */
-  /* 0x44 */ Mat4 liftRotation;
-  /* 0x84 */ f32 windVelocityX;
-  /* 0x88 */ f32 windVelocityZ;
-  /* 0x8C */ s32 state; /* A BALL_STATE_* value */
-  /* 0x90 */ s32 purpose;
-  /* Hits on the ground, hole triangles and billboards */
-  /* 0x94 */ s32 bounceCount;
-  /* 0x98 */ s32 stepCount;
-  /* The step of the ball's last bounce, or NO_BOUNCE_STEP before any */
-  /* 0x9C */ s32 lastBounceStep;
-  /* 0xA0 */ s8 isHoledOut; /* Set as the ball stops in the cup */
-  /* 0xA1 */ s8 hasEnteredWater; /* Set once the ball is in the water */
-  /* 0xA2 */ s8 launchSurface; /* The SURFACE_* launched from */
-  /* 0xA3 */ s8 surface; /* The SURFACE_* that the ball is on */
-  /* 0xA4 */ s8 surfaceBelow; /* The SURFACE_* under the ball, in the air too */
-  /* 0xA5 */ s8 playerIndex;
-  /* 0xA6 */ s8 stepFlags; /* STEP_FLAG_* bits of the last substep */
-  /* The SURFACE_* of the first bounce, if on the ground; at first, where
-     the ball started */
-  /* 0xA7 */ s8 firstBounceSurface;
-  /* 0xA8 */ s8 soundStates[BALL_SOUND_COUNT];
-  /* Keeps the flag from being hit twice */
-  /* 0xB0 */ s8 hasHitFlag;
-  /* 0xB1 */ u8 previousStepFlags; /* stepFlags as the step started */
-  /* 0xB2 */ u16 rollFrameCount; /* Frames since the ball began rolling */
-  /* 0xB4 */ s8 isOverCup; /* The floor under the ball dips into the cup */
+    /* 0x00 */ s32 startPosition[3];
+    /*
+     * The last point the ball crossed over gently sloping ground that is not
+     * lost (IsLostBallKind) or SURFACE_KIND_NO_DROP_GROUND; a ball in a
+     * water hazard is dropped there. Launching sets it to the start.
+     */
+    /* 0x0C */ s32 dropPosition[3];
+    /* 0x18 */ s32 position[3]; /* Where the ball is, in course units */
+    /* 0x24 */ s32 velocity[3];
+    /* Only resetting the simulations clears it; nothing reads it */
+    /* 0x30 */ s32 unusedResetValue;
+    /* The spin about the level axis across spinHeading, which the debug display
+     * calls SpinX; on the ground it is the speed the spin drives the ball to */
+    /* 0x34 */ s32 spinSpeed;
+    /* Curves the ball in flight; the debug display calls it SpinY */
+    /* 0x38 */ s32 sideSpin;
+    /* 0x3C */ Radians spinHeading; /* Launching sets it to the yaw */
+    /* 0x40 */ f32 spinSize; /* Set at launch; read by no routine */
+    /* Turns the ball's velocity through the air into its lift's direction */
+    /* 0x44 */ Mat4 liftRotation;
+    /* 0x84 */ f32 windVelocityX;
+    /* 0x88 */ f32 windVelocityZ;
+    /* 0x8C */ s32 state; /* A BALL_STATE_* value */
+    /* 0x90 */ s32 purpose;
+    /* Hits on the ground, hole triangles and billboards */
+    /* 0x94 */ s32 bounceCount;
+    /* 0x98 */ s32 stepCount;
+    /* The step of the ball's last bounce, or NO_BOUNCE_STEP before any */
+    /* 0x9C */ s32 lastBounceStep;
+    /* 0xA0 */ s8 isHoledOut; /* Set as the ball stops in the cup */
+    /* 0xA1 */ s8 hasEnteredWater; /* Set once the ball is in the water */
+    /* 0xA2 */ s8 launchSurface; /* The SURFACE_* launched from */
+    /* 0xA3 */ s8 surface; /* The SURFACE_* that the ball is on */
+    /* 0xA4 */ s8 surfaceBelow; /* The SURFACE_* under the ball, in the air too */
+    /* 0xA5 */ s8 playerIndex;
+    /* 0xA6 */ s8 stepFlags; /* STEP_FLAG_* bits of the last substep */
+    /* The SURFACE_* of the first bounce, if on the ground; at first, where
+       the ball started */
+    /* 0xA7 */ s8 firstBounceSurface;
+    /* 0xA8 */ s8 soundStates[BALL_SOUND_COUNT];
+    /* Keeps the flag from being hit twice */
+    /* 0xB0 */ s8 hasHitFlag;
+    /* 0xB1 */ u8 previousStepFlags; /* stepFlags as the step started */
+    /* 0xB2 */ u16 rollFrameCount; /* Frames since the ball began rolling */
+    /* 0xB4 */ s8 isOverCup; /* The floor under the ball dips into the cup */
 } BallSimulation; /* size = 0xB8 */
 
 /*
@@ -240,10 +239,13 @@ extern BallSimulation g_BallSimulations[BALL_SIMULATION_COUNT];
 extern s32 g_UnusedLaunchCount;
 
 void ResetBallSimulations(void);
-ImpactEffect* GetImpactTimingEntry(
-    Club* club, Surface surface, ShotMode shotMode, s32 impactTiming);
-s32 StepBallSimulation(BallSimulation* simulation);
-s32 LaunchBallSimulation(
-    BallSimulation* simulation, s32 purpose, ShotLaunch* shot);
+ImpactEffect *GetImpactTimingEntry(
+    Club *club,
+    Surface surface,
+    ShotMode shotMode,
+    s32 impactTiming
+);
+s32 StepBallSimulation(BallSimulation *simulation);
+s32 LaunchBallSimulation(BallSimulation *simulation, s32 purpose, ShotLaunch *shot);
 
 #endif

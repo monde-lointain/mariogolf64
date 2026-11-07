@@ -16,7 +16,7 @@
 
 /* A hole's record, whose yardage is the same from each of its tees */
 #define HOLE_RECORD(par, handicap, yardage, flags) \
-  {(par), (handicap), {(yardage), (yardage), (yardage)}, (flags)}
+    {(par), (handicap), {(yardage), (yardage), (yardage)}, (flags)}
 
 char g_TournamentNames[TOURNAMENT_NAME_COUNT][TOURNAMENT_NAME_SIZE] = {
     "Toad Tournament",
@@ -219,14 +219,13 @@ CourseRecord g_CourseRecords[COURSE_RECORD_COUNT] = {
             HOLE_RECORD(3, 1, 400, 0),
         }},
 };
-static RingShotHole
-    f_RingShotHoles[RING_SHOT_COURSE_COUNT][RING_SHOT_HOLE_COUNT] = {
-        {{0, 0}, {0, 16}, {0, 15}, {0, 13}, {0, 17}, {0, 6}},
-        {{1, 1}, {1, 13}, {1, 11}, {1, 4}, {1, 2}, {1, 17}},
-        {{2, 13}, {2, 2}, {2, 12}, {2, 6}, {2, 4}, {2, 16}},
-        {{3, 14}, {3, 4}, {3, 7}, {3, 11}, {3, 16}, {3, 6}},
-        {{4, 0}, {4, 10}, {4, 15}, {4, 14}, {4, 17}, {4, 1}},
-        {{5, 14}, {5, 10}, {5, 8}, {5, 5}, {5, 16}, {5, 15}},
+static RingShotHole f_RingShotHoles[RING_SHOT_COURSE_COUNT][RING_SHOT_HOLE_COUNT] = {
+    {{0, 0}, {0, 16}, {0, 15}, {0, 13}, {0, 17}, {0, 6}},
+    {{1, 1}, {1, 13}, {1, 11}, {1, 4}, {1, 2}, {1, 17}},
+    {{2, 13}, {2, 2}, {2, 12}, {2, 6}, {2, 4}, {2, 16}},
+    {{3, 14}, {3, 4}, {3, 7}, {3, 11}, {3, 16}, {3, 6}},
+    {{4, 0}, {4, 10}, {4, 15}, {4, 14}, {4, 17}, {4, 1}},
+    {{5, 14}, {5, 10}, {5, 8}, {5, 5}, {5, 16}, {5, 15}},
 };
 
 /*
@@ -234,176 +233,172 @@ static RingShotHole
  * taken to be a radius
  */
 s32 GetHoleRadius(CourseRecordIndex courseRecordIndex, s32 holeIndex) {
-  switch (courseRecordIndex) {
-    case 0:
-      if (holeIndex == 10) {
-        return 400;
-      }
+    switch (courseRecordIndex) {
+        case 0:
+            if (holeIndex == 10) {
+                return 400;
+            }
 
-      if (holeIndex == 16) {
-        return 400;
-      }
+            if (holeIndex == 16) {
+                return 400;
+            }
 
-      break;
-    case 1:
-      if (holeIndex == 1) {
-        return 400;
-      }
+            break;
+        case 1:
+            if (holeIndex == 1) {
+                return 400;
+            }
 
-      if (holeIndex == 5) {
-        return 600;
-      }
+            if (holeIndex == 5) {
+                return 600;
+            }
 
-      if (holeIndex == 7) {
-        return 150;
-      }
+            if (holeIndex == 7) {
+                return 150;
+            }
 
-      if (holeIndex == 16) {
-        return 300;
-      }
+            if (holeIndex == 16) {
+                return 300;
+            }
 
-      break;
-    case 2:
-      if (holeIndex == 2) {
-        return 300;
-      }
+            break;
+        case 2:
+            if (holeIndex == 2) {
+                return 300;
+            }
 
-      if (holeIndex == 12) {
-        return 600;
-      }
+            if (holeIndex == 12) {
+                return 600;
+            }
 
-      if (holeIndex == 16) {
-        return 550;
-      }
+            if (holeIndex == 16) {
+                return 550;
+            }
 
-      break;
-    case 3:
-      if (holeIndex == 2) {
-        return 300;
-      }
+            break;
+        case 3:
+            if (holeIndex == 2) {
+                return 300;
+            }
 
-      if (holeIndex == 4) {
-        return 1000;
-      }
+            if (holeIndex == 4) {
+                return 1000;
+            }
 
-      if (holeIndex == 9) {
-        return 700;
-      }
+            if (holeIndex == 9) {
+                return 700;
+            }
 
-      if (holeIndex == 10) {
-        return 400;
-      }
+            if (holeIndex == 10) {
+                return 400;
+            }
 
-      if (holeIndex == 11) {
-        return 450;
-      }
+            if (holeIndex == 11) {
+                return 450;
+            }
 
-      if (holeIndex == 12) {
-        return 400;
-      }
+            if (holeIndex == 12) {
+                return 400;
+            }
 
-      if (holeIndex == 13) {
-        return 600;
-      }
+            if (holeIndex == 13) {
+                return 600;
+            }
 
-      if (holeIndex == 16) {
-        return 900;
-      }
+            if (holeIndex == 16) {
+                return 900;
+            }
 
-      break;
-    case 4:
-      if (holeIndex == 10) {
-        return 400;
-      }
+            break;
+        case 4:
+            if (holeIndex == 10) {
+                return 400;
+            }
 
-      if (holeIndex == 15) {
-        return 300;
-      }
+            if (holeIndex == 15) {
+                return 300;
+            }
 
-      break;
-    case 5:
-      if (holeIndex == 15) {
-        return 400;
-      }
+            break;
+        case 5:
+            if (holeIndex == 15) {
+                return 400;
+            }
 
-      if (holeIndex == 16) {
-        return 700;
-      }
+            if (holeIndex == 16) {
+                return 700;
+            }
 
-      if (holeIndex == 17) {
-        return 400;
-      }
+            if (holeIndex == 17) {
+                return 400;
+            }
 
-      break;
-    case COURSE_RECORD_LUIGIS_GARDEN:
-    case COURSE_RECORD_PEACHS_CASTLE:
-      return MINI_GOLF_HOLE_RADIUS;
-  }
+            break;
+        case COURSE_RECORD_LUIGIS_GARDEN:
+        case COURSE_RECORD_PEACHS_CASTLE:
+            return MINI_GOLF_HOLE_RADIUS;
+    }
 
-  return DEFAULT_HOLE_RADIUS;
+    return DEFAULT_HOLE_RADIUS;
 }
 
 CourseRecordIndex GetCourseRecordIndex(void) {
-  if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
-    return f_RingShotHoles[g_GameState.courseIndex][g_GameState.holeIndex]
-        .courseRecordIndex;
-  }
+    if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
+        return f_RingShotHoles[g_GameState.courseIndex][g_GameState.holeIndex].courseRecordIndex;
+    }
 
-  if (g_GameState.isMiniGolf) {
-    return (((g_GameState.courseIndex - MINI_GOLF_COURSE_INDEX) /
-                MINI_GOLF_COURSES_PER_RECORD) &
-               1) |
-        COURSE_RECORD_LUIGIS_GARDEN;
-  }
+    if (g_GameState.isMiniGolf) {
+        return (((g_GameState.courseIndex - MINI_GOLF_COURSE_INDEX) /
+                    MINI_GOLF_COURSES_PER_RECORD) &
+                   1) |
+            COURSE_RECORD_LUIGIS_GARDEN;
+    }
 
-  if (g_GameState.courseIndex >= DRIVING_RANGE_COURSE_INDEX) {
-    return COURSE_RECORD_DRIVING_RANGE;
-  }
+    if (g_GameState.courseIndex >= DRIVING_RANGE_COURSE_INDEX) {
+        return COURSE_RECORD_DRIVING_RANGE;
+    }
 
-  return g_GameState.courseIndex;
+    return g_GameState.courseIndex;
 }
 
 s32 GetHoleRecordIndex(void) {
-  if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
-    return f_RingShotHoles[g_GameState.courseIndex][g_GameState.holeIndex]
-        .holeIndex;
-  }
+    if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
+        return f_RingShotHoles[g_GameState.courseIndex][g_GameState.holeIndex].holeIndex;
+    }
 
-  if (g_GameState.courseIndex >= DRIVING_RANGE_COURSE_INDEX) {
-    return 0;
-  }
+    if (g_GameState.courseIndex >= DRIVING_RANGE_COURSE_INDEX) {
+        return 0;
+    }
 
-  return g_GameState.holeIndex;
+    return g_GameState.holeIndex;
 }
 
 /* GetHoleRecordIndex as if outside Ring Shot */
 s32 GetHoleIndexInRecord(void) {
-  if (g_GameState.courseIndex >= DRIVING_RANGE_COURSE_INDEX) {
-    return 0;
-  }
+    if (g_GameState.courseIndex >= DRIVING_RANGE_COURSE_INDEX) {
+        return 0;
+    }
 
-  return g_GameState.holeIndex;
+    return g_GameState.holeIndex;
 }
 
 /* With g_IsDebugEnabled set, the first hole counts too */
 Boolean IsMarkedParFive(s32 courseRecordIndex, s32 holeIndex) {
-  if (g_GameState.isMiniGolf) {
-    return FALSE;
-  }
+    if (g_GameState.isMiniGolf) {
+        return FALSE;
+    }
 
-  if (g_IsDebugEnabled && holeIndex == 0) {
-    return TRUE;
-  }
+    if (g_IsDebugEnabled && holeIndex == 0) {
+        return TRUE;
+    }
 
-  return g_CourseRecords[courseRecordIndex].holes[holeIndex].flags &
-      HOLE_FLAG_MARKED_PAR_FIVE;
+    return g_CourseRecords[courseRecordIndex].holes[holeIndex].flags & HOLE_FLAG_MARKED_PAR_FIVE;
 }
 
 Boolean IsParThree(s32 courseRecordIndex, s32 holeIndex) {
-  if (g_GameState.isMiniGolf) {
-    return FALSE;
-  }
+    if (g_GameState.isMiniGolf) {
+        return FALSE;
+    }
 
-  return g_CourseRecords[courseRecordIndex].holes[holeIndex].flags &
-      HOLE_FLAG_PAR_THREE;
+    return g_CourseRecords[courseRecordIndex].holes[holeIndex].flags & HOLE_FLAG_PAR_THREE;
 }

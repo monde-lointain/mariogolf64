@@ -8,8 +8,8 @@
 /* The Ring Shot select and the hole select */
 
 Boolean ArePlanksOpen(void);
-void DrawHoleSelect(Gfx** displayListHead);
-void DrawRingShotSelect(Gfx** displayListHead);
+void DrawHoleSelect(Gfx **displayListHead);
+void DrawRingShotSelect(Gfx **displayListHead);
 void FreeCourseSelect(void);
 void LoadCourseSelect(Boolean isHoleSelect);
 void SetPlankMotion(s32 motion);

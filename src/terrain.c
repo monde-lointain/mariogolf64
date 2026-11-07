@@ -83,8 +83,7 @@
 /* GROUND_TILE_POINT_SPAN as a shift */
 #define TILE_POINT_SPAN_SHIFT 2
 /* The index in g_WorkArea.hole.tiles of a tile column and row */
-#define TileIndex(tileColumn, tileRow) \
-  (((tileRow) * GROUND_TILE_COLUMN_COUNT) + (tileColumn))
+#define TileIndex(tileColumn, tileRow) (((tileRow) * GROUND_TILE_COLUMN_COUNT) + (tileColumn))
 
 /*
  * Whether a midpoint on a tile's first row, or first column, is also kept
@@ -92,29 +91,29 @@
  * differently from the original.
  */
 #define IsSharedWithPreviousTileRow(column, row) \
-  (((column) & 1) && !PointSlot(row) && (PointTile(row) > 0))
+    (((column) & 1) && !PointSlot(row) && (PointTile(row) > 0))
 #define IsSharedWithPreviousTileColumn(column, row) \
-  (((row) & 1) && !PointSlot(column) && (PointTile(column) > 0))
+    (((row) & 1) && !PointSlot(column) && (PointTile(column) > 0))
 
 /*
  * What SCENE_MAP_OVERVIEW's controls change. Only the camera position is
  * read back; nothing in the ROM reads the other three.
  */
 typedef struct MapOverviewControls {
-  /* 0x00 */ s32 cameraX;
-  /* 0x04 */ s32 cameraZ;
-  /* 0x08 */ s32 selectionIndex; /* A and B cycle it */
-  /* 0x0C */ s32 adjustment; /* L and R step it */
-  /* 0x10 */ Boolean isToggled; /* Z flips it */
+    /* 0x00 */ s32 cameraX;
+    /* 0x04 */ s32 cameraZ;
+    /* 0x08 */ s32 selectionIndex; /* A and B cycle it */
+    /* 0x0C */ s32 adjustment; /* L and R step it */
+    /* 0x10 */ Boolean isToggled; /* Z flips it */
 } MapOverviewControls; /* size = 0x14 */
 
 /* The flags panel's scroll and cursor */
 typedef struct FlagPanel {
-  /* The first flag row shown */
-  /* 0x0 */ s32 firstRow;
-  /* 0x4 */ s32 column;
-  /* Counted from firstRow */
-  /* 0x8 */ s32 row;
+    /* The first flag row shown */
+    /* 0x0 */ s32 firstRow;
+    /* 0x4 */ s32 column;
+    /* Counted from firstRow */
+    /* 0x8 */ s32 row;
 } FlagPanel; /* size = 0xC */
 
 /*
@@ -122,13 +121,13 @@ typedef struct FlagPanel {
  * column of each tile are its border
  */
 #define MAP_TEXEL(column, row) \
-  g_WorkArea.hole \
-      .tiles[((column) / GROUND_TILE_TEXEL_SPAN) + \
-          (((row) / GROUND_TILE_TEXEL_SPAN) * GROUND_TILE_COLUMN_COUNT)] \
-      .texels[1][((column) & (GROUND_TILE_TEXEL_SPAN - 1)) + \
-          (((row) & (GROUND_TILE_TEXEL_SPAN - 1)) * \
-              GROUND_TILE_TEXEL_ROW_LENGTH) + \
-          1]
+    g_WorkArea.hole \
+        .tiles \
+            [((column) / GROUND_TILE_TEXEL_SPAN) + \
+                (((row) / GROUND_TILE_TEXEL_SPAN) * GROUND_TILE_COLUMN_COUNT)] \
+        .texels[1] \
+               [((column) & (GROUND_TILE_TEXEL_SPAN - 1)) + \
+                   (((row) & (GROUND_TILE_TEXEL_SPAN - 1)) * GROUND_TILE_TEXEL_ROW_LENGTH) + 1]
 
 /*
  * Water tests probe a vertical segment from -reach to +reach; the height
@@ -136,8 +135,7 @@ typedef struct FlagPanel {
  */
 #define WATER_PROBE_REACH 3072000
 #define MINI_GOLF_WATER_PROBE_REACH 614400
-#define WaterProbeHeight(fraction, reach) \
-  (((fraction) * (2.0f * (reach))) + -(f32)(reach))
+#define WaterProbeHeight(fraction, reach) (((fraction) * (2.0f * (reach))) + -(f32)(reach))
 /* Raises the water's height for the surface test, or lowers it when asked */
 #define WATER_BIAS 0x266
 #define LOWERED_WATER_BIAS (-0x600)
@@ -149,8 +147,7 @@ typedef struct FlagPanel {
  * ground side; the unsigned compare catches both ends at once
  */
 #define IsInSurfaceEdgeMargin(coordinate, sideSize) \
-  ((u32)((coordinate) - SURFACE_EDGE_MARGIN) > \
-      (sideSize) - (SURFACE_EDGE_MARGIN * 2) - 1)
+    ((u32)((coordinate) - SURFACE_EDGE_MARGIN) > (sideSize) - (SURFACE_EDGE_MARGIN * 2) - 1)
 /* FindSurface and GetMiniGolfSurface weigh the codes of the texels nearest a
  * point */
 #define NEAREST_CODE_COUNT 4
@@ -169,20 +166,20 @@ typedef struct FlagPanel {
 
 /* f_TerrainColors' entries, named for the terrain codes drawn in them */
 enum TerrainColorIndex {
-  TERRAIN_COLOR_FAIRWAY,
-  TERRAIN_COLOR_GREEN,
-  TERRAIN_COLOR_BUNKER,
-  TERRAIN_COLOR_ROUGH,
-  TERRAIN_COLOR_NO_DROP_GROUND,
-  TERRAIN_COLOR_OUT_OF_BOUNDS,
-  TERRAIN_COLOR_CART_WAY,
-  /* An olive, yellower and darker than the fairway green, that
-   * GetTerrainCodeColor never gives, but that GetColorTerrainCode reads back as
-   * fairway */
-  TERRAIN_COLOR_OLIVE_FAIRWAY,
-  TERRAIN_COLOR_TEE_GROUND,
-  TERRAIN_COLOR_ROCK,
-  TERRAIN_COLOR_DEEP_ROUGH
+    TERRAIN_COLOR_FAIRWAY,
+    TERRAIN_COLOR_GREEN,
+    TERRAIN_COLOR_BUNKER,
+    TERRAIN_COLOR_ROUGH,
+    TERRAIN_COLOR_NO_DROP_GROUND,
+    TERRAIN_COLOR_OUT_OF_BOUNDS,
+    TERRAIN_COLOR_CART_WAY,
+    /* An olive, yellower and darker than the fairway green, that
+     * GetTerrainCodeColor never gives, but that GetColorTerrainCode reads back as
+     * fairway */
+    TERRAIN_COLOR_OLIVE_FAIRWAY,
+    TERRAIN_COLOR_TEE_GROUND,
+    TERRAIN_COLOR_ROCK,
+    TERRAIN_COLOR_DEEP_ROUGH
 };
 
 #define TERRAIN_COLOR_COUNT 11
@@ -200,9 +197,9 @@ enum TerrainColorIndex {
 #define SLOT_GRID_COLUMN_SHIFT 2
 #define SLOT_GRID_MASK 3
 s32 g_CoarseVertexOffsets[GROUND_TILE_COUNT][TILE_VERTEX_SEGMENT_COUNT];
-Gfx* g_GroundTileDisplayLists[GROUND_TILE_COUNT];
+Gfx *g_GroundTileDisplayLists[GROUND_TILE_COUNT];
 u16 g_TerrainCodeColors[TERRAIN_CODE_COUNT];
-Vtx* g_VertexListHead;
+Vtx *g_VertexListHead;
 
 static u8 f_PointSlots[GROUND_TILE_POINT_SPAN + 1][8] = {
     {0x80, 0x00, 0x84, 0x01, 0x88},
@@ -216,14 +213,28 @@ HoleSetup g_HoleSetup = {
     .teePosition = {GROUND_WIDTH / 2, 0, GROUND_LENGTH / 8},
 };
 f32 g_GroundTileHeightRanges[GROUND_TILE_COUNT] = {0};
-s16 g_TerrainCodeCells[TERRAIN_CODE_CELL_ROW_COUNT]
-                      [TERRAIN_CODE_CELL_COLUMN_COUNT] = {{0}};
+s16 g_TerrainCodeCells[TERRAIN_CODE_CELL_ROW_COUNT][TERRAIN_CODE_CELL_COLUMN_COUNT] = {{0}};
 s32 g_TerrainCodeBlockCount = -1;
 
 /* Read by no routine */
-static u8 f_UnusedBytesAfterTerrainBlockCount[16] UNUSED = {0xFF, 0xFF, 0xFF,
-    0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-    0xFF};
+static u8 f_UnusedBytesAfterTerrainBlockCount[16] UNUSED = {
+    0xFF,
+    0xFF,
+    0xFF,
+    0xFF,
+    0xFF,
+    0xFF,
+    0xFF,
+    0xFF,
+    0xFF,
+    0xFF,
+    0xFF,
+    0xFF,
+    0xFF,
+    0xFF,
+    0xFF,
+    0xFF
+};
 
 s32 g_Scene = SCENE_FLAG_PANEL;
 s32 g_NextScene = SCENE_SWAPPING_MODULES;
@@ -247,14 +258,22 @@ static TerrainColor f_TerrainColors[TERRAIN_COLOR_COUNT] = {
     {0x05, 0x05, 0x05, 1}, /* TERRAIN_COLOR_ROCK */
     {0x00, 0x1F, 0x1F, 1}, /* TERRAIN_COLOR_DEEP_ROUGH */
 };
-static MapOverviewControls f_MapOverviewControls = {
-    0, 0, 0, MAP_OVERVIEW_ADJUSTMENT_START, FALSE};
+static MapOverviewControls f_MapOverviewControls = {0, 0, 0, MAP_OVERVIEW_ADJUSTMENT_START, FALSE};
 
 static FlagPanel f_FlagPanel = {0, 0, 0};
 static Boolean f_IsSceneMenuOpen = FALSE;
-static AnimatedBox f_SceneMenuBox = {SCENE_MENU_BOX_LEFT, SCENE_MENU_BOX_TOP,
-    SCENE_MENU_BOX_RIGHT, SCENE_MENU_BOX_BOTTOM, 0x00, 0x00, 0x00, 0x9F,
-    BOX_CLOSED, 0};
+static AnimatedBox f_SceneMenuBox = {
+    SCENE_MENU_BOX_LEFT,
+    SCENE_MENU_BOX_TOP,
+    SCENE_MENU_BOX_RIGHT,
+    SCENE_MENU_BOX_BOTTOM,
+    0x00,
+    0x00,
+    0x00,
+    0x9F,
+    BOX_CLOSED,
+    0
+};
 static s32 f_SceneMenuScenes[SCENE_MENU_LENGTH] = {
     SCENE_PLAY_HOLE,
     SCENE_GROUND_CAMERA,
@@ -311,9 +330,9 @@ s32 GetTerrainHeight(s32 x, s32 z);
 
 /* The byte in the terrain codes that holds a code in a block of cells */
 static inline s32 GetPackedCodeOffset(s32 column, s32 row, s32 block) {
-  return ((column & (TERRAIN_CODE_CELL_SPAN - 1)) >> 1) +
-      ((row & (TERRAIN_CODE_CELL_SPAN - 1)) * (TERRAIN_CODE_CELL_SPAN / 2)) +
-      ((block & (TERRAIN_CODE_CELL_BLOCK - 1)) * TERRAIN_CODE_BLOCK_SIZE);
+    return ((column & (TERRAIN_CODE_CELL_SPAN - 1)) >> 1) +
+        ((row & (TERRAIN_CODE_CELL_SPAN - 1)) * (TERRAIN_CODE_CELL_SPAN / 2)) +
+        ((block & (TERRAIN_CODE_CELL_BLOCK - 1)) * TERRAIN_CODE_BLOCK_SIZE);
 }
 
 /*
@@ -326,40 +345,41 @@ static inline s32 GetPackedCodeOffset(s32 column, s32 row, s32 block) {
  * by row and column 17 to 31.
  */
 s32 GetTerrainCode(s32 column, s32 row) {
-  s32 block;
-  s32 cellOffset;
+    s32 block;
+    s32 cellOffset;
 
-  if (column < 0) {
-    column = 0;
-  } else if (column >= CODE_GRID_COLUMN_COUNT) {
-    column = CODE_GRID_COLUMN_COUNT - 1;
-  }
+    if (column < 0) {
+        column = 0;
+    }
+    else if (column >= CODE_GRID_COLUMN_COUNT) {
+        column = CODE_GRID_COLUMN_COUNT - 1;
+    }
 
-  if (row < 0) {
-    row = 0;
-  } else if (row >= CODE_GRID_ROW_COUNT) {
-    row = CODE_GRID_ROW_COUNT - 1;
-  }
+    if (row < 0) {
+        row = 0;
+    }
+    else if (row >= CODE_GRID_ROW_COUNT) {
+        row = CODE_GRID_ROW_COUNT - 1;
+    }
 
-  cellOffset = ((column / TERRAIN_CODE_CELL_SPAN) * TERRAIN_CODE_CELL_SIZE) +
-      ((row / TERRAIN_CODE_CELL_SPAN) * TERRAIN_CODE_CELL_ROW_SIZE);
-  block = *(s16*)AddressPast(g_TerrainCodeCells, cellOffset);
-  if (block == NO_CELL_TERRAIN_CODE) {
-    return NO_CELL_TERRAIN_CODE;
-  }
+    cellOffset = ((column / TERRAIN_CODE_CELL_SPAN) * TERRAIN_CODE_CELL_SIZE) +
+        ((row / TERRAIN_CODE_CELL_SPAN) * TERRAIN_CODE_CELL_ROW_SIZE);
+    block = *(s16 *)AddressPast(g_TerrainCodeCells, cellOffset);
+    if (block == NO_CELL_TERRAIN_CODE) {
+        return NO_CELL_TERRAIN_CODE;
+    }
 
-  if (block >= 0) {
-    return block;
-  }
+    if (block >= 0) {
+        return block;
+    }
 
-  if (!(column & 1)) {
-    return g_WorkArea.hole
-               .terrainCodes[GetPackedCodeOffset(column, row, block)] >>
-        TERRAIN_CODE_BITS;
-  }
+    if (!(column & 1)) {
+        return g_WorkArea.hole.terrainCodes[GetPackedCodeOffset(column, row, block)] >>
+            TERRAIN_CODE_BITS;
+    }
 
-  return g_WorkArea.hole.terrainCodes[GetPackedCodeOffset(column, row, block)] &
-      TERRAIN_CODE_MASK;
+    return g_WorkArea.hole.terrainCodes[GetPackedCodeOffset(column, row, block)] &
+        TERRAIN_CODE_MASK;
 }
 
 /*
@@ -370,107 +390,106 @@ s32 GetTerrainCode(s32 column, s32 row) {
 
 /* Returns the index of the terrain color nearest an RGBA16 color */
 s32 FindNearestTerrainColor(s32 color) {
-  s32 nearestDistance = BEYOND_ANY_COLOR_DISTANCE;
-  s32 nearestIndex = 0;
-  s32 colorRed = (color >> RGBA16_RED_SHIFT) & RGBA16_CHANNEL_MASK;
-  s32 colorGreen = (color >> RGBA16_GREEN_SHIFT) & RGBA16_CHANNEL_MASK;
-  s32 colorBlue = (color >> RGBA16_BLUE_SHIFT) & RGBA16_CHANNEL_MASK;
-  s32 i;
-  s32 red;
-  s32 green;
-  s32 blue;
-  s32 distance;
+    s32 nearestDistance = BEYOND_ANY_COLOR_DISTANCE;
+    s32 nearestIndex = 0;
+    s32 colorRed = (color >> RGBA16_RED_SHIFT) & RGBA16_CHANNEL_MASK;
+    s32 colorGreen = (color >> RGBA16_GREEN_SHIFT) & RGBA16_CHANNEL_MASK;
+    s32 colorBlue = (color >> RGBA16_BLUE_SHIFT) & RGBA16_CHANNEL_MASK;
+    s32 i;
+    s32 red;
+    s32 green;
+    s32 blue;
+    s32 distance;
 
-  for (i = 0; i < TERRAIN_COLOR_COUNT; i++) {
-    red = colorRed - f_TerrainColors[i].red;
-    if (red < 0) {
-      red = -red;
+    for (i = 0; i < TERRAIN_COLOR_COUNT; i++) {
+        red = colorRed - f_TerrainColors[i].red;
+        if (red < 0) {
+            red = -red;
+        }
+
+        green = colorGreen - f_TerrainColors[i].green;
+        if (green < 0) {
+            green = -green;
+        }
+
+        blue = colorBlue - f_TerrainColors[i].blue;
+        distance = red + green + Abs(blue);
+        if (distance < nearestDistance) {
+            nearestDistance = distance;
+            nearestIndex = i;
+        }
     }
 
-    green = colorGreen - f_TerrainColors[i].green;
-    if (green < 0) {
-      green = -green;
-    }
-
-    blue = colorBlue - f_TerrainColors[i].blue;
-    distance = red + green + Abs(blue);
-    if (distance < nearestDistance) {
-      nearestDistance = distance;
-      nearestIndex = i;
-    }
-  }
-
-  return nearestIndex;
+    return nearestIndex;
 }
 
 /* Returns a terrain code's color as RGBA16 */
 s32 GetTerrainCodeColor(s32 code) {
-  s32 colorIndex = TERRAIN_COLOR_FAIRWAY;
+    s32 colorIndex = TERRAIN_COLOR_FAIRWAY;
 
-  switch (code) {
-    case TERRAIN_CODE_FAIRWAY:
-      colorIndex = TERRAIN_COLOR_FAIRWAY;
-      break;
-    case TERRAIN_CODE_GREEN:
-      colorIndex = TERRAIN_COLOR_GREEN;
-      break;
-    case TERRAIN_CODE_BUNKER:
-      colorIndex = TERRAIN_COLOR_BUNKER;
-      break;
-    case TERRAIN_CODE_ROUGH:
-      colorIndex = TERRAIN_COLOR_ROUGH;
-      break;
-    case TERRAIN_CODE_NO_DROP_GROUND:
-      colorIndex = TERRAIN_COLOR_NO_DROP_GROUND;
-      break;
-    case TERRAIN_CODE_OUT_OF_BOUNDS:
-      colorIndex = TERRAIN_COLOR_OUT_OF_BOUNDS;
-      break;
-    case TERRAIN_CODE_CART_WAY:
-      colorIndex = TERRAIN_COLOR_CART_WAY;
-      break;
-    case TERRAIN_CODE_TEE_GROUND:
-      colorIndex = TERRAIN_COLOR_TEE_GROUND;
-      break;
-    case TERRAIN_CODE_ROCK:
-      colorIndex = TERRAIN_COLOR_ROCK;
-      break;
-    case TERRAIN_CODE_DEEP_ROUGH:
-      colorIndex = TERRAIN_COLOR_DEEP_ROUGH;
-      break;
-  }
+    switch (code) {
+        case TERRAIN_CODE_FAIRWAY:
+            colorIndex = TERRAIN_COLOR_FAIRWAY;
+            break;
+        case TERRAIN_CODE_GREEN:
+            colorIndex = TERRAIN_COLOR_GREEN;
+            break;
+        case TERRAIN_CODE_BUNKER:
+            colorIndex = TERRAIN_COLOR_BUNKER;
+            break;
+        case TERRAIN_CODE_ROUGH:
+            colorIndex = TERRAIN_COLOR_ROUGH;
+            break;
+        case TERRAIN_CODE_NO_DROP_GROUND:
+            colorIndex = TERRAIN_COLOR_NO_DROP_GROUND;
+            break;
+        case TERRAIN_CODE_OUT_OF_BOUNDS:
+            colorIndex = TERRAIN_COLOR_OUT_OF_BOUNDS;
+            break;
+        case TERRAIN_CODE_CART_WAY:
+            colorIndex = TERRAIN_COLOR_CART_WAY;
+            break;
+        case TERRAIN_CODE_TEE_GROUND:
+            colorIndex = TERRAIN_COLOR_TEE_GROUND;
+            break;
+        case TERRAIN_CODE_ROCK:
+            colorIndex = TERRAIN_COLOR_ROCK;
+            break;
+        case TERRAIN_CODE_DEEP_ROUGH:
+            colorIndex = TERRAIN_COLOR_DEEP_ROUGH;
+            break;
+    }
 
-  return (f_TerrainColors[colorIndex].red << RGBA16_RED_SHIFT) |
-      (f_TerrainColors[colorIndex].green << RGBA16_GREEN_SHIFT) |
-      (f_TerrainColors[colorIndex].blue << RGBA16_BLUE_SHIFT) |
-      f_TerrainColors[colorIndex].alpha;
+    return (f_TerrainColors[colorIndex].red << RGBA16_RED_SHIFT) |
+        (f_TerrainColors[colorIndex].green << RGBA16_GREEN_SHIFT) |
+        (f_TerrainColors[colorIndex].blue << RGBA16_BLUE_SHIFT) | f_TerrainColors[colorIndex].alpha;
 }
 
 /* Returns the terrain code whose color is nearest an RGBA16 color */
 s32 GetColorTerrainCode(s32 color) {
-  switch (FindNearestTerrainColor(color)) {
-    case TERRAIN_COLOR_GREEN:
-      return TERRAIN_CODE_GREEN;
-    case TERRAIN_COLOR_BUNKER:
-      return TERRAIN_CODE_BUNKER;
-    case TERRAIN_COLOR_ROUGH:
-      return TERRAIN_CODE_ROUGH;
-    case TERRAIN_COLOR_NO_DROP_GROUND:
-      return TERRAIN_CODE_NO_DROP_GROUND;
-    case TERRAIN_COLOR_CART_WAY:
-      return TERRAIN_CODE_CART_WAY;
-    case TERRAIN_COLOR_FAIRWAY:
-    case TERRAIN_COLOR_OLIVE_FAIRWAY:
-      return TERRAIN_CODE_FAIRWAY;
-    case TERRAIN_COLOR_TEE_GROUND:
-      return TERRAIN_CODE_TEE_GROUND;
-    case TERRAIN_COLOR_ROCK:
-      return TERRAIN_CODE_ROCK;
-    case TERRAIN_COLOR_DEEP_ROUGH:
-      return TERRAIN_CODE_DEEP_ROUGH;
-  }
+    switch (FindNearestTerrainColor(color)) {
+        case TERRAIN_COLOR_GREEN:
+            return TERRAIN_CODE_GREEN;
+        case TERRAIN_COLOR_BUNKER:
+            return TERRAIN_CODE_BUNKER;
+        case TERRAIN_COLOR_ROUGH:
+            return TERRAIN_CODE_ROUGH;
+        case TERRAIN_COLOR_NO_DROP_GROUND:
+            return TERRAIN_CODE_NO_DROP_GROUND;
+        case TERRAIN_COLOR_CART_WAY:
+            return TERRAIN_CODE_CART_WAY;
+        case TERRAIN_COLOR_FAIRWAY:
+        case TERRAIN_COLOR_OLIVE_FAIRWAY:
+            return TERRAIN_CODE_FAIRWAY;
+        case TERRAIN_COLOR_TEE_GROUND:
+            return TERRAIN_CODE_TEE_GROUND;
+        case TERRAIN_COLOR_ROCK:
+            return TERRAIN_CODE_ROCK;
+        case TERRAIN_COLOR_DEEP_ROUGH:
+            return TERRAIN_CODE_DEEP_ROUGH;
+    }
 
-  return TERRAIN_CODE_OUT_OF_BOUNDS;
+    return TERRAIN_CODE_OUT_OF_BOUNDS;
 }
 
 /* The wrong club's penalty leaves at least this percent of a shot */
@@ -481,21 +500,22 @@ s32 GetColorTerrainCode(s32 color) {
  * surface loses the penalty from each, down to no less than
  * MIN_SURFACE_PERCENT.
  */
-void GetSurfacePercentRange(SurfaceInfo* info, Club* club, s32* range) {
-  if (club->surfaceMask & GetSurfaceClubMask(TRUE, info)) {
-    range[0] = info->minPercent;
-    range[1] = info->maxPercent;
-  } else {
-    range[0] = info->minPercent - info->wrongClubPenalty;
-    if (range[0] < MIN_SURFACE_PERCENT) {
-      range[0] = MIN_SURFACE_PERCENT;
+void GetSurfacePercentRange(SurfaceInfo *info, Club *club, s32 *range) {
+    if (club->surfaceMask & GetSurfaceClubMask(TRUE, info)) {
+        range[0] = info->minPercent;
+        range[1] = info->maxPercent;
     }
+    else {
+        range[0] = info->minPercent - info->wrongClubPenalty;
+        if (range[0] < MIN_SURFACE_PERCENT) {
+            range[0] = MIN_SURFACE_PERCENT;
+        }
 
-    range[1] = info->maxPercent - info->wrongClubPenalty;
-    if (range[1] < MIN_SURFACE_PERCENT) {
-      range[1] = MIN_SURFACE_PERCENT;
+        range[1] = info->maxPercent - info->wrongClubPenalty;
+        if (range[1] < MIN_SURFACE_PERCENT) {
+            range[1] = MIN_SURFACE_PERCENT;
+        }
     }
-  }
 }
 
 /* Where GetMiniGolfSurface shows its water probe's result for debugging */
@@ -507,149 +527,154 @@ void GetSurfacePercentRange(SurfaceInfo* info, Club* club, s32* range) {
  * FindSurface but returns the first.
  */
 Surface GetMiniGolfSurface(s32 x, s32 z, Boolean lowersWaterLevel) {
-  s8 surfaces[NEAREST_CODE_COUNT];
-  f32 weights[NEAREST_CODE_COUNT] UNUSED;
-  PlaneTriangle hit;
-  f32 fraction;
-  s32 shiftedX;
-  s32 shiftedZ;
-  s32 waterBias;
-  s32 i;
-  s32 column;
-  s32 row;
-  s32 stepColumn;
-  s32 stepRow;
-  f32 weight;
-  Surface surface;
+    s8 surfaces[NEAREST_CODE_COUNT];
+    f32 weights[NEAREST_CODE_COUNT] UNUSED;
+    PlaneTriangle hit;
+    f32 fraction;
+    s32 shiftedX;
+    s32 shiftedZ;
+    s32 waterBias;
+    s32 i;
+    s32 column;
+    s32 row;
+    s32 stepColumn;
+    s32 stepRow;
+    f32 weight;
+    Surface surface;
 
-  /*
-   * Copied, then shifted, to match: shifting in the copies gives 50 words
-   * differing, none in shape
-   */
-  shiftedX = x;
-  shiftedZ = z;
-  shiftedX -= MINI_GOLF_TEXEL_WIDTH / 2;
-  shiftedZ -= MINI_GOLF_TEXEL_LENGTH / 2;
-  if (IsInSurfaceEdgeMargin(shiftedX, MINI_GOLF_GROUND_SIZE) ||
-      IsInSurfaceEdgeMargin(shiftedZ, MINI_GOLF_GROUND_SIZE)) {
-    return SURFACE_OUT_OF_COURSE;
-  }
-
-  if (FindHoleTriangleHit(shiftedX, -MINI_GOLF_WATER_PROBE_REACH, shiftedZ,
-          shiftedX, MINI_GOLF_WATER_PROBE_REACH, shiftedZ, &hit, &fraction)) {
-    waterBias = WATER_BIAS;
-    if (lowersWaterLevel) {
-      waterBias = LOWERED_WATER_BIAS;
+    /*
+     * Copied, then shifted, to match: shifting in the copies gives 50 words
+     * differing, none in shape
+     */
+    shiftedX = x;
+    shiftedZ = z;
+    shiftedX -= MINI_GOLF_TEXEL_WIDTH / 2;
+    shiftedZ -= MINI_GOLF_TEXEL_LENGTH / 2;
+    if (IsInSurfaceEdgeMargin(shiftedX, MINI_GOLF_GROUND_SIZE) ||
+        IsInSurfaceEdgeMargin(shiftedZ, MINI_GOLF_GROUND_SIZE)) {
+        return SURFACE_OUT_OF_COURSE;
     }
 
-    if (IsGameFlagSet(GAME_FLAG_RANDOM_FRAMEBUFFER_COUNT)) {
-      char text[DEBUG_TEXT_BUFFER_SIZE];
+    if (FindHoleTriangleHit(
+            shiftedX,
+            -MINI_GOLF_WATER_PROBE_REACH,
+            shiftedZ,
+            shiftedX,
+            MINI_GOLF_WATER_PROBE_REACH,
+            shiftedZ,
+            &hit,
+            &fraction
+        )) {
+        waterBias = WATER_BIAS;
+        if (lowersWaterLevel) {
+            waterBias = LOWERED_WATER_BIAS;
+        }
 
-      sprintf(text, "ratio %f,%x", fraction,
-          (unsigned int)(s32)(WaterProbeHeight(
-                                  fraction, MINI_GOLF_WATER_PROBE_REACH) +
-              waterBias));
-      PrintDebugText(text, WATER_RATIO_COLUMN, WATER_RATIO_ROW);
+        if (IsGameFlagSet(GAME_FLAG_RANDOM_FRAMEBUFFER_COUNT)) {
+            char text[DEBUG_TEXT_BUFFER_SIZE];
+
+            sprintf(
+                text,
+                "ratio %f,%x",
+                fraction,
+                (unsigned int)(s32)(WaterProbeHeight(fraction, MINI_GOLF_WATER_PROBE_REACH) +
+                    waterBias)
+            );
+            PrintDebugText(text, WATER_RATIO_COLUMN, WATER_RATIO_ROW);
+        }
+
+        if (hit.tag == HOLE_TRIANGLE_KIND_FLAT) {
+            /*
+             * Reuses i as the water height to match: a waterHeight variable,
+             * wherever it is declared, gives 4 words differing (none in shape), and
+             * comparing the height directly 37 (17)
+             */
+            i = WaterProbeHeight(fraction, MINI_GOLF_WATER_PROBE_REACH) + waterBias;
+            if (i < GetTerrainHeight(x, z)) {
+                return SURFACE_WATER_HAZARD;
+            }
+        }
     }
 
-    if (hit.tag == HOLE_TRIANGLE_KIND_FLAT) {
-      /*
-       * Reuses i as the water height to match: a waterHeight variable,
-       * wherever it is declared, gives 4 words differing (none in shape), and
-       * comparing the height directly 37 (17)
-       */
-      i = WaterProbeHeight(fraction, MINI_GOLF_WATER_PROBE_REACH) + waterBias;
-      if (i < GetTerrainHeight(x, z)) {
-        return SURFACE_WATER_HAZARD;
-      }
-    }
-  }
+    column = shiftedX / MINI_GOLF_TEXEL_WIDTH;
+    row = shiftedZ / MINI_GOLF_TEXEL_LENGTH;
+    stepColumn = ((shiftedX & (MINI_GOLF_TEXEL_WIDTH - 1)) < MINI_GOLF_TEXEL_WIDTH / 2) ? -1 : 1;
+    stepRow = ((shiftedZ & (MINI_GOLF_TEXEL_LENGTH - 1)) < MINI_GOLF_TEXEL_LENGTH / 2) ? -1 : 1;
+    for (i = 0; i < NEAREST_CODE_COUNT; i++) {
+        switch (
+            GetTerrainCode((i & 1) ? column + stepColumn : column, (i & 2) ? row + stepRow : row)) {
+            case TERRAIN_CODE_FAIRWAY:
+                weight = 1.0f;
+                surface = SURFACE_MINI_GOLF_FAIRWAY;
+                break;
+            case TERRAIN_CODE_GREEN:
+                weight = GREEN_SURFACE_WEIGHT;
+                surface = SURFACE_MINI_GOLF_GREEN;
+                break;
+            case TERRAIN_CODE_BUNKER:
+                weight = BUNKER_SURFACE_WEIGHT;
+                surface = SURFACE_BUNKER;
+                break;
+            case TERRAIN_CODE_ROUGH:
+                weight = ROUGH_SURFACE_WEIGHT;
+                surface = SURFACE_ROUGH;
+                break;
+            case TERRAIN_CODE_OUT_OF_BOUNDS:
+                weight = MINI_GOLF_OUT_OF_BOUNDS_SURFACE_WEIGHT;
+                surface = SURFACE_OUT_OF_BOUNDS;
+                break;
+            case TERRAIN_CODE_CART_WAY:
+                weight = 1.0f;
+                surface = SURFACE_MINI_GOLF_CART_WAY;
+                break;
+            case TERRAIN_CODE_TEE_GROUND:
+                weight = 1.0f;
+                surface = SURFACE_TEE_GROUND;
+                break;
+            case TERRAIN_CODE_ROCK:
+                weight = 1.0f;
+                surface = SURFACE_ROCK;
+                break;
+            case TERRAIN_CODE_GREEN_EDGE:
+                weight = 1.0f;
+                surface = SURFACE_GREEN_EDGE;
+                break;
+            case TERRAIN_CODE_SEMI_ROUGH:
+                weight = 1.0f;
+                surface = SURFACE_SEMI_ROUGH;
+                break;
+            case TERRAIN_CODE_BARE_GROUND:
+                weight = 1.0f;
+                surface = SURFACE_BARE_GROUND;
+                break;
+            case TERRAIN_CODE_NO_DROP_GROUND:
+                weight = 1.0f;
+                surface = SURFACE_NO_DROP_GROUND;
+                break;
+            case TERRAIN_CODE_DEEP_ROUGH:
+                weight = ROUGH_SURFACE_WEIGHT;
+                surface = SURFACE_DEEP_ROUGH;
+                break;
+            case TERRAIN_CODE_WASTE_AREA:
+                weight = ROUGH_SURFACE_WEIGHT;
+                surface = SURFACE_WASTE_AREA;
+                break;
+            default:
+                surface = SURFACE_OUT_OF_BOUNDS;
+                weight = 0.0f;
+                break;
+        }
 
-  column = shiftedX / MINI_GOLF_TEXEL_WIDTH;
-  row = shiftedZ / MINI_GOLF_TEXEL_LENGTH;
-  stepColumn =
-      ((shiftedX & (MINI_GOLF_TEXEL_WIDTH - 1)) < MINI_GOLF_TEXEL_WIDTH / 2)
-      ? -1
-      : 1;
-  stepRow =
-      ((shiftedZ & (MINI_GOLF_TEXEL_LENGTH - 1)) < MINI_GOLF_TEXEL_LENGTH / 2)
-      ? -1
-      : 1;
-  for (i = 0; i < NEAREST_CODE_COUNT; i++) {
-    switch (GetTerrainCode((i & 1) ? column + stepColumn : column,
-        (i & 2) ? row + stepRow : row)) {
-      case TERRAIN_CODE_FAIRWAY:
-        weight = 1.0f;
-        surface = SURFACE_MINI_GOLF_FAIRWAY;
-        break;
-      case TERRAIN_CODE_GREEN:
-        weight = GREEN_SURFACE_WEIGHT;
-        surface = SURFACE_MINI_GOLF_GREEN;
-        break;
-      case TERRAIN_CODE_BUNKER:
-        weight = BUNKER_SURFACE_WEIGHT;
-        surface = SURFACE_BUNKER;
-        break;
-      case TERRAIN_CODE_ROUGH:
-        weight = ROUGH_SURFACE_WEIGHT;
-        surface = SURFACE_ROUGH;
-        break;
-      case TERRAIN_CODE_OUT_OF_BOUNDS:
-        weight = MINI_GOLF_OUT_OF_BOUNDS_SURFACE_WEIGHT;
-        surface = SURFACE_OUT_OF_BOUNDS;
-        break;
-      case TERRAIN_CODE_CART_WAY:
-        weight = 1.0f;
-        surface = SURFACE_MINI_GOLF_CART_WAY;
-        break;
-      case TERRAIN_CODE_TEE_GROUND:
-        weight = 1.0f;
-        surface = SURFACE_TEE_GROUND;
-        break;
-      case TERRAIN_CODE_ROCK:
-        weight = 1.0f;
-        surface = SURFACE_ROCK;
-        break;
-      case TERRAIN_CODE_GREEN_EDGE:
-        weight = 1.0f;
-        surface = SURFACE_GREEN_EDGE;
-        break;
-      case TERRAIN_CODE_SEMI_ROUGH:
-        weight = 1.0f;
-        surface = SURFACE_SEMI_ROUGH;
-        break;
-      case TERRAIN_CODE_BARE_GROUND:
-        weight = 1.0f;
-        surface = SURFACE_BARE_GROUND;
-        break;
-      case TERRAIN_CODE_NO_DROP_GROUND:
-        weight = 1.0f;
-        surface = SURFACE_NO_DROP_GROUND;
-        break;
-      case TERRAIN_CODE_DEEP_ROUGH:
-        weight = ROUGH_SURFACE_WEIGHT;
-        surface = SURFACE_DEEP_ROUGH;
-        break;
-      case TERRAIN_CODE_WASTE_AREA:
-        weight = ROUGH_SURFACE_WEIGHT;
-        surface = SURFACE_WASTE_AREA;
-        break;
-      default:
-        surface = SURFACE_OUT_OF_BOUNDS;
-        weight = 0.0f;
-        break;
+        surfaces[i] = surface;
+        weights[i] = weight;
     }
 
-    surfaces[i] = surface;
-    weights[i] = weight;
-  }
-
-  return surfaces[0];
+    return surfaces[0];
 }
 
 /* No jal in the ROM calls this */
 f32 ConvertToFloat(s32 value) {
-  return value;
+    return value;
 }
 
 /*
@@ -674,198 +699,196 @@ f32 ConvertToFloat(s32 value) {
  */
 #ifdef NON_MATCHING
 Surface FindSurface(s32 x, s32 z, Boolean lowersWaterLevel) {
-  s8 surfaces[NEAREST_CODE_COUNT];
-  f32 weights[NEAREST_CODE_COUNT];
-  PlaneTriangle hit;
-  f32 fraction;
-  s32 waterBias;
-  s32 i;
-  s32 column;
-  s32 row;
-  s32 fractionX;
-  s32 fractionZ;
-  s32 stepColumn;
-  s32 stepRow;
-  s32 distanceX;
-  s32 distanceZ;
-  f32 weight;
-  Surface surface;
-  s32 bestIndex;
-  s32 weightIndex;
-  f32 bestWeight;
+    s8 surfaces[NEAREST_CODE_COUNT];
+    f32 weights[NEAREST_CODE_COUNT];
+    PlaneTriangle hit;
+    f32 fraction;
+    s32 waterBias;
+    s32 i;
+    s32 column;
+    s32 row;
+    s32 fractionX;
+    s32 fractionZ;
+    s32 stepColumn;
+    s32 stepRow;
+    s32 distanceX;
+    s32 distanceZ;
+    f32 weight;
+    Surface surface;
+    s32 bestIndex;
+    s32 weightIndex;
+    f32 bestWeight;
 
-  if (g_GameState.isMiniGolf) {
-    return GetMiniGolfSurface(x, z, lowersWaterLevel);
-  }
-
-  if (IsInSurfaceEdgeMargin(x, GROUND_WIDTH)) {
-    return SURFACE_OUT_OF_COURSE;
-  }
-
-  if (IsInSurfaceEdgeMargin(z, GROUND_LENGTH)) {
-    return SURFACE_OUT_OF_COURSE;
-  }
-
-  if (FindHoleTriangleHit(
-          x, -WATER_PROBE_REACH, z, x, WATER_PROBE_REACH, z, &hit, &fraction)) {
-    char unusedText[0x80] UNUSED; /* Unused, but keeps the stack frame the same
-                              size as the original */
-
-    waterBias = WATER_BIAS;
-    if (lowersWaterLevel) {
-      waterBias = LOWERED_WATER_BIAS;
+    if (g_GameState.isMiniGolf) {
+        return GetMiniGolfSurface(x, z, lowersWaterLevel);
     }
 
-    if ((s32)(WaterProbeHeight(fraction, WATER_PROBE_REACH) + waterBias) <
-        GetTerrainHeight(x, z)) {
-      return SURFACE_WATER_HAZARD;
-    }
-  }
-
-  column = x / GROUND_TEXEL_SIZE;
-  row = z / GROUND_TEXEL_SIZE;
-  fractionX = x & (GROUND_TEXEL_SIZE - 1);
-  stepColumn = (fractionX < GROUND_TEXEL_SIZE / 2) ? -1 : 1;
-  fractionZ = z & (GROUND_TEXEL_SIZE - 1);
-  stepRow = (fractionZ < GROUND_TEXEL_SIZE / 2) ? -1 : 1;
-  for (i = 0; i < NEAREST_CODE_COUNT; i++) {
-    switch (GetTerrainCode((i & 1) ? column + stepColumn : column,
-        (i & 2) ? row + stepRow : row)) {
-      case TERRAIN_CODE_FAIRWAY:
-        weight = 1.0f;
-        surface = SURFACE_FAIRWAY;
-        break;
-      case TERRAIN_CODE_GREEN:
-        weight = GREEN_SURFACE_WEIGHT;
-        surface = SURFACE_GREEN;
-        break;
-      case TERRAIN_CODE_BUNKER:
-        weight = BUNKER_SURFACE_WEIGHT;
-        surface = SURFACE_BUNKER;
-        break;
-      case TERRAIN_CODE_ROUGH:
-        weight = ROUGH_SURFACE_WEIGHT;
-        surface = SURFACE_ROUGH;
-        break;
-      case TERRAIN_CODE_OUT_OF_BOUNDS:
-        weight = OUT_OF_BOUNDS_SURFACE_WEIGHT;
-        surface = SURFACE_OUT_OF_BOUNDS;
-        break;
-      case TERRAIN_CODE_CART_WAY:
-        weight = 1.0f;
-        surface = SURFACE_CART_WAY;
-        break;
-      case TERRAIN_CODE_TEE_GROUND:
-        weight = 1.0f;
-        surface = SURFACE_TEE_GROUND;
-        break;
-      case TERRAIN_CODE_ROCK:
-        weight = 1.0f;
-        surface = SURFACE_ROCK;
-        break;
-      case TERRAIN_CODE_GREEN_EDGE:
-        weight = 1.0f;
-        surface = SURFACE_GREEN_EDGE;
-        break;
-      case TERRAIN_CODE_SEMI_ROUGH:
-        weight = 1.0f;
-        surface = SURFACE_SEMI_ROUGH;
-        break;
-      case TERRAIN_CODE_BARE_GROUND:
-        weight = 1.0f;
-        surface = SURFACE_BARE_GROUND;
-        break;
-      case TERRAIN_CODE_NO_DROP_GROUND:
-        weight = 1.0f;
-        surface = SURFACE_NO_DROP_GROUND;
-        break;
-      case TERRAIN_CODE_DEEP_ROUGH:
-        weight = ROUGH_SURFACE_WEIGHT;
-        surface = SURFACE_DEEP_ROUGH;
-        break;
-      case TERRAIN_CODE_WASTE_AREA:
-        weight = ROUGH_SURFACE_WEIGHT;
-        surface = SURFACE_WASTE_AREA;
-        break;
-      default:
-        surface = SURFACE_OUT_OF_BOUNDS;
-        weight = 0.0f;
-        break;
+    if (IsInSurfaceEdgeMargin(x, GROUND_WIDTH)) {
+        return SURFACE_OUT_OF_COURSE;
     }
 
-    surfaces[i] = surface;
-    weights[i] = weight;
-  }
-
-  for (i = 1; i < NEAREST_CODE_COUNT; i++) {
-    if (surfaces[i] != surfaces[0]) {
-      break;
+    if (IsInSurfaceEdgeMargin(z, GROUND_LENGTH)) {
+        return SURFACE_OUT_OF_COURSE;
     }
-  }
 
-  if (i == NEAREST_CODE_COUNT) {
-    return surface;
-  }
+    if (FindHoleTriangleHit(x, -WATER_PROBE_REACH, z, x, WATER_PROBE_REACH, z, &hit, &fraction)) {
+        char unusedText[0x80] UNUSED; /* Unused, but keeps the stack frame the same
+                                  size as the original */
 
-  distanceX = Abs(GROUND_TEXEL_SIZE / 2 - fractionX);
-  distanceZ = Abs(GROUND_TEXEL_SIZE / 2 - fractionZ);
-  if (stepColumn == stepRow) {
-    weights[0] = weights[0] *
-        ((1.0f / ((f32)GROUND_TEXEL_SIZE * GROUND_TEXEL_SIZE)) *
-            ((f32)(GROUND_TEXEL_SIZE - distanceX) *
-                (f32)(GROUND_TEXEL_SIZE - distanceZ)));
-    weights[1] = weights[1] *
-        ((1.0f / ((f32)GROUND_TEXEL_SIZE * GROUND_TEXEL_SIZE)) *
-            ((f32)distanceX * (f32)(GROUND_TEXEL_SIZE - distanceZ)));
-    weights[2] = weights[2] * ((1.0f / GROUND_TEXEL_SIZE) * (f32)distanceZ);
-  } else if (distanceX < distanceZ) {
-    surfaces[1] = surfaces[3];
-    weights[0] = weights[0] *
-        ((1.0f / ((f32)GROUND_TEXEL_SIZE * GROUND_TEXEL_SIZE)) *
-            ((f32)(GROUND_TEXEL_SIZE - distanceZ) *
-                (f32)(GROUND_TEXEL_SIZE - distanceX)));
-    weights[2] = weights[2] *
-        ((1.0f / ((f32)GROUND_TEXEL_SIZE * GROUND_TEXEL_SIZE)) *
-            ((f32)distanceZ * (f32)(GROUND_TEXEL_SIZE - distanceX)));
-    weights[1] = weights[3] * (f32)distanceX * (1.0f / GROUND_TEXEL_SIZE);
-  } else {
-    surfaces[2] = surfaces[3];
-    weights[0] = weights[0] *
-        ((1.0f / ((f32)GROUND_TEXEL_SIZE * GROUND_TEXEL_SIZE)) *
-            ((f32)(GROUND_TEXEL_SIZE - distanceX) *
-                (f32)(GROUND_TEXEL_SIZE - distanceZ)));
-    weights[1] = weights[1] *
-        ((1.0f / ((f32)GROUND_TEXEL_SIZE * GROUND_TEXEL_SIZE)) *
-            ((f32)distanceX * (f32)(GROUND_TEXEL_SIZE - distanceZ)));
-    weights[2] = weights[3] * (f32)distanceZ * (1.0f / GROUND_TEXEL_SIZE);
-  }
+        waterBias = WATER_BIAS;
+        if (lowersWaterLevel) {
+            waterBias = LOWERED_WATER_BIAS;
+        }
 
-  if (surfaces[0] == surfaces[1]) {
-    weights[0] += weights[1];
-    weights[1] = 0.0f;
-  }
-
-  if (surfaces[0] == surfaces[2]) {
-    weights[0] += weights[2];
-    weights[2] = 0.0f;
-  }
-
-  bestIndex = 0;
-  if (surfaces[1] == surfaces[2]) {
-    weights[1] += weights[2];
-    weights[2] = 0.0f;
-  }
-
-  /* The last code's weight has gone to another's or been dropped */
-  bestWeight = 0.0f;
-  for (weightIndex = 0; weightIndex < NEAREST_CODE_COUNT - 1; weightIndex++) {
-    if (bestWeight < weights[weightIndex]) {
-      bestIndex = weightIndex;
-      bestWeight = weights[weightIndex];
+        if ((s32)(WaterProbeHeight(fraction, WATER_PROBE_REACH) + waterBias) <
+            GetTerrainHeight(x, z)) {
+            return SURFACE_WATER_HAZARD;
+        }
     }
-  }
 
-  return surfaces[bestIndex];
+    column = x / GROUND_TEXEL_SIZE;
+    row = z / GROUND_TEXEL_SIZE;
+    fractionX = x & (GROUND_TEXEL_SIZE - 1);
+    stepColumn = (fractionX < GROUND_TEXEL_SIZE / 2) ? -1 : 1;
+    fractionZ = z & (GROUND_TEXEL_SIZE - 1);
+    stepRow = (fractionZ < GROUND_TEXEL_SIZE / 2) ? -1 : 1;
+    for (i = 0; i < NEAREST_CODE_COUNT; i++) {
+        switch (
+            GetTerrainCode((i & 1) ? column + stepColumn : column, (i & 2) ? row + stepRow : row)) {
+            case TERRAIN_CODE_FAIRWAY:
+                weight = 1.0f;
+                surface = SURFACE_FAIRWAY;
+                break;
+            case TERRAIN_CODE_GREEN:
+                weight = GREEN_SURFACE_WEIGHT;
+                surface = SURFACE_GREEN;
+                break;
+            case TERRAIN_CODE_BUNKER:
+                weight = BUNKER_SURFACE_WEIGHT;
+                surface = SURFACE_BUNKER;
+                break;
+            case TERRAIN_CODE_ROUGH:
+                weight = ROUGH_SURFACE_WEIGHT;
+                surface = SURFACE_ROUGH;
+                break;
+            case TERRAIN_CODE_OUT_OF_BOUNDS:
+                weight = OUT_OF_BOUNDS_SURFACE_WEIGHT;
+                surface = SURFACE_OUT_OF_BOUNDS;
+                break;
+            case TERRAIN_CODE_CART_WAY:
+                weight = 1.0f;
+                surface = SURFACE_CART_WAY;
+                break;
+            case TERRAIN_CODE_TEE_GROUND:
+                weight = 1.0f;
+                surface = SURFACE_TEE_GROUND;
+                break;
+            case TERRAIN_CODE_ROCK:
+                weight = 1.0f;
+                surface = SURFACE_ROCK;
+                break;
+            case TERRAIN_CODE_GREEN_EDGE:
+                weight = 1.0f;
+                surface = SURFACE_GREEN_EDGE;
+                break;
+            case TERRAIN_CODE_SEMI_ROUGH:
+                weight = 1.0f;
+                surface = SURFACE_SEMI_ROUGH;
+                break;
+            case TERRAIN_CODE_BARE_GROUND:
+                weight = 1.0f;
+                surface = SURFACE_BARE_GROUND;
+                break;
+            case TERRAIN_CODE_NO_DROP_GROUND:
+                weight = 1.0f;
+                surface = SURFACE_NO_DROP_GROUND;
+                break;
+            case TERRAIN_CODE_DEEP_ROUGH:
+                weight = ROUGH_SURFACE_WEIGHT;
+                surface = SURFACE_DEEP_ROUGH;
+                break;
+            case TERRAIN_CODE_WASTE_AREA:
+                weight = ROUGH_SURFACE_WEIGHT;
+                surface = SURFACE_WASTE_AREA;
+                break;
+            default:
+                surface = SURFACE_OUT_OF_BOUNDS;
+                weight = 0.0f;
+                break;
+        }
+
+        surfaces[i] = surface;
+        weights[i] = weight;
+    }
+
+    for (i = 1; i < NEAREST_CODE_COUNT; i++) {
+        if (surfaces[i] != surfaces[0]) {
+            break;
+        }
+    }
+
+    if (i == NEAREST_CODE_COUNT) {
+        return surface;
+    }
+
+    distanceX = Abs(GROUND_TEXEL_SIZE / 2 - fractionX);
+    distanceZ = Abs(GROUND_TEXEL_SIZE / 2 - fractionZ);
+    if (stepColumn == stepRow) {
+        weights[0] = weights[0] *
+            ((1.0f / ((f32)GROUND_TEXEL_SIZE * GROUND_TEXEL_SIZE)) *
+                ((f32)(GROUND_TEXEL_SIZE - distanceX) * (f32)(GROUND_TEXEL_SIZE - distanceZ)));
+        weights[1] = weights[1] *
+            ((1.0f / ((f32)GROUND_TEXEL_SIZE * GROUND_TEXEL_SIZE)) *
+                ((f32)distanceX * (f32)(GROUND_TEXEL_SIZE - distanceZ)));
+        weights[2] = weights[2] * ((1.0f / GROUND_TEXEL_SIZE) * (f32)distanceZ);
+    }
+    else if (distanceX < distanceZ) {
+        surfaces[1] = surfaces[3];
+        weights[0] = weights[0] *
+            ((1.0f / ((f32)GROUND_TEXEL_SIZE * GROUND_TEXEL_SIZE)) *
+                ((f32)(GROUND_TEXEL_SIZE - distanceZ) * (f32)(GROUND_TEXEL_SIZE - distanceX)));
+        weights[2] = weights[2] *
+            ((1.0f / ((f32)GROUND_TEXEL_SIZE * GROUND_TEXEL_SIZE)) *
+                ((f32)distanceZ * (f32)(GROUND_TEXEL_SIZE - distanceX)));
+        weights[1] = weights[3] * (f32)distanceX * (1.0f / GROUND_TEXEL_SIZE);
+    }
+    else {
+        surfaces[2] = surfaces[3];
+        weights[0] = weights[0] *
+            ((1.0f / ((f32)GROUND_TEXEL_SIZE * GROUND_TEXEL_SIZE)) *
+                ((f32)(GROUND_TEXEL_SIZE - distanceX) * (f32)(GROUND_TEXEL_SIZE - distanceZ)));
+        weights[1] = weights[1] *
+            ((1.0f / ((f32)GROUND_TEXEL_SIZE * GROUND_TEXEL_SIZE)) *
+                ((f32)distanceX * (f32)(GROUND_TEXEL_SIZE - distanceZ)));
+        weights[2] = weights[3] * (f32)distanceZ * (1.0f / GROUND_TEXEL_SIZE);
+    }
+
+    if (surfaces[0] == surfaces[1]) {
+        weights[0] += weights[1];
+        weights[1] = 0.0f;
+    }
+
+    if (surfaces[0] == surfaces[2]) {
+        weights[0] += weights[2];
+        weights[2] = 0.0f;
+    }
+
+    bestIndex = 0;
+    if (surfaces[1] == surfaces[2]) {
+        weights[1] += weights[2];
+        weights[2] = 0.0f;
+    }
+
+    /* The last code's weight has gone to another's or been dropped */
+    bestWeight = 0.0f;
+    for (weightIndex = 0; weightIndex < NEAREST_CODE_COUNT - 1; weightIndex++) {
+        if (bestWeight < weights[weightIndex]) {
+            bestIndex = weightIndex;
+            bestWeight = weights[weightIndex];
+        }
+    }
+
+    return surfaces[bestIndex];
 }
 
 #else
@@ -873,193 +896,192 @@ INCLUDE_ASM("asm/nonmatchings/terrain", FindSurface);
 #endif
 
 Surface GetSurface(s32 x, s32 z) {
-  return FindSurface(x, z, FALSE);
+    return FindSurface(x, z, FALSE);
 }
 
-SurfaceInfo* GetSurfaceInfoAt(s32 x, s32 z) {
-  return GetSurfaceInfo(GetSurface(x, z));
+SurfaceInfo *GetSurfaceInfoAt(s32 x, s32 z) {
+    return GetSurfaceInfo(GetSurface(x, z));
 }
 
 /* Returns the map image's color at a point, or 0 off the course */
 u16 GetMapColor(s32 x, s32 z) {
-  u32 column;
-  u32 row;
+    u32 column;
+    u32 row;
 
-  if ((u32)x >= GROUND_WIDTH) {
-    return 0;
-  }
+    if ((u32)x >= GROUND_WIDTH) {
+        return 0;
+    }
 
-  if ((u32)z >= GROUND_LENGTH) {
-    return 0;
-  }
+    if ((u32)z >= GROUND_LENGTH) {
+        return 0;
+    }
 
-  column = x / GROUND_TEXEL_SIZE;
-  row = z / GROUND_TEXEL_SIZE;
-  return MAP_TEXEL(column, row) | 1;
+    column = x / GROUND_TEXEL_SIZE;
+    row = z / GROUND_TEXEL_SIZE;
+    return MAP_TEXEL(column, row) | 1;
 }
 
 /* Returns the map color at a point, averaged with the color of the terrain
  * code for a surface */
 s32 BlendSurfaceMapColor(s32 x, s32 z, Surface surface) {
-  u16 groundColor = GetMapColor(x, z);
-  s32 code = -1;
-  s32 groundRed;
-  s32 groundGreen;
-  s32 groundBlue;
-  s32 surfaceRed;
-  s32 surfaceGreen;
-  s32 surfaceBlue;
-  u16 surfaceColor;
+    u16 groundColor = GetMapColor(x, z);
+    s32 code = -1;
+    s32 groundRed;
+    s32 groundGreen;
+    s32 groundBlue;
+    s32 surfaceRed;
+    s32 surfaceGreen;
+    s32 surfaceBlue;
+    u16 surfaceColor;
 
-  switch (GetSurfaceInfo(surface)->kind) {
-    case SURFACE_KIND_FAIRWAY:
-    case SURFACE_KIND_FAIRWAY_FAIR_LIE:
-    case SURFACE_KIND_FAIRWAY_POOR_LIE:
-    case SURFACE_KIND_SEMI_ROUGH:
-      code = TERRAIN_CODE_FAIRWAY;
-      break;
-    case SURFACE_KIND_ROUGH:
-    case SURFACE_KIND_ROUGH_POOR_LIE:
-      code = TERRAIN_CODE_ROUGH;
-      break;
-    case SURFACE_KIND_BUNKER:
-    case SURFACE_KIND_BUNKER_FAIR_LIE:
-    case SURFACE_KIND_BUNKER_POOR_LIE:
-    case SURFACE_KIND_BUNKER_UNUSED_LIE:
-      code = TERRAIN_CODE_BUNKER;
-      break;
-    case SURFACE_KIND_DEEP_ROUGH:
-      code = TERRAIN_CODE_DEEP_ROUGH;
-      break;
-    case SURFACE_KIND_OUT_OF_BOUNDS:
-      code = TERRAIN_CODE_OUT_OF_BOUNDS;
-      break;
-    case SURFACE_KIND_GREEN:
-    case SURFACE_KIND_GREEN_EDGE:
-      code = TERRAIN_CODE_GREEN;
-      break;
-    case SURFACE_KIND_ROCK:
-      code = TERRAIN_CODE_ROCK;
-      break;
-    case SURFACE_KIND_BARE_GROUND:
-    case SURFACE_KIND_NO_DROP_GROUND:
-      code = TERRAIN_CODE_BARE_GROUND;
-      break;
-    case SURFACE_KIND_TEE_GROUND:
-      code = TERRAIN_CODE_TEE_GROUND;
-      break;
-    case SURFACE_KIND_CART_WAY:
-      code = TERRAIN_CODE_CART_WAY;
-      break;
-  }
+    switch (GetSurfaceInfo(surface)->kind) {
+        case SURFACE_KIND_FAIRWAY:
+        case SURFACE_KIND_FAIRWAY_FAIR_LIE:
+        case SURFACE_KIND_FAIRWAY_POOR_LIE:
+        case SURFACE_KIND_SEMI_ROUGH:
+            code = TERRAIN_CODE_FAIRWAY;
+            break;
+        case SURFACE_KIND_ROUGH:
+        case SURFACE_KIND_ROUGH_POOR_LIE:
+            code = TERRAIN_CODE_ROUGH;
+            break;
+        case SURFACE_KIND_BUNKER:
+        case SURFACE_KIND_BUNKER_FAIR_LIE:
+        case SURFACE_KIND_BUNKER_POOR_LIE:
+        case SURFACE_KIND_BUNKER_UNUSED_LIE:
+            code = TERRAIN_CODE_BUNKER;
+            break;
+        case SURFACE_KIND_DEEP_ROUGH:
+            code = TERRAIN_CODE_DEEP_ROUGH;
+            break;
+        case SURFACE_KIND_OUT_OF_BOUNDS:
+            code = TERRAIN_CODE_OUT_OF_BOUNDS;
+            break;
+        case SURFACE_KIND_GREEN:
+        case SURFACE_KIND_GREEN_EDGE:
+            code = TERRAIN_CODE_GREEN;
+            break;
+        case SURFACE_KIND_ROCK:
+            code = TERRAIN_CODE_ROCK;
+            break;
+        case SURFACE_KIND_BARE_GROUND:
+        case SURFACE_KIND_NO_DROP_GROUND:
+            code = TERRAIN_CODE_BARE_GROUND;
+            break;
+        case SURFACE_KIND_TEE_GROUND:
+            code = TERRAIN_CODE_TEE_GROUND;
+            break;
+        case SURFACE_KIND_CART_WAY:
+            code = TERRAIN_CODE_CART_WAY;
+            break;
+    }
 
-  if (code >= 0) {
-    groundRed = groundColor >> RGBA16_RED_SHIFT;
-    groundGreen = (groundColor >> RGBA16_GREEN_SHIFT) & RGBA16_CHANNEL_MASK;
-    surfaceColor = g_TerrainCodeColors[code];
+    if (code >= 0) {
+        groundRed = groundColor >> RGBA16_RED_SHIFT;
+        groundGreen = (groundColor >> RGBA16_GREEN_SHIFT) & RGBA16_CHANNEL_MASK;
+        surfaceColor = g_TerrainCodeColors[code];
 
-    /* The original assigns the surface's blue to the ground's and never sets
-     * surfaceBlue. */
-    groundBlue = (surfaceColor >> RGBA16_BLUE_SHIFT) & RGBA16_CHANNEL_MASK;
+        /* The original assigns the surface's blue to the ground's and never sets
+         * surfaceBlue. */
+        groundBlue = (surfaceColor >> RGBA16_BLUE_SHIFT) & RGBA16_CHANNEL_MASK;
 #ifdef AVOID_UB
-    surfaceBlue = groundBlue;
+        surfaceBlue = groundBlue;
 #endif
-    surfaceRed = surfaceColor >> RGBA16_RED_SHIFT;
-    surfaceGreen = (surfaceColor >> RGBA16_GREEN_SHIFT) & RGBA16_CHANNEL_MASK;
-    osSyncPrintf("c1(%d,%d,%d) c2(%d,%d,%d)\n", groundRed, groundGreen,
-        groundBlue, surfaceRed, surfaceGreen, surfaceBlue);
-    groundRed = (groundRed + surfaceRed) >> 1;
-    groundGreen = (groundGreen + surfaceGreen) >> 1;
-    groundBlue = (groundBlue + surfaceBlue) / 2;
-    return (groundRed << RGBA16_RED_SHIFT) |
-        (groundGreen << RGBA16_GREEN_SHIFT) |
-        (groundBlue << RGBA16_BLUE_SHIFT) | 1;
-  }
+        surfaceRed = surfaceColor >> RGBA16_RED_SHIFT;
+        surfaceGreen = (surfaceColor >> RGBA16_GREEN_SHIFT) & RGBA16_CHANNEL_MASK;
+        osSyncPrintf(
+            "c1(%d,%d,%d) c2(%d,%d,%d)\n",
+            groundRed,
+            groundGreen,
+            groundBlue,
+            surfaceRed,
+            surfaceGreen,
+            surfaceBlue
+        );
+        groundRed = (groundRed + surfaceRed) >> 1;
+        groundGreen = (groundGreen + surfaceGreen) >> 1;
+        groundBlue = (groundBlue + surfaceBlue) / 2;
+        return (groundRed << RGBA16_RED_SHIFT) | (groundGreen << RGBA16_GREEN_SHIFT) |
+            (groundBlue << RGBA16_BLUE_SHIFT) | 1;
+    }
 
-  return groundColor;
+    return groundColor;
 }
 
 /* The height is unused */
 Boolean IsInWater(s32 x, s32 y UNUSED, s32 z) {
-  return GetSurface(x, z) == SURFACE_WATER_HAZARD;
+    return GetSurface(x, z) == SURFACE_WATER_HAZARD;
 }
 
 /* Sets a vertex halfway between two others */
-void SetVertexMidpoint(Vtx* first, Vtx* second, Vtx* midpoint) {
-  midpoint->v.ob[AXIS_X] = (first->v.ob[AXIS_X] + second->v.ob[AXIS_X]) / 2;
-  midpoint->v.ob[AXIS_Y] = (first->v.ob[AXIS_Y] + second->v.ob[AXIS_Y]) / 2;
-  midpoint->v.ob[AXIS_Z] = (first->v.ob[AXIS_Z] + second->v.ob[AXIS_Z]) / 2;
-  midpoint->v.flag = 0;
-  midpoint->v.tc[TEXTURE_AXIS_S] =
-      (first->v.tc[TEXTURE_AXIS_S] + second->v.tc[TEXTURE_AXIS_S]) / 2;
-  midpoint->v.tc[TEXTURE_AXIS_T] =
-      (first->v.tc[TEXTURE_AXIS_T] + second->v.tc[TEXTURE_AXIS_T]) / 2;
-  midpoint->v.cn[0] = (first->v.cn[0] + second->v.cn[0]) / 2;
-  midpoint->v.cn[1] = (first->v.cn[1] + second->v.cn[1]) / 2;
-  midpoint->v.cn[2] = (first->v.cn[2] + second->v.cn[2]) / 2;
-  midpoint->v.cn[3] = (first->v.cn[3] + second->v.cn[3]) / 2;
+void SetVertexMidpoint(Vtx *first, Vtx *second, Vtx *midpoint) {
+    midpoint->v.ob[AXIS_X] = (first->v.ob[AXIS_X] + second->v.ob[AXIS_X]) / 2;
+    midpoint->v.ob[AXIS_Y] = (first->v.ob[AXIS_Y] + second->v.ob[AXIS_Y]) / 2;
+    midpoint->v.ob[AXIS_Z] = (first->v.ob[AXIS_Z] + second->v.ob[AXIS_Z]) / 2;
+    midpoint->v.flag = 0;
+    midpoint->v.tc[TEXTURE_AXIS_S] =
+        (first->v.tc[TEXTURE_AXIS_S] + second->v.tc[TEXTURE_AXIS_S]) / 2;
+    midpoint->v.tc[TEXTURE_AXIS_T] =
+        (first->v.tc[TEXTURE_AXIS_T] + second->v.tc[TEXTURE_AXIS_T]) / 2;
+    midpoint->v.cn[0] = (first->v.cn[0] + second->v.cn[0]) / 2;
+    midpoint->v.cn[1] = (first->v.cn[1] + second->v.cn[1]) / 2;
+    midpoint->v.cn[2] = (first->v.cn[2] + second->v.cn[2]) / 2;
+    midpoint->v.cn[3] = (first->v.cn[3] + second->v.cn[3]) / 2;
 }
 
 /*
  * Sets a vertex the fraction weight / EDGE_WEIGHT_MAX of the way from one
  * vertex to another
  */
-void BlendVertices(Vtx* first, Vtx* second, Vtx* result, s32 weight) {
-  s32 firstWeight = EDGE_WEIGHT_MAX - weight;
+void BlendVertices(Vtx *first, Vtx *second, Vtx *result, s32 weight) {
+    s32 firstWeight = EDGE_WEIGHT_MAX - weight;
 
-  result->v.ob[AXIS_X] =
-      ((first->v.ob[AXIS_X] * firstWeight) + (second->v.ob[AXIS_X] * weight)) /
-      EDGE_WEIGHT_MAX;
-  result->v.ob[AXIS_Y] =
-      ((first->v.ob[AXIS_Y] * firstWeight) + (second->v.ob[AXIS_Y] * weight)) /
-      EDGE_WEIGHT_MAX;
-  result->v.ob[AXIS_Z] =
-      ((first->v.ob[AXIS_Z] * firstWeight) + (second->v.ob[AXIS_Z] * weight)) /
-      EDGE_WEIGHT_MAX;
-  result->v.flag = 0;
-  result->v.tc[TEXTURE_AXIS_S] = ((first->v.tc[TEXTURE_AXIS_S] * firstWeight) +
-                                     (second->v.tc[TEXTURE_AXIS_S] * weight)) /
-      EDGE_WEIGHT_MAX;
-  result->v.tc[TEXTURE_AXIS_T] = ((first->v.tc[TEXTURE_AXIS_T] * firstWeight) +
-                                     (second->v.tc[TEXTURE_AXIS_T] * weight)) /
-      EDGE_WEIGHT_MAX;
-  result->v.cn[0] =
-      ((first->v.cn[0] * firstWeight) + (second->v.cn[0] * weight)) /
-      EDGE_WEIGHT_MAX;
-  result->v.cn[1] =
-      ((first->v.cn[1] * firstWeight) + (second->v.cn[1] * weight)) /
-      EDGE_WEIGHT_MAX;
-  result->v.cn[2] =
-      ((first->v.cn[2] * firstWeight) + (second->v.cn[2] * weight)) /
-      EDGE_WEIGHT_MAX;
-  result->v.cn[3] =
-      ((first->v.cn[3] * firstWeight) + (second->v.cn[3] * weight)) /
-      EDGE_WEIGHT_MAX;
+    result->v.ob[AXIS_X] =
+        ((first->v.ob[AXIS_X] * firstWeight) + (second->v.ob[AXIS_X] * weight)) / EDGE_WEIGHT_MAX;
+    result->v.ob[AXIS_Y] =
+        ((first->v.ob[AXIS_Y] * firstWeight) + (second->v.ob[AXIS_Y] * weight)) / EDGE_WEIGHT_MAX;
+    result->v.ob[AXIS_Z] =
+        ((first->v.ob[AXIS_Z] * firstWeight) + (second->v.ob[AXIS_Z] * weight)) / EDGE_WEIGHT_MAX;
+    result->v.flag = 0;
+    result->v.tc[TEXTURE_AXIS_S] =
+        ((first->v.tc[TEXTURE_AXIS_S] * firstWeight) + (second->v.tc[TEXTURE_AXIS_S] * weight)) /
+        EDGE_WEIGHT_MAX;
+    result->v.tc[TEXTURE_AXIS_T] =
+        ((first->v.tc[TEXTURE_AXIS_T] * firstWeight) + (second->v.tc[TEXTURE_AXIS_T] * weight)) /
+        EDGE_WEIGHT_MAX;
+    result->v.cn[0] =
+        ((first->v.cn[0] * firstWeight) + (second->v.cn[0] * weight)) / EDGE_WEIGHT_MAX;
+    result->v.cn[1] =
+        ((first->v.cn[1] * firstWeight) + (second->v.cn[1] * weight)) / EDGE_WEIGHT_MAX;
+    result->v.cn[2] =
+        ((first->v.cn[2] * firstWeight) + (second->v.cn[2] * weight)) / EDGE_WEIGHT_MAX;
+    result->v.cn[3] =
+        ((first->v.cn[3] * firstWeight) + (second->v.cn[3] * weight)) / EDGE_WEIGHT_MAX;
 }
 
 /* Returns the grid vertex at a vertex column and row, or the first one off the
  * grid */
-Vtx* GetGridVertex(u32 column, u32 row) {
-  Vtx* vertex;
+Vtx *GetGridVertex(u32 column, u32 row) {
+    Vtx *vertex;
 
-  if (column >= GROUND_GRID_VERTEX_COLUMN_COUNT ||
-      row >= GROUND_GRID_VERTEX_ROW_COUNT) {
-    vertex = &g_WorkArea.hole.gridVertices[0];
-  } else {
-    vertex = &g_WorkArea.hole.gridVertices[(row * GROUND_GRID_COLUMN_COUNT) +
-        (column >> 1) + ((column & 1) * GROUND_GRID_EVEN_COLUMN_COUNT)];
-  }
+    if (column >= GROUND_GRID_VERTEX_COLUMN_COUNT || row >= GROUND_GRID_VERTEX_ROW_COUNT) {
+        vertex = &g_WorkArea.hole.gridVertices[0];
+    }
+    else {
+        vertex = &g_WorkArea.hole.gridVertices
+                      [(row * GROUND_GRID_COLUMN_COUNT) + (column >> 1) +
+                          ((column & 1) * GROUND_GRID_EVEN_COLUMN_COUNT)];
+    }
 
-  return vertex;
+    return vertex;
 }
 
 s16 GetGridVertexHeight(s32 column, s32 row) {
-  return GetGridVertex(column, row)->v.ob[AXIS_Y];
+    return GetGridVertex(column, row)->v.ob[AXIS_Y];
 }
 
 /* Grid vertices are half a tile apart, in world units */
-#define GRID_VERTEX_WORLD_SHIFT \
-  ((GROUND_TILE_SHIFT - WORLD_TO_COURSE_SHIFT) - 1)
+#define GRID_VERTEX_WORLD_SHIFT ((GROUND_TILE_SHIFT - WORLD_TO_COURSE_SHIFT) - 1)
 /* Texture coordinates step this many texels from one grid vertex to the next */
 #define GRID_VERTEX_TEXEL_SPAN 32
 /*
@@ -1070,40 +1092,40 @@ s16 GetGridVertexHeight(s32 column, s32 row) {
 
 /* Places a grid vertex flat on the grid at a height, with a gray shade */
 void InitGridVertex(s32 column, s32 row, s32 height, u8 shade) {
-  Vtx* vertex = GetGridVertex(column, row);
+    Vtx *vertex = GetGridVertex(column, row);
 
-  vertex->v.ob[AXIS_X] = column << GRID_VERTEX_WORLD_SHIFT;
-  vertex->v.ob[AXIS_Z] = row << GRID_VERTEX_WORLD_SHIFT;
-  vertex->v.ob[AXIS_Y] = height & ~1;
-  vertex->v.flag = 0;
-  vertex->v.tc[TEXTURE_AXIS_S] =
-      TexelCoordinate(column * GRID_VERTEX_TEXEL_SPAN) + TexelCoordinate(1);
-  vertex->v.tc[TEXTURE_AXIS_T] =
-      TexelCoordinate(row * GRID_VERTEX_TEXEL_SPAN) + TexelCoordinate(1);
-  if (row == GROUND_GRID_ROW_COUNT - 1) {
-    vertex->v.tc[TEXTURE_AXIS_T] = MAX_TEXTURE_COORDINATE;
-  }
+    vertex->v.ob[AXIS_X] = column << GRID_VERTEX_WORLD_SHIFT;
+    vertex->v.ob[AXIS_Z] = row << GRID_VERTEX_WORLD_SHIFT;
+    vertex->v.ob[AXIS_Y] = height & ~1;
+    vertex->v.flag = 0;
+    vertex->v.tc[TEXTURE_AXIS_S] =
+        TexelCoordinate(column * GRID_VERTEX_TEXEL_SPAN) + TexelCoordinate(1);
+    vertex->v.tc[TEXTURE_AXIS_T] =
+        TexelCoordinate(row * GRID_VERTEX_TEXEL_SPAN) + TexelCoordinate(1);
+    if (row == GROUND_GRID_ROW_COUNT - 1) {
+        vertex->v.tc[TEXTURE_AXIS_T] = MAX_TEXTURE_COORDINATE;
+    }
 
-  vertex->v.cn[0] = shade;
-  vertex->v.cn[1] = shade;
-  vertex->v.cn[2] = shade;
-  vertex->v.cn[3] = OPAQUE_ALPHA;
+    vertex->v.cn[0] = shade;
+    vertex->v.cn[1] = shade;
+    vertex->v.cn[2] = shade;
+    vertex->v.cn[3] = OPAQUE_ALPHA;
 }
 
 void SetGridVertexHeight(s32 column, s32 row, s32 height) {
-  GetGridVertex(column, row)->v.ob[AXIS_Y] = height & ~1;
+    GetGridVertex(column, row)->v.ob[AXIS_Y] = height & ~1;
 }
 
 void SetGridVertexShade(s32 column, s32 row, s8 shade) {
-  Vtx* vertex = GetGridVertex(column, row);
+    Vtx *vertex = GetGridVertex(column, row);
 
-  vertex->v.cn[0] = shade;
-  vertex->v.cn[1] = shade;
-  vertex->v.cn[2] = shade;
+    vertex->v.cn[0] = shade;
+    vertex->v.cn[1] = shade;
+    vertex->v.cn[2] = shade;
 }
 
-void SetGridVertex(s32 column, s32 row, Vtx_t* point) {
-  GetGridVertex(column, row)->v = *point;
+void SetGridVertex(s32 column, s32 row, Vtx_t *point) {
+    GetGridVertex(column, row)->v = *point;
 }
 
 /*
@@ -1131,38 +1153,39 @@ void SetGridVertex(s32 column, s32 row, Vtx_t* point) {
  * midpoints[tileIndex].points[slot], leaves the 2.
  */
 #ifdef NON_MATCHING
-Vtx* GetGroundPoint(u32 column, u32 row) {
-  u32 tileRow;
-  u32 tileColumn;
-  s32 slotRow;
-  s32 slotColumn;
-  s32 tileIndex;
+Vtx *GetGroundPoint(u32 column, u32 row) {
+    u32 tileRow;
+    u32 tileColumn;
+    s32 slotRow;
+    s32 slotColumn;
+    s32 tileIndex;
 
-  if ((column | row) & 1) {
-    tileRow = PointTile(row);
-    if (row == GROUND_POINT_ROW_COUNT - 1) {
-      tileRow = GROUND_TILE_ROW_COUNT - 1;
-      slotRow = GROUND_TILE_POINT_SPAN;
-    } else {
-      slotRow = PointSlot(row);
+    if ((column | row) & 1) {
+        tileRow = PointTile(row);
+        if (row == GROUND_POINT_ROW_COUNT - 1) {
+            tileRow = GROUND_TILE_ROW_COUNT - 1;
+            slotRow = GROUND_TILE_POINT_SPAN;
+        }
+        else {
+            slotRow = PointSlot(row);
+        }
+
+        if (column == GROUND_POINT_COLUMN_COUNT - 1) {
+            tileColumn = GROUND_TILE_COLUMN_COUNT - 1;
+            slotColumn = GROUND_TILE_POINT_SPAN;
+        }
+        else {
+            tileColumn = PointTile(column);
+            slotColumn = PointSlot(column);
+        }
+
+        /* In its own block, to match; without it 26 words differ, 8 in shape,
+         * against 2 (2) */
+        IN_OWN_BLOCK(tileIndex = TileIndex(tileColumn, tileRow));
+        return &g_WorkArea.hole.midpoints[tileIndex][f_PointSlots[slotRow][slotColumn]];
     }
 
-    if (column == GROUND_POINT_COLUMN_COUNT - 1) {
-      tileColumn = GROUND_TILE_COLUMN_COUNT - 1;
-      slotColumn = GROUND_TILE_POINT_SPAN;
-    } else {
-      tileColumn = PointTile(column);
-      slotColumn = PointSlot(column);
-    }
-
-    /* In its own block, to match; without it 26 words differ, 8 in shape,
-     * against 2 (2) */
-    IN_OWN_BLOCK(tileIndex = TileIndex(tileColumn, tileRow));
-    return &g_WorkArea.hole
-                .midpoints[tileIndex][f_PointSlots[slotRow][slotColumn]];
-  }
-
-  return GetGridVertex(column >> 1, row >> 1);
+    return GetGridVertex(column >> 1, row >> 1);
 }
 
 #else
@@ -1173,145 +1196,138 @@ INCLUDE_ASM("asm/nonmatchings/terrain", GetGroundPoint);
  * Copies a point into the ground point, and into every tile that keeps a
  * copy of it
  */
-NO_RESULT SetGroundPoint(s32 column, s32 row, Vtx_t* point) {
-  s32 blockIndex;
-  s32 tileIndex;
-  Vtx* midpoint;
-  Vtx* midpoints;
+NO_RESULT SetGroundPoint(s32 column, s32 row, Vtx_t *point) {
+    s32 blockIndex;
+    s32 tileIndex;
+    Vtx *midpoint;
+    Vtx *midpoints;
 
-  if ((column | row) & 1) {
-    if (row < GROUND_POINT_ROW_COUNT - 1 &&
-        column < GROUND_POINT_COLUMN_COUNT - 1) {
-      tileIndex = TileIndex(PointTile(column), PointTile(row));
-      blockIndex = g_WorkArea.hole.tiles[tileIndex].midpointBlockIndex;
-      if (blockIndex >= 0) {
-        midpoints = g_WorkArea.hole.midpoints[blockIndex];
-        midpoint = &midpoints[f_PointSlots[PointSlot(row)][PointSlot(column)]];
-        midpoint->v = *point;
-      }
-    }
+    if ((column | row) & 1) {
+        if (row < GROUND_POINT_ROW_COUNT - 1 && column < GROUND_POINT_COLUMN_COUNT - 1) {
+            tileIndex = TileIndex(PointTile(column), PointTile(row));
+            blockIndex = g_WorkArea.hole.tiles[tileIndex].midpointBlockIndex;
+            if (blockIndex >= 0) {
+                midpoints = g_WorkArea.hole.midpoints[blockIndex];
+                midpoint = &midpoints[f_PointSlots[PointSlot(row)][PointSlot(column)]];
+                midpoint->v = *point;
+            }
+        }
 
-    if (IsSharedWithPreviousTileRow(column, row)) {
-      tileIndex = TileIndex(PointTile(column), PointTile(row) - 1);
-      blockIndex = g_WorkArea.hole.tiles[tileIndex].midpointBlockIndex;
-      if (blockIndex >= 0) {
-        midpoints = g_WorkArea.hole.midpoints[blockIndex];
-        midpoint =
-            &midpoints[f_PointSlots[GROUND_TILE_POINT_SPAN][PointSlot(column)]];
-        midpoint->v = *point;
-      }
-    }
+        if (IsSharedWithPreviousTileRow(column, row)) {
+            tileIndex = TileIndex(PointTile(column), PointTile(row) - 1);
+            blockIndex = g_WorkArea.hole.tiles[tileIndex].midpointBlockIndex;
+            if (blockIndex >= 0) {
+                midpoints = g_WorkArea.hole.midpoints[blockIndex];
+                midpoint = &midpoints[f_PointSlots[GROUND_TILE_POINT_SPAN][PointSlot(column)]];
+                midpoint->v = *point;
+            }
+        }
 
-    if (IsSharedWithPreviousTileColumn(column, row)) {
-      tileIndex = TileIndex(PointTile(column) - 1, PointTile(row));
-      blockIndex = g_WorkArea.hole.tiles[tileIndex].midpointBlockIndex;
-      if (blockIndex >= 0) {
-        midpoints = g_WorkArea.hole.midpoints[blockIndex];
-        midpoint =
-            &midpoints[f_PointSlots[PointSlot(row)][GROUND_TILE_POINT_SPAN]];
-        midpoint->v = *point;
-      }
+        if (IsSharedWithPreviousTileColumn(column, row)) {
+            tileIndex = TileIndex(PointTile(column) - 1, PointTile(row));
+            blockIndex = g_WorkArea.hole.tiles[tileIndex].midpointBlockIndex;
+            if (blockIndex >= 0) {
+                midpoints = g_WorkArea.hole.midpoints[blockIndex];
+                midpoint = &midpoints[f_PointSlots[PointSlot(row)][GROUND_TILE_POINT_SPAN]];
+                midpoint->v = *point;
+            }
+        }
     }
-  } else {
-    SetGridVertex(column / 2, row / 2, point);
-  }
+    else {
+        SetGridVertex(column / 2, row / 2, point);
+    }
 }
 
 /* SetGroundPoint for just the height and shade */
-NO_RESULT SetGroundPointHeightAndShade(
-    s32 column, s32 row, s32 height, s32 shade) {
-  s32 blockIndex;
-  s32 tileIndex;
-  Vtx* point;
-  Vtx* midpoints;
+NO_RESULT SetGroundPointHeightAndShade(s32 column, s32 row, s32 height, s32 shade) {
+    s32 blockIndex;
+    s32 tileIndex;
+    Vtx *point;
+    Vtx *midpoints;
 
-  if ((column | row) & 1) {
-    if (row < GROUND_POINT_ROW_COUNT - 1 &&
-        column < GROUND_POINT_COLUMN_COUNT - 1) {
-      tileIndex = TileIndex(PointTile(column), PointTile(row));
-      blockIndex = g_WorkArea.hole.tiles[tileIndex].midpointBlockIndex;
-      if (blockIndex >= 0) {
-        midpoints = g_WorkArea.hole.midpoints[blockIndex];
-        point = &midpoints[f_PointSlots[PointSlot(row)][PointSlot(column)]];
-        point->v.ob[AXIS_Y] = height;
+    if ((column | row) & 1) {
+        if (row < GROUND_POINT_ROW_COUNT - 1 && column < GROUND_POINT_COLUMN_COUNT - 1) {
+            tileIndex = TileIndex(PointTile(column), PointTile(row));
+            blockIndex = g_WorkArea.hole.tiles[tileIndex].midpointBlockIndex;
+            if (blockIndex >= 0) {
+                midpoints = g_WorkArea.hole.midpoints[blockIndex];
+                point = &midpoints[f_PointSlots[PointSlot(row)][PointSlot(column)]];
+                point->v.ob[AXIS_Y] = height;
 
-        /*
-         * The chained assignment is there to match: three separate stores,
-         * in either order, in all three places give 21 words differing
-         */
-        point->v.cn[0] = point->v.cn[1] = point->v.cn[2] = shade;
-      }
+                /*
+                 * The chained assignment is there to match: three separate stores,
+                 * in either order, in all three places give 21 words differing
+                 */
+                point->v.cn[0] = point->v.cn[1] = point->v.cn[2] = shade;
+            }
+        }
+
+        if (IsSharedWithPreviousTileRow(column, row)) {
+            tileIndex = TileIndex(PointTile(column), PointTile(row) - 1);
+            blockIndex = g_WorkArea.hole.tiles[tileIndex].midpointBlockIndex;
+            if (blockIndex >= 0) {
+                midpoints = g_WorkArea.hole.midpoints[blockIndex];
+                point = &midpoints[f_PointSlots[GROUND_TILE_POINT_SPAN][PointSlot(column)]];
+                point->v.ob[AXIS_Y] = height;
+
+                /*
+                 * The chained assignment is there to match: three separate stores,
+                 * in either order, in all three places give 21 words differing
+                 */
+                point->v.cn[0] = point->v.cn[1] = point->v.cn[2] = shade;
+            }
+        }
+
+        if (IsSharedWithPreviousTileColumn(column, row)) {
+            tileIndex = TileIndex(PointTile(column) - 1, PointTile(row));
+            blockIndex = g_WorkArea.hole.tiles[tileIndex].midpointBlockIndex;
+            if (blockIndex >= 0) {
+                midpoints = g_WorkArea.hole.midpoints[blockIndex];
+                point = &midpoints[f_PointSlots[PointSlot(row)][GROUND_TILE_POINT_SPAN]];
+                point->v.ob[AXIS_Y] = height;
+
+                /*
+                 * The chained assignment is there to match: three separate stores,
+                 * in either order, in all three places give 21 words differing
+                 */
+                point->v.cn[0] = point->v.cn[1] = point->v.cn[2] = shade;
+            }
+        }
     }
-
-    if (IsSharedWithPreviousTileRow(column, row)) {
-      tileIndex = TileIndex(PointTile(column), PointTile(row) - 1);
-      blockIndex = g_WorkArea.hole.tiles[tileIndex].midpointBlockIndex;
-      if (blockIndex >= 0) {
-        midpoints = g_WorkArea.hole.midpoints[blockIndex];
-        point =
-            &midpoints[f_PointSlots[GROUND_TILE_POINT_SPAN][PointSlot(column)]];
-        point->v.ob[AXIS_Y] = height;
-
-        /*
-         * The chained assignment is there to match: three separate stores,
-         * in either order, in all three places give 21 words differing
-         */
-        point->v.cn[0] = point->v.cn[1] = point->v.cn[2] = shade;
-      }
+    else {
+        SetGridVertexHeight(column / 2, row / 2, height);
     }
-
-    if (IsSharedWithPreviousTileColumn(column, row)) {
-      tileIndex = TileIndex(PointTile(column) - 1, PointTile(row));
-      blockIndex = g_WorkArea.hole.tiles[tileIndex].midpointBlockIndex;
-      if (blockIndex >= 0) {
-        midpoints = g_WorkArea.hole.midpoints[blockIndex];
-        point =
-            &midpoints[f_PointSlots[PointSlot(row)][GROUND_TILE_POINT_SPAN]];
-        point->v.ob[AXIS_Y] = height;
-
-        /*
-         * The chained assignment is there to match: three separate stores,
-         * in either order, in all three places give 21 words differing
-         */
-        point->v.cn[0] = point->v.cn[1] = point->v.cn[2] = shade;
-      }
-    }
-  } else {
-    SetGridVertexHeight(column / 2, row / 2, height);
-  }
 }
 
 void InitTerrainTextures(void) {
-  GroundTile* tile;
-  s32 tileIndex;
-  s32 texelRow;
-  s32 texelColumn;
-  s32 row;
-  s32 column;
+    GroundTile *tile;
+    s32 tileIndex;
+    s32 texelRow;
+    s32 texelColumn;
+    s32 row;
+    s32 column;
 
-  for (tileIndex = 0; tileIndex < GROUND_TILE_COUNT; tileIndex++) {
-    tile = &g_WorkArea.hole.tiles[tileIndex];
-    g_GroundTileHeightRanges[tileIndex] = 1.0f;
-    tile->detail = GROUND_DETAIL_MEDIUM;
-    tile->midpointBlockIndex = -1;
-    tile->extraPassCount = 0;
-    /* Fills the image's first texels as if its rows were unpadded */
-    for (texelRow = 0; texelRow < GROUND_TILE_TEXEL_SPAN; texelRow++) {
-      for (texelColumn = 0; texelColumn < GROUND_TILE_TEXEL_SPAN;
-          texelColumn++) {
-        tile->texels[0][(texelRow * GROUND_TILE_TEXEL_SPAN) + texelColumn] =
-            0x7C1;
-      }
+    for (tileIndex = 0; tileIndex < GROUND_TILE_COUNT; tileIndex++) {
+        tile = &g_WorkArea.hole.tiles[tileIndex];
+        g_GroundTileHeightRanges[tileIndex] = 1.0f;
+        tile->detail = GROUND_DETAIL_MEDIUM;
+        tile->midpointBlockIndex = -1;
+        tile->extraPassCount = 0;
+        /* Fills the image's first texels as if its rows were unpadded */
+        for (texelRow = 0; texelRow < GROUND_TILE_TEXEL_SPAN; texelRow++) {
+            for (texelColumn = 0; texelColumn < GROUND_TILE_TEXEL_SPAN; texelColumn++) {
+                tile->texels[0][(texelRow * GROUND_TILE_TEXEL_SPAN) + texelColumn] = 0x7C1;
+            }
+        }
     }
-  }
 
-  for (row = 0; row < GROUND_GRID_ROW_COUNT; row++) {
-    for (column = 0; column < GROUND_GRID_COLUMN_COUNT; column++) {
-      InitGridVertex(column, row, 0, 0x80);
+    for (row = 0; row < GROUND_GRID_ROW_COUNT; row++) {
+        for (column = 0; column < GROUND_GRID_COLUMN_COUNT; column++) {
+            InitGridVertex(column, row, 0, 0x80);
+        }
     }
-  }
 
-  BuildAllTileMidpoints();
+    BuildAllTileMidpoints();
 }
 
 /* A tile's three by three grid vertices, by row and column */
@@ -1319,75 +1335,59 @@ void InitTerrainTextures(void) {
 #define CORNER(row, column) corners[((row) * TILE_CORNER_SPAN) + (column)]
 
 /* Sets a tile's midpoints between its grid vertices */
-void BuildTileMidpoints(Vtx* midpoints, s32 tileColumn, s32 tileRow) {
-  Vtx* corners[TILE_CORNER_SPAN * TILE_CORNER_SPAN];
-  s32 cornerIndex = 0;
-  s32 row;
-  s32 column;
+void BuildTileMidpoints(Vtx *midpoints, s32 tileColumn, s32 tileRow) {
+    Vtx *corners[TILE_CORNER_SPAN * TILE_CORNER_SPAN];
+    s32 cornerIndex = 0;
+    s32 row;
+    s32 column;
 
-  for (row = 0; row < TILE_CORNER_SPAN; row++) {
-    for (column = 0; column < TILE_CORNER_SPAN; column++) {
-      corners[cornerIndex++] = TileGridVertex(tileColumn, tileRow, column, row);
+    for (row = 0; row < TILE_CORNER_SPAN; row++) {
+        for (column = 0; column < TILE_CORNER_SPAN; column++) {
+            corners[cornerIndex++] = TileGridVertex(tileColumn, tileRow, column, row);
+        }
     }
-  }
 
-  SetVertexMidpoint(
-      CORNER(0, 0), CORNER(0, 1), &midpoints[TILE_MIDPOINT_ROW0_COLUMN1]);
-  SetVertexMidpoint(
-      CORNER(0, 1), CORNER(0, 2), &midpoints[TILE_MIDPOINT_ROW0_COLUMN3]);
-  SetVertexMidpoint(
-      CORNER(0, 0), CORNER(1, 0), &midpoints[TILE_MIDPOINT_ROW1_COLUMN0]);
-  SetVertexMidpoint(
-      CORNER(0, 1), CORNER(1, 1), &midpoints[TILE_MIDPOINT_ROW1_COLUMN2]);
-  SetVertexMidpoint(
-      CORNER(0, 2), CORNER(1, 2), &midpoints[TILE_MIDPOINT_ROW1_COLUMN4]);
-  SetVertexMidpoint(
-      CORNER(1, 0), CORNER(1, 1), &midpoints[TILE_MIDPOINT_ROW2_COLUMN1]);
-  SetVertexMidpoint(
-      CORNER(1, 1), CORNER(1, 2), &midpoints[TILE_MIDPOINT_ROW2_COLUMN3]);
-  SetVertexMidpoint(
-      CORNER(1, 0), CORNER(2, 0), &midpoints[TILE_MIDPOINT_ROW3_COLUMN0]);
-  SetVertexMidpoint(
-      CORNER(1, 1), CORNER(2, 1), &midpoints[TILE_MIDPOINT_ROW3_COLUMN2]);
-  SetVertexMidpoint(
-      CORNER(1, 2), CORNER(2, 2), &midpoints[TILE_MIDPOINT_ROW3_COLUMN4]);
-  SetVertexMidpoint(
-      CORNER(2, 0), CORNER(2, 1), &midpoints[TILE_MIDPOINT_ROW4_COLUMN1]);
-  SetVertexMidpoint(
-      CORNER(2, 1), CORNER(2, 2), &midpoints[TILE_MIDPOINT_ROW4_COLUMN3]);
-  SetVertexMidpoint(
-      CORNER(0, 1), CORNER(1, 0), &midpoints[TILE_MIDPOINT_ROW1_COLUMN1]);
-  SetVertexMidpoint(
-      CORNER(0, 2), CORNER(1, 1), &midpoints[TILE_MIDPOINT_ROW1_COLUMN3]);
-  SetVertexMidpoint(
-      CORNER(1, 1), CORNER(2, 0), &midpoints[TILE_MIDPOINT_ROW3_COLUMN1]);
-  SetVertexMidpoint(
-      CORNER(1, 2), CORNER(2, 1), &midpoints[TILE_MIDPOINT_ROW3_COLUMN3]);
+    SetVertexMidpoint(CORNER(0, 0), CORNER(0, 1), &midpoints[TILE_MIDPOINT_ROW0_COLUMN1]);
+    SetVertexMidpoint(CORNER(0, 1), CORNER(0, 2), &midpoints[TILE_MIDPOINT_ROW0_COLUMN3]);
+    SetVertexMidpoint(CORNER(0, 0), CORNER(1, 0), &midpoints[TILE_MIDPOINT_ROW1_COLUMN0]);
+    SetVertexMidpoint(CORNER(0, 1), CORNER(1, 1), &midpoints[TILE_MIDPOINT_ROW1_COLUMN2]);
+    SetVertexMidpoint(CORNER(0, 2), CORNER(1, 2), &midpoints[TILE_MIDPOINT_ROW1_COLUMN4]);
+    SetVertexMidpoint(CORNER(1, 0), CORNER(1, 1), &midpoints[TILE_MIDPOINT_ROW2_COLUMN1]);
+    SetVertexMidpoint(CORNER(1, 1), CORNER(1, 2), &midpoints[TILE_MIDPOINT_ROW2_COLUMN3]);
+    SetVertexMidpoint(CORNER(1, 0), CORNER(2, 0), &midpoints[TILE_MIDPOINT_ROW3_COLUMN0]);
+    SetVertexMidpoint(CORNER(1, 1), CORNER(2, 1), &midpoints[TILE_MIDPOINT_ROW3_COLUMN2]);
+    SetVertexMidpoint(CORNER(1, 2), CORNER(2, 2), &midpoints[TILE_MIDPOINT_ROW3_COLUMN4]);
+    SetVertexMidpoint(CORNER(2, 0), CORNER(2, 1), &midpoints[TILE_MIDPOINT_ROW4_COLUMN1]);
+    SetVertexMidpoint(CORNER(2, 1), CORNER(2, 2), &midpoints[TILE_MIDPOINT_ROW4_COLUMN3]);
+    SetVertexMidpoint(CORNER(0, 1), CORNER(1, 0), &midpoints[TILE_MIDPOINT_ROW1_COLUMN1]);
+    SetVertexMidpoint(CORNER(0, 2), CORNER(1, 1), &midpoints[TILE_MIDPOINT_ROW1_COLUMN3]);
+    SetVertexMidpoint(CORNER(1, 1), CORNER(2, 0), &midpoints[TILE_MIDPOINT_ROW3_COLUMN1]);
+    SetVertexMidpoint(CORNER(1, 2), CORNER(2, 1), &midpoints[TILE_MIDPOINT_ROW3_COLUMN3]);
 }
 
 /* Gives every tile its own midpoints and center, and builds them */
 void BuildAllTileMidpoints(void) {
-  s32 tileIndex = 0;
-  s32 tileRow;
-  s32 tileColumn;
-  Vtx* midpoints;
-  Vtx* center;
+    s32 tileIndex = 0;
+    s32 tileRow;
+    s32 tileColumn;
+    Vtx *midpoints;
+    Vtx *center;
 
-  for (tileRow = 0; tileRow < GROUND_TILE_ROW_COUNT; tileRow++) {
-    for (tileColumn = 0; tileColumn < GROUND_TILE_COLUMN_COUNT; tileColumn++) {
-      g_WorkArea.hole.tiles[tileIndex].midpointBlockIndex = tileIndex;
-      midpoints = g_WorkArea.hole.midpoints[tileIndex];
-      center = TileGridVertex(tileColumn, tileRow, 1, 1);
-      g_WorkArea.hole.tiles[tileIndex].center[0] = center->v.ob[AXIS_X];
-      g_WorkArea.hole.tiles[tileIndex].center[1] = center->v.ob[AXIS_Y];
-      g_WorkArea.hole.tiles[tileIndex].center[2] = center->v.ob[AXIS_Z];
-      if (g_WorkArea.hole.tiles[tileIndex].midpointBlockIndex >= 0) {
-        BuildTileMidpoints(midpoints, tileColumn, tileRow);
-      }
+    for (tileRow = 0; tileRow < GROUND_TILE_ROW_COUNT; tileRow++) {
+        for (tileColumn = 0; tileColumn < GROUND_TILE_COLUMN_COUNT; tileColumn++) {
+            g_WorkArea.hole.tiles[tileIndex].midpointBlockIndex = tileIndex;
+            midpoints = g_WorkArea.hole.midpoints[tileIndex];
+            center = TileGridVertex(tileColumn, tileRow, 1, 1);
+            g_WorkArea.hole.tiles[tileIndex].center[0] = center->v.ob[AXIS_X];
+            g_WorkArea.hole.tiles[tileIndex].center[1] = center->v.ob[AXIS_Y];
+            g_WorkArea.hole.tiles[tileIndex].center[2] = center->v.ob[AXIS_Z];
+            if (g_WorkArea.hole.tiles[tileIndex].midpointBlockIndex >= 0) {
+                BuildTileMidpoints(midpoints, tileColumn, tileRow);
+            }
 
-      tileIndex++;
+            tileIndex++;
+        }
     }
-  }
 }
 
 /*
@@ -1395,229 +1395,232 @@ void BuildAllTileMidpoints(void) {
  * moves through and sets or clears
  */
 void UpdateFlagPanel(void) {
-  char text[FLAG_PANEL_TEXT_SIZE];
-  s32 row;
-  s32 column;
-  s32 textColumn;
+    char text[FLAG_PANEL_TEXT_SIZE];
+    s32 row;
+    s32 column;
+    s32 textColumn;
 
-  s32 GetSelectedFlag(void) {
-    return (f_FlagPanel.firstRow + f_FlagPanel.row) * FLAG_PANEL_COLUMN_COUNT +
-        f_FlagPanel.column;
-  }
-
-  ClearDebugText();
-  PrintDebugText("ROM :", BUILD_DATE_LABEL_COLUMN, ROM_BUILD_DATE_ROW);
-  PrintDebugText(g_RomBuildDate, BUILD_DATE_COLUMN, ROM_BUILD_DATE_ROW);
-  PrintDebugText("SRAM:", BUILD_DATE_LABEL_COLUMN, SAVE_BUILD_DATE_ROW);
-  PrintDebugText(g_SaveBuildDate, BUILD_DATE_COLUMN, SAVE_BUILD_DATE_ROW);
-  for (row = 0; row < FLAG_PANEL_ROW_COUNT; row++) {
-    sprintf(text, "%x0|", (unsigned int)(row + f_FlagPanel.firstRow));
-    PrintDebugText(
-        text, FLAG_ROW_LABEL_COLUMN, row + FLAG_PANEL_FIRST_TEXT_ROW);
-    for (column = 0, textColumn = FIRST_FLAG_TEXT_COLUMN;
-        column < FLAG_PANEL_COLUMN_COUNT;
-        column++, textColumn += FLAG_TEXT_SPACING) {
-      if (row == 0) {
-        sprintf(text, "%X", (unsigned int)column);
-        PrintDebugText(text, textColumn, FLAG_PANEL_HEADER_ROW);
-      }
-
-      sprintf(text, "%X",
-          (unsigned int)(IsGameFlagSet(
-              ((row + f_FlagPanel.firstRow) * FLAG_PANEL_COLUMN_COUNT) +
-              column)));
-      if (row == f_FlagPanel.row && column == f_FlagPanel.column) {
-        SetDebugTextHighlight(TRUE);
-      }
-
-      PrintDebugText(text, textColumn, row + FLAG_PANEL_FIRST_TEXT_ROW);
+    s32 GetSelectedFlag(void) {
+        return (f_FlagPanel.firstRow + f_FlagPanel.row) * FLAG_PANEL_COLUMN_COUNT +
+            f_FlagPanel.column;
     }
-  }
 
-  if (g_MenuControllerData[0].button & R_JPAD) {
-    f_FlagPanel.column++;
-  }
+    ClearDebugText();
+    PrintDebugText("ROM :", BUILD_DATE_LABEL_COLUMN, ROM_BUILD_DATE_ROW);
+    PrintDebugText(g_RomBuildDate, BUILD_DATE_COLUMN, ROM_BUILD_DATE_ROW);
+    PrintDebugText("SRAM:", BUILD_DATE_LABEL_COLUMN, SAVE_BUILD_DATE_ROW);
+    PrintDebugText(g_SaveBuildDate, BUILD_DATE_COLUMN, SAVE_BUILD_DATE_ROW);
+    for (row = 0; row < FLAG_PANEL_ROW_COUNT; row++) {
+        sprintf(text, "%x0|", (unsigned int)(row + f_FlagPanel.firstRow));
+        PrintDebugText(text, FLAG_ROW_LABEL_COLUMN, row + FLAG_PANEL_FIRST_TEXT_ROW);
+        for (column = 0, textColumn = FIRST_FLAG_TEXT_COLUMN; column < FLAG_PANEL_COLUMN_COUNT;
+            column++, textColumn += FLAG_TEXT_SPACING) {
+            if (row == 0) {
+                sprintf(text, "%X", (unsigned int)column);
+                PrintDebugText(text, textColumn, FLAG_PANEL_HEADER_ROW);
+            }
 
-  if (g_MenuControllerData[0].button & L_JPAD) {
-    f_FlagPanel.column--;
-  }
+            sprintf(
+                text,
+                "%X",
+                (unsigned int)(IsGameFlagSet(
+                    ((row + f_FlagPanel.firstRow) * FLAG_PANEL_COLUMN_COUNT) + column
+                ))
+            );
+            if (row == f_FlagPanel.row && column == f_FlagPanel.column) {
+                SetDebugTextHighlight(TRUE);
+            }
 
-  if (f_FlagPanel.column < 0) {
-    f_FlagPanel.column = FLAG_PANEL_COLUMN_COUNT - 1;
-    f_FlagPanel.row--;
-  }
-
-  if (f_FlagPanel.column >= FLAG_PANEL_COLUMN_COUNT) {
-    f_FlagPanel.column = 0;
-    f_FlagPanel.row++;
-  }
-
-  if (g_MenuControllerData[0].button & U_JPAD) {
-    f_FlagPanel.row--;
-  }
-
-  if (g_MenuControllerData[0].button & D_JPAD) {
-    f_FlagPanel.row++;
-  }
-
-  if (g_MenuControllerData[0].button & R_TRIG) {
-    f_FlagPanel.firstRow += FLAG_PANEL_ROW_COUNT;
-  }
-
-  if (g_MenuControllerData[0].button & L_TRIG) {
-    f_FlagPanel.firstRow -= FLAG_PANEL_ROW_COUNT;
-  }
-  while (TRUE) {
-    if (f_FlagPanel.row < 0) {
-      f_FlagPanel.row++;
-      f_FlagPanel.firstRow--;
-    } else if (f_FlagPanel.row >= FLAG_PANEL_ROW_COUNT) {
-      f_FlagPanel.row--;
-      f_FlagPanel.firstRow++;
-    } else {
-      break;
+            PrintDebugText(text, textColumn, row + FLAG_PANEL_FIRST_TEXT_ROW);
+        }
     }
-  }
 
-  if (f_FlagPanel.firstRow > FLAG_PANEL_FIRST_ROW_MAX) {
-    f_FlagPanel.firstRow = FLAG_PANEL_FIRST_ROW_MAX;
-  }
+    if (g_MenuControllerData[0].button & R_JPAD) {
+        f_FlagPanel.column++;
+    }
 
-  if (f_FlagPanel.firstRow < 0) {
-    f_FlagPanel.firstRow = 0;
-  }
+    if (g_MenuControllerData[0].button & L_JPAD) {
+        f_FlagPanel.column--;
+    }
 
-  if (g_MenuControllerData[0].button & A_BUTTON) {
-    SetGameFlag(GetSelectedFlag());
-  }
+    if (f_FlagPanel.column < 0) {
+        f_FlagPanel.column = FLAG_PANEL_COLUMN_COUNT - 1;
+        f_FlagPanel.row--;
+    }
 
-  if (g_MenuControllerData[0].button & B_BUTTON) {
-    ClearGameFlag(GetSelectedFlag());
-  }
+    if (f_FlagPanel.column >= FLAG_PANEL_COLUMN_COUNT) {
+        f_FlagPanel.column = 0;
+        f_FlagPanel.row++;
+    }
+
+    if (g_MenuControllerData[0].button & U_JPAD) {
+        f_FlagPanel.row--;
+    }
+
+    if (g_MenuControllerData[0].button & D_JPAD) {
+        f_FlagPanel.row++;
+    }
+
+    if (g_MenuControllerData[0].button & R_TRIG) {
+        f_FlagPanel.firstRow += FLAG_PANEL_ROW_COUNT;
+    }
+
+    if (g_MenuControllerData[0].button & L_TRIG) {
+        f_FlagPanel.firstRow -= FLAG_PANEL_ROW_COUNT;
+    }
+    while (TRUE) {
+        if (f_FlagPanel.row < 0) {
+            f_FlagPanel.row++;
+            f_FlagPanel.firstRow--;
+        }
+        else if (f_FlagPanel.row >= FLAG_PANEL_ROW_COUNT) {
+            f_FlagPanel.row--;
+            f_FlagPanel.firstRow++;
+        }
+        else {
+            break;
+        }
+    }
+
+    if (f_FlagPanel.firstRow > FLAG_PANEL_FIRST_ROW_MAX) {
+        f_FlagPanel.firstRow = FLAG_PANEL_FIRST_ROW_MAX;
+    }
+
+    if (f_FlagPanel.firstRow < 0) {
+        f_FlagPanel.firstRow = 0;
+    }
+
+    if (g_MenuControllerData[0].button & A_BUTTON) {
+        SetGameFlag(GetSelectedFlag());
+    }
+
+    if (g_MenuControllerData[0].button & B_BUTTON) {
+        ClearGameFlag(GetSelectedFlag());
+    }
 }
 
 /* Returns the debug scene menu's label for a scene */
-const char* GetDebugSceneLabel(u32 scene) {
-  switch (scene) {
-    case SCENE_FLAG_PANEL:
-      return "FLAGS ";
-    case SCENE_MAP_OVERVIEW:
-      return "ABOUT ";
-    case SCENE_GROUND_CAMERA:
-      return " VIEW ";
-    case SCENE_PLAY_HOLE:
-      return " PLAY ";
-    case SCENE_HEIGHTS:
-      return "HEIGHT";
-    case SCENE_TREES:
-      return " TREE ";
-    case SCENE_PIN:
-      return " PIN  ";
-    case SCENE_CELL_EDITOR:
-      return "DIVINF";
-    case SCENE_TRIANGLES:
-      return "TRIANG";
-    case SCENE_MENU:
-      return "MENU";
-    case SCENE_POINT_EDITOR:
-      return "XZ-DIV";
-    case SCENE_HOLE_FILES:
-      return " FILE ";
-    case SCENE_PLAY_ROUND:
-      return "STROKE";
-    case SCENE_PLAY_BEST_SHOT_REPLAY:
-      return "S-SHOT";
-    case SCENE_RINGS:
-      return "RING  ";
-    case SCENE_WALLS:
-      return "WALL  ";
-    default:
-      return "      ";
-  }
+const char *GetDebugSceneLabel(u32 scene) {
+    switch (scene) {
+        case SCENE_FLAG_PANEL:
+            return "FLAGS ";
+        case SCENE_MAP_OVERVIEW:
+            return "ABOUT ";
+        case SCENE_GROUND_CAMERA:
+            return " VIEW ";
+        case SCENE_PLAY_HOLE:
+            return " PLAY ";
+        case SCENE_HEIGHTS:
+            return "HEIGHT";
+        case SCENE_TREES:
+            return " TREE ";
+        case SCENE_PIN:
+            return " PIN  ";
+        case SCENE_CELL_EDITOR:
+            return "DIVINF";
+        case SCENE_TRIANGLES:
+            return "TRIANG";
+        case SCENE_MENU:
+            return "MENU";
+        case SCENE_POINT_EDITOR:
+            return "XZ-DIV";
+        case SCENE_HOLE_FILES:
+            return " FILE ";
+        case SCENE_PLAY_ROUND:
+            return "STROKE";
+        case SCENE_PLAY_BEST_SHOT_REPLAY:
+            return "S-SHOT";
+        case SCENE_RINGS:
+            return "RING  ";
+        case SCENE_WALLS:
+            return "WALL  ";
+        default:
+            return "      ";
+    }
 }
 
 /*
  * Shows the debug scene menu and enters the chosen scene
  */
 NO_RESULT UpdateDebugSceneMenu(void) {
-  u32 selectedIndex;
-  u32 i;
-  s32 row;
+    u32 selectedIndex;
+    u32 i;
+    s32 row;
 
-  g_CurrentShot.surface = 0;
-  ClearGameFlag(GAME_FLAG_HOLE_LOADED);
-  g_ShowsGroundWaves = 0;
-  if (g_MenuControllerData[0].button & START_BUTTON) {
-    ClearDebugText();
-    f_IsSceneMenuOpen = FALSE;
-    f_SceneMenuBox.state = BOX_CLOSING;
-    f_SceneMenuBox.frameIndex = 0;
-    PlaySound(SOUND_MENU_CANCEL, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
-    return;
-  }
-
-  for (selectedIndex = 0; selectedIndex < SCENE_MENU_LENGTH; selectedIndex++) {
-    if (f_SceneMenuScenes[selectedIndex] == f_SceneMenuSelection) {
-      break;
-    }
-  }
-
-  for (i = 0, row = SCENE_MENU_TOP_ROW; i < SCENE_MENU_LENGTH; i++, row++) {
-    if (i == selectedIndex) {
-      SetDebugTextHighlight(TRUE);
-      PrintDebugText(
-          "->", SCENE_MENU_CURSOR_COLUMN, selectedIndex + SCENE_MENU_TOP_ROW);
-    } else {
-      PrintDebugText("  ", SCENE_MENU_CURSOR_COLUMN, row);
+    g_CurrentShot.surface = 0;
+    ClearGameFlag(GAME_FLAG_HOLE_LOADED);
+    g_ShowsGroundWaves = 0;
+    if (g_MenuControllerData[0].button & START_BUTTON) {
+        ClearDebugText();
+        f_IsSceneMenuOpen = FALSE;
+        f_SceneMenuBox.state = BOX_CLOSING;
+        f_SceneMenuBox.frameIndex = 0;
+        PlaySound(SOUND_MENU_CANCEL, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
+        return;
     }
 
-    PrintDebugText(
-        GetDebugSceneLabel(f_SceneMenuScenes[i]), SCENE_MENU_LABEL_COLUMN, row);
-  }
-
-  if (g_MenuControllerData[0].button & U_JPAD) {
-    selectedIndex = (selectedIndex + SCENE_MENU_LENGTH - 1) % SCENE_MENU_LENGTH;
-    f_SceneMenuSelection = f_SceneMenuScenes[selectedIndex];
-    PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
-  }
-
-  if (g_MenuControllerData[0].button & D_JPAD) {
-    selectedIndex = (selectedIndex + SCENE_MENU_LENGTH + 1) % SCENE_MENU_LENGTH;
-    f_SceneMenuSelection = f_SceneMenuScenes[selectedIndex];
-    PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
-  }
-
-  if (g_MenuControllerData[0].button & A_BUTTON) {
-    ClearDebugText();
-    f_IsSceneMenuOpen = FALSE;
-    f_SceneMenuBox.state = BOX_CLOSING;
-    f_SceneMenuBox.frameIndex = 0;
-    g_Scene = f_SceneMenuSelection;
-    PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
-    if (f_SceneMenuSelection == SCENE_MENU) {
-      ResetMenuChoices();
-    } else {
-      PlaySong(SONG_HOLE_OUT_BIRDIE, 0);
+    for (selectedIndex = 0; selectedIndex < SCENE_MENU_LENGTH; selectedIndex++) {
+        if (f_SceneMenuScenes[selectedIndex] == f_SceneMenuSelection) {
+            break;
+        }
     }
 
-    switch ((u32)g_Scene) {
-      case SCENE_PLAY_HOLE:
-        InitPlay(PLAY_KIND_HOLE);
-        ChooseConditionsAndInitHole();
-        InitRoundHud();
-        break;
-      case SCENE_CELL_EDITOR:
-        break;
-      case SCENE_PLAY_ROUND:
-        InitPlay(PLAY_KIND_FLAGGED_ROUND);
-        InitRoundHud();
-        break;
-      case SCENE_PLAY_BEST_SHOT_REPLAY:
-        InitPlay(PLAY_KIND_BEST_SHOT_REPLAY);
-        InitRoundHud();
-        break;
+    for (i = 0, row = SCENE_MENU_TOP_ROW; i < SCENE_MENU_LENGTH; i++, row++) {
+        if (i == selectedIndex) {
+            SetDebugTextHighlight(TRUE);
+            PrintDebugText("->", SCENE_MENU_CURSOR_COLUMN, selectedIndex + SCENE_MENU_TOP_ROW);
+        }
+        else {
+            PrintDebugText("  ", SCENE_MENU_CURSOR_COLUMN, row);
+        }
+
+        PrintDebugText(GetDebugSceneLabel(f_SceneMenuScenes[i]), SCENE_MENU_LABEL_COLUMN, row);
     }
-  }
+
+    if (g_MenuControllerData[0].button & U_JPAD) {
+        selectedIndex = (selectedIndex + SCENE_MENU_LENGTH - 1) % SCENE_MENU_LENGTH;
+        f_SceneMenuSelection = f_SceneMenuScenes[selectedIndex];
+        PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
+    }
+
+    if (g_MenuControllerData[0].button & D_JPAD) {
+        selectedIndex = (selectedIndex + SCENE_MENU_LENGTH + 1) % SCENE_MENU_LENGTH;
+        f_SceneMenuSelection = f_SceneMenuScenes[selectedIndex];
+        PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
+    }
+
+    if (g_MenuControllerData[0].button & A_BUTTON) {
+        ClearDebugText();
+        f_IsSceneMenuOpen = FALSE;
+        f_SceneMenuBox.state = BOX_CLOSING;
+        f_SceneMenuBox.frameIndex = 0;
+        g_Scene = f_SceneMenuSelection;
+        PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
+        if (f_SceneMenuSelection == SCENE_MENU) {
+            ResetMenuChoices();
+        }
+        else {
+            PlaySong(SONG_HOLE_OUT_BIRDIE, 0);
+        }
+
+        switch ((u32)g_Scene) {
+            case SCENE_PLAY_HOLE:
+                InitPlay(PLAY_KIND_HOLE);
+                ChooseConditionsAndInitHole();
+                InitRoundHud();
+                break;
+            case SCENE_CELL_EDITOR:
+                break;
+            case SCENE_PLAY_ROUND:
+                InitPlay(PLAY_KIND_FLAGGED_ROUND);
+                InitRoundHud();
+                break;
+            case SCENE_PLAY_BEST_SHOT_REPLAY:
+                InitPlay(PLAY_KIND_BEST_SHOT_REPLAY);
+                InitRoundHud();
+                break;
+        }
+    }
 }
 
 /* Starts the search for each triangle's bounds past any corner coordinate */
@@ -1626,65 +1629,58 @@ NO_RESULT UpdateDebugSceneMenu(void) {
 /* Sets each hole triangle's bounds and texture coordinates, then sets up the
  * rings */
 void PrepareHoleTriangles(void) {
-  Vtx_t* vertex;
-  s32 triangleIndex;
-  s32 corner;
-  s32 lowest[AXIS_COUNT];
-  s32 highest[AXIS_COUNT];
+    Vtx_t *vertex;
+    s32 triangleIndex;
+    s32 corner;
+    s32 lowest[AXIS_COUNT];
+    s32 highest[AXIS_COUNT];
 
-  for (triangleIndex = 0; triangleIndex < HOLE_TRIANGLE_COUNT;
-      triangleIndex++) {
-    lowest[AXIS_Z] = BEYOND_ANY_COORDINATE;
-    lowest[AXIS_Y] = lowest[AXIS_Z];
-    lowest[AXIS_X] = lowest[AXIS_Y];
-    highest[AXIS_Z] = -BEYOND_ANY_COORDINATE;
-    highest[AXIS_Y] = highest[AXIS_Z];
-    highest[AXIS_X] = highest[AXIS_Y];
-    for (corner = 0; corner < HOLE_TRIANGLE_VERTEX_COUNT; corner++) {
-      vertex = &g_WorkArea.hole.triangles[triangleIndex].vertices[corner].v;
-      if (vertex->ob[AXIS_X] < lowest[AXIS_X]) {
-        lowest[AXIS_X] = vertex->ob[AXIS_X];
-      }
+    for (triangleIndex = 0; triangleIndex < HOLE_TRIANGLE_COUNT; triangleIndex++) {
+        lowest[AXIS_Z] = BEYOND_ANY_COORDINATE;
+        lowest[AXIS_Y] = lowest[AXIS_Z];
+        lowest[AXIS_X] = lowest[AXIS_Y];
+        highest[AXIS_Z] = -BEYOND_ANY_COORDINATE;
+        highest[AXIS_Y] = highest[AXIS_Z];
+        highest[AXIS_X] = highest[AXIS_Y];
+        for (corner = 0; corner < HOLE_TRIANGLE_VERTEX_COUNT; corner++) {
+            vertex = &g_WorkArea.hole.triangles[triangleIndex].vertices[corner].v;
+            if (vertex->ob[AXIS_X] < lowest[AXIS_X]) {
+                lowest[AXIS_X] = vertex->ob[AXIS_X];
+            }
 
-      if (vertex->ob[AXIS_X] > highest[AXIS_X]) {
-        highest[AXIS_X] = vertex->ob[AXIS_X];
-      }
+            if (vertex->ob[AXIS_X] > highest[AXIS_X]) {
+                highest[AXIS_X] = vertex->ob[AXIS_X];
+            }
 
-      if (vertex->ob[AXIS_Y] < lowest[AXIS_Y]) {
-        lowest[AXIS_Y] = vertex->ob[AXIS_Y];
-      }
+            if (vertex->ob[AXIS_Y] < lowest[AXIS_Y]) {
+                lowest[AXIS_Y] = vertex->ob[AXIS_Y];
+            }
 
-      if (vertex->ob[AXIS_Y] > highest[AXIS_Y]) {
-        highest[AXIS_Y] = vertex->ob[AXIS_Y];
-      }
+            if (vertex->ob[AXIS_Y] > highest[AXIS_Y]) {
+                highest[AXIS_Y] = vertex->ob[AXIS_Y];
+            }
 
-      if (vertex->ob[AXIS_Z] < lowest[AXIS_Z]) {
-        lowest[AXIS_Z] = vertex->ob[AXIS_Z];
-      }
+            if (vertex->ob[AXIS_Z] < lowest[AXIS_Z]) {
+                lowest[AXIS_Z] = vertex->ob[AXIS_Z];
+            }
 
-      if (vertex->ob[AXIS_Z] > highest[AXIS_Z]) {
-        highest[AXIS_Z] = vertex->ob[AXIS_Z];
-      }
+            if (vertex->ob[AXIS_Z] > highest[AXIS_Z]) {
+                highest[AXIS_Z] = vertex->ob[AXIS_Z];
+            }
 
-      vertex->tc[TEXTURE_AXIS_S] = vertex->ob[AXIS_X];
-      vertex->tc[TEXTURE_AXIS_T] = vertex->ob[AXIS_Z];
+            vertex->tc[TEXTURE_AXIS_S] = vertex->ob[AXIS_X];
+            vertex->tc[TEXTURE_AXIS_T] = vertex->ob[AXIS_Z];
+        }
+
+        g_WorkArea.hole.triangles[triangleIndex].bounds[AXIS_X][BOUND_LOWEST] = lowest[AXIS_X];
+        g_WorkArea.hole.triangles[triangleIndex].bounds[AXIS_Y][BOUND_LOWEST] = lowest[AXIS_Y];
+        g_WorkArea.hole.triangles[triangleIndex].bounds[AXIS_Z][BOUND_LOWEST] = lowest[AXIS_Z];
+        g_WorkArea.hole.triangles[triangleIndex].bounds[AXIS_X][BOUND_HIGHEST] = highest[AXIS_X];
+        g_WorkArea.hole.triangles[triangleIndex].bounds[AXIS_Y][BOUND_HIGHEST] = highest[AXIS_Y];
+        g_WorkArea.hole.triangles[triangleIndex].bounds[AXIS_Z][BOUND_HIGHEST] = highest[AXIS_Z];
     }
 
-    g_WorkArea.hole.triangles[triangleIndex].bounds[AXIS_X][BOUND_LOWEST] =
-        lowest[AXIS_X];
-    g_WorkArea.hole.triangles[triangleIndex].bounds[AXIS_Y][BOUND_LOWEST] =
-        lowest[AXIS_Y];
-    g_WorkArea.hole.triangles[triangleIndex].bounds[AXIS_Z][BOUND_LOWEST] =
-        lowest[AXIS_Z];
-    g_WorkArea.hole.triangles[triangleIndex].bounds[AXIS_X][BOUND_HIGHEST] =
-        highest[AXIS_X];
-    g_WorkArea.hole.triangles[triangleIndex].bounds[AXIS_Y][BOUND_HIGHEST] =
-        highest[AXIS_Y];
-    g_WorkArea.hole.triangles[triangleIndex].bounds[AXIS_Z][BOUND_HIGHEST] =
-        highest[AXIS_Z];
-  }
-
-  InitRings();
+    InitRings();
 }
 
 /*
@@ -1692,7 +1688,7 @@ void PrepareHoleTriangles(void) {
  * is not, so this returns FALSE and the debug scene menu never opens.
  */
 Boolean IsOverlayInExpansionMemory(void) {
-  return (u32)BuildHole > BASE_RDRAM_END - 1;
+    return (u32)BuildHole > BASE_RDRAM_END - 1;
 }
 
 /* A map texel's span in world units, which billboards are placed in */
@@ -1700,18 +1696,18 @@ Boolean IsOverlayInExpansionMemory(void) {
 
 /* Marks each billboard on the map image in red */
 void MarkBillboardsOnMap(void) {
-  s32 i;
-  u16 color = 0xF801;
-  u32 column;
-  u32 row;
+    s32 i;
+    u16 color = 0xF801;
+    u32 column;
+    u32 row;
 
-  for (i = 0; i < BILLBOARD_COUNT; i++) {
-    if (g_Billboards[i].textureIndex >= 0) {
-      column = g_Billboards[i].x / GROUND_TEXEL_WORLD_SIZE;
-      row = g_Billboards[i].z / GROUND_TEXEL_WORLD_SIZE;
-      MAP_TEXEL(column, row) = color;
+    for (i = 0; i < BILLBOARD_COUNT; i++) {
+        if (g_Billboards[i].textureIndex >= 0) {
+            column = g_Billboards[i].x / GROUND_TEXEL_WORLD_SIZE;
+            row = g_Billboards[i].z / GROUND_TEXEL_WORLD_SIZE;
+            MAP_TEXEL(column, row) = color;
+        }
     }
-  }
 }
 
 /*
@@ -1720,229 +1716,231 @@ void MarkBillboardsOnMap(void) {
  * the original.
  */
 #define IsSceneMenuRequested() \
-  (g_IsDebugEnabled && (g_MenuControllerData[0].button & START_BUTTON) && \
-      ((g_ControllerData[0].button & (START_BUTTON | L_TRIG)) == \
-          (START_BUTTON | L_TRIG)))
+    (g_IsDebugEnabled && \
+        (g_MenuControllerData[0].button & START_BUTTON) && \
+        ((g_ControllerData[0].button & (START_BUTTON | L_TRIG)) == (START_BUTTON | L_TRIG)))
 
 /* Runs the debug scene menu and the update routine of the current debug scene
  */
 void UpdateDebugScenes(void) {
-  /*
-   * A local, rather than the constant, to match: comparing the box's state
-   * with BOX_OPEN itself, either way round or in a nested test, gives 17
-   * words differing, 5 in shape
-   */
-  s32 openState = BOX_OPEN;
-  s32 stickStep;
+    /*
+     * A local, rather than the constant, to match: comparing the box's state
+     * with BOX_OPEN itself, either way round or in a nested test, gives 17
+     * words differing, 5 in shape
+     */
+    s32 openState = BOX_OPEN;
+    s32 stickStep;
 
-  if (f_IsFirstDebugUpdate) {
-    f_IsFirstDebugUpdate = FALSE;
-    if (g_ControllerData[0].button & L_TRIG) {
-      g_IsDebugEnabled = FALSE;
+    if (f_IsFirstDebugUpdate) {
+        f_IsFirstDebugUpdate = FALSE;
+        if (g_ControllerData[0].button & L_TRIG) {
+            g_IsDebugEnabled = FALSE;
+        }
+
+        g_Scene = SCENE_BOOT_LOGOS;
+        return;
     }
 
-    g_Scene = SCENE_BOOT_LOGOS;
-    return;
-  }
+    if (IsGameFlagSet(GAME_FLAG_SHOW_SURFACE_NAME)) {
+        PrintDebugText(
+            GetSurfaceInfoAt(g_CurrentShot.targetPoint[AXIS_X], g_CurrentShot.targetPoint[AXIS_Z])
+                ->name,
+            SURFACE_NAME_COLUMN,
+            SURFACE_NAME_ROW
+        );
+    }
 
-  if (IsGameFlagSet(GAME_FLAG_SHOW_SURFACE_NAME)) {
-    PrintDebugText(GetSurfaceInfoAt(g_CurrentShot.targetPoint[AXIS_X],
-                       g_CurrentShot.targetPoint[AXIS_Z])
-                       ->name,
-        SURFACE_NAME_COLUMN, SURFACE_NAME_ROW);
-  }
+    if (f_IsSceneMenuOpen && f_SceneMenuBox.state == openState) {
+        UpdateDebugSceneMenu();
+        QueueAnimatedBox(&f_SceneMenuBox);
+        return;
+    }
 
-  if (f_IsSceneMenuOpen && f_SceneMenuBox.state == openState) {
-    UpdateDebugSceneMenu();
+    if (IsSceneMenuRequested()) {
+        if (IsOverlayInExpansionMemory()) {
+            f_IsSceneMenuOpen = TRUE;
+            ClearGameFlag(GAME_FLAG_HIDE_DEBUG_TEXT);
+            FreeAllCharacterSlots();
+            f_SceneMenuBox.state = BOX_OPENING;
+            f_SceneMenuBox.frameIndex = 0;
+            QueueAnimatedBox(&f_SceneMenuBox);
+            PlaySound(SOUND_PAUSE, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
+            MarkBillboardsOnMap();
+            return;
+        }
+
+        if (g_Scene == SCENE_FLAG_PANEL) {
+            ClearDebugText();
+            g_Scene = f_SceneBeforeFlags;
+            InitClubs();
+            if (IsGameFlagSet(GAME_FLAG_LOG_GROUND_ROWS)) {
+                nuContRmbMgrRemove();
+            }
+        }
+        else {
+            f_SceneBeforeFlags = g_Scene;
+            g_Scene = SCENE_FLAG_PANEL;
+        }
+
+        return;
+    }
+
     QueueAnimatedBox(&f_SceneMenuBox);
-    return;
-  }
+    if ((g_Scene != SCENE_PLAY_ROUND) & (g_Scene != SCENE_MENU)) {
+        SetDebugTextHighlight(TRUE);
+        PrintDebugText(GetDebugSceneLabel(g_Scene), SCENE_LABEL_COLUMN, SCENE_LABEL_ROW);
+    }
 
-  if (IsSceneMenuRequested()) {
-    if (IsOverlayInExpansionMemory()) {
-      f_IsSceneMenuOpen = TRUE;
-      ClearGameFlag(GAME_FLAG_HIDE_DEBUG_TEXT);
-      FreeAllCharacterSlots();
-      f_SceneMenuBox.state = BOX_OPENING;
-      f_SceneMenuBox.frameIndex = 0;
-      QueueAnimatedBox(&f_SceneMenuBox);
-      PlaySound(SOUND_PAUSE, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
-      MarkBillboardsOnMap();
-      return;
+    if (g_Scene == SCENE_HOLE_FILES) {
+        UpdateHoleFileMenu();
     }
 
     if (g_Scene == SCENE_FLAG_PANEL) {
-      ClearDebugText();
-      g_Scene = f_SceneBeforeFlags;
-      InitClubs();
-      if (IsGameFlagSet(GAME_FLAG_LOG_GROUND_ROWS)) {
-        nuContRmbMgrRemove();
-      }
-    } else {
-      f_SceneBeforeFlags = g_Scene;
-      g_Scene = SCENE_FLAG_PANEL;
+        UpdateFlagPanel();
     }
 
-    return;
-  }
-
-  QueueAnimatedBox(&f_SceneMenuBox);
-  if ((g_Scene != SCENE_PLAY_ROUND) & (g_Scene != SCENE_MENU)) {
-    SetDebugTextHighlight(TRUE);
-    PrintDebugText(
-        GetDebugSceneLabel(g_Scene), SCENE_LABEL_COLUMN, SCENE_LABEL_ROW);
-  }
-
-  if (g_Scene == SCENE_HOLE_FILES) {
-    UpdateHoleFileMenu();
-  }
-
-  if (g_Scene == SCENE_FLAG_PANEL) {
-    UpdateFlagPanel();
-  }
-
-  if (g_Scene == SCENE_CELL_EDITOR) {
-    UpdateCellEditor();
-  } else if (g_Scene == SCENE_POINT_EDITOR) {
-    UpdateGroundPointEditor();
-  }
-
-  if (g_Scene == SCENE_TREES) {
-    UpdateTreeEditor();
-  }
-
-  if (g_Scene == SCENE_TRIANGLES) {
-    UpdateTriangleEditor();
-  }
-
-  if (g_Scene == SCENE_RINGS) {
-    UpdateRingEditor();
-  }
-
-  if (g_Scene == SCENE_WALLS) {
-    UpdateWallEditor();
-  }
-
-  if (g_Scene == SCENE_MAP_OVERVIEW) {
-    if (g_MenuControllerData[0].button & R_JPAD) {
-      f_MapOverviewControls.cameraZ -= MAP_OVERVIEW_CAMERA_STEP;
+    if (g_Scene == SCENE_CELL_EDITOR) {
+        UpdateCellEditor();
+    }
+    else if (g_Scene == SCENE_POINT_EDITOR) {
+        UpdateGroundPointEditor();
     }
 
-    if (g_MenuControllerData[0].button & L_JPAD) {
-      f_MapOverviewControls.cameraZ += MAP_OVERVIEW_CAMERA_STEP;
+    if (g_Scene == SCENE_TREES) {
+        UpdateTreeEditor();
     }
 
-    if (g_MenuControllerData[0].button & D_JPAD) {
-      f_MapOverviewControls.cameraX -= MAP_OVERVIEW_CAMERA_STEP;
+    if (g_Scene == SCENE_TRIANGLES) {
+        UpdateTriangleEditor();
     }
 
-    if (g_MenuControllerData[0].button & U_JPAD) {
-      f_MapOverviewControls.cameraX += MAP_OVERVIEW_CAMERA_STEP;
+    if (g_Scene == SCENE_RINGS) {
+        UpdateRingEditor();
     }
 
-    stickStep = g_MenuControllerData[0].stick_y / STICK_STEP_SIZE;
-    if (stickStep != 0) {
-      f_MapOverviewControls.cameraX += stickStep;
+    if (g_Scene == SCENE_WALLS) {
+        UpdateWallEditor();
     }
 
-    stickStep = g_MenuControllerData[0].stick_x / STICK_STEP_SIZE;
-    if (stickStep != 0) {
-      f_MapOverviewControls.cameraZ -= stickStep;
+    if (g_Scene == SCENE_MAP_OVERVIEW) {
+        if (g_MenuControllerData[0].button & R_JPAD) {
+            f_MapOverviewControls.cameraZ -= MAP_OVERVIEW_CAMERA_STEP;
+        }
+
+        if (g_MenuControllerData[0].button & L_JPAD) {
+            f_MapOverviewControls.cameraZ += MAP_OVERVIEW_CAMERA_STEP;
+        }
+
+        if (g_MenuControllerData[0].button & D_JPAD) {
+            f_MapOverviewControls.cameraX -= MAP_OVERVIEW_CAMERA_STEP;
+        }
+
+        if (g_MenuControllerData[0].button & U_JPAD) {
+            f_MapOverviewControls.cameraX += MAP_OVERVIEW_CAMERA_STEP;
+        }
+
+        stickStep = g_MenuControllerData[0].stick_y / STICK_STEP_SIZE;
+        if (stickStep != 0) {
+            f_MapOverviewControls.cameraX += stickStep;
+        }
+
+        stickStep = g_MenuControllerData[0].stick_x / STICK_STEP_SIZE;
+        if (stickStep != 0) {
+            f_MapOverviewControls.cameraZ -= stickStep;
+        }
+
+        if (g_MenuControllerData[0].button & L_TRIG) {
+            f_MapOverviewControls.adjustment -= MAP_OVERVIEW_ADJUSTMENT_STEP;
+            if (f_MapOverviewControls.adjustment < MAP_OVERVIEW_ADJUSTMENT_MIN) {
+                f_MapOverviewControls.adjustment = MAP_OVERVIEW_ADJUSTMENT_MIN;
+            }
+        }
+
+        if (g_MenuControllerData[0].button & R_TRIG) {
+            f_MapOverviewControls.adjustment += MAP_OVERVIEW_ADJUSTMENT_STEP;
+            if (f_MapOverviewControls.adjustment > MAP_OVERVIEW_ADJUSTMENT_MAX) {
+                f_MapOverviewControls.adjustment = MAP_OVERVIEW_ADJUSTMENT_MAX;
+            }
+        }
+
+        if (g_MenuControllerData[0].button & Z_TRIG) {
+            f_MapOverviewControls.isToggled ^= TRUE;
+        }
+
+        if (g_MenuControllerData[0].button & A_BUTTON) {
+            f_MapOverviewControls.selectionIndex++;
+            if (f_MapOverviewControls.selectionIndex >= MAP_OVERVIEW_SELECTION_COUNT) {
+                f_MapOverviewControls.selectionIndex = 0;
+            }
+
+            f_MapOverviewControls.isToggled = FALSE;
+        }
+
+        if (g_MenuControllerData[0].button & B_BUTTON) {
+            f_MapOverviewControls.selectionIndex--;
+            if (f_MapOverviewControls.selectionIndex < 0) {
+                f_MapOverviewControls.selectionIndex = MAP_OVERVIEW_SELECTION_COUNT - 1;
+            }
+
+            f_MapOverviewControls.isToggled = FALSE;
+        }
+
+        if (g_MenuControllerData[0].trigger & D_CBUTTONS) {
+            LoadToolCodeMap();
+        }
+
+        if (g_MenuControllerData[0].trigger & R_CBUTTONS) {
+            ToggleCodeMapCleanup();
+        }
+
+        if (g_MenuControllerData[0].trigger & U_CBUTTONS) {
+            g_HoleSetup.conditions.lightPitch = RESET_LIGHT_PITCH;
+            g_HoleSetup.conditions.lightYaw = RESET_LIGHT_YAW;
+            ShadeGround(1);
+        }
+
+        if (g_MenuControllerData[0].trigger & L_CBUTTONS) {
+            ToggleGroundTileBorders();
+        }
+
+        g_MapCamera.view.eye[0] = f_MapOverviewControls.cameraX * MAP_OVERVIEW_CAMERA_SCALE;
+        g_MapCamera.view.eye[2] = f_MapOverviewControls.cameraZ * MAP_OVERVIEW_CAMERA_SCALE;
     }
 
-    if (g_MenuControllerData[0].button & L_TRIG) {
-      f_MapOverviewControls.adjustment -= MAP_OVERVIEW_ADJUSTMENT_STEP;
-      if (f_MapOverviewControls.adjustment < MAP_OVERVIEW_ADJUSTMENT_MIN) {
-        f_MapOverviewControls.adjustment = MAP_OVERVIEW_ADJUSTMENT_MIN;
-      }
+    if (g_Scene == SCENE_HEIGHTS) {
+        UpdateHeightEditor();
     }
 
-    if (g_MenuControllerData[0].button & R_TRIG) {
-      f_MapOverviewControls.adjustment += MAP_OVERVIEW_ADJUSTMENT_STEP;
-      if (f_MapOverviewControls.adjustment > MAP_OVERVIEW_ADJUSTMENT_MAX) {
-        f_MapOverviewControls.adjustment = MAP_OVERVIEW_ADJUSTMENT_MAX;
-      }
+    if (g_Scene == SCENE_PIN) {
+        UpdateHolePointEditor();
     }
-
-    if (g_MenuControllerData[0].button & Z_TRIG) {
-      f_MapOverviewControls.isToggled ^= TRUE;
-    }
-
-    if (g_MenuControllerData[0].button & A_BUTTON) {
-      f_MapOverviewControls.selectionIndex++;
-      if (f_MapOverviewControls.selectionIndex >=
-          MAP_OVERVIEW_SELECTION_COUNT) {
-        f_MapOverviewControls.selectionIndex = 0;
-      }
-
-      f_MapOverviewControls.isToggled = FALSE;
-    }
-
-    if (g_MenuControllerData[0].button & B_BUTTON) {
-      f_MapOverviewControls.selectionIndex--;
-      if (f_MapOverviewControls.selectionIndex < 0) {
-        f_MapOverviewControls.selectionIndex = MAP_OVERVIEW_SELECTION_COUNT - 1;
-      }
-
-      f_MapOverviewControls.isToggled = FALSE;
-    }
-
-    if (g_MenuControllerData[0].trigger & D_CBUTTONS) {
-      LoadToolCodeMap();
-    }
-
-    if (g_MenuControllerData[0].trigger & R_CBUTTONS) {
-      ToggleCodeMapCleanup();
-    }
-
-    if (g_MenuControllerData[0].trigger & U_CBUTTONS) {
-      g_HoleSetup.conditions.lightPitch = RESET_LIGHT_PITCH;
-      g_HoleSetup.conditions.lightYaw = RESET_LIGHT_YAW;
-      ShadeGround(1);
-    }
-
-    if (g_MenuControllerData[0].trigger & L_CBUTTONS) {
-      ToggleGroundTileBorders();
-    }
-
-    g_MapCamera.view.eye[0] =
-        f_MapOverviewControls.cameraX * MAP_OVERVIEW_CAMERA_SCALE;
-    g_MapCamera.view.eye[2] =
-        f_MapOverviewControls.cameraZ * MAP_OVERVIEW_CAMERA_SCALE;
-  }
-
-  if (g_Scene == SCENE_HEIGHTS) {
-    UpdateHeightEditor();
-  }
-
-  if (g_Scene == SCENE_PIN) {
-    UpdateHolePointEditor();
-  }
 }
 
 /*
  * Returns the point in a tile's slot: a grid vertex when the slot has
  * GRID_VERTEX_SLOT_FLAG, otherwise a midpoint
  */
-Vtx* GetTileCellPoint(Vtx* midpoints, s32 tileColumn, s32 tileRow, s32 slot) {
-  Vtx* vertex;
+Vtx *GetTileCellPoint(Vtx *midpoints, s32 tileColumn, s32 tileRow, s32 slot) {
+    Vtx *vertex;
 
-  if (slot & GRID_VERTEX_SLOT_FLAG) {
-    vertex = TileGridVertex(tileColumn, tileRow,
-        (slot >> SLOT_GRID_COLUMN_SHIFT) & SLOT_GRID_MASK,
-        slot & SLOT_GRID_MASK);
-  } else {
-    vertex = &midpoints[slot];
-  }
+    if (slot & GRID_VERTEX_SLOT_FLAG) {
+        vertex = TileGridVertex(
+            tileColumn,
+            tileRow,
+            (slot >> SLOT_GRID_COLUMN_SHIFT) & SLOT_GRID_MASK,
+            slot & SLOT_GRID_MASK
+        );
+    }
+    else {
+        vertex = &midpoints[slot];
+    }
 
-  return vertex;
+    return vertex;
 }
 
 /* Returns the cross product of two points' offsets from an origin */
-s32 CrossProductXZ(s32 originX, s32 originZ, s32 firstX, s32 firstZ,
-    s32 secondX, s32 secondZ) {
-  return ((firstX - originX) * (secondZ - originZ)) -
-      ((firstZ - originZ) * (secondX - originX));
+s32 CrossProductXZ(s32 originX, s32 originZ, s32 firstX, s32 firstZ, s32 secondX, s32 secondZ) {
+    return ((firstX - originX) * (secondZ - originZ)) - ((firstZ - originZ) * (secondX - originX));
 }
 
 /* Where FindGroundTriangle reports a point that is in no triangle */
@@ -1953,110 +1951,111 @@ s32 CrossProductXZ(s32 originX, s32 originZ, s32 firstX, s32 firstZ,
  * Finds the ground triangle under a point and copies its corners. Returns
  * 0, or -1 off the ground.
  */
-s32 FindGroundTriangle(s32 x, s32 z, PlaneTriangle* triangle) {
-  s32 baseColumn;
-  s32 baseRow;
-  s32 slotColumn;
-  s32 slotRow;
-  s32 rowIndex;
-  s32 columnIndex;
-  s32 column;
-  s32 row;
+s32 FindGroundTriangle(s32 x, s32 z, PlaneTriangle *triangle) {
+    s32 baseColumn;
+    s32 baseRow;
+    s32 slotColumn;
+    s32 slotRow;
+    s32 rowIndex;
+    s32 columnIndex;
+    s32 column;
+    s32 row;
 
-  /* Whether x and z are on the outer side of a triangle's edge from start to
-   * end */
-  inline Boolean IsOutsideEdge(Vtx * start, Vtx * end) {
-    return (end->v.ob[AXIS_X] - start->v.ob[AXIS_X]) *
-            (z - (start->v.ob[AXIS_Z] << WORLD_TO_COURSE_SHIFT)) -
-        (end->v.ob[AXIS_Z] - start->v.ob[AXIS_Z]) *
-            (x - (start->v.ob[AXIS_X] << WORLD_TO_COURSE_SHIFT)) <
-        0;
-  }
-
-  inline s32 ContainsPoint(Vtx * first, Vtx * second, Vtx * third) {
-    if (IsOutsideEdge(first, second) || IsOutsideEdge(second, third) ||
-        IsOutsideEdge(third, first)) {
-      return FALSE;
+    /* Whether x and z are on the outer side of a triangle's edge from start to
+     * end */
+    inline Boolean IsOutsideEdge(Vtx * start, Vtx * end) {
+        return (end->v.ob[AXIS_X] - start->v.ob[AXIS_X]) *
+                (z - (start->v.ob[AXIS_Z] << WORLD_TO_COURSE_SHIFT)) -
+            (end->v.ob[AXIS_Z] - start->v.ob[AXIS_Z]) *
+                (x - (start->v.ob[AXIS_X] << WORLD_TO_COURSE_SHIFT)) <
+            0;
     }
 
-    triangle->corners[AXIS_X][0] = first->v.ob[AXIS_X];
-    triangle->corners[AXIS_X][1] = second->v.ob[AXIS_X];
-    triangle->corners[AXIS_X][2] = third->v.ob[AXIS_X];
-    triangle->corners[AXIS_Y][0] = first->v.ob[AXIS_Y];
-    triangle->corners[AXIS_Y][1] = second->v.ob[AXIS_Y];
-    triangle->corners[AXIS_Y][2] = third->v.ob[AXIS_Y];
-    triangle->corners[AXIS_Z][0] = first->v.ob[AXIS_Z];
-    triangle->corners[AXIS_Z][1] = second->v.ob[AXIS_Z];
-    triangle->corners[AXIS_Z][2] = third->v.ob[AXIS_Z];
-    return TRUE;
-  }
+    inline s32 ContainsPoint(Vtx * first, Vtx * second, Vtx * third) {
+        if (IsOutsideEdge(first, second) ||
+            IsOutsideEdge(second, third) ||
+            IsOutsideEdge(third, first)) {
+            return FALSE;
+        }
 
-  if (g_GameState.isMiniGolf) {
-    if ((u32)x > MINI_GOLF_GROUND_SIZE - 1) {
-      return -1;
+        triangle->corners[AXIS_X][0] = first->v.ob[AXIS_X];
+        triangle->corners[AXIS_X][1] = second->v.ob[AXIS_X];
+        triangle->corners[AXIS_X][2] = third->v.ob[AXIS_X];
+        triangle->corners[AXIS_Y][0] = first->v.ob[AXIS_Y];
+        triangle->corners[AXIS_Y][1] = second->v.ob[AXIS_Y];
+        triangle->corners[AXIS_Y][2] = third->v.ob[AXIS_Y];
+        triangle->corners[AXIS_Z][0] = first->v.ob[AXIS_Z];
+        triangle->corners[AXIS_Z][1] = second->v.ob[AXIS_Z];
+        triangle->corners[AXIS_Z][2] = third->v.ob[AXIS_Z];
+        return TRUE;
     }
 
-    if ((u32)z > MINI_GOLF_GROUND_SIZE - 1) {
-      return -1;
+    if (g_GameState.isMiniGolf) {
+        if ((u32)x > MINI_GOLF_GROUND_SIZE - 1) {
+            return -1;
+        }
+
+        if ((u32)z > MINI_GOLF_GROUND_SIZE - 1) {
+            return -1;
+        }
     }
-  } else if ((u32)x > GROUND_WIDTH - 1 || (u32)z > GROUND_LENGTH - 1) {
+    else if ((u32)x > GROUND_WIDTH - 1 || (u32)z > GROUND_LENGTH - 1) {
+        return -1;
+    }
+
+    if (g_GameState.isMiniGolf) {
+        baseColumn = x >> MINI_GOLF_TILE_X_SHIFT;
+        baseRow = z >> MINI_GOLF_TILE_Z_SHIFT;
+        baseColumn *= GROUND_TILE_POINT_SPAN;
+        baseRow *= GROUND_TILE_POINT_SPAN;
+        slotColumn = PointSlot(x >> (MINI_GOLF_TILE_X_SHIFT - TILE_POINT_SPAN_SHIFT));
+        slotRow = PointSlot(z >> (MINI_GOLF_TILE_Z_SHIFT - TILE_POINT_SPAN_SHIFT));
+    }
+    else {
+        baseColumn = x >> GROUND_TILE_SHIFT;
+        baseRow = z >> GROUND_TILE_SHIFT;
+        baseColumn *= GROUND_TILE_POINT_SPAN;
+        baseRow *= GROUND_TILE_POINT_SPAN;
+        slotColumn = PointSlot(x >> (GROUND_TILE_SHIFT - TILE_POINT_SPAN_SHIFT));
+        slotRow = PointSlot(z >> (GROUND_TILE_SHIFT - TILE_POINT_SPAN_SHIFT));
+    }
+
+    for (rowIndex = 0; rowIndex < GROUND_TILE_POINT_SPAN; rowIndex++) {
+        Vtx *corners[4];
+
+        row = baseRow + PointSlot(slotRow + f_CellSearchOffsets[rowIndex]);
+        for (columnIndex = 0; columnIndex < GROUND_TILE_POINT_SPAN; columnIndex++) {
+            column = baseColumn + PointSlot(slotColumn + f_CellSearchOffsets[columnIndex]);
+            corners[0] = GetGroundPoint(column, row);
+            corners[1] = GetGroundPoint(column + 1, row);
+            corners[2] = GetGroundPoint(column, row + 1);
+            if (ContainsPoint(corners[0], corners[1], corners[2])) {
+                return 0;
+            }
+
+            corners[3] = GetGroundPoint(column + 1, row + 1);
+            if (ContainsPoint(corners[1], corners[3], corners[2])) {
+                return 0;
+            }
+        }
+    }
+
+    PrintDebugText("GetHeightInfo", GROUND_ERROR_COLUMN, GROUND_ERROR_ROW);
     return -1;
-  }
-
-  if (g_GameState.isMiniGolf) {
-    baseColumn = x >> MINI_GOLF_TILE_X_SHIFT;
-    baseRow = z >> MINI_GOLF_TILE_Z_SHIFT;
-    baseColumn *= GROUND_TILE_POINT_SPAN;
-    baseRow *= GROUND_TILE_POINT_SPAN;
-    slotColumn =
-        PointSlot(x >> (MINI_GOLF_TILE_X_SHIFT - TILE_POINT_SPAN_SHIFT));
-    slotRow = PointSlot(z >> (MINI_GOLF_TILE_Z_SHIFT - TILE_POINT_SPAN_SHIFT));
-  } else {
-    baseColumn = x >> GROUND_TILE_SHIFT;
-    baseRow = z >> GROUND_TILE_SHIFT;
-    baseColumn *= GROUND_TILE_POINT_SPAN;
-    baseRow *= GROUND_TILE_POINT_SPAN;
-    slotColumn = PointSlot(x >> (GROUND_TILE_SHIFT - TILE_POINT_SPAN_SHIFT));
-    slotRow = PointSlot(z >> (GROUND_TILE_SHIFT - TILE_POINT_SPAN_SHIFT));
-  }
-
-  for (rowIndex = 0; rowIndex < GROUND_TILE_POINT_SPAN; rowIndex++) {
-    Vtx* corners[4];
-
-    row = baseRow + PointSlot(slotRow + f_CellSearchOffsets[rowIndex]);
-    for (columnIndex = 0; columnIndex < GROUND_TILE_POINT_SPAN; columnIndex++) {
-      column =
-          baseColumn + PointSlot(slotColumn + f_CellSearchOffsets[columnIndex]);
-      corners[0] = GetGroundPoint(column, row);
-      corners[1] = GetGroundPoint(column + 1, row);
-      corners[2] = GetGroundPoint(column, row + 1);
-      if (ContainsPoint(corners[0], corners[1], corners[2])) {
-        return 0;
-      }
-
-      corners[3] = GetGroundPoint(column + 1, row + 1);
-      if (ContainsPoint(corners[1], corners[3], corners[2])) {
-        return 0;
-      }
-    }
-  }
-
-  PrintDebugText("GetHeightInfo", GROUND_ERROR_COLUMN, GROUND_ERROR_ROW);
-  return -1;
 }
 
-Boolean AreTrianglesDifferent(PlaneTriangle* first, PlaneTriangle* second) {
-  s32 i;
+Boolean AreTrianglesDifferent(PlaneTriangle *first, PlaneTriangle *second) {
+    s32 i;
 
-  for (i = 0; i < TRIANGLE_CORNER_COUNT; i++) {
-    if (first->corners[AXIS_X][i] != second->corners[AXIS_X][i] ||
-        first->corners[AXIS_Y][i] != second->corners[AXIS_Y][i] ||
-        first->corners[AXIS_Z][i] != second->corners[AXIS_Z][i]) {
-      return TRUE;
+    for (i = 0; i < TRIANGLE_CORNER_COUNT; i++) {
+        if (first->corners[AXIS_X][i] != second->corners[AXIS_X][i] ||
+            first->corners[AXIS_Y][i] != second->corners[AXIS_Y][i] ||
+            first->corners[AXIS_Z][i] != second->corners[AXIS_Z][i]) {
+            return TRUE;
+        }
     }
-  }
 
-  return FALSE;
+    return FALSE;
 }
 
 /*
@@ -2075,133 +2074,132 @@ Boolean AreTrianglesDifferent(PlaneTriangle* first, PlaneTriangle* second) {
  * differently from the original.
  */
 #define IsNormalTooLong(normalX, normalY, normalZ) \
-  ((Abs(normalX) > MAX_NORMAL_PART) || (Abs(normalY) > MAX_NORMAL_PART) || \
-      (Abs(normalZ) > MAX_NORMAL_PART))
+    ((Abs(normalX) > MAX_NORMAL_PART) || \
+        (Abs(normalY) > MAX_NORMAL_PART) || \
+        (Abs(normalZ) > MAX_NORMAL_PART))
 
 /* Integer GetTrianglePlane. Returns 0, or -1 for a degenerate triangle. */
 
-s32 GetTriangleIntegerPlane(PlaneTriangle* triangle, IntegerPlane* plane) {
-  s32 firstX;
-  s32 secondX;
-  s32 firstY;
-  s32 secondY;
-  s32 firstZ;
-  s32 secondZ;
-  s32 normalX;
-  s32 normalY;
-  s32 normalZ;
-  s32 distance;
-  s32 length;
+s32 GetTriangleIntegerPlane(PlaneTriangle *triangle, IntegerPlane *plane) {
+    s32 firstX;
+    s32 secondX;
+    s32 firstY;
+    s32 secondY;
+    s32 firstZ;
+    s32 secondZ;
+    s32 normalX;
+    s32 normalY;
+    s32 normalZ;
+    s32 distance;
+    s32 length;
 
-  secondZ = triangle->corners[AXIS_Z][2] - triangle->corners[AXIS_Z][0];
-  /*
-   * Split from the subtraction to match: as one statement, cast or written
-   * with a negation, 6 to 8 words differ, none in shape. Of the 720 orders of
-   * GetTrianglePlane's six differences with it in one statement, none
-   * matches; the best leave 2 words.
-   */
-  firstY = triangle->corners[AXIS_Y][1];
-  firstY -= triangle->corners[AXIS_Y][0];
-  secondY = triangle->corners[AXIS_Y][2] - triangle->corners[AXIS_Y][0];
-  firstZ = triangle->corners[AXIS_Z][1] - triangle->corners[AXIS_Z][0];
-  firstX = triangle->corners[AXIS_X][1] - triangle->corners[AXIS_X][0];
-  secondX = triangle->corners[AXIS_X][2] - triangle->corners[AXIS_X][0];
-  normalX = (firstY * secondZ) - (secondY * firstZ);
-  normalY = (-firstX * secondZ) + (secondX * firstZ);
-  normalZ = (-firstY * secondX) + (secondY * firstX);
-  distance = -((normalX * triangle->corners[AXIS_X][0]) +
-      (normalY * triangle->corners[AXIS_Y][0]) +
-      (normalZ * triangle->corners[AXIS_Z][0]));
-  while (IsNormalTooLong(normalX, normalY, normalZ)) {
-    normalX /= NORMAL_REDUCTION;
-    normalY /= NORMAL_REDUCTION;
-    normalZ /= NORMAL_REDUCTION;
-    distance /= NORMAL_REDUCTION;
-  }
-
-  length =
-      sqrt((normalX * normalX) + (normalY * normalY) + (normalZ * normalZ));
-  if (length == 0) {
-    PrintDebugText("NormalError", NORMAL_ERROR_COLUMN, NORMAL_ERROR_ROW);
-    plane->normal[AXIS_X] = 0;
-    plane->normal[AXIS_Y] = INTEGER_PLANE_UNIT;
-    plane->normal[AXIS_Z] = 0;
-    plane->distance = 0;
-    plane->normalLength = INTEGER_PLANE_UNIT;
-    return -1;
-  }
-
-  if (normalY < 0) {
-    length = -length;
-  }
-
-  plane->normalLength = INTEGER_PLANE_UNIT;
-  plane->normal[AXIS_X] = (normalX << INTEGER_PLANE_SHIFT) / length;
-  plane->normal[AXIS_Y] = (normalY << INTEGER_PLANE_SHIFT) / length;
-  plane->normal[AXIS_Z] = (normalZ << INTEGER_PLANE_SHIFT) / length;
-  plane->distance = (distance << INTEGER_PLANE_SHIFT) / length;
-  return 0;
-}
-
-s32 GetTrianglePlane(PlaneTriangle* triangle, TrianglePlane* plane) {
-  s32 firstX;
-  s32 secondX;
-  s32 firstY;
-  s32 secondY;
-  s32 firstZ;
-  s32 secondZ;
-  f32 normalX;
-  f32 normalY;
-  f32 normalZ;
-  f32 length;
-  f32 distance;
-  f32 scale;
-
-  secondZ = triangle->corners[AXIS_Z][2] - triangle->corners[AXIS_Z][0];
-  /*
-   * Split from the subtraction to match: as one statement, cast or written
-   * with a negation, 6 to 8 words differ, none in shape. Of the 720 orders of
-   * GetTrianglePlane's six differences with it in one statement, none
-   * matches; the best leave 2 words.
-   */
-  firstY = triangle->corners[AXIS_Y][1];
-  firstY -= triangle->corners[AXIS_Y][0];
-  secondY = triangle->corners[AXIS_Y][2] - triangle->corners[AXIS_Y][0];
-  firstZ = triangle->corners[AXIS_Z][1] - triangle->corners[AXIS_Z][0];
-  firstX = triangle->corners[AXIS_X][1] - triangle->corners[AXIS_X][0];
-  secondX = triangle->corners[AXIS_X][2] - triangle->corners[AXIS_X][0];
-  normalX = (firstY * secondZ) - (secondY * firstZ);
-  normalY = (-firstX * secondZ) + (secondX * firstZ);
-  normalZ = (-firstY * secondX) + (secondY * firstX);
-  length =
-      sqrtf((normalX * normalX) + (normalY * normalY) + (normalZ * normalZ));
-  distance = -((normalX * triangle->corners[AXIS_X][0]) +
-      (normalY * triangle->corners[AXIS_Y][0]) +
-      (normalZ * triangle->corners[AXIS_Z][0]));
-  if (length == 0.0f) {
-    if (g_IsDebugEnabled) {
-      PrintDebugText("NormalFError", NORMAL_ERROR_COLUMN, NORMAL_ERROR_ROW);
+    secondZ = triangle->corners[AXIS_Z][2] - triangle->corners[AXIS_Z][0];
+    /*
+     * Split from the subtraction to match: as one statement, cast or written
+     * with a negation, 6 to 8 words differ, none in shape. Of the 720 orders of
+     * GetTrianglePlane's six differences with it in one statement, none
+     * matches; the best leave 2 words.
+     */
+    firstY = triangle->corners[AXIS_Y][1];
+    firstY -= triangle->corners[AXIS_Y][0];
+    secondY = triangle->corners[AXIS_Y][2] - triangle->corners[AXIS_Y][0];
+    firstZ = triangle->corners[AXIS_Z][1] - triangle->corners[AXIS_Z][0];
+    firstX = triangle->corners[AXIS_X][1] - triangle->corners[AXIS_X][0];
+    secondX = triangle->corners[AXIS_X][2] - triangle->corners[AXIS_X][0];
+    normalX = (firstY * secondZ) - (secondY * firstZ);
+    normalY = (-firstX * secondZ) + (secondX * firstZ);
+    normalZ = (-firstY * secondX) + (secondY * firstX);
+    distance =
+        -((normalX * triangle->corners[AXIS_X][0]) + (normalY * triangle->corners[AXIS_Y][0]) +
+            (normalZ * triangle->corners[AXIS_Z][0]));
+    while (IsNormalTooLong(normalX, normalY, normalZ)) {
+        normalX /= NORMAL_REDUCTION;
+        normalY /= NORMAL_REDUCTION;
+        normalZ /= NORMAL_REDUCTION;
+        distance /= NORMAL_REDUCTION;
     }
 
-    plane->normal[AXIS_X] = 0.0f;
-    plane->normal[AXIS_Z] = 0.0f;
-    plane->distance = 0.0f;
-    plane->normal[AXIS_Y] = 1.0f;
+    length = sqrt((normalX * normalX) + (normalY * normalY) + (normalZ * normalZ));
+    if (length == 0) {
+        PrintDebugText("NormalError", NORMAL_ERROR_COLUMN, NORMAL_ERROR_ROW);
+        plane->normal[AXIS_X] = 0;
+        plane->normal[AXIS_Y] = INTEGER_PLANE_UNIT;
+        plane->normal[AXIS_Z] = 0;
+        plane->distance = 0;
+        plane->normalLength = INTEGER_PLANE_UNIT;
+        return -1;
+    }
+
+    if (normalY < 0) {
+        length = -length;
+    }
+
+    plane->normalLength = INTEGER_PLANE_UNIT;
+    plane->normal[AXIS_X] = (normalX << INTEGER_PLANE_SHIFT) / length;
+    plane->normal[AXIS_Y] = (normalY << INTEGER_PLANE_SHIFT) / length;
+    plane->normal[AXIS_Z] = (normalZ << INTEGER_PLANE_SHIFT) / length;
+    plane->distance = (distance << INTEGER_PLANE_SHIFT) / length;
+    return 0;
+}
+
+s32 GetTrianglePlane(PlaneTriangle *triangle, TrianglePlane *plane) {
+    s32 firstX;
+    s32 secondX;
+    s32 firstY;
+    s32 secondY;
+    s32 firstZ;
+    s32 secondZ;
+    f32 normalX;
+    f32 normalY;
+    f32 normalZ;
+    f32 length;
+    f32 distance;
+    f32 scale;
+
+    secondZ = triangle->corners[AXIS_Z][2] - triangle->corners[AXIS_Z][0];
+    /*
+     * Split from the subtraction to match: as one statement, cast or written
+     * with a negation, 6 to 8 words differ, none in shape. Of the 720 orders of
+     * GetTrianglePlane's six differences with it in one statement, none
+     * matches; the best leave 2 words.
+     */
+    firstY = triangle->corners[AXIS_Y][1];
+    firstY -= triangle->corners[AXIS_Y][0];
+    secondY = triangle->corners[AXIS_Y][2] - triangle->corners[AXIS_Y][0];
+    firstZ = triangle->corners[AXIS_Z][1] - triangle->corners[AXIS_Z][0];
+    firstX = triangle->corners[AXIS_X][1] - triangle->corners[AXIS_X][0];
+    secondX = triangle->corners[AXIS_X][2] - triangle->corners[AXIS_X][0];
+    normalX = (firstY * secondZ) - (secondY * firstZ);
+    normalY = (-firstX * secondZ) + (secondX * firstZ);
+    normalZ = (-firstY * secondX) + (secondY * firstX);
+    length = sqrtf((normalX * normalX) + (normalY * normalY) + (normalZ * normalZ));
+    distance =
+        -((normalX * triangle->corners[AXIS_X][0]) + (normalY * triangle->corners[AXIS_Y][0]) +
+            (normalZ * triangle->corners[AXIS_Z][0]));
+    if (length == 0.0f) {
+        if (g_IsDebugEnabled) {
+            PrintDebugText("NormalFError", NORMAL_ERROR_COLUMN, NORMAL_ERROR_ROW);
+        }
+
+        plane->normal[AXIS_X] = 0.0f;
+        plane->normal[AXIS_Z] = 0.0f;
+        plane->distance = 0.0f;
+        plane->normal[AXIS_Y] = 1.0f;
+        plane->normalLength = 1.0f;
+        return -1;
+    }
+
+    if (normalY < 0.0f) {
+        length = -length;
+    }
+
+    scale = 1.0f / length;
     plane->normalLength = 1.0f;
-    return -1;
-  }
-
-  if (normalY < 0.0f) {
-    length = -length;
-  }
-
-  scale = 1.0f / length;
-  plane->normalLength = 1.0f;
-  plane->normal[AXIS_X] = normalX * scale;
-  plane->normal[AXIS_Y] = normalY * scale;
-  plane->normal[AXIS_Z] = normalZ * scale;
-  plane->distance = distance * scale;
-  return 0;
+    plane->normal[AXIS_X] = normalX * scale;
+    plane->normal[AXIS_Y] = normalY * scale;
+    plane->normal[AXIS_Z] = normalZ * scale;
+    plane->distance = distance * scale;
+    return 0;
 }
 
 /* GetTerrainHeight's height for a point in no ground triangle */
@@ -2212,116 +2210,119 @@ s32 GetTrianglePlane(PlaneTriangle* triangle, TrianglePlane* plane) {
  * NO_GROUND_HEIGHT where no ground triangle holds it
  */
 s32 GetTerrainHeight(s32 x, s32 z) {
-  PlaneTriangle triangle;
-  s32 firstX;
-  s32 secondX;
-  s32 firstY;
-  s32 secondY;
-  s32 firstZ;
-  s32 secondZ;
-  f32 normalX;
-  f32 normalY;
-  f32 normalZ;
-  s32 originX;
-  s32 originZ;
-  s32 offsetX;
-  s32 offsetZ;
-  s32 height;
-  s32 firstEdgeEndY;
+    PlaneTriangle triangle;
+    s32 firstX;
+    s32 secondX;
+    s32 firstY;
+    s32 secondY;
+    s32 firstZ;
+    s32 secondZ;
+    f32 normalX;
+    f32 normalY;
+    f32 normalZ;
+    s32 originX;
+    s32 originZ;
+    s32 offsetX;
+    s32 offsetZ;
+    s32 height;
+    s32 firstEdgeEndY;
 
-  if (g_GameState.isMiniGolf) {
-    if ((u32)x > MINI_GOLF_GROUND_SIZE - 1) {
-      if (x < 0) {
-        x = 0;
-      } else {
-        x = MINI_GOLF_GROUND_SIZE - 1;
-      }
+    if (g_GameState.isMiniGolf) {
+        if ((u32)x > MINI_GOLF_GROUND_SIZE - 1) {
+            if (x < 0) {
+                x = 0;
+            }
+            else {
+                x = MINI_GOLF_GROUND_SIZE - 1;
+            }
+        }
+
+        if ((u32)z > MINI_GOLF_GROUND_SIZE - 1) {
+            if (z < 0) {
+                z = 0;
+            }
+            else {
+                z = MINI_GOLF_GROUND_SIZE - 1;
+            }
+        }
+    }
+    else {
+        if ((u32)x > GROUND_WIDTH - 1) {
+            if (x < 0) {
+                x = 0;
+            }
+            else {
+                x = GROUND_WIDTH - 1;
+            }
+        }
+
+        if ((u32)z > GROUND_LENGTH - 1) {
+            if (z < 0) {
+                z = 0;
+            }
+            else {
+                z = GROUND_LENGTH - 1;
+            }
+        }
     }
 
-    if ((u32)z > MINI_GOLF_GROUND_SIZE - 1) {
-      if (z < 0) {
-        z = 0;
-      } else {
-        z = MINI_GOLF_GROUND_SIZE - 1;
-      }
-    }
-  } else {
-    if ((u32)x > GROUND_WIDTH - 1) {
-      if (x < 0) {
-        x = 0;
-      } else {
-        x = GROUND_WIDTH - 1;
-      }
+    if (FindGroundTriangle(x, z, &triangle) < 0) {
+        return NO_GROUND_HEIGHT;
     }
 
-    if ((u32)z > GROUND_LENGTH - 1) {
-      if (z < 0) {
-        z = 0;
-      } else {
-        z = GROUND_LENGTH - 1;
-      }
+    /*
+     * The first edge's far Y is read before the edges, to match: it is loaded
+     * two instructions before the rest. Subtracting it in place, in any of the
+     * 720 orders of the six edge subtractions, gives 2 or more words differing,
+     * none in shape; so does reading it into an s16, reading it after the
+     * second Z edge, or reaching each axis's corners through a row pointer.
+     * Reading all three Y corners first gives 4, and the first corner of each
+     * axis 50.
+     */
+    firstEdgeEndY = triangle.corners[AXIS_Y][1];
+    secondZ = triangle.corners[AXIS_Z][2] - triangle.corners[AXIS_Z][0];
+    firstY = firstEdgeEndY - triangle.corners[AXIS_Y][0];
+    firstZ = triangle.corners[AXIS_Z][1] - triangle.corners[AXIS_Z][0];
+    firstX = triangle.corners[AXIS_X][1] - triangle.corners[AXIS_X][0];
+    secondY = triangle.corners[AXIS_Y][2] - triangle.corners[AXIS_Y][0];
+    secondX = triangle.corners[AXIS_X][2] - triangle.corners[AXIS_X][0];
+    height = triangle.corners[AXIS_Y][0] << WORLD_TO_COURSE_SHIFT;
+    originX = triangle.corners[AXIS_X][0] << WORLD_TO_COURSE_SHIFT;
+    originZ = triangle.corners[AXIS_Z][0] << WORLD_TO_COURSE_SHIFT;
+    offsetX = x - originX;
+    offsetZ = z - originZ;
+    normalX = (firstY * secondZ) + (secondY * -firstZ);
+    normalY = (firstX * -secondZ) + (secondX * firstZ);
+    normalZ = (firstY * -secondX) + (secondY * firstX);
+    if ((s32)normalY != 0) {
+        return height + (s32)(((-normalX * offsetX) - (normalZ * offsetZ)) / normalY);
     }
-  }
 
-  if (FindGroundTriangle(x, z, &triangle) < 0) {
-    return NO_GROUND_HEIGHT;
-  }
-
-  /*
-   * The first edge's far Y is read before the edges, to match: it is loaded
-   * two instructions before the rest. Subtracting it in place, in any of the
-   * 720 orders of the six edge subtractions, gives 2 or more words differing,
-   * none in shape; so does reading it into an s16, reading it after the
-   * second Z edge, or reaching each axis's corners through a row pointer.
-   * Reading all three Y corners first gives 4, and the first corner of each
-   * axis 50.
-   */
-  firstEdgeEndY = triangle.corners[AXIS_Y][1];
-  secondZ = triangle.corners[AXIS_Z][2] - triangle.corners[AXIS_Z][0];
-  firstY = firstEdgeEndY - triangle.corners[AXIS_Y][0];
-  firstZ = triangle.corners[AXIS_Z][1] - triangle.corners[AXIS_Z][0];
-  firstX = triangle.corners[AXIS_X][1] - triangle.corners[AXIS_X][0];
-  secondY = triangle.corners[AXIS_Y][2] - triangle.corners[AXIS_Y][0];
-  secondX = triangle.corners[AXIS_X][2] - triangle.corners[AXIS_X][0];
-  height = triangle.corners[AXIS_Y][0] << WORLD_TO_COURSE_SHIFT;
-  originX = triangle.corners[AXIS_X][0] << WORLD_TO_COURSE_SHIFT;
-  originZ = triangle.corners[AXIS_Z][0] << WORLD_TO_COURSE_SHIFT;
-  offsetX = x - originX;
-  offsetZ = z - originZ;
-  normalX = (firstY * secondZ) + (secondY * -firstZ);
-  normalY = (firstX * -secondZ) + (secondX * firstZ);
-  normalZ = (firstY * -secondX) + (secondY * firstX);
-  if ((s32)normalY != 0) {
-    return height +
-        (s32)(((-normalX * offsetX) - (normalZ * offsetZ)) / normalY);
-  }
-
-  return 0;
+    return 0;
 }
 
 s32 GetGroundHeight(s32 x, s32 z) {
-  return GetTerrainHeight(x, z);
+    return GetTerrainHeight(x, z);
 }
 
 /* Returns the lower of the ground's height and the water's */
 s32 GetGroundOrWaterHeight(s32 x, s32 z) {
-  PlaneTriangle hit;
-  f32 fraction;
-  s32 height = GetTerrainHeight(x, z);
-  s32 waterHeight;
+    PlaneTriangle hit;
+    f32 fraction;
+    s32 height = GetTerrainHeight(x, z);
+    s32 waterHeight;
 
-  if (FindHoleTriangleHit(
-          x, -WATER_PROBE_REACH, z, x, WATER_PROBE_REACH, z, &hit, &fraction)) {
-    char unusedText[0x80] UNUSED; /* Unused, but keeps the stack frame the same
-                              size as the original */
+    if (FindHoleTriangleHit(x, -WATER_PROBE_REACH, z, x, WATER_PROBE_REACH, z, &hit, &fraction)) {
+        char unusedText[0x80] UNUSED; /* Unused, but keeps the stack frame the same
+                                  size as the original */
 
-    waterHeight = WaterProbeHeight(fraction, WATER_PROBE_REACH);
-    if (waterHeight < height) {
-      height = waterHeight;
+        waterHeight = WaterProbeHeight(fraction, WATER_PROBE_REACH);
+        if (waterHeight < height) {
+            height = waterHeight;
+        }
     }
-  }
 
-  return height;
+    return height;
 }
 
 /* The original ends its rodata with 8 zero bytes that nothing in the ROM

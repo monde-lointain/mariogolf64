@@ -100,30 +100,29 @@
 #define CAPTION_MAX_GROWTH 48
 #define CAPTION_COPY_ALPHA 127
 #define CAPTION_COPY_TOP \
-  (SHRINKING_IMAGE_CENTER_Y - \
-      (MOVIE_IMAGE_STRIP_HEIGHT * SHRINKING_IMAGE_STRIPS_ABOVE_CENTER))
+    (SHRINKING_IMAGE_CENTER_Y - (MOVIE_IMAGE_STRIP_HEIGHT * SHRINKING_IMAGE_STRIPS_ABOVE_CENTER))
 #define CAPTION_FLASH_DEPTH 127.0f
 #define CAPTION_SOUND_CHANNEL 13
 #define CAPTION_SOUND_VOLUME 63
 
 typedef struct Banner {
-  /* 0x0 */ s16 unusedBeforeImageAsset;
-  /* 0x2 */ AssetId imageAsset;
-  /* 0x4 */ s8 letterCount;
-  /* 0x5 */ u8 letterWidth;
-  /* 0x6 */ u8 letterHeight;
-  /* 0x7 */ s8 animation; /* A BANNER_ANIMATION_* value */
+    /* 0x0 */ s16 unusedBeforeImageAsset;
+    /* 0x2 */ AssetId imageAsset;
+    /* 0x4 */ s8 letterCount;
+    /* 0x5 */ u8 letterWidth;
+    /* 0x6 */ u8 letterHeight;
+    /* 0x7 */ s8 animation; /* A BANNER_ANIMATION_* value */
 } Banner; /* size = 0x8 */
 
 /* Where a letter of the shown banner is, and its matrix in each matrix buffer
  */
 typedef struct BannerLetter {
-  /* 0x00 */ f32 x;
-  /* 0x04 */ f32 y;
-  /* 0x08 */ f32 scale;
-  /* Cleared by StartBanner and DrawBanner, and read by nothing */
-  /* 0x0C */ s32 unusedLetterValue;
-  /* 0x10 */ Mtx matrices[2];
+    /* 0x00 */ f32 x;
+    /* 0x04 */ f32 y;
+    /* 0x08 */ f32 scale;
+    /* Cleared by StartBanner and DrawBanner, and read by nothing */
+    /* 0x0C */ s32 unusedLetterValue;
+    /* 0x10 */ Mtx matrices[2];
 } BannerLetter; /* size = 0x90 */
 
 /*
@@ -131,33 +130,33 @@ typedef struct BannerLetter {
  * it (BANNER_LAYOUT_FIRST_LETTER onwards)
  */
 enum BannerLayoutMode {
-  BANNER_LAYOUT_LEFT,
-  BANNER_LAYOUT_FIRST_LETTER
+    BANNER_LAYOUT_LEFT,
+    BANNER_LAYOUT_FIRST_LETTER
 };
 
 /* How a banner comes in */
 enum BannerAnimation {
-  /* Shrinks onto the screen while fading in, then leaves */
-  BANNER_ANIMATION_ZOOM,
-  /* Grows while turning once */
-  BANNER_ANIMATION_SPIN,
-  /* Slides in from the right and wobbles, then leaves */
-  BANNER_ANIMATION_SLIDE,
-  /* Like BANNER_ANIMATION_ZOOM, but larger and stays */
-  BANNER_ANIMATION_ZOOM_STAY
+    /* Shrinks onto the screen while fading in, then leaves */
+    BANNER_ANIMATION_ZOOM,
+    /* Grows while turning once */
+    BANNER_ANIMATION_SPIN,
+    /* Slides in from the right and wobbles, then leaves */
+    BANNER_ANIMATION_SLIDE,
+    /* Like BANNER_ANIMATION_ZOOM, but larger and stays */
+    BANNER_ANIMATION_ZOOM_STAY
 };
 
 typedef s16 BannerLayout[BANNER_LAYOUT_FIRST_LETTER + BANNER_MAX_LETTERS];
 
 typedef struct LakituFlight {
-  /* 0x0 */ f32 x;
-  /* 0x4 */ f32 y;
-  /* 0x8 */ f32 scale;
+    /* 0x0 */ f32 x;
+    /* 0x4 */ f32 y;
+    /* 0x8 */ f32 scale;
 } LakituFlight;
 
 typedef struct LakituVelocity {
-  /* 0x0 */ f32 x;
-  /* 0x4 */ f32 y;
+    /* 0x0 */ f32 x;
+    /* 0x4 */ f32 y;
 } LakituVelocity;
 
 /* ShowFlipMessage's arguments, besides a message to flip in */
@@ -330,7 +329,8 @@ static Vtx f_BannerLetterVertices[QUAD_VERTEX_COUNT] = {
     {{{0, 32, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{0, -32, 0}, 0, {0, 0xFC0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{32, -32, 0}, 0, {0x7FF, 0xFC0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
-    {{{32, 32, 0}, 0, {0x7FF, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}}};
+    {{{32, 32, 0}, 0, {0x7FF, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}}
+};
 /* clang-format off */
 static Banner f_Banners[] = {
     /* BANNER_NICE_SHOT */
@@ -438,7 +438,8 @@ static Vtx f_FlipMessageBoardVertices[QUAD_VERTEX_COUNT] = {
     {{{-72, 12, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{-72, -12, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{72, -12, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
-    {{{72, 12, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}}};
+    {{{72, 12, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}}
+};
 /* Counts the frames that DrawMovie has drawn, up to MOVIE_DRAW_COUNT_MAX */
 static s32 f_MovieDrawCount = 0;
 /* Counts up to MOVIE_TICKS_PER_FRAME between the frames of a Monty Mole movie
@@ -448,15 +449,31 @@ static s32 f_CurrentMovie = MOVIE_NONE;
 /* Which of a two-buffer movie's frame buffers to read into next */
 static s32 f_MovieBackBuffer = 0;
 static s32 f_MovieFrame = 0;
-static AssetId f_ToadMovieFrameAssets[] = {0x92D, 0x92E, 0x92F, 0x930, 0x931,
-    0x932, 0x933, 0x934, 0x935, 0x936, 0x937, 0x938};
-static AssetId f_LakituMovieFrameAssets[] = {0x64E, 0x64F, 0x650, 0x651, 0x652,
-    0x653, 0x654, 0x655, 0x656, 0x657, 0x658, 0x659, 0x65A};
-static AssetId f_MontyMoleMovieFrameAssets[] = {0x915, 0x916, 0x917, 0x918,
-    0x919, 0x91A, 0x91B, 0x91A, 0x919, 0x91C, 0x91D, 0x91E, 0x919, 0x918, 0x917,
-    0x916, 0x915};
-static AssetId f_GoombaMovieFrameAssets[] = {0x920, 0x921, 0x922, 0x923, 0x924,
-    0x924, 0x925, 0x926, 0x927, 0x928, 0x929};
+static AssetId f_ToadMovieFrameAssets[] =
+    {0x92D, 0x92E, 0x92F, 0x930, 0x931, 0x932, 0x933, 0x934, 0x935, 0x936, 0x937, 0x938};
+static AssetId f_LakituMovieFrameAssets[] =
+    {0x64E, 0x64F, 0x650, 0x651, 0x652, 0x653, 0x654, 0x655, 0x656, 0x657, 0x658, 0x659, 0x65A};
+static AssetId f_MontyMoleMovieFrameAssets[] = {
+    0x915,
+    0x916,
+    0x917,
+    0x918,
+    0x919,
+    0x91A,
+    0x91B,
+    0x91A,
+    0x919,
+    0x91C,
+    0x91D,
+    0x91E,
+    0x919,
+    0x918,
+    0x917,
+    0x916,
+    0x915
+};
+static AssetId f_GoombaMovieFrameAssets[] =
+    {0x920, 0x921, 0x922, 0x923, 0x924, 0x924, 0x925, 0x926, 0x927, 0x928, 0x929};
 static Gfx f_MovieImageSetupDisplayList[] = {
     gsDPPipeSync(),
     gsDPPipeSync(),
@@ -493,7 +510,8 @@ static Vtx f_ReadyGoVertices[12] = {
     {{{-76, -20, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{76, -20, 0}, 0, {0, 0x800}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{-76, -32, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
-    {{{76, -32, 0}, 0, {0, 0x800}, {0xFF, 0xFF, 0xFF, 0xFF}}}};
+    {{{76, -32, 0}, 0, {0, 0x800}, {0xFF, 0xFF, 0xFF, 0xFF}}}
+};
 /* Sets the render state for drawing a movie's paletted strips */
 static Gfx f_MovieSetupDisplayList[] = {
     gsDPPipeSync(),
@@ -521,11 +539,13 @@ static Vtx f_ContactSpinVertices[QUAD_VERTEX_COUNT] = {
     {{{-25, 25, 0}, 0, {0, 0}, {0xFF, 0x7F, 0x00, 0xFF}}},
     {{{-25, -15, 0}, 0, {0, 0x7FF}, {0xFF, 0xFF, 0xBF, 0xFF}}},
     {{{15, -15, 0}, 0, {0x7FF, 0x7FF}, {0xFF, 0x7F, 0x00, 0xFF}}},
-    {{{15, 25, 0}, 0, {0x7FF, 0}, {0xFF, 0xFF, 0xBF, 0xFF}}}};
+    {{{15, 25, 0}, 0, {0x7FF, 0}, {0xFF, 0xFF, 0xBF, 0xFF}}}
+};
 /* The contact effect's quad spans from vertex 0 to vertex 1 */
 static Vtx f_ContactVertices[2] = {
     {{{-12, 0, 0}, 0, {0, 0}, {0xFF, 0x7F, 0x00, 0xFF}}},
-    {{{12, 0, 0}, 0, {0xC00, 0}, {0xFF, 0xFF, 0xBF, 0xFF}}}};
+    {{{12, 0, 0}, 0, {0xC00, 0}, {0xFF, 0xFF, 0xBF, 0xFF}}}
+};
 s32 g_ContactEffect = CONTACT_EFFECT_NONE;
 static Boolean f_IsContactEffectFading = FALSE;
 static s32 f_ContactStyle = 0;
@@ -541,14 +561,12 @@ static s32 f_ContactStyle = 0;
  * multiplying (pass * 2) + run out of one product changes the code.
  */
 #define ContactRunStart(pass, run) \
-  (CONTACT_RIBBON_FIRST_SEGMENTS + ((run) * CONTACT_RIBBON_RELOAD_SEGMENTS) + \
-      ((pass) * 2 * CONTACT_RIBBON_RELOAD_SEGMENTS))
-#define CONTACT_RIBBON_SEGMENT_COUNT \
-  ContactRunStart(CONTACT_RIBBON_RELOAD_PASSES, 0)
+    (CONTACT_RIBBON_FIRST_SEGMENTS + ((run) * CONTACT_RIBBON_RELOAD_SEGMENTS) + \
+        ((pass) * 2 * CONTACT_RIBBON_RELOAD_SEGMENTS))
+#define CONTACT_RIBBON_SEGMENT_COUNT ContactRunStart(CONTACT_RIBBON_RELOAD_PASSES, 0)
 /* The T step from one segment to the next that runs the ribbon through texels
  * of the image's height */
-#define ContactStepT(texels) \
-  (TexelCoordinate(texels) / CONTACT_RIBBON_SEGMENT_COUNT)
+#define ContactStepT(texels) (TexelCoordinate(texels) / CONTACT_RIBBON_SEGMENT_COUNT)
 /*
  * In S10.5, the S of the quad's far side, and the step in T from one of the
  * ribbon's segments to the next
@@ -563,15 +581,27 @@ static Degrees f_ContactSpinAngle = 0.0f;
  * StepAlongPath flies the Fly Guy through the first
  * WIND_FLY_GUY_PATH_POINT_COUNT points; the last two are read by no routine
  */
-static PathPoint f_WindFlyGuyPath[] = {{-128.0f, 214.0f, 0.0f},
-    {1e+02f, 215.0f, 0.0f}, {1.6e+02f, 1.9e+02f, 0.0f},
-    {1.8e+02f, 1.5e+02f, 0.0f}, {1.8e+02f, 1.2e+02f, 0.0f},
-    {1.7e+02f, 1e+02f, 0.0f}, {1.5e+02f, 85.0f, 0.0f}, {1.3e+02f, 8e+01f, 0.0f},
-    {115.0f, 85.0f, 0.0f}, {1e+02f, 1e+02f, 0.0f}, {95.0f, 1.2e+02f, 0.0f},
-    {1e+02f, 1.5e+02f, 0.0f}, {1.2e+02f, 1.8e+02f, 0.0f},
-    {145.0f, 195.0f, 0.0f}, {2e+02f, 2e+02f, 0.0f}, {285.0f, 1.9e+02f, 0.0f},
-    {3.3e+02f, 1.8e+02f, 0.0f}, {3.6e+02f, 175.0f, 0.0f},
-    {3.8e+02f, 1.7e+02f, 0.0f}};
+static PathPoint f_WindFlyGuyPath[] = {
+    {-128.0f, 214.0f, 0.0f},
+    {1e+02f, 215.0f, 0.0f},
+    {1.6e+02f, 1.9e+02f, 0.0f},
+    {1.8e+02f, 1.5e+02f, 0.0f},
+    {1.8e+02f, 1.2e+02f, 0.0f},
+    {1.7e+02f, 1e+02f, 0.0f},
+    {1.5e+02f, 85.0f, 0.0f},
+    {1.3e+02f, 8e+01f, 0.0f},
+    {115.0f, 85.0f, 0.0f},
+    {1e+02f, 1e+02f, 0.0f},
+    {95.0f, 1.2e+02f, 0.0f},
+    {1e+02f, 1.5e+02f, 0.0f},
+    {1.2e+02f, 1.8e+02f, 0.0f},
+    {145.0f, 195.0f, 0.0f},
+    {2e+02f, 2e+02f, 0.0f},
+    {285.0f, 1.9e+02f, 0.0f},
+    {3.3e+02f, 1.8e+02f, 0.0f},
+    {3.6e+02f, 175.0f, 0.0f},
+    {3.8e+02f, 1.7e+02f, 0.0f}
+};
 /* Where the Fly Guy stays while its streak fades */
 static PathPoint f_WindFlyGuyExit = {3.8e+02f, 1.7e+02f, 0.0f};
 static s32 f_WindFlyGuyFrame = FLY_GUY_HIDDEN;
@@ -593,198 +623,220 @@ static u8 f_UnusedBufferAfterBannerMatrices[0xD0] UNUSED;
 
 /* Not static: the original left these to the linker's common block */
 BannerLetter f_ActiveBannerLetters[BANNER_LETTER_SLOT_COUNT];
-u8* f_MovieBuffer;
+u8 *f_MovieBuffer;
 Mtx f_ContactMatrices[CONTACT_MATRIX_COUNT];
 LakituFlight f_Lakitu;
 LakituVelocity f_LakituVelocity;
 
-void DrawContestWinnerMovie(Gfx** displayListHead);
-void DrawDriveRecord(Gfx** displayListHead);
-void DrawPuttCaption(Gfx** displayListHead);
-void DrawReadyGoMovie(Gfx** displayListHead);
-void DrawMontyMoleMovie(Gfx** displayListHead);
-void DrawGoombaMovie(Gfx** displayListHead);
-void DrawLakituMovie(Gfx** displayListHead);
-void DrawToadMovie(Gfx** displayListHead);
+void DrawContestWinnerMovie(Gfx **displayListHead);
+void DrawDriveRecord(Gfx **displayListHead);
+void DrawPuttCaption(Gfx **displayListHead);
+void DrawReadyGoMovie(Gfx **displayListHead);
+void DrawMontyMoleMovie(Gfx **displayListHead);
+void DrawGoombaMovie(Gfx **displayListHead);
+void DrawLakituMovie(Gfx **displayListHead);
+void DrawToadMovie(Gfx **displayListHead);
 
 void AllocMovieBuffer(void) {
-  /* Pads the frame to match; without it 12 words differ */
-  EncodedAsset unused UNUSED;
+    /* Pads the frame to match; without it 12 words differ */
+    EncodedAsset unused UNUSED;
 
-  f_CurrentBanner = BANNER_NONE;
-  f_IsMovieBufferAllocated = TRUE;
-  f_MovieBuffer = AllocMemory(MOVIE_BUFFER_SIZE);
-  f_LoadedBanner = BANNER_NONE;
+    f_CurrentBanner = BANNER_NONE;
+    f_IsMovieBufferAllocated = TRUE;
+    f_MovieBuffer = AllocMemory(MOVIE_BUFFER_SIZE);
+    f_LoadedBanner = BANNER_NONE;
 }
 
 void FreeMovieBuffer(void) {
-  f_IsMovieBufferAllocated = FALSE;
-  FreeMemory(&f_MovieBuffer);
+    f_IsMovieBufferAllocated = FALSE;
+    FreeMemory(&f_MovieBuffer);
 }
 
 void StartBanner(s32 banner) {
-  EncodedAsset asset;
-  Vec3 translation;
-  Vec3 rotation;
-  Vec3 scale;
-  Mat4 matrix;
-  s32 i;
+    EncodedAsset asset;
+    Vec3 translation;
+    Vec3 rotation;
+    Vec3 scale;
+    Mat4 matrix;
+    s32 i;
 
-  if (f_IsMovieBufferAllocated != TRUE) {
-    return;
-  }
-
-  if (banner == BANNER_HIDE_NICE_SHOT) {
-    if (f_CurrentBanner == BANNER_NICE_SHOT) {
-      f_BannerFrame = BANNER_FRAME_NONE;
+    if (f_IsMovieBufferAllocated != TRUE) {
+        return;
     }
 
-    return;
-  }
+    if (banner == BANNER_HIDE_NICE_SHOT) {
+        if (f_CurrentBanner == BANNER_NICE_SHOT) {
+            f_BannerFrame = BANNER_FRAME_NONE;
+        }
 
-  if (banner == BANNER_NONE) {
-    f_BannerFrame = BANNER_FRAME_NONE;
-    return;
-  }
+        return;
+    }
 
-  f_CurrentBanner = banner;
-  f_BannerFrame = 0;
-  if (banner > BANNER_STROKES_OVER_PAR) {
-    f_BannerNumber = banner - BANNER_STROKES_OVER_PAR;
-    f_CurrentBanner = BANNER_OVER_PAR_NUMBER;
-    if (f_LoadedBanner < BANNER_OVER_PAR_NUMBER ||
+    if (banner == BANNER_NONE) {
+        f_BannerFrame = BANNER_FRAME_NONE;
+        return;
+    }
+
+    f_CurrentBanner = banner;
+    f_BannerFrame = 0;
+    if (banner > BANNER_STROKES_OVER_PAR) {
+        f_BannerNumber = banner - BANNER_STROKES_OVER_PAR;
+        f_CurrentBanner = BANNER_OVER_PAR_NUMBER;
+        if (f_LoadedBanner < BANNER_OVER_PAR_NUMBER || f_LoadedBanner == BANNER_NONE) {
+            OpenEncodedAsset(f_Banners[BANNER_OVER_PAR_NUMBER].imageAsset, &asset);
+            ReadEncodedAsset(f_MovieBuffer, &asset);
+        }
+
+        f_LoadedBanner = f_CurrentBanner;
+
+        /* The "+" and the digits */
+        if (f_BannerNumber < 10) {
+            f_BannerNumberLetterCount = 2;
+        }
+        else if (f_BannerNumber < 100) {
+            f_BannerNumberLetterCount = 3;
+        }
+        else {
+            f_BannerNumberLetterCount = 4;
+        }
+
+        for (i = 0; i != f_BannerNumberLetterCount; i++) {
+            f_ActiveBannerLetters[i].x = (i * BANNER_LETTER_SPACING) -
+                ((f_BannerNumberLetterCount - 1) * (BANNER_LETTER_SPACING / 2));
+            f_ActiveBannerLetters[i].y = 0.0f;
+            f_ActiveBannerLetters[i].unusedLetterValue = 0;
+            f_ActiveBannerLetters[i].scale = 1.0f;
+            rotation[AXIS_X] = 0;
+            rotation[AXIS_Y] = 0;
+            rotation[AXIS_Z] = 0;
+            translation[AXIS_X] = f_ActiveBannerLetters[i].x;
+            translation[AXIS_Y] = f_ActiveBannerLetters[i].y;
+            translation[AXIS_Z] = BANNER_Z;
+            scale[AXIS_X] = f_ActiveBannerLetters[i].scale;
+            scale[AXIS_Y] = f_ActiveBannerLetters[i].scale;
+            scale[AXIS_Z] = f_ActiveBannerLetters[i].scale;
+            BuildTransformMatrix(matrix, rotation, translation, scale);
+            ConvertMatrixToFixed(matrix, &f_ActiveBannerLetters[i].matrices[g_MatrixBufferIndex]);
+        }
+    }
+
+    if ((f_LoadedBanner != f_CurrentBanner && f_CurrentBanner < BANNER_OVER_PAR_NUMBER) ||
         f_LoadedBanner == BANNER_NONE) {
-      OpenEncodedAsset(f_Banners[BANNER_OVER_PAR_NUMBER].imageAsset, &asset);
-      ReadEncodedAsset(f_MovieBuffer, &asset);
+        OpenEncodedAsset(f_Banners[f_CurrentBanner].imageAsset, &asset);
+        ReadEncodedAsset(f_MovieBuffer, &asset);
+        f_LoadedBanner = f_CurrentBanner;
+        for (i = 0; i != f_Banners[f_CurrentBanner].letterCount; i++) {
+            f_ActiveBannerLetters[i].x =
+                (f32)f_BannerLayouts[f_CurrentBanner][BANNER_LAYOUT_FIRST_LETTER + i] +
+                (f32)f_BannerLayouts[f_CurrentBanner][BANNER_LAYOUT_LEFT];
+            f_ActiveBannerLetters[i].y = 0.0f;
+            f_ActiveBannerLetters[i].unusedLetterValue = 0;
+            f_ActiveBannerLetters[i].scale = 1.0f;
+            rotation[AXIS_X] = 0;
+            rotation[AXIS_Y] = 0;
+            rotation[AXIS_Z] = 0;
+            translation[AXIS_X] = f_ActiveBannerLetters[i].x;
+            translation[AXIS_Y] = f_ActiveBannerLetters[i].y;
+            translation[AXIS_Z] = BANNER_Z;
+            scale[AXIS_X] = f_ActiveBannerLetters[i].scale;
+            scale[AXIS_Y] = f_ActiveBannerLetters[i].scale;
+            scale[AXIS_Z] = f_ActiveBannerLetters[i].scale;
+            BuildTransformMatrix(matrix, rotation, translation, scale);
+            ConvertMatrixToFixed(matrix, &f_ActiveBannerLetters[i].matrices[g_MatrixBufferIndex]);
+        }
     }
-
-    f_LoadedBanner = f_CurrentBanner;
-
-    /* The "+" and the digits */
-    if (f_BannerNumber < 10) {
-      f_BannerNumberLetterCount = 2;
-    } else if (f_BannerNumber < 100) {
-      f_BannerNumberLetterCount = 3;
-    } else {
-      f_BannerNumberLetterCount = 4;
-    }
-
-    for (i = 0; i != f_BannerNumberLetterCount; i++) {
-      f_ActiveBannerLetters[i].x = (i * BANNER_LETTER_SPACING) -
-          ((f_BannerNumberLetterCount - 1) * (BANNER_LETTER_SPACING / 2));
-      f_ActiveBannerLetters[i].y = 0.0f;
-      f_ActiveBannerLetters[i].unusedLetterValue = 0;
-      f_ActiveBannerLetters[i].scale = 1.0f;
-      rotation[AXIS_X] = 0;
-      rotation[AXIS_Y] = 0;
-      rotation[AXIS_Z] = 0;
-      translation[AXIS_X] = f_ActiveBannerLetters[i].x;
-      translation[AXIS_Y] = f_ActiveBannerLetters[i].y;
-      translation[AXIS_Z] = BANNER_Z;
-      scale[AXIS_X] = f_ActiveBannerLetters[i].scale;
-      scale[AXIS_Y] = f_ActiveBannerLetters[i].scale;
-      scale[AXIS_Z] = f_ActiveBannerLetters[i].scale;
-      BuildTransformMatrix(matrix, rotation, translation, scale);
-      ConvertMatrixToFixed(
-          matrix, &f_ActiveBannerLetters[i].matrices[g_MatrixBufferIndex]);
-    }
-  }
-
-  if ((f_LoadedBanner != f_CurrentBanner &&
-          f_CurrentBanner < BANNER_OVER_PAR_NUMBER) ||
-      f_LoadedBanner == BANNER_NONE) {
-    OpenEncodedAsset(f_Banners[f_CurrentBanner].imageAsset, &asset);
-    ReadEncodedAsset(f_MovieBuffer, &asset);
-    f_LoadedBanner = f_CurrentBanner;
-    for (i = 0; i != f_Banners[f_CurrentBanner].letterCount; i++) {
-      f_ActiveBannerLetters[i].x =
-          (f32)
-              f_BannerLayouts[f_CurrentBanner][BANNER_LAYOUT_FIRST_LETTER + i] +
-          (f32)f_BannerLayouts[f_CurrentBanner][BANNER_LAYOUT_LEFT];
-      f_ActiveBannerLetters[i].y = 0.0f;
-      f_ActiveBannerLetters[i].unusedLetterValue = 0;
-      f_ActiveBannerLetters[i].scale = 1.0f;
-      rotation[AXIS_X] = 0;
-      rotation[AXIS_Y] = 0;
-      rotation[AXIS_Z] = 0;
-      translation[AXIS_X] = f_ActiveBannerLetters[i].x;
-      translation[AXIS_Y] = f_ActiveBannerLetters[i].y;
-      translation[AXIS_Z] = BANNER_Z;
-      scale[AXIS_X] = f_ActiveBannerLetters[i].scale;
-      scale[AXIS_Y] = f_ActiveBannerLetters[i].scale;
-      scale[AXIS_Z] = f_ActiveBannerLetters[i].scale;
-      BuildTransformMatrix(matrix, rotation, translation, scale);
-      ConvertMatrixToFixed(
-          matrix, &f_ActiveBannerLetters[i].matrices[g_MatrixBufferIndex]);
-    }
-  }
 }
 
 /* Draws the number banner's "+" and digits */
-void DrawNumberBanner(Gfx** displayListHead) {
-  Gfx* gfx = *displayListHead;
-  s32 i;
-  s32 imageOffset;
+void DrawNumberBanner(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
+    s32 i;
+    s32 imageOffset;
 
-  sprintf(g_PrintBuffer, "%d", (int)f_BannerNumber);
-  for (i = 0; i != f_BannerNumberLetterCount; i++) {
-    if (i == 0) {
-      imageOffset = BANNER_PLUS_IMAGE * BANNER_LETTER_IMAGE_SIZE;
-    } else {
-      imageOffset = ((g_PrintBuffer[i - 1] - '0') * BANNER_LETTER_IMAGE_SIZE) +
-          (BANNER_FIRST_DIGIT_IMAGE * BANNER_LETTER_IMAGE_SIZE);
+    sprintf(g_PrintBuffer, "%d", (int)f_BannerNumber);
+    for (i = 0; i != f_BannerNumberLetterCount; i++) {
+        if (i == 0) {
+            imageOffset = BANNER_PLUS_IMAGE * BANNER_LETTER_IMAGE_SIZE;
+        }
+        else {
+            imageOffset = ((g_PrintBuffer[i - 1] - '0') * BANNER_LETTER_IMAGE_SIZE) +
+                (BANNER_FIRST_DIGIT_IMAGE * BANNER_LETTER_IMAGE_SIZE);
+        }
+
+        LoadTextureBlock(
+            &gfx,
+            f_MovieBuffer + (imageOffset + BANNER_LETTER_IMAGES_OFFSET),
+            G_IM_FMT_CI,
+            G_IM_SIZ_8b,
+            BANNER_LETTER_IMAGE_WIDTH,
+            BANNER_LETTER_IMAGE_HEIGHT,
+            0,
+            0,
+            0,
+            G_TX_NOMASK,
+            G_TX_NOMASK,
+            G_TX_NOLOD,
+            G_TX_NOLOD
+        );
+        gSPMatrix(
+            gfx++,
+            PhysicalAddress(&f_ActiveBannerLetters[i].matrices[g_MatrixBufferIndex]),
+            G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW
+        );
+        gSPVertex(gfx++, f_BannerLetterVertices, QUAD_VERTEX_COUNT, 0);
+        gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
     }
 
-    LoadTextureBlock(&gfx,
-        f_MovieBuffer + (imageOffset + BANNER_LETTER_IMAGES_OFFSET),
-        G_IM_FMT_CI, G_IM_SIZ_8b, BANNER_LETTER_IMAGE_WIDTH,
-        BANNER_LETTER_IMAGE_HEIGHT, 0, 0, 0, G_TX_NOMASK, G_TX_NOMASK,
-        G_TX_NOLOD, G_TX_NOLOD);
-    gSPMatrix(gfx++,
-        PhysicalAddress(
-            &f_ActiveBannerLetters[i].matrices[g_MatrixBufferIndex]),
-        G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-    gSPVertex(gfx++, f_BannerLetterVertices, QUAD_VERTEX_COUNT, 0);
-    gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
-  }
-
-  gDPPipeSync(gfx++);
-  *displayListHead = gfx;
+    gDPPipeSync(gfx++);
+    *displayListHead = gfx;
 }
 
 /* Draws the shown banner's letters, each placed within the whole banner's
  * matrix */
-void DrawBannerLetters(Gfx** displayListHead) {
-  Gfx* gfx = *displayListHead;
-  s32 i;
+void DrawBannerLetters(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
+    s32 i;
 
-  for (i = 0; i != f_Banners[f_CurrentBanner].letterCount; i++) {
-    LoadTextureBlock(&gfx,
-        f_MovieBuffer + BANNER_LETTER_IMAGES_OFFSET +
-            (i * BANNER_LETTER_IMAGE_SIZE),
-        G_IM_FMT_CI, G_IM_SIZ_8b, BANNER_LETTER_IMAGE_WIDTH,
-        BANNER_LETTER_IMAGE_HEIGHT, 0, 0, 0, G_TX_NOMASK, G_TX_NOMASK,
-        G_TX_NOLOD, G_TX_NOLOD);
-    gSPMatrix(gfx++, PhysicalAddress(&f_BannerMatrices[g_MatrixBufferIndex]),
-        G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-    gSPMatrix(gfx++,
-        PhysicalAddress(
-            &f_ActiveBannerLetters[i].matrices[g_MatrixBufferIndex]),
-        G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
-    gSPVertex(gfx++, f_BannerLetterVertices, QUAD_VERTEX_COUNT, 0);
-    gSP2Triangles(gfx++, 0, 1, 3, 0, 1, 2, 3, 0);
-  }
+    for (i = 0; i != f_Banners[f_CurrentBanner].letterCount; i++) {
+        LoadTextureBlock(
+            &gfx,
+            f_MovieBuffer + BANNER_LETTER_IMAGES_OFFSET + (i * BANNER_LETTER_IMAGE_SIZE),
+            G_IM_FMT_CI,
+            G_IM_SIZ_8b,
+            BANNER_LETTER_IMAGE_WIDTH,
+            BANNER_LETTER_IMAGE_HEIGHT,
+            0,
+            0,
+            0,
+            G_TX_NOMASK,
+            G_TX_NOMASK,
+            G_TX_NOLOD,
+            G_TX_NOLOD
+        );
+        gSPMatrix(
+            gfx++,
+            PhysicalAddress(&f_BannerMatrices[g_MatrixBufferIndex]),
+            G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW
+        );
+        gSPMatrix(
+            gfx++,
+            PhysicalAddress(&f_ActiveBannerLetters[i].matrices[g_MatrixBufferIndex]),
+            G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW
+        );
+        gSPVertex(gfx++, f_BannerLetterVertices, QUAD_VERTEX_COUNT, 0);
+        gSP2Triangles(gfx++, 0, 1, 3, 0, 1, 2, 3, 0);
+    }
 
-  gDPPipeSync(gfx++);
-  *displayListHead = gfx;
+    gDPPipeSync(gfx++);
+    *displayListHead = gfx;
 }
 
 /* Left with nothing between taking and storing the display list head in the
  * original; called after a letter banner is drawn */
-void DrawLetterBannerExtras(Gfx** displayListHead) {
-  Gfx* gfx = *displayListHead;
+void DrawLetterBannerExtras(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
 
-  *displayListHead = gfx;
+    *displayListHead = gfx;
 }
 
 /* The debug flag that lets the D-Pad pick a banner and start it */
@@ -817,286 +869,300 @@ void DrawLetterBannerExtras(Gfx** displayListHead) {
 
 /* Animates the shown banner and draws it, its letters each on their own square
  */
-void DrawBanner(Gfx** displayListHead) {
-  Gfx* gfx = *displayListHead;
-  Vec3 translation;
-  Vec3 rotation;
-  Vec3 scale;
-  Mat4 matrix;
-  s32 alpha;
-  f32 letterScale;
-  Radians angle;
-  f32 slide;
-  f32 wobbleDepth;
-  s32 i;
+void DrawBanner(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
+    Vec3 translation;
+    Vec3 rotation;
+    Vec3 scale;
+    Mat4 matrix;
+    s32 alpha;
+    f32 letterScale;
+    Radians angle;
+    f32 slide;
+    f32 wobbleDepth;
+    s32 i;
 
-  angle = 0.0f;
+    angle = 0.0f;
 #ifdef AVOID_UB
-  /*
-   * Only the zooms read it, and they set it, but the animation is reread
-   * from the global after calls that could change it
-   */
-  alpha = BANNER_MAX_ALPHA;
+    /*
+     * Only the zooms read it, and they set it, but the animation is reread
+     * from the global after calls that could change it
+     */
+    alpha = BANNER_MAX_ALPHA;
 #endif
-  if (IsGameFlagSet(GAME_FLAG_TEST_BANNERS)) {
-    if ((g_ControllerStates[0].pressedButtons & L_JPAD) && f_TestBanner > 0) {
-      f_TestBanner--;
-    }
-
-    if ((g_ControllerStates[0].pressedButtons & R_JPAD) &&
-        f_TestBanner < TEST_BANNER_LAST) {
-      f_TestBanner++;
-    }
-
-    if (g_ControllerStates[0].pressedButtons & D_JPAD) {
-      StartBanner(f_TestBanner);
-    }
-  }
-
-  if (f_CurrentBanner == BANNER_NONE || f_BannerFrame == BANNER_FRAME_NONE) {
-    return;
-  }
-
-  f_BannerFrame++;
-  if (f_BannerFrame > BANNER_LAST_FRAME) {
-    f_BannerFrame = BANNER_LAST_FRAME;
-  }
-
-  if (f_BannerFrame == BANNER_SOUND_FRAME) {
-    PlaySound(SOUND_BANNER, BANNER_SOUND_CHANNEL, BANNER_SOUND_VOLUME);
-  }
-
-  switch (f_Banners[f_CurrentBanner].animation) {
-    case BANNER_ANIMATION_ZOOM:
-      letterScale =
-          (BANNER_ZOOM_FRAMES - f_BannerFrame) * BANNER_ZOOM_PER_FRAME;
-      if (letterScale < BANNER_ZOOM_SMALLEST) {
-        letterScale = BANNER_ZOOM_SMALLEST;
-      }
-
-      alpha = f_BannerFrame * f_BannerFrame;
-      if (alpha > BANNER_MAX_ALPHA) {
-        alpha = BANNER_MAX_ALPHA;
-      }
-
-      if (f_BannerFrame == BANNER_END_FRAME) {
-        f_BannerFrame = BANNER_FRAME_NONE;
-      }
-
-      rotation[AXIS_X] = 0;
-      rotation[AXIS_Y] = 0;
-      rotation[AXIS_Z] = angle;
-      translation[AXIS_X] = 0.0f;
-      translation[AXIS_Z] = 0;
-      translation[AXIS_Y] = BANNER_Y;
-      scale[AXIS_X] = 1.0f;
-      scale[AXIS_Y] = 1.0f;
-      scale[AXIS_Z] = 1.0f;
-      BuildTransformMatrix(matrix, rotation, translation, scale);
-      ConvertMatrixToFixed(matrix, &f_BannerMatrices[g_MatrixBufferIndex]);
-      break;
-    case BANNER_ANIMATION_SPIN:
-      letterScale = f_BannerFrame * BANNER_SPIN_GROWTH_PER_FRAME;
-      if (letterScale > 1.0f) {
-        letterScale = 1.0f;
-      }
-
-      alpha = f_BannerFrame * f_BannerFrame;
-      if (alpha > BANNER_MAX_ALPHA) {
-        alpha = BANNER_MAX_ALPHA;
-      }
-
-      angle = f_BannerFrame * BANNER_SPIN_GROWTH_PER_FRAME * FULL_TURN_RADIANS;
-      if (angle > FULL_TURN_RADIANS) {
-        angle = 0.0f;
-      }
-
-      rotation[AXIS_X] = 0;
-      rotation[AXIS_Y] = 0;
-      rotation[AXIS_Z] = angle;
-      translation[AXIS_X] = 0.0f;
-      translation[AXIS_Z] = 0;
-      scale[AXIS_X] = 1.0f;
-      scale[AXIS_Y] = 1.0f;
-      scale[AXIS_Z] = 1.0f;
-      translation[AXIS_Y] = BANNER_Y;
-      BuildTransformMatrix(matrix, rotation, translation, scale);
-      ConvertMatrixToFixed(matrix, &f_BannerMatrices[g_MatrixBufferIndex]);
-      break;
-    case BANNER_ANIMATION_SLIDE:
-      slide = (BANNER_SLIDE_FRAMES - f_BannerFrame) * BANNER_SLIDE_PER_FRAME;
-      if (slide < 0.0f) {
-        slide = 0.0f;
-      }
-
-      if (f_BannerFrame >= BANNER_SLIDE_FRAMES &&
-          f_BannerFrame < BANNER_SLIDE_FRAMES + BANNER_WOBBLE_FRAMES) {
-        wobbleDepth = BANNER_WOBBLE_DEPTH -
-            ((f_BannerFrame - BANNER_WOBBLE_FRAMES) * BANNER_WOBBLE_DEPTH_LOSS);
-        if (wobbleDepth < BANNER_WOBBLE_SMALLEST_DEPTH) {
-          wobbleDepth = BANNER_WOBBLE_SMALLEST_DEPTH;
+    if (IsGameFlagSet(GAME_FLAG_TEST_BANNERS)) {
+        if ((g_ControllerStates[0].pressedButtons & L_JPAD) && f_TestBanner > 0) {
+            f_TestBanner--;
         }
 
-        letterScale = ((sinf((f_BannerFrame - BANNER_WOBBLE_FRAMES) *
-                            BANNER_WOBBLE_TURN_PER_FRAME) +
-                           1.0f) *
-                          wobbleDepth) +
-            (1.0f - wobbleDepth);
-      } else {
-        letterScale = 1.0f;
-      }
+        if ((g_ControllerStates[0].pressedButtons & R_JPAD) && f_TestBanner < TEST_BANNER_LAST) {
+            f_TestBanner++;
+        }
 
-      /* Keeps the banner's left edge in place while it stretches */
-      slide += f_BannerLayouts[f_CurrentBanner][BANNER_LAYOUT_LEFT] *
-          (1.0f - letterScale);
-      rotation[AXIS_X] = 0;
-      rotation[AXIS_Y] = 0;
-      rotation[AXIS_Z] = 0.0f;
-      translation[AXIS_Y] = BANNER_Y;
-      translation[AXIS_Z] = 0;
-      scale[AXIS_X] = letterScale;
-      scale[AXIS_Y] = 1.0f;
-      scale[AXIS_Z] = 1.0f;
-      translation[AXIS_X] = slide;
-      BuildTransformMatrix(matrix, rotation, translation, scale);
-      ConvertMatrixToFixed(matrix, &f_BannerMatrices[g_MatrixBufferIndex]);
-      letterScale = 1.0f;
-      if (f_BannerFrame == BANNER_END_FRAME) {
-        f_BannerFrame = BANNER_FRAME_NONE;
-      }
+        if (g_ControllerStates[0].pressedButtons & D_JPAD) {
+            StartBanner(f_TestBanner);
+        }
+    }
 
-      break;
+    if (f_CurrentBanner == BANNER_NONE || f_BannerFrame == BANNER_FRAME_NONE) {
+        return;
+    }
+
+    f_BannerFrame++;
+    if (f_BannerFrame > BANNER_LAST_FRAME) {
+        f_BannerFrame = BANNER_LAST_FRAME;
+    }
+
+    if (f_BannerFrame == BANNER_SOUND_FRAME) {
+        PlaySound(SOUND_BANNER, BANNER_SOUND_CHANNEL, BANNER_SOUND_VOLUME);
+    }
+
+    switch (f_Banners[f_CurrentBanner].animation) {
+        case BANNER_ANIMATION_ZOOM:
+            letterScale = (BANNER_ZOOM_FRAMES - f_BannerFrame) * BANNER_ZOOM_PER_FRAME;
+            if (letterScale < BANNER_ZOOM_SMALLEST) {
+                letterScale = BANNER_ZOOM_SMALLEST;
+            }
+
+            alpha = f_BannerFrame * f_BannerFrame;
+            if (alpha > BANNER_MAX_ALPHA) {
+                alpha = BANNER_MAX_ALPHA;
+            }
+
+            if (f_BannerFrame == BANNER_END_FRAME) {
+                f_BannerFrame = BANNER_FRAME_NONE;
+            }
+
+            rotation[AXIS_X] = 0;
+            rotation[AXIS_Y] = 0;
+            rotation[AXIS_Z] = angle;
+            translation[AXIS_X] = 0.0f;
+            translation[AXIS_Z] = 0;
+            translation[AXIS_Y] = BANNER_Y;
+            scale[AXIS_X] = 1.0f;
+            scale[AXIS_Y] = 1.0f;
+            scale[AXIS_Z] = 1.0f;
+            BuildTransformMatrix(matrix, rotation, translation, scale);
+            ConvertMatrixToFixed(matrix, &f_BannerMatrices[g_MatrixBufferIndex]);
+            break;
+        case BANNER_ANIMATION_SPIN:
+            letterScale = f_BannerFrame * BANNER_SPIN_GROWTH_PER_FRAME;
+            if (letterScale > 1.0f) {
+                letterScale = 1.0f;
+            }
+
+            alpha = f_BannerFrame * f_BannerFrame;
+            if (alpha > BANNER_MAX_ALPHA) {
+                alpha = BANNER_MAX_ALPHA;
+            }
+
+            angle = f_BannerFrame * BANNER_SPIN_GROWTH_PER_FRAME * FULL_TURN_RADIANS;
+            if (angle > FULL_TURN_RADIANS) {
+                angle = 0.0f;
+            }
+
+            rotation[AXIS_X] = 0;
+            rotation[AXIS_Y] = 0;
+            rotation[AXIS_Z] = angle;
+            translation[AXIS_X] = 0.0f;
+            translation[AXIS_Z] = 0;
+            scale[AXIS_X] = 1.0f;
+            scale[AXIS_Y] = 1.0f;
+            scale[AXIS_Z] = 1.0f;
+            translation[AXIS_Y] = BANNER_Y;
+            BuildTransformMatrix(matrix, rotation, translation, scale);
+            ConvertMatrixToFixed(matrix, &f_BannerMatrices[g_MatrixBufferIndex]);
+            break;
+        case BANNER_ANIMATION_SLIDE:
+            slide = (BANNER_SLIDE_FRAMES - f_BannerFrame) * BANNER_SLIDE_PER_FRAME;
+            if (slide < 0.0f) {
+                slide = 0.0f;
+            }
+
+            if (f_BannerFrame >= BANNER_SLIDE_FRAMES &&
+                f_BannerFrame < BANNER_SLIDE_FRAMES + BANNER_WOBBLE_FRAMES) {
+                wobbleDepth = BANNER_WOBBLE_DEPTH -
+                    ((f_BannerFrame - BANNER_WOBBLE_FRAMES) * BANNER_WOBBLE_DEPTH_LOSS);
+                if (wobbleDepth < BANNER_WOBBLE_SMALLEST_DEPTH) {
+                    wobbleDepth = BANNER_WOBBLE_SMALLEST_DEPTH;
+                }
+
+                letterScale =
+                    ((sinf((f_BannerFrame - BANNER_WOBBLE_FRAMES) * BANNER_WOBBLE_TURN_PER_FRAME) +
+                         1.0f) *
+                        wobbleDepth) +
+                    (1.0f - wobbleDepth);
+            }
+            else {
+                letterScale = 1.0f;
+            }
+
+            /* Keeps the banner's left edge in place while it stretches */
+            slide += f_BannerLayouts[f_CurrentBanner][BANNER_LAYOUT_LEFT] * (1.0f - letterScale);
+            rotation[AXIS_X] = 0;
+            rotation[AXIS_Y] = 0;
+            rotation[AXIS_Z] = 0.0f;
+            translation[AXIS_Y] = BANNER_Y;
+            translation[AXIS_Z] = 0;
+            scale[AXIS_X] = letterScale;
+            scale[AXIS_Y] = 1.0f;
+            scale[AXIS_Z] = 1.0f;
+            translation[AXIS_X] = slide;
+            BuildTransformMatrix(matrix, rotation, translation, scale);
+            ConvertMatrixToFixed(matrix, &f_BannerMatrices[g_MatrixBufferIndex]);
+            letterScale = 1.0f;
+            if (f_BannerFrame == BANNER_END_FRAME) {
+                f_BannerFrame = BANNER_FRAME_NONE;
+            }
+
+            break;
 #ifdef AVOID_UB
-    default:
+        default:
 #endif
-    case BANNER_ANIMATION_ZOOM_STAY:
-      letterScale =
-          (BANNER_ZOOM_FRAMES - f_BannerFrame) * BANNER_ZOOM_PER_FRAME;
-      if (letterScale < BANNER_ZOOM_STAY_SMALLEST) {
-        letterScale = BANNER_ZOOM_STAY_SMALLEST;
-      }
+        case BANNER_ANIMATION_ZOOM_STAY:
+            letterScale = (BANNER_ZOOM_FRAMES - f_BannerFrame) * BANNER_ZOOM_PER_FRAME;
+            if (letterScale < BANNER_ZOOM_STAY_SMALLEST) {
+                letterScale = BANNER_ZOOM_STAY_SMALLEST;
+            }
 
-      alpha = f_BannerFrame * f_BannerFrame;
-      if (alpha > BANNER_MAX_ALPHA) {
-        alpha = BANNER_MAX_ALPHA;
-      }
+            alpha = f_BannerFrame * f_BannerFrame;
+            if (alpha > BANNER_MAX_ALPHA) {
+                alpha = BANNER_MAX_ALPHA;
+            }
 
-      rotation[AXIS_X] = 0;
-      rotation[AXIS_Y] = 0;
-      rotation[AXIS_Z] = 0;
-      translation[AXIS_X] = 0.0f;
-      translation[AXIS_Z] = 0;
-      scale[AXIS_X] = 1.0f;
-      scale[AXIS_Y] = 1.0f;
-      scale[AXIS_Z] = 1.0f;
-      translation[AXIS_Y] = BANNER_Y;
-      BuildTransformMatrix(matrix, rotation, translation, scale);
-      ConvertMatrixToFixed(matrix, &f_BannerMatrices[g_MatrixBufferIndex]);
-      break;
-  }
-
-  if (f_CurrentBanner < BANNER_OVER_PAR_NUMBER) {
-    for (i = 0; i != f_Banners[f_CurrentBanner].letterCount; i++) {
-      f_ActiveBannerLetters[i].x =
-          ((f32)f_BannerLayouts[f_CurrentBanner]
-                               [BANNER_LAYOUT_FIRST_LETTER + i] +
-              (f32)f_BannerLayouts[f_CurrentBanner][BANNER_LAYOUT_LEFT]) *
-          letterScale;
-      f_ActiveBannerLetters[i].y = 0.0f;
-      f_ActiveBannerLetters[i].unusedLetterValue = 0;
-      f_ActiveBannerLetters[i].scale = letterScale;
-      rotation[AXIS_X] = 0;
-      rotation[AXIS_Y] = 0;
-      rotation[AXIS_Z] = 0.0f;
-      translation[AXIS_X] = f_ActiveBannerLetters[i].x;
-      translation[AXIS_Y] = f_ActiveBannerLetters[i].y;
-      translation[AXIS_Z] = BANNER_Z;
-      scale[AXIS_X] = f_ActiveBannerLetters[i].scale;
-      scale[AXIS_Y] = f_ActiveBannerLetters[i].scale;
-      scale[AXIS_Z] = f_ActiveBannerLetters[i].scale;
-      BuildTransformMatrix(matrix, rotation, translation, scale);
-      ConvertMatrixToFixed(
-          matrix, &f_ActiveBannerLetters[i].matrices[g_MatrixBufferIndex]);
+            rotation[AXIS_X] = 0;
+            rotation[AXIS_Y] = 0;
+            rotation[AXIS_Z] = 0;
+            translation[AXIS_X] = 0.0f;
+            translation[AXIS_Z] = 0;
+            scale[AXIS_X] = 1.0f;
+            scale[AXIS_Y] = 1.0f;
+            scale[AXIS_Z] = 1.0f;
+            translation[AXIS_Y] = BANNER_Y;
+            BuildTransformMatrix(matrix, rotation, translation, scale);
+            ConvertMatrixToFixed(matrix, &f_BannerMatrices[g_MatrixBufferIndex]);
+            break;
     }
-  } else {
-    for (i = 0; i != f_BannerNumberLetterCount; i++) {
-      f_ActiveBannerLetters[i].x =
-          ((i * BANNER_LETTER_SPACING) -
-              (f_BannerNumberLetterCount * (BANNER_LETTER_SPACING / 2))) *
-          letterScale;
-      f_ActiveBannerLetters[i].y = 0.0f;
-      f_ActiveBannerLetters[i].unusedLetterValue = 0;
-      f_ActiveBannerLetters[i].scale = letterScale;
-      rotation[AXIS_X] = 0;
-      rotation[AXIS_Y] = 0;
-      rotation[AXIS_Z] = 0.0f;
-      translation[AXIS_X] = f_ActiveBannerLetters[i].x;
-      translation[AXIS_Y] = f_ActiveBannerLetters[i].y;
-      translation[AXIS_Z] = BANNER_Z;
-      scale[AXIS_X] = f_ActiveBannerLetters[i].scale;
-      scale[AXIS_Y] = f_ActiveBannerLetters[i].scale;
-      scale[AXIS_Z] = f_ActiveBannerLetters[i].scale;
-      BuildTransformMatrix(matrix, rotation, translation, scale);
-      ConvertMatrixToFixed(
-          matrix, &f_ActiveBannerLetters[i].matrices[g_MatrixBufferIndex]);
+
+    if (f_CurrentBanner < BANNER_OVER_PAR_NUMBER) {
+        for (i = 0; i != f_Banners[f_CurrentBanner].letterCount; i++) {
+            f_ActiveBannerLetters[i].x =
+                ((f32)f_BannerLayouts[f_CurrentBanner][BANNER_LAYOUT_FIRST_LETTER + i] +
+                    (f32)f_BannerLayouts[f_CurrentBanner][BANNER_LAYOUT_LEFT]) *
+                letterScale;
+            f_ActiveBannerLetters[i].y = 0.0f;
+            f_ActiveBannerLetters[i].unusedLetterValue = 0;
+            f_ActiveBannerLetters[i].scale = letterScale;
+            rotation[AXIS_X] = 0;
+            rotation[AXIS_Y] = 0;
+            rotation[AXIS_Z] = 0.0f;
+            translation[AXIS_X] = f_ActiveBannerLetters[i].x;
+            translation[AXIS_Y] = f_ActiveBannerLetters[i].y;
+            translation[AXIS_Z] = BANNER_Z;
+            scale[AXIS_X] = f_ActiveBannerLetters[i].scale;
+            scale[AXIS_Y] = f_ActiveBannerLetters[i].scale;
+            scale[AXIS_Z] = f_ActiveBannerLetters[i].scale;
+            BuildTransformMatrix(matrix, rotation, translation, scale);
+            ConvertMatrixToFixed(matrix, &f_ActiveBannerLetters[i].matrices[g_MatrixBufferIndex]);
+        }
     }
-  }
+    else {
+        for (i = 0; i != f_BannerNumberLetterCount; i++) {
+            f_ActiveBannerLetters[i].x =
+                ((i * BANNER_LETTER_SPACING) -
+                    (f_BannerNumberLetterCount * (BANNER_LETTER_SPACING / 2))) *
+                letterScale;
+            f_ActiveBannerLetters[i].y = 0.0f;
+            f_ActiveBannerLetters[i].unusedLetterValue = 0;
+            f_ActiveBannerLetters[i].scale = letterScale;
+            rotation[AXIS_X] = 0;
+            rotation[AXIS_Y] = 0;
+            rotation[AXIS_Z] = 0.0f;
+            translation[AXIS_X] = f_ActiveBannerLetters[i].x;
+            translation[AXIS_Y] = f_ActiveBannerLetters[i].y;
+            translation[AXIS_Z] = BANNER_Z;
+            scale[AXIS_X] = f_ActiveBannerLetters[i].scale;
+            scale[AXIS_Y] = f_ActiveBannerLetters[i].scale;
+            scale[AXIS_Z] = f_ActiveBannerLetters[i].scale;
+            BuildTransformMatrix(matrix, rotation, translation, scale);
+            ConvertMatrixToFixed(matrix, &f_ActiveBannerLetters[i].matrices[g_MatrixBufferIndex]);
+        }
+    }
 
-  gDPPipeSync(gfx++);
-  gDPPipeSync(gfx++);
-  gDPSetCycleType(gfx++, G_CYC_1CYCLE);
-  switch (f_Banners[f_CurrentBanner].animation) {
-    case BANNER_ANIMATION_ZOOM:
-    case BANNER_ANIMATION_ZOOM_STAY:
-      gDPSetCombineLERP(gfx++, SHADE, TEXEL0, PRIMITIVE_ALPHA, TEXEL0,
-          ENVIRONMENT, 0, TEXEL0, 0, SHADE, TEXEL0, PRIMITIVE_ALPHA, TEXEL0,
-          ENVIRONMENT, 0, TEXEL0, 0);
-      if (alpha == BANNER_MAX_ALPHA) {
-        gDPPipeSync(gfx++);
-        gDPSetRenderMode(gfx++, G_RM_AA_TEX_EDGE, G_RM_AA_TEX_EDGE2);
-      } else {
-        gDPPipeSync(gfx++);
-        gDPSetRenderMode(gfx++, G_RM_AA_XLU_SURF, G_RM_AA_XLU_SURF2);
-      }
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+    switch (f_Banners[f_CurrentBanner].animation) {
+        case BANNER_ANIMATION_ZOOM:
+        case BANNER_ANIMATION_ZOOM_STAY:
+            gDPSetCombineLERP(
+                gfx++,
+                SHADE,
+                TEXEL0,
+                PRIMITIVE_ALPHA,
+                TEXEL0,
+                ENVIRONMENT,
+                0,
+                TEXEL0,
+                0,
+                SHADE,
+                TEXEL0,
+                PRIMITIVE_ALPHA,
+                TEXEL0,
+                ENVIRONMENT,
+                0,
+                TEXEL0,
+                0
+            );
+            if (alpha == BANNER_MAX_ALPHA) {
+                gDPPipeSync(gfx++);
+                gDPSetRenderMode(gfx++, G_RM_AA_TEX_EDGE, G_RM_AA_TEX_EDGE2);
+            }
+            else {
+                gDPPipeSync(gfx++);
+                gDPSetRenderMode(gfx++, G_RM_AA_XLU_SURF, G_RM_AA_XLU_SURF2);
+            }
 
-      break;
-    case BANNER_ANIMATION_SPIN:
-    case BANNER_ANIMATION_SLIDE:
-      gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-      gDPPipeSync(gfx++);
-      gDPSetRenderMode(gfx++, G_RM_AA_TEX_EDGE, G_RM_AA_TEX_EDGE2);
-      break;
-  }
+            break;
+        case BANNER_ANIMATION_SPIN:
+        case BANNER_ANIMATION_SLIDE:
+            gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+            gDPPipeSync(gfx++);
+            gDPSetRenderMode(gfx++, G_RM_AA_TEX_EDGE, G_RM_AA_TEX_EDGE2);
+            break;
+    }
 
-  gDPPipeSync(gfx++);
-  gDPSetAlphaDither(gfx++, G_AD_DISABLE);
-  gDPPipeSync(gfx++);
-  gDPSetTextureFilter(gfx++, G_TF_BILERP);
-  gDPPipeSync(gfx++);
-  gDPSetTexturePersp(gfx++, G_TP_PERSP);
-  gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, ~alpha);
-  gDPSetEnvColor(gfx++, 0, 0, 0, alpha);
-  gDPPipeSync(gfx++);
-  gDPSetAlphaCompare(gfx++, G_AC_THRESHOLD);
-  gDPSetBlendColor(gfx++, 255, 255, 255, BANNER_BLEND_ALPHA);
-  gSPTexture(
-      gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0, G_TX_RENDERTILE, G_ON);
-  gSPClearGeometryMode(gfx++, ALL_GEOMETRY_MODES);
-  gSPSetGeometryMode(gfx++, G_SHADE | G_SHADING_SMOOTH);
-  gDPLoadTLUT_pal256(
-      gfx++, TextureAddress(f_MovieBuffer + MOVIE_IMAGE_PALETTE_OFFSET));
-  gDPPipeSync(gfx++);
-  gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-  gSPMatrix(gfx++, PhysicalAddress(&g_ScreenOrthoMatrix),
-      G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
-  if (f_CurrentBanner < BANNER_OVER_PAR_NUMBER) {
-    DrawBannerLetters(&gfx);
-    DrawLetterBannerExtras(&gfx);
-  } else {
-    DrawNumberBanner(&gfx);
-  }
+    gDPPipeSync(gfx++);
+    gDPSetAlphaDither(gfx++, G_AD_DISABLE);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_BILERP);
+    gDPPipeSync(gfx++);
+    gDPSetTexturePersp(gfx++, G_TP_PERSP);
+    gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, ~alpha);
+    gDPSetEnvColor(gfx++, 0, 0, 0, alpha);
+    gDPPipeSync(gfx++);
+    gDPSetAlphaCompare(gfx++, G_AC_THRESHOLD);
+    gDPSetBlendColor(gfx++, 255, 255, 255, BANNER_BLEND_ALPHA);
+    gSPTexture(gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0, G_TX_RENDERTILE, G_ON);
+    gSPClearGeometryMode(gfx++, ALL_GEOMETRY_MODES);
+    gSPSetGeometryMode(gfx++, G_SHADE | G_SHADING_SMOOTH);
+    gDPLoadTLUT_pal256(gfx++, TextureAddress(f_MovieBuffer + MOVIE_IMAGE_PALETTE_OFFSET));
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+    gSPMatrix(
+        gfx++,
+        PhysicalAddress(&g_ScreenOrthoMatrix),
+        G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION
+    );
+    if (f_CurrentBanner < BANNER_OVER_PAR_NUMBER) {
+        DrawBannerLetters(&gfx);
+        DrawLetterBannerExtras(&gfx);
+    }
+    else {
+        DrawNumberBanner(&gfx);
+    }
 
-  *displayListHead = gfx;
+    *displayListHead = gfx;
 }
 
 /*
@@ -1105,298 +1171,299 @@ void DrawBanner(Gfx** displayListHead) {
  * away at once.
  */
 void ShowFlipMessage(MessageId messageId) {
-  s32 halfSize;
-  s32 halfWidth;
-  s32 halfHeight;
+    s32 halfSize;
+    s32 halfWidth;
+    s32 halfHeight;
 
-  f_FlipMessageId = messageId;
-  if (messageId == FLIP_MESSAGE_RESET) {
+    f_FlipMessageId = messageId;
+    if (messageId == FLIP_MESSAGE_RESET) {
+        f_IsFlipMessageLeaving = FALSE;
+        f_FlipMessageFrame = FLIP_MESSAGE_FRAME_NONE;
+        return;
+    }
+
+    if (messageId == FLIP_MESSAGE_LEAVE) {
+        f_IsFlipMessageLeaving = TRUE;
+        return;
+    }
+
     f_IsFlipMessageLeaving = FALSE;
-    f_FlipMessageFrame = FLIP_MESSAGE_FRAME_NONE;
-    return;
-  }
-
-  if (messageId == FLIP_MESSAGE_LEAVE) {
-    f_IsFlipMessageLeaving = TRUE;
-    return;
-  }
-
-  f_IsFlipMessageLeaving = FALSE;
-  f_FlipMessageFrame = 0;
-  halfSize = PlaceMessageGlyphGroup(
-      FLIP_MESSAGE_GLYPH_GROUP, FONT_SIZE_LARGE, 0, 0, messageId);
-  halfWidth = HalfSizeWidth(halfSize);
-  f_FlipMessageHalfWidth = halfWidth;
-  halfHeight = HalfSizeHeight(halfSize);
-  f_FlipMessageHalfHeight = halfHeight;
-  f_FlipMessageBoardVertices[0].v.ob[AXIS_X] =
-      -halfWidth - FLIP_MESSAGE_BOARD_MARGIN_X;
-  f_FlipMessageBoardVertices[1].v.ob[AXIS_X] =
-      -halfWidth - FLIP_MESSAGE_BOARD_MARGIN_X;
-  f_FlipMessageBoardVertices[2].v.ob[AXIS_X] =
-      halfWidth + FLIP_MESSAGE_BOARD_MARGIN_X;
-  f_FlipMessageBoardVertices[3].v.ob[AXIS_X] =
-      halfWidth + FLIP_MESSAGE_BOARD_MARGIN_X;
-  f_FlipMessageBoardVertices[0].v.ob[AXIS_Y] =
-      halfHeight + FLIP_MESSAGE_BOARD_MARGIN_Y;
-  f_FlipMessageBoardVertices[3].v.ob[AXIS_Y] =
-      halfHeight + FLIP_MESSAGE_BOARD_MARGIN_Y;
-  f_FlipMessageBoardVertices[1].v.ob[AXIS_Y] =
-      -halfHeight - FLIP_MESSAGE_BOARD_MARGIN_Y;
-  f_FlipMessageBoardVertices[2].v.ob[AXIS_Y] =
-      -halfHeight - FLIP_MESSAGE_BOARD_MARGIN_Y;
-  SetTextSlot(FLIP_MESSAGE_X, FLIP_MESSAGE_Y, f_FlipMessageId,
-      TEXT_SLOT_LARGE_FONT, FLIP_MESSAGE_TEXT_SLOT,
-      TEXT_FLAG_CENTERED | TEXT_FLAG_DRAWN_BY_OWNER, 127, 255, 127,
-      OPAQUE_ALPHA);
+    f_FlipMessageFrame = 0;
+    halfSize = PlaceMessageGlyphGroup(FLIP_MESSAGE_GLYPH_GROUP, FONT_SIZE_LARGE, 0, 0, messageId);
+    halfWidth = HalfSizeWidth(halfSize);
+    f_FlipMessageHalfWidth = halfWidth;
+    halfHeight = HalfSizeHeight(halfSize);
+    f_FlipMessageHalfHeight = halfHeight;
+    f_FlipMessageBoardVertices[0].v.ob[AXIS_X] = -halfWidth - FLIP_MESSAGE_BOARD_MARGIN_X;
+    f_FlipMessageBoardVertices[1].v.ob[AXIS_X] = -halfWidth - FLIP_MESSAGE_BOARD_MARGIN_X;
+    f_FlipMessageBoardVertices[2].v.ob[AXIS_X] = halfWidth + FLIP_MESSAGE_BOARD_MARGIN_X;
+    f_FlipMessageBoardVertices[3].v.ob[AXIS_X] = halfWidth + FLIP_MESSAGE_BOARD_MARGIN_X;
+    f_FlipMessageBoardVertices[0].v.ob[AXIS_Y] = halfHeight + FLIP_MESSAGE_BOARD_MARGIN_Y;
+    f_FlipMessageBoardVertices[3].v.ob[AXIS_Y] = halfHeight + FLIP_MESSAGE_BOARD_MARGIN_Y;
+    f_FlipMessageBoardVertices[1].v.ob[AXIS_Y] = -halfHeight - FLIP_MESSAGE_BOARD_MARGIN_Y;
+    f_FlipMessageBoardVertices[2].v.ob[AXIS_Y] = -halfHeight - FLIP_MESSAGE_BOARD_MARGIN_Y;
+    SetTextSlot(
+        FLIP_MESSAGE_X,
+        FLIP_MESSAGE_Y,
+        f_FlipMessageId,
+        TEXT_SLOT_LARGE_FONT,
+        FLIP_MESSAGE_TEXT_SLOT,
+        TEXT_FLAG_CENTERED | TEXT_FLAG_DRAWN_BY_OWNER,
+        127,
+        255,
+        127,
+        OPAQUE_ALPHA
+    );
 }
 
 /* Turns the flip message board a frame further in or out, then draws it and its
  * text */
-void DrawFlipMessage(Gfx** displayListHead) {
-  Vec3 scale;
-  Vec3 translation;
-  Vec3 rotation;
-  Mat4 matrix;
-  Mat4 hingeMatrix;
-  Gfx* gfx = *displayListHead;
-  Radians angle;
-  f32 size;
+void DrawFlipMessage(Gfx **displayListHead) {
+    Vec3 scale;
+    Vec3 translation;
+    Vec3 rotation;
+    Mat4 matrix;
+    Mat4 hingeMatrix;
+    Gfx *gfx = *displayListHead;
+    Radians angle;
+    f32 size;
 
-  if (f_FlipMessageFrame != FLIP_MESSAGE_FRAME_NONE) {
-    if (!f_IsFlipMessageLeaving) {
-      if (f_FlipMessageFrame < FLIP_MESSAGE_OPEN_FRAME) {
-        f_FlipMessageFrame++;
-      }
-    } else if (f_FlipMessageFrame > 0) {
-      f_FlipMessageFrame--;
+    if (f_FlipMessageFrame != FLIP_MESSAGE_FRAME_NONE) {
+        if (!f_IsFlipMessageLeaving) {
+            if (f_FlipMessageFrame < FLIP_MESSAGE_OPEN_FRAME) {
+                f_FlipMessageFrame++;
+            }
+        }
+        else if (f_FlipMessageFrame > 0) {
+            f_FlipMessageFrame--;
+        }
+
+        gDPPipeSync(gfx++);
+        gDPPipeSync(gfx++);
+        gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+        gSPClearGeometryMode(gfx++, ALL_GEOMETRY_MODES);
+        gSPSetGeometryMode(gfx++, G_SHADE | G_SHADING_SMOOTH);
+        gDPPipeSync(gfx++);
+        gDPSetTexturePersp(gfx++, G_TP_PERSP);
+        gDPPipeSync(gfx++);
+        gDPSetRenderMode(gfx++, G_RM_AA_XLU_SURF, G_RM_AA_XLU_SURF2);
+        gDPSetCombineMode(gfx++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
+        gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, FLIP_MESSAGE_BOARD_ALPHA);
+        gDPPipeSync(gfx++);
+        angle = DegreesToRadians(
+            (f_FlipMessageFrame * FLIP_MESSAGE_DEGREES_PER_FRAME) + FLIP_MESSAGE_START_DEGREES
+        );
+        if (angle > FULL_TURN_RADIANS) {
+            angle = FULL_TURN_RADIANS;
+        }
+
+        size = f_FlipMessageFrame * FLIP_MESSAGE_GROWTH_PER_FRAME;
+        if (size > 1.0f) {
+            size = 1.0f;
+        }
+
+        scale[AXIS_X] = size;
+        scale[AXIS_Y] = size;
+        scale[AXIS_Z] = size;
+        rotation[AXIS_X] = 0;
+        rotation[AXIS_Y] = 0;
+        rotation[AXIS_Z] = -angle;
+        translation[AXIS_X] = -f_FlipMessageHalfWidth;
+        translation[AXIS_Y] = FLIP_MESSAGE_BOARD_Y;
+        translation[AXIS_Z] = FLIP_MESSAGE_BOARD_Z;
+        BuildTransformMatrix(matrix, rotation, translation, scale);
+        guTranslateF(hingeMatrix, f_FlipMessageHalfWidth, -FLIP_MESSAGE_BOARD_Y, 0);
+        guMtxCatF(hingeMatrix, matrix, matrix);
+        ConvertMatrixToFixed(matrix, &f_FlipMessageMatrices[g_MatrixBufferIndex]);
+        gSPMatrix(
+            gfx++,
+            PhysicalAddress(&f_FlipMessageMatrices[g_MatrixBufferIndex]),
+            G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW
+        );
+        gSPVertex(gfx++, f_FlipMessageBoardVertices, QUAD_VERTEX_COUNT, 0);
+        gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
+        if (f_FlipMessageFrame == FLIP_MESSAGE_OPEN_FRAME) {
+            SetUpTextDrawing(&gfx);
+            gDPSetPrimColor(gfx++, 0, 0, 255, 255, 240, OPAQUE_ALPHA);
+            DrawLargeTextSlot(&gfx, FLIP_MESSAGE_TEXT_SLOT);
+        }
+        else {
+            SetUpPerspectiveTextDrawing(&gfx);
+            DrawGlyphGroup(&gfx, FLIP_MESSAGE_GLYPH_GROUP);
+        }
     }
 
-    gDPPipeSync(gfx++);
-    gDPPipeSync(gfx++);
-    gDPSetCycleType(gfx++, G_CYC_1CYCLE);
-    gSPClearGeometryMode(gfx++, ALL_GEOMETRY_MODES);
-    gSPSetGeometryMode(gfx++, G_SHADE | G_SHADING_SMOOTH);
-    gDPPipeSync(gfx++);
-    gDPSetTexturePersp(gfx++, G_TP_PERSP);
-    gDPPipeSync(gfx++);
-    gDPSetRenderMode(gfx++, G_RM_AA_XLU_SURF, G_RM_AA_XLU_SURF2);
-    gDPSetCombineMode(gfx++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
-    gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, FLIP_MESSAGE_BOARD_ALPHA);
-    gDPPipeSync(gfx++);
-    angle =
-        DegreesToRadians((f_FlipMessageFrame * FLIP_MESSAGE_DEGREES_PER_FRAME) +
-            FLIP_MESSAGE_START_DEGREES);
-    if (angle > FULL_TURN_RADIANS) {
-      angle = FULL_TURN_RADIANS;
-    }
-
-    size = f_FlipMessageFrame * FLIP_MESSAGE_GROWTH_PER_FRAME;
-    if (size > 1.0f) {
-      size = 1.0f;
-    }
-
-    scale[AXIS_X] = size;
-    scale[AXIS_Y] = size;
-    scale[AXIS_Z] = size;
-    rotation[AXIS_X] = 0;
-    rotation[AXIS_Y] = 0;
-    rotation[AXIS_Z] = -angle;
-    translation[AXIS_X] = -f_FlipMessageHalfWidth;
-    translation[AXIS_Y] = FLIP_MESSAGE_BOARD_Y;
-    translation[AXIS_Z] = FLIP_MESSAGE_BOARD_Z;
-    BuildTransformMatrix(matrix, rotation, translation, scale);
-    guTranslateF(hingeMatrix, f_FlipMessageHalfWidth, -FLIP_MESSAGE_BOARD_Y, 0);
-    guMtxCatF(hingeMatrix, matrix, matrix);
-    ConvertMatrixToFixed(matrix, &f_FlipMessageMatrices[g_MatrixBufferIndex]);
-    gSPMatrix(gfx++,
-        PhysicalAddress(&f_FlipMessageMatrices[g_MatrixBufferIndex]),
-        G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-    gSPVertex(gfx++, f_FlipMessageBoardVertices, QUAD_VERTEX_COUNT, 0);
-    gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
-    if (f_FlipMessageFrame == FLIP_MESSAGE_OPEN_FRAME) {
-      SetUpTextDrawing(&gfx);
-      gDPSetPrimColor(gfx++, 0, 0, 255, 255, 240, OPAQUE_ALPHA);
-      DrawLargeTextSlot(&gfx, FLIP_MESSAGE_TEXT_SLOT);
-    } else {
-      SetUpPerspectiveTextDrawing(&gfx);
-      DrawGlyphGroup(&gfx, FLIP_MESSAGE_GLYPH_GROUP);
-    }
-  }
-
-  *displayListHead = gfx;
+    *displayListHead = gfx;
 }
 
 Boolean IsMovieFinished(void) {
-  return f_CurrentMovie == MOVIE_NONE;
+    return f_CurrentMovie == MOVIE_NONE;
 }
 
 void StartMovie(s32 movie) {
-  EncodedAsset asset;
-  AssetFile file;
+    EncodedAsset asset;
+    AssetFile file;
 
-  osSyncPrintf("MOVIE %d \n", movie);
-  if (f_IsMovieBufferAllocated != TRUE) {
-    return;
-  }
+    osSyncPrintf("MOVIE %d \n", movie);
+    if (f_IsMovieBufferAllocated != TRUE) {
+        return;
+    }
 
-  f_CurrentMovie = movie;
-  if (movie == MOVIE_NONE) {
-    return;
-  }
+    f_CurrentMovie = movie;
+    if (movie == MOVIE_NONE) {
+        return;
+    }
 
-  f_LoadedBanner = BANNER_NONE;
-  f_CurrentBanner = BANNER_NONE;
-  f_MovieDrawCount = 0;
-  f_MovieTick = 0;
-  f_MovieBackBuffer = 0;
+    f_LoadedBanner = BANNER_NONE;
+    f_CurrentBanner = BANNER_NONE;
+    f_MovieDrawCount = 0;
+    f_MovieTick = 0;
+    f_MovieBackBuffer = 0;
 
-  /* The first frame is loaded here */
-  f_MovieFrame = 1;
-  switch (movie) {
-    case MOVIE_NONE:
-      break;
-    case MOVIE_TOAD_OUT_OF_BOUNDS:
+    /* The first frame is loaded here */
+    f_MovieFrame = 1;
+    switch (movie) {
+        case MOVIE_NONE:
+            break;
+        case MOVIE_TOAD_OUT_OF_BOUNDS:
 
-      OpenAssetFile(ASSET_TOAD_MOVIE_PALETTE, &file);
-      ReadAssetFile(f_MovieBuffer, GetAssetFileSize(&file), &file);
-      OpenEncodedAsset(f_ToadMovieFrameAssets[0], &asset);
-      ReadEncodedAsset(f_MovieBuffer + TOAD_FRAME_OFFSET, &asset);
-      OpenEncodedAsset(f_ToadMovieFrameAssets[0], &asset);
-      ReadEncodedAsset(f_MovieBuffer + TOAD_BACK_FRAME_OFFSET, &asset);
-      break;
-    case MOVIE_LAKITU:
-      OpenEncodedAsset(ASSET_LAKITU, &asset);
-      ReadEncodedAsset(f_MovieBuffer, &asset);
-      OpenEncodedAsset(ASSET_LAKITU, &asset);
-      ReadEncodedAsset(f_MovieBuffer + LAKITU_BACK_IMAGE_OFFSET, &asset);
-      f_Lakitu.x = LAKITU_START_X;
-      f_Lakitu.y = LAKITU_START_Y;
-      f_Lakitu.scale = LAKITU_START_SCALE;
-      break;
-    case MOVIE_UNUSED_MONTY_MOLE_A:
-    case MOVIE_UNUSED_MONTY_MOLE_B:
-    case MOVIE_UNUSED_MONTY_MOLE_C:
-    case MOVIE_MONTY_MOLE:
-      OpenAssetFile(ASSET_MONTY_MOLE_MOVIE_PALETTE, &file);
-      ReadAssetFile(
-          f_MovieBuffer + MOVIE_PALETTE_OFFSET, GetAssetFileSize(&file), &file);
-      OpenEncodedAsset(f_MontyMoleMovieFrameAssets[0], &asset);
-      ReadEncodedAsset(f_MovieBuffer + MOVIE_FRAME_OFFSET, &asset);
-      break;
-    case MOVIE_GOOMBA:
-      OpenAssetFile(ASSET_GOOMBA_MOVIE_PALETTE, &file);
-      ReadAssetFile(
-          f_MovieBuffer + MOVIE_PALETTE_OFFSET, GetAssetFileSize(&file), &file);
-      OpenEncodedAsset(f_GoombaMovieFrameAssets[0], &asset);
-      ReadEncodedAsset(f_MovieBuffer + MOVIE_FRAME_OFFSET, &asset);
-      break;
-    case MOVIE_DRIVE_RECORD:
-      OpenEncodedAsset(ASSET_DRIVE_RECORD_TEXT, &asset);
-      ReadEncodedAsset(f_MovieBuffer, &asset);
-      break;
-    case MOVIE_LONGEST_DRIVE:
-      OpenEncodedAsset(ASSET_LONGEST_DRIVE_TEXT, &asset);
-      ReadEncodedAsset(f_MovieBuffer, &asset);
-      break;
-    case MOVIE_NEAREST_PIN:
-      OpenEncodedAsset(ASSET_NEAREST_PIN_TEXT, &asset);
-      ReadEncodedAsset(f_MovieBuffer, &asset);
-      break;
-    case MOVIE_ALBATROSS_PUTT:
-      OpenEncodedAsset(ASSET_ALBATROSS_PUTT_TEXT, &asset);
-      ReadEncodedAsset(f_MovieBuffer, &asset);
-      break;
-    case MOVIE_EAGLE_PUTT:
-      OpenEncodedAsset(ASSET_EAGLE_PUTT_TEXT, &asset);
-      ReadEncodedAsset(f_MovieBuffer, &asset);
-      break;
-    case MOVIE_BIRDIE_PUTT:
-      OpenEncodedAsset(ASSET_BIRDIE_PUTT_TEXT, &asset);
-      ReadEncodedAsset(f_MovieBuffer, &asset);
-      break;
-    case MOVIE_SINK_TO_WIN:
-      OpenEncodedAsset(ASSET_SINK_TO_WIN_TEXT, &asset);
-      ReadEncodedAsset(f_MovieBuffer, &asset);
-      break;
-    case MOVIE_MISS_AND_LOSE:
-      OpenEncodedAsset(ASSET_MISS_AND_LOSE_TEXT, &asset);
-      ReadEncodedAsset(f_MovieBuffer, &asset);
-      break;
-    case MOVIE_SINK_TO_TIE:
-      OpenEncodedAsset(ASSET_SINK_TO_TIE_TEXT, &asset);
-      ReadEncodedAsset(f_MovieBuffer, &asset);
-      break;
-    case MOVIE_READY_GO:
-      OpenEncodedAsset(ASSET_READY_TEXT, &asset);
-      ReadEncodedAsset(f_MovieBuffer, &asset);
-      OpenEncodedAsset(ASSET_GO_TEXT, &asset);
-      ReadEncodedAsset(f_MovieBuffer + GO_TEXT_OFFSET, &asset);
-      break;
-  }
+            OpenAssetFile(ASSET_TOAD_MOVIE_PALETTE, &file);
+            ReadAssetFile(f_MovieBuffer, GetAssetFileSize(&file), &file);
+            OpenEncodedAsset(f_ToadMovieFrameAssets[0], &asset);
+            ReadEncodedAsset(f_MovieBuffer + TOAD_FRAME_OFFSET, &asset);
+            OpenEncodedAsset(f_ToadMovieFrameAssets[0], &asset);
+            ReadEncodedAsset(f_MovieBuffer + TOAD_BACK_FRAME_OFFSET, &asset);
+            break;
+        case MOVIE_LAKITU:
+            OpenEncodedAsset(ASSET_LAKITU, &asset);
+            ReadEncodedAsset(f_MovieBuffer, &asset);
+            OpenEncodedAsset(ASSET_LAKITU, &asset);
+            ReadEncodedAsset(f_MovieBuffer + LAKITU_BACK_IMAGE_OFFSET, &asset);
+            f_Lakitu.x = LAKITU_START_X;
+            f_Lakitu.y = LAKITU_START_Y;
+            f_Lakitu.scale = LAKITU_START_SCALE;
+            break;
+        case MOVIE_UNUSED_MONTY_MOLE_A:
+        case MOVIE_UNUSED_MONTY_MOLE_B:
+        case MOVIE_UNUSED_MONTY_MOLE_C:
+        case MOVIE_MONTY_MOLE:
+            OpenAssetFile(ASSET_MONTY_MOLE_MOVIE_PALETTE, &file);
+            ReadAssetFile(f_MovieBuffer + MOVIE_PALETTE_OFFSET, GetAssetFileSize(&file), &file);
+            OpenEncodedAsset(f_MontyMoleMovieFrameAssets[0], &asset);
+            ReadEncodedAsset(f_MovieBuffer + MOVIE_FRAME_OFFSET, &asset);
+            break;
+        case MOVIE_GOOMBA:
+            OpenAssetFile(ASSET_GOOMBA_MOVIE_PALETTE, &file);
+            ReadAssetFile(f_MovieBuffer + MOVIE_PALETTE_OFFSET, GetAssetFileSize(&file), &file);
+            OpenEncodedAsset(f_GoombaMovieFrameAssets[0], &asset);
+            ReadEncodedAsset(f_MovieBuffer + MOVIE_FRAME_OFFSET, &asset);
+            break;
+        case MOVIE_DRIVE_RECORD:
+            OpenEncodedAsset(ASSET_DRIVE_RECORD_TEXT, &asset);
+            ReadEncodedAsset(f_MovieBuffer, &asset);
+            break;
+        case MOVIE_LONGEST_DRIVE:
+            OpenEncodedAsset(ASSET_LONGEST_DRIVE_TEXT, &asset);
+            ReadEncodedAsset(f_MovieBuffer, &asset);
+            break;
+        case MOVIE_NEAREST_PIN:
+            OpenEncodedAsset(ASSET_NEAREST_PIN_TEXT, &asset);
+            ReadEncodedAsset(f_MovieBuffer, &asset);
+            break;
+        case MOVIE_ALBATROSS_PUTT:
+            OpenEncodedAsset(ASSET_ALBATROSS_PUTT_TEXT, &asset);
+            ReadEncodedAsset(f_MovieBuffer, &asset);
+            break;
+        case MOVIE_EAGLE_PUTT:
+            OpenEncodedAsset(ASSET_EAGLE_PUTT_TEXT, &asset);
+            ReadEncodedAsset(f_MovieBuffer, &asset);
+            break;
+        case MOVIE_BIRDIE_PUTT:
+            OpenEncodedAsset(ASSET_BIRDIE_PUTT_TEXT, &asset);
+            ReadEncodedAsset(f_MovieBuffer, &asset);
+            break;
+        case MOVIE_SINK_TO_WIN:
+            OpenEncodedAsset(ASSET_SINK_TO_WIN_TEXT, &asset);
+            ReadEncodedAsset(f_MovieBuffer, &asset);
+            break;
+        case MOVIE_MISS_AND_LOSE:
+            OpenEncodedAsset(ASSET_MISS_AND_LOSE_TEXT, &asset);
+            ReadEncodedAsset(f_MovieBuffer, &asset);
+            break;
+        case MOVIE_SINK_TO_TIE:
+            OpenEncodedAsset(ASSET_SINK_TO_TIE_TEXT, &asset);
+            ReadEncodedAsset(f_MovieBuffer, &asset);
+            break;
+        case MOVIE_READY_GO:
+            OpenEncodedAsset(ASSET_READY_TEXT, &asset);
+            ReadEncodedAsset(f_MovieBuffer, &asset);
+            OpenEncodedAsset(ASSET_GO_TEXT, &asset);
+            ReadEncodedAsset(f_MovieBuffer + GO_TEXT_OFFSET, &asset);
+            break;
+    }
 }
 
 Boolean IsMoviePastCue(void) {
-  return f_MovieFrame >= MOVIE_CUE_FRAME;
+    return f_MovieFrame >= MOVIE_CUE_FRAME;
 }
 
-void DrawMovie(Gfx** displayListHead) {
-  Gfx* gfx = *displayListHead;
+void DrawMovie(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
 
-  if (g_PauseScreen != PAUSE_SCREEN_NONE) {
-    return;
-  }
-
-  if (IsGameFlagSet(GAME_FLAG_TEST_AIM_TILT_AND_MOVIES)) {
-    if (g_ControllerStates[MOVIE_TEST_CONTROLLER].pressedButtons & A_BUTTON) {
-      StartMovie(MOVIE_DRIVE_RECORD);
+    if (g_PauseScreen != PAUSE_SCREEN_NONE) {
+        return;
     }
 
-    if (g_ControllerStates[MOVIE_TEST_CONTROLLER].pressedButtons & B_BUTTON) {
-      StartMovie(MOVIE_READY_GO);
+    if (IsGameFlagSet(GAME_FLAG_TEST_AIM_TILT_AND_MOVIES)) {
+        if (g_ControllerStates[MOVIE_TEST_CONTROLLER].pressedButtons & A_BUTTON) {
+            StartMovie(MOVIE_DRIVE_RECORD);
+        }
+
+        if (g_ControllerStates[MOVIE_TEST_CONTROLLER].pressedButtons & B_BUTTON) {
+            StartMovie(MOVIE_READY_GO);
+        }
     }
-  }
 
-  switch (f_CurrentMovie) {
-    case MOVIE_NONE:
-      break;
-    case MOVIE_TOAD_OUT_OF_BOUNDS:
-      DrawToadMovie(&gfx);
-      break;
-    case MOVIE_LAKITU:
-      DrawLakituMovie(&gfx);
-      break;
-    case MOVIE_MONTY_MOLE:
-      DrawMontyMoleMovie(&gfx);
-      break;
-    case MOVIE_GOOMBA:
-      DrawGoombaMovie(&gfx);
-      break;
-    case MOVIE_LONGEST_DRIVE:
-    case MOVIE_NEAREST_PIN:
-      DrawContestWinnerMovie(&gfx);
-      break;
-    case MOVIE_DRIVE_RECORD:
-      DrawDriveRecord(&gfx);
-      break;
-    case MOVIE_ALBATROSS_PUTT:
-    case MOVIE_EAGLE_PUTT:
-    case MOVIE_BIRDIE_PUTT:
-    case MOVIE_SINK_TO_WIN:
-    case MOVIE_SINK_TO_TIE:
-    case MOVIE_MISS_AND_LOSE:
-      DrawPuttCaption(&gfx);
-      break;
-    case MOVIE_READY_GO:
-      DrawReadyGoMovie(&gfx);
-      break;
-  }
+    switch (f_CurrentMovie) {
+        case MOVIE_NONE:
+            break;
+        case MOVIE_TOAD_OUT_OF_BOUNDS:
+            DrawToadMovie(&gfx);
+            break;
+        case MOVIE_LAKITU:
+            DrawLakituMovie(&gfx);
+            break;
+        case MOVIE_MONTY_MOLE:
+            DrawMontyMoleMovie(&gfx);
+            break;
+        case MOVIE_GOOMBA:
+            DrawGoombaMovie(&gfx);
+            break;
+        case MOVIE_LONGEST_DRIVE:
+        case MOVIE_NEAREST_PIN:
+            DrawContestWinnerMovie(&gfx);
+            break;
+        case MOVIE_DRIVE_RECORD:
+            DrawDriveRecord(&gfx);
+            break;
+        case MOVIE_ALBATROSS_PUTT:
+        case MOVIE_EAGLE_PUTT:
+        case MOVIE_BIRDIE_PUTT:
+        case MOVIE_SINK_TO_WIN:
+        case MOVIE_SINK_TO_TIE:
+        case MOVIE_MISS_AND_LOSE:
+            DrawPuttCaption(&gfx);
+            break;
+        case MOVIE_READY_GO:
+            DrawReadyGoMovie(&gfx);
+            break;
+    }
 
-  if (f_MovieDrawCount < MOVIE_DRAW_COUNT_MAX) {
-    f_MovieDrawCount++;
-  }
+    if (f_MovieDrawCount < MOVIE_DRAW_COUNT_MAX) {
+        f_MovieDrawCount++;
+    }
 
-  *displayListHead = gfx;
+    *displayListHead = gfx;
 }
 
 /* Where the contest winner's palette, face and plaque are kept, after the movie
@@ -1448,197 +1515,295 @@ void DrawMovie(Gfx** displayListHead) {
 /* Reads the contest winner's face, the given frame after their first, into
  * the movie buffer */
 #define LoadWinnerFace(asset, frameIndex) \
-  { \
-    OpenEncodedAsset( \
-        g_CharacterImageAssets[g_Players[GetContestWinner()].characterIndex] + \
-            (frameIndex), \
-        (asset)); \
-    ReadEncodedAsset(f_MovieBuffer + WINNER_FACE_OFFSET, (asset)); \
-  }
+    { \
+        OpenEncodedAsset( \
+            g_CharacterImageAssets[g_Players[GetContestWinner()].characterIndex] + (frameIndex), \
+            (asset) \
+        ); \
+        ReadEncodedAsset(f_MovieBuffer + WINNER_FACE_OFFSET, (asset)); \
+    }
 
 /*
  * The caption of a longest drive or nearest pin contest, then its winner's face
  */
-void DrawContestWinnerMovie(Gfx** displayListHead) {
-  Gfx* gfx = *displayListHead;
-  EncodedAsset asset;
-  AssetFile file;
-  u32 width;
-  s32 height;
-  s32 stripCount;
-  s32 halfWidth;
-  s32 stripHeight;
-  s32 slide;
-  s32 centerX;
-  s32 bottom;
-  s32 i;
-  s32 frame;
-  s32 growth;
-  s32 plaqueHalfSize;
-  s32 step;
-  f32 alpha;
+void DrawContestWinnerMovie(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
+    EncodedAsset asset;
+    AssetFile file;
+    u32 width;
+    s32 height;
+    s32 stripCount;
+    s32 halfWidth;
+    s32 stripHeight;
+    s32 slide;
+    s32 centerX;
+    s32 bottom;
+    s32 i;
+    s32 frame;
+    s32 growth;
+    s32 plaqueHalfSize;
+    s32 step;
+    f32 alpha;
 
-  width = ReadImageWidth(f_MovieBuffer);
-  stripHeight = MOVIE_IMAGE_STRIP_HEIGHT;
-  height = ReadImageHeight(f_MovieBuffer);
-  stripCount = height / stripHeight;
-  slide = 0;
-  gDPPipeSync(gfx++);
-  gDPSetCombineLERP(gfx++, TEXEL0, ENVIRONMENT, PRIMITIVE_ALPHA, ENVIRONMENT, 0,
-      0, 0, TEXEL0, TEXEL0, ENVIRONMENT, PRIMITIVE_ALPHA, ENVIRONMENT, 0, 0, 0,
-      TEXEL0);
-  halfWidth = width >> 1;
-  if (f_MovieDrawCount == CONTEST_SLIDE_DRAW) {
-    PlaySoundWithEffects(SOUND_SHRINKING_IMAGE, SHRINKING_IMAGE_SOUND_CHANNEL,
-        SHRINKING_IMAGE_SOUND_VOLUME, CONTEST_SOUND_REVERB, CONTEST_PAN_START);
-  }
-
-  if (f_MovieDrawCount == CONTEST_CHEER_DRAW) {
-    if (f_CurrentMovie == MOVIE_LONGEST_DRIVE) {
-      PlayCharacterSound(g_Players[GetContestWinner()].characterIndex,
-          GetContestWinner(), CHARACTER_SOUND_LONGEST_DRIVE, SOUND_FULL_SCALE,
-          SOUND_FULL_SCALE);
-    } else {
-      PlayCharacterSound(g_Players[GetContestWinner()].characterIndex,
-          GetContestWinner(), CHARACTER_SOUND_NEAREST_PIN, SOUND_FULL_SCALE,
-          SOUND_FULL_SCALE);
-    }
-  }
-
-  if (f_MovieDrawCount > CONTEST_SLIDE_DRAW &&
-      f_MovieDrawCount < CONTEST_PAN_DRAW_END) {
-    SetSoundPan(SHRINKING_IMAGE_SOUND_CHANNEL,
-        CONTEST_PAN_START -
-            ((f_MovieDrawCount - CONTEST_SLIDE_DRAW) * CONTEST_PAN_STEP));
-  }
-
-  if (f_MovieDrawCount < CONTEST_MEET_DRAW) {
-    slide = CONTEST_START_SLIDE - (f_MovieDrawCount * CONTEST_SLIDE_PER_FRAME);
-    if (slide < 0) {
-      slide = 0;
+    width = ReadImageWidth(f_MovieBuffer);
+    stripHeight = MOVIE_IMAGE_STRIP_HEIGHT;
+    height = ReadImageHeight(f_MovieBuffer);
+    stripCount = height / stripHeight;
+    slide = 0;
+    gDPPipeSync(gfx++);
+    gDPSetCombineLERP(
+        gfx++,
+        TEXEL0,
+        ENVIRONMENT,
+        PRIMITIVE_ALPHA,
+        ENVIRONMENT,
+        0,
+        0,
+        0,
+        TEXEL0,
+        TEXEL0,
+        ENVIRONMENT,
+        PRIMITIVE_ALPHA,
+        ENVIRONMENT,
+        0,
+        0,
+        0,
+        TEXEL0
+    );
+    halfWidth = width >> 1;
+    if (f_MovieDrawCount == CONTEST_SLIDE_DRAW) {
+        PlaySoundWithEffects(
+            SOUND_SHRINKING_IMAGE,
+            SHRINKING_IMAGE_SOUND_CHANNEL,
+            SHRINKING_IMAGE_SOUND_VOLUME,
+            CONTEST_SOUND_REVERB,
+            CONTEST_PAN_START
+        );
     }
 
-    gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
-    gDPSetEnvColor(gfx++, 255, 255, 255, CONTEST_COPY_ALPHA);
-    if (f_MovieDrawCount == 0) {
-      OpenAssetFile(g_CharacterPaletteAssets[g_Players[GetContestWinner()]
-                            .characterIndex] +
-              g_Players[GetContestWinner()].paletteIndex,
-          &file);
-      ReadAssetFile(f_MovieBuffer + WINNER_PALETTE_OFFSET,
-          GetAssetFileSize(&file), &file);
-      LoadWinnerFace(&asset, 0);
-      OpenEncodedAsset(ASSET_WOODEN_PLAQUE, &asset);
-      ReadEncodedAsset(f_MovieBuffer + WINNER_PLAQUE_OFFSET, &asset);
-    }
-  } else if (f_MovieDrawCount < CONTEST_FLASH_END_DRAW) {
-    alpha = 255.0f -
-        (sinf((f_MovieDrawCount - CONTEST_MEET_DRAW) * CONTEST_TURN_PER_FRAME) *
-            CONTEST_FLASH_DEPTH);
-    gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, alpha);
-    gDPSetEnvColor(gfx++, 255, 255, 255, OPAQUE_ALPHA);
-  } else if (f_MovieDrawCount < CONTEST_SLIDE_OUT_DRAW) {
-    gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
-    gDPSetEnvColor(gfx++, 255, 255, 255, OPAQUE_ALPHA);
-  } else if (f_MovieDrawCount < CONTEST_END_DRAW) {
-    slide =
-        (CONTEST_SLIDE_OUT_DRAW - f_MovieDrawCount) * CONTEST_SLIDE_PER_FRAME;
-  } else {
-    f_CurrentMovie = MOVIE_NONE;
-    halfWidth = 0;
-  }
-
-  gSPDisplayList(gfx++, f_MovieImageSetupDisplayList);
-  gDPLoadTLUT_pal256(
-      gfx++, TextureAddress(f_MovieBuffer + MOVIE_IMAGE_PALETTE_OFFSET));
-  if (f_MovieDrawCount < CONTEST_DRAW_COUNT && halfWidth != 0) {
-    for (i = 0; i != stripCount; i++) {
-      LoadTextureBlock(&gfx,
-          f_MovieBuffer +
-              ((i * width * MOVIE_IMAGE_STRIP_HEIGHT) +
-                  MOVIE_IMAGE_PIXELS_OFFSET),
-          G_IM_FMT_CI, G_IM_SIZ_8b, width, MOVIE_IMAGE_STRIP_HEIGHT, 0, 0, 0,
-          G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-      bottom = CONTEST_IMAGE_CENTER_Y + i * MOVIE_IMAGE_STRIP_HEIGHT;
-      centerX = CONTEST_IMAGE_CENTER_X + slide;
-      DrawTextureRect(&gfx, QuarterPixels(centerX - halfWidth),
-          QuarterPixels(
-              bottom - (stripHeight * CONTEST_IMAGE_STRIPS_ABOVE_CENTER)),
-          QuarterPixels(halfWidth + centerX),
-          QuarterPixels(bottom -
-              (stripHeight * CONTEST_IMAGE_STRIPS_ABOVE_CENTER) +
-              MOVIE_IMAGE_STRIP_HEIGHT),
-          G_TX_RENDERTILE, 0, 0,
-          (s32)((width >> 1) << TEXEL_STEP_SHIFT) / halfWidth,
-          TexelRunStep(MOVIE_IMAGE_STRIP_HEIGHT, stripHeight));
-    }
-  }
-
-  gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-  if (f_MovieDrawCount > CONTEST_MEET_DRAW &&
-      f_MovieDrawCount <= CONTEST_MEET_DRAW + WINNER_LAST_FRAME) {
-    frame = f_MovieDrawCount - CONTEST_MEET_DRAW;
-    if (frame == WINNER_BLINK_FRAME) {
-      LoadWinnerFace(&asset, 1);
-    } else if (frame == WINNER_BLINK_FRAME + 2) {
-      LoadWinnerFace(&asset, 2);
-    } else if (frame == WINNER_BLINK_FRAME + 4) {
-      LoadWinnerFace(&asset, 3);
-    } else if (frame == WINNER_BLINK_FRAME + 6) {
-      LoadWinnerFace(&asset, 4);
+    if (f_MovieDrawCount == CONTEST_CHEER_DRAW) {
+        if (f_CurrentMovie == MOVIE_LONGEST_DRIVE) {
+            PlayCharacterSound(
+                g_Players[GetContestWinner()].characterIndex,
+                GetContestWinner(),
+                CHARACTER_SOUND_LONGEST_DRIVE,
+                SOUND_FULL_SCALE,
+                SOUND_FULL_SCALE
+            );
+        }
+        else {
+            PlayCharacterSound(
+                g_Players[GetContestWinner()].characterIndex,
+                GetContestWinner(),
+                CHARACTER_SOUND_NEAREST_PIN,
+                SOUND_FULL_SCALE,
+                SOUND_FULL_SCALE
+            );
+        }
     }
 
-    if (frame == WINNER_FIRST_FRAME) {
-      PlaySoundWithEffects(SOUND_READY, g_NextSoundChannel, WINNER_SOUND_VOLUME,
-          WINNER_SOUND_REVERB, SOUND_FULL_SCALE);
+    if (f_MovieDrawCount > CONTEST_SLIDE_DRAW && f_MovieDrawCount < CONTEST_PAN_DRAW_END) {
+        SetSoundPan(
+            SHRINKING_IMAGE_SOUND_CHANNEL,
+            CONTEST_PAN_START - ((f_MovieDrawCount - CONTEST_SLIDE_DRAW) * CONTEST_PAN_STEP)
+        );
     }
 
-    if (frame == WINNER_SHRINK_FRAME) {
-      PlaySoundWithEffects(SOUND_GO, g_NextSoundChannel, WINNER_SOUND_VOLUME,
-          WINNER_SOUND_REVERB, SOUND_FULL_SCALE);
+    if (f_MovieDrawCount < CONTEST_MEET_DRAW) {
+        slide = CONTEST_START_SLIDE - (f_MovieDrawCount * CONTEST_SLIDE_PER_FRAME);
+        if (slide < 0) {
+            slide = 0;
+        }
+
+        gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
+        gDPSetEnvColor(gfx++, 255, 255, 255, CONTEST_COPY_ALPHA);
+        if (f_MovieDrawCount == 0) {
+            OpenAssetFile(
+                g_CharacterPaletteAssets[g_Players[GetContestWinner()].characterIndex] +
+                    g_Players[GetContestWinner()].paletteIndex,
+                &file
+            );
+            ReadAssetFile(f_MovieBuffer + WINNER_PALETTE_OFFSET, GetAssetFileSize(&file), &file);
+            LoadWinnerFace(&asset, 0);
+            OpenEncodedAsset(ASSET_WOODEN_PLAQUE, &asset);
+            ReadEncodedAsset(f_MovieBuffer + WINNER_PLAQUE_OFFSET, &asset);
+        }
+    }
+    else if (f_MovieDrawCount < CONTEST_FLASH_END_DRAW) {
+        alpha = 255.0f -
+            (sinf((f_MovieDrawCount - CONTEST_MEET_DRAW) * CONTEST_TURN_PER_FRAME) *
+                CONTEST_FLASH_DEPTH);
+        gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, alpha);
+        gDPSetEnvColor(gfx++, 255, 255, 255, OPAQUE_ALPHA);
+    }
+    else if (f_MovieDrawCount < CONTEST_SLIDE_OUT_DRAW) {
+        gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
+        gDPSetEnvColor(gfx++, 255, 255, 255, OPAQUE_ALPHA);
+    }
+    else if (f_MovieDrawCount < CONTEST_END_DRAW) {
+        slide = (CONTEST_SLIDE_OUT_DRAW - f_MovieDrawCount) * CONTEST_SLIDE_PER_FRAME;
+    }
+    else {
+        f_CurrentMovie = MOVIE_NONE;
+        halfWidth = 0;
     }
 
-    if (frame >= WINNER_SHRINK_FRAME) {
-      frame = WINNER_SHRINK_FRAME + 3 - frame;
-      if (frame <= 0) {
-        frame = 1;
-      }
-    } else if (frame > WINNER_MAX_GROWTH) {
-      frame = WINNER_MAX_GROWTH;
+    gSPDisplayList(gfx++, f_MovieImageSetupDisplayList);
+    gDPLoadTLUT_pal256(gfx++, TextureAddress(f_MovieBuffer + MOVIE_IMAGE_PALETTE_OFFSET));
+    if (f_MovieDrawCount < CONTEST_DRAW_COUNT && halfWidth != 0) {
+        for (i = 0; i != stripCount; i++) {
+            LoadTextureBlock(
+                &gfx,
+                f_MovieBuffer +
+                    ((i * width * MOVIE_IMAGE_STRIP_HEIGHT) + MOVIE_IMAGE_PIXELS_OFFSET),
+                G_IM_FMT_CI,
+                G_IM_SIZ_8b,
+                width,
+                MOVIE_IMAGE_STRIP_HEIGHT,
+                0,
+                0,
+                0,
+                G_TX_NOMASK,
+                G_TX_NOMASK,
+                G_TX_NOLOD,
+                G_TX_NOLOD
+            );
+            bottom = CONTEST_IMAGE_CENTER_Y + i * MOVIE_IMAGE_STRIP_HEIGHT;
+            centerX = CONTEST_IMAGE_CENTER_X + slide;
+            DrawTextureRect(
+                &gfx,
+                QuarterPixels(centerX - halfWidth),
+                QuarterPixels(bottom - (stripHeight * CONTEST_IMAGE_STRIPS_ABOVE_CENTER)),
+                QuarterPixels(halfWidth + centerX),
+                QuarterPixels(
+                    bottom - (stripHeight * CONTEST_IMAGE_STRIPS_ABOVE_CENTER) +
+                    MOVIE_IMAGE_STRIP_HEIGHT
+                ),
+                G_TX_RENDERTILE,
+                0,
+                0,
+                (s32)((width >> 1) << TEXEL_STEP_SHIFT) / halfWidth,
+                TexelRunStep(MOVIE_IMAGE_STRIP_HEIGHT, stripHeight)
+            );
+        }
     }
 
-    growth = frame * WINNER_GROWTH_STEP;
-    LoadSmallPalette(&gfx, 0, ImageBody(f_MovieBuffer + WINNER_PLAQUE_OFFSET));
-    LoadNibbleTextureBlock(&gfx,
-        ImageTexels(f_MovieBuffer + WINNER_PLAQUE_OFFSET), G_IM_FMT_CI,
-        WINNER_PLAQUE_SIZE, WINNER_PLAQUE_SIZE, 0, 0, 0, G_TX_NOMASK,
-        G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-    plaqueHalfSize = growth + WINNER_PLAQUE_MARGIN;
-    step = TexelRunStep((WINNER_PLAQUE_SIZE / 2), plaqueHalfSize);
-    DrawTextureRect(&gfx, QuarterPixels(WINNER_CENTER_X - plaqueHalfSize),
-        QuarterPixels(WINNER_CENTER_Y - plaqueHalfSize),
-        QuarterPixels(WINNER_CENTER_X + plaqueHalfSize),
-        QuarterPixels(WINNER_CENTER_Y + plaqueHalfSize), G_TX_RENDERTILE, 0, 0,
-        step, step);
-    LoadLargePalette(&gfx, f_MovieBuffer + WINNER_PALETTE_OFFSET);
-    LoadTextureBlock(&gfx, f_MovieBuffer + WINNER_FACE_OFFSET, G_IM_FMT_CI,
-        G_IM_SIZ_8b, WINNER_FACE_SIZE, WINNER_FACE_SIZE, 0, 0, 0, G_TX_NOMASK,
-        G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-    step = TexelRunStep((WINNER_FACE_SIZE / 2), growth);
-    /*
-     * Reuses width for the face's left edge, as the original seems to: the
-     * extra use raises width's global-alloc priority above the strips' right
-     * edge, so that width gets $s7 there as in the original.
-     */
-    width = QuarterPixels(WINNER_CENTER_X - growth);
-    DrawTextureRect(&gfx, width, QuarterPixels(WINNER_CENTER_Y - growth),
-        QuarterPixels(WINNER_CENTER_X + growth),
-        QuarterPixels(WINNER_CENTER_Y + growth), G_TX_RENDERTILE, 0, 0, step,
-        step);
-  }
+    gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+    if (f_MovieDrawCount > CONTEST_MEET_DRAW &&
+        f_MovieDrawCount <= CONTEST_MEET_DRAW + WINNER_LAST_FRAME) {
+        frame = f_MovieDrawCount - CONTEST_MEET_DRAW;
+        if (frame == WINNER_BLINK_FRAME) {
+            LoadWinnerFace(&asset, 1);
+        }
+        else if (frame == WINNER_BLINK_FRAME + 2) {
+            LoadWinnerFace(&asset, 2);
+        }
+        else if (frame == WINNER_BLINK_FRAME + 4) {
+            LoadWinnerFace(&asset, 3);
+        }
+        else if (frame == WINNER_BLINK_FRAME + 6) {
+            LoadWinnerFace(&asset, 4);
+        }
 
-  gDPPipeSync(gfx++);
-  *displayListHead = gfx;
+        if (frame == WINNER_FIRST_FRAME) {
+            PlaySoundWithEffects(
+                SOUND_READY,
+                g_NextSoundChannel,
+                WINNER_SOUND_VOLUME,
+                WINNER_SOUND_REVERB,
+                SOUND_FULL_SCALE
+            );
+        }
+
+        if (frame == WINNER_SHRINK_FRAME) {
+            PlaySoundWithEffects(
+                SOUND_GO,
+                g_NextSoundChannel,
+                WINNER_SOUND_VOLUME,
+                WINNER_SOUND_REVERB,
+                SOUND_FULL_SCALE
+            );
+        }
+
+        if (frame >= WINNER_SHRINK_FRAME) {
+            frame = WINNER_SHRINK_FRAME + 3 - frame;
+            if (frame <= 0) {
+                frame = 1;
+            }
+        }
+        else if (frame > WINNER_MAX_GROWTH) {
+            frame = WINNER_MAX_GROWTH;
+        }
+
+        growth = frame * WINNER_GROWTH_STEP;
+        LoadSmallPalette(&gfx, 0, ImageBody(f_MovieBuffer + WINNER_PLAQUE_OFFSET));
+        LoadNibbleTextureBlock(
+            &gfx,
+            ImageTexels(f_MovieBuffer + WINNER_PLAQUE_OFFSET),
+            G_IM_FMT_CI,
+            WINNER_PLAQUE_SIZE,
+            WINNER_PLAQUE_SIZE,
+            0,
+            0,
+            0,
+            G_TX_NOMASK,
+            G_TX_NOMASK,
+            G_TX_NOLOD,
+            G_TX_NOLOD
+        );
+        plaqueHalfSize = growth + WINNER_PLAQUE_MARGIN;
+        step = TexelRunStep((WINNER_PLAQUE_SIZE / 2), plaqueHalfSize);
+        DrawTextureRect(
+            &gfx,
+            QuarterPixels(WINNER_CENTER_X - plaqueHalfSize),
+            QuarterPixels(WINNER_CENTER_Y - plaqueHalfSize),
+            QuarterPixels(WINNER_CENTER_X + plaqueHalfSize),
+            QuarterPixels(WINNER_CENTER_Y + plaqueHalfSize),
+            G_TX_RENDERTILE,
+            0,
+            0,
+            step,
+            step
+        );
+        LoadLargePalette(&gfx, f_MovieBuffer + WINNER_PALETTE_OFFSET);
+        LoadTextureBlock(
+            &gfx,
+            f_MovieBuffer + WINNER_FACE_OFFSET,
+            G_IM_FMT_CI,
+            G_IM_SIZ_8b,
+            WINNER_FACE_SIZE,
+            WINNER_FACE_SIZE,
+            0,
+            0,
+            0,
+            G_TX_NOMASK,
+            G_TX_NOMASK,
+            G_TX_NOLOD,
+            G_TX_NOLOD
+        );
+        step = TexelRunStep((WINNER_FACE_SIZE / 2), growth);
+        /*
+         * Reuses width for the face's left edge, as the original seems to: the
+         * extra use raises width's global-alloc priority above the strips' right
+         * edge, so that width gets $s7 there as in the original.
+         */
+        width = QuarterPixels(WINNER_CENTER_X - growth);
+        DrawTextureRect(
+            &gfx,
+            width,
+            QuarterPixels(WINNER_CENTER_Y - growth),
+            QuarterPixels(WINNER_CENTER_X + growth),
+            QuarterPixels(WINNER_CENTER_Y + growth),
+            G_TX_RENDERTILE,
+            0,
+            0,
+            step,
+            step
+        );
+    }
+
+    gDPPipeSync(gfx++);
+    *displayListHead = gfx;
 }
 
 /* The record distance shows under the caption once it has met at the center */
@@ -1653,116 +1818,168 @@ void DrawContestWinnerMovie(Gfx** displayListHead) {
  * The drive record caption slides in from either side with a copy of it, then
  * grows and flashes before it closes, with the record distance beneath it
  */
-void DrawDriveRecord(Gfx** displayListHead) {
-  Gfx* gfx = *displayListHead;
-  u32 width;
-  s32 height;
-  s32 stripCount;
-  s32 halfWidth;
-  s32 stripHeight;
-  s32 slide;
-  s32 centerX;
-  s32 bottom;
-  s32 copyTop;
-  s32 i;
-  Radians angle;
-  f32 fade;
-  f32 alpha;
+void DrawDriveRecord(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
+    u32 width;
+    s32 height;
+    s32 stripCount;
+    s32 halfWidth;
+    s32 stripHeight;
+    s32 slide;
+    s32 centerX;
+    s32 bottom;
+    s32 copyTop;
+    s32 i;
+    Radians angle;
+    f32 fade;
+    f32 alpha;
 
-  width = ReadImageWidth(f_MovieBuffer);
-  height = ReadImageHeight(f_MovieBuffer);
-  if (f_MovieDrawCount == CAPTION_MEET_DRAW + 1) {
-    PlaySoundWithEffects(SOUND_SHRINKING_IMAGE, CAPTION_SOUND_CHANNEL,
-        CAPTION_SOUND_VOLUME, 0, SOUND_FULL_SCALE);
-  }
-
-  gDPPipeSync(gfx++);
-  gDPSetCombineLERP(gfx++, TEXEL0, ENVIRONMENT, PRIMITIVE_ALPHA, ENVIRONMENT,
-      ENVIRONMENT, 0, TEXEL0, 0, TEXEL0, ENVIRONMENT, PRIMITIVE_ALPHA,
-      ENVIRONMENT, ENVIRONMENT, 0, TEXEL0, 0);
-  halfWidth = width >> 1;
-  stripHeight = MOVIE_IMAGE_STRIP_HEIGHT;
-  stripCount = height / stripHeight;
-  if (f_MovieDrawCount < CAPTION_MEET_DRAW) {
-    gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
-    gDPSetEnvColor(gfx++, 255, 255, 255, CAPTION_COPY_ALPHA);
-  } else if (f_MovieDrawCount < CAPTION_FLASH_END_DRAW) {
-    alpha = 255.0f -
-        (sinf((f_MovieDrawCount - CAPTION_MEET_DRAW) * CAPTION_TURN_PER_FRAME) *
-            CAPTION_FLASH_DEPTH);
-    gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, alpha);
-    gDPSetEnvColor(gfx++, 255, 255, 255, OPAQUE_ALPHA);
-  } else if (f_MovieDrawCount < CAPTION_GROW_DRAW) {
-    gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
-    gDPSetEnvColor(gfx++, 255, 255, 255, OPAQUE_ALPHA);
-  } else if (f_MovieDrawCount < CAPTION_GROW_END_DRAW) {
-    angle = (f_MovieDrawCount - CAPTION_GROW_DRAW) * CAPTION_TURN_PER_FRAME;
-    fade = sinf(angle) * CAPTION_FLASH_DEPTH;
-    halfWidth = cosf(angle) * halfWidth;
-    stripHeight =
-        ((1.0f - cosf(angle)) * CAPTION_MAX_GROWTH) + MOVIE_IMAGE_STRIP_HEIGHT;
-    gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255.0f - fade);
-    gDPSetEnvColor(gfx++, 255, 255, 255, 255.0f - fade);
-  } else {
-    f_CurrentMovie = MOVIE_NONE;
-    halfWidth = 0;
-  }
-
-  gSPDisplayList(gfx++, f_MovieImageSetupDisplayList);
-  gDPLoadTLUT_pal256(
-      gfx++, TextureAddress(f_MovieBuffer + MOVIE_IMAGE_PALETTE_OFFSET));
-  if (f_MovieDrawCount < CAPTION_DRAW_COUNT && halfWidth > 0) {
-    for (i = 0; i != stripCount; i++) {
-      slide =
-          CAPTION_START_SLIDE - (f_MovieDrawCount * CAPTION_SLIDE_PER_FRAME);
-      if (slide < 0) {
-        slide = 0;
-      }
-
-      LoadTextureBlock(&gfx,
-          f_MovieBuffer +
-              ((i * width * MOVIE_IMAGE_STRIP_HEIGHT) +
-                  MOVIE_IMAGE_PIXELS_OFFSET),
-          G_IM_FMT_CI, G_IM_SIZ_8b, width, MOVIE_IMAGE_STRIP_HEIGHT, 0, 0, 0,
-          G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-      centerX = SHRINKING_IMAGE_CENTER_X + slide;
-      bottom = SHRINKING_IMAGE_CENTER_Y + (i * stripHeight);
-      DrawTextureRect(&gfx, QuarterPixels(centerX - halfWidth),
-          QuarterPixels(
-              bottom - (stripHeight * SHRINKING_IMAGE_STRIPS_ABOVE_CENTER)),
-          QuarterPixels(halfWidth + centerX),
-          QuarterPixels(bottom -
-              (stripHeight * SHRINKING_IMAGE_STRIPS_ABOVE_CENTER) +
-              stripHeight),
-          G_TX_RENDERTILE, 0, 0,
-          (s32)((width >> 1) << TEXEL_STEP_SHIFT) / halfWidth,
-          TexelRunStep(MOVIE_IMAGE_STRIP_HEIGHT, stripHeight));
-      if (f_MovieDrawCount >= CAPTION_MEET_DRAW) {
-        continue;
-      }
-
-      copyTop = CAPTION_COPY_TOP + (i * MOVIE_IMAGE_STRIP_HEIGHT);
-      DrawTextureRect(&gfx,
-          QuarterPixels(SHRINKING_IMAGE_CENTER_X - (s32)(width >> 1) - slide),
-          QuarterPixels(copyTop),
-          QuarterPixels(SHRINKING_IMAGE_CENTER_X + (s32)(width >> 1) - slide),
-          QuarterPixels(copyTop + MOVIE_IMAGE_STRIP_HEIGHT), G_TX_RENDERTILE, 0,
-          0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+    width = ReadImageWidth(f_MovieBuffer);
+    height = ReadImageHeight(f_MovieBuffer);
+    if (f_MovieDrawCount == CAPTION_MEET_DRAW + 1) {
+        PlaySoundWithEffects(
+            SOUND_SHRINKING_IMAGE,
+            CAPTION_SOUND_CHANNEL,
+            CAPTION_SOUND_VOLUME,
+            0,
+            SOUND_FULL_SCALE
+        );
     }
-  }
 
-  if (f_MovieDrawCount >= DRIVE_RECORD_DISTANCE_DRAW &&
-      f_MovieDrawCount < DRIVE_RECORD_DISTANCE_END_DRAW) {
-    SetUpGradientTextDrawing(&gfx, 0);
-    sprintf(g_PrintBuffer, "%5.2f%c",
-        g_Players[0].lastDriveDistance * YARDS_PER_UNIT, YARDS_GLYPH);
-    DrawLargeTextWithShadow(&gfx, DRIVE_RECORD_DISTANCE_X,
-        DRIVE_RECORD_DISTANCE_Y, g_PrintBuffer, DRIVE_RECORD_DISTANCE_ENV_COLOR,
-        DRIVE_RECORD_DISTANCE_PRIM_COLOR, TEXT_FLAG_FIXED_WIDTH);
-  }
+    gDPPipeSync(gfx++);
+    gDPSetCombineLERP(
+        gfx++,
+        TEXEL0,
+        ENVIRONMENT,
+        PRIMITIVE_ALPHA,
+        ENVIRONMENT,
+        ENVIRONMENT,
+        0,
+        TEXEL0,
+        0,
+        TEXEL0,
+        ENVIRONMENT,
+        PRIMITIVE_ALPHA,
+        ENVIRONMENT,
+        ENVIRONMENT,
+        0,
+        TEXEL0,
+        0
+    );
+    halfWidth = width >> 1;
+    stripHeight = MOVIE_IMAGE_STRIP_HEIGHT;
+    stripCount = height / stripHeight;
+    if (f_MovieDrawCount < CAPTION_MEET_DRAW) {
+        gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
+        gDPSetEnvColor(gfx++, 255, 255, 255, CAPTION_COPY_ALPHA);
+    }
+    else if (f_MovieDrawCount < CAPTION_FLASH_END_DRAW) {
+        alpha = 255.0f -
+            (sinf((f_MovieDrawCount - CAPTION_MEET_DRAW) * CAPTION_TURN_PER_FRAME) *
+                CAPTION_FLASH_DEPTH);
+        gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, alpha);
+        gDPSetEnvColor(gfx++, 255, 255, 255, OPAQUE_ALPHA);
+    }
+    else if (f_MovieDrawCount < CAPTION_GROW_DRAW) {
+        gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
+        gDPSetEnvColor(gfx++, 255, 255, 255, OPAQUE_ALPHA);
+    }
+    else if (f_MovieDrawCount < CAPTION_GROW_END_DRAW) {
+        angle = (f_MovieDrawCount - CAPTION_GROW_DRAW) * CAPTION_TURN_PER_FRAME;
+        fade = sinf(angle) * CAPTION_FLASH_DEPTH;
+        halfWidth = cosf(angle) * halfWidth;
+        stripHeight = ((1.0f - cosf(angle)) * CAPTION_MAX_GROWTH) + MOVIE_IMAGE_STRIP_HEIGHT;
+        gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255.0f - fade);
+        gDPSetEnvColor(gfx++, 255, 255, 255, 255.0f - fade);
+    }
+    else {
+        f_CurrentMovie = MOVIE_NONE;
+        halfWidth = 0;
+    }
 
-  gDPPipeSync(gfx++);
-  *displayListHead = gfx;
+    gSPDisplayList(gfx++, f_MovieImageSetupDisplayList);
+    gDPLoadTLUT_pal256(gfx++, TextureAddress(f_MovieBuffer + MOVIE_IMAGE_PALETTE_OFFSET));
+    if (f_MovieDrawCount < CAPTION_DRAW_COUNT && halfWidth > 0) {
+        for (i = 0; i != stripCount; i++) {
+            slide = CAPTION_START_SLIDE - (f_MovieDrawCount * CAPTION_SLIDE_PER_FRAME);
+            if (slide < 0) {
+                slide = 0;
+            }
+
+            LoadTextureBlock(
+                &gfx,
+                f_MovieBuffer +
+                    ((i * width * MOVIE_IMAGE_STRIP_HEIGHT) + MOVIE_IMAGE_PIXELS_OFFSET),
+                G_IM_FMT_CI,
+                G_IM_SIZ_8b,
+                width,
+                MOVIE_IMAGE_STRIP_HEIGHT,
+                0,
+                0,
+                0,
+                G_TX_NOMASK,
+                G_TX_NOMASK,
+                G_TX_NOLOD,
+                G_TX_NOLOD
+            );
+            centerX = SHRINKING_IMAGE_CENTER_X + slide;
+            bottom = SHRINKING_IMAGE_CENTER_Y + (i * stripHeight);
+            DrawTextureRect(
+                &gfx,
+                QuarterPixels(centerX - halfWidth),
+                QuarterPixels(bottom - (stripHeight * SHRINKING_IMAGE_STRIPS_ABOVE_CENTER)),
+                QuarterPixels(halfWidth + centerX),
+                QuarterPixels(
+                    bottom - (stripHeight * SHRINKING_IMAGE_STRIPS_ABOVE_CENTER) + stripHeight
+                ),
+                G_TX_RENDERTILE,
+                0,
+                0,
+                (s32)((width >> 1) << TEXEL_STEP_SHIFT) / halfWidth,
+                TexelRunStep(MOVIE_IMAGE_STRIP_HEIGHT, stripHeight)
+            );
+            if (f_MovieDrawCount >= CAPTION_MEET_DRAW) {
+                continue;
+            }
+
+            copyTop = CAPTION_COPY_TOP + (i * MOVIE_IMAGE_STRIP_HEIGHT);
+            DrawTextureRect(
+                &gfx,
+                QuarterPixels(SHRINKING_IMAGE_CENTER_X - (s32)(width >> 1) - slide),
+                QuarterPixels(copyTop),
+                QuarterPixels(SHRINKING_IMAGE_CENTER_X + (s32)(width >> 1) - slide),
+                QuarterPixels(copyTop + MOVIE_IMAGE_STRIP_HEIGHT),
+                G_TX_RENDERTILE,
+                0,
+                0,
+                TEXEL_STEP_ONE,
+                TEXEL_STEP_ONE
+            );
+        }
+    }
+
+    if (f_MovieDrawCount >= DRIVE_RECORD_DISTANCE_DRAW &&
+        f_MovieDrawCount < DRIVE_RECORD_DISTANCE_END_DRAW) {
+        SetUpGradientTextDrawing(&gfx, 0);
+        sprintf(
+            g_PrintBuffer,
+            "%5.2f%c",
+            g_Players[0].lastDriveDistance * YARDS_PER_UNIT,
+            YARDS_GLYPH
+        );
+        DrawLargeTextWithShadow(
+            &gfx,
+            DRIVE_RECORD_DISTANCE_X,
+            DRIVE_RECORD_DISTANCE_Y,
+            g_PrintBuffer,
+            DRIVE_RECORD_DISTANCE_ENV_COLOR,
+            DRIVE_RECORD_DISTANCE_PRIM_COLOR,
+            TEXT_FLAG_FIXED_WIDTH
+        );
+    }
+
+    gDPPipeSync(gfx++);
+    *displayListHead = gfx;
 }
 
 /*
@@ -1770,106 +1987,148 @@ void DrawDriveRecord(Gfx** displayListHead) {
  * side with a copy of it, then flashes and grows before it closes, as the
  * drive record's does
  */
-void DrawPuttCaption(Gfx** displayListHead) {
-  Gfx* gfx = *displayListHead;
-  u32 width;
-  s32 height;
-  s32 stripCount;
-  s32 halfWidth;
-  s32 stripHeight;
-  s32 slide;
-  s32 centerX;
-  s32 bottom;
-  s32 copyTop;
-  s32 i;
-  Radians angle;
-  f32 fade;
-  f32 alpha;
+void DrawPuttCaption(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
+    u32 width;
+    s32 height;
+    s32 stripCount;
+    s32 halfWidth;
+    s32 stripHeight;
+    s32 slide;
+    s32 centerX;
+    s32 bottom;
+    s32 copyTop;
+    s32 i;
+    Radians angle;
+    f32 fade;
+    f32 alpha;
 
-  width = ReadImageWidth(f_MovieBuffer);
-  height = ReadImageHeight(f_MovieBuffer);
-  gDPPipeSync(gfx++);
-  gDPSetCombineLERP(gfx++, TEXEL0, ENVIRONMENT, PRIMITIVE_ALPHA, ENVIRONMENT,
-      ENVIRONMENT, 0, TEXEL0, 0, TEXEL0, ENVIRONMENT, PRIMITIVE_ALPHA,
-      ENVIRONMENT, ENVIRONMENT, 0, TEXEL0, 0);
-  halfWidth = width >> 1;
-  stripHeight = MOVIE_IMAGE_STRIP_HEIGHT;
-  stripCount = height / stripHeight;
-  if (f_MovieDrawCount == CAPTION_MEET_DRAW + 1) {
-    PlaySoundWithEffects(SOUND_CAPTION_MEET, CAPTION_SOUND_CHANNEL,
-        CAPTION_SOUND_VOLUME, 0, SOUND_FULL_SCALE);
-  }
-
-  if (f_MovieDrawCount < CAPTION_MEET_DRAW) {
-    gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
-    gDPSetEnvColor(gfx++, 255, 255, 255, CAPTION_COPY_ALPHA);
-  } else if (f_MovieDrawCount < CAPTION_FLASH_END_DRAW) {
-    alpha = 255.0f -
-        (sinf((f_MovieDrawCount - CAPTION_MEET_DRAW) * CAPTION_TURN_PER_FRAME) *
-            CAPTION_FLASH_DEPTH);
-    gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, alpha);
-    gDPSetEnvColor(gfx++, 255, 255, 255, OPAQUE_ALPHA);
-  } else if (f_MovieDrawCount < CAPTION_GROW_DRAW) {
-    gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
-    gDPSetEnvColor(gfx++, 255, 255, 255, OPAQUE_ALPHA);
-  } else if (f_MovieDrawCount < CAPTION_GROW_END_DRAW) {
-    angle = (f_MovieDrawCount - CAPTION_GROW_DRAW) * CAPTION_TURN_PER_FRAME;
-    fade = sinf(angle) * CAPTION_FLASH_DEPTH;
-    halfWidth = cosf(angle) * halfWidth;
-    stripHeight =
-        ((1.0f - cosf(angle)) * CAPTION_MAX_GROWTH) + MOVIE_IMAGE_STRIP_HEIGHT;
-    gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255.0f - fade);
-    gDPSetEnvColor(gfx++, 255, 255, 255, 255.0f - fade);
-  } else {
-    f_CurrentMovie = MOVIE_NONE;
-    halfWidth = 0;
-  }
-
-  gSPDisplayList(gfx++, f_MovieImageSetupDisplayList);
-  gDPLoadTLUT_pal256(
-      gfx++, TextureAddress(f_MovieBuffer + MOVIE_IMAGE_PALETTE_OFFSET));
-  if (f_MovieDrawCount < CAPTION_DRAW_COUNT && halfWidth > 0) {
-    for (i = 0; i != stripCount; i++) {
-      slide =
-          CAPTION_START_SLIDE - (f_MovieDrawCount * CAPTION_SLIDE_PER_FRAME);
-      if (slide < 0) {
-        slide = 0;
-      }
-
-      LoadTextureBlock(&gfx,
-          f_MovieBuffer +
-              ((i * width * MOVIE_IMAGE_STRIP_HEIGHT) +
-                  MOVIE_IMAGE_PIXELS_OFFSET),
-          G_IM_FMT_CI, G_IM_SIZ_8b, width, MOVIE_IMAGE_STRIP_HEIGHT, 0, 0, 0,
-          G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-      centerX = SHRINKING_IMAGE_CENTER_X + slide;
-      bottom = SHRINKING_IMAGE_CENTER_Y + (i * stripHeight);
-      DrawTextureRect(&gfx, QuarterPixels(centerX - halfWidth),
-          QuarterPixels(
-              bottom - (stripHeight * SHRINKING_IMAGE_STRIPS_ABOVE_CENTER)),
-          QuarterPixels(halfWidth + centerX),
-          QuarterPixels(bottom -
-              (stripHeight * SHRINKING_IMAGE_STRIPS_ABOVE_CENTER) +
-              stripHeight),
-          G_TX_RENDERTILE, 0, 0,
-          (s32)((width >> 1) << TEXEL_STEP_SHIFT) / halfWidth,
-          TexelRunStep(MOVIE_IMAGE_STRIP_HEIGHT, stripHeight));
-      if (f_MovieDrawCount >= CAPTION_MEET_DRAW) {
-        continue;
-      }
-
-      copyTop = CAPTION_COPY_TOP + (i * MOVIE_IMAGE_STRIP_HEIGHT);
-      DrawTextureRect(&gfx,
-          QuarterPixels(SHRINKING_IMAGE_CENTER_X - (s32)(width >> 1) - slide),
-          QuarterPixels(copyTop),
-          QuarterPixels(SHRINKING_IMAGE_CENTER_X + (s32)(width >> 1) - slide),
-          QuarterPixels(copyTop + MOVIE_IMAGE_STRIP_HEIGHT), G_TX_RENDERTILE, 0,
-          0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+    width = ReadImageWidth(f_MovieBuffer);
+    height = ReadImageHeight(f_MovieBuffer);
+    gDPPipeSync(gfx++);
+    gDPSetCombineLERP(
+        gfx++,
+        TEXEL0,
+        ENVIRONMENT,
+        PRIMITIVE_ALPHA,
+        ENVIRONMENT,
+        ENVIRONMENT,
+        0,
+        TEXEL0,
+        0,
+        TEXEL0,
+        ENVIRONMENT,
+        PRIMITIVE_ALPHA,
+        ENVIRONMENT,
+        ENVIRONMENT,
+        0,
+        TEXEL0,
+        0
+    );
+    halfWidth = width >> 1;
+    stripHeight = MOVIE_IMAGE_STRIP_HEIGHT;
+    stripCount = height / stripHeight;
+    if (f_MovieDrawCount == CAPTION_MEET_DRAW + 1) {
+        PlaySoundWithEffects(
+            SOUND_CAPTION_MEET,
+            CAPTION_SOUND_CHANNEL,
+            CAPTION_SOUND_VOLUME,
+            0,
+            SOUND_FULL_SCALE
+        );
     }
-  }
 
-  gDPPipeSync(gfx++);
-  *displayListHead = gfx;
+    if (f_MovieDrawCount < CAPTION_MEET_DRAW) {
+        gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
+        gDPSetEnvColor(gfx++, 255, 255, 255, CAPTION_COPY_ALPHA);
+    }
+    else if (f_MovieDrawCount < CAPTION_FLASH_END_DRAW) {
+        alpha = 255.0f -
+            (sinf((f_MovieDrawCount - CAPTION_MEET_DRAW) * CAPTION_TURN_PER_FRAME) *
+                CAPTION_FLASH_DEPTH);
+        gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, alpha);
+        gDPSetEnvColor(gfx++, 255, 255, 255, OPAQUE_ALPHA);
+    }
+    else if (f_MovieDrawCount < CAPTION_GROW_DRAW) {
+        gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
+        gDPSetEnvColor(gfx++, 255, 255, 255, OPAQUE_ALPHA);
+    }
+    else if (f_MovieDrawCount < CAPTION_GROW_END_DRAW) {
+        angle = (f_MovieDrawCount - CAPTION_GROW_DRAW) * CAPTION_TURN_PER_FRAME;
+        fade = sinf(angle) * CAPTION_FLASH_DEPTH;
+        halfWidth = cosf(angle) * halfWidth;
+        stripHeight = ((1.0f - cosf(angle)) * CAPTION_MAX_GROWTH) + MOVIE_IMAGE_STRIP_HEIGHT;
+        gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255.0f - fade);
+        gDPSetEnvColor(gfx++, 255, 255, 255, 255.0f - fade);
+    }
+    else {
+        f_CurrentMovie = MOVIE_NONE;
+        halfWidth = 0;
+    }
+
+    gSPDisplayList(gfx++, f_MovieImageSetupDisplayList);
+    gDPLoadTLUT_pal256(gfx++, TextureAddress(f_MovieBuffer + MOVIE_IMAGE_PALETTE_OFFSET));
+    if (f_MovieDrawCount < CAPTION_DRAW_COUNT && halfWidth > 0) {
+        for (i = 0; i != stripCount; i++) {
+            slide = CAPTION_START_SLIDE - (f_MovieDrawCount * CAPTION_SLIDE_PER_FRAME);
+            if (slide < 0) {
+                slide = 0;
+            }
+
+            LoadTextureBlock(
+                &gfx,
+                f_MovieBuffer +
+                    ((i * width * MOVIE_IMAGE_STRIP_HEIGHT) + MOVIE_IMAGE_PIXELS_OFFSET),
+                G_IM_FMT_CI,
+                G_IM_SIZ_8b,
+                width,
+                MOVIE_IMAGE_STRIP_HEIGHT,
+                0,
+                0,
+                0,
+                G_TX_NOMASK,
+                G_TX_NOMASK,
+                G_TX_NOLOD,
+                G_TX_NOLOD
+            );
+            centerX = SHRINKING_IMAGE_CENTER_X + slide;
+            bottom = SHRINKING_IMAGE_CENTER_Y + (i * stripHeight);
+            DrawTextureRect(
+                &gfx,
+                QuarterPixels(centerX - halfWidth),
+                QuarterPixels(bottom - (stripHeight * SHRINKING_IMAGE_STRIPS_ABOVE_CENTER)),
+                QuarterPixels(halfWidth + centerX),
+                QuarterPixels(
+                    bottom - (stripHeight * SHRINKING_IMAGE_STRIPS_ABOVE_CENTER) + stripHeight
+                ),
+                G_TX_RENDERTILE,
+                0,
+                0,
+                (s32)((width >> 1) << TEXEL_STEP_SHIFT) / halfWidth,
+                TexelRunStep(MOVIE_IMAGE_STRIP_HEIGHT, stripHeight)
+            );
+            if (f_MovieDrawCount >= CAPTION_MEET_DRAW) {
+                continue;
+            }
+
+            copyTop = CAPTION_COPY_TOP + (i * MOVIE_IMAGE_STRIP_HEIGHT);
+            DrawTextureRect(
+                &gfx,
+                QuarterPixels(SHRINKING_IMAGE_CENTER_X - (s32)(width >> 1) - slide),
+                QuarterPixels(copyTop),
+                QuarterPixels(SHRINKING_IMAGE_CENTER_X + (s32)(width >> 1) - slide),
+                QuarterPixels(copyTop + MOVIE_IMAGE_STRIP_HEIGHT),
+                G_TX_RENDERTILE,
+                0,
+                0,
+                TEXEL_STEP_ONE,
+                TEXEL_STEP_ONE
+            );
+        }
+    }
+
+    gDPPipeSync(gfx++);
+    *displayListHead = gfx;
 }
 
 /*
@@ -1897,158 +2156,245 @@ void DrawPuttCaption(Gfx** displayListHead) {
 #define GO_STRIP_HEIGHT 14
 #define READY_GO_LAST_STRIP_HEIGHT 8
 
-void DrawReadyGoMovie(Gfx** displayListHead) {
-  Gfx* gfx = *displayListHead;
-  Vec3 rotation;
-  Vec3 translation;
-  Vec3 scale;
-  Mat4 matrix;
-  s32 alpha;
-  s32 stripHeight;
-  s32 i;
+void DrawReadyGoMovie(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
+    Vec3 rotation;
+    Vec3 translation;
+    Vec3 scale;
+    Mat4 matrix;
+    s32 alpha;
+    s32 stripHeight;
+    s32 i;
 
-  f_MovieBackBuffer ^= 1;
-  alpha = OPAQUE_ALPHA;
-  if (f_MovieDrawCount == READY_SOUND_DRAW) {
-    PlaySoundWithEffects(SOUND_READY, g_NextSoundChannel, READY_GO_SOUND_VOLUME,
-        READY_GO_SOUND_REVERB, SOUND_FULL_SCALE);
-  }
-
-  if (f_MovieDrawCount == GO_GROW_DRAW) {
-    PlaySoundWithEffects(SOUND_GO, g_NextSoundChannel, READY_GO_SOUND_VOLUME,
-        READY_GO_SOUND_REVERB, SOUND_FULL_SCALE);
-  }
-
-  scale[AXIS_X] = 1.0f;
-  scale[AXIS_Y] = 1.0f;
-  scale[AXIS_Z] = 1.0f;
-  if (f_MovieDrawCount < READY_FLIP_DRAW) {
-    rotation[AXIS_X] = M_PI;
-    rotation[AXIS_Y] =
-        (M_PI / 2) - ((f32)f_MovieDrawCount * READY_GO_TURN_PER_FRAME);
-    rotation[AXIS_Z] = 0.0f;
-  } else if (f_MovieDrawCount < READY_FACING_DRAW) {
-    rotation[AXIS_X] = M_PI -
-        ((f32)(f_MovieDrawCount - READY_FLIP_DRAW) * READY_GO_TURN_PER_FRAME);
-    rotation[AXIS_Y] = 0.0f;
-    rotation[AXIS_Z] = 0.0f;
-  } else if (f_MovieDrawCount < GO_DRAW) {
-    rotation[AXIS_X] = M_PI -
-        ((f32)(f_MovieDrawCount - READY_FLIP_DRAW) * READY_GO_TURN_PER_FRAME);
-    rotation[AXIS_Y] = 0.0f;
-    rotation[AXIS_Z] = 0.0f;
-  } else if (f_MovieDrawCount < GO_GROW_DRAW) {
-    rotation[AXIS_X] = M_PI -
-        ((f32)(f_MovieDrawCount - READY_FACING_DRAW) * READY_GO_TURN_PER_FRAME);
-    rotation[AXIS_Y] = 0.0f;
-    rotation[AXIS_Z] = 0.0f;
-  } else if (f_MovieDrawCount < READY_GO_END_DRAW) {
-    alpha =
-        OPAQUE_ALPHA - ((f_MovieDrawCount - GO_GROW_DRAW) * GO_FADE_PER_FRAME);
-    if (alpha < 0) {
-      alpha = 0;
+    f_MovieBackBuffer ^= 1;
+    alpha = OPAQUE_ALPHA;
+    if (f_MovieDrawCount == READY_SOUND_DRAW) {
+        PlaySoundWithEffects(
+            SOUND_READY,
+            g_NextSoundChannel,
+            READY_GO_SOUND_VOLUME,
+            READY_GO_SOUND_REVERB,
+            SOUND_FULL_SCALE
+        );
     }
 
-    /*
-     * The chained assignment is there to match: three separate stores, in
-     * either order, give 19 words differing, 9 in shape
-     */
-    rotation[AXIS_X] = rotation[AXIS_Y] = rotation[AXIS_Z] = 0.0f;
-    scale[AXIS_Z] =
-        (GO_GROWTH_PER_FRAME * (f_MovieDrawCount - GO_GROW_DRAW)) + 1.0f;
-    scale[AXIS_X] = scale[AXIS_Y] = scale[AXIS_Z];
-  } else {
-    f_CurrentMovie = MOVIE_NONE;
-    return;
-  }
+    if (f_MovieDrawCount == GO_GROW_DRAW) {
+        PlaySoundWithEffects(
+            SOUND_GO,
+            g_NextSoundChannel,
+            READY_GO_SOUND_VOLUME,
+            READY_GO_SOUND_REVERB,
+            SOUND_FULL_SCALE
+        );
+    }
 
-  translation[AXIS_X] = 0.0f;
-  translation[AXIS_Y] = 0.0f;
-  translation[AXIS_Z] = READY_GO_DISTANCE;
-  BuildTransformMatrix(matrix, rotation, translation, scale);
-  ConvertMatrixToFixed(matrix, &f_ReadyGoMatrices[f_MovieBackBuffer]);
-  gDPPipeSync(gfx++);
-  gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
-  gDPSetEnvColor(gfx++, 255, 255, 255, alpha);
-  gDPSetCombineLERP(gfx++, 0, 0, 0, TEXEL0, ENVIRONMENT, 0, TEXEL0, 0, 0, 0, 0,
-      TEXEL0, ENVIRONMENT, 0, TEXEL0, 0);
-  gSPDisplayList(gfx++, f_MovieImageSetupDisplayList);
-  gDPPipeSync(gfx++);
-  gDPSetTexturePersp(gfx++, G_TP_PERSP);
-  gSPClearGeometryMode(gfx++, ALL_GEOMETRY_MODES);
-  gSPSetGeometryMode(gfx++, G_SHADE | G_SHADING_SMOOTH);
-  if (alpha == OPAQUE_ALPHA) {
+    scale[AXIS_X] = 1.0f;
+    scale[AXIS_Y] = 1.0f;
+    scale[AXIS_Z] = 1.0f;
+    if (f_MovieDrawCount < READY_FLIP_DRAW) {
+        rotation[AXIS_X] = M_PI;
+        rotation[AXIS_Y] = (M_PI / 2) - ((f32)f_MovieDrawCount * READY_GO_TURN_PER_FRAME);
+        rotation[AXIS_Z] = 0.0f;
+    }
+    else if (f_MovieDrawCount < READY_FACING_DRAW) {
+        rotation[AXIS_X] =
+            M_PI - ((f32)(f_MovieDrawCount - READY_FLIP_DRAW) * READY_GO_TURN_PER_FRAME);
+        rotation[AXIS_Y] = 0.0f;
+        rotation[AXIS_Z] = 0.0f;
+    }
+    else if (f_MovieDrawCount < GO_DRAW) {
+        rotation[AXIS_X] =
+            M_PI - ((f32)(f_MovieDrawCount - READY_FLIP_DRAW) * READY_GO_TURN_PER_FRAME);
+        rotation[AXIS_Y] = 0.0f;
+        rotation[AXIS_Z] = 0.0f;
+    }
+    else if (f_MovieDrawCount < GO_GROW_DRAW) {
+        rotation[AXIS_X] =
+            M_PI - ((f32)(f_MovieDrawCount - READY_FACING_DRAW) * READY_GO_TURN_PER_FRAME);
+        rotation[AXIS_Y] = 0.0f;
+        rotation[AXIS_Z] = 0.0f;
+    }
+    else if (f_MovieDrawCount < READY_GO_END_DRAW) {
+        alpha = OPAQUE_ALPHA - ((f_MovieDrawCount - GO_GROW_DRAW) * GO_FADE_PER_FRAME);
+        if (alpha < 0) {
+            alpha = 0;
+        }
+
+        /*
+         * The chained assignment is there to match: three separate stores, in
+         * either order, give 19 words differing, 9 in shape
+         */
+        rotation[AXIS_X] = rotation[AXIS_Y] = rotation[AXIS_Z] = 0.0f;
+        scale[AXIS_Z] = (GO_GROWTH_PER_FRAME * (f_MovieDrawCount - GO_GROW_DRAW)) + 1.0f;
+        scale[AXIS_X] = scale[AXIS_Y] = scale[AXIS_Z];
+    }
+    else {
+        f_CurrentMovie = MOVIE_NONE;
+        return;
+    }
+
+    translation[AXIS_X] = 0.0f;
+    translation[AXIS_Y] = 0.0f;
+    translation[AXIS_Z] = READY_GO_DISTANCE;
+    BuildTransformMatrix(matrix, rotation, translation, scale);
+    ConvertMatrixToFixed(matrix, &f_ReadyGoMatrices[f_MovieBackBuffer]);
     gDPPipeSync(gfx++);
-    gDPSetRenderMode(gfx++, G_RM_AA_TEX_EDGE, G_RM_AA_TEX_EDGE2);
-  } else {
+    gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
+    gDPSetEnvColor(gfx++, 255, 255, 255, alpha);
+    gDPSetCombineLERP(
+        gfx++,
+        0,
+        0,
+        0,
+        TEXEL0,
+        ENVIRONMENT,
+        0,
+        TEXEL0,
+        0,
+        0,
+        0,
+        0,
+        TEXEL0,
+        ENVIRONMENT,
+        0,
+        TEXEL0,
+        0
+    );
+    gSPDisplayList(gfx++, f_MovieImageSetupDisplayList);
     gDPPipeSync(gfx++);
-    gDPSetRenderMode(gfx++, G_RM_AA_XLU_SURF, G_RM_AA_XLU_SURF2);
-  }
+    gDPSetTexturePersp(gfx++, G_TP_PERSP);
+    gSPClearGeometryMode(gfx++, ALL_GEOMETRY_MODES);
+    gSPSetGeometryMode(gfx++, G_SHADE | G_SHADING_SMOOTH);
+    if (alpha == OPAQUE_ALPHA) {
+        gDPPipeSync(gfx++);
+        gDPSetRenderMode(gfx++, G_RM_AA_TEX_EDGE, G_RM_AA_TEX_EDGE2);
+    }
+    else {
+        gDPPipeSync(gfx++);
+        gDPSetRenderMode(gfx++, G_RM_AA_XLU_SURF, G_RM_AA_XLU_SURF2);
+    }
 
-  if (f_MovieDrawCount < GO_DRAW) {
-    gDPLoadTLUT_pal256(
-        gfx++, TextureAddress(f_MovieBuffer + MOVIE_IMAGE_PALETTE_OFFSET));
-  } else {
-    gDPLoadTLUT_pal256(gfx++,
-        TextureAddress(
-            f_MovieBuffer + GO_TEXT_OFFSET + MOVIE_IMAGE_PALETTE_OFFSET));
-  }
-
-  gSPMatrix(gfx++, PhysicalAddress(&g_ScreenOrthoMatrix),
-      G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
-  gSPMatrix(gfx++, PhysicalAddress(&f_ReadyGoMatrices[f_MovieBackBuffer]),
-      G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-  gSPVertex(gfx++, f_ReadyGoVertices, READY_GO_VERTEX_COUNT, 0);
-  for (i = 0; i != READY_GO_STRIP_COUNT; i++) {
     if (f_MovieDrawCount < GO_DRAW) {
-      stripHeight = (i != READY_GO_STRIP_COUNT - 1)
-          ? READY_STRIP_HEIGHT
-          : READY_GO_LAST_STRIP_HEIGHT;
-      gDPLoadTextureTile(gfx++,
-          TextureAddress(f_MovieBuffer +
-              (MOVIE_IMAGE_PIXELS_OFFSET +
-                  (i * READY_WIDTH * READY_STRIP_HEIGHT))),
-          G_IM_FMT_CI, G_IM_SIZ_8b, READY_WIDTH, stripHeight, 0, 0,
-          READY_WIDTH - 1, stripHeight - 1, 0, G_TX_NOMIRROR | G_TX_WRAP,
-          G_TX_MIRROR, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-      gSPModifyVertex(gfx++, i * 2, G_MWO_POINT_ST, 0);
-      gSPModifyVertex(gfx++, (i * 2) + 1, G_MWO_POINT_ST,
-          TexcoordWord(TexelCoordinate(READY_WIDTH) - 1, 0));
-      gSPModifyVertex(
-          gfx++, (i * 2) + 2, G_MWO_POINT_ST, TexelCoordinate(stripHeight));
-      gSPModifyVertex(gfx++, (i * 2) + 3, G_MWO_POINT_ST,
-          TexcoordWord(
-              TexelCoordinate(READY_WIDTH) - 1, TexelCoordinate(stripHeight)));
-    } else {
-      stripHeight = (i != READY_GO_STRIP_COUNT - 1)
-          ? GO_STRIP_HEIGHT
-          : READY_GO_LAST_STRIP_HEIGHT;
-      gDPLoadTextureTile(gfx++,
-          TextureAddress(f_MovieBuffer +
-              (GO_TEXT_OFFSET + MOVIE_IMAGE_PIXELS_OFFSET +
-                  (i * GO_WIDTH * GO_STRIP_HEIGHT))),
-          G_IM_FMT_CI, G_IM_SIZ_8b, GO_WIDTH, stripHeight, 0, 0, GO_WIDTH - 1,
-          stripHeight - 1, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_MIRROR,
-          G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-      gSPModifyVertex(gfx++, i * 2, G_MWO_POINT_ST, 0);
-      gSPModifyVertex(gfx++, (i * 2) + 1, G_MWO_POINT_ST,
-          TexcoordWord(TexelCoordinate(GO_WIDTH) - 1, 0));
-      gSPModifyVertex(
-          gfx++, (i * 2) + 2, G_MWO_POINT_ST, TexelCoordinate(stripHeight));
-      gSPModifyVertex(gfx++, (i * 2) + 3, G_MWO_POINT_ST,
-          TexcoordWord(
-              TexelCoordinate(GO_WIDTH) - 1, TexelCoordinate(stripHeight)));
+        gDPLoadTLUT_pal256(gfx++, TextureAddress(f_MovieBuffer + MOVIE_IMAGE_PALETTE_OFFSET));
+    }
+    else {
+        gDPLoadTLUT_pal256(
+            gfx++,
+            TextureAddress(f_MovieBuffer + GO_TEXT_OFFSET + MOVIE_IMAGE_PALETTE_OFFSET)
+        );
     }
 
-    gSP2Triangles(gfx++, i * 2, (i * 2) + 2, (i * 2) + 3, 0, i * 2, (i * 2) + 3,
-        (i * 2) + 1, 0);
-  }
+    gSPMatrix(
+        gfx++,
+        PhysicalAddress(&g_ScreenOrthoMatrix),
+        G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION
+    );
+    gSPMatrix(
+        gfx++,
+        PhysicalAddress(&f_ReadyGoMatrices[f_MovieBackBuffer]),
+        G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW
+    );
+    gSPVertex(gfx++, f_ReadyGoVertices, READY_GO_VERTEX_COUNT, 0);
+    for (i = 0; i != READY_GO_STRIP_COUNT; i++) {
+        if (f_MovieDrawCount < GO_DRAW) {
+            stripHeight =
+                (i != READY_GO_STRIP_COUNT - 1) ? READY_STRIP_HEIGHT : READY_GO_LAST_STRIP_HEIGHT;
+            gDPLoadTextureTile(
+                gfx++,
+                TextureAddress(
+                    f_MovieBuffer +
+                    (MOVIE_IMAGE_PIXELS_OFFSET + (i * READY_WIDTH * READY_STRIP_HEIGHT))
+                ),
+                G_IM_FMT_CI,
+                G_IM_SIZ_8b,
+                READY_WIDTH,
+                stripHeight,
+                0,
+                0,
+                READY_WIDTH - 1,
+                stripHeight - 1,
+                0,
+                G_TX_NOMIRROR | G_TX_WRAP,
+                G_TX_MIRROR,
+                G_TX_NOMASK,
+                G_TX_NOMASK,
+                G_TX_NOLOD,
+                G_TX_NOLOD
+            );
+            gSPModifyVertex(gfx++, i * 2, G_MWO_POINT_ST, 0);
+            gSPModifyVertex(
+                gfx++,
+                (i * 2) + 1,
+                G_MWO_POINT_ST,
+                TexcoordWord(TexelCoordinate(READY_WIDTH) - 1, 0)
+            );
+            gSPModifyVertex(gfx++, (i * 2) + 2, G_MWO_POINT_ST, TexelCoordinate(stripHeight));
+            gSPModifyVertex(
+                gfx++,
+                (i * 2) + 3,
+                G_MWO_POINT_ST,
+                TexcoordWord(TexelCoordinate(READY_WIDTH) - 1, TexelCoordinate(stripHeight))
+            );
+        }
+        else {
+            stripHeight =
+                (i != READY_GO_STRIP_COUNT - 1) ? GO_STRIP_HEIGHT : READY_GO_LAST_STRIP_HEIGHT;
+            gDPLoadTextureTile(
+                gfx++,
+                TextureAddress(
+                    f_MovieBuffer +
+                    (GO_TEXT_OFFSET + MOVIE_IMAGE_PIXELS_OFFSET + (i * GO_WIDTH * GO_STRIP_HEIGHT))
+                ),
+                G_IM_FMT_CI,
+                G_IM_SIZ_8b,
+                GO_WIDTH,
+                stripHeight,
+                0,
+                0,
+                GO_WIDTH - 1,
+                stripHeight - 1,
+                0,
+                G_TX_NOMIRROR | G_TX_WRAP,
+                G_TX_MIRROR,
+                G_TX_NOMASK,
+                G_TX_NOMASK,
+                G_TX_NOLOD,
+                G_TX_NOLOD
+            );
+            gSPModifyVertex(gfx++, i * 2, G_MWO_POINT_ST, 0);
+            gSPModifyVertex(
+                gfx++,
+                (i * 2) + 1,
+                G_MWO_POINT_ST,
+                TexcoordWord(TexelCoordinate(GO_WIDTH) - 1, 0)
+            );
+            gSPModifyVertex(gfx++, (i * 2) + 2, G_MWO_POINT_ST, TexelCoordinate(stripHeight));
+            gSPModifyVertex(
+                gfx++,
+                (i * 2) + 3,
+                G_MWO_POINT_ST,
+                TexcoordWord(TexelCoordinate(GO_WIDTH) - 1, TexelCoordinate(stripHeight))
+            );
+        }
 
-  gDPPipeSync(gfx++);
-  gDPPipeSync(gfx++);
-  gDPSetTexturePersp(gfx++, G_TP_NONE);
-  gDPPipeSync(gfx++);
-  *displayListHead = gfx;
+        gSP2Triangles(
+            gfx++,
+            i * 2,
+            (i * 2) + 2,
+            (i * 2) + 3,
+            0,
+            i * 2,
+            (i * 2) + 3,
+            (i * 2) + 1,
+            0
+        );
+    }
+
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetTexturePersp(gfx++, G_TP_NONE);
+    gDPPipeSync(gfx++);
+    *displayListHead = gfx;
 }
 
 /*
@@ -2103,419 +2449,568 @@ void DrawReadyGoMovie(Gfx** displayListHead) {
  * and 80 words, and stripCount as u16, s16 or u32 changes nothing.
  */
 #ifdef NON_MATCHING
-void DrawShrinkingMovieImage(Gfx** displayListHead) {
-  Gfx* gfx = *displayListHead;
-  s32 width;
-  s32 stripCount;
-  Radians angle;
-  s32 halfWidth;
-  s32 stripHeight;
-  s32 i;
-  s32 offset;
-  s32 top;
+void DrawShrinkingMovieImage(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
+    s32 width;
+    s32 stripCount;
+    Radians angle;
+    s32 halfWidth;
+    s32 stripHeight;
+    s32 i;
+    s32 offset;
+    s32 top;
 
-  stripHeight = MOVIE_IMAGE_STRIP_HEIGHT;
-  width = ReadImageWidth(f_MovieBuffer);
-  stripCount = ReadImageHeight(f_MovieBuffer) / stripHeight;
-  if (f_MovieDrawCount == SHRINKING_IMAGE_SOUND_DRAW) {
-    PlaySoundWithEffects(SOUND_SHRINKING_IMAGE, SHRINKING_IMAGE_SOUND_CHANNEL,
-        SHRINKING_IMAGE_SOUND_VOLUME, 0, SOUND_FULL_SCALE);
-  }
-
-  gSPDisplayList(gfx++, f_MovieImageSetupDisplayList);
-  gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
-  gDPSetEnvColor(gfx++, 255, 255, 255, OPAQUE_ALPHA);
-  gDPSetCombineLERP(gfx++, TEXEL0, ENVIRONMENT, PRIMITIVE_ALPHA, ENVIRONMENT,
-      ENVIRONMENT, 0, TEXEL0, 0, TEXEL0, ENVIRONMENT, PRIMITIVE_ALPHA,
-      ENVIRONMENT, ENVIRONMENT, 0, TEXEL0, 0);
-  gDPLoadTLUT_pal256(
-      gfx++, TextureAddress(f_MovieBuffer + MOVIE_IMAGE_PALETTE_OFFSET));
-  if (f_MovieDrawCount < SHRINKING_IMAGE_DRAW_COUNT) {
-    angle = (f32)f_MovieDrawCount * SHRINKING_IMAGE_TURN_PER_FRAME;
-    if (angle > M_PI / 2) {
-      angle = M_PI / 2;
+    stripHeight = MOVIE_IMAGE_STRIP_HEIGHT;
+    width = ReadImageWidth(f_MovieBuffer);
+    stripCount = ReadImageHeight(f_MovieBuffer) / stripHeight;
+    if (f_MovieDrawCount == SHRINKING_IMAGE_SOUND_DRAW) {
+        PlaySoundWithEffects(
+            SOUND_SHRINKING_IMAGE,
+            SHRINKING_IMAGE_SOUND_CHANNEL,
+            SHRINKING_IMAGE_SOUND_VOLUME,
+            0,
+            SOUND_FULL_SCALE
+        );
     }
 
-    halfWidth = (cosf(angle) + 1.0f) * width * 0.5f;
-    stripHeight = (cosf(angle) + 1.0f) * MOVIE_IMAGE_STRIP_HEIGHT;
-    if (halfWidth > 0 && stripHeight > 0) {
-      offset = 0;
-      for (i = 0; i != stripCount; i++) {
-        LoadTextureBlock(&gfx,
-            f_MovieBuffer +
-                ((offset * MOVIE_IMAGE_STRIP_HEIGHT) +
-                    MOVIE_IMAGE_PIXELS_OFFSET),
-            G_IM_FMT_CI, G_IM_SIZ_8b, width, MOVIE_IMAGE_STRIP_HEIGHT, 0, 0, 0,
-            G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-        top = SHRINKING_IMAGE_CENTER_Y +
-            ((i - SHRINKING_IMAGE_STRIPS_ABOVE_CENTER) * stripHeight);
-        DrawTextureRect(&gfx,
-            QuarterPixels(SHRINKING_IMAGE_CENTER_X - halfWidth),
-            QuarterPixels(top),
-            QuarterPixels(SHRINKING_IMAGE_CENTER_X + halfWidth),
-            QuarterPixels(top + stripHeight), G_TX_RENDERTILE, 0, 0,
-            TexelRunStep((width >> 1), halfWidth),
-            TexelRunStep(MOVIE_IMAGE_STRIP_HEIGHT, stripHeight));
-        offset += width;
-      }
-    }
-  }
+    gSPDisplayList(gfx++, f_MovieImageSetupDisplayList);
+    gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
+    gDPSetEnvColor(gfx++, 255, 255, 255, OPAQUE_ALPHA);
+    gDPSetCombineLERP(
+        gfx++,
+        TEXEL0,
+        ENVIRONMENT,
+        PRIMITIVE_ALPHA,
+        ENVIRONMENT,
+        ENVIRONMENT,
+        0,
+        TEXEL0,
+        0,
+        TEXEL0,
+        ENVIRONMENT,
+        PRIMITIVE_ALPHA,
+        ENVIRONMENT,
+        ENVIRONMENT,
+        0,
+        TEXEL0,
+        0
+    );
+    gDPLoadTLUT_pal256(gfx++, TextureAddress(f_MovieBuffer + MOVIE_IMAGE_PALETTE_OFFSET));
+    if (f_MovieDrawCount < SHRINKING_IMAGE_DRAW_COUNT) {
+        angle = (f32)f_MovieDrawCount * SHRINKING_IMAGE_TURN_PER_FRAME;
+        if (angle > M_PI / 2) {
+            angle = M_PI / 2;
+        }
 
-  gDPPipeSync(gfx++);
-  *displayListHead = gfx;
+        halfWidth = (cosf(angle) + 1.0f) * width * 0.5f;
+        stripHeight = (cosf(angle) + 1.0f) * MOVIE_IMAGE_STRIP_HEIGHT;
+        if (halfWidth > 0 && stripHeight > 0) {
+            offset = 0;
+            for (i = 0; i != stripCount; i++) {
+                LoadTextureBlock(
+                    &gfx,
+                    f_MovieBuffer +
+                        ((offset * MOVIE_IMAGE_STRIP_HEIGHT) + MOVIE_IMAGE_PIXELS_OFFSET),
+                    G_IM_FMT_CI,
+                    G_IM_SIZ_8b,
+                    width,
+                    MOVIE_IMAGE_STRIP_HEIGHT,
+                    0,
+                    0,
+                    0,
+                    G_TX_NOMASK,
+                    G_TX_NOMASK,
+                    G_TX_NOLOD,
+                    G_TX_NOLOD
+                );
+                top = SHRINKING_IMAGE_CENTER_Y +
+                    ((i - SHRINKING_IMAGE_STRIPS_ABOVE_CENTER) * stripHeight);
+                DrawTextureRect(
+                    &gfx,
+                    QuarterPixels(SHRINKING_IMAGE_CENTER_X - halfWidth),
+                    QuarterPixels(top),
+                    QuarterPixels(SHRINKING_IMAGE_CENTER_X + halfWidth),
+                    QuarterPixels(top + stripHeight),
+                    G_TX_RENDERTILE,
+                    0,
+                    0,
+                    TexelRunStep((width >> 1), halfWidth),
+                    TexelRunStep(MOVIE_IMAGE_STRIP_HEIGHT, stripHeight)
+                );
+                offset += width;
+            }
+        }
+    }
+
+    gDPPipeSync(gfx++);
+    *displayListHead = gfx;
 }
 #else
 INCLUDE_ASM("asm/nonmatchings/ovl_00/round_events", DrawShrinkingMovieImage);
 #endif
 
 /* A Monty Mole pops out of the green */
-void DrawMontyMoleMovie(Gfx** displayListHead) {
-  Gfx* gfx = *displayListHead;
-  EncodedAsset asset;
-  /* Pads the frame to match; without it 84 words differ */
-  s32 unused[4] UNUSED;
-  s32 i;
+void DrawMontyMoleMovie(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
+    EncodedAsset asset;
+    /* Pads the frame to match; without it 84 words differ */
+    s32 unused[4] UNUSED;
+    s32 i;
 
-  f_MovieTick++;
-  if (f_MovieTick == MOVIE_TICKS_PER_FRAME) {
-    f_MovieTick = 0;
-    OpenEncodedAsset(f_MontyMoleMovieFrameAssets[f_MovieFrame], &asset);
-    ReadEncodedAsset(f_MovieBuffer + MOVIE_FRAME_OFFSET, &asset);
-    f_MovieFrame++;
-    if (f_MovieFrame == MONTY_MOLE_FRAME_COUNT) {
-      f_CurrentMovie = MOVIE_NONE;
+    f_MovieTick++;
+    if (f_MovieTick == MOVIE_TICKS_PER_FRAME) {
+        f_MovieTick = 0;
+        OpenEncodedAsset(f_MontyMoleMovieFrameAssets[f_MovieFrame], &asset);
+        ReadEncodedAsset(f_MovieBuffer + MOVIE_FRAME_OFFSET, &asset);
+        f_MovieFrame++;
+        if (f_MovieFrame == MONTY_MOLE_FRAME_COUNT) {
+            f_CurrentMovie = MOVIE_NONE;
+        }
     }
-  }
 
-  if (f_MovieDrawCount == 1) {
-    PlaySoundWithEffects(SOUND_GOOMBA, MOVIE_SOUND_CHANNEL, MOVIE_SOUND_VOLUME,
-        MOVIE_SOUND_REVERB, SOUND_FULL_SCALE);
-  }
+    if (f_MovieDrawCount == 1) {
+        PlaySoundWithEffects(
+            SOUND_GOOMBA,
+            MOVIE_SOUND_CHANNEL,
+            MOVIE_SOUND_VOLUME,
+            MOVIE_SOUND_REVERB,
+            SOUND_FULL_SCALE
+        );
+    }
 
-  gSPDisplayList(gfx++, f_MovieSetupDisplayList);
-  gDPLoadTLUT_pal256(
-      gfx++, TextureAddress(f_MovieBuffer + MOVIE_PALETTE_OFFSET));
-  for (i = 0; i != MONTY_MOLE_STRIP_COUNT; i++) {
-    gDPLoadTextureTile(gfx++,
-        TextureAddress(
-            f_MovieBuffer + (MOVIE_FRAME_OFFSET + (i * MONTY_MOLE_STRIP_SIZE))),
-        G_IM_FMT_CI, G_IM_SIZ_8b, MONTY_MOLE_WIDTH, MONTY_MOLE_STRIP_HEIGHT, 0,
-        0, MONTY_MOLE_WIDTH - 1, MONTY_MOLE_STRIP_HEIGHT - 1, 0,
-        G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
-        G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-    DrawTextureRect(&gfx, QuarterPixels(MONTY_MOLE_X),
-        QuarterPixels(MONTY_MOLE_Y + (i * MONTY_MOLE_STRIP_HEIGHT)),
-        QuarterPixels(MONTY_MOLE_X + MONTY_MOLE_WIDTH),
-        QuarterPixels(MONTY_MOLE_Y + MONTY_MOLE_STRIP_HEIGHT +
-            (i * MONTY_MOLE_STRIP_HEIGHT)),
-        G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
-  }
+    gSPDisplayList(gfx++, f_MovieSetupDisplayList);
+    gDPLoadTLUT_pal256(gfx++, TextureAddress(f_MovieBuffer + MOVIE_PALETTE_OFFSET));
+    for (i = 0; i != MONTY_MOLE_STRIP_COUNT; i++) {
+        gDPLoadTextureTile(
+            gfx++,
+            TextureAddress(f_MovieBuffer + (MOVIE_FRAME_OFFSET + (i * MONTY_MOLE_STRIP_SIZE))),
+            G_IM_FMT_CI,
+            G_IM_SIZ_8b,
+            MONTY_MOLE_WIDTH,
+            MONTY_MOLE_STRIP_HEIGHT,
+            0,
+            0,
+            MONTY_MOLE_WIDTH - 1,
+            MONTY_MOLE_STRIP_HEIGHT - 1,
+            0,
+            G_TX_NOMIRROR | G_TX_WRAP,
+            G_TX_NOMIRROR | G_TX_WRAP,
+            G_TX_NOMASK,
+            G_TX_NOMASK,
+            G_TX_NOLOD,
+            G_TX_NOLOD
+        );
+        DrawTextureRect(
+            &gfx,
+            QuarterPixels(MONTY_MOLE_X),
+            QuarterPixels(MONTY_MOLE_Y + (i * MONTY_MOLE_STRIP_HEIGHT)),
+            QuarterPixels(MONTY_MOLE_X + MONTY_MOLE_WIDTH),
+            QuarterPixels(MONTY_MOLE_Y + MONTY_MOLE_STRIP_HEIGHT + (i * MONTY_MOLE_STRIP_HEIGHT)),
+            G_TX_RENDERTILE,
+            0,
+            0,
+            TEXEL_STEP_ONE,
+            TEXEL_STEP_ONE
+        );
+    }
 
-  gDPPipeSync(gfx++);
-  gDPSetDepthSource(gfx++, G_ZS_PIXEL);
-  gDPPipeSync(gfx++);
-  *displayListHead = gfx;
+    gDPPipeSync(gfx++);
+    gDPSetDepthSource(gfx++, G_ZS_PIXEL);
+    gDPPipeSync(gfx++);
+    *displayListHead = gfx;
 }
 
 /* A Goomba hops out of the green */
-void DrawGoombaMovie(Gfx** displayListHead) {
-  Gfx* gfx = *displayListHead;
-  EncodedAsset asset;
-  /* Pads the frame to match; without it 88 words differ */
-  s32 unused[4] UNUSED;
-  s32 i;
-  s32 height;
+void DrawGoombaMovie(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
+    EncodedAsset asset;
+    /* Pads the frame to match; without it 88 words differ */
+    s32 unused[4] UNUSED;
+    s32 i;
+    s32 height;
 
-  f_MovieTick++;
-  if (f_MovieTick == MOVIE_TICKS_PER_FRAME) {
-    f_MovieTick = 0;
-    OpenEncodedAsset(f_GoombaMovieFrameAssets[f_MovieFrame], &asset);
-    ReadEncodedAsset(f_MovieBuffer + MOVIE_FRAME_OFFSET, &asset);
-    f_MovieFrame++;
-    if (f_MovieFrame == GOOMBA_FRAME_COUNT) {
-      f_CurrentMovie = MOVIE_NONE;
-    }
-  }
-
-  if (f_MovieDrawCount == 1) {
-    PlaySoundWithEffects(SOUND_GOOMBA, MOVIE_SOUND_CHANNEL, MOVIE_SOUND_VOLUME,
-        MOVIE_SOUND_REVERB, SOUND_FULL_SCALE);
-  }
-
-  gSPDisplayList(gfx++, f_MovieSetupDisplayList);
-  gDPLoadTLUT_pal256(
-      gfx++, TextureAddress(f_MovieBuffer + MOVIE_PALETTE_OFFSET));
-  for (i = 0; i != GOOMBA_STRIP_COUNT; i++) {
-    if (i == GOOMBA_STRIP_COUNT - 1) {
-      height = GOOMBA_LAST_STRIP_HEIGHT;
-    } else {
-      height = GOOMBA_STRIP_HEIGHT;
+    f_MovieTick++;
+    if (f_MovieTick == MOVIE_TICKS_PER_FRAME) {
+        f_MovieTick = 0;
+        OpenEncodedAsset(f_GoombaMovieFrameAssets[f_MovieFrame], &asset);
+        ReadEncodedAsset(f_MovieBuffer + MOVIE_FRAME_OFFSET, &asset);
+        f_MovieFrame++;
+        if (f_MovieFrame == GOOMBA_FRAME_COUNT) {
+            f_CurrentMovie = MOVIE_NONE;
+        }
     }
 
-    gDPLoadTextureTile(gfx++,
-        TextureAddress(
-            f_MovieBuffer + (MOVIE_FRAME_OFFSET + (i * GOOMBA_STRIP_SIZE))),
-        G_IM_FMT_CI, G_IM_SIZ_8b, GOOMBA_WIDTH, height, 0, 0, GOOMBA_WIDTH - 1,
-        height - 1, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
-        G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-    DrawTextureRect(&gfx, QuarterPixels(GOOMBA_X),
-        QuarterPixels(GOOMBA_Y + (i * GOOMBA_STRIP_HEIGHT)),
-        QuarterPixels(GOOMBA_X + GOOMBA_WIDTH),
-        QuarterPixels(GOOMBA_Y + (i * GOOMBA_STRIP_HEIGHT) + height),
-        G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
-  }
+    if (f_MovieDrawCount == 1) {
+        PlaySoundWithEffects(
+            SOUND_GOOMBA,
+            MOVIE_SOUND_CHANNEL,
+            MOVIE_SOUND_VOLUME,
+            MOVIE_SOUND_REVERB,
+            SOUND_FULL_SCALE
+        );
+    }
 
-  gDPPipeSync(gfx++);
-  gDPSetDepthSource(gfx++, G_ZS_PIXEL);
-  gDPPipeSync(gfx++);
-  *displayListHead = gfx;
+    gSPDisplayList(gfx++, f_MovieSetupDisplayList);
+    gDPLoadTLUT_pal256(gfx++, TextureAddress(f_MovieBuffer + MOVIE_PALETTE_OFFSET));
+    for (i = 0; i != GOOMBA_STRIP_COUNT; i++) {
+        if (i == GOOMBA_STRIP_COUNT - 1) {
+            height = GOOMBA_LAST_STRIP_HEIGHT;
+        }
+        else {
+            height = GOOMBA_STRIP_HEIGHT;
+        }
+
+        gDPLoadTextureTile(
+            gfx++,
+            TextureAddress(f_MovieBuffer + (MOVIE_FRAME_OFFSET + (i * GOOMBA_STRIP_SIZE))),
+            G_IM_FMT_CI,
+            G_IM_SIZ_8b,
+            GOOMBA_WIDTH,
+            height,
+            0,
+            0,
+            GOOMBA_WIDTH - 1,
+            height - 1,
+            0,
+            G_TX_NOMIRROR | G_TX_WRAP,
+            G_TX_NOMIRROR | G_TX_WRAP,
+            G_TX_NOMASK,
+            G_TX_NOMASK,
+            G_TX_NOLOD,
+            G_TX_NOLOD
+        );
+        DrawTextureRect(
+            &gfx,
+            QuarterPixels(GOOMBA_X),
+            QuarterPixels(GOOMBA_Y + (i * GOOMBA_STRIP_HEIGHT)),
+            QuarterPixels(GOOMBA_X + GOOMBA_WIDTH),
+            QuarterPixels(GOOMBA_Y + (i * GOOMBA_STRIP_HEIGHT) + height),
+            G_TX_RENDERTILE,
+            0,
+            0,
+            TEXEL_STEP_ONE,
+            TEXEL_STEP_ONE
+        );
+    }
+
+    gDPPipeSync(gfx++);
+    gDPSetDepthSource(gfx++, G_ZS_PIXEL);
+    gDPPipeSync(gfx++);
+    *displayListHead = gfx;
 }
 
 /*
  * Lakitu flies in, counts down to the start on its starting light, then flies
  * off
  */
-void DrawLakituMovie(Gfx** displayListHead) {
-  EncodedAsset asset;
-  Gfx* gfx = *displayListHead;
-  s32 i;
-  f32 halfWidth;
-  f32 halfHeight;
-  s32 roundedHalfWidth;
-  s32 roundedHalfHeight;
-  s32 x;
-  s32 y;
-  s32 left;
-  s32 offset;
-  f32 startS;
-  f32 startT;
-  f32 stepS;
-  f32 stepT;
+void DrawLakituMovie(Gfx **displayListHead) {
+    EncodedAsset asset;
+    Gfx *gfx = *displayListHead;
+    s32 i;
+    f32 halfWidth;
+    f32 halfHeight;
+    s32 roundedHalfWidth;
+    s32 roundedHalfHeight;
+    s32 x;
+    s32 y;
+    s32 left;
+    s32 offset;
+    f32 startS;
+    f32 startT;
+    f32 stepS;
+    f32 stepT;
 
-  if (f_MovieDrawCount == LAKITU_RED_LIGHT_DRAW) {
-    PlaySound(SOUND_START_LIGHT_RED, g_NextSoundChannel, SOUND_FULL_SCALE);
-  }
-
-  if (f_MovieDrawCount == LAKITU_SECOND_RED_LIGHT_DRAW) {
-    PlaySound(SOUND_START_LIGHT_RED, g_NextSoundChannel, SOUND_FULL_SCALE);
-  }
-
-  if (f_MovieDrawCount == LAKITU_GO_LIGHT_DRAW) {
-    PlaySound(SOUND_START_LIGHT_GO, g_NextSoundChannel, SOUND_FULL_SCALE);
-  }
-
-  if (f_MovieDrawCount < LAKITU_ARRIVE_DRAW) {
-    f_Lakitu.x -= (LAKITU_START_X - LAKITU_HOVER_X) / LAKITU_ARRIVE_DRAW;
-    f_Lakitu.y += (LAKITU_HOVER_Y - LAKITU_START_Y) / LAKITU_ARRIVE_DRAW;
-  } else if (f_MovieDrawCount < LAKITU_LEAVE_DRAW) {
-    f_MovieTick++;
-    if (f_MovieTick == LAKITU_TICKS_PER_FRAME) {
-      f_MovieTick = 0;
-      if (f_MovieFrame < LAKITU_LAST_FRAME) {
-        f_MovieFrame++;
-        f_MovieBackBuffer ^= 1;
-        OpenEncodedAsset(f_LakituMovieFrameAssets[f_MovieFrame], &asset);
-        ReadEncodedAsset(
-            f_MovieBuffer + (f_MovieBackBuffer * LAKITU_FRAME_SIZE), &asset);
-      }
+    if (f_MovieDrawCount == LAKITU_RED_LIGHT_DRAW) {
+        PlaySound(SOUND_START_LIGHT_RED, g_NextSoundChannel, SOUND_FULL_SCALE);
     }
 
-    f_LakituVelocity.x = 0.0f;
-    f_LakituVelocity.y = 0.0f;
-  } else {
-    f_LakituVelocity.x -= LAKITU_LEAVE_ACCELERATION_X;
-    f_LakituVelocity.y -= LAKITU_LEAVE_ACCELERATION_Y;
-    f_Lakitu.x += f_LakituVelocity.x;
-    f_Lakitu.scale += LAKITU_LEAVE_GROWTH;
-    f_Lakitu.y += f_LakituVelocity.y;
-    if (f_Lakitu.x < LAKITU_GONE_X) {
-      f_CurrentMovie = MOVIE_NONE;
+    if (f_MovieDrawCount == LAKITU_SECOND_RED_LIGHT_DRAW) {
+        PlaySound(SOUND_START_LIGHT_RED, g_NextSoundChannel, SOUND_FULL_SCALE);
     }
-  }
 
-  gSPDisplayList(gfx++, f_MovieImageSetupDisplayList);
-  gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-  gDPPipeSync(gfx++);
-  gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
-  gDPPipeSync(gfx++);
-  gDPSetTextureFilter(gfx++, G_TF_POINT);
-  gDPLoadTLUT_pal256(gfx++,
-      TextureAddress(f_MovieBuffer +
-          ((f_MovieBackBuffer * LAKITU_FRAME_SIZE) +
-              MOVIE_IMAGE_PALETTE_OFFSET)));
-  for (i = 0; i != LAKITU_STRIP_COUNT; i++) {
-    offset = MOVIE_IMAGE_PIXELS_OFFSET + (i * LAKITU_STRIP_SIZE);
-    halfWidth = f_Lakitu.scale * (LAKITU_WIDTH / 2);
-    halfHeight = f_Lakitu.scale * LAKITU_STRIP_HEIGHT;
-    stepS = TexelRunStep((LAKITU_WIDTH / 2), halfWidth);
-    stepT = TexelRunStep(LAKITU_STRIP_HEIGHT, halfHeight);
-    roundedHalfWidth = halfWidth + 0.5f;
+    if (f_MovieDrawCount == LAKITU_GO_LIGHT_DRAW) {
+        PlaySound(SOUND_START_LIGHT_GO, g_NextSoundChannel, SOUND_FULL_SCALE);
+    }
 
-    /*
-     * Start half a texel in, less the rounding, so that the image stays
-     * centered as it scales
-     */
-    startS = 16.0f - (((f32)roundedHalfWidth - halfWidth) * 16.0f);
-    gDPLoadTextureTile(gfx++,
+    if (f_MovieDrawCount < LAKITU_ARRIVE_DRAW) {
+        f_Lakitu.x -= (LAKITU_START_X - LAKITU_HOVER_X) / LAKITU_ARRIVE_DRAW;
+        f_Lakitu.y += (LAKITU_HOVER_Y - LAKITU_START_Y) / LAKITU_ARRIVE_DRAW;
+    }
+    else if (f_MovieDrawCount < LAKITU_LEAVE_DRAW) {
+        f_MovieTick++;
+        if (f_MovieTick == LAKITU_TICKS_PER_FRAME) {
+            f_MovieTick = 0;
+            if (f_MovieFrame < LAKITU_LAST_FRAME) {
+                f_MovieFrame++;
+                f_MovieBackBuffer ^= 1;
+                OpenEncodedAsset(f_LakituMovieFrameAssets[f_MovieFrame], &asset);
+                ReadEncodedAsset(f_MovieBuffer + (f_MovieBackBuffer * LAKITU_FRAME_SIZE), &asset);
+            }
+        }
+
+        f_LakituVelocity.x = 0.0f;
+        f_LakituVelocity.y = 0.0f;
+    }
+    else {
+        f_LakituVelocity.x -= LAKITU_LEAVE_ACCELERATION_X;
+        f_LakituVelocity.y -= LAKITU_LEAVE_ACCELERATION_Y;
+        f_Lakitu.x += f_LakituVelocity.x;
+        f_Lakitu.scale += LAKITU_LEAVE_GROWTH;
+        f_Lakitu.y += f_LakituVelocity.y;
+        if (f_Lakitu.x < LAKITU_GONE_X) {
+            f_CurrentMovie = MOVIE_NONE;
+        }
+    }
+
+    gSPDisplayList(gfx++, f_MovieImageSetupDisplayList);
+    gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_POINT);
+    gDPLoadTLUT_pal256(
+        gfx++,
         TextureAddress(
-            f_MovieBuffer + ((f_MovieBackBuffer * LAKITU_FRAME_SIZE) + offset)),
-        G_IM_FMT_CI, G_IM_SIZ_8b, LAKITU_WIDTH, LAKITU_STRIP_HEIGHT, 0, 0,
-        LAKITU_WIDTH - 1, LAKITU_STRIP_HEIGHT - 1, 0, G_TX_NOMIRROR | G_TX_WRAP,
-        G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
-        G_TX_NOLOD);
-    gDPPipeSync(gfx++);
-    roundedHalfHeight = halfHeight + 0.5f;
-    startT = 16.0f - (((f32)roundedHalfHeight - halfHeight) * 16.0f);
-    x = f_Lakitu.x;
-    left = x - roundedHalfWidth;
-    y = f_Lakitu.y;
+            f_MovieBuffer + ((f_MovieBackBuffer * LAKITU_FRAME_SIZE) + MOVIE_IMAGE_PALETTE_OFFSET)
+        )
+    );
+    for (i = 0; i != LAKITU_STRIP_COUNT; i++) {
+        offset = MOVIE_IMAGE_PIXELS_OFFSET + (i * LAKITU_STRIP_SIZE);
+        halfWidth = f_Lakitu.scale * (LAKITU_WIDTH / 2);
+        halfHeight = f_Lakitu.scale * LAKITU_STRIP_HEIGHT;
+        stepS = TexelRunStep((LAKITU_WIDTH / 2), halfWidth);
+        stepT = TexelRunStep(LAKITU_STRIP_HEIGHT, halfHeight);
+        roundedHalfWidth = halfWidth + 0.5f;
 
-    DrawTextureRect(&gfx, QuarterPixels(left),
-        QuarterPixels(y - roundedHalfHeight + (i * roundedHalfHeight)),
-        QuarterPixels(x + roundedHalfWidth),
-        QuarterPixels(y + (i * roundedHalfHeight)), G_TX_RENDERTILE, startS,
-        startT, stepS, stepT);
-    gDPPipeSync(gfx++);
-  }
+        /*
+         * Start half a texel in, less the rounding, so that the image stays
+         * centered as it scales
+         */
+        startS = 16.0f - (((f32)roundedHalfWidth - halfWidth) * 16.0f);
+        gDPLoadTextureTile(
+            gfx++,
+            TextureAddress(f_MovieBuffer + ((f_MovieBackBuffer * LAKITU_FRAME_SIZE) + offset)),
+            G_IM_FMT_CI,
+            G_IM_SIZ_8b,
+            LAKITU_WIDTH,
+            LAKITU_STRIP_HEIGHT,
+            0,
+            0,
+            LAKITU_WIDTH - 1,
+            LAKITU_STRIP_HEIGHT - 1,
+            0,
+            G_TX_NOMIRROR | G_TX_WRAP,
+            G_TX_NOMIRROR | G_TX_WRAP,
+            G_TX_NOMASK,
+            G_TX_NOMASK,
+            G_TX_NOLOD,
+            G_TX_NOLOD
+        );
+        gDPPipeSync(gfx++);
+        roundedHalfHeight = halfHeight + 0.5f;
+        startT = 16.0f - (((f32)roundedHalfHeight - halfHeight) * 16.0f);
+        x = f_Lakitu.x;
+        left = x - roundedHalfWidth;
+        y = f_Lakitu.y;
 
-  *displayListHead = gfx;
+        DrawTextureRect(
+            &gfx,
+            QuarterPixels(left),
+            QuarterPixels(y - roundedHalfHeight + (i * roundedHalfHeight)),
+            QuarterPixels(x + roundedHalfWidth),
+            QuarterPixels(y + (i * roundedHalfHeight)),
+            G_TX_RENDERTILE,
+            startS,
+            startT,
+            stepS,
+            stepT
+        );
+        gDPPipeSync(gfx++);
+    }
+
+    *displayListHead = gfx;
 }
 
 /* Toad waves the out of bounds flag in the inset view */
-void DrawToadMovie(Gfx** displayListHead) {
-  EncodedAsset asset;
-  Gfx* gfx = *displayListHead;
-  s32 i;
+void DrawToadMovie(Gfx **displayListHead) {
+    EncodedAsset asset;
+    Gfx *gfx = *displayListHead;
+    s32 i;
 
-  f_MovieTick++;
-  if (f_MovieTick == MOVIE_TICKS_PER_FRAME) {
-    f_MovieTick = 0;
-    f_MovieFrame = (f_MovieFrame + 1) % TOAD_FRAME_COUNT;
-    if (f_MovieFrame == TOAD_SWING_LEFT_FRAME) {
-      PlaySoundWithEffects(SOUND_FLAG_SWISH, FLAG_SWISH_SOUND_CHANNEL,
-          SOUND_FULL_SCALE, MOVIE_SOUND_REVERB, FLAG_SWISH_LEFT_PAN);
-      SetSoundFrequencyOffset(FLAG_SWISH_SOUND_CHANNEL, FLAG_SWISH_PITCH);
+    f_MovieTick++;
+    if (f_MovieTick == MOVIE_TICKS_PER_FRAME) {
+        f_MovieTick = 0;
+        f_MovieFrame = (f_MovieFrame + 1) % TOAD_FRAME_COUNT;
+        if (f_MovieFrame == TOAD_SWING_LEFT_FRAME) {
+            PlaySoundWithEffects(
+                SOUND_FLAG_SWISH,
+                FLAG_SWISH_SOUND_CHANNEL,
+                SOUND_FULL_SCALE,
+                MOVIE_SOUND_REVERB,
+                FLAG_SWISH_LEFT_PAN
+            );
+            SetSoundFrequencyOffset(FLAG_SWISH_SOUND_CHANNEL, FLAG_SWISH_PITCH);
+        }
+
+        if (f_MovieFrame == TOAD_SWING_RIGHT_FRAME) {
+            PlaySoundWithEffects(
+                SOUND_FLAG_SWISH,
+                FLAG_SWISH_SOUND_CHANNEL,
+                SOUND_FULL_SCALE,
+                MOVIE_SOUND_REVERB,
+                FLAG_SWISH_RIGHT_PAN
+            );
+            SetSoundFrequencyOffset(FLAG_SWISH_SOUND_CHANNEL, FLAG_SWISH_PITCH);
+        }
+
+        f_MovieBackBuffer ^= 1;
+        OpenEncodedAsset(f_ToadMovieFrameAssets[f_MovieFrame], &asset);
+        ReadEncodedAsset(
+            f_MovieBuffer + ((f_MovieBackBuffer * TOAD_FRAME_SIZE) + TOAD_FRAME_OFFSET),
+            &asset
+        );
     }
 
-    if (f_MovieFrame == TOAD_SWING_RIGHT_FRAME) {
-      PlaySoundWithEffects(SOUND_FLAG_SWISH, FLAG_SWISH_SOUND_CHANNEL,
-          SOUND_FULL_SCALE, MOVIE_SOUND_REVERB, FLAG_SWISH_RIGHT_PAN);
-      SetSoundFrequencyOffset(FLAG_SWISH_SOUND_CHANNEL, FLAG_SWISH_PITCH);
+    if (f_MovieDrawCount == OUT_OF_BOUNDS_SOUND_DRAW) {
+        PlaySoundWithEffects(
+            SOUND_OUT_OF_BOUNDS,
+            OUT_OF_BOUNDS_SOUND_CHANNEL,
+            MOVIE_SOUND_VOLUME,
+            MOVIE_SOUND_REVERB,
+            SOUND_FULL_SCALE
+        );
     }
 
-    f_MovieBackBuffer ^= 1;
-    OpenEncodedAsset(f_ToadMovieFrameAssets[f_MovieFrame], &asset);
-    ReadEncodedAsset(f_MovieBuffer +
-            ((f_MovieBackBuffer * TOAD_FRAME_SIZE) + TOAD_FRAME_OFFSET),
-        &asset);
-  }
+    gSPDisplayList(gfx++, f_MovieImageSetupDisplayList);
+    gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_POINT);
+    gDPPipeSync(gfx++);
+    gDPSetScissor(
+        gfx++,
+        G_SC_NON_INTERLACE,
+        g_Cameras[INSET_VIEW_CAMERA].view.scissorX + INSET_FRAME_WIDTH,
+        g_Cameras[INSET_VIEW_CAMERA].view.scissorY + INSET_FRAME_HEIGHT,
+        g_Cameras[INSET_VIEW_CAMERA].view.scissorX +
+            g_Cameras[INSET_VIEW_CAMERA].view.scissorWidth - INSET_FRAME_WIDTH,
+        g_Cameras[INSET_VIEW_CAMERA].view.scissorY +
+            g_Cameras[INSET_VIEW_CAMERA].view.scissorHeight - INSET_FRAME_HEIGHT
+    );
+    gDPLoadTLUT_pal256(gfx++, TextureAddress(f_MovieBuffer));
+    for (i = 0; i != TOAD_STRIP_COUNT; i++) {
+        gDPLoadTextureTile(
+            gfx++,
+            TextureAddress(
+                f_MovieBuffer +
+                (TOAD_FRAME_OFFSET + (i * TOAD_STRIP_SIZE) + (f_MovieBackBuffer * TOAD_FRAME_SIZE))
+            ),
+            G_IM_FMT_CI,
+            G_IM_SIZ_8b,
+            TOAD_WIDTH,
+            TOAD_STRIP_HEIGHT,
+            0,
+            0,
+            TOAD_WIDTH - 1,
+            TOAD_STRIP_HEIGHT - 1,
+            0,
+            G_TX_NOMIRROR | G_TX_WRAP,
+            G_TX_NOMIRROR | G_TX_WRAP,
+            G_TX_NOMASK,
+            G_TX_NOMASK,
+            G_TX_NOLOD,
+            G_TX_NOLOD
+        );
+        DrawTextureRect(
+            &gfx,
+            QuarterPixels(TOAD_X),
+            QuarterPixels(TOAD_Y + (i * TOAD_STRIP_HEIGHT)),
+            QuarterPixels(TOAD_X + TOAD_WIDTH),
+            QuarterPixels(TOAD_Y + TOAD_STRIP_HEIGHT + (i * TOAD_STRIP_HEIGHT)),
+            G_TX_RENDERTILE,
+            0,
+            0,
+            TEXEL_STEP_ONE,
+            TEXEL_STEP_ONE
+        );
+    }
 
-  if (f_MovieDrawCount == OUT_OF_BOUNDS_SOUND_DRAW) {
-    PlaySoundWithEffects(SOUND_OUT_OF_BOUNDS, OUT_OF_BOUNDS_SOUND_CHANNEL,
-        MOVIE_SOUND_VOLUME, MOVIE_SOUND_REVERB, SOUND_FULL_SCALE);
-  }
-
-  gSPDisplayList(gfx++, f_MovieImageSetupDisplayList);
-  gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-  gDPPipeSync(gfx++);
-  gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
-  gDPPipeSync(gfx++);
-  gDPSetTextureFilter(gfx++, G_TF_POINT);
-  gDPPipeSync(gfx++);
-  gDPSetScissor(gfx++, G_SC_NON_INTERLACE,
-      g_Cameras[INSET_VIEW_CAMERA].view.scissorX + INSET_FRAME_WIDTH,
-      g_Cameras[INSET_VIEW_CAMERA].view.scissorY + INSET_FRAME_HEIGHT,
-      g_Cameras[INSET_VIEW_CAMERA].view.scissorX +
-          g_Cameras[INSET_VIEW_CAMERA].view.scissorWidth - INSET_FRAME_WIDTH,
-      g_Cameras[INSET_VIEW_CAMERA].view.scissorY +
-          g_Cameras[INSET_VIEW_CAMERA].view.scissorHeight - INSET_FRAME_HEIGHT);
-  gDPLoadTLUT_pal256(gfx++, TextureAddress(f_MovieBuffer));
-  for (i = 0; i != TOAD_STRIP_COUNT; i++) {
-    gDPLoadTextureTile(gfx++,
-        TextureAddress(f_MovieBuffer +
-            (TOAD_FRAME_OFFSET + (i * TOAD_STRIP_SIZE) +
-                (f_MovieBackBuffer * TOAD_FRAME_SIZE))),
-        G_IM_FMT_CI, G_IM_SIZ_8b, TOAD_WIDTH, TOAD_STRIP_HEIGHT, 0, 0,
-        TOAD_WIDTH - 1, TOAD_STRIP_HEIGHT - 1, 0, G_TX_NOMIRROR | G_TX_WRAP,
-        G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
-        G_TX_NOLOD);
-    DrawTextureRect(&gfx, QuarterPixels(TOAD_X),
-        QuarterPixels(TOAD_Y + (i * TOAD_STRIP_HEIGHT)),
-        QuarterPixels(TOAD_X + TOAD_WIDTH),
-        QuarterPixels(TOAD_Y + TOAD_STRIP_HEIGHT + (i * TOAD_STRIP_HEIGHT)),
-        G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
-  }
-
-  gDPPipeSync(gfx++);
-  gDPSetScissor(gfx++, G_SC_NON_INTERLACE, g_Cameras[0].view.scissorX,
-      g_Cameras[0].view.scissorY,
-      g_Cameras[0].view.scissorX + g_Cameras[0].view.scissorWidth,
-      g_Cameras[0].view.scissorY + g_Cameras[0].view.scissorHeight);
-  *displayListHead = gfx;
+    gDPPipeSync(gfx++);
+    gDPSetScissor(
+        gfx++,
+        G_SC_NON_INTERLACE,
+        g_Cameras[0].view.scissorX,
+        g_Cameras[0].view.scissorY,
+        g_Cameras[0].view.scissorX + g_Cameras[0].view.scissorWidth,
+        g_Cameras[0].view.scissorY + g_Cameras[0].view.scissorHeight
+    );
+    *displayListHead = gfx;
 }
 
 Boolean IsContactEffectShown(void) {
-  return g_ContactEffect != CONTACT_EFFECT_NONE;
+    return g_ContactEffect != CONTACT_EFFECT_NONE;
 }
 
 /* Returns the CONTACT_STYLE_* of the player's character, or for a Game Boy one,
  * of its ball */
-s32 GetContactStyle(Player* player) {
-  GameBoyCharacter* gameBoyCharacter;
-  s8 character = player->characterIndex;
+s32 GetContactStyle(Player *player) {
+    GameBoyCharacter *gameBoyCharacter;
+    s8 character = player->characterIndex;
 
-  if (character >= CHARACTER_KID) {
-    gameBoyCharacter = &g_GameBoyCharacters[player->gameBoyCharacterIndex];
-    if (gameBoyCharacter->status != GAME_BOY_CHARACTER_STATUS_PRESENT) {
-      return CONTACT_STYLE_PLAIN;
+    if (character >= CHARACTER_KID) {
+        gameBoyCharacter = &g_GameBoyCharacters[player->gameBoyCharacterIndex];
+        if (gameBoyCharacter->status != GAME_BOY_CHARACTER_STATUS_PRESENT) {
+            return CONTACT_STYLE_PLAIN;
+        }
+
+        switch (gameBoyCharacter->ballType) {
+            case GAME_BOY_BALL_TYPE_PLAIN:
+                return CONTACT_STYLE_PLAIN;
+            case GAME_BOY_BALL_TYPE_MARIO:
+                return CONTACT_STYLE_MARIO;
+            case GAME_BOY_BALL_TYPE_BOWSER:
+                return CONTACT_STYLE_BOWSER;
+            case GAME_BOY_BALL_TYPE_WARIO:
+                return CONTACT_STYLE_WARIO;
+            case GAME_BOY_BALL_TYPE_RAINBOW:
+                return CONTACT_STYLE_RAINBOW;
+            case GAME_BOY_BALL_TYPE_5:
+                return CONTACT_STYLE_GAME_BOY_BALL_5;
+            case GAME_BOY_BALL_TYPE_6:
+                return CONTACT_STYLE_GAME_BOY_BALL_6;
+            case GAME_BOY_BALL_TYPE_7:
+                return CONTACT_STYLE_GAME_BOY_BALL_7;
+            default:
+                return CONTACT_STYLE_PLAIN;
+        }
     }
 
-    switch (gameBoyCharacter->ballType) {
-      case GAME_BOY_BALL_TYPE_PLAIN:
-        return CONTACT_STYLE_PLAIN;
-      case GAME_BOY_BALL_TYPE_MARIO:
-        return CONTACT_STYLE_MARIO;
-      case GAME_BOY_BALL_TYPE_BOWSER:
-        return CONTACT_STYLE_BOWSER;
-      case GAME_BOY_BALL_TYPE_WARIO:
+    if (character == CHARACTER_WARIO) {
         return CONTACT_STYLE_WARIO;
-      case GAME_BOY_BALL_TYPE_RAINBOW:
-        return CONTACT_STYLE_RAINBOW;
-      case GAME_BOY_BALL_TYPE_5:
-        return CONTACT_STYLE_GAME_BOY_BALL_5;
-      case GAME_BOY_BALL_TYPE_6:
-        return CONTACT_STYLE_GAME_BOY_BALL_6;
-      case GAME_BOY_BALL_TYPE_7:
-        return CONTACT_STYLE_GAME_BOY_BALL_7;
-      default:
-        return CONTACT_STYLE_PLAIN;
     }
-  }
 
-  if (character == CHARACTER_WARIO) {
-    return CONTACT_STYLE_WARIO;
-  }
+    if (character == CHARACTER_YOSHI || character == CHARACTER_DONKEY_KONG) {
+        return CONTACT_STYLE_RAINBOW;
+    }
 
-  if (character == CHARACTER_YOSHI || character == CHARACTER_DONKEY_KONG) {
-    return CONTACT_STYLE_RAINBOW;
-  }
+    if (character == CHARACTER_BOWSER) {
+        return CONTACT_STYLE_BOWSER;
+    }
 
-  if (character == CHARACTER_BOWSER) {
-    return CONTACT_STYLE_BOWSER;
-  }
+    if (character == CHARACTER_BABY_MARIO ||
+        character == CHARACTER_MARIO ||
+        character == CHARACTER_METAL_MARIO) {
+        return CONTACT_STYLE_MARIO;
+    }
 
-  if (character == CHARACTER_BABY_MARIO || character == CHARACTER_MARIO ||
-      character == CHARACTER_METAL_MARIO) {
-    return CONTACT_STYLE_MARIO;
-  }
-
-  return CONTACT_STYLE_PLAIN;
+    return CONTACT_STYLE_PLAIN;
 }
 
 /* Sets the contact quad's corners halfWidth either side of its center */
 static inline void SetContactHalfWidth(s16 halfWidth) {
-  f_ContactVertices[0].v.ob[AXIS_X] = -halfWidth;
-  f_ContactVertices[1].v.ob[AXIS_X] = halfWidth;
+    f_ContactVertices[0].v.ob[AXIS_X] = -halfWidth;
+    f_ContactVertices[1].v.ob[AXIS_X] = halfWidth;
 }
 
 /*
@@ -2523,122 +3018,132 @@ static inline void SetContactHalfWidth(s16 halfWidth) {
  * CONTACT_EFFECT_NONE removes it and CONTACT_EFFECT_FADE fades it out
  */
 void StartContactEffect(s32 effect) {
-  s32 i;
+    s32 i;
 
-  if (effect == CONTACT_EFFECT_NONE) {
-    g_ContactEffect = effect;
-  } else if (IsShownContactEffect(effect)) {
-    for (i = 0; i != CONTACT_MATRIX_COUNT; i++) {
-      guTranslate(&f_ContactMatrices[i],
-          g_CurrentShot.ballPosition[AXIS_X] * COURSE_TO_WORLD_SCALE,
-          (g_CurrentShot.ballPosition[AXIS_Y] * COURSE_TO_WORLD_SCALE) -
-              (g_PinVertexScale * CONTACT_DROP_PER_PIN_SCALE),
-          g_CurrentShot.ballPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE);
+    if (effect == CONTACT_EFFECT_NONE) {
+        g_ContactEffect = effect;
+    }
+    else if (IsShownContactEffect(effect)) {
+        for (i = 0; i != CONTACT_MATRIX_COUNT; i++) {
+            guTranslate(
+                &f_ContactMatrices[i],
+                g_CurrentShot.ballPosition[AXIS_X] * COURSE_TO_WORLD_SCALE,
+                (g_CurrentShot.ballPosition[AXIS_Y] * COURSE_TO_WORLD_SCALE) -
+                    (g_PinVertexScale * CONTACT_DROP_PER_PIN_SCALE),
+                g_CurrentShot.ballPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE
+            );
+        }
+
+        g_ContactEffect = 0;
+        f_IsContactEffectFading = FALSE;
+        f_ContactVertices[0].v.ob[AXIS_Y] = 0;
+        f_ContactVertices[1].v.ob[AXIS_Y] = 0;
+        if (effect == CONTACT_EFFECT_POWER_IRON) {
+            f_ContactStyle = CONTACT_STYLE_POWER_IRON;
+        }
+        else if (effect == CONTACT_EFFECT_SHOT) {
+            f_ContactStyle = CONTACT_STYLE_SHOT;
+        }
+        else if (effect == CONTACT_EFFECT_PUTT) {
+            f_ContactStyle = CONTACT_STYLE_PUTT;
+        }
+        else {
+            f_ContactStyle = GetContactStyle(&g_Players[g_RoundHud.shooterIndex]);
+        }
+    }
+    else {
+        f_IsContactEffectFading = TRUE;
     }
 
-    g_ContactEffect = 0;
-    f_IsContactEffectFading = FALSE;
-    f_ContactVertices[0].v.ob[AXIS_Y] = 0;
-    f_ContactVertices[1].v.ob[AXIS_Y] = 0;
-    if (effect == CONTACT_EFFECT_POWER_IRON) {
-      f_ContactStyle = CONTACT_STYLE_POWER_IRON;
-    } else if (effect == CONTACT_EFFECT_SHOT) {
-      f_ContactStyle = CONTACT_STYLE_SHOT;
-    } else if (effect == CONTACT_EFFECT_PUTT) {
-      f_ContactStyle = CONTACT_STYLE_PUTT;
-    } else {
-      f_ContactStyle = GetContactStyle(&g_Players[g_RoundHud.shooterIndex]);
+    if (effect != CONTACT_EFFECT_NONE && IsShownContactEffect(effect)) {
+        /* Each style sets its quad's half width, its texture's far corner and its
+         * sound */
+        if (f_ContactStyle == CONTACT_STYLE_POWER_IRON) {
+            SetContactHalfWidth(20);
+            f_ContactTextureS = TexelCoordinate(PLAIN_CONTACT_IMAGE_WIDTH) - 1;
+            f_ContactTextureT = 0xD6;
+            PlaySound(SOUND_CONTACT_PLAIN, CONTACT_SOUND_CHANNEL, SOUND_FULL_SCALE);
+        }
+        else if (f_ContactStyle == CONTACT_STYLE_SHOT) {
+            SetContactHalfWidth(10);
+            f_ContactTextureS = TexelCoordinate(PLAIN_CONTACT_IMAGE_WIDTH) - 1;
+            f_ContactTextureT = 0xD6;
+        }
+        else if (f_ContactStyle == CONTACT_STYLE_PUTT) {
+            SetContactHalfWidth(18);
+            f_ContactVertices[0].v.ob[AXIS_Y] = CONTACT_PUTT_Y;
+            f_ContactVertices[1].v.ob[AXIS_Y] = CONTACT_PUTT_Y;
+            f_ContactTextureS = TexelCoordinate(PUTT_CONTACT_IMAGE_WIDTH) - 1;
+            f_ContactTextureT = ContactStepT(PUTT_CONTACT_IMAGE_HEIGHT);
+        }
+        else if (f_ContactStyle == CONTACT_STYLE_WARIO ||
+            f_ContactStyle == CONTACT_STYLE_GAME_BOY_BALL_7) {
+            StartShotEffect(SHOT_EFFECT_LONG_SHOT);
+            SetContactHalfWidth(120);
+            f_ContactTextureS = TexelCoordinate(WARIO_CONTACT_IMAGE_WIDTH) - 1;
+            f_ContactTextureT = 0x7FF;
+            PlaySound(SOUND_CONTACT_WARIO, CONTACT_STYLE_SOUND_CHANNEL, SOUND_FULL_SCALE);
+        }
+        else if (f_ContactStyle == CONTACT_STYLE_RAINBOW) {
+            SetContactHalfWidth(60);
+            f_ContactTextureS = TexelCoordinate(RAINBOW_CONTACT_IMAGE_WIDTH) - 1;
+            f_ContactTextureT = 0;
+            PlaySound(SOUND_CONTACT_RAINBOW, CONTACT_STYLE_SOUND_CHANNEL, SOUND_FULL_SCALE);
+        }
+        else if (f_ContactStyle == CONTACT_STYLE_BOWSER) {
+            SetContactHalfWidth(20);
+            /* Bowser's image and its mirror across, and twice along the ribbon */
+            f_ContactTextureS = TexelCoordinate(2 * BOWSER_CONTACT_IMAGE_WIDTH) - 1;
+            f_ContactTextureT = ContactStepT(2 * BOWSER_CONTACT_IMAGE_HEIGHT);
+            PlaySound(SOUND_CONTACT_MARIO, CONTACT_STYLE_SOUND_CHANNEL, SOUND_FULL_SCALE);
+        }
+        else if (f_ContactStyle == CONTACT_STYLE_MARIO) {
+            SetContactHalfWidth(160);
+            /* The plain style's, as no ribbon is drawn for Mario */
+            f_ContactTextureS = TexelCoordinate(PLAIN_CONTACT_IMAGE_WIDTH) - 1;
+            f_ContactTextureT = ContactStepT(PLAIN_CONTACT_IMAGE_HEIGHT);
+            PlaySound(SOUND_CONTACT_MARIO, CONTACT_STYLE_SOUND_CHANNEL, SOUND_FULL_SCALE);
+        }
+        else if (f_ContactStyle == CONTACT_STYLE_GAME_BOY_BALL_5) {
+            SetContactHalfWidth(30);
+            f_ContactTextureS = TexelCoordinate(PLAIN_CONTACT_IMAGE_WIDTH) - 1;
+            f_ContactTextureT = ContactStepT(PLAIN_CONTACT_IMAGE_HEIGHT);
+            PlaySound(SOUND_CONTACT_PLAIN, CONTACT_SOUND_CHANNEL, SOUND_FULL_SCALE);
+        }
+        else {
+            SetContactHalfWidth(20);
+            f_ContactTextureS = TexelCoordinate(PLAIN_CONTACT_IMAGE_WIDTH) - 1;
+            f_ContactTextureT = ContactStepT(PLAIN_CONTACT_IMAGE_HEIGHT);
+            PlaySound(SOUND_CONTACT_PLAIN, CONTACT_SOUND_CHANNEL, SOUND_FULL_SCALE);
+        }
     }
-  } else {
-    f_IsContactEffectFading = TRUE;
-  }
-
-  if (effect != CONTACT_EFFECT_NONE && IsShownContactEffect(effect)) {
-    /* Each style sets its quad's half width, its texture's far corner and its
-     * sound */
-    if (f_ContactStyle == CONTACT_STYLE_POWER_IRON) {
-      SetContactHalfWidth(20);
-      f_ContactTextureS = TexelCoordinate(PLAIN_CONTACT_IMAGE_WIDTH) - 1;
-      f_ContactTextureT = 0xD6;
-      PlaySound(SOUND_CONTACT_PLAIN, CONTACT_SOUND_CHANNEL, SOUND_FULL_SCALE);
-    } else if (f_ContactStyle == CONTACT_STYLE_SHOT) {
-      SetContactHalfWidth(10);
-      f_ContactTextureS = TexelCoordinate(PLAIN_CONTACT_IMAGE_WIDTH) - 1;
-      f_ContactTextureT = 0xD6;
-    } else if (f_ContactStyle == CONTACT_STYLE_PUTT) {
-      SetContactHalfWidth(18);
-      f_ContactVertices[0].v.ob[AXIS_Y] = CONTACT_PUTT_Y;
-      f_ContactVertices[1].v.ob[AXIS_Y] = CONTACT_PUTT_Y;
-      f_ContactTextureS = TexelCoordinate(PUTT_CONTACT_IMAGE_WIDTH) - 1;
-      f_ContactTextureT = ContactStepT(PUTT_CONTACT_IMAGE_HEIGHT);
-    } else if (f_ContactStyle == CONTACT_STYLE_WARIO ||
-        f_ContactStyle == CONTACT_STYLE_GAME_BOY_BALL_7) {
-      StartShotEffect(SHOT_EFFECT_LONG_SHOT);
-      SetContactHalfWidth(120);
-      f_ContactTextureS = TexelCoordinate(WARIO_CONTACT_IMAGE_WIDTH) - 1;
-      f_ContactTextureT = 0x7FF;
-      PlaySound(
-          SOUND_CONTACT_WARIO, CONTACT_STYLE_SOUND_CHANNEL, SOUND_FULL_SCALE);
-    } else if (f_ContactStyle == CONTACT_STYLE_RAINBOW) {
-      SetContactHalfWidth(60);
-      f_ContactTextureS = TexelCoordinate(RAINBOW_CONTACT_IMAGE_WIDTH) - 1;
-      f_ContactTextureT = 0;
-      PlaySound(
-          SOUND_CONTACT_RAINBOW, CONTACT_STYLE_SOUND_CHANNEL, SOUND_FULL_SCALE);
-    } else if (f_ContactStyle == CONTACT_STYLE_BOWSER) {
-      SetContactHalfWidth(20);
-      /* Bowser's image and its mirror across, and twice along the ribbon */
-      f_ContactTextureS = TexelCoordinate(2 * BOWSER_CONTACT_IMAGE_WIDTH) - 1;
-      f_ContactTextureT = ContactStepT(2 * BOWSER_CONTACT_IMAGE_HEIGHT);
-      PlaySound(
-          SOUND_CONTACT_MARIO, CONTACT_STYLE_SOUND_CHANNEL, SOUND_FULL_SCALE);
-    } else if (f_ContactStyle == CONTACT_STYLE_MARIO) {
-      SetContactHalfWidth(160);
-      /* The plain style's, as no ribbon is drawn for Mario */
-      f_ContactTextureS = TexelCoordinate(PLAIN_CONTACT_IMAGE_WIDTH) - 1;
-      f_ContactTextureT = ContactStepT(PLAIN_CONTACT_IMAGE_HEIGHT);
-      PlaySound(
-          SOUND_CONTACT_MARIO, CONTACT_STYLE_SOUND_CHANNEL, SOUND_FULL_SCALE);
-    } else if (f_ContactStyle == CONTACT_STYLE_GAME_BOY_BALL_5) {
-      SetContactHalfWidth(30);
-      f_ContactTextureS = TexelCoordinate(PLAIN_CONTACT_IMAGE_WIDTH) - 1;
-      f_ContactTextureT = ContactStepT(PLAIN_CONTACT_IMAGE_HEIGHT);
-      PlaySound(SOUND_CONTACT_PLAIN, CONTACT_SOUND_CHANNEL, SOUND_FULL_SCALE);
-    } else {
-      SetContactHalfWidth(20);
-      f_ContactTextureS = TexelCoordinate(PLAIN_CONTACT_IMAGE_WIDTH) - 1;
-      f_ContactTextureT = ContactStepT(PLAIN_CONTACT_IMAGE_HEIGHT);
-      PlaySound(SOUND_CONTACT_PLAIN, CONTACT_SOUND_CHANNEL, SOUND_FULL_SCALE);
-    }
-  }
 }
 
 /* Reads the images of the player's contact effect */
-void LoadContactImages(Player* player) {
-  EncodedAsset asset;
+void LoadContactImages(Player *player) {
+    EncodedAsset asset;
 
-  switch (GetContactStyle(player)) {
-    case CONTACT_STYLE_WARIO:
-    case CONTACT_STYLE_GAME_BOY_BALL_7:
-      OpenEncodedAsset(WARIO_CONTACT_IMAGE_ASSET, &asset);
-      ReadEncodedAsset(g_SharedEffectImages + CONTACT_IMAGE_OFFSET, &asset);
-      OpenEncodedAsset(WARIO_CONTACT_SECOND_IMAGE_ASSET, &asset);
-      ReadEncodedAsset(
-          g_SharedEffectImages + CONTACT_SECOND_IMAGE_OFFSET, &asset);
-      break;
-    case CONTACT_STYLE_RAINBOW:
-      OpenEncodedAsset(RAINBOW_CONTACT_IMAGE_ASSET, &asset);
-      ReadEncodedAsset(g_SharedEffectImages + CONTACT_IMAGE_OFFSET, &asset);
-      break;
-    case CONTACT_STYLE_MARIO:
-      OpenEncodedAsset(MARIO_CONTACT_IMAGE_ASSET, &asset);
-      ReadEncodedAsset(g_SharedEffectImages + CONTACT_IMAGE_OFFSET, &asset);
-      break;
-    case CONTACT_STYLE_BOWSER:
-      OpenEncodedAsset(BOWSER_CONTACT_IMAGE_ASSET, &asset);
-      ReadEncodedAsset(g_SharedEffectImages + CONTACT_IMAGE_OFFSET, &asset);
-      break;
-  }
+    switch (GetContactStyle(player)) {
+        case CONTACT_STYLE_WARIO:
+        case CONTACT_STYLE_GAME_BOY_BALL_7:
+            OpenEncodedAsset(WARIO_CONTACT_IMAGE_ASSET, &asset);
+            ReadEncodedAsset(g_SharedEffectImages + CONTACT_IMAGE_OFFSET, &asset);
+            OpenEncodedAsset(WARIO_CONTACT_SECOND_IMAGE_ASSET, &asset);
+            ReadEncodedAsset(g_SharedEffectImages + CONTACT_SECOND_IMAGE_OFFSET, &asset);
+            break;
+        case CONTACT_STYLE_RAINBOW:
+            OpenEncodedAsset(RAINBOW_CONTACT_IMAGE_ASSET, &asset);
+            ReadEncodedAsset(g_SharedEffectImages + CONTACT_IMAGE_OFFSET, &asset);
+            break;
+        case CONTACT_STYLE_MARIO:
+            OpenEncodedAsset(MARIO_CONTACT_IMAGE_ASSET, &asset);
+            ReadEncodedAsset(g_SharedEffectImages + CONTACT_IMAGE_OFFSET, &asset);
+            break;
+        case CONTACT_STYLE_BOWSER:
+            OpenEncodedAsset(BOWSER_CONTACT_IMAGE_ASSET, &asset);
+            ReadEncodedAsset(g_SharedEffectImages + CONTACT_IMAGE_OFFSET, &asset);
+            break;
+    }
 }
 
 /* g_ContactEffect counts the frames since contact, faster while fading, up to
@@ -2661,7 +3166,7 @@ void LoadContactImages(Player* player) {
 #define CONTACT_RIBBON_SCALE 0.1f
 #define CONTACT_PALETTE_SIZE 0x200
 #define CONTACT_IMAGE_PIXELS_OFFSET \
-  (CONTACT_IMAGE_OFFSET + IMAGE_HEADER_SIZE + CONTACT_PALETTE_SIZE)
+    (CONTACT_IMAGE_OFFSET + IMAGE_HEADER_SIZE + CONTACT_PALETTE_SIZE)
 #define CONTACT_PUTT_IMAGE_OFFSET 0x648
 #define CONTACT_SPIN_DEGREES_PER_FRAME 70.0f
 #define CONTACT_SPIN_SCALE_PER_ALPHA (1.0f / 512)
@@ -2670,361 +3175,535 @@ void LoadContactImages(Player* player) {
 /* Draws the ribbon segment between two of the ball's positions, as vertex pair
  * firstVertex */
 #define DrawContactSegment(segment, firstVertex) \
-  { \
-    s32 slot = (f_ContactTrailHead + (segment)) % CONTACT_TRAIL_LENGTH; \
+    { \
+        s32 slot = (f_ContactTrailHead + (segment)) % CONTACT_TRAIL_LENGTH; \
 \
-    gSPMatrix(gfx++, PhysicalAddress(&f_ContactMatrices[slot]), \
-        G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW); \
-    gSPMatrix(gfx++, \
-        PhysicalAddress(&f_ContactRibbonMatrices[g_DrawBufferIndex]), \
-        G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW); \
-    gSPVertex(gfx++, f_ContactVertices, 2, firstVertex); \
-    gSPPopMatrix(gfx++, G_MTX_MODELVIEW); \
-    gSPModifyVertex( \
-        gfx++, firstVertex, G_MWO_POINT_ST, f_ContactTextureT * (segment)); \
-    gSPModifyVertex(gfx++, (firstVertex) + 1, G_MWO_POINT_ST, \
-        TexcoordWord(f_ContactTextureS, f_ContactTextureT * (segment))); \
-  }
+        gSPMatrix( \
+            gfx++, \
+            PhysicalAddress(&f_ContactMatrices[slot]), \
+            G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW \
+        ); \
+        gSPMatrix( \
+            gfx++, \
+            PhysicalAddress(&f_ContactRibbonMatrices[g_DrawBufferIndex]), \
+            G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW \
+        ); \
+        gSPVertex(gfx++, f_ContactVertices, 2, firstVertex); \
+        gSPPopMatrix(gfx++, G_MTX_MODELVIEW); \
+        gSPModifyVertex(gfx++, firstVertex, G_MWO_POINT_ST, f_ContactTextureT * (segment)); \
+        gSPModifyVertex( \
+            gfx++, \
+            (firstVertex) + 1, \
+            G_MWO_POINT_ST, \
+            TexcoordWord(f_ContactTextureS, f_ContactTextureT * (segment)) \
+        ); \
+    }
 
 #define DrawContactTriangles() \
-  for (i = 0; i != CONTACT_RIBBON_RELOAD_SEGMENTS; i++) { \
-    gSP2Triangles(gfx++, (i * 2) + 1, i * 2, (i * 2) + 2, 0, (i * 2) + 1, \
-        (i * 2) + 2, (i * 2) + 3, 0); \
-  }
+    for (i = 0; i != CONTACT_RIBBON_RELOAD_SEGMENTS; i++) { \
+        gSP2Triangles( \
+            gfx++, \
+            (i * 2) + 1, \
+            i * 2, \
+            (i * 2) + 2, \
+            0, \
+            (i * 2) + 1, \
+            (i * 2) + 2, \
+            (i * 2) + 3, \
+            0 \
+        ); \
+    }
 
 /* The shot style draws only the first segments */
 #define DrawContactRibbon() \
-  { \
-    for (i = 0; i != CONTACT_RIBBON_FIRST_SEGMENTS; i++) { \
-      DrawContactSegment(i, i * 2); \
-    } \
-    DrawContactTriangles(); \
-    if (f_ContactStyle != CONTACT_STYLE_SHOT) { \
-      for (pass = 0; pass != CONTACT_RIBBON_RELOAD_PASSES; pass++) { \
-        for (i = ContactRunStart(pass, 0); i != ContactRunStart(pass, 1); \
-            i++) { \
-          DrawContactSegment(i, \
-              ((CONTACT_RIBBON_RELOAD_SEGMENTS - 1) * 2) - \
-                  ((i - ContactRunStart(pass, 0)) * 2)); \
+    { \
+        for (i = 0; i != CONTACT_RIBBON_FIRST_SEGMENTS; i++) { \
+            DrawContactSegment(i, i * 2); \
         } \
         DrawContactTriangles(); \
-        for (i = ContactRunStart(pass, 1); i != ContactRunStart(pass, 2); \
-            i++) { \
-          DrawContactSegment(i, ((i - ContactRunStart(pass, 1)) * 2) + 2); \
+        if (f_ContactStyle != CONTACT_STYLE_SHOT) { \
+            for (pass = 0; pass != CONTACT_RIBBON_RELOAD_PASSES; pass++) { \
+                for (i = ContactRunStart(pass, 0); i != ContactRunStart(pass, 1); i++) { \
+                    DrawContactSegment( \
+                        i, \
+                        ((CONTACT_RIBBON_RELOAD_SEGMENTS - 1) * 2) - \
+                            ((i - ContactRunStart(pass, 0)) * 2) \
+                    ); \
+                } \
+                DrawContactTriangles(); \
+                for (i = ContactRunStart(pass, 1); i != ContactRunStart(pass, 2); i++) { \
+                    DrawContactSegment(i, ((i - ContactRunStart(pass, 1)) * 2) + 2); \
+                } \
+                DrawContactTriangles(); \
+            } \
         } \
-        DrawContactTriangles(); \
-      } \
-    } \
-  }
+    }
 
 /*
  * Draws the contact effect as a ribbon through the ball's last positions, and
  * Mario's as a spinning image, while it fades
  */
-void DrawContactEffect(Gfx** displayListHead, CameraMatrices* matrices) {
-  Mat4 scale;
-  Mat4 antiBillboard;
-  Mat4 ribbon;
-  Mat4 spin;
-  Vec3 translation;
-  Vec3 rotation;
-  Vec3 spinScale;
-  Gfx* gfx = *displayListHead;
-  s32 alpha;
-  s32 i;
-  s32 pass;
+void DrawContactEffect(Gfx **displayListHead, CameraMatrices *matrices) {
+    Mat4 scale;
+    Mat4 antiBillboard;
+    Mat4 ribbon;
+    Mat4 spin;
+    Vec3 translation;
+    Vec3 rotation;
+    Vec3 spinScale;
+    Gfx *gfx = *displayListHead;
+    s32 alpha;
+    s32 i;
+    s32 pass;
 
-  if (g_ContactEffect == CONTACT_EFFECT_NONE) {
-    return;
-  }
-
-  if (f_IsContactEffectFading == TRUE) {
-    g_ContactEffect += CONTACT_FADE_STEP;
-    if (g_ContactEffect > CONTACT_AGE_MAX) {
-      g_ContactEffect = CONTACT_AGE_MAX;
-    }
-  } else if (g_ContactEffect < CONTACT_AGE_MAX) {
-    g_ContactEffect++;
-  }
-
-  if (g_IsCupViewShown == TRUE) {
-    return;
-  }
-
-  if (f_ContactStyle == CONTACT_STYLE_WARIO ||
-      f_ContactStyle == CONTACT_STYLE_GAME_BOY_BALL_7) {
-    if (g_ContactEffect < CONTACT_WARIO_HOLD_AGE) {
-      alpha = CONTACT_WARIO_ALPHA;
-    } else {
-      alpha = CONTACT_WARIO_ALPHA -
-          ((g_ContactEffect - CONTACT_WARIO_HOLD_AGE) *
-              CONTACT_WARIO_FADE_PER_AGE);
-    }
-  } else if (f_ContactStyle == CONTACT_STYLE_MARIO) {
-    alpha = CONTACT_WARIO_ALPHA - g_ContactEffect;
-  } else if (f_ContactStyle == CONTACT_STYLE_RAINBOW) {
-    if (g_ContactEffect < CONTACT_HOLD_AGE) {
-      alpha = CONTACT_CHARACTER_ALPHA;
-    } else {
-      alpha = CONTACT_CHARACTER_ALPHA -
-          ((g_ContactEffect - CONTACT_HOLD_AGE) *
-              CONTACT_CHARACTER_FADE_PER_AGE);
-    }
-  } else if (f_ContactStyle == CONTACT_STYLE_PLAIN) {
-    if (g_ContactEffect < CONTACT_HOLD_AGE) {
-      alpha = CONTACT_CHARACTER_ALPHA;
-    } else {
-      alpha = CONTACT_CHARACTER_ALPHA -
-          ((g_ContactEffect - CONTACT_HOLD_AGE) *
-              CONTACT_CHARACTER_FADE_PER_AGE);
-    }
-  } else if (f_ContactStyle == CONTACT_STYLE_BOWSER) {
-    if (g_ContactEffect < CONTACT_HOLD_AGE) {
-      alpha = CONTACT_CHARACTER_ALPHA;
-    } else {
-      alpha = CONTACT_CHARACTER_ALPHA -
-          ((g_ContactEffect - CONTACT_HOLD_AGE) *
-              CONTACT_CHARACTER_FADE_PER_AGE);
-    }
-  } else if (g_ContactEffect < CONTACT_HOLD_AGE) {
-    alpha = CONTACT_SHARED_ALPHA;
-  } else {
-    alpha = CONTACT_SHARED_ALPHA -
-        (CONTACT_SHARED_FADE_PER_AGE * (g_ContactEffect - CONTACT_HOLD_AGE));
-  }
-
-  if (alpha < CONTACT_MIN_ALPHA) {
-    g_ContactEffect = CONTACT_EFFECT_NONE;
-  }
-
-  if (alpha > 0) {
-    /* The ribbon starts where the ball was hit, then follows it */
-    if (g_ContactEffect == 1) {
-      f_ContactTrailHead = 0;
-      for (i = 0; i != CONTACT_MATRIX_COUNT; i++) {
-        guTranslate(&f_ContactMatrices[i],
-            g_CurrentShot.ballPosition[AXIS_X] * COURSE_TO_WORLD_SCALE,
-            (g_CurrentShot.ballPosition[AXIS_Y] * COURSE_TO_WORLD_SCALE) -
-                (g_PinVertexScale * CONTACT_DROP_PER_PIN_SCALE),
-            g_CurrentShot.ballPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE);
-      }
-    } else {
-      guTranslate(&f_ContactMatrices[f_ContactTrailHead],
-          g_TurnBallSimulation.position[AXIS_X] * COURSE_TO_WORLD_SCALE,
-          (g_TurnBallSimulation.position[AXIS_Y] * COURSE_TO_WORLD_SCALE) -
-              (g_PinVertexScale * CONTACT_DROP_PER_PIN_SCALE),
-          g_TurnBallSimulation.position[AXIS_Z] * COURSE_TO_WORLD_SCALE);
+    if (g_ContactEffect == CONTACT_EFFECT_NONE) {
+        return;
     }
 
-    gDPPipeSync(gfx++);
-    gDPPipeSync(gfx++);
-    gDPSetCycleType(gfx++, G_CYC_1CYCLE);
-    gDPPipeSync(gfx++);
-    gDPPipeSync(gfx++);
-    gDPSetRenderMode(gfx++, G_RM_ZB_XLU_SURF, G_RM_ZB_XLU_SURF2);
-    gDPPipeSync(gfx++);
-    gDPSetAlphaCompare(gfx++, G_AC_NONE);
-    gDPPipeSync(gfx++);
-    gDPSetAlphaDither(gfx++, G_AD_PATTERN);
-    gDPPipeSync(gfx++);
-    gDPSetTexturePersp(gfx++, G_TP_PERSP);
-    gDPPipeSync(gfx++);
-    gDPSetTextureFilter(gfx++, G_TF_BILERP);
-    gDPPipeSync(gfx++);
-    gDPSetTextureLUT(gfx++, G_TT_NONE);
-    gSPTexture(gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0,
-        G_TX_RENDERTILE, G_ON);
-    gSPClearGeometryMode(gfx++, ALL_GEOMETRY_MODES);
-    gSPSetGeometryMode(gfx++, G_ZBUFFER | G_SHADE | G_SHADING_SMOOTH);
-    gDPSetEnvColor(gfx++, 255, 255, 255, OPAQUE_ALPHA);
-    if (f_ContactStyle == CONTACT_STYLE_WARIO) {
-      gDPSetPrimColor(gfx++, 0, 0, 255, 0, 255, alpha);
-    } else if (f_ContactStyle == CONTACT_STYLE_GAME_BOY_BALL_7) {
-      gDPSetEnvColor(gfx++, 255, 255, 127, OPAQUE_ALPHA);
-      gDPSetPrimColor(gfx++, 0, 0, guRandom() % 255, guRandom() % 255,
-          guRandom() % 255, alpha);
-    } else if (f_ContactStyle == CONTACT_STYLE_BOWSER) {
-      gDPSetPrimColor(gfx++, 0, 0, 255, 0, 255, alpha);
-      gDPSetPrimColor(gfx++, 0, 0, 255, 0, 0, alpha);
-      gDPSetEnvColor(gfx++, 255, 247, 239, OPAQUE_ALPHA);
-    } else if (f_ContactStyle == CONTACT_STYLE_MARIO) {
-      gDPSetPrimColor(gfx++, 0, 0, 255, 0, 0, alpha);
-    } else if (f_ContactStyle == CONTACT_STYLE_PLAIN ||
-        f_ContactStyle == CONTACT_STYLE_GAME_BOY_BALL_5 ||
-        f_ContactStyle == CONTACT_STYLE_PUTT) {
-      gDPSetPrimColor(gfx++, 0, 0, 0, 0, 255, alpha);
-    } else if (f_ContactStyle == CONTACT_STYLE_GAME_BOY_BALL_6) {
-      gDPSetPrimColor(gfx++, 0, 0, 255, 127, 0, alpha);
-      gDPSetEnvColor(gfx++, 255, 191, 63, OPAQUE_ALPHA);
-    } else {
-      gDPSetPrimColor(gfx++, 0, 0, 191, 191, 255, alpha);
+    if (f_IsContactEffectFading == TRUE) {
+        g_ContactEffect += CONTACT_FADE_STEP;
+        if (g_ContactEffect > CONTACT_AGE_MAX) {
+            g_ContactEffect = CONTACT_AGE_MAX;
+        }
+    }
+    else if (g_ContactEffect < CONTACT_AGE_MAX) {
+        g_ContactEffect++;
     }
 
-    /* Bowser's image and the rainbow have their own colors */
-    if (f_ContactStyle == CONTACT_STYLE_BOWSER ||
-        f_ContactStyle == CONTACT_STYLE_RAINBOW) {
-      gDPSetCombineLERP(gfx++, 0, 0, 0, TEXEL0, TEXEL0, 0, PRIMITIVE, 0, 0, 0,
-          0, TEXEL0, TEXEL0, 0, PRIMITIVE, 0);
-    } else {
-      gDPSetCombineLERP(gfx++, ENVIRONMENT, PRIMITIVE, TEXEL0, PRIMITIVE,
-          PRIMITIVE, 0, TEXEL0, 0, ENVIRONMENT, PRIMITIVE, TEXEL0, PRIMITIVE,
-          PRIMITIVE, 0, TEXEL0, 0);
+    if (g_IsCupViewShown == TRUE) {
+        return;
     }
 
-    if (f_ContactStyle == CONTACT_STYLE_RAINBOW) {
-      gDPPipeSync(gfx++);
-      gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-      gDPLoadTLUT_pal256(gfx++,
-          TextureAddress(
-              ImageBody(g_SharedEffectImages + CONTACT_IMAGE_OFFSET)));
-      gDPLoadTextureBlock(gfx++,
-          TextureAddress(g_SharedEffectImages + CONTACT_IMAGE_PIXELS_OFFSET),
-          G_IM_FMT_CI, G_IM_SIZ_8b, RAINBOW_CONTACT_IMAGE_WIDTH,
-          RAINBOW_CONTACT_IMAGE_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
-          G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, 7, G_TX_NOLOD, G_TX_NOLOD);
-    } else if (f_ContactStyle == CONTACT_STYLE_BOWSER) {
-      gDPPipeSync(gfx++);
-      gDPSetAlphaCompare(gfx++, G_AC_THRESHOLD);
-      gDPSetBlendColor(gfx++, 255, 255, 255, 1);
-      gDPPipeSync(gfx++);
-      gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-      gDPLoadTLUT_pal256(gfx++,
-          TextureAddress(
-              ImageBody(g_SharedEffectImages + CONTACT_IMAGE_OFFSET)));
-      gDPLoadTextureBlock(gfx++,
-          TextureAddress(g_SharedEffectImages + CONTACT_IMAGE_PIXELS_OFFSET),
-          G_IM_FMT_CI, G_IM_SIZ_8b, BOWSER_CONTACT_IMAGE_WIDTH,
-          BOWSER_CONTACT_IMAGE_HEIGHT, 0, G_TX_MIRROR | G_TX_WRAP,
-          G_TX_NOMIRROR | G_TX_WRAP, TextureMask(BOWSER_CONTACT_IMAGE_WIDTH),
-          G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-    } else if (f_ContactStyle == CONTACT_STYLE_WARIO ||
-        f_ContactStyle == CONTACT_STYLE_GAME_BOY_BALL_7) {
-      gDPLoadTextureBlock_4b(gfx++,
-          TextureAddress(
-              ImageBody(g_SharedEffectImages + CONTACT_IMAGE_OFFSET)),
-          G_IM_FMT_I, WARIO_CONTACT_IMAGE_WIDTH, WARIO_CONTACT_IMAGE_HEIGHT, 0,
-          G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
-          TextureMask(WARIO_CONTACT_IMAGE_HEIGHT), G_TX_NOLOD, G_TX_NOLOD);
-    } else if (f_ContactStyle == CONTACT_STYLE_PLAIN ||
-        f_ContactStyle == CONTACT_STYLE_GAME_BOY_BALL_6 ||
-        f_ContactStyle == CONTACT_STYLE_GAME_BOY_BALL_5) {
-      gDPLoadTextureBlock_4b(gfx++,
-          TextureAddress(ImageBody(g_SharedEffectImages)), G_IM_FMT_I,
-          PLAIN_CONTACT_IMAGE_WIDTH, PLAIN_CONTACT_IMAGE_HEIGHT, 0,
-          G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
-          G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-    } else if (f_ContactStyle == CONTACT_STYLE_PUTT) {
-      gDPLoadTextureBlock_4b(gfx++,
-          TextureAddress(
-              ImageBody(g_SharedEffectImages + CONTACT_PUTT_IMAGE_OFFSET)),
-          G_IM_FMT_I, PUTT_CONTACT_IMAGE_WIDTH, PUTT_CONTACT_IMAGE_HEIGHT, 0,
-          G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
-          G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-    } else {
-      gDPLoadTextureBlock_4b(gfx++,
-          TextureAddress(ImageBody(g_SharedEffectImages)), G_IM_FMT_I,
-          PLAIN_CONTACT_IMAGE_WIDTH, PLAIN_CONTACT_IMAGE_HEIGHT, 0,
-          G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
-          G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+    if (f_ContactStyle == CONTACT_STYLE_WARIO || f_ContactStyle == CONTACT_STYLE_GAME_BOY_BALL_7) {
+        if (g_ContactEffect < CONTACT_WARIO_HOLD_AGE) {
+            alpha = CONTACT_WARIO_ALPHA;
+        }
+        else {
+            alpha = CONTACT_WARIO_ALPHA -
+                ((g_ContactEffect - CONTACT_WARIO_HOLD_AGE) * CONTACT_WARIO_FADE_PER_AGE);
+        }
+    }
+    else if (f_ContactStyle == CONTACT_STYLE_MARIO) {
+        alpha = CONTACT_WARIO_ALPHA - g_ContactEffect;
+    }
+    else if (f_ContactStyle == CONTACT_STYLE_RAINBOW) {
+        if (g_ContactEffect < CONTACT_HOLD_AGE) {
+            alpha = CONTACT_CHARACTER_ALPHA;
+        }
+        else {
+            alpha = CONTACT_CHARACTER_ALPHA -
+                ((g_ContactEffect - CONTACT_HOLD_AGE) * CONTACT_CHARACTER_FADE_PER_AGE);
+        }
+    }
+    else if (f_ContactStyle == CONTACT_STYLE_PLAIN) {
+        if (g_ContactEffect < CONTACT_HOLD_AGE) {
+            alpha = CONTACT_CHARACTER_ALPHA;
+        }
+        else {
+            alpha = CONTACT_CHARACTER_ALPHA -
+                ((g_ContactEffect - CONTACT_HOLD_AGE) * CONTACT_CHARACTER_FADE_PER_AGE);
+        }
+    }
+    else if (f_ContactStyle == CONTACT_STYLE_BOWSER) {
+        if (g_ContactEffect < CONTACT_HOLD_AGE) {
+            alpha = CONTACT_CHARACTER_ALPHA;
+        }
+        else {
+            alpha = CONTACT_CHARACTER_ALPHA -
+                ((g_ContactEffect - CONTACT_HOLD_AGE) * CONTACT_CHARACTER_FADE_PER_AGE);
+        }
+    }
+    else if (g_ContactEffect < CONTACT_HOLD_AGE) {
+        alpha = CONTACT_SHARED_ALPHA;
+    }
+    else {
+        alpha = CONTACT_SHARED_ALPHA -
+            (CONTACT_SHARED_FADE_PER_AGE * (g_ContactEffect - CONTACT_HOLD_AGE));
     }
 
-    guScaleF(scale, CONTACT_RIBBON_SCALE, CONTACT_RIBBON_SCALE,
-        CONTACT_RIBBON_SCALE);
-    guMtxL2F(antiBillboard, &matrices->antiBillboard);
-    MultiplyMatrices(scale, antiBillboard, ribbon);
-    guMtxF2L(ribbon, &f_ContactRibbonMatrices[g_DrawBufferIndex]);
-    if (f_ContactStyle != CONTACT_STYLE_MARIO) {
-      gDPPipeSync(gfx++);
-      DrawContactRibbon();
-      if (f_ContactStyle == CONTACT_STYLE_WARIO ||
-          f_ContactStyle == CONTACT_STYLE_GAME_BOY_BALL_7) {
-        gDPLoadTextureBlock_4b(gfx++,
-            TextureAddress(
-                ImageBody(g_SharedEffectImages + CONTACT_SECOND_IMAGE_OFFSET)),
-            G_IM_FMT_I, WARIO_CONTACT_IMAGE_WIDTH, WARIO_CONTACT_IMAGE_HEIGHT,
-            0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
-            G_TX_NOMASK, TextureMask(WARIO_CONTACT_IMAGE_HEIGHT), G_TX_NOLOD,
-            G_TX_NOLOD);
+    if (alpha < CONTACT_MIN_ALPHA) {
+        g_ContactEffect = CONTACT_EFFECT_NONE;
+    }
+
+    if (alpha > 0) {
+        /* The ribbon starts where the ball was hit, then follows it */
+        if (g_ContactEffect == 1) {
+            f_ContactTrailHead = 0;
+            for (i = 0; i != CONTACT_MATRIX_COUNT; i++) {
+                guTranslate(
+                    &f_ContactMatrices[i],
+                    g_CurrentShot.ballPosition[AXIS_X] * COURSE_TO_WORLD_SCALE,
+                    (g_CurrentShot.ballPosition[AXIS_Y] * COURSE_TO_WORLD_SCALE) -
+                        (g_PinVertexScale * CONTACT_DROP_PER_PIN_SCALE),
+                    g_CurrentShot.ballPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE
+                );
+            }
+        }
+        else {
+            guTranslate(
+                &f_ContactMatrices[f_ContactTrailHead],
+                g_TurnBallSimulation.position[AXIS_X] * COURSE_TO_WORLD_SCALE,
+                (g_TurnBallSimulation.position[AXIS_Y] * COURSE_TO_WORLD_SCALE) -
+                    (g_PinVertexScale * CONTACT_DROP_PER_PIN_SCALE),
+                g_TurnBallSimulation.position[AXIS_Z] * COURSE_TO_WORLD_SCALE
+            );
+        }
+
         gDPPipeSync(gfx++);
-        DrawContactRibbon();
-      }
+        gDPPipeSync(gfx++);
+        gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+        gDPPipeSync(gfx++);
+        gDPPipeSync(gfx++);
+        gDPSetRenderMode(gfx++, G_RM_ZB_XLU_SURF, G_RM_ZB_XLU_SURF2);
+        gDPPipeSync(gfx++);
+        gDPSetAlphaCompare(gfx++, G_AC_NONE);
+        gDPPipeSync(gfx++);
+        gDPSetAlphaDither(gfx++, G_AD_PATTERN);
+        gDPPipeSync(gfx++);
+        gDPSetTexturePersp(gfx++, G_TP_PERSP);
+        gDPPipeSync(gfx++);
+        gDPSetTextureFilter(gfx++, G_TF_BILERP);
+        gDPPipeSync(gfx++);
+        gDPSetTextureLUT(gfx++, G_TT_NONE);
+        gSPTexture(gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0, G_TX_RENDERTILE, G_ON);
+        gSPClearGeometryMode(gfx++, ALL_GEOMETRY_MODES);
+        gSPSetGeometryMode(gfx++, G_ZBUFFER | G_SHADE | G_SHADING_SMOOTH);
+        gDPSetEnvColor(gfx++, 255, 255, 255, OPAQUE_ALPHA);
+        if (f_ContactStyle == CONTACT_STYLE_WARIO) {
+            gDPSetPrimColor(gfx++, 0, 0, 255, 0, 255, alpha);
+        }
+        else if (f_ContactStyle == CONTACT_STYLE_GAME_BOY_BALL_7) {
+            gDPSetEnvColor(gfx++, 255, 255, 127, OPAQUE_ALPHA);
+            gDPSetPrimColor(
+                gfx++,
+                0,
+                0,
+                guRandom() % 255,
+                guRandom() % 255,
+                guRandom() % 255,
+                alpha
+            );
+        }
+        else if (f_ContactStyle == CONTACT_STYLE_BOWSER) {
+            gDPSetPrimColor(gfx++, 0, 0, 255, 0, 255, alpha);
+            gDPSetPrimColor(gfx++, 0, 0, 255, 0, 0, alpha);
+            gDPSetEnvColor(gfx++, 255, 247, 239, OPAQUE_ALPHA);
+        }
+        else if (f_ContactStyle == CONTACT_STYLE_MARIO) {
+            gDPSetPrimColor(gfx++, 0, 0, 255, 0, 0, alpha);
+        }
+        else if (f_ContactStyle == CONTACT_STYLE_PLAIN ||
+            f_ContactStyle == CONTACT_STYLE_GAME_BOY_BALL_5 ||
+            f_ContactStyle == CONTACT_STYLE_PUTT) {
+            gDPSetPrimColor(gfx++, 0, 0, 0, 0, 255, alpha);
+        }
+        else if (f_ContactStyle == CONTACT_STYLE_GAME_BOY_BALL_6) {
+            gDPSetPrimColor(gfx++, 0, 0, 255, 127, 0, alpha);
+            gDPSetEnvColor(gfx++, 255, 191, 63, OPAQUE_ALPHA);
+        }
+        else {
+            gDPSetPrimColor(gfx++, 0, 0, 191, 191, 255, alpha);
+        }
+
+        /* Bowser's image and the rainbow have their own colors */
+        if (f_ContactStyle == CONTACT_STYLE_BOWSER || f_ContactStyle == CONTACT_STYLE_RAINBOW) {
+            gDPSetCombineLERP(
+                gfx++,
+                0,
+                0,
+                0,
+                TEXEL0,
+                TEXEL0,
+                0,
+                PRIMITIVE,
+                0,
+                0,
+                0,
+                0,
+                TEXEL0,
+                TEXEL0,
+                0,
+                PRIMITIVE,
+                0
+            );
+        }
+        else {
+            gDPSetCombineLERP(
+                gfx++,
+                ENVIRONMENT,
+                PRIMITIVE,
+                TEXEL0,
+                PRIMITIVE,
+                PRIMITIVE,
+                0,
+                TEXEL0,
+                0,
+                ENVIRONMENT,
+                PRIMITIVE,
+                TEXEL0,
+                PRIMITIVE,
+                PRIMITIVE,
+                0,
+                TEXEL0,
+                0
+            );
+        }
+
+        if (f_ContactStyle == CONTACT_STYLE_RAINBOW) {
+            gDPPipeSync(gfx++);
+            gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+            gDPLoadTLUT_pal256(
+                gfx++,
+                TextureAddress(ImageBody(g_SharedEffectImages + CONTACT_IMAGE_OFFSET))
+            );
+            gDPLoadTextureBlock(
+                gfx++,
+                TextureAddress(g_SharedEffectImages + CONTACT_IMAGE_PIXELS_OFFSET),
+                G_IM_FMT_CI,
+                G_IM_SIZ_8b,
+                RAINBOW_CONTACT_IMAGE_WIDTH,
+                RAINBOW_CONTACT_IMAGE_HEIGHT,
+                0,
+                G_TX_NOMIRROR | G_TX_WRAP,
+                G_TX_NOMIRROR | G_TX_WRAP,
+                G_TX_NOMASK,
+                7,
+                G_TX_NOLOD,
+                G_TX_NOLOD
+            );
+        }
+        else if (f_ContactStyle == CONTACT_STYLE_BOWSER) {
+            gDPPipeSync(gfx++);
+            gDPSetAlphaCompare(gfx++, G_AC_THRESHOLD);
+            gDPSetBlendColor(gfx++, 255, 255, 255, 1);
+            gDPPipeSync(gfx++);
+            gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+            gDPLoadTLUT_pal256(
+                gfx++,
+                TextureAddress(ImageBody(g_SharedEffectImages + CONTACT_IMAGE_OFFSET))
+            );
+            gDPLoadTextureBlock(
+                gfx++,
+                TextureAddress(g_SharedEffectImages + CONTACT_IMAGE_PIXELS_OFFSET),
+                G_IM_FMT_CI,
+                G_IM_SIZ_8b,
+                BOWSER_CONTACT_IMAGE_WIDTH,
+                BOWSER_CONTACT_IMAGE_HEIGHT,
+                0,
+                G_TX_MIRROR | G_TX_WRAP,
+                G_TX_NOMIRROR | G_TX_WRAP,
+                TextureMask(BOWSER_CONTACT_IMAGE_WIDTH),
+                G_TX_NOMASK,
+                G_TX_NOLOD,
+                G_TX_NOLOD
+            );
+        }
+        else if (f_ContactStyle == CONTACT_STYLE_WARIO ||
+            f_ContactStyle == CONTACT_STYLE_GAME_BOY_BALL_7) {
+            gDPLoadTextureBlock_4b(
+                gfx++,
+                TextureAddress(ImageBody(g_SharedEffectImages + CONTACT_IMAGE_OFFSET)),
+                G_IM_FMT_I,
+                WARIO_CONTACT_IMAGE_WIDTH,
+                WARIO_CONTACT_IMAGE_HEIGHT,
+                0,
+                G_TX_NOMIRROR | G_TX_WRAP,
+                G_TX_NOMIRROR | G_TX_WRAP,
+                G_TX_NOMASK,
+                TextureMask(WARIO_CONTACT_IMAGE_HEIGHT),
+                G_TX_NOLOD,
+                G_TX_NOLOD
+            );
+        }
+        else if (f_ContactStyle == CONTACT_STYLE_PLAIN ||
+            f_ContactStyle == CONTACT_STYLE_GAME_BOY_BALL_6 ||
+            f_ContactStyle == CONTACT_STYLE_GAME_BOY_BALL_5) {
+            gDPLoadTextureBlock_4b(
+                gfx++,
+                TextureAddress(ImageBody(g_SharedEffectImages)),
+                G_IM_FMT_I,
+                PLAIN_CONTACT_IMAGE_WIDTH,
+                PLAIN_CONTACT_IMAGE_HEIGHT,
+                0,
+                G_TX_NOMIRROR | G_TX_WRAP,
+                G_TX_NOMIRROR | G_TX_WRAP,
+                G_TX_NOMASK,
+                G_TX_NOMASK,
+                G_TX_NOLOD,
+                G_TX_NOLOD
+            );
+        }
+        else if (f_ContactStyle == CONTACT_STYLE_PUTT) {
+            gDPLoadTextureBlock_4b(
+                gfx++,
+                TextureAddress(ImageBody(g_SharedEffectImages + CONTACT_PUTT_IMAGE_OFFSET)),
+                G_IM_FMT_I,
+                PUTT_CONTACT_IMAGE_WIDTH,
+                PUTT_CONTACT_IMAGE_HEIGHT,
+                0,
+                G_TX_NOMIRROR | G_TX_WRAP,
+                G_TX_NOMIRROR | G_TX_WRAP,
+                G_TX_NOMASK,
+                G_TX_NOMASK,
+                G_TX_NOLOD,
+                G_TX_NOLOD
+            );
+        }
+        else {
+            gDPLoadTextureBlock_4b(
+                gfx++,
+                TextureAddress(ImageBody(g_SharedEffectImages)),
+                G_IM_FMT_I,
+                PLAIN_CONTACT_IMAGE_WIDTH,
+                PLAIN_CONTACT_IMAGE_HEIGHT,
+                0,
+                G_TX_NOMIRROR | G_TX_WRAP,
+                G_TX_NOMIRROR | G_TX_WRAP,
+                G_TX_NOMASK,
+                G_TX_NOMASK,
+                G_TX_NOLOD,
+                G_TX_NOLOD
+            );
+        }
+
+        guScaleF(scale, CONTACT_RIBBON_SCALE, CONTACT_RIBBON_SCALE, CONTACT_RIBBON_SCALE);
+        guMtxL2F(antiBillboard, &matrices->antiBillboard);
+        MultiplyMatrices(scale, antiBillboard, ribbon);
+        guMtxF2L(ribbon, &f_ContactRibbonMatrices[g_DrawBufferIndex]);
+        if (f_ContactStyle != CONTACT_STYLE_MARIO) {
+            gDPPipeSync(gfx++);
+            DrawContactRibbon();
+            if (f_ContactStyle == CONTACT_STYLE_WARIO ||
+                f_ContactStyle == CONTACT_STYLE_GAME_BOY_BALL_7) {
+                gDPLoadTextureBlock_4b(
+                    gfx++,
+                    TextureAddress(ImageBody(g_SharedEffectImages + CONTACT_SECOND_IMAGE_OFFSET)),
+                    G_IM_FMT_I,
+                    WARIO_CONTACT_IMAGE_WIDTH,
+                    WARIO_CONTACT_IMAGE_HEIGHT,
+                    0,
+                    G_TX_NOMIRROR | G_TX_WRAP,
+                    G_TX_NOMIRROR | G_TX_WRAP,
+                    G_TX_NOMASK,
+                    TextureMask(WARIO_CONTACT_IMAGE_HEIGHT),
+                    G_TX_NOLOD,
+                    G_TX_NOLOD
+                );
+                gDPPipeSync(gfx++);
+                DrawContactRibbon();
+            }
+        }
+
+        if (f_ContactStyle == CONTACT_STYLE_MARIO) {
+            /* The chained assignment is there to match: three statements, in either
+             * order, give 501 differing words, 81 in shape */
+            translation[AXIS_X] = translation[AXIS_Y] = translation[AXIS_Z] = 0.0f;
+            f_ContactSpinAngle += CONTACT_SPIN_DEGREES_PER_FRAME;
+            rotation[AXIS_X] = 0.0f;
+            rotation[AXIS_Y] = 0.0f;
+            rotation[AXIS_Z] = f_ContactSpinAngle;
+            spinScale[AXIS_Z] = alpha * CONTACT_SPIN_SCALE_PER_ALPHA;
+            spinScale[AXIS_Y] = spinScale[AXIS_Z];
+            spinScale[AXIS_X] = spinScale[AXIS_Y];
+            BuildTransformMatrix(spin, rotation, translation, spinScale);
+            ConvertMatrixToFixed(spin, &f_ContactSpinMatrices[g_MatrixBufferIndex]);
+            gDPPipeSync(gfx++);
+            gDPPipeSync(gfx++);
+            gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+            gDPLoadTLUT_pal256(
+                gfx++,
+                TextureAddress(ImageBody(g_SharedEffectImages + CONTACT_IMAGE_OFFSET))
+            );
+            gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, CONTACT_SPIN_ALPHA);
+            gDPLoadTextureBlock(
+                gfx++,
+                TextureAddress(g_SharedEffectImages + CONTACT_IMAGE_PIXELS_OFFSET),
+                G_IM_FMT_CI,
+                G_IM_SIZ_8b,
+                MARIO_CONTACT_IMAGE_WIDTH,
+                MARIO_CONTACT_IMAGE_HEIGHT,
+                0,
+                G_TX_NOMIRROR | G_TX_WRAP,
+                G_TX_NOMIRROR | G_TX_WRAP,
+                G_TX_NOMASK,
+                G_TX_NOMASK,
+                G_TX_NOLOD,
+                G_TX_NOLOD
+            );
+            gDPSetCombineLERP(
+                gfx++,
+                0,
+                0,
+                0,
+                TEXEL0,
+                PRIMITIVE,
+                0,
+                TEXEL0,
+                0,
+                0,
+                0,
+                0,
+                TEXEL0,
+                PRIMITIVE,
+                0,
+                TEXEL0,
+                0
+            );
+            gDPPipeSync(gfx++);
+            gSPMatrix(
+                gfx++,
+                PhysicalAddress(&f_ContactMatrices[f_ContactTrailHead]),
+                G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW
+            );
+            gSPMatrix(
+                gfx++,
+                PhysicalAddress(&matrices->antiBillboard),
+                G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW
+            );
+            gSPMatrix(
+                gfx++,
+                PhysicalAddress(&f_ContactSpinMatrices[g_MatrixBufferIndex]),
+                G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW
+            );
+            gSPVertex(gfx++, f_ContactSpinVertices, QUAD_VERTEX_COUNT, 0);
+            gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
+            gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
+        }
+
+        /* The ring of matrices turns back one so the newest position takes the slot
+         * before */
+        f_ContactTrailHead--;
+        if (f_ContactTrailHead < 0) {
+            f_ContactTrailHead = CONTACT_TRAIL_LENGTH - 1;
+        }
+
+        gDPPipeSync(gfx++);
     }
 
-    if (f_ContactStyle == CONTACT_STYLE_MARIO) {
-      /* The chained assignment is there to match: three statements, in either
-       * order, give 501 differing words, 81 in shape */
-      translation[AXIS_X] = translation[AXIS_Y] = translation[AXIS_Z] = 0.0f;
-      f_ContactSpinAngle += CONTACT_SPIN_DEGREES_PER_FRAME;
-      rotation[AXIS_X] = 0.0f;
-      rotation[AXIS_Y] = 0.0f;
-      rotation[AXIS_Z] = f_ContactSpinAngle;
-      spinScale[AXIS_Z] = alpha * CONTACT_SPIN_SCALE_PER_ALPHA;
-      spinScale[AXIS_Y] = spinScale[AXIS_Z];
-      spinScale[AXIS_X] = spinScale[AXIS_Y];
-      BuildTransformMatrix(spin, rotation, translation, spinScale);
-      ConvertMatrixToFixed(spin, &f_ContactSpinMatrices[g_MatrixBufferIndex]);
-      gDPPipeSync(gfx++);
-      gDPPipeSync(gfx++);
-      gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-      gDPLoadTLUT_pal256(gfx++,
-          TextureAddress(
-              ImageBody(g_SharedEffectImages + CONTACT_IMAGE_OFFSET)));
-      gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, CONTACT_SPIN_ALPHA);
-      gDPLoadTextureBlock(gfx++,
-          TextureAddress(g_SharedEffectImages + CONTACT_IMAGE_PIXELS_OFFSET),
-          G_IM_FMT_CI, G_IM_SIZ_8b, MARIO_CONTACT_IMAGE_WIDTH,
-          MARIO_CONTACT_IMAGE_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
-          G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
-          G_TX_NOLOD);
-      gDPSetCombineLERP(gfx++, 0, 0, 0, TEXEL0, PRIMITIVE, 0, TEXEL0, 0, 0, 0,
-          0, TEXEL0, PRIMITIVE, 0, TEXEL0, 0);
-      gDPPipeSync(gfx++);
-      gSPMatrix(gfx++, PhysicalAddress(&f_ContactMatrices[f_ContactTrailHead]),
-          G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
-      gSPMatrix(gfx++, PhysicalAddress(&matrices->antiBillboard),
-          G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
-      gSPMatrix(gfx++,
-          PhysicalAddress(&f_ContactSpinMatrices[g_MatrixBufferIndex]),
-          G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
-      gSPVertex(gfx++, f_ContactSpinVertices, QUAD_VERTEX_COUNT, 0);
-      gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
-      gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
-    }
-
-    /* The ring of matrices turns back one so the newest position takes the slot
-     * before */
-    f_ContactTrailHead--;
-    if (f_ContactTrailHead < 0) {
-      f_ContactTrailHead = CONTACT_TRAIL_LENGTH - 1;
-    }
-
-    gDPPipeSync(gfx++);
-  }
-
-  *displayListHead = gfx;
+    *displayListHead = gfx;
 }
 
 /* Shows the Fly Guy that warns of a strong wind, or hides it given
  * FLY_GUY_HIDDEN */
 void ShowWindFlyGuy(s32 show) {
-  EncodedAsset asset;
+    EncodedAsset asset;
 
-  if (f_IsMovieBufferAllocated == TRUE) {
-    if (show == FLY_GUY_HIDDEN) {
-      f_WindFlyGuyFrame = FLY_GUY_HIDDEN;
-      return;
+    if (f_IsMovieBufferAllocated == TRUE) {
+        if (show == FLY_GUY_HIDDEN) {
+            f_WindFlyGuyFrame = FLY_GUY_HIDDEN;
+            return;
+        }
+
+        f_WindFlyGuyFrame = 0;
+        f_WindFlyGuyAsset = FLY_GUY_IMAGE_ASSET;
+        OpenEncodedAsset(FLY_GUY_IMAGE_ASSET, &asset);
+        ReadEncodedAsset(f_MovieBuffer, &asset);
+        OpenEncodedAsset(ASSET_STREAK_IMAGE, &asset);
+        ReadEncodedAsset(f_MovieBuffer + FLY_GUY_IMAGE_SIZE, &asset);
+        f_LoadedBanner = BANNER_NONE;
+        f_CurrentBanner = BANNER_NONE;
+        ResetPath();
     }
-
-    f_WindFlyGuyFrame = 0;
-    f_WindFlyGuyAsset = FLY_GUY_IMAGE_ASSET;
-    OpenEncodedAsset(FLY_GUY_IMAGE_ASSET, &asset);
-    ReadEncodedAsset(f_MovieBuffer, &asset);
-    OpenEncodedAsset(ASSET_STREAK_IMAGE, &asset);
-    ReadEncodedAsset(f_MovieBuffer + FLY_GUY_IMAGE_SIZE, &asset);
-    f_LoadedBanner = BANNER_NONE;
-    f_CurrentBanner = BANNER_NONE;
-    ResetPath();
-  }
 }
 
 #define WIND_FLY_GUY_PATH_POINT_COUNT 17
@@ -3064,154 +3743,243 @@ void ShowWindFlyGuy(s32 show) {
  * The Fly Guy that warns of a strong wind, flying across the screen and
  * trailing a streak of wind
  */
-void DrawWindFlyGuy(Gfx** displayListHead) {
-  EncodedAsset asset;
-  PathPoint position;
-  Vec3 translation;
-  Vec3 rotation;
-  Mat4 matrix;
-  Gfx* gfx = *displayListHead;
-  s32 alpha;
-  s32 i;
-  s32 slotsBack;
-  s32 streakSlot;
+void DrawWindFlyGuy(Gfx **displayListHead) {
+    EncodedAsset asset;
+    PathPoint position;
+    Vec3 translation;
+    Vec3 rotation;
+    Mat4 matrix;
+    Gfx *gfx = *displayListHead;
+    s32 alpha;
+    s32 i;
+    s32 slotsBack;
+    s32 streakSlot;
 
-  if (f_WindFlyGuyFrame == FLY_GUY_HIDDEN || g_PauseScreen) {
-    return;
-  }
-
-  f_WindFlyGuyAsset++;
-  if (f_WindFlyGuyAsset == FLY_GUY_IMAGE_ASSET + WIND_FLY_GUY_FRAME_COUNT) {
-    f_WindFlyGuyAsset = FLY_GUY_IMAGE_ASSET;
-  }
-
-  OpenEncodedAsset(f_WindFlyGuyAsset, &asset);
-  ReadEncodedAsset(f_MovieBuffer, &asset);
-  if (f_WindFlyGuyFrame < WIND_FLY_GUY_ARRIVED) {
-    if (StepAlongPath(f_WindFlyGuyPath, WIND_FLY_GUY_PATH_POINT_COUNT,
-            WIND_FLY_GUY_PATH_PACE, &position) == PATH_END_REACHED) {
-      f_WindFlyGuyFrame = WIND_FLY_GUY_ARRIVED;
+    if (f_WindFlyGuyFrame == FLY_GUY_HIDDEN || g_PauseScreen) {
+        return;
     }
 
-    alpha = WIND_STREAK_ALPHA;
-  } else {
-    f_WindFlyGuyFrame++;
-    alpha = WIND_STREAK_ALPHA - (f_WindFlyGuyFrame * WIND_STREAK_FADE_STEP);
-    if (alpha < 0) {
-      alpha = 0;
+    f_WindFlyGuyAsset++;
+    if (f_WindFlyGuyAsset == FLY_GUY_IMAGE_ASSET + WIND_FLY_GUY_FRAME_COUNT) {
+        f_WindFlyGuyAsset = FLY_GUY_IMAGE_ASSET;
     }
 
-    if (f_WindFlyGuyFrame == WIND_FLY_GUY_GONE_FRAME) {
-      f_WindFlyGuyFrame = FLY_GUY_HIDDEN;
+    OpenEncodedAsset(f_WindFlyGuyAsset, &asset);
+    ReadEncodedAsset(f_MovieBuffer, &asset);
+    if (f_WindFlyGuyFrame < WIND_FLY_GUY_ARRIVED) {
+        if (StepAlongPath(
+                f_WindFlyGuyPath,
+                WIND_FLY_GUY_PATH_POINT_COUNT,
+                WIND_FLY_GUY_PATH_PACE,
+                &position
+            ) == PATH_END_REACHED) {
+            f_WindFlyGuyFrame = WIND_FLY_GUY_ARRIVED;
+        }
+
+        alpha = WIND_STREAK_ALPHA;
+    }
+    else {
+        f_WindFlyGuyFrame++;
+        alpha = WIND_STREAK_ALPHA - (f_WindFlyGuyFrame * WIND_STREAK_FADE_STEP);
+        if (alpha < 0) {
+            alpha = 0;
+        }
+
+        if (f_WindFlyGuyFrame == WIND_FLY_GUY_GONE_FRAME) {
+            f_WindFlyGuyFrame = FLY_GUY_HIDDEN;
+        }
+
+        position = f_WindFlyGuyExit;
     }
 
-    position = f_WindFlyGuyExit;
-  }
+    if (f_WindFlyGuyFrame == WIND_FLY_GUY_STARTING) {
+        f_WindFlyGuyLastPosition = f_WindFlyGuyPath[0];
+        f_WindStreakHead = 0;
+        SetContactHalfWidth(WIND_STREAK_HALF_WIDTH);
+        for (i = 0; i != CONTACT_MATRIX_COUNT; i++) {
+            guTranslate(
+                &f_ContactMatrices[i],
+                position.x - (SCREEN_WIDTH / 2),
+                (SCREEN_HEIGHT / 2) - position.y,
+                WIND_STREAK_DEPTH
+            );
+        }
 
-  if (f_WindFlyGuyFrame == WIND_FLY_GUY_STARTING) {
-    f_WindFlyGuyLastPosition = f_WindFlyGuyPath[0];
-    f_WindStreakHead = 0;
-    SetContactHalfWidth(WIND_STREAK_HALF_WIDTH);
-    for (i = 0; i != CONTACT_MATRIX_COUNT; i++) {
-      guTranslate(&f_ContactMatrices[i], position.x - (SCREEN_WIDTH / 2),
-          (SCREEN_HEIGHT / 2) - position.y, WIND_STREAK_DEPTH);
+        PlaySound(SOUND_WIND_FLY_GUY, WIND_FLY_GUY_SOUND_CHANNEL, WIND_FLY_GUY_SOUND_VOLUME);
+        f_WindFlyGuyFrame = WIND_FLY_GUY_FLYING;
     }
 
-    PlaySound(SOUND_WIND_FLY_GUY, WIND_FLY_GUY_SOUND_CHANNEL,
-        WIND_FLY_GUY_SOUND_VOLUME);
-    f_WindFlyGuyFrame = WIND_FLY_GUY_FLYING;
-  }
+    rotation[AXIS_X] = 0.0f;
+    rotation[AXIS_Y] = 0.0f;
+    rotation[AXIS_Z] =
+        atan2(f_WindFlyGuyLastPosition.x - position.x, f_WindFlyGuyLastPosition.y - position.y);
+    translation[AXIS_Z] = WIND_STREAK_DEPTH;
+    translation[AXIS_X] = position.x - (SCREEN_WIDTH / 2);
+    translation[AXIS_Y] = (SCREEN_HEIGHT / 2) - position.y;
+    BuildRotationMatrix(matrix, rotation, translation);
+    ConvertMatrixToFixed(matrix, &f_ContactMatrices[f_WindStreakHead]);
+    f_WindFlyGuyLastPosition = position;
+    SetUpTextDrawing(&gfx);
+    gSPClearGeometryMode(gfx++, ALL_GEOMETRY_MODES);
+    gSPSetGeometryMode(gfx++, G_SHADE | G_SHADING_SMOOTH);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
+    gDPPipeSync(gfx++);
+    gDPSetTexturePersp(gfx++, G_TP_PERSP);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_BILERP);
+    gSPTexture(gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0, G_TX_RENDERTILE, G_ON);
+    gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, alpha);
+    gDPSetEnvColor(gfx++, 255, 255, 255, OPAQUE_ALPHA);
+    gDPSetCombineLERP(
+        gfx++,
+        0,
+        0,
+        0,
+        PRIMITIVE,
+        PRIMITIVE,
+        0,
+        TEXEL0,
+        0,
+        0,
+        0,
+        0,
+        PRIMITIVE,
+        PRIMITIVE,
+        0,
+        TEXEL0,
+        0
+    );
+    LoadNibbleTextureBlock(
+        &gfx,
+        ImageBody(f_MovieBuffer + FLY_GUY_IMAGE_SIZE),
+        G_IM_FMT_I,
+        WIND_STREAK_IMAGE_WIDTH,
+        WIND_STREAK_IMAGE_HEIGHT,
+        0,
+        G_TX_MIRROR,
+        G_TX_MIRROR,
+        G_TX_NOMASK,
+        WIND_STREAK_IMAGE_MASK_T,
+        G_TX_NOLOD,
+        G_TX_NOLOD
+    );
+    gSPMatrix(
+        gfx++,
+        PhysicalAddress(&g_ScreenOrthoMatrix),
+        G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH
+    );
+    gDPPipeSync(gfx++);
+    for (i = 0; i != WIND_STREAK_FIRST_RUN; i++) {
+        streakSlot = (f_WindStreakHead + i) % WIND_STREAK_LENGTH;
+        gSPMatrix(
+            gfx++,
+            PhysicalAddress(&f_ContactMatrices[streakSlot]),
+            G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH
+        );
+        gSPVertex(gfx++, f_ContactVertices, 2, i * 2);
+        gSPModifyVertex(gfx++, i * 2, G_MWO_POINT_ST, i << WIND_STREAK_TEXTURE_T_SHIFT);
+        gSPModifyVertex(
+            gfx++,
+            (i * 2) + 1,
+            G_MWO_POINT_ST,
+            TexcoordWord(WIND_STREAK_TEXTURE_S, i << WIND_STREAK_TEXTURE_T_SHIFT)
+        );
+    }
 
-  rotation[AXIS_X] = 0.0f;
-  rotation[AXIS_Y] = 0.0f;
-  rotation[AXIS_Z] = atan2(f_WindFlyGuyLastPosition.x - position.x,
-      f_WindFlyGuyLastPosition.y - position.y);
-  translation[AXIS_Z] = WIND_STREAK_DEPTH;
-  translation[AXIS_X] = position.x - (SCREEN_WIDTH / 2);
-  translation[AXIS_Y] = (SCREEN_HEIGHT / 2) - position.y;
-  BuildRotationMatrix(matrix, rotation, translation);
-  ConvertMatrixToFixed(matrix, &f_ContactMatrices[f_WindStreakHead]);
-  f_WindFlyGuyLastPosition = position;
-  SetUpTextDrawing(&gfx);
-  gSPClearGeometryMode(gfx++, ALL_GEOMETRY_MODES);
-  gSPSetGeometryMode(gfx++, G_SHADE | G_SHADING_SMOOTH);
-  gDPPipeSync(gfx++);
-  gDPSetRenderMode(gfx++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
-  gDPPipeSync(gfx++);
-  gDPSetTexturePersp(gfx++, G_TP_PERSP);
-  gDPPipeSync(gfx++);
-  gDPSetTextureFilter(gfx++, G_TF_BILERP);
-  gSPTexture(
-      gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0, G_TX_RENDERTILE, G_ON);
-  gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, alpha);
-  gDPSetEnvColor(gfx++, 255, 255, 255, OPAQUE_ALPHA);
-  gDPSetCombineLERP(gfx++, 0, 0, 0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0, 0, 0, 0,
-      PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0);
-  LoadNibbleTextureBlock(&gfx, ImageBody(f_MovieBuffer + FLY_GUY_IMAGE_SIZE),
-      G_IM_FMT_I, WIND_STREAK_IMAGE_WIDTH, WIND_STREAK_IMAGE_HEIGHT, 0,
-      G_TX_MIRROR, G_TX_MIRROR, G_TX_NOMASK, WIND_STREAK_IMAGE_MASK_T,
-      G_TX_NOLOD, G_TX_NOLOD);
-  gSPMatrix(gfx++, PhysicalAddress(&g_ScreenOrthoMatrix),
-      G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
-  gDPPipeSync(gfx++);
-  for (i = 0; i != WIND_STREAK_FIRST_RUN; i++) {
-    streakSlot = (f_WindStreakHead + i) % WIND_STREAK_LENGTH;
-    gSPMatrix(gfx++, PhysicalAddress(&f_ContactMatrices[streakSlot]),
-        G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
-    gSPVertex(gfx++, f_ContactVertices, 2, i * 2);
-    gSPModifyVertex(
-        gfx++, i * 2, G_MWO_POINT_ST, i << WIND_STREAK_TEXTURE_T_SHIFT);
-    gSPModifyVertex(gfx++, (i * 2) + 1, G_MWO_POINT_ST,
-        TexcoordWord(WIND_STREAK_TEXTURE_S, i << WIND_STREAK_TEXTURE_T_SHIFT));
-  }
+    for (i = 0; i != WIND_STREAK_QUADS_PER_RUN; i++) {
+        gSP2Triangles(
+            gfx++,
+            (i * 2) + 1,
+            i * 2,
+            (i * 2) + 2,
+            0,
+            (i * 2) + 1,
+            (i * 2) + 2,
+            (i * 2) + 3,
+            0
+        );
+    }
 
-  for (i = 0; i != WIND_STREAK_QUADS_PER_RUN; i++) {
-    gSP2Triangles(gfx++, (i * 2) + 1, i * 2, (i * 2) + 2, 0, (i * 2) + 1,
-        (i * 2) + 2, (i * 2) + 3, 0);
-  }
+    /* The second run reuses the vertex slots backwards from the last vertex of
+     * the first */
+    for (i = WIND_STREAK_FIRST_RUN; i != WIND_STREAK_SECOND_RUN_END; i++) {
+        slotsBack = (i - WIND_STREAK_FIRST_RUN) * 2;
+        streakSlot = (f_WindStreakHead + i) % WIND_STREAK_LENGTH;
+        gSPMatrix(
+            gfx++,
+            PhysicalAddress(&f_ContactMatrices[streakSlot]),
+            G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH
+        );
+        gSPVertex(gfx++, f_ContactVertices, 2, WIND_STREAK_LAST_SLOT - slotsBack);
+        gSPModifyVertex(
+            gfx++,
+            WIND_STREAK_LAST_SLOT - slotsBack,
+            G_MWO_POINT_ST,
+            i << WIND_STREAK_TEXTURE_T_SHIFT
+        );
+        gSPModifyVertex(
+            gfx++,
+            WIND_STREAK_LAST_SLOT + 1 - slotsBack,
+            G_MWO_POINT_ST,
+            TexcoordWord(WIND_STREAK_TEXTURE_S, i << WIND_STREAK_TEXTURE_T_SHIFT)
+        );
+    }
 
-  /* The second run reuses the vertex slots backwards from the last vertex of
-   * the first */
-  for (i = WIND_STREAK_FIRST_RUN; i != WIND_STREAK_SECOND_RUN_END; i++) {
-    slotsBack = (i - WIND_STREAK_FIRST_RUN) * 2;
-    streakSlot = (f_WindStreakHead + i) % WIND_STREAK_LENGTH;
-    gSPMatrix(gfx++, PhysicalAddress(&f_ContactMatrices[streakSlot]),
-        G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
-    gSPVertex(gfx++, f_ContactVertices, 2, WIND_STREAK_LAST_SLOT - slotsBack);
-    gSPModifyVertex(gfx++, WIND_STREAK_LAST_SLOT - slotsBack, G_MWO_POINT_ST,
-        i << WIND_STREAK_TEXTURE_T_SHIFT);
-    gSPModifyVertex(gfx++, WIND_STREAK_LAST_SLOT + 1 - slotsBack,
-        G_MWO_POINT_ST,
-        TexcoordWord(WIND_STREAK_TEXTURE_S, i << WIND_STREAK_TEXTURE_T_SHIFT));
-  }
+    for (i = 0; i != WIND_STREAK_QUADS_PER_RUN; i++) {
+        gSP2Triangles(
+            gfx++,
+            (i * 2) + 1,
+            i * 2,
+            (i * 2) + 2,
+            0,
+            (i * 2) + 1,
+            (i * 2) + 2,
+            (i * 2) + 3,
+            0
+        );
+    }
 
-  for (i = 0; i != WIND_STREAK_QUADS_PER_RUN; i++) {
-    gSP2Triangles(gfx++, (i * 2) + 1, i * 2, (i * 2) + 2, 0, (i * 2) + 1,
-        (i * 2) + 2, (i * 2) + 3, 0);
-  }
+    f_WindStreakHead--;
+    if (f_WindStreakHead < 0) {
+        f_WindStreakHead = WIND_STREAK_LENGTH - 1;
+    }
 
-  f_WindStreakHead--;
-  if (f_WindStreakHead < 0) {
-    f_WindStreakHead = WIND_STREAK_LENGTH - 1;
-  }
-
-  gDPPipeSync(gfx++);
-  gDPPipeSync(gfx++);
-  gDPSetTexturePersp(gfx++, G_TP_NONE);
-  gDPPipeSync(gfx++);
-  gDPSetTextureLUT(gfx++, G_TT_NONE);
-  gDPPipeSync(gfx++);
-  gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
-  gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-  LoadTextureBlock(&gfx, ImageBody(f_MovieBuffer), G_IM_FMT_RGBA, G_IM_SIZ_16b,
-      FLY_GUY_IMAGE_WIDTH, FLY_GUY_IMAGE_HEIGHT, 0, 0, 0, G_TX_NOMASK,
-      G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-  DrawTextureRect(&gfx,
-      QuarterPixels((s32)position.x - (FLY_GUY_IMAGE_WIDTH / 2)),
-      QuarterPixels((s32)position.y - (FLY_GUY_IMAGE_HEIGHT / 2)),
-      QuarterPixels((s32)position.x + (FLY_GUY_IMAGE_WIDTH / 2)),
-      QuarterPixels((s32)position.y + (FLY_GUY_IMAGE_HEIGHT / 2)),
-      G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
-  gDPPipeSync(gfx++);
-  *displayListHead = gfx;
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetTexturePersp(gfx++, G_TP_NONE);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_NONE);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
+    gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+    LoadTextureBlock(
+        &gfx,
+        ImageBody(f_MovieBuffer),
+        G_IM_FMT_RGBA,
+        G_IM_SIZ_16b,
+        FLY_GUY_IMAGE_WIDTH,
+        FLY_GUY_IMAGE_HEIGHT,
+        0,
+        0,
+        0,
+        G_TX_NOMASK,
+        G_TX_NOMASK,
+        G_TX_NOLOD,
+        G_TX_NOLOD
+    );
+    DrawTextureRect(
+        &gfx,
+        QuarterPixels((s32)position.x - (FLY_GUY_IMAGE_WIDTH / 2)),
+        QuarterPixels((s32)position.y - (FLY_GUY_IMAGE_HEIGHT / 2)),
+        QuarterPixels((s32)position.x + (FLY_GUY_IMAGE_WIDTH / 2)),
+        QuarterPixels((s32)position.y + (FLY_GUY_IMAGE_HEIGHT / 2)),
+        G_TX_RENDERTILE,
+        0,
+        0,
+        TEXEL_STEP_ONE,
+        TEXEL_STEP_ONE
+    );
+    gDPPipeSync(gfx++);
+    *displayListHead = gfx;
 }

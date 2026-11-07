@@ -11,9 +11,9 @@
 /* Values of g_FrameStepState, with which the second controller pauses
    the game (L on the control pad) and steps it a frame at a time */
 enum FrameStep {
-  FRAME_STEP_RUNNING,
-  FRAME_STEP_ONE_FRAME,
-  FRAME_STEP_PAUSED
+    FRAME_STEP_RUNNING,
+    FRAME_STEP_ONE_FRAME,
+    FRAME_STEP_PAUSED
 };
 
 extern s8 g_IsDebugEnabled;
@@ -32,8 +32,7 @@ extern char g_RomBuildDate[BUILD_DATE_LENGTH_MAX + 1];
 #define SAVE_BUILD_DATE_SIZE 40
 extern char g_SaveBuildDate[SAVE_BUILD_DATE_SIZE];
 
-void ReportFailedAssertion(
-    const char* expression, const char* fileName, s32 lineNumber);
+void ReportFailedAssertion(const char *expression, const char *fileName, s32 lineNumber);
 
 void AssignCharacterBuffers(void);
 

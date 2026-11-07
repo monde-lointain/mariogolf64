@@ -20,15 +20,15 @@
  * texels, the base-2 logarithm of size, for a power of two up to 256
  */
 #define TextureMask(size) \
-  ((size) >= 256          ? 8 \
-          : (size) >= 128 ? 7 \
-          : (size) >= 64  ? 6 \
-          : (size) >= 32  ? 5 \
-          : (size) >= 16  ? 4 \
-          : (size) >= 8   ? 3 \
-          : (size) >= 4   ? 2 \
-          : (size) >= 2   ? 1 \
-                          : 0)
+    ((size) >= 256        ? 8 : \
+            (size) >= 128 ? 7 : \
+            (size) >= 64  ? 6 : \
+            (size) >= 32  ? 5 : \
+            (size) >= 16  ? 4 : \
+            (size) >= 8   ? 3 : \
+            (size) >= 4   ? 2 : \
+            (size) >= 2   ? 1 : \
+                            0)
 
 /* The vertices of a quad, drawn as two triangles */
 #define QUAD_VERTEX_COUNT 4
@@ -41,20 +41,19 @@
 
 /* Sets a directional light's color and its copy to the same red, green
  * and blue */
-static inline void SetLightColor(Light* light, s32 red, s32 green, s32 blue) {
-  light->l.col[0] = red;
-  light->l.col[1] = green;
-  light->l.col[2] = blue;
-  light->l.colc[0] = red;
-  light->l.colc[1] = green;
-  light->l.colc[2] = blue;
+static inline void SetLightColor(Light *light, s32 red, s32 green, s32 blue) {
+    light->l.col[0] = red;
+    light->l.col[1] = green;
+    light->l.col[2] = blue;
+    light->l.colc[0] = red;
+    light->l.colc[1] = green;
+    light->l.colc[2] = blue;
 }
 
 /* A fill color for a 16-bit color image: the RGBA5551 pixel in both halves,
  * as the RDP fills two pixels at a time */
 #define FillColor16(red, green, blue, alpha) \
-  (GPACK_RGBA5551(red, green, blue, alpha) << 16 | \
-      GPACK_RGBA5551(red, green, blue, alpha))
+    (GPACK_RGBA5551(red, green, blue, alpha) << 16 | GPACK_RGBA5551(red, green, blue, alpha))
 
 /* The ends of an 8-bit color's alpha */
 #define TRANSPARENT_ALPHA 0
@@ -62,7 +61,7 @@ static inline void SetLightColor(Light* light, s32 red, s32 green, s32 blue) {
 
 /* A 32-bit RGBA color, as gSPModifyVertex takes a vertex color */
 #define RgbaColor(red, green, blue, alpha) \
-  (((red) << 24) | ((green) << 16) | ((blue) << 8) | (alpha))
+    (((red) << 24) | ((green) << 16) | ((blue) << 8) | (alpha))
 
 /*
  * Appends a pipe sync followed by a single-command GBI state setter.
@@ -79,11 +78,11 @@ static inline void SetLightColor(Light* light, s32 red, s32 green, s32 blue) {
  * register allocation. Named variadic arguments support KMC's pre-C99 GCC.
  */
 #define AppendSyncedRdpState(displayList, setState, stateArguments...) \
-  { \
-    Gfx* stateCommand; \
-    gDPPipeSync((displayList)++); \
-    stateCommand = (displayList)++; \
-    setState(stateCommand, stateArguments); \
-  }
+    { \
+        Gfx *stateCommand; \
+        gDPPipeSync((displayList)++); \
+        stateCommand = (displayList)++; \
+        setState(stateCommand, stateArguments); \
+    }
 
 #endif

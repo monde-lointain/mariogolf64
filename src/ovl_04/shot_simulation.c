@@ -22,145 +22,142 @@ static u8 f_UnusedBytesBeforeSimulatedShot[0x10] UNUSED;
 SimulatedShot g_SimulatedShot;
 
 /* Simulates the shot from the ball's position and records its path */
-void SimulateShot(ShotLaunch* shot) {
-  BallSimulation simulationState;
-  BallSimulation* simulation;
-  s32 step;
-  Boolean hasGroundHit;
-  Boolean hasHoleTriangleBounce;
-  s32 flags;
-  s32 firstBounceKind;
-  u8 isWaterCut;
+void SimulateShot(ShotLaunch *shot) {
+    BallSimulation simulationState;
+    BallSimulation *simulation;
+    s32 step;
+    Boolean hasGroundHit;
+    Boolean hasHoleTriangleBounce;
+    s32 flags;
+    s32 firstBounceKind;
+    u8 isWaterCut;
 
-  simulation = &simulationState;
-  g_SimulatedShot.shot = *shot;
-  g_SimulatedShot.stepCount = 0;
-  g_SimulatedShot.maxPositionStep[0] = 0;
-  g_SimulatedShot.maxPositionStep[1] = 0;
-  g_SimulatedShot.maxPositionStep[2] = 0;
-  g_SimulatedShot.minPositionStep[0] = 0;
-  g_SimulatedShot.minPositionStep[1] = 0;
-  g_SimulatedShot.minPositionStep[2] = 0;
-  g_SimulatedShot.flagHitStep = NO_STEP;
+    simulation = &simulationState;
+    g_SimulatedShot.shot = *shot;
+    g_SimulatedShot.stepCount = 0;
+    g_SimulatedShot.maxPositionStep[0] = 0;
+    g_SimulatedShot.maxPositionStep[1] = 0;
+    g_SimulatedShot.maxPositionStep[2] = 0;
+    g_SimulatedShot.minPositionStep[0] = 0;
+    g_SimulatedShot.minPositionStep[1] = 0;
+    g_SimulatedShot.minPositionStep[2] = 0;
+    g_SimulatedShot.flagHitStep = NO_STEP;
 
-  /*
-   * The start and both bounds begin at the ball, each stored from it (start
-   * first) or chained; copying the start into the minimum and the minimum
-   * into the maximum instead gives x 29 words differing, 9 in shape
-   */
-  g_SimulatedShot.maxPosition[AXIS_X] = g_SimulatedShot.minPosition[AXIS_X] =
-      g_SimulatedShot.startPosition[AXIS_X] =
-          g_CurrentShot.ballPosition[AXIS_X];
-  g_SimulatedShot.maxPosition[AXIS_Y] = g_SimulatedShot.minPosition[AXIS_Y] =
-      g_SimulatedShot.startPosition[AXIS_Y] =
-          g_CurrentShot.ballPosition[AXIS_Y];
-  g_SimulatedShot.maxPosition[AXIS_Z] = g_SimulatedShot.minPosition[AXIS_Z] =
-      g_SimulatedShot.startPosition[AXIS_Z] =
-          g_CurrentShot.ballPosition[AXIS_Z];
-  simulation->position[AXIS_X] = g_CurrentShot.ballPosition[AXIS_X];
-  simulation->position[AXIS_Y] = g_CurrentShot.ballPosition[AXIS_Y];
-  simulation->position[AXIS_Z] = g_CurrentShot.ballPosition[AXIS_Z];
-  simulation->surface = g_CurrentShot.surface;
-  hasGroundHit = FALSE;
-  hasHoleTriangleBounce = FALSE;
-  g_SimulatedShot.usesPutter =
-      GetClub(shot->clubIndex)->surfaceMask & CLUB_SURFACE_GREEN;
-  g_SimulatedShot.isPerfectSwing = shot->impactTiming == 0 &&
-      shot->power >= MAX_LAUNCH_POWER &&
-      !(GetClub(shot->clubIndex)->surfaceMask & CLUB_SURFACE_GREEN);
-  g_SimulatedShot.impactRumbles = GetImpactTimingEntry(
-      GetClub(
-          g_Players[g_CurrentShot.playerIndex].clubs[g_CurrentShot.clubSlot]),
-      g_CurrentShot.surface, g_CurrentShot.shotMode, shot->impactTiming)
-                                      ->rumbles;
-  LaunchBallSimulation(simulation, LAUNCH_PURPOSE_TRIAL, shot);
-  g_SimulatedShot.startsOnGreen = g_GameState.isMiniGolf ||
-      GetSurfaceInfo(g_CurrentShot.surface)->kind == SURFACE_KIND_GREEN;
-  step = 0;
-  while (simulation->state) {
-    flags = StepBallSimulation(simulation);
-    if (step < PATH_STEP_COUNT) {
-      g_SimulatedShot.pathFlags[step] = flags;
-      g_SimulatedShot.path[step][0] = simulation->position[AXIS_X];
-      g_SimulatedShot.path[step][1] = simulation->position[AXIS_Y];
-      g_SimulatedShot.path[step][2] = simulation->position[AXIS_Z];
+    /*
+     * The start and both bounds begin at the ball, each stored from it (start
+     * first) or chained; copying the start into the minimum and the minimum
+     * into the maximum instead gives x 29 words differing, 9 in shape
+     */
+    g_SimulatedShot.maxPosition[AXIS_X] = g_SimulatedShot.minPosition[AXIS_X] =
+        g_SimulatedShot.startPosition[AXIS_X] = g_CurrentShot.ballPosition[AXIS_X];
+    g_SimulatedShot.maxPosition[AXIS_Y] = g_SimulatedShot.minPosition[AXIS_Y] =
+        g_SimulatedShot.startPosition[AXIS_Y] = g_CurrentShot.ballPosition[AXIS_Y];
+    g_SimulatedShot.maxPosition[AXIS_Z] = g_SimulatedShot.minPosition[AXIS_Z] =
+        g_SimulatedShot.startPosition[AXIS_Z] = g_CurrentShot.ballPosition[AXIS_Z];
+    simulation->position[AXIS_X] = g_CurrentShot.ballPosition[AXIS_X];
+    simulation->position[AXIS_Y] = g_CurrentShot.ballPosition[AXIS_Y];
+    simulation->position[AXIS_Z] = g_CurrentShot.ballPosition[AXIS_Z];
+    simulation->surface = g_CurrentShot.surface;
+    hasGroundHit = FALSE;
+    hasHoleTriangleBounce = FALSE;
+    g_SimulatedShot.usesPutter = GetClub(shot->clubIndex)->surfaceMask & CLUB_SURFACE_GREEN;
+    g_SimulatedShot.isPerfectSwing = shot->impactTiming == 0 &&
+        shot->power >= MAX_LAUNCH_POWER &&
+        !(GetClub(shot->clubIndex)->surfaceMask & CLUB_SURFACE_GREEN);
+    g_SimulatedShot.impactRumbles = GetImpactTimingEntry(
+        GetClub(g_Players[g_CurrentShot.playerIndex].clubs[g_CurrentShot.clubSlot]),
+        g_CurrentShot.surface,
+        g_CurrentShot.shotMode,
+        shot->impactTiming
+    )
+                                        ->rumbles;
+    LaunchBallSimulation(simulation, LAUNCH_PURPOSE_TRIAL, shot);
+    g_SimulatedShot.startsOnGreen =
+        g_GameState.isMiniGolf || GetSurfaceInfo(g_CurrentShot.surface)->kind == SURFACE_KIND_GREEN;
+    step = 0;
+    while (simulation->state) {
+        flags = StepBallSimulation(simulation);
+        if (step < PATH_STEP_COUNT) {
+            g_SimulatedShot.pathFlags[step] = flags;
+            g_SimulatedShot.path[step][0] = simulation->position[AXIS_X];
+            g_SimulatedShot.path[step][1] = simulation->position[AXIS_Y];
+            g_SimulatedShot.path[step][2] = simulation->position[AXIS_Z];
+        }
+
+        if (simulation->hasHitFlag && g_SimulatedShot.flagHitStep == NO_STEP) {
+            g_SimulatedShot.flagHitStep = step;
+        }
+
+        if (flags & STEP_FLAG_GROUND_HIT & !hasGroundHit) {
+            hasGroundHit = TRUE;
+        }
+
+        if (flags & STEP_FLAG_HOLE_TRIANGLE_BOUNCE) {
+            hasHoleTriangleBounce = TRUE;
+        }
+
+        if (step < PATH_STEP_COUNT) {
+            if (simulation->position[AXIS_X] > g_SimulatedShot.maxPosition[AXIS_X]) {
+                g_SimulatedShot.maxPosition[AXIS_X] = simulation->position[AXIS_X];
+                g_SimulatedShot.maxPositionStep[0] = step;
+            }
+
+            if (simulation->position[AXIS_X] < g_SimulatedShot.minPosition[AXIS_X]) {
+                g_SimulatedShot.minPosition[AXIS_X] = simulation->position[AXIS_X];
+                g_SimulatedShot.minPositionStep[0] = step;
+            }
+
+            if (simulation->position[AXIS_Y] > g_SimulatedShot.maxPosition[AXIS_Y]) {
+                g_SimulatedShot.maxPosition[AXIS_Y] = simulation->position[AXIS_Y];
+                g_SimulatedShot.maxPositionStep[1] = step;
+            }
+
+            if (simulation->position[AXIS_Y] < g_SimulatedShot.minPosition[AXIS_Y]) {
+                g_SimulatedShot.minPosition[AXIS_Y] = simulation->position[AXIS_Y];
+                g_SimulatedShot.minPositionStep[1] = step;
+            }
+
+            if (simulation->position[AXIS_Z] > g_SimulatedShot.maxPosition[AXIS_Z]) {
+                g_SimulatedShot.maxPosition[AXIS_Z] = simulation->position[AXIS_Z];
+                g_SimulatedShot.maxPositionStep[2] = step;
+            }
+
+            if (simulation->position[AXIS_Z] < g_SimulatedShot.minPosition[AXIS_Z]) {
+                g_SimulatedShot.minPosition[AXIS_Z] = simulation->position[AXIS_Z];
+                g_SimulatedShot.minPositionStep[2] = step;
+            }
+        }
+
+        step++;
+        if (step >= MAX_STEP_COUNT) {
+            SetDebugTextHighlight(1);
+            PrintDebugText("Sim Fault!", 10, 12);
+            break;
+        }
     }
 
-    if (simulation->hasHitFlag && g_SimulatedShot.flagHitStep == NO_STEP) {
-      g_SimulatedShot.flagHitStep = step;
+    g_SimulatedShot.stepCount = step;
+    g_SimulatedShot.endPosition[AXIS_X] = simulation->position[AXIS_X];
+    g_SimulatedShot.endPosition[AXIS_Y] = simulation->position[AXIS_Y];
+    g_SimulatedShot.endPosition[AXIS_Z] = simulation->position[AXIS_Z];
+    g_SimulatedShot.endsInCup = simulation->isHoledOut;
+    g_SimulatedShot.endSurface = simulation->surface;
+    g_SimulatedShot.endsOnGreen = GetSurfaceInfo(simulation->surface)->kind == SURFACE_KIND_GREEN;
+    isWaterCut = FALSE;
+    if (hasHoleTriangleBounce) {
+        isWaterCut = GetSurfaceInfo(simulation->surface)->kind != SURFACE_KIND_WATER_HAZARD;
     }
 
-    if (flags & STEP_FLAG_GROUND_HIT & !hasGroundHit) {
-      hasGroundHit = TRUE;
+    g_SimulatedShot.isWaterCut = isWaterCut;
+    osSyncPrintf("\nWaterCut%d\n", isWaterCut);
+    firstBounceKind = GetSurfaceInfo(simulation->firstBounceSurface)->kind;
+    if ((firstBounceKind == SURFACE_KIND_OUT_OF_BOUNDS) |
+        (firstBounceKind == SURFACE_KIND_OUT_OF_COURSE)) {
+        g_SimulatedShot.isFirstBounceOut = TRUE;
+    }
+    else {
+        g_SimulatedShot.isFirstBounceOut = FALSE;
     }
 
-    if (flags & STEP_FLAG_HOLE_TRIANGLE_BOUNCE) {
-      hasHoleTriangleBounce = TRUE;
-    }
-
-    if (step < PATH_STEP_COUNT) {
-      if (simulation->position[AXIS_X] > g_SimulatedShot.maxPosition[AXIS_X]) {
-        g_SimulatedShot.maxPosition[AXIS_X] = simulation->position[AXIS_X];
-        g_SimulatedShot.maxPositionStep[0] = step;
-      }
-
-      if (simulation->position[AXIS_X] < g_SimulatedShot.minPosition[AXIS_X]) {
-        g_SimulatedShot.minPosition[AXIS_X] = simulation->position[AXIS_X];
-        g_SimulatedShot.minPositionStep[0] = step;
-      }
-
-      if (simulation->position[AXIS_Y] > g_SimulatedShot.maxPosition[AXIS_Y]) {
-        g_SimulatedShot.maxPosition[AXIS_Y] = simulation->position[AXIS_Y];
-        g_SimulatedShot.maxPositionStep[1] = step;
-      }
-
-      if (simulation->position[AXIS_Y] < g_SimulatedShot.minPosition[AXIS_Y]) {
-        g_SimulatedShot.minPosition[AXIS_Y] = simulation->position[AXIS_Y];
-        g_SimulatedShot.minPositionStep[1] = step;
-      }
-
-      if (simulation->position[AXIS_Z] > g_SimulatedShot.maxPosition[AXIS_Z]) {
-        g_SimulatedShot.maxPosition[AXIS_Z] = simulation->position[AXIS_Z];
-        g_SimulatedShot.maxPositionStep[2] = step;
-      }
-
-      if (simulation->position[AXIS_Z] < g_SimulatedShot.minPosition[AXIS_Z]) {
-        g_SimulatedShot.minPosition[AXIS_Z] = simulation->position[AXIS_Z];
-        g_SimulatedShot.minPositionStep[2] = step;
-      }
-    }
-
-    step++;
-    if (step >= MAX_STEP_COUNT) {
-      SetDebugTextHighlight(1);
-      PrintDebugText("Sim Fault!", 10, 12);
-      break;
-    }
-  }
-
-  g_SimulatedShot.stepCount = step;
-  g_SimulatedShot.endPosition[AXIS_X] = simulation->position[AXIS_X];
-  g_SimulatedShot.endPosition[AXIS_Y] = simulation->position[AXIS_Y];
-  g_SimulatedShot.endPosition[AXIS_Z] = simulation->position[AXIS_Z];
-  g_SimulatedShot.endsInCup = simulation->isHoledOut;
-  g_SimulatedShot.endSurface = simulation->surface;
-  g_SimulatedShot.endsOnGreen =
-      GetSurfaceInfo(simulation->surface)->kind == SURFACE_KIND_GREEN;
-  isWaterCut = FALSE;
-  if (hasHoleTriangleBounce) {
-    isWaterCut =
-        GetSurfaceInfo(simulation->surface)->kind != SURFACE_KIND_WATER_HAZARD;
-  }
-
-  g_SimulatedShot.isWaterCut = isWaterCut;
-  osSyncPrintf("\nWaterCut%d\n", isWaterCut);
-  firstBounceKind = GetSurfaceInfo(simulation->firstBounceSurface)->kind;
-  if ((firstBounceKind == SURFACE_KIND_OUT_OF_BOUNDS) |
-      (firstBounceKind == SURFACE_KIND_OUT_OF_COURSE)) {
-    g_SimulatedShot.isFirstBounceOut = TRUE;
-  } else {
-    g_SimulatedShot.isFirstBounceOut = FALSE;
-  }
-
-  g_SimulatedShot.firstBounceSurface = simulation->firstBounceSurface;
+    g_SimulatedShot.firstBounceSurface = simulation->firstBounceSurface;
 }

@@ -13,41 +13,41 @@
 
 /* The screens that the menu overlay shows, which g_MenuScreen picks */
 enum MenuScreen {
-  MENU_SCREEN_TITLE,
-  MENU_SCREEN_CHARACTER_SELECT,
-  MENU_SCREEN_MAIN,
-  MENU_SCREEN_SAVED_GAMES,
-  MENU_SCREEN_OPTIONS,
-  MENU_SCREEN_MODE_SELECT,
-  MENU_SCREEN_COURSE_SELECT,
-  MENU_SCREEN_BEST_TIMES,
-  MENU_SCREEN_CADDY_SELECT,
-  MENU_SCREEN_CLUBHOUSE,
-  MENU_SCREEN_COURSE_STATS = 11,
-  MENU_SCREEN_BEST_SHOTS,
-  MENU_SCREEN_RING_SHOT_RECORDS,
-  MENU_SCREEN_BIRDIE_BADGES,
-  MENU_SCREEN_CHARACTER_TABLE,
-  /* Get Character's choice of the second player's character */
-  MENU_SCREEN_OPPONENT_SELECT,
-  MENU_SCREEN_HELP,
-  /* Shows nothing and waits for A to go to the title; the menu is left on it
-   * when it exits for anything but Training */
-  MENU_SCREEN_BLANK,
-  /* Loads what the chosen game needs and leaves the menu */
-  MENU_SCREEN_EXIT = 19,
-  MENU_SCREEN_HANDICAPS,
-  MENU_SCREEN_BET_SETTINGS = 22,
-  /* Leaves the menu for Ring Shot with a wipe of the chosen course's shape */
-  MENU_SCREEN_RING_SHOT_EXIT,
-  /* The one player's character select for a Club Tournament */
-  MENU_SCREEN_TOURNAMENT_CHARACTER_SELECT,
-  /* Leaves the menu for Training, whose hole is already loading */
-  MENU_SCREEN_TRAINING_EXIT = 26,
-  /* A tournament entered with a code */
-  MENU_SCREEN_CLUB_TOURNAMENT,
-  /* The main menu when no Transfer Pak holds Mario Golf for Game Boy */
-  MENU_SCREEN_MAIN_WITHOUT_TRANSMIT
+    MENU_SCREEN_TITLE,
+    MENU_SCREEN_CHARACTER_SELECT,
+    MENU_SCREEN_MAIN,
+    MENU_SCREEN_SAVED_GAMES,
+    MENU_SCREEN_OPTIONS,
+    MENU_SCREEN_MODE_SELECT,
+    MENU_SCREEN_COURSE_SELECT,
+    MENU_SCREEN_BEST_TIMES,
+    MENU_SCREEN_CADDY_SELECT,
+    MENU_SCREEN_CLUBHOUSE,
+    MENU_SCREEN_COURSE_STATS = 11,
+    MENU_SCREEN_BEST_SHOTS,
+    MENU_SCREEN_RING_SHOT_RECORDS,
+    MENU_SCREEN_BIRDIE_BADGES,
+    MENU_SCREEN_CHARACTER_TABLE,
+    /* Get Character's choice of the second player's character */
+    MENU_SCREEN_OPPONENT_SELECT,
+    MENU_SCREEN_HELP,
+    /* Shows nothing and waits for A to go to the title; the menu is left on it
+     * when it exits for anything but Training */
+    MENU_SCREEN_BLANK,
+    /* Loads what the chosen game needs and leaves the menu */
+    MENU_SCREEN_EXIT = 19,
+    MENU_SCREEN_HANDICAPS,
+    MENU_SCREEN_BET_SETTINGS = 22,
+    /* Leaves the menu for Ring Shot with a wipe of the chosen course's shape */
+    MENU_SCREEN_RING_SHOT_EXIT,
+    /* The one player's character select for a Club Tournament */
+    MENU_SCREEN_TOURNAMENT_CHARACTER_SELECT,
+    /* Leaves the menu for Training, whose hole is already loading */
+    MENU_SCREEN_TRAINING_EXIT = 26,
+    /* A tournament entered with a code */
+    MENU_SCREEN_CLUB_TOURNAMENT,
+    /* The main menu when no Transfer Pak holds Mario Golf for Game Boy */
+    MENU_SCREEN_MAIN_WITHOUT_TRANSMIT
 };
 
 #define MENU_SCREEN_COUNT 29
@@ -85,14 +85,14 @@ extern AssetId g_TrophyFrameAssets[][TROPHY_FRAME_LIMIT];
 #define TROPHY_FRAME_END (-1)
 extern s16 g_TrophyPaletteFiles[][TROPHY_PALETTE_COUNT];
 /* The chosen course's trophy palettes, by the place they show */
-extern void* g_TrophyPalettes[TROPHY_PALETTE_COUNT];
+extern void *g_TrophyPalettes[TROPHY_PALETTE_COUNT];
 /* The trophy frames are double buffered: one buffer is shown while the next
  * frame is read into the other */
 #define TROPHY_FRAME_BUFFER_COUNT 2
 /* The course select's buffers for the chosen course's trophy frame */
-extern void* g_TrophyFrameBuffers[TROPHY_FRAME_BUFFER_COUNT];
+extern void *g_TrophyFrameBuffers[TROPHY_FRAME_BUFFER_COUNT];
 /* The menus' ASSET_COURSE_SCENE: the sky and the course select's backdrops */
-extern void* g_MenuCourseSceneryAsset;
+extern void *g_MenuCourseSceneryAsset;
 
 /* Screen 5's images in place of g_CourseIconAssets's: a row of asset IDs for
  * each g_ChosenPlayerCount from 1, of which it reads as many as
@@ -102,8 +102,8 @@ extern AssetId g_PlayerCountIconAssets[][PLAYER_COUNT_ASSET_ROW_LENGTH];
 
 /* The size of a course's tournament trophy images */
 typedef struct TrophySize {
-  s8 width;
-  s8 height;
+    s8 width;
+    s8 height;
 } TrophySize;
 
 extern TrophySize g_TrophySizes[COURSE_COUNT];
@@ -115,16 +115,16 @@ extern TrophySize g_TrophySizes[COURSE_COUNT];
 #define MENU_ARROW_SIZED_IMAGE_COUNT 5
 /* The animated icon's two frame buffers, the size of a mode icon, which some
  * screens read other images into */
-extern void* g_AnimatedIconImages[ANIMATED_ICON_BUFFER_COUNT];
+extern void *g_AnimatedIconImages[ANIMATED_ICON_BUFFER_COUNT];
 /* A second animated icon's two frame buffers, the size of a mode icon, which
  * some screens read other images into */
-extern void* g_SecondAnimatedIconImages[ANIMATED_ICON_BUFFER_COUNT];
+extern void *g_SecondAnimatedIconImages[ANIMATED_ICON_BUFFER_COUNT];
 /* Two buffers, each twice the size of a Toad image, that menu screens read
  * their own images into */
-extern void* g_MenuSpareImages[MENU_SPARE_IMAGE_COUNT];
+extern void *g_MenuSpareImages[MENU_SPARE_IMAGE_COUNT];
 /* Five buffers the size of the green arrows image, which menu screens read
  * other images into */
-extern void* g_MenuArrowSizedImages[MENU_ARROW_SIZED_IMAGE_COUNT];
+extern void *g_MenuArrowSizedImages[MENU_ARROW_SIZED_IMAGE_COUNT];
 
 /* The mini-golf disc's images in each of g_MenuIconImages's buffers */
 #define MINI_GOLF_DISC_IMAGE_COUNT 2
@@ -135,20 +135,20 @@ extern void* g_MenuArrowSizedImages[MENU_ARROW_SIZED_IMAGE_COUNT];
  */
 #define MINI_GOLF_TURN_FRAME_COUNT 5
 #define MINI_GOLF_FACING_FRAME 2
-extern AssetId g_MiniGolfDiscFrameAssets[MINI_GOLF_COURSES_PER_RECORD *
-    MINI_GOLF_DISC_IMAGE_COUNT][MINI_GOLF_TURN_FRAME_COUNT];
+extern AssetId g_MiniGolfDiscFrameAssets[MINI_GOLF_COURSES_PER_RECORD * MINI_GOLF_DISC_IMAGE_COUNT]
+                                        [MINI_GOLF_TURN_FRAME_COUNT];
 /* Each mini-golf course's disc image as it faces the screen */
 extern AssetId g_MiniGolfCourseIconAssets[];
 /* The file read with each mini-golf course's disc image */
 extern s16 g_MiniGolfDiscFiles[];
 
 /* Each character's face image, which the menus draw faces from */
-extern void* g_CharacterFaceImages[CHARACTER_COUNT];
+extern void *g_CharacterFaceImages[CHARACTER_COUNT];
 /* The palette of each face in g_CharacterFaceImages */
-extern void* g_CharacterFacePalettes[CHARACTER_COUNT];
+extern void *g_CharacterFacePalettes[CHARACTER_COUNT];
 
 /* The "R: COM" icon above the "L: LEFTY" icon of the character select */
-extern void* g_ComLeftyIcons;
+extern void *g_ComLeftyIcons;
 
 /*
  * Loaded images: the menus load their plain labels, or other images in their
@@ -156,7 +156,7 @@ extern void* g_ComLeftyIcons;
  * its buffers
  */
 #define IMAGE_SLOT_COUNT 14
-extern void* g_ImageSlots[IMAGE_SLOT_COUNT];
+extern void *g_ImageSlots[IMAGE_SLOT_COUNT];
 
 /* The character select's grid of slots */
 #define CHARACTER_GRID_ROW_COUNT 3
@@ -178,13 +178,12 @@ extern void* g_ImageSlots[IMAGE_SLOT_COUNT];
 /* Slots marked with MARKED_CHARACTER_OFFSET hold values below this */
 #define MARKED_CHARACTER_LIMIT (-10)
 
-extern s16 g_CharacterGrid[CHARACTER_GRID_ROW_COUNT]
-                          [CHARACTER_GRID_COLUMN_COUNT];
+extern s16 g_CharacterGrid[CHARACTER_GRID_ROW_COUNT][CHARACTER_GRID_COLUMN_COUNT];
 
 /* What FindCharacterOnGrid returns */
 enum GridSearchResult {
-  CHARACTER_OFF_GRID = -1,
-  CHARACTER_ON_GRID
+    CHARACTER_OFF_GRID = -1,
+    CHARACTER_ON_GRID
 };
 
 s32 FindCharacterOnGrid(CharacterId character);
@@ -252,8 +251,7 @@ extern s16 g_ImportedCharacterColumns[MAX_PLAYER_COUNT];
 #define MODE_ICON_FRAME_COUNT 27
 #define END_OF_ICON_FRAMES (-1)
 
-extern s16 g_ModeIconAnimations[MODE_ICON_ANIMATION_COUNT]
-                               [MODE_ICON_FRAME_COUNT];
+extern s16 g_ModeIconAnimations[MODE_ICON_ANIMATION_COUNT][MODE_ICON_FRAME_COUNT];
 
 /*
  * The menus draw characters' 32x24 faces, darkened or with the name
@@ -302,9 +300,8 @@ s32 GetClubTournamentNameMessage(void);
 s32 GetClubTournamentNumber(void);
 s32 GetRingShotCourseOpenedAtStarCount(void);
 Boolean HasEveryRingShotStar(void);
-void InsertBestTime(s32 courseIndex, s32 time, s32 scoreToPar,
-    CharacterId character, s32 palette);
-void InsertRankedRecord(PlayRecord* record);
+void InsertBestTime(s32 courseIndex, s32 time, s32 scoreToPar, CharacterId character, s32 palette);
+void InsertRankedRecord(PlayRecord *record);
 Boolean IsDonkeyKongUnlocked(void);
 Boolean IsMapleUnlocked(void);
 Boolean IsMetalMarioUnlocked(void);
@@ -328,14 +325,14 @@ void FreeMenuResources(void);
 
 /* The sets of bets that a game's mode and player count offer, as g_BetSet */
 enum BetSet {
-  BET_SET_NONE,
-  BET_SET_STROKE,
-  BET_SET_STROKE_FOUR_PLAYER,
-  BET_SET_MATCH_GAME,
-  BET_SET_SKINS_MATCH,
-  BET_SET_CLUB_SLOTS,
-  BET_SET_MINI_GOLF,
-  BET_SET_MINI_GOLF_FOUR_PLAYER
+    BET_SET_NONE,
+    BET_SET_STROKE,
+    BET_SET_STROKE_FOUR_PLAYER,
+    BET_SET_MATCH_GAME,
+    BET_SET_SKINS_MATCH,
+    BET_SET_CLUB_SLOTS,
+    BET_SET_MINI_GOLF,
+    BET_SET_MINI_GOLF_FOUR_PLAYER
 };
 
 typedef u8 BetSet;
@@ -355,25 +352,24 @@ extern u8 g_TournamentCode[TOURNAMENT_CODE_SIZE];
 extern s16 g_LastMenuScreen;
 /* The menu screen's course or mode icons, whose buffers other screens reuse
  * for their own images */
-extern void* g_MenuIconImages[7];
+extern void *g_MenuIconImages[7];
 /* g_MenuIconImages as the main menu uses them, in pairs of buffers */
-#define MENU_ICON_IMAGE_PAIRS \
-  ((void*(*)[MINI_GOLF_DISC_IMAGE_COUNT])g_MenuIconImages)
-extern void* g_MenuBoardImages[2];
-extern void* g_MenuTitleImages[2];
+#define MENU_ICON_IMAGE_PAIRS ((void *(*)[MINI_GOLF_DISC_IMAGE_COUNT])g_MenuIconImages)
+extern void *g_MenuBoardImages[2];
+extern void *g_MenuTitleImages[2];
 /*
  * More of the menus' image buffers, named for the image LoadMenuResources
  * first reads into each. The screens that UpdateMenus switches to reuse them:
  * g_MenuWideSpareImage holds a wide cloud or the save menu's third board, and
  * g_CourseTrophyImages a chosen course's images.
  */
-extern void* g_MenuWideSpareImage;
-extern void* g_SpinningBadgeImage;
-extern void* g_CourseTrophyImages[2];
-extern void* g_MiniGolfDiscImages[2];
-extern void* g_HoleBadgeImages;
-extern void* g_BrickWallImage;
-extern void* g_ModeIconImages[7];
+extern void *g_MenuWideSpareImage;
+extern void *g_SpinningBadgeImage;
+extern void *g_CourseTrophyImages[2];
+extern void *g_MiniGolfDiscImages[2];
+extern void *g_HoleBadgeImages;
+extern void *g_BrickWallImage;
+extern void *g_ModeIconImages[7];
 
 /* Read by no routine */
 extern u8 g_UnreadMenuBuffer[0x1218];
@@ -392,7 +388,7 @@ void InvalidateBrokenSavedGames(void);
 void RememberPlayedHole(void);
 void ResetMenuChoices(void);
 s32 SaveOrContinueGameByMode(Boolean isContinuing);
-void SaveRingShotRecord(s32 recordIndex, RingShotRecord* record);
-void SortIndicesDescending(s32* values, s32* order, s32 count);
+void SaveRingShotRecord(s32 recordIndex, RingShotRecord *record);
+void SortIndicesDescending(s32 *values, s32 *order, s32 count);
 
 #endif

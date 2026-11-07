@@ -62,20 +62,19 @@
 
 /* How a character plays when the computer controls it */
 typedef struct GolferTraits {
-  /* 0x0 */ s8 strongNine; /* STRONG_NINE_* */
-  /* 0x1 */ s8 consistency; /* CONSISTENCY_*: steadier golfers mishit less */
-  /* 0x2 */ s8 clubBoldness; /* BOLD_CLUB_CHOICE or less */
-  /* 6, or 12 when clubBoldness is above 0; nothing reads it */
-  /* 0x3 */ s8 ignoredBoldnessValue;
-  /* 0 to 2; nothing reads it */
-  /* 0x4 */ s8 ignoredTraitLevel;
-  /* 0x5 */ s8
-      windPlay; /* WIND_PLAY_*: which winds the golfer offsets shots for */
-  /* 0x6 */ s8 powerShotEagerness; /* 0 to 2; only nonzero is tested */
-  /* Added to baseTargetScore on each course */
-  /* 0x7 */ s8 courseTargetOffsets[COURSE_COUNT];
-  /* Its target score to par before the course's offset */
-  /* 0xD */ s8 baseTargetScore;
+    /* 0x0 */ s8 strongNine; /* STRONG_NINE_* */
+    /* 0x1 */ s8 consistency; /* CONSISTENCY_*: steadier golfers mishit less */
+    /* 0x2 */ s8 clubBoldness; /* BOLD_CLUB_CHOICE or less */
+    /* 6, or 12 when clubBoldness is above 0; nothing reads it */
+    /* 0x3 */ s8 ignoredBoldnessValue;
+    /* 0 to 2; nothing reads it */
+    /* 0x4 */ s8 ignoredTraitLevel;
+    /* 0x5 */ s8 windPlay; /* WIND_PLAY_*: which winds the golfer offsets shots for */
+    /* 0x6 */ s8 powerShotEagerness; /* 0 to 2; only nonzero is tested */
+    /* Added to baseTargetScore on each course */
+    /* 0x7 */ s8 courseTargetOffsets[COURSE_COUNT];
+    /* Its target score to par before the course's offset */
+    /* 0xD */ s8 baseTargetScore;
 } GolferTraits; /* size = 0xE */
 
 /*
@@ -86,31 +85,31 @@ typedef struct GolferTraits {
 
 /* GolferTraits.strongNine values */
 enum StrongNine {
-  STRONG_NINE_NEITHER,
-  STRONG_NINE_FRONT, /* Strokes move from the front nine to the back */
-  STRONG_NINE_BACK /* Strokes move from the back nine to the front */
+    STRONG_NINE_NEITHER,
+    STRONG_NINE_FRONT, /* Strokes move from the front nine to the back */
+    STRONG_NINE_BACK /* Strokes move from the back nine to the front */
 };
 
 /* GolferTraits.consistency values */
 enum Consistency {
-  CONSISTENCY_LOW,
-  CONSISTENCY_MIDDLE,
-  CONSISTENCY_HIGH,
-  CONSISTENCY_COUNT
+    CONSISTENCY_LOW,
+    CONSISTENCY_MIDDLE,
+    CONSISTENCY_HIGH,
+    CONSISTENCY_COUNT
 };
 
 /* GolferTraits.windPlay values */
 enum WindPlay {
-  WIND_PLAY_HEAD_WINDS, /* Offsets shots for head winds */
-  /* Offsets shots for the strongest winds either way */
-  WIND_PLAY_STRONG_WINDS,
-  WIND_PLAY_FOLLOWING_WINDS /* Offsets shots for following winds */
+    WIND_PLAY_HEAD_WINDS, /* Offsets shots for head winds */
+    /* Offsets shots for the strongest winds either way */
+    WIND_PLAY_STRONG_WINDS,
+    WIND_PLAY_FOLLOWING_WINDS /* Offsets shots for following winds */
 };
 
 /* The spin-like launch values that each SHOT_OFFSET_* gives a shot */
 typedef struct ShotOffset {
-  /* 0x0 */ s8 offsetX; /* Becomes f_Shot.offsetX */
-  /* 0x1 */ s8 offsetY; /* Becomes f_Shot.offsetY */
+    /* 0x0 */ s8 offsetX; /* Becomes f_Shot.offsetX */
+    /* 0x1 */ s8 offsetY; /* Becomes f_Shot.offsetY */
 } ShotOffset; /* size = 0x2 */
 
 #define APPROACH_BAND_COUNT 4
@@ -122,8 +121,8 @@ typedef struct ShotOffset {
 
 /* A club's name in the table that no routine reads */
 typedef struct ClubName {
-  /* 0x0 */ char name[4];
-  /* 0x4 */ ClubType clubType;
+    /* 0x0 */ char name[4];
+    /* 0x4 */ ClubType clubType;
 } ClubName; /* size = 0x8 */
 
 /* The directions from the ball, in BINARY_ANGLE_TURN / DIRECTION_SECTOR_COUNT
@@ -133,18 +132,18 @@ typedef struct ClubName {
 
 /* The route points and the tee, as PlanRoute gathers them */
 typedef struct RouteCoordinates {
-  /* 0x00 */ s32 x[ROUTE_POINT_COUNT + 1];
-  /* 0x24 */ s32 z[ROUTE_POINT_COUNT + 1];
+    /* 0x00 */ s32 x[ROUTE_POINT_COUNT + 1];
+    /* 0x24 */ s32 z[ROUTE_POINT_COUNT + 1];
 } RouteCoordinates; /* size = 0x48 */
 
 enum PlanStage {
-  PLAN_STAGE_UNSTARTED,
-  PLAN_STAGE_STARTED,
-  PLAN_STAGE_TARGET_CHOSEN,
-  PLAN_STAGE_TRIAL_TAKEN,
-  PLAN_STAGE_UNUSED, /* Never set; IsTrialStage counts it */
-  PLAN_STAGE_LEVEL_FINISHED,
-  PLAN_STAGE_TRIAL_RUNNING
+    PLAN_STAGE_UNSTARTED,
+    PLAN_STAGE_STARTED,
+    PLAN_STAGE_TARGET_CHOSEN,
+    PLAN_STAGE_TRIAL_TAKEN,
+    PLAN_STAGE_UNUSED, /* Never set; IsTrialStage counts it */
+    PLAN_STAGE_LEVEL_FINISHED,
+    PLAN_STAGE_TRIAL_RUNNING
 };
 
 /* The fault report of StepTrialShot and IsTrialShotSafe, which share its one
@@ -242,19 +241,17 @@ static ClubName f_UnusedPlanClubNames[] UNUSED = {
     {"2W", CLUB_TYPE_THREE_WOOD},
 };
 
-s32 PlanShot(CurrentShot* plannedShot);
+s32 PlanShot(CurrentShot *plannedShot);
 ClubType ChooseClubForDistance(s32 distance);
 
 s32 StepTrialShot(void);
 Boolean IsTrialShotSafe(void);
 s32 ChooseShotOffset(void);
 s32 FindClubSlot(s32 unused, ClubType clubType);
-s32 PlanRoute(s8* route);
-void ChooseLandingTarget(
-    s32 x, s32 z, s32 distance, s32* targetX, s32* targetZ);
+s32 PlanRoute(s8 *route);
+void ChooseLandingTarget(s32 x, s32 z, s32 distance, s32 *targetX, s32 *targetZ);
 void PlanClubAndTarget(CoursePoint target);
-void ChooseLongShot(s32 unused, ClubType* clubType, s32* targetX, s32* targetZ,
-    ShotMode* shotMode);
+void ChooseLongShot(s32 unused, ClubType *clubType, s32 *targetX, s32 *targetZ, ShotMode *shotMode);
 s32 ChooseHoleStrokeTarget(void);
 
 static OSThread f_PlanThread;
@@ -263,7 +260,7 @@ static CurrentShot f_PlannedShot;
 static s8 f_IsDirectionExcluded[DIRECTION_SECTOR_COUNT];
 /* Read by no routine */
 static u8 f_UnusedBytesAfterExcludedSectors[8] UNUSED;
-static ShotLaunch* f_TrialLaunch;
+static ShotLaunch *f_TrialLaunch;
 static ShotLaunch f_TrialLaunchValues;
 /* The best evaluation so far */
 static s32 f_BestEvaluation;
@@ -344,59 +341,63 @@ static Boolean f_NeedsShorterClub;
 static u8 f_UnusedBytesAfterNeedsShorterClub[8] UNUSED;
 static CurrentShot f_Shot;
 /* The traits of the golfer whose shot is planned */
-#define ShotGolferTraits() \
-  (f_GolferTraits[g_Players[f_Shot.playerIndex].characterIndex])
+#define ShotGolferTraits() (f_GolferTraits[g_Players[f_Shot.playerIndex].characterIndex])
 
 void RestartShotPlan(void) {
-  f_PlanStage = PLAN_STAGE_UNSTARTED;
+    f_PlanStage = PLAN_STAGE_UNSTARTED;
 }
 
 /* Starts planning the shot that sets g_CurrentShot up, on its own thread */
 void StartShotPlan(void) {
-  void RunShotPlan(void* arg);
+    void RunShotPlan(void *arg);
 
-  RestartShotPlan();
-  f_PlanThreadState = PLAN_THREAD_RUNNING;
-  osCreateThread(&f_PlanThread, PLAN_THREAD_ID, RunShotPlan, NULL,
-      f_PlanThreadStack + PLAN_THREAD_STACK_SIZE, PLAN_THREAD_PRIORITY);
-  osStartThread(&f_PlanThread);
+    RestartShotPlan();
+    f_PlanThreadState = PLAN_THREAD_RUNNING;
+    osCreateThread(
+        &f_PlanThread,
+        PLAN_THREAD_ID,
+        RunShotPlan,
+        NULL,
+        f_PlanThreadStack + PLAN_THREAD_STACK_SIZE,
+        PLAN_THREAD_PRIORITY
+    );
+    osStartThread(&f_PlanThread);
 }
 
 /* The planning thread, which waits to be destroyed once the plan is made */
-void RunShotPlan(void* arg UNUSED) {
-  while (PlanShot(&f_PlannedShot) == PLAN_UNFINISHED) {
-  }
+void RunShotPlan(void *arg UNUSED) {
+    while (PlanShot(&f_PlannedShot) == PLAN_UNFINISHED) {
+    }
 
-  f_PlanThreadState = PLAN_THREAD_FINISHED;
-  while (TRUE) {
-  }
+    f_PlanThreadState = PLAN_THREAD_FINISHED;
+    while (TRUE) {
+    }
 }
 
 /*
  * Copies the planned shot to shot. It returns -1 while the plan is unfinished,
  * and 0 once it is made, when it ends the planning thread.
  */
-s32 GetPlannedShot(CurrentShot* shot) {
-  if (f_PlanThreadState != PLAN_THREAD_RUNNING) {
-    *shot = f_PlannedShot;
-    if (f_PlanThreadState == PLAN_THREAD_FINISHED) {
-      osDestroyThread(&f_PlanThread);
-      f_PlanThreadState = PLAN_THREAD_COLLECTED;
+s32 GetPlannedShot(CurrentShot *shot) {
+    if (f_PlanThreadState != PLAN_THREAD_RUNNING) {
+        *shot = f_PlannedShot;
+        if (f_PlanThreadState == PLAN_THREAD_FINISHED) {
+            osDestroyThread(&f_PlanThread);
+            f_PlanThreadState = PLAN_THREAD_COLLECTED;
+        }
+
+        return 0;
     }
 
-    return 0;
-  }
-
-  return PLANNED_SHOT_UNFINISHED;
+    return PLANNED_SHOT_UNFINISHED;
 }
 
 s32 GetClubBoldness(void) {
-  return ShotGolferTraits().clubBoldness;
+    return ShotGolferTraits().clubBoldness;
 }
 
 Boolean IsStrokeLimitReached(void) {
-  return g_Players[f_Shot.playerIndex].strokeCount >=
-      g_HoleSetup.par + f_HoleTargetToPar - 1;
+    return g_Players[f_Shot.playerIndex].strokeCount >= g_HoleSetup.par + f_HoleTargetToPar - 1;
 }
 
 /* Course units, of which there are 1024 to a world unit */
@@ -413,63 +414,61 @@ Boolean IsStrokeLimitReached(void) {
  * SIDE_SLOPE_STEP. It returns 0 for a cup within SIDE_SLOPE_MIN_DISTANCE.
  */
 s32 GetSideSlope(void) {
-  f32 direction[AXIS_COUNT];
-  f32 distance;
-  s32 sideSlope;
-  s32 sampleIndex;
-  s32 reachX;
-  s32 reachZ;
-  s32 sampleX;
-  s32 sampleZ;
-  s32 reachHeight;
-  s32 oppositeHeight;
-  f32 along;
+    f32 direction[AXIS_COUNT];
+    f32 distance;
+    s32 sideSlope;
+    s32 sampleIndex;
+    s32 reachX;
+    s32 reachZ;
+    s32 sampleX;
+    s32 sampleZ;
+    s32 reachHeight;
+    s32 oppositeHeight;
+    f32 along;
 
-  direction[AXIS_Y] = 0;
-  direction[AXIS_X] =
-      g_HoleSetup.cupPosition[AXIS_X] - f_Shot.ballPosition[AXIS_X];
-  direction[AXIS_Z] =
-      g_HoleSetup.cupPosition[AXIS_Z] - f_Shot.ballPosition[AXIS_Z];
-  distance = Length2D(direction[AXIS_X], direction[AXIS_Z]);
-  sideSlope = 0;
-  if (distance < SIDE_SLOPE_MIN_DISTANCE) {
-    return 0;
-  }
-
-  guNormalize(&direction[AXIS_X], &direction[AXIS_Y], &direction[AXIS_Z]);
-  reachX = 2.0f * (-direction[AXIS_Z] * SIDE_SLOPE_SAMPLE_REACH);
-  reachZ = 2.0f * (direction[AXIS_X] * SIDE_SLOPE_SAMPLE_REACH);
-  for (sampleIndex = 1;
-      sampleIndex < (s32)(distance * (1.0f / SIDE_SLOPE_SAMPLE_SPACING));
-      sampleIndex++) {
-    /*
-     * Setting along inside the x term is there to match: setting it first
-     * gives 2 words differing (2 in shape) in either order of its product,
-     * 4 to 30 in the other operand orders of the terms, 6 with z first, and
-     * writing its product out in both terms 10 (8)
-     */
-    sampleX = f_Shot.ballPosition[AXIS_X] +
-        ((along = sampleIndex * SIDE_SLOPE_SAMPLE_SPACING) * direction[AXIS_X]);
-    sampleZ = f_Shot.ballPosition[AXIS_Z] + (along * direction[AXIS_Z]);
-    reachHeight = GetGroundHeight(sampleX + reachX, sampleZ + reachZ);
-    oppositeHeight = GetGroundHeight(sampleX - reachX, sampleZ - reachZ);
-    if (reachHeight > oppositeHeight) {
-      sideSlope--;
-    } else if (reachHeight < oppositeHeight) {
-      sideSlope++;
+    direction[AXIS_Y] = 0;
+    direction[AXIS_X] = g_HoleSetup.cupPosition[AXIS_X] - f_Shot.ballPosition[AXIS_X];
+    direction[AXIS_Z] = g_HoleSetup.cupPosition[AXIS_Z] - f_Shot.ballPosition[AXIS_Z];
+    distance = Length2D(direction[AXIS_X], direction[AXIS_Z]);
+    sideSlope = 0;
+    if (distance < SIDE_SLOPE_MIN_DISTANCE) {
+        return 0;
     }
-  }
 
-  sideSlope *= SIDE_SLOPE_STEP;
-  if (sideSlope < -SIDE_SLOPE_LIMIT) {
-    sideSlope = -SIDE_SLOPE_LIMIT;
-  }
+    guNormalize(&direction[AXIS_X], &direction[AXIS_Y], &direction[AXIS_Z]);
+    reachX = 2.0f * (-direction[AXIS_Z] * SIDE_SLOPE_SAMPLE_REACH);
+    reachZ = 2.0f * (direction[AXIS_X] * SIDE_SLOPE_SAMPLE_REACH);
+    for (sampleIndex = 1; sampleIndex < (s32)(distance * (1.0f / SIDE_SLOPE_SAMPLE_SPACING));
+        sampleIndex++) {
+        /*
+         * Setting along inside the x term is there to match: setting it first
+         * gives 2 words differing (2 in shape) in either order of its product,
+         * 4 to 30 in the other operand orders of the terms, 6 with z first, and
+         * writing its product out in both terms 10 (8)
+         */
+        sampleX = f_Shot.ballPosition[AXIS_X] +
+            ((along = sampleIndex * SIDE_SLOPE_SAMPLE_SPACING) * direction[AXIS_X]);
+        sampleZ = f_Shot.ballPosition[AXIS_Z] + (along * direction[AXIS_Z]);
+        reachHeight = GetGroundHeight(sampleX + reachX, sampleZ + reachZ);
+        oppositeHeight = GetGroundHeight(sampleX - reachX, sampleZ - reachZ);
+        if (reachHeight > oppositeHeight) {
+            sideSlope--;
+        }
+        else if (reachHeight < oppositeHeight) {
+            sideSlope++;
+        }
+    }
 
-  if (sideSlope > SIDE_SLOPE_LIMIT) {
-    sideSlope = SIDE_SLOPE_LIMIT;
-  }
+    sideSlope *= SIDE_SLOPE_STEP;
+    if (sideSlope < -SIDE_SLOPE_LIMIT) {
+        sideSlope = -SIDE_SLOPE_LIMIT;
+    }
 
-  return sideSlope;
+    if (sideSlope > SIDE_SLOPE_LIMIT) {
+        sideSlope = SIDE_SLOPE_LIMIT;
+    }
+
+    return sideSlope;
 }
 
 /* f_Shot.powerGaugeFrame's range, which GetPowerGaugeFrame maps 0 to 256 onto
@@ -486,14 +485,14 @@ s32 GetSideSlope(void) {
  * while the best evaluation is poor or there is none yet
  */
 #define IsTrialLevelLeft() \
-  (f_TrialLevel < MIN_TRIAL_LEVEL_COUNT || \
-      (f_BestEvaluation > POOR_EVALUATION && \
-          f_TrialLevel < POOR_TRIAL_LEVEL_COUNT) || \
-      (!f_HasBestEvaluation && f_TrialLevel < MAX_TRIAL_LEVEL_COUNT))
+    (f_TrialLevel < MIN_TRIAL_LEVEL_COUNT || \
+        (f_BestEvaluation > POOR_EVALUATION && f_TrialLevel < POOR_TRIAL_LEVEL_COUNT) || \
+        (!f_HasBestEvaluation && f_TrialLevel < MAX_TRIAL_LEVEL_COUNT))
 /* Whether a plan stage is part of a trial under way */
 #define IsTrialStage(stage) \
-  ((stage) == PLAN_STAGE_TRIAL_TAKEN || (stage) == PLAN_STAGE_UNUSED || \
-      (stage) == PLAN_STAGE_TRIAL_RUNNING)
+    ((stage) == PLAN_STAGE_TRIAL_TAKEN || \
+        (stage) == PLAN_STAGE_UNUSED || \
+        (stage) == PLAN_STAGE_TRIAL_RUNNING)
 #define INITIAL_CARRY_SCALE 1.1f
 #define CARRY_SCALE_STEP 0.9f
 #define RAINY_CARRY_SCALE 0.95f
@@ -539,428 +538,451 @@ s32 GetSideSlope(void) {
  * trials ask for it. Once a trial is taken or the levels run out, the best
  * trial may get a random mis-hit, and it is copied to plannedShot.
  */
-s32 PlanShot(CurrentShot* plannedShot) {
-  char text[DEBUG_TEXT_BUFFER_SIZE];
-  s32 percentRange[2];
-  ClubType clubType;
-  s32 targetX;
-  s32 targetZ;
-  ShotMode shotMode;
-  s32 index;
-  s32 strokesOver;
-  s32 distance;
-  s32 reach;
-  s32 nextSlot;
-  s32 shortestReach;
-  s32 targetDistance;
-  s32 missDistance;
-  Radians missAngle;
-  Radians aimAngle;
-  f32 missX;
-  f32 missZ;
-  f32 along;
-  s32 savedPowerGaugeFrame;
-  s32 savedImpactGaugeFrame;
-  s32 par;
-  s32 strokes;
-  s32 mishit;
-  s32 maxMishit;
-  s32 mishitDivisor;
-  u32 kind;
+s32 PlanShot(CurrentShot *plannedShot) {
+    char text[DEBUG_TEXT_BUFFER_SIZE];
+    s32 percentRange[2];
+    ClubType clubType;
+    s32 targetX;
+    s32 targetZ;
+    ShotMode shotMode;
+    s32 index;
+    s32 strokesOver;
+    s32 distance;
+    s32 reach;
+    s32 nextSlot;
+    s32 shortestReach;
+    s32 targetDistance;
+    s32 missDistance;
+    Radians missAngle;
+    Radians aimAngle;
+    f32 missX;
+    f32 missZ;
+    f32 along;
+    s32 savedPowerGaugeFrame;
+    s32 savedImpactGaugeFrame;
+    s32 par;
+    s32 strokes;
+    s32 mishit;
+    s32 maxMishit;
+    s32 mishitDivisor;
+    u32 kind;
 
-  if (f_PlanStage == PLAN_STAGE_UNSTARTED) {
-    osSyncPrintf("\n------------------AI Start---------------------\n");
-    f_Shot = g_CurrentShot;
-    f_TrialShot = f_Shot;
-    f_BestEvaluation = LOST_BALL_EVALUATION;
-    f_NeedsNewTarget = TRUE;
-    f_HasBestEvaluation = FALSE;
-    f_IsTrialLost = FALSE;
-    f_LostTrialCount = 0;
-    f_UnusedPlanStartValue = 0;
-    f_IsTrialAccepted = FALSE;
-    f_AcceptableEvaluation = 0;
-    f_AimChangeCount = 0;
-    f_ShotOffset = SHOT_OFFSET_NONE;
-    f_TrialIndex = 0;
-    f_TrialLevel = 0;
-    f_OtherUnusedPlanStartValue = 0;
-    f_AimChangeCount = 0;
-    f_HasTrialShot = FALSE;
-    f_TrialLaunch = &f_TrialLaunchValues;
-    f_CarryScale = INITIAL_CARRY_SCALE;
-    for (index = 0; index < DIRECTION_SECTOR_COUNT; index++) {
-      f_IsDirectionExcluded[index] = FALSE;
-    }
-
-    f_ClubCount = MarkUsableClubs((s32)GetSurfaceInfo(g_CurrentShot.surface),
-        g_Players[g_CurrentShot.playerIndex].clubs, f_IsClubUsable);
-    osSyncPrintf("canuseflags = ");
-    for (index = 0; index < f_ClubCount; index++) {
-      osSyncPrintf("%d", f_IsClubUsable[index]);
-    }
-
-    osSyncPrintf("\n");
-    f_RouteOrderCount = PlanRoute(f_RouteOrder);
-    osSyncPrintf("TargetNum = %d\n", f_RouteOrderCount);
-    for (index = 0; index < f_RouteOrderCount; index++) {
-      osSyncPrintf("%d ", f_RouteOrder[index]);
-    }
-
-    osSyncPrintf("\n");
-    PlanClubAndTarget(f_PlanTarget);
-    kind = GetSurfaceInfo(f_Shot.surface)->kind;
-    if (kind == SURFACE_KIND_GREEN || kind == SURFACE_KIND_GREEN_EDGE) {
-      f_TrialLevel = 0;
-    }
-
-    osSyncPrintf("wnmTargetScoreOffset = %d\n", f_HoleTargetToPar);
-    osSyncPrintf("ClubIndex = %d\n", f_Shot.clubSlot);
-    sprintf(text, "Target %d   ", (int)f_HoleTargetToPar);
-    PrintDebugText(text, 3, 12);
-    f_PlanStage = PLAN_STAGE_STARTED;
-    return PLAN_UNFINISHED;
-  }
-  while (IsTrialLevelLeft()) {
-    if (IsTrialStage(f_PlanStage)) {
-      /* A trial is under way */
-    } else if (f_NeedsNewTarget == TRUE) {
-      if (f_PlanStage != PLAN_STAGE_TARGET_CHOSEN) {
-        osSyncPrintf("Level %d\n", f_TrialLevel);
-        f_NeedsShorterClub = FALSE;
-        f_NeedsLongerClub = FALSE;
-        if (f_Shot.clubSlot !=
-            FindClubSlot(f_Shot.playerIndex, CLUB_TYPE_PUTTER)) {
-          f_TargetCarry = GetShotWorldDistance(
-              GetClub(g_Players[f_Shot.playerIndex].clubs[f_Shot.clubSlot]),
-              f_Shot.shotMode);
-          if (g_HoleSetup.conditions.isRaining == TRUE) {
-            f_TargetCarry = f_TargetCarry * RAINY_CARRY_SCALE;
-          }
-
-          f_TargetCarry = f_TargetCarry * f_CarryScale;
-          ChooseLandingTarget(f_Shot.ballPosition[AXIS_X],
-              f_Shot.ballPosition[AXIS_Z], f_TargetCarry, &f_PlanTarget[AXIS_X],
-              &f_PlanTarget[AXIS_Z]);
-        } else {
-          f_PlanTarget[AXIS_X] = g_HoleSetup.cupPosition[AXIS_X];
-          f_PlanTarget[AXIS_Z] = g_HoleSetup.cupPosition[AXIS_Z];
-        }
-
-        if (f_Shot.shotMode != SHOT_MODE_APPROACH &&
-            !(GetClub(g_Players[f_Shot.playerIndex].clubs[f_Shot.clubSlot])
-                    ->surfaceMask &
-                CLUB_SURFACE_GREEN)) {
-          targetDistance =
-              IntLength2D(f_PlanTarget[AXIS_X] - f_Shot.ballPosition[AXIS_X],
-                  f_PlanTarget[AXIS_Z] - f_Shot.ballPosition[AXIS_Z]);
-          if (g_HoleSetup.conditions.isRaining == TRUE) {
-            targetDistance = (s32)(targetDistance * RAINY_DISTANCE_SCALE);
-          }
-          while (TRUE) {
-            shortestReach = GetShotWorldDistance(
-                GetClub(g_Players[f_Shot.playerIndex].clubs[f_Shot.clubSlot]),
-                f_Shot.shotMode);
-            GetSurfacePercentRange(GetSurfaceInfo(f_Shot.surface),
-                GetClub(g_Players[f_Shot.playerIndex].clubs[f_Shot.clubSlot]),
-                percentRange);
-            /* The carry per unit of f_Shot.powerGaugeFrame at the least percent
-             */
-            shortestReach = shortestReach * percentRange[0] /
-                (FULL_PERCENT * GAUGE_FULL_FRAME);
-            if (shortestReach < MIN_CLUB_DOWN_REACH ||
-                targetDistance / shortestReach >= CLUB_DOWN_REACH_COUNT) {
-              break;
-            }
-
-            nextSlot = f_Shot.clubSlot;
-            if ((GetClub(g_Players[f_Shot.playerIndex].clubs[nextSlot])
-                        ->surfaceMask &
-                    CLUB_SURFACE_GREEN) ||
-                (GetClub(g_Players[f_Shot.playerIndex].clubs[++nextSlot])
-                        ->surfaceMask &
-                    CLUB_SURFACE_GREEN)) {
-              break;
-            }
-
-            f_Shot.clubSlot = nextSlot;
-            osSyncPrintf("ChangeDefault----------------------ClubDown\n");
-          }
-        }
-
-        f_PlanStage = PLAN_STAGE_TARGET_CHOSEN;
-        if (f_PlanTarget[AXIS_X] == g_HoleSetup.cupPosition[AXIS_X] &&
-            f_PlanTarget[AXIS_Z] == g_HoleSetup.cupPosition[AXIS_Z] &&
-            GetSurfaceInfo(f_Shot.surface)->kind != SURFACE_KIND_GREEN) {
-          strokesOver = g_Players[f_Shot.playerIndex].strokeCount -
-              (g_HoleSetup.par + f_HoleTargetToPar - 2);
-          if (strokesOver <= 0) {
-            missDistance = IntLength2D(g_HoleSetup.cupPosition[AXIS_X] -
-                                   f_Shot.ballPosition[AXIS_X],
-                               g_HoleSetup.cupPosition[AXIS_Z] -
-                                   f_Shot.ballPosition[AXIS_Z]) >>
-                3;
-            missAngle =
-                ((rand() * 4) & BINARY_ANGLE_MASK) * BINARY_ANGLE_TO_RADIANS;
-            aimAngle = (u16)f_Shot.heading * BINARY_ANGLE_TO_RADIANS;
-            if (missDistance >= MAX_MISS_DISTANCE) {
-              missDistance = MAX_MISS_DISTANCE;
-            }
-
-            if (strokesOver < -1) {
-              missDistance *= 2;
-            }
-
-            if (strokesOver == 0) {
-              missDistance = LEVEL_MISS_DISTANCE;
-            }
-
-            missDistance = missDistance * 0.5f;
-            missX = cosf(missAngle) * missDistance;
-            missZ = sinf(missAngle) * missDistance;
-            along = ((missX * cosf(aimAngle)) + (missZ * sinf(aimAngle))) *
-                MISS_STRETCH;
-            missX += cosf(aimAngle) * along;
-            missZ += sinf(aimAngle) * along;
-            f_PlanTarget[AXIS_X] = f_PlanTarget[AXIS_X] + missX;
-            f_PlanTarget[AXIS_Z] = f_PlanTarget[AXIS_Z] + missZ;
-            for (index = 0; index < MISS_REPORT_COUNT; index++) {
-              osSyncPrintf("Iziwaru %d\n", strokesOver);
-            }
-          }
-        }
-
-        return PLAN_UNFINISHED;
-      }
-
-      f_PlanTarget[AXIS_Y] =
-          GetGroundHeight(f_PlanTarget[AXIS_X], f_PlanTarget[AXIS_Z]);
-      f_Shot.heading = atan2(f_PlanTarget[AXIS_Z] - f_Shot.ballPosition[AXIS_Z],
-                           f_PlanTarget[AXIS_X] - f_Shot.ballPosition[AXIS_X]) *
-          RADIANS_TO_BINARY_ANGLE;
-      if (GetClub(g_Players[f_Shot.playerIndex].clubs[f_Shot.clubSlot])
-              ->surfaceMask &
-          CLUB_SURFACE_GREEN) {
-        f_Shot.heading += GetSideSlope();
-      }
-
-      f_Shot.impactGaugeFrame = GAUGE_IMPACT_FRAME;
-      f_Shot.powerGaugeFrame = GAUGE_FULL_FRAME;
-      reach = GetShotWorldDistance(
-          GetClub(g_Players[f_Shot.playerIndex].clubs[f_Shot.clubSlot]),
-          f_Shot.shotMode);
-      distance = IntLength2D(f_Shot.ballPosition[AXIS_X] - f_PlanTarget[AXIS_X],
-          f_Shot.ballPosition[AXIS_Z] - f_PlanTarget[AXIS_Z]);
-      if (g_HoleSetup.conditions.isRaining == TRUE) {
-        distance = (s32)(distance * RAINY_DISTANCE_SCALE);
-      }
-
-      GetSurfacePercentRange(GetSurfaceInfo(f_Shot.surface),
-          GetClub(g_Players[f_Shot.playerIndex].clubs[f_Shot.clubSlot]),
-          percentRange);
-      /* The carry per unit of f_Shot.powerGaugeFrame at the mean percent */
-      reach = reach * (percentRange[1] + percentRange[0]) /
-          (2 * FULL_PERCENT * GAUGE_FULL_FRAME);
-      /*
-       * Holding f_Shot.powerGaugeFrame in distance is there to match: a
-       * powerFrame local of its own gives 26 words differing, none in shape
-       */
-      distance = (rand() & 3) + (distance / reach);
-      if (GetClubBoldness() >= BOLD_CLUB_CHOICE) {
-        distance = distance * POWER_GAUGE_FRAME_BOOST;
-      }
-
-      if (distance < MIN_PLANNED_POWER_GAUGE_FRAME) {
-        distance = MIN_PLANNED_POWER_GAUGE_FRAME;
-      } else if (distance > GAUGE_FULL_FRAME) {
-        distance = GAUGE_FULL_FRAME;
-      }
-
-      f_Shot.powerGaugeFrame = distance;
-      if (f_ShotOffset == SHOT_OFFSET_NONE) {
-        f_Shot.offsetX = 0;
-        f_Shot.offsetY = 0;
-        f_ShotOffset = ChooseShotOffset();
-      }
-
-      f_TrialIndex = 0;
-      f_LevelTrialCount = LEVEL_TRIAL_COUNT;
-      if (!f_HasTrialShot) {
+    if (f_PlanStage == PLAN_STAGE_UNSTARTED) {
+        osSyncPrintf("\n------------------AI Start---------------------\n");
+        f_Shot = g_CurrentShot;
         f_TrialShot = f_Shot;
-        f_HasTrialShot = TRUE;
-      }
-
-      if (f_PlanTarget[AXIS_X] == g_HoleSetup.cupPosition[AXIS_X] &&
-          f_PlanTarget[AXIS_Z] == g_HoleSetup.cupPosition[AXIS_Z]) {
-        f_LevelTrialCount = CUP_LEVEL_TRIAL_COUNT;
-      }
-
-      if (IsGameFlagSet(GAME_FLAG_COMPUTER_PLAYS_BEST)) {
-        f_LevelTrialCount = BEST_PLAY_LEVEL_TRIAL_COUNT;
-      }
-
-      f_NeedsNewTarget = FALSE;
-    } else {
-      f_TrialIndex = 0;
-    }
-
-    if (f_TrialIndex < f_LevelTrialCount) {
-      if (!StepTrialShot()) {
-        return PLAN_UNFINISHED;
-      }
-
-      if (!f_IsTrialAccepted && !f_NeedsShorterClub && !f_NeedsLongerClub) {
-        f_PlanStage = PLAN_STAGE_TRIAL_TAKEN;
-        f_TrialIndex++;
-        return PLAN_UNFINISHED;
-      }
-    }
-
-    f_PlanStage = PLAN_STAGE_LEVEL_FINISHED;
-    if (f_IsTrialLost == TRUE) {
-      f_LostTrialCount++;
-    }
-
-    osSyncPrintf("Besteval = %d\n", f_BestEvaluation);
-    if (f_IsTrialAccepted) {
-      break;
-    }
-
-    if (f_NeedsShorterClub) {
-      if (f_Shot.clubSlot ==
-          FindClubSlot(f_Shot.playerIndex, CLUB_TYPE_PUTTER)) {
-        break;
-      }
-
-      if (f_Shot.shotMode == SHOT_MODE_APPROACH) {
-        if (ShotGolferTraits().windPlay < WIND_PLAY_FOLLOWING_WINDS &&
-            f_Shot.clubSlot ==
-                FindClubSlot(f_Shot.playerIndex, CLUB_TYPE_PITCHING_WEDGE)) {
-          f_Shot.clubSlot =
-              FindClubSlot(f_Shot.playerIndex, CLUB_TYPE_SAND_WEDGE);
-        } else {
-          osSyncPrintf("Approach cancel\n");
-          ChooseLongShot(
-              f_HoleStrokeTarget, &clubType, &targetX, &targetZ, &shotMode);
-          f_Shot.shotMode = shotMode;
-          f_Shot.clubSlot = FindClubSlot(f_Shot.playerIndex, clubType);
-        }
-
+        f_BestEvaluation = LOST_BALL_EVALUATION;
         f_NeedsNewTarget = TRUE;
+        f_HasBestEvaluation = FALSE;
+        f_IsTrialLost = FALSE;
+        f_LostTrialCount = 0;
+        f_UnusedPlanStartValue = 0;
+        f_IsTrialAccepted = FALSE;
+        f_AcceptableEvaluation = 0;
+        f_AimChangeCount = 0;
+        f_ShotOffset = SHOT_OFFSET_NONE;
+        f_TrialIndex = 0;
+        f_TrialLevel = 0;
+        f_OtherUnusedPlanStartValue = 0;
+        f_AimChangeCount = 0;
+        f_HasTrialShot = FALSE;
+        f_TrialLaunch = &f_TrialLaunchValues;
+        f_CarryScale = INITIAL_CARRY_SCALE;
+        for (index = 0; index < DIRECTION_SECTOR_COUNT; index++) {
+            f_IsDirectionExcluded[index] = FALSE;
+        }
+
+        f_ClubCount = MarkUsableClubs(
+            (s32)GetSurfaceInfo(g_CurrentShot.surface),
+            g_Players[g_CurrentShot.playerIndex].clubs,
+            f_IsClubUsable
+        );
+        osSyncPrintf("canuseflags = ");
+        for (index = 0; index < f_ClubCount; index++) {
+            osSyncPrintf("%d", f_IsClubUsable[index]);
+        }
+
+        osSyncPrintf("\n");
+        f_RouteOrderCount = PlanRoute(f_RouteOrder);
+        osSyncPrintf("TargetNum = %d\n", f_RouteOrderCount);
+        for (index = 0; index < f_RouteOrderCount; index++) {
+            osSyncPrintf("%d ", f_RouteOrder[index]);
+        }
+
+        osSyncPrintf("\n");
+        PlanClubAndTarget(f_PlanTarget);
+        kind = GetSurfaceInfo(f_Shot.surface)->kind;
+        if (kind == SURFACE_KIND_GREEN || kind == SURFACE_KIND_GREEN_EDGE) {
+            f_TrialLevel = 0;
+        }
+
+        osSyncPrintf("wnmTargetScoreOffset = %d\n", f_HoleTargetToPar);
+        osSyncPrintf("ClubIndex = %d\n", f_Shot.clubSlot);
+        sprintf(text, "Target %d   ", (int)f_HoleTargetToPar);
+        PrintDebugText(text, 3, 12);
+        f_PlanStage = PLAN_STAGE_STARTED;
+        return PLAN_UNFINISHED;
+    }
+    while (IsTrialLevelLeft()) {
+        if (IsTrialStage(f_PlanStage)) {
+            /* A trial is under way */
+        }
+        else if (f_NeedsNewTarget == TRUE) {
+            if (f_PlanStage != PLAN_STAGE_TARGET_CHOSEN) {
+                osSyncPrintf("Level %d\n", f_TrialLevel);
+                f_NeedsShorterClub = FALSE;
+                f_NeedsLongerClub = FALSE;
+                if (f_Shot.clubSlot != FindClubSlot(f_Shot.playerIndex, CLUB_TYPE_PUTTER)) {
+                    f_TargetCarry = GetShotWorldDistance(
+                        GetClub(g_Players[f_Shot.playerIndex].clubs[f_Shot.clubSlot]),
+                        f_Shot.shotMode
+                    );
+                    if (g_HoleSetup.conditions.isRaining == TRUE) {
+                        f_TargetCarry = f_TargetCarry * RAINY_CARRY_SCALE;
+                    }
+
+                    f_TargetCarry = f_TargetCarry * f_CarryScale;
+                    ChooseLandingTarget(
+                        f_Shot.ballPosition[AXIS_X],
+                        f_Shot.ballPosition[AXIS_Z],
+                        f_TargetCarry,
+                        &f_PlanTarget[AXIS_X],
+                        &f_PlanTarget[AXIS_Z]
+                    );
+                }
+                else {
+                    f_PlanTarget[AXIS_X] = g_HoleSetup.cupPosition[AXIS_X];
+                    f_PlanTarget[AXIS_Z] = g_HoleSetup.cupPosition[AXIS_Z];
+                }
+
+                if (f_Shot.shotMode != SHOT_MODE_APPROACH &&
+                    !(GetClub(g_Players[f_Shot.playerIndex].clubs[f_Shot.clubSlot])->surfaceMask &
+                        CLUB_SURFACE_GREEN)) {
+                    targetDistance = IntLength2D(
+                        f_PlanTarget[AXIS_X] - f_Shot.ballPosition[AXIS_X],
+                        f_PlanTarget[AXIS_Z] - f_Shot.ballPosition[AXIS_Z]
+                    );
+                    if (g_HoleSetup.conditions.isRaining == TRUE) {
+                        targetDistance = (s32)(targetDistance * RAINY_DISTANCE_SCALE);
+                    }
+                    while (TRUE) {
+                        shortestReach = GetShotWorldDistance(
+                            GetClub(g_Players[f_Shot.playerIndex].clubs[f_Shot.clubSlot]),
+                            f_Shot.shotMode
+                        );
+                        GetSurfacePercentRange(
+                            GetSurfaceInfo(f_Shot.surface),
+                            GetClub(g_Players[f_Shot.playerIndex].clubs[f_Shot.clubSlot]),
+                            percentRange
+                        );
+                        /* The carry per unit of f_Shot.powerGaugeFrame at the least percent
+                         */
+                        shortestReach =
+                            shortestReach * percentRange[0] / (FULL_PERCENT * GAUGE_FULL_FRAME);
+                        if (shortestReach < MIN_CLUB_DOWN_REACH ||
+                            targetDistance / shortestReach >= CLUB_DOWN_REACH_COUNT) {
+                            break;
+                        }
+
+                        nextSlot = f_Shot.clubSlot;
+                        if ((GetClub(g_Players[f_Shot.playerIndex].clubs[nextSlot])->surfaceMask &
+                                CLUB_SURFACE_GREEN) ||
+                            (GetClub(g_Players[f_Shot.playerIndex].clubs[++nextSlot])->surfaceMask &
+                                CLUB_SURFACE_GREEN)) {
+                            break;
+                        }
+
+                        f_Shot.clubSlot = nextSlot;
+                        osSyncPrintf("ChangeDefault----------------------ClubDown\n");
+                    }
+                }
+
+                f_PlanStage = PLAN_STAGE_TARGET_CHOSEN;
+                if (f_PlanTarget[AXIS_X] == g_HoleSetup.cupPosition[AXIS_X] &&
+                    f_PlanTarget[AXIS_Z] == g_HoleSetup.cupPosition[AXIS_Z] &&
+                    GetSurfaceInfo(f_Shot.surface)->kind != SURFACE_KIND_GREEN) {
+                    strokesOver = g_Players[f_Shot.playerIndex].strokeCount -
+                        (g_HoleSetup.par + f_HoleTargetToPar - 2);
+                    if (strokesOver <= 0) {
+                        missDistance =
+                            IntLength2D(
+                                g_HoleSetup.cupPosition[AXIS_X] - f_Shot.ballPosition[AXIS_X],
+                                g_HoleSetup.cupPosition[AXIS_Z] - f_Shot.ballPosition[AXIS_Z]
+                            ) >>
+                            3;
+                        missAngle = ((rand() * 4) & BINARY_ANGLE_MASK) * BINARY_ANGLE_TO_RADIANS;
+                        aimAngle = (u16)f_Shot.heading * BINARY_ANGLE_TO_RADIANS;
+                        if (missDistance >= MAX_MISS_DISTANCE) {
+                            missDistance = MAX_MISS_DISTANCE;
+                        }
+
+                        if (strokesOver < -1) {
+                            missDistance *= 2;
+                        }
+
+                        if (strokesOver == 0) {
+                            missDistance = LEVEL_MISS_DISTANCE;
+                        }
+
+                        missDistance = missDistance * 0.5f;
+                        missX = cosf(missAngle) * missDistance;
+                        missZ = sinf(missAngle) * missDistance;
+                        along =
+                            ((missX * cosf(aimAngle)) + (missZ * sinf(aimAngle))) * MISS_STRETCH;
+                        missX += cosf(aimAngle) * along;
+                        missZ += sinf(aimAngle) * along;
+                        f_PlanTarget[AXIS_X] = f_PlanTarget[AXIS_X] + missX;
+                        f_PlanTarget[AXIS_Z] = f_PlanTarget[AXIS_Z] + missZ;
+                        for (index = 0; index < MISS_REPORT_COUNT; index++) {
+                            osSyncPrintf("Iziwaru %d\n", strokesOver);
+                        }
+                    }
+                }
+
+                return PLAN_UNFINISHED;
+            }
+
+            f_PlanTarget[AXIS_Y] = GetGroundHeight(f_PlanTarget[AXIS_X], f_PlanTarget[AXIS_Z]);
+            f_Shot.heading = atan2(
+                                 f_PlanTarget[AXIS_Z] - f_Shot.ballPosition[AXIS_Z],
+                                 f_PlanTarget[AXIS_X] - f_Shot.ballPosition[AXIS_X]
+                             ) *
+                RADIANS_TO_BINARY_ANGLE;
+            if (GetClub(g_Players[f_Shot.playerIndex].clubs[f_Shot.clubSlot])->surfaceMask &
+                CLUB_SURFACE_GREEN) {
+                f_Shot.heading += GetSideSlope();
+            }
+
+            f_Shot.impactGaugeFrame = GAUGE_IMPACT_FRAME;
+            f_Shot.powerGaugeFrame = GAUGE_FULL_FRAME;
+            reach = GetShotWorldDistance(
+                GetClub(g_Players[f_Shot.playerIndex].clubs[f_Shot.clubSlot]),
+                f_Shot.shotMode
+            );
+            distance = IntLength2D(
+                f_Shot.ballPosition[AXIS_X] - f_PlanTarget[AXIS_X],
+                f_Shot.ballPosition[AXIS_Z] - f_PlanTarget[AXIS_Z]
+            );
+            if (g_HoleSetup.conditions.isRaining == TRUE) {
+                distance = (s32)(distance * RAINY_DISTANCE_SCALE);
+            }
+
+            GetSurfacePercentRange(
+                GetSurfaceInfo(f_Shot.surface),
+                GetClub(g_Players[f_Shot.playerIndex].clubs[f_Shot.clubSlot]),
+                percentRange
+            );
+            /* The carry per unit of f_Shot.powerGaugeFrame at the mean percent */
+            reach =
+                reach * (percentRange[1] + percentRange[0]) / (2 * FULL_PERCENT * GAUGE_FULL_FRAME);
+            /*
+             * Holding f_Shot.powerGaugeFrame in distance is there to match: a
+             * powerFrame local of its own gives 26 words differing, none in shape
+             */
+            distance = (rand() & 3) + (distance / reach);
+            if (GetClubBoldness() >= BOLD_CLUB_CHOICE) {
+                distance = distance * POWER_GAUGE_FRAME_BOOST;
+            }
+
+            if (distance < MIN_PLANNED_POWER_GAUGE_FRAME) {
+                distance = MIN_PLANNED_POWER_GAUGE_FRAME;
+            }
+            else if (distance > GAUGE_FULL_FRAME) {
+                distance = GAUGE_FULL_FRAME;
+            }
+
+            f_Shot.powerGaugeFrame = distance;
+            if (f_ShotOffset == SHOT_OFFSET_NONE) {
+                f_Shot.offsetX = 0;
+                f_Shot.offsetY = 0;
+                f_ShotOffset = ChooseShotOffset();
+            }
+
+            f_TrialIndex = 0;
+            f_LevelTrialCount = LEVEL_TRIAL_COUNT;
+            if (!f_HasTrialShot) {
+                f_TrialShot = f_Shot;
+                f_HasTrialShot = TRUE;
+            }
+
+            if (f_PlanTarget[AXIS_X] == g_HoleSetup.cupPosition[AXIS_X] &&
+                f_PlanTarget[AXIS_Z] == g_HoleSetup.cupPosition[AXIS_Z]) {
+                f_LevelTrialCount = CUP_LEVEL_TRIAL_COUNT;
+            }
+
+            if (IsGameFlagSet(GAME_FLAG_COMPUTER_PLAYS_BEST)) {
+                f_LevelTrialCount = BEST_PLAY_LEVEL_TRIAL_COUNT;
+            }
+
+            f_NeedsNewTarget = FALSE;
+        }
+        else {
+            f_TrialIndex = 0;
+        }
+
+        if (f_TrialIndex < f_LevelTrialCount) {
+            if (!StepTrialShot()) {
+                return PLAN_UNFINISHED;
+            }
+
+            if (!f_IsTrialAccepted && !f_NeedsShorterClub && !f_NeedsLongerClub) {
+                f_PlanStage = PLAN_STAGE_TRIAL_TAKEN;
+                f_TrialIndex++;
+                return PLAN_UNFINISHED;
+            }
+        }
+
+        f_PlanStage = PLAN_STAGE_LEVEL_FINISHED;
+        if (f_IsTrialLost == TRUE) {
+            f_LostTrialCount++;
+        }
+
+        osSyncPrintf("Besteval = %d\n", f_BestEvaluation);
+        if (f_IsTrialAccepted) {
+            break;
+        }
+
+        if (f_NeedsShorterClub) {
+            if (f_Shot.clubSlot == FindClubSlot(f_Shot.playerIndex, CLUB_TYPE_PUTTER)) {
+                break;
+            }
+
+            if (f_Shot.shotMode == SHOT_MODE_APPROACH) {
+                if (ShotGolferTraits().windPlay < WIND_PLAY_FOLLOWING_WINDS &&
+                    f_Shot.clubSlot == FindClubSlot(f_Shot.playerIndex, CLUB_TYPE_PITCHING_WEDGE)) {
+                    f_Shot.clubSlot = FindClubSlot(f_Shot.playerIndex, CLUB_TYPE_SAND_WEDGE);
+                }
+                else {
+                    osSyncPrintf("Approach cancel\n");
+                    ChooseLongShot(f_HoleStrokeTarget, &clubType, &targetX, &targetZ, &shotMode);
+                    f_Shot.shotMode = shotMode;
+                    f_Shot.clubSlot = FindClubSlot(f_Shot.playerIndex, clubType);
+                }
+
+                f_NeedsNewTarget = TRUE;
+                f_TrialLevel++;
+                continue;
+            }
+
+            f_Shot.clubSlot++;
+            if (f_Shot.clubSlot >= FindClubSlot(f_Shot.playerIndex, CLUB_TYPE_PITCHING_WEDGE)) {
+                f_Shot.clubSlot = FindClubSlot(f_Shot.playerIndex, CLUB_TYPE_PITCHING_WEDGE);
+            }
+
+            f_NeedsNewTarget = TRUE;
+        }
+        else if (f_NeedsLongerClub == TRUE) {
+            osSyncPrintf("num_hit = %d\n", g_Players[f_Shot.playerIndex].strokeCount);
+            if (f_Shot.clubSlot == FindClubSlot(f_Shot.playerIndex, CLUB_TYPE_PUTTER)) {
+                break;
+            }
+
+            if (f_Shot.clubSlot > 0) {
+                f_Shot.clubSlot--;
+                if (!f_IsClubUsable[f_Shot.clubSlot] ||
+                    (GetClubBoldness() < BOLD_CLUB_CHOICE &&
+                        GetLieRating(
+                            GetClub(g_Players[f_Shot.playerIndex].clubs[f_Shot.clubSlot]),
+                            f_Shot.surface,
+                            f_Shot.shotMode
+                        ) < 2)) {
+                    f_Shot.clubSlot++;
+                    f_CarryScale *= CARRY_SCALE_STEP;
+                }
+            }
+            else {
+                f_CarryScale *= CARRY_SCALE_STEP;
+            }
+
+            f_NeedsNewTarget = TRUE;
+        }
+
         f_TrialLevel++;
-        continue;
-      }
+    }
 
-      f_Shot.clubSlot++;
-      if (f_Shot.clubSlot >=
-          FindClubSlot(f_Shot.playerIndex, CLUB_TYPE_PITCHING_WEDGE)) {
-        f_Shot.clubSlot =
-            FindClubSlot(f_Shot.playerIndex, CLUB_TYPE_PITCHING_WEDGE);
-      }
+    osSyncPrintf(
+        "Finish Eval %d tlevel%d bestevalappear %d\n",
+        f_BestEvaluation,
+        f_TrialLevel,
+        f_HasBestEvaluation
+    );
+    savedImpactGaugeFrame = f_TrialShot.impactGaugeFrame;
+    savedPowerGaugeFrame = f_TrialShot.powerGaugeFrame;
+    if ((s32)IntLength2D(
+            g_HoleSetup.cupPosition[AXIS_X] - f_TrialShot.ballPosition[AXIS_X],
+            g_HoleSetup.cupPosition[AXIS_Z] - f_TrialShot.ballPosition[AXIS_Z]
+        ) <
+        (s32)IntLength2D(
+            g_HoleSetup.cupPosition[AXIS_X] - f_PlanTarget[AXIS_X],
+            g_HoleSetup.cupPosition[AXIS_Z] - f_PlanTarget[AXIS_Z]
+        )) {
+        strokes = g_Players[f_Shot.playerIndex].strokeCount;
+        par = g_HoleSetup.par;
+        mishit = 0;
+        if (GetSurfaceInfo(f_TrialShot.surface)->kind != SURFACE_KIND_GREEN &&
+            strokes < par + f_HoleTargetToPar - 1) {
+            maxMishit = GetLieRating(
+                GetClub(g_Players[f_TrialShot.playerIndex].clubs[f_TrialShot.clubSlot]),
+                f_TrialShot.surface,
+                f_TrialShot.shotMode
+            );
+            maxMishit -= maxMishit != 0;
+            if (strokes < par + f_HoleTargetToPar - 2) {
+                switch (
+                    f_GolferTraits[g_Players[f_TrialShot.playerIndex].characterIndex].consistency) {
+                    case CONSISTENCY_LOW:
+                        mishitDivisor = LOW_CONSISTENCY_MISHIT_DIVISOR;
+                        break;
+                    case CONSISTENCY_MIDDLE:
+                        mishitDivisor = MIDDLE_CONSISTENCY_MISHIT_DIVISOR;
+                        break;
+                    case CONSISTENCY_HIGH:
+                    default:
+                        mishitDivisor = HIGH_CONSISTENCY_MISHIT_DIVISOR;
+                        break;
+                }
+            }
+            else {
+                mishitDivisor = NEAR_TARGET_MISHIT_DIVISOR;
+            }
 
-      f_NeedsNewTarget = TRUE;
-    } else if (f_NeedsLongerClub == TRUE) {
-      osSyncPrintf("num_hit = %d\n", g_Players[f_Shot.playerIndex].strokeCount);
-      if (f_Shot.clubSlot ==
-          FindClubSlot(f_Shot.playerIndex, CLUB_TYPE_PUTTER)) {
-        break;
-      }
+            mishit = rand() % MISHIT_ROLL_RANGE / mishitDivisor;
+            if (maxMishit < Abs(mishit) &&
+                (f_HoleTargetToPar < 0 || strokes >= par + f_HoleTargetToPar - 3)) {
+                mishit = maxMishit;
+            }
 
-      if (f_Shot.clubSlot > 0) {
-        f_Shot.clubSlot--;
-        if (!f_IsClubUsable[f_Shot.clubSlot] ||
-            (GetClubBoldness() < BOLD_CLUB_CHOICE &&
-                GetLieRating(
-                    GetClub(
-                        g_Players[f_Shot.playerIndex].clubs[f_Shot.clubSlot]),
-                    f_Shot.surface, f_Shot.shotMode) < 2)) {
-          f_Shot.clubSlot++;
-          f_CarryScale *= CARRY_SCALE_STEP;
+            if (mishit != 0 && (rand() & MISHIT_SIGN_BIT)) {
+                mishit = -mishit;
+            }
+
+            f_TrialShot.impactGaugeFrame += mishit;
+
+            /* Never printed; the original has it, and its string is in the ROM */
+            if (FALSE) {
+                osSyncPrintf("Dahuri = %d\n", mishit);
+            }
         }
-      } else {
-        f_CarryScale *= CARRY_SCALE_STEP;
-      }
 
-      f_NeedsNewTarget = TRUE;
-    }
-
-    f_TrialLevel++;
-  }
-
-  osSyncPrintf("Finish Eval %d tlevel%d bestevalappear %d\n", f_BestEvaluation,
-      f_TrialLevel, f_HasBestEvaluation);
-  savedImpactGaugeFrame = f_TrialShot.impactGaugeFrame;
-  savedPowerGaugeFrame = f_TrialShot.powerGaugeFrame;
-  if ((s32)IntLength2D(
-          g_HoleSetup.cupPosition[AXIS_X] - f_TrialShot.ballPosition[AXIS_X],
-          g_HoleSetup.cupPosition[AXIS_Z] - f_TrialShot.ballPosition[AXIS_Z]) <
-      (s32)IntLength2D(g_HoleSetup.cupPosition[AXIS_X] - f_PlanTarget[AXIS_X],
-          g_HoleSetup.cupPosition[AXIS_Z] - f_PlanTarget[AXIS_Z])) {
-    strokes = g_Players[f_Shot.playerIndex].strokeCount;
-    par = g_HoleSetup.par;
-    mishit = 0;
-    if (GetSurfaceInfo(f_TrialShot.surface)->kind != SURFACE_KIND_GREEN &&
-        strokes < par + f_HoleTargetToPar - 1) {
-      maxMishit = GetLieRating(
-          GetClub(
-              g_Players[f_TrialShot.playerIndex].clubs[f_TrialShot.clubSlot]),
-          f_TrialShot.surface, f_TrialShot.shotMode);
-      maxMishit -= maxMishit != 0;
-      if (strokes < par + f_HoleTargetToPar - 2) {
-        switch (
-            f_GolferTraits[g_Players[f_TrialShot.playerIndex].characterIndex]
-                .consistency) {
-          case CONSISTENCY_LOW:
-            mishitDivisor = LOW_CONSISTENCY_MISHIT_DIVISOR;
-            break;
-          case CONSISTENCY_MIDDLE:
-            mishitDivisor = MIDDLE_CONSISTENCY_MISHIT_DIVISOR;
-            break;
-          case CONSISTENCY_HIGH:
-          default:
-            mishitDivisor = HIGH_CONSISTENCY_MISHIT_DIVISOR;
-            break;
+        if ((f_HoleTargetToPar <= 0) & (mishit != 0) && !IsTrialShotSafe()) {
+            f_TrialShot.impactGaugeFrame = savedImpactGaugeFrame;
+            f_TrialShot.powerGaugeFrame = savedPowerGaugeFrame;
         }
-      } else {
-        mishitDivisor = NEAR_TARGET_MISHIT_DIVISOR;
-      }
-
-      mishit = rand() % MISHIT_ROLL_RANGE / mishitDivisor;
-      if (maxMishit < Abs(mishit) &&
-          (f_HoleTargetToPar < 0 || strokes >= par + f_HoleTargetToPar - 3)) {
-        mishit = maxMishit;
-      }
-
-      if (mishit != 0 && (rand() & MISHIT_SIGN_BIT)) {
-        mishit = -mishit;
-      }
-
-      f_TrialShot.impactGaugeFrame += mishit;
-
-      /* Never printed; the original has it, and its string is in the ROM */
-      if (FALSE) {
-        osSyncPrintf("Dahuri = %d\n", mishit);
-      }
     }
 
-    if ((f_HoleTargetToPar <= 0) & (mishit != 0) && !IsTrialShotSafe()) {
-      f_TrialShot.impactGaugeFrame = savedImpactGaugeFrame;
-      f_TrialShot.powerGaugeFrame = savedPowerGaugeFrame;
-    }
-  }
-
-  osSyncPrintf("clubidx = %d\n", f_TrialShot.clubSlot);
-  osSyncPrintf("pgaugeresult = %d\n", f_TrialShot.powerGaugeFrame);
-  osSyncPrintf("pgaugeinpact = %d\n", f_TrialShot.impactGaugeFrame);
-  *plannedShot = f_TrialShot;
-  osSyncPrintf("AI End\n");
-  return 1;
+    osSyncPrintf("clubidx = %d\n", f_TrialShot.clubSlot);
+    osSyncPrintf("pgaugeresult = %d\n", f_TrialShot.powerGaugeFrame);
+    osSyncPrintf("pgaugeinpact = %d\n", f_TrialShot.impactGaugeFrame);
+    *plannedShot = f_TrialShot;
+    osSyncPrintf("AI End\n");
+    return 1;
 }
 
 s32 GetBallCupDistance(void) {
-  return IntLength2D(
-      f_Shot.ballPosition[AXIS_X] - g_HoleSetup.cupPosition[AXIS_X],
-      f_Shot.ballPosition[AXIS_Z] - g_HoleSetup.cupPosition[AXIS_Z]);
+    return IntLength2D(
+        f_Shot.ballPosition[AXIS_X] - g_HoleSetup.cupPosition[AXIS_X],
+        f_Shot.ballPosition[AXIS_Z] - g_HoleSetup.cupPosition[AXIS_Z]
+    );
 }
 
 /* The cup distance from which PlanCupDistance allows for the wind */
@@ -983,57 +1005,56 @@ s32 GetBallCupDistance(void) {
  * cup.
  */
 s32 PlanCupDistance(ShotMode shotMode UNUSED) {
-  s32 distance;
-  f32 cupX;
-  f32 cupZ;
-  f32 length;
-  Radians windAngle;
-  f32 inverseLength;
-  f32 windFollow;
-  f32 windX;
-  f32 windZ;
+    s32 distance;
+    f32 cupX;
+    f32 cupZ;
+    f32 length;
+    Radians windAngle;
+    f32 inverseLength;
+    f32 windFollow;
+    f32 windX;
+    f32 windZ;
 
-  distance =
-      IntLength2D(f_Shot.ballPosition[AXIS_X] - g_HoleSetup.cupPosition[AXIS_X],
-          f_Shot.ballPosition[AXIS_Z] - g_HoleSetup.cupPosition[AXIS_Z]);
-  cupX = g_HoleSetup.cupPosition[AXIS_X] - f_Shot.ballPosition[AXIS_X];
-  cupZ = g_HoleSetup.cupPosition[AXIS_Z] - f_Shot.ballPosition[AXIS_Z];
-  length = sqrtf((cupX * cupX) + (cupZ * cupZ));
-  windAngle = g_HoleSetup.conditions.windDirection * WIND_DIRECTION_TO_RADIANS;
-  if (length >= WIND_ALLOWANCE_MIN_DISTANCE) {
-    inverseLength = 1.0f / length;
-    cupX *= inverseLength;
-    cupZ *= inverseLength;
-    windX =
-        cosf(windAngle) * g_HoleSetup.conditions.windSpeed * WIND_SPEED_SCALE;
-    windZ =
-        sinf(windAngle) * g_HoleSetup.conditions.windSpeed * WIND_SPEED_SCALE;
-    windFollow = (cupX * windX) + (cupZ * windZ);
-    osSyncPrintf("WindFollow%f\n", windFollow);
+    distance = IntLength2D(
+        f_Shot.ballPosition[AXIS_X] - g_HoleSetup.cupPosition[AXIS_X],
+        f_Shot.ballPosition[AXIS_Z] - g_HoleSetup.cupPosition[AXIS_Z]
+    );
+    cupX = g_HoleSetup.cupPosition[AXIS_X] - f_Shot.ballPosition[AXIS_X];
+    cupZ = g_HoleSetup.cupPosition[AXIS_Z] - f_Shot.ballPosition[AXIS_Z];
+    length = sqrtf((cupX * cupX) + (cupZ * cupZ));
+    windAngle = g_HoleSetup.conditions.windDirection * WIND_DIRECTION_TO_RADIANS;
+    if (length >= WIND_ALLOWANCE_MIN_DISTANCE) {
+        inverseLength = 1.0f / length;
+        cupX *= inverseLength;
+        cupZ *= inverseLength;
+        windX = cosf(windAngle) * g_HoleSetup.conditions.windSpeed * WIND_SPEED_SCALE;
+        windZ = sinf(windAngle) * g_HoleSetup.conditions.windSpeed * WIND_SPEED_SCALE;
+        windFollow = (cupX * windX) + (cupZ * windZ);
+        osSyncPrintf("WindFollow%f\n", windFollow);
 
-    /*
-     * Turning windFollow into the distance ratio is there to match: a ratio
-     * local of its own gives 8 words differing, none in shape
-     */
-    windFollow = (-windFollow * WIND_FOLLOW_FRACTION) + 1.0f;
-    osSyncPrintf("WindCareRatio%f\n", windFollow);
-    if (windFollow < WIND_DISTANCE_RATIO_MIN) {
-      windFollow = WIND_DISTANCE_RATIO_MIN;
+        /*
+         * Turning windFollow into the distance ratio is there to match: a ratio
+         * local of its own gives 8 words differing, none in shape
+         */
+        windFollow = (-windFollow * WIND_FOLLOW_FRACTION) + 1.0f;
+        osSyncPrintf("WindCareRatio%f\n", windFollow);
+        if (windFollow < WIND_DISTANCE_RATIO_MIN) {
+            windFollow = WIND_DISTANCE_RATIO_MIN;
+        }
+
+        if (windFollow >= WIND_DISTANCE_RATIO_MAX) {
+            windFollow = WIND_DISTANCE_RATIO_MAX;
+        }
+
+        distance = distance * windFollow;
     }
 
-    if (windFollow >= WIND_DISTANCE_RATIO_MAX) {
-      windFollow = WIND_DISTANCE_RATIO_MAX;
-    }
-
-    distance = distance * windFollow;
-  }
-
-  return distance +
-      ((f_Shot.ballPosition[AXIS_Y] - g_HoleSetup.cupPosition[AXIS_Y]) *
-          HEIGHT_DISTANCE_FRACTION);
+    return distance +
+        ((f_Shot.ballPosition[AXIS_Y] - g_HoleSetup.cupPosition[AXIS_Y]) *
+            HEIGHT_DISTANCE_FRACTION);
 }
 
-ClubType ChooseApproachClub(s32* targetX, s32* targetZ);
+ClubType ChooseApproachClub(s32 *targetX, s32 *targetZ);
 
 /* Shots from farther than this are long shots */
 #define APPROACH_RANGE (60 * UNITS_PER_YARD)
@@ -1048,86 +1069,92 @@ ClubType ChooseApproachClub(s32* targetX, s32* targetZ);
  * long shot or an approach, by the cup distance.
  */
 void PlanClubAndTarget(CoursePoint target) {
-  s32 targetX;
-  s32 targetZ;
-  ClubType clubType;
-  ShotMode shotMode;
-  u32 kind;
-  s32 rest;
-  s32 slot;
-  Club* club;
+    s32 targetX;
+    s32 targetZ;
+    ClubType clubType;
+    ShotMode shotMode;
+    u32 kind;
+    s32 rest;
+    s32 slot;
+    Club *club;
 
-  clubType = CLUB_TYPE_DRIVER;
-  kind = GetSurfaceInfo(f_Shot.surface)->kind;
-  f_HoleStrokeTarget = ChooseHoleStrokeTarget();
-  f_HoleTargetToPar = f_HoleStrokeTarget - g_HoleSetup.par;
-  switch (kind) {
-    case SURFACE_KIND_GREEN:
-    case SURFACE_KIND_GREEN_EDGE:
-      rest = GetBallCupDistance();
-      osSyncPrintf("rest = %d\n", rest);
-      if (g_HoleSetup.conditions.isRaining == TRUE) {
-        rest = rest * RAINY_PUTT_DISTANCE_SCALE;
-      }
+    clubType = CLUB_TYPE_DRIVER;
+    kind = GetSurfaceInfo(f_Shot.surface)->kind;
+    f_HoleStrokeTarget = ChooseHoleStrokeTarget();
+    f_HoleTargetToPar = f_HoleStrokeTarget - g_HoleSetup.par;
+    switch (kind) {
+        case SURFACE_KIND_GREEN:
+        case SURFACE_KIND_GREEN_EDGE:
+            rest = GetBallCupDistance();
+            osSyncPrintf("rest = %d\n", rest);
+            if (g_HoleSetup.conditions.isRaining == TRUE) {
+                rest = rest * RAINY_PUTT_DISTANCE_SCALE;
+            }
 
-      for (slot = 0; slot < f_ClubCount; slot++) {
-        if (!f_IsClubUsable[slot]) {
-          continue;
-        }
+            for (slot = 0; slot < f_ClubCount; slot++) {
+                if (!f_IsClubUsable[slot]) {
+                    continue;
+                }
 
-        club = GetClub(g_Players[f_Shot.playerIndex].clubs[slot]);
-        if (!(club->surfaceMask & CLUB_SURFACE_GREEN)) {
-          continue;
-        }
+                club = GetClub(g_Players[f_Shot.playerIndex].clubs[slot]);
+                if (!(club->surfaceMask & CLUB_SURFACE_GREEN)) {
+                    continue;
+                }
 
-        if (GetShotWorldDistance(club, SHOT_MODE_APPROACH) >= rest) {
-          f_Shot.shotMode = SHOT_MODE_APPROACH;
-        } else if (GetShotWorldDistance(club, SHOT_MODE_NORMAL) >= rest) {
-          f_Shot.shotMode = SHOT_MODE_NORMAL;
-        } else {
-          f_Shot.shotMode = SHOT_MODE_POWER;
-        }
+                if (GetShotWorldDistance(club, SHOT_MODE_APPROACH) >= rest) {
+                    f_Shot.shotMode = SHOT_MODE_APPROACH;
+                }
+                else if (GetShotWorldDistance(club, SHOT_MODE_NORMAL) >= rest) {
+                    f_Shot.shotMode = SHOT_MODE_NORMAL;
+                }
+                else {
+                    f_Shot.shotMode = SHOT_MODE_POWER;
+                }
 
-        osSyncPrintf("skSCAI.powermode = %d\n", f_Shot.shotMode);
-        f_Shot.clubSlot = slot;
-      }
+                osSyncPrintf("skSCAI.powermode = %d\n", f_Shot.shotMode);
+                f_Shot.clubSlot = slot;
+            }
 
-      break;
-    case SURFACE_KIND_BUNKER_FAIR_LIE:
-    case SURFACE_KIND_BUNKER_POOR_LIE:
-    case SURFACE_KIND_BUNKER_UNUSED_LIE:
-      f_Shot.shotMode = SHOT_MODE_NORMAL;
-      f_Shot.clubSlot = FindClubSlot(f_Shot.playerIndex, CLUB_TYPE_SAND_WEDGE);
-      ChooseLandingTarget(f_Shot.ballPosition[AXIS_X],
-          f_Shot.ballPosition[AXIS_Z],
-          GetShotWorldDistance(
-              GetClub(g_Players[f_Shot.playerIndex].clubs[f_Shot.clubSlot]),
-              f_Shot.shotMode),
-          &targetX, &targetZ);
-      target[AXIS_X] = targetX;
-      target[AXIS_Z] = targetZ;
-      target[AXIS_Y] = GetGroundHeight(targetX, targetZ);
-      break;
-    default:
-      if (GetBallCupDistance() > APPROACH_RANGE) {
-        ChooseLongShot(
-            f_HoleStrokeTarget, &clubType, &targetX, &targetZ, &shotMode);
-        target[AXIS_X] = targetX;
-        target[AXIS_Z] = targetZ;
-        target[AXIS_Y] = GetGroundHeight(targetX, targetZ);
-        f_Shot.shotMode = shotMode;
-        f_Shot.clubSlot = FindClubSlot(f_Shot.playerIndex, clubType);
-      } else {
-        clubType = ChooseApproachClub(&targetX, &targetZ);
-        target[AXIS_X] = targetX;
-        target[AXIS_Z] = targetZ;
-        target[AXIS_Y] = GetGroundHeight(targetX, targetZ);
-        f_Shot.shotMode = SHOT_MODE_APPROACH;
-        f_Shot.clubSlot = FindClubSlot(f_Shot.playerIndex, clubType);
-      }
+            break;
+        case SURFACE_KIND_BUNKER_FAIR_LIE:
+        case SURFACE_KIND_BUNKER_POOR_LIE:
+        case SURFACE_KIND_BUNKER_UNUSED_LIE:
+            f_Shot.shotMode = SHOT_MODE_NORMAL;
+            f_Shot.clubSlot = FindClubSlot(f_Shot.playerIndex, CLUB_TYPE_SAND_WEDGE);
+            ChooseLandingTarget(
+                f_Shot.ballPosition[AXIS_X],
+                f_Shot.ballPosition[AXIS_Z],
+                GetShotWorldDistance(
+                    GetClub(g_Players[f_Shot.playerIndex].clubs[f_Shot.clubSlot]),
+                    f_Shot.shotMode
+                ),
+                &targetX,
+                &targetZ
+            );
+            target[AXIS_X] = targetX;
+            target[AXIS_Z] = targetZ;
+            target[AXIS_Y] = GetGroundHeight(targetX, targetZ);
+            break;
+        default:
+            if (GetBallCupDistance() > APPROACH_RANGE) {
+                ChooseLongShot(f_HoleStrokeTarget, &clubType, &targetX, &targetZ, &shotMode);
+                target[AXIS_X] = targetX;
+                target[AXIS_Z] = targetZ;
+                target[AXIS_Y] = GetGroundHeight(targetX, targetZ);
+                f_Shot.shotMode = shotMode;
+                f_Shot.clubSlot = FindClubSlot(f_Shot.playerIndex, clubType);
+            }
+            else {
+                clubType = ChooseApproachClub(&targetX, &targetZ);
+                target[AXIS_X] = targetX;
+                target[AXIS_Z] = targetZ;
+                target[AXIS_Y] = GetGroundHeight(targetX, targetZ);
+                f_Shot.shotMode = SHOT_MODE_APPROACH;
+                f_Shot.clubSlot = FindClubSlot(f_Shot.playerIndex, clubType);
+            }
 
-      break;
-  }
+            break;
+    }
 }
 
 /* SortByKeys's orders */
@@ -1137,41 +1164,41 @@ void PlanClubAndTarget(CoursePoint target) {
  * Selection sorts count keys in the given order, swapping the entries of the
  * values and otherValues arrays along with them unless they are NULL.
  */
-void SortByKeys(
-    s32 count, s32* values, s32* otherValues, s32* keys, s32 order) {
-  s32 index;
-  s32 otherIndex;
-  s32 chosenIndex;
-  s32 swapped;
+void SortByKeys(s32 count, s32 *values, s32 *otherValues, s32 *keys, s32 order) {
+    s32 index;
+    s32 otherIndex;
+    s32 chosenIndex;
+    s32 swapped;
 
-  for (index = 0; index < count - 1; index++) {
-    chosenIndex = index;
-    for (otherIndex = index + 1; otherIndex < count; otherIndex++) {
-      if (order == SORT_DESCENDING) {
-        if (keys[otherIndex] > keys[chosenIndex]) {
-          chosenIndex = otherIndex;
+    for (index = 0; index < count - 1; index++) {
+        chosenIndex = index;
+        for (otherIndex = index + 1; otherIndex < count; otherIndex++) {
+            if (order == SORT_DESCENDING) {
+                if (keys[otherIndex] > keys[chosenIndex]) {
+                    chosenIndex = otherIndex;
+                }
+            }
+            else if (keys[otherIndex] < keys[chosenIndex]) {
+                chosenIndex = otherIndex;
+            }
         }
-      } else if (keys[otherIndex] < keys[chosenIndex]) {
-        chosenIndex = otherIndex;
-      }
-    }
 
-    if (values != NULL) {
-      swapped = values[index];
-      values[index] = values[chosenIndex];
-      values[chosenIndex] = swapped;
-    }
+        if (values != NULL) {
+            swapped = values[index];
+            values[index] = values[chosenIndex];
+            values[chosenIndex] = swapped;
+        }
 
-    if (otherValues != NULL) {
-      swapped = otherValues[index];
-      otherValues[index] = otherValues[chosenIndex];
-      otherValues[chosenIndex] = swapped;
-    }
+        if (otherValues != NULL) {
+            swapped = otherValues[index];
+            otherValues[index] = otherValues[chosenIndex];
+            otherValues[chosenIndex] = swapped;
+        }
 
-    swapped = keys[index];
-    keys[index] = keys[chosenIndex];
-    keys[chosenIndex] = swapped;
-  }
+        swapped = keys[index];
+        keys[index] = keys[chosenIndex];
+        keys[chosenIndex] = swapped;
+    }
 }
 
 /*
@@ -1180,30 +1207,30 @@ void SortByKeys(
  * one strokes counts as one under par.
  */
 s32 GetScoreToParSoFar(s32 playerIndex) {
-  s32 strokeTotal = 0;
-  s32 parTotal = 0;
-  s32 hole;
-  s32 par;
-  s32 strokes;
+    s32 strokeTotal = 0;
+    s32 parTotal = 0;
+    s32 hole;
+    s32 par;
+    s32 strokes;
 
-  if (g_GameState.holeIndex == 0) {
-    return 0;
-  }
-
-  for (hole = 0; hole < g_GameState.holeIndex; hole++) {
-    strokes = g_Players[playerIndex].holes[hole].strokes;
-    par = g_CourseRecords[g_GameState.courseIndex].holes[hole].par;
-    if ((par * 2) + 1 < strokes) {
-      strokes = par - 1;
+    if (g_GameState.holeIndex == 0) {
+        return 0;
     }
 
-    if (strokes > 0) {
-      strokeTotal += strokes;
-      parTotal += par;
-    }
-  }
+    for (hole = 0; hole < g_GameState.holeIndex; hole++) {
+        strokes = g_Players[playerIndex].holes[hole].strokes;
+        par = g_CourseRecords[g_GameState.courseIndex].holes[hole].par;
+        if ((par * 2) + 1 < strokes) {
+            strokes = par - 1;
+        }
 
-  return strokeTotal - parTotal;
+        if (strokes > 0) {
+            strokeTotal += strokes;
+            parTotal += par;
+        }
+    }
+
+    return strokeTotal - parTotal;
 }
 
 /* The par range of the course's holes */
@@ -1219,38 +1246,39 @@ s32 GetScoreToParSoFar(s32 playerIndex) {
  * isSpreadHole is an expression on the caller's index.
  */
 #define SpreadStrokes(strokes, strokeCount, isSpreadHole) \
-  { \
-    s32 changeCount_; \
+    { \
+        s32 changeCount_; \
 \
-    while ((strokeCount) != 0) { \
-      changeCount_ = 0; \
-      for (index = 0; index < COURSE_HOLE_COUNT; index++) { \
-        if (!(isSpreadHole)) { \
-          continue; \
-        } \
-        if ((strokeCount) < 0) { \
-          if ((strokes)[index] >= LOWEST_LOWERED_STROKES) { \
-            changeCount_++; \
-            (strokes)[index]--; \
-            (strokeCount)++; \
-            if ((strokeCount) >= 0) { \
-              break; \
+        while ((strokeCount) != 0) { \
+            changeCount_ = 0; \
+            for (index = 0; index < COURSE_HOLE_COUNT; index++) { \
+                if (!(isSpreadHole)) { \
+                    continue; \
+                } \
+                if ((strokeCount) < 0) { \
+                    if ((strokes)[index] >= LOWEST_LOWERED_STROKES) { \
+                        changeCount_++; \
+                        (strokes)[index]--; \
+                        (strokeCount)++; \
+                        if ((strokeCount) >= 0) { \
+                            break; \
+                        } \
+                    } \
+                } \
+                else { \
+                    changeCount_++; \
+                    (strokes)[index]++; \
+                    (strokeCount)--; \
+                    if ((strokeCount) <= 0) { \
+                        break; \
+                    } \
+                } \
             } \
-          } \
-        } else { \
-          changeCount_++; \
-          (strokes)[index]++; \
-          (strokeCount)--; \
-          if ((strokeCount) <= 0) { \
-            break; \
-          } \
+            if (changeCount_ == 0) { \
+                break; \
+            } \
         } \
-      } \
-      if (changeCount_ == 0) { \
-        break; \
-      } \
-    } \
-  }
+    }
 
 /*
  * Chooses how many strokes the golfer aims to take on this hole. It takes the
@@ -1261,299 +1289,298 @@ s32 GetScoreToParSoFar(s32 playerIndex) {
  * the holes still to play.
  */
 s32 ChooseHoleStrokeTarget(void) {
-  s32 strokes[COURSE_HOLE_COUNT];
-  s32 handicaps[COURSE_HOLE_COUNT];
-  s32 holes[COURSE_HOLE_COUNT];
-  s32 groupHandicaps[COURSE_HOLE_COUNT];
-  s32 groupStrokes[COURSE_HOLE_COUNT];
-  s32 groupHoles[COURSE_HOLE_COUNT];
-  s32 luckyBonus;
-  s32 lossCount;
-  s32 winBits;
-  s32 targetScore;
-  s32 strongNine;
-  s32 index;
-  s32 groupCount;
-  s32 frontStrokes;
-  s32 backStrokes;
-  s32 negativeCount;
-  s32 targetLeftToPar;
-  s32 plannedLeftToPar;
-  s32 entry;
-  s32 strokesLeft;
+    s32 strokes[COURSE_HOLE_COUNT];
+    s32 handicaps[COURSE_HOLE_COUNT];
+    s32 holes[COURSE_HOLE_COUNT];
+    s32 groupHandicaps[COURSE_HOLE_COUNT];
+    s32 groupStrokes[COURSE_HOLE_COUNT];
+    s32 groupHoles[COURSE_HOLE_COUNT];
+    s32 luckyBonus;
+    s32 lossCount;
+    s32 winBits;
+    s32 targetScore;
+    s32 strongNine;
+    s32 index;
+    s32 groupCount;
+    s32 frontStrokes;
+    s32 backStrokes;
+    s32 negativeCount;
+    s32 targetLeftToPar;
+    s32 plannedLeftToPar;
+    s32 entry;
+    s32 strokesLeft;
 
-  luckyBonus = 0;
-  if (IsGameFlagSet(GAME_FLAG_COMPUTER_PLAYS_BEST)) {
-    return 0;
-  }
-
-  if (g_GameState.gameMode == GAME_MODE_TRAINING) {
-    return g_HoleSetup.par;
-  }
-
-  if (g_GameState.gameMode == GAME_MODE_GET_CHARACTER) {
-    lossCount = GetSaveData()
-                    ->records.awards
-                    .matchups[g_Players[0].characterIndex]
-                             [g_Players[f_Shot.playerIndex].characterIndex]
-                    .lossCount;
-    winBits = GetSaveData()
-                  ->records.awards
-                  .matchups[g_Players[0].characterIndex]
-                           [g_Players[f_Shot.playerIndex].characterIndex]
-                  .winBits;
-    if ((winBits & WIN_COUNT_MASK) < (lossCount & WIN_COUNT_MASK)) {
-      luckyBonus = g_GameState.roundSeed & 3;
+    luckyBonus = 0;
+    if (IsGameFlagSet(GAME_FLAG_COMPUTER_PLAYS_BEST)) {
+        return 0;
     }
 
-    osSyncPrintf("win%d lose%d lucky%d\n", winBits, lossCount, luckyBonus);
-  }
+    if (g_GameState.gameMode == GAME_MODE_TRAINING) {
+        return g_HoleSetup.par;
+    }
 
-  targetScore = luckyBonus + ShotGolferTraits().baseTargetScore +
-      ShotGolferTraits().courseTargetOffsets[g_GameState.courseIndex];
-  osSyncPrintf(
-      "Char Index = %d\n", g_Players[f_Shot.playerIndex].characterIndex);
-  osSyncPrintf("TargetScore = %d\n", targetScore);
-  strongNine = ShotGolferTraits().strongNine;
-  for (index = 0; index < COURSE_HOLE_COUNT; index++) {
-    strokes[index] = 0;
-    handicaps[index] = 0;
-  }
+    if (g_GameState.gameMode == GAME_MODE_GET_CHARACTER) {
+        lossCount =
+            GetSaveData()
+                ->records.awards
+                .matchups[g_Players[0].characterIndex][g_Players[f_Shot.playerIndex].characterIndex]
+                .lossCount;
+        winBits =
+            GetSaveData()
+                ->records.awards
+                .matchups[g_Players[0].characterIndex][g_Players[f_Shot.playerIndex].characterIndex]
+                .winBits;
+        if ((winBits & WIN_COUNT_MASK) < (lossCount & WIN_COUNT_MASK)) {
+            luckyBonus = g_GameState.roundSeed & 3;
+        }
 
-  for (index = 0; index < COURSE_HOLE_COUNT; index++) {
-    handicaps[index] =
-        g_CourseRecords[g_GameState.courseIndex].holes[index].handicap;
-    strokes[index] = g_CourseRecords[g_GameState.courseIndex].holes[index].par;
-    holes[index] = index;
-  }
+        osSyncPrintf("win%d lose%d lucky%d\n", winBits, lossCount, luckyBonus);
+    }
 
-  if (targetScore < 0) {
-    SortByKeys(COURSE_HOLE_COUNT, holes, handicaps, strokes, SORT_DESCENDING);
-  } else {
-    SortByKeys(COURSE_HOLE_COUNT, holes, handicaps, strokes, SORT_ASCENDING);
-  }
+    targetScore = luckyBonus + ShotGolferTraits().baseTargetScore +
+        ShotGolferTraits().courseTargetOffsets[g_GameState.courseIndex];
+    osSyncPrintf("Char Index = %d\n", g_Players[f_Shot.playerIndex].characterIndex);
+    osSyncPrintf("TargetScore = %d\n", targetScore);
+    strongNine = ShotGolferTraits().strongNine;
+    for (index = 0; index < COURSE_HOLE_COUNT; index++) {
+        strokes[index] = 0;
+        handicaps[index] = 0;
+    }
 
-  for (index = HIGHEST_PAR; index >= LOWEST_PAR; index--) {
-    groupCount = 0;
-    for (entry = 0; entry < COURSE_HOLE_COUNT; entry++) {
-      if (strokes[entry] == index) {
-        groupHoles[groupCount] = holes[entry];
-        groupStrokes[groupCount] = strokes[entry];
-        groupHandicaps[groupCount] = handicaps[entry];
-        groupCount++;
-      }
+    for (index = 0; index < COURSE_HOLE_COUNT; index++) {
+        handicaps[index] = g_CourseRecords[g_GameState.courseIndex].holes[index].handicap;
+        strokes[index] = g_CourseRecords[g_GameState.courseIndex].holes[index].par;
+        holes[index] = index;
     }
 
     if (targetScore < 0) {
-      SortByKeys(groupCount, groupHoles, groupStrokes, groupHandicaps,
-          SORT_DESCENDING);
-    } else {
-      SortByKeys(
-          groupCount, groupHoles, groupStrokes, groupHandicaps, SORT_ASCENDING);
+        SortByKeys(COURSE_HOLE_COUNT, holes, handicaps, strokes, SORT_DESCENDING);
+    }
+    else {
+        SortByKeys(COURSE_HOLE_COUNT, holes, handicaps, strokes, SORT_ASCENDING);
     }
 
-    groupCount = 0;
-    for (entry = 0; entry < COURSE_HOLE_COUNT; entry++) {
-      if (strokes[entry] == index) {
-        holes[entry] = groupHoles[groupCount];
-        strokes[entry] = groupStrokes[groupCount];
+    for (index = HIGHEST_PAR; index >= LOWEST_PAR; index--) {
+        groupCount = 0;
+        for (entry = 0; entry < COURSE_HOLE_COUNT; entry++) {
+            if (strokes[entry] == index) {
+                groupHoles[groupCount] = holes[entry];
+                groupStrokes[groupCount] = strokes[entry];
+                groupHandicaps[groupCount] = handicaps[entry];
+                groupCount++;
+            }
+        }
 
-        /* Reads handicaps rather than groupHandicaps; the original has it */
-        handicaps[entry] = handicaps[groupCount];
-        groupCount++;
-      }
-    }
-  }
+        if (targetScore < 0) {
+            SortByKeys(groupCount, groupHoles, groupStrokes, groupHandicaps, SORT_DESCENDING);
+        }
+        else {
+            SortByKeys(groupCount, groupHoles, groupStrokes, groupHandicaps, SORT_ASCENDING);
+        }
 
-  backStrokes = targetScore / 2;
-  frontStrokes = backStrokes;
-  if (strongNine == STRONG_NINE_NEITHER) {
-    if (targetScore & 1) {
-      frontStrokes = targetScore - backStrokes;
-    }
-  } else if (strongNine == STRONG_NINE_FRONT) {
-    if (targetScore & 1) {
-      frontStrokes = targetScore - backStrokes;
-    }
-  } else if (strongNine == STRONG_NINE_BACK) {
-    if (targetScore & 1) {
-      backStrokes = targetScore - backStrokes;
-    }
-  }
+        groupCount = 0;
+        for (entry = 0; entry < COURSE_HOLE_COUNT; entry++) {
+            if (strokes[entry] == index) {
+                holes[entry] = groupHoles[groupCount];
+                strokes[entry] = groupStrokes[groupCount];
 
-  strokesLeft = frontStrokes;
-  SpreadStrokes(strokes, strokesLeft, holes[index] < HOLES_PER_NINE);
-  strokesLeft = backStrokes;
-  SpreadStrokes(strokes, strokesLeft, holes[index] >= HOLES_PER_NINE);
-  if (strongNine == STRONG_NINE_FRONT || strongNine == STRONG_NINE_BACK) {
-    negativeCount = 0;
-    backStrokes = 0;
-    frontStrokes = 0;
+                /* Reads handicaps rather than groupHandicaps; the original has it */
+                handicaps[entry] = handicaps[groupCount];
+                groupCount++;
+            }
+        }
+    }
+
+    backStrokes = targetScore / 2;
+    frontStrokes = backStrokes;
+    if (strongNine == STRONG_NINE_NEITHER) {
+        if (targetScore & 1) {
+            frontStrokes = targetScore - backStrokes;
+        }
+    }
+    else if (strongNine == STRONG_NINE_FRONT) {
+        if (targetScore & 1) {
+            frontStrokes = targetScore - backStrokes;
+        }
+    }
+    else if (strongNine == STRONG_NINE_BACK) {
+        if (targetScore & 1) {
+            backStrokes = targetScore - backStrokes;
+        }
+    }
+
+    strokesLeft = frontStrokes;
+    SpreadStrokes(strokes, strokesLeft, holes[index] < HOLES_PER_NINE);
+    strokesLeft = backStrokes;
+    SpreadStrokes(strokes, strokesLeft, holes[index] >= HOLES_PER_NINE);
+    if (strongNine == STRONG_NINE_FRONT || strongNine == STRONG_NINE_BACK) {
+        negativeCount = 0;
+        backStrokes = 0;
+        frontStrokes = 0;
+        for (index = 0; index < COURSE_HOLE_COUNT; index++) {
+            if (strongNine == STRONG_NINE_FRONT && !(holes[index] < HOLES_PER_NINE)) {
+                continue;
+            }
+
+            if (strongNine == STRONG_NINE_BACK && holes[index] < HOLES_PER_NINE) {
+                continue;
+            }
+
+            if (strokes[index] < 0) {
+                negativeCount++;
+            }
+        }
+
+        if (targetScore > 0) {
+            if (negativeCount == 0) {
+                if (strongNine == STRONG_NINE_FRONT) {
+                    frontStrokes--;
+                    backStrokes++;
+                }
+                else if (strongNine == STRONG_NINE_BACK) {
+                    backStrokes--;
+                    frontStrokes++;
+                }
+            }
+        }
+        else if (targetScore == 0 || targetScore == -1) {
+            if (negativeCount < 2) {
+                if (strongNine == STRONG_NINE_FRONT) {
+                    frontStrokes += negativeCount - 2;
+                    backStrokes -= negativeCount - 2;
+                }
+                else if (strongNine == STRONG_NINE_BACK) {
+                    backStrokes += negativeCount - 2;
+                    frontStrokes -= negativeCount - 2;
+                }
+            }
+        }
+        else if (negativeCount < 3) {
+            if (strongNine == STRONG_NINE_FRONT) {
+                frontStrokes += negativeCount - 3;
+                backStrokes -= negativeCount - 3;
+            }
+            else if (strongNine == STRONG_NINE_BACK) {
+                backStrokes += negativeCount - 3;
+                frontStrokes -= negativeCount - 3;
+            }
+        }
+
+        for (index = 0; index < COURSE_HOLE_COUNT; index++) {
+            if (holes[index] < HOLES_PER_NINE) {
+                if (frontStrokes < 0) {
+                    if (strokes[index] ==
+                            g_CourseRecords[g_GameState.courseIndex].holes[holes[index]].par &&
+                        strokes[index] != LOWEST_LOWERED_STROKES) {
+                        strokes[index]--;
+                        frontStrokes++;
+                    }
+                }
+                else if (frontStrokes > 0) {
+                    if (strokes[index] ==
+                        g_CourseRecords[g_GameState.courseIndex].holes[holes[index]].par) {
+                        strokes[index]++;
+                        frontStrokes--;
+                    }
+                }
+            }
+            else if (backStrokes < 0) {
+                if (strokes[index] ==
+                        g_CourseRecords[g_GameState.courseIndex].holes[holes[index]].par &&
+                    strokes[index] != LOWEST_LOWERED_STROKES) {
+                    strokes[index]--;
+                    backStrokes++;
+                }
+            }
+            else if (backStrokes > 0) {
+                if (strokes[index] ==
+                    g_CourseRecords[g_GameState.courseIndex].holes[holes[index]].par) {
+                    strokes[index]++;
+                    backStrokes--;
+                }
+            }
+        }
+    }
+
+    plannedLeftToPar = 0;
+    targetLeftToPar = targetScore - GetScoreToParSoFar(f_Shot.playerIndex);
     for (index = 0; index < COURSE_HOLE_COUNT; index++) {
-      if (strongNine == STRONG_NINE_FRONT && !(holes[index] < HOLES_PER_NINE)) {
-        continue;
-      }
-
-      if (strongNine == STRONG_NINE_BACK && holes[index] < HOLES_PER_NINE) {
-        continue;
-      }
-
-      if (strokes[index] < 0) {
-        negativeCount++;
-      }
+        if (holes[index] >= g_GameState.holeIndex) {
+            plannedLeftToPar +=
+                strokes[index] - g_CourseRecords[g_GameState.courseIndex].holes[holes[index]].par;
+        }
     }
 
-    if (targetScore > 0) {
-      if (negativeCount == 0) {
-        if (strongNine == STRONG_NINE_FRONT) {
-          frontStrokes--;
-          backStrokes++;
-        } else if (strongNine == STRONG_NINE_BACK) {
-          backStrokes--;
-          frontStrokes++;
+    if (g_GameState.holeSelection & HOLE_SELECTION_BACK_NINE) {
+        targetLeftToPar = targetScore - targetLeftToPar;
+        if (g_GameState.holeIndex >= HOLES_PER_NINE) {
+            targetLeftToPar = 0;
+            for (index = 0; index < COURSE_HOLE_COUNT; index++) {
+                if (holes[index] < HOLES_PER_NINE) {
+                    targetLeftToPar += strokes[index] -
+                        g_CourseRecords[g_GameState.courseIndex].holes[holes[index]].par;
+                }
+            }
+
+            for (index = 0; index < COURSE_HOLE_COUNT; index++) {
+                if (holes[index] >= HOLES_PER_NINE && holes[index] < g_GameState.holeIndex) {
+                    targetLeftToPar += g_Players[f_Shot.playerIndex].holes[holes[index]].strokes -
+                        g_CourseRecords[g_GameState.courseIndex].holes[holes[index]].par;
+                }
+            }
+
+            targetLeftToPar = targetScore - targetLeftToPar;
         }
-      }
-    } else if (targetScore == 0 || targetScore == -1) {
-      if (negativeCount < 2) {
-        if (strongNine == STRONG_NINE_FRONT) {
-          frontStrokes += negativeCount - 2;
-          backStrokes -= negativeCount - 2;
-        } else if (strongNine == STRONG_NINE_BACK) {
-          backStrokes += negativeCount - 2;
-          frontStrokes -= negativeCount - 2;
-        }
-      }
-    } else if (negativeCount < 3) {
-      if (strongNine == STRONG_NINE_FRONT) {
-        frontStrokes += negativeCount - 3;
-        backStrokes -= negativeCount - 3;
-      } else if (strongNine == STRONG_NINE_BACK) {
-        backStrokes += negativeCount - 3;
-        frontStrokes -= negativeCount - 3;
-      }
     }
 
+    if (g_GameState.betRates[BET_SKINS] > 0 ||
+        g_GameState.gameMode == GAME_MODE_SKINS_MATCH ||
+        g_GameState.gameMode == GAME_MODE_CLUB_SLOTS) {
+        targetLeftToPar = 0;
+        for (index = 0; index < COURSE_HOLE_COUNT; index++) {
+            if (holes[index] < g_GameState.holeIndex) {
+                targetLeftToPar += strokes[index] -
+                    g_CourseRecords[g_GameState.courseIndex].holes[holes[index]].par;
+            }
+        }
+
+        targetLeftToPar = targetScore - targetLeftToPar;
+    }
+
+    SortByKeys(COURSE_HOLE_COUNT, strokes, handicaps, holes, SORT_ASCENDING);
+    osSyncPrintf("OrgOffset = %d\n", targetLeftToPar);
+    osSyncPrintf("Work = %d\n", plannedLeftToPar);
+    strokesLeft = targetLeftToPar - plannedLeftToPar;
+    SpreadStrokes(strokes, strokesLeft, g_GameState.holeIndex <= holes[index]);
+    osSyncPrintf("TS => ");
     for (index = 0; index < COURSE_HOLE_COUNT; index++) {
-      if (holes[index] < HOLES_PER_NINE) {
-        if (frontStrokes < 0) {
-          if (strokes[index] ==
-                  g_CourseRecords[g_GameState.courseIndex]
-                      .holes[holes[index]]
-                      .par &&
-              strokes[index] != LOWEST_LOWERED_STROKES) {
-            strokes[index]--;
-            frontStrokes++;
-          }
-        } else if (frontStrokes > 0) {
-          if (strokes[index] ==
-              g_CourseRecords[g_GameState.courseIndex]
-                  .holes[holes[index]]
-                  .par) {
-            strokes[index]++;
-            frontStrokes--;
-          }
+        for (entry = 0; entry < COURSE_HOLE_COUNT; entry++) {
+            if (holes[entry] == index) {
+                osSyncPrintf(" %d", strokes[entry]);
+            }
         }
-      } else if (backStrokes < 0) {
-        if (strokes[index] ==
-                g_CourseRecords[g_GameState.courseIndex]
-                    .holes[holes[index]]
-                    .par &&
-            strokes[index] != LOWEST_LOWERED_STROKES) {
-          strokes[index]--;
-          backStrokes++;
-        }
-      } else if (backStrokes > 0) {
-        if (strokes[index] ==
-            g_CourseRecords[g_GameState.courseIndex].holes[holes[index]].par) {
-          strokes[index]++;
-          backStrokes--;
-        }
-      }
     }
-  }
 
-  plannedLeftToPar = 0;
-  targetLeftToPar = targetScore - GetScoreToParSoFar(f_Shot.playerIndex);
-  for (index = 0; index < COURSE_HOLE_COUNT; index++) {
-    if (holes[index] >= g_GameState.holeIndex) {
-      plannedLeftToPar += strokes[index] -
-          g_CourseRecords[g_GameState.courseIndex].holes[holes[index]].par;
-    }
-  }
-
-  if (g_GameState.holeSelection & HOLE_SELECTION_BACK_NINE) {
-    targetLeftToPar = targetScore - targetLeftToPar;
-    if (g_GameState.holeIndex >= HOLES_PER_NINE) {
-      targetLeftToPar = 0;
-      for (index = 0; index < COURSE_HOLE_COUNT; index++) {
-        if (holes[index] < HOLES_PER_NINE) {
-          targetLeftToPar += strokes[index] -
-              g_CourseRecords[g_GameState.courseIndex].holes[holes[index]].par;
-        }
-      }
-
-      for (index = 0; index < COURSE_HOLE_COUNT; index++) {
-        if (holes[index] >= HOLES_PER_NINE &&
-            holes[index] < g_GameState.holeIndex) {
-          targetLeftToPar +=
-              g_Players[f_Shot.playerIndex].holes[holes[index]].strokes -
-              g_CourseRecords[g_GameState.courseIndex].holes[holes[index]].par;
-        }
-      }
-
-      targetLeftToPar = targetScore - targetLeftToPar;
-    }
-  }
-
-  if (g_GameState.betRates[BET_SKINS] > 0 ||
-      g_GameState.gameMode == GAME_MODE_SKINS_MATCH ||
-      g_GameState.gameMode == GAME_MODE_CLUB_SLOTS) {
-    targetLeftToPar = 0;
+    osSyncPrintf("\n");
+    osSyncPrintf("OS => ");
     for (index = 0; index < COURSE_HOLE_COUNT; index++) {
-      if (holes[index] < g_GameState.holeIndex) {
-        targetLeftToPar += strokes[index] -
-            g_CourseRecords[g_GameState.courseIndex].holes[holes[index]].par;
-      }
+        osSyncPrintf(" %d", g_CourseRecords[g_GameState.courseIndex].holes[index].par);
     }
 
-    targetLeftToPar = targetScore - targetLeftToPar;
-  }
-
-  SortByKeys(COURSE_HOLE_COUNT, strokes, handicaps, holes, SORT_ASCENDING);
-  osSyncPrintf("OrgOffset = %d\n", targetLeftToPar);
-  osSyncPrintf("Work = %d\n", plannedLeftToPar);
-  strokesLeft = targetLeftToPar - plannedLeftToPar;
-  SpreadStrokes(strokes, strokesLeft, g_GameState.holeIndex <= holes[index]);
-  osSyncPrintf("TS => ");
-  for (index = 0; index < COURSE_HOLE_COUNT; index++) {
-    for (entry = 0; entry < COURSE_HOLE_COUNT; entry++) {
-      if (holes[entry] == index) {
-        osSyncPrintf(" %d", strokes[entry]);
-      }
+    osSyncPrintf("\n");
+    for (index = 0; index < COURSE_HOLE_COUNT; index++) {
+        if (holes[index] == g_GameState.holeIndex) {
+            /* The comma is in the original's string */
+            osSyncPrintf("++ %d\n,", strokes[index]);
+            return strokes[index];
+        }
     }
-  }
 
-  osSyncPrintf("\n");
-  osSyncPrintf("OS => ");
-  for (index = 0; index < COURSE_HOLE_COUNT; index++) {
-    osSyncPrintf(
-        " %d", g_CourseRecords[g_GameState.courseIndex].holes[index].par);
-  }
-
-  osSyncPrintf("\n");
-  for (index = 0; index < COURSE_HOLE_COUNT; index++) {
-    if (holes[index] == g_GameState.holeIndex) {
-      /* The comma is in the original's string */
-      osSyncPrintf("++ %d\n,", strokes[index]);
-      return strokes[index];
-    }
-  }
-
-  /* The original reads past the holes, into the next course record's name */
+    /* The original reads past the holes, into the next course record's name */
 #ifdef AVOID_UB
-  return g_HoleSetup.par;
+    return g_HoleSetup.par;
 #else
-  return g_CourseRecords[g_GameState.courseIndex].holes[index].par;
+    return g_CourseRecords[g_GameState.courseIndex].holes[index].par;
 #endif
 }
 
@@ -1567,149 +1594,150 @@ s32 ChooseHoleStrokeTarget(void) {
  * Starting at the cup, it walks to the nearest point not yet visited until it
  * reaches the tee.
  */
-s32 PlanRoute(s8* route) {
-  s8 isVisited[ROUTE_POINT_COUNT + 1];
-  s8 order[ROUTE_POINT_COUNT];
-  s32 index;
-  s32 pointCount;
-  s8 remainingCount;
-  s32 currentX;
-  s32 currentZ;
-  s32 orderCount;
-  s32 nearestDistance;
-  s32 nearest;
-  s32 distance;
-  s32 orderIndex;
+s32 PlanRoute(s8 *route) {
+    s8 isVisited[ROUTE_POINT_COUNT + 1];
+    s8 order[ROUTE_POINT_COUNT];
+    s32 index;
+    s32 pointCount;
+    s8 remainingCount;
+    s32 currentX;
+    s32 currentZ;
+    s32 orderCount;
+    s32 nearestDistance;
+    s32 nearest;
+    s32 distance;
+    s32 orderIndex;
 
-  for (index = ROUTE_POINT_COUNT - 1; index >= 0; index--) {
-    isVisited[index] = FALSE;
-  }
-
-  currentX = g_HoleSetup.cupPosition[AXIS_X];
-  currentZ = g_HoleSetup.cupPosition[AXIS_Z];
-  pointCount = 0;
-  for (index = 0; index < ROUTE_POINT_COUNT; index++) {
-    if (g_HolePoints.routePoints[index][AXIS_X] == 0 &&
-        g_HolePoints.routePoints[index][AXIS_Z] == 0) {
-      break;
+    for (index = ROUTE_POINT_COUNT - 1; index >= 0; index--) {
+        isVisited[index] = FALSE;
     }
 
-    f_Route.x[pointCount] = g_HolePoints.routePoints[index][AXIS_X];
-    f_Route.z[pointCount] = g_HolePoints.routePoints[index][AXIS_Z];
+    currentX = g_HoleSetup.cupPosition[AXIS_X];
+    currentZ = g_HoleSetup.cupPosition[AXIS_Z];
+    pointCount = 0;
+    for (index = 0; index < ROUTE_POINT_COUNT; index++) {
+        if (g_HolePoints.routePoints[index][AXIS_X] == 0 &&
+            g_HolePoints.routePoints[index][AXIS_Z] == 0) {
+            break;
+        }
+
+        f_Route.x[pointCount] = g_HolePoints.routePoints[index][AXIS_X];
+        f_Route.z[pointCount] = g_HolePoints.routePoints[index][AXIS_Z];
+        pointCount++;
+    }
+
+    f_Route.x[pointCount] = g_HoleSetup.teePosition[AXIS_X];
+    f_Route.z[pointCount] = g_HoleSetup.teePosition[AXIS_Z];
     pointCount++;
-  }
+    remainingCount = pointCount;
+    orderCount = 0;
+    while (remainingCount > 0) {
+        nearest = NO_ROUTE_POINT;
+        nearestDistance = FARTHEST_DISTANCE;
+        for (index = 0; index < pointCount; index++) {
+            if (isVisited[index]) {
+                continue;
+            }
 
-  f_Route.x[pointCount] = g_HoleSetup.teePosition[AXIS_X];
-  f_Route.z[pointCount] = g_HoleSetup.teePosition[AXIS_Z];
-  pointCount++;
-  remainingCount = pointCount;
-  orderCount = 0;
-  while (remainingCount > 0) {
-    nearest = NO_ROUTE_POINT;
-    nearestDistance = FARTHEST_DISTANCE;
-    for (index = 0; index < pointCount; index++) {
-      if (isVisited[index]) {
-        continue;
-      }
+            distance = IntLength2D(currentX - f_Route.x[index], currentZ - f_Route.z[index]);
+            /* Unused; it is there to match */
+            IntLength2D(
+                f_Route.x[index] - g_HoleSetup.teePosition[AXIS_X],
+                f_Route.z[index] - g_HoleSetup.teePosition[AXIS_Z]
+            );
+            if (distance < nearestDistance) {
+                nearest = index;
+                nearestDistance = distance;
+            }
+        }
 
-      distance =
-          IntLength2D(currentX - f_Route.x[index], currentZ - f_Route.z[index]);
-      /* Unused; it is there to match */
-      IntLength2D(f_Route.x[index] - g_HoleSetup.teePosition[AXIS_X],
-          f_Route.z[index] - g_HoleSetup.teePosition[AXIS_Z]);
-      if (distance < nearestDistance) {
-        nearest = index;
-        nearestDistance = distance;
-      }
+        if (nearest != NO_ROUTE_POINT) {
+            remainingCount--;
+            order[orderCount] = nearest;
+            isVisited[nearest] = TRUE;
+            currentX = f_Route.x[nearest];
+            currentZ = f_Route.z[nearest];
+            orderCount++;
+            if (currentX == g_HoleSetup.teePosition[AXIS_X] &&
+                currentZ == g_HoleSetup.teePosition[AXIS_Z]) {
+                break;
+            }
+        }
     }
 
-    if (nearest != NO_ROUTE_POINT) {
-      remainingCount--;
-      order[orderCount] = nearest;
-      isVisited[nearest] = TRUE;
-      currentX = f_Route.x[nearest];
-      currentZ = f_Route.z[nearest];
-      orderCount++;
-      if (currentX == g_HoleSetup.teePosition[AXIS_X] &&
-          currentZ == g_HoleSetup.teePosition[AXIS_Z]) {
-        break;
-      }
+    /*
+     * Counting the route in index is there to match: a routeLength local gives
+     * 64 words differing, none in shape
+     */
+    index = 0;
+    for (orderIndex = orderCount - 1; orderIndex >= 0; orderIndex--) {
+        if (order[orderIndex] != pointCount - 1) {
+            route[index++] = order[orderIndex];
+        }
     }
-  }
 
-  /*
-   * Counting the route in index is there to match: a routeLength local gives
-   * 64 words differing, none in shape
-   */
-  index = 0;
-  for (orderIndex = orderCount - 1; orderIndex >= 0; orderIndex--) {
-    if (order[orderIndex] != pointCount - 1) {
-      route[index++] = order[orderIndex];
-    }
-  }
-
-  return index;
+    return index;
 }
 
 /* How good a place to land each surface kind is, from LANDING_NONE to
  * LANDING_BEST */
 enum LandingRating {
-  LANDING_NONE,
-  LANDING_POOR = 5,
-  LANDING_FAIR = 7,
-  LANDING_BEST
+    LANDING_NONE,
+    LANDING_POOR = 5,
+    LANDING_FAIR = 7,
+    LANDING_BEST
 };
 
 s32 GetLandingRating(u32 surfaceKind) {
-  s32 rating;
+    s32 rating;
 
-  if (g_GameState.courseIndex == COURSE_MARIOS_STAR) {
-    if (surfaceKind == SURFACE_KIND_ROCK) {
-      return LANDING_FAIR;
+    if (g_GameState.courseIndex == COURSE_MARIOS_STAR) {
+        if (surfaceKind == SURFACE_KIND_ROCK) {
+            return LANDING_FAIR;
+        }
+
+        if (surfaceKind == SURFACE_KIND_BUNKER) {
+            return LANDING_FAIR;
+        }
     }
 
-    if (surfaceKind == SURFACE_KIND_BUNKER) {
-      return LANDING_FAIR;
+    switch (surfaceKind) {
+        case SURFACE_KIND_FAIRWAY:
+        case SURFACE_KIND_FAIRWAY_FAIR_LIE:
+        case SURFACE_KIND_FAIRWAY_POOR_LIE:
+        case SURFACE_KIND_GREEN:
+        case SURFACE_KIND_GREEN_EDGE:
+        case SURFACE_KIND_TEE_GROUND:
+        case SURFACE_KIND_SEMI_ROUGH:
+            rating = LANDING_BEST;
+            break;
+        case SURFACE_KIND_ROUGH:
+        case SURFACE_KIND_ROUGH_POOR_LIE:
+        case SURFACE_KIND_ROUGH_UNUSED_LIE:
+        case SURFACE_KIND_CART_WAY:
+        case SURFACE_KIND_ROCK:
+        case SURFACE_KIND_BARE_GROUND:
+        case SURFACE_KIND_DEEP_ROUGH:
+        case SURFACE_KIND_NO_DROP_GROUND:
+        case SURFACE_KIND_WASTE_AREA:
+            rating = LANDING_FAIR;
+            break;
+        case SURFACE_KIND_BUNKER:
+        case SURFACE_KIND_BUNKER_FAIR_LIE:
+        case SURFACE_KIND_BUNKER_POOR_LIE:
+            rating = LANDING_POOR;
+            break;
+        case SURFACE_KIND_BUNKER_UNUSED_LIE:
+        case SURFACE_KIND_WATER_HAZARD:
+        case SURFACE_KIND_OUT_OF_BOUNDS:
+        case SURFACE_KIND_OUT_OF_COURSE:
+        case SURFACE_KIND_TEE_UP:
+        default:
+            rating = LANDING_NONE;
+            break;
     }
-  }
 
-  switch (surfaceKind) {
-    case SURFACE_KIND_FAIRWAY:
-    case SURFACE_KIND_FAIRWAY_FAIR_LIE:
-    case SURFACE_KIND_FAIRWAY_POOR_LIE:
-    case SURFACE_KIND_GREEN:
-    case SURFACE_KIND_GREEN_EDGE:
-    case SURFACE_KIND_TEE_GROUND:
-    case SURFACE_KIND_SEMI_ROUGH:
-      rating = LANDING_BEST;
-      break;
-    case SURFACE_KIND_ROUGH:
-    case SURFACE_KIND_ROUGH_POOR_LIE:
-    case SURFACE_KIND_ROUGH_UNUSED_LIE:
-    case SURFACE_KIND_CART_WAY:
-    case SURFACE_KIND_ROCK:
-    case SURFACE_KIND_BARE_GROUND:
-    case SURFACE_KIND_DEEP_ROUGH:
-    case SURFACE_KIND_NO_DROP_GROUND:
-    case SURFACE_KIND_WASTE_AREA:
-      rating = LANDING_FAIR;
-      break;
-    case SURFACE_KIND_BUNKER:
-    case SURFACE_KIND_BUNKER_FAIR_LIE:
-    case SURFACE_KIND_BUNKER_POOR_LIE:
-      rating = LANDING_POOR;
-      break;
-    case SURFACE_KIND_BUNKER_UNUSED_LIE:
-    case SURFACE_KIND_WATER_HAZARD:
-    case SURFACE_KIND_OUT_OF_BOUNDS:
-    case SURFACE_KIND_OUT_OF_COURSE:
-    case SURFACE_KIND_TEE_UP:
-    default:
-      rating = LANDING_NONE;
-      break;
-  }
-
-  return rating;
+    return rating;
 }
 
 #define END_ROUTE_POINT 0xFF
@@ -1737,235 +1765,250 @@ s32 GetLandingRating(u32 surfaceKind) {
  * Points that lie farther below the ball than they are across from it are
  * skipped.
  */
-void ChooseLandingTarget(
-    s32 x, s32 z, s32 distance, s32* targetX, s32* targetZ) {
-  u8 order[ROUTE_POINT_COUNT + 1];
-  s32 pointX[ROUTE_POINT_COUNT + 1];
-  s32 pointZ[ROUTE_POINT_COUNT + 1];
-  s32 nearIndices[ROUTE_POINT_COUNT + 1];
-  PlaneTriangle hit;
-  f32 hitFraction;
-  s32 pointCount;
-  s32 index;
-  s32 nearCount;
-  s32 ballCupDistance;
-  s32 answerIndex;
-  s32 reach;
-  s32 alongX;
-  s32 alongZ;
-  s32 endX;
-  s32 endZ;
-  s32 endRating;
-  s32 sideCount;
-  Boolean isFound;
-  s32 startX;
-  s32 startZ;
-  Radians angle;
-  f32 cosAngle;
-  f32 sinAngle;
-  f32 along;
-  s32 side;
-  s32 offsetX;
-  s32 offsetZ;
-  s32 candidateX;
-  s32 candidateZ;
-  s32 height;
-  s32 flatDistance;
-  s32 cupDistance;
-  Boolean isPoorlySurrounded;
-  s32 column;
-  s32 row;
+void ChooseLandingTarget(s32 x, s32 z, s32 distance, s32 *targetX, s32 *targetZ) {
+    u8 order[ROUTE_POINT_COUNT + 1];
+    s32 pointX[ROUTE_POINT_COUNT + 1];
+    s32 pointZ[ROUTE_POINT_COUNT + 1];
+    s32 nearIndices[ROUTE_POINT_COUNT + 1];
+    PlaneTriangle hit;
+    f32 hitFraction;
+    s32 pointCount;
+    s32 index;
+    s32 nearCount;
+    s32 ballCupDistance;
+    s32 answerIndex;
+    s32 reach;
+    s32 alongX;
+    s32 alongZ;
+    s32 endX;
+    s32 endZ;
+    s32 endRating;
+    s32 sideCount;
+    Boolean isFound;
+    s32 startX;
+    s32 startZ;
+    Radians angle;
+    f32 cosAngle;
+    f32 sinAngle;
+    f32 along;
+    s32 side;
+    s32 offsetX;
+    s32 offsetZ;
+    s32 candidateX;
+    s32 candidateZ;
+    s32 height;
+    s32 flatDistance;
+    s32 cupDistance;
+    Boolean isPoorlySurrounded;
+    s32 column;
+    s32 row;
 
-  osSyncPrintf("Distance = %dYd\n", (s32)(distance * YARDS_PER_UNIT));
-  pointCount = f_RouteOrderCount;
-  isFound = FALSE;
-  if (pointCount == 0) {
-    sideCount = TARGET_SIDE_COUNT;
-    endX = g_HoleSetup.cupPosition[AXIS_X];
-    endZ = g_HoleSetup.cupPosition[AXIS_Z];
-    startX = x;
-    startZ = z;
-  } else {
-    for (index = 0; index < f_RouteOrderCount; index++) {
-      order[index] = f_RouteOrder[index];
+    osSyncPrintf("Distance = %dYd\n", (s32)(distance * YARDS_PER_UNIT));
+    pointCount = f_RouteOrderCount;
+    isFound = FALSE;
+    if (pointCount == 0) {
+        sideCount = TARGET_SIDE_COUNT;
+        endX = g_HoleSetup.cupPosition[AXIS_X];
+        endZ = g_HoleSetup.cupPosition[AXIS_Z];
+        startX = x;
+        startZ = z;
+    }
+    else {
+        for (index = 0; index < f_RouteOrderCount; index++) {
+            order[index] = f_RouteOrder[index];
+        }
+
+        for (index = 0; index < pointCount; index++) {
+            pointX[index] = f_Route.x[order[index]];
+            pointZ[index] = f_Route.z[order[index]];
+            osSyncPrintf("PointList[%d] = (%d, %d)\n", index, pointX[index], pointZ[index]);
+        }
+
+        /*
+         * Reading the cup's position through g_HoleSetup here and below is there
+         * to match: a cupZ local read once gives 35 words differing (11 in
+         * shape), and cupX and cupZ locals 47 (19)
+         */
+        pointX[pointCount] = g_HoleSetup.cupPosition[AXIS_X];
+        pointZ[pointCount] = g_HoleSetup.cupPosition[AXIS_Z];
+        order[pointCount] = END_ROUTE_POINT;
+        pointCount++;
+        nearCount = 0;
+        ballCupDistance =
+            IntLength2D(g_HoleSetup.cupPosition[AXIS_X] - x, g_HoleSetup.cupPosition[AXIS_Z] - z);
+        for (index = 0; index < pointCount; index++) {
+            if ((s32)IntLength2D(
+                    g_HoleSetup.cupPosition[AXIS_X] - pointX[index],
+                    g_HoleSetup.cupPosition[AXIS_Z] - pointZ[index]
+                ) < ballCupDistance) {
+                nearIndices[nearCount++] = index;
+            }
+        }
+
+        for (index = 0; index < nearCount; index++) {
+            order[index] = order[nearIndices[index]];
+            pointX[index] = pointX[nearIndices[index]];
+            pointZ[index] = pointZ[nearIndices[index]];
+        }
+
+        pointCount = nearCount;
+        answerIndex = -2;
+        if (pointCount == 0) {
+            *targetX = g_HoleSetup.cupPosition[AXIS_X];
+            *targetZ = g_HoleSetup.cupPosition[AXIS_Z];
+            return;
+        }
+
+        for (index = 0; index < pointCount; index++) {
+            if (distance < (s32)IntLength2D(pointX[index] - x, pointZ[index] - z)) {
+                answerIndex = index - 1;
+                break;
+            }
+        }
+
+        osSyncPrintf("AnsIndex = %d\n", answerIndex);
+        endX = g_HoleSetup.cupPosition[AXIS_X];
+        endZ = g_HoleSetup.cupPosition[AXIS_Z];
+        startX = x;
+        startZ = z;
+        sideCount = TARGET_SIDE_COUNT;
     }
 
-    for (index = 0; index < pointCount; index++) {
-      pointX[index] = f_Route.x[order[index]];
-      pointZ[index] = f_Route.z[order[index]];
-      osSyncPrintf(
-          "PointList[%d] = (%d, %d)\n", index, pointX[index], pointZ[index]);
-    }
+    osSyncPrintf("StartX = %d, StartY = %d\n", startX, startZ);
+    osSyncPrintf("EndX = %d, EndY = %d\n", endX, endZ);
+    angle = atan2((f32)(startZ - endZ), (f32)(startX - endX));
+    reach = IntLength2D(endX - startX, endZ - startZ);
+    osSyncPrintf("r = %d\n", reach);
+    cosAngle = cosf(angle);
+    sinAngle = sinf(angle);
+    *targetX = startX;
+    *targetZ = startZ;
+    endRating = GetLandingRating(GetSurfaceInfoAt(endX, endZ)->kind);
+    osSyncPrintf("TALevel %d\n", endRating);
 
     /*
-     * Reading the cup's position through g_HoleSetup here and below is there
-     * to match: a cupZ local read once gives 35 words differing (11 in
-     * shape), and cupX and cupZ locals 47 (19)
+     * Counting the steps in index is there to match: a step local gives 289
+     * words differing, 27 in shape
      */
-    pointX[pointCount] = g_HoleSetup.cupPosition[AXIS_X];
-    pointZ[pointCount] = g_HoleSetup.cupPosition[AXIS_Z];
-    order[pointCount] = END_ROUTE_POINT;
-    pointCount++;
-    nearCount = 0;
-    ballCupDistance = IntLength2D(g_HoleSetup.cupPosition[AXIS_X] - x,
-        g_HoleSetup.cupPosition[AXIS_Z] - z);
-    for (index = 0; index < pointCount; index++) {
-      if ((s32)IntLength2D(g_HoleSetup.cupPosition[AXIS_X] - pointX[index],
-              g_HoleSetup.cupPosition[AXIS_Z] - pointZ[index]) <
-          ballCupDistance) {
-        nearIndices[nearCount++] = index;
-      }
-    }
+    for (index = 0; index < (reach * TARGET_STEPS_PER_UNIT) + EXTRA_TARGET_STEP_COUNT; index++) {
+        along = TARGET_STEP_YARDS * (index * UNITS_PER_YARD);
+        alongX = (along * cosAngle) + endX;
+        alongZ = (along * sinAngle) + endZ;
+        for (side = 0; side < sideCount; side++) {
+            offsetX = -sinAngle * side * TARGET_SIDE_SPACING;
+            offsetZ = cosAngle * side * TARGET_SIDE_SPACING;
+            if (side & 1) {
+                candidateX = alongX + offsetX;
+                candidateZ = alongZ + offsetZ;
+            }
+            else {
+                candidateX = alongX - offsetX;
+                candidateZ = alongZ - offsetZ;
+            }
 
-    for (index = 0; index < nearCount; index++) {
-      order[index] = order[nearIndices[index]];
-      pointX[index] = pointX[nearIndices[index]];
-      pointZ[index] = pointZ[nearIndices[index]];
-    }
+            if (distance < (s32)IntLength2D(candidateX - x, candidateZ - z)) {
+                break;
+            }
 
-    pointCount = nearCount;
-    answerIndex = -2;
-    if (pointCount == 0) {
-      *targetX = g_HoleSetup.cupPosition[AXIS_X];
-      *targetZ = g_HoleSetup.cupPosition[AXIS_Z];
-      return;
-    }
+            if (GetLandingRating(GetSurfaceInfoAt(candidateX, candidateZ)->kind) < endRating) {
+                continue;
+            }
 
-    for (index = 0; index < pointCount; index++) {
-      if (distance < (s32)IntLength2D(pointX[index] - x, pointZ[index] - z)) {
-        answerIndex = index - 1;
-        break;
-      }
-    }
+            if (f_IsDirectionExcluded
+                    [((u32)(s32)(atan2f(
+                                     candidateZ - f_Shot.ballPosition[AXIS_Z],
+                                     candidateX - f_Shot.ballPosition[AXIS_X]
+                                 ) *
+                          RADIANS_TO_BINARY_ANGLE) &
+                         BINARY_ANGLE_MASK) >>
+                        DIRECTION_SECTOR_SHIFT]) {
+                continue;
+            }
 
-    osSyncPrintf("AnsIndex = %d\n", answerIndex);
-    endX = g_HoleSetup.cupPosition[AXIS_X];
-    endZ = g_HoleSetup.cupPosition[AXIS_Z];
-    startX = x;
-    startZ = z;
-    sideCount = TARGET_SIDE_COUNT;
-  }
+            height = GetGroundHeight(candidateX, candidateZ);
+            flatDistance = IntLength2D(
+                candidateZ - f_Shot.ballPosition[AXIS_Z],
+                candidateX - f_Shot.ballPosition[AXIS_X]
+            );
+            if (flatDistance < f_Shot.ballPosition[AXIS_Y] - height) {
+                continue;
+            }
 
-  osSyncPrintf("StartX = %d, StartY = %d\n", startX, startZ);
-  osSyncPrintf("EndX = %d, EndY = %d\n", endX, endZ);
-  angle = atan2((f32)(startZ - endZ), (f32)(startX - endX));
-  reach = IntLength2D(endX - startX, endZ - startZ);
-  osSyncPrintf("r = %d\n", reach);
-  cosAngle = cosf(angle);
-  sinAngle = sinf(angle);
-  *targetX = startX;
-  *targetZ = startZ;
-  endRating = GetLandingRating(GetSurfaceInfoAt(endX, endZ)->kind);
-  osSyncPrintf("TALevel %d\n", endRating);
+            cupDistance = IntLength2D(
+                candidateX - g_HoleSetup.cupPosition[AXIS_X],
+                candidateZ - g_HoleSetup.cupPosition[AXIS_Z]
+            );
+            if (FindGroundHit(
+                    f_Shot.ballPosition[AXIS_X],
+                    f_Shot.ballPosition[AXIS_Y] - PATH_GROUND_CLEARANCE,
+                    f_Shot.ballPosition[AXIS_Z],
+                    candidateX,
+                    f_Shot.ballPosition[AXIS_Y] - flatDistance,
+                    candidateZ,
+                    &hit,
+                    &hitFraction
+                )) {
+                continue;
+            }
 
-  /*
-   * Counting the steps in index is there to match: a step local gives 289
-   * words differing, 27 in shape
-   */
-  for (index = 0;
-      index < (reach * TARGET_STEPS_PER_UNIT) + EXTRA_TARGET_STEP_COUNT;
-      index++) {
-    along = TARGET_STEP_YARDS * (index * UNITS_PER_YARD);
-    alongX = (along * cosAngle) + endX;
-    alongZ = (along * sinAngle) + endZ;
-    for (side = 0; side < sideCount; side++) {
-      offsetX = -sinAngle * side * TARGET_SIDE_SPACING;
-      offsetZ = cosAngle * side * TARGET_SIDE_SPACING;
-      if (side & 1) {
-        candidateX = alongX + offsetX;
-        candidateZ = alongZ + offsetZ;
-      } else {
-        candidateX = alongX - offsetX;
-        candidateZ = alongZ - offsetZ;
-      }
+            if (cupDistance >= MIN_TESTED_ROLL) {
+                if (FindGroundHit(
+                        candidateX,
+                        height - PATH_GROUND_CLEARANCE,
+                        candidateZ,
+                        g_HoleSetup.cupPosition[AXIS_X],
+                        height - (cupDistance / 2),
+                        g_HoleSetup.cupPosition[AXIS_Z],
+                        &hit,
+                        &hitFraction
+                    )) {
+                    continue;
+                }
+            }
 
-      if (distance < (s32)IntLength2D(candidateX - x, candidateZ - z)) {
-        break;
-      }
+            isPoorlySurrounded = FALSE;
+            if (candidateX != g_HoleSetup.cupPosition[AXIS_X] ||
+                candidateZ != g_HoleSetup.cupPosition[AXIS_Z]) {
+                for (column = -TARGET_NEIGHBOR_REACH; column <= TARGET_NEIGHBOR_REACH; column++) {
+                    for (row = -TARGET_NEIGHBOR_REACH; row <= TARGET_NEIGHBOR_REACH; row++) {
+                        if (column == 0 && row == 0) {
+                            continue;
+                        }
 
-      if (GetLandingRating(GetSurfaceInfoAt(candidateX, candidateZ)->kind) <
-          endRating) {
-        continue;
-      }
+                        if (GetLandingRating(GetSurfaceInfoAt(
+                                candidateX + (column * TARGET_NEIGHBOR_SPACING * UNITS_PER_YARD),
+                                candidateZ + (row * TARGET_NEIGHBOR_SPACING * UNITS_PER_YARD)
+                            )
+                                    ->kind) < endRating - 1) {
+                            isPoorlySurrounded = TRUE;
+                            break;
+                        }
+                    }
 
-      if (f_IsDirectionExcluded
-              [((u32)(s32)(atan2f(candidateZ - f_Shot.ballPosition[AXIS_Z],
-                               candidateX - f_Shot.ballPosition[AXIS_X]) *
-                    RADIANS_TO_BINARY_ANGLE) &
-                   BINARY_ANGLE_MASK) >>
-                  DIRECTION_SECTOR_SHIFT]) {
-        continue;
-      }
+                    if (isPoorlySurrounded == TRUE) {
+                        break;
+                    }
+                }
+            }
 
-      height = GetGroundHeight(candidateX, candidateZ);
-      flatDistance = IntLength2D(candidateZ - f_Shot.ballPosition[AXIS_Z],
-          candidateX - f_Shot.ballPosition[AXIS_X]);
-      if (flatDistance < f_Shot.ballPosition[AXIS_Y] - height) {
-        continue;
-      }
-
-      cupDistance = IntLength2D(candidateX - g_HoleSetup.cupPosition[AXIS_X],
-          candidateZ - g_HoleSetup.cupPosition[AXIS_Z]);
-      if (FindGroundHit(f_Shot.ballPosition[AXIS_X],
-              f_Shot.ballPosition[AXIS_Y] - PATH_GROUND_CLEARANCE,
-              f_Shot.ballPosition[AXIS_Z], candidateX,
-              f_Shot.ballPosition[AXIS_Y] - flatDistance, candidateZ, &hit,
-              &hitFraction)) {
-        continue;
-      }
-
-      if (cupDistance >= MIN_TESTED_ROLL) {
-        if (FindGroundHit(candidateX, height - PATH_GROUND_CLEARANCE,
-                candidateZ, g_HoleSetup.cupPosition[AXIS_X],
-                height - (cupDistance / 2), g_HoleSetup.cupPosition[AXIS_Z],
-                &hit, &hitFraction)) {
-          continue;
+            if (!isPoorlySurrounded) {
+                isFound = TRUE;
+                *targetX = candidateX;
+                *targetZ = candidateZ;
+                break;
+            }
         }
-      }
 
-      isPoorlySurrounded = FALSE;
-      if (candidateX != g_HoleSetup.cupPosition[AXIS_X] ||
-          candidateZ != g_HoleSetup.cupPosition[AXIS_Z]) {
-        for (column = -TARGET_NEIGHBOR_REACH; column <= TARGET_NEIGHBOR_REACH;
-            column++) {
-          for (row = -TARGET_NEIGHBOR_REACH; row <= TARGET_NEIGHBOR_REACH;
-              row++) {
-            if (column == 0 && row == 0) {
-              continue;
-            }
-
-            if (GetLandingRating(GetSurfaceInfoAt(candidateX +
-                        (column * TARGET_NEIGHBOR_SPACING * UNITS_PER_YARD),
-                    candidateZ +
-                        (row * TARGET_NEIGHBOR_SPACING * UNITS_PER_YARD))
-                        ->kind) < endRating - 1) {
-              isPoorlySurrounded = TRUE;
-              break;
-            }
-          }
-
-          if (isPoorlySurrounded == TRUE) {
+        if (isFound) {
             break;
-          }
         }
-      }
-
-      if (!isPoorlySurrounded) {
-        isFound = TRUE;
-        *targetX = candidateX;
-        *targetZ = candidateZ;
-        break;
-      }
     }
 
-    if (isFound) {
-      break;
-    }
-  }
-
-  osSyncPrintf("ResultX = %d, ResultY = %d\n", *targetX, *targetZ);
-  osSyncPrintf("Result TALevel %d\n",
-      GetLandingRating(GetSurfaceInfoAt(*targetX, *targetZ)->kind));
+    osSyncPrintf("ResultX = %d, ResultY = %d\n", *targetX, *targetZ);
+    osSyncPrintf(
+        "Result TALevel %d\n",
+        GetLandingRating(GetSurfaceInfoAt(*targetX, *targetZ)->kind)
+    );
 }
 
 /* The shot modes for each stroke count; all of them are SHOT_MODE_NORMAL */
@@ -1975,75 +2018,79 @@ void ChooseLandingTarget(
  * Plans a shot from beyond approach range: aims at the cup with the club whose
  * carry covers PlanCupDistance, in the shot mode for the player's stroke count
  */
-void ChooseLongShot(s32 unused UNUSED, ClubType* clubType, s32* targetX,
-    s32* targetZ, ShotMode* shotMode) {
-  /* The original frame has room for this; without it 34 words differ, none in
-   * shape */
-  s32 pad[44] UNUSED;
-  ShotMode shotModes[STROKE_SHOT_MODE_COUNT];
-  s32 index;
-  /*
-   * normalMode is there to match: the constant in its place as the argument
-   * gives 3 words differing (3 in shape), and as the stored mode or in both
-   * places 5 (3)
-   */
-  s32 normalMode;
-  s32 strokeCount;
+void ChooseLongShot(
+    s32 unused UNUSED,
+    ClubType *clubType,
+    s32 *targetX,
+    s32 *targetZ,
+    ShotMode *shotMode
+) {
+    /* The original frame has room for this; without it 34 words differ, none in
+     * shape */
+    s32 pad[44] UNUSED;
+    ShotMode shotModes[STROKE_SHOT_MODE_COUNT];
+    s32 index;
+    /*
+     * normalMode is there to match: the constant in its place as the argument
+     * gives 3 words differing (3 in shape), and as the stored mode or in both
+     * places 5 (3)
+     */
+    s32 normalMode;
+    s32 strokeCount;
 
-  normalMode = SHOT_MODE_NORMAL;
-  for (index = STROKE_SHOT_MODE_COUNT - 1; index >= 0; index--) {
-    shotModes[index] = normalMode;
-  }
+    normalMode = SHOT_MODE_NORMAL;
+    for (index = STROKE_SHOT_MODE_COUNT - 1; index >= 0; index--) {
+        shotModes[index] = normalMode;
+    }
 
-  strokeCount = g_Players[f_Shot.playerIndex].strokeCount;
-  *clubType = ChooseClubForDistance(PlanCupDistance(normalMode));
-  *targetX = g_HoleSetup.cupPosition[AXIS_X];
-  *targetZ = g_HoleSetup.cupPosition[AXIS_Z];
-  *shotMode = shotModes[strokeCount];
+    strokeCount = g_Players[f_Shot.playerIndex].strokeCount;
+    *clubType = ChooseClubForDistance(PlanCupDistance(normalMode));
+    *targetX = g_HoleSetup.cupPosition[AXIS_X];
+    *targetZ = g_HoleSetup.cupPosition[AXIS_Z];
+    *shotMode = shotModes[strokeCount];
 }
 
 /* It is a macro, as an inline function compiles differently from the original
  */
 #define IsOffFairway(surfaceKind) \
-  ((surfaceKind) != SURFACE_KIND_FAIRWAY && \
-      (surfaceKind) != SURFACE_KIND_FAIRWAY_FAIR_LIE && \
-      (surfaceKind) != SURFACE_KIND_FAIRWAY_POOR_LIE && \
-      (surfaceKind) != SURFACE_KIND_SEMI_ROUGH && \
-      (surfaceKind) != SURFACE_KIND_GREEN && \
-      (surfaceKind) != SURFACE_KIND_GREEN_EDGE)
+    ((surfaceKind) != SURFACE_KIND_FAIRWAY && \
+        (surfaceKind) != SURFACE_KIND_FAIRWAY_FAIR_LIE && \
+        (surfaceKind) != SURFACE_KIND_FAIRWAY_POOR_LIE && \
+        (surfaceKind) != SURFACE_KIND_SEMI_ROUGH && \
+        (surfaceKind) != SURFACE_KIND_GREEN && \
+        (surfaceKind) != SURFACE_KIND_GREEN_EDGE)
 
 /*
  * Returns whether any point a yard apart on the line from from to to, from
  * from itself, lies off the fairway, semi-rough, green and green edge.
  */
 Boolean IsLineOffFairway(CoursePoint from, CoursePoint to) {
-  s32 distance;
-  Radians angle;
-  s32 step;
-  f32 stepLength;
-  s32 x;
-  s32 z;
-  u32 kind;
+    s32 distance;
+    Radians angle;
+    s32 step;
+    f32 stepLength;
+    s32 x;
+    s32 z;
+    u32 kind;
 
-  distance = IntLength2D(to[AXIS_X] - from[AXIS_X], to[AXIS_Z] - from[AXIS_Z]);
-  angle =
-      atan2((f32)(to[AXIS_Z] - from[AXIS_Z]), (f32)(to[AXIS_X] - from[AXIS_X]));
-  for (step = 0; step < distance * YARDS_PER_UNIT; step++) {
-    /*
-     * Setting stepLength in the loop is there to match: setting it before
-     * the loop gives 7 words differing (7 in shape), and the constant in
-     * its place 26
-     */
-    stepLength = UNITS_PER_YARD;
-    x = (step * (cosf(angle) * stepLength)) + from[AXIS_X];
-    z = (step * (sinf(angle) * stepLength)) + from[AXIS_Z];
-    kind = GetSurfaceInfoAt(x, z)->kind;
-    if (IsOffFairway(kind)) {
-      return TRUE;
+    distance = IntLength2D(to[AXIS_X] - from[AXIS_X], to[AXIS_Z] - from[AXIS_Z]);
+    angle = atan2((f32)(to[AXIS_Z] - from[AXIS_Z]), (f32)(to[AXIS_X] - from[AXIS_X]));
+    for (step = 0; step < distance * YARDS_PER_UNIT; step++) {
+        /*
+         * Setting stepLength in the loop is there to match: setting it before
+         * the loop gives 7 words differing (7 in shape), and the constant in
+         * its place 26
+         */
+        stepLength = UNITS_PER_YARD;
+        x = (step * (cosf(angle) * stepLength)) + from[AXIS_X];
+        z = (step * (sinf(angle) * stepLength)) + from[AXIS_Z];
+        kind = GetSurfaceInfoAt(x, z)->kind;
+        if (IsOffFairway(kind)) {
+            return TRUE;
+        }
     }
-  }
 
-  return FALSE;
+    return FALSE;
 }
 
 #define GREEN_EDGE_NOT_FOUND (-1)
@@ -2054,35 +2101,34 @@ Boolean IsLineOffFairway(CoursePoint from, CoursePoint to) {
  * one, otherwise GREEN_EDGE_NOT_FOUND.
  */
 s32 FindGreenEdgeOnLine(CoursePoint from, CoursePoint to, CoursePoint edge) {
-  s32 distance;
-  Radians angle;
-  s32 step;
-  f32 stepLength;
-  s32 x;
-  s32 z;
+    s32 distance;
+    Radians angle;
+    s32 step;
+    f32 stepLength;
+    s32 x;
+    s32 z;
 
-  distance = IntLength2D(to[AXIS_X] - from[AXIS_X], to[AXIS_Z] - from[AXIS_Z]);
-  angle =
-      atan2((f32)(to[AXIS_Z] - from[AXIS_Z]), (f32)(to[AXIS_X] - from[AXIS_X]));
-  osSyncPrintf("StartPoint = (%d, %d)\n", from[AXIS_X], from[AXIS_Z]);
-  osSyncPrintf("EndPoint = (%d, %d)\n", to[AXIS_X], to[AXIS_Z]);
-  for (step = 1; step < (distance * YARDS_PER_UNIT) + 1; step++) {
-    /*
-     * Setting stepLength in the loop is there to match: setting it before
-     * the loop gives 7 words differing (7 in shape), and the constant in
-     * its place 26
-     */
-    stepLength = UNITS_PER_YARD;
-    x = (step * (cosf(angle) * stepLength)) + from[AXIS_X];
-    z = (step * (sinf(angle) * stepLength)) + from[AXIS_Z];
-    if (GetSurfaceInfoAt(x, z)->kind == SURFACE_KIND_GREEN_EDGE) {
-      edge[AXIS_X] = x;
-      edge[AXIS_Z] = z;
-      return GREEN_EDGE_FOUND;
+    distance = IntLength2D(to[AXIS_X] - from[AXIS_X], to[AXIS_Z] - from[AXIS_Z]);
+    angle = atan2((f32)(to[AXIS_Z] - from[AXIS_Z]), (f32)(to[AXIS_X] - from[AXIS_X]));
+    osSyncPrintf("StartPoint = (%d, %d)\n", from[AXIS_X], from[AXIS_Z]);
+    osSyncPrintf("EndPoint = (%d, %d)\n", to[AXIS_X], to[AXIS_Z]);
+    for (step = 1; step < (distance * YARDS_PER_UNIT) + 1; step++) {
+        /*
+         * Setting stepLength in the loop is there to match: setting it before
+         * the loop gives 7 words differing (7 in shape), and the constant in
+         * its place 26
+         */
+        stepLength = UNITS_PER_YARD;
+        x = (step * (cosf(angle) * stepLength)) + from[AXIS_X];
+        z = (step * (sinf(angle) * stepLength)) + from[AXIS_Z];
+        if (GetSurfaceInfoAt(x, z)->kind == SURFACE_KIND_GREEN_EDGE) {
+            edge[AXIS_X] = x;
+            edge[AXIS_Z] = z;
+            return GREEN_EDGE_FOUND;
+        }
     }
-  }
 
-  return GREEN_EDGE_NOT_FOUND;
+    return GREEN_EDGE_NOT_FOUND;
 }
 
 /*
@@ -2090,18 +2136,17 @@ s32 FindGreenEdgeOnLine(CoursePoint from, CoursePoint to, CoursePoint edge) {
  * or to to itself if the line crosses no green edge.
  */
 s32 GetGreenEdgeDistance(CoursePoint from, CoursePoint to) {
-  CoursePoint edge;
-  s32 distance;
+    CoursePoint edge;
+    s32 distance;
 
-  if (FindGreenEdgeOnLine(from, to, edge) != GREEN_EDGE_FOUND) {
-    distance =
-        IntLength2D(to[AXIS_X] - from[AXIS_X], to[AXIS_Z] - from[AXIS_Z]);
-  } else {
-    distance =
-        IntLength2D(edge[AXIS_X] - from[AXIS_X], edge[AXIS_Z] - from[AXIS_Z]);
-  }
+    if (FindGreenEdgeOnLine(from, to, edge) != GREEN_EDGE_FOUND) {
+        distance = IntLength2D(to[AXIS_X] - from[AXIS_X], to[AXIS_Z] - from[AXIS_Z]);
+    }
+    else {
+        distance = IntLength2D(edge[AXIS_X] - from[AXIS_X], edge[AXIS_Z] - from[AXIS_Z]);
+    }
 
-  return distance;
+    return distance;
 }
 
 /*
@@ -2110,40 +2155,39 @@ s32 GetGreenEdgeDistance(CoursePoint from, CoursePoint to) {
  * peak's height only for a point past from.
  */
 void FindPeakOnLine(CoursePoint from, CoursePoint to, CoursePoint peak) {
-  s32 distance;
-  Radians angle;
-  s32 peakHeight;
-  s32 step;
-  f32 stepLength;
-  s32 x;
-  s32 z;
-  s32 height;
+    s32 distance;
+    Radians angle;
+    s32 peakHeight;
+    s32 step;
+    f32 stepLength;
+    s32 x;
+    s32 z;
+    s32 height;
 
-  distance = IntLength2D(to[AXIS_X] - from[AXIS_X], to[AXIS_Z] - from[AXIS_Z]);
-  angle =
-      atan2((f32)(to[AXIS_Z] - from[AXIS_Z]), (f32)(to[AXIS_X] - from[AXIS_X]));
-  peakHeight = GetGroundHeight(from[AXIS_X], from[AXIS_Z]);
-  peakHeight = Abs(peakHeight);
-  peak[AXIS_X] = from[AXIS_X];
-  peak[AXIS_Z] = from[AXIS_Z];
-  for (step = 1; step < distance * YARDS_PER_UNIT; step++) {
-    /*
-     * Setting stepLength in the loop is there to match: setting it before
-     * the loop gives 26 words differing (6 in shape), and the constant in
-     * its place 46
-     */
-    stepLength = UNITS_PER_YARD;
-    x = (step * (cosf(angle) * stepLength)) + from[AXIS_X];
-    z = (step * (sinf(angle) * stepLength)) + from[AXIS_Z];
-    height = GetGroundHeight(x, z);
-    height = Abs(height);
-    if (peakHeight < height) {
-      peak[AXIS_X] = x;
-      peak[AXIS_Y] = GetGroundHeight(x, z);
-      peakHeight = height;
-      peak[AXIS_Z] = z;
+    distance = IntLength2D(to[AXIS_X] - from[AXIS_X], to[AXIS_Z] - from[AXIS_Z]);
+    angle = atan2((f32)(to[AXIS_Z] - from[AXIS_Z]), (f32)(to[AXIS_X] - from[AXIS_X]));
+    peakHeight = GetGroundHeight(from[AXIS_X], from[AXIS_Z]);
+    peakHeight = Abs(peakHeight);
+    peak[AXIS_X] = from[AXIS_X];
+    peak[AXIS_Z] = from[AXIS_Z];
+    for (step = 1; step < distance * YARDS_PER_UNIT; step++) {
+        /*
+         * Setting stepLength in the loop is there to match: setting it before
+         * the loop gives 26 words differing (6 in shape), and the constant in
+         * its place 46
+         */
+        stepLength = UNITS_PER_YARD;
+        x = (step * (cosf(angle) * stepLength)) + from[AXIS_X];
+        z = (step * (sinf(angle) * stepLength)) + from[AXIS_Z];
+        height = GetGroundHeight(x, z);
+        height = Abs(height);
+        if (peakHeight < height) {
+            peak[AXIS_X] = x;
+            peak[AXIS_Y] = GetGroundHeight(x, z);
+            peakHeight = height;
+            peak[AXIS_Z] = z;
+        }
     }
-  }
 }
 
 /*
@@ -2152,85 +2196,90 @@ void FindPeakOnLine(CoursePoint from, CoursePoint to, CoursePoint peak) {
  * line's peak counts when it is on the green, and on the golfer's consistency.
  * A line that crosses rough or hazards takes a wedge.
  */
-ClubType ChooseApproachClub(s32* targetX, s32* targetZ) {
-  CoursePoint peak;
-  s32 cupDistance;
-  s32 edgeDistance;
-  f32 edgeShare;
-  u32 peakKind;
-  s32 band;
-  s32 consistency;
+ClubType ChooseApproachClub(s32 *targetX, s32 *targetZ) {
+    CoursePoint peak;
+    s32 cupDistance;
+    s32 edgeDistance;
+    f32 edgeShare;
+    u32 peakKind;
+    s32 band;
+    s32 consistency;
 
-  *targetX = g_HoleSetup.cupPosition[AXIS_X];
-  *targetZ = g_HoleSetup.cupPosition[AXIS_Z];
-  cupDistance =
-      IntLength2D(g_HoleSetup.cupPosition[AXIS_X] - f_Shot.ballPosition[AXIS_X],
-          g_HoleSetup.cupPosition[AXIS_Z] - f_Shot.ballPosition[AXIS_Z]);
-  /* Unused; it is there to match */
-  GetSurfaceInfo(f_Shot.surface);
-  if (IsLineOffFairway(f_Shot.ballPosition, g_HoleSetup.cupPosition) == TRUE) {
-    osSyncPrintf("Appr60 Return point 1\n");
-    if (ShotGolferTraits().windPlay < WIND_PLAY_FOLLOWING_WINDS) {
-      return CLUB_TYPE_PITCHING_WEDGE;
+    *targetX = g_HoleSetup.cupPosition[AXIS_X];
+    *targetZ = g_HoleSetup.cupPosition[AXIS_Z];
+    cupDistance = IntLength2D(
+        g_HoleSetup.cupPosition[AXIS_X] - f_Shot.ballPosition[AXIS_X],
+        g_HoleSetup.cupPosition[AXIS_Z] - f_Shot.ballPosition[AXIS_Z]
+    );
+    /* Unused; it is there to match */
+    GetSurfaceInfo(f_Shot.surface);
+    if (IsLineOffFairway(f_Shot.ballPosition, g_HoleSetup.cupPosition) == TRUE) {
+        osSyncPrintf("Appr60 Return point 1\n");
+        if (ShotGolferTraits().windPlay < WIND_PLAY_FOLLOWING_WINDS) {
+            return CLUB_TYPE_PITCHING_WEDGE;
+        }
+
+        return CLUB_TYPE_SAND_WEDGE;
     }
 
-    return CLUB_TYPE_SAND_WEDGE;
-  }
-
-  edgeDistance =
-      GetGreenEdgeDistance(f_Shot.ballPosition, g_HoleSetup.cupPosition);
-  edgeShare = (f32)edgeDistance / (f32)cupDistance;
-  osSyncPrintf("Approach : DistForEdge = %d\n", edgeDistance);
-  osSyncPrintf("Approach : Distance = %d\n", cupDistance);
-  osSyncPrintf("Approach : EdgePercent = %f\n", edgeShare);
-  FindPeakOnLine(f_Shot.ballPosition, g_HoleSetup.cupPosition, peak);
-  peakKind = GetSurfaceInfoAt(peak[AXIS_X], peak[AXIS_Z])->kind;
-  if (peakKind == SURFACE_KIND_GREEN || peakKind == SURFACE_KIND_GREEN_EDGE) {
-    edgeDistance = IntLength2D(peak[AXIS_X] - f_Shot.ballPosition[AXIS_X],
-        peak[AXIS_Z] - f_Shot.ballPosition[AXIS_Z]);
+    edgeDistance = GetGreenEdgeDistance(f_Shot.ballPosition, g_HoleSetup.cupPosition);
     edgeShare = (f32)edgeDistance / (f32)cupDistance;
-  }
-
-  consistency = ShotGolferTraits().consistency;
-  for (band = 0; band < APPROACH_BAND_COUNT; band++) {
-    if (edgeShare < f_ApproachBandLimits[band][consistency]) {
-      if (band == 0) {
-        return CLUB_TYPE_PITCHING_WEDGE;
-      } else if (band == 1) {
-        if (consistency == CONSISTENCY_HIGH) {
-          return CLUB_TYPE_DRIVER;
-        }
-
-        if (consistency == CONSISTENCY_MIDDLE) {
-          return CLUB_TYPE_THREE_WOOD;
-        }
-
-        return CLUB_TYPE_FOUR_WOOD;
-      } else if (band == 2) {
-        if (consistency == CONSISTENCY_HIGH) {
-          return CLUB_TYPE_FIVE_IRON;
-        }
-
-        if (consistency == CONSISTENCY_MIDDLE) {
-          return CLUB_TYPE_FOUR_IRON;
-        }
-
-        return CLUB_TYPE_THREE_IRON;
-      } else if (band == 3) {
-        if (consistency == CONSISTENCY_HIGH) {
-          return CLUB_TYPE_SAND_WEDGE;
-        }
-
-        if (consistency == CONSISTENCY_MIDDLE) {
-          return CLUB_TYPE_PITCHING_WEDGE;
-        }
-
-        return CLUB_TYPE_NINE_IRON;
-      }
+    osSyncPrintf("Approach : DistForEdge = %d\n", edgeDistance);
+    osSyncPrintf("Approach : Distance = %d\n", cupDistance);
+    osSyncPrintf("Approach : EdgePercent = %f\n", edgeShare);
+    FindPeakOnLine(f_Shot.ballPosition, g_HoleSetup.cupPosition, peak);
+    peakKind = GetSurfaceInfoAt(peak[AXIS_X], peak[AXIS_Z])->kind;
+    if (peakKind == SURFACE_KIND_GREEN || peakKind == SURFACE_KIND_GREEN_EDGE) {
+        edgeDistance = IntLength2D(
+            peak[AXIS_X] - f_Shot.ballPosition[AXIS_X],
+            peak[AXIS_Z] - f_Shot.ballPosition[AXIS_Z]
+        );
+        edgeShare = (f32)edgeDistance / (f32)cupDistance;
     }
-  }
 
-  return CLUB_TYPE_PITCHING_WEDGE;
+    consistency = ShotGolferTraits().consistency;
+    for (band = 0; band < APPROACH_BAND_COUNT; band++) {
+        if (edgeShare < f_ApproachBandLimits[band][consistency]) {
+            if (band == 0) {
+                return CLUB_TYPE_PITCHING_WEDGE;
+            }
+            else if (band == 1) {
+                if (consistency == CONSISTENCY_HIGH) {
+                    return CLUB_TYPE_DRIVER;
+                }
+
+                if (consistency == CONSISTENCY_MIDDLE) {
+                    return CLUB_TYPE_THREE_WOOD;
+                }
+
+                return CLUB_TYPE_FOUR_WOOD;
+            }
+            else if (band == 2) {
+                if (consistency == CONSISTENCY_HIGH) {
+                    return CLUB_TYPE_FIVE_IRON;
+                }
+
+                if (consistency == CONSISTENCY_MIDDLE) {
+                    return CLUB_TYPE_FOUR_IRON;
+                }
+
+                return CLUB_TYPE_THREE_IRON;
+            }
+            else if (band == 3) {
+                if (consistency == CONSISTENCY_HIGH) {
+                    return CLUB_TYPE_SAND_WEDGE;
+                }
+
+                if (consistency == CONSISTENCY_MIDDLE) {
+                    return CLUB_TYPE_PITCHING_WEDGE;
+                }
+
+                return CLUB_TYPE_NINE_IRON;
+            }
+        }
+    }
+
+    return CLUB_TYPE_PITCHING_WEDGE;
 }
 
 #define POWER_TO_GAUGE_FRAME_SCALE (GAUGE_FULL_FRAME / 256.0f)
@@ -2238,33 +2287,33 @@ ClubType ChooseApproachClub(s32* targetX, s32* targetZ) {
 #ifndef NON_MATCHING
 /* The power gauge frame for a launch power out of 256 */
 s32 GetPowerGaugeFrame(s32 amount) {
-  s32 value;
-#ifndef AVOID_UB
-  s32 unused;
-  s32 uninitialized;
+    s32 value;
+#    ifndef AVOID_UB
+    s32 unused;
+    s32 uninitialized;
 
-  /*
-   * The original nests this routine in StepTrialShot, a GNU C extension:
-   * nested there, it compiles to the original's code, and StepTrialShot
-   * passes a stack address in $v0 as the static chain, which this stores.
-   * This copy stands in for it while StepTrialShot doesn't match; the
-   * draft below nests it in the block that calls it. The store of
-   * an uninitialized value is there to match: it stands in for the static
-   * chain's store, which no other C makes, and without it 7 words differ.
-   */
-  *(&unused) = uninitialized;
-#endif
+    /*
+     * The original nests this routine in StepTrialShot, a GNU C extension:
+     * nested there, it compiles to the original's code, and StepTrialShot
+     * passes a stack address in $v0 as the static chain, which this stores.
+     * This copy stands in for it while StepTrialShot doesn't match; the
+     * draft below nests it in the block that calls it. The store of
+     * an uninitialized value is there to match: it stands in for the static
+     * chain's store, which no other C makes, and without it 7 words differ.
+     */
+    *(&unused) = uninitialized;
+#    endif
 
-  value = (amount * POWER_TO_GAUGE_FRAME_SCALE) + 0.5f;
-  if (value < MIN_POWER_GAUGE_FRAME) {
-    value = MIN_POWER_GAUGE_FRAME;
-  }
+    value = (amount * POWER_TO_GAUGE_FRAME_SCALE) + 0.5f;
+    if (value < MIN_POWER_GAUGE_FRAME) {
+        value = MIN_POWER_GAUGE_FRAME;
+    }
 
-  if (value > GAUGE_FULL_FRAME - 1) {
-    value = GAUGE_FULL_FRAME;
-  }
+    if (value > GAUGE_FULL_FRAME - 1) {
+        value = GAUGE_FULL_FRAME;
+    }
 
-  return value;
+    return value;
 }
 #endif
 
@@ -2333,457 +2382,484 @@ INCLUDE_RODATA("asm/nonmatchings/ovl_03/computer_golfer", f_SimFaultText);
  */
 #ifdef NON_MATCHING
 s32 StepTrialShot(void) {
-  PlaneTriangle hit;
-  f32 fraction;
-  s32 flags;
-  s32 ballState;
-  /* A copy of flags, to match: reading flags gives 45 words, 11 in shape,
-   * against 26 (8) */
-  s32 stepFlags;
-  s32 velocityY;
-  s32 bounceCount;
-  s32 heightMiss;
-  SurfaceInfo* surfaceInfo;
-  s32 targetRating;
-  s32 kind;
-  s32 strokes;
-  s32 par;
-  s32 strokesOver;
-  s32 approachDistance;
-  s32 flyDistance;
-  s32 targetDistance;
-  f32 aimCos;
-  f32 aimSin;
-  f32 ratio;
-  s32 launchPower;
-  s32 index;
+    PlaneTriangle hit;
+    f32 fraction;
+    s32 flags;
+    s32 ballState;
+    /* A copy of flags, to match: reading flags gives 45 words, 11 in shape,
+     * against 26 (8) */
+    s32 stepFlags;
+    s32 velocityY;
+    s32 bounceCount;
+    s32 heightMiss;
+    SurfaceInfo *surfaceInfo;
+    s32 targetRating;
+    s32 kind;
+    s32 strokes;
+    s32 par;
+    s32 strokesOver;
+    s32 approachDistance;
+    s32 flyDistance;
+    s32 targetDistance;
+    f32 aimCos;
+    f32 aimSin;
+    f32 ratio;
+    s32 launchPower;
+    s32 index;
 
-  flags = 0;
-  if (f_PlanStage != PLAN_STAGE_TRIAL_RUNNING) {
-    f_IsTrialLost = FALSE;
-    f_TrialEvaluation = 0;
-    f_IsPutting = FALSE;
-    f_HasLanded = FALSE;
-    f_Shot.offsetX = f_ShotOffsets[f_ShotOffset].offsetX + (rand() & 7) - 3;
-    f_Shot.offsetY = f_ShotOffsets[f_ShotOffset].offsetY + (rand() & 7) - 3;
-    f_TrialLaunch->heading = f_Shot.heading;
-    f_TrialLaunch->clubIndex = f_Shot.clubSlot;
-    f_ClosestTargetDistance = FAR_FROM_TARGET;
-    f_TrialLaunch->power = GetGaugeFramePower(f_Shot.powerGaugeFrame);
-    f_TrialLaunch->impactTiming = 0;
-    f_TrialLaunch->offsetX = f_Shot.offsetX;
-    f_TrialLaunch->offsetY = f_Shot.offsetY;
-    f_TrialLaunch->playerIndex = f_Shot.playerIndex;
-    f_TrialLaunch->shotMode = f_Shot.shotMode;
-    f_IsPutting = GetClub(f_Shot.clubSlot)->surfaceMask & CLUB_SURFACE_GREEN;
-    if (!IsGameFlagSet(GAME_FLAG_COMPUTER_PLAYS_BEST)) {
-      if (f_IsPutting) {
-        f_AcceptableEvaluation = (f_AcceptableEvaluation * 1.1f) + 0.2f;
-      } else {
-        f_AcceptableEvaluation = (f_AcceptableEvaluation * 1.1f) + 20.0f;
-      }
-    }
-
-    f_TrialSimulation.position[AXIS_X] = f_Shot.ballPosition[AXIS_X];
-    f_TrialSimulation.position[AXIS_Y] = f_Shot.ballPosition[AXIS_Y];
-    f_TrialSimulation.position[AXIS_Z] = f_Shot.ballPosition[AXIS_Z];
-    f_TrialSimulation.surface = f_Shot.surface;
-    LaunchBallSimulation(
-        &f_TrialSimulation, LAUNCH_PURPOSE_TRIAL, f_TrialLaunch);
-    f_TrialStepCount = 0;
-    f_HasFirstFallHit = FALSE;
-    f_TrialEndPoint[AXIS_X] = f_TrialSimulation.position[AXIS_X];
-    f_TrialEndPoint[AXIS_Y] = f_TrialSimulation.position[AXIS_Y];
-    f_TrialEndPoint[AXIS_Z] = f_TrialSimulation.position[AXIS_Z];
-    f_LandingPosition[AXIS_X] = f_TrialSimulation.position[AXIS_X];
-    f_LandingPosition[AXIS_Y] = f_TrialSimulation.position[AXIS_Y];
-    f_LandingPosition[AXIS_Z] = f_TrialSimulation.position[AXIS_Z];
-  }
-
-  ballState = f_TrialSimulation.state;
-  if (ballState) {
-    /* A loop that runs once, so that the step's checks can break out to the
-     * end point's update; the original has no loop here, and jumping to a
-     * label instead gives 64 words differing, 28 in shape, against 26 (8) */
-    do {
-      velocityY = f_TrialSimulation.velocity[AXIS_Y];
-      bounceCount = f_TrialSimulation.bounceCount;
-      f_TrialStepCount++;
-      flags = StepBallSimulation(&f_TrialSimulation);
-      stepFlags = flags;
-      if (f_TrialStepCount >= MAX_STEP_COUNT) {
-        SetDebugTextHighlight(TRUE);
-        PrintDebugText(f_SimFaultText, 10, 12);
-        break;
-      }
-
-      if (flags & STEP_FLAG_OUTSIDE_COURSE) {
-        break;
-      }
-
-      if (bounceCount == 0 &&
-          (flags & (STEP_FLAG_GROUND_HIT | STEP_FLAG_BILLBOARD_HIT)) &&
-          velocityY < 0 && ballState == BALL_STATE_FLYING) {
-        if (f_HasBestEvaluation || f_TrialLevel < 2) {
-          break;
+    flags = 0;
+    if (f_PlanStage != PLAN_STAGE_TRIAL_RUNNING) {
+        f_IsTrialLost = FALSE;
+        f_TrialEvaluation = 0;
+        f_IsPutting = FALSE;
+        f_HasLanded = FALSE;
+        f_Shot.offsetX = f_ShotOffsets[f_ShotOffset].offsetX + (rand() & 7) - 3;
+        f_Shot.offsetY = f_ShotOffsets[f_ShotOffset].offsetY + (rand() & 7) - 3;
+        f_TrialLaunch->heading = f_Shot.heading;
+        f_TrialLaunch->clubIndex = f_Shot.clubSlot;
+        f_ClosestTargetDistance = FAR_FROM_TARGET;
+        f_TrialLaunch->power = GetGaugeFramePower(f_Shot.powerGaugeFrame);
+        f_TrialLaunch->impactTiming = 0;
+        f_TrialLaunch->offsetX = f_Shot.offsetX;
+        f_TrialLaunch->offsetY = f_Shot.offsetY;
+        f_TrialLaunch->playerIndex = f_Shot.playerIndex;
+        f_TrialLaunch->shotMode = f_Shot.shotMode;
+        f_IsPutting = GetClub(f_Shot.clubSlot)->surfaceMask & CLUB_SURFACE_GREEN;
+        if (!IsGameFlagSet(GAME_FLAG_COMPUTER_PLAYS_BEST)) {
+            if (f_IsPutting) {
+                f_AcceptableEvaluation = (f_AcceptableEvaluation * 1.1f) + 0.2f;
+            }
+            else {
+                f_AcceptableEvaluation = (f_AcceptableEvaluation * 1.1f) + 20.0f;
+            }
         }
 
-        f_HasFirstFallHit = ballState;
-      }
-
-      if (f_IsPutting) {
-        s32 rollingMiss;
-
-        rollingMiss = IntLength2D(
-            f_TrialSimulation.position[AXIS_X] - f_PlanTarget[AXIS_X],
-            f_TrialSimulation.position[AXIS_Z] - f_PlanTarget[AXIS_Z]);
-        if (rollingMiss < f_ClosestTargetDistance) {
-          f_ClosestTargetDistance = rollingMiss;
-          f_TrialEndPoint[AXIS_X] = f_TrialSimulation.position[AXIS_X];
-          f_TrialEndPoint[AXIS_Y] = f_TrialSimulation.position[AXIS_Y];
-          f_TrialEndPoint[AXIS_Z] = f_TrialSimulation.position[AXIS_Z];
-        }
-
-        if (stepFlags & STEP_FLAG_LIPPED_OUT) {
-          f_TrialEvaluation += LIP_OUT_EVALUATION;
-          if (IsStrokeLimitReached()) {
-            f_TrialEvaluation += POOR_LANDING_EVALUATION;
-          }
-        }
-      } else if ((stepFlags & STEP_FLAG_GROUND_HIT) &&
-          f_TrialSimulation.state == BALL_STATE_FLYING && !f_HasLanded) {
-        f_HasLanded = f_TrialSimulation.state;
+        f_TrialSimulation.position[AXIS_X] = f_Shot.ballPosition[AXIS_X];
+        f_TrialSimulation.position[AXIS_Y] = f_Shot.ballPosition[AXIS_Y];
+        f_TrialSimulation.position[AXIS_Z] = f_Shot.ballPosition[AXIS_Z];
+        f_TrialSimulation.surface = f_Shot.surface;
+        LaunchBallSimulation(&f_TrialSimulation, LAUNCH_PURPOSE_TRIAL, f_TrialLaunch);
+        f_TrialStepCount = 0;
+        f_HasFirstFallHit = FALSE;
+        f_TrialEndPoint[AXIS_X] = f_TrialSimulation.position[AXIS_X];
+        f_TrialEndPoint[AXIS_Y] = f_TrialSimulation.position[AXIS_Y];
+        f_TrialEndPoint[AXIS_Z] = f_TrialSimulation.position[AXIS_Z];
         f_LandingPosition[AXIS_X] = f_TrialSimulation.position[AXIS_X];
         f_LandingPosition[AXIS_Y] = f_TrialSimulation.position[AXIS_Y];
         f_LandingPosition[AXIS_Z] = f_TrialSimulation.position[AXIS_Z];
-      }
-
-      if (f_BestEvaluation > f_TrialEvaluation) {
-        f_PlanStage = PLAN_STAGE_TRIAL_RUNNING;
-        return 0;
-      }
-    } while (0);
-  }
-
-  if (!f_IsPutting) {
-    f_TrialEndPoint[AXIS_X] = f_TrialSimulation.position[AXIS_X];
-    f_TrialEndPoint[AXIS_Y] = f_TrialSimulation.position[AXIS_Y];
-    f_TrialEndPoint[AXIS_Z] = f_TrialSimulation.position[AXIS_Z];
-  }
-
-  if (!f_TrialSimulation.state) {
-    s32 targetMiss;
-
-    IntLength2D(g_HoleSetup.cupPosition[AXIS_X] - f_TrialEndPoint[AXIS_X],
-        g_HoleSetup.cupPosition[AXIS_Z] - f_TrialEndPoint[AXIS_Z]);
-    targetMiss = IntLength2D(f_PlanTarget[AXIS_X] - f_TrialEndPoint[AXIS_X],
-        f_PlanTarget[AXIS_Z] - f_TrialEndPoint[AXIS_Z]);
-    if (f_IsPutting) {
-      targetMiss = IntLength2D(
-          g_HoleSetup.cupPosition[AXIS_X] - f_TrialSimulation.position[AXIS_X],
-          g_HoleSetup.cupPosition[AXIS_Z] - f_TrialSimulation.position[AXIS_Z]);
-      if (IntLength2D(
-              f_TrialSimulation.position[AXIS_X] - f_TrialEndPoint[AXIS_X],
-              f_TrialSimulation.position[AXIS_Z] - f_TrialEndPoint[AXIS_Z]) >
-          PUTT_DRIFT_LIMIT) {
-        f_TrialEvaluation = POOR_LANDING_EVALUATION;
-      }
-
-      /*
-       * A long putt is evaluated even if it holed out. The goto into the
-       * evaluation, to match: against 26 words differing, 8 in shape, a flag
-       * set by an if here and tested with the holed-out one gives 40, 16 in
-       * shape; the flag assigned this test 47, 15; and this test moved into
-       * the holed-out one's 61, 25. An inline helper for the evaluation,
-       * called in both places, gave 151, 45, on an older draft.
-       */
-      if (g_Players[f_Shot.playerIndex].strokeCount + 1 <
-              g_HoleSetup.par + f_HoleTargetToPar &&
-          f_HoleTargetToPar > 0 &&
-          IntLength2D(f_Shot.ballPosition[AXIS_X] - f_TrialEndPoint[AXIS_X],
-              f_Shot.ballPosition[AXIS_Z] - f_TrialEndPoint[AXIS_Z]) >
-              LONG_PUTT_DISTANCE) {
-        goto EVALUATE;
-      }
     }
 
-    if (f_TrialSimulation.isHoledOut) {
-      f_TrialEvaluation = 0;
-    } else {
-EVALUATE:
-
-      surfaceInfo = GetSurfaceInfo(f_TrialSimulation.surface);
-      if (FindGroundHit(f_TrialSimulation.position[AXIS_X],
-              f_TrialSimulation.position[AXIS_Y] - PATH_GROUND_CLEARANCE,
-              f_TrialSimulation.position[AXIS_Z],
-              g_HoleSetup.cupPosition[AXIS_X],
-              f_TrialSimulation.position[AXIS_Y] -
-                  (IntLength2D(f_TrialSimulation.position[AXIS_X] -
-                           g_HoleSetup.cupPosition[AXIS_X],
-                       f_TrialSimulation.position[AXIS_Z] -
-                           g_HoleSetup.cupPosition[AXIS_Z]) >>
-                      1),
-              g_HoleSetup.cupPosition[AXIS_Z], &hit, &fraction)) {
-        f_TrialEvaluation += BLOCKED_CUP_EVALUATION;
-      }
-
-      targetRating = GetLandingRating(
-          GetSurfaceInfoAt(f_PlanTarget[AXIS_X], f_PlanTarget[AXIS_Z])->kind);
-      if (GetLandingRating(surfaceInfo->kind) < targetRating) {
-        kind = surfaceInfo->kind;
-        f_TrialEvaluation += POOR_LANDING_EVALUATION;
-        if (IsOutOfBoundsKind(kind)) {
-          f_TrialEvaluation = LOST_BALL_EVALUATION;
-          f_IsTrialLost = TRUE;
-        }
-
-        if (surfaceInfo->kind == SURFACE_KIND_WATER_HAZARD) {
-          osSyncPrintf("Water Hazzad\n");
-          f_TrialEvaluation = LOST_BALL_EVALUATION;
-          f_IsTrialLost = TRUE;
-        }
-      }
-
-      heightMiss = f_PlanTarget[AXIS_Y] - f_TrialSimulation.position[AXIS_Y];
-      f_TrialEvaluation +=
-          (targetMiss + (Abs(heightMiss) / 2)) * MISS_EVALUATION_SCALE;
-    }
-
-    osSyncPrintf("BestEval = %d\n", f_BestEvaluation);
-    if (f_BestEvaluation > f_TrialEvaluation) {
-      f_HasBestEvaluation = TRUE;
-      f_BestEvaluation = f_TrialEvaluation;
-      f_TrialShot = f_Shot;
-    }
-
-    if (f_TrialIndex != 0) {
-      strokes = g_Players[f_Shot.playerIndex].strokeCount;
-      par = g_HoleSetup.par;
-      if (GetSurfaceInfoAt(f_PlanTarget[AXIS_X], f_PlanTarget[AXIS_Z])->kind ==
-          SURFACE_KIND_GREEN) {
-        /* The stroke this shot would be. Counting it in strokes with ++
-         * gives 30 words differing (8 in shape), and adding it in the
-         * subtraction 43 (11), against 26 (8) */
-        s32 shotStroke = strokes + 1;
-
-        strokesOver = shotStroke - (par + f_HoleTargetToPar);
-        if (strokesOver >= 0) {
-          if (f_BestEvaluation <= f_AcceptableEvaluation) {
-            f_IsTrialAccepted = TRUE;
-            return 1;
-          }
-        } else if (!f_IsPutting) {
-          if (strokesOver >= -1) {
-            if (f_BestEvaluation <= f_AcceptableEvaluation + 500) {
-              f_IsTrialAccepted = TRUE;
-              return 1;
+    ballState = f_TrialSimulation.state;
+    if (ballState) {
+        /* A loop that runs once, so that the step's checks can break out to the
+         * end point's update; the original has no loop here, and jumping to a
+         * label instead gives 64 words differing, 28 in shape, against 26 (8) */
+        do {
+            velocityY = f_TrialSimulation.velocity[AXIS_Y];
+            bounceCount = f_TrialSimulation.bounceCount;
+            f_TrialStepCount++;
+            flags = StepBallSimulation(&f_TrialSimulation);
+            stepFlags = flags;
+            if (f_TrialStepCount >= MAX_STEP_COUNT) {
+                SetDebugTextHighlight(TRUE);
+                PrintDebugText(f_SimFaultText, 10, 12);
+                break;
             }
-          } else if (f_BestEvaluation < f_AcceptableEvaluation + 0x8000) {
-            f_IsTrialAccepted = TRUE;
-            return 1;
-          }
-        } else {
-          approachDistance =
-              (s32)IntLength2D(
-                  f_Shot.ballPosition[AXIS_X] - f_PlanTarget[AXIS_X],
-                  f_Shot.ballPosition[AXIS_Z] - f_PlanTarget[AXIS_Z]) *
-              APPROACH_TOLERANCE_SCALE;
-          if (strokesOver >= -1) {
-            if (f_BestEvaluation <=
-                (approachDistance * 0.3f) + f_AcceptableEvaluation) {
-              f_IsTrialAccepted = TRUE;
-              return 1;
+
+            if (flags & STEP_FLAG_OUTSIDE_COURSE) {
+                break;
             }
-          } else if (f_BestEvaluation <=
-              (approachDistance * 0.4f) + f_AcceptableEvaluation) {
-            f_IsTrialAccepted = TRUE;
-            return 1;
-          }
+
+            if (bounceCount == 0 &&
+                (flags & (STEP_FLAG_GROUND_HIT | STEP_FLAG_BILLBOARD_HIT)) &&
+                velocityY < 0 &&
+                ballState == BALL_STATE_FLYING) {
+                if (f_HasBestEvaluation || f_TrialLevel < 2) {
+                    break;
+                }
+
+                f_HasFirstFallHit = ballState;
+            }
+
+            if (f_IsPutting) {
+                s32 rollingMiss;
+
+                rollingMiss = IntLength2D(
+                    f_TrialSimulation.position[AXIS_X] - f_PlanTarget[AXIS_X],
+                    f_TrialSimulation.position[AXIS_Z] - f_PlanTarget[AXIS_Z]
+                );
+                if (rollingMiss < f_ClosestTargetDistance) {
+                    f_ClosestTargetDistance = rollingMiss;
+                    f_TrialEndPoint[AXIS_X] = f_TrialSimulation.position[AXIS_X];
+                    f_TrialEndPoint[AXIS_Y] = f_TrialSimulation.position[AXIS_Y];
+                    f_TrialEndPoint[AXIS_Z] = f_TrialSimulation.position[AXIS_Z];
+                }
+
+                if (stepFlags & STEP_FLAG_LIPPED_OUT) {
+                    f_TrialEvaluation += LIP_OUT_EVALUATION;
+                    if (IsStrokeLimitReached()) {
+                        f_TrialEvaluation += POOR_LANDING_EVALUATION;
+                    }
+                }
+            }
+            else if ((stepFlags & STEP_FLAG_GROUND_HIT) &&
+                f_TrialSimulation.state == BALL_STATE_FLYING &&
+                !f_HasLanded) {
+                f_HasLanded = f_TrialSimulation.state;
+                f_LandingPosition[AXIS_X] = f_TrialSimulation.position[AXIS_X];
+                f_LandingPosition[AXIS_Y] = f_TrialSimulation.position[AXIS_Y];
+                f_LandingPosition[AXIS_Z] = f_TrialSimulation.position[AXIS_Z];
+            }
+
+            if (f_BestEvaluation > f_TrialEvaluation) {
+                f_PlanStage = PLAN_STAGE_TRIAL_RUNNING;
+                return 0;
+            }
         }
-      } else if (f_BestEvaluation < f_AcceptableEvaluation + 8000) {
-        f_IsTrialAccepted = TRUE;
-        return 1;
-      }
+        while (0);
     }
 
     if (!f_IsPutting) {
-      flyDistance = IntLength2D(
-          ((f_TrialSimulation.position[AXIS_X] + f_TrialEndPoint[AXIS_X]) / 2) -
-              f_Shot.ballPosition[AXIS_X],
-          ((f_TrialSimulation.position[AXIS_Z] + f_TrialEndPoint[AXIS_Z]) / 2) -
-              f_Shot.ballPosition[AXIS_Z]);
-      targetDistance =
-          IntLength2D(f_PlanTarget[AXIS_X] - f_Shot.ballPosition[AXIS_X],
-              f_PlanTarget[AXIS_Z] - f_Shot.ballPosition[AXIS_Z]);
-    } else {
-      aimCos = cosf((u16)f_Shot.heading * BINARY_ANGLE_TO_RADIANS);
-      aimSin = sinf((u16)f_Shot.heading * BINARY_ANGLE_TO_RADIANS);
-      flyDistance = (aimCos *
-                        ((((f_TrialSimulation.position[AXIS_X] * 3) +
-                              f_TrialEndPoint[AXIS_X]) /
-                             4) -
-                            f_Shot.ballPosition[AXIS_X])) +
-          (aimSin *
-              ((((f_TrialSimulation.position[AXIS_Z] * 3) +
-                    f_TrialEndPoint[AXIS_Z]) /
-                   4) -
-                  f_Shot.ballPosition[AXIS_Z]));
-      targetDistance =
-          (aimCos * (f_PlanTarget[AXIS_X] - f_Shot.ballPosition[AXIS_X])) +
-          (aimSin * (f_PlanTarget[AXIS_Z] - f_Shot.ballPosition[AXIS_Z]));
-      if (flyDistance <= 0) {
-        flyDistance = 1;
-      }
-
-      if (targetDistance <= 0) {
-        targetDistance = 1;
-      }
+        f_TrialEndPoint[AXIS_X] = f_TrialSimulation.position[AXIS_X];
+        f_TrialEndPoint[AXIS_Y] = f_TrialSimulation.position[AXIS_Y];
+        f_TrialEndPoint[AXIS_Z] = f_TrialSimulation.position[AXIS_Z];
     }
 
-    osSyncPrintf("flydist = %d\n", flyDistance);
-    osSyncPrintf("targetdist = %d\n", targetDistance);
-    osSyncPrintf("powermode = %d\n", f_Shot.shotMode);
-    osSyncPrintf("powermodeleft = %d\n", f_Shot.powerShotCount);
-    osSyncPrintf("ClubSelectType = %d\n", ShotGolferTraits().clubBoldness);
-    if (flyDistance != 0) {
-      ratio = (f32)targetDistance / flyDistance;
-      launchPower = f_TrialLaunch->power * ratio;
-      if (launchPower > MAX_LAUNCH_POWER) {
-        if (f_Shot.shotMode == SHOT_MODE_NORMAL && f_Shot.powerShotCount > 0 &&
-            ((ShotGolferTraits().powerShotEagerness != 0 &&
-                 ShotGolferTraits().clubBoldness < BOLD_CLUB_CHOICE) ||
-                (rand() & 1)) &&
-            GetSurfaceInfoAt(f_PlanTarget[AXIS_X], f_PlanTarget[AXIS_Z])
-                    ->kind == SURFACE_KIND_GREEN) {
-          f_Shot.shotMode = SHOT_MODE_POWER;
-          osSyncPrintf("Power mode\n ");
-        } else if (f_Shot.shotMode == SHOT_MODE_NORMAL &&
-            f_Shot.powerShotCount > 0 &&
-            ShotGolferTraits().clubBoldness == BOLD_CLUB_CHOICE) {
-          f_Shot.shotMode = SHOT_MODE_POWER;
-          osSyncPrintf("Power mode\n ");
-        } else if (f_Shot.shotMode == SHOT_MODE_APPROACH) {
-          f_Shot.shotMode = SHOT_MODE_NORMAL;
-        } else if (targetDistance < flyDistance) {
-          osSyncPrintf("Level Down\n");
-          f_NeedsShorterClub = TRUE;
-          return 1;
-        } else if (f_HasFirstFallHit || ratio >= 10.0f) {
-          f_AimChangeCount++;
-          f_Shot.heading += (!(f_AimChangeCount & 1) ? -1 : 1) *
-              (f_AimChangeCount * AIM_CHANGE_STEP);
-          osSyncPrintf("Angle Change3\n");
-          for (index = 0; index < EXCLUDED_SECTOR_COUNT; index++) {
-            f_IsDirectionExcluded[(
-                u8)((f_Shot.heading >> DIRECTION_SECTOR_SHIFT) + index -
-                (EXCLUDED_SECTOR_COUNT / 2))] = TRUE;
-          }
+    if (!f_TrialSimulation.state) {
+        s32 targetMiss;
 
-          if (f_AimChangeCount >= 17) {
-            osSyncPrintf("Level Down\n");
-            f_AimChangeCount = 0;
-            f_NeedsShorterClub = TRUE;
-          }
-
-          return 1;
-        } else {
-          f_NeedsLongerClub = TRUE;
-          osSyncPrintf("Level Up1\n");
-          return 1;
-        }
-      } else {
-        /* The power gauge frame for a launch power out of 256 */
-        s32 GetPowerGaugeFrame(s32 amount) {
-          s32 value = (amount * POWER_TO_GAUGE_FRAME_SCALE) + 0.5f;
-
-          if (value < MIN_POWER_GAUGE_FRAME) {
-            value = MIN_POWER_GAUGE_FRAME;
-          }
-
-          if (value > GAUGE_FULL_FRAME - 1) {
-            value = GAUGE_FULL_FRAME;
-          }
-
-          return value;
-        }
-
-        f_Shot.powerGaugeFrame = GetPowerGaugeFrame(launchPower);
+        IntLength2D(
+            g_HoleSetup.cupPosition[AXIS_X] - f_TrialEndPoint[AXIS_X],
+            g_HoleSetup.cupPosition[AXIS_Z] - f_TrialEndPoint[AXIS_Z]
+        );
+        targetMiss = IntLength2D(
+            f_PlanTarget[AXIS_X] - f_TrialEndPoint[AXIS_X],
+            f_PlanTarget[AXIS_Z] - f_TrialEndPoint[AXIS_Z]
+        );
         if (f_IsPutting) {
-          f_Shot.powerGaugeFrame = f_Shot.powerGaugeFrame + ((rand() & 1) + 1);
+            targetMiss = IntLength2D(
+                g_HoleSetup.cupPosition[AXIS_X] - f_TrialSimulation.position[AXIS_X],
+                g_HoleSetup.cupPosition[AXIS_Z] - f_TrialSimulation.position[AXIS_Z]
+            );
+            if (IntLength2D(
+                    f_TrialSimulation.position[AXIS_X] - f_TrialEndPoint[AXIS_X],
+                    f_TrialSimulation.position[AXIS_Z] - f_TrialEndPoint[AXIS_Z]
+                ) > PUTT_DRIFT_LIMIT) {
+                f_TrialEvaluation = POOR_LANDING_EVALUATION;
+            }
+
+            /*
+             * A long putt is evaluated even if it holed out. The goto into the
+             * evaluation, to match: against 26 words differing, 8 in shape, a flag
+             * set by an if here and tested with the holed-out one gives 40, 16 in
+             * shape; the flag assigned this test 47, 15; and this test moved into
+             * the holed-out one's 61, 25. An inline helper for the evaluation,
+             * called in both places, gave 151, 45, on an older draft.
+             */
+            if (g_Players[f_Shot.playerIndex].strokeCount + 1 <
+                    g_HoleSetup.par + f_HoleTargetToPar &&
+                f_HoleTargetToPar > 0 &&
+                IntLength2D(
+                    f_Shot.ballPosition[AXIS_X] - f_TrialEndPoint[AXIS_X],
+                    f_Shot.ballPosition[AXIS_Z] - f_TrialEndPoint[AXIS_Z]
+                ) > LONG_PUTT_DISTANCE) {
+                goto EVALUATE;
+            }
         }
 
-        if (f_Shot.powerGaugeFrame > GAUGE_FULL_FRAME) {
-          f_Shot.powerGaugeFrame = GAUGE_FULL_FRAME;
+        if (f_TrialSimulation.isHoledOut) {
+            f_TrialEvaluation = 0;
+        }
+        else {
+EVALUATE:
+
+            surfaceInfo = GetSurfaceInfo(f_TrialSimulation.surface);
+            if (FindGroundHit(
+                    f_TrialSimulation.position[AXIS_X],
+                    f_TrialSimulation.position[AXIS_Y] - PATH_GROUND_CLEARANCE,
+                    f_TrialSimulation.position[AXIS_Z],
+                    g_HoleSetup.cupPosition[AXIS_X],
+                    f_TrialSimulation.position[AXIS_Y] -
+                        (IntLength2D(
+                             f_TrialSimulation.position[AXIS_X] - g_HoleSetup.cupPosition[AXIS_X],
+                             f_TrialSimulation.position[AXIS_Z] - g_HoleSetup.cupPosition[AXIS_Z]
+                         ) >>
+                            1),
+                    g_HoleSetup.cupPosition[AXIS_Z],
+                    &hit,
+                    &fraction
+                )) {
+                f_TrialEvaluation += BLOCKED_CUP_EVALUATION;
+            }
+
+            targetRating = GetLandingRating(
+                GetSurfaceInfoAt(f_PlanTarget[AXIS_X], f_PlanTarget[AXIS_Z])->kind
+            );
+            if (GetLandingRating(surfaceInfo->kind) < targetRating) {
+                kind = surfaceInfo->kind;
+                f_TrialEvaluation += POOR_LANDING_EVALUATION;
+                if (IsOutOfBoundsKind(kind)) {
+                    f_TrialEvaluation = LOST_BALL_EVALUATION;
+                    f_IsTrialLost = TRUE;
+                }
+
+                if (surfaceInfo->kind == SURFACE_KIND_WATER_HAZARD) {
+                    osSyncPrintf("Water Hazzad\n");
+                    f_TrialEvaluation = LOST_BALL_EVALUATION;
+                    f_IsTrialLost = TRUE;
+                }
+            }
+
+            heightMiss = f_PlanTarget[AXIS_Y] - f_TrialSimulation.position[AXIS_Y];
+            f_TrialEvaluation += (targetMiss + (Abs(heightMiss) / 2)) * MISS_EVALUATION_SCALE;
         }
 
-        if (f_Shot.powerGaugeFrame < 2) {
-          f_Shot.powerGaugeFrame = 2;
+        osSyncPrintf("BestEval = %d\n", f_BestEvaluation);
+        if (f_BestEvaluation > f_TrialEvaluation) {
+            f_HasBestEvaluation = TRUE;
+            f_BestEvaluation = f_TrialEvaluation;
+            f_TrialShot = f_Shot;
         }
 
-        if (f_TrialLaunch->power < launchPower) {
-          if (GetGaugeFramePower(f_Shot.powerGaugeFrame) <=
-                  f_TrialLaunch->power &&
-              f_Shot.powerGaugeFrame < GAUGE_FULL_FRAME) {
-            f_Shot.powerGaugeFrame++;
-          }
-        } else if (launchPower < f_TrialLaunch->power) {
-          if (GetGaugeFramePower(f_Shot.powerGaugeFrame) >=
-                  f_TrialLaunch->power &&
-              f_Shot.powerGaugeFrame >= 4) {
-            f_Shot.powerGaugeFrame--;
-          }
+        if (f_TrialIndex != 0) {
+            strokes = g_Players[f_Shot.playerIndex].strokeCount;
+            par = g_HoleSetup.par;
+            if (GetSurfaceInfoAt(f_PlanTarget[AXIS_X], f_PlanTarget[AXIS_Z])->kind ==
+                SURFACE_KIND_GREEN) {
+                /* The stroke this shot would be. Counting it in strokes with ++
+                 * gives 30 words differing (8 in shape), and adding it in the
+                 * subtraction 43 (11), against 26 (8) */
+                s32 shotStroke = strokes + 1;
+
+                strokesOver = shotStroke - (par + f_HoleTargetToPar);
+                if (strokesOver >= 0) {
+                    if (f_BestEvaluation <= f_AcceptableEvaluation) {
+                        f_IsTrialAccepted = TRUE;
+                        return 1;
+                    }
+                }
+                else if (!f_IsPutting) {
+                    if (strokesOver >= -1) {
+                        if (f_BestEvaluation <= f_AcceptableEvaluation + 500) {
+                            f_IsTrialAccepted = TRUE;
+                            return 1;
+                        }
+                    }
+                    else if (f_BestEvaluation < f_AcceptableEvaluation + 0x8000) {
+                        f_IsTrialAccepted = TRUE;
+                        return 1;
+                    }
+                }
+                else {
+                    approachDistance = (s32)IntLength2D(
+                                           f_Shot.ballPosition[AXIS_X] - f_PlanTarget[AXIS_X],
+                                           f_Shot.ballPosition[AXIS_Z] - f_PlanTarget[AXIS_Z]
+                                       ) *
+                        APPROACH_TOLERANCE_SCALE;
+                    if (strokesOver >= -1) {
+                        if (f_BestEvaluation <=
+                            (approachDistance * 0.3f) + f_AcceptableEvaluation) {
+                            f_IsTrialAccepted = TRUE;
+                            return 1;
+                        }
+                    }
+                    else if (f_BestEvaluation <=
+                        (approachDistance * 0.4f) + f_AcceptableEvaluation) {
+                        f_IsTrialAccepted = TRUE;
+                        return 1;
+                    }
+                }
+            }
+            else if (f_BestEvaluation < f_AcceptableEvaluation + 8000) {
+                f_IsTrialAccepted = TRUE;
+                return 1;
+            }
         }
-      }
+
+        if (!f_IsPutting) {
+            flyDistance = IntLength2D(
+                ((f_TrialSimulation.position[AXIS_X] + f_TrialEndPoint[AXIS_X]) / 2) -
+                    f_Shot.ballPosition[AXIS_X],
+                ((f_TrialSimulation.position[AXIS_Z] + f_TrialEndPoint[AXIS_Z]) / 2) -
+                    f_Shot.ballPosition[AXIS_Z]
+            );
+            targetDistance = IntLength2D(
+                f_PlanTarget[AXIS_X] - f_Shot.ballPosition[AXIS_X],
+                f_PlanTarget[AXIS_Z] - f_Shot.ballPosition[AXIS_Z]
+            );
+        }
+        else {
+            aimCos = cosf((u16)f_Shot.heading * BINARY_ANGLE_TO_RADIANS);
+            aimSin = sinf((u16)f_Shot.heading * BINARY_ANGLE_TO_RADIANS);
+            flyDistance =
+                (aimCos *
+                    ((((f_TrialSimulation.position[AXIS_X] * 3) + f_TrialEndPoint[AXIS_X]) / 4) -
+                        f_Shot.ballPosition[AXIS_X])) +
+                (aimSin *
+                    ((((f_TrialSimulation.position[AXIS_Z] * 3) + f_TrialEndPoint[AXIS_Z]) / 4) -
+                        f_Shot.ballPosition[AXIS_Z]));
+            targetDistance = (aimCos * (f_PlanTarget[AXIS_X] - f_Shot.ballPosition[AXIS_X])) +
+                (aimSin * (f_PlanTarget[AXIS_Z] - f_Shot.ballPosition[AXIS_Z]));
+            if (flyDistance <= 0) {
+                flyDistance = 1;
+            }
+
+            if (targetDistance <= 0) {
+                targetDistance = 1;
+            }
+        }
+
+        osSyncPrintf("flydist = %d\n", flyDistance);
+        osSyncPrintf("targetdist = %d\n", targetDistance);
+        osSyncPrintf("powermode = %d\n", f_Shot.shotMode);
+        osSyncPrintf("powermodeleft = %d\n", f_Shot.powerShotCount);
+        osSyncPrintf("ClubSelectType = %d\n", ShotGolferTraits().clubBoldness);
+        if (flyDistance != 0) {
+            ratio = (f32)targetDistance / flyDistance;
+            launchPower = f_TrialLaunch->power * ratio;
+            if (launchPower > MAX_LAUNCH_POWER) {
+                if (f_Shot.shotMode == SHOT_MODE_NORMAL &&
+                    f_Shot.powerShotCount > 0 &&
+                    ((ShotGolferTraits().powerShotEagerness != 0 &&
+                         ShotGolferTraits().clubBoldness < BOLD_CLUB_CHOICE) ||
+                        (rand() & 1)) &&
+                    GetSurfaceInfoAt(f_PlanTarget[AXIS_X], f_PlanTarget[AXIS_Z])->kind ==
+                        SURFACE_KIND_GREEN) {
+                    f_Shot.shotMode = SHOT_MODE_POWER;
+                    osSyncPrintf("Power mode\n ");
+                }
+                else if (f_Shot.shotMode == SHOT_MODE_NORMAL &&
+                    f_Shot.powerShotCount > 0 &&
+                    ShotGolferTraits().clubBoldness == BOLD_CLUB_CHOICE) {
+                    f_Shot.shotMode = SHOT_MODE_POWER;
+                    osSyncPrintf("Power mode\n ");
+                }
+                else if (f_Shot.shotMode == SHOT_MODE_APPROACH) {
+                    f_Shot.shotMode = SHOT_MODE_NORMAL;
+                }
+                else if (targetDistance < flyDistance) {
+                    osSyncPrintf("Level Down\n");
+                    f_NeedsShorterClub = TRUE;
+                    return 1;
+                }
+                else if (f_HasFirstFallHit || ratio >= 10.0f) {
+                    f_AimChangeCount++;
+                    f_Shot.heading +=
+                        (!(f_AimChangeCount & 1) ? -1 : 1) * (f_AimChangeCount * AIM_CHANGE_STEP);
+                    osSyncPrintf("Angle Change3\n");
+                    for (index = 0; index < EXCLUDED_SECTOR_COUNT; index++) {
+                        f_IsDirectionExcluded[(u8)((f_Shot.heading >> DIRECTION_SECTOR_SHIFT) +
+                            index - (EXCLUDED_SECTOR_COUNT / 2))] = TRUE;
+                    }
+
+                    if (f_AimChangeCount >= 17) {
+                        osSyncPrintf("Level Down\n");
+                        f_AimChangeCount = 0;
+                        f_NeedsShorterClub = TRUE;
+                    }
+
+                    return 1;
+                }
+                else {
+                    f_NeedsLongerClub = TRUE;
+                    osSyncPrintf("Level Up1\n");
+                    return 1;
+                }
+            }
+            else {
+                /* The power gauge frame for a launch power out of 256 */
+                s32 GetPowerGaugeFrame(s32 amount) {
+                    s32 value = (amount * POWER_TO_GAUGE_FRAME_SCALE) + 0.5f;
+
+                    if (value < MIN_POWER_GAUGE_FRAME) {
+                        value = MIN_POWER_GAUGE_FRAME;
+                    }
+
+                    if (value > GAUGE_FULL_FRAME - 1) {
+                        value = GAUGE_FULL_FRAME;
+                    }
+
+                    return value;
+                }
+
+                f_Shot.powerGaugeFrame = GetPowerGaugeFrame(launchPower);
+                if (f_IsPutting) {
+                    f_Shot.powerGaugeFrame = f_Shot.powerGaugeFrame + ((rand() & 1) + 1);
+                }
+
+                if (f_Shot.powerGaugeFrame > GAUGE_FULL_FRAME) {
+                    f_Shot.powerGaugeFrame = GAUGE_FULL_FRAME;
+                }
+
+                if (f_Shot.powerGaugeFrame < 2) {
+                    f_Shot.powerGaugeFrame = 2;
+                }
+
+                if (f_TrialLaunch->power < launchPower) {
+                    if (GetGaugeFramePower(f_Shot.powerGaugeFrame) <= f_TrialLaunch->power &&
+                        f_Shot.powerGaugeFrame < GAUGE_FULL_FRAME) {
+                        f_Shot.powerGaugeFrame++;
+                    }
+                }
+                else if (launchPower < f_TrialLaunch->power) {
+                    if (GetGaugeFramePower(f_Shot.powerGaugeFrame) >= f_TrialLaunch->power &&
+                        f_Shot.powerGaugeFrame >= 4) {
+                        f_Shot.powerGaugeFrame--;
+                    }
+                }
+            }
+        }
+
+        /*
+         * In its own block, as without it 33 words differ, 11 in shape, against
+         * 26 and 8. Adding the heading and the first angle and then subtracting
+         * the second gives 23 (11), but the register oracle's closest result
+         * rises from 10 words to 17; the heading added to the change, with the
+         * operands reversed, gives 24 (8)
+         */
+        IN_OWN_BLOCK(
+            f_Shot.heading += (s32)(atan2(
+                                        f_PlanTarget[AXIS_Z] - f_Shot.ballPosition[AXIS_Z],
+                                        f_PlanTarget[AXIS_X] - f_Shot.ballPosition[AXIS_X]
+                                    ) *
+                                  RADIANS_TO_BINARY_ANGLE) -
+                (s32)(atan2(
+                          f_TrialEndPoint[AXIS_Z] - f_Shot.ballPosition[AXIS_Z],
+                          f_TrialEndPoint[AXIS_X] - f_Shot.ballPosition[AXIS_X]
+                      ) *
+                    RADIANS_TO_BINARY_ANGLE)
+        );
+        return 1;
     }
 
-    /*
-     * In its own block, as without it 33 words differ, 11 in shape, against
-     * 26 and 8. Adding the heading and the first angle and then subtracting
-     * the second gives 23 (11), but the register oracle's closest result
-     * rises from 10 words to 17; the heading added to the change, with the
-     * operands reversed, gives 24 (8)
-     */
-    IN_OWN_BLOCK(f_Shot.heading +=
-        (s32)(atan2(f_PlanTarget[AXIS_Z] - f_Shot.ballPosition[AXIS_Z],
-                  f_PlanTarget[AXIS_X] - f_Shot.ballPosition[AXIS_X]) *
-            RADIANS_TO_BINARY_ANGLE) -
-            (s32)(atan2(f_TrialEndPoint[AXIS_Z] - f_Shot.ballPosition[AXIS_Z],
-                      f_TrialEndPoint[AXIS_X] - f_Shot.ballPosition[AXIS_X]) *
-                RADIANS_TO_BINARY_ANGLE));
+    if (flags & STEP_FLAG_GROUND_HIT) {
+        if (!(GetClub(g_Players[f_Shot.playerIndex].clubs[f_Shot.clubSlot])->surfaceMask &
+                CLUB_SURFACE_GREEN)) {
+            f_Shot.clubSlot++;
+            if (GetClub(g_Players[f_Shot.playerIndex].clubs[f_Shot.clubSlot])->surfaceMask &
+                CLUB_SURFACE_GREEN) {
+                f_Shot.clubSlot--;
+            }
+        }
+    }
+
+    f_AimChangeCount++;
+    for (index = 0; index < EXCLUDED_SECTOR_COUNT; index++) {
+        f_IsDirectionExcluded[(u8)((f_Shot.heading >> DIRECTION_SECTOR_SHIFT) + index -
+            (EXCLUDED_SECTOR_COUNT / 2))] = TRUE;
+    }
+
+    f_ShotOffset = SHOT_OFFSET_MINUS_LARGE;
+    f_Shot.heading += (!(f_AimChangeCount & 1) ? -1 : 1) * (f_AimChangeCount * AIM_CHANGE_STEP);
+
+    osSyncPrintf("Angle Change4\n");
+    if (f_AimChangeCount >= 3) {
+        osSyncPrintf("Level Down\n");
+        f_AimChangeCount = 0;
+        f_NeedsShorterClub = TRUE;
+    }
+
     return 1;
-  }
-
-  if (flags & STEP_FLAG_GROUND_HIT) {
-    if (!(GetClub(g_Players[f_Shot.playerIndex].clubs[f_Shot.clubSlot])
-                ->surfaceMask &
-            CLUB_SURFACE_GREEN)) {
-      f_Shot.clubSlot++;
-      if (GetClub(g_Players[f_Shot.playerIndex].clubs[f_Shot.clubSlot])
-              ->surfaceMask &
-          CLUB_SURFACE_GREEN) {
-        f_Shot.clubSlot--;
-      }
-    }
-  }
-
-  f_AimChangeCount++;
-  for (index = 0; index < EXCLUDED_SECTOR_COUNT; index++) {
-    f_IsDirectionExcluded[(u8)((f_Shot.heading >> DIRECTION_SECTOR_SHIFT) +
-        index - (EXCLUDED_SECTOR_COUNT / 2))] = TRUE;
-  }
-
-  f_ShotOffset = SHOT_OFFSET_MINUS_LARGE;
-  f_Shot.heading +=
-      (!(f_AimChangeCount & 1) ? -1 : 1) * (f_AimChangeCount * AIM_CHANGE_STEP);
-
-  osSyncPrintf("Angle Change4\n");
-  if (f_AimChangeCount >= 3) {
-    osSyncPrintf("Level Down\n");
-    f_AimChangeCount = 0;
-    f_NeedsShorterClub = TRUE;
-  }
-
-  return 1;
 }
 #else
 INCLUDE_ASM("asm/nonmatchings/ovl_03/computer_golfer", StepTrialShot);
@@ -2792,15 +2868,15 @@ INCLUDE_ASM("asm/nonmatchings/ovl_03/computer_golfer", StepTrialShot);
 /* Returns the slot of the golfer's club of type clubType, or 0 if there is none
  */
 s32 FindClubSlot(s32 unused UNUSED, ClubType clubType) {
-  s32 slot;
+    s32 slot;
 
-  for (slot = 0; slot < CLUB_SLOT_COUNT; slot++) {
-    if (GetClub(g_Players[f_Shot.playerIndex].clubs[slot])->type == clubType) {
-      return slot;
+    for (slot = 0; slot < CLUB_SLOT_COUNT; slot++) {
+        if (GetClub(g_Players[f_Shot.playerIndex].clubs[slot])->type == clubType) {
+            return slot;
+        }
     }
-  }
 
-  return 0;
+    return 0;
 }
 
 /* GetLieRating's worst rating */
@@ -2816,52 +2892,52 @@ s32 FindClubSlot(s32 unused UNUSED, ClubType clubType) {
  * longest club that counted, or CLUB_TYPE_SAND_WEDGE if none did.
  */
 ClubType ChooseClubForDistance(s32 distance) {
-  s32 fallback = CLUB_TYPE_SAND_WEDGE;
-  ClubType type;
-  s32 slot;
-  Club* club;
-  s32 carry;
-  s32 rating;
+    s32 fallback = CLUB_TYPE_SAND_WEDGE;
+    ClubType type;
+    s32 slot;
+    Club *club;
+    s32 carry;
+    s32 rating;
 
-  for (type = CLUB_TYPE_SAND_WEDGE; type >= 0; type--) {
-    slot = FindClubSlot(f_Shot.playerIndex, type);
-    if (!f_IsClubUsable[slot]) {
-      continue;
+    for (type = CLUB_TYPE_SAND_WEDGE; type >= 0; type--) {
+        slot = FindClubSlot(f_Shot.playerIndex, type);
+        if (!f_IsClubUsable[slot]) {
+            continue;
+        }
+
+        club = GetClub(g_Players[f_Shot.playerIndex].clubs[slot]);
+        carry = GetShotWorldDistance(club, SHOT_MODE_NORMAL);
+        if (g_HoleSetup.conditions.isRaining == TRUE &&
+            ShotGolferTraits().consistency < CONSISTENCY_HIGH) {
+            carry = carry * RAINY_DISTANCE_FRACTION;
+        }
+
+        carry = carry * GetSurfaceInfo(f_Shot.surface)->minPercent / FULL_PERCENT;
+        rating = GetLieRating(club, f_Shot.surface, SHOT_MODE_NORMAL);
+        if (ShotGolferTraits().clubBoldness < BOLD_CLUB_CHOICE) {
+            if (rating == WORST_LIE_RATING) {
+                continue;
+            }
+        }
+
+        fallback = slot;
+        if (distance < carry) {
+            return type;
+        }
     }
 
-    club = GetClub(g_Players[f_Shot.playerIndex].clubs[slot]);
-    carry = GetShotWorldDistance(club, SHOT_MODE_NORMAL);
-    if (g_HoleSetup.conditions.isRaining == TRUE &&
-        ShotGolferTraits().consistency < CONSISTENCY_HIGH) {
-      carry = carry * RAINY_DISTANCE_FRACTION;
-    }
-
-    carry = carry * GetSurfaceInfo(f_Shot.surface)->minPercent / FULL_PERCENT;
-    rating = GetLieRating(club, f_Shot.surface, SHOT_MODE_NORMAL);
-    if (ShotGolferTraits().clubBoldness < BOLD_CLUB_CHOICE) {
-      if (rating == WORST_LIE_RATING) {
-        continue;
-      }
-    }
-
-    fallback = slot;
-    if (distance < carry) {
-      return type;
-    }
-  }
-
-  return fallback;
+    return fallback;
 }
 
 /* Returns how far apart two binary angles are, up to half a turn */
 s32 GetAngleDifference(s32 angle, s32 otherAngle) {
-  s32 difference = (s16)(angle - otherAngle);
+    s32 difference = (s16)(angle - otherAngle);
 
-  if (difference < 0) {
-    difference = -difference;
-  }
+    if (difference < 0) {
+        difference = -difference;
+    }
 
-  return difference;
+    return difference;
 }
 
 /* How far below the ball a target must be for the largest minus offset */
@@ -2872,13 +2948,12 @@ s32 GetAngleDifference(s32 angle, s32 otherAngle) {
 /* It is a macro, as an inline function compiles differently from the original
  */
 #define IsWindSpeedInRange(lowest, limit) \
-  (g_HoleSetup.conditions.windSpeed >= (lowest) && \
-      g_HoleSetup.conditions.windSpeed < (limit))
+    (g_HoleSetup.conditions.windSpeed >= (lowest) && g_HoleSetup.conditions.windSpeed < (limit))
 
 /* f_ClubKindChances rows */
 enum ClubChanceSet {
-  CLUB_CHANCE_SET_FOLLOWING_WIND,
-  CLUB_CHANCE_SET_HEAD_WIND
+    CLUB_CHANCE_SET_FOLLOWING_WIND,
+    CLUB_CHANCE_SET_HEAD_WIND
 };
 
 s32 RollClubKindChance(s32 chanceSetIndex);
@@ -2890,109 +2965,117 @@ s32 RollClubKindChance(s32 chanceSetIndex);
  * Most offsets also need RollClubKindChance to succeed.
  */
 s32 ChooseShotOffset(void) {
-  s32 windPlay;
-  s32 aimYaw;
-  s32 windDirection;
+    s32 windPlay;
+    s32 aimYaw;
+    s32 windDirection;
 
-  switch (GetSurfaceInfo(f_Shot.surface)->kind) {
-    case SURFACE_KIND_BUNKER:
-    case SURFACE_KIND_BUNKER_FAIR_LIE:
-    case SURFACE_KIND_BUNKER_POOR_LIE:
-    case SURFACE_KIND_BUNKER_UNUSED_LIE:
-    case SURFACE_KIND_GREEN:
-    case SURFACE_KIND_GREEN_EDGE:
-    case SURFACE_KIND_BARE_GROUND:
-    case SURFACE_KIND_DEEP_ROUGH:
-    case SURFACE_KIND_NO_DROP_GROUND:
-    case SURFACE_KIND_WASTE_AREA:
-      return SHOT_OFFSET_NONE;
-  }
-
-  windPlay = ShotGolferTraits().windPlay;
-  if (f_PlanTarget[AXIS_X] == g_HoleSetup.cupPosition[AXIS_X] &&
-      f_PlanTarget[AXIS_Z] == g_HoleSetup.cupPosition[AXIS_Z]) {
-    switch (windPlay) {
-      case WIND_PLAY_HEAD_WINDS:
-        if (rand() % 2 == 1) {
-          return SHOT_OFFSET_PLUS_MEDIUM;
-        }
-
-        break;
-      case WIND_PLAY_STRONG_WINDS:
-        if (rand() % 3 == 0) {
-          return SHOT_OFFSET_PLUS_MEDIUM;
-        }
-
-        break;
+    switch (GetSurfaceInfo(f_Shot.surface)->kind) {
+        case SURFACE_KIND_BUNKER:
+        case SURFACE_KIND_BUNKER_FAIR_LIE:
+        case SURFACE_KIND_BUNKER_POOR_LIE:
+        case SURFACE_KIND_BUNKER_UNUSED_LIE:
+        case SURFACE_KIND_GREEN:
+        case SURFACE_KIND_GREEN_EDGE:
+        case SURFACE_KIND_BARE_GROUND:
+        case SURFACE_KIND_DEEP_ROUGH:
+        case SURFACE_KIND_NO_DROP_GROUND:
+        case SURFACE_KIND_WASTE_AREA:
+            return SHOT_OFFSET_NONE;
     }
-  }
 
-  if (f_PlanTarget[AXIS_Y] <
-      f_Shot.ballPosition[AXIS_Y] - DOWNHILL_TARGET_DROP) {
-    return SHOT_OFFSET_MINUS_LARGE;
-  }
+    windPlay = ShotGolferTraits().windPlay;
+    if (f_PlanTarget[AXIS_X] == g_HoleSetup.cupPosition[AXIS_X] &&
+        f_PlanTarget[AXIS_Z] == g_HoleSetup.cupPosition[AXIS_Z]) {
+        switch (windPlay) {
+            case WIND_PLAY_HEAD_WINDS:
+                if (rand() % 2 == 1) {
+                    return SHOT_OFFSET_PLUS_MEDIUM;
+                }
 
-  aimYaw = (u16)f_Shot.heading;
-  windDirection = g_HoleSetup.conditions.windDirection;
-  osSyncPrintf("skSCAI.angy = %ld\n", aimYaw);
-  osSyncPrintf("wind_ang = %ld\n", windDirection);
-  if (GetAngleDifference(windDirection, aimYaw) < FOLLOWING_WIND_ANGLE) {
-    osSyncPrintf("---- Follow\n");
-    if (windPlay == WIND_PLAY_FOLLOWING_WINDS) {
-      if (IsWindSpeedInRange(4 * WIND_PUSH_UNIT, 5 * WIND_PUSH_UNIT)) {
-        if (RollClubKindChance(CLUB_CHANCE_SET_FOLLOWING_WIND) == TRUE) {
-          return SHOT_OFFSET_MINUS_SMALL;
+                break;
+            case WIND_PLAY_STRONG_WINDS:
+                if (rand() % 3 == 0) {
+                    return SHOT_OFFSET_PLUS_MEDIUM;
+                }
+
+                break;
         }
-      } else if (IsWindSpeedInRange(5 * WIND_PUSH_UNIT, 7 * WIND_PUSH_UNIT)) {
-        if (RollClubKindChance(CLUB_CHANCE_SET_FOLLOWING_WIND) == TRUE) {
-          return SHOT_OFFSET_MINUS_MEDIUM;
-        }
-      } else if (g_HoleSetup.conditions.windSpeed >= 9 * WIND_PUSH_UNIT) {
-        if (RollClubKindChance(CLUB_CHANCE_SET_FOLLOWING_WIND) == TRUE) {
-          return SHOT_OFFSET_MINUS_LARGE;
-        }
-      }
-    } else if (windPlay == WIND_PLAY_STRONG_WINDS) {
-      if (IsWindSpeedInRange(6 * WIND_PUSH_UNIT, 7 * WIND_PUSH_UNIT)) {
-        if (RollClubKindChance(CLUB_CHANCE_SET_FOLLOWING_WIND) == TRUE) {
-          return SHOT_OFFSET_MINUS_SMALL;
-        }
-      } else if (g_HoleSetup.conditions.windSpeed >= 7 * WIND_PUSH_UNIT) {
-        if (RollClubKindChance(CLUB_CHANCE_SET_FOLLOWING_WIND) == TRUE) {
-          return SHOT_OFFSET_MINUS_MEDIUM;
-        }
-      }
     }
-  } else {
-    osSyncPrintf("---- back\n");
-    if (windPlay == WIND_PLAY_HEAD_WINDS) {
-      if (IsWindSpeedInRange(4 * WIND_PUSH_UNIT, 5 * WIND_PUSH_UNIT)) {
-        if (RollClubKindChance(CLUB_CHANCE_SET_HEAD_WIND) == TRUE) {
-          return SHOT_OFFSET_PLUS_SMALL;
-        }
-      } else if (IsWindSpeedInRange(5 * WIND_PUSH_UNIT, 7 * WIND_PUSH_UNIT)) {
-        if (RollClubKindChance(CLUB_CHANCE_SET_HEAD_WIND) == TRUE) {
-          return SHOT_OFFSET_PLUS_MEDIUM;
-        }
-      } else if (g_HoleSetup.conditions.windSpeed >= 9 * WIND_PUSH_UNIT) {
-        if (RollClubKindChance(CLUB_CHANCE_SET_HEAD_WIND) == TRUE) {
-          return SHOT_OFFSET_PLUS_LARGE;
-        }
-      }
-    } else if (windPlay == WIND_PLAY_STRONG_WINDS) {
-      if (IsWindSpeedInRange(6 * WIND_PUSH_UNIT, 7 * WIND_PUSH_UNIT)) {
-        if (RollClubKindChance(CLUB_CHANCE_SET_HEAD_WIND) == TRUE) {
-          return SHOT_OFFSET_PLUS_SMALL;
-        }
-      } else if (g_HoleSetup.conditions.windSpeed >= 7 * WIND_PUSH_UNIT) {
-        if (RollClubKindChance(CLUB_CHANCE_SET_HEAD_WIND) == TRUE) {
-          return SHOT_OFFSET_PLUS_MEDIUM;
-        }
-      }
-    }
-  }
 
-  return SHOT_OFFSET_NONE;
+    if (f_PlanTarget[AXIS_Y] < f_Shot.ballPosition[AXIS_Y] - DOWNHILL_TARGET_DROP) {
+        return SHOT_OFFSET_MINUS_LARGE;
+    }
+
+    aimYaw = (u16)f_Shot.heading;
+    windDirection = g_HoleSetup.conditions.windDirection;
+    osSyncPrintf("skSCAI.angy = %ld\n", aimYaw);
+    osSyncPrintf("wind_ang = %ld\n", windDirection);
+    if (GetAngleDifference(windDirection, aimYaw) < FOLLOWING_WIND_ANGLE) {
+        osSyncPrintf("---- Follow\n");
+        if (windPlay == WIND_PLAY_FOLLOWING_WINDS) {
+            if (IsWindSpeedInRange(4 * WIND_PUSH_UNIT, 5 * WIND_PUSH_UNIT)) {
+                if (RollClubKindChance(CLUB_CHANCE_SET_FOLLOWING_WIND) == TRUE) {
+                    return SHOT_OFFSET_MINUS_SMALL;
+                }
+            }
+            else if (IsWindSpeedInRange(5 * WIND_PUSH_UNIT, 7 * WIND_PUSH_UNIT)) {
+                if (RollClubKindChance(CLUB_CHANCE_SET_FOLLOWING_WIND) == TRUE) {
+                    return SHOT_OFFSET_MINUS_MEDIUM;
+                }
+            }
+            else if (g_HoleSetup.conditions.windSpeed >= 9 * WIND_PUSH_UNIT) {
+                if (RollClubKindChance(CLUB_CHANCE_SET_FOLLOWING_WIND) == TRUE) {
+                    return SHOT_OFFSET_MINUS_LARGE;
+                }
+            }
+        }
+        else if (windPlay == WIND_PLAY_STRONG_WINDS) {
+            if (IsWindSpeedInRange(6 * WIND_PUSH_UNIT, 7 * WIND_PUSH_UNIT)) {
+                if (RollClubKindChance(CLUB_CHANCE_SET_FOLLOWING_WIND) == TRUE) {
+                    return SHOT_OFFSET_MINUS_SMALL;
+                }
+            }
+            else if (g_HoleSetup.conditions.windSpeed >= 7 * WIND_PUSH_UNIT) {
+                if (RollClubKindChance(CLUB_CHANCE_SET_FOLLOWING_WIND) == TRUE) {
+                    return SHOT_OFFSET_MINUS_MEDIUM;
+                }
+            }
+        }
+    }
+    else {
+        osSyncPrintf("---- back\n");
+        if (windPlay == WIND_PLAY_HEAD_WINDS) {
+            if (IsWindSpeedInRange(4 * WIND_PUSH_UNIT, 5 * WIND_PUSH_UNIT)) {
+                if (RollClubKindChance(CLUB_CHANCE_SET_HEAD_WIND) == TRUE) {
+                    return SHOT_OFFSET_PLUS_SMALL;
+                }
+            }
+            else if (IsWindSpeedInRange(5 * WIND_PUSH_UNIT, 7 * WIND_PUSH_UNIT)) {
+                if (RollClubKindChance(CLUB_CHANCE_SET_HEAD_WIND) == TRUE) {
+                    return SHOT_OFFSET_PLUS_MEDIUM;
+                }
+            }
+            else if (g_HoleSetup.conditions.windSpeed >= 9 * WIND_PUSH_UNIT) {
+                if (RollClubKindChance(CLUB_CHANCE_SET_HEAD_WIND) == TRUE) {
+                    return SHOT_OFFSET_PLUS_LARGE;
+                }
+            }
+        }
+        else if (windPlay == WIND_PLAY_STRONG_WINDS) {
+            if (IsWindSpeedInRange(6 * WIND_PUSH_UNIT, 7 * WIND_PUSH_UNIT)) {
+                if (RollClubKindChance(CLUB_CHANCE_SET_HEAD_WIND) == TRUE) {
+                    return SHOT_OFFSET_PLUS_SMALL;
+                }
+            }
+            else if (g_HoleSetup.conditions.windSpeed >= 7 * WIND_PUSH_UNIT) {
+                if (RollClubKindChance(CLUB_CHANCE_SET_HEAD_WIND) == TRUE) {
+                    return SHOT_OFFSET_PLUS_MEDIUM;
+                }
+            }
+        }
+    }
+
+    return SHOT_OFFSET_NONE;
 }
 
 #define CLUB_TYPE_LAST_WOOD 2
@@ -3006,8 +3089,8 @@ s32 ChooseShotOffset(void) {
 /* It is a macro, as an inline function compiles differently from the original
  */
 #define IsShotClubOfTypes(firstType, lastType) \
-  (f_Shot.clubSlot >= FindClubSlot(f_Shot.playerIndex, (firstType)) && \
-      FindClubSlot(f_Shot.playerIndex, (lastType)) >= f_Shot.clubSlot)
+    (f_Shot.clubSlot >= FindClubSlot(f_Shot.playerIndex, (firstType)) && \
+        FindClubSlot(f_Shot.playerIndex, (lastType)) >= f_Shot.clubSlot)
 
 /*
  * Returns TRUE on the golfer's first stroke of the hole. Otherwise it returns
@@ -3015,28 +3098,27 @@ s32 ChooseShotOffset(void) {
  * gives for the kind of the shot's club.
  */
 s32 RollClubKindChance(s32 chanceSetIndex) {
-  if (g_Players[f_Shot.playerIndex].strokeCount == 0) {
-    return TRUE;
-  }
+    if (g_Players[f_Shot.playerIndex].strokeCount == 0) {
+        return TRUE;
+    }
 
-  if (IsShotClubOfTypes(CLUB_TYPE_DRIVER, CLUB_TYPE_LAST_WOOD)) {
-    if (rand() % FULL_PERCENT <
-        f_ClubKindChances[chanceSetIndex][CLUB_CHANCE_WOOD]) {
-      return TRUE;
+    if (IsShotClubOfTypes(CLUB_TYPE_DRIVER, CLUB_TYPE_LAST_WOOD)) {
+        if (rand() % FULL_PERCENT < f_ClubKindChances[chanceSetIndex][CLUB_CHANCE_WOOD]) {
+            return TRUE;
+        }
     }
-  } else if (IsShotClubOfTypes(CLUB_TYPE_FIRST_IRON, CLUB_TYPE_LAST_IRON)) {
-    if (rand() % FULL_PERCENT <
-        f_ClubKindChances[chanceSetIndex][CLUB_CHANCE_IRON]) {
-      return TRUE;
+    else if (IsShotClubOfTypes(CLUB_TYPE_FIRST_IRON, CLUB_TYPE_LAST_IRON)) {
+        if (rand() % FULL_PERCENT < f_ClubKindChances[chanceSetIndex][CLUB_CHANCE_IRON]) {
+            return TRUE;
+        }
     }
-  } else {
-    if (rand() % FULL_PERCENT <
-        f_ClubKindChances[chanceSetIndex][CLUB_CHANCE_OTHER]) {
-      return TRUE;
+    else {
+        if (rand() % FULL_PERCENT < f_ClubKindChances[chanceSetIndex][CLUB_CHANCE_OTHER]) {
+            return TRUE;
+        }
     }
-  }
 
-  return FALSE;
+    return FALSE;
 }
 
 /* Tens of yards in a unit of distance */
@@ -3049,44 +3131,43 @@ s32 RollClubKindChance(s32 chanceSetIndex) {
  * of the line from from to to lie in water, out of bounds or out of the course.
  */
 Boolean IsLineMostlyLost(CoursePoint from, CoursePoint to) {
-  s32 distance;
-  Radians angle;
-  s32 sampleCount;
-  s32 step;
-  s32 lostCount;
-  f32 stepLength;
-  s32 x;
-  s32 z;
-  u32 kind;
+    s32 distance;
+    Radians angle;
+    s32 sampleCount;
+    s32 step;
+    s32 lostCount;
+    f32 stepLength;
+    s32 x;
+    s32 z;
+    u32 kind;
 
-  distance = IntLength2D(to[AXIS_X] - from[AXIS_X], to[AXIS_Z] - from[AXIS_Z]);
-  angle =
-      atan2((f32)(to[AXIS_Z] - from[AXIS_Z]), (f32)(to[AXIS_X] - from[AXIS_X]));
-  sampleCount = 0;
-  lostCount = 0;
-  for (step = 1; step < distance * TENS_OF_YARDS_PER_UNIT; step++) {
-    /*
-     * Setting stepLength in the loop is there to match: setting it before
-     * the loop gives 8 words differing (8 in shape), and the constant in
-     * its place 26
-     */
-    stepLength = UNITS_PER_YARD;
-    x = (step * (cosf(angle) * stepLength)) + from[AXIS_X];
-    z = (step * (sinf(angle) * stepLength)) + from[AXIS_Z];
-    kind = GetSurfaceInfoAt(x, z)->kind;
-    if (IsLostBallKind(kind)) {
-      lostCount++;
+    distance = IntLength2D(to[AXIS_X] - from[AXIS_X], to[AXIS_Z] - from[AXIS_Z]);
+    angle = atan2((f32)(to[AXIS_Z] - from[AXIS_Z]), (f32)(to[AXIS_X] - from[AXIS_X]));
+    sampleCount = 0;
+    lostCount = 0;
+    for (step = 1; step < distance * TENS_OF_YARDS_PER_UNIT; step++) {
+        /*
+         * Setting stepLength in the loop is there to match: setting it before
+         * the loop gives 8 words differing (8 in shape), and the constant in
+         * its place 26
+         */
+        stepLength = UNITS_PER_YARD;
+        x = (step * (cosf(angle) * stepLength)) + from[AXIS_X];
+        z = (step * (sinf(angle) * stepLength)) + from[AXIS_Z];
+        kind = GetSurfaceInfoAt(x, z)->kind;
+        if (IsLostBallKind(kind)) {
+            lostCount++;
+        }
+
+        sampleCount++;
     }
 
-    sampleCount++;
-  }
+    if ((f32)lostCount / sampleCount > LOST_LINE_FRACTION) {
+        osSyncPrintf("Many OB!!\n");
+        return TRUE;
+    }
 
-  if ((f32)lostCount / sampleCount > LOST_LINE_FRACTION) {
-    osSyncPrintf("Many OB!!\n");
-    return TRUE;
-  }
-
-  return FALSE;
+    return FALSE;
 }
 
 /*
@@ -3117,60 +3198,61 @@ Boolean IsLineMostlyLost(CoursePoint from, CoursePoint to) {
  */
 #ifdef NON_MATCHING
 Boolean IsTrialShotSafe(void) {
-  u32 kind;
-  s32 flags;
+    u32 kind;
+    s32 flags;
 
-  f_TrialLaunch->heading = f_TrialShot.heading;
-  f_TrialLaunch->clubIndex = f_TrialShot.clubSlot;
-  f_TrialLaunch->power = GetGaugeFramePower(f_TrialShot.powerGaugeFrame);
-  f_TrialLaunch->impactTiming = f_TrialShot.impactGaugeFrame - 60;
-  f_TrialLaunch->offsetX = f_TrialShot.offsetX;
-  f_TrialLaunch->offsetY = f_TrialShot.offsetY;
-  f_TrialLaunch->playerIndex = f_TrialShot.playerIndex;
-  f_TrialLaunch->shotMode = f_TrialShot.shotMode;
-  f_TrialSimulation.position[AXIS_X] = f_TrialShot.ballPosition[AXIS_X];
-  f_TrialSimulation.position[AXIS_Y] = f_TrialShot.ballPosition[AXIS_Y];
-  f_TrialSimulation.position[AXIS_Z] = f_TrialShot.ballPosition[AXIS_Z];
-  f_TrialSimulation.surface = f_TrialShot.surface;
-  LaunchBallSimulation(&f_TrialSimulation, LAUNCH_PURPOSE_TRIAL, f_TrialLaunch);
-  f_TrialStepCount = 0;
-  while (f_TrialSimulation.state) {
-    f_TrialStepCount++;
-    flags = StepBallSimulation(&f_TrialSimulation);
-    if (f_TrialStepCount >= MAX_STEP_COUNT) {
-      goto reportFault;
-    }
+    f_TrialLaunch->heading = f_TrialShot.heading;
+    f_TrialLaunch->clubIndex = f_TrialShot.clubSlot;
+    f_TrialLaunch->power = GetGaugeFramePower(f_TrialShot.powerGaugeFrame);
+    f_TrialLaunch->impactTiming = f_TrialShot.impactGaugeFrame - 60;
+    f_TrialLaunch->offsetX = f_TrialShot.offsetX;
+    f_TrialLaunch->offsetY = f_TrialShot.offsetY;
+    f_TrialLaunch->playerIndex = f_TrialShot.playerIndex;
+    f_TrialLaunch->shotMode = f_TrialShot.shotMode;
+    f_TrialSimulation.position[AXIS_X] = f_TrialShot.ballPosition[AXIS_X];
+    f_TrialSimulation.position[AXIS_Y] = f_TrialShot.ballPosition[AXIS_Y];
+    f_TrialSimulation.position[AXIS_Z] = f_TrialShot.ballPosition[AXIS_Z];
+    f_TrialSimulation.surface = f_TrialShot.surface;
+    LaunchBallSimulation(&f_TrialSimulation, LAUNCH_PURPOSE_TRIAL, f_TrialLaunch);
+    f_TrialStepCount = 0;
+    while (f_TrialSimulation.state) {
+        f_TrialStepCount++;
+        flags = StepBallSimulation(&f_TrialSimulation);
+        if (f_TrialStepCount >= MAX_STEP_COUNT) {
+            goto reportFault;
+        }
 
-    if (flags & STEP_FLAG_OUTSIDE_COURSE) {
-      break;
+        if (flags & STEP_FLAG_OUTSIDE_COURSE) {
+            break;
+        }
     }
-  }
 
 checkResult:
-  if (!f_TrialSimulation.state) {
-    kind = GetSurfaceInfo(f_TrialSimulation.surface)->kind;
-    if (IsOutOfBoundsKind(kind)) {
-      goto unsafe;
-    } else if (kind != SURFACE_KIND_WATER_HAZARD) {
-      goto safe;
+    if (!f_TrialSimulation.state) {
+        kind = GetSurfaceInfo(f_TrialSimulation.surface)->kind;
+        if (IsOutOfBoundsKind(kind)) {
+            goto unsafe;
+        }
+        else if (kind != SURFACE_KIND_WATER_HAZARD) {
+            goto safe;
+        }
     }
-  }
 
-  goto unsafe;
+    goto unsafe;
 
 reportFault:
-  /* The step limit reports a fault, then rejoins the normal result checks. */
-  SetDebugTextHighlight(TRUE);
-  PrintDebugText(f_SimFaultText, 10, 12);
-  goto checkResult;
+    /* The step limit reports a fault, then rejoins the normal result checks. */
+    SetDebugTextHighlight(TRUE);
+    PrintDebugText(f_SimFaultText, 10, 12);
+    goto checkResult;
 
 safe:
-  osSyncPrintf("nmResultCheck: TRUE\n");
-  return TRUE;
+    osSyncPrintf("nmResultCheck: TRUE\n");
+    return TRUE;
 
 unsafe:
-  osSyncPrintf("nmResultCheck: FALSE\n");
-  return FALSE;
+    osSyncPrintf("nmResultCheck: FALSE\n");
+    return FALSE;
 }
 #else
 INCLUDE_ASM("asm/nonmatchings/ovl_03/computer_golfer", IsTrialShotSafe);

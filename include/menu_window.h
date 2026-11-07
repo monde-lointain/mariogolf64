@@ -7,10 +7,10 @@
 
 /* The states of the menus' popup window, which opens and closes by scaling */
 enum MenuWindowState {
-  MENU_WINDOW_OPENING,
-  MENU_WINDOW_OPEN,
-  MENU_WINDOW_CLOSING,
-  MENU_WINDOW_CLOSED
+    MENU_WINDOW_OPENING,
+    MENU_WINDOW_OPEN,
+    MENU_WINDOW_CLOSING,
+    MENU_WINDOW_CLOSED
 };
 
 /*
@@ -18,9 +18,9 @@ enum MenuWindowState {
  * a caller that only tests the answer counts a moving window as open or closed.
  */
 enum MenuWindowCheck {
-  MENU_WINDOW_CHECK_MOVING = -1,
-  MENU_WINDOW_CHECK_NO,
-  MENU_WINDOW_CHECK_YES
+    MENU_WINDOW_CHECK_MOVING = -1,
+    MENU_WINDOW_CHECK_NO,
+    MENU_WINDOW_CHECK_YES
 };
 
 void ResetMenuWindow(void);

@@ -5,13 +5,13 @@
 
 /* LoadHelpBoardImage's images */
 enum HelpBoardImage {
-  HELP_BOARD_IMAGE_HAND = 1,
-  HELP_BOARD_IMAGE_ARROWS,
-  HELP_BOARD_IMAGE_CHALKBOARD
+    HELP_BOARD_IMAGE_HAND = 1,
+    HELP_BOARD_IMAGE_ARROWS,
+    HELP_BOARD_IMAGE_CHALKBOARD
 };
 
-void LoadHelpBoardImage(void* buffer, s32 image);
+void LoadHelpBoardImage(void *buffer, s32 image);
 void UpdateHelpBoard(void);
-void DrawHelpBoard(Gfx** displayListHead);
+void DrawHelpBoard(Gfx **displayListHead);
 
 #endif

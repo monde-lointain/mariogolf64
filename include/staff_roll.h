@@ -9,6 +9,6 @@ void LoadStaffRoll(void);
 void UnloadStaffRoll(void);
 void UpdateStaffRoll(void);
 
-void DrawStaffRoll(Gfx** displayListHead);
+void DrawStaffRoll(Gfx **displayListHead);
 
 #endif

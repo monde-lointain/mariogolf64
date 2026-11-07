@@ -49,8 +49,7 @@
  * step. The original returns 0, so something else keeps $a3 from the loop
  * there.
  */
-s32 WritePasswordSymbols(
-    u8* symbols, char* password, s32 symbolCount, s32 unused);
+s32 WritePasswordSymbols(u8 *symbols, char *password, s32 symbolCount, s32 unused);
 
 TournamentRules g_ClubTournamentRules;
 
@@ -58,7 +57,7 @@ TournamentRules g_ClubTournamentRules;
  * Each symbol's characters. The first one is the one written; the others
  * are accepted because they look alike.
  */
-static char* f_PasswordAlphabet[PASSWORD_SYMBOL_COUNT] = {
+static char *f_PasswordAlphabet[PASSWORD_SYMBOL_COUNT] = {
     "4",
     "6",
     "X",
@@ -288,19 +287,19 @@ static TournamentRules f_TournamentRules[TOURNAMENT_RULES_COUNT] = {
 };
 
 static u8 ReverseBits(u8 bits) {
-  u8 reversed = 0;
-  s32 i;
+    u8 reversed = 0;
+    s32 i;
 
-  for (i = 0; i < BITS_PER_BYTE; i++) {
-    reversed *= 2;
-    if (bits & 1) {
-      reversed |= 1;
+    for (i = 0; i < BITS_PER_BYTE; i++) {
+        reversed *= 2;
+        if (bits & 1) {
+            reversed |= 1;
+        }
+
+        bits >>= 1;
     }
 
-    bits >>= 1;
-  }
-
-  return reversed;
+    return reversed;
 }
 
 /*
@@ -322,20 +321,18 @@ static u8 ReverseBits(u8 bits) {
  * 2 in shape.
  */
 #ifdef NON_MATCHING
-s32 WritePasswordSymbols(
-    u8* symbols, char* password, s32 symbolCount, s32 unused UNUSED) {
-  s32 i;
+s32 WritePasswordSymbols(u8 *symbols, char *password, s32 symbolCount, s32 unused UNUSED) {
+    s32 i;
 
-  for (i = 0; i < symbolCount; i++) {
-    if (symbols[i] >= PASSWORD_SYMBOL_COUNT) {
-      return -1;
+    for (i = 0; i < symbolCount; i++) {
+        if (symbols[i] >= PASSWORD_SYMBOL_COUNT) {
+            return -1;
+        }
+
+        password[i] = f_PasswordAlphabet[(symbols[i] + i) % PASSWORD_SYMBOL_COUNT][0];
     }
 
-    password[i] =
-        f_PasswordAlphabet[(symbols[i] + i) % PASSWORD_SYMBOL_COUNT][0];
-  }
-
-  return 0;
+    return 0;
 }
 #else
 INCLUDE_ASM("asm/nonmatchings/password", WritePasswordSymbols);
@@ -343,164 +340,151 @@ INCLUDE_ASM("asm/nonmatchings/password", WritePasswordSymbols);
 
 /* Reads symbolCount characters as symbols. It fails with -1 on a character
  * outside the alphabet. */
-static s32 ReadPasswordSymbols(u8* symbols, char* password, s32 symbolCount) {
-  s32 i;
-  s32 symbol;
-  s32 characterIndex;
+static s32 ReadPasswordSymbols(u8 *symbols, char *password, s32 symbolCount) {
+    s32 i;
+    s32 symbol;
+    s32 characterIndex;
 
-  for (i = 0; i < symbolCount; i++) {
-    for (symbol = 0; symbol < PASSWORD_SYMBOL_COUNT; symbol++) {
-      char* characters = f_PasswordAlphabet[symbol];
-      Boolean isFound = FALSE;
+    for (i = 0; i < symbolCount; i++) {
+        for (symbol = 0; symbol < PASSWORD_SYMBOL_COUNT; symbol++) {
+            char *characters = f_PasswordAlphabet[symbol];
+            Boolean isFound = FALSE;
 
-      for (characterIndex = 0; characters[characterIndex] != '\0';
-          characterIndex++) {
-        if (characters[characterIndex] == password[i]) {
-          isFound = TRUE;
-          break;
+            for (characterIndex = 0; characters[characterIndex] != '\0'; characterIndex++) {
+                if (characters[characterIndex] == password[i]) {
+                    isFound = TRUE;
+                    break;
+                }
+            }
+
+            if (isFound) {
+                break;
+            }
         }
-      }
 
-      if (isFound) {
-        break;
-      }
+        if (symbol >= PASSWORD_SYMBOL_COUNT) {
+            return -1;
+        }
+
+        symbols[i] = (symbol + PASSWORD_SYMBOL_COUNT - i) % PASSWORD_SYMBOL_COUNT;
     }
 
-    if (symbol >= PASSWORD_SYMBOL_COUNT) {
-      return -1;
+    return 0;
+}
+
+s32 DecodeTournamentPassword(u8 *code, char *password) {
+    u8 bytes[TOURNAMENT_CODE_SIZE];
+    u8 symbols[TOURNAMENT_PASSWORD_LENGTH];
+    u32 number;
+    s32 i;
+
+    if (ReadPasswordSymbols(symbols, password, TOURNAMENT_PASSWORD_LENGTH) != 0) {
+        return -1;
     }
 
-    symbols[i] = (symbol + PASSWORD_SYMBOL_COUNT - i) % PASSWORD_SYMBOL_COUNT;
-  }
+    symbols[0] = (symbols[0] + PASSWORD_SYMBOL_COUNT - symbols[5]) % PASSWORD_SYMBOL_COUNT;
+    symbols[1] = (symbols[1] + PASSWORD_SYMBOL_COUNT - symbols[6]) % PASSWORD_SYMBOL_COUNT;
+    symbols[2] = (symbols[2] + PASSWORD_SYMBOL_COUNT - symbols[7]) % PASSWORD_SYMBOL_COUNT;
+    symbols[3] = (symbols[3] + PASSWORD_SYMBOL_COUNT - symbols[7]) % PASSWORD_SYMBOL_COUNT;
+    symbols[4] = (symbols[4] + PASSWORD_SYMBOL_COUNT - symbols[5]) % PASSWORD_SYMBOL_COUNT;
+    if (symbols[5] != (symbols[4] + symbols[0] + symbols[1]) % (u32)PASSWORD_SYMBOL_COUNT) {
+        return -1;
+    }
 
-  return 0;
+    if (symbols[6] != (symbols[1] + symbols[2] + symbols[3]) % (u32)PASSWORD_SYMBOL_COUNT) {
+        return -1;
+    }
+
+    if (symbols[7] != (symbols[2] + symbols[3] + symbols[4]) % (u32)PASSWORD_SYMBOL_COUNT) {
+        return -1;
+    }
+
+    number = 0;
+    for (i = NUMBER_SYMBOL_COUNT - 1; i >= 0; i--) {
+        number *= PASSWORD_SYMBOL_COUNT;
+        number += symbols[i];
+    }
+
+    bytes[0] = number >> 16;
+    bytes[1] = number >> 8;
+    bytes[2] = number;
+    for (i = 0; i < TOURNAMENT_CODE_SIZE; i++) {
+        code[i] = ReverseBits(bytes[i] ^ f_TournamentKey[i]);
+    }
+
+    return 0;
 }
 
-s32 DecodeTournamentPassword(u8* code, char* password) {
-  u8 bytes[TOURNAMENT_CODE_SIZE];
-  u8 symbols[TOURNAMENT_PASSWORD_LENGTH];
-  u32 number;
-  s32 i;
+void EncodeScorePassword(ScoreReport *source, char *password) {
+    /* Pads the frame to match; without it 80 words differ */
+    u8 unusedBuffer[8] UNUSED;
+    u8 symbols[SCORE_PASSWORD_LENGTH];
+    ScoreReport report;
+    ScoreReport *clamped = &report;
+    s32 symbolCount = 0;
+    u32 number;
+    s32 i;
 
-  if (ReadPasswordSymbols(symbols, password, TOURNAMENT_PASSWORD_LENGTH) != 0) {
-    return -1;
-  }
+    report = *source;
 
-  symbols[0] =
-      (symbols[0] + PASSWORD_SYMBOL_COUNT - symbols[5]) % PASSWORD_SYMBOL_COUNT;
-  symbols[1] =
-      (symbols[1] + PASSWORD_SYMBOL_COUNT - symbols[6]) % PASSWORD_SYMBOL_COUNT;
-  symbols[2] =
-      (symbols[2] + PASSWORD_SYMBOL_COUNT - symbols[7]) % PASSWORD_SYMBOL_COUNT;
-  symbols[3] =
-      (symbols[3] + PASSWORD_SYMBOL_COUNT - symbols[7]) % PASSWORD_SYMBOL_COUNT;
-  symbols[4] =
-      (symbols[4] + PASSWORD_SYMBOL_COUNT - symbols[5]) % PASSWORD_SYMBOL_COUNT;
-  if (symbols[5] !=
-      (symbols[4] + symbols[0] + symbols[1]) % (u32)PASSWORD_SYMBOL_COUNT) {
-    return -1;
-  }
+    if (clamped->characterIndex >= CHARACTER_COUNT) {
+        clamped->characterIndex = 0;
+    }
 
-  if (symbols[6] !=
-      (symbols[1] + symbols[2] + symbols[3]) % (u32)PASSWORD_SYMBOL_COUNT) {
-    return -1;
-  }
+    clamped->score += SCORE_PASSWORD_BIAS;
+    if (clamped->score >= SCORE_RANGE) {
+        clamped->score = SCORE_RANGE - 1;
+    }
 
-  if (symbols[7] !=
-      (symbols[2] + symbols[3] + symbols[4]) % (u32)PASSWORD_SYMBOL_COUNT) {
-    return -1;
-  }
+    clamped->time--;
+    if (clamped->time > TIME_RANGE - 1) {
+        clamped->time = TIME_RANGE - 1;
+    }
 
-  number = 0;
-  for (i = NUMBER_SYMBOL_COUNT - 1; i >= 0; i--) {
-    number *= PASSWORD_SYMBOL_COUNT;
-    number += symbols[i];
-  }
+    if (clamped->gameBoyLevel >= PASSWORD_GAME_BOY_LEVEL_LIMIT) {
+        clamped->gameBoyLevel = PASSWORD_GAME_BOY_LEVEL_LIMIT - 1;
+    }
 
-  bytes[0] = number >> 16;
-  bytes[1] = number >> 8;
-  bytes[2] = number;
-  for (i = 0; i < TOURNAMENT_CODE_SIZE; i++) {
-    code[i] = ReverseBits(bytes[i] ^ f_TournamentKey[i]);
-  }
+    number = (clamped->tournamentCode[0] << 16) | (clamped->tournamentCode[1] << 8) |
+        clamped->tournamentCode[2];
+    for (i = 0; i < NUMBER_SYMBOL_COUNT; i++) {
+        symbols[symbolCount++] = number % PASSWORD_SYMBOL_COUNT;
+        number /= PASSWORD_SYMBOL_COUNT;
+    }
 
-  return 0;
+    number = (clamped->gameBoyLevel * TIME_RANGE) + clamped->time + TIME_NUMBER_SALT;
+    for (i = 0; i < NUMBER_SYMBOL_COUNT; i++) {
+        symbols[symbolCount++] = number % PASSWORD_SYMBOL_COUNT;
+        number /= PASSWORD_SYMBOL_COUNT;
+    }
+
+    number = (clamped->characterIndex * SCORE_RANGE) + (s16)clamped->score +
+        ((rand() % SCORE_NOISE_RANGE) * (CHARACTER_COUNT * SCORE_RANGE)) + SCORE_NUMBER_SALT;
+    for (i = 0; i < NUMBER_SYMBOL_COUNT; i++) {
+        symbols[symbolCount++] = number % PASSWORD_SYMBOL_COUNT;
+        number /= PASSWORD_SYMBOL_COUNT;
+    }
+
+    for (i = 0; i < NUMBER_SYMBOL_COUNT; i++) {
+        symbols[i] = (symbols[i] + symbols[(2 * NUMBER_SYMBOL_COUNT) + i]) % PASSWORD_SYMBOL_COUNT;
+        symbols[NUMBER_SYMBOL_COUNT + i] =
+            (symbols[NUMBER_SYMBOL_COUNT + i] + symbols[(2 * NUMBER_SYMBOL_COUNT) + i]) %
+            PASSWORD_SYMBOL_COUNT;
+    }
+
+    for (i = 0; i < NUMBER_SYMBOL_COUNT; i++) {
+        symbols[symbolCount++] = (symbols[i] + symbols[NUMBER_SYMBOL_COUNT + i] +
+                                     symbols[(2 * NUMBER_SYMBOL_COUNT) + i]) %
+            PASSWORD_SYMBOL_COUNT;
+    }
+
+    WritePasswordSymbols(symbols, password, SCORE_PASSWORD_LENGTH, 0);
 }
 
-void EncodeScorePassword(ScoreReport* source, char* password) {
-  /* Pads the frame to match; without it 80 words differ */
-  u8 unusedBuffer[8] UNUSED;
-  u8 symbols[SCORE_PASSWORD_LENGTH];
-  ScoreReport report;
-  ScoreReport* clamped = &report;
-  s32 symbolCount = 0;
-  u32 number;
-  s32 i;
+TournamentRules *GetTournamentRules(u8 rulesIndex) {
+    if (rulesIndex >= TOURNAMENT_RULES_COUNT) {
+        return &f_TournamentRules[0];
+    }
 
-  report = *source;
-
-  if (clamped->characterIndex >= CHARACTER_COUNT) {
-    clamped->characterIndex = 0;
-  }
-
-  clamped->score += SCORE_PASSWORD_BIAS;
-  if (clamped->score >= SCORE_RANGE) {
-    clamped->score = SCORE_RANGE - 1;
-  }
-
-  clamped->time--;
-  if (clamped->time > TIME_RANGE - 1) {
-    clamped->time = TIME_RANGE - 1;
-  }
-
-  if (clamped->gameBoyLevel >= PASSWORD_GAME_BOY_LEVEL_LIMIT) {
-    clamped->gameBoyLevel = PASSWORD_GAME_BOY_LEVEL_LIMIT - 1;
-  }
-
-  number = (clamped->tournamentCode[0] << 16) |
-      (clamped->tournamentCode[1] << 8) | clamped->tournamentCode[2];
-  for (i = 0; i < NUMBER_SYMBOL_COUNT; i++) {
-    symbols[symbolCount++] = number % PASSWORD_SYMBOL_COUNT;
-    number /= PASSWORD_SYMBOL_COUNT;
-  }
-
-  number =
-      (clamped->gameBoyLevel * TIME_RANGE) + clamped->time + TIME_NUMBER_SALT;
-  for (i = 0; i < NUMBER_SYMBOL_COUNT; i++) {
-    symbols[symbolCount++] = number % PASSWORD_SYMBOL_COUNT;
-    number /= PASSWORD_SYMBOL_COUNT;
-  }
-
-  number = (clamped->characterIndex * SCORE_RANGE) + (s16)clamped->score +
-      ((rand() % SCORE_NOISE_RANGE) * (CHARACTER_COUNT * SCORE_RANGE)) +
-      SCORE_NUMBER_SALT;
-  for (i = 0; i < NUMBER_SYMBOL_COUNT; i++) {
-    symbols[symbolCount++] = number % PASSWORD_SYMBOL_COUNT;
-    number /= PASSWORD_SYMBOL_COUNT;
-  }
-
-  for (i = 0; i < NUMBER_SYMBOL_COUNT; i++) {
-    symbols[i] = (symbols[i] + symbols[(2 * NUMBER_SYMBOL_COUNT) + i]) %
-        PASSWORD_SYMBOL_COUNT;
-    symbols[NUMBER_SYMBOL_COUNT + i] =
-        (symbols[NUMBER_SYMBOL_COUNT + i] +
-            symbols[(2 * NUMBER_SYMBOL_COUNT) + i]) %
-        PASSWORD_SYMBOL_COUNT;
-  }
-
-  for (i = 0; i < NUMBER_SYMBOL_COUNT; i++) {
-    symbols[symbolCount++] = (symbols[i] + symbols[NUMBER_SYMBOL_COUNT + i] +
-                                 symbols[(2 * NUMBER_SYMBOL_COUNT) + i]) %
-        PASSWORD_SYMBOL_COUNT;
-  }
-
-  WritePasswordSymbols(symbols, password, SCORE_PASSWORD_LENGTH, 0);
-}
-
-TournamentRules* GetTournamentRules(u8 rulesIndex) {
-  if (rulesIndex >= TOURNAMENT_RULES_COUNT) {
-    return &f_TournamentRules[0];
-  }
-
-  return &f_TournamentRules[rulesIndex];
+    return &f_TournamentRules[rulesIndex];
 }

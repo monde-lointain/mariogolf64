@@ -13,6 +13,6 @@ Boolean IsMonkeyShown(void);
 void StartMonkeyDrop(Radians cameraYaw);
 void ClearHoleCreatures(void);
 void StartCheepCheepLeap(s32 startValue);
-void DrawHoleCreatures(Gfx** displayListHead);
+void DrawHoleCreatures(Gfx **displayListHead);
 
 #endif
