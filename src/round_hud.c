@@ -2371,6 +2371,11 @@ void DrawBallTrail(Gfx** displayListHead, CameraMatrices* matrices) {
  * scaling and the division in one block; the register oracle, forcing the
  * speed into $a0, leaves the 4 words of the reciprocal's placement. 14
  * words differ, 4 in shape.
+ *
+ * Neither an inlined call nor the nested function's definition ends the
+ * block: the scaling, the whole conversion or the pulse step as an inline
+ * helper, in any order, and the scaling as scaledSpeed's initializer,
+ * before DrawWindSpeedText, all give 41 words, as with no barrier.
  */
 #ifdef NON_MATCHING
 void DrawWindSpeed(Gfx** displayListHead, f32 x, f32 y) {
