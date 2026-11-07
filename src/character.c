@@ -1602,14 +1602,24 @@ void AnimateCharacter(u32 slotIndex) {
  * shape, to 156 (64); declaring the factors before the weights gives
  * 172 (64), and scaling the next weight first changes nothing. 156 words
  * differ, 64 in shape.
+ *
+ * The quaternion's matrix now takes AnimateCharacterJoints' order, with
+ * variables of its own for the scale, the w and x term and the z square,
+ * and no block around the [2][2] element: of 192 combinations of the two
+ * drafts' forms, it gives the fewest words in shape here. That takes the
+ * draft from 156 words differing (64 in shape) to 232 (48), as the frame
+ * grows by 8 bytes, and the register oracle's closest result from 124
+ * words, forcing 30 pseudos, to 80, forcing 34. Taking the 8 bytes from
+ * either pad matches the frame, but leaves the oracle no closer than 198
+ * words. 232 words differ, 48 in shape.
  */
 #ifdef NON_MATCHING
 void UpdateJointKeyframeSpans(u32 slotIndex) {
-    /* Pads the frame to match; without it 266 words differ, against 156 */
+    /* Pads the frame to match; without it 290 words differ, against 232 */
     f32 unusedMatrices[3][4][4] UNUSED;
     f32 translationMatrix[4][4];
     f32 jointMatrix[4][4];
-    /* Pads the frame to match; without it 288 words differ, against 184 */
+    /* Pads the frame to match; without it 276 words differ, against 232 */
     f32 scaleMatrix[4][4] UNUSED;
     f32 rotation[4];
     f32(*rotationMatrix)[4];
@@ -1637,6 +1647,7 @@ void UpdateJointKeyframeSpans(u32 slotIndex) {
     f32 wz;
     f32 xx;
     f32 yy;
+    f32 zz;
     f32 xy;
     f32 yz;
     f32 xz;
@@ -1797,13 +1808,6 @@ void UpdateJointKeyframeSpans(u32 slotIndex) {
         /* The rotation quaternion (x, y, z, w) as a matrix */
         lengthSquared = (rotation[0] * rotation[0]) + (rotation[1] * rotation[1]) +
             (rotation[2] * rotation[2]) + (rotation[3] * rotation[3]);
-        /*
-         * Fills the matrix through a pointer, which matches more closely: writing
-         * jointMatrix itself gives 186 words differing, 72 in shape, against 184
-         * and 66; the register oracle's closest result is then 133 words, forcing
-         * 30 pseudos, against 136 forcing 28
-         */
-        rotationMatrix = jointMatrix;
         if (lengthSquared > 0.0f) {
             scale = 2.0f / lengthSquared;
         }
@@ -1811,6 +1815,7 @@ void UpdateJointKeyframeSpans(u32 slotIndex) {
             scale = 0.0f;
         }
 
+        rotationMatrix = jointMatrix;
         xs = rotation[0] * scale;
         ys = rotation[1] * scale;
         zs = rotation[2] * scale;
@@ -1819,32 +1824,21 @@ void UpdateJointKeyframeSpans(u32 slotIndex) {
         xx = rotation[0] * xs;
         wy = rotation[3] * ys;
         yy = rotation[1] * ys;
-        /*
-         * dot holds the z axis's square term from here: a zz variable gives
-         * 237 words differing (67 in shape) against the draft's 156 (64)
-         */
-        dot = rotation[2] * zs;
+        zz = rotation[2] * zs;
         xy = rotation[0] * ys;
         yz = rotation[1] * zs;
         xz = rotation[0] * zs;
-        rotationMatrix[0][0] = 1.0f - (yy + dot);
+        rotationMatrix[0][0] = 1.0f - (yy + zz);
         rotationMatrix[0][1] = xy + wz;
         rotationMatrix[0][2] = xz - wy;
         rotationMatrix[0][3] = 0.0f;
         rotationMatrix[1][0] = xy - wz;
-        rotationMatrix[1][1] = 1.0f - (xx + dot);
+        rotationMatrix[1][1] = 1.0f - (xx + zz);
         rotationMatrix[1][2] = yz + wx;
         rotationMatrix[1][3] = 0.0f;
         rotationMatrix[2][0] = xz + wy;
         rotationMatrix[2][1] = yz - wx;
-        /*
-         * In its own block, as without it 315 words differ, 71 in shape, against
-         * 184 and 66. The block around the element before it instead gives 182
-         * words, 68 in shape, and around the two before it 186, 64 in shape; the
-         * register oracle's closest result is 136 words, forcing 27 pseudos, and
-         * 135, forcing 31, against 136, forcing 28
-         */
-        IN_OWN_BLOCK(rotationMatrix[2][2] = 1.0f - (xx + yy));
+        rotationMatrix[2][2] = 1.0f - (xx + yy);
         rotationMatrix[2][3] = 0.0f;
         rotationMatrix[3][0] = 0.0f;
         rotationMatrix[3][1] = 0.0f;
