@@ -990,7 +990,17 @@ enum BallSprite {
  * words differing (78 in shape) to 1851 (177), its frame 0x20 bytes larger
  * than the original's, and the register oracle's closest result from 452
  * words to 1274, forcing 77. The counts above were measured on the draft
- * without it. 1851 words differ, 177 in shape.
+ * without it.
+ *
+ * Both frame counters step before the display list is built, as the
+ * original loads f_BallRollFrame before the first command's store. That
+ * takes the draft from 1851 words differing (177 in shape) to 761 (29),
+ * the frame 8 bytes smaller than the original's, and the oracle's closest
+ * result from 1274 words to 659, forcing 48. Stepping f_BallRollFrame
+ * anywhere from before f_UnusedBallFrame to after the texture LUT gives
+ * the same 761 words, and after a later command 773 to 828 (29 to 68 in
+ * shape); moving f_UnusedBallFrame's step instead gives 1340 to 2053.
+ * 761 words differ, 29 in shape.
  */
 #ifdef NON_MATCHING
 void DrawGolfBalls(CameraMatrices *matrices UNUSED) {
@@ -1031,6 +1041,7 @@ void DrawGolfBalls(CameraMatrices *matrices UNUSED) {
     }
 
     f_UnusedBallFrame = (f_UnusedBallFrame + 1) % 9;
+    f_BallRollFrame = (f_BallRollFrame + 1) & (BALL_ROLL_FRAME_COUNT - 1);
     g_ModuleRdpRequestFrames[MODULE_GOLF_BALLS] = g_FrameCount;
     gDPPipeSync(gfx++);
     gDPPipeSync(gfx++);
@@ -1047,7 +1058,6 @@ void DrawGolfBalls(CameraMatrices *matrices UNUSED) {
     gDPSetBlendColor(gfx++, 0xFF, 0xFF, 0xFF, 0x01);
     gDPPipeSync(gfx++);
     gDPSetDepthSource(gfx++, G_ZS_PRIM);
-    f_BallRollFrame = (f_BallRollFrame + 1) & (BALL_ROLL_FRAME_COUNT - 1);
     gDPLoadTextureBlock(
         gfx++,
         TextureAddress(ImageBodyAt(f_RollingBallImage, f_BallRollFrame / 4 * BALL_ROLL_FRAME_SIZE)),
