@@ -594,8 +594,11 @@ s32 GetStickDiagonal(void) {
  * 10 words with no register forced, so allocation isn't the cause. Testing
  * for the other sound first gives 10 words, 2 in shape: the slot then holds
  * the volume, as the original's does, but the other sound's call falls
- * through. sched1 starts both arms with the volume either way; reorg takes
- * the character's move instead only when the chosen sound falls through.
+ * through. sched1 starts both arms with the volume either way. reorg fills
+ * the slot from the fall-through arm, and takes the volume only if $v0 is
+ * dead at the other arm; mark_target_live_regs finds it live there, as the
+ * walk from that arm to the return meets the USE update_block left for the
+ * return value's $v0 = 0, stolen into an earlier delay slot.
  * The test written != 0 or as % 2 changes nothing, a switch with case 0
  * first gives 10 words (2 in shape) and case 1 first 16 (10), and choosing
  * the sound with ?: in one call, or into a sound local by an if, 27 (19 in
