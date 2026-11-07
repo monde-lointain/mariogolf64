@@ -1,0 +1,248 @@
+--- a/reload1.c
++++ b/reload1.c
+@@ -424,6 +424,88 @@
+   reload_firstobj = (char *) obstack_alloc (&reload_obstack, 0);
+ }
+ 
++/* The oracle's trace (see tools/oracle.py): when cc1 compiles the function
++   ORACLE_FUNCTION, local-alloc, global-alloc and reload append one JSON
++   object a line to the file ORACLE_TRACE.  Returns that file opened to
++   append, or 0 for another function or when no trace is asked for.  */
++
++FILE *
++oracle_open_trace ()
++{
++  char *function = getenv ("ORACLE_FUNCTION");
++  char *path = getenv ("ORACLE_TRACE");
++
++  if (function == 0 || path == 0 || *path == 0
++      || strcmp (function, current_function_name) != 0)
++    return 0;
++  return fopen (path, "a");
++}
++
++/* Record the hard register, or -1, each pseudo goes into reload with.  */
++
++static void
++oracle_trace_dispositions ()
++{
++  FILE *file = oracle_open_trace ();
++  int pseudo;
++
++  if (file == 0)
++    return;
++  fprintf (file, "{\"stage\": \"dispositions\", \"registers\": {");
++  for (pseudo = FIRST_PSEUDO_REGISTER; pseudo < max_regno; pseudo++)
++    fprintf (file, "%s\"%d\": %d", pseudo == FIRST_PSEUDO_REGISTER ? "" : ", ",
++	     pseudo, reg_renumber[pseudo]);
++  fprintf (file, "}}\n");
++  fclose (file);
++}
++
++/* The oracle's forcing (see tools/oracle.py): ORACLE_FORCE names, as
++   PSEUDO=HARD pairs joined by commas, pseudos whose allocation is
++   overridden as reload starts in the function ORACLE_FUNCTION, HARD -1
++   leaving the pseudo to be spilled.  The saved registers the prologue
++   saves are then worked out again from the pseudos.  */
++
++static int oracle_saved_regs[] = {
++  16, 17, 18, 19, 20, 21, 22, 23, 30,
++  52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63
++};
++
++static void
++oracle_force_registers ()
++{
++  char *function = getenv ("ORACLE_FUNCTION");
++  char *pairs = getenv ("ORACLE_FORCE");
++  char used[FIRST_PSEUDO_REGISTER];
++  int pseudo, hard, length, i;
++
++  if (function == 0 || pairs == 0 || *pairs == 0
++      || strcmp (function, current_function_name) != 0)
++    return;
++  while (sscanf (pairs, "%d=%d%n", &pseudo, &hard, &length) == 2)
++    {
++      if (pseudo >= FIRST_PSEUDO_REGISTER && pseudo < max_regno)
++	reg_renumber[pseudo] = hard;
++      pairs += length;
++      if (*pairs != ',')
++	break;
++      pairs++;
++    }
++  bzero (used, sizeof used);
++  for (pseudo = FIRST_PSEUDO_REGISTER; pseudo < max_regno; pseudo++)
++    if (reg_renumber[pseudo] >= 0)
++      for (i = 0;
++	   i < HARD_REGNO_NREGS (reg_renumber[pseudo], PSEUDO_REGNO_MODE (pseudo));
++	   i++)
++	used[reg_renumber[pseudo] + i] = 1;
++  for (i = 0; i < sizeof oracle_saved_regs / sizeof oracle_saved_regs[0]; i++)
++    {
++      hard = oracle_saved_regs[i];
++      if (hard == HARD_FRAME_POINTER_REGNUM && frame_pointer_needed)
++	continue;
++      regs_ever_live[hard] = used[hard];
++    }
++}
++
+ /* Main entry point for the reload pass.
+ 
+    FIRST is the first insn of the function being compiled.
+@@ -466,6 +548,9 @@
+   /* The basic block number currently being processed for INSN.  */
+   int this_block;
+ 
++  oracle_trace_dispositions ();
++  oracle_force_registers ();
++
+   /* Make sure even insns with volatile mem refs are recognizable.  */
+   init_recog ();
+ 
+--- a/local-alloc.c
++++ b/local-alloc.c
+@@ -65,6 +65,8 @@
+ #include "insn-config.h"
+ #include "recog.h"
+ #include "output.h"
++
++extern FILE *oracle_open_trace ();
+ 
+ /* Pseudos allocated here cannot be reallocated by global.c if the hard
+    register is used as a spill register.  So we don't allocate such pseudos
+@@ -1116,6 +1118,36 @@
+     }
+ }
+ 
++/* Record for the oracle's trace (see oracle_open_trace in reload1.c) the
++   quantities of block B, in QTY_ORDER, the order they were placed in.  */
++
++static void
++oracle_trace_block (b, qty_order)
++     int b;
++     int *qty_order;
++{
++  FILE *file = oracle_open_trace ();
++  int i, q, regno;
++
++  if (file == 0)
++    return;
++  fprintf (file, "{\"stage\": \"local\", \"block\": %d, \"quantities\": [", b);
++  for (i = 0; i < next_qty; i++)
++    {
++      q = qty_order[i];
++      fprintf (file, "%s{\"qty\": %d, \"pseudos\": [", i == 0 ? "" : ", ", q);
++      for (regno = qty_first_reg[q]; regno >= 0; regno = reg_next_in_qty[regno])
++	fprintf (file, "%s%d", regno == qty_first_reg[q] ? "" : ", ", regno);
++      fprintf (file, "], \"n_refs\": %d, \"birth\": %d, \"death\": %d, "
++	       "\"size\": %d, \"phys_reg\": %d, \"n_sugg\": %d, "
++	       "\"n_copy_sugg\": %d}",
++	       qty_n_refs[q], qty_birth[q], qty_death[q], qty_size[q],
++	       qty_phys_reg[q], qty_phys_num_sugg[q], qty_phys_num_copy_sugg[q]);
++    }
++  fprintf (file, "]}\n");
++  fclose (file);
++}
++
+ /* Allocate hard regs to the pseudo regs used only within block number B.
+    Only the pseudos that die but once can be handled.  */
+ 
+@@ -1538,6 +1570,8 @@
+ 	}
+     }
+ 
++  oracle_trace_block (b, qty_order);
++
+   /* Now propagate the register assignments
+      to the pseudo regs belonging to the qtys.  */
+ 
+--- a/global.c
++++ b/global.c
+@@ -29,6 +29,9 @@
+ #include "insn-config.h"
+ #include "output.h"
+ 
++extern FILE *oracle_open_trace ();
++static void oracle_trace_global ();
++
+ /* This pass of the compiler performs global register allocation.
+    It assigns hard register numbers to all the pseudo registers
+    that were not handled in local_alloc.  Assignments are recorded
+@@ -573,6 +576,8 @@
+   /* Do the reloads now while the allocno data still exist, so that we can
+      try to assign new hard regs to any pseudo regs that are spilled.  */
+ 
++  oracle_trace_global ();
++
+ #if 0 /* We need to eliminate regs even if there is no rtl code,
+ 	 for the sake of debugging information.  */
+   if (n_basic_blocks > 0)
+@@ -580,6 +585,68 @@
+     return reload (get_insns (), 1, file);
+ }
+ 
++/* Write to FILE, as a JSON list, the hard registers in SET.  */
++
++static void
++oracle_print_hard_regs (file, set)
++     FILE *file;
++     HARD_REG_SET set;
++{
++  int regno;
++  char *separator = "";
++
++  fprintf (file, "[");
++  for (regno = 0; regno < FIRST_PSEUDO_REGISTER; regno++)
++    if (TEST_HARD_REG_BIT (set, regno))
++      {
++	fprintf (file, "%s%d", separator, regno);
++	separator = ", ";
++      }
++  fprintf (file, "]");
++}
++
++/* Record for the oracle's trace (see oracle_open_trace in reload1.c) each
++   allocno, in the order they were placed in.  */
++
++static void
++oracle_trace_global ()
++{
++  FILE *file;
++  int i, allocno, other;
++  char *separator;
++
++  if (max_allocno == 0 || (file = oracle_open_trace ()) == 0)
++    return;
++  fprintf (file, "{\"stage\": \"global\", \"allocnos\": [");
++  for (i = 0; i < max_allocno; i++)
++    {
++      allocno = allocno_order[i];
++      fprintf (file, "%s{\"pseudo\": %d, \"n_refs\": %d, \"size\": %d, "
++	       "\"live_length\": %d, \"calls_crossed\": %d, "
++	       "\"hard\": %d, \"conflicts\": [",
++	       i == 0 ? "" : ", ", allocno_reg[allocno],
++	       allocno_n_refs[allocno], allocno_size[allocno],
++	       allocno_live_length[allocno], allocno_calls_crossed[allocno],
++	       reg_renumber[allocno_reg[allocno]]);
++      separator = "";
++      for (other = 0; other < max_allocno; other++)
++	if (other != allocno && CONFLICTP (allocno, other))
++	  {
++	    fprintf (file, "%s%d", separator, allocno_reg[other]);
++	    separator = ", ";
++	  }
++      fprintf (file, "], \"hard_conflicts\": ");
++      oracle_print_hard_regs (file, hard_reg_conflicts[allocno]);
++      fprintf (file, ", \"preferences\": ");
++      oracle_print_hard_regs (file, hard_reg_preferences[allocno]);
++      fprintf (file, ", \"copy_preferences\": ");
++      oracle_print_hard_regs (file, hard_reg_copy_preferences[allocno]);
++      fprintf (file, "}");
++    }
++  fprintf (file, "]}\n");
++  fclose (file);
++}
++
+ /* Sort predicate for ordering the allocnos.
+    Returns -1 (1) if *v1 should be allocated before (after) *v2.  */
+ 

@@ -30,10 +30,6 @@ ignore = [
   "S607",
 ]
 
-[tool.ruff.lint.per-file-ignores]
-# gdb runs this as a script inside itself, and it is never imported
-"tools/oracle_gdb.py" = ["INP001"]
-
 [tool.ruff.lint.isort]
 # The tools import each other, since Python puts a script's directory on
 # the path

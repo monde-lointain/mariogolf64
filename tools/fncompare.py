@@ -805,10 +805,12 @@ def run_compiler(
     optflags: list[str],
     arguments: list[str],
     cwd: Path | None = None,
+    environment: dict[str, str] | None = None,
 ) -> subprocess.CompletedProcess[str]:
     """Run KMC GCC on C_PATH with the project's flags and ARGUMENTS.
 
-    Runs in CWD, by default the work directory, which also takes any dumps.
+    Runs in CWD, by default the work directory, which also takes any dumps,
+    with ENVIRONMENT's variables added to the process's.
     """
     return subprocess.run(
         [
@@ -821,7 +823,7 @@ def run_compiler(
             str(Path(c_path).resolve()),
         ],
         cwd=cwd or get_work_dir(),
-        env=dict(os.environ, COMPILER_PATH=str(KMC_DIR)),
+        env=dict(os.environ, COMPILER_PATH=str(KMC_DIR), **(environment or {})),
         capture_output=True,
         text=True,
         check=False,

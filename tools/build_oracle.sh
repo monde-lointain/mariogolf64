@@ -3,36 +3,21 @@
 #
 #     tools/build_oracle.sh [KMC_GCC_SOURCE]
 #
-# Builds cc1 twice from the KMC GCC 2.7.2 source (by default
-# ~/src/kmc-gcc-src), with tools/oracle_force.patch, which lets cc1 override
-# the allocation of the pseudos ORACLE_FORCE names as reload starts. The
-# debug build, without optimization and with debug information, lets gdb
-# read the register allocators' state. The optimized build, with -O3, LTO and
-# the profile of a build of the ROM, as the toolchain's cc1 is built, makes
-# the forced compiles, which take a twentieth of the debug build's time under
-# gdb. Both are put beside the toolchain's other programs. Its cc1 runs the
-# debug build under tools/oracle_gdb.py when ORACLE_TRACE is set, and the
-# optimized build otherwise. Without ORACLE_FORCE each gives the same code as
-# the toolchain's cc1: the ROM builds with them unchanged.
+# Builds cc1 from the KMC GCC 2.7.2 source (by default ~/src/kmc-gcc-src),
+# with tools/oracle.patch, which lets cc1 trace its register allocators to
+# the file ORACLE_TRACE and override the allocation of the pseudos
+# ORACLE_FORCE names as reload starts. It is built with -O3, LTO and the
+# profile of a build of the ROM, as the toolchain's cc1 is, and put beside
+# the toolchain's other programs. Without ORACLE_TRACE and ORACLE_FORCE it
+# gives the same code as the toolchain's cc1: the ROM builds with it
+# unchanged. A changed patch rebuilds it.
 set -eu
 
 root=$(cd "$(dirname "$0")/.." && pwd)
 source=${1:-$HOME/src/kmc-gcc-src}
 out=$root/build/oracle
+patch=$root/tools/oracle.patch
 cores=$(nproc)
-
-# configure_source DIR: copy the patched, configured source into DIR
-configure_source() {
-    rm -rf "$1"
-    cp -r "$source" "$1"
-    cd "$1"
-    patch -p1 < "$root/tools/oracle_force.patch" > /dev/null
-    ./configure --target=mips-mips-gnu --prefix=/opt/cross --with-gnu-as \
-        --disable-gprof --disable-gdb --disable-werror \
-        --host=i386-pc-linux --build=i386-pc-linux > configure.log
-    # The parser and keyword table are prebuilt; keep make from remaking them
-    touch c-parse.c c-gperf.h
-}
 
 # build_rom CC1 DIR: build the ROM into DIR with CC1, the toolchain otherwise
 build_rom() {
@@ -45,19 +30,21 @@ build_rom() {
         > "$2/make.log" 2>&1
 }
 
-debug=$out/source
-if [ ! -x "$debug/cc1" ]; then
-    configure_source "$debug"
-    make cc1 CFLAGS="-static -std=gnu89 -m32 -O0 -g3 -w" > make.log 2>&1
-fi
-
-optimized=$out/source-optimized
-if [ ! -x "$optimized/cc1" ]; then
-    configure_source "$optimized"
+build=$out/source
+if [ ! -x "$build/cc1" ] || [ "$patch" -nt "$build/cc1" ]; then
+    rm -rf "$build"
+    cp -r "$source" "$build"
+    cd "$build"
+    patch -p1 < "$patch" > /dev/null
+    ./configure --target=mips-mips-gnu --prefix=/opt/cross --with-gnu-as \
+        --disable-gprof --disable-gdb --disable-werror \
+        --host=i386-pc-linux --build=i386-pc-linux > configure.log
+    # The parser and keyword table are prebuilt; keep make from remaking them
+    touch c-parse.c c-gperf.h
     flags="-static -std=gnu89 -m32 -O3 -flto=auto -w"
     make cc1 CFLAGS="$flags -fprofile-generate" > make.log 2>&1
     rm -rf "$out/training"
-    build_rom "$optimized/cc1" "$out/training"
+    build_rom "$build/cc1" "$out/training"
     rm -rf "$out/training"
     # Keep the profile, in the .gcda files, and build every object again
     rm -f ./*.o cc1
@@ -68,21 +55,13 @@ fi
 for program in "$root"/tools/gcc_kmc/*; do
     ln -sf "$program" "$out/$(basename "$program")"
 done
-rm -f "$out/cc1"
-cp "$debug/cc1" "$out/cc1.debug"
-cp "$optimized/cc1" "$out/cc1.optimized"
-cat > "$out/cc1" <<SCRIPT
-#!/bin/sh
-if [ -n "\${ORACLE_TRACE:-}" ]; then
-    exec gdb -batch -nx -q -x "$root/tools/oracle_gdb.py" --args "$out/cc1.debug" "\$@"
-fi
-exec "$out/cc1.optimized" "\$@"
-SCRIPT
-chmod +x "$out/cc1"
+rm -f "$out/cc1" "$out/cc1.debug" "$out/cc1.optimized"
+rm -rf "$out/source-optimized"
+cp "$build/cc1" "$out/cc1"
 
-# Check that, without ORACLE_FORCE, the optimized build makes the ROM
+# Check that, without ORACLE_TRACE and ORACLE_FORCE, it makes the ROM
 rm -rf "$out/check"
-build_rom "$out/cc1.optimized" "$out/check"
+build_rom "$out/cc1" "$out/check"
 sed "s|build/|$out/check/build/|" "$root/mariogolf64.sha1" | sha1sum -c --quiet
 rm -rf "$out/check"
 echo "built $out"

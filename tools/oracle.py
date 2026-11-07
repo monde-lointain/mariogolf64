@@ -6,17 +6,16 @@
 
 Without ASM_FILE and C_FILE, finds them from FUNCTION as fncompare does.
 
-Compiles FUNCTION once with the debug build of cc1 that
-tools/build_oracle.sh makes, under gdb (see oracle_gdb.py), to trace the
-allocators. The instructions that equal the target's but for their
-registers name, through the insns that made them, the pseudo register each
-target register should hold. Those pseudos are forced into those registers
-as reload starts, by the optimized build, and the compile repeated until it
-matches or stops improving. A match proves that the draft's RTL is
-the original's up to register allocation, and the forced pseudos are then
-cut down to the fewest that still match. PSEUDO=HARD pairs, hard registers
-given by number or name, or "stack" for a pseudo the original spilled, start
-the forcing off.
+Compiles FUNCTION once with the cc1 that tools/build_oracle.sh makes,
+which traces the allocators (see oracle.patch). The instructions that
+equal the target's but for their registers name, through the insns that
+made them, the pseudo register each target register should hold. Those
+pseudos are forced into those registers as reload starts, and the compile
+repeated until it matches or stops improving. A match proves that the
+draft's RTL is the original's up to register allocation, and the forced
+pseudos are then cut down to the fewest that still match. PSEUDO=HARD
+pairs, hard registers given by number or name, or "stack" for a pseudo the
+original spilled, start the forcing off.
 
 For each forced pseudo, prints what the allocator knew of it: its quantity
 in local-alloc or its allocno in global-alloc, with its priority, and the
@@ -43,7 +42,7 @@ import re
 import shutil
 import sys
 import tempfile
-from collections.abc import Iterator
+from collections.abc import Iterator, Sequence
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Literal, TypedDict, cast
@@ -55,6 +54,9 @@ import fncompare
 
 ORACLE_DIR = fncompare.ROOT / "build" / "oracle"
 MAX_ROUNDS = 8
+# The dumps the search reads: the insns' pseudos, before reload, and the
+# asm statements, which -dp doesn't name, from the last pass
+SEARCH_PASSES = ("lreg", blame.PASSES[-1])
 MODE_OPTIONS = ("--allocation", "--splits", "--spills")
 # The closest spill searches that --spills prints
 SPILL_REPORT_COUNT = 10
@@ -91,7 +93,6 @@ class Quantity(TypedDict):
     phys_reg: int
     n_sugg: int
     n_copy_sugg: int
-    priority: int
 
 
 class Allocno(TypedDict):
@@ -101,7 +102,6 @@ class Allocno(TypedDict):
     n_refs: int
     size: int
     live_length: int
-    priority: int
     calls_crossed: int
     conflicts: list[int]
     hard_conflicts: list[int]
@@ -203,23 +203,44 @@ def parse_register(text: str) -> int:
     return blame.GPR_NAMES.index(name)
 
 
-def trace_function(c_path: str, function: str, work: Path) -> Compilation:
-    """Compile FUNCTION unforced under gdb, tracing the allocators.
+class CompileError(Exception):
+    """A unit that doesn't compile, with the compiler's errors."""
+
+
+def isolate_file(c_path: str, function: str, optflags: list[str]) -> str:
+    """Return C_PATH preprocessed and cut down to FUNCTION and its neighbour."""
+    result = fncompare.run_compiler(c_path, optflags, ["-E"])
+    if result.returncode != 0:
+        raise CompileError(result.stderr)
+    isolated = fncompare.isolate_functions(result.stdout, {function})
+    if not re.search(rf"\b{function}\(", isolated):
+        return result.stdout
+    return isolated
+
+
+@dataclass
+class Draft:
+    """The function being compiled, and its traced, unforced compile."""
+
+    function: str
+    optflags: list[str]
+    # Holds the unit.i that trace_function left, and every compile's files
+    work: Path
+    traced: Compilation
+
+
+def trace_function(unit: str, function: str, optflags: list[str], work: Path) -> Draft:
+    """Compile FUNCTION of the preprocessed UNIT unforced, tracing the allocators.
 
     Leaves in WORK the unit.i that every forced compile of the function
     then compiles. The allocators run before reload, where the forcing is
     applied, so the trace and the dumps up to lreg hold for every forcing.
     """
-    optflags = fncompare.get_optflags(c_path)
-    result = fncompare.run_compiler(c_path, optflags, ["-E"])
-    isolated = fncompare.isolate_functions(result.stdout, {function})
-    if not re.search(rf"\b{function}\(", isolated):
-        isolated = result.stdout
-    _ = (work / "unit.i").write_text(isolated)
+    _ = (work / "unit.i").write_text(unit)
     trace_path = work / "trace.jsonl"
     trace_path.unlink(missing_ok=True)
     blamed = build_function(
-        function, optflags, work, {"ORACLE_TRACE": str(trace_path)}, dumps=True
+        function, optflags, work, {"ORACLE_TRACE": str(trace_path)}, SEARCH_PASSES
     )
     compilation = Compilation(blamed, [], [], {})
     for line in trace_path.read_text().splitlines():
@@ -232,18 +253,7 @@ def trace_function(c_path: str, function: str, work: Path) -> Compilation:
             compilation.registers = {
                 int(key): hard for key, hard in record["registers"].items()
             }
-    return compilation
-
-
-@dataclass
-class Draft:
-    """The function being compiled, and its traced, unforced compile."""
-
-    c_path: str
-    function: str
-    # Holds the unit.i that trace_function left, and every compile's files
-    work: Path
-    traced: Compilation
+    return Draft(function, optflags, work, compilation)
 
 
 def compile_function(
@@ -252,17 +262,17 @@ def compile_function(
     """Compile DRAFT again, as it was traced, with FORCE applied.
 
     Takes the trace and the dumps from the traced compile, unless DUMPS asks
-    for the compile's own, which blaming its words on the passes after
-    reload needs.
+    for the compile's own, of every pass, which blaming its words on the
+    passes after reload needs.
     """
     traced = draft.traced
     pairs = ",".join(f"{pseudo}={hard}" for pseudo, hard in force.items())
     blamed = build_function(
         draft.function,
-        fncompare.get_optflags(draft.c_path),
+        draft.optflags,
         draft.work,
         {"ORACLE_FORCE": pairs},
-        dumps=dumps,
+        blame.PASSES if dumps else (),
     )
     if not dumps:
         blamed.dumps = traced.blamed.dumps
@@ -277,20 +287,24 @@ def build_function(
     optflags: list[str],
     work: Path,
     environment: dict[str, str],
-    *,
-    dumps: bool,
+    passes: Sequence[str],
 ) -> blame.Compilation:
     """Compile and assemble WORK's unit.i with ENVIRONMENT, for FUNCTION.
 
-    DUMPS asks for every pass's dump of the function.
+    Reads the function's dumps of PASSES. Raises CompileError when the unit
+    doesn't compile.
     """
-    os.environ.update(ORACLE_FUNCTION=function, **environment)
-    arguments = ["-S", "-dp", *(["-da"] if dumps else []), "-o", "unit.s"]
-    try:
-        blame.run(work / "unit.i", optflags, arguments, work)
-    finally:
-        for name in ["ORACLE_FUNCTION", *environment]:
-            del os.environ[name]
+    dump_flags = [blame.get_dump_flag(passes)] if passes else []
+    arguments = ["-S", "-dp", *dump_flags, "-o", "unit.s"]
+    result = fncompare.run_compiler(
+        work / "unit.i",
+        optflags,
+        arguments,
+        work,
+        {"ORACLE_FUNCTION": function, **environment},
+    )
+    if result.returncode != 0:
+        raise CompileError(result.stderr)
     lines = (work / "unit.s").read_text().splitlines()
     _ = (work / "marked.s").write_text(blame.mark_lines(lines))
     # The marks leave the code as it was, so one object gives both
@@ -304,21 +318,19 @@ def build_function(
         blame.read_word_lines(lines, routine, start, ends),
         routine,
         functions,
-        blame.read_dumps(work, function) if dumps else {},
+        blame.read_dumps(work, function, passes),
         {},
     )
 
 
-def read_insn_lines(
-    c_path: str, function: str, compilation: Compilation, work: Path
-) -> dict[int, int]:
+def read_insn_lines(draft: Draft, compilation: Compilation) -> dict[int, int]:
     """Return {insn UID: its source line}, for the insns before reload.
 
-    WORK must hold the unit.i that COMPILATION was compiled from.
+    COMPILATION must be of DRAFT's unit.i.
     """
     lreg = compilation.blamed.dumps.get("lreg", "")
     insn_lines = blame.read_insn_lines(
-        fncompare.get_optflags(c_path), {"lreg": lreg}, work, function
+        draft.optflags, {"lreg": lreg}, draft.work, draft.function
     ).get("lreg", {})
     return {uid: int(place.split(":")[1]) for uid, place in insn_lines.items()}
 
@@ -514,6 +526,14 @@ def search_forcing(
     return best
 
 
+def summarize_search(search: Search) -> str:
+    """Return in a line the closest forcing SEARCH found, but not its pairs."""
+    count = len(search.force)
+    if search.differences:
+        return f"closest: {search.differences} differ when {count} are forced"
+    return f"matches when {count} are forced" if count else "matches unforced"
+
+
 def minimize_forcing(
     target: fncompare.Routine, draft: Draft, force: dict[int, int]
 ) -> dict[int, int]:
@@ -526,15 +546,26 @@ def minimize_forcing(
     return kept
 
 
+def get_priority(refs: int, size: int, length: int) -> int:
+    """Return the priority qty_compare and allocno_compare give a register.
+
+    That is from its REFS, SIZE and live LENGTH.
+    """
+    if length <= 0 or refs <= 0:
+        return 0
+    return int((refs.bit_length() - 1) * refs * size / length * 10000)
+
+
 def describe_quantity(quantity: Quantity, block: int) -> str:
     """Return what local-alloc knew of QUANTITY of BLOCK."""
     tied = "+".join(map(str, quantity["pseudos"]))
     register = register_name(quantity["phys_reg"])
     heading = f"local qty {quantity['qty']} of block {block} [{tied}] in {register}"
+    life = quantity["death"] - quantity["birth"]
     parts = [
         f"{heading}: {quantity['n_refs']} refs",
         f"life {quantity['birth']}-{quantity['death']}",
-        f"priority {quantity['priority']}",
+        f"priority {get_priority(quantity['n_refs'], quantity['size'], life)}",
     ]
     if quantity["n_sugg"] or quantity["n_copy_sugg"]:
         parts.append("suggested")
@@ -544,12 +575,13 @@ def describe_quantity(quantity: Quantity, block: int) -> str:
 def describe_allocno(allocno: Allocno, order: int) -> str:
     """Return what global-alloc knew of ALLOCNO, the ORDERth allocated."""
     register = register_name(allocno["hard"])
+    priority = get_priority(allocno["n_refs"], allocno["size"], allocno["live_length"])
     parts = [
         ", ".join(
             [
                 f"global #{order} in {register}: {allocno['n_refs']} refs",
                 f"live {allocno['live_length']}",
-                f"priority {allocno['priority']}",
+                f"priority {priority}",
                 f"crosses {allocno['calls_crossed']} calls",
             ]
         )
@@ -806,9 +838,7 @@ def scan_spills(target: fncompare.Routine, draft: Draft, force: dict[int, int]) 
     spill.
     """
     traced = draft.traced
-    lines = read_pseudo_lines(
-        traced, read_insn_lines(draft.c_path, draft.function, traced, draft.work)
-    )
+    lines = read_pseudo_lines(traced, read_insn_lines(draft, traced))
     start = search_forcing(target, draft, force)
     print(f"  without a spill: {start.differences} differ")
     results: list[tuple[int, int, int]] = []
@@ -825,15 +855,19 @@ def scan_spills(target: fncompare.Routine, draft: Draft, force: dict[int, int]) 
         print(f"pseudo {pseudo} ({register}, lines {used}) spilled: {result}")
 
 
+def use_compiler() -> None:
+    """Compile with the oracle's cc1 from now on, or exit if it isn't built."""
+    if not (ORACLE_DIR / "source" / "cc1").exists():
+        sys.exit("run tools/build_oracle.sh first")
+    os.environ["KMC_DIR"] = str(ORACLE_DIR)
+    fncompare.KMC_DIR = ORACLE_DIR
+
+
 def main() -> None:
     """Search for and explain the allocation that matches the function."""
     request = parse_arguments(sys.argv[1:])
     asm_path, c_path, function = request.asm_path, request.c_path, request.function
-    force = request.force
-    if not (ORACLE_DIR / "cc1.optimized").exists():
-        sys.exit("run tools/build_oracle.sh first")
-    os.environ["KMC_DIR"] = str(ORACLE_DIR)
-    fncompare.KMC_DIR = ORACLE_DIR
+    use_compiler()
     original = fncompare.read_original(asm_path, c_path, function)
     target = original.routine
     print(function)
@@ -841,49 +875,57 @@ def main() -> None:
         print(f"  nested, not compared: {' '.join(original.nested)}")
     with tempfile.TemporaryDirectory() as work_name:
         work = Path(work_name)
-        traced = trace_function(c_path, function, work)
-        draft = Draft(c_path, function, work, traced)
-        if request.mode == "spills":
-            scan_spills(target, draft, force)
-            return
-        if request.mode == "allocation":
-            compilation = compile_function(draft, force)
-            print(f"  {count_differences(target, compilation)} differ")
-            print_allocation(
-                compilation,
-                read_pseudo_lines(
-                    compilation, read_insn_lines(c_path, function, compilation, work)
-                ),
-            )
-            return
-        if request.mode == "splits":
-            compilation = compile_function(draft, force)
-            insn_lines = read_insn_lines(c_path, function, compilation, work)
-            print_splits(target, compilation, insn_lines)
-            print_merges(target, compilation, insn_lines)
-            return
-        search = search_forcing(target, draft, force)
-        print_search(search)
-        force = search.force
-        if search.differences == 0 and force:
-            force = minimize_forcing(target, draft, force)
-            print(f"MATCHES when {len(force)} pseudos are forced:")
-        elif search.differences == 0:
-            print("MATCHES unforced")
-            return
-        else:
-            print(f"closest: {search.differences} differ when {len(force)} are forced")
-            closest = compile_function(draft, force, dumps=True).blamed
-            fncompare.print_diff(
-                target, closest.routine, lambda index: blame.blame(closest, index)
-            )
-        noted_work = work / "noted"
-        if noted_work.exists():
-            shutil.rmtree(noted_work)
-        insn_lines = read_insn_lines(c_path, function, traced, work)
-        explain(traced, force, read_pseudo_lines(traced, insn_lines))
-        print_splits(target, traced, insn_lines)
-        print_merges(target, traced, insn_lines)
+        try:
+            optflags = fncompare.get_optflags(c_path)
+            unit = isolate_file(c_path, function, optflags)
+            draft = trace_function(unit, function, optflags, work)
+            run_mode(request, target, draft)
+        except CompileError as error:
+            sys.exit(str(error))
+
+
+def run_mode(request: Request, target: fncompare.Routine, draft: Draft) -> None:
+    """Search for and explain the forcing as REQUEST asks, from DRAFT."""
+    force, traced = request.force, draft.traced
+    if request.mode == "spills":
+        scan_spills(target, draft, force)
+        return
+    if request.mode == "allocation":
+        compilation = compile_function(draft, force)
+        print(f"  {count_differences(target, compilation)} differ")
+        print_allocation(
+            compilation,
+            read_pseudo_lines(compilation, read_insn_lines(draft, compilation)),
+        )
+        return
+    if request.mode == "splits":
+        compilation = compile_function(draft, force)
+        insn_lines = read_insn_lines(draft, compilation)
+        print_splits(target, compilation, insn_lines)
+        print_merges(target, compilation, insn_lines)
+        return
+    search = search_forcing(target, draft, force)
+    print_search(search)
+    force = search.force
+    if search.differences == 0 and force:
+        force = minimize_forcing(target, draft, force)
+        print(f"MATCHES when {len(force)} pseudos are forced:")
+    elif search.differences == 0:
+        print("MATCHES unforced")
+        return
+    else:
+        print(summarize_search(search))
+        closest = compile_function(draft, force, dumps=True).blamed
+        fncompare.print_diff(
+            target, closest.routine, lambda index: blame.blame(closest, index)
+        )
+    noted_work = draft.work / "noted"
+    if noted_work.exists():
+        shutil.rmtree(noted_work)
+    insn_lines = read_insn_lines(draft, traced)
+    explain(traced, force, read_pseudo_lines(traced, insn_lines))
+    print_splits(target, traced, insn_lines)
+    print_merges(target, traced, insn_lines)
 
 
 if __name__ == "__main__":

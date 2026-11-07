@@ -39,7 +39,7 @@ import struct
 import sys
 import tempfile
 from collections import Counter
-from collections.abc import Generator
+from collections.abc import Generator, Iterable
 from dataclasses import dataclass
 from pathlib import Path
 from typing import cast
@@ -70,6 +70,8 @@ PASSES = (
     "jump2",
     "dbr",
 )
+# The letter that asks -d for each pass's dump
+DUMP_LETTERS: dict[str, str] = dict(zip(PASSES, "rjsLtfcSlgRJd", strict=True))
 # The passes before global-alloc, which rewrites every insn's pseudos
 PASSES_BEFORE_ALLOCATION = PASSES[: PASSES.index("greg")]
 # The first register number that names a pseudo, from config/mips/mips.h
@@ -305,12 +307,20 @@ def run(c_path: StrPath, optflags: list[str], arguments: list[str], work: Path) 
         sys.exit(result.stderr)
 
 
-def read_dumps(work: Path, function: str) -> dict[str, str]:
-    """Return {pass: FUNCTION's part of that pass's dump} from WORK."""
+def get_dump_flag(passes: Iterable[str]) -> str:
+    """Return the -d option that asks for the dumps of PASSES."""
+    return "-d" + "".join(DUMP_LETTERS[name] for name in passes)
+
+
+def read_dumps(
+    work: Path, function: str, passes: Iterable[str] = PASSES
+) -> dict[str, str]:
+    """Return {pass: FUNCTION's part of that pass's dump} from WORK, for PASSES."""
     return {
-        path.suffix[1:]: split_dump(path.read_text(errors="replace"), function)
-        for path in work.glob("unit.*")
-        if path.suffix[1:] in PASSES
+        name: split_dump(
+            (work / f"unit.i.{name}").read_text(errors="replace"), function
+        )
+        for name in passes
     }
 
 
@@ -348,10 +358,9 @@ def read_insn_lines(
     noted_work = work / "noted"
     noted_work.mkdir(exist_ok=True)
     _ = (noted_work / "unit.i").write_text((work / "unit.i").read_text())
-    run(
-        noted_work / "unit.i", optflags, ["-S", "-g", "-da", "-o", "unit.s"], noted_work
-    )
-    noted_dumps = read_dumps(noted_work, function)
+    arguments = ["-S", "-g", get_dump_flag(dumps), "-o", "unit.s"]
+    run(noted_work / "unit.i", optflags, arguments, noted_work)
+    noted_dumps = read_dumps(noted_work, function, dumps)
     return {
         name: map_insn_lines(dump, noted_dumps.get(name, ""))
         for name, dump in dumps.items()
