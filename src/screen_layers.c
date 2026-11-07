@@ -75,28 +75,29 @@
  * Marks the eight octants' points two rows deep, then steps the circle.
  * The offsets are clamped to keep the points on the picture. This and
  * MarkOctantPoints are plain blocks: as do { } while (0), each gives GCC's
- * loop pass another loop, and 370 to 396 words differ, against 108.
+ * loop pass another loop: with one radiusOffset for both octant pairs, 370
+ * to 396 words differed, against 108 with plain blocks.
  */
 #define MarkCirclePoints(operation) \
   { \
-    radiusOffset = radius; \
+    radiusColumnOffset = radius; \
     stepOffset = step; \
     if (radius > HALF_TURN_LAST_COLUMN_OFFSET) { \
-      radiusOffset = HALF_TURN_LAST_COLUMN_OFFSET; \
+      radiusColumnOffset = HALF_TURN_LAST_COLUMN_OFFSET; \
     } \
     if (step > HALF_TURN_LAST_ROW_OFFSET) { \
       stepOffset = HALF_TURN_LAST_ROW_OFFSET; \
     } \
-    MarkOctantPoints(radiusOffset, stepOffset, operation); \
+    MarkOctantPoints(radiusColumnOffset, stepOffset, operation); \
+    radiusRowOffset = radius; \
     stepOffset = step; \
-    radiusOffset = radius; \
     if (radius > HALF_TURN_LAST_ROW_OFFSET - 1) { \
-      radiusOffset = HALF_TURN_LAST_ROW_OFFSET - 1; \
+      radiusRowOffset = HALF_TURN_LAST_ROW_OFFSET - 1; \
     } \
     if (step > HALF_TURN_LAST_COLUMN_OFFSET) { \
       stepOffset = HALF_TURN_LAST_COLUMN_OFFSET; \
     } \
-    MarkOctantPoints(stepOffset, radiusOffset, operation); \
+    MarkOctantPoints(stepOffset, radiusRowOffset, operation); \
     error -= (step * 2) + 1; \
     if (error < 0) { \
       error += (radius - 1) * 2; \
@@ -866,42 +867,21 @@ void MarkHalfTurnCircle(
  * showing the bits are cleared, which reveals the texels; otherwise they
  * are set, which hides them again.
  *
- * Doesn't match: the loop-invariant alpha mask takes $t0 ahead of
- * radiusOffset, as their priorities are close (12790 against 12698); the
- * oracle matches with the two masks and radiusOffset forced. Subtracting
- * error's step as (step * 2) + 1 keeps the loop pass from making it an
- * induction variable, which error - 1 - (step * 2) lets it do (192 words).
- * Other declaration orders give 108 to 264 words, clamp and step orders 108 to
- * 264, and column and row offsets in place of radiusOffset and stepOffset 330.
- * An s16 error gives 94 words (4 in shape), but it sign-extends error with two
- * 16-bit shifts the original lacks. 108 words differ.
- *
- * A do-while (0) around the first clamp pair's lines through radiusOffset's
- * clamp matches, as does one around the whole first pair with another around
- * the second pair's radiusOffset lines; both are devices to match, so they
- * are left out. A ClampOffset(offset, value, limit) statement macro, as do {
- * } while (0), gives 28 to 136 words (16 in shape at best) for
- * radiusOffset's clamps alone, 52 to 268 (24) for all four in any order, and
- * a macro clamping a pair 256 (0 to 4). Clamping with ternaries gives 56 to
- * 270 words, at least 48 in shape, and an inline clamp function 64 to 284;
- * testing each offset in place of its source leaves 108, as copy propagation
- * folds the test back. Setting an offset from its source in an else, rather
- * than before its clamp's test, leaves 108 words for the second radiusOffset
- * clamp alone and 112 for the first or both, and gives 264 to 266 words (8
- * to 24 in shape) once any stepOffset clamp takes it.
- *
- * Giving either octant pair's clamped offsets variables of their own, as a
- * permuter run split them, gives 104 words, declared before or after the
- * others, but the register oracle then matches only with 4 pseudos forced,
- * against 3, so the split only moves registers.
+ * The radius's offset has a variable for each octant pair, as a column
+ * offset in the first and a row offset in the second, and the second pair
+ * sets it before stepOffset. With one radiusOffset for both pairs, the
+ * loop-invariant alpha mask took $t0 ahead of it and 108 words differed;
+ * the split alone gives 104 and the order alone 264. Subtracting error's step
+ * as (step * 2) + 1 keeps the loop pass from making it an induction variable,
+ * which error - 1 - (step * 2) lets it do.
  */
-#ifdef NON_MATCHING
 void MarkHalfTurnCircle(
     u32* texelPairs, s32 centerColumn, s32 centerRow, s32 radius) {
   s32 step = 0;
   s32 error = radius;
   s32 stepOffset;
-  s32 radiusOffset;
+  s32 radiusRowOffset;
+  s32 radiusColumnOffset;
 
   if (f_HalfTurnState == HALF_TURN_STATE_SHOWING) {
     while (radius >= step) {
@@ -913,10 +893,6 @@ void MarkHalfTurnCircle(
     }
   }
 }
-
-#else
-INCLUDE_ASM("asm/nonmatchings/screen_layers", MarkHalfTurnCircle);
-#endif
 
 /* Whether A is pressed to dismiss the picture once its time is up */
 #define IsDismissPressed(controller) \
