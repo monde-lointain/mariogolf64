@@ -984,6 +984,13 @@ enum BallSprite {
  * local set before the loop, which only stands in for the hoist, gives
  * 445 words (77 in shape), so the hoist accounts for little of the
  * difference.
+ *
+ * The original's display list opens with two syncs before the cycle type,
+ * where the draft had one. With the second sync, the draft goes from 452
+ * words differing (78 in shape) to 1851 (177), its frame 0x20 bytes larger
+ * than the original's, and the register oracle's closest result from 452
+ * words to 1274, forcing 77. The counts above were measured on the draft
+ * without it. 1851 words differ, 177 in shape.
  */
 #ifdef NON_MATCHING
 void DrawGolfBalls(CameraMatrices *matrices UNUSED) {
@@ -1025,6 +1032,7 @@ void DrawGolfBalls(CameraMatrices *matrices UNUSED) {
 
     f_UnusedBallFrame = (f_UnusedBallFrame + 1) % 9;
     g_ModuleRdpRequestFrames[MODULE_GOLF_BALLS] = g_FrameCount;
+    gDPPipeSync(gfx++);
     gDPPipeSync(gfx++);
     gDPSetCycleType(gfx++, G_CYC_1CYCLE);
     gDPPipeSync(gfx++);
