@@ -4073,7 +4073,19 @@ void WriteHexDumpFile(u32 *words, s32 byteCount, char *fileName) {
  * 921 (133), and the register oracle's closest result from 1189 words,
  * forcing 26 pseudos, to these 921 with none forced, so allocation is no
  * longer the cause. The original's scheduler interleaves the two, so its
- * order can't be read from the code. 921 words differ, 133 in shape.
+ * order can't be read from the code.
+ *
+ * The original keeps no tile column: each edge test reloads half and
+ * groupTile and works out half * 4 + groupTile again, and it works out the
+ * mirrored S line once per fine tile, from the left S's giv, into a slot of
+ * its own. Writing the column out at each use, as a GroupTileColumn macro,
+ * gives 1701 words (125 in shape) with the frame 16 bytes smaller, and with
+ * the mirrored S line set at the top of each fine tile from firstTileS,
+ * 1540 (112) with the frame 8 bytes smaller; the register oracle's closest
+ * is then 1432, forcing 21 pseudos. In both, loop.c makes the column a
+ * giv of its own, stepped in a slot, where the original recomputes it.
+ * Setting the line from the column instead gives 1542 (114), and from it
+ * with tileColumn kept, 2265 (147). 921 words differ, 133 in shape.
  */
 #ifdef NON_MATCHING
 void DrawHoleEditorGround(CameraMatrices *matrices UNUSED, s32 terrainStyle) {
