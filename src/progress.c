@@ -62,6 +62,18 @@
  * words: a u16 or s16 newValue with byte value and count gives 3, as does a
  * u16 value with an s32 newValue and a byte or u16 count, and the rest 4 to
  * 37.
+ *
+ * A wider count loses the original's branch: once cse makes the increment
+ * count = count + 1, jump.c turns the if into an sltiu and addu, which needs
+ * the incremented register to be the count itself, where the original adds
+ * 1 to the masked bits' register. A byte count keeps them apart, as its
+ * zero extension stops cse. Holding the masked bits in a previousCount, as
+ * a copy into the count or in an if/else or ?:, or getting them from an
+ * inline helper, with any of u8, u32 and s32 for the three, gives no fewer
+ * than 3 words. Copying value to newValue before the saveCount test and
+ * setting newValue to value with the flag inside it puts an andi where the
+ * original copies, 15 words (3 in shape), and 5 to 27 with value, count and
+ * newValue of other widths.
  */
 #ifdef NON_MATCHING
 void RecordComCharacterResult(s32 row, s32 column, Boolean isWin) {
