@@ -1303,6 +1303,16 @@ void DrawNamePlate(Gfx **displayListHead, s32 centerX, s32 centerY) {
  * tile or the course it gives the same; halving the width there too gives 55
  * (15), and a top variable, set from STARS_TOP in each arm of the size test or
  * as the top edge before the tile, 109 to 173. 27 words differ, 7 in shape.
+ *
+ * The left edge is set once after the size test, rather than in each arm,
+ * and the first hole test reads hole first, as the second does, as
+ * DrawMenuRingShotStars sets its edges after its own size test. Each takes
+ * the draft down, to 23 words (5 in shape) and then 21 (5), and the register
+ * oracle's closest result is these 21 with none forced. Halving the height
+ * in place again gives 117 (3). Before the hole test changed, zeroing the
+ * width before the size test, as DrawMenuRingShotStars does, gave 23 (5)
+ * with the left edge set once and 27 (7) with it in each arm. Of 48 moves of
+ * the routine's statements, none gives fewer. 21 words differ, 5 in shape.
  */
 #ifdef NON_MATCHING
 void DrawRingShotStars(Gfx **displayListHead, s32 centerX UNUSED, s32 centerY UNUSED) {
@@ -1405,16 +1415,16 @@ void DrawRingShotStars(Gfx **displayListHead, s32 centerX UNUSED, s32 centerY UN
     );
     gDPPipeSync(gfx++);
     for (hole = 0; hole < RING_SHOT_HOLE_COUNT; hole++) {
-        if (memory->holeIndex == hole) {
+        if (hole == memory->holeIndex) {
             width = STAR_GROWTH;
             height = STAR_GROWTH;
-            left = (hole * STAR_SPACING) + STARS_LEFT;
         }
         else {
             width = 0;
             height = 0;
-            left = (hole * STAR_SPACING) + STARS_LEFT;
         }
+
+        left = (hole * STAR_SPACING) + STARS_LEFT;
 
         halfHeight = height / 2;
         course = memory->courseIndex;
