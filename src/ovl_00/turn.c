@@ -407,7 +407,7 @@ static Vtx f_ShotPreviewDashVertices[QUAD_VERTEX_COUNT] = {
     {{{-1, 0, 0}, 0, {0, 0}, {0x00, 0xFF, 0x00, 0xFF}}},
     {{{1, 0, 0}, 0, {0, 0x800}, {0x00, 0x00, 0x00, 0xFF}}},
     {{{1, 0, -1}, 0, {0x800, 0x800}, {0x00, 0x00, 0xFF, 0x00}}},
-    {{{-1, 0, -1}, 0, {0x800, 0}, {0xFF, 0x00, 0x00, 0x00}}}
+    {{{-1, 0, -1}, 0, {0x800, 0}, {0xFF, 0x00, 0x00, 0x00}}},
 };
 /* How many steps the shot preview simulates */
 static s32 f_ShotPreviewStepCount = INITIAL_SHOT_PREVIEW_STEP_COUNT;
@@ -422,31 +422,35 @@ static Vtx f_PuttPreviewLineVertices[QUAD_VERTEX_COUNT] = {
     {{{0, 0, -100}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{0, -1, -100}, 0, {0, 0x7C0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{48, -1, -100}, 0, {0x17C0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
-    {{{48, 0, -100}, 0, {0x17C0, 0x7C0}, {0xFF, 0xFF, 0xFF, 0xFF}}}
+    {{{48, 0, -100}, 0, {0x17C0, 0x7C0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
 };
 /* The ambient sounds that each course may play, or NO_AMBIENT_SOUND */
 static s32 f_AmbientSounds[COURSE_RECORD_COUNT][AMBIENT_SOUND_CHOICES] = {
     {0x16, 0x18, 0x19, 0x16, 0x18, 0x19, NO_AMBIENT_SOUND},
     {0x16, 0x18, 0x19, 0x16, 0x18, 0x19, NO_AMBIENT_SOUND},
-    {NO_AMBIENT_SOUND,
+    {
         NO_AMBIENT_SOUND,
         NO_AMBIENT_SOUND,
         NO_AMBIENT_SOUND,
         NO_AMBIENT_SOUND,
         NO_AMBIENT_SOUND,
-        NO_AMBIENT_SOUND},
+        NO_AMBIENT_SOUND,
+        NO_AMBIENT_SOUND,
+    },
     {0x1E, 0xE3, 0xE4, 0xE5, 0xE6, 0xE7, 0xE8},
-    {NO_AMBIENT_SOUND,
+    {
         NO_AMBIENT_SOUND,
         NO_AMBIENT_SOUND,
         NO_AMBIENT_SOUND,
         NO_AMBIENT_SOUND,
         NO_AMBIENT_SOUND,
-        NO_AMBIENT_SOUND},
+        NO_AMBIENT_SOUND,
+        NO_AMBIENT_SOUND,
+    },
     {0x1A, 0x1B, 0x2B, 0x18, 0x1A, 0x1B, 0x2B},
     {0x16, 0x18, 0x19, 0x16, 0x18, 0x19, NO_AMBIENT_SOUND},
     {0x16, 0x18, 0x19, 0x16, 0x18, 0x19, NO_AMBIENT_SOUND},
-    {0x16, 0x18, 0x19, 0x16, 0x18, 0x19, NO_AMBIENT_SOUND}
+    {0x16, 0x18, 0x19, 0x16, 0x18, 0x19, NO_AMBIENT_SOUND},
 };
 /* Frames since the last ambient sound */
 static s32 f_AmbientSoundIdleFrameCount = 0;

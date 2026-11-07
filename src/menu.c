@@ -210,7 +210,7 @@ AssetId g_MenuScreenImageAssets[MENU_SCREEN_COUNT] = {
     0x070A,
     0x0513,
     0x0940,
-    0x0510
+    0x0510,
 };
 AssetId g_CourseIconAssets[] = {0x05F8, 0x05F9, 0x05FA, 0x05FC, 0x05FB, 0x05FD, 0x05FE};
 AssetId g_TournamentIconAssets[] = {
@@ -225,7 +225,7 @@ AssetId g_TournamentIconAssets[] = {
     0x0951,
     0x0952,
     0x0953,
-    0x0954
+    0x0954,
 };
 AssetId g_MiniGolfCourseIconAssets[] = {0x0855, 0x085A, 0x085F, 0x0864, 0x0869, 0x086E};
 AssetId g_MiniGolfDiscFrameAssets[MINI_GOLF_COURSES_PER_RECORD * MINI_GOLF_DISC_IMAGE_COUNT]
@@ -235,7 +235,7 @@ AssetId g_MiniGolfDiscFrameAssets[MINI_GOLF_COURSES_PER_RECORD * MINI_GOLF_DISC_
                                      {0x0858, 0x0859, 0x085A, 0x085B, 0x085C},
                                      {0x0867, 0x0868, 0x0869, 0x086A, 0x086B},
                                      {0x085D, 0x085E, 0x085F, 0x0860, 0x0861},
-                                     {0x086C, 0x086D, 0x086E, 0x086F, 0x0870}
+                                     {0x086C, 0x086D, 0x086E, 0x086F, 0x0870},
 };
 s16 g_MiniGolfDiscFiles[] = {0x0876, 0x0876, 0x0876, 0x0876, 0x0876, 0x0876};
 TrophySize g_TrophySizes[COURSE_COUNT] =
@@ -243,7 +243,8 @@ TrophySize g_TrophySizes[COURSE_COUNT] =
 /* Read by no routine */
 static u8 f_UnusedBytesAfterTrophySizes[12] UNUSED = {0};
 AssetId g_PlayerCountIconAssets[][PLAYER_COUNT_ASSET_ROW_LENGTH] = {
-    {0x0623,
+    {
+        0x0623,
         0x0629,
         0x05B7,
         0x05AF,
@@ -254,8 +255,10 @@ AssetId g_PlayerCountIconAssets[][PLAYER_COUNT_ASSET_ROW_LENGTH] = {
         0x0000,
         0x0000,
         0x0000,
-        0x0000},
-    {0x0599,
+        0x0000,
+    },
+    {
+        0x0599,
         0x0631,
         0x065E,
         0x0665,
@@ -266,8 +269,10 @@ AssetId g_PlayerCountIconAssets[][PLAYER_COUNT_ASSET_ROW_LENGTH] = {
         0x0000,
         0x0000,
         0x0000,
-        0x0000},
-    {0x0599,
+        0x0000,
+    },
+    {
+        0x0599,
         0x065E,
         0x0665,
         0x06FC,
@@ -278,8 +283,10 @@ AssetId g_PlayerCountIconAssets[][PLAYER_COUNT_ASSET_ROW_LENGTH] = {
         0x0000,
         0x0000,
         0x0000,
-        0x0000},
-    {0x0599,
+        0x0000,
+    },
+    {
+        0x0599,
         0x065E,
         0x0665,
         0x06FC,
@@ -290,8 +297,10 @@ AssetId g_PlayerCountIconAssets[][PLAYER_COUNT_ASSET_ROW_LENGTH] = {
         0x0000,
         0x0000,
         0x0000,
-        0x0000},
-    {0x0599,
+        0x0000,
+    },
+    {
+        0x0599,
         0x05B7,
         0x05AF,
         0x06FC,
@@ -302,8 +311,10 @@ AssetId g_PlayerCountIconAssets[][PLAYER_COUNT_ASSET_ROW_LENGTH] = {
         0x0000,
         0x0000,
         0x0000,
-        0x0000},
-    {0x0599,
+        0x0000,
+    },
+    {
+        0x0599,
         0x0631,
         0x065E,
         0x0665,
@@ -314,7 +325,22 @@ AssetId g_PlayerCountIconAssets[][PLAYER_COUNT_ASSET_ROW_LENGTH] = {
         0x0000,
         0x0000,
         0x0000,
-        0x0000},
+        0x0000,
+    },
+    {
+        0x0599,
+        0x065E,
+        0x0665,
+        0x06FC,
+        0x06FC,
+        0x06FC,
+        0x06FC,
+        0x0000,
+        0x0000,
+        0x0000,
+        0x0000,
+        0x0000,
+    },
     {0x0599,
         0x065E,
         0x0665,
@@ -327,10 +353,10 @@ AssetId g_PlayerCountIconAssets[][PLAYER_COUNT_ASSET_ROW_LENGTH] = {
         0x0000,
         0x0000,
         0x0000},
-    {0x0599, 0x065E, 0x0665, 0x06FC, 0x06FC, 0x06FC, 0x06FC, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000}
 };
 AssetId g_TrophyFrameAssets[][TROPHY_FRAME_LIMIT] = {
-    {0x088D,
+    {
+        0x088D,
         0x088E,
         0x088F,
         0x0890,
@@ -345,8 +371,10 @@ AssetId g_TrophyFrameAssets[][TROPHY_FRAME_LIMIT] = {
         0x0899,
         0x089A,
         0x089B,
-        0x089C},
-    {0x08B2,
+        0x089C,
+    },
+    {
+        0x08B2,
         0x08B3,
         0x08B4,
         0x08B5,
@@ -361,8 +389,10 @@ AssetId g_TrophyFrameAssets[][TROPHY_FRAME_LIMIT] = {
         0x08BE,
         0x08BF,
         0x08C0,
-        0x08C1},
-    {0x087A,
+        0x08C1,
+    },
+    {
+        0x087A,
         0x087B,
         0x087C,
         0x087D,
@@ -377,8 +407,10 @@ AssetId g_TrophyFrameAssets[][TROPHY_FRAME_LIMIT] = {
         0x0886,
         0x0887,
         0x0888,
-        0x0889},
-    {0x08D8,
+        0x0889,
+    },
+    {
+        0x08D8,
         0x08D9,
         0x08DA,
         0x08DB,
@@ -393,8 +425,10 @@ AssetId g_TrophyFrameAssets[][TROPHY_FRAME_LIMIT] = {
         0x08E4,
         0x08E5,
         0x08E6,
-        0x08E7},
-    {0x08C5,
+        0x08E7,
+    },
+    {
+        0x08C5,
         0x08C6,
         0x08C7,
         0x08C8,
@@ -409,8 +443,10 @@ AssetId g_TrophyFrameAssets[][TROPHY_FRAME_LIMIT] = {
         0x08D1,
         0x08D2,
         0x08D3,
-        0x08D4},
-    {0x08AE,
+        0x08D4,
+    },
+    {
+        0x08AE,
         0x08AD,
         0x08AC,
         0x08AB,
@@ -425,7 +461,8 @@ AssetId g_TrophyFrameAssets[][TROPHY_FRAME_LIMIT] = {
         0x08A2,
         0x08A1,
         0x08A0,
-        TROPHY_FRAME_END}
+        TROPHY_FRAME_END,
+    },
 };
 s16 g_TrophyPaletteFiles[][TROPHY_PALETTE_COUNT] = {
     {0x088C, 0x088B, 0x088A},
@@ -433,10 +470,11 @@ s16 g_TrophyPaletteFiles[][TROPHY_PALETTE_COUNT] = {
     {0x0879, 0x0878, 0x0877},
     {0x08D7, 0x08D6, 0x08D5},
     {0x08C4, 0x08C3, 0x08C2},
-    {0x089F, 0x089E, 0x089D}
+    {0x089F, 0x089E, 0x089D},
 };
 s16 g_ModeIconAnimations[MODE_ICON_ANIMATION_COUNT][MODE_ICON_FRAME_COUNT] = {
-    {0x0623,
+    {
+        0x0623,
         0x0624,
         0x0625,
         0x0626,
@@ -462,8 +500,10 @@ s16 g_ModeIconAnimations[MODE_ICON_ANIMATION_COUNT][MODE_ICON_FRAME_COUNT] = {
         END_OF_ICON_FRAMES,
         END_OF_ICON_FRAMES,
         END_OF_ICON_FRAMES,
-        END_OF_ICON_FRAMES},
-    {0x0629,
+        END_OF_ICON_FRAMES,
+    },
+    {
+        0x0629,
         0x062A,
         0x062B,
         0x062C,
@@ -489,8 +529,10 @@ s16 g_ModeIconAnimations[MODE_ICON_ANIMATION_COUNT][MODE_ICON_FRAME_COUNT] = {
         END_OF_ICON_FRAMES,
         END_OF_ICON_FRAMES,
         END_OF_ICON_FRAMES,
-        END_OF_ICON_FRAMES},
-    {0x0598,
+        END_OF_ICON_FRAMES,
+    },
+    {
+        0x0598,
         0x0599,
         0x059A,
         0x059B,
@@ -516,8 +558,10 @@ s16 g_ModeIconAnimations[MODE_ICON_ANIMATION_COUNT][MODE_ICON_FRAME_COUNT] = {
         END_OF_ICON_FRAMES,
         END_OF_ICON_FRAMES,
         END_OF_ICON_FRAMES,
-        END_OF_ICON_FRAMES},
-    {0x05AF,
+        END_OF_ICON_FRAMES,
+    },
+    {
+        0x05AF,
         0x05B0,
         0x05B1,
         0x05B2,
@@ -543,8 +587,10 @@ s16 g_ModeIconAnimations[MODE_ICON_ANIMATION_COUNT][MODE_ICON_FRAME_COUNT] = {
         END_OF_ICON_FRAMES,
         END_OF_ICON_FRAMES,
         END_OF_ICON_FRAMES,
-        END_OF_ICON_FRAMES},
-    {0x05DD,
+        END_OF_ICON_FRAMES,
+    },
+    {
+        0x05DD,
         0x05DE,
         0x05DF,
         0x05E0,
@@ -570,8 +616,10 @@ s16 g_ModeIconAnimations[MODE_ICON_ANIMATION_COUNT][MODE_ICON_FRAME_COUNT] = {
         END_OF_ICON_FRAMES,
         END_OF_ICON_FRAMES,
         END_OF_ICON_FRAMES,
-        END_OF_ICON_FRAMES},
-    {0x06FC,
+        END_OF_ICON_FRAMES,
+    },
+    {
+        0x06FC,
         0x06FD,
         0x06FE,
         0x06FF,
@@ -597,8 +645,10 @@ s16 g_ModeIconAnimations[MODE_ICON_ANIMATION_COUNT][MODE_ICON_FRAME_COUNT] = {
         END_OF_ICON_FRAMES,
         END_OF_ICON_FRAMES,
         END_OF_ICON_FRAMES,
-        END_OF_ICON_FRAMES},
-    {0x0631,
+        END_OF_ICON_FRAMES,
+    },
+    {
+        0x0631,
         0x0632,
         0x0633,
         0x0634,
@@ -624,8 +674,10 @@ s16 g_ModeIconAnimations[MODE_ICON_ANIMATION_COUNT][MODE_ICON_FRAME_COUNT] = {
         END_OF_ICON_FRAMES,
         END_OF_ICON_FRAMES,
         END_OF_ICON_FRAMES,
-        END_OF_ICON_FRAMES},
-    {0x065E,
+        END_OF_ICON_FRAMES,
+    },
+    {
+        0x065E,
         0x065F,
         0x0660,
         0x065F,
@@ -651,8 +703,10 @@ s16 g_ModeIconAnimations[MODE_ICON_ANIMATION_COUNT][MODE_ICON_FRAME_COUNT] = {
         END_OF_ICON_FRAMES,
         END_OF_ICON_FRAMES,
         END_OF_ICON_FRAMES,
-        END_OF_ICON_FRAMES},
-    {0x05B7,
+        END_OF_ICON_FRAMES,
+    },
+    {
+        0x05B7,
         0x05B8,
         0x05B9,
         0x05BA,
@@ -678,8 +732,10 @@ s16 g_ModeIconAnimations[MODE_ICON_ANIMATION_COUNT][MODE_ICON_FRAME_COUNT] = {
         END_OF_ICON_FRAMES,
         END_OF_ICON_FRAMES,
         END_OF_ICON_FRAMES,
-        END_OF_ICON_FRAMES},
-    {0x05A2,
+        END_OF_ICON_FRAMES,
+    },
+    {
+        0x05A2,
         0x05A1,
         0x05A0,
         0x059F,
@@ -705,8 +761,10 @@ s16 g_ModeIconAnimations[MODE_ICON_ANIMATION_COUNT][MODE_ICON_FRAME_COUNT] = {
         0x05F4,
         0x05F5,
         0x05F6,
-        END_OF_ICON_FRAMES},
-    {0x0665,
+        END_OF_ICON_FRAMES,
+    },
+    {
+        0x0665,
         0x0666,
         0x0667,
         0x0668,
@@ -732,8 +790,10 @@ s16 g_ModeIconAnimations[MODE_ICON_ANIMATION_COUNT][MODE_ICON_FRAME_COUNT] = {
         END_OF_ICON_FRAMES,
         END_OF_ICON_FRAMES,
         END_OF_ICON_FRAMES,
-        END_OF_ICON_FRAMES},
-    {0x0598,
+        END_OF_ICON_FRAMES,
+    },
+    {
+        0x0598,
         0x0599,
         0x059A,
         0x059B,
@@ -759,8 +819,10 @@ s16 g_ModeIconAnimations[MODE_ICON_ANIMATION_COUNT][MODE_ICON_FRAME_COUNT] = {
         END_OF_ICON_FRAMES,
         END_OF_ICON_FRAMES,
         END_OF_ICON_FRAMES,
-        END_OF_ICON_FRAMES},
-    {0x0598,
+        END_OF_ICON_FRAMES,
+    },
+    {
+        0x0598,
         0x0599,
         0x059A,
         0x059B,
@@ -786,8 +848,10 @@ s16 g_ModeIconAnimations[MODE_ICON_ANIMATION_COUNT][MODE_ICON_FRAME_COUNT] = {
         END_OF_ICON_FRAMES,
         END_OF_ICON_FRAMES,
         END_OF_ICON_FRAMES,
-        END_OF_ICON_FRAMES},
-    {0x06FC,
+        END_OF_ICON_FRAMES,
+    },
+    {
+        0x06FC,
         0x06FD,
         0x06FE,
         0x06FF,
@@ -813,7 +877,8 @@ s16 g_ModeIconAnimations[MODE_ICON_ANIMATION_COUNT][MODE_ICON_FRAME_COUNT] = {
         END_OF_ICON_FRAMES,
         END_OF_ICON_FRAMES,
         END_OF_ICON_FRAMES,
-        END_OF_ICON_FRAMES}
+        END_OF_ICON_FRAMES,
+    },
 };
 s16 g_CharacterFacePaletteFiles[][CHARACTER_PALETTE_COUNT] = {
     {0x07B8, 0x07B9, 0x07BA, 0x07BB},
@@ -839,7 +904,7 @@ s16 g_CharacterFacePaletteFiles[][CHARACTER_PALETTE_COUNT] = {
     {0x078E, 0x078E, 0x078E, 0x078E},
     {0x078E, 0x078E, 0x078E, 0x078E},
     {0x078E, 0x078E, 0x078E, 0x078E},
-    {0x078E, 0x078E, 0x078E, 0x078E}
+    {0x078E, 0x078E, 0x078E, 0x078E},
 };
 AssetId g_FaceAnimationAssets[][FACE_ANIMATION_FRAME_COUNT] = {
     {0x07BC, 0x07BD, 0x07BE, 0x07BF, 0x07C0, 0x07BF, 0x07BE, 0x07BD},
@@ -860,7 +925,7 @@ AssetId g_FaceAnimationAssets[][FACE_ANIMATION_FRAME_COUNT] = {
     {0x0802, 0x0803, 0x0804, 0x0805, 0x0806, 0x0805, 0x0804, 0x0803},
     {0x0810, 0x0811, 0x0812, 0x0813, 0x0814, 0x0813, 0x0812, 0x0811},
     {0x081E, 0x081F, 0x0820, 0x0821, 0x0822, 0x0821, 0x0820, 0x081F},
-    {0x0792, 0x0793, 0x0794, 0x0795, 0x0796, 0x0795, 0x0794, 0x0793}
+    {0x0792, 0x0793, 0x0794, 0x0795, 0x0796, 0x0795, 0x0794, 0x0793},
 };
 AssetId g_AlternateFaceAnimationAssets[][FACE_ANIMATION_FRAME_COUNT] = {
     {0x07BC, 0x07C1, 0x07C2, 0x07C3, 0x07C4, 0x07C3, 0x07C2, 0x07C1},
@@ -881,7 +946,7 @@ AssetId g_AlternateFaceAnimationAssets[][FACE_ANIMATION_FRAME_COUNT] = {
     {0x0802, 0x0807, 0x0808, 0x0809, 0x080A, 0x0809, 0x0808, 0x0807},
     {0x0810, 0x0815, 0x0816, 0x0817, 0x0818, 0x0817, 0x0816, 0x0815},
     {0x081E, 0x0823, 0x0824, 0x0825, 0x0826, 0x0825, 0x0824, 0x0823},
-    {0x0792, 0x0797, 0x0798, 0x0799, 0x079A, 0x0799, 0x0798, 0x0797}
+    {0x0792, 0x0797, 0x0798, 0x0799, 0x079A, 0x0799, 0x0798, 0x0797},
 };
 static AssetId f_ToadImageAssets[] = {
     0x0710,
@@ -896,80 +961,98 @@ static AssetId f_ToadImageAssets[] = {
     0x0719,
     0x071A,
     0x071B,
-    0x071C
+    0x071C,
 };
 /* Read by no routine */
 static s32 f_UnusedToadAssetIds[] UNUSED =
     {0x00000710, 0x00000711, 0x00000712, 0x00000713, 0x00000714, 0x00000715};
 s16 g_CharacterGrid[CHARACTER_GRID_ROW_COUNT][CHARACTER_GRID_COLUMN_COUNT] = {
-    {CHARACTER_CHOICE_PLUM,
+    {
+        CHARACTER_CHOICE_PLUM,
         CHARACTER_CHOICE_PEACH,
         EMPTY_GRID_SLOT,
         EMPTY_GRID_SLOT,
         EMPTY_GRID_SLOT,
         EMPTY_GRID_SLOT,
-        EMPTY_GRID_SLOT},
-    {CHARACTER_CHOICE_CHARLIE,
+        EMPTY_GRID_SLOT,
+    },
+    {
+        CHARACTER_CHOICE_CHARLIE,
         CHARACTER_CHOICE_BABY_MARIO,
         EMPTY_GRID_SLOT,
         EMPTY_GRID_SLOT,
         EMPTY_GRID_SLOT,
         EMPTY_GRID_SLOT,
-        EMPTY_GRID_SLOT},
-    {EMPTY_GRID_SLOT,
+        EMPTY_GRID_SLOT,
+    },
+    {
         EMPTY_GRID_SLOT,
         EMPTY_GRID_SLOT,
         EMPTY_GRID_SLOT,
         EMPTY_GRID_SLOT,
         EMPTY_GRID_SLOT,
-        EMPTY_GRID_SLOT}
+        EMPTY_GRID_SLOT,
+        EMPTY_GRID_SLOT,
+    },
 };
 static s16 f_EveryCharacterGrid[CHARACTER_GRID_ROW_COUNT][CHARACTER_GRID_COLUMN_COUNT] = {
-    {CHARACTER_CHOICE_PLUM,
+    {
+        CHARACTER_CHOICE_PLUM,
         CHARACTER_CHOICE_PEACH,
         CHARACTER_CHOICE_LUIGI,
         CHARACTER_CHOICE_SONNY,
         CHARACTER_CHOICE_HARRY,
         CHARACTER_CHOICE_MAPLE,
-        CHARACTER_CHOICE_BOWSER},
-    {CHARACTER_CHOICE_CHARLIE,
+        CHARACTER_CHOICE_BOWSER,
+    },
+    {
+        CHARACTER_CHOICE_CHARLIE,
         CHARACTER_CHOICE_BABY_MARIO,
         CHARACTER_CHOICE_YOSHI,
         CHARACTER_CHOICE_WARIO,
         CHARACTER_CHOICE_MARIO,
         CHARACTER_CHOICE_DONKEY_KONG,
-        CHARACTER_CHOICE_METAL_MARIO},
-    {CHARACTER_CHOICE_KID,
+        CHARACTER_CHOICE_METAL_MARIO,
+    },
+    {
+        CHARACTER_CHOICE_KID,
         CHARACTER_CHOICE_SHERRY,
         CHARACTER_CHOICE_AZALEA,
         CHARACTER_CHOICE_JOE,
         EMPTY_GRID_SLOT,
         EMPTY_GRID_SLOT,
-        EMPTY_GRID_SLOT}
+        EMPTY_GRID_SLOT,
+    },
 };
 /* The CharacterId in each slot of f_EveryCharacterGrid */
 static s16 f_RecordGrid[CHARACTER_GRID_ROW_COUNT][CHARACTER_GRID_COLUMN_COUNT] = {
-    {CHARACTER_PLUM,
+    {
+        CHARACTER_PLUM,
         CHARACTER_PEACH,
         CHARACTER_LUIGI,
         CHARACTER_SONNY,
         CHARACTER_HARRY,
         CHARACTER_MAPLE,
-        CHARACTER_BOWSER},
-    {CHARACTER_CHARLIE,
+        CHARACTER_BOWSER,
+    },
+    {
+        CHARACTER_CHARLIE,
         CHARACTER_BABY_MARIO,
         CHARACTER_YOSHI,
         CHARACTER_WARIO,
         CHARACTER_MARIO,
         CHARACTER_DONKEY_KONG,
-        CHARACTER_METAL_MARIO},
-    {CHARACTER_KID,
+        CHARACTER_METAL_MARIO,
+    },
+    {
+        CHARACTER_KID,
         CHARACTER_SHERRY,
         CHARACTER_AZALEA,
         CHARACTER_JOE,
         EMPTY_GRID_SLOT,
         EMPTY_GRID_SLOT,
-        EMPTY_GRID_SLOT}
+        EMPTY_GRID_SLOT,
+    },
 };
 /* The CharacterChoice of each CharacterId */
 static s16 f_RecordCharacters[CHARACTER_COUNT] = {
@@ -990,7 +1073,7 @@ static s16 f_RecordCharacters[CHARACTER_COUNT] = {
     CHARACTER_CHOICE_KID,
     CHARACTER_CHOICE_SHERRY,
     CHARACTER_CHOICE_AZALEA,
-    CHARACTER_CHOICE_JOE
+    CHARACTER_CHOICE_JOE,
 };
 /*
  * The grid's first columns, whose characters a game of two or more players
@@ -998,27 +1081,33 @@ static s16 f_RecordCharacters[CHARACTER_COUNT] = {
  */
 #define MULTIPLAYER_GRID_COLUMN_COUNT 5
 static s16 f_StartingCharacterGrid[CHARACTER_GRID_ROW_COUNT][CHARACTER_GRID_COLUMN_COUNT] = {
-    {CHARACTER_CHOICE_PLUM,
+    {
+        CHARACTER_CHOICE_PLUM,
         CHARACTER_CHOICE_PEACH,
         EMPTY_GRID_SLOT,
         EMPTY_GRID_SLOT,
         EMPTY_GRID_SLOT,
         EMPTY_GRID_SLOT,
-        EMPTY_GRID_SLOT},
-    {CHARACTER_CHOICE_CHARLIE,
+        EMPTY_GRID_SLOT,
+    },
+    {
+        CHARACTER_CHOICE_CHARLIE,
         CHARACTER_CHOICE_BABY_MARIO,
         EMPTY_GRID_SLOT,
         EMPTY_GRID_SLOT,
         EMPTY_GRID_SLOT,
         EMPTY_GRID_SLOT,
-        EMPTY_GRID_SLOT},
-    {EMPTY_GRID_SLOT,
+        EMPTY_GRID_SLOT,
+    },
+    {
         EMPTY_GRID_SLOT,
         EMPTY_GRID_SLOT,
         EMPTY_GRID_SLOT,
         EMPTY_GRID_SLOT,
         EMPTY_GRID_SLOT,
-        EMPTY_GRID_SLOT}
+        EMPTY_GRID_SLOT,
+        EMPTY_GRID_SLOT,
+    },
 };
 static GridCell f_SlotCells[] = {
     {0, 0},
@@ -1038,7 +1127,7 @@ static GridCell f_SlotCells[] = {
     {0, 2},
     {1, 2},
     {2, 2},
-    {3, 2}
+    {3, 2},
 };
 char g_CharacterNames[][IMPORTED_CHARACTER_NAME_LENGTH] = {
     "Plum",
@@ -1054,7 +1143,7 @@ char g_CharacterNames[][IMPORTED_CHARACTER_NAME_LENGTH] = {
     "Maple",
     "DK",
     "Bowser",
-    "Metal Mario"
+    "Metal Mario",
 };
 static s8 f_ImportedCharacterNames[IMPORTED_CHARACTER_COUNT][IMPORTED_CHARACTER_NAME_LENGTH] =
     {"Kid", "Sherry", "Azalea", "Joe"};
@@ -1068,7 +1157,7 @@ s32 g_CourseNameEnvColors[] = {
     0xF5FF0100,
     0xF5FF0100,
     0xF5FF0100,
-    0xF5FF0100
+    0xF5FF0100,
 };
 s32 g_CourseNamePrimColors[] = {
     0x0DFF1E00,
@@ -1080,7 +1169,7 @@ s32 g_CourseNamePrimColors[] = {
     0x0DFF1E00,
     0x18A0E900,
     0xEF470300,
-    0xEF470300
+    0xEF470300,
 };
 /* The course points needed in total to open each course */
 static s32 f_CoursePointsNeeded[COURSE_COUNT] = {0, 50, 300, 1000, 2300, 4500};
@@ -1093,19 +1182,23 @@ static s16 f_DebugImportedSideSpins[IMPORTED_CHARACTER_COUNT] = {0, 50, -50, 10}
 /* Spelled with the top bit set on each lowercase letter */
 static char f_DebugImportedNames[IMPORTED_CHARACTER_COUNT][IMPORTED_CHARACTER_NAME_LENGTH] = {
     {'K', MARK_LOWERCASE('i'), MARK_LOWERCASE('d')},
-    {'S',
+    {
+        'S',
         MARK_LOWERCASE('h'),
         MARK_LOWERCASE('e'),
         MARK_LOWERCASE('r'),
         MARK_LOWERCASE('r'),
-        MARK_LOWERCASE('y')},
-    {'A',
+        MARK_LOWERCASE('y'),
+    },
+    {
+        'A',
         MARK_LOWERCASE('z'),
         MARK_LOWERCASE('a'),
         MARK_LOWERCASE('l'),
         MARK_LOWERCASE('e'),
-        MARK_LOWERCASE('a')},
-    {'J', MARK_LOWERCASE('o'), MARK_LOWERCASE('e')}
+        MARK_LOWERCASE('a'),
+    },
+    {'J', MARK_LOWERCASE('o'), MARK_LOWERCASE('e')},
 };
 static ImportedCharacterCell f_ImportedCharacterCells[IMPORTED_CHARACTER_COUNT] =
     {{0, 0, 0, 2}, {0, 1, 0, 2}, {0, 2, 0, 2}, {0, 3, 0, 2}};

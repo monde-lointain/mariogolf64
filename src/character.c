@@ -529,19 +529,31 @@ static s32 f_UnusedWordAfterDrawParity UNUSED = 0;
 /* A square, textured with g_ShadowTexture, laid on the ground plane by
  * f_ShadowMatrices */
 static Vtx f_ShadowVertices[4] = {
-    {{{-SHADOW_QUAD_HALF_SIZE, SHADOW_QUAD_HALF_SIZE, 0},
-        0,
-        {SHADOW_QUAD_TEXEL_SPAN, SHADOW_QUAD_TEXEL_SPAN},
-        {0x96, 0x96, 0x96, 0xFF}}},
-    {{{SHADOW_QUAD_HALF_SIZE, SHADOW_QUAD_HALF_SIZE, 0},
-        0,
-        {0, SHADOW_QUAD_TEXEL_SPAN},
-        {0xFF, 0xFF, 0xFF, 0xFF}}},
+    {
+        {
+            {-SHADOW_QUAD_HALF_SIZE, SHADOW_QUAD_HALF_SIZE, 0},
+            0,
+            {SHADOW_QUAD_TEXEL_SPAN, SHADOW_QUAD_TEXEL_SPAN},
+            {0x96, 0x96, 0x96, 0xFF},
+        },
+    },
+    {
+        {
+            {SHADOW_QUAD_HALF_SIZE, SHADOW_QUAD_HALF_SIZE, 0},
+            0,
+            {0, SHADOW_QUAD_TEXEL_SPAN},
+            {0xFF, 0xFF, 0xFF, 0xFF},
+        },
+    },
     {{{SHADOW_QUAD_HALF_SIZE, -SHADOW_QUAD_HALF_SIZE, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0x00}}},
-    {{{-SHADOW_QUAD_HALF_SIZE, -SHADOW_QUAD_HALF_SIZE, 0},
-        0,
-        {SHADOW_QUAD_TEXEL_SPAN, 0},
-        {0x96, 0x96, 0x96, 0x00}}},
+    {
+        {
+            {-SHADOW_QUAD_HALF_SIZE, -SHADOW_QUAD_HALF_SIZE, 0},
+            0,
+            {SHADOW_QUAD_TEXEL_SPAN, 0},
+            {0x96, 0x96, 0x96, 0x00},
+        },
+    },
 };
 
 /*

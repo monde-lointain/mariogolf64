@@ -567,31 +567,41 @@ static s8 f_ShadowlessTextures[] = {0x14, 0x15, 0x16, -1};
 /* Read by no routine */
 static s32 f_UnusedWordsAfterShadowlessTextures[] UNUSED = {0, 0, 0};
 static s8 f_TileVertexSlots[TILE_POINT_SPAN][TILE_POINT_SPAN] = {
-    {TILE_SLOT_ROW0_COLUMN0,
+    {
+        TILE_SLOT_ROW0_COLUMN0,
         TILE_SLOT_ROW0_COLUMN1,
         TILE_SLOT_ROW0_COLUMN2,
         TILE_SLOT_ROW0_COLUMN3,
-        TILE_SLOT_ROW0_COLUMN4},
-    {TILE_SLOT_ROW1_COLUMN0,
+        TILE_SLOT_ROW0_COLUMN4,
+    },
+    {
+        TILE_SLOT_ROW1_COLUMN0,
         TILE_SLOT_ROW1_COLUMN1,
         TILE_SLOT_ROW1_COLUMN2,
         TILE_SLOT_ROW1_COLUMN3,
-        TILE_SLOT_ROW1_COLUMN4},
-    {TILE_SLOT_ROW2_COLUMN0,
+        TILE_SLOT_ROW1_COLUMN4,
+    },
+    {
+        TILE_SLOT_ROW2_COLUMN0,
         TILE_SLOT_ROW2_COLUMN1,
         TILE_SLOT_ROW2_COLUMN2,
         TILE_SLOT_ROW2_COLUMN3,
-        TILE_SLOT_ROW2_COLUMN4},
-    {TILE_SLOT_ROW3_COLUMN0,
+        TILE_SLOT_ROW2_COLUMN4,
+    },
+    {
+        TILE_SLOT_ROW3_COLUMN0,
         TILE_SLOT_ROW3_COLUMN1,
         TILE_SLOT_ROW3_COLUMN2,
         TILE_SLOT_ROW3_COLUMN3,
-        TILE_SLOT_ROW3_COLUMN4},
-    {TILE_SLOT_ROW4_COLUMN0,
+        TILE_SLOT_ROW3_COLUMN4,
+    },
+    {
+        TILE_SLOT_ROW4_COLUMN0,
         TILE_SLOT_ROW4_COLUMN1,
         TILE_SLOT_ROW4_COLUMN2,
         TILE_SLOT_ROW4_COLUMN3,
-        TILE_SLOT_ROW4_COLUMN4},
+        TILE_SLOT_ROW4_COLUMN4,
+    },
 };
 /* Read by no routine */
 static s32 f_UnusedWordAfterTileVertexSlots UNUSED = 0;

@@ -329,7 +329,7 @@ static Vtx f_BannerLetterVertices[QUAD_VERTEX_COUNT] = {
     {{{0, 32, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{0, -32, 0}, 0, {0, 0xFC0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{32, -32, 0}, 0, {0x7FF, 0xFC0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
-    {{{32, 32, 0}, 0, {0x7FF, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}}
+    {{{32, 32, 0}, 0, {0x7FF, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
 };
 static Banner f_Banners[] = {
     /* BANNER_NICE_SHOT */
@@ -365,19 +365,23 @@ static Banner f_Banners[] = {
     /* BANNER_PAR */
     {0, 0x54D, 5, BANNER_LETTER_IMAGE_WIDTH, BANNER_LETTER_IMAGE_HEIGHT, BANNER_ANIMATION_SLIDE},
     /* BANNER_BOGEY */
-    {0,
+    {
+        0,
         0x54F,
         6,
         BANNER_LETTER_IMAGE_WIDTH,
         BANNER_LETTER_IMAGE_HEIGHT,
-        BANNER_ANIMATION_ZOOM_STAY},
+        BANNER_ANIMATION_ZOOM_STAY,
+    },
     /* BANNER_OVER_PAR_NUMBER */
-    {0,
+    {
+        0,
         0x553,
         11,
         BANNER_LETTER_IMAGE_WIDTH,
         BANNER_LETTER_IMAGE_HEIGHT,
-        BANNER_ANIMATION_ZOOM_STAY}
+        BANNER_ANIMATION_ZOOM_STAY,
+    },
 };
 static BannerLayout f_BannerLayouts[] = {
     /* BANNER_NICE_SHOT */
@@ -415,7 +419,7 @@ static BannerLayout f_BannerLayouts[] = {
     /* BANNER_BOGEY */
     {-96, 0, 32, 64, 96, 128, 160, 0, 0, 0, 0, 0},
     /* BANNER_OVER_PAR_NUMBER */
-    {-105, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+    {-105, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 };
 static s32 f_TestBanner = 0;
 static Boolean f_IsFlipMessageLeaving = INITIAL_IS_FLIP_MESSAGE_LEAVING;
@@ -428,7 +432,7 @@ static Vtx f_FlipMessageBoardVertices[QUAD_VERTEX_COUNT] = {
     {{{-72, 12, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{-72, -12, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{72, -12, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
-    {{{72, 12, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}}
+    {{{72, 12, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
 };
 /* Counts the frames that DrawMovie has drawn, up to MOVIE_DRAW_COUNT_MAX */
 static s32 f_MovieDrawCount = 0;
@@ -460,7 +464,7 @@ static AssetId f_MontyMoleMovieFrameAssets[] = {
     0x918,
     0x917,
     0x916,
-    0x915
+    0x915,
 };
 static AssetId f_GoombaMovieFrameAssets[] =
     {0x920, 0x921, 0x922, 0x923, 0x924, 0x924, 0x925, 0x926, 0x927, 0x928, 0x929};
@@ -500,7 +504,7 @@ static Vtx f_ReadyGoVertices[12] = {
     {{{-76, -20, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{76, -20, 0}, 0, {0, 0x800}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{-76, -32, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
-    {{{76, -32, 0}, 0, {0, 0x800}, {0xFF, 0xFF, 0xFF, 0xFF}}}
+    {{{76, -32, 0}, 0, {0, 0x800}, {0xFF, 0xFF, 0xFF, 0xFF}}},
 };
 /* Sets the render state for drawing a movie's paletted strips */
 static Gfx f_MovieSetupDisplayList[] = {
@@ -529,12 +533,12 @@ static Vtx f_ContactSpinVertices[QUAD_VERTEX_COUNT] = {
     {{{-25, 25, 0}, 0, {0, 0}, {0xFF, 0x7F, 0x00, 0xFF}}},
     {{{-25, -15, 0}, 0, {0, 0x7FF}, {0xFF, 0xFF, 0xBF, 0xFF}}},
     {{{15, -15, 0}, 0, {0x7FF, 0x7FF}, {0xFF, 0x7F, 0x00, 0xFF}}},
-    {{{15, 25, 0}, 0, {0x7FF, 0}, {0xFF, 0xFF, 0xBF, 0xFF}}}
+    {{{15, 25, 0}, 0, {0x7FF, 0}, {0xFF, 0xFF, 0xBF, 0xFF}}},
 };
 /* The contact effect's quad spans from vertex 0 to vertex 1 */
 static Vtx f_ContactVertices[2] = {
     {{{-12, 0, 0}, 0, {0, 0}, {0xFF, 0x7F, 0x00, 0xFF}}},
-    {{{12, 0, 0}, 0, {0xC00, 0}, {0xFF, 0xFF, 0xBF, 0xFF}}}
+    {{{12, 0, 0}, 0, {0xC00, 0}, {0xFF, 0xFF, 0xBF, 0xFF}}},
 };
 s32 g_ContactEffect = CONTACT_EFFECT_NONE;
 static Boolean f_IsContactEffectFading = FALSE;
@@ -590,7 +594,7 @@ static PathPoint f_WindFlyGuyPath[] = {
     {285.0f, 1.9e+02f, 0.0f},
     {3.3e+02f, 1.8e+02f, 0.0f},
     {3.6e+02f, 175.0f, 0.0f},
-    {3.8e+02f, 1.7e+02f, 0.0f}
+    {3.8e+02f, 1.7e+02f, 0.0f},
 };
 /* Where the Fly Guy stays while its streak fades */
 static PathPoint f_WindFlyGuyExit = {3.8e+02f, 1.7e+02f, 0.0f};

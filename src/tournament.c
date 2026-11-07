@@ -65,7 +65,7 @@ static ContestantProfile f_ContestantProfiles[TOURNAMENT_CONTESTANT_COUNT - 1] =
     {3, {0, 0}, 1},
     {3, {0, 0}, 1},
     {1, {0, 0}, 1},
-    {1, {0, 0}, 0}
+    {1, {0, 0}, 0},
 };
 /*
  * NAMES_PER_COURSE names for each course in turn, spelled with the top bit set

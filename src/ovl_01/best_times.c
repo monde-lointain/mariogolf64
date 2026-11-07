@@ -106,7 +106,7 @@ static s32 f_BestTimesCharacterChoices[CHARACTER_COUNT] = {
     CHARACTER_CHOICE_KID,
     CHARACTER_CHOICE_SHERRY,
     CHARACTER_CHOICE_AZALEA,
-    CHARACTER_CHOICE_JOE
+    CHARACTER_CHOICE_JOE,
 };
 
 /* The camera that DrawBestTimes views the course wheel with */

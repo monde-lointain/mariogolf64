@@ -138,7 +138,7 @@ static s32 f_FireworkState = 0;
 static Vtx f_FireworkParticleVertices[3] = {
     {{{0, 32, 0}, 0, {0, 0}, {0xFF, 0x7F, 0x00, 0x7F}}},
     {{{-10, 0, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xBF, 0xBF}}},
-    {{{10, 0, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xBF, 0xBF}}}
+    {{{10, 0, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xBF, 0xBF}}},
 };
 /*
  * The shapes, by course record index: outlines of Toad, a Koopa Troopa, a Shy

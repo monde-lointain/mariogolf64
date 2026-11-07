@@ -72,14 +72,16 @@ Billboard g_Billboards[BILLBOARD_COUNT];
 FILE_STATIC BillboardTransform g_BillboardTransforms[BILLBOARD_COUNT];
 
 static Vtx f_BillboardVertices[][SHAPE_VERTEX_COUNT] = {
-    {{{{-1, 0, 0}, 0, {0, 4096}, {0x96, 0x96, 0x96, 0xFF}}},
+    {
+        {{{-1, 0, 0}, 0, {0, 4096}, {0x96, 0x96, 0x96, 0xFF}}},
         {{{1, 0, 0}, 0, {8192, 4096}, {0xFF, 0xFF, 0xFF, 0xFF}}},
         {{{1, -1, 0}, 0, {8192, 0}, {0xFF, 0xFF, 0xFF, 0x00}}},
         {{{-1, -1, 0}, 0, {0, 0}, {0x96, 0x96, 0x96, 0x00}}},
         {{{-1, 0, 0}, 0, {0, 4096}, {0x3F, 0x3F, 0x7F, 0xFF}}},
         {{{1, 0, 0}, 0, {8192, 4096}, {0x7F, 0x7F, 0xBF, 0xFF}}},
         {{{1, 1, 0}, 0, {8192, 0}, {0x7F, 0x7F, 0xBF, 0x00}}},
-        {{{-1, 1, 0}, 0, {0, 0}, {0x3F, 0x3F, 0x7F, 0x00}}}},
+        {{{-1, 1, 0}, 0, {0, 0}, {0x3F, 0x3F, 0x7F, 0x00}}},
+    },
 };
 static s32 f_LoadedTextureIndex = NO_TEXTURE_LOADED;
 static BillboardTexture f_BillboardTextures[BILLBOARD_TEXTURE_COUNT] = {

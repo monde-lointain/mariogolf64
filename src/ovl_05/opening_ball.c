@@ -98,7 +98,7 @@ static SurfaceInfo f_OpeningSurfaceInfo[SURFACE_COUNT] = {
     /* SURFACE_MINI_GOLF_FAIRWAY */
     {SURFACE_KIND_FAIRWAY, "ﾌﾞﾙｰ", 98, 100, 5, 960, 400, 0x8F3, SINK_DEPTH_NONE, 0},
     /* SURFACE_MINI_GOLF_CART_WAY */
-    {SURFACE_KIND_CART_WAY, "ﾚｯﾄﾞ", 80, 100, 10, 980, 890, 0x8F4, SINK_DEPTH_NONE, 4}
+    {SURFACE_KIND_CART_WAY, "ﾚｯﾄﾞ", 80, 100, 10, 980, 890, 0x8F4, SINK_DEPTH_NONE, 4},
 };
 
 /* The debug text row, of SPEED_TEXT_ROW_COUNT, that the next ball speed goes in
@@ -110,7 +110,8 @@ static ImpactEffect f_OpeningEarlyImpactEffect UNUSED = {-90, -64, -40, -10, 100
 static ImpactEffect f_OpeningLateImpactEffect UNUSED = {-80, 64, 30, 10, -5, 1};
 /* The opening's copy of f_ImpactEffects */
 static ImpactEffect f_OpeningImpactEffects[MAX_LIE_RATING + 1][IMPACT_TIMING_ENTRY_COUNT] = {
-    {{-90, -64, -40, -10, 100, 1},
+    {
+        {-90, -64, -40, -10, 100, 1},
         {-90, -64, -40, -10, 100, 1},
         {-90, -64, -40, -10, 100, 1},
         {-90, -64, -40, -10, 100, 1},
@@ -120,8 +121,10 @@ static ImpactEffect f_OpeningImpactEffects[MAX_LIE_RATING + 1][IMPACT_TIMING_ENT
         {-80, 64, 30, 10, -5, 1},
         {-80, 64, 30, 10, -5, 1},
         {-80, 64, 30, 10, -5, 1},
-        {-80, 64, 30, 10, -5, 1}},
-    {{-90, -64, -40, -10, 100, 1},
+        {-80, 64, 30, 10, -5, 1},
+    },
+    {
+        {-90, -64, -40, -10, 100, 1},
         {-90, -64, -40, -10, 100, 1},
         {-90, -64, -40, -10, 100, 1},
         {-90, -64, -40, -10, 100, 1},
@@ -131,8 +134,10 @@ static ImpactEffect f_OpeningImpactEffects[MAX_LIE_RATING + 1][IMPACT_TIMING_ENT
         {-80, 64, 30, 10, -5, 1},
         {-80, 64, 30, 10, -5, 1},
         {-80, 64, 30, 10, -5, 1},
-        {-80, 64, 30, 10, -5, 1}},
-    {{-90, -64, -40, -10, 100, 1},
+        {-80, 64, 30, 10, -5, 1},
+    },
+    {
+        {-90, -64, -40, -10, 100, 1},
         {-90, -64, -40, -10, 100, 1},
         {-90, -64, -40, -10, 100, 1},
         {-8, -8, 2, -10, 15, 0},
@@ -142,8 +147,10 @@ static ImpactEffect f_OpeningImpactEffects[MAX_LIE_RATING + 1][IMPACT_TIMING_ENT
         {-12, 8, -2, 10, 4, 0},
         {-80, 64, 30, 10, -5, 1},
         {-80, 64, 30, 10, -5, 1},
-        {-80, 64, 30, 10, -5, 1}},
-    {{-90, -64, -40, -10, 100, 1},
+        {-80, 64, 30, 10, -5, 1},
+    },
+    {
+        {-90, -64, -40, -10, 100, 1},
         {-90, -64, -40, -10, 100, 1},
         {-8, -8, 2, -10, 15, 0},
         {-4, -2, 1, -5, 5, 0},
@@ -153,8 +160,10 @@ static ImpactEffect f_OpeningImpactEffects[MAX_LIE_RATING + 1][IMPACT_TIMING_ENT
         {-8, 2, -1, 5, 4, 0},
         {-12, 8, -2, 10, 4, 0},
         {-80, 64, 30, 10, -5, 1},
-        {-80, 64, 30, 10, -5, 1}},
-    {{-90, -64, -40, -10, 100, 1},
+        {-80, 64, 30, 10, -5, 1},
+    },
+    {
+        {-90, -64, -40, -10, 100, 1},
         {-8, -8, 2, -10, 15, 0},
         {-4, -2, 1, -5, 5, 0},
         {-2, -1, 0, -3, 3, 0},
@@ -164,8 +173,10 @@ static ImpactEffect f_OpeningImpactEffects[MAX_LIE_RATING + 1][IMPACT_TIMING_ENT
         {-4, 1, 0, 3, 2, 0},
         {-8, 2, -1, 5, 4, 0},
         {-12, 8, -2, 10, 4, 0},
-        {-80, 64, 30, 10, -5, 1}},
-    {{-8, -8, 2, -10, 15, 0},
+        {-80, 64, 30, 10, -5, 1},
+    },
+    {
+        {-8, -8, 2, -10, 15, 0},
         {-4, -2, 1, -5, 5, 0},
         {-2, -1, 0, -3, 3, 0},
         {-1, 0, 0, -2, 1, 0},
@@ -175,12 +186,14 @@ static ImpactEffect f_OpeningImpactEffects[MAX_LIE_RATING + 1][IMPACT_TIMING_ENT
         {-2, 0, 0, 2, 1, 0},
         {-4, 1, 0, 3, 2, 0},
         {-8, 2, -1, 5, 4, 0},
-        {-12, 8, -2, 10, 4, 0}}
+        {-12, 8, -2, 10, 4, 0},
+    },
 };
 
 /* The opening's clubs: two drivers that differ only in pitch */
 static Club f_OpeningClubs[OPENING_CLUB_COUNT] = {
-    {0,
+    {
+        0,
         "1W",
         DRIVER_SURFACES,
         208,
@@ -194,8 +207,10 @@ static Club f_OpeningClubs[OPENING_CLUB_COUNT] = {
         0,
         {0, 0, 0},
         ASSET_DRIVER_HEAD_IMAGE,
-        0},
-    {0,
+        0,
+    },
+    {
+        0,
         "1W",
         DRIVER_SURFACES,
         208,
@@ -209,7 +224,8 @@ static Club f_OpeningClubs[OPENING_CLUB_COUNT] = {
         0,
         {0, 0, 0},
         ASSET_DRIVER_HEAD_IMAGE,
-        0}
+        0,
+    },
 };
 
 /* LaunchOpeningBallSimulation counts each launch here, and nothing else reads

@@ -191,7 +191,7 @@ static s32 f_UnusedColorWords[11] UNUSED = {
     0x000000FF,
     0x00000000,
     0x00FF00FF,
-    0x00FF0000
+    0x00FF0000,
 };
 /* The angle, in radians, of the sine waves that tint the chosen replay */
 static f32 f_ReplayHuePhase = 0.0f;
@@ -203,7 +203,7 @@ static s16 f_RingShotIconPositions[RING_SHOT_COURSE_COUNT][RING_SHOT_ROW_COUNT] 
     {78, 120, 162, 0, 0, 0, 204},
     {60, 102, 144, 186, 0, 0, 226},
     {42, 84, 126, 168, 210, 0, 252},
-    {22, 60, 102, 144, 186, 228, 268}
+    {22, 60, 102, 144, 186, 228, 268},
 };
 /* Read by no routine */
 static s32 f_UnusedWordsAfterIconPositions[2] UNUSED = {0, 0};
@@ -237,7 +237,7 @@ static u32 f_SaveMenuGameModes[SAVE_MENU_MODE_COUNT] = {
     GAME_MODE_RING_SHOT,
     GAME_MODE_TRAINING,
     GAME_MODE_SKINS_MATCH,
-    GAME_MODE_UNLISTED_STROKE
+    GAME_MODE_UNLISTED_STROKE,
 };
 /* The mode icon of each save menu mode, mini golf last */
 static s32 f_SaveMenuModeIcons[SAVE_MENU_MODE_MINI_GOLF + 1] = {
@@ -251,7 +251,7 @@ static s32 f_SaveMenuModeIcons[SAVE_MENU_MODE_MINI_GOLF + 1] = {
     MODE_ICON_TRAINING,
     MODE_ICON_SKINS_MATCH,
     MODE_ICON_UNLISTED_STROKE,
-    MODE_ICON_MINI_GOLF
+    MODE_ICON_MINI_GOLF,
 };
 /* Read by no routine */
 static s32 f_UnusedWordsAfterModeIcons[4] UNUSED = {0, 0, 0, 0};
@@ -274,7 +274,7 @@ static s32 f_SavedGamesCharacterChoices[CHARACTER_COUNT] UNUSED = {
     CHARACTER_CHOICE_KID,
     CHARACTER_CHOICE_SHERRY,
     CHARACTER_CHOICE_AZALEA,
-    CHARACTER_CHOICE_JOE
+    CHARACTER_CHOICE_JOE,
 };
 /* The angle, in radians, of the sine wave that bobs the saved games' boards */
 static f32 f_BoardBobPhase = 0.0f;
@@ -283,7 +283,7 @@ static s32 f_UnusedSaveMenuIconPositions[MAX_PLAYER_COUNT][MAX_PLAYER_COUNT][2] 
     {{42, 140}, {76, 120}, {206, 120}, {248, 140}},
     {{42, 140}, {248, 140}, {206, 120}, {248, 140}},
     {{42, 140}, {76, 120}, {211, 120}, {248, 140}},
-    {{42, 140}, {76, 120}, {211, 120}, {248, 140}}
+    {{42, 140}, {76, 120}, {211, 120}, {248, 140}},
 };
 /* Read by no routine; the values of main_menu.c's f_UnusedModeIconValues */
 static s32 f_UnusedSaveMenuModeIconValues[11] UNUSED =
@@ -299,22 +299,30 @@ static f32 f_SavedGolferAngles[3] = {0.0f, 0.0f, 0.0f};
 static s32 f_UnusedWordAfterSavedGolferAngles UNUSED = 0;
 /* Where DrawSavedGolfers stands each golfer, by the player count */
 static Vec3 f_SavedGolferPositions[MAX_PLAYER_COUNT][MAX_PLAYER_COUNT] = {
-    {{-84.0f, -43.0f, -1000.0f},
+    {
+        {-84.0f, -43.0f, -1000.0f},
         {64.0f, 0.0f, -1000.0f},
         {64.0f, 0.0f, -1000.0f},
-        {64.0f, 0.0f, -1000.0f}},
-    {{-106.0f, -32.0f, -1000.0f},
+        {64.0f, 0.0f, -1000.0f},
+    },
+    {
+        {-106.0f, -32.0f, -1000.0f},
         {106.0f, -32.0f, -1000.0f},
         {-106.0f, -52.0f, -1000.0f},
-        {106.0f, -52.0f, -1000.0f}},
-    {{-106.0f, -52.0f, -1000.0f},
+        {106.0f, -52.0f, -1000.0f},
+    },
+    {
+        {-106.0f, -52.0f, -1000.0f},
         {-76.0f, -8.0f, -1700.0f},
         {76.0f, -8.0f, -1700.0f},
-        {106.0f, -52.0f, -1000.0f}},
-    {{-106.0f, -52.0f, -1000.0f},
+        {106.0f, -52.0f, -1000.0f},
+    },
+    {
+        {-106.0f, -52.0f, -1000.0f},
         {-76.0f, -8.0f, -1700.0f},
         {76.0f, -8.0f, -1700.0f},
-        {106.0f, -52.0f, -1000.0f}}
+        {106.0f, -52.0f, -1000.0f},
+    },
 };
 /* Where a saved game's screen puts each player's controller icon and label, by
  * the player count */
@@ -322,7 +330,7 @@ static s32 f_ControllerIconPositions[MAX_PLAYER_COUNT][MAX_PLAYER_COUNT][2] = {
     {{42, 140}, {76, 120}, {206, 120}, {248, 140}},
     {{42, 140}, {248, 140}, {206, 120}, {248, 140}},
     {{42, 140}, {76, 120}, {211, 120}, {248, 140}},
-    {{42, 140}, {76, 120}, {211, 120}, {248, 140}}
+    {{42, 140}, {76, 120}, {211, 120}, {248, 140}},
 };
 /* Read by no routine */
 static s32 f_UnusedWordsAfterControllerIcons[2] UNUSED = {0, 0};

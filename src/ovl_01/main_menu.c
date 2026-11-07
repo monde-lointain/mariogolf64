@@ -435,20 +435,24 @@ static f32 f_SoundTestSongFrequency = 0.0f;
 static s32 f_SoundTestSongTempo = NORMAL_SONG_TEMPO;
 /* The mode that each of the mode select's choices picks, by player count */
 static u8 f_ModeChoiceIcons[MAX_PLAYER_COUNT][MODE_CHOICE_LIMIT] = {
-    {MODE_ICON_TOURNAMENT,
+    {
+        MODE_ICON_TOURNAMENT,
         MODE_ICON_GET_CHARACTER,
         MODE_ICON_RING_SHOT,
         MODE_ICON_SPEED_GOLF,
         MODE_ICON_STROKE,
         MODE_ICON_MINI_GOLF,
-        MODE_ICON_TRAINING},
-    {MODE_ICON_STROKE,
+        MODE_ICON_TRAINING,
+    },
+    {
+        MODE_ICON_STROKE,
         MODE_ICON_MATCH_GAME,
         MODE_ICON_SKINS_MATCH,
         MODE_ICON_CLUB_SLOTS,
-        MODE_ICON_MINI_GOLF},
+        MODE_ICON_MINI_GOLF,
+    },
     {MODE_ICON_STROKE, MODE_ICON_SKINS_MATCH, MODE_ICON_CLUB_SLOTS, MODE_ICON_MINI_GOLF},
-    {MODE_ICON_STROKE, MODE_ICON_SKINS_MATCH, MODE_ICON_CLUB_SLOTS, MODE_ICON_MINI_GOLF}
+    {MODE_ICON_STROKE, MODE_ICON_SKINS_MATCH, MODE_ICON_CLUB_SLOTS, MODE_ICON_MINI_GOLF},
 };
 /* Read by no routine; modes like f_ModeChoiceIcons', as many as
  * f_UnusedModeCounts counts */
@@ -460,7 +464,7 @@ static s16 f_ClubhouseRooms[CLUBHOUSE_CHOICE_COUNT] = {
     CLUBHOUSE_ROOM_CHARACTER_TABLE,
     CLUBHOUSE_ROOM_BEST_TIMES,
     CLUBHOUSE_ROOM_RING_SHOT,
-    CLUBHOUSE_ROOM_BEST_SHOTS
+    CLUBHOUSE_ROOM_BEST_SHOTS,
 };
 /* Read by no routine; the one room that f_ClubhouseRooms leaves out */
 static s16 f_UnusedBirdieBadgesRoom UNUSED = CLUBHOUSE_ROOM_BIRDIE_BADGES;
@@ -480,7 +484,7 @@ static const char *f_UnusedModeNames[] UNUSED = {
     " HANDI CAP",
     " BET",
     "9HOLE MODE  ",
-    "CLUB HANDI"
+    "CLUB HANDI",
 };
 /* Each character's name, with LOWERCASE_CODE_OFFSET added to its lowercase
  * letters */
@@ -502,7 +506,7 @@ char g_MenuCharacterNames[CHARACTER_COUNT][IMPORTED_CHARACTER_NAME_LENGTH] = {
     "K\xE9\xE4", /* Kid */
     "S\xE8\xE5\xF2\xF2\xF9", /* Sherry */
     "A\xFA\xE1\xEC\xE5\xE1", /* Azalea */
-    "J\xEF\xE5" /* Joe */
+    "J\xEF\xE5", /* Joe */
 };
 /* Read by no routine */
 static const char *f_UnusedOptionNames[] UNUSED = {
@@ -516,7 +520,7 @@ static const char *f_UnusedOptionNames[] UNUSED = {
     "SOUND",
     "DATA RESET",
     "BGM TEST",
-    "SOUND TEST"
+    "SOUND TEST",
 };
 /* Read by no routine */
 static const char *f_UnusedGameBoyNames[] UNUSED = {"GB 00 ", "GB 01 ", "GB 02 ", "GB 03 "};
@@ -536,7 +540,7 @@ static const char *f_TestCourseNames[] UNUSED = {
     "TEST COURSE7",
     "TEST COURSE8",
     "TEST COURSE9",
-    "TEST COURSE10"
+    "TEST COURSE10",
 };
 /* The caddies' names */
 static const char *f_CaddyNames[CADDY_COUNT] = {"MARIO", "PEACH"};
@@ -594,7 +598,7 @@ static char f_SoundTestSongNames[][SOUND_TEST_SONG_NAME_LENGTH] = {
     "openning",
     "bgm20",
     "ending",
-    "end-jingle"
+    "end-jingle",
 };
 static char f_SoundTestSoundNames[][SOUND_TEST_SOUND_NAME_LENGTH] = {
     "AE01 ",
@@ -1154,7 +1158,7 @@ static char f_SoundTestSoundNames[][SOUND_TEST_SOUND_NAME_LENGTH] = {
     "NONE_SE",
     "NONE_SE",
     "NONE_SE",
-    "NONE_SE"
+    "NONE_SE",
 };
 /* Read by no routine */
 static Vtx f_UnusedQuadVertices[8] UNUSED = {
@@ -1165,7 +1169,7 @@ static Vtx f_UnusedQuadVertices[8] UNUSED = {
     {{{-32, 0, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{-32, -32, 0}, 0, {0, 2048}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{32, -32, 0}, 0, {4096, 2048}, {0xFF, 0xFF, 0xFF, 0xFF}}},
-    {{{32, 0, 0}, 0, {4096, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}}
+    {{{32, 0, 0}, 0, {4096, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
 };
 /* A gold star with eyes spinning, which also marks a hole's Ring Shot star */
 static s32 f_MenuStarFrameAssets[STAR_FRAME_COUNT] = {
@@ -1183,7 +1187,7 @@ static s32 f_MenuStarFrameAssets[STAR_FRAME_COUNT] = {
     0x05C9,
     0x05CA,
     0x05CB,
-    0x05CC
+    0x05CC,
 };
 /* A silver star without eyes spinning, for a hole without its Ring Shot star
  */
@@ -1202,7 +1206,7 @@ static s32 f_MenuEmptyStarFrameAssets[STAR_FRAME_COUNT] = {
     0x05F0,
     0x05F1,
     0x05F2,
-    0x05F3
+    0x05F3,
 };
 /*
  * The menus' animated icons, such as the mode icons and the Ring Shot stars,
@@ -1251,7 +1255,7 @@ static s32 f_MenuCharacterChoices[CHARACTER_COUNT] = {
     CHARACTER_CHOICE_KID,
     CHARACTER_CHOICE_SHERRY,
     CHARACTER_CHOICE_AZALEA,
-    CHARACTER_CHOICE_JOE
+    CHARACTER_CHOICE_JOE,
 };
 /* Read by no routine */
 static s32 f_UnusedWordAfterCharacterChoices UNUSED = 0;
@@ -1266,7 +1270,7 @@ static s32 f_ModeSelectControllerIconPositions[MAX_PLAYER_COUNT][MAX_PLAYER_COUN
     {{42, 140}, {76, 120}, {206, 120}, {248, 140}},
     {{42, 140}, {248, 140}, {206, 120}, {248, 140}},
     {{42, 140}, {76, 120}, {211, 120}, {248, 140}},
-    {{42, 140}, {76, 120}, {211, 120}, {248, 140}}
+    {{42, 140}, {76, 120}, {211, 120}, {248, 140}},
 };
 /* Read by no routine */
 static s32 f_UnusedModeIconValues[11] UNUSED = {110, 109, 117, 97, 106, 105, 105, 97, 84, 124, 99};
@@ -1282,26 +1286,34 @@ static f32 f_RivalSpinYaw = 0.0f;
 /* Read by no routine */
 static s32 f_UnusedWordsAfterRivalSpin[2] UNUSED = {0, 0};
 static f32 f_MenuCharacterPositions[MENU_CHARACTER_LAYOUT_COUNT][MENU_CHARACTER_SLOT_COUNT][3] = {
-    {{-84.0f, -43.0f, -1000.0f},
+    {
+        {-84.0f, -43.0f, -1000.0f},
         {106.0f, -32.0f, -1000.0f},
         {64.0f, 0.0f, -1000.0f},
         {64.0f, 0.0f, -1000.0f},
-        {0.0f, 0.0f, 0.0f}},
-    {{-106.0f, -32.0f, -1000.0f},
+        {0.0f, 0.0f, 0.0f},
+    },
+    {
+        {-106.0f, -32.0f, -1000.0f},
         {106.0f, -32.0f, -1000.0f},
         {-106.0f, -52.0f, -1000.0f},
         {106.0f, -52.0f, -1000.0f},
-        {0.0f, 0.0f, 0.0f}},
-    {{-106.0f, -52.0f, -1000.0f},
+        {0.0f, 0.0f, 0.0f},
+    },
+    {
+        {-106.0f, -52.0f, -1000.0f},
         {-76.0f, -8.0f, -1700.0f},
         {76.0f, -8.0f, -1700.0f},
         {106.0f, -52.0f, -1000.0f},
-        {0.0f, 0.0f, 0.0f}},
-    {{-106.0f, -52.0f, -1000.0f},
+        {0.0f, 0.0f, 0.0f},
+    },
+    {
+        {-106.0f, -52.0f, -1000.0f},
         {-76.0f, -8.0f, -1700.0f},
         {76.0f, -8.0f, -1700.0f},
         {106.0f, -52.0f, -1000.0f},
-        {0.0f, 0.0f, 0.0f}}
+        {0.0f, 0.0f, 0.0f},
+    },
 };
 /* The character for each grid mark */
 static s32 f_MarkedCharacters[CHARACTER_COUNT] =
@@ -1337,24 +1349,36 @@ static ImageCorner f_UnusedTrophyCorners[6] UNUSED =
     {{24, 173}, {23, 173}, {23, 173}, {29, 161}, {19, 181}, {29, 171}};
 /* Each course's trophies' corners, by the number of trophies */
 static ImageCorner f_TrophyCorners[COURSE_COUNT][TOURNAMENT_PLACE_COUNT][TOURNAMENT_PLACE_COUNT] = {
-    {{{24, 169}, {24, 173}, {24, 173}},
+    {
+        {{24, 169}, {24, 173}, {24, 173}},
         {{16, 169}, {32, 169}, {24, 173}},
-        {{16, 169}, {32, 169}, {24, 173}}},
-    {{{23, 169}, {23, 173}, {23, 173}},
+        {{16, 169}, {32, 169}, {24, 173}},
+    },
+    {
+        {{23, 169}, {23, 173}, {23, 173}},
         {{15, 169}, {31, 169}, {23, 173}},
-        {{15, 169}, {31, 169}, {23, 173}}},
-    {{{23, 169}, {23, 173}, {23, 173}},
         {{15, 169}, {31, 169}, {23, 173}},
-        {{15, 169}, {31, 169}, {23, 173}}},
-    {{{29, 157}, {29, 161}, {29, 161}},
+    },
+    {
+        {{23, 169}, {23, 173}, {23, 173}},
+        {{15, 169}, {31, 169}, {23, 173}},
+        {{15, 169}, {31, 169}, {23, 173}},
+    },
+    {
+        {{29, 157}, {29, 161}, {29, 161}},
         {{21, 157}, {37, 157}, {29, 161}},
-        {{21, 157}, {37, 157}, {29, 161}}},
-    {{{19, 177}, {19, 181}, {19, 181}},
+        {{21, 157}, {37, 157}, {29, 161}},
+    },
+    {
+        {{19, 177}, {19, 181}, {19, 181}},
         {{11, 177}, {27, 177}, {19, 181}},
-        {{11, 177}, {27, 177}, {19, 181}}},
-    {{{29, 167}, {29, 171}, {29, 171}},
+        {{11, 177}, {27, 177}, {19, 181}},
+    },
+    {
+        {{29, 167}, {29, 171}, {29, 171}},
         {{21, 167}, {37, 167}, {29, 171}},
-        {{21, 167}, {37, 167}, {29, 171}}}
+        {{21, 167}, {37, 167}, {29, 171}},
+    },
 };
 /* Read by no routine; katakana for "Course get" */
 static char f_UnusedCourseGetText[16] UNUSED = "ｺｰｽｹﾞｯﾄ純ﾞ";
@@ -1376,7 +1400,7 @@ static u8 f_UnusedRemainingText[16] UNUSED = {
     0x00,
     0x00,
     0x00,
-    0x00
+    0x00,
 };
 /* The Bet badge's color phase */
 static f32 f_BetBadgeColorPhase = 0.0f;
@@ -1388,7 +1412,7 @@ static Vtx f_WaterVertices[WATER_VERTEX_COUNT] = {
     {{{-800, -128, 0}, 0, {0, 25600}, {0x7F, 0x7F, 0x7F, 0xFF}}},
     {{{0, -128, 0}, 0, {16384, 25600}, {0x7F, 0x7F, 0x7F, 0xFF}}},
     {{{800, -128, 0}, 0, {32736, 25600}, {0x7F, 0x7F, 0x7F, 0xFF}}},
-    {{{800, 64, -1024}, 0, {32736, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}}
+    {{{800, 64, -1024}, 0, {32736, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
 };
 /* How far the course select's water has scrolled; its two layers move apart */
 static s32 f_WaterScroll = 0;
@@ -1398,7 +1422,7 @@ static char f_UnusedHolesChoiceNamesCopy[4][20] UNUSED =
 /* The records' names */
 static const char *f_MiniGolfRecordNames[MINI_GOLF_RECORD_COUNT] = {
     f_LuigisGardenName,
-    f_PeachsCastleName
+    f_PeachsCastleName,
 };
 /* The top-left corner of each of the main menu's labels */
 static LabelCorner f_MainChoiceLabelCorners[MAIN_CHOICE_COUNT] =
@@ -1421,12 +1445,13 @@ static s32 f_UnusedLabelPositions[10][2] UNUSED = {
     {48, 140},
     {60, 160},
     {176, 160},
-    {90, 182}
+    {90, 182},
 };
 /* Read by no routine; "データをすべてけしていいですか?" ("Erase all the
  * data?"), "はい" ("Yes") and "いいえ" ("No") in the game's text code */
 static u8 f_UnusedEraseAllDataPrompt[3][20] UNUSED = {
-    {0xC3,
+    {
+        0xC3,
         0xDE,
         0xB0,
         0xC0,
@@ -1445,8 +1470,10 @@ static u8 f_UnusedEraseAllDataPrompt[3][20] UNUSED = {
         0x7D,
         0x76,
         0x3F,
-        0x00},
-    {0x8A,
+        0x00,
+    },
+    {
+        0x8A,
         0x72,
         0x00,
         0x00,
@@ -1465,8 +1492,10 @@ static u8 f_UnusedEraseAllDataPrompt[3][20] UNUSED = {
         0x00,
         0x00,
         0x00,
-        0x00},
-    {0x72,
+        0x00,
+    },
+    {
+        0x72,
         0x72,
         0x74,
         0x00,
@@ -1485,7 +1514,8 @@ static u8 f_UnusedEraseAllDataPrompt[3][20] UNUSED = {
         0x00,
         0x00,
         0x00,
-        0x00}
+        0x00,
+    },
 };
 /* Read by no routine */
 static s32 f_UnusedWordBeforeArrowTimer UNUSED = 0;

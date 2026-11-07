@@ -100,7 +100,7 @@ static s32 f_ImpactFrameCount = 0;
 static Vtx f_SparkVertices[3] = {
     {{{0, 160, 0}, 0, {0, 0}, {0xFF, 0x40, 0x00, 0xFF}}},
     {{{-12, -480, 0}, 0, {0, 0}, {0xFF, 0xFA, 0x7F, 0xDC}}},
-    {{{12, -480, 0}, 0, {0, 0}, {0xFF, 0xFA, 0x7F, 0xDC}}}
+    {{{12, -480, 0}, 0, {0, 0}, {0xFF, 0xFA, 0x7F, 0xDC}}},
 };
 /* Read by no routine */
 static s32 f_UnusedWordsAfterSparkVertices[2] UNUSED = {0};
@@ -116,7 +116,7 @@ static s32 f_SwingTrailAlpha = SWING_TRAIL_FULL_ALPHA;
 /* A vertex at the origin for each edge of the trail */
 static Vtx f_SwingTrailVertices[2] = {
     {{{0, 0, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0x00}}},
-    {{{0, 0, 0}, 0, {0, 0}, {0xC8, 0xDC, 0xC8, 0xBF}}}
+    {{{0, 0, 0}, 0, {0, 0}, {0xC8, 0xDC, 0xC8, 0xBF}}},
 };
 static Mtx f_SwingTrailOrigin = IDENTITY_MTX;
 

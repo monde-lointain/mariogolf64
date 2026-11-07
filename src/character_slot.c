@@ -301,7 +301,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x01652EB0,
             0x0165BD50,
-            {0x02010F60,
+            {
+                0x02010F60,
                 0x02000540,
                 0x02005DD8,
                 0x02005488,
@@ -315,7 +316,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000530,
                 0x02000534,
                 0x02000538,
-                0x0200053C},
+                0x0200053C,
+            },
             100,
             0x01652EB0,
             0x0165BD50,
@@ -325,7 +327,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x015EE790,
             0x015F6EC0,
-            {0x02010C80,
+            {
+                0x02010C80,
                 0x02000540,
                 0x02004B10,
                 0x020041C0,
@@ -339,7 +342,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000530,
                 0x02000534,
                 0x02000538,
-                0x0200053C},
+                0x0200053C,
+            },
             100,
             0x015EE790,
             0x015F6EC0,
@@ -349,7 +353,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x01606090,
             0x0160ED90,
-            {0x02012BB0,
+            {
+                0x02012BB0,
                 0x02000540,
                 0x02006FA8,
                 0x02006658,
@@ -363,7 +368,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000530,
                 0x02000534,
                 0x02000538,
-                0x0200053C},
+                0x0200053C,
+            },
             100,
             0x01606090,
             0x0160ED90,
@@ -373,7 +379,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x016A1220,
             0x016A73A0,
-            {0x0200FF90,
+            {
+                0x0200FF90,
                 0x02000540,
                 0x02005818,
                 0x02004F10,
@@ -387,7 +394,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000530,
                 0x02000534,
                 0x02000538,
-                0x0200053C},
+                0x0200053C,
+            },
             70,
             0x016A1220,
             0x016A73A0,
@@ -397,7 +405,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x01545D80,
             0x0154C190,
-            {0x0200EFD0,
+            {
+                0x0200EFD0,
                 0x02000540,
                 0x02005660,
                 0x02004D10,
@@ -411,7 +420,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000530,
                 0x02000534,
                 0x02000538,
-                0x0200053C},
+                0x0200053C,
+            },
             100,
             0x01545D80,
             0x0154C190,
@@ -421,7 +431,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x015D5A90,
             0x015DE6D0,
-            {0x02011260,
+            {
+                0x02011260,
                 0x02000540,
                 0x02005278,
                 0x02004920,
@@ -435,7 +446,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000530,
                 0x02000534,
                 0x02000538,
-                0x0200053C},
+                0x0200053C,
+            },
             100,
             0x015D5A90,
             0x015DE6D0,
@@ -445,7 +457,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x0167A3C0,
             0x01681F70,
-            {0x02011BE0,
+            {
+                0x02011BE0,
                 0x02000540,
                 0x02006720,
                 0x02005DD0,
@@ -459,7 +472,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000530,
                 0x02000534,
                 0x02000538,
-                0x0200053C},
+                0x0200053C,
+            },
             100,
             0x0167A3C0,
             0x01681F70,
@@ -469,7 +483,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x015544C0,
             0x0155D0C0,
-            {0x02011530,
+            {
+                0x02011530,
                 0x02000540,
                 0x02005660,
                 0x02004D10,
@@ -483,7 +498,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000530,
                 0x02000534,
                 0x02000538,
-                0x0200053C},
+                0x0200053C,
+            },
             100,
             0x015544C0,
             0x0155D0C0,
@@ -493,7 +509,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x01644C90,
             0x0164C520,
-            {0x0200F640,
+            {
+                0x0200F640,
                 0x02000540,
                 0x02005A58,
                 0x02005108,
@@ -507,7 +524,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000530,
                 0x02000534,
                 0x02000538,
-                0x0200053C},
+                0x0200053C,
+            },
             100,
             0x01644C90,
             0x0164C520,
@@ -517,7 +535,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x01533380,
             0x015384B0,
-            {0x0200C598,
+            {
+                0x0200C598,
                 0x02000540,
                 0x02004E58,
                 0x02004508,
@@ -531,7 +550,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000530,
                 0x02000534,
                 0x02000538,
-                0x0200053C},
+                0x0200053C,
+            },
             100,
             0x01533380,
             0x015384B0,
@@ -541,7 +561,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x016C88B0,
             0x016CE3C0,
-            {0x0200E358,
+            {
+                0x0200E358,
                 0x02000540,
                 0x020040F8,
                 0x020037C8,
@@ -555,7 +576,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000530,
                 0x02000534,
                 0x02000538,
-                0x0200053C},
+                0x0200053C,
+            },
             100,
             0x016C88B0,
             0x016CE3C0,
@@ -565,7 +587,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x0161B430,
             0x01622860,
-            {0x020119E8,
+            {
+                0x020119E8,
                 0x02000540,
                 0x020074D0,
                 0x02006B68,
@@ -579,7 +602,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000530,
                 0x02000534,
                 0x02000538,
-                0x0200053C},
+                0x0200053C,
+            },
             120,
             0x0161B430,
             0x01622860,
@@ -589,7 +613,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x016B72B0,
             0x016BDB40,
-            {0x02010148,
+            {
+                0x02010148,
                 0x02000540,
                 0x02005ED8,
                 0x02005570,
@@ -603,7 +628,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000530,
                 0x02000534,
                 0x02000538,
-                0x0200053C},
+                0x0200053C,
+            },
             150,
             0x016B72B0,
             0x016BDB40,
@@ -613,7 +639,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x01715F00,
             0x0171A110,
-            {0x02007900,
+            {
+                0x02007900,
                 0x02000018,
                 0x02000898,
                 0x02000078,
@@ -627,7 +654,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000008,
                 0x0200000C,
                 0x02000010,
-                0x02000014},
+                0x02000014,
+            },
             100,
             0x01715F00,
             0x0171A110,
@@ -637,7 +665,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x015A4050,
             0x015AB320,
-            {0x0200FB28,
+            {
+                0x0200FB28,
                 0x02000540,
                 0x02005668,
                 0x02004D10,
@@ -651,7 +680,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000530,
                 0x02000534,
                 0x02000538,
-                0x0200053C},
+                0x0200053C,
+            },
             100,
             0x015A4050,
             0x015AB320,
@@ -661,7 +691,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x015C67B0,
             0x015CD7B0,
-            {0x0200EFF8,
+            {
+                0x0200EFF8,
                 0x02000540,
                 0x02004AD8,
                 0x02004188,
@@ -675,7 +706,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000530,
                 0x02000534,
                 0x02000538,
-                0x0200053C},
+                0x0200053C,
+            },
             100,
             0x015C67B0,
             0x015CD7B0,
@@ -685,7 +717,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x0156A510,
             0x01575410,
-            {0x020131E8,
+            {
+                0x020131E8,
                 0x02000540,
                 0x02004050,
                 0x02003700,
@@ -699,7 +732,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000530,
                 0x02000534,
                 0x02000538,
-                0x0200053C},
+                0x0200053C,
+            },
             100,
             0x0156A510,
             0x01575410,
@@ -709,7 +743,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x01630880,
             0x01638FA0,
-            {0x02012A48,
+            {
+                0x02012A48,
                 0x02000540,
                 0x02006A20,
                 0x020060D0,
@@ -723,7 +758,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000530,
                 0x02000534,
                 0x02000538,
-                0x0200053C},
+                0x0200053C,
+            },
             100,
             0x01630880,
             0x01638FA0,
@@ -733,7 +769,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x016651E0,
             0x0166EDE0,
-            {0x02010F98,
+            {
+                0x02010F98,
                 0x02000018,
                 0x02005F4C,
                 0x02005EF8,
@@ -747,7 +784,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000008,
                 0x0200000C,
                 0x02000010,
-                0x02000014},
+                0x02000014,
+            },
             100,
             0x016651E0,
             0x0166EDE0,
@@ -757,7 +795,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x015F7E90,
             0x01605EE0,
-            {0x02019188,
+            {
+                0x02019188,
                 0x02000018,
                 0x0200A60C,
                 0x0200A5B8,
@@ -771,7 +810,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000008,
                 0x0200000C,
                 0x02000010,
-                0x02000014},
+                0x02000014,
+            },
             100,
             0x015F7E90,
             0x01605EE0,
@@ -781,7 +821,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x01610E80,
             0x0161AC20,
-            {0x0201A6D0,
+            {
+                0x0201A6D0,
                 0x02000018,
                 0x0200CFF8,
                 0x0200CFA4,
@@ -795,7 +836,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000008,
                 0x0200000C,
                 0x02000010,
-                0x02000014},
+                0x02000014,
+            },
             100,
             0x01610E80,
             0x0161AC20,
@@ -805,7 +847,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x016A8840,
             0x016B0170,
-            {0x02013ED0,
+            {
+                0x02013ED0,
                 0x02000018,
                 0x02009D64,
                 0x02009D10,
@@ -819,7 +862,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000008,
                 0x0200000C,
                 0x02000010,
-                0x02000014},
+                0x02000014,
+            },
             70,
             0x016A8840,
             0x016B0170,
@@ -829,7 +873,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x0154C850,
             0x01552B20,
-            {0x02010020,
+            {
+                0x02010020,
                 0x02000018,
                 0x02006F84,
                 0x02006F30,
@@ -843,7 +888,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000008,
                 0x0200000C,
                 0x02000010,
-                0x02000014},
+                0x02000014,
+            },
             100,
             0x0154C850,
             0x01552B20,
@@ -853,7 +899,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x015E2E00,
             0x015EC1B0,
-            {0x020160C8,
+            {
+                0x020160C8,
                 0x02000018,
                 0x0200AB6C,
                 0x0200AB18,
@@ -867,7 +914,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000008,
                 0x0200000C,
                 0x02000010,
-                0x02000014},
+                0x02000014,
+            },
             100,
             0x015E2E00,
             0x015EC1B0,
@@ -877,7 +925,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x01697C80,
             0x016A0220,
-            {0x02011898,
+            {
+                0x02011898,
                 0x02000018,
                 0x020067D8,
                 0x02006784,
@@ -891,7 +940,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000008,
                 0x0200000C,
                 0x02000010,
-                0x02000014},
+                0x02000014,
+            },
             100,
             0x01697C80,
             0x016A0220,
@@ -901,7 +951,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x0155DB00,
             0x015690A0,
-            {0x020153E8,
+            {
+                0x020153E8,
                 0x020004D8,
                 0x02005EDC,
                 0x02005E88,
@@ -915,7 +966,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x020004C8,
                 0x020004CC,
                 0x020004D0,
-                0x020004D4},
+                0x020004D4,
+            },
             100,
             0x0155DB00,
             0x015690A0,
@@ -925,7 +977,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x0164CBE0,
             0x016525C0,
-            {0x0200BD58,
+            {
+                0x0200BD58,
                 0x02000018,
                 0x02004C18,
                 0x02004BC4,
@@ -939,7 +992,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000008,
                 0x0200000C,
                 0x02000010,
-                0x02000014},
+                0x02000014,
+            },
             100,
             0x0164CBE0,
             0x016525C0,
@@ -949,7 +1003,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x0153DEA0,
             0x01543EC0,
-            {0x020109B8,
+            {
+                0x020109B8,
                 0x02000018,
                 0x020071F0,
                 0x02007158,
@@ -963,7 +1018,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000008,
                 0x0200000C,
                 0x02000010,
-                0x02000014},
+                0x02000014,
+            },
             100,
             0x0153DEA0,
             0x01543EC0,
@@ -973,7 +1029,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x016DBA80,
             0x016E2A10,
-            {0x020103C0,
+            {
+                0x020103C0,
                 0x02000540,
                 0x02005DBC,
                 0x02005D68,
@@ -987,7 +1044,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000530,
                 0x02000534,
                 0x02000538,
-                0x0200053C},
+                0x0200053C,
+            },
             100,
             0x016DBA80,
             0x016E2A10,
@@ -997,7 +1055,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x01624100,
             0x0162D080,
-            {0x020130F0,
+            {
+                0x020130F0,
                 0x02000018,
                 0x02007574,
                 0x02007520,
@@ -1011,7 +1070,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000008,
                 0x0200000C,
                 0x02000010,
-                0x02000014},
+                0x02000014,
+            },
             120,
             0x01624100,
             0x0162D080,
@@ -1021,7 +1081,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x016BF760,
             0x016C7100,
-            {0x0200FD50,
+            {
+                0x0200FD50,
                 0x02000018,
                 0x02005890,
                 0x0200583C,
@@ -1035,7 +1096,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000008,
                 0x0200000C,
                 0x02000010,
-                0x02000014},
+                0x02000014,
+            },
             150,
             0x016BF760,
             0x016C7100,
@@ -1045,7 +1107,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x0171A110,
             0x0171EB40,
-            {0x020089A8,
+            {
+                0x020089A8,
                 0x02000018,
                 0x02000308,
                 0x02000270,
@@ -1059,7 +1122,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000008,
                 0x0200000C,
                 0x02000010,
-                0x02000014},
+                0x02000014,
+            },
             100,
             0x0171A110,
             0x0171EB40,
@@ -1069,7 +1133,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x015B43A0,
             0x015B9750,
-            {0x0200F620,
+            {
+                0x0200F620,
                 0x02000018,
                 0x02007FF4,
                 0x02007FA0,
@@ -1083,7 +1148,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000008,
                 0x0200000C,
                 0x02000010,
-                0x02000014},
+                0x02000014,
+            },
             100,
             0x015B43A0,
             0x015B9750,
@@ -1093,7 +1159,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x015CE6E0,
             0x015D53C0,
-            {0x02012760,
+            {
+                0x02012760,
                 0x02000018,
                 0x02007C78,
                 0x02007C24,
@@ -1107,7 +1174,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000008,
                 0x0200000C,
                 0x02000010,
-                0x02000014},
+                0x02000014,
+            },
             100,
             0x015CE6E0,
             0x015D53C0,
@@ -1117,7 +1185,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x01598100,
             0x015A19A0,
-            {0x02019B68,
+            {
+                0x02019B68,
                 0x02000018,
                 0x0200CFEC,
                 0x0200CF98,
@@ -1131,7 +1200,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000008,
                 0x0200000C,
                 0x02000010,
-                0x02000014},
+                0x02000014,
+            },
             100,
             0x01598100,
             0x015A19A0,
@@ -1141,7 +1211,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x0163A970,
             0x016432D0,
-            {0x02010930,
+            {
+                0x02010930,
                 0x02000540,
                 0x020069BC,
                 0x02006968,
@@ -1155,7 +1226,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000530,
                 0x02000534,
                 0x02000538,
-                0x0200053C},
+                0x0200053C,
+            },
             100,
             0x0163A970,
             0x016432D0,
@@ -1167,7 +1239,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x0165BD50,
             0x0165C0C0,
-            {0x02010F70,
+            {
+                0x02010F70,
                 0x02000540,
                 0x02005DD8,
                 0x02005488,
@@ -1181,7 +1254,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000530,
                 0x02000534,
                 0x02000538,
-                0x0200053C},
+                0x0200053C,
+            },
             100,
             0x01652EB0,
             0x0165BD50,
@@ -1191,7 +1265,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x015F6EC0,
             0x015F7400,
-            {0x02010C80,
+            {
+                0x02010C80,
                 0x02000540,
                 0x02004B10,
                 0x020041C0,
@@ -1205,7 +1280,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000530,
                 0x02000534,
                 0x02000538,
-                0x0200053C},
+                0x0200053C,
+            },
             100,
             0x015EE790,
             0x015F6EC0,
@@ -1215,7 +1291,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x0160ED90,
             0x0160F870,
-            {0x02012B40,
+            {
+                0x02012B40,
                 0x02000540,
                 0x02006FA8,
                 0x02006658,
@@ -1229,7 +1306,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000530,
                 0x02000534,
                 0x02000538,
-                0x0200053C},
+                0x0200053C,
+            },
             100,
             0x01606090,
             0x0160ED90,
@@ -1239,7 +1317,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x016A73A0,
             0x016A7A50,
-            {0x0200FF78,
+            {
+                0x0200FF78,
                 0x02000540,
                 0x02005800,
                 0x02004F10,
@@ -1253,7 +1332,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000530,
                 0x02000534,
                 0x02000538,
-                0x0200053C},
+                0x0200053C,
+            },
             70,
             0x016A1220,
             0x016A73A0,
@@ -1263,7 +1343,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x0154C190,
             0x0154C370,
-            {0x0200EFD0,
+            {
+                0x0200EFD0,
                 0x02000540,
                 0x02005660,
                 0x02004D10,
@@ -1277,7 +1358,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000530,
                 0x02000534,
                 0x02000538,
-                0x0200053C},
+                0x0200053C,
+            },
             100,
             0x01545D80,
             0x0154C190,
@@ -1287,7 +1369,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x015DE6D0,
             0x015E0570,
-            {0x02011338,
+            {
+                0x02011338,
                 0x02000540,
                 0x02005278,
                 0x02004920,
@@ -1301,7 +1384,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000530,
                 0x02000534,
                 0x02000538,
-                0x0200053C},
+                0x0200053C,
+            },
             100,
             0x015D5A90,
             0x015DE6D0,
@@ -1311,7 +1395,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x01681F70,
             0x01689380,
-            {0x0200FC10,
+            {
+                0x0200FC10,
                 0x02000540,
                 0x02004910,
                 0x02003FC0,
@@ -1325,7 +1410,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000530,
                 0x02000534,
                 0x02000538,
-                0x0200053C},
+                0x0200053C,
+            },
             100,
             0x0167A3C0,
             0x01681F70,
@@ -1335,7 +1421,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x0155D0C0,
             0x0155D450,
-            {0x02011530,
+            {
+                0x02011530,
                 0x02000540,
                 0x02005660,
                 0x02004D10,
@@ -1349,7 +1436,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000530,
                 0x02000534,
                 0x02000538,
-                0x0200053C},
+                0x0200053C,
+            },
             100,
             0x015544C0,
             0x0155D0C0,
@@ -1359,7 +1447,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x0164C520,
             0x0164C5F0,
-            {0x0200F640,
+            {
+                0x0200F640,
                 0x02000540,
                 0x02005A58,
                 0x02005108,
@@ -1373,7 +1462,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000530,
                 0x02000534,
                 0x02000538,
-                0x0200053C},
+                0x0200053C,
+            },
             100,
             0x01644C90,
             0x0164C520,
@@ -1383,7 +1473,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x015384B0,
             0x01538880,
-            {0x0200C4E0,
+            {
+                0x0200C4E0,
                 0x02000540,
                 0x02004E58,
                 0x02004508,
@@ -1397,7 +1488,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000530,
                 0x02000534,
                 0x02000538,
-                0x0200053C},
+                0x0200053C,
+            },
             100,
             0x01533380,
             0x015384B0,
@@ -1407,7 +1499,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x016CE3C0,
             0x016D2C20,
-            {0x0200E668,
+            {
+                0x0200E668,
                 0x02000540,
                 0x020040F8,
                 0x020037C8,
@@ -1421,7 +1514,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000530,
                 0x02000534,
                 0x02000538,
-                0x0200053C},
+                0x0200053C,
+            },
             100,
             0x016C88B0,
             0x016CE3C0,
@@ -1431,7 +1525,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x01622860,
             0x01622E00,
-            {0x020119E8,
+            {
+                0x020119E8,
                 0x02000540,
                 0x020074D0,
                 0x02006B68,
@@ -1445,7 +1540,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000530,
                 0x02000534,
                 0x02000538,
-                0x0200053C},
+                0x0200053C,
+            },
             120,
             0x0161B430,
             0x01622860,
@@ -1455,7 +1551,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x016BDB40,
             0x016BE230,
-            {0x02010148,
+            {
+                0x02010148,
                 0x02000540,
                 0x02005ED8,
                 0x02005570,
@@ -1469,7 +1566,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000530,
                 0x02000534,
                 0x02000538,
-                0x0200053C},
+                0x0200053C,
+            },
             150,
             0x016B72B0,
             0x016BDB40,
@@ -1479,7 +1577,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x0171EB40,
             0x0171EF00,
-            {0x02007820,
+            {
+                0x02007820,
                 0x02000018,
                 0x02000868,
                 0x02000078,
@@ -1493,7 +1592,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000008,
                 0x0200000C,
                 0x02000010,
-                0x02000014},
+                0x02000014,
+            },
             100,
             0x01715F00,
             0x0171A110,
@@ -1503,7 +1603,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x015AB320,
             0x015AC1B0,
-            {0x0200FB18,
+            {
+                0x0200FB18,
                 0x02000540,
                 0x02005668,
                 0x02004D10,
@@ -1517,7 +1618,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000530,
                 0x02000534,
                 0x02000538,
-                0x0200053C},
+                0x0200053C,
+            },
             100,
             0x015A4050,
             0x015AB320,
@@ -1527,7 +1629,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x015CD7B0,
             0x015CDCB0,
-            {0x0200F000,
+            {
+                0x0200F000,
                 0x02000540,
                 0x02004AE0,
                 0x02004188,
@@ -1541,7 +1644,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000530,
                 0x02000534,
                 0x02000538,
-                0x0200053C},
+                0x0200053C,
+            },
             100,
             0x015C67B0,
             0x015CD7B0,
@@ -1551,7 +1655,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x01575410,
             0x01580D90,
-            {0x02016498,
+            {
+                0x02016498,
                 0x02000540,
                 0x02006FA8,
                 0x02006658,
@@ -1565,7 +1670,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000530,
                 0x02000534,
                 0x02000538,
-                0x0200053C},
+                0x0200053C,
+            },
             100,
             0x0156A510,
             0x01575410,
@@ -1575,7 +1681,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x01638FA0,
             0x01639330,
-            {0x02012A48,
+            {
+                0x02012A48,
                 0x02000540,
                 0x02006A20,
                 0x020060D0,
@@ -1589,7 +1696,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000530,
                 0x02000534,
                 0x02000538,
-                0x0200053C},
+                0x0200053C,
+            },
             100,
             0x01630880,
             0x01638FA0,
@@ -1599,7 +1707,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x0166EDE0,
             0x0166F670,
-            {0x02010FD0,
+            {
+                0x02010FD0,
                 0x02000018,
                 0x02005F4C,
                 0x02005EF8,
@@ -1613,7 +1722,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000008,
                 0x0200000C,
                 0x02000010,
-                0x02000014},
+                0x02000014,
+            },
             100,
             0x016651E0,
             0x0166EDE0,
@@ -1623,7 +1733,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x01605EE0,
             0x01605F70,
-            {0x02019188,
+            {
+                0x02019188,
                 0x02000018,
                 0x0200A60C,
                 0x0200A5B8,
@@ -1637,7 +1748,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000008,
                 0x0200000C,
                 0x02000010,
-                0x02000014},
+                0x02000014,
+            },
             100,
             0x015F7E90,
             0x01605EE0,
@@ -1647,7 +1759,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x0161AC20,
             0x0161AEC0,
-            {0x0201A6D0,
+            {
+                0x0201A6D0,
                 0x02000018,
                 0x0200CFF8,
                 0x0200CFA4,
@@ -1661,7 +1774,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000008,
                 0x0200000C,
                 0x02000010,
-                0x02000014},
+                0x02000014,
+            },
             100,
             0x01610E80,
             0x0161AC20,
@@ -1671,7 +1785,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x016B0170,
             0x016B0A60,
-            {0x02013EB0,
+            {
+                0x02013EB0,
                 0x02000018,
                 0x02009D64,
                 0x02009D10,
@@ -1685,7 +1800,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000008,
                 0x0200000C,
                 0x02000010,
-                0x02000014},
+                0x02000014,
+            },
             70,
             0x016A8840,
             0x016B0170,
@@ -1695,7 +1811,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x01552B20,
             0x015533C0,
-            {0x02010018,
+            {
+                0x02010018,
                 0x02000018,
                 0x02006F84,
                 0x02006F30,
@@ -1709,7 +1826,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000008,
                 0x0200000C,
                 0x02000010,
-                0x02000014},
+                0x02000014,
+            },
             100,
             0x0154C850,
             0x01552B20,
@@ -1719,7 +1837,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x015EC1B0,
             0x015ECE50,
-            {0x02015FD8,
+            {
+                0x02015FD8,
                 0x02000018,
                 0x0200AB6C,
                 0x0200AB18,
@@ -1733,7 +1852,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000008,
                 0x0200000C,
                 0x02000010,
-                0x02000014},
+                0x02000014,
+            },
             100,
             0x015E2E00,
             0x015EC1B0,
@@ -1743,7 +1863,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x016A0220,
             0x016A0500,
-            {0x02011898,
+            {
+                0x02011898,
                 0x02000018,
                 0x020067D8,
                 0x02006784,
@@ -1757,7 +1878,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000008,
                 0x0200000C,
                 0x02000010,
-                0x02000014},
+                0x02000014,
+            },
             100,
             0x01697C80,
             0x016A0220,
@@ -1767,7 +1889,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x015690A0,
             0x01569760,
-            {0x02015448,
+            {
+                0x02015448,
                 0x02000540,
                 0x02005F44,
                 0x02005EF0,
@@ -1781,7 +1904,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000530,
                 0x02000534,
                 0x02000538,
-                0x0200053C},
+                0x0200053C,
+            },
             100,
             0x0155DB00,
             0x015690A0,
@@ -1791,7 +1915,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x016525C0,
             0x01652690,
-            {0x0200BD58,
+            {
+                0x0200BD58,
                 0x02000018,
                 0x02004C18,
                 0x02004BC4,
@@ -1805,7 +1930,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000008,
                 0x0200000C,
                 0x02000010,
-                0x02000014},
+                0x02000014,
+            },
             100,
             0x0164CBE0,
             0x016525C0,
@@ -1815,7 +1941,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x01543EC0,
             0x015448E0,
-            {0x020109C0,
+            {
+                0x020109C0,
                 0x02000018,
                 0x020071F0,
                 0x02007158,
@@ -1829,7 +1956,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000008,
                 0x0200000C,
                 0x02000010,
-                0x02000014},
+                0x02000014,
+            },
             100,
             0x0153DEA0,
             0x01543EC0,
@@ -1839,7 +1967,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x016E2A10,
             0x016E3460,
-            {0x02010380,
+            {
+                0x02010380,
                 0x02000540,
                 0x02005DBC,
                 0x02005D68,
@@ -1853,7 +1982,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000530,
                 0x02000534,
                 0x02000538,
-                0x0200053C},
+                0x0200053C,
+            },
             100,
             0x016DBA80,
             0x016E2A10,
@@ -1863,7 +1993,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x0162D080,
             0x0162E020,
-            {0x020130E8,
+            {
+                0x020130E8,
                 0x02000018,
                 0x02007574,
                 0x02007520,
@@ -1877,7 +2008,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000008,
                 0x0200000C,
                 0x02000010,
-                0x02000014},
+                0x02000014,
+            },
             120,
             0x01624100,
             0x0162D080,
@@ -1887,7 +2019,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x016C7100,
             0x016C78C0,
-            {0x0200FD50,
+            {
+                0x0200FD50,
                 0x02000018,
                 0x02005890,
                 0x0200583C,
@@ -1901,7 +2034,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000008,
                 0x0200000C,
                 0x02000010,
-                0x02000014},
+                0x02000014,
+            },
             150,
             0x016BF760,
             0x016C7100,
@@ -1911,7 +2045,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x0171EF00,
             0x0171F1F0,
-            {0x020089B0,
+            {
+                0x020089B0,
                 0x02000018,
                 0x02000308,
                 0x02000270,
@@ -1925,7 +2060,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000008,
                 0x0200000C,
                 0x02000010,
-                0x02000014},
+                0x02000014,
+            },
             100,
             0x0171A110,
             0x0171EB40,
@@ -1935,7 +2071,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x015B9750,
             0x015BDCC0,
-            {0x0200FE40,
+            {
+                0x0200FE40,
                 0x02000018,
                 0x020087FC,
                 0x020087A8,
@@ -1949,7 +2086,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000008,
                 0x0200000C,
                 0x02000010,
-                0x02000014},
+                0x02000014,
+            },
             100,
             0x015B43A0,
             0x015B9750,
@@ -1959,7 +2097,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x015D53C0,
             0x015D5470,
-            {0x02012760,
+            {
+                0x02012760,
                 0x02000018,
                 0x02007C78,
                 0x02007C24,
@@ -1973,7 +2112,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000008,
                 0x0200000C,
                 0x02000010,
-                0x02000014},
+                0x02000014,
+            },
             100,
             0x015CE6E0,
             0x015D53C0,
@@ -1983,7 +2123,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x015A19A0,
             0x015A2670,
-            {0x02019B98,
+            {
+                0x02019B98,
                 0x02000018,
                 0x0200CFEC,
                 0x0200CF98,
@@ -1997,7 +2138,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000008,
                 0x0200000C,
                 0x02000010,
-                0x02000014},
+                0x02000014,
+            },
             100,
             0x01598100,
             0x015A19A0,
@@ -2007,7 +2149,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x016432D0,
             0x01643930,
-            {0x020108C0,
+            {
+                0x020108C0,
                 0x020004D0,
                 0x0200694C,
                 0x020068F8,
@@ -2021,7 +2164,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x020004C0,
                 0x020004C4,
                 0x020004C8,
-                0x020004CC},
+                0x020004CC,
+            },
             100,
             0x0163A970,
             0x016432D0,
@@ -2033,7 +2177,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x0165C0C0,
             0x0165C430,
-            {0x02010F70,
+            {
+                0x02010F70,
                 0x02000540,
                 0x02005DD8,
                 0x02005488,
@@ -2047,7 +2192,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000530,
                 0x02000534,
                 0x02000538,
-                0x0200053C},
+                0x0200053C,
+            },
             100,
             0x01652EB0,
             0x0165BD50,
@@ -2057,7 +2203,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x015F7400,
             0x015F7950,
-            {0x02010C80,
+            {
+                0x02010C80,
                 0x02000540,
                 0x02004B10,
                 0x020041C0,
@@ -2071,7 +2218,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000530,
                 0x02000534,
                 0x02000538,
-                0x0200053C},
+                0x0200053C,
+            },
             100,
             0x015EE790,
             0x015F6EC0,
@@ -2081,7 +2229,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x0160F870,
             0x01610390,
-            {0x02012B40,
+            {
+                0x02012B40,
                 0x02000540,
                 0x02006FA8,
                 0x02006658,
@@ -2095,7 +2244,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000530,
                 0x02000534,
                 0x02000538,
-                0x0200053C},
+                0x0200053C,
+            },
             100,
             0x01606090,
             0x0160ED90,
@@ -2105,7 +2255,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x016A7A50,
             0x016A8190,
-            {0x0200FF68,
+            {
+                0x0200FF68,
                 0x02000540,
                 0x02005800,
                 0x02004F10,
@@ -2119,7 +2270,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000530,
                 0x02000534,
                 0x02000538,
-                0x0200053C},
+                0x0200053C,
+            },
             70,
             0x016A1220,
             0x016A73A0,
@@ -2129,7 +2281,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x0154C370,
             0x0154C530,
-            {0x0200EFD0,
+            {
+                0x0200EFD0,
                 0x02000540,
                 0x02005660,
                 0x02004D10,
@@ -2143,7 +2296,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000530,
                 0x02000534,
                 0x02000538,
-                0x0200053C},
+                0x0200053C,
+            },
             100,
             0x01545D80,
             0x0154C190,
@@ -2153,7 +2307,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x015E0570,
             0x015E19B0,
-            {0x020112F0,
+            {
+                0x020112F0,
                 0x02000540,
                 0x02005278,
                 0x02004920,
@@ -2167,7 +2322,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000530,
                 0x02000534,
                 0x02000538,
-                0x0200053C},
+                0x0200053C,
+            },
             100,
             0x015D5A90,
             0x015DE6D0,
@@ -2177,7 +2333,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x01689380,
             0x01690730,
-            {0x0200FBC8,
+            {
+                0x0200FBC8,
                 0x02000540,
                 0x020048C8,
                 0x02003FC0,
@@ -2191,7 +2348,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000530,
                 0x02000534,
                 0x02000538,
-                0x0200053C},
+                0x0200053C,
+            },
             100,
             0x0167A3C0,
             0x01681F70,
@@ -2201,7 +2359,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x0155D450,
             0x0155D7E0,
-            {0x02011530,
+            {
+                0x02011530,
                 0x02000540,
                 0x02005660,
                 0x02004D10,
@@ -2215,7 +2374,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000530,
                 0x02000534,
                 0x02000538,
-                0x0200053C},
+                0x0200053C,
+            },
             100,
             0x015544C0,
             0x0155D0C0,
@@ -2225,7 +2385,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x0164C5F0,
             0x0164CB00,
-            {0x0200F648,
+            {
+                0x0200F648,
                 0x02000540,
                 0x02005A40,
                 0x02005108,
@@ -2239,7 +2400,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000530,
                 0x02000534,
                 0x02000538,
-                0x0200053C},
+                0x0200053C,
+            },
             100,
             0x01644C90,
             0x0164C520,
@@ -2249,7 +2411,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x01538880,
             0x01538CA0,
-            {0x0200C4E0,
+            {
+                0x0200C4E0,
                 0x02000540,
                 0x02004E58,
                 0x02004508,
@@ -2263,7 +2426,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000530,
                 0x02000534,
                 0x02000538,
-                0x0200053C},
+                0x0200053C,
+            },
             100,
             0x01533380,
             0x015384B0,
@@ -2273,7 +2437,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x016D2C20,
             0x016D7650,
-            {0x0200E668,
+            {
+                0x0200E668,
                 0x02000540,
                 0x02004110,
                 0x020037C8,
@@ -2287,7 +2452,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000530,
                 0x02000534,
                 0x02000538,
-                0x0200053C},
+                0x0200053C,
+            },
             100,
             0x016C88B0,
             0x016CE3C0,
@@ -2297,7 +2463,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x01622E00,
             0x016237F0,
-            {0x020119E8,
+            {
+                0x020119E8,
                 0x02000540,
                 0x020074D0,
                 0x02006B68,
@@ -2311,7 +2478,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000530,
                 0x02000534,
                 0x02000538,
-                0x0200053C},
+                0x0200053C,
+            },
             120,
             0x0161B430,
             0x01622860,
@@ -2321,7 +2489,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x016BE230,
             0x016BF010,
-            {0x020101F8,
+            {
+                0x020101F8,
                 0x02000540,
                 0x02005ED8,
                 0x02005570,
@@ -2335,7 +2504,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000530,
                 0x02000534,
                 0x02000538,
-                0x0200053C},
+                0x0200053C,
+            },
             150,
             0x016B72B0,
             0x016BDB40,
@@ -2345,7 +2515,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x0171F1F0,
             0x0171F210,
-            {0x02007900,
+            {
+                0x02007900,
                 0x02000018,
                 0x02000898,
                 0x02000078,
@@ -2359,7 +2530,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000008,
                 0x0200000C,
                 0x02000010,
-                0x02000014},
+                0x02000014,
+            },
             100,
             0x01715F00,
             0x0171A110,
@@ -2369,7 +2541,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x015AC1B0,
             0x015AD030,
-            {0x0200FB18,
+            {
+                0x0200FB18,
                 0x02000540,
                 0x02005668,
                 0x02004D10,
@@ -2383,7 +2556,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000530,
                 0x02000534,
                 0x02000538,
-                0x0200053C},
+                0x0200053C,
+            },
             100,
             0x015A4050,
             0x015AB320,
@@ -2393,7 +2567,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x015CDCB0,
             0x015CE220,
-            {0x0200EFA8,
+            {
+                0x0200EFA8,
                 0x02000540,
                 0x02004AE0,
                 0x02004188,
@@ -2407,7 +2582,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000530,
                 0x02000534,
                 0x02000538,
-                0x0200053C},
+                0x0200053C,
+            },
             100,
             0x015C67B0,
             0x015CD7B0,
@@ -2417,7 +2593,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x01580D90,
             0x0158C750,
-            {0x02016490,
+            {
+                0x02016490,
                 0x02000540,
                 0x02006FA0,
                 0x02006658,
@@ -2431,7 +2608,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000530,
                 0x02000534,
                 0x02000538,
-                0x0200053C},
+                0x0200053C,
+            },
             100,
             0x0156A510,
             0x01575410,
@@ -2441,7 +2619,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x01639330,
             0x01639A30,
-            {0x02012A88,
+            {
+                0x02012A88,
                 0x02000540,
                 0x02006A20,
                 0x020060D0,
@@ -2455,7 +2634,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000530,
                 0x02000534,
                 0x02000538,
-                0x0200053C},
+                0x0200053C,
+            },
             100,
             0x01630880,
             0x01638FA0,
@@ -2465,7 +2645,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x0166F670,
             0x0166FF00,
-            {0x02010FD0,
+            {
+                0x02010FD0,
                 0x02000018,
                 0x02005F4C,
                 0x02005EF8,
@@ -2479,7 +2660,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000008,
                 0x0200000C,
                 0x02000010,
-                0x02000014},
+                0x02000014,
+            },
             100,
             0x016651E0,
             0x0166EDE0,
@@ -2489,7 +2671,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x01605F70,
             0x01606000,
-            {0x02019188,
+            {
+                0x02019188,
                 0x02000018,
                 0x0200A60C,
                 0x0200A5B8,
@@ -2503,7 +2686,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000008,
                 0x0200000C,
                 0x02000010,
-                0x02000014},
+                0x02000014,
+            },
             100,
             0x015F7E90,
             0x01605EE0,
@@ -2513,7 +2697,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x0161AEC0,
             0x0161B180,
-            {0x0201A6D0,
+            {
+                0x0201A6D0,
                 0x02000018,
                 0x0200CFF8,
                 0x0200CFA4,
@@ -2527,7 +2712,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000008,
                 0x0200000C,
                 0x02000010,
-                0x02000014},
+                0x02000014,
+            },
             100,
             0x01610E80,
             0x0161AC20,
@@ -2537,7 +2723,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x016B0A60,
             0x016B1300,
-            {0x02013EA0,
+            {
+                0x02013EA0,
                 0x02000018,
                 0x02009D64,
                 0x02009D10,
@@ -2551,7 +2738,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000008,
                 0x0200000C,
                 0x02000010,
-                0x02000014},
+                0x02000014,
+            },
             70,
             0x016A8840,
             0x016B0170,
@@ -2561,7 +2749,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x015533C0,
             0x01553C40,
-            {0x02010018,
+            {
+                0x02010018,
                 0x02000018,
                 0x02006F84,
                 0x02006F30,
@@ -2575,7 +2764,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000008,
                 0x0200000C,
                 0x02000010,
-                0x02000014},
+                0x02000014,
+            },
             100,
             0x0154C850,
             0x01552B20,
@@ -2585,7 +2775,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x015ECE50,
             0x015EDAF0,
-            {0x02015FD8,
+            {
+                0x02015FD8,
                 0x02000018,
                 0x0200AB6C,
                 0x0200AB18,
@@ -2599,7 +2790,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000008,
                 0x0200000C,
                 0x02000010,
-                0x02000014},
+                0x02000014,
+            },
             100,
             0x015E2E00,
             0x015EC1B0,
@@ -2609,7 +2801,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x016A0500,
             0x016A0770,
-            {0x02011898,
+            {
+                0x02011898,
                 0x02000018,
                 0x020067D8,
                 0x02006784,
@@ -2623,7 +2816,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000008,
                 0x0200000C,
                 0x02000010,
-                0x02000014},
+                0x02000014,
+            },
             100,
             0x01697C80,
             0x016A0220,
@@ -2633,7 +2827,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x01569760,
             0x01569E60,
-            {0x02015448,
+            {
+                0x02015448,
                 0x02000540,
                 0x02005F44,
                 0x02005EF0,
@@ -2647,7 +2842,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000530,
                 0x02000534,
                 0x02000538,
-                0x0200053C},
+                0x0200053C,
+            },
             100,
             0x0155DB00,
             0x015690A0,
@@ -2657,7 +2853,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x01652690,
             0x01652A60,
-            {0x0200BD68,
+            {
+                0x0200BD68,
                 0x02000018,
                 0x02004C18,
                 0x02004BC4,
@@ -2671,7 +2868,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000008,
                 0x0200000C,
                 0x02000010,
-                0x02000014},
+                0x02000014,
+            },
             100,
             0x0164CBE0,
             0x016525C0,
@@ -2681,7 +2879,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x015448E0,
             0x01545360,
-            {0x020109C0,
+            {
+                0x020109C0,
                 0x02000018,
                 0x020071F0,
                 0x02007158,
@@ -2695,7 +2894,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000008,
                 0x0200000C,
                 0x02000010,
-                0x02000014},
+                0x02000014,
+            },
             100,
             0x0153DEA0,
             0x01543EC0,
@@ -2705,7 +2905,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x016E3460,
             0x016E3D90,
-            {0x02010380,
+            {
+                0x02010380,
                 0x02000540,
                 0x02005DBC,
                 0x02005D68,
@@ -2719,7 +2920,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000530,
                 0x02000534,
                 0x02000538,
-                0x0200053C},
+                0x0200053C,
+            },
             100,
             0x016DBA80,
             0x016E2A10,
@@ -2729,7 +2931,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x0162E020,
             0x0162F580,
-            {0x020130E8,
+            {
+                0x020130E8,
                 0x02000018,
                 0x02007574,
                 0x02007520,
@@ -2743,7 +2946,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000008,
                 0x0200000C,
                 0x02000010,
-                0x02000014},
+                0x02000014,
+            },
             120,
             0x01624100,
             0x0162D080,
@@ -2753,7 +2957,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x016C78C0,
             0x016C8080,
-            {0x0200FD50,
+            {
+                0x0200FD50,
                 0x02000018,
                 0x02005890,
                 0x0200583C,
@@ -2767,7 +2972,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000008,
                 0x0200000C,
                 0x02000010,
-                0x02000014},
+                0x02000014,
+            },
             150,
             0x016BF760,
             0x016C7100,
@@ -2777,7 +2983,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x0171F210,
             0x0171F500,
-            {0x020089B0,
+            {
+                0x020089B0,
                 0x02000018,
                 0x02000308,
                 0x02000270,
@@ -2791,7 +2998,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000008,
                 0x0200000C,
                 0x02000010,
-                0x02000014},
+                0x02000014,
+            },
             100,
             0x0171A110,
             0x0171EB40,
@@ -2801,7 +3009,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x015BDCC0,
             0x015C2240,
-            {0x0200FE40,
+            {
+                0x0200FE40,
                 0x02000018,
                 0x020087FC,
                 0x020087A8,
@@ -2815,7 +3024,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000008,
                 0x0200000C,
                 0x02000010,
-                0x02000014},
+                0x02000014,
+            },
             100,
             0x015B43A0,
             0x015B9750,
@@ -2825,7 +3035,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x015D5470,
             0x015D59D0,
-            {0x02012718,
+            {
+                0x02012718,
                 0x02000018,
                 0x02007C78,
                 0x02007C24,
@@ -2839,7 +3050,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000008,
                 0x0200000C,
                 0x02000010,
-                0x02000014},
+                0x02000014,
+            },
             100,
             0x015CE6E0,
             0x015D53C0,
@@ -2849,7 +3061,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x015A2670,
             0x015A3350,
-            {0x02019B98,
+            {
+                0x02019B98,
                 0x02000018,
                 0x0200CFEC,
                 0x0200CF98,
@@ -2863,7 +3076,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000008,
                 0x0200000C,
                 0x02000010,
-                0x02000014},
+                0x02000014,
+            },
             100,
             0x01598100,
             0x015A19A0,
@@ -2873,7 +3087,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x01643930,
             0x01643D10,
-            {0x02010980,
+            {
+                0x02010980,
                 0x02000540,
                 0x020069BC,
                 0x02006968,
@@ -2887,7 +3102,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000530,
                 0x02000534,
                 0x02000538,
-                0x0200053C},
+                0x0200053C,
+            },
             100,
             0x0163A970,
             0x016432D0,
@@ -2899,7 +3115,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x0165C430,
             0x016651E0,
-            {0x020109F8,
+            {
+                0x020109F8,
                 0x02000018,
                 0x02005860,
                 0x02004F60,
@@ -2913,7 +3130,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000008,
                 0x0200000C,
                 0x02000010,
-                0x02000014},
+                0x02000014,
+            },
             100,
             0x01652EB0,
             0x0165BD50,
@@ -2923,7 +3141,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x015F7950,
             0x015F7E90,
-            {0x02010C80,
+            {
+                0x02010C80,
                 0x02000540,
                 0x02004B10,
                 0x020041C0,
@@ -2937,7 +3156,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000530,
                 0x02000534,
                 0x02000538,
-                0x0200053C},
+                0x0200053C,
+            },
             100,
             0x015EE790,
             0x015F6EC0,
@@ -2947,7 +3167,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x01610390,
             0x01610E80,
-            {0x02012B40,
+            {
+                0x02012B40,
                 0x02000540,
                 0x02006FA8,
                 0x02006658,
@@ -2961,7 +3182,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000530,
                 0x02000534,
                 0x02000538,
-                0x0200053C},
+                0x0200053C,
+            },
             100,
             0x01606090,
             0x0160ED90,
@@ -2971,7 +3193,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x016A8190,
             0x016A8840,
-            {0x0200FF78,
+            {
+                0x0200FF78,
                 0x02000540,
                 0x02005800,
                 0x02004F10,
@@ -2985,7 +3208,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000530,
                 0x02000534,
                 0x02000538,
-                0x0200053C},
+                0x0200053C,
+            },
             70,
             0x016A1220,
             0x016A73A0,
@@ -2995,7 +3219,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x0154C530,
             0x0154C850,
-            {0x0200EFD0,
+            {
+                0x0200EFD0,
                 0x02000540,
                 0x02005660,
                 0x02004D10,
@@ -3009,7 +3234,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000530,
                 0x02000534,
                 0x02000538,
-                0x0200053C},
+                0x0200053C,
+            },
             100,
             0x01545D80,
             0x0154C190,
@@ -3019,7 +3245,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x015E19B0,
             0x015E2E00,
-            {0x020112F0,
+            {
+                0x020112F0,
                 0x02000540,
                 0x02005278,
                 0x02004920,
@@ -3033,7 +3260,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000530,
                 0x02000534,
                 0x02000538,
-                0x0200053C},
+                0x0200053C,
+            },
             100,
             0x015D5A90,
             0x015DE6D0,
@@ -3043,7 +3271,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x01690730,
             0x01697C80,
-            {0x0200FC10,
+            {
+                0x0200FC10,
                 0x02000540,
                 0x02004910,
                 0x02003FC0,
@@ -3057,7 +3286,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000530,
                 0x02000534,
                 0x02000538,
-                0x0200053C},
+                0x0200053C,
+            },
             100,
             0x0167A3C0,
             0x01681F70,
@@ -3067,7 +3297,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x0155D7E0,
             0x0155DB00,
-            {0x02011530,
+            {
+                0x02011530,
                 0x02000540,
                 0x02005660,
                 0x02004D10,
@@ -3081,7 +3312,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000530,
                 0x02000534,
                 0x02000538,
-                0x0200053C},
+                0x0200053C,
+            },
             100,
             0x015544C0,
             0x0155D0C0,
@@ -3091,7 +3323,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x0164CB00,
             0x0164CBE0,
-            {0x0200F640,
+            {
+                0x0200F640,
                 0x02000540,
                 0x02005A58,
                 0x02005108,
@@ -3105,7 +3338,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000530,
                 0x02000534,
                 0x02000538,
-                0x0200053C},
+                0x0200053C,
+            },
             100,
             0x01644C90,
             0x0164C520,
@@ -3115,7 +3349,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x01538CA0,
             0x0153DEA0,
-            {0x0200BF68,
+            {
+                0x0200BF68,
                 0x02000018,
                 0x020048E0,
                 0x02003FE0,
@@ -3129,7 +3364,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000008,
                 0x0200000C,
                 0x02000010,
-                0x02000014},
+                0x02000014,
+            },
             100,
             0x01533380,
             0x015384B0,
@@ -3139,7 +3375,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x016D7650,
             0x016DBA80,
-            {0x0200E548,
+            {
+                0x0200E548,
                 0x02000540,
                 0x020040F8,
                 0x020037C8,
@@ -3153,7 +3390,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000530,
                 0x02000534,
                 0x02000538,
-                0x0200053C},
+                0x0200053C,
+            },
             100,
             0x016C88B0,
             0x016CE3C0,
@@ -3163,7 +3401,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x016237F0,
             0x01624100,
-            {0x020119E8,
+            {
+                0x020119E8,
                 0x02000540,
                 0x020074D0,
                 0x02006B68,
@@ -3177,7 +3416,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000530,
                 0x02000534,
                 0x02000538,
-                0x0200053C},
+                0x0200053C,
+            },
             120,
             0x0161B430,
             0x01622860,
@@ -3187,7 +3427,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x016BF010,
             0x016BF760,
-            {0x02010148,
+            {
+                0x02010148,
                 0x02000540,
                 0x02005ED8,
                 0x02005570,
@@ -3201,7 +3442,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000530,
                 0x02000534,
                 0x02000538,
-                0x0200053C},
+                0x0200053C,
+            },
             150,
             0x016B72B0,
             0x016BDB40,
@@ -3211,7 +3453,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x0171F500,
             0x0171F520,
-            {0x02007900,
+            {
+                0x02007900,
                 0x02000018,
                 0x02000898,
                 0x02000078,
@@ -3225,7 +3468,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000008,
                 0x0200000C,
                 0x02000010,
-                0x02000014},
+                0x02000014,
+            },
             100,
             0x01715F00,
             0x0171A110,
@@ -3235,7 +3479,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x015AD030,
             0x015B43A0,
-            {0x0200F5A0,
+            {
+                0x0200F5A0,
                 0x02000018,
                 0x020050F0,
                 0x020047E8,
@@ -3249,7 +3494,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000008,
                 0x0200000C,
                 0x02000010,
-                0x02000014},
+                0x02000014,
+            },
             100,
             0x015A4050,
             0x015AB320,
@@ -3259,7 +3505,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x015CE220,
             0x015CE6E0,
-            {0x0200F060,
+            {
+                0x0200F060,
                 0x02000540,
                 0x02004AE0,
                 0x02004188,
@@ -3273,7 +3520,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000530,
                 0x02000534,
                 0x02000538,
-                0x0200053C},
+                0x0200053C,
+            },
             100,
             0x015C67B0,
             0x015CD7B0,
@@ -3283,7 +3531,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x0158C750,
             0x01598100,
-            {0x02016498,
+            {
+                0x02016498,
                 0x02000540,
                 0x02006FA8,
                 0x02006658,
@@ -3297,7 +3546,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000530,
                 0x02000534,
                 0x02000538,
-                0x0200053C},
+                0x0200053C,
+            },
             100,
             0x0156A510,
             0x01575410,
@@ -3307,7 +3557,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x01639A30,
             0x0163A970,
-            {0x02012A88,
+            {
+                0x02012A88,
                 0x02000540,
                 0x02006A20,
                 0x020060D0,
@@ -3321,7 +3572,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000530,
                 0x02000534,
                 0x02000538,
-                0x0200053C},
+                0x0200053C,
+            },
             100,
             0x01630880,
             0x01638FA0,
@@ -3331,7 +3583,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x0166FF00,
             0x0167A3C0,
-            {0x02012F38,
+            {
+                0x02012F38,
                 0x02000018,
                 0x02007EDC,
                 0x02007E88,
@@ -3345,7 +3598,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000008,
                 0x0200000C,
                 0x02000010,
-                0x02000014},
+                0x02000014,
+            },
             100,
             0x016651E0,
             0x0166EDE0,
@@ -3355,7 +3609,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x01606000,
             0x01606090,
-            {0x02019188,
+            {
+                0x02019188,
                 0x02000018,
                 0x0200A60C,
                 0x0200A5B8,
@@ -3369,7 +3624,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000008,
                 0x0200000C,
                 0x02000010,
-                0x02000014},
+                0x02000014,
+            },
             100,
             0x015F7E90,
             0x01605EE0,
@@ -3379,7 +3635,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x0161B180,
             0x0161B430,
-            {0x0201A6D0,
+            {
+                0x0201A6D0,
                 0x02000018,
                 0x0200CFF8,
                 0x0200CFA4,
@@ -3393,7 +3650,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000008,
                 0x0200000C,
                 0x02000010,
-                0x02000014},
+                0x02000014,
+            },
             100,
             0x01610E80,
             0x0161AC20,
@@ -3403,7 +3661,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x016B1300,
             0x016B1BF0,
-            {0x02013EB0,
+            {
+                0x02013EB0,
                 0x02000018,
                 0x02009D64,
                 0x02009D10,
@@ -3417,7 +3676,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000008,
                 0x0200000C,
                 0x02000010,
-                0x02000014},
+                0x02000014,
+            },
             70,
             0x016A8840,
             0x016B0170,
@@ -3427,7 +3687,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x01553C40,
             0x015544C0,
-            {0x02010018,
+            {
+                0x02010018,
                 0x02000018,
                 0x02006F84,
                 0x02006F30,
@@ -3441,7 +3702,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000008,
                 0x0200000C,
                 0x02000010,
-                0x02000014},
+                0x02000014,
+            },
             100,
             0x0154C850,
             0x01552B20,
@@ -3451,7 +3713,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x015EDAF0,
             0x015EE790,
-            {0x02015FD8,
+            {
+                0x02015FD8,
                 0x02000018,
                 0x0200AB6C,
                 0x0200AB18,
@@ -3465,7 +3728,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000008,
                 0x0200000C,
                 0x02000010,
-                0x02000014},
+                0x02000014,
+            },
             100,
             0x015E2E00,
             0x015EC1B0,
@@ -3475,7 +3739,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x016A0770,
             0x016A1220,
-            {0x02011898,
+            {
+                0x02011898,
                 0x02000018,
                 0x020067D8,
                 0x02006784,
@@ -3489,7 +3754,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000008,
                 0x0200000C,
                 0x02000010,
-                0x02000014},
+                0x02000014,
+            },
             100,
             0x01697C80,
             0x016A0220,
@@ -3499,7 +3765,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x01569E60,
             0x0156A510,
-            {0x02015448,
+            {
+                0x02015448,
                 0x02000540,
                 0x02005F44,
                 0x02005EF0,
@@ -3513,7 +3780,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000530,
                 0x02000534,
                 0x02000538,
-                0x0200053C},
+                0x0200053C,
+            },
             100,
             0x0155DB00,
             0x015690A0,
@@ -3523,7 +3791,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x01652A60,
             0x01652EB0,
-            {0x0200BD40,
+            {
+                0x0200BD40,
                 0x02000018,
                 0x02004C18,
                 0x02004BC4,
@@ -3537,7 +3806,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000008,
                 0x0200000C,
                 0x02000010,
-                0x02000014},
+                0x02000014,
+            },
             100,
             0x0164CBE0,
             0x016525C0,
@@ -3547,7 +3817,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x01545360,
             0x01545D80,
-            {0x020109C0,
+            {
+                0x020109C0,
                 0x02000018,
                 0x020071F0,
                 0x02007158,
@@ -3561,7 +3832,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000008,
                 0x0200000C,
                 0x02000010,
-                0x02000014},
+                0x02000014,
+            },
             100,
             0x0153DEA0,
             0x01543EC0,
@@ -3571,7 +3843,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x016E3D90,
             0x016E46B0,
-            {0x02010380,
+            {
+                0x02010380,
                 0x02000540,
                 0x02005DBC,
                 0x02005D68,
@@ -3585,7 +3858,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000530,
                 0x02000534,
                 0x02000538,
-                0x0200053C},
+                0x0200053C,
+            },
             100,
             0x016DBA80,
             0x016E2A10,
@@ -3595,7 +3869,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x0162F580,
             0x01630880,
-            {0x020130E8,
+            {
+                0x020130E8,
                 0x02000018,
                 0x02007574,
                 0x02007520,
@@ -3609,7 +3884,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000008,
                 0x0200000C,
                 0x02000010,
-                0x02000014},
+                0x02000014,
+            },
             120,
             0x01624100,
             0x0162D080,
@@ -3619,7 +3895,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x016C8080,
             0x016C88B0,
-            {0x0200FD50,
+            {
+                0x0200FD50,
                 0x02000018,
                 0x02005890,
                 0x0200583C,
@@ -3633,7 +3910,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000008,
                 0x0200000C,
                 0x02000010,
-                0x02000014},
+                0x02000014,
+            },
             150,
             0x016BF760,
             0x016C7100,
@@ -3643,7 +3921,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x0171F520,
             0x0171F540,
-            {0x020089A8,
+            {
+                0x020089A8,
                 0x02000018,
                 0x02000308,
                 0x02000270,
@@ -3657,7 +3936,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000008,
                 0x0200000C,
                 0x02000010,
-                0x02000014},
+                0x02000014,
+            },
             100,
             0x0171A110,
             0x0171EB40,
@@ -3667,7 +3947,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x015C2240,
             0x015C67B0,
-            {0x0200FE40,
+            {
+                0x0200FE40,
                 0x02000018,
                 0x020087FC,
                 0x020087A8,
@@ -3681,7 +3962,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000008,
                 0x0200000C,
                 0x02000010,
-                0x02000014},
+                0x02000014,
+            },
             100,
             0x015B43A0,
             0x015B9750,
@@ -3691,7 +3973,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x015D59D0,
             0x015D5A90,
-            {0x02012760,
+            {
+                0x02012760,
                 0x02000018,
                 0x02007C78,
                 0x02007C24,
@@ -3705,7 +3988,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000008,
                 0x0200000C,
                 0x02000010,
-                0x02000014},
+                0x02000014,
+            },
             100,
             0x015CE6E0,
             0x015D53C0,
@@ -3715,7 +3999,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x015A3350,
             0x015A4050,
-            {0x02019B98,
+            {
+                0x02019B98,
                 0x02000018,
                 0x0200CFEC,
                 0x0200CF98,
@@ -3729,7 +4014,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000008,
                 0x0200000C,
                 0x02000010,
-                0x02000014},
+                0x02000014,
+            },
             100,
             0x01598100,
             0x015A19A0,
@@ -3739,7 +4025,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
         {
             0x01643D10,
             0x01644C90,
-            {0x02010910,
+            {
+                0x02010910,
                 0x020004D0,
                 0x0200694C,
                 0x020068F8,
@@ -3753,7 +4040,8 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x020004C0,
                 0x020004C4,
                 0x020004C8,
-                0x020004CC},
+                0x020004CC,
+            },
             100,
             0x0163A970,
             0x016432D0,
@@ -3769,7 +4057,8 @@ const CharacterModel g_OtherCharacterModels[OTHER_CHARACTER_MODEL_COUNT] = {
     {
         0x016E46B0,
         0x016ED4B0,
-        {0x020124B8,
+        {
+            0x020124B8,
             0x02000018,
             0x020053CC,
             0x02005348,
@@ -3783,7 +4072,8 @@ const CharacterModel g_OtherCharacterModels[OTHER_CHARACTER_MODEL_COUNT] = {
             0x02000008,
             0x0200000C,
             0x02000010,
-            0x02000014},
+            0x02000014,
+        },
         70,
         0x016E46B0,
         0x016ED4B0,
@@ -3793,7 +4083,8 @@ const CharacterModel g_OtherCharacterModels[OTHER_CHARACTER_MODEL_COUNT] = {
     {
         0x016E46B0,
         0x016ED4B0,
-        {0x020124B8,
+        {
+            0x020124B8,
             0x02000018,
             0x020053CC,
             0x02005348,
@@ -3807,7 +4098,8 @@ const CharacterModel g_OtherCharacterModels[OTHER_CHARACTER_MODEL_COUNT] = {
             0x02000008,
             0x0200000C,
             0x02000010,
-            0x02000014},
+            0x02000014,
+        },
         70,
         0x016E46B0,
         0x016ED4B0,
@@ -3817,7 +4109,8 @@ const CharacterModel g_OtherCharacterModels[OTHER_CHARACTER_MODEL_COUNT] = {
     {
         0x016E46B0,
         0x016ED4B0,
-        {0x020124B8,
+        {
+            0x020124B8,
             0x02000018,
             0x020053CC,
             0x02005348,
@@ -3831,7 +4124,8 @@ const CharacterModel g_OtherCharacterModels[OTHER_CHARACTER_MODEL_COUNT] = {
             0x02000008,
             0x0200000C,
             0x02000010,
-            0x02000014},
+            0x02000014,
+        },
         70,
         0x016E46B0,
         0x016ED4B0,
@@ -3841,7 +4135,8 @@ const CharacterModel g_OtherCharacterModels[OTHER_CHARACTER_MODEL_COUNT] = {
     {
         0x016E46B0,
         0x016ED4B0,
-        {0x020124B8,
+        {
+            0x020124B8,
             0x02000018,
             0x020053CC,
             0x02005348,
@@ -3855,7 +4150,8 @@ const CharacterModel g_OtherCharacterModels[OTHER_CHARACTER_MODEL_COUNT] = {
             0x02000008,
             0x0200000C,
             0x02000010,
-            0x02000014},
+            0x02000014,
+        },
         70,
         0x016E46B0,
         0x016ED4B0,
@@ -3865,7 +4161,8 @@ const CharacterModel g_OtherCharacterModels[OTHER_CHARACTER_MODEL_COUNT] = {
     {
         0x016E46B0,
         0x016ED4B0,
-        {0x020124B8,
+        {
+            0x020124B8,
             0x02000018,
             0x020053CC,
             0x02005348,
@@ -3879,7 +4176,8 @@ const CharacterModel g_OtherCharacterModels[OTHER_CHARACTER_MODEL_COUNT] = {
             0x02000008,
             0x0200000C,
             0x02000010,
-            0x02000014},
+            0x02000014,
+        },
         70,
         0x016E46B0,
         0x016ED4B0,
@@ -3889,7 +4187,8 @@ const CharacterModel g_OtherCharacterModels[OTHER_CHARACTER_MODEL_COUNT] = {
     {
         0x016E46B0,
         0x016ED4B0,
-        {0x020124B8,
+        {
+            0x020124B8,
             0x02000018,
             0x020053CC,
             0x02005348,
@@ -3903,7 +4202,8 @@ const CharacterModel g_OtherCharacterModels[OTHER_CHARACTER_MODEL_COUNT] = {
             0x02000008,
             0x0200000C,
             0x02000010,
-            0x02000014},
+            0x02000014,
+        },
         70,
         0x016E46B0,
         0x016ED4B0,
@@ -3913,7 +4213,8 @@ const CharacterModel g_OtherCharacterModels[OTHER_CHARACTER_MODEL_COUNT] = {
     {
         0x016E46B0,
         0x016ED4B0,
-        {0x020124B8,
+        {
+            0x020124B8,
             0x02000018,
             0x020053CC,
             0x02005348,
@@ -3927,7 +4228,8 @@ const CharacterModel g_OtherCharacterModels[OTHER_CHARACTER_MODEL_COUNT] = {
             0x02000008,
             0x0200000C,
             0x02000010,
-            0x02000014},
+            0x02000014,
+        },
         70,
         0x016E46B0,
         0x016ED4B0,
@@ -3937,7 +4239,8 @@ const CharacterModel g_OtherCharacterModels[OTHER_CHARACTER_MODEL_COUNT] = {
     {
         0x016E46B0,
         0x016ED4B0,
-        {0x020124B8,
+        {
+            0x020124B8,
             0x02000018,
             0x020053CC,
             0x02005348,
@@ -3951,7 +4254,8 @@ const CharacterModel g_OtherCharacterModels[OTHER_CHARACTER_MODEL_COUNT] = {
             0x02000008,
             0x0200000C,
             0x02000010,
-            0x02000014},
+            0x02000014,
+        },
         70,
         0x016E46B0,
         0x016ED4B0,
@@ -3961,7 +4265,8 @@ const CharacterModel g_OtherCharacterModels[OTHER_CHARACTER_MODEL_COUNT] = {
     {
         0x016E46B0,
         0x016ED4B0,
-        {0x020124B8,
+        {
+            0x020124B8,
             0x02000018,
             0x020053CC,
             0x02005348,
@@ -3975,7 +4280,8 @@ const CharacterModel g_OtherCharacterModels[OTHER_CHARACTER_MODEL_COUNT] = {
             0x02000008,
             0x0200000C,
             0x02000010,
-            0x02000014},
+            0x02000014,
+        },
         70,
         0x016E46B0,
         0x016ED4B0,
@@ -3985,7 +4291,8 @@ const CharacterModel g_OtherCharacterModels[OTHER_CHARACTER_MODEL_COUNT] = {
     {
         0x0170CDB0,
         0x017107A0,
-        {0x02007DF8,
+        {
+            0x02007DF8,
             0x02000540,
             0x02001E84,
             0x02001E6C,
@@ -3999,7 +4306,8 @@ const CharacterModel g_OtherCharacterModels[OTHER_CHARACTER_MODEL_COUNT] = {
             0x02000530,
             0x02000534,
             0x02000538,
-            0x0200053C},
+            0x0200053C,
+        },
         100,
         0x0170CDB0,
         0x017107A0,
@@ -4009,7 +4317,8 @@ const CharacterModel g_OtherCharacterModels[OTHER_CHARACTER_MODEL_COUNT] = {
     {
         0x01704B40,
         0x01709770,
-        {0x02009088,
+        {
+            0x02009088,
             0x02000018,
             0x020033BC,
             0x02003398,
@@ -4023,7 +4332,8 @@ const CharacterModel g_OtherCharacterModels[OTHER_CHARACTER_MODEL_COUNT] = {
             0x02000008,
             0x0200000C,
             0x02000010,
-            0x02000014},
+            0x02000014,
+        },
         60,
         0x01704B40,
         0x01709770,
@@ -4033,7 +4343,8 @@ const CharacterModel g_OtherCharacterModels[OTHER_CHARACTER_MODEL_COUNT] = {
     {
         0x01709770,
         0x0170CDB0,
-        {0x020085C8,
+        {
+            0x020085C8,
             0x02000018,
             0x02003CF4,
             0x02003CDC,
@@ -4047,7 +4358,8 @@ const CharacterModel g_OtherCharacterModels[OTHER_CHARACTER_MODEL_COUNT] = {
             0x02000008,
             0x0200000C,
             0x02000010,
-            0x02000014},
+            0x02000014,
+        },
         120,
         0x01709770,
         0x0170CDB0,
@@ -4057,7 +4369,8 @@ const CharacterModel g_OtherCharacterModels[OTHER_CHARACTER_MODEL_COUNT] = {
     {
         0x016F7950,
         0x016FD9F0,
-        {0x0200A888,
+        {
+            0x0200A888,
             0x02000018,
             0x02002FD4,
             0x02002F98,
@@ -4071,7 +4384,8 @@ const CharacterModel g_OtherCharacterModels[OTHER_CHARACTER_MODEL_COUNT] = {
             0x02000008,
             0x0200000C,
             0x02000010,
-            0x02000014},
+            0x02000014,
+        },
         60,
         0x016F7950,
         0x016FD9F0,
@@ -4081,7 +4395,8 @@ const CharacterModel g_OtherCharacterModels[OTHER_CHARACTER_MODEL_COUNT] = {
     {
         0x016FD9F0,
         0x01704B40,
-        {0x0200C7C0,
+        {
+            0x0200C7C0,
             0x02000018,
             0x020024BC,
             0x02002450,
@@ -4095,7 +4410,8 @@ const CharacterModel g_OtherCharacterModels[OTHER_CHARACTER_MODEL_COUNT] = {
             0x02000008,
             0x0200000C,
             0x02000010,
-            0x02000014},
+            0x02000014,
+        },
         60,
         0x016FD9F0,
         0x01704B40,
@@ -4105,7 +4421,8 @@ const CharacterModel g_OtherCharacterModels[OTHER_CHARACTER_MODEL_COUNT] = {
     {
         0x016ED4B0,
         0x016F5610,
-        {0x02011338,
+        {
+            0x02011338,
             0x02000018,
             0x02006314,
             0x020062CC,
@@ -4119,7 +4436,8 @@ const CharacterModel g_OtherCharacterModels[OTHER_CHARACTER_MODEL_COUNT] = {
             0x02000008,
             0x0200000C,
             0x02000010,
-            0x02000014},
+            0x02000014,
+        },
         70,
         0x016ED4B0,
         0x016F5610,
@@ -4129,7 +4447,8 @@ const CharacterModel g_OtherCharacterModels[OTHER_CHARACTER_MODEL_COUNT] = {
     {
         0x0152B6C0,
         0x01533380,
-        {0x02010050,
+        {
+            0x02010050,
             0x02000018,
             0x02004100,
             0x02003880,
@@ -4143,7 +4462,8 @@ const CharacterModel g_OtherCharacterModels[OTHER_CHARACTER_MODEL_COUNT] = {
             0x02000008,
             0x0200000C,
             0x02000010,
-            0x02000014},
+            0x02000014,
+        },
         100,
         0x0152B6C0,
         0x01533380,
@@ -4153,7 +4473,8 @@ const CharacterModel g_OtherCharacterModels[OTHER_CHARACTER_MODEL_COUNT] = {
     {
         0x016F5610,
         0x016F7950,
-        {0x02005340,
+        {
+            0x02005340,
             0x02000018,
             0x020025F4,
             0x020025DC,
@@ -4167,7 +4488,8 @@ const CharacterModel g_OtherCharacterModels[OTHER_CHARACTER_MODEL_COUNT] = {
             0x02000008,
             0x0200000C,
             0x02000010,
-            0x02000014},
+            0x02000014,
+        },
         60,
         0x016F5610,
         0x016F7950,
@@ -4177,7 +4499,8 @@ const CharacterModel g_OtherCharacterModels[OTHER_CHARACTER_MODEL_COUNT] = {
     {
         0x017107A0,
         0x01715F00,
-        {0x0200D0A0,
+        {
+            0x0200D0A0,
             0x02000018,
             0x02004270,
             0x020041DC,
@@ -4191,7 +4514,8 @@ const CharacterModel g_OtherCharacterModels[OTHER_CHARACTER_MODEL_COUNT] = {
             0x02000008,
             0x0200000C,
             0x02000010,
-            0x02000014},
+            0x02000014,
+        },
         100,
         0x017107A0,
         0x01715F00,

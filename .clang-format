@@ -54,7 +54,9 @@ PointerAlignment: Right
 
 # Braced initializers are laid out like a call's argument list, with no padding
 # inside the braces: {0, 42}. One that doesn't fit breaks the same way, after
-# the "{" and before the "}".
+# the "{" and before the "}". A list that spans lines ends with a comma, which
+# holds it to one item per line; without one, a nested list starts its first
+# item on the line of its "{" and hangs the rest beneath it.
 Cpp11BracedListStyle: FunctionCall
 BreakAfterOpenBracketBracedList: true
 BreakBeforeCloseBracketBracedList: true

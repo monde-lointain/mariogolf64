@@ -182,7 +182,7 @@ static CharacterId f_ChoiceCharacters[CHARACTER_COUNT] = {
     CHARACTER_KID,
     CHARACTER_SHERRY,
     CHARACTER_AZALEA,
-    CHARACTER_JOE
+    CHARACTER_JOE,
 };
 /* Read by no routine */
 static u8 f_UnreadSelectBytes[8] UNUSED = {0x71, 0x76, 0x81, 0x6C, 0x9D, 0x00, 0x00, 0x00};
@@ -211,7 +211,7 @@ static Vtx f_GridCursorVertices[MENU_CURSOR_VERTEX_COUNT] = {
     {{{-24, 24, 0}, 0, {0, 0}, {0xFF, 0x00, 0x00, 0xFF}}},
     {{{-24, -24, 0}, 0, {0, 3072}, {0x00, 0xFF, 0x00, 0xFF}}},
     {{{24, -24, 0}, 0, {3072, 3072}, {0x00, 0x00, 0xFF, 0xFF}}},
-    {{{24, 24, 0}, 0, {3072, 0}, {0xFF, 0xFF, 0x00, 0xFF}}}
+    {{{24, 24, 0}, 0, {3072, 0}, {0xFF, 0xFF, 0x00, 0xFF}}},
 };
 /* Read by no routine */
 static s32 f_UnreadSelectPair[2] UNUSED = {0, 0};

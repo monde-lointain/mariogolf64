@@ -177,14 +177,14 @@ static CharacterId f_TableCharacters[CHARACTER_COUNT] = {
     CHARACTER_KID,
     CHARACTER_SHERRY,
     CHARACTER_AZALEA,
-    CHARACTER_JOE
+    CHARACTER_JOE,
 };
 /* The table cursor's corners, whose colors DrawTableCursor cycles */
 static Vtx f_TableCursorVertices[MENU_CURSOR_VERTEX_COUNT] = {
     {{{-48, 48, 0}, 0, {0, 0}, {0xFF, 0x00, 0x00, 0xFF}}},
     {{{-48, 0, 0}, 0, {0, 3072}, {0x00, 0xFF, 0x00, 0xFF}}},
     {{{0, 0, 0}, 0, {3072, 3072}, {0x00, 0x00, 0xFF, 0xFF}}},
-    {{{0, 48, 0}, 0, {3072, 0}, {0xFF, 0xFF, 0x00, 0xFF}}}
+    {{{0, 48, 0}, 0, {3072, 0}, {0xFF, 0xFF, 0x00, 0xFF}}},
 };
 /* Read by no routine */
 static s32 f_UnreadTablePair[2] UNUSED = {0, 0};
@@ -218,33 +218,41 @@ static TableCorner f_TableLineCorners[TABLE_LINE_COUNT * 2] = {
     {231, 52},
     {232, 228},
     {266, 52},
-    {267, 228}
+    {267, 228},
 };
 /* Read by no routine */
 static s32 f_UnreadTablePoint[2] UNUSED = {64, 84};
 /* Which of the cursor's shown cells each popup corner would cover */
 static u8 f_DoesTablePopupCoverCell[TABLE_POPUP_CORNER_COUNT][TABLE_SHOWN_ROW_COUNT]
                                    [TABLE_SHOWN_COLUMN_COUNT] = {
-                                       {{TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, FALSE},
+                                       {
+                                           {TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, FALSE},
                                            {TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, FALSE},
                                            {FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE},
                                            {FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE},
-                                           {FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE}},
-                                       {{FALSE, FALSE, FALSE, TRUE, TRUE, TRUE, TRUE},
+                                           {FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE},
+                                       },
+                                       {
+                                           {FALSE, FALSE, FALSE, TRUE, TRUE, TRUE, TRUE},
                                            {FALSE, FALSE, FALSE, TRUE, TRUE, TRUE, TRUE},
                                            {FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE},
                                            {FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE},
-                                           {FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE}},
-                                       {{FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE},
+                                           {FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE},
+                                       },
+                                       {
+                                           {FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE},
                                            {FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE},
                                            {FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE},
                                            {TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, FALSE},
-                                           {TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, FALSE}},
-                                       {{FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE},
+                                           {TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, FALSE},
+                                       },
+                                       {
+                                           {FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE},
                                            {FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE},
                                            {FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE},
                                            {FALSE, FALSE, FALSE, TRUE, TRUE, TRUE, TRUE},
-                                           {FALSE, FALSE, FALSE, TRUE, TRUE, TRUE, TRUE}}
+                                           {FALSE, FALSE, FALSE, TRUE, TRUE, TRUE, TRUE},
+                                       },
 };
 
 /* The camera and placement that DrawTableCursor draws the cursor with */

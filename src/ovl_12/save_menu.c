@@ -1118,7 +1118,7 @@ void DrawGameSaveMenu(Gfx **displayListHead) {
                 WIDE_PANEL_HALF_WIDTH,
                 WIDE_PANEL_HALF_WIDTH,
                 WIDE_PANEL_HALF_WIDTH,
-                NARROW_PANEL_HALF_WIDTH
+                NARROW_PANEL_HALF_WIDTH,
             };
             s32 centerX;
             s32 rowTop;
@@ -2131,7 +2131,7 @@ void DrawReplaySaveMenu(Gfx **displayListHead) {
                 RECORD_PANEL_HEIGHT,
                 RECORD_PANEL_HEIGHT,
                 RECORD_PANEL_HEIGHT,
-                HOLE_OUT_PANEL_HEIGHT
+                HOLE_OUT_PANEL_HEIGHT,
             };
             s32 rowHalfWidths[REPLAY_ROW_COUNT] = {
                 WIDE_PANEL_HALF_WIDTH,
@@ -2139,7 +2139,7 @@ void DrawReplaySaveMenu(Gfx **displayListHead) {
                 WIDE_PANEL_HALF_WIDTH,
                 WIDE_PANEL_HALF_WIDTH,
                 WIDE_PANEL_HALF_WIDTH,
-                NARROW_PANEL_HALF_WIDTH
+                NARROW_PANEL_HALF_WIDTH,
             };
             s32 centerX;
 

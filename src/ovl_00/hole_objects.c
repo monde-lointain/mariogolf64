@@ -94,7 +94,7 @@ static AssetId f_CheepCheepViewAssets[CHEEP_CHEEP_VIEW_COUNT] UNUSED = {
     CHEEP_CHEEP_FIRST_VIEW_ASSET + 1,
     CHEEP_CHEEP_FIRST_VIEW_ASSET + 2,
     CHEEP_CHEEP_FIRST_VIEW_ASSET + 3,
-    CHEEP_CHEEP_FIRST_VIEW_ASSET + 4
+    CHEEP_CHEEP_FIRST_VIEW_ASSET + 4,
 };
 static AssetId f_MonkeyFrameAssets[MONKEY_FRAME_COUNT] =
     {MONKEY_ASSET, MONKEY_ASSET + 1, MONKEY_ASSET + 2, MONKEY_ASSET + 3};
@@ -110,7 +110,7 @@ static Vtx f_CheepCheepVertices[QUAD_VERTEX_COUNT] = {
     {{{-7, -7, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{-7, 7, 0}, 0, {0, 0x7C0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{7, 7, 0}, 0, {0x7C0, 0x7C0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
-    {{{7, -7, 0}, 0, {0x7C0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}}
+    {{{7, -7, 0}, 0, {0x7C0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
 };
 static Vtx f_MonkeyVertices[8] = {
     {{{-10, -12, 0}, 0, {0xFC0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
@@ -120,7 +120,7 @@ static Vtx f_MonkeyVertices[8] = {
     {{{-10, -6, 0}, 0, {0xFC0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{-10, 0, 0}, 0, {0xFC0, 0x7C0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{1, 0, 0}, 0, {0, 0x7C0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
-    {{{1, -6, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}}
+    {{{1, -6, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
 };
 
 static u8 *f_CheepCheepImages[2];

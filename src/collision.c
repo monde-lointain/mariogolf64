@@ -1036,7 +1036,7 @@ static u8 f_BillboardMaskIndices[BILLBOARD_MASK_INDEX_COUNT] = {
     0,
     0,
     0,
-    0
+    0,
 };
 /* Read by no routine */
 static s32 f_UnusedWordsAfterBillboardMasks[4] UNUSED = {0};

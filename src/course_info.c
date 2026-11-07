@@ -29,7 +29,8 @@ char g_TournamentNames[TOURNAMENT_NAME_COUNT][TOURNAMENT_NAME_SIZE] = {
 };
 /* Each course's name, then its holes in the order they are played */
 CourseRecord g_CourseRecords[COURSE_RECORD_COUNT] = {
-    {"Toad HighLands",
+    {
+        "Toad HighLands",
         {
             HOLE_RECORD(4, 11, 363, 0),
             HOLE_RECORD(3, 1, 161, HOLE_FLAG_PAR_THREE),
@@ -49,8 +50,10 @@ CourseRecord g_CourseRecords[COURSE_RECORD_COUNT] = {
             HOLE_RECORD(5, 18, 448, HOLE_FLAG_MARKED_PAR_FIVE),
             HOLE_RECORD(3, 14, 149, HOLE_FLAG_PAR_THREE),
             HOLE_RECORD(4, 6, 400, 0),
-        }},
-    {"Koopa Park",
+        },
+    },
+    {
+        "Koopa Park",
         {
             HOLE_RECORD(4, 11, 372, 0),
             HOLE_RECORD(5, 15, 527, HOLE_FLAG_MARKED_PAR_FIVE),
@@ -70,8 +73,10 @@ CourseRecord g_CourseRecords[COURSE_RECORD_COUNT] = {
             HOLE_RECORD(3, 4, 154, HOLE_FLAG_PAR_THREE),
             HOLE_RECORD(4, 12, 360, 0),
             HOLE_RECORD(5, 18, 520, HOLE_FLAG_MARKED_PAR_FIVE),
-        }},
-    {"Shy Guy Desert",
+        },
+    },
+    {
+        "Shy Guy Desert",
         {
             HOLE_RECORD(4, 11, 360, 0),
             HOLE_RECORD(3, 13, 153, HOLE_FLAG_PAR_THREE),
@@ -91,8 +96,10 @@ CourseRecord g_CourseRecords[COURSE_RECORD_COUNT] = {
             HOLE_RECORD(4, 14, 340, 0),
             HOLE_RECORD(5, 10, 570, HOLE_FLAG_MARKED_PAR_FIVE),
             HOLE_RECORD(4, 16, 398, 0),
-        }},
-    {"Yoshi's Island",
+        },
+    },
+    {
+        "Yoshi's Island",
         {
             HOLE_RECORD(4, 9, 350, 0),
             HOLE_RECORD(4, 15, 400, 0),
@@ -112,8 +119,10 @@ CourseRecord g_CourseRecords[COURSE_RECORD_COUNT] = {
             HOLE_RECORD(4, 8, 398, 0),
             HOLE_RECORD(4, 4, 389, 0),
             HOLE_RECORD(5, 14, 530, HOLE_FLAG_MARKED_PAR_FIVE),
-        }},
-    {"Boo Valley",
+        },
+    },
+    {
+        "Boo Valley",
         {
             HOLE_RECORD(4, 17, 373, 0),
             HOLE_RECORD(4, 5, 400, 0),
@@ -133,8 +142,10 @@ CourseRecord g_CourseRecords[COURSE_RECORD_COUNT] = {
             HOLE_RECORD(4, 2, 407, 0),
             HOLE_RECORD(5, 12, 484, HOLE_FLAG_MARKED_PAR_FIVE),
             HOLE_RECORD(4, 10, 380, 0),
-        }},
-    {"Mario's Star",
+        },
+    },
+    {
+        "Mario's Star",
         {
             HOLE_RECORD(4, 17, 338, 0),
             HOLE_RECORD(4, 1, 414, 0),
@@ -154,8 +165,10 @@ CourseRecord g_CourseRecords[COURSE_RECORD_COUNT] = {
             HOLE_RECORD(3, 14, 195, HOLE_FLAG_PAR_THREE),
             HOLE_RECORD(5, 10, 520, HOLE_FLAG_MARKED_PAR_FIVE),
             HOLE_RECORD(4, 6, 395, 0),
-        }},
-    {"Luigi's Garden",
+        },
+    },
+    {
+        "Luigi's Garden",
         {
             HOLE_RECORD(3, 17, 363, 0),
             HOLE_RECORD(3, 7, 165, 0),
@@ -175,8 +188,10 @@ CourseRecord g_CourseRecords[COURSE_RECORD_COUNT] = {
             HOLE_RECORD(3, 4, 448, 0),
             HOLE_RECORD(3, 16, 150, 0),
             HOLE_RECORD(3, 2, 400, 0),
-        }},
-    {"Peach's Castle",
+        },
+    },
+    {
+        "Peach's Castle",
         {
             HOLE_RECORD(3, 17, 363, 0),
             HOLE_RECORD(3, 7, 165, 0),
@@ -196,8 +211,10 @@ CourseRecord g_CourseRecords[COURSE_RECORD_COUNT] = {
             HOLE_RECORD(3, 4, 448, 0),
             HOLE_RECORD(3, 12, 150, 0),
             HOLE_RECORD(3, 2, 400, 0),
-        }},
-    {"Driving Range",
+        },
+    },
+    {
+        "Driving Range",
         {
             HOLE_RECORD(3, 1, 363, 0),
             HOLE_RECORD(3, 1, 165, 0),
@@ -217,7 +234,8 @@ CourseRecord g_CourseRecords[COURSE_RECORD_COUNT] = {
             HOLE_RECORD(3, 1, 448, 0),
             HOLE_RECORD(3, 1, 150, 0),
             HOLE_RECORD(3, 1, 400, 0),
-        }},
+        },
+    },
 };
 static RingShotHole f_RingShotHoles[RING_SHOT_COURSE_COUNT][RING_SHOT_HOLE_COUNT] = {
     {{0, 0}, {0, 16}, {0, 15}, {0, 13}, {0, 17}, {0, 6}},

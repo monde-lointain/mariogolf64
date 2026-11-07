@@ -180,7 +180,7 @@ static const char *f_StatLabels[STATS_COUNT] = {
     "Avg. Putt",
     "Par Saves",
     "Par Ons",
-    "Sand Saves"
+    "Sand Saves",
 };
 /* DrawCourseStats adds a tenth to it on every draw, but no routine reads it */
 static f32 f_UnreadStatsDrawTime = 0.0f;

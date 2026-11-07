@@ -254,7 +254,7 @@ static u32 f_BetIconFrameAssets[BET_ICON_COUNT][BET_ICON_FRAME_COUNT] = {
     {0x0680, 0x0681},
     {0x067C, 0x067D},
     {0x0676, 0x0677},
-    {0x0672, 0x0673}
+    {0x0672, 0x0673},
 };
 /* The bet whose label and icon each column of a bet set shows */
 static s16 f_BetSetBets[OFFERING_BET_SET_COUNT][BET_SET_MAX_COLUMN_COUNT] = {
@@ -264,7 +264,7 @@ static s16 f_BetSetBets[OFFERING_BET_SET_COUNT][BET_SET_MAX_COLUMN_COUNT] = {
     {0, 1, 5, UNUSED_BET_COLUMN, UNUSED_BET_COLUMN, UNUSED_BET_COLUMN},
     {0, 1, 5, UNUSED_BET_COLUMN, UNUSED_BET_COLUMN, UNUSED_BET_COLUMN},
     {2, 3, 5, UNUSED_BET_COLUMN, UNUSED_BET_COLUMN, UNUSED_BET_COLUMN},
-    {2, 3, 5, 7, UNUSED_BET_COLUMN, UNUSED_BET_COLUMN}
+    {2, 3, 5, 7, UNUSED_BET_COLUMN, UNUSED_BET_COLUMN},
 };
 /* Which of betStakeLevels' stakes each column of a bet set sets */
 static s16 f_BetSetStakeSlots[OFFERING_BET_SET_COUNT][BET_SET_MAX_COLUMN_COUNT] = {
@@ -274,7 +274,7 @@ static s16 f_BetSetStakeSlots[OFFERING_BET_SET_COUNT][BET_SET_MAX_COLUMN_COUNT] 
     {0, 1, 4, UNUSED_BET_COLUMN, UNUSED_BET_COLUMN, UNUSED_BET_COLUMN},
     {0, 1, 4, UNUSED_BET_COLUMN, UNUSED_BET_COLUMN, UNUSED_BET_COLUMN},
     {2, 3, 4, UNUSED_BET_COLUMN, UNUSED_BET_COLUMN, UNUSED_BET_COLUMN},
-    {2, 3, 4, 6, UNUSED_BET_COLUMN, UNUSED_BET_COLUMN}
+    {2, 3, 4, 6, UNUSED_BET_COLUMN, UNUSED_BET_COLUMN},
 };
 /* How many columns each bet set uses */
 static u8 f_BetSetColumnCounts[OFFERING_BET_SET_COUNT] = {5, 6, 3, 3, 3, 3, 4};
@@ -286,7 +286,7 @@ static u8 f_BetPresetStakeLevels[BET_PRESET_COUNT][BET_STAKE_SLOT_COUNT] = {
     {4, 4, NO_BET, NO_BET, 1, NO_BET, NO_BET, NO_BET},
     {4, 4, NO_BET, NO_BET, 1, NO_BET, NO_BET, NO_BET},
     {NO_BET, NO_BET, 1, 0, 0, NO_BET, NO_BET, NO_BET},
-    {NO_BET, NO_BET, 0, 0, 0, NO_BET, 0, NO_BET}
+    {NO_BET, NO_BET, 0, 0, 0, NO_BET, 0, NO_BET},
 };
 static u8 f_BetStakeAmounts[BET_STAKE_LEVEL_COUNT] = {0, 1, 2, 3, 5, 10};
 /* The x of each column of a bet set */
@@ -297,7 +297,7 @@ static s32 f_BetSetColumnXs[OFFERING_BET_SET_COUNT][BET_SET_MAX_COLUMN_COUNT] = 
     {114, 148, 184, 216, 256, 256},
     {114, 148, 184, 144, 144, 144},
     {114, 148, 184, 216, 256, 256},
-    {87, 127, 167, 207, 228, 228}
+    {87, 127, 167, 207, 228, 228},
 };
 /* Read by no routine; katakana for "Drive contest", "Near pin", "Score",
  * "Vertical", "Horizontal", "Skins", "Match" and "Doubles" */
@@ -311,22 +311,30 @@ static s32 f_UnusedWordsAfterGolferAngles[3] UNUSED = {0, 0, 0};
 static f32 f_HandicapGolferScales[MAX_PLAYER_COUNT] = {4.2f, 4.0f, 4.2f, 4.0f};
 /* Where DrawHandicaps stands each golfer, by the player count */
 static Vec3 f_HandicapGolferPositions[MAX_PLAYER_COUNT][MAX_PLAYER_COUNT] = {
-    {{0.0f, -44.0f, -1000.0f},
+    {
+        {0.0f, -44.0f, -1000.0f},
         {64.0f, -44.0f, -1500.0f},
         {64.0f, -44.0f, -1000.0f},
-        {64.0f, -44.0f, -1500.0f}},
-    {{-64.0f, -44.0f, -1500.0f},
+        {64.0f, -44.0f, -1500.0f},
+    },
+    {
+        {-64.0f, -44.0f, -1500.0f},
         {64.0f, -44.0f, -1000.0f},
         {64.0f, -44.0f, -1500.0f},
-        {64.0f, -44.0f, -1000.0f}},
-    {{-96.0f, -44.0f, -1500.0f},
+        {64.0f, -44.0f, -1000.0f},
+    },
+    {
+        {-96.0f, -44.0f, -1500.0f},
         {0.0f, -54.0f, -1000.0f},
         {96.0f, -44.0f, -1500.0f},
-        {96.0f, -44.0f, -1000.0f}},
-    {{-96.0f, -44.0f, -1500.0f},
+        {96.0f, -44.0f, -1000.0f},
+    },
+    {
+        {-96.0f, -44.0f, -1500.0f},
         {-32.0f, -54.0f, -1000.0f},
         {32.0f, -44.0f, -1500.0f},
-        {96.0f, -54.0f, -1000.0f}}
+        {96.0f, -54.0f, -1000.0f},
+    },
 };
 /* The left of each player's column, by the player count */
 static s32 f_HandicapColumnLefts[MAX_PLAYER_COUNT][MAX_PLAYER_COUNT] =
@@ -344,7 +352,7 @@ static s32 f_BrickSlideStartOffsets[STATS_SLIDE_COUNT - 1][STATS_SLIDE_ROW_COUNT
     {320, 320, 320, 320, 320, 320, 320, 320, 320},
     {-320, -320, -320, -320, -320, -320, -320, -320, -320},
     {0, 0, 0, 0, 0, 0, 0, 0, 0},
-    {0, 0, 0, 0, 0, 0, 0, 0, 0}
+    {0, 0, 0, 0, 0, 0, 0, 0, 0},
 };
 /* The slide that the rows were last started on */
 static u8 f_BrickWallSlide = 0;
@@ -353,7 +361,7 @@ static Vtx f_TurnedArrowVertices[TURNED_ARROW_VERTEX_COUNT] = {
     {{{-16, 16, 0}, 0, {0, 0}, {0xFF, 0x00, 0x00, 0xFF}}},
     {{{-16, -16, 0}, 0, {0, 2048}, {0x00, 0xFF, 0x00, 0xFF}}},
     {{{16, -16, 0}, 0, {2048, 2048}, {0x00, 0x00, 0xFF, 0xFF}}},
-    {{{16, 16, 0}, 0, {2048, 0}, {0xFF, 0xFF, 0x00, 0xFF}}}
+    {{{16, 16, 0}, 0, {2048, 0}, {0xFF, 0xFF, 0x00, 0xFF}}},
 };
 /* Read by no routine */
 static s32 f_UnusedWordsAfterArrowVertices[2] UNUSED = {0, 0};
@@ -381,7 +389,7 @@ AssetId g_CharacterFaceAssets[CHARACTER_COUNT] = {
     0x07FD,
     0x080B,
     0x0819,
-    0x0827
+    0x0827,
 };
 s16 g_CharacterPaletteFiles[CHARACTER_COUNT][CHARACTER_PALETTE_COUNT] = {
     {0x07B8, 0x07B9, 0x07BA, 0x07BB},
@@ -401,7 +409,7 @@ s16 g_CharacterPaletteFiles[CHARACTER_COUNT][CHARACTER_PALETTE_COUNT] = {
     {0x07F0, 0x07F1, 0x07F2, 0x07F3},
     {0x07FE, 0x07FF, 0x0800, 0x0801},
     {0x080C, 0x080D, 0x080E, 0x080F},
-    {0x081A, 0x081B, 0x081C, 0x081D}
+    {0x081A, 0x081B, 0x081C, 0x081D},
 };
 /* Read by no routine; a row like the six that follow the characters' rows of
  * g_CharacterFacePaletteFiles */
@@ -422,7 +430,7 @@ static Vtx f_BestShotsCursorVertices[MENU_CURSOR_VERTEX_COUNT] = {
     {{{-48, 48, 0}, 0, {0, 0}, {0xFF, 0x00, 0x00, 0xFF}}},
     {{{-48, 0, 0}, 0, {0, 3072}, {0x00, 0xFF, 0x00, 0xFF}}},
     {{{0, 0, 0}, 0, {3072, 3072}, {0x00, 0x00, 0xFF, 0xFF}}},
-    {{{0, 48, 0}, 0, {3072, 0}, {0xFF, 0xFF, 0x00, 0xFF}}}
+    {{{0, 48, 0}, 0, {3072, 0}, {0xFF, 0xFF, 0x00, 0xFF}}},
 };
 /* Read by no routine */
 static s32 f_UnusedWordsAfterBestShotsCursor[2] UNUSED = {0, 0};
@@ -447,7 +455,7 @@ static s32 f_StatsCharacterChoices[CHARACTER_COUNT] = {
     CHARACTER_CHOICE_KID,
     CHARACTER_CHOICE_SHERRY,
     CHARACTER_CHOICE_AZALEA,
-    CHARACTER_CHOICE_JOE
+    CHARACTER_CHOICE_JOE,
 };
 
 /* The camera and placement that DrawHandicaps draws each golfer with */

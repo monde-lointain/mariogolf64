@@ -213,7 +213,7 @@ static AssetId f_MenuWindowImageAssets[MENU_WINDOW_PICTURE_COUNT] = {
     0x075E,
     0x077A,
     0x0988,
-    0x0958
+    0x0958,
 };
 /* Each window picture's palette files, by picture and color */
 static s16 f_MenuWindowPaletteFiles[MENU_WINDOW_PICTURE_COUNT][MENU_WINDOW_PALETTE_COUNT] = {
@@ -231,7 +231,7 @@ static s16 f_MenuWindowPaletteFiles[MENU_WINDOW_PICTURE_COUNT][MENU_WINDOW_PALET
     {0x0756, 0x0757, 0x0758, 0x0759},
     {0x0772, 0x0773, 0x0774, 0x0775},
     {0x0980, 0x0981, 0x0982, 0x0983},
-    {0x0957, 0x0957, 0x0957, 0x0957}
+    {0x0957, 0x0957, 0x0957, 0x0957},
 };
 /* Read by no routine */
 static s32 f_UnusedWordAfterPaletteFiles UNUSED = 0;
@@ -270,14 +270,14 @@ static u8 f_CodeKeys[CODE_KEYBOARD_ROW_COUNT][CODE_KEYBOARD_COLUMN_COUNT] = {
     {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'},
     {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'},
     {'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T'},
-    {'U', 'V', 'W', 'X', 'Y', 'Z', CODE_KEY_BLANK, CODE_KEY_BLANK, CODE_KEY_BACK, CODE_KEY_END}
+    {'U', 'V', 'W', 'X', 'Y', 'Z', CODE_KEY_BLANK, CODE_KEY_BLANK, CODE_KEY_BACK, CODE_KEY_END},
 };
 /* Each key's glyph */
 static s8 f_CodeKeyGlyphs[CODE_KEYBOARD_ROW_COUNT][CODE_KEYBOARD_COLUMN_COUNT] = {
     {0, 1, 2, 3, 4, 5, 6, 7, 8, 9},
     {10, 11, 12, 13, 14, 15, 16, 17, 18, 19},
     {20, 21, 22, 23, 24, 25, 26, 27, 28, 29},
-    {30, 31, 32, 33, 34, 35, CODE_GLYPH_NONE, CODE_GLYPH_NONE, 36, 37}
+    {30, 31, 32, 33, 34, 35, CODE_GLYPH_NONE, CODE_GLYPH_NONE, 36, 37},
 };
 /* The code entered so far */
 static u8 f_EnteredCode[CLUB_TOURNAMENT_CODE_LENGTH] = {
@@ -288,7 +288,7 @@ static u8 f_EnteredCode[CLUB_TOURNAMENT_CODE_LENGTH] = {
     CLUB_CODE_NO_CHAR,
     CLUB_CODE_NO_CHAR,
     CLUB_CODE_NO_CHAR,
-    CLUB_CODE_NO_CHAR
+    CLUB_CODE_NO_CHAR,
 };
 /* The codes, each padded with CLUB_CODE_NO_CHAR */
 static u8 f_ClubTournamentCodes[CLUB_TOURNAMENT_CODE_COUNT][CLUB_TOURNAMENT_CODE_LENGTH] = {
@@ -327,7 +327,7 @@ static u8 f_ClubTournamentCodes[CLUB_TOURNAMENT_CODE_COUNT][CLUB_TOURNAMENT_CODE
     {'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W'},
     {'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X'},
     {'Y', 'Y', 'Y', 'Y', 'Y', 'Y', 'Y', 'Y'},
-    {'Z', 'Z', 'Z', 'Z', 'Z', 'Z', 'Z', 'Z'}
+    {'Z', 'Z', 'Z', 'Z', 'Z', 'Z', 'Z', 'Z'},
 };
 /* Read by no routine; f_MenuCharacterChoices' first 14 values */
 static s32 f_TournamentCharacterChoices[14] UNUSED = {
@@ -344,7 +344,7 @@ static s32 f_TournamentCharacterChoices[14] UNUSED = {
     CHARACTER_CHOICE_YOSHI,
     CHARACTER_CHOICE_DONKEY_KONG,
     CHARACTER_CHOICE_BOWSER,
-    CHARACTER_CHOICE_METAL_MARIO
+    CHARACTER_CHOICE_METAL_MARIO,
 };
 /* The tournament code byte being edited */
 static s32 f_EditedCodeByteIndex = 0;
@@ -353,7 +353,7 @@ static Vtx f_CodeCursorVertices[MENU_CURSOR_VERTEX_COUNT] = {
     {{{-48, 48, 0}, 0, {0, 0}, {0xFF, 0x00, 0x00, 0xFF}}},
     {{{-48, 0, 0}, 0, {0, 3072}, {0x00, 0xFF, 0x00, 0xFF}}},
     {{{0, 0, 0}, 0, {3072, 3072}, {0x00, 0x00, 0xFF, 0xFF}}},
-    {{{0, 48, 0}, 0, {3072, 0}, {0xFF, 0xFF, 0x00, 0xFF}}}
+    {{{0, 48, 0}, 0, {3072, 0}, {0xFF, 0xFF, 0x00, 0xFF}}},
 };
 /* Read by no routine */
 static s32 f_UnusedWordsAfterCursorVertices[2] UNUSED = {0, 0};

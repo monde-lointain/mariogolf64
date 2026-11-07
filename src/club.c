@@ -112,7 +112,8 @@
 
 /* GetPuttPower's putter powers, by shot mode and fraction of its reach */
 static s32 f_PutterPowers[SHOT_MODE_COUNT][PUTT_STEP_COUNT] = {
-    {966,
+    {
+        966,
         1914,
         2742,
         3656,
@@ -141,8 +142,10 @@ static s32 f_PutterPowers[SHOT_MODE_COUNT][PUTT_STEP_COUNT] = {
         24065,
         24896,
         25830,
-        26765},
-    {540,
+        26765,
+    },
+    {
+        540,
         1027,
         1442,
         1915,
@@ -171,8 +174,10 @@ static s32 f_PutterPowers[SHOT_MODE_COUNT][PUTT_STEP_COUNT] = {
         12114,
         12530,
         12998,
-        13466},
-    {231,
+        13466,
+    },
+    {
+        231,
         382,
         513,
         659,
@@ -201,7 +206,8 @@ static s32 f_PutterPowers[SHOT_MODE_COUNT][PUTT_STEP_COUNT] = {
         3739,
         3864,
         4005,
-        4145},
+        4145,
+    },
 };
 Club g_Clubs[CLUB_COUNT] = {
     /* Set 0 */
@@ -3503,7 +3509,7 @@ static Club f_NoClub = {
     0,
     {0, 0, 0},
     ASSET_DRIVER_HEAD_IMAGE,
-    0
+    0,
 };
 static ShotLaunch f_ClubTestShot =
     {STRAIGHT_ANGLE, NO_CLUB, MAX_LAUNCH_POWER, 0, 0, 0, 0, SHOT_MODE_NORMAL};

@@ -313,7 +313,7 @@ static s32 f_TournamentPrizes[COURSE_COUNT][PRIZE_BRACKET_COUNT] = {
     {600, 300, 150, 75, 35, 17},
     {1200, 600, 300, 100, 50, 25},
     {2000, 1000, 500, 200, 100, 50},
-    {2000, 1000, 500, 200, 100, 50}
+    {2000, 1000, 500, 200, 100, 50},
 };
 static f32 f_CoursePointRates[] = {1.0f, 1.5f, 2.0f, 2.5f, 3.5f, 3.5f, 1.0f, 1.0f};
 static s32 f_OpenCourseCount = 1;
@@ -325,7 +325,7 @@ static TrophyAssets f_TrophyAssets[COURSE_COUNT] = {
     {0x877, 0x87A, 16},
     {0x8D5, 0x8D8, 16},
     {0x8C2, 0x8C5, 16},
-    {0x89D, 0x8A0, 15}
+    {0x89D, 0x8A0, 15},
 };
 static s32 f_BannerState = BANNER_UNSET;
 static s32 f_BannerKind = BANNER_KIND_NONE;
@@ -341,7 +341,7 @@ static s32 f_TrophySizes[COURSE_COUNT][TROPHY_SIZE_COUNT] = {
     {40, 40, 11, 50},
     {32, 32, 32, 64},
     {48, 22, 20, 21},
-    {36, 40, 11, 40}
+    {36, 40, 11, 40},
 };
 static s32 f_TrophyShineFrame = 0;
 static s32 f_TrophyFrame = 0;
@@ -354,7 +354,7 @@ static u8 f_TextSlotColors[][3] = {
     {0x7F, 0xBF, 0xFF},
     {0x7F, 0xBF, 0xFF},
     {0x7F, 0xFF, 0x4B},
-    {0xFF, 0x7F, 0x9F}
+    {0xFF, 0x7F, 0x9F},
 };
 /* Counts up through the pressing hand's frames, HAND_FRAME_DRAWS draws to a
  * frame */

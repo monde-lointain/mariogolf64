@@ -233,7 +233,7 @@ static u8 f_UnusedBytesAfterTerrainBlockCount[16] UNUSED = {
     0xFF,
     0xFF,
     0xFF,
-    0xFF
+    0xFF,
 };
 
 s32 g_Scene = SCENE_FLAG_PANEL;
@@ -272,7 +272,7 @@ static AnimatedBox f_SceneMenuBox = {
     0x00,
     0x9F,
     BOX_CLOSED,
-    0
+    0,
 };
 static s32 f_SceneMenuScenes[SCENE_MENU_LENGTH] = {
     SCENE_PLAY_HOLE,

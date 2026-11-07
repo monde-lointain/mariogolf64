@@ -387,7 +387,7 @@ static OpeningNameLogo f_OpeningNameLogos[OPENING_NAME_LOGO_COUNT] = {
     {ASSET_PLUM_NAME_LOGO, 160, 32, 88, 208, 1, 32},
     {ASSET_YOSHI_NAME_LOGO, 160, 32, 88, 208, 1, 32},
     {ASSET_BABY_MARIO_NAME_LOGO, 216, 32, 196, 32, 1, 32},
-    {ASSET_DONKEY_KONG_NAME_LOGO, 256, 32, 136, 208, 1, 32}
+    {ASSET_DONKEY_KONG_NAME_LOGO, 256, 32, 136, 208, 1, 32},
 };
 static Boolean f_AreImpactLinesShown = FALSE;
 static Boolean f_IsBurstShown = FALSE;
@@ -397,20 +397,20 @@ static s32 f_LookAtEaseMode = 0;
 static s32 f_UnusedWordAfterEaseMode UNUSED = 0;
 static s32 f_OpeningBallStates[OPENING_BALL_SLOT_COUNT] = {
     OPENING_BALL_HIDDEN,
-    OPENING_BALL_HIDDEN
+    OPENING_BALL_HIDDEN,
 };
 /* Read by no routine */
 static s32 f_UnusedWordsAfterBallStates[2] UNUSED = {0, 0};
 static f32 f_OpeningBallScales[OPENING_BALL_SLOT_COUNT] = {
     OPENING_BALL_NORMAL_SCALE,
-    OPENING_BALL_NORMAL_SCALE
+    OPENING_BALL_NORMAL_SCALE,
 };
 static s32 f_OpeningBallAssets[OPENING_BALL_IMAGE_COUNT] = {
     ASSET_MARIO_BALL_IMAGE,
     ASSET_DONKEY_KONG_BALL_IMAGE,
     ASSET_YOSHI_BALL_IMAGE,
     ASSET_LUIGI_BALL_IMAGE,
-    ASSET_SHOT_BALL_IMAGE
+    ASSET_SHOT_BALL_IMAGE,
 };
 /* Whether Donkey Kong stands in for Yoshi, once he is unlocked */
 static Boolean f_IsDonkeyKongShown = FALSE;
@@ -447,7 +447,7 @@ static Vtx f_OpeningShotDashVertices[QUAD_VERTEX_COUNT] = {
     {{{-15, 0, 0}, 0, {0, 0}, {0x00, 0xFF, 0x00, 0xFF}}},
     {{{15, 0, 0}, 0, {0, 2048}, {0x00, 0x00, 0x00, 0xFF}}},
     {{{15, 0, -1}, 0, {2048, 2048}, {0x00, 0x00, 0xFF, 0x00}}},
-    {{{-15, 0, -1}, 0, {2048, 0}, {0xFF, 0x00, 0x00, 0x00}}}
+    {{{-15, 0, -1}, 0, {2048, 0}, {0xFF, 0x00, 0x00, 0x00}}},
 };
 /*
  * The opening's shot path is drawn as the turn's shot preview is, but
@@ -464,53 +464,69 @@ static f32 f_UnusedStickOffsetX = 0.0f;
 static f32 f_UnusedStickOffsetY = 0.0f;
 static s32 f_OpeningFrameParity = 0;
 static Vtx f_LookAtMarkerVertices[6][QUAD_VERTEX_COUNT] = {
-    {{{{-50, 0, 5}, 0, {0, 0}, {0xFF, 0x00, 0x00, 0xFF}}},
+    {
+        {{{-50, 0, 5}, 0, {0, 0}, {0xFF, 0x00, 0x00, 0xFF}}},
         {{{-50, 0, -5}, 0, {0, 0}, {0xFF, 0x00, 0x00, 0xFF}}},
         {{{50, 0, -5}, 0, {0, 0}, {0xFF, 0x00, 0x00, 0xFF}}},
-        {{{50, 0, 5}, 0, {0, 0}, {0xFF, 0x00, 0x00, 0xFF}}}},
-    {{{{-50, 5, 0}, 0, {0, 0}, {0xFF, 0x00, 0x00, 0xFF}}},
+        {{{50, 0, 5}, 0, {0, 0}, {0xFF, 0x00, 0x00, 0xFF}}},
+    },
+    {
+        {{{-50, 5, 0}, 0, {0, 0}, {0xFF, 0x00, 0x00, 0xFF}}},
         {{{-50, -5, 0}, 0, {0, 0}, {0xFF, 0x00, 0x00, 0xFF}}},
         {{{50, -5, 0}, 0, {0, 0}, {0xFF, 0x00, 0x00, 0xFF}}},
-        {{{50, 5, 0}, 0, {0, 0}, {0xFF, 0x00, 0x00, 0xFF}}}},
-    {{{{0, -50, -5}, 0, {0, 0}, {0xFF, 0xFF, 0x00, 0xFF}}},
+        {{{50, 5, 0}, 0, {0, 0}, {0xFF, 0x00, 0x00, 0xFF}}},
+    },
+    {
+        {{{0, -50, -5}, 0, {0, 0}, {0xFF, 0xFF, 0x00, 0xFF}}},
         {{{0, 50, -5}, 0, {0, 0}, {0xFF, 0xFF, 0x00, 0xFF}}},
         {{{0, 50, 5}, 0, {0, 0}, {0xFF, 0xFF, 0x00, 0xFF}}},
-        {{{0, -50, 5}, 0, {0, 0}, {0xFF, 0xFF, 0x00, 0xFF}}}},
-    {{{{-5, -50, 0}, 0, {0, 0}, {0xFF, 0xFF, 0x00, 0xFF}}},
+        {{{0, -50, 5}, 0, {0, 0}, {0xFF, 0xFF, 0x00, 0xFF}}},
+    },
+    {
+        {{{-5, -50, 0}, 0, {0, 0}, {0xFF, 0xFF, 0x00, 0xFF}}},
         {{{-5, 50, 0}, 0, {0, 0}, {0xFF, 0xFF, 0x00, 0xFF}}},
         {{{5, 50, 0}, 0, {0, 0}, {0xFF, 0xFF, 0x00, 0xFF}}},
-        {{{5, -50, 0}, 0, {0, 0}, {0xFF, 0xFF, 0x00, 0xFF}}}},
-    {{{{-3, 3, -50}, 0, {0, 0}, {0x00, 0xFF, 0xFF, 0xFF}}},
+        {{{5, -50, 0}, 0, {0, 0}, {0xFF, 0xFF, 0x00, 0xFF}}},
+    },
+    {
+        {{{-3, 3, -50}, 0, {0, 0}, {0x00, 0xFF, 0xFF, 0xFF}}},
         {{{3, -3, -50}, 0, {0, 0}, {0x00, 0xFF, 0xFF, 0xFF}}},
         {{{3, -3, 50}, 0, {0, 0}, {0x00, 0xFF, 0xFF, 0xFF}}},
-        {{{-3, 3, 50}, 0, {0, 0}, {0x00, 0xFF, 0xFF, 0xFF}}}},
-    {{{{-3, -3, -50}, 0, {0, 0}, {0x00, 0xFF, 0xFF, 0xFF}}},
+        {{{-3, 3, 50}, 0, {0, 0}, {0x00, 0xFF, 0xFF, 0xFF}}},
+    },
+    {
+        {{{-3, -3, -50}, 0, {0, 0}, {0x00, 0xFF, 0xFF, 0xFF}}},
         {{{3, 3, -50}, 0, {0, 0}, {0x00, 0xFF, 0xFF, 0xFF}}},
         {{{3, 3, 50}, 0, {0, 0}, {0x00, 0xFF, 0xFF, 0xFF}}},
-        {{{-3, -3, 50}, 0, {0, 0}, {0x00, 0xFF, 0xFF, 0xFF}}}}
+        {{{-3, -3, 50}, 0, {0, 0}, {0x00, 0xFF, 0xFF, 0xFF}}},
+    },
 };
 static Vtx f_OpeningBallStripVertices[OPENING_BALL_STRIP_COUNT][QUAD_VERTEX_COUNT] = {
-    {{{{1, -1, 0}, 0, {0, 2048}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+    {
+        {{{1, -1, 0}, 0, {0, 2048}, {0xFF, 0xFF, 0xFF, 0xFF}}},
         {{{1, -2, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
         {{{-1, -2, 0}, 0, {4096, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
-        {{{-1, -1, 0}, 0, {4096, 2048}, {0xFF, 0xFF, 0xFF, 0xFF}}}},
-    {{{{1, 0, 0}, 0, {0, 2048}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+        {{{-1, -1, 0}, 0, {4096, 2048}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+    },
+    {
+        {{{1, 0, 0}, 0, {0, 2048}, {0xFF, 0xFF, 0xFF, 0xFF}}},
         {{{1, -1, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
         {{{-1, -1, 0}, 0, {4096, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
-        {{{-1, 0, 0}, 0, {4096, 2048}, {0xFF, 0xFF, 0xFF, 0xFF}}}}
+        {{{-1, 0, 0}, 0, {4096, 2048}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+    },
 };
 static Boolean f_HasLogoBallLastPosition = FALSE;
 static Vtx f_OpeningBallShadowVertices[QUAD_VERTEX_COUNT] = {
     {{{-1, 0, 1}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{-1, 0, -1}, 0, {0, 2048}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{1, 0, -1}, 0, {2048, 2048}, {0xFF, 0xFF, 0xFF, 0xFF}}},
-    {{{1, 0, 1}, 0, {2048, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}}
+    {{{1, 0, 1}, 0, {2048, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
 };
 static Vtx f_LogoBallMarioVertices[QUAD_VERTEX_COUNT] = {
     {{{-1, -1, 1}, 0, {1536, 1536}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{-1, -1, -1}, 0, {0, 1536}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{-1, 1, -1}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
-    {{{-1, 1, 1}, 0, {1536, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}}
+    {{{-1, 1, 1}, 0, {1536, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
 };
 /* The logo ball's roll, from its position's change each frame */
 static Boolean f_ShouldResetLogoBallRoll = TRUE;
@@ -520,13 +536,13 @@ static Vtx f_ProjectedShadowVertices[QUAD_VERTEX_COUNT] = {
     {{{-1, 0, 1}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{-1, 0, -1}, 0, {0, 2048}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{1, 0, -1}, 0, {2048, 2048}, {0xFF, 0xFF, 0xFF, 0xFF}}},
-    {{{1, 0, 1}, 0, {2048, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}}
+    {{{1, 0, 1}, 0, {2048, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
 };
 static Vtx f_ProjectedLogoBallMarioVertices[QUAD_VERTEX_COUNT] = {
     {{{-1, -1, 1}, 0, {1536, 1536}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{-1, -1, -1}, 0, {0, 1536}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{-1, 1, -1}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
-    {{{-1, 1, 1}, 0, {1536, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}}
+    {{{-1, 1, 1}, 0, {1536, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
 };
 /* The same as the logo ball's roll, kept apart for the projected logo ball */
 static Boolean f_ShouldResetProjectedLogoBallRoll = TRUE;
@@ -535,7 +551,7 @@ static s32 f_ImpactLinesFrame = 0;
 static s32 f_LakituTrailAlpha = LAKITU_TRAIL_START_ALPHA;
 static Vtx f_LakituTrailVertices[2] = {
     {{{-10, 0, 0}, 0, {0, 0}, {0xFF, 0x7F, 0x00, 0xFF}}},
-    {{{10, 0, 0}, 0, {3072, 0}, {0xFF, 0xFF, 0xBF, 0xFF}}}
+    {{{10, 0, 0}, 0, {3072, 0}, {0xFF, 0xFF, 0xBF, 0xFF}}},
 };
 static s32 f_LakituAngle = 0;
 static s32 f_BurstFrame = BURST_NOT_STARTED;
@@ -544,7 +560,7 @@ static Vtx f_ShotBallShadowVertices[QUAD_VERTEX_COUNT] = {
     {{{-1, 0, 1}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{-1, 0, -1}, 0, {0, 2048}, {0xFF, 0xFF, 0xFF, 0xFF}}},
     {{{1, 0, -1}, 0, {2048, 2048}, {0xFF, 0xFF, 0xFF, 0xFF}}},
-    {{{1, 0, 1}, 0, {2048, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}}
+    {{{1, 0, 1}, 0, {2048, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
 };
 static f32 f_LookAtEaseRate = LOOK_AT_START_EASE_RATE;
 static s32 f_LogoLettersAlpha = OPAQUE_ALPHA;
@@ -568,45 +584,61 @@ static Degrees f_LogoClubUnusedAngle = LOGO_CLUB_START_UNUSED_ANGLE;
 static Degrees f_LogoClubWobbleAngle = 0.0f;
 /* The top and bottom halves of a letter */
 static Vtx f_LogoLetterVertices[2][QUAD_VERTEX_COUNT] = {
-    {{{{-24, 48, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+    {
+        {{{-24, 48, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
         {{{-24, 24, 0}, 0, {0, 1536}, {0xFF, 0xFF, 0xFF, 0xFF}}},
         {{{24, 24, 0}, 0, {3072, 1536}, {0xFF, 0xFF, 0xFF, 0xFF}}},
-        {{{24, 48, 0}, 0, {3072, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}}},
-    {{{{-24, 24, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+        {{{24, 48, 0}, 0, {3072, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+    },
+    {
+        {{{-24, 24, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
         {{{-24, 0, 0}, 0, {0, 1536}, {0xFF, 0xFF, 0xFF, 0xFF}}},
         {{{24, 0, 0}, 0, {3072, 1536}, {0xFF, 0xFF, 0xFF, 0xFF}}},
-        {{{24, 24, 0}, 0, {3072, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}}}
+        {{{24, 24, 0}, 0, {3072, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+    },
 };
 static Vtx f_LogoClubVertices[LOGO_CLUB_STRIP_COUNT][QUAD_VERTEX_COUNT] = {
-    {{{{-76, 39, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+    {
+        {{{-76, 39, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
         {{{-76, 26, 0}, 0, {0, 832}, {0xFF, 0xFF, 0xFF, 0xFF}}},
         {{{76, 26, 0}, 0, {9728, 832}, {0xFF, 0xFF, 0xFF, 0xFF}}},
-        {{{76, 39, 0}, 0, {9728, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}}},
-    {{{{-76, 26, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+        {{{76, 39, 0}, 0, {9728, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+    },
+    {
+        {{{-76, 26, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
         {{{-76, 13, 0}, 0, {0, 832}, {0xFF, 0xFF, 0xFF, 0xFF}}},
         {{{76, 13, 0}, 0, {9728, 832}, {0xFF, 0xFF, 0xFF, 0xFF}}},
-        {{{76, 26, 0}, 0, {9728, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}}},
-    {{{{-76, 13, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+        {{{76, 26, 0}, 0, {9728, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+    },
+    {
+        {{{-76, 13, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
         {{{-76, 0, 0}, 0, {0, 832}, {0xFF, 0xFF, 0xFF, 0xFF}}},
         {{{76, 0, 0}, 0, {9728, 832}, {0xFF, 0xFF, 0xFF, 0xFF}}},
-        {{{76, 13, 0}, 0, {9728, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}}},
-    {{{{-76, 0, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+        {{{76, 13, 0}, 0, {9728, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+    },
+    {
+        {{{-76, 0, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
         {{{-76, -13, 0}, 0, {0, 832}, {0xFF, 0xFF, 0xFF, 0xFF}}},
         {{{76, -13, 0}, 0, {9728, 832}, {0xFF, 0xFF, 0xFF, 0xFF}}},
-        {{{76, 0, 0}, 0, {9728, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}}},
-    {{{{-76, -13, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+        {{{76, 0, 0}, 0, {9728, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+    },
+    {
+        {{{-76, -13, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
         {{{-76, -26, 0}, 0, {0, 832}, {0xFF, 0xFF, 0xFF, 0xFF}}},
         {{{76, -26, 0}, 0, {9728, 832}, {0xFF, 0xFF, 0xFF, 0xFF}}},
-        {{{76, -13, 0}, 0, {9728, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}}},
-    {{{{-76, -26, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+        {{{76, -13, 0}, 0, {9728, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+    },
+    {
+        {{{-76, -26, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
         {{{-76, -39, 0}, 0, {0, 832}, {0xFF, 0xFF, 0xFF, 0xFF}}},
         {{{76, -39, 0}, 0, {9728, 832}, {0xFF, 0xFF, 0xFF, 0xFF}}},
-        {{{76, -26, 0}, 0, {9728, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}}}
+        {{{76, -26, 0}, 0, {9728, 0}, {0xFF, 0xFF, 0xFF, 0xFF}}},
+    },
 };
 static Vtx f_OpeningSparkVertices[3] = {
     {{{0, 16, 0}, 0, {0, 0}, {0xFF, 0x7F, 0x00, 0xFF}}},
     {{{-1, -48, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xBF, 0xFF}}},
-    {{{1, -48, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xBF, 0xFF}}}
+    {{{1, -48, 0}, 0, {0, 0}, {0xFF, 0xFF, 0xBF, 0xFF}}},
 };
 
 /* Read by no routine */

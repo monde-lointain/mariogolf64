@@ -218,7 +218,7 @@ static s32 f_WipeShapeIds[WIPE_SHAPE_COUNT] = {
     0x90E,
     0x90E,
     DEFAULT_WIPE_SHAPE,
-    0x640
+    0x640,
 };
 /* Read by no routine */
 static s32 f_UnusedWordAfterWipeShapeIds UNUSED = 0x63E;
@@ -249,7 +249,7 @@ static Prompt f_Prompts[] = {
     /* PROMPT_SCORE_PASSWORD */
     {0x35, PROMPT_CHOICE_NO, {PROMPT_RESULT_YES, PROMPT_RESULT_NO}},
     /* PROMPT_OVERWRITE_RECORDS */
-    {0x36, PROMPT_CHOICE_NO, {PROMPT_RESULT_YES, PROMPT_RESULT_NO}}
+    {0x36, PROMPT_CHOICE_NO, {PROMPT_RESULT_YES, PROMPT_RESULT_NO}},
 };
 static s32 f_PromptIndex = 0;
 static s32 f_PromptFrame = 0;

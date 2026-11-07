@@ -165,10 +165,12 @@ static Vtx f_RdpTmemBarVertices[] = {
     RDP_TMEM_BAR_QUAD,
 };
 /* Scaled to the screen each time the meter is drawn */
-static Vp f_MeterViewport = {{
-    {SCREEN_WIDTH * 2, SCREEN_HEIGHT * 2, G_MAXZ / 2, 0},
-    {SCREEN_WIDTH * 2, SCREEN_HEIGHT * 2, G_MAXZ / 2, 0},
-}};
+static Vp f_MeterViewport = {
+    {
+        {SCREEN_WIDTH * 2, SCREEN_HEIGHT * 2, G_MAXZ / 2, 0},
+        {SCREEN_WIDTH * 2, SCREEN_HEIGHT * 2, G_MAXZ / 2, 0},
+    },
+};
 static Gfx f_InitRcpDisplayList[] = {
     gsSPSegment(0x00, 0x00000000),
     gsSPGeometryMode(~0, 0),

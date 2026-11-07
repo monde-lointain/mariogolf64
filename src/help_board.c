@@ -101,7 +101,7 @@ static s32 f_FirstListedTopic = 0;
  */
 static TopicPageTable f_TopicPages = {
     {0x11, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01},
-    {1, 4, 4, 4, 4, 3, 4, 5, 4, 4, 3, 5, 4, 4, 4, 4, 3, 6}
+    {1, 4, 4, 4, 4, 3, 4, 5, 4, 4, 3, 5, 4, 4, 4, 4, 3, 6},
 };
 /* The list's first message, then each topic's title */
 static s16 f_TopicTitleMessages[HELP_TOPIC_COUNT + 1] = {
@@ -122,7 +122,7 @@ static s16 f_TopicTitleMessages[HELP_TOPIC_COUNT + 1] = {
     0x128,
     0x12D,
     0x139,
-    0x132
+    0x132,
 };
 static f32 f_ListColorPhase = 0.0f;
 static TextListLayout f_HelpListLayout = {84, 22};

@@ -48,7 +48,7 @@ static f32 f_UnusedFloatsAfterPathStep[33] UNUSED = {
     19.0f,
     10.0f,
     5.0f,
-    3.0f
+    3.0f,
 };
 static f32 f_PathPosition[AXIS_COUNT];
 

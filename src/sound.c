@@ -122,7 +122,7 @@ static s32 f_EchoingSoundIds[ECHOING_SOUND_COUNT] = {
     0x9A,
     0x9B,
     0x9C,
-    0x9D
+    0x9D,
 };
 /* Frames from a character sound's request until it plays, by kind and character
  */
@@ -147,7 +147,7 @@ static s32 f_PreviewSoundDelays[CHARACTER_COUNT] = {
     PLAYED_DELAY,
     PLAYED_DELAY,
     PLAYED_DELAY,
-    PLAYED_DELAY
+    PLAYED_DELAY,
 };
 static QueuedCharacterSound f_QueuedCharacterSounds[QUEUED_CHARACTER_SOUND_COUNT] = {
     {0, PLAYED_DELAY, 0, 0, 0},
@@ -163,7 +163,7 @@ static u8 f_CharacterSoundIndexes[CHARACTER_SOUND_KIND_COUNT] = {
     CHARACTER_SOUND_CALL_OUT_C_UP,
     CHARACTER_SOUND_CALL_OUT_C_DOWN,
     CHARACTER_SOUND_CALL_OUT_C_LEFT,
-    CHARACTER_SOUND_CALL_OUT_C_RIGHT
+    CHARACTER_SOUND_CALL_OUT_C_RIGHT,
 };
 static CharacterId f_DelayEditorCharacter = 0;
 static s32 f_DelayEditorKind = 0;
