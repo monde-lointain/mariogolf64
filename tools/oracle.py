@@ -495,7 +495,8 @@ def search_forcing(
     Each round adds to the last round's forcing every pseudo whose votes
     favour another register than the one it has, until a forcing repeats.
     Forcing one pseudo can move others, so a round may do worse than the
-    last and still lead to a better one.
+    last and still lead to a better one. A forcing that reload can't carry
+    out, which crashes cc1, ends the search.
     """
     compilation = compile_function(draft, force) if force else draft.traced
     differences = count_differences(target, compilation)
@@ -517,7 +518,10 @@ def search_forcing(
         if proposal in tried:
             break
         tried.append(proposal)
-        compilation = compile_function(draft, proposal)
+        try:
+            compilation = compile_function(draft, proposal)
+        except CompileError:
+            break
         differences = count_differences(target, compilation)
         best.rounds.append((len(proposal), differences))
         if differences < best.differences:
@@ -541,7 +545,11 @@ def minimize_forcing(
     kept = dict(force)
     for pseudo in list(force):
         trial = {key: hard for key, hard in kept.items() if key != pseudo}
-        if count_differences(target, compile_function(draft, trial)) == 0:
+        try:
+            compilation = compile_function(draft, trial)
+        except CompileError:
+            continue
+        if count_differences(target, compilation) == 0:
             kept = trial
     return kept
 
