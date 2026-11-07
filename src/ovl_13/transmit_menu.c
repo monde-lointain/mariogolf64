@@ -2526,28 +2526,30 @@ void ClearCartridgeCharacters(void) {
  * from, looking through every controller's pak for it, and rewrites the save's
  * checksums.
  *
- * Doesn't match: the original copies the experience sum from a scratch
- * register into the one that holds the stored experience, then clamps it
- * there, where this keeps the stored experience in a register of its own.
- * Clamping with an if statement gives that shape, but the record offset and
- * the save index then swap $s1 and $s2 (49 words, 1 in shape); the register
- * oracle leaves 3 words differing once it forces 6 pseudos of that form. A
- * switch or an else-if chain for the record offset gives 25 to 51. Splitting
- * the sum into a load and an add gives the shape (18 words, none in shape);
- * a total local of its own gives 54 words, 4 in shape, and adding into the
- * experience 49 to 57. 18 words differ, 4 in shape.
+ * Doesn't match: recordOffset and saveIndex swap $s1 and $s2. global-alloc
+ * takes recordOffset (28 refs over a live length of 159, priority 7044) before
+ * storedSum (6666) and saveIndex (5714), giving it $s1; the original gives $s1
+ * to saveIndex and later storedSum, and $s2 to recordOffset. The register
+ * oracle matches once it forces those 3 pseudos, so the code is the original's.
+ * Every declaration order of saveIndex and recordOffset and three orders of
+ * the assignments before PHASE 1 give the same 40 words, an else-if chain for
+ * the record offset 42 (6 in shape), a switch 16 (10) and testing
+ * character->saveIndex 54 (16). 40 words differ, none in shape.
  *
- * The focused permuter's best, 9 words (3 in shape), reads
- * character->experience into a local before IsCharacterFromSave and clamps
- * with sum <= MAX_EXPERIENCE first; the read alone gives 88 words (6 in
- * shape) and the flipped clamp alone 49 (1). The original loads it from
- * 0x28($fp) after the call, so the early read isn't its form.
+ * The clamp repeats the sum in each arm, which gives the original's copy of
+ * the sum into the stored experience's register. Through a sum local, as a ?:
+ * either way round or an if storing over it, the clamp gave 18 to 49 words,
+ * with the oracle no closer than 12 words forcing 3 pseudos; adding into the
+ * experience gives 57, and the ?: repeating the sum 49 to 61. The focused
+ * permuter's best for that draft, 9 words (3 in shape), read
+ * character->experience into a local before IsCharacterFromSave, where the
+ * original loads it from 0x28($fp) after the call.
  */
 #ifdef NON_MATCHING
 s32 WriteExperienceToCartridge(s32 characterIndex) {
   /*
    * The transfer pointer is there to match: reaching g_GameBoyTransfer
-   * directly gives 170 words differing, 70 in shape, against 18 (4)
+   * directly gives 190 words differing, 66 in shape, against 40 (0)
    */
   GameBoyTransfer* transfer = &g_GameBoyTransfer;
   u8 characterData[CHARACTER_DATA_SIZE];
@@ -2604,7 +2606,7 @@ s32 WriteExperienceToCartridge(s32 characterIndex) {
       /*
        * Each pak error powers off and continues, to match: jumping to the
        * loop's last power off from the five read and write errors instead
-       * gives 180 words differing, 72 in shape, against 18 (4)
+       * gives 164 words differing, 68 in shape, against 40 (0)
        */
       if (result != 0) {
         nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
@@ -2675,8 +2677,11 @@ s32 WriteExperienceToCartridge(s32 characterIndex) {
           experience =
               ((characterData[DATA_EXPERIENCE_OFFSET + 1] << BITS_PER_BYTE) |
                   characterData[DATA_EXPERIENCE_OFFSET]);
-          sum = character->experience + experience;
-          experience = (sum > MAX_EXPERIENCE) ? MAX_EXPERIENCE : sum;
+          if (character->experience + experience > MAX_EXPERIENCE) {
+            experience = MAX_EXPERIENCE;
+          } else {
+            experience = character->experience + experience;
+          }
           osSyncPrintf("PHASE 10\n");
           characterData[DATA_EXPERIENCE_OFFSET + 1] =
               experience >> BITS_PER_BYTE;
