@@ -54,8 +54,9 @@ SCRIPT_MODE = 0o755
 # KMC's as writes a scratch file into the working directory and waits for the
 # filesystem journal to commit it. On disk, that serialises the permuter's
 # workers and leaves the CPUs idle, so compile.sh works in the temp directory
-# and takes absolute paths.
-COMPILE_SH = """#!/bin/bash
+# and takes absolute paths. It is a POSIX script, so the permuter runs it in
+# sh, which starts in half the time bash does.
+COMPILE_SH = """#!/bin/sh
 # Invoked by the permuter as: compile.sh INPUT.c -o OUTPUT.o
 cd "${{TMPDIR:-/tmp}}" || exit
 COMPILER_PATH={kmc} exec {kmc}/gcc -c {flags} -x c "$@"
