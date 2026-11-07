@@ -1019,7 +1019,9 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/course_menu", DrawStatsScrollArrows);
  * (5) and a u32 36 (8); with place an s8, 12 (2), or a u16, 35 (11). The
  * edges' other orders of position, spacing and shift give 14 to 67 words.
  * What's left is the shift's load, four instructions before the original's,
- * and one register. 4 words differ, 2 in shape.
+ * and one register. Picking the palette with g_TrophyPalettes[place] in
+ * any of the three ifs, rather than the place's constant, gives 12 to 33
+ * words. 4 words differ, 2 in shape.
  */
 #ifdef NON_MATCHING
 void DrawCourseTrophies(Gfx** displayListHead) {

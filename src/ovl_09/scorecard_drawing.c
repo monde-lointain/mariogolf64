@@ -1161,7 +1161,9 @@ static const char f_BlankBetName[] = " ";
  * the crossings' row top in a register of its own, where the original
  * adds GRID_ROW_LINE_TOP to the row's offset on each pass; four other
  * orders and groupings of that top, alone or with the bottom grouped to
- * match, give 80 to 90 words. 56 words differ, 22 in shape.
+ * match, give 80 to 90 words. Reading the pots' rates with betRates[i]
+ * rather than the bet's constant, in any of the four ifs, changes nothing.
+ * 56 words differ, 22 in shape.
  */
 #ifdef NON_MATCHING
 void DrawBetsPage(Gfx** displayListHead) {
