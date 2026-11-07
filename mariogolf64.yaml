@@ -107,7 +107,7 @@ segments:
       - [0x2D5C0, asm]
       - [0x2E3E0, asm]
       - [0x2FD00, asm]
-      - [0x34FA0, asm]
+      - [0x34FA0, c]
       - [0x396C0, asm]
       - [0x40180, asm]
       - [0x414A0, asm]
