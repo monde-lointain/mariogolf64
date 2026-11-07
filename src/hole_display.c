@@ -2381,7 +2381,10 @@ void HandleFrameBufferSwap(void) {}
  * gives the same. The last loop still steps frame: indexing it by i -
  * BACKDROP_BORDER gives 180 words, 40 in shape. A u16 or u8 height in the last
  * loop gives 147 words, 31 in shape, but adds two andi masks, 0xffff or 0xff,
- * to the original's three andi 0xffff. 147 words differ, 33 in shape.
+ * to the original's three andi 0xffff. Holding the last loop's strip bottom,
+ * i + height, in a local of its own, as a permuter run suggested, takes the
+ * draft to 137 words, 33 in shape, and the oracle to 64 words forcing 10
+ * pseudos; as an s16 it gives 150 words. 137 words differ, 33 in shape.
  *
  * The register oracle lines frame up with $s3 where it is set and with $a3
  * in the last loop. A pointer of the last loop's own, set to f_CapturedFrame
@@ -2495,10 +2498,12 @@ void DrawFadeAnimation(Gfx** displayListHead) {
           ((i + BACKDROP_STRIP_STEP <= SCREEN_HEIGHT - BACKDROP_BORDER)
                   ? (BACKDROP_STRIP_HEIGHT - BACKDROP_LAST_STRIP_HEIGHT)
                   : 0);
+      s32 bottom = i + height;
+
       LoadFadeFrameStrip(gfx, frame, height, isTileSet);
       gSPTextureRectangle(gfx++, QuarterPixels(BACKDROP_BORDER),
           QuarterPixels(i), QuarterPixels(BACKDROP_RIGHT + 1),
-          QuarterPixels(i + height), G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE,
+          QuarterPixels(bottom), G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE,
           TEXEL_STEP_ONE);
       frame += BACKDROP_STRIP_STEP * FADE_FRAME_WORDS_PER_ROW;
     }
