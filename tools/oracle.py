@@ -14,7 +14,8 @@ forced into those registers as reload starts, and the compile repeated
 until it matches or stops improving. A match proves that the draft's RTL is
 the original's up to register allocation, and the forced pseudos are then
 cut down to the fewest that still match. PSEUDO=HARD pairs, hard registers
-given by number or name, start the forcing off.
+given by number or name, or "stack" for a pseudo the original spilled, start
+the forcing off.
 
 For each forced pseudo, prints what the allocator knew of it: its quantity
 in local-alloc or its allocno in global-alloc, with its priority, and the
@@ -54,6 +55,8 @@ MIN_ARGUMENT_COUNT = 3
 MIN_SPLIT_VOTES = 2
 FIRST_PSEUDO_REGISTER = blame.FIRST_PSEUDO_REGISTER
 FPR_BASE = len(blame.GPR_NAMES)
+# reg_renumber's value for a pseudo that has no hard register
+NO_REGISTER = -1
 FIELD_MASK = 0x1F
 OPCODE_SHIFT = 26
 # Opcodes whose register fields this reads differently from the I-type's
@@ -174,7 +177,12 @@ def mask_registers(word: int) -> int:
 
 
 def parse_register(text: str) -> int:
-    """Return the GCC number of a register given by number or by name."""
+    """Return the GCC number of a register given by number or by name.
+
+    "stack" gives NO_REGISTER, which leaves the pseudo for reload to spill.
+    """
+    if text == "stack":
+        return NO_REGISTER
     if text.isdigit():
         return int(text)
     name = text.lstrip("$")
