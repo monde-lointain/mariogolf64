@@ -1,16 +1,12 @@
-"""A gdb script that watches and steers KMC GCC's register allocators.
+"""A gdb script that watches KMC GCC's register allocators.
 
     gdb -batch -nx -x oracle_gdb.py --args cc1.debug ARGUMENTS...
 
-Runs a debug build of the unmodified cc1, which oracle.py's compiler
-directory puts in cc1's place. The environment says what to do with the
-function ORACLE_FUNCTION:
-
-    ORACLE_FORCE  PSEUDO=HARD pairs, joined by commas, whose allocation is
-                  overridden as reload starts, after both allocators ran
-    ORACLE_TRACE  a file that takes one JSON object per line: each block's
-                  quantities from local-alloc, then the allocnos of
-                  global-alloc and every pseudo's final register
+Runs the debug build of cc1 that oracle.py's compiler directory puts in
+cc1's place. For the function ORACLE_FUNCTION it writes to the file
+ORACLE_TRACE one JSON object per line: each block's quantities from
+local-alloc, then the allocnos of global-alloc and every pseudo's register
+as reload starts, before the build applies any ORACLE_FORCE.
 
 The other functions compile untouched. cc1's exit code is passed on.
 """
@@ -22,23 +18,11 @@ from pathlib import Path
 import gdb  # pyright: ignore[reportMissingModuleSource]
 
 FUNCTION = os.environ.get("ORACLE_FUNCTION", "")
-FORCE = {
-    int(pseudo): int(hard)
-    for pseudo, hard in (
-        pair.split("=")
-        for pair in os.environ.get("ORACLE_FORCE", "").split(",")
-        if pair
-    )
-}
-TRACE_PATH = os.environ.get("ORACLE_TRACE")
+TRACE_PATH = os.environ["ORACLE_TRACE"]
 # From config/mips/mips.h
 FIRST_PSEUDO_REGISTER = 68
-# The registers a function saves when it uses them: $s0-$s7, $fp, $f20-$f31
-HARD_FRAME_POINTER = 30
-CALLEE_SAVED = (*range(16, 24), HARD_FRAME_POINTER, *range(52, 64))
 # Where block_alloc has given every quantity its register
 BLOCK_ALLOC_DONE = "local-alloc.c:1541"
-WORD_SIZE = 4
 HARD_REG_SET_BITS = 32
 
 
@@ -54,10 +38,9 @@ def is_watched() -> bool:
 
 
 def trace(record: dict[str, object]) -> None:
-    """Append RECORD to the trace file, if one was named."""
-    if TRACE_PATH:
-        with Path(TRACE_PATH).open("a") as file:
-            _ = file.write(json.dumps(record) + "\n")
+    """Append RECORD to the trace file."""
+    with Path(TRACE_PATH).open("a") as file:
+        _ = file.write(json.dumps(record) + "\n")
 
 
 def read_ints(array: str, count: int) -> list[int]:
@@ -124,18 +107,14 @@ class BlockAllocDone(gdb.Breakpoint):
 
 
 class ReloadStart(gdb.Breakpoint):
-    """Records global-alloc's allocnos and applies ORACLE_FORCE."""
+    """Records global-alloc's allocnos and every pseudo's register."""
 
     def stop(self) -> bool:  # pyright: ignore[reportImplicitOverride]
         """Record the watched function's state and carry on running."""
         if not is_watched():
             return False
-        if TRACE_PATH:
-            trace_global()
-        if FORCE:
-            force_registers()
-        if TRACE_PATH:
-            trace_dispositions()
+        trace_global()
+        trace_dispositions()
         return False
 
 
@@ -185,33 +164,6 @@ def trace_global() -> None:
     trace({"stage": "global", "allocnos": allocnos})
 
 
-def get_register_count(pseudo: int) -> int:
-    """Return how many hard registers PSEUDO takes, at 4 bytes each."""
-    mode = value(f"regno_reg_rtx[{pseudo}]->mode")
-    return max(1, (int(value(f"mode_size[{int(mode)}]")) + WORD_SIZE - 1) // WORD_SIZE)
-
-
-def force_registers() -> None:
-    """Give each pseudo of ORACLE_FORCE its register.
-
-    The saved registers that the prologue saves are worked out again from
-    the pseudos, since one may have moved off or onto them.
-    """
-    pseudo_count = int(value("max_regno"))
-    for pseudo, hard in FORCE.items():
-        if FIRST_PSEUDO_REGISTER <= pseudo < pseudo_count:
-            _ = gdb.execute(f"set var reg_renumber[{pseudo}] = {hard}", to_string=True)
-    used: set[int] = set()
-    for pseudo, hard in enumerate(read_ints("reg_renumber", pseudo_count)):
-        if pseudo >= FIRST_PSEUDO_REGISTER and hard >= 0:
-            used.update(range(hard, hard + get_register_count(pseudo)))
-    for register in CALLEE_SAVED:
-        if register == HARD_FRAME_POINTER and int(value("frame_pointer_needed")):
-            continue
-        live = 1 if register in used else 0
-        _ = gdb.execute(f"set var regs_ever_live[{register}] = {live}", to_string=True)
-
-
 def trace_dispositions() -> None:
     """Record the register each pseudo goes into reload with."""
     pseudo_count = int(value("max_regno"))
@@ -231,8 +183,7 @@ def main() -> None:
     """Run cc1 under the breakpoints and exit with its code."""
     gdb.execute("set pagination off")
     gdb.execute("set confirm off")
-    if TRACE_PATH:
-        _ = BlockAllocDone(BLOCK_ALLOC_DONE, internal=True)
+    _ = BlockAllocDone(BLOCK_ALLOC_DONE, internal=True)
     _ = ReloadStart("reload", internal=True)
     _ = gdb.execute("run", to_string=True)
     exit_code = value("$_exitcode")

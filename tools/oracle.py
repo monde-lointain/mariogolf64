@@ -6,12 +6,13 @@
 
 Without ASM_FILE and C_FILE, finds them from FUNCTION as fncompare does.
 
-Compiles FUNCTION with the debug build of cc1 that tools/build_oracle.sh
-makes, under gdb (see oracle_gdb.py). The instructions that equal the
-target's but for their registers name, through the insns that made them,
-the pseudo register each target register should hold. Those pseudos are
-forced into those registers as reload starts, and the compile repeated
-until it matches or stops improving. A match proves that the draft's RTL is
+Compiles FUNCTION once with the debug build of cc1 that
+tools/build_oracle.sh makes, under gdb (see oracle_gdb.py), to trace the
+allocators. The instructions that equal the target's but for their
+registers name, through the insns that made them, the pseudo register each
+target register should hold. Those pseudos are forced into those registers
+as reload starts, by the optimized build, and the compile repeated until it
+matches or stops improving. A match proves that the draft's RTL is
 the original's up to register allocation, and the forced pseudos are then
 cut down to the fewest that still match. PSEUDO=HARD pairs, hard registers
 given by number or name, or "stack" for a pseudo the original spilled, start
@@ -49,6 +50,7 @@ import fncompare
 
 ORACLE_DIR = fncompare.ROOT / "build" / "oracle"
 MAX_ROUNDS = 8
+MODE_OPTIONS = ("--allocation", "--splits")
 # The assembly, the C file and the function, before any forced pairs
 MIN_ARGUMENT_COUNT = 3
 # The instructions a register needs from a pseudo to count as holding it
@@ -191,40 +193,23 @@ def parse_register(text: str) -> int:
     return blame.GPR_NAMES.index(name)
 
 
-def compile_function(
-    c_path: str, function: str, force: dict[int, int], work: Path
-) -> Compilation:
-    """Compile FUNCTION with FORCE applied, tracing the allocators."""
-    trace_path = work / "trace.jsonl"
-    trace_path.unlink(missing_ok=True)
-    os.environ.update(
-        ORACLE_FUNCTION=function,
-        ORACLE_FORCE=",".join(f"{pseudo}={hard}" for pseudo, hard in force.items()),
-        ORACLE_TRACE=str(trace_path),
-    )
+def trace_function(c_path: str, function: str, work: Path) -> Compilation:
+    """Compile FUNCTION unforced under gdb, tracing the allocators.
+
+    Leaves in WORK the unit.i that every forced compile of the function
+    then compiles. The allocators run before reload, where the forcing is
+    applied, so the trace and the dumps up to lreg hold for every forcing.
+    """
     optflags = fncompare.get_optflags(c_path)
     result = fncompare.run_compiler(c_path, optflags, ["-E"])
     isolated = fncompare.isolate_functions(result.stdout, {function})
     if not re.search(rf"\b{function}\(", isolated):
         isolated = result.stdout
     _ = (work / "unit.i").write_text(isolated)
-    blame.run(work / "unit.i", optflags, ["-S", "-dp", "-da", "-o", "unit.s"], work)
-    del os.environ["ORACLE_FUNCTION"]
-    lines = (work / "unit.s").read_text().splitlines()
-    _ = (work / "marked.s").write_text(blame.mark_lines(lines))
-    assemble = ["-c", f"-Wa,-I{fncompare.ROOT}", "-o"]
-    blame.run(work / "unit.s", optflags, [*assemble, "unit.o"], work)
-    blame.run(work / "marked.s", optflags, [*assemble, "marked.o"], work)
-    functions = fncompare.read_object_file(work / "unit.o")
-    routine = functions[function]
-    start, ends = blame.read_line_ends(work / "marked.o", function)
-    blamed = blame.Compilation(
-        lines,
-        blame.read_word_lines(lines, routine, start, ends),
-        routine,
-        functions,
-        blame.read_dumps(work, function),
-        {},
+    trace_path = work / "trace.jsonl"
+    trace_path.unlink(missing_ok=True)
+    blamed = build_function(
+        function, optflags, work, {"ORACLE_TRACE": str(trace_path)}, dumps=True
     )
     compilation = Compilation(blamed, [], [], {})
     for line in trace_path.read_text().splitlines():
@@ -238,6 +223,80 @@ def compile_function(
                 int(key): hard for key, hard in record["registers"].items()
             }
     return compilation
+
+
+@dataclass
+class Draft:
+    """The function being compiled, and its traced, unforced compile."""
+
+    c_path: str
+    function: str
+    # Holds the unit.i that trace_function left, and every compile's files
+    work: Path
+    traced: Compilation
+
+
+def compile_function(
+    draft: Draft, force: dict[int, int], *, dumps: bool = False
+) -> Compilation:
+    """Compile DRAFT again, as it was traced, with FORCE applied.
+
+    Takes the trace and the dumps from the traced compile, unless DUMPS asks
+    for the compile's own, which blaming its words on the passes after
+    reload needs.
+    """
+    traced = draft.traced
+    pairs = ",".join(f"{pseudo}={hard}" for pseudo, hard in force.items())
+    blamed = build_function(
+        draft.function,
+        fncompare.get_optflags(draft.c_path),
+        draft.work,
+        {"ORACLE_FORCE": pairs},
+        dumps=dumps,
+    )
+    if not dumps:
+        blamed.dumps = traced.blamed.dumps
+    registers = traced.registers | {
+        pseudo: hard for pseudo, hard in force.items() if pseudo in traced.registers
+    }
+    return Compilation(blamed, traced.blocks, traced.allocnos, registers)
+
+
+def build_function(
+    function: str,
+    optflags: list[str],
+    work: Path,
+    environment: dict[str, str],
+    *,
+    dumps: bool,
+) -> blame.Compilation:
+    """Compile and assemble WORK's unit.i with ENVIRONMENT, for FUNCTION.
+
+    DUMPS asks for every pass's dump of the function.
+    """
+    os.environ.update(ORACLE_FUNCTION=function, **environment)
+    arguments = ["-S", "-dp", *(["-da"] if dumps else []), "-o", "unit.s"]
+    try:
+        blame.run(work / "unit.i", optflags, arguments, work)
+    finally:
+        for name in ["ORACLE_FUNCTION", *environment]:
+            del os.environ[name]
+    lines = (work / "unit.s").read_text().splitlines()
+    _ = (work / "marked.s").write_text(blame.mark_lines(lines))
+    assemble = ["-c", f"-Wa,-I{fncompare.ROOT}", "-o"]
+    blame.run(work / "unit.s", optflags, [*assemble, "unit.o"], work)
+    blame.run(work / "marked.s", optflags, [*assemble, "marked.o"], work)
+    functions = fncompare.read_object_file(work / "unit.o")
+    routine = functions[function]
+    start, ends = blame.read_line_ends(work / "marked.o", function)
+    return blame.Compilation(
+        lines,
+        blame.read_word_lines(lines, routine, start, ends),
+        routine,
+        functions,
+        blame.read_dumps(work, function) if dumps else {},
+        {},
+    )
 
 
 def read_insn_lines(
@@ -358,13 +417,21 @@ def find_tied_pseudos(compilation: Compilation) -> dict[int, list[int]]:
     return tied
 
 
+@dataclass
+class Search:
+    """The closest forcing that search_forcing found, and how it got there."""
+
+    force: dict[int, int]
+    differences: int
+    compilation: Compilation
+    # The pairs forced and the words that differed in each round, the first
+    # the starting forcing's
+    rounds: list[tuple[int, int]]
+
+
 def search_forcing(
-    target: fncompare.Routine,
-    c_path: str,
-    function: str,
-    force: dict[int, int],
-    work: Path,
-) -> tuple[dict[int, int], int, Compilation]:
+    target: fncompare.Routine, draft: Draft, force: dict[int, int]
+) -> Search:
     """Return the forcing that brings the draft closest to TARGET.
 
     Each round adds to the last round's forcing every pseudo whose votes
@@ -372,12 +439,12 @@ def search_forcing(
     Forcing one pseudo can move others, so a round may do worse than the
     last and still lead to a better one.
     """
-    compilation = compile_function(c_path, function, force, work)
-    best = (dict(force), count_differences(target, compilation), compilation)
-    print(f"  unforced: {best[1]} differ")
+    compilation = compile_function(draft, force) if force else draft.traced
+    differences = count_differences(target, compilation)
+    best = Search(dict(force), differences, compilation, [(len(force), differences)])
     tried = [dict(force)]
-    for round_number in range(1, MAX_ROUNDS + 1):
-        if best[1] == 0:
+    for _ in range(MAX_ROUNDS):
+        if best.differences == 0:
             break
         registers = compilation.registers
         tied = find_tied_pseudos(compilation)
@@ -392,29 +459,23 @@ def search_forcing(
         if proposal in tried:
             break
         tried.append(proposal)
-        compilation = compile_function(c_path, function, proposal, work)
+        compilation = compile_function(draft, proposal)
         differences = count_differences(target, compilation)
-        print(f"  round {round_number}: {len(proposal)} forced, {differences} differ")
-        if differences < best[1]:
-            best = (proposal, differences, compilation)
+        best.rounds.append((len(proposal), differences))
+        if differences < best.differences:
+            best.force, best.differences = proposal, differences
+            best.compilation = compilation
     return best
 
 
 def minimize_forcing(
-    target: fncompare.Routine,
-    c_path: str,
-    function: str,
-    force: dict[int, int],
-    work: Path,
+    target: fncompare.Routine, draft: Draft, force: dict[int, int]
 ) -> dict[int, int]:
     """Return the fewest of FORCE's pairs that still make the draft match."""
     kept = dict(force)
     for pseudo in list(force):
         trial = {key: hard for key, hard in kept.items() if key != pseudo}
-        if (
-            count_differences(target, compile_function(c_path, function, trial, work))
-            == 0
-        ):
+        if count_differences(target, compile_function(draft, trial)) == 0:
             kept = trial
     return kept
 
@@ -656,8 +717,8 @@ def print_allocation(compilation: Compilation, lines: dict[int, set[int]]) -> No
 class Request:
     """What the command line asks for."""
 
-    show_allocation: bool
-    show_splits: bool
+    # "search", or the option that names another mode
+    mode: str
     asm_path: str
     c_path: str
     function: str
@@ -666,15 +727,13 @@ class Request:
 
 def parse_arguments(arguments: list[str]) -> Request:
     """Read the command line, or exit with the usage if it doesn't fit."""
-    show_allocation = "--allocation" in arguments
-    if show_allocation:
-        arguments.remove("--allocation")
-    show_splits = "--splits" in arguments
-    if show_splits:
-        arguments.remove("--splits")
+    modes = [argument[2:] for argument in arguments if argument in MODE_OPTIONS]
+    arguments = [argument for argument in arguments if argument not in MODE_OPTIONS]
     arguments = fncompare.expand_function_name(arguments)
-    if len(arguments) < MIN_ARGUMENT_COUNT or any(
-        argument.startswith("-") for argument in arguments
+    if (
+        len(modes) > 1
+        or len(arguments) < MIN_ARGUMENT_COUNT
+        or any(argument.startswith("-") for argument in arguments)
     ):
         sys.exit(__doc__)
     asm_path, c_path, function, *pairs = arguments
@@ -682,7 +741,15 @@ def parse_arguments(arguments: list[str]) -> Request:
         int(pseudo): parse_register(hard)
         for pseudo, hard in (pair.split("=") for pair in pairs)
     }
-    return Request(show_allocation, show_splits, asm_path, c_path, function, force)
+    return Request(modes[0] if modes else "search", asm_path, c_path, function, force)
+
+
+def print_search(search: Search) -> None:
+    """Print each round of SEARCH."""
+    _, differences = search.rounds[0]
+    print(f"  unforced: {differences} differ")
+    for number, (forced, differences) in enumerate(search.rounds[1:], 1):
+        print(f"  round {number}: {forced} forced, {differences} differ")
 
 
 def main() -> None:
@@ -690,9 +757,7 @@ def main() -> None:
     request = parse_arguments(sys.argv[1:])
     asm_path, c_path, function = request.asm_path, request.c_path, request.function
     force = request.force
-    show_allocation = request.show_allocation
-    show_splits = request.show_splits
-    if not (ORACLE_DIR / "cc1.debug").exists():
+    if not (ORACLE_DIR / "cc1.optimized").exists():
         sys.exit("run tools/build_oracle.sh first")
     os.environ["KMC_DIR"] = str(ORACLE_DIR)
     fncompare.KMC_DIR = ORACLE_DIR
@@ -703,8 +768,10 @@ def main() -> None:
         print(f"  nested, not compared: {' '.join(original.nested)}")
     with tempfile.TemporaryDirectory() as work_name:
         work = Path(work_name)
-        if show_allocation:
-            compilation = compile_function(c_path, function, force, work)
+        traced = trace_function(c_path, function, work)
+        draft = Draft(c_path, function, work, traced)
+        if request.mode == "allocation":
+            compilation = compile_function(draft, force)
             print(f"  {count_differences(target, compilation)} differ")
             print_allocation(
                 compilation,
@@ -713,37 +780,34 @@ def main() -> None:
                 ),
             )
             return
-        if show_splits:
-            compilation = compile_function(c_path, function, force, work)
+        if request.mode == "splits":
+            compilation = compile_function(draft, force)
             insn_lines = read_insn_lines(c_path, function, compilation, work)
             print_splits(target, compilation, insn_lines)
             print_merges(target, compilation, insn_lines)
             return
-        force, differences, compilation = search_forcing(
-            target, c_path, function, force, work
-        )
-        if differences == 0 and force:
-            force = minimize_forcing(target, c_path, function, force, work)
-            compilation = compile_function(c_path, function, {}, work)
+        search = search_forcing(target, draft, force)
+        print_search(search)
+        force = search.force
+        if search.differences == 0 and force:
+            force = minimize_forcing(target, draft, force)
             print(f"MATCHES when {len(force)} pseudos are forced:")
-        elif differences == 0:
+        elif search.differences == 0:
             print("MATCHES unforced")
             return
         else:
-            print(f"closest: {differences} differ when {len(force)} are forced")
+            print(f"closest: {search.differences} differ when {len(force)} are forced")
+            closest = compile_function(draft, force, dumps=True).blamed
             fncompare.print_diff(
-                target,
-                compilation.routine,
-                lambda index: blame.blame(compilation.blamed, index),
+                target, closest.routine, lambda index: blame.blame(closest, index)
             )
-            compilation = compile_function(c_path, function, {}, work)
         noted_work = work / "noted"
         if noted_work.exists():
             shutil.rmtree(noted_work)
-        insn_lines = read_insn_lines(c_path, function, compilation, work)
-        explain(compilation, force, read_pseudo_lines(compilation, insn_lines))
-        print_splits(target, compilation, insn_lines)
-        print_merges(target, compilation, insn_lines)
+        insn_lines = read_insn_lines(c_path, function, traced, work)
+        explain(traced, force, read_pseudo_lines(traced, insn_lines))
+        print_splits(target, traced, insn_lines)
+        print_merges(target, traced, insn_lines)
 
 
 if __name__ == "__main__":
