@@ -4060,7 +4060,12 @@ void WriteHexDumpFile(u32 *words, s32 byteCount, char *fileName) {
  * Setting each half's bottom slot, tile index, top slot and previous detail
  * in that order, as the original's stores go, gives 1661 words (159 in
  * shape) but leaves the oracle's closest at 1189, and breaks the order
- * DrawGround's copy sets them in. 1665 words differ, 165 in shape.
+ * DrawGround's copy sets them in. Holding terrainStyle != TERRAIN_STYLE_NORMAL
+ * in a flag set after each fine pass's texture load, as a permuter run did,
+ * gives 1209 words (141 in shape), but it compiles to an sltu that the
+ * original doesn't have: the original reloads terrainStyle and branches on it
+ * at each test. Set anywhere else, once or per half, row, tile or pass, the
+ * flag gives 1773 to 2312 words. 1665 words differ, 165 in shape.
  */
 #ifdef NON_MATCHING
 void DrawHoleEditorGround(CameraMatrices *matrices UNUSED, s32 terrainStyle) {
