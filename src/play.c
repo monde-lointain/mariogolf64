@@ -2241,8 +2241,14 @@ INCLUDE_ASM("asm/nonmatchings/play", RebuildGroundTextureCoordinates);
  * then 670 (122). Setting firstTileS after tileIndex gives 640 where before it
  * gives 670. The frame is now 0x10 bytes smaller than the original's, against
  * 8 larger before, and forcing the register oracle's pseudos only moves the
- * spills: its closest result is the draft's own 640 words. 640 words differ,
- * 118 in shape.
+ * spills: its closest result is the draft's own 640 words.
+ *
+ * The original steps the tile index, its column and their givs at the end of
+ * a fine tile drawn from its display list too, and from there goes straight
+ * to the next tile, so that arm moves on to the next tile itself and
+ * continues. That takes the draft from 640 words differing (118 in shape) to
+ * 580 (94); stepping only the tile index there gives 585 (93). 580 words
+ * differ, 94 in shape.
  */
 void DrawGround(CameraMatrices *matrices, s32 terrainStyle) {
     u8 snapsEdge[2][TILE_VERTEX_SEGMENT_COUNT]; /* For the current and the last
@@ -2610,6 +2616,9 @@ void DrawGround(CameraMatrices *matrices, s32 terrainStyle) {
 
                             current ^= 1;
                             gSPDisplayList(gfx++, g_GroundTileDisplayLists[tileIndex]);
+                            tileIndex++;
+                            tileColumn++;
+                            continue;
                         }
                     }
                     else if (g_WorkArea.hole.tiles[tileIndex].detail >= 0) {
