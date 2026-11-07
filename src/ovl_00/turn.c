@@ -3362,8 +3362,13 @@ void ShowHoleOutBanner(s32 playerIndex) {
  * run found, where the reaction hold's test puts the player's frame count
  * first. That takes the draft from 51 words to 41, the 29 in shape
  * staying, and the register oracle's closest result, with today's oracle,
- * from 36 words with 6 pseudos forced to 34 with 1. 41 words differ, 29
- * in shape.
+ * from 36 words with 6 pseudos forced to 34 with 1.
+ *
+ * When the hole isn't a group's, the next state is set after the one-on-one
+ * match's handicap scoring, as the original stores it after that block's
+ * code. That takes the draft from 41 words to 33, 21 in shape, and the
+ * register oracle's closest from 34 words to 26, forcing 1 pseudo either
+ * way. 33 words differ, 21 in shape.
  */
 #ifdef NON_MATCHING
 /* Whether the stopwatches run in a player state: from aiming to the flight */
@@ -5489,7 +5494,6 @@ void UpdateTurns(void) {
                             PLAYER_STATE_HOLE_DONE;
                     }
                     else {
-                        nextState = PLAYER_STATE_HOLE_DONE;
                         if (IsOneOnOneMatchMode(g_GameState.gameMode)) {
                             s32 result;
 
@@ -5559,6 +5563,8 @@ void UpdateTurns(void) {
                                 g_Players[playerIndex ^ 1].holeStatus = HOLE_STATUS_OUT;
                             }
                         }
+
+                        nextState = PLAYER_STATE_HOLE_DONE;
                     }
                 }
 
