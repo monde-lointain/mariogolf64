@@ -5039,48 +5039,29 @@ void LoadOpeningBurst(void) {
 /*
  * Draws a yellow burst for a few frames, stretched over the burst's corners.
  *
- * Doesn't match: the original divides for the texture's steps at run time,
- * dividing 0x8000 by 28 and 26 loaded as constants, where this folds them into
- * constants. Here cse doesn't yet know the corners when it meets the divisions,
- * and cse2 folds them; the original's divisions survive cse2, though its
- * corners are folded into the rectangle's words. The scheduler then starts the
- * long divisions first and spills every command's address ahead of them, so
- * almost every word moves. GCC keeps such a division when the size is set the
- * same way in both arms of an if, which cse cannot see through but
- * cross-jumping later merges, so the original likely chose the size by some
- * condition. Placing such an if here keeps the divisions, but its arms spill
- * the size differently and are not merged. The original aligns the palette's
- * and texels' addresses to 8 bytes, as TextureAddress does; without that, 391
- * words differed, 145 in shape, when the draft had 364 (132). The original has
- * one pipe sync after the palette load, not two, which leaves 367 words
- * differing, 127 in shape. The register oracle's closest result is these 367
- * words with no register forced, so allocation isn't the cause. Width and
- * height locals, or corners held as u8, s16, u16 or u32, still fold the
- * divisions, leaving 367 words. The permuter's best, 322 words (128 in shape),
- * declares left as an unset char, so it draws from garbage.
+ * Doesn't match: the registers and a few instructions' order differ, and
+ * one value. The original works out the bottom step with the height known as 26, so combine can tell
+ * the quotient fits in 16 bits and ORs it into the rectangle's word
+ * unmasked, where ours subtracts the top from the bottom at run time and
+ * masks it. Corners declared as s16, u16 or u8 give 180 words (14 in
+ * shape), a u32 top and bottom 470 (86), a height local 165 (49), width and
+ * height locals 246 (60), and those locals with the corners written as
+ * constants 470 (86). The register oracle's closest result is 107 words,
+ * forcing 20 pseudos.
  *
- * The texture rectangle shares the block that holds the pipe sync before it.
- * That takes the draft from 367 words differing to 347, 127 in shape to 129,
- * and the register oracle's closest result from 367 words to 347, with no
- * register forced for either, so allocation still isn't the cause. 347 words
- * differ, 129 in shape.
- *
- * The counts above were measured before the change below. Each pipe sync and
- * the RDP state command after it now goes through AppendSyncedRdpState,
- * which declares the command's pointer first, as DrawHoleTriangles does. Of
- * the seven pairs, the cycle type's and the render mode's each take 8 words
- * off alone, and all seven take the draft from 347 words differing to 331,
- * 129 in shape.
- *
- * The original's render mode is the opaque one that keeps alpha as coverage,
- * 0x0F0A7008, rather than G_RM_XLU_SURF's 0x00504240, which takes the draft
- * from 331 words differing to 327, 129 in shape both. With it, the sync and
- * the rectangle without their block give 470 words (86 in shape), the
- * register oracle's closest 388 forcing 23 pseudos; the sync alone in its
- * block 347 (127), and the rectangle alone 468 (130). Step locals, set at
- * their declarations, at the top of the if, before the palette load or
- * before the block, still fold the divisions, giving 327 to 337 words.
- * 327 words differ, 129 in shape.
+ * The rectangle is a scissored one, as the original divides 0x8000 by 28
+ * and 26 at run time: the clamps in gSPScisTextureRectangle read the steps
+ * again, and GCC then keeps the divisions, where with gSPTextureRectangle
+ * it folds them into constants and nearly every word moves. With it the
+ * draft went from 327 words differing (129 in shape) to 175 (7), and the
+ * frame to the original's size; the sync before it in a block of its own
+ * gives 551 (377). Each pipe sync and the RDP state command after it goes
+ * through AppendSyncedRdpState, as in DrawHoleTriangles: plain pairs give
+ * 191 words (7 in shape). The palette's and texels' addresses are aligned
+ * to 8 bytes, as TextureAddress does; without that 407 words differ (63 in
+ * shape). The render mode is the opaque one that keeps alpha as coverage,
+ * 0x0F0A7008; G_RM_XLU_SURF gives 179 words (7 in shape). 175 words
+ * differ, 7 in shape.
  */
 #ifdef NON_MATCHING
 void DrawOpeningBurst(Gfx **displayListHead) {
@@ -5122,31 +5103,19 @@ void DrawOpeningBurst(Gfx **displayListHead) {
             G_TX_NOLOD,
             G_TX_NOLOD
         );
-        /*
-         * The sync and the rectangle in their own block, to match: without a
-         * block 476 words differ, 86 in shape, against 347 and 129. The sync
-         * alone in a block gives 367 (127), the rectangle alone 474 (130),
-         * and the rectangle with the sync after it 352 (132); the register
-         * oracle's closest result is the unforced count for the sync alone
-         * and for the two together. With the second palette sync, when the
-         * sync alone had its block, 449 (91) differed against 364 (132), and
-         * the register oracle stayed above 420 then and above 364 there.
-         */
-        IN_OWN_BLOCK({
-            gDPPipeSync(gfx++);
-            gSPTextureRectangle(
-                gfx++,
-                QuarterPixels(left),
-                QuarterPixels(top),
-                QuarterPixels(right),
-                QuarterPixels(bottom),
-                G_TX_RENDERTILE,
-                0,
-                0,
-                TexelRunStep(BURST_IMAGE_SIZE, right - left),
-                TexelRunStep(BURST_IMAGE_SIZE, bottom - top)
-            );
-        });
+        gDPPipeSync(gfx++);
+        gSPScisTextureRectangle(
+            gfx++,
+            QuarterPixels(left),
+            QuarterPixels(top),
+            QuarterPixels(right),
+            QuarterPixels(bottom),
+            G_TX_RENDERTILE,
+            0,
+            0,
+            TexelRunStep(BURST_IMAGE_SIZE, right - left),
+            TexelRunStep(BURST_IMAGE_SIZE, bottom - top)
+        );
         gDPPipeSync(gfx++);
         *displayListHead = gfx;
     }
