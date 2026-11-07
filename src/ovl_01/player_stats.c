@@ -1461,6 +1461,15 @@ NO_RESULT UpdateHandicaps(s32 firstPlayerIndex UNUSED, s32 playerCount UNUSED) {
  * from 18 to 14. Set at the top of the loop's body, it gives 181 words (21
  * in shape) and an oracle closest of 79; a local for the label's left edge
  * instead gives 334 (94). 179 words differ, 19 in shape.
+ *
+ * The numbers' loop reads its column's left edge, columnLeft, before it
+ * sets numberOffsetX, as the original hoists the column table's address
+ * out of the loop before slide + 16. That takes the draft from 179 words
+ * differing to 177, 19 in shape to 17, and the oracle's closest from 77
+ * words to 75, forcing 16 pseudos either way, and with offsetY forced onto
+ * the stack from 14 to 12. Adding the column's left edge to slide + 16 in
+ * the call gives 187 words (19 in shape), and reading it into columnLeft
+ * in the columns' loop as well 398 to 554. 177 words differ, 17 in shape.
  */
 #ifdef NON_MATCHING
 void DrawHandicaps(Gfx **displayListHead, s32 slide, u8 reverseVerticalSlide, u8 canShowPrompt) {
@@ -1481,6 +1490,7 @@ void DrawHandicaps(Gfx **displayListHead, s32 slide, u8 reverseVerticalSlide, u8
     u8 unusedStack[0x30] UNUSED;
     Mat4 transform;
     s32 numberOffsetX;
+    s32 columnLeft;
     s32 arrowTop;
     s32 stripTop;
 
@@ -1865,10 +1875,11 @@ void DrawHandicaps(Gfx **displayListHead, s32 slide, u8 reverseVerticalSlide, u8
     }
 
     for (i = 0; i != g_ChosenPlayerCount; i++) {
+        columnLeft = f_HandicapColumnLefts[g_ChosenPlayerCount - 1][i];
         numberOffsetX = slide + HANDICAP_NUMBER_OFFSET_X;
         DrawTwoDigitMenuNumber(
             &gfx,
-            f_HandicapColumnLefts[g_ChosenPlayerCount - 1][i] + numberOffsetX,
+            columnLeft + numberOffsetX,
             HANDICAP_NUMBER_Y,
             g_ChosenHandicaps[i],
             MENU_NUMBER_PLAIN
