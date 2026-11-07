@@ -51,7 +51,6 @@ from pathlib import Path
 from typing import cast
 
 import rabbitizer
-from elftools.construct.lib.container import Container
 
 ROOT = Path(__file__).resolve().parent.parent
 LINKED_ELF = ROOT / "build" / "mariogolf64.elf"
@@ -1088,20 +1087,6 @@ def read_object(obj_path: StrPath) -> ObjectFile:
 def read_object_file(obj_path: StrPath) -> Functions:
     """Return the functions in an object file, as read_object_functions does."""
     return read_object_functions(read_object(obj_path))
-
-
-def read_entry_field(entry: Container, field: str) -> object:
-    """Return a field of an ELF entry, which pyelftools types as Any."""
-    return entry[field]  # pyright: ignore[reportAny]
-
-
-def read_entry_int(entry: Container, field: str) -> int:
-    """Return an integer field of an ELF entry."""
-    value = read_entry_field(entry, field)
-    if not isinstance(value, int):
-        message = f"{field} is {value!r}, not an integer"
-        raise TypeError(message)
-    return value
 
 
 # {first word: (symbol name, size in words)} of each function in .text.

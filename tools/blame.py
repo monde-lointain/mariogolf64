@@ -35,16 +35,16 @@ those UIDs or using those pseudos, and the passes' notes on the pseudos.
 import contextlib
 import functools
 import re
+import struct
 import sys
 import tempfile
 from collections import Counter
 from collections.abc import Generator
 from dataclasses import dataclass
 from pathlib import Path
+from typing import cast
 
 import rabbitizer
-from elftools.elf.elffile import ELFFile
-from elftools.elf.sections import SymbolTableSection
 
 import fncompare
 from fncompare import StrPath
@@ -87,6 +87,14 @@ OTHER_REGISTER_NAMES = ("hi", "lo", "accum", "fcc")
 INSTRUCTION_LINE_RE = re.compile(r"^(\t[a-z][^#]*?)(\s*#.*)?$")
 # The start of the symbols that mark where each line's words end
 MARK_PREFIX = "blame_line_"
+# Big-endian ELF32: the header from e_shoff to e_shstrndx, a section header,
+# and a symbol, with the fields of a section header this reads
+ELF_HEADER_OFFSET = 0x20
+ELF_HEADER = struct.Struct(">IIHHHHHH")
+SECTION_HEADER = struct.Struct(">10I")
+SYMBOL = struct.Struct(">IIIBBH")
+SECTION_NAME, SECTION_TYPE, SECTION_OFFSET, SECTION_SIZE, SECTION_LINK = 0, 1, 4, 5, 6
+SYMBOL_TABLE_TYPE = 2
 # The insn UID and pattern name -dp writes after each instruction
 INSN_NAME_RE = re.compile(r"#\s+(\d+)\s+(\S+)$")
 # The line before an asm statement's lines in the assembly
@@ -191,17 +199,7 @@ def read_line_ends(obj_path: Path, function: str) -> tuple[int, dict[int, int]]:
 
     A nested function's symbol is FUNCTION.N, after its label number.
     """
-    with obj_path.open("rb") as obj_file:
-        elf = ELFFile(obj_file)
-        symbols = elf.get_section_by_name(".symtab")
-        if not isinstance(symbols, SymbolTableSection):
-            sys.exit(f"{obj_path} has no symbols")
-        text_index = elf.get_section_index(".text")
-        values = {
-            symbol.name: fncompare.read_entry_int(symbol.entry, "st_value")
-            for symbol in symbols.iter_symbols()
-            if fncompare.read_entry_field(symbol.entry, "st_shndx") == text_index
-        }
+    values = read_text_symbols(obj_path.read_bytes())
     start = next(
         value for name, value in values.items() if name.split(".")[0] == function
     )
@@ -211,6 +209,47 @@ def read_line_ends(obj_path: Path, function: str) -> tuple[int, dict[int, int]]:
         if name.startswith(MARK_PREFIX)
     }
     return start, ends
+
+
+def read_text_symbols(elf: bytes) -> dict[str, int]:
+    """Return {name: value} of the symbols in .text of the object ELF.
+
+    The object is the assembler's, big-endian ELF32. It is read here rather
+    than with pyelftools, which took most of the oracle's time on the marks.
+    """
+    header = unpack_fields(ELF_HEADER, elf, ELF_HEADER_OFFSET)
+    section_offset, section_count, names_index = header[0], header[6], header[7]
+    sections = [
+        unpack_fields(SECTION_HEADER, elf, section_offset + index * SECTION_HEADER.size)
+        for index in range(section_count)
+    ]
+    section_names = sections[names_index][SECTION_OFFSET]
+
+    def read_name(table: int, offset: int) -> str:
+        end = elf.index(0, table + offset)
+        return elf[table + offset : end].decode()
+
+    text_index = next(
+        index
+        for index, section in enumerate(sections)
+        if read_name(section_names, section[SECTION_NAME]) == ".text"
+    )
+    symbols = next(
+        section for section in sections if section[SECTION_TYPE] == SYMBOL_TABLE_TYPE
+    )
+    strings = sections[symbols[SECTION_LINK]][SECTION_OFFSET]
+    start = symbols[SECTION_OFFSET]
+    values: dict[str, int] = {}
+    for offset in range(start, start + symbols[SECTION_SIZE], SYMBOL.size):
+        name, value, _, _, _, section = unpack_fields(SYMBOL, elf, offset)
+        if section == text_index:
+            values[read_name(strings, name)] = value
+    return values
+
+
+def unpack_fields(layout: struct.Struct, data: bytes, offset: int) -> tuple[int, ...]:
+    """Return the integer fields of LAYOUT at OFFSET of DATA."""
+    return cast("tuple[int, ...]", layout.unpack_from(data, offset))
 
 
 def is_branch_line(line: str) -> bool:
