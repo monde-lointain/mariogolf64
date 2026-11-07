@@ -2390,6 +2390,10 @@ void HandleFrameBufferSwap(void) {}
  * in the last loop. A pointer of the last loop's own, set to f_CapturedFrame
  * before the loop or in its header and declared before or after frame, gives
  * 227 words (33 in shape) all four ways, so the loops share frame.
+ *
+ * Naming the second loop's strip offset, i * BACKDROP_STRIP_STEP, gives 156
+ * words (40 in shape) used at all five places, and the strip's top,
+ * offset plus the border, 160 (48).
  */
 #ifdef NON_MATCHING
 void DrawFadeAnimation(Gfx** displayListHead) {
