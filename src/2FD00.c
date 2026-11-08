@@ -14,7 +14,16 @@ typedef struct Unk80054354 {
     /* 0x010 */ f32 unk10;
     /* 0x014 */ u8 pad14[0x4];
     /* 0x018 */ s32 unk18;
-    /* 0x01C */ u8 pad1C[0x40];
+    /* 0x01C */ u8 pad1C[0x1C];
+    /* 0x038 */ f32 unk38;
+    /* 0x03C */ f32 unk3C;
+    /* 0x040 */ f32 unk40;
+    /* 0x044 */ s32 unk44;
+    /* 0x048 */ f32 unk48;
+    /* 0x04C */ s32 unk4C;
+    /* 0x050 */ f32 unk50;
+    /* 0x054 */ f32 unk54;
+    /* 0x058 */ f32 unk58;
     /* 0x05C */ f32 unk5C;
     /* 0x060 */ u8 unk60;
     /* 0x061 */ u8 unk61;
@@ -38,6 +47,21 @@ typedef struct Unk80056060 {
 
 s32 func_800299F4(s32 arg0);
 Unk80054354 *func_80054354(s32 arg0);
+/* Assert / error report: (expression, source file, line). */
+void func_800298E0(const char *expr, const char *file, s32 line);
+s32 func_80043A04(s32 arg0, s32 arg1);
+
+/* "EX" and "c:/usgolf64/polychara/pcsub.c": this segment is probably the
+ * original polychara/pcsub.c. */
+extern char D_800D0620[];
+extern char D_800D0624[];
+
+/* Argument of func_80058C58: three s32s, probably an integer x/y/z. */
+typedef struct Unk80058C58 {
+    /* 0x0 */ s32 unk0;
+    /* 0x4 */ s32 unk4;
+    /* 0x8 */ s32 unk8;
+} Unk80058C58;
 void func_80054BC0(void);
 void func_80054FF4(s32 arg0, s32 arg1, s32 arg2);
 Unk80056060 *func_80056060(s32 arg0);
@@ -92,7 +116,18 @@ void func_80055788(s32 arg0) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/2FD00", func_800557BC);
+/* s32 with no return: implicit int in the original (see func_80055738). */
+s32 func_800557BC(s32 arg0, s32 arg1) {
+    Unk80054354 *p = func_80054354(arg0);
+
+    if (arg1 >= 0x20) {
+        func_800298E0(D_800D0620, D_800D0624, 1956);
+    }
+    if (p != NULL) {
+        p->unk88[arg1].unk4 = 4;
+        p->unk88[arg1].unk0 = 0;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/2FD00", func_80055828);
 
@@ -120,7 +155,20 @@ void func_80056264(s32 arg0) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/2FD00", func_80056294);
+void func_80056294(s32 arg0, s32 arg1) {
+    Unk80054354 *p = func_80054354(arg0);
+    f32 value;
+    f32 limit;
+
+    if (p != NULL) {
+        value = p->unk10 + (f32)arg1;
+        limit = (f32)p->unk18;
+        p->unk10 = value;
+        if (limit <= value) {
+            p->unk10 = limit;
+        }
+    }
+}
 
 void func_800562F4(s32 arg0, f32 arg1) {
     Unk80054354 *p = func_80054354(arg0);
@@ -264,6 +312,22 @@ INCLUDE_ASM("asm/nonmatchings/2FD00", func_80058ACC);
 
 INCLUDE_ASM("asm/nonmatchings/2FD00", func_80058B34);
 
-INCLUDE_ASM("asm/nonmatchings/2FD00", func_80058C58);
+void func_80058C58(s32 arg0, Unk80058C58 *arg1, f32 arg2) {
+    Unk80054354 *p = func_80054354(arg0);
+    f32 z;
+
+    if (p != NULL) {
+        p->unk38 = arg1->unk0;
+        z = arg1->unk8;
+        p->unk40 = z;
+        p->unk3C = func_80043A04(p->unk38, z);
+        p->unk44 = 0;
+        p->unk4C = 0;
+        p->unk48 = -arg2;
+        p->unk50 = 1.0f;
+        p->unk54 = 1.0f;
+        p->unk58 = 1.0f;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/2FD00", func_80058D04);
