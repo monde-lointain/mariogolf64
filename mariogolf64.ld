@@ -1806,18 +1806,18 @@ SECTIONS
         FILL(0x00000000);
         overlay_16_TEXT_START = .;
         build/asm/16D650.o(.text);
-        build/asm/16D660.o(.text);
+        build/src/16D660.o(.text);
         overlay_16_TEXT_END = .;
         overlay_16_TEXT_SIZE = ABSOLUTE(overlay_16_TEXT_END - overlay_16_TEXT_START);
         overlay_16_DATA_START = .;
         build/asm/16D650.o(.data);
-        build/asm/16D660.o(.data);
+        build/src/16D660.o(.data);
         build/asm/data/1715C0.data.o(.data);
         overlay_16_DATA_END = .;
         overlay_16_DATA_SIZE = ABSOLUTE(overlay_16_DATA_END - overlay_16_DATA_START);
         overlay_16_RODATA_START = .;
         build/asm/16D650.o(.rodata);
-        build/asm/16D660.o(.rodata);
+        build/src/16D660.o(.rodata);
         overlay_16_RODATA_END = .;
         overlay_16_RODATA_SIZE = ABSOLUTE(overlay_16_RODATA_END - overlay_16_RODATA_START);
     }
@@ -1827,7 +1827,7 @@ SECTIONS
         FILL(0x00000000);
         overlay_16_BSS_START = .;
         build/asm/16D650.o(.bss);
-        build/asm/16D660.o(.bss);
+        build/src/16D660.o(.bss);
         build/asm/data/171770.bss.o(.bss);
         overlay_16_BSS_END = .;
         overlay_16_BSS_SIZE = ABSOLUTE(overlay_16_BSS_END - overlay_16_BSS_START);
