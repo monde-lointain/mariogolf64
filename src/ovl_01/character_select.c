@@ -592,42 +592,34 @@ s32 GetStickDiagonal(void) {
  */
 
 /*
- * Doesn't match: the original holds NO_PALETTE, stored after the face
- * preview, in $v0, where this holds it in $v1; the register oracle's closest
- * result is these 4 words with no register forced, so allocation isn't the
- * cause. Storing it first, as the undo does, gives 6 words, 4 in shape.
+ * The undo with B falls through to the routine's last return, and the
+ * palette, COM and lefty buttons are handled in its else, with the lefty
+ * flag set in an if and its else. The original sets the return value at
+ * that shared return: an undo with its own return 0 has sched put the
+ * return value's set ahead of the undo's last stores, so $v0 is live there
+ * and NO_PALETTE goes to $v1, giving 4 words differing, none in shape. With
+ * the else, the lefty test returning at once in its if gives the same code;
+ * setting the flag in an if and its else with the undo's own return kept
+ * gives 4 words.
  *
  * Each cursor move returns at once when the move fails, before clearing the
- * text slots. Clearing them inside an if on the move's success, with one
- * return after it, gives 10 words, 4 in shape: the original fills the random
- * test's delay slot, for the chosen character's sound, with the volume, and
- * that form with the character. reorg takes the volume only if $v0 is dead
- * at the other arm, and mark_target_live_regs finds it live there, as the
- * walk from that arm to the return meets the USE update_block left for the
- * return value's $v0 = 0, stolen into an earlier delay slot. Testing for the
- * other sound first there gives 10 words, 2 in shape, the test written != 0
- * or as % 2 changes nothing, a switch with case 0 first gives 10 words (2 in
- * shape) and case 1 first 16 (10), and choosing the sound with ?: in one
- * call, or into a sound local by an if, 27 (19 in shape). 4 words differ,
- * none in shape.
+ * text slots; clearing them inside an if on the move's success, with one
+ * return after it, gives 6 words, 4 in shape. Testing for the other sound
+ * first gives 6 words, 2 in shape, while the test written != 0 or as % 2
+ * changes nothing; a switch with case 0 first gives 13 words (5 in shape),
+ * case 1 first 8 (4), and choosing the sound with ?: in one call 17 (13).
  *
- * The grid marks of a player whose choice is undone are read into character,
- * as the original keeps them in character's register; in gridMark, 136 words
- * differ, and for either of the two undos alone 16. It reads canChooseMarked
- * as a byte throughout, hence the casts; declared u8 instead, 22 words
- * differ, 12 in shape. Clearing the same-character count before the preview
- * loops, not in their initializers, gives 26. Declaring the button as an s16
- * gives 63 words, 7 in shape, and as a u32 or s32 28; the original loads it
- * with lhu, so it is unsigned. Reading an imported character's character
- * after marking it chosen gives 18 words, 10 in shape, and the target loads
- * it before the stores.
- *
- * Permuter runs on older bases found no natural form: one best returned from
- * the diagonal move only when it failed, so a successful move would go on to
- * the other buttons' tests, and another copied the button through an
- * unsigned long long temporary.
+ * The grid marks of a player whose choice is undone are read into
+ * character, as the original keeps them in character's register; in
+ * gridMark, 130 words differ, and for either of the two undos alone 6. It
+ * reads canChooseMarked as a byte throughout, hence the casts; declared u8
+ * instead, 12 words differ, 8 in shape, and without the casts 29 (15).
+ * Clearing the same-character count before the preview loops, not in their
+ * initializers, gives 16 words. Declaring the button as an s16 gives 53
+ * words, 3 in shape, and as a u32 or s32 18; the original loads it with
+ * lhu, so it is unsigned. An imported character's character may be read
+ * before or after marking it chosen.
  */
-#ifdef NON_MATCHING
 s32 UpdateCharacterSelect(s32 firstPlayerIndex, s32 playerCount, Boolean canChooseMarked) {
     EncodedAsset asset;
     AssetFile file;
@@ -1313,135 +1305,133 @@ s32 UpdateCharacterSelect(s32 firstPlayerIndex, s32 playerCount, Boolean canChoo
         f_IsComButtonHeld = FALSE;
         f_IsLeftyButtonHeld = FALSE;
         f_PreviewedPalette = NO_PALETTE;
-        return 0;
-    }
-
-    button = g_ControllerStates[3].buttons |
-        (g_ControllerStates[2].buttons |
-            (g_ControllerStates[0].buttons | g_ControllerStates[1].buttons));
-    if (button & U_CBUTTONS) {
-        palette = UP_C_PALETTE;
-    }
-    else if (button & D_CBUTTONS) {
-        palette = DOWN_C_PALETTE;
-    }
-    else if (button & L_CBUTTONS) {
-        palette = LEFT_C_PALETTE;
-    }
-    else if (button & R_CBUTTONS) {
-        palette = RIGHT_C_PALETTE;
     }
     else {
-        palette = NO_PALETTE;
-    }
-
-    if (palette != NO_PALETTE) {
-        chosenColumn = memory->characterColumns[playerIndex];
-        character = g_CharacterGrid[memory->characterRows[playerIndex]][chosenColumn];
-        if (((u8)canChooseMarked == TRUE) & (character < CHOOSABLE_MARK_LIMIT)) {
-            character += MARKED_CHARACTER_OFFSET;
+        button = g_ControllerStates[3].buttons |
+            (g_ControllerStates[2].buttons |
+                (g_ControllerStates[0].buttons | g_ControllerStates[1].buttons));
+        if (button & U_CBUTTONS) {
+            palette = UP_C_PALETTE;
         }
-
-        character = f_ChoiceCharacters[character];
-        if (character >= FIRST_IMPORTED_CHARACTER) {
-            if (g_ImportedCharacters[character - FIRST_IMPORTED_CHARACTER].isChosen == TRUE) {
-                return UNSET_RESULT;
-            }
-
-            character = g_ImportedCharacters[character - FIRST_IMPORTED_CHARACTER].character;
-            g_ImportedCharacterColumns[playerIndex] = chosenColumn;
-            if (chosenColumn < 0) {
-                g_ImportedCharacterColumns[playerIndex] = 0;
-            }
-
-            if (g_ImportedCharacterColumns[playerIndex] >= IMPORTED_CHARACTER_COUNT) {
-                g_ImportedCharacterColumns[playerIndex] = IMPORTED_CHARACTER_COUNT - 1;
-            }
+        else if (button & D_CBUTTONS) {
+            palette = DOWN_C_PALETTE;
         }
-
-        /* The preview gives way as the A button's palette does */
-        for (index = 0, sameCharacterCount = 0; index != playerIndex; index++) {
-            if (g_Players[index].characterIndex == character) {
-                sameCharacterPlayers[sameCharacterCount] = index;
-                sameCharacterCount++;
-            }
+        else if (button & L_CBUTTONS) {
+            palette = LEFT_C_PALETTE;
         }
-
-        for (index = 0; index != sameCharacterCount; index++) {
-            if (g_Players[sameCharacterPlayers[index]].paletteIndex == palette) {
-                break;
-            }
-        }
-
-        if (index == sameCharacterCount) {
-            f_PreviewedPalette = palette;
+        else if (button & R_CBUTTONS) {
+            palette = RIGHT_C_PALETTE;
         }
         else {
-            for (index = 0; index != CHARACTER_PALETTE_COUNT; index++) {
-                for (otherIndex = 0; otherIndex != sameCharacterCount; otherIndex++) {
-                    if (g_Players[sameCharacterPlayers[otherIndex]].paletteIndex == index) {
-                        break;
-                    }
+            palette = NO_PALETTE;
+        }
+
+        if (palette != NO_PALETTE) {
+            chosenColumn = memory->characterColumns[playerIndex];
+            character = g_CharacterGrid[memory->characterRows[playerIndex]][chosenColumn];
+            if (((u8)canChooseMarked == TRUE) & (character < CHOOSABLE_MARK_LIMIT)) {
+                character += MARKED_CHARACTER_OFFSET;
+            }
+
+            character = f_ChoiceCharacters[character];
+            if (character >= FIRST_IMPORTED_CHARACTER) {
+                if (g_ImportedCharacters[character - FIRST_IMPORTED_CHARACTER].isChosen == TRUE) {
+                    return UNSET_RESULT;
                 }
 
-                if (otherIndex == sameCharacterCount) {
-                    f_PreviewedPalette = index;
+                character = g_ImportedCharacters[character - FIRST_IMPORTED_CHARACTER].character;
+                g_ImportedCharacterColumns[playerIndex] = chosenColumn;
+                if (chosenColumn < 0) {
+                    g_ImportedCharacterColumns[playerIndex] = 0;
+                }
+
+                if (g_ImportedCharacterColumns[playerIndex] >= IMPORTED_CHARACTER_COUNT) {
+                    g_ImportedCharacterColumns[playerIndex] = IMPORTED_CHARACTER_COUNT - 1;
+                }
+            }
+
+            /* The preview gives way as the A button's palette does */
+            for (index = 0, sameCharacterCount = 0; index != playerIndex; index++) {
+                if (g_Players[index].characterIndex == character) {
+                    sameCharacterPlayers[sameCharacterCount] = index;
+                    sameCharacterCount++;
+                }
+            }
+
+            for (index = 0; index != sameCharacterCount; index++) {
+                if (g_Players[sameCharacterPlayers[index]].paletteIndex == palette) {
                     break;
                 }
             }
 
-            if (index == CHARACTER_PALETTE_COUNT) {
-                f_PreviewedPalette = 0;
+            if (index == sameCharacterCount) {
+                f_PreviewedPalette = palette;
             }
-        }
-    }
-    else {
-        f_PreviewedPalette = NO_PALETTE;
-    }
+            else {
+                for (index = 0; index != CHARACTER_PALETTE_COUNT; index++) {
+                    for (otherIndex = 0; otherIndex != sameCharacterCount; otherIndex++) {
+                        if (g_Players[sameCharacterPlayers[otherIndex]].paletteIndex == index) {
+                            break;
+                        }
+                    }
 
-    /* Set only where A with R would leave the player without a controller */
-    if (((g_ControllerStates[3].buttons |
-             (g_ControllerStates[2].buttons |
-                 (g_ControllerStates[0].buttons | g_ControllerStates[1].buttons))) &
-            R_TRIG) &&
-        memory->characterRows[playerIndex] != GAME_BOY_CHARACTER_ROW &&
-        (u8)canChooseMarked == FALSE) {
-        if (g_ChosenPlayerCount >= MIN_PLAYER_COUNT_WITHOUT_CONTROLLER) {
-            if (g_ChoosingPlayerIndex == g_ChosenPlayerCount - 1) {
-                for (index = 0; index != g_ChoosingPlayerIndex; index++) {
-                    if (g_PlayerControllerIndices[index] != NO_CONTROLLER_INDEX) {
+                    if (otherIndex == sameCharacterCount) {
+                        f_PreviewedPalette = index;
                         break;
                     }
                 }
 
-                if (index < g_ChosenPlayerCount - 1) {
+                if (index == CHARACTER_PALETTE_COUNT) {
+                    f_PreviewedPalette = 0;
+                }
+            }
+        }
+        else {
+            f_PreviewedPalette = NO_PALETTE;
+        }
+
+        /* Set only where A with R would leave the player without a controller */
+        if (((g_ControllerStates[3].buttons |
+                 (g_ControllerStates[2].buttons |
+                     (g_ControllerStates[0].buttons | g_ControllerStates[1].buttons))) &
+                R_TRIG) &&
+            memory->characterRows[playerIndex] != GAME_BOY_CHARACTER_ROW &&
+            (u8)canChooseMarked == FALSE) {
+            if (g_ChosenPlayerCount >= MIN_PLAYER_COUNT_WITHOUT_CONTROLLER) {
+                if (g_ChoosingPlayerIndex == g_ChosenPlayerCount - 1) {
+                    for (index = 0; index != g_ChoosingPlayerIndex; index++) {
+                        if (g_PlayerControllerIndices[index] != NO_CONTROLLER_INDEX) {
+                            break;
+                        }
+                    }
+
+                    if (index < g_ChosenPlayerCount - 1) {
+                        f_IsComButtonHeld = TRUE;
+                    }
+                }
+                else {
                     f_IsComButtonHeld = TRUE;
                 }
             }
-            else {
-                f_IsComButtonHeld = TRUE;
-            }
+        }
+        else {
+            f_IsComButtonHeld = FALSE;
+        }
+
+        if (((g_ControllerStates[3].buttons |
+                 (g_ControllerStates[2].buttons |
+                     (g_ControllerStates[0].buttons | g_ControllerStates[1].buttons))) &
+                Z_OR_L_BUTTONS) &&
+            memory->characterRows[playerIndex] != GAME_BOY_CHARACTER_ROW) {
+            f_IsLeftyButtonHeld = TRUE;
+        }
+        else {
+            f_IsLeftyButtonHeld = FALSE;
         }
     }
-    else {
-        f_IsComButtonHeld = FALSE;
-    }
 
-    if (((g_ControllerStates[3].buttons |
-             (g_ControllerStates[2].buttons |
-                 (g_ControllerStates[0].buttons | g_ControllerStates[1].buttons))) &
-            Z_OR_L_BUTTONS) &&
-        memory->characterRows[playerIndex] != GAME_BOY_CHARACTER_ROW) {
-        f_IsLeftyButtonHeld = TRUE;
-        return 0;
-    }
-
-    f_IsLeftyButtonHeld = FALSE;
     return 0;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/character_select", UpdateCharacterSelect);
-#endif
 
 void LoadCharacterSelectBuffer(void *buffer, s16 bufferKind) {
     EncodedAsset asset;
