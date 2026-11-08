@@ -68,6 +68,8 @@ tools/cc/
 # Decomp helper tools (local clones)
 tools/m2c/
 tools/decomp-permuter/
+# decomp-permuter work directories (created by tools/permuter-import.sh)
+permuter/
 
 # macOS
 .DS_Store
