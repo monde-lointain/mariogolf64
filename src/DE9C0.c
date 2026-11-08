@@ -3,7 +3,9 @@
 /* D_801323A0: placeholder, real type unknown. splat labels part of it as
  * D_801323B8 (= +0x18), so 0x2B / 0x2C appear as D_801323B8 + 0x13 / 0x14. */
 typedef struct Unk801323A0 {
-    /* 0x00 */ u8 pad0[0x16];
+    /* 0x00 */ u8 pad0[0x2];
+    /* 0x02 */ u8 unk2;
+    /* 0x03 */ u8 pad3[0x13];
     /* 0x16 */ s8 unk16;
     /* 0x17 */ u8 pad17[0x14];
     /* 0x2B */ s8 unk2B;
@@ -52,7 +54,30 @@ INCLUDE_ASM("asm/nonmatchings/DE9C0", func_ovl3_801F6B28);
 
 INCLUDE_ASM("asm/nonmatchings/DE9C0", func_ovl3_801F70F0);
 
-INCLUDE_ASM("asm/nonmatchings/DE9C0", func_ovl3_801F75EC);
+/* D_800FBD40: an s32 array starting at offset 8 (indexed by D_801323A0.unk2). */
+typedef struct Unk800FBD40 {
+    /* 0x0 */ u8 pad0[0x8];
+    /* 0x8 */ s32 unk8[1]; /* length unknown */
+} Unk800FBD40;
+
+extern Unk800FBD40 D_800FBD40;
+extern s32 D_ovl3_8022BE0C;
+
+/* s32 with no return: implicit int (empty delay-slot pattern). */
+s32 func_ovl3_801F75EC(void) {
+    u8 next;
+
+    D_801323A0.unk2 = 0;
+    if (D_800FBD40.unk8[0] == 1) {
+        do {
+            next = D_801323A0.unk2 + 1;
+            D_801323A0.unk2 = next;
+            if (D_ovl3_8022BE0C - 1 < (s8)next) {
+                D_801323A0.unk2 = 0;
+            }
+        } while (D_800FBD40.unk8[(s8)D_801323A0.unk2] == 1);
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/DE9C0", func_ovl3_801F7660);
 
