@@ -486,10 +486,6 @@ enum ExperienceWriteResult {
 
 #define FIRST_GAME_BOY_GOLFER CHARACTER_KID
 
-/* WriteExperienceToCartridge and WriteStatusToCartridge share one copy of this
- */
-extern const char f_WriteSumFormat[];
-
 s32 ReadCartridgeCharacters(void);
 void BringOverCharacter(s32 listedIndex, s32 slot);
 void ListPresentCharacters(void);
@@ -2971,40 +2967,24 @@ void ClearCartridgeCharacters(void) {
  * from, looking through every controller's pak for it, and rewrites the save's
  * checksums.
  *
- * Doesn't match: recordOffset and saveIndex swap $s1 and $s2. global-alloc
- * takes recordOffset (28 refs over a live length of 159, priority 7044) before
- * storedSum (6666) and saveIndex (5714), giving it $s1; the original gives $s1
- * to saveIndex and later storedSum, and $s2 to recordOffset. The register
- * oracle matches once it forces those 3 pseudos, so the code is the original's.
- * Every declaration order of saveIndex and recordOffset and three orders of
- * the assignments before PHASE 1 give the same 40 words, an else-if chain for
- * the record offset 42 (6 in shape), a switch 16 (10) and testing
- * character->saveIndex 54 (16). The oracle's merging of any of at least 35
- * expressions' pseudos into saveIndex's matches, as the added references
- * raise it above recordOffset, but no natural form found does that:
- * building storedSum in two steps, its low byte first, gives 10 words (none
- * in shape), and the oracle then leaves 4 forcing 5, so its RTL is no longer
- * the original's. Replaying global-alloc (oracle.py --levers), one more
- * reference to saveIndex or storedSum in the loop, or one fewer to
- * recordOffset, would match. Masking storedSum with sum matches, but it holds
- * two bytes already, so the mask can't change it; masking it in the test
- * gives 44 words (2 in shape), dropping the record offset's first set 70 (4)
- * and a sumOffset local for PHASE 12 14 (4). 40 words differ, none in shape.
+ * storedSum is masked to 16 bits beside the computed sum, to match, though
+ * its two bytes can't exceed that. The mask's references raise storedSum's
+ * global-alloc priority above recordOffset's, so storedSum takes $s1 first,
+ * then recordOffset $s2 and saveIndex $s1, as in the original. Without it, 40
+ * words differ, none in shape: recordOffset (28 references over a live
+ * length of 159, priority 7044) goes first and takes $s1. Types, declaration
+ * orders, while loops and building storedSum in two steps found no natural
+ * form that does the same.
  *
  * The clamp repeats the sum in each arm, which gives the original's copy of
- * the sum into the stored experience's register. Through a sum local, as a ?:
- * either way round or an if storing over it, the clamp gave 18 to 49 words,
- * with the oracle no closer than 12 words forcing 3 pseudos; adding into the
- * experience gives 57, and the ?: repeating the sum 49 to 61. The focused
- * permuter's best for that draft, 9 words (3 in shape), read
- * character->experience into a local before IsCharacterFromSave, where the
- * original loads it from 0x28($fp) after the call.
+ * the sum into the stored experience's register: adding into the experience
+ * and then clamping gives 9 words (1 in shape), and a ?: repeating the sum
+ * 19 (7).
  */
-#ifdef NON_MATCHING
 s32 WriteExperienceToCartridge(s32 characterIndex) {
     /*
      * The transfer pointer is there to match: reaching g_GameBoyTransfer
-     * directly gives 190 words differing, 66 in shape, against 40 (0)
+     * directly gives 154 words differing, 66 in shape
      */
     GameBoyTransfer *transfer = &g_GameBoyTransfer;
     u8 characterData[CHARACTER_DATA_SIZE];
@@ -3067,7 +3047,7 @@ s32 WriteExperienceToCartridge(s32 characterIndex) {
             /*
              * Each pak error powers off and continues, to match: jumping to the
              * loop's last power off from the five read and write errors instead
-             * gives 164 words differing, 68 in shape, against 40 (0)
+             * gives 182 words differing, 68 in shape
              */
             if (result != 0) {
                 nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
@@ -3130,6 +3110,7 @@ s32 WriteExperienceToCartridge(s32 characterIndex) {
 
                 osSyncPrintf("PHASE 8\n");
                 sum &= 0xFFFF;
+                storedSum &= 0xFFFF;
                 if (sum != storedSum) {
                     nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
                     fault = CARTRIDGE_FAULT_CORRUPTED;
@@ -3248,17 +3229,6 @@ s32 WriteExperienceToCartridge(s32 characterIndex) {
 
     return EXPERIENCE_WRITE_FAILED;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_13/transmit_menu", WriteExperienceToCartridge);
-#endif
-
-RESUME_RODATA_SECTION();
-const char f_WriteSumFormat[] = "write sum %04x\n";
-#ifndef NON_MATCHING
-static const char f_PhaseTwelveText[] = "PHASE 12\n";
-static const char f_PhaseThirteenText[] = "PHASE 13\n";
-static const char f_PhaseFourteenText[] = "PHASE 14\n";
-#endif
 
 /*
  * Checks that the chosen cartridge is the one tagged and that its save is
@@ -3430,7 +3400,7 @@ s32 WriteStatusToCartridge(s32 cartridgeIndex) {
         }
 
         sum &= 0xFFFF;
-        osSyncPrintf(f_WriteSumFormat, sum);
+        osSyncPrintf("write sum %04x\n", sum);
         save[SAVE_STATUS_SUM_OFFSET] = sum;
         save[SAVE_STATUS_SUM_OFFSET + 1] = sum >> BITS_PER_BYTE;
         result = nuContGBPakFwrite(
