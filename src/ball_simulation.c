@@ -319,10 +319,16 @@ void ResetBallSimulations(void) {
  * one, written the other way round from before, as a sweep swapping each
  * operator's operands found. That takes the draft from 440 words (114 in
  * shape) to 419 (109), and the register oracle's closest from 222 words,
- * forcing 123 pseudos, to 217, forcing 119. Swapping the water skip's test
- * too gives 415 (107), but StepOpeningBallSimulation's copy of that test keeps
- * this order, and swapping it there gains nothing. 419 words differ, 109 in
- * shape.
+ * forcing 123 pseudos, to 217, forcing 119.
+ *
+ * The water skip's test compares the impact speed first, as its other two
+ * tests do, and StepOpeningBallSimulation's copy now does too, where it
+ * makes no difference. The ground's drift scales the normal's y before the
+ * restitution's complement, as the roll's spin grip above does without it.
+ * editsearch found the pair; it takes the draft from 419 words (109 in
+ * shape) to 413 (107), and the register oracle's closest from 217 words,
+ * forcing 119 pseudos, to 215, forcing 116. The skip test alone gives 415
+ * (107) and the drift alone 417 (109). 413 words differ, 107 in shape.
  */
 #ifdef NON_MATCHING
 s32 StepBallSimulation(BallSimulation *simulation) {
@@ -1358,11 +1364,11 @@ s32 StepBallSimulation(BallSimulation *simulation) {
                 (simulation->state == BALL_STATE_ROLLING ||
                     fabsf(impactSpeed) >= MAX_SKIP_IMPACT_SPEED ||
                     fabsf(impactSpeed) <= MIN_SKIP_IMPACT_SPEED ||
-                    sqrtf(
-                        (velocity[AXIS_X] * velocity[AXIS_X]) +
-                        (velocity[AXIS_Z] * velocity[AXIS_Z])
-                    ) * SKIP_SPEED_RATIO <=
-                        fabsf(impactSpeed))) {
+                    fabsf(impactSpeed) >=
+                        sqrtf(
+                            (velocity[AXIS_X] * velocity[AXIS_X]) +
+                            (velocity[AXIS_Z] * velocity[AXIS_Z])
+                        ) * SKIP_SPEED_RATIO)) {
                 simulation->state = BALL_STATE_IN_WATER;
                 impactSpeed = 0.0f;
                 /*
@@ -1753,9 +1759,9 @@ s32 StepBallSimulation(BallSimulation *simulation) {
                 spinVelocityX = simulation->spinSpeed * cosf(simulation->spinHeading);
                 spinVelocityZ = simulation->spinSpeed * sinf(simulation->spinHeading);
                 driftX = (spinVelocityX - velocity[AXIS_X]) *
-                    ((1.0f - restitution) * fabsf(plane.normal[AXIS_Y]) * GROUND_SPIN_GRIP);
+                    (fabsf(plane.normal[AXIS_Y]) * (1.0f - restitution) * GROUND_SPIN_GRIP);
                 driftZ = (spinVelocityZ - velocity[AXIS_Z]) *
-                    ((1.0f - restitution) * fabsf(plane.normal[AXIS_Y]) * GROUND_SPIN_GRIP);
+                    (fabsf(plane.normal[AXIS_Y]) * (1.0f - restitution) * GROUND_SPIN_GRIP);
                 drift = (s32)IntLength2D(driftX, driftZ);
                 driftLimit = impactSpeed * MAX_SPIN_DRIFT_SHARE;
                 if (driftLimit < drift && impactSpeed > 1.0f) {

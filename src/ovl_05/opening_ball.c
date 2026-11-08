@@ -1382,11 +1382,11 @@ s32 StepOpeningBallSimulation(BallSimulation *simulation) {
             else if (simulation->surface == SURFACE_WATER_HAZARD) {
                 if (simulation->state == BALL_STATE_ROLLING ||
                     (impactSpeed <= OPENING_MIN_SKIP_IMPACT_SPEED ||
-                        GetOpeningLength2D(
-                            simulation->velocity[AXIS_X],
-                            simulation->velocity[AXIS_Z]
-                        ) * OPENING_SKIP_SPEED_RATIO <=
-                            impactSpeed)) {
+                        impactSpeed >=
+                            GetOpeningLength2D(
+                                simulation->velocity[AXIS_X],
+                                simulation->velocity[AXIS_Z]
+                            ) * OPENING_SKIP_SPEED_RATIO)) {
                     simulation->state = BALL_STATE_IN_WATER;
                     simulation->velocity[AXIS_Z] = 0;
                     simulation->velocity[AXIS_X] = 0;
