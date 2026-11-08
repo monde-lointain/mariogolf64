@@ -828,6 +828,16 @@ s32 ListOffsetsByDistance(s32 span, GridOffset *offsets, s32 maxCount) {
  * to 38 in shape; all nine give 464. The best, longX, shortHeight and
  * shortXStep, a choice with no reason behind it, gives 276 words, and the
  * oracle's closest is then 120 words, forcing 59 pseudos, against 118.
+ *
+ * The lower half works out its short slopes before its long positions, as
+ * the upper half works out its slopes first, and each row works out the
+ * heights at its ends after its direction, beside their only use. That
+ * takes the draft from 284 words differing (34 in shape) to 238 (28), and
+ * the register oracle's closest from 118 words, forcing 54 pseudos, to
+ * 114, forcing 44. The slopes alone give 260 words (34 in shape) and the
+ * heights alone 260 (28); editsearch had found 252 (28) moving shortSlopeX
+ * without shortSlopeHeight and toHeight without fromHeight. 238 words
+ * differ, 28 in shape.
  */
 #ifdef NON_MATCHING
 void DrawBandHeights(s16 *heights, s32 band) {
@@ -880,9 +890,7 @@ void DrawBandHeights(s16 *heights, s32 band) {
             s32 value;
 
             fromX = longX >> HEIGHT_FRACTION_BITS;
-            fromHeight = longHeight >> HEIGHT_FRACTION_BITS;
             toX = shortX >> HEIGHT_FRACTION_BITS;
-            toHeight = shortHeight >> HEIGHT_FRACTION_BITS;
             width = fromX - toX;
             if (width < 0) {
                 width = -width;
@@ -890,6 +898,8 @@ void DrawBandHeights(s16 *heights, s32 band) {
 
             count = (width + HEIGHT_ROW_SPAN / 2) / HEIGHT_ROW_SPAN;
             direction = (fromX < toX) ? 1 : -1;
+            fromHeight = longHeight >> HEIGHT_FRACTION_BITS;
+            toHeight = shortHeight >> HEIGHT_FRACTION_BITS;
             if (count < HEIGHT_STEP_SCALE_COUNT) {
                 texelHeightStep = f_HeightStepScales[count] * (toHeight - fromHeight);
             }
@@ -967,12 +977,12 @@ void DrawBandHeights(s16 *heights, s32 band) {
                 cachedReciprocal = 1.0f / lowerSpan;
             }
 
-            longX = ((s32)(longSlopeX * span) + corners[0]->v.ob[AXIS_X]) << HEIGHT_FRACTION_BITS;
-            longHeight = ((s32)(longSlopeHeight * span) + corners[0]->v.ob[AXIS_Y])
-                << HEIGHT_FRACTION_BITS;
             shortSlopeX = (corners[2]->v.ob[AXIS_X] - corners[1]->v.ob[AXIS_X]) * cachedReciprocal;
             shortSlopeHeight =
                 (corners[2]->v.ob[AXIS_Y] - corners[1]->v.ob[AXIS_Y]) * cachedReciprocal;
+            longX = ((s32)(longSlopeX * span) + corners[0]->v.ob[AXIS_X]) << HEIGHT_FRACTION_BITS;
+            longHeight = ((s32)(longSlopeHeight * span) + corners[0]->v.ob[AXIS_Y])
+                << HEIGHT_FRACTION_BITS;
             longXStep = longSlopeX * HEIGHT_ROW_STEP_SCALE;
             longHeightStep = longSlopeHeight * HEIGHT_ROW_STEP_SCALE;
             shortXStep = shortSlopeX * HEIGHT_ROW_STEP_SCALE;
