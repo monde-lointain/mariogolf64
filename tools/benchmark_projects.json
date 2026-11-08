@@ -1,0 +1,15 @@
+{
+    "snowboardkids2-decomp": {
+        "driver_dir": "tools/gcc_kmc",
+        "language": "-nostdinc -w -fno-asm -I{src_dir} -I include -I lib/ultralib/include -I lib/ultralib/include/PR -I lib/libmus/include/PR -I lib/libmus/src -I lib/f3dex2/PR -D_LANGUAGE_C -D_MIPS_SZLONG=32 -D_MIPS_SZINT=32 -D__USE_ISOC99 -DF3DEX_GBI_2 -DNDEBUG -D_FINALROM -I {dir} -I src/ -I assets/courses -I assets/modelpayload -I build/include -I build/{dir}",
+        "codegen": "-mabi=32 -mgp32 -mfp32 -mno-abicalls -fno-PIC -G 0 -Wa,-force-n64align -funsigned-char -mips3 -EB -fno-builtin -fno-common -O2",
+        "objects": "build/{stem}.o",
+        "filter": "python3 tools/textconv.py tools/charmap.txt {src} -"
+    },
+    "marioparty3": {
+        "driver_dir": "tools/gcc_2.7.2/linux",
+        "language": "-I{src_dir} -D_LANGUAGE_C -DOLD_GCC -I include -I build/include -I src -DF3DEX_GBI_2",
+        "codegen": "-O1 -G0 -mips3 -mgp32 -mfp32 -Wa,--force-n64align",
+        "objects": "build/{stem}.c.o"
+    }
+}
