@@ -45,7 +45,30 @@ INCLUDE_ASM("asm/nonmatchings/165BD0", func_ovl15_801F5644);
 
 INCLUDE_ASM("asm/nonmatchings/165BD0", func_ovl15_801F5AF0);
 
-INCLUDE_ASM("asm/nonmatchings/165BD0", func_ovl15_801F5EA8);
+s32 nuContRmbCheck(u32 contNo);
+extern s32 D_801049C0[];
+extern s32 D_80105218;
+
+/* Returns 1 if nuContRmbCheck() returns 0 for every entry of D_801049C0
+ * (D_80105218 entries), else 0. */
+s32 func_ovl15_801F5EA8(void) {
+    s32 *port;
+    s32 i;
+    s32 ok = 1;
+
+    i = 0;
+    if (D_80105218 != 0) {
+        port = D_801049C0;
+        do {
+            s32 value = *port;
+
+            port++;
+            i++;
+            ok &= -(nuContRmbCheck(value) == 0);
+        } while (i != D_80105218);
+    }
+    return ok;
+}
 
 INCLUDE_ASM("asm/nonmatchings/165BD0", func_ovl15_801F5F1C);
 
@@ -95,7 +118,37 @@ s32 func_ovl15_801F686C(UnkSaveBlock *arg0) {
 
 INCLUDE_ASM("asm/nonmatchings/165BD0", func_ovl15_801F6890);
 
-INCLUDE_ASM("asm/nonmatchings/165BD0", func_ovl15_801F68FC);
+/* Object passed to func_ovl15_801F68FC; only the mode at 0x7A8 is known. */
+typedef struct UnkOvl15_801F68FC {
+    /* 0x000 */ u8 pad0[0x7A8];
+    /* 0x7A8 */ s32 unk7A8;
+} UnkOvl15_801F68FC;
+
+void func_800719A0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9);
+void func_80071CE4(s32 *arg0, s32 arg1);
+
+void func_ovl15_801F68FC(s32 *arg0, UnkOvl15_801F68FC *arg1) {
+    s32 value = *arg0;
+    s32 mode = arg1->unk7A8;
+    s32 id = -1;
+
+    switch (mode) {
+        case 1:
+            id = 0x160;
+            break;
+        case 5:
+            id = 0x162;
+            break;
+        case 3:
+            id = 0x161;
+            break;
+    }
+    if (id != -1) {
+        func_800719A0(0x1C, 0xBA, id, 1, 3, 0x20, 0xFF, 0xFF, 0xFF, 0xFF);
+        func_80071CE4(&value, 3);
+    }
+    *arg0 = value;
+}
 
 INCLUDE_ASM("asm/nonmatchings/165BD0", func_ovl15_801F69B8);
 
