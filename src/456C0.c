@@ -101,7 +101,18 @@ void func_8006B5A0(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
 
 INCLUDE_ASM("asm/nonmatchings/456C0", func_8006B5D8);
 
-INCLUDE_ASM("asm/nonmatchings/456C0", func_8006B980);
+void func_8006B980(void) {
+    s32 sp10[8];
+    s32 handle;
+    s32 handle2;
+
+    handle = func_8004E2DC(func_8005062C(0x70B, sp10));
+    D_800E1C08 = handle;
+    func_800506D4(handle, sp10);
+    handle2 = func_8004E2DC(func_8005062C(0x70C, sp10));
+    D_800E1C0C = handle2;
+    func_800506D4(handle2, sp10);
+}
 
 void func_8006B9E4(void) {
     func_8004E47C(&D_800E1C08);
@@ -112,13 +123,52 @@ s32 func_8006BA10(void) {
     return D_800C4124 == -1;
 }
 
-INCLUDE_ASM("asm/nonmatchings/456C0", func_8006BA24);
+/* 0x10-byte entries of D_800C406C. Placeholder. */
+typedef struct Unk800C406C {
+    /* 0x0 */ s32 unk0;
+    /* 0x4 */ s32 unk4;
+    /* 0x8 */ u8 pad8[0x8];
+} Unk800C406C;
+
+void func_80050BF0(s32 arg0, s32 arg1, s32 arg2);
+
+extern Unk800C406C D_800C406C[];
+extern s32 D_800C0E60;
+extern s32 D_800C411C;
+extern s32 D_800C4120;
+extern s32 D_800C4128;
+
+void func_8006BA24(s32 arg0) {
+    Unk800C406C *entry;
+
+    if (arg0 != -1) {
+        entry = &D_800C406C[arg0];
+        D_800C4120 = 0;
+        D_800C411C = arg0;
+        func_8006B980();
+        D_800C4124 = 0;
+        D_800C4128 = entry->unk4;
+        func_80050BF0(0x64, D_800C0E60, 0x64);
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/456C0", func_8006BA94);
 
 INCLUDE_ASM("asm/nonmatchings/456C0", func_8006BC80);
 
-INCLUDE_ASM("asm/nonmatchings/456C0", func_8006C3E8);
+void func_8006C3E8(void) {
+    s32 sp10[8];
+    s32 handle;
+
+    if (D_800C4010 == 0) {
+        handle = func_8004E2DC(func_8005062C(0x955, sp10));
+        D_800E1C00 = handle;
+        func_800506D4(handle, sp10);
+    }
+    D_800C4010 = 1;
+    D_800C4014 = 0;
+    D_800C4018 = 0x90;
+}
 
 void func_8006C450(void) {
     if (D_800C4010 != 0) {
