@@ -1,13 +1,25 @@
 --- a/reload1.c
 +++ b/reload1.c
-@@ -424,6 +424,88 @@
+@@ -20,6 +20,7 @@
+ 
+ 
+ #include <stdio.h>
++#include <stdio_ext.h>
+ #include "config.h"
+ #include "rtl.h"
+ #include "obstack.h"
+@@ -424,6 +425,143 @@
    reload_firstobj = (char *) obstack_alloc (&reload_obstack, 0);
  }
  
 +/* The oracle's trace (see tools/oracle.py): when cc1 compiles the function
 +   ORACLE_FUNCTION, local-alloc, global-alloc and reload append one JSON
 +   object a line to the file ORACLE_TRACE.  Returns that file opened to
-+   append, or 0 for another function or when no trace is asked for.  */
++   append, or 0 for another function or when no trace is asked for.  The
++   file is opened once and kept open; oracle_end_record writes out each
++   record as it ends.  */
++
++static FILE *oracle_trace_file;
 +
 +FILE *
 +oracle_open_trace ()
@@ -18,7 +30,55 @@
 +  if (function == 0 || path == 0 || *path == 0
 +      || strcmp (function, current_function_name) != 0)
 +    return 0;
-+  return fopen (path, "a");
++  if (oracle_trace_file == 0 && (oracle_trace_file = fopen (path, "a")) != 0)
++    /* Only cc1's one thread writes the trace */
++    __fsetlocking (oracle_trace_file, FSETLOCKING_BYCALLER);
++  return oracle_trace_file;
++}
++
++/* End a record of the trace FILE, writing out what it holds so that the
++   file has each record whole even if cc1 then fails.  */
++
++void
++oracle_end_record (file)
++     FILE *file;
++{
++  fflush (file);
++}
++
++/* Write to FILE the decimal digits of N.  The trace writes many numbers,
++   which this does faster than fprintf.  */
++
++void
++oracle_put_int (file, n)
++     FILE *file;
++     int n;
++{
++  char digits[12];
++  char *start = digits + sizeof digits;
++  unsigned int magnitude = n < 0 ? - (unsigned int) n : n;
++
++  do
++    {
++      *--start = '0' + magnitude % 10;
++      magnitude /= 10;
++    }
++  while (magnitude != 0);
++  if (n < 0)
++    *--start = '-';
++  fwrite (start, 1, digits + sizeof digits - start, file);
++}
++
++/* Write to FILE SEPARATOR and then N.  */
++
++void
++oracle_put_item (file, separator, n)
++     FILE *file;
++     char *separator;
++     int n;
++{
++  fputs (separator, file);
++  oracle_put_int (file, n);
 +}
 +
 +/* Record the hard register, or -1, each pseudo goes into reload with.  */
@@ -31,12 +91,15 @@
 +
 +  if (file == 0)
 +    return;
-+  fprintf (file, "{\"stage\": \"dispositions\", \"registers\": {");
++  fputs ("{\"stage\": \"dispositions\", \"registers\": {", file);
 +  for (pseudo = FIRST_PSEUDO_REGISTER; pseudo < max_regno; pseudo++)
-+    fprintf (file, "%s\"%d\": %d", pseudo == FIRST_PSEUDO_REGISTER ? "" : ", ",
-+	     pseudo, reg_renumber[pseudo]);
-+  fprintf (file, "}}\n");
-+  fclose (file);
++    {
++      oracle_put_item (file, pseudo == FIRST_PSEUDO_REGISTER ? "\"" : ", \"",
++		       pseudo);
++      oracle_put_item (file, "\": ", reg_renumber[pseudo]);
++    }
++  fputs ("}}\n", file);
++  oracle_end_record (file);
 +}
 +
 +/* The oracle's forcing (see tools/oracle.py): ORACLE_FORCE names, as
@@ -89,7 +152,7 @@
  /* Main entry point for the reload pass.
  
     FIRST is the first insn of the function being compiled.
-@@ -466,6 +548,9 @@
+@@ -466,6 +604,9 @@
    /* The basic block number currently being processed for INSN.  */
    int this_block;
  
@@ -101,16 +164,18 @@
  
 --- a/local-alloc.c
 +++ b/local-alloc.c
-@@ -65,6 +65,8 @@
+@@ -65,6 +65,10 @@
  #include "insn-config.h"
  #include "recog.h"
  #include "output.h"
 +
 +extern FILE *oracle_open_trace ();
++extern void oracle_end_record ();
++extern void oracle_put_item ();
  
  /* Pseudos allocated here cannot be reallocated by global.c if the hard
     register is used as a spill register.  So we don't allocate such pseudos
-@@ -1116,6 +1118,36 @@
+@@ -1116,6 +1120,42 @@
      }
  }
  
@@ -127,27 +192,33 @@
 +
 +  if (file == 0)
 +    return;
-+  fprintf (file, "{\"stage\": \"local\", \"block\": %d, \"quantities\": [", b);
++  oracle_put_item (file, "{\"stage\": \"local\", \"block\": ", b);
++  fputs (", \"quantities\": [", file);
 +  for (i = 0; i < next_qty; i++)
 +    {
 +      q = qty_order[i];
-+      fprintf (file, "%s{\"qty\": %d, \"pseudos\": [", i == 0 ? "" : ", ", q);
++      oracle_put_item (file, i == 0 ? "{\"qty\": " : ", {\"qty\": ", q);
++      fputs (", \"pseudos\": [", file);
 +      for (regno = qty_first_reg[q]; regno >= 0; regno = reg_next_in_qty[regno])
-+	fprintf (file, "%s%d", regno == qty_first_reg[q] ? "" : ", ", regno);
-+      fprintf (file, "], \"n_refs\": %d, \"birth\": %d, \"death\": %d, "
-+	       "\"size\": %d, \"phys_reg\": %d, \"n_sugg\": %d, "
-+	       "\"n_copy_sugg\": %d}",
-+	       qty_n_refs[q], qty_birth[q], qty_death[q], qty_size[q],
-+	       qty_phys_reg[q], qty_phys_num_sugg[q], qty_phys_num_copy_sugg[q]);
++	oracle_put_item (file, regno == qty_first_reg[q] ? "" : ", ", regno);
++      oracle_put_item (file, "], \"n_refs\": ", qty_n_refs[q]);
++      oracle_put_item (file, ", \"birth\": ", qty_birth[q]);
++      oracle_put_item (file, ", \"death\": ", qty_death[q]);
++      oracle_put_item (file, ", \"size\": ", qty_size[q]);
++      oracle_put_item (file, ", \"phys_reg\": ", qty_phys_reg[q]);
++      oracle_put_item (file, ", \"n_sugg\": ", qty_phys_num_sugg[q]);
++      oracle_put_item (file, ", \"n_copy_sugg\": ",
++		       qty_phys_num_copy_sugg[q]);
++      fputs ("}", file);
 +    }
-+  fprintf (file, "]}\n");
-+  fclose (file);
++  fputs ("]}\n", file);
++  oracle_end_record (file);
 +}
 +
  /* Allocate hard regs to the pseudo regs used only within block number B.
     Only the pseudos that die but once can be handled.  */
  
-@@ -1538,6 +1570,8 @@
+@@ -1538,6 +1578,8 @@
  	}
      }
  
@@ -158,18 +229,20 @@
  
 --- a/global.c
 +++ b/global.c
-@@ -29,6 +29,10 @@
+@@ -29,6 +29,12 @@
  #include "insn-config.h"
  #include "output.h"
  
 +extern FILE *oracle_open_trace ();
++extern void oracle_end_record ();
++extern void oracle_put_item ();
 +static void oracle_trace_global ();
 +static void oracle_trace_global_start ();
 +
  /* This pass of the compiler performs global register allocation.
     It assigns hard register numbers to all the pseudo registers
     that were not handled in local_alloc.  Assignments are recorded
-@@ -545,6 +549,7 @@
+@@ -545,6 +551,7 @@
  
        qsort (allocno_order, max_allocno, sizeof (int), allocno_compare);
        
@@ -177,7 +250,7 @@
        prune_preferences ();
  
        if (file)
-@@ -573,6 +578,8 @@
+@@ -573,6 +580,8 @@
    /* Do the reloads now while the allocno data still exist, so that we can
       try to assign new hard regs to any pseudo regs that are spilled.  */
  
@@ -186,7 +259,7 @@
  #if 0 /* We need to eliminate regs even if there is no rtl code,
  	 for the sake of debugging information.  */
    if (n_basic_blocks > 0)
-@@ -580,6 +587,167 @@
+@@ -580,6 +589,180 @@
      return reload (get_insns (), 1, file);
  }
  
@@ -200,14 +273,32 @@
 +  int regno;
 +  char *separator = "";
 +
-+  fprintf (file, "[");
++  fputs ("[", file);
 +  for (regno = 0; regno < FIRST_PSEUDO_REGISTER; regno++)
 +    if (TEST_HARD_REG_BIT (set, regno))
 +      {
-+	fprintf (file, "%s%d", separator, regno);
++	oracle_put_item (file, separator, regno);
 +	separator = ", ";
 +      }
-+  fprintf (file, "]");
++  fputs ("]", file);
++}
++
++/* Write to FILE, after SEPARATOR, the start of a JSON object for ALLOCNO,
++   with the figures it is placed by.  */
++
++static void
++oracle_print_allocno (file, separator, allocno)
++     FILE *file;
++     char *separator;
++     int allocno;
++{
++  fputs (separator, file);
++  oracle_put_item (file, "{\"pseudo\": ", allocno_reg[allocno]);
++  oracle_put_item (file, ", \"n_refs\": ", allocno_n_refs[allocno]);
++  oracle_put_item (file, ", \"size\": ", allocno_size[allocno]);
++  oracle_put_item (file, ", \"live_length\": ", allocno_live_length[allocno]);
++  oracle_put_item (file, ", \"calls_crossed\": ",
++		   allocno_calls_crossed[allocno]);
 +}
 +
 +/* Record for the oracle's trace (see oracle_open_trace in reload1.c) each
@@ -222,34 +313,31 @@
 +
 +  if (max_allocno == 0 || (file = oracle_open_trace ()) == 0)
 +    return;
-+  fprintf (file, "{\"stage\": \"global\", \"allocnos\": [");
++  fputs ("{\"stage\": \"global\", \"allocnos\": [", file);
 +  for (i = 0; i < max_allocno; i++)
 +    {
 +      allocno = allocno_order[i];
-+      fprintf (file, "%s{\"pseudo\": %d, \"n_refs\": %d, \"size\": %d, "
-+	       "\"live_length\": %d, \"calls_crossed\": %d, "
-+	       "\"hard\": %d, \"conflicts\": [",
-+	       i == 0 ? "" : ", ", allocno_reg[allocno],
-+	       allocno_n_refs[allocno], allocno_size[allocno],
-+	       allocno_live_length[allocno], allocno_calls_crossed[allocno],
-+	       reg_renumber[allocno_reg[allocno]]);
++      oracle_print_allocno (file, i == 0 ? "" : ", ", allocno);
++      oracle_put_item (file, ", \"hard\": ",
++		       reg_renumber[allocno_reg[allocno]]);
++      fputs (", \"conflicts\": [", file);
 +      separator = "";
 +      for (other = 0; other < max_allocno; other++)
 +	if (other != allocno && CONFLICTP (allocno, other))
 +	  {
-+	    fprintf (file, "%s%d", separator, allocno_reg[other]);
++	    oracle_put_item (file, separator, allocno_reg[other]);
 +	    separator = ", ";
 +	  }
-+      fprintf (file, "], \"hard_conflicts\": ");
++      fputs ("], \"hard_conflicts\": ", file);
 +      oracle_print_hard_regs (file, hard_reg_conflicts[allocno]);
-+      fprintf (file, ", \"preferences\": ");
++      fputs (", \"preferences\": ", file);
 +      oracle_print_hard_regs (file, hard_reg_preferences[allocno]);
-+      fprintf (file, ", \"copy_preferences\": ");
++      fputs (", \"copy_preferences\": ", file);
 +      oracle_print_hard_regs (file, hard_reg_copy_preferences[allocno]);
-+      fprintf (file, "}");
++      fputs ("}", file);
 +    }
-+  fprintf (file, "]}\n");
-+  fclose (file);
++  fputs ("]}\n", file);
++  oracle_end_record (file);
 +}
 +
 +/* Record for the oracle's trace, as global-alloc starts, what it places
@@ -273,17 +361,17 @@
 +
 +  if (max_allocno == 0 || (file = oracle_open_trace ()) == 0)
 +    return;
-+  fprintf (file, "{\"stage\": \"global_start\", \"fixed\": ");
++  fputs ("{\"stage\": \"global_start\", \"fixed\": ", file);
 +  oracle_print_hard_regs (file, fixed_reg_set);
-+  fprintf (file, ", \"call_used\": ");
++  fputs (", \"call_used\": ", file);
 +  oracle_print_hard_regs (file, call_used_reg_set);
-+  fprintf (file, ", \"call_fixed\": ");
++  fputs (", \"call_fixed\": ", file);
 +  oracle_print_hard_regs (file, call_fixed_reg_set);
-+  fprintf (file, ", \"no_global\": ");
++  fputs (", \"no_global\": ", file);
 +  oracle_print_hard_regs (file, no_global_alloc_regs);
-+  fprintf (file, ", \"used_so_far\": ");
++  fputs (", \"used_so_far\": ", file);
 +  oracle_print_hard_regs (file, regs_used_so_far);
-+  fprintf (file, ", \"alike\": [");
++  fputs (", \"alike\": [", file);
 +  for (i = 0; i < FIRST_PSEUDO_REGISTER; i++)
 +    {
 +      CLEAR_HARD_REG_SET (set);
@@ -292,63 +380,61 @@
 +	    || reg_class_subset_p (REGNO_REG_CLASS (i), REGNO_REG_CLASS (j))
 +	    || reg_class_subset_p (REGNO_REG_CLASS (j), REGNO_REG_CLASS (i)))
 +	  SET_HARD_REG_BIT (set, j);
-+      fprintf (file, "%s", i == 0 ? "" : ", ");
++      fputs (i == 0 ? "" : ", ", file);
 +      oracle_print_hard_regs (file, set);
 +    }
-+  fprintf (file, "], \"local_n_refs\": [");
++  fputs ("], \"local_n_refs\": [", file);
 +  for (i = 0; i < FIRST_PSEUDO_REGISTER; i++)
-+    fprintf (file, "%s%d", i == 0 ? "" : ", ", local_reg_n_refs[i]);
-+  fprintf (file, "], \"local_live_length\": [");
++    oracle_put_item (file, i == 0 ? "" : ", ", local_reg_n_refs[i]);
++  fputs ("], \"local_live_length\": [", file);
 +  for (i = 0; i < FIRST_PSEUDO_REGISTER; i++)
-+    fprintf (file, "%s%d", i == 0 ? "" : ", ", local_reg_live_length[i]);
-+  fprintf (file, "], \"allocnos\": [");
++    oracle_put_item (file, i == 0 ? "" : ", ", local_reg_live_length[i]);
++  fputs ("], \"allocnos\": [", file);
 +  for (allocno = 0; allocno < max_allocno; allocno++)
 +    {
 +      mode = PSEUDO_REGNO_MODE (allocno_reg[allocno]);
-+      fprintf (file, "%s{\"pseudo\": %d, \"n_refs\": %d, \"size\": %d, "
-+	       "\"live_length\": %d, \"calls_crossed\": %d, "
-+	       "\"left_out\": %d, \"gpr_nregs\": %d, \"fpr_nregs\": %d, "
-+	       "\"conflicts\": [",
-+	       allocno == 0 ? "" : ", ", allocno_reg[allocno],
-+	       allocno_n_refs[allocno], allocno_size[allocno],
-+	       allocno_live_length[allocno], allocno_calls_crossed[allocno],
-+	       reg_live_length[allocno_reg[allocno]] < 0,
-+	       HARD_REGNO_NREGS (GP_REG_FIRST, mode),
-+	       HARD_REGNO_NREGS (FP_REG_FIRST, mode));
++      oracle_print_allocno (file, allocno == 0 ? "" : ", ", allocno);
++      oracle_put_item (file, ", \"left_out\": ",
++		       reg_live_length[allocno_reg[allocno]] < 0);
++      oracle_put_item (file, ", \"gpr_nregs\": ",
++		       HARD_REGNO_NREGS (GP_REG_FIRST, mode));
++      oracle_put_item (file, ", \"fpr_nregs\": ",
++		       HARD_REGNO_NREGS (FP_REG_FIRST, mode));
++      fputs (", \"conflicts\": [", file);
 +      separator = "";
 +      for (i = 0; i < max_allocno; i++)
 +	if (CONFLICTP (allocno, i))
 +	  {
-+	    fprintf (file, "%s%d", separator, i);
++	    oracle_put_item (file, separator, i);
 +	    separator = ", ";
 +	  }
-+      fprintf (file, "], \"mode_ok\": ");
++      fputs ("], \"mode_ok\": ", file);
 +      CLEAR_HARD_REG_SET (set);
 +      for (i = 0; i < FIRST_PSEUDO_REGISTER; i++)
 +	if (HARD_REGNO_MODE_OK (i, mode))
 +	  SET_HARD_REG_BIT (set, i);
 +      oracle_print_hard_regs (file, set);
-+      fprintf (file, ", \"preferred_class\": ");
++      fputs (", \"preferred_class\": ", file);
 +      class = reg_preferred_class (allocno_reg[allocno]);
 +      oracle_print_hard_regs (file, reg_class_contents[(int) class]);
-+      fprintf (file, ", \"alternate_class\": ");
++      fputs (", \"alternate_class\": ", file);
 +      class = reg_alternate_class (allocno_reg[allocno]);
 +      CLEAR_HARD_REG_SET (set);
 +      if (class != NO_REGS)
 +	COPY_HARD_REG_SET (set, reg_class_contents[(int) class]);
 +      oracle_print_hard_regs (file, set);
-+      fprintf (file, ", \"hard_conflicts\": ");
++      fputs (", \"hard_conflicts\": ", file);
 +      oracle_print_hard_regs (file, hard_reg_conflicts[allocno]);
-+      fprintf (file, ", \"full_preferences\": ");
++      fputs (", \"full_preferences\": ", file);
 +      oracle_print_hard_regs (file, hard_reg_full_preferences[allocno]);
-+      fprintf (file, ", \"copy_preferences\": ");
++      fputs (", \"copy_preferences\": ", file);
 +      oracle_print_hard_regs (file, hard_reg_copy_preferences[allocno]);
-+      fprintf (file, ", \"preferences\": ");
++      fputs (", \"preferences\": ", file);
 +      oracle_print_hard_regs (file, hard_reg_preferences[allocno]);
-+      fprintf (file, "}");
++      fputs ("}", file);
 +    }
-+  fprintf (file, "]}\n");
-+  fclose (file);
++  fputs ("]}\n", file);
++  oracle_end_record (file);
 +}
 +
  /* Sort predicate for ordering the allocnos.
@@ -356,7 +442,7 @@
  
 --- a/toplev.c
 +++ b/toplev.c
-@@ -2637,6 +2637,150 @@
+@@ -2637,6 +2637,159 @@
  #endif
  }
  
@@ -365,6 +451,8 @@
 +   RTL was made, and each pseudo's mode and whether it is a variable's.  */
 +
 +extern FILE *oracle_open_trace ();
++extern void oracle_end_record ();
++extern void oracle_put_item ();
 +
 +static char *oracle_separator;
 +
@@ -382,9 +470,12 @@
 +	&& GET_CODE (DECL_RTL (decl)) == REG
 +	&& REGNO (DECL_RTL (decl)) >= FIRST_PSEUDO_REGISTER)
 +      {
-+	fprintf (file, "%s{\"name\": \"%s\", \"pseudo\": %d, \"line\": %d}",
-+		 oracle_separator, IDENTIFIER_POINTER (DECL_NAME (decl)),
-+		 REGNO (DECL_RTL (decl)), DECL_SOURCE_LINE (decl));
++	fputs (oracle_separator, file);
++	fputs ("{\"name\": \"", file);
++	fputs (IDENTIFIER_POINTER (DECL_NAME (decl)), file);
++	oracle_put_item (file, "\", \"pseudo\": ", REGNO (DECL_RTL (decl)));
++	oracle_put_item (file, ", \"line\": ", DECL_SOURCE_LINE (decl));
++	fputs ("}", file);
 +	oracle_separator = ", ";
 +      }
 +}
@@ -415,20 +506,24 @@
 +
 +  if (file == 0)
 +    return;
-+  fprintf (file, "{\"stage\": \"variables\", \"variables\": [");
++  fputs ("{\"stage\": \"variables\", \"variables\": [", file);
 +  oracle_separator = "";
 +  oracle_trace_decls (file, DECL_ARGUMENTS (decl));
 +  if (DECL_INITIAL (decl) != 0 && TREE_CODE (DECL_INITIAL (decl)) == BLOCK)
 +    oracle_trace_block_decls (file, DECL_INITIAL (decl));
-+  fprintf (file, "], \"pseudos\": {");
++  fputs ("], \"pseudos\": {", file);
 +  for (regno = FIRST_PSEUDO_REGISTER; regno < max_reg_num (); regno++)
 +    if (regno_reg_rtx[regno] != 0)
-+      fprintf (file, "%s\"%d\": [\"%s\", %d]",
-+	       regno == FIRST_PSEUDO_REGISTER ? "" : ", ", regno,
-+	       GET_MODE_NAME (GET_MODE (regno_reg_rtx[regno])),
-+	       REG_USERVAR_P (regno_reg_rtx[regno]) != 0);
-+  fprintf (file, "}}\n");
-+  fclose (file);
++      {
++	oracle_put_item (file, regno == FIRST_PSEUDO_REGISTER ? "\"" : ", \"",
++			 regno);
++	fputs ("\": [\"", file);
++	fputs (GET_MODE_NAME (GET_MODE (regno_reg_rtx[regno])), file);
++	oracle_put_item (file, "\", ", REG_USERVAR_P (regno_reg_rtx[regno]) != 0);
++	fputs ("]", file);
++      }
++  fputs ("}}\n", file);
++  oracle_end_record (file);
 +}
 +
 +/* Replace in the rtx at LOC each use of the pseudo GONE with KEPT.  */
@@ -507,7 +602,7 @@
  /* This is called from finish_function (within yyparse)
     after each top-level definition is parsed.
     It is supposed to compile that function or variable
-@@ -2810,6 +2954,9 @@
+@@ -2810,6 +2963,9 @@
  
    instantiate_virtual_regs (current_function_decl, get_insns ());
  
