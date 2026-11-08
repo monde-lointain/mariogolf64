@@ -1119,33 +1119,23 @@ void SetGridVertex(s32 column, s32 row, Vtx_t *point) {
  * Returns the ground point at a point column and row: a grid vertex, or a
  * tile's midpoint.
  *
- * Doesn't match: the original adds the tile's offset to the midpoints'
- * address before adding the slot's, where this adds the slot's first; 2
- * words differ. Computing tileIndex outside its own block gives 26, other
- * orders of its terms give 2 to 4, and adding the slot to the tile's
- * midpoints as a pointer gives 2. A midpoints local, as SetGroundPoint has,
- * gives the original's order of instructions but 38 differing words: local
- * allocation ties tileIndex, its offset and midpoints into one quantity that
- * takes $v0 ahead of the slot's lookup, and the rest of the registers follow.
- * The oracle matches that form when 13 pseudos are forced, so its RTL is the
- * original's up to allocation; the slot's operand order there changes
- * nothing.
- *
- * A static inline helper returning the tile's midpoints, given the index or
- * the tile's column and row, gives the same 38 words as the local; one
- * returning the midpoint's address gives 26, or 36 with tileIndex in its own
- * block. Reading the slot into a local first, as an s32, u8 or u32, before
- * or after tileIndex and with or without the helper, gives 34 to 42.
- * Grouping each tile's midpoints in a struct of their own, indexed as
- * midpoints[tileIndex].points[slot], leaves the 2.
+ * The midpoint is found through the tile's midpoints, as SetGroundPoint
+ * finds it, and both kinds of point are returned from one place. Returning
+ * the midpoint where it is found makes 38 words differ, 2 in shape: the
+ * final sum is then local to its block, and local allocation ties it to the
+ * tile's midpoints and gives the slot's lookup other registers. Indexing
+ * g_WorkArea.hole.midpoints with the tile and the slot directly makes 26
+ * differ, 8 in shape, as sched mixes the tile's offset into the slot's
+ * lookup; returning the grid vertex first makes 13 differ.
  */
-#ifdef NON_MATCHING
 Vtx *GetGroundPoint(u32 column, u32 row) {
     u32 tileRow;
     u32 tileColumn;
     s32 slotRow;
     s32 slotColumn;
     s32 tileIndex;
+    Vtx *midpoints;
+    Vtx *point;
 
     if ((column | row) & 1) {
         tileRow = PointTile(row);
@@ -1166,18 +1156,16 @@ Vtx *GetGroundPoint(u32 column, u32 row) {
             slotColumn = PointSlot(column);
         }
 
-        /* In its own block, to match; without it 26 words differ, 8 in shape,
-         * against 2 (2) */
-        IN_OWN_BLOCK(tileIndex = TileIndex(tileColumn, tileRow));
-        return &g_WorkArea.hole.midpoints[tileIndex][f_PointSlots[slotRow][slotColumn]];
+        tileIndex = TileIndex(tileColumn, tileRow);
+        midpoints = g_WorkArea.hole.midpoints[tileIndex];
+        point = &midpoints[f_PointSlots[slotRow][slotColumn]];
+    }
+    else {
+        point = GetGridVertex(column >> 1, row >> 1);
     }
 
-    return GetGridVertex(column >> 1, row >> 1);
+    return point;
 }
-
-#else
-INCLUDE_ASM("asm/nonmatchings/terrain", GetGroundPoint);
-#endif
 
 /*
  * Copies a point into the ground point, and into every tile that keeps a
