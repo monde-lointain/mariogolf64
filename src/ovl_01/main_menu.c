@@ -7196,16 +7196,13 @@ void DrawAnimationViewer(Gfx **displayListHead) {
  * loading once they stop.
  */
 /*
- * Doesn't match: GCC reloads the chosen course from the stack for its test in
- * the icon loop, where the original reads it before the mini golf test and
- * keeps it in $a3 until then; the register oracle's closest result is these
- * 5 words with no register forced. Copying the choice into a second
- * variable just before the mini golf test, and testing that, matches, but no
- * natural form found needs the copy, so it isn't adopted. A static inline
- * helper would make one, as GCC copies each argument of a parameter that
- * isn't const, but it copies the slot too: copies of both give 11 words,
- * which the oracle doesn't bring closer, and a helper drawing the whole
- * icon gives 540 words, 172 in shape.
+ * The choice is copied into chosenSlot before each icon's mini golf test, to
+ * match: the original reads it there and keeps it in $a3 until its test.
+ * Testing choice itself, 5 words differ, all in shape, as GCC reloads it from
+ * the stack; no natural form found needs the copy. A static inline helper
+ * would make one, as GCC copies each argument of a parameter that isn't
+ * const, but it copies the slot too: copies of both give 11 words, and a
+ * helper drawing the whole icon gives 540 words, 172 in shape.
  *
  * The mini golf disc's centre is set in two arms, when the disc stops
  * spinning and when it has none yet, which cross-jumping merges into one
@@ -7217,25 +7214,25 @@ void DrawAnimationViewer(Gfx **displayListHead) {
  * from them gave 24 words differing, 6 in shape, against 89 and 5 with the
  * joined test. Earlier, clearing the place count in the place loop's
  * initializer took 51 words differing to 49, and reading the slot in its own
- * block gave 40 words, 10 in shape. 5 words differ, all in shape.
+ * block gave 40 words, 10 in shape.
  */
-#ifdef NON_MATCHING
 void DrawCourseSelect(Gfx **displayListHead) {
     Gfx *gfx;
     u16 perspNorm;
     u16 wheelPerspNorm;
-    /* Pads the frame to match; without it 741 words differ, against 5 */
+    /* Pads the frame to match; without it 738 words differ */
     u8 unusedStackBeforeIcons[0x10] UNUSED;
     f32 iconX[COURSE_COUNT];
     f32 iconY[COURSE_COUNT];
     f32 iconScale[COURSE_COUNT];
-    /* Pads the frame to match; without it 709 words differ, against 5 */
+    /* Pads the frame to match; without it 706 words differ */
     u8 unusedStackAfterIcons[0x18] UNUSED;
     s32 drawOrder[COURSE_COUNT];
     s16 places[TOURNAMENT_PLACE_COUNT];
     SaveData *save;
     s32 courseCount;
     s32 choice;
+    s32 chosenSlot;
     s32 spin;
     s32 texelsOffset;
     s32 angleStep;
@@ -7485,11 +7482,12 @@ void DrawCourseSelect(Gfx **displayListHead) {
                 bob = 0.0f;
             }
 
+            chosenSlot = choice;
             if (g_GameState.isMiniGolf == TRUE) {
                 palette = g_MiniGolfDiscImages[slot];
                 /*
                  * Indexed as one row, to match: indexed by the buffer and the slot,
-                 * 30 words differ, 6 in shape, against 5 and 5
+                 * 5 words differ, 1 in shape
                  */
                 texels =
                     MENU_ICON_IMAGE_PAIRS[0]
@@ -7502,7 +7500,7 @@ void DrawCourseSelect(Gfx **displayListHead) {
             }
 
             gDPLoadTLUT_pal256(gfx++, TextureAddress(palette));
-            if (choice == slot) {
+            if (chosenSlot == slot) {
                 gDPPipeSync(gfx++);
                 gDPSetRenderMode(gfx++, G_RM_AA_TEX_EDGE | Z_UPD, G_RM_AA_TEX_EDGE2 | Z_UPD);
                 gDPSetPrimDepth(gfx++, CHOSEN_COURSE_DEPTH, 0);
@@ -7884,8 +7882,8 @@ void DrawCourseSelect(Gfx **displayListHead) {
         /*
          * The wall stays still at other slides. An empty case for
          * STATS_SLIDE_CURRENT compiles to the same tests but moves registers
-         * elsewhere (22 words, all in shape), and default for the slides out
-         * tests the tree differently (11, all in shape), against 5 (5)
+         * elsewhere (17 words, all in shape), and default for the slides out
+         * tests the tree differently (6, all in shape)
          */
         switch (g_BetPagesWallSlide) {
             case STATS_SLIDE_OUT_RIGHT:
@@ -8040,9 +8038,6 @@ void DrawCourseSelect(Gfx **displayListHead) {
     gDPPipeSync(gfx++);
     *displayListHead = gfx;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", DrawCourseSelect);
-#endif
 
 /*
  * DrawCourseSelectBanners draws the course select's banners of
