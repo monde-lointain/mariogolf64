@@ -36,7 +36,18 @@ INCLUDE_ASM("asm/nonmatchings/16D660", func_ovl16_801F4B9C);
 
 INCLUDE_ASM("asm/nonmatchings/16D660", func_ovl16_801F4E54);
 
-INCLUDE_ASM("asm/nonmatchings/16D660", func_ovl16_801F4F24);
+f32 func_ovl16_801F4F24(f32 arg0, f32 arg1, f32 arg2) {
+    f32 var_ft0;
+
+    var_ft0 = arg2;
+    if (var_ft0 < 0.0f) {
+        var_ft0 = 0.0f;
+    }
+    if (var_ft0 > 1.0f) {
+        var_ft0 = 1.0f;
+    }
+    return (arg0 * (1.0f - var_ft0)) + (arg1 * var_ft0);
+}
 
 void func_ovl16_801F4F7C(void) {
     D_ovl16_802237B8 = 0;
