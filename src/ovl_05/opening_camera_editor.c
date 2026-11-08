@@ -519,7 +519,10 @@ void StopEditorMoves(void) {
  * 87 with nothing forced. But the original's three moves there write
  * $f20, $f24 and $f22 in that order, as the draft's x, y, z does, and the
  * swapped order writes the last two the other way round; only their source
- * registers come to line up.
+ * registers come to line up. Reading the point as x, z, y as well gives 83
+ * words (33 in shape), and the oracle's closest 83 with nothing forced, but
+ * those moves are still the other way round; reading the point alone as x,
+ * z, y gives 95 (33).
  *
  * The turn sets isDone before it reads turnLeft, where the tilt sets it
  * after stepping: the original loads isDone's 1 once for the turn, where
