@@ -17,7 +17,17 @@ INCLUDE_ASM("asm/nonmatchings/748B0", func_800995F0);
 
 INCLUDE_ASM("asm/nonmatchings/748B0", func_8009973C);
 
-INCLUDE_ASM("asm/nonmatchings/748B0", func_800999C4);
+extern s16 D_800E705C;
+extern s16 D_800E705E;
+
+void func_800999C4(s32 arg0, s16 arg1) {
+    if (arg0 & 1) {
+        D_800E705C = arg1;
+    }
+    if (arg0 & 2) {
+        D_800E705E = arg1;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/748B0", func_800999F0);
 
@@ -51,7 +61,11 @@ INCLUDE_ASM("asm/nonmatchings/748B0", func_8009A2F0);
 
 INCLUDE_ASM("asm/nonmatchings/748B0", func_8009A318);
 
-INCLUDE_ASM("asm/nonmatchings/748B0", func_8009A33C);
+extern s32 D_800E706C;
+
+s32 func_8009A33C(void) {
+    return D_800E706C;
+}
 
 INCLUDE_ASM("asm/nonmatchings/748B0", func_8009A348);
 
@@ -69,11 +83,21 @@ s32 func_8009A500(Unk8009A500 *arg0) {
     return arg0->unk4;
 }
 
-INCLUDE_ASM("asm/nonmatchings/748B0", func_8009A508);
+extern s32 D_800E7078;
 
-INCLUDE_ASM("asm/nonmatchings/748B0", func_8009A514);
+void func_8009A508(s32 arg0) {
+    D_800E7078 = arg0;
+}
 
-INCLUDE_ASM("asm/nonmatchings/748B0", func_8009A520);
+extern s32 D_800E707C;
+
+void func_8009A514(s32 arg0) {
+    D_800E707C = arg0;
+}
+
+s32 func_8009A520(void) {
+    return D_800E7078;
+}
 
 void func_8009A52C(Unk8009A500 *arg0, s32 arg1) {
     arg0->unk10 = arg1;
@@ -83,23 +107,54 @@ s32 func_8009A534(Unk8009A500 *arg0) {
     return arg0->unk10;
 }
 
-INCLUDE_ASM("asm/nonmatchings/748B0", func_8009A53C);
+extern s32 __libmus_current_sched;
+
+void func_8009A53C(s32 arg0) {
+    __libmus_current_sched = arg0;
+}
 
 INCLUDE_ASM("asm/nonmatchings/748B0", func_8009A548);
 
 INCLUDE_ASM("asm/nonmatchings/748B0", func_8009A5AC);
 
-INCLUDE_ASM("asm/nonmatchings/748B0", func_8009A624);
+extern s32 D_800E7080;
+
+void func_8009A624(s32 arg0) {
+    D_800E7080 = arg0;
+}
 
 INCLUDE_ASM("asm/nonmatchings/748B0", func_8009A630);
 
-INCLUDE_ASM("asm/nonmatchings/748B0", func_8009A64C);
+s32 __MusIntMemMalloc(s32);
+extern s32 D_800E7084;
+extern s32 D_800E7088;
+extern s32 D_800E708C;
+extern s32 D_800E7090;
+
+void func_8009A64C(s32 arg0) {
+    s32 var_s0;
+
+    var_s0 = arg0;
+    if (var_s0 < 0x40) {
+        var_s0 = 0x40;
+    } else if (var_s0 >= 0x401) {
+        var_s0 = 0x400;
+    }
+    D_800E7090 = __MusIntMemMalloc(var_s0 * 8);
+    D_800E708C = var_s0;
+    D_800E7088 = 0;
+    D_800E7084 = 0;
+}
 
 INCLUDE_ASM("asm/nonmatchings/748B0", func_8009A6B0);
 
 INCLUDE_ASM("asm/nonmatchings/748B0", func_8009A730);
 
-INCLUDE_ASM("asm/nonmatchings/748B0", func_8009A7C8);
+extern s32 D_800C7770;
+
+s32 func_8009A7C8(void) {
+    return D_800C7770;
+}
 
 INCLUDE_ASM("asm/nonmatchings/748B0", func_8009A7D4);
 
@@ -107,7 +162,11 @@ INCLUDE_ASM("asm/nonmatchings/748B0", func_8009AB18);
 
 INCLUDE_ASM("asm/nonmatchings/748B0", func_8009B060);
 
-INCLUDE_ASM("asm/nonmatchings/748B0", func_8009B0DC);
+extern s32 D_800C76B8;
+
+void func_8009B0DC(s32 arg0) {
+    D_800C76B8 = arg0 == 1;
+}
 
 INCLUDE_ASM("asm/nonmatchings/748B0", func_8009B0F0);
 
@@ -133,7 +192,27 @@ INCLUDE_ASM("asm/nonmatchings/748B0", func_8009B92C);
 
 INCLUDE_ASM("asm/nonmatchings/748B0", func_8009BAC0);
 
-INCLUDE_ASM("asm/nonmatchings/748B0", func_8009BC58);
+extern s32 D_800E7064;
+
+s32 func_8009BC58(s32 arg0) {
+    s32 temp_a1;
+    s32 temp_v0;
+    s32 temp_v1;
+    s32 var_a2;
+
+    var_a2 = 0;
+    do {
+        temp_a1 = D_800E7064 * 2;
+        temp_v0 = D_800E7064 & 0x48000000;
+        temp_v1 = (temp_v0 == 0x48000000) | (temp_v0 == 0x08000000);
+        D_800E7064 = temp_a1;
+        var_a2 += 1;
+        if (temp_v1 != 0) {
+            D_800E7064 = temp_a1 | 1;
+        }
+    } while (var_a2 < 8);
+    return (s32) ((f32) arg0 * (((f32) D_800E7064 / 65536.0f) / 65536.0f));
+}
 
 INCLUDE_ASM("asm/nonmatchings/748B0", func_8009BCEC);
 
