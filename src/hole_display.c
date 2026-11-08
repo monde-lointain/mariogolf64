@@ -4663,19 +4663,15 @@ INCLUDE_ASM("asm/nonmatchings/hole_display", CaptureHudAnimationFrame);
  * worked out in the rectangle 132 words differ, with it in pixels 90, and
  * with the left edge set at each strip 97. Each strip's top is worked out
  * from the strip index, as the original copies the slice's top into a
- * register only after the column's edges; counting the slice rows and
- * multiplying them by SLICE_HEIGHT gives 96 words.
+ * register only after the column's edges.
  *
- * Doesn't match: the original clears the slice's top after the slices'
- * loop tests the slice count, among the strip commands' hoisted constants,
- * and the slice index in that test's delay slot, where ours clears the
- * index before the test, copying it into the sound test's delay slot too,
- * and the top in the delay slot. All 240 placements and orders of the four
- * counters' clears, before or after the sound or in the loop's
- * initializer, give 5 words or more, and the register oracle forces
- * nothing. 5 words differ, 3 in shape.
+ * The slice's top is the slice row times SLICE_HEIGHT, worked out once per
+ * slice: loop's strength reduction then gives the top a register of its
+ * own, cleared after the slices' loop tests the slice count, among the strip
+ * commands' hoisted constants, as the original's is. Keeping a running top
+ * that steps by SLICE_HEIGHT gives 5 words (3 in shape), clearing it before
+ * that test, and multiplying the row out in each strip's top 96.
  */
-#ifdef NON_MATCHING
 void DrawSliceAnimation(void) {
     s32 frame;
     s32 sliceCount;
@@ -4683,7 +4679,7 @@ void DrawSliceAnimation(void) {
     s32 strip;
     s32 column;
     s32 wordIndex;
-    s32 sliceY;
+    s32 row;
 
     if (f_HudAnimationFramesLeft <= 0) {
         return;
@@ -4698,6 +4694,7 @@ void DrawSliceAnimation(void) {
     gDPSetCombineMode(g_DisplayListHead++, G_CC_MODULATEI_PRIM, G_CC_MODULATEI_PRIM);
     gDPPipeSync(g_DisplayListHead++);
     column = 0;
+    row = 0;
     wordIndex = 0;
     frame = SLICE_ANIMATION_FRAME_COUNT - f_HudAnimationFramesLeft;
     sliceCount = (frame / SLICE_FRAME_COUNT) + 1;
@@ -4705,11 +4702,12 @@ void DrawSliceAnimation(void) {
         PlaySound(SOUND_SLICE, SLICE_SOUND_CHANNEL, SOUND_FULL_SCALE);
     }
 
-    for (slice = 0, sliceY = 0; slice != sliceCount; slice++) {
+    for (slice = 0; slice != sliceCount; slice++) {
         s32 left = column * SLICE_WIDTH;
+        s32 top = row * SLICE_HEIGHT;
 
         for (strip = 0; strip != SLICE_STRIP_COUNT; strip++) {
-            s32 y = sliceY + strip * SLICE_STRIP_HEIGHT;
+            s32 y = top + strip * SLICE_STRIP_HEIGHT;
             s32 quarterRight = QuarterPixels(left + SLICE_WIDTH);
 
             gDPLoadTextureBlock(
@@ -4747,15 +4745,12 @@ void DrawSliceAnimation(void) {
         column++;
         if (column == SLICE_COLUMN_COUNT) {
             column = 0;
-            sliceY += SLICE_HEIGHT;
+            row++;
         }
     }
 
     f_HudAnimationFramesLeft--;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/hole_display", DrawSliceAnimation);
-#endif
 
 /* Draws the animation that StartHudAnimation started over the frame */
 void DrawHudAnimation(void) {
