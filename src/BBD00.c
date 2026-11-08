@@ -55,9 +55,52 @@ INCLUDE_ASM("asm/nonmatchings/BBD00", func_ovl0_802038D0);
 
 INCLUDE_ASM("asm/nonmatchings/BBD00", func_ovl0_80203B4C);
 
-INCLUDE_ASM("asm/nonmatchings/BBD00", func_ovl0_80203DAC);
+s32 func_800292FC(s32);
+s32 func_8002A97C(s32, s32);
+s32 func_80050F68(s32);
+s32 func_800934CC(s32);
+extern s32 D_800B680C;
+extern s32 D_800C306C;
+extern s32 D_800C308C;
+extern s32 D_800C3090;
+extern u16 D_800FBE48;
+extern s8 D_801061BD;
+extern s8 D_801061C4;
+extern s8 D_80106240;
 
-INCLUDE_ASM("asm/nonmatchings/BBD00", func_ovl0_80203E58);
+void func_ovl0_80203DAC(void) {
+    D_800FBE78.unk4 = -0x12C00;
+    D_800C308C = 1;
+    D_800C3070 = 0;
+    D_800C3090 = 0;
+    D_80106240 = 0x47;
+    D_800C307A = D_800FBE48;
+    func_800934CC(3);
+    D_800C306C = 4;
+    D_801061BD = 0;
+    D_801061C4 = 0;
+    if (D_800B680C == 3) {
+        func_800292FC(3);
+        func_8002A97C(4, 0);
+    }
+    func_80050F68(8);
+}
+
+s32 func_80050DA0(s32, s32, s32, s32, s32);
+extern s32 D_800C3084;
+extern s32 D_ovl0_80227194;
+
+void func_ovl0_80203E58(void) {
+    if ((D_801B55CC & 0x2020) && !(D_800C3084 & 2)) {
+        if ((D_800C3090 == 0) && (D_ovl0_80227194 == 0)) {
+            func_80050DA0(0x26, 8, 0x3C, 0x14, 0xE6);
+        }
+        D_800C3090 = 1;
+        return;
+    }
+    func_80050F68(8);
+    D_800C3090 = 0;
+}
 
 void func_ovl0_80203EEC(void) {
     s32 sp10[4]; /* unused; only sizes the stack frame (0x28) to match */
