@@ -531,7 +531,16 @@ typedef s32 (*BillboardHitFinder)(
  * sums' and products' operands found it. That takes the draft from 210
  * words to 208, 104 in shape either way, and the register oracle's closest
  * from 125 words forcing 42 pseudos to 121 forcing 36. StepBallSimulation's
- * copy is unchanged by it. 208 words differ, 104 in shape.
+ * copy is unchanged by it.
+ *
+ * The wall hit's positions multiply the step share by the contact fraction
+ * and then the velocity, and the speed kept after a bounce multiplies its
+ * scale by the softness and the steepness twice, each product written in
+ * that order; a search reordering and regrouping products found them. Both
+ * take the draft from 208 words (104 in shape) to 185 (83), and the
+ * register oracle's closest from 121 words forcing 36 pseudos to 100
+ * forcing 35; the wall hit's alone gives 193 (91), the kept speed's alone
+ * 200 (96). 185 words differ, 83 in shape.
  */
 #ifdef NON_MATCHING
 s32 StepOpeningBallSimulation(BallSimulation *simulation) {
@@ -1264,14 +1273,14 @@ s32 StepOpeningBallSimulation(BallSimulation *simulation) {
             }
 
             hitPosition[AXIS_X] = startX +
-                (f_OpeningContactFraction *
-                    (simulation->velocity[AXIS_X] * OPENING_WALL_HIT_STEP_SHARE));
+                (OPENING_WALL_HIT_STEP_SHARE * f_OpeningContactFraction *
+                    simulation->velocity[AXIS_X]);
             hitPosition[AXIS_Y] = startY +
-                (f_OpeningContactFraction *
-                    (simulation->velocity[AXIS_Y] * OPENING_WALL_HIT_STEP_SHARE));
+                (OPENING_WALL_HIT_STEP_SHARE * f_OpeningContactFraction *
+                    simulation->velocity[AXIS_Y]);
             hitPosition[AXIS_Z] = startZ +
-                (f_OpeningContactFraction *
-                    (simulation->velocity[AXIS_Z] * OPENING_WALL_HIT_STEP_SHARE));
+                (OPENING_WALL_HIT_STEP_SHARE * f_OpeningContactFraction *
+                    simulation->velocity[AXIS_Z]);
             simulation->position[AXIS_X] = hitPosition[AXIS_X];
             simulation->position[AXIS_Y] = hitPosition[AXIS_Y];
             simulation->position[AXIS_Z] = hitPosition[AXIS_Z];
@@ -1395,7 +1404,7 @@ s32 StepOpeningBallSimulation(BallSimulation *simulation) {
 
             softness = THOUSANDTHS_PER_ONE - GetOpeningSurfaceInfo(simulation->surface)->bounciness;
             keep = ((f32)THOUSANDTHS_PER_ONE -
-                       (softness * (steepness * SOFTNESS_SPEED_LOSS_SCALE) * steepness)) *
+                       (SOFTNESS_SPEED_LOSS_SCALE * softness * steepness * steepness)) *
                 ONE_PER_THOUSANDTH;
             if (simulation->stepCount < OPENING_EARLY_BOUNCE_STEP_COUNT) {
                 keep *= EARLY_BOUNCE_SPEED_SCALE;
