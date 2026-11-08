@@ -547,6 +547,16 @@ void OpenRoundResults(s32 request) {
  * skins ranks with i gives the same 158 words and 7 forced; counting the
  * club tournament's results with i or j gives 279 or 191 words, the oracle
  * needing 17 or 26 forced.
+ *
+ * No split of the loops between i and k matches. The target holds both in
+ * $s2, so both must fall below the stepped addresses' priority of 11666 for
+ * the addresses to take $s1 first. Each loop adds its own references and
+ * life to its counter's, about 112 references over 303 instructions in all,
+ * and at that density only a counter of fewer than 16 references could
+ * fall below, leaving the other more than 96, which would need over 500
+ * instructions. The portrait, club and stroke results loops on k alone bring
+ * it to 10101, but i then takes the other 87 references over 204, priority
+ * 25588, and $s0: 135 words, 7 in shape.
  */
 void LoadRoundResults(void) {
     EncodedAsset asset;
