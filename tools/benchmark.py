@@ -5,6 +5,7 @@
     benchmark.py functions PROJECT
     benchmark.py export PROJECT FLAGS C_FILE FUNCTION OUT_DIR
     benchmark.py respond PROJECT FLAGS OUT_DIR [LIMIT]
+    benchmark.py history OUT_DIR
 
 A benchmark's job is scored against what its matching body compiles to
 (see editsearch's targets), so any project whose C files rebuild its
@@ -112,6 +113,14 @@ def read_projects() -> dict[str, Project]:
 # What a stage's command starts with in the driver's -v output
 STAGES = ("cc1", "as")
 BODY_MARK = "__benchmark_body__;"
+# The directories under lib that this project's C files include from
+HEADER_DIRS = tuple(
+    flag.removeprefix("-I") for flag in fncompare.INCLUDES if flag.startswith("-Ilib/")
+)
+# A draft that doesn't match yet: a definition under #ifdef NON_MATCHING
+DRAFT_RE = re.compile(
+    r"^#ifdef NON_MATCHING\n[A-Za-z_][\w* \t]*?\b(\w+)\s*\(", re.MULTILINE
+)
 # The tokens of C source that nest braces: comments, strings, characters
 # and directives are matched whole, so that the braces in them are passed
 # over
@@ -255,8 +264,12 @@ def functions(name: str) -> None:
 
 def read_stage_commands(
     root: Path, project: Project, flags: list[str], unit: str
-) -> dict[str, list[str]]:
-    """Return the driver's cc1 and as commands for UNIT, with placeholders."""
+) -> dict[str, list[str]] | str:
+    """Return the driver's cc1 and as commands for UNIT, with placeholders.
+
+    If the driver stops before as, as when UNIT doesn't compile, returns
+    the first error it printed instead.
+    """
     with tempfile.TemporaryDirectory() as scratch:
         path = Path(scratch) / "unit.i"
         _ = path.write_text(unit, encoding="latin-1")
@@ -289,7 +302,10 @@ def read_stage_commands(
                 command.append(word)
         commands[Path(words[0]).name] = command
     if set(commands) != set(STAGES):
-        sys.exit(f"the driver ran {sorted(commands)}:\n{result.stderr}")
+        errors = [
+            line for line in result.stderr.splitlines() if re.match(r":\d+: ", line)
+        ]
+        return (errors or ["the driver stopped"])[0]
     return commands
 
 
@@ -300,14 +316,43 @@ def write_lines(path: Path, lines: list[str]) -> None:
 
 def export(name: str, flags: str, c_file: str, function: str, out_dir: Path) -> str:
     """Write FUNCTION's job, with its targets, to OUT_DIR; return any error."""
-    project = read_projects()[name]
     root = N64 / name
+    error = write_job(name, flags, c_file, function, out_dir, root=root)
+    return error or make_targets(out_dir)
+
+
+def make_targets(job: Path) -> str:
+    """Write the targets of JOB, its draft compiled; return any error."""
+    made = subprocess.run(
+        [str(EDITSEARCH), "targets", "--cc1", CC1, str(job)],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    return "" if made.returncode == 0 else made.stderr.strip().splitlines()[-1]
+
+
+def write_job(  # noqa: PLR0913 - each says where the function is
+    name: str,
+    flags: str,
+    c_file: str,
+    function: str,
+    out_dir: Path,
+    *,
+    root: Path,
+    defines: tuple[str, ...] = (),
+) -> str:
+    """Write FUNCTION's job, as ROOT holds it, to OUT_DIR, without targets.
+
+    DEFINES go to the driver after the project's flags. Returns any error.
+    """
+    project = read_projects()[name]
     source = read_source(root, project, c_file)
     definition = find_definition(source, function)
     if definition is None:
         return "no single definition"
     start, body_start, end = definition
-    driver_flags = get_flags(project, flags, c_file)
+    driver_flags = [*get_flags(project, flags, c_file), *defines]
     marked = source[:body_start] + BODY_MARK + "\n" + source[body_start:]
     result = run_driver(root, project, [*driver_flags, "-E", "-"], marked)
     before, mark, rest = result.stdout.partition(BODY_MARK)
@@ -333,17 +378,115 @@ def export(name: str, flags: str, c_file: str, function: str, out_dir: Path) -> 
         [str(root / project.driver_dir / "gcc"), *driver_flags, "-E", "{input}"],
     )
     commands = read_stage_commands(root, project, driver_flags, before + rest)
+    if isinstance(commands, str):
+        return commands
     write_lines(out_dir / "cc1.args", commands["cc1"])
     write_lines(out_dir / "as.args", commands["as"])
     nested = fncompare.find_nested_functions(before + rest, function)
     write_lines(out_dir / "targets.txt", [function, *nested])
-    made = subprocess.run(
-        [str(EDITSEARCH), "targets", "--cc1", CC1, str(out_dir)],
+    return ""
+
+
+def git(*arguments: str) -> str:
+    """Return the output of this repository's git with ARGUMENTS."""
+    return subprocess.run(
+        ["git", *arguments],
+        cwd=fncompare.ROOT,
         capture_output=True,
-        text=True,
-        check=False,
+        check=True,
+    ).stdout.decode("latin-1")
+
+
+def check_out(commit: str, trees: Path) -> Path:
+    """Return a tree of what COMMIT's C files include, made under TREES.
+
+    The toolchain, generated headers and split assembly are the working
+    tree's.
+    """
+    tree = trees / commit
+    if tree.exists():
+        return tree
+    paths = [
+        path
+        for path in ("include", "src", *HEADER_DIRS)
+        if git("ls-tree", "--name-only", commit, path).strip()
+    ]
+    scratch = trees / f"{commit}.part"
+    scratch.mkdir(parents=True)
+    archive = subprocess.run(
+        ["git", "archive", commit, *paths],
+        cwd=fncompare.ROOT,
+        capture_output=True,
+        check=True,
+    ).stdout
+    _ = subprocess.run(["tar", "-x", "-C", str(scratch)], input=archive, check=True)
+    for linked in ("tools", "build", "asm"):
+        (scratch / linked).symlink_to(fncompare.ROOT / linked)
+    _ = scratch.rename(tree)
+    return tree
+
+
+def find_drafts(source: str) -> set[str]:
+    """Return the functions SOURCE has drafts of."""
+    return {str(match[1]) for match in DRAFT_RE.finditer(source)}
+
+
+def history(out_dir: Path) -> None:
+    """Write a job for each draft that a "Match" commit made match.
+
+    Each job, under OUT_DIR/jobs, is the draft as the commit's parent held
+    it, scored against what the commit's matching body compiles to.
+    out_dir/history.txt lists the commit, function and file of each, or
+    why there is none.
+    """
+    trees = out_dir / "trees"
+    lines: list[str] = []
+    for entry in git("log", "--format=%h %s").splitlines():
+        commit, subject = entry.split(" ", 1)
+        if not subject.startswith("Match "):
+            continue
+        changed = git(
+            "diff", "--name-only", "--diff-filter=M", f"{commit}^", commit, "--", "src"
+        )
+        for c_file in changed.split():
+            if not c_file.endswith(".c"):
+                continue
+            old = git("show", f"{commit}^:{c_file}")
+            new = git("show", f"{commit}:{c_file}")
+            drafts = find_drafts(old) - find_drafts(new)
+            for function in sorted(drafts):
+                error = export_history(commit, c_file, function, trees, out_dir)
+                lines.append(f"{commit} {function} {c_file} {error or 'exported'}")
+                print(lines[-1])
+    write_lines(out_dir / "history.txt", lines)
+
+
+def export_history(
+    commit: str, c_file: str, function: str, trees: Path, out_dir: Path
+) -> str:
+    """Write the job of FUNCTION's draft, which COMMIT made match."""
+    matched = out_dir / "matched" / f"{commit}.{function}"
+    draft = out_dir / "jobs" / f"{commit}.{function}"
+    tree = check_out(commit, trees)
+    error = write_job("mariogolf64", "original", c_file, function, matched, root=tree)
+    if error or (error := make_targets(matched)):
+        return f"matched: {error}"
+    parent = check_out(git("rev-parse", "--short", f"{commit}^").strip(), trees)
+    error = write_job(
+        "mariogolf64",
+        "original",
+        c_file,
+        function,
+        draft,
+        root=parent,
+        defines=("-DNON_MATCHING",),
     )
-    return "" if made.returncode == 0 else made.stderr.strip().splitlines()[-1]
+    if error:
+        return f"draft: {error}"
+    for target in [*matched.glob("target.*.txt"), matched / "symbols.txt"]:
+        _ = shutil.copy(target, draft)
+    _ = shutil.copy(matched / "targets.txt", draft)
+    return ""
 
 
 def respond_one(
@@ -425,6 +568,8 @@ def main() -> None:
             functions(name)
         case ["export", name, flags, c_file, function, out_dir]:
             print(export(name, flags, c_file, function, Path(out_dir)) or "exported")
+        case ["history", out_dir]:
+            history(Path(out_dir))
         case ["respond", name, flags, out_dir, *limit]:
             respond(name, flags, Path(out_dir), int(limit[0]) if limit else None)
         case _:
