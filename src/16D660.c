@@ -56,7 +56,23 @@ void func_ovl16_801F4F7C(void) {
 
 INCLUDE_ASM("asm/nonmatchings/16D660", func_ovl16_801F4F90);
 
-INCLUDE_ASM("asm/nonmatchings/16D660", func_ovl16_801F5138);
+s32 func_800544B4(void);
+
+/* The explicit case 0 is needed: it changes GCC's compare tree. */
+s32 func_ovl16_801F5138(s32 arg0) {
+    switch (func_800544B4()) {
+        case 0:
+            return 0;
+        case 1:
+            return 3;
+        case 2:
+            return 6;
+        case 3:
+            return 9;
+        default:
+            return 0;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/16D660", func_ovl16_801F5194);
 
