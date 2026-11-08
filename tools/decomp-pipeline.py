@@ -84,6 +84,18 @@ def func_words(obj, func):
     return words
 
 
+def fix_table_arith(code):
+    """Rewrite m2c's `&X + (i * k)` / `(i * k) + &X` (meant as byte offsets)
+    into explicit byte arithmetic that keeps X's element type."""
+    def byte_ptr(x, expr):
+        return f"((__typeof__({x}) *)((u8 *)&{x} + ({expr})))"
+    code = re.sub(r"\*\(&(\w+) \+ \(([^()]*? \* \d+)\)\)", lambda m: "*" + byte_ptr(m.group(1), m.group(2)), code)
+    code = re.sub(r"\*\(\(([^()]*? \* \d+)\) \+ &(\w+)\)", lambda m: "*" + byte_ptr(m.group(2), m.group(1)), code)
+    code = re.sub(r"\(&(\w+) \+ \(([^()]*? \* \d+)\)\)", lambda m: byte_ptr(m.group(1), m.group(2)), code)
+    code = re.sub(r"\(([^()]*? \* \d+)\) \+ &(\w+)", lambda m: byte_ptr(m.group(2), m.group(1)), code)
+    return code
+
+
 def compare(a, b):
     if len(a) != len(b):
         return f"length {len(b)} vs {len(a)}"
@@ -145,6 +157,12 @@ def main():
             attempts = [("m2c", draft)]
             if re.search(rf"^void {func}\(", draft, re.M):
                 attempts.append(("m2c, s32 return", re.sub(rf"^void {func}\(", f"s32 {func}(", draft, flags=re.M)))
+            # m2c writes table indexing as `&X + (i * k)` meaning a byte offset,
+            # but C scales that by sizeof(X). Retry with explicit byte offsets.
+            for label, code in list(attempts):
+                fixed = fix_table_arith(code)
+                if fixed != code:
+                    attempts.append((label + ", byte offsets", fixed))
 
             verdict, detail, last_err = "", "", ""
             # A hand-written prototype for func may clash with the draft's real
