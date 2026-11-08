@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Find the register allocation that would make a draft match, and why.
 
-    oracle.py [--allocation | --splits | --spills | --merges] [ASM_FILE C_FILE]
-              FUNCTION [PSEUDO=HARD ...]
+    oracle.py [--allocation | --splits | --spills | --merges | --levers]
+              [ASM_FILE C_FILE] FUNCTION [PSEUDO=HARD ...]
 
 Without ASM_FILE and C_FILE, finds them from FUNCTION as fncompare does.
 
@@ -30,6 +30,12 @@ that, from one compile.
 register forced onto the stack, for an original whose frame is larger, and
 prints the closest.
 
+--levers finds the forcing as the search does, and then, replaying
+global-alloc from the trace in editsearch (see EDITSEARCH), the refs or
+live length of a single allocno that would give global-alloc the forced
+registers unforced: the levers a source change can pull, each pseudo named
+by its variable and lines. Pseudos local-alloc placed are out of its reach.
+
 --merges searches for the draft's values that the original held in one
 variable: as the RTL is first made (see ORACLE_MERGE in oracle.patch), each
 pseudo of the closest forcing found is made one with every other pseudo of
@@ -48,6 +54,7 @@ import json
 import os
 import re
 import shutil
+import subprocess
 import sys
 import tempfile
 from collections.abc import Iterable, Iterator, Sequence
@@ -67,7 +74,22 @@ MAX_ROUNDS = 8
 # and before reload, and the asm statements, which -dp doesn't name, from
 # the last pass
 SEARCH_PASSES = ("rtl", "lreg", blame.PASSES[-1])
-MODE_OPTIONS = ("--allocation", "--splits", "--spills", "--merges")
+MODE_OPTIONS = ("--allocation", "--splits", "--spills", "--merges", "--levers")
+# The editsearch that replays global-alloc for --levers
+EDITSEARCH = Path(
+    os.environ.get(
+        "EDITSEARCH",
+        Path.home()
+        / "projects"
+        / "tools"
+        / "editsearch"
+        / "target"
+        / "release"
+        / "editsearch",
+    )
+)
+TRACE_NAME = "trace.jsonl"
+LEVER_PSEUDO_RE = re.compile(r"pseudo (\d+)")
 # The closest spill searches that --spills prints
 SPILL_REPORT_COUNT = 10
 # The closest merges that --merges prints
@@ -165,7 +187,19 @@ class VariablesRecord(TypedDict):
     pseudos: dict[str, tuple[str, int]]
 
 
-TraceRecord = LocalRecord | GlobalRecord | DispositionsRecord | VariablesRecord
+class GlobalStartRecord(TypedDict):
+    """What global-alloc starts from, which editsearch's replay reads."""
+
+    stage: Literal["global_start"]
+
+
+TraceRecord = (
+    LocalRecord
+    | GlobalRecord
+    | DispositionsRecord
+    | VariablesRecord
+    | GlobalStartRecord
+)
 
 
 @dataclass
@@ -273,7 +307,7 @@ def trace_function(unit: str, function: str, optflags: list[str], work: Path) ->
     applied, so the trace and the dumps up to lreg hold for every forcing.
     """
     _ = (work / "unit.i").write_text(unit)
-    trace_path = work / "trace.jsonl"
+    trace_path = work / TRACE_NAME
     trace_path.unlink(missing_ok=True)
     blamed = build_function(
         function, optflags, work, {"ORACLE_TRACE": str(trace_path)}, SEARCH_PASSES
@@ -293,7 +327,7 @@ def trace_function(unit: str, function: str, optflags: list[str], work: Path) ->
             compilation.blocks.append(record)
         elif record["stage"] == "global":
             compilation.allocnos = record["allocnos"]
-        else:
+        elif record["stage"] == "dispositions":
             compilation.registers = {
                 int(key): hard for key, hard in record["registers"].items()
             }
@@ -887,6 +921,32 @@ def print_search(search: Search) -> None:
         print(f"  round {number}: {forced} forced, {differences} differ")
 
 
+def print_levers(
+    target: fncompare.Routine, draft: Draft, force: dict[int, int]
+) -> None:
+    """Print the refs and live lengths that would place the forcing unforced.
+
+    The forcing is the search's, cut to the fewest pairs where it matches,
+    and editsearch replays global-alloc from the draft's trace for each.
+    """
+    search = search_forcing(target, draft, force)
+    print_search(search)
+    print(summarize_search(search))
+    force = search.force
+    if search.differences == 0 and force:
+        force = minimize_forcing(target, draft, force)
+    pairs = [f"{pseudo}={hard}" for pseudo, hard in sorted(force.items())]
+    command = [str(EDITSEARCH), "allocation", str(draft.work / TRACE_NAME), *pairs]
+    report = subprocess.run(command, check=True, capture_output=True, text=True).stdout
+    print(report, end="")
+    lines = read_pseudo_lines(draft.traced, read_insn_lines(draft, draft.traced))
+    named = sorted(
+        {int(match[1]) for match in LEVER_PSEUDO_RE.finditer(report)} | set(force)
+    )
+    for pseudo in named:
+        print(f"  {describe_pseudo(draft, pseudo, lines)}")
+
+
 def scan_spills(target: fncompare.Routine, draft: Draft, force: dict[int, int]) -> None:
     """Print the closest searches that start with a pseudo forced onto the stack.
 
@@ -1077,6 +1137,9 @@ def run_mode(request: Request, target: fncompare.Routine, draft: Draft) -> None:
         return
     if request.mode == "merges":
         scan_merges(target, draft, force)
+        return
+    if request.mode == "levers":
+        print_levers(target, draft, force)
         return
     if request.mode == "allocation":
         compilation = compile_function(draft, force)

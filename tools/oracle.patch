@@ -158,17 +158,26 @@
  
 --- a/global.c
 +++ b/global.c
-@@ -29,6 +29,9 @@
+@@ -29,6 +29,10 @@
  #include "insn-config.h"
  #include "output.h"
  
 +extern FILE *oracle_open_trace ();
 +static void oracle_trace_global ();
++static void oracle_trace_global_start ();
 +
  /* This pass of the compiler performs global register allocation.
     It assigns hard register numbers to all the pseudo registers
     that were not handled in local_alloc.  Assignments are recorded
-@@ -573,6 +576,8 @@
+@@ -545,6 +549,7 @@
+ 
+       qsort (allocno_order, max_allocno, sizeof (int), allocno_compare);
+       
++      oracle_trace_global_start ();
+       prune_preferences ();
+ 
+       if (file)
+@@ -573,6 +578,8 @@
    /* Do the reloads now while the allocno data still exist, so that we can
       try to assign new hard regs to any pseudo regs that are spilled.  */
  
@@ -177,7 +186,7 @@
  #if 0 /* We need to eliminate regs even if there is no rtl code,
  	 for the sake of debugging information.  */
    if (n_basic_blocks > 0)
-@@ -580,6 +585,68 @@
+@@ -580,6 +587,167 @@
      return reload (get_insns (), 1, file);
  }
  
@@ -237,6 +246,105 @@
 +      oracle_print_hard_regs (file, hard_reg_preferences[allocno]);
 +      fprintf (file, ", \"copy_preferences\": ");
 +      oracle_print_hard_regs (file, hard_reg_copy_preferences[allocno]);
++      fprintf (file, "}");
++    }
++  fprintf (file, "]}\n");
++  fclose (file);
++}
++
++/* Record for the oracle's trace, as global-alloc starts, what it places
++   the allocnos from, so that a tool can replay the placing (see
++   prune_preferences and find_reg) in another order: the register sets of
++   the machine, which hard registers' classes find_reg counts as alike,
++   the hard registers in use so far and those local-alloc gave pseudos,
++   and each allocno's figures, classes, preferences before they are
++   pruned, and the allocnos in its row of the conflict matrix, which
++   needn't be in theirs.  */
++
++static void
++oracle_trace_global_start ()
++{
++  FILE *file;
++  int i, j, allocno;
++  char *separator;
++  enum reg_class class;
++  enum machine_mode mode;
++  HARD_REG_SET set;
++
++  if (max_allocno == 0 || (file = oracle_open_trace ()) == 0)
++    return;
++  fprintf (file, "{\"stage\": \"global_start\", \"fixed\": ");
++  oracle_print_hard_regs (file, fixed_reg_set);
++  fprintf (file, ", \"call_used\": ");
++  oracle_print_hard_regs (file, call_used_reg_set);
++  fprintf (file, ", \"call_fixed\": ");
++  oracle_print_hard_regs (file, call_fixed_reg_set);
++  fprintf (file, ", \"no_global\": ");
++  oracle_print_hard_regs (file, no_global_alloc_regs);
++  fprintf (file, ", \"used_so_far\": ");
++  oracle_print_hard_regs (file, regs_used_so_far);
++  fprintf (file, ", \"alike\": [");
++  for (i = 0; i < FIRST_PSEUDO_REGISTER; i++)
++    {
++      CLEAR_HARD_REG_SET (set);
++      for (j = 0; j < FIRST_PSEUDO_REGISTER; j++)
++	if (REGNO_REG_CLASS (i) == REGNO_REG_CLASS (j)
++	    || reg_class_subset_p (REGNO_REG_CLASS (i), REGNO_REG_CLASS (j))
++	    || reg_class_subset_p (REGNO_REG_CLASS (j), REGNO_REG_CLASS (i)))
++	  SET_HARD_REG_BIT (set, j);
++      fprintf (file, "%s", i == 0 ? "" : ", ");
++      oracle_print_hard_regs (file, set);
++    }
++  fprintf (file, "], \"local_n_refs\": [");
++  for (i = 0; i < FIRST_PSEUDO_REGISTER; i++)
++    fprintf (file, "%s%d", i == 0 ? "" : ", ", local_reg_n_refs[i]);
++  fprintf (file, "], \"local_live_length\": [");
++  for (i = 0; i < FIRST_PSEUDO_REGISTER; i++)
++    fprintf (file, "%s%d", i == 0 ? "" : ", ", local_reg_live_length[i]);
++  fprintf (file, "], \"allocnos\": [");
++  for (allocno = 0; allocno < max_allocno; allocno++)
++    {
++      mode = PSEUDO_REGNO_MODE (allocno_reg[allocno]);
++      fprintf (file, "%s{\"pseudo\": %d, \"n_refs\": %d, \"size\": %d, "
++	       "\"live_length\": %d, \"calls_crossed\": %d, "
++	       "\"left_out\": %d, \"gpr_nregs\": %d, \"fpr_nregs\": %d, "
++	       "\"conflicts\": [",
++	       allocno == 0 ? "" : ", ", allocno_reg[allocno],
++	       allocno_n_refs[allocno], allocno_size[allocno],
++	       allocno_live_length[allocno], allocno_calls_crossed[allocno],
++	       reg_live_length[allocno_reg[allocno]] < 0,
++	       HARD_REGNO_NREGS (GP_REG_FIRST, mode),
++	       HARD_REGNO_NREGS (FP_REG_FIRST, mode));
++      separator = "";
++      for (i = 0; i < max_allocno; i++)
++	if (CONFLICTP (allocno, i))
++	  {
++	    fprintf (file, "%s%d", separator, i);
++	    separator = ", ";
++	  }
++      fprintf (file, "], \"mode_ok\": ");
++      CLEAR_HARD_REG_SET (set);
++      for (i = 0; i < FIRST_PSEUDO_REGISTER; i++)
++	if (HARD_REGNO_MODE_OK (i, mode))
++	  SET_HARD_REG_BIT (set, i);
++      oracle_print_hard_regs (file, set);
++      fprintf (file, ", \"preferred_class\": ");
++      class = reg_preferred_class (allocno_reg[allocno]);
++      oracle_print_hard_regs (file, reg_class_contents[(int) class]);
++      fprintf (file, ", \"alternate_class\": ");
++      class = reg_alternate_class (allocno_reg[allocno]);
++      CLEAR_HARD_REG_SET (set);
++      if (class != NO_REGS)
++	COPY_HARD_REG_SET (set, reg_class_contents[(int) class]);
++      oracle_print_hard_regs (file, set);
++      fprintf (file, ", \"hard_conflicts\": ");
++      oracle_print_hard_regs (file, hard_reg_conflicts[allocno]);
++      fprintf (file, ", \"full_preferences\": ");
++      oracle_print_hard_regs (file, hard_reg_full_preferences[allocno]);
++      fprintf (file, ", \"copy_preferences\": ");
++      oracle_print_hard_regs (file, hard_reg_copy_preferences[allocno]);
++      fprintf (file, ", \"preferences\": ");
++      oracle_print_hard_regs (file, hard_reg_preferences[allocno]);
 +      fprintf (file, "}");
 +    }
 +  fprintf (file, "]}\n");
