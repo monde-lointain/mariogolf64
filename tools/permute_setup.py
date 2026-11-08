@@ -233,16 +233,17 @@ def find_closing_parenthesis(text: str, start: int) -> int:
     return index - 1
 
 
-def fold_statement_expressions(c_path: str, source: str) -> tuple[str, str]:
+def fold_statement_expressions(definitions: str, source: str) -> tuple[str, str]:
     """Turn the expansions of statement-expression macros back into calls.
 
-    pycparser can't read GNU statement expressions. The permuter keeps each
+    DEFINITIONS holds the macros, as cpp -dM prints them. pycparser can't
+    read GNU statement expressions. The permuter keeps each
     such macro as a call that its parser sees declared as a function, and puts
     the definition back from a latedefine block before compiling. Returns the
     source and that block, which goes after the types it names.
     """
     late_defines: list[str] = []
-    for macro in STATEMENT_EXPRESSION_MACRO.finditer(preprocess(c_path, "-dM")):
+    for macro in STATEMENT_EXPRESSION_MACRO.finditer(definitions):
         name, parameter, body, result_type = macro.groups()
         prefix, separator, suffix = body.partition(f"({parameter})")
         if not separator or parameter in suffix:
@@ -281,7 +282,7 @@ def fold_statement_expressions(c_path: str, source: str) -> tuple[str, str]:
 def write_base(c_path: str, function: str, base_path: Path) -> None:
     """Write C_PATH preprocessed, with every function but FUNCTION stripped."""
     source, late_defines = fold_statement_expressions(
-        c_path, preprocess_keeping_display_list_macros(c_path)
+        preprocess(c_path, "-dM"), preprocess_keeping_display_list_macros(c_path)
     )
     _ = base_path.write_text(source)
     _ = subprocess.run(
