@@ -2704,8 +2704,12 @@ void UpdateBestShots(void) {
  * register oracle's closest result from 37 words, forcing 12 pseudos, to 27,
  * forcing 11. One pair shared as before, with index, gives 89 words and 37 at
  * best forcing 9; the pairs with a labelRow, 101 words and 27 forcing 14; and
- * the name's column shared with the icon's, 95 words and 31 forcing 10. 83
- * words differ, 13 in shape.
+ * the name's column shared with the icon's, 95 words and 31 forcing 10.
+ *
+ * The faces' loop counts its rows with index too, as editsearch's --counters
+ * found toward the oracle's goal: index's references move into the loop and
+ * row's go, taking the draft from 83 words to 53, and the oracle's closest to
+ * 27 forcing 9. 53 words differ, 13 in shape.
  */
 #ifdef NON_MATCHING
 void DrawBestShots(Gfx **displayListHead) {
@@ -2713,7 +2717,6 @@ void DrawBestShots(Gfx **displayListHead) {
     s16 index = 0;
     SaveData *save = GetSaveData();
     MenuMemory *memory = GetMenuMemory();
-    s16 row;
     s16 column;
     s16 character;
     s32 iconRow;
@@ -2789,16 +2792,16 @@ void DrawBestShots(Gfx **displayListHead) {
     }
     while (index != RECORDS_STRIP_COUNT);
 
-    for (row = 0; row != STATS_GRID_ROW_COUNT; row++) {
+    for (index = 0; index != STATS_GRID_ROW_COUNT; index++) {
         for (column = 0; column != STATS_GRID_COLUMN_COUNT; column++) {
-            if (f_BestShotRecords[row][column] != STATS_CELL_EMPTY) {
-                character = save->rankedRecords[f_BestShotRecords[row][column]].characterIndex;
+            if (f_BestShotRecords[index][column] != STATS_CELL_EMPTY) {
+                character = save->rankedRecords[f_BestShotRecords[index][column]].characterIndex;
                 DrawCharacterFace(
                     &gfx,
                     g_CharacterFaceImages[character],
-                    f_BestShotFaces[row][column],
+                    f_BestShotFaces[index][column],
                     RECORD_FACE_X + (column * STATS_CURSOR_COLUMN_WIDTH),
-                    RECORD_FACE_Y + (row * STATS_CURSOR_ROW_HEIGHT),
+                    RECORD_FACE_Y + (index * STATS_CURSOR_ROW_HEIGHT),
                     character,
                     FACE_PLAIN
                 );
@@ -2807,7 +2810,7 @@ void DrawBestShots(Gfx **displayListHead) {
             DrawOneDigitMenuNumber(
                 &gfx,
                 RECORD_PLACE_X + (column * STATS_CURSOR_COLUMN_WIDTH),
-                RECORD_PLACE_Y + (row * STATS_CURSOR_ROW_HEIGHT),
+                RECORD_PLACE_Y + (index * STATS_CURSOR_ROW_HEIGHT),
                 column + 1,
                 MENU_NUMBER_PLAIN
             );
