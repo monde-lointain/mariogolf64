@@ -1438,53 +1438,22 @@ void ResetCodeEntry(void) {
     f_UnusedCodeEntryWord = 0;
 }
 
-/* Returns the code keyboard's key at row and column */
-static inline u8 GetCodeKey(s32 row, s32 column) {
-    return f_CodeKeys[row][column];
-}
-
 void UpdateClubWindow(void);
 
 /*
- * Doesn't match: when the cursor moves, the original stores the new coordinate
- * after sign-extending it, and builds the key's address after the step. Reading
- * the keys through GetCodeKey loads both coordinates before the address, as the
- * original does; indexing f_CodeKeys directly gives 68 words differing, 26 in
- * shape. Swapping its parameters, or stepping the cursor before a call that
- * reads both from memory (68), doesn't help, s16 or s8 parameters give 68-76,
- * and u16 or u8 ones, on either or both, 66-82. The register oracle matches the
- * draft when it forces 14 pseudos, in the four moves' key tests, so the RTL is
- * the original's and only local-alloc's choices differ: in each move two of the
- * block's quantities take each other's registers. GetCodeKey returning s32
- * changes nothing, and reading the row through a pointer gives 64 words (22 in
- * shape); a u8 row gives 67 (23), and a macro in its place 68 (26). A focused
- * permuter run's best, 57 words (17 in shape), casts the stepped row to
- * unsigned short in the call, a fake. 64 words differ, 18 in shape.
- *
- * A later run's best, 1455 points from 1980, copies the key column into a
- * char in the up move, also a fake. In GetCodeKey, a pointer to the key row
- * gives 64 words (22 in shape), and a pointer to the row array or the key in
- * a local 64 (18); *(f_CodeKeys[row] + column) and (*(f_CodeKeys +
- * row))[column] give 76 (18).
- *
- * Stepping the coordinates in the calls with += 1 or as x = x + 1 leaves 64
- * words, but the oracle then needs 17 pseudos forced. In the down move, an s8
- * row local stepped from the field, stored and passed gives 63 (19 in shape),
- * and the oracle no longer matches: its closest is 11 words, forcing 17.
- *
- * editsearch's allocation report shows what the forcing undoes. In the down,
- * left and right moves local-alloc ties the stepped coordinate, its shift and
- * its sign extension into one quantity, as each dies in the insn that sets
- * the next, where the original holds them apart, in $v0, $v1 and $a0 or $a1.
- * In the up move it places the row, priority 3750, before the keys' address,
- * 2500, which would need a life of 5 or less, for 8, to come first. Stepping
- * in a statement before the test, with ++ either side, and a const
- * f_CodeKeys leave 64 words, 18 in shape.
+ * Each cursor move reads the coordinates into row and column, stepping one,
+ * before it tests the key there. Set in all four moves, row and column aren't
+ * set once, so the scheduler doesn't hurry their sign extensions ahead of the
+ * stepped coordinate's store; the store then follows them, as in the
+ * original, and local-alloc keeps the coordinate, its shift and its extension
+ * in separate registers. Stepping the coordinate inside the key's index gave
+ * 64 words differing, 18 in shape.
  */
-#ifdef NON_MATCHING
 void UpdateClubTournament(void) {
     MenuMemory *memory = GetMenuMemory();
     s32 index;
+    s32 row;
+    s32 column;
     s32 result;
     Boolean isInvalid;
     TournamentRules *rules;
@@ -1637,13 +1606,17 @@ void UpdateClubTournament(void) {
             memory->codeKeyRow = CODE_KEYBOARD_ROW_COUNT - 1;
         }
 
-        if (GetCodeKey(memory->codeKeyRow, memory->codeKeyColumn) == CODE_KEY_BLANK) {
+        row = memory->codeKeyRow;
+        column = memory->codeKeyColumn;
+        if (f_CodeKeys[row][column] == CODE_KEY_BLANK) {
             memory->codeKeyRow = CODE_KEYBOARD_END_ROW - 1;
         }
     }
     else if (g_MenuRepeatButtons & D_JPAD) {
         PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
-        if (GetCodeKey(++memory->codeKeyRow, memory->codeKeyColumn) == CODE_KEY_BLANK) {
+        row = ++memory->codeKeyRow;
+        column = memory->codeKeyColumn;
+        if (f_CodeKeys[row][column] == CODE_KEY_BLANK) {
             memory->codeKeyRow = 0;
         }
 
@@ -1653,7 +1626,9 @@ void UpdateClubTournament(void) {
     }
     else if (g_MenuRepeatButtons & L_JPAD) {
         PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
-        if (GetCodeKey(memory->codeKeyRow, --memory->codeKeyColumn) == CODE_KEY_BLANK) {
+        row = memory->codeKeyRow;
+        column = --memory->codeKeyColumn;
+        if (f_CodeKeys[row][column] == CODE_KEY_BLANK) {
             memory->codeKeyColumn = CODE_KEYBOARD_FIRST_BLANK_COLUMN - 1;
         }
 
@@ -1663,7 +1638,9 @@ void UpdateClubTournament(void) {
     }
     else if (g_MenuRepeatButtons & R_JPAD) {
         PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
-        if (GetCodeKey(memory->codeKeyRow, ++memory->codeKeyColumn) == CODE_KEY_BLANK) {
+        row = memory->codeKeyRow;
+        column = ++memory->codeKeyColumn;
+        if (f_CodeKeys[row][column] == CODE_KEY_BLANK) {
             memory->codeKeyColumn = CODE_KEYBOARD_BACK_COLUMN;
         }
 
@@ -1672,9 +1649,6 @@ void UpdateClubTournament(void) {
         }
     }
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/tournament_menu", UpdateClubTournament);
-#endif
 
 s32 IsClubCharacterChoosable(void);
 
