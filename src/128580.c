@@ -100,7 +100,24 @@ void func_ovl4_8024FA98(void) {
 
 INCLUDE_ASM("asm/nonmatchings/128580", func_ovl4_8024FAA0);
 
-INCLUDE_ASM("asm/nonmatchings/128580", func_ovl4_8024FF14);
+void func_ovl4_8024F4DC(void);
+void func_ovl4_8024F7DC(void);
+void func_ovl4_8024FAA0(void);
+
+void func_ovl4_8024FF14(void) {
+    u8 unused[0x640]; /* unused; only sizes the 0x658 stack frame to match */
+
+    if (D_ovl4_802543A8 == 0) {
+        func_ovl4_8024F4DC();
+        D_ovl4_802543A8 = 1;
+        func_ovl4_8024F7DC();
+        func_ovl4_8024FAA0();
+        func_ovl4_8024FA98();
+    } else {
+        func_ovl4_8024F790();
+        D_ovl4_802543A8 = 0;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/128580", func_ovl4_8024FF74);
 
@@ -160,7 +177,26 @@ INCLUDE_ASM("asm/nonmatchings/128580", func_ovl4_802513B8);
 
 INCLUDE_ASM("asm/nonmatchings/128580", func_ovl4_80251610);
 
-INCLUDE_ASM("asm/nonmatchings/128580", func_ovl4_8025176C);
+extern u8 *D_ovl4_80255330;
+
+/* Reads two bytes per entry from the stream D_ovl4_80255330 into unk948 of
+ * all 128 D_80132D4A entries, advancing the stream. */
+void func_ovl4_8025176C(void) {
+    s32 i;
+    u8 *src;
+    u8 *end;
+    u8 *dst;
+
+    for (i = 0; i < 0x80; i++) {
+        src = D_ovl4_80255330;
+        end = src + 2;
+        dst = (u8 *)&D_80132D4A[i].unk948;
+        while (src != end) {
+            *dst++ = *src++;
+        }
+        D_ovl4_80255330 = end;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/128580", func_ovl4_802517C4);
 
