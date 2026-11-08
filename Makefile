@@ -45,12 +45,22 @@ AS      := $(MIPS_BINUTILS_PREFIX)as
 LD      := $(MIPS_BINUTILS_PREFIX)ld
 OBJCOPY := $(MIPS_BINUTILS_PREFIX)objcopy
 STRIP   := $(MIPS_BINUTILS_PREFIX)strip
-CPP     := $(MIPS_BINUTILS_PREFIX)cpp
-
-# Fail early and clearly if the asm preprocessor is missing, rather than leaving
-# pipefail to catch the empty-pipe case later.
-ifeq (,$(shell command -v $(CPP) 2>/dev/null))
-$(error $(CPP) not found; install it, e.g. `sudo apt install cpp-mips-linux-gnu`)
+# The asm preprocessor. Prefer the cross cpp; overridable (make CPP=...). Homebrew
+# ships no mips-linux-gnu-cpp, and a hand-made stand-in (e.g. a symlink to
+# mips-linux-gnu-as) "exists" but preprocesses nothing. So probe that it really
+# expands a macro, and otherwise fall back to the host clang, whose
+# assembler-with-cpp output assembles to byte-identical objects.
+ifeq ($(origin CPP),default)
+  CPP := $(MIPS_BINUTILS_PREFIX)cpp
+endif
+cpp_works = $(shell printf 'X\n' | $(1) -P -DX=ok - 2>/dev/null | grep -qx ok && echo y)
+ifneq (y,$(call cpp_works,$(CPP)))
+  ifeq (y,$(call cpp_works,clang -E -x assembler-with-cpp))
+    $(info $(CPP) is missing or not a working C preprocessor; using clang -E instead)
+    CPP := clang -E -x assembler-with-cpp
+  else
+    $(error $(CPP) is missing or not a working C preprocessor; install it, e.g. `sudo apt install cpp-mips-linux-gnu`)
+  endif
 endif
 
 # KMC_PREFIX is overridable for a relocated toolchain. COMPILER_PATH points GCC at

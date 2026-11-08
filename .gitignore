@@ -61,3 +61,18 @@ Sessionx.vim
 tags
 # Persistent undo
 [._]*.un~
+
+# KMC toolchain (downloaded by `make -C tools`)
+tools/cc/
+
+# Decomp helper tools (local clones)
+tools/m2c/
+tools/decomp-permuter/
+# decomp-permuter work directories (created by tools/permuter-import.sh)
+permuter/
+
+# macOS
+.DS_Store
+
+# Claude Code personal settings
+.claude/settings.local.json
