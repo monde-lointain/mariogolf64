@@ -4,23 +4,77 @@ INCLUDE_ASM("asm/nonmatchings/2BFF0", func_80050BF0);
 
 INCLUDE_ASM("asm/nonmatchings/2BFF0", func_80050DA0);
 
-INCLUDE_ASM("asm/nonmatchings/2BFF0", func_80050F68);
+/* Interrupt-safe wrappers: look up a handle by index in D_800C0E6C and,
+ * if it is valid (not -1), pass it to a 748B0 (probably libmus) function. */
+extern s32 D_800C0E6C[];
 
-INCLUDE_ASM("asm/nonmatchings/2BFF0", func_80050FC0);
+void func_80050F68(s32 index) {
+    OSIntMask mask = osSetIntMask(1);
+    s32 handle = D_800C0E6C[index];
 
-INCLUDE_ASM("asm/nonmatchings/2BFF0", func_80051024);
+    if (handle != -1) {
+        func_80099F54(handle, 0);
+    }
+    osSetIntMask(mask);
+}
 
-INCLUDE_ASM("asm/nonmatchings/2BFF0", func_80051088);
+s32 func_8009A0C0(s32, s32);
 
-INCLUDE_ASM("asm/nonmatchings/2BFF0", func_800510EC);
+void func_80050FC0(s32 index, s32 arg1) {
+    OSIntMask mask = osSetIntMask(1);
+    s32 handle = D_800C0E6C[index];
 
-INCLUDE_ASM("asm/nonmatchings/2BFF0", func_80051100);
+    if (handle != -1) {
+        func_8009A0C0(handle, arg1);
+    }
+    osSetIntMask(mask);
+}
+
+
+void func_80051024(s32 index, s32 arg1) {
+    OSIntMask mask = osSetIntMask(1);
+    s32 handle = D_800C0E6C[index];
+
+    if (handle != -1) {
+        func_8009A060(handle, arg1);
+    }
+    osSetIntMask(mask);
+}
+
+
+void func_80051088(s32 index, s32 arg1) {
+    OSIntMask mask = osSetIntMask(1);
+    s32 handle = D_800C0E6C[index];
+
+    if (handle != -1) {
+        func_8009A22C(handle, arg1);
+    }
+    osSetIntMask(mask);
+}
+
+extern s32 D_800C0EAC[];
+
+void func_800510EC(s32 arg0, s32 arg1) {
+    D_800C0EAC[arg0] = arg1;
+}
+
+
+void func_80051100(s32 index, s32 arg1) {
+    OSIntMask mask = osSetIntMask(1);
+    s32 handle = D_800C0E6C[index];
+
+    if (handle != -1) {
+        func_8009A1A0(handle, arg1);
+    }
+    osSetIntMask(mask);
+}
 
 INCLUDE_ASM("asm/nonmatchings/2BFF0", func_80051164);
 
 INCLUDE_ASM("asm/nonmatchings/2BFF0", func_800511D8);
 
 INCLUDE_ASM("asm/nonmatchings/2BFF0", func_80051210);
+
 
 INCLUDE_ASM("asm/nonmatchings/2BFF0", func_80051778);
 
