@@ -5,7 +5,7 @@
     benchmark.py functions PROJECT
     benchmark.py export PROJECT FLAGS C_FILE FUNCTION OUT_DIR
     benchmark.py respond PROJECT FLAGS OUT_DIR [LIMIT]
-    benchmark.py history OUT_DIR
+    benchmark.py history PROJECT OUT_DIR
 
 A benchmark's job is scored against what its matching body compiles to
 (see editsearch's targets), so any project whose C files rebuild its
@@ -19,7 +19,9 @@ project's, as FLAGS ("original" or "mariogolf") says:
 - export writes FUNCTION's job, with targets, to OUT_DIR;
 - respond exports each listed function, LIMIT of them spread evenly
   through the list, and runs each built-in generator's edits alone on it,
-  writing what each edit's compile gives to OUT_DIR/responses.tsv.
+  writing what each edit's compile gives to OUT_DIR/responses.tsv;
+- history writes a job for each draft the project's history made match,
+  scored against the matching body, to OUT_DIR/jobs.
 
 CC1 in the environment names KMC cc1 built as the fork server editsearch
 runs (see ~/projects/tools/kmc-cc1/build-cc1.sh), whose codegen is KMC
@@ -120,10 +122,17 @@ BODY_MARK = "__benchmark_body__;"
 HEADER_DIRS = tuple(
     flag.removeprefix("-I") for flag in fncompare.INCLUDES if flag.startswith("-Ilib/")
 )
-# A draft that doesn't match yet: a definition under #ifdef NON_MATCHING
+# A draft that doesn't match yet: a definition right after its guard,
+# #ifdef NON_MATCHING or the like, which may bear a comment
+DRAFT_GUARD = r"^#if(?:def)? (NON_MATCHING|NONMATCHING)\b[^\n]*\n"
 DRAFT_RE = re.compile(
-    r"^#ifdef NON_MATCHING\n[A-Za-z_][\w* \t]*?\b(\w+)\s*\(", re.MULTILINE
+    DRAFT_GUARD + r"(?:static |inline )*[A-Za-z_][\w* \t]*?\b(\w+)\s*\(",
+    re.MULTILINE,
 )
+# A string literal's contents, and the file an asm statement's joined
+# literals include
+STRING_RE = re.compile(r'"((?:\\.|[^"\\])*)"')
+ASM_INCLUDE_RE = re.compile(r'\.include \\"([^"\\]+)\\"')
 # The tokens of C source that nest braces: comments, strings, characters
 # and directives are matched whole, so that the braces in them are passed
 # over
@@ -338,6 +347,25 @@ def make_targets(job: Path) -> str:
     return "" if made.returncode == 0 else made.stderr.strip().splitlines()[-1]
 
 
+def drop_missing_includes(root: Path, unit: str) -> str:
+    """Return the preprocessed UNIT without asm that includes a missing file.
+
+    ROOT holds the files.
+    A tree from a project's history includes the asm of the functions it
+    hadn't matched, which later splits rename and later matches delete;
+    only the job's own function is scored, so the others may go.
+    """
+    kept: list[str] = []
+    for line in unit.splitlines(keepends=True):
+        if line.startswith("__asm__"):
+            text = "".join(STRING_RE.findall(line))
+            included = ASM_INCLUDE_RE.search(text)
+            if included and not (root / included[1]).exists():
+                continue
+        kept.append(line)
+    return "".join(kept)
+
+
 def write_job(  # noqa: PLR0913 - each says where the function is
     name: str,
     flags: str,
@@ -361,7 +389,8 @@ def write_job(  # noqa: PLR0913 - each says where the function is
     driver_flags = [*get_flags(project, flags, c_file), *defines]
     marked = source[:body_start] + BODY_MARK + "\n" + source[body_start:]
     result = run_driver(root, project, [*driver_flags, "-E", "-"], marked)
-    before, mark, rest = result.stdout.partition(BODY_MARK)
+    unit = drop_missing_includes(root, result.stdout)
+    before, mark, rest = unit.partition(BODY_MARK)
     if not mark:
         return "the body lost its mark in cpp"
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -393,21 +422,21 @@ def write_job(  # noqa: PLR0913 - each says where the function is
     return ""
 
 
-def git(*arguments: str) -> str:
-    """Return the output of this repository's git with ARGUMENTS."""
+def git(root: Path, *arguments: str) -> str:
+    """Return the output of ROOT's git with ARGUMENTS."""
     return subprocess.run(
         ["git", *arguments],
-        cwd=fncompare.ROOT,
+        cwd=root,
         capture_output=True,
         check=True,
     ).stdout.decode("latin-1")
 
 
-def check_out(commit: str, trees: Path) -> Path:
+def check_out(root: Path, commit: str, trees: Path) -> Path:
     """Return a tree of what COMMIT's C files include, made under TREES.
 
-    The toolchain, generated headers and split assembly are the working
-    tree's.
+    The rest, as the toolchain, generated headers, split assembly and
+    submodules, is the working tree's.
     """
     tree = trees / commit
     if tree.exists():
@@ -415,83 +444,92 @@ def check_out(commit: str, trees: Path) -> Path:
     paths = [
         path
         for path in ("include", "src", *HEADER_DIRS)
-        if git("ls-tree", "--name-only", commit, path).strip()
+        if git(root, "ls-tree", "--name-only", commit, path).strip()
     ]
     scratch = trees / f"{commit}.part"
     scratch.mkdir(parents=True)
     archive = subprocess.run(
         ["git", "archive", commit, *paths],
-        cwd=fncompare.ROOT,
+        cwd=root,
         capture_output=True,
         check=True,
     ).stdout
     _ = subprocess.run(["tar", "-x", "-C", str(scratch)], input=archive, check=True)
-    for linked in ("tools", "build", "asm"):
-        (scratch / linked).symlink_to(fncompare.ROOT / linked)
+    for entry in root.iterdir():
+        if entry.name != ".git" and not (scratch / entry.name).exists():
+            (scratch / entry.name).symlink_to(entry)
     _ = scratch.rename(tree)
     return tree
 
 
-def find_drafts(source: str) -> set[str]:
-    """Return the functions SOURCE has drafts of."""
-    return {str(match[1]) for match in DRAFT_RE.finditer(source)}
+def find_drafts(source: str) -> dict[str, str]:
+    """Return the guard of each function SOURCE has a draft of."""
+    return {str(match[2]): str(match[1]) for match in DRAFT_RE.finditer(source)}
 
 
-def history(out_dir: Path) -> None:
-    """Write a job for each draft that a "Match" commit made match.
+def history(name: str, out_dir: Path) -> None:
+    """Write a job for each draft of NAME's that a commit made match.
 
-    Each job, under OUT_DIR/jobs, is the draft as the commit's parent held
-    it, scored against what the commit's matching body compiles to.
-    out_dir/history.txt lists the commit, function and file of each, or
-    why there is none.
+    A commit makes a draft match where its C file loses the draft and still
+    defines the function. Each job, under OUT_DIR/jobs, is the draft as the
+    commit's parent held it, under the project's own flags, scored against
+    what the commit's matching body compiles to. OUT_DIR/history.txt lists
+    the commit, function and file of each, or why there is none.
     """
+    root = N64 / name
     trees = out_dir / "trees"
     lines: list[str] = []
-    for entry in git("log", "--format=%h %s").splitlines():
-        commit, subject = entry.split(" ", 1)
-        if not subject.startswith("Match "):
-            continue
+    guards = "^#if(def)? (NON_MATCHING|NONMATCHING)"
+    for commit in git(root, "log", "--format=%h", "-G", guards, "--", "*.c").split():
         changed = git(
-            "diff", "--name-only", "--diff-filter=M", f"{commit}^", commit, "--", "src"
+            root,
+            "diff",
+            "--name-only",
+            "--diff-filter=M",
+            f"{commit}^",
+            commit,
+            "--",
+            "*.c",
         )
         for c_file in changed.split():
-            if not c_file.endswith(".c"):
-                continue
-            old = git("show", f"{commit}^:{c_file}")
-            new = git("show", f"{commit}:{c_file}")
-            drafts = find_drafts(old) - find_drafts(new)
-            for function in sorted(drafts):
-                error = export_history(commit, c_file, function, trees, out_dir)
+            old = find_drafts(git(root, "show", f"{commit}^:{c_file}"))
+            new = git(root, "show", f"{commit}:{c_file}")
+            for function in sorted(old.keys() - find_drafts(new).keys()):
+                if find_definition(new, function) is None:
+                    continue
+                draft = (commit, c_file, function, old[function])
+                error = export_history(name, draft, trees, out_dir)
                 lines.append(f"{commit} {function} {c_file} {error or 'exported'}")
                 print(lines[-1])
     write_lines(out_dir / "history.txt", lines)
 
 
 def export_history(
-    commit: str, c_file: str, function: str, trees: Path, out_dir: Path
+    name: str, draft: tuple[str, str, str, str], trees: Path, out_dir: Path
 ) -> str:
-    """Write the job of FUNCTION's draft, which COMMIT made match."""
+    """Write the job of DRAFT, which a commit made match.
+
+    DRAFT gives the commit, the C file, the function and its guard.
+    """
+    commit, c_file, function, guard = draft
+    root = N64 / name
     matched = out_dir / "matched" / f"{commit}.{function}"
-    draft = out_dir / "jobs" / f"{commit}.{function}"
-    tree = check_out(commit, trees)
-    error = write_job("mariogolf64", "original", c_file, function, matched, root=tree)
+    job = out_dir / "jobs" / f"{commit}.{function}"
+    tree = check_out(root, commit, trees)
+    error = write_job(name, "original", c_file, function, matched, root=tree)
     if error or (error := make_targets(matched)):
         return f"matched: {error}"
-    parent = check_out(git("rev-parse", "--short", f"{commit}^").strip(), trees)
+    parent = check_out(
+        root, git(root, "rev-parse", "--short", f"{commit}^").strip(), trees
+    )
     error = write_job(
-        "mariogolf64",
-        "original",
-        c_file,
-        function,
-        draft,
-        root=parent,
-        defines=("-DNON_MATCHING",),
+        name, "original", c_file, function, job, root=parent, defines=(f"-D{guard}",)
     )
     if error:
         return f"draft: {error}"
     for target in [*matched.glob("target.*.txt"), matched / "symbols.txt"]:
-        _ = shutil.copy(target, draft)
-    _ = shutil.copy(matched / "targets.txt", draft)
+        _ = shutil.copy(target, job)
+    _ = shutil.copy(matched / "targets.txt", job)
     return ""
 
 
@@ -574,8 +612,8 @@ def main() -> None:
             functions(name)
         case ["export", name, flags, c_file, function, out_dir]:
             print(export(name, flags, c_file, function, Path(out_dir)) or "exported")
-        case ["history", out_dir]:
-            history(Path(out_dir))
+        case ["history", name, out_dir]:
+            history(name, Path(out_dir))
         case ["respond", name, flags, out_dir, *limit]:
             respond(name, flags, Path(out_dir), int(limit[0]) if limit else None)
         case _:
