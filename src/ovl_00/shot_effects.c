@@ -73,6 +73,9 @@ enum SwingTrailState {
 #define SWING_TRAIL_INNER_POINT 7
 /* The frames of the swing recorded, each a sample of both points */
 #define SWING_TRAIL_SAMPLES 14
+/* Each kind's samples, set apart though they are the same */
+#define POWER_SHOT_SWING_TRAIL_SAMPLES 14
+#define NORMAL_SHOT_SWING_TRAIL_SAMPLES 14
 #define SWING_TRAIL_MAX_SAMPLES 56
 #define SWING_TRAIL_AXIS_COUNT 6
 /* The path between the samples, two steps to a sample */
@@ -584,22 +587,19 @@ void DrawShotEffectsHud(Gfx **displayListHead UNUSED) {
  * club through the swing's next frames, or with SWING_TRAIL_KIND_CLEAR stops it
  * at once. Any other kind lets the trail fade out quickly.
  *
- * Doesn't match: the original reloads f_SwingTrailSampleCount to test the
- * sample loop on entry, where GCC knows the count. It also sets the trail's
- * state from another register. Testing i < f_SwingTrailSampleCount gives 20
- * differing words, storing the count without IN_OWN_BLOCK 23, storing it
- * first 25 and swapping the alpha and state 10; of the 720 orders of the
- * six stores before it, none gives fewer than these 9. Declaring the count
- * volatile, with both blocks gone, gives 18 words, 14 in shape, and the
- * count isn't hardware. The register oracle's closest result is these 9
- * words with no register forced, so allocation isn't the cause.
+ * Each kind sets its own sample count, as the samples' buffer holds up to
+ * SWING_TRAIL_MAX_SAMPLES: with the count set in two branches, cse can't
+ * tell its value at the sample loop's entry test, which reloads it, as the
+ * original's does, and cross-jumping then merges the two stores. One store
+ * of SWING_TRAIL_SAMPLES gives 23 words differing, 21 in shape, as GCC
+ * knows the count and drops the test; with the state set fourth, after the
+ * alpha, 6 differ (2 in shape).
  *
  * The eight trail statics from f_SwingTrailPathLength to f_SwingTrailAlpha
- * lie side by side, but as the fields of one struct they give 40 words (14
- * in shape), and DrawSwingTrail, which matches, then differs in 155. 9 words
- * differ, 5 in shape.
+ * lie side by side, but as the fields of one struct they gave 40 words (14
+ * in shape) against an older draft's 9, and DrawSwingTrail, which matches,
+ * then differs in 155.
  */
-#ifdef NON_MATCHING
 void StartSwingTrail(s32 kind) {
     f32 samples[SWING_TRAIL_AXIS_COUNT][SWING_TRAIL_MAX_SAMPLES];
     f32 point[3];
@@ -610,15 +610,19 @@ void StartSwingTrail(s32 kind) {
         f_SwingTrailState = SWING_TRAIL_NONE;
     }
     else if (kind == SWING_TRAIL_KIND_POWER_SHOT || kind == SWING_TRAIL_KIND_NORMAL_SHOT) {
+        f_SwingTrailState = SWING_TRAIL_SHOWN;
         f_SwingTrailHead = 0;
         f_SwingTrailPathIndex = 0;
         f_SwingTrailAlpha = SWING_TRAIL_FULL_ALPHA;
-        f_SwingTrailState = SWING_TRAIL_SHOWN;
         f_SwingTrailLength = 0;
         f_SwingTrailKind = kind;
-        /* In its own block, to match; without it 23 words differ, 21 in shape,
-         * against 9 (5) */
-        IN_OWN_BLOCK(f_SwingTrailSampleCount = SWING_TRAIL_SAMPLES);
+        if (kind == SWING_TRAIL_KIND_POWER_SHOT) {
+            f_SwingTrailSampleCount = POWER_SHOT_SWING_TRAIL_SAMPLES;
+        }
+        else {
+            f_SwingTrailSampleCount = NORMAL_SHOT_SWING_TRAIL_SAMPLES;
+        }
+
         for (i = 0; i != f_SwingTrailSampleCount; i++) {
             GetCharacterPointPosition(0, SWING_TRAIL_OUTER_POINT, point);
             samples[0][i] = point[AXIS_X];
@@ -631,11 +635,7 @@ void StartSwingTrail(s32 kind) {
             AnimateCharacterInSameCopy(0);
         }
 
-        /* Rewinds the swing to where it was. Ending the block first reloads the
-         * count, as the original does, to match; negating it as a float, through
-         * a cast or by subtraction, IN_OWN_BLOCK or an empty block don't.
-         * Without it 13 words differ, 7 in shape, against 9 (5) */
-        END_BASIC_BLOCK();
+        /* Rewinds the swing to where it was */
         SetAnimationSpeed(0, -f_SwingTrailSampleCount);
         AnimateCharacterInSameCopy(0);
         SetAnimationSpeed(0, 1.0f);
@@ -670,9 +670,6 @@ void StartSwingTrail(s32 kind) {
         f_SwingTrailState = SWING_TRAIL_FADING;
     }
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_00/shot_effects", StartSwingTrail);
-#endif
 
 /*
  * Advances the swing trail two steps along its path and draws it as a
