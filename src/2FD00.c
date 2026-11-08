@@ -71,7 +71,17 @@ INCLUDE_ASM("asm/nonmatchings/2FD00", func_800550D8);
 
 INCLUDE_ASM("asm/nonmatchings/2FD00", func_80055368);
 
-INCLUDE_ASM("asm/nonmatchings/2FD00", func_80055738);
+/* Returns s32 but has no return statement: the original was presumably
+ * declared with an implicit-int (or int) return type. With void, GCC fills
+ * the delay slot after the null check, which the original leaves empty. */
+s32 func_80055738(s32 arg0, s32 arg1, s32 arg2) {
+    Unk80054354 *p = func_80054354(arg0);
+
+    if (p != NULL) {
+        p->unk88[arg1].unk0 = arg2;
+        p->unk88[arg1].unk4 = 3;
+    }
+}
 
 void func_80055788(s32 arg0) {
     Unk80054354 *p = func_80054354(arg0);
@@ -205,7 +215,14 @@ void func_800564C4(s32 arg0, s32 arg1) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/2FD00", func_800564F0);
+/* Same implicit-int return type as func_80055738 (see there). */
+s32 func_800564F0(s32 arg0) {
+    Unk80054354 *p = func_80054354(arg0);
+
+    if (p != NULL) {
+        p->unk189 = 1;
+    }
+}
 
 s32 func_80056520(s32 arg0) {
     Unk80054354 *p = func_80054354(arg0);
