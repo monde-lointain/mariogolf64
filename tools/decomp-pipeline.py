@@ -17,6 +17,7 @@ usage: tools/decomp-pipeline.py <seg> [--max N] [--only func ...]
 Run from the repo root, on the segment's decompile/<seg> branch.
 """
 import argparse
+import itertools
 import os
 import re
 import subprocess
@@ -89,11 +90,112 @@ def fix_table_arith(code):
     into explicit byte arithmetic that keeps X's element type."""
     def byte_ptr(x, expr):
         return f"((__typeof__({x}) *)((u8 *)&{x} + ({expr})))"
+    # 2D form: *((i * a) + ((j * b) + &X))
+    code = re.sub(r"\*\(\(([^()]*? \* \d+)\) \+ \(\(([^()]*? \* \d+)\) \+ &(\w+)\)\)",
+                  lambda m: "*" + byte_ptr(m.group(3), f"({m.group(2)}) + ({m.group(1)})"), code)
     code = re.sub(r"\*\(&(\w+) \+ \(([^()]*? \* \d+)\)\)", lambda m: "*" + byte_ptr(m.group(1), m.group(2)), code)
     code = re.sub(r"\*\(\(([^()]*? \* \d+)\) \+ &(\w+)\)", lambda m: "*" + byte_ptr(m.group(2), m.group(1)), code)
     code = re.sub(r"\(&(\w+) \+ \(([^()]*? \* \d+)\)\)", lambda m: byte_ptr(m.group(1), m.group(2)), code)
     code = re.sub(r"\(([^()]*? \* \d+)\) \+ &(\w+)", lambda m: byte_ptr(m.group(2), m.group(1)), code)
     return code
+
+
+def fix_signed_div(code):
+    """m2c expands signed division by 2^n as `v = (s32) X >> n; if (X < 0)
+    { v = (s32) (X + (2^n - 1)) >> n; }`. Turn it back into `v = X / 2^n;`."""
+    pat = re.compile(
+        r"(?P<ind>[ \t]*)(?P<v>\w+) = \(s32\) (?P<x>[\w.>\-\[\]]+) >> (?P<n>0x[0-9A-F]+|\d+);\n"
+        r"(?P=ind)if \((?P=x) < 0\) \{\n"
+        r"[ \t]*(?P=v) = \(s32\) \((?P=x) \+ (?P<m>0x[0-9A-F]+|\d+)\) >> (?P=n);\n"
+        r"(?P=ind)\}\n")
+    def rep(m):
+        n = int(m.group("n"), 0)
+        if int(m.group("m"), 0) != (1 << n) - 1:
+            return m.group(0)
+        return f"{m.group('ind')}{m.group('v')} = {m.group('x')} / 0x{1 << n:X};\n"
+    return pat.sub(rep, code)
+
+
+SIZES = {"s8": 1, "u8": 1, "s16": 2, "u16": 2, "s32": 4, "u32": 4, "f32": 4, "f64": 8, "s64": 8, "u64": 8}
+
+
+def fix_pointer_stride(code):
+    """m2c steps a typed pointer by a byte count (`p += 4` on s32 *); C scales
+    that by the element size, so make it one element."""
+    for t, name in re.findall(r"^\s+(\w+) \*(\w+);$", code, re.M):
+        size = SIZES.get(t)
+        if size and size > 1:
+            code = re.sub(rf"\b{name} \+= {size};", f"{name} += 1;", code)
+    return code
+
+
+def fix_read_args_first(code, func):
+    """Hoist a single read of `*argN` into a local initialised at the top of
+    the function, so the load comes first, as in the original."""
+    m = re.search(rf"^\w[^\n]*\b{func}\(([^)]*)\) \{{\n", code, re.M)
+    if not m:
+        return code
+    params = [p.strip() for p in m.group(1).split(",")]
+    for p in params:
+        pm = re.match(r"(?:const )?(\w+) \*(arg\d+)$", p)
+        if not pm:
+            continue
+        t, arg = pm.groups()
+        body = code[m.end():]
+        reads = re.findall(rf"(?<![\w)])\*{arg}\b(?!\s*=[^=])", body)
+        if len(reads) != 1:
+            continue
+        body = re.sub(rf"(?<![\w)])\*{arg}\b(?!\s*=[^=])", f"{arg}_val", body, count=1)
+        code = code[:m.end()] + f"    {t} {arg}_val = *{arg};\n" + body
+        m = re.search(rf"^\w[^\n]*\b{func}\(([^)]*)\) \{{\n", code, re.M)
+    return code
+
+
+def stack_layout(ins):
+    """(frame size, lowest saved-register slot) from the asm prologue."""
+    frame, saved = None, None
+    for op in ins[:12]:
+        m = re.match(r"addiu\s+\$sp, \$sp, -(0x[0-9A-F]+|\d+)$", op)
+        if m:
+            frame = int(m.group(1), 0)
+        m = re.match(r"s[wd]c?1?\s+\$(ra|s\d|fp|fs\d|fv\d), (0x[0-9A-F]+|\d+)\(\$sp\)$", op)
+        if m:
+            off = int(m.group(2), 0)
+            saved = off if saved is None else min(saved, off)
+    return frame, saved
+
+
+def fix_stack_buffer(code, ins):
+    """m2c declares a stack buffer whose address is passed to a callee as a
+    single `M2C_UNK spXX;`. Size it as an s32 array reaching up to the first
+    saved register."""
+    frame, saved = stack_layout(ins)
+    if not saved:
+        return code
+    def rep(m):
+        off = int(m.group(2), 16)
+        size = saved - off
+        if size <= 4 or size % 4:
+            return m.group(0)
+        return f"{m.group(1)}s32 sp{m.group(2)}[{size // 4}];"
+    new = re.sub(r"^([ \t]+)M2C_UNK sp([0-9A-F]+);", rep, code, flags=re.M)
+    if new != code:
+        for name in re.findall(r"s32 (sp[0-9A-F]+)\[", new):
+            new = new.replace(f"&{name}", name)
+    return new
+
+
+def frame_size(obj, func):
+    out = run(["mips-linux-gnu-objdump", "-d", f"--disassemble={func}", obj]).stdout
+    m = re.search(r"addiu\s+sp,sp,-(\d+)", out)
+    return int(m.group(1)) if m else 0
+
+
+def pad_frame(code, func, nbytes):
+    """Insert an unused local of nbytes at the top of func's body."""
+    return re.sub(rf"^(\w[^\n]*\b{func}\([^)]*\) \{{\n)",
+                  lambda m: m.group(1) + f"    u8 pad_unused[0x{nbytes:X}]; /* unused; sizes the stack frame */\n",
+                  code, count=1, flags=re.M)
 
 
 def compare(a, b):
@@ -154,15 +256,26 @@ def main():
             draft = r.stdout
             open(os.path.join(outdir, f"{func}.c"), "w").write(draft)
 
-            attempts = [("m2c", draft)]
-            if re.search(rf"^void {func}\(", draft, re.M):
-                attempts.append(("m2c, s32 return", re.sub(rf"^void {func}\(", f"s32 {func}(", draft, flags=re.M)))
-            # m2c writes table indexing as `&X + (i * k)` meaning a byte offset,
-            # but C scales that by sizeof(X). Retry with explicit byte offsets.
-            for label, code in list(attempts):
-                fixed = fix_table_arith(code)
-                if fixed != code:
-                    attempts.append((label + ", byte offsets", fixed))
+            # Known m2c gaps, each a transform; try every applicable
+            # combination, fewest transforms first.
+            transforms = [
+                ("s32 return", lambda c: re.sub(rf"^void {func}\(", f"s32 {func}(", c, flags=re.M)),
+                # `&X + (i * k)` means a byte offset, but C scales it by sizeof(X)
+                ("byte offsets", fix_table_arith),
+                ("signed div", fix_signed_div),
+                ("stack buffer", lambda c: fix_stack_buffer(c, ins)),
+                ("pointer stride", fix_pointer_stride),
+                ("read args first", lambda c: fix_read_args_first(c, func)),
+            ]
+            applicable = [(n, fn) for n, fn in transforms if fn(draft) != draft]
+            attempts = []
+            for k in range(len(applicable) + 1):
+                for combo in itertools.combinations(applicable, k):
+                    code = draft
+                    for _, fn in combo:
+                        code = fn(code)
+                    attempts.append((", ".join(["m2c"] + [n for n, _ in combo]), code))
+            target_frame, _ = stack_layout(ins)
 
             verdict, detail, last_err = "", "", ""
             # A hand-written prototype for func may clash with the draft's real
@@ -201,6 +314,12 @@ def main():
                     if label != "m2c":
                         open(os.path.join(outdir, f"{func}.c"), "w").write(code)
                     break
+                # Frame smaller than the original's: retry once with an unused
+                # local making up the difference.
+                got = frame_size(tobj2, func)
+                if (target_frame and got and got < target_frame and "frame pad" not in label
+                        and len(attempts) < 200):
+                    attempts.append((label + ", frame pad", pad_frame(code, func, target_frame - got)))
             uses_macros = "M2C_" in draft
             results.append((func, len(ins), verdict, ("uses M2C macros; " if uses_macros else "") + detail))
     finally:
