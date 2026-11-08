@@ -203,7 +203,23 @@ INCLUDE_ASM("asm/nonmatchings/BBD00", func_ovl0_80207080);
 
 INCLUDE_ASM("asm/nonmatchings/BBD00", func_ovl0_802071B8);
 
-INCLUDE_ASM("asm/nonmatchings/BBD00", func_ovl0_80207250);
+s32 func_800544B4(void);
+
+/* The explicit case 0 is needed: it changes GCC's compare tree. */
+s32 func_ovl0_80207250(s32 arg0) {
+    switch (func_800544B4()) {
+        case 0:
+            return 0;
+        case 1:
+            return 3;
+        case 2:
+            return 6;
+        case 3:
+            return 9;
+        default:
+            return 0;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/BBD00", func_ovl0_802072AC);
 
