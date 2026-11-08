@@ -1471,6 +1471,15 @@ void UpdateClubWindow(void);
  * words, but the oracle then needs 17 pseudos forced. In the down move, an s8
  * row local stepped from the field, stored and passed gives 63 (19 in shape),
  * and the oracle no longer matches: its closest is 11 words, forcing 17.
+ *
+ * editsearch's allocation report shows what the forcing undoes. In the down,
+ * left and right moves local-alloc ties the stepped coordinate, its shift and
+ * its sign extension into one quantity, as each dies in the insn that sets
+ * the next, where the original holds them apart, in $v0, $v1 and $a0 or $a1.
+ * In the up move it places the row, priority 3750, before the keys' address,
+ * 2500, which would need a life of 5 or less, for 8, to come first. Stepping
+ * in a statement before the test, with ++ either side, and a const
+ * f_CodeKeys leave 64 words, 18 in shape.
  */
 #ifdef NON_MATCHING
 void UpdateClubTournament(void) {
