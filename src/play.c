@@ -2227,10 +2227,12 @@ INCLUDE_ASM("asm/nonmatchings/play", RebuildGroundTextureCoordinates);
  * nextColumnParity, and passing it to GridVertexOfParity in the middle and
  * bottom rows gives 933 to 1047 words, and declaring column a u32 leaves 897.
  *
- * Each half starts its middle slot after the row log's test, beside the
- * column, as a sweep moving each assignment found. That takes the draft
- * from 897 words (233 in shape) to 893 (231), and the register oracle's
- * closest from 801 words to 797, forcing 84 pseudos either way.
+ * Each half starts its middle slot after the first tile's S, before the
+ * row log's test, as editsearch found: that takes the draft from 580 words
+ * (94 in shape) to 574 (92), where after the test, beside the column, it
+ * had taken it from 897 words (233 in shape) to 893 (231). Beside the
+ * other slots, after the top slot or between the bottom and top, gives
+ * 580 (92).
  *
  * In each tile loop the original steps two registers by 0x80: one starts at
  * half << 9, which it keeps in a stack slot, and gives the tile's left S; the
@@ -2255,9 +2257,8 @@ INCLUDE_ASM("asm/nonmatchings/play", RebuildGroundTextureCoordinates);
  * The original keeps column + 1 in a slot of its own and works out its
  * parity with an andi, where combine folds ours to the constant 1, since
  * column is half * 8 in the same block. Setting column before the row log's
- * test keeps the andi and brings the frame to 8 bytes short, but gives 625
- * words (105 in shape), and with the middle slot moved there too, before or
- * after it, 628 (108). 580 words differ, 94 in shape.
+ * test keeps the andi and brings the frame to 8 bytes short, but gives 628
+ * words (108 in shape). 574 words differ, 92 in shape.
  */
 void DrawGround(CameraMatrices *matrices, s32 terrainStyle) {
     u8 snapsEdge[2][TILE_VERTEX_SEGMENT_COUNT]; /* For the current and the last
@@ -2534,6 +2535,7 @@ void DrawGround(CameraMatrices *matrices, s32 terrainStyle) {
         firstTileColumn = half * GROUND_TILE_GROUP_SIZE;
         tileIndex = firstTileColumn;
         firstTileS = firstTileColumn * TILE_COORDINATE_SPAN;
+        middleSlot = FIRST_MIDDLE_SLOT;
         if (IsGameFlagSet(GAME_FLAG_LOG_GROUND_ROWS)) {
             osSyncPrintf("DG[");
             if (half != 0) {
@@ -2541,7 +2543,6 @@ void DrawGround(CameraMatrices *matrices, s32 terrainStyle) {
             }
         }
 
-        middleSlot = FIRST_MIDDLE_SLOT;
         column = half * GROUND_HALF_VERTEX_COLUMNS;
         nextColumnParity = (u32)(column + 1) & 1;
         for (row = 0; row < GROUND_TILE_ROW_COUNT; row++) {
