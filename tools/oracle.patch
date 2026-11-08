@@ -246,3 +246,166 @@
  /* Sort predicate for ordering the allocnos.
     Returns -1 (1) if *v1 should be allocated before (after) *v2.  */
  
+--- a/toplev.c
++++ b/toplev.c
+@@ -2637,6 +2637,150 @@
+ #endif
+ }
+ 
++/* The oracle's trace of variables (see oracle_open_trace in reload1.c):
++   the pseudo each of the function's variables and parameters got as its
++   RTL was made, and each pseudo's mode and whether it is a variable's.  */
++
++extern FILE *oracle_open_trace ();
++
++static char *oracle_separator;
++
++/* Write to FILE each variable in the chain DECLS held in a pseudo.  */
++
++static void
++oracle_trace_decls (file, decls)
++     FILE *file;
++     tree decls;
++{
++  tree decl;
++
++  for (decl = decls; decl; decl = TREE_CHAIN (decl))
++    if (DECL_NAME (decl) != 0 && DECL_RTL (decl) != 0
++	&& GET_CODE (DECL_RTL (decl)) == REG
++	&& REGNO (DECL_RTL (decl)) >= FIRST_PSEUDO_REGISTER)
++      {
++	fprintf (file, "%s{\"name\": \"%s\", \"pseudo\": %d, \"line\": %d}",
++		 oracle_separator, IDENTIFIER_POINTER (DECL_NAME (decl)),
++		 REGNO (DECL_RTL (decl)), DECL_SOURCE_LINE (decl));
++	oracle_separator = ", ";
++      }
++}
++
++/* Write to FILE the variables of BLOCK and of the blocks in it.  */
++
++static void
++oracle_trace_block_decls (file, block)
++     FILE *file;
++     tree block;
++{
++  tree inner;
++
++  oracle_trace_decls (file, BLOCK_VARS (block));
++  for (inner = BLOCK_SUBBLOCKS (block); inner; inner = BLOCK_CHAIN (inner))
++    oracle_trace_block_decls (file, inner);
++}
++
++/* Write to the trace the variables of the function DECL, and the modes
++   of its pseudos.  */
++
++static void
++oracle_trace_variables (decl)
++     tree decl;
++{
++  FILE *file = oracle_open_trace ();
++  int regno;
++
++  if (file == 0)
++    return;
++  fprintf (file, "{\"stage\": \"variables\", \"variables\": [");
++  oracle_separator = "";
++  oracle_trace_decls (file, DECL_ARGUMENTS (decl));
++  if (DECL_INITIAL (decl) != 0 && TREE_CODE (DECL_INITIAL (decl)) == BLOCK)
++    oracle_trace_block_decls (file, DECL_INITIAL (decl));
++  fprintf (file, "], \"pseudos\": {");
++  for (regno = FIRST_PSEUDO_REGISTER; regno < max_reg_num (); regno++)
++    if (regno_reg_rtx[regno] != 0)
++      fprintf (file, "%s\"%d\": [\"%s\", %d]",
++	       regno == FIRST_PSEUDO_REGISTER ? "" : ", ", regno,
++	       GET_MODE_NAME (GET_MODE (regno_reg_rtx[regno])),
++	       REG_USERVAR_P (regno_reg_rtx[regno]) != 0);
++  fprintf (file, "}}\n");
++  fclose (file);
++}
++
++/* Replace in the rtx at LOC each use of the pseudo GONE with KEPT.  */
++
++static void
++oracle_replace_pseudo (loc, gone, kept)
++     rtx *loc;
++     int gone;
++     rtx kept;
++{
++  rtx x = *loc;
++  char *format;
++  int i, j;
++
++  if (x == 0)
++    return;
++  if (GET_CODE (x) == REG)
++    {
++      if (REGNO (x) == gone)
++	*loc = kept;
++      return;
++    }
++  format = GET_RTX_FORMAT (GET_CODE (x));
++  for (i = GET_RTX_LENGTH (GET_CODE (x)) - 1; i >= 0; i--)
++    if (format[i] == 'e')
++      oracle_replace_pseudo (&XEXP (x, i), gone, kept);
++    else if (format[i] == 'E' && XVEC (x, i) != 0)
++      for (j = XVECLEN (x, i) - 1; j >= 0; j--)
++	oracle_replace_pseudo (&XVECEXP (x, i, j), gone, kept);
++}
++
++/* The oracle's merging (see tools/oracle.py): ORACLE_MERGE names, as
++   KEPT=GONE pairs joined by commas, pseudos to make one in INSNS, the RTL
++   of the function ORACLE_FUNCTION as it is first made, before any pass
++   sees it: each use of GONE becomes one of KEPT, as though the source had
++   held both values in one variable.  A pair whose modes differ is left
++   alone.  */
++
++static void
++oracle_merge_pseudos (insns)
++     rtx insns;
++{
++  char *function = getenv ("ORACLE_FUNCTION");
++  char *pairs = getenv ("ORACLE_MERGE");
++  int kept, gone, length;
++  rtx insn, pattern;
++
++  if (function == 0 || pairs == 0 || *pairs == 0
++      || strcmp (function, current_function_name) != 0)
++    return;
++  while (sscanf (pairs, "%d=%d%n", &kept, &gone, &length) == 2)
++    {
++      if (kept >= FIRST_PSEUDO_REGISTER && gone >= FIRST_PSEUDO_REGISTER
++	  && kept < max_reg_num () && gone < max_reg_num () && kept != gone
++	  && regno_reg_rtx[kept] != 0 && regno_reg_rtx[gone] != 0
++	  && (GET_MODE (regno_reg_rtx[kept])
++	      == GET_MODE (regno_reg_rtx[gone])))
++	for (insn = insns; insn; insn = NEXT_INSN (insn))
++	  if (GET_RTX_CLASS (GET_CODE (insn)) == 'i')
++	    {
++	      oracle_replace_pseudo (&PATTERN (insn), gone,
++				     regno_reg_rtx[kept]);
++	      oracle_replace_pseudo (&REG_NOTES (insn), gone,
++				     regno_reg_rtx[kept]);
++	      if (GET_CODE (insn) == CALL_INSN)
++		oracle_replace_pseudo (&CALL_INSN_FUNCTION_USAGE (insn), gone,
++				       regno_reg_rtx[kept]);
++	    }
++      pairs += length;
++      if (*pairs != ',')
++	break;
++      pairs++;
++    }
++}
++
+ /* This is called from finish_function (within yyparse)
+    after each top-level definition is parsed.
+    It is supposed to compile that function or variable
+@@ -2810,6 +2954,9 @@
+ 
+   instantiate_virtual_regs (current_function_decl, get_insns ());
+ 
++  oracle_trace_variables (decl);
++  oracle_merge_pseudos (insns);
++
+   /* See if we have allocated stack slots that are not directly addressable.
+      If so, scan all the insns and create explicit address computation
+      for all references to such slots.  */

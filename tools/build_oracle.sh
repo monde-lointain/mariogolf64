@@ -5,12 +5,13 @@
 #
 # Builds cc1 from the KMC GCC 2.7.2 source (by default ~/src/kmc-gcc-src),
 # with tools/oracle.patch, which lets cc1 trace its register allocators to
-# the file ORACLE_TRACE and override the allocation of the pseudos
-# ORACLE_FORCE names as reload starts. It is built with -O3, LTO and the
-# profile of a build of the ROM, as the toolchain's cc1 is, and put beside
-# the toolchain's other programs. Without ORACLE_TRACE and ORACLE_FORCE it
-# gives the same code as the toolchain's cc1: the ROM builds with it
-# unchanged. A changed patch rebuilds it.
+# the file ORACLE_TRACE, merge the pseudos ORACLE_MERGE pairs as the RTL is
+# made, and override the allocation of the pseudos ORACLE_FORCE names as
+# reload starts. It is built with -O3, LTO and the profile of a build of the
+# ROM, as the toolchain's cc1 is, and put beside the toolchain's other
+# programs. Without the ORACLE_ variables it gives the same code as the
+# toolchain's cc1: the ROM builds with it unchanged. A changed patch rebuilds
+# it.
 set -eu
 
 root=$(cd "$(dirname "$0")/.." && pwd)
@@ -59,7 +60,7 @@ rm -f "$out/cc1" "$out/cc1.debug" "$out/cc1.optimized"
 rm -rf "$out/source-optimized"
 cp "$build/cc1" "$out/cc1"
 
-# Check that, without ORACLE_TRACE and ORACLE_FORCE, it makes the ROM
+# Check that, without the ORACLE_ variables, it makes the ROM
 rm -rf "$out/check"
 build_rom "$out/cc1" "$out/check"
 sed "s|build/|$out/check/build/|" "$root/mariogolf64.sha1" | sha1sum -c --quiet

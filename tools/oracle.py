@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Find the register allocation that would make a draft match, and why.
 
-    oracle.py [--allocation | --splits | --spills] [ASM_FILE C_FILE] FUNCTION
-              [PSEUDO=HARD ...]
+    oracle.py [--allocation | --splits | --spills | --merges] [ASM_FILE C_FILE]
+              FUNCTION [PSEUDO=HARD ...]
 
 Without ASM_FILE and C_FILE, finds them from FUNCTION as fncompare does.
 
@@ -30,6 +30,14 @@ that, from one compile.
 register forced onto the stack, for an original whose frame is larger, and
 prints the closest.
 
+--merges searches for the draft's values that the original held in one
+variable: as the RTL is first made (see ORACLE_MERGE in oracle.patch), each
+pseudo of the closest forcing found is made one with every other pseudo of
+its mode, and each variable with every other, then the closest of those two
+at a time, and each is compiled unforced. A merge that matches names the
+variable, or the expression, that the source would hold in another's
+variable for the allocators to give the original's registers.
+
 Only FUNCTION's own routine is compared; the functions nested in it, which
 fncompare counts with it, are named so that each can be given as FUNCTION.
 """
@@ -42,7 +50,8 @@ import re
 import shutil
 import sys
 import tempfile
-from collections.abc import Iterator, Sequence
+from collections.abc import Iterable, Iterator, Sequence
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Literal, TypedDict, cast
@@ -54,12 +63,17 @@ import fncompare
 
 ORACLE_DIR = fncompare.ROOT / "build" / "oracle"
 MAX_ROUNDS = 8
-# The dumps the search reads: the insns' pseudos, before reload, and the
-# asm statements, which -dp doesn't name, from the last pass
-SEARCH_PASSES = ("lreg", blame.PASSES[-1])
-MODE_OPTIONS = ("--allocation", "--splits", "--spills")
+# The dumps the search reads: the insns' pseudos as the RTL is first made
+# and before reload, and the asm statements, which -dp doesn't name, from
+# the last pass
+SEARCH_PASSES = ("rtl", "lreg", blame.PASSES[-1])
+MODE_OPTIONS = ("--allocation", "--splits", "--spills", "--merges")
 # The closest spill searches that --spills prints
 SPILL_REPORT_COUNT = 10
+# The closest merges that --merges prints
+MERGE_REPORT_COUNT = 15
+# The closest merges that --merges tries two at a time
+MERGE_BEAM = 24
 # The assembly, the C file and the function, before any forced pairs
 MIN_ARGUMENT_COUNT = 3
 # The instructions a register needs from a pseudo to count as holding it
@@ -132,7 +146,26 @@ class DispositionsRecord(TypedDict):
     registers: dict[str, int]
 
 
-TraceRecord = LocalRecord | GlobalRecord | DispositionsRecord
+class Variable(TypedDict):
+    """A variable or parameter of the function held in a pseudo, as traced."""
+
+    name: str
+    pseudo: int
+    line: int
+
+
+class VariablesRecord(TypedDict):
+    """The function's variables, and each pseudo's mode, as the RTL is made.
+
+    pseudos is {pseudo: [its mode, whether it is a variable's]}.
+    """
+
+    stage: Literal["variables"]
+    variables: list[Variable]
+    pseudos: dict[str, tuple[str, int]]
+
+
+TraceRecord = LocalRecord | GlobalRecord | DispositionsRecord | VariablesRecord
 
 
 @dataclass
@@ -227,6 +260,9 @@ class Draft:
     # Holds the unit.i that trace_function left, and every compile's files
     work: Path
     traced: Compilation
+    # {pseudo: its mode} as the RTL is first made, and the variables'
+    modes: dict[int, str]
+    variables: dict[int, Variable]
 
 
 def trace_function(unit: str, function: str, optflags: list[str], work: Path) -> Draft:
@@ -243,9 +279,17 @@ def trace_function(unit: str, function: str, optflags: list[str], work: Path) ->
         function, optflags, work, {"ORACLE_TRACE": str(trace_path)}, SEARCH_PASSES
     )
     compilation = Compilation(blamed, [], [], {})
+    draft = Draft(function, optflags, work, compilation, {}, {})
     for line in trace_path.read_text().splitlines():
         record = cast("TraceRecord", json.loads(line))
-        if record["stage"] == "local":
+        if record["stage"] == "variables":
+            draft.modes = {
+                int(key): mode for key, (mode, _) in record["pseudos"].items()
+            }
+            draft.variables = {
+                variable["pseudo"]: variable for variable in record["variables"]
+            }
+        elif record["stage"] == "local":
             compilation.blocks.append(record)
         elif record["stage"] == "global":
             compilation.allocnos = record["allocnos"]
@@ -253,7 +297,7 @@ def trace_function(unit: str, function: str, optflags: list[str], work: Path) ->
             compilation.registers = {
                 int(key): hard for key, hard in record["registers"].items()
             }
-    return Draft(function, optflags, work, compilation)
+    return draft
 
 
 def compile_function(
@@ -323,27 +367,32 @@ def build_function(
     )
 
 
-def read_insn_lines(draft: Draft, compilation: Compilation) -> dict[int, int]:
-    """Return {insn UID: its source line}, for the insns before reload.
+def read_insn_lines(
+    draft: Draft, compilation: Compilation, stage: str = "lreg"
+) -> dict[int, int]:
+    """Return {insn UID: its source line}, for the insns of STAGE's dump.
 
-    COMPILATION must be of DRAFT's unit.i.
+    By default those before reload. COMPILATION must be of DRAFT's unit.i.
     """
-    lreg = compilation.blamed.dumps.get("lreg", "")
+    dump = compilation.blamed.dumps.get(stage, "")
     insn_lines = blame.read_insn_lines(
-        draft.optflags, {"lreg": lreg}, draft.work, draft.function
-    ).get("lreg", {})
+        draft.optflags, {stage: dump}, draft.work, draft.function
+    ).get(stage, {})
     return {uid: int(place.split(":")[1]) for uid, place in insn_lines.items()}
 
 
 def read_pseudo_lines(
-    compilation: Compilation, insn_lines: dict[int, int]
+    compilation: Compilation, insn_lines: dict[int, int], stage: str = "lreg"
 ) -> dict[int, set[int]]:
-    """Return {pseudo: the source lines of the insns using it before reload}."""
-    lreg = compilation.blamed.dumps.get("lreg", "")
+    """Return {pseudo: the source lines of the insns using it}.
+
+    The insns are those of STAGE's dump, by default before reload.
+    """
+    dump = compilation.blamed.dumps.get(stage, "")
     lines: dict[int, set[int]] = collections.defaultdict(set)
-    for header in blame.INSN_HEADER_RE.finditer(lreg):
+    for header in blame.INSN_HEADER_RE.finditer(dump):
         uid = int(header.group(1))
-        rtl = blame.find_insn(lreg, uid)
+        rtl = blame.find_insn(dump, uid)
         for match in blame.PSEUDO_RE.finditer(rtl):
             if uid in insn_lines:
                 lines[int(match.group(1))].add(insn_lines[uid])
@@ -863,6 +912,134 @@ def scan_spills(target: fncompare.Routine, draft: Draft, force: dict[int, int]) 
         print(f"pseudo {pseudo} ({register}, lines {used}) spilled: {result}")
 
 
+Merge = tuple[int, int]
+
+
+def compile_merged(
+    target: fncompare.Routine, draft: Draft, merges: Sequence[Merge], work: Path
+) -> int | None:
+    """Return how many words differ when DRAFT is compiled with MERGES.
+
+    Each (kept, gone) pair makes the pseudo gone one with kept. Compiles in
+    WORK, which must hold the draft's unit.i, unforced. None is a compile
+    that failed.
+    """
+    pairs = ",".join(f"{kept}={gone}" for kept, gone in merges)
+    try:
+        blamed = build_function(
+            draft.function, draft.optflags, work, {"ORACLE_MERGE": pairs}, ()
+        )
+    except CompileError:
+        return None
+    return fncompare.count_differences(target, blamed.routine)
+
+
+def run_merges(
+    target: fncompare.Routine, draft: Draft, trials: list[tuple[Merge, ...]]
+) -> list[int | None]:
+    """Return the words that differ for each of TRIALS, compiled in parallel."""
+    count = os.cpu_count() or 1
+    works = [draft.work / f"merge{index}" for index in range(count)]
+    for work in works:
+        work.mkdir(exist_ok=True)
+        _ = shutil.copy(draft.work / "unit.i", work / "unit.i")
+    results: list[int | None] = [None] * len(trials)
+
+    def run_share(index: int) -> None:
+        for trial in range(index, len(trials), count):
+            results[trial] = compile_merged(target, draft, trials[trial], works[index])
+
+    with ThreadPoolExecutor(count) as pool:
+        for future in [pool.submit(run_share, index) for index in range(count)]:
+            future.result()
+    return results
+
+
+def describe_pseudo(draft: Draft, pseudo: int, lines: dict[int, set[int]]) -> str:
+    """Return PSEUDO's variable, or that it holds an expression, and its lines.
+
+    LINES are those of the insns using it as the RTL is first made.
+    """
+    variable = draft.variables.get(pseudo)
+    what = f"`{variable['name']}`" if variable else "an expression"
+    used = " ".join(map(str, sorted(lines.get(pseudo, set()))))
+    return f"{pseudo} ({what}, lines {used})"
+
+
+def list_merges(draft: Draft, forced: Iterable[int]) -> list[Merge]:
+    """Return the merges to try alone, each a (kept, gone) pair.
+
+    Each FORCED pseudo is merged with every other pseudo of its mode, and
+    each variable with every other of its mode, each way round, as the one
+    kept gives the merged pseudo its number.
+    """
+    modes = draft.modes
+    forced_merges = {
+        merge
+        for pseudo in forced
+        if pseudo in modes
+        for other, mode in modes.items()
+        if other != pseudo and mode == modes[pseudo]
+        for merge in ((pseudo, other), (other, pseudo))
+    }
+    variable_merges = {
+        (kept, gone)
+        for kept in draft.variables
+        for gone in draft.variables
+        if kept != gone and modes.get(kept) == modes.get(gone)
+    }
+    return sorted(forced_merges | variable_merges)
+
+
+def scan_merges(target: fncompare.Routine, draft: Draft, force: dict[int, int]) -> None:
+    """Print the merges of a forced pseudo with another that come closest.
+
+    The forcing is search_forcing's from FORCE. list_merges's merges are
+    tried alone, then the MERGE_BEAM closest two at a time.
+    """
+    search = search_forcing(target, draft, force)
+    forced = search.force
+    if search.differences == 0 and forced:
+        forced = minimize_forcing(target, draft, forced)
+    unforced = count_differences(target, draft.traced)
+    print(f"  unforced: {unforced} differ; {summarize_search(search)}")
+    trials: list[tuple[Merge, ...]] = [(merge,) for merge in list_merges(draft, forced)]
+    results = run_merges(target, draft, trials)
+    print(f"  {len(trials)} merges of {len(forced)} forced pseudos or variables tried")
+    ranked = sorted(
+        (differences, trial)
+        for trial, differences in zip(trials, results, strict=True)
+        if differences is not None and differences < unforced
+    )
+    beam = [trial[0] for _, trial in ranked[:MERGE_BEAM]]
+    pairs: list[tuple[Merge, ...]] = [
+        (first, second)
+        for index, first in enumerate(beam)
+        for second in beam[index + 1 :]
+        if not {*first} & {*second}
+    ]
+    results = run_merges(target, draft, pairs)
+    ranked += [
+        (differences, trial)
+        for trial, differences in zip(pairs, results, strict=True)
+        if differences is not None and differences < unforced
+    ]
+    print(f"  {len(pairs)} pairs of the closest tried")
+    traced = draft.traced
+    lines = read_pseudo_lines(traced, read_insn_lines(draft, traced, "rtl"), "rtl")
+    closest = sorted(ranked, key=lambda item: (item[0], len(item[1])))[
+        :MERGE_REPORT_COUNT
+    ]
+    for differences, trial in closest:
+        merges = "; ".join(
+            describe_pseudo(draft, gone, lines)
+            + " into "
+            + describe_pseudo(draft, kept, lines)
+            for kept, gone in trial
+        )
+        print(f"{differences} differ: {merges}")
+
+
 def use_compiler() -> None:
     """Compile with the oracle's cc1 from now on, or exit if it isn't built."""
     if not (ORACLE_DIR / "source" / "cc1").exists():
@@ -897,6 +1074,9 @@ def run_mode(request: Request, target: fncompare.Routine, draft: Draft) -> None:
     force, traced = request.force, draft.traced
     if request.mode == "spills":
         scan_spills(target, draft, force)
+        return
+    if request.mode == "merges":
+        scan_merges(target, draft, force)
         return
     if request.mode == "allocation":
         compilation = compile_function(draft, force)
