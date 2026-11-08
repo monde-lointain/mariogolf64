@@ -28,7 +28,15 @@ INCLUDE_ASM("asm/nonmatchings/2BFF0", func_800517E0);
 
 INCLUDE_ASM("asm/nonmatchings/2BFF0", func_80051A08);
 
-INCLUDE_ASM("asm/nonmatchings/2BFF0", func_80051A60);
+extern s32 D_800C119C;
+extern s32 D_800C11A8;
+extern s32 D_800C11AC;
+
+void func_80051A60(void) {
+    D_800C119C = 2;
+    D_800C11A8 = 1;
+    D_800C11AC = -1;
+}
 
 INCLUDE_ASM("asm/nonmatchings/2BFF0", func_80051A88);
 
@@ -38,7 +46,9 @@ INCLUDE_ASM("asm/nonmatchings/2BFF0", func_80051B40);
 
 INCLUDE_ASM("asm/nonmatchings/2BFF0", func_80051B9C);
 
-INCLUDE_ASM("asm/nonmatchings/2BFF0", func_80051BFC);
+s32 func_80051BFC(void) {
+    return D_800C11AC;
+}
 
 INCLUDE_ASM("asm/nonmatchings/2BFF0", func_80051C08);
 
