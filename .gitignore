@@ -65,5 +65,12 @@ tags
 # KMC toolchain (downloaded by `make -C tools`)
 tools/cc/
 
+# Decomp helper tools (local clones)
+tools/m2c/
+tools/decomp-permuter/
+
 # macOS
 .DS_Store
+
+# Claude Code personal settings
+.claude/settings.local.json
