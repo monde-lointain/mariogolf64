@@ -48,11 +48,68 @@ s32 func_ovl3_80226788(void) {
 
 INCLUDE_ASM("asm/nonmatchings/110670", func_ovl3_802267B0);
 
-INCLUDE_ASM("asm/nonmatchings/110670", func_ovl3_80226904);
+/* Look up a 16-bit id in a table, fill a 0x20-byte buffer for it via
+ * func_8005062C and pass both to func_800506D4 (cf. func_8006ACD8 in 456C0). */
+s32 func_8005062C(s32 id, void *buf);
+void func_800506D4(s32 handle, void *buf);
 
-INCLUDE_ASM("asm/nonmatchings/110670", func_ovl3_80226958);
+extern u16 D_800C2074[];
+extern s32 D_ovl3_80230E7C;
+extern s32 D_ovl3_80230E80;
+extern u16 D_ovl3_80230EA4[];
 
-INCLUDE_ASM("asm/nonmatchings/110670", func_ovl3_802269AC);
+void func_ovl3_80226904(s32 arg0) {
+    s32 sp10[8];
+
+    if (arg0 < 0) {
+        arg0 = 0;
+    }
+    if (arg0 >= 10) {
+        arg0 = 9;
+    }
+    func_8005062C(D_800C2074[arg0], sp10);
+    func_800506D4(D_ovl3_80230E7C, sp10);
+}
+
+void func_ovl3_80226958(s32 arg0) {
+    s32 sp10[8];
+
+    if (arg0 < 0) {
+        arg0 = 0;
+    }
+    if (arg0 >= 15) {
+        arg0 = 14;
+    }
+    func_8005062C(D_ovl3_80230EA4[arg0], sp10);
+    func_800506D4(D_ovl3_80230E80, sp10);
+}
+
+/* func_800504E8 / 80050598 / 800505A0 (2B800) work on a 0x10-byte object. */
+s32 func_800504E8(s32 id, void *obj);
+s16 func_80050598(void *obj);
+s32 func_800505A0(s32 handle, s16 arg1, void *obj);
+
+extern s32 D_ovl3_80230E84;
+extern s16 D_ovl3_80230EC4[15][4];
+
+void func_ovl3_802269AC(s32 arg0, s32 arg1) {
+    s32 sp10[4];
+
+    if (arg0 < 0) {
+        arg0 = 0;
+    }
+    if (arg0 >= 15) {
+        arg0 = 14;
+    }
+    if (arg1 < 0) {
+        arg1 = 0;
+    }
+    if (arg1 >= 4) {
+        arg1 = 3;
+    }
+    func_800504E8(D_ovl3_80230EC4[arg0][arg1], sp10);
+    func_800505A0(D_ovl3_80230E84, func_80050598(sp10), sp10);
+}
 
 void func_ovl3_80226A34(void) {
     func_8005AF50();
