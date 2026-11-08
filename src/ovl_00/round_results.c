@@ -2417,29 +2417,19 @@ void SetResultsBanner(s32 state, s32 kind) {
  * Draws the banner of a round's result, and the trophy above a top three
  * tournament place
  *
- * Doesn't match: only the registers differ, 32 words. The register oracle
- * matches when course takes $s6 ahead of the trophy loops' row values, so its
- * global-alloc priority must top theirs (342 and 340); here it is 266, so
- * course gets $fp. Assigning course later or before the kind test, narrower
- * or unsigned types, reading frameCount through g_GameState, and regrouping
- * the trophy heights give 32-63 words.
- *
- * Advancing the trophy frame inside a do-while (0) matches, since flow weights
- * each reference by its loop depth and course then counts 8 references instead
- * of 6, but it is a device to match: all 32 increment-and-wrap sites in the
- * source are written plainly, and wrapping them all in do-while (0) breaks 14
- * of the 21 matched functions that hold them. A static inline function in its
- * place leaves 32 words. A struct for each course's trophy sizes gives 52
- * words, and the oracle's closest is then 20 with 4 forced; a helper for the
- * two identical trophy-part loops gives 207 words taking the course, or 295
- * taking its sizes' address.
- *
- * Other forms of the frame's wrap: a pre-increment in the test gives the same
- * 32 words; testing against the last frame before stepping 32 (12 in shape);
- * a >= test 36 (4); a while loop subtracting the frame count 65 (23); a
- * conditional expression 65 (17); and a modulo 74 (16).
+ * The trophy's frame advances in two arms, one for the fast tally and one on
+ * the shine's tick, which cross-jumping merges into one copy, as the
+ * original has it. Each arm reads course twice, which lifts its global-alloc
+ * priority above the trophy loops' row values (342 and 340), so it takes $s6
+ * as in the original. Joining the two tests with ||, course's priority is
+ * 266 and it gets $fp: 32 words differ, none in shape. Against the joined
+ * test, assigning course later or before the kind test, narrower or
+ * unsigned types, reading frameCount through g_GameState, regrouping the
+ * trophy heights and other forms of the frame's wrap gave 32 to 74 words; a
+ * struct for each course's trophy sizes 52, and a helper for the two
+ * identical trophy-part loops 207 taking the course, or 295 taking its
+ * sizes' address.
  */
-#ifdef NON_MATCHING
 void DrawResultsBanner(Gfx **displayListHead) {
     Gfx *gfx;
     s32 i;
@@ -2693,10 +2683,19 @@ void DrawResultsBanner(Gfx **displayListHead) {
     if (f_BannerKind == BANNER_KIND_TOURNAMENT_PLACE) {
         course = g_GameState.courseIndex;
         if (f_PlayerRanks[0] <= TROPHY_PLACE_COUNT) {
-            f_TrophyShineFrame = (f_TrophyShineFrame + 1) % TROPHY_SHINE_CYCLE;
-            if (f_TallySpeed == FAST_TALLY_SPEED || f_TrophyShineFrame % TROPHY_FRAME_TICKS == 0) {
-                EncodedAsset asset;
+            EncodedAsset asset;
 
+            f_TrophyShineFrame = (f_TrophyShineFrame + 1) % TROPHY_SHINE_CYCLE;
+            if (f_TallySpeed == FAST_TALLY_SPEED) {
+                f_TrophyFrame++;
+                if (f_TrophyFrame == f_TrophyAssets[course].frameCount) {
+                    f_TrophyFrame = 0;
+                }
+
+                OpenEncodedAsset(f_TrophyAssets[course].image + f_TrophyFrame, &asset);
+                ReadEncodedAsset(f_TrophyImage, &asset);
+            }
+            else if (f_TrophyShineFrame % TROPHY_FRAME_TICKS == 0) {
                 f_TrophyFrame++;
                 if (f_TrophyFrame == f_TrophyAssets[course].frameCount) {
                     f_TrophyFrame = 0;
@@ -2926,9 +2925,6 @@ void DrawResultsBanner(Gfx **displayListHead) {
 
     *displayListHead = gfx;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", DrawResultsBanner);
-#endif
 
 /* f_ResultsStep values while UpdateTournamentResults runs */
 enum TournamentStep {
