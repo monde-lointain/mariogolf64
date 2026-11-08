@@ -2979,20 +2979,12 @@ s32 FindWallHit(
  * above the ground, where course y points down, is left alone. It returns
  * a value only for a ball off the ground.
  *
- * Doesn't match: the push's two arms keep their products and sums in other
- * float registers. The original's first arm converts x back from a register
- * the second arm's doesn't use, so cross-jumping shares only z's conversion
- * between them; ours shares both. Local-alloc gives x's sum (priority 45000)
- * its register before z's product (36000). The register oracle, forcing 11
- * pseudos, leaves 12 words, all in the first arm's schedule. Either operand
- * order of the products, x = x + ..., z pushed before x, either arm first, a
- * push distance set in the arms, subtracting WALL_PUSH_DISTANCE + side, and
- * the push as a ternary give 41 to 91 words, 5 to 45 in shape. The corner
- * push sets y between x and z, which puts its store after the corner's load
- * as in the original; set first, 45 words differ, 5 in shape, and set last
- * or with z before x, 47 to 109. 43 words differ, 3 in shape.
+ * Each arm of the wall's push sets isPushed itself; set once before the
+ * test, the arms keep their products and sums in other float registers and
+ * 43 words differ (3 in shape). The corner push sets y between x and z,
+ * which puts its store after the corner's load as in the original; set
+ * first, 2 words differ (2 in shape), and set last, 4 (4).
  */
-#ifdef NON_MATCHING
 s32 PushBallOutOfWalls(BallSimulation *simulation, s32 checksHeight) {
     PlaneTriangle wall;
     TrianglePlane plane;
@@ -3078,9 +3070,8 @@ s32 PushBallOutOfWalls(BallSimulation *simulation, s32 checksHeight) {
                 (plane.normal[AXIS_Z] * z) + (plane.distance * WORLD_TO_COURSE_SCALE);
             osSyncPrintf("?");
             /* The original tests whether the magnitude is less than the distance,
-             * a c.lt.s, and skips the wall when it isn't; testing >= gives 47
-             * differing words (7 in shape), fabs 54 (12) and AbsFloat 86 (12),
-             * against 43 (3) */
+             * a c.lt.s, and skips the wall when it isn't; testing >= gives 4
+             * differing words (4 in shape), fabs 11 (9) and AbsFloat 45 (9) */
             if (!(fabsf(side) < WALL_TOUCH_DISTANCE)) {
                 continue;
             }
@@ -3152,12 +3143,13 @@ s32 PushBallOutOfWalls(BallSimulation *simulation, s32 checksHeight) {
                 }
             }
 
-            isPushed = TRUE;
             if (side < 0.0f) {
+                isPushed = TRUE;
                 x += plane.normal[AXIS_X] * (-WALL_PUSH_DISTANCE - side);
                 z += plane.normal[AXIS_Z] * (-WALL_PUSH_DISTANCE - side);
             }
             else {
+                isPushed = TRUE;
                 x += plane.normal[AXIS_X] * (WALL_PUSH_DISTANCE - side);
                 z += plane.normal[AXIS_Z] * (WALL_PUSH_DISTANCE - side);
             }
@@ -3178,16 +3170,6 @@ s32 PushBallOutOfWalls(BallSimulation *simulation, s32 checksHeight) {
 
     return UNSET_RESULT;
 }
-
-#else
-INCLUDE_ASM("asm/nonmatchings/collision", PushBallOutOfWalls);
-RESUME_RODATA_SECTION();
-static const char f_WallUghText[] = "うっ\n";
-static const char f_WallInsideOutCornerText[] = "WallInsideOutCorner!\n";
-static const char f_WallInsideOutTwoText[] = "WallInsideOut2!\n";
-static const char f_WallInsideOutText[] = "WallInsideOut!\n";
-static const char f_UnusedWallText[3][4] = {"", "", ""};
-#endif
 
 /*
  * Finds the nearest ring that a ball moving from one point to another
