@@ -146,10 +146,10 @@ DISPLAY_LIST_MACROS = re.compile(r"^(?:g[A-Za-z]\w*|G_\w+|FR_\w+|_SHIFT[LR]?)$")
 
 
 # A one-parameter macro whose body is a GNU statement expression, as cpp -dM
-# prints it: its name, parameter, the type of the body's first declaration, and
-# the body
+# prints it, which KMC's cpp ends with a space: its name, parameter, the type
+# of the body's first declaration, and the body
 STATEMENT_EXPRESSION_MACRO = re.compile(
-    r"^#define (\w+)\((\w+)\) (\(\{ (\w+) .*\}\))$", re.MULTILINE
+    r"^#define (\w+)\((\w+)\) (\(\{ (\w+) .*\}\)) ?$", re.MULTILINE
 )
 
 
