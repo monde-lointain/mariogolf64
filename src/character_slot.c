@@ -4561,8 +4561,16 @@ const CharacterModel g_OtherCharacterModels[OTHER_CHARACTER_MODEL_COUNT] = {
  * report had shown each weight in one register before the scaling and
  * another after. That takes the draft from 206 words differing, 42 in
  * shape, to 180 (40); declaring the factors before the weights gives
- * 196 (40), and scaling the next weight first changes nothing. 180 words
- * differ, 40 in shape.
+ * 196 (40), and scaling the next weight first changes nothing.
+ *
+ * The dot product multiplies each of the span's components by the product
+ * scale and then by the next span's, where the draft started from the next
+ * span's; a search reordering and regrouping products found it, and the
+ * scale first, then the two components, gives the same. Of the 12 orders
+ * and groupings of each product, written the same way in all four, none
+ * does better. That takes the draft from 180 words differing (40 in shape)
+ * to 170 (34), and the register oracle's closest from 180 words with no
+ * pseudo forced to 170. 170 words differ, 34 in shape.
  */
 #ifdef NON_MATCHING
 void AnimateCharacterJoints(u32 slotIndex) {
@@ -4720,14 +4728,14 @@ void AnimateCharacterJoints(u32 slotIndex) {
 
                 spanIndex = joint->rotationSpan.index;
                 nextSpanIndex = spanIndex + 1;
-                dot = ((joint->rotations[nextSpanIndex][0] * QUATERNION_PRODUCT_SCALE) *
-                          joint->rotations[spanIndex][0]) +
-                    ((joint->rotations[nextSpanIndex][1] * QUATERNION_PRODUCT_SCALE) *
-                        joint->rotations[spanIndex][1]) +
-                    ((joint->rotations[nextSpanIndex][2] * QUATERNION_PRODUCT_SCALE) *
-                        joint->rotations[spanIndex][2]) +
-                    ((joint->rotations[nextSpanIndex][3] * QUATERNION_PRODUCT_SCALE) *
-                        joint->rotations[spanIndex][3]);
+                dot = ((joint->rotations[spanIndex][0] * QUATERNION_PRODUCT_SCALE) *
+                          joint->rotations[nextSpanIndex][0]) +
+                    ((joint->rotations[spanIndex][1] * QUATERNION_PRODUCT_SCALE) *
+                        joint->rotations[nextSpanIndex][1]) +
+                    ((joint->rotations[spanIndex][2] * QUATERNION_PRODUCT_SCALE) *
+                        joint->rotations[nextSpanIndex][2]) +
+                    ((joint->rotations[spanIndex][3] * QUATERNION_PRODUCT_SCALE) *
+                        joint->rotations[nextSpanIndex][3]);
                 rotationProgress = (g_CurrentAnimationFrame - joint->rotationSpan.startFrame) /
                     (joint->rotationSpan.endFrame - joint->rotationSpan.startFrame);
                 /* Nearly equal rotations are blended linearly, where the sines below

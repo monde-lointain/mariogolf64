@@ -1621,6 +1621,15 @@ void AnimateCharacter(u32 slotIndex) {
  * global frame where the other two read frame; the original loads the
  * global twice in each of the three, and all three reading it give 258
  * (50), so the one-sided read is left out.
+ *
+ * The dot product multiplies each of the span's components by the product
+ * scale and then by the next span's, where the draft started from the next
+ * span's; a search reordering and regrouping products found it, and the
+ * scale first, then the two components, gives the same. Of the 12 orders
+ * and groupings of each product, written the same way in all four, none
+ * does better. That takes the draft from 232 words differing (48 in shape)
+ * to 224 (44), and the register oracle's closest from 80 words, forcing 34
+ * pseudos, to 72, forcing 33. 224 words differ, 44 in shape.
  */
 #ifdef NON_MATCHING
 void UpdateJointKeyframeSpans(u32 slotIndex) {
@@ -1777,14 +1786,14 @@ void UpdateJointKeyframeSpans(u32 slotIndex) {
 
                 spanIndex = joint->rotationSpan.index;
                 nextSpanIndex = spanIndex + 1;
-                dot = ((joint->rotations[nextSpanIndex][0] * QUATERNION_PRODUCT_SCALE) *
-                          joint->rotations[spanIndex][0]) +
-                    ((joint->rotations[nextSpanIndex][1] * QUATERNION_PRODUCT_SCALE) *
-                        joint->rotations[spanIndex][1]) +
-                    ((joint->rotations[nextSpanIndex][2] * QUATERNION_PRODUCT_SCALE) *
-                        joint->rotations[spanIndex][2]) +
-                    ((joint->rotations[nextSpanIndex][3] * QUATERNION_PRODUCT_SCALE) *
-                        joint->rotations[spanIndex][3]);
+                dot = ((joint->rotations[spanIndex][0] * QUATERNION_PRODUCT_SCALE) *
+                          joint->rotations[nextSpanIndex][0]) +
+                    ((joint->rotations[spanIndex][1] * QUATERNION_PRODUCT_SCALE) *
+                        joint->rotations[nextSpanIndex][1]) +
+                    ((joint->rotations[spanIndex][2] * QUATERNION_PRODUCT_SCALE) *
+                        joint->rotations[nextSpanIndex][2]) +
+                    ((joint->rotations[spanIndex][3] * QUATERNION_PRODUCT_SCALE) *
+                        joint->rotations[nextSpanIndex][3]);
                 rotationProgress = (g_CurrentAnimationFrame - joint->rotationSpan.startFrame) /
                     (joint->rotationSpan.endFrame - joint->rotationSpan.startFrame);
                 /* Nearly equal rotations are blended linearly, where the sines below
