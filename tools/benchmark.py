@@ -69,7 +69,8 @@ class Project:
     LANGUAGE holds the flags that say what the C means: includes, defines
     and dialect, with {dir} for the file's directory under src. CODEGEN
     holds the rest. FILTER, if any, is the command the build pipes each
-    file through first, with {src} for it.
+    file through first, with {src} for it. FIX, if any, is the command the
+    build runs on each object after, with {obj} for it.
     """
 
     driver_dir: str
@@ -77,6 +78,7 @@ class Project:
     codegen: tuple[str, ...]
     objects: str
     filter: tuple[str, ...] = ()
+    fix: tuple[str, ...] = ()
 
 
 def read_projects() -> dict[str, Project]:
@@ -106,6 +108,7 @@ def read_projects() -> dict[str, Project]:
             codegen=tuple(fields["codegen"].split()),
             objects=fields["objects"],
             filter=tuple(fields.get("filter", "").split()),
+            fix=tuple(fields.get("fix", "").split()),
         )
     return projects
 
@@ -204,6 +207,9 @@ def verify(name: str) -> None:
             flags = get_flags(project, "original", c_file)
             text = read_source(root, project, c_file)
             _ = run_driver(root, project, [*flags, "-c", "-o", str(obj), "-"], text)
+            if project.fix and obj.exists():
+                command = [part.replace("{obj}", str(obj)) for part in project.fix]
+                _ = subprocess.run(command, cwd=root, capture_output=True, check=False)
             if disassemble(obj) == built:
                 rebuilt.append(c_file)
     BENCH_DIR.mkdir(parents=True, exist_ok=True)
