@@ -38,7 +38,10 @@ typedef struct UnkMusChannel {
     /* 0x94 */ s32 unk94;
     /* 0x98 */ u8 pad98[0x14];
     /* 0xAC */ s16 unkAC;
-    /* 0xAE */ u8 padAE[0x9];
+    /* 0xAE */ u8 padAE[0x4];
+    /* 0xB2 */ s16 unkB2;
+    /* 0xB4 */ s16 unkB4;
+    /* 0xB6 */ u8 padB6[0x1];
     /* 0xB7 */ u8 unkB7;
     /* 0xB8 */ u8 unkB8;
     /* 0xB9 */ u8 unkB9;
@@ -55,7 +58,7 @@ typedef struct UnkMusChannel {
     /* 0xD0 */ u8 unkD0;
     /* 0xD1 */ s8 unkD1;
     /* 0xD2 */ u8 unkD2;
-    /* 0xD3 */ u8 padD3[0x1];
+    /* 0xD3 */ u8 unkD3;
     /* 0xD4 */ u8 unkD4;
     /* 0xD5 */ u8 unkD5;
     /* 0xD6 */ u8 unkD6;
@@ -410,7 +413,13 @@ INCLUDE_ASM("asm/nonmatchings/748B0", func_8009C5BC);
 
 INCLUDE_ASM("asm/nonmatchings/748B0", func_8009C6E4);
 
-INCLUDE_ASM("asm/nonmatchings/748B0", func_8009C7C8);
+u8 *func_8009C7C8(UnkMusChannel *ch, u8 *p) {
+    u8 v = *p;
+
+    ch->unkB2 = 0;
+    ch->unkB4 = v;
+    return p + 1;
+}
 
 INCLUDE_ASM("asm/nonmatchings/748B0", func_8009C7DC);
 
@@ -484,7 +493,13 @@ u8 *func_8009CB30(UnkMusChannel *ch, u8 *p) {
     return p;
 }
 
-INCLUDE_ASM("asm/nonmatchings/748B0", func_8009CB3C);
+u8 *func_8009CB3C(UnkMusChannel *ch, u8 *p) {
+    u8 v = *p;
+
+    ch->unkD2 = 0;
+    ch->unkD3 = v;
+    return p + 1;
+}
 
 u8 *func_8009CB50(UnkMusChannel *ch, u8 *p) {
     ch->unkBD = *p >> 1;
