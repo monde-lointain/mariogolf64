@@ -928,6 +928,8 @@ def print_levers(
 
     The forcing is the search's, cut to the fewest pairs where it matches,
     and editsearch replays global-alloc from the draft's trace for each.
+    The forced variables make editsearch's --goal, which ranks the edits
+    that move them toward their registers.
     """
     search = search_forcing(target, draft, force)
     print_search(search)
@@ -945,6 +947,13 @@ def print_levers(
     )
     for pseudo in named:
         print(f"  {describe_pseudo(draft, pseudo, lines)}")
+    goal = [
+        f"--goal {draft.variables[pseudo]['name']}={hard}"
+        for pseudo, hard in sorted(force.items())
+        if pseudo in draft.variables
+    ]
+    if goal:
+        print(f"editsearch's goal: {' '.join(goal)}")
 
 
 def scan_spills(target: fncompare.Routine, draft: Draft, force: dict[int, int]) -> None:
