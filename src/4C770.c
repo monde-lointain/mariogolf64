@@ -41,7 +41,23 @@ extern u8 D_801321B0[];
 
 INCLUDE_ASM("asm/nonmatchings/4C770", func_80071370);
 
-INCLUDE_ASM("asm/nonmatchings/4C770", func_800715A0);
+s32 func_8004E47C(Unk800E1C48 **);
+extern Unk800E1C48 *D_800E1C30;
+extern Unk800E1C48 *D_800E1C34;
+extern Unk800E1C48 *D_800E1C38;
+extern Unk800E1C48 *D_800E1C44;
+extern Unk800E1C48 *D_800E1C4C;
+extern Unk800E1C48 *D_8012F4E0;
+
+void func_800715A0(void) {
+    func_8004E47C(&D_8012F4E0);
+    func_8004E47C(&D_800E1C30);
+    func_8004E47C(&D_800E1C34);
+    func_8004E47C(&D_800E1C38);
+    func_8004E47C(&D_800E1C4C);
+    func_8004E47C(&D_800E1C44);
+    func_8004E47C(&D_800E1C48);
+}
 
 INCLUDE_ASM("asm/nonmatchings/4C770", func_80071608);
 
@@ -126,11 +142,42 @@ INCLUDE_ASM("asm/nonmatchings/4C770", func_80074230);
 
 INCLUDE_ASM("asm/nonmatchings/4C770", func_80074500);
 
-INCLUDE_ASM("asm/nonmatchings/4C770", func_800747B0);
+u32 func_800738BC(s32, s32, s32);
+s32 func_80073F24(s32 *, s16, s16, s32);
 
-INCLUDE_ASM("asm/nonmatchings/4C770", func_80074840);
+void func_800747B0(s32 *arg0, s32 arg1, s16 arg2, s32 arg3) {
+    s32 sp10;
+    u32 temp_v0;
 
-INCLUDE_ASM("asm/nonmatchings/4C770", func_800748D0);
+    sp10 = *arg0;
+    temp_v0 = func_800738BC(arg3, 0xC, 2);
+    func_80073F24(&sp10, (s16) (arg1 - ((s32) ((temp_v0 >> 0x1F) + temp_v0) >> 1)), arg2, arg3);
+    *arg0 = sp10;
+}
+
+s32 func_80074230(s32 *, s16, s16, s32);
+
+void func_80074840(s32 *arg0, s32 arg1, s16 arg2, s32 arg3) {
+    s32 sp10;
+    u32 temp_v0;
+
+    sp10 = *arg0;
+    temp_v0 = func_800738BC(arg3, 0xA, 2);
+    func_80074230(&sp10, (s16) (arg1 - ((s32) ((temp_v0 >> 0x1F) + temp_v0) >> 1)), arg2, arg3);
+    *arg0 = sp10;
+}
+
+s32 func_80074500(s32 *, s16, s16, s32);
+
+void func_800748D0(s32 *arg0, s32 arg1, s16 arg2, s32 arg3) {
+    s32 sp10;
+    u32 temp_v0;
+
+    sp10 = *arg0;
+    temp_v0 = func_800738BC(arg3, 8, 2);
+    func_80074500(&sp10, (s16) (arg1 - ((s32) ((temp_v0 >> 0x1F) + temp_v0) >> 1)), arg2, arg3);
+    *arg0 = sp10;
+}
 
 void func_80074960(void) {
 }
