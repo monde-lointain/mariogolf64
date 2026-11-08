@@ -1211,12 +1211,28 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/course_menu", DrawStatsScrollArrows);
  * to these 4 with nothing forced. Set at the top of the place's branch, 39
  * words differ (17 in shape), and before its first sync 32 (10), which is
  * where it was set when it gave 48. As an s32 it gives 27 (5), an s16 31
- * (5) and a u32 36 (8); with place an s8, 12 (2), or a u16, 35 (11). The
- * edges' other orders of position, spacing and shift give 14 to 67 words.
- * What's left is the shift's load, four instructions before the original's,
- * and one register. Picking the palette with g_TrophyPalettes[place] in
- * any of the three ifs, rather than the place's constant, gives 12 to 33
- * words. 4 words differ, 2 in shape.
+ * (5) and a u32 36 (8); with place an s8, 12 (2), or a u16, 35 (11).
+ * Picking the palette with g_TrophyPalettes[place] in any of the three
+ * ifs, rather than the place's constant, gives 12 to 33 words.
+ *
+ * The right edge adds the offset to the position plus the width. Of the 60
+ * orders and groupings of width, position, offset, or spacing and shift
+ * apart, that and the position and width swapped give 2 words, none in
+ * shape; the width plus the offset, then the position, gives 4 (2), as
+ * does the offset plus the width, then the position, and the rest 14 or
+ * more. Casting the offset to u16, s16, s32 or u32 gives 2 words at best.
+ * What's left is the order of the last addition's operands: the original
+ * adds the width to the position plus the offset, where this adds the
+ * offset to the width plus the position, and the register oracle's closest
+ * result is these 2 words with nothing forced. Adding the width to the
+ * position plus the offset gives the original's instructions, but swaps
+ * $a0 and $a1 through the rectangle's first word: 48 words, none in shape,
+ * which the oracle matches by forcing 15 pseudos. local-alloc gives $a0 to
+ * the position plus the offset (8 refs over 8, priority 30000) before the
+ * bottom edge's quantity (34 refs over 58, 29310); with one more ref or two
+ * fewer insns of life for the bottom edge, or a longer life for the sum, it
+ * would match, but no order of the edges' terms, and no width of place or
+ * spacing, changes them. 2 words differ, none in shape.
  */
 #ifdef NON_MATCHING
 void DrawCourseTrophies(Gfx **displayListHead) {
@@ -1316,8 +1332,8 @@ void DrawCourseTrophies(Gfx **displayListHead) {
                 );
                 gDPPipeSync(gfx++);
                 /*
-                 * The right edge adds the offset before the position, to match: the
-                 * other orders give 14 to 67 words differing against 4
+                 * The right edge adds the offset to the position plus the width:
+                 * the other orders give 4 to 67 words differing against 2
                  */
                 gSPScisTextureRectangle(
                     gfx++,
@@ -1327,8 +1343,9 @@ void DrawCourseTrophies(Gfx **displayListHead) {
                     ),
                     QuarterPixels(f_StatsTrophyPositions[memory->statsCourse].y),
                     QuarterPixels(
-                        g_TrophySizes[memory->statsCourse].width + (spacing - TROPHY_SHIFT_LEFT) +
-                        f_StatsTrophyPositions[memory->statsCourse].x
+                        (spacing - TROPHY_SHIFT_LEFT) +
+                        (f_StatsTrophyPositions[memory->statsCourse].x +
+                            g_TrophySizes[memory->statsCourse].width)
                     ),
                     QuarterPixels(
                         g_TrophySizes[memory->statsCourse].height +
