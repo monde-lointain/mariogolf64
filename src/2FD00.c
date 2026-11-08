@@ -42,9 +42,9 @@ typedef struct Unk80054354 {
     /* 0x038 */ f32 unk38;
     /* 0x03C */ f32 unk3C;
     /* 0x040 */ f32 unk40;
-    /* 0x044 */ s32 unk44;
+    /* 0x044 */ f32 unk44; /* 0x38..0x58: position, rotation (radians), scale */
     /* 0x048 */ f32 unk48;
-    /* 0x04C */ s32 unk4C;
+    /* 0x04C */ f32 unk4C;
     /* 0x050 */ f32 unk50;
     /* 0x054 */ f32 unk54;
     /* 0x058 */ f32 unk58;
@@ -74,6 +74,10 @@ Unk80054354 *func_80054354(s32 arg0);
 /* Assert / error report: (expression, source file, line). */
 void func_800298E0(const char *expr, const char *file, s32 line);
 s32 func_80043A04(s32 arg0, s32 arg1);
+void func_800453E0(f32 *pos, f32 *rot, f32 *scale);
+
+/* A 16-bit game angle (0x10000 = full turn). */
+extern s16 D_800FBE48;
 
 /* "EX" and "c:/usgolf64/polychara/pcsub.c": this segment is probably the
  * original polychara/pcsub.c. */
@@ -348,7 +352,15 @@ INCLUDE_ASM("asm/nonmatchings/2FD00", func_80057914);
 
 INCLUDE_ASM("asm/nonmatchings/2FD00", func_80057FFC);
 
-INCLUDE_ASM("asm/nonmatchings/2FD00", func_80058ACC);
+void func_80058ACC(s32 arg0) {
+    Unk80054354 *p = func_80054354(arg0);
+
+    if (p != NULL) {
+        func_800453E0(&p->unk38, &p->unk44, &p->unk50);
+        /* 0.0000958738f = 2 * pi / 0x10000: game angle -> radians. */
+        p->unk48 = (f32)(-D_800FBE48 & 0xFFFF) * 0.0000958738f;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/2FD00", func_80058B34);
 
