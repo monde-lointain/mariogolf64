@@ -4097,7 +4097,9 @@ void WriteHexDumpFile(u32 *words, s32 byteCount, char *fileName) {
  * Each half starts its middle slot after the first tile's S, before the
  * wave's tile, as DrawGround now does; after the wave's tile it was 921
  * words (133 in shape), and this gives 917 (131). Set before the first
- * tile's S, it gives 917 (131) too. 917 words differ, 131 in shape.
+ * tile's S, it gives 917 (131) too. The bottom slot is set after the
+ * tile index, as in DrawGround; before the top slot, it gave those 917
+ * words, and this gives 905 (123). 905 words differ, 123 in shape.
  */
 #ifdef NON_MATCHING
 void DrawHoleEditorGround(CameraMatrices *matrices UNUSED, s32 terrainStyle) {
@@ -4675,9 +4677,9 @@ void DrawHoleEditorGround(CameraMatrices *matrices UNUSED, s32 terrainStyle) {
         s32 firstTileS;
 
         previousDetail = GROUND_DETAIL_HIDDEN;
-        bottomSlot = FIRST_BOTTOM_SLOT;
         topSlot = FIRST_TOP_SLOT;
         tileIndex = half * GROUND_TILE_GROUP_SIZE;
+        bottomSlot = FIRST_BOTTOM_SLOT;
         firstTileS = tileIndex * TILE_COORDINATE_SPAN;
         middleSlot = FIRST_MIDDLE_SLOT;
         gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0, f_TriangleSlopes[slopeIndex].shade);

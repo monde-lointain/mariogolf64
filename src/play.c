@@ -2232,7 +2232,9 @@ INCLUDE_ASM("asm/nonmatchings/play", RebuildGroundTextureCoordinates);
  * (94 in shape) to 574 (92), where after the test, beside the column, it
  * had taken it from 897 words (233 in shape) to 893 (231). Beside the
  * other slots, after the top slot or between the bottom and top, gives
- * 580 (92).
+ * 580 (92). The bottom slot is set after the tile index, as in
+ * DrawHoleEditorGround, where that does better; before the top slot, as it
+ * was, it gives the same 574 words (92 in shape).
  *
  * In each tile loop the original steps two registers by 0x80: one starts at
  * half << 9, which it keeps in a stack slot, and gives the tile's left S; the
@@ -2530,10 +2532,10 @@ void DrawGround(CameraMatrices *matrices, s32 terrainStyle) {
         s32 firstTileS;
 
         previousDetail = GROUND_DETAIL_HIDDEN;
-        bottomSlot = FIRST_BOTTOM_SLOT;
         topSlot = FIRST_TOP_SLOT;
         firstTileColumn = half * GROUND_TILE_GROUP_SIZE;
         tileIndex = firstTileColumn;
+        bottomSlot = FIRST_BOTTOM_SLOT;
         firstTileS = firstTileColumn * TILE_COORDINATE_SPAN;
         middleSlot = FIRST_MIDDLE_SLOT;
         if (IsGameFlagSet(GAME_FLAG_LOG_GROUND_ROWS)) {
