@@ -3107,6 +3107,17 @@ INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard_drawing", DrawLeaderboardPage);
  * forcing 47 pseudos either way. Swapping the front or the back face
  * alone gives 963 or 967 words (153 in shape). 688 words differ, 150 in
  * shape.
+ *
+ * The back nine's skins total and net score, and all four handicap-stroke
+ * texts, add their row's offset first, then the nine's top and the row:
+ * that takes the draft from 688 words differing to 665, 150 in shape to
+ * 131, and the register oracle's closest from 542 words, forcing 47
+ * pseudos, to 537, forcing 38. editsearch found the pair of changes; the
+ * skins and net score alone give 738 words (146 in shape) with a frame 8
+ * bytes smaller, and the handicap strokes alone 747 (135) with one 8
+ * bytes larger. The condensed net score's sum written the same way too
+ * gives 636 words (130 in shape), but the oracle then forces nothing and
+ * leaves all 636. 665 words differ, 131 in shape.
  */
 #ifdef NON_MATCHING
 void DrawScoresPage(Gfx **displayListHead) {
@@ -4271,7 +4282,7 @@ void DrawScoresPage(Gfx **displayListHead) {
                 DrawShadowedText(
                     &gfx,
                     g_Scorecard.x + SKINS_TOTAL_LEFT,
-                    backTop + (i * rowSpacing) + PLAYER_ROW_TOP + g_Scorecard.y,
+                    PLAYER_ROW_TOP + backTop + (i * rowSpacing) + g_Scorecard.y,
                     g_PrintBuffer
                 );
             }
@@ -4465,7 +4476,7 @@ void DrawScoresPage(Gfx **displayListHead) {
                 DrawShadowedText(
                     &gfx,
                     g_Scorecard.x + NET_SCORE_LEFT,
-                    backTop + (i * rowSpacing) + PLAYER_ROW_TOP + g_Scorecard.y,
+                    PLAYER_ROW_TOP + backTop + (i * rowSpacing) + g_Scorecard.y,
                     g_PrintBuffer
                 );
             }
@@ -4489,7 +4500,7 @@ void DrawScoresPage(Gfx **displayListHead) {
                     DrawShadowedText(
                         &gfx,
                         (j * CELL_WIDTH) + HANDICAP_STROKE_LEFT + g_Scorecard.x,
-                        frontTop + (i * PLAYER_ROW_SPACING) + HANDICAP_STROKE_TOP + g_Scorecard.y,
+                        HANDICAP_STROKE_TOP + frontTop + (i * PLAYER_ROW_SPACING) + g_Scorecard.y,
                         g_PrintBuffer
                     );
                 }
@@ -4498,7 +4509,7 @@ void DrawScoresPage(Gfx **displayListHead) {
                     DrawShadowedText(
                         &gfx,
                         (j * CELL_WIDTH) + SECOND_HANDICAP_STROKE_LEFT + g_Scorecard.x,
-                        frontTop + (i * PLAYER_ROW_SPACING) + HANDICAP_STROKE_TOP + g_Scorecard.y,
+                        HANDICAP_STROKE_TOP + frontTop + (i * PLAYER_ROW_SPACING) + g_Scorecard.y,
                         g_PrintBuffer
                     );
                 }
@@ -4509,7 +4520,7 @@ void DrawScoresPage(Gfx **displayListHead) {
                     DrawShadowedText(
                         &gfx,
                         (j * CELL_WIDTH) + HANDICAP_STROKE_LEFT + g_Scorecard.x,
-                        backTop + (i * PLAYER_ROW_SPACING) + HANDICAP_STROKE_TOP + g_Scorecard.y,
+                        HANDICAP_STROKE_TOP + backTop + (i * PLAYER_ROW_SPACING) + g_Scorecard.y,
                         g_PrintBuffer
                     );
                 }
@@ -4518,7 +4529,7 @@ void DrawScoresPage(Gfx **displayListHead) {
                     DrawShadowedText(
                         &gfx,
                         (j * CELL_WIDTH) + SECOND_HANDICAP_STROKE_LEFT + g_Scorecard.x,
-                        backTop + (i * PLAYER_ROW_SPACING) + HANDICAP_STROKE_TOP + g_Scorecard.y,
+                        HANDICAP_STROKE_TOP + backTop + (i * PLAYER_ROW_SPACING) + g_Scorecard.y,
                         g_PrintBuffer
                     );
                 }
