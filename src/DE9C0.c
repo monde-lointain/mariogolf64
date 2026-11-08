@@ -70,7 +70,14 @@ INCLUDE_ASM("asm/nonmatchings/DE9C0", func_ovl3_801F9E38);
 
 INCLUDE_ASM("asm/nonmatchings/DE9C0", func_ovl3_801F9FF8);
 
-INCLUDE_ASM("asm/nonmatchings/DE9C0", func_ovl3_801FA1B8);
+s32 func_800959F8();
+
+void func_ovl3_801FA1B8(void) {
+    if ((func_800959F8() == 1) && (D_800C2004 & 0x4000)) {
+        func_80050BF0(0x5F, 0xF, 0x50);
+        D_801EFFA0 = 2;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/DE9C0", func_ovl3_801FA20C);
 
