@@ -35,7 +35,34 @@ void func_8005E2C0(void) {
     s32 sp0[6]; /* unused; only sizes the 0x18 stack frame to match */
 }
 
-INCLUDE_ASM("asm/nonmatchings/396C0", func_8005E2CC);
+s32 __osGetCurrFaultedThread();
+s32 func_80050BF0(s32, s32, s32);
+s32 func_8005E380(s32);
+extern s8 D_800D0AE4;
+extern s8 D_800D0AF8;
+extern s32 D_800DF0B0;
+extern s32 D_800DF0B4;
+extern OSMesgQueue D_800E1270;
+
+void func_8005E2CC(void) {
+    void *sp10;
+    s32 temp_v0;
+
+    osSetEventMesg(0xCU, &D_800E1270, (void *)0x10);
+    D_800DF0B4 = 0;
+loop_1:
+    osSyncPrintf(&D_800D0AE4);
+    osRecvMesg(&D_800E1270, &sp10, 1);
+    osSyncPrintf(&D_800D0AF8);
+    temp_v0 = __osGetCurrFaultedThread();
+    D_800DF0B0 = temp_v0;
+    if (temp_v0 == 0) {
+        goto loop_1;
+    }
+    func_80050BF0(0x30, 0xB, 0x7F);
+    func_8005E380(D_800DF0B0);
+    goto loop_1;
+}
 
 void func_8005E360(void) {
     osSyncPrintf(D_800FF428);
@@ -71,7 +98,18 @@ void func_8005ED8C(u8 *arg0) {
 
 INCLUDE_ASM("asm/nonmatchings/396C0", func_8005EDD0);
 
-INCLUDE_ASM("asm/nonmatchings/396C0", func_8005EE94);
+s32 nuScAddClient(s32 *, OSMesgQueue *, s32);
+extern void *D_800E1290;
+extern void *D_800E1298;
+extern s32 D_800E129C;
+extern OSMesgQueue D_800FC8C0;
+extern OSMesgQueue D_80132198;
+
+void func_8005EE94(void) {
+    osCreateMesgQueue(&D_80132198, &D_800E1290, 2);
+    osCreateMesgQueue(&D_800FC8C0, &D_800E1298, 1);
+    nuScAddClient(&D_800E129C, &D_80132198, 3);
+}
 
 INCLUDE_ASM("asm/nonmatchings/396C0", func_8005EEF8);
 
@@ -102,7 +140,19 @@ void func_8005F0FC(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     func_80099CF0(arg0, arg1, arg2, arg3, arg4);
 }
 
-INCLUDE_ASM("asm/nonmatchings/396C0", func_8005F11C);
+s32 func_8009A47C(void *);
+extern s8 D_800D1220;
+
+void func_8005F11C(u32 arg0, s32 arg1) {
+    u32 temp_s0;
+
+    temp_s0 = (arg1 & 1) + arg1;
+    if (temp_s0 >= 0x4001U) {
+        osSyncPrintf(&D_800D1220);
+    }
+    nuPiReadRom(arg0, D_800C2FF4, temp_s0);
+    func_8009A47C(D_800C2FF4);
+}
 
 s32 func_8005F180(void) {
     s32 ret = 0;
