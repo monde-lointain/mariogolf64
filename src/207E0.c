@@ -154,7 +154,24 @@ void func_8004876C(void) {
     func_800719A0(0, 0, -1, 1, 1, 0, 0, 0, 0, 0);
 }
 
-INCLUDE_ASM("asm/nonmatchings/207E0", func_800487E4);
+s32 func_800299F4(s32 arg0);
+void func_80216130(s32 arg0);
+extern s32 D_800BA9F0;
+extern s32 D_801B608C;
+extern s8 D_801B60C2;
+
+/* s32 with no return: implicit int (empty delay-slot pattern). */
+s32 func_800487E4(void) {
+    D_800BE694 = -1;
+    D_801B7F70 = 0;
+    D_801B7F74 = 0;
+    D_801B557C = 0;
+    if (D_801B608C != 7 && D_801B60C2 == 0) {
+        if (func_800299F4(0x48) != 0 || D_800BA9F0 / 0x10000 >= 6) {
+            func_80216130(1);
+        }
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/207E0", func_8004887C);
 
