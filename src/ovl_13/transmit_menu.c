@@ -2979,7 +2979,12 @@ void ClearCartridgeCharacters(void) {
  * Every declaration order of saveIndex and recordOffset and three orders of
  * the assignments before PHASE 1 give the same 40 words, an else-if chain for
  * the record offset 42 (6 in shape), a switch 16 (10) and testing
- * character->saveIndex 54 (16). 40 words differ, none in shape.
+ * character->saveIndex 54 (16). The oracle's merging of any of at least 35
+ * expressions' pseudos into saveIndex's matches, as the added references
+ * raise it above recordOffset, but no natural form found does that:
+ * building storedSum in two steps, its low byte first, gives 10 words (none
+ * in shape), and the oracle then leaves 4 forcing 5, so its RTL is no longer
+ * the original's. 40 words differ, none in shape.
  *
  * The clamp repeats the sum in each arm, which gives the original's copy of
  * the sum into the stored experience's register. Through a sum local, as a ?:
