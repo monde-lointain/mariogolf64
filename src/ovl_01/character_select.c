@@ -592,23 +592,24 @@ s32 GetStickDiagonal(void) {
  */
 
 /*
- * Doesn't match: the original sets up the chosen character's sound with the
- * volume first, filling the random test's delay slot with it, where this
- * fills it with the character. The register oracle's closest result is these
- * 10 words with no register forced, so allocation isn't the cause. Testing
- * for the other sound first gives 10 words, 2 in shape: the slot then holds
- * the volume, as the original's does, but the other sound's call falls
- * through. sched1 starts both arms with the volume either way. reorg fills
- * the slot from the fall-through arm, and takes the volume only if $v0 is
- * dead at the other arm; mark_target_live_regs finds it live there, as the
+ * Doesn't match: the original holds NO_PALETTE, stored after the face
+ * preview, in $v0, where this holds it in $v1; the register oracle's closest
+ * result is these 4 words with no register forced, so allocation isn't the
+ * cause. Storing it first, as the undo does, gives 6 words, 4 in shape.
+ *
+ * Each cursor move returns at once when the move fails, before clearing the
+ * text slots. Clearing them inside an if on the move's success, with one
+ * return after it, gives 10 words, 4 in shape: the original fills the random
+ * test's delay slot, for the chosen character's sound, with the volume, and
+ * that form with the character. reorg takes the volume only if $v0 is dead
+ * at the other arm, and mark_target_live_regs finds it live there, as the
  * walk from that arm to the return meets the USE update_block left for the
- * return value's $v0 = 0, stolen into an earlier delay slot.
- * The test written != 0 or as % 2 changes nothing, a switch with case 0
- * first gives 10 words (2 in shape) and case 1 first 16 (10), and choosing
- * the sound with ?: in one call, or into a sound local by an if, 27 (19 in
- * shape). The other 2 words are NO_PALETTE, stored after the face preview,
- * which the original holds in $v0 and this in $v1. 10 words differ, 4 in
- * shape.
+ * return value's $v0 = 0, stolen into an earlier delay slot. Testing for the
+ * other sound first there gives 10 words, 2 in shape, the test written != 0
+ * or as % 2 changes nothing, a switch with case 0 first gives 10 words (2 in
+ * shape) and case 1 first 16 (10), and choosing the sound with ?: in one
+ * call, or into a sound local by an if, 27 (19 in shape). 4 words differ,
+ * none in shape.
  *
  * The grid marks of a player whose choice is undone are read into character,
  * as the original keeps them in character's register; in gridMark, 136 words
@@ -689,21 +690,23 @@ s32 UpdateCharacterSelect(s32 firstPlayerIndex, s32 playerCount, Boolean canChoo
     playerIndex = g_ChoosingPlayerIndex;
     if (g_MenuRepeatButtons == (U_JPAD | L_JPAD)) {
         PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
-        if (MoveGridCursorDiagonal(playerIndex, STICK_DIAGONAL_UP_LEFT, (u8)canChooseMarked) == 0) {
-            for (index = 1; index != CHARACTER_SELECT_TEXT_SLOT_COUNT; index++) {
-                SetTextSlot(
-                    0,
-                    0,
-                    NO_MESSAGE,
-                    TEXT_SLOT_LARGE_FONT,
-                    index,
-                    0,
-                    255,
-                    255,
-                    255,
-                    OPAQUE_ALPHA
-                );
-            }
+        if (MoveGridCursorDiagonal(playerIndex, STICK_DIAGONAL_UP_LEFT, (u8)canChooseMarked) != 0) {
+            return 0;
+        }
+
+        for (index = 1; index != CHARACTER_SELECT_TEXT_SLOT_COUNT; index++) {
+            SetTextSlot(
+                0,
+                0,
+                NO_MESSAGE,
+                TEXT_SLOT_LARGE_FONT,
+                index,
+                0,
+                255,
+                255,
+                255,
+                OPAQUE_ALPHA
+            );
         }
 
         return 0;
@@ -711,22 +714,24 @@ s32 UpdateCharacterSelect(s32 firstPlayerIndex, s32 playerCount, Boolean canChoo
 
     if (g_MenuRepeatButtons == (U_JPAD | R_JPAD)) {
         PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
-        if (MoveGridCursorDiagonal(playerIndex, STICK_DIAGONAL_UP_RIGHT, (u8)canChooseMarked) ==
+        if (MoveGridCursorDiagonal(playerIndex, STICK_DIAGONAL_UP_RIGHT, (u8)canChooseMarked) !=
             0) {
-            for (index = 1; index != CHARACTER_SELECT_TEXT_SLOT_COUNT; index++) {
-                SetTextSlot(
-                    0,
-                    0,
-                    NO_MESSAGE,
-                    TEXT_SLOT_LARGE_FONT,
-                    index,
-                    0,
-                    255,
-                    255,
-                    255,
-                    OPAQUE_ALPHA
-                );
-            }
+            return 0;
+        }
+
+        for (index = 1; index != CHARACTER_SELECT_TEXT_SLOT_COUNT; index++) {
+            SetTextSlot(
+                0,
+                0,
+                NO_MESSAGE,
+                TEXT_SLOT_LARGE_FONT,
+                index,
+                0,
+                255,
+                255,
+                255,
+                OPAQUE_ALPHA
+            );
         }
 
         return 0;
@@ -734,22 +739,24 @@ s32 UpdateCharacterSelect(s32 firstPlayerIndex, s32 playerCount, Boolean canChoo
 
     if (g_MenuRepeatButtons == (D_JPAD | L_JPAD)) {
         PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
-        if (MoveGridCursorDiagonal(playerIndex, STICK_DIAGONAL_DOWN_LEFT, (u8)canChooseMarked) ==
+        if (MoveGridCursorDiagonal(playerIndex, STICK_DIAGONAL_DOWN_LEFT, (u8)canChooseMarked) !=
             0) {
-            for (index = 1; index != CHARACTER_SELECT_TEXT_SLOT_COUNT; index++) {
-                SetTextSlot(
-                    0,
-                    0,
-                    NO_MESSAGE,
-                    TEXT_SLOT_LARGE_FONT,
-                    index,
-                    0,
-                    255,
-                    255,
-                    255,
-                    OPAQUE_ALPHA
-                );
-            }
+            return 0;
+        }
+
+        for (index = 1; index != CHARACTER_SELECT_TEXT_SLOT_COUNT; index++) {
+            SetTextSlot(
+                0,
+                0,
+                NO_MESSAGE,
+                TEXT_SLOT_LARGE_FONT,
+                index,
+                0,
+                255,
+                255,
+                255,
+                OPAQUE_ALPHA
+            );
         }
 
         return 0;
@@ -757,22 +764,24 @@ s32 UpdateCharacterSelect(s32 firstPlayerIndex, s32 playerCount, Boolean canChoo
 
     if (g_MenuRepeatButtons == (D_JPAD | R_JPAD)) {
         PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
-        if (MoveGridCursorDiagonal(playerIndex, STICK_DIAGONAL_DOWN_RIGHT, (u8)canChooseMarked) ==
+        if (MoveGridCursorDiagonal(playerIndex, STICK_DIAGONAL_DOWN_RIGHT, (u8)canChooseMarked) !=
             0) {
-            for (index = 1; index != CHARACTER_SELECT_TEXT_SLOT_COUNT; index++) {
-                SetTextSlot(
-                    0,
-                    0,
-                    NO_MESSAGE,
-                    TEXT_SLOT_LARGE_FONT,
-                    index,
-                    0,
-                    255,
-                    255,
-                    255,
-                    OPAQUE_ALPHA
-                );
-            }
+            return 0;
+        }
+
+        for (index = 1; index != CHARACTER_SELECT_TEXT_SLOT_COUNT; index++) {
+            SetTextSlot(
+                0,
+                0,
+                NO_MESSAGE,
+                TEXT_SLOT_LARGE_FONT,
+                index,
+                0,
+                255,
+                255,
+                255,
+                OPAQUE_ALPHA
+            );
         }
 
         return 0;
@@ -781,21 +790,23 @@ s32 UpdateCharacterSelect(s32 firstPlayerIndex, s32 playerCount, Boolean canChoo
     if (g_MenuRepeatButtons & U_JPAD) {
         PrintDebugText("          ", BLANKED_DEBUG_TEXT_COLUMN, BLANKED_DEBUG_TEXT_ROW);
         PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
-        if (MoveGridCursor(playerIndex, GRID_MOVE_UP, (u8)canChooseMarked) == 0) {
-            for (index = 1; index != CHARACTER_SELECT_TEXT_SLOT_COUNT; index++) {
-                SetTextSlot(
-                    0,
-                    0,
-                    NO_MESSAGE,
-                    TEXT_SLOT_LARGE_FONT,
-                    index,
-                    0,
-                    255,
-                    255,
-                    255,
-                    OPAQUE_ALPHA
-                );
-            }
+        if (MoveGridCursor(playerIndex, GRID_MOVE_UP, (u8)canChooseMarked) != 0) {
+            return 0;
+        }
+
+        for (index = 1; index != CHARACTER_SELECT_TEXT_SLOT_COUNT; index++) {
+            SetTextSlot(
+                0,
+                0,
+                NO_MESSAGE,
+                TEXT_SLOT_LARGE_FONT,
+                index,
+                0,
+                255,
+                255,
+                255,
+                OPAQUE_ALPHA
+            );
         }
 
         return 0;
@@ -803,21 +814,23 @@ s32 UpdateCharacterSelect(s32 firstPlayerIndex, s32 playerCount, Boolean canChoo
 
     if (g_MenuRepeatButtons & D_JPAD) {
         PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
-        if (MoveGridCursor(playerIndex, GRID_MOVE_DOWN, (u8)canChooseMarked) == 0) {
-            for (index = 1; index != CHARACTER_SELECT_TEXT_SLOT_COUNT; index++) {
-                SetTextSlot(
-                    0,
-                    0,
-                    NO_MESSAGE,
-                    TEXT_SLOT_LARGE_FONT,
-                    index,
-                    0,
-                    255,
-                    255,
-                    255,
-                    OPAQUE_ALPHA
-                );
-            }
+        if (MoveGridCursor(playerIndex, GRID_MOVE_DOWN, (u8)canChooseMarked) != 0) {
+            return 0;
+        }
+
+        for (index = 1; index != CHARACTER_SELECT_TEXT_SLOT_COUNT; index++) {
+            SetTextSlot(
+                0,
+                0,
+                NO_MESSAGE,
+                TEXT_SLOT_LARGE_FONT,
+                index,
+                0,
+                255,
+                255,
+                255,
+                OPAQUE_ALPHA
+            );
         }
 
         return 0;
@@ -825,21 +838,23 @@ s32 UpdateCharacterSelect(s32 firstPlayerIndex, s32 playerCount, Boolean canChoo
 
     if (g_MenuRepeatButtons & L_JPAD) {
         PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
-        if (MoveGridCursor(playerIndex, GRID_MOVE_LEFT, (u8)canChooseMarked) == 0) {
-            for (index = 1; index != CHARACTER_SELECT_TEXT_SLOT_COUNT; index++) {
-                SetTextSlot(
-                    0,
-                    0,
-                    NO_MESSAGE,
-                    TEXT_SLOT_LARGE_FONT,
-                    index,
-                    0,
-                    255,
-                    255,
-                    255,
-                    OPAQUE_ALPHA
-                );
-            }
+        if (MoveGridCursor(playerIndex, GRID_MOVE_LEFT, (u8)canChooseMarked) != 0) {
+            return 0;
+        }
+
+        for (index = 1; index != CHARACTER_SELECT_TEXT_SLOT_COUNT; index++) {
+            SetTextSlot(
+                0,
+                0,
+                NO_MESSAGE,
+                TEXT_SLOT_LARGE_FONT,
+                index,
+                0,
+                255,
+                255,
+                255,
+                OPAQUE_ALPHA
+            );
         }
 
         return 0;
@@ -847,21 +862,23 @@ s32 UpdateCharacterSelect(s32 firstPlayerIndex, s32 playerCount, Boolean canChoo
 
     if (g_MenuRepeatButtons & R_JPAD) {
         PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
-        if (MoveGridCursor(playerIndex, GRID_MOVE_RIGHT, (u8)canChooseMarked) == 0) {
-            for (index = 1; index != CHARACTER_SELECT_TEXT_SLOT_COUNT; index++) {
-                SetTextSlot(
-                    0,
-                    0,
-                    NO_MESSAGE,
-                    TEXT_SLOT_LARGE_FONT,
-                    index,
-                    0,
-                    255,
-                    255,
-                    255,
-                    OPAQUE_ALPHA
-                );
-            }
+        if (MoveGridCursor(playerIndex, GRID_MOVE_RIGHT, (u8)canChooseMarked) != 0) {
+            return 0;
+        }
+
+        for (index = 1; index != CHARACTER_SELECT_TEXT_SLOT_COUNT; index++) {
+            SetTextSlot(
+                0,
+                0,
+                NO_MESSAGE,
+                TEXT_SLOT_LARGE_FONT,
+                index,
+                0,
+                255,
+                255,
+                255,
+                OPAQUE_ALPHA
+            );
         }
 
         return 0;
