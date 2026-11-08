@@ -238,7 +238,25 @@ void func_ovl0_8020D784(void) {
     func_8004E47C(&D_ovl0_80227C98);
 }
 
-INCLUDE_ASM("asm/nonmatchings/BBD00", func_ovl0_8020D7C4);
+f32 func_80059FAC(f32, f32);
+extern f32 D_801B54EC;
+extern f32 D_801B54F4;
+extern f32 D_801B54F8;
+extern f32 D_801B5500;
+
+f32 func_ovl0_8020D7C4(void) {
+    f32 temp_fa0;
+    f32 temp_fa1;
+    f32 var_ft1;
+
+    temp_fa0 = D_801B54F8 - D_801B54EC;
+    var_ft1 = 0.0f;
+    temp_fa1 = D_801B5500 - D_801B54F4;
+    if (((s32) temp_fa0 != 0) || ((s32) temp_fa1 != 0)) {
+        var_ft1 = func_80059FAC(temp_fa0, temp_fa1);
+    }
+    return var_ft1;
+}
 
 s32 func_ovl0_8020D838(void) {
     UnkOvl0_8022B5D0 *p;
