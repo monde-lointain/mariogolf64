@@ -2984,7 +2984,12 @@ void ClearCartridgeCharacters(void) {
  * raise it above recordOffset, but no natural form found does that:
  * building storedSum in two steps, its low byte first, gives 10 words (none
  * in shape), and the oracle then leaves 4 forcing 5, so its RTL is no longer
- * the original's. 40 words differ, none in shape.
+ * the original's. Replaying global-alloc (oracle.py --levers), one more
+ * reference to saveIndex or storedSum in the loop, or one fewer to
+ * recordOffset, would match. Masking storedSum with sum matches, but it holds
+ * two bytes already, so the mask can't change it; masking it in the test
+ * gives 44 words (2 in shape), dropping the record offset's first set 70 (4)
+ * and a sumOffset local for PHASE 12 14 (4). 40 words differ, none in shape.
  *
  * The clamp repeats the sum in each arm, which gives the original's copy of
  * the sum into the stored experience's register. Through a sum local, as a ?:
