@@ -53,7 +53,21 @@ s32 func_8006AD94(void) {
     return D_800C4020;
 }
 
-INCLUDE_ASM("asm/nonmatchings/456C0", func_8006ADA0);
+extern f32 D_800C401C;
+
+s32 func_8006ADA0(void) {
+    if (D_800C4010 == 0) {
+        return (s32) D_800C401C;
+    }
+    switch (D_800C4014) {
+    case 1:
+    default:
+        return 0;
+    case 3:
+        D_800C4010 = 0;
+        return 0x14;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/456C0", func_8006ADF8);
 
