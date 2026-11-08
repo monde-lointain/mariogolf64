@@ -328,7 +328,25 @@ void ResetBallSimulations(void) {
  * editsearch found the pair; it takes the draft from 419 words (109 in
  * shape) to 413 (107), and the register oracle's closest from 217 words,
  * forcing 119 pseudos, to 215, forcing 116. The skip test alone gives 415
- * (107) and the drift alone 417 (109). 413 words differ, 107 in shape.
+ * (107) and the drift alone 417 (109).
+ *
+ * The counts above were measured before the changes below. A search
+ * reordering and regrouping sums and products, applied one find at a time,
+ * took the draft from 413 words (107 in shape) to 329 (79), and the
+ * register oracle's closest from 215 words, forcing 116 pseudos, to 162,
+ * forcing 89. The slope steering multiplies SLOPE_STEER_SCALE by against
+ * and then by the slope over the speed (374 words, 98 in shape); the
+ * ground's drift multiplies the spin's difference by the restitution's
+ * complement, the normal's y and the grip in turn (363, 91); the roll's
+ * volume multiplies the speed by the volume per speed times the frames
+ * (357, 87); the curve multiplies the side spin by CURVE_PER_SIDE_SPIN and
+ * then by the weight (353, 87); the roll's tilt multiplies each velocity by
+ * the tilt over ROLL_TILT_FULL_SPEED (351, 83); and the triangle hit writes
+ * its three steps alike, the fraction times the share times the velocity,
+ * where z took the fraction last (329, 79). The wall hit's three steps, now
+ * also written alike as the share times the velocity times the fraction,
+ * keep 329 words, so neither hit keeps the earlier sweep's z-last form. 329
+ * words differ, 79 in shape.
  */
 #ifdef NON_MATCHING
 s32 StepBallSimulation(BallSimulation *simulation) {
@@ -1193,9 +1211,9 @@ s32 StepBallSimulation(BallSimulation *simulation) {
                     along = 0.0f;
                 }
 
-                hitPosition[AXIS_X] = startX + (along * (velocity[AXIS_X] * WALL_HIT_STEP_SHARE));
-                hitPosition[AXIS_Y] = startY + (along * (velocity[AXIS_Y] * WALL_HIT_STEP_SHARE));
-                hitPosition[AXIS_Z] = startZ + ((velocity[AXIS_Z] * WALL_HIT_STEP_SHARE) * along);
+                hitPosition[AXIS_X] = startX + (WALL_HIT_STEP_SHARE * velocity[AXIS_X] * along);
+                hitPosition[AXIS_Y] = startY + (WALL_HIT_STEP_SHARE * velocity[AXIS_Y] * along);
+                hitPosition[AXIS_Z] = startZ + (WALL_HIT_STEP_SHARE * velocity[AXIS_Z] * along);
                 if (wallFraction < 0.0f && fabsf(inwardSpeed) < WALL_ESCAPE_SPEED) {
                     BallSpeed speed = sqrtf(squareX + squareZ);
 
@@ -1258,11 +1276,11 @@ s32 StepBallSimulation(BallSimulation *simulation) {
             simulation->bounceCount++;
             GetTrianglePlane(&triangle, &plane);
             simulation->position[AXIS_X] =
-                (fraction * (velocity[AXIS_X] * TRIANGLE_HIT_STEP_SHARE)) + startX;
+                startX + (fraction * TRIANGLE_HIT_STEP_SHARE * velocity[AXIS_X]);
             simulation->position[AXIS_Y] =
-                startY + (fraction * (velocity[AXIS_Y] * TRIANGLE_HIT_STEP_SHARE));
+                startY + (fraction * TRIANGLE_HIT_STEP_SHARE * velocity[AXIS_Y]);
             simulation->position[AXIS_Z] =
-                startZ + ((velocity[AXIS_Z] * TRIANGLE_HIT_STEP_SHARE) * fraction);
+                startZ + (fraction * TRIANGLE_HIT_STEP_SHARE * velocity[AXIS_Z]);
             substepCount += (fraction < EARLY_HIT_FRACTION) & (substepCount == 1);
             if (simulation->purpose == LAUNCH_PURPOSE_CLUB_TEST) {
                 simulation->surface = SURFACE_FAIRWAY;
@@ -1758,10 +1776,10 @@ s32 StepBallSimulation(BallSimulation *simulation) {
                 simulation->lastBounceStep = simulation->stepCount;
                 spinVelocityX = simulation->spinSpeed * cosf(simulation->spinHeading);
                 spinVelocityZ = simulation->spinSpeed * sinf(simulation->spinHeading);
-                driftX = (spinVelocityX - velocity[AXIS_X]) *
-                    (fabsf(plane.normal[AXIS_Y]) * (1.0f - restitution) * GROUND_SPIN_GRIP);
-                driftZ = (spinVelocityZ - velocity[AXIS_Z]) *
-                    (fabsf(plane.normal[AXIS_Y]) * (1.0f - restitution) * GROUND_SPIN_GRIP);
+                driftX = (spinVelocityX - velocity[AXIS_X]) * (1.0f - restitution) *
+                    fabsf(plane.normal[AXIS_Y]) * GROUND_SPIN_GRIP;
+                driftZ = (spinVelocityZ - velocity[AXIS_Z]) * (1.0f - restitution) *
+                    fabsf(plane.normal[AXIS_Y]) * GROUND_SPIN_GRIP;
                 drift = (s32)IntLength2D(driftX, driftZ);
                 driftLimit = impactSpeed * MAX_SPIN_DRIFT_SHARE;
                 if (driftLimit < drift && impactSpeed > 1.0f) {
@@ -1877,8 +1895,10 @@ s32 StepBallSimulation(BallSimulation *simulation) {
                     fabsf(velocity[AXIS_X]) + fabsf(velocity[AXIS_Z]) >= KilometersPerHour(5)) {
                     f32 tilt = (GetStepNoise() - NOISE_MIDDLE) * ROLL_TILT_NOISE_SCALE;
 
-                    plane.normal[AXIS_X] -= velocity[AXIS_Z] * (1.0f / ROLL_TILT_FULL_SPEED) * tilt;
-                    plane.normal[AXIS_Z] += velocity[AXIS_X] * (1.0f / ROLL_TILT_FULL_SPEED) * tilt;
+                    plane.normal[AXIS_X] -=
+                        velocity[AXIS_Z] * (tilt * (1.0f / ROLL_TILT_FULL_SPEED));
+                    plane.normal[AXIS_Z] +=
+                        velocity[AXIS_X] * (tilt * (1.0f / ROLL_TILT_FULL_SPEED));
                     guNormalize(
                         &plane.normal[AXIS_X],
                         &plane.normal[AXIS_Y],
@@ -2009,8 +2029,8 @@ TAKE_OFF:
                     (((f32)slopeX * velocity[AXIS_X]) + ((f32)slopeZ * velocity[AXIS_Z])) / speed
                 );
 
-                slopeX = slopeX + (against * ((slopeX / speed) * SLOPE_STEER_SCALE));
-                slopeZ = slopeZ + (against * ((slopeZ / speed) * SLOPE_STEER_SCALE));
+                slopeX = slopeX + (SLOPE_STEER_SCALE * against * (slopeX / speed));
+                slopeZ = slopeZ + (SLOPE_STEER_SCALE * against * (slopeZ / speed));
             }
             else {
                 slopeX = slopeX * STILL_BALL_SLOPE_SCALE;
@@ -2113,7 +2133,7 @@ ROLLED:
                     weight = 0.0f;
                 }
 
-                curve = sideSpin * (weight * CURVE_PER_SIDE_SPIN);
+                curve = sideSpin * CURVE_PER_SIDE_SPIN * weight;
                 if (horizontalSpeed < fabsf(curve) * MAX_CURVE_SPEED_RATIO) {
                     curve = horizontalSpeed * (1.0f / MAX_CURVE_SPEED_RATIO);
                     if (simulation->sideSpin < 0) {
@@ -2306,7 +2326,7 @@ NEXT:
                              (velocity[AXIS_X] * velocity[AXIS_X]) +
                              (velocity[AXIS_Z] * velocity[AXIS_Z])
                          ) *
-                    ROLL_VOLUME_PER_SPEED * (rollFrames + 1);
+                    (ROLL_VOLUME_PER_SPEED * (rollFrames + 1));
                 if (volume > MAX_ROLL_VOLUME) {
                     volume = MAX_ROLL_VOLUME;
                 }

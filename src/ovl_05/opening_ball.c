@@ -540,7 +540,13 @@ typedef s32 (*BillboardHitFinder)(
  * take the draft from 208 words (104 in shape) to 185 (83), and the
  * register oracle's closest from 121 words forcing 36 pseudos to 100
  * forcing 35; the wall hit's alone gives 193 (91), the kept speed's alone
- * 200 (96). 185 words differ, 83 in shape.
+ * 200 (96).
+ *
+ * The curve multiplies the side spin by CURVE_PER_SIDE_SPIN and then by the
+ * weight, as StepBallSimulation's now does, which takes the draft from 185
+ * words to 183, 83 in shape either way, and the register oracle's closest
+ * from 100 words, forcing 35 pseudos, to 96, forcing 33. 183 words differ,
+ * 83 in shape.
  */
 #ifdef NON_MATCHING
 s32 StepOpeningBallSimulation(BallSimulation *simulation) {
@@ -1907,7 +1913,7 @@ ROLLED:
                 curveWeight = 0.0f;
             }
 
-            curve = sideSpin * (curveWeight * CURVE_PER_SIDE_SPIN);
+            curve = sideSpin * CURVE_PER_SIDE_SPIN * curveWeight;
             if (horizontalSpeed < AbsFloat(curve) * MAX_CURVE_SPEED_RATIO) {
                 curve = horizontalSpeed * (1.0f / MAX_CURVE_SPEED_RATIO);
                 if (sideSpin < 0) {
