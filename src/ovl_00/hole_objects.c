@@ -232,17 +232,14 @@ void ClearHoleCreatures(void) {
 /*
  * Sends a Cheep Cheep leaping across the wind from below the ball.
  *
- * Doesn't match: GCC schedules the store of the rotation's zero X angle right
- * after the Cheep Cheep's velocity, where the original stores it after
- * converting the translation. sched can't tell the array store from the loads
- * of the creature's position, so they wait for it. Clearing it later, or
- * through a pointer, which frees it, lets the velocity's Z store slide past the
- * first load instead: 14 to 26 words. No order of the eight statements does
- * better, nor velocity stores through a pointer or the array. The register
- * oracle's closest result is these 2 words with no register forced, so
- * allocation isn't the cause. 2 words differ.
+ * Each way of facing sets the velocity in an arm of its own, which
+ * cross-jumping merges, and the rotation is set after the translation, as
+ * the other creatures' transforms are. Negating the speed in the test and
+ * setting the velocity once after it gives 14 words differing, 6 in shape,
+ * as sched then lets the velocity's Z store slide past the position's
+ * first load; clearing the rotation's X angle before the translation as
+ * well gives 2.
  */
-#ifdef NON_MATCHING
 void StartCheepCheepLeap(s32 startValue) {
     EncodedAsset asset;
     Vec3 translation;
@@ -284,17 +281,20 @@ void StartCheepCheepLeap(s32 startValue) {
 
             creature->yaw = g_SkyState.yaws[0];
             if (creature->isFacingBack) {
-                speed = -speed;
+                creature->velocity[0] = cosf(creature->yaw) * -speed;
+                creature->velocity[2] = -sinf(creature->yaw) * -speed;
+            }
+            else {
+                creature->velocity[0] = cosf(creature->yaw) * speed;
+                creature->velocity[2] = -sinf(creature->yaw) * speed;
             }
 
-            creature->velocity[0] = cosf(creature->yaw) * speed;
-            creature->velocity[2] = -sinf(creature->yaw) * speed;
-            rotation[AXIS_X] = 0;
             creature->velocity[1] = -CHEEP_CHEEP_LEAP_SPEED;
             creature->pitch = -M_PI / 2;
             translation[AXIS_X] = creature->position[AXIS_X] * COURSE_TO_WORLD_SCALE;
             translation[AXIS_Y] = creature->position[AXIS_Y] * COURSE_TO_WORLD_SCALE;
             translation[AXIS_Z] = creature->position[AXIS_Z] * COURSE_TO_WORLD_SCALE;
+            rotation[AXIS_X] = 0.0f;
             rotation[AXIS_Y] = creature->yaw;
             rotation[AXIS_Z] = creature->pitch + (M_PI / 2);
             scale[AXIS_X] = 1.0f;
@@ -307,9 +307,6 @@ void StartCheepCheepLeap(s32 startValue) {
         }
     }
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_00/hole_objects", StartCheepCheepLeap);
-#endif
 
 void DrawHoleCreatures(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
