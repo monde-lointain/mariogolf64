@@ -7201,7 +7201,11 @@ void DrawAnimationViewer(Gfx **displayListHead) {
  * keeps it in $a3 until then; the register oracle's closest result is these
  * 5 words with no register forced. Copying the choice into a second
  * variable just before the mini golf test, and testing that, matches, but no
- * natural form found needs the copy, so it isn't adopted.
+ * natural form found needs the copy, so it isn't adopted. A static inline
+ * helper would make one, as GCC copies each argument of a parameter that
+ * isn't const, but it copies the slot too: copies of both give 11 words,
+ * which the oracle doesn't bring closer, and a helper drawing the whole
+ * icon gives 540 words, 172 in shape.
  *
  * The mini golf disc's centre is set in two arms, when the disc stops
  * spinning and when it has none yet, which cross-jumping merges into one
