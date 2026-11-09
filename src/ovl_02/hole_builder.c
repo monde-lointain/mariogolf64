@@ -836,8 +836,25 @@ s32 ListOffsetsByDistance(s32 span, GridOffset *offsets, s32 maxCount) {
  * the register oracle's closest from 118 words, forcing 54 pseudos, to
  * 114, forcing 44. The slopes alone give 260 words (34 in shape) and the
  * heights alone 260 (28); editsearch had found 252 (28) moving shortSlopeX
- * without shortSlopeHeight and toHeight without fromHeight. 238 words
- * differ, 28 in shape.
+ * without shortSlopeHeight and toHeight without fromHeight. That left 238
+ * words, 28 in shape.
+ *
+ * Each row now points rowTexels at the start of its map row and indexes
+ * it by texelColumn, as tried with texel above. Storing through an index
+ * sums an address, so GCC marks the store as an array element's, which
+ * can't alias the frame slot holding the static chain; loop then hoists
+ * the chain's load out of the row loop into a saved register, as the
+ * original does, where storing through a stepped pointer kept it in the
+ * loop. The inner loop also takes the original's form. That takes the
+ * draft from 238 words differing, 28 in shape, to 478, 18 in shape, the
+ * registers shifting with the extra saved one, and the register oracle's
+ * closest from 114 words, forcing 44 pseudos, to 76, forcing 45.
+ * Indexing heights by the whole sum, with no row pointer, gives 274
+ * words (40 in shape), and texelColumn from longX's single shift by 16,
+ * as the original works it out, changes nothing. Ordering the steps in
+ * the lower half as in the upper gives 474 words, and the short x step
+ * first in both 468, both 18 in shape, but the oracle's closest is then
+ * 78. 478 words differ, 18 in shape.
  */
 #ifdef NON_MATCHING
 void DrawBandHeights(s16 *heights, s32 band) {
@@ -885,7 +902,7 @@ void DrawBandHeights(s16 *heights, s32 band) {
             s32 texelHeightStep;
             s32 height;
             s32 texelColumn;
-            s16 *texel;
+            s16 *rowTexels;
             s32 texelIndex;
             s32 value;
 
@@ -911,19 +928,18 @@ void DrawBandHeights(s16 *heights, s32 band) {
             texelRow = (texelRow >> HEIGHT_ROW_SPAN_SHIFT) - band * HEIGHT_BAND_ROW_COUNT;
             if (texelRow >= 0 && texelRow < HEIGHT_BAND_ROW_COUNT) {
                 height = fromHeight << TEXEL_HEIGHT_FRACTION_BITS;
-                texel = &heights[(texelRow * MAP_COLUMN_COUNT) + texelColumn];
+                rowTexels = &heights[texelRow * MAP_COLUMN_COUNT];
                 for (texelIndex = 0; texelIndex <= count; texelIndex++) {
                     if (texelColumn >= 0 && texelColumn < MAP_COLUMN_COUNT) {
                         value = height >> TEXEL_HEIGHT_FRACTION_BITS;
-                        if (*texel != NO_HEIGHT) {
-                            value = (*texel + value) / 2;
+                        if (rowTexels[texelColumn] != NO_HEIGHT) {
+                            value = (rowTexels[texelColumn] + value) / 2;
                         }
 
-                        *texel = value;
+                        rowTexels[texelColumn] = value;
                     }
 
                     texelColumn += direction;
-                    texel += direction;
                     height += texelHeightStep;
                 }
             }
