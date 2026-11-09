@@ -1803,7 +1803,17 @@ void MoveBallToCupEdge(BallSimulation *simulation) {
  * words differing to 137, 17 in shape either way, and the register
  * oracle's closest from 66 words, forcing 16 pseudos, to 57, forcing 5.
  * Converting the sum with a cast before subtracting the cup's position
- * gives the same. 137 words differ, 17 in shape.
+ * gives the same.
+ *
+ * Moving both axes along the direction before making either relative to
+ * the cup, x first, then gives 109 words, 7 in shape, and the oracle's
+ * closest 33 words, forcing 3: startX and startZ tie in priority, and
+ * startX takes the register startZ has in the original. With x moved
+ * first but z made relative before x, 118 words differ (8 in shape);
+ * with each axis finished in turn, x first, 137 (11). Clamping the
+ * bounce to its most only when not flying, with an else if, gives 72
+ * words but 10 in shape, with the oracle's closest 38, forcing 6. 109
+ * words differ, 7 in shape.
  */
 #ifdef NON_MATCHING
 s32 FindPinHit(
@@ -1948,10 +1958,10 @@ s32 FindPinHit(
         direction[AXIS_X] *= halfChord;
         direction[AXIS_Y] *= halfChord;
         direction[AXIS_Z] *= halfChord;
-        contactZ += direction[AXIS_Z];
-        contactZ -= g_HoleSetup.cupPosition[AXIS_Z];
         contactX += direction[AXIS_X];
+        contactZ += direction[AXIS_Z];
         contactX -= g_HoleSetup.cupPosition[AXIS_X];
+        contactZ -= g_HoleSetup.cupPosition[AXIS_Z];
         angle = 0.0f;
         if ((contactX | contactZ) != 0) {
             angle = atan2(contactZ, contactX);
