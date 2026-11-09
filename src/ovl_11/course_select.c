@@ -1264,69 +1264,23 @@ void DrawNamePlate(Gfx **displayListHead, s32 centerX, s32 centerY) {
 }
 
 /*
- * Spins the chosen hole's star; the position is unused, the stars are always in
- * one place
+ * Spins the chosen hole's star; the position is unused, the stars are
+ * always in one place
  *
- * Doesn't match: the texture loads hold their constants, such as the load
- * blocks' 0x070BF400, in $t4 where this uses $t3, and a few loop words
- * are scheduled differently. The original loads the spinning star's and
- * the spinning empty star's images through one variable, which it keeps
- * in $fp for both; separate locals, as earlier drafts had, spill save and
- * give the constants callee-saved registers, which grows the frame and
- * reorders the texture loads. The one variable took the draft from 219
- * words differing (129 in shape), with the top edge then set in a
- * variable on each pass, to 93 (15); dropping that top variable, which
- * only the split locals had needed for the original's 88 to be loaded in
- * the loop, gave 102 (6), with the original's frame. Separate locals in
- * their own blocks give 219 (129), the images read in place 262 (156),
- * and the still images loaded through the variable too 308 (74). Choosing
- * the tile in one if, from course, read before it, rather than overriding
- * the still tile, took it from 280 words to 259, 142 in shape to 133; a
- * Boolean row pointer gave 275 and 145, a u8 width and height 288 and
- * 146. The original reads course in each pass of the loop, beside the
- * hole test's read of holeIndex; reading it before the loop gave 288
- * words (92 in shape), and in each arm of the test 268 (136). Writing the
- * stars' right and bottom edges as the left or top edge plus the star's
- * size plus half the growth took the draft from 259 words to 257. These
- * earlier figures were measured before the one image variable. An earlier
- * permuter best, 219 words (9 in shape), passed the last three palette
- * loads a Gfx** set to &gfx only later, so it read garbage. The register
- * oracle's closest result is 96 words, forcing 2 pseudos. 102 words
- * differ, 6 in shape.
+ * The spinning star's and the spinning empty star's images go through
+ * one variable, which the original keeps in $fp for both; separate
+ * locals spill and give the texture loads' constants callee-saved
+ * registers, growing the frame (219 words differing, 129 in shape).
  *
- * Set just before the call, the height's half, the width's or both give 102
- * words (6).
- *
- * The first hole test reads holeIndex first and the second reads hole first,
- * as the original's bne operands show for each: written hole first, the
- * first test's bne takes its registers in the other order and the draft
- * differs in 102 words; written holeIndex first, the second test's does and
- * it differs in 100 words with other code than the draft's. The register
- * oracle's closest result is still 96 words, forcing 2 pseudos, and setting
- * either half size or both just before the call gives 100 words (6). 100
- * words differ, 6 in shape.
- *
- * The height's half has a variable of its own, halfHeight, set once the sizes
- * are, before the tile is chosen. That takes the draft from 100 words to 27,
- * 6 in shape to 7, and the register oracle's closest result from 96 words,
- * forcing 2 pseudos, to these 27 with none forced. Its srl takes the place
- * where the original loads the stars' top, 88, into $t3; the original halves
- * the height later, just before the call. Declared after any of the sizes, the
- * tile or the course it gives the same; halving the width there too gives 55
- * (15), and a top variable, set from STARS_TOP in each arm of the size test or
- * as the top edge before the tile, 109 to 173. 27 words differ, 7 in shape.
- *
- * The left edge is set once after the size test, rather than in each arm,
- * and the first hole test reads hole first, as the second does, as
- * DrawMenuRingShotStars sets its edges after its own size test. Each takes
- * the draft down, to 23 words (5 in shape) and then 21 (5), and the register
- * oracle's closest result is these 21 with none forced. Halving the height
- * in place again gives 117 (3). Before the hole test changed, zeroing the
- * width before the size test, as DrawMenuRingShotStars does, gave 23 (5)
- * with the left edge set once and 27 (7) with it in each arm. Of 48 moves of
- * the routine's statements, none gives fewer. 21 words differ, 5 in shape.
+ * Each star's left and top edges are set once its size is chosen, and
+ * its edges written from them as DrawMenuRingShotStars writes its own.
+ * The top, the same for every star, is still set on each pass: the
+ * original loads the 88 into a register there and adds the bottom edge's
+ * height to the half growth before adding the top. With STARS_TOP
+ * written in the edges, fold-const joins it with the height, and the
+ * closest form, a variable for the height's half, left 21 words
+ * differing, 5 in shape.
  */
-#ifdef NON_MATCHING
 void DrawRingShotStars(Gfx **displayListHead, s32 centerX UNUSED, s32 centerY UNUSED) {
     EncodedAsset asset;
     SaveData *save = GetSaveData();
@@ -1346,15 +1300,11 @@ void DrawRingShotStars(Gfx **displayListHead, s32 centerX UNUSED, s32 centerY UN
     s32 width;
     s32 height;
     s32 left;
-    s32 halfHeight;
+    s32 top;
     s32 tile;
     s32 course;
-    /*
-     * The spinning star's image and then the spinning empty star's: one
-     * variable, as the original keeps both in $fp; two locals, with the top
-     * edge variable they needed, gave 219 words differing (129 in shape)
-     * against 102 (6)
-     */
+    /* The spinning star's image and then the spinning empty star's, in one
+     * variable as the original keeps both in $fp */
     u8 *spinningImage = f_StarImages[f_StarBufferIndex];
 
     LoadSmallPalette(&gfx, TILE_SPINNING_STAR, ImageBody(spinningImage));
@@ -1437,8 +1387,8 @@ void DrawRingShotStars(Gfx **displayListHead, s32 centerX UNUSED, s32 centerY UN
         }
 
         left = (hole * STAR_SPACING) + STARS_LEFT;
+        top = STARS_TOP;
 
-        halfHeight = height / 2;
         course = memory->courseIndex;
         if (hole == memory->holeIndex) {
             tile = (save->records.hasRingShotStar[course][hole] == 0) ? TILE_SPINNING_EMPTY_STAR :
@@ -1452,9 +1402,9 @@ void DrawRingShotStars(Gfx **displayListHead, s32 centerX UNUSED, s32 centerY UN
         DrawTextureRect(
             &gfx,
             QuarterPixels(left - (width / 2)),
-            QuarterPixels(STARS_TOP - halfHeight),
+            QuarterPixels(top - (height / 2)),
             QuarterPixels(left + STAR_WIDTH + (width / 2)),
-            QuarterPixels(STARS_TOP + STAR_HEIGHT + halfHeight),
+            QuarterPixels(top + STAR_HEIGHT + (height / 2)),
             tile,
             0,
             0,
@@ -1481,16 +1431,3 @@ void DrawRingShotStars(Gfx **displayListHead, s32 centerX UNUSED, s32 centerY UN
 
     *displayListHead = gfx;
 }
-
-#else
-/* The hexagon above, which the asm copies to the stack */
-static const f32 f_UnusedHexagon[6][2] = {
-    {0.0f, -1.0f},
-    {0.89f, -0.45f},
-    {0.89f, 0.45f},
-    {0.0f, 1.0f},
-    {-0.89f, 0.45f},
-    {-0.89f, -0.45f},
-};
-INCLUDE_ASM("asm/nonmatchings/ovl_11/course_select", DrawRingShotStars);
-#endif
