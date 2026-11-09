@@ -898,8 +898,18 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/tournament_menu", DrawYesNoWindow);
  * the edges as DrawYesNoWindow does gave 378 to 442. The register oracle,
  * forcing 5 pseudos' registers, leaves 152 words at best, so the code differs
  * too. An s16 or s8 badgeHalfWidth gives 165 words but 49 in shape, adding
- * three shifts or masks to the draft's 18, as many as the original has. 166
- * words differ, 26 in shape.
+ * three shifts or masks to the draft's 18, as many as the original has.
+ *
+ * The edge is centerX less badgeTop, and loop.c hoists it out of the
+ * cloud loop because its threshold, 58 once the strip height's constant
+ * is hoisted, just reaches the loop's 58 insns; the sum beside it, met
+ * at 55, stays. One insn more would keep both in the loop, as in the
+ * original. Regrouping the strip's bottom edge, as DrawYesNoWindow does,
+ * or halving the strip offset by a shift adds one, but then the bottom
+ * no longer reuses the top and centerX takes a register, giving 308 to
+ * 392 words. A stripLeft or stripTop local, the offset through
+ * ImageBodyAt and other loop tests leave 58 insns. 166 words differ, 26
+ * in shape.
  */
 #ifdef NON_MATCHING
 void DrawClubWindow(
