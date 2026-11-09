@@ -3397,8 +3397,12 @@ void ShowHoleOutBanner(s32 playerIndex) {
  * Preparing the aim, the original sets the next state's 2 in $s3 before
  * testing f_ShotSource and compares the source with $s3, where this
  * compares it with the 2 both keep in $fp. Setting the next state at the
- * top of the case, or anywhere before that test, still compares with
- * $fp and gives 36 words, 26 in shape.
+ * top of the case, or anywhere before that test, still compares with $fp
+ * and gives 36 words, 26 in shape. Setting nextState to
+ * PLAYER_STATE_AIMING at the top of the case, a store that the HUD test
+ * always overwrites, gives 12 words (6 in shape) against 15 (7), as cse
+ * then compares the source with nextState's register; it isn't kept, as
+ * nothing reads the store.
  *
  * The handicap scoring calls GetCourseRecordIndex with no argument, as
  * the ambient sounds' lookups do, where it passed g_GameState.gameMode,
