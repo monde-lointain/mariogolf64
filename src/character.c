@@ -1636,7 +1636,9 @@ void AnimateCharacter(u32 slotIndex) {
  * words, forcing 37 pseudos. A search splitting assignments into steps
  * found 213 words, 33 in shape, by first setting dot to one of the next
  * span's components and multiplying by dot in its place, a copy that
- * stands for nothing. 224 words differ, 44 in shape.
+ * stands for nothing. Writing the scale first in xs, ys and zs gives 222
+ * words, 44 in shape, but the register oracle's closest is then 87
+ * words, forcing 32 pseudos. 224 words differ, 44 in shape.
  */
 #ifdef NON_MATCHING
 void UpdateJointKeyframeSpans(u32 slotIndex) {
