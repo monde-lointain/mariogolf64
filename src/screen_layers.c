@@ -895,17 +895,23 @@ s32 UpdatePrompt(ControllerState *controller) {
  * Draws the open prompt: a cloud that grows in and shrinks away, with Yes
  * and No under its message once it has opened. The chosen answer bobs.
  *
- * Doesn't match: the original works out each rectangle's middle, such as
- * CHOICES_MIDDLE_Y plus a quarter of the cloud, once and takes halfHeight from
- * it, where GCC folds the top into middle - (halfHeight - constant) and adds
- * the constant to the bottom separately. A middleY temporary at the draws gives
- * 10-38 shape differences (for the cloud alone 50 words, 10 in shape, with the
- * constant 1 then kept in a saved register and the frame 8 bytes larger),
- * writing the cloud's top with the product first changes nothing, as halfHeight
- * times (half - 1) it gives 34 words, 12 in shape, and an inline helper that
- * draws a choice around its middle 69 words, 31 in shape. The register oracle,
- * forcing one pseudo's register, leaves 21 words at best, so the code differs
- * too. 29 words differ, 5 in shape.
+ * Doesn't match: the cloud's halves are drawn from a bottom that starts
+ * at PROMPT_CLOUD_MIDDLE_Y and moves down by half the cloud's height,
+ * and the choices' edges add halfHeight and a quarter of the cloud to
+ * CHOICES_MIDDLE_Y in that order. Setting bottom in one statement lets
+ * fold-const reassociate it with the top's constant (30 words, 8 in
+ * shape, the frame 8 bytes smaller), and writing the quarter first folds
+ * the top into middle - (halfHeight - constant) (29 words, 5 in shape).
+ *
+ * Advancing texelOffset after the draw instead of after the load swaps
+ * halfWidth's and halfHeight's registers (86 words). Without the pad in
+ * the choices' block the frame is 8 bytes smaller (42 words, 4 in
+ * shape).
+ *
+ * What's left is scheduling: the original sets texelOffset one slot
+ * later and steps it after the second division's quotient rather than
+ * before the draw's arguments. Moving statements and editsearch's
+ * generators find nothing closer. 6 words differ, 4 in shape.
  */
 #ifdef NON_MATCHING
 void DrawPrompt(Gfx **displayListHead) {
@@ -918,6 +924,7 @@ void DrawPrompt(Gfx **displayListHead) {
     s32 halfWidth;
     s32 half;
     s32 texelOffset;
+    s32 bottom;
 
     if (f_PromptState == PROMPT_STATE_CLOSED) {
         return;
@@ -985,12 +992,14 @@ void DrawPrompt(Gfx **displayListHead) {
             G_TX_NOLOD
         );
         texelOffset += PROMPT_CLOUD_WIDTH * PROMPT_CLOUD_HALF_TEXELS / 2;
+        bottom = PROMPT_CLOUD_MIDDLE_Y;
+        bottom += half * halfHeight;
         DrawTextureRect(
             &gfx,
             QuarterPixels(PROMPT_CENTER_X - halfWidth),
-            QuarterPixels(PROMPT_CLOUD_MIDDLE_Y + (half * halfHeight) - halfHeight),
+            QuarterPixels(bottom - halfHeight),
             QuarterPixels(PROMPT_CENTER_X + halfWidth),
-            QuarterPixels(PROMPT_CLOUD_MIDDLE_Y + (half * halfHeight)),
+            QuarterPixels(bottom),
             G_TX_RENDERTILE,
             0,
             0,
@@ -1002,7 +1011,7 @@ void DrawPrompt(Gfx **displayListHead) {
     while (half != 2);
 
     if (f_PromptState == PROMPT_STATE_CHOOSING) {
-        /* Pads the frame to match; without it 65 words differ, against 29 */
+        /* Pads the frame to match; without it 42 words differ, against 6 */
         s32 unused[2] UNUSED;
 
         f_ChoiceBobAngle += DegreesToRadians(CHOICE_BOB_STEP_DEGREES);
@@ -1039,9 +1048,9 @@ void DrawPrompt(Gfx **displayListHead) {
         DrawTextureRect(
             &gfx,
             QuarterPixels(YES_CENTER_X - halfWidth),
-            QuarterPixels((cloudHeight / 4) + CHOICES_MIDDLE_Y - halfHeight),
+            QuarterPixels(CHOICES_MIDDLE_Y - halfHeight + (cloudHeight / 4)),
             QuarterPixels(YES_CENTER_X + halfWidth),
-            QuarterPixels(halfHeight + (cloudHeight / 4) + CHOICES_MIDDLE_Y),
+            QuarterPixels(CHOICES_MIDDLE_Y + halfHeight + (cloudHeight / 4)),
             G_TX_RENDERTILE,
             0,
             0,
@@ -1075,9 +1084,9 @@ void DrawPrompt(Gfx **displayListHead) {
         DrawTextureRect(
             &gfx,
             QuarterPixels(NO_CENTER_X - halfWidth),
-            QuarterPixels((cloudHeight / 4) + CHOICES_MIDDLE_Y - halfHeight),
+            QuarterPixels(CHOICES_MIDDLE_Y - halfHeight + (cloudHeight / 4)),
             QuarterPixels(NO_CENTER_X + halfWidth),
-            QuarterPixels(CHOICES_MIDDLE_Y + (halfHeight + (cloudHeight / 4))),
+            QuarterPixels(CHOICES_MIDDLE_Y + halfHeight + (cloudHeight / 4)),
             G_TX_RENDERTILE,
             0,
             0,
