@@ -3400,7 +3400,7 @@ void ShowHoleOutBanner(s32 playerIndex) {
  * top of the case, or anywhere before that test, still compares with $fp
  * and gives 36 words, 26 in shape. Setting nextState to
  * PLAYER_STATE_AIMING at the top of the case, a store that the HUD test
- * always overwrites, gives 12 words (6 in shape) against 15 (7), as cse
+ * always overwrites, gives 8 words (4 in shape) against 11 (5), as cse
  * then compares the source with nextState's register; it isn't kept, as
  * nothing reads the store.
  *
@@ -3432,8 +3432,19 @@ void ShowHoleOutBanner(s32 playerIndex) {
  * bogey's in the delay slot of the ring test's branch; set before the
  * test, it is set in the delay slot of the mode test's, and 19 words
  * differ (11 in shape) against 15 (7). The register oracle's closest
- * result is these 15 words with no register forced. 15 words differ, 7
- * in shape.
+ * result is these 15 words with no register forced.
+ *
+ * A player out at the stroke limit gets the reaction state once, after
+ * the speed-golf penalty, and the Ring Shot's par test sets the reaction
+ * state in its own arm, so that the original's three tails that set the
+ * reaction state and jump to the end stay apart: the replay's and the
+ * Ring Shot's branch to the end with the store in the delay slot, and
+ * the penalty's keeps its own jump. With the state set before the speed-
+ * golf test and again after the clamps, cse drops the second store and
+ * 15 words differ (7 in shape); set once after the test, jump2 cross-
+ * jumps the penalty's tail into the replay's, 17 (9); with the par
+ * test's else arm too, 11 (5). The register oracle's closest result is
+ * these 11 words with no register forced. 11 words differ, 5 in shape.
  */
 #ifdef NON_MATCHING
 /* Whether the stopwatches run in a player state: from aiming to the flight */
@@ -5129,8 +5140,10 @@ void UpdateTurns(void) {
                             nextState = PLAYER_STATE_STARTING_REACTION;
                         }
                         else if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
-                            nextState = PLAYER_STATE_STARTING_REACTION;
-                            if (g_Players[playerIndex].strokeCount < g_HoleSetup.par) {
+                            if (g_Players[playerIndex].strokeCount >= g_HoleSetup.par) {
+                                nextState = PLAYER_STATE_STARTING_REACTION;
+                            }
+                            else {
                                 EndFlightCamera();
                                 StartHudAnimation(HUD_ANIMATION_TURN_AWAY);
                                 nextState = PLAYER_STATE_ENDING_TURN;
@@ -5194,7 +5207,6 @@ void UpdateTurns(void) {
                                 .holes[g_GameState.holeIndex % COURSE_HOLE_COUNT]
                                 .strokes = g_HoleSetup.par * STROKE_LIMIT_PER_PAR;
                             g_Players[playerIndex].holeStatus = HOLE_STATUS_OUT;
-                            nextState = PLAYER_STATE_STARTING_REACTION;
                             if (g_GameState.gameMode == GAME_MODE_SPEED_GOLF) {
                                 g_Players[playerIndex].stopwatchFrameCount +=
                                     STROKE_LIMIT_PENALTY_MINUTES * FRAMES_PER_MINUTE;
@@ -5216,9 +5228,9 @@ void UpdateTurns(void) {
                                     STOPWATCH_MAX_FRAMES) {
                                     g_HoleTimeFrames[g_GameState.holeIndex] = STOPWATCH_MAX_FRAMES;
                                 }
-
-                                nextState = PLAYER_STATE_STARTING_REACTION;
                             }
+
+                            nextState = PLAYER_STATE_STARTING_REACTION;
                         }
                         else {
                             EndFlightCamera();
