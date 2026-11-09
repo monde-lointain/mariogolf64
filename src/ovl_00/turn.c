@@ -1288,6 +1288,20 @@ void MoveAimCameraDistance(void) {
  * of their own, or counting in static inline helpers that take its address,
  * gives 80 words differing (28 in shape), and one pointer for the whole
  * function, set as it is declared, 61 to 67.
+ *
+ * The register oracle lines the saved heading up with two registers, as
+ * the original loads it with lhu into $s1 and sign-extends a copy at
+ * each use, for the aim's step and for the frame test. The draft's frame
+ * test does the same, but its step's subtraction is narrowed to 16 bits,
+ * as it is stored to the heading, and needs no extension; the original's
+ * subtracts from the extended copy in both arms of the speed's test, as
+ * if the difference were held in 32 bits first. Working it out into step
+ * before the store gives 42 words (16 in shape), and in both arms 52
+ * (26). A BinaryAngle or u16 saved heading, converted to
+ * SignedBinaryAngle at both uses, compiles to the draft's code, as cse
+ * folds each conversion into the load; with the shot's heading a
+ * BinaryAngle too, 41 words differ (11 in shape). 39 words differ, 9 in
+ * shape.
  */
 #ifdef NON_MATCHING
 void TurnAim(s32 turnsAltHeading) {
