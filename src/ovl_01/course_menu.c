@@ -1061,8 +1061,8 @@ void DrawStatsBadgeCount(Gfx **displayListHead) {
  * Draws the arrows beside the panel that show there are more statistics above
  * or below.
  * Doesn't match: 94 words differ, 20 in shape. The original picks the first
- * arrow with a branch around a copy of hasRowsBelow; GCC's jump pass makes
- * the copy branchless here, so the registers and the spills to the stack
+ * arrow with a branch around a copy of the rows-below test; GCC's jump pass
+ * makes the copy branchless here, so the registers and the spills to the stack
  * differ. The first arrow is an s16, as the arrow index it is added to is;
  * as an s32 102 words differed, 22 in shape, and the register oracle got to
  * 83 words where it now gets to 77, forcing 14 pseudos either way. With it
@@ -1092,32 +1092,49 @@ void DrawStatsBadgeCount(Gfx **displayListHead) {
  * 16 bytes smaller. Reload gives spilled pseudos their slots after the
  * locals, at higher offsets, so no local can stand for the original's unused
  * bytes: those would follow from reload giving slots to pseudos whose stack
- * references were later removed. *
- * The two flags are s16s, as the arrow count they start is, which takes the
+ * references were later removed.
+ *
+ * The two flags were s16s, as the arrow count they start is, which took the
  * draft from 94 words differing (20 in shape) to 90 (18), and the register
  * oracle's closest result from 77 words, forcing 15 pseudos, to 65, forcing
- * 14. Both as u8s or s8s give 93 (21); the flag for the rows below alone as a
- * byte gives 90 (18) too, and the flag for the rows above alone 95 (19). 90
- * words differ, 18 in shape.
+ * 14. Both as u8s or s8s gave 93 (21); the flag for the rows below alone as a
+ * byte gave 90 (18) too, and the flag for the rows above alone 95 (19). That
+ * left 90 words, 18 in shape.
+ *
+ * The draft then kept the two tests in the flags hasRowsAbove and
+ * hasRowsBelow. Testing f_FirstShownStat where each flag was read, in
+ * the arrow count's initializer, the test that counts the down arrow and
+ * the first arrow's test, takes the draft from 90 words differing (18 in
+ * shape) to 71 (11), and the register oracle's closest result from 65
+ * words, forcing 14 pseudos, to 64, forcing 9. Dropping only the flag
+ * for the rows below gives 78 (12); setting it in the counting test,
+ * from FALSE, 94 (20); and the arrow count as an s32 126 (44). Without
+ * the padding 95 words differ (11 in shape), with the frame 16 bytes
+ * smaller.
+ *
+ * Of the bytes above the four spill slots, the draft leaves one slot
+ * unused: reload spills $s2 for a register to read the display list
+ * through displayListHead, which is kept on the stack, and the one
+ * pseudo in $s2, the texture LUT command's word, gets a slot that
+ * inheritance leaves unread. The original's 24 unused bytes would be
+ * three such slots. 71 words differ, 11 in shape.
  */
 #ifdef NON_MATCHING
 void DrawStatsScrollArrows(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
-    s16 hasRowsAbove = f_FirstShownStat > 0;
-    s16 arrowCount = hasRowsAbove;
-    s16 hasRowsBelow = f_FirstShownStat + STATS_SHOWN_ROW_COUNT < STATS_COUNT;
+    s16 arrowCount = f_FirstShownStat > 0;
     s16 firstArrow;
     s16 arrowIndex;
     s32 top;
-    /* Pads the frame to match; without it 118 words differ, against 90 */
+    /* Pads the frame to match; without it 95 words differ, against 71 */
     s32 unused[4] UNUSED;
 
-    if (hasRowsBelow) {
+    if (f_FirstShownStat + STATS_SHOWN_ROW_COUNT < STATS_COUNT) {
         arrowCount++;
     }
 
     if (arrowCount != 0) {
-        firstArrow = arrowCount == 1 && hasRowsBelow;
+        firstArrow = arrowCount == 1 && (f_FirstShownStat + STATS_SHOWN_ROW_COUNT < STATS_COUNT);
 
         gDPPipeSync(gfx++);
         gDPPipeSync(gfx++);
