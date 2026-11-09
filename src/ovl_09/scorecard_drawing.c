@@ -716,7 +716,7 @@ const char f_CompactHoleFormat[] = "Hole%d";
  * gives 86 words in one and 137 in both; in the wide tile's edges it ties at
  * 63, first or last, and is added last as in the other tiles. The register
  * oracle's closest result is these 63 words with no register forced, so
- * allocation isn't the cause. 63 words differ, 45 in shape.
+ * allocation isn't the cause. That left 63 words, 45 in shape.
  *
  * The original adds rowOffset to the scorecard's y plus TILE_TOP in the
  * tiles' y. Writing rowOffset + (g_Scorecard.y + TILE_TOP), or adding
@@ -729,6 +729,13 @@ const char f_CompactHoleFormat[] = "Hole%d";
  * groupings and the y sums in any of four, gives 122 words or more; the
  * original's own grouping, j * TILE_SPACING + (g_Scorecard.x + TILE_LEFT)
  * with rowOffset + (g_Scorecard.y + TILE_TOP), gives 199 (125).
+ *
+ * The rows' loop clears rowOffset before i, where the draft cleared i
+ * first; a sweep reordering for loops' first clauses found it. That
+ * takes the draft from 63 words differing to 61, 45 in shape both, and
+ * the register oracle's closest from 60 words to 57, forcing 2 pseudos;
+ * stepping rowOffset first as well changes nothing. 61 words differ, 45
+ * in shape.
  */
 #ifdef NON_MATCHING
 void DrawMatchPage(Gfx **displayListHead) {
@@ -975,7 +982,7 @@ void DrawMatchPage(Gfx **displayListHead) {
         G_TX_NOLOD
     );
     gDPPipeSync(gfx++);
-    for (i = 0, rowOffset = 0; i != MATCH_PLAYER_COUNT; i++, rowOffset += MATCH_ROW_SPACING) {
+    for (rowOffset = 0, i = 0; i != MATCH_PLAYER_COUNT; i++, rowOffset += MATCH_ROW_SPACING) {
         for (j = 0; j != winsNeeded; j++) {
             imageLeft = (j % TILES_PER_IMAGE_ROW) * TILE_PIECE_WIDTH;
             imageTop = (j / TILES_PER_IMAGE_ROW) * TILE_HEIGHT;
