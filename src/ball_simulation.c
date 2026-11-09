@@ -345,8 +345,15 @@ void ResetBallSimulations(void) {
  * its three steps alike, the fraction times the share times the velocity,
  * where z took the fraction last (329, 79). The wall hit's three steps, now
  * also written alike as the share times the velocity times the fraction,
- * keep 329 words, so neither hit keeps the earlier sweep's z-last form. 329
- * words differ, 79 in shape.
+ * keep 329 words, so neither hit keeps the earlier sweep's z-last form.
+ * That left 329 words, 79 in shape.
+ *
+ * The roll's sound is started, then tested in an if of its own rather
+ * than an else, so the step that starts it also sets its volume: the
+ * original falls through from PlaySound's call into the test of the
+ * sound's state. That takes the draft from 329 words to 325, 77 in
+ * shape, and the register oracle's closest from 162 words to 158,
+ * forcing 89 pseudos. 325 words differ, 77 in shape.
  */
 #ifdef NON_MATCHING
 s32 StepBallSimulation(BallSimulation *simulation) {
@@ -2309,7 +2316,8 @@ NEXT:
             PlaySound(SOUND_ROLL, ROLL_SOUND_CHANNEL, SOUND_FULL_SCALE);
             simulation->soundStates[BALL_SOUND_ROLL] = TRUE;
         }
-        else if (simulation->soundStates[BALL_SOUND_ROLL]) {
+
+        if (simulation->soundStates[BALL_SOUND_ROLL]) {
             if (simulation->state != BALL_STATE_ROLLING) {
                 StopSound(ROLL_SOUND_CHANNEL);
                 simulation->soundStates[BALL_SOUND_ROLL] = FALSE;
