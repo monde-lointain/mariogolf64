@@ -2716,7 +2716,17 @@ void UpdateBestShots(void) {
  * The faces' loop counts its rows with index too, as editsearch's --counters
  * found toward the oracle's goal: index's references move into the loop and
  * row's go, taking the draft from 83 words to 53, and the oracle's closest to
- * 27 forcing 9. 53 words differ, 13 in shape.
+ * 27 forcing 9.
+ *
+ * The original's second address shows a block boundary for cse between
+ * each cell test and the drawing it guards, as the name's test shows
+ * too: a jump from before the icon's test to a label at the start of its
+ * drawing, there only to measure, gives the original's code for the
+ * icon, 22 words differing, 12 in shape, 9 of them the jump's own test.
+ * An empty then with the drawing in an else, a switch with an empty case
+ * for STATS_CELL_EMPTY, a do-while (0) at the drawing's start, and
+ * comparing as s16, u16 or s32 change nothing. 53 words differ, 13 in
+ * shape.
  */
 #ifdef NON_MATCHING
 void DrawBestShots(Gfx **displayListHead) {
