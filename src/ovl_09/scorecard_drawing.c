@@ -1534,7 +1534,15 @@ static const char f_BlankBetName[] = " ";
  * orders and groupings of that top, alone or with the bottom grouped to
  * match, give 80 to 90 words. Reading the pots' rates with betRates[i]
  * rather than the bet's constant, in any of the four ifs, changes nothing.
- * 56 words differ, 22 in shape.
+ * That left 56 words, 22 in shape.
+ *
+ * Both loops over the bets clear column before i, where the draft
+ * cleared i first; the register oracle's split report had lined i,
+ * column and left up with two registers each. That takes the draft from
+ * 56 words differing to 52, 22 in shape both, and the oracle's closest
+ * from 43 words to 39, forcing 4 pseudos; either loop alone gives 54,
+ * and left's place in the first loop changes nothing. 52 words differ,
+ * 22 in shape.
  */
 #ifdef NON_MATCHING
 void DrawBetsPage(Gfx **displayListHead) {
@@ -1704,7 +1712,7 @@ void DrawBetsPage(Gfx **displayListHead) {
     }
 
     gDPSetCombineMode(gfx++, G_CC_MODULATERGBA_PRIM, G_CC_MODULATERGBA_PRIM);
-    for (i = 0, column = 0, left = 0; i != BET_COUNT; i++) {
+    for (column = 0, i = 0, left = 0; i != BET_COUNT; i++) {
         if (g_GameState.betRates[i] != UNSET_BET_RATE) {
             frame = 0;
             if (g_GameState.betRates[i] == 0) {
@@ -1883,7 +1891,7 @@ void DrawBetsPage(Gfx **displayListHead) {
     DrawSmallText(&gfx, g_Scorecard.x + 39, g_Scorecard.y + CARRY_OVER_SECOND_TOP, "e");
     DrawSmallText(&gfx, g_Scorecard.x + 45, g_Scorecard.y + CARRY_OVER_SECOND_TOP, "r");
     /* A pot holds its bet's rate plus whatever ties carried over */
-    for (i = 0, column = 0; i != BET_COUNT; i++) {
+    for (column = 0, i = 0; i != BET_COUNT; i++) {
         if (g_GameState.betRates[i] > 0) {
             if (i == BET_LONGEST_DRIVE) {
                 sprintf(
