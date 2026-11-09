@@ -668,7 +668,14 @@ void KeepAimCameraOnCourse(void) {
  * maxRise three meanings in turn. cse makes the reads of
  * aimCameraDistance after the call relative to that address, as the
  * original's are, and cse2 folds them back, as it knows the register
- * holds the address. 34 words differ, 6 in shape.
+ * holds the address. That left 34 words, 6 in shape.
+ *
+ * Squaring the rise into maxRise and dividing it in a second statement,
+ * which a search splitting assignments into steps found, gives 27 words,
+ * 3 in shape, and the register oracle's closest falls from 18 words to
+ * 11, forcing 6 pseudos either way, but maxRise then holds the square
+ * first, a second meaning, so the draft divides in the one expression.
+ * 34 words differ, 6 in shape.
  */
 #ifdef NON_MATCHING
 void PlaceShotCamera(void) {
