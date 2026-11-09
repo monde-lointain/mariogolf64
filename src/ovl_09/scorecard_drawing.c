@@ -3138,8 +3138,15 @@ INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard_drawing", DrawLeaderboardPage);
  * cellRowIndex, are counted in j: that takes the draft from 531 words
  * differing to 525, 131 in shape either way, and the register oracle
  * still forces nothing. Counting its rows in i and its columns in j, as
- * the first checkerboard does, gives 667 words. 525 words differ, 131 in
- * shape.
+ * the first checkerboard does, gives 667 words. That left 525 words, 131
+ * in shape.
+ *
+ * Each player's shown hole count is set first in the scores' player
+ * loop, before the standing, the color and the totals are cleared, as a
+ * search moving statements found: that takes the draft from 525 words
+ * differing to 519, 131 in shape either way, and the register oracle's
+ * closest from all 525 words, forcing nothing, to 361, forcing 21
+ * pseudos. 519 words differ, 131 in shape.
  */
 #ifdef NON_MATCHING
 void DrawScoresPage(Gfx **displayListHead) {
@@ -4155,11 +4162,11 @@ void DrawScoresPage(Gfx **displayListHead) {
         s32 backTotal;
         s32 frontTotal;
 
+        shownHoleCount = g_Scorecard.content.holeIndex;
         standing = 0;
         colorIndex = PAR_COLOR;
         backTotal = 0;
         frontTotal = 0;
-        shownHoleCount = g_Scorecard.content.holeIndex;
         if (IsOneOnOneMatchMode(g_GameState.gameMode)) {
             /* A hole shows once both players have finished it */
             if (g_Players[i].holeStatus != HOLE_STATUS_PLAYING) {
