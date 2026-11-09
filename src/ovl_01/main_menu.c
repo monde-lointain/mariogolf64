@@ -4792,7 +4792,7 @@ void DrawMenuScreen(Gfx **displayListHead) {
  *
  * Doesn't match: the scenery strips' 0xFD500000 and -8 swap registers, and
  * the board loop's registers differ. The original also reads g_MenuScreen
- * for MENU_LAYER_PER_SCREEN where this drops the read. An empty case or
+ * for MENU_LAYER_PER_SCREEN where this dropped the read. An empty case or
  * default, an empty if, a (void) read and switches of 4, 6 or 10 shared
  * cases all dropped it too before the strips' row count variable, as did 6
  * cases that each break. A permuter run pointed to the variable. Adding the
@@ -4810,8 +4810,31 @@ void DrawMenuScreen(Gfx **displayListHead) {
  * gives 612 (430 in shape) for the counter, as loop.c then hoists other
  * constants into saved registers through the whole function, or 42 for the
  * offset; the offset as the strip's whole texel count or its first row times
- * the width gives 612, in any of seven declaration places. 26 words differ, 8
- * in shape.
+ * the width gives 612, in any of seven declaration places.
+ *
+ * The per-screen layer's switch has a case that ends the display list
+ * and returns, as the code after the switch does. jump2 then finds the
+ * case's code the same as the tail, cross-jumps the two and deletes the
+ * branch, leaving the original's dead read of g_MenuScreen and its sync
+ * after the board loop in place: 26 words go to 18, 8 in shape to 2, and
+ * the register oracle's closest result is these 18 with none forced. The
+ * case is the one form here with no other reason to exist, and which
+ * screen it names is unknown; an if on one screen gives the same 18
+ * words, a default that returns 25 (7 in shape), and a case and a
+ * default that each sync and break, with an else that syncs, 22 (4).
+ *
+ * What's left is the banner's strip top. The original steps a register
+ * by the strip's height from 0 and adds the bob offset to it for each
+ * edge, where this folds the bob offset into the stepped register's
+ * start. loop.c reduces bobOffset plus bannerStrip times the height as
+ * one giv, as the product's shifts give it a large benefit; a top
+ * stepped by the height in a variable of its own leaves the sum
+ * unreduced, as the original does, but cse shares the sum between the
+ * edges, and the new variable moves registers through the whole
+ * function: 286 words or more, 39 or more in shape, for six orders of
+ * the edges' terms. bobOffset as an s16 or s8 gives 29 words (7 in
+ * shape), a u16 34 (18) and an f32 61 (17), and stripTop as an s16 679
+ * (93). 18 words differ, 2 in shape.
  */
 #ifdef NON_MATCHING
 void DrawMenuBackdropLayers(Gfx **displayListHead, s32 layers) {
@@ -5180,7 +5203,12 @@ void DrawMenuBackdropLayers(Gfx **displayListHead, s32 layers) {
 
     /* The game reads g_MenuScreen for this layer but draws nothing */
     if (layers & MENU_LAYER_PER_SCREEN) {
-        switch (g_MenuScreen) { }
+        switch (g_MenuScreen) {
+            case MENU_SCREEN_COURSE_SELECT:
+                gDPPipeSync(gfx++);
+                *displayListHead = gfx;
+                return;
+        }
     }
 
     gDPPipeSync(gfx++);
