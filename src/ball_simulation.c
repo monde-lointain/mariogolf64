@@ -363,8 +363,14 @@ void ResetBallSimulations(void) {
  * invalidates all memory. That takes the draft from 325 words differing
  * (77 in shape) to 296 (74), and the register oracle's closest from 158
  * words, forcing 89 pseudos, to 157, forcing 78; nested without the
- * local it gives 325, and as a u8 or s8 298 (76). 296 words differ, 74
- * in shape.
+ * local it gives 325, and as a u8 or s8 298 (76). That left 296 words,
+ * 74 in shape.
+ *
+ * The billboard hit is found through FindSimulationBillboardHit, which
+ * passes the simulation as a ninth argument, as the original does here
+ * and in the opening's copy: 296 words to 295, 73 in shape, and the
+ * register oracle's closest from 157 words to 156, forcing 78 pseudos
+ * either way. 295 words differ, 73 in shape.
  */
 #ifdef NON_MATCHING
 s32 StepBallSimulation(BallSimulation *simulation) {
@@ -654,7 +660,7 @@ s32 StepBallSimulation(BallSimulation *simulation) {
                     (simulation->lastBounceStep < 0 ||
                         simulation->lastBounceStep + BILLBOARD_HIT_BOUNCE_GAP <
                             simulation->stepCount)) {
-                    hitsBillboard = FindBillboardHit(
+                    hitsBillboard = FindSimulationBillboardHit(
                         startX,
                         startY,
                         startZ,
@@ -662,7 +668,8 @@ s32 StepBallSimulation(BallSimulation *simulation) {
                         simulation->position[AXIS_Y],
                         simulation->position[AXIS_Z],
                         &triangle.tag,
-                        &fraction
+                        &fraction,
+                        simulation
                     );
                 }
 
