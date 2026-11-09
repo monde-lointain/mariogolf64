@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Find the register allocation that would make a draft match, and why.
 
-    oracle.py [--allocation | --splits | --spills | --merges | --levers]
-              [ASM_FILE C_FILE] FUNCTION [PSEUDO=HARD ...]
+    oracle.py [--allocation | --splits | --spills | --merges | --levers |
+               --globals] [ASM_FILE C_FILE] FUNCTION [PSEUDO=HARD ...]
 
 Without ASM_FILE and C_FILE, finds them from FUNCTION as fncompare does.
 
@@ -44,6 +44,13 @@ at a time, and each is compiled unforced. A merge that matches names the
 variable, or the expression, that the source would hold in another's
 variable for the allocators to give the original's registers.
 
+--globals searches for the pseudos that local-alloc placed and the
+original left to global-alloc, as a pseudo living in more than one basic
+block is: each is made global (see ORACLE_GLOBAL in oracle.patch) and
+compiled unforced, then the closest two at a time. One that matches, or
+comes closest, names a variable whose setting and uses the original had
+in different blocks.
+
 Only FUNCTION's own routine is compared; the functions nested in it, which
 fncompare counts with it, are named so that each can be given as FUNCTION.
 """
@@ -57,7 +64,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
-from collections.abc import Iterable, Iterator, Sequence
+from collections.abc import Callable, Iterable, Iterator, Sequence
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from pathlib import Path
@@ -74,7 +81,14 @@ MAX_ROUNDS = 8
 # and before reload, and the asm statements, which -dp doesn't name, from
 # the last pass
 SEARCH_PASSES = ("rtl", "lreg", blame.PASSES[-1])
-MODE_OPTIONS = ("--allocation", "--splits", "--spills", "--merges", "--levers")
+MODE_OPTIONS = (
+    "--allocation",
+    "--splits",
+    "--spills",
+    "--merges",
+    "--levers",
+    "--globals",
+)
 # The editsearch that replays global-alloc for --levers
 EDITSEARCH = Path(
     os.environ.get(
@@ -96,6 +110,10 @@ SPILL_REPORT_COUNT = 10
 MERGE_REPORT_COUNT = 15
 # The closest merges that --merges tries two at a time
 MERGE_BEAM = 24
+# The closest pseudos made global that --globals prints, and tries two at
+# a time
+GLOBAL_REPORT_COUNT = 15
+GLOBAL_BEAM = 24
 # The assembly, the C file and the function, before any forced pairs
 MIN_ARGUMENT_COUNT = 3
 # The instructions a register needs from a pseudo to count as holding it
@@ -984,31 +1002,30 @@ def scan_spills(target: fncompare.Routine, draft: Draft, force: dict[int, int]) 
 Merge = tuple[int, int]
 
 
-def compile_merged(
-    target: fncompare.Routine, draft: Draft, merges: Sequence[Merge], work: Path
+def compile_trial(
+    target: fncompare.Routine, draft: Draft, environment: dict[str, str], work: Path
 ) -> int | None:
-    """Return how many words differ when DRAFT is compiled with MERGES.
+    """Return how many words differ when DRAFT is compiled with ENVIRONMENT.
 
-    Each (kept, gone) pair makes the pseudo gone one with kept. Compiles in
-    WORK, which must hold the draft's unit.i, unforced. None is a compile
-    that failed.
+    Compiles in WORK, which must hold the draft's unit.i, unforced. None is
+    a compile that failed.
     """
-    pairs = ",".join(f"{kept}={gone}" for kept, gone in merges)
     try:
-        blamed = build_function(
-            draft.function, draft.optflags, work, {"ORACLE_MERGE": pairs}, ()
-        )
+        blamed = build_function(draft.function, draft.optflags, work, environment, ())
     except CompileError:
         return None
     return fncompare.count_differences(target, blamed.routine)
 
 
-def run_merges(
-    target: fncompare.Routine, draft: Draft, trials: list[tuple[Merge, ...]]
+def run_trials(
+    target: fncompare.Routine, draft: Draft, trials: list[dict[str, str]]
 ) -> list[int | None]:
-    """Return the words that differ for each of TRIALS, compiled in parallel."""
+    """Return the words that differ for each of TRIALS, compiled in parallel.
+
+    Each trial is the environment of one compile.
+    """
     count = os.cpu_count() or 1
-    works = [draft.work / f"merge{index}" for index in range(count)]
+    works = [draft.work / f"trial{index}" for index in range(count)]
     for work in works:
         work.mkdir(exist_ok=True)
         _ = shutil.copy(draft.work / "unit.i", work / "unit.i")
@@ -1016,12 +1033,26 @@ def run_merges(
 
     def run_share(index: int) -> None:
         for trial in range(index, len(trials), count):
-            results[trial] = compile_merged(target, draft, trials[trial], works[index])
+            results[trial] = compile_trial(target, draft, trials[trial], works[index])
 
     with ThreadPoolExecutor(count) as pool:
         for future in [pool.submit(run_share, index) for index in range(count)]:
             future.result()
     return results
+
+
+def run_merges(
+    target: fncompare.Routine, draft: Draft, trials: list[tuple[Merge, ...]]
+) -> list[int | None]:
+    """Return the words that differ for each of TRIALS, compiled in parallel.
+
+    Each (kept, gone) pair of a trial makes the pseudo gone one with kept.
+    """
+    environments = [
+        {"ORACLE_MERGE": ",".join(f"{kept}={gone}" for kept, gone in trial)}
+        for trial in trials
+    ]
+    return run_trials(target, draft, environments)
 
 
 def describe_pseudo(draft: Draft, pseudo: int, lines: dict[int, set[int]]) -> str:
@@ -1109,6 +1140,52 @@ def scan_merges(target: fncompare.Routine, draft: Draft, force: dict[int, int]) 
         print(f"{differences} differ: {merges}")
 
 
+def scan_globals(target: fncompare.Routine, draft: Draft) -> None:
+    """Print the pseudos local-alloc placed whose making global comes closest.
+
+    Each is tried alone, then the GLOBAL_BEAM closest two at a time, all
+    unforced.
+    """
+    traced = draft.traced
+    unforced = count_differences(target, traced)
+    print(f"  unforced: {unforced} differ")
+    local = sorted(
+        {
+            pseudo
+            for block in traced.blocks
+            for quantity in block["quantities"]
+            for pseudo in quantity["pseudos"]
+        }
+    )
+
+    def rank(trials: list[tuple[int, ...]]) -> list[tuple[int, tuple[int, ...]]]:
+        environments = [
+            {"ORACLE_GLOBAL": ",".join(map(str, trial))} for trial in trials
+        ]
+        results = run_trials(target, draft, environments)
+        return sorted(
+            (differences, trial)
+            for trial, differences in zip(trials, results, strict=True)
+            if differences is not None and differences < unforced
+        )
+
+    ranked = rank([(pseudo,) for pseudo in local])
+    beam = [trial for _, trial in ranked[:GLOBAL_BEAM]]
+    ranked += rank(
+        [
+            first + second
+            for index, first in enumerate(beam)
+            for second in beam[index + 1 :]
+        ]
+    )
+    print(f"  {len(local)} local pseudos tried alone, then the closest in pairs")
+    lines = read_pseudo_lines(traced, read_insn_lines(draft, traced, "rtl"), "rtl")
+    closest = sorted(ranked, key=lambda item: (item[0], len(item[1])))
+    for differences, trial in closest[:GLOBAL_REPORT_COUNT]:
+        pseudos = "; ".join(describe_pseudo(draft, pseudo, lines) for pseudo in trial)
+        print(f"{differences} differ: {pseudos}")
+
+
 def use_compiler() -> None:
     """Compile with the oracle's cc1 from now on, or exit if it isn't built."""
     if not (ORACLE_DIR / "source" / "cc1").exists():
@@ -1141,14 +1218,14 @@ def main() -> None:
 def run_mode(request: Request, target: fncompare.Routine, draft: Draft) -> None:
     """Search for and explain the forcing as REQUEST asks, from DRAFT."""
     force, traced = request.force, draft.traced
-    if request.mode == "spills":
-        scan_spills(target, draft, force)
-        return
-    if request.mode == "merges":
-        scan_merges(target, draft, force)
-        return
-    if request.mode == "levers":
-        print_levers(target, draft, force)
+    scans: dict[str, Callable[[fncompare.Routine, Draft, dict[int, int]], None]] = {
+        "spills": scan_spills,
+        "merges": scan_merges,
+        "levers": print_levers,
+        "globals": lambda target, draft, _: scan_globals(target, draft),
+    }
+    if request.mode in scans:
+        scans[request.mode](target, draft, force)
         return
     if request.mode == "allocation":
         compilation = compile_function(draft, force)

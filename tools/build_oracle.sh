@@ -6,8 +6,8 @@
 # Builds cc1 from the KMC GCC 2.7.2 source (by default ~/src/kmc-gcc-src),
 # with tools/oracle.patch, which lets cc1 trace its register allocators to
 # the file ORACLE_TRACE, merge the pseudos ORACLE_MERGE pairs as the RTL is
-# made, and override the allocation of the pseudos ORACLE_FORCE names as
-# reload starts. It is built with -O3, LTO and the profile of a build of the
+# made, leave the pseudos ORACLE_GLOBAL names to global-alloc, and override
+# the allocation of the pseudos ORACLE_FORCE names as reload starts. It is built with -O3, LTO and the profile of a build of the
 # ROM, as the toolchain's cc1 is, and put beside the toolchain's other
 # programs. Without the ORACLE_ variables it gives the same code as the
 # toolchain's cc1: the ROM builds with it unchanged. A changed patch rebuilds

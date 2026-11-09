@@ -164,7 +164,7 @@
  
 --- a/local-alloc.c
 +++ b/local-alloc.c
-@@ -65,6 +65,10 @@
+@@ -65,6 +65,11 @@
  #include "insn-config.h"
  #include "recog.h"
  #include "output.h"
@@ -172,10 +172,19 @@
 +extern FILE *oracle_open_trace ();
 +extern void oracle_end_record ();
 +extern void oracle_put_item ();
++static void oracle_make_global ();
  
  /* Pseudos allocated here cannot be reallocated by global.c if the hard
     register is used as a spill register.  So we don't allocate such pseudos
-@@ -1116,6 +1120,42 @@
+@@ -467,6 +472,7 @@
+      We need not be concerned with which block actually uses the register
+      since we will never see it outside that block.  */
+ 
++  oracle_make_global ();
+   for (i = FIRST_PSEUDO_REGISTER; i < max_regno; i++)
+     {
+       if (reg_basic_block[i] >= 0 && reg_n_deaths[i] == 1
+@@ -1116,6 +1122,67 @@
      }
  }
  
@@ -215,10 +224,35 @@
 +  oracle_end_record (file);
 +}
 +
++/* The oracle's globals (see tools/oracle.py): ORACLE_GLOBAL names, joined
++   by commas, pseudos that local-alloc leaves to global-alloc in the
++   function ORACLE_FUNCTION, as if each lived in more than one block.  */
++
++static void
++oracle_make_global ()
++{
++  char *function = getenv ("ORACLE_FUNCTION");
++  char *pseudos = getenv ("ORACLE_GLOBAL");
++  int pseudo, length;
++
++  if (function == 0 || pseudos == 0
++      || strcmp (function, current_function_name) != 0)
++    return;
++  while (sscanf (pseudos, "%d%n", &pseudo, &length) == 1)
++    {
++      if (pseudo >= FIRST_PSEUDO_REGISTER && pseudo < max_regno)
++	reg_basic_block[pseudo] = REG_BLOCK_GLOBAL;
++      pseudos += length;
++      if (*pseudos != ',')
++	break;
++      pseudos++;
++    }
++}
++
  /* Allocate hard regs to the pseudo regs used only within block number B.
     Only the pseudos that die but once can be handled.  */
  
-@@ -1538,6 +1578,8 @@
+@@ -1538,6 +1605,8 @@
  	}
      }
  
