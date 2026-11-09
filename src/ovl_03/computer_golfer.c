@@ -2348,15 +2348,25 @@ static const char f_SimFaultText[] = "AI Sim Fault!";
  * the start of the ratio's test, 86 (40); in the block that calls it, 30 (8);
  * and separate, 101 (35). These counts were measured before shotStroke.
  *
- * Doesn't match: 26 words differ, 8 in shape. Ours sums the poor landing's
- * evaluation into $v0 and stores it at once, where the original sums into $v1
- * and stores it later: the sum's and the constant's quantities tie on
- * local-alloc's priority, and the tie goes to the lower quantity number, the
- * sum's. The heading's correction at the end loads f_Shot.heading before both
- * conversions, where the original loads it between them. The aim change's step
- * as an if/else subtracting or adding gives 75 words (31 in shape), and adding
- * the step or its negation, chosen by ?:, 45 (17); these two counts were
- * measured before shotStroke, when 30 words differed (8 in shape).
+ * Doesn't match: 12 words differ, 4 in shape. Ours sums the poor
+ * landing's evaluation into $v0 and stores it at once, where the
+ * original sums into $v1 and stores it later: the sum's and the
+ * constant's quantities tie on local-alloc's priority, and the tie goes
+ * to the lower quantity number, the sum's. The register oracle matches
+ * the draft when it swaps the two. Reading kind after the sum, or
+ * testing surfaceInfo->kind directly, leaves the 12 words, as do
+ * editsearch's generators and the permuter's passes. The heading's
+ * correction ends the arm for a finished trial, and the next try's aim
+ * change is the else arm, both reaching the one return: with an early
+ * return in the arm instead, its return value's $v0 is set in the
+ * correction's block, which loads f_Shot.heading before both
+ * conversions, and 33 words differ (11 in shape). A do-while (0) around
+ * the correction gave 26 (8), as its loop weights the uses inside, and
+ * an empty one after it 12, as the arm's end does. The aim change's step
+ * as an if/else subtracting or adding gave 75 words (31 in shape), and
+ * adding the step or its negation, chosen by ?:, 45 (17); these two
+ * counts were measured before shotStroke, when 30 words differed (8 in
+ * shape).
  *
  * Before the nesting, when 101 words differed (35 in shape): reading kind
  * after the sum, testing surfaceInfo->kind directly, and spelling the tests
@@ -2810,53 +2820,44 @@ EVALUATE:
             }
         }
 
-        /*
-         * In its own block, as without it 33 words differ, 11 in shape, against
-         * 26 and 8. Adding the heading and the first angle and then subtracting
-         * the second gives 23 (11), but the register oracle's closest result
-         * rises from 10 words to 17; the heading added to the change, with the
-         * operands reversed, gives 24 (8)
-         */
-        IN_OWN_BLOCK(
-            f_Shot.heading += (s32)(atan2(
-                                        f_PlanTarget[AXIS_Z] - f_Shot.ballPosition[AXIS_Z],
-                                        f_PlanTarget[AXIS_X] - f_Shot.ballPosition[AXIS_X]
-                                    ) *
-                                  RADIANS_TO_BINARY_ANGLE) -
-                (s32)(atan2(
-                          f_TrialEndPoint[AXIS_Z] - f_Shot.ballPosition[AXIS_Z],
-                          f_TrialEndPoint[AXIS_X] - f_Shot.ballPosition[AXIS_X]
-                      ) *
-                    RADIANS_TO_BINARY_ANGLE)
-        );
-        return 1;
+        f_Shot.heading += (s32)(atan2(
+                                    f_PlanTarget[AXIS_Z] - f_Shot.ballPosition[AXIS_Z],
+                                    f_PlanTarget[AXIS_X] - f_Shot.ballPosition[AXIS_X]
+                                ) *
+                              RADIANS_TO_BINARY_ANGLE) -
+            (s32)(atan2(
+                      f_TrialEndPoint[AXIS_Z] - f_Shot.ballPosition[AXIS_Z],
+                      f_TrialEndPoint[AXIS_X] - f_Shot.ballPosition[AXIS_X]
+                  ) *
+                RADIANS_TO_BINARY_ANGLE);
     }
-
-    if (flags & STEP_FLAG_GROUND_HIT) {
-        if (!(GetClub(g_Players[f_Shot.playerIndex].clubs[f_Shot.clubSlot])->surfaceMask &
-                CLUB_SURFACE_GREEN)) {
-            f_Shot.clubSlot++;
-            if (GetClub(g_Players[f_Shot.playerIndex].clubs[f_Shot.clubSlot])->surfaceMask &
-                CLUB_SURFACE_GREEN) {
-                f_Shot.clubSlot--;
+    else {
+        if (flags & STEP_FLAG_GROUND_HIT) {
+            if (!(GetClub(g_Players[f_Shot.playerIndex].clubs[f_Shot.clubSlot])->surfaceMask &
+                    CLUB_SURFACE_GREEN)) {
+                f_Shot.clubSlot++;
+                if (GetClub(g_Players[f_Shot.playerIndex].clubs[f_Shot.clubSlot])->surfaceMask &
+                    CLUB_SURFACE_GREEN) {
+                    f_Shot.clubSlot--;
+                }
             }
         }
-    }
 
-    f_AimChangeCount++;
-    for (index = 0; index < EXCLUDED_SECTOR_COUNT; index++) {
-        f_IsDirectionExcluded[(u8)((f_Shot.heading >> DIRECTION_SECTOR_SHIFT) + index -
-            (EXCLUDED_SECTOR_COUNT / 2))] = TRUE;
-    }
+        f_AimChangeCount++;
+        for (index = 0; index < EXCLUDED_SECTOR_COUNT; index++) {
+            f_IsDirectionExcluded[(u8)((f_Shot.heading >> DIRECTION_SECTOR_SHIFT) + index -
+                (EXCLUDED_SECTOR_COUNT / 2))] = TRUE;
+        }
 
-    f_ShotOffset = SHOT_OFFSET_MINUS_LARGE;
-    f_Shot.heading += (!(f_AimChangeCount & 1) ? -1 : 1) * (f_AimChangeCount * AIM_CHANGE_STEP);
+        f_ShotOffset = SHOT_OFFSET_MINUS_LARGE;
+        f_Shot.heading += (!(f_AimChangeCount & 1) ? -1 : 1) * (f_AimChangeCount * AIM_CHANGE_STEP);
 
-    osSyncPrintf("Angle Change4\n");
-    if (f_AimChangeCount >= 3) {
-        osSyncPrintf("Level Down\n");
-        f_AimChangeCount = 0;
-        f_NeedsShorterClub = TRUE;
+        osSyncPrintf("Angle Change4\n");
+        if (f_AimChangeCount >= 3) {
+            osSyncPrintf("Level Down\n");
+            f_AimChangeCount = 0;
+            f_NeedsShorterClub = TRUE;
+        }
     }
 
     return 1;
