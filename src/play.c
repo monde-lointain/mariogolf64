@@ -2289,7 +2289,16 @@ INCLUDE_ASM("asm/nonmatchings/play", RebuildGroundTextureCoordinates);
  * the original's offsets. That takes the draft from 570 words differing
  * to 556, 88 in shape either way; the register oracle forces nothing
  * either way. Declaring k last at the top gives the same 556, and first
- * 580. 556 words differ, 88 in shape.
+ * 580. That left 556 words, 88 in shape.
+ *
+ * The frame's 16 bytes are two stack slots that no instruction uses.
+ * Both frames use 38 spill slots, but the original leaves seven between
+ * them unused, where the draft leaves five. Reload gives the draft's
+ * five to temporaries for GridVertex's row index, which combine folds
+ * into their use, leaving a dangling use of each behind. So the original
+ * keeps no more values on the stack than the draft; its two extra slots
+ * are dead too, likely from two more such temporaries. 556 words differ,
+ * 88 in shape.
  */
 void DrawGround(CameraMatrices *matrices, s32 terrainStyle) {
     u8 snapsEdge[2][TILE_VERTEX_SEGMENT_COUNT]; /* For the current and the last
