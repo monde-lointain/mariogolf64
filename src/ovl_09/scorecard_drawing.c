@@ -3117,7 +3117,13 @@ INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard_drawing", DrawLeaderboardPage);
  * bytes smaller, and the handicap strokes alone 747 (135) with one 8
  * bytes larger. The condensed net score's sum written the same way too
  * gives 636 words (130 in shape), but the oracle then forces nothing and
- * leaves all 636. 665 words differ, 131 in shape.
+ * leaves all 636. That left 665 words, 131 in shape.
+ *
+ * The hole numbers are counted in i too, as the par row's holes are,
+ * rather than in j: that takes the draft from 665 words differing to
+ * 645, 131 in shape either way, and the register oracle's closest stays
+ * at 537 words, now forcing 36 pseudos rather than 38. 645 words differ,
+ * 131 in shape.
  */
 #ifdef NON_MATCHING
 void DrawScoresPage(Gfx **displayListHead) {
@@ -4076,22 +4082,22 @@ void DrawScoresPage(Gfx **displayListHead) {
 
     BeginShadowedText(&gfx);
     SetTextColor(&gfx, 0xFF, 0xFF, 0);
-    for (j = 0; j != HOLES_PER_NINE; j++) {
+    for (i = 0; i != HOLES_PER_NINE; i++) {
         if (!(g_GameState.holeSelection & HOLE_SELECTION_BACK_NINE)) {
-            sprintf(g_PrintBuffer, f_TwoDigitFormat, j + 1);
+            sprintf(g_PrintBuffer, f_TwoDigitFormat, i + 1);
             DrawCondensedShadowedText(
                 &gfx,
-                (j * CELL_WIDTH) + HOLE_NUMBERS_LEFT + g_Scorecard.x,
+                (i * CELL_WIDTH) + HOLE_NUMBERS_LEFT + g_Scorecard.x,
                 frontTop + HOLE_NUMBERS_TOP + g_Scorecard.y,
                 g_PrintBuffer
             );
         }
 
         if (!(g_GameState.holeSelection & HOLE_SELECTION_FRONT_NINE)) {
-            sprintf(g_PrintBuffer, f_TwoDigitFormat, j + HOLES_PER_NINE + 1);
+            sprintf(g_PrintBuffer, f_TwoDigitFormat, i + HOLES_PER_NINE + 1);
             DrawCondensedShadowedText(
                 &gfx,
-                (j * CELL_WIDTH) + BACK_HOLE_NUMBERS_LEFT + g_Scorecard.x,
+                (i * CELL_WIDTH) + BACK_HOLE_NUMBERS_LEFT + g_Scorecard.x,
                 backTop + HOLE_NUMBERS_TOP + g_Scorecard.y,
                 g_PrintBuffer
             );
