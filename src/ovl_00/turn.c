@@ -3414,7 +3414,16 @@ void ShowHoleOutBanner(s32 playerIndex) {
  * test, the local lives across the green arm's calls in $s0, and 29
  * words differ (17 in shape); the two calls give 22 (14), and the
  * register oracle's closest result is these 22 words with no register
- * forced. 22 words differ, 14 in shape.
+ * forced.
+ *
+ * The planning loops count their polls in while loops, the count zeroed
+ * first in the planning block, as the original zeroes the aiming count
+ * in the delay slot of the screen effect's test; zeroed in the for
+ * loop's initializer, after the screen effect and the timer's start, 22
+ * words differ (14 in shape), and zeroed first, 19 (11). Writing the
+ * preparing loop the same way changes nothing. The register oracle's
+ * closest result is these 19 words with no register forced. 19 words
+ * differ, 11 in shape.
  */
 #ifdef NON_MATCHING
 /* Whether the stopwatches run in a player state: from aiming to the flight */
@@ -4006,10 +4015,10 @@ void UpdateTurns(void) {
                 f_ShotLaunch.shotMode = g_CurrentShot.shotMode;
                 f_ShotLaunch.heading = g_CurrentShot.heading;
                 if (f_ShotSource == SHOT_SOURCE_PLANNING) {
+                    preparingPollIndex = 0;
                     StartTurnTimer();
-                    for (preparingPollIndex = 0; f_ShotSource == SHOT_SOURCE_PLANNING &&
-                        preparingPollIndex < PLAN_PREPARING_POLL_COUNT;
-                        preparingPollIndex++) {
+                    while (f_ShotSource == SHOT_SOURCE_PLANNING &&
+                        preparingPollIndex < PLAN_PREPARING_POLL_COUNT) {
                         f_ShotSource =
                             (GetPlannedShot(&g_ScriptedShot) != PLANNED_SHOT_UNFINISHED) ?
                             SHOT_SOURCE_PREPARED :
@@ -4017,6 +4026,8 @@ void UpdateTurns(void) {
                         if (!HasPlanTime(PLAN_PREPARING_TIME_BUDGET)) {
                             break;
                         }
+
+                        preparingPollIndex++;
                     }
                 }
 
@@ -4254,15 +4265,15 @@ void UpdateTurns(void) {
                     }
 
                     if (f_ShotSource == SHOT_SOURCE_PLANNING) {
+                        aimingPollIndex = 0;
                         if (g_ScreenEffect != SCREEN_EFFECT_SAVED_FRAME) {
                             SetScreenEffect(SCREEN_EFFECT_SAVED_FRAME, SAVED_FRAME_STEP_SAVING);
                             SetFramebufferCount(DOUBLE_BUFFERING);
                         }
 
                         StartTurnTimer();
-                        for (aimingPollIndex = 0; f_ShotSource == SHOT_SOURCE_PLANNING &&
-                            aimingPollIndex < PLAN_AIMING_POLL_COUNT;
-                            aimingPollIndex++) {
+                        while (f_ShotSource == SHOT_SOURCE_PLANNING &&
+                            aimingPollIndex < PLAN_AIMING_POLL_COUNT) {
                             f_ShotSource =
                                 (GetPlannedShot(&g_ScriptedShot) != PLANNED_SHOT_UNFINISHED) ?
                                 SHOT_SOURCE_PREPARED :
@@ -4270,7 +4281,10 @@ void UpdateTurns(void) {
                             if (!HasPlanTime(f_PlanTimeBudget)) {
                                 break;
                             }
+
+                            aimingPollIndex++;
                         }
+
 
                         f_PlanTimeBudget *= PLAN_TIME_BUDGET_GROWTH;
                         if (f_PlanTimeBudget > PLAN_MAX_TIME_BUDGET) {
