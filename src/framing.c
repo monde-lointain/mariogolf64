@@ -164,7 +164,13 @@ void TransformPoint(Mat4 mf, Vec3 point, Vec3 result) {
  * gives 250 words, the distance worked out into verticalEyeZ 258, the
  * top edge in two statements 275 to 486, the top angle's radians in
  * angle 190 (84 in shape), and every declaration order of the eye
- * distances and edges 250. 250 words differ, 56 in shape.
+ * distances and edges 250. That left 250 words, 56 in shape.
+ *
+ * Declaring maxZ first gives 204 words, and minZ or an angle first 210
+ * to 228, with nothing forced, but only by shifting the spill slots
+ * against the draft's extra one: with the top edge's copy, which gives
+ * the original's frame, maxZ first takes the draft from 157 words to
+ * 211. 250 words differ, 56 in shape.
  */
 #ifdef NON_MATCHING
 void FrameSpheres(f32 depthOffset) {
