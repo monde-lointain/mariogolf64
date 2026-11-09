@@ -3421,9 +3421,15 @@ void ShowHoleOutBanner(s32 playerIndex) {
  * in the delay slot of the screen effect's test; zeroed in the for
  * loop's initializer, after the screen effect and the timer's start, 22
  * words differ (14 in shape), and zeroed first, 19 (11). Writing the
- * preparing loop the same way changes nothing. The register oracle's
- * closest result is these 19 words with no register forced. 19 words
- * differ, 11 in shape.
+ * preparing loop the same way changes nothing.
+ *
+ * A Ring Shot's holed-out reaction is the eagle's when no rings are left
+ * and the bogey's otherwise, in an else arm, as the original sets the
+ * bogey's in the delay slot of the ring test's branch; set before the
+ * test, it is set in the delay slot of the mode test's, and 19 words
+ * differ (11 in shape) against 15 (7). The register oracle's closest
+ * result is these 15 words with no register forced. 15 words differ, 7
+ * in shape.
  */
 #ifdef NON_MATCHING
 /* Whether the stopwatches run in a player state: from aiming to the flight */
@@ -5260,10 +5266,12 @@ void UpdateTurns(void) {
                     reaction = REACTION_ANIMATION_BOGEY;
                 }
                 else if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
-                    reaction = REACTION_ANIMATION_BOGEY;
                     if (HasNoRingsLeft(&g_Players[playerIndex])) {
                         SetRingShotCleared(TRUE);
                         reaction = REACTION_ANIMATION_EAGLE;
+                    }
+                    else {
+                        reaction = REACTION_ANIMATION_BOGEY;
                     }
                 }
                 else {
