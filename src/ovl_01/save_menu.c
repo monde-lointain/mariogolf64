@@ -2387,8 +2387,16 @@ void DrawSavedMiniGolfImage(Gfx **displayListHead);
  * first, but loop.c still moves 120 (171 words, 77 in shape), and
  * boardDegrees set before the loop moves the factor instead of 48.0
  * (171, 79). Each signed-byte member read is a load and two shifts until
- * combine, so the loop's insn count can't drop there. 169 words differ,
- * 77 in shape.
+ * combine, so the loop's insn count can't drop there. That left 169
+ * words, 77 in shape.
+ *
+ * Each board works out its own texel step straight after its half size,
+ * before the mode icon's values, as a sweep moving each statement found.
+ * The original sets the board count in $v0 before converting the icon's
+ * step and leaves the mfc1's load delay empty, where this put the count
+ * in that delay. That takes the draft from 169 words (77 in shape) to
+ * 166 (74), and the register oracle's closest from 153 words to 150,
+ * forcing 14 pseudos either way. 166 words differ, 74 in shape.
  */
 #ifdef NON_MATCHING
 void DrawSavedGames(Gfx **displayListHead) {
@@ -2522,12 +2530,12 @@ void DrawSavedGames(Gfx **displayListHead) {
     for (index = 0; index != SAVED_GAME_COUNT; index++) {
         slot = drawOrder[index];
         halfSize = boardScale[slot] * GAME_BOARD_HALF_SIZE;
+        step = (f32)(GAME_BOARD_STRIP_HEIGHT << TEXEL_STEP_SHIFT) / halfSize;
         f_ChosenModeIconHalfSize = boardScale[slot] * MODE_ICON_HALF_SIZE;
         f_ChosenModeIconScale =
             (f32)(MODE_ICON_STRIP_HEIGHT << TEXEL_STEP_SHIFT) / f_ChosenModeIconHalfSize;
         iconHalfSize = f_ChosenModeIconHalfSize;
         iconStep = f_ChosenModeIconScale;
-        step = (f32)(GAME_BOARD_STRIP_HEIGHT << TEXEL_STEP_SHIFT) / halfSize;
         /* The loop stops before SAVED_GAME_COUNT, so no board bobs */
         if (index == SAVED_GAME_COUNT) {
             bob = sinf(f_BoardBobPhase) * BOARD_BOB_HEIGHT;
