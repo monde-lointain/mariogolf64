@@ -353,7 +353,18 @@ void ResetBallSimulations(void) {
  * original falls through from PlaySound's call into the test of the
  * sound's state. That takes the draft from 329 words to 325, 77 in
  * shape, and the register oracle's closest from 162 words to 158,
- * forcing 89 pseudos. 325 words differ, 77 in shape.
+ * forcing 89 pseudos. That left 325 words, 77 in shape.
+ *
+ * A ring hit is tested in an if of its own, which reads the ring's index
+ * into ringIndex and then tests the ring's state and the stroke, where
+ * one test read hit.tag at each use. The original loads the index once
+ * and keeps it in a saved register across PlaySound, which cse can't do
+ * for a field of a struct whose address is taken, since a call
+ * invalidates all memory. That takes the draft from 325 words differing
+ * (77 in shape) to 296 (74), and the register oracle's closest from 158
+ * words, forcing 89 pseudos, to 157, forcing 78; nested without the
+ * local it gives 325, and as a u8 or s8 298 (76). 296 words differ, 74
+ * in shape.
  */
 #ifdef NON_MATCHING
 s32 StepBallSimulation(BallSimulation *simulation) {
@@ -558,13 +569,18 @@ s32 StepBallSimulation(BallSimulation *simulation) {
                         simulation->position[AXIS_Z],
                         &hit,
                         &hitFraction
-                    ) > 0 &&
-                    g_Players[simulation->playerIndex].ringStates[hit.tag] == RING_STATE_SHOWN &&
-                    simulation->purpose == LAUNCH_PURPOSE_STROKE) {
-                    PlaySound(SOUND_IMPACT_ON_MARK, RING_SOUND_CHANNEL, SOUND_FULL_SCALE);
-                    if (simulation->purpose == LAUNCH_PURPOSE_STROKE) {
-                        g_Players[simulation->playerIndex].ringStates[hit.tag] = RING_STATE_PASSED;
-                        StartRingPassRumble(&g_Players[simulation->playerIndex]);
+                    ) > 0) {
+                    s32 ringIndex = hit.tag;
+
+                    if (g_Players[simulation->playerIndex].ringStates[ringIndex] ==
+                            RING_STATE_SHOWN &&
+                        simulation->purpose == LAUNCH_PURPOSE_STROKE) {
+                        PlaySound(SOUND_IMPACT_ON_MARK, RING_SOUND_CHANNEL, SOUND_FULL_SCALE);
+                        if (simulation->purpose == LAUNCH_PURPOSE_STROKE) {
+                            g_Players[simulation->playerIndex].ringStates[ringIndex] =
+                                RING_STATE_PASSED;
+                            StartRingPassRumble(&g_Players[simulation->playerIndex]);
+                        }
                     }
                 }
 
