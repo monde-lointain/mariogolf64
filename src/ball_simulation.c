@@ -370,7 +370,18 @@ void ResetBallSimulations(void) {
  * passes the simulation as a ninth argument, as the original does here
  * and in the opening's copy: 296 words to 295, 73 in shape, and the
  * register oracle's closest from 157 words to 156, forcing 78 pseudos
- * either way. 295 words differ, 73 in shape.
+ * either way. That left 295 words, 73 in shape.
+ *
+ * holeHit is cleared in an else of the water test, as well as in the
+ * else of the state test inside it, where it was cleared with
+ * hitsBillboard before the billboard's test: the original clears it in
+ * the water test's delay slot, which reorg fills from such an else, and
+ * holeHit no longer lives across FindBillboardHit's call in a saved
+ * register. That takes the draft from 295 words to 294, 72 in shape, and
+ * the register oracle's closest from 156 words to 154, forcing 78
+ * pseudos either way. Clearing it just before the water test instead
+ * gives 298 words, 72 in shape, as cse then deletes the inner clear. 294
+ * words differ, 72 in shape.
  */
 #ifdef NON_MATCHING
 s32 StepBallSimulation(BallSimulation *simulation) {
@@ -654,7 +665,6 @@ s32 StepBallSimulation(BallSimulation *simulation) {
                     );
                 }
 
-                holeHit = FALSE;
                 hitsBillboard = FALSE;
                 if (simulation->state == BALL_STATE_FLYING &&
                     (simulation->lastBounceStep < 0 ||
@@ -711,6 +721,9 @@ s32 StepBallSimulation(BallSimulation *simulation) {
                     else {
                         holeHit = FALSE;
                     }
+                }
+                else {
+                    holeHit = FALSE;
                 }
 
                 if (holeHit && (contact == 0 || hitFraction <= fraction)) {
