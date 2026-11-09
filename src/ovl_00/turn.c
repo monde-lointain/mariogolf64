@@ -3229,276 +3229,81 @@ void ShowHoleOutBanner(s32 playerIndex) {
  * in place, the ball placement gave 90 words (48 in shape) against 146 (78) as
  * a helper.
  *
- * Doesn't match: 41 words differ, 29 in shape, spread through the routine's
- * states; the register oracle's closest result is 34 words with 1 pseudo
- * forced, so most of the difference is in the code. The counts in the
- * paragraphs after the next were measured when 454 words differed, 184 in
- * shape.
+ * Many forms follow the original's code rather than the shortest C.
+ * Tests that the original branches on separately are nested, not joined
+ * with &&: the hole-out song's Speed Golf and Ring Shot tests, Speed
+ * Golf outside, and the debug step's trigger and camera tests. The
+ * letterbox test before the debug output is written "== FALSE", for
+ * which the original ors both comparisons. The cup distance goes through
+ * a float, as round_hud.c's does. The hole-out song switch lists its
+ * modes in the order the original places their bodies, and the score
+ * switch gives a bogey a case before the default so that GCC builds the
+ * original's jump table. The planning tests read f_ShotSource itself
+ * after each loop, and the poll counts are zeroed first in the planning
+ * block. A player out of the group game has the hole's strokes and the
+ * stroke count zeroed by one chained assignment.
  *
- * A player out of the group game has the hole's strokes and the stroke
- * count zeroed by one chained assignment. As two statements, the strokes
- * first, 454 words differ (184 in shape), and zeroing the stroke count
- * first gives 456 (186).
+ * Where the original sets a value in a branch's delay slot, the draft
+ * sets it in an arm of that branch: the holed-out reaction and notable
+ * shot work out the score to par before the hole-in-one test; a Ring
+ * Shot's reaction is the bogey's in an else arm; the turn's start tests
+ * the shot's rest first, in one chain with the speed-golf hole intro and
+ * aiming; the stroke limit sets the reaction state once, after the
+ * speed-golf penalty, and the Ring Shot's par test sets it in its own
+ * arm, which keeps those tails from being cross-jumped together. Where
+ * the original shares code by cross-jumping, each arm has its own copy:
+ * the song tempo's calls, PlaceTargetPoint in each arm of the units
+ * test, and nextState set before ForceStopRumble in the Ring Shot
+ * hole-out. The next state is set after the one-on-one match's handicap
+ * scoring, which calls GetCourseRecordIndex with no argument, as the
+ * ambient sounds' lookups do. The debug ball move holds the Z trigger
+ * test in a flag, as the original shifts the bit down and masks it,
+ * which GCC does only for a bit test stored as a value. The training
+ * choice box's reaction test and the frame test at the end are written
+ * in place, as inline helpers reload their constants and addresses for
+ * each call.
  *
- * The letterbox test before the debug output is written "== FALSE", for
- * which the original ors both comparisons; "!(a || b)" turns into an and
- * of two "!=" tests, and 501 words differ (227 in shape). The same test
- * later in the shot setup matches with "!".
- *
- * The cup distance after the ball comes to rest goes through a float, as
- * round_hud.c's (f32)GetCupDistance does: the original converts the
- * integer to single and truncates it back. Without the cast 493 words
- * differ, 219 in shape.
- *
- * The hole-out song's Speed Golf and Ring Shot tests are nested, Speed Golf
- * outside, as the original branches on each in that order. As one && test,
- * fold_truthop evaluates the two compares of one operand without a branch, with
- * xori, sltu and and, and 227 words differ (97 in shape) against 146 (78);
- * nesting them the other way round gives 150 (78), a switch whose two modes
- * break out 146 (78), and an empty arm for the two modes 227 (97). Unlike the
- * paragraphs around it, these counts were measured after the debug timing's two
- * stores, but before the ball placement was written in place.
- *
- * The hole-out song switch lists its modes from Ring Shot down to Training,
- * the order the original places their bodies in; in the enum's order 475
- * words differ (193 in shape).
- *
- * The original keeps the ball placement's and reaction test's buffer
- * address in $s0. One buffer declared in UpdateTurns before its nested
- * functions and passed to both gives that (175 in shape), but puts
- * playerIndex's slot above the buffer and grows the frame, 751 words;
- * declared after the nested functions it keeps the frame but not $s0, 485.
- *
- * The Ring Shot hole-out sets nextState before stopping the rumble, so its
- * tail is the other hole-outs' and cross-jumping shares their call, giving
- * the original's four ForceStopRumble calls; stopping the rumble first keeps
- * a fifth (454 words, 182 in shape). Setting the pause menu hole-out's
- * nextState first too gives 458 (186 in shape).
- *
- * A permuter output with 378 words (134 in shape) reads
- * f_ShotLaunch.impactTiming through a pointer, set before the swing's lower
- * clamp and used by the debug clamp and the timing test after the launch, which
- * accounts for all of its gain: with the field read directly again it gives the
- * draft's 392 (148). Clamping through an inline helper or macro taking the
- * field's address gives 392 to 400 words (148 to 152 in shape). The debug
- * step's test of the triggers and isCameraDone is nested, as the original
- * branches on isCameraDone apart from the triggers; as one && test,
- * fold_truthop compiles it to sltiu, sltu and and, and 392 words differ (148 in
- * shape), with == FALSE or != 0 too. A focused permuter run's best by words,
- * 311 (145 in shape), comes mostly from copying the heading, in the aiming
- * state, into a function-wide variable that the angle in the
- * g_RoundHud.isDistanceSignShown block at the end also reads: that alone gives
- * 325 words (147 in shape), but outside the aiming state the angle then reads
- * the variable unset, and the original reloads g_CurrentShot.heading there with
- * an lhu. Setting nextState after the calls when a ring shot holes out, as
- * starting over does, gives 386 words (140 in shape); it is kept first, as the
- * training choice box's hole out has it.
- *
- * Setting a local to MAX_ROLL_SKIP_STEPS before the player loop and bounding
- * the roll skip with it gives 336 words (144 in shape), but the build still
- * compares the step count with slti 4, as the original does, so the gain comes
- * from the extra pseudo's numbering.
- *
- * The score switch lists a bogey's case before the default it shares: the
- * original dispatches through a five-entry jump table from -3 to 1 (addiu 3,
- * sltiu 5), where with four case labels GCC branches. The planning test and the
- * prepared-shot test read f_ShotSource itself, where a copy was kept across the
- * planning loop; the original loads it again (beqz on the reload after the
- * loop). With the bogey's case alone, 622 words differ (148 in shape): the -1
- * that the GetPlannedShot loops compare with moves to $s1 for each loop, as the
- * original's does, and with the copy also live across the loop, the constant 2
- * gets no register and is loaded at each use, where the original keeps it in
- * $fp. With the direct reads alone, 412 (142); with both, 349 words differ, 125
- * in shape, against 386 (142), and the register oracle's closest result is
- * these 349 words with no register forced. The counts above were measured
- * before these two changes.
- *
- * The training choice box's reaction test and the frame test at the end
- * are written in place, where they were inline helpers. In place, the
- * frame test keeps 7.5f in $f22 and its buffer address in $s0 across
- * both AddFramedSphere calls, as the original does, where the helper
- * loaded both again for each call. The reaction test in place alone
- * gives 252 words (120 in shape), the frame test alone 338 (116), and
- * both 241 (111), against 349 (125) with both as helpers; the register
- * oracle's closest result is these 241 words with no register forced. As
- * an inline function nested in UpdateTurns, the ball placement reads
- * playerIndex from the frame at each use, as the original does, but the
- * static chain takes the first slot of a nested function's frame, which
- * puts the buffer at 0x28 where the original's is at 0x20, and 953 words
- * differ (900 with 55 registers forced). These counts were measured
- * before the debug timing's two stores.
- *
- * The ball placement's Z_TRIG test compiles to andi and a branch, where
- * the original shifts the bit down with srl 13 and andi 1 before
- * branching. do_jump tests an & of one bit with andi; only a test
- * expanded as a value goes through do_store_flag, which shifts and masks.
- * A Boolean local set to the test gives the original's instructions, 74
- * words differing (42 in shape) against 77 (43), as does shifting the
- * button bits right 13 and testing the low bit, but each adds a name or a
- * shift the draft has no other reason for, and a shared helper would
- * change the eleven other tests of g_ControllerData's buttons, which
- * compile to andi and a branch as the draft's does. Comparing the test
- * with 0 or Z_TRIG, comparing that != 0 with TRUE, negating it twice or
- * choosing TRUE or FALSE with it leaves 77 words (43).
- *
- * The holed-out reaction works out the score to par before testing for a
- * hole in one, and tests for it first; the original subtracts par in the
- * delay slot of the branch taken for a hole in one. That gives 77 words
- * differing, 43 in shape, against 84 (46) with the subtraction in the switch
- * after the != 1 test; measured when the draft gave 83 words, the register
- * oracle's closest result fell from 75 words to 68, with 5 registers forced
- * for each. Testing for a hole in one first without the local gives 80 (46),
- * and the local with the != 1 test first 83 (43).
- *
- * At the end, each arm of the units test places the target point, through
- * PlaceTargetPoint, and cross-jumping shares the arms' code after the unit's
- * load, as in the original. Choosing the scale in the arms and placing the
- * point once after them gave 77 words (43 in shape), and passed the
- * truncated z to GetGroundHeight in a register (mfc1) where the original
- * stores it into the field and loads it back; the macro takes the draft to
- * 68 words (36) and the register oracle's closest result from 60 words to
- * 51, with 4 pseudos forced for each, and the routine's code from there to
- * its end matches. The same code as an inline function gives 96 words (44),
- * and with the scale constant written into the product inside each arm, cosf
- * coming after the length, 88 (50).
- *
- * Re-measured with the macro, against 68 words (36 in shape): a Boolean
- * local set to the Z button's test compared != 0, or shifting the bits right
- * 13, gives 65 words with 35 in shape; the local set to the test alone,
- * comparing the test with 0 or Z_TRIG, or negating it twice leaves 68 (36).
- * For the holed-out reaction, the subtraction in the switch after the != 1
- * test gives 75 (39), testing for a hole in one first without the local 71,
- * also 39 in shape, and the local with the != 1 test first 74 (36).
- *
- * A holed-out player's notable shot is counted from a scoreToPar of its
- * own, worked out before the hole-in-one test as the reaction's is, as
- * the original subtracts the par in the delay slot of that test's branch,
- * and the birdie's case comes first in the switch. Together these take
- * the draft from 68 words differing, 36 in shape, to 51 (29), the
- * switch's code then matching, and the register oracle's closest result
- * from 51 words, forcing 4 pseudos, to 42, forcing 3. The local alone
- * gives 55 words (31 in shape), the birdie first alone 66 (34), and with
- * the local, the birdie in the middle or last 55. With the birdie first,
- * the local declared for the whole state gives 86 words (48 in shape),
- * and set after the hole-in-one test 66 (34).
- *
- * The wood swing's trail test puts the event frame first, as a permuter
- * run found, where the reaction hold's test puts the player's frame count
- * first. That takes the draft from 51 words to 41, the 29 in shape
- * staying, and the register oracle's closest result, with today's oracle,
- * from 36 words with 6 pseudos forced to 34 with 1.
- *
- * When the hole isn't a group's, the next state is set after the one-on-one
- * match's handicap scoring, as the original stores it after that block's
- * code. That takes the draft from 41 words to 33, 21 in shape, and the
- * register oracle's closest from 34 words to 26, forcing 1 pseudo either
- * way.
- *
- * Preparing the aim, the original sets the next state's 2 in $s3 before
- * testing f_ShotSource and compares the source with $s3, where this
- * compares it with the 2 both keep in $fp. Setting the next state at the
- * top of the case, or anywhere before that test, still compares with $fp
- * and gives 36 words, 26 in shape. Setting nextState to
- * PLAYER_STATE_AIMING at the top of the case, a store that the HUD test
- * always overwrites, makes the function match, against 3 words (1 in
- * shape) without it, as cse then compares the source with nextState's
- * register; it isn't kept, as nothing reads the store.
- *
- * The handicap scoring calls GetCourseRecordIndex with no argument, as
- * the ambient sounds' lookups do, where it passed g_GameState.gameMode,
- * which the function ignores: the original's last three calls leave $a0
- * as it was. That takes the draft from 33 words differing to 29, 17 in
- * shape, and the register oracle's closest result from 26 words to 22,
- * forcing 1 pseudo either way.
- *
- * While aiming, the song's tempo is set by a call in each arm of the
- * green test, the green's tempo or the aiming one, and cross-jumping
- * shares the two calls, as the original loads AIMING_SONG_TEMPO into $a0
- * in the green test's delay slot. Through a tempo local set before the
- * test, the local lives across the green arm's calls in $s0, and 29
- * words differ (17 in shape); the two calls give 22 (14), and the
- * register oracle's closest result is these 22 words with no register
- * forced.
- *
- * The planning loops count their polls in while loops, the count zeroed
- * first in the planning block, as the original zeroes the aiming count
- * in the delay slot of the screen effect's test; zeroed in the for
- * loop's initializer, after the screen effect and the timer's start, 22
- * words differ (14 in shape), and zeroed first, 19 (11). Writing the
- * preparing loop the same way changes nothing.
- *
- * A Ring Shot's holed-out reaction is the eagle's when no rings are left
- * and the bogey's otherwise, in an else arm, as the original sets the
- * bogey's in the delay slot of the ring test's branch; set before the
- * test, it is set in the delay slot of the mode test's, and 19 words
- * differ (11 in shape) against 15 (7). The register oracle's closest
- * result is these 15 words with no register forced.
- *
- * A player out at the stroke limit gets the reaction state once, after
- * the speed-golf penalty, and the Ring Shot's par test sets the reaction
- * state in its own arm, so that the original's three tails that set the
- * reaction state and jump to the end stay apart: the replay's and the
- * Ring Shot's branch to the end with the store in the delay slot, and
- * the penalty's keeps its own jump. With the state set before the speed-
- * golf test and again after the clamps, cse drops the second store and
- * 15 words differ (7 in shape); set once after the test, jump2 cross-
- * jumps the penalty's tail into the replay's, 17 (9); with the par
- * test's else arm too, 11 (5). The register oracle's closest result is
- * these 11 words with no register forced.
- *
- * The debug ball move holds the Z trigger test in a flag, as the
- * original shifts the button bits right by 13 and masks the low bit,
- * which GCC does only when it stores a bit test's truth as a value;
- * tested directly, as !!, or compared with Z_TRIG, it masks with Z_TRIG
- * in place. The flag set just before its test takes the draft from 11
- * words differing to 8, 4 in shape, as a Boolean or an s32; initialized
- * at the top of the debug block, 27 words differ (15 in shape).
- *
- * Starting the turn, the rest test comes first, choosing between
- * preparing the aim, the speed-golf hole intro and aiming in one chain,
- * as the original loads g_HasShotComeToRest before setting the next
- * state and sets it in the test's delay slot; with the preparing state
- * set before the test and overwritten inside it, the store fills the
- * shot panel call's delay slot. That takes the draft from 8 words
- * differing to 3, 1 in shape; the rest test with an else arm for aiming,
- * and the speed-golf test nested in it, gives 5 (3). 3 words differ, 1
- * in shape.
+ * Preparing the aim, nextState is set to PLAYER_STATE_AIMING at the top
+ * of the case, though the HUD test at its end always overwrites it. This
+ * is the one form here with no other reason to exist: the original
+ * compares f_ShotSource with nextState's $s3, which cse does only when
+ * nextState already holds the 2 that the comparison needs, and without
+ * the store 3 words differ.
  */
-#ifdef NON_MATCHING
 /* Whether the stopwatches run in a player state: from aiming to the flight */
-#    define IsTimedState(state) \
-        ((state) == PLAYER_STATE_AIMING || \
-            (state) == PLAYER_STATE_SETTING_POWER || \
-            (state) == PLAYER_STATE_SETTING_IMPACT || \
-            (state) == PLAYER_STATE_STARTING_SWING || \
-            (state) == PLAYER_STATE_SWINGING || \
-            (state) == PLAYER_STATE_BALL_IN_FLIGHT)
+#define IsTimedState(state) \
+    ((state) == PLAYER_STATE_AIMING || \
+        (state) == PLAYER_STATE_SETTING_POWER || \
+        (state) == PLAYER_STATE_SETTING_IMPACT || \
+        (state) == PLAYER_STATE_STARTING_SWING || \
+        (state) == PLAYER_STATE_SWINGING || \
+        (state) == PLAYER_STATE_BALL_IN_FLIGHT)
 /* Whether a pause screen lets play go on */
-#    define IsPlayGoingOn(pauseScreen) \
-        ((pauseScreen) == PAUSE_SCREEN_NONE || (pauseScreen) == PAUSE_SCREEN_FREE_LOOK)
+#define IsPlayGoingOn(pauseScreen) \
+    ((pauseScreen) == PAUSE_SCREEN_NONE || (pauseScreen) == PAUSE_SCREEN_FREE_LOOK)
 /* Whether a character is Yoshi or Donkey Kong, who share a round song */
-#    define IsYoshiOrDonkeyKong(character) \
-        ((character) == CHARACTER_YOSHI || (character) == CHARACTER_DONKEY_KONG)
+#define IsYoshiOrDonkeyKong(character) \
+    ((character) == CHARACTER_YOSHI || (character) == CHARACTER_DONKEY_KONG)
 /* Whether four players are all Yoshi or Donkey Kong, which has its own song */
-#    define IsYoshiAndDonkeyKongRound() \
-        (g_GameState.playerCount == MAX_PLAYER_COUNT && \
-            IsYoshiOrDonkeyKong(g_Players[0].characterIndex) && \
-            IsYoshiOrDonkeyKong(g_Players[1].characterIndex) && \
-            IsYoshiOrDonkeyKong(g_Players[2].characterIndex) && \
-            IsYoshiOrDonkeyKong(g_Players[3].characterIndex))
+#define IsYoshiAndDonkeyKongRound() \
+    (g_GameState.playerCount == MAX_PLAYER_COUNT && \
+        IsYoshiOrDonkeyKong(g_Players[0].characterIndex) && \
+        IsYoshiOrDonkeyKong(g_Players[1].characterIndex) && \
+        IsYoshiOrDonkeyKong(g_Players[2].characterIndex) && \
+        IsYoshiOrDonkeyKong(g_Players[3].characterIndex))
 
 /* Places the target point DISTANCE units of SCALE from the ball at ANGLE */
-#    define PlaceTargetPoint(angle, distance, scale) \
-        do { \
-            f32 cosine = cosf(angle); \
-            f32 length = (distance) * (scale); \
+#define PlaceTargetPoint(angle, distance, scale) \
+    do { \
+        f32 cosine = cosf(angle); \
+        f32 length = (distance) * (scale); \
 \
-            g_CurrentShot.targetPoint[AXIS_X] = \
-                (cosine * length) + g_CurrentShot.ballPosition[AXIS_X]; \
-            g_CurrentShot.targetPoint[AXIS_Z] = \
-                (sinf(angle) * length) + g_CurrentShot.ballPosition[AXIS_Z]; \
-        } \
-        while (0)
+        g_CurrentShot.targetPoint[AXIS_X] = \
+            (cosine * length) + g_CurrentShot.ballPosition[AXIS_X]; \
+        g_CurrentShot.targetPoint[AXIS_Z] = \
+            (sinf(angle) * length) + g_CurrentShot.ballPosition[AXIS_Z]; \
+    } \
+    while (0)
 
 void UpdateTurns(void) {
     s32 playerIndex;
@@ -4052,6 +3857,7 @@ void UpdateTurns(void) {
                 StartTurnRumble(g_GameState.currentPlayerIndex);
                 break;
             case PLAYER_STATE_PREPARING_AIM:
+                nextState = PLAYER_STATE_AIMING;
                 f_ShotLaunch.clubIndex = g_CurrentShot.clubSlot;
                 f_ShotLaunch.shotMode = g_CurrentShot.shotMode;
                 f_ShotLaunch.heading = g_CurrentShot.heading;
@@ -5798,26 +5604,3 @@ void UpdateTurns(void) {
 
     UpdateGolfBalls();
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", IsBButtonHeld);
-
-INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", GetTurnStickX);
-
-INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", GetTurnStickY);
-
-INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", UpdateGolferTranslucency);
-
-INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", PoseGolferForShot);
-
-INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", TickStopwatches);
-
-INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", GiveUpHole);
-
-INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", SetRoundHudPartsShown);
-
-INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", DoesImpactRumble);
-
-INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", PlayImpactClickSound);
-
-INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", UpdateTurns);
-#endif
