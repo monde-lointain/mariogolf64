@@ -380,7 +380,17 @@ void ResetBallSimulations(void) {
  * register. That takes the draft from 295 words to 294, 72 in shape, and
  * the register oracle's closest from 156 words to 154, forcing 78
  * pseudos either way. Clearing it just before the water test instead
- * gives 298 words, 72 in shape, as cse then deletes the inner clear. 294
+ * gives 298 words, 72 in shape, as cse then deletes the inner clear.
+ * That left 294 words, 72 in shape.
+ *
+ * At the cup, the alignment is worked out before the outward speed, and
+ * the outward speed multiplies the velocity by fromCup rather than
+ * fromCup by the velocity: the original's products take the velocity
+ * first, and its loads come in this order only with the alignment first.
+ * That takes the draft from 294 words to 290, 72 in shape either way,
+ * and the register oracle's closest from 154 words to 150, forcing 78
+ * pseudos either way. Swapping the outward speed's operands alone gives
+ * 306 words; taking fromCup first in the alignment, 312 to 314. 290
  * words differ, 72 in shape.
  */
 #ifdef NON_MATCHING
@@ -962,10 +972,10 @@ s32 StepBallSimulation(BallSimulation *simulation) {
                             );
                             guNormalize(&fromCup[AXIS_X], &fromCup[AXIS_Y], &fromCup[AXIS_Z]);
                             guNormalize(&direction[AXIS_X], &direction[AXIS_Y], &direction[AXIS_Z]);
-                            outwardSpeed = (fromCup[AXIS_X] * velocity[AXIS_X]) +
-                                (fromCup[AXIS_Z] * velocity[AXIS_Z]);
                             alignment = (direction[AXIS_X] * fromCup[AXIS_X]) +
                                 (direction[AXIS_Z] * fromCup[AXIS_Z]);
+                            outwardSpeed = (velocity[AXIS_X] * fromCup[AXIS_X]) +
+                                (velocity[AXIS_Z] * fromCup[AXIS_Z]);
                             osSyncPrintf(
                                 "InnerMult %f, %f, %d\n",
                                 alignment,
