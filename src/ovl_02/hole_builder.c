@@ -854,7 +854,21 @@ s32 ListOffsetsByDistance(s32 span, GridOffset *offsets, s32 maxCount) {
  * as the original works it out, changes nothing. Ordering the steps in
  * the lower half as in the upper gives 474 words, and the short x step
  * first in both 468, both 18 in shape, but the oracle's closest is then
- * 78. 478 words differ, 18 in shape.
+ * 78. That left 478 words, 18 in shape.
+ *
+ * Each row now works out toHeight just after toX, shifts texelRow down
+ * to a row before it subtracts the band's first row, and works out
+ * texelColumn from longX in one shift, as the original does, rather than
+ * from fromX. That takes the draft from 478 words differing, 18 in
+ * shape, to 236, 8 in shape; the register oracle's closest stays at 76
+ * words, forcing 48 pseudos. Alone, the toHeight move gives 478 words
+ * (10 in shape), texelRow in two steps 494 (18) and the single shift 478
+ * (18); the first two together 242 (8). Of the 36 places for the two
+ * heights among the row's first statements, with texelRow in two steps,
+ * only toHeight before the width and fromHeight after the direction give
+ * 8 in shape; both heights together give 238 to 474 words, 16 to 26 in
+ * shape. Working out texelColumn before the height step gives 270 to 314
+ * words, 12 to 24 in shape. 236 words differ, 8 in shape.
  */
 #ifdef NON_MATCHING
 void DrawBandHeights(s16 *heights, s32 band) {
@@ -908,6 +922,7 @@ void DrawBandHeights(s16 *heights, s32 band) {
 
             fromX = longX >> HEIGHT_FRACTION_BITS;
             toX = shortX >> HEIGHT_FRACTION_BITS;
+            toHeight = shortHeight >> HEIGHT_FRACTION_BITS;
             width = fromX - toX;
             if (width < 0) {
                 width = -width;
@@ -916,7 +931,6 @@ void DrawBandHeights(s16 *heights, s32 band) {
             count = (width + HEIGHT_ROW_SPAN / 2) / HEIGHT_ROW_SPAN;
             direction = (fromX < toX) ? 1 : -1;
             fromHeight = longHeight >> HEIGHT_FRACTION_BITS;
-            toHeight = shortHeight >> HEIGHT_FRACTION_BITS;
             if (count < HEIGHT_STEP_SCALE_COUNT) {
                 texelHeightStep = f_HeightStepScales[count] * (toHeight - fromHeight);
             }
@@ -924,8 +938,9 @@ void DrawBandHeights(s16 *heights, s32 band) {
                 texelHeightStep = ((toHeight - fromHeight) << TEXEL_HEIGHT_FRACTION_BITS) / count;
             }
 
-            texelColumn = fromX >> HEIGHT_ROW_SPAN_SHIFT;
-            texelRow = (texelRow >> HEIGHT_ROW_SPAN_SHIFT) - band * HEIGHT_BAND_ROW_COUNT;
+            texelColumn = longX >> (HEIGHT_FRACTION_BITS + HEIGHT_ROW_SPAN_SHIFT);
+            texelRow >>= HEIGHT_ROW_SPAN_SHIFT;
+            texelRow -= band * HEIGHT_BAND_ROW_COUNT;
             if (texelRow >= 0 && texelRow < HEIGHT_BAND_ROW_COUNT) {
                 height = fromHeight << TEXEL_HEIGHT_FRACTION_BITS;
                 rowTexels = &heights[texelRow * MAP_COLUMN_COUNT];
