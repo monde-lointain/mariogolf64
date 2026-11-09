@@ -51,6 +51,54 @@ s32 FindBillboardHit(
     BillboardCell *cell,
     f32 *fraction
 );
+
+/*
+ * The original's ball steppers call FindBillboardHit with a ninth
+ * argument, the simulation, which FindBillboardHit does not read. The cast
+ * goes through a function of no arguments, which GCC takes as meant.
+ * Calling through it is undefined, so otherwise the simulation is left out.
+ */
+#ifndef AVOID_UB
+typedef s32 (*BillboardHitFinder)(
+    s32 startX,
+    s32 startY,
+    s32 startZ,
+    s32 endX,
+    s32 endY,
+    s32 endZ,
+    BillboardCell *cell,
+    f32 *fraction,
+    BallSimulation *simulation
+);
+#    define FindSimulationBillboardHit( \
+        startX, \
+        startY, \
+        startZ, \
+        endX, \
+        endY, \
+        endZ, \
+        cell, \
+        fraction, \
+        simulation \
+    ) \
+        ((BillboardHitFinder)(void (*)( \
+            void \
+        ))FindBillboardHit)(startX, startY, startZ, endX, endY, endZ, cell, fraction, simulation)
+#else
+#    define FindSimulationBillboardHit( \
+        startX, \
+        startY, \
+        startZ, \
+        endX, \
+        endY, \
+        endZ, \
+        cell, \
+        fraction, \
+        simulation \
+    ) \
+        FindBillboardHit(startX, startY, startZ, endX, endY, endZ, cell, fraction)
+#endif
+
 void MoveBallToCupEdge(BallSimulation *simulation);
 s32 FindPinHit(
     s32 startX,
