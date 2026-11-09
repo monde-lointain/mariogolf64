@@ -2279,8 +2279,17 @@ INCLUDE_ASM("asm/nonmatchings/play", RebuildGroundTextureCoordinates);
  * first, so the top slot's register is set where the original sets it; a
  * sweep moving each statement found it, and DrawHoleEditorGround now
  * does the same. That takes the draft from 572 words differing (90 in
- * shape) to 570 (88); the register oracle forces nothing either way. 570
- * words differ, 88 in shape.
+ * shape) to 570 (88); the register oracle forces nothing either way.
+ * That left 570 words, 88 in shape.
+ *
+ * The medium and coarse passes' tile counter k is declared in the row
+ * loop, beside groupDetail, where it was declared at the top; a sweep
+ * narrowing each local's scope found it. Its stack slot then comes after
+ * the others, as the original's does, which moves several spill slots to
+ * the original's offsets. That takes the draft from 570 words differing
+ * to 556, 88 in shape either way; the register oracle forces nothing
+ * either way. Declaring k last at the top gives the same 556, and first
+ * 580. 556 words differ, 88 in shape.
  */
 void DrawGround(CameraMatrices *matrices, s32 terrainStyle) {
     u8 snapsEdge[2][TILE_VERTEX_SEGMENT_COUNT]; /* For the current and the last
@@ -2304,7 +2313,6 @@ void DrawGround(CameraMatrices *matrices, s32 terrainStyle) {
     s32 j;
     s32 segmentIndex;
     s32 row;
-    s32 k;
     s32 groupTileIndex;
     s32 detailTileIndex;
     s32 pass;
@@ -2568,6 +2576,7 @@ void DrawGround(CameraMatrices *matrices, s32 terrainStyle) {
         column = half * GROUND_HALF_VERTEX_COLUMNS;
         nextColumnParity = (u32)(column + 1) & 1;
         for (row = 0; row < GROUND_TILE_ROW_COUNT; row++) {
+            s32 k;
             s32 groupDetail;
 
             groupDetail = GROUND_DETAIL_COARSE;
