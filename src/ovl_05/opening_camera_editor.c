@@ -537,7 +537,14 @@ void StopEditorMoves(void) {
  * after the step's if, as before, the draft gave 93 words differing, 33
  * in shape, against 77 (31), and the register oracle's closest falls
  * from 93 to 77, with nothing forced. Testing it in both arms gives 83
- * words (33 in shape). 77 words differ, 31 in shape.
+ * words (33 in shape). That left 77 words, 31 in shape.
+ *
+ * The tilt now sets isDone before it reads tiltLeft too, as the turn
+ * does, where it set it after its step; a sweep moving each statement
+ * found it. Measured before the turn's arrival test moved, that order
+ * gave 341 words, but it now takes the draft from 77 words differing (31
+ * in shape) to 71 (27), and the register oracle's closest from 77 to 71,
+ * with nothing forced. 71 words differ, 27 in shape.
  */
 #ifdef NON_MATCHING
 void UpdateCameraEditor(void) {
@@ -843,6 +850,7 @@ void UpdateCameraEditor(void) {
     if (g_CameraEditor.flags[index] & EDITOR_FLAG_TILTING) {
         f32 tiltLeft;
 
+        isDone = TRUE;
         tiltLeft = g_CameraEditor.tiltLeft;
         if (tiltLeft != 0.0f) {
             if (fabsf(tiltLeft) < EDITOR_ARRIVAL_ANGLE) {
@@ -861,8 +869,6 @@ void UpdateCameraEditor(void) {
                 }
             }
         }
-
-        isDone = TRUE;
         if (!(fabsf(g_CameraEditor.tiltLeft) <
                 fabsf(g_CameraEditor.tiltLeft - g_CameraEditor.tiltSpeed))) {
             isDone = FALSE;
