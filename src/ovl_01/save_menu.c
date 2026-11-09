@@ -677,14 +677,14 @@ void UpdateRingShotRecords(void) {
 #define REPLAY_GLOW_DIVISOR 4
 
 /*
- * Doesn't match: the original gives several values other saved registers,
- * and keeps memory on the stack. The register oracle comes within 8 words
- * with 2 pseudos forced: the face loop's itemIndex and listIndex, each in
- * the other's register. Other orders of their declarations, setting
- * listIndex before row or in the loop's header, change nothing; counting the
- * empty slot's dashes with listIndex, column, drop, row or a counter of
- * their own gives 26 to 62 words, all in registers. 16 words differ, none in
- * shape.
+ * Doesn't match: the original gives several values other saved
+ * registers, and keeps memory on the stack. With the empty slot's dashes
+ * counted with itemIndex, the register oracle comes within 8 words with
+ * 2 pseudos forced: the face loop's itemIndex and listIndex, each in the
+ * other's register. Other orders of their declarations, setting
+ * listIndex before row or in the loop's header, change nothing; counting
+ * the dashes with column, drop, row or a counter of their own gives 26
+ * to 62 words, all in registers. That left 16 words, none in shape.
  *
  * The row icon's draws are counted with index, which also counts the strips
  * and the replay slots and holds each face's draw mode; counting them with
@@ -702,6 +702,20 @@ void UpdateRingShotRecords(void) {
  * indexing the order from listIndex plus itemIndex, with listIndex fixed,
  * gives 115 (15), and from the row's first character plus itemIndex, with
  * no listIndex, 53 (27).
+ *
+ * The empty slot's dashes are counted with listIndex, which the original
+ * keeps in one register with the face loop's, as the split search
+ * suggested. That gives 26 words differing, none in shape, but the
+ * register oracle then matches with 3 pseudos forced: global-alloc
+ * places listIndex before the face's vertical offset, itemIndex times
+ * the spacing, as listIndex's 22 references, weighted by loop depth,
+ * give it the higher priority; with 16 to 18 it would come second, as in
+ * the original. Counting the dashes with replayCourse or replayHole
+ * gives 42 and 48 words; an s8 listIndex gives 18 words, 2 in shape, but
+ * extends it as a byte at each use, where the original extends a
+ * halfword; and setting listIndex before the slot's test gives 31 (3). A
+ * permuter run on this draft found nothing closer in 818,000 candidates.
+ * 26 words differ, none in shape.
  */
 #ifdef NON_MATCHING
 void DrawRingShotRecords(Gfx **displayListHead) {
@@ -714,8 +728,9 @@ void DrawRingShotRecords(Gfx **displayListHead) {
     s32 openCourseCount = GetOpenRingShotCourseCount();
     s16 row;
     s16 column;
-    /* Counts the faces shown in a column, or an empty slot's dashes */
+    /* Counts the faces shown in a column */
     s16 itemIndex;
+    /* Steps through the character order, or counts an empty slot's dashes */
     s16 listIndex;
     s16 drop;
     s32 character;
@@ -971,10 +986,10 @@ void DrawRingShotRecords(Gfx **displayListHead) {
                 );
             }
             else {
-                for (itemIndex = 0; itemIndex != RING_SHOT_EMPTY_DASH_COUNT; itemIndex++) {
+                for (listIndex = 0; listIndex != RING_SHOT_EMPTY_DASH_COUNT; listIndex++) {
                     DrawMenuSign(
                         &gfx,
-                        RING_SHOT_EMPTY_DASH_X + (itemIndex * RING_SHOT_EMPTY_DASH_SPACING),
+                        RING_SHOT_EMPTY_DASH_X + (listIndex * RING_SHOT_EMPTY_DASH_SPACING),
                         RING_SHOT_EMPTY_DASH_Y + (index * RING_SHOT_SLOT_SPACING),
                         MENU_SIGN_DASH
                     );
