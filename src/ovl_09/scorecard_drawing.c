@@ -3199,7 +3199,16 @@ INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard_drawing", DrawLeaderboardPage);
  * differing (129 in shape) to 441 (121), and the register oracle's
  * closest from 351 words to 331, forcing 15 pseudos either way. The
  * front nine's standing that way too gives 472 words (114 in shape),
- * with the closest at 366, forcing 11. 441 words differ, 121 in shape.
+ * with the closest at 366, forcing 11. That left 441 words, 121 in
+ * shape.
+ *
+ * The back nine's match mark adds the hole's offset, then
+ * MATCH_MARK_LEFT and g_Scorecard.x, as the front nine's does, where it
+ * added g_Scorecard.x to the other two; a search regrouping sums found
+ * it. The sum's last add then takes its operands in the original's
+ * order, which takes the draft from 441 words differing to 439, 121 in
+ * shape either way, and the register oracle's closest from 331 words to
+ * 329, forcing 15 pseudos either way. 439 words differ, 121 in shape.
  */
 #ifdef NON_MATCHING
 void DrawScoresPage(Gfx **displayListHead) {
@@ -4253,7 +4262,7 @@ void DrawScoresPage(Gfx **displayListHead) {
                 else {
                     DrawShadowedText(
                         &gfx,
-                        g_Scorecard.x + (((hole - HOLES_PER_NINE) * CELL_WIDTH) + MATCH_MARK_LEFT),
+                        ((hole - HOLES_PER_NINE) * CELL_WIDTH) + MATCH_MARK_LEFT + g_Scorecard.x,
                         backTop + (i * rowSpacing) + PLAYER_ROW_TOP + g_Scorecard.y,
                         g_PrintBuffer
                     );
