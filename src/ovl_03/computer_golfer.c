@@ -1416,7 +1416,7 @@ s32 ChooseHoleStrokeTarget(void) {
         backStrokes = 0;
         frontStrokes = 0;
         for (index = 0; index < COURSE_HOLE_COUNT; index++) {
-            if (strongNine == STRONG_NINE_FRONT && !(holes[index] < HOLES_PER_NINE)) {
+            if (strongNine == STRONG_NINE_FRONT && holes[index] >= HOLES_PER_NINE) {
                 continue;
             }
 

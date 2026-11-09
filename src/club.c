@@ -4653,7 +4653,7 @@ void HandleShotModeInput(void) {
         }
 
         if ((g_CurrentShot.shotMode == SHOT_MODE_APPROACH) &
-            !(cupDistance <= APPROACH_SHOT_DISTANCE)) {
+            (cupDistance > APPROACH_SHOT_DISTANCE)) {
             g_CurrentShot.shotMode = SHOT_MODE_NORMAL;
         }
 
