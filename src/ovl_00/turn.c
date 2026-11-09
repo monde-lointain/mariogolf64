@@ -3392,13 +3392,20 @@ void ShowHoleOutBanner(s32 playerIndex) {
  * match's handicap scoring, as the original stores it after that block's
  * code. That takes the draft from 41 words to 33, 21 in shape, and the
  * register oracle's closest from 34 words to 26, forcing 1 pseudo either
- * way. 33 words differ, 21 in shape.
+ * way.
  *
  * Preparing the aim, the original sets the next state's 2 in $s3 before
  * testing f_ShotSource and compares the source with $s3, where this
  * compares it with the 2 both keep in $fp. Setting the next state at the
  * top of the case, or anywhere before that test, still compares with
  * $fp and gives 36 words, 26 in shape.
+ *
+ * The handicap scoring calls GetCourseRecordIndex with no argument, as
+ * the ambient sounds' lookups do, where it passed g_GameState.gameMode,
+ * which the function ignores: the original's last three calls leave $a0
+ * as it was. That takes the draft from 33 words differing to 29, 17 in
+ * shape, and the register oracle's closest result from 26 words to 22,
+ * forcing 1 pseudo either way. 29 words differ, 17 in shape.
  */
 #ifdef NON_MATCHING
 /* Whether the stopwatches run in a player state: from aiming to the flight */
@@ -5069,7 +5076,7 @@ void UpdateTurns(void) {
                             g_Players[playerIndex]
                                 .holes[g_GameState.holeIndex % COURSE_HOLE_COUNT]
                                 .strokes += GetHandicapOffset(
-                                GetCourseRecordIndex(g_GameState.gameMode),
+                                GetCourseRecordIndex(),
                                 g_GameState.holeIndex,
                                 g_Players[playerIndex].handicap
                             );
@@ -5551,7 +5558,7 @@ void UpdateTurns(void) {
                                         .holes[g_GameState.holeIndex % COURSE_HOLE_COUNT]
                                         .strokes -
                                     GetHandicapOffset(
-                                        GetCourseRecordIndex(g_GameState.gameMode),
+                                        GetCourseRecordIndex(),
                                         g_GameState.holeIndex,
                                         g_Players[playerIndex ^ 1].handicap
                                     );
@@ -5569,7 +5576,7 @@ void UpdateTurns(void) {
                                         .holes[g_GameState.holeIndex % COURSE_HOLE_COUNT]
                                         .strokes -
                                     GetHandicapOffset(
-                                        GetCourseRecordIndex(g_GameState.gameMode),
+                                        GetCourseRecordIndex(),
                                         g_GameState.holeIndex,
                                         g_Players[playerIndex ^ 1].handicap
                                     );
@@ -5586,7 +5593,7 @@ void UpdateTurns(void) {
                                         .holes[g_GameState.holeIndex % COURSE_HOLE_COUNT]
                                         .strokes -
                                     GetHandicapOffset(
-                                        GetCourseRecordIndex(g_GameState.gameMode),
+                                        GetCourseRecordIndex(),
                                         g_GameState.holeIndex,
                                         g_Players[playerIndex ^ 1].handicap
                                     );
