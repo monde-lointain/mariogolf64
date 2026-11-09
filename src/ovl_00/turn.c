@@ -652,7 +652,23 @@ void KeepAimCameraOnCourse(void) {
  * differing, 9 in shape, to 37 (7), and the register oracle's closest result
  * from 31 words, forcing 12 pseudos, to 21, forcing 6. Declared before or after
  * rise, first in the branch or last, it gives the same, as does a local for the
- * ball's height plus the rise; as an f32, 48 (16). 37 words differ, 7 in shape.
+ * ball's height plus the rise; as an f32, 48 (16).
+ *
+ * Looking back at the ball, the look-at's height is worked out from the
+ * center's height, which the original reloads from the stack, rather
+ * than from the ball's: 37 words to 34, 7 in shape to 6. The register
+ * oracle's --globals finds rise is all but certainly left to
+ * global-alloc in the original: made global it gives 18 words, as does
+ * reusing ground for the rise. local-alloc takes rise as it lives in one
+ * block, and no natural form found makes it live in two: setting it
+ * earlier gives 63 words or more, and working the rise out twice in the
+ * clamp 59. Building maxRise up in place (maxRise = distance / 1000,
+ * then maxRise *= maxRise, then maxRise /= 4) gives 11 words, 3 in
+ * shape, leaving only g_CurrentShot's address in $s0, but it gives
+ * maxRise three meanings in turn. cse makes the reads of
+ * aimCameraDistance after the call relative to that address, as the
+ * original's are, and cse2 folds them back, as it knows the register
+ * holds the address. 34 words differ, 6 in shape.
  */
 #ifdef NON_MATCHING
 void PlaceShotCamera(void) {
@@ -852,7 +868,7 @@ void PlaceShotCamera(void) {
             (cosf(heading) * (g_CurrentShot.aimCameraDistance + GREEN_LOOK_AHEAD)) + center[AXIS_X];
         point[AXIS_Z] =
             (sinf(heading) * (g_CurrentShot.aimCameraDistance + GREEN_LOOK_AHEAD)) + center[AXIS_Z];
-        point[AXIS_Y] = (g_CurrentShot.ballPosition[AXIS_Y] - LOOK_BACK_RISE) -
+        point[AXIS_Y] = (center[AXIS_Y] - LOOK_BACK_RISE) -
             (g_CurrentShot.aimCameraHeight * LOOK_BACK_HEIGHT_SCALE);
         g_Cameras[0].view.heading = heading;
         g_Cameras[0].view.lookAt[AXIS_X] = point[AXIS_X] * COURSE_TO_WORLD_SCALE;
