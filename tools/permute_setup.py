@@ -390,6 +390,10 @@ class CodeScanner:
         self.depth: int = 0
         # Whether each open brace opens an initializer rather than a block
         self.braces: list[bool] = []
+        # The open blocks, outermost first, each by the number of blocks
+        # opened before it
+        self.blocks: list[int] = []
+        self.block_count: int = 0
         self.last_code: str = "{"
 
     def may_start_statement(self) -> bool:
@@ -433,25 +437,63 @@ class CodeScanner:
         elif text == "{":
             in_initializer = bool(self.braces) and self.braces[-1]
             self.braces.append(self.last_code in "=," or in_initializer)
+            if not self.braces[-1]:
+                self.block_count += 1
+                self.blocks.append(self.block_count)
         elif text == "}" and self.braces:
-            _ = self.braces.pop()
+            closes_initializer = self.braces.pop()
+            if not closes_initializer:
+                _ = self.blocks.pop()
         if not text.isspace():
             self.last_code = text[-1]
 
 
-def find_statement_starts(lines: list[str], first: int, last: int) -> list[int]:
+def find_statement_starts(
+    lines: list[str], first: int, last: int
+) -> list[tuple[int, tuple[int, ...]]]:
     """Return the lines of LINES[FIRST:LAST] that a statement may start on.
 
-    A pragma line can go before each. Indices are LINES' own.
+    A pragma line can go before each. Each comes with the blocks open there,
+    outermost first, so that a region can start and end in the same block.
+    Indices are LINES' own. An else is no start: a pragma before it would
+    split its if.
     """
     scanner = CodeScanner()
-    starts: list[int] = []
+    starts: list[tuple[int, tuple[int, ...]]] = []
     for number in range(first, last):
-        if scanner.may_start_statement():
-            starts.append(number)
+        is_else = re.match(r"\s*else\b", lines[number]) is not None
+        if scanner.may_start_statement() and not is_else:
+            starts.append((number, tuple(scanner.blocks)))
         if not lines[number].lstrip().startswith("#"):
             scanner.scan_line(lines[number])
     return starts
+
+
+# Above any block number, to find a line's last start by bisection
+_MAX_BLOCK = sys.maxsize
+
+
+def widen_to_one_block(
+    starts: list[tuple[int, tuple[int, ...]]], first: int, last: int
+) -> tuple[int, int]:
+    """Return the lines a region from STARTS[FIRST] to STARTS[LAST] spans.
+
+    The permuter parses a region as whole statements, so when the two lie in
+    different blocks the region widens to the statements, in the innermost
+    block holding both, that hold them.
+    """
+    first_blocks, last_blocks = starts[first][1], starts[last][1]
+    shared = 0
+    while shared < min(len(first_blocks), len(last_blocks)) and (
+        first_blocks[shared] == last_blocks[shared]
+    ):
+        shared += 1
+    blocks = first_blocks[:shared]
+    while first > 0 and starts[first][1] != blocks:
+        first -= 1
+    while last < len(starts) - 1 and starts[last][1] != blocks:
+        last += 1
+    return starts[first][0], starts[last][0]
 
 
 def mark_focus_regions(c_path: str, asm_path: str, function: str) -> str:
@@ -482,11 +524,14 @@ def mark_focus_regions(c_path: str, asm_path: str, function: str) -> str:
         blamed += blame.find_blamed_lines(nested_asm, c_path, name)
     regions: list[tuple[int, int]] = []
     for line_number in sorted(blamed):
-        index = bisect.bisect_right(starts, line_number - 1) - 1
+        index = bisect.bisect_right(starts, (line_number - 1, (_MAX_BLOCK,))) - 1
         if not first <= line_number - 1 < last or index < 0:
             continue
-        start = starts[max(0, index - FOCUS_CONTEXT)]
-        end = starts[min(len(starts) - 1, index + 1 + FOCUS_CONTEXT)]
+        start, end = widen_to_one_block(
+            starts,
+            max(0, index - FOCUS_CONTEXT),
+            min(len(starts) - 1, index + 1 + FOCUS_CONTEXT),
+        )
         if regions and start <= regions[-1][1]:
             regions[-1] = (regions[-1][0], max(end, regions[-1][1]))
         else:
