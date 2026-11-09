@@ -4099,7 +4099,15 @@ void WriteHexDumpFile(u32 *words, s32 byteCount, char *fileName) {
  * words (133 in shape), and this gives 917 (131). Set before the first
  * tile's S, it gives 917 (131) too. The bottom slot is set after the
  * tile index, as in DrawGround; before the top slot, it gave those 917
- * words, and this gives 905 (123). 905 words differ, 123 in shape.
+ * words, and this gives 905 (123). That left 905 words, 123 in shape.
+ *
+ * The fine tiles' column and their checkerboard parity add the row and
+ * the half's first column to groupTile, where the draft added groupTile
+ * to them; a search regrouping sums found it. That takes the draft from
+ * 905 words differing to 899, 123 in shape both, and the register
+ * oracle's closest from 905 words to 899, with nothing forced; the
+ * column alone gives 901, the parity alone 903. 899 words differ, 123 in
+ * shape.
  */
 #ifdef NON_MATCHING
 void DrawHoleEditorGround(CameraMatrices *matrices UNUSED, s32 terrainStyle) {
@@ -4709,11 +4717,11 @@ void DrawHoleEditorGround(CameraMatrices *matrices UNUSED, s32 terrainStyle) {
 
                     midpoints = g_WorkArea.hole
                                     .midpoints[g_WorkArea.hole.tiles[tileIndex].midpointBlockIndex];
-                    tileColumn = (half * GROUND_TILE_GROUP_SIZE) + groupTile;
+                    tileColumn = groupTile + (half * GROUND_TILE_GROUP_SIZE);
 
                     /* The maps tell each tile from its neighbors by color */
                     if (IsMapTerrainStyle(terrainStyle)) {
-                        Boolean isOdd = (row + groupTile) & 1;
+                        Boolean isOdd = (groupTile + row) & 1;
                         s32 red = isOdd * COLOR_CHANNEL_MAX;
                         s32 blue = COLOR_CHANNEL_MAX - red;
 
