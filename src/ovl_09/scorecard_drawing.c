@@ -3122,8 +3122,17 @@ INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard_drawing", DrawLeaderboardPage);
  * The hole numbers are counted in i too, as the par row's holes are,
  * rather than in j: that takes the draft from 665 words differing to
  * 645, 131 in shape either way, and the register oracle's closest stays
- * at 537 words, now forcing 36 pseudos rather than 38. 645 words differ,
- * 131 in shape.
+ * at 537 words, now forcing 36 pseudos rather than 38. That left 645
+ * words, 131 in shape.
+ *
+ * The checkerboard's columns and the scores page's faces are counted in
+ * i as well, in place of counters of their own, which a search over loop
+ * counters found together: that takes the draft from 645 words differing
+ * to 531, 131 in shape either way, and the register oracle then forces
+ * nothing, leaving all 531, against 537 forcing 36. Counting the holes
+ * of either one of the handicap strokes' two copies in j gives 505
+ * words, but both 657, so the copies keep hole. 531 words differ, 131 in
+ * shape.
  */
 #ifdef NON_MATCHING
 void DrawScoresPage(Gfx **displayListHead) {
@@ -3148,9 +3157,7 @@ void DrawScoresPage(Gfx **displayListHead) {
     s32 secondRow;
     s32 i;
     s32 cellRowIndex;
-    s32 facePlayerIndex;
     s32 j;
-    s32 cellColumn;
     s32 hole;
     SaveData *saveData;
     s32 glow;
@@ -3701,16 +3708,14 @@ void DrawScoresPage(Gfx **displayListHead) {
             gDPSetPrimColor(gfx++, 0, 0, 0x7F, 0xFF, 0, cellAlpha);
         }
 
-        for (cellColumn = 0; cellColumn != HOLES_PER_NINE; cellColumn++) {
-            if (!(cellColumn & 1)) {
+        for (i = 0; i != HOLES_PER_NINE; i++) {
+            if (!(i & 1)) {
                 if (!(g_GameState.holeSelection & HOLE_SELECTION_BACK_NINE)) {
                     DrawTextureRect(
                         &gfx,
-                        QuarterPixels((cellColumn * CELL_WIDTH) + CELL_LEFT + g_Scorecard.x),
+                        QuarterPixels((i * CELL_WIDTH) + CELL_LEFT + g_Scorecard.x),
                         QuarterPixels(g_Scorecard.y + (cellRowIndex * CELL_HEIGHT) + CELL_TOP),
-                        QuarterPixels(
-                            (cellColumn * CELL_WIDTH) + CELL_LEFT + CELL_WIDTH + g_Scorecard.x
-                        ),
+                        QuarterPixels((i * CELL_WIDTH) + CELL_LEFT + CELL_WIDTH + g_Scorecard.x),
                         QuarterPixels(
                             g_Scorecard.y + (cellRowIndex * CELL_HEIGHT) + CELL_TOP + CELL_HEIGHT
                         ),
@@ -3725,13 +3730,11 @@ void DrawScoresPage(Gfx **displayListHead) {
                 if (!(g_GameState.holeSelection & HOLE_SELECTION_FRONT_NINE)) {
                     DrawTextureRect(
                         &gfx,
-                        QuarterPixels((cellColumn * CELL_WIDTH) + CELL_LEFT + g_Scorecard.x),
+                        QuarterPixels((i * CELL_WIDTH) + CELL_LEFT + g_Scorecard.x),
                         QuarterPixels(
                             (cellRowIndex * CELL_HEIGHT) + CELL_TOP + NINE_SPACING + g_Scorecard.y
                         ),
-                        QuarterPixels(
-                            (cellColumn * CELL_WIDTH) + CELL_LEFT + CELL_WIDTH + g_Scorecard.x
-                        ),
+                        QuarterPixels((i * CELL_WIDTH) + CELL_LEFT + CELL_WIDTH + g_Scorecard.x),
                         QuarterPixels(
                             (cellRowIndex * CELL_HEIGHT) + CELL_HEIGHT + CELL_TOP + NINE_SPACING +
                             g_Scorecard.y
@@ -3925,12 +3928,11 @@ void DrawScoresPage(Gfx **displayListHead) {
         case 3:
         case 4:
             rowSpacing = PLAYER_ROW_SPACING;
-            for (facePlayerIndex = 0; facePlayerIndex != g_GameState.playerCount;
-                facePlayerIndex++) {
-                LoadLargePalette(&gfx, g_PlayerFacePalettes[facePlayerIndex]);
+            for (i = 0; i != g_GameState.playerCount; i++) {
+                LoadLargePalette(&gfx, g_PlayerFacePalettes[i]);
                 LoadTextureBlock(
                     &gfx,
-                    g_PlayerFaceImages[facePlayerIndex],
+                    g_PlayerFaceImages[i],
                     G_IM_FMT_CI,
                     G_IM_SIZ_8b,
                     FACE_SIZE,
@@ -3946,11 +3948,10 @@ void DrawScoresPage(Gfx **displayListHead) {
                 if (!(g_GameState.holeSelection & HOLE_SELECTION_BACK_NINE)) {
                     DrawSmallFace(
                         &gfx,
-                        ((facePlayerIndex & 1) * SCORES_FACE_STAGGER) + SCORES_FACE_LEFT +
-                            g_Scorecard.x,
+                        ((i & 1) * SCORES_FACE_STAGGER) + SCORES_FACE_LEFT + g_Scorecard.x,
                         PLAYER_ROW_TOP - SCORES_FACE_RISE + g_Scorecard.y +
-                            ((facePlayerIndex * PLAYER_ROW_SPACING) + frontTop),
-                        facePlayerIndex,
+                            ((i * PLAYER_ROW_SPACING) + frontTop),
+                        i,
                         TRUE
                     );
                 }
@@ -3958,11 +3959,10 @@ void DrawScoresPage(Gfx **displayListHead) {
                 if (!(g_GameState.holeSelection & HOLE_SELECTION_FRONT_NINE)) {
                     DrawSmallFace(
                         &gfx,
-                        ((facePlayerIndex & 1) * SCORES_FACE_STAGGER) + SCORES_FACE_LEFT +
-                            g_Scorecard.x,
+                        ((i & 1) * SCORES_FACE_STAGGER) + SCORES_FACE_LEFT + g_Scorecard.x,
                         PLAYER_ROW_TOP - SCORES_FACE_RISE + g_Scorecard.y +
-                            ((facePlayerIndex * PLAYER_ROW_SPACING) + backTop),
-                        facePlayerIndex,
+                            ((i * PLAYER_ROW_SPACING) + backTop),
+                        i,
                         TRUE
                     );
                 }
