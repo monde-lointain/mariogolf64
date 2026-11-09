@@ -4617,7 +4617,7 @@ void LoadOpeningImpactLines(void) {
  * 32 words (4 in shape), also counts the row down before the rectangle;
  * measured before the left edge, that alone gave 252 (30). The register
  * oracle's closest result is the 46 words with no register forced;
- * forcing any gives 212 or more. 46 words differ, none in shape.
+ * forcing any gives 212 or more; that left 46 words, none in shape.
  *
  * The counts above were measured before the change below. Each pipe sync and
  * the RDP state command after it now goes through AppendSyncedRdpState,
@@ -4637,7 +4637,18 @@ void LoadOpeningImpactLines(void) {
  * subtracting the row offset. The original adds the height to the offset
  * first and shares the bottom calculation's 88. Using bottomEdge for both
  * edges gives 168 differences (58 in shape); inline helpers for the top or
- * offset do not improve on 19. This remains a draft, not a matching routine.
+ * offset do not improve on 19.
+ *
+ * Setting the top to the bottom edge's 88 and then moving it up by the
+ * row's offset and a strip, before the bottom, drops bottomEdge and
+ * leaves 12 words, none in shape. fold-const still turns the subtraction
+ * of row * 32 + 32 into one of 32 and then the offset, so the top starts
+ * from 56, where the original shares the bottom's 88 and adds the strip
+ * height to the offset. A height variable, as for the width, keeps the
+ * sum but strength-reduces the row (168 words, 54 in shape, the frame 8
+ * bytes smaller); the bottom worked out from the top gives 9 words, 3 in
+ * shape. The register oracle forces nothing closer. 12 words differ,
+ * none in shape.
  */
 #ifdef NON_MATCHING
 void DrawOpeningImpactLines(Gfx **displayListHead) {
@@ -4652,7 +4663,6 @@ void DrawOpeningImpactLines(Gfx **displayListHead) {
     s32 left;
     s32 bottom;
     s32 top;
-    s32 bottomEdge = IMPACT_LINES_BOTTOM;
 
     if (f_AreImpactLinesShown) {
         frame = f_ImpactLinesFrame++;
@@ -4683,8 +4693,9 @@ void DrawOpeningImpactLines(Gfx **displayListHead) {
                  * 253 words differing (19 in shape) against 46 (none)
                  */
                 left = IMPACT_LINES_LEFT;
+                top = IMPACT_LINES_BOTTOM;
+                top -= row * IMPACT_LINES_STRIP_HEIGHT + IMPACT_LINES_STRIP_HEIGHT;
                 bottom = IMPACT_LINES_BOTTOM - (row * IMPACT_LINES_STRIP_HEIGHT);
-                top = bottomEdge - (row * IMPACT_LINES_STRIP_HEIGHT + IMPACT_LINES_STRIP_HEIGHT);
                 texelOffset = LARGE_PALETTED_TEXELS_OFFSET +
                     (stripIndex * IMPACT_LINES_SIZE * IMPACT_LINES_STRIP_HEIGHT);
                 gDPLoadTextureBlock(
