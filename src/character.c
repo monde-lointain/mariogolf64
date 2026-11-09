@@ -1629,7 +1629,14 @@ void AnimateCharacter(u32 slotIndex) {
  * and groupings of each product, written the same way in all four, none
  * does better. That takes the draft from 232 words differing (48 in shape)
  * to 224 (44), and the register oracle's closest from 80 words, forcing 34
- * pseudos, to 72, forcing 33. 224 words differ, 44 in shape.
+ * pseudos, to 72, forcing 33. That left 224 words, 44 in shape.
+ *
+ * Building the dot product up a component at a time, with +=, gives 241
+ * words but 33 in shape, and the register oracle's closest is then 74
+ * words, forcing 37 pseudos. A search splitting assignments into steps
+ * found 213 words, 33 in shape, by first setting dot to one of the next
+ * span's components and multiplying by dot in its place, a copy that
+ * stands for nothing. 224 words differ, 44 in shape.
  */
 #ifdef NON_MATCHING
 void UpdateJointKeyframeSpans(u32 slotIndex) {
