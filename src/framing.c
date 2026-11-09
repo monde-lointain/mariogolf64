@@ -149,8 +149,22 @@ void TransformPoint(Mat4 mf, Vec3 point, Vec3 result) {
  * 258 to 250, with nothing forced; set right after the horizontal fit it
  * gives 255 (63).
  *
- * Without the spill, every offset into the frame differs: 250 words
- * differ, 56 in shape.
+ * Without the spill, every offset into the frame differs. That left 250
+ * words, 56 in shape.
+ *
+ * Copying verticalEyeZ into top before working the top edge out from it,
+ * which a search splitting assignments into steps found, gives 157
+ * words, 53 in shape, with the original's frame, and the register
+ * oracle's closest falls from 250 words to 157, forcing nothing. The
+ * copy gives top 5 references where it had 3, raising its global-alloc
+ * priority from 1428 to 4347, and horizontalEyeZ then spills as in the
+ * original; copying into bottom changes nothing. The copy stands for
+ * nothing, and the natural forms tried don't bring it: a local for the
+ * vertical distance, set beside frontDistance or before the top edge,
+ * gives 250 words, the distance worked out into verticalEyeZ 258, the
+ * top edge in two statements 275 to 486, the top angle's radians in
+ * angle 190 (84 in shape), and every declaration order of the eye
+ * distances and edges 250. 250 words differ, 56 in shape.
  */
 #ifdef NON_MATCHING
 void FrameSpheres(f32 depthOffset) {
