@@ -1473,8 +1473,14 @@ NO_RESULT UpdateHandicaps(s32 firstPlayerIndex UNUSED, s32 playerCount UNUSED) {
  * $s7, where the build gives it $fp and $s7 to the pipe sync's command,
  * which the golfers' loop hoists; leaving arrowY unset at its declaration
  * gives 176 words but 18 in shape, as it stays live from the function's
- * entry, and ending the arrows' tests in a plain else 279 (41). 177 words
- * differ, 17 in shape.
+ * entry, and ending the arrows' tests in a plain else 279 (41). That left
+ * 177 words, 17 in shape.
+ *
+ * The arrows' top starts from offsetY and then adds the column's top in
+ * a statement of its own, which takes the draft from 177 words differing
+ * to 141, 17 in shape either way, and the oracle's closest from 75 words
+ * forcing 16 pseudos to 75 forcing 11. Starting from the column's top
+ * and adding offsetY leaves 177. 141 words differ, 17 in shape.
  */
 #ifdef NON_MATCHING
 void DrawHandicaps(Gfx **displayListHead, s32 slide, u8 reverseVerticalSlide, u8 canShowPrompt) {
@@ -1780,7 +1786,8 @@ void DrawHandicaps(Gfx **displayListHead, s32 slide, u8 reverseVerticalSlide, u8
 
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
     gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(f_StatsGreenArrows)));
-    arrowTop = offsetY + HANDICAP_COLUMN_TOP;
+    arrowTop = offsetY;
+    arrowTop += HANDICAP_COLUMN_TOP;
     for (i = 0; i != MENU_ARROW_COUNT; i++) {
         if (i == MENU_ARROW_LEFT) {
             gDPLoadTextureTile_4b(
