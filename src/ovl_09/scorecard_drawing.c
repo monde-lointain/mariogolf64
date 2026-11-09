@@ -2404,6 +2404,11 @@ void DrawLeaderboardPage(Gfx **displayListHead) {
     for (i = 0; i != LEADERBOARD_ROW_COUNT; i++) {
         if (i * ROW_FLIP_STAGGER < g_Scorecard.content.flipTime) {
             shade = COLOR_CHANNEL_MAX;
+            /*
+             * The angle's test is negated, as GCC keeps the negation of a
+             * floating-point comparison rather than inverting it: written as <=,
+             * 85 words differ, 39 in shape, against 81 and 35
+             */
             if (g_Scorecard.content.isRowFlipping[i] == TRUE &&
                 !(g_Scorecard.content.rowFlipAngles[i] > FLAP_EDGE_ON_ANGLE)) {
                 shade = (sinf(g_Scorecard.content.rowFlipAngles[i]) * FLAP_SHADE_RANGE) +

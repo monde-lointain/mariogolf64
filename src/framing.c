@@ -286,6 +286,11 @@ void FrameSpheres(f32 depthOffset) {
     if (g_ControllerData[1].trigger & D_CBUTTONS) {
         osSyncPrintf("xd %f yd %f xzd %f yzd %f\n", eyeX, eyeY, horizontalEyeZ, verticalEyeZ);
     }
+    /*
+     * Negated, as GCC keeps the negation of a floating-point comparison
+     * rather than inverting it: verticalEyeZ > horizontalEyeZ gives 58 words
+     * in shape against 56
+     */
     if (!(verticalEyeZ <= horizontalEyeZ)) {
         eyeZ = verticalEyeZ;
     }

@@ -2504,6 +2504,11 @@ s32 FindWallHit(
             hitFraction = 0.0f;
         }
 
+        /*
+         * Negated, to match: GCC keeps the negation of a floating-point
+         * comparison rather than inverting it, so hitFraction >=
+         * nearestFraction branches differently
+         */
         if (!(hitFraction < nearestFraction)) {
             continue;
         }
