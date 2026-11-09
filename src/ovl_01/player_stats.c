@@ -3383,7 +3383,14 @@ void DrawBestShotsCursor(Gfx **displayListHead) {
  * 55 words, 4 to 9 in shape. The original computes the lower clamps
  * without a branch, as GCC does for the operator. Repeating the
  * palette's lower clamp in both arms of the character's upper one gives
- * the same 38 words. 38 words differ, none in shape.
+ * the same 38 words. That left 38 words, none in shape.
+ *
+ * The cell loop steps cell before column, where the draft stepped column
+ * first; a search reordering for headers' clauses found it. That takes
+ * the draft from 38 words differing to 36, none in shape, and the
+ * register oracle's closest from 12 words to 6, forcing 4 pseudos either
+ * way; starting cell first as well gives 62 words, and starting it first
+ * alone 60. 36 words differ, none in shape.
  */
 #ifdef NON_MATCHING
 void LoadBestShotFaces(void) {
@@ -3407,7 +3414,7 @@ void LoadBestShotFaces(void) {
         /* The row's first cell, which the original works out apart from the cell
          * it steps */
         rowStart = row * STATS_GRID_COLUMN_COUNT;
-        for (column = 0, cell = rowStart; column != STATS_GRID_COLUMN_COUNT; column++, cell++) {
+        for (column = 0, cell = rowStart; column != STATS_GRID_COLUMN_COUNT; cell++, column++) {
             if (f_BestShotRecords[row][column] != STATS_CELL_EMPTY) {
                 character = save->rankedRecords[f_BestShotRecords[row][column]].characterIndex;
                 palette = save->rankedRecords[f_BestShotRecords[row][column]].paletteIndex;
