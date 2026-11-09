@@ -3405,7 +3405,16 @@ void ShowHoleOutBanner(s32 playerIndex) {
  * which the function ignores: the original's last three calls leave $a0
  * as it was. That takes the draft from 33 words differing to 29, 17 in
  * shape, and the register oracle's closest result from 26 words to 22,
- * forcing 1 pseudo either way. 29 words differ, 17 in shape.
+ * forcing 1 pseudo either way.
+ *
+ * While aiming, the song's tempo is set by a call in each arm of the
+ * green test, the green's tempo or the aiming one, and cross-jumping
+ * shares the two calls, as the original loads AIMING_SONG_TEMPO into $a0
+ * in the green test's delay slot. Through a tempo local set before the
+ * test, the local lives across the green arm's calls in $s0, and 29
+ * words differ (17 in shape); the two calls give 22 (14), and the
+ * register oracle's closest result is these 22 words with no register
+ * forced. 22 words differ, 14 in shape.
  */
 #ifdef NON_MATCHING
 /* Whether the stopwatches run in a player state: from aiming to the flight */
@@ -4210,7 +4219,6 @@ void UpdateTurns(void) {
                 }
                 else if (g_PauseScreen == PAUSE_SCREEN_NONE) {
                     Boolean isReady;
-                    s32 tempo;
 
                     if (f_ShotSource == SHOT_SOURCE_PLAYER &&
                         (g_TurnController.buttons & (Z_TRIG | L_TRIG)) &&
@@ -4227,7 +4235,6 @@ void UpdateTurns(void) {
                             AIMING_MEAN_ALPHA
                     );
                     isReady = TRUE;
-                    tempo = AIMING_SONG_TEMPO;
                     if (GetSurfaceInfo(g_CurrentShot.surface)->kind == SURFACE_KIND_GREEN &&
                         !g_GameState.isMiniGolf) {
                         f_GreenSongTempo += GREEN_SONG_TEMPO_STEP;
@@ -4240,10 +4247,12 @@ void UpdateTurns(void) {
                             PrintDebugText(g_PrintBuffer, 10, 10);
                         }
 
-                        tempo = f_GreenSongTempo;
+                        SetSongTempo(f_GreenSongTempo);
+                    }
+                    else {
+                        SetSongTempo(AIMING_SONG_TEMPO);
                     }
 
-                    SetSongTempo(tempo);
                     if (f_ShotSource == SHOT_SOURCE_PLANNING) {
                         if (g_ScreenEffect != SCREEN_EFFECT_SAVED_FRAME) {
                             SetScreenEffect(SCREEN_EFFECT_SAVED_FRAME, SAVED_FRAME_STEP_SAVING);
