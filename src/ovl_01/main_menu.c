@@ -5619,7 +5619,7 @@ void DrawMenuBanner(Gfx **displayListHead) {
  * by 5 alongside the label table's pointers, which also moves the title row's
  * pointer from s0 to t7. loop.c turns the offset down because the loop has 268
  * insns after CSE and the offset is worth 252; the original's loop must be 252
- * insns or fewer. 62 words differ. A permuter run got to 2 only by testing
+ * insns or fewer. That left 62 words. A permuter run got to 2 only by testing
  * f_TitleLabelCorners around two identical labelOffset branches, and an else if
  * around identical branches gets 16; neither test has any meaning. Another got
  * to 4 words, none in shape, by setting labelOffset to TITLE_LABEL_WIDTH and
@@ -5638,6 +5638,14 @@ void DrawMenuBanner(Gfx **displayListHead) {
  * in shape), and grouping only the New Game labels 88 (24), which suggests
  * the original tests the choice in each of the three cases. Giving the lit
  * loop its own offset or index gives 62 to 74.
+ *
+ * Edge locals for the lit rectangle (left, top, right and bottom, with
+ * or without a halfGrowth) cut the loop to 251 insns, and loop.c then
+ * steps the offset by 5 as the original does, but the locals move the
+ * table loads ahead of the display list stores: 127 to 266 words. A
+ * halfGrowth alone leaves 260 insns and gives 117 words. Counting the
+ * image offset in rows or in row bytes, or growth as an s32, doesn't
+ * bring the loop under 252 either. 62 words differ, 10 in shape.
  */
 #ifdef NON_MATCHING
 const char f_PlainMenuHeading[] = "MAIN MENU";
