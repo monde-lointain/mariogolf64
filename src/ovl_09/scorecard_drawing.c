@@ -3166,7 +3166,30 @@ INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard_drawing", DrawLeaderboardPage);
  * search moving statements found: that takes the draft from 525 words
  * differing to 519, 131 in shape either way, and the register oracle's
  * closest from all 525 words, forcing nothing, to 361, forcing 21
- * pseudos. 519 words differ, 131 in shape.
+ * pseudos. That left 519 words, 131 in shape.
+ *
+ * The faces of one, three or four players add the nine's top first, then
+ * the face's offset, the player's row and g_Scorecard.y, where they
+ * added the offset and g_Scorecard.y first and the row and the nine's
+ * top last, as editsearch's regrouping found: that takes the draft from
+ * 519 words differing to 459, 131 in shape to 129, and the register
+ * oracle's closest from 361 words, forcing 21 pseudos, to 351, forcing
+ * 15. The same search's best, 436 words (130 in shape), also puts
+ * extraTop and overTop before the nine's top in the over and badges
+ * labels, but the oracle then forces nothing and leaves all 436; the
+ * front nine's over text alone that way gives 424 (130), also with
+ * nothing forced. The original's over and badges labels load the nine's
+ * top into a register as the sum's first operand, which the draft's
+ * order gives. That left 459 words, 129 in shape.
+ *
+ * Adding the row's offset first in the two nines' totals and in the
+ * front nine's and the whole round's net scores, as the back nine's net
+ * score does, loads the nine's top into a register there as the original
+ * does, and takes the draft to 461 words, 115 in shape; but the register
+ * oracle's voting then makes each round worse, so it forces nothing and
+ * leaves all 461, against 351. With the labels' regrouping too it gives
+ * 406 words (116 in shape), again with nothing forced. 459 words differ,
+ * 129 in shape.
  */
 #ifdef NON_MATCHING
 void DrawScoresPage(Gfx **displayListHead) {
@@ -3978,8 +4001,8 @@ void DrawScoresPage(Gfx **displayListHead) {
                     DrawSmallFace(
                         &gfx,
                         ((i & 1) * SCORES_FACE_STAGGER) + SCORES_FACE_LEFT + g_Scorecard.x,
-                        PLAYER_ROW_TOP - SCORES_FACE_RISE + g_Scorecard.y +
-                            ((i * PLAYER_ROW_SPACING) + frontTop),
+                        frontTop + (PLAYER_ROW_TOP - SCORES_FACE_RISE) + (i * PLAYER_ROW_SPACING) +
+                            g_Scorecard.y,
                         i,
                         TRUE
                     );
@@ -3989,8 +4012,8 @@ void DrawScoresPage(Gfx **displayListHead) {
                     DrawSmallFace(
                         &gfx,
                         ((i & 1) * SCORES_FACE_STAGGER) + SCORES_FACE_LEFT + g_Scorecard.x,
-                        PLAYER_ROW_TOP - SCORES_FACE_RISE + g_Scorecard.y +
-                            ((i * PLAYER_ROW_SPACING) + backTop),
+                        backTop + (PLAYER_ROW_TOP - SCORES_FACE_RISE) + (i * PLAYER_ROW_SPACING) +
+                            g_Scorecard.y,
                         i,
                         TRUE
                     );
