@@ -2363,7 +2363,18 @@ void DrawSavedMiniGolfImage(Gfx **displayListHead);
  * whether the controllers are assigned, with the continue prompt first and
  * the assigning prompts in the else, as a sweep inverting each if found,
  * takes it on to 199 words (81 in shape), and the closest to 169, still
- * forcing 17. 199 words differ, 81 in shape.
+ * forcing 17. That left 199 words, 81 in shape.
+ *
+ * Each board sets the mode icon's half size and scale in their globals
+ * first, the scale divided by the global half size, and then takes the
+ * locals from them: the original works both values out in temporaries,
+ * stores them and copies them to their saved registers after. That takes
+ * the draft from 199 words (81 in shape) to 169 (77), and the register
+ * oracle's closest from 169 words, forcing 17 pseudos, to 153, forcing
+ * 14. Assigning the locals and globals together in one statement, or
+ * only the scale's, gives 177 to 199 words, and setting the half size's
+ * global before the board's half size 184. 169 words differ, 77 in
+ * shape.
  */
 #ifdef NON_MATCHING
 void DrawSavedGames(Gfx **displayListHead) {
@@ -2496,11 +2507,12 @@ void DrawSavedGames(Gfx **displayListHead) {
     f_BoardBobPhase += BOARD_BOB_PHASE_STEP;
     for (index = 0; index != SAVED_GAME_COUNT; index++) {
         slot = drawOrder[index];
-        iconHalfSize = boardScale[slot] * MODE_ICON_HALF_SIZE;
         halfSize = boardScale[slot] * GAME_BOARD_HALF_SIZE;
-        f_ChosenModeIconHalfSize = iconHalfSize;
-        iconStep = (f32)(MODE_ICON_STRIP_HEIGHT << TEXEL_STEP_SHIFT) / iconHalfSize;
-        f_ChosenModeIconScale = iconStep;
+        f_ChosenModeIconHalfSize = boardScale[slot] * MODE_ICON_HALF_SIZE;
+        f_ChosenModeIconScale =
+            (f32)(MODE_ICON_STRIP_HEIGHT << TEXEL_STEP_SHIFT) / f_ChosenModeIconHalfSize;
+        iconHalfSize = f_ChosenModeIconHalfSize;
+        iconStep = f_ChosenModeIconScale;
         step = (f32)(GAME_BOARD_STRIP_HEIGHT << TEXEL_STEP_SHIFT) / halfSize;
         /* The loop stops before SAVED_GAME_COUNT, so no board bobs */
         if (index == SAVED_GAME_COUNT) {
