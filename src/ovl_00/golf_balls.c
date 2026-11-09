@@ -952,15 +952,15 @@ enum BallSprite {
  * branches to the sync after the switch. The macro in each case with a
  * default case holding the copy as well gives 1155 (207).
  *
- * Each ball's marker player is read once into markerPlayer, which the
- * no-marker test and the marker colors' switch share. That takes the draft
+ * Reading each ball's marker player once into markerPlayer, which the
+ * no-marker test and the marker colors' switch shared, took the draft
  * from 648 words differing, 90 in shape, to 492 (100), and the register
  * oracle's closest result from 648 words to 492, with nothing forced; the
- * frame grows 8 bytes to the original's 0x390. The local as an s32 gives 663
+ * frame grew 8 bytes to the original's 0x390. The local as an s32 gives 663
  * words (101 in shape), set as it is declared at the top of the drawn ball's
  * block 852 (114), and read only for the switch, at the top of the near
  * ball's block, 492 (100). The counts in the paragraphs above were measured
- * before this change. 492 words differ, 100 in shape.
+ * before this change. That left 492 words, 100 in shape.
  *
  * The Pika Ball's test reads the shown alpha as f_GolfBalls[i].alpha,
  * beside ball's other fields: reading it through ball, alone or with the
@@ -995,7 +995,7 @@ enum BallSprite {
  * Both frame counters step before the display list is built, as the
  * original loads f_BallRollFrame before the first command's store. That
  * takes the draft from 1851 words differing (177 in shape) to 761 (29),
- * the frame 8 bytes smaller than the original's, and the oracle's closest
+ * the frame 8 bytes larger than the original's, and the oracle's closest
  * result from 1274 words to 659, forcing 48. Stepping f_BallRollFrame
  * anywhere from before f_UnusedBallFrame to after the texture LUT gives
  * the same 761 words, and after a later command 773 to 828 (29 to 68 in
@@ -1008,7 +1008,21 @@ enum BallSprite {
  * 761 words differing to 759, 29 in shape both, and the oracle's closest
  * result from 659 words to 655, forcing 48; size *= the shade's scale,
  * or 127.0f as a divisor, gives 761, and the three factors ungrouped 763
- * or 764. 759 words differ, 29 in shape.
+ * or 764. That left 759 words, 29 in shape.
+ *
+ * The no-marker test and the marker colors' switch each read the marker
+ * player from the ball, where the draft read it once into an s8 local.
+ * Combine folds the local's sign extension into its load, and finding no
+ * earlier insn to carry the dead shift's death, leaves a use of it
+ * further up the ball's block. The use gets no register, so reload gives
+ * it a stack slot that nothing reads: the 8 bytes by which the frame was
+ * larger than the original's, which moved every slot above it. Reading
+ * the field at each site takes the draft from 759 words differing (29 in
+ * shape) to 571 (19), with the original's frame, and the register
+ * oracle's closest result from 655 words, forcing 48 pseudos, to 473,
+ * forcing 47. The local as an s32 also loses the slot, but gives 586
+ * words (30 in shape), as the switch then adds one to the register where
+ * the original reloads the byte. 571 words differ, 19 in shape.
  */
 #ifdef NON_MATCHING
 void DrawGolfBalls(CameraMatrices *matrices UNUSED) {
@@ -1170,8 +1184,6 @@ void DrawGolfBalls(CameraMatrices *matrices UNUSED) {
     for (i = 0; i < GOLF_BALL_COUNT; i++) {
         ball = &f_GolfBalls[i];
         if (ball->alpha > 0) {
-            s8 markerPlayer;
-
             surface = ball->surface;
             groundHeight = GetGroundHeight(
                 ball->position[AXIS_X] * WORLD_TO_COURSE_SCALE,
@@ -1215,8 +1227,7 @@ void DrawGolfBalls(CameraMatrices *matrices UNUSED) {
                 ball->position[AXIS_Z],
                 &shadowPoint
             );
-            markerPlayer = ball->markerPlayerIndex;
-            if (markerPlayer == BALL_NO_MARKER) {
+            if (ball->markerPlayerIndex == BALL_NO_MARKER) {
                 if (ballDepth < BALL_NEAREST_DEPTH && exposure >= BALL_HALF_SUNK) {
                     gDPPipeSync(gfx++);
                     if (ball->hasEnteredWater) {
@@ -1560,7 +1571,7 @@ void DrawGolfBalls(CameraMatrices *matrices UNUSED) {
 
                     gDPSetPrimDepth(gfx++, shadowPrimDepth & ~3, 0);
                     gDPPipeSync(gfx++);
-                    switch (markerPlayer) {
+                    switch (ball->markerPlayerIndex) {
                         case BALL_NO_MARKER:
                             gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, 0);
                             break;
