@@ -3400,9 +3400,9 @@ void ShowHoleOutBanner(s32 playerIndex) {
  * top of the case, or anywhere before that test, still compares with $fp
  * and gives 36 words, 26 in shape. Setting nextState to
  * PLAYER_STATE_AIMING at the top of the case, a store that the HUD test
- * always overwrites, gives 8 words (4 in shape) against 11 (5), as cse
- * then compares the source with nextState's register; it isn't kept, as
- * nothing reads the store.
+ * always overwrites, makes the function match, against 3 words (1 in
+ * shape) without it, as cse then compares the source with nextState's
+ * register; it isn't kept, as nothing reads the store.
  *
  * The handicap scoring calls GetCourseRecordIndex with no argument, as
  * the ambient sounds' lookups do, where it passed g_GameState.gameMode,
@@ -3452,8 +3452,17 @@ void ShowHoleOutBanner(s32 playerIndex) {
  * tested directly, as !!, or compared with Z_TRIG, it masks with Z_TRIG
  * in place. The flag set just before its test takes the draft from 11
  * words differing to 8, 4 in shape, as a Boolean or an s32; initialized
- * at the top of the debug block, 27 words differ (15 in shape). 8 words
- * differ, 4 in shape.
+ * at the top of the debug block, 27 words differ (15 in shape).
+ *
+ * Starting the turn, the rest test comes first, choosing between
+ * preparing the aim, the speed-golf hole intro and aiming in one chain,
+ * as the original loads g_HasShotComeToRest before setting the next
+ * state and sets it in the test's delay slot; with the preparing state
+ * set before the test and overwritten inside it, the store fills the
+ * shot panel call's delay slot. That takes the draft from 8 words
+ * differing to 3, 1 in shape; the rest test with an else arm for aiming,
+ * and the speed-golf test nested in it, gives 5 (3). 3 words differ, 1
+ * in shape.
  */
 #ifdef NON_MATCHING
 /* Whether the stopwatches run in a player state: from aiming to the flight */
@@ -4028,14 +4037,16 @@ void UpdateTurns(void) {
                 }
 
                 StartShotPanel();
-                nextState = PLAYER_STATE_PREPARING_AIM;
-                if (!g_HasShotComeToRest) {
+                if (g_HasShotComeToRest) {
+                    nextState = PLAYER_STATE_PREPARING_AIM;
+                }
+                else if (g_GameState.gameMode == GAME_MODE_SPEED_GOLF) {
+                    nextState = PLAYER_STATE_HOLE_INTRO;
+                    StartHoleIntroCamera();
+                    ResetShotSetup();
+                }
+                else {
                     nextState = PLAYER_STATE_AIMING;
-                    if (g_GameState.gameMode == GAME_MODE_SPEED_GOLF) {
-                        nextState = PLAYER_STATE_HOLE_INTRO;
-                        StartHoleIntroCamera();
-                        ResetShotSetup();
-                    }
                 }
 
                 StartTurnRumble(g_GameState.currentPlayerIndex);
