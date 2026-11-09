@@ -4114,8 +4114,16 @@ void WriteHexDumpFile(u32 *words, s32 byteCount, char *fileName) {
  * each statement found it. That takes the draft from 899 words differing
  * to 891, 123 in shape either way, as the original stores the slots'
  * starts in that order; the register oracle forces nothing either way,
- * its closest being the draft's own words. 891 words differ, 123 in
+ * its closest being the draft's own words. That left 891 words, 123 in
  * shape.
+ *
+ * The medium groups step the slope index before their slots, where they
+ * stepped it after them; a sweep moving each statement found it. That
+ * takes the draft from 891 words differing to 879, 123 in shape either
+ * way, and the register oracle's closest from 891 words to 879, with
+ * nothing forced. Stepping it first or after k in the coarse groups'
+ * loop header too gives 899 words, 123 or 121 in shape. 879 words
+ * differ, 123 in shape.
  */
 #ifdef NON_MATCHING
 void DrawHoleEditorGround(CameraMatrices *matrices UNUSED, s32 terrainStyle) {
@@ -5372,11 +5380,11 @@ void DrawHoleEditorGround(CameraMatrices *matrices UNUSED, s32 terrainStyle) {
                         }
                     }
 
+                    slopeIndex += TILE_TRIANGLE_COUNT;
                     middleSlot++;
                     bottomSlot++;
                     tileIndex++;
                     topSlot++;
-                    slopeIndex += TILE_TRIANGLE_COUNT;
                 }
 
                 middleSlot -= GROUND_TILE_GROUP_SIZE;
