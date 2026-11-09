@@ -3373,7 +3373,17 @@ void DrawBestShotsCursor(Gfx **displayListHead) {
  * original and this load the empty cell's value just before the compare on
  * each pass, and the matched FindNextBestShotCell writes the same test
  * with the constant, so nothing shows the original kept the value in a
- * variable. 46 words differ, 4 in shape.
+ * variable. That left 46 words, 4 in shape.
+ *
+ * The character and palette are clamped at zero with the conditional
+ * operator and at their counts with ifs, which takes the draft from 46
+ * words differing, 4 in shape, to 38, none in shape, and the register
+ * oracle's closest from 20 words to 12, forcing 4 pseudos either way. Of
+ * the 16 mixes of the two forms for the four clamps, the rest give 45 to
+ * 55 words, 4 to 9 in shape. The original computes the lower clamps
+ * without a branch, as GCC does for the operator. Repeating the
+ * palette's lower clamp in both arms of the character's upper one gives
+ * the same 38 words. 38 words differ, none in shape.
  */
 #ifdef NON_MATCHING
 void LoadBestShotFaces(void) {
@@ -3401,17 +3411,13 @@ void LoadBestShotFaces(void) {
             if (f_BestShotRecords[row][column] != STATS_CELL_EMPTY) {
                 character = save->rankedRecords[f_BestShotRecords[row][column]].characterIndex;
                 palette = save->rankedRecords[f_BestShotRecords[row][column]].paletteIndex;
-                if (character < 0) {
-                    character = 0;
-                }
+                character = (character < 0) ? 0 : character;
 
                 if (character >= CHARACTER_COUNT) {
                     character = CHARACTER_COUNT - 1;
                 }
 
-                if (palette < 0) {
-                    palette = 0;
-                }
+                palette = (palette < 0) ? 0 : palette;
 
                 if (palette >= CHARACTER_PALETTE_COUNT) {
                     palette = CHARACTER_PALETTE_COUNT - 1;
