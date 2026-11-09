@@ -1734,7 +1734,14 @@ s32 __MusIntMemRemaining(void);
  * registers in the other order, and the isometric map view reloads
  * matrices from the stack after its first-view test, where the original
  * reloads it before. The register oracle's closest result is these 31
- * words with no register forced. 31 words differ, 9 in shape.
+ * words with no register forced.
+ *
+ * Stepping camera before viewIndex in the loop's step hoists the two
+ * zeroed registers in the original's order, but the camera's offset then
+ * takes $s4 rather than $s5 and 49 words differ, 5 in shape, with the
+ * register oracle's closest result those 49 words with no register
+ * forced. Setting camera first in the loop's initializer changes
+ * nothing. 31 words differ, 9 in shape.
  */
 #ifdef NON_MATCHING
 s32 DrawGame(void) {
