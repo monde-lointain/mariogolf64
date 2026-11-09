@@ -3444,7 +3444,16 @@ void ShowHoleOutBanner(s32 playerIndex) {
  * 15 words differ (7 in shape); set once after the test, jump2 cross-
  * jumps the penalty's tail into the replay's, 17 (9); with the par
  * test's else arm too, 11 (5). The register oracle's closest result is
- * these 11 words with no register forced. 11 words differ, 5 in shape.
+ * these 11 words with no register forced.
+ *
+ * The debug ball move holds the Z trigger test in a flag, as the
+ * original shifts the button bits right by 13 and masks the low bit,
+ * which GCC does only when it stores a bit test's truth as a value;
+ * tested directly, as !!, or compared with Z_TRIG, it masks with Z_TRIG
+ * in place. The flag set just before its test takes the draft from 11
+ * words differing to 8, 4 in shape, as a Boolean or an s32; initialized
+ * at the top of the debug block, 27 words differ (15 in shape). 8 words
+ * differ, 4 in shape.
  */
 #ifdef NON_MATCHING
 /* Whether the stopwatches run in a player state: from aiming to the flight */
@@ -4359,6 +4368,7 @@ void UpdateTurns(void) {
                          */
                         {
                             char text[DEBUG_TEXT_BUFFER_SIZE];
+                            Boolean isMovingBall;
 
                             f_UnusedDebugCourseIndex = g_GameState.courseIndex;
                             f_UnusedDebugHoleIndex = g_GameState.holeIndex;
@@ -4376,7 +4386,8 @@ void UpdateTurns(void) {
                             );
                             PrintDebugText(text, 3, 6);
                             ClearGameFlag(GAME_FLAG_RANDOM_FRAMEBUFFER_COUNT);
-                            if (g_ControllerData[1].button & Z_TRIG) {
+                            isMovingBall = (g_ControllerData[1].button & Z_TRIG) != 0;
+                            if (isMovingBall) {
                                 g_CurrentShot.ballPosition[AXIS_X] += g_ControllerStates[1].stickX *
                                     ((Abs(g_ControllerStates[1].stickX) * 2) + 1);
                                 g_CurrentShot.ballPosition[AXIS_Z] += g_ControllerStates[1].stickY *
