@@ -3131,7 +3131,14 @@ INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard_drawing", DrawLeaderboardPage);
  * to 531, 131 in shape either way, and the register oracle then forces
  * nothing, leaving all 531, against 537 forcing 36. Counting the holes
  * of either one of the handicap strokes' two copies in j gives 505
- * words, but both 657, so the copies keep hole. 531 words differ, 131 in
+ * words, but both 657, so the copies keep hole. That left 531 words, 131
+ * in shape.
+ *
+ * The second checkerboard's rows, which had a counter of their own,
+ * cellRowIndex, are counted in j: that takes the draft from 531 words
+ * differing to 525, 131 in shape either way, and the register oracle
+ * still forces nothing. Counting its rows in i and its columns in j, as
+ * the first checkerboard does, gives 667 words. 525 words differ, 131 in
  * shape.
  */
 #ifdef NON_MATCHING
@@ -3156,7 +3163,6 @@ void DrawScoresPage(Gfx **displayListHead) {
     s32 overTop;
     s32 secondRow;
     s32 i;
-    s32 cellRowIndex;
     s32 j;
     s32 hole;
     SaveData *saveData;
@@ -3700,8 +3706,8 @@ void DrawScoresPage(Gfx **displayListHead) {
         );
     }
 
-    for (cellRowIndex = 0; cellRowIndex != CELL_ROW_COUNT; cellRowIndex++) {
-        if (cellRowIndex & 1) {
+    for (j = 0; j != CELL_ROW_COUNT; j++) {
+        if (j & 1) {
             gDPSetPrimColor(gfx++, 0, 0, 0xBF, 0xFF, 0, cellAlpha);
         }
         else {
@@ -3714,14 +3720,12 @@ void DrawScoresPage(Gfx **displayListHead) {
                     DrawTextureRect(
                         &gfx,
                         QuarterPixels((i * CELL_WIDTH) + CELL_LEFT + g_Scorecard.x),
-                        QuarterPixels(g_Scorecard.y + (cellRowIndex * CELL_HEIGHT) + CELL_TOP),
+                        QuarterPixels(g_Scorecard.y + (j * CELL_HEIGHT) + CELL_TOP),
                         QuarterPixels((i * CELL_WIDTH) + CELL_LEFT + CELL_WIDTH + g_Scorecard.x),
-                        QuarterPixels(
-                            g_Scorecard.y + (cellRowIndex * CELL_HEIGHT) + CELL_TOP + CELL_HEIGHT
-                        ),
+                        QuarterPixels(g_Scorecard.y + (j * CELL_HEIGHT) + CELL_TOP + CELL_HEIGHT),
                         G_TX_RENDERTILE,
                         0,
-                        TexelCoordinate(cellRowIndex * CELL_HEIGHT),
+                        TexelCoordinate(j * CELL_HEIGHT),
                         TEXEL_STEP_ONE,
                         TEXEL_STEP_ONE
                     );
@@ -3731,17 +3735,15 @@ void DrawScoresPage(Gfx **displayListHead) {
                     DrawTextureRect(
                         &gfx,
                         QuarterPixels((i * CELL_WIDTH) + CELL_LEFT + g_Scorecard.x),
-                        QuarterPixels(
-                            (cellRowIndex * CELL_HEIGHT) + CELL_TOP + NINE_SPACING + g_Scorecard.y
-                        ),
+                        QuarterPixels((j * CELL_HEIGHT) + CELL_TOP + NINE_SPACING + g_Scorecard.y),
                         QuarterPixels((i * CELL_WIDTH) + CELL_LEFT + CELL_WIDTH + g_Scorecard.x),
                         QuarterPixels(
-                            (cellRowIndex * CELL_HEIGHT) + CELL_HEIGHT + CELL_TOP + NINE_SPACING +
+                            (j * CELL_HEIGHT) + CELL_HEIGHT + CELL_TOP + NINE_SPACING +
                             g_Scorecard.y
                         ),
                         G_TX_RENDERTILE,
                         0,
-                        TexelCoordinate(cellRowIndex * CELL_HEIGHT),
+                        TexelCoordinate(j * CELL_HEIGHT),
                         TEXEL_STEP_ONE,
                         TEXEL_STEP_ONE
                     );
