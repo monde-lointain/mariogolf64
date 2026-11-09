@@ -221,10 +221,10 @@ void ResetBallSimulations(void) {
  * branch. Adding the height to its slide step, rather than the step to the
  * height, took 779 words differing to 771, 235 in shape; it later cost 8 words,
  * so the slide adds the step to the height, as it does in x and z. The slope's
- * two compare-and-branch magnitudes come from the nested AbsoluteValue
- * helper; with fabsf there 1194 words differ (326 in shape) and with
- * AbsFloat 482 (128). Mixing two forms, one per slope, gives 452 to
- * 482, but takes one magnitude two ways. The spin grip's two take fabsf, an
+ * two magnitudes then came from a nested AbsoluteValue helper, as a compare
+ * and branch; with fabsf there 1194 words differed (326 in shape) and with
+ * AbsFloat 482 (128). Mixing two forms, one per slope, gave 452 to
+ * 482, but took one magnitude two ways. The spin grip's two take fabsf, an
  * abs.s: with AbsoluteValue there 518 words differed (144). The pull toward the
  * cup sets toCup's X before its zero Y, so the zero store follows the cup's X
  * load as in the original rather than filling the debug text branch's delay
@@ -390,8 +390,15 @@ void ResetBallSimulations(void) {
  * That takes the draft from 294 words to 290, 72 in shape either way,
  * and the register oracle's closest from 154 words to 150, forcing 78
  * pseudos either way. Swapping the outward speed's operands alone gives
- * 306 words; taking fromCup first in the alignment, 312 to 314. 290
- * words differ, 72 in shape.
+ * 306 words; taking fromCup first in the alignment, 312 to 314. That
+ * left 290 words, 72 in shape.
+ *
+ * The slope's two magnitudes now take fabsf, as the original's two abs.s
+ * of the normal's y show, and the AbsoluteValue helper, left unused,
+ * goes. With the draft this close, that takes it from 290 words to 245,
+ * 72 in shape to 59, and the register oracle's closest from 150 words,
+ * forcing 78 pseudos, to 137, forcing 72; AbsFloat there gives 294 (74).
+ * 245 words differ, 59 in shape.
  */
 #ifdef NON_MATCHING
 s32 StepBallSimulation(BallSimulation *simulation) {
@@ -487,10 +494,6 @@ s32 StepBallSimulation(BallSimulation *simulation) {
         return (((simulation->position[AXIS_X] + simulation->position[AXIS_Z]) & NOISE_BYTE_MASK) -
                    NOISE_BYTE_MIDPOINT) /
             NOISE_BYTE_MIDPOINT;
-    }
-
-    inline f32 AbsoluteValue(f32 value) {
-        return value < 0.0f ? -value : value;
     }
 
     inline f32 GetStepNoise(void) {
@@ -2016,10 +2019,8 @@ TAKE_OFF:
                 }
             }
 
-            slopeX =
-                (-plane.normal[AXIS_X] * SLOPE_ACCELERATION) / AbsoluteValue(plane.normal[AXIS_Y]);
-            slopeZ =
-                (-plane.normal[AXIS_Z] * SLOPE_ACCELERATION) / AbsoluteValue(plane.normal[AXIS_Y]);
+            slopeX = (-plane.normal[AXIS_X] * SLOPE_ACCELERATION) / fabsf(plane.normal[AXIS_Y]);
+            slopeZ = (-plane.normal[AXIS_Z] * SLOPE_ACCELERATION) / fabsf(plane.normal[AXIS_Y]);
             if (fabsf((f32)slopeX) + fabsf((f32)slopeZ) >= MAX_SLOPE_ACCELERATION) {
                 f32 scale =
                     MAX_SLOPE_ACCELERATION / sqrtf(((f32)slopeX * slopeX) + ((f32)slopeZ * slopeZ));
