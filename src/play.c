@@ -2273,7 +2273,14 @@ INCLUDE_ASM("asm/nonmatchings/play", RebuildGroundTextureCoordinates);
  * where the original has it; a sweep moving each statement found it, and
  * DrawHoleEditorGround now does the same. That takes the draft from 574
  * words differing (92 in shape) to 572 (90); the register oracle forces
- * nothing either way. 572 words differ, 90 in shape.
+ * nothing either way. That left 572 words, 90 in shape.
+ *
+ * Each half sets its top slot after the tile index, where it set it
+ * first, so the top slot's register is set where the original sets it; a
+ * sweep moving each statement found it, and DrawHoleEditorGround now
+ * does the same. That takes the draft from 572 words differing (90 in
+ * shape) to 570 (88); the register oracle forces nothing either way. 570
+ * words differ, 88 in shape.
  */
 void DrawGround(CameraMatrices *matrices, s32 terrainStyle) {
     u8 snapsEdge[2][TILE_VERTEX_SEGMENT_COUNT]; /* For the current and the last
@@ -2545,9 +2552,9 @@ void DrawGround(CameraMatrices *matrices, s32 terrainStyle) {
         s32 firstTileS;
 
         previousDetail = GROUND_DETAIL_HIDDEN;
-        topSlot = FIRST_TOP_SLOT;
         firstTileColumn = half * GROUND_TILE_GROUP_SIZE;
         tileIndex = firstTileColumn;
+        topSlot = FIRST_TOP_SLOT;
         firstTileS = firstTileColumn * TILE_COORDINATE_SPAN;
         middleSlot = FIRST_MIDDLE_SLOT;
         bottomSlot = FIRST_BOTTOM_SLOT;

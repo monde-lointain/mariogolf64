@@ -4122,8 +4122,14 @@ void WriteHexDumpFile(u32 *words, s32 byteCount, char *fileName) {
  * takes the draft from 891 words differing to 879, 123 in shape either
  * way, and the register oracle's closest from 891 words to 879, with
  * nothing forced. Stepping it first or after k in the coarse groups'
- * loop header too gives 899 words, 123 or 121 in shape. 879 words
- * differ, 123 in shape.
+ * loop header too gives 899 words, 123 or 121 in shape. That left 879
+ * words, 123 in shape.
+ *
+ * Each half sets its top slot after the tile index, as DrawGround now
+ * does, where it set it first. That takes the draft from 879 words
+ * differing to 873, 123 in shape either way; the register oracle forces
+ * nothing, its closest being the draft's own words. Setting it last,
+ * after the bottom slot, gives 883. 873 words differ, 123 in shape.
  */
 #ifdef NON_MATCHING
 void DrawHoleEditorGround(CameraMatrices *matrices UNUSED, s32 terrainStyle) {
@@ -4701,8 +4707,8 @@ void DrawHoleEditorGround(CameraMatrices *matrices UNUSED, s32 terrainStyle) {
         s32 firstTileS;
 
         previousDetail = GROUND_DETAIL_HIDDEN;
-        topSlot = FIRST_TOP_SLOT;
         tileIndex = half * GROUND_TILE_GROUP_SIZE;
+        topSlot = FIRST_TOP_SLOT;
         firstTileS = tileIndex * TILE_COORDINATE_SPAN;
         middleSlot = FIRST_MIDDLE_SLOT;
         bottomSlot = FIRST_BOTTOM_SLOT;
