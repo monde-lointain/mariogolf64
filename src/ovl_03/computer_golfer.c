@@ -2460,7 +2460,7 @@ s32 StepTrialShot(void) {
     }
 
     ballState = f_TrialSimulation.state;
-    if (ballState) {
+    if (ballState != BALL_STATE_STOPPED) {
         /* A loop that runs once, so that the step's checks can break out to the
          * end point's update; the original has no loop here, and jumping to a
          * label instead gives 64 words differing, 28 in shape, against 26 (8) */
@@ -2535,7 +2535,7 @@ s32 StepTrialShot(void) {
         f_TrialEndPoint[AXIS_Z] = f_TrialSimulation.position[AXIS_Z];
     }
 
-    if (!f_TrialSimulation.state) {
+    if (f_TrialSimulation.state == BALL_STATE_STOPPED) {
         s32 targetMiss;
 
         IntLength2D(
@@ -3216,7 +3216,7 @@ Boolean IsTrialShotSafe(void) {
     f_TrialSimulation.surface = f_TrialShot.surface;
     LaunchBallSimulation(&f_TrialSimulation, LAUNCH_PURPOSE_TRIAL, f_TrialLaunch);
     f_TrialStepCount = 0;
-    while (f_TrialSimulation.state) {
+    while (f_TrialSimulation.state != BALL_STATE_STOPPED) {
         f_TrialStepCount++;
         flags = StepBallSimulation(&f_TrialSimulation);
         if (f_TrialStepCount >= MAX_STEP_COUNT) {
@@ -3229,7 +3229,7 @@ Boolean IsTrialShotSafe(void) {
     }
 
 checkResult:
-    if (!f_TrialSimulation.state) {
+    if (f_TrialSimulation.state == BALL_STATE_STOPPED) {
         kind = GetSurfaceInfo(f_TrialSimulation.surface)->kind;
         if (IsOutOfBoundsKind(kind)) {
             goto unsafe;

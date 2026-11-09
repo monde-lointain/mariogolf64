@@ -1874,7 +1874,7 @@ void PickStartingClub(HoleSetup *hole) {
             if (GetShotWorldDistance(club, PUTT_MODE_SHORT) >= cupDistance) {
                 g_CurrentShot.shotMode = PUTT_MODE_SHORT;
             }
-            else if (!g_CurrentShot.powerShotCount ||
+            else if (g_CurrentShot.powerShotCount == 0 ||
                 GetShotWorldDistance(club, PUTT_MODE_MIDDLE) >= cupDistance) {
                 g_CurrentShot.shotMode = PUTT_MODE_MIDDLE;
             }
@@ -2193,7 +2193,7 @@ void BuildShotPreview(ShotLaunch *swing, s32 playerState) {
     f_ShotPreviewDotScroll += SHOT_PREVIEW_SCROLL_STEP;
     for (step = 0; step < f_ShotPreviewStepCount; step++) {
         isMiniGolf = &g_GameState.isMiniGolf;
-        if (*isMiniGolf && !simulation.bounceCount) {
+        if (*isMiniGolf && simulation.bounceCount == 0) {
             break;
         }
 
@@ -2235,7 +2235,7 @@ void BuildShotPreview(ShotLaunch *swing, s32 playerState) {
         }
 
         guMtxF2L(dash, &f_ShotPreviewMatrices[g_DrawBufferIndex][step]);
-        if (!*isMiniGolf && simulation.bounceCount) {
+        if (!*isMiniGolf && simulation.bounceCount != 0) {
             break;
         }
     }
@@ -2245,7 +2245,7 @@ void BuildShotPreview(ShotLaunch *swing, s32 playerState) {
         f_ShownShotPreviewPointCount = 1;
     }
 
-    if (simulation.bounceCount) {
+    if (simulation.bounceCount != 0) {
         f_HasShotPreviewEnded = TRUE;
         f_ShownShotPreviewPointCount = step + 1;
     }
@@ -4828,7 +4828,7 @@ void UpdateTurns(void) {
                     }
 
                     if (g_MergedController.buttons & A_BUTTON) {
-                        while (g_TurnBallSimulation.state) {
+                        while (g_TurnBallSimulation.state != BALL_STATE_STOPPED) {
                             StepBallSimulation(&g_TurnBallSimulation);
                             TickStopwatches();
                             UpdateFlightCamera(TRUE, g_TurnController.buttons);
@@ -4839,7 +4839,7 @@ void UpdateTurns(void) {
                     }
                 }
 
-                if (!g_TurnBallSimulation.state) {
+                if (g_TurnBallSimulation.state == BALL_STATE_STOPPED) {
                     ClearShotEffects(CLEAR_KIND_EFFECTS);
                     nextState = PLAYER_STATE_BALL_AT_REST;
                     g_HasShotComeToRest = 1;
@@ -5316,7 +5316,7 @@ void UpdateTurns(void) {
                             LoadCharacter(0, f_GutsTestCharacter + CHARACTER_COUNT, 0);
                         }
 
-                        if (g_TurnController.buttons) {
+                        if (g_TurnController.buttons != 0) {
                             FreeCharacterAndReactionLight(0);
                         }
 

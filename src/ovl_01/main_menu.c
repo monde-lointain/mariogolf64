@@ -7618,7 +7618,8 @@ void DrawCourseSelect(Gfx **displayListHead) {
         if (COURSE_SELECT_LAYOUT == COURSE_SELECT_LAYOUT_AWARDS) {
             badgeCount = 0;
             for (otherIndex = 0; otherIndex != COURSE_HOLE_COUNT; otherIndex++) {
-                if (save->records.awards.birdieBadgeCounts[g_MenuMemory.courseChoice][otherIndex]) {
+                if (save->records.awards.birdieBadgeCounts[g_MenuMemory.courseChoice][otherIndex] !=
+                    0) {
                     badgeCount++;
                 }
             }
@@ -7829,7 +7830,8 @@ void DrawCourseSelect(Gfx **displayListHead) {
 
             badgeCount = 0;
             for (otherIndex = 0; otherIndex != COURSE_HOLE_COUNT; otherIndex++) {
-                if (save->records.awards.birdieBadgeCounts[g_MenuMemory.courseChoice][otherIndex]) {
+                if (save->records.awards.birdieBadgeCounts[g_MenuMemory.courseChoice][otherIndex] !=
+                    0) {
                     badgeCount++;
                 }
             }
@@ -8199,7 +8201,7 @@ void DrawCourseSelectBanners(Gfx **displayListHead) {
     SetUpTextDrawing(&gfx);
     SetTextColor(&gfx, 255, 255, 255);
     stripTop = !g_GameState.isMiniGolf;
-    if (stripTop) {
+    if (stripTop != 0) {
         if (g_CourseSelectKind == COURSE_SELECT_KIND_COURSES) {
             sprintf(
                 g_PrintBuffer,

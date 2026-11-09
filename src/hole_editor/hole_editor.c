@@ -755,7 +755,7 @@ static s32 f_LastSetHeight = 0; /* The height C-up or C-down last set */
 static Boolean f_ShowsGroundWaves = TRUE; /* Copied to g_ShowsGroundWaves */
 static s32 f_CLeftPickedHeight = 0; /* Heights picked up by the second editor pad */
 static s32 f_CUpPickedHeight = 0;
-static s32 f_LastHeightEditKind = 0; /* The last frame's HEIGHT_EDIT_* */
+static s32 f_LastHeightEditKind = HEIGHT_EDIT_NONE; /* The last frame's HEIGHT_EDIT_* */
 
 /*
  * The original declares this without a prototype, so BlendGroundAroundPoint's
@@ -2803,7 +2803,7 @@ void UpdateHeightEditor(void) {
     }
 
     f_HeightCameraHeading = f_HeightCameraHeadingAngle * EDITOR_ANGLE_TO_RADIANS;
-    if (f_LastHeightEditKind && editKind == HEIGHT_EDIT_NONE) {
+    if (f_LastHeightEditKind != HEIGHT_EDIT_NONE && editKind == HEIGHT_EDIT_NONE) {
         UpdateTriangleSlopes();
     }
 

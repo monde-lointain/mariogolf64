@@ -75,7 +75,7 @@ void SimulateShot(ShotLaunch *shot) {
     g_SimulatedShot.startsOnGreen =
         g_GameState.isMiniGolf || GetSurfaceInfo(g_CurrentShot.surface)->kind == SURFACE_KIND_GREEN;
     step = 0;
-    while (simulation->state) {
+    while (simulation->state != BALL_STATE_STOPPED) {
         flags = StepBallSimulation(simulation);
         if (step < PATH_STEP_COUNT) {
             g_SimulatedShot.pathFlags[step] = flags;

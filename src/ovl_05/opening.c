@@ -3365,7 +3365,7 @@ void UpdateOpening(void) {
                 skipButtons = pressedButtons & SKIP_BUTTONS;
             }
 
-            if (skipButtons) {
+            if (skipButtons != 0) {
                 f_OpeningScene = OPENING_SCENE_SKIPPED;
             }
         }

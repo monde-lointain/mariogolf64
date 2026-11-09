@@ -3912,7 +3912,7 @@ void GenerateClub(s32 clubIndex) {
             simulation.position[AXIS_Z] = 0;
             LaunchBallSimulation(&simulation, LAUNCH_PURPOSE_CLUB_TEST, &f_ClubTestShot);
             for (step = 0; step < MAX_TEST_SHOT_STEP_COUNT; step++) {
-                if (!simulation.state) {
+                if (simulation.state == BALL_STATE_STOPPED) {
                     break;
                 }
 
@@ -4203,7 +4203,7 @@ s32 GetPuttPower(s32 fraction, ShotMode shotMode) {
         simulation.surface = PUTT_TEST_SURFACE;
         LaunchBallSimulation(&simulation, LAUNCH_PURPOSE_CLUB_TEST, &f_PutterTestShot);
         for (step = 0; step < MAX_TEST_SHOT_STEP_COUNT; step++) {
-            if (!simulation.state) {
+            if (simulation.state == BALL_STATE_STOPPED) {
                 break;
             }
 
@@ -4624,7 +4624,7 @@ void HandleShotModeInput(void) {
         else if (IsFartherThan(cupDistance, APPROACH_SHOT_DISTANCE)) {
             if (g_CurrentShot.shotMode == SHOT_MODE_NORMAL) {
                 sound = SOUND_POWER_SHOT_REFUSED;
-                if (g_CurrentShot.powerShotCount) {
+                if (g_CurrentShot.powerShotCount != 0) {
                     g_CurrentShot.shotMode = SHOT_MODE_POWER;
                     sound = SOUND_LOOK_DOWN_RANGE;
                 }
@@ -4657,7 +4657,7 @@ void HandleShotModeInput(void) {
             g_CurrentShot.shotMode = SHOT_MODE_NORMAL;
         }
 
-        if (g_CurrentShot.shotMode == SHOT_MODE_POWER && !g_CurrentShot.powerShotCount) {
+        if (g_CurrentShot.shotMode == SHOT_MODE_POWER && g_CurrentShot.powerShotCount == 0) {
             g_CurrentShot.shotMode = SHOT_MODE_NORMAL;
         }
     }

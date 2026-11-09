@@ -1006,7 +1006,7 @@ void DrawStatsBadgeCount(Gfx **displayListHead) {
     if (memory->statsCourse != totalsPage) {
         badgeCount = 0;
         for (index = 0; index != COURSE_HOLE_COUNT; index++) {
-            if (save->records.awards.birdieBadgeCounts[memory->statsCourse][index]) {
+            if (save->records.awards.birdieBadgeCounts[memory->statsCourse][index] != 0) {
                 badgeCount++;
             }
         }
@@ -1015,7 +1015,7 @@ void DrawStatsBadgeCount(Gfx **displayListHead) {
         badgeCount = 0;
         for (index = 0; index != COURSE_COUNT; index++) {
             for (holeIndex = 0; holeIndex != COURSE_HOLE_COUNT; holeIndex++) {
-                if (save->records.awards.birdieBadgeCounts[index][holeIndex]) {
+                if (save->records.awards.birdieBadgeCounts[index][holeIndex] != 0) {
                     badgeCount++;
                 }
             }

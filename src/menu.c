@@ -2436,7 +2436,7 @@ void InvalidateBrokenRingShotRecords(void) {
          * words differing, 1 in shape
          */
         scoreKind &= SCORE_KIND_RECORDED;
-        if (scoreKind) {
+        if (scoreKind != 0) {
             /*
              * Masking within the test keeps GCC from merging the two bounds into
              * one unsigned test, to match: masking before the test gives 4 words

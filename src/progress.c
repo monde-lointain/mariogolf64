@@ -91,7 +91,7 @@ void RecordComCharacterResult(s32 row, s32 column, Boolean isWin) {
         }
 
         value = count | (value & WON_UNSAVED_FLAG);
-        if (!g_GameState.saveCount) {
+        if (g_GameState.saveCount == 0) {
             value |= WON_UNSAVED_FLAG;
         }
 
