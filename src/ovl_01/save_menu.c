@@ -2373,8 +2373,22 @@ void DrawSavedMiniGolfImage(Gfx **displayListHead);
  * oracle's closest from 169 words, forcing 17 pseudos, to 153, forcing
  * 14. Assigning the locals and globals together in one statement, or
  * only the scale's, gives 177 to 199 words, and setting the half size's
- * global before the board's half size 184. 169 words differ, 77 in
+ * global before the board's half size 184. That left 169 words, 77 in
  * shape.
+ *
+ * A debug cc1 that inverts loop.c's choices shows the board loop's
+ * constants account for 24 of those words: leaving 120 and the
+ * degrees-to-radians factor in the loop and moving only the % 3
+ * multiplier and 48.0 out gives 145 words, 69 in shape, with the
+ * original's frame. The factor and 48.0 each save one insn over a
+ * one-luid life, and the threshold loop.c compares them with only falls
+ * as it moves each, so the original's 48.0 must have lived longer than
+ * the factor. Setting boardDegrees after slotOffset puts the multiplier
+ * first, but loop.c still moves 120 (171 words, 77 in shape), and
+ * boardDegrees set before the loop moves the factor instead of 48.0
+ * (171, 79). Each signed-byte member read is a load and two shifts until
+ * combine, so the loop's insn count can't drop there. 169 words differ,
+ * 77 in shape.
  */
 #ifdef NON_MATCHING
 void DrawSavedGames(Gfx **displayListHead) {
