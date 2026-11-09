@@ -2266,7 +2266,14 @@ INCLUDE_ASM("asm/nonmatchings/play", RebuildGroundTextureCoordinates);
  * parity with an andi, where combine folds ours to the constant 1, since
  * column is half * 8 in the same block. Setting column before the row log's
  * test keeps the andi and brings the frame to 8 bytes short, but gives 628
- * words (108 in shape). 574 words differ, 92 in shape.
+ * words (108 in shape). That left 574 words, 92 in shape.
+ *
+ * Each half sets its bottom slot last, after the middle slot, where it
+ * set it after the tile index, so the zeroing of a slot's register falls
+ * where the original has it; a sweep moving each statement found it, and
+ * DrawHoleEditorGround now does the same. That takes the draft from 574
+ * words differing (92 in shape) to 572 (90); the register oracle forces
+ * nothing either way. 572 words differ, 90 in shape.
  */
 void DrawGround(CameraMatrices *matrices, s32 terrainStyle) {
     u8 snapsEdge[2][TILE_VERTEX_SEGMENT_COUNT]; /* For the current and the last
@@ -2541,9 +2548,9 @@ void DrawGround(CameraMatrices *matrices, s32 terrainStyle) {
         topSlot = FIRST_TOP_SLOT;
         firstTileColumn = half * GROUND_TILE_GROUP_SIZE;
         tileIndex = firstTileColumn;
-        bottomSlot = FIRST_BOTTOM_SLOT;
         firstTileS = firstTileColumn * TILE_COORDINATE_SPAN;
         middleSlot = FIRST_MIDDLE_SLOT;
+        bottomSlot = FIRST_BOTTOM_SLOT;
         if (IsGameFlagSet(GAME_FLAG_LOG_GROUND_ROWS)) {
             osSyncPrintf("DG[");
             if (half != 0) {

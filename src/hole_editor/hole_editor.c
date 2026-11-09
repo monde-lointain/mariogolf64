@@ -4106,7 +4106,15 @@ void WriteHexDumpFile(u32 *words, s32 byteCount, char *fileName) {
  * to them; a search regrouping sums found it. That takes the draft from
  * 905 words differing to 899, 123 in shape both, and the register
  * oracle's closest from 905 words to 899, with nothing forced; the
- * column alone gives 901, the parity alone 903. 899 words differ, 123 in
+ * column alone gives 901, the parity alone 903. That left 899 words, 123
+ * in shape.
+ *
+ * Each half now sets its bottom slot last, after the middle slot, as
+ * DrawGround does, where it set it after the tile index; a sweep moving
+ * each statement found it. That takes the draft from 899 words differing
+ * to 891, 123 in shape either way, as the original stores the slots'
+ * starts in that order; the register oracle forces nothing either way,
+ * its closest being the draft's own words. 891 words differ, 123 in
  * shape.
  */
 #ifdef NON_MATCHING
@@ -4687,9 +4695,9 @@ void DrawHoleEditorGround(CameraMatrices *matrices UNUSED, s32 terrainStyle) {
         previousDetail = GROUND_DETAIL_HIDDEN;
         topSlot = FIRST_TOP_SLOT;
         tileIndex = half * GROUND_TILE_GROUP_SIZE;
-        bottomSlot = FIRST_BOTTOM_SLOT;
         firstTileS = tileIndex * TILE_COORDINATE_SPAN;
         middleSlot = FIRST_MIDDLE_SLOT;
+        bottomSlot = FIRST_BOTTOM_SLOT;
         gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0, f_TriangleSlopes[slopeIndex].shade);
         gDPSetTileSize(
             gfx++,
