@@ -4306,7 +4306,6 @@ void UpdateTurns(void) {
                             aimingPollIndex++;
                         }
 
-
                         f_PlanTimeBudget *= PLAN_TIME_BUDGET_GROWTH;
                         if (f_PlanTimeBudget > PLAN_MAX_TIME_BUDGET) {
                             f_PlanTimeBudget = PLAN_MAX_TIME_BUDGET;
