@@ -3495,13 +3495,13 @@ void OpenHoleAsset(CourseRecordIndex course, s32 hole, s8 kind) {
 #define SHADOW_SCALE_ONE (1 << SHADOW_SCALE_FRACTION_BITS)
 
 static inline u16 *GetShadowedTexel(u32 column, u32 row) {
-    return &g_WorkArea.hole
-                .tiles
-                    [(column / GROUND_TILE_TEXEL_SPAN) +
-                        ((row / GROUND_TILE_TEXEL_SPAN) * GROUND_TILE_COLUMN_COUNT)]
-                .texels[0]
-                       [((row & MAP_TILE_MASK) * GROUND_TILE_TEXEL_SPAN) +
-                           (column & MAP_TILE_MASK)];
+    u32 tileOffset = ((column / GROUND_TILE_TEXEL_SPAN) +
+                         ((row / GROUND_TILE_TEXEL_SPAN) * GROUND_TILE_COLUMN_COUNT)) *
+        sizeof(GroundTile);
+    u32 texelOffset =
+        (((row & MAP_TILE_MASK) * GROUND_TILE_TEXEL_SPAN) + (column & MAP_TILE_MASK)) * sizeof(u16);
+
+    return (u16 *)((u8 *)g_WorkArea.hole.tiles + texelOffset + tileOffset);
 }
 
 /*
@@ -3514,68 +3514,19 @@ static inline u16 *GetShadowedTexel(u32 column, u32 row) {
  * within the width ends the shadow once one has started. Billboards with a
  * texture in f_ShadowlessTextures cast no shadow.
  *
- * Doesn't match: the original loads a float constant four instructions
- * sooner, $t8 and $t9 trade places in several spots, ours sets 100 in three
- * places where the original does once, and a halfword load and its store add
- * their address terms in another order.
- * Indexing the solidities as one flat array, where a row pointer into a
- * two-dimensional one gave 271 words, 45 in shape, lets SHADOW_LIGHT_DISTANCE's
- * load stay inside the billboard loop, as the original's does; indexing the
- * two-dimensional array by row and column gives 315 words, 41 in shape.
- * Shifting the row inside the index spills widthScale, which the original keeps
- * in $fp, for an 8 byte larger frame (303 words, 29 in shape); a row pointer
- * for the mask rows gives 308 and 32, and testing the row's width the other way
- * round 162 and 28. The register oracle, forcing 28 pseudos, leaves 64 words.
- * Taking the alpha bit after the channels are scaled, where the original does,
- * rather than just before repacking them, gives 153 words (19 in shape) against
- * 159 (23); so does taking it before the scale or after scaling red, but with
- * the channels' unpacking 302 (28). The permuter's best, 164 (16), adds
- * swapping the solidity index's terms, which alone gives 170 (20). An s16
- * centerColumn, alone or with centerRow, gives 152 words (20 in shape) but only
- * moves the column's quotient to another register, adding a move; it adds no
- * extension, and the oracle leaves 64 words either way, so the centers stay s32
- * as the rows and columns are. Naming the solidity texel's row and column, as a
- * focused permuter run's best did, took 153 words (19 in shape) to 149 (15),
- * and the register oracle's best from 64 to 60, forcing 28 pseudos; the figures
- * above were measured before it. Since then, an s16 centerColumn gives 148
- * words (16 in shape), with the same 3 extensions as the target and the oracle
- * still at 60. Those counts were measured with GCC's built-in fabsf, when 149
- * words differed, 15 in shape. With fabsf an abs.s in volatile inline
- * assembly, 157 words differ, 23 in shape; AbsFloat at any one of its four
- * sites gives 163 to 187 (39 to 43 in shape), and at all four 364 (80). An
- * s16 centerColumn, alone or with centerRow, now gives 156 (24).
+ * GetShadowedTexel adds byte offsets to the tiles, as GetMapTexel does,
+ * and the brightness drops its floor in a statement of its own. With
+ * these, where indexing the texel and subtracting the floor in the sum
+ * gave 53 words, 13 in shape, 37 words differ, 11 in shape.
  *
- * Giving the mask loops their own maskRow and maskColumn, and the clamped
- * starts their own firstRow and firstColumn, as the register oracle's split-
- * variable hints suggested, gives 67 words (21 in shape); the mask variables
- * alone give 85 (23), maskRow alone 175, maskColumn alone 135, the starts
- * alone 262 (26), and the mask variables with only one start 76 (22). The
- * oracle then leaves 59 words, forcing 6. An s16 centerColumn, alone or with
- * centerRow, and any other order of the three opening assignments give 67 or
- * 75.
- *
- * Working out the texel's width fraction before its height fraction, as a
- * focused permuter run's best did through a temporary, takes the draft from
- * 67 words (21 in shape) to 59 (17), and the oracle's closest from 59 words
- * forcing 6 to 55 forcing 5. The original takes viewX's absolute value
- * first, though it multiplies the height first; setting litPercent between
- * the two fractions or after both gives 61 (19), and the height first with
- * litPercent last 67.
- *
- * Clamping the first column in maskRow, which would give the mask's row
- * counter a second meaning, gives 57 words, 17 in shape, but the oracle's
- * closest is then those 57 words with nothing forced, against 55 forcing 5.
- *
- * The mask loops index the solidities with the row shifted in place, where a
- * rowStart local set at the top of each row gave 59 words (17 in shape):
- * that gives 53 (13), and the register oracle's closest result falls from 55
- * words to 49, forcing 5 pseudos for each. Setting rowStart in the column
- * loop's initializer, after the column, gives 57 (15) and the oracle 53; an
- * s16 rowStart gave 56 (14) but sign-extended the start with an sll by 21
- * and an sra by 16, where the original shifts once, by 5. 53 words differ,
- * 13 in shape.
+ * The rest is the bodies of one statement, which have no braces. Each
+ * braced block leaves a deleted note in the RTL, and loop.c measures a
+ * hoisted constant's life in notes as well as insns. With braces, the
+ * row loop is long enough that the constant 100, already moved out of
+ * the column and row loops, also leaves the billboard loop; the original
+ * sets it before each row. Hence the clang-format markers.
  */
-#ifdef NON_MATCHING
+/* clang-format off */
 void CastBillboardShadows(void) {
     Mat4 lightView;
     Vec3 lightPoint;
@@ -3627,9 +3578,8 @@ void CastBillboardShadows(void) {
 
     for (index = 0; index != BILLBOARD_COUNT; index++) {
         hasShadowStarted = FALSE;
-        if (g_Billboards[index].textureIndex < 0) {
+        if (g_Billboards[index].textureIndex < 0)
             continue;
-        }
 
         for (listIndex = 0;; listIndex++) {
             if (f_ShadowlessTextures[listIndex] == g_Billboards[index].textureIndex) {
@@ -3637,25 +3587,21 @@ void CastBillboardShadows(void) {
                 break;
             }
 
-            if (f_ShadowlessTextures[listIndex] < 0) {
+            if (f_ShadowlessTextures[listIndex] < 0)
                 break;
-            }
         }
 
-        if (listIndex < 0) {
+        if (listIndex < 0)
             continue;
-        }
 
         if (g_Billboards[index].textureIndex != lastTextureIndex) {
-            for (maskRow = 0; maskRow <= BILLBOARD_MASK_SIZE; maskRow++) {
-                for (maskColumn = 0; maskColumn <= BILLBOARD_MASK_SIZE; maskColumn++) {
+            for (maskRow = 0; maskRow <= BILLBOARD_MASK_SIZE; maskRow++)
+                for (maskColumn = 0; maskColumn <= BILLBOARD_MASK_SIZE; maskColumn++)
                     solidities[(maskRow << SOLIDITY_ROW_SHIFT) + maskColumn] = GetBillboardSolidity(
                         g_Billboards[index].textureIndex,
                         maskColumn * (1.0f / BILLBOARD_MASK_SIZE),
                         maskRow * (1.0f / BILLBOARD_MASK_SIZE)
                     );
-                }
-            }
 
             lastTextureIndex = g_Billboards[index].textureIndex;
         }
@@ -3691,13 +3637,11 @@ void CastBillboardShadows(void) {
         lightView[2][2] *= BILLBOARD_UNITS_PER_TEXEL;
         firstRow = centerRow - SHADOW_ROWS_BEFORE;
         rowEnd = centerRow + SHADOW_ROWS_AFTER;
-        if (firstRow < 0) {
+        if (firstRow < 0)
             firstRow = 0;
-        }
 
-        if (rowEnd >= MAP_ROW_COUNT) {
+        if (rowEnd >= MAP_ROW_COUNT)
             rowEnd = MAP_ROW_COUNT - 1;
-        }
 
         for (row = firstRow; row < rowEnd; row++) {
             rowPoint[AXIS_X] = (lightView[2][0] * row) + lightView[3][0];
@@ -3706,40 +3650,35 @@ void CastBillboardShadows(void) {
             isRowInWidth = FALSE;
             firstColumn = centerColumn - SHADOW_COLUMN_REACH;
             columnEnd = centerColumn + SHADOW_COLUMN_REACH;
-            if (firstColumn < 0) {
+            if (firstColumn < 0)
                 firstColumn = 0;
-            }
 
-            if (columnEnd >= MAP_COLUMN_COUNT) {
+            if (columnEnd >= MAP_COLUMN_COUNT)
                 columnEnd = MAP_COLUMN_COUNT - 1;
-            }
 
             for (column = firstColumn; column < columnEnd; column++) {
                 viewX = (lightView[0][0] * column) + rowPoint[AXIS_X];
                 if (width <= fabsf(viewX)) {
-                    if (!isRowInWidth) {
+                    if (!isRowInWidth)
                         continue;
-                    }
 
                     break;
                 }
 
                 isRowInWidth = TRUE;
                 viewY = (lightView[0][1] * column) + rowPoint[AXIS_Y];
-                if (((-width <= viewY) & (viewY < height)) == 0) {
+                if (((-width <= viewY) & (viewY < height)) == 0)
                     continue;
-                }
 
                 litPercent = LIT_PERCENT_FULL;
                 widthFraction = fabsf(viewX) * widthScale;
                 heightFraction = viewY * heightScale;
-                if (widthFraction + fabsf(heightFraction * 2) < 1.0f) {
+                if (widthFraction + fabsf(heightFraction * 2) < 1.0f)
                     litPercent = (sqrtf(
                                       (widthFraction * widthFraction) +
                                       (heightFraction * heightFraction * 4.0f)
                                   ) * LIT_PERCENT_AT_BASE) +
                         LIT_PERCENT_AT_BASE;
-                }
 
                 if (viewY >= 0.0f) {
                     s32 texelRow = heightFraction * BILLBOARD_MASK_SIZE;
@@ -3752,30 +3691,26 @@ void CastBillboardShadows(void) {
                         if (nearness > SHADOW_NEARNESS_MIN) {
                             solidLitPercent =
                                 LIT_PERCENT_FULL - (solidity * nearness * SHADOW_SOLIDITY_SCALE);
-                            if (solidLitPercent < litPercent) {
+                            if (solidLitPercent < litPercent)
                                 litPercent = solidLitPercent;
-                            }
                         }
                     }
                 }
 
-                if (litPercent == LIT_PERCENT_FULL) {
+                if (litPercent == LIT_PERCENT_FULL)
                     continue;
-                }
 
                 color = *GetShadowedTexel(column, row);
                 red = color & TEXEL_RED_MASK;
                 green = color & TEXEL_GREEN_MASK;
                 blue = color & TEXEL_BLUE_MASK;
-                brightness = (red >> RED_BRIGHTNESS_SHIFT) +
-                    ((green >> GREEN_BRIGHTNESS_SHIFT) + (blue - SHADOW_BRIGHTNESS_FLOOR));
-                if (brightness < 0) {
+                brightness = (red >> RED_BRIGHTNESS_SHIFT) + (green >> GREEN_BRIGHTNESS_SHIFT) + blue;
+                brightness -= SHADOW_BRIGHTNESS_FLOOR;
+                if (brightness < 0)
                     continue;
-                }
 
-                if (brightness > SHADOW_BRIGHTNESS_MAX) {
+                if (brightness > SHADOW_BRIGHTNESS_MAX)
                     brightness = SHADOW_BRIGHTNESS_MAX;
-                }
 
                 scale = SHADOW_SCALE_ONE -
                     ((LIT_PERCENT_FULL - litPercent) * brightness * SHADOW_DARKENING_SCALE);
@@ -3783,45 +3718,35 @@ void CastBillboardShadows(void) {
                 green = (green * scale) >> SHADOW_SCALE_FRACTION_BITS;
                 blue = (blue * scale) >> SHADOW_SCALE_FRACTION_BITS;
                 alpha = color & TEXEL_ALPHA_MASK;
-                if (red > TEXEL_RED_MASK) {
+                if (red > TEXEL_RED_MASK)
                     red = TEXEL_RED_MASK;
-                }
-                else {
+                else
                     red &= TEXEL_RED_MASK;
-                }
 
-                if (green > TEXEL_GREEN_MASK) {
+                if (green > TEXEL_GREEN_MASK)
                     green = TEXEL_GREEN_MASK;
-                }
-                else {
+                else
                     green &= TEXEL_GREEN_MASK;
-                }
 
-                if (blue > TEXEL_BLUE_MASK) {
+                if (blue > TEXEL_BLUE_MASK)
                     blue = TEXEL_BLUE_MASK;
-                }
-                else {
+                else
                     blue &= TEXEL_BLUE_MASK;
-                }
 
                 color = red | green | blue | alpha;
                 *GetShadowedTexel(column, row) = color;
             }
 
             if (!isRowInWidth) {
-                if (hasShadowStarted == TRUE) {
+                if (hasShadowStarted == TRUE)
                     break;
-                }
             }
-            else {
+            else
                 hasShadowStarted = TRUE;
-            }
         }
     }
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", CastBillboardShadows);
-#endif
+/* clang-format on */
 
 /*
  * Sets the ground's light and shade colors for the scene's color index,
