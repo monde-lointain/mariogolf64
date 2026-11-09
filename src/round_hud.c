@@ -1935,8 +1935,16 @@ typedef struct GridScreenPoint {
  * The black tint sets blue in each branch too, so that every branch of
  * both tints sets all three channels. That takes the draft from 296 words
  * differing (24 in shape) to 275 (21); the oracle's closest result goes
- * from 176 words, forcing 30 pseudos, to 179, forcing 27. 275 words
- * differ, 21 in shape.
+ * from 176 words, forcing 30 pseudos, to 179, forcing 27. That left 275
+ * words, 21 in shape.
+ *
+ * Working the shift out as a row count first and scaling it by the row
+ * spacing in a second statement, which a search splitting assignments
+ * into steps found, gives 259 words, 21 in shape, but the oracle's
+ * closest stays at 179 words, forcing 21 pseudos, and shift would hold a
+ * count before a distance, so the draft scales it in the one expression;
+ * subtracting the count from rowShift in place gives 377 (61), and the
+ * spacing first 275. 275 words differ, 21 in shape.
  */
 void DrawGreenGrid(Gfx **displayListHead, CameraMatrices *matrices) {
     f32 points[GREEN_GRID_POINT_COUNT][3];
