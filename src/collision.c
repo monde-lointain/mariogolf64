@@ -1790,13 +1790,20 @@ void MoveBallToCupEdge(BallSimulation *simulation) {
  * The half chord's square has a variable of its own, where it had shared
  * bounceSpeed, which took the draft from 145 words differing to 143, 17 in
  * shape either way; the register oracle's closest stays at 66 words forcing
- * 16 pseudos. 143 words differ, 17 in shape.
+ * 16 pseudos.
  *
  * A focused permuter run's best scales the direction's z before its x and y,
  * the order the contact point is moved in. That alone gives 155 words, 11 in
  * shape, as does any order scaling z before y, but the register oracle's
  * closest rises to 78 words, forcing 11 pseudos, so the draft keeps axis
  * order.
+ *
+ * The contact point moves along the direction and then becomes relative
+ * to the cup in statements of their own, which takes the draft from 143
+ * words differing to 137, 17 in shape either way, and the register
+ * oracle's closest from 66 words, forcing 16 pseudos, to 57, forcing 5.
+ * Converting the sum with a cast before subtracting the cup's position
+ * gives the same. 137 words differ, 17 in shape.
  */
 #ifdef NON_MATCHING
 s32 FindPinHit(
@@ -1941,8 +1948,10 @@ s32 FindPinHit(
         direction[AXIS_X] *= halfChord;
         direction[AXIS_Y] *= halfChord;
         direction[AXIS_Z] *= halfChord;
-        contactZ = (s32)(contactZ + direction[AXIS_Z]) - g_HoleSetup.cupPosition[AXIS_Z];
-        contactX = (s32)(contactX + direction[AXIS_X]) - g_HoleSetup.cupPosition[AXIS_X];
+        contactZ += direction[AXIS_Z];
+        contactZ -= g_HoleSetup.cupPosition[AXIS_Z];
+        contactX += direction[AXIS_X];
+        contactX -= g_HoleSetup.cupPosition[AXIS_X];
         angle = 0.0f;
         if ((contactX | contactZ) != 0) {
             angle = atan2(contactZ, contactX);
