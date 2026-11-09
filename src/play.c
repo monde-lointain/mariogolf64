@@ -2143,49 +2143,55 @@ INCLUDE_ASM("asm/nonmatchings/play", RebuildGroundTextureCoordinates);
  * tiles go down two halves in rows of four, and a fine tile snaps the edge
  * vertices it shares with coarser neighbors so that no gaps open between them.
  *
- * Doesn't match: the original's frame is 0x10 bytes larger (0x260 against
- * 0x250; it was 0x38 when first measured), so most stack offsets differ, and
- * terrainStyle and the locals take other saved registers. The original works out column + 1's parity once per half, where
- * ours did at each GridVertex, with three more andi: loop.c finds moving them
- * out of the row loop not desirable, since the six invariants it moved out of
- * the inner tile loops come first and each doubles the row loop's count. A
- * nextColumnParity local set once per half, as a permuter run's temp suggested,
- * gives the original's andi count and took the function from 1179 words, 283 in
- * shape, to 950 (244); an s32 parity gives the same. A nextColumn local set
- * once per half kept the andi (1214 words, 322 in shape), and with the parity
- * local it gives 1073 (261); the next column's offset within a row as a local
- * gives 1457 (291). Earlier, writing the tile column out where it is used, and
- * giving the medium tiles' pass loop its own counter, took it from 1194 words
- * differing, 352 in shape, to 1160 (348). Naming the half's first tile column,
- * as a permuter run's copy of half * 4 suggested, then brought the shape to
- * 283, with words at 1179; declaring it first gave 1185 (283). That run's other
- * changes, a char for the slot after the top one and a flag for the detail
- * test, changed the shape by at most one. The fine tiles count their column in
- * tileColumn, stepped with tileIndex, which took the function from 950 words to
- * 945 and the shape from 244 to 233; counting the medium tiles' column the same
- * way gave 988 (252) alone and 1133 (253) with the fine tiles', the coarse
- * tiles' 1131 (285) alone, and all three 1213 (277). Declaring vertices after
- * current, and column after middleSlot, then took it from 945 words to 911, 233
- * in shape either way; a greedy search over single declaration moves found no
- * further gain. The original sets the fine detail once, in the delay slot of the nearby
- * flag's branch, and that branch and the fine depth test's both go straight
- * past the medium test, as if the fine detail were the detail test's else arm.
- * Writing it as the else arm, or as a default that the medium and coarse
- * details override, gives those branches, but as branch-likelies, and moves the
- * tile loop's registers: 967 to 972 words, 231 to 236 in shape. Setting the
- * fine detail first and testing for the medium and coarse ones only when the
- * tile is neither nearby nor fine by depth gives the original's plain
- * branches, but takes the current draft from 580 words (94 in shape) to 636
- * (92). Testing the nearby flag and the fine depth in two else-if arms left 911. Setting the
- * slots in DrawHoleEditorGround's order, the bottom before the top and the
- * middle after the tile index, then took it to 909; the register oracle gets to
- * 896 words forcing 70 pseudos either way. A u16 or u8 groupTileIndex gives 908
- * words (236 in shape) against 909 (233), but adds two 16- or 8-bit shifts or
- * masks to the 23 that the draft and the original have. The medium groups
- * rewind their slots top, bottom and middle: in DrawHoleEditorGround's order,
- * middle, bottom and top, 915 words differ (237 in shape), and top, middle and
- * bottom 913 (245); stepping them after each tile in its order, middle, bottom,
- * tile index and top, gives 935 (267), and with its rewind too 937 (267).
+ * Doesn't match: the original's frame is 0x10 bytes larger (0x260
+ * against 0x250; it was 0x38 when first measured), so most stack offsets
+ * differ, and terrainStyle and the locals take other saved registers.
+ * The original works out column + 1's parity once per half, where ours
+ * did at each GridVertex, with three more andi: loop.c finds moving them
+ * out of the row loop not desirable, since the six invariants it moved
+ * out of the inner tile loops come first and each doubles the row loop's
+ * count. A nextColumnParity local set once per half, as a permuter run's
+ * temp suggested, gives the original's andi count and took the function
+ * from 1179 words, 283 in shape, to 950 (244); an s32 parity gives the
+ * same. A nextColumn local set once per half kept the andi (1214 words,
+ * 322 in shape), and with the parity local it gives 1073 (261); the next
+ * column's offset within a row as a local gives 1457 (291). Earlier,
+ * writing the tile column out where it is used, and giving the medium
+ * tiles' pass loop its own counter, took it from 1194 words differing,
+ * 352 in shape, to 1160 (348). Naming the half's first tile column, as a
+ * permuter run's copy of half * 4 suggested, then brought the shape to
+ * 283, with words at 1179; declaring it first gave 1185 (283). That
+ * run's other changes, a char for the slot after the top one and a flag
+ * for the detail test, changed the shape by at most one. The fine tiles
+ * count their column in tileColumn, stepped with tileIndex, which took
+ * the function from 950 words to 945 and the shape from 244 to 233;
+ * counting the medium tiles' column the same way gave 988 (252) alone
+ * and 1133 (253) with the fine tiles', the coarse tiles' 1131 (285)
+ * alone, and all three 1213 (277). Declaring vertices after current, and
+ * column after middleSlot, then took it from 945 words to 911, 233 in
+ * shape either way; a greedy search over single declaration moves found
+ * no further gain. The original sets the fine detail once, in the delay
+ * slot of the nearby flag's branch, and that branch and the fine depth
+ * test's both go straight past the medium test, as if the fine detail
+ * were the detail test's else arm. Writing it as the else arm, or as a
+ * default that the medium and coarse details override, gives those
+ * branches, but as branch-likelies, and moves the tile loop's registers:
+ * 967 to 972 words, 231 to 236 in shape. Setting the fine detail first
+ * and testing for the medium and coarse ones only when the tile is
+ * neither nearby nor fine by depth gives the original's plain branches,
+ * but takes the current draft from 580 words (94 in shape) to 636 (92).
+ * Testing the nearby flag and the fine depth in two else-if arms left
+ * 911. Setting the slots in DrawHoleEditorGround's order, the bottom
+ * before the top and the middle after the tile index, then took it to
+ * 909; the register oracle gets to 896 words forcing 70 pseudos either
+ * way. A u16 or u8 groupTileIndex gives 908 words (236 in shape) against
+ * 909 (233), but adds two 16- or 8-bit shifts or masks to the 23 that
+ * the draft and the original have. The medium groups rewind their slots
+ * top, bottom and middle: in DrawHoleEditorGround's order, middle,
+ * bottom and top, 915 words differ (237 in shape), and top, middle and
+ * bottom 913 (245); stepping them after each tile in its order, middle,
+ * bottom, tile index and top, gives 935 (267), and with its rewind too
+ * 937 (267).
  *
  * Each half declares its own nextColumnParity, the only place it is used, as
  * a search over rewrites suggested: that takes the draft from 909 words to

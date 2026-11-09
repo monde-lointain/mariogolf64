@@ -2351,9 +2351,10 @@ void DrawSavedMiniGolfImage(Gfx **displayListHead);
  * both axes, or the x product as ProjectPoint's argument leaves 287.
  *
  * The chosen game's mode label works out its x first, before its offset
- * and texture, as a sweep moving each assignment found. That takes the draft from 287 words to 213,
- * 91 in shape either way, and the register oracle's closest from 183 words, forcing 28 pseudos, to
- * 183 forcing 17.
+ * and texture, as a sweep moving each assignment found. That takes the
+ * draft from 287 words to 213, 91 in shape either way, and the register
+ * oracle's closest from 183 words, forcing 28 pseudos, to 183 forcing
+ * 17.
  *
  * The prompts test for a chosen game that isn't empty first, and set the
  * empty game's text in the else, as a permuter output does. That takes the
