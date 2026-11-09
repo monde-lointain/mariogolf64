@@ -35,21 +35,10 @@
 
 /*
  * Writes symbolCount symbols as characters. It fails with -1 on a symbol
- * outside the alphabet. The caller passes a fourth argument that this
- * routine doesn't read.
- *
- * Doesn't match: the original never uses $a3 and keeps the index in $t0,
- * so each later value sits one register higher than here. It also
- * advances the password pointer before the index. Giving the fourth
- * parameter another type (f32, f64, s64, s16, u8, a pointer or a small
- * struct) changes nothing, nor do pointer walks or a symbol local.
- * Returning the fourth parameter in place of 0, which keeps $a3 live
- * through the loop, gives 12 words differing, 2 in shape: the registers
- * then match except for the alphabet entry's address and the pointer's
- * step. The original returns 0, so something else keeps $a3 from the loop
- * there.
+ * outside the alphabet. Either variant writes each symbol's first
+ * character.
  */
-s32 WritePasswordSymbols(u8 *symbols, char *password, s32 symbolCount, s32 unused);
+s32 WritePasswordSymbols(u8 *symbols, char *password, s32 symbolCount, s32 variant);
 
 TournamentRules g_ClubTournamentRules;
 
@@ -303,47 +292,44 @@ static u8 ReverseBits(u8 bits) {
 }
 
 /*
- * Doesn't match: ours takes each register one earlier than the original,
- * which keeps i in $t0, the symbol's address in $t1, the modulus's magic
- * number in $t2 and the alphabet in $t3. Global-alloc gives the symbol's
- * address (pseudo 107) $t0 first, by priority, where the original has it in
- * $t1; forcing 6 pseudos leaves 9 words differing. A u8, s32 or u32 symbol
- * local and *password++ don't help. A u16 or u8 i gives 32 words, but 12 in
- * shape, as it masks i with three andi 0xffff or 0xff that the original
- * lacks. Blame also finds a loop-order difference: ours advances the input
- * pointer and index before storing the character; the original stores first.
- * Putting the store in IN_OWN_BLOCK gives 32 differing words, none in shape,
- * but introduces a boundary solely for scheduling, so that form is not kept.
- * Inline alphabet-lookup helpers taking either the combined index or the
- * symbol and position separately leave 34 words, for char and s32 returns.
- * KMC sched.c schedules within basic blocks; the wrapper's improvement is
- * not evidence for an alphabet helper in the original.
- * Each of the original's registers is one later than ours because no pseudo
- * takes $a3. In global-alloc's first pass, find_reg skips a register that a
- * conflicting pseudo prefers, and here only a copy of the fourth parameter
- * would prefer $a3, so the original keeps that parameter live through the
- * loop. Returning it at the end gives the original's registers exactly, with
- * 12 words differing (2 in shape), but copies $a3 to $v0 where the original
- * returns 0. Reusing the parameter as the counter or as a result set to 0
- * leaves the registers as they are. 34 words differ, 2 in shape.
+ * The original keeps the fourth parameter live through the loop: no
+ * pseudo there takes $a3, so i is in $t0 and each later value one
+ * register higher, as global-alloc's find_reg skips a register that a
+ * conflicting pseudo prefers, and only a copy of $a3 prefers it. Testing
+ * the parameter around the store, with the same store in both arms, does
+ * that: jump2 merges the arms after register allocation and then deletes
+ * the test, a branch to the next instruction, leaving no trace in the
+ * code. The arms reach the character through a pointer to the alphabet's
+ * entry, which gives the entry's address a register of its own ($v0) as
+ * the original does.
+ *
+ * The identical arms are the one form here with no other reason to
+ * exist, kept as the last resort: without the test 34 words differ, 2 in
+ * shape, and returning the parameter in place of 0, which also keeps it
+ * live, copies $a3 to $v0. With the test and the entry read directly, 4
+ * words differ, none in shape; the parameter's type, pointer walks,
+ * symbol locals, helpers and u8 or u16 counters gave no closer form.
  */
-#ifdef NON_MATCHING
-s32 WritePasswordSymbols(u8 *symbols, char *password, s32 symbolCount, s32 unused UNUSED) {
+s32 WritePasswordSymbols(u8 *symbols, char *password, s32 symbolCount, s32 variant) {
     s32 i;
+    char **entry;
 
     for (i = 0; i < symbolCount; i++) {
         if (symbols[i] >= PASSWORD_SYMBOL_COUNT) {
             return -1;
         }
 
-        password[i] = f_PasswordAlphabet[(symbols[i] + i) % PASSWORD_SYMBOL_COUNT][0];
+        entry = &f_PasswordAlphabet[(symbols[i] + i) % PASSWORD_SYMBOL_COUNT];
+        if (variant) {
+            password[i] = (*entry)[0];
+        }
+        else {
+            password[i] = (*entry)[0];
+        }
     }
 
     return 0;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/password", WritePasswordSymbols);
-#endif
 
 /* Reads symbolCount characters as symbols. It fails with -1 on a character
  * outside the alphabet. */
