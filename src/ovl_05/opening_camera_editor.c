@@ -529,8 +529,15 @@ void StopEditorMoves(void) {
  * setting it after stepping copies the load into both of the step's arms,
  * as the tilt's still does. That takes the draft from 99 words to 93, 37
  * in shape to 33, and the register oracle's closest from 99 to 93, with
- * nothing forced; the tilt's set at its start gives 341 words. 93 words
- * differ, 33 in shape.
+ * nothing forced; the tilt's set at its start gives 341 words. That left
+ * 93 words, 33 in shape.
+ *
+ * The turn tests for arrival only after a step, as the tilt tests its
+ * limits, since isDone is already set when no step is taken; tested
+ * after the step's if, as before, the draft gave 93 words differing, 33
+ * in shape, against 77 (31), and the register oracle's closest falls
+ * from 93 to 77, with nothing forced. Testing it in both arms gives 83
+ * words (33 in shape). 77 words differ, 31 in shape.
  */
 #ifdef NON_MATCHING
 void UpdateCameraEditor(void) {
@@ -817,10 +824,9 @@ void UpdateCameraEditor(void) {
             isDone = FALSE;
             g_CameraEditor.turnLeft -= g_CameraEditor.turnSpeed;
             g_CameraEditor.heading += g_CameraEditor.turnSpeed;
-        }
-
-        if (fabsf(g_CameraEditor.turnLeft) < EDITOR_ARRIVAL_ANGLE) {
-            isDone = TRUE;
+            if (fabsf(g_CameraEditor.turnLeft) < EDITOR_ARRIVAL_ANGLE) {
+                isDone = TRUE;
+            }
         }
 
         if (isDone) {
