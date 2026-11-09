@@ -895,25 +895,23 @@ s32 UpdatePrompt(ControllerState *controller) {
  * Draws the open prompt: a cloud that grows in and shrinks away, with Yes
  * and No under its message once it has opened. The chosen answer bobs.
  *
- * Doesn't match: the cloud's halves are drawn from a bottom that starts
- * at PROMPT_CLOUD_MIDDLE_Y and moves down by half the cloud's height,
- * and the choices' edges add halfHeight and a quarter of the cloud to
- * CHOICES_MIDDLE_Y in that order. Setting bottom in one statement lets
- * fold-const reassociate it with the top's constant (30 words, 8 in
- * shape, the frame 8 bytes smaller), and writing the quarter first folds
- * the top into middle - (halfHeight - constant) (29 words, 5 in shape).
+ * The cloud's edges come from a bottom local, the middle moved down by
+ * half the cloud's height; written into the rectangle, 15 words differ,
+ * 5 in shape. The choices' edges add halfHeight and a quarter of the
+ * cloud to CHOICES_MIDDLE_Y in that order, as the quarter first folds
+ * the top into middle - (halfHeight - constant) (20 words, 2 in shape).
+ * Each half's texels are addressed from the header by half rather than
+ * through a stepped offset, which leaves the offset's register to the
+ * loop's start as the original does (26 words, 4 in shape, with a
+ * stepped offset).
  *
- * Advancing texelOffset after the draw instead of after the load swaps
- * halfWidth's and halfHeight's registers (86 words). Without the pad in
- * the choices' block the frame is 8 bytes smaller (42 words, 4 in
- * shape).
- *
- * What's left is scheduling: the original sets texelOffset one slot
- * later and steps it after the second division's quotient rather than
- * before the draw's arguments. Moving statements and editsearch's
- * generators find nothing closer. 6 words differ, 4 in shape.
+ * The chosen answer's halfHeight starts at its rest size and adds the
+ * bob in a statement of its own. That is the one form with no other
+ * reason to exist: the extra reference ranks halfHeight ahead of
+ * halfWidth in global-alloc, and in one statement, as halfWidth is, the
+ * two swap registers (84 words). The pad in the choices' block is a last
+ * resort as well; without it the frame is 8 bytes smaller (36 words).
  */
-#ifdef NON_MATCHING
 void DrawPrompt(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     Prompt *prompt = &f_Prompts[f_PromptIndex];
@@ -923,7 +921,6 @@ void DrawPrompt(Gfx **displayListHead) {
     s32 halfHeight;
     s32 halfWidth;
     s32 half;
-    s32 texelOffset;
     s32 bottom;
 
     if (f_PromptState == PROMPT_STATE_CLOSED) {
@@ -966,7 +963,6 @@ void DrawPrompt(Gfx **displayListHead) {
     /* The cloud image's top and bottom halves are drawn above and below its
      * middle */
     half = 0;
-    texelOffset = IMAGE_HEADER_SIZE;
     do {
         if (f_PromptState == PROMPT_STATE_CHOOSING) {
             halfWidth = PROMPT_CLOUD_HALF_WIDTH;
@@ -979,7 +975,10 @@ void DrawPrompt(Gfx **displayListHead) {
 
         LoadNibbleTextureBlock(
             &gfx,
-            AddressPast(f_PromptCloudImage, texelOffset),
+            AddressPast(
+                f_PromptCloudImage,
+                IMAGE_HEADER_SIZE + (half * (PROMPT_CLOUD_WIDTH * PROMPT_CLOUD_HALF_TEXELS / 2))
+            ),
             G_IM_FMT_I,
             PROMPT_CLOUD_WIDTH,
             PROMPT_CLOUD_HALF_TEXELS,
@@ -991,9 +990,7 @@ void DrawPrompt(Gfx **displayListHead) {
             G_TX_NOLOD,
             G_TX_NOLOD
         );
-        texelOffset += PROMPT_CLOUD_WIDTH * PROMPT_CLOUD_HALF_TEXELS / 2;
-        bottom = PROMPT_CLOUD_MIDDLE_Y;
-        bottom += half * halfHeight;
+        bottom = PROMPT_CLOUD_MIDDLE_Y + (half * halfHeight);
         DrawTextureRect(
             &gfx,
             QuarterPixels(PROMPT_CENTER_X - halfWidth),
@@ -1011,13 +1008,14 @@ void DrawPrompt(Gfx **displayListHead) {
     while (half != 2);
 
     if (f_PromptState == PROMPT_STATE_CHOOSING) {
-        /* Pads the frame to match; without it 42 words differ, against 6 */
+        /* Pads the frame to match; without it 36 words differ */
         s32 unused[2] UNUSED;
 
         f_ChoiceBobAngle += DegreesToRadians(CHOICE_BOB_STEP_DEGREES);
         if (f_PromptChoice == PROMPT_CHOICE_YES) {
             halfWidth = (sinf(f_ChoiceBobAngle) * CHOSEN_WIDTH_BOB) + CHOSEN_HALF_WIDTH;
-            halfHeight = (CHOSEN_HEIGHT_BOB * sinf(f_ChoiceBobAngle)) + CHOSEN_HALF_HEIGHT;
+            halfHeight = CHOSEN_HALF_HEIGHT;
+            halfHeight += CHOSEN_HEIGHT_BOB * sinf(f_ChoiceBobAngle);
         }
         else {
             halfWidth = CHOICE_HALF_WIDTH;
@@ -1059,7 +1057,8 @@ void DrawPrompt(Gfx **displayListHead) {
         );
         if (f_PromptChoice == PROMPT_CHOICE_NO) {
             halfWidth = (sinf(f_ChoiceBobAngle) * CHOSEN_WIDTH_BOB) + CHOSEN_HALF_WIDTH;
-            halfHeight = (CHOSEN_HEIGHT_BOB * sinf(f_ChoiceBobAngle)) + CHOSEN_HALF_HEIGHT;
+            halfHeight = CHOSEN_HALF_HEIGHT;
+            halfHeight += CHOSEN_HEIGHT_BOB * sinf(f_ChoiceBobAngle);
         }
         else {
             halfWidth = CHOICE_HALF_WIDTH;
@@ -1097,10 +1096,6 @@ void DrawPrompt(Gfx **displayListHead) {
 
     *displayListHead = gfx;
 }
-
-#else
-INCLUDE_ASM("asm/nonmatchings/screen_layers", DrawPrompt);
-#endif
 
 void ShowHalfTurn(void) {
     EncodedAsset asset;
