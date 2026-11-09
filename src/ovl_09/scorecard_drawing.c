@@ -3188,8 +3188,18 @@ INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard_drawing", DrawLeaderboardPage);
  * does, and takes the draft to 461 words, 115 in shape; but the register
  * oracle's voting then makes each round worse, so it forces nothing and
  * leaves all 461, against 351. With the labels' regrouping too it gives
- * 406 words (116 in shape), again with nothing forced. 459 words differ,
- * 129 in shape.
+ * 406 words (116 in shape), again with nothing forced. That left 459
+ * words, 129 in shape.
+ *
+ * The back nine's match standing and the front nine's skins total add
+ * the row's top first, then the nine's top, the row's offset and
+ * g_Scorecard.y, as the back nine's skins total does, where they added
+ * the offset first and the row's top to g_Scorecard.y; a search
+ * regrouping sums found it. That takes the draft from 459 words
+ * differing (129 in shape) to 441 (121), and the register oracle's
+ * closest from 351 words to 331, forcing 15 pseudos either way. The
+ * front nine's standing that way too gives 472 words (114 in shape),
+ * with the closest at 366, forcing 11. 441 words differ, 121 in shape.
  */
 #ifdef NON_MATCHING
 void DrawScoresPage(Gfx **displayListHead) {
@@ -4272,7 +4282,7 @@ void DrawScoresPage(Gfx **displayListHead) {
                 DrawShadowedText(
                     &gfx,
                     g_Scorecard.x + MATCH_STANDING_LEFT,
-                    (i * rowSpacing) + backTop + (PLAYER_ROW_TOP + g_Scorecard.y),
+                    PLAYER_ROW_TOP + backTop + (i * rowSpacing) + g_Scorecard.y,
                     g_PrintBuffer
                 );
             }
@@ -4332,7 +4342,7 @@ void DrawScoresPage(Gfx **displayListHead) {
                 DrawShadowedText(
                     &gfx,
                     g_Scorecard.x + SKINS_TOTAL_LEFT,
-                    (i * rowSpacing) + frontTop + (PLAYER_ROW_TOP + g_Scorecard.y),
+                    PLAYER_ROW_TOP + frontTop + (i * rowSpacing) + g_Scorecard.y,
                     g_PrintBuffer
                 );
             }
