@@ -1000,7 +1000,15 @@ enum BallSprite {
  * anywhere from before f_UnusedBallFrame to after the texture LUT gives
  * the same 761 words, and after a later command 773 to 828 (29 to 68 in
  * shape); moving f_UnusedBallFrame's step instead gives 1340 to 2053.
- * 761 words differ, 29 in shape.
+ * That left 761 words, 29 in shape.
+ *
+ * The shadow's size is scaled to 1/127 before the shade multiplies it,
+ * where the draft scaled the shade; a search regrouping products found
+ * it, and size times the scale gives the same. That takes the draft from
+ * 761 words differing to 759, 29 in shape both, and the oracle's closest
+ * result from 659 words to 655, forcing 48; size *= the shade's scale,
+ * or 127.0f as a divisor, gives 761, and the three factors ungrouped 763
+ * or 764. 759 words differ, 29 in shape.
  */
 #ifdef NON_MATCHING
 void DrawGolfBalls(CameraMatrices *matrices UNUSED) {
@@ -1491,7 +1499,7 @@ void DrawGolfBalls(CameraMatrices *matrices UNUSED) {
                         shade = 0x7F;
                     }
 
-                    size = size * (shade * 0.007874016f);
+                    size = shade * (0.007874016f * size);
                     if (size <= 0) {
                         size = 1;
                     }
