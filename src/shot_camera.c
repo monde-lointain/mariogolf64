@@ -3609,39 +3609,43 @@ void SecondUnusedCameraStub(void) {
  * Builds the top-left quarter of a spot, as SPOT_QUARTER_SIZE x
  * SPOT_QUARTER_SIZE I8 texels. A soft spot is a disc that fades out toward its
  * edge. Otherwise it is a disc, a dark gap and a ring that brightens outward.
- * Doesn't match: the original converts the soft spot's squared distance into a
- * temporary, takes its root there and copies the root to distance, which radius
- * then reads. Here cse2 replaces distance with the root's register, so the copy
- * goes. Per cse.c, the copy survives only if make_regs_eqv makes distance the
- * class's canonical register, which needs distance to outlive the root beyond
- * the extended block or to be used before it, and if cse_insn's swap, which
- * makes the root's insn set distance itself, then fails, which needs the copy's
- * previous insn to set something other than the root. Getting the distance from
- * an inline helper, with the squared distance and the root in locals of their
- * own, gives these 3 words (1 in shape), and the register oracle leaves them
- * with no register forced, so allocation isn't the cause. Before the helper,
- * the draft converted into distance and took the root there, leaving 6 words;
- * taking sqrtf of the sum directly gave 10, setting distance before the loops
- * or copying a root temporary to it 3, writing it in the first loop as well 9,
- * and a squaredDistance local, wherever declared, 10 (4 in shape). 3 words
- * differ, 1 in shape.
  *
- * Taking the helper's root with an sqrt.s in inline assembly, volatile or
- * not, as the game's fabsf takes its magnitude, gives 10 words, 4 in shape.
+ * The original takes the soft spot's root in one register and copies it to
+ * distance in another, which radius and the fall then read. A test between
+ * the root and the copy leaves that behind when it guards a store to distance
+ * that the copy overwrites. What the original's test was can't be recovered;
+ * a zero squared distance is the one a root would want.
+ *
+ * - Flow deletes the guarded store as dead, but the branch around it lasts
+ *   until the final jump pass, which deletes it and its test as a branch to
+ *   the next instruction. Until then its label parts the root from the copy,
+ *   so neither combine nor local allocation gives the two one register.
+ * - With the label before the copy, cse can't make the root's instruction
+ *   set distance itself (cse.c, cse_insn, "Special handling for (set REG0
+ *   REG1)"). With distance set ahead of the label, cse keeps reading distance
+ *   after the copy rather than the root (cse.c, make_regs_eqv). A guarded
+ *   store to intensity or radius gives 3 words (1 in shape), as does no test
+ *   or the test before the root.
+ *
+ * A test of column, width or texels matches as well, as does storing the
+ * root or another value under it. Testing row gives 28 words and isSoft 72,
+ * none in shape, with other registers throughout; testing root against 0.0f,
+ * or a float squaredDistance, gives 1 word, a zero loaded ahead of the
+ * loops. An if and else storing 0.0f and the root gives 6 words (4 in
+ * shape), and the root in both arms 10 (4). Setting distance from sqrtf and
+ * to 0.0f under the test after it gives 6 (4).
+ *
+ * The first loop has to take its root straight into radius: written as the
+ * second's is, 9 words differ (1 in shape), and through distance alone 6,
+ * none in shape.
  */
-#ifdef NON_MATCHING
-static inline f32 GetSpotDistance(s32 rowOffset, s32 columnOffset) {
-    f32 squaredDistance = (rowOffset * rowOffset) + (columnOffset * columnOffset);
-    f32 distance = sqrtf(squaredDistance);
-
-    return distance;
-}
-
 void BuildSpotTexels(u8 *texels, Boolean isSoft) {
     s32 row;
     s32 column;
     s32 texelIndex;
     s32 radius;
+    s32 squaredDistance;
+    f32 root;
     f32 distance;
     s32 intensity;
     s32 width;
@@ -3656,7 +3660,9 @@ void BuildSpotTexels(u8 *texels, Boolean isSoft) {
     if (!isSoft) {
         for (row = 0; row != height; row++) {
             for (column = 0; column != width; column++) {
-                radius = GetSpotDistance(row - height, column - width);
+                radius = sqrtf(
+                    ((row - height) * (row - height)) + ((column - width) * (column - width))
+                );
                 if (radius <= SPOT_DISC_RADIUS) {
                     intensity = SPOT_PEAK_INTENSITY;
                 }
@@ -3678,7 +3684,16 @@ void BuildSpotTexels(u8 *texels, Boolean isSoft) {
     else {
         for (row = 0, softDiscRadius = SPOT_SOFT_DISC_RADIUS; row != height; row++) {
             for (column = 0; column != width; column++) {
-                distance = GetSpotDistance(row - height, column - width);
+                squaredDistance =
+                    ((row - height) * (row - height)) + ((column - width) * (column - width));
+                root = sqrtf(squaredDistance);
+                /* Changes nothing, as distance is set again below, but the test
+                 * is needed to match, as the header comment explains */
+                if (squaredDistance == 0) {
+                    distance = 0.0f;
+                }
+
+                distance = root;
                 radius = distance;
                 if (radius <= softDiscRadius) {
                     intensity = SPOT_PEAK_INTENSITY;
@@ -3696,9 +3711,6 @@ void BuildSpotTexels(u8 *texels, Boolean isSoft) {
         }
     }
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/shot_camera", BuildSpotTexels);
-#endif
 
 /*
  * Fills a width by height texture with a quarter of a ring around its far
