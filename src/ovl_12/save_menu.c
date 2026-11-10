@@ -373,41 +373,31 @@ s32 GetModeIconIndex(GameState *state) {
  * the first free slot.
  *
  * Each mode icon's two images are read in both arms of the icon test, and GCC
- * merges the arms' identical tails, as the original does. The second image is
- * stored through a pointer to it, as the original steps one register to each
- * slot's second image and derives the first's from it: naming both images
- * directly gives 46 differing words, 2 in shape, as loop.c combines the two
- * stores into one register; a pointer to the slot's row, or to the first image,
- * 54 (12) when set before the icon test and 46 (2) when set in each arm. Where
- * the pointer is declared, in the loop or in each arm, and whether it is set as
- * &f_ModeIconImages[slot][1] or f_ModeIconImages[slot] + 1, changes nothing.
- * Testing iconIndex after the validity test, with NO_MODE_ICON as its default,
- * gives 9 words (3). Doesn't match: loop.c loads the pointer's first address
- * into a temporary and copies it into the pointer's register, a move the
- * original lacks. The register oracle matches the draft when it gives that
- * temporary the pointer's $s1. The move comes from cse2: loop hoists
- * f_ModeIconImages + 4 and then f_ModeIconImages, for the two images'
- * givs, ahead of the givs' initial copies, and cse2 rewrites the second
- * constant as the first's register minus 4. That register then has two
- * uses, so combine can't fold its constant into the pointer's copy. Had
- * cse2 met the copy first, the pointer's longer-lived register would lead
- * the class and take both uses, as the original's addiu $s2, $s1, -0x4
- * suggests. Setting a first-image pointer to second - 1 in each pass gives
- * 40 words (14 in shape), as the address is then built in the loop.
+ * merges the arms' identical tails, as the original does. The original steps
+ * $s1 over each slot's second image, sets the first image's $s2 from it as
+ * $s1 - 4, and holds the default frames' address in $s6, which it loads before
+ * both. The second image is stored through a pointer the loop steps, to match:
+ * loop.c moves the first image's address out of the loop, and cse2 rewrites
+ * it as the pointer's less 4. The default frames are read through a pointer
+ * set before that one, to match: the scheduler keeps the order of the loads
+ * before the loop, and loop.c would put the frames' address, read directly,
+ * after the pointer's.
  *
- * A pointer to the second image stepped by the loop, set before it and
- * stepped after the icon test or with slot in the loop's step, gives 4 words
- * differing, 0 in shape, if it is stepped before slot and 8 if after; its
- * initial address is then set before the hoisted address of
- * g_ModeIconAnimations, where the original sets it after, and the register
- * oracle's closest result is these 4 words, against 0 for the draft. Setting
- * it in the loop's initializer or before the loop, as
- * &f_ModeIconImages[0][1], f_ModeIconImages[0] + 1 or *f_ModeIconImages + 1,
- * changes nothing. With the pointer set in each pass, writing the first
- * image through it, as second[-1], gives 38 words (12 in shape). 5 words
- * differ, 1 in shape.
+ * With the frames read directly, or their pointer declared after the image's,
+ * 4 words differ, 0 in shape, the two addresses' loads swapped; with the
+ * frames' pointer set with the function's locals, 4 (4). A pointer to the
+ * whole table matches if only the default frames are read through it, and
+ * gives 10 words (6) if the icon's frames are too. Stepping the image's
+ * pointer at the end of the loop's body, setting it in the loop's initializer,
+ * and setting it as f_ModeIconImages[0] + 1 all match; stepping it after slot
+ * gives 4 words (0). Setting it in each pass, as &f_ModeIconImages[slot][1],
+ * gives 5 words (1): loop.c loads its first address into a temporary and
+ * copies that into the pointer's register. Naming both images directly gives
+ * 46 words (2), as loop.c combines the two stores into one register; writing
+ * the first image through the pointer, as second[-1], 4 (2); a stepped pointer
+ * for each image 10 (0); and one stepped pointer to the slot's pair of images
+ * 12 (2).
  */
-#ifdef NON_MATCHING
 void OpenSaveMenu(s32 kind) {
     EncodedAsset encodedAsset;
     AssetFile file;
@@ -461,9 +451,10 @@ void OpenSaveMenu(s32 kind) {
     }
 
     if (kind == SAVE_MENU_GAMES) {
-        for (slot = 0; slot != SAVED_GAME_COUNT; slot++) {
-            void **second = &f_ModeIconImages[slot][1];
+        s16 *defaultFrames = g_ModeIconAnimations[0];
+        void **second = &f_ModeIconImages[0][1];
 
+        for (slot = 0; slot != SAVED_GAME_COUNT; second += 2, slot++) {
             if (save->savedGames[slot].isValid &&
                 (iconIndex = GetModeIconIndex(&save->savedGames[slot].state)) != NO_MODE_ICON) {
                 ReadEncodedAsset(
@@ -482,13 +473,11 @@ void OpenSaveMenu(s32 kind) {
             else {
                 ReadEncodedAsset(
                     f_ModeIconImages[slot][0] =
-                        AllocMemory(OpenEncodedAsset(g_ModeIconAnimations[0][0], &encodedAsset)),
+                        AllocMemory(OpenEncodedAsset(defaultFrames[0], &encodedAsset)),
                     &encodedAsset
                 );
                 ReadEncodedAsset(
-                        *second = AllocMemory(
-                            OpenEncodedAsset(g_ModeIconAnimations[0][1], &encodedAsset)
-                        ),
+                        *second = AllocMemory(OpenEncodedAsset(defaultFrames[1], &encodedAsset)),
                     &encodedAsset
                 );
             }
@@ -587,10 +576,6 @@ void OpenSaveMenu(s32 kind) {
     f_SlideOffsets[3] = SCREEN_WIDTH;
     f_MenuKind = kind;
 }
-
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_12/save_menu", OpenSaveMenu);
-#endif
 
 void CloseSaveMenu(void) {
     s32 index;
