@@ -399,7 +399,7 @@ def read_original(
     routine = read_target_functions(asm_path)[function]
     if optflags is None:
         optflags = get_optflags(c_path)
-    result = run_compiler(c_path, optflags, ["-E"])
+    result = preprocess(c_path, optflags)
     nested: Functions = {}
     if result.returncode != 0:
         return Original(routine, nested)
@@ -1014,6 +1014,31 @@ def run_compiler(
     )
 
 
+def preprocess(
+    c_path: StrPath, optflags: list[str]
+) -> subprocess.CompletedProcess[str]:
+    """Run KMC GCC's preprocessor on C_PATH with the project's flags and OPTFLAGS.
+
+    A score preprocesses its file twice, to isolate the function and to find
+    its nested ones, so the output is kept while the file stays the same.
+    """
+    status = Path(c_path).resolve().stat()
+    return preprocess_version(
+        str(Path(c_path).resolve()),
+        tuple(optflags),
+        status.st_mtime_ns,
+        status.st_size,
+    )
+
+
+@functools.lru_cache(maxsize=4)
+def preprocess_version(
+    c_path: str, optflags: tuple[str, ...], _mtime_ns: int, _size: int
+) -> subprocess.CompletedProcess[str]:
+    """Preprocess the version of C_PATH that its modification time and size tell."""
+    return run_compiler(c_path, list(optflags), ["-E"])
+
+
 def compile_isolated(
     c_path: StrPath, keep: set[str], optflags: list[str] | None = None
 ) -> tuple[Functions | None, str]:
@@ -1025,7 +1050,7 @@ def compile_isolated(
     """
     if optflags is None:
         optflags = get_optflags(c_path)
-    result = run_compiler(c_path, optflags, ["-E"])
+    result = preprocess(c_path, optflags)
     if result.returncode != 0:
         return None, result.stderr
     with tempfile.TemporaryDirectory() as tmp:
