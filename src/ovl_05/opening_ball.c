@@ -540,7 +540,13 @@ static UNUSED_FUNCTION void ResetOpeningBallSimulations(void) {
  * draft from 172 words differing (78 in shape) to 140 (68), and the
  * register oracle's closest from 96 words, forcing 32 pseudos, to 86,
  * forcing 26; adding each push with = and the sum written out gives 168
- * (68). 140 words differ, 68 in shape.
+ * (68). That left 140 words, 68 in shape.
+ *
+ * Each landing surface's case clamps its spin at zero itself, as
+ * StepBallSimulation's cases clamp theirs, where the draft clamped once
+ * after the switch. That takes the draft from 140 words differing (68 in
+ * shape) to 116 (52), and the register oracle's closest from 86 words,
+ * forcing 26 pseudos, to 66, forcing 24. 116 words differ, 52 in shape.
  */
 #ifdef NON_MATCHING
 s32 StepOpeningBallSimulation(BallSimulation *simulation) {
@@ -1553,6 +1559,10 @@ s32 StepOpeningBallSimulation(BallSimulation *simulation) {
                         OPENING_GREEN_LANDING_FRICTION_BASE;
                     spin = ((impactSpeed * steepness) - OPENING_SPINLESS_LANDING_SPEED) *
                         (1.0f / OPENING_LANDING_SPIN_SPEED_RANGE);
+                    if (spin < 0.0f) {
+                        spin = 0.0f;
+                    }
+
                     break;
                 default:
                     friction *=
@@ -1560,11 +1570,11 @@ s32 StepOpeningBallSimulation(BallSimulation *simulation) {
                     friction += friction * GetOpeningPositionNoise() * LANDING_NOISE_SCALE;
                     spin = ((impactSpeed * steepness) - OPENING_SPINLESS_LANDING_SPEED) *
                         (1.0f / OPENING_LANDING_SPIN_SPEED_RANGE);
-                    break;
-            }
+                    if (spin < 0.0f) {
+                        spin = 0.0f;
+                    }
 
-            if (spin < 0.0f) {
-                spin = 0.0f;
+                    break;
             }
 
             restitution = 1.0f - friction;
