@@ -1033,7 +1033,17 @@ enum BallSprite {
  * shape both, with every stack slot as in the original, and the register
  * oracle's closest result from 473 words to 197, forcing 47 pseudos
  * either way. Declaring it at the top of the loop's body gives the same
- * 295 words. 295 words differ, 19 in shape.
+ * 295 words. That left 295 words, 19 in shape.
+ *
+ * Each arm of the shadow's depth subtracts BALL_DEPTH_BIAS itself, as the
+ * ball's arms do, where the draft set a depth local in each arm and
+ * subtracted the bias once after them. Both forms share the subtraction
+ * at the end, but with the local the sums take their registers in the
+ * other order. That takes the draft from 295 words differing, 19 in
+ * shape, to 42 (6), and the register oracle's closest result from 197
+ * words, forcing 47 pseudos, to 34, forcing 8; adding each constant
+ * first instead gives 301 words, 105 in shape. 42 words differ, 6 in
+ * shape.
  */
 #ifdef NON_MATCHING
 void DrawGolfBalls(CameraMatrices *matrices UNUSED) {
@@ -1493,22 +1503,21 @@ void DrawGolfBalls(CameraMatrices *matrices UNUSED) {
                             shadowPrimDepth = ballPoint.depth;
                         }
                         else {
-                            f32 depth;
-
                             if (shadowDepth < g_CupViewDepth) {
-                                depth = shadowPoint.depth -
-                                    (shadowPoint.depthStep * (10.5f * g_PinVertexScale)) + 56.0f;
+                                shadowPrimDepth = shadowPoint.depth -
+                                    (shadowPoint.depthStep * (10.5f * g_PinVertexScale)) + 56.0f -
+                                    BALL_DEPTH_BIAS;
                             }
                             else if (ball->isInCup == TRUE) {
-                                depth = shadowPoint.depth -
-                                    (shadowPoint.depthStep * (10.5f * g_PinVertexScale)) + 40.0f;
+                                shadowPrimDepth = shadowPoint.depth -
+                                    (shadowPoint.depthStep * (10.5f * g_PinVertexScale)) + 40.0f -
+                                    BALL_DEPTH_BIAS;
                             }
                             else {
-                                depth = shadowPoint.depth -
-                                    (shadowPoint.depthStep * (10.5f * g_PinVertexScale)) + 16.0f;
+                                shadowPrimDepth = shadowPoint.depth -
+                                    (shadowPoint.depthStep * (10.5f * g_PinVertexScale)) + 16.0f -
+                                    BALL_DEPTH_BIAS;
                             }
-
-                            shadowPrimDepth = depth - BALL_DEPTH_BIAS;
                         }
 
                         shade = 0x7F -
@@ -1561,24 +1570,24 @@ void DrawGolfBalls(CameraMatrices *matrices UNUSED) {
                 }
             }
             else if (shadowDepth < BALL_NEAREST_DEPTH) {
-                f32 depth;
-
                 size = AbsFloat(shadowPoint.scaleX) * (0.6f * (2.0f * g_PinVertexScale)) * 0.25f;
                 if (g_IsCupViewShown != TRUE) {
                     if (shadowDepth < g_CupViewDepth) {
-                        depth = shadowPoint.depth -
-                            (shadowPoint.depthStep * (10.5f * g_PinVertexScale)) + 56.0f;
+                        shadowPrimDepth = shadowPoint.depth -
+                            (shadowPoint.depthStep * (10.5f * g_PinVertexScale)) + 56.0f -
+                            BALL_DEPTH_BIAS;
                     }
                     else if (ball->isInCup == TRUE) {
-                        depth = shadowPoint.depth -
-                            (shadowPoint.depthStep * (10.5f * g_PinVertexScale)) + 40.0f;
+                        shadowPrimDepth = shadowPoint.depth -
+                            (shadowPoint.depthStep * (10.5f * g_PinVertexScale)) + 40.0f -
+                            BALL_DEPTH_BIAS;
                     }
                     else {
-                        depth = shadowPoint.depth -
-                            (shadowPoint.depthStep * (10.5f * g_PinVertexScale)) + 16.0f;
+                        shadowPrimDepth = shadowPoint.depth -
+                            (shadowPoint.depthStep * (10.5f * g_PinVertexScale)) + 16.0f -
+                            BALL_DEPTH_BIAS;
                     }
 
-                    shadowPrimDepth = depth - BALL_DEPTH_BIAS;
                     if (size <= 0) {
                         size = 1;
                     }
