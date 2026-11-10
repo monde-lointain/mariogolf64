@@ -4601,68 +4601,21 @@ void LoadOpeningImpactLines(void) {
  * Draws blinking impact lines around the burst for a few frames, once
  * f_AreImpactLinesShown is set.
  *
- * Doesn't match: the registers and scheduling in the strip loop differ.
- * Working out each strip's texel offset from its index, with the row
- * counted down in the strip loop's initializer, took it from 229 words
- * differing, 27 in shape, to 217 (23), and dropping a second pipe sync
- * after the palette load, which the original doesn't have, to 186 (16).
- * Setting the left edge in a variable on each pass took it to 45 (1); one
- * set once, at its declaration or before the loop, gives 274 (32) on the
- * current draft. Working out the top edge from the row, as the original
- * does, rather than from the bottom then gave 46 words, none in shape;
- * the bottom less the strip height gives 45 (1), and the next row's
- * offset, (row + 1) times the height, 184 (54). The permuter's best, 36
- * words (4 in shape), also sets the left edge on each pass and moves that
- * sync into the strip loop, adding a command there. A focused run's best,
- * 32 words (4 in shape), also counts the row down before the rectangle;
- * measured before the left edge, that alone gave 252 (30). The register
- * oracle's closest result is the 46 words with no register forced;
- * forcing any gives 212 or more; that left 46 words, none in shape.
- *
- * The counts above were measured before the change below. Each pipe sync and
- * the RDP state command after it now goes through AppendSyncedRdpState,
- * which declares the command's pointer first, as DrawHoleTriangles does; of
- * the eight pairs, the cycle type's and the render mode's each take 8 words
- * off alone, and all eight give 30 words differing, none in shape. All are
- * in the strip loop: the original keeps the bottom edge's 88 in a register
- * and subtracts the row's offset plus the strip height from it for the top
- * edge, where this subtracts the offset from 56. Grouping the top edge's
- * terms that way, or as (row + 1) strips, folds the same or gives 168 (54);
- * the top as the bottom less the strip height gives 29 (1), and the bottom
- * edge's 88 in a variable 46 (4) or 168 (58).
- *
- * Keeping bottomEdge only for the top calculation and grouping the row
- * offset with the strip height reduces the 30 differing words to 19, but
- * adds one instruction: GCC subtracts the height from bottomEdge before
- * subtracting the row offset. The original adds the height to the offset
- * first and shares the bottom calculation's 88. Using bottomEdge for both
- * edges gives 168 differences (58 in shape); inline helpers for the top or
- * offset do not improve on 19.
- *
- * Setting the top to the bottom edge's 88 and then moving it up by the
- * row's offset and a strip, before the bottom, drops bottomEdge and
- * leaves 12 words, none in shape. fold-const still turns the subtraction
- * of row * 32 + 32 into one of 32 and then the offset, so the top starts
- * from 56, where the original shares the bottom's 88 and adds the strip
- * height to the offset. A height variable, as for the width, keeps the
- * sum but strength-reduces the row (168 words, 54 in shape, the frame 8
- * bytes smaller); the bottom worked out from the top gives 9 words, 3 in
- * shape. The register oracle forces nothing closer. 12 words differ,
+ * Each pipe sync and the RDP state command after it goes through
+ * AppendSyncedRdpState, to match: the plain pairs give 16 words differing,
  * none in shape.
  */
-#ifdef NON_MATCHING
 void DrawOpeningImpactLines(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     s32 frame;
     s32 stripIndex;
     s32 texelOffset;
     s32 row;
-
-    /* A variable, so GCC does not fold the right edge into the command */
-    s32 width = IMPACT_LINES_SIZE;
     s32 left;
     s32 bottom;
     s32 top;
+    s32 bottomEdge;
+    s32 offset;
 
     if (f_AreImpactLinesShown) {
         frame = f_ImpactLinesFrame++;
@@ -4689,13 +4642,31 @@ void DrawOpeningImpactLines(Gfx **displayListHead) {
                 /*
                  * Set on each pass, as the original works out the rectangle's shifted
                  * left and right edges once, outside the loop, and keeps them on the
-                 * stack; written as the constant, the edges fold into the commands,
-                 * 253 words differing (19 in shape) against 46 (none)
+                 * stack. Written as the constant, the edges fold into the commands,
+                 * 342 words differing (32 in shape); set once, at its declaration or
+                 * before the loop, 264 (32). The width in a variable set before the
+                 * loop swaps the operands of one or, 2 (none)
                  */
                 left = IMPACT_LINES_LEFT;
-                top = IMPACT_LINES_BOTTOM;
-                top -= row * IMPACT_LINES_STRIP_HEIGHT + IMPACT_LINES_STRIP_HEIGHT;
-                bottom = IMPACT_LINES_BOTTOM - (row * IMPACT_LINES_STRIP_HEIGHT);
+
+                /*
+                 * The original loads the bottom edge once for both of the strip's
+                 * edges, and adds the strip height to the row's offset for the top.
+                 * The edge is a variable here, which loop.c moves out of the loop;
+                 * the constant written for each edge gives 49 (13). The bottom is
+                 * set in two steps and the offset stepped so that loop.c takes
+                 * neither edge for an induction variable of the row: the bottom in
+                 * one statement is reduced to a counter of its own, 188 (58), and
+                 * the top as the edge less the offset plus the height gives 163
+                 * (61). The top in two steps as well gives 44 (12), and both edges
+                 * worked out from the row without the offset 10 (none)
+                 */
+                bottomEdge = IMPACT_LINES_BOTTOM;
+                offset = row * IMPACT_LINES_STRIP_HEIGHT;
+                bottom = bottomEdge;
+                bottom -= offset;
+                offset += IMPACT_LINES_STRIP_HEIGHT;
+                top = bottomEdge - offset;
                 texelOffset = LARGE_PALETTED_TEXELS_OFFSET +
                     (stripIndex * IMPACT_LINES_SIZE * IMPACT_LINES_STRIP_HEIGHT);
                 gDPLoadTextureBlock(
@@ -4718,7 +4689,7 @@ void DrawOpeningImpactLines(Gfx **displayListHead) {
                     gfx++,
                     QuarterPixels(left),
                     QuarterPixels(top),
-                    QuarterPixels(left + width),
+                    QuarterPixels(left + IMPACT_LINES_SIZE),
                     QuarterPixels(bottom),
                     G_TX_RENDERTILE,
                     0,
@@ -4727,6 +4698,8 @@ void DrawOpeningImpactLines(Gfx **displayListHead) {
                     TEXEL_STEP_ONE
                 );
                 gDPPipeSync(gfx++);
+
+                /* Counted down here: in the loop's increment, 2 (none) */
                 row--;
             }
 
@@ -4734,9 +4707,6 @@ void DrawOpeningImpactLines(Gfx **displayListHead) {
         }
     }
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_05/opening", DrawOpeningImpactLines);
-#endif
 
 #define ASSET_LAKITU_IMAGE 0x64B
 
