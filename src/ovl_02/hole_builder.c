@@ -4228,48 +4228,50 @@ static inline u16 ReadTileTexel(s32 tileColumn, s32 tileRow, s32 texelColumn, s3
 
     texelColumn = (texelColumn + GROUND_TILE_TEXEL_SPAN) & MAP_TILE_MASK;
     texelRow = (texelRow + GROUND_TILE_TEXEL_SPAN) & MAP_TILE_MASK;
+
+    /*
+     * Each layout reads its texel itself, to match. Each arm then ends in its
+     * own load, which cross-jumping merges once the function is inlined, and
+     * the caller's block after the arms holds only single-cycle instructions,
+     * which the scheduler leaves in the source's order. With one read after the
+     * arms the load is in that block: its latency raises the priority of the
+     * store of the texel, and the scheduler puts the column's step ahead of the
+     * load, 12 words differing (4 in shape).
+     */
     if (g_WorkArea.hole.tiles[tileIndex]
             .texels[GROUND_TILE_TEXEL_ROW_COUNT - 1][GROUND_TILE_TEXEL_ROW_LENGTH - 1] != 0) {
-        texel =
-            (u16 *)((u8 *)&g_WorkArea.hole.tiles[0].texels[TILE_BORDER_BEFORE][TILE_BORDER_BEFORE] +
-                (tileIndex * sizeof(GroundTile)) +
-                (((texelRow * GROUND_TILE_TEXEL_ROW_LENGTH) + texelColumn) * sizeof(u16)));
+        /*
+         * Moved to the tile in a statement of its own, to match: the original
+         * adds the tile's offset last, as the second operand. In one sum
+         * fold-const takes the first texel's address, a constant, into the
+         * innermost sum and the tile's offset comes out as the last
+         * addition's first operand; the twelve groupings of one sum give 4
+         * words differing (none in shape), 8 (none) or 10 (2)
+         */
+        texel = &g_WorkArea.hole.tiles[0].texels[TILE_BORDER_BEFORE][TILE_BORDER_BEFORE] +
+            ((texelRow * GROUND_TILE_TEXEL_ROW_LENGTH) + texelColumn);
+        texel = (u16 *)AddressPast(texel, tileIndex * sizeof(GroundTile));
+        return *texel;
     }
     else {
+        /*
+         * One sum here: fold-const takes the first tile's texels, a constant,
+         * into the innermost sum with the tile's offset, as the original has
+         * them. Moved to the tile in a second statement, as above, gives 16
+         * (4); the tile's offset grouped with the first tile's texels in the
+         * source, 16 (4), and with the texel's offset, 8 (none)
+         */
         texel = (u16 *)((u8 *)g_WorkArea.hole.tiles[0].texels +
             (((texelRow * GROUND_TILE_TEXEL_SPAN) + texelColumn) * sizeof(u16)) +
             (tileIndex * sizeof(GroundTile)));
+        return *texel;
     }
-
-    return *texel;
 }
 
 /*
  * Switches the ground tiles between their two texel layouts: 32 texels a
  * row, or inside a border of their neighbors' texels.
- *
- * Doesn't match: ours steps the border loop's column and loads the texel in
- * another order, and adds two of the texel addresses' terms the other way
- * round. ReadTileTexel adds the byte offsets of the tile and the texel to the
- * first tile's texels, in that order in the bordered layout's source; GCC adds
- * the bordered texel's offset first, as the original does. Adding the tile's
- * offset first in the plain layout gives 20 words differing (8 in shape), and
- * swapping both layouts 22 (4). Earlier, adding the texel's offset first in
- * both layouts gave 20 (8), in the plain layout only 24 (10); the offsets in
- * locals 24 (10), the sum through AddressPast 26 (6), a tile pointer for the
- * plain layout 142 (16). Before that, indexing the tile's texels gave 76 (26):
- * with the stripped loop's != test, indexing texels[row + 1][column + 1] gave
- * 97, texels[0] at the row's sum 79 to 85, and the offset added to
- * &texels[1][1] 79; indexing the tile in g_WorkArea rather than through tile
- * 132 to 153. The permuter's best then held the last texel's column in a
- * variable for the corner's two stores, a fake (82 words, 24 in shape). The
- * copy loop sets its source and the source's end before the destination, as the
- * original does: with the end computed in the loop's test and the source set
- * after the destination 16 words differed (6), and moving only the source first
- * gave 28 (4). The register oracle, forcing 2 pseudos' registers, leaves 10
- * words at best, so the code differs too. 12 words differ, 4 in shape.
  */
-#ifdef NON_MATCHING
 void ToggleGroundTileBorders(void) {
     u16 texels[GROUND_TILE_TEXEL_ROW_COUNT][GROUND_TILE_TEXEL_ROW_LENGTH];
     s32 tileColumn;
@@ -4358,6 +4360,13 @@ void ToggleGroundTileBorders(void) {
             }
 
             texels[GROUND_TILE_TEXEL_ROW_COUNT - 1][GROUND_TILE_TEXEL_ROW_LENGTH - 1] = 0xFFFF;
+
+            /*
+             * The source is set before the destination and its end kept in a
+             * variable, to match: the destination set first gives 4 words
+             * differing (2 in shape), and the end worked out in the loop's test
+             * 16 (none)
+             */
             source = (f64 *)texels;
             sourceEnd = (f64 *)&texels[GROUND_TILE_TEXEL_ROW_COUNT];
             destination =
@@ -4373,9 +4382,6 @@ void ToggleGroundTileBorders(void) {
         }
     }
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", ToggleGroundTileBorders);
-#endif
 
 /*
  * Gives the vertices from start up to end texture coordinates on the
