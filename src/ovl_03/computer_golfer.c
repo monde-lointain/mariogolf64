@@ -3125,32 +3125,46 @@ Boolean IsLineMostlyLost(CoursePoint from, CoursePoint to) {
  * Simulates f_TrialShot and returns TRUE if the ball comes to rest, and not out
  * of bounds, off the course or in a water hazard
  *
- * Doesn't match: the original reads the loop's state through a saved address
- * biased into the simulation, also used for StepBallSimulation's argument.
- * Here the state is read from its global address. 6 words differ, 4 in shape.
+ * Its loop is a cut-down copy of StepTrialShot's step, and it keeps that step's
+ * read of the fall speed, which nothing here uses, to match. The original holds
+ * &f_TrialSimulation.velocity[AXIS_Y] in $s0 through the loop, passes
+ * StepBallSimulation that address less 0x28 and reads the loop's state 0x64
+ * past it, and nothing in the loop reads the fall speed itself. GCC expands
+ * the read as the address into a register and a load through it; jump deletes
+ * the load, whose value is unused, and leaves the address, and cse's
+ * use_related_value then derives the simulation's address and the state's
+ * from it. That leaves the simulation's address with one use, the call's
+ * argument, and in a loop with calls loop.c substitutes such a register's
+ * value into its use rather than move it out of the loop.
  *
- * The original reads the state inside the loop as 0x64 from that address, 0x28
- * past the simulation, and outside it from the global. Reading the loop's state
- * and passing StepBallSimulation's argument through a simulation pointer set
- * before the loop reads the state from the saved address, unbiased, and gives 7
- * words, 3 in shape; setting it at the top gives 15, using it after the launch
- * as well 13, and for every access 60. The pointer isn't adopted: cse's
- * use_related_value derives one address in a symbol from a register holding
- * another, as StepTrialShot passes &f_TrialSimulation and is compiled
- * to its state's address less 140, as in its target. The 0x28 bias is
- * unexplained.
+ * Without the read 6 words differ, 4 in shape: the loop keeps the simulation's
+ * own address and reads the state from its constant address. Reading the
+ * bounce count as well, as StepTrialShot does, matches too, as do the read
+ * after the count, the read declared in the loop's body and an empty test of
+ * the fall speed. The read after the step or before the loop gives the same 6
+ * words (4), and through a simulation pointer 14 (6); a read of the bounce
+ * count alone, the state or another axis's speed gives 6 (0), biased by that
+ * field's offset instead.
  *
- * The register oracle's closest result is these 6 words with no register
- * forced, so allocation isn't the cause. Keeping
- * &f_TrialSimulation.velocity[AXIS_Y], the biased address, live in the
- * loop through empty inline assembly, as a probe, loads it into a
- * register of its own, and the loop still derives nothing from it: 8
- * words differ, 6 in shape.
+ * The step limit's report is written inside the loop and the original has it
+ * after the result's checks, jumping back to them: loop.c moves a block that
+ * ends in a jump out of its loop to a barrier outside it, here the one that
+ * ends the first FALSE report. The original's rodata has the FALSE text before
+ * the TRUE one, though the TRUE report's code comes first, so the FALSE report
+ * is written twice, before and after the TRUE one, and jump's cross-jumping
+ * then merges the first into the last. An else arm for the TRUE report matches
+ * too. Testing the out-of-bounds kinds and the water hazard in separate ifs,
+ * each with its own FALSE report, gives 8 words (6 in shape); the TRUE report
+ * first, with one FALSE report after it, 24 (18); a result flag tested for the
+ * reports 31 (25); a FALSE report for a ball that hasn't stopped before the
+ * kind's tests 44 (34); and one condition for all three tests 18 (12). The
+ * outside-course test before the step limit's gives 9 (5).
  */
-#ifdef NON_MATCHING
 Boolean IsTrialShotSafe(void) {
     u32 kind;
     s32 flags;
+    /* Read and never used, to match */
+    s32 velocityY UNUSED;
 
     f_TrialLaunch->heading = f_TrialShot.heading;
     f_TrialLaunch->clubIndex = f_TrialShot.clubSlot;
@@ -3167,10 +3181,13 @@ Boolean IsTrialShotSafe(void) {
     LaunchBallSimulation(&f_TrialSimulation, LAUNCH_PURPOSE_TRIAL, f_TrialLaunch);
     f_TrialStepCount = 0;
     while (f_TrialSimulation.state != BALL_STATE_STOPPED) {
+        velocityY = f_TrialSimulation.velocity[AXIS_Y];
         f_TrialStepCount++;
         flags = StepBallSimulation(&f_TrialSimulation);
         if (f_TrialStepCount >= MAX_STEP_COUNT) {
-            goto reportFault;
+            SetDebugTextHighlight(TRUE);
+            PrintDebugText(f_SimFaultText, 10, 12);
+            break;
         }
 
         if (flags & STEP_FLAG_OUTSIDE_COURSE) {
@@ -3178,33 +3195,17 @@ Boolean IsTrialShotSafe(void) {
         }
     }
 
-checkResult:
     if (f_TrialSimulation.state == BALL_STATE_STOPPED) {
         kind = GetSurfaceInfo(f_TrialSimulation.surface)->kind;
-        if (IsOutOfBoundsKind(kind)) {
-            goto unsafe;
+        if (IsOutOfBoundsKind(kind) || kind == SURFACE_KIND_WATER_HAZARD) {
+            osSyncPrintf("nmResultCheck: FALSE\n");
+            return FALSE;
         }
-        else if (kind != SURFACE_KIND_WATER_HAZARD) {
-            goto safe;
-        }
+
+        osSyncPrintf("nmResultCheck: TRUE\n");
+        return TRUE;
     }
 
-    goto unsafe;
-
-reportFault:
-    /* The step limit reports a fault, then rejoins the normal result checks. */
-    SetDebugTextHighlight(TRUE);
-    PrintDebugText(f_SimFaultText, 10, 12);
-    goto checkResult;
-
-safe:
-    osSyncPrintf("nmResultCheck: TRUE\n");
-    return TRUE;
-
-unsafe:
     osSyncPrintf("nmResultCheck: FALSE\n");
     return FALSE;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_03/computer_golfer", IsTrialShotSafe);
-#endif
