@@ -4115,36 +4115,51 @@ void InitClubs(void) {
  * set, it is found by test-firing the first set's putter instead.
  * InterpolatePuttPower is a nested function, a GNU C extension.
  *
- * Doesn't match: the original copies shotMode into $fp as the flag's test
- * branches and uses the copy only when test-firing. With GCC's built-in
- * fabsf, the short half of the search storing the new power in both arms, as
- * the long half did, took the draft from 65 words differing to 63. With
- * fabsf an abs.s in volatile inline assembly, the tolerance is worked out
- * after the error's abs.s, as in the original, which took the draft to 47
- * words, 3 in shape. Negating the error by an if, or through AbsFloat, gives
- * 58 words (10 in shape), and a ?: on the integer difference 31 (7), but
- * neither form takes the original's abs.s. The long half now stores the
- * power once after its arms, which ties; the short half keeps a store in
- * each arm, as storing once in both halves gives 67 words (3 in shape). 47
- * words differ, 3 in shape.
+ * The test-firing keeps the mode in a variable of its own, testShotMode, to
+ * match: the original copies shotMode from $s0 into $fp as the flag's test
+ * branches, reads the table with $s0 and test-fires with $fp. The search is
+ * GenerateClub's, where the mode is a local that counts the modes, which may
+ * be how the original came by the copy. Without it 23 words differ, 3 in
+ * shape. Where the copy is made before GetShotDistance, and whether the test
+ * shot's mode is set from it, set with it in one statement or read back into
+ * it, changes nothing; made after GetShotDistance it gives 102 words (24 in
+ * shape), and made at its declaration GCC ties it to the parameter again, for
+ * the same 23 (3). Neither can it get the copy from an inline function's
+ * parameter: GCC won't inline a function that holds a nested one, so the
+ * test-firing can't move into a helper, and with the table's lookup in one 16
+ * words differ, 4 in shape.
  *
- * The register oracle lines shotMode up with $s0 for the table and $fp for
- * the test-firing. Moving the table lookup into a static inline helper, so
- * that it gets its own copy of shotMode, gives 59 words (7 in shape).
+ * The long half's read of the putter's power sits in a block of its own, to
+ * match. The original keeps the hoisted address of the putter's power for the
+ * mode in $s2 and shortDistance in $s3. global-alloc places the saved values
+ * by priority: targetDistance's is 4756 and shortDistance's 4500, and the
+ * address, with 12 references over a live length of 85, has 4235, so without
+ * the block, or with plain braces, it comes after shortDistance, the two swap
+ * registers and 24 words differ, none in shape. flow weights a reference by
+ * its loop depth, and a loop that runs once still counts, so the block gives
+ * the address a 13th reference and a priority of 4588, between the two. It
+ * lifts longPower's priority too, from 4105 to 4421, which leaves it below
+ * shortDistance's. Any one of the loop's three stores of the power in a
+ * block matches as well, as does a block around the read and the distance's
+ * copy after it. The short half's read in a block lifts shortPower past
+ * longPower instead and gives 24 words; two blocks, around both reads or
+ * around the long half's read and store, take the address past
+ * targetDistance for the same 24; and the first store, before the loop, in a
+ * block gives 96 (30 in shape).
  *
- * A second variable copied from shotMode before the test shot's club is
- * set, and used for every use of the mode when test-firing, reproduces
- * the original's copy and gives 24 words, 0 in shape; the register oracle
- * then matches when it swaps the saved registers of shortDistance and the
- * hoisted address of the putter's power for the mode. The copy isn't
- * adopted: it is an alias of the parameter with no purpose of its own,
- * and still doesn't match. Copying it after GetShotDistance gives 32
- * words (4 in shape), and reading the mode back from f_PutterTestShot
- * instead gives 182. GCC won't inline a function that contains a nested
- * function, so the test-firing, which uses InterpolatePuttPower, can't
- * move into an inline helper with its own copy of the mode.
+ * The long half stores the new power once after its arms and the short half
+ * in each arm. With the block, the long half storing through power in each
+ * arm or straight from each arm's expression matches if the short half
+ * stores once, and so does the short half storing straight from each arm;
+ * both halves storing once gives 44 words, and the other four pairings,
+ * among them GenerateClub's straight stores in all four arms, 24, none in
+ * shape. No pairing matches without the block.
+ *
+ * fabsf is an abs.s in volatile inline assembly, and the error may as well
+ * be taken in the test itself. With GCC's built-in fabsf 18 words differ (12
+ * in shape); negating the error by an if gives 11 (7), and a ?: on the
+ * integer difference 7 (3).
  */
-#ifdef NON_MATCHING
 s32 GetPuttPower(s32 fraction, ShotMode shotMode) {
     BallSimulation simulation;
     Club *putter;
@@ -4162,6 +4177,8 @@ s32 GetPuttPower(s32 fraction, ShotMode shotMode) {
     s32 initialPowerNumerator;
     f32 error;
     s32 power;
+    /* The mode the putter is test-fired in: a copy of shotMode, to match */
+    ShotMode testShotMode;
 
     s32 InterpolatePuttPower(s32 from, s32 to, f32 fraction) {
         return from + (to - from) * (f64)fraction;
@@ -4181,10 +4198,11 @@ s32 GetPuttPower(s32 fraction, ShotMode shotMode) {
         return f_PutterPowers[shotMode][index];
     }
 
+    testShotMode = shotMode;
     f_PutterTestShot.clubIndex = CLUB_TYPE_PUTTER;
-    f_PutterTestShot.shotMode = shotMode;
+    f_PutterTestShot.shotMode = testShotMode;
     putter = &g_Clubs[CLUB_TYPE_PUTTER];
-    reach = GetShotDistance(putter, shotMode);
+    reach = GetShotDistance(putter, testShotMode);
     distancePerPower = reach * (UNITS_PER_FOOT / MAX_LAUNCH_POWER);
     initialPowerNumerator = (s32)(reach * PUTT_POWER_ESTIMATE_SCALE);
     shortDistance = 0;
@@ -4195,7 +4213,7 @@ s32 GetPuttPower(s32 fraction, ShotMode shotMode) {
     g_ClubTestMode = CLUB_TEST_PUTT;
     targetDistance = (s32)(distancePerPower * fraction);
     targetDistance += PUTT_OVERSHOOT;
-    putter->power[shotMode] = initialPowerNumerator / PUTT_POWER_ESTIMATE_DIVISOR;
+    putter->power[testShotMode] = initialPowerNumerator / PUTT_POWER_ESTIMATE_DIVISOR;
     for (; tryIndex < MAX_PUTT_TRY_COUNT; tryIndex++) {
         simulation.position[AXIS_X] = 0;
         simulation.position[AXIS_Y] = 0;
@@ -4217,7 +4235,8 @@ s32 GetPuttPower(s32 fraction, ShotMode shotMode) {
         }
 
         if (distance > targetDistance) {
-            longPower = putter->power[shotMode];
+            /* In a block of its own to match, as the header comment explains */
+            IN_OWN_BLOCK(longPower = putter->power[testShotMode]);
             longDistance = distance;
             if (longDistance == shortDistance) {
                 break;
@@ -4234,18 +4253,18 @@ s32 GetPuttPower(s32 fraction, ShotMode shotMode) {
                 );
             }
 
-            putter->power[shotMode] = power;
+            putter->power[testShotMode] = power;
         }
         else {
             shortDistance = distance;
-            shortPower = putter->power[shotMode];
+            shortPower = putter->power[testShotMode];
             if (longDistance == shortDistance) {
                 break;
             }
 
             if (longPower == 0) {
                 power = shortPower * 3 / 2;
-                putter->power[shotMode] = power;
+                putter->power[testShotMode] = power;
             }
             else {
                 power = InterpolatePuttPower(
@@ -4253,18 +4272,14 @@ s32 GetPuttPower(s32 fraction, ShotMode shotMode) {
                     longPower,
                     (f32)(targetDistance - shortDistance) / (f32)(longDistance - shortDistance)
                 );
-                putter->power[shotMode] = power;
+                putter->power[testShotMode] = power;
             }
         }
     }
 
     g_ClubTestMode = CLUB_TEST_NONE;
-    return putter->power[shotMode];
+    return putter->power[testShotMode];
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/club", InterpolatePuttPower);
-INCLUDE_ASM("asm/nonmatchings/club", GetPuttPower);
-#endif
 
 s32 GetClubPower(Club *club, ShotMode shotMode) {
     return club->power[shotMode];
