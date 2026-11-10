@@ -517,8 +517,20 @@ static UNUSED_FUNCTION void ResetOpeningBallSimulations(void) {
  * copies IntLength2D's result into $v1 before the stop speed test; ours
  * tests $v0. Forcing the two hit flags into $a0 gives 170 words, but no
  * declaration, type, scope, ?: or assignment in the condition does, nor
- * one flag for both hits, nor an s32 or u32 speed local. 183 words
- * differ, 83 in shape.
+ * one flag for both hits, nor an s32 or u32 speed local. That left 183
+ * words, 83 in shape.
+ *
+ * The rolling ball's vertical velocity is set by a conditional
+ * expression, adding the gravity to the velocity when the drop to the
+ * ground is at least it and to the drop otherwise, as the original
+ * stores it once for all four arms; with an if and else in each
+ * gravity's branch, each arm stored it. That takes the draft from 183
+ * words (83 in shape) to 172 (78), the register oracle's closest staying
+ * at 96 words, forcing 32 pseudos where it forced 33. Testing the drop
+ * with <, as the if did, gives 183 words (81 in shape), and taking the
+ * lesser of the two first and then adding the gravity 170 (86).
+ * StepBallSimulation's float copy so written gives 796 words. 172 words
+ * differ, 78 in shape.
  */
 #ifdef NON_MATCHING
 s32 StepOpeningBallSimulation(BallSimulation *simulation) {
@@ -1802,21 +1814,16 @@ s32 StepOpeningBallSimulation(BallSimulation *simulation) {
             simulation->velocity[AXIS_Z] =
                 (slopeZ * friction * SLOPE_PULL_SCALE) + (simulation->velocity[AXIS_Z] * friction);
             if (simulation->purpose != LAUNCH_PURPOSE_CLUB_TEST && g_GameState.isMiniGolf) {
-                if (groundHeight - startY < simulation->velocity[AXIS_Y]) {
-                    simulation->velocity[AXIS_Y] =
-                        groundHeight - startY + (s32)MINI_GOLF_ROLL_GRAVITY;
-                }
-                else {
-                    simulation->velocity[AXIS_Y] += (s32)MINI_GOLF_ROLL_GRAVITY;
-                }
+                simulation->velocity[AXIS_Y] =
+                    (groundHeight - startY >= simulation->velocity[AXIS_Y]) ?
+                    simulation->velocity[AXIS_Y] + (s32)MINI_GOLF_ROLL_GRAVITY :
+                    groundHeight - startY + (s32)MINI_GOLF_ROLL_GRAVITY;
             }
             else {
-                if (groundHeight - startY < simulation->velocity[AXIS_Y]) {
-                    simulation->velocity[AXIS_Y] = groundHeight - startY + (s32)GRAVITY;
-                }
-                else {
-                    simulation->velocity[AXIS_Y] += (s32)GRAVITY;
-                }
+                simulation->velocity[AXIS_Y] =
+                    (groundHeight - startY >= simulation->velocity[AXIS_Y]) ?
+                    simulation->velocity[AXIS_Y] + (s32)GRAVITY :
+                    groundHeight - startY + (s32)GRAVITY;
             }
 
             if (simulation->purpose == LAUNCH_PURPOSE_STROKE &&
