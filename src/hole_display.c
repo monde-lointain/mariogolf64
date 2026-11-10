@@ -3384,7 +3384,7 @@ void HandleFrameBufferSwap(void) {
  * to the original's three andi 0xffff. Holding the last loop's strip bottom,
  * i + height, in a local of its own, as a permuter run suggested, takes the
  * draft to 137 words, 33 in shape, and the oracle to 64 words forcing 10
- * pseudos; as an s16 it gives 150 words. 137 words differ, 33 in shape.
+ * pseudos; as an s16 it gives 150 words. That left 137 words, 33 in shape.
  *
  * The register oracle lines frame up with $s3 where it is set and with $a3
  * in the last loop. A pointer of the last loop's own, set to f_CapturedFrame
@@ -3394,10 +3394,20 @@ void HandleFrameBufferSwap(void) {
  * Naming the second loop's strip offset, i * BACKDROP_STRIP_STEP, gives 156
  * words (40 in shape) used at all five places, and the strip's top,
  * offset plus the border, 160 (48).
+ *
+ * The motion blur's loop indexes a source pointer set to
+ * f_LastFrameBuffer just before it, as CaptureMenuBackdrop's capture
+ * loop does, in place of indexing f_LastFrameBuffer itself. The loop
+ * then keeps the texture address mask in $s2 as the original does, which
+ * takes the draft from 137 words (33 in shape) to 133 (31), and the
+ * register oracle's closest from 64 words to 60, forcing 10 pseudos both
+ * ways. Set at the start of the motion blur's branch, or in its
+ * declaration, 246 or 142 words differ. 133 words differ, 31 in shape.
  */
 #ifdef NON_MATCHING
 void DrawFadeAnimation(Gfx **displayListHead) {
     u32 *frame = f_CapturedFrame;
+    u16 *source;
     Gfx *gfx = *displayListHead;
     Boolean isTileSet;
     /*
@@ -3443,12 +3453,13 @@ void DrawFadeAnimation(Gfx **displayListHead) {
                 gDPPipeSync(gfx++);
                 gDPSetRenderMode(gfx++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
                 gDPSetCombineMode(gfx++, G_CC_MODULATEI_PRIM, G_CC_MODULATEI_PRIM);
+                source = f_LastFrameBuffer;
                 for (i = 0; i != BACKDROP_STRIP_COUNT; i++) {
                     s32 height = StripHeight(i);
 
                     gDPLoadTextureTile(
                         gfx++,
-                        TextureAddress(&f_LastFrameBuffer[i * BACKDROP_STRIP_STEP * SCREEN_WIDTH]),
+                        TextureAddress(&source[i * BACKDROP_STRIP_STEP * SCREEN_WIDTH]),
                         G_IM_FMT_RGBA,
                         G_IM_SIZ_16b,
                         SCREEN_WIDTH,
