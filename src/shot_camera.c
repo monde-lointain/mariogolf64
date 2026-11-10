@@ -2626,27 +2626,29 @@ void PlaceFlightCamera(s32 step) {
  * may start another one. In debug builds, the second controller's B and A
  * buttons pick FLIGHT_CAMERA_BESIDE_GOLFER and FLIGHT_CAMERA_CIRCLING_BALL.
  *
- * Doesn't match: cross-jumping sends the second switch's case 5 trouble-surface
- * branch through the identical "kind = FLIGHT_CAMERA_AROUND_END" tail of the
- * first switch's case 3, where the original branches straight to the end. The
- * other instructions are the same. The register oracle's closest result is
- * these 2 words with no register forced, so allocation isn't the cause. 2 words
- * differ.
+ * FLIGHT_PHASE_NEARING_CONTACT picks FLIGHT_CAMERA_AROUND_END in every arm of
+ * its tests, and the form of those tests is what the original's code and frame
+ * show:
  *
- * The original cross-jumps the same way: its jump table sends the mini-golf
- * pick's cases 3 and 4 to the shared store and jump. The difference is in
- * reorg. relax_delay_slots moves a branch past a redundant store at its target.
- * For the later tests, redundant_insn finds the store in the first test's delay
- * slot, but for the first test it starts scanning before the branch, which
- * leaves out its own delay slot, and stops at the case label. Breaking out of
- * the case on a trouble surface, alone or after its store, testing the
- * following-path kind in a second if, an if/else storing in each arm, a ?: of
- * the two equal kinds, and storing after the if give 2 to 35 words.
+ * - The last two arms store the same kind, so jump.c turns them into a
+ *   store-flag sequence, which combine then folds to the constant. The folded
+ *   test leaves no code, but each of its temporaries keeps a (use) insn and with
+ *   it an 8-byte stack slot: the original's frame holds 56 unused bytes, which
+ *   is the seven temporaries of two equality tests of one value joined by ||.
+ *   Which kinds the test names can't be recovered; these are the two that the
+ *   cases before it test. One comparison leaves 24 to 40 bytes.
+ * - With that arm folded to a plain store, the following-path test is an if/else
+ *   of two equal stores once reload is done. jump.c then moves the else's store
+ *   ahead of the test, where it is too late for another store-flag, and reorg
+ *   takes it for the trouble-surface test's delay slot and sends every test
+ *   straight to the end.
+ *
+ * Joining the first two tests with || gives 7 words differing. Storing the kind
+ * once before that joined test, with an array to pad the frame, differs only in
+ * the trouble-surface branch's target, which then goes through the store that
+ * the cases share.
  */
-#ifdef NON_MATCHING
 void ChooseFlightCameraKind(void) {
-    /* Pads the frame to match; without it 18 words differ, against 2 */
-    f32 unusedValues[14] UNUSED;
     s32 animation;
     s32 kind;
     s32 pick;
@@ -2825,8 +2827,7 @@ void ChooseFlightCameraKind(void) {
                 else if (f_FlightCameraKind != FLIGHT_CAMERA_TRAILING_BALL) {
                     /*
                      * The nested ifs and the separate cases are there to match: one &&
-                     * test gives 9 words differing (5 in shape), and shared cases 12
-                     * (10), against the draft's 2 (0)
+                     * test gives 18 words differing, and shared cases 10
                      */
                     if (f_FlightCameraKind != FLIGHT_CAMERA_FOLLOWING_PATH) {
                         if (f_FlightCameraKind != FLIGHT_CAMERA_SIDE_OF_FLIGHT) {
@@ -2853,8 +2854,7 @@ void ChooseFlightCameraKind(void) {
                 else if (f_FlightCameraKind == FLIGHT_CAMERA_TRAILING_BALL) {
                     /*
                      * The empty branches are there to match: one && test of the other
-                     * kinds gives 16 words differing (10 in shape) against the draft's 2
-                     * (0)
+                     * kinds gives 14 words differing
                      */
                 }
                 else if (f_FlightCameraKind == FLIGHT_CAMERA_FOLLOWING_PATH) {
@@ -2876,19 +2876,19 @@ void ChooseFlightCameraKind(void) {
 
                 break;
             case FLIGHT_PHASE_NEARING_CONTACT:
-                kind = FLIGHT_CAMERA_AROUND_END;
-
-                /*
-                 * The repeated store is there to match: dropping the test, keeping
-                 * only its call, or leaving its branch empty gives 26 words
-                 * differing (22 in shape), and storing in both arms in place of
-                 * before the test 19 (19), against 2 (none)
-                 */
-                if (IsTroubleSurface(f_EndSurfaceInfo) ||
-                    f_FlightCameraKind == FLIGHT_CAMERA_FOLLOWING_PATH) {
+                if (IsTroubleSurface(f_EndSurfaceInfo)) {
                     kind = FLIGHT_CAMERA_AROUND_END;
                 }
-
+                else if (f_FlightCameraKind == FLIGHT_CAMERA_FOLLOWING_PATH) {
+                    kind = FLIGHT_CAMERA_AROUND_END;
+                }
+                else if (f_FlightCameraKind == FLIGHT_CAMERA_SIDE_OF_FLIGHT ||
+                    f_FlightCameraKind == FLIGHT_CAMERA_TRAILING_BALL) {
+                    kind = FLIGHT_CAMERA_AROUND_END;
+                }
+                else {
+                    kind = FLIGHT_CAMERA_AROUND_END;
+                }
                 break;
             case FLIGHT_PHASE_CONTACT:
                 if (f_CameraChangeHoldCount == 0) {
@@ -2902,8 +2902,8 @@ void ChooseFlightCameraKind(void) {
             case FLIGHT_PHASE_END:
                 if (IsTroubleSurface(f_EndSurfaceInfo) || g_SimulatedShot.endsInCup) {
                     /*
-                     * The empty branch is there to match: the inverted test gives 10
-                     * words differing (8 in shape) against the draft's 2 (0)
+                     * The empty branch is there to match: the inverted test gives 8
+                     * words differing
                      */
                 }
                 else {
@@ -2963,8 +2963,7 @@ void ChooseFlightCameraKind(void) {
                 break;
             case FLIGHT_PHASE_CONTACT:
                 /*
-                 * The empty case is there to match: without it 17 words differ (9 in
-                 * shape) against the draft's 2 (0)
+                 * The empty case is there to match: without it 15 words differ
                  */
                 break;
         }
@@ -3009,9 +3008,6 @@ void ChooseFlightCameraKind(void) {
         }
     }
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/shot_camera", ChooseFlightCameraKind);
-#endif
 
 #define CUP_PASS_LOOKAHEAD_STEP_COUNT 30
 #define PATH_FLAG_LOOKAHEAD_STEP_COUNT 60
