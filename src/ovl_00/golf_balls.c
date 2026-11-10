@@ -909,16 +909,16 @@ enum BallSprite {
     )
 
 /*
- * Doesn't match: the original's reload spills the divide by 9's constant first,
- * to 0x54($sp), and the depth in pseudo 87 later, so its spill slots come in
- * another order and the display list pointers take other registers. The sprite
- * branches share one sync after the chain, which the original reaches by
- * jumping from each branch; with a sync ending each branch instead, which emits
- * the same commands, 911 words differed, 137 in shape. Before that change,
- * updating f_UnusedBallFrame ahead of the display list, rather than after
- * f_BallRollFrame, cut 1220 words differing to 834, and updating
- * f_BallRollFrame anywhere else gave 822 to 1633 words, 158 or more in shape.
- * The original aligns the Pika ball texture's address to 8 bytes, as
+ * Doesn't match: the display list pointers take other registers than the
+ * original's. Its reload spilled the divide by 9's constant to 0x54($sp) and
+ * the depth later, so its spill slots came in another order, until the last
+ * paragraph's change. The sprite branches share one sync after the chain, which
+ * the original reaches by jumping from each branch; with a sync ending each
+ * branch instead, which emits the same commands, 911 words differed, 137 in
+ * shape. Before that change, updating f_UnusedBallFrame ahead of the display
+ * list, rather than after f_BallRollFrame, cut 1220 words differing to 834, and
+ * updating f_BallRollFrame anywhere else gave 822 to 1633 words, 158 or more in
+ * shape. The original aligns the Pika ball texture's address to 8 bytes, as
  * TextureAddress does; without that, 894 words differed, 152 in shape. The
  * afterimages' loop tests i != f_BallAfterimageLength, as the original's bne
  * against the reloaded length shows; < compiles to slt and bnez. The register
@@ -1022,7 +1022,18 @@ enum BallSprite {
  * oracle's closest result from 655 words, forcing 48 pseudos, to 473,
  * forcing 47. The local as an s32 also loses the slot, but gives 586
  * words (30 in shape), as the switch then adds one to the register where
- * the original reloads the byte. 571 words differ, 19 in shape.
+ * the original reloads the byte. That left 571 words, 19 in shape.
+ *
+ * Each drawn ball's block declares primDepth, as the original's spill
+ * slots show: reload gives the pseudos it spills from the start their
+ * slots in the order of their numbers, and the original's slot for the
+ * depth comes after those of the display list temporaries made before
+ * the ball loop, where the draft, declaring it at the top, gave it the
+ * first. That takes the draft from 571 words differing to 295, 19 in
+ * shape both, with every stack slot as in the original, and the register
+ * oracle's closest result from 473 words to 197, forcing 47 pseudos
+ * either way. Declaring it at the top of the loop's body gives the same
+ * 295 words. 295 words differ, 19 in shape.
  */
 #ifdef NON_MATCHING
 void DrawGolfBalls(CameraMatrices *matrices UNUSED) {
@@ -1043,7 +1054,9 @@ void DrawGolfBalls(CameraMatrices *matrices UNUSED) {
     s32 afterimageProjectedDepth;
     s32 shadowDepth;
     s32 routePointDepth;
-    s32 primDepth;
+#    ifdef AVOID_UB
+    s32 primDepth = 0;
+#    endif
     s32 shadowPrimDepth;
     s32 size;
     s32 shade;
@@ -1051,13 +1064,6 @@ void DrawGolfBalls(CameraMatrices *matrices UNUSED) {
     s32 halfHeight;
     u32 afterimageDepth;
 
-    /*
-     * A shadow stays behind the last ball drawn, which the original leaves
-     * unset until a ball is drawn
-     */
-#    ifdef AVOID_UB
-    primDepth = 0;
-#    endif
     if (!IsTurnTakingStep(g_GameState.step)) {
         return;
     }
@@ -1184,6 +1190,14 @@ void DrawGolfBalls(CameraMatrices *matrices UNUSED) {
     for (i = 0; i < GOLF_BALL_COUNT; i++) {
         ball = &f_GolfBalls[i];
         if (ball->alpha > 0) {
+            /*
+             * A shadow stays behind the last ball drawn, which the original
+             * leaves unset until a ball is drawn, and declares here
+             */
+#    ifndef AVOID_UB
+            s32 primDepth;
+#    endif
+
             surface = ball->surface;
             groundHeight = GetGroundHeight(
                 ball->position[AXIS_X] * WORLD_TO_COURSE_SCALE,
