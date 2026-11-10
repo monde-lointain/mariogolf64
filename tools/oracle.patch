@@ -819,6 +819,110 @@
    /* Write DBX symbols if requested */
  
    /* Note that for those inline functions where we don't initially
+--- a/cse.c
++++ b/cse.c
+@@ -2618,6 +2618,52 @@
+    than hard registers here because we would also prefer the pseudo registers.
+   */
+ 
++/* The oracle's decisions (see oracle_next_decision in reload1.c).  */
++
++extern FILE *oracle_open_trace ();
++extern void oracle_end_record ();
++extern void oracle_put_item ();
++extern int oracle_next_decision ();
++extern int oracle_flips_decision ();
++
++/* Nonzero in the cse pass after loop, cse2 */
++static int oracle_after_loop;
++
++/* Number cse's putting a cheaper equivalent at LOC in INSN, a set's
++   source or, if IS_ADDRESS, an address, as a decision.  Where the oracle
++   flips it, put ORIGINAL back and return nonzero, for cse to go on to the
++   next cheapest as if the change were invalid.  The trace records the
++   insn and what was substituted, by "source" or "address".  */
++
++static int
++oracle_refuses_substitution (insn, loc, original, is_address)
++     rtx insn;
++     rtx *loc;
++     rtx original;
++     int is_address;
++{
++  int index = oracle_next_decision ();
++  FILE *file;
++
++  if (index < 0)
++    return 0;
++  if ((file = oracle_open_trace ()) != 0)
++    {
++      oracle_put_item (file, "{\"stage\": \"decision\", \"index\": ", index);
++      fputs (oracle_after_loop
++	     ? ", \"site\": \"cse2\"" : ", \"site\": \"cse\"", file);
++      oracle_put_item (file, ", \"insns\": [", INSN_UID (insn));
++      fputs (is_address
++	     ? "], \"gap\": 0, \"by\": \"address\"}\n"
++	     : "], \"gap\": 0, \"by\": \"source\"}\n", file);
++      oracle_end_record (file);
++    }
++  if (! oracle_flips_decision (index))
++    return 0;
++  validate_change (insn, loc, original, 0);
++  return 1;
++}
++
+ static void
+ find_best_addr (insn, loc)
+      rtx insn;
+@@ -2730,10 +2776,10 @@
+ 	    {
+ 	      if (validate_change (insn, loc,
+ 				   canon_reg (copy_rtx (best_elt->exp),
+-					      NULL_RTX), 0))
++					      NULL_RTX), 0)
++		  && ! oracle_refuses_substitution (insn, loc, addr, 1))
+ 		return;
+-	      else
+-		best_elt->flag = 1;
++	      best_elt->flag = 1;
+ 	    }
+ 	}
+     }
+@@ -2812,10 +2858,10 @@
+ 	    {
+ 	      if (validate_change (insn, loc,
+ 				   canon_reg (copy_rtx (best_rtx),
+-					      NULL_RTX), 0))
++					      NULL_RTX), 0)
++		  && ! oracle_refuses_substitution (insn, loc, addr, 1))
+ 		return;
+-	      else
+-		best_elt->flag = 1;
++	      best_elt->flag = 1;
+ 	    }
+ 	}
+     }
+@@ -6835,7 +6881,11 @@
+ 	    }
+ 	   
+ 	  /* Look for a substitution that makes a valid insn.  */
+-          else if (validate_change (insn, &SET_SRC (sets[i].rtl), trial, 0))
++          else if (validate_change (insn, &SET_SRC (sets[i].rtl), trial, 0)
++		   && (trial == src
++		       || ! oracle_refuses_substitution (insn,
++							 &SET_SRC (sets[i].rtl),
++							 src, 0)))
+ 	    {
+ 	      /* The result of apply_change_group can be ignored; see
+ 		 canon_reg.  */
+@@ -8231,6 +8281,7 @@
+   recorded_label_ref = 0;
+   constant_pool_entries_cost = 0;
+   val.path_size = 0;
++  oracle_after_loop = after_loop;
+ 
+   init_recog ();
+ 
 --- a/sched.c
 +++ b/sched.c
 @@ -2428,6 +2428,83 @@

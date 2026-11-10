@@ -130,7 +130,7 @@ GLOBAL_BEAM = 24
 # The closest flips that --decisions prints in each round
 DECISION_REPORT_COUNT = 10
 # The dumps whose insns the scheduler's decisions name, by their site
-DECISION_DUMPS = {"sched": "sched", "sched2": "sched2"}
+DECISION_DUMPS = {"cse": "cse", "cse2": "cse2", "sched": "sched", "sched2": "sched2"}
 # The children cc1's fork mode runs at once (see ORACLE_FORK_DIR in
 # oracle.patch), and then the processes that score their assembly.
 # Scoring them as they finish, in fewer processes beside fewer children,
@@ -238,10 +238,12 @@ class GlobalStartRecord(TypedDict):
 class DecisionRecord(TypedDict):
     """A choice a pass made, which ORACLE_FLIP can take the other way.
 
-    site is the pass; insns the UIDs of the insn chosen and of the one
-    that flipping it would take; gap how far apart their priorities were;
-    and by what chose between them: "launch" is a priority raised to
-    launch an insn whose register is born, whose gap is no distance.
+    site is the pass. For the scheduler's, insns are the UIDs of the insn
+    chosen and of the one that flipping it would take; gap how far apart
+    their priorities were; and by what chose between them: "launch" is a
+    priority raised to launch an insn whose register is born, whose gap is
+    no distance. For cse's, insns is the insn cse changed, by putting a
+    cheaper equivalent in its "source" or an "address", and gap is 0.
     """
 
     stage: Literal["decision"]
@@ -1398,11 +1400,14 @@ def describe_decision(
 ) -> str:
     """Return DECISION's pass, its insns with their lines, and what chose."""
     site_lines = lines.get(decision["site"], {})
-    chosen, other = (f"{uid}@{site_lines.get(uid, '?')}" for uid in decision["insns"])
+    places = [f"{uid}@{site_lines.get(uid, '?')}" for uid in decision["insns"]]
     by = decision["by"]
+    heading = f"#{decision['index']} {decision['site']}"
+    if len(places) == 1:
+        return f"{heading}: refuse the {by} cse puts in {places[0]}"
     if by == "priority":
         by = f"priority by {decision['gap']}"
-    return f"#{decision['index']} {decision['site']}: {other} before {chosen} ({by})"
+    return f"{heading}: {places[1]} before {places[0]} ({by})"
 
 
 def scan_decisions(target: fncompare.Routine, draft: Draft) -> None:
