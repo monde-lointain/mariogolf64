@@ -496,10 +496,29 @@ static UNUSED_FUNCTION void ResetOpeningBallSimulations(void) {
  * 200 (96).
  *
  * The curve multiplies the side spin by CURVE_PER_SIDE_SPIN and then by the
- * weight, as StepBallSimulation's now does, which takes the draft from 185
+ * weight, as StepBallSimulation's now does, which took the draft from 185
  * words to 183, 83 in shape either way, and the register oracle's closest
- * from 100 words, forcing 35 pseudos, to 96, forcing 33. 183 words differ,
- * 83 in shape.
+ * from 100 words, forcing 35 pseudos, to 96, forcing 33.
+ *
+ * The original works out the cup pull's depth in atan2's delay slot and
+ * one less the alignment in a later branch's, as StepBallSimulation's
+ * order of depth, angle, alignment and clamp does. Written in that
+ * order, with the pull scaled by the alignment, those two match, but
+ * CUP_PULL_OUTER_RADIUS, which the range test loads, is then not worth
+ * hoisting from the substep loop, so it takes the 0.5f's $f30, and the
+ * draft goes to 426 words (114 in shape); the register oracle forces
+ * nothing. Forcing the constant onto the stack and the 0.5f into $f30
+ * leaves 97 words, forcing 46 pseudos, against the draft's 96 forcing
+ * 33. Turning only the alignment around gives 192 words (76 in shape),
+ * and working out the depth before the angle 411 (121).
+ *
+ * After FindHoleTriangleHit and the putter's FindMiniGolfGroundHit, the
+ * original copies the result from $v0 into $a0 before testing it, and it
+ * copies IntLength2D's result into $v1 before the stop speed test; ours
+ * tests $v0. Forcing the two hit flags into $a0 gives 170 words, but no
+ * declaration, type, scope, ?: or assignment in the condition does, nor
+ * one flag for both hits, nor an s32 or u32 speed local. 183 words
+ * differ, 83 in shape.
  */
 #ifdef NON_MATCHING
 s32 StepOpeningBallSimulation(BallSimulation *simulation) {
