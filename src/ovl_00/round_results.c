@@ -443,120 +443,93 @@ void OpenRoundResults(s32 request) {
     f_ResultsState = RESULTS_SLIDING_IN;
 }
 
-#ifdef NON_MATCHING
 /*
  * Adds to the save the average points of the players that have them,
  * scaled by the course's rate, counting them with index. A macro, since the
  * original repeats it for each mode.
  */
-#    define AddRoundPoints(save, index) \
-        { \
-            s32 counted_; \
-            s32 total_; \
+#define AddRoundPoints(save, index) \
+    { \
+        s32 counted_; \
+        s32 total_; \
 \
-            f_OpenCourseCount = CountOpenCourses((save)->coursePoints); \
-            if (f_OpenCourseCount < COURSE_COUNT) { \
-                counted_ = 0; \
-                f_PointsToNextCourse = \
-                    GetCoursePointsNeeded(f_OpenCourseCount) - (save)->coursePoints; \
-                f_CoursePointsTally.earned = 0; \
-                for ((index) = 0; (index) != g_GameState.playerCount; (index)++) { \
-                    if (f_PlayerPoints[(index)] >= 0) { \
-                        counted_++; \
-                        f_CoursePointsTally.earned += f_PlayerPoints[(index)]; \
-                    } \
+        f_OpenCourseCount = CountOpenCourses((save)->coursePoints); \
+        if (f_OpenCourseCount < COURSE_COUNT) { \
+            counted_ = 0; \
+            f_PointsToNextCourse = \
+                GetCoursePointsNeeded(f_OpenCourseCount) - (save)->coursePoints; \
+            f_CoursePointsTally.earned = 0; \
+            for ((index) = 0; (index) != g_GameState.playerCount; (index)++) { \
+                if (f_PlayerPoints[(index)] >= 0) { \
+                    counted_++; \
+                    f_CoursePointsTally.earned += f_PlayerPoints[(index)]; \
                 } \
-                if (counted_ == 0) { \
-                    counted_ = 1; \
-                } \
-                f_CoursePointsTally.earned = f_CoursePointsTally.earned * \
-                    f_CoursePointRates[GetCourseRecordIndex(g_GameState.courseIndex)] / counted_; \
-                f_CoursePointsTally.shown = f_CoursePointsTally.earned; \
-                f_PointsToNextCourse -= f_CoursePointsTally.earned; \
             } \
-            total_ = (save)->coursePoints + f_CoursePointsTally.earned; \
-            if (total_ > MAX_COURSE_POINTS) { \
-                (save)->coursePoints = MAX_COURSE_POINTS; \
+            if (counted_ == 0) { \
+                counted_ = 1; \
             } \
-            else { \
-                (save)->coursePoints = total_; \
-            } \
-        }
+            f_CoursePointsTally.earned = f_CoursePointsTally.earned * \
+                f_CoursePointRates[GetCourseRecordIndex(g_GameState.courseIndex)] / counted_; \
+            f_CoursePointsTally.shown = f_CoursePointsTally.earned; \
+            f_PointsToNextCourse -= f_CoursePointsTally.earned; \
+        } \
+        total_ = (save)->coursePoints + f_CoursePointsTally.earned; \
+        if (total_ > MAX_COURSE_POINTS) { \
+            (save)->coursePoints = MAX_COURSE_POINTS; \
+        } \
+        else { \
+            (save)->coursePoints = total_; \
+        } \
+    }
 
 /*
- * Doesn't match: in the club tournament's results loop the original keeps k
- * in $s2 and the stepped result's address in $s1, where ours swaps them; the
- * register oracle matches with those 2 forced, so what remains is
- * allocation. The club tournament's results loop counts with k and the Game
- * Boy experience loop with i: counting the results with i, with j or with a
- * counter of their own gives 279, 191 or 175 words differing, 7 in shape,
- * and the experience loop with k 70, none in shape, when the oracle needed 3
- * forced. The tally counts with k, which the original keeps in $s2 there too
- * though the loop crosses no call; with a counter of its own the function
- * gives 90 words, none in shape, and with i or j 158 or 128. 54 words
- * differ, none in shape.
+ * Loads the results screen's images and each player's portrait, works out the
+ * players' results and ranks for the game mode, adds the round's course points
+ * to the save and starts the results' song. It does nothing if the results are
+ * already loaded.
+ *
+ * The club tournament's results loop sits in a block of its own, as a macro's
+ * do-while would make it, to match. The original keeps k in $s2 and the loop's
+ * stepped result address in $s1. flow weights a reference by its loop depth,
+ * and a loop that runs once still counts, so the block lifts the address's 7
+ * references to 11 over a live length of 12, priority 27500 in global-alloc,
+ * where k has 59 over 121, priority 24380: the address takes $s1 first.
+ * Without the block, or with plain braces, the address's priority is 11666 and
+ * k's 22314, so k takes $s1 and 54 words differ, none in shape. A block inside
+ * the loop, around its statement, gives the same 54. In the block, counting
+ * the results with i, with j or with a counter of their own gives 159, 191 or
+ * 175 words, 7 in shape. With the stroke results' loop in a block as well, the
+ * function still matches.
+ *
+ * k also counts the tally, the tournament's standings and the skins' totals
+ * and ranks. None of the other choices of counter differs in shape: counting
+ * the Game Boy experience loop or the stroke results with k gives 70 words;
+ * the bet loop, the portrait loop or both with k 62, 60 or 68; the tally with
+ * a counter of its own 90, all three tallies with i or j 158 or 128, and any
+ * one of them 110 or 58; the tournament's standings or the skins' totals with
+ * i 110, and the skins' ranks 112.
  *
  * The match game reads the last hole into holeEnd before clearing the results,
  * as the matched scorecard_drawing.c reads its countEnd, and the original loads
  * it in GetFirstHoleIndex's delay slot; testing g_GameState.holeIndex in the
- * loop gave 107 words (3 in shape), with the oracle's closest 5 words with 17
- * forced. Its clear is written as f_PlayerResults[0] = f_PlayerResults[1] = 0,
- * which stores the second result first, as the original does; two statements in
- * that order give 100 words (8 in shape). The tournament's cap adds the prize
- * before the earned points, as the subtraction before it does, where the other
- * order gave 115 words (5 in shape) with the bound tested in the loop.
+ * loop gives 17 words (3 in shape). Its clear is written as
+ * f_PlayerResults[0] = f_PlayerResults[1] = 0, which stores the second result
+ * first, as the original does; two statements in that order give 10 words (8
+ * in shape), and in the other order 6 (6). The tournament's cap adds the prize
+ * before the earned points, as the subtraction before it does; the other
+ * order in its test gives 8 words (2 in shape), and in its sum as well 10 (2).
  *
  * The original keeps the earned points' address in $a1 across the tally and
  * builds it again in $a0 after GetCourseRecordIndex, the address forms GCC
- * gives a struct's fields; as two separate s32s they were addressed through $at
- * each time (156 words, 28 in shape, the oracle's closest 82 with 14 forced).
- * The pointers to the earned points that UpdateTournamentResults,
- * UpdateCoursePointsResults and UpdateMatchResults kept are gone; the first and
- * last still match, and the other still differs by 5 words.
+ * gives a struct's fields; as two separate s32s they are addressed through $at
+ * each time, and 93 words differ, 25 in shape.
  *
  * The tournament's open course count is stored first, as the original does, and
- * the ranks are counted in f_PlayerRanks itself, which a permuter run pointed
- * to. The tournament finds the player's standing through a pointer to the
- * standing it tests, as another permuter run suggested. AddRoundPoints passes
- * g_GameState.courseIndex to GetCourseRecordIndex, which ignores it, as the
- * original loads it into $a0 before both calls; play.c passes the same field
- * where it opens the scorecard.
- *
- * Measured before the struct, against 156 words or more: indexing
- * g_TournamentStandings in both reads gave 177 words differing, 39 in shape;
- * reading the earned points through a pointer in AddRoundPoints 228 (62);
- * summing the points in a local 247; storing the open course count last 211;
- * counting the ranks through a pointer to the rank 207 (45); and passing the
- * tournament's course points to CountOpenCourses through a pointer to the field
- * 162 (30).
- *
- * In global-alloc, k has 54 references over a live length of 121,
- * priority 22314, and the stepped address 7 over 12, priority 11666, so k
- * takes $s1 first. The address would win with k at 31 references or
- * fewer, or live past 231. Giving AddRoundPoints an index of its own
- * drops k to 33 references, but over 67, priority 24626, and gives 90
- * words, none in shape, and the oracle then wants the macro's index in
- * $s2, which k's sharing it explains. Counting the bet loop, the portrait
- * loop or both with k gives 62, 60 or 68 words, none in shape.
- *
- * Counting any of the three AddRoundPoints with i instead of k gives 158
- * words, none in shape, and the oracle then needs 7 forced: i's priority
- * passes pseudo 78's, so i takes $s1 instead. Counting any of them with j
- * gives 104 to 218 words, and the oracle comes no closer than 11 with 9
- * forced. Counting the tournament's standings, the skins totals or the
- * skins ranks with i gives the same 158 words and 7 forced; counting the
- * club tournament's results with i or j gives 279 or 191 words, the oracle
- * needing 17 or 26 forced.
- *
- * No split of the loops between i and k matches. The target holds both in
- * $s2, so both must fall below the stepped addresses' priority of 11666 for
- * the addresses to take $s1 first. Each loop adds its own references and
- * life to its counter's, about 112 references over 303 instructions in all,
- * and at that density only a counter of fewer than 16 references could
- * fall below, leaving the other more than 96, which would need over 500
- * instructions. The portrait, club and stroke results loops on k alone bring
- * it to 10101, but i then takes the other 87 references over 204, priority
- * 25588, and $s0: 135 words, 7 in shape.
+ * the ranks are counted in f_PlayerRanks itself. The tournament finds the
+ * player's standing through a pointer to the standing it tests. AddRoundPoints
+ * passes g_GameState.courseIndex to GetCourseRecordIndex, which ignores it, as
+ * the original loads it into $a0 before both calls; play.c passes the same
+ * field where it opens the scorecard.
  */
 void LoadRoundResults(void) {
     EncodedAsset asset;
@@ -693,9 +666,10 @@ void LoadRoundResults(void) {
     }
 
     if (g_GameState.isClubTournament) {
-        for (k = 0; k != g_GameState.playerCount; k++) {
+        /* In a block of its own to match, as the header comment explains */
+        IN_OWN_BLOCK(for (k = 0; k != g_GameState.playerCount; k++) {
             f_PlayerResults[k] = GetNetScoreToPar(GetFirstHoleIndex() + GetRoundHoleCount(), k);
-        }
+        });
     }
     else {
         switch (g_GameState.gameMode) {
@@ -874,10 +848,6 @@ void LoadRoundResults(void) {
             break;
     }
 }
-
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", LoadRoundResults);
-#endif
 
 /*
  * Loads the notice of what the round unlocked: one of the characters for
