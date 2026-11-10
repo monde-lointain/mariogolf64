@@ -36,7 +36,7 @@ compiled draft beside the original assembly.
 import atexit
 import bisect
 import collections
-import difflib
+import ctypes
 import functools
 import itertools
 import os
@@ -47,7 +47,7 @@ import subprocess
 import sys
 import tempfile
 import threading
-from collections.abc import Callable, Iterator, Sequence
+from collections.abc import Callable, Hashable, Iterator, Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import cast
@@ -1278,12 +1278,110 @@ def read_object_functions(obj: ObjectFile) -> Functions:
     return functions
 
 
+# match_blocks.c, which finds difflib's matching blocks, and where it's built
+MATCH_BLOCKS_SOURCE = ROOT / "tools" / "match_blocks.c"
+MATCH_BLOCKS_LIBRARY = ROOT / "build" / "tools" / "match_blocks.so"
+INT32_POINTER = ctypes.POINTER(ctypes.c_int32)
+# (start in the first sequence, start in the second, length) of a run of
+# equal entries
+Block = tuple[int, int, int]
+# A difflib opcode: its tag and the two sequences' ranges it covers
+Opcode = tuple[str, int, int, int, int]
+
+
+@functools.cache
+def load_match_blocks() -> Callable[..., int]:
+    """Return match_blocks.c's function, building it first when it's stale.
+
+    It's built under another name and renamed, so that runs in parallel
+    never load half a library.
+    """
+    library = MATCH_BLOCKS_LIBRARY
+    if (
+        not library.exists()
+        or library.stat().st_mtime < MATCH_BLOCKS_SOURCE.stat().st_mtime
+    ):
+        library.parent.mkdir(parents=True, exist_ok=True)
+        building = library.with_name(f"{library.name}.{os.getpid()}")
+        _ = subprocess.run(
+            [
+                "cc",
+                "-O2",
+                "-shared",
+                "-fPIC",
+                "-o",
+                str(building),
+                str(MATCH_BLOCKS_SOURCE),
+            ],
+            check=True,
+        )
+        _ = building.replace(library)
+    function = ctypes.CDLL(str(library)).match_blocks
+    function.restype = ctypes.c_int32
+    function.argtypes = [
+        INT32_POINTER,
+        ctypes.c_int32,
+        INT32_POINTER,
+        ctypes.c_int32,
+        ctypes.c_int32,
+        INT32_POINTER,
+    ]
+    return function
+
+
+def find_matching_blocks(a: Sequence[Hashable], b: Sequence[Hashable]) -> list[Block]:
+    """Return A's and B's matching blocks, as difflib.SequenceMatcher's.
+
+    These are the blocks of difflib.SequenceMatcher(None, a, b,
+    autojunk=False).get_matching_blocks(), which match_blocks.c finds by
+    difflib's search, in compiled code: difflib's own took most of a score.
+    """
+    codes: dict[Hashable, int] = {}
+    a_codes = [codes.setdefault(entry, len(codes)) for entry in a]
+    b_codes = [codes.setdefault(entry, len(codes)) for entry in b]
+    capacity = min(len(a), len(b)) + 1
+    blocks = (ctypes.c_int32 * (3 * capacity))()
+    count = load_match_blocks()(
+        (ctypes.c_int32 * len(a))(*a_codes),
+        len(a),
+        (ctypes.c_int32 * len(b))(*b_codes),
+        len(b),
+        len(codes),
+        blocks,
+    )
+    if count < 0:
+        sys.exit("match_blocks: out of memory")
+    found = [
+        (blocks[start], blocks[start + 1], blocks[start + 2])
+        for start in range(0, 3 * count, 3)
+    ]
+    found.append((len(a), len(b), 0))
+    return found
+
+
+def find_opcodes(a: Sequence[Hashable], b: Sequence[Hashable]) -> list[Opcode]:
+    """Return the opcodes that turn A into B, as difflib.SequenceMatcher's."""
+    opcodes: list[Opcode] = []
+    a_index = b_index = 0
+    for a_start, b_start, size in find_matching_blocks(a, b):
+        if a_index < a_start and b_index < b_start:
+            opcodes.append(("replace", a_index, a_start, b_index, b_start))
+        elif a_index < a_start:
+            opcodes.append(("delete", a_index, a_start, b_index, b_start))
+        elif b_index < b_start:
+            opcodes.append(("insert", a_index, a_start, b_index, b_start))
+        a_index, b_index = a_start + size, b_start + size
+        if size:
+            opcodes.append(("equal", a_start, a_index, b_start, b_index))
+    return opcodes
+
+
 # A row of two routines' instructions, as pair_rows pairs them: the index of
 # each side's instruction, or None where the other side's has no pair
 Row = tuple[int | None, int | None]
 
 
-def pair_rows(opcodes: Sequence[tuple[str, int, int, int, int]]) -> list[Row]:
+def pair_rows(opcodes: Sequence[Opcode]) -> list[Row]:
     """Return the rows of a matcher's OPCODES, pairing changed runs in order."""
     rows: list[Row] = []
     for _, start1, end1, start2, end2 in opcodes:
@@ -1344,10 +1442,8 @@ class Pairing:
 
 def pair_words(target: Routine, compiled: Routine) -> Pairing:
     """Pair two routines' instructions by their masked words."""
-    matcher = difflib.SequenceMatcher(
-        None, target.words, compiled.words, autojunk=False
-    )
-    return Pairing(target, compiled, pair_rows(matcher.get_opcodes()))
+    opcodes = find_opcodes(target.words, compiled.words)
+    return Pairing(target, compiled, pair_rows(opcodes))
 
 
 def count_differences(target: Routine, compiled: Routine) -> int:
@@ -1383,10 +1479,8 @@ def count_operation_differences(
     aligning these is the slowest part of a score, since a routine uses few
     kinds of operation, so each count is kept.
     """
-    matcher = difflib.SequenceMatcher(
-        None, target_operations, compiled_operations, autojunk=False
-    )
-    shared = sum(block.size for block in matcher.get_matching_blocks())
+    blocks = find_matching_blocks(target_operations, compiled_operations)
+    shared = sum(size for _, _, size in blocks)
     return len(target_operations) + len(compiled_operations) - 2 * shared
 
 
@@ -1554,10 +1648,8 @@ def print_diff(
 
 def print_shape_diff(target: Routine, compiled: Routine) -> None:
     """Print the instructions that have no pair by operation."""
-    matcher = difflib.SequenceMatcher(
-        None, read_operations(target), read_operations(compiled), autojunk=False
-    )
-    for tag, first, last, compiled_first, compiled_last in matcher.get_opcodes():
+    opcodes = find_opcodes(read_operations(target), read_operations(compiled))
+    for tag, first, last, compiled_first, compiled_last in opcodes:
         if tag == "equal":
             continue
         for index in range(first, last):
