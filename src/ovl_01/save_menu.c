@@ -677,47 +677,43 @@ void UpdateRingShotRecords(void) {
 #define REPLAY_GLOW_DIVISOR 4
 
 /*
- * Doesn't match: the original gives several values other saved
- * registers, and keeps memory on the stack. With the empty slot's dashes
- * counted with itemIndex, the register oracle comes within 8 words with
- * 2 pseudos forced: the face loop's itemIndex and listIndex, each in the
- * other's register. Other orders of their declarations, setting
- * listIndex before row or in the loop's header, change nothing; counting
- * the dashes with column, drop, row or a counter of their own gives 26
- * to 62 words, all in registers. That left 16 words, none in shape.
+ * Each face's drawing sits in a block of its own, as a macro's do-while would
+ * make it, to match. flow weights a reference by its loop depth, and a loop
+ * that runs once still counts, so the references in the block weigh 4 where
+ * they weighed 3. The face's vertical offset, itemIndex times the spacing, has
+ * all of its references there and listIndex only its lookup and its step,
+ * which lifts the offset's priority in global-alloc to 14400 and listIndex's
+ * to 14285, from 10800 and 12571. So the offset is placed first and takes
+ * $s2, as in the original, and listIndex takes $s3. Without the block, or
+ * with plain braces, 26 words differ, none in shape.
+ *
+ * A block around the whole face loop gives 58 words (8 in shape), one that
+ * ends before listIndex's step 3 (1), and one around the two draws alone 35
+ * (1). A block from the face's draw to listIndex's step matches too; from the
+ * cross's test to the step, or around the lookup and the draw mode alone, 26
+ * differ (none). The declarations of itemIndex and listIndex in the other
+ * order, and listIndex set before row or in the loop's header, match as well.
  *
  * The row icon's draws are counted with index, which also counts the strips
  * and the replay slots and holds each face's draw mode; counting them with
- * column, the hole columns' counter, gives 26 words differing, and with a
- * counter of their own 62. Giving index's other uses variables of their own
- * costs words too: a strip counter gives 92, a face mode 248 (38 in shape)
- * and a slot index 66.
- *
- * The register oracle's split search finds itemIndex in different registers
- * in the face loop and the empty dashes' loop, but a counter of its own for
- * either gives 36 words differing.
+ * column, the hole columns' counter, gives 44 words differing, and with a
+ * counter of their own 46, none in shape. Giving index's other uses variables
+ * of their own costs words too: a strip counter gives 108, a face mode 232
+ * (38 in shape) and a slot index 50.
  *
  * Stepping listIndex in the face's lookup, as
- * f_RingShotCharacterOrder[listIndex++], gives 20 words, 4 in shape;
+ * f_RingShotCharacterOrder[listIndex++], gives 11 words, 5 in shape;
  * indexing the order from listIndex plus itemIndex, with listIndex fixed,
- * gives 115 (15), and from the row's first character plus itemIndex, with
- * no listIndex, 53 (27).
+ * gives 148 (16), and from the row's first character plus itemIndex 96 (26).
  *
  * The empty slot's dashes are counted with listIndex, which the original
- * keeps in one register with the face loop's, as the split search
- * suggested. That gives 26 words differing, none in shape, but the
- * register oracle then matches with 3 pseudos forced: global-alloc
- * places listIndex before the face's vertical offset, itemIndex times
- * the spacing, as listIndex's 22 references, weighted by loop depth,
- * give it the higher priority; with 16 to 18 it would come second, as in
- * the original. Counting the dashes with replayCourse or replayHole
- * gives 42 and 48 words; an s8 listIndex gives 18 words, 2 in shape, but
- * extends it as a byte at each use, where the original extends a
- * halfword; and setting listIndex before the slot's test gives 31 (3). A
- * permuter run on this draft found nothing closer in 818,000 candidates.
- * 26 words differ, none in shape.
+ * keeps in one register with the face loop's. Counting them with drop or a
+ * counter of their own gives 36 words differing, with itemIndex or
+ * replayCourse 42, with row or replayHole 48 and with column 68, none in
+ * shape. An s8 listIndex gives 44 words, 2 in shape, and extends it as a byte
+ * at each use, where the original extends a halfword; setting listIndex
+ * before the slot's test gives 5 (3).
  */
-#ifdef NON_MATCHING
 void DrawRingShotRecords(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     /* Counts the strips and a row icon's draws, holds each face's draw mode and
@@ -827,36 +823,39 @@ void DrawRingShotRecords(Gfx **displayListHead) {
                 /*
                  * The icon loop in a block of its own, as a macro's do-while would
                  * make it, to match: without it, or with plain braces, three saved
-                 * values take each other's registers; 32 words differ, against 16
+                 * values take each other's registers and 16 words differ
                  */
-                IN_OWN_BLOCK(for (index = 0; index != RING_SHOT_ICON_DRAW_COUNT; index++) {
-                    if (row == 0) {
-                        DrawRingShotRowIcon(
-                            &gfx,
-                            0,
-                            RING_SHOT_FIRST_ICON_X,
-                            RING_SHOT_ICON_TOP + drop
-                        );
-                    }
-                    else if (row == RING_SHOT_REPLAY_ROW) {
-                        DrawRingShotRowIcon(
-                            &gfx,
-                            RING_SHOT_REPLAY_ROW,
-                            RING_SHOT_REPLAY_ICON_X,
-                            RING_SHOT_ICON_TOP + drop
-                        );
-                    }
-                    else {
-                        DrawRingShotRowIcon(
-                            &gfx,
-                            row,
-                            (row * RING_SHOT_ICON_SPACING) + RING_SHOT_ICON_OFFSET_X,
-                            RING_SHOT_ICON_TOP + drop
-                        );
-                    }
+                do {
+                    for (index = 0; index != RING_SHOT_ICON_DRAW_COUNT; index++) {
+                        if (row == 0) {
+                            DrawRingShotRowIcon(
+                                &gfx,
+                                0,
+                                RING_SHOT_FIRST_ICON_X,
+                                RING_SHOT_ICON_TOP + drop
+                            );
+                        }
+                        else if (row == RING_SHOT_REPLAY_ROW) {
+                            DrawRingShotRowIcon(
+                                &gfx,
+                                RING_SHOT_REPLAY_ROW,
+                                RING_SHOT_REPLAY_ICON_X,
+                                RING_SHOT_ICON_TOP + drop
+                            );
+                        }
+                        else {
+                            DrawRingShotRowIcon(
+                                &gfx,
+                                row,
+                                (row * RING_SHOT_ICON_SPACING) + RING_SHOT_ICON_OFFSET_X,
+                                RING_SHOT_ICON_TOP + drop
+                            );
+                        }
 
-                    gDPPipeSync(gfx++);
-                });
+                        gDPPipeSync(gfx++);
+                    }
+                }
+                while (0);
             }
         }
 
@@ -910,31 +909,35 @@ void DrawRingShotRecords(Gfx **displayListHead) {
             row = memory->ringShotRow;
             listIndex = memory->ringShotFirstCharacters[row];
             for (itemIndex = 0; itemIndex != RING_SHOT_SHOWN_CHARACTER_COUNT; itemIndex++) {
-                character = f_RingShotCharacterOrder[listIndex];
-                index = FACE_PLAIN;
-                if (save->ringShotClearCounts[row][column][character] == 0) {
-                    index = FACE_DARKENED;
-                }
+                /* In a block of its own to match, as the header comment explains */
+                do {
+                    character = f_RingShotCharacterOrder[listIndex];
+                    index = FACE_PLAIN;
+                    if (save->ringShotClearCounts[row][column][character] == 0) {
+                        index = FACE_DARKENED;
+                    }
 
-                DrawCharacterFace(
-                    &gfx,
-                    g_CharacterFaceImages[character],
-                    g_MenuCharacterPalettes[character],
-                    RING_SHOT_FACE_X + (column * RING_SHOT_COLUMN_SPACING),
-                    RING_SHOT_FACE_Y + (itemIndex * RING_SHOT_FACE_SPACING),
-                    character,
-                    index
-                );
-                if (index == FACE_DARKENED) {
-                    DrawMenuSign(
+                    DrawCharacterFace(
                         &gfx,
-                        RING_SHOT_CROSS_X + (column * RING_SHOT_COLUMN_SPACING),
-                        RING_SHOT_CROSS_Y + (itemIndex * RING_SHOT_FACE_SPACING),
-                        MENU_SIGN_TIMES
+                        g_CharacterFaceImages[character],
+                        g_MenuCharacterPalettes[character],
+                        RING_SHOT_FACE_X + (column * RING_SHOT_COLUMN_SPACING),
+                        RING_SHOT_FACE_Y + (itemIndex * RING_SHOT_FACE_SPACING),
+                        character,
+                        index
                     );
-                }
+                    if (index == FACE_DARKENED) {
+                        DrawMenuSign(
+                            &gfx,
+                            RING_SHOT_CROSS_X + (column * RING_SHOT_COLUMN_SPACING),
+                            RING_SHOT_CROSS_Y + (itemIndex * RING_SHOT_FACE_SPACING),
+                            MENU_SIGN_TIMES
+                        );
+                    }
 
-                listIndex++;
+                    listIndex++;
+                }
+                while (0);
             }
         }
 
@@ -1089,9 +1092,11 @@ void DrawRingShotRecords(Gfx **displayListHead) {
     gDPPipeSync(gfx++);
     *displayListHead = gfx;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/save_menu", DrawRingShotRecords);
-#endif
+
+/* The original has 8 zero bytes in its rodata that nothing in the ROM
+ * references, between DrawRingShotRecords's constants and LoadSaveGameBuffer's
+ * jump table. The table is aligned to 8 bytes, so they may have held less */
+static const char f_UnreferencedRodata[8] = {0};
 
 s32 IsRingShotRecorded(RingShotRecord *record);
 
