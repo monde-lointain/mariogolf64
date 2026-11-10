@@ -3797,29 +3797,8 @@ void SetMenuBackdrop(s32 backdrop) {
 }
 
 /*
- * Starts the plain menu backdrop by capturing the last frame for it.
- *
- * Doesn't match: GCC loads f_LastFrameBuffer and f_CapturedFrame in the other
- * order before the strip loop, and places the loop's stores differently. An
- * earlier permuter run reported 2 words from copying f_LastFrameBuffer into a
- * second local before source, but on the current draft that copy gives 45 words
- * when made where source is set, and 146 (50 in shape) when made in its
- * declaration or before the first sync. Setting source at the start of the
- * capture branch, after either of its stores or between the syncs changes
- * nothing; setting it in its declaration gives 125 (45), and indexing
- * f_LastFrameBuffer by strip in place of the walk 195 (41). The permuter's best
- * kept output, 7 words, loads every strip from the first strip's address
- * truncated to a char. The register oracle's closest result is these 45 words
- * with no register forced, so allocation isn't the cause. 45 words differ, 11
- * in shape.
- *
- * A later focused permuter run's best, 535 points from 1005, holds the
- * strip's texture address in a char copy. Naming that address in a
- * tileTexels local, as u32, s32 or a pointer, set in its declaration or
- * after the strip's height, gives the draft's 45 words (11 in shape) in all
- * six forms.
+ * Starts the plain menu backdrop by capturing the last frame for it
  */
-#ifdef NON_MATCHING
 void CaptureMenuBackdrop(Gfx **displayListHead, s32 unused UNUSED) {
     Gfx *gfx = *displayListHead;
     s32 strip;
@@ -3846,6 +3825,7 @@ void CaptureMenuBackdrop(Gfx **displayListHead, s32 unused UNUSED) {
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_NONE);
     if (g_MenuBackdropState == MENU_BACKDROP_STATE_CAPTURING) {
+        source = f_LastFrameBuffer;
         g_MenuBackdropState = MENU_BACKDROP_STATE_SHOWN;
         f_BackdropFadeLevel = BACKDROP_START_FADE_LEVEL;
         gDPPipeSync(gfx++);
@@ -3857,12 +3837,11 @@ void CaptureMenuBackdrop(Gfx **displayListHead, s32 unused UNUSED) {
             RenderTargetAddress(PhysicalAddress(f_CapturedFrame))
         );
         gDPPipeSync(gfx++);
-        source = f_LastFrameBuffer;
         for (strip = 0; strip != BACKDROP_STRIP_COUNT; strip++) {
             height = StripHeight(strip);
             gDPLoadTextureTile(
                 gfx++,
-                TextureAddress(source),
+                TextureAddress(&source[strip * BACKDROP_STRIP_STEP * SCREEN_WIDTH]),
                 G_IM_FMT_RGBA,
                 G_IM_SIZ_16b,
                 SCREEN_WIDTH,
@@ -3893,7 +3872,6 @@ void CaptureMenuBackdrop(Gfx **displayListHead, s32 unused UNUSED) {
                 TEXEL_STEP_ONE
             );
             gDPPipeSync(gfx++);
-            source += BACKDROP_STRIP_STEP * SCREEN_WIDTH;
         }
 
         gDPPipeSync(gfx++);
@@ -3908,9 +3886,6 @@ void CaptureMenuBackdrop(Gfx **displayListHead, s32 unused UNUSED) {
 
     *displayListHead = gfx;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/hole_display", CaptureMenuBackdrop);
-#endif
 
 /* MENU_BACKDROP_TINTED's color */
 #define BACKDROP_TINT_RED 144
