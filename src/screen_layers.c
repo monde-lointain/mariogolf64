@@ -182,9 +182,7 @@ typedef struct Prompt {
     /* 0x8 */ s32 results[2];
 } Prompt; /* size = 0x10 */
 
-s32 g_ScreenFadeBlue;
-s32 g_ScreenFadeGreen;
-s32 g_ScreenFadeRed;
+ScreenFadeColor g_ScreenFadeColor;
 
 Gfx g_DecalTextureSetup[] = {
     gsDPPipeSync(),
@@ -682,46 +680,41 @@ void StartScreenFadeOut(s32 red, s32 green, s32 blue, s32 frameCount) {
     g_ScreenFadeKind = FADE_OUT;
     g_ScreenFadeDuration = frameCount;
     g_ScreenFadeFramesLeft = g_ScreenFadeDuration;
-    g_ScreenFadeRed = red;
-    g_ScreenFadeGreen = green;
-    g_ScreenFadeBlue = blue;
+    g_ScreenFadeColor.red = red;
+    g_ScreenFadeColor.green = green;
+    g_ScreenFadeColor.blue = blue;
 }
 
 void StartScreenFadeIn(s32 red, s32 green, s32 blue, s32 frameCount) {
     g_ScreenFadeKind = FADE_IN;
     g_ScreenFadeDuration = frameCount;
     g_ScreenFadeFramesLeft = g_ScreenFadeDuration;
-    g_ScreenFadeRed = red;
-    g_ScreenFadeGreen = green;
-    g_ScreenFadeBlue = blue;
+    g_ScreenFadeColor.red = red;
+    g_ScreenFadeColor.green = green;
+    g_ScreenFadeColor.blue = blue;
 }
 
 /*
  * Covers the screen with the fade's color, at the opacity it has reached.
  *
- * Doesn't match: near the color loads, the original loads a value from a stack
- * slot, sets bit 0x400 in it and stores it back, where this sets the bit
- * earlier and keeps the value in $s7; 10 words differ. Reading blue as an int
- * gives 15, putting the first pipe sync in its own block gives 196, and other
- * orders of the color loads give 12 to 34. The register oracle's closest result
- * is these 10 words with no register forced, so allocation isn't the cause.
+ * The color's channels are members of one object, passed straight to the
+ * macro, to match. The scheduler takes a member's read to depend on the display
+ * list's stores before it (true_dependence, both being in structures), so the
+ * primitive color's first word isn't ready to place until the reads are. That
+ * leaves sched1, working from the block's end, a cycle between green's read
+ * and red's with only the constants' halves ready, and it places the or of
+ * the rectangle step's low half there: the original loads the step from its
+ * stack slot after red's read, sets bit 0x400 after blue's and stores it back.
  *
- * The value is the texture rectangle's step word. sched1 splits its
- * constant, by mips.md's split for large integers, into the high half and
- * an or of the low half into the same pseudo, which is why the original
- * sets the bit in the slot. Both halves have priority 1, tied with the
- * other constants; here sched1 places the or at T-32, ahead of the color
- * loads at T-30, where the original places it after them. Holding the
- * step in a local, passed as either or both steps, changes the code
- * elsewhere and gives 208 to 211 words.
+ * Three separate globals aren't taken to depend on the stores: passed straight
+ * 308 words differ (56 in shape), through u8 locals 10 (8), through s32
+ * locals 36 (12). An array of three words matches as well. The members
+ * through u8 locals give 56 (36), through s32 locals 90 (46). With blue alone
+ * outside the object it still matches, with green 6 (6), with red 308 (50).
  */
-#ifdef NON_MATCHING
 void DrawScreenFade(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     s32 alpha;
-    u8 red;
-    u8 green;
-    u8 blue;
 
     if (g_ScreenFadeKind != FADE_NONE) {
         if (g_ScreenFadeKind == FADE_OUT) {
@@ -750,15 +743,15 @@ void DrawScreenFade(Gfx **displayListHead) {
         gDPSetBlendColor(gfx++, 255, 255, 255, 1);
         gDPPipeSync(gfx++);
         gDPSetAlphaDither(gfx++, G_AD_PATTERN);
-        /*
-         * Through bytes, to match: s32 locals give 36 words differing (12 in
-         * shape), and the globals passed straight to the macro 308 (56),
-         * against 10 (8)
-         */
-        red = g_ScreenFadeRed;
-        green = g_ScreenFadeGreen;
-        blue = g_ScreenFadeBlue;
-        gDPSetPrimColor(gfx++, 0, 0, red, green, blue, alpha);
+        gDPSetPrimColor(
+            gfx++,
+            0,
+            0,
+            g_ScreenFadeColor.red,
+            g_ScreenFadeColor.green,
+            g_ScreenFadeColor.blue,
+            alpha
+        );
         gDPSetCombineMode(gfx++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
         gDPPipeSync(gfx++);
         gSPTextureRectangle(
@@ -782,10 +775,6 @@ void DrawScreenFade(Gfx **displayListHead) {
         *displayListHead = gfx;
     }
 }
-
-#else
-INCLUDE_ASM("asm/nonmatchings/screen_layers", DrawScreenFade);
-#endif
 
 void LoadPromptImages(void) {
     EncodedAsset asset;

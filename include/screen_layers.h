@@ -69,12 +69,20 @@ enum FadeDirection {
     FADE_IN
 };
 
+/*
+ * The screen fade's color, a channel to a word. One object and not three
+ * globals, to match DrawScreenFade
+ */
+typedef struct ScreenFadeColor {
+    /* 0x0 */ s32 red;
+    /* 0x4 */ s32 green;
+    /* 0x8 */ s32 blue;
+} ScreenFadeColor; /* size = 0xC */
+
 extern s32 g_ScreenFadeDuration;
 extern s32 g_ScreenFadeFramesLeft;
 extern s32 g_ScreenFadeKind;
-extern s32 g_ScreenFadeRed;
-extern s32 g_ScreenFadeGreen;
-extern s32 g_ScreenFadeBlue;
+extern ScreenFadeColor g_ScreenFadeColor;
 /* Draws textures with their own colors, cut at their alpha */
 extern Gfx g_DecalTextureSetup[];
 

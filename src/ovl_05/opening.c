@@ -1694,9 +1694,9 @@ void UpdateOpening(void) {
                 g_ScreenFadeDuration = 1;
                 g_ScreenFadeFramesLeft = 1;
                 g_ScreenFadeKind = 1;
-                g_ScreenFadeRed = 0;
-                g_ScreenFadeGreen = 0;
-                g_ScreenFadeBlue = 0;
+                g_ScreenFadeColor.red = 0;
+                g_ScreenFadeColor.green = 0;
+                g_ScreenFadeColor.blue = 0;
                 f_OpeningSceneFramesLeft = 10;
                 f_OpeningScene++;
                 break;
@@ -1704,9 +1704,9 @@ void UpdateOpening(void) {
                 g_ScreenFadeDuration = 1;
                 g_ScreenFadeFramesLeft = 1;
                 g_ScreenFadeKind = 1;
-                g_ScreenFadeRed = 0;
-                g_ScreenFadeGreen = 0;
-                g_ScreenFadeBlue = 0;
+                g_ScreenFadeColor.red = 0;
+                g_ScreenFadeColor.green = 0;
+                g_ScreenFadeColor.blue = 0;
                 if (f_OpeningSceneFramesLeft == 0) {
                     f_OpeningSceneFramesLeft = 30;
                     LoadNameLogo(0, 0);
@@ -5627,11 +5627,11 @@ void DrawOpeningLogo(Gfx **displayListHead, Boolean isDrawn) {
             break;
         case LOGO_FADE_WHITENING:
             g_ScreenFadeFramesLeft = f_LogoFadeFramesLeft;
-            g_ScreenFadeRed = (s32)((LOGO_FADE_WHITENING_FRAMES - f_LogoFadeFramesLeft) *
-                                  LOGO_FADE_WHITENING_STEP) +
+            g_ScreenFadeColor.red = (s32)((LOGO_FADE_WHITENING_FRAMES - f_LogoFadeFramesLeft) *
+                                        LOGO_FADE_WHITENING_STEP) +
                 LOGO_FADE_GRAY_LEVEL;
-            g_ScreenFadeGreen = g_ScreenFadeRed;
-            g_ScreenFadeBlue = g_ScreenFadeGreen;
+            g_ScreenFadeColor.green = g_ScreenFadeColor.red;
+            g_ScreenFadeColor.blue = g_ScreenFadeColor.green;
             f_LogoFadeFramesLeft--;
             if (f_LogoFadeFramesLeft == 0) {
                 f_LogoFadeStage++;
@@ -5640,9 +5640,9 @@ void DrawOpeningLogo(Gfx **displayListHead, Boolean isDrawn) {
             break;
         case LOGO_FADE_WHITE:
             g_ScreenFadeDuration = LOGO_FADE_WHITE_DURATION;
-            g_ScreenFadeRed = LOGO_FADE_WHITE_LEVEL;
-            g_ScreenFadeGreen = g_ScreenFadeRed;
-            g_ScreenFadeBlue = g_ScreenFadeGreen;
+            g_ScreenFadeColor.red = LOGO_FADE_WHITE_LEVEL;
+            g_ScreenFadeColor.green = g_ScreenFadeColor.red;
+            g_ScreenFadeColor.blue = g_ScreenFadeColor.green;
             g_ScreenFadeKind = FADE_OUT;
             g_ScreenFadeFramesLeft = 0;
             if (f_LogoState == LOGO_SHRINKING) {
@@ -5654,9 +5654,9 @@ void DrawOpeningLogo(Gfx **displayListHead, Boolean isDrawn) {
             g_ScreenFadeDuration = LOGO_FADE_WHITE_DURATION;
             g_ScreenFadeKind = FADE_OUT;
             g_ScreenFadeFramesLeft = 0;
-            g_ScreenFadeRed = LOGO_FADE_WHITE_LEVEL;
-            g_ScreenFadeGreen = g_ScreenFadeRed;
-            g_ScreenFadeBlue = g_ScreenFadeGreen;
+            g_ScreenFadeColor.red = LOGO_FADE_WHITE_LEVEL;
+            g_ScreenFadeColor.green = g_ScreenFadeColor.red;
+            g_ScreenFadeColor.blue = g_ScreenFadeColor.green;
             f_LogoLettersAlpha -= LOGO_FADE_OUT_STEP;
             f_LogoClubAlpha -= LOGO_FADE_OUT_STEP;
             if (f_LogoLettersAlpha < 0) {
@@ -5677,9 +5677,9 @@ void DrawOpeningLogo(Gfx **displayListHead, Boolean isDrawn) {
         g_ScreenFadeDuration = LOGO_GRAYING_DURATION;
         g_ScreenFadeFramesLeft = g_ScreenFadeDuration;
         g_ScreenFadeKind = FADE_OUT;
-        g_ScreenFadeRed = LOGO_FADE_GRAY_LEVEL;
-        g_ScreenFadeGreen = g_ScreenFadeRed;
-        g_ScreenFadeBlue = g_ScreenFadeGreen;
+        g_ScreenFadeColor.red = LOGO_FADE_GRAY_LEVEL;
+        g_ScreenFadeColor.green = g_ScreenFadeColor.red;
+        g_ScreenFadeColor.blue = g_ScreenFadeColor.green;
         f_LogoFadeStage = LOGO_FADE_GRAYING;
         f_HasLogoStarted = TRUE;
     }
