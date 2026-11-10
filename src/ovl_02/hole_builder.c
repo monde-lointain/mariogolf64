@@ -1241,28 +1241,28 @@ s32 PaintMainCourse(s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32 z
  * cart way away from more of it. Neither the paint-logic table nor any code
  * refers to it.
  *
- * Doesn't match: the original zeroes $t0, which nothing reads, in the delay
- * slot of the range test, and its two cart-way arms share one jump to the
- * end. 12 words differ. Initializing color, paintedCode or fairwayRandom
- * doesn't bring the zeroing back; the cart-way arms' comment gives the
- * counts for their other forms. The register oracle, forcing one pseudo's
- * register, leaves 8 words of the 12 at best, so the code differs too.
- *
- * A local set to 0 before the switch and used as a component of two arms'
- * colors does bring it back, with z in $t1: as deep rough's blue and
- * no-drop ground's red or green, only the cart-way arms' 3 words differ (3
- * in shape). With one use the zero is folded away and the 12 stay, and as
- * deep rough's blue and the dark green checks' blue, which a permuter run
- * found, the checks' ternary branches the other way, for 9 (5). No one
- * quantity is both of those components, so the local stands for nothing,
- * but the original keeps some value known to be 0 from the start that
- * reaches at least two arms.
+ * To match, the cart way's color where the other terrain isn't one cell away
+ * is the gray mottled by a random value that is always 0, written as the
+ * sibling logics mottle their no-drop ground: the original zeroes $t0, which
+ * nothing reads, in the delay slot of the range test, and stores the same
+ * gray in each of the two arms.
  */
-#ifdef NON_MATCHING
 s32 PaintPaleRoughCourse(s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32 z) {
     u32 color;
     s32 paintedCode;
+    s32 random;
     s32 fairwayRandom;
+
+    /* To match, no seed is drawn for the cart way's mottle. The zero isn't
+     * carried past the switch's jump, so the mottle's two reads last until
+     * combine, which knows the value of a register that is set once and folds
+     * the color. It leaves a use of the register in the arm, so the zero
+     * keeps a register, and with three references counted that register is
+     * allocated ahead of z's and is $t0. With one read, local-alloc replaces
+     * a register set once and read once by its constant and drops the set: 9
+     * words differ (5 in shape). Set in the cart-way arm instead, the zero is
+     * folded away at once: 18 (10). */
+    random = 0;
 
     switch (code) {
         case TERRAIN_CODE_DEEP_ROUGH:
@@ -1318,20 +1318,24 @@ s32 PaintPaleRoughCourse(s32 code, s32 nearestCode, s32 nearestDistance, s32 x, 
                 color = Rgba16(0, 0, 31, 0);
             }
             else {
-                /* Both colors are the same in the original, which stores the color
-                 * in each arm. Against these arms' 12 words differing (8 in shape),
-                 * the same order in both gives 14 (8) with the color first or 16 (10)
-                 * with the code first, the other differing order 14 (10), the code
-                 * set once after the test, which GCC then drops, 18 (10) or before it
-                 * 20 (12), and no test 16 (10) */
+                /* Both colors are the same gray, which the original stores in
+                 * each arm: the mottle is folded after cse, so only the jump
+                 * pass is left to see that the arms are the same, and it moves
+                 * the second arm's store ahead of the test without dropping
+                 * the first's. With the plain gray in both arms and no zero,
+                 * the test goes and a stack frame comes: 18 words differ (10
+                 * in shape). With the mottle in the first arm, 3 (1); with the
+                 * test reversed or as a conditional expression, 3 (3); with
+                 * the mottle stored before the test, or the code set in each
+                 * arm, 5 (3) */
                 if (nearestDistance == 1) {
-                    paintedCode = TERRAIN_CODE_CART_WAY;
                     color = Rgba16(18, 18, 18, 1);
                 }
                 else {
-                    color = Rgba16(18, 18, 18, 1);
-                    paintedCode = TERRAIN_CODE_CART_WAY;
+                    color = Rgba16((random & 4) + 18, 18 - ((random >> 5) & 3), 18, 1);
                 }
+
+                paintedCode = TERRAIN_CODE_CART_WAY;
             }
 
             break;
@@ -1377,9 +1381,6 @@ s32 PaintPaleRoughCourse(s32 code, s32 nearestCode, s32 nearestDistance, s32 x, 
 
     return (color << PAINTED_COLOR_SHIFT) | paintedCode;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", PaintPaleRoughCourse);
-#endif
 
 /*
  * The paint logic of Shy Guy Desert: like PaintMainCourse with other
