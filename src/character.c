@@ -2350,58 +2350,39 @@ void PlaceCharacter(u32 slotIndex, CoursePoint point, Radians heading) {
     (((cameraIndex) == OPENING_CAMERA) || (((cameraIndex) != INSET_CAMERA) && g_AreCharactersDrawn))
 
 /*
+ * Returns the yaw of the impact flash's light for a character's yaw: the yaw
+ * itself for a left-handed player, who stands mirrored, and its negation for
+ * a right-handed one.
+ *
+ * To match, the negation is set first and the yaw copied over it under the
+ * test, which is the original's code: it loads the yaw into $f0 before it
+ * reads isLefty, negates it into $f12 in the delay slot of the branch, and
+ * copies it over on the fall-through. Picked by a conditional expression,
+ * here or in the call's argument, the yaw is loaded straight into $f12 and
+ * negated in place, as expr.c expands such an expression in one operand when
+ * one arm negates the other: 14 words of DrawCharacterAndShadow differ (6 in
+ * shape). So it is with the yaw set first and negated under the opposite
+ * test, and with isLefty taken as the s8 it is; an if and an else, or two
+ * returns, give 53 (23). Reading isLefty here, and so after the negation,
+ * gives 8 (4), and the pick in statements of the caller, which come before
+ * the light's address is worked out, 33 (25).
+ */
+static inline f32 GetImpactFlashYaw(f32 yaw, Boolean isLefty) {
+    f32 flashYaw;
+
+    flashYaw = -yaw;
+    if (isLefty) {
+        flashYaw = yaw;
+    }
+
+    return flashYaw;
+}
+
+/*
  * Draws the character in the slot and its shadow, for cameraIndex's view.
  * The shadow lies on the ground plane under three points around the
  * character's shadow point.
- *
- * Doesn't match: the original loads the light's rotation into $f0 and picks it
- * or its negation into $f12, which is jump.c's form of a general ?: expansion.
- * Ours is expand_expr's single-operand form, which expr.c takes when one arm
- * negates the other, and which loads straight into $f12 and negates it in
- * place. Reading the rotation into a local first, or writing the arms
- * differently, keeps that form. The negated arm as a subtraction from 0, or a
- * static inline function that picks the yaw with a ?: or negates it under an
- * if, gives the same 14 words, and one that returns from an if and
- * an else 53 (23 in shape), still negating in place. With fabsf an abs.s in
- * volatile inline assembly, the view direction's stores and the shadow
- * scale's abs.s are scheduled as in the original, which took the draft from
- * 49 words differing, 19 in shape, to 14, 6 in shape, all in the two ?:s.
- *
- * expr.c takes the single-operand form only when the condition has no
- * side effects. Declaring g_CurrentShot with its definition's volatile,
- * which the planning thread justifies, changes nothing, as c-typeck.c
- * gives an array reference no side effects from its index; reading
- * isLefty as volatile, which nothing justifies, gives 219 words (35 in
- * shape).
- *
- * The register oracle's closest result is these 14 words with no register
- * forced, so allocation isn't the cause.
- *
- * Setting the impact flash's light color through SetLightColor, which
- * works out the halved level once, gives 90 words, 68 in shape.
- *
- * Reading isLefty through a static inline function, so that the condition
- * is a call, gives the general form, but each arm then loads the rotation
- * itself: 59 words (25 in shape). A second inline function that reads the
- * rotation into a local and picks it or its negation gives 22 words (10
- * in shape), still negating in place, with the register oracle forcing
- * nothing; so do the same pick written as an if that negates the local
- * and as a ?: whose other arm reads the rotation again, and an if and an
- * else that set a result give 53 (23). jump.c's rewrite of an if and an
- * else into a set and a conditional set takes only integer modes, so it
- * isn't the original's route for the float.
- *
- * The original's code is the general form after reorg: $f12 takes the
- * negation in the branch's delay slot, and the fall-through then copies the
- * rotation over it. Reading the rotation into a local at the flash's start
- * and testing isLefty through an inline helper, so that both are in place,
- * gives 29 words (15 in shape), with either arm first: the local lives in
- * $f20 across sinf, where the original loads the rotation afresh for each
- * ?:, and the pick becomes a copy and a conditional negation. Passing
- * the rotation to an inline helper that picks it or its negation, testing
- * isLefty directly or through a second helper, gives 22 (10).
  */
-#ifdef NON_MATCHING
 void DrawCharacterAndShadow(CameraMatrices *matrices, s32 cameraIndex, s32 slotIndex) {
     f32 shadowPoint[3];
     f32 corners[TRIANGLE_CORNER_COUNT][3];
@@ -2415,8 +2396,8 @@ void DrawCharacterAndShadow(CameraMatrices *matrices, s32 cameraIndex, s32 slotI
     PlaneTriangle triangle;
     TrianglePlane plane;
     Mat4 projection;
-    /* The original frame has room for this; without it 218 words differ, 6 in
-     * shape, against 14 */
+    /* The original frame has room for this; without it 204 words differ, none
+     * in shape */
     Mat4 unusedMatrix UNUSED;
     Gfx *gfx;
     CharacterSlot *slot;
@@ -2453,17 +2434,17 @@ void DrawCharacterAndShadow(CameraMatrices *matrices, s32 cameraIndex, s32 slotI
             f_SavedLights[g_DrawBufferIndex ^ 1].l[1].l.colc[1] = g_ImpactFlashLevel;
             f_SavedLights[g_DrawBufferIndex ^ 1].l[1].l.colc[2] = g_ImpactFlashLevel / 2;
             f_SavedLights[g_DrawBufferIndex ^ 1].l[1].l.dir[0] =
-                sinf(
-                    g_Players[g_CurrentShot.playerIndex].isLefty ? slot->rotation[1] :
-                                                                   -slot->rotation[1]
-                ) *
+                sinf(GetImpactFlashYaw(
+                    slot->rotation[1],
+                    g_Players[g_CurrentShot.playerIndex].isLefty
+                )) *
                 LIGHT_DIRECTION_SCALE;
             f_SavedLights[g_DrawBufferIndex ^ 1].l[1].l.dir[1] = 0;
             f_SavedLights[g_DrawBufferIndex ^ 1].l[1].l.dir[2] =
-                -cosf(
-                    g_Players[g_CurrentShot.playerIndex].isLefty ? slot->rotation[1] :
-                                                                   -slot->rotation[1]
-                ) *
+                -cosf(GetImpactFlashYaw(
+                    slot->rotation[1],
+                    g_Players[g_CurrentShot.playerIndex].isLefty
+                )) *
                 LIGHT_DIRECTION_SCALE;
         }
 
@@ -2679,7 +2660,3 @@ void DrawCharacterAndShadow(CameraMatrices *matrices, s32 cameraIndex, s32 slotI
         g_DisplayListHead = gfx;
     }
 }
-
-#else
-INCLUDE_ASM("asm/nonmatchings/character", DrawCharacterAndShadow);
-#endif
