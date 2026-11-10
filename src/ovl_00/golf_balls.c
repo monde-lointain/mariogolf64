@@ -1042,8 +1042,19 @@ enum BallSprite {
  * other order. That takes the draft from 295 words differing, 19 in
  * shape, to 42 (6), and the register oracle's closest result from 197
  * words, forcing 47 pseudos, to 34, forcing 8; adding each constant
- * first instead gives 301 words, 105 in shape. 42 words differ, 6 in
+ * first instead gives 301 words, 105 in shape. That left 42 words, 6 in
  * shape.
+ *
+ * The far dot's top edge is a pixel above its texture step's start,
+ * QuarterPixels(ballPoint.y - 1) - 4, as the original works out the
+ * start, keeps it, and subtracts 4 from it; written as
+ * QuarterPixels(ballPoint.y) - 8, combine folded it into a shift of its
+ * own. That takes the draft from 42 words differing (6 in shape) to 29
+ * (5), and the register oracle's closest result from 34 words, forcing
+ * 8 pseudos, to 27, forcing 3. The original also ends the step at
+ * QuarterPixels(ballPoint.y) plus 4, but written so, combine rewrites
+ * the start in terms of it, giving 70 words (6 in shape). 29 words
+ * differ, 5 in shape.
  */
 #ifdef NON_MATCHING
 void DrawGolfBalls(CameraMatrices *matrices UNUSED) {
@@ -1441,7 +1452,7 @@ void DrawGolfBalls(CameraMatrices *matrices UNUSED) {
                         gSPScisTextureRectangle(
                             gfx++,
                             QuarterPixels(ballPoint.x) - 4,
-                            QuarterPixels(ballPoint.y) - 8,
+                            QuarterPixels(ballPoint.y - 1) - 4,
                             QuarterPixels(ballPoint.x),
                             QuarterPixels(ballPoint.y),
                             BALL_TILE_SMALL,
