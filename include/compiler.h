@@ -107,25 +107,21 @@
 #endif
 
 /*
- * Compiles statements in a basic block of their own, to match. KMC GCC
- * schedules instructions and reuses values only within a block, and the
- * original's code shows block boundaries around some statements where its
- * source has none that survives; a loop that runs once gives them back.
+ * Compiles statements in a block of their own, to match. KMC GCC schedules
+ * instructions and reuses values only within a block, and the original's code
+ * shows block boundaries around some statements where its source has none
+ * that survives; a loop that runs once gives them back. The original's
+ * osSyncPrintf isn't a do-while (0) macro that would end blocks like this:
+ * wrapping every call in IN_OWN_BLOCK breaks 37 matched functions.
+ *
+ * The loop leaves only its notes, which the scheduler moves nothing across.
+ * They don't end a basic block for local-alloc, which takes a label: where
+ * the original's registers show one, a test that lasts past flow gives it, as
+ * in DrawWindSpeed.
  */
 #define IN_OWN_BLOCK(statements) \
     do { \
         statements; \
-    } \
-    while (0)
-
-/*
- * Ends a basic block between two statements, to match. Each use's note gives
- * the words it saves. The original's osSyncPrintf isn't a do-while (0) macro
- * that would end blocks like this: wrapping every call in IN_OWN_BLOCK breaks
- * 37 matched functions.
- */
-#define END_BASIC_BLOCK() \
-    do { \
     } \
     while (0)
 

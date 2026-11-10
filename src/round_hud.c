@@ -2677,25 +2677,7 @@ void DrawBallTrail(Gfx **displayListHead, CameraMatrices *matrices) {
 /*
  * Draws the wind's icon, which pulses in size, and the wind's speed in
  * meters below it. Both lean away from the given point along the viewed wind.
- *
- * Doesn't match: the target loads the wind speed into $a0 and its divisor's
- * reciprocal before the scaling, where ours takes $v1 for the speed and loads
- * the reciprocal at the division. Scaling the speed in the division's
- * statement gives 20 words differing, 22 in shape; scaling it before the
- * pulse step with that step not kept in its own block, or stepping the pulse
- * first, gives 32 to 41, and dividing before the pulse step 41 in either
- * form. sched1 runs before local-alloc, so the original's reciprocal was
- * hoisted into $v1 before the speed got a register, which needs the
- * scaling and the division in one block; the register oracle, forcing the
- * speed into $a0, leaves the 4 words of the reciprocal's placement. 14
- * words differ, 4 in shape.
- *
- * Neither an inlined call nor the nested function's definition ends the
- * block: the scaling, the whole conversion or the pulse step as an inline
- * helper, in any order, and the scaling as scaledSpeed's initializer,
- * before DrawWindSpeedText, all give 41 words, as with no barrier.
  */
-#ifdef NON_MATCHING
 void DrawWindSpeed(Gfx **displayListHead, f32 x, f32 y) {
     Gfx *gfx = *displayListHead;
     s32 halfWidthRounded;
@@ -2705,7 +2687,8 @@ void DrawWindSpeed(Gfx **displayListHead, f32 x, f32 y) {
     s32 dsdx;
     s32 dtdy;
     s32 speed;
-    u32 scaledSpeed;
+    u32 windSpeed;
+    u64 unusedWindSpeed UNUSED;
     f32 halfWidth;
     f32 halfHeight;
     f32 centerX;
@@ -2749,16 +2732,33 @@ void DrawWindSpeed(Gfx **displayListHead, f32 x, f32 y) {
         }
     }
 
-    scaledSpeed = (u32)g_HoleSetup.conditions.windSpeed * WIND_SPEED_TO_METERS_SCALE;
+    windSpeed = g_HoleSetup.conditions.windSpeed;
     /*
-     * The scaling ends its block, to match: 14 words differ, 6 in shape, as
-     * with the scaling in a block of its own. With the pulse step in a block
-     * of its own instead 16 differ (6), and with no barrier, plain braces
-     * around either statement, or the step first, 41 (31)
+     * A 64-bit copy that nothing reads, taken when there is wind, to match:
+     * the original's code has a basic block's end between the wind speed's
+     * read and its conversion, and no branch there. KMC GCC widens to 64 bits
+     * in a libcall block, which the dead code removal after cse leaves alone
+     * and flow deletes, so the test, now around nothing, lasts until the jump
+     * pass after reload. sched1 and local-alloc still see its label: the
+     * conversion's block is scheduled by itself, with the divisor's
+     * reciprocal first and in $v1, and the wind speed, living across the
+     * label, is left to global-alloc and gets $a0.
+     *
+     * Without the test 99 words differ, 31 in shape, with the frame 8 bytes
+     * smaller. A 32-bit or f64 copy, or the 64-bit product, isn't a libcall
+     * block and gives 41 (31), as with no test. An empty do-while (0) in the
+     * test's place, whose loop notes local-alloc doesn't see, gives 16 (2),
+     * and the conversion IN_OWN_BLOCK 109 (31). The scaling before the test
+     * gives 18 (4), and the wind speed kept in speed 100 (24).
      */
-    END_BASIC_BLOCK();
+    if (windSpeed != 0) {
+        unusedWindSpeed = windSpeed;
+    }
+
+    /* The pulse is stepped after the conversion, to match: before it 4 words
+     * differ, 4 in shape, and before the test 18 (18) */
+    speed = (windSpeed * WIND_SPEED_TO_METERS_SCALE) / WIND_SPEED_TO_METERS_DIVISOR;
     f_WindIconPulseAngle += WIND_ICON_PULSE_STEP;
-    speed = scaledSpeed / WIND_SPEED_TO_METERS_DIVISOR;
     if (speed >= WIND_SPEED_TWO_DIGITS) {
         halfWidth = sinf(f_WindIconPulseAngle) + WIND_ICON_WIDE_HALF_WIDTH;
     }
@@ -2929,11 +2929,6 @@ void DrawWindSpeed(Gfx **displayListHead, f32 x, f32 y) {
 
     *displayListHead = gfx;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/round_hud", DrawWindSpeedText);
-
-INCLUDE_ASM("asm/nonmatchings/round_hud", DrawWindSpeed);
-#endif
 
 /*
  * Draws the wind indicator at the given point. DrawWindSpeed's part is drawn
