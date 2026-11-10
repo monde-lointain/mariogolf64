@@ -3237,33 +3237,45 @@ enum PointsStep {
  * Counts the earned course points into the save, showing a notice when they
  * open a course, then returns TRUE once A is pressed
  *
- * Doesn't match: when starting the tally, the original reads the player
- * count through the address of g_GameState.gameMode, which moves the
- * branches after it by a word. The register oracle's closest result is these
- * 5 words with no register forced, so allocation isn't the cause. Reading
- * g_GameState.gameMode just before the loop, into j, as a switch with only a
- * default, or as an empty if's test, still reads the player count directly.
- * Ending the loops on < rather than != gives 42 words (6 in shape) for i's
- * loop, 72 (6) for j's and 75 (11) for both; reading the count through a
- * GameState pointer set to &g_GameState gives 21 words (7) for the outer
- * loop alone, 25 (9) for both loops and 28 (10) everywhere. 5 words differ,
- * 1 in shape.
+ * When starting the tally, the original reads the player count for the
+ * portrait loop's entry test through the address of g_GameState.gameMode,
+ * kept in $a0, though nothing else uses that address. A test of the game mode
+ * that changes nothing leaves that behind, and the do-while (0) before the
+ * loop is one. What the original's test was for can't be recovered. Without
+ * it the count is read from its own address, and 5 words differ, 1 in shape.
+ * Each part of it is needed:
  *
- * Keeping &g_GameState.gameMode live before the loop through empty inline
- * assembly, as a probe, loads that address into a register but still
- * reads the player count from its own address: 7 words differ.
+ * - The first store to j is dead, but only flow finds that out, so the
+ *   branch around it lasts until the final jump pass. That pass deletes it as
+ *   a branch to the next instruction, with the loads of the mode and the
+ *   constant that feed it (jump.c, delete_computation), but not the address,
+ *   which the count's read uses by then. Until then the mode and the constant
+ *   hold $v1 and $v0, so global allocation gives the address $a0. A test
+ *   against GAME_MODE_STROKE, which needs no constant loaded, or against both
+ *   GAME_MODE_SKINS_MATCH and GAME_MODE_CLUB_SLOTS, which folds into one range
+ *   test, leaves the address in $v1: 6 words differ, none in shape.
+ * - The loop's end note ends the first cse pass's block but not the second's
+ *   (cse.c, cse_end_of_basic_block), so only the second pass finds the mode's
+ *   address in a register at the entry test and rewrites the count's as that
+ *   register plus 4 (cse.c, use_related_value). Where the first pass does the
+ *   rewriting, the second folds the sum back into the count's own address:
+ *   in plain braces the same statements give the 5 words.
+ * - The second store keeps the branch's label inside the loop. Without it, or
+ *   with it after the loop, jump points the branch past the loop's end note
+ *   and the first pass follows it there: the 5 words again.
  *
- * Per mips_address_cost, a register plus 4 costs 1 and the constant
- * address 2, so cse's find_best_addr keeps the original's form wherever
- * the address is written as a register known to hold
- * &g_GameState.gameMode plus 4; with gameMode read into j before the
- * loop, that register reaches the loop's entry test unused, as cse looks
- * up related values only for a set's source, not for an address. Reading
- * the count as an inline helper's mode[1], given &g_GameState.gameMode,
- * keeps jump from duplicating the loop's exit test: 21 words (15 in
- * shape), or 47 (5) with the entry test written out as an if.
+ * Each of the other 12 modes after GAME_MODE_STROKE matches too, as do a !=
+ * test, a switch with the one case, stores of the player count, stores to
+ * overshoot, stores to i with the loop's own left out, and a for (;;) loop
+ * ending in a break. Storing 1 or 0 in an if and else, equal values in both
+ * stores, or a conditional expression's value all give the 5 words. Setting
+ * a pointer to &g_GameState.gameMode in both arms of the if before the loop
+ * and reading the count as its second word, with no test, gives 6 words,
+ * none in shape: the address stays in $v0.
+ *
+ * Ending the loops on < rather than != gives 37 words (5 in shape) for i's
+ * loop, 67 (5) for j's and 70 (10) for both.
  */
-#ifdef NON_MATCHING
 s32 UpdateCoursePointsResults(ControllerState *controller) {
     EncodedAsset asset;
     s32 i;
@@ -3313,6 +3325,18 @@ s32 UpdateCoursePointsResults(ControllerState *controller) {
                         f_ResultsStep = POINTS_STEP_WAITING;
                     }
 
+                    /*
+                     * Changes nothing, but leaves the game mode's address behind
+                     * for the loop's entry test, as the header comment explains
+                     */
+                    do {
+                        if (g_GameState.gameMode == GAME_MODE_SKINS_MATCH) {
+                            j = 1;
+                        }
+
+                        j = 0;
+                    }
+                    while (0);
                     for (i = 0; i != g_GameState.playerCount; i++) {
                         StartPortraitAnimation(PORTRAIT_ANIMATION_PLEASED, i);
                         for (j = 0; j != g_GameState.playerCount; j++) {
@@ -3392,9 +3416,6 @@ s32 UpdateCoursePointsResults(ControllerState *controller) {
 
     return FALSE;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", UpdateCoursePointsResults);
-#endif
 
 /* f_ResultsStep values while UpdateMatchResults runs */
 enum MatchStep {
