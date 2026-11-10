@@ -676,6 +676,20 @@ void KeepAimCameraOnCourse(void) {
  * 11, forcing 6 pseudos either way, but maxRise then holds the square
  * first, a second meaning, so the draft divides in the one expression.
  * 34 words differ, 6 in shape.
+ *
+ * The decision oracle finds the rest is one cse choice: with maxRise
+ * built up in place, refusing the address cse1 puts in the read of
+ * aimCameraDistance for point's x, relative to the register that holds
+ * g_CurrentShot's address from the heading's read, matches, on the last
+ * of the six paths cse1 follows through that read; refused on any other,
+ * the address is put in again on the next. The read then reaches cse2
+ * through a register, which cse2 rewrites relative to the address, where
+ * given the relative address it folds it to a constant. With the draft's
+ * maxRise the same flip gives 23 words. Reading g_CurrentShot through a
+ * local pointer on any run of the branch's lines through point's z
+ * changes nothing, and on later lines gives 40 words or more, measured
+ * from the 11; a search of 2220 combinations of up to three natural
+ * edits found none closer. 34 words differ, 6 in shape.
  */
 #ifdef NON_MATCHING
 void PlaceShotCamera(void) {
