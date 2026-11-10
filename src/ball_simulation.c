@@ -398,7 +398,11 @@ void ResetBallSimulations(void) {
  * goes. With the draft this close, that takes it from 290 words to 245,
  * 72 in shape to 59, and the register oracle's closest from 150 words,
  * forcing 78 pseudos, to 137, forcing 72; AbsFloat there gives 294 (74).
- * 245 words differ, 59 in shape.
+ * That left 245 words, 59 in shape.
+ *
+ * The curve's push along each axis is worked out before either is added,
+ * as StepOpeningBallSimulation's must be; here, where the velocity is a
+ * local array, that changes nothing. 245 words differ, 59 in shape.
  */
 #ifdef NON_MATCHING
 s32 StepBallSimulation(BallSimulation *simulation) {
@@ -2197,9 +2201,11 @@ ROLLED:
 
                 if (horizontalSpeed > MIN_CURVE_SPEED) {
                     f32 scale = (1.0f / horizontalSpeed) * curve;
+                    f32 curveX = -relative[AXIS_Z] * scale;
+                    f32 curveZ = relative[AXIS_X] * scale;
 
-                    velocity[AXIS_X] += -relative[AXIS_Z] * scale;
-                    velocity[AXIS_Z] += relative[AXIS_X] * scale;
+                    velocity[AXIS_X] += curveX;
+                    velocity[AXIS_Z] += curveZ;
                 }
 
                 simulation->sideSpin = simulation->sideSpin * SIDE_SPIN_DECAY;

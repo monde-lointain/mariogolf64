@@ -529,8 +529,18 @@ static UNUSED_FUNCTION void ResetOpeningBallSimulations(void) {
  * at 96 words, forcing 32 pseudos where it forced 33. Testing the drop
  * with <, as the if did, gives 183 words (81 in shape), and taking the
  * lesser of the two first and then adding the gravity 170 (86).
- * StepBallSimulation's float copy so written gives 796 words. 172 words
- * differ, 78 in shape.
+ * StepBallSimulation's float copy so written gives 796 words. That left
+ * 172 words, 78 in shape.
+ *
+ * The curve's push along each axis is worked out before either is added
+ * to the velocity. The original reads both axes of the relative velocity
+ * before storing the new X velocity, but sched.c can't move those reads
+ * above that store, both being parts of aggregates, so with each push
+ * worked out in its own sum the draft stored X first. That takes the
+ * draft from 172 words differing (78 in shape) to 140 (68), and the
+ * register oracle's closest from 96 words, forcing 32 pseudos, to 86,
+ * forcing 26; adding each push with = and the sum written out gives 168
+ * (68). 140 words differ, 68 in shape.
  */
 #ifdef NON_MATCHING
 s32 StepOpeningBallSimulation(BallSimulation *simulation) {
@@ -1902,11 +1912,11 @@ ROLLED:
 
             if (horizontalSpeed > MIN_CURVE_SPEED) {
                 f32 scale = (1.0f / horizontalSpeed) * curve;
+                f32 curveX = -relative[AXIS_Z] * scale;
+                f32 curveZ = relative[AXIS_X] * scale;
 
-                simulation->velocity[AXIS_X] =
-                    (-relative[AXIS_Z] * scale) + simulation->velocity[AXIS_X];
-                simulation->velocity[AXIS_Z] =
-                    simulation->velocity[AXIS_Z] + (relative[AXIS_X] * scale);
+                simulation->velocity[AXIS_X] += curveX;
+                simulation->velocity[AXIS_Z] += curveZ;
             }
 
             simulation->sideSpin = simulation->sideSpin * SIDE_SPIN_DECAY;
