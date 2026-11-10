@@ -29,78 +29,57 @@
  * WON_UNSAVED_FLAG unless g_GameState.saveCount is set, and prints "Win Com
  * Chara".
  *
- * Doesn't match: GCC masks the new win bits to a byte before printing them,
- * where the original prints the unmasked value. Building them in newValue
- * gives 19 differing words, not 3; dropping newValue or printing the stored
- * byte gives 5, and an s32 or u32 value gives 9. Blame traces the extra andi
- * to the RTL zero_extendqisi2 at newValue = value; mips.md emits it for a
- * register-to-register QI-to-SI conversion. Widening value removes that mask
- * but moves the flag mask and ties the combined bits to the final result
- * instead of copying them in the branch delay slot. Widening count too gives
- * 33 differing words; casting the comparison back to u8 does not restore the
- * original. Promoting value to newValue before the saveCount test gives 6,
- * and assigning newValue separately in both branches gives 23.
- * END_BASIC_BLOCK before the combination or final promotion leaves 3; before
- * the saveCount test gives 21. Of the 27 combinations of u8, s32 and u32 for
- * value, count and newValue, none gives fewer than 3, and an s32 or u32
- * count gives 31 to 36 whatever the other two are, though the original adds
- * 1 to the count unmasked. Keep the byte draft until both the promotion and
- * delay-slot copy are explained. The register oracle's closest result is
- * these 3 words with no register forced, so allocation isn't the cause. The
- * original picks the printed value as either the combined bits or the bits
- * with the flag, in another register, so choosing newValue from the combined
- * value with a ternary or an if/else in either order was tried, with value
- * and count each a u8, s32 or u32 and newValue an s32 or u32: these give 19
- * to 47 words, and setting newValue to the combined bits and or-ing the flag
- * into it 19 to 27. Without newValue, the 9 combinations of u8, s32 and u32
- * for value and count give 5 words (3 in shape) for two bytes, 9 (5) for a
- * byte count and a wider value, and 33 (13) for any wider count. 3 words
- * differ.
+ * The original holds the win count with its carried flag in one register and
+ * copies it to another, into which it then ors the flag from the first. That
+ * needs each of these:
  *
- * A focused permuter run's best made value a u16. Of the 44 combinations
- * with a u16 or s16 among value, count and newValue, none gives fewer than 3
- * words: a u16 or s16 newValue with byte value and count gives 3, as does a
- * u16 value with an s32 newValue and a byte or u16 count, and the rest 4 to
- * 37.
+ * - tally also takes the new loss count. cse reads a copy in place of its
+ *   source only when the copy is used further down the function than the
+ *   source is (cse.c, make_regs_eqv), and the loss branch comes last. So the
+ *   flag is or-ed into tally's register, not value's, and the two stay apart.
+ *   With lossCount++ in the loss branch, 9 words differ (5 in shape), as
+ *   with the win branch building its bits in value alone; with the loss
+ *   count in value 15 (7), and in count 20 (6).
+ * - The loss count is stored from tally and tested as stored. Testing tally
+ *   gives 3 words, all in shape, and tally = ++lossCount 10 (4). Testing
+ *   (u8)tally matches.
+ * - value is as wide as a register. A u8 value has to be widened to print,
+ *   which costs a mask, 7 words (3 in shape); copied to an s32 for that, the
+ *   or is done in a byte and widened, and combine swaps its operands in
+ *   folding the widening away, 2 words. A u8 tally gives 4 (2).
+ * - count is a byte. An s32 or u32 count gives 30 words (10 in shape): once
+ *   cse makes the increment count = count + 1, jump.c turns the if into an
+ *   sltiu and addu, where the original branches.
  *
- * A wider count loses the original's branch: once cse makes the increment
- * count = count + 1, jump.c turns the if into an sltiu and addu, which needs
- * the incremented register to be the count itself, where the original adds
- * 1 to the masked bits' register. A byte count keeps them apart, as its
- * zero extension stops cse. Holding the masked bits in a previousCount, as
- * a copy into the count or in an if/else or ?:, or getting them from an
- * inline helper, with any of u8, u32 and s32 for the three, gives no fewer
- * than 3 words. Copying value to newValue before the saveCount test and
- * setting newValue to value with the flag inside it puts an andi where the
- * original copies, 15 words (3 in shape), and 5 to 27 with value, count and
- * newValue of other widths.
+ * Setting value in an if and else or with ?: matches as well, as do a u32
+ * value or tally and (value & WIN_COUNT_MASK) + 1 for the increment.
  */
-#ifdef NON_MATCHING
 void RecordComCharacterResult(s32 row, s32 column, Boolean isWin) {
     Awards *awards;
     u8 count;
-    u8 value;
-    s32 newValue;
+    s32 value;
+    s32 tally;
 
     awards = &GetSaveData()->records.awards;
     if (isWin) {
         value = awards->matchups[row][column].winBits;
         count = value & WIN_COUNT_MASK;
         if (count < MAX_SAVED_COUNT) {
-            count = (value & WIN_COUNT_MASK) + 1;
+            count++;
         }
 
-        value = count | (value & WON_UNSAVED_FLAG);
+        tally = count | (value & WON_UNSAVED_FLAG);
+        value = tally;
         if (g_GameState.saveCount == 0) {
             value |= WON_UNSAVED_FLAG;
         }
 
-        newValue = value;
-        awards->matchups[row][column].winBits = newValue;
-        osSyncPrintf("Win Com Chara[%d]\n", newValue);
+        awards->matchups[row][column].winBits = value;
+        osSyncPrintf("Win Com Chara[%d]\n", value);
     }
     else {
-        awards->matchups[row][column].lossCount++;
+        tally = awards->matchups[row][column].lossCount + 1;
+        awards->matchups[row][column].lossCount = tally;
         if (awards->matchups[row][column].lossCount > MAX_SAVED_COUNT) {
             awards->matchups[row][column].lossCount = MAX_SAVED_COUNT;
         }
@@ -108,9 +87,6 @@ void RecordComCharacterResult(s32 row, s32 column, Boolean isWin) {
 
     TransferSaveData(GetSaveData(), TRUE);
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/progress", RecordComCharacterResult);
-#endif
 
 /* Adds a birdie badge on the current hole of a tournament, and saves */
 void AddBirdieBadge(void) {
