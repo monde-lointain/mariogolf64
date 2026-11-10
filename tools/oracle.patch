@@ -1,14 +1,16 @@
 --- a/reload1.c
 +++ b/reload1.c
-@@ -20,6 +20,7 @@
+@@ -20,6 +20,9 @@
  
  
  #include <stdio.h>
 +#include <stdio_ext.h>
++#include <sys/wait.h>
++#include <unistd.h>
  #include "config.h"
  #include "rtl.h"
  #include "obstack.h"
-@@ -424,6 +425,143 @@
+@@ -424,6 +427,301 @@
    reload_firstobj = (char *) obstack_alloc (&reload_obstack, 0);
  }
  
@@ -21,13 +23,19 @@
 +
 +static FILE *oracle_trace_file;
 +
++/* The decision a child of the fork mode takes the other way, or -1 in
++   any other cc1 (see oracle_fork_decision) */
++static int oracle_fork_index = -1;
++
 +FILE *
 +oracle_open_trace ()
 +{
 +  char *function = getenv ("ORACLE_FUNCTION");
 +  char *path = getenv ("ORACLE_TRACE");
 +
-+  if (function == 0 || path == 0 || *path == 0
++  /* A child of the fork mode leaves the trace to its parent */
++  if (oracle_fork_index >= 0
++      || function == 0 || path == 0 || *path == 0
 +      || strcmp (function, current_function_name) != 0)
 +    return 0;
 +  if (oracle_trace_file == 0 && (oracle_trace_file = fopen (path, "a")) != 0)
@@ -79,6 +87,158 @@
 +{
 +  fputs (separator, file);
 +  oracle_put_int (file, n);
++}
++
++/* The oracle's decisions (see --decisions in tools/oracle.py).  When cc1
++   compiles the function ORACLE_FUNCTION, each pass that chooses between
++   ways of compiling it numbers the choice with oracle_next_decision, in
++   the order they are made, from 0, and takes the other way where
++   oracle_flips_decision says the number is one ORACLE_FLIP lists,
++   separated by commas.  Flipping a decision renumbers only those after
++   it.  */
++
++static int oracle_decision_count;
++static int *oracle_flipped;
++static int oracle_flipped_count = -1;
++
++/* The fork mode, for a search over many flips: when ORACLE_FORK_DIR names
++   a directory, cc1 forks at each decision it makes, and the child takes
++   the other way, finishes the function alone and leaves its assembly in
++   the directory as INDEX.s, INDEX being the decision's number.  The
++   parent goes on as ORACLE_FLIP says, with at most ORACLE_FORK_JOBS
++   children at once, and waits for them all at the function's end.  So one
++   compile gives every flip of one more decision, sharing all the work
++   before it.  */
++
++extern FILE *asm_out_file;
++extern char *asm_file_name;
++
++static char *oracle_fork_dir;
++static int oracle_fork_jobs;
++static int oracle_fork_running;
++
++/* Return the number of the decision about to be made, or -1 when the
++   function being compiled isn't ORACLE_FUNCTION.  */
++
++int
++oracle_next_decision ()
++{
++  char *function = getenv ("ORACLE_FUNCTION");
++
++  if (function == 0 || strcmp (function, current_function_name) != 0)
++    return -1;
++  return oracle_decision_count++;
++}
++
++/* In the fork mode, start a child that takes the other way at the
++   decision numbered INDEX, its assembly so far a copy of the parent's.
++   Return nonzero in the child.  */
++
++static int
++oracle_fork_decision (index)
++     int index;
++{
++  char path[4096];
++  char buffer[65536];
++  FILE *copy, *original;
++  size_t length;
++  int pid;
++
++  if (oracle_fork_jobs == 0)
++    {
++      char *jobs = getenv ("ORACLE_FORK_JOBS");
++
++      oracle_fork_dir = getenv ("ORACLE_FORK_DIR");
++      oracle_fork_jobs = jobs != 0 && atoi (jobs) > 0 ? atoi (jobs) : 1;
++    }
++  if (oracle_fork_dir == 0 || *oracle_fork_dir == 0 || oracle_fork_index >= 0)
++    return 0;
++  if (oracle_fork_running == oracle_fork_jobs)
++    {
++      wait (0);
++      oracle_fork_running--;
++    }
++  fflush (asm_out_file);
++  pid = fork ();
++  if (pid != 0)
++    {
++      if (pid > 0)
++	oracle_fork_running++;
++      return 0;
++    }
++  oracle_fork_index = index;
++  sprintf (path, "%s/%d.s.tmp", oracle_fork_dir, index);
++  if ((copy = fopen (path, "w")) == 0
++      || (original = fopen (asm_file_name, "r")) == 0)
++    _exit (1);
++  while ((length = fread (buffer, 1, sizeof buffer, original)) > 0)
++    fwrite (buffer, 1, length, copy);
++  fclose (original);
++  /* The parent's stream was flushed before the fork and is left as it is,
++     as the child ends with _exit, which writes out no stream */
++  asm_out_file = copy;
++  return 1;
++}
++
++/* At the end of a function's compile, end a child of the fork mode once
++   its function is written, renaming its assembly to show that it is
++   whole, or have the parent wait for its children.  */
++
++void
++oracle_end_function ()
++{
++  char path[4096];
++  char done[4096];
++
++  if (oracle_fork_index < 0)
++    {
++      while (oracle_fork_running > 0)
++	{
++	  wait (0);
++	  oracle_fork_running--;
++	}
++      return;
++    }
++  if (fclose (asm_out_file) != 0)
++    _exit (1);
++  sprintf (path, "%s/%d.s.tmp", oracle_fork_dir, oracle_fork_index);
++  sprintf (done, "%s/%d.s", oracle_fork_dir, oracle_fork_index);
++  _exit (rename (path, done) != 0);
++}
++
++/* Return nonzero if the decision numbered INDEX is to take the other way:
++   if ORACLE_FLIP lists it, or in a child the fork mode starts for it.  */
++
++int
++oracle_flips_decision (index)
++     int index;
++{
++  int i;
++
++  if (oracle_fork_decision (index))
++    return 1;
++
++  if (oracle_flipped_count < 0)
++    {
++      char *list = getenv ("ORACLE_FLIP");
++      char *p;
++
++      oracle_flipped_count = 0;
++      if (list == 0 || *list == 0)
++	return 0;
++      oracle_flipped = (int *) xmalloc ((strlen (list) / 2 + 1) * sizeof (int));
++      for (p = list; *p; p++)
++	{
++	  oracle_flipped[oracle_flipped_count++] = atoi (p);
++	  p = strchr (p, ',');
++	  if (p == 0)
++	    break;
++	}
++    }
++  for (i = 0; i < oracle_flipped_count; i++)
++    if (oracle_flipped[i] == index)
++      return 1;
++  return 0;
 +}
 +
 +/* Record the hard register, or -1, each pseudo goes into reload with.  */
@@ -152,7 +312,7 @@
  /* Main entry point for the reload pass.
  
     FIRST is the first insn of the function being compiled.
-@@ -466,6 +604,9 @@
+@@ -466,6 +764,9 @@
    /* The basic block number currently being processed for INSN.  */
    int this_block;
  
@@ -476,7 +636,7 @@
  
 --- a/toplev.c
 +++ b/toplev.c
-@@ -2637,6 +2637,159 @@
+@@ -2637,6 +2637,160 @@
  #endif
  }
  
@@ -485,6 +645,7 @@
 +   RTL was made, and each pseudo's mode and whether it is a variable's.  */
 +
 +extern FILE *oracle_open_trace ();
++extern void oracle_end_function ();
 +extern void oracle_end_record ();
 +extern void oracle_put_item ();
 +
@@ -636,7 +797,7 @@
  /* This is called from finish_function (within yyparse)
     after each top-level definition is parsed.
     It is supposed to compile that function or variable
-@@ -2810,6 +2963,9 @@
+@@ -2810,6 +2964,9 @@
  
    instantiate_virtual_regs (current_function_decl, get_insns ());
  
@@ -646,3 +807,109 @@
    /* See if we have allocated stack slots that are not directly addressable.
       If so, scan all the insns and create explicit address computation
       for all references to such slots.  */
+@@ -3225,6 +3382,11 @@
+ 	     fflush (asm_out_file);
+ 	   });
+ 
++  /* The oracle's fork mode ends its children here (see reload1.c) */
++  if (getenv ("ORACLE_FUNCTION") != 0
++      && strcmp (getenv ("ORACLE_FUNCTION"), current_function_name) == 0)
++    oracle_end_function ();
++
+   /* Write DBX symbols if requested */
+ 
+   /* Note that for those inline functions where we don't initially
+--- a/sched.c
++++ b/sched.c
+@@ -2428,6 +2428,83 @@
+   return INSN_LUID (tmp) - INSN_LUID (tmp2);
+ }
+ 
++/* The oracle's decisions (see oracle_next_decision in reload1.c).  */
++
++extern FILE *oracle_open_trace ();
++extern void oracle_end_record ();
++extern void oracle_put_item ();
++extern int oracle_next_decision ();
++extern int oracle_flips_decision ();
++
++/* Return the class rank_for_schedule gives INSN after the last insn
++   scheduled: 1 if it depends on the last's data, 2 on its other uses, and
++   3 if on neither, or it takes one cycle.  */
++
++static int
++oracle_schedule_class (insn)
++     rtx insn;
++{
++  rtx link = find_insn_list (insn, LOG_LINKS (last_scheduled_insn));
++
++  if (link == 0 || insn_cost (insn, link, last_scheduled_insn) == 1)
++    return 3;
++  if (REG_NOTE_KIND (link) == 0)
++    return 1;
++  return 2;
++}
++
++/* Number the choice of the next insn to schedule, the first of the N_READY
++   in READY, as a decision, and take the second instead where the oracle
++   flips it.  The trace records the two insns, why the first comes first,
++   by "launch", "priority", "class" or "order" (the insns' order in the
++   RTL), and which pass, "sched" before reload or "sched2" after, chose.  */
++
++static void
++oracle_decide_schedule (ready, n_ready)
++     rtx *ready;
++     int n_ready;
++{
++  int index;
++  FILE *file;
++  rtx first, second;
++  char *by = "order";
++
++  if (n_ready < 2 || (index = oracle_next_decision ()) < 0)
++    return;
++  first = ready[0];
++  second = ready[1];
++  if ((file = oracle_open_trace ()) != 0)
++    {
++      /* An insn whose register is born is launched, by its priority's
++	 rising to LAUNCH_PRIORITY's range (see adjust_priority), and the
++	 gap between such a priority and another is no distance */
++      if (LOW_PRIORITY_P (first) != LOW_PRIORITY_P (second))
++	by = "launch";
++      else if (INSN_PRIORITY (first) != INSN_PRIORITY (second))
++	by = "priority";
++      else if (last_scheduled_insn != 0
++	       && (oracle_schedule_class (first)
++		   != oracle_schedule_class (second)))
++	by = "class";
++      oracle_put_item (file, "{\"stage\": \"decision\", \"index\": ", index);
++      fputs (reload_completed
++	     ? ", \"site\": \"sched2\"" : ", \"site\": \"sched\"", file);
++      oracle_put_item (file, ", \"insns\": [", INSN_UID (first));
++      oracle_put_item (file, ", ", INSN_UID (second));
++      oracle_put_item (file, "], \"gap\": ",
++		       INSN_PRIORITY (first) - INSN_PRIORITY (second));
++      fputs (", \"by\": \"", file);
++      fputs (by, file);
++      fputs ("\"}\n", file);
++      oracle_end_record (file);
++    }
++  if (oracle_flips_decision (index))
++    {
++      ready[0] = second;
++      ready[1] = first;
++    }
++}
++
+ /* Resort the array A in which only element at index N may be out of order.  */
+ 
+ __inline static void
+@@ -3744,6 +3821,7 @@
+ 	    }
+ 	}
+       n_ready = new_ready;
++      oracle_decide_schedule (ready, n_ready);
+       last_scheduled_insn = insn = ready[0];
+ 
+       /* The first insn scheduled becomes the new tail.  */

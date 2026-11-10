@@ -2,7 +2,8 @@
 """Find the register allocation that would make a draft match, and why.
 
     oracle.py [--allocation | --splits | --spills | --merges | --levers |
-               --globals] [ASM_FILE C_FILE] FUNCTION [PSEUDO=HARD ...]
+               --globals | --decisions] [ASM_FILE C_FILE] FUNCTION
+              [PSEUDO=HARD ...]
 
 Without ASM_FILE and C_FILE, finds them from FUNCTION as fncompare does.
 
@@ -51,6 +52,16 @@ compiled unforced, then the closest two at a time. One that matches, or
 comes closest, names a variable whose setting and uses the original had
 in different blocks.
 
+--decisions searches the choices the passes make between ways of
+compiling the draft, which register allocation can't explain: each choice
+is numbered (see ORACLE_FLIP in oracle.patch) and taken the other way
+alone, compiled unforced, and the closest kept, round by round, until the
+draft matches or nothing comes closer. Each flip found names the pass,
+the insns and their lines, and why the pass chose as it did: for the
+scheduler, by "order", the insns' order in the RTL, which the source's
+order of statements sets, or by "priority" or "class", which the
+dependences between the insns set.
+
 Only FUNCTION's own routine is compared; the functions nested in it, which
 fncompare counts with it, are named so that each can be given as FUNCTION.
 """
@@ -65,7 +76,7 @@ import subprocess
 import sys
 import tempfile
 from collections.abc import Callable, Iterable, Iterator, Sequence
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Literal, TypedDict, cast
@@ -75,7 +86,8 @@ import Levenshtein
 
 import fncompare
 
-ORACLE_DIR = fncompare.ROOT / "build" / "oracle"
+# The oracle's compiler directory, which ORACLE_DIR can override
+ORACLE_DIR = Path(os.environ.get("ORACLE_DIR", fncompare.ROOT / "build" / "oracle"))
 MAX_ROUNDS = 8
 # The dumps the search reads: the insns' pseudos as the RTL is first made
 # and before reload, and the asm statements, which -dp doesn't name, from
@@ -88,6 +100,7 @@ MODE_OPTIONS = (
     "--merges",
     "--levers",
     "--globals",
+    "--decisions",
 )
 # The editsearch that replays global-alloc for --levers
 EDITSEARCH = Path(
@@ -114,6 +127,17 @@ MERGE_BEAM = 24
 # a time
 GLOBAL_REPORT_COUNT = 15
 GLOBAL_BEAM = 24
+# The closest flips that --decisions prints in each round
+DECISION_REPORT_COUNT = 10
+# The dumps whose insns the scheduler's decisions name, by their site
+DECISION_DUMPS = {"sched": "sched", "sched2": "sched2"}
+# The children cc1's fork mode runs at once (see ORACLE_FORK_DIR in
+# oracle.patch), and then the processes that score their assembly.
+# Scoring them as they finish, in fewer processes beside fewer children,
+# measured no faster.
+FORK_JOBS = 19
+# The assembly files a scoring process takes at a time
+SCORE_CHUNK = 16
 # The assembly, the C file and the function, before any forced pairs
 MIN_ARGUMENT_COUNT = 3
 # The instructions a register needs from a pseudo to count as holding it
@@ -211,12 +235,30 @@ class GlobalStartRecord(TypedDict):
     stage: Literal["global_start"]
 
 
+class DecisionRecord(TypedDict):
+    """A choice a pass made, which ORACLE_FLIP can take the other way.
+
+    site is the pass; insns the UIDs of the insn chosen and of the one
+    that flipping it would take; gap how far apart their priorities were;
+    and by what chose between them: "launch" is a priority raised to
+    launch an insn whose register is born, whose gap is no distance.
+    """
+
+    stage: Literal["decision"]
+    index: int
+    site: str
+    insns: list[int]
+    gap: int
+    by: str
+
+
 TraceRecord = (
     LocalRecord
     | GlobalRecord
     | DispositionsRecord
     | VariablesRecord
     | GlobalStartRecord
+    | DecisionRecord
 )
 
 
@@ -1186,6 +1228,219 @@ def scan_globals(target: fncompare.Routine, draft: Draft) -> None:
         print(f"{differences} differ: {pseudos}")
 
 
+@functools.cache
+def read_driver_commands(
+    work: Path, optflags: tuple[str, ...]
+) -> tuple[list[str], list[str]]:
+    """Return the cc1 and the as command lines that the driver runs.
+
+    Each is without its input and output files, for a trial to name its
+    own: a trial runs both itself, which saves two runs of the driver.
+    """
+    probe = work / "probe"
+    probe.mkdir(exist_ok=True)
+    _ = shutil.copy(work / "unit.i", probe / "unit.i")
+    commands: list[list[str]] = []
+    for arguments, program, files in (
+        (["-v", "-S", "-o", "unit.s"], "/cc1 ", ("unit.s",)),
+        (["-v", "-c", f"-Wa,-I{fncompare.ROOT}", "-o", "unit.o"], "/as ", ("unit.o",)),
+    ):
+        source = probe / ("unit.i" if program == "/cc1 " else "unit.s")
+        result = fncompare.run_compiler(source, list(optflags), arguments, probe)
+        if result.returncode != 0:
+            raise CompileError(result.stderr)
+        line = next(line for line in result.stderr.splitlines() if program in line)
+        words = line.split()
+        dropped = {str(source.resolve()), "-version", "-v", "-o", *files}
+        commands.append([word for word in words if word not in dropped])
+    cc1, assemble = commands
+    return cc1, assemble
+
+
+@dataclass
+class Scoring:
+    """What each scoring process compares the trials' assembly with."""
+
+    target: fncompare.Routine | None = None
+    function: str = ""
+    assemble: Sequence[str] = ()
+
+
+# Set in each scoring process by start_scoring
+SCORING = Scoring()
+
+
+def start_scoring(
+    target: fncompare.Routine, function: str, assemble: list[str]
+) -> None:
+    """Give a scoring process what it compares the trials with."""
+    SCORING.target, SCORING.function, SCORING.assemble = target, function, assemble
+
+
+def score_assembly(path: str) -> tuple[int, int | None]:
+    """Return a trial's number, from its file's name, and how many words differ.
+
+    None is assembly that didn't assemble or lacks the function.
+    """
+    object_path = path.removesuffix(".s") + ".o"
+    result = subprocess.run(
+        [*SCORING.assemble, "-o", object_path, path], capture_output=True, check=False
+    )
+    index = int(Path(path).stem)
+    if result.returncode != 0 or SCORING.target is None:
+        return index, None
+    routine = fncompare.read_object_file(object_path, {SCORING.function}).get(
+        SCORING.function
+    )
+    if routine is None:
+        return index, None
+    return index, fncompare.count_differences(SCORING.target, routine)
+
+
+def read_function_text(path: Path, function: str) -> bytes:
+    """Return FUNCTION's assembly in the file at PATH, or all of it if not found.
+
+    Two trials whose function reads the same assemble to the same words.
+    """
+    text = path.read_bytes()
+    start = text.find(b"\n" + function.encode() + b":\n")
+    end = text.find(b"\t.end\t" + function.encode() + b"\n", start)
+    return text[start:end] if 0 <= start < end else text
+
+
+def fork_decisions(
+    target: fncompare.Routine, draft: Draft, flips: tuple[int, ...]
+) -> tuple[list[DecisionRecord], dict[int, int]]:
+    """Return DRAFT's decisions with FLIPS, and the words each flip leaves.
+
+    One compile in cc1's fork mode gives every decision, beside FLIPS,
+    taken the other way; the words are {decision's number: words that
+    differ}, without the flips whose assembly fails.
+    """
+    work = draft.work / "fork"
+    shutil.rmtree(work, ignore_errors=True)
+    children = work / "children"
+    children.mkdir(parents=True)
+    cc1, assemble = read_driver_commands(draft.work, tuple(draft.optflags))
+    trace_path = work / TRACE_NAME
+    environment = {
+        "ORACLE_FUNCTION": draft.function,
+        "ORACLE_FLIP": ",".join(map(str, flips)),
+        "ORACLE_TRACE": str(trace_path),
+        "ORACLE_FORK_DIR": str(children),
+        "ORACLE_FORK_JOBS": str(FORK_JOBS),
+    }
+    result = subprocess.run(
+        [*cc1, str(draft.work / "unit.i"), "-o", str(work / "unit.s")],
+        cwd=work,
+        env=dict(os.environ, **environment),
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if result.returncode != 0:
+        raise CompileError(result.stderr)
+    records = (
+        cast("TraceRecord", json.loads(line))
+        for line in trace_path.read_text().splitlines()
+    )
+    decisions = [record for record in records if record["stage"] == "decision"]
+    # The children whose function reads the same take one scoring: about
+    # a third of them for DrawGame
+    alike: dict[bytes, list[int]] = collections.defaultdict(list)
+    for path in children.glob("*.s"):
+        alike[read_function_text(path, draft.function)].append(int(path.stem))
+    paths = [str(children / f"{indices[0]}.s") for indices in alike.values()]
+    with ProcessPoolExecutor(
+        FORK_JOBS,
+        initializer=start_scoring,
+        initargs=(target, draft.function, assemble),
+    ) as pool:
+        scores = dict(pool.map(score_assembly, paths, chunksize=SCORE_CHUNK))
+    words = {
+        index: count
+        for indices in alike.values()
+        if (count := scores[indices[0]]) is not None
+        for index in indices
+    }
+    return decisions, words
+
+
+def read_decision_lines(
+    draft: Draft, flips: tuple[int, ...]
+) -> dict[str, dict[int, int]]:
+    """Return the source lines of the insns DRAFT's decisions name with FLIPS.
+
+    They are {site: {insn UID: source line}}, from the dumps of the passes
+    that decide.
+    """
+    work = draft.work / "decisions"
+    work.mkdir(exist_ok=True)
+    _ = shutil.copy(draft.work / "unit.i", work / "unit.i")
+    environment = {"ORACLE_FLIP": ",".join(map(str, flips))}
+    passes = sorted(set(DECISION_DUMPS.values()))
+    blamed = build_function(draft.function, draft.optflags, work, environment, passes)
+    noted = blame.read_insn_lines(
+        draft.optflags,
+        blamed.dumps,
+        work,
+        draft.function,
+        {"ORACLE_FUNCTION": draft.function, **environment},
+    )
+    return {
+        site: {uid: int(place.split(":")[1]) for uid, place in noted[dump].items()}
+        for site, dump in DECISION_DUMPS.items()
+    }
+
+
+def describe_decision(
+    decision: DecisionRecord, lines: dict[str, dict[int, int]]
+) -> str:
+    """Return DECISION's pass, its insns with their lines, and what chose."""
+    site_lines = lines.get(decision["site"], {})
+    chosen, other = (f"{uid}@{site_lines.get(uid, '?')}" for uid in decision["insns"])
+    by = decision["by"]
+    if by == "priority":
+        by = f"priority by {decision['gap']}"
+    return f"#{decision['index']} {decision['site']}: {other} before {chosen} ({by})"
+
+
+def scan_decisions(target: fncompare.Routine, draft: Draft) -> None:
+    """Print the flips of the passes' decisions that bring DRAFT closest.
+
+    Each round takes each decision the other way alone, beside the flips
+    kept so far, and keeps the closest, until the draft matches or no flip
+    comes closer. The scheduler schedules each block from its end, so a
+    flip puts the insn it names first before the other.
+    """
+    closest = count_differences(target, draft.traced)
+    print(f"  unflipped: {closest} differ")
+    flips: tuple[int, ...] = ()
+    for number in range(1, MAX_ROUNDS + 1):
+        decisions, words = fork_decisions(target, draft, flips)
+        if number == 1:
+            print(f"  {len(decisions)} decisions")
+        by_index = {decision["index"]: decision for decision in decisions}
+        ranked = sorted(
+            (differences, (*flips, index))
+            for index, differences in words.items()
+            if differences < closest and index not in flips
+        )
+        if not ranked:
+            print(f"  round {number}: no flip comes closer")
+            return
+        print(f"  round {number}:")
+        lines = read_decision_lines(draft, flips)
+        for differences, trial in ranked[:DECISION_REPORT_COUNT]:
+            decision = describe_decision(by_index[trial[-1]], lines)
+            print(f"    {differences} differ: {decision}")
+        closest, flips = ranked[0]
+        if closest == 0:
+            print(f"MATCHES when {len(flips)} decisions are flipped: {flips}")
+            return
+    print(f"  closest: {closest} differ when {flips} are flipped")
+
+
 def use_compiler() -> None:
     """Compile with the oracle's cc1 from now on, or exit if it isn't built."""
     if not (ORACLE_DIR / "source" / "cc1").exists():
@@ -1223,6 +1478,7 @@ def run_mode(request: Request, target: fncompare.Routine, draft: Draft) -> None:
         "merges": scan_merges,
         "levers": print_levers,
         "globals": lambda target, draft, _: scan_globals(target, draft),
+        "decisions": lambda target, draft, _: scan_decisions(target, draft),
     }
     if request.mode in scans:
         scans[request.mode](target, draft, force)
