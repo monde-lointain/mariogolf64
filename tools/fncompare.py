@@ -48,7 +48,7 @@ import subprocess
 import sys
 import tempfile
 import threading
-from collections.abc import Callable, Hashable, Sequence
+from collections.abc import Callable, Container, Hashable, Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import cast, final
@@ -1305,9 +1305,11 @@ def read_object(obj_path: StrPath) -> ObjectFile:
     return obj
 
 
-def read_object_file(obj_path: StrPath) -> Functions:
+def read_object_file(
+    obj_path: StrPath, names: Container[str] | None = None
+) -> Functions:
     """Return the functions in an object file, as read_object_functions does."""
-    return read_object_functions(read_object(obj_path))
+    return read_object_functions(read_object(obj_path), names)
 
 
 # {first word: (symbol name, size in words)} of each function in .text.
@@ -1462,8 +1464,10 @@ def keep_constant_values(words: list[int], relocated: Relocated) -> None:
             relocated.references[index] = None
 
 
-def read_object_functions(obj: ObjectFile) -> Functions:
-    """Return {name: routine} of each function in OBJ's .text."""
+def read_object_functions(
+    obj: ObjectFile, names: Container[str] | None = None
+) -> Functions:
+    """Return {name: routine} of each function in OBJ's .text, or of NAMES."""
     text_index = obj.find_section(".text")
     if text_index is None or not obj.symbols:
         return {}
@@ -1473,6 +1477,8 @@ def read_object_functions(obj: ObjectFile) -> Functions:
     keep_constant_values(words, relocated)
     functions: Functions = {}
     for start, (name, size) in read_function_spans(obj.symbols, text_index).items():
+        if names is not None and name.split(".")[0] not in names:
+            continue
         end = start + size
         jumps = {
             index - start: target - start

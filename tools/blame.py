@@ -300,9 +300,15 @@ def split_dump(dump: str, function: str) -> str:
     return next((part for part in parts if part.startswith(f"{function}\n")), "")
 
 
-def run(c_path: StrPath, optflags: list[str], arguments: list[str], work: Path) -> None:
-    """Run the compiler in WORK, or exit with its errors."""
-    result = fncompare.run_compiler(c_path, optflags, arguments, cwd=work)
+def run(
+    c_path: StrPath,
+    optflags: list[str],
+    arguments: list[str],
+    work: Path,
+    environment: dict[str, str] | None = None,
+) -> None:
+    """Run the compiler in WORK with ENVIRONMENT, or exit with its errors."""
+    result = fncompare.run_compiler(c_path, optflags, arguments, work, environment)
     if result.returncode != 0:
         sys.exit(result.stderr)
 
@@ -352,14 +358,22 @@ def map_insn_lines(dump: str, noted_dump: str) -> dict[int, str]:
 
 
 def read_insn_lines(
-    optflags: list[str], dumps: dict[str, str], work: Path, function: str
+    optflags: list[str],
+    dumps: dict[str, str],
+    work: Path,
+    function: str,
+    environment: dict[str, str] | None = None,
 ) -> dict[str, dict[int, str]]:
-    """Return {pass: {insn UID: source line}} for the insns of DUMPS."""
+    """Return {pass: {insn UID: source line}} for the insns of DUMPS.
+
+    DUMPS must come from a compile with ENVIRONMENT, which the -g compile
+    that notes the lines then has too.
+    """
     noted_work = work / "noted"
     noted_work.mkdir(exist_ok=True)
     _ = (noted_work / "unit.i").write_text((work / "unit.i").read_text())
     arguments = ["-S", "-g", get_dump_flag(dumps), "-o", "unit.s"]
-    run(noted_work / "unit.i", optflags, arguments, noted_work)
+    run(noted_work / "unit.i", optflags, arguments, noted_work, environment)
     noted_dumps = read_dumps(noted_work, function, dumps)
     return {
         name: map_insn_lines(dump, noted_dumps.get(name, ""))
