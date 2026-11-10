@@ -2282,39 +2282,6 @@ ClubType ChooseApproachClub(s32 *targetX, s32 *targetZ) {
 
 #define POWER_TO_GAUGE_FRAME_SCALE (GAUGE_FULL_FRAME / 256.0f)
 
-#ifndef NON_MATCHING
-/* The power gauge frame for a launch power out of 256 */
-s32 GetPowerGaugeFrame(s32 amount) {
-    s32 value;
-#    ifndef AVOID_UB
-    s32 unused;
-    s32 uninitialized;
-
-    /*
-     * The original nests this routine in StepTrialShot, a GNU C extension:
-     * nested there, it compiles to the original's code, and StepTrialShot
-     * passes a stack address in $v0 as the static chain, which this stores.
-     * This copy stands in for it while StepTrialShot doesn't match; the
-     * draft below nests it in the block that calls it. The store of
-     * an uninitialized value is there to match: it stands in for the static
-     * chain's store, which no other C makes, and without it 7 words differ.
-     */
-    *(&unused) = uninitialized;
-#    endif
-
-    value = (amount * POWER_TO_GAUGE_FRAME_SCALE) + 0.5f;
-    if (value < MIN_POWER_GAUGE_FRAME) {
-        value = MIN_POWER_GAUGE_FRAME;
-    }
-
-    if (value > GAUGE_FULL_FRAME - 1) {
-        value = GAUGE_FULL_FRAME;
-    }
-
-    return value;
-}
-#endif
-
 /* The fault report of StepTrialShot and IsTrialShotSafe, which share its one
  * copy */
 static const char f_SimFaultText[] = "AI Sim Fault!";
@@ -2338,73 +2305,57 @@ static const char f_SimFaultText[] = "AI Sim Fault!";
  * better than the best so far, and 1 once it has evaluated the trial, or
  * abandoned it, and adjusted f_Shot's power, mode or aim for the next one.
  *
- * GetPowerGaugeFrame is nested in the block that calls it, as in the original;
- * see its copy above. GCC compiles a nested function at its definition, and
- * rest_of_compilation sets cse_not_expected, which isn't saved across it, so
- * the code after the definition is expanded with constant addresses inside its
- * memory references, as the original's is there, and the code before it with
- * the addresses in registers. Nested at the start of the routine, 215 words
- * differ (131 in shape); at the start of the evaluation block, 178 (114); at
- * the start of the ratio's test, 86 (40); in the block that calls it, 30 (8);
- * and separate, 101 (35). These counts were measured before shotStroke.
+ * GetPowerGaugeFrame is nested in the block that calls it, a GNU C extension,
+ * as in the original: StepTrialShot passes it a stack address in $v0 as the
+ * static chain, which it stores. GCC compiles a nested function at its
+ * definition, and rest_of_compilation sets cse_not_expected, which isn't saved
+ * across it, so the code after the definition is expanded with constant
+ * addresses inside its memory references, as the original's is there, and the
+ * code before it with the addresses in registers. Nested at the start of the
+ * routine, 185 words differ (123 in shape); at the start of the evaluation
+ * block, 148 (106); at the start of the ratio's test, 56 (32); at the start
+ * of the test for too much power, 57 (33); and as a routine of its own, with
+ * or without a store standing in for the static chain's, 71 (27).
  *
- * Doesn't match: 12 words differ, 4 in shape. Ours sums the poor
- * landing's evaluation into $v0 and stores it at once, where the
- * original sums into $v1 and stores it later: the sum's and the
- * constant's quantities tie on local-alloc's priority, and the tie goes
- * to the lower quantity number, the sum's. The register oracle matches
- * the draft when it swaps the two. Reading kind after the sum, or
- * testing surfaceInfo->kind directly, leaves the 12 words, as do
- * editsearch's generators and the permuter's passes. The heading's
- * correction ends the arm for a finished trial, and the next try's aim
- * change is the else arm, both reaching the one return: with an early
- * return in the arm instead, its return value's $v0 is set in the
- * correction's block, which loads f_Shot.heading before both
- * conversions, and 33 words differ (11 in shape). A do-while (0) around
- * the correction gave 26 (8), as its loop weights the uses inside, and
- * an empty one after it 12, as the arm's end does. The aim change's step
- * as an if/else subtracting or adding gave 75 words (31 in shape), and
- * adding the step or its negation, chosen by ?:, 45 (17); these two
- * counts were measured before shotStroke, when 30 words differed (8 in
- * shape).
+ * A poor landing's evaluation sits in a block of its own, as a macro's
+ * do-while would make it, to match. The original loads
+ * POOR_LANDING_EVALUATION into $v0 and sums it into $v1. local-alloc ranks a
+ * block's quantities by floor_log2(refs) * refs / life, and outside a loop
+ * the sum's 4 references over a life of 8 tie with the constant's 2 over a
+ * life of 2; the tie goes to the lower quantity number, the sum's, which
+ * takes $v0. flow counts a reference twice in a loop, even one that runs
+ * once, and the logarithm then ranks the constant's 4 references above the
+ * sum's 8, so the constant takes $v0.
  *
- * Before the nesting, when 101 words differed (35 in shape): reading kind
- * after the sum, testing surfaceInfo->kind directly, and spelling the tests
- * out with || or | leave the code as it is. Writing the last aim change as
- * the earlier one is, the step times -1 or 1, reads f_Shot.heading signed
- * once before the parity test, as the original does, and gives 101 words
- * differing (35 in shape); adding the change or its negation, chosen by ?:,
- * gives the same, and choosing by ?: between the heading minus and plus the
- * change 106 (38). With an if/else subtracting or adding, the change worked
- * out once into a local gave 106 (40) and worked out in each arm 117 (43).
- * Earlier, the register oracle, forcing 16 pseudos, left 76 words. The
- * permuter's best runs, 103 words (35 in shape) and later 89 (31) with the
- * aim change worked out once, read the heading for the excluded sectors
- * through a pointer taken before the club checks, where the original reads
- * f_Shot.heading directly; taking it just before the loop gave 116 (36),
- * using it for the aim change too 118 (36), and reading the centre sector
- * into a local 153 (57). A later run reached 87 (27) with the same pointer
- * alone. Now, a local holding the heading's sector before the loop, or the
- * heading itself, gives 139 (47), and one holding the first excluded sector
- * 135 (47). A focused run reached 73 (23) with the same pointer, the aim's
- * update out of its block and an empty do-while (0) after it, neither of
- * which is natural.
+ * Without the block, or with plain braces, 12 words differ (4 in shape). A
+ * block around the whole if, one that ends after the out-of-bounds test, and
+ * one around the whole else arm from the EVALUATE label match too. One around
+ * the sum alone, the out-of-bounds test alone or both tests gives 24 (6), and
+ * one around the water hazard's test 12 (4). The kind read into a local
+ * inside the block, before or after the sum, matches; read before the block
+ * it gives 12 (6), and with only its read and the sum in the block 4 (4).
+ *
+ * The heading's correction ends the arm for a finished trial, and the next
+ * try's aim change is the else arm, both reaching the one return: with an
+ * early return in the arm instead, 21 words differ (7 in shape), and with a
+ * do-while (0) around the correction 14 (4). The aim change's step as an
+ * if/else subtracting or adding gives 23 (13); adding the step or its
+ * negation, chosen by ?:, 15 (7); and choosing by ?: between the heading
+ * minus and plus the step 23 (9).
  */
-#ifdef NON_MATCHING
 s32 StepTrialShot(void) {
     PlaneTriangle hit;
     f32 fraction;
     s32 flags;
     s32 ballState;
-    /* A copy of flags, to match: reading flags gives 45 words, 11 in shape,
-     * against 26 (8) */
+    /* A copy of flags, to match: reading flags gives 19 words differing, 3 in
+     * shape */
     s32 stepFlags;
     s32 velocityY;
     s32 bounceCount;
     s32 heightMiss;
     SurfaceInfo *surfaceInfo;
     s32 targetRating;
-    s32 kind;
     s32 strokes;
     s32 par;
     s32 strokesOver;
@@ -2463,7 +2414,7 @@ s32 StepTrialShot(void) {
     if (ballState != BALL_STATE_STOPPED) {
         /* A loop that runs once, so that the step's checks can break out to the
          * end point's update; the original has no loop here, and jumping to a
-         * label instead gives 64 words differing, 28 in shape, against 26 (8) */
+         * label instead gives 38 words differing, 20 in shape */
         do {
             velocityY = f_TrialSimulation.velocity[AXIS_Y];
             bounceCount = f_TrialSimulation.bounceCount;
@@ -2560,11 +2511,10 @@ s32 StepTrialShot(void) {
 
             /*
              * A long putt is evaluated even if it holed out. The goto into the
-             * evaluation, to match: against 26 words differing, 8 in shape, a flag
-             * set by an if here and tested with the holed-out one gives 40, 16 in
-             * shape; the flag assigned this test 47, 15; and this test moved into
-             * the holed-out one's 61, 25. An inline helper for the evaluation,
-             * called in both places, gave 151, 45, on an older draft.
+             * evaluation, to match: a flag set by an if here and tested with the
+             * holed-out one gives 14 words differing, 8 in shape; the flag
+             * assigned this test 21, 7; and this test moved into the holed-out
+             * one's 35, 17.
              */
             if (g_Players[f_Shot.playerIndex].strokeCount + 1 <
                     g_HoleSetup.par + f_HoleTargetToPar &&
@@ -2606,18 +2556,21 @@ EVALUATE:
                 GetSurfaceInfoAt(f_PlanTarget[AXIS_X], f_PlanTarget[AXIS_Z])->kind
             );
             if (GetLandingRating(surfaceInfo->kind) < targetRating) {
-                kind = surfaceInfo->kind;
-                f_TrialEvaluation += POOR_LANDING_EVALUATION;
-                if (IsOutOfBoundsKind(kind)) {
-                    f_TrialEvaluation = LOST_BALL_EVALUATION;
-                    f_IsTrialLost = TRUE;
-                }
+                /* In a block of its own to match, as the header comment explains */
+                do {
+                    f_TrialEvaluation += POOR_LANDING_EVALUATION;
+                    if (IsOutOfBoundsKind(surfaceInfo->kind)) {
+                        f_TrialEvaluation = LOST_BALL_EVALUATION;
+                        f_IsTrialLost = TRUE;
+                    }
 
-                if (surfaceInfo->kind == SURFACE_KIND_WATER_HAZARD) {
-                    osSyncPrintf("Water Hazzad\n");
-                    f_TrialEvaluation = LOST_BALL_EVALUATION;
-                    f_IsTrialLost = TRUE;
+                    if (surfaceInfo->kind == SURFACE_KIND_WATER_HAZARD) {
+                        osSyncPrintf("Water Hazzad\n");
+                        f_TrialEvaluation = LOST_BALL_EVALUATION;
+                        f_IsTrialLost = TRUE;
+                    }
                 }
+                while (0);
             }
 
             heightMiss = f_PlanTarget[AXIS_Y] - f_TrialSimulation.position[AXIS_Y];
@@ -2637,8 +2590,8 @@ EVALUATE:
             if (GetSurfaceInfoAt(f_PlanTarget[AXIS_X], f_PlanTarget[AXIS_Z])->kind ==
                 SURFACE_KIND_GREEN) {
                 /* The stroke this shot would be. Counting it in strokes with ++
-                 * gives 30 words differing (8 in shape), and adding it in the
-                 * subtraction 43 (11), against 26 (8) */
+                 * gives 4 words differing (none in shape), and adding it in the
+                 * subtraction 17 (3) */
                 s32 shotStroke = strokes + 1;
 
                 strokesOver = shotStroke - (par + f_HoleTargetToPar);
@@ -2862,9 +2815,6 @@ EVALUATE:
 
     return 1;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_03/computer_golfer", StepTrialShot);
-#endif
 
 /* Returns the slot of the golfer's club of type clubType, or 0 if there is none
  */
@@ -3186,7 +3136,7 @@ Boolean IsLineMostlyLost(CoursePoint from, CoursePoint to) {
  * words, 3 in shape; setting it at the top gives 15, using it after the launch
  * as well 13, and for every access 60. The pointer isn't adopted: cse's
  * use_related_value derives one address in a symbol from a register holding
- * another, as StepTrialShot's draft passes &f_TrialSimulation and is compiled
+ * another, as StepTrialShot passes &f_TrialSimulation and is compiled
  * to its state's address less 140, as in its target. The 0x28 bias is
  * unexplained.
  *
