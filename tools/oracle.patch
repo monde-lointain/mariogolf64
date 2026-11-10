@@ -908,10 +908,10 @@
  	  /* Look for a substitution that makes a valid insn.  */
 -          else if (validate_change (insn, &SET_SRC (sets[i].rtl), trial, 0))
 +          else if (validate_change (insn, &SET_SRC (sets[i].rtl), trial, 0)
-+		   && (trial == src
++		   && (rtx_equal_p (trial, sets[i].src)
 +		       || ! oracle_refuses_substitution (insn,
 +							 &SET_SRC (sets[i].rtl),
-+							 src, 0)))
++							 sets[i].src, 0)))
  	    {
  	      /* The result of apply_change_group can be ignored; see
  		 canon_reg.  */
