@@ -235,7 +235,14 @@ class GlobalStartRecord(TypedDict):
     stage: Literal["global_start"]
 
 
-class DecisionRecord(TypedDict):
+class DecisionChange(TypedDict, total=False):
+    """The RTL a cse decision took out, original, and put in, replacement."""
+
+    original: str
+    replacement: str
+
+
+class DecisionRecord(DecisionChange):
     """A choice a pass made, which ORACLE_FLIP can take the other way.
 
     site is the pass. For the scheduler's, insns are the UIDs of the insn
@@ -243,7 +250,8 @@ class DecisionRecord(TypedDict):
     their priorities were; and by what chose between them: "launch" is a
     priority raised to launch an insn whose register is born, whose gap is
     no distance. For cse's, insns is the insn cse changed, by putting a
-    cheaper equivalent in its "source" or an "address", and gap is 0.
+    cheaper equivalent in its "source" or an "address", gap is 0, and from
+    original and replacement the RTL cse took out and put in.
     """
 
     stage: Literal["decision"]
@@ -1395,6 +1403,12 @@ def read_decision_lines(
     }
 
 
+def compact_rtl(text: str) -> str:
+    """Return the printed RTL TEXT without its modes, flags and const_ints."""
+    text = re.sub(r"(?<=[a-z_])(/[a-z]+)?:[A-Z]+", "", text)
+    return re.sub(r"\(const_int (-?\d+)\)", r"\1", text).strip()
+
+
 def describe_decision(
     decision: DecisionRecord, lines: dict[str, dict[int, int]]
 ) -> str:
@@ -1404,7 +1418,9 @@ def describe_decision(
     by = decision["by"]
     heading = f"#{decision['index']} {decision['site']}"
     if len(places) == 1:
-        return f"{heading}: refuse the {by} cse puts in {places[0]}"
+        change = f"{compact_rtl(decision.get('original', '?'))} -> "
+        change += compact_rtl(decision.get("replacement", "?"))
+        return f"{heading}: refuse the {by} cse puts in {places[0]}, {change}"
     if by == "priority":
         by = f"priority by {decision['gap']}"
     return f"{heading}: {places[1]} before {places[0]} ({by})"

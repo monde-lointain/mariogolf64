@@ -821,7 +821,7 @@
    /* Note that for those inline functions where we don't initially
 --- a/cse.c
 +++ b/cse.c
-@@ -2618,6 +2618,52 @@
+@@ -2618,6 +2618,90 @@
     than hard registers here because we would also prefer the pseudo registers.
    */
  
@@ -842,6 +842,41 @@
 +   next cheapest as if the change were invalid.  The trace records the
 +   insn and what was substituted, by "source" or "address".  */
 +
++/* Put KEY's string, RTL X printed on one line, into the trace FILE.  */
++
++static void
++oracle_put_rtx (file, key, x)
++     FILE *file;
++     char *key;
++     rtx x;
++{
++  char *text = 0;
++  size_t size = 0;
++  FILE *memory = open_memstream (&text, &size);
++  char *p;
++  int was_space = 1;
++
++  print_rtl (memory, x);
++  fclose (memory);
++  fprintf (file, ", \"%s\": \"", key);
++  for (p = text; *p; p++)
++    {
++      int is_space = *p == ' ' || *p == '\n' || *p == '\t';
++
++      if (is_space && ! was_space)
++	putc (' ', file);
++      else if (! is_space)
++	{
++	  if (*p == '"' || *p == '\\')
++	    putc ('\\', file);
++	  putc (*p, file);
++	}
++      was_space = is_space;
++    }
++  putc ('"', file);
++  free (text);
++}
++
 +static int
 +oracle_refuses_substitution (insn, loc, original, is_address)
 +     rtx insn;
@@ -861,8 +896,11 @@
 +	     ? ", \"site\": \"cse2\"" : ", \"site\": \"cse\"", file);
 +      oracle_put_item (file, ", \"insns\": [", INSN_UID (insn));
 +      fputs (is_address
-+	     ? "], \"gap\": 0, \"by\": \"address\"}\n"
-+	     : "], \"gap\": 0, \"by\": \"source\"}\n", file);
++	     ? "], \"gap\": 0, \"by\": \"address\""
++	     : "], \"gap\": 0, \"by\": \"source\"", file);
++      oracle_put_rtx (file, "original", original);
++      oracle_put_rtx (file, "replacement", *loc);
++      fputs ("}\n", file);
 +      oracle_end_record (file);
 +    }
 +  if (! oracle_flips_decision (index))
@@ -874,7 +912,7 @@
  static void
  find_best_addr (insn, loc)
       rtx insn;
-@@ -2730,10 +2776,10 @@
+@@ -2730,10 +2814,10 @@
  	    {
  	      if (validate_change (insn, loc,
  				   canon_reg (copy_rtx (best_elt->exp),
@@ -888,7 +926,7 @@
  	    }
  	}
      }
-@@ -2812,10 +2858,10 @@
+@@ -2812,10 +2896,10 @@
  	    {
  	      if (validate_change (insn, loc,
  				   canon_reg (copy_rtx (best_rtx),
@@ -902,7 +940,7 @@
  	    }
  	}
      }
-@@ -6835,7 +6881,11 @@
+@@ -6835,7 +6919,11 @@
  	    }
  	   
  	  /* Look for a substitution that makes a valid insn.  */
@@ -915,7 +953,7 @@
  	    {
  	      /* The result of apply_change_group can be ignored; see
  		 canon_reg.  */
-@@ -8231,6 +8281,7 @@
+@@ -8231,6 +8319,7 @@
    recorded_label_ref = 0;
    constant_pool_entries_cost = 0;
    val.path_size = 0;
