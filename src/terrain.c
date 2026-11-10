@@ -668,27 +668,34 @@ f32 ConvertToFloat(s32 value) {
  * Returns the surface at a point: water if the water is above the ground,
  * otherwise the heaviest of the four nearest codes' surfaces.
  *
- * Doesn't match: the original tests whether the steps are equal by XORing
- * each plus one, and branches first on a register it has just zeroed. The
- * direction comparison accounts for the remaining 8 differing words, all in
- * shape, and the register oracle's closest result is these 8 with no
- * register forced. Comparing the steps plus one, for equality or by XORing
- * them, gives 10 words, 6 in shape; the equality compares them with a bne
- * and has no zeroed register's branch. Testing the steps' product for being
- * above 0 or equal to 1 gives 15 and 13, their sum for being nonzero 11,
- * their signs 12 and 13, and which half each fraction is in 41. Comparing
- * the steps plus one halved gives 44 words (10 in shape) by division and 12
- * (8) by a shift. An inline helper comparing the steps plus one, by == or
- * by XOR, or returning the XOR itself, gives 10 words (6 in shape), as do
- * the XOR compared == 0 and the steps' plus one from a helper; a helper
- * returning TRUE when the steps are equal left 8.
+ * The original XORs the steps, each plus one, into $v1, then zeroes $v0 and
+ * branches on it to the equal steps' arm before it branches on $v1 to the
+ * other two. The steps' difference is first tested for being both below and
+ * above 0, to match: fold makes the two tests one AND of their flags, combine
+ * reduces the AND to a constant 0, and the branch on the 0's register stays,
+ * ahead of the difference's own.
  *
- * Comparing the steps' signs as truth values, by == or != against each
- * other's opposite, gives 11 to 14 words, a product equal to 1 gives 13,
- * either both negative or both positive 16 to 20, and XORing the steps
- * themselves or subtracting them leaves 8. 8 words differ, all in shape.
+ * With the steps compared directly 8 words differ, 8 in shape, and with the
+ * difference compared with 0 alone 10 (6). The two tests in the other order
+ * give 18 (4), the pair after the comparison with 0 gives 9 (3), and joined
+ * to it by ?: instead of || 21 (7). Above 2 or equal to 1 for the second
+ * test gives 21 (5); <= 0 for the comparison 2 (2); and the steps compared
+ * directly after the pair 51 (5), with a frame 24 bytes smaller. The same
+ * pair of tests on stepColumn gives 12 (0), and on distanceX matches. The
+ * difference XORed without the ones, or subtracted, gives 9 (7), and as the
+ * != of the steps plus one 47 (1).
+ *
+ * These also match: !stepDifference for the comparison; != 0 && == 0, or
+ * < 0 && >= 1, for the pair; the XOR written out three times with no local;
+ * the whole test as !((d >= 0 || d <= 0) && d != 0); and the pair in its own
+ * if with a goto into the arm. A bit that is always clear, (d & 1) >> 1,
+ * matches in such an if or before ?:, but before || gives 10 (6), as fold
+ * ORs its flag with the comparison's and combine drops it. A local set to 0
+ * gives 10 (6) too, since cse removes its branch. A 64-bit difference, whose
+ * high word is a zeroed register with a branch of its own, gives 32 (10)
+ * compared == 0 as a u64 and 33 (13) compared <= 0 as an s64, the pair in
+ * $t0 and $t1; an s64 holding the == of the steps plus one gives 17 (5).
  */
-#ifdef NON_MATCHING
 Surface FindSurface(s32 x, s32 z, Boolean lowersWaterLevel) {
     s8 surfaces[NEAREST_CODE_COUNT];
     f32 weights[NEAREST_CODE_COUNT];
@@ -704,6 +711,7 @@ Surface FindSurface(s32 x, s32 z, Boolean lowersWaterLevel) {
     s32 stepRow;
     s32 distanceX;
     s32 distanceZ;
+    s32 stepDifference;
     f32 weight;
     Surface surface;
     s32 bestIndex;
@@ -824,7 +832,9 @@ Surface FindSurface(s32 x, s32 z, Boolean lowersWaterLevel) {
 
     distanceX = Abs(GROUND_TEXEL_SIZE / 2 - fractionX);
     distanceZ = Abs(GROUND_TEXEL_SIZE / 2 - fractionZ);
-    if (stepColumn == stepRow) {
+    stepDifference = (stepColumn + 1) ^ (stepRow + 1);
+    /* The difference is never both below and above 0; tested to match */
+    if ((stepDifference < 0 && stepDifference > 0) || stepDifference == 0) {
         weights[0] = weights[0] *
             ((1.0f / ((f32)GROUND_TEXEL_SIZE * GROUND_TEXEL_SIZE)) *
                 ((f32)(GROUND_TEXEL_SIZE - distanceX) * (f32)(GROUND_TEXEL_SIZE - distanceZ)));
@@ -881,10 +891,6 @@ Surface FindSurface(s32 x, s32 z, Boolean lowersWaterLevel) {
 
     return surfaces[bestIndex];
 }
-
-#else
-INCLUDE_ASM("asm/nonmatchings/terrain", FindSurface);
-#endif
 
 Surface GetSurface(s32 x, s32 z) {
     return FindSurface(x, z, FALSE);
