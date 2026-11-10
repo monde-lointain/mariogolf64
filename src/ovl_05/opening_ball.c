@@ -2114,44 +2114,25 @@ INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_ball", StepOpeningBallSimulation);
  * entry, picks a lie blend of 0, leaves out the slopes, rain and wind, and
  * prints the launch velocity to the debug output.
  *
- * Doesn't match: fold moves CLUB_SIDE_SPIN_SCALE onto sideSign, where the
- * original doubles club->sideSpin before multiplying by sideSign. The two
- * products agree, but their shift and multiply operands differ (4 words).
- * A left shift of the club value prevents that reassociation, but leaves 14
- * words differing: local-alloc assigns the club contribution and shot->offsetX
- * the opposite registers. Keep the named scale, as in LaunchBallSimulation,
- * rather than shifting a potentially negative signed club value.
+ * groundHeight also holds the club's doubled side spin, to match. Doubled in
+ * the sum, fold moves CLUB_SIDE_SPIN_SCALE onto sideSign, where the original
+ * doubles club->sideSpin before multiplying by sideSign (4 words differ, none
+ * in shape). Doubled in a variable of its own, local-alloc ties the club's
+ * value, its doubling and the product into one quantity. That ties on priority
+ * with shot->offsetX and comes first by number, so it takes $v1 and leaves
+ * the offset $a0, where the original has them the other way round (14, none).
+ * As groundHeight is also used in an earlier block, its register is left to
+ * global-alloc, and the product alone ranks below the offset, which takes
+ * $v1. groundHeight then gets $a0, as $v0 and $v1 are taken where the ground
+ * height is.
  *
- * Swapping the sum's operands gives 16 to 28 words with the shift form.
- * Computing the doubled club contribution in a local before yawRadians or
- * just before the sum leaves 14, unless staged multiplications let fold move
- * the scale onto sideSign again (4). No extra local is needed for that form.
- *
- * With the doubled club value in a local, the register oracle matches when 4
- * pseudos are forced, so only allocation differs: local-alloc ties the load to
- * its doubling and gives that quantity $v1 before shot->offsetX's load, where
- * the original has them the other way round. Setting the local just before the
- * pitch's offset term, the yaw or the sum, with either operand order at the yaw
- * or the sum, leaves 14 words, as do 48 orders of the operands of the sum and
- * of its product with speed with the local; set before the pitch or its sign
- * test, 11 differ (9 in shape), and earlier 20 to 30 (8 to 14), as the load
- * moves into earlier blocks. Staging the product in the local, or putting the
- * offset's part or the whole sum in locals of their own, leaves 14 too, or 18
- * when the sum starts with the club's part.
- *
- * fold's associate step rewrites (club->sideSpin * 2) * sideSign as
- * club->sideSpin * (sideSign * 2), and does so too with sideSign written
- * first, as LaunchBallSimulation's club test writes it, which gives 6 words;
- * other orders of the club's part give 14 to 26, multiplying each part by
- * speed 12 to 20, and doubling the offset's and club's parts together 16.
- * Doubling through a static inline helper, which GCC inlines after fold,
- * keeps the target's sll before the mult but leaves 14 words, as the local
- * does, and so does adding club->sideSpin to itself, with sideSign on either
- * side. Holding the scale in a local, as the club test holds its percent,
- * leaves 14 words too, none in shape, and setting it at the routine's start
- * 23 (15).
+ * Doubling it where it is loaded gives 4 words (none in shape), doubling it
+ * in the sum 12 (none), and multiplying it by sideSign in a third statement,
+ * or writing sideSign second in the product, 2 (none). Reusing purpose gives
+ * 6 (none), index 22 (2), rumbles 32 (4) and speed 56 (46). Loading and
+ * doubling it before the yaw matches too, as does doubling it by adding it to
+ * itself or by a shift.
  */
-#ifdef NON_MATCHING
 s32 LaunchOpeningBallSimulation(BallSimulation *simulation, s32 purpose, ShotLaunch *shot) {
     s32 percentRange[2];
     Club *club;
@@ -2240,9 +2221,12 @@ s32 LaunchOpeningBallSimulation(BallSimulation *simulation, s32 purpose, ShotLau
     pitch +=
         (f32)club->offsetPitch * shot->offsetY * (DEGREES_TO_RADIANS / OFFSET_Y_PER_PITCH_STEP);
     yawRadians = (u16)shot->heading * BINARY_ANGLE_TO_RADIANS;
+    /* Reused to match, as the header comment explains */
+    groundHeight = club->sideSpin;
+    groundHeight *= CLUB_SIDE_SPIN_SCALE;
     simulation->sideSpin =
         (((((sideSign * entry->sideSpinChange) + shot->offsetX) * OPENING_OFFSET_SIDE_SPIN_SCALE) +
-             ((club->sideSpin * CLUB_SIDE_SPIN_SCALE) * sideSign)) *
+             (sideSign * groundHeight)) *
             speed) *
         SIDE_SPIN_PER_SPEED;
     simulation->spinSize = 0.0f;
@@ -2345,8 +2329,3 @@ s32 LaunchOpeningBallSimulation(BallSimulation *simulation, s32 purpose, ShotLau
 
     return 0;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_ball", PickOpeningLieBlend);
-
-INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_ball", LaunchOpeningBallSimulation);
-#endif
