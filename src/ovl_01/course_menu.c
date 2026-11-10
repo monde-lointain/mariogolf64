@@ -129,6 +129,11 @@
  * the totals page the course points */
 #define TROPHY_SPACING 24
 #define TROPHY_SHIFT_LEFT 20
+/*
+ * How far right of its course's position the place's trophy is. The spacing is
+ * unsigned and 16 bits wide, as the original's sum is
+ */
+#define TrophyOffset(place) ((u16)((place) * TROPHY_SPACING) - TROPHY_SHIFT_LEFT)
 #define TROPHY_FRAME_DELAY 4
 #define POINTS_NEEDED_X 192
 #define POINTS_NEEDED_Y 174
@@ -1196,62 +1201,15 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/course_menu", DrawStatsScrollArrows);
  * tournament, stepping the spin's images, or on the totals the points needed to
  * open the next course.
  *
- * Doesn't match: the original loads the trophies' shift once as 0xFFEC, the
- * low half of -20, and adds it in a register, where this adds -20 to each
- * edge, and the load sync and tile commands' upper halves swap registers.
- * TrophyPosition's y is unsigned: with an s32 y, 31 words differ (21 in
- * shape), as GCC works out the clipped top edge a second time for the
- * rectangle's t coordinate, a clamp of a negative top edge that the original
- * lacks; the unsigned y makes that clamp dead, as -Wextra reports in the
- * modern build, and gives 19 words (5 in shape), and the register oracle's
- * closest result falls from 29 words to 11, forcing 3 pseudos for each. An
- * unsigned x as well gives 20 words, the oracle's closest 14, forcing 4.
- * Taking the offset into a local, of any type, gave 41 words or more, and an
- * unsigned x or place 20 or more, with the s32 y. The permuter's best cast y
- * to unsigned at the rectangle's top edge, the same 19 words, 5 in shape;
- * its fewest words, 12 (10 in shape), came from casting the rectangle's dtdy
- * to a char, which makes it 0.
- *
- * Re-measured with the unsigned y: the offset in a local, as an s32, s16,
- * u16 or u32, gives 179 words (11 in shape); place as an s8 gives 27 (5), as
- * a u8 or u16 50 (14), as an s32 174 (22) and as a u32 179 (23). Subtracting
- * 20U, or TROPHY_SHIFT_LEFT cast to u32, or casting the offset to u16, loads
- * 0xFFEC as the original does, but once before the trophies' loop, where the
- * original loads it on each pass: 28 words (6 in shape), or 36 (8) for the
- * casts. 19 words differ, 5 in shape.
- *
- * The trophies' spacing, place times TROPHY_SPACING, is a u16 local from
- * which each edge subtracts TROPHY_SHIFT_LEFT, as a permuter run pointed to:
- * set with the texels, the tile load or the rectangle, that takes the draft
- * from 19 words (5 in shape) to 4 (2), the shift then loaded as 0xFFEC in
- * the loop as the original does, and the register oracle's closest result
- * to these 4 with nothing forced. Set at the top of the place's branch, 39
- * words differ (17 in shape), and before its first sync 32 (10), which is
- * where it was set when it gave 48. As an s32 it gives 27 (5), an s16 31
- * (5) and a u32 36 (8); with place an s8, 12 (2), or a u16, 35 (11).
- * Picking the palette with g_TrophyPalettes[place] in any of the three
- * ifs, rather than the place's constant, gives 12 to 33 words.
- *
- * The right edge adds the offset to the position plus the width. Of the 60
- * orders and groupings of width, position, offset, or spacing and shift
- * apart, that and the position and width swapped give 2 words, none in
- * shape; the width plus the offset, then the position, gives 4 (2), as
- * does the offset plus the width, then the position, and the rest 14 or
- * more. Casting the offset to u16, s16, s32 or u32 gives 2 words at best.
- * What's left is the order of the last addition's operands: the original
- * adds the width to the position plus the offset, where this adds the
- * offset to the width plus the position, and the register oracle's closest
- * result is these 2 words with nothing forced. Adding the width to the
- * position plus the offset gives the original's instructions, but swaps
- * $a0 and $a1 through the rectangle's first word: 48 words, none in shape,
- * which the oracle matches by forcing 15 pseudos. local-alloc gives $a0 to
- * the position plus the offset (8 refs over 8, priority 30000) before the
- * bottom edge's quantity (34 refs over 58, 29310); with one more ref or two
- * fewer insns of life for the bottom edge, or a longer life for the sum, it
- * would match, but no order of the edges' terms, and no width of place or
- * spacing, changes them. 2 words differ, none in shape.
+ * Each edge works out TrophyOffset anew, and that is there to match: the
+ * rectangle's command casts its edges to s16, so GCC adds the shift left in 16
+ * bits, as 0xFFEC in a register, and the scheduler puts the offset's
+ * instructions among the first edge's, where they lengthen the life of the
+ * left position's register and so decide which registers the edges get. With
+ * the spacing in a u16 local, 48 words differ in those registers alone, and
+ * with the whole offset in a local, 29 to 51. Without the cast to u16 the shift
+ * left is added as -20 to each edge: 27 words differ.
  */
-#ifdef NON_MATCHING
 void DrawCourseTrophies(Gfx **displayListHead) {
     EncodedAsset asset;
     Gfx *gfx = *displayListHead;
@@ -1261,11 +1219,6 @@ void DrawCourseTrophies(Gfx **displayListHead) {
     s32 openCourseCount;
     void *texels;
     s16 place;
-    /*
-     * How far right of the first place's trophy the place's is. Unsigned, as the
-     * original adds the shift left as 0xFFEC, its low half
-     */
-    u16 spacing;
 
     openCourseCount = GetOpenCourseCount();
     if (memory->statsCourse == openCourseCount) {
@@ -1325,7 +1278,6 @@ void DrawCourseTrophies(Gfx **displayListHead) {
                     palette = g_TrophyPalettes[THIRD_PLACE_INDEX];
                 }
 
-                spacing = place * TROPHY_SPACING;
                 texels = f_StatsTrophyBuffers[f_ShownStatsTrophyBufferIndex];
                 gDPLoadTLUT_pal256(gfx++, TextureAddress(palette));
                 gDPLoadTextureTile(
@@ -1348,21 +1300,15 @@ void DrawCourseTrophies(Gfx **displayListHead) {
                     G_TX_NOLOD
                 );
                 gDPPipeSync(gfx++);
-                /*
-                 * The right edge adds the offset to the position plus the width:
-                 * the other orders give 4 to 67 words differing against 2
-                 */
                 gSPScisTextureRectangle(
                     gfx++,
                     QuarterPixels(
-                        f_StatsTrophyPositions[memory->statsCourse].x +
-                        (spacing - TROPHY_SHIFT_LEFT)
+                        f_StatsTrophyPositions[memory->statsCourse].x + TrophyOffset(place)
                     ),
                     QuarterPixels(f_StatsTrophyPositions[memory->statsCourse].y),
                     QuarterPixels(
-                        (spacing - TROPHY_SHIFT_LEFT) +
-                        (f_StatsTrophyPositions[memory->statsCourse].x +
-                            g_TrophySizes[memory->statsCourse].width)
+                        f_StatsTrophyPositions[memory->statsCourse].x + TrophyOffset(place) +
+                        g_TrophySizes[memory->statsCourse].width
                     ),
                     QuarterPixels(
                         g_TrophySizes[memory->statsCourse].height +
@@ -1399,9 +1345,6 @@ void DrawCourseTrophies(Gfx **displayListHead) {
 
     *displayListHead = gfx;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/course_menu", DrawCourseTrophies);
-#endif
 
 /* The smallest number of each length */
 #define TWO_DIGIT_FIRST DECIMAL_BASE
