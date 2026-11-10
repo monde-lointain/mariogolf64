@@ -402,7 +402,12 @@ void ResetBallSimulations(void) {
  *
  * The curve's push along each axis is worked out before either is added,
  * as StepOpeningBallSimulation's must be; here, where the velocity is a
- * local array, that changes nothing. 245 words differ, 59 in shape.
+ * local array, that changes nothing. That left 245 words, 59 in shape.
+ *
+ * A hole-triangle hit sets hitsHoleTriangle even when an earlier contact wins
+ * the fraction test. Keeping that flag outside the inner test reproduces the
+ * original's unconditional branch-delay-slot assignment: 240 words differ,
+ * 54 in shape.
  */
 #ifdef NON_MATCHING
 s32 StepBallSimulation(BallSimulation *simulation) {
@@ -743,10 +748,14 @@ s32 StepBallSimulation(BallSimulation *simulation) {
                     holeHit = FALSE;
                 }
 
-                if (holeHit && (contact == 0 || hitFraction <= fraction)) {
-                    triangle = hit;
-                    contact = STEP_FLAG_HOLE_TRIANGLE_HIT;
-                    fraction = hitFraction;
+                if (holeHit) {
+                    if (contact == 0 || hitFraction <= fraction) {
+                        triangle = hit;
+                        contact = STEP_FLAG_HOLE_TRIANGLE_HIT;
+                        fraction = hitFraction;
+                    }
+
+                    /* Remember the hit even when an earlier contact takes precedence. */
                     hitsHoleTriangle = TRUE;
                 }
             }
