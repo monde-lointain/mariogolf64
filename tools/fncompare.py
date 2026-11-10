@@ -37,6 +37,7 @@ import atexit
 import bisect
 import collections
 import ctypes
+import enum
 import functools
 import itertools
 import os
@@ -47,10 +48,10 @@ import subprocess
 import sys
 import tempfile
 import threading
-from collections.abc import Callable, Hashable, Iterator, Sequence
+from collections.abc import Callable, Hashable, Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import cast
+from typing import cast, final
 
 import rabbitizer
 
@@ -473,8 +474,6 @@ def get_optflags(c_path: StrPath) -> list[str]:
     return DEFAULT_OPTFLAGS.split()
 
 
-# The text that a top-level function definition's body starts after
-DEFINITION_END_RE = re.compile(r"\)\s*$")
 # A function defined inside another, indented as the formatter leaves it: its
 # name follows a return type and precedes a parameter list holding no ";" or
 # braces
@@ -485,8 +484,6 @@ NESTED_DEFINITION_RE = re.compile(
 NESTED_DEFINITION_KEYWORDS = frozenset(
     {"if", "for", "while", "switch", "return", "sizeof"}
 )
-# A function definition's name, the first identifier its header calls
-DEFINITION_NAME_RE = re.compile(r"(\w+)\s*\(")
 # A C identifier, or a keyword
 IDENTIFIER_RE = re.compile(r"\b[A-Za-z_]\w*")
 # The functions that KMC GCC expands itself when it sees no definition of
@@ -500,12 +497,376 @@ BUILTIN_NAMES = frozenset(
 )  # fmt: skip
 
 
-# The tokens of preprocessed C that bound declarations and bodies. Strings,
-# characters and line markers are matched whole, so that the braces and
-# semicolons in them are passed over.
-STRUCTURE_RE = re.compile(
-    r""""(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|^#[^\n]*|[{};]""", re.MULTILINE
+# The tokens of preprocessed C matched whole, so that the brackets and words
+# in them are passed over: strings, characters and line markers
+WHOLE_TOKENS = r""""(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|^#[^\n]*"""
+# The tokens a declaration's words are read from, and each with any
+# whitespace before it
+WORD_TOKENS = rf"{WHOLE_TOKENS}|[A-Za-z_]\w*|\S"
+WORD_TOKEN_RE = re.compile(WORD_TOKENS, re.MULTILINE)
+TOKEN_RE = re.compile(rf"\s*({WORD_TOKENS})", re.MULTILINE)
+# Each opening bracket's closing one, and the tokens that matching it reads:
+# its own brackets and the whole tokens, which hold brackets of no account
+BRACKET_PAIRS = {"(": ")", "[": "]", "{": "}"}
+BRACKET_TOKEN_RES = {
+    opening: re.compile(
+        rf"{WHOLE_TOKENS}|[{re.escape(opening + closing)}]", re.MULTILINE
+    )
+    for opening, closing in BRACKET_PAIRS.items()
+}
+# The words of declaration specifiers that make the type, those that say
+# where the declared thing lives, and those that only qualify it
+TYPE_KEYWORDS = frozenset(
+    (
+        "char", "double", "float", "int", "long", "short", "signed",
+        "unsigned", "void",
+    )
+)  # fmt: skip
+STORAGE_KEYWORDS = frozenset(
+    ("auto", "extern", "inline", "__inline__", "register", "static", "typedef")
 )
+QUALIFIER_KEYWORDS = frozenset(
+    ("const", "volatile", "__extension__", "__restrict", "__restrict__")
+)
+# The words that take a parenthesized argument wherever specifiers or
+# declarators may
+PARENTHESIZED_KEYWORDS = frozenset(("__attribute__", "__asm__", "asm"))
+TAG_KEYWORDS = frozenset(("struct", "union", "enum"))
+# The words that name no declaration of the file's own
+C_KEYWORDS = (
+    TYPE_KEYWORDS
+    | STORAGE_KEYWORDS
+    | QUALIFIER_KEYWORDS
+    | PARENTHESIZED_KEYWORDS
+    | TAG_KEYWORDS
+    | frozenset(
+        (
+            "break", "case", "continue", "default", "do", "else", "for",
+            "goto", "if", "return", "sizeof", "switch", "__typeof__", "while",
+        )
+    )
+)  # fmt: skip
+
+
+class Derivation(enum.Enum):
+    """What a declarator makes of the type its specifiers give."""
+
+    POINTER = enum.auto()
+    FUNCTION = enum.auto()
+    ARRAY = enum.auto()
+
+
+# How tightly the declarator's operators bind: a pointer's operand stops
+# before a function's parameters or an array's size, which bind first
+POINTER_PRECEDENCE = 1
+POSTFIX_PRECEDENCE = 2
+
+
+@dataclass
+class Declarator:
+    """The name a declarator declares, and what the type nearest it makes it.
+
+    A declarator with no name, as in a cast, declares "". In "*f(void)" f
+    is a function, and in "(*f)(void)" a pointer.
+    """
+
+    name: str
+    derivation: Derivation | None = None
+
+    def derive(self, derivation: Derivation) -> "Declarator":
+        """Return this declarator with DERIVATION applied outside it."""
+        if self.derivation is None:
+            self.derivation = derivation
+        return self
+
+
+@dataclass
+class Definition:
+    """A function's definition: its name, its body's bounds and if it's inline."""
+
+    name: str
+    body_start: int
+    body_end: int
+    is_inline: bool
+
+
+@dataclass
+class Declaration:
+    """One top-level declaration, definition or line marker of preprocessed C.
+
+    It spans [START, END) of the source, from the end of the one before.
+    """
+
+    start: int
+    end: int
+    # The names it declares
+    names: set[str]
+    # Whether it defines an object, which takes room in the file's data
+    is_object: bool = False
+    definition: Definition | None = None
+
+
+@final
+class DeclarationParser:
+    """Parses preprocessed C's top-level declarations.
+
+    Declarations are parsed by recursive descent, and their declarators by
+    Pratt's method, as Bob Nystrom's Bantam parses expressions: a pointer
+    is a prefix operator, a function's parameters and an array's size are
+    postfix ones, and parentheses group. Bodies, parameters, initializers
+    and expressions declare nothing at the top level, so they are skipped
+    by matching their brackets, which is most of the source.
+    """
+
+    def __init__(self, source: str) -> None:
+        """Parse SOURCE, reading its first token."""
+        self.source = source
+        # The end of the last token consumed, and the next token's text,
+        # or "" at the end, and its bounds
+        self.position = 0
+        self.upcoming = ""
+        self.token_start = 0
+        self.token_end = 0
+        self.read_token()
+
+    def read_token(self) -> None:
+        """Read the token after the last one consumed."""
+        match = TOKEN_RE.match(self.source, self.position)
+        if match is None:
+            self.upcoming = ""
+            self.token_start = self.token_end = len(self.source)
+            return
+        self.upcoming = match.group(1)
+        self.token_start, self.token_end = match.span(1)
+
+    def consume(self) -> str:
+        """Consume the next token and return it."""
+        consumed = self.upcoming
+        self.position = self.token_end
+        self.read_token()
+        return consumed
+
+    def match(self, expected: str) -> bool:
+        """Consume the next token if it's EXPECTED, and tell whether it was."""
+        if self.upcoming != expected:
+            return False
+        _ = self.consume()
+        return True
+
+    def is_name(self) -> bool:
+        """Whether the next token is a name other than C's keywords."""
+        first = self.upcoming[:1]
+        return (first.isalpha() or first == "_") and self.upcoming not in C_KEYWORDS
+
+    def skip_group(self) -> None:
+        """Consume the bracketed group the next token opens.
+
+        A group left open runs to the end of the source.
+        """
+        opening = self.upcoming
+        closing = BRACKET_PAIRS[opening]
+        depth = 0
+        for match in BRACKET_TOKEN_RES[opening].finditer(self.source, self.token_start):
+            bracket = match.group()
+            if bracket == opening:
+                depth += 1
+            elif bracket == closing:
+                depth -= 1
+                if depth == 0:
+                    self.position = match.end()
+                    self.read_token()
+                    return
+        self.position = len(self.source)
+        self.read_token()
+
+    def skip_parenthesized(self) -> None:
+        """Consume an __attribute__ or __asm__ word and its argument, if any."""
+        _ = self.consume()
+        if self.upcoming == "(":
+            self.skip_group()
+
+    def skip_to(self, ends: frozenset[str]) -> None:
+        """Consume tokens, groups whole, up to one of ENDS or the end."""
+        while self.upcoming and self.upcoming not in ends:
+            if self.upcoming in BRACKET_PAIRS:
+                self.skip_group()
+            else:
+                _ = self.consume()
+
+    def parse_unit(self) -> list[Declaration]:
+        """Return the source's top-level declarations, in order.
+
+        Whatever follows the last, such as whitespace, is one more that
+        declares nothing.
+        """
+        declarations: list[Declaration] = []
+        while self.upcoming:
+            start = self.position
+            if self.upcoming[0] == "#":
+                _ = self.consume()
+                declarations.append(Declaration(start, self.position, set()))
+            else:
+                declarations.append(self.parse_declaration(start))
+        if self.position < len(self.source):
+            declarations.append(Declaration(self.position, len(self.source), set()))
+        return declarations
+
+    def parse_declaration(self, start: int) -> Declaration:
+        """Parse a declaration or a function's definition, from START.
+
+        One that this can't make out runs to its semicolon.
+        """
+        names: set[str] = set()
+        storage = self.parse_specifiers(names)
+        is_object = False
+        while self.upcoming not in DECLARATION_ENDS:
+            declarator = self.parse_declarator(0)
+            if declarator.name:
+                names.add(declarator.name)
+            while self.upcoming in PARENTHESIZED_KEYWORDS:
+                self.skip_parenthesized()
+            is_function = declarator.derivation is Derivation.FUNCTION
+            if is_function and self.upcoming == "{":
+                body_start = self.token_start
+                self.skip_group()
+                is_inline = not storage.isdisjoint(("inline", "__inline__"))
+                definition = Definition(
+                    declarator.name, body_start, self.position, is_inline
+                )
+                return Declaration(start, self.position, names, definition=definition)
+            is_object = is_object or not (
+                is_function or {"typedef", "extern"} & storage
+            )
+            if self.match("="):
+                self.skip_to(DECLARATOR_ENDS)
+            if not self.match(","):
+                break
+        self.skip_to(DECLARATION_ENDS)
+        _ = self.match(";")
+        return Declaration(start, self.position, names, is_object=is_object)
+
+    def parse_specifiers(self, names: set[str]) -> set[str]:
+        """Parse a declaration's specifiers, adding the tags they define to NAMES.
+
+        Returns the storage words among them. A name is the type's when no
+        other word has given the type.
+        """
+        storage: set[str] = set()
+        has_type = False
+        while True:
+            upcoming = self.upcoming
+            if upcoming in STORAGE_KEYWORDS:
+                storage.add(self.consume())
+            elif upcoming in TYPE_KEYWORDS:
+                _ = self.consume()
+                has_type = True
+            elif upcoming in QUALIFIER_KEYWORDS:
+                _ = self.consume()
+            elif upcoming in PARENTHESIZED_KEYWORDS:
+                self.skip_parenthesized()
+            elif upcoming in TAG_KEYWORDS:
+                self.parse_tagged_type(names)
+                has_type = True
+            elif upcoming == "__typeof__":
+                self.skip_parenthesized()
+                has_type = True
+            elif not has_type and self.is_name():
+                _ = self.consume()
+                has_type = True
+            else:
+                return storage
+
+    def parse_tagged_type(self, names: set[str]) -> None:
+        """Parse a structure, union or enumeration type, adding to NAMES.
+
+        Its tag counts as declared where its body is or where it's declared
+        alone, and so does each of an enumeration's constants.
+        """
+        is_enumeration = self.consume() == "enum"
+        while self.upcoming in PARENTHESIZED_KEYWORDS:
+            self.skip_parenthesized()
+        tag = self.consume() if self.is_name() else ""
+        while self.upcoming in PARENTHESIZED_KEYWORDS:
+            self.skip_parenthesized()
+        if tag and self.upcoming in TAG_DECLARING_FOLLOWERS:
+            names.add(tag)
+        if self.upcoming != "{":
+            return
+        if not is_enumeration:
+            self.skip_group()
+            return
+        _ = self.consume()
+        while self.upcoming and not self.match("}"):
+            if self.is_name():
+                names.add(self.consume())
+            if self.match("="):
+                self.skip_to(ENUMERATOR_ENDS)
+            if not self.match(","):
+                self.skip_to(ENUMERATOR_ENDS)
+                _ = self.match(",")
+
+    def parse_declarator(self, precedence: int) -> Declarator:
+        """Parse a declarator, taking only operators binding tighter than PRECEDENCE."""
+        prefix = DECLARATOR_PREFIX_PARSELETS.get(self.upcoming)
+        if prefix is not None:
+            declarator = prefix(self)
+        elif self.is_name():
+            declarator = Declarator(self.consume())
+        else:
+            declarator = Declarator("")
+        while precedence < DECLARATOR_PRECEDENCES.get(self.upcoming, 0):
+            derivation = DECLARATOR_POSTFIX_DERIVATIONS[self.upcoming]
+            self.skip_group()
+            declarator = declarator.derive(derivation)
+        return declarator
+
+    def parse_pointer(self) -> Declarator:
+        """Parse a pointer's "*", its qualifiers and what it points from."""
+        _ = self.consume()
+        while True:
+            if self.upcoming in PARENTHESIZED_KEYWORDS:
+                self.skip_parenthesized()
+            elif self.upcoming in QUALIFIER_KEYWORDS:
+                _ = self.consume()
+            else:
+                break
+        return self.parse_declarator(POINTER_PRECEDENCE).derive(Derivation.POINTER)
+
+    def parse_grouping(self) -> Declarator:
+        """Parse a parenthesized declarator."""
+        _ = self.consume()
+        declarator = self.parse_declarator(0)
+        self.skip_to(GROUPING_ENDS)
+        _ = self.match(")")
+        return declarator
+
+
+# The prefix parselets of declarators, and the postfix ones' precedences and
+# what they derive
+DECLARATOR_PREFIX_PARSELETS: dict[str, Callable[[DeclarationParser], Declarator]] = {
+    "*": DeclarationParser.parse_pointer,
+    "(": DeclarationParser.parse_grouping,
+}
+DECLARATOR_PRECEDENCES = {"(": POSTFIX_PRECEDENCE, "[": POSTFIX_PRECEDENCE}
+DECLARATOR_POSTFIX_DERIVATIONS = {"(": Derivation.FUNCTION, "[": Derivation.ARRAY}
+# The tokens that end a declaration, a declarator with its initializer, an
+# enumeration's constant and a parenthesized declarator, and those that
+# follow a tag that is declared
+DECLARATION_ENDS = frozenset((";", ""))
+DECLARATOR_ENDS = frozenset((",", ";", ""))
+ENUMERATOR_ENDS = frozenset((",", "}", ""))
+GROUPING_ENDS = frozenset((")", ";", ""))
+TAG_DECLARING_FOLLOWERS = frozenset(("{", ";"))
+
+
+@functools.lru_cache(maxsize=4)
+def parse_declarations(source: str) -> list[Declaration]:
+    """Return the top-level declarations of the preprocessed SOURCE.
+
+    Each tool parses the same source more than once, so the last few
+    parses are kept.
+    """
+    return DeclarationParser(source).parse_unit()
 
 
 def find_definitions(source: str) -> list[tuple[str, int, int, bool]]:
@@ -513,32 +874,16 @@ def find_definitions(source: str) -> list[tuple[str, int, int, bool]]:
 
     Each is (name, body start, body end, is inline), in order.
     """
-    definitions: list[tuple[str, int, int, bool]] = []
-    # Where the declaration being scanned starts
-    header_start = 0
-    body_start = 0
-    depth = 0
-    for token in STRUCTURE_RE.finditer(source):
-        kind = token.group()
-        if kind == "{":
-            if depth == 0:
-                body_start = token.start()
-            depth += 1
-        elif kind == "}":
-            depth -= 1
-            if depth == 0:
-                header = source[header_start:body_start]
-                name = DEFINITION_NAME_RE.search(header)
-                is_function = DEFINITION_END_RE.search(header) is not None
-                if name is not None and is_function:
-                    is_inline = "inline" in header.split()
-                    definitions.append(
-                        (name.group(1), body_start, token.end(), is_inline)
-                    )
-                header_start = token.end()
-        elif depth == 0 and kind[0] in ";#":
-            header_start = token.end()
-    return definitions
+    return [
+        (
+            definition.name,
+            definition.body_start,
+            definition.body_end,
+            definition.is_inline,
+        )
+        for declaration in parse_declarations(source)
+        if (definition := declaration.definition) is not None
+    ]
 
 
 def find_nested_functions(source: str, function: str) -> list[str]:
@@ -600,175 +945,6 @@ def isolate_functions(source: str, keep: set[str], *, prune: bool = True) -> str
     return prune_declarations(isolated, set(roots)) if prune else isolated
 
 
-# The tokens of preprocessed C that a declaration names things with. Strings
-# and characters are matched whole, so that the words in them are passed
-# over, and line markers so that they end the declaration before them.
-DECLARATION_TOKEN_RE = re.compile(
-    r""""(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|^#[^\n]*|[A-Za-z_]\w*|\S""",
-    re.MULTILINE,
-)
-# The words that name no declaration of the file's own
-C_KEYWORDS = frozenset(
-    (
-        "__asm__", "__attribute__", "__extension__", "__inline__", "asm",
-        "auto", "break", "case", "char", "const", "continue", "default", "do",
-        "double", "else", "enum", "extern", "float", "for", "goto", "if",
-        "inline", "int", "long", "register", "return", "short", "signed",
-        "sizeof", "static", "struct", "switch", "typedef", "union",
-        "unsigned", "void", "volatile", "while",
-    )
-)  # fmt: skip
-# What follows a name where a top-level declaration declares it, and where
-# it declares an object
-DECLARING_FOLLOWERS = frozenset("([=;,{:")
-OBJECT_FOLLOWERS = frozenset("[=;,")
-OPENING_BRACKETS = frozenset("([")
-CLOSING_BRACKETS = frozenset(")]")
-# What comes before an enumeration's constant
-ENUMERATOR_LEADERS = frozenset("{,")
-
-
-@dataclass
-class Declaration:
-    """One top-level declaration or definition of preprocessed C."""
-
-    text: str
-    # The names it declares, and every name in it
-    names: set[str]
-    words: set[str]
-    # Whether it defines an object, which takes room in the file's data
-    is_object: bool
-
-
-def split_declarations(source: str) -> list[Declaration]:
-    """Return SOURCE's top-level declarations, definitions and line markers.
-
-    A function definition ends at its closing brace, and anything else at
-    its semicolon, so that a structure's body and the name it is typedefed
-    as stay together.
-    """
-    declarations: list[Declaration] = []
-    tokens: list[str] = []
-    start = 0
-    depth = 0
-    for match in DECLARATION_TOKEN_RE.finditer(source):
-        part = match.group()
-        ends = False
-        if part[0] == "#":
-            ends = depth == 0
-        elif part == "{":
-            depth += 1
-        elif part == "}":
-            depth -= 1
-            # A definition's header ends in its parameters, an initializer's
-            # in "=" and a structure's in its tag
-            ends = depth == 0 and is_function_header(tokens)
-        elif part == ";":
-            ends = depth == 0
-        tokens.append(part)
-        if ends:
-            text = source[start : match.end()]
-            names = find_declared_names(tokens)
-            declarations.append(
-                Declaration(text, names, set(tokens), defines_object(tokens))
-            )
-            tokens = []
-            start = match.end()
-    declarations.append(
-        Declaration(source[start:], set(), set(tokens), is_object=False)
-    )
-    return declarations
-
-
-def is_function_header(tokens: list[str]) -> bool:
-    """Tell whether TOKENS, through a closing brace, are a function definition."""
-    depth = 0
-    for number, part in enumerate(tokens):
-        if part == "{":
-            if depth == 0:
-                return number > 0 and tokens[number - 1] == ")"
-            depth += 1
-    return False
-
-
-@dataclass(frozen=True)
-class Word:
-    """A name in a declaration, where it stands among the others."""
-
-    text: str
-    previous: str
-    following: str
-    # How deep in parentheses or brackets, and in braces, it is
-    parentheses: int
-    braces: int
-
-
-def read_words(parts: list[str]) -> Iterator[Word]:
-    """Yield each name in a declaration's PARTS, other than C's keywords."""
-    parentheses = 0
-    braces = 0
-    for number, part in enumerate(parts):
-        if part in OPENING_BRACKETS:
-            parentheses += 1
-        elif part in CLOSING_BRACKETS:
-            parentheses -= 1
-        elif part == "{":
-            braces += 1
-        elif part == "}":
-            braces -= 1
-        elif (part[0].isalpha() or part[0] == "_") and part not in C_KEYWORDS:
-            previous = parts[number - 1] if number else ""
-            following = parts[number + 1] if number + 1 < len(parts) else ""
-            yield Word(part, previous, following, parentheses, braces)
-
-
-def find_declared_names(parts: list[str]) -> set[str]:
-    """Return the names that a top-level declaration's PARTS declare.
-
-    These are the declarator's name, at the top level of the declaration's
-    parentheses and braces, or the name a function pointer gets in its
-    parentheses, and an enumeration's constants.
-    """
-    is_enumeration = "enum" in parts
-    names: set[str] = set()
-    for word in read_words(parts):
-        is_declarator = (
-            word.braces == 0
-            and word.parentheses == 0
-            and word.following in DECLARING_FOLLOWERS
-        )
-        is_function_pointer = (
-            word.braces == 0
-            and word.parentheses == 1
-            and word.previous == "*"
-            and word.following in CLOSING_BRACKETS
-        )
-        is_constant = (
-            is_enumeration and word.braces == 1 and word.previous in ENUMERATOR_LEADERS
-        )
-        if is_declarator or is_function_pointer or is_constant:
-            names.add(word.text)
-    return names
-
-
-def defines_object(parts: list[str]) -> bool:
-    """Tell whether a top-level declaration's PARTS define an object.
-
-    Neither a typedef, an extern declaration, a function's declaration nor
-    a bare structure, union or enumeration does. Its first top-level name
-    that a declaration could follow tells which it is.
-    """
-    if "typedef" in parts or "extern" in parts or parts[-1] != ";":
-        return False
-    for word in read_words(parts):
-        if word.braces == 0 and word.parentheses == 0:
-            if word.following == "(":
-                return False
-            if word.following in OBJECT_FOLLOWERS:
-                return True
-    return False
-
-
 def prune_declarations(source: str, roots: set[str]) -> str:
     """Return SOURCE without the declarations that the definitions of ROOTS can't use.
 
@@ -779,7 +955,7 @@ def prune_declarations(source: str, roots: set[str]) -> str:
     rest took about half of each compile. A pruned declaration leaves its
     newlines, so the lines after it keep their numbers.
     """
-    declarations = split_declarations(source)
+    declarations = parse_declarations(source)
     declaring: dict[str, list[int]] = collections.defaultdict(list)
     for number, declaration in enumerate(declarations):
         for name in declaration.names:
@@ -791,13 +967,19 @@ def prune_declarations(source: str, roots: set[str]) -> str:
     ]
     kept = set(pending)
     while pending:
-        for word in declarations[pending.pop()].words:
+        declaration = declarations[pending.pop()]
+        words: list[str] = WORD_TOKEN_RE.findall(
+            source, declaration.start, declaration.end
+        )
+        for word in set(words):
             for number in declaring.get(word, ()):
                 if number not in kept:
                     kept.add(number)
                     pending.append(number)
     return "".join(
-        declaration.text if number in kept else "\n" * declaration.text.count("\n")
+        source[declaration.start : declaration.end]
+        if number in kept
+        else "\n" * source.count("\n", declaration.start, declaration.end)
         for number, declaration in enumerate(declarations)
     )
 
