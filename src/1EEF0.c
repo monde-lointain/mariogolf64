@@ -26,7 +26,6 @@ extern s32 D_800FBE54;
 extern s32 D_800FBE70;
 
 s32 func_80032E60(s32 arg0);
-void func_80043B14(Unk800BB258 *arg0, s32 arg1);
 void func_80043BB0(Unk800BB258 *arg0, s32 arg1);
 Unk800BB258 *func_8004491C(void);
 void func_800449D4(s32 arg0, s32 arg1);
@@ -39,13 +38,11 @@ Unk800CABD0 *func_80043AF0(s32 arg0) {
 void func_80043B0C(void) {
 }
 
-s32 func_80043B14(void *arg0, s32 arg1) {
+s32 func_80043B14(Unk800BB258 *arg0, s32 arg1) {
     u32 flags = *(u32 *)((u8 *)arg0 + 0x8);
-    s16 field = *(s16 *)((u8 *)arg0 + 0xC);
-    s32 v1;
+    s32 v1 = 0;
 
     if (flags & 0x1) {
-        v1 = 0;
         if (arg1 == 1) {
             v1 = 0x64;
         } else if (arg1 == 0) {
@@ -54,21 +51,21 @@ s32 func_80043B14(void *arg0, s32 arg1) {
             v1 = 0x1E;
         }
     } else {
-        v1 = 0;
         if (arg1 == 1) {
-            v1 = 0x3C;
+            v1 = *(s16 *)((u8 *)arg0 + 0xC);
         } else if (arg1 == 0) {
-            v1 = field;
+            s16 field = *(s16 *)((u8 *)arg0 + 0xC);
+            v1 = (s32)(1.1f * (f32)field);
         } else if (arg1 == 2) {
-            v1 = (s32)(0.1f * field);
+            v1 = 0x3C;
         }
     }
 
     return v1;
 }
 
-void func_80043BB0(Unk800BB258 *arg0, s32 arg1);
 
+INCLUDE_ASM("asm/nonmatchings/1EEF0", func_80043BB0);
 INCLUDE_ASM("asm/nonmatchings/1EEF0", func_80043C20);
 
 INCLUDE_ASM("asm/nonmatchings/1EEF0", func_80043C64);
