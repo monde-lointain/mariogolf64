@@ -852,44 +852,55 @@ void UpdateBetSettings(void) {
  * when isSlideReversed is set). Once the screen has settled it types the
  * chosen bet's explanation
  *
- * Doesn't match: the original keeps the stake marks' coordinates in other
- * registers, and uses markGrowth without masking it to 16 bits. The marks' left
- * edges add slide and their offset as one sum, which the loop hoists: written
- * in a row they give 147 differing words, or 33 with slide first. The right
- * edges are written in a row, which took the draft from 25 words to 16, 5 in
- * shape to 2; the grouped sum of the left edge there gives 25, and the other
- * orders of the row 26 to 29. Before that, halving markGrowth as unsigned, by a
- * cast to u32 or "/ 2u", gave 20 but kept the mask; no type of markGrowth,
- * markRaise or a halfGrowth local removed it. The permuter's u16 local for the
- * right edge's column sum alone gave 16 and still masked; as s16 or s32 it gave
- * 25 and as u32 28, and used for both edges 207 whatever its type. Earlier, the
- * register oracle's closest result was the 25 words of the draft then, with no
- * register forced. Ordering the marks' top subtractions otherwise gives 18 to
- * 126 words; subtracting the bottom edge's spacing before its raise gives the
- * same 16, and no pair of types among u8, s8, u16, s16, u32 and s32 for
- * markGrowth and markRaise fewer than 16. 16 words differ, 2 in shape.
+ * The stake marks' sizes are signed 16-bit values, halved by a division, and
+ * their edges are sums written in a row, which is what matches. Measured
+ * against it, in words differing (and how many of them in shape):
+ *
+ *   markGrowth as u16 or u8                              145 (13)
+ *   markGrowth as s32                                    218 (30)
+ *   markGrowth as u32                                    284 (98)
+ *   markGrowth as s8                                     215 (59)
+ *   markRaise as u16 or s32                              4 (0)
+ *   markRaise as u8                                      9 (1)
+ *   markRaise as s8                                      294 (76)
+ *   Halves as "markGrowth >> 1"                          17 (5)
+ *   Halves as "/ 2u" or "(u16)markGrowth >> 1"           143 to 145 (13)
+ *   Halves as "(u32)markGrowth >> 1"                     146 (16)
+ *   Left edge with slide and the offset in parentheses   143 (13)
+ *   Left edge with slide before the offset               31 (5)
+ *   Right edge with slide and the offset in parentheses  23 (3)
+ *   Right edge with slide before the offset              24 (2)
+ *   Right edge with the size and the half in parentheses 4 (2)
+ *   Top edge less growth, spacing, raise                 120 (10)
+ *   Top edge less raise, growth, spacing                 4 (0)
+ *   Top edge less growth, raise, spacing                 8 (0)
+ *   Top edge less spacing, raise, growth                 8 (0)
+ *   Top edge less raise, spacing, growth                 124 (10)
+ *   Bottom edge less the raise before the spacing        209 (53)
+ *
+ * An earlier draft with markGrowth as u32, cast to s16 in the top edge and the
+ * steps, came to 10 (0): the same code with two registers swapped, which the
+ * allocator orders by how often each is referenced
  */
-#ifdef NON_MATCHING
 void DrawBetSettings(Gfx **displayListHead, s32 slide, u8 isSlideReversed, u8 isSettled) {
     Gfx *gfx = *displayListHead;
     MenuMemory *memory = GetMenuMemory();
     /*
      * One index for the bet columns and the banner strips, to match: an s16
-     * strip variable for the strips gives 48 words differing, 2 in shape, and
-     * an s32 one 346 (60), against the draft's 16 (2)
+     * strip variable for the strips gives 32 words differing, 0 in shape, and
+     * an s32 one 330 (58)
      */
     s16 i;
     s16 stakeLevel;
     s16 betIndex;
-    u16 markGrowth;
-    u16 markRaise;
+    s16 markGrowth;
+    s16 markRaise;
     s16 bannerShift;
     u8 *icon;
     s32 stripTop;
     /*
      * The wide banner's strips, kept apart from stripTop to match: sharing
-     * stripTop gives 340 words differing (38 in shape) against the draft's 16
-     * (2)
+     * stripTop gives 324 words differing (36 in shape)
      */
     s32 wideStripTop;
     s8 stakeAmount;
@@ -1032,18 +1043,18 @@ void DrawBetSettings(Gfx **displayListHead, s32 slide, u8 isSlideReversed, u8 is
             gSPScisTextureRectangle(
                 gfx++,
                 QuarterPixels(
-                    f_BetSetColumnXs[g_BetSet - 1][i] + (slide + STAKE_MARK_OFFSET_X) -
-                    (markGrowth >> 1)
+                    f_BetSetColumnXs[g_BetSet - 1][i] + STAKE_MARK_OFFSET_X + slide -
+                    (markGrowth / 2)
                 ),
                 QuarterPixels(
-                    (STAKE_MARK_BOTTOM - STAKE_MARK_SIZE) - markGrowth - markRaise -
-                    (stakeLevel * STAKE_MARK_SPACING)
+                    (STAKE_MARK_BOTTOM - STAKE_MARK_SIZE) - (stakeLevel * STAKE_MARK_SPACING) -
+                    markGrowth - markRaise
                 ),
                 QuarterPixels(
                     f_BetSetColumnXs[g_BetSet - 1][i] + STAKE_MARK_OFFSET_X + slide +
-                    STAKE_MARK_SIZE + (markGrowth >> 1)
+                    STAKE_MARK_SIZE + (markGrowth / 2)
                 ),
-                QuarterPixels(STAKE_MARK_BOTTOM - markRaise - (stakeLevel * STAKE_MARK_SPACING)),
+                QuarterPixels(STAKE_MARK_BOTTOM - (stakeLevel * STAKE_MARK_SPACING) - markRaise),
                 G_TX_RENDERTILE,
                 0,
                 0,
@@ -1164,9 +1175,6 @@ void DrawBetSettings(Gfx **displayListHead, s32 slide, u8 isSlideReversed, u8 is
 
     *displayListHead = gfx;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", DrawBetSettings);
-#endif
 
 /*
  * Draws the chosen bet's icon size pixels square at (left, top), and reads its
