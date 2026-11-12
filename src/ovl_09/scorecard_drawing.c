@@ -4675,36 +4675,70 @@ static const f64 f_ScoresTenDegrees = DegreesToRadians(10);
  * at the end. The bet columns show g_PrintBuffer as it already stands, and
  * are skipped when the bet rate at the player's index is zero or unset.
  *
- * Doesn't match: loop.c strength-reduces BET_TALLY_TOP + rowOffset into the
- * register that steps by BET_TALLY_ROW_SPACING, where the original steps
- * rowOffset itself from 0 and adds BET_TALLY_TOP at each digit. The nested ifs
- * make GCC compare the bet rate with zero and UNSET_BET_RATE in turn, as the
- * original does, rather than as a range. Indexing g_PrintBuffer by digit, where
- * walking a pointer gave 35 words, 15 in shape, tests its first character at
- * its own address and reloads each character, as the original does; setting
- * left from the digit index gives 123. Stepping rowOffset at the end of the
- * player loop gives 24 words, 14 in shape; a top of its own, 25 and 15; no
- * rowOffset, 92; and rowOffset as an s16, u16 or u32, 98 to 112. The register
- * oracle's closest result is these 22 words with no register forced, so
- * allocation isn't the cause. The difference starts in the digit loops: loop.c
- * moves BET_TALLY_TOP + rowOffset out of each, its first movable, with a saving
- * of 1 over a lifetime of 1 against 33 insns, and the outer loop then reduces
- * it; the original adds it at each digit while moving the bottom's sum out,
- * which needs a larger digit loop or more moves before the top's. A top
- * variable set in each digit loop, for the top alone or for the bottom too,
- * gives 96 words, 18 in shape; declared in the loop, 90 (18); and a bottom
- * variable, 114 (20). 22 words differ, 12 in shape.
+ * Each digit loop works out its glyph's place in two variables of its own. x
+ * is the column's left edge plus the digit index times the glyph's size, which
+ * loop.c reduces to a register stepped by the glyph's size. y is set to the
+ * row's offset, and the rows' top is added to it after x is set. With x's
+ * statement between y's two, loop.c can't take them for consecutive sets and
+ * leaves y in the loop: it moves the row's offset out, and with it the bottom
+ * edge, which cse has by then written as the offset plus a constant, but the
+ * top edge's add stays at each digit, as in the original. The player loop
+ * then steps the offset and the bottom edge in registers of their own. The
+ * totals' loop gets them moved to after its entry test, which a player's
+ * pass can jump over, so there they stay copies of the stepped registers, as
+ * the original's are.
+ *
+ * The nested ifs make GCC compare the bet rate with zero and UNSET_BET_RATE in
+ * turn, as the original does.
+ *
+ * Measured against the match, as words differing and how many of them in
+ * shape:
+ *
+ *   x and y declared in the function, for both loops       151 (23), frame -8
+ *   x so declared, with y in each loop                     117 (19), frame -8
+ *   y so declared, with x in each loop                      86 (8)
+ *   This form in the bets' loop only, the totals' with x
+ *   stepped in its header and its edges written as sums     85 (11), frame -8
+ *   This form in the totals' loop only, the bets' so        100 (30), frame -24
+ *   y set after x, its two statements together              81 (19), frame -16
+ *   y set whole in one statement                            81 (19), frame -16
+ *   The top added to y in each edge, or no y at all         88 (20), frame -16
+ *   A local for the bottom edge, set after the top's add    78 (12), frame -8
+ *   y from a row offset variable set at each player          9 (5)
+ *   y as an s16                                            116 (24), frame -8
+ *   y as a u16                                              48 (12)
+ *   x as an s16                                             26 (12)
+ *   The scorecard's x added where x is set                 161 (47), frame -8
+ *   The scorecard's x added in a statement after the top   160 (52), frame -8
+ *   x written out in each edge, a glyph local between y's   15 (7)
+ *   x stepped in the loops' headers, the same local there   10 (8)
+ *   x stepped in the headers and copied between y's         87 (23), frame -16
+ *   The glyph read through a pointer walked with the index  25 (11)
+ *   An inline function for the digit, adding the top to y   91 (15), frame -8
+ *   The edges as sums of a row offset, x stepped (the old
+ *   draft)                                                  22 (12)
+ *   One if with both of the bet rate's tests                18 (10)
+ *   The column stepped in its loop's header, after the
+ *   bet index                                                8 (0)
+ *   The column set before its loop                          16 (2)
+ *   The total summed after the ifs                         117 (29), frame +8
+ *   The player loop testing < the player count              57 (5), frame -8
+ *
+ * Also matching: y set to the rows' top, with the row's offset added after x;
+ * a local for the glyph's character set between y's statements, with x before
+ * or after y; x and y declared without values and set in the same order;
+ * x and y declared in the function under different names for each loop; x's
+ * product before the column; y or x as a u32; the bottom edge with the glyph's
+ * size first; the column stepped in its loop's header before the bet index;
+ * and the total zeroed in the bet loop's header.
  */
-#ifdef NON_MATCHING
 void DrawBetTallies(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     s32 playerIndex;
     s32 betIndex;
     s32 total;
     s32 column;
-    s32 left;
     s32 digit;
-    s32 rowOffset;
 
     LoadSmallPalette(&gfx, 0, ImageBody(g_Scorecard.digitsImage));
     LoadNibbleTextureBlock(
@@ -4722,20 +4756,23 @@ void DrawBetTallies(Gfx **displayListHead) {
         G_TX_NOLOD
     );
     for (playerIndex = 0; playerIndex != g_GameState.playerCount; playerIndex++) {
-        rowOffset = playerIndex * BET_TALLY_ROW_SPACING;
         total = 0;
         for (betIndex = 0, column = BET_TALLY_LEFT; betIndex != BET_COUNT; betIndex++) {
             total += g_BetTallies[playerIndex][betIndex];
             if (g_GameState.betRates[playerIndex] != 0) {
                 if (g_GameState.betRates[playerIndex] != UNSET_BET_RATE) {
-                    for (digit = 0, left = column; g_PrintBuffer[digit] != '\0';
-                        digit++, left += DIGIT_GLYPH_SIZE) {
+                    for (digit = 0; g_PrintBuffer[digit] != '\0'; digit++) {
+                        s32 y = playerIndex * BET_TALLY_ROW_SPACING;
+                        s32 x = column + (digit * DIGIT_GLYPH_SIZE);
+
+                        /* The rows' top is added after x is set, to match */
+                        y += BET_TALLY_TOP;
                         DrawTextureRect(
                             &gfx,
-                            QuarterPixels(left + g_Scorecard.x),
-                            QuarterPixels(BET_TALLY_TOP + rowOffset),
-                            QuarterPixels(left + g_Scorecard.x + DIGIT_GLYPH_SIZE),
-                            QuarterPixels(BET_TALLY_TOP + DIGIT_GLYPH_SIZE + rowOffset),
+                            QuarterPixels(x + g_Scorecard.x),
+                            QuarterPixels(y),
+                            QuarterPixels(x + g_Scorecard.x + DIGIT_GLYPH_SIZE),
+                            QuarterPixels(y + DIGIT_GLYPH_SIZE),
                             G_TX_RENDERTILE,
                             0,
                             TexelCoordinate(GetDigitGlyphTop(g_PrintBuffer[digit])),
@@ -4750,14 +4787,18 @@ void DrawBetTallies(Gfx **displayListHead) {
         }
 
         sprintf(g_PrintBuffer, f_DecimalFormat, total);
-        for (digit = 0, left = BET_TOTAL_LEFT; g_PrintBuffer[digit] != '\0';
-            digit++, left += DIGIT_GLYPH_SIZE) {
+        for (digit = 0; g_PrintBuffer[digit] != '\0'; digit++) {
+            s32 y = playerIndex * BET_TALLY_ROW_SPACING;
+            s32 x = BET_TOTAL_LEFT + (digit * DIGIT_GLYPH_SIZE);
+
+            /* As in the bets' loop, to match */
+            y += BET_TALLY_TOP;
             DrawTextureRect(
                 &gfx,
-                QuarterPixels(left + g_Scorecard.x),
-                QuarterPixels(BET_TALLY_TOP + rowOffset),
-                QuarterPixels(left + g_Scorecard.x + DIGIT_GLYPH_SIZE),
-                QuarterPixels(BET_TALLY_TOP + DIGIT_GLYPH_SIZE + rowOffset),
+                QuarterPixels(x + g_Scorecard.x),
+                QuarterPixels(y),
+                QuarterPixels(x + g_Scorecard.x + DIGIT_GLYPH_SIZE),
+                QuarterPixels(y + DIGIT_GLYPH_SIZE),
                 G_TX_RENDERTILE,
                 0,
                 TexelCoordinate(GetDigitGlyphTop(g_PrintBuffer[digit])),
@@ -4769,6 +4810,3 @@ void DrawBetTallies(Gfx **displayListHead) {
 
     *displayListHead = gfx;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard_drawing", DrawBetTallies);
-#endif
