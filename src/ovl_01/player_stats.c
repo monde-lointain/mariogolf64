@@ -3361,56 +3361,35 @@ void DrawBestShotsCursor(Gfx **displayListHead) {
  * Reads every character's face, then the palette of each best shot's character
  * in the grid, clamped to the known ones
  *
- * Doesn't match: GCC moves the palette files' address out of the loop, and
- * reload then rebuilds it in the loop where the original builds it, so the
- * face's store is scheduled after the palette lookup's first steps rather
- * than before them; the palette and the character, and the cell and the
- * record pointer, also take each other's registers. The register oracle,
- * forcing 4 pseudos, leaves 20 words differing. Storing the face once
- * after the branches, as the original does, keeps the cell as an index
- * that is shifted each pass. A store in each branch made the address worth
- * strength reduction, a pointer stepped through the palettes, which gave
- * 19 words differing but 9 in shape, and the oracle found nothing closer.
- * Declaring the character before the palette gives 62 words and clamping
- * the palette first 58; reading the palette first, or a variable for the
- * record index or the palette file, changes nothing, and reading the
- * palette file before the store gives 38 (18 in shape). An s16 cell gave
- * 15 words differing, 1 in shape, with the store in each branch, and an
- * s16 or s8 cell gives 39 (1) with the single store, but each sign-extends
- * the cell with sll and sra before the palette offset, where the original
- * shifts it by 9 alone, so the cell is a word. A permuter run's best, 38
- * words with none in shape, passes the palette file through a pointer to
- * file set at the start of each pass, a second name for one local; the
- * pointer set in its declaration gives 50 (6), and an inline helper taking
- * the file's pointer, opening and reading it, 49 (13), or reading it only,
- * 125 (13). Setting a local to STATS_CELL_EMPTY on each pass and testing
- * the record against it gives 42 words with none in shape, and the
- * register oracle's closest is then 16 words against 20 here, both forcing
- * 4 pseudos; reading the record into an s32 or s16 local, in or before the
- * test, changes nothing, and a pointer to it gives 124 (16). Both the
- * original and this load the empty cell's value just before the compare on
- * each pass, and the matched FindNextBestShotCell writes the same test
- * with the constant, so nothing shows the original kept the value in a
- * variable. That left 46 words, 4 in shape.
+ * Each arm of the record test stores the cell's palette address itself, with
+ * the cell's index written out, which is what matches: the two index sums are
+ * what makes GCC step the index in a register of its own, and the two
+ * addresses what makes it keep the palettes' base outside the loop. Measured
+ * against it, in words differing (and how many of them in shape):
  *
- * The character and palette are clamped at zero with the conditional
- * operator and at their counts with ifs, which takes the draft from 46
- * words differing, 4 in shape, to 38, none in shape, and the register
- * oracle's closest from 20 words to 12, forcing 4 pseudos either way. Of
- * the 16 mixes of the two forms for the four clamps, the rest give 45 to
- * 55 words, 4 to 9 in shape. The original computes the lower clamps
- * without a branch, as GCC does for the operator. Repeating the
- * palette's lower clamp in both arms of the character's upper one gives
- * the same 38 words. That left 38 words, none in shape.
+ *   One store after the arms                             122 (12)
+ *   One store before the test                            103 (17)
+ *   One store after the arms from a cell stepped in the
+ *   loop's header                                        44 (4)
+ *   The same cell with a store in each arm               17 (9)
+ *   A cell local set before the test, a store in each    51 (7)
+ *   A cell local set in each arm                         41 (9)
+ *   The store first in both arms                         31 (15)
+ *   The store first in the record's arm only             25 (11)
+ *   The store first in the empty arm only                16 (10)
+ *   The store between the reads and the clamps           11 (7)
+ *   The character's upper clamp as a conditional         11 (9)
+ *   The palette's upper clamp as a conditional           19 (5)
+ *   Both upper clamps as conditionals                    25 (9)
+ *   The palette clamped before the character             16 (0)
+ *   Each upper clamp before its lower one                17 (7)
+ *   The empty arm zeroing the palette first              4 (0)
+ *   The test as == with the arms swapped                 9 (9)
+ *   Both zeroed before the test, with no else            121 (9)
  *
- * The cell loop steps cell before column, where the draft stepped column
- * first; a search reordering for headers' clauses found it. That takes
- * the draft from 38 words differing to 36, none in shape, and the
- * register oracle's closest from 12 words to 6, forcing 4 pseudos either
- * way; starting cell first as well gives 62 words, and starting it first
- * alone 60. 36 words differ, none in shape.
+ * The lower clamps as conditionals and the palette read before the character
+ * match as well
  */
-#ifdef NON_MATCHING
 void LoadBestShotFaces(void) {
     EncodedAsset asset;
     AssetFile file;
@@ -3420,8 +3399,6 @@ void LoadBestShotFaces(void) {
     s32 column;
     s32 palette;
     CharacterId character;
-    s32 cell;
-    s32 rowStart;
 
     for (index = 0; index != CHARACTER_COUNT; index++) {
         OpenEncodedAsset(g_CharacterFaceAssets[index], &asset);
@@ -3429,39 +3406,42 @@ void LoadBestShotFaces(void) {
     }
 
     for (row = 0; row != STATS_GRID_ROW_COUNT; row++) {
-        /* The row's first cell, which the original works out apart from the cell
-         * it steps */
-        rowStart = row * STATS_GRID_COLUMN_COUNT;
-        for (column = 0, cell = rowStart; column != STATS_GRID_COLUMN_COUNT; cell++, column++) {
+        for (column = 0; column != STATS_GRID_COLUMN_COUNT; column++) {
             if (f_BestShotRecords[row][column] != STATS_CELL_EMPTY) {
                 character = save->rankedRecords[f_BestShotRecords[row][column]].characterIndex;
                 palette = save->rankedRecords[f_BestShotRecords[row][column]].paletteIndex;
-                character = (character < 0) ? 0 : character;
+
+                if (character < 0) {
+                    character = 0;
+                }
 
                 if (character >= CHARACTER_COUNT) {
                     character = CHARACTER_COUNT - 1;
                 }
 
-                palette = (palette < 0) ? 0 : palette;
+                if (palette < 0) {
+                    palette = 0;
+                }
 
                 if (palette >= CHARACTER_PALETTE_COUNT) {
                     palette = CHARACTER_PALETTE_COUNT - 1;
                 }
+
+                f_BestShotFaces[row][column] =
+                    g_MenuCharacterPalettes[(row * STATS_GRID_COLUMN_COUNT) + column];
             }
             else {
                 character = 0;
                 palette = 0;
+                f_BestShotFaces[row][column] =
+                    g_MenuCharacterPalettes[(row * STATS_GRID_COLUMN_COUNT) + column];
             }
 
-            f_BestShotFaces[row][column] = g_MenuCharacterPalettes[cell];
             OpenAssetFile(g_CharacterPaletteFiles[character][palette], &file);
             ReadAssetFile(f_BestShotFaces[row][column], GetAssetFileSize(&file), &file);
         }
     }
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", LoadBestShotFaces);
-#endif
 
 /*
  * Draws a character's face from texels and a palette at (left, top), darkened
