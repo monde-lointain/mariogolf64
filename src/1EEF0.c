@@ -39,9 +39,35 @@ Unk800CABD0 *func_80043AF0(s32 arg0) {
 void func_80043B0C(void) {
 }
 
-INCLUDE_ASM("asm/nonmatchings/1EEF0", func_80043B14);
+s32 func_80043B14(void *arg0, s32 arg1) {
+    u32 flags = *(u32 *)((u8 *)arg0 + 0x8);
+    s16 field = *(s16 *)((u8 *)arg0 + 0xC);
+    s32 v1;
 
-INCLUDE_ASM("asm/nonmatchings/1EEF0", func_80043BB0);
+    if (flags & 0x1) {
+        v1 = 0;
+        if (arg1 == 1) {
+            v1 = 0x64;
+        } else if (arg1 == 0) {
+            v1 = 0xC8;
+        } else if (arg1 == 2) {
+            v1 = 0x1E;
+        }
+    } else {
+        v1 = 0;
+        if (arg1 == 1) {
+            v1 = 0x3C;
+        } else if (arg1 == 0) {
+            v1 = field;
+        } else if (arg1 == 2) {
+            v1 = (s32)(0.1f * field);
+        }
+    }
+
+    return v1;
+}
+
+void func_80043BB0(Unk800BB258 *arg0, s32 arg1);
 
 INCLUDE_ASM("asm/nonmatchings/1EEF0", func_80043C20);
 
