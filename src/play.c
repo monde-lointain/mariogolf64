@@ -1981,61 +1981,99 @@ void ClearNearbyGroundTiles(void) {
 /*
  * Gives each ground point texture coordinates from its x and z, mirrored on
  * every other tile so that the texture tiles seamlessly, under
- * GAME_FLAG_TEST_GROUND_TEXTURE
+ * GAME_FLAG_TEST_GROUND_TEXTURE.
  *
- * Doesn't match: the original copies each tile number into a second register
- * after the division, where this divides into the register it keeps it in.
- * Mirroring each coordinate in a GetMirroredOffset helper gives 40 words, but
- * the register oracle leaves 10 at best, forcing 5 pseudos. Written out with
- * one tile local and an offset local for each texture axis, as a permuter
- * run found, it gives 30 words and leaves 6, forcing 3; with one offset
- * local, 46 words, leaving 6 forcing 6, and with a tile local for each axis
- * as well, 40, leaving 10. Taking the coordinate in an s16 or s32 local, or
- * the tile from an inline helper, with one offset local, also gives 46.
- * Taking the helper's coordinate as an s32 copies the coordinate twice
- * instead (44); other helper shapes and a separate tile helper give 40-52. A
- * u16 offset gives 34 words (8 in shape against 6), but masks each offset with
- * an andi 0xffff, which the original never does. An s16 offset gives 36 words
- * (10 in shape) but sign-extends it with two pairs of 16-bit shifts the
- * original lacks, both measured with the helper. Taking each offset as the
- * coordinate % TEST_TEXTURE_TILE_SIZE gives 44 words (10 in shape), as the
- * remainder is sign-extended from 16 bits. 30 words differ, 6 in shape.
+ * Each coordinate is copied to an s32, and its offset in the tile is taken
+ * as a remainder before the tile's number as a quotient. GCC works the
+ * remainder out as the coordinate less the quotient times the size, with the
+ * quotient in the offset's own register on the way. cse then finds that the
+ * tile's division is the one just done, and makes the tile a copy of that
+ * quotient: the original's move of each tile number from $a0 to $v1. Read
+ * straight from the point, the coordinate is a short, and the remainder is
+ * taken in 16 bits and sign-extended.
+ *
+ * One offset and one copy serve both axes. With an offset for each, the
+ * offsets take $v0 and the coordinates $a0, where the original has $a0 and
+ * $a1.
+ *
+ * An offset of the tile's size stores the size's texel coordinate, which is
+ * what the other arm would store; without the test the original's beq is
+ * gone.
+ *
+ * Measured against the match, as words differing and how many of them in
+ * shape:
+ *
+ *   The tile's quotient before the offset's remainder       34 (4)
+ *   The coordinate read from the point in each, with or
+ *   without a cast to s32                                   52 (10)
+ *   The copy as an s16                                      52 (10)
+ *   The copy as a u16                                       36 (28)
+ *   The copy as a u32                                       26 (20)
+ *   A copy for each axis, or one declared in a block
+ *   around each                                             50 (4)
+ *   An offset for each axis, or so declared                 44 (0)
+ *   The offset as an s16                                    44 (12)
+ *   The offset as a u16                                     42 (10)
+ *   The offset as the coordinate less the tile times the
+ *   size, after the tile                                    46 (6)
+ *   The same from the point, with an offset for each axis
+ *   and no copy (the old draft)                             30 (6)
+ *   The quotient set in the offset and copied to the
+ *   tile, then the offset as the coordinate less the
+ *   tile times the size                                     34 (4)
+ *   The offset as coordinate & (size - 1)                   33 (11)
+ *   An inline function for the mirrored offset              54 (8)
+ *   The same, taking the coordinate as an s16               52 (16)
+ *   No test of the offset against the size                  36 (22)
+ *   That test as ==, with its arms swapped                   8 (4)
+ *   0x100 added in each arm of the test                     25 (17)
+ *   The coordinates read through GetGroundPoint again       23 (17)
+ *   The row loop or the column loop testing !=               4 (4)
+ *
+ * Also matching: the three locals declared in any order; the tile as an
+ * s16, u16 or u32, one for each axis, or declared in a block; no tile at
+ * all, with the quotient written in the mirror's test; that test as & 1 or
+ * != 0; the offset as a u32; and the mirror or the offset's test as a
+ * conditional expression.
  */
-#ifdef NON_MATCHING
 void RebuildGroundTextureCoordinates(void) {
     Vtx_t point;
     s32 row;
     s32 column;
     s32 tile;
-    s32 offsetS;
-    s32 offsetT;
+    s32 offset;
+    s32 coordinate;
 
     ClearGameFlag(GAME_FLAG_HOLE_LOADED);
     for (row = 0; row < GROUND_POINT_ROW_COUNT; row++) {
         for (column = 0; column < GROUND_POINT_COLUMN_COUNT; column++) {
             point = GetGroundPoint(column, row)->v;
-            tile = point.ob[AXIS_X] / TEST_TEXTURE_TILE_SIZE;
-            offsetS = point.ob[AXIS_X] - (tile * TEST_TEXTURE_TILE_SIZE);
+            /* The remainder comes before the quotient, both taken from an s32
+             * copy, to match */
+            coordinate = point.ob[AXIS_X];
+            offset = coordinate % TEST_TEXTURE_TILE_SIZE;
+            tile = coordinate / TEST_TEXTURE_TILE_SIZE;
             if (tile % 2) {
-                offsetS = TEST_TEXTURE_TILE_SIZE - offsetS;
+                offset = TEST_TEXTURE_TILE_SIZE - offset;
             }
 
-            if (offsetS != TEST_TEXTURE_TILE_SIZE) {
-                point.tc[TEXTURE_AXIS_S] = TexelCoordinate(offsetS);
+            if (offset != TEST_TEXTURE_TILE_SIZE) {
+                point.tc[TEXTURE_AXIS_S] = TexelCoordinate(offset);
             }
             else {
                 point.tc[TEXTURE_AXIS_S] = TexelCoordinate(TEST_TEXTURE_TILE_SIZE);
             }
 
             point.tc[TEXTURE_AXIS_S] += 0x100;
-            tile = point.ob[AXIS_Z] / TEST_TEXTURE_TILE_SIZE;
-            offsetT = point.ob[AXIS_Z] - (tile * TEST_TEXTURE_TILE_SIZE);
+            coordinate = point.ob[AXIS_Z];
+            offset = coordinate % TEST_TEXTURE_TILE_SIZE;
+            tile = coordinate / TEST_TEXTURE_TILE_SIZE;
             if (tile % 2) {
-                offsetT = TEST_TEXTURE_TILE_SIZE - offsetT;
+                offset = TEST_TEXTURE_TILE_SIZE - offset;
             }
 
-            if (offsetT != TEST_TEXTURE_TILE_SIZE) {
-                point.tc[TEXTURE_AXIS_T] = TexelCoordinate(offsetT);
+            if (offset != TEST_TEXTURE_TILE_SIZE) {
+                point.tc[TEXTURE_AXIS_T] = TexelCoordinate(offset);
             }
             else {
                 point.tc[TEXTURE_AXIS_T] = TexelCoordinate(TEST_TEXTURE_TILE_SIZE);
@@ -2046,10 +2084,6 @@ void RebuildGroundTextureCoordinates(void) {
         }
     }
 }
-
-#else
-INCLUDE_ASM("asm/nonmatchings/play", RebuildGroundTextureCoordinates);
-#endif
 
 #ifdef NON_MATCHING
 /* Whether the neighbor makes it snap the edge's midpoints */
