@@ -36,8 +36,8 @@ enum CourseSelectLayout {
 #define MENU_LAYER_BOARD (1 << 2)
 #define MENU_LAYER_BANNER (1 << 3)
 #define MENU_LAYER_LARGE_BANNER (1 << 4)
-/* DrawMenuBackdropLayers switches on g_MenuScreen for it, but with no cases,
- * so it draws nothing */
+/* DrawMenuBackdropLayers reads g_MenuScreen for it but draws nothing on any
+ * screen */
 #define MENU_LAYER_PER_SCREEN (1 << 5)
 #define MENU_LAYER_TALL_NARROW_BOARD (1 << 7)
 /* Just the scenery and the banner, behind the screens that draw their own

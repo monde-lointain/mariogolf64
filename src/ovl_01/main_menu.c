@@ -4778,6 +4778,13 @@ void DrawMenuScreen(Gfx **displayListHead) {
  */
 #define BANNER_BOB_LOWERING 13.0f
 #define BANNER_BOB_RAISING 4.0f
+/*
+ * DrawMenuBackdropLayers adds the banner's top in two parts, one before the
+ * bob offset and one after it. Only their sum of MENU_BANNER_TOP is known:
+ * any two parts other than 0 give the same code, and this split is a guess.
+ */
+#define BOBBING_BANNER_TOP 8
+#define BOBBING_BANNER_DROP (MENU_BANNER_TOP - BOBBING_BANNER_TOP)
 /* Whether the banner bobs on a menu screen */
 #define IsBannerBobScreen(screen) \
     ((screen) == MENU_SCREEN_TITLE || \
@@ -4790,57 +4797,70 @@ void DrawMenuScreen(Gfx **displayListHead) {
  * Draws the chosen layers of the menu's backdrop: the course backdrop, the
  * board and the banner
  *
- * Doesn't match: the scenery strips' 0xFD500000 and -8 swap registers, and
- * the board loop's registers differ. The original also reads g_MenuScreen
- * for MENU_LAYER_PER_SCREEN where this dropped the read. An empty case or
- * default, an empty if, a (void) read and switches of 4, 6 or 10 shared
- * cases all dropped it too before the strips' row count variable, as did 6
- * cases that each break. A permuter run pointed to the variable. Adding the
- * strip's offset to the texels' start, rather than both to the image, gives
- * the same code. The first strip's texels and a strip's top in quarter
- * pixels go straight into their commands: holding them in locals gave 58
- * words differing, 16 in shape. The register oracle's closest result is
- * these 42 words with no register forced, so allocation isn't the cause. 42
- * words differ, 10 in shape.
+ * The banner's strips count with stripIndex, as the board's do, and work out
+ * their texels' offset in one expression. Each edge of a strip is one sum in
+ * its command: a part of the banner's top, the strip's own top as the counter
+ * times the strip's height, the bob offset, and the rest of the banner's top.
+ * loop.c then steps the product from 0 in a register of its own and leaves
+ * the bob offset to be added to it for each edge, as the original does. With
+ * the banner's top as one constant the edges' adds come out another way, and
+ * most such forms keep one more value in a saved register through the whole
+ * function. Any two parts other than 0 give the same code, so only their sum
+ * is known (BOBBING_BANNER_TOP).
  *
- * The banner loop counts with bannerStrip, a counter of its own, and works out
- * its strip's offset through stripWidthOffset, as a permuter run found. That
- * takes the draft from 42 words to 26, 10 in shape to 8, and the register
- * oracle's closest result to these 26 with none forced. Each change alone
- * gives 612 (430 in shape) for the counter, as loop.c then hoists other
- * constants into saved registers through the whole function, or 42 for the
- * offset; the offset as the strip's whole texel count or its first row times
- * the width gives 612, in any of seven declaration places.
+ * The per-screen layer's switch has a case that ends the display list and
+ * returns, as the code after the switch does. jump2 finds the case's code
+ * the same as the tail, cross-jumps the two and deletes the branch, which
+ * leaves the original's dead read of g_MenuScreen and its test in place. The
+ * case is the one form here with no other reason to exist, and which screen
+ * it names is unknown: any but MENU_SCREEN_TITLE gives the same code.
  *
- * The per-screen layer's switch has a case that ends the display list
- * and returns, as the code after the switch does. jump2 then finds the
- * case's code the same as the tail, cross-jumps the two and deletes the
- * branch, leaving the original's dead read of g_MenuScreen and its sync
- * after the board loop in place: 26 words go to 18, 8 in shape to 2, and
- * the register oracle's closest result is these 18 with none forced. The
- * case is the one form here with no other reason to exist, and which
- * screen it names is unknown; an if on one screen gives the same 18
- * words, a default that returns 25 (7 in shape), and a case and a
- * default that each sync and break, with an else that syncs, 22 (4).
+ * The clamped scenery counts its loaded rows in a variable, as its comment
+ * explains.
  *
- * What's left is the banner's strip top. The original steps a register
- * by the strip's height from 0 and adds the bob offset to it for each
- * edge, where this folds the bob offset into the stepped register's
- * start. loop.c reduces bobOffset plus bannerStrip times the height as
- * one giv, as the product's shifts give it a large benefit; a top
- * stepped by the height in a variable of its own leaves the sum
- * unreduced, as the original does, but cse shares the sum between the
- * edges, and the new variable moves registers through the whole
- * function: 286 words or more, 39 or more in shape, for six orders of
- * the edges' terms. bobOffset as an s16 or s8 gives 29 words (7 in
- * shape), a u16 34 (18) and an f32 61 (17), and stripTop as an s16 679
- * (93). 18 words differ, 2 in shape.
+ * Measured against the match, in words differing (and how many in shape):
+ *
+ *   The banner's strips counted by a variable of their own  618 (420)
+ *   The texels' offset through a local of counter times width 4 (4)
+ *   The banner's top whole, before the product              598 (426)
+ *   The banner's top whole, after the bob offset            275 (37)
+ *   Both parts before the bob offset                        598 (426)
+ *   Both parts after the bob offset                         275 (37)
+ *   The top after the bob offset, the two in parentheses    285 (39)
+ *   The bob offset first in each edge                       626 (424)
+ *   The bottom's strip height after the bob offset, or last 648 (424)
+ *   The bottom's product as the counter plus 1, times height 20 (10)
+ *   A local for the first part plus the product               8 (2)
+ *   A local for the product                                  37 (1)
+ *   A local for the bob offset plus the product              34 (4)
+ *   A local stepped by the height from 0 for the product    594 (426)
+ *   bobOffset as an s16                                      68 (16)
+ *   bobOffset as an s8                                       56 (18)
+ *   bobOffset as a u16                                       85 (31)
+ *   bobOffset zeroed before its test, with no else            3 (3)
+ *   The bob offset's two constants as one                     6 (4)
+ *   The banner's image read at each use, with no local      135 (39), frame -8
+ *   MENU_SCREEN_TITLE as the returning case's screen          7 (5)
+ *   A default that returns, in place of the case              7 (5)
+ *   A case that breaks, an empty default or if, a (void) read 8 (6)
+ *   No read of g_MenuScreen at all                            8 (6)
+ *   A case and a default that sync and break, an else too     4 (2)
+ *   The clamped scenery's loaded rows as the constant       811 (431), frame +8
+ *   The rows' count set where it is declared                219 (29)
+ *   The first strip's load counting its rows with it too    811 (431), frame +8
+ *   The plain scenery's bottom edge from stripTop             3 (3)
+ *   Without the unused GetMenuMemory call                   397 (3), frame +16
+ *
+ * Also matching: the bottom's strip height after the product; the product
+ * before the first part in both edges; the bob offset as a conditional
+ * expression; an if on one screen that returns, a case of two screens, or a
+ * case, a default and an else that each sync and store the list's head; the
+ * clamped scenery's texels as a sum, or the plain scenery's through
+ * LargeImageTexelsAt; loadedRowCount declared before stripIndex, image before
+ * bobOffset, or stripTop before shownRowCount.
  */
-#ifdef NON_MATCHING
 void DrawMenuBackdropLayers(Gfx **displayListHead, s32 layers) {
     Gfx *gfx = *displayListHead;
-    s32 bannerStrip;
-    s32 stripWidthOffset;
     s32 stripIndex;
     s32 shownRowCount;
     s32 stripTop;
@@ -4902,9 +4922,9 @@ void DrawMenuBackdropLayers(Gfx **displayListHead, s32 layers) {
                     gDPPipeSync(gfx++);
                     /*
                      * The loaded rows are counted in a variable here, to match: the
-                     * constant gives 849 words differing (441 in shape), setting the
-                     * count where it is declared 261 (39), and counting the rows in the
-                     * first strip's load too 849 (441), against 42 (10)
+                     * constant gives 811 words differing (431 in shape), setting the
+                     * count where it is declared 219 (29), and counting the rows in the
+                     * first strip's load too 811 (431)
                      */
                     loadedRowCount = BACKDROP_STRIP_ROW_COUNT + BACKDROP_SEAM_ROW_COUNT;
                     gDPLoadTextureBlock(
@@ -5159,16 +5179,12 @@ void DrawMenuBackdropLayers(Gfx **displayListHead, s32 layers) {
         image = g_MenuTitleImages[f_MenuTitleImageIndex];
         gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(image)));
 
-        for (bannerStrip = 0; bannerStrip != MENU_BANNER_STRIP_COUNT; bannerStrip++) {
-            /*
-             * The strip's texel offset is worked out in two steps, to match: in one
-             * expression, as the scenery and board strips do, 612 words differ
-             */
-            stripWidthOffset = bannerStrip * MENU_BANNER_WIDTH;
+        for (stripIndex = 0; stripIndex != MENU_BANNER_STRIP_COUNT; stripIndex++) {
             gDPLoadTextureBlock(
                 gfx++,
                 TextureAddress(
-                    LargeImageTexels(image) + (stripWidthOffset * MENU_BANNER_STRIP_HEIGHT)
+                    LargeImageTexels(image) +
+                    (stripIndex * MENU_BANNER_WIDTH * MENU_BANNER_STRIP_HEIGHT)
                 ),
                 G_IM_FMT_CI,
                 G_IM_SIZ_8b,
@@ -5184,13 +5200,20 @@ void DrawMenuBackdropLayers(Gfx **displayListHead, s32 layers) {
             );
             gDPPipeSync(gfx++);
 
-            stripTop = bobOffset + (bannerStrip * MENU_BANNER_STRIP_HEIGHT);
+            /* The banner's top goes in two parts around the bob offset, to
+             * match */
             gSPScisTextureRectangle(
                 gfx++,
                 QuarterPixels(MENU_BANNER_LEFT),
-                QuarterPixels(stripTop + MENU_BANNER_TOP),
+                QuarterPixels(
+                    BOBBING_BANNER_TOP + (stripIndex * MENU_BANNER_STRIP_HEIGHT) + bobOffset +
+                    BOBBING_BANNER_DROP
+                ),
                 QuarterPixels(MENU_BANNER_LEFT + MENU_BANNER_WIDTH),
-                QuarterPixels(stripTop + MENU_BANNER_TOP + MENU_BANNER_STRIP_HEIGHT),
+                QuarterPixels(
+                    BOBBING_BANNER_TOP + MENU_BANNER_STRIP_HEIGHT +
+                    (stripIndex * MENU_BANNER_STRIP_HEIGHT) + bobOffset + BOBBING_BANNER_DROP
+                ),
                 G_TX_RENDERTILE,
                 0,
                 0,
@@ -5201,7 +5224,11 @@ void DrawMenuBackdropLayers(Gfx **displayListHead, s32 layers) {
         }
     }
 
-    /* The game reads g_MenuScreen for this layer but draws nothing */
+    /*
+     * The game reads g_MenuScreen for this layer but draws nothing. The case
+     * ends the list as the code below does, which keeps the read: see the
+     * header comment
+     */
     if (layers & MENU_LAYER_PER_SCREEN) {
         switch (g_MenuScreen) {
             case MENU_SCREEN_COURSE_SELECT:
@@ -5214,9 +5241,6 @@ void DrawMenuBackdropLayers(Gfx **displayListHead, s32 layers) {
     gDPPipeSync(gfx++);
     *displayListHead = gfx;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", DrawMenuBackdropLayers);
-#endif
 
 /*
  * Draws the chosen layers of the backdrop from their own routines, unlike
