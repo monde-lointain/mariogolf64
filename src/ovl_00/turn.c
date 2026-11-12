@@ -1244,67 +1244,82 @@ void MoveAimCameraDistance(void) {
  * heading holds still, the scene is drawn from a saved frame, through two
  * framebuffers.
  *
- * Each stick branch has its own step and speed. The original holds the speed in
- * different registers in the two branches, but a speed of its own in each
- * changes nothing; a step of its own in each takes the draft from 44 words
- * differing, 12 in shape, to 39. Doesn't match: 39 words differ, 9 in shape, in
- * the stick's step. The original keeps the stick's 16-bit value and its
- * pointers in other registers, and schedules the divisions differently. Before
- * the branches had their own variables: choosing g_AltHeading's step with ?:
- * loaded the heading with lh, as the original does, though after the speed test
- * where the original loads it before; with an if it gave 55 words (21 in
- * shape). The aim heading's step as ?: too gave 64 (22), and a BinaryAngle
- * saved heading, which the original loads with lhu, 56 (20). Storing heading -
- * step changed nothing, subtracting in both arms of the speed test gave 57
- * words, and an inline helper taking the divisor gave 97, as the divisor isn't
- * folded. A permuter output with 39 words (9 in shape) worked out
- * g_AltHeading's half stick into a temp before the speed and copied it to step
- * after; computing step after the speed instead gave 43 (19), and in both
- * branches 54 (30). A u32 speed for the aim heading's step gives 37 words (11
- * in shape), but it drops the speed's < 0 test, where the original keeps its
- * bltzl and negu.
+ * Each stick branch takes its turn from the heading in 32 bits: the heading
+ * before the turn is copied to an s32, after the stick's half is worked out and
+ * before the speed. The original sign-extends the saved heading there, from $s1
+ * into $v1, and loads g_AltHeading with lh while the speed is still being
+ * divided. With -= on the heading itself, the difference is narrowed to 16 bits
+ * and needs no extension: the aim's turn is subtracted from $s1 as it was
+ * loaded, and g_AltHeading is loaded after the speed's absolute value is taken.
  *
- * Reading g_TurnController.stickX directly in the steps, alone or in either
- * branch, as a focused permuter run's best did through a temporary, leaves
- * 39 words; in the speeds it gives 51, at every use 96 (30 in shape), and an
- * s16 stickX 86 (28).
+ * The aim's branch also stores the new heading through a pointer, from a
+ * variable of its own. The original copies g_CurrentShot's address from $a2,
+ * through which the heading was saved, to $a3, and stores the heading through
+ * $a3 once, after both arms of the speed's test. Without the pointer the
+ * heading is saved and stored by its address, with no register for it. Without
+ * the variable the pointer is the address's own register, with no copy, and
+ * each arm of the speed's test ends in a store of its own.
  *
- * The original subtracts the aim's step from the heading it saved, sign-
- * extended, rather than reading g_CurrentShot.heading again, and the
- * draft's code does the same. Storing heading - step leaves 39 words;
- * subtracting step * speed or step in the two arms of the speed test,
- * with -= or from heading, gives 37 (9 in shape), and a ?: as
- * g_AltHeading's step has it 35 (15), but the register oracle's closest
- * result rises from 27 words, forcing 3 pseudos, to 29 for both the -=
- * arms and the ?:. A saved heading of s32 or BinaryAngle gives 49 to 66
- * words (17 to 20 in shape).
+ * The heading is saved as a SignedBinaryAngle, where the stick is read: the
+ * original loads it with lhu into $s1 and sign-extends it at each use, for the
+ * aim's turn and for the test of whether it held still.
  *
- * Each D-pad branch counts through a pointer to f_AimTurnFrameCount of its own:
- * naming the static directly, with ++ and -- inside the tests or as statements
- * of their own, or counting in static inline helpers that take its address,
- * gives 80 words differing (28 in shape), and one pointer for the whole
- * function, set as it is declared, 61 to 67.
+ * Each D-pad branch counts through a pointer to f_AimTurnFrameCount of its own,
+ * which the original keeps in $v1.
  *
- * The register oracle lines the saved heading up with two registers, as
- * the original loads it with lhu into $s1 and sign-extends a copy at
- * each use, for the aim's step and for the frame test. The draft's frame
- * test does the same, but its step's subtraction is narrowed to 16 bits,
- * as it is stored to the heading, and needs no extension; the original's
- * subtracts from the extended copy in both arms of the speed's test, as
- * if the difference were held in 32 bits first. Working it out into step
- * before the store gives 42 words (16 in shape), and in both arms 52
- * (26). A BinaryAngle or u16 saved heading, converted to
- * SignedBinaryAngle at both uses, compiles to the draft's code, as cse
- * folds each conversion into the load; with the shot's heading a
- * BinaryAngle too, 41 words differ (11 in shape). 39 words differ, 9 in
- * shape.
+ * Measured against the match, as words differing and how many of them in shape:
+ *   The aim's turn as -= on g_CurrentShot.heading, with the
+ *   step multiplied by the speed under an if                  33 (5)
+ *   The same, with g_AltHeading's turn as -= too (the old
+ *   draft)                                                    39 (9)
+ *   The aim's turn as -= of a conditional expression          29 (11)
+ *   No shotHeading, newHeading stored to
+ *   g_CurrentShot.heading                                     24 (12)
+ *   No newHeading, the difference stored through shotHeading,
+ *   or to g_CurrentShot.heading                               9 (3)
+ *   oldHeading turned in place and stored                     35 (7)
+ *   No oldHeading, the turn taken from heading                22 (12)
+ *   oldHeading as a SignedBinaryAngle                         22 (12)
+ *   oldHeading declared before step                           22 (6)
+ *   oldHeading declared after speed                           22 (12)
+ *   speed declared before step                                41 (15)
+ *   shotHeading declared after speed                          20 (10)
+ *   The step multiplied by the speed under an if, then taken
+ *   from oldHeading                                           37 (5)
+ *   The step as stickX >> 1                                   4 (2)
+ *   An inline function for the step times the speed           33 (5)
+ *   g_AltHeading's turn as -=, or taken from g_AltHeading
+ *   with no oldHeading                                        6 (4)
+ *   g_AltHeading's turn stored through a pointer              8 (2)
+ *   g_AltHeading's oldHeading as a SignedBinaryAngle          23 (15)
+ *   g_AltHeading's step multiplied by the speed under an if   7 (3)
+ *   g_AltHeading's speed declared before its step             12 (12)
+ *   The test as turnsAltHeading, with its branches swapped    54 (42)
+ *   The saved heading as a BinaryAngle                        31 (11)
+ *   The saved heading as an s32                               45 (13)
+ *   stickX as an s8                                           91 (21)
+ *   stickX as an s16                                          89 (23)
+ *   The heading saved before the stick is read                21 (5)
+ *   Both read after g_ImpactPointState's test                 26 (12)
+ *   f_AimTurnFrameCount named in both D-pad branches          41 (19)
+ *   f_AimTurnFrameCount named in one D-pad branch             20 (8)
+ *   One pointer to f_AimTurnFrameCount for the function       40 (8)
+ *
+ * Also matching: newHeading declared and then set, set in an if and an else, or
+ * as a conditional expression that subtracts in each arm; newHeading as a
+ * SignedBinaryAngle; oldHeading read through shotHeading, or from
+ * g_CurrentShot.heading; shotHeading as a pointer to g_CurrentShot; the aim's
+ * step as an s16, or read from g_TurnController.stickX; either speed's absolute
+ * value taken with an if; either speed tested == 0, with the arms swapped;
+ * g_AltHeading's turn through a newHeading too, or with its oldHeading declared
+ * before its step; the frame count copied to a local for the D-pad's turn; the
+ * D-pad's speed as a conditional expression; and the shot's heading cast to s16
+ * in the test of whether it held still.
  */
-#ifdef NON_MATCHING
 void TurnAim(s32 turnsAltHeading) {
     s32 stickX = g_TurnController.stickX;
     SignedBinaryAngle heading = g_CurrentShot.heading;
     s32 dpad;
-    s32 heldFrameCount;
     s32 dpadSpeed;
 
     if (g_ImpactPointState != IMPACT_POINT_OFF) {
@@ -1312,28 +1327,22 @@ void TurnAim(s32 turnsAltHeading) {
     }
 
     if (!turnsAltHeading) {
+        /* Turned in 32 bits and stored through a pointer, to match */
+        SignedBinaryAngle *shotHeading = &g_CurrentShot.heading;
         s32 step = stickX / 2;
-        s32 speed = stickX / AIM_STICK_SPEED_DIVISOR;
+        s32 oldHeading = heading;
+        s32 speed = Abs(stickX / AIM_STICK_SPEED_DIVISOR);
+        s32 newHeading = oldHeading - ((speed != 0) ? step * speed : step);
 
-        if (speed < 0) {
-            speed = -speed;
-        }
-
-        if (speed != 0) {
-            step *= speed;
-        }
-
-        g_CurrentShot.heading -= step;
+        *shotHeading = newHeading;
     }
     else {
+        /* Turned in 32 bits as well, to match */
         s32 step = stickX / 2;
-        s32 speed = stickX / ALT_HEADING_STICK_SPEED_DIVISOR;
+        s32 oldHeading = g_AltHeading;
+        s32 speed = Abs(stickX / ALT_HEADING_STICK_SPEED_DIVISOR);
 
-        if (speed < 0) {
-            speed = -speed;
-        }
-
-        g_AltHeading -= (speed != 0) ? step * speed : step;
+        g_AltHeading = oldHeading - ((speed != 0) ? step * speed : step);
     }
 
     dpad = g_TurnController.buttons & (L_JPAD | R_JPAD);
@@ -1341,6 +1350,7 @@ void TurnAim(s32 turnsAltHeading) {
         f_AimTurnFrameCount = 0;
     }
     else if (dpad & L_JPAD) {
+        /* Counted through a pointer of this branch's own, to match */
         s32 *dpadFrames = &f_AimTurnFrameCount;
 
         if (*dpadFrames < 0) {
@@ -1352,6 +1362,7 @@ void TurnAim(s32 turnsAltHeading) {
         }
     }
     else {
+        /* As in the left branch, to match */
         s32 *dpadFrames = &f_AimTurnFrameCount;
 
         if (*dpadFrames > 0) {
@@ -1363,14 +1374,13 @@ void TurnAim(s32 turnsAltHeading) {
         }
     }
 
-    heldFrameCount = f_AimTurnFrameCount;
-    dpadSpeed = (heldFrameCount < 0) ? -heldFrameCount : heldFrameCount;
+    dpadSpeed = Abs(f_AimTurnFrameCount);
     g_CurrentShot.heading +=
-        heldFrameCount * ((dpadSpeed / AIM_DPAD_SPEED_DIVISOR) + AIM_DPAD_BASE_SPEED);
+        f_AimTurnFrameCount * ((dpadSpeed / AIM_DPAD_SPEED_DIVISOR) + AIM_DPAD_BASE_SPEED);
     if (!IsGameFlagSet(GAME_FLAG_RANDOM_FRAMEBUFFER_COUNT)) {
         if (g_LetterboxState == LETTERBOX_STATE_NONE ||
             g_LetterboxState == LETTERBOX_STATE_UNUSED_AIMING) {
-            if (heading == (s16)g_CurrentShot.heading) {
+            if (heading == g_CurrentShot.heading) {
                 if (g_ScreenEffect != SCREEN_EFFECT_SAVED_FRAME) {
                     SetScreenEffect(SCREEN_EFFECT_SAVED_FRAME, SAVED_FRAME_STEP_SAVING);
                     SetFramebufferCount(DOUBLE_BUFFERING);
@@ -1395,9 +1405,6 @@ void TurnAim(s32 turnsAltHeading) {
         }
     }
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", TurnAim);
-#endif
 
 /*
  * Clamps the aim camera's height between minHeight and AIM_CAMERA_MAX_HEIGHT,
