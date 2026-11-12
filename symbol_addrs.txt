@@ -3230,7 +3230,6 @@ f_NameFormat = 0x80231514; // type:asciz segment:ovl_01 force_migration:True
 f_NumberedNameFormat = 0x80231660; // type:asciz segment:ovl_01 force_migration:True
 f_StatsStringFormat = 0x802318A8; // type:asciz segment:ovl_01 force_migration:True
 f_UnitMarkFormat = 0x802318E0; // type:asciz segment:ovl_01 force_migration:True
-f_FaceNameFormat = 0x802319E0; // type:asciz segment:ovl_01 force_migration:True
 f_SaveMenuNameFormat = 0x80231A3C; // type:asciz segment:ovl_01 force_migration:True
 D_8023177C_ovl_01 = 0x8023177C; // size:0x34 segment:ovl_01 force_migration:True
 D_80231918_ovl_01 = 0x80231918; // size:0x88 segment:ovl_01 force_migration:True

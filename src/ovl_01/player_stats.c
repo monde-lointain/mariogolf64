@@ -200,17 +200,6 @@ enum StatsDirection {
 #define HANDICAP_CHOICE_COUNT 37
 #define HANDICAP_SLIDE_START (-512)
 
-/*
- * GCC 2.7 emits each string constant once per file, where it is first used,
- * so the original's "%s" belongs to DrawBestShots. While that is asm, the
- * routines after it print with the copy in its rodata.
- */
-#ifdef NON_MATCHING
-#    define f_FaceNameFormat "%s"
-#else
-extern const char f_FaceNameFormat[];
-#endif
-
 /* A step from one grid cell to its neighbor */
 typedef struct GridStep {
     /* 0x0 */ s8 column;
@@ -2702,41 +2691,37 @@ void UpdateBestShots(void) {
 #define MESSAGE_NO_RECORDS 0x16E
 
 /*
- * Doesn't match: the original works out the chosen cell's address again after
- * checking that it holds a record, before drawing its course's image and name,
- * where GCC reuses the address from the check. Reading the cell from the menu
- * memory at each use gives 245 words, the row and column as u8 or s16 107, and
- * the record index in a local 177. The permuter's best, a u8 cast on the row
- * at the name's lookup, gave 104 words, 12 in shape. The labels' loop tests
- * its counter != STATS_GRID_ROW_COUNT, as the original's bne shows; with <,
- * which d849c579 chose for its lower count, it compiles to slti and bnez, 101
- * words (17 in shape).
+ * The original works out the chosen cell's address twice, once to test that
+ * it holds a record and again for the drawing the test guards, though the
+ * row and column are read from the menu memory once. An s8 cast on each index
+ * of the test gives that: the cast sign-extends a copy that cse takes for a
+ * different value, so it shares nothing between the two addresses, and
+ * combine then drops the extension as the index is sign-extended already.
+ * Measured against the match, in words differing (and how many in shape):
  *
- * The icon and the name each read the chosen cell into a pair of locals of
- * their own, and the labels' loop counts with index, as the strip loops
- * count, which a permuter run's best pointed at. Together they take the
- * draft from 107 words differing to 83, 13 in shape either way, and the
- * register oracle's closest result from 37 words, forcing 12 pseudos, to 27,
- * forcing 11. One pair shared as before, with index, gives 89 words and 37 at
- * best forcing 9; the pairs with a labelRow, 101 words and 27 forcing 14; and
- * the name's column shared with the icon's, 95 words and 31 forcing 10.
+ *   No casts                                             53 (13)
+ *   The casts in the icon's test only                    17 (7)
+ *   The casts in the name's test only                    36 (6)
+ *   The row's casts only                                 64 (4)
+ *   The column's casts only                              46 (10)
+ *   u8 casts                                             16 (4)
+ *   The casts in the tests and the drawing both          65 (17)
+ *   s8 locals, with no casts                             65 (17)
+ *   The tests through an inline with s32 parameters      53 (13)
+ *   An inline with s8 parameters at every lookup         69 (19)
+ *   An inline with s8 parameters returning the test      24 (8)
+ *   One pair of locals for the icon and the name         16 (0)
+ *   The name's row shared with the icon's                18 (0)
+ *   The name's column shared with the icon's             24 (0)
+ *   The cursor's test through the icon's locals          10 (2)
+ *   The faces' loop counting rows with a row variable    30 (0)
+ *   The labels' loop counting with a variable of its own 64 (0)
+ *   The labels' loop testing < STATS_GRID_ROW_COUNT      10 (4)
  *
- * The faces' loop counts its rows with index too, as editsearch's --counters
- * found toward the oracle's goal: index's references move into the loop and
- * row's go, taking the draft from 83 words to 53, and the oracle's closest to
- * 27 forcing 9.
- *
- * The original's second address shows a block boundary for cse between
- * each cell test and the drawing it guards, as the name's test shows
- * too: a jump from before the icon's test to a label at the start of its
- * drawing, there only to measure, gives the original's code for the
- * icon, 22 words differing, 12 in shape, 9 of them the jump's own test.
- * An empty then with the drawing in an else, a switch with an empty case
- * for STATS_CELL_EMPTY, a do-while (0) at the drawing's start, and
- * comparing as s16, u16 or s32 change nothing. 53 words differ, 13 in
- * shape.
+ * s16 casts match as well, as do the casts in the drawing's lookups instead of
+ * the tests, the tests through an inline with s8 parameters, and the column
+ * read before the row
  */
-#ifdef NON_MATCHING
 void DrawBestShots(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     s16 index = 0;
@@ -2862,7 +2847,12 @@ void DrawBestShots(Gfx **displayListHead) {
     gDPPipeSync(gfx++);
     iconRow = memory->bestShotRow;
     iconColumn = memory->bestShotColumn;
-    if (f_BestShotRecords[iconRow][iconColumn] != STATS_CELL_EMPTY) {
+
+    /*
+     * The casts are needed to match: cse can't tell the test's cell from
+     * the one the drawing reads, so the drawing works its address out again
+     */
+    if (f_BestShotRecords[(s8)iconRow][(s8)iconColumn] != STATS_CELL_EMPTY) {
         gDPLoadTLUT_pal256(
             gfx++,
             TextureAddress(
@@ -2926,7 +2916,9 @@ void DrawBestShots(Gfx **displayListHead) {
 
     nameRow = memory->bestShotRow;
     nameColumn = memory->bestShotColumn;
-    if (f_BestShotRecords[nameRow][nameColumn] != STATS_CELL_EMPTY) {
+
+    /* Cast to match, as the icon's test is */
+    if (f_BestShotRecords[(s8)nameRow][(s8)nameColumn] != STATS_CELL_EMPTY) {
         sprintf(
             g_PrintBuffer,
             "%s",
@@ -2970,9 +2962,6 @@ void DrawBestShots(Gfx **displayListHead) {
 
     *displayListHead = gfx;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", DrawBestShots);
-#endif
 
 /*
  * Reads the save data from SRAM and lays the recorded best shots out in a grid,
@@ -3523,11 +3512,7 @@ void DrawCharacterFace(
         if (character < NAMED_CHARACTER_COUNT) {
             SetUpTextDrawing(&gfx);
             SetTextColor(&gfx, 255, 255, 255);
-            sprintf(
-                g_PrintBuffer,
-                f_FaceNameFormat,
-                g_MenuCharacterNames[f_StatsCharacterChoices[character]]
-            );
+            sprintf(g_PrintBuffer, "%s", g_MenuCharacterNames[f_StatsCharacterChoices[character]]);
             DrawLargeText(&gfx, left + FACE_NAME_OFFSET_X, top + FACE_NAME_OFFSET_Y, g_PrintBuffer);
             gDPPipeSync(gfx++);
         }
