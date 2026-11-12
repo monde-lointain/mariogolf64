@@ -1380,106 +1380,66 @@ NO_RESULT UpdateHandicaps(s32 firstPlayerIndex UNUSED, s32 playerCount UNUSED) {
  * naming that player is typed once each time f_IsHandicapPromptShown is
  * cleared.
  *
- * Doesn't match: the original adds the texel offset to the blink frame's
- * offset before the arrow's. The arrows' top is worked out once before their
- * loop, as the original adds 150 to the vertical slide there; added in each
- * rectangle, as the draft had it, 222 words differed (32 in shape), and
- * worked out where the vertical slide is set gives 237 (33). A local for the
- * label's left edge as well gives 212 (32), and one for the chosen column's
- * left edge 351 (89). Before the arrows' top was hoisted, naming the arrow's
- * left texel as a u16 took the draft from 197 words differing to 191, 51 in
- * shape to 41, and as an s32 gave 205, 53 in shape. The columns' loop tests
- * columnIndex != g_ChosenPlayerCount, as the original's bne shows; with <,
- * which d849c579 chose for its lower count, it compiles to slt and bnez. The
- * register oracle, forcing 16 pseudos' registers, left 185 words at best
- * when the draft gave 213, where it left 122 with 17 forced before the
- * hoist, so the code differs too. The left arrow's texels are found by
- * ImageTexelsAt, adding the arrow's offset to the frame's, which took the
- * draft from 213 words differing to 210, 31 in shape to 30; the other arrows
- * keep their sum, as through ImageTexelsAt or ImageTexels they give 272 to
- * 372 words, and the left arrow written as they are 275. A focused permuter
- * run's best, 172 words (30 in shape), sets numberOffsetX first of all.
- * Setting it once before the players' loop or the columns' loop gives 174
- * words, and next to the vertical slide 171 (31 in shape), but adds 16 to
- * the slide there, where the original adds it in the preheader of the
- * numbers' loop, as the draft does; set just before that loop, it gives 212.
- * The label's slid offset, labelSlide, is worked out once before the
- * columns' loop, as the original keeps slide + 4 in $s3 there and adds 16 to
- * it for the right edge; written into both edges, the right edge folds to
- * slide + 20, and 210 words differed (30 in shape), against 209 (31) here,
- * with the register oracle's closest 182 words, forcing 16 pseudos, against
- * 175 forcing 17. Holding the offset alone in a local set before the loop
- * gives 207 words (27 in shape) and an oracle closest of 171 forcing 17, but
- * the local only holds the constant 4, which the build still adds as an
- * immediate. 209 words differ, 31 in shape.
+ * The original keeps the vertical slide, offsetY, in a stack slot, and reloads
+ * it to add the column's top, 150, just before the arrows' loop. Here that
+ * comes of holding the column's top in a local, arrowTop, set before the
+ * loop, and adding offsetY to it in each rectangle, with the arrow's own
+ * offset added to their sum: loop.c hoists the sum out of the loop by
+ * itself, and global-alloc then leaves offsetY without a register. With the
+ * sum written before the loop, offsetY gets one and the frame is 8 bytes
+ * smaller.
  *
- * The original's frame is 0x170 bytes against 0x168 here: it keeps offsetY in a
- * stack slot at 0x13C($sp), storing slide there before the banner and its
- * negation after the reverseVerticalSlide test, and reloading it in the
- * banner's loop and before the arrows, where the build keeps it in a register.
- * Setting offsetY by if/else, by ?:, by negating offsetY itself, or testing
- * reverseVerticalSlide != FALSE all leave 209 words.
+ * The label's pick sits two loops deep, as a do-while (0) macro inside
+ * another would put it. flow weights a reference by its loop depth, and a
+ * loop that runs once still counts, so columnIndex's three references there
+ * weigh 4 each where they weighed 2, which makes 21 where it had 15. That
+ * lifts its priority in global-alloc from 1424 to 2658, past the 2229 to
+ * 2291 of the five values that the strips' loop steps. So columnIndex is
+ * placed before them and takes $t2, as in the original, and they take $t3
+ * to $t7. One loop makes 18 references and a priority of 2278, just short.
  *
- * Each banner strip syncs the pipe between its texture load and its
- * rectangle, as the original's extra G_RDPPIPESYNC shows, and its top is
- * offsetY plus the strip's own top, as the original steps the strip's top
- * from 190 without offsetY and adds offsetY at each edge. Those took the
- * draft from 209 words differing to 188, 31 in shape to 22, and the register
- * oracle's closest from 175 words, forcing 17 pseudos, to 96, forcing 15;
- * with offsetY forced onto the stack as well, it got to 43.
+ * Measured against the match, in words differing (and how many in shape):
  *
- * The register oracle lines the strips', arrows' and numbers' counters up
- * with the saved register that the golfers' loop counts players in, so they
- * share one counter, i. That takes the draft from 188 words differing to
- * 198, 22 in shape either way, but the oracle's closest from 96 words to 88,
- * forcing 19 pseudos, and with offsetY forced onto the stack from 43 to 35.
- * Counting the numbers in playerIndex, which masks it as a u16, gives 238
- * words (30 in shape); before the pipe syncs, counting the strips in
- * playerIndex gave 416 words (90 in shape), the arrows 248 (46) and all
- * three 455 (105). Counting the arrows in a second counter, the columns'
- * one, as a permuter run found, gives 142 words (22 in shape), but the
- * oracle's closest rises to 100, forcing 10, and with offsetY on the stack
- * to 47; holding the prompt's test in a local changes nothing.
+ *   The label's pick in no loop, or in plain braces         42 (0)
+ *   The label's pick in one loop                            32 (0)
+ *   The label's test alone in one loop                      42 (0)
+ *   The loops around the label's texture load as well       90 (58)
+ *   The computer's label in the else of a != test           216 (64)
+ *   The players' counter zeroed after the arrow's offsets   171 (13), frame +8
+ *   arrowY zeroed before arrowX                             2 (0)
+ *   arrowY zeroed at its declaration                        157 (13), frame +8
+ *   The arrows' top as (offsetY + arrowTop) + arrowY        4 (0)
+ *   The same sum with no parentheses                        198 (18), frame +8
+ *   The arrows' top summed before their loop                171 (17), frame +8
+ *   The same in two statements (the old draft)              135 (17), frame +8
+ *   No arrowTop, the column's top in each rectangle         198 (18), frame +8
+ *   The left arrow's texels summed as the others' are       67 (17)
+ *   The other arrows' texels through ImageTexelsAt          67 (15)
+ *   textureLeft as an s32                                   34 (12)
+ *   textureLeft's value written in the rectangle            24 (10)
+ *   The arrows counted by columnIndex                       68 (0)
+ *   The arrows counted by a variable of their own           78 (0)
+ *   The banner's strips counted by one of their own         18 (0)
+ *   The banner strip's top in a local set at the loop's top 12 (0)
+ *   No pipe sync before the banner strip's rectangle        30 (12)
+ *   offsetY added last in the banner strip's edges          165 (21), frame +8
+ *   The columns' loop testing < g_ChosenPlayerCount         75 (9), frame -8
+ *   labelSlide set before the columns' loop                 4 (4)
+ *   labelSlide set at the top of the loop's body            2 (2)
+ *   The label's offset written into both edges              19 (3)
+ *   numberOffsetX set before columnLeft                     2 (2)
+ *   numberOffsetX set before the numbers' loop              4 (4)
+ *   The number's left edge written in the call              10 (4)
+ *   The numbers counted by columnIndex                      136 (0)
+ *   The numbers counted by playerIndex                      204 (8)
+ *   Without unusedStack                                     362 (0), frame +48
  *
- * Each strip's top, without offsetY, has a local, stripTop. That takes the
- * draft from 198 words differing to 181, 22 in shape to 23, and the
- * oracle's closest from 88 words, forcing 19 pseudos, to 81, forcing 16,
- * and with offsetY forced onto the stack from 35 to 18. Holding offsetY in
- * it as well gives the same, and setting it at the top of the strips' loop
- * instead of after the sync 191 words and an oracle closest of 87. 181
- * words differ, 23 in shape.
- *
- * labelSlide is set in the columns' loop, beside the label's rectangle, and
- * loop.c hoists it into the loop's preheader, after the loop's first test,
- * where the original adds 4 to the slide; set before the loop, the build
- * adds it before the test. That takes the draft from 181 words differing to
- * 179, 23 in shape to 19, and the oracle's closest from 81 words to 77,
- * forcing 16 pseudos either way, and with offsetY forced onto the stack
- * from 18 to 14. Set at the top of the loop's body, it gives 181 words (21
- * in shape) and an oracle closest of 79; a local for the label's left edge
- * instead gives 334 (94). 179 words differ, 19 in shape.
- *
- * The numbers' loop reads its column's left edge, columnLeft, before it
- * sets numberOffsetX, as the original hoists the column table's address
- * out of the loop before slide + 16. That takes the draft from 179 words
- * differing to 177, 19 in shape to 17, and the oracle's closest from 77
- * words to 75, forcing 16 pseudos either way, and with offsetY forced onto
- * the stack from 14 to 12. Adding the column's left edge to slide + 16 in
- * the call gives 187 words (19 in shape), and reading it into columnLeft
- * in the columns' loop as well 398 to 554. The original keeps arrowY in
- * $s7, where the build gives it $fp and $s7 to the pipe sync's command,
- * which the golfers' loop hoists; leaving arrowY unset at its declaration
- * gives 176 words but 18 in shape, as it stays live from the function's
- * entry, and ending the arrows' tests in a plain else 279 (41). That left
- * 177 words, 17 in shape.
- *
- * The arrows' top starts from offsetY and then adds the column's top in
- * a statement of its own, which takes the draft from 177 words differing
- * to 141, 17 in shape either way, and the oracle's closest from 75 words
- * forcing 16 pseudos to 75 forcing 11. Starting from the column's top
- * and adding offsetY leaves 177. 141 words differ, 17 in shape.
+ * Three loops around the label's pick match as well, as do two around its
+ * test alone, the pick as a conditional expression in the two, the players'
+ * counter zeroed at its declaration or with the arrow's offsets after it in
+ * the loop's header, arrowTop added before offsetY, and a local for the
+ * banner strip's top set after the sync
  */
-#ifdef NON_MATCHING
 void DrawHandicaps(Gfx **displayListHead, s32 slide, u8 reverseVerticalSlide, u8 canShowPrompt) {
     Gfx *gfx = *displayListHead;
     s32 labelSlide;
@@ -1491,7 +1451,7 @@ void DrawHandicaps(Gfx **displayListHead, s32 slide, u8 reverseVerticalSlide, u8
     s32 labelIndex;
     s32 offsetY;
     s32 arrowX;
-    s32 arrowY = 0;
+    s32 arrowY;
     Vec3 translation;
     Vec3 rotation;
     Vec3 scale;
@@ -1500,7 +1460,6 @@ void DrawHandicaps(Gfx **displayListHead, s32 slide, u8 reverseVerticalSlide, u8
     s32 numberOffsetX;
     s32 columnLeft;
     s32 arrowTop;
-    s32 stripTop;
 
     BuildDynamicTextures(&gfx);
     gDPPipeSync(gfx++);
@@ -1542,8 +1501,11 @@ void DrawHandicaps(Gfx **displayListHead, s32 slide, u8 reverseVerticalSlide, u8
     }
 
     gSPLookAt(gfx++, &f_HandicapGolfersLookAts[g_DrawBufferIndex]);
+    /* The counter is zeroed before the arrow's offsets to match */
+    playerIndex = 0;
     arrowX = 0;
-    for (playerIndex = 0; playerIndex != g_ChosenPlayerCount; playerIndex++) {
+    arrowY = 0;
+    for (; playerIndex != g_ChosenPlayerCount; playerIndex++) {
         if (g_MenuFidgetDelays[playerIndex] > 0) {
             g_MenuFidgetDelays[playerIndex]--;
         }
@@ -1656,13 +1618,15 @@ void DrawHandicaps(Gfx **displayListHead, s32 slide, u8 reverseVerticalSlide, u8
             G_TX_NOLOD
         );
         gDPPipeSync(gfx++);
-        stripTop = HANDICAP_BANNER_TOP + (i * HANDICAP_BANNER_STRIP_HEIGHT);
         gSPScisTextureRectangle(
             gfx++,
             QuarterPixels(HANDICAP_BANNER_LEFT),
-            QuarterPixels(offsetY + stripTop),
+            QuarterPixels(offsetY + HANDICAP_BANNER_TOP + (i * HANDICAP_BANNER_STRIP_HEIGHT)),
             QuarterPixels(HANDICAP_BANNER_RIGHT),
-            QuarterPixels(offsetY + stripTop + HANDICAP_BANNER_STRIP_HEIGHT),
+            QuarterPixels(
+                offsetY + HANDICAP_BANNER_TOP + (i * HANDICAP_BANNER_STRIP_HEIGHT) +
+                HANDICAP_BANNER_STRIP_HEIGHT
+            ),
             G_TX_RENDERTILE,
             0,
             0,
@@ -1732,10 +1696,17 @@ void DrawHandicaps(Gfx **displayListHead, s32 slide, u8 reverseVerticalSlide, u8
             gDPPipeSync(gfx++);
         }
 
-        labelIndex = columnIndex;
-        if (g_PlayerControllerIndices[columnIndex] == NO_CONTROLLER_INDEX) {
-            labelIndex = columnIndex + PLAYER_LABEL_COMPUTER_FIRST;
+        /* Both loops are needed to match, as the header comment explains */
+        do {
+            do {
+                labelIndex = columnIndex;
+                if (g_PlayerControllerIndices[columnIndex] == NO_CONTROLLER_INDEX) {
+                    labelIndex = columnIndex + PLAYER_LABEL_COMPUTER_FIRST;
+                }
+            }
+            while (0);
         }
+        while (0);
 
         gDPLoadMultiBlock_4b(
             gfx++,
@@ -1783,8 +1754,8 @@ void DrawHandicaps(Gfx **displayListHead, s32 slide, u8 reverseVerticalSlide, u8
 
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
     gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(f_StatsGreenArrows)));
-    arrowTop = offsetY;
-    arrowTop += HANDICAP_COLUMN_TOP;
+    /* The slide is added in each rectangle to match */
+    arrowTop = HANDICAP_COLUMN_TOP;
     for (i = 0; i != MENU_ARROW_COUNT; i++) {
         if (i == MENU_ARROW_LEFT) {
             gDPLoadTextureTile_4b(
@@ -1868,12 +1839,12 @@ void DrawHandicaps(Gfx **displayListHead, s32 slide, u8 reverseVerticalSlide, u8
                 f_HandicapColumnLefts[g_ChosenPlayerCount - 1][memory->handicapPlayer] + arrowX +
                 slide
             ),
-            QuarterPixels(arrowTop + arrowY),
+            QuarterPixels(arrowY + (offsetY + arrowTop)),
             QuarterPixels(
                 f_HandicapColumnLefts[g_ChosenPlayerCount - 1][memory->handicapPlayer] + arrowX +
                 slide + GREEN_ARROW_SIZE
             ),
-            QuarterPixels(arrowTop + arrowY + GREEN_ARROW_SIZE),
+            QuarterPixels(arrowY + (offsetY + arrowTop) + GREEN_ARROW_SIZE),
             G_TX_RENDERTILE,
             textureLeft,
             0,
@@ -1932,10 +1903,6 @@ void DrawHandicaps(Gfx **displayListHead, s32 slide, u8 reverseVerticalSlide, u8
 
     *displayListHead = gfx;
 }
-
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", DrawHandicaps);
-#endif
 
 /* Draws a bet's name centered on centerX */
 void DrawBetLabel(Gfx **displayListHead, s32 centerX, s32 top, u8 labelIndex) {
