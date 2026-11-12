@@ -613,85 +613,68 @@ void KeepAimCameraOnCourse(void) {
  * screen, behind the ball while aiming, or looking back at it from past the
  * ball.
  *
- * Doesn't match: the original keeps g_CurrentShot's address in $s0 from
- * the heading's read across KeepAimCameraOnCourse, and reads
- * aimCameraDistance through it. Calling KeepAimCameraOnCourse first gives
- * 151 words; only a barrier around the call helps (137). On the green the
- * look-at's height is worked out after its x and z; between them, as
- * before, gave 113 words, 43 in shape. The tilt in world units gets its
- * own local, set just before the look- at's height: scaling it inside
- * that expression gives 78 words, 20 in shape, and setting it before the
- * look-at's x or after the clamp 86 (18). The permuter reached the same
- * 67 words with a float local holding 1/1024. The register oracle,
- * forcing 12 pseudos' registers, left 31 words at best with the draft at
- * 67, so the code differs too. A focused permuter run reached 60 words (8
- * in shape) by reading aimCameraDistance through a pointer to that field,
- * set just before rise is worked out and read from there on; a
- * CurrentShot pointer used for every field in the branch instead gives
- * 120 (18), so the draft keeps reading g_CurrentShot directly. A local
- * copy of aimCameraDistance, set where rise is worked out or at the
- * branch's start, gives 117 words (19 in shape) or 189 (37), measured
- * with the draft at 59. On the mini golf course, point is set in axis
- * order, which took the draft from 67 words to 59, 9 in shape either way;
- * setting its z before its y, as the draft did, gave 67. The counts above
- * were measured with the draft at 67. 59 words differ, 9 in shape.
+ * Behind the ball, KeepAimCameraOnCourse is called in a block of its own. The
+ * original keeps g_CurrentShot's address in $s0 from the heading's read and
+ * reads aimCameraDistance through it for point's x and z, but reads the
+ * ball's position by its addresses. cse's first pass stops at the block's
+ * end and forgets the heading's register there: past it the distance's
+ * address gets a register of its own, and the ball's coordinates are read as
+ * offsets from that one. The second pass doesn't stop. It finds that the
+ * distance's address is g_CurrentShot's register plus 0x34 and reads the
+ * distance so, and it folds the ball's offsets back into addresses. Without
+ * the block, the first pass makes every read an offset from g_CurrentShot's
+ * register, the second folds them all into addresses, and the register is
+ * left with the heading's read alone.
  *
- * Taking the current player's address with & and reading its clubs through it,
- * as CheckControllersAndSetPans sets soundPan, or adding the index to
- * g_Players, gives 51 words differing, 9 in shape, but the register oracle's
- * closest is 31 words either way, so the gain is in the registers alone, and
- * the draft keeps indexing.
+ * The camera's greatest rise above the ball is built up in maxRise: the
+ * distance in thousands, then its square, then that over the divisor. The
+ * original keeps all three in $v1. With the distance in thousands in a local
+ * of its own, it and its square trade $v0 and $v1.
  *
- * The register oracle lines rise up with the saved register that the probe
- * loop's counter takes. Working rise out in probe gives 49 words, 9 in
- * shape, against 59 (in offset, 59), but it gives the counter a second
- * meaning, so rise keeps its own local.
+ * On the green, the look-at's height is worked out after its x and z; down
+ * range, the tilt in world units has a local of its own, set just before the
+ * look-at's height. On the mini golf course, point is set in axis order.
+ * Looking back at the ball, the look-at's height comes from the center's,
+ * which the original reloads from the stack.
  *
- * The camera's greatest rise above the ball has a local of its own, maxRise,
- * where the clamp worked it out twice. That takes the draft from 59 words
- * differing, 9 in shape, to 37 (7), and the register oracle's closest result
- * from 31 words, forcing 12 pseudos, to 21, forcing 6. Declared before or after
- * rise, first in the branch or last, it gives the same, as does a local for the
- * ball's height plus the rise; as an f32, 48 (16).
+ * Measured against the match, as words differing and how many of them in
+ * shape:
  *
- * Looking back at the ball, the look-at's height is worked out from the
- * center's height, which the original reloads from the stack, rather
- * than from the ball's: 37 words to 34, 7 in shape to 6. The register
- * oracle's --globals finds rise is all but certainly left to
- * global-alloc in the original: made global it gives 18 words, as does
- * reusing ground for the rise. local-alloc takes rise as it lives in one
- * block, and no natural form found makes it live in two: setting it
- * earlier gives 63 words or more, and working the rise out twice in the
- * clamp 59. Building maxRise up in place (maxRise = distance / 1000,
- * then maxRise *= maxRise, then maxRise /= 4) gives 11 words, 3 in
- * shape, leaving only g_CurrentShot's address in $s0, but it gives
- * maxRise three meanings in turn. cse makes the reads of
- * aimCameraDistance after the call relative to that address, as the
- * original's are, and cse2 folds them back, as it knows the register
- * holds the address. That left 34 words, 6 in shape.
+ *   KeepAimCameraOnCourse outside a block, or in plain braces 11 (3)
+ *   The first point's x in a block, in place of the call      7 (5)
+ *   The first point's x and z in one, in place of the call    25 (9)
+ *   The call before the heading is set, in a block or not     14 (6)
+ *   The first point's distance read through a pointer         14 (4)
+ *   The distance in thousands in a local, rise, with maxRise
+ *   set to its square over the divisor                        23 (3)
+ *   The same without the block (the old draft)                34 (6)
+ *   rise squared into maxRise, and maxRise divided in place   16 (0)
+ *   rise squared in place, and divided into maxRise           23 (3)
+ *   maxRise squared and divided in one statement              7 (3)
+ *   maxRise's square shifted right, not divided               7 (7)
+ *   maxRise as an f32                                         36 (22)
+ *   maxRise as an s16                                         29 (7)
+ *   maxRise as a u32                                          74 (32)
+ *   The ball's height added to maxRise before the clamp       4 (0)
+ *   The probes' loop testing < the count                      23 (9)
+ *   The eye's x and z stored before the first ground is read  45 (19)
+ *   On the green, the look-at's height before its z           35 (31)
+ *   The tilt scaled inside the look-at height's expression    13 (11)
+ *   The tilt in world units set before the look-at's x        21 (9)
+ *   Down range, point's y not set to the eye's                21 (1)
+ *   On the mini golf course, point's z set before its y       8 (0)
+ *   Looking back, the look-at's height from the ball's        3 (1)
+ *   Looking back, without the middle's stores                 55 (37)
+ *   Looking back, without point's first y                     10 (10)
+ *   The current player's address taken with &                 4 (0)
  *
- * Squaring the rise into maxRise and dividing it in a second statement,
- * which a search splitting assignments into steps found, gives 27 words,
- * 3 in shape, and the register oracle's closest falls from 18 words to
- * 11, forcing 6 pseudos either way, but maxRise then holds the square
- * first, a second meaning, so the draft divides in the one expression.
- * 34 words differ, 6 in shape.
- *
- * The decision oracle finds the rest is one cse choice: with maxRise
- * built up in place, refusing the address cse1 puts in the read of
- * aimCameraDistance for point's x, relative to the register that holds
- * g_CurrentShot's address from the heading's read, matches, on the last
- * of the six paths cse1 follows through that read; refused on any other,
- * the address is put in again on the next. The read then reaches cse2
- * through a register, which cse2 rewrites relative to the address, where
- * given the relative address it folds it to a constant. With the draft's
- * maxRise the same flip gives 23 words. Reading g_CurrentShot through a
- * local pointer on any run of the branch's lines through point's z
- * changes nothing, and on later lines gives 40 words or more, measured
- * from the 11; a search of 2220 combinations of up to three natural
- * edits found none closer. 34 words differ, 6 in shape.
+ * Also matching: the heading's statement in the block in place of the call,
+ * or with it, or in a block of its own as well; the look-back's call in a
+ * block too; maxRise's steps spelled maxRise = maxRise * maxRise and maxRise
+ * = maxRise / AIM_CAMERA_RISE_DIVISOR; maxRise declared first in its branch,
+ * or in the function; and the probe's offset written out at each use, with
+ * no local.
  */
-#ifdef NON_MATCHING
 void PlaceShotCamera(void) {
     Vec3 point;
     CoursePoint center;
@@ -764,14 +747,14 @@ void PlaceShotCamera(void) {
         s32 ground;
         s32 probe;
         s32 offset;
-        s32 rise;
         s32 maxRise;
         f32 tilt;
         /* The tilt in world units */
         f32 worldTilt;
 
         heading = (u16)g_CurrentShot.heading * BINARY_ANGLE_TO_RADIANS;
-        KeepAimCameraOnCourse();
+        /* In a block of its own, to match */
+        IN_OWN_BLOCK(KeepAimCameraOnCourse());
         point[AXIS_X] =
             (cosf(heading) * g_CurrentShot.aimCameraDistance) + g_CurrentShot.ballPosition[AXIS_X];
         point[AXIS_Z] =
@@ -816,8 +799,10 @@ void PlaceShotCamera(void) {
             point[AXIS_Y] = lowestGround + g_CurrentShot.aimCameraHeight;
         }
 
-        rise = g_CurrentShot.aimCameraDistance / 1000;
-        maxRise = rise * rise / AIM_CAMERA_RISE_DIVISOR;
+        /* Built up in place, to match */
+        maxRise = g_CurrentShot.aimCameraDistance / 1000;
+        maxRise *= maxRise;
+        maxRise /= AIM_CAMERA_RISE_DIVISOR;
         if (g_CurrentShot.ballPosition[AXIS_Y] + maxRise < point[AXIS_Y]) {
             point[AXIS_Y] = g_CurrentShot.ballPosition[AXIS_Y] + maxRise;
         }
@@ -900,9 +885,6 @@ void PlaceShotCamera(void) {
     g_Cameras[0].view.fieldOfView = SHOT_CAMERA_FIELD_OF_VIEW;
     OnShotCameraPlaced();
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", PlaceShotCamera);
-#endif
 
 /*
  * Backs the aim camera up behind the ball, and points it down the shot's
