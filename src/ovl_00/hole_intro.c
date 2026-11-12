@@ -56,58 +56,90 @@ static f32 f_IntroCameraDistance = 0.0f;
 static f32 f_IntroCameraHeight = 0.0f;
 
 /*
- * Places the camera for the start of the hole intro. The heading is worked
- * out in double precision and narrowed once for sinf and cosf.
+ * Places the camera for the start of the hole intro: the look-at point goes
+ * under the ball, and the eye behind the ball and above it, looking along the
+ * shot's heading on the first hole and against it on the others.
  *
- * Doesn't match: the original stores the look-at point's Z through its pointer
- * and its Y through the camera's address, where GCC stores both through the
- * camera's address. Storing Z before Y, or Y straight into g_Cameras, doesn't
- * help. The heading is built in two steps, as one expression gives 37 words and
- * hoisting the shared first step above the test 101; an f32 heading gives
- * 39-47. The original also builds the heading and its double precision steps in
- * $f20, where global-alloc gives the heading $f4 although it prefers $f20, the
- * narrowed heading's register from local-alloc. find_reg's first pass takes
- * only registers already used, and nothing has used $f21, the pair's other
- * half, so it settles on $f4 and the preference fails the same test. In
- * the original, something must have used $f21 before the heading was
- * allocated. Narrowing the heading into an f32 local after the test, or
- * building each arm's product in it, gives 33 or 47 words (1 in shape); the
- * register oracle, forcing 8 pseudos into the original's registers, leaves 7
- * words: the Y store and the first multiply's registers. 33 words differ, 1 in
- * shape.
+ * Each arm of the test has a heading of its own and places the eye itself. A
+ * heading that lives in one arm lives in one basic block, so local-alloc
+ * gives it its register, $f20, which has to last across sinf, and ties the
+ * heading's double precision steps to it: the original builds each arm's
+ * heading in $f20 from the first conversion on. A heading shared by the arms
+ * is left to global-alloc, which gives it $f22, and its steps take $f0 and
+ * $f2.
+ *
+ * The look-at point is written and read as g_Cameras' member, with no pointer
+ * to it. cse's first pass gives the point's address a register and reaches Y
+ * and Z as offsets from it; its second pass writes the offsets as addresses
+ * again, except Z's, whose own register the else arm still read after the
+ * first pass. So the original keeps the point's address in $s0 for X and Z
+ * and stores Y by its address. With a pointer variable, Z goes by its address
+ * as well.
+ *
+ * Measured against the match, as words differing and how many of them in
+ * shape:
+ *
+ *   A heading declared in the function and set in each arm 44 (0)
+ *   The same, with the eye placed once after the arms      108 (16), frame +8
+ *   An inline function for the eye, given the heading      22 (10)
+ *   No heading variable, the sum written in each call      130 (54), frame -8
+ *   The heading as an f64 built in two statements          21 (3)
+ *   The else arm's heading as the product less (M_PI / 2)  3 (3)
+ *   The same as + (M_PI / 2) + -(f32)M_PI                  5 (5)
+ *   The same as + ((M_PI / 2) - M_PI)                      6 (6)
+ *   The eye's Y set first                                  49 (35), frame +8
+ *   The eye's Y set last                                   18 (16)
+ *   The eye's X as the look-at's less sinf's product       10 (8)
+ *   The eye's X with the distance negated, not sinf        30 (8), frame +8
+ *   The eye's products before the look-at coordinates      8 (0)
+ *   The eye worked out from the ball's position again      96 (30), frame -16
+ *   The look-at point's Z set before its Y                 24 (4)
+ *   The look-at point's Y set first                        42 (26)
+ *   A look-at pointer, for the stores or the reads         6 (2)
+ *   The same, with one f64 heading built in two statements
+ *   and the eye placed after the arms (the old draft)      33 (1)
+ *   The test as !=, with its arms swapped                  30 (30)
+ *
+ * Also matching: the heading as an f32 or an f64, or declared and then set; a
+ * heading of its own in one arm only, with the other's declared in the
+ * function; the eye's X offset in a local set first, with the eye's Y stored
+ * before its X; the scale in a variable; and the look-at point set before the
+ * intro's frame, distance and height.
  */
-#ifdef NON_MATCHING
 void StartHoleIntroCamera(void) {
-    Vec3 *lookAt = &g_Cameras[1].view.lookAt;
-    f64 heading;
-    f32 offsetX;
-    f32 scale = COURSE_TO_WORLD_SCALE;
-
     f_IntroFrame = 0;
     f_IntroCameraDistance = INTRO_CAMERA_START_DISTANCE;
     f_IntroCameraHeight = INTRO_CAMERA_START_HEIGHT;
-    (*lookAt)[AXIS_X] = g_CurrentShot.ballPosition[AXIS_X] * scale;
-    (*lookAt)[AXIS_Y] = (g_CurrentShot.ballPosition[AXIS_Y] - INTRO_LOOK_AT_DROP) * scale;
-    (*lookAt)[AXIS_Z] = g_CurrentShot.ballPosition[AXIS_Z] * scale;
+    g_Cameras[1].view.lookAt[AXIS_X] = g_CurrentShot.ballPosition[AXIS_X] * COURSE_TO_WORLD_SCALE;
+    g_Cameras[1].view.lookAt[AXIS_Y] =
+        (g_CurrentShot.ballPosition[AXIS_Y] - INTRO_LOOK_AT_DROP) * COURSE_TO_WORLD_SCALE;
+    g_Cameras[1].view.lookAt[AXIS_Z] = g_CurrentShot.ballPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE;
     if (g_GameState.holeIndex == GetFirstHoleIndex()) {
-        heading = (u16)g_CurrentShot.heading * BINARY_ANGLE_TO_RADIANS;
-        heading = heading + (M_PI / 2);
+        /* Each arm has its own heading and places the eye itself, to match */
+        Radians heading = ((u16)g_CurrentShot.heading * BINARY_ANGLE_TO_RADIANS) + (M_PI / 2);
+
+        g_Cameras[0].view.eye[AXIS_X] = g_Cameras[1].view.lookAt[AXIS_X] +
+            (-sinf(heading) * INTRO_CAMERA_FIRST_DISTANCE);
+        g_Cameras[0].view.eye[AXIS_Y] =
+            (g_CurrentShot.ballPosition[AXIS_Y] + INTRO_CAMERA_FIRST_HEIGHT) *
+            COURSE_TO_WORLD_SCALE;
+        g_Cameras[0].view.eye[AXIS_Z] = g_Cameras[1].view.lookAt[AXIS_Z] +
+            (cosf(heading) * INTRO_CAMERA_FIRST_DISTANCE);
     }
     else {
-        heading = (u16)g_CurrentShot.heading * BINARY_ANGLE_TO_RADIANS;
-        heading = heading + (M_PI / 2) - M_PI;
-    }
+        /* As in the first hole's arm, to match */
+        Radians heading =
+            ((u16)g_CurrentShot.heading * BINARY_ANGLE_TO_RADIANS) + (M_PI / 2) - M_PI;
 
-    offsetX = -sinf(heading) * INTRO_CAMERA_FIRST_DISTANCE;
-    g_Cameras[0].view.eye[AXIS_Y] =
-        (g_CurrentShot.ballPosition[AXIS_Y] + INTRO_CAMERA_FIRST_HEIGHT) * scale;
-    g_Cameras[0].view.eye[AXIS_X] = (*lookAt)[AXIS_X] + offsetX;
-    g_Cameras[0].view.eye[AXIS_Z] =
-        (*lookAt)[AXIS_Z] + (cosf(heading) * INTRO_CAMERA_FIRST_DISTANCE);
+        g_Cameras[0].view.eye[AXIS_X] = g_Cameras[1].view.lookAt[AXIS_X] +
+            (-sinf(heading) * INTRO_CAMERA_FIRST_DISTANCE);
+        g_Cameras[0].view.eye[AXIS_Y] =
+            (g_CurrentShot.ballPosition[AXIS_Y] + INTRO_CAMERA_FIRST_HEIGHT) *
+            COURSE_TO_WORLD_SCALE;
+        g_Cameras[0].view.eye[AXIS_Z] = g_Cameras[1].view.lookAt[AXIS_Z] +
+            (cosf(heading) * INTRO_CAMERA_FIRST_DISTANCE);
+    }
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_00/hole_intro", StartHoleIntroCamera);
-#endif
 
 /* Moves the hole intro camera on by a frame. Returns TRUE once the intro is
  * over. */
