@@ -909,154 +909,142 @@ enum BallSprite {
     )
 
 /*
- * Doesn't match: the display list pointers take other registers than the
- * original's. Its reload spilled the divide by 9's constant to 0x54($sp) and
- * the depth later, so its spill slots came in another order, until the last
- * paragraph's change. The sprite branches share one sync after the chain, which
- * the original reaches by jumping from each branch; with a sync ending each
- * branch instead, which emits the same commands, 911 words differed, 137 in
- * shape. Before that change, updating f_UnusedBallFrame ahead of the display
- * list, rather than after f_BallRollFrame, cut 1220 words differing to 834, and
- * updating f_BallRollFrame anywhere else gave 822 to 1633 words, 158 or more in
- * shape. The original aligns the Pika ball texture's address to 8 bytes, as
- * TextureAddress does; without that, 894 words differed, 152 in shape. The
- * afterimages' loop tests i != f_BallAfterimageLength, as the original's bne
- * against the reloaded length shows; < compiles to slt and bnez. The register
- * oracle's closest result has no register forced, so the code itself differs.
- * Copying the sync, render mode and sync that follow the marker colors' switch
- * into each of its cases gives 515 words, 89 in shape, but then a marker player
- * outside -1 to 3 would skip them, where the original's range check jumps to
- * the one copy after the switch. A sync ending each case gives 666 words, the
- * sync and render mode in each case 677, the last case as default 827, a
- * default case 654, and an if chain 827. A focused permuter run's best, 620
- * words (74 in shape), keeps G_BL_CLR_IN << 30, which is 0, in an unsigned long
- * variable that three render modes or in, in place of the constant zero.
- * Setting a local to BALL_NEAR_DEPTH, BALL_NEAREST_DEPTH or
- * BALL_FULL_SPRITE_DEPTH on each ball's pass and testing it gives 518 words (88
- * in shape) for each of the three. With BALL_NEAR_DEPTH, the constant still
- * folds into the same slti immediates the original has, and the build differs
- * from this one only in which temporaries hold display list words and in one
- * store moved by a slot, so the gain comes from the extra pseudo's numbering,
- * not from the code. The draft then gave 654 words, 90 in shape.
+ * Draws the balls during the steps of taking a turn: each ball's sprite,
+ * which shrinks to a dot with distance, and its shadow; a colored marker in
+ * place of a ball that has a marker player; the ball's afterimages; the
+ * hole's route points while GAME_FLAG_SHOW_ROUTE_POINTS is set; and the
+ * "PIKA" models while the current ball is nearer than PIKA_BALL_DEPTH.
  *
- * The debug route points' depth has its own local, routePointDepth, where
- * the draft reused the shadow's depth: the register oracle lined that pseudo
- * up with one register for the shadow and another for the route points. That
- * takes the draft from 654 words differing to 648, 90 in shape either way,
- * and the oracle still forces none; a screen point of their own as well
- * gives 988 or 1002, as it moves the stack slots.
+ * Both frame counters step before the display list is built, as the original
+ * loads f_BallRollFrame before the first command's store, and the list opens
+ * with two syncs. isCurrentBallAboveGround is set where it is declared: the
+ * original zeroes its stack slot in the delay slot of the turn step's test,
+ * before anything else.
  *
- * Setting each marker color, sync, render mode and sync through one
- * statement macro in each case gives 509 words (89 in shape), with the same
- * skipped commands for other marker players: the original's range check
- * branches to the sync after the switch. The macro in each case with a
- * default case holding the copy as well gives 1155 (207).
- *
- * Reading each ball's marker player once into markerPlayer, which the
- * no-marker test and the marker colors' switch shared, took the draft
- * from 648 words differing, 90 in shape, to 492 (100), and the register
- * oracle's closest result from 648 words to 492, with nothing forced; the
- * frame grew 8 bytes to the original's 0x390. The local as an s32 gives 663
- * words (101 in shape), set as it is declared at the top of the drawn ball's
- * block 852 (114), and read only for the switch, at the top of the near
- * ball's block, 492 (100). The counts in the paragraphs above were measured
- * before this change. That left 492 words, 100 in shape.
- *
- * The Pika Ball's test reads the shown alpha as f_GolfBalls[i].alpha,
- * beside ball's other fields: reading it through ball, alone or with the
- * whole test in a macro taking ball, gives 522 words differing (122 in
- * shape) against 492 (100).
- *
- * isCurrentBallAboveGround is set to FALSE where it is declared, as the
- * original zeroes its stack slot in the delay slot of the turn step's
- * test, before anything else. That takes the draft from 492 words
- * differing, 100 in shape, to 452 (78), and the register oracle's closest
- * result from 492 words to 452, still forcing none. Setting it just
- * before the step's test gives the same 452 words, and just after the
- * test 454 (78). The counts above were measured before this change. 452
- * words differ, 78 in shape.
- *
- * The original keeps BALL_DEPTH_BIAS in $f26 across the ball loop, set
- * beside 10.5f before it, where ours loads it at each of its three
- * subtractions there. loop.c finds its four sets, each used once, too
- * little to move in a loop of 2119 insns: their savings and lifetime come
- * to 4 each, where the 10.5f's 8 uses are moved. Holding the bias in a
- * local set before the loop, which only stands in for the hoist, gives
- * 445 words (77 in shape), so the hoist accounts for little of the
- * difference.
- *
- * The original's display list opens with two syncs before the cycle type,
- * where the draft had one. With the second sync, the draft goes from 452
- * words differing (78 in shape) to 1851 (177), its frame 0x20 bytes larger
- * than the original's, and the register oracle's closest result from 452
- * words to 1274, forcing 77. The counts above were measured on the draft
- * without it.
- *
- * Both frame counters step before the display list is built, as the
- * original loads f_BallRollFrame before the first command's store. That
- * takes the draft from 1851 words differing (177 in shape) to 761 (29),
- * the frame 8 bytes larger than the original's, and the oracle's closest
- * result from 1274 words to 659, forcing 48. Stepping f_BallRollFrame
- * anywhere from before f_UnusedBallFrame to after the texture LUT gives
- * the same 761 words, and after a later command 773 to 828 (29 to 68 in
- * shape); moving f_UnusedBallFrame's step instead gives 1340 to 2053.
- * That left 761 words, 29 in shape.
- *
- * The shadow's size is scaled to 1/127 before the shade multiplies it,
- * where the draft scaled the shade; a search regrouping products found
- * it, and size times the scale gives the same. That takes the draft from
- * 761 words differing to 759, 29 in shape both, and the oracle's closest
- * result from 659 words to 655, forcing 48; size *= the shade's scale,
- * or 127.0f as a divisor, gives 761, and the three factors ungrouped 763
- * or 764. That left 759 words, 29 in shape.
+ * Each drawn ball's block declares primDepth. Reload gives the pseudos it
+ * spills from the start their slots in the order of their numbers, and the
+ * original's slot for the depth comes after those of the display list
+ * temporaries made before the ball loop.
  *
  * The no-marker test and the marker colors' switch each read the marker
- * player from the ball, where the draft read it once into an s8 local.
- * Combine folds the local's sign extension into its load, and finding no
- * earlier insn to carry the dead shift's death, leaves a use of it
- * further up the ball's block. The use gets no register, so reload gives
- * it a stack slot that nothing reads: the 8 bytes by which the frame was
- * larger than the original's, which moved every slot above it. Reading
- * the field at each site takes the draft from 759 words differing (29 in
- * shape) to 571 (19), with the original's frame, and the register
- * oracle's closest result from 655 words, forcing 48 pseudos, to 473,
- * forcing 47. The local as an s32 also loses the slot, but gives 586
- * words (30 in shape), as the switch then adds one to the register where
- * the original reloads the byte. That left 571 words, 19 in shape.
+ * player from the ball. Read once into an s8 local, combine folds the
+ * local's sign extension into its load and, finding no earlier insn to carry
+ * the dead shift's death, leaves a use of it further up the ball's block.
+ * The use gets no register, so reload gives it a stack slot that nothing
+ * reads, and the frame grows by 8 bytes.
  *
- * Each drawn ball's block declares primDepth, as the original's spill
- * slots show: reload gives the pseudos it spills from the start their
- * slots in the order of their numbers, and the original's slot for the
- * depth comes after those of the display list temporaries made before
- * the ball loop, where the draft, declaring it at the top, gave it the
- * first. That takes the draft from 571 words differing to 295, 19 in
- * shape both, with every stack slot as in the original, and the register
- * oracle's closest result from 473 words to 197, forcing 47 pseudos
- * either way. Declaring it at the top of the loop's body gives the same
- * 295 words. That left 295 words, 19 in shape.
+ * The water shade has a variable of its own, set to the ball's scaled height
+ * and taken from 100 in a second statement. The conversion and the
+ * difference then set the one pseudo, which dies at the clamp and keeps $v1
+ * up to the color's word, as in the original. Written in one statement the
+ * conversion gets a temporary of its own, and with the shadow's shade
+ * variable in its place the clamp sets the variable again and the color's
+ * mask makes a copy of it.
+ *
+ * The sprite branches share one sync after their chain, which the original
+ * reaches by jumping from each branch. The far dot's rectangle goes through
+ * gSPStretchedTextureRectangle like the others, so its vertical step is
+ * worked out from its own edges: the original shifts ballPoint.y - 1, keeps
+ * that and takes 4 from it for the top, and measures the step from the kept
+ * shift to the shifted ballPoint.y plus 4.
  *
  * Each arm of the shadow's depth subtracts BALL_DEPTH_BIAS itself, as the
- * ball's arms do, where the draft set a depth local in each arm and
- * subtracted the bias once after them. Both forms share the subtraction
- * at the end, but with the local the sums take their registers in the
- * other order. That takes the draft from 295 words differing, 19 in
- * shape, to 42 (6), and the register oracle's closest result from 197
- * words, forcing 47 pseudos, to 34, forcing 8; adding each constant
- * first instead gives 301 words, 105 in shape. That left 42 words, 6 in
- * shape.
+ * ball's arms do. With one subtraction after the arms the sums take their
+ * registers in the other order.
  *
- * The far dot's top edge is a pixel above its texture step's start,
- * QuarterPixels(ballPoint.y - 1) - 4, as the original works out the
- * start, keeps it, and subtracts 4 from it; written as
- * QuarterPixels(ballPoint.y) - 8, combine folded it into a shift of its
- * own. That takes the draft from 42 words differing (6 in shape) to 29
- * (5), and the register oracle's closest result from 34 words, forcing
- * 8 pseudos, to 27, forcing 3. The original also ends the step at
- * QuarterPixels(ballPoint.y) plus 4, but written so, combine rewrites
- * the start in terms of it, giving 70 words (6 in shape). 29 words
- * differ, 5 in shape.
+ * The shadow's size is scaled through an f32 variable that starts as one
+ * part in 0x7F, the shade's full value, and is multiplied by the shade
+ * before the size is multiplied by it. The constant and the product are
+ * then one pseudo, which keeps $f2 while the shade and the size pass
+ * through $f0 in turn, as in the original; as one expression the product
+ * is a temporary that takes $f0, and the size goes through $f2.
+ *
+ * The afterimages' loop tests i != f_BallAfterimageLength, as the original's
+ * bne against the reloaded length shows. The route points' depth has a
+ * local of its own, where the shadow's depth would serve.
+ *
+ * After the loops, the cycle type is set through AppendSyncedRdpState,
+ * which declares the command's pointer before its sync's. That swaps the
+ * stack slots the two pointers are spilled to, 0x27C and 0x284, into the
+ * original's order.
+ *
+ * The "PIKA" texture's address is aligned to 8 bytes, as TextureAddress
+ * does. The models' test reads the shown alpha as f_GolfBalls[i].alpha,
+ * beside ball's other fields, and is split in two so that the ball's surface
+ * is read into a variable between the halves: the original loads the surface
+ * in the delay slot of the branch that tests isCurrentBallAboveGround, where
+ * one test reading ball->surface->sinkDepth loads it after the branch and
+ * leaves a nop in the slot.
+ *
+ * Measured against the match, as words differing and how many of them in
+ * shape:
+ *
+ *   One sync opening the display list                      555 (77), frame +8
+ *   f_BallRollFrame stepped after the first render mode     66 (30)
+ *   f_UnusedBallFrame stepped after the request frame is
+ *   stored, or the request frame stored first                4 (0)
+ *   f_UnusedBallFrame stepped after the texture LUT         28 (4)
+ *   isCurrentBallAboveGround set after the step's test       2 (2)
+ *   The ball loop testing != GOLF_BALL_COUNT                 4 (4)
+ *   primDepth declared in the function                     276 (0)
+ *   The marker player in an s8 local                       206 (10), frame -8
+ *   The marker player in an s32 local                       15 (11)
+ *   The marker colors' last case as the default            319 (29)
+ *   The water shade through shade, in one statement (the
+ *   old draft)                                               6 (0)
+ *   The water shade through shade, in two statements        74 (0)
+ *   The water shade in one statement                        14 (0)
+ *   The water shade set to 100, the height taken from it    11 (7)
+ *   The water shade set to less the height, 100 added       19 (3)
+ *   The water shade as a u8                                 11 (3)
+ *   The height in waterShade, shade set to 100 less it       6 (0)
+ *   A sync ending each sprite branch                       496 (58)
+ *   The far dot's steps written out, the vertical one
+ *   from ballPoint.y - 1 to ballPoint.y + 1, shifted (the
+ *   old draft)                                               8 (4)
+ *   The same, ending at the shifted ballPoint.y plus 4      49 (5)
+ *   The far dot's top as QuarterPixels(ballPoint.y) - 8     97 (71)
+ *   The far dot's top as QuarterPixels(ballPoint.y - 2)     53 (7)
+ *   The far dot's left as QuarterPixels(ballPoint.x - 1)   112 (70)
+ *   The shadow's bias subtracted once, after the arms      205 (13)
+ *   The size as shade times the product of the scale and
+ *   the size, in one expression (the old draft)              6 (0)
+ *   The scale set to the shade times the constant            8 (0)
+ *   The scale set to the shade, then multiplied or
+ *   divided by the constant                                  8 (0)
+ *   The size multiplied by the scale times the shade         8 (0)
+ *   The last statement as size = shadowScale * size          6 (0)
+ *   The scale multiplied by the size, then the size set
+ *   to the shade times the scale                             4 (0)
+ *   The same, set to the scale times the shade              14 (0)
+ *   The scale multiplied by the size as well, then copied
+ *   to it                                                    6 (0)
+ *   The scale set where it is declared                      18 (12)
+ *   The scale as an f64                                     15 (13)
+ *   The afterimages' loop testing < the length              93 (5), frame -8
+ *   The route points' depth in shadowDepth                   6 (0)
+ *   The tail's cycle type after a plain sync, whether or
+ *   not its other states go through the macro                8 (0)
+ *   The "PIKA" texture's address unaligned                  70 (10)
+ *   The shown alpha read through ball                       31 (23)
+ *   One test reading ball->surface->sinkDepth (the old
+ *   draft), or the split test's second half reading it       1 (1)
+ *   One test setting the variable in a comma expression      1 (1)
+ *   The split test reading into surface                     22 (0)
+ *   One test setting surface in a comma expression          23 (1)
+ *   The surface read before the first half                   6 (4)
+ *   The alpha's test split off as well                       7 (3)
+ *
+ * Also matching: f_BallRollFrame stepped before f_UnusedBallFrame, after the
+ * request frame is stored, or after the texture LUT; the opening's cycle
+ * type through AppendSyncedRdpState, or the tail's other states as well as
+ * its cycle type; isCurrentBallAboveGround set just before the step's test;
+ * a default that breaks in the marker colors' switch; waterShade declared in
+ * its block, after shade, or last; its clamp before the render mode; the far
+ * dot's steps written out from its own edges; shadowScale declared in a
+ * block or last, or its statements spelled shade * shadowScale and
+ * size * shadowScale; and pikaBallSurface declared in its block or last.
  */
-#ifdef NON_MATCHING
 void DrawGolfBalls(CameraMatrices *matrices UNUSED) {
     Gfx *gfx = g_DisplayListHead;
     ScreenPoint ballPoint;
@@ -1066,6 +1054,7 @@ void DrawGolfBalls(CameraMatrices *matrices UNUSED) {
     GolfBall *ball;
     BallAfterimage *afterimage;
     SurfaceInfo *surface;
+    SurfaceInfo *pikaBallSurface;
     s32 groundHeight;
     s32 spriteKind;
     Boolean isAboveGround;
@@ -1080,7 +1069,9 @@ void DrawGolfBalls(CameraMatrices *matrices UNUSED) {
 #    endif
     s32 shadowPrimDepth;
     s32 size;
+    s32 waterShade;
     s32 shade;
+    f32 shadowScale;
     s32 halfWidth;
     s32 halfHeight;
     u32 afterimageDepth;
@@ -1270,21 +1261,22 @@ void DrawGolfBalls(CameraMatrices *matrices UNUSED) {
                             ball->position[AXIS_X] * WORLD_TO_COURSE_SCALE,
                             ball->position[AXIS_Z] * WORLD_TO_COURSE_SCALE
                         );
-                        shade = 100 -
-                            (s32)(((ball->position[AXIS_Y] * WORLD_TO_COURSE_SCALE) -
-                                      groundHeight) *
-                                0.0032552085f);
+                        /* The height is set first and taken from 100 after, to match */
+                        waterShade = (s32)(((ball->position[AXIS_Y] * WORLD_TO_COURSE_SCALE) -
+                                               groundHeight) *
+                            0.0032552085f);
+                        waterShade = 100 - waterShade;
                         gDPPipeSync(gfx++);
                         gDPSetRenderMode(
                             gfx++,
                             RM_AA_ZB_XLU_SURF_UPDATE(1),
                             RM_AA_ZB_XLU_SURF_UPDATE(2)
                         );
-                        if (shade < 0) {
-                            shade = 0;
+                        if (waterShade < 0) {
+                            waterShade = 0;
                         }
 
-                        gDPSetPrimColor(gfx++, 0, 0, 0xEF, 0xEF, 0xFF, shade);
+                        gDPSetPrimColor(gfx++, 0, 0, 0xEF, 0xEF, 0xFF, waterShade);
                         gDPPipeSync(gfx++);
                         gDPSetAlphaCompare(gfx++, G_AC_THRESHOLD);
                     }
@@ -1449,7 +1441,7 @@ void DrawGolfBalls(CameraMatrices *matrices UNUSED) {
                         gDPSetRenderMode(gfx++, RM_ZB_XLU_SURF_UPDATE(1), RM_ZB_XLU_SURF_UPDATE(2));
                         gDPSetCombineMode(gfx++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
                         gDPPipeSync(gfx++);
-                        gSPScisTextureRectangle(
+                        gSPStretchedTextureRectangle(
                             gfx++,
                             QuarterPixels(ballPoint.x) - 4,
                             QuarterPixels(ballPoint.y - 1) - 4,
@@ -1458,16 +1450,8 @@ void DrawGolfBalls(CameraMatrices *matrices UNUSED) {
                             BALL_TILE_SMALL,
                             0,
                             0,
-                            TexelStep(
-                                SMALL_BALL_TEXTURE_SIZE,
-                                QuarterPixels(ballPoint.x) - 4,
-                                QuarterPixels(ballPoint.x)
-                            ),
-                            TexelStep(
-                                SMALL_BALL_TEXTURE_SIZE,
-                                QuarterPixels(ballPoint.y - 1),
-                                QuarterPixels(ballPoint.y + 1)
-                            )
+                            SMALL_BALL_TEXTURE_SIZE,
+                            SMALL_BALL_TEXTURE_SIZE
                         );
                         gDPPipeSync(gfx++);
                         gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, OPAQUE_ALPHA);
@@ -1544,7 +1528,11 @@ void DrawGolfBalls(CameraMatrices *matrices UNUSED) {
                         shade = 0x7F;
                     }
 
-                    size = shade * (0.007874016f * size);
+                    /* The scale starts as the constant and is multiplied by the
+                     * shade, to match */
+                    shadowScale = 1.0f / 0x7F;
+                    shadowScale *= shade;
+                    size *= shadowScale;
                     if (size <= 0) {
                         size = 1;
                     }
@@ -1849,8 +1837,8 @@ void DrawGolfBalls(CameraMatrices *matrices UNUSED) {
     }
 
     gDPPipeSync(gfx++);
-    gDPPipeSync(gfx++);
-    gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+    /* The cycle type's pointer is declared before its sync's, to match */
+    AppendSyncedRdpState(gfx, gDPSetCycleType, G_CYC_1CYCLE);
     gDPPipeSync(gfx++);
     gDPSetTextureFilter(gfx++, G_TF_BILERP);
     gDPPipeSync(gfx++);
@@ -1902,22 +1890,26 @@ void DrawGolfBalls(CameraMatrices *matrices UNUSED) {
             ball = &f_GolfBalls[i];
             if (ball->markerPlayerIndex == BALL_NO_MARKER &&
                 f_GolfBalls[i].alpha == BALL_SHOWN &&
-                (g_IsCupViewShown || ball->isInCup != TRUE) &&
-                (!isCurrentBallAboveGround || ball->surface->sinkDepth == SINK_DEPTH_NONE) &&
-                ball->alpha > 0) {
-                gDPPipeSync(gfx++);
-                gSPMatrix(
-                    gfx++,
-                    &ball->matrices[g_DrawBufferIndex],
-                    G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW
-                );
-                gSPVertex(gfx++, f_PikaBallVertices, 16, 0);
-                gSP2Triangles(gfx++, 0, 2, 1, 0, 1, 2, 3, 0);
-                gSP2Triangles(gfx++, 4, 6, 5, 0, 5, 6, 7, 0);
-                gSP2Triangles(gfx++, 8, 9, 10, 0, 9, 11, 10, 0);
-                gSP2Triangles(gfx++, 12, 13, 14, 0, 13, 15, 14, 0);
-                gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
-                gDPPipeSync(gfx++);
+                (g_IsCupViewShown || ball->isInCup != TRUE)) {
+                /* The surface is read between the test's halves, to match */
+                pikaBallSurface = ball->surface;
+                if ((!isCurrentBallAboveGround ||
+                        pikaBallSurface->sinkDepth == SINK_DEPTH_NONE) &&
+                    ball->alpha > 0) {
+                    gDPPipeSync(gfx++);
+                    gSPMatrix(
+                        gfx++,
+                        &ball->matrices[g_DrawBufferIndex],
+                        G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW
+                    );
+                    gSPVertex(gfx++, f_PikaBallVertices, 16, 0);
+                    gSP2Triangles(gfx++, 0, 2, 1, 0, 1, 2, 3, 0);
+                    gSP2Triangles(gfx++, 4, 6, 5, 0, 5, 6, 7, 0);
+                    gSP2Triangles(gfx++, 8, 9, 10, 0, 9, 11, 10, 0);
+                    gSP2Triangles(gfx++, 12, 13, 14, 0, 13, 15, 14, 0);
+                    gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
+                    gDPPipeSync(gfx++);
+                }
             }
         }
     }
@@ -1928,7 +1920,3 @@ void DrawGolfBalls(CameraMatrices *matrices UNUSED) {
     gDPPipeSync(gfx++);
     g_DisplayListHead = gfx;
 }
-
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_00/golf_balls", DrawGolfBalls);
-#endif
