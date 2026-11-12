@@ -16,6 +16,8 @@ typedef s32 Boolean;
 
 /* The size of a struct member, without an instance to apply sizeof to */
 #define MemberSize(type, member) (s32)sizeof(((type *)0)->member)
+/* How many bytes into a struct a member is, likewise */
+#define MemberOffset(type, member) ((u32)&((type *)0)->member)
 
 #define BITS_PER_BYTE 8
 

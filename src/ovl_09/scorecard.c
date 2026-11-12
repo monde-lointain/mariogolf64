@@ -387,28 +387,78 @@ void OpenScorecard(CourseIndex courseIndex, s32 holeIndex) {
     ForceStopRumble();
 }
 
+/* How many bytes past the scorecard's tableImage one of its other members is */
+#define BytesPastTableImage(member) \
+    (MemberOffset(Scorecard, member) - MemberOffset(Scorecard, tableImage))
+
 /*
  * Closes the scorecard: frees the images that OpenScorecard loaded for the
  * game mode and clears its text slots. It stops any rumble even if the
  * scorecard was already closed.
  *
- * Doesn't match: the original keeps tableImage's address in a register of its
- * own, freeing it and then stepping the face images' addresses from it, where
- * GCC folds it into the argument register and steps them from
- * totalLabelsImage's. cse2's use_related_value bases a constant address on the
- * oldest related table entry that holds a register, and both addresses are in
- * its table here, totalLabelsImage's first, so in the original tableImage's
- * entry must be older or alone. Taking its address into a local before the
- * frees gives 17 words, 3 in shape, but bases the frees on it too, and the
- * register oracle gets no closer; freed in place, the oracle comes within 7
- * words with 1 register forced. Giving the face loop, or every loop, its own
- * counter gives 21 words (3 in shape), but the oracle still comes within 7,
- * now forcing 3. 33 words differ, 3 in shape.
+ * Each run of frees loads its first image's address and passes the others as
+ * offsets from it, which is what cse makes of constant addresses. After the
+ * last run, though, the original keeps tableImage's address in a register of
+ * its own, and the faces' loop steps two pointers that start as that register
+ * plus the arrays' offsets from tableImage. So tableImage's address is in a
+ * variable, and the loop takes each array's address from it into a local. The
+ * loop pass moves those two sums out of the loop and steps a pointer from
+ * each. Written in the calls, the sums stay in the loop: only the counter's
+ * part is stepped, and tableImage's address is added to it each time.
+ *
+ * cse has by then written tableImage's address as totalLabelsImage's less
+ * 0x80, and its second pass would rewrite the moved sums as offsets from
+ * totalLabelsImage's register too, leaving tableImage's address without a
+ * register. It can't once that register has been set again. So
+ * totalLabelsImage is freed through a variable, image, and image is set to
+ * tableImage's address before that is freed. cse passes tableImage's own
+ * register to the call, and flow deletes the store as dead. The target tells
+ * only that such a store was there, not what it stored or where between
+ * tableImage's address and the loop it stood.
+ *
+ * Measured against the match, as words differing and how many of them in
+ * shape:
+ *
+ *     Every address written out, with no variables (the old
+ *     draft)                                                  33 (3)
+ *     tableImage's address in its variable, without image     33 (3)
+ *     image freeing totalLabelsImage, but not set again       33 (3)
+ *     image set to tableImage's address only                  33 (3)
+ *     image freeing labelsImage or raisedPanelImage, in
+ *     place of totalLabelsImage                               33 (3)
+ *     image freeing each of the run's images                  17 (7)
+ *     image set again before tableImage's address is taken    10 (6)
+ *     image set to tableImage's address as a constant, and
+ *     tableImage copied from it after the call                18 (0)
+ *     One variable for both                                   18 (0)
+ *     tableImage set where it is declared                     25 (7), frame -8
+ *     tableImage set before the run                           17 (3)
+ *     The arrays' addresses written in the calls              12 (0)
+ *     A local for one of the arrays only                      10 (0)
+ *     The arrays read as g_Scorecard's members in the calls   10 (6)
+ *     The arrays' offsets taken between g_Scorecard's own
+ *     addresses, with BytesBetween                            7 (3)
+ *     The arrays' addresses set before the loop               48 (8)
+ *     Pointers stepped in the loop's header                   50 (4)
+ *     Pointers set before the loop and stepped in its body    24 (4)
+ *     The palettes freed before the faces                     4 (0)
+ *     The faces' loop with a counter of its own               22 (0)
+ *     The faces' loop testing < the player count              33 (5), frame -8
+ *
+ * Also matching: image set to tableImage's address or to NULL anywhere from
+ * tableImage's statement to the loop's header, with tableImage passed to the
+ * call; image set to tableImage's address as a constant, and tableImage
+ * copied from it before the call; tableImage set just after totalLabelsImage
+ * is freed; the arrays' locals declared in the function and set in the loop,
+ * set in the other order, or set to tableImage plus a count of pointers;
+ * image as a void pointer or a u8 pointer; and the two variables declared in
+ * the other order, or before the counters.
  */
-#ifdef NON_MATCHING
 void FreeScorecard(void) {
     s32 i;
     s32 imageIndex;
+    u8 **image;
+    u8 **tableImage;
 
     if (g_ScorecardState != SCORECARD_CLOSED) {
         g_ScorecardState = SCORECARD_CLOSED;
@@ -462,16 +512,26 @@ void FreeScorecard(void) {
                 break;
         }
 
-        FreeMemory(&g_Scorecard.totalLabelsImage);
+        /* Freed through image, which is set again below, to match */
+        image = &g_Scorecard.totalLabelsImage;
+        FreeMemory(image);
         FreeMemory(&g_Scorecard.labelsImage);
         FreeMemory(&g_Scorecard.digitsImage);
         FreeMemory(&g_Scorecard.betSubtitlesImage);
         FreeMemory(&g_Scorecard.scoresPanelImage);
         FreeMemory(&g_Scorecard.raisedPanelImage);
-        FreeMemory(&g_Scorecard.tableImage);
+        tableImage = &g_Scorecard.tableImage;
+        /* Sets image again, so that tableImage's address keeps a register, to
+         * match */
+        image = tableImage;
+        FreeMemory(image);
         for (i = 0; i != g_GameState.playerCount; i++) {
-            FreeMemory(&g_Scorecard.faceImages[i]);
-            FreeMemory(&g_Scorecard.facePalettes[i]);
+            /* Each array is reached from tableImage's address, to match */
+            u8 **faceImages = (u8 **)AddressPast(tableImage, BytesPastTableImage(faceImages));
+            u16 **facePalettes = (u16 **)AddressPast(tableImage, BytesPastTableImage(facePalettes));
+
+            FreeMemory(&faceImages[i]);
+            FreeMemory(&facePalettes[i]);
         }
 
         SetTextSlot(0, 0, NO_MESSAGE, TEXT_SLOT_LARGE_FONT, 0, TEXT_FLAG_TYPED, 0, 0, 0, 0);
@@ -480,9 +540,6 @@ void FreeScorecard(void) {
 
     ForceStopRumble();
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard", FreeScorecard);
-#endif
 
 /* A hole time of this many minutes or more shows as dashes */
 #define SHOWN_MINUTE_LIMIT 60
