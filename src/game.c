@@ -1714,36 +1714,91 @@ s32 __MusIntMemRemaining(void);
 /*
  * Returns the frame count, which the caller ignores
  *
+ * The views are counted by viewIndex alone, and each camera is read as
+ * g_Cameras[viewIndex]. Only the menu inset's hole keeps its view's address
+ * in a variable, insetView, set in that arm. The loop pass takes the first
+ * view's address out of the loop and makes insetView that address plus
+ * viewIndex times a camera's size, which it reduces to a register stepped
+ * by the size ($s4), beside the one it steps for the cameras' byte offset
+ * ($s5). It zeroes the offset before it sets the pointer, as the original
+ * does. The hoisted address gets no register of its own, so each other
+ * &g_Cameras[viewIndex].view rebuilds it in $t1 and adds the offset, as in
+ * the original. A camera pointer stepped in the loop's header ends up as
+ * the same two registers, but set in the other order before the loop.
+ *
+ * The inset's backdrop takes the inset camera's view by its index, as the
+ * course's inset view does, and the two calls share a tail that loads the
+ * address as a constant.
+ *
+ * The isometric map's eye is worked out inside guLookAt's arguments. The
+ * matrices pointer is then reloaded from the stack before the eye's
+ * subtractions, as in the original; with the eye set in statements before
+ * the call, it is reloaded after them.
+ *
  * The far plane is clamped between the short far plane and the course's,
  * then set to the course's anyway, so both clamps are dead. The upper
  * clamp keeps the lower clamp's move, as the original does, whose bc1tl
  * branches to the very next instruction with the move in its delay slot:
  * flow deletes the upper clamp's move as dead but keeps its branch, which
  * still reads the clamped value, and jump2 then deletes the empty branch
- * with its compare. Without the upper clamp, flow deleted the lower
- * clamp's move and 41 words differed, 17 in shape; the clamps joined by
- * else give 41 too, and the upper clamp first 49 (15).
+ * with its compare.
  *
  * COURSE_FAR_CLIP is a double, unlike the other planes, so the upper
  * clamp compares in double precision. As a float, the clamped value takes
  * $f0 rather than the $f6 that the original gives it and the course's far
- * plane: 43 words differ, 13 in shape. The target keeps no trace of the
- * bound, and other bounds, such as 0.0f or 1000.0f, also give 31 words.
+ * plane. The target keeps no trace of the upper clamp's bound: other
+ * bounds, such as 0.0f or 1000.0f, match as well.
  *
- * Doesn't match: the loop pass hoists the view loop's two zeroed
- * registers in the other order, and the isometric map view reloads
- * matrices from the stack after its first-view test, where the original
- * reloads it before. The register oracle's closest result is these 31
- * words with no register forced.
+ * Measured against the match, as words differing and how many of them in
+ * shape:
  *
- * Stepping camera before viewIndex in the loop's step hoists the two
- * zeroed registers in the original's order, but the camera's offset then
- * takes $s4 rather than $s5 and 49 words differ, 5 in shape, with the
- * register oracle's closest result those 49 words with no register
- * forced. Setting camera first in the loop's initializer changes
- * nothing. 31 words differ, 9 in shape.
+ *   The inset's view read as g_Cameras[viewIndex].view at each
+ *     use, with no variable                                    478 (106)
+ *   The inset's view read through courseView                   390 (54),
+ *                                                              frame -8
+ *   A camera pointer set in the inset's arm, for insetView     129 (33)
+ *   insetView set at the loop's top                            356 (66)
+ *   insetView set after matrices                               346 (58)
+ *   The inset's field of view read through insetView           19 (9)
+ *   The inset's scissor read through insetView                 154 (6)
+ *   The inset's scissor read from g_Cameras[viewIndex].view    118 (6)
+ *   The inset's backdrop given insetView, or
+ *     &g_Cameras[viewIndex].view                               341 (51)
+ *   The inset's pin given insetView                            93 (11),
+ *                                                              frame -8
+ *   The inset's pin given the inset camera's view by its index 3 (3)
+ *   The course's pin given courseView                          216 (0)
+ *   The course's view read as g_Cameras[viewIndex].view at
+ *     each use, with no variable                               427 (83)
+ *   A camera pointer stepped in the loop's header, the inset's
+ *     view read through it or insetView set from it            81 (21)
+ *   The same, with the pins' views through it as well          32 (14)
+ *   The same, with the inset's backdrop through it too         27 (7)
+ *   The same, with the eye set in statements (the old draft)   31 (9)
+ *   insetView set from a camera pointer set at the loop's top  356 (66)
+ *   The eye set in statements before guLookAt                  4 (2)
+ *   The eye's x alone set in the arguments                     56 (16)
+ *   The eye's y alone set in the arguments                     8 (6)
+ *   The eye's x and y set in the arguments                     12 (6)
+ *   The eye's z, or its y and z, set in the arguments          4 (2)
+ *   The eye set in statements before the buffers are cleared   88 (22)
+ *   Without the upper clamp, or without the lower              10 (8)
+ *   Without either clamp                                       26 (18)
+ *   The clamps joined by else                                  272 (12)
+ *   The upper clamp first                                      13 (13)
+ *   COURSE_FAR_CLIP as a float                                 12 (4)
+ *   Without LoadProjection's unusedMatrix                      16 (0), and
+ *                                                              16 (0),
+ *                                                              frame +64,
+ *                                                              there
+ *   The view loop testing != 2                                 4 (4)
+ *
+ * Also matching: insetView set anywhere in its arm before guLookAtF, or
+ * at the top of the inset screen's case; insetView declared in its arm
+ * with its value, or after courseView; and the eye set in statements
+ * after a variable is set to the viewing matrix's address, for guLookAt's
+ * first argument.
  */
-#ifdef NON_MATCHING
 s32 DrawGame(void) {
     Boolean usesFloatMatrices;
     CameraMatrices *matrices;
@@ -1769,7 +1824,7 @@ s32 DrawGame(void) {
     f32 lookAtY;
     f32 lookAtZ;
     s32 mode;
-    Camera *camera;
+    CameraView *insetView;
     CameraView *courseView;
     f32 *target;
     u16 *trigger;
@@ -1778,7 +1833,7 @@ s32 DrawGame(void) {
     void LoadProjection(void) {
         Mat4 projection;
         Mat4 translation;
-        /* Pads the frame to match; without it 57 words differ, against 41 */
+        /* Pads the frame to match */
         Mat4 unusedMatrix UNUSED;
 
         if (usesFloatMatrices) {
@@ -1897,7 +1952,7 @@ s32 DrawGame(void) {
             (g_DrawBufferIndex * VERTEX_BUFFER_LENGTH);
     }
 
-    for (viewIndex = 0, camera = g_Cameras; viewIndex < 2; viewIndex++, camera++) {
+    for (viewIndex = 0; viewIndex < 2; viewIndex++) {
         drawsScene = TRUE;
         terrainStyle = TERRAIN_STYLE_NORMAL;
         usesFloatMatrices = FALSE;
@@ -1988,14 +2043,12 @@ s32 DrawGame(void) {
                     ClearBuffers(BUFFER_CLEAR_BY_LINE);
                 }
 
-                eyeX = g_MapCamera.view.eye[0] - MAP_ISOMETRIC_OFFSET_X;
-                eyeY = g_MapCamera.view.eye[1] - MAP_ISOMETRIC_OFFSET_Y;
-                eyeZ = g_MapCamera.view.eye[2] - MAP_ISOMETRIC_OFFSET_X;
+                /* The eye is set in the arguments, to match */
                 guLookAt(
                     &matrices->viewing,
-                    eyeX,
-                    eyeY,
-                    eyeZ,
+                    eyeX = g_MapCamera.view.eye[0] - MAP_ISOMETRIC_OFFSET_X,
+                    eyeY = g_MapCamera.view.eye[1] - MAP_ISOMETRIC_OFFSET_Y,
+                    eyeZ = g_MapCamera.view.eye[2] - MAP_ISOMETRIC_OFFSET_X,
                     g_MapCamera.view.eye[0],
                     g_MapCamera.view.eye[1],
                     g_MapCamera.view.eye[2],
@@ -2216,7 +2269,6 @@ s32 DrawGame(void) {
                         matrices->perspectiveF,
                         &insetPerspNorm,
                         g_Cameras[viewIndex].view.fieldOfView,
-
                         SCREEN_ASPECT_RATIO,
                         MAP_NEAR_CLIP,
                         MAP_FAR_CLIP,
@@ -2224,14 +2276,16 @@ s32 DrawGame(void) {
                     );
                     ConvertMatrixToFixed(matrices->perspectiveF, &matrices->perspective);
                     guTranslate(&matrices->placement, 0.0f, 0.0f, 0.0f);
+                    /* Only this arm keeps its view's address in a variable, to match */
+                    insetView = &g_Cameras[viewIndex].view;
                     guLookAtF(
                         matrices->viewingF,
-                        camera->view.eye[0],
-                        camera->view.eye[1],
-                        camera->view.eye[2],
-                        camera->view.lookAt[0],
-                        camera->view.lookAt[1],
-                        camera->view.lookAt[2],
+                        insetView->eye[0],
+                        insetView->eye[1],
+                        insetView->eye[2],
+                        insetView->lookAt[0],
+                        insetView->lookAt[1],
+                        insetView->lookAt[2],
                         0.0f,
                         -1.0f,
                         0.0f
@@ -2240,16 +2294,16 @@ s32 DrawGame(void) {
                     guAlign(
                         &matrices->billboard,
                         0.0f,
-                        camera->view.lookAt[0] - camera->view.eye[0],
-                        camera->view.lookAt[1] - camera->view.eye[1],
-                        camera->view.lookAt[2] - camera->view.eye[2]
+                        insetView->lookAt[0] - insetView->eye[0],
+                        insetView->lookAt[1] - insetView->eye[1],
+                        insetView->lookAt[2] - insetView->eye[2]
                     );
                     guAlign(
                         &matrices->antiBillboard,
                         0.0f,
-                        -(camera->view.lookAt[0] - camera->view.eye[0]),
-                        -(camera->view.lookAt[1] - camera->view.eye[1]),
-                        -(camera->view.lookAt[2] - camera->view.eye[2])
+                        -(insetView->lookAt[0] - insetView->eye[0]),
+                        -(insetView->lookAt[1] - insetView->eye[1]),
+                        -(insetView->lookAt[2] - insetView->eye[2])
                     );
                     LoadProjection();
                     gSPPerspNormalize(g_DisplayListHead++, insetPerspNorm);
@@ -2259,7 +2313,7 @@ s32 DrawGame(void) {
                     gDPPipeSync(g_DisplayListHead++);
                     gDPSetCycleType(g_DisplayListHead++, G_CYC_1CYCLE);
                     UsePrimitiveDepth(1);
-                    DrawBackdrop(&g_DisplayListHead, &camera->view, INSET_CAMERA);
+                    DrawBackdrop(&g_DisplayListHead, &g_Cameras[INSET_CAMERA].view, INSET_CAMERA);
                     LoadProjection();
                 }
 
@@ -2656,7 +2710,7 @@ s32 DrawGame(void) {
                     }
                     else {
                         if (!IsGameFlagSet(GAME_FLAG_HIDE_PIN)) {
-                            DrawPin(matrices, &camera->view, viewIndex);
+                            DrawPin(matrices, &g_Cameras[viewIndex].view, viewIndex);
                         }
 
                         if (g_ScreenEffect == SCREEN_EFFECT_SAVED_FRAME &&
@@ -2769,7 +2823,7 @@ s32 DrawGame(void) {
                 DrawGround(matrices, terrainStyle);
                 DrawBillboards(matrices, viewIndex);
                 if (!IsGameFlagSet(GAME_FLAG_HIDE_PIN)) {
-                    DrawPin(matrices, &camera->view, viewIndex);
+                    DrawPin(matrices, &g_Cameras[viewIndex].view, viewIndex);
                 }
 
                 DrawHoleTriangles(&g_DisplayListHead, matrices, &g_Cameras[viewIndex]);
@@ -3106,10 +3160,6 @@ s32 DrawGame(void) {
     nuGfxDisplayOn();
     return g_FrameCount;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/game", LoadProjection);
-INCLUDE_ASM("asm/nonmatchings/game", DrawGame);
-#endif
 
 /*
  * Copies the frame shown last onto the frame being drawn, so a frame can be
