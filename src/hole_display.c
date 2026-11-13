@@ -160,6 +160,11 @@ enum SkyImageKind {
 #define TILE_GRID_ROW_SPACING 32
 /* The height of a row of the tile grid's vertices */
 #define TileGridRowY(row) (TILE_GRID_TOP - ((row) * TILE_GRID_ROW_SPACING))
+/* The x of a column of the tile grid's vertices, other than the last */
+#define TileGridColumnX(column) (TILE_GRID_LEFT + ((column) * TILE_GRID_SPACING))
+/* The x of the last column, which is narrower; columns count on from it by the spacing */
+#define TileGridLastColumnX(column) \
+    (TILE_GRID_RIGHT + (((column) - (TILE_GRID_COLUMN_COUNT - 1)) * TILE_GRID_SPACING))
 
 /*
  * The plain backdrop copies the last frame, inside a border, into
@@ -4487,73 +4492,58 @@ void DrawTurnAwayAnimation(void) {
     }
 }
 
-
 /*
  * Copies the frame that a HUD animation that has just started breaks apart
  *
- * The original copies the row's height into a register of its own for the last
- * column, and reloads the row count on each pass, as when each store works the
- * height out from the row: earlier, stepping it beside the row gave 116 words
- * differing, 18 in shape, and setting it at the start of each column 119-139.
- * The narrow column's vertex z is stored in a block of its own; stored plainly,
- * 97 words differ, 21 in shape.
+ * Much of it is written to match. The counts below are of the words that
+ * differ with one thing changed, and in brackets how many of those differ in
+ * shape:
  *
- * Doesn't match: the copy's loops allocate their counters and addresses to
- * other registers, and the grid's stores are scheduled in another order. Giving
- * the slice copy its own row counter, and adding the tile start to the column
- * before the row, took it from 144 words differing to 116. Indexing the grid's
- * vertices, in place of the two pointers, gave 184. The permuter's best, at 103
- * words (15 in shape) when the draft gave 97, stored the column's x after the
- * step to the next vertex, which changes what is drawn. The wide columns store
- * each vertex's coordinates in turn, as the narrow column does, which took the
- * draft from 97 words differing to 95, 17 in shape to 19. Storing the first
- * vertex's z between the second's x and y gives 95 words, 15 in shape, but
- * splits both vertices' stores for no reason; storing the x's, the y's and the
- * z's in pairs gives 97, and the second vertex first 101. A focused permuter
- * run's best by words (93, 15 in shape) gives the second vertex an x 64
- * greater, but the original stores the same register as both vertices' x before
- * adding 64 to it. Giving the copy loops of one or more of the four kinds
- * counters of their own, for the column, the row or both, gives 95 to 153
- * words, 19 in shape, in each of the 127 ways. The draft then gave 95 words,
- * 19 in shape.
- *
- * The slice copy's words are counted with the tile grid's column counter:
- * with wordIndex, 95 words differ, 19 in shape, and with a counter of their
- * own 84, 20 in shape, and the register oracle's closest result falls from
- * 66 words forcing 14 pseudos to 63 forcing 11. Counting the slice copy's
- * columns with tileRow as well gives 74. The counts above were measured
- * before this.
- *
- * The register oracle lined wordIndex up with one register in the tiles'
- * copy and another in the fade and negative copies, so each of the three
- * copies now counts its words with a wordIndex of its own, declared in
- * its branch. That takes the draft from 72 words differing to 102, but
- * from 20 in shape to 16, and the register oracle's closest result from
- * 63 words forcing 11 pseudos to 53 forcing 19; the differences it adds
- * are mostly in which registers the loops use. Resetting the shared
- * wordIndex in each branch instead gives 120 words (18 in shape), with
- * the oracle at 63 forcing 17; the fade and negative copies' own counters
- * alone give 102 (16), the negative copy's alone 89 (19), the tiles'
- * alone 103 (21) and the fade's alone 199 (17). The slice copy's words
- * are still best counted with gridColumnOrSliceWord: a sliceWord of their
- * own gives 114 words, 16 in shape. 102 words differ, 16 in shape.
+ * - i and j each count loops in several branches. global-alloc ranks a
+ *   register by its references over its life, summed over every loop that
+ *   uses it, and of two that rank level places the lower-numbered first. j,
+ *   with 43 references over 86 instructions, ranks level with the tile
+ *   copy's row offset, 15 over 18, and so is placed ahead of it and takes
+ *   $a1 in every loop. With counters of their own the slice copy's words
+ *   give 12, the grid's columns 64 and the tiles' columns 96; the slice
+ *   copy's words counted with i give 24. The fade and negative copies'
+ *   words with counters of their own give 60 (either alone 46), with j 112,
+ *   and with the tile copy's wordIndex 90 (2). The tiles' rows with a
+ *   counter of their own give 52; the grid's rows match with one too.
+ * - The slice copy sets its row before j. Set first, j lives one instruction
+ *   longer, ranks below the tile copy's row offset and takes $a2: 54 (2).
+ * - The fade, negative and slice copies step the word's counter in the
+ *   loop's header, after the column. Stepped ahead of the column, or where
+ *   the word is stored, the fade and negative copies give 4 and the slice
+ *   copy 16. The tile copy's is stepped where the word is stored; in the
+ *   header after the column it gives 2.
+ * - The tile copy adds the tile's start to the row and column last. Added
+ *   to the column first it gives 4, and added first or second 99 (1).
+ *   Worked out in the index, with no tileStart, it gives 95 (13) and a
+ *   frame of 8 bytes where the original has none.
+ * - Each of the grid's stores works its x out from the column and its y
+ *   from the row. An x stepped in the loops' headers gives 4 (2) stepped
+ *   first, 12 (4) after the column and 24 (12) last; a y set once a row
+ *   gives 21 (3).
+ * - The grid's vertex pointers step in the loops' headers, after the
+ *   column: at the end of the body, or ahead of the column, 48 (12).
+ * - The last column is a loop of one pass whose x is worked out from the
+ *   column like the others', as the original adds the spacing to it: with
+ *   TILE_GRID_RIGHT stored, 43 (5), and without the loop 116 (18).
+ * - Each vertex's coordinates are stored in turn: the two x's, the y's and
+ *   the z's in pairs give 6 (6).
  */
-#ifdef NON_MATCHING
 void CaptureHudAnimationFrame(void) {
     u32 *frame;
     s32 tileStart;
-    s32 tileRow;
-    s32 tileColumn;
+    /* Counts the tiles' and the grid's rows, and the fade and negative copies' words */
+    s32 i;
+    /* Counts the tiles' and the grid's columns, and the slice copy's words */
+    s32 j;
     s32 row;
-    s32 sliceRow;
-    s32 gridRow;
     s32 column;
-    /* Counts the tile grid's columns, or the slice copy's words, as the
-     * original's shared register needs */
-    s32 gridColumnOrSliceWord;
     Vtx *vertex;
     Vtx *nextVertex;
-    s32 x;
 
     if (!f_IsFrameCapturePending) {
         return;
@@ -4564,17 +4554,16 @@ void CaptureHudAnimationFrame(void) {
     if (f_HudAnimation == HUD_ANIMATION_TURN_AWAY || f_HudAnimation == HUD_ANIMATION_TILES) {
         s32 wordIndex = 0;
 
-        for (tileRow = 0; tileRow != FRAME_TILE_ROW_COUNT; tileRow++) {
-            for (tileColumn = 0; tileColumn != FRAME_TILE_COLUMN_COUNT; tileColumn++) {
+        for (i = 0; i != FRAME_TILE_ROW_COUNT; i++) {
+            for (j = 0; j != FRAME_TILE_COLUMN_COUNT; j++) {
                 /* The word the tile's rows count from */
-                tileStart = (tileRow * FRAME_TILE_ROWS * FRAME_WORDS_PER_ROW) +
-                    (tileColumn * FRAME_TILE_WORDS);
+                tileStart = (i * FRAME_TILE_ROWS * FRAME_WORDS_PER_ROW) + (j * FRAME_TILE_WORDS);
                 for (row = FRAME_MARGIN_ROWS; row != FRAME_MARGIN_ROWS + FRAME_TILE_ROWS; row++) {
                     for (column = FRAME_MARGIN_WORDS;
                         column != FRAME_MARGIN_WORDS + FRAME_TILE_WORDS;
                         column++) {
                         f_CapturedFrame[wordIndex++] =
-                            frame[(row * FRAME_WORDS_PER_ROW) + (tileStart + column)];
+                            frame[(row * FRAME_WORDS_PER_ROW) + column + tileStart];
                     }
                 }
             }
@@ -4582,36 +4571,25 @@ void CaptureHudAnimationFrame(void) {
 
         vertex = f_TileGridVertices[0];
         nextVertex = f_TileGridVertices[1];
-        for (gridRow = 0; gridRow != TILE_GRID_ROW_COUNT; gridRow++) {
-            for (gridColumnOrSliceWord = 0, x = TILE_GRID_LEFT;
-                gridColumnOrSliceWord != TILE_GRID_COLUMN_COUNT - 1;
-                gridColumnOrSliceWord++, x += TILE_GRID_SPACING) {
-                vertex->v.ob[AXIS_X] = x;
-                vertex->v.ob[AXIS_Y] = TileGridRowY(gridRow);
+        for (i = 0; i != TILE_GRID_ROW_COUNT; i++) {
+            for (j = 0; j != TILE_GRID_COLUMN_COUNT - 1; j++, vertex++, nextVertex++) {
+                vertex->v.ob[AXIS_X] = TileGridColumnX(j);
+                vertex->v.ob[AXIS_Y] = TileGridRowY(i);
                 vertex->v.ob[AXIS_Z] = 0;
-                nextVertex->v.ob[AXIS_X] = x;
-                nextVertex->v.ob[AXIS_Y] = TileGridRowY(gridRow);
+                nextVertex->v.ob[AXIS_X] = TileGridColumnX(j);
+                nextVertex->v.ob[AXIS_Y] = TileGridRowY(i);
                 nextVertex->v.ob[AXIS_Z] = 0;
-                vertex++;
-                nextVertex++;
             }
 
             /* The last column is narrower, ending inside the HUD's margin */
-            for (gridColumnOrSliceWord = TILE_GRID_COLUMN_COUNT - 1, x = TILE_GRID_RIGHT;
-                gridColumnOrSliceWord != TILE_GRID_COLUMN_COUNT;
-                gridColumnOrSliceWord++, x += TILE_GRID_SPACING) {
-                vertex->v.ob[AXIS_X] = x;
-                vertex->v.ob[AXIS_Y] = TileGridRowY(gridRow);
-                /*
-                 * In its own block, as without it 104 words differ, 18 in shape,
-                 * against 102 and 16
-                 */
-                IN_OWN_BLOCK(vertex->v.ob[AXIS_Z] = 0);
-                nextVertex->v.ob[AXIS_X] = x;
-                nextVertex->v.ob[AXIS_Y] = TileGridRowY(gridRow);
+            for (j = TILE_GRID_COLUMN_COUNT - 1; j != TILE_GRID_COLUMN_COUNT;
+                j++, vertex++, nextVertex++) {
+                vertex->v.ob[AXIS_X] = TileGridLastColumnX(j);
+                vertex->v.ob[AXIS_Y] = TileGridRowY(i);
+                vertex->v.ob[AXIS_Z] = 0;
+                nextVertex->v.ob[AXIS_X] = TileGridLastColumnX(j);
+                nextVertex->v.ob[AXIS_Y] = TileGridRowY(i);
                 nextVertex->v.ob[AXIS_Z] = 0;
-                vertex++;
-                nextVertex++;
             }
         }
     }
@@ -4619,24 +4597,21 @@ void CaptureHudAnimationFrame(void) {
         f_HudAnimation == HUD_ANIMATION_FAST_FADE_OUT ||
         f_HudAnimation == HUD_ANIMATION_SLIDE_APART ||
         f_HudAnimation == HUD_ANIMATION_SPIRAL) {
-        s32 wordIndex = 0;
-
+        i = 0;
         for (row = FRAME_MARGIN_ROWS; row != SCREEN_HEIGHT - FRAME_MARGIN_ROWS; row++) {
             for (column = FRAME_MARGIN_WORDS; column != FRAME_WORDS_PER_ROW - FRAME_MARGIN_WORDS;
-                column++) {
-                f_CapturedFrame[wordIndex++] = frame[(row * FRAME_WORDS_PER_ROW) + column];
+                column++, i++) {
+                f_CapturedFrame[i] = frame[(row * FRAME_WORDS_PER_ROW) + column];
             }
         }
     }
     else if (f_HudAnimation == HUD_ANIMATION_SLICE_CAPTURE) {
         if (g_CapturedSliceCount < FRAME_SLICE_COUNT) {
-            gridColumnOrSliceWord = 0;
-            for (sliceRow = FRAME_SLICE_TOP; sliceRow != FRAME_SLICE_BOTTOM; sliceRow++) {
-                for (column = FRAME_SLICE_LEFT_WORD; column != FRAME_SLICE_RIGHT_WORD;) {
-                    f_CapturedFrame
-                        [(g_CapturedSliceCount * FRAME_SLICE_WORD_COUNT) +
-                            gridColumnOrSliceWord++] =
-                            frame[(sliceRow * FRAME_WORDS_PER_ROW) + column++];
+            for (row = FRAME_SLICE_TOP, j = 0; row != FRAME_SLICE_BOTTOM; row++) {
+                for (column = FRAME_SLICE_LEFT_WORD; column != FRAME_SLICE_RIGHT_WORD;
+                    column++, j++) {
+                    f_CapturedFrame[(g_CapturedSliceCount * FRAME_SLICE_WORD_COUNT) + j] =
+                        frame[(row * FRAME_WORDS_PER_ROW) + column];
                 }
             }
 
@@ -4646,21 +4621,17 @@ void CaptureHudAnimationFrame(void) {
     else if (f_HudAnimation == HUD_ANIMATION_MOTION_BLUR) {
     }
     else if (f_HudAnimation == HUD_ANIMATION_NEGATIVE) {
-        s32 wordIndex = 0;
-
+        i = 0;
         for (row = FRAME_MARGIN_ROWS; row != SCREEN_HEIGHT - FRAME_MARGIN_ROWS; row++) {
             for (column = FRAME_MARGIN_WORDS; column != FRAME_WORDS_PER_ROW - FRAME_MARGIN_WORDS;
-                column++) {
-                f_CapturedFrame[wordIndex++] = ~frame[(row * FRAME_WORDS_PER_ROW) + column];
+                column++, i++) {
+                f_CapturedFrame[i] = ~frame[(row * FRAME_WORDS_PER_ROW) + column];
             }
         }
     }
 
     f_HudAnimationFrame = 1;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/hole_display", CaptureHudAnimationFrame);
-#endif
 
 /*
  * Draws the slice animation from the captured frame, a strip at a time; each
