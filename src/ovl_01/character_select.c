@@ -1697,21 +1697,27 @@ s32 GetUnusedPalette(s32 choiceIndex);
  * Draws each grid cell's face, with characters still to be won as dark shapes
  * in single player, and every few draws steps the current player's face to its
  * next frame.
- * Doesn't match: the original keeps row in a temporary register and spills the
- * menu memory pointer, where GCC keeps the pointer in a saved register and
- * spills row instead. Comparing row as a byte with the cursor's row, the
- * permuter's best form, gives 175 words, 13 in shape.
  *
- * The original sets the alternate faces' table on the flag test's
- * fall-through path, as a positive test of the flag would, and jumps over
- * the other table. Testing the flag positively, with if/else or ?:, gives
- * that order but 97 words (25 in shape); opening the asset in each arm gives
- * 134 (24), or 140 (26) with the negated test. 91 words differ, 25 in shape.
- *
- * The register oracle's closest result is these 91 words with no register
- * forced, so allocation isn't the cause.
+ * Four things in it are written to match, and each needs the other three:
+ * - The loops step row and column at the end of their bodies, each step in a
+ *   block of its own. GCC counts a register's uses once more for each loop
+ *   they are in, so the blocks' loop notes raise row's and column's places in
+ *   the order registers are handed out. Stepping row in the loop's header, or
+ *   at the body's end outside a block, spills it to a frame 8 bytes smaller
+ *   (116 words differ, 34 in shape). Stepping column in the header gives 22
+ *   words (16 in shape); at the body's end outside a block, it swaps
+ *   registers with the display list pointer's copy (28 words).
+ * - The dark shapes' arm ends in an empty block. Its loop notes sit just
+ *   ahead of the label where the arms join, which GCC takes for a loop's top,
+ *   so it predicts the mark test's branch there as taken and fills its delay
+ *   slot with column's step from the join rather than with the arm's first
+ *   instruction. Without it 3 words differ, 1 in shape.
+ * - The grid slot's read isn't in a block of its own, which gives 92 words
+ *   (2 in shape).
+ * - The frame's asset is opened in each arm of the flag test. Choosing the
+ *   table in the arms for one call gives 95 words (15 in shape) and a frame 8
+ *   bytes larger.
  */
-#ifdef NON_MATCHING
 void DrawGridFaces(Gfx **displayListHead, u8 isSinglePlayer) {
     EncodedAsset asset;
     AssetFile file;
@@ -1724,15 +1730,10 @@ void DrawGridFaces(Gfx **displayListHead, u8 isSinglePlayer) {
     u16 character;
     void *faceImage;
     void *facePalette;
-    u16(*faceAssets)[8];
 
-    for (row = 0; row != CHARACTER_GRID_ROW_COUNT; row++) {
-        for (column = 0; column != CHARACTER_GRID_COLUMN_COUNT; column++) {
-            /*
-             * In its own block, as without it 105 words differ, 35 in shape, against
-             * 91 and 25
-             */
-            IN_OWN_BLOCK(slot = g_CharacterGrid[row][column]);
+    for (row = 0; row != CHARACTER_GRID_ROW_COUNT;) {
+        for (column = 0; column != CHARACTER_GRID_COLUMN_COUNT;) {
+            slot = g_CharacterGrid[row][column];
             if (g_MenuScreen == MENU_SCREEN_OPPONENT_SELECT &&
                 row == memory->characterRows[0] &&
                 column == memory->characterColumns[0] &&
@@ -1814,8 +1815,12 @@ void DrawGridFaces(Gfx **displayListHead, u8 isSinglePlayer) {
                     TEXEL_STEP_ONE
                 );
                 gDPPipeSync(gfx++);
+                /* Empty, for the notes it leaves ahead of the arms' join */
+                IN_OWN_BLOCK(;);
             }
+            IN_OWN_BLOCK(column++);
         }
+        IN_OWN_BLOCK(row++);
     }
 
     f_FaceFrameTimer++;
@@ -1865,14 +1870,12 @@ void DrawGridFaces(Gfx **displayListHead, u8 isSinglePlayer) {
         }
 
         ReadAssetFile(facePalette, (s16)GetAssetFileSize(&file), &file);
-        if (!IsGameFlagSet(GAME_FLAG_ALTERNATE_SELECT_FACES)) {
-            faceAssets = g_FaceAnimationAssets;
+        if (IsGameFlagSet(GAME_FLAG_ALTERNATE_SELECT_FACES)) {
+            OpenEncodedAsset(g_AlternateFaceAnimationAssets[(s16)character][f_FaceFrame], &asset);
         }
         else {
-            faceAssets = g_AlternateFaceAnimationAssets;
+            OpenEncodedAsset(g_FaceAnimationAssets[(s16)character][f_FaceFrame], &asset);
         }
-
-        OpenEncodedAsset(faceAssets[(s16)character][f_FaceFrame], &asset);
         ReadEncodedAsset(faceImage, &asset);
         f_UnreadFaceColumn = memory->characterColumns[g_ChoosingPlayerIndex];
         f_UnreadFaceRow = memory->characterRows[g_ChoosingPlayerIndex];
@@ -1880,9 +1883,6 @@ void DrawGridFaces(Gfx **displayListHead, u8 isSinglePlayer) {
 
     *displayListHead = gfx;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/character_select", DrawGridFaces);
-#endif
 
 /* The first palette that no earlier player with the same character uses, so
  * that players who choose one character still look different */
