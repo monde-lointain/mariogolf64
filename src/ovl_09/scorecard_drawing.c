@@ -2310,90 +2310,91 @@ void FormatLeaderboardRow(char *row, TournamentStanding *standing) {
  * new standings, and the player's row shows their face and, if their place
  * changed, an arrow.
  *
- * Doesn't match: in the faces' loop the original reads topRow and
- * g_Scorecard.x through a register it sets from flipTime's address less
- * 0x64, and loads two of the display list's words on each pass, where this
- * draft reads both fields at their addresses and keeps those words in saved
- * registers. The bottom flaps' loop also reads the flip angles through the
- * stagger's index instead of a pointer of their own. Stepping the rows' tops
- * beside the index gives 140 words differing, 54 in shape. The name flaps'
- * shade test branches over the sine and jumps past it with 0xFF, where GCC
- * branches to the join with 0xFF in the delay slot; testing !(angle >=
- * FLAP_EDGE_ON_ANGLE) gives that layout but reverses the compare (121 words,
- * 45 in shape), and >= with the sine first gives 125. In both flap loops the
- * original masks the shade in its own register; a u8, u16 or u32 shade gives
- * 202-208 words, s16 changes nothing. The permuter's best read g_Scorecard.x
- * through a pointer to it in the faces' and arrow's calls, giving 99 to 104
- * words, 41 to 44 in shape; no such pointer is natural here, and setting the
- * arrow's bottom edge in a local of its own, as one of them also did,
- * changes nothing. The original divides and truncates the arrow's texel step
- * once, storing it as both of DrawTextureRect's steps; an f32 texelStep the
- * call converts gave 120 words. These counts were measured when the faces
- * and arrows were drawn only once flipTime passed ROW_FLIP_TIME, which it
- * never does, and the draft gave 120 words (46 in shape); the original
- * compares it with 36, the last row's start. The draft then gave 110 words,
- * 44 in shape.
+ * The faces' loop finds the player's row through a pointer of its own to the
+ * row's standing. Worked out as a pointer, the standings' address is set in an
+ * insn of its own, which loop.c can move out of the loop; indexed in place it
+ * is part of the load's address and stays in. loop.c moves out a value set once
+ * and used once if its threshold is no less than the loop's insn count, and the
+ * threshold starts at 61 in a loop with calls and drops by 3 for each value
+ * moved. This loop has 45 insns. topRow's address, which cse takes from
+ * flipTime's, the standings' address, the -1, the display list call's two words
+ * and the pipe sync's first are moved at 61 down to 46, to $s1, $s7, $s6, $s4,
+ * $s3 and $s2, and the texture table mode's two words, met at 43, are left in
+ * the loop, as in the original. With the standing indexed in place the loop has
+ * 43 insns and both of those words are moved too, which takes a saved register
+ * more than there are, so displayListHead is kept on the stack. Read through
+ * standing, the new standings' pointer, the row's address takes that variable's
+ * saved register and not $v1, with the same result. The old draft put the
+ * display list call in a block of its own, which kept the frame's size but read
+ * topRow and g_Scorecard.x at their addresses.
  *
- * The arrow's rect adds the row's top in place in each edge, as the
- * function's other rects do. A local for the top, set before the texel start,
- * gave 116 words (46 in shape), and the register oracle's closest result
- * falls from 76 words to 68 without it, forcing 13 pseudos either way; the
- * original loads g_Scorecard.y late, among the texel start's float steps, and
- * works out the top once for both edges. The local set just before the call
- * gives 116 words (44 in shape), and other orders of the sum 119 to 127. With
- * the top in place, writing the texel step's division into both of its
- * arguments gives 108 words (42 in shape) and the oracle's closest 66, still
- * forcing 13, but it repeats the division for a gain of 2 words in the code.
+ * The arrow's half size is set to a fall's ahead of the fall's test, and a
+ * fall's pulse is added to it: the original loads the 8.0 into $f20 before the
+ * test, and halfSize, which then lasts across sinf's call, is kept in that
+ * saved register for either arm. Set in each arm, it takes $f6 and the 8.0 is
+ * loaded after the call.
  *
- * A focused permuter run's best outputs read the row's contestantId through a
- * pointer to its standing. Setting standing to the row's entry, as the flipping
- * rows' loop does, and reading contestantId through it gives 111 words (47 in
- * shape) in the faces' loop, 132 (44) in the arrows' loop, 111 (47) in both,
- * and 212 (52) in the row text's loop, where it is also passed to
- * FormatLeaderboardRow.
+ * The arrow's left edge is the scorecard's x, plus the center, less the rounded
+ * half size. GCC regroups that as x - (roundedHalfSize - 32), which is what the
+ * original works out; written that way in the source, it is regrouped as (x +
+ * 32) - roundedHalfSize. The texel step is divided once, in a local worked out
+ * ahead of the rounding, so that its 16384.0 is loaded straight after the
+ * rounding's 0.5; worked out later, or in the call, the load comes three
+ * instructions later.
  *
- * The bottom flaps have their own shade, bottomFlapShade, as the register
- * oracle lined shade up with one register in the rows' and the name flaps'
- * loops and another in the bottom flaps'. That takes the draft from 110
- * words differing (44 in shape) to 87 (39), and the oracle's closest from 68
- * words forcing 13 pseudos to 60 forcing 12; shades of their own for the
- * rows or the name flaps as well, or for both of those instead, give the
- * same, and for either alone 102 or 101. The counts above were measured
- * before it.
+ * The bottom flaps have a shade of their own, bottomFlapShade, as the original
+ * keeps theirs in another register than the rows' and the name flaps'. The
+ * rows' angle test is negated, as GCC keeps the negation of a floating-point
+ * comparison rather than inverting it.
  *
- * A focused permuter run's best reads the face loop's standing index into an
- * unsigned temporary and g_Scorecard.x through a pointer. Reading the
- * standing through standing instead, in the face loop, gives 88 words (42 in
- * shape), in the arrows' loop 109 (39), and in both 88 (42).
+ * Measured against the match, as words differing and how many of them in shape:
+ *   The old draft                                             81 (35)
+ *   The old draft's faces' loop: the standing indexed in
+ *   place, and the display list call in a block of its own    57 (23)
+ *   The standing indexed in place, with no block              91 (21)
+ *   The pointer, with the display list call in a block of its
+ *   own                                                       64 (22)
+ *   The pointer, with the texture table mode in a block of
+ *   its own                                                   46 (26)
+ *   The row's standing read through standing                  110 (12)
+ *   The faces' loop's test as <                               4 (4)
+ *   halfSize set in each arm, to the pulse plus the arm's
+ *   half size                                                 16 (6)
+ *   halfSize set to a fall's before the row's test            4 (4)
+ *   A rise's half size set and then added to as well, in its
+ *   arm                                                       7 (1)
+ *   halfSize set to a rise's first, and added to for a rise   12 (6)
+ *   The arrow's left edge as g_Scorecard.x - (roundedHalfSize
+ *   - ARROW_CENTER_X)                                         10 (8)
+ *   The same as g_Scorecard.x - roundedHalfSize +
+ *   ARROW_CENTER_X                                            8 (6)
+ *   The same as ARROW_CENTER_X - roundedHalfSize +
+ *   g_Scorecard.x                                             10 (8)
+ *   The arrow's right edge with the center added last         12 (10)
+ *   The same with the scorecard's x added last, or with the
+ *   center and the half size in brackets                      12 (6)
+ *   No texelStep, the division written in both of the call's
+ *   steps                                                     4 (4)
+ *   texelStep worked out after the rounding, or after
+ *   texelStart                                                4 (4)
+ *   The arrow's top in a local worked out before texelStep    8 (2)
+ *   The same worked out just before the call                  8 (0)
+ *   The arrow's top with the scorecard's y added first        19 (13)
+ *   The arrows' loop's test as <                              4 (4)
+ *   One shade for all the flaps, with no bottomFlapShade      23 (5)
+ *   shade as a u8                                             67 (45)
+ *   bottomFlapShade as a u8                                   26 (18)
+ *   halfSize as an f64                                        43 (33)
+ *   The rows' angle test as <=, with no negation              4 (4)
  *
- * The arrow's texel step is written into both of DrawTextureRect's steps
- * rather than held in a texelStep local; GCC still divides and truncates it
- * once, as the original does. That takes the draft from 87 words to 85 (39
- * in shape to 37), and the register oracle's closest result from 60 words to
- * 58, forcing 12 pseudos for each. The counts above were measured before
- * the change below.
- *
- * The faces' loop puts the display list call in its own block, rather than
- * the pipe sync after it. That takes the draft from 85 words differing to
- * 81, 37 in shape to 35, and the register oracle's closest result from 58
- * words to 54, forcing 12 pseudos for each. With no block there, the faces'
- * loop sets topRow's address from flipTime's and reads g_Scorecard.x through
- * it, as the original does; but 115 words differ (33 in shape), 13 more each
- * in the prologue and epilogue, where it spills displayListHead in a frame 8
- * bytes larger, and the oracle's closest is 72 words, forcing 10. Reading
- * contestantId through standing as well gives 134 words (24 in shape), and
- * the oracle's closest 75, forcing 15. 81 words differ, 35 in shape.
- *
- * A later focused run's best reads g_Scorecard.x through an s32 pointer and
- * topRow through a temporary in the faces' loop: 65 words (29 in shape). A
- * Scorecard pointer local to that loop, read for both fields, gives 74 (30),
- * and for x alone 77 (29); without the block, 133 (45) and 122 (36), each in
- * a frame 8 bytes smaller. None is kept: the original never forms
- * g_Scorecard's address in that loop, but reads topRow and x at 0 and 4 from
- * a register it derives from flipTime's address, as the draft's direct reads
- * do without the block.
+ * Also matching: rowStanding declared for the function; a pointer to the
+ * standing's contestantId in its place; the arrows' loop reading its standing
+ * through a pointer too; the face's top with the row's product first; a fall's
+ * half size as the pulse plus halfSize; the arrow's left edge with the center
+ * ahead of the scorecard's x; the arrow's top with no brackets; texelStep as an
+ * f32; and the names' loop indexing the standings for the contestant each time,
+ * with no contestantId.
  */
-#ifdef NON_MATCHING
 void DrawLeaderboardPage(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     TournamentStanding *standing;
@@ -2405,6 +2406,7 @@ void DrawLeaderboardPage(Gfx **displayListHead) {
     f32 halfSize;
     s32 roundedHalfSize;
     s32 texelStart;
+    s32 texelStep;
 
     gSPDisplayList(gfx++, g_DecalTextureSetup);
     gDPPipeSync(gfx++);
@@ -2441,11 +2443,8 @@ void DrawLeaderboardPage(Gfx **displayListHead) {
     for (i = 0; i != LEADERBOARD_ROW_COUNT; i++) {
         if (i * ROW_FLIP_STAGGER < g_Scorecard.content.flipTime) {
             shade = COLOR_CHANNEL_MAX;
-            /*
-             * The angle's test is negated, as GCC keeps the negation of a
-             * floating-point comparison rather than inverting it: written as <=,
-             * 85 words differ, 39 in shape, against 81 and 35
-             */
+            /* The angle's test is negated, to match: GCC keeps the negation of a
+             * floating-point comparison rather than inverting it */
             if (g_Scorecard.content.isRowFlipping[i] == TRUE &&
                 !(g_Scorecard.content.rowFlipAngles[i] > FLAP_EDGE_ON_ANGLE)) {
                 shade = (sinf(g_Scorecard.content.rowFlipAngles[i]) * FLAP_SHADE_RANGE) +
@@ -2828,16 +2827,11 @@ void DrawLeaderboardPage(Gfx **displayListHead) {
 
     if (g_Scorecard.content.flipTime > LAST_ROW_FLIP_TIME) {
         for (i = 0; i != LEADERBOARD_ROW_COUNT; i++) {
-            if (g_TournamentStandings[g_Scorecard.topRow + i].contestantId == PLAYER_CONTESTANT) {
-                /*
-                 * In its own block, to match: without a block 115 words
-                 * differ, 33 in shape, against 81 and 35, and the register
-                 * oracle's closest result rises from 54 words, forcing 12
-                 * pseudos, to 72, forcing 10. The pipe sync in its own block
-                 * instead, or in the same block, gives 85 (37), and a block
-                 * for each 85 (37)
-                 */
-                IN_OWN_BLOCK(gSPDisplayList(gfx++, g_DecalTextureSetup));
+            /* Read through a pointer of this loop's own, to match */
+            TournamentStanding *rowStanding = &g_TournamentStandings[g_Scorecard.topRow + i];
+
+            if (rowStanding->contestantId == PLAYER_CONTESTANT) {
+                gSPDisplayList(gfx++, g_DecalTextureSetup);
                 gDPPipeSync(gfx++);
                 gDPSetTextureLUT(gfx++, G_TT_RGBA16);
                 DrawSmallFace(
@@ -2894,12 +2888,14 @@ void DrawLeaderboardPage(Gfx **displayListHead) {
         for (i = 0; i != LEADERBOARD_ROW_COUNT; i++) {
             if (g_TournamentStandings[g_Scorecard.topRow + i].contestantId == PLAYER_CONTESTANT &&
                 g_Scorecard.placeChange != PLACE_HELD) {
+                /* Set to a fall's first, and added to for one, to match */
+                halfSize = FELL_ARROW_HALF_SIZE;
                 if (g_Scorecard.placeChange & PLACE_FELL) {
                     gDPSetEnvColor(gfx++, 0xA0, 0xA0, 0xFF, OPAQUE_ALPHA);
                     gDPSetPrimColor(gfx++, 0, 0, 0x00, 0x40, 0xFF, OPAQUE_ALPHA);
                     gDPPipeSync(gfx++);
                     f_ArrowPulseAngle += FELL_ARROW_PULSE_STEP;
-                    halfSize = (ARROW_PULSE_SIZE * sinf(f_ArrowPulseAngle)) + FELL_ARROW_HALF_SIZE;
+                    halfSize += ARROW_PULSE_SIZE * sinf(f_ArrowPulseAngle);
                 }
                 else {
                     gDPSetEnvColor(gfx++, 0xFF, 0x7F, 0x90, OPAQUE_ALPHA);
@@ -2909,6 +2905,8 @@ void DrawLeaderboardPage(Gfx **displayListHead) {
                     halfSize = (ARROW_PULSE_SIZE * sinf(f_ArrowPulseAngle)) + ROSE_ARROW_HALF_SIZE;
                 }
 
+                /* Worked out ahead of the rounding, to match */
+                texelStep = (TEXEL_STEP_ONE * ARROW_IMAGE_SIZE / 2) / halfSize;
                 roundedHalfSize = halfSize + 0.5f;
                 /* Starts the texels part of a texel in, as far as the rect's rounding
                  * moved its edge */
@@ -2916,7 +2914,7 @@ void DrawLeaderboardPage(Gfx **displayListHead) {
                     (((f32)roundedHalfSize - halfSize) * (ARROW_IMAGE_SIZE / 2));
                 DrawTextureRect(
                     &gfx,
-                    QuarterPixels(g_Scorecard.x - (roundedHalfSize - ARROW_CENTER_X)),
+                    QuarterPixels(g_Scorecard.x + ARROW_CENTER_X - roundedHalfSize),
                     QuarterPixels(
                         ((i * LEADERBOARD_ROW_SPACING) + ROW_HINGE_TOP + g_Scorecard.y) -
                         roundedHalfSize
@@ -2929,8 +2927,8 @@ void DrawLeaderboardPage(Gfx **displayListHead) {
                     G_TX_RENDERTILE,
                     texelStart,
                     texelStart + TexelCoordinate(g_Scorecard.placeChange * ARROW_IMAGE_SIZE),
-                    (TEXEL_STEP_ONE * ARROW_IMAGE_SIZE / 2) / halfSize,
-                    (TEXEL_STEP_ONE * ARROW_IMAGE_SIZE / 2) / halfSize
+                    texelStep,
+                    texelStep
                 );
             }
         }
@@ -2938,9 +2936,6 @@ void DrawLeaderboardPage(Gfx **displayListHead) {
 
     *displayListHead = gfx;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard_drawing", DrawLeaderboardPage);
-#endif
 
 /*
  * The scores page: the front nine above the back nine, each with a row of
