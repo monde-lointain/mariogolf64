@@ -1753,69 +1753,61 @@ void MoveBallToCupEdge(BallSimulation *simulation) {
  * flagstick or the flag. It sets the ball's new velocity and the fraction
  * of the way along the path, and returns which it hits as a PIN_HIT_*.
  *
- * Doesn't match: setting the hit fraction with an if rather than a ternary
- * takes 203 words differing, 41 in shape, to 198 and 40. The original sets a
- * flag for each of the direction's components and ors them before its one
- * branch, as a | gives; with || GCC branches on each (177 against 198). It
- * ors the contact offsets themselves to test them, where with || GCC sets
- * and ors flags (173 against 177). The permuter's best output (144 words, 20
- * in shape) scales the direction's y before normalizing, where the original
- * scales it after, with x and z; moving that line alone gains incidentally,
- * and is left out. A later run scaled z before y; that gives 155 words, 11
- * in shape, where the draft's scaling already matches, so it is left out
- * too; also reading the cup's position through a pointer, as another run's
- * best did, gives the same. The half chord starts as the flagstick's radius
- * and takes the square root when its square isn't negative, which took
- * the draft from 173 words differing to 157, 27 in shape either way; an
- * if/else either way round, or a conditional operator, gives 173 to 175. The
- * original works out the direction once, after both; setting it in each arm
- * instead gave 147 words, 47 in shape, when the draft gave 173. The register
- * oracle, forcing 16 pseudos' registers, left 78 words at best with the
- * draft at 157, so the code differs too. Setting the bounce's velocity in
- * axis order, as the flag's is set, took it from 157 words, 27 in shape, to
- * 150 (22); the original stores y between x's product and its store, as
- * either order allows. Working out endSide before startSide gives 144 words,
- * but 26 in shape, and the register oracle then gets no closer than 107
- * words, forcing 25 pseudos, against 71 forcing 16. The original multiplies
- * the start side's terms first; the start side before the end-to-cup values
- * ties at 150. Those counts were measured with GCC's built-in fabsf.
- *
- * With fabsf an abs.s in volatile inline assembly, the hit fraction's abs.s
- * comes before the branch-likely as in the original, which took the draft
- * from 150 words differing, 22 in shape, to 145 (17). Testing the sum itself
- * rather than comparing it with 0 gives the same 145 words, the arms swapped
- * on a test for 0 153 (25), and setting 0.0f before an if without an else
- * 154 (22).
- *
- * The half chord's square has a variable of its own, where it had shared
- * bounceSpeed, which took the draft from 145 words differing to 143, 17 in
- * shape either way; the register oracle's closest stays at 66 words forcing
- * 16 pseudos.
- *
- * A focused permuter run's best scales the direction's z before its x and y,
- * the order the contact point is moved in. That alone gives 155 words, 11 in
- * shape, as does any order scaling z before y, but the register oracle's
- * closest rises to 78 words, forcing 11 pseudos, so the draft keeps axis
- * order.
- *
- * The contact point moves along the direction and then becomes relative
- * to the cup in statements of their own, which takes the draft from 143
- * words differing to 137, 17 in shape either way, and the register
- * oracle's closest from 66 words, forcing 16 pseudos, to 57, forcing 5.
- * Converting the sum with a cast before subtracting the cup's position
- * gives the same.
- *
- * Moving both axes along the direction before making either relative to
- * the cup, x first, then gives 109 words, 7 in shape, and the oracle's
- * closest 33 words, forcing 3: startX and startZ tie in priority, and
- * startX takes the register startZ has in the original. With x moved
- * first but z made relative before x, 118 words differ (8 in shape);
- * with each axis finished in turn, x first, 137 (11). Clamping the
- * bounce to its most only when not flying, with an else if, gives 72
- * words but 10 in shape, with the oracle's closest 38, forcing 6. 109
- * words differ, 7 in shape.
+ * Much of it is written to match. The counts below are of the words that
+ * differ with one thing changed, and in brackets how many of those differ in
+ * shape:
+ * - The path's ends are copied into locals. Only toX, toZ and fromY are
+ *   needed, declared in that order after i. The original keeps endZ in a
+ *   slot of its own frame, where the parameter itself would be read from the
+ *   caller's, where it was passed: without toZ the frame is 8 bytes smaller
+ *   (113 words, 1 in shape). Without toX, it and i swap stack slots (14);
+ *   without fromY the slots move and startX and startZ swap registers (98);
+ *   with no copies 147 differ (1 in shape). Declared with y's between x's
+ *   and z's they give 12, with z's first 16, with y's first or each end's in
+ *   axis order 20, before i 26, after the deltas 44 (10) and last 52 (10).
+ * - i is set in the loop's header rather than where it is declared (2), and
+ *   the deltas are declared in axis order, ahead of nearestFraction and
+ *   hitKind: x, z, y gives 4 (2), and those two declared first 18.
+ * - The contact point's y has a variable of its own, set ahead of contactZ,
+ *   and the height is taken from it after all three. The height straight
+ *   from the sum gives 4 (4) before contactX and 8 (8) after contactZ,
+ *   contactY after contactZ 8 (8), and the height before contactZ 4 (4).
+ *   Clearing isFlagHit after the height's test gives 5 (5).
+ * - The flag's test is an if inside an if: as one, with &&, 99 words differ
+ *   (19 in shape) and the frame is 8 bytes larger.
+ * - A path with both ends on one side of the cup continues from an else:
+ *   testing for the miss first gives 4 (4). The hit fraction is set in the
+ *   arms of an if/else: a conditional operator gives 7 (1), the arms swapped
+ *   8 (8), and 0.0f set before an if 9 (5). startSide is worked out before
+ *   endSide, which the other way round gives 44 (4).
+ * - The half chord's square is kept in halfChord itself, which the arms of
+ *   an if/else replace. The original works the square out in the half
+ *   chord's register and takes its root in place, past a branch-likely with
+ *   the radius set in its delay slot. A variable of its own for the square
+ *   gives 8 (2), as an if/else or with the radius set first, a conditional
+ *   operator 7 (3), and the arms swapped 4 (4).
+ * - The direction's y is set with ASSIGN_FOR_VALUE, so that it is stored
+ *   from a register, which cse makes the one that holds 0.0f for the half
+ *   chord's test. That use, counted twice inside the loop, takes the
+ *   register's count from 9 to 11, level with the register's that holds the
+ *   flag's reach, and over its shorter life (476 insns against 482)
+ *   global-alloc places it first: 0.0f takes $f24 and the reach $f26. As a
+ *   plain statement the store is a sw of $zero and the two swap registers,
+ *   32 (2).
+ * - The direction's components are tested with |, for one branch, where ||
+ *   gives 47 (13), and the contact offsets are ored themselves, where
+ *   testing each with || gives 4 (2).
+ * - The direction is scaled in axis order after it is normalized: z, x, y
+ *   gives 16 (2), x, z, y 20 (2), and y scaled before normalizing 3 (3).
+ * - The contact point moves along the direction on both axes, then becomes
+ *   relative to the cup on both, in statements of their own and in the same
+ *   variables: each axis finished in turn gives 28 (4), z made relative
+ *   before x 9 (1), one statement an axis 66 (24), and the offsets in
+ *   variables of their own 34.
+ * - The bounce is clamped to its most whether or not the ball is flying,
+ *   which with an else if gives 35 (3), and its velocity is set in axis
+ *   order: y first gives 7 (5) and y last 2 (2).
  */
-#ifdef NON_MATCHING
 s32 FindPinHit(
     s32 startX,
     s32 startY,
@@ -1828,12 +1820,18 @@ s32 FindPinHit(
     s32 hasHitFlag,
     BallSimulation *simulation
 ) {
-    s32 i = 0;
-    s32 deltaX = endX - startX;
+    s32 i;
+    s32 fromX = startX;
+    s32 toX = endX;
+    s32 fromZ = startZ;
+    s32 toZ = endZ;
+    s32 fromY = startY;
+    s32 toY = endY;
+    s32 deltaX = toX - fromX;
+    s32 deltaY = toY - fromY;
+    s32 deltaZ = toZ - fromZ;
     f32 nearestFraction = NO_HIT_FRACTION;
-    s32 deltaZ = endZ - startZ;
     s32 hitKind = PIN_HIT_NONE;
-    s32 deltaY = endY - startY;
     s32 startSide;
     s32 endSide;
     s32 endToCupX;
@@ -1845,44 +1843,42 @@ s32 FindPinHit(
     s32 speed;
     f32 halfChord;
     Vec3 direction;
-    /* The hit point first, then its offset from the cup, as is contactZ, to
-     * match */
+    /* The hit point first, then its offset from the cup, as is contactZ */
     s32 contactX;
+    s32 contactY;
     s32 contactZ;
     Radians angle;
     f32 bounceSpeed;
-    f32 halfChordSquared;
-    s32 unused[2] UNUSED;
 
-    for (; i < PIN_COUNT; i++) {
-        if (startX < (s32)(g_HoleSetup.cupPosition[AXIS_X] - FLAG_REACH)) {
-            if (endX < (s32)(g_HoleSetup.cupPosition[AXIS_X] - FLAG_REACH)) {
+    for (i = 0; i < PIN_COUNT; i++) {
+        if (fromX < (s32)(g_HoleSetup.cupPosition[AXIS_X] - FLAG_REACH)) {
+            if (toX < (s32)(g_HoleSetup.cupPosition[AXIS_X] - FLAG_REACH)) {
                 continue;
             }
         }
 
-        if ((s32)(g_HoleSetup.cupPosition[AXIS_X] + FLAG_REACH) < startX) {
-            if ((s32)(g_HoleSetup.cupPosition[AXIS_X] + FLAG_REACH) < endX) {
+        if ((s32)(g_HoleSetup.cupPosition[AXIS_X] + FLAG_REACH) < fromX) {
+            if ((s32)(g_HoleSetup.cupPosition[AXIS_X] + FLAG_REACH) < toX) {
                 continue;
             }
         }
 
-        if (startZ < (s32)(g_HoleSetup.cupPosition[AXIS_Z] - FLAG_REACH)) {
-            if (endZ < (s32)(g_HoleSetup.cupPosition[AXIS_Z] - FLAG_REACH)) {
+        if (fromZ < (s32)(g_HoleSetup.cupPosition[AXIS_Z] - FLAG_REACH)) {
+            if (toZ < (s32)(g_HoleSetup.cupPosition[AXIS_Z] - FLAG_REACH)) {
                 continue;
             }
         }
 
-        if ((s32)(g_HoleSetup.cupPosition[AXIS_Z] + FLAG_REACH) < startZ) {
-            if ((s32)(g_HoleSetup.cupPosition[AXIS_Z] + FLAG_REACH) < endZ) {
+        if ((s32)(g_HoleSetup.cupPosition[AXIS_Z] + FLAG_REACH) < fromZ) {
+            if ((s32)(g_HoleSetup.cupPosition[AXIS_Z] + FLAG_REACH) < toZ) {
                 continue;
             }
         }
 
-        endToCupX = g_HoleSetup.cupPosition[AXIS_X] - endX;
-        endToCupZ = g_HoleSetup.cupPosition[AXIS_Z] - endZ;
-        startSide = (deltaX * (g_HoleSetup.cupPosition[AXIS_X] - startX)) +
-            (deltaZ * (g_HoleSetup.cupPosition[AXIS_Z] - startZ));
+        endToCupX = g_HoleSetup.cupPosition[AXIS_X] - toX;
+        endToCupZ = g_HoleSetup.cupPosition[AXIS_Z] - toZ;
+        startSide = (deltaX * (g_HoleSetup.cupPosition[AXIS_X] - fromX)) +
+            (deltaZ * (g_HoleSetup.cupPosition[AXIS_Z] - fromZ));
         endSide = (deltaX * endToCupX) + (deltaZ * endToCupZ);
         if (HaveSameSign(startSide, endSide)) {
             if ((s32)IntLength2D(endToCupX, endToCupZ) <= FLAGSTICK_RADIUS) {
@@ -1905,9 +1901,10 @@ s32 FindPinHit(
             }
         }
 
-        height = g_HoleSetup.cupPosition[AXIS_Y] - (s32)(startY + (deltaY * hitFraction));
-        contactX = startX + (deltaX * hitFraction);
-        contactZ = startZ + (deltaZ * hitFraction);
+        contactX = fromX + (deltaX * hitFraction);
+        contactY = fromY + (deltaY * hitFraction);
+        contactZ = fromZ + (deltaZ * hitFraction);
+        height = g_HoleSetup.cupPosition[AXIS_Y] - contactY;
         isFlagHit = FALSE;
         if (height > FLAGSTICK_HEIGHT) {
             continue;
@@ -1919,8 +1916,8 @@ s32 FindPinHit(
             }
         }
 
-        if (deltaY < 0) {
-            isFlagHit &= -(IsGameFlagSet(GAME_FLAG_RISING_FLAG_HITS) != 0);
+        if ((deltaY < 0) && !IsGameFlagSet(GAME_FLAG_RISING_FLAG_HITS)) {
+            isFlagHit = FALSE;
         }
 
         distance = IntLength2D(
@@ -1931,7 +1928,7 @@ s32 FindPinHit(
             continue;
         }
 
-        if ((distance > FLAGSTICK_RADIUS) & !isFlagHit) {
+        if ((distance > FLAGSTICK_RADIUS) && !isFlagHit) {
             continue;
         }
 
@@ -1942,15 +1939,17 @@ s32 FindPinHit(
             hitKind = PIN_HIT_FLAG;
         }
 
-        halfChordSquared = FLAGSTICK_RADIUS_SQUARED - (distance * distance);
-        halfChord = FLAGSTICK_RADIUS;
-        if (halfChordSquared >= 0.0f) {
-            halfChord = sqrtf(halfChordSquared);
+        halfChord = FLAGSTICK_RADIUS_SQUARED - (distance * distance);
+        if (halfChord >= 0.0f) {
+            halfChord = sqrtf(halfChord);
+        }
+        else {
+            halfChord = FLAGSTICK_RADIUS;
         }
 
-        direction[AXIS_X] = startX - contactX;
-        direction[AXIS_Y] = 0.0f;
-        direction[AXIS_Z] = startZ - contactZ;
+        direction[AXIS_X] = fromX - contactX;
+        ASSIGN_FOR_VALUE(direction[AXIS_Y] = 0.0f);
+        direction[AXIS_Z] = fromZ - contactZ;
         if ((direction[AXIS_X] != 0.0f) | (direction[AXIS_Z] != 0.0f)) {
             guNormalize(&direction[AXIS_X], &direction[AXIS_Y], &direction[AXIS_Z]);
         }
@@ -1995,10 +1994,6 @@ s32 FindPinHit(
     *fraction = nearestFraction;
     return hitKind;
 }
-
-#else
-INCLUDE_ASM("asm/nonmatchings/collision", FindPinHit);
-#endif
 
 /*
  * Returns which plane a triangle faces most: the one its normal's largest

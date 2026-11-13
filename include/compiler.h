@@ -126,6 +126,15 @@
     while (0)
 
 /*
+ * Makes an assignment as GCC makes one whose value is used, to match. Storing
+ * to memory, it then copies the value to a register and stores the register,
+ * where a statement's constant is stored as it is. cse can make the copy a
+ * register that already holds the value, which is then used once more, as in
+ * FindPinHit.
+ */
+#define ASSIGN_FOR_VALUE(assignment) ({ assignment; })
+
+/*
  * The stack pointer's current value. The asm is volatile, as a read of the
  * register has to be: GCC can't move memory accesses across it, and the
  * original's code shows none that moved.
