@@ -792,92 +792,13 @@ s32 ListOffsetsByDistance(s32 span, GridOffset *offsets, s32 maxCount) {
  * columns, with the ground's heights, by drawing the two triangles of each
  * ground grid square that covers the band. Where triangles overlap, it averages
  * their heights. A band at or past GROUND_TILE_ROW_COUNT is left untouched.
- *
- * Doesn't match: the nested DrawTriangleHeights allocates its registers
- * differently, using $s7 where the original reloads the static chain. 284
- * words differ in it, 34 in shape. The counts that follow were measured
- * when texelColumn came from longX rather than the converted fromX, which
- * gave 323 words, 45 in shape. Indexing the row, as texel[texelColumn]
- * from texel = &heights[texelRow * MAP_COLUMN_COUNT], gives 497 words but
- * only 29 in shape: the inner loop takes the original's form, and what is
- * left is the extra saved register, with span in $s1 rather than $t8, and
- * the order of the sra and mul.s around it. Indexing heights directly
- * gives 335 words, 51 in shape; texel[0] for *texel, 323 and 45. Swapping
- * the operands of longX's sum or of its product, or moving longX after
- * shortSlopeX or before the reciprocal's update, gives 490 to 511 words,
- * 29 to 54 in shape. The register oracle, forcing 52 pseudos' registers
- * in DrawTriangleHeights, leaves 166 of its 323 words at best, so its
- * code differs too. A u32 width gives 315 words, but 65 in shape, as it
- * drops the test before negating the width and the rounding of its signed
- * division, which the original's DrawTriangleHeights keeps as a bgez and
- * a bltzl before an sra. Both signed shifts of the current form still
- * fold into the original's single shift by 16.
- *
- * Each half of the triangle, upper and lower, declares its own shortSlopeX
- * and shortSlopeHeight, which only that half uses. That takes the draft from
- * 321 words differing to 284, 45 in shape to 34; shortSlopeHeight alone in
- * each half gives 296 (34) and shortSlopeX alone 352 (38). The register
- * oracle, given DrawTriangleHeights, leaves 118 of its 284 words at best,
- * forcing 53 pseudos, so its code still differs. 284 words differ, 34 in
- * shape.
- *
- * The register oracle's split report puts six of the halves' shared
- * positions and steps in other registers in the lower half than in the
- * upper. Declaring any of the 511 subsets of the four positions, the four
- * steps and z in each half, as the slopes are, gives 276 to 464 words, 34
- * to 38 in shape; all nine give 464. The best, longX, shortHeight and
- * shortXStep, a choice with no reason behind it, gives 276 words, and the
- * oracle's closest is then 120 words, forcing 59 pseudos, against 118.
- *
- * The lower half works out its short slopes before its long positions, as
- * the upper half works out its slopes first, and each row works out the
- * heights at its ends after its direction, beside their only use. That
- * takes the draft from 284 words differing (34 in shape) to 238 (28), and
- * the register oracle's closest from 118 words, forcing 54 pseudos, to
- * 114, forcing 44. The slopes alone give 260 words (34 in shape) and the
- * heights alone 260 (28); editsearch had found 252 (28) moving shortSlopeX
- * without shortSlopeHeight and toHeight without fromHeight. That left 238
- * words, 28 in shape.
- *
- * Each row now points rowTexels at the start of its map row and indexes
- * it by texelColumn, as tried with texel above. Storing through an index
- * sums an address, so GCC marks the store as an array element's, which
- * can't alias the frame slot holding the static chain; loop then hoists
- * the chain's load out of the row loop into a saved register, as the
- * original does, where storing through a stepped pointer kept it in the
- * loop. The inner loop also takes the original's form. That takes the
- * draft from 238 words differing, 28 in shape, to 478, 18 in shape, the
- * registers shifting with the extra saved one, and the register oracle's
- * closest from 114 words, forcing 44 pseudos, to 76, forcing 45.
- * Indexing heights by the whole sum, with no row pointer, gives 274
- * words (40 in shape), and texelColumn from longX's single shift by 16,
- * as the original works it out, changes nothing. Ordering the steps in
- * the lower half as in the upper gives 474 words, and the short x step
- * first in both 468, both 18 in shape, but the oracle's closest is then
- * 78. That left 478 words, 18 in shape.
- *
- * Each row now works out toHeight just after toX, shifts texelRow down
- * to a row before it subtracts the band's first row, and works out
- * texelColumn from longX in one shift, as the original does, rather than
- * from fromX. That takes the draft from 478 words differing, 18 in
- * shape, to 236, 8 in shape; the register oracle's closest stays at 76
- * words, forcing 48 pseudos. Alone, the toHeight move gives 478 words
- * (10 in shape), texelRow in two steps 494 (18) and the single shift 478
- * (18); the first two together 242 (8). Of the 36 places for the two
- * heights among the row's first statements, with texelRow in two steps,
- * only toHeight before the width and fromHeight after the direction give
- * 8 in shape; both heights together give 238 to 474 words, 16 to 26 in
- * shape. Working out texelColumn before the height step gives 270 to 314
- * words, 12 to 24 in shape. 236 words differ, 8 in shape.
  */
-#ifdef NON_MATCHING
 void DrawBandHeights(s16 *heights, s32 band) {
     /*
      * corners[4] is where the corners are swapped; it is there to match, as the
      * original stores each swapped pointer in the frame slot after corners[3],
      * 0x20($sp). A Vtx* of its own, declared before or after corners, is also
-     * stored in the frame, but the frame is 8 bytes smaller, and 449 words
-     * differ, 51 in shape, against 321 and 45
+     * stored in the frame, but the frame is 8 bytes smaller.
      */
     Vtx *corners[5];
     s32 cachedSpan;
@@ -890,71 +811,61 @@ void DrawBandHeights(s16 *heights, s32 band) {
     void DrawTriangleHeights(void) {
         f32 longSlopeX;
         f32 longSlopeHeight;
-        s32 longX;
-        s32 longHeight;
-        s32 shortX;
-        s32 shortHeight;
-        s32 longXStep;
-        s32 longHeightStep;
-        s32 shortXStep;
-        s32 shortHeightStep;
         s32 totalSpan;
         s32 span;
         s32 lowerSpan;
-        s32 z;
 
-        /* DrawHeightRow is a nested function, a GNU C extension. */
+        /*
+         * Draws the heights of one row of the triangle, from (x, height) on
+         * its long edge to (toX, toHeight) on its short edge, into the map
+         * row that holds rowZ. All five are in ground units.
+         *
+         * DrawHeightRow is a nested function, a GNU C extension. It rescales
+         * x and height in place, x to a map column and height to a fixed-point
+         * texel height, to match: the original's schedule of the caller's
+         * shifts needs both parameters assigned more than once.
+         */
         inline void
-        DrawHeightRow(s32 longX, s32 longHeight, s32 shortX, s32 shortHeight, s32 texelRow) {
-            s32 fromX;
-            s32 fromHeight;
-            s32 toX;
-            s32 toHeight;
+        DrawHeightRow(s32 x, s32 height, s32 toX, s32 toHeight, s32 rowZ) {
             s32 width;
             s32 count;
             s32 direction;
             s32 texelHeightStep;
-            s32 height;
-            s32 texelColumn;
+            s32 bandRow;
             s16 *rowTexels;
             s32 texelIndex;
             s32 value;
 
-            fromX = longX >> HEIGHT_FRACTION_BITS;
-            toX = shortX >> HEIGHT_FRACTION_BITS;
-            toHeight = shortHeight >> HEIGHT_FRACTION_BITS;
-            width = fromX - toX;
+            width = x - toX;
             if (width < 0) {
                 width = -width;
             }
 
             count = (width + HEIGHT_ROW_SPAN / 2) / HEIGHT_ROW_SPAN;
-            direction = (fromX < toX) ? 1 : -1;
-            fromHeight = longHeight >> HEIGHT_FRACTION_BITS;
+            direction = (x < toX) ? 1 : -1;
+            x >>= HEIGHT_ROW_SPAN_SHIFT;
             if (count < HEIGHT_STEP_SCALE_COUNT) {
-                texelHeightStep = f_HeightStepScales[count] * (toHeight - fromHeight);
+                texelHeightStep = f_HeightStepScales[count] * (toHeight - height);
             }
             else {
-                texelHeightStep = ((toHeight - fromHeight) << TEXEL_HEIGHT_FRACTION_BITS) / count;
+                texelHeightStep = ((toHeight - height) << TEXEL_HEIGHT_FRACTION_BITS) / count;
             }
 
-            texelColumn = longX >> (HEIGHT_FRACTION_BITS + HEIGHT_ROW_SPAN_SHIFT);
-            texelRow >>= HEIGHT_ROW_SPAN_SHIFT;
-            texelRow -= band * HEIGHT_BAND_ROW_COUNT;
-            if (texelRow >= 0 && texelRow < HEIGHT_BAND_ROW_COUNT) {
-                height = fromHeight << TEXEL_HEIGHT_FRACTION_BITS;
-                rowTexels = &heights[texelRow * MAP_COLUMN_COUNT];
+            bandRow = (rowZ >> HEIGHT_ROW_SPAN_SHIFT) - band * HEIGHT_BAND_ROW_COUNT;
+            height <<= TEXEL_HEIGHT_FRACTION_BITS;
+            if (bandRow >= 0 && bandRow < HEIGHT_BAND_ROW_COUNT) {
+                rowTexels = &heights[bandRow * MAP_COLUMN_COUNT];
                 for (texelIndex = 0; texelIndex <= count; texelIndex++) {
-                    if (texelColumn >= 0 && texelColumn < MAP_COLUMN_COUNT) {
+                    if (x >= 0 && x < MAP_COLUMN_COUNT) {
                         value = height >> TEXEL_HEIGHT_FRACTION_BITS;
-                        if (rowTexels[texelColumn] != NO_HEIGHT) {
-                            value = (rowTexels[texelColumn] + value) / 2;
+                        if (rowTexels[x] != NO_HEIGHT) {
+                            value = (rowTexels[x] + value) / 2;
                         }
 
-                        rowTexels[texelColumn] = value;
+                        rowTexels[x] = value;
                     }
 
-                    texelColumn += direction;
+                    x += direction;
                     height += texelHeightStep;
                 }
             }
@@ -972,6 +883,15 @@ void DrawBandHeights(s16 *heights, s32 band) {
         if (span != 0) {
             f32 shortSlopeX;
             f32 shortSlopeHeight;
+            s32 longX;
+            s32 longHeight;
+            s32 shortX;
+            s32 shortHeight;
+            s32 longXStep;
+            s32 longHeightStep;
+            s32 shortXStep;
+            s32 shortHeightStep;
+            s32 z;
 
             if (cachedSpan != span) {
                 cachedSpan = span;
@@ -990,7 +910,13 @@ void DrawBandHeights(s16 *heights, s32 band) {
             shortHeight = corners[0]->v.ob[AXIS_Y] << HEIGHT_FRACTION_BITS;
             longHeight = shortHeight;
             for (z = 0; z < span + HEIGHT_ROW_SPAN / 2; z += HEIGHT_ROW_SPAN) {
-                DrawHeightRow(longX, longHeight, shortX, shortHeight, corners[0]->v.ob[AXIS_Z] + z);
+                DrawHeightRow(
+                    longX >> HEIGHT_FRACTION_BITS,
+                    longHeight >> HEIGHT_FRACTION_BITS,
+                    shortX >> HEIGHT_FRACTION_BITS,
+                    shortHeight >> HEIGHT_FRACTION_BITS,
+                    z + corners[0]->v.ob[AXIS_Z]
+                );
                 longX += longXStep;
                 shortX += shortXStep;
                 longHeight += longHeightStep;
@@ -1002,6 +928,15 @@ void DrawBandHeights(s16 *heights, s32 band) {
         if (lowerSpan != 0) {
             f32 shortSlopeX;
             f32 shortSlopeHeight;
+            s32 longX;
+            s32 longHeight;
+            s32 shortX;
+            s32 shortHeight;
+            s32 longXStep;
+            s32 longHeightStep;
+            s32 shortXStep;
+            s32 shortHeightStep;
+            s32 z;
 
             if (cachedSpan != lowerSpan) {
                 cachedSpan = lowerSpan;
@@ -1015,13 +950,19 @@ void DrawBandHeights(s16 *heights, s32 band) {
             longHeight = ((s32)(longSlopeHeight * span) + corners[0]->v.ob[AXIS_Y])
                 << HEIGHT_FRACTION_BITS;
             longXStep = longSlopeX * HEIGHT_ROW_STEP_SCALE;
-            longHeightStep = longSlopeHeight * HEIGHT_ROW_STEP_SCALE;
             shortXStep = shortSlopeX * HEIGHT_ROW_STEP_SCALE;
+            longHeightStep = longSlopeHeight * HEIGHT_ROW_STEP_SCALE;
             shortHeightStep = shortSlopeHeight * HEIGHT_ROW_STEP_SCALE;
             shortX = corners[1]->v.ob[AXIS_X] << HEIGHT_FRACTION_BITS;
             shortHeight = corners[1]->v.ob[AXIS_Y] << HEIGHT_FRACTION_BITS;
             for (z = 0; z < lowerSpan + HEIGHT_ROW_SPAN / 2; z += HEIGHT_ROW_SPAN) {
-                DrawHeightRow(longX, longHeight, shortX, shortHeight, corners[1]->v.ob[AXIS_Z] + z);
+                DrawHeightRow(
+                    longX >> HEIGHT_FRACTION_BITS,
+                    longHeight >> HEIGHT_FRACTION_BITS,
+                    shortX >> HEIGHT_FRACTION_BITS,
+                    shortHeight >> HEIGHT_FRACTION_BITS,
+                    z + corners[1]->v.ob[AXIS_Z]
+                );
                 longX += longXStep;
                 shortX += shortXStep;
                 longHeight += longHeightStep;
@@ -1099,10 +1040,6 @@ void DrawBandHeights(s16 *heights, s32 band) {
         }
     }
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", DrawTriangleHeights);
-INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", DrawBandHeights);
-#endif
 
 /* Empties every terrain code cell and frees the packed code blocks */
 void ResetTerrainCodeCells(void) {
