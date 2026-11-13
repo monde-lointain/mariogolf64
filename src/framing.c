@@ -11,7 +11,6 @@
 #include "compiler.h"
 #include "controller.h"
 #include "geometry.h"
-#include "include_asm.h"
 #include "math_util.h"
 
 /* How many spheres f_FramedSphereCenters has room for */
@@ -27,10 +26,10 @@
 /* The starting x and y bounds */
 #define FAR_EXTENT 30000.0f
 
-/* How far along z the look-at point lies from the eye */
-#define LOOK_DISTANCE 10.0f
-
-/* The starting z bounds, also added to the eye's distance */
+/*
+ * The room kept between the eye and the nearest sphere along z. It is also the
+ * starting z bounds and how far along z the look-at point lies from the eye.
+ */
 #define Z_MARGIN 10.0f
 
 static f32 f_FramedSphereCenters[FRAMED_SPHERE_CAPACITY][3];
@@ -105,74 +104,7 @@ void TransformPoint(Mat4 mf, Vec3 point, Vec3 result) {
 /*
  * Places the eye and look-at point so that the first camera's field of view
  * takes in every framed sphere, looking from the framing angles
- *
- * Doesn't match: the original's frame is 8 bytes larger. It spills
- * horizontalEyeZ, which ours keeps in $fp, and gives $fp to eyeZ, which ours
- * keeps in $f26; global-alloc ranks eyeZ (9 uses across 147 insns) above
- * right and verticalEyeZ, so it takes a float register they would have
- * taken. Forcing eyeZ into $fp, and horizontalEyeZ and the 10.0 constant
- * onto the stack, leaves 46 words in the register oracle, where the
- * best forcing of hard registers alone leaves 204.
- *
- * The spill slots are given out in declaration order, and the original's
- * hold the four angles, minZ and then maxZ, so maxZ is declared after minZ.
- * With the forcing above, the following forms took the oracle from 126
- * words to 46. eyeZ starts as horizontalEyeZ and takes verticalEyeZ when
- * that is not at most it, as the original's c.le.s tests; with if and else
- * 62 words differ, with < or > 50, and as a conditional expression 68. The
- * margin is added to eyeZ itself, from which the edges' distances are
- * measured and depth worked out, as the original's $fp holds the eye
- * distance after the margin; with a depth variable for the sum and the
- * eye's depth worked out into it, 64 words differ, or 47 into eyeZ.
- *
- * The original negates 10.0 at run time for maxZ, so maxZ is set from minZ
- * after the block that ends at bottomAngle, where cse no longer knows
- * minZ's value; set in the first block, maxZ shares minZ's load of 10.0,
- * where the original loads it twice, and 55 words differ under the forcing.
- * Written -Z_MARGIN the negation folded (282 words, 108 in shape, when the
- * draft gave 279). The permuter's best (269 words, 89 in shape) set eyeZ
- * from horizontalEyeZ before working it out. The vertical distance to the
- * depth is written into the top and bottom edges' products, and each
- * sphere's radius is read from f_FramedSphereRadii at each of its twelve
- * uses, rather than through a radius local, each a few words closer.
- * Computing both centers after the four edges, keeping the horizontal
- * front distance as f32, and giving the right edge its own variable took
- * the draft from 265 words (113 in shape) to 228 (66); the original also
- * computes the centers after its fourth tan call. The left and right
- * edges' eye distances have their own leftDistance and rightDistance, as
- * the top and bottom edges' do, which took it to 204 (66).
- *
- * The eye's depth starts from the horizontal fit's once the vertical
- * angle is known, as a sweep moving each assignment found, where the draft
- * set it just before comparing the two fits. That takes the draft from 258
- * words (54 in shape) to 250 (56), and the register oracle's closest from
- * 258 to 250, with nothing forced; set right after the horizontal fit it
- * gives 255 (63).
- *
- * Without the spill, every offset into the frame differs. That left 250
- * words, 56 in shape.
- *
- * Copying verticalEyeZ into top before working the top edge out from it,
- * which a search splitting assignments into steps found, gives 157
- * words, 53 in shape, with the original's frame, and the register
- * oracle's closest falls from 250 words to 157, forcing nothing. The
- * copy gives top 5 references where it had 3, raising its global-alloc
- * priority from 1428 to 4347, and horizontalEyeZ then spills as in the
- * original; copying into bottom changes nothing. The copy stands for
- * nothing, and the natural forms tried don't bring it: a local for the
- * vertical distance, set beside frontDistance or before the top edge,
- * gives 250 words, the distance worked out into verticalEyeZ 258, the
- * top edge in two statements 275 to 486, the top angle's radians in
- * angle 190 (84 in shape), and every declaration order of the eye
- * distances and edges 250. That left 250 words, 56 in shape.
- *
- * Declaring maxZ first gives 204 words, and minZ or an angle first 210
- * to 228, with nothing forced, but only by shifting the spill slots
- * against the draft's extra one: with the top edge's copy, which gives
- * the original's frame, maxZ first takes the draft from 157 words to
- * 211. 250 words differ, 56 in shape.
  */
-#ifdef NON_MATCHING
 void FrameSpheres(f32 depthOffset) {
     Vec3 point;
     Mat4 rotation;
@@ -206,23 +138,27 @@ void FrameSpheres(f32 depthOffset) {
     f32 bottom;
     f32 centerX;
     f32 centerY;
-    f32 frontDistance;
+    f32 clearEyeZ;
+    f32 margin;
     s32 i;
-    f32 rightRadians;
-    minZ = Z_MARGIN;
+
+    /*
+     * The margin is a variable to match: the original loads it anew at each use,
+     * as the compiler does for a constant it keeps in a variable that gets no
+     * register. With the look-at distance a constant of its own, 20 words
+     * differ from the original's (2 in shape).
+     */
+    margin = Z_MARGIN;
     minY = FAR_EXTENT;
     minX = minY;
     maxY = -FAR_EXTENT;
     maxX = maxY;
+    minZ = margin;
+    maxZ = -margin;
     rightAngle = g_Cameras[0].view.fieldOfView * 0.5f;
     leftAngle = -rightAngle;
     topAngle = rightAngle * 0.75f;
-    /*
-     * In its own block, as without it 259 words differ, 57 in shape, against 258
-     * and 54, and 55 against 46 under the note's forcing
-     */
-    IN_OWN_BLOCK(bottomAngle = leftAngle * 0.75f);
-    maxZ = -minZ;
+    bottomAngle = leftAngle * 0.75f;
     if (g_ControllerData[1].trigger & D_CBUTTONS) {
         osSyncPrintf("forv %f\n", g_Cameras[0].view.fieldOfView);
     }
@@ -276,7 +212,6 @@ void FrameSpheres(f32 depthOffset) {
     horizontalEyeZ += cosf(FramingDegreesToRadians(rightAngle)) * rightDistance;
 
     angle = FramingDegreesToRadians(topAngle - bottomAngle) - FramingDegreesToRadians(90);
-    eyeZ = horizontalEyeZ;
     bottomDistance = -minY / cosf(angle);
     eyeY = sinf(FramingDegreesToRadians(bottomAngle)) * bottomDistance;
     verticalEyeZ = cosf(FramingDegreesToRadians(bottomAngle)) * bottomDistance;
@@ -286,10 +221,11 @@ void FrameSpheres(f32 depthOffset) {
     if (g_ControllerData[1].trigger & D_CBUTTONS) {
         osSyncPrintf("xd %f yd %f xzd %f yzd %f\n", eyeX, eyeY, horizontalEyeZ, verticalEyeZ);
     }
+    eyeZ = horizontalEyeZ;
     /*
      * Negated, as GCC keeps the negation of a floating-point comparison
-     * rather than inverting it: verticalEyeZ > horizontalEyeZ gives 58 words
-     * in shape against 56
+     * rather than inverting it: with verticalEyeZ > horizontalEyeZ, 4 words differ
+     * from the original's, all in shape
      */
     if (!(verticalEyeZ <= horizontalEyeZ)) {
         eyeZ = verticalEyeZ;
@@ -331,15 +267,20 @@ void FrameSpheres(f32 depthOffset) {
         }
     }
 
-    eyeZ += Z_MARGIN - minZ;
-    frontDistance = eyeZ - horizontalEyeZ;
-    rightRadians = FramingDegreesToRadians(rightAngle);
-    right = frontDistance * tan(rightRadians);
-    left = frontDistance * tan(FramingDegreesToRadians(leftAngle));
-    top = (eyeZ - verticalEyeZ) * tan(FramingDegreesToRadians(topAngle));
-    bottom = (eyeZ - verticalEyeZ) * tan(FramingDegreesToRadians(bottomAngle));
+    /*
+     * The eye backs away until the nearest sphere is the margin in front of it.
+     * Its new depth has a variable of its own until the edges are worked out, to
+     * match: with the margin added to eyeZ itself, 236 words differ from the
+     * original's (30 in shape).
+     */
+    clearEyeZ = margin - minZ + eyeZ;
+    right = (clearEyeZ - horizontalEyeZ) * tan(FramingDegreesToRadians(rightAngle));
+    left = (clearEyeZ - horizontalEyeZ) * tan(FramingDegreesToRadians(leftAngle));
+    top = (clearEyeZ - verticalEyeZ) * tan(FramingDegreesToRadians(topAngle));
+    bottom = (clearEyeZ - verticalEyeZ) * tan(FramingDegreesToRadians(bottomAngle));
     centerX = (minX + maxX) * 0.5f;
     centerY = (minY + maxY) * 0.5f;
+    eyeZ = clearEyeZ;
     if (centerX < left) {
         centerX = left;
     }
@@ -368,7 +309,7 @@ void FrameSpheres(f32 depthOffset) {
         orientation,
         eyeX,
         eyeY,
-        depth + LOOK_DISTANCE,
+        depth + margin,
         &f_FramedLookAt[0],
         &f_FramedLookAt[1],
         &f_FramedLookAt[2]
@@ -385,7 +326,3 @@ void FrameSpheres(f32 depthOffset) {
         }
     }
 }
-
-#else
-INCLUDE_ASM("asm/nonmatchings/framing", FrameSpheres);
-#endif
