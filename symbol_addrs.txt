@@ -2412,7 +2412,6 @@ f_TrialEndPoint = 0x8025C834; // size:0xC segment:ovl_03
 f_OtherUnusedPlanStartValue = 0x8025C840; // size:0x1 segment:ovl_03
 f_LostTrialCount = 0x8025C844; // size:0x4 segment:ovl_03
 f_NeedsShorterClub = 0x8025C84C; // size:0x4 segment:ovl_03
-f_GreenGridLandingColumnCount = 0x800D1B10; // type:s32 size:0x8
 g_PlayerFaceImages = 0x801B55E0;
 g_PlayerFacePalettes = 0x801321C8;
 f_SceneryState = 0x800C59E0;

@@ -41,7 +41,6 @@
 #include "hole_conditions.h"
 #include "hole_display.h"
 #include "hole_objects.h"
-#include "include_asm.h"
 #include "language.h"
 #include "main.h"
 #include "math_util.h"
@@ -1792,194 +1791,94 @@ typedef struct GridScreenPoint {
     /* 0x0C */ s32 depth;
 } GridScreenPoint; /* size = 0x10 */
 
-#ifdef NON_MATCHING
+/*
+ * The index of the grid's point at a row and column, in a function that holds
+ * the grid's width in columnCount.
+ *
+ * DrawGreenGrid writes the index out at each use, to match: with a local
+ * holding it, 8 words differ from the original's in the pass that samples the
+ * ground, 4 in the one that projects the points and 40 in the lines across
+ * the aim; with a row's start stepped beside the row, 8 in the sampling pass
+ * and 16 in the projecting one. The lines along the aim match either way.
+ */
+#define GridPointIndex(row, column) (((row) * columnCount) + (column))
+
 /*
  * Sets red, green and blue for a point of the grid from its slope. White
  * lines warm towards red where the ground rises and cool towards blue where
  * it falls; black lines turn red or blue.
  */
-#    define SetGreenGridTint(slope) \
-        if (g_Players[g_CurrentShot.playerIndex].gridColor == GRID_COLOR_WHITE) { \
-            if ((slope) == 0) { \
-                blue = COLOR_CHANNEL_MAX; \
-                green = COLOR_CHANNEL_MAX; \
-                red = COLOR_CHANNEL_MAX; \
-            } \
-            else if ((slope) > 0) { \
-                red = COLOR_CHANNEL_MAX; \
-                blue = red - (slope); \
-                green = blue; \
-            } \
-            else { \
-                blue = COLOR_CHANNEL_MAX; \
-                green = (slope) + COLOR_CHANNEL_MAX; \
-                red = green; \
-            } \
+#define SetGreenGridTint(slope) \
+    if (g_Players[g_CurrentShot.playerIndex].gridColor == GRID_COLOR_WHITE) { \
+        if ((slope) == 0) { \
+            blue = COLOR_CHANNEL_MAX; \
+            green = COLOR_CHANNEL_MAX; \
+            red = COLOR_CHANNEL_MAX; \
+        } \
+        else if ((slope) > 0) { \
+            red = COLOR_CHANNEL_MAX; \
+            blue = red - (slope); \
+            green = blue; \
         } \
         else { \
-            if ((slope) == 0) { \
-                blue = 0; \
-                green = 0; \
-                red = 0; \
-            } \
-            else if ((slope) > 0) { \
-                red = (slope); \
-                blue = 0; \
-                green = 0; \
-            } \
-            else { \
-                blue = -(slope); \
-                green = 0; \
-                red = 0; \
-            } \
-        }
+            blue = COLOR_CHANNEL_MAX; \
+            green = (slope) + COLOR_CHANNEL_MAX; \
+            red = green; \
+        } \
+    } \
+    else { \
+        if ((slope) == 0) { \
+            blue = 0; \
+            green = 0; \
+            red = 0; \
+        } \
+        else if ((slope) > 0) { \
+            red = (slope); \
+            blue = 0; \
+            green = 0; \
+        } \
+        else { \
+            blue = -(slope); \
+            green = 0; \
+            red = 0; \
+        } \
+    }
 
 /*
- * Doesn't match: the club and the shot's distance take each other's saved
- * registers, and registers differ through the grid's loops. The register oracle
- * comes no closer than 214 words differing, with 26 pseudos forced. The quads
- * across the aim sync once after choosing their depth, and the lines along it
- * don't sync before choosing theirs, as in the original's display list; with a
- * sync inside each of the quads' depth branches and another before the lines'
- * test, 337 words differed (51 in shape) but the later commands went to other
- * slots and the oracle came no closer than 241. A sync in each of the quads'
- * depth branches alone, in place of the one after them, gives 338 words (48 in
- * shape) at either of the two depth choices in the lines across the aim, 344 at
- * both, and 344 with the lines along the aim too, but the original's branches
- * join before a single sync. The permuter's best outputs, 5478 to 5518 against
- * 6454, set columnCount only in the fade's last branch or drop the near-landing
- * branch, which change what the code does, or shift both sides of the scroll
- * test by 1 and nest a color in a chained assignment, which are fakes. A later
- * output computed distance * GREEN_GRID_ROW_SPACING into a temp before its
- * division and joined the early exit's first two tests in an int temp; a
- * Boolean local for those tests made the exit store the Boolean and test it,
- * where the original branches straight to the return. Before the syncs were
- * moved, indexing the first two loops' arrays by rowStart + column gave 337
- * words (51 in shape) where a local holding it gave 345 (55). A BinaryAngle
- * local for the heading changes nothing in place, and read before
- * GetSelectedClub gives 311 words (51 in shape), but the original reads the
- * heading after that call returns. An s16 green gives 328 words, but 60 in
- * shape, as it adds three sll and sra pairs by 16, which the original lacks.
- * Keeping the neighbor point's index in distance's variable, which would give
- * one variable two meanings, gives 336 words (50 in shape), but the register
- * oracle's closest is then 236 words, forcing 28 pseudos, against 228, forcing
- * 29, at the time. The counts before here were measured while the pass across
- * the aim stepped rowStart, as the first two loops do; a row start of that
- * pass's own, acrossRowStart, took the draft from 342 words differing to 308,
- * 48 in shape both, in each of the five declaration places tried, and the
- * oracle's closest from 228 words, forcing 29 pseudos, to 222, forcing 26. 308
- * words differed, 48 in shape, at the time. Stepping the lines along the aim
- * with the quads' column counter, drawnColumn, rather than the column the first
- * two loops step, took the draft to 302 words, 48 in shape, and the oracle's
- * closest from 222 words to 214, forcing 26 pseudos both. The draft then gave
- * 302 words, 48 in shape.
- *
- * The lines across the aim and along it index their points through
- * acrossPoint and alongPoint, where one point served both: the register
- * oracle lined it up with different registers in the two loops. That takes
- * the draft from 302 words differing (48 in shape) to 300 (44), and the
- * oracle's closest from 214 words to 204, forcing 26 pseudos both. 300 words
- * differ, 44 in shape.
- *
- * A focused permuter run's best indexes the tint's slope with
- * acrossRowStart + drawnColumn rather than acrossPoint, which gives 330
- * words, 40 in shape.
- *
- * A chained search over rewrites found 292 words (40 in shape) by giving the
- * lines across the aim a column counter of their own and writing
- * acrossPoint's sum, cast to s32, at each use. The cast is redundant, as the
- * sum is already an s32; without it the two changes give 306 words, 40 in
- * shape, the counter alone 310, 44 in shape, and the sum alone 330, 40 in
- * shape, against 300, 44 in shape.
- *
- * The register oracle lines row up with other registers in the lines
- * along the aim, and row and rowStart with others in the projection pass.
- * A row counter of its own for the lines along the aim, declared in any
- * of four places, changes nothing; one for the projection pass gives 310
- * words (46 in shape), and a row start of its own there 308 (44).
- *
- * Reading the shot's heading into a local before GetSelectedClub, which a
- * permuter run's best did beside a temporary for the green channel's shift,
- * gives 269 words but 47 in shape, and the register oracle's closest result
- * rises from 204 words, forcing 29 pseudos, to 207, forcing 25; read just
- * before the yaw, it changes nothing.
- *
- * The original divides the middle range's row spacing by 30.0f at run
- * time, where a literal divisor folds, under -ffast-math, into a multiply
- * by 512.0f; that branch sets maxPuttDistance as the green's does and
- * divides by it. That takes the draft from 300 words differing (44 in
- * shape) to 301 (37), and the register oracle's closest result from 204
- * words to 193, forcing 29 pseudos both. The original also divides the
- * landing width by columnCount at run time, converting an 8 loaded from
- * its constant pool, which reload does for a constant-equivalent pseudo
- * that cse never saw set, and it converts that 8 again for the centering.
- * The column count is set only before the grid's loops, so both read it
- * unset, as the original must: reload then gives each the constant from
- * the pool. That takes the draft from 301 words differing (37 in shape) to
- * 297 (27), and the oracle's closest result from 193 words to 181, forcing
- * 30. Set after the distance tests but before the centering, it folds the
- * centering to -3.5f instead and gives 307 words (41 in shape); set as it
- * is declared, it folds the landing spacing to 38400.0f. Set just before
- * the row step, it gives the same 297 words. 297 words differ, 27 in
- * shape.
- *
- * The white tint sets blue in each of its branches, where GetWarmthTint
- * sets it once before them: the original loads 255 into blue again in the
- * falling branch at each of the three tints, and fills the slope test's
- * delay slot from the level branch's first set. That takes the draft from
- * 297 words differing (27 in shape) to 296 (24), and the oracle's closest
- * result from 181 words to 176, forcing 30. The rising branch's blue is
- * then red less the slope; through a blue set to the slope first, as
- * GetWarmthTint has it, gives the same 296. 296 words differ, 24 in shape.
- *
- * The black tint sets blue in each branch too, so that every branch of
- * both tints sets all three channels. That takes the draft from 296 words
- * differing (24 in shape) to 275 (21); the oracle's closest result goes
- * from 176 words, forcing 30 pseudos, to 179, forcing 27. That left 275
- * words, 21 in shape.
- *
- * Working the shift out as a row count first and scaling it by the row
- * spacing in a second statement, which a search splitting assignments
- * into steps found, gives 259 words, 21 in shape, but the oracle's
- * closest stays at 179 words, forcing 21 pseudos, and shift would hold a
- * count before a distance, so the draft scales it in the one expression;
- * subtracting the count from rowShift in place gives 377 (61), and the
- * spacing first 275. 275 words differ, 21 in shape.
+ * Draws the grid over the ground around the current shot's target, which is
+ * the ball for putts and short shots and the landing point for longer ones.
+ * The grid's rows cross the aim and scroll towards the target while the grid
+ * shows; a fading grid keeps the heights it last sampled. Each line is a run
+ * of screen-space quads between neighboring points, tinted by their slopes.
  */
 void DrawGreenGrid(Gfx **displayListHead, CameraMatrices *matrices) {
     f32 points[GREEN_GRID_POINT_COUNT][3];
     GridScreenPoint screenPoints[GREEN_GRID_POINT_COUNT];
     s32 slopes[GREEN_GRID_POINT_COUNT];
-    /* Pads the frame to match; without it 496 words differ, against 300 */
-    s32 unused[GREEN_GRID_POINT_COUNT * 3] UNUSED;
+    /* Nothing uses them, but the original's frame has the room for them */
+    f32 unusedPoints[GREEN_GRID_POINT_COUNT][3] UNUSED;
     CoursePoint center;
     ScreenPoint projected;
     Gfx *gfx = *displayListHead;
     Club *club;
+    u64 unusedClub UNUSED;
     s32 distance;
     s32 worldDistance;
     s32 rowCount;
     s32 columnCount;
     s32 maxPuttDistance;
     s32 row;
-    s32 acrossRow;
     s32 column;
     /*
-     * The column in both the quads across the aim and the lines along it, to
-     * match: a column variable of the lines' own gives 310 words differing
-     * against 300, 44 in shape both
+     * The row and column in both the lines across the aim and the lines along
+     * it, to match: with a row of their own for the lines along the aim, 56
+     * words differ from the original's; with a column of their own, 14; and
+     * with the earlier passes' row and column in both, 96.
      */
+    s32 drawnRow;
     s32 drawnColumn;
-    s32 rowStart;
-    s32 acrossRowStart;
-    s32 acrossPoint;
-    s32 alongPoint;
     s32 rowPosition;
     Boolean isUnscrolledRow;
-    s32 neighbor;
-    s32 red;
-    s32 green;
-    s32 blue;
     Radians yaw;
     Radians sideAngle;
     f32 rowShift;
@@ -1993,7 +1892,6 @@ void DrawGreenGrid(Gfx **displayListHead, CameraMatrices *matrices) {
     f32 centering;
     f32 originX;
     f32 originZ;
-    f32 stepZ;
     f32 scrollX;
     f32 scrollZ;
     f32 height;
@@ -2005,9 +1903,9 @@ void DrawGreenGrid(Gfx **displayListHead, CameraMatrices *matrices) {
      * The original sets the column count only before the grid's loops, so
      * the landing spacing and the centering read it unset
      */
-#    ifdef AVOID_UB
+#ifdef AVOID_UB
     columnCount = GREEN_GRID_COLUMN_COUNT;
-#    endif
+#endif
     if (g_RoundHud.greenGridState == GREEN_GRID_HIDDEN ||
         g_IsCupViewShown == TRUE ||
         IsGameFlagSet(GAME_FLAG_HIDE_GREEN_GRID) ||
@@ -2016,6 +1914,31 @@ void DrawGreenGrid(Gfx **displayListHead, CameraMatrices *matrices) {
     }
 
     club = GetSelectedClub();
+    /*
+     * A 64-bit copy that nothing reads, taken inside two tests, to match, as
+     * in DrawWindSpeed: the original's code has a basic block's end between
+     * the club's call and the heading's read, and no branch there. The copy's
+     * libcall block lasts until flow, so the tests last until the jump pass
+     * after reload, and local-alloc sees their label: the club, living across
+     * it, is left to global-alloc and gets $s1 ahead of the shot's distance.
+     * Two jumps reach the label, so the path that cse follows from the
+     * function's start ends there as well, and the 1 that the cup view's test
+     * loads isn't kept in a saved register for the ground query marker, which
+     * the original loads a 1 of its own for. With one test, or two joined by
+     * &&, which compile to one jump, cse skips around the block.
+     *
+     * What the original tested is a guess: the display list in the inner
+     * test, or as the outer one, or the cup view inside, match alike. Without
+     * the copy 89 words differ from the original's; with one test, or the
+     * two joined by &&, 49; with a 32-bit copy 89; and with an empty do-while
+     * (0) in the tests' place 83.
+     */
+    if (club != NULL) {
+        if (gfx != NULL) {
+            unusedClub = (u32)club;
+        }
+    }
+
     yaw = (u16)g_CurrentShot.heading * BINARY_ANGLE_TO_RADIANS;
     distance = GetSelectedShotDistance();
     worldDistance = GetSelectedShotWorldDistance();
@@ -2068,14 +1991,15 @@ void DrawGreenGrid(Gfx **displayListHead, CameraMatrices *matrices) {
     sideZ = -sinf(sideAngle) * columnSpacing;
     shift = (rowShift - rowCount) * rowSpacing;
     centering = 0.5f - (columnCount * 0.5f);
-    originX = (shift * forwardX) + (sideX * centering);
-    originZ = (shift * forwardZ) + (sideZ * centering);
+    originX = (forwardX * shift) + (sideX * centering);
+    originZ = (forwardZ * shift) + (sideZ * centering);
     /*
-     * forwardX holds the row step's x from here, to match: a stepX variable gives
-     * 342 words differing (48 in shape) against the draft's 300 (44)
+     * forwardX and forwardZ hold the row's step from here, to match: with
+     * variables of the step's own, 161 words differ from the original's; with
+     * one for x alone, 76; and with one for z alone, 66
      */
     forwardX = -cosf(yaw) * rowSpacing;
-    stepZ = -sinf(yaw) * rowSpacing;
+    forwardZ = -sinf(yaw) * rowSpacing;
     if (g_RoundHud.greenGridState == GREEN_GRID_SHOWN) {
         f_GreenGridScroll -= GREEN_GRID_SCROLL_STEP;
         if (rowCount != GREEN_GRID_MAX_ROW_COUNT) {
@@ -2089,10 +2013,10 @@ void DrawGreenGrid(Gfx **displayListHead, CameraMatrices *matrices) {
     }
 
     scrollX = forwardX * f_GreenGridScroll;
-    scrollZ = stepZ * f_GreenGridScroll;
+    scrollZ = forwardZ * f_GreenGridScroll;
     columnCount = GREEN_GRID_COLUMN_COUNT;
 
-    for (row = 0, rowStart = 0; row != rowCount;) {
+    for (row = 0; row != rowCount;) {
         for (column = 0; column != columnCount; column++) {
             isUnscrolledRow = row == rowCount - 1 || row == 0;
             rowPosition = row;
@@ -2101,41 +2025,40 @@ void DrawGreenGrid(Gfx **displayListHead, CameraMatrices *matrices) {
             }
 
             if (isUnscrolledRow || (f_GreenGridScroll < 0.0f && row == 1)) {
-                points[rowStart + column][AXIS_X] =
+                points[GridPointIndex(row, column)][AXIS_X] =
                     center[AXIS_X] + originX + (forwardX * rowPosition) + (sideX * column);
-                points[rowStart + column][AXIS_Z] =
-                    center[AXIS_Z] + originZ + (stepZ * rowPosition) + (sideZ * column);
+                points[GridPointIndex(row, column)][AXIS_Z] =
+                    center[AXIS_Z] + originZ + (forwardZ * rowPosition) + (sideZ * column);
             }
             else {
-                points[rowStart + column][AXIS_X] = center[AXIS_X] + originX +
+                points[GridPointIndex(row, column)][AXIS_X] = center[AXIS_X] + originX +
                     (forwardX * rowPosition) + (sideX * column) + scrollX;
-                points[rowStart + column][AXIS_Z] =
-                    center[AXIS_Z] + originZ + (stepZ * rowPosition) + (sideZ * column) + scrollZ;
+                points[GridPointIndex(row, column)][AXIS_Z] = center[AXIS_Z] + originZ +
+                    (forwardZ * rowPosition) + (sideZ * column) + scrollZ;
             }
 
             if (g_RoundHud.greenGridState == GREEN_GRID_SHOWN) {
                 g_UnreadGroundQueryMarker = 1;
-                points[rowStart + column][AXIS_Y] = GetGroundHeight(
-                    points[rowStart + column][AXIS_X],
-                    points[rowStart + column][AXIS_Z]
+                points[GridPointIndex(row, column)][AXIS_Y] = GetGroundHeight(
+                    points[GridPointIndex(row, column)][AXIS_X],
+                    points[GridPointIndex(row, column)][AXIS_Z]
                 );
-                f_GreenGridHeights[rowStart + column] = points[rowStart + column][AXIS_Y];
+                f_GreenGridHeights[GridPointIndex(row, column)] =
+                    points[GridPointIndex(row, column)][AXIS_Y];
             }
             else {
-                points[rowStart + column][AXIS_Y] = f_GreenGridHeights[rowStart + column];
+                points[GridPointIndex(row, column)][AXIS_Y] =
+                    f_GreenGridHeights[GridPointIndex(row, column)];
             }
         }
 
         if (rowCount != GREEN_GRID_MAX_ROW_COUNT) {
-            rowStart += columnCount;
             row++;
         }
         else if (row >= GREEN_GRID_FIRST_FULL_ROW) {
-            rowStart += columnCount;
             row++;
         }
         else {
-            rowStart += columnCount * 2;
             row += 2;
         }
     }
@@ -2144,57 +2067,59 @@ void DrawGreenGrid(Gfx **displayListHead, CameraMatrices *matrices) {
     if (rowCount == GREEN_GRID_MAX_ROW_COUNT) {
         for (row = 1; row != rowCount - 1; row += 2) {
             for (column = 0; column != columnCount; column++) {
-                points[(row * columnCount) + column][AXIS_X] =
-                    (points[((row - 1) * columnCount) + column][AXIS_X] +
-                        points[((row + 1) * columnCount) + column][AXIS_X]) *
+                points[GridPointIndex(row, column)][AXIS_X] =
+                    (points[GridPointIndex(row - 1, column)][AXIS_X] +
+                        points[GridPointIndex(row + 1, column)][AXIS_X]) *
                     0.5f;
-                points[(row * columnCount) + column][AXIS_Y] =
-                    (points[((row - 1) * columnCount) + column][AXIS_Y] +
-                        points[((row + 1) * columnCount) + column][AXIS_Y]) *
+                points[GridPointIndex(row, column)][AXIS_Y] =
+                    (points[GridPointIndex(row - 1, column)][AXIS_Y] +
+                        points[GridPointIndex(row + 1, column)][AXIS_Y]) *
                     0.5f;
-                points[(row * columnCount) + column][AXIS_Z] =
-                    (points[((row - 1) * columnCount) + column][AXIS_Z] +
-                        points[((row + 1) * columnCount) + column][AXIS_Z]) *
+                points[GridPointIndex(row, column)][AXIS_Z] =
+                    (points[GridPointIndex(row - 1, column)][AXIS_Z] +
+                        points[GridPointIndex(row + 1, column)][AXIS_Z]) *
                     0.5f;
             }
         }
     }
 
-    for (row = 0, rowStart = 0; row != rowCount; row++, rowStart += columnCount) {
+    for (row = 0; row != rowCount; row++) {
         for (column = 0; column != columnCount; column++) {
             if (ProjectPoint(
-                    points[rowStart + column][AXIS_X] * COURSE_TO_WORLD_SCALE,
-                    points[rowStart + column][AXIS_Y] * COURSE_TO_WORLD_SCALE,
-                    points[rowStart + column][AXIS_Z] * COURSE_TO_WORLD_SCALE,
+                    points[GridPointIndex(row, column)][AXIS_X] * COURSE_TO_WORLD_SCALE,
+                    points[GridPointIndex(row, column)][AXIS_Y] * COURSE_TO_WORLD_SCALE,
+                    points[GridPointIndex(row, column)][AXIS_Z] * COURSE_TO_WORLD_SCALE,
                     &projected
                 ) < 0) {
-                screenPoints[rowStart + column].x = projected.x * QUARTER_PIXELS_PER_PIXEL;
-                screenPoints[rowStart + column].y = projected.y * QUARTER_PIXELS_PER_PIXEL;
-                screenPoints[rowStart + column].isVisible = TRUE;
-                screenPoints[rowStart + column].depth =
+                screenPoints[GridPointIndex(row, column)].x =
+                    projected.x * QUARTER_PIXELS_PER_PIXEL;
+                screenPoints[GridPointIndex(row, column)].y =
+                    projected.y * QUARTER_PIXELS_PER_PIXEL;
+                screenPoints[GridPointIndex(row, column)].isVisible = TRUE;
+                screenPoints[GridPointIndex(row, column)].depth =
                     projected.depth - (projected.depthStep * GREEN_GRID_DEPTH_BIAS);
             }
             else {
-                screenPoints[rowStart + column].isVisible = FALSE;
+                screenPoints[GridPointIndex(row, column)].isVisible = FALSE;
             }
 
-            height = points[rowStart + column][AXIS_Y] - center[AXIS_Y];
+            height = points[GridPointIndex(row, column)][AXIS_Y] - center[AXIS_Y];
             if (height < 0.0f) {
-                slopes[rowStart + column] = sqrtf(-height) * GREEN_GRID_SLOPE_SCALE;
+                slopes[GridPointIndex(row, column)] = sqrtf(-height) * GREEN_GRID_SLOPE_SCALE;
             }
             else if (height > 0.0f) {
-                slopes[rowStart + column] = -sqrtf(height) * GREEN_GRID_SLOPE_SCALE;
+                slopes[GridPointIndex(row, column)] = -sqrtf(height) * GREEN_GRID_SLOPE_SCALE;
             }
             else {
-                slopes[rowStart + column] = 0;
+                slopes[GridPointIndex(row, column)] = 0;
             }
 
-            if (slopes[rowStart + column] > GREEN_GRID_MAX_SLOPE) {
-                slopes[rowStart + column] = GREEN_GRID_MAX_SLOPE;
+            if (slopes[GridPointIndex(row, column)] > GREEN_GRID_MAX_SLOPE) {
+                slopes[GridPointIndex(row, column)] = GREEN_GRID_MAX_SLOPE;
             }
 
-            if (slopes[rowStart + column] < -GREEN_GRID_MAX_SLOPE) {
-                slopes[rowStart + column] = -GREEN_GRID_MAX_SLOPE;
+            if (slopes[GridPointIndex(row, column)] < -GREEN_GRID_MAX_SLOPE) {
+                slopes[GridPointIndex(row, column)] = -GREEN_GRID_MAX_SLOPE;
             }
         }
     }
@@ -2241,47 +2166,57 @@ void DrawGreenGrid(Gfx **displayListHead, CameraMatrices *matrices) {
     if (g_RoundHud.greenGridState != GREEN_GRID_HIDDEN) {
         /* The lines across the aim, one quad between each pair of points in a row
          */
-        for (acrossRow = 0, acrossRowStart = 0; acrossRow != rowCount;) {
+        for (drawnRow = 0; drawnRow != rowCount;) {
             for (drawnColumn = 0; drawnColumn != columnCount; drawnColumn++) {
-                acrossPoint = acrossRowStart + drawnColumn;
-                if (screenPoints[acrossPoint].isVisible != TRUE) {
+                /* The tint has variables of each pass's own, to match: with one set
+                 * for both passes, 142 words differ from the original's */
+                s32 red;
+                s32 green;
+                s32 blue;
+
+                if (screenPoints[GridPointIndex(drawnRow, drawnColumn)].isVisible != TRUE) {
                     continue;
                 }
 
                 if (drawnColumn & 1) {
-                    neighbor = acrossPoint - 1;
-                    dx = screenPoints[acrossPoint].x - screenPoints[neighbor].x;
-                    dy = screenPoints[acrossPoint].y - screenPoints[neighbor].y;
+                    dx = screenPoints[GridPointIndex(drawnRow, drawnColumn)].x -
+                        screenPoints[GridPointIndex(drawnRow, drawnColumn) - 1].x;
+                    dy = screenPoints[GridPointIndex(drawnRow, drawnColumn)].y -
+                        screenPoints[GridPointIndex(drawnRow, drawnColumn) - 1].y;
                 }
                 else {
-                    neighbor = acrossPoint + 1;
-                    dx = screenPoints[acrossPoint].x - screenPoints[neighbor].x;
-                    dy = screenPoints[acrossPoint].y - screenPoints[neighbor].y;
+                    dx = screenPoints[GridPointIndex(drawnRow, drawnColumn)].x -
+                        screenPoints[GridPointIndex(drawnRow, drawnColumn) + 1].x;
+                    dy = screenPoints[GridPointIndex(drawnRow, drawnColumn)].y -
+                        screenPoints[GridPointIndex(drawnRow, drawnColumn) + 1].y;
                 }
 
                 if (dx == 0.0f && dy == 0.0f) {
-                    screenPoints[acrossPoint].isVisible = FALSE;
+                    screenPoints[GridPointIndex(drawnRow, drawnColumn)].isVisible = FALSE;
                     continue;
                 }
 
                 scale = GREEN_GRID_LINE_HALF_WIDTH / sqrtf((dx * dx) + (dy * dy));
                 dx *= scale;
                 dy *= scale;
-                SetGreenGridTint(slopes[acrossPoint]);
+                SetGreenGridTint(slopes[GridPointIndex(drawnRow, drawnColumn)]);
                 if (drawnColumn & 1) {
                     gSPModifyVertex(
                         gfx++,
                         2,
                         G_MWO_POINT_XYSCREEN,
-                        ScreenPointWord(screenPoints[acrossPoint].x, screenPoints[acrossPoint].y)
+                        ScreenPointWord(
+                            screenPoints[GridPointIndex(drawnRow, drawnColumn)].x,
+                            screenPoints[GridPointIndex(drawnRow, drawnColumn)].y
+                        )
                     );
                     gSPModifyVertex(
                         gfx++,
                         3,
                         G_MWO_POINT_XYSCREEN,
                         ScreenPointWord(
-                            screenPoints[acrossPoint].x + (s32)dy,
-                            screenPoints[acrossPoint].y - (s32)dx
+                            screenPoints[GridPointIndex(drawnRow, drawnColumn)].x + (s32)dy,
+                            screenPoints[GridPointIndex(drawnRow, drawnColumn)].y - (s32)dx
                         )
                     );
                     gSPModifyVertex(
@@ -2296,13 +2231,22 @@ void DrawGreenGrid(Gfx **displayListHead, CameraMatrices *matrices) {
                         G_MWO_POINT_RGBA,
                         RgbaColor(red, green, blue, f_GreenGridAlpha)
                     );
-                    if (screenPoints[acrossPoint - 1].isVisible == TRUE) {
+                    if (screenPoints[GridPointIndex(drawnRow, drawnColumn) - 1].isVisible == TRUE) {
                         gDPPipeSync(gfx++);
-                        if (screenPoints[acrossPoint].depth < screenPoints[acrossPoint - 1].depth) {
-                            gDPSetPrimDepth(gfx++, screenPoints[acrossPoint].depth, 0);
+                        if (screenPoints[GridPointIndex(drawnRow, drawnColumn)].depth <
+                            screenPoints[GridPointIndex(drawnRow, drawnColumn) - 1].depth) {
+                            gDPSetPrimDepth(
+                                gfx++,
+                                screenPoints[GridPointIndex(drawnRow, drawnColumn)].depth,
+                                0
+                            );
                         }
                         else {
-                            gDPSetPrimDepth(gfx++, screenPoints[acrossPoint - 1].depth, 0);
+                            gDPSetPrimDepth(
+                                gfx++,
+                                screenPoints[GridPointIndex(drawnRow, drawnColumn) - 1].depth,
+                                0
+                            );
                         }
 
                         gDPPipeSync(gfx++);
@@ -2314,15 +2258,18 @@ void DrawGreenGrid(Gfx **displayListHead, CameraMatrices *matrices) {
                         gfx++,
                         0,
                         G_MWO_POINT_XYSCREEN,
-                        ScreenPointWord(screenPoints[acrossPoint].x, screenPoints[acrossPoint].y)
+                        ScreenPointWord(
+                            screenPoints[GridPointIndex(drawnRow, drawnColumn)].x,
+                            screenPoints[GridPointIndex(drawnRow, drawnColumn)].y
+                        )
                     );
                     gSPModifyVertex(
                         gfx++,
                         1,
                         G_MWO_POINT_XYSCREEN,
                         ScreenPointWord(
-                            screenPoints[acrossPoint].x + (s32)dy,
-                            screenPoints[acrossPoint].y - (s32)dx
+                            screenPoints[GridPointIndex(drawnRow, drawnColumn)].x + (s32)dy,
+                            screenPoints[GridPointIndex(drawnRow, drawnColumn)].y - (s32)dx
                         )
                     );
                     gSPModifyVertex(
@@ -2337,13 +2284,23 @@ void DrawGreenGrid(Gfx **displayListHead, CameraMatrices *matrices) {
                         G_MWO_POINT_RGBA,
                         RgbaColor(red, green, blue, f_GreenGridAlpha)
                     );
-                    if (drawnColumn != 0 && screenPoints[acrossPoint - 1].isVisible == TRUE) {
+                    if (drawnColumn != 0 &&
+                        screenPoints[GridPointIndex(drawnRow, drawnColumn) - 1].isVisible == TRUE) {
                         gDPPipeSync(gfx++);
-                        if (screenPoints[acrossPoint].depth < screenPoints[acrossPoint - 1].depth) {
-                            gDPSetPrimDepth(gfx++, screenPoints[acrossPoint].depth, 0);
+                        if (screenPoints[GridPointIndex(drawnRow, drawnColumn)].depth <
+                            screenPoints[GridPointIndex(drawnRow, drawnColumn) - 1].depth) {
+                            gDPSetPrimDepth(
+                                gfx++,
+                                screenPoints[GridPointIndex(drawnRow, drawnColumn)].depth,
+                                0
+                            );
                         }
                         else {
-                            gDPSetPrimDepth(gfx++, screenPoints[acrossPoint - 1].depth, 0);
+                            gDPSetPrimDepth(
+                                gfx++,
+                                screenPoints[GridPointIndex(drawnRow, drawnColumn) - 1].depth,
+                                0
+                            );
                         }
 
                         gDPPipeSync(gfx++);
@@ -2353,32 +2310,35 @@ void DrawGreenGrid(Gfx **displayListHead, CameraMatrices *matrices) {
             }
 
             if (rowCount != GREEN_GRID_MAX_ROW_COUNT) {
-                acrossRowStart += columnCount;
-                acrossRow++;
+                drawnRow++;
             }
-            else if (acrossRow >= GREEN_GRID_FIRST_FULL_ROW) {
-                acrossRowStart += columnCount;
-                acrossRow++;
+            else if (drawnRow >= GREEN_GRID_FIRST_FULL_ROW) {
+                drawnRow++;
             }
             else {
-                acrossRowStart += columnCount * 2;
-                acrossRow += 2;
+                drawnRow += 2;
             }
         }
 
         /* The lines along the aim, one quad between each pair of points in a column
          */
         for (drawnColumn = 0; drawnColumn != columnCount; drawnColumn++) {
-            for (row = 0; row != rowCount - 1; row++) {
-                alongPoint = (row * columnCount) + drawnColumn;
+            for (drawnRow = 0; drawnRow != rowCount - 1; drawnRow++) {
+                s32 red;
+                s32 green;
+                s32 blue;
+                s32 point = GridPointIndex(drawnRow, drawnColumn);
 
-                if (screenPoints[alongPoint].isVisible != TRUE ||
-                    screenPoints[alongPoint + columnCount].isVisible != TRUE) {
+                /* The next row's point is reached as a row's points on from this
+                 * one, to match: indexed by the next row, 108 words differ from the
+                 * original's */
+                if (screenPoints[point].isVisible != TRUE ||
+                    screenPoints[point + columnCount].isVisible != TRUE) {
                     continue;
                 }
 
-                dx = screenPoints[alongPoint].x - screenPoints[alongPoint + columnCount].x;
-                dy = screenPoints[alongPoint].y - screenPoints[alongPoint + columnCount].y;
+                dx = screenPoints[point].x - screenPoints[point + columnCount].x;
+                dy = screenPoints[point].y - screenPoints[point + columnCount].y;
                 if (dx == 0.0f && dy == 0.0f) {
                     continue;
                 }
@@ -2386,7 +2346,7 @@ void DrawGreenGrid(Gfx **displayListHead, CameraMatrices *matrices) {
                 scale = GREEN_GRID_LINE_HALF_WIDTH / sqrtf((dx * dx) + (dy * dy));
                 dx *= scale;
                 dy *= scale;
-                SetGreenGridTint(slopes[alongPoint]);
+                SetGreenGridTint(slopes[point]);
                 gSPModifyVertex(
                     gfx++,
                     0,
@@ -2399,7 +2359,7 @@ void DrawGreenGrid(Gfx **displayListHead, CameraMatrices *matrices) {
                     G_MWO_POINT_RGBA,
                     RgbaColor(red, green, blue, f_GreenGridAlpha)
                 );
-                SetGreenGridTint(slopes[alongPoint + columnCount]);
+                SetGreenGridTint(slopes[point + columnCount]);
                 gSPModifyVertex(
                     gfx++,
                     2,
@@ -2416,15 +2376,15 @@ void DrawGreenGrid(Gfx **displayListHead, CameraMatrices *matrices) {
                     gfx++,
                     0,
                     G_MWO_POINT_XYSCREEN,
-                    ScreenPointWord(screenPoints[alongPoint].x, screenPoints[alongPoint].y)
+                    ScreenPointWord(screenPoints[point].x, screenPoints[point].y)
                 );
                 gSPModifyVertex(
                     gfx++,
                     1,
                     G_MWO_POINT_XYSCREEN,
                     ScreenPointWord(
-                        screenPoints[alongPoint].x - (s32)dy,
-                        screenPoints[alongPoint].y + (s32)dx
+                        screenPoints[point].x - (s32)dy,
+                        screenPoints[point].y + (s32)dx
                     )
                 );
                 gSPModifyVertex(
@@ -2432,8 +2392,8 @@ void DrawGreenGrid(Gfx **displayListHead, CameraMatrices *matrices) {
                     2,
                     G_MWO_POINT_XYSCREEN,
                     ScreenPointWord(
-                        screenPoints[alongPoint + columnCount].x,
-                        screenPoints[alongPoint + columnCount].y
+                        screenPoints[point + columnCount].x,
+                        screenPoints[point + columnCount].y
                     )
                 );
                 gSPModifyVertex(
@@ -2441,15 +2401,15 @@ void DrawGreenGrid(Gfx **displayListHead, CameraMatrices *matrices) {
                     3,
                     G_MWO_POINT_XYSCREEN,
                     ScreenPointWord(
-                        screenPoints[alongPoint + columnCount].x - (s32)dy,
-                        screenPoints[alongPoint + columnCount].y + (s32)dx
+                        screenPoints[point + columnCount].x - (s32)dy,
+                        screenPoints[point + columnCount].y + (s32)dx
                     )
                 );
-                if (screenPoints[alongPoint].depth < screenPoints[alongPoint + columnCount].depth) {
-                    gDPSetPrimDepth(gfx++, screenPoints[alongPoint].depth, 0);
+                if (screenPoints[point].depth < screenPoints[point + columnCount].depth) {
+                    gDPSetPrimDepth(gfx++, screenPoints[point].depth, 0);
                 }
                 else {
-                    gDPSetPrimDepth(gfx++, screenPoints[alongPoint + columnCount].depth, 0);
+                    gDPSetPrimDepth(gfx++, screenPoints[point + columnCount].depth, 0);
                 }
 
                 gDPPipeSync(gfx++);
@@ -2469,11 +2429,6 @@ void DrawGreenGrid(Gfx **displayListHead, CameraMatrices *matrices) {
     gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
     *displayListHead = gfx;
 }
-#else
-INCLUDE_RODATA("asm/nonmatchings/round_hud", f_GreenGridLandingColumnCount);
-
-INCLUDE_ASM("asm/nonmatchings/round_hud", DrawGreenGrid);
-#endif
 
 /* Gathers the whole ball trail at the ball, so it starts out empty */
 void ResetBallTrail(void) {
