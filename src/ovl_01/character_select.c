@@ -1703,7 +1703,7 @@ s32 GetUnusedPalette(s32 choiceIndex);
  *   block of its own. GCC counts a register's uses once more for each loop
  *   they are in, so the blocks' loop notes raise row's and column's places in
  *   the order registers are handed out. Stepping row in the loop's header, or
- *   at the body's end outside a block, spills it to a frame 8 bytes smaller
+ *   at the body's end outside a block, spills it to a frame 8 bytes larger
  *   (116 words differ, 34 in shape). Stepping column in the header gives 22
  *   words (16 in shape); at the body's end outside a block, it swaps
  *   registers with the display list pointer's copy (28 words).
@@ -1716,7 +1716,7 @@ s32 GetUnusedPalette(s32 choiceIndex);
  *   (2 in shape).
  * - The frame's asset is opened in each arm of the flag test. Choosing the
  *   table in the arms for one call gives 95 words (15 in shape) and a frame 8
- *   bytes larger.
+ *   bytes smaller.
  */
 void DrawGridFaces(Gfx **displayListHead, u8 isSinglePlayer) {
     EncodedAsset asset;
