@@ -2093,9 +2093,9 @@ static inline u16 *GetMapTexel(s32 column, s32 row) {
 static inline u16 ReadMapTexel(s32 column, s32 row) {
     /*
      * The separate tests are there to match: one || test gives 43 words differing
-     * (15 in shape) in EncodeCodeMap, 63 (15) in SaveHoleFiles and 145 (27) in
+     * (15 in shape) in EncodeCodeMap, 63 (15) in SaveHoleFiles and 59 (15) in
      * CleanCodeMap, and one && test for being on the map 51 (17), 103 (17) and
-     * 153 (29), against the CleanCodeMap draft's 88 (12)
+     * 67 (17)
      */
     if (column < 0) {
         return 0;
@@ -2205,82 +2205,165 @@ void LoadToolCodeMap(void) {
     f_IsCodeMapCleaned = FALSE;
 }
 
-/* Returns the code at a column and row of the code map, pointing the build
- * cursor at it */
-static inline u8 GetCode(s32 column, s32 row) {
-    f_BuildCursor = f_BuildBuffer + (row * MAP_COLUMN_COUNT) + column;
+/* The index in the code map of the code at a column and row */
+#define CodeIndex(column, row) (((row) * MAP_COLUMN_COUNT) + (column))
+
+/*
+ * The index in the code map of the code a step away from a column and row.
+ * The row's step is taken before the row's codes are counted and the
+ * column's after the column is added, to match.
+ */
+#define NeighborCodeIndex(column, row, columnStep, rowStep) \
+    ((((row) + (rowStep)) * MAP_COLUMN_COUNT) + (column) + (columnStep))
+
+/* Returns the code at an index of the code map, pointing the build cursor at it */
+static inline u8 GetCode(s32 index) {
+    f_BuildCursor = &f_BuildBuffer[index];
     return *f_BuildCursor;
 }
 
-/* Sets the code at a column and row of the code map, pointing the build cursor
- * at it */
-static inline void SetCode(s32 column, s32 row, u8 code) {
-    f_BuildCursor = &f_BuildBuffer[(row * MAP_COLUMN_COUNT) + column];
+/* Sets the code at an index of the code map, pointing the build cursor at it */
+static inline void SetCode(s32 index, u8 code) {
+    f_BuildCursor = &f_BuildBuffer[index];
     *f_BuildCursor = code;
 }
 
 /*
  * Fills the code at a column and row of the code map with its neighbors'
  * code, if they are equal and it differs. The neighbors are a step away
- * each side.
+ * each side. The code before is read twice, and the code after again to
+ * fill with. The index and the code before are kept in the caller's
+ * variables, and the block is no loop that runs once, to match.
  */
-static inline void FillCodeGap(s32 column, s32 row, s32 columnStep, s32 rowStep) {
-    Boolean differsFromPrevious =
-        GetCode(column, row) != GetCode(column - columnStep, row - rowStep);
-    Boolean neighborsMatch =
-        GetCode(column - columnStep, row - rowStep) == GetCode(column + columnStep, row + rowStep);
-
-    /*
-     * The original ands the two tests' results without a branch; && gives
-     * CleanCodeMap 88 words differing, 16 in shape, against 88 (12)
-     */
-    if (differsFromPrevious & neighborsMatch) {
-        SetCode(column, row, GetCode(column + columnStep, row + rowStep));
+#define FillCodeGap(index, previous, column, row, columnStep, rowStep) \
+    { \
+        s32 code; \
+        s32 previousAgain; \
+        s32 next; \
+\
+        index = CodeIndex(column, row); \
+        code = GetCode(index); \
+        index = NeighborCodeIndex(column, row, -(columnStep), -(rowStep)); \
+        previous = GetCode(index); \
+        index = NeighborCodeIndex(column, row, -(columnStep), -(rowStep)); \
+        previousAgain = GetCode(index); \
+        index = NeighborCodeIndex(column, row, columnStep, rowStep); \
+        next = GetCode(index); \
+        if (code != previous && previousAgain == next) { \
+            u8 fill; \
+\
+            index = NeighborCodeIndex(column, row, columnStep, rowStep); \
+            fill = GetCode(index); \
+            index = CodeIndex(column, row); \
+            SetCode(index, fill); \
+        } \
     }
-}
 
 /*
  * Encodes the map as EncodeCodeMap does, then runs the clean-up passes, each
  * filling the codes that differ from two equal neighbors, along the row and
  * then down the column. There are no passes, so it only encodes the map.
- * Doesn't match: the passes add the row's offset to the buffer before the
- * column, where the original adds the column to the row's offset first and
- * steps each neighbor's index from that sum. Before the encoding matched,
- * GetCode's pointer sum gave 95 words, 17 in shape, against 137 and 31 for
- * indexing the buffer; indexing it in SetCode too 143, and passing GetCode
- * and SetCode the index, with FillCodeGap stepping it, 130 to 144. Narrowing
- * the row pass's column to an unsigned char, the permuter's best then, gave
- * 108 words, 10 in shape; the column is no byte. A later run's best casts
- * the row pass's column to a u16, which gives 101 words, 5 in shape, but
- * declaring the column a u16 gives 153 (31) and the row as well 237 (69), so
- * the cast doesn't stand for the column's type. 88 words differ, 12 in
- * shape.
  *
- * The register oracle's closest result is 37 words, forcing 22 pseudos, so
- * the code differs too. On the current draft, indexing the buffer in
- * GetCode, or adding the summed index to it, gives 130 words (26 in shape)
- * with either order of the sum's terms, adding the column before the row's
- * offset 92 (20), and passing FillCodeGap the index and a step 137 (35). In
- * the draft and the index forms, loop.c steps the code's index alongside the
- * column, where the original adds the column to the row's offset on each
- * pass and steps only the neighbor rows' offsets.
+ * The original keeps the index of the code it is at in one register, $a0,
+ * through the encoding and the passes alike, setting it ahead of each read and
+ * each store and adding it to the buffer's address. So the index is one
+ * variable of the function's, set in a statement of its own each time. Along
+ * the row the code before's index is the cell's less one, and the cell's is
+ * copied to $t0 for the fill; up the column it is the column added to the row
+ * above's offset, which loop.c steps beside the row. A neighbor's index is
+ * written to give both: the row's step is taken before the row is scaled, and
+ * the column's is added after the column. With the column's step added to the
+ * column first, or the steps added to the cell's index, the sums are grouped
+ * another way; with no index, loop.c steps the cell's beside the column; and
+ * set in GetCode's argument, the index is copied for the fill up the column as
+ * well.
  *
- * The register oracle's split search lines the column up with $s0 at most of
- * its uses and with $a0 where it is passed to FillCodeGap, but a column
- * counter of the gap-filling passes' own gives 138 words differing (12 in
- * shape), and a row counter as well 146 (12), against 88 (12).
+ * The code before the cell is kept in one variable for both directions. A
+ * variable that lives in one block gets its register from local-alloc, the
+ * lowest one free; one read in more than a block is left to the global
+ * allocator, which takes them in order of priority, the references weighted by
+ * loop depth, times their logarithm, over the length of the life
+ * (allocno_compare in global.c). The original has the code after's address in
+ * $a1, the code before in $a2 and the buffer's address in $a3. In a variable of
+ * the gap's own, the code before lives within the test's block and takes $a1
+ * ahead of the address, which lasts into the fill. Shared by the two directions
+ * it waits for the global allocator, where the address comes first, with 20
+ * references over 11 instructions, and the code before, with 16 over 18, ties
+ * with the buffer's address, with 24 over 27, and goes ahead of it for its
+ * lower register number. A loop that runs once around the fill counts it a
+ * level deeper: the buffer's address then has 25 references and goes ahead of
+ * the code before, so FillCodeGap's block is a plain one.
+ *
+ * The code before is read twice for the test, and the code after again for the
+ * fill, as the original reads them. The encoding sets its cursor from the same
+ * index, as the original has it in $a0 there too; with the sum written where
+ * the buffer is indexed, it takes $v1.
+ *
+ * Measured against the match, as words differing and how many of them in shape:
+ *   The old draft: GetCode and SetCode given the column and
+ *   row, with no index, and FillCodeGap an inline function    88 (12)
+ *   The code before in a variable of FillCodeGap's own        26 (0)
+ *   The code before as a u8                                   26 (0)
+ *   The code before as an s16 or a u16                        4 (0)
+ *   The cell's code shared by the two directions as well      60 (0)
+ *   The cell's code shared in place of the code before        52 (0)
+ *   The code before's second read shared as well              26 (0)
+ *   FillCodeGap's block as a loop that runs once              7 (7)
+ *   The fill alone in a loop that runs once                   34 (0)
+ *   The test as previous != code                              4 (0)
+ *   The test as next == previousAgain                         46 (0)
+ *   The neighbors compared ahead of the cell                  96 (8)
+ *   The second comparison in an if inside the first's         68 (18)
+ *   The code before read once                                 90 (8)
+ *   The gap filled from the code after's first read           112 (4)
+ *   The code before read ahead of the cell's                  68 (6)
+ *   The code after read ahead of the code before's second
+ *   read                                                      94 (8)
+ *   The code after read ahead of both reads of the code
+ *   before                                                    90 (12)
+ *   The code before's first read taken into previousAgain and
+ *   its second into previous                                  66 (0)
+ *   The index set in GetCode's argument                       7 (5)
+ *   The index in a variable of FillCodeGap's own              4 (0)
+ *   The encoding's cursor set with no index                   4 (0)
+ *   The encoding's code stored by SetCode                     144 (12)
+ *   No index, each sum written in GetCode's or SetCode's
+ *   argument                                                  137 (35)
+ *   A neighbor's index with the column's step added to the
+ *   column first, or as CodeIndex of the stepped column and
+ *   row                                                       42 (18)
+ *   A neighbor's index with the column and its step ahead of
+ *   the row's offset                                          42 (18)
+ *   A neighbor's index as the cell's plus the steps           60 (24)
+ *   CodeIndex with the column ahead of the row's offset       8 (0)
+ *   The encoding's loops' tests as !=                         25 (9)
+ *   The passes' loops' tests as !=                            8 (8)
+ *   The passes' count tested as > 0                           4 (4)
+ *   ReadMapTexel's tests as one ||                            59 (15)
+ *   ReadMapTexel's tests as one && for being on the map       67 (17)
+ *
+ * Also matching: the code before declared for the function, or as a u32; the
+ * code after shared by the two directions as well; the gap's other codes as u8
+ * or u32; the two comparisons anded with &; the fill kept in an s32, or read
+ * back through the build cursor with no local; GetCode adding the index to the
+ * buffer, returning an s32, or as a macro; SetCode as a macro; the column's
+ * test or the row's with its halves the other way round; the column's as one
+ * unsigned comparison; the encoding's index written as a neighbor's with no
+ * steps; index as a u32, or declared first; and passCount declared last.
  */
-#ifdef NON_MATCHING
 void CleanCodeMap(void) {
     s32 passCount = 0;
     s32 column;
     s32 row;
+    s32 index;
 
     f_BuildCursor = HOLE_FILE_BUFFER;
     f_BuildBuffer = f_BuildCursor;
     for (row = 0; row < MAP_ROW_COUNT; row++) {
         for (column = 0; column < MAP_COLUMN_COUNT; column++) {
-            f_BuildCursor = &f_BuildBuffer[(row * MAP_COLUMN_COUNT) + column];
+            /* Kept in the index the passes use, to match */
+            index = CodeIndex(column, row);
+            f_BuildCursor = &f_BuildBuffer[index];
             *f_BuildCursor = GetColorTerrainCode(ReadMapTexel(column, row));
         }
     }
@@ -2288,20 +2371,20 @@ void CleanCodeMap(void) {
     for (; passCount != 0; passCount--) {
         for (row = 0; row < MAP_ROW_COUNT; row++) {
             for (column = 0; column < MAP_COLUMN_COUNT; column++) {
+                /* The code before the cell's, in one variable for both directions, to match */
+                s32 previous;
+
                 if (column > 0 && column < MAP_COLUMN_COUNT - 1) {
-                    FillCodeGap(column, row, 1, 0);
+                    FillCodeGap(index, previous, column, row, 1, 0);
                 }
 
                 if (row > 0 && row < MAP_ROW_COUNT - 1) {
-                    FillCodeGap(column, row, 0, 1);
+                    FillCodeGap(index, previous, column, row, 0, 1);
                 }
             }
         }
     }
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", CleanCodeMap);
-#endif
 
 /* Does nothing */
 void FinishCodeMapCleanup(void) {
