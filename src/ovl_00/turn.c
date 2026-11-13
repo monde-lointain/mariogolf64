@@ -2261,45 +2261,38 @@ void BuildShotPreview(ShotLaunch *swing, s32 playerState) {
  * Draws the shot preview that BuildShotPreview built. On the pause screen it is
  * instead a straight line on screen, from the ball to the preview's last point.
  *
- * Doesn't match: in the free-look line the original loads ball.x and end.x,
- * scales them and converts dx into $f6 before it scales the y values, and
- * converts dy into $f4; this loads them in the order of its statements and
- * converts dx into $f8, so the float registers differ through the line's
- * setup. Scaling and subtracting each axis in turn, either barrier-free, the
- * sum's other order and the sweeps' moves give 49 to 67 words. The register
- * oracle gets no closer than 32 with 13 pseudos forced. 52 words differ, 12
- * in shape.
+ * For that line the original scales dx and dy to the line's half width in
+ * place, in $f6 and $f4, and that both are set twice decides the order of the
+ * insns that first set them. sched.c fills a block from its end, and raises the
+ * priority of an insn that gives a register its only set (birthing_insn_p).
+ * Were dx and dy set once, their conversions from the integer differences would
+ * be such insns and would go last before fabsf's assembly, with the stores of
+ * the scaled coordinates ahead of the subtractions; each scaled end coordinate
+ * would die at its subtraction and local-alloc would give the difference its
+ * register. Set again by the scaling they are not, so the stores, which fabsf's
+ * operand does not wait on, go last: the four scaled coordinates outlive the
+ * subtractions in $a1, $v1, $a2 and $a0, and both differences take $v0.
  *
- * A focused permuter run's best, 50 words (10 in shape), works out dx
- * after scaling ball.x but before scaling end.x, so dx changes; the
- * original subtracts the scaled ball.x from the scaled end.x. Its other
- * change, scale * dy in place of dy * scale, and the same for dx, give 52
- * words (12).
+ * Measured against the match, as words differing and how many of them in shape:
+ *   The offsets as the products dy * scale and dx * scale, dx
+ *   and dy set once                                           60 (12)
+ *   The same with the squares summed dy's first (the old
+ *   draft)                                                    56 (12)
+ *   dy alone scaled in place, offsetY as dx * scale           42 (2)
+ *   dx alone scaled in place, offsetX as dy * scale           58 (4)
+ *   The squares summed dy's first                             6 (0)
+ *   dy worked out before dx                                   28 (0)
+ *   fabsf(dy) tested first                                    4 (0)
+ *   No scale: each scaled as itself times the half width,
+ *   divided by the length                                     41 (19)
+ *   The offsets as s16                                        29 (17)
  *
- * The free-look line's dy was set in a block of its own, which gave 52
- * words, 12 in shape, against 56 without it. But the register oracle's
- * closest result without the block is 22 words, against 24, forcing 14
- * pseudos either way, so the block is gone. 56 words differ, 12 in shape.
- *
- * A focused permuter run works out dy before dx, which gives 48 words, 12 in
- * shape, but the register oracle's closest result is then 37 words, forcing 15
- * pseudos, against 22 forcing 14, so the gain is in the registers alone.
- *
- * Of the 48 orders of the four scalings and two subtractions, five give 44
- * words, 12 in shape, all with dy worked out first; scaling the end point
- * before the ball is the plainest of them. But with it the register oracle
- * gets no closer than those 44, forcing none, against 16 forcing 16 for
- * this order.
- *
- * The original stores the four scaled coordinates after both subtractions;
- * this stores end.x's first, because local-alloc ties its scaled value to
- * dx's difference, where it dies, and the subu then overwrites its register
- * (the oracle's quantity [262+256+254], in $v0). The original keeps the
- * scaled end.x in $a2 past the subu, as though it is still live there.
- * Calling guMtxIdent after the scalings gives 64 words (24 in shape), and
- * after the subtractions 82 (28). 56 words differ, 12 in shape.
+ * Also matching: dy scaled before dx; both scaled where the offsets are set,
+ * together or each before its offset; either scaling spelled out, with scale as
+ * either operand; the half width divided by a length local in each scaling; no
+ * offsets, with dy and dx cast where they are added; and the four coordinates
+ * scaled into locals and stored after the differences.
  */
-#ifdef NON_MATCHING
 void DrawShotPreview(CameraMatrices *matrices) {
     ScreenPoint ball;
     ScreenPoint end;
@@ -2392,7 +2385,10 @@ void DrawShotPreview(CameraMatrices *matrices) {
         dx = end.x - ball.x;
         dy = end.y - ball.y;
         if (fabsf(dx) > 1.0f || fabsf(dy) > 1.0f) {
-            scale = PUTT_PREVIEW_HALF_WIDTH / sqrtf((dy * dy) + (dx * dx));
+            scale = PUTT_PREVIEW_HALF_WIDTH / sqrtf((dx * dx) + (dy * dy));
+            /* Both scaled in place, to match */
+            dx *= scale;
+            dy *= scale;
             gSPLoadGeometryMode(g_DisplayListHead++, 0);
             gSPSetGeometryMode(g_DisplayListHead++, G_SHADE | G_SHADING_SMOOTH);
             gDPSetCombineMode(
@@ -2414,8 +2410,8 @@ void DrawShotPreview(CameraMatrices *matrices) {
                 G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW
             );
             gSPVertex(g_DisplayListHead++, f_PuttPreviewLineVertices, QUAD_VERTEX_COUNT, 0);
-            offsetX = dy * scale;
-            offsetY = dx * scale;
+            offsetX = dy;
+            offsetY = dx;
             gSPModifyVertex(
                 g_DisplayListHead++,
                 0,
@@ -2498,9 +2494,6 @@ void DrawShotPreview(CameraMatrices *matrices) {
         gDPPipeSync(g_DisplayListHead++);
     }
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", DrawShotPreview);
-#endif
 
 /*
  * Returns whether the player's hole-out may enter the records: a short one,
