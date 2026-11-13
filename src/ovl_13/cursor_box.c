@@ -19,6 +19,15 @@
 /* Half the size of the box the cursor frames, whose top-left corner the callers
  * give */
 #define CURSOR_BOX_HALF_SIZE 24
+/* A corner's red swings this far to either side of its middle as its phase
+ * turns */
+#define CURSOR_RED_SWING 127.0f
+#define CURSOR_RED_MIDDLE 127
+#define CURSOR_GREEN COLOR_CHANNEL_MAX
+#define CURSOR_BLUE 32
+#define CURSOR_ALPHA 191
+/* How far each corner's phase turns in a frame */
+#define CURSOR_PHASE_STEP DegreesToRadians(15)
 
 static void *f_CursorBoxImage = NULL;
 static Vtx f_CursorBoxVertices[] = {
@@ -74,42 +83,49 @@ void LoadCursorBox(void *image) {
 /*
  * Draws the cursor box with its top-left corner at the given screen position.
  * Each corner's red pulses with the sine of its own phase, which the four
- * corners start a quarter turn apart. Doesn't match: the original keeps the
- * green and blue in the loop rather than hoisting them, which leaves left in a
- * saved register and the frame 8 bytes smaller. It also keeps corner as a
- * counter rather than turning it into an offset. A u32 corner ties; an s16 or
- * u8 corner, a < test or dropping the barrier give 72-176, and storing the
- * alpha first 44. The original sets the green before the red's clamp and stores
- * it after it. loop.c keeps a variable's set in the loop when the set may not
- * run in every pass, past a label or jump, and is used in another block. Green
- * and blue variables are hoisted wherever they are set (42 words, 10 in shape):
- * set before the clamp, loop.c's dump treats them as always set, and set after
- * it they are used in their own block. A static inline function stepping the
- * phase, in place of the block, gives 173 words (11 in shape), as with no
- * barrier. So does a pointer to the corner's phase, set inside or outside the
- * block or with the step outside it. A pointer to the projection matrix changes
- * nothing. Naming the translation's y as boxY saves 2 words and 2 in shape, and
- * naming x too gains nothing more. The register oracle, forcing 6 pseudos'
- * registers, leaves 12 words at best, so the code differs too. 42 words differ,
- * 10 in shape.
+ * corners start a quarter turn apart.
  *
- * Green and blue variables set at the start of each pass, before the red, and
- * clamped as the red is, keep their sets in the loop: clamping all three gives
- * 38 words (8 in shape), and the register oracle's closest result is then 10
- * words, forcing 4 pseudos; clamping the red and green gives 20 (12), and the
- * red and blue 26 (12). Set after the red and clamped, they give 171 words, as
- * the frame grows by 8 bytes. Clamping a constant has no purpose, so the draft
- * keeps the constant stores. A helper setting a vertex's color and clamping
- * each channel it is given, as a static inline function or a macro, with the
- * red as a variable or an argument, gives 178 words (18 in shape) and the
- * same 8 byte larger frame, as it too clamps the green and blue after the
- * red is worked out.
+ * The green and blue are variables, held to a channel's range as the red is
+ * though they are constants. The original sets both in the loop, where it sets
+ * the alpha in $s5 before the loop: the green in $s0, a saved register as its
+ * life crosses sinf's call, and the blue in $a0 after the call. loop.c moves
+ * out of a loop only a register set once in it, and its dump shows each of the
+ * two with a second set, the one that holds it at zero or above. Stored as
+ * constants, or as variables that are not held, they are set before the loop as
+ * the alpha is.
+ *
+ * Measured against the match, as words differing and how many of them in shape:
+ *   The green and blue not held                               173 (11)
+ *   The green held and not the blue                           135 (7)
+ *   The blue held and not the green                           38 (2)
+ *   The two held only above, or only below                    173 (11)
+ *   The red set before the green                              173 (5)
+ *   The green and then the blue set before the red            167 (5)
+ *   The blue and then the green set before the red            169 (5)
+ *   The blue set before the red and the green after it        8 (0)
+ *   The green held before the red                             38 (2)
+ *   The blue held before the red                              135 (7)
+ *   Both held before the red                                  173 (11)
+ *   The phase stepped in IN_OWN_BLOCK                         143 (11)
+ *   The loop's test as corner < CURSOR_BOX_CORNER_COUNT       141 (11)
+ *   u8 green and blue                                         173 (11)
+ *   The alpha a variable too, held as the others are          139 (9)
+ *   The red stored after the green and blue                   6 (0)
+ *   boxY's difference written in the call                     2 (2)
+ *   The old draft: the green and blue stored as constants and
+ *   the phase stepped in IN_OWN_BLOCK                         42 (10)
+ *
+ * Also matching: the green set before the phase is stepped, or declared in the
+ * loop's block with its value; the blue held before the green; all three held
+ * above and then all three below; the alpha as a variable set after the blue
+ * and not held; and the stepped phase in a local.
  */
-#ifdef NON_MATCHING
 void DrawCursorBox(Gfx **displayListHead, s32 left, s32 top) {
     Gfx *displayList = *displayListHead;
     s32 corner;
     s32 red;
+    s32 green;
+    s32 blue;
     s32 width;
     s32 height;
     s32 boxY;
@@ -117,10 +133,11 @@ void DrawCursorBox(Gfx **displayListHead, s32 left, s32 top) {
     width = ReadImageWidth(f_CursorBoxImage);
     height = ReadImageHeight(f_CursorBoxImage);
     for (corner = 0; corner != CURSOR_BOX_CORNER_COUNT; corner++) {
-        /* In its own block, to match; without it 173 words differ, 11 in shape,
-         * against 42 (10) */
-        IN_OWN_BLOCK(f_CursorCornerPhases[corner] += DegreesToRadians(15));
-        red = (s32)(sinf(f_CursorCornerPhases[corner]) * 127.0f) + 127;
+        f_CursorCornerPhases[corner] += CURSOR_PHASE_STEP;
+        /* The green is set before the red and the blue after it, to match */
+        green = CURSOR_GREEN;
+        red = (s32)(sinf(f_CursorCornerPhases[corner]) * CURSOR_RED_SWING) + CURSOR_RED_MIDDLE;
+        blue = CURSOR_BLUE;
         if (red > COLOR_CHANNEL_MAX) {
             red = COLOR_CHANNEL_MAX;
         }
@@ -129,10 +146,27 @@ void DrawCursorBox(Gfx **displayListHead, s32 left, s32 top) {
             red = 0;
         }
 
+        /* Held as the red is, though they are constants, to match */
+        if (green > COLOR_CHANNEL_MAX) {
+            green = COLOR_CHANNEL_MAX;
+        }
+
+        if (green < 0) {
+            green = 0;
+        }
+
+        if (blue > COLOR_CHANNEL_MAX) {
+            blue = COLOR_CHANNEL_MAX;
+        }
+
+        if (blue < 0) {
+            blue = 0;
+        }
+
         f_CursorBoxVertices[corner].v.cn[0] = red;
-        f_CursorBoxVertices[corner].v.cn[1] = 255;
-        f_CursorBoxVertices[corner].v.cn[2] = 32;
-        f_CursorBoxVertices[corner].v.cn[3] = 191;
+        f_CursorBoxVertices[corner].v.cn[1] = green;
+        f_CursorBoxVertices[corner].v.cn[2] = blue;
+        f_CursorBoxVertices[corner].v.cn[3] = CURSOR_ALPHA;
     }
 
     guOrtho(
@@ -145,6 +179,7 @@ void DrawCursorBox(Gfx **displayListHead, s32 left, s32 top) {
         2000.0f,
         1.0f
     );
+    /* In a variable, to match */
     boxY = (SCREEN_HEIGHT / 2) - CURSOR_BOX_HALF_SIZE - top;
     guTranslate(
         &f_CursorBoxTranslations[g_DrawBufferIndex],
@@ -217,6 +252,3 @@ void DrawCursorBox(Gfx **displayListHead, s32 left, s32 top) {
     gDPPipeSync(displayList++);
     *displayListHead = displayList;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_13/cursor_box", DrawCursorBox);
-#endif
