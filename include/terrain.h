@@ -328,6 +328,31 @@ typedef struct PlaneTriangle {
     /* 0x04 */ s16 corners[AXIS_COUNT][TRIANGLE_CORNER_COUNT];
 } PlaneTriangle; /* size = 0x18 */
 
+/* The length of the legs of the club test's ground triangle */
+#define FLAT_TRIANGLE_LEG 0x100
+
+/*
+ * Sets a triangle's corners to the club test's ground: level at height 0,
+ * with a right angle at the origin and a leg along each of X and Z.
+ *
+ * It is an inline function to match. Taking the triangle's address ahead of
+ * the stores, as the ball simulations' original code does, needs the address
+ * in a variable; with the stores written to the local itself, the address is
+ * only worked out for GetTrianglePlane's call after them. It is at file
+ * scope, as one nested in StepOpeningBallSimulation changes 174 of its words.
+ */
+static inline void SetFlatTriangle(PlaneTriangle *triangle) {
+    triangle->corners[AXIS_X][0] = 0;
+    triangle->corners[AXIS_X][1] = FLAT_TRIANGLE_LEG;
+    triangle->corners[AXIS_X][2] = 0;
+    triangle->corners[AXIS_Y][0] = 0;
+    triangle->corners[AXIS_Y][1] = 0;
+    triangle->corners[AXIS_Y][2] = 0;
+    triangle->corners[AXIS_Z][0] = 0;
+    triangle->corners[AXIS_Z][1] = 0;
+    triangle->corners[AXIS_Z][2] = FLAT_TRIANGLE_LEG;
+}
+
 /* The plane through a triangle: normal . point + distance = 0, with the
  * normal's y at least 0 */
 typedef struct TrianglePlane {

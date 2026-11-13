@@ -696,15 +696,7 @@ s32 StepOpeningBallSimulation(BallSimulation *simulation) {
         simulation->position[AXIS_Z] += simulation->velocity[AXIS_Z];
         if (simulation->purpose == LAUNCH_PURPOSE_CLUB_TEST) {
             if (simulation->position[AXIS_Y] >= 0) {
-                triangle.corners[AXIS_X][0] = 0;
-                triangle.corners[AXIS_X][1] = 0x100;
-                triangle.corners[AXIS_X][2] = 0;
-                triangle.corners[AXIS_Y][0] = 0;
-                triangle.corners[AXIS_Y][1] = 0;
-                triangle.corners[AXIS_Y][2] = 0;
-                triangle.corners[AXIS_Z][0] = 0;
-                triangle.corners[AXIS_Z][1] = 0;
-                triangle.corners[AXIS_Z][2] = 0x100;
+                SetFlatTriangle(&triangle);
                 contact = STEP_FLAG_GROUND_HIT;
                 if (Abs(simulation->position[AXIS_Y]) + Abs(startY) != 0) {
                     fraction = (f32)simulation->position[AXIS_Y] /
@@ -1699,15 +1691,7 @@ s32 StepOpeningBallSimulation(BallSimulation *simulation) {
             if (simulation->purpose == LAUNCH_PURPOSE_CLUB_TEST) {
                 contact = STEP_FLAG_GROUND_HIT;
                 info = &f_OpeningSurfaceInfo[SURFACE_GREEN];
-                triangle.corners[AXIS_X][0] = 0;
-                triangle.corners[AXIS_X][1] = 0x100;
-                triangle.corners[AXIS_X][2] = 0;
-                triangle.corners[AXIS_Y][0] = 0;
-                triangle.corners[AXIS_Y][1] = 0;
-                triangle.corners[AXIS_Y][2] = 0;
-                triangle.corners[AXIS_Z][0] = 0;
-                triangle.corners[AXIS_Z][1] = 0;
-                triangle.corners[AXIS_Z][2] = 0x100;
+                SetFlatTriangle(&triangle);
                 if (f_OpeningClubTestMode == CLUB_TEST_SHOT) {
                     info = &f_OpeningSurfaceInfo[SURFACE_FAIRWAY];
                 }

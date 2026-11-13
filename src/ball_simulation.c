@@ -408,6 +408,11 @@ void ResetBallSimulations(void) {
  * the fraction test. Keeping that flag outside the inner test reproduces the
  * original's unconditional branch-delay-slot assignment: 240 words differ,
  * 54 in shape.
+ *
+ * The club test's flat triangle is set by SetFlatTriangle, an inline
+ * function, so the rolling ball's test takes the triangle's address ahead
+ * of the stores, as the original does in its branch's delay slot. That
+ * left 237 words, 51 in shape.
  */
 #ifdef NON_MATCHING
 s32 StepBallSimulation(BallSimulation *simulation) {
@@ -566,15 +571,7 @@ s32 StepBallSimulation(BallSimulation *simulation) {
         simulation->position[AXIS_Z] = simulation->position[AXIS_Z] + velocity[AXIS_Z];
         if (simulation->purpose == LAUNCH_PURPOSE_CLUB_TEST) {
             if (simulation->position[AXIS_Y] >= 0) {
-                triangle.corners[AXIS_X][0] = 0;
-                triangle.corners[AXIS_X][1] = 0x100;
-                triangle.corners[AXIS_X][2] = 0;
-                triangle.corners[AXIS_Y][0] = 0;
-                triangle.corners[AXIS_Y][1] = 0;
-                triangle.corners[AXIS_Y][2] = 0;
-                triangle.corners[AXIS_Z][0] = 0;
-                triangle.corners[AXIS_Z][1] = 0;
-                triangle.corners[AXIS_Z][2] = 0x100;
+                SetFlatTriangle(&triangle);
                 contact = STEP_FLAG_GROUND_HIT;
                 if (Abs(simulation->position[AXIS_Y]) + Abs(startY) != 0) {
                     fraction = (f32)simulation->position[AXIS_Y] /
@@ -1912,15 +1909,7 @@ s32 StepBallSimulation(BallSimulation *simulation) {
             );
             if (simulation->purpose == LAUNCH_PURPOSE_CLUB_TEST) {
                 info = &f_SurfaceInfo[SURFACE_GREEN];
-                triangle.corners[AXIS_X][0] = 0;
-                triangle.corners[AXIS_X][1] = 0x100;
-                triangle.corners[AXIS_X][2] = 0;
-                triangle.corners[AXIS_Y][0] = 0;
-                triangle.corners[AXIS_Y][1] = 0;
-                triangle.corners[AXIS_Y][2] = 0;
-                triangle.corners[AXIS_Z][0] = 0;
-                triangle.corners[AXIS_Z][1] = 0;
-                triangle.corners[AXIS_Z][2] = 0x100;
+                SetFlatTriangle(&triangle);
                 if (g_ClubTestMode == CLUB_TEST_SHOT) {
                     info = &f_SurfaceInfo[SURFACE_FAIRWAY];
                 }
