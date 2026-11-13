@@ -581,58 +581,55 @@ void GetSaveDataAndMenuMemory(void) {
 #define NO_OK_TEXT (-1)
 
 /*
- * Doesn't match: GCC spills the button's half height to the stack, where the
- * original keeps it in a saved register like the other halves. The oracle found
- * no allocation that avoids the spill. Earlier, a flag held whether the
- * button's half height was empty, as clamping it without the flag gave 65 words
- * when the draft had 54; an if clamping it gives the same code as the flag did.
- * The permuter's best truncates each button size into its half and halves it in
- * a second statement (71 words, 7 in shape, on the current draft; 85 on an
- * earlier one), a split assignment that gives the variable two meanings.
- * Truncating into separate integer locals first changes nothing, and halving
- * the float sizes gives 73 words (37 in shape); swapping the sizes'
- * declarations alone changed nothing. Keeping the window's half width in its
- * own variable, rather than in buttonY before the button's y, took it from 54
- * words differing to 44, 18 in shape either way; where halfWidth is declared
- * makes no difference. Clamping the half width before the half height took it
- * to 36, 18 in shape. The button's half height is clamped by an if, to match,
- * where the other halves use the conditional operator: with that operator it
- * gives 47 words (19 in shape), and with ifs for every half 140 (56); of the 32
- * mixes of the two forms, with either order of the window's halves, this one
- * was the lowest, when the draft gave 36 words. Each button's bottom edge sums
- * its row's offset, the half height and the window's top in that order, which
- * took the draft from 36 words differing to 34, though 18 in shape to 20, and
- * the register oracle's best, with none forced, from 36 to 34; with the half
- * height and the top grouped, as before, 36 words differed, with the top first
- * and the offset and half height grouped the same 34, and the other orders 36
- * to 175. A focused permuter run's best (32 words, 14 in shape) puts the
- * button's top at buttonY - 1, but the original subtracts the button's half
- * height there, from the same register it adds for the bottom. A u16 or u8
- * button half height gives 29 words (19 in shape); the u16 halves the height
- * with srl and stores a halfword, where the original halves it with sra into
- * $s7 and tests it with bgtz as it does the other halves. Subtracting the
- * growth before the half height from the button's y, but not its x, gives 34
- * words with 18 in shape, but the original subtracts the half height first, as
- * here; growth first in both gives 38 words.
+ * Draws the window growing as it opens and shrinking as it closes, by
+ * f_MenuWindowScaleX and f_MenuWindowScaleY, with each size held to 1 or more,
+ * and the OK text above the buttons once it is open, unless okTextShown is
+ * NO_OK_TEXT.
  *
- * The window's right edge is added at its use, where its left edge has a
- * local: a windowRight local beside windowLeft, set in the strip loop or
- * before it, gives 180 words (36 or 34 in shape).
+ * Each cloud strip's edges are worked out from the window's center in the call,
+ * the bottom as the top plus halfHeight. The original works out centerY -
+ * halfHeight before the loop, onto the stack, and the left and right edges in
+ * it. loop.c moves an invariant out of a loop when its threshold times the
+ * invariant's lifetime reaches the loop's count of insns, and takes 3 from the
+ * threshold for each one moved. The threshold is 58 once the strip height's
+ * constant is moved, and with the top's subtraction in it the loop has 59
+ * insns: the left edge, with a lifetime of 1, stays, and the top, with a
+ * lifetime of 2, is moved. With the top worked out before the loop, 58 insns
+ * are left, so the left edge is moved, onto the stack as well, in a frame 8
+ * bytes larger.
  *
- * The original spills windowTop, not the button's half height: forcing the
- * half height into $s7 and windowTop onto the stack, the register oracle
- * leaves 10 words. Global-alloc ranks windowTop (5 references over 110
- * insns, priority 909) above the half height (7 over 294, 476), and
- * windowTop would rank below it only if it lived over 210 insns or its
- * loop used it once. Setting it anywhere among the display list commands
- * before the loop, or in the loop beside windowLeft, gives 36 to 60 words,
- * and after the clamps 155 (25 in shape) with a frame 8 bytes larger.
- * Using it once, with the strip's bottom its top plus halfHeight as the
- * original computes it, in any grouping or through a stripTop local, gives
- * 173 to 198 words with that larger frame, the oracle leaving 59 at best.
- * 34 words differ, 20 in shape.
+ * Measured against the match, as words differing and how many of them in shape:
+ *   The top in a windowTop local set before the loop          140 (16)
+ *   The same, set in the for's first clause                   140 (14)
+ *   The same, set as the loop's first statement               4 (2)
+ *   The same, set before the call after a windowLeft local    138 (14)
+ *   windowLeft and windowRight locals set before the call     166 (22)
+ *   The bottom as centerY + (index * halfHeight)              75 (7)
+ *   The bottom's strip offset and halfHeight grouped          45 (21)
+ *   The bottom's offset as (index + 1) * halfHeight           54 (24)
+ *   The top as centerY + (index * halfHeight) - halfHeight    76 (4)
+ *   The strip offset first in both, before centerY            11 (5)
+ *   The old draft: the top set in the for's first clause, the
+ *   bottom as the offset, halfHeight and the top, and the
+ *   button's half height held by an if                        34 (20)
+ *   The button's half height held by an if                    60 (34)
+ *   Every half held by an if                                  121 (55)
+ *   A half held as (half > 0) ? half : 1                      64 (8)
+ *   halfHeight held before halfWidth                          8 (0)
+ *   halfHeight set after buttonHalfWidth                      4 (4)
+ *   The float sizes held before the halves                    41 (41)
+ *   index as an s32                                           247 (75)
+ *   pulse and growth both cleared before the test             7 (3)
+ *   Both cleared in the else                                  4 (0)
+ *   growth as half of pulse after the test                    75 (19)
+ *   The shrinking pulse's test under an else                  21 (7)
+ *   f_MenuWindowState tested in place of IsMenuWindowOpen     12 (6)
+ *
+ * Also matching: the top in a windowTop local set just before the call, alone
+ * or before a windowLeft local; a windowLeft local alone; the strip's top in a
+ * local of its own, set in one statement; a half held as (half < 1) ? 1 : half;
+ * and buttonX as a conditional expression.
  */
-#ifdef NON_MATCHING
 void DrawYesNoWindow(
     Gfx **displayListHead,
     s32 width,
@@ -651,8 +648,6 @@ void DrawYesNoWindow(
     s32 halfHeight;
     s32 buttonHalfWidth;
     s32 buttonHalfHeight;
-    s32 windowTop;
-    s32 windowLeft;
     s16 index;
     s32 buttonX;
     s32 buttonY;
@@ -719,9 +714,7 @@ void DrawYesNoWindow(
     halfWidth = (halfWidth <= 0) ? 1 : halfWidth;
     halfHeight = (halfHeight <= 0) ? 1 : halfHeight;
     buttonHalfWidth = (buttonHalfWidth <= 0) ? 1 : buttonHalfWidth;
-    if (buttonHalfHeight <= 0) {
-        buttonHalfHeight = 1;
-    }
+    buttonHalfHeight = (buttonHalfHeight <= 0) ? 1 : buttonHalfHeight;
 
     windowWidth = (windowWidth <= 0.0f) ? 1.0f : windowWidth;
     windowHalfHeight = (windowHalfHeight <= 0.0f) ? 1.0f : windowHalfHeight;
@@ -739,7 +732,7 @@ void DrawYesNoWindow(
     gDPPipeSync(gfx++);
     gDPSetRenderMode(gfx++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
     gDPSetCombineMode(gfx++, G_CC_BLENDPEDECALA, G_CC_BLENDPEDECALA);
-    for (index = 0, windowTop = centerY - halfHeight; index != MENU_WINDOW_STRIP_COUNT; index++) {
+    for (index = 0; index != MENU_WINDOW_STRIP_COUNT; index++) {
         LoadNibbleTextureBlock(
             &gfx,
             ImageBody(f_WideCloudImage) +
@@ -755,13 +748,12 @@ void DrawYesNoWindow(
             G_TX_NOLOD,
             G_TX_NOLOD
         );
-        windowLeft = centerX - halfWidth;
         DrawTextureRect(
             &gfx,
-            QuarterPixels(windowLeft),
-            QuarterPixels(windowTop + (index * halfHeight)),
+            QuarterPixels(centerX - halfWidth),
+            QuarterPixels(centerY - halfHeight + (index * halfHeight)),
             QuarterPixels(centerX + halfWidth),
-            QuarterPixels((index * halfHeight) + halfHeight + windowTop),
+            QuarterPixels(centerY - halfHeight + (index * halfHeight) + halfHeight),
             G_TX_RENDERTILE,
             0,
             0,
@@ -801,6 +793,7 @@ void DrawYesNoWindow(
         }
 
         buttonY = centerY + windowHalfHeight - (s32)(f_MenuWindowScaleY * YES_NO_BUTTON_OFFSET);
+        /* growth is cleared before the test and pulse in its else, to match */
         growth = 0;
         if (index == chosenButton) {
             pulse = f_YesNoPulse;
@@ -858,9 +851,6 @@ void DrawYesNoWindow(
 
     *displayListHead = gfx;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/tournament_menu", DrawYesNoWindow);
-#endif
 
 /*
  * DrawClubWindow adds to that window the Nintendo badge of f_NintendoBadge near
@@ -895,7 +885,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/tournament_menu", DrawYesNoWindow);
  * courseTop takes it from 224 words differing (62 in shape) to 166 (26),
  * wherever windowLeft is declared; computing courseLeft before courseTop gives
  * 242 (78), and a windowRight for pictureX changes nothing. Earlier, spelling
- * the edges as DrawYesNoWindow does gave 378 to 442. The register oracle,
+ * the edges as DrawYesNoWindow's draft did gave 378 to 442. The register oracle,
  * forcing 5 pseudos' registers, leaves 152 words at best, so the code differs
  * too. An s16 or s8 badgeHalfWidth gives 165 words but 49 in shape, adding
  * three shifts or masks to the draft's 18, as many as the original has.
@@ -904,7 +894,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/tournament_menu", DrawYesNoWindow);
  * cloud loop because its threshold, 58 once the strip height's constant
  * is hoisted, just reaches the loop's 58 insns; the sum beside it, met
  * at 55, stays. One insn more would keep both in the loop, as in the
- * original. Regrouping the strip's bottom edge, as DrawYesNoWindow does,
+ * original. Regrouping the strip's bottom edge, as DrawYesNoWindow's draft did,
  * or halving the strip offset by a shift adds one, but then the bottom
  * no longer reuses the top and centerX takes a register, giving 308 to
  * 392 words. A stripLeft or stripTop local, the offset through
