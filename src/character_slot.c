@@ -4529,62 +4529,16 @@ const CharacterModel g_OtherCharacterModels[OTHER_CHARACTER_MODEL_COUNT] = {
  * g_CurrentJointMatrices. Each joint's translation, rotation and scale is
  * interpolated between the keys around the frame, or held at the nearest key
  * outside them or past g_CurrentAnimationEndFrame.
- *
- * Doesn't match: GCC keeps frame in $f6, where the original keeps it in
- * $f2, which shifts the other floating-point registers. Reload also puts
- * yy on the stack, in an 8-byte slot above rotation, to free a float pair
- * for a hoisted constant; the original spills nothing, so its locals sit
- * 8 bytes higher (translationMatrix at 0xD0, rotation at 0x190). Pads of
- * 40 to 52 floats give 228 to 280 words, and other orders of the
- * quaternion's products 208 to 342. The register oracle finds no closer
- * allocation, so the code differs too. The permuter's best (199 words, 27
- * in shape) scale rotationProgress by the angle before acosf sets it. A
- * focused permuter run's output, 200 words (32 in shape), reads the
- * rotation span's end frame into an unsigned short for the interpolation
- * test alone, where the field is an s16 and the original loads it there
- * with lh; s16 locals for the span's frames at each of their uses in the
- * interpolation give 206 to 208 words. 206 words differ, 42 in shape.
- *
- * A search over merges of two variables found none with a single meaning
- * that gains: holding the scale's frame in lengthSquared gives 198 words, 42
- * in shape, but would give the quaternion's squared length a second meaning.
- *
- * A later focused run's best reads the span's start frame into an unsigned
- * short for the progress's divisor alone: 259 words (29 in shape), in a
- * frame 8 bytes smaller, reading an s16 field as unsigned. An s16 or s32
- * local for the start frame, used in the divisor alone or in both its reads,
- * and a u16 local used in both, compile as the draft does.
- *
- * The counts above were measured before the change below. The span
- * weights, once scaled by QUATERNION_SCALE, are held in spanFactor and
- * nextFactor rather than scaled in place: the register oracle's split
- * report had shown each weight in one register before the scaling and
- * another after. That takes the draft from 206 words differing, 42 in
- * shape, to 180 (40); declaring the factors before the weights gives
- * 196 (40), and scaling the next weight first changes nothing.
- *
- * The dot product multiplies each of the span's components by the product
- * scale and then by the next span's, where the draft started from the next
- * span's; a search reordering and regrouping products found it, and the
- * scale first, then the two components, gives the same. Of the 12 orders
- * and groupings of each product, written the same way in all four, none
- * does better. That takes the draft from 180 words differing (40 in shape)
- * to 170 (34), and the register oracle's closest from 180 words with no
- * pseudo forced to 170. 170 words differ, 34 in shape.
  */
-#ifdef NON_MATCHING
 void AnimateCharacterJoints(u32 slotIndex) {
-    /* Pads the frame to match; without it 256 words differ, against 180 */
-    f32 unused[46] UNUSED;
+    /* Nothing uses them, but the original's frame has the room for them */
+    f32 unusedMatrices[3][4][4] UNUSED;
     f32 translationMatrix[4][4];
     f32 jointMatrix[4][4];
     f32 scaleMatrix[4][4];
     f32 rotation[4];
-    f32(*rotationMatrix)[4];
     JointAnimation *joint;
     Mtx *matrix;
-    f32 frame;
-    f32 rotationFrame;
     f32 x;
     f32 y;
     f32 z;
@@ -4592,23 +4546,10 @@ void AnimateCharacterJoints(u32 slotIndex) {
     f32 remaining;
     f32 dot;
     Radians angle;
-    f32 nextWeight;
     f32 spanWeight;
     f32 spanFactor;
     f32 nextFactor;
     f32 sinAngle;
-    f32 lengthSquared;
-    f32 xs;
-    f32 ys;
-    f32 zs;
-    f32 wy;
-    f32 wz;
-    f32 xx;
-    f32 yy;
-    f32 zz;
-    f32 xy;
-    f32 yz;
-    f32 xz;
     s16 isInterpolated;
     s32 keyIndex;
     s16 spanIndex;
@@ -4622,11 +4563,11 @@ void AnimateCharacterJoints(u32 slotIndex) {
     }
 
     do {
-        frame = g_CurrentAnimationFrame;
         isInterpolated = TRUE;
-        if (joint->translationSpan.endFrame < frame || frame < joint->translationSpan.startFrame) {
+        if (joint->translationSpan.endFrame < g_CurrentAnimationFrame ||
+            g_CurrentAnimationFrame < joint->translationSpan.startFrame) {
             keyIndex = 1;
-            if (frame < joint->translationFrames[0]) {
+            if (g_CurrentAnimationFrame < joint->translationFrames[0]) {
                 isInterpolated = FALSE;
                 x = joint->translations[0][0];
                 y = joint->translations[0][1];
@@ -4634,7 +4575,7 @@ void AnimateCharacterJoints(u32 slotIndex) {
             }
             else {
                 for (; keyIndex < joint->translationKeyCount; keyIndex++) {
-                    if (frame < joint->translationFrames[keyIndex]) {
+                    if (g_CurrentAnimationFrame < joint->translationFrames[keyIndex]) {
                         joint->translationSpan.index = keyIndex - 1;
                         joint->translationSpan.startFrame = joint->translationFrames[keyIndex - 1];
                         joint->translationSpan.endFrame = joint->translationFrames[keyIndex];
@@ -4659,13 +4600,6 @@ void AnimateCharacterJoints(u32 slotIndex) {
                 z = joint->translations[joint->translationSpan.index][2];
             }
             else {
-                /*
-                 * This and the other two progress fractions read the global again,
-                 * though frame holds it, to match: reading frame in all three gives 328
-                 * words differing (72 in shape), in the translation's alone 214 (44),
-                 * the rotation's 312 (68) and the scale's 214 (44), against the draft's
-                 * 206 (42)
-                 */
                 progress = (g_CurrentAnimationFrame - joint->translationSpan.startFrame) /
                     (joint->translationSpan.endFrame - joint->translationSpan.startFrame);
                 spanIndex = joint->translationSpan.index;
@@ -4682,12 +4616,11 @@ void AnimateCharacterJoints(u32 slotIndex) {
 
         guTranslateF(translationMatrix, x, y, z);
 
-        rotationFrame = g_CurrentAnimationFrame;
         isInterpolated = TRUE;
-        if (joint->rotationSpan.endFrame < rotationFrame ||
-            rotationFrame < joint->rotationSpan.startFrame) {
+        if (joint->rotationSpan.endFrame < g_CurrentAnimationFrame ||
+            g_CurrentAnimationFrame < joint->rotationSpan.startFrame) {
             keyIndex = 1;
-            if (rotationFrame < joint->rotationFrames[0]) {
+            if (g_CurrentAnimationFrame < joint->rotationFrames[0]) {
                 isInterpolated = FALSE;
                 rotation[0] = joint->rotations[0][0] * QUATERNION_SCALE;
                 rotation[1] = joint->rotations[0][1] * QUATERNION_SCALE;
@@ -4696,7 +4629,7 @@ void AnimateCharacterJoints(u32 slotIndex) {
             }
             else {
                 for (; keyIndex < joint->rotationKeyCount; keyIndex++) {
-                    if (rotationFrame < joint->rotationFrames[keyIndex]) {
+                    if (g_CurrentAnimationFrame < joint->rotationFrames[keyIndex]) {
                         joint->rotationSpan.index = keyIndex - 1;
                         joint->rotationSpan.startFrame = joint->rotationFrames[keyIndex - 1];
                         joint->rotationSpan.endFrame = joint->rotationFrames[keyIndex];
@@ -4725,6 +4658,11 @@ void AnimateCharacterJoints(u32 slotIndex) {
             else {
                 /* Its own, as the original allocates it within the branch */
                 f32 rotationProgress;
+                /*
+                 * A variable of its own to match: with rotationProgress scaled in
+                 * place, 35 words differ from the original's (27 in shape)
+                 */
+                f32 coveredAngle;
 
                 spanIndex = joint->rotationSpan.index;
                 nextSpanIndex = spanIndex + 1;
@@ -4738,22 +4676,26 @@ void AnimateCharacterJoints(u32 slotIndex) {
                         joint->rotations[nextSpanIndex][3]);
                 rotationProgress = (g_CurrentAnimationFrame - joint->rotationSpan.startFrame) /
                     (joint->rotationSpan.endFrame - joint->rotationSpan.startFrame);
-                /* Nearly equal rotations are blended linearly, where the sines below
-                 * would be near zero */
+                /*
+                 * Nearly equal rotations are blended linearly, where the sines below
+                 * would be near zero. progress holds the next span's weight from
+                 * here to match: with a variable of its own, 20 words differ from
+                 * the original's
+                 */
                 if (1.0 - dot < SLERP_THRESHOLD) {
-                    nextWeight = rotationProgress;
-                    spanWeight = 1.0 - nextWeight;
+                    progress = rotationProgress;
+                    spanWeight = 1.0 - progress;
                 }
                 else {
                     angle = acosf(dot);
-                    rotationProgress *= angle;
+                    coveredAngle = rotationProgress * angle;
                     sinAngle = sinf(angle);
-                    nextWeight = sinf(rotationProgress) / sinAngle;
-                    spanWeight = sinf(angle - rotationProgress) / sinAngle;
+                    progress = sinf(coveredAngle) / sinAngle;
+                    spanWeight = sinf(angle - coveredAngle) / sinAngle;
                 }
 
                 spanFactor = spanWeight * QUATERNION_SCALE;
-                nextFactor = nextWeight * QUATERNION_SCALE;
+                nextFactor = progress * QUATERNION_SCALE;
                 rotation[0] = (spanFactor * joint->rotations[spanIndex][0]) +
                     (nextFactor * joint->rotations[nextSpanIndex][0]);
                 rotation[1] = (spanFactor * joint->rotations[spanIndex][1]) +
@@ -4765,59 +4707,13 @@ void AnimateCharacterJoints(u32 slotIndex) {
             }
         }
 
-        /* The rotation quaternion (x, y, z, w) as a matrix */
-        lengthSquared = (rotation[2] * rotation[2]) + (rotation[3] * rotation[3]) +
-            (rotation[0] * rotation[0]) + (rotation[1] * rotation[1]);
-        /*
-         * dot holds the quaternion's scale from here, and progress holds the
-         * w and x term: a scale variable gives 197 words differing (51 in
-         * shape), a wx variable 202 (40), and both 219 (51), against the
-         * draft's 180 (40). Measured before the weights' factors had
-         * variables of their own, a static inline converter with its own
-         * locals gave 298 (50), and 318 to 374 with other pads from 30 to 52
-         * floats
-         */
-        if (lengthSquared > 0.0f) {
-            dot = 2.0f / lengthSquared;
-        }
-        else {
-            dot = 0.0f;
-        }
+        QuaternionToMatrix(rotation, jointMatrix);
 
-        rotationMatrix = jointMatrix;
-        xs = rotation[0] * dot;
-        ys = rotation[1] * dot;
-        zs = rotation[2] * dot;
-        progress = rotation[3] * xs;
-        wy = rotation[3] * ys;
-        wz = rotation[3] * zs;
-        xx = rotation[0] * xs;
-        yy = rotation[1] * ys;
-        zz = rotation[2] * zs;
-        xy = rotation[0] * ys;
-        yz = rotation[1] * zs;
-        xz = rotation[0] * zs;
-        rotationMatrix[0][0] = 1.0f - (yy + zz);
-        rotationMatrix[0][1] = xy + wz;
-        rotationMatrix[0][2] = xz - wy;
-        rotationMatrix[0][3] = 0.0f;
-        rotationMatrix[1][0] = xy - wz;
-        rotationMatrix[1][1] = 1.0f - (xx + zz);
-        rotationMatrix[1][2] = yz + progress;
-        rotationMatrix[1][3] = 0.0f;
-        rotationMatrix[2][0] = xz + wy;
-        rotationMatrix[2][1] = yz - progress;
-        rotationMatrix[2][2] = 1.0f - (xx + yy);
-        rotationMatrix[2][3] = 0.0f;
-        rotationMatrix[3][0] = 0.0f;
-        rotationMatrix[3][2] = rotationMatrix[3][1] = 0.0f;
-        rotationMatrix[3][3] = 1.0f;
-
-        frame = g_CurrentAnimationFrame;
         isInterpolated = TRUE;
-        if (joint->scaleSpan.endFrame < frame || frame < joint->scaleSpan.startFrame) {
+        if (joint->scaleSpan.endFrame < g_CurrentAnimationFrame ||
+            g_CurrentAnimationFrame < joint->scaleSpan.startFrame) {
             keyIndex = 1;
-            if (frame < joint->scaleFrames[0]) {
+            if (g_CurrentAnimationFrame < joint->scaleFrames[0]) {
                 isInterpolated = FALSE;
                 x = joint->scales[0][0];
                 y = joint->scales[0][1];
@@ -4825,7 +4721,7 @@ void AnimateCharacterJoints(u32 slotIndex) {
             }
             else {
                 for (; keyIndex < joint->scaleKeyCount; keyIndex++) {
-                    if (frame < joint->scaleFrames[keyIndex]) {
+                    if (g_CurrentAnimationFrame < joint->scaleFrames[keyIndex]) {
                         joint->scaleSpan.index = keyIndex - 1;
                         joint->scaleSpan.startFrame = joint->scaleFrames[keyIndex - 1];
                         joint->scaleSpan.endFrame = joint->scaleFrames[keyIndex];
@@ -4872,20 +4768,6 @@ void AnimateCharacterJoints(u32 slotIndex) {
     }
     while (joint->translationKeyCount != END_OF_JOINT_ANIMATIONS);
 }
-
-#else
-/* The double 1.0, which AnimateCharacterJoints loads as two words */
-const u32 f_JointAnimationOneHighWord = 0x3FF00000;
-const u32 f_JointAnimationOneLowWord = 0;
-
-INCLUDE_ASM("asm/nonmatchings/character_slot", AnimateCharacterJoints);
-/*
- * GCC last wrote the constants above, so it thinks the assembler is still in
- * .rodata, but INCLUDE_ASM left it in .text. Agree with GCC so the string below
- * lands in .rodata.
- */
-RESUME_RODATA_SECTION();
-#endif
 
 NO_RESULT FreeCharacterSlot(u32 slotIndex) {
     osSyncPrintf("D PC[%d]\n", slotIndex);

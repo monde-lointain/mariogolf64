@@ -131,6 +131,48 @@ typedef struct JointAnimation {
 /* The least 1 - cos of the angle between rotations that are slerped */
 #define SLERP_THRESHOLD 1e-06
 
+/*
+ * Sets the matrix to the rotation of the quaternion (x, y, z, w), whatever its
+ * length; a zero quaternion gives the identity.
+ *
+ * AnimateCharacterJoints and UpdateJointKeyframeSpans need it as an inline
+ * function to match: written out in AnimateCharacterJoints, 257 of its words
+ * differ from the original's (55 in shape), and as a plain static function
+ * 158 (88). It sets the rotation's elements by column for the same reason: by
+ * row, 213 words differ (23 in shape).
+ */
+static inline void QuaternionToMatrix(f32 quaternion[4], Mat4 matrix) {
+    f32 lengthSquared = (quaternion[0] * quaternion[0]) + (quaternion[1] * quaternion[1]) +
+        (quaternion[2] * quaternion[2]) + (quaternion[3] * quaternion[3]);
+    f32 scale = (lengthSquared > 0.0f) ? (2.0f / lengthSquared) : 0.0f;
+    /* The components scaled, then their products with the unscaled ones */
+    f32 xs = quaternion[0] * scale;
+    f32 ys = quaternion[1] * scale;
+    f32 zs = quaternion[2] * scale;
+    f32 wx = quaternion[3] * xs;
+    f32 wy = quaternion[3] * ys;
+    f32 wz = quaternion[3] * zs;
+    f32 xx = quaternion[0] * xs;
+    f32 yy = quaternion[1] * ys;
+    f32 zz = quaternion[2] * zs;
+    f32 xy = quaternion[0] * ys;
+    f32 yz = quaternion[1] * zs;
+    f32 xz = quaternion[0] * zs;
+
+    matrix[0][0] = 1.0f - (yy + zz);
+    matrix[1][0] = xy - wz;
+    matrix[2][0] = xz + wy;
+    matrix[0][1] = xy + wz;
+    matrix[1][1] = 1.0f - (xx + zz);
+    matrix[2][1] = yz - wx;
+    matrix[0][2] = xz - wy;
+    matrix[1][2] = yz + wx;
+    matrix[2][2] = 1.0f - (xx + yy);
+    matrix[0][3] = matrix[1][3] = matrix[2][3] = 0.0f;
+    matrix[3][0] = matrix[3][1] = matrix[3][2] = 0.0f;
+    matrix[3][3] = 1.0f;
+}
+
 /* Something that happens on a frame of a CharacterAnimation */
 typedef struct AnimationEvent {
     /* 0x0 */ s16 frame; /* END_OF_ANIMATION_EVENTS ends the list */
