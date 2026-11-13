@@ -2399,11 +2399,15 @@ static inline s32 GetCellOffset(u32 column, u32 row) {
 /* The cell at a byte offset from GetCellOffset */
 #define CellAt(cellOffset) (*(s16 *)AddressPast(g_TerrainCodeCells, (cellOffset)))
 
+/* The offset of a map texel's code in its cell's block of packed codes */
+static inline s32 GetBlockCodeOffset(u32 column, u32 row) {
+    return ((column % TERRAIN_CODE_CELL_SPAN) / 2) +
+        ((row % TERRAIN_CODE_CELL_SPAN) * (TERRAIN_CODE_CELL_SPAN / 2));
+}
+
 /* The offset of a map texel's code in the packed codes */
 static inline s32 GetPackedCodeOffset(s32 block, u32 column, u32 row) {
-    return ((column % TERRAIN_CODE_CELL_SPAN) / 2) +
-        ((row % TERRAIN_CODE_CELL_SPAN) * (TERRAIN_CODE_CELL_SPAN / 2)) +
-        (block * TERRAIN_CODE_BLOCK_SIZE);
+    return GetBlockCodeOffset(column, row) + (block * TERRAIN_CODE_BLOCK_SIZE);
 }
 
 /*
@@ -2411,27 +2415,61 @@ static inline s32 GetPackedCodeOffset(s32 block, u32 column, u32 row) {
  * the cell's block marker
  */
 static inline s32 GetCellCodeOffset(s32 cell, u32 column, u32 row) {
-    return ((column % TERRAIN_CODE_CELL_SPAN) / 2) +
-        ((row % TERRAIN_CODE_CELL_SPAN) * (TERRAIN_CODE_CELL_SPAN / 2)) +
+    return GetBlockCodeOffset(column, row) +
         ((cell & (TERRAIN_CODE_CELL_BLOCK - 1)) * TERRAIN_CODE_BLOCK_SIZE);
 }
 
 /*
  * Sets a map texel's code in a block of packed codes, two to a byte, with
- * the even column's code in the high bits
+ * the even column's code in the high bits. The words that differ are
+ * PaintGroundTiles', which this is part of.
+ *
+ * The odd column's offset within the block is worked out in a block of its
+ * own, and the code block's offset added after it, to match. The original
+ * keeps the byte's offset in $v0 and the byte in $v1 here. The store's basic
+ * block has three quantities: the offset, the code block's shift and the
+ * byte. With three, local-alloc's block_alloc orders them by hand, comparing
+ * quantities 0 and 1, then 1 and 2, then 0 and 1 again whatever the first
+ * two steps swapped, so the offset is placed first, and takes $v0, unless
+ * the shift outranks it and the byte outranks the shift. They rank by
+ * floor_log2(refs) * refs / life, and flow counts each reference once and
+ * once more for every loop around it. Inside the three loops the offset's 9
+ * references count 36 over a life of 16, which is 112500, the shift's 2
+ * count 8 over 2, 120000, and the byte's 6 count 24 over 6, 160000, so the
+ * byte is placed first and takes $v0, with the offset in $v1. The even
+ * columns' stores hold them that way, so jump2 merges the end of this store
+ * with theirs: 26 words differ, 6 in shape. The block's loop notes end
+ * before the code block's shift and bring the offset's count to 41, 128125,
+ * above the shift.
+ *
+ * Only the column's half in the block, with the row's part and the code
+ * block's added after it, matches too (39). The whole offset in the block
+ * gives 26 (6) again, as the shift's count rises with it to 10, 150000,
+ * above the offset's 43, 134375. Indexing in place with GetPackedCodeOffset,
+ * or the same statements without the block, gives 26 (6).
+ *
+ * The even column's code is shifted into a local before the byte is read, to
+ * match: the original shifts it between the load and the mask. Shifted in
+ * the store's expression, here 105 words differ (13 in shape), in the cell's
+ * store below 142 (14), and in both 131 (1). Working the offset out as the
+ * odd column's is gives 7 (3) with both stores done so.
  */
 static inline void SetPackedTerrainCode(s32 block, u32 column, u32 row, s32 code) {
     if (column & 1) {
-        g_WorkArea.hole.terrainCodes[GetPackedCodeOffset(block, column, row)] =
-            (g_WorkArea.hole.terrainCodes[GetPackedCodeOffset(block, column, row)] &
-                EVEN_COLUMN_CODE_MASK) |
-            code;
+        s32 offset;
+
+        IN_OWN_BLOCK(offset = GetBlockCodeOffset(column, row));
+        offset += block * TERRAIN_CODE_BLOCK_SIZE;
+        g_WorkArea.hole.terrainCodes[offset] =
+            (g_WorkArea.hole.terrainCodes[offset] & EVEN_COLUMN_CODE_MASK) | code;
     }
     else {
+        s32 high = code << TERRAIN_CODE_BITS;
+
         g_WorkArea.hole.terrainCodes[GetPackedCodeOffset(block, column, row)] =
             (g_WorkArea.hole.terrainCodes[GetPackedCodeOffset(block, column, row)] &
                 TERRAIN_CODE_MASK) |
-            (code << TERRAIN_CODE_BITS);
+            high;
     }
 }
 
@@ -2468,9 +2506,9 @@ static inline void SetCellTerrainCode(u32 column, u32 row, s32 code) {
             }
 
             /*
-             * The original works the offset out again; storing through cellOffset
-             * gives PaintGroundTiles 237 words differing, 19 in shape, against 134,
-             * 4
+             * The original works the offset out again; storing through
+             * cellOffset gives PaintGroundTiles 125 words differing, 15 in
+             * shape
              */
             CellAt(GetCellOffset(column, row)) = block | TERRAIN_CODE_CELL_BLOCK;
             SetPackedTerrainCode(block, column, row, code);
@@ -2478,8 +2516,15 @@ static inline void SetCellTerrainCode(u32 column, u32 row, s32 code) {
     }
     else {
         /*
-         * The separate stores are there to match: computing the byte's offset
-         * once, into i, gives PaintGroundTiles 159 words differing, 23 in shape
+         * The stores are written out to match, as the original masks the
+         * cell's marker after each column's test: calling
+         * SetPackedTerrainCode with the masked marker gives PaintGroundTiles
+         * 52 words differing, 4 in shape, GetPackedCodeOffset with it in the
+         * even column's store 51 (3), and the byte's offset worked out once,
+         * into i, 147 (19). The odd column's store matches with or without
+         * SetPackedTerrainCode's block: the mask and the shift make a
+         * quantity of two registers that ranks level with the byte, 160000,
+         * so local-alloc places the offset first either way.
          */
         if (column & 1) {
             g_WorkArea.hole.terrainCodes[GetCellCodeOffset(cell, column, row)] =
@@ -2488,10 +2533,12 @@ static inline void SetCellTerrainCode(u32 column, u32 row, s32 code) {
                 code;
         }
         else {
+            s32 high = code << TERRAIN_CODE_BITS;
+
             g_WorkArea.hole.terrainCodes[GetCellCodeOffset(cell, column, row)] =
                 (g_WorkArea.hole.terrainCodes[GetCellCodeOffset(cell, column, row)] &
                     TERRAIN_CODE_MASK) |
-                (code << TERRAIN_CODE_BITS);
+                high;
         }
     }
 }
@@ -2499,24 +2546,15 @@ static inline void SetCellTerrainCode(u32 column, u32 row, s32 code) {
 /*
  * Paints the map's texels from the code map with the course's paint logic, sets
  * each terrain code's color, and stores the painted terrain codes in their
- * cells. Doesn't match: ours keeps the cell's offset and code in other
- * registers, copies the new block's index before repeating the code across the
- * fill word rather than after, and when the blocks run out it branches to the
- * texel loop's increment, where the original's branch-likely does the increment
- * in its delay slot. The register oracle, forcing 25 pseudos' registers, leaves
- * 16 words at best, so the code differs too. Like the original, which shifts it
- * before the search loop, this works out the search's limit once in
- * searchDistance; comparing against the product in the loop gave 134 words
- * differing, 6 in shape. 134 words differ, 4 in shape.
+ * cells.
  *
- * The register oracle's split report puts the cell's offset in one register
- * where it is read and another where a new block's marker is stored, as if
- * they were two values. Storing the marker through the offset worked out
- * again in place, rather than set again in cellOffset, gives 134 words, 4 in
- * shape, against 132, but the oracle's closest falls from 20 words, forcing
- * 26 pseudos, to 16 forcing 25.
+ * The texel loop steps column in its header, with texelIndex, to match: when
+ * the code blocks run out the original leaves SetCellTerrainCode with a
+ * branch-likely that steps texelIndex in its delay slot. Stepped at the end
+ * of the body, plainly or in a block of its own, 3 words differ, all in
+ * shape. The stores in SetPackedTerrainCode and SetCellTerrainCode are
+ * written to match too, as their comments say.
  */
-#ifdef NON_MATCHING
 void PaintGroundTiles(void) {
     GridOffset offsets[PAINT_OFFSET_COUNT];
     u32 codePaintings[TERRAIN_CODE_COUNT];
@@ -2550,9 +2588,8 @@ void PaintGroundTiles(void) {
 
     /*
      * row is there to match: counting with column or an s32 codeIndex of its
-     * own gives 148 words, against 132, 4 in shape each, with texelIndex 162,
-     * and with code 312; the register oracle's closest result is 22 words for
-     * both row and codeIndex, forcing 25 and 27 pseudos
+     * own gives 16 words differing, with texelIndex 40, none in shape, and
+     * with code 194, 10 in shape
      */
     for (row = 0; row < TERRAIN_CODE_COUNT; row++) {
         codePaintings[row] = paint(row, row, 0, 0, 0);
@@ -2567,7 +2604,7 @@ void PaintGroundTiles(void) {
                     [(column / GROUND_TILE_TEXEL_SPAN) +
                         (row / GROUND_TILE_TEXEL_SPAN * GROUND_TILE_COLUMN_COUNT)]
             )[(row & MAP_TILE_MASK) * GROUND_TILE_TEXEL_SPAN];
-            for (texelIndex = 0; texelIndex < GROUND_TILE_TEXEL_SPAN; texelIndex++) {
+            for (texelIndex = 0; texelIndex < GROUND_TILE_TEXEL_SPAN; texelIndex++, column++) {
                 nearestCode = *nextCode++;
                 code = nearestCode;
                 nearestDistance = searchSpans[code];
@@ -2577,10 +2614,10 @@ void PaintGroundTiles(void) {
 
                         /*
                          * The goto is there to match: testing for a fixed painting first
-                         * in an if-else, and searching and painting in its else, gives
-                         * 138 words (10 in shape) against 132 (4); testing for no search
-                         * first gives 243, as does keeping the nesting with the paint
-                         * call in both arms
+                         * in an if-else, and searching and painting in its else, gives 6
+                         * words differing, all in shape; testing for no search first
+                         * gives 111 (31), and keeping the nesting with the paint call in
+                         * both arms 111 (29)
                          */
                         goto PAINTED;
                     }
@@ -2610,7 +2647,6 @@ PAINTED:
 
                 *texel++ = painting >> PAINTED_COLOR_SHIFT;
                 SetCellTerrainCode(column, row, painting & TERRAIN_CODE_MASK);
-                column++;
             }
         }
     }
@@ -2618,9 +2654,6 @@ PAINTED:
     osSyncPrintf("Comp\n");
     f_BuildCursor = f_BuildBuffer;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", PaintGroundTiles);
-#endif
 
 /*
  * Cleans up the terrain code map and repaints the ground tiles from it,
