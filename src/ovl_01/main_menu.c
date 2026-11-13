@@ -146,7 +146,9 @@
 #define TITLE_LABEL_COUNT 7
 #define TITLE_LABEL_WIDTH 128
 #define TITLE_LABEL_HEIGHT 20
-#define TITLE_LABEL_IMAGE_SIZE (TITLE_LABEL_WIDTH * TITLE_LABEL_HEIGHT / 2)
+/* The bytes in one row of a label's texels, which are 4 bits each */
+#define TITLE_LABEL_ROW_SIZE (TITLE_LABEL_WIDTH / 2)
+#define TITLE_LABEL_IMAGE_SIZE (TITLE_LABEL_ROW_SIZE * TITLE_LABEL_HEIGHT)
 /* DrawSpinningStars draws a row of spinning stars, one per hole, from
  * g_MenuArrowSizedImages, and enlarges the chosen hole's */
 #define STAR_WIDTH 32
@@ -5638,55 +5640,93 @@ void DrawMenuBanner(Gfx **displayListHead) {
         MENU_LAYER_PER_SCREEN)
 
 /*
- * Doesn't match: in the lit labels' loop GCC works out labelIndex *
- * TITLE_LABEL_IMAGE_SIZE afresh each pass, where the original steps an offset
- * by 5 alongside the label table's pointers, which also moves the title row's
- * pointer from s0 to t7. loop.c turns the offset down because the loop has 268
- * insns after CSE and the offset is worth 252; the original's loop must be 252
- * insns or fewer. That left 62 words. A permuter run got to 2 only by testing
- * f_TitleLabelCorners around two identical labelOffset branches, and an else if
- * around identical branches gets 16; neither test has any meaning. Another got
- * to 4 words, none in shape, by setting labelOffset to TITLE_LABEL_WIDTH and
- * then multiplying it in, which leaves loop.c a mult whose reduction it rates
- * higher, so it steps the offset even in a 270-insn loop; that split alone
- * gives 6 words. Every constant spelling of the size, in either operand order
- * or with a named size, gives 62 to 73. A u16 labelOffset gives 27 words (17 in
- * shape), and an s16 29 (19). With the u16, loop.c steps the offset, by 0x500
- * where the original steps by 5 and shifts, but each use masks it with andi
- * 0xFFFF, which the original doesn't. Casting only the lit loop's product to
- * u16, a permuter find, does the same in that loop alone: 6 words, 2 in shape,
- * the andi among them.
+ * Draws the title screen: a plain-text menu under the board, the backdrop, the
+ * labels that aren't chosen, and then the chosen ones lit, growing and
+ * shrinking, all but New Game's.
  *
- * Testing the New Game choice once in IsChosenTitleLabel, with ?: or with &&
- * around its two labels, would shorten the lit loop, but gives 93 words (29
- * in shape), and grouping only the New Game labels 88 (24), which suggests
- * the original tests the choice in each of the three cases. Giving the lit
- * loop its own offset or index gives 62 to 74.
+ * In the lit labels' loop the original steps a register by 5 beside the label
+ * table's pointers and shifts it left by 8 for the label's offset into the
+ * texels: loop.c has taken the first half of the product with the image's size
+ * of 0x500, the index times 5, for an induction variable of its own. It steps
+ * one when the variable's lifetime, times its benefit and a threshold, reaches
+ * the loop's insn count. Written as labelIndex * TITLE_LABEL_IMAGE_SIZE the
+ * index times 5 lasts one insn, up to its shift, and is worth 252 against the
+ * lit loop's 268 insns, so it is worked out afresh on each pass, and the title
+ * choice's pointer moves from $s0 to $t7 with it. The unlit loop has 195 insns,
+ * and steps it either way.
  *
- * Edge locals for the lit rectangle (left, top, right and bottom, with
- * or without a halfGrowth) cut the loop to 251 insns, and loop.c then
- * steps the offset by 5 as the original does, but the locals move the
- * table loads ahead of the display list stores: 127 to 266 words. A
- * halfGrowth alone leaves 260 insns and gives 117 words. Counting the
- * image offset in rows or in row bytes, or growth as an s32, doesn't
- * bring the loop under 252 either. 62 words differ, 10 in shape.
+ * Counted in rows first, the offset is the row times TITLE_LABEL_ROW_SIZE,
+ * which is expanded as a shift left by 6 with a note that it equals that
+ * product. The first cse pass joins the row's shift by 2 to it, so the offset
+ * is shifted by 8 from the index times 5 and nothing reads the row any more.
+ * But the note now names the row's register, and as the pass counts a note's
+ * registers as used when it deletes dead insns, the row's shift is left in. At
+ * loop.c's turn the index times 5 is read twice, its lifetime is 2, it is worth
+ * 504 and is stepped; flow deletes the row's shift afterwards. With the row
+ * shifted left by 6 in the source there is no note, the row's insn is deleted
+ * after cse, and the index times 5 lasts one insn again.
+ *
+ * The original's loops don't test the chosen choice's own label alike: the
+ * unlit loop has bnel $v0, $s2 and the lit loop bnel $s2, $v0, where $s2 is
+ * labelIndex. So that term is written out in each loop, the label's index last
+ * in the first and first in the second, and IsChosenNewGameLabel holds the two
+ * terms they share.
+ *
+ * Measured against the match, as words differing and how many of them in shape:
+ *   The old draft: each loop's offset as labelIndex *
+ *   TITLE_LABEL_IMAGE_SIZE, and one test for both             62 (10)
+ *   The lit labels' offset alone as that product              62 (10)
+ *   That product from an inline function                      62 (10)
+ *   That product in a statement expression                    8 (6)
+ *   The same as labelIndex * TITLE_LABEL_HEIGHT *
+ *   TITLE_LABEL_ROW_SIZE, with no row                         62 (10)
+ *   The lit labels' row shifted left by 6                     62 (10)
+ *   The lit labels' offset counted in blocks of 256 bytes
+ *   first, 5 to a label                                       62 (10)
+ *   The same counted first in a row's bytes, and multiplied
+ *   by the height                                             4 (0)
+ *   The lit labels' row as an s16                             16 (8)
+ *   The lit labels' row as a u8                               13 (5)
+ *   The lit labels' offset worked out before Transmit's test,
+ *   and set again under it                                    4 (4)
+ *   The lit labels' row worked out before Transmit's test     61 (11)
+ *   Transmit's row set under the test, and the offset taken
+ *   from the row after it                                     65 (11)
+ *   The label's index swapped for Transmit's under the test,
+ *   and multiplied after it                                   63 (15)
+ *   labelOffset as a u16                                      25 (17)
+ *   labelOffset as an s16                                     27 (19)
+ *   The lit loop's test with the label's index last, as in
+ *   the unlit loop's                                          2 (0)
+ *   The unlit loop's test with the label's index first, as in
+ *   the lit loop's                                            2 (0)
+ *   The lit loop's test with the choice tested as not New
+ *   Game before its label is compared                         8 (4)
+ *   New Game's choice tested once for its two labels          30 (14)
+ *   growth as an s32                                          124 (14)
+ *   The loops' tests as <                                     8 (8)
+ *
+ * Also matching: the unlit labels' offset as the one product, or its row
+ * shifted left by 6; row declared once for the function, or declared in its
+ * block and set after; row or labelOffset as a u32; either product with its
+ * operands the other way round; the row kept in labelOffset and multiplied
+ * there; the row counted in pairs of rows and multiplied by the width; and the
+ * lit labels' row from a statement expression or an inline function, multiplied
+ * by the row's size where it is called.
  */
-#ifdef NON_MATCHING
 const char f_PlainMenuHeading[] = "MAIN MENU";
 const char f_SaveSizesFormat[] = "%8d:%8d:%8d";
 
 /*
- * Whether a title label is the chosen one: New Game and the chosen player
- * count once New Game is chosen, or else the chosen choice's own label
+ * Whether a title label is New Game's or the chosen player count's while New
+ * Game is the chosen choice. A label is the chosen one if it is either of
+ * these, or else the chosen choice's own.
  */
-#    define IsChosenTitleLabel(labelIndex) \
-        ((g_MenuMemory.titleChoice == TITLE_CHOICE_NEW_GAME && \
-             (labelIndex) == TITLE_LABEL_NEW_GAME) || \
-            (g_MenuMemory.titleChoice == TITLE_CHOICE_NEW_GAME && \
-                (labelIndex) == \
-                    g_MenuMemory.playerCountChoice + TITLE_LABEL_FIRST_PLAYER_COUNT) || \
-            (g_MenuMemory.titleChoice + TITLE_LABEL_FIRST_OTHER_CHOICE == (labelIndex) && \
-                g_MenuMemory.titleChoice != TITLE_CHOICE_NEW_GAME))
+#define IsChosenNewGameLabel(labelIndex) \
+    ((g_MenuMemory.titleChoice == TITLE_CHOICE_NEW_GAME && \
+         (labelIndex) == TITLE_LABEL_NEW_GAME) || \
+        (g_MenuMemory.titleChoice == TITLE_CHOICE_NEW_GAME && \
+            (labelIndex) == g_MenuMemory.playerCountChoice + TITLE_LABEL_FIRST_PLAYER_COUNT))
 
 void DrawMenuTitleScreen(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
@@ -5722,7 +5762,9 @@ void DrawMenuTitleScreen(Gfx **displayListHead) {
 
     gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(g_ImageSlots[f_ImageSlotIndex])));
     for (labelIndex = 0; labelIndex != TITLE_LABEL_COUNT; labelIndex++) {
-        if (IsChosenTitleLabel(labelIndex)) {
+        if (IsChosenNewGameLabel(labelIndex) ||
+            (g_MenuMemory.titleChoice + TITLE_LABEL_FIRST_OTHER_CHOICE == labelIndex &&
+                g_MenuMemory.titleChoice != TITLE_CHOICE_NEW_GAME)) {
             continue;
         }
 
@@ -5730,7 +5772,10 @@ void DrawMenuTitleScreen(Gfx **displayListHead) {
             labelOffset = TITLE_LABEL_TRANSMIT * TITLE_LABEL_IMAGE_SIZE;
         }
         else {
-            labelOffset = labelIndex * TITLE_LABEL_IMAGE_SIZE;
+            /* Counted in rows first, as for the lit labels */
+            s32 row = labelIndex * TITLE_LABEL_HEIGHT;
+
+            labelOffset = row * TITLE_LABEL_ROW_SIZE;
         }
 
         gDPLoadTextureBlock_4b(
@@ -5769,12 +5814,18 @@ void DrawMenuTitleScreen(Gfx **displayListHead) {
         TextureAddress(ImageBody(g_MenuLabelImages[f_MenuLabelImageIndex]))
     );
     for (labelIndex = 0; labelIndex != TITLE_LABEL_COUNT; labelIndex++) {
-        if (IsChosenTitleLabel(labelIndex)) {
+        /* The chosen choice's label is compared the other way round here, to match */
+        if (IsChosenNewGameLabel(labelIndex) ||
+            (labelIndex == g_MenuMemory.titleChoice + TITLE_LABEL_FIRST_OTHER_CHOICE &&
+                g_MenuMemory.titleChoice != TITLE_CHOICE_NEW_GAME)) {
             if (labelIndex == TITLE_LABEL_SAVED_GAMES && g_HasBroughtOverCharacter == TRUE) {
                 labelOffset = TITLE_LABEL_TRANSMIT * TITLE_LABEL_IMAGE_SIZE;
             }
             else {
-                labelOffset = labelIndex * TITLE_LABEL_IMAGE_SIZE;
+                /* Counted in rows first, to match */
+                s32 row = labelIndex * TITLE_LABEL_HEIGHT;
+
+                labelOffset = row * TITLE_LABEL_ROW_SIZE;
             }
 
             gDPLoadTextureBlock_4b(
@@ -5838,9 +5889,6 @@ void DrawMenuTitleScreen(Gfx **displayListHead) {
 
 /* Read by no routine */
 const char f_UnusedEmptyString[] = "";
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", DrawMenuTitleScreen);
-#endif
 
 /*
  * The drawing of most of the menu screens: the main menu, the clubhouse, the
