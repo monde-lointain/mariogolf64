@@ -4186,10 +4186,15 @@ void DrawTileAnimation(void) {
 /* The lower rows' texture coordinates stop a quarter texel short, in 10.5 fixed
  * point */
 #define LOWER_TILE_TEXCOORD_INSET 8
-/* The index of the tile grid vertex at a row and column. It is a macro because
-   DrawTurnAwayAnimation compiles further from the original with an inline
-   function. */
+/* The index of the tile grid vertex at a row and column */
 #define GridVertex(row, column) ((column) + ((row) * TILE_GRID_COLUMN_COUNT))
+/* The grid vertices at the corners of the tile at a row and column. The lower
+ * ones are counted on from the upper left in the grid's row order, a row's
+ * vertices further on, and not as the next row's, to match. */
+#define TileUpperLeft(row, column) GridVertex(row, column)
+#define TileUpperRight(row, column) GridVertex(row, (column) + 1)
+#define TileLowerLeft(row, column) GridVertex(row, (column) + TILE_GRID_COLUMN_COUNT)
+#define TileLowerRight(row, column) GridVertex(row, (column) + TILE_GRID_COLUMN_COUNT + 1)
 static Mtx f_TurnAwayMatrices[MATRIX_BUFFER_COUNT];
 
 void DrawTurnAwayAnimation(void);
@@ -4197,53 +4202,70 @@ void DrawTurnAwayAnimation(void);
 /*
  * Draws HUD_ANIMATION_TURN_AWAY.
  *
- * Doesn't match: the original keeps the texture image command in a saved
- * register and adds the lower corners' offsets to the row's first vertex
- * inside the loops, and registers are allocated differently. GCC's loop
- * optimizer moves more out of the loops when its threshold is one higher.
- * Writing the corners' expressions differently in each loop gets closer, but
- * no single form matches. The permuter's best output, 2715 against 3450 (81
- * words differing, 23 in shape), holds the last column in a variable and
- * splits the corners into temporaries; its natural parts, the matrix address
- * or the lower right corner in a local, gave 106 and 102 words differing (30
- * and 36 in shape). A local for each tile's first vertex, with the other
- * corners as offsets from it, gave 126 to 159 words differing (34 to 55 in
- * shape) in any one tile loop and 167 to 234 in two or three, when the draft
- * gave 106. The lower rows' tile width is chosen by an if/else, which took
- * the draft from 106 words to 104, 30 in shape either way, and the register
- * oracle's best from 51 words to 49; set first and overridden for the last
- * column, as before, it gave 106, a conditional operator gives the same 104,
- * and the upper rows' width chosen by an if/else gave 158.
+ * All four of a tile's corners are named from the tile's own row, the lower
+ * ones a row's vertices further on in the column, so that the row's product
+ * with the grid's column count is one value they share. Where it draws the
+ * textured tiles the original keeps that product and the upper right's sum of
+ * it and 1 in registers stepped once a row, $s3 and $s5 for the upper rows, and
+ * adds the lower corners' 6 and 7 to the product inside the column loop. loop.c
+ * moves the product out of the column loop for its long life, and the upper
+ * right's sum with it as the product's last use; the lower corners' sums each
+ * last one instruction, too short a life for it to move them out of so long a
+ * loop. The backs' loop is short and all four are moved out of it.
  *
- * Each row's first vertex is held in rowStart, which a focused permuter
- * run's best pointed at by holding row * 6 in a temporary. In all three
- * tile loops it takes the draft from 104 words to 111 but from 30 in
- * shape to 17, and the register oracle's closest result from 49 words,
- * forcing 17 pseudos, to 41, forcing 24. In one loop alone it gave 102 to
- * 179 words (24 to 33 in shape); a nextRowStart for the lower corners as
- * well, 106 to 197 (28 to 75), and 134 (22) in all three loops, with the
- * oracle's closest 56; the next row written as an offset from rowStart,
- * 137 or 235; and GridVertex with the row's product first, 110 (30).
+ * Named as the next row's, the lower corners have a product of their own, which
+ * is moved out of the column loops as well. With each row's first vertex in a
+ * local set outside the column loop, the upper right's sum stays in the loop
+ * with the others.
  *
- * The upper rows' tile width is now chosen by an if/else too, which on this
- * base takes the draft from 111 words to 89, 17 in shape to 13, and the
- * register oracle's closest result from 41 words, forcing 24 pseudos, to 39,
- * forcing 20. The loop that draws the upper rows' triangles holding its
- * row's first vertex in a local of its own gives 88 words (16 in shape), but
- * the oracle's closest rises to 44, forcing 21, and with both changes 95
- * words (21) differ.
+ * Measured against the match, as words differing and how many of them in shape:
+ *   The lower corners as the next row's, GridVertex(row + 1,
+ *   ...), in all three loops                                  158 (36)
+ *   The same in the upper rows' textured loop alone           102 (20)
+ *   The same in the backs' loop alone                         8 (2)
+ *   The same in the lower rows' loop alone                    48 (14)
+ *   The lower left alone as the next row's, in the upper
+ *   rows' textured loop                                       20 (8)
+ *   The same in the lower rows' loop                          19 (11)
+ *   The lower right alone as the next row's, in the upper
+ *   rows' textured loop                                       50 (14)
+ *   The same in the backs' loop                               8 (2)
+ *   The same in the lower rows' loop                          37 (9)
+ *   Each row's first vertex in a local and the corners added
+ *   to it, in both textured loops                             51 (17)
+ *   The same in all three loops                               125 (21)
+ *   The same in the upper rows' textured loop alone           77 (15)
+ *   The same in the lower rows' loop alone                    50 (12)
+ *   The same in both textured loops, with the vertex after it
+ *   in a second local                                         22 (10)
+ *   The old draft: the first vertex in a local, the lower
+ *   corners as the next row's and the upper rows' lower right
+ *   in a local                                                45 (11)
+ *   GridVertex as an inline function                          213 (53)
+ *   GridVertex with the row's product first                   24 (0)
+ *   The upper right as the upper left plus 1                  99 (21)
+ *   The lower right as the lower left plus 1                  111 (11)
+ *   The lower left as the upper left plus a row's vertices    121 (21)
+ *   The tile's width set first and overridden for the last
+ *   column, in both textured loops                            34 (6)
+ *   The same in the upper rows' loop alone                    24 (4)
+ *   The same in the lower rows' loop alone                    10 (2)
+ *   The row loops' tests as <                                 11 (11)
+ *   The column loops' tests as <                              20 (12)
+ *   The lower right in a local, in both textured loops        14 (4)
+ *   The same in either loop alone                             6 (2)
+ *   The lower left in a local, in both textured loops         14 (4)
+ *   The same in either loop alone                             4 (2)
+ *   The upper right in a local, in both textured loops        38 (4)
+ *   The same in the upper rows' loop alone                    28 (2)
+ *   The same in the lower rows' loop alone                    10 (2)
+ *   The upper left in a local, in both textured loops         72 (0)
  *
- * A permuter run's best pointed at the upper rows' lower right corner in a
- * local, set once the upper left corner is placed, and at their triangle
- * loop naming each corner by GridVertex alone, without rowStart. Together
- * they take the draft from 89 words to 45, 13 in shape to 11, leaving the
- * loops' induction variables chosen differently; the register oracle no
- * longer gets closer by forcing pseudos, where it gave 39 words forcing 20.
- * The loop alone gives 78 words (22 in shape), the local alone 109 (11),
- * and the local set before the upper left corner or at the column's start,
- * 45 (15) or 73 (27). 45 words differ, 11 in shape.
+ * Also matching: the backs' lower left as the next row's; the lower right's
+ * offset written as 1 plus a row's vertices; the tile's width chosen by a
+ * conditional operator; and the upper left in a local in either one of the
+ * textured loops.
  */
-#ifdef NON_MATCHING
 void DrawTurnAwayAnimation(void) {
     Vec3 rotation;
     Vec3 translation;
@@ -4252,8 +4274,6 @@ void DrawTurnAwayAnimation(void) {
     s32 row;
     s32 column;
     s32 width;
-    s32 rowStart;
-    s32 lowerRight;
 
     if (f_HudAnimationFramesLeft > 0) {
         rotation[AXIS_X] = 0.0f;
@@ -4299,7 +4319,6 @@ void DrawTurnAwayAnimation(void) {
         gDPSetCombineMode(g_DisplayListHead++, G_CC_DECALRGB, G_CC_DECALRGB);
         gDPPipeSync(g_DisplayListHead++);
         for (row = 0; row != TURN_AWAY_UPPER_ROW_COUNT; row++) {
-            rowStart = GridVertex(row, 0);
             for (column = 0; column != FRAME_TILE_COLUMN_COUNT; column++) {
                 gDPLoadTextureBlock(
                     g_DisplayListHead++,
@@ -4324,36 +4343,40 @@ void DrawTurnAwayAnimation(void) {
                     width = FRAME_TILE_WIDTH;
                 }
 
-                gSPModifyVertex(g_DisplayListHead++, column + rowStart, G_MWO_POINT_ST, 0);
-                lowerRight = GridVertex(row + 1, column + 1);
                 gSPModifyVertex(
                     g_DisplayListHead++,
-                    GridVertex(row + 1, column),
+                    TileUpperLeft(row, column),
+                    G_MWO_POINT_ST,
+                    0
+                );
+                gSPModifyVertex(
+                    g_DisplayListHead++,
+                    TileLowerLeft(row, column),
                     G_MWO_POINT_ST,
                     TexelCoordinate(FRAME_TILE_ROWS)
                 );
                 gSPModifyVertex(
                     g_DisplayListHead++,
-                    lowerRight,
+                    TileLowerRight(row, column),
                     G_MWO_POINT_ST,
                     TexcoordWord(TexelCoordinate(width), TexelCoordinate(FRAME_TILE_ROWS))
                 );
                 gSPModifyVertex(
                     g_DisplayListHead++,
-                    (column + 1) + rowStart,
+                    TileUpperRight(row, column),
                     G_MWO_POINT_ST,
                     TexcoordWord(TexelCoordinate(width), 0)
                 );
                 gDPPipeSync(g_DisplayListHead++);
                 gSP2Triangles(
                     g_DisplayListHead++,
-                    column + rowStart,
-                    GridVertex(row + 1, column),
-                    lowerRight,
+                    TileUpperLeft(row, column),
+                    TileLowerLeft(row, column),
+                    TileLowerRight(row, column),
                     0,
-                    column + rowStart,
-                    lowerRight,
-                    (column + 1) + rowStart,
+                    TileUpperLeft(row, column),
+                    TileLowerRight(row, column),
+                    TileUpperRight(row, column),
                     0
                 );
                 gDPPipeSync(g_DisplayListHead++);
@@ -4367,13 +4390,13 @@ void DrawTurnAwayAnimation(void) {
             for (column = 0; column != FRAME_TILE_COLUMN_COUNT; column++) {
                 gSP2Triangles(
                     g_DisplayListHead++,
-                    GridVertex(row + 1, column + 1),
-                    GridVertex(row + 1, column),
-                    GridVertex(row, column),
+                    TileLowerRight(row, column),
+                    TileLowerLeft(row, column),
+                    TileUpperLeft(row, column),
                     0,
-                    GridVertex(row, column + 1),
-                    GridVertex(row + 1, column + 1),
-                    GridVertex(row, column),
+                    TileUpperRight(row, column),
+                    TileLowerRight(row, column),
+                    TileUpperLeft(row, column),
                     0
                 );
             }
@@ -4390,7 +4413,6 @@ void DrawTurnAwayAnimation(void) {
             0
         );
         for (row = 0; row != TURN_AWAY_LOWER_ROW_COUNT; row++) {
-            rowStart = GridVertex(row, 0);
             for (column = 0; column != FRAME_TILE_COLUMN_COUNT; column++) {
                 gDPLoadTextureBlock(
                     g_DisplayListHead++,
@@ -4416,16 +4438,21 @@ void DrawTurnAwayAnimation(void) {
                 }
 
                 gDPPipeSync(g_DisplayListHead++);
-                gSPModifyVertex(g_DisplayListHead++, column + rowStart, G_MWO_POINT_ST, 0);
                 gSPModifyVertex(
                     g_DisplayListHead++,
-                    GridVertex(row + 1, column),
+                    TileUpperLeft(row, column),
+                    G_MWO_POINT_ST,
+                    0
+                );
+                gSPModifyVertex(
+                    g_DisplayListHead++,
+                    TileLowerLeft(row, column),
                     G_MWO_POINT_ST,
                     TexelCoordinate(FRAME_TILE_ROWS) - LOWER_TILE_TEXCOORD_INSET
                 );
                 gSPModifyVertex(
                     g_DisplayListHead++,
-                    GridVertex(row + 1, column + 1),
+                    TileLowerRight(row, column),
                     G_MWO_POINT_ST,
                     TexcoordWord(
                         TexelCoordinate(width) - LOWER_TILE_TEXCOORD_INSET,
@@ -4434,19 +4461,19 @@ void DrawTurnAwayAnimation(void) {
                 );
                 gSPModifyVertex(
                     g_DisplayListHead++,
-                    (column + 1) + rowStart,
+                    TileUpperRight(row, column),
                     G_MWO_POINT_ST,
                     TexcoordWord(TexelCoordinate(width) - LOWER_TILE_TEXCOORD_INSET, 0)
                 );
                 gSP2Triangles(
                     g_DisplayListHead++,
-                    column + rowStart,
-                    GridVertex(row + 1, column),
-                    GridVertex(row + 1, column + 1),
+                    TileUpperLeft(row, column),
+                    TileLowerLeft(row, column),
+                    TileLowerRight(row, column),
                     0,
-                    column + rowStart,
-                    GridVertex(row + 1, column + 1),
-                    (column + 1) + rowStart,
+                    TileUpperLeft(row, column),
+                    TileLowerRight(row, column),
+                    TileUpperRight(row, column),
                     0
                 );
                 gDPPipeSync(g_DisplayListHead++);
@@ -4460,9 +4487,6 @@ void DrawTurnAwayAnimation(void) {
     }
 }
 
-#else
-INCLUDE_ASM("asm/nonmatchings/hole_display", DrawTurnAwayAnimation);
-#endif
 
 /*
  * Copies the frame that a HUD animation that has just started breaks apart
