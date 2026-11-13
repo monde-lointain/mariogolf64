@@ -876,32 +876,38 @@ void DrawYesNoWindow(
  * buttons with the chosen one pulsing, the Nintendo badge for a Nintendo
  * tournament, the course image, the picture and the OK text once the window is
  * open. The window grows and shrinks as DrawYesNoWindow's does.
- */
-/*
- * Doesn't match: GCC works out a texture rectangle's edge (a difference with
- * the value in $s4) early and keeps it on the stack, where the original
- * subtracts at the call. The spill makes the frame 8 bytes larger, 0x118 rather
- * than 0x110, which moves every stack offset. Working out windowLeft before
- * courseTop takes it from 224 words differing (62 in shape) to 166 (26),
- * wherever windowLeft is declared; computing courseLeft before courseTop gives
- * 242 (78), and a windowRight for pictureX changes nothing. Earlier, spelling
- * the edges as DrawYesNoWindow's draft did gave 378 to 442. The register oracle,
- * forcing 5 pseudos' registers, leaves 152 words at best, so the code differs
- * too. An s16 or s8 badgeHalfWidth gives 165 words but 49 in shape, adding
- * three shifts or masks to the draft's 18, as many as the original has.
  *
- * The edge is centerX less badgeTop, and loop.c hoists it out of the
- * cloud loop because its threshold, 58 once the strip height's constant
- * is hoisted, just reaches the loop's 58 insns; the sum beside it, met
- * at 55, stays. One insn more would keep both in the loop, as in the
- * original. Regrouping the strip's bottom edge, as DrawYesNoWindow's draft did,
- * or halving the strip offset by a shift adds one, but then the bottom
- * no longer reuses the top and centerX takes a register, giving 308 to
- * 392 words. A stripLeft or stripTop local, the offset through
- * ImageBodyAt and other loop tests leave 58 insns. 166 words differ, 26
- * in shape.
+ * The badge's strips are placed from badgeX, a copy of centerX made before
+ * their loop. The original loads centerX from the stack into $s4 there and
+ * keeps it over the loop, where the cloud's loop loads it for each strip: with
+ * centerX itself in the badge's loop, centerX takes a saved register for the
+ * whole function and buttonHalfWidth goes to the stack. The cloud strips' edges
+ * are worked out in the call as DrawYesNoWindow's are, for the reason given
+ * there.
+ *
+ * Measured against the match, as words differing and how many of them in shape:
+ *   centerX in place of badgeX                                314 (64)
+ *   badgeX set in the badge's loop                            314 (64)
+ *   The cloud's top in a windowTop local set in the for's
+ *   first clause                                              140 (12)
+ *   The cloud strip's bottom as centerY + (index *
+ *   halfHeight)                                               55 (7)
+ *   The window's half width kept in badgeTop until the
+ *   badge's top is set                                        30 (0)
+ *   No windowLeft, its sum written in courseX's               60 (36)
+ *   windowLeft set after courseTop                            60 (36)
+ *   courseX set before courseTop                              78 (52)
+ *   No pipe sync before the badge's rectangle                 59 (17)
+ *   The old draft: no badgeX, the cloud's top set in the
+ *   for's first clause, and the window's half width kept in
+ *   badgeTop                                                  166 (26)
+ *
+ * Also matching: badgeX set after badgeTop, or before the badge's palette is
+ * loaded; badgeX or halfWidth declared anywhere among the locals; the window's
+ * half width kept in badgeX until the badge's loop; the cloud's top in a
+ * windowTop local set just before the call; and a windowRight local for
+ * pictureX.
  */
-#ifdef NON_MATCHING
 void DrawClubWindow(
     Gfx **displayListHead,
     s32 width,
@@ -924,6 +930,7 @@ void DrawClubWindow(
     f32 courseStripHeight;
     f32 pictureWidth;
     f32 pictureHeight;
+    s32 halfWidth;
     s32 halfHeight;
     s32 buttonHalfWidth;
     s32 buttonHalfHeight;
@@ -938,17 +945,12 @@ void DrawClubWindow(
     s32 buttonY;
     s32 pulse;
     s32 growth;
-    /*
-     * The window's half width, then the badge's top, to match: a separate
-     * halfWidth, wherever declared, gives 214 words differing (26 in shape)
-     * against the draft's 166 (26)
-     */
+    s32 badgeX;
     s32 badgeTop;
-    s32 courseLeft;
+    s32 courseX;
     s32 courseTop;
     s32 pictureX;
     s32 pictureY;
-    s32 windowTop;
 
     GetMenuMemory();
     switch (f_MenuWindowState) {
@@ -1021,7 +1023,7 @@ void DrawClubWindow(
             return;
     }
 
-    badgeTop = (s32)windowWidth / 2;
+    halfWidth = (s32)windowWidth / 2;
     halfHeight = windowHalfHeight;
     buttonHalfWidth = (s32)buttonWidth / 2;
     buttonHalfHeight = (s32)buttonHeight / 2;
@@ -1032,7 +1034,7 @@ void DrawClubWindow(
     pictureHalfWidth = (s32)pictureWidth / 2;
     pictureHalfHeight = (s32)pictureHeight / 2;
 
-    badgeTop = (badgeTop <= 0) ? 1 : badgeTop;
+    halfWidth = (halfWidth <= 0) ? 1 : halfWidth;
     halfHeight = (halfHeight <= 0) ? 1 : halfHeight;
     buttonHalfWidth = (buttonHalfWidth <= 0) ? 1 : buttonHalfWidth;
     buttonHalfHeight = (buttonHalfHeight <= 0) ? 1 : buttonHalfHeight;
@@ -1066,7 +1068,7 @@ void DrawClubWindow(
     gDPPipeSync(gfx++);
     gDPSetRenderMode(gfx++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
     gDPSetCombineMode(gfx++, G_CC_BLENDPEDECALA, G_CC_BLENDPEDECALA);
-    for (index = 0, windowTop = centerY - halfHeight; index != MENU_WINDOW_STRIP_COUNT; index++) {
+    for (index = 0; index != MENU_WINDOW_STRIP_COUNT; index++) {
         LoadNibbleTextureBlock(
             &gfx,
             ImageBody(f_WideCloudImage) +
@@ -1084,10 +1086,10 @@ void DrawClubWindow(
         );
         DrawTextureRect(
             &gfx,
-            QuarterPixels(centerX - badgeTop),
-            QuarterPixels(windowTop + (index * halfHeight)),
-            QuarterPixels(centerX + badgeTop),
-            QuarterPixels(windowTop + (index * halfHeight) + halfHeight),
+            QuarterPixels(centerX - halfWidth),
+            QuarterPixels(centerY - halfHeight + (index * halfHeight)),
+            QuarterPixels(centerX + halfWidth),
+            QuarterPixels(centerY - halfHeight + (index * halfHeight) + halfHeight),
             G_TX_RENDERTILE,
             0,
             0,
@@ -1127,6 +1129,7 @@ void DrawClubWindow(
         }
 
         buttonY = centerY + windowHalfHeight - (s32)(f_MenuWindowScaleY * YES_NO_BUTTON_OFFSET);
+        /* As in DrawYesNoWindow, to match */
         growth = 0;
         if (index == chosenButton) {
             pulse = f_YesNoPulse;
@@ -1178,6 +1181,8 @@ void DrawClubWindow(
         gDPPipeSync(gfx++);
         gDPSetTextureLUT(gfx++, G_TT_RGBA16);
         LoadLargePalette(&gfx, ImageBody(f_NintendoBadge));
+        /* A copy of centerX for the badge's loop, to match */
+        badgeX = centerX;
         badgeTop =
             (s32)(centerY - windowHalfHeight + (s32)(f_MenuWindowScaleY * NINTENDO_BADGE_OFFSET)) -
             badgeStripRows;
@@ -1201,9 +1206,9 @@ void DrawClubWindow(
             gDPPipeSync(gfx++);
             DrawTextureRect(
                 &gfx,
-                QuarterPixels(centerX - badgeHalfWidth),
+                QuarterPixels(badgeX - badgeHalfWidth),
                 QuarterPixels(badgeTop + (index * badgeStripRows)),
-                QuarterPixels(centerX + badgeHalfWidth),
+                QuarterPixels(badgeX + badgeHalfWidth),
                 QuarterPixels(badgeTop + (index * badgeStripRows) + badgeStripRows),
                 G_TX_RENDERTILE,
                 0,
@@ -1219,7 +1224,7 @@ void DrawClubWindow(
     courseTop =
         (s32)(centerY + windowHalfHeight - (s32)(f_MenuWindowScaleY * WINDOW_IMAGE_OFFSET_Y)) -
         courseStripRows;
-    courseLeft = windowLeft + (s32)(f_MenuWindowScaleX * WINDOW_IMAGE_OFFSET_X);
+    courseX = windowLeft + (s32)(f_MenuWindowScaleX * WINDOW_IMAGE_OFFSET_X);
     LoadLargePalette(&gfx, ImageBody(f_ClubCourseIcon));
     for (index = 0; index != COURSE_IMAGE_STRIP_COUNT; index++) {
         LoadTextureBlock(
@@ -1240,9 +1245,9 @@ void DrawClubWindow(
         );
         DrawTextureRect(
             &gfx,
-            QuarterPixels(courseLeft - courseHalfWidth),
+            QuarterPixels(courseX - courseHalfWidth),
             QuarterPixels(courseTop + (index * courseStripRows)),
-            QuarterPixels(courseLeft + courseHalfWidth),
+            QuarterPixels(courseX + courseHalfWidth),
             QuarterPixels(courseTop + (index * courseStripRows) + courseStripRows),
             G_TX_RENDERTILE,
             0,
@@ -1304,10 +1309,6 @@ void DrawClubWindow(
 
     *displayListHead = gfx;
 }
-
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/tournament_menu", DrawClubWindow);
-#endif
 
 /*
  * Stretches the wide cloud image, in two strips, around a center; no routine
