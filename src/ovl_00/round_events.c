@@ -2393,70 +2393,103 @@ void DrawReadyGoMovie(Gfx **displayListHead) {
 
 /*
  * Unused: draws the movie image in f_MovieBuffer, shrinking it from double size
- * to its own size
+ * to its own size.
  *
- * Doesn't match: the original copies width to $s1 before the sound for the
- * scale's (width >> 1), and its strip loop keeps bottom stepping by
- * stripHeight, takes stripHeight * 4 from it inside the loop, and leaves
- * offset * 6 unreduced. loop.c moves an invariant only while threshold times
- * its savings and lifetime reach the loop's insn count, and lowers the
- * threshold by 3 for each register it moves, so the original's loop is longer
- * or meets its invariants in another order. Taking top from bottom, as bottom
- * less 4 strips, hoists stripHeight * 4 into $fp and spills stripCount (107
- * words differing, 27 in shape); taking top from the strip index, as here,
- * leaves stripCount in $fp but drops bottom's stepping. Pointer and corner
- * locals in the loop, stepping bottom by hand, a while loop, a u32 offset and
- * taking offset from the strip index give 107 to 119 words. A permuter run got
- * to 50 words, 12 in shape, only by dropping the 4 strips from top and reading
- * an unset variable; its other changes, naming the image's height and writing
- * 1.0f + cosf(angle), leave 54. A second run got to 40 words, 14 in shape, by
- * taking top as 104 + (i - 4) * 4, which drops the strip height. The register
- * oracle's closest result is these 54 words with no register forced, so
- * allocation isn't the cause. 54 words differ, 24 in shape.
+ * The original copies the image's width from $s6 to $s1 before the sound, and
+ * halves the copy for the horizontal texel step. A plain copy doesn't last:
+ * once loop.c has moved the step's shifts ahead of the loop, the second cse
+ * pass reads width in them and the copy is dropped. Narrowed to 16 bits and
+ * widened again, the copy is two insns that cse can't follow back to width.
+ * combine, which knows the top half of a width read as two bytes is clear, then
+ * makes of the two a plain move, and as it works within a block, the shift
+ * ahead of the loop is left an arithmetic one. A cast or a mask is a single
+ * insn, which combine has nothing to join to, and stays an andi. A u16 halved
+ * in the loop has its widening moved out with the shift, and combine joins
+ * those as an srl.
  *
- * A third focused run's best, 1817 points from 2465, declares offset as a
- * char, which would wrap the strip's offset into the image after 255 bytes,
- * and copies the palette's address and the strip's distance from the center
- * into new locals. Naming that distance and adding it to the center gives 54
- * words, and taking top as i strips below the center, less 4 strips, gives
- * 109 to 128 (27 to 34 in shape) in each order of the terms.
+ * left and texelStep are worked out ahead of DrawTextureRect's call for the
+ * order loop.c meets the loop's invariants in. It moves one out while its
+ * threshold, times the invariant's savings and lifetime, reaches the loop's
+ * insn count. The threshold starts at 61, as the loop has calls, and drops by 3
+ * for each register moved; the strip loop has 52 insns. LoadTextureBlock's
+ * strip height of 6 is moved at 61, the center's 160 and left at 58 and 55, and
+ * the texel step's two shifts at 52 and 49. That leaves 46 for stripHeight * 4
+ * and for the right edge's sum, each used once, in the next insn, so both stay
+ * in the loop as in the original. With the step written in the call its shifts
+ * come after the edges: stripHeight * 4 is met at 52 and moved out, to a tenth
+ * register kept across the calls, and stripCount goes to the stack. With left's
+ * difference written in the call, the shifts are moved first and the two pairs
+ * swap places ahead of the loop.
  *
- * Per loop.c's dump (-dL), the strip loop has 51 real insns when loop.c
- * scans it, and its threshold starts at 61, one more than MIPS's 60
- * registers that aren't fixed, as the loop has calls. The draft's loop
- * moves the constant 6 at 61, so the original's, which leaves that
- * constant and CENTER_X + halfWidth in the loop but moves CENTER_X -
- * halfWidth and (width >> 1) << 10, had at least 62. Indexing the strip
- * as i * width, without offset, gives the original's code for the strip's
- * address, offset stepping by width with offset * 6 unreduced, as loop.c
- * can't fold a giv whose multiplier is a register; it gives 81 words (19
- * in shape). Writing top as CENTER_Y + i * stripHeight less 4 strips
- * folds back to the draft's (i - 4) * stripHeight, and setting the first
- * sum in a statement of its own keeps stripHeight * 4 a movable of its
- * own, but with 52 insns loop.c still moves it (113 words, 25 in shape).
- * Routing the corners and texel steps through inline helpers adds no
- * insns.
+ * The 6 is moved out as well, but the nine saved registers go to width,
+ * stripCount, halfWidth, stripHeight, i, left, the shifted half width, and the
+ * two registers loop.c steps for the strip's offset and for bottom. With no
+ * register it is loaded again where it is used, by reload, into $t2. A loop of
+ * 62 insns would keep stripHeight * 4 in without the two locals, but keeps the
+ * 6 in too, in $v0.
  *
- * A second width variable for the texel step, copied from width or read
- * with it before the sound test, leaves 54 words, as cse folds the copy
- * back into width. Declaring width as u16, s16, u32 or u8 gives 73, 61, 87
- * and 80 words, and stripCount as u16, s16 or u32 changes nothing.
+ * The strip's address is taken from i * width, which loop.c reduces to a
+ * register stepped by width, leaving the product with the strip's height in the
+ * loop as the original has it. bottom, as in DrawPuttCaption, is reduced to a
+ * register stepped by stripHeight from the center.
+ *
+ * Measured against the match, as words differing and how many of them in shape:
+ *   The old draft                                             54 (24)
+ *   texelWidth copied from width as it is, or the step taken
+ *   from width                                                6 (2)
+ *   texelWidth set to (u16)width or to width & 0xFFFF         2 (2)
+ *   A u16 texelWidth set to width, with no narrowWidth        2 (2)
+ *   narrowWidth as an s16                                     4 (2)
+ *   texelWidth as a u32                                       12 (10)
+ *   The copy made before stripCount is worked out             14 (10)
+ *   The copy made after the sound                             8 (6)
+ *   narrowWidth set before the sound and texelWidth after it  4 (4)
+ *   texelWidth read again from the image through a (u16) cast 9 (3)
+ *   halfWidth worked out from texelWidth                      2 (0)
+ *   No left, its difference written in the call               4 (4)
+ *   texelStep worked out before left                          4 (4)
+ *   The center in a centerX set in the loop, in place of left 4 (4)
+ *   No texelStep, the step written in the call, with or
+ *   without left                                              118 (26)
+ *   The right edge in a local as well                         90 (26)
+ *   The vertical step in a local worked out before texelStep  107 (27)
+ *   left and texelStep worked out before LoadTextureBlock     165 (67)
+ *   The same before the loop                                  170 (66)
+ *   The strip's address from an offset stepped by width       31 (7)
+ *   bottom as the center plus (i - 4) * stripHeight, used as
+ *   the strip's top                                           87 (19)
+ *   The rectangle's bottom as bottom less 3 strips            110 (28)
+ *   The loop's test as <                                      79 (3)
+ *   Neither local, and a slide clamped at the loop's start as
+ *   DrawPuttCaption's is, never read                          4 (2)
+ *
+ * Also matching: narrowWidth and texelWidth set in one chained assignment; the
+ * right edge's sum with halfWidth first; left as quarter pixels; bottom worked
+ * out before left, or between left and texelStep; the strip's top in a local of
+ * its own, taken from bottom; the vertical step in a local worked out after
+ * texelStep; texelStep as the shifted half width alone, divided in the call;
+ * the image's height in a local; and the new locals declared after i.
  */
-#ifdef NON_MATCHING
 void DrawShrinkingMovieImage(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     s32 width;
+    u16 narrowWidth;
+    s32 texelWidth;
     s32 stripCount;
     Radians angle;
     s32 halfWidth;
     s32 stripHeight;
+    s32 left;
+    s32 bottom;
+    s32 texelStep;
     s32 i;
-    s32 offset;
-    s32 top;
 
     stripHeight = MOVIE_IMAGE_STRIP_HEIGHT;
     width = ReadImageWidth(f_MovieBuffer);
     stripCount = ReadImageHeight(f_MovieBuffer) / stripHeight;
+    /* Narrowed to 16 bits and widened again, to match */
+    narrowWidth = width;
+    texelWidth = narrowWidth;
     if (f_MovieDrawCount == SHRINKING_IMAGE_SOUND_DRAW) {
         PlaySoundWithEffects(
             SOUND_SHRINKING_IMAGE,
@@ -2499,12 +2532,11 @@ void DrawShrinkingMovieImage(Gfx **displayListHead) {
         halfWidth = (cosf(angle) + 1.0f) * width * 0.5f;
         stripHeight = (cosf(angle) + 1.0f) * MOVIE_IMAGE_STRIP_HEIGHT;
         if (halfWidth > 0 && stripHeight > 0) {
-            offset = 0;
             for (i = 0; i != stripCount; i++) {
                 LoadTextureBlock(
                     &gfx,
                     f_MovieBuffer +
-                        ((offset * MOVIE_IMAGE_STRIP_HEIGHT) + MOVIE_IMAGE_PIXELS_OFFSET),
+                        ((i * width * MOVIE_IMAGE_STRIP_HEIGHT) + MOVIE_IMAGE_PIXELS_OFFSET),
                     G_IM_FMT_CI,
                     G_IM_SIZ_8b,
                     width,
@@ -2517,21 +2549,24 @@ void DrawShrinkingMovieImage(Gfx **displayListHead) {
                     G_TX_NOLOD,
                     G_TX_NOLOD
                 );
-                top = SHRINKING_IMAGE_CENTER_Y +
-                    ((i - SHRINKING_IMAGE_STRIPS_ABOVE_CENTER) * stripHeight);
+                /* Both worked out ahead of the call, to match */
+                left = SHRINKING_IMAGE_CENTER_X - halfWidth;
+                texelStep = TexelRunStep((texelWidth >> 1), halfWidth);
+                bottom = SHRINKING_IMAGE_CENTER_Y + (i * stripHeight);
                 DrawTextureRect(
                     &gfx,
-                    QuarterPixels(SHRINKING_IMAGE_CENTER_X - halfWidth),
-                    QuarterPixels(top),
+                    QuarterPixels(left),
+                    QuarterPixels(bottom - (stripHeight * SHRINKING_IMAGE_STRIPS_ABOVE_CENTER)),
                     QuarterPixels(SHRINKING_IMAGE_CENTER_X + halfWidth),
-                    QuarterPixels(top + stripHeight),
+                    QuarterPixels(
+                        bottom - (stripHeight * SHRINKING_IMAGE_STRIPS_ABOVE_CENTER) + stripHeight
+                    ),
                     G_TX_RENDERTILE,
                     0,
                     0,
-                    TexelRunStep((width >> 1), halfWidth),
+                    texelStep,
                     TexelRunStep(MOVIE_IMAGE_STRIP_HEIGHT, stripHeight)
                 );
-                offset += width;
             }
         }
     }
@@ -2539,9 +2574,6 @@ void DrawShrinkingMovieImage(Gfx **displayListHead) {
     gDPPipeSync(gfx++);
     *displayListHead = gfx;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_00/round_events", DrawShrinkingMovieImage);
-#endif
 
 /* A Monty Mole pops out of the green */
 void DrawMontyMoleMovie(Gfx **displayListHead) {
