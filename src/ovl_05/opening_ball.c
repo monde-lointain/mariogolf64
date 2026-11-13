@@ -382,173 +382,7 @@ static UNUSED_FUNCTION void ResetOpeningBallSimulations(void) {
  * The sparks it starts on a stroke's pin and wall hits are called at ovl_00's
  * addresses, which lie in the opening's BSS while it is loaded. Returns the
  * STEP_FLAG_* bits for the step.
- *
- * Doesn't match: the nested helpers match. The substep loop's hoisted
- * 0.5f now sits in $f30 as in the original; of the 552 differing lines,
- * 216 use floating-point registers. On an older base, forcing the
- * original's registers on 61 pseudos left 632 words at best, so the code
- * differs too. Reading the side spin before the drag, and adding the
- * velocity to the spin's push rather than the other way round, took it
- * from 676 words differing to 662. The water skip's last two tests are
- * grouped, as the original branches on the rolling state and then the
- * impact speed: in one chain fold_truthop ors their flags (662). Working
- * out the horizontal speed before the side spin's magnitude, as
- * StepBallSimulation does, took it from 652 words, 248 in shape, to
- * 422 (182). Naming the lift per unit of spin, as a permuter run's float
- * temp suggested, takes it to 395 (167) wherever the local is declared;
- * scaling weight in place instead gives 412 (170). The register oracle,
- * forcing 53 pseudos' registers, leaves 188 words at best, so the code
- * differs too. The original's add.s for the x and z velocities takes the
- * velocity first and the wind's pull second, as velocity + pull does,
- * where the draft writes pull + velocity; written as the original orders
- * them, both lines gave 397 words, and the x line alone 393, with the
- * draft at 395. A billboard hit now updates the ball in
- * StepBallSimulation's order: the bounce count, the position, the last
- * bounce step, then both spins, which took the draft from 395 words (167
- * in shape) to 337 (149); of the 58 other orders of those five steps that
- * divide the spin speed before the side spin, the best gave 341 (153).
- * With that, writing the x line as velocity + pull gave 343 words, the z
- * line as pull + velocity 341, and both 345. With the draft at 247
- * words (111 in shape), velocity + pull gave 245 words in the x line
- * alone, 249 in the z line alone and 249 in both, and with both the
- * register oracle got no closer than 128 words forcing 32, against the
- * draft's 124 forcing 32; at 237 words (109), they give 235, 239 and 239.
- * Both bounces set the last bounce step after the three velocities, as
- * StepBallSimulation's do, which took the draft from 337 words (149 in
- * shape) to 325 (141); moving the first alone gave 329 (145), the second
- * alone 333 (145). Each substep copies stepFlags to previousStepFlags
- * after saving the start and the previous velocity, as StepBallSimulation
- * does, which took the draft from 325 words (141 in shape) to 314 (138);
- * with the start's y saved before its x as well, 316 (138). The lift
- * decays the spin after all three velocity updates, as StepBallSimulation
- * does, which took the draft from 314 words (138 in shape) to 296 (126).
- * The cup pull sets toCup in axis order, as StepBallSimulation does, and
- * a wall hit's reflection sets all three velocities before clearing the
- * spin, which took the draft from 296 words (126 in shape) to 290 (122);
- * alone, they gave 292 (124) and 294 (124). The ground spin's grip clears
- * the spin after both velocity updates, as StepBallSimulation's does,
- * which took the draft from 290 words (122 in shape) to 288 (120).
- * Holding the side spin in an s32, the field's type, and testing it for
- * the curve's sign keeps 288 words, takes the shape from 120 to 114 and
- * the register oracle from 129 words forcing 34 pseudos to 127 forcing
- * 35. Scaling the wall hit's x velocity into a local before its hit
- * position gives 278 words (106 in shape), but not for y and z: locals
- * for all three first give 328, one step local set for each axis in turn
- * 289 (101), and the contact fraction in a local 288. Writing the x line
- * as the sibling writes its z, or its triangle hit's x, gives 290 and
- * 298. The floor's in-cup and rolling tests read simulation->state after
- * GetGroundHeight, as StepBallSimulation's do, where a state local set
- * before the call gives 278 words (112 in shape) against 237 (109).
- *
- * The side spin's curve and the lift each weigh the ball's speed against
- * its spin, with their own ratio and weight; one ratio and one weight for
- * both gave 247 words differing (109 in shape), a weight for each takes
- * it to 237 (109), and a ratio for each as well keeps 237.
- *
- * Adding the wind's pull to the x velocity, rather than the velocity to the
- * pull, gives 235 words (109 in shape), but only two floating-point
- * registers change, and z's would then be written the other way round.
- *
- * Writing windX and windZ as scale times the wind's velocity, rather than
- * the velocity times scale, gives 235 words, 109 in shape, but the register
- * oracle's closest result rises from 118 words, forcing 31 pseudos, to 124,
- * forcing 29.
- *
- * The water's stop test compares the ball's height with the water's depth
- * below it, as StepBallSimulation's matched test does, where the draft put
- * the depth first; a permuter run pointed to it. That takes the draft from
- * 237 words (109 in shape) to 217 (107), and the register oracle from 132
- * words forcing 38 pseudos to 130 forcing 37.
- *
- * A later permuter run's best, 205 words (99 in shape), holds the X axis's
- * wall step and the curve's per-spin weight in locals and tests the stop
- * depth with <= one less. The X step alone gives 207 words (99 in shape) and
- * the oracle's closest 128 forcing 45, but holding all three axes' steps
- * gives 887; the per-spin weight alone gives 215 (107) and 128 forcing 41,
- * though the original multiplies in the draft's order; and its gravity test
- * made an else-if alone changes nothing.
- *
- * The air step reads the side spin after the horizontal speed, just before
- * scaling it, where the draft read it among the relative velocity's axes;
- * a sweep moving each assignment found it. That takes the draft from 217
- * words (107 in shape) to 210 (104), and the register oracle's closest
- * from 132 words forcing 43 pseudos to 125 forcing 42.
- *
- * The original tests the lip-out speed with c.le.s and bc1t, as KMC GCC
- * compiles !(speed >= limit) or a return when speed >= limit, where ours
- * has c.lt.s and bc1f. Testing the state first gives 240 words (114 in
- * shape), and speed as an f32 253 (121). 210 words differ, 104 in shape.
- *
- * The height-scaled wind multiplies the scale by each wind axis, where the
- * low wind multiplies each axis by its constant; a search swapping twin
- * sums' and products' operands found it. That takes the draft from 210
- * words to 208, 104 in shape either way, and the register oracle's closest
- * from 125 words forcing 42 pseudos to 121 forcing 36. StepBallSimulation's
- * copy is unchanged by it.
- *
- * The wall hit's positions multiply the step share by the contact fraction
- * and then the velocity, and the speed kept after a bounce multiplies its
- * scale by the softness and the steepness twice, each product written in
- * that order; a search reordering and regrouping products found them. Both
- * take the draft from 208 words (104 in shape) to 185 (83), and the
- * register oracle's closest from 121 words forcing 36 pseudos to 100
- * forcing 35; the wall hit's alone gives 193 (91), the kept speed's alone
- * 200 (96).
- *
- * The curve multiplies the side spin by CURVE_PER_SIDE_SPIN and then by the
- * weight, as StepBallSimulation's now does, which took the draft from 185
- * words to 183, 83 in shape either way, and the register oracle's closest
- * from 100 words, forcing 35 pseudos, to 96, forcing 33.
- *
- * The original works out the cup pull's depth in atan2's delay slot and
- * one less the alignment in a later branch's, as StepBallSimulation's
- * order of depth, angle, alignment and clamp does. Written in that
- * order, with the pull scaled by the alignment, those two match, but
- * CUP_PULL_OUTER_RADIUS, which the range test loads, is then not worth
- * hoisting from the substep loop, so it takes the 0.5f's $f30, and the
- * draft goes to 426 words (114 in shape); the register oracle forces
- * nothing. Forcing the constant onto the stack and the 0.5f into $f30
- * leaves 97 words, forcing 46 pseudos, against the draft's 96 forcing
- * 33. Turning only the alignment around gives 192 words (76 in shape),
- * and working out the depth before the angle 411 (121).
- *
- * After FindHoleTriangleHit and the putter's FindMiniGolfGroundHit, the
- * original copies the result from $v0 into $a0 before testing it, and it
- * copies IntLength2D's result into $v1 before the stop speed test; ours
- * tests $v0. Forcing the two hit flags into $a0 gives 170 words, but no
- * declaration, type, scope, ?: or assignment in the condition does, nor
- * one flag for both hits, nor an s32 or u32 speed local. That left 183
- * words, 83 in shape.
- *
- * The rolling ball's vertical velocity is set by a conditional
- * expression, adding the gravity to the velocity when the drop to the
- * ground is at least it and to the drop otherwise, as the original
- * stores it once for all four arms; with an if and else in each
- * gravity's branch, each arm stored it. That takes the draft from 183
- * words (83 in shape) to 172 (78), the register oracle's closest staying
- * at 96 words, forcing 32 pseudos where it forced 33. Testing the drop
- * with <, as the if did, gives 183 words (81 in shape), and taking the
- * lesser of the two first and then adding the gravity 170 (86).
- * StepBallSimulation's float copy so written gives 796 words. That left
- * 172 words, 78 in shape.
- *
- * The curve's push along each axis is worked out before either is added
- * to the velocity. The original reads both axes of the relative velocity
- * before storing the new X velocity, but sched.c can't move those reads
- * above that store, both being parts of aggregates, so with each push
- * worked out in its own sum the draft stored X first. That takes the
- * draft from 172 words differing (78 in shape) to 140 (68), and the
- * register oracle's closest from 96 words, forcing 32 pseudos, to 86,
- * forcing 26; adding each push with = and the sum written out gives 168
- * (68). That left 140 words, 68 in shape.
- *
- * Each landing surface's case clamps its spin at zero itself, as
- * StepBallSimulation's cases clamp theirs, where the draft clamped once
- * after the switch. That takes the draft from 140 words differing (68 in
- * shape) to 116 (52), and the register oracle's closest from 86 words,
- * forcing 26 pseudos, to 66, forcing 24. 116 words differ, 52 in shape.
  */
-#ifdef NON_MATCHING
 s32 StepOpeningBallSimulation(BallSimulation *simulation) {
     PlaneTriangle triangle;
 
@@ -715,8 +549,14 @@ s32 StepOpeningBallSimulation(BallSimulation *simulation) {
                 contact = 0;
             }
             else {
-                s32 hitsBillboard;
-                s32 holeHit;
+                /*
+                 * Each hit test's result in turn: the putter's ground contact,
+                 * the billboard's hit, then the hole triangle's. One variable
+                 * holds all three to match: the original copies the first and
+                 * the last out of $v0 before testing them, as it does for a
+                 * variable set in several places.
+                 */
+                s32 hit;
 
                 if (IsStrokeOrTrialLaunch(simulation->purpose) &&
                     FindRingHit(
@@ -751,7 +591,7 @@ s32 StepOpeningBallSimulation(BallSimulation *simulation) {
                         &f_OpeningContactFraction
                     );
                     if (g_GameState.isMiniGolf && simulation->state == BALL_STATE_ROLLING) {
-                        s32 putterContact = FindMiniGolfGroundHit(
+                        hit = FindMiniGolfGroundHit(
                             simulation,
                             startX,
                             startY,
@@ -763,14 +603,14 @@ s32 StepOpeningBallSimulation(BallSimulation *simulation) {
                             &fraction
                         );
 
-                        if (putterContact && fraction < f_OpeningContactFraction) {
-                            contact = putterContact;
+                        if (hit && fraction < f_OpeningContactFraction) {
+                            contact = hit;
                             osSyncPrintf("PutterSpecialGroundCollision\n");
                             f_OpeningContactTriangle = triangle;
                             f_OpeningContactFraction = fraction;
                         }
                     }
-                    hitsBillboard = FALSE;
+                    hit = FALSE;
                 }
                 else {
                     contact = FindGroundHit(
@@ -783,13 +623,13 @@ s32 StepOpeningBallSimulation(BallSimulation *simulation) {
                         &f_OpeningContactTriangle,
                         &f_OpeningContactFraction
                     );
-                    hitsBillboard = FALSE;
+                    hit = FALSE;
                 }
 
                 if (simulation->state == BALL_STATE_FLYING) {
                     if (simulation->lastBounceStep + BILLBOARD_HIT_BOUNCE_GAP <
                         simulation->stepCount) {
-                        hitsBillboard = FindSimulationBillboardHit(
+                        hit = FindSimulationBillboardHit(
                             startX,
                             startY,
                             startZ,
@@ -802,11 +642,11 @@ s32 StepOpeningBallSimulation(BallSimulation *simulation) {
                         );
                     }
                     else {
-                        hitsBillboard = FALSE;
+                        hit = FALSE;
                     }
                 }
 
-                if (hitsBillboard && contact == STEP_FLAG_GROUND_HIT) {
+                if (hit && contact == STEP_FLAG_GROUND_HIT) {
                     if (f_OpeningContactFraction <= fraction) {
                         contact = STEP_FLAG_GROUND_HIT;
                         triangle = f_OpeningContactTriangle;
@@ -816,7 +656,7 @@ s32 StepOpeningBallSimulation(BallSimulation *simulation) {
                         contact = STEP_FLAG_BILLBOARD_HIT;
                     }
                 }
-                else if (hitsBillboard) {
+                else if (hit) {
                     contact = STEP_FLAG_BILLBOARD_HIT;
                 }
                 else if (contact == STEP_FLAG_GROUND_HIT) {
@@ -829,7 +669,7 @@ s32 StepOpeningBallSimulation(BallSimulation *simulation) {
 
                 if (simulation->state == BALL_STATE_FLYING ||
                     simulation->state == BALL_STATE_ROLLING) {
-                    holeHit = FindHoleTriangleHit(
+                    hit = FindHoleTriangleHit(
                         startX,
                         startY,
                         startZ,
@@ -841,10 +681,10 @@ s32 StepOpeningBallSimulation(BallSimulation *simulation) {
                     );
                 }
                 else {
-                    holeHit = FALSE;
+                    hit = FALSE;
                 }
 
-                if (holeHit && (contact == 0 || f_OpeningContactFraction <= fraction)) {
+                if (hit && (contact == 0 || f_OpeningContactFraction <= fraction)) {
                     contact = STEP_FLAG_HOLE_TRIANGLE_HIT;
                     triangle = f_OpeningContactTriangle;
                     fraction = f_OpeningContactFraction;
@@ -901,11 +741,26 @@ s32 StepOpeningBallSimulation(BallSimulation *simulation) {
                         }
                     }
 
+                    /*
+                     * The opening plays no flagstick sound, but the original
+                     * copies the speed out of $f0 as if for a later use. The
+                     * volume StepBallSimulation plays that sound at is such a
+                     * use, and all of it compiles away; that it is what the
+                     * original had here is a guess.
+                     */
                     if (pinHit == PIN_HIT_FLAGSTICK) {
-                        GetOpeningLength2D(
+                        BallSpeed speed = GetOpeningLength2D(
                             simulation->velocity[AXIS_X],
                             simulation->velocity[AXIS_Z]
                         );
+
+                        if (speed > KilometersPerHour(1)) {
+                            SoundVolume volume = speed * FLAGSTICK_SOUND_VOLUME_PER_SPEED;
+
+                            if (volume >= SOUND_FULL_SCALE) {
+                                volume = MAX_KNOCK_VOLUME;
+                            }
+                        }
                     }
 
                     if (simulation->state == BALL_STATE_ROLLING) {
@@ -991,7 +846,6 @@ s32 StepOpeningBallSimulation(BallSimulation *simulation) {
                                 f32 toCup[3];
                                 f32 direction[3];
                                 f32 alignment;
-                                f32 depth;
                                 Radians angle;
                                 f32 pull;
 
@@ -1025,16 +879,29 @@ s32 StepOpeningBallSimulation(BallSimulation *simulation) {
                                     alignment = 0.0f;
                                 }
 
+                                /*
+                                 * pull first holds the ball's depth into the
+                                 * pull's range, and is scaled by the alignment
+                                 * in a statement of its own, to match. The
+                                 * original works the depth out before atan2's
+                                 * call, where the scheduler puts it; written
+                                 * there, the depth uses CUP_PULL_OUTER_RADIUS
+                                 * too soon after the range test does for
+                                 * loop.c to hoist the constant from the
+                                 * substep loop, and it gets $f24 where the
+                                 * original loads it at each use.
+                                 */
                                 angle = atan2(toCup[AXIS_Z], toCup[AXIS_X]);
-                                depth = CUP_PULL_OUTER_RADIUS - (f32)cupDistance;
-                                if (depth > CUP_PULL_DEPTH_RANGE) {
-                                    depth = CUP_PULL_DEPTH_RANGE;
+                                alignment = 1.0f - alignment;
+                                pull = CUP_PULL_OUTER_RADIUS - (f32)cupDistance;
+                                if (pull > CUP_PULL_DEPTH_RANGE) {
+                                    pull = CUP_PULL_DEPTH_RANGE;
                                 }
 
-                                pull = ((sinf(depth * ((f32)M_PI / CUP_PULL_DEPTH_RANGE)) *
-                                            CUP_PULL_RISE) +
-                                           MIN_CUP_PULL) *
-                                    (1.0f - alignment);
+                                pull = (sinf(pull * ((f32)M_PI / CUP_PULL_DEPTH_RANGE)) *
+                                           CUP_PULL_RISE) +
+                                    MIN_CUP_PULL;
+                                pull *= alignment;
                                 simulation->velocity[AXIS_X] =
                                     simulation->velocity[AXIS_X] * CUP_PULL_DRAG;
                                 simulation->velocity[AXIS_Z] =
@@ -1057,7 +924,13 @@ s32 StepOpeningBallSimulation(BallSimulation *simulation) {
                                     simulation->velocity[AXIS_Z]
                                 );
 
-                                if ((f32)speed < OPENING_MAX_LIP_OUT_SPEED &&
+                                /*
+                                 * The speed's test is written as not at least
+                                 * the limit to match: the original tests it
+                                 * with c.le.s and bc1t, where < compiles to
+                                 * c.lt.s and bc1f.
+                                 */
+                                if (!((f32)speed >= OPENING_MAX_LIP_OUT_SPEED) &&
                                     simulation->state == BALL_STATE_ROLLING) {
                                     f32 keep = speed * (1.0f / LIP_OUT_FULL_SPEED);
                                     BallSpeed fallSpeed;
@@ -1316,6 +1189,12 @@ s32 StepOpeningBallSimulation(BallSimulation *simulation) {
 
             simulation->bounceCount++;
             GetTrianglePlane(&triangle, &plane);
+            /*
+             * Empty, for the notes it leaves: they end the first cse pass's
+             * path from the call, so the bounce works out plane's address
+             * anew, as the original does, rather than keep it in $s0.
+             */
+            IN_OWN_BLOCK(;);
             simulation->position[AXIS_X] = startX + (fraction * simulation->velocity[AXIS_X]);
             simulation->position[AXIS_Y] = startY + (fraction * simulation->velocity[AXIS_Y]);
             simulation->position[AXIS_Z] = startZ + (fraction * simulation->velocity[AXIS_Z]);
@@ -1818,16 +1697,37 @@ s32 StepOpeningBallSimulation(BallSimulation *simulation) {
             simulation->velocity[AXIS_Z] =
                 (slopeZ * friction * SLOPE_PULL_SCALE) + (simulation->velocity[AXIS_Z] * friction);
             if (simulation->purpose != LAUNCH_PURPOSE_CLUB_TEST && g_GameState.isMiniGolf) {
-                simulation->velocity[AXIS_Y] =
-                    (groundHeight - startY >= simulation->velocity[AXIS_Y]) ?
-                    simulation->velocity[AXIS_Y] + (s32)MINI_GOLF_ROLL_GRAVITY :
-                    groundHeight - startY + (s32)MINI_GOLF_ROLL_GRAVITY;
+                if (groundHeight - startY < simulation->velocity[AXIS_Y]) {
+                    simulation->velocity[AXIS_Y] =
+                        groundHeight - startY + (s32)MINI_GOLF_ROLL_GRAVITY;
+                }
+                else {
+                    simulation->velocity[AXIS_Y] += (s32)MINI_GOLF_ROLL_GRAVITY;
+                }
             }
             else {
-                simulation->velocity[AXIS_Y] =
-                    (groundHeight - startY >= simulation->velocity[AXIS_Y]) ?
-                    simulation->velocity[AXIS_Y] + (s32)GRAVITY :
-                    groundHeight - startY + (s32)GRAVITY;
+                if (groundHeight - startY < simulation->velocity[AXIS_Y]) {
+                    simulation->velocity[AXIS_Y] = groundHeight - startY + (s32)GRAVITY;
+                }
+                else {
+                    simulation->velocity[AXIS_Y] += (s32)GRAVITY;
+                }
+            }
+
+            /*
+             * Nothing reads groundGap; it is here to match. With startY still
+             * in use after the gravity's arms, the drop to the ground and the
+             * velocity get the original's $v1 and $a1 in them, and the four
+             * arms share one store, as the original's do. What the original
+             * did with startY here is unknown: other sums of it tested and
+             * set in a branch work as well, but Abs and an empty test don't.
+             */
+            {
+                s32 groundGap = groundHeight - startY;
+
+                if (groundGap < 0) {
+                    groundGap = -groundGap;
+                }
             }
 
             if (simulation->purpose == LAUNCH_PURPOSE_STROKE &&
@@ -1835,10 +1735,28 @@ s32 StepOpeningBallSimulation(BallSimulation *simulation) {
                 osSyncPrintf("V[1] %d\n", simulation->velocity[AXIS_Y]);
             }
 
-            if ((s32)IntLength2D(simulation->velocity[AXIS_X], simulation->velocity[AXIS_Z]) <
-                MAX_STOP_SPEED) {
-                if (!isSteep && IntLength2D(slopeX, slopeZ) * friction < MAX_STOP_SLOPE_PULL) {
-                    simulation->state = BALL_STATE_STOPPED;
+            {
+                s32 speed = IntLength2D(simulation->velocity[AXIS_X], simulation->velocity[AXIS_Z]);
+
+                if (speed < MAX_STOP_SPEED) {
+                    if (!isSteep && IntLength2D(slopeX, slopeZ) * friction < MAX_STOP_SLOPE_PULL) {
+                        simulation->state = BALL_STATE_STOPPED;
+                    }
+                }
+                else {
+                    /*
+                     * The opening plays no rolling sound, but the original
+                     * copies the speed out of $v0 before testing it, as if
+                     * for a later use. A volume like the one
+                     * StepBallSimulation sets for that sound is such a use,
+                     * and all of it compiles away; that it is what the
+                     * original had here is a guess.
+                     */
+                    SoundVolume volume = speed * ROLL_VOLUME_PER_SPEED;
+
+                    if (volume > MAX_ROLL_VOLUME) {
+                        volume = MAX_ROLL_VOLUME;
+                    }
                 }
             }
 
@@ -1948,22 +1866,26 @@ ROLLED:
                 simulation->spinSpeed = simulation->spinSpeed * OPENING_SPIN_DECAY;
             }
 
+            /*
+             * height goes on to hold the wind's scale, and windX and windZ the
+             * wind's push along each axis, to match: the original keeps each
+             * pair of values in one register.
+             */
             height = simulation->startPosition[AXIS_Y] - simulation->position[AXIS_Y];
             if (height <= 0.0f) {
                 windX = simulation->windVelocityX * LOW_WIND_SCALE;
                 windZ = simulation->windVelocityZ * LOW_WIND_SCALE;
             }
             else {
-                f32 scale = (height * OPENING_WIND_SCALE_PER_HEIGHT) + LOW_WIND_SCALE;
-
-                windX = scale * simulation->windVelocityX;
-                windZ = scale * simulation->windVelocityZ;
+                height = (height * OPENING_WIND_SCALE_PER_HEIGHT) + LOW_WIND_SCALE;
+                windX = simulation->windVelocityX * height;
+                windZ = simulation->windVelocityZ * height;
             }
 
-            simulation->velocity[AXIS_X] =
-                ((windX - simulation->velocity[AXIS_X]) * drag) + simulation->velocity[AXIS_X];
-            simulation->velocity[AXIS_Z] =
-                ((windZ - simulation->velocity[AXIS_Z]) * drag) + simulation->velocity[AXIS_Z];
+            windX = (windX - simulation->velocity[AXIS_X]) * drag;
+            windZ = (windZ - simulation->velocity[AXIS_Z]) * drag;
+            simulation->velocity[AXIS_X] = simulation->velocity[AXIS_X] + windX;
+            simulation->velocity[AXIS_Z] = simulation->velocity[AXIS_Z] + windZ;
             simulation->velocity[AXIS_Y] =
                 simulation->velocity[AXIS_Y] + ((-simulation->velocity[AXIS_Y] * drag) + GRAVITY);
         }
@@ -2069,21 +1991,6 @@ SETTLE:
 
     return flags;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_ball", GetOpeningStepNoise);
-
-INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_ball", GetOpeningLength3D);
-
-INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_ball", GetOpeningLength2D);
-
-INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_ball", ScaleToOpeningLength);
-
-INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_ball", BuildOpeningLiftRotation);
-
-INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_ball", GetOpeningPositionNoise);
-
-INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_ball", StepOpeningBallSimulation);
-#endif
 
 /*
  * The opening's launch doubles the impact's and the aim's side spin, as it
