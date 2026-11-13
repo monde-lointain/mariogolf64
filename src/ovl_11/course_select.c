@@ -622,49 +622,58 @@ void SetPlankMotion(s32 motion) {
 }
 
 /*
- * Doesn't match: the original's loop.c hoists the plank group's division magic
- * number into $s7 and a second 0x20 into $s3, where ours loads the magic number
- * inside the loop, so the saved registers shift by one and the group takes $s0
- * rather than $v1. The other hoisted constants come from strength reduction and
- * match. move_movables moves a constant used once only when its threshold, 62
- * in a loop with calls, reaches the loop's 101 insns, so the original's hoist
- * needs a longer life or a second set of the magic number. Naming the group
- * gives 70 words, computing it before the if 92, a ternary clamp 77 and an
- * if/else strip height worse; testing a second division in the clamp 56 to 77
- * without the hoist, and a do-while (0) around the division changes nothing.
- * The permuter's 26 words come from dropping the group's division, which leaves
- * the lag unset below the last group; writing the strips' bottom into both
- * rectangles, with or without a group local, gives 70. The register oracle,
- * forcing 5 pseudos' registers, leaves 38 words at best, so the code differs
- * too. Working out the strip's top before its pipe sync gives 54 words (12 in
- * shape), but the oracle's best rises to 44 words with 4 forced, so the order
- * is kept; the bottom moved with it, or alone, gives 124 to 126. Summing the
- * border and the strip's height before its offset, in the bottom edge, in any
- * of four orders and groupings, gives 55 words but 13 in shape, and with the
- * border first the oracle's best rises to 39 words with 5 forced. 56 words
- * differ, 10 in shape.
+ * Draws the planks that shut over the screen from its left and right. They are
+ * drawn in strips, and each group of PLANK_GROUP_STRIP_COUNT strips slides
+ * PLANK_GROUP_LAG pixels behind the group above it.
  *
- * A focused permuter run reached 19 words (11 in shape) by writing the
- * bottom into both rectangles and testing the strip index against a u16
- * local set to PLANK_STRIP_COUNT - 1 before the loop; a u8 or s16 local
- * gives the same, an s32 one 35 (17), and the local alone changes nothing.
- * That build compares with xor against 37 held in $fp, where the original
- * uses xori 0x25, so the local only fills a saved register and isn't the
- * original's form.
+ * The original divides the strip's index for its group in an arm for each of
+ * the two motions, though the arms are the same. loop.c so finds the division's
+ * magic number, 0x92492493, set twice in the loop, takes the second set as
+ * matching the first, and weighs the two as one movable with savings of 2 and a
+ * life of 2 insns. Times its threshold of 62 that is 248, over the loop's 110
+ * insns, so the number is moved out of the loop, into $s7. The last jump pass
+ * then merges the arms, which end alike, and drops the test between them,
+ * leaving one division. Written once, the number has savings of 1 and a life of
+ * 1, and 62 falls short of the loop's 101 insns: it is loaded inside the loop,
+ * the saved registers shift by one and the group takes $s0 rather than $v1.
  *
- * Another permuter output, 20 words (10 in shape), sets the right plank's
- * texture S in a local inside the loop. A pair of locals for both planks'
- * S, set after the edges, gives the same, with bottom kept for the edge and
- * the group in a plankGroup; set before the texture load, 104, and before
- * the loop 36 (16). But loop.c then hoists 0x1300 into the saved register
- * where the original keeps the magic number, which it still loads in the
- * loop, so the locals only fill that register too. The magic number's set
- * is one insn before its mult, a lifetime of 1, which against the loop's
- * 106 insns falls short of the threshold. With a plankGroup, s16, u16, u8,
- * s8 or u32 strip indexes, or an s16 or u32 group, give 72 to 165 words,
- * against 70 with both s32.
+ * Measured against the match, as words differing and how many of them in shape:
+ *   The division written once                                 70 (16)
+ *   The same with the group held in bottom (the old draft)    56 (10)
+ *   The two arms with the group held in bottom                53 (5)
+ *   The division in each arm of a conditional operator        70 (16)
+ *   The division in an inline function called once            70 (16)
+ *   The division written once after one of the strip's
+ *   height, its quotient unused                               14 (0)
+ *   The lag taken from the slide in each arm as well          14 (0)
+ *   A switch on the motion, the whole of the slide worked out
+ *   in a case for each                                        53 (13)
+ *   The same with the closing case the default too            11 (9)
+ *   The same with one case for both                           109 (21)
+ *   The same with a default for both                          70 (16)
+ *   The group as a u32                                        2 (2)
+ *   The group as an s16                                       7 (3)
+ *   The group as a u8                                         4 (4)
+ *   The group clamped by a conditional operator               7 (3)
+ *   The slide clamped to its least first                      13 (9)
+ *   The motion tested as not shut, with the arms swapped      7 (7)
+ *   The slide set to the middle, then worked out if not shut  6 (6)
+ *   The top worked out before the pipe sync                   12 (2)
+ *   The bottom worked out before the pipe sync                20 (10)
+ *   Both worked out before the pipe sync                      22 (10)
+ *   The bottom as the top plus the strip's height             81 (13)
+ *   The bottom's border and height summed first               5 (3)
+ *   The bottom written into stripHeight                       52 (2)
+ *   The loop's test as <                                      4 (4)
+ *
+ * Also matching: the arms' test as closing, as not closing or as not opening;
+ * the group's clamp in each arm as well; the whole of the slide worked out in
+ * each arm, under an else if and an else or under a switch's opening case and
+ * its default; an inline function for the division called in each arm; the
+ * group declared in its block or before top; the bottom worked out before the
+ * top; and the strip's height set by an if and an else, or tested as the last
+ * strip's with the heights swapped.
  */
-#ifdef NON_MATCHING
 void DrawPlanks(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     s32 stripIndex;
@@ -672,6 +681,7 @@ void DrawPlanks(Gfx **displayListHead) {
     s32 slide;
     s32 top;
     s32 bottom;
+    s32 group;
 
     gDPPipeSync(gfx++);
     gDPPipeSync(gfx++);
@@ -725,20 +735,19 @@ void DrawPlanks(Gfx **displayListHead) {
             slide = PLANKS_MIDDLE;
         }
         else {
-            /*
-             * bottom holds the strip's plank group here, to match: a plankGroup
-             * variable gives 70 words differing (16 in shape), against the draft's
-             * 56 (10), whether it is declared in this block or at the top, and 72
-             * to 80 as a u32, u8 or s16. The register oracle, though it lines the
-             * draft's bottom up with two registers, then comes no closer than
-             * those 70 words, against 38 for the draft
-             */
-            bottom = stripIndex / PLANK_GROUP_STRIP_COUNT;
-            if (bottom > PLANK_LAST_GROUP) {
-                bottom = PLANK_LAST_GROUP;
+            /* Worked out in an arm for each motion, to match */
+            if (f_PlankMotion == PLANKS_OPENING) {
+                group = stripIndex / PLANK_GROUP_STRIP_COUNT;
+            }
+            else {
+                group = stripIndex / PLANK_GROUP_STRIP_COUNT;
             }
 
-            slide = f_PlankSlide - (bottom * PLANK_GROUP_LAG);
+            if (group > PLANK_LAST_GROUP) {
+                group = PLANK_LAST_GROUP;
+            }
+
+            slide = f_PlankSlide - (group * PLANK_GROUP_LAG);
             if (slide > PLANKS_MIDDLE) {
                 slide = PLANKS_MIDDLE;
             }
@@ -794,10 +803,6 @@ void DrawPlanks(Gfx **displayListHead) {
 
     *displayListHead = gfx;
 }
-
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_11/course_select", DrawPlanks);
-#endif
 
 /*
  * Draws the Ring Shot select: the planks, the name plate, the course image,
