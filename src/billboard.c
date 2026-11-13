@@ -168,6 +168,11 @@ static s8 f_UnusedBytesAfterDrawOrder[2] UNUSED = {1, 1};
 /* Depth of unused billboards, behind every used one */
 #define VIEW_DEPTH_FAR 0x40000000
 
+/* Like G_RM_ZB_XLU_SURF2, but also updating the depth buffer */
+#define BILLBOARD_RENDER_MODE_BLENDED2 \
+    (Z_CMP | Z_UPD | IM_RD | CVG_DST_FULL | ZMODE_XLU | FORCE_BL | \
+        GBL_c2(G_BL_CLR_IN, G_BL_A_IN, G_BL_CLR_MEM, G_BL_1MA))
+
 void DestroyBillboardManager(void) {
     u32 offset;
 
@@ -572,12 +577,7 @@ void DrawBillboards(CameraMatrices *cameraMatrices, s32 cameraIndex) {
     }
 
     gDPPipeSync(gfx++);
-    gDPSetRenderMode(
-        gfx++,
-        G_RM_FOG_SHADE_A,
-        Z_CMP | Z_UPD | IM_RD | CVG_DST_FULL | ZMODE_XLU | FORCE_BL |
-            GBL_c2(G_BL_CLR_IN, G_BL_A_IN, G_BL_CLR_MEM, G_BL_1MA)
-    );
+    gDPSetRenderMode(gfx++, G_RM_FOG_SHADE_A, BILLBOARD_RENDER_MODE_BLENDED2);
     gDPPipeSync(gfx++);
     gDPSetAlphaCompare(gfx++, G_AC_THRESHOLD);
     gDPSetBlendColor(gfx++, 0xFF, 0xFF, 0xFF, 0x3F);
@@ -724,12 +724,7 @@ void DrawFadingBillboards(CameraMatrices *cameraMatrices, s32 cameraIndex) {
     /* The blended mode set here is not the translucent surface mode that the
      * loop switches to */
     hasTranslucentMode = FALSE;
-    gDPSetRenderMode(
-        gfx++,
-        G_RM_FOG_SHADE_A,
-        Z_CMP | Z_UPD | IM_RD | CVG_DST_FULL | ZMODE_XLU | FORCE_BL |
-            GBL_c2(G_BL_CLR_IN, G_BL_A_IN, G_BL_CLR_MEM, G_BL_1MA)
-    );
+    gDPSetRenderMode(gfx++, G_RM_FOG_SHADE_A, BILLBOARD_RENDER_MODE_BLENDED2);
     gDPPipeSync(gfx++);
     gDPSetAlphaCompare(gfx++, G_AC_THRESHOLD);
     gDPSetBlendColor(gfx++, 0xFF, 0xFF, 0xFF, 0x3F);
