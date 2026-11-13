@@ -435,11 +435,7 @@ void StopEditorMoves(void) {
 /* The closest a zoom brings the eye to the look-at point */
 #define EDITOR_MIN_DISTANCE 1.0f
 
-/*
- * Braking lowers a top speed no further than the acceleration. A do-while,
- * as with a plain block UpdateCameraEditor gives 347 words differing, 127 in
- * shape, against 278 (80)
- */
+/* Braking lowers a top speed no further than the acceleration */
 #define KeepTopSpeed(topSpeed, acceleration) \
     do { \
         if (fabsf(topSpeed) < fabsf(acceleration)) { \
@@ -449,126 +445,112 @@ void StopEditorMoves(void) {
     while (0)
 
 /*
- * Moves the camera on by an update: the point being moved, or carried with
- * the other, speeds up, brakes near its target and stops on reaching it, and
- * then the turn, tilt and zoom around the pivot point do the same. The
- * point that moves around the pivot is then placed from the heading, pitch
- * and distance.
+ * Moves the camera on by an update: the point being moved, or carried with the
+ * other, speeds up, brakes near its target and stops on reaching it, and then
+ * the zoom, the turn and the tilt around the pivot point do the same. The point
+ * that moves around the pivot is then placed from the heading, pitch and
+ * distance.
  *
- * Doesn't match: GCC keeps the zoom's gap in a float register rather than $s6,
- * and allocates the fabsf operands to other registers. It also reads turnLeft
- * and tiltLeft once before stepping them, where the original reads each twice.
- * The distance to a target sums the offsets' squares in x, y, z order, as the
- * original adds them; summing x, z, y gives 266 words, but the register oracle
- * then comes no closer than 173, against 161. A permuter run's best output,
- * 6723 against 7158, only clears turnLeft after toggling the turning flag,
- * giving 278 words differing, 74 in shape; the original clears it with the
- * turn's speed and braking angle, as here, so the gain is incidental. Setting a
- * reached target's z before its y also gives 266 words (80 in shape), but the
- * oracle then comes no closer than 165 words, forcing 48 pseudos, against 161
- * forcing 49, and the offsets and velocities around it go x, y, z. Those
- * counts were measured with GCC's built-in fabsf, when 278 words differed, 80
- * in shape. With the game's fabsf, an abs.s in volatile inline assembly, 188
- * words differ, 44 in shape.
+ * The zoom works in the points' variables: the distance before it is kept in z,
+ * its target in offsetZ, and the length of what is left after its step in
+ * distance. A variable is one register to GCC's allocator, and the original
+ * keeps a point's offsetZ and the zoom's target both in $f18, and takes both
+ * square roots into $f12. With a variable of its own the zoom's target takes
+ * $f6, as offsetZ then does, and the three loads of the point's target move up
+ * to $f18, $f16 and $f10 from $f16, $f10 and $f6. Tested where it is taken, the
+ * zoom's square root is left in $f0.
  *
- * The zoom, the turn and the tilt each have their own remaining amount,
- * zoomLeft, turnLeft and tiltLeft, where one left variable served all three:
- * that takes the draft from 188 words to 154 (44 in shape), declared in
- * their blocks or at the top. Only the turn's own gives 172, only the zoom's
- * 186, and only the tilt's 394.
+ * The turn and the tilt read what is left of them from the editor at each use:
+ * the original copies its first read to another register in the delay slot of
+ * the test against zero, and takes the magnitude for the braking test from the
+ * first. Read once into a local, there is no copy. Each is done if a step would
+ * leave more to go than there is, and takes the step if not, in the two arms of
+ * one test: the original sets isDone in the delay slot of that test's branch
+ * and clears it among the step's stores. Set once ahead of the test, its 1 is
+ * loaded before what is left is read. The turn's arrival is tested after both
+ * arms, for a turn that isn't done, as the original tests isDone ahead of it.
  *
- * The eight flag tests before letting go of the pivot each clear isDone:
- * jump.c turns each "if (test) isDone = FALSE" into an and with the negated
- * test, the original's branchless chain. Written as one expression, fold
- * merges the tests into two mask tests: with & or && between them 298 or
- * 309 words differ (102 and 111 in shape), and with * 322. A new flag
- * variable instead of isDone gives 314, in any declaration position.
+ * The eight flag tests before the pivot is let go each clear isDone, which
+ * jump.c turns into the original's chain of ands with each test negated; in one
+ * expression, fold merges them into two mask tests. They come inside the test
+ * for a leader, as the original branches on hasLeader ahead of them. The
+ * zoom's, the turn's and the tilt's speed tests read the speed first, as the
+ * original loads it ahead of the top speed. The pitch's cosine has a variable
+ * of its own in each of the two blocks that work out the direction.
  *
- * The point's velocity has its own velocityX, velocityY and velocityZ, where
- * the offsets to the target held it too, which keeps 154 words. distance
- * also holds the velocity's length, the distance moved in an update: a speed
- * variable for it gives 192 words (44 in shape), and 166 with the velocity's
- * variables.
+ * Measured against the match, as words differing and how many of them in shape:
+ *   The old draft                                             71 (27)
+ *   The zoom's target in a variable of its own, declared
+ *   anywhere                                                  36 (0)
+ *   The zoom's target in offsetX                              26 (0)
+ *   The zoom's target in offsetY                              20 (0)
+ *   The zoom's target in scale                                80 (0)
+ *   The zoom's target in x or y                               36 (0)
+ *   The zoom's target read before the distance                4 (0)
+ *   The zoom's square root tested where it is taken, or kept
+ *   in scale, offsetX or a variable of its own                4 (0)
+ *   The distance before the zoom read where it is used        70 (4)
+ *   The same in a variable of its own                         70 (0)
+ *   The same in distance or x                                 68 (0)
+ *   The same in y                                             64 (0)
+ *   What is left of the zoom kept in offsetX                  14 (0)
+ *   The zoom's end tested with no isDone                      14 (8)
+ *   The zoom's isDone set to the comparison                   8 (8)
+ *   The length of what is left of the zoom taken with fabsf   18 (10)
+ *   The zoom's distance set from offsetZ when it is done      4 (4)
+ *   What is left of the turn, or of the tilt, read once into
+ *   a local                                                   7 (3)
+ *   Both read once into locals                                14 (6)
+ *   The turn's step under the negated test, and isDone set in
+ *   its else                                                  2 (2)
+ *   The turn's arrival tested in the step's arm               15 (11)
+ *   isDone set ahead of the turn's test, or the tilt's, with
+ *   no else                                                   12 (10)
+ *   The old draft's turn: isDone set at its start, and the
+ *   arrival tested in the step                                17 (21)
+ *   The old draft's tilt: isDone set at its start             4 (4)
+ *   Both of those                                             21 (25)
+ *   The pitch's cosine in one variable for both blocks        142 (0)
+ *   The velocity's length in a speed variable of its own      12 (0)
+ *   The velocity kept in the offsets' variables               36 (0)
+ *   The offsets' squares summed x, z, y                       22 (0)
+ *   The velocity's squares summed x, z, y                     16 (0)
+ *   An arrived point's target copied x, z, y                  14 (0)
+ *   x's arrival test with its offset taken into offsetX       10 (4)
+ *   The eight flag tests as one expression with &&            51 (33)
+ *   The same with &                                           169 (25)
+ *   The pivot let go under hasLeader && isDone, after the
+ *   flag tests                                                9 (3)
+ *   The zoom's speed test, or the turn's, with the top speed
+ *   first                                                     10 (0)
+ *   The points' loop's test as <                              21 (9)
+ *   hasMoved declared after index                             4 (0)
  *
- * The arrival tests work out the point's offset from its target in each
- * case, as the y axis's test does, where offsetX and offsetZ, the offsets to
- * the target, held it too, reversed: that takes the draft from 154 words to
- * 138 (44 in shape to 40), and the register oracle's closest result from 154
- * to 138, with nothing forced. Only x's test gives 150, only z's 148, and a
- * variable of its own, shared or one for each axis, 159 (43 in shape).
- *
- * The zoom's, turn's and tilt's speed tests read the speed first and ask
- * whether it exceeds the top speed, as the original loads the speed before
- * the top speed and compares the top speed's magnitude below the speed's;
- * written top speed first, they load the top speed first. That takes the
- * draft from 138 words to 108, 40 in shape either way, and the register
- * oracle's closest result from 138 to 108, with nothing forced. Writing the
- * point's top speed test or its braking test the other way round gives 108
- * words too, and a speed variable for the velocity's length gives 120.
- *
- * The eight flag tests that set isDone come inside the test for a leader,
- * as the original branches on hasLeader before them. That takes the draft
- * from 108 words differing, 40 in shape, to 99 (37), and the register
- * oracle's closest result from 108 words to 99, with nothing forced.
- * Testing hasLeader && isDone after the flag tests as two nested ifs
- * gives 104 words (40 in shape), with isDone tested first 105 (41), and
- * as isDone && hasLeader 108 (40).
- *
- * Copying an arrived point's target as x, z, y, as a permuter run did,
- * gives 87 words (37 in shape), with the register oracle's closest result
- * 87 with nothing forced. But the original's three moves there write
- * $f20, $f24 and $f22 in that order, as the draft's x, y, z does, and the
- * swapped order writes the last two the other way round; only their source
- * registers come to line up. Reading the point as x, z, y as well gives 83
- * words (33 in shape), and the oracle's closest 83 with nothing forced, but
- * those moves are still the other way round; reading the point alone as x,
- * z, y gives 95 (33).
- *
- * The turn sets isDone before it reads turnLeft, where the tilt sets it
- * after stepping: the original loads isDone's 1 once for the turn, where
- * setting it after stepping copies the load into both of the step's arms,
- * as the tilt's still does. That takes the draft from 99 words to 93, 37
- * in shape to 33, and the register oracle's closest from 99 to 93, with
- * nothing forced; the tilt's set at its start gives 341 words. That left
- * 93 words, 33 in shape.
- *
- * The turn tests for arrival only after a step, as the tilt tests its
- * limits, since isDone is already set when no step is taken; tested
- * after the step's if, as before, the draft gave 93 words differing, 33
- * in shape, against 77 (31), and the register oracle's closest falls
- * from 93 to 77, with nothing forced. Testing it in both arms gives 83
- * words (33 in shape). That left 77 words, 31 in shape.
- *
- * The tilt now sets isDone before it reads tiltLeft too, as the turn
- * does, where it set it after its step; a sweep moving each statement
- * found it. Measured before the turn's arrival test moved, that order
- * gave 341 words, but it now takes the draft from 77 words differing (31
- * in shape) to 71 (27), and the register oracle's closest from 77 to 71,
- * with nothing forced. 71 words differ, 27 in shape.
+ * Also matching: the zoom's test as distance >= gap; its isDone cleared after
+ * the square root; zoomLeft declared for the function, or its difference
+ * squared in place; the turn's arrival under an if of its own inside isDone's;
+ * the tilt's step under the negated test, with isDone set in its else; the
+ * pitch's cosine kept in x, in either block or both, or set after its
+ * declaration; the velocity's variables declared for the function; the point's
+ * top speed test with the velocity's length first; KeepTopSpeed as a plain
+ * block or a bare if; and x, offsetZ, distance, gap or isDone declared
+ * elsewhere.
  */
-#ifdef NON_MATCHING
 void UpdateCameraEditor(void) {
     Boolean hasMoved = FALSE;
     /* Whether a point carries the other, and later whether one is a pivot */
     Boolean hasLeader = FALSE;
     s32 index;
     Boolean isDone;
+    f32 x;
     f32 y;
-    f32 z; /* Also the distance before a zoom */
+    f32 z;
     f32 offsetX;
     f32 offsetY;
     f32 offsetZ;
     f32 distance;
     f32 scale;
     f32 gap;
-    f32 zoomTarget;
-    /*
-     * The point's x, then the pitch's cosine, to match: a pitchCosine variable
-     * in both direction blocks gives 186 words differing (44 in shape) against
-     * the draft's 154 (44), and the register oracle's closest 164 words,
-     * forcing 15 pseudos, against 154 with none forced
-     */
-    f32 x;
 
     if (g_CameraEditor.flags[EDITOR_POINT_EYE] == 0 &&
         g_CameraEditor.flags[EDITOR_POINT_LOOK_AT] == 0) {
@@ -718,10 +700,11 @@ void UpdateCameraEditor(void) {
 
     /* The carried point keeps its place from the leader */
     if (hasLeader) {
-        x = cosf(g_CameraEditor.pitch);
+        f32 pitchCosine = cosf(g_CameraEditor.pitch);
+
         y = sinf(g_CameraEditor.pitch);
-        z = sinf(g_CameraEditor.heading) * x;
-        x = x * cosf(g_CameraEditor.heading);
+        z = sinf(g_CameraEditor.heading) * pitchCosine;
+        x = pitchCosine * cosf(g_CameraEditor.heading);
         distance = sqrtf((x * x) + (y * y) + (z * z));
         x /= distance;
         y /= distance;
@@ -754,19 +737,24 @@ void UpdateCameraEditor(void) {
     if (g_CameraEditor.flags[index] & EDITOR_FLAG_ZOOMING) {
         f32 zoomLeft;
 
+        /*
+         * Kept in the points' variables, to match: the distance before the zoom
+         * in z, its target in offsetZ, and further on the length of what is
+         * left in distance
+         */
         z = g_CameraEditor.distance;
-        zoomTarget = g_CameraEditor.zoomTarget;
+        offsetZ = g_CameraEditor.zoomTarget;
         /*
          * In the original, gap is unset when there is no braking distance; this
          * stops the zoom once a step brings it no closer
          */
-#    ifdef AVOID_UB
-        gap = fabsf(zoomTarget - z);
-#    endif
+#ifdef AVOID_UB
+        gap = fabsf(offsetZ - z);
+#endif
         if (g_CameraEditor.zoomBrakingDistance != 0.0f) {
-            gap = fabsf(zoomTarget - z);
+            gap = fabsf(offsetZ - z);
             if (gap < EDITOR_ARRIVAL_DISTANCE) {
-                g_CameraEditor.distance = zoomTarget;
+                g_CameraEditor.distance = offsetZ;
             }
             else {
                 g_CameraEditor.zoomSpeed += g_CameraEditor.zoomAcceleration;
@@ -783,9 +771,10 @@ void UpdateCameraEditor(void) {
         }
 
         g_CameraEditor.distance += g_CameraEditor.zoomSpeed;
-        zoomLeft = zoomTarget - g_CameraEditor.distance;
+        zoomLeft = offsetZ - g_CameraEditor.distance;
         isDone = FALSE;
-        if (gap <= sqrtf(zoomLeft * zoomLeft)) {
+        distance = sqrtf(zoomLeft * zoomLeft);
+        if (gap <= distance) {
             isDone = TRUE;
         }
 
@@ -805,17 +794,13 @@ void UpdateCameraEditor(void) {
     }
 
     if (g_CameraEditor.flags[index] & EDITOR_FLAG_TURNING) {
-        f32 turnLeft;
-
-        isDone = TRUE;
-        turnLeft = g_CameraEditor.turnLeft;
-        if (turnLeft != 0.0f) {
-            if (fabsf(turnLeft) < EDITOR_ARRIVAL_ANGLE) {
-                g_CameraEditor.heading += turnLeft;
+        if (g_CameraEditor.turnLeft != 0.0f) {
+            if (fabsf(g_CameraEditor.turnLeft) < EDITOR_ARRIVAL_ANGLE) {
+                g_CameraEditor.heading += g_CameraEditor.turnLeft;
             }
             else {
                 g_CameraEditor.turnSpeed += g_CameraEditor.turnAcceleration;
-                if (fabsf(turnLeft) < fabsf(g_CameraEditor.turnBrakingAngle)) {
+                if (fabsf(g_CameraEditor.turnLeft) < fabsf(g_CameraEditor.turnBrakingAngle)) {
                     g_CameraEditor.turnTopSpeed -=
                         g_CameraEditor.turnAcceleration * EDITOR_BRAKING_RATE;
                     KeepTopSpeed(g_CameraEditor.turnTopSpeed, g_CameraEditor.turnAcceleration);
@@ -826,14 +811,20 @@ void UpdateCameraEditor(void) {
                 }
             }
         }
-        if (!(fabsf(g_CameraEditor.turnLeft) <
-                fabsf(g_CameraEditor.turnLeft - g_CameraEditor.turnSpeed))) {
+
+        /* A step that would leave more to turn ends it. isDone is set in each arm, to match. */
+        if (fabsf(g_CameraEditor.turnLeft) <
+            fabsf(g_CameraEditor.turnLeft - g_CameraEditor.turnSpeed)) {
+            isDone = TRUE;
+        }
+        else {
             isDone = FALSE;
             g_CameraEditor.turnLeft -= g_CameraEditor.turnSpeed;
             g_CameraEditor.heading += g_CameraEditor.turnSpeed;
-            if (fabsf(g_CameraEditor.turnLeft) < EDITOR_ARRIVAL_ANGLE) {
-                isDone = TRUE;
-            }
+        }
+
+        if (!isDone && fabsf(g_CameraEditor.turnLeft) < EDITOR_ARRIVAL_ANGLE) {
+            isDone = TRUE;
         }
 
         if (isDone) {
@@ -848,17 +839,13 @@ void UpdateCameraEditor(void) {
     }
 
     if (g_CameraEditor.flags[index] & EDITOR_FLAG_TILTING) {
-        f32 tiltLeft;
-
-        isDone = TRUE;
-        tiltLeft = g_CameraEditor.tiltLeft;
-        if (tiltLeft != 0.0f) {
-            if (fabsf(tiltLeft) < EDITOR_ARRIVAL_ANGLE) {
-                g_CameraEditor.pitch += tiltLeft;
+        if (g_CameraEditor.tiltLeft != 0.0f) {
+            if (fabsf(g_CameraEditor.tiltLeft) < EDITOR_ARRIVAL_ANGLE) {
+                g_CameraEditor.pitch += g_CameraEditor.tiltLeft;
             }
             else {
                 g_CameraEditor.tiltSpeed += g_CameraEditor.tiltAcceleration;
-                if (fabsf(tiltLeft) < fabsf(g_CameraEditor.tiltBrakingAngle)) {
+                if (fabsf(g_CameraEditor.tiltLeft) < fabsf(g_CameraEditor.tiltBrakingAngle)) {
                     g_CameraEditor.tiltTopSpeed -=
                         g_CameraEditor.tiltAcceleration * EDITOR_BRAKING_RATE;
                     KeepTopSpeed(g_CameraEditor.tiltTopSpeed, g_CameraEditor.tiltAcceleration);
@@ -869,8 +856,13 @@ void UpdateCameraEditor(void) {
                 }
             }
         }
-        if (!(fabsf(g_CameraEditor.tiltLeft) <
-                fabsf(g_CameraEditor.tiltLeft - g_CameraEditor.tiltSpeed))) {
+
+        /* As for the turn, to match */
+        if (fabsf(g_CameraEditor.tiltLeft) <
+            fabsf(g_CameraEditor.tiltLeft - g_CameraEditor.tiltSpeed)) {
+            isDone = TRUE;
+        }
+        else {
             isDone = FALSE;
             g_CameraEditor.tiltLeft -= g_CameraEditor.tiltSpeed;
             g_CameraEditor.pitch += g_CameraEditor.tiltSpeed;
@@ -935,10 +927,11 @@ void UpdateCameraEditor(void) {
     }
 
     if (hasMoved) {
-        x = cosf(g_CameraEditor.pitch);
+        f32 pitchCosine = cosf(g_CameraEditor.pitch);
+
         y = sinf(g_CameraEditor.pitch);
-        z = sinf(g_CameraEditor.heading) * x;
-        x = x * cosf(g_CameraEditor.heading);
+        z = sinf(g_CameraEditor.heading) * pitchCosine;
+        x = pitchCosine * cosf(g_CameraEditor.heading);
         distance = sqrtf((x * x) + (y * y) + (z * z));
         x /= distance;
         y /= distance;
@@ -959,10 +952,6 @@ void UpdateCameraEditor(void) {
 
     MeasureEditorCamera();
 }
-
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_camera_editor", UpdateCameraEditor);
-#endif
 
 /* The controllers that EditOpeningCamera reads */
 #define EDITOR_PAD 0
