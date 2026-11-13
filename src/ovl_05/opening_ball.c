@@ -1189,12 +1189,6 @@ s32 StepOpeningBallSimulation(BallSimulation *simulation) {
 
             simulation->bounceCount++;
             GetTrianglePlane(&triangle, &plane);
-            /*
-             * Empty, for the notes it leaves: they end the first cse pass's
-             * path from the call, so the bounce works out plane's address
-             * anew, as the original does, rather than keep it in $s0.
-             */
-            IN_OWN_BLOCK(;);
             simulation->position[AXIS_X] = startX + (fraction * simulation->velocity[AXIS_X]);
             simulation->position[AXIS_Y] = startY + (fraction * simulation->velocity[AXIS_Y]);
             simulation->position[AXIS_Z] = startZ + (fraction * simulation->velocity[AXIS_Z]);
@@ -1203,7 +1197,13 @@ s32 StepOpeningBallSimulation(BallSimulation *simulation) {
                 simulation->surface = SURFACE_FAIRWAY;
             }
             else {
-                simulation->surface = SURFACE_WATER_HAZARD;
+                /*
+                 * In its own block for the notes that leaves: they end the
+                 * first cse pass's path from GetTrianglePlane's call, so the
+                 * bounce works out plane's address anew, as the original does,
+                 * rather than keep it in $s0.
+                 */
+                IN_OWN_BLOCK(simulation->surface = SURFACE_WATER_HAZARD);
                 if (simulation->bounceCount == 1) {
                     simulation->firstBounceSurface = simulation->surface;
                 }
