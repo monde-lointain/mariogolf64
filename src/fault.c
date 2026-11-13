@@ -204,53 +204,34 @@ void PrintFaultText(void) {
 /*
  * Prints the faulted thread's registers to the host, and all but the
  * floating-point ones to the screen as debug text.
- *
- * Doesn't match: the original keeps context in $s1 and reads the registers
- * through it, where this folds context into thread and reads them at thread's
- * offsets from $s0. The text buffer's register swaps with it. The second CSE
- * pass does the folding, as it knows context to be thread plus 0x20 throughout
- * a function without branches; setting context after the first block boundary
- * or in a block of its own leaves it so. Compiling
- * with -fno-rerun-cse-after-loop, which skips that pass, leaves 276 words, only
- * 2 in shape, but costs the matched PrintRegisterFields 3 words, so the file
- * wasn't built so. The first CSE pass leaves context alone only because
- * IN_OWN_BLOCK's loop ends its block after context is set; jump deletes that
- * loop's labels before the second pass, and the original has no branch here to
- * keep a boundary. At -O1, 475 words differ (319 in shape), and
- * PrintRegisterFields 96; at -O3, which inlines PrintFaultText where the
- * original calls it, 378 (54). The register oracle, forcing 2 pseudos'
- * registers, leaves 200 words at best, so the code differs too. 278 words
- * differ, 4 in shape.
- *
- * The second pass folds context's field addresses into thread's only
- * while thread is unchanged since context was set. Setting thread to NULL
- * after the first sprintf, a store that flow then deletes as dead, gives
- * the same 276 words (2 in shape) as skipping the pass. The register
- * oracle then matches with 2 pseudos forced: local allocation gives
- * context, at 67 references and priority 6090, $s0 ahead of the text
- * buffer, at 39 and 2963, where the original gives the buffer $s0. That
- * fits context being left to global allocation, which a block boundary
- * between its setting and its uses would do, but the original has no
- * branch. Setting thread to NULL in a branch on context being NULL, after
- * the first sprintf, gives 276 to 297 words; setting it to context, a
- * pointer of another type, in a branch on thread being NULL there gives
- * 97 (9 in shape), with thread kept across the call in a third saved
- * register.
- *
- * Printing the registers in a static inline helper given &thread->context
- * gives 294 words (6 in shape), or 282 (6) with the store in the helper;
- * the title in a helper given thread 296 (12); context set after the title
- * 294 (6); and everything in a helper given thread 398 (164).
  */
-#ifdef NON_MATCHING
 void PrintFaultContext(OSThread *thread) {
     __OSThreadContext *context = &thread->context;
 
     /*
-     * In its own block, as without it 294 words differ, 6 in shape, against 278
-     * and 4
+     * The arms are the same, and written out to match: the compiler merges
+     * them and drops the test, but only once the registers are allocated.
+     * Until then they end context's block, so that
+     * - neither CSE pass knows context to be thread plus 0x20 where its
+     *   fields are read, so they aren't read at thread's offsets;
+     * - the scheduler can't move context's setting down to the first call;
+     * - context is left to global-alloc, which gives it $s1 after local-alloc
+     *   has given the text buffer's address $s0.
+     * With the value stored once, 294 words differ, 6 of them in shape, and
+     * stored in a block of its own 278 (4); the conditional operator gives
+     * 294 (6), and an if without the else 201 (3). Setting context after the
+     * arms, or reading the fields through thread, gives 200 (2), and setting
+     * it in each arm 6 (6). The arms after the title give 25 (9). Testing
+     * thread's id gives 4 (4); testing context, or the value itself, matches
+     * too.
      */
-    IN_OWN_BLOCK(f_UnusedFaultContextValue = 0);
+    if (thread != NULL) {
+        f_UnusedFaultContextValue = 0;
+    }
+    else {
+        f_UnusedFaultContextValue = 0;
+    }
+
     sprintf(f_FaultText, "\nFault in thread %d:\n\n", thread->id);
     PrintFaultText();
     PrintFaultMessage(FAULT_TEXT_COLUMN, FAULT_TITLE_ROW);
@@ -400,10 +381,6 @@ void PrintFaultContext(OSThread *thread) {
     sprintf(f_FaultText, "d28 %.15e\td30 %.15e\n", context->fp28.d, context->fp30.d);
     PrintFaultText();
 }
-
-#else
-INCLUDE_ASM("asm/nonmatchings/fault", PrintFaultContext);
-#endif
 
 /*
  * Prints a register's value and the names of its fields' values, each
