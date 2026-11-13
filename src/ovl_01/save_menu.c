@@ -21,7 +21,6 @@
 #include "geometry.h"
 #include "hole_display.h"
 #include "hole_loader.h"
-#include "include_asm.h"
 #include "main_menu.h"
 #include "math_util.h"
 #include "menu.h"
@@ -2298,112 +2297,7 @@ void DrawSavedMiniGolfImage(Gfx **displayListHead);
  * Draws the saved-games screen: the characters, the three numbered boards
  * turning on their circle with each game's mode icon, the chosen game's mode,
  * course and hole, and the prompt for giving out the controllers.
- *
- * Doesn't match: the original keeps the menu memory pointer on the stack and
- * the mode icons' texel step in a saved register. Like the original, ours loads
- * the degrees-to-radians factor on each pass of the board loop only when
- * boardDegrees is the loop's own: set before the loop, loop.c hoists the factor
- * instead (403 words, 151 in shape). The original still multiplies by a 120 it
- * loads in the loop, where ours keeps it in a saved register; a literal 120 is
- * expanded into shifts (417 words, 163 in shape). Each mode icon's image is
- * read once into modeImage, as the original reads it once for the palette and
- * the strips; reading the table at each use gives 401 words, 149 in shape.
- * Reading the name plate into a local too, as a permuter output does, gives 331
- * words, 131 in shape, or 328 and 132 for its strips alone. The register
- * oracle, forcing 31 pseudos' registers, left 237 words at best when the draft
- * gave 307, so the code differs too. Adding the strip's offset to the mode
- * icon's texels, rather than adding the texel offset last, took the draft from
- * 307 words differing to 293, 121 in shape to 115; any order that adds the
- * texel offset to modeImage first gives 293, and a texels pointer set before
- * the strip loop 320. Clearing the text slots with the strips' counter took the
- * draft to 255 words, 115 in shape, and the register oracle's closest result
- * from 227 words, forcing 30 pseudos, to 219, forcing 24.
- *
- * The draft then gave 255 words, 115 in shape. The game mode label's x was
- * held in courseIndex; in a labelX local of its own, 287 words differ, but
- * 91 in shape, and the register oracle's closest result falls from 219
- * words, forcing 24 pseudos, to 183, forcing 28: the code comes closer to
- * the original's, though more registers differ. 287 words differ, 91 in
- * shape.
- *
- * The register oracle reports courseIndex lining up with $s1, the register
- * the original gives the shared counter, and the hole index with $s6.
- * Counting the boards and strips with courseIndex in place of holeIndex
- * gives 597 words (99 in shape). The report lists gfx, the strip counter and
- * two other values as lining up with $s1 too, so it is weak. A counter of
- * its own, declared before or after holeIndex, which then holds only the
- * chosen game's hole, also gives 597 words (99 in shape), so holeIndex keeps
- * both roles.
- *
- * A u16 playerCount gives 223 words, but 97 in shape. The original reloads
- * the count from its stack slot and sign-extends it with sll and sra by 16
- * before the first player-count test, as the s16 does, where the u16 uses
- * the reloaded half as it is, so the count is signed.
- *
- * The original keeps 48.0, the board circle's x radius, in $f24 through the
- * board loop, and the multiplier for the % 3 in $s7, but loads 120 and the
- * degrees-to-radians factor on each pass. This draft keeps 120 and the
- * multiplier out of the loop instead and loads 48.0 on each pass, so its
- * frame lacks the $f24 slot and is 8 bytes smaller. The loop dump shows why:
- * loop.c moves boardDegrees' 120 and then the multiplier, lowering its
- * threshold by 3 with each move, and then finds moving the factor, 48.0 and
- * 40.0 not desirable. Re-measured on the current draft, boardDegrees set
- * before the loop gives 289 words (93 in shape), with the original's frame
- * and $f24 saved, but loop.c then moves the multiplier and the factor rather
- * than 48.0, and the register oracle's closest result rises from 183 words,
- * forcing 28 pseudos, to 195, forcing 29. A literal 120 gives 303 words (105
- * in shape). Writing the radius as the product's first factor, for x or for
- * both axes, or the x product as ProjectPoint's argument leaves 287.
- *
- * The chosen game's mode label works out its x first, before its offset
- * and texture, as a sweep moving each assignment found. That takes the
- * draft from 287 words to 213, 91 in shape either way, and the register
- * oracle's closest from 183 words, forcing 28 pseudos, to 183 forcing
- * 17.
- *
- * The prompts test for a chosen game that isn't empty first, and set the
- * empty game's text in the else, as a permuter output does. That takes the
- * draft from 213 words (91 in shape) to 207 (89), and the register oracle's
- * closest from 183 words to 177, forcing 17 pseudos either way. Testing
- * whether the controllers are assigned, with the continue prompt first and
- * the assigning prompts in the else, as a sweep inverting each if found,
- * takes it on to 199 words (81 in shape), and the closest to 169, still
- * forcing 17. That left 199 words, 81 in shape.
- *
- * Each board sets the mode icon's half size and scale in their globals
- * first, the scale divided by the global half size, and then takes the
- * locals from them: the original works both values out in temporaries,
- * stores them and copies them to their saved registers after. That takes
- * the draft from 199 words (81 in shape) to 169 (77), and the register
- * oracle's closest from 169 words, forcing 17 pseudos, to 153, forcing
- * 14. Assigning the locals and globals together in one statement, or
- * only the scale's, gives 177 to 199 words, and setting the half size's
- * global before the board's half size 184. That left 169 words, 77 in
- * shape.
- *
- * A debug cc1 that inverts loop.c's choices shows the board loop's
- * constants account for 24 of those words: leaving 120 and the
- * degrees-to-radians factor in the loop and moving only the % 3
- * multiplier and 48.0 out gives 145 words, 69 in shape, with the
- * original's frame. The factor and 48.0 each save one insn over a
- * one-luid life, and the threshold loop.c compares them with only falls
- * as it moves each, so the original's 48.0 must have lived longer than
- * the factor. Setting boardDegrees after slotOffset puts the multiplier
- * first, but loop.c still moves 120 (171 words, 77 in shape), and
- * boardDegrees set before the loop moves the factor instead of 48.0
- * (171, 79). Each signed-byte member read is a load and two shifts until
- * combine, so the loop's insn count can't drop there. That left 169
- * words, 77 in shape.
- *
- * Each board works out its own texel step straight after its half size,
- * before the mode icon's values, as a sweep moving each statement found.
- * The original sets the board count in $v0 before converting the icon's
- * step and leaves the mfc1's load delay empty, where this put the count
- * in that delay. That takes the draft from 169 words (77 in shape) to
- * 166 (74), and the register oracle's closest from 153 words to 150,
- * forcing 14 pseudos either way. 166 words differ, 74 in shape.
  */
-#ifdef NON_MATCHING
 void DrawSavedGames(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     u16 perspNorm;
@@ -2411,21 +2305,20 @@ void DrawSavedGames(Gfx **displayListHead) {
     f32 boardX[COURSE_COUNT];
     f32 boardY[COURSE_COUNT];
     f32 boardScale[COURSE_COUNT];
-    /* Pads the frame to match; without it 669 words differ, against 287 */
+    /* Nothing uses them, but the original's frame has the room for them */
     s32 unusedSlots[COURSE_COUNT] UNUSED;
     s32 drawOrder[COURSE_COUNT];
-    /* Pads the frame to match; without it 659 words differ, against 287 */
+    /* Nothing uses it, but the original's frame has the room for it */
     u8 unusedStack[8] UNUSED;
     SaveData *save = GetSaveData();
     MenuMemory *memory = GetMenuMemory();
     s16 playerCount = save->savedGames[memory->savedGameIndex].state.playerCount;
-    s32 index;
     /*
-     * Also the text slots that the controller prompt clears, to match: index
-     * for them gives 325 words differing against the draft's 287, 91 in shape
-     * both
+     * The board, or its place in the draw order. Also the chosen game's hole, to
+     * match: with a variable of its own for the hole, 6 words differ, none in
+     * shape.
      */
-    s32 stripOrTextSlotIndex;
+    s32 boardIndex;
     s32 key;
     Radians angle;
     f32 circleX;
@@ -2438,18 +2331,18 @@ void DrawSavedGames(Gfx **displayListHead) {
     s32 stripLeft;
     s32 stripShownWidth;
     s32 gameIndex;
-    s32 courseIndex;
     /*
-     * Also the board index in the sorting loops and the strip index in the
-     * boards' and icons' loops, to match: a board variable for the sorting
-     * loops gives 369 words differing (91 in shape), and a stripIndex for the
-     * strip loops 541 (99), against the draft's 287 (91)
+     * Counts everything but the boards: the places in the draw order as they are
+     * sorted, the strips of each image and the text slots that the controller
+     * prompt clears. It is also the chosen game's index and then its course. The
+     * one variable does it all to match: with a variable of its own for the
+     * sorting, 44 words differ; for the boards' strips, 272; for the mode icons'
+     * strips, 178; for the name plate's strips, 28; for the chosen game's index,
+     * 10; for its course, 26; and for the text slots, 346.
      */
-    s32 holeIndex;
+    s32 index;
     s32 labelX;
-    s32 *chosenMode;
-    s32 *labelOffset;
-    u32 modeLabelTexels;
+    s32 iconIndex;
     s32 slotOffset;
 
     DrawLargeBannerBackdropLayers(&gfx, SAVED_GAMES_BACKDROP_LAYERS);
@@ -2497,34 +2390,53 @@ void DrawSavedGames(Gfx **displayListHead) {
     gDPPipeSync(gfx++);
     gDPSetTexturePersp(gfx++, G_TP_NONE);
 
-    for (index = 0; index != SAVED_GAME_COUNT; index++) {
+    for (boardIndex = 0; boardIndex != SAVED_GAME_COUNT; boardIndex++) {
         ScreenPoint point;
-        s32 boardDegrees = DEGREES_PER_TURN / SAVED_GAME_COUNT;
+        /*
+         * The circle's x radius is a variable to match: the original keeps it in a
+         * register through the loop, where it loads the z radius on each pass.
+         * With the constant in the product, 26 words differ (8 in shape), and the
+         * frame is 8 bytes smaller.
+         */
+        f32 radiusX = BOARD_RADIUS_X;
+        /*
+         * The angle between boards is a variable to match: the original multiplies
+         * by a 120 that it loads on each pass, where the compiler turns a
+         * multiplication by a constant into shifts. With the constant in the
+         * product, 34 words differ (20 in shape).
+         */
+        s32 boardDegrees;
 
-        slotOffset = (memory->savedGameIndex - index) % SAVED_GAME_COUNT;
+        slotOffset = (memory->savedGameIndex - boardIndex) % SAVED_GAME_COUNT;
+        /*
+         * Set after the slot offset to match: set in its declaration, or before
+         * the slot offset, 24 words differ (10 in shape)
+         */
+        boardDegrees = DEGREES_PER_TURN / SAVED_GAME_COUNT;
         angle = -DegreesToRadians(
             (slotOffset * boardDegrees) + (memory->savedGameTurn * BOARD_TURN_STEP_DEGREES)
         );
-        circleX = sinf(angle) * BOARD_RADIUS_X;
+        circleX = sinf(angle) * radiusX;
         if (ProjectPoint(circleX, 0.0f, cosf(angle) * BOARD_RADIUS_Z, &point) < 0) {
-            boardX[index] = point.x;
-            boardY[index] = point.y - WHEEL_RAISE;
-            boardScale[index] = point.scaleX;
+            boardX[boardIndex] = point.x;
+            boardY[boardIndex] = point.y - WHEEL_RAISE;
+            boardScale[boardIndex] = point.scaleX;
         }
     }
 
-    for (holeIndex = 0; holeIndex != SAVED_GAME_COUNT; holeIndex++) {
-        drawOrder[holeIndex] = holeIndex;
+    for (index = 0; index != SAVED_GAME_COUNT; index++) {
+        drawOrder[index] = index;
     }
 
     /* Draw the farthest boards first, so the nearer ones cover them */
-    for (holeIndex = 1; holeIndex != SAVED_GAME_COUNT; holeIndex++) {
-        key = drawOrder[holeIndex];
-        for (index = holeIndex - 1; index >= 0 && boardY[drawOrder[index]] > boardY[key]; index--) {
-            drawOrder[index + 1] = drawOrder[index];
+    for (index = 1; index != SAVED_GAME_COUNT; index++) {
+        key = drawOrder[index];
+        for (boardIndex = index - 1; boardIndex >= 0 && boardY[drawOrder[boardIndex]] > boardY[key];
+            boardIndex--) {
+            drawOrder[boardIndex + 1] = drawOrder[boardIndex];
         }
 
-        drawOrder[index + 1] = key;
+        drawOrder[boardIndex + 1] = key;
     }
 
     gDPPipeSync(gfx++);
@@ -2532,8 +2444,8 @@ void DrawSavedGames(Gfx **displayListHead) {
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
 
     f_BoardBobPhase += BOARD_BOB_PHASE_STEP;
-    for (index = 0; index != SAVED_GAME_COUNT; index++) {
-        slot = drawOrder[index];
+    for (boardIndex = 0; boardIndex != SAVED_GAME_COUNT; boardIndex++) {
+        slot = drawOrder[boardIndex];
         halfSize = boardScale[slot] * GAME_BOARD_HALF_SIZE;
         step = (f32)(GAME_BOARD_STRIP_HEIGHT << TEXEL_STEP_SHIFT) / halfSize;
         f_ChosenModeIconHalfSize = boardScale[slot] * MODE_ICON_HALF_SIZE;
@@ -2542,7 +2454,7 @@ void DrawSavedGames(Gfx **displayListHead) {
         iconHalfSize = f_ChosenModeIconHalfSize;
         iconStep = f_ChosenModeIconScale;
         /* The loop stops before SAVED_GAME_COUNT, so no board bobs */
-        if (index == SAVED_GAME_COUNT) {
+        if (boardIndex == SAVED_GAME_COUNT) {
             bob = sinf(f_BoardBobPhase) * BOARD_BOB_HEIGHT;
         }
         else {
@@ -2573,12 +2485,12 @@ void DrawSavedGames(Gfx **displayListHead) {
             }
 
             gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_GameBoards[slot])));
-            for (holeIndex = 0; holeIndex != GAME_BOARD_STRIP_COUNT; holeIndex++) {
+            for (index = 0; index != GAME_BOARD_STRIP_COUNT; index++) {
                 gDPLoadTextureBlock(
                     gfx++,
                     TextureAddress(
                         LargeImageTexels(f_GameBoards[slot]) +
-                        (holeIndex * GAME_BOARD_WIDTH * GAME_BOARD_STRIP_HEIGHT)
+                        (index * GAME_BOARD_WIDTH * GAME_BOARD_STRIP_HEIGHT)
                     ),
                     G_IM_FMT_CI,
                     G_IM_SIZ_8b,
@@ -2596,9 +2508,9 @@ void DrawSavedGames(Gfx **displayListHead) {
                 gSPScisTextureRectangle(
                     gfx++,
                     QuarterPixels((s32)(boardX[slot] - halfSize)),
-                    QuarterPixels((s32)(boardY[slot] - halfSize + (holeIndex * halfSize) + bob)),
+                    QuarterPixels((s32)(boardY[slot] - halfSize + (index * halfSize) + bob)),
                     QuarterPixels((s32)(boardX[slot] + halfSize)),
-                    QuarterPixels((s32)(boardY[slot] + (holeIndex * halfSize) + bob)),
+                    QuarterPixels((s32)(boardY[slot] + (index * halfSize) + bob)),
                     G_TX_RENDERTILE,
                     0,
                     0,
@@ -2612,12 +2524,12 @@ void DrawSavedGames(Gfx **displayListHead) {
                 u8 *modeImage = f_SavedGameModeImages[slot];
 
                 gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(modeImage)));
-                for (holeIndex = 0; holeIndex != MODE_ICON_STRIP_COUNT; holeIndex++) {
+                for (index = 0; index != MODE_ICON_STRIP_COUNT; index++) {
                     gDPLoadTextureBlock(
                         gfx++,
                         TextureAddress(
                             modeImage + LARGE_PALETTED_TEXELS_OFFSET +
-                            (holeIndex * MODE_ICON_WIDTH * MODE_ICON_STRIP_HEIGHT)
+                            (index * MODE_ICON_WIDTH * MODE_ICON_STRIP_HEIGHT)
                         ),
                         G_IM_FMT_CI,
                         G_IM_SIZ_8b,
@@ -2636,12 +2548,12 @@ void DrawSavedGames(Gfx **displayListHead) {
                         gfx++,
                         QuarterPixels((s32)(boardX[slot] - iconHalfSize)),
                         QuarterPixels(
-                            (s32)(boardY[slot] - iconHalfSize + (holeIndex * iconHalfSize) + bob) +
+                            (s32)(boardY[slot] - iconHalfSize + (index * iconHalfSize) + bob) +
                             MODE_ICON_DROP
                         ),
                         QuarterPixels((s32)(boardX[slot] + iconHalfSize)),
                         QuarterPixels(
-                            (s32)(boardY[slot] + (holeIndex * iconHalfSize) + bob) + MODE_ICON_DROP
+                            (s32)(boardY[slot] + (index * iconHalfSize) + bob) + MODE_ICON_DROP
                         ),
                         G_TX_RENDERTILE,
                         0,
@@ -2680,8 +2592,7 @@ void DrawSavedGames(Gfx **displayListHead) {
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
 
     gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_SavedGamesNamePlate)));
-    for (stripOrTextSlotIndex = 0; stripOrTextSlotIndex != SAVED_GAME_STRIP_COUNT;
-        stripOrTextSlotIndex++) {
+    for (index = 0; index != SAVED_GAME_STRIP_COUNT; index++) {
         if (playerCount == 1) {
             stripLeft = SAVED_GAME_STRIP_LEFT;
             stripShownWidth = SAVED_GAME_FEW_PLAYER_STRIP_SHOWN_WIDTH;
@@ -2699,7 +2610,7 @@ void DrawSavedGames(Gfx **displayListHead) {
             gfx++,
             TextureAddress(
                 LargeImageTexels(f_SavedGamesNamePlate) +
-                (stripOrTextSlotIndex * SAVED_GAME_STRIP_WIDTH * SAVED_GAME_STRIP_HEIGHT)
+                (index * SAVED_GAME_STRIP_WIDTH * SAVED_GAME_STRIP_HEIGHT)
             ),
             G_IM_FMT_CI,
             G_IM_SIZ_8b,
@@ -2717,11 +2628,11 @@ void DrawSavedGames(Gfx **displayListHead) {
         gSPScisTextureRectangle(
             gfx++,
             QuarterPixels(stripLeft),
-            QuarterPixels(SAVED_GAME_STRIP_TOP + (stripOrTextSlotIndex * SAVED_GAME_STRIP_HEIGHT)),
+            QuarterPixels(SAVED_GAME_STRIP_TOP + (index * SAVED_GAME_STRIP_HEIGHT)),
             QuarterPixels(stripLeft + stripShownWidth),
             QuarterPixels(
                 SAVED_GAME_STRIP_TOP + SAVED_GAME_STRIP_HEIGHT +
-                (stripOrTextSlotIndex * SAVED_GAME_STRIP_HEIGHT)
+                (index * SAVED_GAME_STRIP_HEIGHT)
             ),
             G_TX_RENDERTILE,
             0,
@@ -2733,18 +2644,29 @@ void DrawSavedGames(Gfx **displayListHead) {
     }
 
     DrawCenteredPageArrows(&gfx, SAVED_GAME_ARROW_GAP, SAVED_GAME_ARROW_Y);
-    chosenMode = &f_SavedGameModes[memory->savedGameIndex];
-    if (*chosenMode != NO_SAVE_MENU_MODE) {
+    index = memory->savedGameIndex;
+    if (f_SavedGameModes[index] != NO_SAVE_MENU_MODE) {
         labelX = (playerCount == 1) ? SINGLE_PLAYER_GAME_MODE_LABEL_X : GAME_MODE_LABEL_X;
-        labelOffset = &f_GameModeLabelOffsets[f_SaveMenuModeIcons[*chosenMode]];
+        iconIndex = f_SaveMenuModeIcons[f_SavedGameModes[index]];
         gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(f_GameModeLabels)));
-        modeLabelTexels = TextureAddress(
-            ImageTexels(f_GameModeLabels) +
-            (f_SaveMenuModeIcons[*chosenMode] * GAME_MODE_LABEL_IMAGE_SIZE)
-        );
+        /*
+         * The label's texels are worked out in the command, reading the game's mode
+         * and the mode's icon from their tables again, and the label's offset is
+         * read from its table at each use, to match. The original makes these reads
+         * ahead of the stores that advance gfx, though they follow the stores in
+         * the source. The compiler only moves a table's element so: a read through
+         * a pointer could be of gfx itself, which is in memory as the drawing
+         * functions take its address, and so stays behind the stores. With the
+         * mode read through a pointer, 64 words differ (40 in shape); with the
+         * offset read through one, 68 (32); with the texels in a local, 24 (4);
+         * and with them worked out from iconIndex, 198 (90).
+         */
         gDPLoadTextureBlock_4b(
             gfx++,
-            modeLabelTexels,
+            TextureAddress(
+                ImageTexels(f_GameModeLabels) +
+                (f_SaveMenuModeIcons[f_SavedGameModes[index]] * GAME_MODE_LABEL_IMAGE_SIZE)
+            ),
             G_IM_FMT_CI,
             GAME_MODE_LABEL_WIDTH,
             GAME_MODE_LABEL_HEIGHT,
@@ -2759,9 +2681,9 @@ void DrawSavedGames(Gfx **displayListHead) {
         gDPPipeSync(gfx++);
         gSPScisTextureRectangle(
             gfx++,
-            QuarterPixels(labelX - *labelOffset),
+            QuarterPixels(labelX - f_GameModeLabelOffsets[iconIndex]),
             QuarterPixels(GAME_MODE_LABEL_TOP),
-            QuarterPixels(labelX - *labelOffset + GAME_MODE_LABEL_WIDTH),
+            QuarterPixels(labelX - f_GameModeLabelOffsets[iconIndex] + GAME_MODE_LABEL_WIDTH),
             QuarterPixels(GAME_MODE_LABEL_TOP + GAME_MODE_LABEL_HEIGHT),
             G_TX_RENDERTILE,
             0,
@@ -2794,13 +2716,13 @@ void DrawSavedGames(Gfx **displayListHead) {
 
             SetUpTextDrawing(&gfx);
             SetTextColor(&gfx, 255, 255, 255);
-            courseIndex = CHOSEN_GAME.state.courseIndex;
-            holeIndex = CHOSEN_GAME.state.holeIndex;
+            index = CHOSEN_GAME.state.courseIndex;
+            boardIndex = CHOSEN_GAME.state.holeIndex;
             if (CHOSEN_GAME.state.gameMode == GAME_MODE_TOURNAMENT) {
                 SetTextSlot(
                     SAVED_GAME_COURSE_X,
                     SAVED_GAME_COURSE_Y,
-                    MESSAGE_FIRST_TOURNAMENT_COURSE + courseIndex,
+                    MESSAGE_FIRST_TOURNAMENT_COURSE + index,
                     TEXT_SLOT_LARGE_FONT,
                     0,
                     0,
@@ -2812,16 +2734,16 @@ void DrawSavedGames(Gfx **displayListHead) {
             }
             else {
                 if (CHOSEN_GAME.state.isMiniGolf == TRUE) {
-                    courseIndex = (courseIndex >= FIRST_PEACHS_CASTLE_MINI_GOLF_COURSE) ?
+                    index = (index >= FIRST_PEACHS_CASTLE_MINI_GOLF_COURSE) ?
                         COURSE_RECORD_PEACHS_CASTLE :
                         COURSE_RECORD_LUIGIS_GARDEN;
                 }
 
-                sprintf(g_PrintBuffer, f_SaveMenuNameFormat, g_CourseRecords[courseIndex].name);
+                sprintf(g_PrintBuffer, f_SaveMenuNameFormat, g_CourseRecords[index].name);
                 DrawLargeText(&gfx, SAVED_GAME_COURSE_X, SAVED_GAME_COURSE_Y, g_PrintBuffer);
             }
 
-            SetTextSlotValue(holeIndex + 1, 1, 0);
+            SetTextSlotValue(boardIndex + 1, 1, 0);
             SetTextSlot(
                 SAVED_GAME_HOLE_X,
                 SAVED_GAME_HOLE_Y,
@@ -2882,14 +2804,13 @@ void DrawSavedGames(Gfx **displayListHead) {
                     0xFF,
                     OPAQUE_ALPHA
                 );
-                for (stripOrTextSlotIndex = 1; stripOrTextSlotIndex != SAVED_GAME_TEXT_SLOT_COUNT;
-                    stripOrTextSlotIndex++) {
+                for (index = 1; index != SAVED_GAME_TEXT_SLOT_COUNT; index++) {
                     SetTextSlot(
                         0,
                         0,
                         NO_MESSAGE,
                         TEXT_SLOT_LARGE_FONT,
-                        stripOrTextSlotIndex,
+                        index,
                         0,
                         0xFF,
                         0xFF,
@@ -2918,9 +2839,6 @@ void DrawSavedGames(Gfx **displayListHead) {
     gDPPipeSync(gfx++);
     *displayListHead = gfx;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/save_menu", DrawSavedGames);
-#endif
 
 /*
  * Draws the chosen saved game's board, halfSize * 2 pixels square, at (left,
