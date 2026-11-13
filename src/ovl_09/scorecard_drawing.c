@@ -698,52 +698,73 @@ const char f_CompactHoleFormat[] = "Hole%d";
  * for each hole won. Once the hole's result is tallied, it animates the
  * winner's new mark.
  *
- * Doesn't match: sched places $fp's setup from the matchPanelImage address
- * later, after the panel's calls, and the tile loops take &gfx from $s1 where
- * the original copies it to $s7, spilling zero rather than $s1 to 0x6C($sp).
- * The tiles' texel offsets are worked out once per tile, as the original scales
- * them before the calls (scaling at each call gives 110 words, 104 in shape).
- * Grouping the tiles' y as g_Scorecard.y + (rowOffset + TILE_TOP) gives 111
- * words, 49 in shape; stepping rowOffset as i * MATCH_ROW_SPACING gives 183.
- * The win arrow's rise is read once, before the strokes test, as the original
- * does (86 words, 66 in shape, reading it in each call). The tiles' x edges add
- * the scorecard's x last, but for the middle one. Moving it last in the second
- * piece's left edge took the draft from 70 words to 68, where the sum's other
- * orders and groupings gave 68 to 103; in the last piece's right edge from 68
- * to 66, one of 20 forms giving 66; and in both of the first piece's edges from
- * 66 to 63, 45 in shape, where either alone gave 65 or 67. Adding it last in
- * the middle edge, which the second piece's right and the third's left share,
- * gives 86 words in one and 137 in both; in the wide tile's edges it ties at
- * 63, first or last, and is added last as in the other tiles. The register
- * oracle's closest result is these 63 words with no register forced, so
- * allocation isn't the cause. That left 63 words, 45 in shape.
+ * Each of the tiles' edges is written as its row's or column's product, its
+ * constant, and then the scorecard's x or y. GCC folds such a sum by moving the
+ * constant across to the term added last, so the constant is added to the
+ * scorecard's coordinate and the product to that, which is what the original
+ * has for every edge: an addiu on the coordinate, then an addu with the
+ * product's register. Where the scorecard's x is grouped with the constant in
+ * the source, as the old draft had the edge between the second and third
+ * pieces, the constant is moved onto the product instead, and loop.c steps j *
+ * 25 + 52 in a register of its own beside j * 25.
  *
- * The original adds rowOffset to the scorecard's y plus TILE_TOP in the
- * tiles' y. Writing rowOffset + (g_Scorecard.y + TILE_TOP), or adding
- * rowOffset last, in every tile's top and bottom gives 149 words (39 in
- * shape) with the frame 8 bytes smaller, rowOffset + TILE_TOP +
- * g_Scorecard.y 85 (31), and rowOffset + g_Scorecard.y + TILE_TOP changes
- * nothing; in the tops alone those give 126 (64) and 88 (34).
+ * The row's offset is i * MATCH_ROW_SPACING in each edge, and not a variable
+ * stepped by the rows' loop. The product doesn't change in the columns' loop,
+ * so loop.c moves it out, to $s3. In the rows' loop it then steps a register by
+ * 80 in the product's place, and $s3 is left a copy of that, made ahead of each
+ * row's columns. With no saved register left for it, the stepped one is kept on
+ * the stack, at 0x6C($sp), and the address of the display list's head, moved
+ * out of both loops, takes $s7. A variable stepped in the source has no copy:
+ * it takes $s7 itself and the address goes to the stack.
  *
- * Writing every tile's edges in one form, with the x sums in any of five
- * groupings and the y sums in any of four, gives 122 words or more; the
- * original's own grouping, j * TILE_SPACING + (g_Scorecard.x + TILE_LEFT)
- * with rowOffset + (g_Scorecard.y + TILE_TOP), gives 199 (125).
+ * The tiles' texel offsets are worked out once a tile, ahead of the calls, and
+ * the arrow's rise is read once, ahead of the strokes' test, as the original
+ * does both.
  *
- * The rows' loop clears rowOffset before i, where the draft cleared i
- * first; a sweep reordering for loops' first clauses found it. That
- * takes the draft from 63 words differing to 61, 45 in shape both, and
- * the register oracle's closest from 60 words to 57, forcing 2 pseudos;
- * stepping rowOffset first as well changes nothing. 61 words differ, 45
- * in shape.
+ * Measured against the match, as words differing and how many of them in shape:
+ *   The old draft's tiles: the row's offset in a variable
+ *   stepped by the rows' loop and added to the scorecard's y,
+ *   and the middle edge's x grouped with its constant         46 (40)
+ *   The row's offset in a variable stepped by the rows' loop,
+ *   the edges as they are                                     107 (13)
+ *   The same with the scorecard's y added first               122 (24)
+ *   The row's offset in a variable set to the product as each
+ *   row starts                                                55 (9)
+ *   The middle edge's x grouped with its constant in both
+ *   pieces                                                    107 (65)
+ *   The same in the second piece's right edge alone           98 (66)
+ *   The tiles' edges with the scorecard's y added first       11 (11)
+ *   The same with the scorecard's y and the constant in
+ *   brackets                                                  147 (75)
+ *   The same with the row's product added last                153 (75)
+ *   The tiles' edges with the scorecard's x added first       29 (9)
+ *   The tiles' loops' tests as <                              61 (9)
+ *   The tiles' texel offsets scaled in each call, with no
+ *   locals                                                    316 (104)
+ *   The marks' edges with the scorecard's y added first       3 (3)
+ *   The marks' columns' test as <                             59 (5)
+ *   The moving mark's edges with the scorecard's y added
+ *   first                                                     46 (6)
+ *   The needed wins' text with the scorecard's y added first  8 (8)
+ *   The arrow's rise taken from the constant, as ARROW_TOP -
+ *   arrowRise + g_Scorecard.y                                 90 (26)
+ *   The rise negated where it is read                         101 (23)
+ *   The rise read in each call, with no local                 16 (16)
+ *   The tallied hole read once for the mark and the arrow     10 (2)
+ *   The holes to share out halved with no shareCount          20 (8)
+ *   The wins counted with no countEnd                         20 (10)
+ *   wins[0] cleared before wins[1]                            4 (0)
+ *
+ * Also matching: the tiles' edges with the constant ahead of the product; the
+ * wide tile's with the scorecard's x first; the moving mark's with the bounce
+ * first; the bounce clamped by an if; the mark's image index kept in j; the
+ * arrow's rise read after the tallied hole; and the display list's head stored
+ * through a copy of its pointer.
  */
-#ifdef NON_MATCHING
 void DrawMatchPage(Gfx **displayListHead) {
     s32 wins[MATCH_PLAYER_COUNT];
     Gfx *gfx;
-    Gfx **head;
     s32 winsNeeded;
-    s32 rowOffset;
     Boolean canDraw = FALSE;
     s32 halvedCount;
     s32 countEnd;
@@ -754,10 +775,10 @@ void DrawMatchPage(Gfx **displayListHead) {
     s32 imageLeft;
     s32 imageTop;
     s32 frame;
+    s32 markImage;
     s32 bounce;
     s32 arrowRise;
 
-    head = displayListHead;
     gfx = *displayListHead;
     if (g_Scorecard.content.isSuddenDeath == TRUE) {
         winsNeeded = 2;
@@ -779,6 +800,7 @@ void DrawMatchPage(Gfx **displayListHead) {
     /* Each halved hole leaves one fewer to win */
     countEnd = g_Scorecard.skinsCarryover.intoLastHole;
     halvedCount = 0;
+    /* The second is cleared first, to match */
     wins[1] = 0;
     wins[0] = 0;
     for (i = GetFirstHoleIndex(); i != countEnd; i++) {
@@ -982,7 +1004,8 @@ void DrawMatchPage(Gfx **displayListHead) {
         G_TX_NOLOD
     );
     gDPPipeSync(gfx++);
-    for (rowOffset = 0, i = 0; i != MATCH_PLAYER_COUNT; i++, rowOffset += MATCH_ROW_SPACING) {
+    /* Each edge has the row's offset as a product and the scorecard's x or y last, to match */
+    for (i = 0; i != MATCH_PLAYER_COUNT; i++) {
         for (j = 0; j != winsNeeded; j++) {
             imageLeft = (j % TILES_PER_IMAGE_ROW) * TILE_PIECE_WIDTH;
             imageTop = (j / TILES_PER_IMAGE_ROW) * TILE_HEIGHT;
@@ -990,9 +1013,9 @@ void DrawMatchPage(Gfx **displayListHead) {
                 DrawTextureRect(
                     &gfx,
                     QuarterPixels(WIDE_TILE_LEFT + g_Scorecard.x),
-                    QuarterPixels(g_Scorecard.y + rowOffset + TILE_TOP),
+                    QuarterPixels((i * MATCH_ROW_SPACING) + TILE_TOP + g_Scorecard.y),
                     QuarterPixels(WIDE_TILE_LEFT + (TILE_PIECE_WIDTH * 3) + g_Scorecard.x),
-                    QuarterPixels(g_Scorecard.y + rowOffset + TILE_TOP + TILE_HEIGHT),
+                    QuarterPixels((i * MATCH_ROW_SPACING) + TILE_TOP + TILE_HEIGHT + g_Scorecard.y),
                     G_TX_RENDERTILE,
                     TexelCoordinate(WIDE_TILE_IMAGE_COLUMN * TILE_PIECE_WIDTH),
                     TexelCoordinate(WIDE_TILE_IMAGE_ROW * TILE_HEIGHT),
@@ -1004,11 +1027,11 @@ void DrawMatchPage(Gfx **displayListHead) {
                 DrawTextureRect(
                     &gfx,
                     QuarterPixels((j * TILE_SPACING) + TILE_LEFT + g_Scorecard.x),
-                    QuarterPixels(g_Scorecard.y + rowOffset + TILE_TOP),
+                    QuarterPixels((i * MATCH_ROW_SPACING) + TILE_TOP + g_Scorecard.y),
                     QuarterPixels(
                         (j * TILE_SPACING) + TILE_LEFT + TILE_PIECE_WIDTH + g_Scorecard.x
                     ),
-                    QuarterPixels(g_Scorecard.y + rowOffset + TILE_TOP + TILE_HEIGHT),
+                    QuarterPixels((i * MATCH_ROW_SPACING) + TILE_TOP + TILE_HEIGHT + g_Scorecard.y),
                     G_TX_RENDERTILE,
                     0,
                     TexelCoordinate(TILE_EDGE_IMAGE_ROW * TILE_HEIGHT),
@@ -1020,11 +1043,11 @@ void DrawMatchPage(Gfx **displayListHead) {
                     QuarterPixels(
                         (j * TILE_SPACING) + TILE_LEFT + TILE_PIECE_WIDTH + g_Scorecard.x
                     ),
-                    QuarterPixels(g_Scorecard.y + rowOffset + TILE_TOP),
+                    QuarterPixels((i * MATCH_ROW_SPACING) + TILE_TOP + g_Scorecard.y),
                     QuarterPixels(
-                        (j * TILE_SPACING) + (g_Scorecard.x + TILE_LEFT + (TILE_PIECE_WIDTH * 2))
+                        (j * TILE_SPACING) + TILE_LEFT + (TILE_PIECE_WIDTH * 2) + g_Scorecard.x
                     ),
-                    QuarterPixels(g_Scorecard.y + rowOffset + TILE_TOP + TILE_HEIGHT),
+                    QuarterPixels((i * MATCH_ROW_SPACING) + TILE_TOP + TILE_HEIGHT + g_Scorecard.y),
                     G_TX_RENDERTILE,
                     TexelCoordinate(imageLeft),
                     TexelCoordinate(imageTop),
@@ -1034,13 +1057,13 @@ void DrawMatchPage(Gfx **displayListHead) {
                 DrawTextureRect(
                     &gfx,
                     QuarterPixels(
-                        (j * TILE_SPACING) + (g_Scorecard.x + TILE_LEFT + (TILE_PIECE_WIDTH * 2))
+                        (j * TILE_SPACING) + TILE_LEFT + (TILE_PIECE_WIDTH * 2) + g_Scorecard.x
                     ),
-                    QuarterPixels(g_Scorecard.y + rowOffset + TILE_TOP),
+                    QuarterPixels((i * MATCH_ROW_SPACING) + TILE_TOP + g_Scorecard.y),
                     QuarterPixels(
                         (j * TILE_SPACING) + TILE_LEFT + (TILE_PIECE_WIDTH * 3) + g_Scorecard.x
                     ),
-                    QuarterPixels(g_Scorecard.y + rowOffset + TILE_TOP + TILE_HEIGHT),
+                    QuarterPixels((i * MATCH_ROW_SPACING) + TILE_TOP + TILE_HEIGHT + g_Scorecard.y),
                     G_TX_RENDERTILE,
                     TexelCoordinate(TILE_PIECE_WIDTH),
                     TexelCoordinate(TILE_EDGE_IMAGE_ROW * TILE_HEIGHT),
@@ -1057,7 +1080,7 @@ void DrawMatchPage(Gfx **displayListHead) {
         DrawScorecardFace(
             &gfx,
             g_Scorecard.x + MATCH_FACE_LEFT,
-            MATCH_FACE_TOP + (i * MATCH_ROW_SPACING),
+            (i * MATCH_ROW_SPACING) + MATCH_FACE_TOP,
             i
         );
     }
@@ -1085,8 +1108,8 @@ void DrawMatchPage(Gfx **displayListHead) {
         for (j = 0; j != wins[i]; j++) {
             DrawTextureRect(
                 &gfx,
-                QuarterPixels(((j * TILE_SPACING) + TILE_LEFT) + g_Scorecard.x),
-                QuarterPixels(((i * MATCH_ROW_SPACING) + WIN_MARK_TOP) + g_Scorecard.y),
+                QuarterPixels((j * TILE_SPACING) + TILE_LEFT + g_Scorecard.x),
+                QuarterPixels((i * MATCH_ROW_SPACING) + WIN_MARK_TOP + g_Scorecard.y),
                 QuarterPixels(
                     (j * TILE_SPACING) + TILE_LEFT + WIN_MARK_SHOWN_WIDTH + g_Scorecard.x
                 ),
@@ -1094,8 +1117,8 @@ void DrawMatchPage(Gfx **displayListHead) {
                     (i * MATCH_ROW_SPACING) + WIN_MARK_TOP + WIN_MARK_HEIGHT + g_Scorecard.y
                 ),
                 G_TX_RENDERTILE,
+                (j < wins[i ^ 1]) ? TexelCoordinate(WIN_MARK_SHOWN_WIDTH) : 0,
                 0,
-                (j < wins[i ^ 1]) ? TexelCoordinate(WIN_MARK_HEIGHT) : 0,
                 TEXEL_STEP_ONE,
                 TEXEL_STEP_ONE
             );
@@ -1105,13 +1128,13 @@ void DrawMatchPage(Gfx **displayListHead) {
     if ((u8)(g_Scorecard.skinsCarryover.onLastHole - WIN_MARK_START_TIME) <
         WIN_MARK_ANIMATION_TIME) {
         frame = g_Scorecard.skinsCarryover.onLastHole - WIN_MARK_START_TIME;
-        j = f_WinMarkFrames[frame / WIN_MARK_FRAME_TIME];
+        markImage = f_WinMarkFrames[frame / WIN_MARK_FRAME_TIME];
         bounce = -(s32)(sinf((f32)frame * WIN_MARK_BOUNCE_STEP) * WIN_MARK_BOUNCE_HEIGHT);
         /* The mark only rises */
         bounce = (bounce <= 0) ? bounce : 0;
         LoadTextureBlock(
             &gfx,
-            LargeImageTexels(g_Scorecard.winMarkImage) + (j * WIN_MARK_SIZE),
+            LargeImageTexels(g_Scorecard.winMarkImage) + (markImage * WIN_MARK_SIZE),
             G_IM_FMT_CI,
             G_IM_SIZ_8b,
             WIN_MARK_WIDTH,
@@ -1131,12 +1154,12 @@ void DrawMatchPage(Gfx **displayListHead) {
                 QuarterPixels((wins[0] * TILE_SPACING) + TILE_LEFT + g_Scorecard.x),
                 QuarterPixels(WIN_MARK_TOP + bounce + g_Scorecard.y),
                 QuarterPixels(
-                    (wins[0] * TILE_SPACING) + (TILE_LEFT + WIN_MARK_SHOWN_WIDTH) + g_Scorecard.x
+                    (wins[0] * TILE_SPACING) + TILE_LEFT + WIN_MARK_SHOWN_WIDTH + g_Scorecard.x
                 ),
-                QuarterPixels(WIN_MARK_HEIGHT + (WIN_MARK_TOP + bounce) + g_Scorecard.y),
+                QuarterPixels(WIN_MARK_TOP + WIN_MARK_HEIGHT + bounce + g_Scorecard.y),
                 G_TX_RENDERTILE,
+                (wins[1] < wins[0]) ? TexelCoordinate(WIN_MARK_SHOWN_WIDTH) : 0,
                 0,
-                (wins[1] < wins[0]) ? TexelCoordinate(WIN_MARK_HEIGHT) : 0,
                 TEXEL_STEP_ONE,
                 TEXEL_STEP_ONE
             );
@@ -1145,16 +1168,16 @@ void DrawMatchPage(Gfx **displayListHead) {
             DrawTextureRect(
                 &gfx,
                 QuarterPixels((wins[1] * TILE_SPACING) + TILE_LEFT + g_Scorecard.x),
-                QuarterPixels(MATCH_ROW_SPACING + (WIN_MARK_TOP + bounce) + g_Scorecard.y),
+                QuarterPixels(MATCH_ROW_SPACING + WIN_MARK_TOP + bounce + g_Scorecard.y),
                 QuarterPixels(
-                    (wins[1] * TILE_SPACING) + (TILE_LEFT + WIN_MARK_SHOWN_WIDTH) + g_Scorecard.x
+                    (wins[1] * TILE_SPACING) + TILE_LEFT + WIN_MARK_SHOWN_WIDTH + g_Scorecard.x
                 ),
                 QuarterPixels(
-                    MATCH_ROW_SPACING + WIN_MARK_HEIGHT + WIN_MARK_TOP + bounce + g_Scorecard.y
+                    MATCH_ROW_SPACING + WIN_MARK_TOP + WIN_MARK_HEIGHT + bounce + g_Scorecard.y
                 ),
                 G_TX_RENDERTILE,
+                (wins[0] < wins[1]) ? TexelCoordinate(WIN_MARK_SHOWN_WIDTH) : 0,
                 0,
-                (wins[0] < wins[1]) ? TexelCoordinate(WIN_MARK_HEIGHT) : 0,
                 TEXEL_STEP_ONE,
                 TEXEL_STEP_ONE
             );
@@ -1175,7 +1198,7 @@ void DrawMatchPage(Gfx **displayListHead) {
             G_TX_NOLOD,
             G_TX_NOLOD
         );
-        /* The arrow rises as the count goes on */
+        /* The arrow rises as the count goes on. Its rise is negated first in each sum, to match. */
         arrowRise = g_Scorecard.skinsCarryover.onLastHole;
         holeIndex = g_Scorecard.skinsCarryover.intoLastHole;
         if (g_Players[0].holes[holeIndex].strokes < g_Players[1].holes[holeIndex].strokes) {
@@ -1184,7 +1207,7 @@ void DrawMatchPage(Gfx **displayListHead) {
                 QuarterPixels((wins[0] * TILE_SPACING) + ARROW_LEFT + g_Scorecard.x),
                 QuarterPixels(-arrowRise + ARROW_TOP + g_Scorecard.y),
                 QuarterPixels((wins[0] * TILE_SPACING) + ARROW_LEFT + ARROW_WIDTH + g_Scorecard.x),
-                QuarterPixels(-arrowRise + (ARROW_HEIGHT + ARROW_TOP) + g_Scorecard.y),
+                QuarterPixels(-arrowRise + ARROW_TOP + ARROW_HEIGHT + g_Scorecard.y),
                 G_TX_RENDERTILE,
                 0,
                 0,
@@ -1196,10 +1219,10 @@ void DrawMatchPage(Gfx **displayListHead) {
             DrawTextureRect(
                 &gfx,
                 QuarterPixels((wins[1] * TILE_SPACING) + ARROW_LEFT + g_Scorecard.x),
-                QuarterPixels(-arrowRise + (ARROW_TOP + MATCH_ROW_SPACING) + g_Scorecard.y),
+                QuarterPixels(-arrowRise + MATCH_ROW_SPACING + ARROW_TOP + g_Scorecard.y),
                 QuarterPixels((wins[1] * TILE_SPACING) + ARROW_LEFT + ARROW_WIDTH + g_Scorecard.x),
                 QuarterPixels(
-                    -arrowRise + ARROW_HEIGHT + ARROW_TOP + MATCH_ROW_SPACING + g_Scorecard.y
+                    -arrowRise + MATCH_ROW_SPACING + ARROW_TOP + ARROW_HEIGHT + g_Scorecard.y
                 ),
                 G_TX_RENDERTILE,
                 0,
@@ -1211,13 +1234,9 @@ void DrawMatchPage(Gfx **displayListHead) {
     }
 
     gDPPipeSync(gfx++);
-    *head = gfx;
+    *displayListHead = gfx;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard_drawing", DrawMatchPage);
-#endif
 
-RESUME_RODATA_SECTION();
 const char f_StringFormat[] = "%s";
 
 /*
