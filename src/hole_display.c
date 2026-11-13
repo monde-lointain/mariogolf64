@@ -3271,7 +3271,6 @@ void HandleFrameBufferSwap(void) {
  * set up with the first.
  */
 #define FADE_FRAME_WIDTH (SCREEN_WIDTH - (2 * BACKDROP_BORDER))
-#define FADE_FRAME_WORDS_PER_ROW (FADE_FRAME_WIDTH / 2)
 #define FADE_STEP 12
 #define FAST_FADE_STEP 24
 #define NEGATIVE_BRIGHTNESS 127
@@ -3356,71 +3355,49 @@ void HandleFrameBufferSwap(void) {
  * splitting the frame into halves that slide apart. When a fade ends,
  * the unread f_UnusedFadeEndCount counts up, wrapping at FADE_COUNT_PERIOD.
  *
- * Doesn't match: registers are allocated differently. The original loads
- * f_CapturedFrame into $s3, stores it at once in a reload slot (0xC($sp)) and
- * reads it back for the strip loops, using $s3 for gbi words; its frame is 8
- * bytes larger for that slot. The register oracle forced 20 pseudos and still
- * left 74 words, starting with the frame's size, so reload's spill choice
- * differs too. That height written as a plain ?: branches, where the original
- * doesn't; it gave 174 words, 50 in shape, against 193 (45) with the |, whose
- * extra words are register choices. A permuter output, 215 words with 31 in
- * shape, needed two temps: a u32 copy of frame, set before the first PipeSync,
- * for the strip loop's two texture images, and ~7 held in a variable for one of
- * them. Without the copy it gave 202 words, 48 in shape, and without the mask's
- * variable 299, 35 in shape; writing the load block's count as width times
- * height changed nothing. Each strip loop declares its own height, as each
- * loop's height is a different strip's or row's, which took the draft from 193
- * words differing to 179, 45 in shape either way; declaring it in the second or
- * third loop alone gave 179 too. The two StripHeight loops' heights are s32 and
- * the last loop's an s16: the second loop's as an s32 takes the draft to 163
- * words, 41 in shape, and the oracle from 74 words forcing 19 pseudos to 69
- * forcing 16, and the first loop's type changes nothing. The last loop's as an
- * s32 as well gives 181 words (37 in shape), though the oracle gets to 62, or
- * 197 (41) with the second's an s16. Declaring the frame pointer before the
- * display list pointer, as a permuter run suggested, keeps 163 words and takes
- * the shape from 41 to 37, with the oracle at 69 words forcing 15 pseudos. The
- * motion blur's strip loop indexes the last frame buffer for each strip, as the
- * next loop indexes the captured frame, in place of stepping a source pointer,
- * which took the draft to 147 words, 33 in shape, and the oracle to 67 words
- * forcing 12 pseudos; setting a source pointer from the index in each strip
- * gives the same. The last loop still steps frame: indexing it by i -
- * BACKDROP_BORDER gives 180 words, 40 in shape. A u16 or u8 height in the last
- * loop gives 147 words, 31 in shape, but adds two andi masks, 0xffff or 0xff,
- * to the original's three andi 0xffff. Holding the last loop's strip bottom,
- * i + height, in a local of its own, as a permuter run suggested, takes the
- * draft to 137 words, 33 in shape, and the oracle to 64 words forcing 10
- * pseudos; as an s16 it gives 150 words. That left 137 words, 33 in shape.
+ * Much of it is written to match. The counts below are of the words that
+ * differ with one thing changed, and in brackets how many of those differ in
+ * shape:
  *
- * The register oracle lines frame up with $s3 where it is set and with $a3
- * in the last loop. A pointer of the last loop's own, set to f_CapturedFrame
- * before the loop or in its header and declared before or after frame, gives
- * 227 words (33 in shape) all four ways, so the loops share frame.
- *
- * Naming the second loop's strip offset, i * BACKDROP_STRIP_STEP, gives 156
- * words (40 in shape) used at all five places, and the strip's top,
- * offset plus the border, 160 (48).
- *
- * The motion blur's loop indexes a source pointer set to
- * f_LastFrameBuffer just before it, as CaptureMenuBackdrop's capture
- * loop does, in place of indexing f_LastFrameBuffer itself. The loop
- * then keeps the texture address mask in $s2 as the original does, which
- * takes the draft from 137 words (33 in shape) to 133 (31), and the
- * register oracle's closest from 64 words to 60, forcing 10 pseudos both
- * ways. Set at the start of the motion blur's branch, or in its
- * declaration, 246 or 142 words differ. 133 words differ, 31 in shape.
+ * - frame points to the last frame for the motion blur, set just before its
+ *   loop or in the loop's header. The combiner folds that load into the
+ *   loop's copy of it, but the two references it removes stay counted, so
+ *   global-alloc counts frame as used 5 times over 155 instructions and
+ *   places it ahead of the strips' 0xE7000000, used 9 times over 444, in
+ *   $s3. Reload then needs a register, and takes the saved one whose pseudos
+ *   are used least, the lowest of those level: $s3, which leaves frame in a
+ *   stack slot. With a pointer of the motion blur's own, or the buffer indexed
+ *   itself, frame is used 3 times and gets no register; reload takes $s4
+ *   from the strips' 0x04000400, which needs a slot as well, in a frame 8
+ *   bytes larger: 134 (18) and 138 (20). frame set at the start of the
+ *   motion blur's branch gives 126 (8), set after the primitive color 142
+ *   (8), and with the loop indexing the buffer all the same 4 (2).
+ * - The strip loops index frame by strip, a count of their own that each
+ *   header steps ahead of i, which puts the strip address's step and
+ *   setting where the original's are. The second loop indexed by i gives
+ *   2 (2), stepping i first 101 (31), counted by strip alone 60 (2), and
+ *   stepping a pointer of its own 115 (29); its height from strip gives
+ *   43 (5), and its rows 191 (49). The last loop stepping i first gives
+ *   2 (0), indexed by i less the border 88 (28), stepping frame 151 (21),
+ *   and with a row variable in place of i 46 (0). The motion blur's loop
+ *   indexed by strip as well gives 2 (2).
+ * - The second loop reads f_HudAnimationFramesLeft once, after loading the
+ *   strip. Read at each of its three uses it gives 104 (30), and read at
+ *   the start of the body 38 (24).
+ * - Each loop declares its own height, an s32. One height for the three
+ *   gives 130 (12); an s16 gives 4 (2) in the motion blur's loop, 98 (30)
+ *   in the second and 54 (4) in the last, and the last loop's strip bottom
+ *   in a local 55 (5).
  */
-#ifdef NON_MATCHING
 void DrawFadeAnimation(Gfx **displayListHead) {
-    u32 *frame = f_CapturedFrame;
-    u16 *source;
+    /* The frame drawn: the captured one, or the last one for the motion blur */
+    u16 *frame = (u16 *)f_CapturedFrame;
     Gfx *gfx = *displayListHead;
     Boolean isTileSet;
-    /*
-     * One index for the strips and the rows, to match: a separate row or strip
-     * variable gives 183 words differing against the draft's 147, 33 in shape
-     * both
-     */
+    /* The strip, or in the last loop its top row */
     s32 i;
+    /* The strip of the captured frame, stepped beside i to match */
+    s32 strip;
 
     if (f_HudAnimationFramesLeft > 0) {
         isTileSet = FALSE;
@@ -3447,7 +3424,7 @@ void DrawFadeAnimation(Gfx **displayListHead) {
                     OPAQUE_ALPHA
                 );
             }
-            else if ((f_HudAnimation == HUD_ANIMATION_FADE_OUT) |
+            else if ((f_HudAnimation == HUD_ANIMATION_FADE_OUT) ||
                 (f_HudAnimation == HUD_ANIMATION_FAST_FADE_OUT)) {
                 gDPPipeSync(gfx++);
                 gDPSetRenderMode(gfx++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
@@ -3458,13 +3435,13 @@ void DrawFadeAnimation(Gfx **displayListHead) {
                 gDPPipeSync(gfx++);
                 gDPSetRenderMode(gfx++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
                 gDPSetCombineMode(gfx++, G_CC_MODULATEI_PRIM, G_CC_MODULATEI_PRIM);
-                source = f_LastFrameBuffer;
+                frame = f_LastFrameBuffer;
                 for (i = 0; i != BACKDROP_STRIP_COUNT; i++) {
                     s32 height = StripHeight(i);
 
                     gDPLoadTextureTile(
                         gfx++,
-                        TextureAddress(&source[i * BACKDROP_STRIP_STEP * SCREEN_WIDTH]),
+                        TextureAddress(&frame[i * BACKDROP_STRIP_STEP * SCREEN_WIDTH]),
                         G_IM_FMT_RGBA,
                         G_IM_SIZ_16b,
                         SCREEN_WIDTH,
@@ -3498,7 +3475,7 @@ void DrawFadeAnimation(Gfx **displayListHead) {
                 *displayListHead = gfx;
                 return;
             }
-            else if ((f_HudAnimation == HUD_ANIMATION_SLIDE_APART) |
+            else if ((f_HudAnimation == HUD_ANIMATION_SLIDE_APART) ||
                 (f_HudAnimation == HUD_ANIMATION_SPIRAL)) {
                 /* DrawHudAnimation draws HUD_ANIMATION_SPIRAL with DrawSpiralAnimation
                  * instead */
@@ -3507,31 +3484,33 @@ void DrawFadeAnimation(Gfx **displayListHead) {
                 gDPSetCombineMode(gfx++, G_CC_DECALRGB, G_CC_DECALRGB);
                 gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
                 gDPPipeSync(gfx++);
-                for (i = 0; i != BACKDROP_STRIP_COUNT; i++) {
+                for (i = 0, strip = 0; i != BACKDROP_STRIP_COUNT; strip++, i++) {
                     s32 height = StripHeight(i);
+                    s32 framesLeft;
 
                     LoadFadeFrameStrip(
                         gfx,
-                        &frame[i * BACKDROP_STRIP_STEP * FADE_FRAME_WORDS_PER_ROW],
+                        &frame[strip * BACKDROP_STRIP_STEP * FADE_FRAME_WIDTH],
                         height,
                         isTileSet
                     );
                     gDPPipeSync(gfx++);
+                    framesLeft = f_HudAnimationFramesLeft;
                     gSPScisTextureRectangle(
                         gfx++,
                         QuarterPixels(BACKDROP_BORDER),
                         QuarterPixels(i * BACKDROP_STRIP_STEP + BACKDROP_BORDER),
-                        QuarterPixels(f_HudAnimationFramesLeft),
+                        QuarterPixels(framesLeft),
                         QuarterPixels(i * BACKDROP_STRIP_STEP + BACKDROP_BORDER + height),
                         G_TX_RENDERTILE,
-                        TexelCoordinate((SCREEN_WIDTH / 2) - f_HudAnimationFramesLeft),
+                        TexelCoordinate((SCREEN_WIDTH / 2) - framesLeft),
                         0,
                         TEXEL_STEP_ONE,
                         TEXEL_STEP_ONE
                     );
                     gSPScisTextureRectangle(
                         gfx++,
-                        QuarterPixels(SCREEN_WIDTH - f_HudAnimationFramesLeft),
+                        QuarterPixels(SCREEN_WIDTH - framesLeft),
                         QuarterPixels(i * BACKDROP_STRIP_STEP + BACKDROP_BORDER),
                         QuarterPixels(BACKDROP_RIGHT + 1),
                         QuarterPixels(i * BACKDROP_STRIP_STEP + BACKDROP_BORDER + height),
@@ -3552,28 +3531,32 @@ void DrawFadeAnimation(Gfx **displayListHead) {
 
         gDPSetCombineMode(gfx++, G_CC_MODULATEI_PRIM, G_CC_MODULATEI_PRIM);
         gDPPipeSync(gfx++);
-        for (i = BACKDROP_BORDER; i < SCREEN_HEIGHT - BACKDROP_BORDER; i += BACKDROP_STRIP_STEP) {
+        for (i = BACKDROP_BORDER, strip = 0; i < SCREEN_HEIGHT - BACKDROP_BORDER;
+            strip++, i += BACKDROP_STRIP_STEP) {
             /* Written with | for the reason StripHeight is */
-            s16 height = BACKDROP_LAST_STRIP_HEIGHT |
+            s32 height = BACKDROP_LAST_STRIP_HEIGHT |
                 ((i + BACKDROP_STRIP_STEP <= SCREEN_HEIGHT - BACKDROP_BORDER) ?
                         (BACKDROP_STRIP_HEIGHT - BACKDROP_LAST_STRIP_HEIGHT) :
                         0);
-            s32 bottom = i + height;
 
-            LoadFadeFrameStrip(gfx, frame, height, isTileSet);
+            LoadFadeFrameStrip(
+                gfx,
+                &frame[strip * BACKDROP_STRIP_STEP * FADE_FRAME_WIDTH],
+                height,
+                isTileSet
+            );
             gSPTextureRectangle(
                 gfx++,
                 QuarterPixels(BACKDROP_BORDER),
                 QuarterPixels(i),
                 QuarterPixels(BACKDROP_RIGHT + 1),
-                QuarterPixels(bottom),
+                QuarterPixels(i + height),
                 G_TX_RENDERTILE,
                 0,
                 0,
                 TEXEL_STEP_ONE,
                 TEXEL_STEP_ONE
             );
-            frame += BACKDROP_STRIP_STEP * FADE_FRAME_WORDS_PER_ROW;
         }
 
         if (f_HudAnimation == HUD_ANIMATION_FAST_FADE_OUT) {
@@ -3590,9 +3573,6 @@ void DrawFadeAnimation(Gfx **displayListHead) {
 
     *displayListHead = gfx;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/hole_display", DrawFadeAnimation);
-#endif
 
 /*
  * Draws HUD_ANIMATION_SPIRAL, where the frame is cut into a grid of tiles. It
