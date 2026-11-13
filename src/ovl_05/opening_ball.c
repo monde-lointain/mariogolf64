@@ -1849,7 +1849,7 @@ s32 StepOpeningBallSimulation(BallSimulation *simulation) {
                     simulation->velocity[AXIS_X],
                     simulation->velocity[AXIS_Y],
                     simulation->velocity[AXIS_Z]
-                ) < (f64)MAX_OFF_GREEN_STOP_SPEED) {
+                ) < MAX_OFF_GREEN_STOP_SPEED) {
                 simulation->state = BALL_STATE_STOPPED;
             }
         }
