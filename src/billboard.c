@@ -377,63 +377,14 @@ void DrawBillboard(
  * the nearest to the farthest; DrawFadingBillboards draws the close ones
  * that need to stay see-through. Here, the close ones are only drawn when
  * they stay opaque.
- *
- * Doesn't match: the original's frame is 16 bytes larger, with the space
- * unused above the spill slots, which moves every register save. Between
- * the loops it sets $s6 to 0 and never reads it, as a biv that loop.c
- * eliminated would leave, and in the far loop it keeps ballDepth -
- * BALL_CLEARANCE_DEPTH in $fp and rebuilds both tables' addresses, where
- * ours keeps g_BillboardTransforms in $fp. Counting the far loop up and
- * indexing f_DrawOrder from the end gives more words: loop.c doesn't
- * reduce the index. Unused locals for the frame move the spill slots. The
- * permuter's flag for the near loop's viewDepth >= 0 test (131 words, 9
- * in shape) only takes an 8-byte slot that grows the frame, so it is a
- * pad in disguise. The register oracle, forcing 7 pseudos' registers,
- * leaves 77 words at best, so the code differs too. Declaring the far
- * loop's textureIndex unsigned gives 107 words (25 in shape) only because
- * it drops the unused-billboard test, which the original keeps as an lb
- * and a bltzl. Declaring it an s16 gives 131 words (9 in shape), and the
- * oracle's best 67 with 8 forced, but only changes which table's address
- * the far loop keeps; it adds no extension, but the field is an s8, which
- * as the local's type changes nothing, and the s16 in the near loop too
- * gives 156 words, or in the near loop alone 164. An s16 viewDepth gives
- * 133 words (11 in shape) but loads the field's low half with an lh, and
- * an s8 billboardIndex 135 (13) but loads each order entry's low byte
- * with an lb, where the original loads the depth with lw and the entries
- * with lhu. Reading the texture index from the billboard at both uses in
- * the second loop, which counts down, gives 121 words (21 in shape), but
- * it loads the field again after IsDebugBButtonView, where the original
- * keeps its one load in $s4 for the call; a focused permuter run's 88
- * words test textureIndex before setting it. Those counts were measured
- * with the view test taking fabs of each component converted back to f32,
- * when 139 words differed, 17 in shape. With the game's fabsf there, 125
- * words differ, 13 in shape.
- *
- * Computing ballDepth - BALL_CLEARANCE_DEPTH into its own local before
- * SortBillboardsByDepth gives 127 words (15 in shape) and a frame 8 bytes
- * short, and before the far loop the draft's 125, as loop.c hoists it
- * there anyway. A counter of the billboards drawn in the far loop that
- * nothing reads, set to 0 in or before the loop, is deleted whole and
- * gives the draft's 125; counting the far loop with it while orderIndex
- * counts down gives 137 (11 in shape) and keeps the counter's increments.
- *
- * In the second loop, a counter from 0 with orderIndex set to
- * BILLBOARD_COUNT - 1 less it gives 136 words (12 in shape), and indexing
- * f_DrawOrder with that difference 126 (12): loop.c then keeps the
- * subtraction in the loop rather than reducing the address, and the
- * counter's own test. Flags for the debug view's test, the near-ball test
- * or the opaque test, set to FALSE and then TRUE in each pass, give 125
- * to 129 words; none leaves the original's unread $s6 = 0 before the
- * loop.
  */
-#ifdef NON_MATCHING
 void DrawBillboards(CameraMatrices *cameraMatrices, s32 cameraIndex) {
     Gfx *gfx = g_DisplayListHead;
     BillboardColor lightColor UNUSED = g_BillboardLightColor;
     BillboardColor envColor = g_BillboardEnvColor;
     Vec3 viewDir;
     Vec3 lightDir;
-    /* Pads the frame to match; without it 227 words differ, against 125 */
+    /* Nothing uses it, but the original's frame has the room for it */
     Vec3 unusedVector UNUSED;
     Radians lightPitch;
     Radians lightYaw;
@@ -441,6 +392,7 @@ void DrawBillboards(CameraMatrices *cameraMatrices, s32 cameraIndex) {
     f32 lightHeight;
     f32 leftAlignment;
     f32 rightAlignment;
+    Boolean hasTranslucentMode;
     s32 ballDepth;
     s32 orderIndex;
     s32 billboardIndex;
@@ -577,6 +529,7 @@ void DrawBillboards(CameraMatrices *cameraMatrices, s32 cameraIndex) {
     }
 
     gDPPipeSync(gfx++);
+    hasTranslucentMode = FALSE;
     gDPSetRenderMode(gfx++, G_RM_FOG_SHADE_A, BILLBOARD_RENDER_MODE_BLENDED2);
     gDPPipeSync(gfx++);
     gDPSetAlphaCompare(gfx++, G_AC_THRESHOLD);
@@ -627,6 +580,17 @@ void DrawBillboards(CameraMatrices *cameraMatrices, s32 cameraIndex) {
             continue;
         }
 
+        /* Never true, as this loop draws no fading billboard that would set
+         * the flag, and the compiler drops the test: it only leaves the
+         * flag's unread register and 16 unused bytes of the frame. So the
+         * mode restored here is a guess; the match needs the test against
+         * TRUE, the flag cleared and any command drawn */
+        if (hasTranslucentMode == TRUE && alpha == OPAQUE_ALPHA) {
+            hasTranslucentMode = FALSE;
+            gDPPipeSync(gfx++);
+            gDPSetRenderMode(gfx++, G_RM_FOG_SHADE_A, BILLBOARD_RENDER_MODE_BLENDED2);
+        }
+
         DrawBillboard(
             &gfx,
             &g_Billboards[billboardIndex],
@@ -645,9 +609,6 @@ void DrawBillboards(CameraMatrices *cameraMatrices, s32 cameraIndex) {
     gDPPipeSync(gfx++);
     g_DisplayListHead = gfx;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/billboard", DrawBillboards);
-#endif
 
 /*
  * Whether the billboards are hidden: by the game flag, while their heap
