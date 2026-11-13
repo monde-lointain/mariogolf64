@@ -1065,74 +1065,82 @@ void DrawStatsBadgeCount(Gfx **displayListHead) {
 /*
  * Draws the arrows beside the panel that show there are more statistics above
  * or below.
- * Doesn't match: 94 words differ, 20 in shape. The original picks the first
- * arrow with a branch around a copy of the rows-below test; GCC's jump pass
- * makes the copy branchless here, so the registers and the spills to the stack
- * differ. The first arrow is an s16, as the arrow index it is added to is;
- * as an s32 102 words differed, 22 in shape, and the register oracle got to
- * 83 words where it now gets to 77, forcing 14 pseudos either way. With it
- * an s16, the copy under "if (arrowCount == 1)", a ternary or an if/else
- * gives 101 words (23 in shape). The counts that follow were measured with
- * the draft at 102 words. Copying hasRowsBelow under "if (arrowCount == 1)"
- * gives 107 words (33 in shape), and copying hasRowsBelow != FALSE there
- * 109; the same with "arrowCount += hasRowsBelow" gives 99 words but 23 in
- * shape, as the original branches to count that arrow. Adding the arrows'
- * offsets as two products gives 103-113 words, 27-31 in shape. The
- * permuter's best outputs (66 and 70 words) load the arrow's texture only
- * for a lone down arrow, which changes what is drawn: the original's loop
- * sets the texture image on every pass. They are left out, as are a later
- * run's outputs of 65 and 66 words, which do the same. A ternary or an
- * if/else choosing hasRowsBelow or FALSE gives the 107 words (33 in shape)
- * of the copy, and setting TRUE under nested tests 109 (39). A u16 arrow
- * index gives 75 words (27 in shape), but zero-extends it with andi 0xffff
- * at both of the two places where the original sign-extends it with sll and
- * sra by 16, as the s16 does.
  *
- * Testing "(arrowCount == 1) & firstArrow" for the lone down arrow gives 183
- * words (63 in shape) and a frame 16 bytes larger.
+ * The rectangle is drawn with gSPScisTextureRectangle, which clamps each edge
+ * at zero and, for a left or top edge off the screen, moves the texel
+ * coordinate on by the edge times its step. All that is left of that in the
+ * code is a shift of the top by 2 whose result nothing reads, left from the
+ * test of the top's sign, and 16 bytes of the frame. combine, knowing the top
+ * is 144 or 216, drops the bottom edge's clamp and the top's texel offset, and
+ * where it can't place the note for the death of each one's register it leaves
+ * a use of it. With nothing else reading them they get no hard register, and
+ * reload gives each a stack slot of 8 bytes that nothing reads. The frame's
+ * other five slots are displayListHead's, the arrow count's, the first arrow's
+ * and the lone down arrow's test's, which the code reads at 0x4 to 0x1C, and
+ * one for the texture table mode's word, which reload takes out of $s2 and
+ * never reads back. With gSPTextureRectangle the frame is 16 bytes smaller,
+ * which the old draft made up with an unused array.
  *
- * The original's four spill slots, 8 bytes apart, are at 0x4-0x1C, with the
- * stack unused above them, from 0x20 to 0x37; the draft's are the same four
- * slots above its 16 bytes of padding, and without the padding its frame is
- * 16 bytes smaller. Reload gives spilled pseudos their slots after the
- * locals, at higher offsets, so no local can stand for the original's unused
- * bytes: those would follow from reload giving slots to pseudos whose stack
- * references were later removed.
+ * The top is an s16, as the count, the first arrow and the index are. As an
+ * s32, the top's two shifts for the rectangle's words trade places and
+ * registers.
  *
- * The two flags were s16s, as the arrow count they start is, which took the
- * draft from 94 words differing (20 in shape) to 90 (18), and the register
- * oracle's closest result from 77 words, forcing 15 pseudos, to 65, forcing
- * 14. Both as u8s or s8s gave 93 (21); the flag for the rows below alone as a
- * byte gave 90 (18) too, and the flag for the rows above alone 95 (19). That
- * left 90 words, 18 in shape.
+ * The rows below are tested where the down arrow is counted and again for the
+ * first arrow, and cse joins the two: the original keeps the test's result in
+ * $a1 and copies it under a branch on the count. Kept in a flag, the copy is
+ * made without a branch. The lone down arrow's test in the loop tests the count
+ * again, though firstArrow is only set for a count of one: loop.c moves the
+ * test out as (arrowCount == 1) & firstArrow, the original's xori, sltiu and
+ * and, kept at 0x1C($sp).
  *
- * The draft then kept the two tests in the flags hasRowsAbove and
- * hasRowsBelow. Testing f_FirstShownStat where each flag was read, in
- * the arrow count's initializer, the test that counts the down arrow and
- * the first arrow's test, takes the draft from 90 words differing (18 in
- * shape) to 71 (11), and the register oracle's closest result from 65
- * words, forcing 14 pseudos, to 64, forcing 9. Dropping only the flag
- * for the rows below gives 78 (12); setting it in the counting test,
- * from FALSE, 94 (20); and the arrow count as an s32 126 (44). Without
- * the padding 95 words differ (11 in shape), with the frame 16 bytes
- * smaller.
+ * Measured against the match, as words differing and how many of them in shape:
+ *   The old draft: gSPTextureRectangle, an s32 top and 16
+ *   unused bytes                                              71 (11)
+ *   gSPTextureRectangle, with no unused bytes                 96 (14)
+ *   gSPTextureRectangle, with the unused bytes                72 (14)
+ *   The unused bytes as well as gSPScisTextureRectangle       56 (0)
+ *   top as an s32                                             8 (4)
+ *   top as a u8                                               24 (4)
+ *   top as a u32                                              55 (11)
+ *   top as an s8                                              116 (30)
+ *   The bottom edge as the top's quarter pixels plus the
+ *   height's                                                  51 (3)
+ *   The rows below tested once, in an s16 flag                113 (45)
+ *   The same in an s32 flag                                   117 (47)
+ *   The rows above in an s16 flag as well                     113 (45)
+ *   The down arrow counted by adding its test                 18 (8)
+ *   The first arrow as a conditional expression on the count  113 (45)
+ *   The first arrow cleared, then set under the count's test  20 (8)
+ *   The first arrow with the rows' test ahead of the count's  113 (57)
+ *   firstArrow as an s32                                      28 (10)
+ *   firstArrow as a u16                                       3 (3)
+ *   arrowCount as an s32                                      65 (29)
+ *   arrowCount as a u16                                       2 (2)
+ *   arrowIndex as an s32                                      23 (7)
+ *   arrowIndex as a u16                                       9 (9)
+ *   The lone down arrow tested by firstArrow alone            146 (16)
+ *   The same tested with firstArrow ahead of the count        10 (0)
+ *   The top in one conditional expression, a down arrow's for
+ *   a later arrow or a lone down arrow                        17 (15)
+ *   The lone down arrow tested first, and the index in its
+ *   else                                                      17 (13)
+ *   The top chosen by the arrow's image, firstArrow +
+ *   arrowIndex                                                191 (37)
+ *   The arrow's image as arrowIndex + firstArrow              19 (1)
+ *   The arrow's image offset as a product for each            41 (15)
+ *   The loop's test as <                                      283 (37)
  *
- * Of the bytes above the four spill slots, the draft leaves one slot
- * unused: reload spills $s2 for a register to read the display list
- * through displayListHead, which is kept on the stack, and the one
- * pseudo in $s2, the texture LUT command's word, gets a slot that
- * inheritance leaves unread. The original's 24 unused bytes would be
- * three such slots. 71 words differ, 11 in shape.
+ * Also matching: top as a u16; the top chosen by an if and an else, or set to
+ * the up arrow's and then to the down arrow's under the index's test; the index
+ * tested as zero with the tops swapped; arrowCount cleared and counted up under
+ * a test for each arrow; and top declared before arrowIndex.
  */
-#ifdef NON_MATCHING
 void DrawStatsScrollArrows(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     s16 arrowCount = f_FirstShownStat > 0;
     s16 firstArrow;
     s16 arrowIndex;
-    s32 top;
-    /* Pads the frame to match; without it 95 words differ, against 71 */
-    s32 unused[4] UNUSED;
+    s16 top;
 
     if (f_FirstShownStat + STATS_SHOWN_ROW_COUNT < STATS_COUNT) {
         arrowCount++;
@@ -1151,6 +1159,7 @@ void DrawStatsScrollArrows(Gfx **displayListHead) {
         gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(f_CourseStatsDigitsAndArrows)));
         for (arrowIndex = 0; arrowIndex != arrowCount; arrowIndex++) {
             top = (arrowIndex != 0) ? STATS_DOWN_ARROW_TOP : STATS_UP_ARROW_TOP;
+            /* A lone down arrow. The count is tested again, to match. */
             if (arrowCount == 1 && firstArrow) {
                 top = STATS_DOWN_ARROW_TOP;
             }
@@ -1174,7 +1183,7 @@ void DrawStatsScrollArrows(Gfx **displayListHead) {
                 G_TX_NOLOD
             );
             gDPPipeSync(gfx++);
-            gSPTextureRectangle(
+            gSPScisTextureRectangle(
                 gfx++,
                 QuarterPixels(STATS_ARROW_LEFT),
                 QuarterPixels(top),
@@ -1192,9 +1201,6 @@ void DrawStatsScrollArrows(Gfx **displayListHead) {
 
     *displayListHead = gfx;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/course_menu", DrawStatsScrollArrows);
-#endif
 
 /*
  * Draws the course's spinning trophy in the color of each place won in its
