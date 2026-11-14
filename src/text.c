@@ -449,7 +449,7 @@ void DrawLargeTextSlot(Gfx **displayListHead, s32 slot) {
     Gfx *gfx = *displayListHead;
     TextSlot *textSlot = &g_TextSlots[slot];
     s32 characterIndex;
-    s32 start;
+    s32 messageStart;
     s32 length;
     Boolean isIconLoaded;
     s32 x;
@@ -470,7 +470,7 @@ void DrawLargeTextSlot(Gfx **displayListHead, s32 slot) {
     y = textSlot->y;
 
     length = MessageSpanAt(textSlot->messageId)->length;
-    start = MessageSpanAt(textSlot->messageId)->start;
+    messageStart = MessageSpanAt(textSlot->messageId)->start;
     if (textSlot->flags & TEXT_FLAG_TYPED) {
         if (textSlot->shownCount < length) {
             length = textSlot->shownCount;
@@ -487,7 +487,7 @@ void DrawLargeTextSlot(Gfx **displayListHead, s32 slot) {
         (textSlot->flags & TEXT_FLAG_WIDE_SPACING) ? WIDE_LARGE_FONT_ADVANCE : FONT_SIZE_LARGE;
     gDPPipeSync(gfx++);
     for (characterIndex = 0; characterIndex != length; characterIndex++) {
-        code = ((u16 *)f_Messages)[start + characterIndex + g_MessageCodesStart];
+        code = ((u16 *)f_Messages)[messageStart + characterIndex + g_MessageCodesStart];
         if (isIconLoaded == TRUE) {
             gDPSetCombineLERP(
                 gfx++,
@@ -970,7 +970,7 @@ void DrawMediumTextSlot(Gfx **displayListHead, s32 slot) {
     Gfx *gfx = *displayListHead;
     TextSlot *textSlot = &g_TextSlots[slot];
     s32 characterIndex;
-    s32 start;
+    s32 messageStart;
     s32 length;
     Boolean isIconLoaded;
     s32 x;
@@ -991,7 +991,7 @@ void DrawMediumTextSlot(Gfx **displayListHead, s32 slot) {
     y = textSlot->y;
 
     length = MessageSpanAt(textSlot->messageId)->length;
-    start = MessageSpanAt(textSlot->messageId)->start;
+    messageStart = MessageSpanAt(textSlot->messageId)->start;
     if (textSlot->flags & TEXT_FLAG_TYPED) {
         if (textSlot->shownCount < length) {
             length = textSlot->shownCount;
@@ -1006,7 +1006,7 @@ void DrawMediumTextSlot(Gfx **displayListHead, s32 slot) {
 
     gDPPipeSync(gfx++);
     for (characterIndex = 0; characterIndex != length; characterIndex++) {
-        code = ((u16 *)f_Messages)[start + characterIndex + g_MessageCodesStart];
+        code = ((u16 *)f_Messages)[messageStart + characterIndex + g_MessageCodesStart];
         if (isIconLoaded == TRUE) {
             gDPSetCombineLERP(
                 gfx++,
@@ -1532,15 +1532,15 @@ void MeasureMessage(MessageId messageId, s32 fontSize, s32 *width, s32 *height, 
     s32 widest;
     s32 code;
     s32 length;
-    s32 start;
+    s32 messageStart;
 
     lineCount = 0;
 
     length = MessageSpanAt(messageId)->length;
-    start = MessageSpanAt(messageId)->start;
+    messageStart = MessageSpanAt(messageId)->start;
     line = 0;
     for (characterIndex = 0; characterIndex != length; characterIndex++) {
-        code = ((u16 *)f_Messages)[g_MessageCodesStart + start + characterIndex];
+        code = ((u16 *)f_Messages)[g_MessageCodesStart + messageStart + characterIndex];
         if (code < MESSAGE_CODE_GLYPH) {
             if (code < CHARACTER_CODE_MARK_FIRST ||
                 code >= CHARACTER_CODE_MARK_FIRST + CHARACTER_CODE_MARK_COUNT) {
@@ -2427,7 +2427,7 @@ s32 PlaceMessageGlyphGroup(s32 group, s32 fontSize, s32 x, s32 y, MessageId mess
     s32 width;
     s32 height;
     s32 spriteIndex;
-    s32 start;
+    s32 messageStart;
     s32 length;
     s32 codeIndex;
     s32 advance;
@@ -2443,7 +2443,7 @@ s32 PlaceMessageGlyphGroup(s32 group, s32 fontSize, s32 x, s32 y, MessageId mess
         return UNSET_RESULT;
     }
 
-    start = MessageSpanAt(messageId)->start;
+    messageStart = MessageSpanAt(messageId)->start;
     length = MessageSpanAt(messageId)->length;
     MeasureMessage(messageId, fontSize, &width, &height, 0);
     width /= 2;
@@ -2460,7 +2460,7 @@ s32 PlaceMessageGlyphGroup(s32 group, s32 fontSize, s32 x, s32 y, MessageId mess
     advance = 0;
     for (spriteIndex = 0; codeIndex != length; spriteIndex++) {
         if (g_GlyphSprites[spriteIndex].group == NO_GLYPH_GROUP) {
-            code = ((u16 *)f_Messages)[g_MessageCodesStart + start + codeIndex];
+            code = ((u16 *)f_Messages)[g_MessageCodesStart + messageStart + codeIndex];
             if (code < MESSAGE_CODE_GLYPH) {
                 if (code >= CHARACTER_CODE_MARK_FIRST &&
                     code < CHARACTER_CODE_MARK_FIRST + CHARACTER_CODE_MARK_COUNT) {
