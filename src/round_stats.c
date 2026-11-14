@@ -320,7 +320,7 @@ void RecordCourseRound(void) {
     s32 holeIndex;
     s64 score;
     s64 total;
-    s32 sum;
+    s32 measuredDriveTotal;
     s32 shotsToGreen;
 
     if (courseStats->roundCount <= 0) {
@@ -403,12 +403,12 @@ void RecordCourseRound(void) {
         courseStats->averagedDriveCount += stats->averagedDriveCount;
     }
 
-    sum = courseStats->measuredDriveTotal + stats->measuredDriveCount;
-    if (sum > RECORD_TOTAL_LIMIT) {
+    measuredDriveTotal = courseStats->measuredDriveTotal + stats->measuredDriveCount;
+    if (measuredDriveTotal > RECORD_TOTAL_LIMIT) {
         courseStats->measuredDriveTotal = RECORD_TOTAL_LIMIT;
     }
     else {
-        courseStats->measuredDriveTotal = sum;
+        courseStats->measuredDriveTotal = measuredDriveTotal;
     }
 
     if (isAtRoundLimit == TRUE) {
@@ -462,20 +462,20 @@ void RecordCourseRound(void) {
         }
     }
 
-    sum = courseStats->sandSaveCount + stats->sandSaveCount;
-    if (sum > RECORD_TOTAL_LIMIT) {
+    measuredDriveTotal = courseStats->sandSaveCount + stats->sandSaveCount;
+    if (measuredDriveTotal > RECORD_TOTAL_LIMIT) {
         courseStats->sandSaveCount = RECORD_TOTAL_LIMIT;
     }
     else {
-        courseStats->sandSaveCount = sum;
+        courseStats->sandSaveCount = measuredDriveTotal;
     }
 
-    sum = courseStats->missedSandSaveCount + stats->missedSandSaveCount;
-    if (sum > RECORD_TOTAL_LIMIT) {
+    measuredDriveTotal = courseStats->missedSandSaveCount + stats->missedSandSaveCount;
+    if (measuredDriveTotal > RECORD_TOTAL_LIMIT) {
         courseStats->missedSandSaveCount = RECORD_TOTAL_LIMIT;
     }
     else {
-        courseStats->missedSandSaveCount = sum;
+        courseStats->missedSandSaveCount = measuredDriveTotal;
     }
 
     WriteSaveData();
