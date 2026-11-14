@@ -3387,9 +3387,7 @@ void GetGroundLightColors(GroundLightColor *light, GroundLightColor *shade) {
 #define HEIGHT_FADE_LIMIT 0.25f
 #define HEIGHT_FADE_FULL 1.0f
 
-#define SLOPE_LIGHT_RED 0
-#define SLOPE_LIGHT_GREEN 1
-#define SLOPE_LIGHT_BLUE 2
+// Each slope light holds a word per ColorChannel.
 #define SLOPE_LIGHT_WORD_COUNT 4
 
 void ShadeGroundTiles(void) {
@@ -3470,11 +3468,11 @@ void ShadeGroundTiles(void) {
             scale = LIGHT_SCALE_MAX;
         }
 
-        slopeLights[((lightSlope - LIGHT_SLOPE_MIN) * SLOPE_LIGHT_WORD_COUNT) + SLOPE_LIGHT_RED] =
+        slopeLights[((lightSlope - LIGHT_SLOPE_MIN) * SLOPE_LIGHT_WORD_COUNT) + RED_CHANNEL] =
             light.red * scale;
-        slopeLights[((lightSlope - LIGHT_SLOPE_MIN) * SLOPE_LIGHT_WORD_COUNT) + SLOPE_LIGHT_GREEN] =
+        slopeLights[((lightSlope - LIGHT_SLOPE_MIN) * SLOPE_LIGHT_WORD_COUNT) + GREEN_CHANNEL] =
             light.green * scale;
-        slopeLights[((lightSlope - LIGHT_SLOPE_MIN) * SLOPE_LIGHT_WORD_COUNT) + SLOPE_LIGHT_BLUE] =
+        slopeLights[((lightSlope - LIGHT_SLOPE_MIN) * SLOPE_LIGHT_WORD_COUNT) + BLUE_CHANNEL] =
             light.blue * scale;
     }
 
@@ -3555,7 +3553,7 @@ void ShadeGroundTiles(void) {
                     color = ((shade.red + (texelColor >> TEXEL_RED_SHIFT)) *
                                 slopeLights
                                     [((slope - LIGHT_SLOPE_MIN) * SLOPE_LIGHT_WORD_COUNT) +
-                                        SLOPE_LIGHT_RED]) >>
+                                        RED_CHANNEL]) >>
                         (LIGHT_SCALE_FRACTION_BITS + LIGHT_COLOR_FRACTION_BITS);
                     if (color > TEXEL_CHANNEL_MAX) {
                         color = TEXEL_CHANNEL_MAX;
@@ -3565,7 +3563,7 @@ void ShadeGroundTiles(void) {
                     channel = ((shade.green + (texelColor & TEXEL_GREEN_MASK)) *
                                   slopeLights
                                       [((slope - LIGHT_SLOPE_MIN) * SLOPE_LIGHT_WORD_COUNT) +
-                                          SLOPE_LIGHT_GREEN]) >>
+                                          GREEN_CHANNEL]) >>
                         (LIGHT_SCALE_FRACTION_BITS + LIGHT_COLOR_FRACTION_BITS + TEXEL_GREEN_SHIFT);
                     if (channel > TEXEL_CHANNEL_MAX) {
                         channel = TEXEL_CHANNEL_MAX;
@@ -3575,7 +3573,7 @@ void ShadeGroundTiles(void) {
                     channel = ((shade.blue + (texelColor & TEXEL_BLUE_MASK)) *
                                   slopeLights
                                       [((slope - LIGHT_SLOPE_MIN) * SLOPE_LIGHT_WORD_COUNT) +
-                                          SLOPE_LIGHT_BLUE]) >>
+                                          BLUE_CHANNEL]) >>
                         (LIGHT_SCALE_FRACTION_BITS + LIGHT_COLOR_FRACTION_BITS + TEXEL_BLUE_SHIFT);
                     if (channel > TEXEL_CHANNEL_MAX) {
                         channel = TEXEL_CHANNEL_MAX;
@@ -3589,7 +3587,7 @@ void ShadeGroundTiles(void) {
                     red = ((shade.red + (texelColor >> TEXEL_RED_SHIFT)) *
                               slopeLights
                                   [((slope - LIGHT_SLOPE_MIN) * SLOPE_LIGHT_WORD_COUNT) +
-                                      SLOPE_LIGHT_RED]) >>
+                                      RED_CHANNEL]) >>
                         (LIGHT_SCALE_FRACTION_BITS + LIGHT_COLOR_FRACTION_BITS);
                     shaded.red = red;
                     if (red > TEXEL_CHANNEL_MAX) {
@@ -3599,7 +3597,7 @@ void ShadeGroundTiles(void) {
                     green = ((shade.green + (texelColor & TEXEL_GREEN_MASK)) *
                                 slopeLights
                                     [((slope - LIGHT_SLOPE_MIN) * SLOPE_LIGHT_WORD_COUNT) +
-                                        SLOPE_LIGHT_GREEN]) >>
+                                        GREEN_CHANNEL]) >>
                         (LIGHT_SCALE_FRACTION_BITS + LIGHT_COLOR_FRACTION_BITS + TEXEL_GREEN_SHIFT);
                     shaded.green = green;
                     if (green > TEXEL_CHANNEL_MAX) {
@@ -3609,7 +3607,7 @@ void ShadeGroundTiles(void) {
                     blue = ((shade.blue + (texelColor & TEXEL_BLUE_MASK)) *
                                slopeLights
                                    [((slope - LIGHT_SLOPE_MIN) * SLOPE_LIGHT_WORD_COUNT) +
-                                       SLOPE_LIGHT_BLUE]) >>
+                                       BLUE_CHANNEL]) >>
                         (LIGHT_SCALE_FRACTION_BITS + LIGHT_COLOR_FRACTION_BITS + TEXEL_BLUE_SHIFT);
                     shaded.blue = blue;
                     if (blue > TEXEL_CHANNEL_MAX) {
