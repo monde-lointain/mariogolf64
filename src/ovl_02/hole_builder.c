@@ -24,7 +24,7 @@
 #include "system/host_file.h"
 #include "system/memory_address.h"
 #include "terrain.h"
-#include "text.h"
+#include "text/text.h"
 #include "work_area.h"
 
 #define TILE_ORIGIN_SHIFT 9

@@ -9,7 +9,7 @@
 #include "system/compiler.h"
 #include "system/main.h"
 #include "system/memory_address.h"
-#include "text.h"
+#include "text/text.h"
 
 #define TEXT_COLUMN_COUNT 40
 #define TEXT_ROW_COUNT 30

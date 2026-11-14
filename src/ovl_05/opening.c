@@ -41,7 +41,7 @@
 #include "system/memory_address.h"
 #include "system/overlay_manager.h"
 #include "terrain.h"
-#include "text.h"
+#include "text/text.h"
 
 #define OPENING_BILLBOARD_HEAP_SIZE 0x7038
 

@@ -119,7 +119,7 @@ segments:
       - [0x4A5A0, c, controllers/controller_paks]
       - [0x4A9E0, c, help_board]
       - [0x4C3D0, c, awards]
-      - [0x4C770, c, text]
+      - [0x4C770, c, text/text]
       - [0x51900, c, camera/camera_framing]
       - [0x526B0, c, math/curve]
       - [0x52FF0, c, fireworks]
@@ -388,7 +388,7 @@ segments:
       - [0x9F560, .data, screen/scene_colors]
       - [0x9F6D0, .data, controllers/controller_paks]
       - [0x9F6E0, .data, help_board]
-      - [0x9F790, .data, text]
+      - [0x9F790, .data, text/text]
       - [0x9F9D0, .data, math/curve]
       - [0x9FA60, .data, fireworks]
       - [0xA06B0, .data, particle_effects]
@@ -478,7 +478,7 @@ segments:
       - [0xAC8C0, .rodata, controllers/controller_paks]
       - [0xAC950, .rodata, help_board]
       - [0xAC970, .rodata, awards]
-      - [0xAC988, .rodata, text]
+      - [0xAC988, .rodata, text/text]
       - [0xACC50, .rodata, camera/camera_framing]
       - [0xACD00, .rodata, fireworks]
       - [0xACD10, .rodata, particle_effects]
@@ -537,7 +537,7 @@ segments:
       - { type: .bss, vram: 0x800E1C00, name: screen/screen_layers }
       - { type: .bss, vram: 0x800E1C10, name: screen/scene_colors }
       - { type: .bss, vram: 0x800E1C20, name: help_board }
-      - { type: .bss, vram: 0x800E1C30, name: text }
+      - { type: .bss, vram: 0x800E1C30, name: text/text }
       - { type: .bss, vram: 0x800E1C50, name: camera/camera_framing }
       - { type: .bss, vram: 0x800E1D20, name: math/curve }
       - { type: .bss, vram: 0x800E1D60, name: particle_effects }

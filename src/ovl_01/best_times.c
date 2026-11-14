@@ -25,7 +25,7 @@
 #include "system/compiler.h"
 #include "system/frame_time.h"
 #include "system/memory_address.h"
-#include "text.h"
+#include "text/text.h"
 #include "work_area.h"
 
 #define ASSET_CHARACTER_FACE_STRIP 0x8E9

@@ -32,7 +32,7 @@
 #include "system/compiler.h"
 #include "system/heap.h"
 #include "system/memory_address.h"
-#include "text.h"
+#include "text/text.h"
 
 #define TITLE_HOLE_INDEX 9
 #define TITLE_COURSE_INDEX 0

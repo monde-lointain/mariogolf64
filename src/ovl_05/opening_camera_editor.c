@@ -11,7 +11,7 @@
 #include "system/c_language.h"
 #include "system/compiler.h"
 #include "system/host_file.h"
-#include "text.h"
+#include "text/text.h"
 
 #define SNAPSHOT_COUNT 32
 #define SNAPSHOT_LOOK_AT 0

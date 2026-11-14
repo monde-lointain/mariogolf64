@@ -6,7 +6,7 @@
 #include "camera/camera.h"
 #include "player.h"
 #include "system/c_language.h"
-#include "text.h"
+#include "text/text.h"
 
 enum FlyGuyVisibility {
     FLY_GUY_HIDDEN = -1,

@@ -19,7 +19,7 @@
 #include "system/main.h"
 #include "system/memory_address.h"
 #include "system/overlay_manager.h"
-#include "text.h"
+#include "text/text.h"
 
 enum BootLogo {
     BOOT_LOGO_N64,

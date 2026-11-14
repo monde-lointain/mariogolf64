@@ -18,7 +18,7 @@
 #include "system/compiler.h"
 #include "system/heap.h"
 #include "system/memory_address.h"
-#include "text.h"
+#include "text/text.h"
 
 enum CourseSelectState {
     COURSE_SELECT_UNLOADED,

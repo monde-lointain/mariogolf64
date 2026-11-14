@@ -37,7 +37,7 @@
 #include "system/asset.h"
 #include "system/compiler.h"
 #include "system/memory_address.h"
-#include "text.h"
+#include "text/text.h"
 
 #define COURSE_THUMBNAIL_WIDTH 64
 #define COURSE_THUMBNAIL_STRIP_HEIGHT 32

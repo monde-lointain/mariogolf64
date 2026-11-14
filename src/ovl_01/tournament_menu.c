@@ -23,7 +23,7 @@
 #include "system/c_language.h"
 #include "system/compiler.h"
 #include "system/memory_address.h"
-#include "text.h"
+#include "text/text.h"
 
 #define ASSET_CODE_ENTRY_BAR 0x93E
 #define ASSET_CODE_ENTRY_GLYPHS 0x942

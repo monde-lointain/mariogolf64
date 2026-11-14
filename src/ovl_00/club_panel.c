@@ -21,7 +21,7 @@
 #include "system/compiler.h"
 #include "system/heap.h"
 #include "system/memory_address.h"
-#include "text.h"
+#include "text/text.h"
 
 #define GAME_FLAG_CLUB_PANEL_DEBUG 0x6E
 #define DEBUG_VALUE_COLUMN 20

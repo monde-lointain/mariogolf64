@@ -28,8 +28,8 @@
 #include "system/compiler.h"
 #include "system/heap.h"
 #include "system/memory_address.h"
-#include "text.h"
-#include "text_format.h"
+#include "text/text.h"
+#include "text/text_format.h"
 
 enum SaveMenuState {
     SAVE_MENU_STATE_OPENING,

@@ -44,7 +44,7 @@
 #include "system/main.h"
 #include "system/overlay_manager.h"
 #include "terrain.h"
-#include "text.h"
+#include "text/text.h"
 #include "turn.h"
 
 #define RANDOM_YAW_MASK 0x7FFF

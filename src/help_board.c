@@ -17,7 +17,7 @@
 #include "system/c_language.h"
 #include "system/compiler.h"
 #include "system/memory_address.h"
-#include "text.h"
+#include "text/text.h"
 
 #define ASSET_HELP_BOARD_CHALKBOARD 0x833
 

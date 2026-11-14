@@ -26,7 +26,7 @@
 #include "system/compiler.h"
 #include "system/frame_time.h"
 #include "system/memory_address.h"
-#include "text.h"
+#include "text/text.h"
 #include "tournament.h"
 
 #define PLACE_SUFFIX_X 24

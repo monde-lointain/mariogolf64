@@ -25,7 +25,7 @@
 #include "system/compiler.h"
 #include "system/memory_address.h"
 #include "system/overlay_manager.h"
-#include "text.h"
+#include "text/text.h"
 #include "turn.h"
 
 enum ShotLabelMode {

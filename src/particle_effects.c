@@ -31,7 +31,7 @@
 #include "system/heap.h"
 #include "system/memory_address.h"
 #include "terrain.h"
-#include "text.h"
+#include "text/text.h"
 #include "turn.h"
 
 #define POINT_SPREAD 3072

@@ -31,7 +31,7 @@
 #include "system/asset.h"
 #include "system/compiler.h"
 #include "system/memory_address.h"
-#include "text.h"
+#include "text/text.h"
 
 #define ASSET_JAPANESE_BIRDIE_LABEL 0x82D
 #define ASSET_JAPANESE_ALBATROSS_LABEL 0x82E

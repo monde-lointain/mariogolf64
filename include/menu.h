@@ -10,7 +10,7 @@
 #include "player.h"
 #include "system/asset.h"
 #include "system/c_language.h"
-#include "text_format.h"
+#include "text/text_format.h"
 
 enum MenuScreen {
     MENU_SCREEN_TITLE,

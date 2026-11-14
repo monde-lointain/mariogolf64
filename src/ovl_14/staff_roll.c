@@ -43,7 +43,7 @@
 #include "system/memory_address.h"
 #include "system/overlay_manager.h"
 #include "terrain.h"
-#include "text.h"
+#include "text/text.h"
 
 #define CAST_MEMBER_COUNT (CHARACTER_COUNT - 1)
 #define FIRST_CAST_OFFSET 2

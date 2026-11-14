@@ -7,7 +7,7 @@
 #include "system/asset.h"
 #include "system/c_language.h"
 #include "system/compiler.h"
-#include "text_format.h"
+#include "text/text_format.h"
 
 #define TextRenderMode(cycle) \
     (IM_RD | CLR_ON_CVG | CVG_DST_CLAMP | ZMODE_OPA | CVG_X_ALPHA | \

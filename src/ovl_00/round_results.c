@@ -34,7 +34,7 @@
 #include "system/heap.h"
 #include "system/main.h"
 #include "system/memory_address.h"
-#include "text.h"
+#include "text/text.h"
 #include "tournament.h"
 
 enum ResultsState {

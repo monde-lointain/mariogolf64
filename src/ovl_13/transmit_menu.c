@@ -29,7 +29,7 @@
 #include "system/host_file.h"
 #include "system/memory_address.h"
 #include "system/overlay_manager.h"
-#include "text.h"
+#include "text/text.h"
 
 #define TRANSFER_MODE_COUNT 2
 #define MODE_OPTION_COUNT 3

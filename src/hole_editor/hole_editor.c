@@ -36,7 +36,7 @@
 #include "system/main.h"
 #include "system/memory_address.h"
 #include "terrain.h"
-#include "text.h"
+#include "text/text.h"
 #include "work_area.h"
 
 #define EDGE_POINT_COUNT (GROUND_TILE_POINT_SPAN + 1)

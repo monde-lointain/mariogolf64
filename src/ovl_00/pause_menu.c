@@ -31,7 +31,7 @@
 #include "system/memory_address.h"
 #include "system/overlay_manager.h"
 #include "terrain.h"
-#include "text.h"
+#include "text/text.h"
 #include "turn.h"
 
 #define ASSET_CHOICE_BOX_CLOUD_IMAGE 0x71F

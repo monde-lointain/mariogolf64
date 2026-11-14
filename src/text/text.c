@@ -15,7 +15,7 @@
 #include "system/compiler.h"
 #include "system/heap.h"
 #include "system/memory_address.h"
-#include "text.h"
+#include "text/text.h"
 
 typedef struct MessageTable {
     u16 size;

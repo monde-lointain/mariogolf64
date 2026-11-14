@@ -29,7 +29,7 @@
 #include "system/frame_time.h"
 #include "system/heap.h"
 #include "system/memory_address.h"
-#include "text.h"
+#include "text/text.h"
 #include "tournament.h"
 
 #define MATCH_RESULT_SOUND_TIME 1

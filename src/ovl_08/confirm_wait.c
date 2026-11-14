@@ -8,7 +8,7 @@
 #include "sound.h"
 #include "system/compiler.h"
 #include "system/overlay_manager.h"
-#include "text.h"
+#include "text/text.h"
 
 static u8 f_UnusedConfirmWaitBytes[0x10] UNUSED;
 

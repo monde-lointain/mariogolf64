@@ -25,7 +25,7 @@
 #include "system/c_language.h"
 #include "system/compiler.h"
 #include "system/memory_address.h"
-#include "text.h"
+#include "text/text.h"
 
 #define CHOOSABLE_MARK_LIMIT (-20)
 

@@ -14,7 +14,7 @@
 #include "system/asset.h"
 #include "system/compiler.h"
 #include "system/memory_address.h"
-#include "text.h"
+#include "text/text.h"
 
 #define NO_HANDLE (-1)
 #define SOUND_COUNT 0x215

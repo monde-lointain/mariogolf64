@@ -22,7 +22,7 @@
 #include "system/c_language.h"
 #include "system/compiler.h"
 #include "system/memory_address.h"
-#include "text.h"
+#include "text/text.h"
 
 #define ASSET_HOLE_IN_ONE_BADGE 0x8EA
 #define ASSET_DIGITS_AND_ARROWS 0x5A5

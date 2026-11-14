@@ -14,7 +14,7 @@
 #include "system/heap.h"
 #include "system/main.h"
 #include "system/memory_address.h"
-#include "text.h"
+#include "text/text.h"
 
 #define ASSET_DEFAULT_WIPE_SHAPE 0x63F
 #define WIPE_SHAPE_COUNT 14

@@ -18,7 +18,7 @@
 #include "scoring.h"
 #include "system/c_language.h"
 #include "system/compiler.h"
-#include "text.h"
+#include "text/text.h"
 
 #define NO_SKINS_WINNER (-1)
 #define RECORD_TOTAL_LIMIT S32_MAX

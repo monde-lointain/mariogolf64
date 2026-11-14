@@ -61,7 +61,7 @@
 #include "system/memory_address.h"
 #include "system/overlay_manager.h"
 #include "terrain.h"
-#include "text.h"
+#include "text/text.h"
 #include "title_screen.h"
 #include "transmit_menu.h"
 #include "work_area.h"
