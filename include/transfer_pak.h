@@ -44,7 +44,7 @@ typedef struct GameBoyCharacter {
     char name[GAME_BOY_CHARACTER_NAME_LENGTH];
     u8 saveName[SAVE_NAME_SIZE];
     u8 unusedAfterSaveName;
-    u8 character;
+    u8 golferIndex;
     u8 isLefty;
     u8 level;
     s8 clubPitch;

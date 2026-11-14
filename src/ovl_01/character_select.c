@@ -266,7 +266,7 @@ s32 MoveGridCursor(s32 playerIndex, u8 direction, u8 canChooseMarked) {
 
         if ((s16)character >= FIRST_IMPORTED_CHARACTER) {
             slot = character;
-            character = g_ImportedCharacters[(s16)slot - FIRST_IMPORTED_CHARACTER].character;
+            character = g_ImportedCharacters[(s16)slot - FIRST_IMPORTED_CHARACTER].characterIndex;
         }
         else {
             slot = character;
@@ -375,7 +375,7 @@ s32 MoveGridCursorDiagonal(s32 playerIndex, u8 diagonal, u8 canChooseMarked) {
 
         if ((s16)character >= FIRST_IMPORTED_CHARACTER) {
             slot = character;
-            character = g_ImportedCharacters[(s16)slot - FIRST_IMPORTED_CHARACTER].character;
+            character = g_ImportedCharacters[(s16)slot - FIRST_IMPORTED_CHARACTER].characterIndex;
         }
         else {
             slot = character;
@@ -747,7 +747,7 @@ s32 UpdateCharacterSelect(s32 firstPlayerIndex, s32 playerCount, Boolean canChoo
             }
 
             index = character - FIRST_IMPORTED_CHARACTER;
-            character = g_ImportedCharacters[index].character;
+            character = g_ImportedCharacters[index].characterIndex;
             g_ImportedCharacters[index].isChosen = TRUE;
             g_GameState.isImportedCharacterChosen = TRUE;
             g_ImportedCharacterColumns[playerIndex] = memory->characterColumns[playerIndex];
@@ -891,7 +891,8 @@ s32 UpdateCharacterSelect(s32 firstPlayerIndex, s32 playerCount, Boolean canChoo
             }
             else if (gridMark >= FIRST_IMPORTED_CHARACTER) {
                 slot = faceCharacter;
-                faceCharacter = g_ImportedCharacters[gridMark - FIRST_IMPORTED_CHARACTER].character;
+                faceCharacter =
+                    g_ImportedCharacters[gridMark - FIRST_IMPORTED_CHARACTER].characterIndex;
             }
             else {
                 slot = faceCharacter;
@@ -1102,7 +1103,8 @@ s32 UpdateCharacterSelect(s32 firstPlayerIndex, s32 playerCount, Boolean canChoo
         }
         else if (gridMark >= FIRST_IMPORTED_CHARACTER) {
             slot = faceCharacter;
-            faceCharacter = g_ImportedCharacters[gridMark - FIRST_IMPORTED_CHARACTER].character;
+            faceCharacter =
+                g_ImportedCharacters[gridMark - FIRST_IMPORTED_CHARACTER].characterIndex;
         }
         else {
             slot = faceCharacter;
@@ -1160,7 +1162,8 @@ s32 UpdateCharacterSelect(s32 firstPlayerIndex, s32 playerCount, Boolean canChoo
                     return UNSET_RESULT;
                 }
 
-                character = g_ImportedCharacters[character - FIRST_IMPORTED_CHARACTER].character;
+                character =
+                    g_ImportedCharacters[character - FIRST_IMPORTED_CHARACTER].characterIndex;
                 g_ImportedCharacterColumns[playerIndex] = chosenColumn;
                 if (chosenColumn < 0) {
                     g_ImportedCharacterColumns[playerIndex] = 0;
@@ -1325,8 +1328,9 @@ void LoadCharacterFaces(void) {
         void *palette = g_CharacterFacePalettes[slotIndex];
 
         if (slotIndex >= FIRST_IMPORTED_CHARACTER) {
-            if (g_ImportedCharacters[slotIndex - FIRST_IMPORTED_CHARACTER].character >= 0) {
-                character = g_ImportedCharacters[slotIndex - FIRST_IMPORTED_CHARACTER].character;
+            if (g_ImportedCharacters[slotIndex - FIRST_IMPORTED_CHARACTER].characterIndex >= 0) {
+                character =
+                    g_ImportedCharacters[slotIndex - FIRST_IMPORTED_CHARACTER].characterIndex;
             }
         }
         else {
@@ -1616,7 +1620,7 @@ void DrawGridFaces(Gfx **displayListHead, u8 isSinglePlayer) {
         }
         else if (gridMark >= FIRST_IMPORTED_CHARACTER) {
             slot = character;
-            character = g_ImportedCharacters[gridMark - FIRST_IMPORTED_CHARACTER].character;
+            character = g_ImportedCharacters[gridMark - FIRST_IMPORTED_CHARACTER].characterIndex;
         }
         else {
             slot = character;

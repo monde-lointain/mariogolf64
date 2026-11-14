@@ -266,7 +266,7 @@ typedef struct StatusTime {
     u8 minutes;
     u8 seconds;
     u8 hundredths;
-    u8 character;
+    u8 characterIndex;
     u8 scoreToPar;
 } StatusTime;
 
@@ -1368,9 +1368,9 @@ void DecodeCartridgeCharacter(
         character->saveKey[index] = characterData[DATA_SAVE_KEY_OFFSET + index];
     }
 
-    character->character = characterData[DATA_CHARACTER_OFFSET];
-    if (character->character >= GAME_BOY_GOLFER_COUNT) {
-        character->character = GAME_BOY_GOLFER_COUNT - 1;
+    character->golferIndex = characterData[DATA_CHARACTER_OFFSET];
+    if (character->golferIndex >= GAME_BOY_GOLFER_COUNT) {
+        character->golferIndex = GAME_BOY_GOLFER_COUNT - 1;
     }
 
     if (IsGameFlagSet(GAME_FLAG_GAME_BOY_LEFTIES)) {
@@ -2023,17 +2023,17 @@ void DrawSendStatusScreen(Gfx **displayListHead, GameBoyTransfer *transfer) {
 void DrawImportedFaces(Gfx **displayListHead, GameBoyTransfer *transfer) {
     Gfx *gfx = *displayListHead;
     s32 slot;
-    s32 character;
+    s32 golferIndex;
 
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
     for (slot = 0; slot != GAME_BOY_CHARACTER_COUNT; slot++) {
         if (g_GameBoyCharacters[slot].status == GAME_BOY_CHARACTER_STATUS_PRESENT) {
-            character = g_GameBoyCharacters[slot].character;
-            LoadLargePalette(&gfx, transfer->facePalettes[character]);
+            golferIndex = g_GameBoyCharacters[slot].golferIndex;
+            LoadLargePalette(&gfx, transfer->facePalettes[golferIndex]);
             LoadTextureBlock(
                 &gfx,
-                transfer->faceImages[character],
+                transfer->faceImages[golferIndex],
                 G_IM_FMT_CI,
                 G_IM_SIZ_8b,
                 FACE_SIZE,
@@ -2083,7 +2083,7 @@ void DrawBringCharactersScreen(Gfx **displayListHead, GameBoyTransfer *transfer)
     s32 left;
     s32 slotLeft;
     s32 top;
-    s32 character;
+    s32 golferIndex;
 
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
@@ -2167,7 +2167,7 @@ void DrawBringCharactersScreen(Gfx **displayListHead, GameBoyTransfer *transfer)
         listed = transfer->listedCharacters[index];
         if (transfer->cartridgeCharacters[listed].status == GAME_BOY_CHARACTER_STATUS_PRESENT &&
             IsListed(transfer->listingStates[listed])) {
-            character = transfer->cartridgeCharacters[listed].character;
+            golferIndex = transfer->cartridgeCharacters[listed].golferIndex;
             left = LISTED_FACES_LEFT + (shownCount * LISTED_FACE_SPACING);
             top = LISTED_FACES_TOP;
             if (transfer->listingStates[listed] == LISTING_BRINGING) {
@@ -2176,10 +2176,10 @@ void DrawBringCharactersScreen(Gfx **displayListHead, GameBoyTransfer *transfer)
                 top += (FACES_TOP - top) * transfer->bringingFrame / (BRINGING_FRAME_COUNT - 1);
             }
 
-            LoadLargePalette(&gfx, transfer->facePalettes[character]);
+            LoadLargePalette(&gfx, transfer->facePalettes[golferIndex]);
             LoadTextureBlock(
                 &gfx,
-                transfer->faceImages[character],
+                transfer->faceImages[golferIndex],
                 G_IM_FMT_CI,
                 G_IM_SIZ_8b,
                 FACE_SIZE,
@@ -3937,7 +3937,7 @@ void BuildStatusData(StatusData *status) {
                              ((f32)HUNDREDTHS_PER_SECOND / FRAMES_PER_SECOND)) %
                     HUNDREDTHS_PER_SECOND;
                 course->bestTimes[index].hundredths = figure;
-                course->bestTimes[index].character =
+                course->bestTimes[index].characterIndex =
                     records->bestTimeCharacters[courseIndex][index];
                 course->bestTimes[index].scoreToPar =
                     records->bestTimeScoresToPar[courseIndex][index] + STATUS_SCORE_BIAS;
@@ -3946,7 +3946,7 @@ void BuildStatusData(StatusData *status) {
                 course->bestTimes[index].minutes = 0;
                 course->bestTimes[index].seconds = 0;
                 course->bestTimes[index].hundredths = 0;
-                course->bestTimes[index].character = 0;
+                course->bestTimes[index].characterIndex = 0;
                 course->bestTimes[index].scoreToPar = 0;
             }
         }
@@ -4024,7 +4024,7 @@ void BuildStatusData(StatusData *status) {
             course->bestTimes[index].minutes = 0;
             course->bestTimes[index].seconds = 0;
             course->bestTimes[index].hundredths = 0;
-            course->bestTimes[index].character = 0;
+            course->bestTimes[index].characterIndex = 0;
             course->bestTimes[index].scoreToPar = 0;
         }
 

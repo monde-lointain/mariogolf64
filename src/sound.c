@@ -40,7 +40,7 @@
 #define PLAYED_DELAY (-1)
 
 typedef struct QueuedCharacterSound {
-    CharacterId character;
+    CharacterId characterIndex;
     s32 delay;
     s32 kind;
     SoundVolume volume;
@@ -441,7 +441,7 @@ void QueueCharacterSound(
     SoundPan pan
 ) {
     f_QueuedCharacterSounds[slot].delay = f_CharacterSoundDelays[kind][characterIndex];
-    f_QueuedCharacterSounds[slot].character = characterIndex;
+    f_QueuedCharacterSounds[slot].characterIndex = characterIndex;
     f_QueuedCharacterSounds[slot].kind = kind;
     f_QueuedCharacterSounds[slot].volume = volume;
     f_QueuedCharacterSounds[slot].pan = pan;
@@ -458,7 +458,7 @@ static void UpdateCharacterSounds(void) {
         for (index = 0; index != QUEUED_CHARACTER_SOUND_COUNT; index++) {
             if (f_QueuedCharacterSounds[index].delay == 0) {
                 PlayCharacterSound(
-                    f_QueuedCharacterSounds[index].character,
+                    f_QueuedCharacterSounds[index].characterIndex,
                     index,
                     f_CharacterSoundIndexes[f_QueuedCharacterSounds[index].kind],
                     f_QueuedCharacterSounds[index].volume,

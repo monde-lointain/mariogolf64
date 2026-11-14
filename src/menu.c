@@ -2110,7 +2110,7 @@ void BuildCharacterGrid(s32 playerCount, Boolean skipsImportedFaces) {
         for (index = 0; index != ARRAY_COUNT(g_ImportedCharacters); index++) {
             characterIndex = g_CharacterGrid[2][index];
             if (characterIndex >= 0) {
-                playerCount = g_ImportedCharacters[index].character;
+                playerCount = g_ImportedCharacters[index].characterIndex;
                 OpenEncodedAsset(g_FaceAnimationAssets[playerCount][0], &asset);
                 ReadEncodedAsset(g_CharacterFaceImages[FIRST_IMPORTED_CHARACTER + index], &asset);
                 OpenAssetFile(g_CharacterFacePaletteFiles[playerCount][0], &file);
@@ -2132,7 +2132,7 @@ void PlaceImportedCharacters(void) {
     u8 letter;
 
     for (index = 0; index != IMPORTED_CHARACTER_COUNT; index++) {
-        g_ImportedCharacters[index].character = 0;
+        g_ImportedCharacters[index].characterIndex = 0;
         g_ImportedCharacters[index].clubDistance = 0;
         g_ImportedCharacters[index].clubSpin = 0;
         g_ImportedCharacters[index].clubSideSpin = 0;
@@ -2181,7 +2181,7 @@ void PlaceImportedCharacters(void) {
                            [f_ImportedCharacterCells[index].column] =
                                FIRST_IMPORTED_CHARACTER + index;
             if (IsGameFlagSet(GAME_FLAG_ALL_CHARACTERS)) {
-                g_ImportedCharacters[index].character = f_DebugImportedCharacters[index];
+                g_ImportedCharacters[index].characterIndex = f_DebugImportedCharacters[index];
                 g_ImportedCharacters[index].clubDistance = f_DebugImportedDistances[index];
                 g_ImportedCharacters[index].clubSpin = f_DebugImportedSpins[index];
                 g_ImportedCharacters[index].clubSideSpin = f_DebugImportedSideSpins[index];
@@ -2193,8 +2193,8 @@ void PlaceImportedCharacters(void) {
                     f_DebugImportedSideSpins[index];
             }
             else {
-                g_ImportedCharacters[index].character =
-                    g_GameBoyCharacters[index].character + FIRST_IMPORTED_CHARACTER;
+                g_ImportedCharacters[index].characterIndex =
+                    g_GameBoyCharacters[index].golferIndex + FIRST_IMPORTED_CHARACTER;
                 g_ImportedCharacters[index].clubDistance =
                     g_Clubs[(FIRST_IMPORTED_CHARACTER + index) * CLUB_SET_SIZE].distance;
                 g_ImportedCharacters[index].clubSpin =
@@ -2462,7 +2462,7 @@ void ClearImportedCharacters(void) {
     s32 byteIndex;
 
     for (index = 0; index != ARRAY_COUNT(g_ImportedCharacters); index++) {
-        g_ImportedCharacters[index].character = 0;
+        g_ImportedCharacters[index].characterIndex = 0;
         g_ImportedCharacters[index].clubDistance = 0;
         g_ImportedCharacters[index].clubSpin = 0;
         g_ImportedCharacters[index].clubSideSpin = 0;

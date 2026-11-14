@@ -64,7 +64,7 @@ extern s16 g_CharacterPaletteFiles[CHARACTER_COUNT][CHARACTER_PALETTE_COUNT];
 #define FIRST_IMPORTED_CHARACTER 14
 
 typedef struct ImportedCharacter {
-    s16 character;
+    s16 characterIndex;
     s16 clubDistance;
     s16 clubSpin;
     s16 clubSideSpin;
