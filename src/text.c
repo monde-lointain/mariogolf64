@@ -214,9 +214,6 @@ FILE_STATIC char g_TextName[TEXT_NAME_SIZE];
 FILE_STATIC GlyphSprite g_GlyphSprites[GLYPH_SPRITE_COUNT];
 FILE_STATIC u8 g_GlyphGroupSizes[GLYPH_GROUP_COUNT];
 
-#define MATCH_SCORE_EVEN_TEXT "EVEN"
-#define PAR_SCORE_EVEN_TEXT "#0"
-
 static inline s16 GetShadowedGlyphLeft(s32 code) {
     return (code - SHADOWED_GLYPH_FIRST) % SHADOWED_GLYPHS_PER_ROW * SHADOWED_GLYPH_SIZE;
 }
@@ -756,7 +753,7 @@ void DrawLargeTextSlot(Gfx **displayListHead, s32 slot) {
                     isPrinted = TRUE;
                     if (IsOneOnOneMatchMode(g_GameState.gameMode)) {
                         if (score == 0) {
-                            sprintf(g_PrintBuffer, MATCH_SCORE_EVEN_TEXT);
+                            sprintf(g_PrintBuffer, "EVEN");
                         }
                         else if (score < 0) {
                             sprintf(g_PrintBuffer, "%dUP", score);
@@ -770,7 +767,7 @@ void DrawLargeTextSlot(Gfx **displayListHead, s32 slot) {
                         sprintf(g_PrintBuffer, "%dP", score);
                     }
                     else if (score == 0) {
-                        sprintf(g_PrintBuffer, PAR_SCORE_EVEN_TEXT);
+                        sprintf(g_PrintBuffer, "#0");
                     }
                     else {
                         sprintf(g_PrintBuffer, "%+d", score);
@@ -1189,7 +1186,7 @@ void DrawMediumTextSlot(Gfx **displayListHead, s32 slot) {
                     isPrinted = TRUE;
                     if (IsOneOnOneMatchMode(g_GameState.gameMode)) {
                         if (score == 0) {
-                            sprintf(g_PrintBuffer, MATCH_SCORE_EVEN_TEXT);
+                            sprintf(g_PrintBuffer, "EVEN");
                         }
                         else if (score < 0) {
                             sprintf(g_PrintBuffer, "%dUP", score);
@@ -1203,7 +1200,7 @@ void DrawMediumTextSlot(Gfx **displayListHead, s32 slot) {
                         sprintf(g_PrintBuffer, "%dP", score);
                     }
                     else if (score == 0) {
-                        sprintf(g_PrintBuffer, PAR_SCORE_EVEN_TEXT);
+                        sprintf(g_PrintBuffer, "#0");
                     }
                     else {
                         sprintf(g_PrintBuffer, "%+d", score);

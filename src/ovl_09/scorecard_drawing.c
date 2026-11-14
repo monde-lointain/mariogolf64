@@ -82,9 +82,6 @@ enum ScoresStyle {
 
 typedef s32 ScoresStyle;
 
-#define ZERO_TO_PAR_TEXT "  #0"
-#define WIN_TEXT "WIN"
-
 static const char f_BlankBetName[];
 
 static s32 f_MatchResultFrameCount = 0;
@@ -345,7 +342,7 @@ void DrawMatchResult(Gfx **displayListHead) {
         else if (g_Players[playerIndex].holes[ownHole].strokeCount <
             g_Players[playerIndex ^ 1].holes[holeIndex].strokeCount) {
             SetTextColor(&gfx, 0xFF, 0x7F, 0x7F);
-            DrawLargeText(&gfx, x, MATCH_RESULT_Y, WIN_TEXT);
+            DrawLargeText(&gfx, x, MATCH_RESULT_Y, "WIN");
         }
         else {
             SetTextColor(&gfx, 0x7F, 0x7F, 0xFF);
@@ -522,7 +519,7 @@ void DrawStandingsPage(Gfx **displayListHead) {
     for (playerIndex = 0; playerIndex != g_GameState.playerCount; playerIndex++) {
         betTotal = 0;
         if (scoresToPar[playerIndex] == 0) {
-            sprintf(g_PrintBuffer, ZERO_TO_PAR_TEXT);
+            sprintf(g_PrintBuffer, "  #0");
         }
         else {
             sprintf(g_PrintBuffer, "%+4d", scoresToPar[playerIndex]);
@@ -1174,7 +1171,7 @@ void DrawSkinsPage(Gfx **displayListHead) {
                 &gfx,
                 g_Scorecard.x + SKINS_WIN_LEFT,
                 SKINS_WIN_TOP + (playerIndex * SKINS_ROW_SPACING),
-                WIN_TEXT
+                "WIN"
             );
         }
     }
@@ -3966,7 +3963,7 @@ void DrawScoresPage(Gfx **displayListHead) {
 
             standing = GetNetScoreToPar(g_Scorecard.content.holeIndex, i);
             if (standing == 0) {
-                sprintf(g_PrintBuffer, ZERO_TO_PAR_TEXT);
+                sprintf(g_PrintBuffer, "  #0");
             }
             else {
                 sprintf(g_PrintBuffer, "%+4d", standing);

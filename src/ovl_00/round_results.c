@@ -188,10 +188,6 @@ enum PrizeBracket {
 #define MATCH_RANK_WON 100
 #define MATCH_RANK_LOST 101
 
-#define EVEN_SCORE_TEXT " #0"
-#define TIME_LABEL "Time"
-#define NO_POINTS_TEXT "  -"
-
 void FreeRoundResults(void);
 void LoadRoundResults(void);
 void DrawResultsBanner(Gfx **displayListHead);
@@ -3411,7 +3407,7 @@ void DrawTournamentResults(Gfx **displayListHead) {
         G_TX_NOLOD
     );
     if (f_PlayerResults[0] == 0) {
-        sprintf(g_PrintBuffer, EVEN_SCORE_TEXT, 0);
+        sprintf(g_PrintBuffer, " #0", 0);
     }
     else {
         sprintf(g_PrintBuffer, "%+3d", f_PlayerResults[0]);
@@ -3529,7 +3525,7 @@ void DrawSpeedGolfResults(Gfx **displayListHead) {
         G_TX_NOLOD
     );
     if (f_PlayerResults[0] == 0) {
-        sprintf(g_PrintBuffer, EVEN_SCORE_TEXT, 0);
+        sprintf(g_PrintBuffer, " #0", 0);
     }
     else {
         sprintf(g_PrintBuffer, "%+3d", f_PlayerResults[0]);
@@ -3566,7 +3562,7 @@ void DrawSpeedGolfResults(Gfx **displayListHead) {
         g_PrintBuffer
     );
     SetUpGradientTextDrawing(&gfx, 0);
-    sprintf(g_PrintBuffer, TIME_LABEL);
+    sprintf(g_PrintBuffer, "Time");
     DrawLargeTextWithShadow(
         &gfx,
         f_ResultsSlide + SPEED_GOLF_HEADING_X,
@@ -3723,7 +3719,7 @@ void DrawPlayersResults(Gfx **displayListHead) {
                 sprintf(g_PrintBuffer, "%3d", f_PlayerResults[playerIndex]);
             }
             else if (f_PlayerResults[playerIndex] == 0) {
-                sprintf(g_PrintBuffer, EVEN_SCORE_TEXT, 0);
+                sprintf(g_PrintBuffer, " #0", 0);
             }
             else {
                 sprintf(g_PrintBuffer, "%+3d", f_PlayerResults[playerIndex]);
@@ -3743,7 +3739,7 @@ void DrawPlayersResults(Gfx **displayListHead) {
                 g_PrintBuffer
             );
             if (f_PlayerPoints[playerIndex] < 0) {
-                sprintf(g_PrintBuffer, NO_POINTS_TEXT, f_PlayerPoints[playerIndex]);
+                sprintf(g_PrintBuffer, "  -", f_PlayerPoints[playerIndex]);
             }
             else {
                 sprintf(g_PrintBuffer, "%3d", f_PlayerPoints[playerIndex]);
@@ -3764,7 +3760,7 @@ void DrawPlayersResults(Gfx **displayListHead) {
                 sprintf(g_PrintBuffer, "%3d", f_PlayerResults[playerIndex]);
             }
             else if (f_PlayerResults[playerIndex] == 0) {
-                sprintf(g_PrintBuffer, EVEN_SCORE_TEXT, 0);
+                sprintf(g_PrintBuffer, " #0", 0);
             }
             else {
                 sprintf(g_PrintBuffer, "%+3d", f_PlayerResults[playerIndex]);
@@ -3777,7 +3773,7 @@ void DrawPlayersResults(Gfx **displayListHead) {
                 g_PrintBuffer
             );
             if (f_PlayerPoints[playerIndex] < 0) {
-                sprintf(g_PrintBuffer, NO_POINTS_TEXT, f_PlayerPoints[playerIndex]);
+                sprintf(g_PrintBuffer, "  -", f_PlayerPoints[playerIndex]);
             }
             else {
                 sprintf(g_PrintBuffer, "%3d", f_PlayerPoints[playerIndex]);
@@ -4089,7 +4085,7 @@ void DrawMatchResults(Gfx **displayListHead) {
                 g_PrintBuffer
             );
             if (f_PlayerPoints[playerIndex] < 0) {
-                sprintf(g_PrintBuffer, NO_POINTS_TEXT, f_PlayerPoints[playerIndex]);
+                sprintf(g_PrintBuffer, "  -", f_PlayerPoints[playerIndex]);
             }
             else {
                 sprintf(g_PrintBuffer, "%3d", f_PlayerPoints[playerIndex]);
@@ -4119,7 +4115,7 @@ void DrawMatchResults(Gfx **displayListHead) {
             }
 
             if (f_PlayerPoints[playerIndex] < 0) {
-                sprintf(g_PrintBuffer, NO_POINTS_TEXT, f_PlayerPoints[playerIndex]);
+                sprintf(g_PrintBuffer, "  -", f_PlayerPoints[playerIndex]);
             }
             else {
                 sprintf(g_PrintBuffer, "%3d", f_PlayerPoints[playerIndex]);
@@ -4418,7 +4414,7 @@ void DrawClubTournamentResults(Gfx **displayListHead) {
         seconds = g_GameState.stopwatchFrameCount / FRAMES_PER_SECOND % SECONDS_PER_MINUTE;
         minutes = g_GameState.stopwatchFrameCount / FRAMES_PER_SECOND / SECONDS_PER_MINUTE %
             SHOWN_MINUTES_LIMIT;
-        sprintf(g_PrintBuffer, TIME_LABEL);
+        sprintf(g_PrintBuffer, "Time");
         DrawLargeTextWithShadow(
             &gfx,
             f_ResultsSlide + CLUB_TOURNAMENT_LABEL_X,
