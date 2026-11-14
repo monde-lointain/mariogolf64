@@ -20,7 +20,9 @@ typedef struct HolePoints {
 
 extern HolePoints g_HolePoints;
 
-#ifdef __IS_KMC__
+// The original reads this as volatile only in a file that defines
+// READS_LOADER_FLAG_VOLATILE; newer compilers always need it volatile.
+#if defined(__IS_KMC__) && !defined(READS_LOADER_FLAG_VOLATILE)
 extern Boolean g_HasLoaderFinished;
 #else
 extern volatile Boolean g_HasLoaderFinished;

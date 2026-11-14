@@ -1,5 +1,9 @@
 #include "game.h"
 
+// The original reads the loader flag and current shot as volatile here.
+#define READS_LOADER_FLAG_VOLATILE
+#define READS_CURRENT_SHOT_VOLATILE
+
 #include <nusys.h>
 #include <ultra64.h>
 
@@ -26,6 +30,7 @@
 #include "hole_conditions.h"
 #include "hole_display.h"
 #include "hole_editor.h"
+#include "hole_loader.h"
 #include "hole_objects.h"
 #include "hole_triangles.h"
 #include "language.h"
@@ -59,12 +64,6 @@
 #include "title_screen.h"
 #include "transmit_menu.h"
 #include "work_area.h"
-
-extern volatile Boolean g_HasLoaderFinished;
-
-#ifdef __IS_KMC__
-extern volatile CurrentShot g_CurrentShot;
-#endif
 
 #define INSET_VIEW_SOUND_VOLUME 0x3F
 #define INSET_VIEW_SOUND_REVERB 0x1E
