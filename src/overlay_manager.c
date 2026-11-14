@@ -4,7 +4,6 @@
 #include <ultra64.h>
 
 #include "boot_logos.h"
-#include "camera_editor.h"
 #include "compiler.h"
 #include "game_flags.h"
 #include "golf_balls.h"
@@ -12,6 +11,7 @@
 #include "main.h"
 #include "menu.h"
 #include "opening.h"
+#include "opening_camera_editor.h"
 #include "round_hud.h"
 #include "segment_symbols.h"
 #include "staff_roll.h"

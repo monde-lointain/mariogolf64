@@ -1,5 +1,5 @@
-#ifndef CAMERA_EDITOR_H
-#define CAMERA_EDITOR_H
+#ifndef OPENING_CAMERA_EDITOR_H
+#define OPENING_CAMERA_EDITOR_H
 
 #include <ultra64.h>
 

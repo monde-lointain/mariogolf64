@@ -1,7 +1,8 @@
+#include "opening_camera_editor.h"
+
 #include <math.h>
 #include <ultra64.h>
 
-#include "camera_editor.h"
 #include "compiler.h"
 #include "controller.h"
 #include "debug_text.h"
