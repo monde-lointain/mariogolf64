@@ -82,7 +82,6 @@ extern const char f_SaveMenuNameFormat[];
 
 void ResetSavedGameControllers(void);
 
-
 #define SAVE_MENU_CHOSEN_IMAGE_COUNT 2
 #define ASSET_SAVE_MENU_FRAME 0x70D
 #define COURSE_WORD_OFFSET_X (-5)
@@ -556,7 +555,7 @@ void UpdateRingShotRecords(void) {
 #define RING_SHOT_SLOT_NUMBER_Y 82
 #define RING_SHOT_TITLE_X 36
 #define RING_SHOT_TITLE_Y 211
-#define MESSAGE_FIRST_RING_SHOT_TITLE 0x1E
+#define MESSAGE_FIRST_RING_SHOT_CLEARERS 0x1E
 #define RING_SHOT_REPLAY_TEXT_X 124
 #define RING_SHOT_REPLAY_TEXT_Y 84
 #define RING_SHOT_REPLAY_TEXT_FONT 2
@@ -849,7 +848,7 @@ void DrawRingShotRecords(Gfx **displayListHead) {
     SetTextSlot(
         RING_SHOT_TITLE_X,
         RING_SHOT_TITLE_Y,
-        MESSAGE_FIRST_RING_SHOT_TITLE + memory->ringShotRow,
+        MESSAGE_FIRST_RING_SHOT_CLEARERS + memory->ringShotRow,
         TEXT_SLOT_LARGE_FONT,
         0,
         TEXT_FLAG_TYPED,

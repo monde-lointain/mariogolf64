@@ -2372,7 +2372,10 @@ Boolean IsNintendoClubTournament(void) {
     return g_IsNintendoClubTournament != 0;
 }
 
-#define MESSAGE_FIRST_COURSE_NAME 0x1EB
+#define MESSAGE_FIRST_COURSE_NAME 0x1EA
+// The original names a club tournament's course with the message after its
+// own: Koopa Park for Toad Highlands, and DUMMY for Mario's Star.
+#define CLUB_COURSE_NAME_MESSAGE_SHIFT 1
 #define MESSAGE_STROKE_PLAY 0x9E
 #define MESSAGE_SPEED_GOLF 0x9D
 #define MESSAGE_FIRST_MINI_GOLF_TITLE 0xC7
@@ -2397,7 +2400,7 @@ MessageId GetClubTournamentCourseMessage(void) {
         courseIndex = 0;
     }
 
-    return courseIndex + MESSAGE_FIRST_COURSE_NAME;
+    return courseIndex + (MESSAGE_FIRST_COURSE_NAME + CLUB_COURSE_NAME_MESSAGE_SHIFT);
 }
 
 s32 GetClubTournamentNumber(void) {
@@ -2446,7 +2449,8 @@ MessageId GetClubTournamentCourseTitleMessage(void) {
         }
     }
     else {
-        messageId = g_ClubTournamentRules.courseIndex + MESSAGE_FIRST_COURSE_NAME;
+        messageId = g_ClubTournamentRules.courseIndex +
+            (MESSAGE_FIRST_COURSE_NAME + CLUB_COURSE_NAME_MESSAGE_SHIFT);
     }
 
     return messageId;
