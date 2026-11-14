@@ -97,6 +97,12 @@ typedef struct KeyframeSpan {
     s16 startKeyIndex;
 } KeyframeSpan;
 
+// Rotations are quaternions stored x, y, z, then w.
+#define QUATERNION_W 3
+#define QUATERNION_COMPONENT_COUNT 4
+
+typedef f32 Quaternion[QUATERNION_COMPONENT_COUNT];
+
 typedef struct JointAnimation {
     s16 translationKeyCount;
     s16 rotationKeyCount;
@@ -105,7 +111,7 @@ typedef struct JointAnimation {
     s16 *rotationFrames;
     s16 *scaleFrames;
     Vec3 *translations;
-    s16 (*rotations)[4];
+    s16 (*rotations)[QUATERNION_COMPONENT_COUNT];
     Vec3 *scales;
     KeyframeSpan translationSpan;
     KeyframeSpan rotationSpan;
@@ -120,22 +126,23 @@ typedef struct JointAnimation {
 #define QUATERNION_PRODUCT_SCALE (1.0f / (16384 * 16384))
 #define SLERP_THRESHOLD 1e-06
 
-static inline void QuaternionToMatrix(f32 quaternion[4], Mat4 matrix) {
-    f32 lengthSquared = (quaternion[0] * quaternion[0]) + (quaternion[1] * quaternion[1]) +
-        (quaternion[2] * quaternion[2]) + (quaternion[3] * quaternion[3]);
+static inline void QuaternionToMatrix(Quaternion quaternion, Mat4 matrix) {
+    f32 lengthSquared = (quaternion[AXIS_X] * quaternion[AXIS_X]) +
+        (quaternion[AXIS_Y] * quaternion[AXIS_Y]) + (quaternion[AXIS_Z] * quaternion[AXIS_Z]) +
+        (quaternion[QUATERNION_W] * quaternion[QUATERNION_W]);
     f32 scale = (lengthSquared > 0.0f) ? (2.0f / lengthSquared) : 0.0f;
-    f32 xs = quaternion[0] * scale;
-    f32 ys = quaternion[1] * scale;
-    f32 zs = quaternion[2] * scale;
-    f32 wx = quaternion[3] * xs;
-    f32 wy = quaternion[3] * ys;
-    f32 wz = quaternion[3] * zs;
-    f32 xx = quaternion[0] * xs;
-    f32 yy = quaternion[1] * ys;
-    f32 zz = quaternion[2] * zs;
-    f32 xy = quaternion[0] * ys;
-    f32 yz = quaternion[1] * zs;
-    f32 xz = quaternion[0] * zs;
+    f32 xs = quaternion[AXIS_X] * scale;
+    f32 ys = quaternion[AXIS_Y] * scale;
+    f32 zs = quaternion[AXIS_Z] * scale;
+    f32 wx = quaternion[QUATERNION_W] * xs;
+    f32 wy = quaternion[QUATERNION_W] * ys;
+    f32 wz = quaternion[QUATERNION_W] * zs;
+    f32 xx = quaternion[AXIS_X] * xs;
+    f32 yy = quaternion[AXIS_Y] * ys;
+    f32 zz = quaternion[AXIS_Z] * zs;
+    f32 xy = quaternion[AXIS_X] * ys;
+    f32 yz = quaternion[AXIS_Y] * zs;
+    f32 xz = quaternion[AXIS_X] * zs;
 
     matrix[0][0] = 1.0f - (yy + zz);
     matrix[1][0] = xy - wz;

@@ -4333,7 +4333,7 @@ void AnimateCharacterJoints(u32 slotIndex) {
     Mat4 translationMatrix;
     Mat4 jointMatrix;
     Mat4 scaleMatrix;
-    f32 rotation[4];
+    Quaternion rotation;
     JointAnimation *joint;
     Mtx *matrix;
     f32 x;
@@ -4419,10 +4419,10 @@ void AnimateCharacterJoints(u32 slotIndex) {
             keyIndex = 1;
             if (g_CurrentAnimationFrame < joint->rotationFrames[0]) {
                 isInterpolated = FALSE;
-                rotation[0] = joint->rotations[0][0] * QUATERNION_SCALE;
-                rotation[1] = joint->rotations[0][1] * QUATERNION_SCALE;
-                rotation[2] = joint->rotations[0][2] * QUATERNION_SCALE;
-                rotation[3] = joint->rotations[0][3] * QUATERNION_SCALE;
+                rotation[AXIS_X] = joint->rotations[0][AXIS_X] * QUATERNION_SCALE;
+                rotation[AXIS_Y] = joint->rotations[0][AXIS_Y] * QUATERNION_SCALE;
+                rotation[AXIS_Z] = joint->rotations[0][AXIS_Z] * QUATERNION_SCALE;
+                rotation[QUATERNION_W] = joint->rotations[0][QUATERNION_W] * QUATERNION_SCALE;
             }
             else {
                 for (; keyIndex < joint->rotationKeyCount; keyIndex++) {
@@ -4437,23 +4437,24 @@ void AnimateCharacterJoints(u32 slotIndex) {
                 if (keyIndex == joint->rotationKeyCount) {
                     keyIndex--;
                     isInterpolated = FALSE;
-                    rotation[0] = joint->rotations[keyIndex][0] * QUATERNION_SCALE;
-                    rotation[1] = joint->rotations[keyIndex][1] * QUATERNION_SCALE;
-                    rotation[2] = joint->rotations[keyIndex][2] * QUATERNION_SCALE;
-                    rotation[3] = joint->rotations[keyIndex][3] * QUATERNION_SCALE;
+                    rotation[AXIS_X] = joint->rotations[keyIndex][AXIS_X] * QUATERNION_SCALE;
+                    rotation[AXIS_Y] = joint->rotations[keyIndex][AXIS_Y] * QUATERNION_SCALE;
+                    rotation[AXIS_Z] = joint->rotations[keyIndex][AXIS_Z] * QUATERNION_SCALE;
+                    rotation[QUATERNION_W] =
+                        joint->rotations[keyIndex][QUATERNION_W] * QUATERNION_SCALE;
                 }
             }
         }
 
         if (isInterpolated) {
             if (g_CurrentAnimationEndFrame < joint->rotationSpan.endFrame) {
-                rotation[0] =
+                rotation[AXIS_X] =
                     joint->rotations[joint->rotationSpan.startKeyIndex][0] * QUATERNION_SCALE;
-                rotation[1] =
+                rotation[AXIS_Y] =
                     joint->rotations[joint->rotationSpan.startKeyIndex][1] * QUATERNION_SCALE;
-                rotation[2] =
+                rotation[AXIS_Z] =
                     joint->rotations[joint->rotationSpan.startKeyIndex][2] * QUATERNION_SCALE;
-                rotation[3] =
+                rotation[QUATERNION_W] =
                     joint->rotations[joint->rotationSpan.startKeyIndex][3] * QUATERNION_SCALE;
             }
             else {
@@ -4462,14 +4463,14 @@ void AnimateCharacterJoints(u32 slotIndex) {
 
                 spanIndex = joint->rotationSpan.startKeyIndex;
                 nextSpanIndex = spanIndex + 1;
-                dot = ((joint->rotations[spanIndex][0] * QUATERNION_PRODUCT_SCALE) *
-                          joint->rotations[nextSpanIndex][0]) +
-                    ((joint->rotations[spanIndex][1] * QUATERNION_PRODUCT_SCALE) *
-                        joint->rotations[nextSpanIndex][1]) +
-                    ((joint->rotations[spanIndex][2] * QUATERNION_PRODUCT_SCALE) *
-                        joint->rotations[nextSpanIndex][2]) +
-                    ((joint->rotations[spanIndex][3] * QUATERNION_PRODUCT_SCALE) *
-                        joint->rotations[nextSpanIndex][3]);
+                dot = ((joint->rotations[spanIndex][AXIS_X] * QUATERNION_PRODUCT_SCALE) *
+                          joint->rotations[nextSpanIndex][AXIS_X]) +
+                    ((joint->rotations[spanIndex][AXIS_Y] * QUATERNION_PRODUCT_SCALE) *
+                        joint->rotations[nextSpanIndex][AXIS_Y]) +
+                    ((joint->rotations[spanIndex][AXIS_Z] * QUATERNION_PRODUCT_SCALE) *
+                        joint->rotations[nextSpanIndex][AXIS_Z]) +
+                    ((joint->rotations[spanIndex][QUATERNION_W] * QUATERNION_PRODUCT_SCALE) *
+                        joint->rotations[nextSpanIndex][QUATERNION_W]);
                 rotationProgress = (g_CurrentAnimationFrame - joint->rotationSpan.startFrame) /
                     (joint->rotationSpan.endFrame - joint->rotationSpan.startFrame);
                 if (1.0 - dot < SLERP_THRESHOLD) {
@@ -4486,14 +4487,14 @@ void AnimateCharacterJoints(u32 slotIndex) {
 
                 spanFactor = spanWeight * QUATERNION_SCALE;
                 nextFactor = progress * QUATERNION_SCALE;
-                rotation[0] = (spanFactor * joint->rotations[spanIndex][0]) +
-                    (nextFactor * joint->rotations[nextSpanIndex][0]);
-                rotation[1] = (spanFactor * joint->rotations[spanIndex][1]) +
-                    (nextFactor * joint->rotations[nextSpanIndex][1]);
-                rotation[2] = (spanFactor * joint->rotations[spanIndex][2]) +
-                    (nextFactor * joint->rotations[nextSpanIndex][2]);
-                rotation[3] = (spanFactor * joint->rotations[spanIndex][3]) +
-                    (nextFactor * joint->rotations[nextSpanIndex][3]);
+                rotation[AXIS_X] = (spanFactor * joint->rotations[spanIndex][AXIS_X]) +
+                    (nextFactor * joint->rotations[nextSpanIndex][AXIS_X]);
+                rotation[AXIS_Y] = (spanFactor * joint->rotations[spanIndex][AXIS_Y]) +
+                    (nextFactor * joint->rotations[nextSpanIndex][AXIS_Y]);
+                rotation[AXIS_Z] = (spanFactor * joint->rotations[spanIndex][AXIS_Z]) +
+                    (nextFactor * joint->rotations[nextSpanIndex][AXIS_Z]);
+                rotation[QUATERNION_W] = (spanFactor * joint->rotations[spanIndex][QUATERNION_W]) +
+                    (nextFactor * joint->rotations[nextSpanIndex][QUATERNION_W]);
             }
         }
 
