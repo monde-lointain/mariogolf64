@@ -1424,7 +1424,7 @@ void DrawHandicaps(Gfx **displayListHead, s32 slide, u8 reverseVerticalSlide, u8
         IN_OWN_BLOCK(IN_OWN_BLOCK({
             labelIndex = column;
             if (g_PlayerControllerIndices[column] == NO_CONTROLLER_INDEX) {
-                labelIndex = column + PLAYER_LABEL_COMPUTER_FIRST;
+                labelIndex = column + PLAYER_LABEL_FIRST_COMPUTER;
             }
         }));
 

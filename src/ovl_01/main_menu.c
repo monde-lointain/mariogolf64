@@ -5899,7 +5899,7 @@ void DrawModeSelect(Gfx **displayListHead) {
             gDPLoadTextureBlock_4b(
                 gfx++,
                 TextureAddress(
-                    ImageTexels(image) + (PLAYER_LABEL_COMPUTER_FIRST * PLAYER_LABEL_IMAGE_SIZE) +
+                    ImageTexels(image) + (PLAYER_LABEL_FIRST_COMPUTER * PLAYER_LABEL_IMAGE_SIZE) +
                     (i * PLAYER_LABEL_IMAGE_SIZE)
                 ),
                 G_IM_FMT_CI,

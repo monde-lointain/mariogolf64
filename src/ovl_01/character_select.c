@@ -1791,7 +1791,7 @@ void DrawCharacterGridCursor(Gfx **displayListHead, s32 x, s32 y);
 #define PLAYER_TAG_SINGLE_PLAYER 2
 #define PLAYER_TAG_FIRST_PLAYER 0
 #define PLAYER_TAG_FIRST_COMPUTER 4
-#define PLAYER_TAG_COM 8
+#define PLAYER_TAG_COMPUTER 8
 #define PLAYER_TAG_IMAGE_SIZE 64
 #define PlayerTagTexels(firstTag, playerIndex) \
     (TextureAddress(ImageTexelsAt( \
@@ -1850,7 +1850,7 @@ void DrawPlayerTags(Gfx **displayListHead, u8 tagMode) {
         if ((tagMode == PLAYER_TAG_SINGLE_PLAYER) & (playerIndex == 1)) {
             gDPLoadTextureBlock_4b(
                 gfx++,
-                PlayerTagTexels(PLAYER_TAG_COM, 0),
+                PlayerTagTexels(PLAYER_TAG_COMPUTER, 0),
                 G_IM_FMT_CI,
                 PLAYER_TAG_WIDTH,
                 PLAYER_TAG_HEIGHT,

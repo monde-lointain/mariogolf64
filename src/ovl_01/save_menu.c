@@ -2842,10 +2842,10 @@ void DrawPlayerControllers(Gfx **displayListHead) {
         if (f_SavedPlayerControllers[playerIndex] == COMPUTER_CONTROLLER) {
             if (save->savedGames[memory->savedGameIndex].state.gameMode ==
                 GAME_MODE_GET_CHARACTER) {
-                labelIndex = PLAYER_LABEL_COM;
+                labelIndex = PLAYER_LABEL_COMPUTER;
             }
             else {
-                labelIndex = playerIndex + PLAYER_LABEL_COMPUTER_FIRST;
+                labelIndex = playerIndex + PLAYER_LABEL_FIRST_COMPUTER;
             }
 
             gDPLoadTextureBlock_4b(
