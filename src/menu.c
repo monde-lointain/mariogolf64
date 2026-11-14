@@ -6,6 +6,7 @@
 #include <string.h>
 #include <ultra64.h>
 
+#include "audio/sound.h"
 #include "character.h"
 #include "club.h"
 #include "controllers/transfer_pak.h"
@@ -25,7 +26,6 @@
 #include "save.h"
 #include "scene.h"
 #include "screen/screen.h"
-#include "sound.h"
 #include "sram.h"
 #include "system/asset.h"
 #include "system/c_language.h"

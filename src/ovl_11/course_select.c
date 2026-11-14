@@ -2,6 +2,7 @@
 
 #include <ultra64.h>
 
+#include "audio/sound.h"
 #include "course.h"
 #include "game_flags.h"
 #include "game_state.h"
@@ -12,7 +13,6 @@
 #include "screen/display_list.h"
 #include "screen/screen.h"
 #include "screen/screen_layers.h"
-#include "sound.h"
 #include "system/asset.h"
 #include "system/c_language.h"
 #include "system/compiler.h"

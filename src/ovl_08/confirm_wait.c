@@ -2,10 +2,10 @@
 
 #include <ultra64.h>
 
+#include "audio/sound.h"
 #include "controllers/controller.h"
 #include "scene.h"
 #include "screen/sky_and_hud_animations.h"
-#include "sound.h"
 #include "system/compiler.h"
 #include "system/overlay_manager.h"
 #include "text/text.h"

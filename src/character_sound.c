@@ -1,7 +1,7 @@
 #include <ultra64.h>
 
+#include "audio/sound.h"
 #include "character.h"
-#include "sound.h"
 #include "system/compiler.h"
 
 #define CHARACTER_SOUND_VALUE_COUNT 34

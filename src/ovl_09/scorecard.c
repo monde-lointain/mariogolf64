@@ -3,6 +3,7 @@
 #include <framebuffer_count.h>
 #include <ultra64.h>
 
+#include "audio/sound.h"
 #include "bets.h"
 #include "character.h"
 #include "character_model.h"
@@ -23,7 +24,6 @@
 #include "screen/screen.h"
 #include "screen/screen_layers.h"
 #include "screen/sky_and_hud_animations.h"
-#include "sound.h"
 #include "system/asset.h"
 #include "system/compiler.h"
 #include "system/frame_time.h"

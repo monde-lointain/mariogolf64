@@ -2,12 +2,12 @@
 
 #include <ultra64.h>
 
+#include "audio/sound.h"
 #include "controllers/controller.h"
 #include "debug_text.h"
 #include "math/math_util.h"
 #include "screen/display_list.h"
 #include "screen/screen.h"
-#include "sound.h"
 #include "system/asset.h"
 #include "system/c_language.h"
 #include "system/compiler.h"

@@ -6,6 +6,7 @@
 
 #define WIDENS_AIM_SLOPE_ANGLE
 
+#include "audio/sound.h"
 #include "ball_physics.h"
 #include "camera/shot_camera.h"
 #include "club.h"
@@ -23,7 +24,6 @@
 #include "player.h"
 #include "scene.h"
 #include "shot_effects.h"
-#include "sound.h"
 #include "surface.h"
 #include "system/c_language.h"
 #include "system/compiler.h"

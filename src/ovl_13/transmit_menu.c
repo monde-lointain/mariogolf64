@@ -3,6 +3,7 @@
 #include <string.h>
 #include <ultra64.h>
 
+#include "audio/sound.h"
 #include "character.h"
 #include "club.h"
 #include "controllers/controller.h"
@@ -20,7 +21,6 @@
 #include "screen/display_list.h"
 #include "screen/screen.h"
 #include "screen/screen_layers.h"
-#include "sound.h"
 #include "system/asset.h"
 #include "system/c_language.h"
 #include "system/compiler.h"

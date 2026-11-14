@@ -3,11 +3,11 @@
 #include <math.h>
 #include <ultra64.h>
 
+#include "audio/sound.h"
 #include "controllers/controller.h"
 #include "debug_text.h"
 #include "math/geometry.h"
 #include "math/math_util.h"
-#include "sound.h"
 #include "system/c_language.h"
 #include "system/compiler.h"
 #include "system/host_file.h"

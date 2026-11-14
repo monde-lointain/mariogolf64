@@ -2,12 +2,12 @@
 
 #include <ultra64.h>
 
+#include "audio/sound.h"
 #include "character.h"
 #include "course.h"
 #include "course_stats.h"
 #include "menu.h"
 #include "save.h"
-#include "sound.h"
 #include "sram.h"
 
 #define GRANTED_WIN_ROW_COUNT 14

@@ -8,6 +8,7 @@
 #define WIDENS_CHOSEN_OPTIONS
 #define WIDENS_CHOSEN_BEST_SHOT
 
+#include "audio/sound.h"
 #include "best_times.h"
 #include "bets.h"
 #include "camera/camera.h"
@@ -51,7 +52,6 @@
 #include "screen/screen.h"
 #include "screen/screen_layers.h"
 #include "screen/sky_and_hud_animations.h"
-#include "sound.h"
 #include "sram.h"
 #include "system/asset.h"
 #include "system/c_language.h"

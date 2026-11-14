@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <ultra64.h>
 
+#include "audio/sound.h"
 #include "ball_simulation.h"
 #include "camera/camera.h"
 #include "camera/view_projection.h"
@@ -23,7 +24,6 @@
 #include "screen/screen.h"
 #include "screen/screen_layers.h"
 #include "shot_effects.h"
-#include "sound.h"
 #include "surface.h"
 #include "system/asset.h"
 #include "system/c_language.h"

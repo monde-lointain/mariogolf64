@@ -6,6 +6,7 @@
 #include <string.h>
 #include <ultra64.h>
 
+#include "audio/sound.h"
 #include "camera/camera.h"
 #include "camera/shot_camera.h"
 #include "camera/view_projection.h"
@@ -26,7 +27,6 @@
 #include "screen/display_list.h"
 #include "screen/scene_colors.h"
 #include "screen/screen.h"
-#include "sound.h"
 #include "system/asset.h"
 #include "system/c_language.h"
 #include "system/compiler.h"

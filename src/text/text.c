@@ -2,6 +2,7 @@
 
 #define DEFINES_SET_TEXT_SLOT
 
+#include "audio/sound.h"
 #include "current_shot.h"
 #include "game_state.h"
 #include "round_hud.h"
@@ -9,7 +10,6 @@
 #include "screen/display_list.h"
 #include "screen/screen.h"
 #include "screen/screen_layers.h"
-#include "sound.h"
 #include "system/asset.h"
 #include "system/c_language.h"
 #include "system/compiler.h"

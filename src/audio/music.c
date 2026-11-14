@@ -1,11 +1,11 @@
-#include "music.h"
+#include "audio/music.h"
 
 #include <PR/libmus.h>
 #include <PR/n_libaudio_sc.h>
 #include <nusys.h>
 #include <ultra64.h>
 
-#include "sound.h"
+#include "audio/sound.h"
 #include "system/c_language.h"
 #include "system/compiler.h"
 #include "system/memory_address.h"

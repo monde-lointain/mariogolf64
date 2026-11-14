@@ -6,6 +6,7 @@
 
 #define WIDENS_CHOSEN_OPTIONS
 
+#include "audio/sound.h"
 #include "ball_simulation.h"
 #include "camera/camera.h"
 #include "camera/camera_framing.h"
@@ -37,7 +38,6 @@
 #include "screen/sky_and_hud_animations.h"
 #include "shot_effects.h"
 #include "shot_simulation.h"
-#include "sound.h"
 #include "surface.h"
 #include "system/c_language.h"
 #include "system/compiler.h"

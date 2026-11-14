@@ -7,6 +7,7 @@
 #include <nusys.h>
 #include <ultra64.h>
 
+#include "audio/sound.h"
 #include "billboard.h"
 #include "boot_logos.h"
 #include "camera/camera.h"
@@ -51,7 +52,6 @@
 #include "screen/sky_and_hud_animations.h"
 #include "shot_effects.h"
 #include "shot_labels.h"
-#include "sound.h"
 #include "staff_roll.h"
 #include "system/asset.h"
 #include "system/c_language.h"

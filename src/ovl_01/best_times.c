@@ -2,6 +2,7 @@
 
 #include <ultra64.h>
 
+#include "audio/sound.h"
 #include "camera/view_projection.h"
 #include "character.h"
 #include "course.h"
@@ -20,7 +21,6 @@
 #include "screen/display_list.h"
 #include "screen/screen.h"
 #include "screen/sky_and_hud_animations.h"
-#include "sound.h"
 #include "system/asset.h"
 #include "system/compiler.h"
 #include "system/frame_time.h"

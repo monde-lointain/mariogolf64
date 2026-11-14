@@ -1,15 +1,15 @@
-#include "sound.h"
+#include "audio/sound.h"
 
 #include <PR/libmus.h>
 #include <ultra64.h>
 
 #define WIDENS_CHOSEN_OPTIONS
 
+#include "audio/music.h"
 #include "character.h"
 #include "controllers/controller.h"
 #include "debug_text.h"
 #include "game_flags.h"
-#include "music.h"
 #include "save.h"
 #include "system/asset.h"
 #include "system/compiler.h"

@@ -3,6 +3,7 @@
 #include <math.h>
 #include <ultra64.h>
 
+#include "audio/sound.h"
 #include "billboard.h"
 #include "camera/camera.h"
 #include "character_model.h"
@@ -28,7 +29,6 @@
 #include "screen/animated_box.h"
 #include "screen/display_list.h"
 #include "screen/screen.h"
-#include "sound.h"
 #include "surface.h"
 #include "system/c_language.h"
 #include "system/compiler.h"

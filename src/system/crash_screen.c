@@ -3,8 +3,8 @@
 #include <ultra64.h>
 
 #include "PR/R4300.h"
+#include "audio/sound.h"
 #include "debug_text.h"
-#include "sound.h"
 #include "system/c_language.h"
 #include "system/compiler.h"
 

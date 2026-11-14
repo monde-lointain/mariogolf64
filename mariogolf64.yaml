@@ -96,7 +96,7 @@ segments:
       - [0x299A0, c, performance_meter]
       - [0x2B4E0, c, screen/animated_box]
       - [0x2B800, c, system/asset]
-      - [0x2BFF0, c, sound]
+      - [0x2BFF0, c, audio/sound]
       - [0x2D290, c, course]
       - [0x2D5C0, c, scoring]
       - [0x2E3E0, c, character_model]
@@ -104,7 +104,7 @@ segments:
       - [0x34FA0, c, math/math_library]
       - [0x35980, c, menu]
       - [0x396C0, c, system/crash_screen]
-      - [0x3A010, c, music]
+      - [0x3A010, c, audio/music]
       - [0x3A580, c, play]
       - [0x40180, c, camera/view_projection]
       - [0x414A0, c, hole_triangles]
@@ -371,12 +371,12 @@ segments:
       - [0x99AE0, .data, debug_text]
       - [0x9B2F0, .data, performance_meter]
       - [0x9C250, .data, screen/animated_box]
-      - [0x9C260, .data, sound]
+      - [0x9C260, .data, audio/sound]
       - [0x9C770, .data, course]
       - [0x9CF70, .data, character]
       - [0x9D3F0, .data, menu]
       - [0x9E010, .data, system/crash_screen]
-      - [0x9E3F0, .data, music]
+      - [0x9E3F0, .data, audio/music]
       - [0x9E460, .data, play]
       - [0x9E500, .data, hole_triangles]
       - [0x9E530, .data, character_sound]
@@ -459,14 +459,14 @@ segments:
       - [0xA7E90, .rodata, system/heap]
       - [0xA7F08, .rodata, performance_meter]
       - [0xA7F70, .rodata, system/asset]
-      - [0xA7FB8, .rodata, sound]
+      - [0xA7FB8, .rodata, audio/sound]
       - [0xA8030, .rodata, course]
       - [0xA8050, .rodata, character_model]
       - [0xAB8A0, .rodata, character]
       - [0xABC50, .rodata, math/math_library]
       - [0xABCF0, .rodata, menu]
       - [0xABEC0, .rodata, system/crash_screen]
-      - [0xAC5F4, .rodata, music]
+      - [0xAC5F4, .rodata, audio/music]
       - [0xAC638, .rodata, play]
       - [0xAC760, .rodata, hole_triangles]
       - [0xAC770, .rodata, tournament]
@@ -525,11 +525,11 @@ segments:
       - { type: .bss, vram: 0x800DC6E0, name: system/heap }
       - { type: .bss, vram: 0x800DC740, name: performance_meter }
       - { type: .bss, vram: 0x800DE8A0, name: system/asset }
-      - { type: .bss, vram: 0x800DE900, name: sound }
+      - { type: .bss, vram: 0x800DE900, name: audio/sound }
       - { type: .bss, vram: 0x800DE910, name: character_model }
       - { type: .bss, vram: 0x800DE970, name: character }
       - { type: .bss, vram: 0x800DF0B0, name: system/crash_screen }
-      - { type: .bss, vram: 0x800E1290, name: music }
+      - { type: .bss, vram: 0x800E1290, name: audio/music }
       - { type: .bss, vram: 0x800E12B0, name: play }
       - { type: .bss, vram: 0x800E16B0, name: camera/view_projection }
       - { type: .bss, vram: 0x800E17D0, name: hole_triangles }

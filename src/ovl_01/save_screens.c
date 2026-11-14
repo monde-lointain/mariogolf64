@@ -3,6 +3,7 @@
 
 #define WIDENS_FACE_DRAW_MODE
 
+#include "audio/sound.h"
 #include "camera/view_projection.h"
 #include "character.h"
 #include "character_model.h"
@@ -32,7 +33,6 @@
 #include "screen/screen.h"
 #include "screen/screen_layers.h"
 #include "screen/sky_and_hud_animations.h"
-#include "sound.h"
 #include "sram.h"
 #include "system/asset.h"
 #include "system/compiler.h"

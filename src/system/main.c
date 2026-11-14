@@ -4,6 +4,7 @@
 #include <string.h>
 #include <ultra64.h>
 
+#include "audio/sound.h"
 #include "ball_simulation.h"
 #include "character.h"
 #include "character_model.h"
@@ -19,7 +20,6 @@
 #include "save.h"
 #include "scene.h"
 #include "screen/screen.h"
-#include "sound.h"
 #include "system/asset.h"
 #include "system/c_language.h"
 #include "system/compiler.h"

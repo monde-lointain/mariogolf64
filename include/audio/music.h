@@ -4,7 +4,7 @@
 #include <PR/libmus.h>
 #include <ultra64.h>
 
-#include "sound.h"
+#include "audio/sound.h"
 
 void InitMusic(musConfig *config);
 void LoadSampleBank(u8 *pointerBankRom, u32 pointerBankSize, u8 *waveBankRom);

@@ -6,6 +6,7 @@
 #include <string.h>
 #include <ultra64.h>
 
+#include "audio/sound.h"
 #include "awards.h"
 #include "ball_simulation.h"
 #include "camera/camera.h"
@@ -56,7 +57,6 @@
 #include "screen/sky_and_hud_animations.h"
 #include "shot_effects.h"
 #include "shot_simulation.h"
-#include "sound.h"
 #include "surface.h"
 #include "system/asset.h"
 #include "system/c_language.h"

@@ -5,6 +5,7 @@
 #include <string.h>
 #include <ultra64.h>
 
+#include "audio/sound.h"
 #include "billboard.h"
 #include "camera/camera.h"
 #include "camera/camera_framing.h"
@@ -34,7 +35,6 @@
 #include "screen/rcp_init.h"
 #include "screen/screen.h"
 #include "screen/sky_and_hud_animations.h"
-#include "sound.h"
 #include "system/asset.h"
 #include "system/c_language.h"
 #include "system/compiler.h"

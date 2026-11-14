@@ -2,6 +2,7 @@
 
 #include <ultra64.h>
 
+#include "audio/sound.h"
 #include "character.h"
 #include "controllers/controller.h"
 #include "debug_text.h"
@@ -18,7 +19,6 @@
 #include "screen/screen.h"
 #include "screen/screen_layers.h"
 #include "screen/sky_and_hud_animations.h"
-#include "sound.h"
 #include "system/asset.h"
 #include "system/c_language.h"
 #include "system/compiler.h"

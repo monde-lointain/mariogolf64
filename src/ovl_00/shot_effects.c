@@ -2,6 +2,7 @@
 
 #include <ultra64.h>
 
+#include "audio/sound.h"
 #include "camera/camera.h"
 #include "camera/view_projection.h"
 #include "character_model.h"
@@ -19,7 +20,6 @@
 #include "round_hud.h"
 #include "screen/display_list.h"
 #include "screen/screen.h"
-#include "sound.h"
 #include "system/asset.h"
 #include "system/compiler.h"
 #include "system/heap.h"

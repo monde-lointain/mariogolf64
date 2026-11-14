@@ -2,6 +2,7 @@
 
 #include <ultra64.h>
 
+#include "audio/sound.h"
 #include "camera/camera.h"
 #include "course_space.h"
 #include "current_shot.h"
@@ -11,7 +12,6 @@
 #include "math/math_util.h"
 #include "movie.h"
 #include "scoring.h"
-#include "sound.h"
 #include "text/text.h"
 
 #define INTRO_CAMERA_START_DISTANCE (-768000.0f)

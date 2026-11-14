@@ -3,6 +3,7 @@
 #include <math.h>
 #include <ultra64.h>
 
+#include "audio/sound.h"
 #include "ball_simulation.h"
 #include "club.h"
 #include "club_panel.h"
@@ -17,7 +18,6 @@
 #include "math/math_util.h"
 #include "pin.h"
 #include "player.h"
-#include "sound.h"
 #include "surface.h"
 #include "system/asset.h"
 #include "system/c_language.h"

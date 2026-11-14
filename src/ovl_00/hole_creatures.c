@@ -3,6 +3,7 @@
 #include <math.h>
 #include <ultra64.h>
 
+#include "audio/sound.h"
 #include "camera/camera.h"
 #include "camera/view_projection.h"
 #include "course_space.h"
@@ -16,7 +17,6 @@
 #include "screen/display_list.h"
 #include "screen/screen_layers.h"
 #include "screen/sky_and_hud_animations.h"
-#include "sound.h"
 #include "system/asset.h"
 #include "system/c_language.h"
 #include "system/compiler.h"

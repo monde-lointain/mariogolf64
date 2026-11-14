@@ -1,5 +1,6 @@
 #include <ultra64.h>
 
+#include "audio/sound.h"
 #include "bets.h"
 #include "camera/view_projection.h"
 #include "character_model.h"
@@ -20,7 +21,6 @@
 #include "screen/display_list.h"
 #include "screen/screen.h"
 #include "screen/screen_layers.h"
-#include "sound.h"
 #include "system/asset.h"
 #include "system/c_language.h"
 #include "system/compiler.h"
