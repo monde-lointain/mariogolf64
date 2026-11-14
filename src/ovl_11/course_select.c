@@ -373,7 +373,7 @@ void FreeCourseSelect(void) {
     f_LoadedScreen = COURSE_SELECT_UNLOADED;
 }
 
-s32 UpdateRingShotSelect(s32 pressedButtons, u32 repeatedButtons) {
+SelectResult UpdateRingShotSelect(s32 pressedButtons, u32 repeatedButtons) {
     MenuMemory *memory = GetMenuMemory();
     s32 openCourseCount = CountOpenRingShotCourses();
     SelectResult result = SELECT_IDLE;

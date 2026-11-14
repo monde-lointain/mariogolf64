@@ -20,6 +20,6 @@ void FreeCourseSelect(void);
 void LoadCourseSelect(Boolean isHoleSelect);
 void SetPlankMotion(s32 motion);
 SelectResult UpdateHoleSelect(s32 pressedButtons, s32 repeatedButtons);
-s32 UpdateRingShotSelect(s32 pressedButtons, u32 repeatedButtons);
+SelectResult UpdateRingShotSelect(s32 pressedButtons, u32 repeatedButtons);
 
 #endif

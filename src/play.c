@@ -739,17 +739,6 @@ Boolean HasWonFinalChallenge(void) {
     return FALSE;
 }
 
-enum HoleMenuChoice {
-    HOLE_MENU_NONE,
-    HOLE_MENU_RELOAD,
-    HOLE_MENU_QUIT
-};
-
-typedef s32 HoleMenuChoice;
-
-#define RING_SHOT_RESULTS_DONE 1
-#define RING_SHOT_RESULTS_SAVE 2
-
 #define UNLOCK_NOTICE_DONKEY_KONG 0
 #define UNLOCK_NOTICE_MAPLE 1
 #define UNLOCK_NOTICE_METAL_MARIO 2
@@ -789,7 +778,7 @@ void UpdatePlay(void) {
     s32 anyHuman;
     s32 playerSlot;
     s32 playerIndex;
-    HoleMenuChoice result;
+    SelectResult result;
     s32 clearHud;
     HoleEndStep nextStep;
 
@@ -886,7 +875,7 @@ void UpdatePlay(void) {
                             UpdateHoleSelect(
                                 g_MergedController.pressedButtons,
                                 g_MergedController.repeatedButtons
-                            ) == HOLE_MENU_RELOAD) {
+                            ) == SELECT_MOVED) {
                             LoadWipeShape(g_GameState.courseIndex);
                             SetMenuBackdrop(MENU_BACKDROP_STILL);
                             if (GetWipeProgress() == WIPE_OPEN_PROGRESS) {
@@ -904,7 +893,7 @@ void UpdatePlay(void) {
                             g_MergedController.pressedButtons,
                             g_MergedController.repeatedButtons
                         );
-                        if (result == HOLE_MENU_RELOAD) {
+                        if (result == SELECT_MOVED) {
                             LoadWipeShape(g_GameState.courseIndex);
                             SetMenuBackdrop(MENU_BACKDROP_STILL);
                             SetPlankMotion(FALSE);
@@ -925,14 +914,14 @@ void UpdatePlay(void) {
                             g_MergedController.repeatedButtons
                         );
                         switch (result) {
-                            case HOLE_MENU_RELOAD:
+                            case SELECT_MOVED:
                                 SetMenuBackdrop(MENU_BACKDROP_STILL);
                                 StartWipe(WIPE_CLOSING);
                                 LoadWipeShape(g_GameState.courseIndex);
                                 g_GameState.step = GAME_STATE_LOAD_HOLE;
                                 repeat = TRUE;
                                 break;
-                            case HOLE_MENU_QUIT:
+                            case SELECT_BACK:
                                 SetMenuBackdrop(MENU_BACKDROP_STILL);
                                 f_PlayExit = PLAY_EXIT_QUIT;
                                 PlaySound(SOUND_MENU_CANCEL, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
@@ -940,7 +929,7 @@ void UpdatePlay(void) {
                                 f_HoleEndStep = HOLE_END_STEP_START;
                                 ClearHoleIntroText();
                                 break;
-                            case HOLE_MENU_NONE:
+                            case SELECT_IDLE:
                                 if (GetWipeProgress() == WIPE_OPEN_PROGRESS && IsAButtonPressed()) {
                                     g_GameState.step = GAME_STATE_END_INTRO;
                                     StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
@@ -958,14 +947,14 @@ void UpdatePlay(void) {
                             g_MergedController.repeatedButtons
                         );
                         switch (result) {
-                            case HOLE_MENU_RELOAD:
+                            case SELECT_MOVED:
                                 SetMenuBackdrop(MENU_BACKDROP_STILL);
                                 SetPlankMotion(FALSE);
                                 g_GameState.step = GAME_STATE_LOAD_HOLE;
                                 repeat = TRUE;
                                 LoadWipeShape(g_GameState.courseIndex);
                                 break;
-                            case HOLE_MENU_QUIT:
+                            case SELECT_BACK:
                                 SetMenuBackdrop(MENU_BACKDROP_STILL);
                                 f_PlayExit = PLAY_EXIT_QUIT;
                                 PlaySound(SOUND_MENU_CANCEL, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
@@ -973,7 +962,7 @@ void UpdatePlay(void) {
                                 f_HoleEndStep = HOLE_END_STEP_START;
                                 ClearHoleIntroText();
                                 break;
-                            case HOLE_MENU_NONE:
+                            case SELECT_IDLE:
                                 if (ArePlanksOpen() &&
                                     GetWipeProgress() == WIPE_OPEN_PROGRESS &&
                                     IsAButtonPressed()) {
@@ -1548,7 +1537,7 @@ DIM_BACKDROP:
                         switch (UpdateReplaySaveMenu(
                             &g_ControllerStates[g_CurrentShot.controllerIndex]
                         )) {
-                            case RING_SHOT_RESULTS_DONE:
+                            case REPLAY_MENU_CLOSED:
                                 StartWipe(WIPE_CLOSING);
                                 if (IsStaffRollDueAfterRingShot()) {
                                     f_HoleEndStep = HOLE_END_STEP_STAFF_ROLL;
@@ -1558,7 +1547,7 @@ DIM_BACKDROP:
                                 }
 
                                 break;
-                            case RING_SHOT_RESULTS_SAVE:
+                            case REPLAY_MENU_PROMPTING:
                                 f_HoleEndStep = HOLE_END_STEP_PROMPT;
                                 break;
                         }
