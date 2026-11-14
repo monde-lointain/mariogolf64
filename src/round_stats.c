@@ -557,7 +557,7 @@ void SettleHoleBets(void) {
     s32 teamScore;
     s32 rivalTeamScore;
     s32 bet;
-    s32 best;
+    s32 bestScore;
     s32 count;
     s32 score;
 
@@ -717,21 +717,21 @@ void SettleHoleBets(void) {
                         );
                 }
 
-                best = WORST_HOLE_SCORE;
+                bestScore = WORST_HOLE_SCORE;
                 for (playerIndex = 0; playerIndex != g_GameState.playerCount; playerIndex++) {
-                    if (scores[playerIndex] < best) {
-                        best = scores[playerIndex];
+                    if (scores[playerIndex] < bestScore) {
+                        bestScore = scores[playerIndex];
                     }
                 }
 
                 count = 0;
                 for (playerIndex = 0; playerIndex != g_GameState.playerCount; playerIndex++) {
-                    count += best == scores[playerIndex];
+                    count += bestScore == scores[playerIndex];
                 }
 
                 if (count == 1) {
                     for (playerIndex = 0; playerIndex != g_GameState.playerCount; playerIndex++) {
-                        if (best == scores[playerIndex]) {
+                        if (bestScore == scores[playerIndex]) {
                             g_BetTallies[playerIndex][bet] +=
                                 g_HolePot * (g_GameState.playerCount - 1);
                         }
