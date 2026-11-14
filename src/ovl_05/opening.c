@@ -1523,7 +1523,7 @@ void UpdateOpening(void) {
                     PlaySoundWithEffects(SOUND_SHOT_SPARKS, f_OpeningSoundChannel, 0x4C, 0, 0xA7);
                     AdvanceOpeningSoundChannel();
                     f_OpeningSparksState = 1;
-                    LaunchDrop(f_OpeningShotImpactPoint);
+                    SpawnDrop(f_OpeningShotImpactPoint);
                 }
 
                 if (f_OpeningSceneFramesLeft == 24) {
@@ -1684,7 +1684,7 @@ void UpdateOpening(void) {
                     PlaySoundWithEffects(SOUND_SHOT_SPARKS, f_OpeningSoundChannel, 0x4C, 0, 0xA7);
                     AdvanceOpeningSoundChannel();
                     f_OpeningSparksState = 1;
-                    LaunchDrop(f_OpeningShotImpactPoint);
+                    SpawnDrop(f_OpeningShotImpactPoint);
                 }
 
                 if (f_OpeningSceneFramesLeft == 22) {
@@ -1815,7 +1815,7 @@ void UpdateOpening(void) {
                     PlaySoundWithEffects(SOUND_SHOT_SPARKS, f_OpeningSoundChannel, 0x4C, 0, 0xA7);
                     AdvanceOpeningSoundChannel();
                     f_OpeningSparksState = 1;
-                    LaunchDrop(f_OpeningShotImpactPoint);
+                    SpawnDrop(f_OpeningShotImpactPoint);
                 }
 
                 if (f_OpeningSceneFramesLeft == 20) {
@@ -1943,7 +1943,7 @@ void UpdateOpening(void) {
                     PlaySoundWithEffects(SOUND_SHOT_SPARKS, f_OpeningSoundChannel, 0x4C, 0, 0xA7);
                     AdvanceOpeningSoundChannel();
                     f_OpeningSparksState = 1;
-                    LaunchDrop(f_OpeningShotImpactPoint);
+                    SpawnDrop(f_OpeningShotImpactPoint);
                 }
 
                 break;

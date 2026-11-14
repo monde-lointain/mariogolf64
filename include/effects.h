@@ -68,7 +68,7 @@ void UpdateEffects(void);
 
 void DrawEffects(CameraMatrices *matrices, Gfx **displayListHead);
 void DrawRain(Gfx **displayListHead, CameraMatrices *matrices);
-void LaunchDrop(CoursePoint point);
+void SpawnDrop(CoursePoint point);
 void ShowBirdieBadgeCount(s32 badgeCount);
 void SpawnRipple(CoursePoint position);
 void SpawnSparkle(CoursePoint position);

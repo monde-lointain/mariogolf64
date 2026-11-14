@@ -526,7 +526,7 @@ void SpawnRipple(CoursePoint position) {
     }
 }
 
-void LaunchDrop(CoursePoint point) {
+void SpawnDrop(CoursePoint point) {
     Vec3 translation;
     Vec3 scale;
     Vec3 rotation;
