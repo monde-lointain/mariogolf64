@@ -2213,17 +2213,17 @@ void CheckRingShotClear(s32 playerIndex) {
 static s32 GetStanceAnimation(u32 slotIndex, s32 clubIndex, ShotMode shotMode UNUSED) {
     s32 animationId;
 
-    switch (GetCharacterClubKind(slotIndex, clubIndex)) {
-        case CLUB_KIND_WOOD:
+    switch (GetCharacterClubCategory(slotIndex, clubIndex)) {
+        case CLUB_CATEGORY_WOOD:
             animationId = WOOD_ANIMATIONS;
             break;
-        case CLUB_KIND_IRON:
+        case CLUB_CATEGORY_IRON:
             animationId = IRON_ANIMATIONS;
             break;
-        case CLUB_KIND_WEDGE:
+        case CLUB_CATEGORY_WEDGE:
             animationId = WEDGE_ANIMATIONS;
             break;
-        case CLUB_KIND_PUTTER:
+        case CLUB_CATEGORY_PUTTER:
             animationId = PUTTER_ANIMATIONS;
             break;
         default:
@@ -2237,17 +2237,17 @@ static s32 GetStanceAnimation(u32 slotIndex, s32 clubIndex, ShotMode shotMode UN
 static s32 GetSwingAnimation(u32 slotIndex, s32 clubIndex, ShotMode shotMode) {
     s32 animationId;
 
-    switch (GetCharacterClubKind(slotIndex, clubIndex)) {
-        case CLUB_KIND_WOOD:
+    switch (GetCharacterClubCategory(slotIndex, clubIndex)) {
+        case CLUB_CATEGORY_WOOD:
             animationId = WOOD_ANIMATIONS + SWING_ANIMATION;
             break;
-        case CLUB_KIND_IRON:
+        case CLUB_CATEGORY_IRON:
             animationId = IRON_ANIMATIONS + SWING_ANIMATION;
             break;
-        case CLUB_KIND_WEDGE:
+        case CLUB_CATEGORY_WEDGE:
             animationId = WEDGE_ANIMATIONS + SWING_ANIMATION;
             break;
-        case CLUB_KIND_PUTTER:
+        case CLUB_CATEGORY_PUTTER:
             animationId = PUTTER_ANIMATIONS + SWING_ANIMATION;
             break;
         default:
@@ -4084,8 +4084,8 @@ void UpdateTurns(void) {
             case PLAYER_STATE_SWINGING:
                 if (f_StateEventFrame - WOOD_SWING_TRAIL_LEAD_FRAMES ==
                         f_StateFrameCounts[playerIndex] &&
-                    GetClub(g_Players[playerIndex].clubs[g_CurrentShot.clubSlot])->kind ==
-                        CLUB_KIND_WOOD) {
+                    GetClub(g_Players[playerIndex].clubs[g_CurrentShot.clubSlot])->category ==
+                        CLUB_CATEGORY_WOOD) {
                     if (g_CurrentShot.shotMode == SHOT_MODE_NORMAL) {
                         StartSwingTrail(SWING_TRAIL_KIND_NORMAL_SHOT);
                     }

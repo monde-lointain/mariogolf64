@@ -474,48 +474,48 @@ static const s32 f_BallDistances[CHARACTER_COUNT][BALL_DISTANCE_COUNT] = {
     {0x3295, 0x2776, 0x1FD8, 0x1931, 0x2BC9},
 };
 
-s32 GetBallDistance(u32 slotIndex, s32 club, Boolean isClubKind, ShotMode shotMode) {
+s32 GetBallDistance(u32 slotIndex, s32 club, Boolean isClubCategory, ShotMode shotMode) {
     f32 position[3];
     char text[DEBUG_LINE_SIZE];
     s32 distance;
     s32 pointId = WOOD_DISTANCE_POINT;
     s32 column;
     CharacterSlot *slot;
-    ClubKind clubKind;
+    ClubCategory clubCategory;
     f32 depth;
 
     slot = GetUsedCharacterSlot(slotIndex);
-    column = CLUB_KIND_WOOD;
-    if (!isClubKind) {
-        clubKind = GetCharacterClubKind(slotIndex, club);
+    column = CLUB_CATEGORY_WOOD;
+    if (!isClubCategory) {
+        clubCategory = GetCharacterClubCategory(slotIndex, club);
     }
     else {
-        clubKind = club;
+        clubCategory = club;
     }
 
-    switch (clubKind) {
+    switch (clubCategory) {
 #ifdef AVOID_UB
         default:
 #endif
-        case CLUB_KIND_WOOD:
+        case CLUB_CATEGORY_WOOD:
             distance = WOOD_BALL_DISTANCE;
             pointId = WOOD_DISTANCE_POINT;
             column = (shotMode == SHOT_MODE_APPROACH) * BALL_DISTANCE_WOOD_APPROACH;
             break;
-        case CLUB_KIND_IRON:
+        case CLUB_CATEGORY_IRON:
             distance = IRON_BALL_DISTANCE;
             pointId = IRON_DISTANCE_POINT;
-            column = CLUB_KIND_IRON;
+            column = CLUB_CATEGORY_IRON;
             break;
-        case CLUB_KIND_WEDGE:
+        case CLUB_CATEGORY_WEDGE:
             distance = IRON_BALL_DISTANCE;
             pointId = WEDGE_DISTANCE_POINT;
-            column = CLUB_KIND_WEDGE;
+            column = CLUB_CATEGORY_WEDGE;
             break;
-        case CLUB_KIND_PUTTER:
+        case CLUB_CATEGORY_PUTTER:
             distance = PUTTER_BALL_DISTANCE;
             pointId = PUTTER_DISTANCE_POINT;
-            column = CLUB_KIND_PUTTER;
+            column = CLUB_CATEGORY_PUTTER;
             break;
     }
 
@@ -560,7 +560,7 @@ void WriteBallDistances(void) {
     s32 modelIndex;
     s32 column;
     s32 animationId;
-    ClubKind clubKind;
+    ClubCategory clubCategory;
 
     void AppendDistanceText(char *text) {
         char character;
@@ -597,25 +597,25 @@ void WriteBallDistances(void) {
         g_CharacterModelIndex = g_CharacterSlots[MEASURED_SLOT].modelIndex;
         for (column = 0; column < BALL_DISTANCE_COUNT; column++) {
             switch (column) {
-                case CLUB_KIND_WOOD:
+                case CLUB_CATEGORY_WOOD:
                     animationId = WOOD_DISTANCE_ANIMATION;
-                    clubKind = CLUB_KIND_WOOD;
+                    clubCategory = CLUB_CATEGORY_WOOD;
                     break;
-                case CLUB_KIND_IRON:
+                case CLUB_CATEGORY_IRON:
                     animationId = IRON_DISTANCE_ANIMATION;
-                    clubKind = CLUB_KIND_IRON;
+                    clubCategory = CLUB_CATEGORY_IRON;
                     break;
-                case CLUB_KIND_WEDGE:
+                case CLUB_CATEGORY_WEDGE:
                     animationId = WEDGE_DISTANCE_ANIMATION;
-                    clubKind = CLUB_KIND_WEDGE;
+                    clubCategory = CLUB_CATEGORY_WEDGE;
                     break;
-                case CLUB_KIND_PUTTER:
+                case CLUB_CATEGORY_PUTTER:
                     animationId = PUTTER_DISTANCE_ANIMATION;
-                    clubKind = CLUB_KIND_PUTTER;
+                    clubCategory = CLUB_CATEGORY_PUTTER;
                     break;
                 case BALL_DISTANCE_WOOD_APPROACH:
                     animationId = WOOD_APPROACH_DISTANCE_ANIMATION;
-                    clubKind = CLUB_KIND_WOOD;
+                    clubCategory = CLUB_CATEGORY_WOOD;
                     break;
             }
 
@@ -626,7 +626,8 @@ void WriteBallDistances(void) {
             }
 
             AnimateCharacter(MEASURED_SLOT);
-            distances[column] = GetBallDistance(MEASURED_SLOT, clubKind, TRUE, MEASURED_SHOT_MODE);
+            distances[column] =
+                GetBallDistance(MEASURED_SLOT, clubCategory, TRUE, MEASURED_SHOT_MODE);
         }
 
         osSyncPrintf("\n");
@@ -668,17 +669,17 @@ void SetCharacterClub(u32 slotIndex, s32 clubIndex) {
 
     if (slot != NULL) {
         g_CharacterModelIndex = slot->modelIndex;
-        switch (GetCharacterClubKind(slotIndex, clubIndex)) {
-            case CLUB_KIND_WOOD:
+        switch (GetCharacterClubCategory(slotIndex, clubIndex)) {
+            case CLUB_CATEGORY_WOOD:
                 choiceIndex = WOOD_DISPLAY_LIST_CHOICE;
                 break;
-            case CLUB_KIND_IRON:
+            case CLUB_CATEGORY_IRON:
                 choiceIndex = IRON_DISPLAY_LIST_CHOICE;
                 break;
-            case CLUB_KIND_WEDGE:
+            case CLUB_CATEGORY_WEDGE:
                 choiceIndex = WEDGE_DISPLAY_LIST_CHOICE;
                 break;
-            case CLUB_KIND_PUTTER:
+            case CLUB_CATEGORY_PUTTER:
                 choiceIndex = PUTTER_DISPLAY_LIST_CHOICE;
                 break;
             default:

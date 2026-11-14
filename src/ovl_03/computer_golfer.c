@@ -90,7 +90,7 @@ typedef struct ShotOffset {
 #define APPROACH_BAND_COUNT 4
 
 #define CLUB_CHANCE_SET_COUNT 2
-#define CLUB_CHANCE_KIND_COUNT 3
+#define CLUB_CHANCE_CATEGORY_COUNT 3
 
 typedef struct ClubName {
     char name[4];
@@ -137,7 +137,7 @@ static GolferTraits f_GolferTraits[CHARACTER_COUNT] = {
     {0, 0, 0, 6, 0, WIND_PLAY_HEAD_WINDS, 0, {0, 0, 0, 0, 0, 0}, 0},
     {0, 0, 0, 6, 0, WIND_PLAY_HEAD_WINDS, 0, {0, 0, 0, 0, 0, 0}, 0},
 };
-static s8 f_ClubKindChances[CLUB_CHANCE_SET_COUNT][CLUB_CHANCE_KIND_COUNT] = {
+static s8 f_ClubCategoryChances[CLUB_CHANCE_SET_COUNT][CLUB_CHANCE_CATEGORY_COUNT] = {
     {75, 50, 25},
     {75, 25, 50},
 };
@@ -2530,7 +2530,7 @@ enum ClubChanceSet {
     CLUB_CHANCE_SET_HEAD_WIND
 };
 
-s32 RollClubKindChance(s32 chanceSetIndex);
+s32 RollClubCategoryChance(s32 chanceSetIndex);
 
 s32 ChooseShotOffset(void) {
     s32 windPlay;
@@ -2582,29 +2582,29 @@ s32 ChooseShotOffset(void) {
         osSyncPrintf("---- Follow\n");
         if (windPlay == WIND_PLAY_FOLLOWING_WINDS) {
             if (IsWindSpeedInRange(4 * WIND_PUSH_UNIT, 5 * WIND_PUSH_UNIT)) {
-                if (RollClubKindChance(CLUB_CHANCE_SET_FOLLOWING_WIND) == TRUE) {
+                if (RollClubCategoryChance(CLUB_CHANCE_SET_FOLLOWING_WIND) == TRUE) {
                     return SHOT_OFFSET_MINUS_SMALL;
                 }
             }
             else if (IsWindSpeedInRange(5 * WIND_PUSH_UNIT, 7 * WIND_PUSH_UNIT)) {
-                if (RollClubKindChance(CLUB_CHANCE_SET_FOLLOWING_WIND) == TRUE) {
+                if (RollClubCategoryChance(CLUB_CHANCE_SET_FOLLOWING_WIND) == TRUE) {
                     return SHOT_OFFSET_MINUS_MEDIUM;
                 }
             }
             else if (g_HoleSetup.conditions.windSpeed >= 9 * WIND_PUSH_UNIT) {
-                if (RollClubKindChance(CLUB_CHANCE_SET_FOLLOWING_WIND) == TRUE) {
+                if (RollClubCategoryChance(CLUB_CHANCE_SET_FOLLOWING_WIND) == TRUE) {
                     return SHOT_OFFSET_MINUS_LARGE;
                 }
             }
         }
         else if (windPlay == WIND_PLAY_STRONG_WINDS) {
             if (IsWindSpeedInRange(6 * WIND_PUSH_UNIT, 7 * WIND_PUSH_UNIT)) {
-                if (RollClubKindChance(CLUB_CHANCE_SET_FOLLOWING_WIND) == TRUE) {
+                if (RollClubCategoryChance(CLUB_CHANCE_SET_FOLLOWING_WIND) == TRUE) {
                     return SHOT_OFFSET_MINUS_SMALL;
                 }
             }
             else if (g_HoleSetup.conditions.windSpeed >= 7 * WIND_PUSH_UNIT) {
-                if (RollClubKindChance(CLUB_CHANCE_SET_FOLLOWING_WIND) == TRUE) {
+                if (RollClubCategoryChance(CLUB_CHANCE_SET_FOLLOWING_WIND) == TRUE) {
                     return SHOT_OFFSET_MINUS_MEDIUM;
                 }
             }
@@ -2614,29 +2614,29 @@ s32 ChooseShotOffset(void) {
         osSyncPrintf("---- back\n");
         if (windPlay == WIND_PLAY_HEAD_WINDS) {
             if (IsWindSpeedInRange(4 * WIND_PUSH_UNIT, 5 * WIND_PUSH_UNIT)) {
-                if (RollClubKindChance(CLUB_CHANCE_SET_HEAD_WIND) == TRUE) {
+                if (RollClubCategoryChance(CLUB_CHANCE_SET_HEAD_WIND) == TRUE) {
                     return SHOT_OFFSET_PLUS_SMALL;
                 }
             }
             else if (IsWindSpeedInRange(5 * WIND_PUSH_UNIT, 7 * WIND_PUSH_UNIT)) {
-                if (RollClubKindChance(CLUB_CHANCE_SET_HEAD_WIND) == TRUE) {
+                if (RollClubCategoryChance(CLUB_CHANCE_SET_HEAD_WIND) == TRUE) {
                     return SHOT_OFFSET_PLUS_MEDIUM;
                 }
             }
             else if (g_HoleSetup.conditions.windSpeed >= 9 * WIND_PUSH_UNIT) {
-                if (RollClubKindChance(CLUB_CHANCE_SET_HEAD_WIND) == TRUE) {
+                if (RollClubCategoryChance(CLUB_CHANCE_SET_HEAD_WIND) == TRUE) {
                     return SHOT_OFFSET_PLUS_LARGE;
                 }
             }
         }
         else if (windPlay == WIND_PLAY_STRONG_WINDS) {
             if (IsWindSpeedInRange(6 * WIND_PUSH_UNIT, 7 * WIND_PUSH_UNIT)) {
-                if (RollClubKindChance(CLUB_CHANCE_SET_HEAD_WIND) == TRUE) {
+                if (RollClubCategoryChance(CLUB_CHANCE_SET_HEAD_WIND) == TRUE) {
                     return SHOT_OFFSET_PLUS_SMALL;
                 }
             }
             else if (g_HoleSetup.conditions.windSpeed >= 7 * WIND_PUSH_UNIT) {
-                if (RollClubKindChance(CLUB_CHANCE_SET_HEAD_WIND) == TRUE) {
+                if (RollClubCategoryChance(CLUB_CHANCE_SET_HEAD_WIND) == TRUE) {
                     return SHOT_OFFSET_PLUS_MEDIUM;
                 }
             }
@@ -2657,23 +2657,23 @@ s32 ChooseShotOffset(void) {
     (f_Shot.clubSlot >= FindClubSlot(f_Shot.playerIndex, (firstType)) && \
         FindClubSlot(f_Shot.playerIndex, (lastType)) >= f_Shot.clubSlot)
 
-s32 RollClubKindChance(s32 chanceSetIndex) {
+s32 RollClubCategoryChance(s32 chanceSetIndex) {
     if (g_Players[f_Shot.playerIndex].strokeCount == 0) {
         return TRUE;
     }
 
     if (IsShotClubOfTypes(CLUB_TYPE_DRIVER, CLUB_TYPE_LAST_WOOD)) {
-        if (rand() % FULL_PERCENT < f_ClubKindChances[chanceSetIndex][CLUB_CHANCE_WOOD]) {
+        if (rand() % FULL_PERCENT < f_ClubCategoryChances[chanceSetIndex][CLUB_CHANCE_WOOD]) {
             return TRUE;
         }
     }
     else if (IsShotClubOfTypes(CLUB_TYPE_FIRST_IRON, CLUB_TYPE_LAST_IRON)) {
-        if (rand() % FULL_PERCENT < f_ClubKindChances[chanceSetIndex][CLUB_CHANCE_IRON]) {
+        if (rand() % FULL_PERCENT < f_ClubCategoryChances[chanceSetIndex][CLUB_CHANCE_IRON]) {
             return TRUE;
         }
     }
     else {
-        if (rand() % FULL_PERCENT < f_ClubKindChances[chanceSetIndex][CLUB_CHANCE_OTHER]) {
+        if (rand() % FULL_PERCENT < f_ClubCategoryChances[chanceSetIndex][CLUB_CHANCE_OTHER]) {
             return TRUE;
         }
     }

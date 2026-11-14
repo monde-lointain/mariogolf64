@@ -288,13 +288,13 @@ s32 SetMultiTlb(
     u32 physicalAddress
 );
 s32 SelectCharacterDisplayList(u32 slotIndex, s32 choiceIndex);
-ClubKind GetCharacterClubKind(u32 slotIndex, s32 clubIndex);
+ClubCategory GetCharacterClubCategory(u32 slotIndex, s32 clubIndex);
 s32 GetCharacterPointModelPosition(u32 slotIndex, s32 pointId, f32 *position);
 void GetCharacterSlotMatrix(CharacterSlot *slot, Mat4 matrix);
 s32 GetCharacterPointPosition(u32 slotIndex, s32 pointId, f32 *position);
 void GetCharacterShadowPoint(u32 slotIndex, f32 *position);
 
-s32 GetBallDistance(u32 slotIndex, s32 club, Boolean isClubKind, ShotMode shotMode);
+s32 GetBallDistance(u32 slotIndex, s32 club, Boolean isClubCategory, ShotMode shotMode);
 void LoadCharacter(u32 slotIndex, s32 characterIndex, s32 kind);
 void SetCharacterAnimation(u32 slotIndex, s32 animationId);
 void SetAnimationLooping(u32 slotIndex, s32 isLooping);

@@ -59,7 +59,7 @@
 #define CLUB_ENTRY( \
     type, \
     name, \
-    kind, \
+    category, \
     surfaceMask, \
     mishitScale, \
     distance, \
@@ -79,7 +79,7 @@
         (lieRatingPercent), \
         (type), \
         {0, 0, 0}, \
-        (kind), \
+        (category), \
         (sideSpin), \
         {0, 0, 0}, \
         ASSET_DRIVER_HEAD_IMAGE + (type), \
@@ -108,7 +108,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_DRIVER,
         "1W",
-        CLUB_KIND_WOOD,
+        CLUB_CATEGORY_WOOD,
         DRIVER_SURFACES,
         80,
         208,
@@ -121,7 +121,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_THREE_WOOD,
         "3W",
-        CLUB_KIND_WOOD,
+        CLUB_CATEGORY_WOOD,
         FAIRWAY_WOOD_SURFACES,
         80,
         194,
@@ -134,7 +134,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_FOUR_WOOD,
         "4W",
-        CLUB_KIND_WOOD,
+        CLUB_CATEGORY_WOOD,
         FAIRWAY_WOOD_SURFACES,
         80,
         180,
@@ -147,7 +147,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_TWO_IRON,
         "2I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         80,
         165,
@@ -160,7 +160,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_THREE_IRON,
         "3I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         80,
         156,
@@ -173,7 +173,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_FOUR_IRON,
         "4I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         80,
         147,
@@ -186,7 +186,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_FIVE_IRON,
         "5I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         80,
         137,
@@ -199,7 +199,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_SIX_IRON,
         "6I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         80,
         128,
@@ -212,7 +212,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_SEVEN_IRON,
         "7I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         80,
         118,
@@ -225,7 +225,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_EIGHT_IRON,
         "8I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         80,
         109,
@@ -238,7 +238,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_NINE_IRON,
         "9I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         80,
         99,
@@ -251,7 +251,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_PITCHING_WEDGE,
         "PW",
-        CLUB_KIND_WEDGE,
+        CLUB_CATEGORY_WEDGE,
         IRON_SURFACES,
         80,
         85,
@@ -264,7 +264,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_SAND_WEDGE,
         "SW",
-        CLUB_KIND_WEDGE,
+        CLUB_CATEGORY_WEDGE,
         IRON_SURFACES,
         80,
         66,
@@ -277,7 +277,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_PUTTER,
         "PT",
-        CLUB_KIND_PUTTER,
+        CLUB_CATEGORY_PUTTER,
         CLUB_SURFACE_ALL,
         80,
         30,
@@ -290,7 +290,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_DRIVER,
         "1W",
-        CLUB_KIND_WOOD,
+        CLUB_CATEGORY_WOOD,
         DRIVER_SURFACES,
         85,
         210,
@@ -303,7 +303,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_THREE_WOOD,
         "3W",
-        CLUB_KIND_WOOD,
+        CLUB_CATEGORY_WOOD,
         FAIRWAY_WOOD_SURFACES,
         85,
         195,
@@ -316,7 +316,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_FOUR_WOOD,
         "4W",
-        CLUB_KIND_WOOD,
+        CLUB_CATEGORY_WOOD,
         FAIRWAY_WOOD_SURFACES,
         85,
         180,
@@ -329,7 +329,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_TWO_IRON,
         "2I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         85,
         170,
@@ -342,7 +342,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_THREE_IRON,
         "3I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         85,
         160,
@@ -355,7 +355,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_FOUR_IRON,
         "4I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         85,
         150,
@@ -368,7 +368,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_FIVE_IRON,
         "5I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         85,
         140,
@@ -381,7 +381,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_SIX_IRON,
         "6I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         85,
         130,
@@ -394,7 +394,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_SEVEN_IRON,
         "7I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         85,
         120,
@@ -407,7 +407,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_EIGHT_IRON,
         "8I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         85,
         110,
@@ -420,7 +420,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_NINE_IRON,
         "9I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         85,
         100,
@@ -433,7 +433,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_PITCHING_WEDGE,
         "PW",
-        CLUB_KIND_WEDGE,
+        CLUB_CATEGORY_WEDGE,
         IRON_SURFACES,
         85,
         85,
@@ -446,7 +446,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_SAND_WEDGE,
         "SW",
-        CLUB_KIND_WEDGE,
+        CLUB_CATEGORY_WEDGE,
         IRON_SURFACES,
         85,
         65,
@@ -459,7 +459,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_PUTTER,
         "PT",
-        CLUB_KIND_PUTTER,
+        CLUB_CATEGORY_PUTTER,
         CLUB_SURFACE_ALL,
         85,
         30,
@@ -472,7 +472,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_DRIVER,
         "1W",
-        CLUB_KIND_WOOD,
+        CLUB_CATEGORY_WOOD,
         DRIVER_SURFACES,
         115,
         245,
@@ -485,7 +485,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_THREE_WOOD,
         "3W",
-        CLUB_KIND_WOOD,
+        CLUB_CATEGORY_WOOD,
         FAIRWAY_WOOD_SURFACES,
         115,
         228,
@@ -498,7 +498,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_FOUR_WOOD,
         "4W",
-        CLUB_KIND_WOOD,
+        CLUB_CATEGORY_WOOD,
         FAIRWAY_WOOD_SURFACES,
         115,
         212,
@@ -511,7 +511,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_TWO_IRON,
         "2I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         115,
         195,
@@ -524,7 +524,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_THREE_IRON,
         "3I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         115,
         184,
@@ -537,7 +537,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_FOUR_IRON,
         "4I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         115,
         173,
@@ -550,7 +550,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_FIVE_IRON,
         "5I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         115,
         161,
@@ -563,7 +563,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_SIX_IRON,
         "6I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         115,
         150,
@@ -576,7 +576,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_SEVEN_IRON,
         "7I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         115,
         139,
@@ -589,7 +589,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_EIGHT_IRON,
         "8I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         115,
         128,
@@ -602,7 +602,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_NINE_IRON,
         "9I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         115,
         117,
@@ -615,7 +615,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_PITCHING_WEDGE,
         "PW",
-        CLUB_KIND_WEDGE,
+        CLUB_CATEGORY_WEDGE,
         IRON_SURFACES,
         115,
         100,
@@ -628,7 +628,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_SAND_WEDGE,
         "SW",
-        CLUB_KIND_WEDGE,
+        CLUB_CATEGORY_WEDGE,
         IRON_SURFACES,
         115,
         78,
@@ -641,7 +641,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_PUTTER,
         "PT",
-        CLUB_KIND_PUTTER,
+        CLUB_CATEGORY_PUTTER,
         CLUB_SURFACE_ALL,
         115,
         30,
@@ -654,7 +654,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_DRIVER,
         "1W",
-        CLUB_KIND_WOOD,
+        CLUB_CATEGORY_WOOD,
         DRIVER_SURFACES,
         95,
         215,
@@ -667,7 +667,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_THREE_WOOD,
         "3W",
-        CLUB_KIND_WOOD,
+        CLUB_CATEGORY_WOOD,
         FAIRWAY_WOOD_SURFACES,
         95,
         200,
@@ -680,7 +680,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_FOUR_WOOD,
         "4W",
-        CLUB_KIND_WOOD,
+        CLUB_CATEGORY_WOOD,
         FAIRWAY_WOOD_SURFACES,
         95,
         186,
@@ -693,7 +693,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_TWO_IRON,
         "2I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         95,
         171,
@@ -706,7 +706,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_THREE_IRON,
         "3I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         95,
         161,
@@ -719,7 +719,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_FOUR_IRON,
         "4I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         95,
         151,
@@ -732,7 +732,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_FIVE_IRON,
         "5I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         95,
         142,
@@ -745,7 +745,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_SIX_IRON,
         "6I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         95,
         132,
@@ -758,7 +758,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_SEVEN_IRON,
         "7I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         95,
         122,
@@ -771,7 +771,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_EIGHT_IRON,
         "8I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         95,
         112,
@@ -784,7 +784,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_NINE_IRON,
         "9I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         95,
         103,
@@ -797,7 +797,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_PITCHING_WEDGE,
         "PW",
-        CLUB_KIND_WEDGE,
+        CLUB_CATEGORY_WEDGE,
         IRON_SURFACES,
         95,
         88,
@@ -810,7 +810,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_SAND_WEDGE,
         "SW",
-        CLUB_KIND_WEDGE,
+        CLUB_CATEGORY_WEDGE,
         IRON_SURFACES,
         95,
         68,
@@ -823,7 +823,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_PUTTER,
         "PT",
-        CLUB_KIND_PUTTER,
+        CLUB_CATEGORY_PUTTER,
         CLUB_SURFACE_ALL,
         95,
         30,
@@ -836,7 +836,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_DRIVER,
         "1W",
-        CLUB_KIND_WOOD,
+        CLUB_CATEGORY_WOOD,
         DRIVER_SURFACES,
         100,
         220,
@@ -849,7 +849,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_THREE_WOOD,
         "3W",
-        CLUB_KIND_WOOD,
+        CLUB_CATEGORY_WOOD,
         FAIRWAY_WOOD_SURFACES,
         100,
         205,
@@ -862,7 +862,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_FOUR_WOOD,
         "4W",
-        CLUB_KIND_WOOD,
+        CLUB_CATEGORY_WOOD,
         FAIRWAY_WOOD_SURFACES,
         100,
         190,
@@ -875,7 +875,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_TWO_IRON,
         "2I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         100,
         175,
@@ -888,7 +888,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_THREE_IRON,
         "3I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         100,
         165,
@@ -901,7 +901,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_FOUR_IRON,
         "4I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         100,
         155,
@@ -914,7 +914,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_FIVE_IRON,
         "5I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         100,
         145,
@@ -927,7 +927,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_SIX_IRON,
         "6I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         100,
         135,
@@ -940,7 +940,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_SEVEN_IRON,
         "7I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         100,
         125,
@@ -953,7 +953,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_EIGHT_IRON,
         "8I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         100,
         115,
@@ -966,7 +966,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_NINE_IRON,
         "9I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         100,
         105,
@@ -979,7 +979,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_PITCHING_WEDGE,
         "PW",
-        CLUB_KIND_WEDGE,
+        CLUB_CATEGORY_WEDGE,
         IRON_SURFACES,
         100,
         90,
@@ -992,7 +992,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_SAND_WEDGE,
         "SW",
-        CLUB_KIND_WEDGE,
+        CLUB_CATEGORY_WEDGE,
         IRON_SURFACES,
         100,
         70,
@@ -1005,7 +1005,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_PUTTER,
         "PT",
-        CLUB_KIND_PUTTER,
+        CLUB_CATEGORY_PUTTER,
         CLUB_SURFACE_ALL,
         100,
         30,
@@ -1015,11 +1015,23 @@ Club g_Clubs[CLUB_COUNT] = {
         100,
         0
     ),
-    CLUB_ENTRY(CLUB_TYPE_DRIVER, "1W", CLUB_KIND_WOOD, DRIVER_SURFACES, 90, 212, -14, 1, 9, 120, 0),
+    CLUB_ENTRY(
+        CLUB_TYPE_DRIVER,
+        "1W",
+        CLUB_CATEGORY_WOOD,
+        DRIVER_SURFACES,
+        90,
+        212,
+        -14,
+        1,
+        9,
+        120,
+        0
+    ),
     CLUB_ENTRY(
         CLUB_TYPE_THREE_WOOD,
         "3W",
-        CLUB_KIND_WOOD,
+        CLUB_CATEGORY_WOOD,
         FAIRWAY_WOOD_SURFACES,
         90,
         198,
@@ -1032,7 +1044,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_FOUR_WOOD,
         "4W",
-        CLUB_KIND_WOOD,
+        CLUB_CATEGORY_WOOD,
         FAIRWAY_WOOD_SURFACES,
         90,
         183,
@@ -1045,7 +1057,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_TWO_IRON,
         "2I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         90,
         169,
@@ -1058,7 +1070,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_THREE_IRON,
         "3I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         90,
         159,
@@ -1071,7 +1083,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_FOUR_IRON,
         "4I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         90,
         149,
@@ -1084,7 +1096,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_FIVE_IRON,
         "5I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         90,
         140,
@@ -1097,7 +1109,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_SIX_IRON,
         "6I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         90,
         130,
@@ -1110,7 +1122,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_SEVEN_IRON,
         "7I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         90,
         120,
@@ -1123,7 +1135,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_EIGHT_IRON,
         "8I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         90,
         111,
@@ -1136,7 +1148,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_NINE_IRON,
         "9I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         90,
         101,
@@ -1149,7 +1161,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_PITCHING_WEDGE,
         "PW",
-        CLUB_KIND_WEDGE,
+        CLUB_CATEGORY_WEDGE,
         IRON_SURFACES,
         90,
         87,
@@ -1162,7 +1174,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_SAND_WEDGE,
         "SW",
-        CLUB_KIND_WEDGE,
+        CLUB_CATEGORY_WEDGE,
         IRON_SURFACES,
         90,
         67,
@@ -1175,7 +1187,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_PUTTER,
         "PT",
-        CLUB_KIND_PUTTER,
+        CLUB_CATEGORY_PUTTER,
         CLUB_SURFACE_ALL,
         90,
         30,
@@ -1188,7 +1200,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_DRIVER,
         "1W",
-        CLUB_KIND_WOOD,
+        CLUB_CATEGORY_WOOD,
         DRIVER_SURFACES,
         110,
         240,
@@ -1201,7 +1213,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_THREE_WOOD,
         "3W",
-        CLUB_KIND_WOOD,
+        CLUB_CATEGORY_WOOD,
         FAIRWAY_WOOD_SURFACES,
         110,
         223,
@@ -1214,7 +1226,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_FOUR_WOOD,
         "4W",
-        CLUB_KIND_WOOD,
+        CLUB_CATEGORY_WOOD,
         FAIRWAY_WOOD_SURFACES,
         110,
         207,
@@ -1227,7 +1239,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_TWO_IRON,
         "2I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         110,
         191,
@@ -1240,7 +1252,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_THREE_IRON,
         "3I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         110,
         180,
@@ -1253,7 +1265,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_FOUR_IRON,
         "4I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         110,
         169,
@@ -1266,7 +1278,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_FIVE_IRON,
         "5I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         110,
         158,
@@ -1279,7 +1291,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_SIX_IRON,
         "6I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         110,
         147,
@@ -1292,7 +1304,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_SEVEN_IRON,
         "7I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         110,
         136,
@@ -1305,7 +1317,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_EIGHT_IRON,
         "8I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         110,
         125,
@@ -1318,7 +1330,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_NINE_IRON,
         "9I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         110,
         114,
@@ -1331,7 +1343,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_PITCHING_WEDGE,
         "PW",
-        CLUB_KIND_WEDGE,
+        CLUB_CATEGORY_WEDGE,
         IRON_SURFACES,
         110,
         98,
@@ -1344,7 +1356,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_SAND_WEDGE,
         "SW",
-        CLUB_KIND_WEDGE,
+        CLUB_CATEGORY_WEDGE,
         IRON_SURFACES,
         110,
         76,
@@ -1357,7 +1369,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_PUTTER,
         "PT",
-        CLUB_KIND_PUTTER,
+        CLUB_CATEGORY_PUTTER,
         CLUB_SURFACE_ALL,
         110,
         30,
@@ -1370,7 +1382,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_DRIVER,
         "1W",
-        CLUB_KIND_WOOD,
+        CLUB_CATEGORY_WOOD,
         DRIVER_SURFACES,
         120,
         250,
@@ -1383,7 +1395,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_THREE_WOOD,
         "3W",
-        CLUB_KIND_WOOD,
+        CLUB_CATEGORY_WOOD,
         FAIRWAY_WOOD_SURFACES,
         120,
         233,
@@ -1396,7 +1408,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_FOUR_WOOD,
         "4W",
-        CLUB_KIND_WOOD,
+        CLUB_CATEGORY_WOOD,
         FAIRWAY_WOOD_SURFACES,
         120,
         216,
@@ -1409,7 +1421,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_TWO_IRON,
         "2I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         120,
         199,
@@ -1422,7 +1434,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_THREE_IRON,
         "3I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         120,
         187,
@@ -1435,7 +1447,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_FOUR_IRON,
         "4I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         120,
         176,
@@ -1448,7 +1460,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_FIVE_IRON,
         "5I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         120,
         165,
@@ -1461,7 +1473,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_SIX_IRON,
         "6I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         120,
         153,
@@ -1474,7 +1486,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_SEVEN_IRON,
         "7I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         120,
         142,
@@ -1487,7 +1499,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_EIGHT_IRON,
         "8I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         120,
         131,
@@ -1500,7 +1512,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_NINE_IRON,
         "9I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         120,
         119,
@@ -1513,7 +1525,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_PITCHING_WEDGE,
         "PW",
-        CLUB_KIND_WEDGE,
+        CLUB_CATEGORY_WEDGE,
         IRON_SURFACES,
         120,
         102,
@@ -1526,7 +1538,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_SAND_WEDGE,
         "SW",
-        CLUB_KIND_WEDGE,
+        CLUB_CATEGORY_WEDGE,
         IRON_SURFACES,
         120,
         80,
@@ -1539,7 +1551,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_PUTTER,
         "PT",
-        CLUB_KIND_PUTTER,
+        CLUB_CATEGORY_PUTTER,
         CLUB_SURFACE_ALL,
         120,
         30,
@@ -1552,7 +1564,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_DRIVER,
         "1W",
-        CLUB_KIND_WOOD,
+        CLUB_CATEGORY_WOOD,
         DRIVER_SURFACES,
         125,
         260,
@@ -1565,7 +1577,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_THREE_WOOD,
         "3W",
-        CLUB_KIND_WOOD,
+        CLUB_CATEGORY_WOOD,
         FAIRWAY_WOOD_SURFACES,
         125,
         242,
@@ -1578,7 +1590,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_FOUR_WOOD,
         "4W",
-        CLUB_KIND_WOOD,
+        CLUB_CATEGORY_WOOD,
         FAIRWAY_WOOD_SURFACES,
         125,
         224,
@@ -1591,7 +1603,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_TWO_IRON,
         "2I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         125,
         207,
@@ -1604,7 +1616,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_THREE_IRON,
         "3I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         125,
         195,
@@ -1617,7 +1629,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_FOUR_IRON,
         "4I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         125,
         183,
@@ -1630,7 +1642,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_FIVE_IRON,
         "5I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         125,
         171,
@@ -1643,7 +1655,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_SIX_IRON,
         "6I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         125,
         159,
@@ -1656,7 +1668,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_SEVEN_IRON,
         "7I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         125,
         148,
@@ -1669,7 +1681,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_EIGHT_IRON,
         "8I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         125,
         136,
@@ -1682,7 +1694,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_NINE_IRON,
         "9I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         125,
         124,
@@ -1695,7 +1707,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_PITCHING_WEDGE,
         "PW",
-        CLUB_KIND_WEDGE,
+        CLUB_CATEGORY_WEDGE,
         IRON_SURFACES,
         125,
         106,
@@ -1708,7 +1720,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_SAND_WEDGE,
         "SW",
-        CLUB_KIND_WEDGE,
+        CLUB_CATEGORY_WEDGE,
         IRON_SURFACES,
         125,
         83,
@@ -1721,7 +1733,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_PUTTER,
         "PT",
-        CLUB_KIND_PUTTER,
+        CLUB_CATEGORY_PUTTER,
         CLUB_SURFACE_ALL,
         125,
         30,
@@ -1734,7 +1746,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_DRIVER,
         "1W",
-        CLUB_KIND_WOOD,
+        CLUB_CATEGORY_WOOD,
         DRIVER_SURFACES,
         130,
         270,
@@ -1747,7 +1759,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_THREE_WOOD,
         "3W",
-        CLUB_KIND_WOOD,
+        CLUB_CATEGORY_WOOD,
         FAIRWAY_WOOD_SURFACES,
         130,
         252,
@@ -1760,7 +1772,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_FOUR_WOOD,
         "4W",
-        CLUB_KIND_WOOD,
+        CLUB_CATEGORY_WOOD,
         FAIRWAY_WOOD_SURFACES,
         130,
         233,
@@ -1773,7 +1785,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_TWO_IRON,
         "2I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         130,
         215,
@@ -1786,7 +1798,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_THREE_IRON,
         "3I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         130,
         202,
@@ -1799,7 +1811,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_FOUR_IRON,
         "4I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         130,
         190,
@@ -1812,7 +1824,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_FIVE_IRON,
         "5I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         130,
         178,
@@ -1825,7 +1837,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_SIX_IRON,
         "6I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         130,
         166,
@@ -1838,7 +1850,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_SEVEN_IRON,
         "7I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         130,
         153,
@@ -1851,7 +1863,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_EIGHT_IRON,
         "8I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         130,
         141,
@@ -1864,7 +1876,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_NINE_IRON,
         "9I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         130,
         129,
@@ -1877,7 +1889,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_PITCHING_WEDGE,
         "PW",
-        CLUB_KIND_WEDGE,
+        CLUB_CATEGORY_WEDGE,
         IRON_SURFACES,
         130,
         110,
@@ -1890,7 +1902,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_SAND_WEDGE,
         "SW",
-        CLUB_KIND_WEDGE,
+        CLUB_CATEGORY_WEDGE,
         IRON_SURFACES,
         130,
         86,
@@ -1903,7 +1915,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_PUTTER,
         "PT",
-        CLUB_KIND_PUTTER,
+        CLUB_CATEGORY_PUTTER,
         CLUB_SURFACE_ALL,
         130,
         30,
@@ -1916,7 +1928,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_DRIVER,
         "1W",
-        CLUB_KIND_WOOD,
+        CLUB_CATEGORY_WOOD,
         DRIVER_SURFACES,
         105,
         230,
@@ -1929,7 +1941,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_THREE_WOOD,
         "3W",
-        CLUB_KIND_WOOD,
+        CLUB_CATEGORY_WOOD,
         FAIRWAY_WOOD_SURFACES,
         105,
         214,
@@ -1942,7 +1954,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_FOUR_WOOD,
         "4W",
-        CLUB_KIND_WOOD,
+        CLUB_CATEGORY_WOOD,
         FAIRWAY_WOOD_SURFACES,
         105,
         199,
@@ -1955,7 +1967,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_TWO_IRON,
         "2I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         105,
         183,
@@ -1968,7 +1980,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_THREE_IRON,
         "3I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         105,
         172,
@@ -1981,7 +1993,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_FOUR_IRON,
         "4I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         105,
         162,
@@ -1994,7 +2006,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_FIVE_IRON,
         "5I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         105,
         152,
@@ -2007,7 +2019,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_SIX_IRON,
         "6I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         105,
         141,
@@ -2020,7 +2032,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_SEVEN_IRON,
         "7I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         105,
         131,
@@ -2033,7 +2045,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_EIGHT_IRON,
         "8I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         105,
         120,
@@ -2046,7 +2058,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_NINE_IRON,
         "9I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         105,
         110,
@@ -2059,7 +2071,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_PITCHING_WEDGE,
         "PW",
-        CLUB_KIND_WEDGE,
+        CLUB_CATEGORY_WEDGE,
         IRON_SURFACES,
         105,
         94,
@@ -2072,7 +2084,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_SAND_WEDGE,
         "SW",
-        CLUB_KIND_WEDGE,
+        CLUB_CATEGORY_WEDGE,
         IRON_SURFACES,
         105,
         73,
@@ -2085,7 +2097,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_PUTTER,
         "PT",
-        CLUB_KIND_PUTTER,
+        CLUB_CATEGORY_PUTTER,
         CLUB_SURFACE_ALL,
         105,
         30,
@@ -2098,7 +2110,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_DRIVER,
         "1W",
-        CLUB_KIND_WOOD,
+        CLUB_CATEGORY_WOOD,
         DRIVER_SURFACES,
         135,
         275,
@@ -2111,7 +2123,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_THREE_WOOD,
         "3W",
-        CLUB_KIND_WOOD,
+        CLUB_CATEGORY_WOOD,
         FAIRWAY_WOOD_SURFACES,
         135,
         256,
@@ -2124,7 +2136,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_FOUR_WOOD,
         "4W",
-        CLUB_KIND_WOOD,
+        CLUB_CATEGORY_WOOD,
         FAIRWAY_WOOD_SURFACES,
         135,
         238,
@@ -2137,7 +2149,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_TWO_IRON,
         "2I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         135,
         219,
@@ -2150,7 +2162,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_THREE_IRON,
         "3I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         135,
         206,
@@ -2163,7 +2175,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_FOUR_IRON,
         "4I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         135,
         194,
@@ -2176,7 +2188,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_FIVE_IRON,
         "5I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         135,
         181,
@@ -2189,7 +2201,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_SIX_IRON,
         "6I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         135,
         169,
@@ -2202,7 +2214,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_SEVEN_IRON,
         "7I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         135,
         156,
@@ -2215,7 +2227,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_EIGHT_IRON,
         "8I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         135,
         144,
@@ -2228,7 +2240,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_NINE_IRON,
         "9I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         135,
         131,
@@ -2241,7 +2253,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_PITCHING_WEDGE,
         "PW",
-        CLUB_KIND_WEDGE,
+        CLUB_CATEGORY_WEDGE,
         IRON_SURFACES,
         135,
         113,
@@ -2254,7 +2266,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_SAND_WEDGE,
         "SW",
-        CLUB_KIND_WEDGE,
+        CLUB_CATEGORY_WEDGE,
         IRON_SURFACES,
         135,
         88,
@@ -2267,7 +2279,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_PUTTER,
         "PT",
-        CLUB_KIND_PUTTER,
+        CLUB_CATEGORY_PUTTER,
         CLUB_SURFACE_ALL,
         135,
         30,
@@ -2280,7 +2292,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_DRIVER,
         "1W",
-        CLUB_KIND_WOOD,
+        CLUB_CATEGORY_WOOD,
         DRIVER_SURFACES,
         140,
         280,
@@ -2293,7 +2305,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_THREE_WOOD,
         "3W",
-        CLUB_KIND_WOOD,
+        CLUB_CATEGORY_WOOD,
         FAIRWAY_WOOD_SURFACES,
         140,
         261,
@@ -2306,7 +2318,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_FOUR_WOOD,
         "4W",
-        CLUB_KIND_WOOD,
+        CLUB_CATEGORY_WOOD,
         FAIRWAY_WOOD_SURFACES,
         140,
         242,
@@ -2319,7 +2331,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_TWO_IRON,
         "2I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         140,
         223,
@@ -2332,7 +2344,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_THREE_IRON,
         "3I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         140,
         210,
@@ -2345,7 +2357,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_FOUR_IRON,
         "4I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         140,
         197,
@@ -2358,7 +2370,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_FIVE_IRON,
         "5I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         140,
         184,
@@ -2371,7 +2383,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_SIX_IRON,
         "6I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         140,
         172,
@@ -2384,7 +2396,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_SEVEN_IRON,
         "7I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         140,
         159,
@@ -2397,7 +2409,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_EIGHT_IRON,
         "8I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         140,
         146,
@@ -2410,7 +2422,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_NINE_IRON,
         "9I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         140,
         134,
@@ -2423,7 +2435,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_PITCHING_WEDGE,
         "PW",
-        CLUB_KIND_WEDGE,
+        CLUB_CATEGORY_WEDGE,
         IRON_SURFACES,
         140,
         114,
@@ -2436,7 +2448,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_SAND_WEDGE,
         "SW",
-        CLUB_KIND_WEDGE,
+        CLUB_CATEGORY_WEDGE,
         IRON_SURFACES,
         140,
         89,
@@ -2449,7 +2461,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_PUTTER,
         "PT",
-        CLUB_KIND_PUTTER,
+        CLUB_CATEGORY_PUTTER,
         CLUB_SURFACE_ALL,
         140,
         30,
@@ -2462,7 +2474,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_DRIVER,
         "1W",
-        CLUB_KIND_WOOD,
+        CLUB_CATEGORY_WOOD,
         DRIVER_SURFACES,
         130,
         285,
@@ -2475,7 +2487,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_THREE_WOOD,
         "3W",
-        CLUB_KIND_WOOD,
+        CLUB_CATEGORY_WOOD,
         FAIRWAY_WOOD_SURFACES,
         130,
         265,
@@ -2488,7 +2500,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_FOUR_WOOD,
         "4W",
-        CLUB_KIND_WOOD,
+        CLUB_CATEGORY_WOOD,
         FAIRWAY_WOOD_SURFACES,
         130,
         246,
@@ -2501,7 +2513,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_TWO_IRON,
         "2I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         130,
         227,
@@ -2514,7 +2526,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_THREE_IRON,
         "3I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         130,
         214,
@@ -2527,7 +2539,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_FOUR_IRON,
         "4I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         130,
         201,
@@ -2540,7 +2552,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_FIVE_IRON,
         "5I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         130,
         188,
@@ -2553,7 +2565,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_SIX_IRON,
         "6I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         130,
         175,
@@ -2566,7 +2578,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_SEVEN_IRON,
         "7I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         130,
         162,
@@ -2579,7 +2591,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_EIGHT_IRON,
         "8I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         130,
         149,
@@ -2592,7 +2604,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_NINE_IRON,
         "9I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         130,
         136,
@@ -2605,7 +2617,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_PITCHING_WEDGE,
         "PW",
-        CLUB_KIND_WEDGE,
+        CLUB_CATEGORY_WEDGE,
         IRON_SURFACES,
         130,
         117,
@@ -2618,7 +2630,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_SAND_WEDGE,
         "SW",
-        CLUB_KIND_WEDGE,
+        CLUB_CATEGORY_WEDGE,
         IRON_SURFACES,
         130,
         91,
@@ -2631,7 +2643,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_PUTTER,
         "PT",
-        CLUB_KIND_PUTTER,
+        CLUB_CATEGORY_PUTTER,
         CLUB_SURFACE_ALL,
         130,
         30,
@@ -2644,7 +2656,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_DRIVER,
         "1W",
-        CLUB_KIND_WOOD,
+        CLUB_CATEGORY_WOOD,
         DRIVER_SURFACES,
         85,
         205,
@@ -2657,7 +2669,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_THREE_WOOD,
         "3W",
-        CLUB_KIND_WOOD,
+        CLUB_CATEGORY_WOOD,
         FAIRWAY_WOOD_SURFACES,
         85,
         190,
@@ -2670,7 +2682,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_FOUR_WOOD,
         "4W",
-        CLUB_KIND_WOOD,
+        CLUB_CATEGORY_WOOD,
         FAIRWAY_WOOD_SURFACES,
         85,
         175,
@@ -2683,7 +2695,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_TWO_IRON,
         "2I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         85,
         165,
@@ -2696,7 +2708,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_THREE_IRON,
         "3I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         85,
         155,
@@ -2709,7 +2721,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_FOUR_IRON,
         "4I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         85,
         145,
@@ -2722,7 +2734,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_FIVE_IRON,
         "5I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         85,
         135,
@@ -2735,7 +2747,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_SIX_IRON,
         "6I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         85,
         125,
@@ -2748,7 +2760,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_SEVEN_IRON,
         "7I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         85,
         115,
@@ -2761,7 +2773,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_EIGHT_IRON,
         "8I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         85,
         105,
@@ -2774,7 +2786,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_NINE_IRON,
         "9I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         85,
         95,
@@ -2787,7 +2799,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_PITCHING_WEDGE,
         "PW",
-        CLUB_KIND_WEDGE,
+        CLUB_CATEGORY_WEDGE,
         IRON_SURFACES,
         85,
         82,
@@ -2800,7 +2812,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_SAND_WEDGE,
         "SW",
-        CLUB_KIND_WEDGE,
+        CLUB_CATEGORY_WEDGE,
         IRON_SURFACES,
         85,
         62,
@@ -2813,7 +2825,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_PUTTER,
         "PT",
-        CLUB_KIND_PUTTER,
+        CLUB_CATEGORY_PUTTER,
         CLUB_SURFACE_ALL,
         85,
         30,
@@ -2826,7 +2838,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_DRIVER,
         "1W",
-        CLUB_KIND_WOOD,
+        CLUB_CATEGORY_WOOD,
         DRIVER_SURFACES,
         80,
         207,
@@ -2839,7 +2851,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_THREE_WOOD,
         "3W",
-        CLUB_KIND_WOOD,
+        CLUB_CATEGORY_WOOD,
         FAIRWAY_WOOD_SURFACES,
         80,
         192,
@@ -2852,7 +2864,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_FOUR_WOOD,
         "4W",
-        CLUB_KIND_WOOD,
+        CLUB_CATEGORY_WOOD,
         FAIRWAY_WOOD_SURFACES,
         80,
         177,
@@ -2865,7 +2877,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_TWO_IRON,
         "2I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         80,
         167,
@@ -2878,7 +2890,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_THREE_IRON,
         "3I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         80,
         157,
@@ -2891,7 +2903,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_FOUR_IRON,
         "4I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         80,
         147,
@@ -2904,7 +2916,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_FIVE_IRON,
         "5I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         80,
         137,
@@ -2917,7 +2929,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_SIX_IRON,
         "6I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         80,
         127,
@@ -2930,7 +2942,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_SEVEN_IRON,
         "7I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         80,
         117,
@@ -2943,7 +2955,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_EIGHT_IRON,
         "8I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         80,
         107,
@@ -2956,7 +2968,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_NINE_IRON,
         "9I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         80,
         97,
@@ -2969,7 +2981,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_PITCHING_WEDGE,
         "PW",
-        CLUB_KIND_WEDGE,
+        CLUB_CATEGORY_WEDGE,
         IRON_SURFACES,
         80,
         83,
@@ -2982,7 +2994,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_SAND_WEDGE,
         "SW",
-        CLUB_KIND_WEDGE,
+        CLUB_CATEGORY_WEDGE,
         IRON_SURFACES,
         80,
         63,
@@ -2995,7 +3007,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_PUTTER,
         "PT",
-        CLUB_KIND_PUTTER,
+        CLUB_CATEGORY_PUTTER,
         CLUB_SURFACE_ALL,
         80,
         30,
@@ -3008,7 +3020,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_DRIVER,
         "1W",
-        CLUB_KIND_WOOD,
+        CLUB_CATEGORY_WOOD,
         DRIVER_SURFACES,
         90,
         210,
@@ -3021,7 +3033,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_THREE_WOOD,
         "3W",
-        CLUB_KIND_WOOD,
+        CLUB_CATEGORY_WOOD,
         FAIRWAY_WOOD_SURFACES,
         90,
         195,
@@ -3034,7 +3046,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_FOUR_WOOD,
         "4W",
-        CLUB_KIND_WOOD,
+        CLUB_CATEGORY_WOOD,
         FAIRWAY_WOOD_SURFACES,
         90,
         180,
@@ -3047,7 +3059,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_TWO_IRON,
         "2I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         90,
         168,
@@ -3060,7 +3072,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_THREE_IRON,
         "3I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         90,
         158,
@@ -3073,7 +3085,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_FOUR_IRON,
         "4I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         90,
         149,
@@ -3086,7 +3098,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_FIVE_IRON,
         "5I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         90,
         139,
@@ -3099,7 +3111,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_SIX_IRON,
         "6I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         90,
         129,
@@ -3112,7 +3124,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_SEVEN_IRON,
         "7I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         90,
         119,
@@ -3125,7 +3137,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_EIGHT_IRON,
         "8I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         90,
         109,
@@ -3138,7 +3150,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_NINE_IRON,
         "9I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         90,
         99,
@@ -3151,7 +3163,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_PITCHING_WEDGE,
         "PW",
-        CLUB_KIND_WEDGE,
+        CLUB_CATEGORY_WEDGE,
         IRON_SURFACES,
         90,
         84,
@@ -3164,7 +3176,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_SAND_WEDGE,
         "SW",
-        CLUB_KIND_WEDGE,
+        CLUB_CATEGORY_WEDGE,
         IRON_SURFACES,
         90,
         64,
@@ -3177,7 +3189,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_PUTTER,
         "PT",
-        CLUB_KIND_PUTTER,
+        CLUB_CATEGORY_PUTTER,
         CLUB_SURFACE_ALL,
         90,
         30,
@@ -3190,7 +3202,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_DRIVER,
         "1W",
-        CLUB_KIND_WOOD,
+        CLUB_CATEGORY_WOOD,
         DRIVER_SURFACES,
         95,
         210,
@@ -3203,7 +3215,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_THREE_WOOD,
         "3W",
-        CLUB_KIND_WOOD,
+        CLUB_CATEGORY_WOOD,
         FAIRWAY_WOOD_SURFACES,
         95,
         195,
@@ -3216,7 +3228,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_FOUR_WOOD,
         "4W",
-        CLUB_KIND_WOOD,
+        CLUB_CATEGORY_WOOD,
         FAIRWAY_WOOD_SURFACES,
         95,
         180,
@@ -3229,7 +3241,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_TWO_IRON,
         "2I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         95,
         170,
@@ -3242,7 +3254,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_THREE_IRON,
         "3I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         95,
         160,
@@ -3255,7 +3267,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_FOUR_IRON,
         "4I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         95,
         150,
@@ -3268,7 +3280,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_FIVE_IRON,
         "5I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         95,
         140,
@@ -3281,7 +3293,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_SIX_IRON,
         "6I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         95,
         130,
@@ -3294,7 +3306,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_SEVEN_IRON,
         "7I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         95,
         120,
@@ -3307,7 +3319,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_EIGHT_IRON,
         "8I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         95,
         110,
@@ -3320,7 +3332,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_NINE_IRON,
         "9I",
-        CLUB_KIND_IRON,
+        CLUB_CATEGORY_IRON,
         IRON_SURFACES,
         95,
         100,
@@ -3333,7 +3345,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_PITCHING_WEDGE,
         "PW",
-        CLUB_KIND_WEDGE,
+        CLUB_CATEGORY_WEDGE,
         IRON_SURFACES,
         95,
         85,
@@ -3346,7 +3358,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_SAND_WEDGE,
         "SW",
-        CLUB_KIND_WEDGE,
+        CLUB_CATEGORY_WEDGE,
         IRON_SURFACES,
         95,
         65,
@@ -3359,7 +3371,7 @@ Club g_Clubs[CLUB_COUNT] = {
     CLUB_ENTRY(
         CLUB_TYPE_PUTTER,
         "PT",
-        CLUB_KIND_PUTTER,
+        CLUB_CATEGORY_PUTTER,
         CLUB_SURFACE_ALL,
         95,
         30,
@@ -3381,7 +3393,7 @@ static Club f_NoClub = {
     100,
     CLUB_TYPE_DRIVER,
     {0, 0, 0},
-    CLUB_KIND_WOOD,
+    CLUB_CATEGORY_WOOD,
     0,
     {0, 0, 0},
     ASSET_DRIVER_HEAD_IMAGE,

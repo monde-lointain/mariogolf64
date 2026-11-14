@@ -698,7 +698,7 @@ void PlayContactSound(void) {
     club =
         GetClub(g_Players[g_SimulatedShot.shot.playerIndex].clubs[g_SimulatedShot.shot.clubSlot]);
     surfaceTraits = GetSurfaceTraits(g_CurrentShot.surface);
-    if (club->kind == CLUB_KIND_WOOD) {
+    if (club->category == CLUB_CATEGORY_WOOD) {
         if (IsPerfectPowerShot()) {
             PlaySound(SOUND_MENU_START, CONTACT_SOUND_CHANNEL, SOUND_FULL_SCALE);
             StartContactEffect(CONTACT_EFFECT_POWER_WOOD);
@@ -714,7 +714,7 @@ void PlayContactSound(void) {
 
         StartImpactSparks();
     }
-    else if (club->kind == CLUB_KIND_IRON || club->kind == CLUB_KIND_WEDGE) {
+    else if (club->category == CLUB_CATEGORY_IRON || club->category == CLUB_CATEGORY_WEDGE) {
         if (IsPerfectPowerShot()) {
             if (g_CurrentShot.clubSlot < LEADING_CLUB_SLOT_COUNT) {
                 StartContactEffect(CONTACT_EFFECT_POWER_IRON);

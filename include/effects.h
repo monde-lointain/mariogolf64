@@ -43,8 +43,8 @@ typedef struct ShotDebris {
     s32 unusedAfterSpawnCount;
     f32 ignoredNegativeSetting;
     f32 ignoredPositiveSetting;
-    ClubKind clubKind;
-    s32 unusedAfterClubKind;
+    ClubCategory clubCategory;
+    s32 unusedAfterClubCategory;
 } ShotDebris;
 
 typedef struct Raindrop Raindrop;

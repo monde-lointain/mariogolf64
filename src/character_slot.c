@@ -4638,34 +4638,34 @@ s32 SelectCharacterDisplayList(u32 slotIndex, s32 choiceIndex) {
     return -1;
 }
 
-ClubKind GetCharacterClubKind(u32 slotIndex, s32 clubIndex) {
+ClubCategory GetCharacterClubCategory(u32 slotIndex, s32 clubIndex) {
     CharacterSlot *slot;
-    s32 kind;
+    s32 category;
 
-    kind = -1;
+    category = -1;
     slot = GetUsedCharacterSlot(slotIndex);
     if (slot != NULL) {
         g_CharacterModelIndex = slot->modelIndex;
-        switch (GetClub(clubIndex)->kind) {
-            case CLUB_KIND_WOOD:
-                kind = CLUB_KIND_WOOD;
+        switch (GetClub(clubIndex)->category) {
+            case CLUB_CATEGORY_WOOD:
+                category = CLUB_CATEGORY_WOOD;
                 break;
-            case CLUB_KIND_IRON:
-                kind = CLUB_KIND_IRON;
+            case CLUB_CATEGORY_IRON:
+                category = CLUB_CATEGORY_IRON;
                 break;
-            case CLUB_KIND_WEDGE:
-                kind = CLUB_KIND_WEDGE;
+            case CLUB_CATEGORY_WEDGE:
+                category = CLUB_CATEGORY_WEDGE;
                 break;
-            case CLUB_KIND_PUTTER:
-                kind = CLUB_KIND_PUTTER;
+            case CLUB_CATEGORY_PUTTER:
+                category = CLUB_CATEGORY_PUTTER;
                 break;
             default:
-                kind = -1;
+                category = -1;
                 break;
         }
     }
 
-    return kind;
+    return category;
 }
 
 s32 GetCharacterPointModelPosition(u32 slotIndex, s32 pointId, f32 *position) {

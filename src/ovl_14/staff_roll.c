@@ -481,17 +481,17 @@ void EaseStaffRollView(f32 *eye, f32 *lookAt, f32 rate, s32 easedParts) {
 s32 GetStanceAnimation(u32 slotIndex, s32 clubIndex, ShotMode shotMode UNUSED) {
     s32 animationId;
 
-    switch (GetCharacterClubKind(slotIndex, clubIndex)) {
-        case CLUB_KIND_WOOD:
+    switch (GetCharacterClubCategory(slotIndex, clubIndex)) {
+        case CLUB_CATEGORY_WOOD:
             animationId = WOOD_ANIMATIONS;
             break;
-        case CLUB_KIND_IRON:
+        case CLUB_CATEGORY_IRON:
             animationId = IRON_ANIMATIONS;
             break;
-        case CLUB_KIND_WEDGE:
+        case CLUB_CATEGORY_WEDGE:
             animationId = WEDGE_ANIMATIONS;
             break;
-        case CLUB_KIND_PUTTER:
+        case CLUB_CATEGORY_PUTTER:
             animationId = PUTTER_ANIMATIONS;
             break;
         default:
@@ -505,17 +505,17 @@ s32 GetStanceAnimation(u32 slotIndex, s32 clubIndex, ShotMode shotMode UNUSED) {
 s32 GetSwingAnimation(u32 slotIndex, s32 clubIndex, ShotMode shotMode) {
     s32 animationId;
 
-    switch (GetCharacterClubKind(slotIndex, clubIndex)) {
-        case CLUB_KIND_WOOD:
+    switch (GetCharacterClubCategory(slotIndex, clubIndex)) {
+        case CLUB_CATEGORY_WOOD:
             animationId = WOOD_ANIMATIONS + SWING_ANIMATION;
             break;
-        case CLUB_KIND_IRON:
+        case CLUB_CATEGORY_IRON:
             animationId = IRON_ANIMATIONS + SWING_ANIMATION;
             break;
-        case CLUB_KIND_WEDGE:
+        case CLUB_CATEGORY_WEDGE:
             animationId = WEDGE_ANIMATIONS + SWING_ANIMATION;
             break;
-        case CLUB_KIND_PUTTER:
+        case CLUB_CATEGORY_PUTTER:
             animationId = PUTTER_ANIMATIONS + SWING_ANIMATION;
             break;
         default:

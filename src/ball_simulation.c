@@ -2336,7 +2336,7 @@ s32 LaunchBallSimulation(BallSimulation *simulation, s32 purpose, ShotLaunch *sh
         sinf(pitch);
         launchScale =
             (cosf(along) - LAUNCH_SCALE_COSINE_BASE) * shot->offsetY * LAUNCH_SCALE_PER_OFFSET;
-        if (club->kind == CLUB_KIND_WOOD) {
+        if (club->category == CLUB_CATEGORY_WOOD) {
             launchScale *= WOOD_LAUNCH_SCALE_FACTOR;
         }
 

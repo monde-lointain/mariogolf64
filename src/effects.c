@@ -954,14 +954,14 @@ void SpawnShotDebris(CoursePoint point, Radians pitch, Radians yaw, s32 launchSp
         launchSpeed = LAUNCH_SPEED_MOST;
     }
 
-    f_ShotDebris.clubKind = GetSelectedClub()->kind;
-    if (f_ShotDebris.clubKind == CLUB_KIND_WOOD) {
+    f_ShotDebris.clubCategory = GetSelectedClub()->category;
+    if (f_ShotDebris.clubCategory == CLUB_CATEGORY_WOOD) {
         debrisAmount = -sinPitch * DEBRIS_AMOUNT_MOST;
     }
-    else if (f_ShotDebris.clubKind == CLUB_KIND_IRON) {
+    else if (f_ShotDebris.clubCategory == CLUB_CATEGORY_IRON) {
         debrisAmount = -sinPitch * DEBRIS_AMOUNT_MOST;
     }
-    else if (f_ShotDebris.clubKind == CLUB_KIND_WEDGE) {
+    else if (f_ShotDebris.clubCategory == CLUB_CATEGORY_WEDGE) {
         debrisAmount = -sinPitch * DEBRIS_AMOUNT_MOST;
     }
     else {
@@ -983,19 +983,20 @@ void SpawnShotDebris(CoursePoint point, Radians pitch, Radians yaw, s32 launchSp
 
     if (f_DebrisKind == DEBRIS_KIND_TEE_UP) {
         dropCount = 1;
-        if (f_ShotDebris.clubKind == CLUB_KIND_IRON) {
+        if (f_ShotDebris.clubCategory == CLUB_CATEGORY_IRON) {
             lowDebrisCount = debrisAmount;
         }
-        else if (f_ShotDebris.clubKind == CLUB_KIND_WEDGE) {
+        else if (f_ShotDebris.clubCategory == CLUB_CATEGORY_WEDGE) {
             lowDebrisCount = debrisAmount;
         }
     }
     else if (f_DebrisKind == DEBRIS_KIND_GRASS) {
-        if (f_ShotDebris.clubKind == CLUB_KIND_WOOD) {
+        if (f_ShotDebris.clubCategory == CLUB_CATEGORY_WOOD) {
             lowDebrisCount = debrisAmount;
         }
 
-        if (f_ShotDebris.clubKind == CLUB_KIND_IRON || f_ShotDebris.clubKind == CLUB_KIND_WEDGE) {
+        if (f_ShotDebris.clubCategory == CLUB_CATEGORY_IRON ||
+            f_ShotDebris.clubCategory == CLUB_CATEGORY_WEDGE) {
             divotCount = 1;
             lowDebrisCount = 2.0f * debrisAmount;
             divotMarkCount = 1;
@@ -1037,7 +1038,7 @@ void SpawnShotDebris(CoursePoint point, Radians pitch, Radians yaw, s32 launchSp
                 (f32)(headingIndex * (M_PI / 2 / DROP_HEADING_COUNT)) - (M_PI / 4);
             effect->velocity[AXIS_X] = cosf(heading) * speed * COURSE_TO_WORLD_SCALE;
             effect->velocity[AXIS_Z] = sinf(heading) * speed * COURSE_TO_WORLD_SCALE;
-            if (f_ShotDebris.clubKind == CLUB_KIND_PUTTER) {
+            if (f_ShotDebris.clubCategory == CLUB_CATEGORY_PUTTER) {
                 effect->velocity[AXIS_Y] = -PUTTED_DROP_SLOWEST_RISE_SPEED -
                     (headingIndex * PUTTED_DROP_RISE_STEP * COURSE_TO_WORLD_SCALE);
             }
