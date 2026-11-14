@@ -2484,7 +2484,7 @@ void ResetViewerCharacter(void) {
     }
 }
 
-s32 UpdateViewerCharacter(s32 unusedSetting UNUSED, s32 playerNumber) {
+s32 UpdateViewerCharacter(s32 unusedSetting UNUSED, s32 finalPlayerIndex) {
     if (f_IsViewerAdjusting != 0) {
         while (g_TakenCharacters.isCharacterTaken[g_MenuMemory.viewerCharacter] == 1) {
             g_MenuMemory.viewerCharacter++;
@@ -2531,7 +2531,7 @@ s32 UpdateViewerCharacter(s32 unusedSetting UNUSED, s32 playerNumber) {
     else if (f_IsChosenAnimationPlaying == 1) {
         if (GetCurrentAnimationEndFrame(0) == GetAnimationFrame(0)) {
             f_IsChosenAnimationPlaying = 0;
-            if (g_ChoosingPlayerIndex == playerNumber) {
+            if (g_ChoosingPlayerIndex == finalPlayerIndex) {
                 return 1;
             }
         }
