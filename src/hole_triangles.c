@@ -50,7 +50,7 @@
 
 typedef struct RingCorners {
     s32 unusedBeforeCoordinates;
-    s16 coordinates[3][HOLE_TRIANGLE_VERTEX_COUNT];
+    s16 coordinates[3][TRIANGLE_VERTEX_COUNT];
     s16 unusedAfterCoordinates[(0x2C - 0x16) / 2];
 } RingCorners;
 
@@ -198,7 +198,7 @@ void DrawHoleTriangles(
     for (index = 0; index < HOLE_TRIANGLE_COUNT; index++) {
         switch (f_HoleTriangles[index].kind) {
             case HOLE_TRIANGLE_KIND_FLAT:
-                for (vertexIndex = 0; vertexIndex < HOLE_TRIANGLE_VERTEX_COUNT; vertexIndex++) {
+                for (vertexIndex = 0; vertexIndex < TRIANGLE_VERTEX_COUNT; vertexIndex++) {
                     f_HoleTriangles[index].vertices[vertexIndex].v.tc[TEXTURE_AXIS_S] =
                         f_HoleTriangles[index].vertices[vertexIndex].v.ob[AXIS_X] *
                         TEXTURE_COORDINATE_SCALE;
@@ -208,11 +208,11 @@ void DrawHoleTriangles(
                         TEXTURE_COORDINATE_SCALE;
                 }
 
-                gSPVertex(gfx++, f_HoleTriangles[index].vertices, HOLE_TRIANGLE_VERTEX_COUNT, 0);
+                gSPVertex(gfx++, f_HoleTriangles[index].vertices, TRIANGLE_VERTEX_COUNT, 0);
                 gSP1Triangle(gfx++, 0, 1, 2, 0);
                 break;
             case HOLE_TRIANGLE_KIND_UPRIGHT:
-                for (vertexIndex = 0; vertexIndex < HOLE_TRIANGLE_VERTEX_COUNT; vertexIndex++) {
+                for (vertexIndex = 0; vertexIndex < TRIANGLE_VERTEX_COUNT; vertexIndex++) {
                     f_HoleTriangles[index].vertices[vertexIndex].v.tc[TEXTURE_AXIS_S] =
                         (f_HoleTriangles[index].vertices[vertexIndex].v.ob[AXIS_X] +
                             f_HoleTriangles[index].vertices[vertexIndex].v.ob[AXIS_Z]) *
@@ -224,7 +224,7 @@ void DrawHoleTriangles(
 
                 gDPSetPrimColor(gfx++, 0, 0, 0x3F, 0xB4, 0xFF, 0x40);
                 gDPSetEnvColor(gfx++, 0x80, 0xBE, 0xFF, 0x10);
-                gSPVertex(gfx++, f_HoleTriangles[index].vertices, HOLE_TRIANGLE_VERTEX_COUNT, 0);
+                gSPVertex(gfx++, f_HoleTriangles[index].vertices, TRIANGLE_VERTEX_COUNT, 0);
                 gSP1Triangle(gfx++, 0, 1, 2, 0);
                 break;
             case HOLE_TRIANGLE_KIND_SHADED:
@@ -305,7 +305,7 @@ void DrawHoleTriangles(
                 gDPSetPrimColor(gfx++, 0, 0, 0xE0, 0xE0, 0x00, alpha);
                 gDPSetEnvColor(gfx++, 0xE0, 0xE0, 0x00, 0x40);
                 gDPPipeSync(gfx++);
-                gSPVertex(gfx++, f_HoleTriangles[index].vertices, HOLE_TRIANGLE_VERTEX_COUNT, 0);
+                gSPVertex(gfx++, f_HoleTriangles[index].vertices, TRIANGLE_VERTEX_COUNT, 0);
                 gSP1Triangle(gfx++, 0, 1, 2, 0);
                 gDPPipeSync(gfx++);
                 break;

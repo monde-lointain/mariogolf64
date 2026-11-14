@@ -1416,7 +1416,7 @@ void UpdateTriangleEditor(void) {
     }
 
     if (g_MenuControllerData[EDITOR_CONTROLLER].button & B_BUTTON) {
-        f_EditedCornerIndex = (f_EditedCornerIndex + 1) % HOLE_TRIANGLE_VERTEX_COUNT;
+        f_EditedCornerIndex = (f_EditedCornerIndex + 1) % TRIANGLE_VERTEX_COUNT;
     }
 
     PrintDebugHex(editKind, TRIANGLE_TEXT_COLUMN, EDIT_KIND_TEXT_ROW);
@@ -1435,7 +1435,7 @@ void UpdateTriangleEditor(void) {
             stepZ = scaledZ * g_MapCamera.view.zoom;
         }
 
-        for (corner = 0; corner < HOLE_TRIANGLE_VERTEX_COUNT; corner++) {
+        for (corner = 0; corner < TRIANGLE_VERTEX_COUNT; corner++) {
             if (!(g_ControllerData[EDITOR_CONTROLLER].button & Z_TRIG) ||
                 f_EditedCornerIndex == corner) {
                 Vtx_t *vertex;
@@ -1658,7 +1658,7 @@ void UpdateRingEditor(void) {
             stepZ = scaledZ * g_MapCamera.view.zoom;
         }
 
-        for (corner = 0; corner < HOLE_TRIANGLE_VERTEX_COUNT; corner++) {
+        for (corner = 0; corner < TRIANGLE_VERTEX_COUNT; corner++) {
             if (f_RingCornerIndex == corner) {
                 Vtx_t *vertex;
 
@@ -1811,8 +1811,8 @@ void UpdateRingEditor(void) {
 
 void UpdateWallEditor(void) {
     char text[DEBUG_TEXT_BUFFER_SIZE];
-    Vtx_t *corners[HOLE_TRIANGLE_VERTEX_COUNT];
-    Vtx_t *nextCorners[HOLE_TRIANGLE_VERTEX_COUNT];
+    Vtx_t *corners[TRIANGLE_VERTEX_COUNT];
+    Vtx_t *nextCorners[TRIANGLE_VERTEX_COUNT];
     Mat4 unusedMatrices[2] UNUSED;
     f32 stepRight;
     f32 stepUp;
@@ -1890,7 +1890,7 @@ void UpdateWallEditor(void) {
             stepZ = scaledZ * g_MapCamera.view.zoom;
         }
 
-        for (corner = 0; corner < HOLE_TRIANGLE_VERTEX_COUNT; corner++) {
+        for (corner = 0; corner < TRIANGLE_VERTEX_COUNT; corner++) {
             if (!(g_ControllerData[EDITOR_CONTROLLER].button & Z_TRIG) ||
                 f_WallCornerIndex == corner) {
                 Vtx_t *vertex;
@@ -1921,7 +1921,7 @@ void UpdateWallEditor(void) {
             }
         }
 
-        for (corner = 0; corner < HOLE_TRIANGLE_VERTEX_COUNT; corner++) {
+        for (corner = 0; corner < TRIANGLE_VERTEX_COUNT; corner++) {
             corners[corner] = &g_WorkArea.hole.triangles[f_WallTriangleIndex].vertices[corner].v;
             nextCorners[corner] =
                 &g_WorkArea.hole.triangles[f_WallTriangleIndex + 1].vertices[corner].v;

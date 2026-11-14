@@ -647,7 +647,7 @@ void ShrinkMiniGolfHole(void) {
         }
 
         for (index = 0; index < HOLE_TRIANGLE_COUNT; index++) {
-            for (vertexIndex = 0; vertexIndex < HOLE_TRIANGLE_VERTEX_COUNT; vertexIndex++) {
+            for (vertexIndex = 0; vertexIndex < TRIANGLE_VERTEX_COUNT; vertexIndex++) {
                 vertex = g_WorkArea.hole.triangles[index].vertices;
                 vertex[vertexIndex].v.ob[AXIS_X] *= g_MiniGolfScale[AXIS_X];
                 vertex[vertexIndex].v.ob[AXIS_Y] *= g_MiniGolfScale[AXIS_Y];

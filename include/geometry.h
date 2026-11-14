@@ -13,4 +13,6 @@ typedef f32 Vec2[PLANE_AXIS_COUNT];
 
 typedef f32 Mat4[4][4];
 
+#define TRIANGLE_VERTEX_COUNT 3
+
 #endif

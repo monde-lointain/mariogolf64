@@ -190,8 +190,6 @@ typedef struct AnimatedTexture {
     u8 height;
 } AnimatedTexture;
 
-#define TRIANGLE_VERTEX_COUNT 3
-
 typedef struct TriangleTextureKey {
     s16 frame;
     s16 textureIndex;

@@ -7,7 +7,6 @@
 #include "geometry.h"
 
 #define HOLE_TRIANGLE_COUNT 160
-#define HOLE_TRIANGLE_VERTEX_COUNT 3
 
 enum BoundEnd {
     BOUND_LOWEST,
@@ -27,7 +26,7 @@ typedef s8 HoleTriangleKind;
 
 typedef struct HoleTriangle {
     u32 kind;
-    Vtx vertices[HOLE_TRIANGLE_VERTEX_COUNT];
+    Vtx vertices[TRIANGLE_VERTEX_COUNT];
     s16 bounds[AXIS_COUNT][BOUND_END_COUNT];
     f32 ignoredCenter[AXIS_COUNT];
     s32 unusedEditorValues[3];

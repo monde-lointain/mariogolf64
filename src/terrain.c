@@ -1417,7 +1417,7 @@ void PrepareHoleTriangles(void) {
         highest[AXIS_Z] = -BEYOND_ANY_COORDINATE;
         highest[AXIS_Y] = highest[AXIS_Z];
         highest[AXIS_X] = highest[AXIS_Y];
-        for (corner = 0; corner < HOLE_TRIANGLE_VERTEX_COUNT; corner++) {
+        for (corner = 0; corner < TRIANGLE_VERTEX_COUNT; corner++) {
             vertex = &g_WorkArea.hole.triangles[triangleIndex].vertices[corner].v;
             if (vertex->ob[AXIS_X] < lowest[AXIS_X]) {
                 lowest[AXIS_X] = vertex->ob[AXIS_X];
