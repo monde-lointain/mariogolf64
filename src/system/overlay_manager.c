@@ -258,6 +258,13 @@ Boolean LoadOverlay(s32 overlayId) {
 
         overlay = &f_Overlays[overlayId];
         moduleIds = overlay->moduleIds;
+#ifdef AVOID_UB
+        // Display lists queued in earlier frames may still read textures and
+        // vertices in the memory the overlay replaces. The original relies on
+        // CanLoadOverlay's RDP_REQUEST_FRAMES_IN_USE, which most modules
+        // don't record and which the queue of tasks can outlast.
+        nuGfxTaskAllEndWait();
+#endif
         osWritebackDCacheAll();
         nuPiReadRom(overlay->romStart, overlay->vramStart, overlay->romEnd - overlay->romStart);
         bzero(overlay->bssStart, overlay->bssEnd - overlay->bssStart);
@@ -297,6 +304,11 @@ void UnloadOverlay(s32 overlayId) {
     overlayId = GetOverlayIndex(overlayId);
     overlay = &f_Overlays[overlayId];
     if (overlay->isLoaded) {
+#ifdef AVOID_UB
+        // The hook frees memory that display lists queued in earlier frames
+        // may still read, and the heap can hand it out again at once
+        nuGfxTaskAllEndWait();
+#endif
         if (overlay->onUnload != NULL) {
             overlay->onUnload();
         }
