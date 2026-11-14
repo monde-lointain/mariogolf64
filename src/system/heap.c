@@ -13,9 +13,6 @@
 #include "system/c_language.h"
 #include "system/memory_address.h"
 
-// Heaps, numbered from 0, besides the main memory's
-#define HEAP_COUNT 3
-
 // Copies $ra, for the messages that name the caller of a failed call
 #define GET_RETURN_ADDRESS(variable) __asm__ volatile("addu %0, $31, $0" : "=r"(variable))
 
@@ -76,7 +73,7 @@ static u32 f_FreeMemorySize;
 static u32 f_LargestFreeMemorySize; // As the last allocation measured
 
 // Gives the memory from start to end to the heap as a free block
-void AddHeapRegion(s32 heapIndex, void *start, void *end) {
+void AddHeapRegion(HeapIndex heapIndex, void *start, void *end) {
     MemoryBlock *block = start;
     u32 size = BytesBetween(start, end);
 
@@ -90,7 +87,7 @@ void AddHeapRegion(s32 heapIndex, void *start, void *end) {
 }
 
 // Empties the heap of all its blocks, so that it needs regions added again
-void ResetHeap(s32 heapIndex) {
+void ResetHeap(HeapIndex heapIndex) {
     Heap *heap = &f_Heaps[heapIndex];
 
     f_Heaps[heapIndex].freeSize = 0;
@@ -101,17 +98,17 @@ void ResetHeap(s32 heapIndex) {
     f_Heaps[heapIndex].largestFreeSize = UNMEASURED_SIZE;
 }
 
-s32 GetHeapFreeSize(s32 heapIndex) {
+s32 GetHeapFreeSize(HeapIndex heapIndex) {
     return f_Heaps[heapIndex].freeSize;
 }
 
-s32 GetHeapLargestFreeSize(s32 heapIndex) {
+s32 GetHeapLargestFreeSize(HeapIndex heapIndex) {
     return f_Heaps[heapIndex].largestFreeSize;
 }
 
 // Allocates size bytes from the smallest free block of the heap that fits,
 // and returns NULL if none does
-void *AllocFromHeap(s32 heapIndex, u32 size) {
+void *AllocFromHeap(HeapIndex heapIndex, u32 size) {
     u32 callerAddress;
     u32 largestFreeSize;
     Heap *heap;
@@ -186,7 +183,7 @@ void *AllocFromHeap(s32 heapIndex, u32 size) {
 }
 
 // Frees the block that *pointerToBlock points to and clears the pointer
-void FreeFromHeap(s32 heapIndex, void *pointerToBlock) {
+void FreeFromHeap(HeapIndex heapIndex, void *pointerToBlock) {
     void *pointer;
     s32 mask;
     MemoryBlock *block;

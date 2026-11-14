@@ -51,8 +51,7 @@
 // Slow afterimages fade by one on every this many frames
 #define AFTERIMAGE_SLOW_FADE_PERIOD 3
 
-// The heap that the ball images are loaded into, and its size
-#define HEAP_BALL_IMAGES 2
+// The size of HEAP_BALL_IMAGES, which the ball images are loaded into
 #define BALL_IMAGE_HEAP_SIZE 0x1800
 
 // The ball images' assets

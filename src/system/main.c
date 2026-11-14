@@ -308,7 +308,7 @@ void mainproc(void *arg UNUSED) {
     nuGfxInitEX2();
     g_FrameCount = 0;
     InitHeapRegions(g_HasExpansionPak);
-    ResetHeap(1);
+    ResetHeap(HEAP_BILLBOARD);
     InitAssetFiles();
     ClearAllGameFlags();
     InitOverlayManager();
