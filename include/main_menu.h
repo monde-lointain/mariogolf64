@@ -56,15 +56,22 @@ extern LabelGrowthDirection g_ChosenLabelGrowthDirection;
 extern ImageAsset *g_NamePlateImage;
 extern s32 g_ChosenPlayerCount;
 
-#define MENU_PHASE_START 0
-#define MENU_PHASE_CHOOSING 5
-#define MENU_PHASE_CANCELED 6
-#define MENU_PHASE_CONFIRMED 7
-#define BET_PHASE_OPENING 1
-#define BET_PHASE_CHOOSING 2
-#define BET_PHASE_CANCELED 3
-#define BET_PHASE_CONFIRMED 4
-extern u8 g_BetPagesPhase;
+// The bet pages' phases: the BET phases choose the bet settings, and the
+// later MENU phases choose the handicaps that follow them.
+enum BetPagesPhase {
+    MENU_PHASE_START,
+    BET_PHASE_OPENING,
+    BET_PHASE_CHOOSING,
+    BET_PHASE_CANCELED,
+    BET_PHASE_CONFIRMED,
+    MENU_PHASE_CHOOSING,
+    MENU_PHASE_CANCELED,
+    MENU_PHASE_CONFIRMED
+};
+
+typedef u8 UBetPagesPhase8;
+
+extern UBetPagesPhase8 g_BetPagesPhase;
 extern u8 g_BetPagesWallSlide;
 extern s32 g_AnimatedIconFrame;
 extern u8 g_AnimatedIconBufferIndex;
