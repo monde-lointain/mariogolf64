@@ -73,16 +73,16 @@ f32 Length3D(f32 x, f32 y, f32 z) {
     return sqrtf((x * x) + (y * y) + (z * z));
 }
 
-u16 ComputeCrc16(u8 *data, u32 size) {
+u16 ComputeCrc16(u8 *bytes, u32 size) {
     u32 crc;
     u32 bitIndex;
     u8 *end;
 
     crc = CRC16_INITIAL_VALUE;
     if (size != 0) {
-        end = (u8 *)(size + (u32)data);
+        end = (u8 *)(size + (u32)bytes);
         do {
-            crc ^= *data;
+            crc ^= *bytes;
             for (bitIndex = 0; bitIndex < 8; bitIndex++) {
                 if (crc & 1) {
                     crc = (crc >> 1) ^ CRC16_REFLECTED_POLYNOMIAL;
@@ -92,9 +92,9 @@ u16 ComputeCrc16(u8 *data, u32 size) {
                 }
             }
 
-            data++;
+            bytes++;
         }
-        while (data < end);
+        while (bytes < end);
     }
 
     crc = ~crc;
