@@ -13,38 +13,40 @@
 #include "scoring.h"
 #include "tournament.h"
 
-#define SAVED_COUNT_MAX 99
+#define MATCHUP_RESULT_COUNT_MAX 99
 
 #define PLACE_UNPLACED 4
 
 void RecordComCharacterResult(s32 row, s32 column, Boolean isWin) {
     Awards *awards;
-    u8 count;
-    s32 value;
+    u8 winCount;
+    s32 winBits;
+    // The new win bits or loss count. Giving each its own variable
+    // breaks the match.
     s32 tally;
 
     awards = &GetSaveData()->records.awards;
     if (isWin) {
-        value = awards->matchups[row][column].winBits;
-        count = value & WIN_COUNT_MASK;
-        if (count < SAVED_COUNT_MAX) {
-            count++;
+        winBits = awards->matchups[row][column].winBits;
+        winCount = winBits & WIN_COUNT_MASK;
+        if (winCount < MATCHUP_RESULT_COUNT_MAX) {
+            winCount++;
         }
 
-        tally = count | (value & WON_UNSAVED_FLAG);
-        value = tally;
+        tally = winCount | (winBits & WON_UNSAVED_FLAG);
+        winBits = tally;
         if (g_GameState.saveCount == 0) {
-            value |= WON_UNSAVED_FLAG;
+            winBits |= WON_UNSAVED_FLAG;
         }
 
-        awards->matchups[row][column].winBits = value;
-        osSyncPrintf("Win Com Chara[%d]\n", value);
+        awards->matchups[row][column].winBits = winBits;
+        osSyncPrintf("Win Com Chara[%d]\n", winBits);
     }
     else {
         tally = awards->matchups[row][column].lossCount + 1;
         awards->matchups[row][column].lossCount = tally;
-        if (awards->matchups[row][column].lossCount > SAVED_COUNT_MAX) {
-            awards->matchups[row][column].lossCount = SAVED_COUNT_MAX;
+        if (awards->matchups[row][column].lossCount > MATCHUP_RESULT_COUNT_MAX) {
+            awards->matchups[row][column].lossCount = MATCHUP_RESULT_COUNT_MAX;
         }
     }
 
@@ -58,9 +60,9 @@ void AddBirdieBadge(void) {
     if (g_GameState.gameMode == GAME_MODE_TOURNAMENT) {
         awards->birdieBadgeCounts[g_GameState.courseIndex][g_GameState.holeIndex]++;
         if (awards->birdieBadgeCounts[g_GameState.courseIndex][g_GameState.holeIndex] >
-            SAVED_COUNT_MAX) {
+            MATCHUP_RESULT_COUNT_MAX) {
             awards->birdieBadgeCounts[g_GameState.courseIndex][g_GameState.holeIndex] =
-                SAVED_COUNT_MAX;
+                MATCHUP_RESULT_COUNT_MAX;
         }
 
         TransferSaveData(GetSaveData(), TRUE);
