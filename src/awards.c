@@ -1,4 +1,4 @@
-#include "progress.h"
+#include "awards.h"
 
 #include <ultra64.h>
 

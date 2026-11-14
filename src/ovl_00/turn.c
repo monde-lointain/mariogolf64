@@ -8,6 +8,7 @@
 
 #include "address.h"
 #include "asset.h"
+#include "awards.h"
 #include "ball_simulation.h"
 #include "camera.h"
 #include "character.h"
@@ -47,7 +48,6 @@
 #include "play.h"
 #include "play_record.h"
 #include "player.h"
-#include "progress.h"
 #include "reaction.h"
 #include "round_events.h"
 #include "round_hud.h"

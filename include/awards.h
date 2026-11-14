@@ -1,5 +1,5 @@
-#ifndef PROGRESS_H
-#define PROGRESS_H
+#ifndef AWARDS_H
+#define AWARDS_H
 
 #include <ultra64.h>
 

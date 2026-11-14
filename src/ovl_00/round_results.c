@@ -4,6 +4,7 @@
 
 #include "address.h"
 #include "asset.h"
+#include "awards.h"
 #include "bets.h"
 #include "character.h"
 #include "compiler.h"
@@ -23,7 +24,6 @@
 #include "menu.h"
 #include "password.h"
 #include "player.h"
-#include "progress.h"
 #include "round_hud.h"
 #include "round_stats.h"
 #include "save.h"

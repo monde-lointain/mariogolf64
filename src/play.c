@@ -6,6 +6,7 @@
 #include <ultra64.h>
 
 #include "address.h"
+#include "awards.h"
 #include "ball_simulation.h"
 #include "camera.h"
 #include "character.h"
@@ -39,7 +40,6 @@
 #include "pause_menu.h"
 #include "play_record.h"
 #include "player.h"
-#include "progress.h"
 #include "round_events.h"
 #include "round_hud.h"
 #include "round_results.h"
