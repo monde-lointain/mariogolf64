@@ -2256,7 +2256,6 @@ void PlaceFlightCamera(s32 step) {
     ((distance) >= CUP_LANDING_DISTANCE_MIN && (distance) <= CUP_LANDING_DISTANCE_MAX)
 #define IsEndingNearCup() \
     (g_SimulatedShot.endsInCup || f_LandingCupDistance < NEAR_CUP_DISTANCE_MAX)
-#define DEBUG_CAMERA_CONTROLLER 1
 // Flight lengths, in simulation steps, that change which camera is picked.
 #define LONG_FLIGHT_STEP_COUNT 120
 #define BESIDE_GOLFER_FLIGHT_STEPS_MIN 61
@@ -2608,11 +2607,11 @@ void ChooseFlightCameraKind(void) {
     }
 
     if (g_IsDebugEnabled) {
-        if (g_ControllerStates[DEBUG_CAMERA_CONTROLLER].buttons & B_BUTTON) {
+        if (g_ControllerStates[DEBUG_CONTROLLER].buttons & B_BUTTON) {
             f_FlightCameraKind = FLIGHT_CAMERA_BESIDE_GOLFER;
         }
 
-        if (g_ControllerStates[DEBUG_CAMERA_CONTROLLER].buttons & A_BUTTON) {
+        if (g_ControllerStates[DEBUG_CONTROLLER].buttons & A_BUTTON) {
             f_FlightCameraKind = FLIGHT_CAMERA_CIRCLING_BALL;
         }
     }

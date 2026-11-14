@@ -75,7 +75,6 @@
 
 // The frame step pause and screen tests read the second controller, and the
 // inset view test the fourth as well; the debug menu reads the first.
-#define DEBUG_CONTROLLER 1
 #define SECOND_INSET_TEST_CONTROLLER 3
 #define DEBUG_MENU_CONTROLLER 0
 #define SCREEN_TEST_FADE_STEP 8

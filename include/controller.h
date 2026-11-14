@@ -15,6 +15,9 @@
 #define OPTION_CONTROLLER 1
 #define SECOND_EDITOR_CONTROLLER 2
 
+// Most debug displays and tests read their controls from the second port.
+#define DEBUG_CONTROLLER 1
+
 typedef struct ControllerState {
     u16 buttons;
     u16 heldButtons;

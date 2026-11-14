@@ -24,7 +24,6 @@
 #include "text.h"
 
 #define GAME_FLAG_CLUB_PANEL_DEBUG 0x6E
-#define DEBUG_CONTROLLER 1
 #define DEBUG_VALUE_COLUMN 20
 #define DEBUG_VALUE_ROW 5
 

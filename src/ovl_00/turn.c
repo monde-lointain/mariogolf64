@@ -75,7 +75,6 @@
 // The aim tilt test and shot preview tuning read the first controller;
 // moving the ball and turning the debug framing read the second.
 #define TEST_CONTROLLER 0
-#define DEBUG_CONTROLLER 1
 #define DEBUG_AIM_TILT_STEP 1.0f
 #define DEBUG_FRAMING_TURN_PER_STICK 0.002f
 // The ball moves faster the further the stick leans.
