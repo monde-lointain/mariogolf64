@@ -324,7 +324,7 @@ void DrawRings(Gfx **displayListHead, CameraMatrices *matrices UNUSED, Camera *c
     Mat4 transform;
     Vec3 ringPoint;
     Vec3 worldPoint;
-    s32 position[3];
+    s32 position[AXIS_COUNT];
     s32 triangleIndex;
     s32 red;
     s32 green;

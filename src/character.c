@@ -1751,9 +1751,9 @@ void ResetCharacterSlots(void) {
 }
 
 void SetCharacterLights(void) {
-    u8 ambientColor[3];
-    u8 lightColor[3];
-    s8 lightDirection[3];
+    u8 ambientColor[RGB_CHANNEL_COUNT];
+    u8 lightColor[RGB_CHANNEL_COUNT];
+    s8 lightDirection[AXIS_COUNT];
     Radians lightPitch;
     Radians lightYaw;
 
@@ -2004,7 +2004,7 @@ void DrawCharacterAndShadow(CameraMatrices *matrices, s32 cameraIndex, s32 slotI
     Vec3 shadowPoint;
     f32 corners[TRIANGLE_CORNER_COUNT][3];
     Vec3 viewDirection;
-    s32 lightDirection[3];
+    s32 lightDirection[AXIS_COUNT];
     Mat4 transform;
     Mat4 rotation;
     Mat4 translation;

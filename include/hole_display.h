@@ -5,6 +5,7 @@
 
 #include "asset.h"
 #include "camera.h"
+#include "gbi_helpers.h"
 #include "language.h"
 #include "math_util.h"
 
@@ -44,7 +45,7 @@ enum HudAnimation {
 typedef s32 HudAnimation;
 
 typedef struct Fog {
-    s32 color[3];
+    s32 color[RGB_CHANNEL_COUNT];
     s32 near;
     s32 far;
 } Fog;
@@ -57,13 +58,13 @@ extern Fog g_DebugFog;
 
 typedef struct SkyColors {
     s32 addsNoise;
-    u8 topColor[3];
-    u8 horizonColor[3];
-    u8 noiseColor[3];
+    u8 topColor[RGB_CHANNEL_COUNT];
+    u8 horizonColor[RGB_CHANNEL_COUNT];
+    u8 noiseColor[RGB_CHANNEL_COUNT];
     u8 backgroundColor[SKY_BACKGROUND_CHANNEL_COUNT];
     UBoolean8 hasLensFlare;
     struct Sun *sun;
-    u8 fogColor[3];
+    u8 fogColor[RGB_CHANNEL_COUNT];
     s16 fogNear;
     s16 fogFar;
 } SkyColors;
@@ -84,8 +85,8 @@ typedef u8 SkyImageKind;
 typedef struct Sun {
     u8 unusedBeforeHeight[4];
     s32 height;
-    u8 primColor[3];
-    u8 envColor[3];
+    u8 primColor[RGB_CHANNEL_COUNT];
+    u8 envColor[RGB_CHANNEL_COUNT];
     s32 radius;
     s16 unusedBeforeTexelStep;
     s16 texelStep;

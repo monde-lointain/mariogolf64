@@ -26,7 +26,7 @@ static Gfx f_RspInitList[] = {
     gsSPEndDisplayList(),
 };
 
-static s32 f_FillColor[3] = {0};
+static s32 f_FillColor[RGB_CHANNEL_COUNT] = {0};
 
 void AppendRcpInit(s32 viewportIndex, Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;

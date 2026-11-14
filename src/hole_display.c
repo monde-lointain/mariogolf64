@@ -165,8 +165,8 @@ void DrawSliceAnimation(void);
 #define LENS_FLARE_COUNT 8
 
 typedef struct LensFlare {
-    u8 color[3];
-    u8 envColor[3];
+    u8 color[RGB_CHANNEL_COUNT];
+    u8 envColor[RGB_CHANNEL_COUNT];
     s32 size;
     s32 ignoredScaleValue;
     f32 position;

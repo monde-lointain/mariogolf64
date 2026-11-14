@@ -4130,7 +4130,7 @@ void UpdateTurns(void) {
                 }
             case PLAYER_STATE_BALL_IN_FLIGHT: {
                 Boolean isCameraDone;
-                s32 previousPosition[3];
+                s32 previousPosition[AXIS_COUNT];
 
                 if (f_StateEventFrame + SWING_TRAIL_FADE_DELAY == f_StateFrameCounts[playerIndex]) {
                     StartSwingTrail(SWING_TRAIL_KIND_FADE);

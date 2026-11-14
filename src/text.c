@@ -2912,8 +2912,8 @@ void DrawLargeTextWithShadow(
     TextFlags flags
 ) {
     Gfx *gfx = *displayListHead;
-    u8 env[3];
-    u8 prim[3];
+    u8 env[RGB_CHANNEL_COUNT];
+    u8 prim[RGB_CHANNEL_COUNT];
 
     env[0] = envColor >> 24;
     env[1] = envColor >> 16;

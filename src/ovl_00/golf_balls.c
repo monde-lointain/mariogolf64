@@ -381,7 +381,7 @@ static u8 f_BallImageHeap[BALL_IMAGE_HEAP_SIZE];
 static u16 f_PikaBallTexture[PIKA_TEXTURE_WIDTH * PIKA_TEXTURE_HEIGHT / 4];
 static Mat4 f_BallRotation;
 static s32 f_UnusedGolfBallResetValue;
-static s32 f_LastRolledBallPosition[3];
+static s32 f_LastRolledBallPosition[AXIS_COUNT];
 
 void DrawPikaBallTexture(void) {
     DrawTextIntoTexture(PIKA_BALL_TEXT, ARRAY_COUNT(PIKA_BALL_TEXT) - 1, f_PikaBallTexture);
@@ -415,7 +415,7 @@ void LoadGolfBallImages(void) {
 
 void RollGolfBall(GolfBall *ball UNUSED, BallSimulation *simulation) {
     Mat4 rotation;
-    s32 movement[3];
+    s32 movement[AXIS_COUNT];
     f32 distance;
 
     f32 GetLength(f32 x, f32 y, f32 z) {

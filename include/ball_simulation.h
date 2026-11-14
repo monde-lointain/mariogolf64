@@ -135,10 +135,10 @@ typedef s8 LaunchPurpose8;
     ((purpose) == LAUNCH_PURPOSE_STROKE || (purpose) == LAUNCH_PURPOSE_TRIAL)
 
 typedef struct BallSimulation {
-    s32 startPosition[3];
-    s32 dropPosition[3];
-    s32 position[3];
-    s32 velocity[3];
+    s32 startPosition[AXIS_COUNT];
+    s32 dropPosition[AXIS_COUNT];
+    s32 position[AXIS_COUNT];
+    s32 velocity[AXIS_COUNT];
     s32 unusedResetValue;
     s32 spinSpeed;
     s32 sideSpin;

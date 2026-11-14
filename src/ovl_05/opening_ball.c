@@ -1023,7 +1023,7 @@ StepFlags StepOpeningBallSimulation(BallSimulation *simulation) {
         if (contact == STEP_FLAG_HOLE_TRIANGLE_HIT &&
             (simulation->state == BALL_STATE_FLYING || simulation->state == BALL_STATE_ROLLING)) {
             TrianglePlane plane;
-            s32 bounced[3];
+            s32 bounced[AXIS_COUNT];
             BallSpeed impactSpeed;
             f32 steepness;
             s32 speed;
@@ -1323,7 +1323,7 @@ StepFlags StepOpeningBallSimulation(BallSimulation *simulation) {
             }
             else {
                 f32 keptFraction = 1.0f - spin;
-                s32 bounced[3];
+                s32 bounced[AXIS_COUNT];
                 f32 push;
                 s32 spinVelocityX;
                 s32 spinVelocityZ;

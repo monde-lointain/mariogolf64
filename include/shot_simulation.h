@@ -11,15 +11,15 @@
 #define NO_STEP (-1)
 
 typedef struct SimulatedShot {
-    s32 startPosition[3];
-    s32 endPosition[3];
+    s32 startPosition[AXIS_COUNT];
+    s32 endPosition[AXIS_COUNT];
     s32 path[PATH_STEP_COUNT][3];
     StepFlags8 pathFlags[PATH_STEP_COUNT];
     s32 stepCount;
-    s32 positionMax[3];
-    s32 positionStepMax[3];
-    s32 positionMin[3];
-    s32 positionStepMin[3];
+    s32 positionMax[AXIS_COUNT];
+    s32 positionStepMax[AXIS_COUNT];
+    s32 positionMin[AXIS_COUNT];
+    s32 positionStepMin[AXIS_COUNT];
     Boolean isFirstBounceOut;
     Boolean endsOnGreen;
     Boolean startsOnGreen;
