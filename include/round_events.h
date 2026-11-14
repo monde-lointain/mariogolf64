@@ -8,7 +8,12 @@
 #include "player.h"
 #include "text.h"
 
-#define FLY_GUY_HIDDEN (-1)
+enum FlyGuyVisibility {
+    FLY_GUY_HIDDEN = -1,
+    FLY_GUY_SHOWN = 1
+};
+
+typedef s32 FlyGuyVisibility;
 
 enum ContactEffect {
     CONTACT_EFFECT_NONE = -1,
@@ -74,7 +79,7 @@ typedef s32 ContactStyle;
 extern s32 g_ContactEffectAge;
 
 void StartBanner(s32 banner);
-void ShowWindFlyGuy(s32 show);
+void ShowWindFlyGuy(FlyGuyVisibility show);
 ContactStyle GetContactStyle(Player *player);
 void LoadContactImages(Player *player);
 Boolean IsContactEffectShown(void);

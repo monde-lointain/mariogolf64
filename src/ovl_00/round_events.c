@@ -3434,7 +3434,11 @@ void DrawContactEffect(Gfx **displayListHead, CameraMatrices *matrices) {
     *displayListHead = gfx;
 }
 
-void ShowWindFlyGuy(s32 show) {
+#define WIND_FLY_GUY_STARTING 0
+#define WIND_FLY_GUY_FLYING 1
+#define WIND_FLY_GUY_ARRIVED 2
+
+void ShowWindFlyGuy(FlyGuyVisibility show) {
     EncodedAsset asset;
 
     if (f_IsMovieBufferAllocated == TRUE) {
@@ -3443,7 +3447,7 @@ void ShowWindFlyGuy(s32 show) {
             return;
         }
 
-        f_WindFlyGuyFrame = 0;
+        f_WindFlyGuyFrame = WIND_FLY_GUY_STARTING;
         f_WindFlyGuyAsset = ASSET_FLY_GUY_IMAGE;
         OpenEncodedAsset(ASSET_FLY_GUY_IMAGE, &asset);
         ReadEncodedAsset(f_MovieBuffer, &asset);
@@ -3458,9 +3462,6 @@ void ShowWindFlyGuy(s32 show) {
 #define WIND_FLY_GUY_PATH_POINT_COUNT 17
 #define WIND_FLY_GUY_PATH_PACE PathPace(1, 2)
 #define WIND_FLY_GUY_FRAME_COUNT 14
-#define WIND_FLY_GUY_STARTING 0
-#define WIND_FLY_GUY_FLYING 1
-#define WIND_FLY_GUY_ARRIVED 2
 #define WIND_FLY_GUY_GONE_FRAME 20
 #define WIND_STREAK_ALPHA 190
 #define WIND_STREAK_FADE_STEP 10

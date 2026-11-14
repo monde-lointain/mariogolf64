@@ -1467,7 +1467,7 @@ void StopHoleFlyover(void) {
     if (g_GameState.gameMode != GAME_MODE_SPEED_GOLF && !g_GameState.isMiniGolf) {
         if (IsGameFlagSet(GAME_FLAG_FORCE_FLOURISHES) ||
             g_HoleSetup.conditions.windSpeed / WIND_SPEED_UNIT >= STRONG_WIND_SPEED) {
-            ShowWindFlyGuy(TRUE);
+            ShowWindFlyGuy(FLY_GUY_SHOWN);
         }
     }
 }
