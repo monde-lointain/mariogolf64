@@ -52,7 +52,6 @@
 
 #define PIKA_TEXTURE_WIDTH 32
 #define PIKA_TEXTURE_HEIGHT 8
-#define PIKA_BALL_TEXT "PIKA"
 
 #define BOO_TEXTURE_WIDTH 48
 #define BOO_TEXTURE_HEIGHT 42
@@ -384,7 +383,7 @@ static s32 f_UnusedGolfBallResetValue;
 static s32 f_LastRolledBallPosition[AXIS_COUNT];
 
 void DrawPikaBallTexture(void) {
-    DrawTextIntoTexture(PIKA_BALL_TEXT, ARRAY_COUNT(PIKA_BALL_TEXT) - 1, f_PikaBallTexture);
+    DrawTextIntoTexture("PIKA", PIKA_TEXTURE_WIDTH / DEBUG_GLYPH_SIZE, f_PikaBallTexture);
 }
 
 void LoadGolfBallImages(void) {
