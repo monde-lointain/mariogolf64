@@ -408,7 +408,7 @@ HAS_DIRECTION:
 void UpdateMenuController(
     NUContData *controllerData,
     NUContData *previousMenuControllerData UNUSED,
-    s32 portIndex
+    s32 playerIndex
 ) {
     s32 ApplyStickDeadZone(s32 stick) {
         s32 magnitude = Abs(stick);
@@ -424,36 +424,36 @@ void UpdateMenuController(
         return (stick < 0) ? -magnitude : magnitude;
     }
 
-    s32 repeatDelay = g_MenuRepeatStates[portIndex].repeatDelay;
-    NUContData *menuControllerData = &g_MenuControllerData[portIndex];
+    s32 repeatDelay = g_MenuRepeatStates[playerIndex].repeatDelay;
+    NUContData *menuControllerData = &g_MenuControllerData[playerIndex];
 
     menuControllerData->stick_x = ApplyStickDeadZone(controllerData->stick_x);
     menuControllerData->stick_y = ApplyStickDeadZone(controllerData->stick_y);
-    g_MenuRepeatStates[portIndex].stickDirectionX = GetStickDirection(
+    g_MenuRepeatStates[playerIndex].stickDirectionX = GetStickDirection(
         controllerData->stick_x,
-        g_MenuRepeatStates[portIndex].stickDirectionX,
+        g_MenuRepeatStates[playerIndex].stickDirectionX,
         STICK_PRESS_THRESHOLD,
         STICK_RELEASE_THRESHOLD
     );
-    g_MenuRepeatStates[portIndex].stickDirectionY = GetStickDirection(
+    g_MenuRepeatStates[playerIndex].stickDirectionY = GetStickDirection(
         controllerData->stick_y,
-        g_MenuRepeatStates[portIndex].stickDirectionY,
+        g_MenuRepeatStates[playerIndex].stickDirectionY,
         STICK_PRESS_THRESHOLD,
         STICK_RELEASE_THRESHOLD
     );
 
     menuControllerData->button = controllerData->button;
-    if (g_MenuRepeatStates[portIndex].stickDirectionX == 1) {
+    if (g_MenuRepeatStates[playerIndex].stickDirectionX == 1) {
         menuControllerData->button |= R_JPAD;
     }
-    else if (g_MenuRepeatStates[portIndex].stickDirectionX == -1) {
+    else if (g_MenuRepeatStates[playerIndex].stickDirectionX == -1) {
         menuControllerData->button |= L_JPAD;
     }
 
-    if (g_MenuRepeatStates[portIndex].stickDirectionY == 1) {
+    if (g_MenuRepeatStates[playerIndex].stickDirectionY == 1) {
         menuControllerData->button |= U_JPAD;
     }
-    else if (g_MenuRepeatStates[portIndex].stickDirectionY == -1) {
+    else if (g_MenuRepeatStates[playerIndex].stickDirectionY == -1) {
         menuControllerData->button |= D_JPAD;
     }
 
@@ -461,8 +461,8 @@ void UpdateMenuController(
 
     // While the buttons stay the same, report them only when the delay runs
     // out, which is shorter after the first time
-    if (menuControllerData->button == g_MenuRepeatStates[portIndex].previousButtons) {
-        g_MenuRepeatStates[portIndex].previousButtons = menuControllerData->button;
+    if (menuControllerData->button == g_MenuRepeatStates[playerIndex].previousButtons) {
+        g_MenuRepeatStates[playerIndex].previousButtons = menuControllerData->button;
         if (repeatDelay > BUTTON_REPEAT_DELAY_FIRST) {
             repeatDelay = BUTTON_REPEAT_DELAY_FIRST;
         }
@@ -476,11 +476,11 @@ void UpdateMenuController(
         }
     }
     else {
-        g_MenuRepeatStates[portIndex].previousButtons = menuControllerData->button;
+        g_MenuRepeatStates[playerIndex].previousButtons = menuControllerData->button;
         repeatDelay = BUTTON_REPEAT_DELAY_FIRST;
     }
 
-    g_MenuRepeatStates[portIndex].repeatDelay = repeatDelay;
+    g_MenuRepeatStates[playerIndex].repeatDelay = repeatDelay;
 }
 
 // Reads the game's view of a controller, as UpdateMenuController does but
