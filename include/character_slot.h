@@ -164,6 +164,8 @@ typedef u8 AnimationEventKind8;
 typedef struct AnimationEvent {
     s16 frame;
     AnimationEventKind8 kind;
+    // For ANIMATION_EVENT_TEXTURE_ANIMATION, a TextureAnimationEvent or a
+    // texture animation to play.
     u8 value;
 } AnimationEvent;
 
