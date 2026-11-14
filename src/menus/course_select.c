@@ -1,12 +1,12 @@
-#include "course_select.h"
+#include "menus/course_select.h"
 
 #include <ultra64.h>
 
 #include "audio/sound.h"
 #include "course/course.h"
 #include "game_flags.h"
-#include "menu.h"
-#include "menu_memory.h"
+#include "menus/menu.h"
+#include "menus/menu_memory.h"
 #include "round/game_state.h"
 #include "round/scoring.h"
 #include "save/save.h"

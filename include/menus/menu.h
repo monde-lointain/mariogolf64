@@ -5,7 +5,7 @@
 
 #include "characters/character.h"
 #include "course/course.h"
-#include "password.h"
+#include "menus/password.h"
 #include "round/player.h"
 #include "save/play_record.h"
 #include "system/asset.h"

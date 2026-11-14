@@ -1,4 +1,4 @@
-#include "transmit_menu.h"
+#include "menus/transmit_menu.h"
 
 #include <string.h>
 #include <ultra64.h>
@@ -9,11 +9,11 @@
 #include "controllers/transfer_pak.h"
 #include "course/course.h"
 #include "course/course_space.h"
-#include "cursor_box.h"
 #include "debug_text.h"
 #include "game_flags.h"
 #include "math/math_util.h"
-#include "menu.h"
+#include "menus/cursor_box.h"
+#include "menus/menu.h"
 #include "save/course_stats.h"
 #include "save/save.h"
 #include "scene.h"

@@ -1,4 +1,4 @@
-#include "password.h"
+#include "menus/password.h"
 
 #include <stdlib.h>
 #include <ultra64.h>

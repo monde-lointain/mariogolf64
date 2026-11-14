@@ -1,11 +1,11 @@
-#include "unlocks.h"
+#include "menus/unlocks.h"
 
 #include <ultra64.h>
 
 #include "audio/sound.h"
 #include "characters/character.h"
 #include "course/course.h"
-#include "menu.h"
+#include "menus/menu.h"
 #include "save/course_stats.h"
 #include "save/save.h"
 #include "save/sram.h"

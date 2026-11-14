@@ -5,7 +5,9 @@
 
 #include "boot_logos.h"
 #include "game_flags.h"
-#include "menu.h"
+#include "menus/menu.h"
+#include "menus/title_screen.h"
+#include "menus/transmit_menu.h"
 #include "opening.h"
 #include "opening_camera_editor.h"
 #include "round/round_hud.h"
@@ -15,8 +17,6 @@
 #include "system/compiler.h"
 #include "system/main.h"
 #include "system/segment_symbols.h"
-#include "title_screen.h"
-#include "transmit_menu.h"
 
 #define RDP_REQUEST_FRAME_NEVER 0x80000000
 

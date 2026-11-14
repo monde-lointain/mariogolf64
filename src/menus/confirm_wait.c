@@ -1,4 +1,4 @@
-#include "confirm_wait.h"
+#include "menus/confirm_wait.h"
 
 #include <ultra64.h>
 

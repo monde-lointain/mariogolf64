@@ -1,4 +1,4 @@
-#include "cursor_box.h"
+#include "menus/cursor_box.h"
 
 #include <ultra64.h>
 

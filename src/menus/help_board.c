@@ -1,4 +1,4 @@
-#include "help_board.h"
+#include "menus/help_board.h"
 
 #include <nusys.h>
 #include <ultra64.h>
@@ -6,10 +6,10 @@
 #include "audio/sound.h"
 #include "characters/character_model.h"
 #include "course/hole_loader.h"
-#include "main_menu.h"
 #include "math/math_util.h"
-#include "menu.h"
-#include "menu_memory.h"
+#include "menus/main_menu.h"
+#include "menus/menu.h"
+#include "menus/menu_memory.h"
 #include "screen/display_list.h"
 #include "screen/screen.h"
 #include "screen/sky_and_hud_animations.h"

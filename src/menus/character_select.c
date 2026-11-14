@@ -1,4 +1,4 @@
-#include "character_select.h"
+#include "menus/character_select.h"
 
 #include <stdlib.h>
 #include <ultra64.h>
@@ -11,9 +11,9 @@
 #include "debug_text.h"
 #include "game.h"
 #include "game_flags.h"
-#include "main_menu.h"
-#include "menu.h"
-#include "menu_memory.h"
+#include "menus/main_menu.h"
+#include "menus/menu.h"
+#include "menus/menu_memory.h"
 #include "round/game_state.h"
 #include "round/player.h"
 #include "screen/display_list.h"

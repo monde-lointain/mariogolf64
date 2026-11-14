@@ -1,4 +1,4 @@
-#include "menu.h"
+#include "menus/menu.h"
 
 #include <framebuffer_count.h>
 #include <nusys.h>
@@ -13,10 +13,10 @@
 #include "course/course_space.h"
 #include "course/hole_setup.h"
 #include "game_flags.h"
-#include "main_menu.h"
 #include "math/math_util.h"
-#include "menu_memory.h"
-#include "password.h"
+#include "menus/main_menu.h"
+#include "menus/menu_memory.h"
+#include "menus/password.h"
 #include "round/game_state.h"
 #include "round/player.h"
 #include "round/round_stats.h"

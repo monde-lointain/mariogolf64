@@ -1,4 +1,4 @@
-#include "character_table.h"
+#include "menus/character_table.h"
 
 #include <ultra64.h>
 
@@ -6,14 +6,14 @@
 
 #include "audio/sound.h"
 #include "characters/character.h"
-#include "main_menu.h"
-#include "menu.h"
-#include "menu_arrows.h"
-#include "menu_memory.h"
-#include "menu_number.h"
-#include "player_stats.h"
+#include "menus/main_menu.h"
+#include "menus/menu.h"
+#include "menus/menu_arrows.h"
+#include "menus/menu_memory.h"
+#include "menus/menu_number.h"
+#include "menus/player_stats.h"
+#include "menus/save_screens.h"
 #include "save/save.h"
-#include "save_screens.h"
 #include "screen/display_list.h"
 #include "screen/screen.h"
 #include "screen/sky_and_hud_animations.h"

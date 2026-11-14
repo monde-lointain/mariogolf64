@@ -1,4 +1,4 @@
-#include "main_menu.h"
+#include "menus/main_menu.h"
 
 #include <PR/libmus.h>
 #include <stdlib.h>
@@ -9,11 +9,8 @@
 #define WIDENS_CHOSEN_BEST_SHOT
 
 #include "audio/sound.h"
-#include "best_times.h"
 #include "camera/camera.h"
 #include "camera/view_projection.h"
-#include "character_select.h"
-#include "character_table.h"
 #include "characters/character.h"
 #include "characters/character_model.h"
 #include "controllers/controller.h"
@@ -23,19 +20,24 @@
 #include "course/hole_conditions.h"
 #include "course/hole_loader.h"
 #include "course/hole_setup.h"
-#include "course_stats_screen.h"
 #include "game.h"
 #include "game_flags.h"
-#include "help_board.h"
 #include "math/geometry.h"
 #include "math/math_util.h"
-#include "menu.h"
-#include "menu_arrows.h"
-#include "menu_memory.h"
-#include "menu_number.h"
-#include "menu_window.h"
-#include "password.h"
-#include "player_stats.h"
+#include "menus/best_times.h"
+#include "menus/character_select.h"
+#include "menus/character_table.h"
+#include "menus/course_stats_screen.h"
+#include "menus/help_board.h"
+#include "menus/menu.h"
+#include "menus/menu_arrows.h"
+#include "menus/menu_memory.h"
+#include "menus/menu_number.h"
+#include "menus/menu_window.h"
+#include "menus/password.h"
+#include "menus/player_stats.h"
+#include "menus/save_screens.h"
+#include "menus/tournament_menu.h"
 #include "round/bets.h"
 #include "round/game_state.h"
 #include "round/play.h"
@@ -46,7 +48,6 @@
 #include "save/course_stats.h"
 #include "save/save.h"
 #include "save/sram.h"
-#include "save_screens.h"
 #include "scene.h"
 #include "screen/display_list.h"
 #include "screen/screen.h"
@@ -60,7 +61,6 @@
 #include "system/memory_address.h"
 #include "system/overlay_manager.h"
 #include "text/text.h"
-#include "tournament_menu.h"
 
 #define MODE_CHOICE_LIMIT 12
 

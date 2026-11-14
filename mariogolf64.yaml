@@ -102,7 +102,7 @@ segments:
       - [0x2E3E0, c, characters/character_model]
       - [0x2FD00, c, characters/character]
       - [0x34FA0, c, math/math_library]
-      - [0x35980, c, menu]
+      - [0x35980, c, menus/menu]
       - [0x396C0, c, system/crash_screen]
       - [0x3A010, c, audio/music]
       - [0x3A580, c, round/play]
@@ -117,7 +117,7 @@ segments:
       - [0x48150, c, round/round_stats]
       - [0x49E90, c, screen/scene_colors]
       - [0x4A5A0, c, controllers/controller_paks]
-      - [0x4A9E0, c, help_board]
+      - [0x4A9E0, c, menus/help_board]
       - [0x4C3D0, c, save/awards]
       - [0x4C770, c, text/text]
       - [0x51900, c, camera/camera_framing]
@@ -127,7 +127,7 @@ segments:
       - [0x5B620, c, round/round_hud]
       - [0x68500, c, screen/sky_and_hud_animations]
       - [0x70E10, c, characters/reaction]
-      - [0x740A0, c, password]
+      - [0x740A0, c, menus/password]
       - [0x74890, c, save/sram]
       - [0x748B0, c, ../lib/libnusys/src/nuboot]
       - [0x749F0, c, ../lib/libmus/src/player]
@@ -374,7 +374,7 @@ segments:
       - [0x9C260, .data, audio/sound]
       - [0x9C770, .data, course/course]
       - [0x9CF70, .data, characters/character]
-      - [0x9D3F0, .data, menu]
+      - [0x9D3F0, .data, menus/menu]
       - [0x9E010, .data, system/crash_screen]
       - [0x9E3F0, .data, audio/music]
       - [0x9E460, .data, round/play]
@@ -387,7 +387,7 @@ segments:
       - [0x9F530, .data, round/round_stats]
       - [0x9F560, .data, screen/scene_colors]
       - [0x9F6D0, .data, controllers/controller_paks]
-      - [0x9F6E0, .data, help_board]
+      - [0x9F6E0, .data, menus/help_board]
       - [0x9F790, .data, text/text]
       - [0x9F9D0, .data, math/curve]
       - [0x9FA60, .data, round/fireworks]
@@ -395,7 +395,7 @@ segments:
       - [0xA0870, .data, round/round_hud]
       - [0xA12E0, .data, screen/sky_and_hud_animations]
       - [0xA27A0, .data, characters/reaction]
-      - [0xA27F0, .data, password]
+      - [0xA27F0, .data, menus/password]
       - [0xA2AB0, .data, ../lib/libmus/src/player]
       - [0xA2B80, .data, ../lib/libmus/src/player_fx]
       - [0xA2EC0, .data, ../lib/libmus/src/aud_dma]
@@ -464,7 +464,7 @@ segments:
       - [0xA8050, .rodata, characters/character_model]
       - [0xAB8A0, .rodata, characters/character]
       - [0xABC50, .rodata, math/math_library]
-      - [0xABCF0, .rodata, menu]
+      - [0xABCF0, .rodata, menus/menu]
       - [0xABEC0, .rodata, system/crash_screen]
       - [0xAC5F4, .rodata, audio/music]
       - [0xAC638, .rodata, round/play]
@@ -476,7 +476,7 @@ segments:
       - [0xAC850, .rodata, round/round_stats]
       - [0xAC890, .rodata, screen/scene_colors]
       - [0xAC8C0, .rodata, controllers/controller_paks]
-      - [0xAC950, .rodata, help_board]
+      - [0xAC950, .rodata, menus/help_board]
       - [0xAC970, .rodata, save/awards]
       - [0xAC988, .rodata, text/text]
       - [0xACC50, .rodata, camera/camera_framing]
@@ -485,7 +485,7 @@ segments:
       - [0xACEA0, .rodata, round/round_hud]
       - [0xAD0E0, .rodata, screen/sky_and_hud_animations]
       - [0xAD280, .rodata, characters/reaction]
-      - [0xAD340, .rodata, password]
+      - [0xAD340, .rodata, menus/password]
       - [0xAD3B0, .rodata, ../lib/libmus/src/player]
       - [0xAD490, .rodata, ../lib/libmus/src/player_fx]
       - [0xAD4F0, .rodata, ../lib/libnaudio/src/n_drvrNew]
@@ -536,7 +536,7 @@ segments:
       - { type: .bss, vram: 0x800E1A50, name: course/hole_loader }
       - { type: .bss, vram: 0x800E1C00, name: screen/screen_layers }
       - { type: .bss, vram: 0x800E1C10, name: screen/scene_colors }
-      - { type: .bss, vram: 0x800E1C20, name: help_board }
+      - { type: .bss, vram: 0x800E1C20, name: menus/help_board }
       - { type: .bss, vram: 0x800E1C30, name: text/text }
       - { type: .bss, vram: 0x800E1C50, name: camera/camera_framing }
       - { type: .bss, vram: 0x800E1D20, name: math/curve }
@@ -636,43 +636,43 @@ segments:
     exclusive_ram_id: overlay_801F4A30
     symbol_name_format: $VRAM_$SEG
     subsegments:
-      - [0xDE9B0, hasm, ovl_01/padding]
-      - [0xDE9C0, c, ovl_01/main_menu]
-      - [0xF3480, c, ovl_01/character_select]
-      - [0xF7F90, c, ovl_01/course_stats_screen]
-      - [0xFD310, c, ovl_01/best_times]
-      - [0xFF940, c, ovl_01/character_table]
-      - [0x101830, c, ovl_01/player_stats]
-      - [0x109570, c, ovl_01/save_screens]
-      - [0x110670, c, ovl_01/tournament_menu]
-      - [0x115D80, .data, ovl_01/main_menu]
-      - [0x119E80, .data, ovl_01/character_select]
-      - [0x11A020, .data, ovl_01/course_stats_screen]
-      - [0x11A0B0, .data, ovl_01/best_times]
-      - [0x11A110, .data, ovl_01/character_table]
-      - [0x11A320, .data, ovl_01/player_stats]
-      - [0x11AA10, .data, ovl_01/save_screens]
-      - [0x11ADF0, .data, ovl_01/tournament_menu]
-      - [0x11B110, .rodata, ovl_01/main_menu]
-      - [0x11B730, .rodata, ovl_01/character_select]
-      - [0x11B790, .rodata, ovl_01/course_stats_screen]
-      - [0x11B870, .rodata, ovl_01/best_times]
-      - [0x11B880, .rodata, ovl_01/character_table]
-      - [0x11B920, .rodata, ovl_01/player_stats]
-      - [0x11B980, .rodata, ovl_01/save_screens]
-      - [0x11B9D0, .rodata, ovl_01/tournament_menu]
-      - { start: 0x11BA50, type: .bss, vram: 0x80231AD0, name: ovl_01/main_menu }
-      - { type: .bss, vram: 0x8023A3A0, name: ovl_01/character_select }
-      - { type: .bss, vram: 0x8023A790, name: ovl_01/course_stats_screen }
-      - { type: .bss, vram: 0x8023A9C0, name: ovl_01/best_times }
-      - { type: .bss, vram: 0x8023AAE0, name: ovl_01/character_table }
-      - { type: .bss, vram: 0x8023ACC0, name: ovl_01/player_stats }
-      - { type: .bss, vram: 0x8023B670, name: ovl_01/save_screens }
-      - { type: .bss, vram: 0x8023BE40, name: ovl_01/tournament_menu }
-      - { type: .bss, vram: 0x8023BFC0, name: ovl_01/main_menu, linker_section: COMMON .scommon }
-      - { type: .bss, vram: 0x8023BFD4, name: ovl_01/character_select, linker_section: COMMON .scommon }
-      - { type: .bss, vram: 0x8023BFDC, name: ovl_01/player_stats, linker_section: COMMON .scommon }
-      - { type: .bss, vram: 0x8023BFF0, name: ovl_01/save_screens, linker_section: COMMON .scommon }
+      - [0xDE9B0, hasm, menus/menu_overlay_padding]
+      - [0xDE9C0, c, menus/main_menu]
+      - [0xF3480, c, menus/character_select]
+      - [0xF7F90, c, menus/course_stats_screen]
+      - [0xFD310, c, menus/best_times]
+      - [0xFF940, c, menus/character_table]
+      - [0x101830, c, menus/player_stats]
+      - [0x109570, c, menus/save_screens]
+      - [0x110670, c, menus/tournament_menu]
+      - [0x115D80, .data, menus/main_menu]
+      - [0x119E80, .data, menus/character_select]
+      - [0x11A020, .data, menus/course_stats_screen]
+      - [0x11A0B0, .data, menus/best_times]
+      - [0x11A110, .data, menus/character_table]
+      - [0x11A320, .data, menus/player_stats]
+      - [0x11AA10, .data, menus/save_screens]
+      - [0x11ADF0, .data, menus/tournament_menu]
+      - [0x11B110, .rodata, menus/main_menu]
+      - [0x11B730, .rodata, menus/character_select]
+      - [0x11B790, .rodata, menus/course_stats_screen]
+      - [0x11B870, .rodata, menus/best_times]
+      - [0x11B880, .rodata, menus/character_table]
+      - [0x11B920, .rodata, menus/player_stats]
+      - [0x11B980, .rodata, menus/save_screens]
+      - [0x11B9D0, .rodata, menus/tournament_menu]
+      - { start: 0x11BA50, type: .bss, vram: 0x80231AD0, name: menus/main_menu }
+      - { type: .bss, vram: 0x8023A3A0, name: menus/character_select }
+      - { type: .bss, vram: 0x8023A790, name: menus/course_stats_screen }
+      - { type: .bss, vram: 0x8023A9C0, name: menus/best_times }
+      - { type: .bss, vram: 0x8023AAE0, name: menus/character_table }
+      - { type: .bss, vram: 0x8023ACC0, name: menus/player_stats }
+      - { type: .bss, vram: 0x8023B670, name: menus/save_screens }
+      - { type: .bss, vram: 0x8023BE40, name: menus/tournament_menu }
+      - { type: .bss, vram: 0x8023BFC0, name: menus/main_menu, linker_section: COMMON .scommon }
+      - { type: .bss, vram: 0x8023BFD4, name: menus/character_select, linker_section: COMMON .scommon }
+      - { type: .bss, vram: 0x8023BFDC, name: menus/player_stats, linker_section: COMMON .scommon }
+      - { type: .bss, vram: 0x8023BFF0, name: menus/save_screens, linker_section: COMMON .scommon }
 
   - name: hole_editor
     type: code
@@ -758,13 +758,13 @@ segments:
     exclusive_ram_id: overlay_801F4A30
     symbol_name_format: $VRAM_$SEG
     subsegments:
-      - [0x14EA70, hasm, ovl_06/padding]
-      - [0x14EA80, c, ovl_06/title_screen]
-      - [0x14F5E0, c, ovl_06/unlocks]
-      - [0x14F960, .data, ovl_06/title_screen]
-      - [0x14F9A0, .data, ovl_06/unlocks]
-      - [0x14FA10, .rodata, ovl_06/title_screen]
-      - { start: 0x14FB50, type: .bss, vram: 0x801F5B10, name: ovl_06/title_screen }
+      - [0x14EA70, hasm, menus/title_screen_overlay_padding]
+      - [0x14EA80, c, menus/title_screen]
+      - [0x14F5E0, c, menus/unlocks]
+      - [0x14F960, .data, menus/title_screen]
+      - [0x14F9A0, .data, menus/unlocks]
+      - [0x14FA10, .rodata, menus/title_screen]
+      - { start: 0x14FB50, type: .bss, vram: 0x801F5B10, name: menus/title_screen }
 
   - name: ovl_07
     type: code
@@ -788,9 +788,9 @@ segments:
     exclusive_ram_id: overlay_801F4A30
     symbol_name_format: $VRAM_$SEG
     subsegments:
-      - [0x1508D0, hasm, ovl_08/padding]
-      - [0x1508E0, c, ovl_08/confirm_wait]
-      - { start: 0x150990, type: .bss, vram: 0x801F4AF0, name: ovl_08/confirm_wait }
+      - [0x1508D0, hasm, menus/confirm_wait_overlay_padding]
+      - [0x1508E0, c, menus/confirm_wait]
+      - { start: 0x150990, type: .bss, vram: 0x801F4AF0, name: menus/confirm_wait }
 
   - name: ovl_09
     type: code
@@ -829,10 +829,10 @@ segments:
     exclusive_ram_id: overlay_80241800
     symbol_name_format: $VRAM_$SEG
     subsegments:
-      - [0x15F250, c, ovl_11/course_select]
-      - [0x161870, .data, ovl_11/course_select]
-      - [0x161940, .rodata, ovl_11/course_select]
-      - { start: 0x1619A0, type: .bss, vram: 0x80243F50, name: ovl_11/course_select }
+      - [0x15F250, c, menus/course_select]
+      - [0x161870, .data, menus/course_select]
+      - [0x161940, .rodata, menus/course_select]
+      - { start: 0x1619A0, type: .bss, vram: 0x80243F50, name: menus/course_select }
 
   - name: ovl_12
     type: code
@@ -855,15 +855,15 @@ segments:
     exclusive_ram_id: overlay_801F4A30
     symbol_name_format: $VRAM_$SEG
     subsegments:
-      - [0x165BC0, hasm, ovl_13/padding]
-      - [0x165BD0, c, ovl_13/transmit_menu]
-      - [0x16C590, c, ovl_13/cursor_box]
-      - [0x16CCB0, .data, ovl_13/transmit_menu]
-      - [0x16CD70, .data, ovl_13/cursor_box]
-      - [0x16CDD0, .rodata, ovl_13/transmit_menu]
-      - [0x16D640, .rodata, ovl_13/cursor_box]
-      - { start: 0x16D650, type: .bss, vram: 0x801FC4C0, name: ovl_13/cursor_box }
-      - { type: .bss, vram: 0x801FC5C0, name: ovl_13/transmit_menu }
+      - [0x165BC0, hasm, menus/transmit_menu_overlay_padding]
+      - [0x165BD0, c, menus/transmit_menu]
+      - [0x16C590, c, menus/cursor_box]
+      - [0x16CCB0, .data, menus/transmit_menu]
+      - [0x16CD70, .data, menus/cursor_box]
+      - [0x16CDD0, .rodata, menus/transmit_menu]
+      - [0x16D640, .rodata, menus/cursor_box]
+      - { start: 0x16D650, type: .bss, vram: 0x801FC4C0, name: menus/cursor_box }
+      - { type: .bss, vram: 0x801FC5C0, name: menus/transmit_menu }
 
   - name: ovl_14
     type: code

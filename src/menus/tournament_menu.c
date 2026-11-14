@@ -1,4 +1,4 @@
-#include "tournament_menu.h"
+#include "menus/tournament_menu.h"
 
 #include <ultra64.h>
 
@@ -7,11 +7,11 @@
 #include "controllers/controller.h"
 #include "debug_text.h"
 #include "game_flags.h"
-#include "main_menu.h"
-#include "menu.h"
-#include "menu_memory.h"
-#include "menu_window.h"
-#include "password.h"
+#include "menus/main_menu.h"
+#include "menus/menu.h"
+#include "menus/menu_memory.h"
+#include "menus/menu_window.h"
+#include "menus/password.h"
 #include "round/game_state.h"
 #include "round/player.h"
 #include "save/save.h"

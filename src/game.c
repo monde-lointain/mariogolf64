@@ -13,7 +13,6 @@
 #include "camera/shot_camera.h"
 #include "camera/view_projection.h"
 #include "characters/character_model.h"
-#include "confirm_wait.h"
 #include "controllers/controller.h"
 #include "course/billboard.h"
 #include "course/hole_conditions.h"
@@ -27,9 +26,12 @@
 #include "debug_text.h"
 #include "game_flags.h"
 #include "hole_editor.h"
-#include "main_menu.h"
 #include "math/geometry.h"
 #include "math/math_util.h"
+#include "menus/confirm_wait.h"
+#include "menus/main_menu.h"
+#include "menus/title_screen.h"
+#include "menus/transmit_menu.h"
 #include "opening.h"
 #include "performance_meter.h"
 #include "round/game_state.h"
@@ -63,8 +65,6 @@
 #include "system/memory_address.h"
 #include "system/overlay_manager.h"
 #include "text/text.h"
-#include "title_screen.h"
-#include "transmit_menu.h"
 
 #define INSET_VIEW_SOUND_VOLUME 0x3F
 #define INSET_VIEW_SOUND_REVERB 0x1E

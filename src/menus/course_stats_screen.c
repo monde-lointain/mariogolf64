@@ -1,4 +1,4 @@
-#include "course_stats_screen.h"
+#include "menus/course_stats_screen.h"
 
 #include <ultra64.h>
 
@@ -6,13 +6,13 @@
 #include "camera/view_projection.h"
 #include "course/course.h"
 #include "game.h"
-#include "main_menu.h"
 #include "math/geometry.h"
 #include "math/math_util.h"
-#include "menu.h"
-#include "menu_arrows.h"
-#include "menu_memory.h"
-#include "menu_number.h"
+#include "menus/main_menu.h"
+#include "menus/menu.h"
+#include "menus/menu_arrows.h"
+#include "menus/menu_memory.h"
+#include "menus/menu_number.h"
 #include "save/course_stats.h"
 #include "save/save.h"
 #include "screen/display_list.h"

@@ -5,7 +5,7 @@
 #include "course/course.h"
 #include "game_flags.h"
 #include "math/math_util.h"
-#include "menu.h"
+#include "menus/menu.h"
 #include "round/game_state.h"
 #include "round/player.h"
 #include "scene.h"

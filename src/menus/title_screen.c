@@ -1,4 +1,4 @@
-#include "title_screen.h"
+#include "menus/title_screen.h"
 
 #include <ultra64.h>
 
@@ -7,7 +7,8 @@
 #include "controllers/transfer_pak.h"
 #include "game_flags.h"
 #include "math/math_util.h"
-#include "menu.h"
+#include "menus/menu.h"
+#include "menus/unlocks.h"
 #include "scene.h"
 #include "screen/display_list.h"
 #include "screen/rcp_init.h"
@@ -20,7 +21,6 @@
 #include "system/main.h"
 #include "system/memory_address.h"
 #include "system/overlay_manager.h"
-#include "unlocks.h"
 
 enum TitleState {
     TITLE_SHOWING,

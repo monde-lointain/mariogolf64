@@ -21,7 +21,7 @@
 #include "hole_editor.h"
 #include "math/geometry.h"
 #include "math/math_util.h"
-#include "menu.h"
+#include "menus/menu.h"
 #include "round/game_state.h"
 #include "round/play.h"
 #include "round/round_hud.h"

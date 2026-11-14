@@ -20,7 +20,7 @@
 #include "game_flags.h"
 #include "math/geometry.h"
 #include "math/math_util.h"
-#include "menu.h"
+#include "menus/menu.h"
 #include "opening_ball.h"
 #include "opening_camera_editor.h"
 #include "round/round_hud.h"

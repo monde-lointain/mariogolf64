@@ -29,7 +29,7 @@
 #include "game_flags.h"
 #include "math/geometry.h"
 #include "math/math_util.h"
-#include "menu.h"
+#include "menus/menu.h"
 #include "round/computer_golfer.h"
 #include "round/fireworks.h"
 #include "round/game_state.h"
