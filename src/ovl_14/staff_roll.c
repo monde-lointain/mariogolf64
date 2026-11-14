@@ -520,7 +520,9 @@ AnimationId GetSwingAnimation(u32 slotIndex, ClubIndex clubIndex, ShotMode shotM
             animationId = PUTTER_ANIMATIONS + SWING_ANIMATION;
             break;
         default:
-            animationId = 0;
+            // Unlike the other categories, this falls back to the wood
+            // stance rather than a swing.
+            animationId = WOOD_ANIMATIONS;
             break;
     }
 
