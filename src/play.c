@@ -630,7 +630,7 @@ void LoadRingShotReplayInputs(s32 index) {
 }
 
 s32 GetRecordedScoreKind(s32 strokes) {
-    s32 toPar = strokes - g_HoleSetup.par;
+    ScoreToPar toPar = strokes - g_HoleSetup.par;
 
     if (strokes == 1) {
         return SCORE_KIND_RECORDED | SCORE_KIND_HOLE_IN_ONE;
