@@ -184,34 +184,34 @@ s32 StartSparkBurst(void) {
 }
 
 void StartImpactSparks(void) {
-    s32 count = 0;
-    s32 burst;
+    s32 sparkCount = 0;
+    s32 burstIndex;
     s32 sparkIndex;
 
     f_ImpactFrameCount = 1;
-    burst = StartSparkBurst();
-    if (burst != NO_SPARK_BURST) {
-        f_SparkBurstPoints[burst][AXIS_X] = g_CurrentShot.ballPosition[AXIS_X];
-        f_SparkBurstPoints[burst][AXIS_Y] = g_CurrentShot.ballPosition[AXIS_Y];
-        f_SparkBurstPoints[burst][AXIS_Z] = g_CurrentShot.ballPosition[AXIS_Z];
+    burstIndex = StartSparkBurst();
+    if (burstIndex != NO_SPARK_BURST) {
+        f_SparkBurstPoints[burstIndex][AXIS_X] = g_CurrentShot.ballPosition[AXIS_X];
+        f_SparkBurstPoints[burstIndex][AXIS_Y] = g_CurrentShot.ballPosition[AXIS_Y];
+        f_SparkBurstPoints[burstIndex][AXIS_Z] = g_CurrentShot.ballPosition[AXIS_Z];
         for (sparkIndex = 0; sparkIndex != SPARK_COUNT; sparkIndex++) {
             if (f_SparkLives[sparkIndex] == 0) {
                 f32 speed;
 
                 f_SparkOffsets[sparkIndex][AXIS_X] = 0;
                 f_SparkOffsets[sparkIndex][AXIS_Y] = 0;
-                f_SparkAngles[sparkIndex] =
-                    ((f32)count * IMPACT_SPARK_SPACING) + DegreesToRadians((guRandom() % 20) - 10);
+                f_SparkAngles[sparkIndex] = ((f32)sparkCount * IMPACT_SPARK_SPACING) +
+                    DegreesToRadians((guRandom() % 20) - 10);
                 f_SparkKinds[sparkIndex] = SPARK_KIND_IMPACT;
                 speed = (guRandom() % IMPACT_SPARK_SPEED_RANGE) + IMPACT_SPARK_SPEED_MIN;
                 f_SparkVelocities[sparkIndex][AXIS_X] = sinf(f_SparkAngles[sparkIndex]) * speed;
-                count++;
+                sparkCount++;
                 f_SparkVelocities[sparkIndex][AXIS_Y] = -cosf(f_SparkAngles[sparkIndex]) * speed;
                 f_SparkLives[sparkIndex] = SPARK_LIFE;
-                f_SparkBursts[sparkIndex] = burst;
+                f_SparkBursts[sparkIndex] = burstIndex;
             }
 
-            if (count == IMPACT_SPARK_COUNT) {
+            if (sparkCount == IMPACT_SPARK_COUNT) {
                 break;
             }
         }
@@ -245,30 +245,30 @@ void StartFlagSparks(CoursePoint point UNUSED) {
 }
 
 void StartFlagstickSparks(CoursePoint point) {
-    s32 count = 0;
-    s32 burst = StartSparkBurst();
+    s32 sparkCount = 0;
+    s32 burstIndex = StartSparkBurst();
     s32 sparkIndex;
 
-    if (burst != NO_SPARK_BURST) {
-        f_SparkBurstPoints[burst][AXIS_X] = point[AXIS_X];
-        f_SparkBurstPoints[burst][AXIS_Y] = point[AXIS_Y];
-        f_SparkBurstPoints[burst][AXIS_Z] = point[AXIS_Z];
+    if (burstIndex != NO_SPARK_BURST) {
+        f_SparkBurstPoints[burstIndex][AXIS_X] = point[AXIS_X];
+        f_SparkBurstPoints[burstIndex][AXIS_Y] = point[AXIS_Y];
+        f_SparkBurstPoints[burstIndex][AXIS_Z] = point[AXIS_Z];
         for (sparkIndex = 0; sparkIndex != SPARK_COUNT; sparkIndex++) {
             if (f_SparkLives[sparkIndex] == 0) {
                 f_SparkOffsets[sparkIndex][AXIS_X] = 0;
                 f_SparkOffsets[sparkIndex][AXIS_Y] = 0;
-                f_SparkAngles[sparkIndex] = (f32)count * FLAGSTICK_SPARK_SPACING;
+                f_SparkAngles[sparkIndex] = (f32)sparkCount * FLAGSTICK_SPARK_SPACING;
                 f_SparkKinds[sparkIndex] = SPARK_KIND_FLAGSTICK;
-                count++;
+                sparkCount++;
                 f_SparkVelocities[sparkIndex][AXIS_X] =
                     sinf(f_SparkAngles[sparkIndex]) * FLAGSTICK_SPARK_SPEED;
                 f_SparkVelocities[sparkIndex][AXIS_Y] =
                     -cosf(f_SparkAngles[sparkIndex]) * FLAGSTICK_SPARK_SPEED;
                 f_SparkLives[sparkIndex] = SPARK_LIFE;
-                f_SparkBursts[sparkIndex] = burst;
+                f_SparkBursts[sparkIndex] = burstIndex;
             }
 
-            if (count == FLAGSTICK_SPARK_COUNT) {
+            if (sparkCount == FLAGSTICK_SPARK_COUNT) {
                 break;
             }
         }
@@ -304,7 +304,7 @@ void DrawSparks(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     f32 size;
     f32 halfSize;
-    s32 burst;
+    s32 burstIndex;
     s32 left;
     s32 top;
     s32 i;
@@ -421,45 +421,47 @@ void DrawSparks(Gfx **displayListHead) {
     gDPPipeSync(gfx++);
     for (i = 0; i != SPARK_COUNT; i++) {
         if (f_SparkLives[i] != 0) {
-            burst = f_SparkBursts[i];
+            burstIndex = f_SparkBursts[i];
             f_SparkOffsets[i][AXIS_X] += f_SparkVelocities[i][AXIS_X];
             f_SparkOffsets[i][AXIS_Y] += f_SparkVelocities[i][AXIS_Y];
             f_SparkVelocities[i][AXIS_X] *= SPARK_DRAG;
             f_SparkVelocities[i][AXIS_Y] *= SPARK_DRAG;
             f_SparkLives[i]--;
-            if (burstShown[burst] == SPARK_BURST_SHOWN) {
+            if (burstShown[burstIndex] == SPARK_BURST_SHOWN) {
                 rotation[AXIS_X] = 0;
                 rotation[AXIS_Y] = 0;
                 rotation[AXIS_Z] = f_SparkAngles[i];
-                translation[AXIS_X] = (f_SparkOffsets[i][AXIS_X] * burstScales[burst]) +
-                    burstPoints[burst][0] - (SCREEN_WIDTH / 2);
-                translation[AXIS_Y] = (f_SparkOffsets[i][AXIS_Y] * burstScales[burst]) -
-                    burstPoints[burst][1] + (SCREEN_HEIGHT / 2);
+                translation[AXIS_X] = (f_SparkOffsets[i][AXIS_X] * burstScales[burstIndex]) +
+                    burstPoints[burstIndex][0] - (SCREEN_WIDTH / 2);
+                translation[AXIS_Y] = (f_SparkOffsets[i][AXIS_Y] * burstScales[burstIndex]) -
+                    burstPoints[burstIndex][1] + (SCREEN_HEIGHT / 2);
                 translation[AXIS_Z] = SPARK_MODEL_Z;
-                scale[AXIS_X] = burstScales[burst] * SPARK_MODEL_SCALE;
-                scale[AXIS_Y] = burstScales[burst] * SPARK_MODEL_SCALE;
-                scale[AXIS_Z] = burstScales[burst] * SPARK_MODEL_SCALE;
+                scale[AXIS_X] = burstScales[burstIndex] * SPARK_MODEL_SCALE;
+                scale[AXIS_Y] = burstScales[burstIndex] * SPARK_MODEL_SCALE;
+                scale[AXIS_Z] = burstScales[burstIndex] * SPARK_MODEL_SCALE;
                 if (f_SparkKinds[i] == SPARK_KIND_IMPACT) {
                     BuildTransformMatrix(matrix, rotation, translation, scale);
                     ConvertMatrixToFixed(matrix, &f_SparkMatrices[g_MatrixBufferIndex][i]);
                 }
 
                 if (f_SparkKinds[i] == SPARK_KIND_FLAGSTICK &&
-                    IsSparkCoordinateInRange(burstPoints[burst][0]) &&
-                    IsSparkCoordinateInRange(burstPoints[burst][1])) {
-                    left = (f_SparkOffsets[i][AXIS_X] * burstScales[burst]) + burstPoints[burst][0];
-                    top = (f_SparkOffsets[i][AXIS_Y] * burstScales[burst]) + burstPoints[burst][1];
+                    IsSparkCoordinateInRange(burstPoints[burstIndex][0]) &&
+                    IsSparkCoordinateInRange(burstPoints[burstIndex][1])) {
+                    left = (f_SparkOffsets[i][AXIS_X] * burstScales[burstIndex]) +
+                        burstPoints[burstIndex][0];
+                    top = (f_SparkOffsets[i][AXIS_Y] * burstScales[burstIndex]) +
+                        burstPoints[burstIndex][1];
                     gSPScisTextureRectangle(
                         gfx++,
-                        QuarterPixels(left - burstHalfSizes[burst]),
-                        QuarterPixels(top - burstHalfSizes[burst]),
-                        QuarterPixels(left + burstHalfSizes[burst]),
-                        QuarterPixels(top + burstHalfSizes[burst]),
+                        QuarterPixels(left - burstHalfSizes[burstIndex]),
+                        QuarterPixels(top - burstHalfSizes[burstIndex]),
+                        QuarterPixels(left + burstHalfSizes[burstIndex]),
+                        QuarterPixels(top + burstHalfSizes[burstIndex]),
                         G_TX_RENDERTILE,
                         0,
                         0,
-                        burstTextureSteps[burst],
-                        burstTextureSteps[burst]
+                        burstTextureSteps[burstIndex],
+                        burstTextureSteps[burstIndex]
                     );
                 }
             }
