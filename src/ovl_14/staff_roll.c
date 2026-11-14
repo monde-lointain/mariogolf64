@@ -583,7 +583,7 @@ void RunStaffRollTimeline(s32 frame) {
     s32 swingAnimation;
     CameraView *view;
 
-    void PickFramingPitch(void) {
+    void ChooseFramingPitch(void) {
         f_CastFramingPitch = ((rand() & RANDOM_PITCH_MASK) - RANDOM_PITCH_BIAS) *
             RANDOM_PITCH_SCALE * PITCH_UNIT_TO_RADIANS;
     }
@@ -627,7 +627,7 @@ void RunStaffRollTimeline(s32 frame) {
     }
 
     if (IsTeeShotFrame(frame)) {
-        PickFramingPitch();
+        ChooseFramingPitch();
         f_CastFramingYaw = (f_CastIndex * CAST_YAW_STEP) * DEGREES_TO_RADIANS_F;
         FreeCharacterSlot(f_CastSlot);
         ResetStaffRollEase();
@@ -691,7 +691,7 @@ void RunStaffRollTimeline(s32 frame) {
 
     if (IsFairwayShotFrame(frame)) {
         ClearEffects();
-        PickFramingPitch();
+        ChooseFramingPitch();
         g_HoleSetup.conditions.sceneColorIndex = SCENE_COLOR_INDEX_AFTERNOON;
         f_CastFramingYaw = ((f_CastIndex - SHOTS_PER_STAGE) * CAST_YAW_STEP) * DEGREES_TO_RADIANS_F;
         FreeCharacterSlot(f_CastSlot);
@@ -769,7 +769,7 @@ void RunStaffRollTimeline(s32 frame) {
 
     if (IsApproachShotFrame(frame)) {
         ClearEffects();
-        PickFramingPitch();
+        ChooseFramingPitch();
         g_HoleSetup.conditions.sceneColorIndex = SCENE_COLOR_INDEX_ROUND_LATE;
         f_CastFramingYaw =
             ((f_CastIndex - (2 * SHOTS_PER_STAGE)) * CAST_YAW_STEP) * DEGREES_TO_RADIANS_F;
@@ -849,7 +849,7 @@ void RunStaffRollTimeline(s32 frame) {
     if (IsPuttShotFrame(frame)) {
         ClearEffects();
         f_CastFramingYaw = ((f_CastIndex - PUTT_YAW_OFFSET) * CAST_YAW_STEP) * DEGREES_TO_RADIANS_F;
-        PickFramingPitch();
+        ChooseFramingPitch();
         g_HoleSetup.conditions.sceneColorIndex = SCENE_COLOR_INDEX_ROUND_END;
         f_UnreadValue = 15.0f;
         FreeCharacterSlot(f_CastSlot);
@@ -925,7 +925,7 @@ void RunStaffRollTimeline(s32 frame) {
         StartFadeIn(CAST_FADE_FRAMES);
         f_CastFramingYaw = 0.0f;
         ClearEffects();
-        PickFramingPitch();
+        ChooseFramingPitch();
         f_IsReactionShown = FALSE;
         FreeCharacterSlot(f_CastSlot);
         ResetStaffRollEase();
@@ -973,7 +973,7 @@ void RunStaffRollTimeline(s32 frame) {
     if (frame == FINALE_FAIRWAY_FRAME) {
         ClearEffects();
         f_CastFramingYaw = 0.0f;
-        PickFramingPitch();
+        ChooseFramingPitch();
         FreeCharacterSlot(f_CastSlot);
         ResetStaffRollEase();
         f_IsReactionShown = FALSE;
@@ -1024,7 +1024,7 @@ void RunStaffRollTimeline(s32 frame) {
     if (frame == FINALE_APPROACH_FRAME) {
         f_CastFramingYaw = DEGREES_TO_RADIANS_F * CAST_YAW_STEP;
         ClearEffects();
-        PickFramingPitch();
+        ChooseFramingPitch();
         FreeCharacterSlot(f_CastSlot);
         ResetStaffRollEase();
         f_IsReactionShown = FALSE;
@@ -1075,7 +1075,7 @@ void RunStaffRollTimeline(s32 frame) {
 
     if (frame == FINALE_PUTT_FRAME) {
         ClearEffects();
-        PickFramingPitch();
+        ChooseFramingPitch();
         FreeCharacterSlot(f_CastSlot);
         ResetStaffRollEase();
         f_IsReactionShown = FALSE;

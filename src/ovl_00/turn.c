@@ -1443,7 +1443,7 @@ Boolean HasPlanTime(s32 timeBudget UNUSED) {
     return FALSE;
 }
 
-void PickStartingClub(HoleSetup *hole) {
+void ChooseStartingClub(HoleSetup *hole) {
     s8 isUsable[CLUB_SLOT_COUNT];
     s32 clubCount;
     s32 cupDistance;
@@ -2312,7 +2312,7 @@ void StartPlayerShot(s32 playerIndex) {
                                     target[AXIS_X] - player->ballPosition[AXIS_X]
                                 ) *
             RADIANS_TO_BINARY_ANGLE;
-        PickStartingClub(&g_HoleSetup);
+        ChooseStartingClub(&g_HoleSetup);
     }
 
     g_IsTrainingHeadingKept = FALSE;
@@ -2346,7 +2346,7 @@ void StartPlayerShot(s32 playerIndex) {
 void OnBallStepped(Player *player UNUSED) {
 }
 
-void PickNextPlayer(void) {
+void ChooseNextPlayer(void) {
     s32 playerIndex;
     s32 finishedCount;
     s32 nextPlayer;
@@ -2969,7 +2969,7 @@ void UpdateTurns(void) {
     }
 
     PlayAmbientSound();
-    PickNextPlayer();
+    ChooseNextPlayer();
     for (playerIndex = 0; playerIndex < g_GameState.playerCount; playerIndex++) {
         s32 controllerIndex = g_Players[playerIndex].controllerIndex;
 

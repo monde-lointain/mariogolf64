@@ -1828,7 +1828,7 @@ s32 LaunchOpeningBallSimulation(BallSimulation *simulation, s32 purpose, ShotLau
     f32 spinLoss;
     s32 index;
 
-    f32 PickOpeningLieBlend(void) {
+    f32 ChooseOpeningLieBlend(void) {
         return 0.0f;
     }
 
@@ -1878,7 +1878,7 @@ s32 LaunchOpeningBallSimulation(BallSimulation *simulation, s32 purpose, ShotLau
     if (simulation->purpose != LAUNCH_PURPOSE_CLUB_TEST) {
         SurfaceTraits *surfaceTraits = GetOpeningSurfaceTraits(simulation->launchSurface);
 
-        blend = PickOpeningLieBlend();
+        blend = ChooseOpeningLieBlend();
         GetSurfacePercentRange(surfaceTraits, club, percentRange);
         speed = ((percentRange[0] * blend) + (percentRange[1] * (1.0f - blend))) * speed *
             ONE_PER_PERCENT;

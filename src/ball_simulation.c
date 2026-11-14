@@ -2210,7 +2210,7 @@ s32 LaunchBallSimulation(BallSimulation *simulation, s32 purpose, ShotLaunch *sh
     s32 index;
     s8 surface;
 
-    f32 PickLieBlend(void) {
+    f32 ChooseLieBlend(void) {
         return (u32)((simulation->position[AXIS_X] + simulation->position[AXIS_Z] +
                          g_Players[simulation->playerIndex].noiseSeed) &
                    NOISE_BYTE_MASK) /
@@ -2312,7 +2312,7 @@ s32 LaunchBallSimulation(BallSimulation *simulation, s32 purpose, ShotLaunch *sh
     if (simulation->purpose != LAUNCH_PURPOSE_CLUB_TEST) {
         SurfaceTraits *surfaceTraits = GetSurfaceTraits(simulation->launchSurface);
 
-        blend = PickLieBlend();
+        blend = ChooseLieBlend();
         GetSurfacePercentRange(surfaceTraits, club, percentRange);
         speed = ((percentRange[0] * blend) + (percentRange[1] * (1.0f - blend))) * speed *
             ONE_PER_PERCENT;
