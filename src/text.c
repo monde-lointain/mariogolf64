@@ -17,18 +17,13 @@
 #include "sound.h"
 #include "text.h"
 
-typedef struct MessageEntry {
-    u16 start;
-    u16 length;
-} MessageEntry;
-
 typedef struct MessageTable {
     u16 size;
     u16 messageCount;
-    MessageEntry messages[1];
+    TextSpan messages[1];
 } MessageTable;
 
-#define MessageEntryAt(id) (f_Messages->messages + (id))
+#define MessageSpanAt(id) (f_Messages->messages + (id))
 
 #define TEXT_ASSET_SMALL_FONT 0x4B3
 #define TEXT_ASSET_MEDIUM_FONT 0x4B5
@@ -447,7 +442,7 @@ void RevealTextSlot(s32 slot) {
 Boolean IsTextSlotRevealed(s32 slot) {
     TextSlot *textSlot = &g_TextSlots[slot];
 
-    return !(textSlot->shownCount < MessageEntryAt(textSlot->messageId)->length);
+    return !(textSlot->shownCount < MessageSpanAt(textSlot->messageId)->length);
 }
 
 void DrawLargeTextSlot(Gfx **displayListHead, s32 slot) {
@@ -474,8 +469,8 @@ void DrawLargeTextSlot(Gfx **displayListHead, s32 slot) {
     x = textSlot->x;
     y = textSlot->y;
 
-    length = MessageEntryAt(textSlot->messageId)->length;
-    start = MessageEntryAt(textSlot->messageId)->start;
+    length = MessageSpanAt(textSlot->messageId)->length;
+    start = MessageSpanAt(textSlot->messageId)->start;
     if (textSlot->flags & TEXT_FLAG_TYPED) {
         if (textSlot->shownCount < length) {
             length = textSlot->shownCount;
@@ -995,8 +990,8 @@ void DrawMediumTextSlot(Gfx **displayListHead, s32 slot) {
     x = textSlot->x;
     y = textSlot->y;
 
-    length = MessageEntryAt(textSlot->messageId)->length;
-    start = MessageEntryAt(textSlot->messageId)->start;
+    length = MessageSpanAt(textSlot->messageId)->length;
+    start = MessageSpanAt(textSlot->messageId)->start;
     if (textSlot->flags & TEXT_FLAG_TYPED) {
         if (textSlot->shownCount < length) {
             length = textSlot->shownCount;
@@ -1541,8 +1536,8 @@ void MeasureMessage(MessageId messageId, s32 fontSize, s32 *width, s32 *height, 
 
     lineCount = 0;
 
-    length = MessageEntryAt(messageId)->length;
-    start = MessageEntryAt(messageId)->start;
+    length = MessageSpanAt(messageId)->length;
+    start = MessageSpanAt(messageId)->start;
     line = 0;
     for (characterIndex = 0; characterIndex != length; characterIndex++) {
         code = ((u16 *)f_Messages)[g_MessageCodesStart + start + characterIndex];
@@ -2448,8 +2443,8 @@ s32 PlaceMessageGlyphGroup(s32 group, s32 fontSize, s32 x, s32 y, MessageId mess
         return UNSET_RESULT;
     }
 
-    start = MessageEntryAt(messageId)->start;
-    length = MessageEntryAt(messageId)->length;
+    start = MessageSpanAt(messageId)->start;
+    length = MessageSpanAt(messageId)->length;
     MeasureMessage(messageId, fontSize, &width, &height, 0);
     width /= 2;
     height /= 2;

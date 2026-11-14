@@ -237,20 +237,15 @@ typedef struct StaffRollImage {
     u8 texels[STAFF_ROLL_IMAGE_SIZE];
 } StaffRollImage;
 
-typedef struct StaffLine {
-    u16 start;
-    u16 length;
-} StaffLine;
-
 typedef struct StaffText {
     u16 size;
     u16 lineCount;
-    StaffLine lines[TRAILING_ARRAY_LENGTH];
+    TextSpan lines[TRAILING_ARRAY_LENGTH];
 } StaffText;
 
 #define STAFF_LINE(text, index) ((text)->lines + (index))
 #define STAFF_TEXT_HEADER_CHARACTERS 2
-#define CHARACTERS_PER_STAFF_LINE ((s32)(sizeof(StaffLine) / sizeof(u16)))
+#define CHARACTERS_PER_STAFF_LINE ((s32)(sizeof(TextSpan) / sizeof(u16)))
 #define FIRST_STAFF_CHARACTER(text) \
     (((text)->lineCount * CHARACTERS_PER_STAFF_LINE) + STAFF_TEXT_HEADER_CHARACTERS)
 #define STAFF_CHARACTER(text, index) (((u16 *)(text))[index])

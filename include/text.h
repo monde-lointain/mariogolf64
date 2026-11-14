@@ -20,6 +20,12 @@
 
 typedef s32 MessageId;
 
+// Where one string sits in a table of u16 character codes.
+typedef struct TextSpan {
+    u16 start;
+    u16 length;
+} TextSpan;
+
 #define SHADOWED_FONT_IMAGE_WIDTH 256
 #define SHADOWED_FONT_IMAGE_HEIGHT 32
 
