@@ -594,7 +594,7 @@ void BisectFramingPitch(Radians pitch, Radians yaw, f32 depthOffset) {
 void RunStaffRollTimeline(s32 frame) {
     CoursePoint point;
     Vec3 focus;
-    CharacterSlot *character;
+    CharacterSlot *slot;
     s32 slotIndex;
     s32 shrink;
     f32 radius;
@@ -1160,12 +1160,12 @@ void RunStaffRollTimeline(s32 frame) {
         UpdateReaction(f_CastSlot);
     }
     else {
-        character = GetUsedCharacterSlot(f_CastSlot);
+        slot = GetUsedCharacterSlot(f_CastSlot);
         ClearFramedSpheres();
         SetFramingAngles(f_CastFramingPitch, f_CastFramingYaw);
         GetCharacterPointPosition(f_CastSlot, CAST_FOCUS_POINT, focus);
-        if (character != NULL) {
-            radius = character->shadowScale * SHADOW_SCALE_TO_RADIUS;
+        if (slot != NULL) {
+            radius = slot->shadowScale * SHADOW_SCALE_TO_RADIUS;
         }
         else {
             radius = DEFAULT_FRAMED_RADIUS;
