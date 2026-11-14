@@ -4,14 +4,14 @@
 
 #include "course/course.h"
 #include "course_stats.h"
-#include "game_state.h"
-#include "round_stats.h"
+#include "round/game_state.h"
+#include "round/round_stats.h"
+#include "round/scoring.h"
+#include "round/tournament.h"
 #include "save.h"
 #include "scene.h"
-#include "scoring.h"
 #include "shot/particle_effects.h"
 #include "system/c_language.h"
-#include "tournament.h"
 
 #define MATCHUP_RESULT_COUNT_MAX 99
 

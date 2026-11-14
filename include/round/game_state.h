@@ -3,9 +3,9 @@
 
 #include <ultra64.h>
 
-#include "bets.h"
 #include "course/course.h"
-#include "player.h"
+#include "round/bets.h"
+#include "round/player.h"
 #include "scene.h"
 #include "system/c_language.h"
 

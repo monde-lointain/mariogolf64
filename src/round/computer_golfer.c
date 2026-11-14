@@ -1,10 +1,9 @@
-#include "computer_golfer.h"
+#include "round/computer_golfer.h"
 
 #include <math.h>
 #include <stdlib.h>
 #include <ultra64.h>
 
-#include "bets.h"
 #include "characters/character.h"
 #include "course/collision.h"
 #include "course/course.h"
@@ -16,11 +15,12 @@
 #include "course/terrain.h"
 #include "debug_text.h"
 #include "game_flags.h"
-#include "game_state.h"
 #include "math/geometry.h"
 #include "math/math_util.h"
-#include "play.h"
-#include "player.h"
+#include "round/bets.h"
+#include "round/game_state.h"
+#include "round/play.h"
+#include "round/player.h"
 #include "save.h"
 #include "scene.h"
 #include "shot/ball_simulation.h"

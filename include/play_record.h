@@ -7,7 +7,7 @@
 #include "course/course.h"
 #include "course/hole_setup.h"
 #include "math/math_util.h"
-#include "player.h"
+#include "round/player.h"
 #include "scene.h"
 #include "shot/club.h"
 #include "system/c_language.h"

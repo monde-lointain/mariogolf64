@@ -1,10 +1,9 @@
-#include "round_results.h"
+#include "round/round_results.h"
 
 #include <ultra64.h>
 
 #include "audio/sound.h"
 #include "awards.h"
-#include "bets.h"
 #include "characters/character.h"
 #include "controllers/controller.h"
 #include "controllers/transfer_pak.h"
@@ -12,17 +11,19 @@
 #include "course_stats.h"
 #include "debug_text.h"
 #include "game_flags.h"
-#include "game_state.h"
 #include "math/math_util.h"
 #include "menu.h"
 #include "password.h"
-#include "player.h"
-#include "round_hud.h"
-#include "round_stats.h"
+#include "round/bets.h"
+#include "round/game_state.h"
+#include "round/player.h"
+#include "round/round_hud.h"
+#include "round/round_stats.h"
+#include "round/scorecard.h"
+#include "round/scoring.h"
+#include "round/tournament.h"
 #include "save.h"
 #include "scene.h"
-#include "scorecard.h"
-#include "scoring.h"
 #include "screen/display_list.h"
 #include "screen/screen.h"
 #include "screen/screen_layers.h"
@@ -35,7 +36,6 @@
 #include "system/main.h"
 #include "system/memory_address.h"
 #include "text/text.h"
-#include "tournament.h"
 
 enum ResultsState {
     RESULTS_SLIDING_IN,

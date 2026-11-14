@@ -1,14 +1,14 @@
-#include "tournament.h"
+#include "round/tournament.h"
 
 #include <math.h>
 #include <string.h>
 #include <ultra64.h>
 
 #include "course/course.h"
-#include "game_state.h"
 #include "math/math_util.h"
 #include "menu.h"
-#include "player.h"
+#include "round/game_state.h"
+#include "round/player.h"
 #include "system/c_language.h"
 #include "system/compiler.h"
 

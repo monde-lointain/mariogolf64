@@ -3,8 +3,8 @@
 
 #include <ultra64.h>
 
-#include "bets.h"
-#include "player.h"
+#include "round/bets.h"
+#include "round/player.h"
 #include "system/c_language.h"
 
 typedef struct RoundStats {

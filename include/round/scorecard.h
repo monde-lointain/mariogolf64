@@ -3,11 +3,11 @@
 
 #include <ultra64.h>
 
-#include "bets.h"
 #include "course/course.h"
 #include "math/math_util.h"
-#include "player.h"
-#include "round_stats.h"
+#include "round/bets.h"
+#include "round/player.h"
+#include "round/round_stats.h"
 #include "system/asset.h"
 #include "system/c_language.h"
 

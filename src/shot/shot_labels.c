@@ -11,12 +11,13 @@
 #include "course/hole_setup.h"
 #include "course/surface.h"
 #include "game.h"
-#include "game_state.h"
 #include "math/geometry.h"
 #include "math/math_util.h"
-#include "play.h"
-#include "player.h"
-#include "round_hud.h"
+#include "round/game_state.h"
+#include "round/play.h"
+#include "round/player.h"
+#include "round/round_hud.h"
+#include "round/turn.h"
 #include "screen/display_list.h"
 #include "screen/screen.h"
 #include "shot/club.h"
@@ -26,7 +27,6 @@
 #include "system/memory_address.h"
 #include "system/overlay_manager.h"
 #include "text/text.h"
-#include "turn.h"
 
 enum ShotLabelMode {
     SHOT_LABELS_NONE = -1,

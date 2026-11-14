@@ -1,13 +1,13 @@
-#include "scoring.h"
+#include "round/scoring.h"
 
 #include <ultra64.h>
 
 #include "course/course.h"
 #include "game_flags.h"
-#include "game_state.h"
 #include "math/math_util.h"
 #include "menu.h"
-#include "player.h"
+#include "round/game_state.h"
+#include "round/player.h"
 #include "scene.h"
 #include "system/c_language.h"
 

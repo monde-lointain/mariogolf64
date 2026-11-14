@@ -1,4 +1,4 @@
-#include "round_events.h"
+#include "round/round_events.h"
 
 #include <math.h>
 #include <ultra64.h>
@@ -17,11 +17,12 @@
 #include "math/curve.h"
 #include "math/geometry.h"
 #include "math/math_util.h"
-#include "movie.h"
-#include "play.h"
-#include "player.h"
-#include "round_hud.h"
-#include "round_stats.h"
+#include "round/movie.h"
+#include "round/play.h"
+#include "round/player.h"
+#include "round/round_hud.h"
+#include "round/round_stats.h"
+#include "round/turn.h"
 #include "screen/display_list.h"
 #include "screen/screen.h"
 #include "screen/screen_layers.h"
@@ -33,7 +34,6 @@
 #include "system/heap.h"
 #include "system/memory_address.h"
 #include "text/text.h"
-#include "turn.h"
 
 #define MOVIE_BUFFER_SIZE 0x6270
 #define MOVIE_CUE_FRAME 12

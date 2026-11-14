@@ -15,10 +15,11 @@
 #include "course/surface.h"
 #include "course/terrain.h"
 #include "game.h"
-#include "game_state.h"
 #include "math/geometry.h"
 #include "math/math_util.h"
-#include "player.h"
+#include "round/game_state.h"
+#include "round/player.h"
+#include "round/turn.h"
 #include "screen/display_list.h"
 #include "screen/screen.h"
 #include "screen/screen_layers.h"
@@ -32,7 +33,6 @@
 #include "system/heap.h"
 #include "system/memory_address.h"
 #include "text/text.h"
-#include "turn.h"
 
 #define POINT_SPREAD 3072
 #define SPARKLE_FALL_SPEED (2.62f * COURSE_TO_WORLD_SCALE)

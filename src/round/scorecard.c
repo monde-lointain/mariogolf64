@@ -1,10 +1,9 @@
-#include "scorecard.h"
+#include "round/scorecard.h"
 
 #include <framebuffer_count.h>
 #include <ultra64.h>
 
 #include "audio/sound.h"
-#include "bets.h"
 #include "characters/character.h"
 #include "characters/character_model.h"
 #include "characters/reaction.h"
@@ -12,14 +11,16 @@
 #include "course/course.h"
 #include "course/hole_loader.h"
 #include "game_flags.h"
-#include "game_state.h"
 #include "math/math_util.h"
-#include "play.h"
-#include "player.h"
-#include "round_hud.h"
-#include "round_stats.h"
+#include "round/bets.h"
+#include "round/game_state.h"
+#include "round/play.h"
+#include "round/player.h"
+#include "round/round_hud.h"
+#include "round/round_stats.h"
+#include "round/scoring.h"
+#include "round/tournament.h"
 #include "scene.h"
-#include "scoring.h"
 #include "screen/display_list.h"
 #include "screen/screen.h"
 #include "screen/screen_layers.h"
@@ -30,7 +31,6 @@
 #include "system/heap.h"
 #include "system/memory_address.h"
 #include "text/text.h"
-#include "tournament.h"
 
 #define MATCH_RESULT_SOUND_TIME 1
 #define MATCH_RESULT_TIME 5

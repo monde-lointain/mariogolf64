@@ -1,4 +1,4 @@
-#include "club_slots.h"
+#include "round/club_slots.h"
 
 #include <framebuffer_count.h>
 #include <ultra64.h>
@@ -9,12 +9,12 @@
 #include "controllers/controller.h"
 #include "game.h"
 #include "game_flags.h"
-#include "game_state.h"
 #include "math/geometry.h"
 #include "math/math_util.h"
 #include "menu.h"
-#include "player.h"
-#include "round_hud.h"
+#include "round/game_state.h"
+#include "round/player.h"
+#include "round/round_hud.h"
 #include "screen/display_list.h"
 #include "screen/screen.h"
 #include "screen/screen_layers.h"

@@ -3,10 +3,10 @@
 
 #include <ultra64.h>
 
-#include "bets.h"
 #include "characters/character.h"
 #include "course/course.h"
-#include "player.h"
+#include "round/bets.h"
+#include "round/player.h"
 #include "system/c_language.h"
 
 #define BET_STAKE_SLOT_COUNT (BET_COUNT + 1)

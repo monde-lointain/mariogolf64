@@ -1,4 +1,4 @@
-#include "save_menu.h"
+#include "round/save_menu.h"
 
 #include <framebuffer_count.h>
 #include <ultra64.h>
@@ -9,14 +9,14 @@
 #include "characters/character.h"
 #include "controllers/controller.h"
 #include "course/course.h"
-#include "game_state.h"
 #include "math/math_util.h"
 #include "menu.h"
-#include "pause_menu.h"
-#include "play.h"
 #include "play_record.h"
-#include "player.h"
-#include "round_hud.h"
+#include "round/game_state.h"
+#include "round/pause_menu.h"
+#include "round/play.h"
+#include "round/player.h"
+#include "round/round_hud.h"
 #include "save.h"
 #include "scene.h"
 #include "screen/display_list.h"

@@ -4,7 +4,7 @@
 #include <ultra64.h>
 
 #include "camera/camera.h"
-#include "player.h"
+#include "round/player.h"
 #include "system/c_language.h"
 #include "text/text.h"
 

@@ -1,4 +1,4 @@
-#include "round_hud.h"
+#include "round/round_hud.h"
 
 #include <math.h>
 #include <stdlib.h>
@@ -6,12 +6,10 @@
 #include <ultra64.h>
 
 #include "audio/sound.h"
-#include "bets.h"
 #include "camera/camera.h"
 #include "camera/shot_camera.h"
 #include "camera/view_projection.h"
 #include "characters/character.h"
-#include "club_slots.h"
 #include "controllers/controller.h"
 #include "course/billboard.h"
 #include "course/course.h"
@@ -24,22 +22,25 @@
 #include "course/terrain.h"
 #include "course_select.h"
 #include "debug_text.h"
-#include "fireworks.h"
 #include "game.h"
 #include "game_flags.h"
-#include "game_state.h"
 #include "math/curve.h"
 #include "math/geometry.h"
 #include "math/math_util.h"
-#include "movie.h"
-#include "pause_menu.h"
-#include "play.h"
-#include "player.h"
-#include "round_events.h"
-#include "round_stats.h"
+#include "round/bets.h"
+#include "round/club_slots.h"
+#include "round/fireworks.h"
+#include "round/game_state.h"
+#include "round/movie.h"
+#include "round/pause_menu.h"
+#include "round/play.h"
+#include "round/player.h"
+#include "round/round_events.h"
+#include "round/round_stats.h"
+#include "round/scoring.h"
+#include "round/turn.h"
 #include "save.h"
 #include "scene.h"
-#include "scoring.h"
 #include "screen/display_list.h"
 #include "screen/screen.h"
 #include "screen/screen_layers.h"
@@ -59,7 +60,6 @@
 #include "system/memory_address.h"
 #include "system/overlay_manager.h"
 #include "text/text.h"
-#include "turn.h"
 
 enum SceneryState {
     SCENERY_UNLOADED,
@@ -510,7 +510,7 @@ static Gfx f_UnusedNoOpDisplayList[] UNUSED = {
     gsSPEndDisplayList(),
 };
 static u8 f_InsetFrameTexture[] = {
-#include "assets/round_hud/inset_frame_texture.i4.inc.c"
+#include "assets/round/round_hud/inset_frame_texture.i4.inc.c"
 };
 static LandingReaction f_LandingReaction = LANDING_REACTION_NONE;
 static s32 f_LandingReactionFrame = NO_LANDING_REACTION_FRAME;
@@ -638,7 +638,7 @@ static Gfx f_UnusedEmptyHudDisplayList[] UNUSED = {
     gsSPEndDisplayList(),
 };
 static u16 f_WhiteDistancePalette[] = {
-#include "assets/round_hud/white_distance_palette.rgba16.inc.c"
+#include "assets/round/round_hud/white_distance_palette.rgba16.inc.c"
 };
 static s32 f_LoadedHoleIntroImages = 0;
 

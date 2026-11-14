@@ -3,7 +3,6 @@
 #include <ultra64.h>
 
 #include "audio/sound.h"
-#include "bets.h"
 #include "camera/view_projection.h"
 #include "characters/character.h"
 #include "characters/character_model.h"
@@ -11,7 +10,6 @@
 #include "course/hole_loader.h"
 #include "game.h"
 #include "game_flags.h"
-#include "game_state.h"
 #include "main_menu.h"
 #include "math/geometry.h"
 #include "math/math_util.h"
@@ -20,7 +18,9 @@
 #include "menu_memory.h"
 #include "menu_number.h"
 #include "play_record.h"
-#include "player.h"
+#include "round/bets.h"
+#include "round/game_state.h"
+#include "round/player.h"
 #include "save.h"
 #include "save_screens.h"
 #include "screen/display_list.h"

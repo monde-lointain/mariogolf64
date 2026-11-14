@@ -4,9 +4,9 @@
 
 #include "course/surface.h"
 #include "debug_text.h"
-#include "game_state.h"
 #include "math/geometry.h"
-#include "player.h"
+#include "round/game_state.h"
+#include "round/player.h"
 #include "shot/ball_simulation.h"
 #include "shot/club.h"
 #include "shot/current_shot.h"

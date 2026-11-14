@@ -13,7 +13,8 @@
 #include "game_flags.h"
 #include "math/geometry.h"
 #include "math/math_util.h"
-#include "round_hud.h"
+#include "round/round_hud.h"
+#include "round/turn.h"
 #include "screen/display_list.h"
 #include "screen/screen_layers.h"
 #include "screen/sky_and_hud_animations.h"
@@ -23,7 +24,6 @@
 #include "system/compiler.h"
 #include "system/heap.h"
 #include "system/memory_address.h"
-#include "turn.h"
 
 #define HOLE_CREATURE_COUNT 10
 

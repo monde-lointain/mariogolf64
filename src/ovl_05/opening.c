@@ -23,7 +23,7 @@
 #include "menu.h"
 #include "opening_ball.h"
 #include "opening_camera_editor.h"
-#include "round_hud.h"
+#include "round/round_hud.h"
 #include "scene.h"
 #include "screen/display_list.h"
 #include "screen/rcp_init.h"

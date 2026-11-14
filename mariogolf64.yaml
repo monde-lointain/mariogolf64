@@ -98,23 +98,23 @@ segments:
       - [0x2B800, c, system/asset]
       - [0x2BFF0, c, audio/sound]
       - [0x2D290, c, course/course]
-      - [0x2D5C0, c, scoring]
+      - [0x2D5C0, c, round/scoring]
       - [0x2E3E0, c, characters/character_model]
       - [0x2FD00, c, characters/character]
       - [0x34FA0, c, math/math_library]
       - [0x35980, c, menu]
       - [0x396C0, c, system/crash_screen]
       - [0x3A010, c, audio/music]
-      - [0x3A580, c, play]
+      - [0x3A580, c, round/play]
       - [0x40180, c, camera/view_projection]
       - [0x414A0, c, course/hole_triangles]
       - [0x42E60, c, characters/character_sound]
       - [0x42F00, c, math/matrix_conversion]
-      - [0x43140, c, tournament]
+      - [0x43140, c, round/tournament]
       - [0x43810, c, course/hole_loader]
       - [0x45400, c, math/math_util]
       - [0x456C0, c, screen/screen_layers]
-      - [0x48150, c, round_stats]
+      - [0x48150, c, round/round_stats]
       - [0x49E90, c, screen/scene_colors]
       - [0x4A5A0, c, controllers/controller_paks]
       - [0x4A9E0, c, help_board]
@@ -122,9 +122,9 @@ segments:
       - [0x4C770, c, text/text]
       - [0x51900, c, camera/camera_framing]
       - [0x526B0, c, math/curve]
-      - [0x52FF0, c, fireworks]
+      - [0x52FF0, c, round/fireworks]
       - [0x53D10, c, shot/particle_effects]
-      - [0x5B620, c, round_hud]
+      - [0x5B620, c, round/round_hud]
       - [0x68500, c, screen/sky_and_hud_animations]
       - [0x70E10, c, characters/reaction]
       - [0x740A0, c, password]
@@ -377,22 +377,22 @@ segments:
       - [0x9D3F0, .data, menu]
       - [0x9E010, .data, system/crash_screen]
       - [0x9E3F0, .data, audio/music]
-      - [0x9E460, .data, play]
+      - [0x9E460, .data, round/play]
       - [0x9E500, .data, course/hole_triangles]
       - [0x9E530, .data, characters/character_sound]
-      - [0x9EA00, .data, tournament]
+      - [0x9EA00, .data, round/tournament]
       - [0x9F3A0, .data, course/hole_loader]
       - [0x9F3B0, .data, math/math_util]
       - [0x9F3C0, .data, screen/screen_layers]
-      - [0x9F530, .data, round_stats]
+      - [0x9F530, .data, round/round_stats]
       - [0x9F560, .data, screen/scene_colors]
       - [0x9F6D0, .data, controllers/controller_paks]
       - [0x9F6E0, .data, help_board]
       - [0x9F790, .data, text/text]
       - [0x9F9D0, .data, math/curve]
-      - [0x9FA60, .data, fireworks]
+      - [0x9FA60, .data, round/fireworks]
       - [0xA06B0, .data, shot/particle_effects]
-      - [0xA0870, .data, round_hud]
+      - [0xA0870, .data, round/round_hud]
       - [0xA12E0, .data, screen/sky_and_hud_animations]
       - [0xA27A0, .data, characters/reaction]
       - [0xA27F0, .data, password]
@@ -467,22 +467,22 @@ segments:
       - [0xABCF0, .rodata, menu]
       - [0xABEC0, .rodata, system/crash_screen]
       - [0xAC5F4, .rodata, audio/music]
-      - [0xAC638, .rodata, play]
+      - [0xAC638, .rodata, round/play]
       - [0xAC760, .rodata, course/hole_triangles]
-      - [0xAC770, .rodata, tournament]
+      - [0xAC770, .rodata, round/tournament]
       - [0xAC780, .rodata, course/hole_loader]
       - [0xAC810, .rodata, math/math_util]
       - [0xAC840, .rodata, screen/screen_layers]
-      - [0xAC850, .rodata, round_stats]
+      - [0xAC850, .rodata, round/round_stats]
       - [0xAC890, .rodata, screen/scene_colors]
       - [0xAC8C0, .rodata, controllers/controller_paks]
       - [0xAC950, .rodata, help_board]
       - [0xAC970, .rodata, awards]
       - [0xAC988, .rodata, text/text]
       - [0xACC50, .rodata, camera/camera_framing]
-      - [0xACD00, .rodata, fireworks]
+      - [0xACD00, .rodata, round/fireworks]
       - [0xACD10, .rodata, shot/particle_effects]
-      - [0xACEA0, .rodata, round_hud]
+      - [0xACEA0, .rodata, round/round_hud]
       - [0xAD0E0, .rodata, screen/sky_and_hud_animations]
       - [0xAD280, .rodata, characters/reaction]
       - [0xAD340, .rodata, password]
@@ -530,7 +530,7 @@ segments:
       - { type: .bss, vram: 0x800DE970, name: characters/character }
       - { type: .bss, vram: 0x800DF0B0, name: system/crash_screen }
       - { type: .bss, vram: 0x800E1290, name: audio/music }
-      - { type: .bss, vram: 0x800E12B0, name: play }
+      - { type: .bss, vram: 0x800E12B0, name: round/play }
       - { type: .bss, vram: 0x800E16B0, name: camera/view_projection }
       - { type: .bss, vram: 0x800E17D0, name: course/hole_triangles }
       - { type: .bss, vram: 0x800E1A50, name: course/hole_loader }
@@ -541,7 +541,7 @@ segments:
       - { type: .bss, vram: 0x800E1C50, name: camera/camera_framing }
       - { type: .bss, vram: 0x800E1D20, name: math/curve }
       - { type: .bss, vram: 0x800E1D60, name: shot/particle_effects }
-      - { type: .bss, vram: 0x800E1DD0, name: round_hud }
+      - { type: .bss, vram: 0x800E1DD0, name: round/round_hud }
       - { type: .bss, vram: 0x800E3980, name: screen/sky_and_hud_animations }
       - { type: .bss, vram: 0x800E4C50, name: characters/reaction }
       - { type: .bss, vram: 0x800E4CD0, name: ../lib/libnusys/src/nuboot }
@@ -581,50 +581,50 @@ segments:
     exclusive_ram_id: overlay_801F4A30
     symbol_name_format: $VRAM_$SEG
     subsegments:
-      - [0xADD30, hasm, ovl_00/padding]
-      - [0xADD40, c, ovl_00/round_results]
+      - [0xADD30, hasm, round/round_overlay_padding]
+      - [0xADD40, c, round/round_results]
       - [0xB68F0, c, shot/golf_balls]
-      - [0xBBD00, c, ovl_00/turn]
+      - [0xBBD00, c, round/turn]
       - [0xC69F0, c, course/hole_creatures]
-      - [0xC7A40, c, ovl_00/round_events]
+      - [0xC7A40, c, round/round_events]
       - [0xCFE10, c, shot/shot_effects]
-      - [0xD1FC0, c, ovl_00/pause_menu]
+      - [0xD1FC0, c, round/pause_menu]
       - [0xD4330, c, shot/shot_labels]
-      - [0xD71D0, c, ovl_00/hole_intro]
+      - [0xD71D0, c, round/hole_intro]
       - [0xD7850, c, shot/club_panel]
-      - [0xD8F70, .data, ovl_00/round_results]
+      - [0xD8F70, .data, round/round_results]
       - [0xD9160, .data, shot/golf_balls]
-      - [0xDD140, .data, ovl_00/turn]
+      - [0xDD140, .data, round/turn]
       - [0xDD320, .data, course/hole_creatures]
-      - [0xDD410, .data, ovl_00/round_events]
+      - [0xDD410, .data, round/round_events]
       - [0xDDB60, .data, shot/shot_effects]
-      - [0xDDC20, .data, ovl_00/pause_menu]
+      - [0xDDC20, .data, round/pause_menu]
       - [0xDDDB0, .data, shot/shot_labels]
-      - [0xDDE10, .data, ovl_00/hole_intro]
+      - [0xDDE10, .data, round/hole_intro]
       - [0xDDE20, .data, shot/club_panel]
-      - [0xDDF10, .rodata, ovl_00/round_results]
+      - [0xDDF10, .rodata, round/round_results]
       - [0xDE190, .rodata, shot/golf_balls]
-      - [0xDE1F0, .rodata, ovl_00/turn]
+      - [0xDE1F0, .rodata, round/turn]
       - [0xDE570, .rodata, course/hole_creatures]
-      - [0xDE590, .rodata, ovl_00/round_events]
+      - [0xDE590, .rodata, round/round_events]
       - [0xDE710, .rodata, shot/shot_effects]
-      - [0xDE740, .rodata, ovl_00/pause_menu]
+      - [0xDE740, .rodata, round/pause_menu]
       - [0xDE900, .rodata, shot/shot_labels]
-      - [0xDE940, .rodata, ovl_00/hole_intro]
+      - [0xDE940, .rodata, round/hole_intro]
       - [0xDE990, .rodata, shot/club_panel]
-      - { start: 0xDE9B0, type: .bss, vram: 0x802256B0, name: ovl_00/round_results }
+      - { start: 0xDE9B0, type: .bss, vram: 0x802256B0, name: round/round_results }
       - { type: .bss, vram: 0x80225810, name: shot/golf_balls }
-      - { type: .bss, vram: 0x80227110, name: ovl_00/turn }
+      - { type: .bss, vram: 0x80227110, name: round/turn }
       - { type: .bss, vram: 0x80227C90, name: course/hole_creatures }
-      - { type: .bss, vram: 0x80227CA0, name: ovl_00/round_events }
+      - { type: .bss, vram: 0x80227CA0, name: round/round_events }
       - { type: .bss, vram: 0x80228000, name: shot/shot_effects }
-      - { type: .bss, vram: 0x8022B530, name: ovl_00/pause_menu }
+      - { type: .bss, vram: 0x8022B530, name: round/pause_menu }
       - { type: .bss, vram: 0x8022B540, name: shot/club_panel }
-      - { type: .bss, vram: 0x8022B5C0, name: ovl_00/turn, linker_section: COMMON .scommon }
+      - { type: .bss, vram: 0x8022B5C0, name: round/turn, linker_section: COMMON .scommon }
       - { type: .bss, vram: 0x8022B5D0, name: course/hole_creatures, linker_section: COMMON .scommon }
-      - { type: .bss, vram: 0x8022BC60, name: ovl_00/round_events, linker_section: COMMON .scommon }
+      - { type: .bss, vram: 0x8022BC60, name: round/round_events, linker_section: COMMON .scommon }
       - { type: .bss, vram: 0x8022D660, name: shot/shot_effects, linker_section: COMMON .scommon }
-      - { type: .bss, vram: 0x8022D678, name: ovl_00/pause_menu, linker_section: COMMON .scommon }
+      - { type: .bss, vram: 0x8022D678, name: round/pause_menu, linker_section: COMMON .scommon }
       - { type: .bss, vram: 0x8022D68C, name: shot/shot_labels, linker_section: COMMON .scommon }
       - { type: .bss, vram: 0x8022D690, name: shot/club_panel, linker_section: COMMON .scommon }
 
@@ -708,10 +708,10 @@ segments:
     exclusive_ram_id: overlay_8024D800
     symbol_name_format: $VRAM_$SEG
     subsegments:
-      - [0x1300A0, c, ovl_03/computer_golfer]
-      - [0x1363F0, .data, ovl_03/computer_golfer]
-      - [0x1365D0, .rodata, ovl_03/computer_golfer]
-      - { start: 0x136BA0, type: .bss, vram: 0x80254300, name: ovl_03/computer_golfer }
+      - [0x1300A0, c, round/computer_golfer]
+      - [0x1363F0, .data, round/computer_golfer]
+      - [0x1365D0, .rodata, round/computer_golfer]
+      - { start: 0x136BA0, type: .bss, vram: 0x80254300, name: round/computer_golfer }
 
   - name: ovl_04
     type: code
@@ -800,13 +800,13 @@ segments:
     exclusive_ram_id: overlay_80241800
     symbol_name_format: $VRAM_$SEG
     subsegments:
-      - [0x150990, c, ovl_09/scorecard]
-      - [0x153560, c, ovl_09/scorecard_drawing]
-      - [0x15B5E0, .data, ovl_09/scorecard]
-      - [0x15B640, .data, ovl_09/scorecard_drawing]
-      - [0x15B780, .rodata, ovl_09/scorecard]
-      - [0x15B940, .rodata, ovl_09/scorecard_drawing]
-      - { start: 0x15BB50, type: .bss, vram: 0x8024C9C0, name: ovl_09/scorecard_drawing }
+      - [0x150990, c, round/scorecard]
+      - [0x153560, c, round/scorecard_drawing]
+      - [0x15B5E0, .data, round/scorecard]
+      - [0x15B640, .data, round/scorecard_drawing]
+      - [0x15B780, .rodata, round/scorecard]
+      - [0x15B940, .rodata, round/scorecard_drawing]
+      - { start: 0x15BB50, type: .bss, vram: 0x8024C9C0, name: round/scorecard_drawing }
 
   - name: ovl_10
     type: code
@@ -816,10 +816,10 @@ segments:
     exclusive_ram_id: overlay_80241800
     symbol_name_format: $VRAM_$SEG
     subsegments:
-      - [0x15BB50, c, ovl_10/club_slots]
-      - [0x15F160, .data, ovl_10/club_slots]
-      - [0x15F210, .rodata, ovl_10/club_slots]
-      - { start: 0x15F250, type: .bss, vram: 0x80244F00, name: ovl_10/club_slots }
+      - [0x15BB50, c, round/club_slots]
+      - [0x15F160, .data, round/club_slots]
+      - [0x15F210, .rodata, round/club_slots]
+      - { start: 0x15F250, type: .bss, vram: 0x80244F00, name: round/club_slots }
 
   - name: ovl_11
     type: code
@@ -842,10 +842,10 @@ segments:
     exclusive_ram_id: overlay_80241800
     symbol_name_format: $VRAM_$SEG
     subsegments:
-      - [0x1619A0, c, ovl_12/save_menu]
-      - [0x165970, .data, ovl_12/save_menu]
-      - [0x165A30, .rodata, ovl_12/save_menu]
-      - { start: 0x165BC0, type: .bss, vram: 0x80245A20, name: ovl_12/save_menu }
+      - [0x1619A0, c, round/save_menu]
+      - [0x165970, .data, round/save_menu]
+      - [0x165A30, .rodata, round/save_menu]
+      - { start: 0x165BC0, type: .bss, vram: 0x80245A20, name: round/save_menu }
 
   - name: ovl_13
     type: code

@@ -15,14 +15,15 @@
 #include "course/terrain.h"
 #include "course/work_area.h"
 #include "game_flags.h"
-#include "game_state.h"
 #include "math/geometry.h"
 #include "math/math_util.h"
-#include "play.h"
 #include "play_record.h"
-#include "round_hud.h"
+#include "round/game_state.h"
+#include "round/play.h"
+#include "round/round_hud.h"
+#include "round/scoring.h"
+#include "round/turn.h"
 #include "scene.h"
-#include "scoring.h"
 #include "shot/ball_simulation.h"
 #include "shot/current_shot.h"
 #include "system/c_language.h"
@@ -30,7 +31,6 @@
 #include "system/main.h"
 #include "system/memory_address.h"
 #include "system/overlay_manager.h"
-#include "turn.h"
 
 #define CUP_ATTEMPT_COUNT_MAX 120
 #define AreCupAndTeeSet() \

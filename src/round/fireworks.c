@@ -1,4 +1,4 @@
-#include "fireworks.h"
+#include "round/fireworks.h"
 
 #include <ultra64.h>
 
@@ -6,7 +6,7 @@
 #include "camera/view_projection.h"
 #include "math/geometry.h"
 #include "math/math_util.h"
-#include "round_hud.h"
+#include "round/round_hud.h"
 #include "screen/display_list.h"
 #include "screen/screen.h"
 #include "system/asset.h"

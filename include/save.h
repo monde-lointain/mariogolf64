@@ -7,10 +7,10 @@
 #include "course/course.h"
 #include "course/hole_setup.h"
 #include "course_stats.h"
-#include "game_state.h"
 #include "play_record.h"
-#include "player.h"
-#include "round_stats.h"
+#include "round/game_state.h"
+#include "round/player.h"
+#include "round/round_stats.h"
 #include "system/c_language.h"
 
 #define SAVE_MAGIC 0x12345678

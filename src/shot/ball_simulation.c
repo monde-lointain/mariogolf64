@@ -17,10 +17,11 @@
 #include "course/terrain.h"
 #include "debug_text.h"
 #include "game_flags.h"
-#include "game_state.h"
 #include "math/geometry.h"
 #include "math/math_util.h"
-#include "player.h"
+#include "round/game_state.h"
+#include "round/player.h"
+#include "round/turn.h"
 #include "scene.h"
 #include "shot/ball_physics.h"
 #include "shot/club.h"
@@ -28,7 +29,6 @@
 #include "shot/shot_effects.h"
 #include "system/c_language.h"
 #include "system/compiler.h"
-#include "turn.h"
 
 BallSimulation g_TurnBallSimulation;
 
