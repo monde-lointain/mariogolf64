@@ -4182,9 +4182,6 @@ void DrawMatchResults(Gfx **displayListHead) {
 
 const char f_UnusedModeNamesText[] = "StrokeSpeedGolfMini-Golf";
 
-#define CLUB_TOURNAMENT_COURSE_STRIP_WIDTH 64
-#define CLUB_TOURNAMENT_COURSE_STRIP_HEIGHT 32
-#define CLUB_TOURNAMENT_COURSE_STRIP_COUNT 2
 #define CLUB_TOURNAMENT_DETAILS_TOP 74
 #define CLUB_TOURNAMENT_LINE_HEIGHT 16
 #define CLUB_TOURNAMENT_UNBADGED_DETAILS_TOP 58
@@ -4247,15 +4244,15 @@ void DrawClubTournamentResults(Gfx **displayListHead) {
     gDPSetTextureFilter(gfx++, G_TF_POINT);
     gameMode = GetClubTournamentGameMode();
     LoadLargePalette(&gfx, ImageBody(f_ResultsCourseImage));
-    for (i = 0; i != CLUB_TOURNAMENT_COURSE_STRIP_COUNT; i++) {
+    for (i = 0; i != COURSE_ICON_STRIP_COUNT; i++) {
         LoadTextureBlock(
             &gfx,
             LargeImageTexels(f_ResultsCourseImage) +
-                (i * CLUB_TOURNAMENT_COURSE_STRIP_WIDTH * CLUB_TOURNAMENT_COURSE_STRIP_HEIGHT),
+                (i * COURSE_ICON_WIDTH * COURSE_ICON_STRIP_HEIGHT),
             G_IM_FMT_CI,
             G_IM_SIZ_8b,
-            CLUB_TOURNAMENT_COURSE_STRIP_WIDTH,
-            CLUB_TOURNAMENT_COURSE_STRIP_HEIGHT,
+            COURSE_ICON_WIDTH,
+            COURSE_ICON_STRIP_HEIGHT,
             0,
             0,
             0,
@@ -4264,18 +4261,13 @@ void DrawClubTournamentResults(Gfx **displayListHead) {
             G_TX_NOLOD,
             G_TX_NOLOD
         );
-        firstStripBottom =
-            f_ResultsTop + CLUB_TOURNAMENT_COURSE_Y + CLUB_TOURNAMENT_COURSE_STRIP_HEIGHT;
+        firstStripBottom = f_ResultsTop + CLUB_TOURNAMENT_COURSE_Y + COURSE_ICON_STRIP_HEIGHT;
         DrawTextureRectangle(
             &gfx,
             QuarterPixels(f_ResultsSlide + CLUB_TOURNAMENT_COURSE_X),
-            QuarterPixels(
-                (i * CLUB_TOURNAMENT_COURSE_STRIP_HEIGHT) + CLUB_TOURNAMENT_COURSE_Y + f_ResultsTop
-            ),
-            QuarterPixels(
-                f_ResultsSlide + CLUB_TOURNAMENT_COURSE_X + CLUB_TOURNAMENT_COURSE_STRIP_WIDTH
-            ),
-            QuarterPixels((i * CLUB_TOURNAMENT_COURSE_STRIP_HEIGHT) + firstStripBottom),
+            QuarterPixels((i * COURSE_ICON_STRIP_HEIGHT) + CLUB_TOURNAMENT_COURSE_Y + f_ResultsTop),
+            QuarterPixels(f_ResultsSlide + CLUB_TOURNAMENT_COURSE_X + COURSE_ICON_WIDTH),
+            QuarterPixels((i * COURSE_ICON_STRIP_HEIGHT) + firstStripBottom),
             G_TX_RENDERTILE,
             0,
             0,

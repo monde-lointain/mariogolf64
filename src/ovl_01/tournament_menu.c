@@ -785,8 +785,8 @@ void DrawClubWindow(
             buttonHeight = f_MenuWindowScaleY * YES_NO_BUTTON_SHOWN_HEIGHT;
             badgeWidth = f_MenuWindowScaleX * NINTENDO_BADGE_WIDTH;
             badgeStripHeight = f_MenuWindowScaleY * NINTENDO_BADGE_STRIP_HEIGHT;
-            courseWidth = f_MenuWindowScaleX * COURSE_IMAGE_WIDTH;
-            courseStripHeight = f_MenuWindowScaleY * COURSE_IMAGE_STRIP_HEIGHT;
+            courseWidth = f_MenuWindowScaleX * COURSE_ICON_WIDTH;
+            courseStripHeight = f_MenuWindowScaleY * COURSE_ICON_STRIP_HEIGHT;
             pictureWidth = f_MenuWindowScaleX * WINDOW_PICTURE_SIZE;
             pictureHeight = f_MenuWindowScaleY * WINDOW_PICTURE_SIZE;
             if (f_MenuWindowScaleX == 1.0f && f_MenuWindowScaleY == 1.0f) {
@@ -801,8 +801,8 @@ void DrawClubWindow(
             buttonHeight = YES_NO_BUTTON_SHOWN_HEIGHT;
             badgeWidth = NINTENDO_BADGE_WIDTH;
             badgeStripHeight = NINTENDO_BADGE_STRIP_HEIGHT;
-            courseWidth = COURSE_IMAGE_WIDTH;
-            courseStripHeight = COURSE_IMAGE_STRIP_HEIGHT;
+            courseWidth = COURSE_ICON_WIDTH;
+            courseStripHeight = COURSE_ICON_STRIP_HEIGHT;
             pictureWidth = WINDOW_PICTURE_SIZE;
             pictureHeight = WINDOW_PICTURE_SIZE;
             break;
@@ -823,8 +823,8 @@ void DrawClubWindow(
             buttonHeight = f_MenuWindowScaleY * YES_NO_BUTTON_SHOWN_HEIGHT;
             badgeWidth = f_MenuWindowScaleX * NINTENDO_BADGE_WIDTH;
             badgeStripHeight = f_MenuWindowScaleY * NINTENDO_BADGE_STRIP_HEIGHT;
-            courseWidth = f_MenuWindowScaleX * COURSE_IMAGE_WIDTH;
-            courseStripHeight = f_MenuWindowScaleY * COURSE_IMAGE_STRIP_HEIGHT;
+            courseWidth = f_MenuWindowScaleX * COURSE_ICON_WIDTH;
+            courseStripHeight = f_MenuWindowScaleY * COURSE_ICON_STRIP_HEIGHT;
             pictureWidth = f_MenuWindowScaleX * WINDOW_PICTURE_SIZE;
             pictureHeight = f_MenuWindowScaleY * WINDOW_PICTURE_SIZE;
             if (f_MenuWindowScaleX <= MENU_WINDOW_CLOSED_SCALE &&
@@ -1038,15 +1038,15 @@ void DrawClubWindow(
         courseStripRows;
     courseX = windowLeft + (s32)(f_MenuWindowScaleX * WINDOW_IMAGE_OFFSET_X);
     LoadLargePalette(&gfx, ImageBody(f_ClubCourseIcon));
-    for (index = 0; index != COURSE_IMAGE_STRIP_COUNT; index++) {
+    for (index = 0; index != COURSE_ICON_STRIP_COUNT; index++) {
         LoadTextureBlock(
             &gfx,
             LargeImageTexels(f_ClubCourseIcon) +
-                (index * COURSE_IMAGE_WIDTH * COURSE_IMAGE_STRIP_HEIGHT),
+                (index * COURSE_ICON_WIDTH * COURSE_ICON_STRIP_HEIGHT),
             G_IM_FMT_CI,
             G_IM_SIZ_8b,
-            COURSE_IMAGE_WIDTH,
-            COURSE_IMAGE_STRIP_HEIGHT,
+            COURSE_ICON_WIDTH,
+            COURSE_ICON_STRIP_HEIGHT,
             0,
             0,
             0,
@@ -1064,8 +1064,8 @@ void DrawClubWindow(
             G_TX_RENDERTILE,
             0,
             0,
-            TexelRunStep(COURSE_IMAGE_WIDTH, (s32)courseWidth),
-            TexelRunStep(COURSE_IMAGE_STRIP_HEIGHT, (s32)courseStripHeight)
+            TexelRunStep(COURSE_ICON_WIDTH, (s32)courseWidth),
+            TexelRunStep(COURSE_ICON_STRIP_HEIGHT, (s32)courseStripHeight)
         );
         gDPPipeSync(gfx++);
     }
