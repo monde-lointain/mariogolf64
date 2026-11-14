@@ -2999,7 +2999,7 @@ s32 CheckStatusCartridge(s32 cartridgeIndex) {
     return STATUS_CHECK_FAILED;
 }
 
-void BuildStatusData(u8 *status);
+void BuildStatusData(StatusData *status);
 
 s32 WriteStatusToCartridge(s32 cartridgeIndex) {
     GameBoyTransfer *transfer = &g_GameBoyTransfer;
@@ -3063,7 +3063,7 @@ s32 WriteStatusToCartridge(s32 cartridgeIndex) {
             return STATUS_WRITE_PAK_ERROR;
         }
 
-        BuildStatusData(status);
+        BuildStatusData((StatusData *)status);
         result = nuContGBPakFwrite(
             &transfer->pakFile,
             statusAddress - STATUS_ADDRESS_BIAS,
@@ -3840,8 +3840,7 @@ static inline s32 PackTenths(f32 value) {
     return (wholePart * TENTHS_PER_ONE) + fraction;
 }
 
-void BuildStatusData(u8 *status) {
-    StatusData *data = (StatusData *)status;
+void BuildStatusData(StatusData *status) {
     SaveData *save = GetSaveData();
     StatusCourse *course;
     StatusProgress *progress;
@@ -3861,7 +3860,7 @@ void BuildStatusData(u8 *status) {
     memset(status, 0, STATUS_CLEARED_SIZE);
     for (courseIndex = 0; courseIndex != COURSE_COUNT; courseIndex++) {
         entry = &save->records.courseStats[courseIndex];
-        course = &data->courses[courseIndex];
+        course = &status->courses[courseIndex];
 
         if (entry->roundCount != 0) {
             if (entry->roundCount > 0) {
@@ -3972,7 +3971,7 @@ void BuildStatusData(u8 *status) {
     }
 
     ComputeRoundStatistics();
-    course = &data->allCourses;
+    course = &status->allCourses;
     figure = g_CourseStatFigures[COURSE_COUNT].roundCount;
     if (figure > 0) {
         course->roundCount[0] = figure;
@@ -4031,7 +4030,7 @@ void BuildStatusData(u8 *status) {
         course->birdieBadges[2] = 0;
     }
 
-    progress = &data->progress;
+    progress = &status->progress;
     openCourseCount = CountOpenCourses(save->coursePoints);
     progress->openCourses = 0;
     for (courseIndex = 0; courseIndex != openCourseCount; courseIndex++) {
