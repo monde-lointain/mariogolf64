@@ -11,7 +11,6 @@
 #include "course_space.h"
 #include "language.h"
 #include "surface.h"
-#include "turn.h"
 
 #define PLAYER_COUNT_MAX 4
 
@@ -92,6 +91,24 @@ enum GridColor {
 typedef s8 GridColor;
 
 #define GRID_COLOR_FLIP 1
+
+enum NotableShot {
+    NOTABLE_SHOT_GREAT,
+    NOTABLE_SHOT_EXCELLENT,
+    NOTABLE_SHOT_PIN_SHOT,
+    NOTABLE_SHOT_CHIP_IN,
+    NOTABLE_SHOT_LONG_CHIP_IN,
+    NOTABLE_SHOT_UNUSED,
+    NOTABLE_SHOT_FLAG_SHOT,
+    NOTABLE_SHOT_HOLE_IN_ONE,
+    NOTABLE_SHOT_ALBATROSS,
+    NOTABLE_SHOT_EAGLE,
+    NOTABLE_SHOT_BIRDIE,
+    NOTABLE_SHOT_WATER_CUT,
+    NOTABLE_SHOT_COUNT
+};
+
+typedef s32 NotableShot;
 
 typedef struct Player {
     char name[PLAYER_NAME_SIZE];
