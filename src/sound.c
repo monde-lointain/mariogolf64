@@ -169,62 +169,117 @@ static CharacterId f_DelayEditorCharacter = 0;
 static s32 f_DelayEditorKind = 0;
 static SongChange f_PendingSongChange = {SONG_CHANGE_NONE, 0, 0, 0};
 static SongId f_SongId = NO_SONG;
-/* The start and end of each song in the ROM, in turn */
-/* clang-format off */
+/* A song's file in ROM, whose bounds the linker script defines */
+#define DeclareSongFile(name) extern u8 songs_##name##_ROM_START[], songs_##name##_ROM_END[]
+#define SongRomBounds(name) (u32)(songs_##name##_ROM_START), (u32)(songs_##name##_ROM_END)
+
+DeclareSongFile(hole_out_eagle);
+DeclareSongFile(hole_out_birdie);
+DeclareSongFile(hole_out_par);
+DeclareSongFile(results);
+DeclareSongFile(hole_out_bogey);
+DeclareSongFile(hole_out_over_bogey);
+DeclareSongFile(hole_won);
+DeclareSongFile(hole_lost);
+DeclareSongFile(hole_halved);
+DeclareSongFile(song_9);
+DeclareSongFile(match_result);
+DeclareSongFile(round_tournament);
+DeclareSongFile(course_toad_highlands);
+DeclareSongFile(course_koopa_park);
+DeclareSongFile(cup_in_par);
+DeclareSongFile(cup_in_over_par);
+DeclareSongFile(cup_in_under_par);
+DeclareSongFile(course_shy_guy_desert);
+DeclareSongFile(course_boo_valley);
+DeclareSongFile(course_yoshis_island);
+DeclareSongFile(round_final);
+DeclareSongFile(training);
+DeclareSongFile(transmit_menu);
+DeclareSongFile(controls);
+DeclareSongFile(round_speed_golf);
+DeclareSongFile(round_match);
+DeclareSongFile(round_training);
+DeclareSongFile(round_course);
+DeclareSongFile(song_28);
+DeclareSongFile(round_ring_shot);
+DeclareSongFile(ring_shot);
+DeclareSongFile(round_replay);
+DeclareSongFile(tournament_toad_highlands);
+DeclareSongFile(tournament_koopa_park);
+DeclareSongFile(tournament_shy_guy_desert);
+DeclareSongFile(tournament_boo_valley);
+DeclareSongFile(tournament_marios_star);
+DeclareSongFile(tournament_results);
+DeclareSongFile(speed_golf);
+DeclareSongFile(title);
+DeclareSongFile(yoshi_and_donkey_kong);
+DeclareSongFile(course_marios_star);
+DeclareSongFile(attract_title);
+DeclareSongFile(round_club_slots);
+DeclareSongFile(mini_golf);
+DeclareSongFile(round_mini_golf);
+DeclareSongFile(round_skins_match);
+DeclareSongFile(opening);
+DeclareSongFile(tournament_yoshis_island);
+DeclareSongFile(staff_roll);
+DeclareSongFile(closing);
+
+/* The start and end of each song in the ROM, by its enum Song value. Songs 9
+ * and 28 have no value there, as no routine plays them. */
 static u32 f_SongRomBounds[(LAST_SONG_ID + 1) * 2] = {
-    (u32)g_SoundEffectBankRomEnd, 0xD9FB20,
-    0xD9FB20, 0xDA0640,
-    0xDA0640, 0xDA0D70,
-    0xDA0D70, 0xDA1900,
-    0xDA1900, 0xDA2000,
-    0xDA2000, 0xDA2620,
-    0xDA2620, 0xDA3590,
-    0xDA3590, 0xDA4040,
-    0xDA4040, 0xDA50A0,
-    0xDA50A0, 0xDA73E0,
-    0xDA73E0, 0xDA8A40,
-    0xDA8A40, 0xDA9E40,
-    0xDA9E40, 0xDB2070,
-    0xDB2070, 0xDB9A00,
-    0xDB9A00, 0xDBC0D0,
-    0xDBC0D0, 0xDBDC40,
-    0xDBDC40, 0xDBF230,
-    0xDBF230, 0xDC3010,
-    0xDC3010, 0xDC6E50,
-    0xDC6E50, 0xDCCC90,
-    0xDCCC90, 0xDCE3C0,
-    0xDCE3C0, 0xDD0B10,
-    0xDD0B10, 0xDD16A0,
-    0xDD16A0, 0xDD24E0,
-    0xDD24E0, 0xDD35C0,
-    0xDD35C0, 0xDD4320,
-    0xDD4320, 0xDD5240,
-    0xDD5240, 0xDD6390,
-    0xDD6390, 0xDD7550,
-    0xDD7550, 0xDE1280,
-    0xDE1280, 0xDE76A0,
-    0xDE76A0, 0xDF1030,
-    0xDF1030, 0xDF6A00,
-    0xDF6A00, 0xDFC1F0,
-    0xDFC1F0, 0xE03170,
-    0xE03170, 0xE08660,
-    0xE08660, 0xE0D6F0,
-    0xE0D6F0, 0xE14780,
-    0xE14780, 0xE1CCD0,
-    0xE1CCD0, 0xE210F0,
-    0xE210F0, 0xE25410,
-    0xE25410, 0xE2B6B0,
-    0xE2B6B0, 0xE2CF90,
-    0xE2CF90, 0xE2D7A0,
-    0xE2D7A0, 0xE329E0,
-    0xE329E0, 0xE33210,
-    0xE33210, 0xE33F40,
-    0xE33F40, 0xE37E40,
-    0xE37E40, 0xE3FCD0,
-    0xE3FCD0, 0xE470C0,
-    0xE470C0, (u32)g_AssetArchiveRomStart,
+    SongRomBounds(hole_out_eagle),
+    SongRomBounds(hole_out_birdie),
+    SongRomBounds(hole_out_par),
+    SongRomBounds(results),
+    SongRomBounds(hole_out_bogey),
+    SongRomBounds(hole_out_over_bogey),
+    SongRomBounds(hole_won),
+    SongRomBounds(hole_lost),
+    SongRomBounds(hole_halved),
+    SongRomBounds(song_9),
+    SongRomBounds(match_result),
+    SongRomBounds(round_tournament),
+    SongRomBounds(course_toad_highlands),
+    SongRomBounds(course_koopa_park),
+    SongRomBounds(cup_in_par),
+    SongRomBounds(cup_in_over_par),
+    SongRomBounds(cup_in_under_par),
+    SongRomBounds(course_shy_guy_desert),
+    SongRomBounds(course_boo_valley),
+    SongRomBounds(course_yoshis_island),
+    SongRomBounds(round_final),
+    SongRomBounds(training),
+    SongRomBounds(transmit_menu),
+    SongRomBounds(controls),
+    SongRomBounds(round_speed_golf),
+    SongRomBounds(round_match),
+    SongRomBounds(round_training),
+    SongRomBounds(round_course),
+    SongRomBounds(song_28),
+    SongRomBounds(round_ring_shot),
+    SongRomBounds(ring_shot),
+    SongRomBounds(round_replay),
+    SongRomBounds(tournament_toad_highlands),
+    SongRomBounds(tournament_koopa_park),
+    SongRomBounds(tournament_shy_guy_desert),
+    SongRomBounds(tournament_boo_valley),
+    SongRomBounds(tournament_marios_star),
+    SongRomBounds(tournament_results),
+    SongRomBounds(speed_golf),
+    SongRomBounds(title),
+    SongRomBounds(yoshi_and_donkey_kong),
+    SongRomBounds(course_marios_star),
+    SongRomBounds(attract_title),
+    SongRomBounds(round_club_slots),
+    SongRomBounds(mini_golf),
+    SongRomBounds(round_mini_golf),
+    SongRomBounds(round_skins_match),
+    SongRomBounds(opening),
+    SongRomBounds(tournament_yoshis_island),
+    SongRomBounds(staff_roll),
+    SongRomBounds(closing),
 };
-/* clang-format on */
 /* Read by no routine */
 static s32 f_UnusedWordsAfterSongRomBounds[10] UNUSED = {5, 0, 5, 5, 0, 5, 5, 5, 0, 0};
 static u32 f_LastAudioFrame;

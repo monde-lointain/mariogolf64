@@ -295,11 +295,171 @@ s32 SetMultiTlb(
     return tlbIndex;
 }
 
+/* A character model's file in ROM, whose bounds the linker script defines */
+#define DeclareModelFile(name) \
+    extern u8 character_models_##name##_ROM_START[], character_models_##name##_ROM_END[]
+#define ModelRomBounds(name) \
+    (u32)(character_models_##name##_ROM_START), (u32)(character_models_##name##_ROM_END)
+
+DeclareModelFile(plum);
+DeclareModelFile(charlie);
+DeclareModelFile(maple);
+DeclareModelFile(baby_mario);
+DeclareModelFile(luigi);
+DeclareModelFile(peach);
+DeclareModelFile(sonny);
+DeclareModelFile(wario);
+DeclareModelFile(harry);
+DeclareModelFile(mario);
+DeclareModelFile(yoshi);
+DeclareModelFile(donkey_kong);
+DeclareModelFile(bowser);
+DeclareModelFile(metal_mario);
+DeclareModelFile(kid);
+DeclareModelFile(sherry);
+DeclareModelFile(azalea);
+DeclareModelFile(joe);
+DeclareModelFile(plum_reaction);
+DeclareModelFile(charlie_reaction);
+DeclareModelFile(maple_reaction);
+DeclareModelFile(baby_mario_reaction);
+DeclareModelFile(luigi_reaction);
+DeclareModelFile(peach_reaction);
+DeclareModelFile(sonny_reaction);
+DeclareModelFile(wario_reaction);
+DeclareModelFile(harry_reaction);
+DeclareModelFile(mario_reaction);
+DeclareModelFile(yoshi_reaction);
+DeclareModelFile(donkey_kong_reaction);
+DeclareModelFile(bowser_reaction);
+DeclareModelFile(metal_mario_reaction);
+DeclareModelFile(kid_reaction);
+DeclareModelFile(sherry_reaction);
+DeclareModelFile(azalea_reaction);
+DeclareModelFile(joe_reaction);
+DeclareModelFile(plum_palette_1);
+DeclareModelFile(charlie_palette_1);
+DeclareModelFile(maple_palette_1);
+DeclareModelFile(baby_mario_palette_1);
+DeclareModelFile(luigi_palette_1);
+DeclareModelFile(peach_palette_1);
+DeclareModelFile(sonny_palette_1);
+DeclareModelFile(wario_palette_1);
+DeclareModelFile(harry_palette_1);
+DeclareModelFile(mario_palette_1);
+DeclareModelFile(yoshi_palette_1);
+DeclareModelFile(donkey_kong_palette_1);
+DeclareModelFile(bowser_palette_1);
+DeclareModelFile(metal_mario_palette_1);
+DeclareModelFile(kid_palette_1);
+DeclareModelFile(sherry_palette_1);
+DeclareModelFile(azalea_palette_1);
+DeclareModelFile(joe_palette_1);
+DeclareModelFile(plum_reaction_palette_1);
+DeclareModelFile(charlie_reaction_palette_1);
+DeclareModelFile(maple_reaction_palette_1);
+DeclareModelFile(baby_mario_reaction_palette_1);
+DeclareModelFile(luigi_reaction_palette_1);
+DeclareModelFile(peach_reaction_palette_1);
+DeclareModelFile(sonny_reaction_palette_1);
+DeclareModelFile(wario_reaction_palette_1);
+DeclareModelFile(harry_reaction_palette_1);
+DeclareModelFile(mario_reaction_palette_1);
+DeclareModelFile(yoshi_reaction_palette_1);
+DeclareModelFile(donkey_kong_reaction_palette_1);
+DeclareModelFile(bowser_reaction_palette_1);
+DeclareModelFile(metal_mario_reaction_palette_1);
+DeclareModelFile(kid_reaction_palette_1);
+DeclareModelFile(sherry_reaction_palette_1);
+DeclareModelFile(azalea_reaction_palette_1);
+DeclareModelFile(joe_reaction_palette_1);
+DeclareModelFile(plum_palette_2);
+DeclareModelFile(charlie_palette_2);
+DeclareModelFile(maple_palette_2);
+DeclareModelFile(baby_mario_palette_2);
+DeclareModelFile(luigi_palette_2);
+DeclareModelFile(peach_palette_2);
+DeclareModelFile(sonny_palette_2);
+DeclareModelFile(wario_palette_2);
+DeclareModelFile(harry_palette_2);
+DeclareModelFile(mario_palette_2);
+DeclareModelFile(yoshi_palette_2);
+DeclareModelFile(donkey_kong_palette_2);
+DeclareModelFile(bowser_palette_2);
+DeclareModelFile(metal_mario_palette_2);
+DeclareModelFile(kid_palette_2);
+DeclareModelFile(sherry_palette_2);
+DeclareModelFile(azalea_palette_2);
+DeclareModelFile(joe_palette_2);
+DeclareModelFile(plum_reaction_palette_2);
+DeclareModelFile(charlie_reaction_palette_2);
+DeclareModelFile(maple_reaction_palette_2);
+DeclareModelFile(baby_mario_reaction_palette_2);
+DeclareModelFile(luigi_reaction_palette_2);
+DeclareModelFile(peach_reaction_palette_2);
+DeclareModelFile(sonny_reaction_palette_2);
+DeclareModelFile(wario_reaction_palette_2);
+DeclareModelFile(harry_reaction_palette_2);
+DeclareModelFile(mario_reaction_palette_2);
+DeclareModelFile(yoshi_reaction_palette_2);
+DeclareModelFile(donkey_kong_reaction_palette_2);
+DeclareModelFile(bowser_reaction_palette_2);
+DeclareModelFile(metal_mario_reaction_palette_2);
+DeclareModelFile(kid_reaction_palette_2);
+DeclareModelFile(sherry_reaction_palette_2);
+DeclareModelFile(azalea_reaction_palette_2);
+DeclareModelFile(joe_reaction_palette_2);
+DeclareModelFile(plum_palette_3);
+DeclareModelFile(charlie_palette_3);
+DeclareModelFile(maple_palette_3);
+DeclareModelFile(baby_mario_palette_3);
+DeclareModelFile(luigi_palette_3);
+DeclareModelFile(peach_palette_3);
+DeclareModelFile(sonny_palette_3);
+DeclareModelFile(wario_palette_3);
+DeclareModelFile(harry_palette_3);
+DeclareModelFile(mario_palette_3);
+DeclareModelFile(yoshi_palette_3);
+DeclareModelFile(donkey_kong_palette_3);
+DeclareModelFile(bowser_palette_3);
+DeclareModelFile(metal_mario_palette_3);
+DeclareModelFile(kid_palette_3);
+DeclareModelFile(sherry_palette_3);
+DeclareModelFile(azalea_palette_3);
+DeclareModelFile(joe_palette_3);
+DeclareModelFile(plum_reaction_palette_3);
+DeclareModelFile(charlie_reaction_palette_3);
+DeclareModelFile(maple_reaction_palette_3);
+DeclareModelFile(baby_mario_reaction_palette_3);
+DeclareModelFile(luigi_reaction_palette_3);
+DeclareModelFile(peach_reaction_palette_3);
+DeclareModelFile(sonny_reaction_palette_3);
+DeclareModelFile(wario_reaction_palette_3);
+DeclareModelFile(harry_reaction_palette_3);
+DeclareModelFile(mario_reaction_palette_3);
+DeclareModelFile(yoshi_reaction_palette_3);
+DeclareModelFile(donkey_kong_reaction_palette_3);
+DeclareModelFile(bowser_reaction_palette_3);
+DeclareModelFile(metal_mario_reaction_palette_3);
+DeclareModelFile(kid_reaction_palette_3);
+DeclareModelFile(sherry_reaction_palette_3);
+DeclareModelFile(azalea_reaction_palette_3);
+DeclareModelFile(joe_reaction_palette_3);
+DeclareModelFile(opening_mario);
+DeclareModelFile(opening_yoshi);
+DeclareModelFile(opening_baby_mario);
+DeclareModelFile(opening_donkey_kong);
+DeclareModelFile(opening_plum);
+DeclareModelFile(opening_peach);
+DeclareModelFile(opening_luigi);
+DeclareModelFile(opening_model_15);
+DeclareModelFile(opening_toad);
+DeclareModelFile(opening_model_17);
+
 const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MODELS_PER_KIND] = {
     {
         {
-            0x01652EB0,
-            0x0165BD50,
+            ModelRomBounds(plum),
             {
                 0x02010F60,
                 0x02000540,
@@ -318,14 +478,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x0200053C,
             },
             100,
-            0x01652EB0,
-            0x0165BD50,
+            ModelRomBounds(plum),
             0x02011750,
             0x02012750,
         },
         {
-            0x015EE790,
-            0x015F6EC0,
+            ModelRomBounds(charlie),
             {
                 0x02010C80,
                 0x02000540,
@@ -344,14 +502,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x0200053C,
             },
             100,
-            0x015EE790,
-            0x015F6EC0,
+            ModelRomBounds(charlie),
             0x02011460,
             0x02012460,
         },
         {
-            0x01606090,
-            0x0160ED90,
+            ModelRomBounds(maple),
             {
                 0x02012BB0,
                 0x02000540,
@@ -370,14 +526,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x0200053C,
             },
             100,
-            0x01606090,
-            0x0160ED90,
+            ModelRomBounds(maple),
             0x020133D0,
             0x020143D0,
         },
         {
-            0x016A1220,
-            0x016A73A0,
+            ModelRomBounds(baby_mario),
             {
                 0x0200FF90,
                 0x02000540,
@@ -396,14 +550,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x0200053C,
             },
             70,
-            0x016A1220,
-            0x016A73A0,
+            ModelRomBounds(baby_mario),
             0x02010750,
             0x02011750,
         },
         {
-            0x01545D80,
-            0x0154C190,
+            ModelRomBounds(luigi),
             {
                 0x0200EFD0,
                 0x02000540,
@@ -422,14 +574,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x0200053C,
             },
             100,
-            0x01545D80,
-            0x0154C190,
+            ModelRomBounds(luigi),
             0x0200F6F8,
             0x020106F8,
         },
         {
-            0x015D5A90,
-            0x015DE6D0,
+            ModelRomBounds(peach),
             {
                 0x02011260,
                 0x02000540,
@@ -448,14 +598,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x0200053C,
             },
             100,
-            0x015D5A90,
-            0x015DE6D0,
+            ModelRomBounds(peach),
             0x02011B08,
             0x02012B08,
         },
         {
-            0x0167A3C0,
-            0x01681F70,
+            ModelRomBounds(sonny),
             {
                 0x02011BE0,
                 0x02000540,
@@ -474,14 +622,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x0200053C,
             },
             100,
-            0x0167A3C0,
-            0x01681F70,
+            ModelRomBounds(sonny),
             0x020123D0,
             0x020133D0,
         },
         {
-            0x015544C0,
-            0x0155D0C0,
+            ModelRomBounds(wario),
             {
                 0x02011530,
                 0x02000540,
@@ -500,14 +646,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x0200053C,
             },
             100,
-            0x015544C0,
-            0x0155D0C0,
+            ModelRomBounds(wario),
             0x02011D78,
             0x02012D78,
         },
         {
-            0x01644C90,
-            0x0164C520,
+            ModelRomBounds(harry),
             {
                 0x0200F640,
                 0x02000540,
@@ -526,14 +670,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x0200053C,
             },
             100,
-            0x01644C90,
-            0x0164C520,
+            ModelRomBounds(harry),
             0x0200FD58,
             0x02010D58,
         },
         {
-            0x01533380,
-            0x015384B0,
+            ModelRomBounds(mario),
             {
                 0x0200C598,
                 0x02000540,
@@ -552,14 +694,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x0200053C,
             },
             100,
-            0x01533380,
-            0x015384B0,
+            ModelRomBounds(mario),
             0x0200CCA8,
             0x0200DCA8,
         },
         {
-            0x016C88B0,
-            0x016CE3C0,
+            ModelRomBounds(yoshi),
             {
                 0x0200E358,
                 0x02000540,
@@ -578,14 +718,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x0200053C,
             },
             100,
-            0x016C88B0,
-            0x016CE3C0,
+            ModelRomBounds(yoshi),
             0x0200EB08,
             0x0200FB08,
         },
         {
-            0x0161B430,
-            0x01622860,
+            ModelRomBounds(donkey_kong),
             {
                 0x020119E8,
                 0x02000540,
@@ -604,14 +742,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x0200053C,
             },
             120,
-            0x0161B430,
-            0x01622860,
+            ModelRomBounds(donkey_kong),
             0x020121C0,
             0x020131C0,
         },
         {
-            0x016B72B0,
-            0x016BDB40,
+            ModelRomBounds(bowser),
             {
                 0x02010148,
                 0x02000540,
@@ -630,14 +766,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x0200053C,
             },
             150,
-            0x016B72B0,
-            0x016BDB40,
+            ModelRomBounds(bowser),
             0x02010790,
             0x02011790,
         },
         {
-            0x01715F00,
-            0x0171A110,
+            ModelRomBounds(metal_mario),
             {
                 0x02007900,
                 0x02000018,
@@ -656,14 +790,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000014,
             },
             100,
-            0x01715F00,
-            0x0171A110,
+            ModelRomBounds(metal_mario),
             0x02007FE0,
             0x020087E0,
         },
         {
-            0x015A4050,
-            0x015AB320,
+            ModelRomBounds(kid),
             {
                 0x0200FB28,
                 0x02000540,
@@ -682,14 +814,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x0200053C,
             },
             100,
-            0x015A4050,
-            0x015AB320,
+            ModelRomBounds(kid),
             0x020102F8,
             0x020112F8,
         },
         {
-            0x015C67B0,
-            0x015CD7B0,
+            ModelRomBounds(sherry),
             {
                 0x0200EFF8,
                 0x02000540,
@@ -708,14 +838,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x0200053C,
             },
             100,
-            0x015C67B0,
-            0x015CD7B0,
+            ModelRomBounds(sherry),
             0x0200F718,
             0x02010718,
         },
         {
-            0x0156A510,
-            0x01575410,
+            ModelRomBounds(azalea),
             {
                 0x020131E8,
                 0x02000540,
@@ -734,14 +862,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x0200053C,
             },
             100,
-            0x0156A510,
-            0x01575410,
+            ModelRomBounds(azalea),
             0x020139B8,
             0x020141B8,
         },
         {
-            0x01630880,
-            0x01638FA0,
+            ModelRomBounds(joe),
             {
                 0x02012A48,
                 0x02000540,
@@ -760,14 +886,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x0200053C,
             },
             100,
-            0x01630880,
-            0x01638FA0,
+            ModelRomBounds(joe),
             0x02013220,
             0x02013A20,
         },
         {
-            0x016651E0,
-            0x0166EDE0,
+            ModelRomBounds(plum_reaction),
             {
                 0x02010F98,
                 0x02000018,
@@ -786,14 +910,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000014,
             },
             100,
-            0x016651E0,
-            0x0166EDE0,
+            ModelRomBounds(plum_reaction),
             0x02011618,
             0x02012618,
         },
         {
-            0x015F7E90,
-            0x01605EE0,
+            ModelRomBounds(charlie_reaction),
             {
                 0x02019188,
                 0x02000018,
@@ -812,14 +934,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000014,
             },
             100,
-            0x015F7E90,
-            0x01605EE0,
+            ModelRomBounds(charlie_reaction),
             0x02019770,
             0x0201A770,
         },
         {
-            0x01610E80,
-            0x0161AC20,
+            ModelRomBounds(maple_reaction),
             {
                 0x0201A6D0,
                 0x02000018,
@@ -838,14 +958,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000014,
             },
             100,
-            0x01610E80,
-            0x0161AC20,
+            ModelRomBounds(maple_reaction),
             0x0201AE40,
             0x0201BE40,
         },
         {
-            0x016A8840,
-            0x016B0170,
+            ModelRomBounds(baby_mario_reaction),
             {
                 0x02013ED0,
                 0x02000018,
@@ -864,14 +982,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000014,
             },
             70,
-            0x016A8840,
-            0x016B0170,
+            ModelRomBounds(baby_mario_reaction),
             0x02014590,
             0x02015590,
         },
         {
-            0x0154C850,
-            0x01552B20,
+            ModelRomBounds(luigi_reaction),
             {
                 0x02010020,
                 0x02000018,
@@ -890,14 +1006,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000014,
             },
             100,
-            0x0154C850,
-            0x01552B20,
+            ModelRomBounds(luigi_reaction),
             0x02010630,
             0x02011630,
         },
         {
-            0x015E2E00,
-            0x015EC1B0,
+            ModelRomBounds(peach_reaction),
             {
                 0x020160C8,
                 0x02000018,
@@ -916,14 +1030,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000014,
             },
             100,
-            0x015E2E00,
-            0x015EC1B0,
+            ModelRomBounds(peach_reaction),
             0x02016728,
             0x02017728,
         },
         {
-            0x01697C80,
-            0x016A0220,
+            ModelRomBounds(sonny_reaction),
             {
                 0x02011898,
                 0x02000018,
@@ -942,14 +1054,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000014,
             },
             100,
-            0x01697C80,
-            0x016A0220,
+            ModelRomBounds(sonny_reaction),
             0x02011F80,
             0x02012F80,
         },
         {
-            0x0155DB00,
-            0x015690A0,
+            ModelRomBounds(wario_reaction),
             {
                 0x020153E8,
                 0x020004D8,
@@ -968,14 +1078,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x020004D4,
             },
             100,
-            0x0155DB00,
-            0x015690A0,
+            ModelRomBounds(wario_reaction),
             0x02015AA0,
             0x02016AA0,
         },
         {
-            0x0164CBE0,
-            0x016525C0,
+            ModelRomBounds(harry_reaction),
             {
                 0x0200BD58,
                 0x02000018,
@@ -994,14 +1102,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000014,
             },
             100,
-            0x0164CBE0,
-            0x016525C0,
+            ModelRomBounds(harry_reaction),
             0x0200C400,
             0x0200D400,
         },
         {
-            0x0153DEA0,
-            0x01543EC0,
+            ModelRomBounds(mario_reaction),
             {
                 0x020109B8,
                 0x02000018,
@@ -1020,14 +1126,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000014,
             },
             100,
-            0x0153DEA0,
-            0x01543EC0,
+            ModelRomBounds(mario_reaction),
             0x020110E8,
             0x020120E8,
         },
         {
-            0x016DBA80,
-            0x016E2A10,
+            ModelRomBounds(yoshi_reaction),
             {
                 0x020103C0,
                 0x02000540,
@@ -1046,14 +1150,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x0200053C,
             },
             100,
-            0x016DBA80,
-            0x016E2A10,
+            ModelRomBounds(yoshi_reaction),
             0x02010990,
             0x02011990,
         },
         {
-            0x01624100,
-            0x0162D080,
+            ModelRomBounds(donkey_kong_reaction),
             {
                 0x020130F0,
                 0x02000018,
@@ -1072,14 +1174,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000014,
             },
             120,
-            0x01624100,
-            0x0162D080,
+            ModelRomBounds(donkey_kong_reaction),
             0x020138F8,
             0x020148F8,
         },
         {
-            0x016BF760,
-            0x016C7100,
+            ModelRomBounds(bowser_reaction),
             {
                 0x0200FD50,
                 0x02000018,
@@ -1098,14 +1198,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000014,
             },
             150,
-            0x016BF760,
-            0x016C7100,
+            ModelRomBounds(bowser_reaction),
             0x020102F0,
             0x020112F0,
         },
         {
-            0x0171A110,
-            0x0171EB40,
+            ModelRomBounds(metal_mario_reaction),
             {
                 0x020089A8,
                 0x02000018,
@@ -1124,14 +1222,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000014,
             },
             100,
-            0x0171A110,
-            0x0171EB40,
+            ModelRomBounds(metal_mario_reaction),
             0x02009090,
             0x02009890,
         },
         {
-            0x015B43A0,
-            0x015B9750,
+            ModelRomBounds(kid_reaction),
             {
                 0x0200F620,
                 0x02000018,
@@ -1150,14 +1246,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000014,
             },
             100,
-            0x015B43A0,
-            0x015B9750,
+            ModelRomBounds(kid_reaction),
             0x0200FBC8,
             0x02010BC8,
         },
         {
-            0x015CE6E0,
-            0x015D53C0,
+            ModelRomBounds(sherry_reaction),
             {
                 0x02012760,
                 0x02000018,
@@ -1176,14 +1270,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000014,
             },
             100,
-            0x015CE6E0,
-            0x015D53C0,
+            ModelRomBounds(sherry_reaction),
             0x02013000,
             0x02014000,
         },
         {
-            0x01598100,
-            0x015A19A0,
+            ModelRomBounds(azalea_reaction),
             {
                 0x02019B68,
                 0x02000018,
@@ -1202,14 +1294,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000014,
             },
             100,
-            0x01598100,
-            0x015A19A0,
+            ModelRomBounds(azalea_reaction),
             0x0201A468,
             0x0201B468,
         },
         {
-            0x0163A970,
-            0x016432D0,
+            ModelRomBounds(joe_reaction),
             {
                 0x02010930,
                 0x02000540,
@@ -1228,16 +1318,14 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x0200053C,
             },
             100,
-            0x0163A970,
-            0x016432D0,
+            ModelRomBounds(joe_reaction),
             0x02010F50,
             0x02011750,
         },
     },
     {
         {
-            0x0165BD50,
-            0x0165C0C0,
+            ModelRomBounds(plum_palette_1),
             {
                 0x02010F70,
                 0x02000540,
@@ -1256,14 +1344,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x0200053C,
             },
             100,
-            0x01652EB0,
-            0x0165BD50,
+            ModelRomBounds(plum),
             0x02011760,
             0x02012760,
         },
         {
-            0x015F6EC0,
-            0x015F7400,
+            ModelRomBounds(charlie_palette_1),
             {
                 0x02010C80,
                 0x02000540,
@@ -1282,14 +1368,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x0200053C,
             },
             100,
-            0x015EE790,
-            0x015F6EC0,
+            ModelRomBounds(charlie),
             0x02011460,
             0x02012460,
         },
         {
-            0x0160ED90,
-            0x0160F870,
+            ModelRomBounds(maple_palette_1),
             {
                 0x02012B40,
                 0x02000540,
@@ -1308,14 +1392,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x0200053C,
             },
             100,
-            0x01606090,
-            0x0160ED90,
+            ModelRomBounds(maple),
             0x02013358,
             0x02014358,
         },
         {
-            0x016A73A0,
-            0x016A7A50,
+            ModelRomBounds(baby_mario_palette_1),
             {
                 0x0200FF78,
                 0x02000540,
@@ -1334,14 +1416,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x0200053C,
             },
             70,
-            0x016A1220,
-            0x016A73A0,
+            ModelRomBounds(baby_mario),
             0x02010738,
             0x02011738,
         },
         {
-            0x0154C190,
-            0x0154C370,
+            ModelRomBounds(luigi_palette_1),
             {
                 0x0200EFD0,
                 0x02000540,
@@ -1360,14 +1440,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x0200053C,
             },
             100,
-            0x01545D80,
-            0x0154C190,
+            ModelRomBounds(luigi),
             0x0200F6F8,
             0x020106F8,
         },
         {
-            0x015DE6D0,
-            0x015E0570,
+            ModelRomBounds(peach_palette_1),
             {
                 0x02011338,
                 0x02000540,
@@ -1386,14 +1464,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x0200053C,
             },
             100,
-            0x015D5A90,
-            0x015DE6D0,
+            ModelRomBounds(peach),
             0x02011BE0,
             0x02012BE0,
         },
         {
-            0x01681F70,
-            0x01689380,
+            ModelRomBounds(sonny_palette_1),
             {
                 0x0200FC10,
                 0x02000540,
@@ -1412,14 +1488,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x0200053C,
             },
             100,
-            0x0167A3C0,
-            0x01681F70,
+            ModelRomBounds(sonny),
             0x020103E0,
             0x02010BE0,
         },
         {
-            0x0155D0C0,
-            0x0155D450,
+            ModelRomBounds(wario_palette_1),
             {
                 0x02011530,
                 0x02000540,
@@ -1438,14 +1512,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x0200053C,
             },
             100,
-            0x015544C0,
-            0x0155D0C0,
+            ModelRomBounds(wario),
             0x02011D78,
             0x02012D78,
         },
         {
-            0x0164C520,
-            0x0164C5F0,
+            ModelRomBounds(harry_palette_1),
             {
                 0x0200F640,
                 0x02000540,
@@ -1464,14 +1536,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x0200053C,
             },
             100,
-            0x01644C90,
-            0x0164C520,
+            ModelRomBounds(harry),
             0x0200FD58,
             0x02010D58,
         },
         {
-            0x015384B0,
-            0x01538880,
+            ModelRomBounds(mario_palette_1),
             {
                 0x0200C4E0,
                 0x02000540,
@@ -1490,14 +1560,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x0200053C,
             },
             100,
-            0x01533380,
-            0x015384B0,
+            ModelRomBounds(mario),
             0x0200CBF0,
             0x0200DBF0,
         },
         {
-            0x016CE3C0,
-            0x016D2C20,
+            ModelRomBounds(yoshi_palette_1),
             {
                 0x0200E668,
                 0x02000540,
@@ -1516,14 +1584,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x0200053C,
             },
             100,
-            0x016C88B0,
-            0x016CE3C0,
+            ModelRomBounds(yoshi),
             0x0200EE18,
             0x0200FE18,
         },
         {
-            0x01622860,
-            0x01622E00,
+            ModelRomBounds(donkey_kong_palette_1),
             {
                 0x020119E8,
                 0x02000540,
@@ -1542,14 +1608,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x0200053C,
             },
             120,
-            0x0161B430,
-            0x01622860,
+            ModelRomBounds(donkey_kong),
             0x020121C0,
             0x020131C0,
         },
         {
-            0x016BDB40,
-            0x016BE230,
+            ModelRomBounds(bowser_palette_1),
             {
                 0x02010148,
                 0x02000540,
@@ -1568,14 +1632,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x0200053C,
             },
             150,
-            0x016B72B0,
-            0x016BDB40,
+            ModelRomBounds(bowser),
             0x02010790,
             0x02011790,
         },
         {
-            0x0171EB40,
-            0x0171EF00,
+            ModelRomBounds(metal_mario_palette_1),
             {
                 0x02007820,
                 0x02000018,
@@ -1594,14 +1656,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000014,
             },
             100,
-            0x01715F00,
-            0x0171A110,
+            ModelRomBounds(metal_mario),
             0x02007F00,
             0x02008700,
         },
         {
-            0x015AB320,
-            0x015AC1B0,
+            ModelRomBounds(kid_palette_1),
             {
                 0x0200FB18,
                 0x02000540,
@@ -1620,14 +1680,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x0200053C,
             },
             100,
-            0x015A4050,
-            0x015AB320,
+            ModelRomBounds(kid),
             0x020102E8,
             0x020112E8,
         },
         {
-            0x015CD7B0,
-            0x015CDCB0,
+            ModelRomBounds(sherry_palette_1),
             {
                 0x0200F000,
                 0x02000540,
@@ -1646,14 +1704,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x0200053C,
             },
             100,
-            0x015C67B0,
-            0x015CD7B0,
+            ModelRomBounds(sherry),
             0x0200F720,
             0x02010720,
         },
         {
-            0x01575410,
-            0x01580D90,
+            ModelRomBounds(azalea_palette_1),
             {
                 0x02016498,
                 0x02000540,
@@ -1672,14 +1728,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x0200053C,
             },
             100,
-            0x0156A510,
-            0x01575410,
+            ModelRomBounds(azalea),
             0x02016CA8,
             0x02017CA8,
         },
         {
-            0x01638FA0,
-            0x01639330,
+            ModelRomBounds(joe_palette_1),
             {
                 0x02012A48,
                 0x02000540,
@@ -1698,14 +1752,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x0200053C,
             },
             100,
-            0x01630880,
-            0x01638FA0,
+            ModelRomBounds(joe),
             0x02013220,
             0x02013A20,
         },
         {
-            0x0166EDE0,
-            0x0166F670,
+            ModelRomBounds(plum_reaction_palette_1),
             {
                 0x02010FD0,
                 0x02000018,
@@ -1724,14 +1776,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000014,
             },
             100,
-            0x016651E0,
-            0x0166EDE0,
+            ModelRomBounds(plum_reaction),
             0x02011650,
             0x02012650,
         },
         {
-            0x01605EE0,
-            0x01605F70,
+            ModelRomBounds(charlie_reaction_palette_1),
             {
                 0x02019188,
                 0x02000018,
@@ -1750,14 +1800,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000014,
             },
             100,
-            0x015F7E90,
-            0x01605EE0,
+            ModelRomBounds(charlie_reaction),
             0x02019770,
             0x0201A770,
         },
         {
-            0x0161AC20,
-            0x0161AEC0,
+            ModelRomBounds(maple_reaction_palette_1),
             {
                 0x0201A6D0,
                 0x02000018,
@@ -1776,14 +1824,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000014,
             },
             100,
-            0x01610E80,
-            0x0161AC20,
+            ModelRomBounds(maple_reaction),
             0x0201AE40,
             0x0201BE40,
         },
         {
-            0x016B0170,
-            0x016B0A60,
+            ModelRomBounds(baby_mario_reaction_palette_1),
             {
                 0x02013EB0,
                 0x02000018,
@@ -1802,14 +1848,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000014,
             },
             70,
-            0x016A8840,
-            0x016B0170,
+            ModelRomBounds(baby_mario_reaction),
             0x02014570,
             0x02015570,
         },
         {
-            0x01552B20,
-            0x015533C0,
+            ModelRomBounds(luigi_reaction_palette_1),
             {
                 0x02010018,
                 0x02000018,
@@ -1828,14 +1872,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000014,
             },
             100,
-            0x0154C850,
-            0x01552B20,
+            ModelRomBounds(luigi_reaction),
             0x02010628,
             0x02011628,
         },
         {
-            0x015EC1B0,
-            0x015ECE50,
+            ModelRomBounds(peach_reaction_palette_1),
             {
                 0x02015FD8,
                 0x02000018,
@@ -1854,14 +1896,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000014,
             },
             100,
-            0x015E2E00,
-            0x015EC1B0,
+            ModelRomBounds(peach_reaction),
             0x02016638,
             0x02017638,
         },
         {
-            0x016A0220,
-            0x016A0500,
+            ModelRomBounds(sonny_reaction_palette_1),
             {
                 0x02011898,
                 0x02000018,
@@ -1880,14 +1920,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000014,
             },
             100,
-            0x01697C80,
-            0x016A0220,
+            ModelRomBounds(sonny_reaction),
             0x02011F80,
             0x02012F80,
         },
         {
-            0x015690A0,
-            0x01569760,
+            ModelRomBounds(wario_reaction_palette_1),
             {
                 0x02015448,
                 0x02000540,
@@ -1906,14 +1944,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x0200053C,
             },
             100,
-            0x0155DB00,
-            0x015690A0,
+            ModelRomBounds(wario_reaction),
             0x02015B00,
             0x02016B00,
         },
         {
-            0x016525C0,
-            0x01652690,
+            ModelRomBounds(harry_reaction_palette_1),
             {
                 0x0200BD58,
                 0x02000018,
@@ -1932,14 +1968,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000014,
             },
             100,
-            0x0164CBE0,
-            0x016525C0,
+            ModelRomBounds(harry_reaction),
             0x0200C400,
             0x0200D400,
         },
         {
-            0x01543EC0,
-            0x015448E0,
+            ModelRomBounds(mario_reaction_palette_1),
             {
                 0x020109C0,
                 0x02000018,
@@ -1958,14 +1992,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000014,
             },
             100,
-            0x0153DEA0,
-            0x01543EC0,
+            ModelRomBounds(mario_reaction),
             0x020110F0,
             0x020120F0,
         },
         {
-            0x016E2A10,
-            0x016E3460,
+            ModelRomBounds(yoshi_reaction_palette_1),
             {
                 0x02010380,
                 0x02000540,
@@ -1984,14 +2016,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x0200053C,
             },
             100,
-            0x016DBA80,
-            0x016E2A10,
+            ModelRomBounds(yoshi_reaction),
             0x02010950,
             0x02011950,
         },
         {
-            0x0162D080,
-            0x0162E020,
+            ModelRomBounds(donkey_kong_reaction_palette_1),
             {
                 0x020130E8,
                 0x02000018,
@@ -2010,14 +2040,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000014,
             },
             120,
-            0x01624100,
-            0x0162D080,
+            ModelRomBounds(donkey_kong_reaction),
             0x020138F0,
             0x020148F0,
         },
         {
-            0x016C7100,
-            0x016C78C0,
+            ModelRomBounds(bowser_reaction_palette_1),
             {
                 0x0200FD50,
                 0x02000018,
@@ -2036,14 +2064,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000014,
             },
             150,
-            0x016BF760,
-            0x016C7100,
+            ModelRomBounds(bowser_reaction),
             0x020102F0,
             0x020112F0,
         },
         {
-            0x0171EF00,
-            0x0171F1F0,
+            ModelRomBounds(metal_mario_reaction_palette_1),
             {
                 0x020089B0,
                 0x02000018,
@@ -2062,14 +2088,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000014,
             },
             100,
-            0x0171A110,
-            0x0171EB40,
+            ModelRomBounds(metal_mario_reaction),
             0x02009098,
             0x02009898,
         },
         {
-            0x015B9750,
-            0x015BDCC0,
+            ModelRomBounds(kid_reaction_palette_1),
             {
                 0x0200FE40,
                 0x02000018,
@@ -2088,14 +2112,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000014,
             },
             100,
-            0x015B43A0,
-            0x015B9750,
+            ModelRomBounds(kid_reaction),
             0x020103F0,
             0x020113F0,
         },
         {
-            0x015D53C0,
-            0x015D5470,
+            ModelRomBounds(sherry_reaction_palette_1),
             {
                 0x02012760,
                 0x02000018,
@@ -2114,14 +2136,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000014,
             },
             100,
-            0x015CE6E0,
-            0x015D53C0,
+            ModelRomBounds(sherry_reaction),
             0x02013000,
             0x02014000,
         },
         {
-            0x015A19A0,
-            0x015A2670,
+            ModelRomBounds(azalea_reaction_palette_1),
             {
                 0x02019B98,
                 0x02000018,
@@ -2140,14 +2160,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000014,
             },
             100,
-            0x01598100,
-            0x015A19A0,
+            ModelRomBounds(azalea_reaction),
             0x0201A498,
             0x0201B498,
         },
         {
-            0x016432D0,
-            0x01643930,
+            ModelRomBounds(joe_reaction_palette_1),
             {
                 0x020108C0,
                 0x020004D0,
@@ -2166,16 +2184,14 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x020004CC,
             },
             100,
-            0x0163A970,
-            0x016432D0,
+            ModelRomBounds(joe_reaction),
             0x02010EE0,
             0x020116E0,
         },
     },
     {
         {
-            0x0165C0C0,
-            0x0165C430,
+            ModelRomBounds(plum_palette_2),
             {
                 0x02010F70,
                 0x02000540,
@@ -2194,14 +2210,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x0200053C,
             },
             100,
-            0x01652EB0,
-            0x0165BD50,
+            ModelRomBounds(plum),
             0x02011760,
             0x02012760,
         },
         {
-            0x015F7400,
-            0x015F7950,
+            ModelRomBounds(charlie_palette_2),
             {
                 0x02010C80,
                 0x02000540,
@@ -2220,14 +2234,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x0200053C,
             },
             100,
-            0x015EE790,
-            0x015F6EC0,
+            ModelRomBounds(charlie),
             0x02011460,
             0x02012460,
         },
         {
-            0x0160F870,
-            0x01610390,
+            ModelRomBounds(maple_palette_2),
             {
                 0x02012B40,
                 0x02000540,
@@ -2246,14 +2258,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x0200053C,
             },
             100,
-            0x01606090,
-            0x0160ED90,
+            ModelRomBounds(maple),
             0x02013358,
             0x02014358,
         },
         {
-            0x016A7A50,
-            0x016A8190,
+            ModelRomBounds(baby_mario_palette_2),
             {
                 0x0200FF68,
                 0x02000540,
@@ -2272,14 +2282,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x0200053C,
             },
             70,
-            0x016A1220,
-            0x016A73A0,
+            ModelRomBounds(baby_mario),
             0x02010728,
             0x02011728,
         },
         {
-            0x0154C370,
-            0x0154C530,
+            ModelRomBounds(luigi_palette_2),
             {
                 0x0200EFD0,
                 0x02000540,
@@ -2298,14 +2306,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x0200053C,
             },
             100,
-            0x01545D80,
-            0x0154C190,
+            ModelRomBounds(luigi),
             0x0200F6F8,
             0x020106F8,
         },
         {
-            0x015E0570,
-            0x015E19B0,
+            ModelRomBounds(peach_palette_2),
             {
                 0x020112F0,
                 0x02000540,
@@ -2324,14 +2330,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x0200053C,
             },
             100,
-            0x015D5A90,
-            0x015DE6D0,
+            ModelRomBounds(peach),
             0x02011B98,
             0x02012B98,
         },
         {
-            0x01689380,
-            0x01690730,
+            ModelRomBounds(sonny_palette_2),
             {
                 0x0200FBC8,
                 0x02000540,
@@ -2350,14 +2354,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x0200053C,
             },
             100,
-            0x0167A3C0,
-            0x01681F70,
+            ModelRomBounds(sonny),
             0x02010398,
             0x02010B98,
         },
         {
-            0x0155D450,
-            0x0155D7E0,
+            ModelRomBounds(wario_palette_2),
             {
                 0x02011530,
                 0x02000540,
@@ -2376,14 +2378,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x0200053C,
             },
             100,
-            0x015544C0,
-            0x0155D0C0,
+            ModelRomBounds(wario),
             0x02011D78,
             0x02012D78,
         },
         {
-            0x0164C5F0,
-            0x0164CB00,
+            ModelRomBounds(harry_palette_2),
             {
                 0x0200F648,
                 0x02000540,
@@ -2402,14 +2402,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x0200053C,
             },
             100,
-            0x01644C90,
-            0x0164C520,
+            ModelRomBounds(harry),
             0x0200FD60,
             0x02010D60,
         },
         {
-            0x01538880,
-            0x01538CA0,
+            ModelRomBounds(mario_palette_2),
             {
                 0x0200C4E0,
                 0x02000540,
@@ -2428,14 +2426,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x0200053C,
             },
             100,
-            0x01533380,
-            0x015384B0,
+            ModelRomBounds(mario),
             0x0200CBF0,
             0x0200DBF0,
         },
         {
-            0x016D2C20,
-            0x016D7650,
+            ModelRomBounds(yoshi_palette_2),
             {
                 0x0200E668,
                 0x02000540,
@@ -2454,14 +2450,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x0200053C,
             },
             100,
-            0x016C88B0,
-            0x016CE3C0,
+            ModelRomBounds(yoshi),
             0x0200EE18,
             0x0200FE18,
         },
         {
-            0x01622E00,
-            0x016237F0,
+            ModelRomBounds(donkey_kong_palette_2),
             {
                 0x020119E8,
                 0x02000540,
@@ -2480,14 +2474,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x0200053C,
             },
             120,
-            0x0161B430,
-            0x01622860,
+            ModelRomBounds(donkey_kong),
             0x020121C0,
             0x020131C0,
         },
         {
-            0x016BE230,
-            0x016BF010,
+            ModelRomBounds(bowser_palette_2),
             {
                 0x020101F8,
                 0x02000540,
@@ -2506,14 +2498,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x0200053C,
             },
             150,
-            0x016B72B0,
-            0x016BDB40,
+            ModelRomBounds(bowser),
             0x02010840,
             0x02011840,
         },
         {
-            0x0171F1F0,
-            0x0171F210,
+            ModelRomBounds(metal_mario_palette_2),
             {
                 0x02007900,
                 0x02000018,
@@ -2532,14 +2522,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000014,
             },
             100,
-            0x01715F00,
-            0x0171A110,
+            ModelRomBounds(metal_mario),
             0x02007FE0,
             0x020087E0,
         },
         {
-            0x015AC1B0,
-            0x015AD030,
+            ModelRomBounds(kid_palette_2),
             {
                 0x0200FB18,
                 0x02000540,
@@ -2558,14 +2546,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x0200053C,
             },
             100,
-            0x015A4050,
-            0x015AB320,
+            ModelRomBounds(kid),
             0x020102E8,
             0x020112E8,
         },
         {
-            0x015CDCB0,
-            0x015CE220,
+            ModelRomBounds(sherry_palette_2),
             {
                 0x0200EFA8,
                 0x02000540,
@@ -2584,14 +2570,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x0200053C,
             },
             100,
-            0x015C67B0,
-            0x015CD7B0,
+            ModelRomBounds(sherry),
             0x0200F6C8,
             0x020106C8,
         },
         {
-            0x01580D90,
-            0x0158C750,
+            ModelRomBounds(azalea_palette_2),
             {
                 0x02016490,
                 0x02000540,
@@ -2610,14 +2594,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x0200053C,
             },
             100,
-            0x0156A510,
-            0x01575410,
+            ModelRomBounds(azalea),
             0x02016CA0,
             0x02017CA0,
         },
         {
-            0x01639330,
-            0x01639A30,
+            ModelRomBounds(joe_palette_2),
             {
                 0x02012A88,
                 0x02000540,
@@ -2636,14 +2618,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x0200053C,
             },
             100,
-            0x01630880,
-            0x01638FA0,
+            ModelRomBounds(joe),
             0x02013260,
             0x02013A60,
         },
         {
-            0x0166F670,
-            0x0166FF00,
+            ModelRomBounds(plum_reaction_palette_2),
             {
                 0x02010FD0,
                 0x02000018,
@@ -2662,14 +2642,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000014,
             },
             100,
-            0x016651E0,
-            0x0166EDE0,
+            ModelRomBounds(plum_reaction),
             0x02011650,
             0x02012650,
         },
         {
-            0x01605F70,
-            0x01606000,
+            ModelRomBounds(charlie_reaction_palette_2),
             {
                 0x02019188,
                 0x02000018,
@@ -2688,14 +2666,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000014,
             },
             100,
-            0x015F7E90,
-            0x01605EE0,
+            ModelRomBounds(charlie_reaction),
             0x02019770,
             0x0201A770,
         },
         {
-            0x0161AEC0,
-            0x0161B180,
+            ModelRomBounds(maple_reaction_palette_2),
             {
                 0x0201A6D0,
                 0x02000018,
@@ -2714,14 +2690,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000014,
             },
             100,
-            0x01610E80,
-            0x0161AC20,
+            ModelRomBounds(maple_reaction),
             0x0201AE40,
             0x0201BE40,
         },
         {
-            0x016B0A60,
-            0x016B1300,
+            ModelRomBounds(baby_mario_reaction_palette_2),
             {
                 0x02013EA0,
                 0x02000018,
@@ -2740,14 +2714,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000014,
             },
             70,
-            0x016A8840,
-            0x016B0170,
+            ModelRomBounds(baby_mario_reaction),
             0x02014560,
             0x02015560,
         },
         {
-            0x015533C0,
-            0x01553C40,
+            ModelRomBounds(luigi_reaction_palette_2),
             {
                 0x02010018,
                 0x02000018,
@@ -2766,14 +2738,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000014,
             },
             100,
-            0x0154C850,
-            0x01552B20,
+            ModelRomBounds(luigi_reaction),
             0x02010628,
             0x02011628,
         },
         {
-            0x015ECE50,
-            0x015EDAF0,
+            ModelRomBounds(peach_reaction_palette_2),
             {
                 0x02015FD8,
                 0x02000018,
@@ -2792,14 +2762,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000014,
             },
             100,
-            0x015E2E00,
-            0x015EC1B0,
+            ModelRomBounds(peach_reaction),
             0x02016638,
             0x02017638,
         },
         {
-            0x016A0500,
-            0x016A0770,
+            ModelRomBounds(sonny_reaction_palette_2),
             {
                 0x02011898,
                 0x02000018,
@@ -2818,14 +2786,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000014,
             },
             100,
-            0x01697C80,
-            0x016A0220,
+            ModelRomBounds(sonny_reaction),
             0x02011F80,
             0x02012F80,
         },
         {
-            0x01569760,
-            0x01569E60,
+            ModelRomBounds(wario_reaction_palette_2),
             {
                 0x02015448,
                 0x02000540,
@@ -2844,14 +2810,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x0200053C,
             },
             100,
-            0x0155DB00,
-            0x015690A0,
+            ModelRomBounds(wario_reaction),
             0x02015B00,
             0x02016B00,
         },
         {
-            0x01652690,
-            0x01652A60,
+            ModelRomBounds(harry_reaction_palette_2),
             {
                 0x0200BD68,
                 0x02000018,
@@ -2870,14 +2834,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000014,
             },
             100,
-            0x0164CBE0,
-            0x016525C0,
+            ModelRomBounds(harry_reaction),
             0x0200C410,
             0x0200D410,
         },
         {
-            0x015448E0,
-            0x01545360,
+            ModelRomBounds(mario_reaction_palette_2),
             {
                 0x020109C0,
                 0x02000018,
@@ -2896,14 +2858,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000014,
             },
             100,
-            0x0153DEA0,
-            0x01543EC0,
+            ModelRomBounds(mario_reaction),
             0x020110F0,
             0x020120F0,
         },
         {
-            0x016E3460,
-            0x016E3D90,
+            ModelRomBounds(yoshi_reaction_palette_2),
             {
                 0x02010380,
                 0x02000540,
@@ -2922,14 +2882,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x0200053C,
             },
             100,
-            0x016DBA80,
-            0x016E2A10,
+            ModelRomBounds(yoshi_reaction),
             0x02010950,
             0x02011950,
         },
         {
-            0x0162E020,
-            0x0162F580,
+            ModelRomBounds(donkey_kong_reaction_palette_2),
             {
                 0x020130E8,
                 0x02000018,
@@ -2948,14 +2906,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000014,
             },
             120,
-            0x01624100,
-            0x0162D080,
+            ModelRomBounds(donkey_kong_reaction),
             0x020138F0,
             0x020148F0,
         },
         {
-            0x016C78C0,
-            0x016C8080,
+            ModelRomBounds(bowser_reaction_palette_2),
             {
                 0x0200FD50,
                 0x02000018,
@@ -2974,14 +2930,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000014,
             },
             150,
-            0x016BF760,
-            0x016C7100,
+            ModelRomBounds(bowser_reaction),
             0x020102F0,
             0x020112F0,
         },
         {
-            0x0171F210,
-            0x0171F500,
+            ModelRomBounds(metal_mario_reaction_palette_2),
             {
                 0x020089B0,
                 0x02000018,
@@ -3000,14 +2954,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000014,
             },
             100,
-            0x0171A110,
-            0x0171EB40,
+            ModelRomBounds(metal_mario_reaction),
             0x02009098,
             0x02009898,
         },
         {
-            0x015BDCC0,
-            0x015C2240,
+            ModelRomBounds(kid_reaction_palette_2),
             {
                 0x0200FE40,
                 0x02000018,
@@ -3026,14 +2978,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000014,
             },
             100,
-            0x015B43A0,
-            0x015B9750,
+            ModelRomBounds(kid_reaction),
             0x020103F0,
             0x020113F0,
         },
         {
-            0x015D5470,
-            0x015D59D0,
+            ModelRomBounds(sherry_reaction_palette_2),
             {
                 0x02012718,
                 0x02000018,
@@ -3052,14 +3002,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000014,
             },
             100,
-            0x015CE6E0,
-            0x015D53C0,
+            ModelRomBounds(sherry_reaction),
             0x02012FB8,
             0x02013FB8,
         },
         {
-            0x015A2670,
-            0x015A3350,
+            ModelRomBounds(azalea_reaction_palette_2),
             {
                 0x02019B98,
                 0x02000018,
@@ -3078,14 +3026,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000014,
             },
             100,
-            0x01598100,
-            0x015A19A0,
+            ModelRomBounds(azalea_reaction),
             0x0201A498,
             0x0201B498,
         },
         {
-            0x01643930,
-            0x01643D10,
+            ModelRomBounds(joe_reaction_palette_2),
             {
                 0x02010980,
                 0x02000540,
@@ -3104,16 +3050,14 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x0200053C,
             },
             100,
-            0x0163A970,
-            0x016432D0,
+            ModelRomBounds(joe_reaction),
             0x02010FA0,
             0x020117A0,
         },
     },
     {
         {
-            0x0165C430,
-            0x016651E0,
+            ModelRomBounds(plum_palette_3),
             {
                 0x020109F8,
                 0x02000018,
@@ -3132,14 +3076,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000014,
             },
             100,
-            0x01652EB0,
-            0x0165BD50,
+            ModelRomBounds(plum),
             0x020111E8,
             0x020121E8,
         },
         {
-            0x015F7950,
-            0x015F7E90,
+            ModelRomBounds(charlie_palette_3),
             {
                 0x02010C80,
                 0x02000540,
@@ -3158,14 +3100,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x0200053C,
             },
             100,
-            0x015EE790,
-            0x015F6EC0,
+            ModelRomBounds(charlie),
             0x02011460,
             0x02012460,
         },
         {
-            0x01610390,
-            0x01610E80,
+            ModelRomBounds(maple_palette_3),
             {
                 0x02012B40,
                 0x02000540,
@@ -3184,14 +3124,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x0200053C,
             },
             100,
-            0x01606090,
-            0x0160ED90,
+            ModelRomBounds(maple),
             0x02013358,
             0x02014358,
         },
         {
-            0x016A8190,
-            0x016A8840,
+            ModelRomBounds(baby_mario_palette_3),
             {
                 0x0200FF78,
                 0x02000540,
@@ -3210,14 +3148,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x0200053C,
             },
             70,
-            0x016A1220,
-            0x016A73A0,
+            ModelRomBounds(baby_mario),
             0x02010738,
             0x02011738,
         },
         {
-            0x0154C530,
-            0x0154C850,
+            ModelRomBounds(luigi_palette_3),
             {
                 0x0200EFD0,
                 0x02000540,
@@ -3236,14 +3172,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x0200053C,
             },
             100,
-            0x01545D80,
-            0x0154C190,
+            ModelRomBounds(luigi),
             0x0200F6F8,
             0x020106F8,
         },
         {
-            0x015E19B0,
-            0x015E2E00,
+            ModelRomBounds(peach_palette_3),
             {
                 0x020112F0,
                 0x02000540,
@@ -3262,14 +3196,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x0200053C,
             },
             100,
-            0x015D5A90,
-            0x015DE6D0,
+            ModelRomBounds(peach),
             0x02011B98,
             0x02012B98,
         },
         {
-            0x01690730,
-            0x01697C80,
+            ModelRomBounds(sonny_palette_3),
             {
                 0x0200FC10,
                 0x02000540,
@@ -3288,14 +3220,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x0200053C,
             },
             100,
-            0x0167A3C0,
-            0x01681F70,
+            ModelRomBounds(sonny),
             0x020103E0,
             0x02010BE0,
         },
         {
-            0x0155D7E0,
-            0x0155DB00,
+            ModelRomBounds(wario_palette_3),
             {
                 0x02011530,
                 0x02000540,
@@ -3314,14 +3244,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x0200053C,
             },
             100,
-            0x015544C0,
-            0x0155D0C0,
+            ModelRomBounds(wario),
             0x02011D78,
             0x02012D78,
         },
         {
-            0x0164CB00,
-            0x0164CBE0,
+            ModelRomBounds(harry_palette_3),
             {
                 0x0200F640,
                 0x02000540,
@@ -3340,14 +3268,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x0200053C,
             },
             100,
-            0x01644C90,
-            0x0164C520,
+            ModelRomBounds(harry),
             0x0200FD58,
             0x02010D58,
         },
         {
-            0x01538CA0,
-            0x0153DEA0,
+            ModelRomBounds(mario_palette_3),
             {
                 0x0200BF68,
                 0x02000018,
@@ -3366,14 +3292,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000014,
             },
             100,
-            0x01533380,
-            0x015384B0,
+            ModelRomBounds(mario),
             0x0200C678,
             0x0200D678,
         },
         {
-            0x016D7650,
-            0x016DBA80,
+            ModelRomBounds(yoshi_palette_3),
             {
                 0x0200E548,
                 0x02000540,
@@ -3392,14 +3316,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x0200053C,
             },
             100,
-            0x016C88B0,
-            0x016CE3C0,
+            ModelRomBounds(yoshi),
             0x0200ECF8,
             0x0200FCF8,
         },
         {
-            0x016237F0,
-            0x01624100,
+            ModelRomBounds(donkey_kong_palette_3),
             {
                 0x020119E8,
                 0x02000540,
@@ -3418,14 +3340,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x0200053C,
             },
             120,
-            0x0161B430,
-            0x01622860,
+            ModelRomBounds(donkey_kong),
             0x020121C0,
             0x020131C0,
         },
         {
-            0x016BF010,
-            0x016BF760,
+            ModelRomBounds(bowser_palette_3),
             {
                 0x02010148,
                 0x02000540,
@@ -3444,14 +3364,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x0200053C,
             },
             150,
-            0x016B72B0,
-            0x016BDB40,
+            ModelRomBounds(bowser),
             0x02010790,
             0x02011790,
         },
         {
-            0x0171F500,
-            0x0171F520,
+            ModelRomBounds(metal_mario_palette_3),
             {
                 0x02007900,
                 0x02000018,
@@ -3470,14 +3388,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000014,
             },
             100,
-            0x01715F00,
-            0x0171A110,
+            ModelRomBounds(metal_mario),
             0x02007FE0,
             0x020087E0,
         },
         {
-            0x015AD030,
-            0x015B43A0,
+            ModelRomBounds(kid_palette_3),
             {
                 0x0200F5A0,
                 0x02000018,
@@ -3496,14 +3412,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000014,
             },
             100,
-            0x015A4050,
-            0x015AB320,
+            ModelRomBounds(kid),
             0x0200FD70,
             0x02010D70,
         },
         {
-            0x015CE220,
-            0x015CE6E0,
+            ModelRomBounds(sherry_palette_3),
             {
                 0x0200F060,
                 0x02000540,
@@ -3522,14 +3436,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x0200053C,
             },
             100,
-            0x015C67B0,
-            0x015CD7B0,
+            ModelRomBounds(sherry),
             0x0200F780,
             0x02010780,
         },
         {
-            0x0158C750,
-            0x01598100,
+            ModelRomBounds(azalea_palette_3),
             {
                 0x02016498,
                 0x02000540,
@@ -3548,14 +3460,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x0200053C,
             },
             100,
-            0x0156A510,
-            0x01575410,
+            ModelRomBounds(azalea),
             0x02016CA8,
             0x02017CA8,
         },
         {
-            0x01639A30,
-            0x0163A970,
+            ModelRomBounds(joe_palette_3),
             {
                 0x02012A88,
                 0x02000540,
@@ -3574,14 +3484,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x0200053C,
             },
             100,
-            0x01630880,
-            0x01638FA0,
+            ModelRomBounds(joe),
             0x02013260,
             0x02013A60,
         },
         {
-            0x0166FF00,
-            0x0167A3C0,
+            ModelRomBounds(plum_reaction_palette_3),
             {
                 0x02012F38,
                 0x02000018,
@@ -3600,14 +3508,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000014,
             },
             100,
-            0x016651E0,
-            0x0166EDE0,
+            ModelRomBounds(plum_reaction),
             0x020135C8,
             0x020145C8,
         },
         {
-            0x01606000,
-            0x01606090,
+            ModelRomBounds(charlie_reaction_palette_3),
             {
                 0x02019188,
                 0x02000018,
@@ -3626,14 +3532,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000014,
             },
             100,
-            0x015F7E90,
-            0x01605EE0,
+            ModelRomBounds(charlie_reaction),
             0x02019770,
             0x0201A770,
         },
         {
-            0x0161B180,
-            0x0161B430,
+            ModelRomBounds(maple_reaction_palette_3),
             {
                 0x0201A6D0,
                 0x02000018,
@@ -3652,14 +3556,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000014,
             },
             100,
-            0x01610E80,
-            0x0161AC20,
+            ModelRomBounds(maple_reaction),
             0x0201AE40,
             0x0201BE40,
         },
         {
-            0x016B1300,
-            0x016B1BF0,
+            ModelRomBounds(baby_mario_reaction_palette_3),
             {
                 0x02013EB0,
                 0x02000018,
@@ -3678,14 +3580,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000014,
             },
             70,
-            0x016A8840,
-            0x016B0170,
+            ModelRomBounds(baby_mario_reaction),
             0x02014570,
             0x02015570,
         },
         {
-            0x01553C40,
-            0x015544C0,
+            ModelRomBounds(luigi_reaction_palette_3),
             {
                 0x02010018,
                 0x02000018,
@@ -3704,14 +3604,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000014,
             },
             100,
-            0x0154C850,
-            0x01552B20,
+            ModelRomBounds(luigi_reaction),
             0x02010628,
             0x02011628,
         },
         {
-            0x015EDAF0,
-            0x015EE790,
+            ModelRomBounds(peach_reaction_palette_3),
             {
                 0x02015FD8,
                 0x02000018,
@@ -3730,14 +3628,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000014,
             },
             100,
-            0x015E2E00,
-            0x015EC1B0,
+            ModelRomBounds(peach_reaction),
             0x02016638,
             0x02017638,
         },
         {
-            0x016A0770,
-            0x016A1220,
+            ModelRomBounds(sonny_reaction_palette_3),
             {
                 0x02011898,
                 0x02000018,
@@ -3756,14 +3652,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000014,
             },
             100,
-            0x01697C80,
-            0x016A0220,
+            ModelRomBounds(sonny_reaction),
             0x02011F80,
             0x02012F80,
         },
         {
-            0x01569E60,
-            0x0156A510,
+            ModelRomBounds(wario_reaction_palette_3),
             {
                 0x02015448,
                 0x02000540,
@@ -3782,14 +3676,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x0200053C,
             },
             100,
-            0x0155DB00,
-            0x015690A0,
+            ModelRomBounds(wario_reaction),
             0x02015B00,
             0x02016B00,
         },
         {
-            0x01652A60,
-            0x01652EB0,
+            ModelRomBounds(harry_reaction_palette_3),
             {
                 0x0200BD40,
                 0x02000018,
@@ -3808,14 +3700,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000014,
             },
             100,
-            0x0164CBE0,
-            0x016525C0,
+            ModelRomBounds(harry_reaction),
             0x0200C3E8,
             0x0200D3E8,
         },
         {
-            0x01545360,
-            0x01545D80,
+            ModelRomBounds(mario_reaction_palette_3),
             {
                 0x020109C0,
                 0x02000018,
@@ -3834,14 +3724,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000014,
             },
             100,
-            0x0153DEA0,
-            0x01543EC0,
+            ModelRomBounds(mario_reaction),
             0x020110F0,
             0x020120F0,
         },
         {
-            0x016E3D90,
-            0x016E46B0,
+            ModelRomBounds(yoshi_reaction_palette_3),
             {
                 0x02010380,
                 0x02000540,
@@ -3860,14 +3748,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x0200053C,
             },
             100,
-            0x016DBA80,
-            0x016E2A10,
+            ModelRomBounds(yoshi_reaction),
             0x02010950,
             0x02011950,
         },
         {
-            0x0162F580,
-            0x01630880,
+            ModelRomBounds(donkey_kong_reaction_palette_3),
             {
                 0x020130E8,
                 0x02000018,
@@ -3886,14 +3772,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000014,
             },
             120,
-            0x01624100,
-            0x0162D080,
+            ModelRomBounds(donkey_kong_reaction),
             0x020138F0,
             0x020148F0,
         },
         {
-            0x016C8080,
-            0x016C88B0,
+            ModelRomBounds(bowser_reaction_palette_3),
             {
                 0x0200FD50,
                 0x02000018,
@@ -3912,14 +3796,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000014,
             },
             150,
-            0x016BF760,
-            0x016C7100,
+            ModelRomBounds(bowser_reaction),
             0x020102F0,
             0x020112F0,
         },
         {
-            0x0171F520,
-            0x0171F540,
+            ModelRomBounds(metal_mario_reaction_palette_3),
             {
                 0x020089A8,
                 0x02000018,
@@ -3938,14 +3820,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000014,
             },
             100,
-            0x0171A110,
-            0x0171EB40,
+            ModelRomBounds(metal_mario_reaction),
             0x02009090,
             0x02009890,
         },
         {
-            0x015C2240,
-            0x015C67B0,
+            ModelRomBounds(kid_reaction_palette_3),
             {
                 0x0200FE40,
                 0x02000018,
@@ -3964,14 +3844,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000014,
             },
             100,
-            0x015B43A0,
-            0x015B9750,
+            ModelRomBounds(kid_reaction),
             0x020103F0,
             0x020113F0,
         },
         {
-            0x015D59D0,
-            0x015D5A90,
+            ModelRomBounds(sherry_reaction_palette_3),
             {
                 0x02012760,
                 0x02000018,
@@ -3990,14 +3868,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000014,
             },
             100,
-            0x015CE6E0,
-            0x015D53C0,
+            ModelRomBounds(sherry_reaction),
             0x02013000,
             0x02014000,
         },
         {
-            0x015A3350,
-            0x015A4050,
+            ModelRomBounds(azalea_reaction_palette_3),
             {
                 0x02019B98,
                 0x02000018,
@@ -4016,14 +3892,12 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x02000014,
             },
             100,
-            0x01598100,
-            0x015A19A0,
+            ModelRomBounds(azalea_reaction),
             0x0201A498,
             0x0201B498,
         },
         {
-            0x01643D10,
-            0x01644C90,
+            ModelRomBounds(joe_reaction_palette_3),
             {
                 0x02010910,
                 0x020004D0,
@@ -4042,8 +3916,7 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
                 0x020004CC,
             },
             100,
-            0x0163A970,
-            0x016432D0,
+            ModelRomBounds(joe_reaction),
             0x02010F30,
             0x02011730,
         },
@@ -4054,8 +3927,7 @@ const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MOD
  * CHARACTER_MODEL_KIND_COUNT or more */
 const CharacterModel g_OtherCharacterModels[OTHER_CHARACTER_MODEL_COUNT] = {
     {
-        0x016E46B0,
-        0x016ED4B0,
+        ModelRomBounds(opening_mario),
         {
             0x020124B8,
             0x02000018,
@@ -4074,14 +3946,12 @@ const CharacterModel g_OtherCharacterModels[OTHER_CHARACTER_MODEL_COUNT] = {
             0x02000014,
         },
         70,
-        0x016E46B0,
-        0x016ED4B0,
+        ModelRomBounds(opening_mario),
         0x02012B10,
         0x02013B10,
     },
     {
-        0x016E46B0,
-        0x016ED4B0,
+        ModelRomBounds(opening_mario),
         {
             0x020124B8,
             0x02000018,
@@ -4100,14 +3970,12 @@ const CharacterModel g_OtherCharacterModels[OTHER_CHARACTER_MODEL_COUNT] = {
             0x02000014,
         },
         70,
-        0x016E46B0,
-        0x016ED4B0,
+        ModelRomBounds(opening_mario),
         0x02012B10,
         0x02013B10,
     },
     {
-        0x016E46B0,
-        0x016ED4B0,
+        ModelRomBounds(opening_mario),
         {
             0x020124B8,
             0x02000018,
@@ -4126,14 +3994,12 @@ const CharacterModel g_OtherCharacterModels[OTHER_CHARACTER_MODEL_COUNT] = {
             0x02000014,
         },
         70,
-        0x016E46B0,
-        0x016ED4B0,
+        ModelRomBounds(opening_mario),
         0x02012B10,
         0x02013B10,
     },
     {
-        0x016E46B0,
-        0x016ED4B0,
+        ModelRomBounds(opening_mario),
         {
             0x020124B8,
             0x02000018,
@@ -4152,14 +4018,12 @@ const CharacterModel g_OtherCharacterModels[OTHER_CHARACTER_MODEL_COUNT] = {
             0x02000014,
         },
         70,
-        0x016E46B0,
-        0x016ED4B0,
+        ModelRomBounds(opening_mario),
         0x02012B10,
         0x02013B10,
     },
     {
-        0x016E46B0,
-        0x016ED4B0,
+        ModelRomBounds(opening_mario),
         {
             0x020124B8,
             0x02000018,
@@ -4178,14 +4042,12 @@ const CharacterModel g_OtherCharacterModels[OTHER_CHARACTER_MODEL_COUNT] = {
             0x02000014,
         },
         70,
-        0x016E46B0,
-        0x016ED4B0,
+        ModelRomBounds(opening_mario),
         0x02012B10,
         0x02013B10,
     },
     {
-        0x016E46B0,
-        0x016ED4B0,
+        ModelRomBounds(opening_mario),
         {
             0x020124B8,
             0x02000018,
@@ -4204,14 +4066,12 @@ const CharacterModel g_OtherCharacterModels[OTHER_CHARACTER_MODEL_COUNT] = {
             0x02000014,
         },
         70,
-        0x016E46B0,
-        0x016ED4B0,
+        ModelRomBounds(opening_mario),
         0x02012B10,
         0x02013B10,
     },
     {
-        0x016E46B0,
-        0x016ED4B0,
+        ModelRomBounds(opening_mario),
         {
             0x020124B8,
             0x02000018,
@@ -4230,14 +4090,12 @@ const CharacterModel g_OtherCharacterModels[OTHER_CHARACTER_MODEL_COUNT] = {
             0x02000014,
         },
         70,
-        0x016E46B0,
-        0x016ED4B0,
+        ModelRomBounds(opening_mario),
         0x02012B10,
         0x02013B10,
     },
     {
-        0x016E46B0,
-        0x016ED4B0,
+        ModelRomBounds(opening_mario),
         {
             0x020124B8,
             0x02000018,
@@ -4256,14 +4114,12 @@ const CharacterModel g_OtherCharacterModels[OTHER_CHARACTER_MODEL_COUNT] = {
             0x02000014,
         },
         70,
-        0x016E46B0,
-        0x016ED4B0,
+        ModelRomBounds(opening_mario),
         0x02012B10,
         0x02013B10,
     },
     {
-        0x016E46B0,
-        0x016ED4B0,
+        ModelRomBounds(opening_mario),
         {
             0x020124B8,
             0x02000018,
@@ -4282,14 +4138,12 @@ const CharacterModel g_OtherCharacterModels[OTHER_CHARACTER_MODEL_COUNT] = {
             0x02000014,
         },
         70,
-        0x016E46B0,
-        0x016ED4B0,
+        ModelRomBounds(opening_mario),
         0x02012B10,
         0x02013B10,
     },
     {
-        0x0170CDB0,
-        0x017107A0,
+        ModelRomBounds(opening_yoshi),
         {
             0x02007DF8,
             0x02000540,
@@ -4308,14 +4162,12 @@ const CharacterModel g_OtherCharacterModels[OTHER_CHARACTER_MODEL_COUNT] = {
             0x0200053C,
         },
         100,
-        0x0170CDB0,
-        0x017107A0,
+        ModelRomBounds(opening_yoshi),
         0x02008318,
         0x02008B18,
     },
     {
-        0x01704B40,
-        0x01709770,
+        ModelRomBounds(opening_baby_mario),
         {
             0x02009088,
             0x02000018,
@@ -4334,14 +4186,12 @@ const CharacterModel g_OtherCharacterModels[OTHER_CHARACTER_MODEL_COUNT] = {
             0x02000014,
         },
         60,
-        0x01704B40,
-        0x01709770,
+        ModelRomBounds(opening_baby_mario),
         0x02009600,
         0x02009E00,
     },
     {
-        0x01709770,
-        0x0170CDB0,
+        ModelRomBounds(opening_donkey_kong),
         {
             0x020085C8,
             0x02000018,
@@ -4360,14 +4210,12 @@ const CharacterModel g_OtherCharacterModels[OTHER_CHARACTER_MODEL_COUNT] = {
             0x02000014,
         },
         120,
-        0x01709770,
-        0x0170CDB0,
+        ModelRomBounds(opening_donkey_kong),
         0x02008BD8,
         0x020093D8,
     },
     {
-        0x016F7950,
-        0x016FD9F0,
+        ModelRomBounds(opening_plum),
         {
             0x0200A888,
             0x02000018,
@@ -4386,14 +4234,12 @@ const CharacterModel g_OtherCharacterModels[OTHER_CHARACTER_MODEL_COUNT] = {
             0x02000014,
         },
         60,
-        0x016F7950,
-        0x016FD9F0,
+        ModelRomBounds(opening_plum),
         0x0200AFE0,
         0x0200B7E0,
     },
     {
-        0x016FD9F0,
-        0x01704B40,
+        ModelRomBounds(opening_peach),
         {
             0x0200C7C0,
             0x02000018,
@@ -4412,14 +4258,12 @@ const CharacterModel g_OtherCharacterModels[OTHER_CHARACTER_MODEL_COUNT] = {
             0x02000014,
         },
         60,
-        0x016FD9F0,
-        0x01704B40,
+        ModelRomBounds(opening_peach),
         0x0200CF38,
         0x0200D738,
     },
     {
-        0x016ED4B0,
-        0x016F5610,
+        ModelRomBounds(opening_luigi),
         {
             0x02011338,
             0x02000018,
@@ -4438,14 +4282,12 @@ const CharacterModel g_OtherCharacterModels[OTHER_CHARACTER_MODEL_COUNT] = {
             0x02000014,
         },
         70,
-        0x016ED4B0,
-        0x016F5610,
+        ModelRomBounds(opening_luigi),
         0x02011980,
         0x02012980,
     },
     {
-        0x0152B6C0,
-        0x01533380,
+        ModelRomBounds(opening_model_15),
         {
             0x02010050,
             0x02000018,
@@ -4464,14 +4306,12 @@ const CharacterModel g_OtherCharacterModels[OTHER_CHARACTER_MODEL_COUNT] = {
             0x02000014,
         },
         100,
-        0x0152B6C0,
-        0x01533380,
+        ModelRomBounds(opening_model_15),
         0x02010668,
         0x02011668,
     },
     {
-        0x016F5610,
-        0x016F7950,
+        ModelRomBounds(opening_toad),
         {
             0x02005340,
             0x02000018,
@@ -4490,14 +4330,12 @@ const CharacterModel g_OtherCharacterModels[OTHER_CHARACTER_MODEL_COUNT] = {
             0x02000014,
         },
         60,
-        0x016F5610,
-        0x016F7950,
+        ModelRomBounds(opening_toad),
         0x02005810,
         0x02006010,
     },
     {
-        0x017107A0,
-        0x01715F00,
+        ModelRomBounds(opening_model_17),
         {
             0x0200D0A0,
             0x02000018,
@@ -4516,8 +4354,7 @@ const CharacterModel g_OtherCharacterModels[OTHER_CHARACTER_MODEL_COUNT] = {
             0x02000014,
         },
         100,
-        0x017107A0,
-        0x01715F00,
+        ModelRomBounds(opening_model_17),
         0x0200D790,
         0x0200E790,
     },
