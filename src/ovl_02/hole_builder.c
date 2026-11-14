@@ -2657,10 +2657,10 @@ void InitGridVertices(void) {
         g_WorkArea.hole.gridVertices[vertexIndex].v.flag = 0;
         g_WorkArea.hole.gridVertices[vertexIndex].v.tc[TEXTURE_AXIS_T] =
             (z * GRID_TEXTURE_SCALE) + GRID_TEXTURE_BORDER;
-        g_WorkArea.hole.gridVertices[vertexIndex].v.cn[0] = 0;
-        g_WorkArea.hole.gridVertices[vertexIndex].v.cn[1] = 0;
-        g_WorkArea.hole.gridVertices[vertexIndex].v.cn[2] = 0;
-        g_WorkArea.hole.gridVertices[vertexIndex].v.cn[3] = 0;
+        g_WorkArea.hole.gridVertices[vertexIndex].v.cn[RED_CHANNEL] = 0;
+        g_WorkArea.hole.gridVertices[vertexIndex].v.cn[GREEN_CHANNEL] = 0;
+        g_WorkArea.hole.gridVertices[vertexIndex].v.cn[BLUE_CHANNEL] = 0;
+        g_WorkArea.hole.gridVertices[vertexIndex].v.cn[ALPHA_CHANNEL] = 0;
         x += TILE_SPAN;
         if (x == (GROUND_TILE_COLUMN_COUNT + 1) * TILE_SPAN) {
             x = HALF_TILE_SPAN;
@@ -2726,10 +2726,10 @@ void InitTileMidpoints(void) {
                 ((x + offsets[midpointIndex][0]) * GRID_TEXTURE_SCALE) + GRID_TEXTURE_BORDER;
             g_WorkArea.hole.midpoints[tileIndex][midpointIndex].v.tc[TEXTURE_AXIS_T] =
                 ((z + offsets[midpointIndex][1]) * GRID_TEXTURE_SCALE) + GRID_TEXTURE_BORDER;
-            g_WorkArea.hole.midpoints[tileIndex][midpointIndex].v.cn[0] = 0;
-            g_WorkArea.hole.midpoints[tileIndex][midpointIndex].v.cn[1] = 0;
-            g_WorkArea.hole.midpoints[tileIndex][midpointIndex].v.cn[2] = 0;
-            g_WorkArea.hole.midpoints[tileIndex][midpointIndex].v.cn[3] = 0;
+            g_WorkArea.hole.midpoints[tileIndex][midpointIndex].v.cn[RED_CHANNEL] = 0;
+            g_WorkArea.hole.midpoints[tileIndex][midpointIndex].v.cn[GREEN_CHANNEL] = 0;
+            g_WorkArea.hole.midpoints[tileIndex][midpointIndex].v.cn[BLUE_CHANNEL] = 0;
+            g_WorkArea.hole.midpoints[tileIndex][midpointIndex].v.cn[ALPHA_CHANNEL] = 0;
         }
 
         x += TILE_SPAN;

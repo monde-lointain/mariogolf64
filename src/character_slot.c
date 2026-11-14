@@ -50,9 +50,9 @@ void SetCharacterAlpha(s32 alpha) {
     for (colorIndex = 0; colorIndex != ENV_COLOR_COUNT; colorIndex++) {
         gDPSetEnvColor(
             gfx++,
-            g_CharacterEnvColors[colorIndex][0],
-            g_CharacterEnvColors[colorIndex][1],
-            g_CharacterEnvColors[colorIndex][2],
+            g_CharacterEnvColors[colorIndex][RED_CHANNEL],
+            g_CharacterEnvColors[colorIndex][GREEN_CHANNEL],
+            g_CharacterEnvColors[colorIndex][BLUE_CHANNEL],
             alpha
         );
         gSPEndDisplayList(gfx++);

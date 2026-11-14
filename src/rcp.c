@@ -46,9 +46,9 @@ void InitRcp(s32 viewportIndex) {
 }
 
 void SetFillColor(s32 red, s32 green, s32 blue) {
-    f_FillColor[0] = red;
-    f_FillColor[1] = green;
-    f_FillColor[2] = blue;
+    f_FillColor[RED_CHANNEL] = red;
+    f_FillColor[GREEN_CHANNEL] = green;
+    f_FillColor[BLUE_CHANNEL] = blue;
 }
 
 void FillScreen(void) {
@@ -59,7 +59,12 @@ void FillScreen(void) {
     gDPSetCycleType(g_DisplayListHead++, G_CYC_FILL);
     gDPSetFillColor(
         g_DisplayListHead++,
-        FillColor16(f_FillColor[0], f_FillColor[1], f_FillColor[2], 1)
+        FillColor16(
+            f_FillColor[RED_CHANNEL],
+            f_FillColor[GREEN_CHANNEL],
+            f_FillColor[BLUE_CHANNEL],
+            1
+        )
     );
     gDPPipeSync(g_DisplayListHead++);
     gDPFillRectangle(

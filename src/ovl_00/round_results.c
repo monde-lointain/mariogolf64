@@ -4393,9 +4393,9 @@ void DrawClubTournamentResults(Gfx **displayListHead) {
             gfx++,
             0,
             0,
-            f_TextSlotColors[i - 1][0],
-            f_TextSlotColors[i - 1][1],
-            f_TextSlotColors[i - 1][2],
+            f_TextSlotColors[i - 1][RED_CHANNEL],
+            f_TextSlotColors[i - 1][GREEN_CHANNEL],
+            f_TextSlotColors[i - 1][BLUE_CHANNEL],
             OPAQUE_ALPHA
         );
         DrawLargeTextSlot(&gfx, i);

@@ -2366,9 +2366,9 @@ void DrawCodeCursor(Gfx **displayListHead) {
             MENU_CURSOR_COLOR_MIDDLE;
         green = (s32)(sinf(f_CodeCursorPhases[vertexIndex] + M_PI) * MENU_CURSOR_COLOR_SWING) +
             MENU_CURSOR_COLOR_MIDDLE;
-        f_CodeCursorVertices[vertexIndex].v.cn[0] = red;
-        f_CodeCursorVertices[vertexIndex].v.cn[2] = blue;
-        f_CodeCursorVertices[vertexIndex].v.cn[1] = green;
+        f_CodeCursorVertices[vertexIndex].v.cn[RED_CHANNEL] = red;
+        f_CodeCursorVertices[vertexIndex].v.cn[BLUE_CHANNEL] = blue;
+        f_CodeCursorVertices[vertexIndex].v.cn[GREEN_CHANNEL] = green;
     }
 
     guOrtho(

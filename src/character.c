@@ -1760,20 +1760,20 @@ void SetCharacterLights(void) {
     switch (g_HoleSetup.conditions.sceneColorIndex) {
         case SCENE_COLOR_INDEX_ROUND_LATE:
         case SCENE_COLOR_INDEX_ROUND_END:
-            ambientColor[0] = LATE_AMBIENT_LEVEL;
-            ambientColor[1] = LATE_AMBIENT_LEVEL;
-            ambientColor[2] = LATE_AMBIENT_LEVEL;
-            lightColor[0] = LATE_LIGHT_RED;
-            lightColor[1] = LATE_LIGHT_GREEN;
-            lightColor[2] = LATE_LIGHT_BLUE;
+            ambientColor[RED_CHANNEL] = LATE_AMBIENT_LEVEL;
+            ambientColor[GREEN_CHANNEL] = LATE_AMBIENT_LEVEL;
+            ambientColor[BLUE_CHANNEL] = LATE_AMBIENT_LEVEL;
+            lightColor[RED_CHANNEL] = LATE_LIGHT_RED;
+            lightColor[GREEN_CHANNEL] = LATE_LIGHT_GREEN;
+            lightColor[BLUE_CHANNEL] = LATE_LIGHT_BLUE;
             break;
         default:
-            ambientColor[0] = DAY_AMBIENT_RED;
-            ambientColor[1] = DAY_AMBIENT_GREEN;
-            ambientColor[2] = DAY_AMBIENT_BLUE;
-            lightColor[0] = DAY_LIGHT_RED;
-            lightColor[1] = DAY_LIGHT_GREEN;
-            lightColor[2] = DAY_LIGHT_BLUE;
+            ambientColor[RED_CHANNEL] = DAY_AMBIENT_RED;
+            ambientColor[GREEN_CHANNEL] = DAY_AMBIENT_GREEN;
+            ambientColor[BLUE_CHANNEL] = DAY_AMBIENT_BLUE;
+            lightColor[RED_CHANNEL] = DAY_LIGHT_RED;
+            lightColor[GREEN_CHANNEL] = DAY_LIGHT_GREEN;
+            lightColor[BLUE_CHANNEL] = DAY_LIGHT_BLUE;
             break;
     }
 
@@ -1783,18 +1783,18 @@ void SetCharacterLights(void) {
     lightDirection[AXIS_Y] = -cosf(lightPitch) * LIGHT_DIRECTION_SCALE;
     lightDirection[AXIS_Z] = -sinf(lightPitch) * sinf(lightYaw) * LIGHT_DIRECTION_SCALE;
     f_DryLights[g_DrawBufferIndex] = (Lights2)gdSPDefLights2(
-        ambientColor[0],
-        ambientColor[1],
-        ambientColor[2],
-        lightColor[0],
-        lightColor[1],
-        lightColor[2],
+        ambientColor[RED_CHANNEL],
+        ambientColor[GREEN_CHANNEL],
+        ambientColor[BLUE_CHANNEL],
+        lightColor[RED_CHANNEL],
+        lightColor[GREEN_CHANNEL],
+        lightColor[BLUE_CHANNEL],
         lightDirection[AXIS_X],
         lightDirection[AXIS_Y],
         lightDirection[AXIS_Z],
-        lightColor[0],
-        lightColor[1],
-        lightColor[2],
+        lightColor[RED_CHANNEL],
+        lightColor[GREEN_CHANNEL],
+        lightColor[BLUE_CHANNEL],
         f_SecondLightDirection[AXIS_X],
         f_SecondLightDirection[AXIS_Y],
         f_SecondLightDirection[AXIS_Z]

@@ -863,10 +863,10 @@ void SetVertexMidpoint(Vtx *first, Vtx *second, Vtx *midpoint) {
         (first->v.tc[TEXTURE_AXIS_S] + second->v.tc[TEXTURE_AXIS_S]) / 2;
     midpoint->v.tc[TEXTURE_AXIS_T] =
         (first->v.tc[TEXTURE_AXIS_T] + second->v.tc[TEXTURE_AXIS_T]) / 2;
-    midpoint->v.cn[0] = (first->v.cn[0] + second->v.cn[0]) / 2;
-    midpoint->v.cn[1] = (first->v.cn[1] + second->v.cn[1]) / 2;
-    midpoint->v.cn[2] = (first->v.cn[2] + second->v.cn[2]) / 2;
-    midpoint->v.cn[3] = (first->v.cn[3] + second->v.cn[3]) / 2;
+    midpoint->v.cn[RED_CHANNEL] = (first->v.cn[RED_CHANNEL] + second->v.cn[RED_CHANNEL]) / 2;
+    midpoint->v.cn[GREEN_CHANNEL] = (first->v.cn[GREEN_CHANNEL] + second->v.cn[GREEN_CHANNEL]) / 2;
+    midpoint->v.cn[BLUE_CHANNEL] = (first->v.cn[BLUE_CHANNEL] + second->v.cn[BLUE_CHANNEL]) / 2;
+    midpoint->v.cn[ALPHA_CHANNEL] = (first->v.cn[ALPHA_CHANNEL] + second->v.cn[ALPHA_CHANNEL]) / 2;
 }
 
 void BlendVertices(Vtx *first, Vtx *second, Vtx *result, s32 weight) {
@@ -885,14 +885,18 @@ void BlendVertices(Vtx *first, Vtx *second, Vtx *result, s32 weight) {
     result->v.tc[TEXTURE_AXIS_T] =
         ((first->v.tc[TEXTURE_AXIS_T] * firstWeight) + (second->v.tc[TEXTURE_AXIS_T] * weight)) /
         EDGE_WEIGHT_MAX;
-    result->v.cn[0] =
-        ((first->v.cn[0] * firstWeight) + (second->v.cn[0] * weight)) / EDGE_WEIGHT_MAX;
-    result->v.cn[1] =
-        ((first->v.cn[1] * firstWeight) + (second->v.cn[1] * weight)) / EDGE_WEIGHT_MAX;
-    result->v.cn[2] =
-        ((first->v.cn[2] * firstWeight) + (second->v.cn[2] * weight)) / EDGE_WEIGHT_MAX;
-    result->v.cn[3] =
-        ((first->v.cn[3] * firstWeight) + (second->v.cn[3] * weight)) / EDGE_WEIGHT_MAX;
+    result->v.cn[RED_CHANNEL] =
+        ((first->v.cn[RED_CHANNEL] * firstWeight) + (second->v.cn[RED_CHANNEL] * weight)) /
+        EDGE_WEIGHT_MAX;
+    result->v.cn[GREEN_CHANNEL] =
+        ((first->v.cn[GREEN_CHANNEL] * firstWeight) + (second->v.cn[GREEN_CHANNEL] * weight)) /
+        EDGE_WEIGHT_MAX;
+    result->v.cn[BLUE_CHANNEL] =
+        ((first->v.cn[BLUE_CHANNEL] * firstWeight) + (second->v.cn[BLUE_CHANNEL] * weight)) /
+        EDGE_WEIGHT_MAX;
+    result->v.cn[ALPHA_CHANNEL] =
+        ((first->v.cn[ALPHA_CHANNEL] * firstWeight) + (second->v.cn[ALPHA_CHANNEL] * weight)) /
+        EDGE_WEIGHT_MAX;
 }
 
 Vtx *GetGridVertex(u32 column, u32 row) {
@@ -933,10 +937,10 @@ void InitGridVertex(s32 column, s32 row, s32 height, u8 shade) {
         vertex->v.tc[TEXTURE_AXIS_T] = TEXTURE_COORDINATE_MAX;
     }
 
-    vertex->v.cn[0] = shade;
-    vertex->v.cn[1] = shade;
-    vertex->v.cn[2] = shade;
-    vertex->v.cn[3] = OPAQUE_ALPHA;
+    vertex->v.cn[RED_CHANNEL] = shade;
+    vertex->v.cn[GREEN_CHANNEL] = shade;
+    vertex->v.cn[BLUE_CHANNEL] = shade;
+    vertex->v.cn[ALPHA_CHANNEL] = OPAQUE_ALPHA;
 }
 
 void SetGridVertexHeight(s32 column, s32 row, s32 height) {
@@ -946,9 +950,9 @@ void SetGridVertexHeight(s32 column, s32 row, s32 height) {
 void SetGridVertexShade(s32 column, s32 row, s8 shade) {
     Vtx *vertex = GetGridVertex(column, row);
 
-    vertex->v.cn[0] = shade;
-    vertex->v.cn[1] = shade;
-    vertex->v.cn[2] = shade;
+    vertex->v.cn[RED_CHANNEL] = shade;
+    vertex->v.cn[GREEN_CHANNEL] = shade;
+    vertex->v.cn[BLUE_CHANNEL] = shade;
 }
 
 void SetGridVertex(s32 column, s32 row, Vtx_t *point) {
@@ -1051,7 +1055,8 @@ NO_RESULT SetGroundPointHeightAndShade(s32 column, s32 row, s32 height, s32 shad
                 point = &midpoints[f_PointSlots[PointSlot(row)][PointSlot(column)]];
                 point->v.ob[AXIS_Y] = height;
 
-                point->v.cn[0] = point->v.cn[1] = point->v.cn[2] = shade;
+                point->v.cn[RED_CHANNEL] = point->v.cn[GREEN_CHANNEL] = point->v.cn[BLUE_CHANNEL] =
+                    shade;
             }
         }
 
@@ -1063,7 +1068,8 @@ NO_RESULT SetGroundPointHeightAndShade(s32 column, s32 row, s32 height, s32 shad
                 point = &midpoints[f_PointSlots[GROUND_TILE_POINT_SPAN][PointSlot(column)]];
                 point->v.ob[AXIS_Y] = height;
 
-                point->v.cn[0] = point->v.cn[1] = point->v.cn[2] = shade;
+                point->v.cn[RED_CHANNEL] = point->v.cn[GREEN_CHANNEL] = point->v.cn[BLUE_CHANNEL] =
+                    shade;
             }
         }
 
@@ -1075,7 +1081,8 @@ NO_RESULT SetGroundPointHeightAndShade(s32 column, s32 row, s32 height, s32 shad
                 point = &midpoints[f_PointSlots[PointSlot(row)][GROUND_TILE_POINT_SPAN]];
                 point->v.ob[AXIS_Y] = height;
 
-                point->v.cn[0] = point->v.cn[1] = point->v.cn[2] = shade;
+                point->v.cn[RED_CHANNEL] = point->v.cn[GREEN_CHANNEL] = point->v.cn[BLUE_CHANNEL] =
+                    shade;
             }
         }
     }

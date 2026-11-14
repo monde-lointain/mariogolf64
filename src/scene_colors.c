@@ -80,12 +80,15 @@ void DeriveSceneColors(void) {
         }
     }
 
-    f_UnusedBlendedRed = (s32)((colors->topColor[0] + colors->horizonColor[0]) * 0.35f);
-    f_UnusedBlendedGreen = (s32)((colors->topColor[1] + colors->horizonColor[1]) * 0.35f);
-    f_UnusedBlendedBlue = (s32)((colors->topColor[2] + colors->horizonColor[2]) * 0.35f);
-    f_UnusedDimmedRed = colors->noiseColor[0] * 0.8;
-    f_UnusedDimmedGreen = colors->noiseColor[1] * 0.8;
-    f_UnusedDimmedBlue = colors->noiseColor[2] * 0.8;
+    f_UnusedBlendedRed =
+        (s32)((colors->topColor[RED_CHANNEL] + colors->horizonColor[RED_CHANNEL]) * 0.35f);
+    f_UnusedBlendedGreen =
+        (s32)((colors->topColor[GREEN_CHANNEL] + colors->horizonColor[GREEN_CHANNEL]) * 0.35f);
+    f_UnusedBlendedBlue =
+        (s32)((colors->topColor[BLUE_CHANNEL] + colors->horizonColor[BLUE_CHANNEL]) * 0.35f);
+    f_UnusedDimmedRed = colors->noiseColor[RED_CHANNEL] * 0.8;
+    f_UnusedDimmedGreen = colors->noiseColor[GREEN_CHANNEL] * 0.8;
+    f_UnusedDimmedBlue = colors->noiseColor[BLUE_CHANNEL] * 0.8;
 }
 
 void DoNothing(void) {

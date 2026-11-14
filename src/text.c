@@ -209,7 +209,7 @@ ImageAsset *g_ShadowedFontImage;
 
 FILE_STATIC s32 g_MessageCodesStart;
 FILE_STATIC TextSlot g_TextSlots[TEXT_SLOT_COUNT];
-FILE_STATIC u8 g_TextPalette[TEXT_PALETTE_COLOR_COUNT][3];
+FILE_STATIC u8 g_TextPalette[TEXT_PALETTE_COLOR_COUNT][ALPHA_CHANNEL];
 FILE_STATIC char g_TextName[TEXT_NAME_SIZE];
 FILE_STATIC GlyphSprite g_GlyphSprites[GLYPH_SPRITE_COUNT];
 FILE_STATIC u8 g_GlyphGroupSizes[GLYPH_GROUP_COUNT];
@@ -334,9 +334,9 @@ void ClearTextSlots(void) {
 }
 
 void SetTextPaletteColor(s32 red, s32 green, s32 blue, s32 colorIndex) {
-    g_TextPalette[colorIndex][0] = red;
-    g_TextPalette[colorIndex][1] = green;
-    g_TextPalette[colorIndex][2] = blue;
+    g_TextPalette[colorIndex][RED_CHANNEL] = red;
+    g_TextPalette[colorIndex][GREEN_CHANNEL] = green;
+    g_TextPalette[colorIndex][BLUE_CHANNEL] = blue;
 }
 
 void SetTextSlotValue(s32 value, s32 slot, s32 valueIndex) {
@@ -702,9 +702,9 @@ void DrawLargeTextSlot(Gfx **displayListHead, s32 slot) {
                         gfx++,
                         0,
                         0,
-                        g_TextPalette[0][0],
-                        g_TextPalette[0][1],
-                        g_TextPalette[0][2],
+                        g_TextPalette[0][RED_CHANNEL],
+                        g_TextPalette[0][GREEN_CHANNEL],
+                        g_TextPalette[0][BLUE_CHANNEL],
                         OPAQUE_ALPHA
                     );
                     break;
@@ -713,9 +713,9 @@ void DrawLargeTextSlot(Gfx **displayListHead, s32 slot) {
                         gfx++,
                         0,
                         0,
-                        g_TextPalette[1][0],
-                        g_TextPalette[1][1],
-                        g_TextPalette[1][2],
+                        g_TextPalette[1][RED_CHANNEL],
+                        g_TextPalette[1][GREEN_CHANNEL],
+                        g_TextPalette[1][BLUE_CHANNEL],
                         OPAQUE_ALPHA
                     );
                     break;
@@ -724,9 +724,9 @@ void DrawLargeTextSlot(Gfx **displayListHead, s32 slot) {
                         gfx++,
                         0,
                         0,
-                        g_TextPalette[2][0],
-                        g_TextPalette[2][1],
-                        g_TextPalette[2][2],
+                        g_TextPalette[2][RED_CHANNEL],
+                        g_TextPalette[2][GREEN_CHANNEL],
+                        g_TextPalette[2][BLUE_CHANNEL],
                         OPAQUE_ALPHA
                     );
                     break;
@@ -735,9 +735,9 @@ void DrawLargeTextSlot(Gfx **displayListHead, s32 slot) {
                         gfx++,
                         0,
                         0,
-                        g_TextPalette[3][0],
-                        g_TextPalette[3][1],
-                        g_TextPalette[3][2],
+                        g_TextPalette[3][RED_CHANNEL],
+                        g_TextPalette[3][GREEN_CHANNEL],
+                        g_TextPalette[3][BLUE_CHANNEL],
                         OPAQUE_ALPHA
                     );
                     break;

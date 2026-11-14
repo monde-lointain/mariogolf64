@@ -535,9 +535,9 @@ void DrawTableCursor(Gfx **displayListHead, s32 x, s32 y) {
             MENU_CURSOR_COLOR_MIDDLE;
         green = (s32)(sinf(f_TableCursorPhases[vertexIndex] + M_PI) * MENU_CURSOR_COLOR_SWING) +
             MENU_CURSOR_COLOR_MIDDLE;
-        f_TableCursorVertices[vertexIndex].v.cn[0] = red;
-        f_TableCursorVertices[vertexIndex].v.cn[2] = blue;
-        f_TableCursorVertices[vertexIndex].v.cn[1] = green;
+        f_TableCursorVertices[vertexIndex].v.cn[RED_CHANNEL] = red;
+        f_TableCursorVertices[vertexIndex].v.cn[BLUE_CHANNEL] = blue;
+        f_TableCursorVertices[vertexIndex].v.cn[GREEN_CHANNEL] = green;
     }
 
     guOrtho(

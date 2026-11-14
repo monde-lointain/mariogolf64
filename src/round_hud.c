@@ -732,10 +732,10 @@ void InitRoundHud(void) {
                 vertex->v.ob[AXIS_Z] = 0;
                 vertex->v.tc[TEXTURE_AXIS_S] = column * HOLE_FLAG_TEXEL_COLUMN_STEP;
                 vertex->v.tc[TEXTURE_AXIS_T] = row * HOLE_FLAG_TEXEL_ROW_STEP;
-                vertex->v.cn[0] = HOLE_FLAG_START_SHADE;
-                vertex->v.cn[1] = HOLE_FLAG_START_SHADE;
-                vertex->v.cn[2] = HOLE_FLAG_START_SHADE;
-                vertex->v.cn[3] = HOLE_FLAG_START_SHADE;
+                vertex->v.cn[RED_CHANNEL] = HOLE_FLAG_START_SHADE;
+                vertex->v.cn[GREEN_CHANNEL] = HOLE_FLAG_START_SHADE;
+                vertex->v.cn[BLUE_CHANNEL] = HOLE_FLAG_START_SHADE;
+                vertex->v.cn[ALPHA_CHANNEL] = HOLE_FLAG_START_SHADE;
             }
         }
     }
@@ -3002,9 +3002,9 @@ void DrawHoleFlag(Boolean isBackDrawn) {
                     vertexIndex,
                     G_MWO_POINT_RGBA,
                     RgbaColor(
-                        2 * HOLE_FLAG_START_SHADE - vertex->v.cn[0],
-                        2 * HOLE_FLAG_START_SHADE - vertex->v.cn[1],
-                        2 * HOLE_FLAG_START_SHADE - vertex->v.cn[2],
+                        2 * HOLE_FLAG_START_SHADE - vertex->v.cn[RED_CHANNEL],
+                        2 * HOLE_FLAG_START_SHADE - vertex->v.cn[GREEN_CHANNEL],
+                        2 * HOLE_FLAG_START_SHADE - vertex->v.cn[BLUE_CHANNEL],
                         HOLE_FLAG_START_SHADE
                     )
                 );
@@ -3469,16 +3469,16 @@ void WaveHoleFlag(void) {
 
     for (row = 0; row != HOLE_FLAG_ROW_COUNT; row++) {
         for (column = 1; column != HOLE_FLAG_COLUMN_COUNT; column++) {
-            HOLE_FLAG_VERTEX(row, column).v.cn[0] = HOLE_FLAG_SHADE(row, column);
-            HOLE_FLAG_VERTEX(row, column).v.cn[1] = HOLE_FLAG_SHADE(row, column);
-            HOLE_FLAG_VERTEX(row, column).v.cn[2] = HOLE_FLAG_SHADE(row, column);
+            HOLE_FLAG_VERTEX(row, column).v.cn[RED_CHANNEL] = HOLE_FLAG_SHADE(row, column);
+            HOLE_FLAG_VERTEX(row, column).v.cn[GREEN_CHANNEL] = HOLE_FLAG_SHADE(row, column);
+            HOLE_FLAG_VERTEX(row, column).v.cn[BLUE_CHANNEL] = HOLE_FLAG_SHADE(row, column);
         }
     }
 
     factor = (windSpeed * HOLE_FLAG_BULGE_PER_SPEED) + HOLE_FLAG_BULGE_MIN;
     for (row = 0; row != HOLE_FLAG_ROW_COUNT; row++) {
         for (column = 1; column != HOLE_FLAG_COLUMN_COUNT; column++) {
-            bulge = (f32)(HOLE_FLAG_VERTEX(row, column).v.cn[0] - HOLE_FLAG_START_SHADE) /
+            bulge = (f32)(HOLE_FLAG_VERTEX(row, column).v.cn[RED_CHANNEL] - HOLE_FLAG_START_SHADE) /
                 (f32)(HOLE_FLAG_BULGE_COLUMN_BASE - column) * factor;
             otherFactor = HOLE_FLAG_BULGE_SCALE;
             HOLE_FLAG_VERTEX(row, column).v.ob[AXIS_Z] = bulge * otherFactor *
@@ -3821,16 +3821,16 @@ void DrawColorTest(Gfx **displayListHead) {
         gfx++,
         0,
         0,
-        f_TestColors[COLOR_TEST_PRIM][0],
-        f_TestColors[COLOR_TEST_PRIM][1],
-        f_TestColors[COLOR_TEST_PRIM][2],
+        f_TestColors[COLOR_TEST_PRIM][RED_CHANNEL],
+        f_TestColors[COLOR_TEST_PRIM][GREEN_CHANNEL],
+        f_TestColors[COLOR_TEST_PRIM][BLUE_CHANNEL],
         COLOR_CHANNEL_MAX
     );
     gDPSetEnvColor(
         gfx++,
-        f_TestColors[COLOR_TEST_ENV][0],
-        f_TestColors[COLOR_TEST_ENV][1],
-        f_TestColors[COLOR_TEST_ENV][2],
+        f_TestColors[COLOR_TEST_ENV][RED_CHANNEL],
+        f_TestColors[COLOR_TEST_ENV][GREEN_CHANNEL],
+        f_TestColors[COLOR_TEST_ENV][BLUE_CHANNEL],
         COLOR_CHANNEL_MAX
     );
     gDPPipeSync(gfx++);
@@ -3898,17 +3898,17 @@ void DrawColorTest(Gfx **displayListHead) {
     sprintf(
         g_PrintBuffer,
         "%3d  %3d  %3d",
-        (int)f_TestColors[COLOR_TEST_PRIM][0],
-        (int)f_TestColors[COLOR_TEST_PRIM][1],
-        (int)f_TestColors[COLOR_TEST_PRIM][2]
+        (int)f_TestColors[COLOR_TEST_PRIM][RED_CHANNEL],
+        (int)f_TestColors[COLOR_TEST_PRIM][GREEN_CHANNEL],
+        (int)f_TestColors[COLOR_TEST_PRIM][BLUE_CHANNEL]
     );
     PrintDebugText(g_PrintBuffer, COLOR_TEST_TEXT_COLUMN, COLOR_TEST_TEXT_ROW + COLOR_TEST_PRIM);
     sprintf(
         g_PrintBuffer,
         "%3d  %3d  %3d",
-        (int)f_TestColors[COLOR_TEST_ENV][0],
-        (int)f_TestColors[COLOR_TEST_ENV][1],
-        (int)f_TestColors[COLOR_TEST_ENV][2]
+        (int)f_TestColors[COLOR_TEST_ENV][RED_CHANNEL],
+        (int)f_TestColors[COLOR_TEST_ENV][GREEN_CHANNEL],
+        (int)f_TestColors[COLOR_TEST_ENV][BLUE_CHANNEL]
     );
     PrintDebugText(g_PrintBuffer, COLOR_TEST_TEXT_COLUMN, COLOR_TEST_TEXT_ROW + COLOR_TEST_ENV);
     PrintDebugText(

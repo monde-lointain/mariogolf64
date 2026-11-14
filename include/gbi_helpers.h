@@ -3,6 +3,13 @@
 
 #include <ultra64.h>
 
+enum ColorChannel {
+    RED_CHANNEL,
+    GREEN_CHANNEL,
+    BLUE_CHANNEL,
+    ALPHA_CHANNEL
+};
+
 #define RGB_CHANNEL_COUNT 3
 
 typedef struct RgbColor {

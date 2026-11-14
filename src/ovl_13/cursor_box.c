@@ -104,10 +104,10 @@ void DrawCursorBox(Gfx **displayListHead, s32 left, s32 top) {
             blue = 0;
         }
 
-        f_CursorBoxVertices[corner].v.cn[0] = red;
-        f_CursorBoxVertices[corner].v.cn[1] = green;
-        f_CursorBoxVertices[corner].v.cn[2] = blue;
-        f_CursorBoxVertices[corner].v.cn[3] = CURSOR_ALPHA;
+        f_CursorBoxVertices[corner].v.cn[RED_CHANNEL] = red;
+        f_CursorBoxVertices[corner].v.cn[GREEN_CHANNEL] = green;
+        f_CursorBoxVertices[corner].v.cn[BLUE_CHANNEL] = blue;
+        f_CursorBoxVertices[corner].v.cn[ALPHA_CHANNEL] = CURSOR_ALPHA;
     }
 
     guOrtho(

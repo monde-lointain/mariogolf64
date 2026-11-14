@@ -1758,11 +1758,23 @@ void SetSceneFog(Gfx **displayListHead) {
 
     if (IsGameFlagSet(GAME_FLAG_SKY_EDITOR)) {
         gSPFogPosition(gfx++, g_DebugFog.near, g_DebugFog.far);
-        gDPSetFogColor(gfx++, g_DebugFog.color[0], g_DebugFog.color[1], g_DebugFog.color[2], 0);
+        gDPSetFogColor(
+            gfx++,
+            g_DebugFog.color[RED_CHANNEL],
+            g_DebugFog.color[GREEN_CHANNEL],
+            g_DebugFog.color[BLUE_CHANNEL],
+            0
+        );
     }
     else {
         gSPFogPosition(gfx++, g_SceneFog.near, g_SceneFog.far);
-        gDPSetFogColor(gfx++, g_SceneFog.color[0], g_SceneFog.color[1], g_SceneFog.color[2], 0xFF);
+        gDPSetFogColor(
+            gfx++,
+            g_SceneFog.color[RED_CHANNEL],
+            g_SceneFog.color[GREEN_CHANNEL],
+            g_SceneFog.color[BLUE_CHANNEL],
+            0xFF
+        );
     }
 
     *displayListHead = gfx;

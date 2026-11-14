@@ -1535,16 +1535,16 @@ void DrawLensFlare(Gfx **displayListHead) {
             gfx++,
             0,
             0,
-            f_LensFlares[flareIndex].color[0],
-            f_LensFlares[flareIndex].color[1],
-            f_LensFlares[flareIndex].color[2],
+            f_LensFlares[flareIndex].color[RED_CHANNEL],
+            f_LensFlares[flareIndex].color[GREEN_CHANNEL],
+            f_LensFlares[flareIndex].color[BLUE_CHANNEL],
             glare
         );
         gDPSetEnvColor(
             gfx++,
-            f_LensFlares[flareIndex].envColor[0],
-            f_LensFlares[flareIndex].envColor[1],
-            f_LensFlares[flareIndex].envColor[2],
+            f_LensFlares[flareIndex].envColor[RED_CHANNEL],
+            f_LensFlares[flareIndex].envColor[GREEN_CHANNEL],
+            f_LensFlares[flareIndex].envColor[BLUE_CHANNEL],
             OPAQUE_ALPHA
         );
         size =
@@ -1704,23 +1704,26 @@ void InitSkyColors(void) {
         blue = (color >> 1) & SKY_IMAGE_CHANNEL_MAX;
         alpha = color & 1;
         if (!alpha) {
-            red = ((colors->horizonColor[0] * SKY_IMAGE_HORIZON_PARTS) + colors->topColor[0]) /
+            red = ((colors->horizonColor[RED_CHANNEL] * SKY_IMAGE_HORIZON_PARTS) +
+                      colors->topColor[RED_CHANNEL]) /
                 SKY_IMAGE_DIVISOR;
-            green = ((colors->horizonColor[1] * SKY_IMAGE_HORIZON_PARTS) + colors->topColor[1]) /
+            green = ((colors->horizonColor[GREEN_CHANNEL] * SKY_IMAGE_HORIZON_PARTS) +
+                        colors->topColor[GREEN_CHANNEL]) /
                 SKY_IMAGE_DIVISOR;
-            blue = ((colors->horizonColor[2] * SKY_IMAGE_HORIZON_PARTS) + colors->topColor[2]) /
+            blue = ((colors->horizonColor[BLUE_CHANNEL] * SKY_IMAGE_HORIZON_PARTS) +
+                       colors->topColor[BLUE_CHANNEL]) /
                 SKY_IMAGE_DIVISOR;
         }
         else {
-            blended[0] = from->backgroundColor[0] +
-                ((to->backgroundColor[0] - from->backgroundColor[0]) * f_SkyBlendStep /
-                    SKY_BLEND_STEP_COUNT);
-            blended[1] = from->backgroundColor[1] +
-                ((to->backgroundColor[1] - from->backgroundColor[1]) * f_SkyBlendStep /
-                    SKY_BLEND_STEP_COUNT);
-            blended[2] = from->backgroundColor[2] +
-                ((to->backgroundColor[2] - from->backgroundColor[2]) * f_SkyBlendStep /
-                    SKY_BLEND_STEP_COUNT);
+            blended[0] = from->backgroundColor[RED_CHANNEL] +
+                ((to->backgroundColor[RED_CHANNEL] - from->backgroundColor[RED_CHANNEL]) *
+                    f_SkyBlendStep / SKY_BLEND_STEP_COUNT);
+            blended[1] = from->backgroundColor[GREEN_CHANNEL] +
+                ((to->backgroundColor[GREEN_CHANNEL] - from->backgroundColor[GREEN_CHANNEL]) *
+                    f_SkyBlendStep / SKY_BLEND_STEP_COUNT);
+            blended[2] = from->backgroundColor[BLUE_CHANNEL] +
+                ((to->backgroundColor[BLUE_CHANNEL] - from->backgroundColor[BLUE_CHANNEL]) *
+                    f_SkyBlendStep / SKY_BLEND_STEP_COUNT);
             red = ((red * (PERCENT_PER_WHOLE - colors->backgroundColor[SKY_BACKGROUND_ALPHA])) +
                       (blended[0] * colors->backgroundColor[SKY_BACKGROUND_ALPHA])) /
                 PERCENT_PER_WHOLE;
@@ -1926,16 +1929,16 @@ Boolean UpdateSkyEditor(void) {
         }
     }
 
-    if (g_DebugFog.color[0] > COLOR_CHANNEL_MAX) {
-        g_DebugFog.color[0] = COLOR_CHANNEL_MAX;
+    if (g_DebugFog.color[RED_CHANNEL] > COLOR_CHANNEL_MAX) {
+        g_DebugFog.color[RED_CHANNEL] = COLOR_CHANNEL_MAX;
     }
 
-    if (g_DebugFog.color[1] > COLOR_CHANNEL_MAX) {
-        g_DebugFog.color[1] = COLOR_CHANNEL_MAX;
+    if (g_DebugFog.color[GREEN_CHANNEL] > COLOR_CHANNEL_MAX) {
+        g_DebugFog.color[GREEN_CHANNEL] = COLOR_CHANNEL_MAX;
     }
 
-    if (g_DebugFog.color[2] > COLOR_CHANNEL_MAX) {
-        g_DebugFog.color[2] = COLOR_CHANNEL_MAX;
+    if (g_DebugFog.color[BLUE_CHANNEL] > COLOR_CHANNEL_MAX) {
+        g_DebugFog.color[BLUE_CHANNEL] = COLOR_CHANNEL_MAX;
     }
 
     if (g_DebugFog.near > FOG_DEPTH_MAX) {
@@ -1946,16 +1949,16 @@ Boolean UpdateSkyEditor(void) {
         g_DebugFog.far = FOG_DEPTH_MAX;
     }
 
-    if (g_DebugFog.color[0] < 0) {
-        g_DebugFog.color[0] = 0;
+    if (g_DebugFog.color[RED_CHANNEL] < 0) {
+        g_DebugFog.color[RED_CHANNEL] = 0;
     }
 
-    if (g_DebugFog.color[1] < 0) {
-        g_DebugFog.color[1] = 0;
+    if (g_DebugFog.color[GREEN_CHANNEL] < 0) {
+        g_DebugFog.color[GREEN_CHANNEL] = 0;
     }
 
-    if (g_DebugFog.color[2] < 0) {
-        g_DebugFog.color[2] = 0;
+    if (g_DebugFog.color[BLUE_CHANNEL] < 0) {
+        g_DebugFog.color[BLUE_CHANNEL] = 0;
     }
 
     if (g_DebugFog.near < 0) {
@@ -1996,33 +1999,34 @@ Boolean UpdateSkyEditor(void) {
             blue = (color >> 1) & SKY_IMAGE_CHANNEL_MAX;
             alpha = color & 1;
             if (!alpha) {
-                red = ((f_EditedSkyColors->horizonColor[0] * SKY_IMAGE_HORIZON_PARTS) +
-                          f_EditedSkyColors->topColor[0]) /
+                red = ((f_EditedSkyColors->horizonColor[RED_CHANNEL] * SKY_IMAGE_HORIZON_PARTS) +
+                          f_EditedSkyColors->topColor[RED_CHANNEL]) /
                     SKY_IMAGE_DIVISOR;
-                green = ((f_EditedSkyColors->horizonColor[1] * SKY_IMAGE_HORIZON_PARTS) +
-                            f_EditedSkyColors->topColor[1]) /
+                green =
+                    ((f_EditedSkyColors->horizonColor[GREEN_CHANNEL] * SKY_IMAGE_HORIZON_PARTS) +
+                        f_EditedSkyColors->topColor[GREEN_CHANNEL]) /
                     SKY_IMAGE_DIVISOR;
-                blue = ((f_EditedSkyColors->horizonColor[2] * SKY_IMAGE_HORIZON_PARTS) +
-                           f_EditedSkyColors->topColor[2]) /
+                blue = ((f_EditedSkyColors->horizonColor[BLUE_CHANNEL] * SKY_IMAGE_HORIZON_PARTS) +
+                           f_EditedSkyColors->topColor[BLUE_CHANNEL]) /
                     SKY_IMAGE_DIVISOR;
             }
             else {
                 red = ((red *
                            (PERCENT_PER_WHOLE -
                                f_EditedSkyColors->backgroundColor[SKY_BACKGROUND_ALPHA])) +
-                          (f_EditedSkyColors->backgroundColor[0] *
+                          (f_EditedSkyColors->backgroundColor[RED_CHANNEL] *
                               f_EditedSkyColors->backgroundColor[SKY_BACKGROUND_ALPHA])) /
                     PERCENT_PER_WHOLE;
                 green = ((green *
                              (PERCENT_PER_WHOLE -
                                  f_EditedSkyColors->backgroundColor[SKY_BACKGROUND_ALPHA])) +
-                            (f_EditedSkyColors->backgroundColor[1] *
+                            (f_EditedSkyColors->backgroundColor[GREEN_CHANNEL] *
                                 f_EditedSkyColors->backgroundColor[SKY_BACKGROUND_ALPHA])) /
                     PERCENT_PER_WHOLE;
                 blue = ((blue *
                             (PERCENT_PER_WHOLE -
                                 f_EditedSkyColors->backgroundColor[SKY_BACKGROUND_ALPHA])) +
-                           (f_EditedSkyColors->backgroundColor[2] *
+                           (f_EditedSkyColors->backgroundColor[BLUE_CHANNEL] *
                                f_EditedSkyColors->backgroundColor[SKY_BACKGROUND_ALPHA])) /
                     PERCENT_PER_WHOLE;
             }
@@ -2060,31 +2064,31 @@ Boolean UpdateSkyEditor(void) {
     sprintf(
         g_PrintBuffer,
         "R: %3d %3d %3d %3d %4d  ",
-        f_EditedSkyColors->topColor[0],
-        f_EditedSkyColors->horizonColor[0],
-        f_EditedSkyColors->noiseColor[0],
-        f_EditedSkyColors->backgroundColor[0],
-        (int)g_DebugFog.color[0]
+        f_EditedSkyColors->topColor[RED_CHANNEL],
+        f_EditedSkyColors->horizonColor[RED_CHANNEL],
+        f_EditedSkyColors->noiseColor[RED_CHANNEL],
+        f_EditedSkyColors->backgroundColor[RED_CHANNEL],
+        (int)g_DebugFog.color[RED_CHANNEL]
     );
     PrintDebugText(g_PrintBuffer, SKY_EDITOR_TEXT_COLUMN, SKY_EDITOR_TEXT_ROW + 1);
     sprintf(
         g_PrintBuffer,
         "G: %3d %3d %3d %3d %4d  ",
-        f_EditedSkyColors->topColor[1],
-        f_EditedSkyColors->horizonColor[1],
-        f_EditedSkyColors->noiseColor[1],
-        f_EditedSkyColors->backgroundColor[1],
-        (int)g_DebugFog.color[1]
+        f_EditedSkyColors->topColor[GREEN_CHANNEL],
+        f_EditedSkyColors->horizonColor[GREEN_CHANNEL],
+        f_EditedSkyColors->noiseColor[GREEN_CHANNEL],
+        f_EditedSkyColors->backgroundColor[GREEN_CHANNEL],
+        (int)g_DebugFog.color[GREEN_CHANNEL]
     );
     PrintDebugText(g_PrintBuffer, SKY_EDITOR_TEXT_COLUMN, SKY_EDITOR_TEXT_ROW + 2);
     sprintf(
         g_PrintBuffer,
         "B: %3d %3d %3d %3d %4d  ",
-        f_EditedSkyColors->topColor[2],
-        f_EditedSkyColors->horizonColor[2],
-        f_EditedSkyColors->noiseColor[2],
-        f_EditedSkyColors->backgroundColor[2],
-        (int)g_DebugFog.color[2]
+        f_EditedSkyColors->topColor[BLUE_CHANNEL],
+        f_EditedSkyColors->horizonColor[BLUE_CHANNEL],
+        f_EditedSkyColors->noiseColor[BLUE_CHANNEL],
+        f_EditedSkyColors->backgroundColor[BLUE_CHANNEL],
+        (int)g_DebugFog.color[BLUE_CHANNEL]
     );
     PrintDebugText(g_PrintBuffer, SKY_EDITOR_TEXT_COLUMN, SKY_EDITOR_TEXT_ROW + 3);
     sprintf(
@@ -2437,9 +2441,9 @@ void DrawSky(Gfx **displayListHead, f32 eyeY UNUSED, s32 unusedSetting UNUSED, s
 
     gDPSetEnvColor(
         gfx++,
-        colors->noiseColor[0],
-        colors->noiseColor[1],
-        colors->noiseColor[2],
+        colors->noiseColor[RED_CHANNEL],
+        colors->noiseColor[GREEN_CHANNEL],
+        colors->noiseColor[BLUE_CHANNEL],
         OPAQUE_ALPHA
     );
     gDPLoadTextureBlock(
@@ -2644,16 +2648,16 @@ void DrawSky(Gfx **displayListHead, f32 eyeY UNUSED, s32 unusedSetting UNUSED, s
                     gfx++,
                     0,
                     0,
-                    colors->sun->primColor[0],
-                    colors->sun->primColor[1],
-                    colors->sun->primColor[2],
+                    colors->sun->primColor[RED_CHANNEL],
+                    colors->sun->primColor[GREEN_CHANNEL],
+                    colors->sun->primColor[BLUE_CHANNEL],
                     OPAQUE_ALPHA
                 );
                 gDPSetEnvColor(
                     gfx++,
-                    colors->sun->envColor[0],
-                    colors->sun->envColor[1],
-                    colors->sun->envColor[2],
+                    colors->sun->envColor[RED_CHANNEL],
+                    colors->sun->envColor[GREEN_CHANNEL],
+                    colors->sun->envColor[BLUE_CHANNEL],
                     OPAQUE_ALPHA
                 );
                 gDPPipeSync(gfx++);

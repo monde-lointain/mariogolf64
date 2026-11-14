@@ -288,14 +288,14 @@ void LoadClubSlots(void) {
         f_Slots->reelVertices[(index * 2) + 1].v.ob[AXIS_Y] = cosf(angle) * REEL_RADIUS;
         f_Slots->reelVertices[index * 2].v.ob[AXIS_Z] = sinf(angle) * REEL_RADIUS;
         f_Slots->reelVertices[(index * 2) + 1].v.ob[AXIS_Z] = sinf(angle) * REEL_RADIUS;
-        f_Slots->reelVertices[index * 2].v.cn[0] = COLOR_CHANNEL_MAX;
-        f_Slots->reelVertices[(index * 2) + 1].v.cn[0] = COLOR_CHANNEL_MAX;
-        f_Slots->reelVertices[index * 2].v.cn[1] = COLOR_CHANNEL_MAX;
-        f_Slots->reelVertices[(index * 2) + 1].v.cn[1] = COLOR_CHANNEL_MAX;
-        f_Slots->reelVertices[index * 2].v.cn[2] = COLOR_CHANNEL_MAX;
-        f_Slots->reelVertices[(index * 2) + 1].v.cn[2] = COLOR_CHANNEL_MAX;
-        f_Slots->reelVertices[index * 2].v.cn[3] = OPAQUE_ALPHA;
-        f_Slots->reelVertices[(index * 2) + 1].v.cn[3] = OPAQUE_ALPHA;
+        f_Slots->reelVertices[index * 2].v.cn[RED_CHANNEL] = COLOR_CHANNEL_MAX;
+        f_Slots->reelVertices[(index * 2) + 1].v.cn[RED_CHANNEL] = COLOR_CHANNEL_MAX;
+        f_Slots->reelVertices[index * 2].v.cn[GREEN_CHANNEL] = COLOR_CHANNEL_MAX;
+        f_Slots->reelVertices[(index * 2) + 1].v.cn[GREEN_CHANNEL] = COLOR_CHANNEL_MAX;
+        f_Slots->reelVertices[index * 2].v.cn[BLUE_CHANNEL] = COLOR_CHANNEL_MAX;
+        f_Slots->reelVertices[(index * 2) + 1].v.cn[BLUE_CHANNEL] = COLOR_CHANNEL_MAX;
+        f_Slots->reelVertices[index * 2].v.cn[ALPHA_CHANNEL] = OPAQUE_ALPHA;
+        f_Slots->reelVertices[(index * 2) + 1].v.cn[ALPHA_CHANNEL] = OPAQUE_ALPHA;
     }
 
     for (index = 0; index != SHADE_VERTEX_COUNT; index++) {
@@ -307,10 +307,10 @@ void LoadClubSlots(void) {
         }
 
         f_Slots->shadeVertices[index].v.ob[AXIS_Z] = SHADE_Z;
-        f_Slots->shadeVertices[index].v.cn[0] = 0;
-        f_Slots->shadeVertices[index].v.cn[1] = 0;
-        f_Slots->shadeVertices[index].v.cn[2] = 0;
-        f_Slots->shadeVertices[index].v.cn[3] = 0;
+        f_Slots->shadeVertices[index].v.cn[RED_CHANNEL] = 0;
+        f_Slots->shadeVertices[index].v.cn[GREEN_CHANNEL] = 0;
+        f_Slots->shadeVertices[index].v.cn[BLUE_CHANNEL] = 0;
+        f_Slots->shadeVertices[index].v.cn[ALPHA_CHANNEL] = 0;
     }
 
     f_Slots->shadeVertices[0].v.ob[AXIS_Y] = SHADE_EDGE_Y;
@@ -321,10 +321,10 @@ void LoadClubSlots(void) {
     f_Slots->shadeVertices[5].v.ob[AXIS_Y] = -SHADE_EDGE_Y;
     f_Slots->shadeVertices[6].v.ob[AXIS_Y] = -SHADE_EDGE_Y;
     f_Slots->shadeVertices[7].v.ob[AXIS_Y] = -SHADE_INNER_Y;
-    f_Slots->shadeVertices[0].v.cn[3] = SHADE_ALPHA;
-    f_Slots->shadeVertices[3].v.cn[3] = SHADE_ALPHA;
-    f_Slots->shadeVertices[5].v.cn[3] = SHADE_ALPHA;
-    f_Slots->shadeVertices[6].v.cn[3] = SHADE_ALPHA;
+    f_Slots->shadeVertices[0].v.cn[ALPHA_CHANNEL] = SHADE_ALPHA;
+    f_Slots->shadeVertices[3].v.cn[ALPHA_CHANNEL] = SHADE_ALPHA;
+    f_Slots->shadeVertices[5].v.cn[ALPHA_CHANNEL] = SHADE_ALPHA;
+    f_Slots->shadeVertices[6].v.cn[ALPHA_CHANNEL] = SHADE_ALPHA;
     PlaySound(SOUND_TALLY_DONE, g_NextSoundChannel, SOUND_FULL_SCALE);
 }
 

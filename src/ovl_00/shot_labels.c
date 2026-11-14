@@ -447,9 +447,9 @@ NEXT:;
                     gfx++,
                     0,
                     0,
-                    f_PlayerTagColors[playerIndex][0],
-                    f_PlayerTagColors[playerIndex][1],
-                    f_PlayerTagColors[playerIndex][2],
+                    f_PlayerTagColors[playerIndex][RED_CHANNEL],
+                    f_PlayerTagColors[playerIndex][GREEN_CHANNEL],
+                    f_PlayerTagColors[playerIndex][BLUE_CHANNEL],
                     TAG_ALPHA
                 );
                 DrawLeaderLine(
@@ -523,9 +523,9 @@ NEXT:;
                     gfx++,
                     0,
                     0,
-                    f_PlayerTagColors[playerIndex][0],
-                    f_PlayerTagColors[playerIndex][1],
-                    f_PlayerTagColors[playerIndex][2],
+                    f_PlayerTagColors[playerIndex][RED_CHANNEL],
+                    f_PlayerTagColors[playerIndex][GREEN_CHANNEL],
+                    f_PlayerTagColors[playerIndex][BLUE_CHANNEL],
                     TAG_SHADOW_ALPHA
                 );
                 DrawLeaderLine(

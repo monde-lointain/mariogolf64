@@ -388,29 +388,29 @@ void DrawBillboards(CameraMatrices *matrices, s32 cameraIndex) {
                 rightAlignment = -lightHeight;
             }
 
-            f_BillboardVertices[0][0].v.cn[0] =
+            f_BillboardVertices[0][0].v.cn[RED_CHANNEL] =
                 (((-lightHeight * 0.5f) + (leftAlignment * 0.5f)) * 127.0f) + 255.0f;
-            f_BillboardVertices[0][0].v.cn[1] =
+            f_BillboardVertices[0][0].v.cn[GREEN_CHANNEL] =
                 (((-lightHeight * 0.5f) + (leftAlignment * 0.5f)) * 127.0f) + 255.0f;
-            f_BillboardVertices[0][0].v.cn[2] =
+            f_BillboardVertices[0][0].v.cn[BLUE_CHANNEL] =
                 (((-lightHeight * 0.5f) + (leftAlignment * 0.5f)) * 127.0f) + 255.0f;
-            f_BillboardVertices[0][1].v.cn[0] =
+            f_BillboardVertices[0][1].v.cn[RED_CHANNEL] =
                 (((-lightHeight * 0.5f) + (rightAlignment * 0.5f)) * 127.0f) + 255.0f;
-            f_BillboardVertices[0][1].v.cn[1] =
+            f_BillboardVertices[0][1].v.cn[GREEN_CHANNEL] =
                 (((-lightHeight * 0.5f) + (rightAlignment * 0.5f)) * 127.0f) + 255.0f;
-            f_BillboardVertices[0][1].v.cn[2] =
+            f_BillboardVertices[0][1].v.cn[BLUE_CHANNEL] =
                 (((-lightHeight * 0.5f) + (rightAlignment * 0.5f)) * 127.0f) + 255.0f;
-            f_BillboardVertices[0][2].v.cn[0] =
+            f_BillboardVertices[0][2].v.cn[RED_CHANNEL] =
                 (((-lightHeight * 0.5f) + (rightAlignment * 0.5f)) * 255.0f) + 255.0f;
-            f_BillboardVertices[0][2].v.cn[1] =
+            f_BillboardVertices[0][2].v.cn[GREEN_CHANNEL] =
                 (((-lightHeight * 0.5f) + (rightAlignment * 0.5f)) * 255.0f) + 255.0f;
-            f_BillboardVertices[0][2].v.cn[2] =
+            f_BillboardVertices[0][2].v.cn[BLUE_CHANNEL] =
                 (((-lightHeight * 0.5f) + (rightAlignment * 0.5f)) * 255.0f) + 255.0f;
-            f_BillboardVertices[0][3].v.cn[0] =
+            f_BillboardVertices[0][3].v.cn[RED_CHANNEL] =
                 (((-lightHeight * 0.5f) + (leftAlignment * 0.5f)) * 255.0f) + 255.0f;
-            f_BillboardVertices[0][3].v.cn[1] =
+            f_BillboardVertices[0][3].v.cn[GREEN_CHANNEL] =
                 (((-lightHeight * 0.5f) + (leftAlignment * 0.5f)) * 255.0f) + 255.0f;
-            f_BillboardVertices[0][3].v.cn[2] =
+            f_BillboardVertices[0][3].v.cn[BLUE_CHANNEL] =
                 (((-lightHeight * 0.5f) + (leftAlignment * 0.5f)) * 255.0f) + 255.0f;
         }
     }
