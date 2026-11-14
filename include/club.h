@@ -124,7 +124,7 @@ s32 GetSurfaceClubMask(s32 distinguishesKinds, SurfaceTraits *surfaceTraits);
 s32 GetCurrentSurfaceClubMask(s32 distinguishesKinds);
 s32 GetLieRating(Club *club, Surface surface, ShotMode shotMode);
 void GetSurfacePercentRange(SurfaceTraits *surfaceTraits, Club *club, s32 *range);
-void GetLieSpan(Club *club, Surface surface, s32 *span, ShotMode shotMode);
+void GetLieSpan(Club *club, Surface surface, s32 *lieSpan, ShotMode shotMode);
 void UpdateClubControls(void);
 void UpdateShotModeControls(void);
 s32 StepToClubChoice(struct CurrentShot *targetShot);

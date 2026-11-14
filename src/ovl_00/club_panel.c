@@ -328,7 +328,7 @@ Boolean IsShotModeChangeDone(void) {
 #define MARKER_PULSE_LEVEL 100.0
 
 void DrawClubPanel(Gfx **displayListHead) {
-    s32 span[2];
+    s32 lieSpan[2];
     Gfx *gfx;
     Boolean isPutter;
     s32 fill;
@@ -348,7 +348,7 @@ void DrawClubPanel(Gfx **displayListHead) {
     GetLieSpan(
         GetClub(g_Players[g_CurrentShot.playerIndex].clubs[g_CurrentShot.clubSlot]),
         g_CurrentShot.surface,
-        span,
+        lieSpan,
         g_CurrentShot.shotMode
     );
     gDPPipeSync(gfx++);
@@ -625,7 +625,7 @@ void DrawClubPanel(Gfx **displayListHead) {
             fillMagnitude = -fillMagnitude;
         }
 
-        if (fillMagnitude <= span[0] / 2) {
+        if (fillMagnitude <= lieSpan[0] / 2) {
             gDPSetEnvColor(gfx++, 0, 0, 0, OPAQUE_ALPHA);
         }
         else {
@@ -705,7 +705,7 @@ void DrawClubPanel(Gfx **displayListHead) {
     gDPPipeSync(gfx++);
     gDPSetTextureFilter(gfx++, G_TF_BILERP);
     gDPPipeSync(gfx++);
-    if (span[0] != 0) {
+    if (lieSpan[0] != 0) {
         guTranslate(
             &f_SpanBarTranslation,
             SPAN_BAR_X,
@@ -714,7 +714,7 @@ void DrawClubPanel(Gfx **displayListHead) {
         );
         guScale(
             &f_SpanBarScale,
-            span[0] * SPAN_BAR_SCALE_PER_SPAN,
+            lieSpan[0] * SPAN_BAR_SCALE_PER_SPAN,
             SPAN_BAR_THICKNESS,
             SPAN_BAR_THICKNESS
         );

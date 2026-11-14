@@ -4335,16 +4335,16 @@ s32 GetLieRating(Club *club, Surface surface, ShotMode shotMode) {
     return rating;
 }
 
-void GetLieSpan(Club *club, Surface surface, s32 *span, ShotMode shotMode) {
+void GetLieSpan(Club *club, Surface surface, s32 *lieSpan, ShotMode shotMode) {
     s32 rating = GetLieRating(club, surface, shotMode);
 
     if (rating > 0) {
-        span[0] = (rating * 2) - 1;
-        span[1] = rating - 1;
+        lieSpan[0] = (rating * 2) - 1;
+        lieSpan[1] = rating - 1;
     }
     else {
-        span[0] = 0;
-        span[1] = 0;
+        lieSpan[0] = 0;
+        lieSpan[1] = 0;
     }
 }
 
