@@ -104,12 +104,17 @@ typedef s32 HalfTurnState;
 
 #define FADE_ALPHA_RANGE 256
 
-#define PROMPT_STATE_CLOSED (-1)
-#define PROMPT_STATE_OPENING 0
-#define PROMPT_STATE_CHOOSING 1
-#define PROMPT_STATE_CHOSEN 2
-#define PROMPT_STATE_CLOSING 3
-#define PROMPT_STATE_CLOSED_AFTER_CHOICE 4
+enum PromptState {
+    PROMPT_STATE_CLOSED = -1,
+    PROMPT_STATE_OPENING,
+    PROMPT_STATE_CHOOSING,
+    PROMPT_STATE_CHOSEN,
+    PROMPT_STATE_CLOSING,
+    PROMPT_STATE_CLOSED_AFTER_CHOICE
+};
+
+typedef s32 PromptState;
+
 #define PROMPT_CHOICE_YES 0
 #define PROMPT_CHOICE_NO 1
 #define SAVING_RESULT_COUNT (PROMPT_RESULT_SAVE_REPLAY + 1)
@@ -197,7 +202,7 @@ static Prompt f_Prompts[] = {
 };
 static s32 f_PromptIndex = 0;
 static s32 f_PromptFrame = 0;
-static s32 f_PromptState = PROMPT_STATE_CLOSED;
+static PromptState f_PromptState = PROMPT_STATE_CLOSED;
 static s32 f_PromptChoice = PROMPT_CHOICE_YES;
 static Radians f_ChoiceBobAngle = 0.0f;
 static ImageAsset *f_HalfTurnImage;

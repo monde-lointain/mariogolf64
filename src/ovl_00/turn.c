@@ -171,7 +171,7 @@
 #define LOOK_BACK_DISTANCE_MAX 0x177000
 #define AIM_CAMERA_DISTANCE_MIN (-0xBB800)
 #define AIM_CAMERA_DISTANCE_MAX 0x8CA000
-#define AIM_VIEW_TOGGLE_COUNT 2
+#define AIM_VIEW_TOGGLE_COUNT (GREEN_GRID_SHOWN + 1)
 #define PUTT_PREVIEW_HALF_WIDTH 10.0f
 #define GAME_FLAG_HIDE_SHOT_PREVIEW 0x4B
 #define GAME_FLAG_TUNE_SHOT_PREVIEW 0x71
@@ -1332,7 +1332,7 @@ Boolean UpdateAimControls(void) {
     }
 
     if (g_RoundHud.greenGridState >= AIM_VIEW_TOGGLE_COUNT) {
-        g_RoundHud.greenGridState = 0;
+        g_RoundHud.greenGridState = GREEN_GRID_HIDDEN;
     }
 
     if (g_HasPressedShotButton != TRUE) {
@@ -3038,7 +3038,7 @@ void UpdateTurns(void) {
                     g_TurnBallSimulation.position[AXIS_X] - g_HoleSetup.cupPosition[AXIS_X],
                     g_TurnBallSimulation.position[AXIS_Z] - g_HoleSetup.cupPosition[AXIS_Z]
                 );
-                g_RoundHud.greenGridState = 1;
+                g_RoundHud.greenGridState = GREEN_GRID_SHOWN;
                 g_RoundHud.isDistanceSignShown = TRUE;
                 g_RoundHud.isPinFlagShown = TRUE;
                 f_ShotLaunch.clubSlot = g_CurrentShot.clubSlot;
@@ -3777,8 +3777,8 @@ void UpdateTurns(void) {
                 ReuseLastCharacterMatrices(0);
                 BuildShotPreview(&f_ShotLaunch, state);
                 areCallsAllowed = FALSE;
-                if (g_RoundHud.greenGridState == 1) {
-                    g_RoundHud.greenGridState = 2;
+                if (g_RoundHud.greenGridState == GREEN_GRID_SHOWN) {
+                    g_RoundHud.greenGridState = GREEN_GRID_FADING;
                 }
 
                 g_RoundHud.isDistanceSignShown = FALSE;
@@ -3854,8 +3854,8 @@ void UpdateTurns(void) {
                     nextState = PLAYER_STATE_AIMING;
                     ResetShotModeChange();
                     PlaySound(SOUND_MENU_BLOCKED, g_NextSoundChannel, IMPACT_SOUND_VOLUME);
-                    if (g_RoundHud.greenGridState != 0) {
-                        g_RoundHud.greenGridState = 1;
+                    if (g_RoundHud.greenGridState != GREEN_GRID_HIDDEN) {
+                        g_RoundHud.greenGridState = GREEN_GRID_SHOWN;
                     }
 
                     g_RoundHud.isDistanceSignShown = TRUE;

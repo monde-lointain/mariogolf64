@@ -204,9 +204,13 @@ static const char f_UnusedFloatFormat[] = "            %f";
 #define RING_PEAK_INTENSITY 255
 #define RING_FALL_PER_TEXEL 36
 
-#define SHOT_LENGTH_UNRATED 0
-#define SHOT_LENGTH_FULL 1
-#define SHOT_LENGTH_SHORT 2
+enum ShotLengthRating {
+    SHOT_LENGTH_UNRATED,
+    SHOT_LENGTH_FULL,
+    SHOT_LENGTH_SHORT
+};
+
+typedef s32 ShotLengthRating;
 
 #define FULL_SHOT_FRACTION 0.8f
 #define SHORT_SHOT_FRACTION 0.6f
@@ -776,7 +780,7 @@ Boolean IsCupPassPoint(s32 cupDistance, s32 height) {
         !g_SimulatedShot.isFirstBounceOut && \
         g_SimulatedShot.shot.shotMode != SHOT_MODE_APPROACH)
 
-s32 RateShotLength(void) {
+ShotLengthRating RateShotLength(void) {
     SurfaceKind endKind;
 
     endKind = f_EndSurfaceTraits->kind;

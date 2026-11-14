@@ -45,6 +45,15 @@ typedef s8 HeightComparison;
 #define HUD_FLAG_TRANSLUCENT_GAUGE 0x40
 #define HUD_FLAG_SWINGING 0x80
 
+enum GreenGridState {
+    GREEN_GRID_HIDDEN,
+    GREEN_GRID_SHOWN,
+    GREEN_GRID_FADING
+};
+
+typedef s32 GreenGridState;
+typedef s8 GreenGridState8;
+
 typedef struct RoundHud {
     s8 scorecardPage;
     s8 unusedScorecardValue;
@@ -62,7 +71,7 @@ typedef struct RoundHud {
     Boolean8 isProgressShown;
     u8 unusedBeforeDistanceSign;
     Boolean8 isDistanceSignShown;
-    s8 greenGridState;
+    GreenGridState8 greenGridState;
     u8 unusedAfterGreenGrid;
     Boolean8 isPinFlagShown;
     Boolean8 isShotLengthShown;

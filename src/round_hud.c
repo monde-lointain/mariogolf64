@@ -1565,9 +1565,6 @@ u32 GetWarmthTint(s32 warmth, s32 alpha) {
 #define GREEN_GRID_FADE_STEP 8
 #define GREEN_GRID_FADE_END_ALPHA 0x48
 #define GAME_FLAG_HIDE_GREEN_GRID 0x79
-#define GREEN_GRID_HIDDEN 0
-#define GREEN_GRID_SHOWN 1
-#define GREEN_GRID_FADING 2
 
 typedef struct GridScreenPoint {
     s32 x;
@@ -3594,14 +3591,19 @@ void DrawShotOffsetMarker(void) {
 #define ANIMATED_ICON_LABEL_WIDTH 64
 #define ANIMATED_ICON_LABEL_HEIGHT 16
 #define ANIMATED_ICON_LABEL_OFFSET_X 24
-#define ANIMATED_ICON_LABEL_JUMP 0
-#define ANIMATED_ICON_LABEL_MODE 1
-#define ANIMATED_ICON_LABEL_CUP 2
+
+enum AnimatedIconLabel {
+    ANIMATED_ICON_LABEL_JUMP,
+    ANIMATED_ICON_LABEL_MODE,
+    ANIMATED_ICON_LABEL_CUP
+};
+
+typedef s32 AnimatedIconLabel;
 
 void DrawAnimatedIcon(Gfx **displayListHead, s32 letterboxHeight) {
     Gfx *gfx = *displayListHead;
     EncodedAsset asset;
-    s32 label;
+    AnimatedIconLabel label;
 
     if (f_SceneryState == SCENERY_LOADED) {
         if (letterboxHeight == LETTERBOX_GROWTH_STEP) {
