@@ -59,7 +59,7 @@ extern s32 g_PauseScreen;
 extern s8 g_IsTrainingHeadingKept;
 extern s32 g_IsAimCameraEasing;
 extern Boolean g_HasPressedShotButton;
-extern SignedBinaryAngle g_AltHeading;
+extern SignedBinaryAngle g_LookBackHeading;
 extern SignedBinaryAngle g_FreeLookHeading;
 extern s32 g_ShotSetupFrameCount;
 extern s32 g_ImpactPointLingerFrameCount;

@@ -122,7 +122,7 @@
 #define LIE_PRIORITY_TEE 2
 #define STROKE_PRIORITY_BASE 200
 #define AIM_STICK_SPEED_DIVISOR 4
-#define ALT_HEADING_STICK_SPEED_DIVISOR 6
+#define LOOK_BACK_STICK_SPEED_DIVISOR 6
 #define AIM_DPAD_MAX_FRAMES 60
 #define AIM_DPAD_SPEED_DIVISOR 6
 #define AIM_DPAD_BASE_SPEED 3
@@ -325,7 +325,7 @@ static Radians f_DebugFramingPitch = 0.0f;
 static s32 f_UnusedWordAfterFramingAngles UNUSED = 0;
 
 void PlaceShotCamera(void);
-void TurnAim(s32 turnsAltHeading);
+void TurnAim(s32 turnsLookBackHeading);
 
 static Mtx f_PuttPreviewIdentity;
 static ShotLaunch f_ShotLaunch;
@@ -590,7 +590,7 @@ void PlaceShotCamera(void) {
     else {
         KeepAimCameraOnCourse();
 
-        heading = ((u16)g_AltHeading * BINARY_ANGLE_TO_RADIANS) + M_PI;
+        heading = ((u16)g_LookBackHeading * BINARY_ANGLE_TO_RADIANS) + M_PI;
         center[AXIS_X] = g_CurrentShot.ballPosition[AXIS_X] +
             ((g_HoleSetup.cupPosition[AXIS_X] - g_CurrentShot.ballPosition[AXIS_X]) * 0.5f);
         center[AXIS_Y] = g_HoleSetup.cupPosition[AXIS_Y];
@@ -946,7 +946,7 @@ void MoveAimCameraDistance(void) {
     }
 }
 
-void TurnAim(s32 turnsAltHeading) {
+void TurnAim(s32 turnsLookBackHeading) {
     s32 stickX = g_TurnController.stickX;
     SignedBinaryAngle heading = g_CurrentShot.heading;
     s32 dpad;
@@ -956,7 +956,7 @@ void TurnAim(s32 turnsAltHeading) {
         return;
     }
 
-    if (!turnsAltHeading) {
+    if (!turnsLookBackHeading) {
         SignedBinaryAngle *shotHeading = &g_CurrentShot.heading;
         s32 step = stickX / 2;
         s32 oldHeading = heading;
@@ -967,10 +967,10 @@ void TurnAim(s32 turnsAltHeading) {
     }
     else {
         s32 step = stickX / 2;
-        s32 oldHeading = g_AltHeading;
-        s32 speed = Abs(stickX / ALT_HEADING_STICK_SPEED_DIVISOR);
+        s32 oldHeading = g_LookBackHeading;
+        s32 speed = Abs(stickX / LOOK_BACK_STICK_SPEED_DIVISOR);
 
-        g_AltHeading = oldHeading - ((speed != 0) ? step * speed : step);
+        g_LookBackHeading = oldHeading - ((speed != 0) ? step * speed : step);
     }
 
     dpad = g_TurnController.buttons & (L_JPAD | R_JPAD);
@@ -1104,7 +1104,7 @@ s32 UpdateAimControls(void) {
                             g_HoleSetup.cupPosition[AXIS_X] - g_CurrentShot.ballPosition[AXIS_X];
                         toCup[AXIS_Z] =
                             g_HoleSetup.cupPosition[AXIS_Z] - g_CurrentShot.ballPosition[AXIS_Z];
-                        g_AltHeading =
+                        g_LookBackHeading =
                             (atan2(toCup[AXIS_Z], toCup[AXIS_X]) + M_PI) * RADIANS_TO_BINARY_ANGLE;
                         g_CurrentShot.aimCameraDistance =
                             -sqrtf(
@@ -1238,7 +1238,7 @@ s32 UpdateAimControls(void) {
                             g_HoleSetup.cupPosition[AXIS_Z] - g_CurrentShot.ballPosition[AXIS_Z];
                         g_LetterboxState = LETTERBOX_STATE_STARTING_LOOK_BACK;
                         g_CurrentShot.aimCameraHeight = LOOK_BACK_START_HEIGHT;
-                        g_AltHeading = g_CurrentShot.heading;
+                        g_LookBackHeading = g_CurrentShot.heading;
                         g_CurrentShot.aimCameraDistance =
                             -sqrtf(
                                 (toCup[AXIS_X] * toCup[AXIS_X]) + (toCup[AXIS_Z] * toCup[AXIS_Z])
@@ -1306,7 +1306,7 @@ s32 UpdateAimControls(void) {
                 }
 
                 TurnAim(0);
-                g_AltHeading = g_CurrentShot.heading;
+                g_LookBackHeading = g_CurrentShot.heading;
                 break;
             case LETTERBOX_STATE_LOOKING_BACK:
                 if (g_TurnController.pressedButtons & A_BUTTON) {
@@ -1323,7 +1323,7 @@ s32 UpdateAimControls(void) {
                 }
 
                 TurnAim(0);
-                g_AltHeading = g_CurrentShot.heading;
+                g_LookBackHeading = g_CurrentShot.heading;
                 break;
         }
     }

@@ -129,7 +129,7 @@ s8 g_IsTrainingHeadingKept = FALSE;
 s32 g_PauseScreen = PAUSE_SCREEN_NONE;
 s32 g_IsAimCameraEasing = 0;
 Boolean g_HasPressedShotButton = FALSE;
-SignedBinaryAngle g_AltHeading = 0;
+SignedBinaryAngle g_LookBackHeading = 0;
 SignedBinaryAngle g_FreeLookHeading = 0;
 s32 g_ShotSetupFrameCount = 0;
 s32 g_ImpactPointLingerFrameCount = 0;
@@ -168,7 +168,7 @@ void ResetShotSetup(void) {
     g_PauseScreen = PAUSE_SCREEN_NONE;
     g_IsAimCameraEasing = 0;
     g_HasPressedShotButton = FALSE;
-    g_AltHeading = 0;
+    g_LookBackHeading = 0;
     g_ShotFlags = 0;
     f_UnusedClearedPlayWord = 0;
     g_LetterboxState = LETTERBOX_STATE_NONE;
