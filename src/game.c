@@ -1595,8 +1595,8 @@ s32 DrawGame(void) {
     s32 mode;
     CameraView *insetView;
     CameraView *courseView;
-    f32 *target;
-    u16 *trigger;
+    f32 *lookAt;
+    u16 *pressedButtons;
 
     void LoadProjection(void) {
         Mat4 projection;
@@ -1644,13 +1644,13 @@ s32 DrawGame(void) {
 
     if (IsGameFlagSet(GAME_FLAG_AUDIO_TEST)) {
         PrintDebugPaddedHex(__MusIntMemRemaining(), 20, 10);
-        trigger = &g_ControllerData[1].trigger;
-        if (*trigger & B_BUTTON) {
+        pressedButtons = &g_ControllerData[1].trigger;
+        if (*pressedButtons & B_BUTTON) {
             RequestSongStop();
             _mus_cpu_worst = 0;
         }
 
-        if (*trigger & A_BUTTON) {
+        if (*pressedButtons & A_BUTTON) {
             PlaySound(SOUND_CALL_BIRDIE, AUDIO_TEST_FIRST_CHANNEL, AUDIO_TEST_VOLUME);
             PlaySound(SOUND_PEACH_CALL_OUT_C_LEFT, AUDIO_TEST_SECOND_CHANNEL, AUDIO_TEST_VOLUME);
             PlaySound(SOUND_EAGLE_CUP_IN, AUDIO_TEST_THIRD_CHANNEL, AUDIO_TEST_VOLUME);
@@ -2145,7 +2145,7 @@ s32 DrawGame(void) {
                         gSPLookAt(g_DisplayListHead++, &matrices->lookAt);
                         SetCharacterHighlight(matrices);
                         ConvertMatrixToFixed(matrices->viewingF, &matrices->viewing);
-                        target = courseView->lookAt;
+                        lookAt = courseView->lookAt;
                         if (g_GameState.isMiniGolf) {
                             billboardRise = (courseView->lookAt[1] - courseView->eye[1]) * 0.125f;
                             guAlign(
@@ -2170,9 +2170,9 @@ s32 DrawGame(void) {
                         guAlign(
                             &matrices->antiBillboard,
                             0.0f,
-                            -(target[0] - courseView->eye[0]),
-                            -(target[1] - courseView->eye[1]),
-                            -(target[2] - courseView->eye[2])
+                            -(lookAt[0] - courseView->eye[0]),
+                            -(lookAt[1] - courseView->eye[1]),
+                            -(lookAt[2] - courseView->eye[2])
                         );
                         LoadProjection();
                     }
