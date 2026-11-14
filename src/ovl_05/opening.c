@@ -45,6 +45,16 @@
 
 #define OPENING_BILLBOARD_HEAP_SIZE 0x7038
 
+// OPENING_SHOT_PLAIN_FLIGHT steps the ball without the flight's leftover
+// point lookups; no scene sets it.
+enum OpeningShotState {
+    OPENING_SHOT_IDLE,
+    OPENING_SHOT_FLYING,
+    OPENING_SHOT_PLAIN_FLIGHT
+};
+
+typedef s32 OpeningShotState;
+
 enum OpeningBallImage {
     MARIO_FACE_BALL,
     DONKEY_KONG_FACE_BALL,
@@ -368,7 +378,7 @@ static ShotLaunch f_OpeningFourthShot = {-0x2B00, 1, 400, 0, -180, -720, 0, SHOT
 static SparksState f_OpeningSparksState = SPARKS_HIDDEN;
 f32 g_LookAtMarkerScale = 1.0f;
 static Boolean f_IsLookAtMarkerShown = FALSE;
-static s32 f_OpeningShotState = 0;
+static OpeningShotState f_OpeningShotState = OPENING_SHOT_IDLE;
 static ShotLaunch f_UnusedSecondShotCopy
     UNUSED = {-0x2000, 0, LAUNCH_POWER_MAX, 0, 0, 0, 0, SHOT_MODE_NORMAL};
 static Vtx f_OpeningShotDashVertices[QUAD_VERTEX_COUNT] = {
@@ -1429,6 +1439,7 @@ void MoveLakitu(void);
 #define OPENING_DEBUG_SKIP_CONTROLLER 0
 #define OPENING_SCENE_CONTROLLER 1
 #define OPENING_EDITOR_CONTROLLER 2
+#define UNUSED_STICK_OFFSET_SCALE 0.002f
 #define SCRIPT_SOUND_CHANNEL_COUNT ALTERNATING_SOUND_CHANNEL
 #define FRAME_COUNT_TEXT_COLUMN 30
 #define FRAME_COUNT_TEXT_ROW 26
@@ -1555,7 +1566,7 @@ void UpdateOpening(void) {
                     f_OpeningShotSimulation.state = BALL_STATE_STOPPED;
                     f_OpeningShotSimulation.surface = SURFACE_TEE_UP;
                     LaunchOpeningBallSimulation(&f_OpeningShotSimulation, 0, &f_OpeningFirstShot);
-                    f_OpeningShotState = 1;
+                    f_OpeningShotState = OPENING_SHOT_FLYING;
                     f_ShotBallScale = 1;
                 }
 
@@ -1570,7 +1581,7 @@ void UpdateOpening(void) {
                 ZoomEditorCamera(EDITOR_POINT_LOOK_AT, 18.469883f, 0x1E);
                 MoveEditorCamera(EDITOR_POINT_LOOK_AT, 642.835f, -100.5f, 4746.187f, 0x1E);
                 f_IsNameSlotShown[0] = FALSE;
-                f_OpeningShotState = 0;
+                f_OpeningShotState = OPENING_SHOT_IDLE;
                 f_ShotBallScale = 0;
                 f_OpeningSceneFramesLeft = 30;
                 f_OpeningScene++;
@@ -1643,7 +1654,7 @@ void UpdateOpening(void) {
                 f_OpeningShotSimulation.state = BALL_STATE_STOPPED;
                 f_OpeningShotSimulation.surface = SURFACE_TEE_UP;
                 LaunchOpeningBallSimulation(&f_OpeningShotSimulation, 0, &f_OpeningFirstShot);
-                f_OpeningShotState = 1;
+                f_OpeningShotState = OPENING_SHOT_FLYING;
                 f_ShotBallScale = 1;
                 f_OpeningSparksState = 1;
                 f_OpeningSceneFramesLeft = 20;
@@ -1681,7 +1692,7 @@ void UpdateOpening(void) {
                 f_OpeningCue = OPENING_CUE_PEACH_TEE_SHOT;
                 f_LookAtEaseMode = LOOK_AT_EASE_NONE;
                 f_OpeningSceneFramesLeft = 100;
-                f_OpeningShotState = 0;
+                f_OpeningShotState = OPENING_SHOT_IDLE;
                 f_OpeningShotSimulation.position[AXIS_X] = 0xF1882;
                 f_OpeningShotSimulation.position[AXIS_Z] = 0x48D4C4;
                 f_OpeningScene++;
@@ -1722,7 +1733,7 @@ void UpdateOpening(void) {
                     f_OpeningShotSimulation.state = BALL_STATE_STOPPED;
                     f_OpeningShotSimulation.surface = SURFACE_TEE_UP;
                     LaunchOpeningBallSimulation(&f_OpeningShotSimulation, 0, &f_OpeningSecondShot);
-                    f_OpeningShotState = 1;
+                    f_OpeningShotState = OPENING_SHOT_FLYING;
                 }
 
                 if (f_OpeningSceneFramesLeft == 90) {
@@ -1742,7 +1753,7 @@ void UpdateOpening(void) {
                 f_OpeningScene = OPENING_SCENE_PEACH_DRIVE_FLIGHT;
                 f_OpeningCue = OPENING_CUE_PLUM_CHEER;
                 f_IsNameSlotShown[0] = FALSE;
-                f_OpeningShotState = 0;
+                f_OpeningShotState = OPENING_SHOT_IDLE;
                 f_ShotBallScale = 0;
                 PlaySoundWithEffects(
                     SOUND_PEACH_CALL_OUT_UP,
@@ -1791,7 +1802,7 @@ void UpdateOpening(void) {
                     f_OpeningShotSimulation.state = BALL_STATE_STOPPED;
                     f_OpeningShotSimulation.surface = SURFACE_TEE_UP;
                     LaunchOpeningBallSimulation(&f_OpeningShotSimulation, 0, &f_OpeningSecondShot);
-                    f_OpeningShotState = 1;
+                    f_OpeningShotState = OPENING_SHOT_FLYING;
                 }
 
                 if (AreEditorMovesDone()) {
@@ -1824,7 +1835,7 @@ void UpdateOpening(void) {
                 f_OpeningCue = OPENING_CUE_PLUM_TEE_SHOT;
                 f_OpeningScene++;
                 LoadNameLogo(3, 0);
-                f_OpeningShotState = 0;
+                f_OpeningShotState = OPENING_SHOT_IDLE;
                 f_LookAtEaseMode = LOOK_AT_EASE_NONE;
                 f_OpeningShotSimulation.position[AXIS_X] = 0xF3930;
                 f_OpeningShotSimulation.position[AXIS_Z] = 0x48D1D1;
@@ -1865,7 +1876,7 @@ void UpdateOpening(void) {
                     f_OpeningShotSimulation.state = BALL_STATE_STOPPED;
                     f_OpeningShotSimulation.surface = SURFACE_TEE_UP;
                     LaunchOpeningBallSimulation(&f_OpeningShotSimulation, 0, &f_OpeningThirdShot);
-                    f_OpeningShotState = 1;
+                    f_OpeningShotState = OPENING_SHOT_FLYING;
                 }
 
                 if (f_OpeningSceneFramesLeft == 90) {
@@ -1886,7 +1897,7 @@ void UpdateOpening(void) {
                 f_OpeningSceneFramesLeft = 50;
                 f_OpeningScene = OPENING_SCENE_MARIO_CHEER;
                 f_IsNameSlotShown[0] = FALSE;
-                f_OpeningShotState = 0;
+                f_OpeningShotState = OPENING_SHOT_IDLE;
                 f_ShotBallScale = 0;
                 ClearEffects();
                 break;
@@ -1976,7 +1987,7 @@ void UpdateOpening(void) {
                     f_OpeningShotSimulation.state = BALL_STATE_STOPPED;
                     f_OpeningShotSimulation.surface = SURFACE_TEE_UP;
                     LaunchOpeningBallSimulation(&f_OpeningShotSimulation, 0, &f_OpeningFourthShot);
-                    f_OpeningShotState = 1;
+                    f_OpeningShotState = OPENING_SHOT_FLYING;
                     f_ShotBallScale = 1;
                     ZoomEditorCamera(EDITOR_POINT_LOOK_AT, 33.056084f, 0x28);
                     f_OpeningSceneFramesLeft = 5;
@@ -3194,9 +3205,11 @@ void UpdateOpening(void) {
     g_Cameras[MAIN_CAMERA].view.lookAt[AXIS_Z] =
         g_CameraEditor.points[EDITOR_POINT_LOOK_AT][AXIS_Z];
     g_Cameras[MAIN_CAMERA].view.fieldOfView = g_CameraEditor.fieldOfView;
-    if (f_OpeningShotState == 1) {
-        f_UnusedStickOffsetX += g_ControllerStates[1].stickX * 0.002f;
-        f_UnusedStickOffsetY += g_ControllerStates[1].stickY * 0.002f;
+    if (f_OpeningShotState == OPENING_SHOT_FLYING) {
+        f_UnusedStickOffsetX +=
+            g_ControllerStates[OPENING_SCENE_CONTROLLER].stickX * UNUSED_STICK_OFFSET_SCALE;
+        f_UnusedStickOffsetY +=
+            g_ControllerStates[OPENING_SCENE_CONTROLLER].stickY * UNUSED_STICK_OFFSET_SCALE;
         for (slotIndex = 0; slotIndex < CHARACTER_SLOT_COUNT; slotIndex++) {
             if (IsCharacterSlotBusy(slotIndex)) {
                 GetCharacterPointPosition(slotIndex, 1, point);
@@ -3208,7 +3221,7 @@ void UpdateOpening(void) {
         point[AXIS_Z] = f_OpeningShotSimulation.position[AXIS_Z] * COURSE_TO_WORLD_SCALE;
         StepOpeningBallSimulation(&f_OpeningShotSimulation);
     }
-    else if (f_OpeningShotState == 2) {
+    else if (f_OpeningShotState == OPENING_SHOT_PLAIN_FLIGHT) {
         StepOpeningBallSimulation(&f_OpeningShotSimulation);
     }
 

@@ -71,6 +71,15 @@
 #define IMPACT_POINT_SOUND_CHANNEL 8
 #define IMPACT_POINT_SOUND_VOLUME 60
 #define IMPACT_POINT_SOUND_REVERB 20
+
+// The aim tilt test and shot preview tuning read the first controller;
+// moving the ball and turning the debug framing read the second.
+#define TEST_CONTROLLER 0
+#define DEBUG_CONTROLLER 1
+#define DEBUG_AIM_TILT_STEP 1.0f
+#define DEBUG_FRAMING_TURN_PER_STICK 0.002f
+// The ball moves faster the further the stick leans.
+#define BALL_MOVE_SPEED_PER_STICK 2
 #define IMPACT_POINT_SOUND_PAN 230
 
 #define IMPACT_POINT_BUTTONS (Z_TRIG | L_TRIG)
@@ -428,12 +437,12 @@ void PlaceShotCamera(void) {
     Radians heading;
 
     if (IsGameFlagSet(GAME_FLAG_TEST_AIM_TILT_AND_MOVIES)) {
-        if (g_ControllerStates[0].buttons & L_CBUTTONS) {
-            f_DebugAimCameraTilt -= 1.0f;
+        if (g_ControllerStates[TEST_CONTROLLER].buttons & L_CBUTTONS) {
+            f_DebugAimCameraTilt -= DEBUG_AIM_TILT_STEP;
         }
 
-        if (g_ControllerStates[0].buttons & R_CBUTTONS) {
-            f_DebugAimCameraTilt += 1.0f;
+        if (g_ControllerStates[TEST_CONTROLLER].buttons & R_CBUTTONS) {
+            f_DebugAimCameraTilt += DEBUG_AIM_TILT_STEP;
         }
     }
 
@@ -1740,22 +1749,22 @@ void BuildShotPreview(ShotLaunch *shot, s32 playerState) {
     previewShot.clubSlot = g_CurrentShot.clubSlot;
     if (IsGameFlagSet(GAME_FLAG_TUNE_SHOT_PREVIEW)) {
         PrintDebugText("               ", PREVIEW_TUNING_TEXT_COLUMN, PREVIEW_TUNING_TEXT_ROW);
-        if ((g_ControllerStates[0].pressedButtons & U_JPAD) &&
+        if ((g_ControllerStates[TEST_CONTROLLER].pressedButtons & U_JPAD) &&
             f_ShotPreviewStepCount < SHOT_PREVIEW_STEPS_MAX) {
             f_ShotPreviewStepCount++;
         }
 
-        if ((g_ControllerStates[0].pressedButtons & D_JPAD) &&
+        if ((g_ControllerStates[TEST_CONTROLLER].pressedButtons & D_JPAD) &&
             f_ShotPreviewStepCount > SHOT_PREVIEW_STEPS_MIN) {
             f_ShotPreviewStepCount--;
         }
 
-        if ((g_ControllerStates[0].buttons & L_JPAD) &&
+        if ((g_ControllerStates[TEST_CONTROLLER].buttons & L_JPAD) &&
             f_ShotPreviewStepCount < SHOT_PREVIEW_STEPS_MAX) {
             f_ShotPreviewStepCount++;
         }
 
-        if ((g_ControllerStates[0].buttons & R_JPAD) &&
+        if ((g_ControllerStates[TEST_CONTROLLER].buttons & R_JPAD) &&
             f_ShotPreviewStepCount > SHOT_PREVIEW_STEPS_MIN) {
             f_ShotPreviewStepCount--;
         }
@@ -3642,12 +3651,19 @@ void UpdateTurns(void) {
                             );
                             PrintDebugText(text, BALL_POSITION_TEXT_COLUMN, BALL_POSITION_TEXT_ROW);
                             ClearGameFlag(GAME_FLAG_RANDOM_FRAMEBUFFER_COUNT);
-                            isMovingBall = (g_ControllerData[1].button & Z_TRIG) != 0;
+                            isMovingBall =
+                                (g_ControllerData[DEBUG_CONTROLLER].button & Z_TRIG) != 0;
                             if (isMovingBall) {
-                                g_CurrentShot.ballPosition[AXIS_X] += g_ControllerStates[1].stickX *
-                                    ((Abs(g_ControllerStates[1].stickX) * 2) + 1);
-                                g_CurrentShot.ballPosition[AXIS_Z] += g_ControllerStates[1].stickY *
-                                    ((Abs(g_ControllerStates[1].stickY) * 2) + 1);
+                                g_CurrentShot.ballPosition[AXIS_X] +=
+                                    g_ControllerStates[DEBUG_CONTROLLER].stickX *
+                                    ((Abs(g_ControllerStates[DEBUG_CONTROLLER].stickX) *
+                                         BALL_MOVE_SPEED_PER_STICK) +
+                                        1);
+                                g_CurrentShot.ballPosition[AXIS_Z] +=
+                                    g_ControllerStates[DEBUG_CONTROLLER].stickY *
+                                    ((Abs(g_ControllerStates[DEBUG_CONTROLLER].stickY) *
+                                         BALL_MOVE_SPEED_PER_STICK) +
+                                        1);
                                 g_CurrentShot.ballPosition[AXIS_Y] = GetGroundHeight(
                                     g_CurrentShot.ballPosition[AXIS_X],
                                     g_CurrentShot.ballPosition[AXIS_Z]
@@ -5000,8 +5016,10 @@ void UpdateTurns(void) {
     if (IsGameFlagSet(GAME_FLAG_FRAME_BALL_AND_SHOT)) {
         Vec3 center;
 
-        f_DebugFramingYaw += g_ControllerStates[1].stickX * 0.002f;
-        f_DebugFramingPitch += g_ControllerStates[1].stickY * 0.002f;
+        f_DebugFramingYaw +=
+            g_ControllerStates[DEBUG_CONTROLLER].stickX * DEBUG_FRAMING_TURN_PER_STICK;
+        f_DebugFramingPitch +=
+            g_ControllerStates[DEBUG_CONTROLLER].stickY * DEBUG_FRAMING_TURN_PER_STICK;
         ClearFramedSpheres();
         SetFramingAngles(f_DebugFramingPitch, f_DebugFramingYaw);
         center[AXIS_X] = g_TurnBallSimulation.position[AXIS_X] * COURSE_TO_WORLD_SCALE;
