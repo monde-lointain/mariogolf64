@@ -199,8 +199,8 @@ typedef struct ArrowShape {
 #define COLOR_TEST_TEXT_COLUMN 20
 #define COLOR_TEST_TEXT_ROW 5
 #define COLOR_TEST_COLUMN_WIDTH 5
-extern const char f_ColorTestSampleText[];
-extern const char f_BlankText[];
+
+#define BLANK_TEXT " "
 
 #define HUD_OFFSET_TEXT_COLUMN 20
 #define HUD_OFFSET_TEXT_ROW 6
@@ -3811,9 +3811,6 @@ void DrawDistanceText(Gfx **displayListHead, s32 x, s32 y, char *text) {
     *displayListHead = gfx;
 }
 
-const char f_ColorTestSampleText[] = "ｻﾝﾌﾟﾙABCDEFG";
-const char f_BlankText[] = " ";
-
 void DrawColorTest(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
 
@@ -3836,10 +3833,10 @@ void DrawColorTest(Gfx **displayListHead) {
     );
     gDPPipeSync(gfx++);
 
-    DrawCenteredLargeText(&gfx, f_TestTextX, f_TestTextY, f_ColorTestSampleText);
+    DrawCenteredLargeText(&gfx, f_TestTextX, f_TestTextY, "ｻﾝﾌﾟﾙABCDEFG");
     gDPPipeSync(gfx++);
     PrintDebugText(
-        f_BlankText,
+        BLANK_TEXT,
         (f_TestChannelIndex * COLOR_TEST_COLUMN_WIDTH) + COLOR_TEST_TEXT_COLUMN - 1,
         f_TestColorIndex + COLOR_TEST_TEXT_ROW
     );
@@ -4678,7 +4675,7 @@ void DrawRoundHud(CameraView *view) {
 
             SetTextColor(&g_DisplayListHead, 255, 230, 0);
             if (g_GameState.replayKind != REPLAY_KIND_NONE) {
-                sprintf(g_PrintBuffer, f_BlankText);
+                sprintf(g_PrintBuffer, BLANK_TEXT);
             }
             else {
                 switch (g_GameState.gameMode) {
@@ -4714,7 +4711,7 @@ void DrawRoundHud(CameraView *view) {
                     case GAME_MODE_TRAINING:
                     case GAME_MODE_RECORD_REPLAY:
                     case GAME_MODE_RING_SHOT:
-                        sprintf(g_PrintBuffer, f_BlankText);
+                        sprintf(g_PrintBuffer, BLANK_TEXT);
                         break;
                 }
             }

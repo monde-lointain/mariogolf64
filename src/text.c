@@ -214,14 +214,8 @@ FILE_STATIC char g_TextName[TEXT_NAME_SIZE];
 FILE_STATIC GlyphSprite g_GlyphSprites[GLYPH_SPRITE_COUNT];
 FILE_STATIC u8 g_GlyphGroupSizes[GLYPH_GROUP_COUNT];
 
-const char g_TextStringFormat[] = "%s";
-const char g_TextNumberFormat[] = "%d";
-const char g_MatchScoreEvenText[] = "EVEN";
-const char g_MatchScoreUpFormat[] = "%dUP";
-const char g_MatchScoreDownFormat[] = "%dDOWN";
-const char g_SkinsScoreFormat[] = "%dP";
-const char g_ParScoreEvenText[] = "#0";
-const char g_ParScoreFormat[] = "%+d";
+#define MATCH_SCORE_EVEN_TEXT "EVEN"
+#define PAR_SCORE_EVEN_TEXT "#0"
 
 static inline s16 GetShadowedGlyphLeft(s32 code) {
     return (code - SHADOWED_GLYPH_FIRST) % SHADOWED_GLYPHS_PER_ROW * SHADOWED_GLYPH_SIZE;
@@ -684,7 +678,7 @@ void DrawLargeTextSlot(Gfx **displayListHead, s32 slot) {
                     break;
                 case MESSAGE_CODE_NAME:
                     isPrinted = TRUE;
-                    sprintf(g_PrintBuffer, g_TextStringFormat, g_TextName);
+                    sprintf(g_PrintBuffer, "%s", g_TextName);
                     break;
                 case MESSAGE_CODE_SLOT_COLOR:
                     gDPSetPrimColor(
@@ -743,43 +737,43 @@ void DrawLargeTextSlot(Gfx **displayListHead, s32 slot) {
                     break;
                 case MESSAGE_CODE_VALUE:
                     isPrinted = TRUE;
-                    sprintf(g_PrintBuffer, g_TextNumberFormat, textSlot->values[0]);
+                    sprintf(g_PrintBuffer, "%d", textSlot->values[0]);
                     break;
                 case MESSAGE_CODE_VALUE + 1:
                     isPrinted = TRUE;
-                    sprintf(g_PrintBuffer, g_TextNumberFormat, textSlot->values[1]);
+                    sprintf(g_PrintBuffer, "%d", textSlot->values[1]);
                     break;
                 case MESSAGE_CODE_VALUE + 2:
                     isPrinted = TRUE;
-                    sprintf(g_PrintBuffer, g_TextNumberFormat, textSlot->values[2]);
+                    sprintf(g_PrintBuffer, "%d", textSlot->values[2]);
                     break;
                 case MESSAGE_CODE_VALUE + 3:
                     isPrinted = TRUE;
-                    sprintf(g_PrintBuffer, g_TextNumberFormat, textSlot->values[3]);
+                    sprintf(g_PrintBuffer, "%d", textSlot->values[3]);
                     break;
                 case MESSAGE_CODE_SCORE:
                     score = g_RoundHud.skinsTotals[g_CurrentShot.playerIndex];
                     isPrinted = TRUE;
                     if (IsOneOnOneMatchMode(g_GameState.gameMode)) {
                         if (score == 0) {
-                            sprintf(g_PrintBuffer, g_MatchScoreEvenText);
+                            sprintf(g_PrintBuffer, MATCH_SCORE_EVEN_TEXT);
                         }
                         else if (score < 0) {
-                            sprintf(g_PrintBuffer, g_MatchScoreUpFormat, score);
+                            sprintf(g_PrintBuffer, "%dUP", score);
                         }
                         else {
-                            sprintf(g_PrintBuffer, g_MatchScoreDownFormat, score);
+                            sprintf(g_PrintBuffer, "%dDOWN", score);
                         }
                     }
                     else if (g_GameState.gameMode == GAME_MODE_SKINS_MATCH ||
                         g_GameState.gameMode == GAME_MODE_CLUB_SLOTS) {
-                        sprintf(g_PrintBuffer, g_SkinsScoreFormat, score);
+                        sprintf(g_PrintBuffer, "%dP", score);
                     }
                     else if (score == 0) {
-                        sprintf(g_PrintBuffer, g_ParScoreEvenText);
+                        sprintf(g_PrintBuffer, PAR_SCORE_EVEN_TEXT);
                     }
                     else {
-                        sprintf(g_PrintBuffer, g_ParScoreFormat, score);
+                        sprintf(g_PrintBuffer, "%+d", score);
                     }
 
                     break;
@@ -1172,47 +1166,47 @@ void DrawMediumTextSlot(Gfx **displayListHead, s32 slot) {
                     break;
                 case MESSAGE_CODE_NAME:
                     isPrinted = TRUE;
-                    sprintf(g_PrintBuffer, g_TextStringFormat, g_TextName);
+                    sprintf(g_PrintBuffer, "%s", g_TextName);
                     break;
                 case MESSAGE_CODE_VALUE:
                     isPrinted = TRUE;
-                    sprintf(g_PrintBuffer, g_TextNumberFormat, textSlot->values[0]);
+                    sprintf(g_PrintBuffer, "%d", textSlot->values[0]);
                     break;
                 case MESSAGE_CODE_VALUE + 1:
                     isPrinted = TRUE;
-                    sprintf(g_PrintBuffer, g_TextNumberFormat, textSlot->values[1]);
+                    sprintf(g_PrintBuffer, "%d", textSlot->values[1]);
                     break;
                 case MESSAGE_CODE_VALUE + 2:
                     isPrinted = TRUE;
-                    sprintf(g_PrintBuffer, g_TextNumberFormat, textSlot->values[2]);
+                    sprintf(g_PrintBuffer, "%d", textSlot->values[2]);
                     break;
                 case MESSAGE_CODE_VALUE + 3:
                     isPrinted = TRUE;
-                    sprintf(g_PrintBuffer, g_TextNumberFormat, textSlot->values[3]);
+                    sprintf(g_PrintBuffer, "%d", textSlot->values[3]);
                     break;
                 case MESSAGE_CODE_SCORE:
                     score = g_RoundHud.skinsTotals[g_CurrentShot.playerIndex];
                     isPrinted = TRUE;
                     if (IsOneOnOneMatchMode(g_GameState.gameMode)) {
                         if (score == 0) {
-                            sprintf(g_PrintBuffer, g_MatchScoreEvenText);
+                            sprintf(g_PrintBuffer, MATCH_SCORE_EVEN_TEXT);
                         }
                         else if (score < 0) {
-                            sprintf(g_PrintBuffer, g_MatchScoreUpFormat, score);
+                            sprintf(g_PrintBuffer, "%dUP", score);
                         }
                         else {
-                            sprintf(g_PrintBuffer, g_MatchScoreDownFormat, score);
+                            sprintf(g_PrintBuffer, "%dDOWN", score);
                         }
                     }
                     else if (g_GameState.gameMode == GAME_MODE_SKINS_MATCH ||
                         g_GameState.gameMode == GAME_MODE_CLUB_SLOTS) {
-                        sprintf(g_PrintBuffer, g_SkinsScoreFormat, score);
+                        sprintf(g_PrintBuffer, "%dP", score);
                     }
                     else if (score == 0) {
-                        sprintf(g_PrintBuffer, g_ParScoreEvenText);
+                        sprintf(g_PrintBuffer, PAR_SCORE_EVEN_TEXT);
                     }
                     else {
-                        sprintf(g_PrintBuffer, g_ParScoreFormat, score);
+                        sprintf(g_PrintBuffer, "%+d", score);
                     }
 
                     break;
@@ -1559,7 +1553,7 @@ void MeasureMessage(MessageId messageId, s32 fontSize, s32 *width, s32 *height, 
                     lineCount += LINE_SPACING + fontSize;
                     break;
                 case MESSAGE_CODE_NAME:
-                    sprintf(g_PrintBuffer, g_TextStringFormat, g_TextName);
+                    sprintf(g_PrintBuffer, "%s", g_TextName);
                     lineWidths[line] +=
                         MeasureText(g_PrintBuffer, fontSize, MEASURE_TEXT_PROPORTIONAL);
                     break;
@@ -1569,7 +1563,7 @@ void MeasureMessage(MessageId messageId, s32 fontSize, s32 *width, s32 *height, 
                 case MESSAGE_CODE_VALUE + 3:
                     sprintf(
                         g_PrintBuffer,
-                        g_TextNumberFormat,
+                        "%d",
                         g_TextSlots[slot].values[code - MESSAGE_CODE_VALUE]
                     );
                     lineWidths[line] += GetTextLength(g_PrintBuffer) * fontSize;

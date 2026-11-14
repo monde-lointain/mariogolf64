@@ -82,17 +82,9 @@ enum ScoresStyle {
 
 typedef s32 ScoresStyle;
 
-extern const char f_HoleNumberFormat[];
-extern const char f_StringFormat[];
-extern const char f_CompactHoleFormat[];
-extern const char f_TwoDigitFormat[];
-extern const char f_ZeroToParFormat[];
-extern const char f_ScoreToParFormat[];
-extern const char f_WideTotalFormat[];
-extern const char f_TotalFormat[];
-extern const char f_TieText[];
-extern const char f_WinText[];
-extern const char f_LoseText[];
+#define ZERO_TO_PAR_TEXT "  #0"
+#define WIN_TEXT "WIN"
+
 static const char f_BlankBetName[];
 
 static s32 f_MatchResultFrameCount = 0;
@@ -339,7 +331,7 @@ void DrawMatchResult(Gfx **displayListHead) {
     SetUpTextDrawing(&gfx);
     SetTextColor(&gfx, 0xFF, 0xFF, 0xFF);
     DrawLargeText(&gfx, MATCH_TITLE_X, MATCH_TITLE_Y, "Match Game");
-    sprintf(g_PrintBuffer, f_HoleNumberFormat, holeNumber);
+    sprintf(g_PrintBuffer, "ﾎｰﾙ%d", holeNumber);
     DrawLargeText(&gfx, MATCH_HOLE_X, MATCH_HOLE_Y, g_PrintBuffer);
     holeIndex = holeNumber - 1;
     ownHole = holeIndex;
@@ -348,16 +340,16 @@ void DrawMatchResult(Gfx **displayListHead) {
         if (g_Players[playerIndex].holes[ownHole].strokeCount ==
             g_Players[playerIndex ^ 1].holes[holeIndex].strokeCount) {
             SetTextColor(&gfx, 0xFF, 0xFF, 0);
-            DrawLargeText(&gfx, x, MATCH_RESULT_Y, (char *)f_TieText);
+            DrawLargeText(&gfx, x, MATCH_RESULT_Y, "DRAW");
         }
         else if (g_Players[playerIndex].holes[ownHole].strokeCount <
             g_Players[playerIndex ^ 1].holes[holeIndex].strokeCount) {
             SetTextColor(&gfx, 0xFF, 0x7F, 0x7F);
-            DrawLargeText(&gfx, x, MATCH_RESULT_Y, (char *)f_WinText);
+            DrawLargeText(&gfx, x, MATCH_RESULT_Y, WIN_TEXT);
         }
         else {
             SetTextColor(&gfx, 0x7F, 0x7F, 0xFF);
-            DrawLargeText(&gfx, x, MATCH_RESULT_Y, (char *)f_LoseText);
+            DrawLargeText(&gfx, x, MATCH_RESULT_Y, "LOSE");
         }
 
         x += MATCH_RESULT_SPACING;
@@ -417,11 +409,6 @@ void DrawMatchResult(Gfx **displayListHead) {
 
     *displayListHead = gfx;
 }
-
-const char f_HoleNumberFormat[] = "ﾎｰﾙ%d";
-const char f_TieText[] = "DRAW";
-const char f_WinText[] = "WIN";
-const char f_LoseText[] = "LOSE";
 
 #define NO_BETS_SHIFT 32
 #define STANDINGS_PLACE_LEFT 32
@@ -535,10 +522,10 @@ void DrawStandingsPage(Gfx **displayListHead) {
     for (playerIndex = 0; playerIndex != g_GameState.playerCount; playerIndex++) {
         betTotal = 0;
         if (scoresToPar[playerIndex] == 0) {
-            sprintf(g_PrintBuffer, f_ZeroToParFormat);
+            sprintf(g_PrintBuffer, ZERO_TO_PAR_TEXT);
         }
         else {
-            sprintf(g_PrintBuffer, f_ScoreToParFormat, scoresToPar[playerIndex]);
+            sprintf(g_PrintBuffer, "%+4d", scoresToPar[playerIndex]);
         }
 
         DrawDigitText(
@@ -555,10 +542,10 @@ void DrawStandingsPage(Gfx **displayListHead) {
             }
 
             if (betTotal >= WIDE_BET_TOTAL) {
-                sprintf(g_PrintBuffer, f_WideTotalFormat, betTotal);
+                sprintf(g_PrintBuffer, "%5d", betTotal);
             }
             else {
-                sprintf(g_PrintBuffer, f_TotalFormat, betTotal);
+                sprintf(g_PrintBuffer, "%4d", betTotal);
             }
 
             DrawDigitText(
@@ -572,12 +559,6 @@ void DrawStandingsPage(Gfx **displayListHead) {
 
     *displayListHead = gfx;
 }
-
-const char f_ZeroToParFormat[] = "  #0";
-const char f_ScoreToParFormat[] = "%+4d";
-const char f_WideTotalFormat[] = "%5d";
-const char f_TotalFormat[] = "%4d";
-const char f_CompactHoleFormat[] = "Hole%d";
 
 #define MESSAGE_WINS_NEEDED 1
 #define MESSAGE_WIN_ON_DRAW 2
@@ -706,11 +687,7 @@ void DrawMatchPage(Gfx **displayListHead) {
     SetUpGradientTextDrawing(&gfx, 0);
     gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0, OPAQUE_ALPHA);
     gDPSetPrimColor(gfx++, 0, 0, 0x30, 0xFF, 0, OPAQUE_ALPHA);
-    sprintf(
-        g_PrintBuffer,
-        f_CompactHoleFormat,
-        g_Scorecard.content.holeIndex + g_Scorecard.isTallied
-    );
+    sprintf(g_PrintBuffer, "Hole%d", g_Scorecard.content.holeIndex + g_Scorecard.isTallied);
     DrawLargeTextWithShadow(
         &gfx,
         g_Scorecard.x + STANDINGS_HOLE_LEFT,
@@ -1097,8 +1074,6 @@ void DrawMatchPage(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
-const char f_StringFormat[] = "%s";
-
 #define SKINS_TITLE_LEFT 122
 #define SKINS_TITLE_TOP 52
 #define SKINS_ROW_TOP 72
@@ -1135,7 +1110,7 @@ void DrawSkinsPage(Gfx **displayListHead) {
     gfx = *displayListHead;
     holeIndex = g_Scorecard.content.holeIndex;
     SetUpGradientTextDrawing(&gfx, 0);
-    sprintf(g_PrintBuffer, f_CompactHoleFormat, holeIndex + g_Scorecard.isTallied);
+    sprintf(g_PrintBuffer, "Hole%d", holeIndex + g_Scorecard.isTallied);
     DrawLargeTextWithShadow(
         &gfx,
         g_Scorecard.x + STANDINGS_HOLE_LEFT,
@@ -1145,7 +1120,7 @@ void DrawSkinsPage(Gfx **displayListHead) {
         HOLE_NUMBER_PRIM_COLOR,
         0
     );
-    sprintf(g_PrintBuffer, f_StringFormat, f_CarryOverText);
+    sprintf(g_PrintBuffer, "%s", f_CarryOverText);
     DrawLargeTextWithShadow(
         &gfx,
         g_Scorecard.x + SKINS_TITLE_LEFT,
@@ -1199,7 +1174,7 @@ void DrawSkinsPage(Gfx **displayListHead) {
                 &gfx,
                 g_Scorecard.x + SKINS_WIN_LEFT,
                 SKINS_WIN_TOP + (playerIndex * SKINS_ROW_SPACING),
-                (char *)f_WinText
+                WIN_TEXT
             );
         }
     }
@@ -1309,7 +1284,6 @@ void DrawSkinsPage(Gfx **displayListHead) {
 }
 
 static const char f_BlankBetName[] = " ";
-extern const char f_BetDashText[];
 
 #define BET_COLUMN_SPACING 35
 #define BET_NAME_SPACING 36
@@ -1718,7 +1692,7 @@ void DrawBetsPage(Gfx **displayListHead) {
             if (i == BET_LONGEST_DRIVE) {
                 sprintf(
                     g_PrintBuffer,
-                    f_TotalFormat,
+                    "%4d",
                     g_LongestDrivePot - g_GameState.betRates[BET_LONGEST_DRIVE]
                 );
                 DrawCenteredSmallText(
@@ -1732,7 +1706,7 @@ void DrawBetsPage(Gfx **displayListHead) {
             if (i == BET_NEAREST_PIN) {
                 sprintf(
                     g_PrintBuffer,
-                    f_TotalFormat,
+                    "%4d",
                     g_NearestPinPot - g_GameState.betRates[BET_NEAREST_PIN]
                 );
                 DrawCenteredSmallText(
@@ -1744,7 +1718,7 @@ void DrawBetsPage(Gfx **displayListHead) {
             }
 
             if (i == BET_SKINS) {
-                sprintf(g_PrintBuffer, f_TotalFormat, g_HolePot - g_GameState.betRates[BET_SKINS]);
+                sprintf(g_PrintBuffer, "%4d", g_HolePot - g_GameState.betRates[BET_SKINS]);
                 DrawCenteredSmallText(
                     &gfx,
                     (j * BET_COLUMN_SPACING) + BET_POT_LEFT + g_Scorecard.x,
@@ -1754,11 +1728,7 @@ void DrawBetsPage(Gfx **displayListHead) {
             }
 
             if (i == BET_MATCH_POT) {
-                sprintf(
-                    g_PrintBuffer,
-                    f_TotalFormat,
-                    g_HolePot - g_GameState.betRates[BET_MATCH_POT]
-                );
+                sprintf(g_PrintBuffer, "%4d", g_HolePot - g_GameState.betRates[BET_MATCH_POT]);
                 DrawCenteredSmallText(
                     &gfx,
                     (j * BET_COLUMN_SPACING) + BET_POT_LEFT + g_Scorecard.x,
@@ -1777,7 +1747,7 @@ void DrawBetsPage(Gfx **displayListHead) {
     for (i = 0; i != BET_COUNT; i++) {
         if (g_GameState.betRates[i] != UNSET_BET_RATE) {
             if (g_GameState.betRates[i] != 0) {
-                sprintf(g_PrintBuffer, f_TwoDigitFormat, g_GameState.betRates[i]);
+                sprintf(g_PrintBuffer, "%2d", g_GameState.betRates[i]);
                 DrawCondensedShadowedText(
                     &gfx,
                     (column * BET_COLUMN_SPACING) + BET_RATE_LEFT + g_Scorecard.x,
@@ -1800,13 +1770,13 @@ void DrawBetsPage(Gfx **displayListHead) {
                     &gfx,
                     (column * BET_COLUMN_SPACING) + NO_TALLY_LEFT + g_Scorecard.x,
                     (i * GRID_ROW_HEIGHT) + BETS_PAGE_TALLY_TOP + g_Scorecard.y,
-                    (READ_ONLY char *)f_BetDashText
+                    "-"
                 );
                 column++;
             }
             else if (g_GameState.betRates[j] != UNSET_BET_RATE) {
                 total += g_BetTallies[i][j];
-                sprintf(g_PrintBuffer, f_WideTotalFormat, g_BetTallies[i][j]);
+                sprintf(g_PrintBuffer, "%5d", g_BetTallies[i][j]);
                 DrawCondensedShadowedText(
                     &gfx,
                     (column * BET_COLUMN_SPACING) + BETS_PAGE_TALLY_LEFT + g_Scorecard.x,
@@ -1817,7 +1787,7 @@ void DrawBetsPage(Gfx **displayListHead) {
             }
         }
 
-        sprintf(g_PrintBuffer, f_WideTotalFormat, total);
+        sprintf(g_PrintBuffer, "%5d", total);
         DrawCondensedShadowedText(
             &gfx,
             (column * BET_COLUMN_SPACING) + BETS_PAGE_TALLY_LEFT + g_Scorecard.x,
@@ -1828,9 +1798,6 @@ void DrawBetsPage(Gfx **displayListHead) {
 
     *displayListHead = gfx;
 }
-
-const char f_TwoDigitFormat[] = "%2d";
-const char f_BetDashText[] = "-";
 
 #define HOLE_NUMBER_LEFT 32
 #define HOLE_TIME_LEFT 64
@@ -1860,7 +1827,7 @@ void DrawSpeedGolfPage(Gfx **displayListHead) {
 
     SetUpGradientTextDrawing(&gfx, 0);
     for (holeIndex = 0; holeIndex != NINE_HOLE_COUNT; holeIndex++) {
-        sprintf(g_PrintBuffer, f_TwoDigitFormat, holeIndex + 1);
+        sprintf(g_PrintBuffer, "%2d", holeIndex + 1);
         DrawLargeTextWithShadow(
             &gfx,
             g_Scorecard.x + HOLE_NUMBER_LEFT,
@@ -1870,7 +1837,7 @@ void DrawSpeedGolfPage(Gfx **displayListHead) {
             HOLE_NUMBER_PRIM_COLOR,
             0
         );
-        sprintf(g_PrintBuffer, f_TwoDigitFormat, holeIndex + NINE_HOLE_COUNT + 1);
+        sprintf(g_PrintBuffer, "%2d", holeIndex + NINE_HOLE_COUNT + 1);
         DrawLargeTextWithShadow(
             &gfx,
             g_Scorecard.x + HOLE_NUMBER_LEFT + BACK_NINE_SPACING,
@@ -1909,7 +1876,7 @@ void DrawSpeedGolfPage(Gfx **displayListHead) {
         if (holeIndex < shownHoleCount) {
             minutes = g_HoleTimeMinutes[holeIndex];
             if (minutes < 0) {
-                sprintf(g_PrintBuffer, f_StringFormat, "--------");
+                sprintf(g_PrintBuffer, "%s", "--------");
                 DrawMediumText(
                     &gfx,
                     g_Scorecard.x + HOLE_TIME_LEFT,
@@ -1933,7 +1900,7 @@ void DrawSpeedGolfPage(Gfx **displayListHead) {
         if (holeIndex + NINE_HOLE_COUNT < shownHoleCount) {
             minutes = g_HoleTimeMinutes[holeIndex + NINE_HOLE_COUNT];
             if (minutes < 0) {
-                sprintf(g_PrintBuffer, f_StringFormat, "--------");
+                sprintf(g_PrintBuffer, "%s", "--------");
                 DrawMediumText(
                     &gfx,
                     g_Scorecard.x + HOLE_TIME_LEFT + BACK_NINE_SPACING,
@@ -2189,7 +2156,7 @@ void DrawLeaderboardPage(Gfx **displayListHead) {
             else {
                 sprintf(
                     g_PrintBuffer,
-                    f_StringFormat,
+                    "%s",
                     g_ContestantNames[g_ContestantNameIndices[contestantId]]
                 );
             }
@@ -2450,7 +2417,7 @@ void DrawLeaderboardPage(Gfx **displayListHead) {
                 else {
                     sprintf(
                         g_PrintBuffer,
-                        f_StringFormat,
+                        "%s",
                         g_ContestantNames[g_ContestantNameIndices[standing->contestantId]]
                     );
                 }
@@ -3623,7 +3590,7 @@ void DrawScoresPage(Gfx **displayListHead) {
     SetTextColor(&gfx, 0xFF, 0xFF, 0);
     for (i = 0; i != HOLES_PER_NINE; i++) {
         if (!(g_GameState.holeSelection & HOLE_SELECTION_BACK_NINE)) {
-            sprintf(g_PrintBuffer, f_TwoDigitFormat, i + 1);
+            sprintf(g_PrintBuffer, "%2d", i + 1);
             DrawCondensedShadowedText(
                 &gfx,
                 (i * CELL_WIDTH) + HOLE_NUMBERS_LEFT + g_Scorecard.x,
@@ -3633,7 +3600,7 @@ void DrawScoresPage(Gfx **displayListHead) {
         }
 
         if (!(g_GameState.holeSelection & HOLE_SELECTION_FRONT_NINE)) {
-            sprintf(g_PrintBuffer, f_TwoDigitFormat, i + HOLES_PER_NINE + 1);
+            sprintf(g_PrintBuffer, "%2d", i + HOLES_PER_NINE + 1);
             DrawCondensedShadowedText(
                 &gfx,
                 (i * CELL_WIDTH) + BACK_HOLE_NUMBERS_LEFT + g_Scorecard.x,
@@ -3788,7 +3755,7 @@ void DrawScoresPage(Gfx **displayListHead) {
                     }
                 }
                 else {
-                    sprintf(g_PrintBuffer, f_TwoDigitFormat, g_Players[i].holes[j].strokeCount);
+                    sprintf(g_PrintBuffer, "%2d", g_Players[i].holes[j].strokeCount);
                     if (j < HOLES_PER_NINE) {
                         DrawShadowedText(
                             &gfx,
@@ -3877,7 +3844,7 @@ void DrawScoresPage(Gfx **displayListHead) {
                     }
                 }
 
-                sprintf(g_PrintBuffer, f_TwoDigitFormat, g_Players[i].holes[j].strokeCount);
+                sprintf(g_PrintBuffer, "%2d", g_Players[i].holes[j].strokeCount);
                 if (j < HOLES_PER_NINE) {
                     DrawCondensedShadowedText(
                         &gfx,
@@ -3918,7 +3885,7 @@ void DrawScoresPage(Gfx **displayListHead) {
                         }
                     }
                     else {
-                        sprintf(g_PrintBuffer, f_TwoDigitFormat, g_Players[i].holes[j].puttCount);
+                        sprintf(g_PrintBuffer, "%2d", g_Players[i].holes[j].puttCount);
                         if (j < HOLES_PER_NINE) {
                             overTop += PLAYER_ROW_SPACING;
                             DrawCenteredNarrowText(
@@ -3999,10 +3966,10 @@ void DrawScoresPage(Gfx **displayListHead) {
 
             standing = GetNetScoreToPar(g_Scorecard.content.holeIndex, i);
             if (standing == 0) {
-                sprintf(g_PrintBuffer, f_ZeroToParFormat);
+                sprintf(g_PrintBuffer, ZERO_TO_PAR_TEXT);
             }
             else {
-                sprintf(g_PrintBuffer, f_ScoreToParFormat, standing);
+                sprintf(g_PrintBuffer, "%+4d", standing);
             }
 
             if (g_GameState.holeSelection & HOLE_SELECTION_FRONT_NINE) {

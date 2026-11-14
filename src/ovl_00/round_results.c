@@ -184,18 +184,13 @@ enum PrizeBracket {
 #define FOUR_DIGIT_BET_SHIFT (-16)
 #define FOUR_DIGIT_BET_MIN 999
 #define FOUR_DIGIT_BET_MAX 9999
-extern const char f_NumberFormat[];
-extern const char f_PlaceNumberFormat[];
 
 #define MATCH_RANK_WON 100
 #define MATCH_RANK_LOST 101
 
-extern const char f_EvenScoreFormat[];
-extern const char f_ScoreFormat[];
-extern const char f_PointsFormat[];
-extern const char f_TimeFormat[];
-extern const char f_TimeLabel[];
-extern const char f_NoPointsText[];
+#define EVEN_SCORE_TEXT " #0"
+#define TIME_LABEL "Time"
+#define NO_POINTS_TEXT "  -"
 
 void FreeRoundResults(void);
 void LoadRoundResults(void);
@@ -937,7 +932,7 @@ void DrawResultsNumber(Gfx **displayListHead, s32 x, s32 y, s32 number) {
     u8 character;
     s32 offset;
 
-    sprintf(g_PrintBuffer, f_NumberFormat, number);
+    sprintf(g_PrintBuffer, "%4d", number);
     LoadSmallPalette(&gfx, 0, ImagePalette(f_DigitsImage));
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
@@ -1023,7 +1018,7 @@ void DrawPlaceNumber(Gfx **displayListHead, s32 x, s32 y, s32 place) {
     u8 character;
     s32 glyph;
 
-    sprintf(g_PrintBuffer, f_PlaceNumberFormat, place);
+    sprintf(g_PrintBuffer, "%d", place);
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
     LoadLargePalette(&gfx, ImagePalette(f_PlaceDigitsImage));
@@ -1173,7 +1168,7 @@ void DrawRank(Gfx **displayListHead, s32 x, s32 y, s32 rank) {
             TEXEL_STEP_ONE
         );
         if (rank >= RANK_FOURTH) {
-            sprintf(g_PrintBuffer, f_PlaceNumberFormat, rank + 1);
+            sprintf(g_PrintBuffer, "%d", rank + 1);
             LoadSmallPalette(&gfx, 0, ImagePalette(f_SecondBannerImage));
             if (rank >= RANK_TENTH) {
                 x -= PLACE_TWO_DIGIT_SHIFT;
@@ -1393,9 +1388,6 @@ void StartResultsNotice(UnlockNoticeKind kind) {
             break;
     }
 }
-
-const char f_NumberFormat[] = "%4d";
-const char f_PlaceNumberFormat[] = "%d";
 
 void UpdateCourseResultsNotice(void) {
     SaveData *save = GetSaveData();
@@ -3419,10 +3411,10 @@ void DrawTournamentResults(Gfx **displayListHead) {
         G_TX_NOLOD
     );
     if (f_PlayerResults[0] == 0) {
-        sprintf(g_PrintBuffer, f_EvenScoreFormat, 0);
+        sprintf(g_PrintBuffer, EVEN_SCORE_TEXT, 0);
     }
     else {
-        sprintf(g_PrintBuffer, f_ScoreFormat, f_PlayerResults[0]);
+        sprintf(g_PrintBuffer, "%+3d", f_PlayerResults[0]);
     }
 
     DrawDigitText(
@@ -3431,7 +3423,7 @@ void DrawTournamentResults(Gfx **displayListHead) {
         f_ResultsTop + TOURNAMENT_NUMBER_Y,
         g_PrintBuffer
     );
-    sprintf(g_PrintBuffer, f_PointsFormat, f_PlayerPoints[0]);
+    sprintf(g_PrintBuffer, "%3d", f_PlayerPoints[0]);
     DrawDigitText(
         &gfx,
         f_ResultsSlide + TOURNAMENT_POINTS_X,
@@ -3440,12 +3432,6 @@ void DrawTournamentResults(Gfx **displayListHead) {
     );
     *displayListHead = gfx;
 }
-
-const char f_EvenScoreFormat[] = " #0";
-const char f_ScoreFormat[] = "%+3d";
-const char f_PointsFormat[] = "%3d";
-const char f_TimeFormat[] = "%02d:%02d:%02d";
-const char f_TimeLabel[] = "Time";
 
 #define RESULTS_HEADING_ENV_COLOR 0xFFFF0000
 #define RESULTS_HEADING_PRIM_COLOR 0x30FF0000
@@ -3543,10 +3529,10 @@ void DrawSpeedGolfResults(Gfx **displayListHead) {
         G_TX_NOLOD
     );
     if (f_PlayerResults[0] == 0) {
-        sprintf(g_PrintBuffer, f_EvenScoreFormat, 0);
+        sprintf(g_PrintBuffer, EVEN_SCORE_TEXT, 0);
     }
     else {
-        sprintf(g_PrintBuffer, f_ScoreFormat, f_PlayerResults[0]);
+        sprintf(g_PrintBuffer, "%+3d", f_PlayerResults[0]);
     }
 
     DrawDigitText(
@@ -3561,7 +3547,7 @@ void DrawSpeedGolfResults(Gfx **displayListHead) {
         HUNDREDTHS_PER_SECOND;
     sprintf(
         g_PrintBuffer,
-        f_TimeFormat,
+        "%02d:%02d:%02d",
         seconds / SECONDS_PER_MINUTE % SHOWN_MINUTES_LIMIT,
         seconds % SECONDS_PER_MINUTE,
         hundredths
@@ -3572,7 +3558,7 @@ void DrawSpeedGolfResults(Gfx **displayListHead) {
         f_ResultsTop + SPEED_GOLF_TIME_Y,
         g_PrintBuffer
     );
-    sprintf(g_PrintBuffer, f_PointsFormat, f_PlayerPoints[0]);
+    sprintf(g_PrintBuffer, "%3d", f_PlayerPoints[0]);
     DrawDigitText(
         &gfx,
         f_ResultsSlide + SPEED_GOLF_POINTS_X,
@@ -3580,7 +3566,7 @@ void DrawSpeedGolfResults(Gfx **displayListHead) {
         g_PrintBuffer
     );
     SetUpGradientTextDrawing(&gfx, 0);
-    sprintf(g_PrintBuffer, f_TimeLabel);
+    sprintf(g_PrintBuffer, TIME_LABEL);
     DrawLargeTextWithShadow(
         &gfx,
         f_ResultsSlide + SPEED_GOLF_HEADING_X,
@@ -3734,13 +3720,13 @@ void DrawPlayersResults(Gfx **displayListHead) {
         for (playerIndex = 0; playerIndex != g_GameState.playerCount; playerIndex++) {
             if (g_GameState.gameMode == GAME_MODE_SKINS_MATCH ||
                 g_GameState.gameMode == GAME_MODE_CLUB_SLOTS) {
-                sprintf(g_PrintBuffer, f_PointsFormat, f_PlayerResults[playerIndex]);
+                sprintf(g_PrintBuffer, "%3d", f_PlayerResults[playerIndex]);
             }
             else if (f_PlayerResults[playerIndex] == 0) {
-                sprintf(g_PrintBuffer, f_EvenScoreFormat, 0);
+                sprintf(g_PrintBuffer, EVEN_SCORE_TEXT, 0);
             }
             else {
-                sprintf(g_PrintBuffer, f_ScoreFormat, f_PlayerResults[playerIndex]);
+                sprintf(g_PrintBuffer, "%+3d", f_PlayerResults[playerIndex]);
             }
 
             DrawDigitText(
@@ -3757,10 +3743,10 @@ void DrawPlayersResults(Gfx **displayListHead) {
                 g_PrintBuffer
             );
             if (f_PlayerPoints[playerIndex] < 0) {
-                sprintf(g_PrintBuffer, f_NoPointsText, f_PlayerPoints[playerIndex]);
+                sprintf(g_PrintBuffer, NO_POINTS_TEXT, f_PlayerPoints[playerIndex]);
             }
             else {
-                sprintf(g_PrintBuffer, f_PointsFormat, f_PlayerPoints[playerIndex]);
+                sprintf(g_PrintBuffer, "%3d", f_PlayerPoints[playerIndex]);
             }
 
             DrawDigitText(
@@ -3775,13 +3761,13 @@ void DrawPlayersResults(Gfx **displayListHead) {
         for (playerIndex = 0; playerIndex != g_GameState.playerCount; playerIndex++) {
             if (g_GameState.gameMode == GAME_MODE_SKINS_MATCH ||
                 g_GameState.gameMode == GAME_MODE_CLUB_SLOTS) {
-                sprintf(g_PrintBuffer, f_PointsFormat, f_PlayerResults[playerIndex]);
+                sprintf(g_PrintBuffer, "%3d", f_PlayerResults[playerIndex]);
             }
             else if (f_PlayerResults[playerIndex] == 0) {
-                sprintf(g_PrintBuffer, f_EvenScoreFormat, 0);
+                sprintf(g_PrintBuffer, EVEN_SCORE_TEXT, 0);
             }
             else {
-                sprintf(g_PrintBuffer, f_ScoreFormat, f_PlayerResults[playerIndex]);
+                sprintf(g_PrintBuffer, "%+3d", f_PlayerResults[playerIndex]);
             }
 
             DrawDigitText(
@@ -3791,10 +3777,10 @@ void DrawPlayersResults(Gfx **displayListHead) {
                 g_PrintBuffer
             );
             if (f_PlayerPoints[playerIndex] < 0) {
-                sprintf(g_PrintBuffer, f_NoPointsText, f_PlayerPoints[playerIndex]);
+                sprintf(g_PrintBuffer, NO_POINTS_TEXT, f_PlayerPoints[playerIndex]);
             }
             else {
-                sprintf(g_PrintBuffer, f_PointsFormat, f_PlayerPoints[playerIndex]);
+                sprintf(g_PrintBuffer, "%3d", f_PlayerPoints[playerIndex]);
             }
 
             DrawDigitText(
@@ -3843,8 +3829,6 @@ void DrawPlayersResults(Gfx **displayListHead) {
 
     *displayListHead = gfx;
 }
-
-const char f_NoPointsText[] = "  -";
 
 #define MATCH_ROW_HEIGHT 72
 #define MATCH_HEADING_Y 62
@@ -4097,7 +4081,7 @@ void DrawMatchResults(Gfx **displayListHead) {
                 );
             }
 
-            sprintf(g_PrintBuffer, f_NumberFormat, f_PlayerBetTotals[playerIndex]);
+            sprintf(g_PrintBuffer, "%4d", f_PlayerBetTotals[playerIndex]);
             DrawDigitText(
                 &gfx,
                 (BETTING_MATCH_BET_TOTAL_X + f_ResultsSlide) + betShift,
@@ -4105,10 +4089,10 @@ void DrawMatchResults(Gfx **displayListHead) {
                 g_PrintBuffer
             );
             if (f_PlayerPoints[playerIndex] < 0) {
-                sprintf(g_PrintBuffer, f_NoPointsText, f_PlayerPoints[playerIndex]);
+                sprintf(g_PrintBuffer, NO_POINTS_TEXT, f_PlayerPoints[playerIndex]);
             }
             else {
-                sprintf(g_PrintBuffer, f_PointsFormat, f_PlayerPoints[playerIndex]);
+                sprintf(g_PrintBuffer, "%3d", f_PlayerPoints[playerIndex]);
             }
 
             DrawDigitText(
@@ -4135,10 +4119,10 @@ void DrawMatchResults(Gfx **displayListHead) {
             }
 
             if (f_PlayerPoints[playerIndex] < 0) {
-                sprintf(g_PrintBuffer, f_NoPointsText, f_PlayerPoints[playerIndex]);
+                sprintf(g_PrintBuffer, NO_POINTS_TEXT, f_PlayerPoints[playerIndex]);
             }
             else {
-                sprintf(g_PrintBuffer, f_PointsFormat, f_PlayerPoints[playerIndex]);
+                sprintf(g_PrintBuffer, "%3d", f_PlayerPoints[playerIndex]);
             }
 
             DrawDigitText(
@@ -4434,7 +4418,7 @@ void DrawClubTournamentResults(Gfx **displayListHead) {
         seconds = g_GameState.stopwatchFrameCount / FRAMES_PER_SECOND % SECONDS_PER_MINUTE;
         minutes = g_GameState.stopwatchFrameCount / FRAMES_PER_SECOND / SECONDS_PER_MINUTE %
             SHOWN_MINUTES_LIMIT;
-        sprintf(g_PrintBuffer, f_TimeLabel);
+        sprintf(g_PrintBuffer, TIME_LABEL);
         DrawLargeTextWithShadow(
             &gfx,
             f_ResultsSlide + CLUB_TOURNAMENT_LABEL_X,
@@ -4444,7 +4428,7 @@ void DrawClubTournamentResults(Gfx **displayListHead) {
             CLUB_TOURNAMENT_LABEL_PRIM_COLOR,
             CLUB_TOURNAMENT_LABEL_FLAGS
         );
-        sprintf(g_PrintBuffer, f_TimeFormat, minutes, seconds, hundredths);
+        sprintf(g_PrintBuffer, "%02d:%02d:%02d", minutes, seconds, hundredths);
         DrawLargeTextWithShadow(
             &gfx,
             f_ResultsSlide + CLUB_TOURNAMENT_VALUE_X,
