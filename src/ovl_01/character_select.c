@@ -38,11 +38,17 @@ enum GridMove {
 
 typedef u8 GridMove;
 
-#define STICK_DIAGONAL_NONE 0
-#define STICK_DIAGONAL_UP_LEFT 1
-#define STICK_DIAGONAL_UP_RIGHT 2
-#define STICK_DIAGONAL_DOWN_LEFT 3
-#define STICK_DIAGONAL_DOWN_RIGHT 4
+enum StickDiagonal {
+    STICK_DIAGONAL_NONE,
+    STICK_DIAGONAL_UP_LEFT,
+    STICK_DIAGONAL_UP_RIGHT,
+    STICK_DIAGONAL_DOWN_LEFT,
+    STICK_DIAGONAL_DOWN_RIGHT
+};
+
+typedef s32 StickDiagonal;
+typedef u8 UStickDiagonal8;
+
 #define STICK_DIAGONAL_THRESHOLD 20
 #define STICK_HOLD_FRAME_COUNT 4
 
@@ -294,7 +300,11 @@ Boolean MoveGridCursor(s32 playerIndex, GridMove direction, UBoolean8 canChooseM
 }
 
 // Returns -TRUE when the cursor cannot move, and FALSE when it moves.
-Boolean MoveGridCursorDiagonal(s32 playerIndex, u8 diagonal, UBoolean8 canChooseMarked) {
+Boolean MoveGridCursorDiagonal(
+    s32 playerIndex,
+    UStickDiagonal8 diagonal,
+    UBoolean8 canChooseMarked
+) {
     EncodedAsset asset;
     AssetFile file;
     MenuMemory *memory = GetMenuMemory();
@@ -411,7 +421,7 @@ Boolean MoveGridCursorDiagonal(s32 playerIndex, u8 diagonal, UBoolean8 canChoose
     return FALSE;
 }
 
-s32 GetStickDiagonal(void) {
+StickDiagonal GetStickDiagonal(void) {
     s32 stickX;
     s32 stickY;
     s8 anyStick;
