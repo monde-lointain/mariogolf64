@@ -1581,7 +1581,7 @@ void DrawLensFlare(Gfx **displayListHead) {
 void BlendSkyColors(void) {
     SkyColors *from;
     SkyColors *to;
-    s32 group;
+    s32 skyIndex;
     s32 channel;
 
     if (f_SkyBlendStep < f_SkyBlendStepCount) {
@@ -1592,21 +1592,21 @@ void BlendSkyColors(void) {
                        [(g_HoleSetup.conditions.isRaining * SKY_TIME_COUNT) + f_SkyTimeIndex];
     to = &g_SkyColors[GetCourseRecordIndex()]
                      [(g_HoleSetup.conditions.isRaining * SKY_TIME_COUNT) + f_SkyTimeIndex + 1];
-    for (group = 0; group != SKY_VIEW_COUNT * MATRIX_BUFFER_COUNT; group++) {
+    for (skyIndex = 0; skyIndex != SKY_VIEW_COUNT * MATRIX_BUFFER_COUNT; skyIndex++) {
         for (channel = 0; channel != 3; channel++) {
-            f_SkyVertices[group][0].v.cn[channel] = from->topColor[channel] +
+            f_SkyVertices[skyIndex][0].v.cn[channel] = from->topColor[channel] +
                 ((to->topColor[channel] - from->topColor[channel]) * f_SkyBlendStep /
                     SKY_BLEND_STEP_COUNT);
-            f_SkyVertices[group][1].v.cn[channel] = from->horizonColor[channel] +
+            f_SkyVertices[skyIndex][1].v.cn[channel] = from->horizonColor[channel] +
                 ((to->horizonColor[channel] - from->horizonColor[channel]) * f_SkyBlendStep /
                     SKY_BLEND_STEP_COUNT);
-            f_SkyVertices[group][2].v.cn[channel] = from->horizonColor[channel] +
+            f_SkyVertices[skyIndex][2].v.cn[channel] = from->horizonColor[channel] +
                 ((to->horizonColor[channel] - from->horizonColor[channel]) * f_SkyBlendStep /
                     SKY_BLEND_STEP_COUNT);
-            f_SkyVertices[group][3].v.cn[channel] = from->topColor[channel] +
+            f_SkyVertices[skyIndex][3].v.cn[channel] = from->topColor[channel] +
                 ((to->topColor[channel] - from->topColor[channel]) * f_SkyBlendStep /
                     SKY_BLEND_STEP_COUNT);
-            f_SkyVertices[group][4].v.cn[channel] = from->topColor[channel] +
+            f_SkyVertices[skyIndex][4].v.cn[channel] = from->topColor[channel] +
                 ((to->topColor[channel] - from->topColor[channel]) * f_SkyBlendStep /
                     SKY_BLEND_STEP_COUNT);
         }
