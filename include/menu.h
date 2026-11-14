@@ -177,6 +177,13 @@ extern s16 g_ModeIconAnimations[MODE_ICON_ANIMATION_COUNT][MODE_ICON_FRAME_COUNT
 #define COURSE_SCENE_WIDTH 152
 #define COURSE_SCENE_STRIP_ROW_COUNT 11
 #define COURSE_SCENE_STRIP_COUNT 11
+#define COURSE_SCENE_SCALE 2
+// Each strip loads extra rows below it so filtering blends across the seam.
+#define COURSE_SCENE_SEAM_ROW_COUNT 2
+#define COURSE_SCENE_LEFT 8
+#define COURSE_SCENE_FIRST_TOP 8
+// The first strip shows one extra row, so later strips are laid out from here.
+#define COURSE_SCENE_TOP (COURSE_SCENE_FIRST_TOP + COURSE_SCENE_SCALE)
 #define STAR_WIDTH 32
 #define STAR_HEIGHT 24
 #define STAR_FRAME_COUNT 15

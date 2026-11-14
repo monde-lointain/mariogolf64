@@ -180,12 +180,7 @@ typedef struct ImageCorner {
 #define NARROW_BOARD_TOP 36
 #define NARROW_BOARD_SHOWN_WIDTH 170
 
-#define COURSE_SCENE_SCALE 2
-#define COURSE_SCENE_SEAM_ROW_COUNT 2
 #define COURSE_SCENE_SECOND_ROW_START TexelCoordinate(1)
-#define COURSE_SCENE_LEFT 8
-#define COURSE_SCENE_FIRST_TOP 8
-#define COURSE_SCENE_TOP 10
 
 extern const char f_NameFormat[];
 

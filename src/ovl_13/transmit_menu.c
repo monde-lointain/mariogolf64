@@ -185,8 +185,6 @@ enum ListingState {
 #define OPTION_SPACING 18
 #define OPTION_POINTER_TOP 60
 #define OPTION_POINTER_GAP 8
-#define COURSE_SCENE_LEFT 8
-#define COURSE_SCENE_TOP 8
 #define TITLE_LEFT 60
 #define TITLE_TOP 16
 #define TITLE_WIDTH 200
@@ -2416,7 +2414,7 @@ void DrawTransmitMenu(Gfx **displayListHead) {
                 G_IM_FMT_CI,
                 G_IM_SIZ_8b,
                 COURSE_SCENE_WIDTH,
-                COURSE_SCENE_STRIP_ROW_COUNT + 2,
+                COURSE_SCENE_STRIP_ROW_COUNT + COURSE_SCENE_SEAM_ROW_COUNT,
                 0,
                 0,
                 0,
@@ -2428,9 +2426,12 @@ void DrawTransmitMenu(Gfx **displayListHead) {
             DrawTextureRectangle(
                 &gfx,
                 QuarterPixels(COURSE_SCENE_LEFT),
-                QuarterPixels(COURSE_SCENE_TOP),
-                QuarterPixels(COURSE_SCENE_LEFT + (COURSE_SCENE_WIDTH * 2)),
-                QuarterPixels(COURSE_SCENE_TOP + ((COURSE_SCENE_STRIP_ROW_COUNT + 1) * 2)),
+                QuarterPixels(COURSE_SCENE_FIRST_TOP),
+                QuarterPixels(COURSE_SCENE_LEFT + (COURSE_SCENE_WIDTH * COURSE_SCENE_SCALE)),
+                QuarterPixels(
+                    COURSE_SCENE_FIRST_TOP +
+                    ((COURSE_SCENE_STRIP_ROW_COUNT + 1) * COURSE_SCENE_SCALE)
+                ),
                 G_TX_RENDERTILE,
                 0,
                 0,
@@ -2446,7 +2447,7 @@ void DrawTransmitMenu(Gfx **displayListHead) {
                 G_IM_FMT_CI,
                 G_IM_SIZ_8b,
                 COURSE_SCENE_WIDTH,
-                rowCount + 2,
+                rowCount + COURSE_SCENE_SEAM_ROW_COUNT,
                 0,
                 0,
                 0,
@@ -2458,11 +2459,13 @@ void DrawTransmitMenu(Gfx **displayListHead) {
             DrawTextureRectangle(
                 &gfx,
                 QuarterPixels(COURSE_SCENE_LEFT),
-                QuarterPixels(COURSE_SCENE_TOP + 2 + (index * COURSE_SCENE_STRIP_ROW_COUNT * 2)),
-                QuarterPixels(COURSE_SCENE_LEFT + (COURSE_SCENE_WIDTH * 2)),
                 QuarterPixels(
-                    COURSE_SCENE_TOP + 2 + (index * COURSE_SCENE_STRIP_ROW_COUNT * 2) +
-                    (rowCount * 2)
+                    COURSE_SCENE_TOP + (index * COURSE_SCENE_STRIP_ROW_COUNT * COURSE_SCENE_SCALE)
+                ),
+                QuarterPixels(COURSE_SCENE_LEFT + (COURSE_SCENE_WIDTH * COURSE_SCENE_SCALE)),
+                QuarterPixels(
+                    COURSE_SCENE_TOP + (index * COURSE_SCENE_STRIP_ROW_COUNT * COURSE_SCENE_SCALE) +
+                    (rowCount * COURSE_SCENE_SCALE)
                 ),
                 G_TX_RENDERTILE,
                 0,
