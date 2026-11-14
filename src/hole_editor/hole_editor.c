@@ -29,7 +29,6 @@
 #include "hole_loader.h"
 #include "hole_triangles.h"
 #include "host_file.h"
-#include "include_asm.h"
 #include "language.h"
 #include "main.h"
 #include "math_util.h"
@@ -410,6 +409,8 @@ enum TriangleEdit {
  */
 #define FINE_TILE_CELL_SPAN 4
 #define FINE_TILE_BLOCK_SPAN 2
+/* How many cell columns one of the ground's halves is wide */
+#define GROUND_HALF_CELL_COLUMNS (GROUND_TILE_GROUP_SIZE * FINE_TILE_CELL_SPAN)
 #define FINE_TILE_POINT_SPAN (FINE_TILE_CELL_SPAN + 1)
 #define FINE_TILE_BUILT_VERTEX_COUNT 17
 #define TILE_TRIANGLE_COUNT (FINE_TILE_CELL_SPAN * FINE_TILE_CELL_SPAN * 2)
@@ -3954,196 +3955,65 @@ void WriteHexDumpFile(u32 *words, s32 byteCount, char *fileName) {
  * GetMidpointVertex and SetEditorCombineMode are nested functions, a GNU C
  * extension.
  *
- * Doesn't match: the frame is the original's size, but the registers and
- * the spill slots differ; see the last paragraph. Stepping the half's first
- * column beside half gives 2403 words differing, 581 in shape. Giving the
- * fine tiles' loop its own counter and setting the middle slot after the
- * wave's tile took it from 2258 words differing, 518 in shape. In the
- * medium tiles' pass loop, loop.c hoists 0xF5100000 in the original, as it
- * does in the coarse tiles' loop, but finds it not worth moving in ours
- * (savings 3, the loop 308 insns against 259); with that constant also live
- * across the calls, the original's two SetEditorCombineMode calls restore
- * it in different orders, where ours have the same tail and cross-jumping
- * merged them, so ours had 11 calls to the original's 12 until the tile S
- * form below. A local for the half's first tile column, which brought
- * DrawGround's shape from 348 to 283, gives
- * 3683 words differing here (505 in shape) when declared after half, and
- * 3709 (505) when declared first. A permuter output with 2050 words (472
- * in shape) held TILE_COORDINATE_SPAN in a variable set before the tiles
- * and multiplied by it in seven of the eight tile coordinates the texture
- * loads work out, leaving the first expansion's S as the constant;
- * through such a local in all of them, 2236 words differed (474 in
- * shape), and in the rows' coordinates only, 2231 (483). The register
- * oracle, forcing 113 pseudos' registers, left 1763 words at best, so the
- * code differs too. Counting the tile column in tileColumn, set before a
- * tile loop and stepped with tileIndex, as DrawGround's fine tiles do,
- * gave 2158 words (480 in shape) in the medium tiles' loop, 2534 (1216)
- * in the coarse tiles', 2268 (1226) in both, 2985 (499) in the fine
- * tiles' and 3002 (1232) in all three, when the draft gave 2128 (488).
- * The mirrored cells' S line is worked out where the vertex change uses
- * it, in a local declared there, rather than once per fine tile beside
- * tileColumn, which took the draft from 2128 words differing to 2037, 488
- * in shape to 491; written straight into the vertex change it gives the
- * same. A u32 groupDetail gives 2026 words (488 in shape), but it would
- * rank a hidden tile's -1 above every detail level when comparing it with
- * the s32 field; it compiles 27 signed and 16 unsigned compares and 4
- * blez where the original, like the s32, has 29, 14 and 5. The medium
- * groups step their slots middle, bottom, tile index and top, and rewind
- * them middle, bottom and top: stepping them top, middle, bottom and tile
- * index, as DrawGround does, gives 2055 words (491 in shape), also with a
- * top, middle and bottom rewind; that rewind alone gives 2074 (494) and
- * DrawGround's top, bottom and middle 2086 (494). 2037 words differ, 491
- * in shape.
+ * To match, with the words that differ from the original's otherwise and how
+ * many of them differ in shape:
+ * - GridVertex is an inline function, as in DrawGround: as a macro it gives
+ *   2009 words (5 in shape) and a frame 8 bytes smaller.
+ * - It keeps no tile column. The edge tests and the mirrored points work the
+ *   column out from half and groupTile at each use, the points from the
+ *   half's first cell column: with a tileColumn local for the edge tests,
+ *   36 words (22), and with the points' column worked out as the tile's
+ *   times its cells, 1584 (82).
+ * - The mirrored S line is a local of the fine tiles' loop, set once per
+ *   tile from firstTileS.
+ * - Each snapped edge's segment offset goes through a local, as in
+ *   DrawGround: with a gSPSegment in each arm of the test, 1613 words (21).
+ * - half, vertices, start and current are declared in that order, with
+ *   firstTileS after them (160 words in the earlier order, and 184 with
+ *   firstTileS in the half's block), topSlot beside the other slots (102 in
+ *   the half's block), groupDetail in the row's block (174 with the
+ *   routine's locals) and finePass last in the fine tiles' loop (150 with
+ *   the routine's locals, 12 declared first in the loop).
+ * - The three later pass loops each have a counter of their own: sharing one
+ *   among all three gives 54 words, and between any two 36.
+ * - The medium and coarse groups step their slots top, middle and bottom,
+ *   then the tile index and the slope index, at the end of the tile loop's
+ *   body, and rewind the slots in that order. With the medium groups' slope
+ *   index first and top slot last, 24 words; with the coarse groups' steps
+ *   in the loop's header and a hidden tile skipped by continue, 28 (8).
+ * - A cell's mirror bit is masked out of the tile's bits in one expression:
+ *   read into isMirrored and masked there, 28 words.
+ * - The checkerboard parity adds groupTile to the row (4 words the other
+ *   way round), and the fine tile's first vertex column adds the tile's
+ *   offset to the half's first column (2 words).
  *
- * A search over merges of two variables gains words only by giving one a
- * second meaning: holding previousDetail in keepsCombineMode gives 2015
- * words, but 515 in shape.
- *
- * Each mirrored-cell vertex loop declares its own st beside its point, as
- * the register oracle's split search suggested, where one st at the top
- * served both: that takes the draft from 2037 words to 2033 (491 in shape
- * either way), and the oracle's closest result from 2001 words to 1995,
- * forcing 112 pseudos for each. Declaring it in only one of the two loops
- * gives the same 2033 words.
- *
- * Each mirrored-cell block also declares its own pointRow and pointColumn,
- * which only those loops use. That takes the draft from 2033 words differing
- * to 2009, 491 in shape either way, and the oracle's closest result from
- * 1995 words, forcing 112 pseudos, to 1975, forcing 110. A pointColumn of
- * their own alone gives 2025, in either block or both.
- *
- * The fine tiles' loop declares its own groupTile, and its body its own
- * tileColumn, which nothing else uses. Together they take the draft from
- * 2009 words differing to 2007, 491 in shape either way, and leave the
- * oracle's closest result at 1975 words, forcing 110 pseudos; tileColumn
- * alone gives 2013 and groupTile alone 2015.
- *
- * A map tile's checker color names its red and blue, set before the color
- * command, where both were written into it. That takes the draft from 2007
- * words differing, 491 in shape, to 1993 (489), and the oracle's closest
- * result from 1975 words, forcing 110 pseudos, to 1968, forcing 95. Naming
- * the blue alone gives the same 1993 words, and the red alone leaves 2007;
- * choosing each with ?: gives 2520 (612).
- *
- * As in DrawGround, each tile loop in the original steps the tile's left S
- * and its place's end by 0x80, with the half's first S, half << 9, in a
- * stack slot. So LoadEditorTileTexture adds the tile's place in its group to
- * firstTileS, and takes the right S and the bottom T past the next tile's
- * start. Written straight into the tile size commands, that takes the draft
- * from 1993 words differing (489 in shape) to 1791 (233), with the
- * original's frame and its 12 SetEditorCombineMode calls, and the register
- * oracle's closest result from 1968 words, forcing 95 pseudos, to 1359,
- * forcing 26. Through locals for the S and T set at the top of the macro,
- * loop.c makes no giv of them, and the draft gives 2425 words (579 in
- * shape); taking only the bottom T as the row's plus 0x82 then gives 2471
- * (337), and only a borderless tile's as its own plus 0x84, 2503 (325).
- * Setting firstTileS from half gives the same 1791 words. The original
- * still loads 0xF5100000 6 times, where ours does 18 times.
- *
- * As in DrawGround, the original steps the tile index and its givs at the end
- * of a fine tile drawn from its display list, and goes from there to the next
- * tile, so that arm steps tileIndex itself and continues. That takes the draft
- * from 1791 words differing (233 in shape) to 1751 (187), and the register
- * oracle's closest result from 1359 words to 1345, forcing 26 pseudos either
- * way. The original stores each snapped edge's segment once, its address
- * chosen as DrawGround's ?: chooses it, but that form gives 2017 words here
- * (189 in shape), and the oracle's closest 1924.
- *
- * The original lays out the hidden groups' arm last, so the coarse groups
- * are tested for, with >=, before the hidden ones fall to the last else, as
- * in DrawGround. That takes the draft from 1751 words differing (187 in
- * shape) to 1665 (165), and the oracle's closest from 1345 words to 1189,
- * forcing 26 pseudos either way; testing for them with == gives 1667 (167).
- * Setting each half's bottom slot, tile index, top slot and previous detail
- * in that order, as the original's stores go, gives 1661 words (159 in
- * shape) but leaves the oracle's closest at 1189, and breaks the order
- * DrawGround's copy sets them in. Holding terrainStyle != TERRAIN_STYLE_NORMAL
- * in a flag set after each fine pass's texture load, as a permuter run did,
- * gives 1209 words (141 in shape), but it compiles to an sltu that the
- * original doesn't have: the original reloads terrainStyle and branches on it
- * at each test. Set anywhere else, once or per half, row, tile or pass, the
- * flag gives 1773 to 2312 words.
- *
- * A mirrored point under the test texture works out its texture
- * coordinates before setting the test tile's size, as a permuter run
- * found. That takes the draft from 1665 words differing (165 in shape) to
- * 921 (133), and the register oracle's closest result from 1189 words,
- * forcing 26 pseudos, to these 921 with none forced, so allocation is no
- * longer the cause. The original's scheduler interleaves the two, so its
- * order can't be read from the code.
- *
- * The original keeps no tile column: each edge test reloads half and
- * groupTile and works out half * 4 + groupTile again, and it works out the
- * mirrored S line once per fine tile, from the left S's giv, into a slot of
- * its own. Writing the column out at each use, as a GroupTileColumn macro,
- * gives 1701 words (125 in shape) with the frame 16 bytes smaller, and with
- * the mirrored S line set at the top of each fine tile from firstTileS,
- * 1540 (112) with the frame 8 bytes smaller; the register oracle's closest
- * is then 1432, forcing 21 pseudos. In both, loop.c makes the column a
- * giv of its own, stepped in a slot, where the original recomputes it.
- * Setting the line from the column instead gives 1542 (114), and from it
- * with tileColumn kept, 2265 (147).
- *
- * A permuter run found 795 words, but 193 in shape, by naming the bottom row
- * test in a Boolean set before the hole-loaded test and using it only for
- * the bottom midpoints. Using it in both of the bottom row's tests gives 1829
- * (245), the top and bottom rows' Booleans in all four row tests 1724 (250),
- * and all four edges' Booleans, the columns' too, 986 (348). 921 words
- * differ, 133 in shape.
- *
- * Each half starts its middle slot after the first tile's S, before the
- * wave's tile, as DrawGround now does; after the wave's tile it was 921
- * words (133 in shape), and this gives 917 (131). Set before the first
- * tile's S, it gives 917 (131) too. The bottom slot is set after the
- * tile index, as in DrawGround; before the top slot, it gave those 917
- * words, and this gives 905 (123). That left 905 words, 123 in shape.
- *
- * The fine tiles' column and their checkerboard parity add the row and
- * the half's first column to groupTile, where the draft added groupTile
- * to them; a search regrouping sums found it. That takes the draft from
- * 905 words differing to 899, 123 in shape both, and the register
- * oracle's closest from 905 words to 899, with nothing forced; the
- * column alone gives 901, the parity alone 903. That left 899 words, 123
- * in shape.
- *
- * Each half now sets its bottom slot last, after the middle slot, as
- * DrawGround does, where it set it after the tile index; a sweep moving
- * each statement found it. That takes the draft from 899 words differing
- * to 891, 123 in shape either way, as the original stores the slots'
- * starts in that order; the register oracle forces nothing either way,
- * its closest being the draft's own words. That left 891 words, 123 in
- * shape.
- *
- * The medium groups step the slope index before their slots, where they
- * stepped it after them; a sweep moving each statement found it. That
- * takes the draft from 891 words differing to 879, 123 in shape either
- * way, and the register oracle's closest from 891 words to 879, with
- * nothing forced. Stepping it first or after k in the coarse groups'
- * loop header too gives 899 words, 123 or 121 in shape. That left 879
- * words, 123 in shape.
- *
- * Each half sets its top slot after the tile index, as DrawGround now
- * does, where it set it first. That takes the draft from 879 words
- * differing to 873, 123 in shape either way; the register oracle forces
- * nothing, its closest being the draft's own words. Setting it last,
- * after the bottom slot, gives 883. 873 words differ, 123 in shape.
+ * As in DrawGround, LoadEditorTileTexture adds the tile's place in its group
+ * to firstTileS, since the original steps the tile's left S and its place's
+ * end by 0x80 in each tile loop, and a fine tile drawn from its display list
+ * steps the tile index itself and continues. The hidden groups' arm comes
+ * last, after the coarse groups' >= test, as the original lays it out. Each
+ * mirrored-cell block declares its own point, st, pointRow and pointColumn,
+ * and under the test texture works out a point's texture coordinates before
+ * setting the test tile's size. A map tile's checker color names its red and
+ * blue before the color command. terrainStyle is tested at each use, as the
+ * original reloads it and branches on it; a flag for it compiles to an sltu
+ * that the original doesn't have.
  */
-#ifdef NON_MATCHING
 void DrawHoleEditorGround(CameraMatrices *matrices UNUSED, s32 terrainStyle) {
     u8 snapsEdge[2][TILE_VERTEX_SEGMENT_COUNT]; /* For the current and the last
                                                    fine tile */
     s32 keepsCombineMode;
     s32 combineMode; /* An EDITOR_COMBINE_* */
     Gfx *gfx;
-    u8 current;
+    s32 half;
     Vtx *vertices;
     u32 start;
+    u8 current;
+    s32 firstTileS;
     s32 visibility;
     s32 detail;
-    s32 groupDetail;
     s32 previousDetail;
     s32 slopeIndex;
-    s32 half;
     s32 row;
     s32 detailTileIndex;
     s32 groupTileIndex;
@@ -4151,14 +4021,10 @@ void DrawHoleEditorGround(CameraMatrices *matrices UNUSED, s32 terrainStyle) {
     s32 segmentIndex;
     s32 edge;
     s32 pass;
+    s32 mediumPass;
+    s32 coarsePass;
     s32 tileIndex;
-    /*
-     * The fine tiles' own pass counter, to match: using pass gives 2332 words
-     * differing (484 in shape) against the draft's 2037 (491), and the register
-     * oracle's closest result rises from 2001 words, forcing 112 pseudos, to
-     * the unforced 2332
-     */
-    s32 finePass;
+    s32 topSlot;
     s32 middleSlot;
     s32 bottomSlot;
     s32 spareSlot;
@@ -4700,9 +4566,6 @@ void DrawHoleEditorGround(CameraMatrices *matrices UNUSED, s32 terrainStyle) {
     gSPSegment(gfx++, 7, 0);
     gSPSegment(gfx++, 8, 0);
     for (half = 0; half < GROUND_HALF_COUNT; half++) {
-        s32 topSlot;
-        s32 firstTileS;
-
         previousDetail = GROUND_DETAIL_HIDDEN;
         tileIndex = half * GROUND_TILE_GROUP_SIZE;
         topSlot = FIRST_TOP_SLOT;
@@ -4721,6 +4584,8 @@ void DrawHoleEditorGround(CameraMatrices *matrices UNUSED, s32 terrainStyle) {
         gDPPipeSync(gfx++);
 
         for (row = 0; row < GROUND_TILE_ROW_COUNT; row++) {
+            s32 groupDetail;
+
             groupDetail = GROUND_DETAIL_COARSE;
             for (detailTileIndex = 0; detailTileIndex < GROUND_TILE_GROUP_SIZE; detailTileIndex++) {
                 if (groupDetail < g_WorkArea.hole.tiles[tileIndex + detailTileIndex].detail) {
@@ -4732,15 +4597,18 @@ void DrawHoleEditorGround(CameraMatrices *matrices UNUSED, s32 terrainStyle) {
                 s32 groupTile;
 
                 for (groupTile = 0; groupTile < GROUND_TILE_GROUP_SIZE; groupTile++) {
-                    s32 tileColumn;
+                    s32 mirroredS;
+                    s32 finePass;
 
                     midpoints = g_WorkArea.hole
                                     .midpoints[g_WorkArea.hole.tiles[tileIndex].midpointBlockIndex];
-                    tileColumn = groupTile + (half * GROUND_TILE_GROUP_SIZE);
+                    mirroredS =
+                        ((firstTileS + (groupTile * TILE_COORDINATE_SPAN)) + MIRROR_S_OFFSET) *
+                        MIRROR_S_SCALE;
 
                     /* The maps tell each tile from its neighbors by color */
                     if (IsMapTerrainStyle(terrainStyle)) {
-                        Boolean isOdd = (groupTile + row) & 1;
+                        Boolean isOdd = (row + groupTile) & 1;
                         s32 red = isOdd * COLOR_CHANNEL_MAX;
                         s32 blue = COLOR_CHANNEL_MAX - red;
 
@@ -4750,7 +4618,7 @@ void DrawHoleEditorGround(CameraMatrices *matrices UNUSED, s32 terrainStyle) {
                     if (g_WorkArea.hole.tiles[tileIndex].detail == GROUND_DETAIL_FINE &&
                         g_WorkArea.hole.tiles[tileIndex].midpointBlockIndex >= 0) {
                         if (IsGameFlagSet(GAME_FLAG_HOLE_LOADED)) {
-                            if (tileColumn != 0) {
+                            if ((half * GROUND_TILE_GROUP_SIZE) + groupTile != 0) {
                                 snapsEdge[current][TILE_EDGE_COUNT + TILE_EDGE_LEFT] =
                                     IsCoarse(tileIndex - 1);
                                 snapsEdge[current][TILE_EDGE_LEFT] = IsNotFine(tileIndex - 1);
@@ -4782,7 +4650,8 @@ void DrawHoleEditorGround(CameraMatrices *matrices UNUSED, s32 terrainStyle) {
                                 snapsEdge[current][TILE_EDGE_BOTTOM] = FALSE;
                             }
 
-                            if (tileColumn != GROUND_TILE_COLUMN_COUNT - 1) {
+                            if ((half * GROUND_TILE_GROUP_SIZE) + groupTile !=
+                                GROUND_TILE_COLUMN_COUNT - 1) {
                                 snapsEdge[current][TILE_EDGE_COUNT + TILE_EDGE_RIGHT] =
                                     IsCoarse(tileIndex + 1);
                                 snapsEdge[current][TILE_EDGE_RIGHT] = IsNotFine(tileIndex + 1);
@@ -4795,18 +4664,12 @@ void DrawHoleEditorGround(CameraMatrices *matrices UNUSED, s32 terrainStyle) {
                                 /* Moves a snapped edge's vertices, or moves back those snapped
                                  * for the last tile */
                                 if (snapsEdge[current][j] || snapsEdge[current ^ 1][j]) {
-                                    /* Indexing the tile's offsets as a pointer is closer to the
-                                     * original than indexing the array */
-                                    if (snapsEdge[current][j]) {
-                                        gSPSegment(
-                                            gfx++,
-                                            j + 1,
-                                            ((s32 *)g_CoarseVertexOffsets[tileIndex])[j]
-                                        );
-                                    }
-                                    else {
-                                        gSPSegment(gfx++, j + 1, 0);
-                                    }
+                                    s32 offset;
+
+                                    offset = snapsEdge[current][j] ?
+                                        g_CoarseVertexOffsets[tileIndex][j] :
+                                        0;
+                                    gSPSegment(gfx++, j + 1, offset);
                                 }
                             }
 
@@ -4855,7 +4718,7 @@ void DrawHoleEditorGround(CameraMatrices *matrices UNUSED, s32 terrainStyle) {
                                 (f64 *)GridVertex(vertexColumn + 2, (row * 2) + 2),
                                 (f64 *)&vertices[16]
                             );
-                            if (tileColumn == 0 ||
+                            if ((half * GROUND_TILE_GROUP_SIZE) + groupTile == 0 ||
                                 g_WorkArea.hole.tiles[tileIndex - 1].detail !=
                                     GROUND_DETAIL_MEDIUM) {
                                 CopyDoublePair(
@@ -4906,7 +4769,8 @@ void DrawHoleEditorGround(CameraMatrices *matrices UNUSED, s32 terrainStyle) {
                                 GetMidpointVertex(&vertices[9].v, &vertices[16].v, &vertices[11].v);
                             }
 
-                            if (tileColumn == GROUND_TILE_COLUMN_COUNT - 1 ||
+                            if ((half * GROUND_TILE_GROUP_SIZE) + groupTile ==
+                                    GROUND_TILE_COLUMN_COUNT - 1 ||
                                 g_WorkArea.hole.tiles[tileIndex + 1].detail !=
                                     GROUND_DETAIL_MEDIUM) {
                                 CopyDoublePair(
@@ -4964,17 +4828,19 @@ void DrawHoleEditorGround(CameraMatrices *matrices UNUSED, s32 terrainStyle) {
                                                 cellColumn++) {
                                                 if (IsGameFlagSet(GAME_FLAG_TEST_GROUND_TEXTURE)) {
                                                     isMirrored = g_WorkArea.hole.tiles[tileIndex]
-                                                                     .mirroredCells;
-                                                    isMirrored &= 1
-                                                        << (cellColumn +
-                                                               (cellRow * FINE_TILE_CELL_SPAN));
+                                                                     .mirroredCells &
+                                                        (1
+                                                            << (cellColumn +
+                                                                   (cellRow *
+                                                                       FINE_TILE_CELL_SPAN)));
                                                 }
                                                 else {
                                                     isMirrored = g_WorkArea.hole.tiles[tileIndex]
-                                                                     .mirroredCells;
-                                                    isMirrored &= 1
-                                                        << (cellColumn +
-                                                               (cellRow * FINE_TILE_CELL_SPAN));
+                                                                     .mirroredCells &
+                                                        (1
+                                                            << (cellColumn +
+                                                                   (cellRow *
+                                                                       FINE_TILE_CELL_SPAN)));
                                                 }
                                                 if (isMirrored) {
                                                     s32 pointColumn;
@@ -4987,7 +4853,9 @@ void DrawHoleEditorGround(CameraMatrices *matrices UNUSED, s32 terrainStyle) {
                                                             pointColumn < FINE_TILE_BLOCK_SPAN;
                                                             pointColumn++) {
                                                             Vtx *point = GetGroundPoint(
-                                                                (tileColumn * FINE_TILE_CELL_SPAN) +
+                                                                (half * GROUND_HALF_CELL_COLUMNS) +
+                                                                    (groupTile *
+                                                                        FINE_TILE_CELL_SPAN) +
                                                                     cellColumn + pointColumn,
                                                                 (row * FINE_TILE_CELL_SPAN) +
                                                                     cellRow + pointRow
@@ -5016,12 +4884,6 @@ void DrawHoleEditorGround(CameraMatrices *matrices UNUSED, s32 terrainStyle) {
                                                                 );
                                                             }
                                                             else {
-                                                                s32 mirroredS =
-                                                                    ((tileColumn *
-                                                                         TILE_COORDINATE_SPAN) +
-                                                                        MIRROR_S_OFFSET) *
-                                                                    MIRROR_S_SCALE;
-
                                                                 st = ((
                                                                           mirroredS -
                                                                           (point->v.tc
@@ -5177,7 +5039,9 @@ void DrawHoleEditorGround(CameraMatrices *matrices UNUSED, s32 terrainStyle) {
                                                             pointColumn < FINE_TILE_BLOCK_SPAN;
                                                             pointColumn++) {
                                                             Vtx *point = GetGroundPoint(
-                                                                (tileColumn * FINE_TILE_CELL_SPAN) +
+                                                                (half * GROUND_HALF_CELL_COLUMNS) +
+                                                                    (groupTile *
+                                                                        FINE_TILE_CELL_SPAN) +
                                                                     cellColumn + pointColumn,
                                                                 (row * FINE_TILE_CELL_SPAN) +
                                                                     cellRow + pointRow
@@ -5228,7 +5092,7 @@ void DrawHoleEditorGround(CameraMatrices *matrices UNUSED, s32 terrainStyle) {
                         /* A medium tile among fine ones loads only its own vertices */
                         gSPVertex(
                             gfx++,
-                            GridVertex((groupTile * 2) + HalfFirstColumn(half), row * 2),
+                            GridVertex(HalfFirstColumn(half) + (groupTile * 2), row * 2),
                             2,
                             0
                         );
@@ -5262,13 +5126,13 @@ void DrawHoleEditorGround(CameraMatrices *matrices UNUSED, s32 terrainStyle) {
                             1,
                             8
                         );
-                        for (pass = 0; pass < GROUND_TILE_MAX_PASSES; pass++) {
+                        for (mediumPass = 0; mediumPass < GROUND_TILE_MAX_PASSES; mediumPass++) {
                             LoadEditorTileTexture(
                                 tileIndex,
                                 firstTileS,
                                 groupTile,
                                 row,
-                                pass,
+                                mediumPass,
                                 GROUND_OVERLAY_NOISE
                             );
                             gSP2Triangles(gfx++, 0, 2, 3, 0, 2, 5, 3, 0);
@@ -5383,16 +5247,16 @@ void DrawHoleEditorGround(CameraMatrices *matrices UNUSED, s32 terrainStyle) {
                         }
                     }
 
-                    slopeIndex += TILE_TRIANGLE_COUNT;
+                    topSlot++;
                     middleSlot++;
                     bottomSlot++;
                     tileIndex++;
-                    topSlot++;
+                    slopeIndex += TILE_TRIANGLE_COUNT;
                 }
 
+                topSlot -= GROUND_TILE_GROUP_SIZE;
                 middleSlot -= GROUND_TILE_GROUP_SIZE;
                 bottomSlot -= GROUND_TILE_GROUP_SIZE;
-                topSlot -= GROUND_TILE_GROUP_SIZE;
             }
             else if (groupDetail >= GROUND_DETAIL_COARSE) {
                 spareSlot = middleSlot;
@@ -5414,36 +5278,38 @@ void DrawHoleEditorGround(CameraMatrices *matrices UNUSED, s32 terrainStyle) {
                     GROUND_TILE_GROUP_SIZE + 1,
                     bottomSlot
                 );
-                for (k = 0; k < GROUND_TILE_GROUP_SIZE;
-                    k++, topSlot++, bottomSlot++, tileIndex++, slopeIndex += TILE_TRIANGLE_COUNT) {
-                    if (g_WorkArea.hole.tiles[tileIndex].detail < 0) {
-                        continue;
-                    }
-
-                    for (pass = 0; pass < GROUND_TILE_MAX_PASSES; pass++) {
-                        LoadEditorTileTexture(
-                            tileIndex,
-                            firstTileS,
-                            k,
-                            row,
-                            pass,
-                            GROUND_OVERLAY_NOISE
-                        );
-                        gSP2Triangles(
-                            gfx++,
-                            topSlot,
-                            topSlot + 1,
-                            bottomSlot,
-                            0,
-                            topSlot + 1,
-                            bottomSlot + 1,
-                            bottomSlot,
-                            0
-                        );
-                        if (g_WorkArea.hole.tiles[tileIndex].extraPassCount <= 0) {
-                            break;
+                for (k = 0; k < GROUND_TILE_GROUP_SIZE; k++) {
+                    if (g_WorkArea.hole.tiles[tileIndex].detail >= 0) {
+                        for (coarsePass = 0; coarsePass < GROUND_TILE_MAX_PASSES; coarsePass++) {
+                            LoadEditorTileTexture(
+                                tileIndex,
+                                firstTileS,
+                                k,
+                                row,
+                                coarsePass,
+                                GROUND_OVERLAY_NOISE
+                            );
+                            gSP2Triangles(
+                                gfx++,
+                                topSlot,
+                                topSlot + 1,
+                                bottomSlot,
+                                0,
+                                topSlot + 1,
+                                bottomSlot + 1,
+                                bottomSlot,
+                                0
+                            );
+                            if (g_WorkArea.hole.tiles[tileIndex].extraPassCount <= 0) {
+                                break;
+                            }
                         }
                     }
+
+                    topSlot++;
+                    bottomSlot++;
+                    tileIndex++;
+                    slopeIndex += TILE_TRIANGLE_COUNT;
                 }
 
                 topSlot -= GROUND_TILE_GROUP_SIZE;
@@ -5475,13 +5341,6 @@ void DrawHoleEditorGround(CameraMatrices *matrices UNUSED, s32 terrainStyle) {
         f_EditorGroundTimingRow = 1 - f_EditorGroundTimingRow;
     }
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/hole_editor/hole_editor", GetMidpointVertex);
-
-INCLUDE_ASM("asm/nonmatchings/hole_editor/hole_editor", SetEditorCombineMode);
-
-INCLUDE_ASM("asm/nonmatchings/hole_editor/hole_editor", DrawHoleEditorGround);
-#endif
 
 /*
  * Marks the billboards on the map, then writes the whole map image to
