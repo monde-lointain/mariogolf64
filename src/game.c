@@ -848,11 +848,11 @@ void DrawScreenEffect(CameraMatrices *matrices, CameraView *view) {
 void BuildHorizonDynamicTextures(Gfx **displayListHead) {
     s32 stripTop;
     s32 sourceTop;
-    s32 destOffset;
+    s32 destinationOffset;
     s32 rowCount;
     Gfx *gfx = *displayListHead;
     u32 frame = osVirtualToPhysical(nuGfxCfb_ptr);
-    s32 mode;
+    s32 gameStep;
     s32 rowIndex;
     s32 blockIndex;
 
@@ -865,17 +865,17 @@ void BuildHorizonDynamicTextures(Gfx **displayListHead) {
         }
 
         if (stripTop > 0) {
-            destOffset = 0;
+            destinationOffset = 0;
         }
         else {
-            destOffset = -stripTop / HORIZON_ROW_SPACING;
+            destinationOffset = -stripTop / HORIZON_ROW_SPACING;
         }
 
         if (sourceTop > 0) {
             rowCount = (HORIZON_STRIP_BOTTOM - sourceTop) / HORIZON_ROW_SPACING;
         }
         else {
-            rowCount = DYNAMIC_TEXTURE_SIZE - destOffset;
+            rowCount = DYNAMIC_TEXTURE_SIZE - destinationOffset;
         }
     }
 
@@ -884,15 +884,17 @@ void BuildHorizonDynamicTextures(Gfx **displayListHead) {
     }
 
     stripTop = g_HorizonRow - HORIZON_STRIP_RISE;
-    mode = g_GameState.step;
-    if (IsHoleOverviewStep(mode)) {
+    gameStep = g_GameState.step;
+    if (IsHoleOverviewStep(gameStep)) {
         sourceTop = 0;
-        destOffset = 0;
+        destinationOffset = 0;
         rowCount = DYNAMIC_TEXTURE_SIZE;
     }
     else {
-        if (mode == GAME_STATE_TAKING_TURNS) {
-            mode = g_CurrentShot.playerIndex;
+        if (gameStep == GAME_STATE_TAKING_TURNS) {
+            // A dead store, but reading g_CurrentShot.playerIndex alone
+            // compiles differently, so the original must have stored it
+            gameStep = g_CurrentShot.playerIndex;
         }
 
         FitStripToScreen();
@@ -929,7 +931,7 @@ void BuildHorizonDynamicTextures(Gfx **displayListHead) {
     if (g_Cameras[1].view.drawFlags != CAMERA_DRAW_SCENE &&
         g_PauseScreen != PAUSE_SCREEN_FREE_LOOK &&
         sourceTop <= HORIZON_STRIP_BOTTOM &&
-        destOffset < DYNAMIC_TEXTURE_SIZE) {
+        destinationOffset < DYNAMIC_TEXTURE_SIZE) {
         for (rowIndex = 0; rowIndex != rowCount; rowIndex++) {
             for (blockIndex = 0; blockIndex != MIRROR_BLOCK_COUNT; blockIndex++) {
                 gDPLoadTextureTile(
@@ -955,9 +957,9 @@ void BuildHorizonDynamicTextures(Gfx **displayListHead) {
                 gSPScisTextureRectangle(
                     gfx++,
                     QuarterPixels(blockIndex * MIRROR_BLOCK_WIDTH),
-                    QuarterPixels(DYNAMIC_TEXTURE_SIZE - 1 - rowIndex - destOffset),
+                    QuarterPixels(DYNAMIC_TEXTURE_SIZE - 1 - rowIndex - destinationOffset),
                     QuarterPixels((blockIndex * MIRROR_BLOCK_WIDTH) + MIRROR_BLOCK_WIDTH),
-                    QuarterPixels(DYNAMIC_TEXTURE_SIZE - 1 - rowIndex - destOffset + 1),
+                    QuarterPixels(DYNAMIC_TEXTURE_SIZE - 1 - rowIndex - destinationOffset + 1),
                     G_TX_RENDERTILE,
                     TexelCoordinate(MIRROR_SOURCE_LEFT + (blockIndex * MIRROR_BLOCK_SPACING)),
                     TexelCoordinate(
@@ -1029,12 +1031,12 @@ void BuildHorizonDynamicTextures(Gfx **displayListHead) {
         gSPScisTextureRectangle(
             gfx++,
             0,
-            QuarterPixels(DYNAMIC_TEXTURE_SIZE - destOffset - rowCount),
+            QuarterPixels(DYNAMIC_TEXTURE_SIZE - destinationOffset - rowCount),
             QuarterPixels(DYNAMIC_TEXTURE_SIZE),
-            QuarterPixels(DYNAMIC_TEXTURE_SIZE - destOffset),
+            QuarterPixels(DYNAMIC_TEXTURE_SIZE - destinationOffset),
             G_TX_RENDERTILE,
             0,
-            TexelCoordinate(DYNAMIC_TEXTURE_SIZE - destOffset - rowCount),
+            TexelCoordinate(DYNAMIC_TEXTURE_SIZE - destinationOffset - rowCount),
             TEXEL_STEP_ONE,
             TEXEL_STEP_ONE
         );
