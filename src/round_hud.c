@@ -3935,8 +3935,8 @@ void DrawColorTest(Gfx **displayListHead) {
 #define SMALL_FACE_STEP (TEXEL_STEP_ONE * 3 / 2)
 #define PIN_FLAG_TIME_COUNT 16
 #define PIN_FLAG_FRAME_LENGTH 4
-#define PIN_FLAG_IMAGE_SIZE 32
-#define PIN_FLAG_IMAGE_T 16
+#define PIN_FLAG_IMAGES_SIDE 32
+#define PIN_FLAG_FRAMES_T 16
 #define PIN_FLAG_X 24
 #define PIN_FLAG_Y 72
 #define PIN_FLAG_WIDTH 8
@@ -4179,8 +4179,8 @@ void DrawRoundHud(CameraView *view) {
             g_DisplayListHead++,
             TextureAddress(ImageTexels(g_PinFlagImages)),
             G_IM_FMT_CI,
-            PIN_FLAG_IMAGE_SIZE,
-            PIN_FLAG_IMAGE_SIZE,
+            PIN_FLAG_IMAGES_SIDE,
+            PIN_FLAG_IMAGES_SIDE,
             0,
             G_TX_NOMIRROR | G_TX_WRAP,
             G_TX_NOMIRROR | G_TX_WRAP,
@@ -4198,7 +4198,7 @@ void DrawRoundHud(CameraView *view) {
             QuarterPixels(PIN_FLAG_Y + PIN_FLAG_HEIGHT),
             G_TX_RENDERTILE,
             (f_PinFlagTime / PIN_FLAG_FRAME_LENGTH) * TexelCoordinate(PIN_FLAG_WIDTH),
-            TexelCoordinate(PIN_FLAG_IMAGE_T),
+            TexelCoordinate(PIN_FLAG_FRAMES_T),
             TEXEL_STEP_ONE,
             TEXEL_STEP_ONE
         );
