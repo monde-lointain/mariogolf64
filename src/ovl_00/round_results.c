@@ -1760,7 +1760,7 @@ void UpdateCharacterResultsNotice(void) {
 void DrawCharacterResultsNotice(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     Radians angle;
-    f32 pop;
+    f32 popScale;
     s32 size;
     s32 step;
     s32 width;
@@ -1777,14 +1777,14 @@ void DrawCharacterResultsNotice(Gfx **displayListHead) {
         angle = NOTICE_POP_SETTLE_ANGLE;
     }
 
-    pop = sinf(angle);
+    popScale = sinf(angle);
     gSPDisplayList(gfx++, g_DecalTextureSetup);
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
     gDPPipeSync(gfx++);
     gDPSetTextureFilter(gfx++, G_TF_BILERP);
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-    size = pop * NOTICE_NAMEPLATE_POP_SIZE;
+    size = popScale * NOTICE_NAMEPLATE_POP_SIZE;
     if (size > 0) {
         s32 centerX;
         s32 centerY;
@@ -1820,7 +1820,7 @@ void DrawCharacterResultsNotice(Gfx **displayListHead) {
         );
     }
 
-    size = pop * NOTICE_PORTRAIT_POP_SIZE;
+    size = popScale * NOTICE_PORTRAIT_POP_SIZE;
     if (size > 0) {
         s32 centerX;
         s32 centerY;
@@ -1860,8 +1860,8 @@ void DrawCharacterResultsNotice(Gfx **displayListHead) {
 
     gDPPipeSync(gfx++);
     gDPSetTextureFilter(gfx++, G_TF_POINT);
-    height = pop * NOTICE_CHARACTER_TITLE_POP_HEIGHT;
-    width = pop * NOTICE_CHARACTER_TITLE_POP_WIDTH;
+    height = popScale * NOTICE_CHARACTER_TITLE_POP_HEIGHT;
+    width = popScale * NOTICE_CHARACTER_TITLE_POP_WIDTH;
     if (width > 0 && height > 0) {
         LoadLargePalette(&gfx, ImageBody(f_NoticeTitleImage));
         for (stripIndex = 0; stripIndex != NOTICE_CHARACTER_TITLE_STRIP_COUNT; stripIndex++) {

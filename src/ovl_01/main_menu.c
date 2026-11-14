@@ -5488,7 +5488,7 @@ void DrawModeSelect(Gfx **displayListHead) {
     s32 slot;
     s32 halfSize;
     s32 step;
-    f32 bob;
+    f32 bobOffset;
     s32 wheelShiftX = 0;
     u8 areCharactersDrawn;
     s32 labelIndex;
@@ -5594,10 +5594,10 @@ void DrawModeSelect(Gfx **displayListHead) {
         halfSize = boardScale[slot] * MODE_BOARD_HALF_SIZE;
         step = (f32)(MODE_ICON_STRIP_HEIGHT << TEXEL_STEP_SHIFT) / halfSize;
         if (index == modeCount) {
-            bob = sinf(f_ModeBoardBobPhase) * MODE_BOARD_BOB_HEIGHT;
+            bobOffset = sinf(f_ModeBoardBobPhase) * MODE_BOARD_BOB_HEIGHT;
         }
         else {
-            bob = 0.0f;
+            bobOffset = 0.0f;
         }
 
         gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(g_ModeIconImages[slot])));
@@ -5625,7 +5625,7 @@ void DrawModeSelect(Gfx **displayListHead) {
             DrawScaledModeIcon(
                 &gfx,
                 wheelShiftX + (s32)(boardX[slot] - halfSize),
-                boardY[slot] - halfSize + bob,
+                boardY[slot] - halfSize + bobOffset,
                 halfSize,
                 step
             );
@@ -5694,9 +5694,9 @@ void DrawModeSelect(Gfx **displayListHead) {
                 gSPScisTextureRectangle(
                     gfx++,
                     QuarterPixels(wheelShiftX + (s32)(boardX[slot] - halfSize)),
-                    QuarterPixels((s32)(boardY[slot] - halfSize + (i * halfSize) + bob)),
+                    QuarterPixels((s32)(boardY[slot] - halfSize + (i * halfSize) + bobOffset)),
                     QuarterPixels(wheelShiftX + (s32)(boardX[slot] + halfSize)),
-                    QuarterPixels((s32)(boardY[slot] + (i * halfSize) + bob)),
+                    QuarterPixels((s32)(boardY[slot] + (i * halfSize) + bobOffset)),
                     G_TX_RENDERTILE,
                     0,
                     0,
@@ -6657,7 +6657,7 @@ void DrawCourseSelect(Gfx **displayListHead) {
     s32 stripOffset;
     Radians angle;
     f32 wheelX;
-    f32 bob;
+    f32 bobOffset;
     void *palette;
     u8 *texels;
     s16 badgeCount;
@@ -6885,10 +6885,10 @@ void DrawCourseSelect(Gfx **displayListHead) {
             halfSize = iconScale[slot] * COURSE_ICON_HALF_SIZE;
             step = (f32)(COURSE_ICON_STRIP_HEIGHT << TEXEL_STEP_SHIFT) / halfSize;
             if (index == (courseCount - 1)) {
-                bob = sinf(f_FrontCourseBobPhase) * FRONT_COURSE_BOB_HEIGHT;
+                bobOffset = sinf(f_FrontCourseBobPhase) * FRONT_COURSE_BOB_HEIGHT;
             }
             else {
-                bob = 0.0f;
+                bobOffset = 0.0f;
             }
 
             chosenSlot = choice;
@@ -6956,9 +6956,9 @@ void DrawCourseSelect(Gfx **displayListHead) {
                 gSPScisTextureRectangle(
                     gfx++,
                     QuarterPixels((s32)(iconX[slot] - halfSize)),
-                    QuarterPixels((s32)((iconY[slot] - halfSize) + stripTop + bob)),
+                    QuarterPixels((s32)((iconY[slot] - halfSize) + stripTop + bobOffset)),
                     QuarterPixels((s32)(iconX[slot] + halfSize)),
-                    QuarterPixels((s32)(iconY[slot] + stripTop + bob)),
+                    QuarterPixels((s32)(iconY[slot] + stripTop + bobOffset)),
                     G_TX_RENDERTILE,
                     0,
                     0,
@@ -6976,7 +6976,7 @@ void DrawCourseSelect(Gfx **displayListHead) {
                     f_MiniGolfChoiceCenterY = iconY[slot];
                 }
 
-                DrawUpDownArrows(&gfx, f_MiniGolfChoiceCenterY + bob);
+                DrawUpDownArrows(&gfx, f_MiniGolfChoiceCenterY + bobOffset);
             }
         }
 

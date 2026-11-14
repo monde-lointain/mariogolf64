@@ -187,8 +187,8 @@ void DecodeHalfwordRuns(u8 *buffer, EncodedAsset *asset) {
     s32 count;
     s32 index;
     s32 repeatCount;
-    u8 high;
-    u8 low;
+    u8 highByte;
+    u8 lowByte;
 
     reader.remaining = asset->encodedSize - sizeof(u32);
     chunk = AlignedReadBuffer(reader.rawChunk);
@@ -202,25 +202,25 @@ void DecodeHalfwordRuns(u8 *buffer, EncodedAsset *asset) {
         }
 
         if (count > 0) {
-            high = chunk[reader.position];
+            highByte = chunk[reader.position];
             AdvanceChunkPosition(chunk, reader.position, reader.remaining, asset);
-            low = chunk[reader.position];
+            lowByte = chunk[reader.position];
             repeatCount = count;
             AdvanceChunkPosition(chunk, reader.position, reader.remaining, asset);
             for (index = 0; index != repeatCount; index++) {
-                *buffer++ = high;
-                *buffer++ = low;
+                *buffer++ = highByte;
+                *buffer++ = lowByte;
             }
         }
         else {
             count = -count;
             for (index = 0; index != count; index++) {
-                high = chunk[reader.position];
+                highByte = chunk[reader.position];
                 AdvanceChunkPosition(chunk, reader.position, reader.remaining, asset);
-                low = chunk[reader.position];
+                lowByte = chunk[reader.position];
                 AdvanceChunkPosition(chunk, reader.position, reader.remaining, asset);
-                *buffer++ = high;
-                *buffer++ = low;
+                *buffer++ = highByte;
+                *buffer++ = lowByte;
             }
         }
     }

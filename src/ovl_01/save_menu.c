@@ -2048,7 +2048,7 @@ void DrawSavedGames(Gfx **displayListHead) {
     s32 step;
     s32 iconHalfSize;
     s32 iconStep;
-    f32 bob;
+    f32 bobOffset;
     s32 stripLeft;
     s32 stripShownWidth;
     s32 gameIndex;
@@ -2149,10 +2149,10 @@ void DrawSavedGames(Gfx **displayListHead) {
         iconHalfSize = f_ChosenModeIconHalfSize;
         iconStep = f_ChosenModeIconScale;
         if (boardIndex == SAVED_GAME_COUNT) {
-            bob = sinf(f_BoardBobPhase) * BOARD_BOB_HEIGHT;
+            bobOffset = sinf(f_BoardBobPhase) * BOARD_BOB_HEIGHT;
         }
         else {
-            bob = 0.0f;
+            bobOffset = 0.0f;
         }
 
         gDPPipeSync(gfx++);
@@ -2202,9 +2202,9 @@ void DrawSavedGames(Gfx **displayListHead) {
                 gSPScisTextureRectangle(
                     gfx++,
                     QuarterPixels((s32)(boardX[slot] - halfSize)),
-                    QuarterPixels((s32)(boardY[slot] - halfSize + (index * halfSize) + bob)),
+                    QuarterPixels((s32)(boardY[slot] - halfSize + (index * halfSize) + bobOffset)),
                     QuarterPixels((s32)(boardX[slot] + halfSize)),
-                    QuarterPixels((s32)(boardY[slot] + (index * halfSize) + bob)),
+                    QuarterPixels((s32)(boardY[slot] + (index * halfSize) + bobOffset)),
                     G_TX_RENDERTILE,
                     0,
                     0,
@@ -2242,12 +2242,14 @@ void DrawSavedGames(Gfx **displayListHead) {
                         gfx++,
                         QuarterPixels((s32)(boardX[slot] - iconHalfSize)),
                         QuarterPixels(
-                            (s32)(boardY[slot] - iconHalfSize + (index * iconHalfSize) + bob) +
+                            (s32)(boardY[slot] - iconHalfSize + (index * iconHalfSize) +
+                                bobOffset) +
                             MODE_ICON_DROP
                         ),
                         QuarterPixels((s32)(boardX[slot] + iconHalfSize)),
                         QuarterPixels(
-                            (s32)(boardY[slot] + (index * iconHalfSize) + bob) + MODE_ICON_DROP
+                            (s32)(boardY[slot] + (index * iconHalfSize) + bobOffset) +
+                            MODE_ICON_DROP
                         ),
                         G_TX_RENDERTILE,
                         0,
@@ -2264,7 +2266,7 @@ void DrawSavedGames(Gfx **displayListHead) {
             DrawChosenGameBoard(
                 &gfx,
                 boardX[slot] - halfSize,
-                boardY[slot] - halfSize + bob,
+                boardY[slot] - halfSize + bobOffset,
                 halfSize,
                 step
             );
