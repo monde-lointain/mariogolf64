@@ -3,6 +3,7 @@
 
 #include <ultra64.h>
 
+#include "course.h"
 #include "geometry.h"
 
 #define HOLE_FILE_COURSE_COUNT 9
@@ -22,7 +23,7 @@ extern Vec3 g_MiniGolfScale;
 
 s32 ListOffsetsByDistance(s32 span, GridOffset *offsets, s32 countMax);
 f32 MeasureGroundTiles(void);
-void BuildHole(s32 courseRecordIndex, s32 holeIndex);
+void BuildHole(CourseRecordIndex courseRecordIndex, s32 holeIndex);
 void SaveHoleFiles(s32 courseNumber, s32 holeNumber);
 void ToggleGroundTileBorders(void);
 void ShadeGround(s32 shadeVariant);

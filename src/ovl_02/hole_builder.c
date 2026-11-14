@@ -2245,7 +2245,7 @@ void FinishHolePoints(CourseRecordIndex courseRecordIndex UNUSED, s32 holeIndex 
 // courseRecordIndex and holeIndex index the hole asset tables, except
 // that when GAME_FLAG_READ_HOST_HOLE is set, they hold the hole editor's
 // one-based course and hole numbers, which name the host files.
-void BuildHole(s32 courseRecordIndex, s32 holeIndex) {
+void BuildHole(CourseRecordIndex courseRecordIndex, s32 holeIndex) {
     AssetFile asset;
     char path[HOST_PATH_SIZE];
     u32 size;

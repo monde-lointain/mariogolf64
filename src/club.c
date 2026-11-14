@@ -3673,11 +3673,12 @@ const ClubParameters *GetClubParameters(s32 clubIndex) {
 void DoNothingWithClubs(void) {
 }
 
-s32 GetShotDistance(Club *club, u32 shotMode) {
+s32 GetShotDistance(Club *club, ShotMode shotMode) {
     s32 distance = 0;
 
+    // The original switches on the mode as unsigned, here and below.
     if (club->surfaceMask & CLUB_SURFACE_GREEN) {
-        switch (shotMode) {
+        switch ((u32)shotMode) {
             case PUTT_MODE_LONG:
                 distance = LONG_PUTT_DISTANCE;
                 break;
@@ -3690,7 +3691,7 @@ s32 GetShotDistance(Club *club, u32 shotMode) {
         }
     }
     else {
-        switch (shotMode) {
+        switch ((u32)shotMode) {
             case SHOT_MODE_POWER:
                 distance = club->distance * POWER_SHOT_SCALE;
                 break;

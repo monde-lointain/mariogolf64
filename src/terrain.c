@@ -214,7 +214,7 @@ static Boolean f_IsFirstDebugUpdate = TRUE;
 s32 g_UnreadGroundQueryMarker = 0;
 static s8 f_CellSearchOffsets[GROUND_TILE_POINT_SPAN] = {0, 1, 3, 2};
 
-static s32 f_SceneMenuSelection;
+static Scene f_SceneMenuSelection;
 
 #define FLAG_PANEL_ROW_COUNT 8
 #define FLAG_PANEL_COLUMN_COUNT 16

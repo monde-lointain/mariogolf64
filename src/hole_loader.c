@@ -701,7 +701,7 @@ NO_RESULT ChooseHoleConditions(void) {
     s32 cupIndex;
     s32 attemptCount;
     u32 cupDraw;
-    s32 courseRecordIndex;
+    CourseRecordIndex courseRecordIndex;
 
     g_TurnBallSimulation.playerIndex = -1;
     if (g_Scene == SCENE_PLAY_BEST_SHOT_REPLAY ||
@@ -890,7 +890,7 @@ void ChooseConditionsAndInitHole(void) {
 }
 
 void RunLoaderThread(void) {
-    s32 courseRecordIndex;
+    CourseRecordIndex courseRecordIndex;
 
     while (TRUE) {
         while (g_HasLoaderFinished) {

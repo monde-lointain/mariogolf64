@@ -4644,7 +4644,7 @@ s32 SelectCharacterDisplayList(u32 slotIndex, s32 choiceIndex) {
 
 ClubCategory GetCharacterClubCategory(u32 slotIndex, s32 clubIndex) {
     CharacterSlot *slot;
-    s32 category;
+    ClubCategory category;
 
     category = -1;
     slot = GetUsedCharacterSlot(slotIndex);

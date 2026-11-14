@@ -109,7 +109,7 @@ struct CurrentShot;
 struct GameBoyCharacter;
 
 const ClubParameters *GetClubParameters(s32 clubIndex);
-s32 GetShotDistance(Club *club, u32 shotMode);
+s32 GetShotDistance(Club *club, ShotMode shotMode);
 s32 GetShotWorldDistance(Club *club, ShotMode shotMode);
 void GenerateClub(s32 clubIndex);
 void GenerateClubSet(s32 setIndex, struct GameBoyCharacter *gameBoyCharacter);

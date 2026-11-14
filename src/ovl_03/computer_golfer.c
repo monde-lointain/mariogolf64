@@ -420,7 +420,7 @@ s32 PlanShot(CurrentShot *plannedShot) {
     s32 mishit;
     s32 mishitMax;
     s32 mishitDivisor;
-    u32 surfaceKind;
+    SurfaceKind surfaceKind;
 
     if (f_PlanStage == PLAN_STAGE_UNSTARTED) {
         osSyncPrintf("\n------------------AI Start---------------------\n");
@@ -895,7 +895,7 @@ void PlanClubAndTarget(CoursePoint target) {
     s32 targetZ;
     ClubType clubType;
     ShotMode shotMode;
-    u32 surfaceKind;
+    SurfaceKind surfaceKind;
     s32 cupDistance;
     s32 clubSlot;
     Club *club;
@@ -904,7 +904,8 @@ void PlanClubAndTarget(CoursePoint target) {
     surfaceKind = GetSurfaceTraits(f_Shot.surface)->kind;
     f_HoleStrokeTarget = ChooseHoleStrokeTarget();
     f_HoleTargetToPar = f_HoleStrokeTarget - g_HoleSetup.par;
-    switch (surfaceKind) {
+    // The original switches on the kind as unsigned.
+    switch ((u32)surfaceKind) {
         case SURFACE_KIND_GREEN:
         case SURFACE_KIND_GREEN_EDGE:
             cupDistance = GetBallCupDistance();
@@ -1471,7 +1472,7 @@ enum LandingRating {
     LANDING_BEST
 };
 
-s32 GetLandingRating(u32 surfaceKind) {
+s32 GetLandingRating(SurfaceKind surfaceKind) {
     s32 rating;
 
     if (g_GameState.courseIndex == COURSE_MARIOS_STAR) {
@@ -1782,7 +1783,7 @@ void ChooseLongShot(
     s32 pad[44] UNUSED;
     ShotMode shotModes[STROKE_SHOT_MODE_COUNT];
     s32 index;
-    s32 normalMode;
+    ShotMode normalMode;
     s32 strokeCount;
 
     normalMode = SHOT_MODE_NORMAL;
@@ -1812,7 +1813,7 @@ Boolean IsLineOffFairway(CoursePoint from, CoursePoint to) {
     f32 stepLength;
     s32 x;
     s32 z;
-    u32 surfaceKind;
+    SurfaceKind surfaceKind;
 
     distance = IntLength2D(to[AXIS_X] - from[AXIS_X], to[AXIS_Z] - from[AXIS_Z]);
     angle = atan2((f32)(to[AXIS_Z] - from[AXIS_Z]), (f32)(to[AXIS_X] - from[AXIS_X]));
@@ -1907,7 +1908,7 @@ ClubType ChooseApproachClub(s32 *targetX, s32 *targetZ) {
     s32 cupDistance;
     s32 edgeDistance;
     f32 edgeShare;
-    u32 peakKind;
+    SurfaceKind peakKind;
     s32 band;
     s32 consistency;
 
@@ -2475,7 +2476,7 @@ s32 FindClubSlot(s32 unused UNUSED, ClubType clubType) {
 #define RAINY_DISTANCE_FRACTION 0.95f
 
 ClubType ChooseClubForDistance(s32 distance) {
-    s32 fallback = CLUB_TYPE_SAND_WEDGE;
+    ClubType fallback = CLUB_TYPE_SAND_WEDGE;
     ClubType clubType;
     s32 clubSlot;
     Club *club;
@@ -2696,7 +2697,7 @@ Boolean IsLineMostlyLost(CoursePoint from, CoursePoint to) {
     f32 stepLength;
     s32 x;
     s32 z;
-    u32 surfaceKind;
+    SurfaceKind surfaceKind;
 
     distance = IntLength2D(to[AXIS_X] - from[AXIS_X], to[AXIS_Z] - from[AXIS_Z]);
     angle = atan2((f32)(to[AXIS_Z] - from[AXIS_Z]), (f32)(to[AXIS_X] - from[AXIS_X]));
@@ -2723,7 +2724,7 @@ Boolean IsLineMostlyLost(CoursePoint from, CoursePoint to) {
 }
 
 Boolean IsTrialShotSafe(void) {
-    u32 surfaceKind;
+    SurfaceKind surfaceKind;
     s32 stepFlags;
     s32 velocityY UNUSED;
 

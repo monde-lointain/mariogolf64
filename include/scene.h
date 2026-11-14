@@ -83,7 +83,7 @@ typedef enum TitleScreenEntrance {
     TITLE_ENTRANCE_SHOWN
 } TitleScreenEntrance;
 
-extern s32 g_TitleScreenEntrance;
+extern TitleScreenEntrance g_TitleScreenEntrance;
 
 void UpdateOverlays(void);
 Boolean IsSubModuleLoaded(void);

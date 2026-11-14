@@ -115,7 +115,7 @@ enum FadeColor {
 
 s8 g_FramePacingMode = PACING_MODE_NORMAL;
 static s32 f_FadeAlpha = 0;
-s32 g_TitleScreenEntrance = TITLE_ENTRANCE_NONE;
+TitleScreenEntrance g_TitleScreenEntrance = TITLE_ENTRANCE_NONE;
 s32 g_ScreenEffect = SCREEN_EFFECT_NONE;
 static s32 f_ScreenEffectFrameCount = 0;
 static u16 *f_SavedFrameBuffer = (u16 *)MAIN_REGION_END;
@@ -851,7 +851,7 @@ void BuildHorizonDynamicTextures(Gfx **displayListHead) {
     s32 rowCount;
     Gfx *gfx = *displayListHead;
     u32 frame = osVirtualToPhysical(nuGfxCfb_ptr);
-    s32 gameStep;
+    GameStateStep gameStep;
     s32 row;
     s32 blockIndex;
 

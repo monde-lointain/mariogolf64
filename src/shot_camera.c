@@ -775,7 +775,7 @@ Boolean IsCupPassPoint(s32 cupDistance, s32 height) {
         g_SimulatedShot.shot.shotMode != SHOT_MODE_APPROACH)
 
 s32 RateShotLength(void) {
-    s32 endKind;
+    SurfaceKind endKind;
 
     endKind = f_EndSurfaceTraits->kind;
     if (endKind == SURFACE_KIND_OUT_OF_COURSE) {

@@ -71,7 +71,7 @@ static u32 f_SoundFadeFramesLeft[SOUND_CHANNEL_COUNT] = {0};
 static f32 f_SoundVolumes[SOUND_CHANNEL_COUNT] = {0.0f};
 static s32 f_SongHandleCopy = NO_HANDLE;
 static s32 f_SoundHandleCopies[SOUND_CHANNEL_COUNT] = {NO_HANDLE};
-static s32 f_EchoingSoundIds[ECHOING_SOUND_COUNT] = {
+static SoundId f_EchoingSoundIds[ECHOING_SOUND_COUNT] = {
     0x7B,
     0x7C,
     0x7D,
