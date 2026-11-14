@@ -1592,7 +1592,7 @@ s32 DrawGame(void) {
     f32 lookAtX;
     f32 lookAtY;
     f32 lookAtZ;
-    s32 mode;
+    s32 cameraMode;
     CameraView *insetView;
     CameraView *courseView;
     f32 *lookAt;
@@ -2484,8 +2484,8 @@ s32 DrawGame(void) {
                         }
 
                         if (!IsHoleOverviewStep(g_GameState.step)) {
-                            mode = g_Cameras[viewIndex].mode;
-                            if (mode != 8 && mode != 2) {
+                            cameraMode = g_Cameras[viewIndex].mode;
+                            if (cameraMode != 8 && cameraMode != 2) {
                                 if (!IsGameFlagSet(GAME_FLAG_HIDE_GOLF_BALLS) &&
                                     g_IsModuleAlive[MODULE_GOLF_BALLS]) {
                                     DrawGolfBalls(matrices);
