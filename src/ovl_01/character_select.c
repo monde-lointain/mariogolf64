@@ -6,7 +6,7 @@
 #include "address.h"
 #include "asset.h"
 #include "character.h"
-#include "character_slot.h"
+#include "character_model.h"
 #include "club.h"
 #include "compiler.h"
 #include "controller.h"

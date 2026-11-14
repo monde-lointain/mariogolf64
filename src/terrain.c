@@ -7,7 +7,7 @@
 #include "animated_box.h"
 #include "billboard.h"
 #include "camera.h"
-#include "character_slot.h"
+#include "character_model.h"
 #include "club.h"
 #include "collision.h"
 #include "compiler.h"

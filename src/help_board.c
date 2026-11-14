@@ -5,7 +5,7 @@
 
 #include "address.h"
 #include "asset.h"
-#include "character_slot.h"
+#include "character_model.h"
 #include "compiler.h"
 #include "gbi_helpers.h"
 #include "hole_loader.h"

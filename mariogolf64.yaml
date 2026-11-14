@@ -99,7 +99,7 @@ segments:
       - [0x2BFF0, c, sound]
       - [0x2D290, c, course]
       - [0x2D5C0, c, scoring]
-      - [0x2E3E0, c, character_slot]
+      - [0x2E3E0, c, character_model]
       - [0x2FD00, c, character]
       - [0x34FA0, c, float_math]
       - [0x35980, c, menu]
@@ -461,7 +461,7 @@ segments:
       - [0xA7F70, .rodata, asset]
       - [0xA7FB8, .rodata, sound]
       - [0xA8030, .rodata, course]
-      - [0xA8050, .rodata, character_slot]
+      - [0xA8050, .rodata, character_model]
       - [0xAB8A0, .rodata, character]
       - [0xABC50, .rodata, float_math]
       - [0xABCF0, .rodata, menu]
@@ -526,7 +526,7 @@ segments:
       - { type: .bss, vram: 0x800DC740, name: performance_meter }
       - { type: .bss, vram: 0x800DE8A0, name: asset }
       - { type: .bss, vram: 0x800DE900, name: sound }
-      - { type: .bss, vram: 0x800DE910, name: character_slot }
+      - { type: .bss, vram: 0x800DE910, name: character_model }
       - { type: .bss, vram: 0x800DE970, name: character }
       - { type: .bss, vram: 0x800DF0B0, name: fault }
       - { type: .bss, vram: 0x800E1290, name: music }

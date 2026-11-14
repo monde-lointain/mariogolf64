@@ -1,4 +1,4 @@
-#include "character_slot.h"
+#include "character_model.h"
 
 #include <ultra64.h>
 

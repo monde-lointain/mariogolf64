@@ -7,7 +7,7 @@
 #include "address.h"
 #include "ball_simulation.h"
 #include "billboard.h"
-#include "character_slot.h"
+#include "character_model.h"
 #include "compiler.h"
 #include "course.h"
 #include "current_shot.h"

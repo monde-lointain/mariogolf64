@@ -1,5 +1,5 @@
-#ifndef CHARACTER_SLOT_H
-#define CHARACTER_SLOT_H
+#ifndef CHARACTER_MODEL_H
+#define CHARACTER_MODEL_H
 
 #include <ultra64.h>
 

@@ -13,7 +13,7 @@
 #include "billboard.h"
 #include "boot_logos.h"
 #include "camera.h"
-#include "character_slot.h"
+#include "character_model.h"
 #include "compiler.h"
 #include "confirm_wait.h"
 #include "controller.h"

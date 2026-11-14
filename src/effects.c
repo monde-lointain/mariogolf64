@@ -8,7 +8,7 @@
 #include "asset.h"
 #include "ball_simulation.h"
 #include "camera.h"
-#include "character_slot.h"
+#include "character_model.h"
 #include "club.h"
 #include "compiler.h"
 #include "controller.h"

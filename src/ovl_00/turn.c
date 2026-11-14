@@ -12,7 +12,7 @@
 #include "ball_simulation.h"
 #include "camera.h"
 #include "character.h"
-#include "character_slot.h"
+#include "character_model.h"
 #include "club.h"
 #include "club_panel.h"
 #include "compiler.h"
