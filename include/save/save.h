@@ -13,6 +13,7 @@
 #include "round/game_state.h"
 #include "round/player.h"
 #include "round/round_stats.h"
+#include "menus/menu_memory.h"
 #include "save/course_stats.h"
 #include "save/play_record.h"
 #include "system/c_language.h"
@@ -58,13 +59,9 @@
 #define SAVE_OPTION_SIMPLE_CAMERA 3
 #define SAVE_OPTION_COUNT 4
 
-// Bits of MenuMemory's optionBits, each mirroring one of the saved options
-#define OPTION_BIT_MUSIC_OFF (1 << 0)
-#define OPTION_BIT_MONO (1 << 1)
-#define OPTION_BIT_SIMPLE_CAMERA (1 << 2)
 // A copy of MenuMemory's optionBits, from which the music code reads
 // OPTION_BIT_MONO
-extern u8 g_SoundOptionBits;
+extern UOptionBits8 g_SoundOptionBits;
 
 // Results of reading the save data
 enum SaveReadResult {

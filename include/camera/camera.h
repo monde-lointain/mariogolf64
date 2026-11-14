@@ -29,9 +29,10 @@ typedef s32 CameraMode;
 #define IsCloseUpCameraMode(mode) \
     ((mode) == CAMERA_MODE_FREE_LOOK || (mode) == CAMERA_MODE_HOLE_INTRO)
 
-// Camera drawFlags bits
+// The bits of a camera view's drawFlags
 #define CAMERA_DRAW_SCENE (1 << 0)
 #define CAMERA_DRAW_SCREEN_EFFECT (1 << 1)
+typedef s32 CameraDrawFlags;
 
 // What a camera sees and where on the screen it draws
 typedef struct CameraView {
@@ -46,7 +47,7 @@ typedef struct CameraView {
     s32 viewportCenterX; // In half pixels
     s32 viewportCenterY;
     f32 zoom;
-    s32 drawFlags; // CAMERA_DRAW_ bits
+    CameraDrawFlags drawFlags;
     f32 fieldOfView; // In degrees
 } CameraView;
 

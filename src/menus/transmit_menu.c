@@ -297,9 +297,12 @@ typedef s32 ShotType;
 #define STATUS_CLEARED_SIZE 0x400
 // Scores are sent raised by this, to keep them positive
 #define STATUS_SCORE_BIAS 54
+// The bits of a course's places: the tournament places won on it
 #define STATUS_THIRD_PLACE (1 << 0)
 #define STATUS_SECOND_PLACE (1 << 1)
 #define STATUS_FIRST_PLACE (1 << 2)
+typedef u8 UStatusPlaces8;
+
 // The computer characters sent, those before the Game Boy characters
 #define STATUS_MATCHUP_COLUMN_COUNT 14
 
@@ -328,7 +331,7 @@ typedef struct StatusCourse {
     u8 parSavePercent; // As percentages
     u8 parOnPercent;
     u8 sandSavePercent;
-    u8 places; // STATUS_FIRST_PLACE and the other place bits
+    UStatusPlaces8 places;
     u8 characterBestScores[CHARACTER_COUNT];
     StatusTime bestTimes[BEST_TIME_COUNT];
     u8 birdieBadges[BIRDIE_BADGE_BYTE_COUNT]; // See BirdieBadgeBit

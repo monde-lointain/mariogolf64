@@ -165,7 +165,7 @@ s8 g_PlayerControllerIndices[PLAYER_COUNT_MAX] =
     {UNCHOSEN_CONTROLLER, UNCHOSEN_CONTROLLER, UNCHOSEN_CONTROLLER, UNCHOSEN_CONTROLLER};
 s8 g_ChoosingControllerIndices[PLAYER_COUNT_MAX] =
     {UNCHOSEN_CONTROLLER, UNCHOSEN_CONTROLLER, UNCHOSEN_CONTROLLER, UNCHOSEN_CONTROLLER};
-u8 g_SoundOptionBits = 0;
+UOptionBits8 g_SoundOptionBits = 0;
 s32 g_MenuRepeatButtons = 0;
 s32 g_MenuPressedButtons = 0;
 static s32 f_UnusedWordAfterPressedButtons UNUSED = 0;
@@ -2957,7 +2957,7 @@ void WriteSaveData(void) {
 // Copies the options between the save data and g_MenuMemory's option bits, in
 // the direction of the transfer
 void SyncSaveOptions(SaveData *save, Boolean isWrite, SaveReadResult readResult) {
-    u8 *optionBits;
+    UOptionBits8 *optionBits;
     s8 *options;
 
     options = save->options;

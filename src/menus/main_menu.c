@@ -1517,7 +1517,7 @@ void UpdateMenus(void) {
     s32 index;
     u8 *imageBuffer;
     ImageAsset *tournamentImage;
-    u8 *optionBits;
+    UOptionBits8 *optionBits;
     UModeIcon8 iconIndex;
 
     save = GetSaveData();
@@ -3979,7 +3979,7 @@ void UpdateOptionsScreen(void) {
     MenuMemory *memory = GetMenuMemory();
     MenuWindowCheck closedCheck;
     s32 slot;
-    u8 *optionBits;
+    UOptionBits8 *optionBits;
 
     if (IsHudAnimationDone() != TRUE) {
         return;

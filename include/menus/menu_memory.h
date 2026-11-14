@@ -81,6 +81,12 @@ enum EraseChoice {
 
 typedef s8 EraseChoice8;
 
+// Bits of MenuMemory's optionBits, each mirroring one of the saved options
+#define OPTION_BIT_MUSIC_OFF (1 << 0)
+#define OPTION_BIT_MONO (1 << 1)
+#define OPTION_BIT_SIMPLE_CAMERA (1 << 2)
+typedef u8 UOptionBits8;
+
 // What the menus keep between visits, such as the last choices made
 typedef struct MenuMemory {
     s8 playerCountChoice; // The title screen's player count, less one
@@ -135,7 +141,7 @@ typedef struct MenuMemory {
     s8 savedGameIndex;
     // Updates left of the saved games' boards turning, negative when turning right
     s8 savedGameTurn;
-    u8 optionBits; // Each OPTION_BIT_ bit mirrors a saved option
+    UOptionBits8 optionBits;
     // The menus were entered with the transmit buttons, so the main menu offers it
     UBoolean8 isTransmitShown;
     s8 codeKeyColumn; // The club tournament code keyboard's chosen key

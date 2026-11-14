@@ -106,6 +106,7 @@
 #define EDGE_SIDE_POSITIVE 1
 #define EDGE_SIDE_NEGATIVE 2
 #define EDGE_SIDE_ON (EDGE_SIDE_POSITIVE | EDGE_SIDE_NEGATIVE)
+typedef s32 EdgeSides;
 
 // A ring's hit radius in units for each unit of its scale's x, which is 1024 at
 // full size
@@ -2106,7 +2107,7 @@ Boolean FindHoleTriangleHit(
     f32 hitFraction;
     s32 hitX;
     s32 hitZ;
-    s32 sides;
+    EdgeSides sides;
     Boolean isDebug = IsGameFlagSet(GAME_FLAG_PRINT_HIT_PATHS);
 
     hitIndex = NO_HOLE_TRIANGLE;
