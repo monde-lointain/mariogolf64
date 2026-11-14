@@ -1,5 +1,5 @@
-#ifndef EFFECTS_H
-#define EFFECTS_H
+#ifndef PARTICLE_EFFECTS_H
+#define PARTICLE_EFFECTS_H
 
 #include <ultra64.h>
 

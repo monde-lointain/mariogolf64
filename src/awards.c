@@ -4,9 +4,9 @@
 
 #include "course.h"
 #include "course_stats.h"
-#include "effects.h"
 #include "game_state.h"
 #include "language.h"
+#include "particle_effects.h"
 #include "round_stats.h"
 #include "save.h"
 #include "scene.h"

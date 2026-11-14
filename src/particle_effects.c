@@ -1,4 +1,4 @@
-#include "effects.h"
+#include "particle_effects.h"
 
 #include <nusys.h>
 #include <stdlib.h>
