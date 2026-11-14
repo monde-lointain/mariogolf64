@@ -95,18 +95,31 @@
 #define ROUGH_NOISE_OFFSET 0x40
 #define STEP_NOISE_BIT (HEIGHT_STEP * 2)
 #define DIP_NOISE_BIT 0x10
-#define HEIGHT_EDIT_NONE 0
-#define HEIGHT_EDIT_POINT 1
-#define HEIGHT_EDIT_MOVE 2
-#define CURSOR_DIRECTION_NONE 0
-#define CURSOR_DIRECTION_RIGHT 2
-#define CURSOR_DIRECTION_UP_RIGHT 3
-#define CURSOR_DIRECTION_UP 4
-#define CURSOR_DIRECTION_UP_LEFT 5
-#define CURSOR_DIRECTION_LEFT 6
-#define CURSOR_DIRECTION_DOWN_LEFT 7
-#define CURSOR_DIRECTION_DOWN 8
-#define CURSOR_DIRECTION_DOWN_RIGHT 9
+
+enum HeightEdit {
+    HEIGHT_EDIT_NONE,
+    HEIGHT_EDIT_POINT,
+    HEIGHT_EDIT_MOVE
+};
+
+typedef s32 HeightEdit;
+
+// Each direction times BINARY_ANGLE_EIGHTH_TURN, added to the camera's yaw,
+// is the angle the height cursor steps at. 1 goes unused.
+enum CursorDirection {
+    CURSOR_DIRECTION_NONE,
+    CURSOR_DIRECTION_RIGHT = 2,
+    CURSOR_DIRECTION_UP_RIGHT,
+    CURSOR_DIRECTION_UP,
+    CURSOR_DIRECTION_UP_LEFT,
+    CURSOR_DIRECTION_LEFT,
+    CURSOR_DIRECTION_DOWN_LEFT,
+    CURSOR_DIRECTION_DOWN,
+    CURSOR_DIRECTION_DOWN_RIGHT
+};
+
+typedef s32 CursorDirection;
+
 #define BINARY_ANGLE_EIGHTH_TURN (BINARY_ANGLE_TURN / 8)
 #define EDITOR_ANGLE_TO_RADIANS (3.1416 / 32768)
 #define CURSOR_STEP_LENGTH 1.5
@@ -596,7 +609,7 @@ static s32 f_LastSetHeight = 0;
 static Boolean f_ShowsGroundWaves = TRUE;
 static s32 f_CLeftPickedHeight = 0;
 static s32 f_CUpPickedHeight = 0;
-static s32 f_LastHeightEditKind = HEIGHT_EDIT_NONE;
+static HeightEdit f_LastHeightEditKind = HEIGHT_EDIT_NONE;
 
 static s32 f_UnusedHoleFileSetting UNUSED = 1;
 static Boolean f_IsSavingHoleFiles = FALSE;
@@ -2176,8 +2189,8 @@ void SlopeOutOfBoundsGround(void) {
 void UpdateHeightEditor(void) {
     char text[DEBUG_TEXT_BUFFER_SIZE];
     s32 baseHeight;
-    s32 editKind;
-    s32 direction;
+    HeightEdit editKind;
+    CursorDirection direction;
     s32 columnStep;
     s32 rowStep;
     f64 cameraDistance;
