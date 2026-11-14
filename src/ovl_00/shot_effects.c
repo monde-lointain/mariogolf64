@@ -602,15 +602,15 @@ void StartSwingTrail(SwingTrailKind kind) {
         for (i = 0; i != SWING_TRAIL_MATRIX_COUNT; i++) {
             guTranslate(
                 &f_SwingTrailMatrices[i][0],
-                f_SwingTrailOuterPath[AXIS_X][AXIS_X],
-                f_SwingTrailOuterPath[AXIS_X][AXIS_Y],
-                f_SwingTrailOuterPath[AXIS_X][AXIS_Z]
+                f_SwingTrailOuterPath[0][AXIS_X],
+                f_SwingTrailOuterPath[0][AXIS_Y],
+                f_SwingTrailOuterPath[0][AXIS_Z]
             );
             guTranslate(
                 &f_SwingTrailMatrices[i][1],
-                f_SwingTrailInnerPath[AXIS_X][AXIS_X],
-                f_SwingTrailInnerPath[AXIS_X][AXIS_Y],
-                f_SwingTrailInnerPath[AXIS_X][AXIS_Z]
+                f_SwingTrailInnerPath[0][AXIS_X],
+                f_SwingTrailInnerPath[0][AXIS_Y],
+                f_SwingTrailInnerPath[0][AXIS_Z]
             );
         }
     }
