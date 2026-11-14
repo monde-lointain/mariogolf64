@@ -203,7 +203,7 @@ static u8 f_UnreadTableWord[0x4] UNUSED;
 
 static ImageAsset *f_TableCursorBox;
 static ImageAsset *f_TablePopupBanner;
-static void *f_TableArrows;
+static ImageAsset *f_TableArrows;
 static ImageAsset *f_TableStar;
 static s32 f_TableCharacterVisibility[CHARACTER_COUNT];
 

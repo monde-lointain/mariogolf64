@@ -173,8 +173,8 @@ static u8 f_UnreadSelectGap[0x4] UNUSED;
 
 static ImageAsset *f_PlayerTags;
 static ImageAsset *f_GridCursorBox;
-static void *f_UnreadNamePlate;
-static void *f_UnreadControllerIcons;
+static ImageAsset *f_UnreadNamePlate;
+static ImageAsset *f_UnreadControllerIcons;
 static void *f_UnreadColorBars;
 static ImageAsset *f_CurveMeterCells;
 
@@ -209,7 +209,7 @@ s32 MoveGridCursor(s32 playerIndex, u8 direction, UBoolean8 canChooseMarked) {
     s16 row = oldRow;
     u16 faceSlot;
     u16 characterIndex;
-    void *faceImage;
+    ImageAsset *faceImage;
     s32 unused[2] UNUSED;
 
     do {
@@ -301,7 +301,7 @@ s32 MoveGridCursorDiagonal(s32 playerIndex, u8 diagonal, UBoolean8 canChooseMark
     s32 row = oldRow;
     u16 faceSlot;
     u16 characterIndex;
-    void *faceImage;
+    ImageAsset *faceImage;
     s32 unused[2] UNUSED;
 
     while (TRUE) {
@@ -493,7 +493,7 @@ s32 UpdateCharacterSelect(s32 firstPlayerIndex, s32 playerCount, Boolean canChoo
     u16 row;
     u16 faceSlot;
     u16 faceCharacter;
-    void *faceImage;
+    ImageAsset *faceImage;
     SoundChannel channel;
 
     if (IsHudAnimationDone() != TRUE) {
@@ -1330,7 +1330,7 @@ void LoadCharacterFaces(void) {
     OpenEncodedAsset(ASSET_STAT_LABELS, &asset);
     ReadEncodedAsset(images + CHARACTER_SELECT_FIRST_IMAGE_SIZE, &asset);
     for (slotIndex = 0; slotIndex != CHARACTER_COUNT; slotIndex++) {
-        void *faceImage = g_CharacterFaceImages[slotIndex];
+        ImageAsset *faceImage = g_CharacterFaceImages[slotIndex];
         AssetFile *paletteFile = &file;
         void *palette = g_CharacterFacePalettes[slotIndex];
 
@@ -1513,7 +1513,7 @@ void DrawGridFaces(Gfx **displayListHead, UBoolean8 isSinglePlayer) {
     u16 faceSlot;
     s16 gridMark;
     u16 characterIndex;
-    void *faceImage;
+    ImageAsset *faceImage;
     void *facePalette;
 
     for (row = 0; row != CHARACTER_GRID_ROW_COUNT;) {

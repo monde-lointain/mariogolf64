@@ -4,6 +4,7 @@
 #include <nusys.h>
 #include <ultra64.h>
 
+#include "asset.h"
 #include "language.h"
 #include "math_util.h"
 
@@ -86,22 +87,22 @@ enum TransmitScreen {
 #define CARTRIDGE_TAG_SIZE 16
 
 typedef struct GameBoyTransfer {
-    void *courseSceneImage;
-    void *pointerImage;
-    void *arrowsImage;
+    ImageAsset *courseSceneImage;
+    ImageAsset *pointerImage;
+    ImageAsset *arrowsImage;
     void *facePalettes[GAME_BOY_GOLFER_COUNT];
-    void *faceImages[GAME_BOY_GOLFER_COUNT];
-    void *titleImage;
-    void *woodPanelImage;
-    void *transferPakIconsImage;
-    void *cursorBoxImage;
-    void *curveSegmentsImage;
-    void *pressingHandImage;
-    void *statBarsImage;
-    void *statLabelsImage;
-    void *noticeCloudImage;
-    void *accessingImage;
-    void *shotTypesImage;
+    ImageAsset *faceImages[GAME_BOY_GOLFER_COUNT];
+    ImageAsset *titleImage;
+    ImageAsset *woodPanelImage;
+    ImageAsset *transferPakIconsImage;
+    ImageAsset *cursorBoxImage;
+    ImageAsset *curveSegmentsImage;
+    ImageAsset *pressingHandImage;
+    ImageAsset *statBarsImage;
+    ImageAsset *statLabelsImage;
+    ImageAsset *noticeCloudImage;
+    ImageAsset *accessingImage;
+    ImageAsset *shotTypesImage;
     Boolean hasGameBoyPak;
     s32 screen;
     s32 transferMode;

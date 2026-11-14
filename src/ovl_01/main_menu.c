@@ -1335,7 +1335,7 @@ void UpdateMenus(void) {
     SaveData *save;
     s32 index;
     u8 *imageBuffer;
-    void *tournamentImage;
+    ImageAsset *tournamentImage;
     u8 *optionBits;
     u8 iconIndex;
 

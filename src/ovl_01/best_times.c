@@ -83,7 +83,7 @@ static ImageAsset **f_BestTimesCourseIcons;
 static ImageAsset *f_CharacterFaceStrip;
 static ImageAsset *f_StopwatchGlyphs;
 static ImageAsset *f_PlaceLabels;
-static void *f_BestTimesGreenArrows;
+static ImageAsset *f_BestTimesGreenArrows;
 
 static u8 f_UnusedBytesAfterGreenArrows[0x4] UNUSED;
 static u8 f_UnusedBufferAfterGreenArrows[0x88] UNUSED;

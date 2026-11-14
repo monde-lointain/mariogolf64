@@ -347,7 +347,7 @@ static Mtx f_TurnedArrowRotations[PAGE_ARROW_COUNT];
 static u8 f_UnusedBufferAfterArrowRotations[0x100] UNUSED;
 
 static Mtx f_TurnedArrowScales[PAGE_ARROW_COUNT];
-static void *f_BetIcons;
+static ImageAsset *f_BetIcons;
 static void *f_UnusedStatsBuffer;
 static ImageAsset *f_StakeMark;
 static ImageAsset *f_StatsNamePlate;
@@ -371,8 +371,8 @@ static Mtx f_BestShotsCursorScale;
 
 static u8 f_UnusedBufferAfterBestShotsScale[0x50] UNUSED;
 
-static void *f_BestShotFaces[STATS_GRID_ROW_COUNT][STATS_GRID_COLUMN_COUNT];
-static void **f_BestShotsCourseIcons;
+static ImageAsset *f_BestShotFaces[STATS_GRID_ROW_COUNT][STATS_GRID_COLUMN_COUNT];
+static ImageAsset **f_BestShotsCourseIcons;
 static ImageAsset *f_BestShotsNamePlate;
 static ImageAsset *f_BestShotsCursorBox;
 static u8 *f_ScoreLabels;

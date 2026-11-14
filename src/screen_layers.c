@@ -200,7 +200,7 @@ static s32 f_PromptChoice = PROMPT_CHOICE_YES;
 static Radians f_ChoiceBobAngle = 0.0f;
 static ImageAsset *f_HalfTurnImage;
 static ImageAsset *f_WipeShapeImage;
-static void *f_PromptCloudImage;
+static ImageAsset *f_PromptCloudImage;
 static ImageAsset *f_YesNoImage;
 
 void DrawTextureRectangle(

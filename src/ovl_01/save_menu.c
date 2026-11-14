@@ -246,9 +246,9 @@ static s32 f_SavedGameControllerIconPositions[PLAYER_COUNT_MAX][PLAYER_COUNT_MAX
 static s32 f_UnusedWordsAfterControllerIcons[2] UNUSED = {0, 0};
 
 static ImageAsset *f_RingShotNamePlate;
-static void *f_RingShotRainbowBox;
+static ImageAsset *f_RingShotRainbowBox;
 static ImageAsset *f_RingShotCourseNumbers;
-static void *f_RingShotGreenArrows;
+static ImageAsset *f_RingShotGreenArrows;
 static ImageAsset **f_RingShotCourseIcons;
 static s16 f_RecordedReplaySlots[SAVE_MENU_SLOT_COUNT];
 
@@ -260,12 +260,12 @@ static Mtx f_SavedGolferTransforms[PLAYER_COUNT_MAX][DRAW_BUFFER_COUNT];
 static Mtx f_SavedGolfersProjection;
 static f32 f_SavedGolferScales[PLAYER_COUNT_MAX];
 static LookAt f_SavedGolfersLookAts[DRAW_BUFFER_COUNT];
-static void **f_SavedGameModeImages;
+static ImageAsset **f_SavedGameModeImages;
 static void **f_ChosenModeIconBuffers;
 static ImageAsset *f_SavedGamesNamePlate;
 static ImageAsset *f_GameModeLabels;
-static void *f_ControllerIcons;
-static void *f_PlayerLabels;
+static ImageAsset *f_ControllerIcons;
+static ImageAsset *f_PlayerLabels;
 
 static u8 f_UnusedBytesAfterPlayerLabels[0x4] UNUSED;
 
