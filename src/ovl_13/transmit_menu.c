@@ -1561,7 +1561,7 @@ void ListPresentCharacters(void) {
 }
 
 void DrawSendStatusHint(Gfx **displayListHead, GameBoyTransfer *transfer) {
-    Gfx *displayList = *displayListHead;
+    Gfx *gfx = *displayListHead;
     MessageId messageId = NO_MESSAGE;
 
     switch (transfer->screenStep) {
@@ -1589,10 +1589,10 @@ void DrawSendStatusHint(Gfx **displayListHead, GameBoyTransfer *transfer) {
             255,
             OPAQUE_ALPHA
         );
-        DrawLargeTextSlot(&displayList, HINT_TEXT_SLOT);
+        DrawLargeTextSlot(&gfx, HINT_TEXT_SLOT);
     }
 
-    *displayListHead = displayList;
+    *displayListHead = gfx;
 }
 
 void DrawCharacterStats(
@@ -1600,16 +1600,16 @@ void DrawCharacterStats(
     GameBoyCharacter *character,
     GameBoyTransfer *transfer
 ) {
-    Gfx *displayList = *displayListHead;
+    Gfx *gfx = *displayListHead;
     s32 segment;
 
     s32 segmentCurve;
 
-    SetUpTextDrawing(&displayList);
-    DrawLargeText(&displayList, STATS_NAME_LEFT, STATS_NAME_TOP, character->name);
-    BeginShadowedText(&displayList);
+    SetUpTextDrawing(&gfx);
+    DrawLargeText(&gfx, STATS_NAME_LEFT, STATS_NAME_TOP, character->name);
+    BeginShadowedText(&gfx);
     sprintf(g_PrintBuffer, "  %2d     :%3d", character->level, character->driveDistance);
-    DrawSmallText(&displayList, STATS_LEFT, STATS_TOP, g_PrintBuffer);
+    DrawSmallText(&gfx, STATS_LEFT, STATS_TOP, g_PrintBuffer);
     if (character->shotCurve == 0) {
         segmentCurve = SHOT_TYPE_STRAIGHT;
     }
@@ -1632,16 +1632,16 @@ void DrawCharacterStats(
         255,
         OPAQUE_ALPHA
     );
-    gDPPipeSync(displayList++);
-    gDPSetAlphaCompare(displayList++, G_AC_NONE);
-    gDPPipeSync(displayList++);
-    gDPSetRenderMode(displayList++, G_RM_TEX_EDGE | AA_EN, G_RM_TEX_EDGE2 | AA_EN);
-    gDPSetCombineMode(displayList++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-    gDPPipeSync(displayList++);
-    gDPSetTextureLUT(displayList++, G_TT_RGBA16);
-    LoadSmallPalette(&displayList, 0, ImageBody(transfer->shotTypesImage));
+    gDPPipeSync(gfx++);
+    gDPSetAlphaCompare(gfx++, G_AC_NONE);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_TEX_EDGE | AA_EN, G_RM_TEX_EDGE2 | AA_EN);
+    gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+    LoadSmallPalette(&gfx, 0, ImageBody(transfer->shotTypesImage));
     LoadNibbleTextureBlock(
-        &displayList,
+        &gfx,
         ImageTexels(transfer->shotTypesImage),
         G_IM_FMT_CI,
         SHOT_TYPE_WIDTH,
@@ -1655,7 +1655,7 @@ void DrawCharacterStats(
         G_TX_NOLOD
     );
     DrawTextureRect(
-        &displayList,
+        &gfx,
         QuarterPixels(SHOT_TYPE_LEFT),
         QuarterPixels(SHOT_TYPE_TOP),
         QuarterPixels(SHOT_TYPE_LEFT + SHOT_TYPE_WIDTH),
@@ -1666,9 +1666,9 @@ void DrawCharacterStats(
         TEXEL_STEP_ONE,
         TEXEL_STEP_ONE
     );
-    LoadSmallPalette(&displayList, 0, ImageBody(transfer->statLabelsImage));
+    LoadSmallPalette(&gfx, 0, ImageBody(transfer->statLabelsImage));
     LoadNibbleTextureBlock(
-        &displayList,
+        &gfx,
         ImageTexels(transfer->statLabelsImage),
         G_IM_FMT_CI,
         STAT_LABELS_WIDTH,
@@ -1682,7 +1682,7 @@ void DrawCharacterStats(
         G_TX_NOLOD
     );
     DrawTextureRect(
-        &displayList,
+        &gfx,
         QuarterPixels(STATS_LEFT),
         QuarterPixels(STATS_TOP),
         QuarterPixels(STATS_LEFT + STAT_LABELS_WIDTH),
@@ -1693,9 +1693,9 @@ void DrawCharacterStats(
         TEXEL_STEP_ONE,
         TEXEL_STEP_ONE
     );
-    LoadSmallPalette(&displayList, 0, ImageBody(transfer->statBarsImage));
+    LoadSmallPalette(&gfx, 0, ImageBody(transfer->statBarsImage));
     gDPLoadTextureTile_4b(
-        displayList++,
+        gfx++,
         TextureAddress(ImageTexels(transfer->statBarsImage)),
         G_IM_FMT_CI,
         CURVE_BAR_WIDTH,
@@ -1713,7 +1713,7 @@ void DrawCharacterStats(
         G_TX_NOLOD
     );
     DrawTextureRect(
-        &displayList,
+        &gfx,
         QuarterPixels(CURVE_BAR_LEFT),
         QuarterPixels(CURVE_BAR_TOP),
         QuarterPixels(CURVE_BAR_LEFT + CURVE_BAR_WIDTH),
@@ -1724,9 +1724,9 @@ void DrawCharacterStats(
         TEXEL_STEP_ONE,
         TEXEL_STEP_ONE
     );
-    LoadLargePalette(&displayList, ImageBody(transfer->curveSegmentsImage));
+    LoadLargePalette(&gfx, ImageBody(transfer->curveSegmentsImage));
     LoadTextureBlock(
-        &displayList,
+        &gfx,
         LargeImageTexels(transfer->curveSegmentsImage),
         G_IM_FMT_CI,
         G_IM_SIZ_8b,
@@ -1767,7 +1767,7 @@ void DrawCharacterStats(
         }
 
         DrawTextureRect(
-            &displayList,
+            &gfx,
             QuarterPixels(CURVE_BAR_LEFT + (segment * CURVE_SEGMENT_WIDTH)),
             QuarterPixels(CURVE_BAR_TOP),
             QuarterPixels(CURVE_BAR_LEFT + ((segment + 1) * CURVE_SEGMENT_WIDTH)),
@@ -1780,7 +1780,7 @@ void DrawCharacterStats(
         );
     }
 
-    *displayListHead = displayList;
+    *displayListHead = gfx;
 }
 
 #define STEP_DEBUG_COLUMN 20
@@ -1788,12 +1788,12 @@ void DrawCharacterStats(
 
 void DrawBringCharactersText(Gfx **displayListHead, GameBoyTransfer *transfer) {
     GameBoyCharacter *character = g_GameBoyCharacters;
-    Gfx *displayList = *displayListHead;
+    Gfx *gfx = *displayListHead;
     Boolean isCharacterShown = FALSE;
     MessageId messageId;
 
-    SetUpTextDrawing(&displayList);
-    gDPSetPrimColor(displayList++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
+    SetUpTextDrawing(&gfx);
+    gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
     sprintf(g_PrintBuffer, "%3d", (int)transfer->screenStep);
     PrintDebugText(g_PrintBuffer, STEP_DEBUG_COLUMN, STEP_DEBUG_ROW);
     if (transfer->screenStep == BRING_CHOOSING_SLOT) {
@@ -1810,10 +1810,10 @@ void DrawBringCharactersText(Gfx **displayListHead, GameBoyTransfer *transfer) {
     }
 
     if (isCharacterShown) {
-        DrawCharacterStats(&displayList, character, transfer);
+        DrawCharacterStats(&gfx, character, transfer);
     }
 
-    SetUpTextDrawing(&displayList);
+    SetUpTextDrawing(&gfx);
     if (transfer->readStep == LastCartridgeReadStep(g_ControllerCount)) {
         messageId = NO_MESSAGE;
         switch (transfer->screenStep) {
@@ -1841,34 +1841,29 @@ void DrawBringCharactersText(Gfx **displayListHead, GameBoyTransfer *transfer) {
                 255,
                 OPAQUE_ALPHA
             );
-            DrawLargeTextSlot(&displayList, HINT_TEXT_SLOT);
+            DrawLargeTextSlot(&gfx, HINT_TEXT_SLOT);
         }
     }
 
-    *displayListHead = displayList;
+    *displayListHead = gfx;
 }
 
 void DrawSendExperienceText(Gfx **displayListHead, GameBoyTransfer *transfer) {
-    Gfx *displayList = *displayListHead;
+    Gfx *gfx = *displayListHead;
     s32 slot;
     MessageId messageId;
 
-    gDPSetPrimColor(displayList++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
-    BeginShadowedText(&displayList);
+    gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
+    BeginShadowedText(&gfx);
     for (slot = 0; slot != g_GameBoyTransfer.characterCount; slot++) {
         GameBoyCharacter *character = &g_GameBoyCharacters[slot];
 
         sprintf(g_PrintBuffer, "%4d", (int)character->experience);
-        DrawSmallText(
-            &displayList,
-            EXPERIENCE_LEFT + (slot * FACE_SPACING),
-            EXPERIENCE_TOP,
-            g_PrintBuffer
-        );
+        DrawSmallText(&gfx, EXPERIENCE_LEFT + (slot * FACE_SPACING), EXPERIENCE_TOP, g_PrintBuffer);
     }
 
-    DrawCharacterStats(&displayList, &g_GameBoyCharacters[transfer->characterIndex], transfer);
-    SetUpTextDrawing(&displayList);
+    DrawCharacterStats(&gfx, &g_GameBoyCharacters[transfer->characterIndex], transfer);
+    SetUpTextDrawing(&gfx);
     messageId = NO_MESSAGE;
     switch (transfer->screenStep) {
         case SEND_EXPERIENCE_CHOOSING:
@@ -1892,27 +1887,27 @@ void DrawSendExperienceText(Gfx **displayListHead, GameBoyTransfer *transfer) {
             255,
             OPAQUE_ALPHA
         );
-        DrawLargeTextSlot(&displayList, HINT_TEXT_SLOT);
+        DrawLargeTextSlot(&gfx, HINT_TEXT_SLOT);
     }
 
-    *displayListHead = displayList;
+    *displayListHead = gfx;
 }
 
 void DrawSendStatusScreen(Gfx **displayListHead, GameBoyTransfer *transfer) {
-    Gfx *displayList = *displayListHead;
+    Gfx *gfx = *displayListHead;
     s32 index;
     s32 slot;
     s32 pointerRestLeft;
     s32 pointerLeft;
     s32 pointerSwing;
 
-    DrawImportedFaces(&displayList, transfer);
-    gDPPipeSync(displayList++);
-    gDPSetTextureLUT(displayList++, G_TT_RGBA16);
-    gDPSetCombineMode(displayList++, G_CC_MODULATERGBA_PRIM, G_CC_MODULATERGBA_PRIM);
-    LoadSmallPalette(&displayList, 0, ImageBody(transfer->controllerIconsImage));
+    DrawImportedFaces(&gfx, transfer);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+    gDPSetCombineMode(gfx++, G_CC_MODULATERGBA_PRIM, G_CC_MODULATERGBA_PRIM);
+    LoadSmallPalette(&gfx, 0, ImageBody(transfer->controllerIconsImage));
     LoadNibbleTextureBlock(
-        &displayList,
+        &gfx,
         ImageTexels(transfer->controllerIconsImage),
         G_IM_FMT_CI,
         CONTROLLER_ICON_SIZE,
@@ -1926,17 +1921,17 @@ void DrawSendStatusScreen(Gfx **displayListHead, GameBoyTransfer *transfer) {
         G_TX_NOLOD
     );
     slot = 0;
-    gDPSetPrimColor(displayList++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
+    gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
     for (index = 0; index != transfer->taggedCartridgeCount; index++) {
         if (transfer->screenStep == SEND_STATUS_READY && slot != transfer->chosenCartridgeIndex) {
-            gDPSetPrimColor(displayList++, 0, 0, 127, 127, 127, OPAQUE_ALPHA);
+            gDPSetPrimColor(gfx++, 0, 0, 127, 127, 127, OPAQUE_ALPHA);
         }
         else {
-            gDPSetPrimColor(displayList++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
+            gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
         }
 
         DrawTextureRect(
-            &displayList,
+            &gfx,
             QuarterPixels(CONTROLLER_ICONS_LEFT + (slot * CONTROLLER_ICON_SPACING)),
             QuarterPixels(CONTROLLER_ICONS_TOP),
             QuarterPixels(
@@ -1952,7 +1947,7 @@ void DrawSendStatusScreen(Gfx **displayListHead, GameBoyTransfer *transfer) {
         slot++;
     }
 
-    gDPSetPrimColor(displayList++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
+    gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
     if (transfer->taggedCartridgeCount != 0) {
         if (transfer->screenStep == SEND_STATUS_CHOOSING) {
             f_StatusPointerAngle += POINTER_SWING_STEP;
@@ -1961,11 +1956,11 @@ void DrawSendStatusScreen(Gfx **displayListHead, GameBoyTransfer *transfer) {
             }
 
             pointerSwing = sinf(f_StatusPointerAngle) * POINTER_SWING_DISTANCE;
-            gDPPipeSync(displayList++);
-            gDPSetTextureLUT(displayList++, G_TT_RGBA16);
-            LoadSmallPalette(&displayList, 0, ImageBody(transfer->pointerImage));
+            gDPPipeSync(gfx++);
+            gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+            LoadSmallPalette(&gfx, 0, ImageBody(transfer->pointerImage));
             LoadNibbleTextureBlock(
-                &displayList,
+                &gfx,
                 ImageTexels(transfer->controllerIconsImage),
                 G_IM_FMT_CI,
                 CONTROLLER_ICON_SIZE,
@@ -1979,7 +1974,7 @@ void DrawSendStatusScreen(Gfx **displayListHead, GameBoyTransfer *transfer) {
                 G_TX_NOLOD
             );
             gDPLoadTextureTile_4b(
-                displayList++,
+                gfx++,
                 TextureAddress(ImageTexels(transfer->pointerImage)),
                 G_IM_FMT_CI,
                 POINTER_WIDTH,
@@ -2000,7 +1995,7 @@ void DrawSendStatusScreen(Gfx **displayListHead, GameBoyTransfer *transfer) {
                 (CONTROLLER_ICONS_LEFT - POINTER_WIDTH);
             pointerLeft = pointerRestLeft - pointerSwing;
             DrawTextureRect(
-                &displayList,
+                &gfx,
                 QuarterPixels(pointerLeft),
                 QuarterPixels(POINTER_TOP),
                 QuarterPixels(pointerLeft + POINTER_WIDTH),
@@ -2014,7 +2009,7 @@ void DrawSendStatusScreen(Gfx **displayListHead, GameBoyTransfer *transfer) {
         }
         else if (transfer->screenStep == SEND_STATUS_READY) {
             DrawCursorBox(
-                &displayList,
+                &gfx,
                 CONTROLLER_ICONS_LEFT - CONTROLLER_CURSOR_MARGIN +
                     (transfer->chosenCartridgeIndex * CONTROLLER_ICON_SPACING),
                 CONTROLLER_ICONS_TOP - CONTROLLER_CURSOR_MARGIN
@@ -2022,22 +2017,22 @@ void DrawSendStatusScreen(Gfx **displayListHead, GameBoyTransfer *transfer) {
         }
     }
 
-    *displayListHead = displayList;
+    *displayListHead = gfx;
 }
 
 void DrawImportedFaces(Gfx **displayListHead, GameBoyTransfer *transfer) {
-    Gfx *displayList = *displayListHead;
+    Gfx *gfx = *displayListHead;
     s32 slot;
     s32 character;
 
-    gDPPipeSync(displayList++);
-    gDPSetTextureLUT(displayList++, G_TT_RGBA16);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
     for (slot = 0; slot != GAME_BOY_CHARACTER_COUNT; slot++) {
         if (g_GameBoyCharacters[slot].status == GAME_BOY_CHARACTER_STATUS_PRESENT) {
             character = g_GameBoyCharacters[slot].character;
-            LoadLargePalette(&displayList, transfer->facePalettes[character]);
+            LoadLargePalette(&gfx, transfer->facePalettes[character]);
             LoadTextureBlock(
-                &displayList,
+                &gfx,
                 transfer->faceImages[character],
                 G_IM_FMT_CI,
                 G_IM_SIZ_8b,
@@ -2052,7 +2047,7 @@ void DrawImportedFaces(Gfx **displayListHead, GameBoyTransfer *transfer) {
                 G_TX_NOLOD
             );
             DrawTextureRect(
-                &displayList,
+                &gfx,
                 QuarterPixels(FACES_LEFT + (slot * FACE_SPACING)),
                 QuarterPixels(FACES_TOP),
                 QuarterPixels(FACES_LEFT + (slot * FACE_SPACING) + FACE_SIZE),
@@ -2066,14 +2061,14 @@ void DrawImportedFaces(Gfx **displayListHead, GameBoyTransfer *transfer) {
         }
     }
 
-    *displayListHead = displayList;
+    *displayListHead = gfx;
 }
 
 void DrawTransmitOptionFaces(Gfx **displayListHead, GameBoyTransfer *transfer) {
-    Gfx *displayList = *displayListHead;
+    Gfx *gfx = *displayListHead;
 
-    DrawImportedFaces(&displayList, transfer);
-    *displayListHead = displayList;
+    DrawImportedFaces(&gfx, transfer);
+    *displayListHead = gfx;
 }
 
 static inline Boolean IsListed(s32 listing) {
@@ -2081,7 +2076,7 @@ static inline Boolean IsListed(s32 listing) {
 }
 
 void DrawBringCharactersScreen(Gfx **displayListHead, GameBoyTransfer *transfer) {
-    Gfx *displayList = *displayListHead;
+    Gfx *gfx = *displayListHead;
     s32 index;
     s32 shownCount;
     s32 listed;
@@ -2090,12 +2085,12 @@ void DrawBringCharactersScreen(Gfx **displayListHead, GameBoyTransfer *transfer)
     s32 top;
     s32 character;
 
-    gDPPipeSync(displayList++);
-    gDPSetTextureLUT(displayList++, G_TT_RGBA16);
-    DrawImportedFaces(&displayList, transfer);
-    LoadSmallPalette(&displayList, 0, ImageBody(transfer->controllerIconsImage));
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+    DrawImportedFaces(&gfx, transfer);
+    LoadSmallPalette(&gfx, 0, ImageBody(transfer->controllerIconsImage));
     LoadNibbleTextureBlock(
-        &displayList,
+        &gfx,
         ImageTexels(transfer->controllerIconsImage),
         G_IM_FMT_CI,
         CONTROLLER_ICON_SIZE,
@@ -2114,7 +2109,7 @@ void DrawBringCharactersScreen(Gfx **displayListHead, GameBoyTransfer *transfer)
                 GAME_BOY_CHARACTER_STATUS_PRESENT &&
             IsListed(transfer->listingStates[transfer->listedCharacters[index]])) {
             DrawTextureRect(
-                &displayList,
+                &gfx,
                 QuarterPixels(LISTED_FACES_LEFT + (shownCount * LISTED_FACE_SPACING)),
                 QuarterPixels(LISTED_ICONS_TOP),
                 QuarterPixels(
@@ -2136,9 +2131,9 @@ void DrawBringCharactersScreen(Gfx **displayListHead, GameBoyTransfer *transfer)
         }
     }
 
-    LoadSmallPalette(&displayList, 0, ImageBody(transfer->statBarsImage));
+    LoadSmallPalette(&gfx, 0, ImageBody(transfer->statBarsImage));
     gDPLoadTextureTile_4b(
-        displayList++,
+        gfx++,
         TextureAddress(ImageTexels(transfer->statBarsImage)),
         G_IM_FMT_CI,
         CURVE_BAR_WIDTH,
@@ -2156,7 +2151,7 @@ void DrawBringCharactersScreen(Gfx **displayListHead, GameBoyTransfer *transfer)
         G_TX_NOLOD
     );
     DrawTextureRect(
-        &displayList,
+        &gfx,
         QuarterPixels(CURVE_BAR_LEFT),
         QuarterPixels(CURVE_BAR_TOP),
         QuarterPixels(CURVE_BAR_LEFT + CURVE_BAR_WIDTH),
@@ -2181,9 +2176,9 @@ void DrawBringCharactersScreen(Gfx **displayListHead, GameBoyTransfer *transfer)
                 top += (FACES_TOP - top) * transfer->bringingFrame / (BRINGING_FRAME_COUNT - 1);
             }
 
-            LoadLargePalette(&displayList, transfer->facePalettes[character]);
+            LoadLargePalette(&gfx, transfer->facePalettes[character]);
             LoadTextureBlock(
-                &displayList,
+                &gfx,
                 transfer->faceImages[character],
                 G_IM_FMT_CI,
                 G_IM_SIZ_8b,
@@ -2198,7 +2193,7 @@ void DrawBringCharactersScreen(Gfx **displayListHead, GameBoyTransfer *transfer)
                 G_TX_NOLOD
             );
             DrawTextureRect(
-                &displayList,
+                &gfx,
                 QuarterPixels(left),
                 QuarterPixels(top),
                 QuarterPixels(left + FACE_SIZE),
@@ -2219,7 +2214,7 @@ void DrawBringCharactersScreen(Gfx **displayListHead, GameBoyTransfer *transfer)
     if (g_GameBoyTransfer.listedCharacterCount != 0) {
         if (transfer->screenStep == BRING_CHOOSING) {
             DrawCursorBox(
-                &displayList,
+                &gfx,
                 LISTED_FACES_LEFT - BRING_CURSOR_MARGIN +
                     ((transfer->listedCharacterIndex - transfer->firstShownListedIndex) *
                         LISTED_FACE_SPACING),
@@ -2228,23 +2223,23 @@ void DrawBringCharactersScreen(Gfx **displayListHead, GameBoyTransfer *transfer)
         }
         else if (transfer->screenStep == BRING_CHOOSING_SLOT) {
             DrawCursorBox(
-                &displayList,
+                &gfx,
                 FACES_LEFT - BRING_CURSOR_MARGIN + (transfer->characterIndex * FACE_SPACING),
                 FACES_TOP - BRING_CURSOR_MARGIN
             );
         }
     }
 
-    gSPDisplayList(displayList++, g_DecalTextureSetup);
-    gDPPipeSync(displayList++);
-    gDPSetTextureLUT(displayList++, G_TT_RGBA16);
-    gDPPipeSync(displayList++);
-    gDPSetTexturePersp(displayList++, G_TP_NONE);
+    gSPDisplayList(gfx++, g_DecalTextureSetup);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+    gDPPipeSync(gfx++);
+    gDPSetTexturePersp(gfx++, G_TP_NONE);
     if (transfer->screenStep == BRING_CHOOSING) {
         f_CharacterArrowFrame = (f_CharacterArrowFrame + 1) % ARROW_CYCLE_TICKS;
-        LoadSmallPalette(&displayList, 0, ImageBody(transfer->arrowsImage));
+        LoadSmallPalette(&gfx, 0, ImageBody(transfer->arrowsImage));
         LoadNibbleTextureBlock(
-            &displayList,
+            &gfx,
             ImageTexelsAt(
                 transfer->arrowsImage,
                 f_CharacterArrowFrame / ARROW_FRAME_TICKS * GREEN_ARROW_FRAME_SIZE
@@ -2260,10 +2255,10 @@ void DrawBringCharactersScreen(Gfx **displayListHead, GameBoyTransfer *transfer)
             G_TX_NOLOD,
             G_TX_NOLOD
         );
-        gDPPipeSync(displayList++);
+        gDPPipeSync(gfx++);
         if (transfer->firstShownListedIndex > 0) {
             DrawTextureRect(
-                &displayList,
+                &gfx,
                 QuarterPixels(LEFT_ARROW_LEFT),
                 QuarterPixels(ARROWS_TOP),
                 QuarterPixels(LEFT_ARROW_LEFT + GREEN_ARROW_SIZE),
@@ -2278,7 +2273,7 @@ void DrawBringCharactersScreen(Gfx **displayListHead, GameBoyTransfer *transfer)
 
         if (transfer->firstShownListedIndex < transfer->listedCharacterCount - SHOWN_LISTED_COUNT) {
             DrawTextureRect(
-                &displayList,
+                &gfx,
                 QuarterPixels(RIGHT_ARROW_LEFT),
                 QuarterPixels(ARROWS_TOP),
                 QuarterPixels(RIGHT_ARROW_LEFT + GREEN_ARROW_SIZE),
@@ -2292,31 +2287,31 @@ void DrawBringCharactersScreen(Gfx **displayListHead, GameBoyTransfer *transfer)
         }
     }
 
-    *displayListHead = displayList;
+    *displayListHead = gfx;
 }
 
 void DrawSendExperienceScreen(Gfx **displayListHead, GameBoyTransfer *transfer) {
-    Gfx *displayList = *displayListHead;
+    Gfx *gfx = *displayListHead;
     s32 index;
 
     s32 slot;
 
-    DrawImportedFaces(&displayList, transfer);
+    DrawImportedFaces(&gfx, transfer);
     if (transfer->screenStep == SEND_EXPERIENCE_CHOOSING) {
         DrawCursorBox(
-            &displayList,
+            &gfx,
             FACES_LEFT - FACE_CURSOR_MARGIN + (transfer->characterIndex * FACE_SPACING),
             FACES_TOP - FACE_CURSOR_MARGIN
         );
-        gDPPipeSync(displayList++);
-        gDPSetTexturePersp(displayList++, G_TP_NONE);
-        gDPPipeSync(displayList++);
-        gDPSetTextureLUT(displayList++, G_TT_RGBA16);
+        gDPPipeSync(gfx++);
+        gDPSetTexturePersp(gfx++, G_TP_NONE);
+        gDPPipeSync(gfx++);
+        gDPSetTextureLUT(gfx++, G_TT_RGBA16);
     }
 
-    LoadSmallPalette(&displayList, 0, ImageBody(transfer->controllerIconsImage));
+    LoadSmallPalette(&gfx, 0, ImageBody(transfer->controllerIconsImage));
     LoadNibbleTextureBlock(
-        &displayList,
+        &gfx,
         ImageTexels(transfer->controllerIconsImage),
         G_IM_FMT_CI,
         CONTROLLER_ICON_SIZE,
@@ -2330,18 +2325,18 @@ void DrawSendExperienceScreen(Gfx **displayListHead, GameBoyTransfer *transfer) 
         G_TX_NOLOD
     );
     slot = 0;
-    gDPSetPrimColor(displayList++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
+    gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
     for (index = 0; index != transfer->taggedCartridgeCount; index++) {
         if (transfer->screenStep == SEND_EXPERIENCE_SENT &&
             slot != transfer->chosenCartridgeIndex) {
-            gDPSetPrimColor(displayList++, 0, 0, 127, 127, 127, OPAQUE_ALPHA);
+            gDPSetPrimColor(gfx++, 0, 0, 127, 127, 127, OPAQUE_ALPHA);
         }
         else {
-            gDPSetPrimColor(displayList++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
+            gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
         }
 
         DrawTextureRect(
-            &displayList,
+            &gfx,
             QuarterPixels(CONTROLLER_ICONS_LEFT + (slot * CONTROLLER_ICON_SPACING)),
             QuarterPixels(CONTROLLER_ICONS_TOP),
             QuarterPixels(
@@ -2357,7 +2352,7 @@ void DrawSendExperienceScreen(Gfx **displayListHead, GameBoyTransfer *transfer) 
         slot++;
     }
 
-    *displayListHead = displayList;
+    *displayListHead = gfx;
 }
 
 void DrawAccessingSign(Gfx **displayListHead);
@@ -2372,7 +2367,7 @@ void DrawPressingHand(Gfx **displayListHead);
 
 void DrawTransmitMenu(Gfx **displayListHead) {
     GameBoyTransfer *transfer = &g_GameBoyTransfer;
-    Gfx *displayList = *displayListHead;
+    Gfx *gfx = *displayListHead;
     s32 index;
     s32 rowCount;
     s32 panelRowCount;
@@ -2382,30 +2377,30 @@ void DrawTransmitMenu(Gfx **displayListHead) {
     s32 pointerLeft;
     s32 pointerSwing;
 
-    gDPPipeSync(displayList++);
-    gDPPipeSync(displayList++);
-    gDPSetCycleType(displayList++, G_CYC_1CYCLE);
-    gDPPipeSync(displayList++);
-    gDPPipeSync(displayList++);
-    gDPSetRenderMode(displayList++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
-    gDPSetCombineMode(displayList++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-    gDPPipeSync(displayList++);
-    gDPSetColorDither(displayList++, G_CD_DISABLE);
-    gSPTexture(displayList++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0, G_TX_RENDERTILE, G_ON);
-    gDPPipeSync(displayList++);
-    gDPSetTexturePersp(displayList++, G_TP_NONE);
-    gDPPipeSync(displayList++);
-    gDPSetTextureFilter(displayList++, G_TF_POINT);
-    gDPPipeSync(displayList++);
-    gDPSetAlphaCompare(displayList++, G_AC_NONE);
-    gDPPipeSync(displayList++);
-    gDPSetTextureLUT(displayList++, G_TT_RGBA16);
-    LoadLargePalette(&displayList, ImageBody(transfer->courseSceneImage));
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
+    gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+    gDPPipeSync(gfx++);
+    gDPSetColorDither(gfx++, G_CD_DISABLE);
+    gSPTexture(gfx++, TEXTURE_SCALE_HALF, TEXTURE_SCALE_HALF, 0, G_TX_RENDERTILE, G_ON);
+    gDPPipeSync(gfx++);
+    gDPSetTexturePersp(gfx++, G_TP_NONE);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_POINT);
+    gDPPipeSync(gfx++);
+    gDPSetAlphaCompare(gfx++, G_AC_NONE);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+    LoadLargePalette(&gfx, ImageBody(transfer->courseSceneImage));
     for (index = 0; index != COURSE_SCENE_STRIP_COUNT; index++) {
         rowCount = (index != COURSE_SCENE_STRIP_COUNT - 1) ? COURSE_SCENE_STRIP_ROWS : 1;
         if (index == 0) {
             LoadTextureBlock(
-                &displayList,
+                &gfx,
                 LargeImageTexels(transfer->courseSceneImage),
                 G_IM_FMT_CI,
                 G_IM_SIZ_8b,
@@ -2420,7 +2415,7 @@ void DrawTransmitMenu(Gfx **displayListHead) {
                 G_TX_NOLOD
             );
             DrawTextureRect(
-                &displayList,
+                &gfx,
                 QuarterPixels(COURSE_SCENE_LEFT),
                 QuarterPixels(COURSE_SCENE_TOP),
                 QuarterPixels(COURSE_SCENE_LEFT + (COURSE_SCENE_WIDTH * 2)),
@@ -2434,7 +2429,7 @@ void DrawTransmitMenu(Gfx **displayListHead) {
         }
         else {
             LoadTextureBlock(
-                &displayList,
+                &gfx,
                 LargeImageTexels(transfer->courseSceneImage) +
                     (index * (COURSE_SCENE_WIDTH * COURSE_SCENE_STRIP_ROWS)),
                 G_IM_FMT_CI,
@@ -2450,7 +2445,7 @@ void DrawTransmitMenu(Gfx **displayListHead) {
                 G_TX_NOLOD
             );
             DrawTextureRect(
-                &displayList,
+                &gfx,
                 QuarterPixels(COURSE_SCENE_LEFT),
                 QuarterPixels(COURSE_SCENE_TOP + 2 + (index * COURSE_SCENE_STRIP_ROWS * 2)),
                 QuarterPixels(COURSE_SCENE_LEFT + (COURSE_SCENE_WIDTH * 2)),
@@ -2466,10 +2461,10 @@ void DrawTransmitMenu(Gfx **displayListHead) {
         }
     }
 
-    LoadLargePalette(&displayList, ImageBody(transfer->titleImage));
+    LoadLargePalette(&gfx, ImageBody(transfer->titleImage));
     for (index = 0; index != TITLE_STRIP_COUNT; index++) {
         gDPLoadTextureTile(
-            displayList++,
+            gfx++,
             TextureAddress(
                 LargeImageTexels(transfer->titleImage) + (index * (TITLE_WIDTH * TITLE_STRIP_ROWS))
             ),
@@ -2490,7 +2485,7 @@ void DrawTransmitMenu(Gfx **displayListHead) {
             G_TX_NOLOD
         );
         DrawTextureRect(
-            &displayList,
+            &gfx,
             QuarterPixels(TITLE_LEFT),
             QuarterPixels(TITLE_TOP + (index * TITLE_STRIP_ROWS)),
             QuarterPixels(TITLE_LEFT + TITLE_WIDTH),
@@ -2503,12 +2498,12 @@ void DrawTransmitMenu(Gfx **displayListHead) {
         );
     }
 
-    gDPPipeSync(displayList++);
-    gDPSetTextureLUT(displayList++, G_TT_NONE);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_NONE);
     for (index = 0; index != WOOD_PANEL_STRIP_COUNT; index++) {
         panelRowCount = (index != WOOD_PANEL_STRIP_COUNT - 1) ? WOOD_PANEL_STRIP_ROWS : 1;
         gDPLoadTextureTile(
-            displayList++,
+            gfx++,
             TextureAddress(
                 ImageBody(transfer->woodPanelImage) +
                 (index * (WOOD_PANEL_WIDTH * WOOD_PANEL_STRIP_ROWS * 2))
@@ -2530,7 +2525,7 @@ void DrawTransmitMenu(Gfx **displayListHead) {
             G_TX_NOLOD
         );
         DrawTextureRect(
-            &displayList,
+            &gfx,
             QuarterPixels(WOOD_PANEL_LEFT),
             QuarterPixels(WOOD_PANEL_TOP + (index * WOOD_PANEL_STRIP_ROWS)),
             QuarterPixels(WOOD_PANEL_LEFT + WOOD_PANEL_WIDTH),
@@ -2545,16 +2540,16 @@ void DrawTransmitMenu(Gfx **displayListHead) {
 
     switch (transfer->screen) {
         case TRANSMIT_SCREEN_OPTIONS:
-            DrawTransmitOptionFaces(&displayList, transfer);
+            DrawTransmitOptionFaces(&gfx, transfer);
             break;
         case TRANSMIT_SCREEN_BRING_CHARACTERS:
-            DrawBringCharactersScreen(&displayList, transfer);
+            DrawBringCharactersScreen(&gfx, transfer);
             break;
         case TRANSMIT_SCREEN_SEND_STATUS:
-            DrawSendStatusScreen(&displayList, transfer);
+            DrawSendStatusScreen(&gfx, transfer);
             break;
         case TRANSMIT_SCREEN_SEND_EXPERIENCE:
-            DrawSendExperienceScreen(&displayList, transfer);
+            DrawSendExperienceScreen(&gfx, transfer);
             break;
     }
 
@@ -2572,11 +2567,11 @@ void DrawTransmitMenu(Gfx **displayListHead) {
         }
 
         pointerSwing = sinf(f_OptionPointerAngle) * POINTER_SWING_DISTANCE;
-        gDPPipeSync(displayList++);
-        gDPSetTextureLUT(displayList++, G_TT_RGBA16);
-        LoadSmallPalette(&displayList, 0, ImageBody(transfer->pointerImage));
+        gDPPipeSync(gfx++);
+        gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+        LoadSmallPalette(&gfx, 0, ImageBody(transfer->pointerImage));
         gDPLoadTextureTile_4b(
-            displayList++,
+            gfx++,
             TextureAddress(ImageTexels(transfer->pointerImage)),
             G_IM_FMT_CI,
             POINTER_WIDTH,
@@ -2596,7 +2591,7 @@ void DrawTransmitMenu(Gfx **displayListHead) {
         pointerLeft =
             OPTIONS_CENTER_X - OPTION_POINTER_GAP - POINTER_WIDTH - (width / 2) - pointerSwing;
         DrawTextureRect(
-            &displayList,
+            &gfx,
             QuarterPixels(pointerLeft),
             QuarterPixels(OPTION_POINTER_TOP + (transfer->optionIndex * OPTION_SPACING)),
             QuarterPixels(pointerLeft + POINTER_WIDTH),
@@ -2611,8 +2606,8 @@ void DrawTransmitMenu(Gfx **displayListHead) {
         );
     }
 
-    SetUpTextDrawing(&displayList);
-    gDPSetPrimColor(displayList++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
+    SetUpTextDrawing(&gfx);
+    gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
     if (AreOptionsShown(transfer->screen)) {
         for (index = 0; index != MODE_OPTION_COUNT; index++) {
             option = f_ModeOptions[transfer->transferMode][index];
@@ -2629,7 +2624,7 @@ void DrawTransmitMenu(Gfx **displayListHead) {
                     255,
                     OPAQUE_ALPHA
                 );
-                DrawLargeTextSlot(&displayList, index);
+                DrawLargeTextSlot(&gfx, index);
             }
         }
 
@@ -2645,36 +2640,36 @@ void DrawTransmitMenu(Gfx **displayListHead) {
             255,
             OPAQUE_ALPHA
         );
-        DrawLargeTextSlot(&displayList, HINT_TEXT_SLOT);
+        DrawLargeTextSlot(&gfx, HINT_TEXT_SLOT);
     }
 
     if (transfer->screen == TRANSMIT_SCREEN_SEND_STATUS) {
-        DrawSendStatusHint(&displayList, transfer);
+        DrawSendStatusHint(&gfx, transfer);
     }
 
     if (transfer->screen == TRANSMIT_SCREEN_BRING_CHARACTERS) {
-        DrawBringCharactersText(&displayList, transfer);
+        DrawBringCharactersText(&gfx, transfer);
     }
 
     if (transfer->screen == TRANSMIT_SCREEN_SEND_EXPERIENCE) {
-        DrawSendExperienceText(&displayList, transfer);
+        DrawSendExperienceText(&gfx, transfer);
     }
 
-    DrawNotice(&displayList);
-    gSPDisplayList(displayList++, g_DecalTextureSetup);
-    gDPPipeSync(displayList++);
-    gDPSetTextureLUT(displayList++, G_TT_RGBA16);
-    gDPPipeSync(displayList++);
-    gDPSetTextureFilter(displayList++, G_TF_POINT);
+    DrawNotice(&gfx);
+    gSPDisplayList(gfx++, g_DecalTextureSetup);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_POINT);
     if (transfer->isAccessing == TRUE) {
-        DrawAccessingSign(&displayList);
+        DrawAccessingSign(&gfx);
     }
 
     if (transfer->pressingHandPosition != 0) {
-        DrawPressingHand(&displayList);
+        DrawPressingHand(&gfx);
     }
 
-    *displayListHead = displayList;
+    *displayListHead = gfx;
 }
 
 void ClearCartridgeCharacters(void) {
@@ -3614,7 +3609,7 @@ s32 GetNoticeState(void) {
 }
 
 void DrawNotice(Gfx **displayListHead) {
-    Gfx *displayList = *displayListHead;
+    Gfx *gfx = *displayListHead;
     s32 strip;
     s32 halfWidth;
     s32 halfHeight;
@@ -3643,17 +3638,17 @@ void DrawNotice(Gfx **displayListHead) {
         }
     }
 
-    gDPPipeSync(displayList++);
-    gDPPipeSync(displayList++);
-    gDPSetTextureLUT(displayList++, G_TT_NONE);
-    gDPPipeSync(displayList++);
-    gDPSetAlphaDither(displayList++, G_AD_PATTERN);
-    gDPPipeSync(displayList++);
-    gDPSetTextureFilter(displayList++, G_TF_BILERP);
-    gDPPipeSync(displayList++);
-    gDPSetRenderMode(displayList++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_NONE);
+    gDPPipeSync(gfx++);
+    gDPSetAlphaDither(gfx++, G_AD_PATTERN);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_BILERP);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
     gDPSetCombineLERP(
-        displayList++,
+        gfx++,
         0,
         0,
         0,
@@ -3671,15 +3666,15 @@ void DrawNotice(Gfx **displayListHead) {
         TEXEL0,
         0
     );
-    gDPPipeSync(displayList++);
-    gDPSetAlphaCompare(displayList++, G_AC_NONE);
-    gDPSetPrimColor(displayList++, 0, 0, 255, 255, 255, 240);
+    gDPPipeSync(gfx++);
+    gDPSetAlphaCompare(gfx++, G_AC_NONE);
+    gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 240);
     if (f_NoticeSize > 0) {
         for (strip = 0; strip != NOTICE_STRIP_COUNT; strip++) {
             halfHeight = f_NoticeSize * NOTICE_HALF_HEIGHT_STEP;
             halfWidth = f_NoticeSize * NOTICE_HALF_WIDTH_STEP;
             LoadNibbleTextureBlock(
-                &displayList,
+                &gfx,
                 ImageBody(g_GameBoyTransfer.noticeCloudImage) + (strip * NOTICE_STRIP_SIZE),
                 G_IM_FMT_I,
                 NOTICE_WIDTH,
@@ -3695,7 +3690,7 @@ void DrawNotice(Gfx **displayListHead) {
             stripHeight = halfHeight;
             bottom = (strip * stripHeight) + NOTICE_CENTER_Y;
             DrawTextureRect(
-                &displayList,
+                &gfx,
                 QuarterPixels(NOTICE_CENTER_X - halfWidth),
                 QuarterPixels(bottom - stripHeight),
                 QuarterPixels(NOTICE_CENTER_X + halfWidth),
@@ -3724,21 +3719,21 @@ void DrawNotice(Gfx **displayListHead) {
             255,
             OPAQUE_ALPHA
         );
-        gDPSetPrimColor(displayList++, 0, 0, 32, 64, 255, OPAQUE_ALPHA);
-        DrawLargeTextSlot(&displayList, NOTICE_TEXT_SLOT);
+        gDPSetPrimColor(gfx++, 0, 0, 32, 64, 255, OPAQUE_ALPHA);
+        DrawLargeTextSlot(&gfx, NOTICE_TEXT_SLOT);
     }
 
-    *displayListHead = displayList;
+    *displayListHead = gfx;
 }
 
 void DrawAccessingSign(Gfx **displayListHead) {
-    Gfx *displayList = *displayListHead;
+    Gfx *gfx = *displayListHead;
     s32 strip;
 
-    LoadLargePalette(&displayList, ImageBody(g_GameBoyTransfer.accessingImage));
+    LoadLargePalette(&gfx, ImageBody(g_GameBoyTransfer.accessingImage));
     for (strip = 0; strip != ACCESSING_STRIP_COUNT; strip++) {
         LoadTextureBlock(
-            &displayList,
+            &gfx,
             LargeImageTexels(g_GameBoyTransfer.accessingImage) + (strip * ACCESSING_STRIP_SIZE),
             G_IM_FMT_CI,
             G_IM_SIZ_8b,
@@ -3753,7 +3748,7 @@ void DrawAccessingSign(Gfx **displayListHead) {
             G_TX_NOLOD
         );
         DrawTextureRect(
-            &displayList,
+            &gfx,
             QuarterPixels(ACCESSING_LEFT),
             QuarterPixels(ACCESSING_TOP + (strip * ACCESSING_STRIP_HEIGHT)),
             QuarterPixels(ACCESSING_LEFT + ACCESSING_WIDTH),
@@ -3768,16 +3763,16 @@ void DrawAccessingSign(Gfx **displayListHead) {
         );
     }
 
-    *displayListHead = displayList;
+    *displayListHead = gfx;
 }
 
 void DrawPressingHand(Gfx **displayListHead) {
-    Gfx *displayList = *displayListHead;
+    Gfx *gfx = *displayListHead;
 
     f_PressingHandFrame = (f_PressingHandFrame + 1) % PRESSING_HAND_FRAME_COUNT;
-    LoadLargePalette(&displayList, ImageBody(g_PressingHandImage));
+    LoadLargePalette(&gfx, ImageBody(g_PressingHandImage));
     LoadTextureBlock(
-        &displayList,
+        &gfx,
         LargeImageTexels(g_PressingHandImage) +
             (f_PressingHandFrame / PRESSING_HAND_FRAMES_PER_IMAGE * PRESSING_HAND_IMAGE_SIZE),
         G_IM_FMT_CI,
@@ -3794,7 +3789,7 @@ void DrawPressingHand(Gfx **displayListHead) {
     );
     if (g_GameBoyTransfer.pressingHandPosition == PRESSING_HAND_LOW) {
         DrawTextureRect(
-            &displayList,
+            &gfx,
             QuarterPixels(LOW_PRESSING_HAND_LEFT),
             QuarterPixels(LOW_PRESSING_HAND_TOP),
             QuarterPixels(LOW_PRESSING_HAND_LEFT + PRESSING_HAND_SIZE),
@@ -3808,7 +3803,7 @@ void DrawPressingHand(Gfx **displayListHead) {
     }
     else {
         DrawTextureRect(
-            &displayList,
+            &gfx,
             QuarterPixels(NOTICE_PRESSING_HAND_LEFT),
             QuarterPixels(NOTICE_PRESSING_HAND_TOP),
             QuarterPixels(NOTICE_PRESSING_HAND_LEFT + PRESSING_HAND_SIZE),
@@ -3821,7 +3816,7 @@ void DrawPressingHand(Gfx **displayListHead) {
         );
     }
 
-    *displayListHead = displayList;
+    *displayListHead = gfx;
 }
 
 static inline s32 PackTenths(f32 value) {

@@ -64,7 +64,7 @@ void LoadCursorBox(void *image) {
 }
 
 void DrawCursorBox(Gfx **displayListHead, s32 left, s32 top) {
-    Gfx *displayList = *displayListHead;
+    Gfx *gfx = *displayListHead;
     s32 corner;
     s32 red;
     s32 green;
@@ -127,11 +127,11 @@ void DrawCursorBox(Gfx **displayListHead, s32 left, s32 top) {
         (f32)boxY + 0.5f,
         -100.0f
     );
-    gDPPipeSync(displayList++);
-    gDPPipeSync(displayList++);
-    gDPSetTextureLUT(displayList++, G_TT_NONE);
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_NONE);
     gDPLoadTextureBlock_4b(
-        displayList++,
+        gfx++,
         TextureAddress(ImageBody(f_CursorBoxImage)),
         G_IM_FMT_IA,
         width,
@@ -144,18 +144,18 @@ void DrawCursorBox(Gfx **displayListHead, s32 left, s32 top) {
         G_TX_NOLOD,
         G_TX_NOLOD
     );
-    gDPPipeSync(displayList++);
-    gDPPipeSync(displayList++);
-    gDPSetCycleType(displayList++, G_CYC_1CYCLE);
-    gDPPipeSync(displayList++);
-    gDPPipeSync(displayList++);
-    gDPSetTexturePersp(displayList++, G_TP_PERSP);
-    gDPPipeSync(displayList++);
-    gDPSetTextureFilter(displayList++, G_TF_POINT);
-    gDPPipeSync(displayList++);
-    gDPSetRenderMode(displayList++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetTexturePersp(gfx++, G_TP_PERSP);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_POINT);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
     gDPSetCombineLERP(
-        displayList++,
+        gfx++,
         0,
         0,
         0,
@@ -173,22 +173,22 @@ void DrawCursorBox(Gfx **displayListHead, s32 left, s32 top) {
         TEXEL0,
         0
     );
-    gSPClearGeometryMode(displayList++, ALL_GEOMETRY_MODES);
-    gSPSetGeometryMode(displayList++, G_SHADE | G_SHADING_SMOOTH);
-    gDPPipeSync(displayList++);
+    gSPClearGeometryMode(gfx++, ALL_GEOMETRY_MODES);
+    gSPSetGeometryMode(gfx++, G_SHADE | G_SHADING_SMOOTH);
+    gDPPipeSync(gfx++);
     gSPMatrix(
-        displayList++,
+        gfx++,
         PhysicalAddress(&f_CursorBoxProjection),
         G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION
     );
     gSPMatrix(
-        displayList++,
+        gfx++,
         PhysicalAddress(&f_CursorBoxTranslations[g_DrawBufferIndex]),
         G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW
     );
-    gDPPipeSync(displayList++);
-    gSPVertex(displayList++, f_CursorBoxVertices, CURSOR_BOX_CORNER_COUNT, 0);
-    gSP2Triangles(displayList++, 0, 1, 2, 0, 0, 2, 3, 0);
-    gDPPipeSync(displayList++);
-    *displayListHead = displayList;
+    gDPPipeSync(gfx++);
+    gSPVertex(gfx++, f_CursorBoxVertices, CURSOR_BOX_CORNER_COUNT, 0);
+    gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
+    gDPPipeSync(gfx++);
+    *displayListHead = gfx;
 }
