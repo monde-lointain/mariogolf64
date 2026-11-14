@@ -1349,99 +1349,104 @@ void DecodeCartridgeCharacter(
     s32 saveIndex,
     s32 companyCode
 ) {
-    GameBoyCharacter *character =
+    GameBoyCharacter *gameBoyCharacter =
         &g_GameBoyTransfer.cartridgeCharacters[(cartridgeIndex * CARTRIDGE_SAVE_COUNT) + saveIndex];
     s32 index;
 
-    character->status = GAME_BOY_CHARACTER_STATUS_PRESENT;
+    gameBoyCharacter->status = GAME_BOY_CHARACTER_STATUS_PRESENT;
     for (index = 0; index != (SAVE_NAME_SIZE - 1); index++) {
-        character->name[index] = characterData[index];
-        character->saveName[index] = characterData[index];
-        if (character->name[index] >= 'a' && character->name[index] <= 'z') {
-            character->name[index] += LOWERCASE_CODE_OFFSET;
+        gameBoyCharacter->name[index] = characterData[index];
+        gameBoyCharacter->saveName[index] = characterData[index];
+        if (gameBoyCharacter->name[index] >= 'a' && gameBoyCharacter->name[index] <= 'z') {
+            gameBoyCharacter->name[index] += LOWERCASE_CODE_OFFSET;
         }
     }
 
-    character->name[(SAVE_NAME_SIZE - 1)] = '\0';
-    character->saveName[(SAVE_NAME_SIZE - 1)] = '\0';
+    gameBoyCharacter->name[(SAVE_NAME_SIZE - 1)] = '\0';
+    gameBoyCharacter->saveName[(SAVE_NAME_SIZE - 1)] = '\0';
     for (index = 0; index != SAVE_KEY_SIZE; index++) {
-        character->saveKey[index] = characterData[DATA_SAVE_KEY_OFFSET + index];
+        gameBoyCharacter->saveKey[index] = characterData[DATA_SAVE_KEY_OFFSET + index];
     }
 
-    character->golferIndex = characterData[DATA_CHARACTER_OFFSET];
-    if (character->golferIndex >= GAME_BOY_GOLFER_COUNT) {
-        character->golferIndex = GAME_BOY_GOLFER_COUNT - 1;
+    gameBoyCharacter->golferIndex = characterData[DATA_CHARACTER_OFFSET];
+    if (gameBoyCharacter->golferIndex >= GAME_BOY_GOLFER_COUNT) {
+        gameBoyCharacter->golferIndex = GAME_BOY_GOLFER_COUNT - 1;
     }
 
     if (IsGameFlagSet(GAME_FLAG_GAME_BOY_LEFTIES)) {
-        character->isLefty = 1;
+        gameBoyCharacter->isLefty = 1;
     }
     else {
-        character->isLefty = characterData[DATA_IS_LEFTY_OFFSET];
+        gameBoyCharacter->isLefty = characterData[DATA_IS_LEFTY_OFFSET];
     }
 
-    character->level = characterData[DATA_LEVEL_OFFSET];
-    character->clubPitch = characterData[DATA_CLUB_PITCH_OFFSET];
-    character->shotCurve = characterData[DATA_SHOT_CURVE_OFFSET];
-    character->lieRatingLevel = characterData[DATA_LIE_RATING_LEVEL_OFFSET];
-    character->mishitResistance = characterData[DATA_MISHIT_RESISTANCE_OFFSET];
+    gameBoyCharacter->level = characterData[DATA_LEVEL_OFFSET];
+    gameBoyCharacter->clubPitch = characterData[DATA_CLUB_PITCH_OFFSET];
+    gameBoyCharacter->shotCurve = characterData[DATA_SHOT_CURVE_OFFSET];
+    gameBoyCharacter->lieRatingLevel = characterData[DATA_LIE_RATING_LEVEL_OFFSET];
+    gameBoyCharacter->mishitResistance = characterData[DATA_MISHIT_RESISTANCE_OFFSET];
     if (IsGameFlagSet(GAME_FLAG_BALL_TYPE_1)) {
-        character->ballType = GAME_BOY_BALL_TYPE_MARIO;
+        gameBoyCharacter->ballType = GAME_BOY_BALL_TYPE_MARIO;
     }
     else if (IsGameFlagSet(GAME_FLAG_BALL_TYPE_2)) {
-        character->ballType = GAME_BOY_BALL_TYPE_BOWSER;
+        gameBoyCharacter->ballType = GAME_BOY_BALL_TYPE_BOWSER;
     }
     else if (IsGameFlagSet(GAME_FLAG_BALL_TYPE_3)) {
-        character->ballType = GAME_BOY_BALL_TYPE_WARIO;
+        gameBoyCharacter->ballType = GAME_BOY_BALL_TYPE_WARIO;
     }
     else if (IsGameFlagSet(GAME_FLAG_BALL_TYPE_4)) {
-        character->ballType = GAME_BOY_BALL_TYPE_RAINBOW;
+        gameBoyCharacter->ballType = GAME_BOY_BALL_TYPE_RAINBOW;
     }
     else if (IsGameFlagSet(GAME_FLAG_BALL_TYPE_5)) {
-        character->ballType = GAME_BOY_BALL_TYPE_5;
+        gameBoyCharacter->ballType = GAME_BOY_BALL_TYPE_5;
     }
     else if (IsGameFlagSet(GAME_FLAG_BALL_TYPE_6)) {
-        character->ballType = GAME_BOY_BALL_TYPE_6;
+        gameBoyCharacter->ballType = GAME_BOY_BALL_TYPE_6;
     }
     else if (IsGameFlagSet(GAME_FLAG_BALL_TYPE_7)) {
-        character->ballType = GAME_BOY_BALL_TYPE_7;
+        gameBoyCharacter->ballType = GAME_BOY_BALL_TYPE_7;
     }
     else {
-        character->ballType = characterData[DATA_BALL_TYPE_OFFSET];
+        gameBoyCharacter->ballType = characterData[DATA_BALL_TYPE_OFFSET];
     }
 
-    osSyncPrintf("balltype %d\n", character->ballType);
-    character->ignoredValue =
+    osSyncPrintf("balltype %d\n", gameBoyCharacter->ballType);
+    gameBoyCharacter->ignoredValue =
         (characterData[DATA_IGNORED_VALUE_OFFSET + 2] << (BITS_PER_BYTE * 2)) |
         (characterData[DATA_IGNORED_VALUE_OFFSET + 1] << BITS_PER_BYTE) |
         characterData[DATA_IGNORED_VALUE_OFFSET];
-    character->experience = 0;
-    character->driveDistance = characterData[DATA_DRIVE_DISTANCE_OFFSET] |
+    gameBoyCharacter->experience = 0;
+    gameBoyCharacter->driveDistance = characterData[DATA_DRIVE_DISTANCE_OFFSET] |
         (characterData[DATA_DRIVE_DISTANCE_OFFSET + 1] << BITS_PER_BYTE);
-    osSyncPrintf("%d, %d %d\n", character->experience, character->clubPitch, character->shotCurve);
+    osSyncPrintf(
+        "%d, %d %d\n",
+        gameBoyCharacter->experience,
+        gameBoyCharacter->clubPitch,
+        gameBoyCharacter->shotCurve
+    );
     for (index = 0; index != GAME_BOY_CLUB_COUNT; index++) {
-        character->clubs[index].distance =
+        gameBoyCharacter->clubs[index].distance =
             characterData[DATA_CLUBS_OFFSET + (index * DATA_CLUB_SIZE)] |
             (characterData[DATA_CLUBS_OFFSET + (index * DATA_CLUB_SIZE) + 1] << BITS_PER_BYTE);
-        character->clubs[index].pitch =
+        gameBoyCharacter->clubs[index].pitch =
             characterData[DATA_CLUBS_OFFSET + (index * DATA_CLUB_SIZE) + CLUB_DATA_PITCH_OFFSET] |
             (characterData
                     [DATA_CLUBS_OFFSET + (index * DATA_CLUB_SIZE) + CLUB_DATA_PITCH_OFFSET + 1]
                 << BITS_PER_BYTE);
-        character->clubs[index].ignoredStat = characterData
+        gameBoyCharacter->clubs[index].ignoredStat = characterData
             [DATA_CLUBS_OFFSET + (index * DATA_CLUB_SIZE) + CLUB_DATA_IGNORED_STAT_OFFSET];
-        character->clubs[index].sideSpin = characterData
+        gameBoyCharacter->clubs[index].sideSpin = characterData
             [DATA_CLUBS_OFFSET + (index * DATA_CLUB_SIZE) + CLUB_DATA_SIDE_SPIN_OFFSET];
         osSyncPrintf(
             "%d, %d %d\n",
             index,
-            character->clubs[index].distance,
-            character->clubs[index].pitch
+            gameBoyCharacter->clubs[index].distance,
+            gameBoyCharacter->clubs[index].pitch
         );
     }
 
-    character->companyCode = companyCode;
-    character->saveIndex = saveIndex;
+    gameBoyCharacter->companyCode = companyCode;
+    gameBoyCharacter->saveIndex = saveIndex;
 }
 
 void SkipCartridgeSave(
@@ -1453,12 +1458,12 @@ void SkipCartridgeSave(
 ) {
 }
 
-Boolean IsCharacterFromSave(GameBoyCharacter *character, u8 *characterData) {
+Boolean IsCharacterFromSave(GameBoyCharacter *gameBoyCharacter, u8 *characterData) {
     s32 index;
 
     osSyncPrintf("PHASE a\n");
     for (index = 0; index != SAVE_NAME_SIZE; index++) {
-        if (character->saveName[index] != characterData[index]) {
+        if (gameBoyCharacter->saveName[index] != characterData[index]) {
             if (FALSE) {
                 osSyncPrintf("PHASE b\n");
             }
@@ -1469,7 +1474,7 @@ Boolean IsCharacterFromSave(GameBoyCharacter *character, u8 *characterData) {
 
     osSyncPrintf("PHASE c\n");
     for (index = 0; index != SAVE_KEY_SIZE; index++) {
-        if (character->saveKey[index] != characterData[DATA_SAVE_KEY_OFFSET + index]) {
+        if (gameBoyCharacter->saveKey[index] != characterData[DATA_SAVE_KEY_OFFSET + index]) {
             osSyncPrintf("PHASE d\n");
             return FALSE;
         }
@@ -1597,7 +1602,7 @@ void DrawSendStatusHint(Gfx **displayListHead, GameBoyTransfer *transfer) {
 
 void DrawCharacterStats(
     Gfx **displayListHead,
-    GameBoyCharacter *character,
+    GameBoyCharacter *gameBoyCharacter,
     GameBoyTransfer *transfer
 ) {
     Gfx *gfx = *displayListHead;
@@ -1606,14 +1611,19 @@ void DrawCharacterStats(
     s32 segmentCurve;
 
     SetUpTextDrawing(&gfx);
-    DrawLargeText(&gfx, STATS_NAME_LEFT, STATS_NAME_TOP, character->name);
+    DrawLargeText(&gfx, STATS_NAME_LEFT, STATS_NAME_TOP, gameBoyCharacter->name);
     BeginShadowedText(&gfx);
-    sprintf(g_PrintBuffer, "  %2d     :%3d", character->level, character->driveDistance);
+    sprintf(
+        g_PrintBuffer,
+        "  %2d     :%3d",
+        gameBoyCharacter->level,
+        gameBoyCharacter->driveDistance
+    );
     DrawSmallText(&gfx, STATS_LEFT, STATS_TOP, g_PrintBuffer);
-    if (character->shotCurve == 0) {
+    if (gameBoyCharacter->shotCurve == 0) {
         segmentCurve = SHOT_TYPE_STRAIGHT;
     }
-    else if (character->shotCurve > 0) {
+    else if (gameBoyCharacter->shotCurve > 0) {
         segmentCurve = SHOT_TYPE_DRAW;
     }
     else {
@@ -1742,8 +1752,8 @@ void DrawCharacterStats(
     );
     for (segment = 0, segmentCurve = -CURVE_SEGMENT_COUNT / 2; segment != CURVE_SEGMENT_COUNT;
         segment++, segmentCurve++) {
-        if (character->shotCurve < 0) {
-            if (segmentCurve < character->shotCurve) {
+        if (gameBoyCharacter->shotCurve < 0) {
+            if (segmentCurve < gameBoyCharacter->shotCurve) {
                 continue;
             }
 
@@ -1752,8 +1762,8 @@ void DrawCharacterStats(
             }
         }
 
-        if (character->shotCurve > 0) {
-            if (segmentCurve > character->shotCurve) {
+        if (gameBoyCharacter->shotCurve > 0) {
+            if (segmentCurve > gameBoyCharacter->shotCurve) {
                 continue;
             }
 
@@ -1762,7 +1772,7 @@ void DrawCharacterStats(
             }
         }
 
-        if (character->shotCurve == 0 && segment != CURVE_SEGMENT_COUNT / 2) {
+        if (gameBoyCharacter->shotCurve == 0 && segment != CURVE_SEGMENT_COUNT / 2) {
             continue;
         }
 
@@ -1787,7 +1797,7 @@ void DrawCharacterStats(
 #define STEP_DEBUG_ROW 2
 
 void DrawBringCharactersText(Gfx **displayListHead, GameBoyTransfer *transfer) {
-    GameBoyCharacter *character = g_GameBoyCharacters;
+    GameBoyCharacter *gameBoyCharacter = g_GameBoyCharacters;
     Gfx *gfx = *displayListHead;
     Boolean isCharacterShown = FALSE;
     MessageId messageId;
@@ -1798,19 +1808,19 @@ void DrawBringCharactersText(Gfx **displayListHead, GameBoyTransfer *transfer) {
     PrintDebugText(g_PrintBuffer, STEP_DEBUG_COLUMN, STEP_DEBUG_ROW);
     if (transfer->screenStep == BRING_CHOOSING_SLOT) {
         isCharacterShown = TRUE;
-        character = &g_GameBoyCharacters[transfer->gameBoyCharacterIndex];
+        gameBoyCharacter = &g_GameBoyCharacters[transfer->gameBoyCharacterIndex];
     }
 
     if ((transfer->screenStep == BRING_CHOOSING || transfer->screenStep == BRING_BRINGING) &&
         g_GameBoyTransfer.listedCharacterCount > 0) {
         isCharacterShown = TRUE;
-        character =
+        gameBoyCharacter =
             &transfer
                  ->cartridgeCharacters[transfer->listedCharacters[transfer->listedCharacterIndex]];
     }
 
     if (isCharacterShown) {
-        DrawCharacterStats(&gfx, character, transfer);
+        DrawCharacterStats(&gfx, gameBoyCharacter, transfer);
     }
 
     SetUpTextDrawing(&gfx);
@@ -1857,9 +1867,9 @@ void DrawSendExperienceText(Gfx **displayListHead, GameBoyTransfer *transfer) {
     BeginShadowedText(&gfx);
     for (gameBoyCharacterIndex = 0; gameBoyCharacterIndex != g_GameBoyTransfer.characterCount;
         gameBoyCharacterIndex++) {
-        GameBoyCharacter *character = &g_GameBoyCharacters[gameBoyCharacterIndex];
+        GameBoyCharacter *gameBoyCharacter = &g_GameBoyCharacters[gameBoyCharacterIndex];
 
-        sprintf(g_PrintBuffer, "%4d", (int)character->experience);
+        sprintf(g_PrintBuffer, "%4d", (int)gameBoyCharacter->experience);
         DrawSmallText(
             &gfx,
             EXPERIENCE_LEFT + (gameBoyCharacterIndex * FACE_SPACING),
@@ -2705,7 +2715,7 @@ s32 WriteExperienceToCartridge(s32 gameBoyCharacterIndex) {
     GameBoyTransfer *transfer = &g_GameBoyTransfer;
     u8 characterData[CHARACTER_DATA_SIZE];
     u8 save[CARTRIDGE_SAVE_SIZE];
-    GameBoyCharacter *character;
+    GameBoyCharacter *gameBoyCharacter;
     s32 fault = CARTRIDGE_FAULT_NONE;
     s32 controllerIndex;
     s32 result;
@@ -2750,8 +2760,8 @@ s32 WriteExperienceToCartridge(s32 gameBoyCharacterIndex) {
         if (transfer->transferResult == PAK_RESULT_OK) {
             recordOffset = SAVE_RECORDS_OFFSET;
             isSignatureWrong = FALSE;
-            character = &g_GameBoyCharacters[gameBoyCharacterIndex];
-            saveIndex = character->saveIndex;
+            gameBoyCharacter = &g_GameBoyCharacters[gameBoyCharacterIndex];
+            saveIndex = gameBoyCharacter->saveIndex;
             transfer->openedCartridgeCount++;
             osSyncPrintf("PHASE 1\n");
             result = nuContGBPakFread(
@@ -2829,16 +2839,16 @@ s32 WriteExperienceToCartridge(s32 gameBoyCharacterIndex) {
                 }
 
                 osSyncPrintf("PHASE 9\n");
-                if (IsCharacterFromSave(character, characterData)) {
+                if (IsCharacterFromSave(gameBoyCharacter, characterData)) {
                     osSyncPrintf("PHASE 9.5\n");
                     experience =
                         ((characterData[DATA_EXPERIENCE_OFFSET + 1] << BITS_PER_BYTE) |
                             characterData[DATA_EXPERIENCE_OFFSET]);
-                    if (character->experience + experience > EXPERIENCE_MAX) {
+                    if (gameBoyCharacter->experience + experience > EXPERIENCE_MAX) {
                         experience = EXPERIENCE_MAX;
                     }
                     else {
-                        experience = character->experience + experience;
+                        experience = gameBoyCharacter->experience + experience;
                     }
                     osSyncPrintf("PHASE 10\n");
                     characterData[DATA_EXPERIENCE_OFFSET + 1] = experience >> BITS_PER_BYTE;
@@ -2894,7 +2904,7 @@ s32 WriteExperienceToCartridge(s32 gameBoyCharacterIndex) {
 
                     nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
                     osSyncPrintf("PHASE 14\n");
-                    character->experience = 0;
+                    gameBoyCharacter->experience = 0;
                     transfer->transferResult = PAK_RESULT_OK;
                     return EXPERIENCE_WRITE_DONE;
                 }

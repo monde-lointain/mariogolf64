@@ -3914,21 +3914,21 @@ void GenerateClub(s32 clubIndex) {
 #define MISHIT_SCALE_MIN 70
 #define MISHIT_SCALE_MAX 145
 
-void GenerateClubSet(s32 setIndex, GameBoyCharacter *character) {
+void GenerateClubSet(s32 setIndex, GameBoyCharacter *gameBoyCharacter) {
     s32 type;
     Club *club;
 
     for (type = 0; type < CLUB_SET_SIZE; type++) {
         club = GetClub((setIndex * CLUB_SET_SIZE) + type);
-        club->distance = character->clubs[type].distance;
+        club->distance = gameBoyCharacter->clubs[type].distance;
         if (club->distance > CLUB_DISTANCE_MAX) {
             club->distance = CLUB_DISTANCE_MAX;
         }
 
         osSyncPrintf("TargetDist %d\n", club->distance);
         club->pitch =
-            -((character->clubs[type].pitch * DEGREES_PER_TURN / BINARY_ANGLE_TURN) +
-                character->clubPitch);
+            -((gameBoyCharacter->clubs[type].pitch * DEGREES_PER_TURN / BINARY_ANGLE_TURN) +
+                gameBoyCharacter->clubPitch);
         osSyncPrintf("Xang %d\n", club->pitch);
         if (club->pitch > FLATTEST_CLUB_PITCH) {
             club->pitch = FLATTEST_CLUB_PITCH;
@@ -3938,7 +3938,7 @@ void GenerateClubSet(s32 setIndex, GameBoyCharacter *character) {
             club->pitch = STEEPEST_CLUB_PITCH;
         }
 
-        club->sideSpin = character->clubs[type].sideSpin;
+        club->sideSpin = gameBoyCharacter->clubs[type].sideSpin;
         if (club->sideSpin > CLUB_SIDE_SPIN_MAX) {
             club->sideSpin = CLUB_SIDE_SPIN_MAX;
         }
@@ -3947,18 +3947,18 @@ void GenerateClubSet(s32 setIndex, GameBoyCharacter *character) {
             club->sideSpin = -CLUB_SIDE_SPIN_MAX;
         }
 
-        if ((u8)(character->lieRatingLevel + LIE_RATING_LEVEL_MAX) >=
+        if ((u8)(gameBoyCharacter->lieRatingLevel + LIE_RATING_LEVEL_MAX) >=
             ARRAY_COUNT(f_LieRatingPercents)) {
             club->lieRatingPercent = DEFAULT_LIE_RATING_PERCENT;
         }
         else {
             club->lieRatingPercent =
-                f_LieRatingPercents[character->lieRatingLevel + LIE_RATING_LEVEL_MAX];
+                f_LieRatingPercents[gameBoyCharacter->lieRatingLevel + LIE_RATING_LEVEL_MAX];
         }
 
         club->mishitScale =
-            BASE_MISHIT_SCALE - (character->mishitResistance * MISHIT_SCALE_PER_RESISTANCE);
-        club->curve = character->shotCurve;
+            BASE_MISHIT_SCALE - (gameBoyCharacter->mishitResistance * MISHIT_SCALE_PER_RESISTANCE);
+        club->curve = gameBoyCharacter->shotCurve;
         if (club->curve < -CLUB_CURVE_MAX) {
             club->curve = -CLUB_CURVE_MAX;
         }

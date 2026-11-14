@@ -112,7 +112,7 @@ const ClubParameters *GetClubParameters(s32 clubIndex);
 s32 GetShotDistance(Club *club, u32 shotMode);
 s32 GetShotWorldDistance(Club *club, ShotMode shotMode);
 void GenerateClub(s32 clubIndex);
-void GenerateClubSet(s32 setIndex, struct GameBoyCharacter *character);
+void GenerateClubSet(s32 setIndex, struct GameBoyCharacter *gameBoyCharacter);
 void InitClubs(void);
 s32 GetPuttPower(s32 fraction, ShotMode shotMode);
 s32 GetClubPower(Club *club, ShotMode shotMode);
