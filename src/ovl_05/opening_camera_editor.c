@@ -899,7 +899,7 @@ void EditOpeningCamera(void) {
     if (g_ControllerStates[EDITOR_CONTROLLER].pressedButtons & U_JPAD) {
         PlaySound(SOUND_SPLASH, EDITOR_SOUND_CHANNEL, SOUND_FULL_SCALE);
         f_EditorChoice--;
-        if (f_EditorChoice < 0) {
+        if (f_EditorChoice < EDITOR_CHOICE_SLIDE) {
             f_EditorChoice = EDITOR_CHOICE_COUNT - 1;
         }
     }
