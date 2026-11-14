@@ -109,7 +109,7 @@ segments:
       - [0x40180, c, cpu_projection]
       - [0x414A0, c, hole_triangles]
       - [0x42E60, c, character_sound]
-      - [0x42F00, c, mtxutil]
+      - [0x42F00, c, matrix_conversion]
       - [0x43140, c, tournament]
       - [0x43810, c, hole_loader]
       - [0x45400, c, math_util]
