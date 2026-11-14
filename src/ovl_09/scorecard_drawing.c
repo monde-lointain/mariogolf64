@@ -18,7 +18,6 @@
 #include "gbi_helpers.h"
 #include "geometry.h"
 #include "hole_loader.h"
-#include "include_asm.h"
 #include "language.h"
 #include "math_util.h"
 #include "player.h"
@@ -194,7 +193,6 @@ static Radians f_BadgeGlowAngle = 0.0f;
 #define RESULT_CHARACTER_Y (-80.0f)
 #define RESULT_CHARACTER_Z (-500.0f)
 #define RESULT_CHARACTER_SCALE 5.0f
-extern const char f_DecimalFormat[];
 
 void DrawScorecardFace(Gfx **displayListHead, s32 left, s32 top, s32 playerIndex) {
     Gfx *gfx = *displayListHead;
@@ -2942,10 +2940,10 @@ void DrawLeaderboardPage(Gfx **displayListHead) {
  * hole numbers, a row of pars and a row for each player
  */
 /*
- * Some tests compare it with FALSE rather than negate it, to match: negating
- * all four gave 799 words differing (251 in shape), against DrawScoresPage's
- * 762 (212) at the time, and negating any one 770 to 773 (220 to 223). The one
- * negated test compared with FALSE gave 770 (220).
+ * DrawScoresPage compares it with FALSE in four tests rather than negate it, to
+ * match: negating any one gives 8 to 11 words differing from the original's,
+ * and all four 39. The fifth, for the handicap strokes' rows, negates it:
+ * compared with FALSE there, 8 words differ.
  */
 #define IsMatchPlayMode() \
     (g_GameState.gameMode == GAME_MODE_MATCH_GAME || \
@@ -3066,188 +3064,20 @@ void DrawLeaderboardPage(Gfx **displayListHead) {
  * sees their putts and strokes over par, and in a tournament the holes whose
  * birdie badge they hold.
  *
- * Doesn't match: the registers and stack slots differ throughout. The cell
- * loops add the column's offset to x after adding the cells' left edge, where
- * this adds it first, and the target keeps the address of
- * g_GameState.holeSelection in a saved register while it draws the faces. A
- * permuter output with 848 words (200 in shape) sets backTop only in the match
- * standing's non-even branch, which leaves it unset at its earlier uses and for
- * an even standing; the original loads 137 as a constant at each use, so
- * backTop is 137 on every path there. With backTop set at its declaration
- * again, the output gave 768 (218); its other change, a temp for one texture
- * rectangle's top, 56 below the card's, gave 842 (194) without it. The register
- * oracle, forcing 45 pseudos' registers, leaves 593 words at best, so the code
- * differs too. The faded style sets the cells' alpha after its commands, as the
- * yellow style does; set first, 762 words differed (212 in shape). Adding the
- * skins won to standing in both arms of the front and back nine test, after
- * each DrawShadowedText, gave 734 words (216 in shape), later 734 (184), and
- * now 729 (171), but the original adds them once, after both arms, as the draft
- * does. The skins, strokes, putts, over-par and handicap-stroke texts add
- * g_Scorecard.x last, as the hole numbers, par and badges do; with x first, as
- * the draft had them, 760 words differed, 210 in shape, and the oracle left
- * 628. The back nine's match mark still adds x first, to the cell's offset
- * grouped, which leaves the same words with 2 fewer in shape and the same
- * oracle result as the plain sum: x last there gives 767 words (165 in shape),
- * and the front nine's mark grouped with x first too gives 755 (165), but the
- * oracle leaves 595 words against 593. Writing each of the four cell
- * rectangles' edges as plain sums, with g_Scorecard.x and g_Scorecard.y all
- * first or all last in each, gave 1031 to 1041 words in all sixteen
- * combinations when the draft had 760. The first cell loop's back nine adds
- * g_Scorecard.x last at its right edge, as at its left; added first there, 760
- * words differed, 178 in shape. The second loop's front-nine rectangle adds x
- * last at both edges, as the first loop's does; with x first at both, 758 words
- * differ (172 in shape). Grouping the y sums of the second loop's front
- * rectangle as the first loop's are gave 762 to 764 words. These counts were
- * measured before the bogey tests below.
- *
- * The score colors test overPar >= 2 for a double bogey and then overPar > 0
- * for a bogey, after the par's test, as the original's slti 2 and blez show;
- * with == 1 for the bogey and the double bogey in the last else, as the draft
- * had, 755 words differed (165 in shape). A test of overPar > 1 gives the same
- * as >= 2, and == 1 for the bogey before > 1 for the double bogey 755 (165).
- * The counts before here were measured while the skins total was kept in
- * standing, the match standing's variable; a skinsWon of the skins branch's own
- * took the draft from 733 words differing to 710, 157 in shape to 156, and the
- * register oracle's closest from 569 words, forcing 44 pseudos, to 568, forcing
- * 42. Declared beside standing and zeroed with it, it gives 718 words (158 in
- * shape). Merging cellColumn or facePlayerIndex into standing gives 691 words,
- * but the oracle's closest is then 589. 710 words differ, 156 in shape.
- *
- * A search over merges of two variables found 674 words, 156 in shape, by
- * counting the checkerboard's columns in overTop, which would give it a
- * second meaning. Giving that loop a counter of its own, declared anywhere,
- * gives 706 (156), but the register oracle's closest stays at 564 words,
- * forcing 42 pseudos, so the loops keep sharing j.
- *
- * Setting the back nine face's top into a local before its DrawSmallFace
- * gives 705 words but 163 in shape; a top of their own for both faces gives
- * 710 words, 168 in shape, and a left shared by the two faces 735 (185),
- * alone, with the back face's top, or with both tops. 710 words differ, 156
- * in shape.
- *
- * The register oracle lines i and hole up with each other's registers in
- * the handicap strokes' loops, against the later loops. Counting those
- * loops' holes with a variable of their own gives 866 words (156 in
- * shape), or with j 846 (156); counting their rows and players with one
- * of their own gives 1150 (208), with a frame 16 bytes larger.
- *
- * The register oracle's split report finds i in $s1 up to the cell loops
- * and in $s5 from the scores' player loop on, and j and hole the other
- * way round. Giving the later loops variables of their own gives 1056
- * words for i (190 in shape, with a frame 16 bytes larger), 866 for hole,
- * 706 for j, and 862 to 1200 for the combinations, so the loops keep
- * sharing them.
- *
- * The par row's holes are counted in i too, as the routine's other
- * sequential loops are: with a counter of their own, 710 words differed
- * (156 in shape) and the register oracle's closest was 566, forcing 48
- * pseudos, against 706 and 560, forcing 47.
- *
- * backPar is declared before rowSpacing, as a sweep moving each statement
- * found: GCC numbers the pseudos in declaration order, and that takes the
- * draft from 706 words to 698, 156 in shape either way, and the register
- * oracle's closest from 560 words to 552, forcing 47 pseudos either way.
- * 698 words differ, 156 in shape.
- *
- * frontTop and backTop are constants that the build doesn't keep in a
- * register: reload puts 57 or 137 in their place, and the original adds
- * them as immediates where they are the sum's second operand and loads
- * them into $t2 or $t3 where they are its first. The two-player faces'
- * first row adds them to g_Scorecard.y, as the original's lw and addiu
- * show; that takes the draft from 698 words differing to 688, 156 in
- * shape to 150, and the register oracle's closest from 552 to 542,
- * forcing 47 pseudos either way. Swapping the front or the back face
- * alone gives 963 or 967 words (153 in shape). 688 words differ, 150 in
- * shape.
- *
- * The back nine's skins total and net score, and all four handicap-stroke
- * texts, add their row's offset first, then the nine's top and the row:
- * that takes the draft from 688 words differing to 665, 150 in shape to
- * 131, and the register oracle's closest from 542 words, forcing 47
- * pseudos, to 537, forcing 38. editsearch found the pair of changes; the
- * skins and net score alone give 738 words (146 in shape) with a frame 8
- * bytes smaller, and the handicap strokes alone 747 (135) with one 8
- * bytes larger. The condensed net score's sum written the same way too
- * gives 636 words (130 in shape), but the oracle then forces nothing and
- * leaves all 636. That left 665 words, 131 in shape.
- *
- * The hole numbers are counted in i too, as the par row's holes are,
- * rather than in j: that takes the draft from 665 words differing to
- * 645, 131 in shape either way, and the register oracle's closest stays
- * at 537 words, now forcing 36 pseudos rather than 38. That left 645
- * words, 131 in shape.
- *
- * The checkerboard's columns and the scores page's faces are counted in
- * i as well, in place of counters of their own, which a search over loop
- * counters found together: that takes the draft from 645 words differing
- * to 531, 131 in shape either way, and the register oracle then forces
- * nothing, leaving all 531, against 537 forcing 36. Counting the holes
- * of either one of the handicap strokes' two copies in j gives 505
- * words, but both 657, so the copies keep hole. That left 531 words, 131
- * in shape.
- *
- * The second checkerboard's rows, which had a counter of their own,
- * cellRowIndex, are counted in j: that takes the draft from 531 words
- * differing to 525, 131 in shape either way, and the register oracle
- * still forces nothing. Counting its rows in i and its columns in j, as
- * the first checkerboard does, gives 667 words. That left 525 words, 131
- * in shape.
- *
- * Each player's shown hole count is set first in the scores' player
- * loop, before the standing, the color and the totals are cleared, as a
- * search moving statements found: that takes the draft from 525 words
- * differing to 519, 131 in shape either way, and the register oracle's
- * closest from all 525 words, forcing nothing, to 361, forcing 21
- * pseudos. That left 519 words, 131 in shape.
- *
- * The faces of one, three or four players add the nine's top first, then
- * the face's offset, the player's row and g_Scorecard.y, where they
- * added the offset and g_Scorecard.y first and the row and the nine's
- * top last, as editsearch's regrouping found: that takes the draft from
- * 519 words differing to 459, 131 in shape to 129, and the register
- * oracle's closest from 361 words, forcing 21 pseudos, to 351, forcing
- * 15. The same search's best, 436 words (130 in shape), also puts
- * extraTop and overTop before the nine's top in the over and badges
- * labels, but the oracle then forces nothing and leaves all 436; the
- * front nine's over text alone that way gives 424 (130), also with
- * nothing forced. The original's over and badges labels load the nine's
- * top into a register as the sum's first operand, which the draft's
- * order gives. That left 459 words, 129 in shape.
- *
- * Adding the row's offset first in the two nines' totals and in the
- * front nine's and the whole round's net scores, as the back nine's net
- * score does, loads the nine's top into a register there as the original
- * does, and takes the draft to 461 words, 115 in shape; but the register
- * oracle's voting then makes each round worse, so it forces nothing and
- * leaves all 461, against 351. With the labels' regrouping too it gives
- * 406 words (116 in shape), again with nothing forced. That left 459
- * words, 129 in shape.
- *
- * The back nine's match standing and the front nine's skins total add
- * the row's top first, then the nine's top, the row's offset and
- * g_Scorecard.y, as the back nine's skins total does, where they added
- * the offset first and the row's top to g_Scorecard.y; a search
- * regrouping sums found it. That takes the draft from 459 words
- * differing (129 in shape) to 441 (121), and the register oracle's
- * closest from 351 words to 331, forcing 15 pseudos either way. The
- * front nine's standing that way too gives 472 words (114 in shape),
- * with the closest at 366, forcing 11. That left 441 words, 121 in
- * shape.
- *
- * The back nine's match mark adds the hole's offset, then
- * MATCH_MARK_LEFT and g_Scorecard.x, as the front nine's does, where it
- * added g_Scorecard.x to the other two; a search regrouping sums found
- * it. The sum's last add then takes its operands in the original's
- * order, which takes the draft from 441 words differing to 439, 121 in
- * shape either way, and the register oracle's closest from 331 words to
- * 329, forcing 15 pseudos either way. 439 words differ, 121 in shape.
+ * The sums that place the rows take their terms in the original's order: the
+ * nine's top, the row's top, the player's offset and then g_Scorecard.y. The
+ * compiler folds a sum's constants as it reads them, so another order gives
+ * other code: with the player's offset ahead of the row's top in the scores'
+ * rows, 360 words differ from the original's (72 in shape).
  */
-#ifdef NON_MATCHING
 void DrawScoresPage(Gfx **displayListHead) {
     s32 frontPar = 0;
+    s32 backPar = 0;
     Gfx *gfx = *displayListHead;
     s8 handicapStrokes[SCORE_ROW_COUNT][COURSE_HOLE_COUNT];
-    s32 firstHole = GetFirstHoleIndex();
+    /* The nines' tops are variables to match, though nothing changes them: with
+     * the constants in their place, 619 words differ from the original's (275 in
+     * shape) */
     s32 frontTop = FRONT_NINE_TOP;
     s32 backTop = BACK_NINE_TOP;
     CourseRecord *course;
@@ -3255,18 +3085,36 @@ void DrawScoresPage(Gfx **displayListHead) {
     s32 pulseGreen;
     s32 pulseBlue;
     s32 cellAlpha;
-    s32 backPar = 0;
+    /* Declared after the cells' alpha to match, as the stack slots follow the
+     * declarations' order: declared ahead of the nines' tops, with backPar here,
+     * 16 words differ */
+    s32 firstHole = GetFirstHoleIndex();
     s32 rowSpacing;
+    /*
+     * How a player stands: in the one-on-one match modes, the holes they lead
+     * by; in the skins modes, the skins they have won; and otherwise their
+     * strokes over par on each hole in turn, and then their net score to par.
+     * The one variable holds them all, to match: with a variable of its own for
+     * the holes led, 53 words differ; for the skins, 33; for the strokes over
+     * par, 170; and for the net score, 5.
+     */
     s32 standing;
     s32 colorIndex;
-    s32 overPar;
     s32 extraTop;
     s32 overTop;
     s32 secondRow;
+    /*
+     * The two counters. i counts each loop that stands alone, the holes of the
+     * handicap strokes' rows, the cells' columns, and the players of the scores
+     * and the rows of the handicap strokes' marks; j counts the other loop of
+     * each of those pairs, and the holes of the badges. They take these roles to
+     * match: with i and j exchanged in the handicap strokes' loops, 34 words
+     * differ; in either of the cells' pairs, 22; and in the marks', 12. With a
+     * counter of their own for the scores' holes, or for the badges', 214 differ.
+     */
     s32 i;
     s32 j;
-    s32 hole;
-    SaveData *saveData;
+    Awards *awards;
     s32 glow;
     Boolean isPuttsShown;
     Boolean isOverShown;
@@ -3284,6 +3132,15 @@ void DrawScoresPage(Gfx **displayListHead) {
     gDPSetTextureFilter(gfx++, G_TF_POINT);
     gDPPipeSync(gfx++);
     gDPSetAlphaCompare(gfx++, G_AC_THRESHOLD);
+    /*
+     * Empty, for the notes it leaves ahead of the switch, to match: the original
+     * reads f_ScoresStyle directly before the first case's test, where without
+     * the block the scheduler moves the read ahead of the course's address and
+     * the last command's stores, and 16 words differ (10 in shape). With the
+     * command in the block, 22 differ (14); with an empty test of the style in
+     * the block's place, 21 (13).
+     */
+    IN_OWN_BLOCK(;);
     switch (f_ScoresStyle) {
         case SCORES_STYLE_YELLOW:
             gDPSetEnvColor(gfx++, 0xFF, 0xF0, 0x7F, OPAQUE_ALPHA);
@@ -3339,9 +3196,9 @@ void DrawScoresPage(Gfx **displayListHead) {
             break;
         case SCORES_STYLE_OPAQUE:
             /* The cells are opaque, so the original leaves their alpha unset */
-#    ifdef AVOID_UB
+#ifdef AVOID_UB
             cellAlpha = OPAQUE_ALPHA;
-#    endif
+#endif
             gDPSetEnvColor(gfx++, 0, 0x1F, 0, OPAQUE_ALPHA);
             gDPSetBlendColor(gfx++, 0, 0, 0, 0x40);
             gDPPipeSync(gfx++);
@@ -3366,9 +3223,9 @@ void DrawScoresPage(Gfx **displayListHead) {
                 TEXEL0
             );
             break;
-#    ifdef AVOID_UB
+#ifdef AVOID_UB
         default:
-#    endif
+#endif
         case SCORES_STYLE_TINTED:
             gDPSetEnvColor(gfx++, 0, 0x40, 0, OPAQUE_ALPHA);
             gDPSetBlendColor(gfx++, 0, 0, 0, 0x1F);
@@ -3662,34 +3519,34 @@ void DrawScoresPage(Gfx **displayListHead) {
 
     /* Two players in stroke play take every other row, so their handicap strokes
      * do too */
-    for (i = 0; i != SCORE_ROW_COUNT; i++) {
-        for (hole = 0; hole != COURSE_HOLE_COUNT; hole++) {
-            handicapStrokes[i][hole] = 0;
+    for (j = 0; j != SCORE_ROW_COUNT; j++) {
+        for (i = 0; i != COURSE_HOLE_COUNT; i++) {
+            handicapStrokes[j][i] = 0;
         }
     }
 
     if (g_GameState.playerCount == 2 && !IsMatchPlayMode()) {
-        for (i = 0; i != g_GameState.playerCount; i++) {
-            for (hole = 0; hole != COURSE_HOLE_COUNT; hole++) {
-                handicapStrokes[i * 2][hole] =
-                    GetHandicapOffset(GetCourseRecordIndex(), hole, g_Players[i].handicap);
+        for (j = 0; j != g_GameState.playerCount; j++) {
+            for (i = 0; i != COURSE_HOLE_COUNT; i++) {
+                handicapStrokes[j * 2][i] =
+                    GetHandicapOffset(GetCourseRecordIndex(), i, g_Players[j].handicap);
             }
         }
     }
     else {
-        for (i = 0; i != g_GameState.playerCount; i++) {
-            for (hole = 0; hole != COURSE_HOLE_COUNT; hole++) {
-                handicapStrokes[i][hole] =
-                    GetHandicapOffset(GetCourseRecordIndex(), hole, g_Players[i].handicap);
+        for (j = 0; j != g_GameState.playerCount; j++) {
+            for (i = 0; i != COURSE_HOLE_COUNT; i++) {
+                handicapStrokes[j][i] =
+                    GetHandicapOffset(GetCourseRecordIndex(), i, g_Players[j].handicap);
             }
         }
     }
 
     /* The cells, in a checkerboard of two shades of each row's color */
-    for (i = 0; i != CELL_ROW_COUNT; i++) {
-        for (j = 0; j != HOLES_PER_NINE; j++) {
+    for (j = 0; j != CELL_ROW_COUNT; j++) {
+        for (i = 0; i != HOLES_PER_NINE; i++) {
             gDPPipeSync(gfx++);
-            if (i & 1) {
+            if (j & 1) {
                 gDPSetPrimColor(gfx++, 0, 0, 0x3F, 0xBF, 0, cellAlpha);
             }
             else {
@@ -3697,23 +3554,17 @@ void DrawScoresPage(Gfx **displayListHead) {
             }
 
             gDPPipeSync(gfx++);
-            if (j & 1) {
+            if (i & 1) {
                 if (!(g_GameState.holeSelection & HOLE_SELECTION_BACK_NINE)) {
-                    /*
-                     * g_Scorecard.y comes last, to match: added first, as the front
-                     * nine's cells have it, it gives 712 words differing (158 in shape)
-                     * for the top, 710 (158) for the bottom and 715 (159) for both,
-                     * against the draft's 710 (156), and 712 to 725 with CELL_TOP next
-                     */
                     DrawTextureRect(
                         &gfx,
-                        QuarterPixels((j * CELL_WIDTH) + CELL_LEFT + g_Scorecard.x),
-                        QuarterPixels((i * CELL_HEIGHT) + CELL_TOP + g_Scorecard.y),
-                        QuarterPixels((j * CELL_WIDTH) + CELL_LEFT + CELL_WIDTH + g_Scorecard.x),
-                        QuarterPixels((i * CELL_HEIGHT) + CELL_TOP + CELL_HEIGHT + g_Scorecard.y),
+                        QuarterPixels((i * CELL_WIDTH) + CELL_LEFT + g_Scorecard.x),
+                        QuarterPixels((j * CELL_HEIGHT) + CELL_TOP + g_Scorecard.y),
+                        QuarterPixels((i * CELL_WIDTH) + CELL_LEFT + CELL_WIDTH + g_Scorecard.x),
+                        QuarterPixels((j * CELL_HEIGHT) + CELL_TOP + CELL_HEIGHT + g_Scorecard.y),
                         G_TX_RENDERTILE,
                         0,
-                        TexelCoordinate(i * CELL_HEIGHT),
+                        TexelCoordinate(j * CELL_HEIGHT),
                         TEXEL_STEP_ONE,
                         TEXEL_STEP_ONE
                     );
@@ -3722,16 +3573,16 @@ void DrawScoresPage(Gfx **displayListHead) {
                 if (!(g_GameState.holeSelection & HOLE_SELECTION_FRONT_NINE)) {
                     DrawTextureRect(
                         &gfx,
-                        QuarterPixels((j * CELL_WIDTH) + CELL_LEFT + g_Scorecard.x),
-                        QuarterPixels(g_Scorecard.y + (i * CELL_HEIGHT) + CELL_TOP + NINE_SPACING),
-                        QuarterPixels((j * CELL_WIDTH) + CELL_LEFT + CELL_WIDTH + g_Scorecard.x),
+                        QuarterPixels((i * CELL_WIDTH) + CELL_LEFT + g_Scorecard.x),
+                        QuarterPixels((j * CELL_HEIGHT) + CELL_TOP + NINE_SPACING + g_Scorecard.y),
+                        QuarterPixels((i * CELL_WIDTH) + CELL_LEFT + CELL_WIDTH + g_Scorecard.x),
                         QuarterPixels(
-                            g_Scorecard.y + (i * CELL_HEIGHT) + CELL_TOP + NINE_SPACING +
-                            CELL_HEIGHT
+                            (j * CELL_HEIGHT) + CELL_TOP + NINE_SPACING + CELL_HEIGHT +
+                            g_Scorecard.y
                         ),
                         G_TX_RENDERTILE,
                         0,
-                        TexelCoordinate(i * CELL_HEIGHT),
+                        TexelCoordinate(j * CELL_HEIGHT),
                         TEXEL_STEP_ONE,
                         TEXEL_STEP_ONE
                     );
@@ -3821,9 +3672,9 @@ void DrawScoresPage(Gfx **displayListHead) {
                     DrawTextureRect(
                         &gfx,
                         QuarterPixels((i * CELL_WIDTH) + CELL_LEFT + g_Scorecard.x),
-                        QuarterPixels(g_Scorecard.y + (j * CELL_HEIGHT) + CELL_TOP),
+                        QuarterPixels((j * CELL_HEIGHT) + CELL_TOP + g_Scorecard.y),
                         QuarterPixels((i * CELL_WIDTH) + CELL_LEFT + CELL_WIDTH + g_Scorecard.x),
-                        QuarterPixels(g_Scorecard.y + (j * CELL_HEIGHT) + CELL_TOP + CELL_HEIGHT),
+                        QuarterPixels((j * CELL_HEIGHT) + CELL_TOP + CELL_HEIGHT + g_Scorecard.y),
                         G_TX_RENDERTILE,
                         0,
                         TexelCoordinate(j * CELL_HEIGHT),
@@ -3991,15 +3842,15 @@ void DrawScoresPage(Gfx **displayListHead) {
                 DrawSmallFace(
                     &gfx,
                     g_Scorecard.x + SCORES_FACE_LEFT,
-                    PLAYER_ROW_TOP - SCORES_FACE_RISE + (g_Scorecard.y + frontTop),
+                    frontTop + PLAYER_ROW_TOP + g_Scorecard.y - SCORES_FACE_RISE,
                     0,
                     TRUE
                 );
                 DrawSmallFace(
                     &gfx,
                     ((secondRow & 1) * SCORES_FACE_STAGGER) + SCORES_FACE_LEFT + g_Scorecard.x,
-                    PLAYER_ROW_TOP - SCORES_FACE_RISE +
-                        (frontTop + (secondRow * PLAYER_ROW_SPACING) + g_Scorecard.y),
+                    frontTop + PLAYER_ROW_TOP + (secondRow * PLAYER_ROW_SPACING) + g_Scorecard.y -
+                        SCORES_FACE_RISE,
                     1,
                     TRUE
                 );
@@ -4009,24 +3860,24 @@ void DrawScoresPage(Gfx **displayListHead) {
                 DrawSmallFace(
                     &gfx,
                     g_Scorecard.x + SCORES_FACE_LEFT,
-                    PLAYER_ROW_TOP - SCORES_FACE_RISE + (g_Scorecard.y + backTop),
+                    backTop + PLAYER_ROW_TOP + g_Scorecard.y - SCORES_FACE_RISE,
                     0,
                     TRUE
                 );
                 DrawSmallFace(
                     &gfx,
                     ((secondRow & 1) * SCORES_FACE_STAGGER) + SCORES_FACE_LEFT + g_Scorecard.x,
-                    PLAYER_ROW_TOP - SCORES_FACE_RISE +
-                        (backTop + (secondRow * PLAYER_ROW_SPACING) + g_Scorecard.y),
+                    backTop + PLAYER_ROW_TOP + (secondRow * PLAYER_ROW_SPACING) + g_Scorecard.y -
+                        SCORES_FACE_RISE,
                     1,
                     TRUE
                 );
             }
 
             break;
-#    ifdef AVOID_UB
+#ifdef AVOID_UB
         default:
-#    endif
+#endif
         case 1:
         case 3:
         case 4:
@@ -4052,8 +3903,8 @@ void DrawScoresPage(Gfx **displayListHead) {
                     DrawSmallFace(
                         &gfx,
                         ((i & 1) * SCORES_FACE_STAGGER) + SCORES_FACE_LEFT + g_Scorecard.x,
-                        frontTop + (PLAYER_ROW_TOP - SCORES_FACE_RISE) + (i * PLAYER_ROW_SPACING) +
-                            g_Scorecard.y,
+                        frontTop + PLAYER_ROW_TOP + (i * PLAYER_ROW_SPACING) + g_Scorecard.y -
+                            SCORES_FACE_RISE,
                         i,
                         TRUE
                     );
@@ -4063,8 +3914,8 @@ void DrawScoresPage(Gfx **displayListHead) {
                     DrawSmallFace(
                         &gfx,
                         ((i & 1) * SCORES_FACE_STAGGER) + SCORES_FACE_LEFT + g_Scorecard.x,
-                        backTop + (PLAYER_ROW_TOP - SCORES_FACE_RISE) + (i * PLAYER_ROW_SPACING) +
-                            g_Scorecard.y,
+                        backTop + PLAYER_ROW_TOP + (i * PLAYER_ROW_SPACING) + g_Scorecard.y -
+                            SCORES_FACE_RISE,
                         i,
                         TRUE
                     );
@@ -4122,6 +3973,8 @@ void DrawScoresPage(Gfx **displayListHead) {
             extraTop = EXTRA_ROW_TOP;
             if (isPuttsShown) {
                 extraTop += PLAYER_ROW_SPACING;
+                /* The player's offset is grouped with the row's top to match, here
+                 * and on the back nine: ungrouped, 48 words differ (4 in shape) */
                 DrawSmallText(
                     &gfx,
                     g_Scorecard.x + PUTTS_LABEL_LEFT,
@@ -4131,13 +3984,21 @@ void DrawScoresPage(Gfx **displayListHead) {
             }
 
             if (isOverShown) {
+                /*
+                 * The label's top is taken before extraTop moves on to the next
+                 * row, and the label drawn after, to match, here and on the back
+                 * nine: with the label drawn from extraTop and the row moved on
+                 * after it, 8 words differ for each nine (4 in shape).
+                 */
+                s32 labelTop = frontTop + extraTop;
+
+                extraTop += PLAYER_ROW_SPACING;
                 DrawSmallText(
                     &gfx,
                     g_Scorecard.x + OVER_LABEL_LEFT,
-                    frontTop + extraTop + (i * rowSpacing) + g_Scorecard.y,
+                    labelTop + (i * rowSpacing) + g_Scorecard.y,
                     "Over"
                 );
-                extraTop += PLAYER_ROW_SPACING;
             }
 
             if (isBadgesShown) {
@@ -4163,13 +4024,15 @@ void DrawScoresPage(Gfx **displayListHead) {
             }
 
             if (isOverShown) {
+                s32 labelTop = backTop + extraTop;
+
+                extraTop += PLAYER_ROW_SPACING;
                 DrawSmallText(
                     &gfx,
                     g_Scorecard.x + OVER_LABEL_LEFT,
-                    backTop + extraTop + (i * rowSpacing) + g_Scorecard.y,
+                    labelTop + (i * rowSpacing) + g_Scorecard.y,
                     "Over"
                 );
-                extraTop += PLAYER_ROW_SPACING;
             }
 
             if (isBadgesShown) {
@@ -4211,7 +4074,7 @@ void DrawScoresPage(Gfx **displayListHead) {
     for (i = 0; i != HOLES_PER_NINE; i++) {
         if (!(g_GameState.holeSelection & HOLE_SELECTION_BACK_NINE)) {
             frontPar += course->holes[i].par;
-            sprintf(g_PrintBuffer, f_DecimalFormat, course->holes[i].par);
+            sprintf(g_PrintBuffer, "%d", course->holes[i].par);
             DrawCondensedShadowedText(
                 &gfx,
                 (i * CELL_WIDTH) + PAR_LEFT + g_Scorecard.x,
@@ -4222,7 +4085,7 @@ void DrawScoresPage(Gfx **displayListHead) {
 
         if (!(g_GameState.holeSelection & HOLE_SELECTION_FRONT_NINE)) {
             backPar += course->holes[i + HOLES_PER_NINE].par;
-            sprintf(g_PrintBuffer, f_DecimalFormat, course->holes[i + HOLES_PER_NINE].par);
+            sprintf(g_PrintBuffer, "%d", course->holes[i + HOLES_PER_NINE].par);
             DrawCondensedShadowedText(
                 &gfx,
                 (i * CELL_WIDTH) + PAR_LEFT + g_Scorecard.x,
@@ -4269,11 +4132,11 @@ void DrawScoresPage(Gfx **displayListHead) {
             }
 
             SetTextColor(&gfx, 0xFF, 0xFF, 0xFF);
-            for (hole = firstHole; hole != shownHoleCount; hole++) {
-                if (g_Players[i].holes[hole].strokes == g_Players[i ^ 1].holes[hole].strokes) {
+            for (j = firstHole; j != shownHoleCount; j++) {
+                if (g_Players[i].holes[j].strokes == g_Players[i ^ 1].holes[j].strokes) {
                     g_PrintBuffer[0] = NO_SCORE_CODE;
                 }
-                else if (g_Players[i].holes[hole].strokes < g_Players[i ^ 1].holes[hole].strokes) {
+                else if (g_Players[i].holes[j].strokes < g_Players[i ^ 1].holes[j].strokes) {
                     g_PrintBuffer[0] = HOLE_WON_CODE;
                     standing++;
                 }
@@ -4283,19 +4146,19 @@ void DrawScoresPage(Gfx **displayListHead) {
                 }
 
                 sprintf(g_PrintBuffer + 1, "");
-                if (hole < HOLES_PER_NINE) {
+                if (j < HOLES_PER_NINE) {
                     DrawShadowedText(
                         &gfx,
-                        (hole * CELL_WIDTH) + MATCH_MARK_LEFT + g_Scorecard.x,
-                        frontTop + (i * rowSpacing) + PLAYER_ROW_TOP + g_Scorecard.y,
+                        (j * CELL_WIDTH) + MATCH_MARK_LEFT + g_Scorecard.x,
+                        frontTop + PLAYER_ROW_TOP + (i * rowSpacing) + g_Scorecard.y,
                         g_PrintBuffer
                     );
                 }
                 else {
                     DrawShadowedText(
                         &gfx,
-                        ((hole - HOLES_PER_NINE) * CELL_WIDTH) + MATCH_MARK_LEFT + g_Scorecard.x,
-                        backTop + (i * rowSpacing) + PLAYER_ROW_TOP + g_Scorecard.y,
+                        ((j - HOLES_PER_NINE) * CELL_WIDTH) + MATCH_MARK_LEFT + g_Scorecard.x,
+                        backTop + PLAYER_ROW_TOP + (i * rowSpacing) + g_Scorecard.y,
                         g_PrintBuffer
                     );
                 }
@@ -4315,7 +4178,7 @@ void DrawScoresPage(Gfx **displayListHead) {
                 DrawShadowedText(
                     &gfx,
                     g_Scorecard.x + MATCH_STANDING_LEFT,
-                    frontTop + (i * rowSpacing) + PLAYER_ROW_TOP + g_Scorecard.y,
+                    frontTop + PLAYER_ROW_TOP + (i * rowSpacing) + g_Scorecard.y,
                     g_PrintBuffer
                 );
             }
@@ -4323,67 +4186,66 @@ void DrawScoresPage(Gfx **displayListHead) {
                 DrawShadowedText(
                     &gfx,
                     g_Scorecard.x + MATCH_STANDING_LEFT,
-                    PLAYER_ROW_TOP + backTop + (i * rowSpacing) + g_Scorecard.y,
+                    backTop + PLAYER_ROW_TOP + (i * rowSpacing) + g_Scorecard.y,
                     g_PrintBuffer
                 );
             }
         }
         else if (g_GameState.gameMode == GAME_MODE_SKINS_MATCH ||
             g_GameState.gameMode == GAME_MODE_CLUB_SLOTS) {
-            s32 skinsWon = 0;
 
             /* Strokes here count the skins won on the hole */
             SetTextColor(&gfx, 0xFF, 0xFF, 0xFF);
-            for (hole = firstHole; hole != shownHoleCount; hole++) {
-                if (g_Players[i].holes[hole].strokes == 0) {
+            for (j = firstHole; j != shownHoleCount; j++) {
+                if (g_Players[i].holes[j].strokes == 0) {
                     sprintf(g_PrintBuffer, "%c", NO_SCORE_CODE);
-                    if (hole < HOLES_PER_NINE) {
+                    if (j < HOLES_PER_NINE) {
                         DrawShadowedText(
                             &gfx,
-                            (hole * CELL_WIDTH) + SKINS_MARK_LEFT + g_Scorecard.x,
-                            frontTop + (i * rowSpacing) + PLAYER_ROW_TOP + g_Scorecard.y,
+                            (j * CELL_WIDTH) + SKINS_MARK_LEFT + g_Scorecard.x,
+                            frontTop + PLAYER_ROW_TOP + (i * rowSpacing) + g_Scorecard.y,
                             g_PrintBuffer
                         );
                     }
                     else {
                         DrawShadowedText(
                             &gfx,
-                            ((hole - HOLES_PER_NINE) * CELL_WIDTH) + SKINS_MARK_LEFT +
+                            ((j - HOLES_PER_NINE) * CELL_WIDTH) + SKINS_MARK_LEFT +
                                 g_Scorecard.x,
-                            backTop + (i * rowSpacing) + PLAYER_ROW_TOP + g_Scorecard.y,
+                            backTop + PLAYER_ROW_TOP + (i * rowSpacing) + g_Scorecard.y,
                             g_PrintBuffer
                         );
                     }
                 }
                 else {
-                    sprintf(g_PrintBuffer, f_TwoDigitFormat, g_Players[i].holes[hole].strokes);
-                    if (hole < HOLES_PER_NINE) {
+                    sprintf(g_PrintBuffer, f_TwoDigitFormat, g_Players[i].holes[j].strokes);
+                    if (j < HOLES_PER_NINE) {
                         DrawShadowedText(
                             &gfx,
-                            (hole * CELL_WIDTH) + SKINS_WON_LEFT + g_Scorecard.x,
-                            frontTop + (i * rowSpacing) + PLAYER_ROW_TOP + g_Scorecard.y,
+                            (j * CELL_WIDTH) + SKINS_WON_LEFT + g_Scorecard.x,
+                            frontTop + PLAYER_ROW_TOP + (i * rowSpacing) + g_Scorecard.y,
                             g_PrintBuffer
                         );
                     }
                     else {
                         DrawShadowedText(
                             &gfx,
-                            ((hole - HOLES_PER_NINE) * CELL_WIDTH) + SKINS_WON_LEFT + g_Scorecard.x,
-                            backTop + (i * rowSpacing) + PLAYER_ROW_TOP + g_Scorecard.y,
+                            ((j - HOLES_PER_NINE) * CELL_WIDTH) + SKINS_WON_LEFT + g_Scorecard.x,
+                            backTop + PLAYER_ROW_TOP + (i * rowSpacing) + g_Scorecard.y,
                             g_PrintBuffer
                         );
                     }
 
-                    skinsWon += g_Players[i].holes[hole].strokes;
+                    standing += g_Players[i].holes[j].strokes;
                 }
             }
 
-            sprintf(g_PrintBuffer, "%2dP", skinsWon);
+            sprintf(g_PrintBuffer, "%2dP", standing);
             if (g_GameState.holeSelection & HOLE_SELECTION_FRONT_NINE) {
                 DrawShadowedText(
                     &gfx,
                     g_Scorecard.x + SKINS_TOTAL_LEFT,
-                    PLAYER_ROW_TOP + frontTop + (i * rowSpacing) + g_Scorecard.y,
+                    frontTop + PLAYER_ROW_TOP + (i * rowSpacing) + g_Scorecard.y,
                     g_PrintBuffer
                 );
             }
@@ -4391,108 +4253,110 @@ void DrawScoresPage(Gfx **displayListHead) {
                 DrawShadowedText(
                     &gfx,
                     g_Scorecard.x + SKINS_TOTAL_LEFT,
-                    PLAYER_ROW_TOP + backTop + (i * rowSpacing) + g_Scorecard.y,
+                    backTop + PLAYER_ROW_TOP + (i * rowSpacing) + g_Scorecard.y,
                     g_PrintBuffer
                 );
             }
         }
         else {
             shownHoleCount += g_Players[i].holeStatus != HOLE_STATUS_PLAYING;
-            for (hole = firstHole; hole != shownHoleCount; hole++) {
-                overPar = g_Players[i].holes[hole].strokes - course->holes[hole].par;
-                if (hole < HOLES_PER_NINE) {
-                    frontTotal += g_Players[i].holes[hole].strokes;
+            for (j = firstHole; j != shownHoleCount; j++) {
+                standing = g_Players[i].holes[j].strokes - course->holes[j].par;
+                if (j < HOLES_PER_NINE) {
+                    frontTotal += g_Players[i].holes[j].strokes;
                 }
                 else {
-                    backTotal += g_Players[i].holes[hole].strokes;
+                    backTotal += g_Players[i].holes[j].strokes;
                 }
 
-                if ((overPar < -2 && course->holes[hole].par == PAR_FIVE) ||
-                    (overPar < -1 && course->holes[hole].par != PAR_FIVE)) {
+                if ((standing < -2 && course->holes[j].par == PAR_FIVE) ||
+                    (standing < -1 && course->holes[j].par != PAR_FIVE)) {
                     if (colorIndex != PULSING_COLOR) {
                         colorIndex = PULSING_COLOR;
                         SetTextColor(&gfx, pulseRed, pulseGreen, pulseBlue);
                     }
                 }
-                else if (overPar < -1) {
+                else if (standing < -1) {
                     if (colorIndex != EAGLE_COLOR) {
                         colorIndex = EAGLE_COLOR;
                         SetTextColor(&gfx, 0xFF, 0, 0);
                     }
                 }
-                else if (overPar < 0) {
+                else if (standing < 0) {
                     if (colorIndex != BIRDIE_COLOR) {
                         colorIndex = BIRDIE_COLOR;
                         SetTextColor(&gfx, 0xFF, 0x7F, 0x1F);
                     }
                 }
-                else if (overPar == 0) {
+                else if (standing == 0) {
                     if (colorIndex != PAR_COLOR) {
                         colorIndex = PAR_COLOR;
                         SetTextColor(&gfx, 0xFF, 0xFF, 0xFF);
                     }
                 }
-                else if (overPar >= 2) {
+                else if (standing >= 2) {
                     if (colorIndex != DOUBLE_BOGEY_COLOR) {
                         colorIndex = DOUBLE_BOGEY_COLOR;
                         SetTextColor(&gfx, 0x9F, 0xBF, 0xFF);
                     }
                 }
-                else if (overPar > 0) {
+                else if (standing > 0) {
                     if (colorIndex != BOGEY_COLOR) {
                         colorIndex = BOGEY_COLOR;
                         SetTextColor(&gfx, 0x7F, 0xFF, 0x7F);
                     }
                 }
 
-                sprintf(g_PrintBuffer, f_TwoDigitFormat, g_Players[i].holes[hole].strokes);
-                if (hole < HOLES_PER_NINE) {
+                sprintf(g_PrintBuffer, f_TwoDigitFormat, g_Players[i].holes[j].strokes);
+                if (j < HOLES_PER_NINE) {
                     DrawCondensedShadowedText(
                         &gfx,
-                        (hole * CELL_WIDTH) + STROKES_LEFT + g_Scorecard.x,
-                        frontTop + (i * rowSpacing) + PLAYER_ROW_TOP + g_Scorecard.y,
+                        (j * CELL_WIDTH) + STROKES_LEFT + g_Scorecard.x,
+                        frontTop + PLAYER_ROW_TOP + (i * rowSpacing) + g_Scorecard.y,
                         g_PrintBuffer
                     );
                 }
                 else {
                     DrawCondensedShadowedText(
                         &gfx,
-                        ((hole - HOLES_PER_NINE) * CELL_WIDTH) + STROKES_LEFT + g_Scorecard.x,
-                        backTop + (i * rowSpacing) + PLAYER_ROW_TOP + g_Scorecard.y,
+                        ((j - HOLES_PER_NINE) * CELL_WIDTH) + STROKES_LEFT + g_Scorecard.x,
+                        backTop + PLAYER_ROW_TOP + (i * rowSpacing) + g_Scorecard.y,
                         g_PrintBuffer
                     );
                 }
 
                 overTop = PUTTS_TOP;
+                /* The player's offset is grouped with the putts' top to match:
+                 * ungrouped, 373 words differ (27 in shape) */
                 if (isPuttsShown) {
-                    if (g_Players[i].holes[hole].putts == UNCOUNTED_PUTTS) {
+                    if (g_Players[i].holes[j].putts == UNCOUNTED_PUTTS) {
                         sprintf(g_PrintBuffer, "%c", NO_SCORE_CODE);
                         overTop += PLAYER_ROW_SPACING;
-                        if (hole < HOLES_PER_NINE) {
+                        if (j < HOLES_PER_NINE) {
                             DrawShadowedText(
                                 &gfx,
-                                (hole * CELL_WIDTH) + PUTTS_LEFT + g_Scorecard.x,
-                                frontTop + (i * rowSpacing) + PUTTS_TOP + g_Scorecard.y,
+                                (j * CELL_WIDTH) + PUTTS_LEFT + g_Scorecard.x,
+                                frontTop + (PUTTS_TOP + (i * rowSpacing)) + g_Scorecard.y,
                                 g_PrintBuffer
                             );
                         }
                         else {
                             DrawShadowedText(
                                 &gfx,
-                                ((hole - HOLES_PER_NINE) * CELL_WIDTH) + PUTTS_LEFT + g_Scorecard.x,
-                                backTop + (i * rowSpacing) + PUTTS_TOP + g_Scorecard.y,
+                                ((j - HOLES_PER_NINE) * CELL_WIDTH) + PUTTS_LEFT + g_Scorecard.x,
+                                backTop + (PUTTS_TOP + (i * rowSpacing)) + g_Scorecard.y,
                                 g_PrintBuffer
                             );
                         }
                     }
                     else {
-                        sprintf(g_PrintBuffer, f_TwoDigitFormat, g_Players[i].holes[hole].putts);
-                        if (hole < HOLES_PER_NINE) {
+                        sprintf(g_PrintBuffer, f_TwoDigitFormat, g_Players[i].holes[j].putts);
+                        if (j < HOLES_PER_NINE) {
                             overTop += PLAYER_ROW_SPACING;
                             DrawCenteredNarrowText(
                                 &gfx,
-                                (hole * CELL_WIDTH) + PUTTS_LEFT + g_Scorecard.x,
-                                frontTop + (i * rowSpacing) + PUTTS_TOP + g_Scorecard.y,
+                                (j * CELL_WIDTH) + PUTTS_LEFT + g_Scorecard.x,
+                                frontTop + (PUTTS_TOP + (i * rowSpacing)) + g_Scorecard.y,
                                 g_PrintBuffer
                             );
                         }
@@ -4500,8 +4364,8 @@ void DrawScoresPage(Gfx **displayListHead) {
                             overTop += PLAYER_ROW_SPACING;
                             DrawCenteredNarrowText(
                                 &gfx,
-                                ((hole - HOLES_PER_NINE) * CELL_WIDTH) + PUTTS_LEFT + g_Scorecard.x,
-                                backTop + (i * rowSpacing) + PUTTS_TOP + g_Scorecard.y,
+                                ((j - HOLES_PER_NINE) * CELL_WIDTH) + PUTTS_LEFT + g_Scorecard.x,
+                                backTop + (PUTTS_TOP + (i * rowSpacing)) + g_Scorecard.y,
                                 g_PrintBuffer
                             );
                         }
@@ -4509,20 +4373,20 @@ void DrawScoresPage(Gfx **displayListHead) {
                 }
 
                 if (isOverShown) {
-                    if (overPar == 0) {
+                    if (standing == 0) {
                         sprintf(g_PrintBuffer, "<0");
                     }
-                    else if (overPar > 0) {
-                        sprintf(g_PrintBuffer, ":%d", overPar);
+                    else if (standing > 0) {
+                        sprintf(g_PrintBuffer, ":%d", standing);
                     }
                     else {
-                        sprintf(g_PrintBuffer, ";%d", -overPar);
+                        sprintf(g_PrintBuffer, ";%d", -standing);
                     }
 
-                    if (hole < HOLES_PER_NINE) {
+                    if (j < HOLES_PER_NINE) {
                         DrawCenteredNarrowText(
                             &gfx,
-                            (hole * CELL_WIDTH) + OVER_LEFT + g_Scorecard.x,
+                            (j * CELL_WIDTH) + OVER_LEFT + g_Scorecard.x,
                             frontTop + overTop + (i * rowSpacing) + g_Scorecard.y,
                             g_PrintBuffer
                         );
@@ -4530,8 +4394,8 @@ void DrawScoresPage(Gfx **displayListHead) {
                     else {
                         DrawCenteredNarrowText(
                             &gfx,
-                            ((hole - HOLES_PER_NINE) * CELL_WIDTH) + OVER_LEFT + g_Scorecard.x,
-                            backTop + (i * rowSpacing) + overTop + g_Scorecard.y,
+                            ((j - HOLES_PER_NINE) * CELL_WIDTH) + OVER_LEFT + g_Scorecard.x,
+                            backTop + overTop + (i * rowSpacing) + g_Scorecard.y,
                             g_PrintBuffer
                         );
                     }
@@ -4549,7 +4413,7 @@ void DrawScoresPage(Gfx **displayListHead) {
                     DrawCondensedShadowedText(
                         &gfx,
                         g_Scorecard.x + FRONT_TOTAL_LEFT,
-                        frontTop + (i * rowSpacing) + (PLAYER_ROW_TOP + g_Scorecard.y),
+                        frontTop + PLAYER_ROW_TOP + (i * rowSpacing) + g_Scorecard.y,
                         g_PrintBuffer
                     );
                 }
@@ -4559,25 +4423,25 @@ void DrawScoresPage(Gfx **displayListHead) {
                     DrawCondensedShadowedText(
                         &gfx,
                         g_Scorecard.x + BACK_TOTAL_LEFT,
-                        backTop + (i * rowSpacing) + (PLAYER_ROW_TOP + g_Scorecard.y),
+                        backTop + PLAYER_ROW_TOP + (i * rowSpacing) + g_Scorecard.y,
                         g_PrintBuffer
                     );
                 }
             }
 
-            overPar = GetNetScoreToPar(g_Scorecard.content.holeIndex, i);
-            if (overPar == 0) {
+            standing = GetNetScoreToPar(g_Scorecard.content.holeIndex, i);
+            if (standing == 0) {
                 sprintf(g_PrintBuffer, f_ZeroToParFormat);
             }
             else {
-                sprintf(g_PrintBuffer, f_ScoreToParFormat, overPar);
+                sprintf(g_PrintBuffer, f_ScoreToParFormat, standing);
             }
 
             if (g_GameState.holeSelection & HOLE_SELECTION_FRONT_NINE) {
                 DrawShadowedText(
                     &gfx,
                     g_Scorecard.x + NET_SCORE_LEFT,
-                    frontTop + (i * rowSpacing) + (PLAYER_ROW_TOP + g_Scorecard.y),
+                    frontTop + PLAYER_ROW_TOP + (i * rowSpacing) + g_Scorecard.y,
                     g_PrintBuffer
                 );
             }
@@ -4585,7 +4449,7 @@ void DrawScoresPage(Gfx **displayListHead) {
                 DrawShadowedText(
                     &gfx,
                     g_Scorecard.x + NET_SCORE_LEFT,
-                    PLAYER_ROW_TOP + backTop + (i * rowSpacing) + g_Scorecard.y,
+                    backTop + PLAYER_ROW_TOP + (i * rowSpacing) + g_Scorecard.y,
                     g_PrintBuffer
                 );
             }
@@ -4593,7 +4457,7 @@ void DrawScoresPage(Gfx **displayListHead) {
                 DrawCondensedShadowedText(
                     &gfx,
                     g_Scorecard.x + CONDENSED_NET_SCORE_LEFT,
-                    backTop + (i * rowSpacing) + (PLAYER_ROW_TOP + g_Scorecard.y),
+                    backTop + PLAYER_ROW_TOP + (i * rowSpacing) + g_Scorecard.y,
                     g_PrintBuffer
                 );
             }
@@ -4609,7 +4473,7 @@ void DrawScoresPage(Gfx **displayListHead) {
                     DrawShadowedText(
                         &gfx,
                         (j * CELL_WIDTH) + HANDICAP_STROKE_LEFT + g_Scorecard.x,
-                        HANDICAP_STROKE_TOP + frontTop + (i * PLAYER_ROW_SPACING) + g_Scorecard.y,
+                        frontTop + HANDICAP_STROKE_TOP + (i * PLAYER_ROW_SPACING) + g_Scorecard.y,
                         g_PrintBuffer
                     );
                 }
@@ -4618,7 +4482,7 @@ void DrawScoresPage(Gfx **displayListHead) {
                     DrawShadowedText(
                         &gfx,
                         (j * CELL_WIDTH) + SECOND_HANDICAP_STROKE_LEFT + g_Scorecard.x,
-                        HANDICAP_STROKE_TOP + frontTop + (i * PLAYER_ROW_SPACING) + g_Scorecard.y,
+                        frontTop + HANDICAP_STROKE_TOP + (i * PLAYER_ROW_SPACING) + g_Scorecard.y,
                         g_PrintBuffer
                     );
                 }
@@ -4629,7 +4493,7 @@ void DrawScoresPage(Gfx **displayListHead) {
                     DrawShadowedText(
                         &gfx,
                         (j * CELL_WIDTH) + HANDICAP_STROKE_LEFT + g_Scorecard.x,
-                        HANDICAP_STROKE_TOP + backTop + (i * PLAYER_ROW_SPACING) + g_Scorecard.y,
+                        backTop + HANDICAP_STROKE_TOP + (i * PLAYER_ROW_SPACING) + g_Scorecard.y,
                         g_PrintBuffer
                     );
                 }
@@ -4638,7 +4502,7 @@ void DrawScoresPage(Gfx **displayListHead) {
                     DrawShadowedText(
                         &gfx,
                         (j * CELL_WIDTH) + SECOND_HANDICAP_STROKE_LEFT + g_Scorecard.x,
-                        HANDICAP_STROKE_TOP + backTop + (i * PLAYER_ROW_SPACING) + g_Scorecard.y,
+                        backTop + HANDICAP_STROKE_TOP + (i * PLAYER_ROW_SPACING) + g_Scorecard.y,
                         g_PrintBuffer
                     );
                 }
@@ -4647,18 +4511,17 @@ void DrawScoresPage(Gfx **displayListHead) {
     }
 
     if (isBadgesShown) {
-        saveData = GetSaveData();
+        awards = &GetSaveData()->records.awards;
         f_BadgeGlowAngle += BADGE_GLOW_STEP;
         glow = sinf(f_BadgeGlowAngle) * (f32)BADGE_GLOW_RANGE;
         gDPSetPrimColor(gfx++, 0, 0, glow + 0xE0, glow + 0xC4, 0x1E, OPAQUE_ALPHA);
-        for (hole = 0; hole != COURSE_HOLE_COUNT; hole++) {
-            if (saveData->records.awards.birdieBadgeCounts[g_Scorecard.content.courseIndex][hole] >
-                0) {
+        for (j = 0; j != COURSE_HOLE_COUNT; j++) {
+            if (awards->birdieBadgeCounts[g_Scorecard.content.courseIndex][j] > 0) {
                 sprintf(g_PrintBuffer, "%c", BIRDIE_BADGE_CODE);
-                if (hole < HOLES_PER_NINE) {
+                if (j < HOLES_PER_NINE) {
                     DrawShadowedText(
                         &gfx,
-                        (hole * CELL_WIDTH) + BADGE_LEFT + g_Scorecard.x,
+                        (j * CELL_WIDTH) + BADGE_LEFT + g_Scorecard.x,
                         frontTop + BADGE_TOP + g_Scorecard.y,
                         g_PrintBuffer
                     );
@@ -4666,7 +4529,7 @@ void DrawScoresPage(Gfx **displayListHead) {
                 else {
                     DrawShadowedText(
                         &gfx,
-                        ((hole - HOLES_PER_NINE) * CELL_WIDTH) + BADGE_LEFT + g_Scorecard.x,
+                        ((j - HOLES_PER_NINE) * CELL_WIDTH) + BADGE_LEFT + g_Scorecard.x,
                         backTop + BADGE_TOP + g_Scorecard.y,
                         g_PrintBuffer
                     );
@@ -4677,30 +4540,6 @@ void DrawScoresPage(Gfx **displayListHead) {
 
     *displayListHead = gfx;
 }
-
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard_drawing", DrawScoresPage);
-#endif
-
-RESUME_RODATA_SECTION();
-const char f_DecimalFormat[] = "%d";
-
-#ifndef NON_MATCHING
-static const char f_ScoreTotalFormat[] = "%3d";
-static const char f_EmptyFormat[] = "";
-static const char f_EvenStandingText[] = " EVEN";
-static const char f_UpStandingFormat[] = "%2dUP";
-static const char f_DownStandingFormat[] = "%2dDOWN";
-static const char f_ScoreGlyphFormat[] = "%c";
-static const char f_PointsStandingFormat[] = "%2dP";
-static const char f_EvenParText[] = "<0";
-static const char f_OverParFormat[] = ":%d";
-static const char f_UnderParFormat[] = ";%d";
-static const f64 f_ScoresTwentyDegrees = DegreesToRadians(20);
-static const f64 f_ScoresPi = M_PI;
-static const f64 f_ScoresHalfPi = M_PI / 2;
-static const f64 f_ScoresTenDegrees = DegreesToRadians(10);
-#endif
 
 /*
  * Draws each player's row of bet tallies in the digit font, with their total
@@ -4818,7 +4657,7 @@ void DrawBetTallies(Gfx **displayListHead) {
             column += BET_TALLY_COLUMN_SPACING;
         }
 
-        sprintf(g_PrintBuffer, f_DecimalFormat, total);
+        sprintf(g_PrintBuffer, "%d", total);
         for (digit = 0; g_PrintBuffer[digit] != '\0'; digit++) {
             s32 y = playerIndex * BET_TALLY_ROW_SPACING;
             s32 x = BET_TOTAL_LEFT + (digit * DIGIT_GLYPH_SIZE);
