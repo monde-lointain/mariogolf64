@@ -2210,10 +2210,10 @@ void CheckRingShotClear(s32 playerIndex) {
     }
 }
 
-static s32 GetStanceAnimation(u32 slotIndex, s32 club, ShotMode shotMode UNUSED) {
+static s32 GetStanceAnimation(u32 slotIndex, s32 clubIndex, ShotMode shotMode UNUSED) {
     s32 animation;
 
-    switch (GetCharacterClubKind(slotIndex, club)) {
+    switch (GetCharacterClubKind(slotIndex, clubIndex)) {
         case CLUB_KIND_WOOD:
             animation = WOOD_ANIMATIONS;
             break;
@@ -2234,10 +2234,10 @@ static s32 GetStanceAnimation(u32 slotIndex, s32 club, ShotMode shotMode UNUSED)
     return animation;
 }
 
-static s32 GetSwingAnimation(u32 slotIndex, s32 club, ShotMode shotMode) {
+static s32 GetSwingAnimation(u32 slotIndex, s32 clubIndex, ShotMode shotMode) {
     s32 animation;
 
-    switch (GetCharacterClubKind(slotIndex, club)) {
+    switch (GetCharacterClubKind(slotIndex, clubIndex)) {
         case CLUB_KIND_WOOD:
             animation = WOOD_ANIMATIONS + SWING_ANIMATION;
             break;
@@ -2258,12 +2258,12 @@ static s32 GetSwingAnimation(u32 slotIndex, s32 club, ShotMode shotMode) {
     return animation + (shotMode == SHOT_MODE_APPROACH);
 }
 
-static void SetStanceAnimation(u32 slotIndex, s32 club, ShotMode shotMode) {
-    SetCharacterAnimation(slotIndex, GetStanceAnimation(slotIndex, club, shotMode));
+static void SetStanceAnimation(u32 slotIndex, s32 clubIndex, ShotMode shotMode) {
+    SetCharacterAnimation(slotIndex, GetStanceAnimation(slotIndex, clubIndex, shotMode));
 }
 
-static void SetSwingAnimation(u32 slotIndex, s32 club, ShotMode shotMode) {
-    SetCharacterAnimation(slotIndex, GetSwingAnimation(slotIndex, club, shotMode));
+static void SetSwingAnimation(u32 slotIndex, s32 clubIndex, ShotMode shotMode) {
+    SetCharacterAnimation(slotIndex, GetSwingAnimation(slotIndex, clubIndex, shotMode));
 }
 
 void StartPlayerShot(s32 playerIndex) {

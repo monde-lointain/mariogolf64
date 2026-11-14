@@ -496,10 +496,10 @@ void EaseStaffRollView(f32 *eye, f32 *lookAt, f32 rate, s32 easedParts) {
     }
 }
 
-s32 GetStanceAnimation(u32 slotIndex, s32 club, ShotMode shotMode UNUSED) {
+s32 GetStanceAnimation(u32 slotIndex, s32 clubIndex, ShotMode shotMode UNUSED) {
     s32 animation;
 
-    switch (GetCharacterClubKind(slotIndex, club)) {
+    switch (GetCharacterClubKind(slotIndex, clubIndex)) {
         case CLUB_KIND_WOOD:
             animation = WOOD_ANIMATIONS;
             break;
@@ -520,10 +520,10 @@ s32 GetStanceAnimation(u32 slotIndex, s32 club, ShotMode shotMode UNUSED) {
     return animation;
 }
 
-s32 GetSwingAnimation(u32 slotIndex, s32 club, ShotMode shotMode) {
+s32 GetSwingAnimation(u32 slotIndex, s32 clubIndex, ShotMode shotMode) {
     s32 animation;
 
-    switch (GetCharacterClubKind(slotIndex, club)) {
+    switch (GetCharacterClubKind(slotIndex, clubIndex)) {
         case CLUB_KIND_WOOD:
             animation = WOOD_ANIMATIONS + SWING_ANIMATION;
             break;
@@ -544,12 +544,12 @@ s32 GetSwingAnimation(u32 slotIndex, s32 club, ShotMode shotMode) {
     return animation + (shotMode == SHOT_MODE_APPROACH);
 }
 
-void SetStanceAnimation(u32 slotIndex, s32 club, ShotMode shotMode) {
-    SetCharacterAnimation(slotIndex, GetStanceAnimation(slotIndex, club, shotMode));
+void SetStanceAnimation(u32 slotIndex, s32 clubIndex, ShotMode shotMode) {
+    SetCharacterAnimation(slotIndex, GetStanceAnimation(slotIndex, clubIndex, shotMode));
 }
 
-void SetSwingAnimation(u32 slotIndex, s32 club, ShotMode shotMode) {
-    SetCharacterAnimation(slotIndex, GetSwingAnimation(slotIndex, club, shotMode));
+void SetSwingAnimation(u32 slotIndex, s32 clubIndex, ShotMode shotMode) {
+    SetCharacterAnimation(slotIndex, GetSwingAnimation(slotIndex, clubIndex, shotMode));
 }
 
 void BisectFramingPitch(Radians pitch, Radians yaw, f32 depthOffset) {
