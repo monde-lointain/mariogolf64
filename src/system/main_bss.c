@@ -16,7 +16,11 @@
 #include <PRinternal/macros.h>
 #include <PRinternal/osint.h>
 #include <nusys.h>
+
+/* libmus is built for n_audio, which gives its objects n_audio's types */
+#define SUPPORT_NAUDIO
 #include <player_fx.h>
+
 #include <ultra64.h>
 
 #include "camera/camera.h"
@@ -304,7 +308,6 @@ Mtx g_ScreenOrthoMatrix BSS ALIGNED(8) = {{{0}}};
 UNREAD_COMMON(0x8);
 ShotLaunch g_LastShotLaunch BSS ALIGNED(8) = {0};
 ALGlobals __libmus_alglobals BSS ALIGNED(8) = {{0}};
-UNREAD_COMMON(0x4);
 s16 (*f_NoiseGrid)[NOISE_GRID_SIZE] BSS = {0};
 UNREAD_COMMON(0x8);
 NUDebTaskPerf nuDebTaskPerf[NU_DEB_PERF_BUF_NUM] BSS ALIGNED(8) = {{0}};
