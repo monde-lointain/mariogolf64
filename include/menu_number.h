@@ -17,10 +17,10 @@ enum MenuSign {
     MENU_SIGN_CIRCLE
 };
 
-void DrawNarrowTwoDigitMenuNumber(Gfx **displayListHead, s32 x, s32 y, s32 value, u8 mark);
-void DrawOneDigitMenuNumber(Gfx **displayListHead, s32 x, s32 y, s32 value, u8 mark);
-void DrawTwoDigitMenuNumber(Gfx **displayListHead, s32 x, s32 y, s32 value, u8 mark);
-void DrawUnalignedMenuNumber(Gfx **displayListHead, s32 x, s32 y, s32 value, u8 mark);
+void DrawNarrowTwoDigitMenuNumber(Gfx **displayListHead, s32 x, s32 y, s32 number, u8 mark);
+void DrawOneDigitMenuNumber(Gfx **displayListHead, s32 x, s32 y, s32 number, u8 mark);
+void DrawTwoDigitMenuNumber(Gfx **displayListHead, s32 x, s32 y, s32 number, u8 mark);
+void DrawUnalignedMenuNumber(Gfx **displayListHead, s32 x, s32 y, s32 number, u8 mark);
 void DrawMenuSign(Gfx **displayListHead, s32 x, s32 y, u8 sign);
 
 #endif

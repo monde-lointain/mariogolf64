@@ -924,13 +924,13 @@ void PlayTallySound(void) {
     }
 }
 
-void DrawResultsNumber(Gfx **displayListHead, s32 x, s32 y, s32 value) {
+void DrawResultsNumber(Gfx **displayListHead, s32 x, s32 y, s32 number) {
     Gfx *gfx = *displayListHead;
     u8 *text;
     u8 character;
     s32 offset;
 
-    sprintf(g_PrintBuffer, f_NumberFormat, value);
+    sprintf(g_PrintBuffer, f_NumberFormat, number);
     LoadSmallPalette(&gfx, 0, ImageBody(f_DigitsImage));
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);

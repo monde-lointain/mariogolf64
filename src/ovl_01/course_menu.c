@@ -119,10 +119,10 @@ extern const char f_StatsStringFormat[];
 extern const char f_NumberedCourseFormat[];
 
 void DrawStatFigure(Gfx **displayListHead, s16 statIndex, u8 row);
-void DrawThreeDigitMenuNumber(Gfx **displayListHead, s32 x, s32 y, s32 value, u8 mark);
-void DrawFourDigitMenuNumber(Gfx **displayListHead, s32 x, s32 y, s32 value, u8 mark);
-void DrawDecimalMenuNumber(Gfx **displayListHead, s32 x, s32 y, f32 value);
-void DrawMenuNumber(Gfx **displayListHead, s32 x, s32 y, s32 value, u8 mark, u8 field);
+void DrawThreeDigitMenuNumber(Gfx **displayListHead, s32 x, s32 y, s32 number, u8 mark);
+void DrawFourDigitMenuNumber(Gfx **displayListHead, s32 x, s32 y, s32 number, u8 mark);
+void DrawDecimalMenuNumber(Gfx **displayListHead, s32 x, s32 y, f32 number);
+void DrawMenuNumber(Gfx **displayListHead, s32 x, s32 y, s32 number, u8 mark, u8 field);
 
 static s16 f_FirstShownStat = 0;
 static s16 f_StatsTrophyFrame = 0;
@@ -1176,85 +1176,85 @@ enum NumberField {
     NUMBER_FIELD_NONE
 };
 
-void DrawNarrowTwoDigitMenuNumber(Gfx **displayListHead, s32 x, s32 y, s32 value, u8 mark) {
+void DrawNarrowTwoDigitMenuNumber(Gfx **displayListHead, s32 x, s32 y, s32 number, u8 mark) {
     Gfx *gfx = *displayListHead;
 
-    if (value > TWO_DIGIT_MAX) {
-        value = TWO_DIGIT_MAX;
+    if (number > TWO_DIGIT_MAX) {
+        number = TWO_DIGIT_MAX;
     }
 
-    if (value < -TWO_DIGIT_MAX) {
-        value = -TWO_DIGIT_MAX;
+    if (number < -TWO_DIGIT_MAX) {
+        number = -TWO_DIGIT_MAX;
     }
 
-    DrawMenuNumber(&gfx, x, y, value, mark, NUMBER_FIELD_TWO_NARROW);
+    DrawMenuNumber(&gfx, x, y, number, mark, NUMBER_FIELD_TWO_NARROW);
     *displayListHead = gfx;
 }
 
-void DrawOneDigitMenuNumber(Gfx **displayListHead, s32 x, s32 y, s32 value, u8 mark) {
+void DrawOneDigitMenuNumber(Gfx **displayListHead, s32 x, s32 y, s32 number, u8 mark) {
     Gfx *gfx = *displayListHead;
 
-    if (value > ONE_DIGIT_MAX) {
-        value = ONE_DIGIT_MAX;
+    if (number > ONE_DIGIT_MAX) {
+        number = ONE_DIGIT_MAX;
     }
 
-    if (value < -ONE_DIGIT_MAX) {
-        value = -ONE_DIGIT_MAX;
+    if (number < -ONE_DIGIT_MAX) {
+        number = -ONE_DIGIT_MAX;
     }
 
-    DrawMenuNumber(&gfx, x, y, value, mark, NUMBER_FIELD_ONE);
+    DrawMenuNumber(&gfx, x, y, number, mark, NUMBER_FIELD_ONE);
     *displayListHead = gfx;
 }
 
-void DrawTwoDigitMenuNumber(Gfx **displayListHead, s32 x, s32 y, s32 value, u8 mark) {
+void DrawTwoDigitMenuNumber(Gfx **displayListHead, s32 x, s32 y, s32 number, u8 mark) {
     Gfx *gfx = *displayListHead;
 
-    if (value > TWO_DIGIT_MAX) {
-        value = TWO_DIGIT_MAX;
+    if (number > TWO_DIGIT_MAX) {
+        number = TWO_DIGIT_MAX;
     }
 
-    if (value < -TWO_DIGIT_MAX) {
-        value = -TWO_DIGIT_MAX;
+    if (number < -TWO_DIGIT_MAX) {
+        number = -TWO_DIGIT_MAX;
     }
 
-    DrawMenuNumber(&gfx, x, y, value, mark, NUMBER_FIELD_TWO);
+    DrawMenuNumber(&gfx, x, y, number, mark, NUMBER_FIELD_TWO);
     *displayListHead = gfx;
 }
 
-void DrawThreeDigitMenuNumber(Gfx **displayListHead, s32 x, s32 y, s32 value, u8 mark) {
+void DrawThreeDigitMenuNumber(Gfx **displayListHead, s32 x, s32 y, s32 number, u8 mark) {
     Gfx *gfx = *displayListHead;
 
-    if (value > THREE_DIGIT_MAX) {
-        value = THREE_DIGIT_MAX;
+    if (number > THREE_DIGIT_MAX) {
+        number = THREE_DIGIT_MAX;
     }
 
-    if (value < -THREE_DIGIT_MAX) {
-        value = -THREE_DIGIT_MAX;
+    if (number < -THREE_DIGIT_MAX) {
+        number = -THREE_DIGIT_MAX;
     }
 
-    DrawMenuNumber(&gfx, x, y, value, mark, NUMBER_FIELD_THREE);
+    DrawMenuNumber(&gfx, x, y, number, mark, NUMBER_FIELD_THREE);
     *displayListHead = gfx;
 }
 
-void DrawFourDigitMenuNumber(Gfx **displayListHead, s32 x, s32 y, s32 value, u8 mark) {
+void DrawFourDigitMenuNumber(Gfx **displayListHead, s32 x, s32 y, s32 number, u8 mark) {
     Gfx *gfx = *displayListHead;
 
-    if (value > FOUR_DIGIT_MAX) {
-        value = FOUR_DIGIT_MAX;
+    if (number > FOUR_DIGIT_MAX) {
+        number = FOUR_DIGIT_MAX;
     }
 
-    if (value < -FOUR_DIGIT_MAX) {
-        value = -FOUR_DIGIT_MAX;
+    if (number < -FOUR_DIGIT_MAX) {
+        number = -FOUR_DIGIT_MAX;
     }
 
-    DrawMenuNumber(&gfx, x, y, value, mark, NUMBER_FIELD_FOUR);
+    DrawMenuNumber(&gfx, x, y, number, mark, NUMBER_FIELD_FOUR);
     *displayListHead = gfx;
 }
 
-void DrawUnalignedMenuNumber(Gfx **displayListHead, s32 x, s32 y, s32 value, u8 mark) {
+void DrawUnalignedMenuNumber(Gfx **displayListHead, s32 x, s32 y, s32 number, u8 mark) {
     Gfx *gfx = *displayListHead;
 
-    DrawMenuNumber(&gfx, x, y, value, mark, NUMBER_FIELD_NONE);
+    DrawMenuNumber(&gfx, x, y, number, mark, NUMBER_FIELD_NONE);
     *displayListHead = gfx;
 }
 
@@ -1262,7 +1262,7 @@ void DrawUnalignedMenuNumber(Gfx **displayListHead, s32 x, s32 y, s32 value, u8 
 #define MENU_NUMBER_DIGIT_LIMIT 4
 #define MENU_NUMBER_LIMIT FOUR_DIGIT_MAX
 
-void DrawMenuNumber(Gfx **displayListHead, s32 x, s32 y, s32 value, u8 mark, u8 field) {
+void DrawMenuNumber(Gfx **displayListHead, s32 x, s32 y, s32 number, u8 mark, u8 field) {
     Gfx *gfx = *displayListHead;
     s16 digits[MENU_NUMBER_DIGIT_LIMIT];
     s16 digitCount = 0;
@@ -1270,11 +1270,11 @@ void DrawMenuNumber(Gfx **displayListHead, s32 x, s32 y, s32 value, u8 mark, u8 
     s16 spacing;
     s16 index;
 
-    if (value > MENU_NUMBER_LIMIT) {
+    if (number > MENU_NUMBER_LIMIT) {
         return;
     }
 
-    if (value < -MENU_NUMBER_LIMIT) {
+    if (number < -MENU_NUMBER_LIMIT) {
         return;
     }
 
@@ -1291,12 +1291,12 @@ void DrawMenuNumber(Gfx **displayListHead, s32 x, s32 y, s32 value, u8 mark, u8 
     if (mark != MENU_NUMBER_PLAIN) {
         switch (mark) {
             case MENU_NUMBER_SIGNED:
-                if (value > 0) {
+                if (number > 0) {
                     index = MENU_GLYPH_PLUS;
                     gDPSetCombineMode(gfx++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
                     gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0x7F, 0x7F, OPAQUE_ALPHA);
                 }
-                else if (value < 0) {
+                else if (number < 0) {
                     index = MENU_GLYPH_MINUS;
                     gDPSetCombineMode(gfx++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
                     gDPSetPrimColor(gfx++, 0, 0, 0x7F, 0xFF, 0x7F, OPAQUE_ALPHA);
@@ -1354,7 +1354,7 @@ void DrawMenuNumber(Gfx **displayListHead, s32 x, s32 y, s32 value, u8 mark, u8 
         }
     }
 
-    if (value >= 0 && value < TWO_DIGIT_FIRST) {
+    if (number >= 0 && number < TWO_DIGIT_FIRST) {
         digitCount = 1;
         if (field == NUMBER_FIELD_TWO) {
             shift += MENU_GLYPH_SIZE;
@@ -1372,10 +1372,10 @@ void DrawMenuNumber(Gfx **displayListHead, s32 x, s32 y, s32 value, u8 mark, u8 
             shift += NARROW_DIGIT_SPACING;
         }
 
-        digits[0] = value % DECIMAL_BASE;
+        digits[0] = number % DECIMAL_BASE;
     }
 
-    if (value >= TWO_DIGIT_FIRST && value < THREE_DIGIT_FIRST) {
+    if (number >= TWO_DIGIT_FIRST && number < THREE_DIGIT_FIRST) {
         digitCount = 2;
         if (field == NUMBER_FIELD_THREE) {
             shift += 2 * MENU_GLYPH_SIZE;
@@ -1385,30 +1385,30 @@ void DrawMenuNumber(Gfx **displayListHead, s32 x, s32 y, s32 value, u8 mark, u8 
             shift += 3 * MENU_GLYPH_SIZE;
         }
 
-        digits[0] = value / DECIMAL_BASE;
-        digits[1] = value % DECIMAL_BASE;
+        digits[0] = number / DECIMAL_BASE;
+        digits[1] = number % DECIMAL_BASE;
     }
 
-    if (value >= THREE_DIGIT_FIRST && value < FOUR_DIGIT_FIRST) {
+    if (number >= THREE_DIGIT_FIRST && number < FOUR_DIGIT_FIRST) {
         digitCount = 3;
         if (field == NUMBER_FIELD_FOUR) {
             shift += 3 * MENU_GLYPH_SIZE;
         }
 
-        digits[0] = value / THREE_DIGIT_FIRST;
-        digits[1] = (value % THREE_DIGIT_FIRST) / DECIMAL_BASE;
-        digits[2] = (value % THREE_DIGIT_FIRST) % DECIMAL_BASE;
+        digits[0] = number / THREE_DIGIT_FIRST;
+        digits[1] = (number % THREE_DIGIT_FIRST) / DECIMAL_BASE;
+        digits[2] = (number % THREE_DIGIT_FIRST) % DECIMAL_BASE;
     }
 
-    if (value >= FOUR_DIGIT_FIRST && value <= MENU_NUMBER_LIMIT) {
+    if (number >= FOUR_DIGIT_FIRST && number <= MENU_NUMBER_LIMIT) {
         digitCount = 4;
-        digits[0] = value / FOUR_DIGIT_FIRST;
-        digits[1] = (value % FOUR_DIGIT_FIRST) / THREE_DIGIT_FIRST;
-        digits[2] = ((value % FOUR_DIGIT_FIRST) % THREE_DIGIT_FIRST) / DECIMAL_BASE;
-        digits[3] = ((value % FOUR_DIGIT_FIRST) % THREE_DIGIT_FIRST) % DECIMAL_BASE;
+        digits[0] = number / FOUR_DIGIT_FIRST;
+        digits[1] = (number % FOUR_DIGIT_FIRST) / THREE_DIGIT_FIRST;
+        digits[2] = ((number % FOUR_DIGIT_FIRST) % THREE_DIGIT_FIRST) / DECIMAL_BASE;
+        digits[3] = ((number % FOUR_DIGIT_FIRST) % THREE_DIGIT_FIRST) % DECIMAL_BASE;
     }
 
-    if (value < 0 && value > -TWO_DIGIT_FIRST) {
+    if (number < 0 && number > -TWO_DIGIT_FIRST) {
         digitCount = 1;
         if (field == NUMBER_FIELD_TWO) {
             shift += MENU_GLYPH_SIZE;
@@ -1426,10 +1426,10 @@ void DrawMenuNumber(Gfx **displayListHead, s32 x, s32 y, s32 value, u8 mark, u8 
             shift += NARROW_DIGIT_SPACING;
         }
 
-        digits[0] = -value % DECIMAL_BASE;
+        digits[0] = -number % DECIMAL_BASE;
     }
 
-    if (value <= -TWO_DIGIT_FIRST && value > -THREE_DIGIT_FIRST) {
+    if (number <= -TWO_DIGIT_FIRST && number > -THREE_DIGIT_FIRST) {
         digitCount = 2;
         if (field == NUMBER_FIELD_THREE) {
             shift += 2 * MENU_GLYPH_SIZE;
@@ -1439,27 +1439,27 @@ void DrawMenuNumber(Gfx **displayListHead, s32 x, s32 y, s32 value, u8 mark, u8 
             shift += 3 * MENU_GLYPH_SIZE;
         }
 
-        digits[0] = -value / DECIMAL_BASE;
-        digits[1] = -value % DECIMAL_BASE;
+        digits[0] = -number / DECIMAL_BASE;
+        digits[1] = -number % DECIMAL_BASE;
     }
 
-    if (value <= -THREE_DIGIT_FIRST && value > -FOUR_DIGIT_FIRST) {
+    if (number <= -THREE_DIGIT_FIRST && number > -FOUR_DIGIT_FIRST) {
         digitCount = 3;
         if (field == NUMBER_FIELD_FOUR) {
             shift += 3 * MENU_GLYPH_SIZE;
         }
 
-        digits[0] = -value / THREE_DIGIT_FIRST;
-        digits[1] = (-value % THREE_DIGIT_FIRST) / DECIMAL_BASE;
-        digits[2] = (-value % THREE_DIGIT_FIRST) % DECIMAL_BASE;
+        digits[0] = -number / THREE_DIGIT_FIRST;
+        digits[1] = (-number % THREE_DIGIT_FIRST) / DECIMAL_BASE;
+        digits[2] = (-number % THREE_DIGIT_FIRST) % DECIMAL_BASE;
     }
 
-    if (value <= -FOUR_DIGIT_FIRST && value >= -MENU_NUMBER_LIMIT) {
+    if (number <= -FOUR_DIGIT_FIRST && number >= -MENU_NUMBER_LIMIT) {
         digitCount = 4;
-        digits[0] = -value / FOUR_DIGIT_FIRST;
-        digits[1] = (-value % FOUR_DIGIT_FIRST) / THREE_DIGIT_FIRST;
-        digits[2] = ((-value % FOUR_DIGIT_FIRST) % THREE_DIGIT_FIRST) / DECIMAL_BASE;
-        digits[3] = ((-value % FOUR_DIGIT_FIRST) % THREE_DIGIT_FIRST) % DECIMAL_BASE;
+        digits[0] = -number / FOUR_DIGIT_FIRST;
+        digits[1] = (-number % FOUR_DIGIT_FIRST) / THREE_DIGIT_FIRST;
+        digits[2] = ((-number % FOUR_DIGIT_FIRST) % THREE_DIGIT_FIRST) / DECIMAL_BASE;
+        digits[3] = ((-number % FOUR_DIGIT_FIRST) % THREE_DIGIT_FIRST) % DECIMAL_BASE;
     }
 
     spacing = MENU_GLYPH_SIZE;
@@ -1513,9 +1513,9 @@ void DrawMenuNumber(Gfx **displayListHead, s32 x, s32 y, s32 value, u8 mark, u8 
 
 const char f_DecimalWholeFormat[] = "%d";
 
-void DrawDecimalMenuNumber(Gfx **displayListHead, s32 x, s32 y, f32 value) {
+void DrawDecimalMenuNumber(Gfx **displayListHead, s32 x, s32 y, f32 number) {
     Gfx *gfx = *displayListHead;
-    s32 whole = value;
+    s32 whole = number;
     s32 shift;
     s32 fraction;
     s32 digitIndex;
@@ -1530,7 +1530,7 @@ void DrawDecimalMenuNumber(Gfx **displayListHead, s32 x, s32 y, f32 value) {
         whole = 0;
     }
 
-    fraction = (value - whole) * HUNDREDTHS_PER_UNIT;
+    fraction = (number - whole) * HUNDREDTHS_PER_UNIT;
 
     if (fraction % DECIMAL_BASE >= DECIMAL_BASE / 2) {
         fraction += DECIMAL_BASE;
