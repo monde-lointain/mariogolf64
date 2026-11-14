@@ -59,12 +59,17 @@ enum SaveMenuGame {
 #define SAVE_MENU_SLOT_COUNT 5
 #define COURSE_IMAGE_BUFFER_COUNT 2
 
-enum {
+enum CourseImageBuffer {
     COURSE_IMAGE_BUFFER_FIRST,
     COURSE_IMAGE_BUFFER_SECOND
 };
 
-enum {
+typedef u8 UCourseImageBuffer8;
+
+// Flips between the two course image buffers.
+#define COURSE_IMAGE_BUFFER_FLIP 1
+
+enum SavedGameBoard {
     SAVED_GAME_FIRST,
     SAVED_GAME_SECOND,
     SAVED_GAME_THIRD
@@ -181,7 +186,7 @@ static s16 f_AssignedHumanCount = 0;
 static s16 f_HumanPlayerCount = PLAYER_COUNT_MAX;
 static UBoolean8 f_IsGameChosen = FALSE;
 static UBoolean8 f_AreControllersAssigned = FALSE;
-static u8 f_ShownCourseBufferIndex = 0;
+static UCourseImageBuffer8 f_ShownCourseBufferIndex = COURSE_IMAGE_BUFFER_FIRST;
 static SaveMenuMode f_SavedGameModes[SAVED_GAME_COUNT] =
     {NO_SAVE_MENU_MODE, NO_SAVE_MENU_MODE, NO_SAVE_MENU_MODE};
 static WideAssetId f_ModeImageAssets[SAVE_MENU_MODE_COUNT] =
@@ -1496,17 +1501,23 @@ Outcome ContinueSavedGame(void);
         if (CHOSEN_GAME.isValid) { \
             if (!CHOSEN_GAME.state.isMiniGolf) { \
                 OpenEncodedAsset(g_CourseIconAssets[CHOSEN_GAME.state.courseIndex], &asset); \
-                ReadEncodedAsset(f_CourseImageBuffers[f_ShownCourseBufferIndex ^ 1], &asset); \
-                f_ShownCourseBufferIndex ^= 1; \
+                ReadEncodedAsset( \
+                    f_CourseImageBuffers[f_ShownCourseBufferIndex ^ COURSE_IMAGE_BUFFER_FLIP], \
+                    &asset \
+                ); \
+                f_ShownCourseBufferIndex ^= COURSE_IMAGE_BUFFER_FLIP; \
             } \
             else { \
                 miniGolfIndex = CHOSEN_GAME.state.courseIndex; \
                 miniGolfIndex -= MINI_GOLF_COURSE_INDEX; \
                 OpenEncodedAsset(g_MiniGolfCourseIconAssets[miniGolfIndex], &asset); \
-                ReadEncodedAsset(f_CourseImageBuffers[f_ShownCourseBufferIndex ^ 1], &asset); \
+                ReadEncodedAsset( \
+                    f_CourseImageBuffers[f_ShownCourseBufferIndex ^ COURSE_IMAGE_BUFFER_FLIP], \
+                    &asset \
+                ); \
                 OpenAssetFile(g_MiniGolfDiscFiles[miniGolfIndex], &file); \
                 ReadAssetFile(g_MiniGolfDiscImages[0], GetAssetFileSize(&file), &file); \
-                f_ShownCourseBufferIndex ^= 1; \
+                f_ShownCourseBufferIndex ^= COURSE_IMAGE_BUFFER_FLIP; \
             } \
         } \
     }
