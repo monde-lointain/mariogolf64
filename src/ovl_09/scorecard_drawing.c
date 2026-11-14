@@ -90,7 +90,7 @@ extern const char f_ZeroToParFormat[];
 extern const char f_ScoreToParFormat[];
 extern const char f_WideTotalFormat[];
 extern const char f_TotalFormat[];
-extern const char f_DrawText[];
+extern const char f_TieText[];
 extern const char f_WinText[];
 extern const char f_LoseText[];
 static const char f_BlankBetName[];
@@ -348,7 +348,7 @@ void DrawMatchResult(Gfx **displayListHead) {
         if (g_Players[playerIndex].holes[ownHole].strokeCount ==
             g_Players[playerIndex ^ 1].holes[holeIndex].strokeCount) {
             SetTextColor(&gfx, 0xFF, 0xFF, 0);
-            DrawLargeText(&gfx, x, MATCH_RESULT_Y, (char *)f_DrawText);
+            DrawLargeText(&gfx, x, MATCH_RESULT_Y, (char *)f_TieText);
         }
         else if (g_Players[playerIndex].holes[ownHole].strokeCount <
             g_Players[playerIndex ^ 1].holes[holeIndex].strokeCount) {
@@ -419,7 +419,7 @@ void DrawMatchResult(Gfx **displayListHead) {
 }
 
 const char f_HoleNumberFormat[] = "ﾎｰﾙ%d";
-const char f_DrawText[] = "DRAW";
+const char f_TieText[] = "DRAW";
 const char f_WinText[] = "WIN";
 const char f_LoseText[] = "LOSE";
 
