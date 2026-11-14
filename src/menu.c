@@ -1485,7 +1485,7 @@ void SortIndicesDescending(s32 *values, s32 *order, s32 count) {
     s32 index;
     s32 searchIndex;
     s32 shiftIndex;
-    s32 value;
+    s32 insertedValue;
     s32 valueIndex;
 
     for (index = 0; index < count; index++) {
@@ -1497,10 +1497,10 @@ void SortIndicesDescending(s32 *values, s32 *order, s32 count) {
     }
 
     for (index = 0; index < count; index++) {
-        value = sortedValues[index];
+        insertedValue = sortedValues[index];
         valueIndex = order[index];
         for (searchIndex = index - 1; searchIndex >= 0; searchIndex--) {
-            if (sortedValues[searchIndex] >= value) {
+            if (sortedValues[searchIndex] >= insertedValue) {
                 break;
             }
         }
@@ -1511,7 +1511,7 @@ void SortIndicesDescending(s32 *values, s32 *order, s32 count) {
                 order[shiftIndex] = order[shiftIndex - 1];
             }
 
-            sortedValues[shiftIndex] = value;
+            sortedValues[shiftIndex] = insertedValue;
             order[shiftIndex] = valueIndex;
         }
     }
@@ -2380,36 +2380,36 @@ Boolean IsNintendoClubTournament(void) {
 #define SECOND_MINI_GOLF_TITLE_MESSAGE 0xC8
 
 s32 GetClubTournamentNameMessage(void) {
-    s32 value;
+    s32 nameIndex;
 
-    value = g_ClubTournamentNameIndex;
-    if (value < 0) {
-        value = 0;
+    nameIndex = g_ClubTournamentNameIndex;
+    if (nameIndex < 0) {
+        nameIndex = 0;
     }
 
-    return value + FIRST_TOURNAMENT_NAME_MESSAGE;
+    return nameIndex + FIRST_TOURNAMENT_NAME_MESSAGE;
 }
 
 s32 GetClubTournamentCourseMessage(void) {
-    s32 value;
+    s32 courseIndex;
 
-    value = GetClubTournamentCourse();
-    if (value < 0) {
-        value = 0;
+    courseIndex = GetClubTournamentCourse();
+    if (courseIndex < 0) {
+        courseIndex = 0;
     }
 
-    return value + FIRST_COURSE_NAME_MESSAGE;
+    return courseIndex + FIRST_COURSE_NAME_MESSAGE;
 }
 
 s32 GetClubTournamentNumber(void) {
-    s32 value;
+    s32 tournamentNumber;
 
-    value = g_ClubTournamentNumber;
-    if (value <= 0) {
-        value = 1;
+    tournamentNumber = g_ClubTournamentNumber;
+    if (tournamentNumber <= 0) {
+        tournamentNumber = 1;
     }
 
-    return value;
+    return tournamentNumber;
 }
 
 void CopyTournamentCode(u8 *destination) {
@@ -2421,36 +2421,36 @@ void CopyTournamentCode(u8 *destination) {
 }
 
 s32 GetClubTournamentModeMessage(void) {
-    s32 value;
+    s32 messageId;
 
     switch (g_ClubTournamentRules.isSpeedGolf) {
         case 0:
         default:
-            value = STROKE_PLAY_MESSAGE;
+            messageId = STROKE_PLAY_MESSAGE;
             break;
         case 1:
-            value = SPEED_GOLF_MESSAGE;
+            messageId = SPEED_GOLF_MESSAGE;
             break;
     }
 
-    return value;
+    return messageId;
 }
 
 s32 GetClubTournamentCourseTitleMessage(void) {
-    s32 value;
+    s32 messageId;
 
     if (g_ClubTournamentRules.courseIndex >= MINI_GOLF_COURSE_INDEX) {
-        value = FIRST_MINI_GOLF_TITLE_MESSAGE;
+        messageId = FIRST_MINI_GOLF_TITLE_MESSAGE;
         if (g_ClubTournamentRules.courseIndex >=
             MINI_GOLF_COURSE_INDEX + MINI_GOLF_COURSES_PER_RECORD) {
-            value = SECOND_MINI_GOLF_TITLE_MESSAGE;
+            messageId = SECOND_MINI_GOLF_TITLE_MESSAGE;
         }
     }
     else {
-        value = g_ClubTournamentRules.courseIndex + FIRST_COURSE_NAME_MESSAGE;
+        messageId = g_ClubTournamentRules.courseIndex + FIRST_COURSE_NAME_MESSAGE;
     }
 
-    return value;
+    return messageId;
 }
 
 void ClearImportedCharacters(void) {
