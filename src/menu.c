@@ -2488,7 +2488,7 @@ void ComputeRoundStatistics(void) {
     f32 sandSaveChanceSum;
     f32 driveYardSum;
     s32 driveCountSum;
-    f32 zero;
+    f32 unplayedRoundCount;
     f32 emptyCount;
     f32 holeCount;
 
@@ -2562,9 +2562,9 @@ void ComputeRoundStatistics(void) {
     g_CourseStatFigures[COURSE_COUNT].bestDrive = 0.0f;
     g_CourseStatFigures[COURSE_COUNT].bestScore = g_CourseStatFigures[0].bestScore;
     g_CourseStatFigures[COURSE_COUNT].bestDrive = g_CourseStatFigures[0].bestDrive;
-    zero = g_CourseStatFigures[COURSE_COUNT].roundCount;
+    unplayedRoundCount = g_CourseStatFigures[COURSE_COUNT].roundCount;
     for (; courseIndex != COURSE_COUNT; courseIndex++) {
-        if (zero < g_CourseStatFigures[courseIndex].roundCount) {
+        if (unplayedRoundCount < g_CourseStatFigures[courseIndex].roundCount) {
             if (!hasPlayedCourse) {
                 g_CourseStatFigures[COURSE_COUNT].bestScore =
                     g_CourseStatFigures[courseIndex].bestScore;
