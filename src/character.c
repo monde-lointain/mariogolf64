@@ -199,7 +199,7 @@ FILE_STATIC s32 g_CurrentAnimationStartFrame;
 #define RENDER_MODES_SEGMENT 0x04
 #define CULLING_SEGMENT 0x05
 #define ENV_COLOR_SEGMENT 0x08
-#define HILITE_SEGMENT 0x09
+#define HIGHLIGHT_SEGMENT 0x09
 #define RENDER_MODE_SEGMENT 0x0A
 #define COMBINE_SEGMENT 0x0B
 #define MIRROR_TEXTURE_SEGMENT 0x0C
@@ -316,7 +316,7 @@ Gfx g_CharacterCombineDisplayList[2] = {
     ),
     gsSPEndDisplayList(),
 };
-Gfx g_CharacterHiliteDisplayList[3] = {
+Gfx g_CharacterHighlightDisplayList[3] = {
     gsDPPipeSync(),
     gsDPSetRenderMode(G_RM_PASS, G_RM_AA_ZB_OPA_SURF2),
     gsSPEndDisplayList(),
@@ -1897,7 +1897,7 @@ void DrawCharacter(u32 slotIndex) {
         gDPSetDepthSource(gfx++, G_ZS_PIXEL);
         gDPSetBlendColor(gfx++, 0xFF, 0xFF, 0xFF, BLEND_ALPHA);
         gSPSegment(gfx++, ENV_COLOR_SEGMENT, osVirtualToPhysical(g_CharacterEnvColorDisplayLists));
-        gSPSegment(gfx++, HILITE_SEGMENT, osVirtualToPhysical(g_CharacterHiliteDisplayList));
+        gSPSegment(gfx++, HIGHLIGHT_SEGMENT, osVirtualToPhysical(g_CharacterHighlightDisplayList));
         gSPSegment(
             gfx++,
             RENDER_MODE_SEGMENT,

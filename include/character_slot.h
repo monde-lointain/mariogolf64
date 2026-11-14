@@ -258,7 +258,7 @@ extern CharacterSlot g_CharacterSlots[CHARACTER_SLOT_COUNT];
 
 extern Gfx g_CharacterRenderModeDisplayList[3];
 extern Gfx g_CharacterCombineDisplayList[2];
-extern Gfx g_CharacterHiliteDisplayList[3];
+extern Gfx g_CharacterHighlightDisplayList[3];
 #define ENV_COLOR_COUNT 10
 extern u8 g_CharacterEnvColors[ENV_COLOR_COUNT][3];
 extern Gfx g_CharacterEnvColorDisplayLists[ENV_COLOR_COUNT][2];
@@ -317,6 +317,6 @@ void PlaceAndViewCharacter(u32 slotIndex);
 void PlaceCharacter(u32 slotIndex, CoursePoint point, Radians heading);
 void DrawCharacter(u32 slotIndex);
 void DrawCharacterAndShadow(CameraMatrices *matrices, s32 cameraIndex, s32 slotIndex);
-void SetCharacterHilite(CameraMatrices *matrices UNUSED);
+void SetCharacterHighlight(CameraMatrices *matrices UNUSED);
 
 #endif

@@ -2024,7 +2024,7 @@ s32 DrawGame(void) {
                     g_Cameras[0].view.lookAt[2] = 0.0f;
                     g_Cameras[0].view.eye[1] = 10.0f;
                     g_Cameras[0].view.eye[2] = 60.0f;
-                    SetCharacterHilite(matrices);
+                    SetCharacterHighlight(matrices);
                 }
                 else if (g_IsHoleShownInMenuInset && g_HasLoaderFinished == TRUE) {
                     usesFloatMatrices = TRUE;
@@ -2145,7 +2145,7 @@ s32 DrawGame(void) {
                             0.0f
                         );
                         gSPLookAt(g_DisplayListHead++, &matrices->lookAt);
-                        SetCharacterHilite(matrices);
+                        SetCharacterHighlight(matrices);
                         ConvertMatrixToFixed(matrices->viewingF, &matrices->viewing);
                         target = courseView->lookAt;
                         if (g_GameState.isMiniGolf) {

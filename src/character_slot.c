@@ -20,8 +20,8 @@
     (AA_EN | Z_CMP | Z_UPD | IM_RD | CLR_ON_CVG | CVG_DST_WRAP | ZMODE_XLU | FORCE_BL | \
         GBL_c2(G_BL_CLR_IN, G_BL_A_IN, G_BL_CLR_MEM, G_BL_1MA))
 
-#define HILITE_TEXTURE_SIZE 32
-#define HILITE_SECOND_TILE 1
+#define HIGHLIGHT_TEXTURE_SIZE 32
+#define HIGHLIGHT_SECOND_TILE 1
 
 #define ModelChosenDisplayList(model) \
     ((Gfx *)(model)->segmentAddresses[CHARACTER_MODEL_CHOSEN_DISPLAY_LIST])
@@ -39,8 +39,8 @@ s32 g_CurrentAnimationEndFrame;
 f32 g_CurrentAnimationFrame;
 Mtx *g_CurrentJointMatrices;
 
-static LookAt f_HiliteLookAts[DRAW_BUFFER_COUNT];
-static Hilite f_Hilites[DRAW_BUFFER_COUNT];
+static LookAt f_HighlightLookAts[DRAW_BUFFER_COUNT];
+static Hilite f_Highlights[DRAW_BUFFER_COUNT];
 
 void SetCharacterAlpha(s32 alpha) {
     Gfx *gfx;
@@ -117,7 +117,7 @@ void SetCharacterAlpha(s32 alpha) {
     }
 }
 
-void SetCharacterHilite(CameraMatrices *matrices UNUSED) {
+void SetCharacterHighlight(CameraMatrices *matrices UNUSED) {
     f32 lookAtMatrix[4][4];
     f32 lightDirection[3];
     Radians lightPitch;
@@ -131,8 +131,8 @@ void SetCharacterHilite(CameraMatrices *matrices UNUSED) {
     lightDirection[2] = -sinf(lightPitch) * sinf(lightYaw) * LIGHT_DIRECTION_SCALE;
     guLookAtHiliteF(
         lookAtMatrix,
-        &f_HiliteLookAts[g_DrawBufferIndex],
-        &f_Hilites[g_DrawBufferIndex],
+        &f_HighlightLookAts[g_DrawBufferIndex],
+        &f_Highlights[g_DrawBufferIndex],
         g_Cameras[0].view.eye[0],
         g_Cameras[0].view.eye[1],
         g_Cameras[0].view.eye[2],
@@ -148,23 +148,23 @@ void SetCharacterHilite(CameraMatrices *matrices UNUSED) {
         (s8)lightDirection[0],
         (s8)lightDirection[1],
         (s8)lightDirection[2],
-        HILITE_TEXTURE_SIZE,
-        HILITE_TEXTURE_SIZE
+        HIGHLIGHT_TEXTURE_SIZE,
+        HIGHLIGHT_TEXTURE_SIZE
     );
-    gfx = g_CharacterHiliteDisplayList;
+    gfx = g_CharacterHighlightDisplayList;
     gDPSetHilite1Tile(
         gfx++,
         G_TX_RENDERTILE,
-        &f_Hilites[g_DrawBufferIndex],
-        HILITE_TEXTURE_SIZE,
-        HILITE_TEXTURE_SIZE
+        &f_Highlights[g_DrawBufferIndex],
+        HIGHLIGHT_TEXTURE_SIZE,
+        HIGHLIGHT_TEXTURE_SIZE
     );
     gDPSetHilite2Tile(
         gfx++,
-        HILITE_SECOND_TILE,
-        &f_Hilites[g_DrawBufferIndex],
-        HILITE_TEXTURE_SIZE,
-        HILITE_TEXTURE_SIZE
+        HIGHLIGHT_SECOND_TILE,
+        &f_Highlights[g_DrawBufferIndex],
+        HIGHLIGHT_TEXTURE_SIZE,
+        HIGHLIGHT_TEXTURE_SIZE
     );
     gSPEndDisplayList(gfx++);
 }
