@@ -127,6 +127,6 @@ void GetSurfacePercentRange(SurfaceInfo *info, Club *club, s32 *range);
 void GetLieSpan(Club *club, Surface surface, s32 *span, ShotMode shotMode);
 void HandleClubInput(void);
 void HandleShotModeInput(void);
-s32 StepToClubChoice(struct CurrentShot *choice);
+s32 StepToClubChoice(struct CurrentShot *targetShot);
 
 #endif

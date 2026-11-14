@@ -4336,11 +4336,12 @@ void GetLieSpan(Club *club, Surface surface, s32 *span, ShotMode shotMode) {
     }
 }
 
-s32 StepToClubChoice(CurrentShot *choice) {
+s32 StepToClubChoice(CurrentShot *targetShot) {
     Boolean hasStepped = FALSE;
     s32 slot;
 
-    if (g_CurrentShot.shotMode == choice->shotMode && g_CurrentShot.clubSlot == choice->clubSlot) {
+    if (g_CurrentShot.shotMode == targetShot->shotMode &&
+        g_CurrentShot.clubSlot == targetShot->clubSlot) {
         return TRUE;
     }
 
@@ -4355,15 +4356,15 @@ s32 StepToClubChoice(CurrentShot *choice) {
 
     f_ClubChoiceDelay = CLUB_CHOICE_STEP_DELAY;
     if (!hasStepped) {
-        if (g_CurrentShot.shotMode != choice->shotMode) {
+        if (g_CurrentShot.shotMode != targetShot->shotMode) {
             PlaySound(SOUND_LOOK_DOWN_RANGE, CLUB_SOUND_CHANNEL, SOUND_FULL_SCALE);
             hasStepped = TRUE;
-            g_CurrentShot.shotMode = choice->shotMode;
+            g_CurrentShot.shotMode = targetShot->shotMode;
         }
     }
 
     if (!hasStepped) {
-        if (choice->clubSlot > g_CurrentShot.clubSlot) {
+        if (targetShot->clubSlot > g_CurrentShot.clubSlot) {
             PlaySound(SOUND_LOOK_DOWN_RANGE, CLUB_SOUND_CHANNEL, SOUND_FULL_SCALE);
             for (slot = g_CurrentShot.clubSlot + 1; slot < CLUB_SLOT_COUNT; slot++) {
                 if (g_Players[g_CurrentShot.playerIndex].clubs[slot] != NO_CLUB &&
@@ -4375,11 +4376,11 @@ s32 StepToClubChoice(CurrentShot *choice) {
                 }
             }
 
-            if (!hasStepped || g_CurrentShot.clubSlot > choice->clubSlot) {
-                g_CurrentShot.clubSlot = choice->clubSlot;
+            if (!hasStepped || g_CurrentShot.clubSlot > targetShot->clubSlot) {
+                g_CurrentShot.clubSlot = targetShot->clubSlot;
             }
         }
-        else if (choice->clubSlot < g_CurrentShot.clubSlot) {
+        else if (targetShot->clubSlot < g_CurrentShot.clubSlot) {
             PlaySound(SOUND_LOOK_DOWN_RANGE, CLUB_SOUND_CHANNEL, SOUND_FULL_SCALE);
             for (slot = g_CurrentShot.clubSlot - 1; slot >= 0; slot--) {
                 if (g_Players[g_CurrentShot.playerIndex].clubs[slot] != NO_CLUB &&
@@ -4391,8 +4392,8 @@ s32 StepToClubChoice(CurrentShot *choice) {
                 }
             }
 
-            if (!hasStepped || g_CurrentShot.clubSlot < choice->clubSlot) {
-                g_CurrentShot.clubSlot = choice->clubSlot;
+            if (!hasStepped || g_CurrentShot.clubSlot < targetShot->clubSlot) {
+                g_CurrentShot.clubSlot = targetShot->clubSlot;
             }
         }
     }
