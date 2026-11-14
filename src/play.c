@@ -122,10 +122,10 @@ u8 g_UnreadPlayBuffer[0xDEC];
 
 FILE_STATIC u8 g_IsGroundTileNearby[GROUND_TILE_COUNT];
 FILE_STATIC PlayRecord f_BestShotReplayRecord;
-FILE_STATIC s8 g_WasDonkeyKongUnlocked;
-FILE_STATIC s8 g_WasMapleUnlocked;
-FILE_STATIC s8 g_WasMetalMarioUnlocked;
-FILE_STATIC s8 g_HadEveryRingShotStar;
+FILE_STATIC Boolean8 g_WasDonkeyKongUnlocked;
+FILE_STATIC Boolean8 g_WasMapleUnlocked;
+FILE_STATIC Boolean8 g_WasMetalMarioUnlocked;
+FILE_STATIC Boolean8 g_HadEveryRingShotStar;
 FILE_STATIC s8 g_RingShotCourseOpenedAtStart;
 
 static s32 f_UnusedWordsBeforeTrainingHeading[2] UNUSED = {0};

@@ -181,7 +181,7 @@ MatchSide GetMatchWinner(s32 playerIndex, s32 opponentIndex) {
         !(GetNetScore(dormieIndex) > GetNetScore(otherIndex) + 1))
 
 MatchSide GetMatchHoleResult(s32 playerIndex, s32 opponentIndex) {
-    s32 standing;
+    MatchStanding standing;
 
     if (g_Players[playerIndex].holeStatus != HOLE_STATUS_PLAYING ||
         g_Players[opponentIndex].holeStatus != HOLE_STATUS_PLAYING) {

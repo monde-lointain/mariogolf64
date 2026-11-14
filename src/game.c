@@ -1529,6 +1529,8 @@ enum DrawMode {
     DRAW_MODE_BLANK
 };
 
+typedef u32 DrawMode;
+
 #define MAP_NEAR_CLIP 10.0f
 #define MAP_FAR_CLIP 8000.0f
 #define MAP_ORTHO_HALF_WIDTH 160.0f
@@ -1577,7 +1579,7 @@ s32 DrawGame(void) {
     u16 perspectiveNormalization;
     Boolean drawsScene;
     TerrainStyle terrainStyle;
-    u32 drawMode;
+    DrawMode drawMode;
     s32 viewIndex;
     s32 playerIndex;
     s32 commandCount;

@@ -1562,7 +1562,7 @@ void ChooseLandingTarget(s32 x, s32 z, s32 distance, s32 *targetX, s32 *targetZ)
     s32 alongZ;
     s32 endX;
     s32 endZ;
-    s32 endRating;
+    LandingRating endRating;
     s32 sideCount;
     Boolean isFound;
     s32 startX;
@@ -2026,7 +2026,7 @@ s32 StepTrialShot(void) {
     s32 bounceCount;
     s32 heightMiss;
     SurfaceTraits *surfaceTraits;
-    s32 targetRating;
+    LandingRating targetRating;
     s32 strokeCount;
     s32 par;
     s32 strokesOver;

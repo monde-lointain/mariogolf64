@@ -334,7 +334,7 @@ s32 StepOpeningBallSimulation(BallSimulation *simulation) {
     s32 previousVelocityZ;
     s32 contact;
     s32 stepFlags = 0;
-    s32 printsDebugText;
+    Boolean printsDebugText;
     s32 substep;
     s32 substepCount;
     Boolean isNearCup;
