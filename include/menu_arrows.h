@@ -18,7 +18,7 @@ void DrawGreenArrow(
     Gfx **displayListHead,
     ImageAsset *image,
     s32 blinkFrame,
-    s32 direction,
+    MenuArrow direction,
     s32 centerX,
     s32 centerY
 );

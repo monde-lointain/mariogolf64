@@ -82,8 +82,10 @@ enum InsetViewState {
     INSET_VIEW_CLOSING
 };
 
+typedef s32 InsetViewState;
+
 typedef struct InsetView {
-    s32 animation;
+    InsetViewState animation;
     s32 step;
     s32 ignoredSourceCode;
     s32 ignoredSizeCode;

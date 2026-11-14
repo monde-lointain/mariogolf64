@@ -86,6 +86,8 @@ enum TriangleFacing {
     TRIANGLE_FACING_Z
 };
 
+typedef s32 TriangleFacing;
+
 #define GetPlaneSide(plane, x, y, z) \
     (((plane).normal[AXIS_X] * (x)) + ((plane).normal[AXIS_Y] * (y)) + \
         ((plane).normal[AXIS_Z] * (z)) + ((plane).distance * WORLD_TO_COURSE_SCALE))
@@ -1783,7 +1785,7 @@ PinHit FindPinHit(
     return hitKind;
 }
 
-s32 GetTriangleFacing(
+TriangleFacing GetTriangleFacing(
     s32 firstX,
     s32 firstY,
     s32 firstZ,
@@ -1804,7 +1806,7 @@ s32 GetTriangleFacing(
     s32 normalX;
     s32 normalY;
     s32 normalZ;
-    s32 facing;
+    TriangleFacing facing;
 
     secondDeltaZ = secondZ - firstZ;
     thirdDeltaX = thirdX - firstX;
@@ -2142,7 +2144,7 @@ s32 FindWallHit(
     f32 cornerDistance;
     s32 hitPointU;
     s32 hitPointV;
-    s32 facing;
+    TriangleFacing facing;
     s32 cornerIndex;
     Boolean isDebug = IsGameFlagSet(GAME_FLAG_PRINT_HIT_PATHS);
 

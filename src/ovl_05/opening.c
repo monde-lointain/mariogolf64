@@ -955,17 +955,6 @@ void DrawOpeningShotPath(CameraMatrices *matrices UNUSED) {
     gDPPipeSync(g_DisplayListHead++);
 }
 
-enum OpeningModel {
-    OPENING_MODEL_MARIO = 3,
-    OPENING_MODEL_YOSHI = 9,
-    OPENING_MODEL_BABY_MARIO,
-    OPENING_MODEL_DONKEY_KONG,
-    OPENING_MODEL_PLUM,
-    OPENING_MODEL_PEACH,
-    OPENING_MODEL_LUIGI,
-    OPENING_MODEL_TOAD = 16
-};
-
 #define MARIO_TEE_SHOT_ANIMATION 0x10
 #define MARIO_CHEER_ANIMATION 0x11
 #define MARIO_WALK_ANIMATION 0x12

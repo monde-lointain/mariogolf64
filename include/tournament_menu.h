@@ -12,6 +12,8 @@ enum TournamentBuffer {
     TOURNAMENT_BUFFER_ROW_FILE
 };
 
+typedef s16 TournamentBuffer;
+
 enum CodeEntryBuffer {
     CODE_ENTRY_BUFFER_NAME_PLATE = 1,
     CODE_ENTRY_BUFFER_BAR,
@@ -20,7 +22,9 @@ enum CodeEntryBuffer {
     CODE_ENTRY_BUFFER_CURSOR_BOX
 };
 
-void LoadTournamentBuffer(void *buffer, s16 bufferKind);
+typedef s32 CodeEntryBuffer;
+
+void LoadTournamentBuffer(void *buffer, TournamentBuffer bufferKind);
 
 // Passed as DrawYesNoWindow's okTextShown to leave out the OK label.
 #define NO_OK_TEXT (-1)
@@ -33,7 +37,7 @@ void DrawYesNoWindow(
     s32 okTextShown,
     s32 chosenButton
 );
-void LoadCodeEntryBuffer(void *buffer, s32 bufferKind);
+void LoadCodeEntryBuffer(void *buffer, CodeEntryBuffer bufferKind);
 void ResetCodeEntry(void);
 void UpdateClubTournament(void);
 void DrawClubTournament(Gfx **displayListHead);

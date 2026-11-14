@@ -434,7 +434,7 @@ void SetSoundTempo(SoundChannel channel, s32 tempo) {
 void QueueCharacterSound(
     CharacterIndex characterIndex,
     s32 slot,
-    s32 kind,
+    CharacterSoundKind kind,
     SoundVolume volume,
     SoundPan pan
 ) {

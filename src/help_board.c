@@ -114,7 +114,7 @@ static TextListLayout f_UnusedTextListLayouts[8] UNUSED =
 
 void DrawChalkboard(Gfx **displayListHead);
 
-void LoadHelpBoardImage(void *buffer, s32 image) {
+void LoadHelpBoardImage(void *buffer, HelpBoardImage image) {
     EncodedAsset asset;
     MenuMemory *memory = GetMenuMemory();
 

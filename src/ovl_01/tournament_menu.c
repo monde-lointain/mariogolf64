@@ -377,7 +377,7 @@ s32 IsMenuWindowClosed(void) {
     return check;
 }
 
-void LoadTournamentBuffer(void *buffer, s16 bufferKind) {
+void LoadTournamentBuffer(void *buffer, TournamentBuffer bufferKind) {
     EncodedAsset asset;
     AssetFile file;
 
@@ -1189,7 +1189,7 @@ void DrawUnusedWideCloud(
     }
 }
 
-void LoadCodeEntryBuffer(void *buffer, s32 bufferKind) {
+void LoadCodeEntryBuffer(void *buffer, CodeEntryBuffer bufferKind) {
     EncodedAsset asset;
 
     switch (bufferKind) {

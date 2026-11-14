@@ -16,6 +16,6 @@ void AppendBufferClear(BufferClear clearMode, Gfx **displayListHead);
 void InitRcp(s32 viewportIndex);
 void SetFillColor(s32 red, s32 green, s32 blue);
 void FillScreen(void);
-void ClearBuffers(s32 clearMode);
+void ClearBuffers(BufferClear clearMode);
 
 #endif

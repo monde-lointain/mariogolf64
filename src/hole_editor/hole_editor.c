@@ -334,6 +334,8 @@ enum TilePass {
     TILE_PASS_SECOND
 };
 
+typedef s32 TilePass;
+
 enum GroundOverlay {
     GROUND_OVERLAY_NOISE,
     GROUND_OVERLAY_WAVES,
@@ -3620,7 +3622,7 @@ void DrawHoleEditorGround(CameraMatrices *matrices UNUSED, TerrainStyle terrainS
         midpoint->cn[3] = (first->cn[3] + second->cn[3]) / 2;
     }
 
-    void SetEditorCombineMode(s32 tilePass, GroundOverlay overlay) {
+    void SetEditorCombineMode(TilePass tilePass, GroundOverlay overlay) {
         if (!keepsCombineMode) {
             switch (tilePass) {
                 case TILE_PASS_ONLY:

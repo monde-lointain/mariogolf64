@@ -10,7 +10,9 @@ enum TableBuffer {
     TABLE_BUFFER_STAR
 };
 
-void LoadCharacterTableBuffer(void *buffer, s16 bufferKind);
+typedef s16 TableBuffer;
+
+void LoadCharacterTableBuffer(void *buffer, TableBuffer bufferKind);
 void UpdateCharacterTable(void);
 void DrawCharacterTable(Gfx **displayListHead);
 void MarkShownTableCharacters(void);

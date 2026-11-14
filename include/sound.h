@@ -321,6 +321,8 @@ enum CharacterSound {
     CHARACTER_SOUND_FULL_SHOT = 32
 };
 
+typedef s32 CharacterSound;
+
 enum CharacterSoundKind {
     CHARACTER_SOUND_KIND_FULL_SHOT,
     CHARACTER_SOUND_KIND_EXCELLENT,
@@ -331,6 +333,8 @@ enum CharacterSoundKind {
     CHARACTER_SOUND_KIND_BUNKER,
     CHARACTER_SOUND_KIND_COUNT
 };
+
+typedef s32 CharacterSoundKind;
 
 extern SoundChannel g_NextSoundChannel;
 
@@ -351,14 +355,14 @@ void SetSoundTempo(SoundChannel channel, s32 tempo);
 void PlayCharacterSound(
     CharacterIndex characterIndex,
     s32 voiceSlot,
-    s32 soundIndex,
+    CharacterSound sound,
     SoundVolume volume,
     SoundPan pan
 );
 void QueueCharacterSound(
     CharacterIndex characterIndex,
     s32 slot,
-    s32 kind,
+    CharacterSoundKind kind,
     SoundVolume volume,
     SoundPan pan
 );

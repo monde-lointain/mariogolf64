@@ -188,13 +188,13 @@ static s32 f_UnusedOpeningLaunchCount = 0;
 static PlaneTriangle f_OpeningContactTriangle;
 static f32 f_OpeningContactFraction;
 
-s32 ToggleOpeningCharacter(u32 slotIndex, s32 characterIndex) {
+s32 ToggleOpeningCharacter(u32 slotIndex, OpeningModel model) {
     if (IsCharacterSlotBusy(slotIndex)) {
         FreeCharacterSlot(slotIndex);
         return FALSE;
     }
 
-    LoadCharacter(slotIndex, characterIndex, OPENING_CHARACTER_MODEL_KIND);
+    LoadCharacter(slotIndex, model, OPENING_CHARACTER_MODEL_KIND);
     SetCharacterAnimation(slotIndex, REACTION_ANIMATION_BIRDIE);
     SetAnimationSpeed(slotIndex, 1.0f);
     return TRUE;

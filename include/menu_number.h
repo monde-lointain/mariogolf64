@@ -19,6 +19,8 @@ enum MenuSign {
     MENU_SIGN_CIRCLE
 };
 
+typedef u8 MenuSign;
+
 void DrawNarrowTwoDigitMenuNumber(
     Gfx **displayListHead,
     s32 x,
@@ -29,6 +31,6 @@ void DrawNarrowTwoDigitMenuNumber(
 void DrawOneDigitMenuNumber(Gfx **displayListHead, s32 x, s32 y, s32 number, MenuNumberStyle mark);
 void DrawTwoDigitMenuNumber(Gfx **displayListHead, s32 x, s32 y, s32 number, MenuNumberStyle mark);
 void DrawUnalignedMenuNumber(Gfx **displayListHead, s32 x, s32 y, s32 number, MenuNumberStyle mark);
-void DrawMenuSign(Gfx **displayListHead, s32 x, s32 y, u8 sign);
+void DrawMenuSign(Gfx **displayListHead, s32 x, s32 y, MenuSign sign);
 
 #endif

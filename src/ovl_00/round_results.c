@@ -99,6 +99,8 @@ enum FaceAnimation {
     FACE_ANIMATION_BEATEN = 4
 };
 
+typedef s32 FaceAnimation;
+
 #define NOTICE_SWING_HEIGHT 160.0f
 #define NOTICE_SWING_START_ANGLE (-1.57f)
 #define NOTICE_SWING_STEP (M_PI / 9)
@@ -917,8 +919,8 @@ void FreeRoundResults(void) {
     }
 }
 
-void StartFaceAnimation(s32 animationId, s32 playerIndex) {
-    f_FaceAnimations[playerIndex] = animationId;
+void StartFaceAnimation(FaceAnimation animation, s32 playerIndex) {
+    f_FaceAnimations[playerIndex] = animation;
     f_FaceFrames[playerIndex] = 0;
     f_FaceFrameTimes[playerIndex] = 0;
 }
@@ -1371,7 +1373,7 @@ void DrawPlayerFace(Gfx **displayListHead, s32 x, s32 y, s32 playerIndex, Boolea
     *displayListHead = gfx;
 }
 
-void StartResultsNotice(s32 kind) {
+void StartResultsNotice(UnlockNoticeKind kind) {
     f_UnlockNoticeKind = kind;
     switch (kind) {
         case UNLOCK_NOTICE_KIND_NONE:
@@ -2125,7 +2127,7 @@ s32 GetBannerState(void) {
     return f_BannerState;
 }
 
-void SetResultsBanner(BannerState state, s32 kind) {
+void SetResultsBanner(BannerState state, BannerKind kind) {
     f_BannerState = state;
     f_BannerKind = kind;
     if (state == BANNER_SLIDING_IN) {

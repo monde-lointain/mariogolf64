@@ -24,6 +24,8 @@ enum ScorecardLayout {
     SCORECARD_LAYOUT_SPEED_GOLF
 };
 
+typedef s32 ScorecardLayout;
+
 enum ScorecardState {
     SCORECARD_OPENING,
     SCORECARD_CLOSING,
@@ -127,7 +129,7 @@ void DrawLeaderboardPage(Gfx **displayListHead);
 void DrawScoresPage(Gfx **displayListHead);
 
 void OpenScorecard(CourseIndex courseIndex, s32 holeIndex);
-void SetScorecardLayout(s32 layout);
+void SetScorecardLayout(ScorecardLayout layout);
 void UpdateScorecard(u16 buttons, u16 pressedButtons);
 void DrawScorecard(Gfx **displayListHead);
 

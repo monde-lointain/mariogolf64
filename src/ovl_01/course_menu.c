@@ -228,7 +228,7 @@ void LoadCourseTrophyImages(ImageAsset **buffers, s32 requestedKind) {
     }
 }
 
-void LoadCourseMenuBuffer(void *buffer, s16 bufferKind) {
+void LoadCourseMenuBuffer(void *buffer, CourseMenuBuffer bufferKind) {
     EncodedAsset asset;
 
     switch (bufferKind) {
@@ -1713,7 +1713,7 @@ void DrawDecimalMenuNumber(Gfx **displayListHead, s32 x, s32 y, f32 number) {
 const char f_UnreadFirstEmptyText[] = "";
 const char f_UnreadSecondEmptyText[] = "";
 
-void DrawMenuSign(Gfx **displayListHead, s32 x, s32 y, u8 sign) {
+void DrawMenuSign(Gfx **displayListHead, s32 x, s32 y, MenuSign sign) {
     Gfx *gfx = *displayListHead;
     s32 glyphIndex = DIGIT_GLYPH_TIMES;
 
@@ -1895,7 +1895,7 @@ void DrawGreenArrow(
     Gfx **displayListHead,
     ImageAsset *image,
     s32 blinkFrame,
-    s32 direction,
+    MenuArrow direction,
     s32 centerX,
     s32 centerY
 ) {

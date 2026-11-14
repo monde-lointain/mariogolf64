@@ -674,7 +674,7 @@ HALVED:
     }
 }
 
-void SetScorecardLayout(s32 layout) {
+void SetScorecardLayout(ScorecardLayout layout) {
     s32 ranks[PLAYER_COUNT_MAX];
     s32 scoresToPar[PLAYER_COUNT_MAX];
     s32 holesWon[MATCH_PLAYER_COUNT];

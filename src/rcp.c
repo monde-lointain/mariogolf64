@@ -127,6 +127,6 @@ void AppendBufferClear(BufferClear clearMode, Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
-void ClearBuffers(s32 clearMode) {
+void ClearBuffers(BufferClear clearMode) {
     AppendBufferClear(clearMode, &g_DisplayListHead);
 }

@@ -19,7 +19,7 @@ typedef s32 ReactionAnimation;
 typedef s8 ReactionAnimation8;
 
 s32 AddReactionLight(Gfx **displayListHead, Lights2 *lights);
-void StartReaction(u32 slotIndex, CharacterIndex characterIndex, s32 animationId);
+void StartReaction(u32 slotIndex, CharacterIndex characterIndex, ReactionAnimation animation);
 void TurnOffReactionLight(void);
 NO_RESULT UpdateReaction(u32 slotIndex);
 void ClearReactionSpot(void);

@@ -108,7 +108,7 @@ void LoadCharacterFaceStrip(void *buffer) {
     ReadEncodedAsset(f_CharacterFaceStrip, &asset);
 }
 
-void LoadBestTimesBuffer(void *buffer, s16 bufferKind) {
+void LoadBestTimesBuffer(void *buffer, BestTimesBuffer bufferKind) {
     EncodedAsset asset;
 
     switch (bufferKind) {

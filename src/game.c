@@ -3070,7 +3070,7 @@ void DrawResetFade(void) {
 }
 
 void UpdateGame(void) {
-    s32 *animation;
+    InsetViewState *animation;
     u16 *windDirection;
 
     f_UpdateStartTime = OS_CYCLES_TO_USEC(osGetTime());
@@ -3336,7 +3336,7 @@ void SetInsetViewRectangle(s32 centerX, s32 centerY, s32 width, s32 height) {
 }
 
 void UpdateInsetView(void) {
-    s32 *animation = &g_InsetView.animation;
+    InsetViewState *animation = &g_InsetView.animation;
 
     if (*animation == INSET_VIEW_OPENING) {
         if (g_InsetView.step == 1) {

@@ -894,7 +894,7 @@ void SpawnShotDebris(CoursePoint point, Radians pitch, Radians yaw, s32 launchSp
         return slotCount;
     }
 
-    s32 SpawnHighDebris(s32 slotCount, s32 debrisCount, s32 kind) {
+    s32 SpawnHighDebris(s32 slotCount, s32 debrisCount, EffectKind kind) {
         Effect *effect;
         s32 speed;
 

@@ -209,7 +209,7 @@ static ImageAsset *f_TableArrows;
 static ImageAsset *f_TableStar;
 static s32 f_TableCharacterVisibility[CHARACTER_COUNT];
 
-void LoadCharacterTableBuffer(void *buffer, s16 bufferKind) {
+void LoadCharacterTableBuffer(void *buffer, TableBuffer bufferKind) {
     EncodedAsset asset;
     MenuMemory *memory = GetMenuMemory();
     s32 x;

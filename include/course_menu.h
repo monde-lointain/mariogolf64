@@ -15,6 +15,8 @@ enum CourseMenuBuffer {
     COURSE_MENU_BUFFER_GREEN_ARROWS
 };
 
+typedef s16 CourseMenuBuffer;
+
 enum CourseBuffer {
     COURSE_BUFFER_FIRST = 1,
     COURSE_BUFFER_SECOND,
@@ -23,7 +25,7 @@ enum CourseBuffer {
 
 void LoadCourseStatsIcons(ImageAsset **buffers);
 void LoadCourseTrophyImages(ImageAsset **buffers, s32 requestedKind);
-void LoadCourseMenuBuffer(void *buffer, s16 bufferKind);
+void LoadCourseMenuBuffer(void *buffer, CourseMenuBuffer bufferKind);
 void UpdateCourseStats(void);
 void DrawCourseStats(Gfx **displayListHead);
 void DrawCourseBanner(Gfx **displayListHead, u8 useCourseNames, s32 courseIndex);

@@ -23,11 +23,15 @@ enum PlayerStatsBuffer {
     PLAYER_STATS_BUFFER_DOUBLE_PAGE_ARROWS
 };
 
+typedef s16 PlayerStatsBuffer;
+
 enum ScoreLabelBuffer {
     SCORE_LABEL_BUFFER_NAME_PLATE = 1,
     SCORE_LABEL_BUFFER_CURSOR_BOX,
     SCORE_LABEL_BUFFER_LABELS
 };
+
+typedef s16 ScoreLabelBuffer;
 
 #define STATS_SLIDE_CURRENT 0
 #define STATS_SLIDE_OUT_RIGHT 1
@@ -36,7 +40,7 @@ enum ScoreLabelBuffer {
 #define STATS_SLIDE_IN_FROM_LEFT 4
 #define STATS_SLIDE_COUNT 5
 
-void LoadPlayerStatsBuffer(void *buffer, s16 bufferKind);
+void LoadPlayerStatsBuffer(void *buffer, PlayerStatsBuffer bufferKind);
 void ApplyBetPreset(s32 requestedPreset);
 void UpdateBetSettings(void);
 void DrawBetSettings(
@@ -54,7 +58,7 @@ void DrawHandicaps(
 );
 s32 SlideBrickWall(Gfx **displayListHead, u8 slide);
 void LoadBestShotsCourseIcons(ImageAsset **buffers);
-void LoadScoreLabelBuffer(void *buffer, s16 bufferKind);
+void LoadScoreLabelBuffer(void *buffer, ScoreLabelBuffer bufferKind);
 void UpdateBestShots(void);
 void DrawBestShots(Gfx **displayListHead);
 void ReadBestShots(void);

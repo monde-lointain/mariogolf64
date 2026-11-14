@@ -49,6 +49,8 @@ enum TlbPageMode {
     TLB_PAGE_MODE_512K
 };
 
+typedef s32 TlbPageMode;
+
 #define SMALLEST_PAGE_SIZE 0x1000
 
 #define LIGHT_DIRECTION_SCALE 127.0f
@@ -153,6 +155,8 @@ enum AnimationEventKind {
     ANIMATION_EVENT_IMPACT = 6,
     ANIMATION_EVENT_TEXTURE_ANIMATION = 0xFE
 };
+
+typedef s32 AnimationEventKind;
 
 typedef struct AnimationEventAction {
     u8 kind;
@@ -298,7 +302,7 @@ CharacterSlot *GetUsedCharacterSlot(u32 slotIndex);
 void FreeAllCharacterSlots(void);
 s32 SetMultiTlb(
     s32 firstTlbIndex,
-    s32 pageMode,
+    TlbPageMode pageMode,
     u32 pageCount,
     u32 virtualAddress,
     u32 physicalAddress
@@ -324,7 +328,7 @@ void AnimateCharacter(u32 slotIndex);
 void AnimateCharacterInSameCopy(u32 slotIndex);
 void SetCharacterLights(void);
 void SetCharacterClub(u32 slotIndex, s32 clubIndex);
-s32 GetAnimationEventFrame(u32 slotIndex, s32 animationIndex, s32 kind);
+s32 GetAnimationEventFrame(u32 slotIndex, s32 animationIndex, AnimationEventKind kind);
 s32 GetAnimationIndex(u32 slotIndex, s32 animationId);
 void AdvanceAnimation(u32 slotIndex, s32 frameCount);
 void SetCharacterLighting(u32 slotIndex, s32 lighting);

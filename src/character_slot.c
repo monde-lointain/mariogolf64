@@ -171,7 +171,7 @@ void SetCharacterHighlight(CameraMatrices *matrices UNUSED) {
 
 s32 SetMultiTlb(
     s32 firstTlbIndex,
-    s32 pageMode,
+    TlbPageMode pageMode,
     u32 pageCount,
     u32 virtualAddress,
     u32 physicalAddress

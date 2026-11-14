@@ -479,7 +479,7 @@ s32 GetBallDistance(u32 slotIndex, s32 club, Boolean isClubCategory, ShotMode sh
     char text[DEBUG_LINE_SIZE];
     s32 distance;
     s32 pointId = WOOD_DISTANCE_POINT;
-    ClubCategory column;
+    s32 column;
     CharacterSlot *slot;
     ClubCategory clubCategory;
     f32 depth;
@@ -721,7 +721,7 @@ s32 GetAnimationEventActions(
     return count;
 }
 
-s32 GetAnimationEventFrame(u32 slotIndex, s32 animationIndex, s32 kind) {
+s32 GetAnimationEventFrame(u32 slotIndex, s32 animationIndex, AnimationEventKind kind) {
     s32 frame = -1;
     CharacterSlot *slot = GetUsedCharacterSlot(slotIndex);
     AnimationEvent *event;

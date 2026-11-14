@@ -12,9 +12,11 @@ enum BestTimesBuffer {
     BEST_TIMES_BUFFER_GREEN_ARROWS
 };
 
+typedef s16 BestTimesBuffer;
+
 void LoadBestTimesCourseIcons(ImageAsset **buffers);
 void LoadCharacterFaceStrip(void *buffer);
-void LoadBestTimesBuffer(void *buffer, s16 bufferKind);
+void LoadBestTimesBuffer(void *buffer, BestTimesBuffer bufferKind);
 void UpdateBestTimes(void);
 void DrawBestTimes(Gfx **displayListHead);
 void LoadBestTimesFaces(void);

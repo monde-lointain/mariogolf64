@@ -9,7 +9,9 @@ enum HelpBoardImage {
     HELP_BOARD_IMAGE_CHALKBOARD
 };
 
-void LoadHelpBoardImage(void *buffer, s32 image);
+typedef s32 HelpBoardImage;
+
+void LoadHelpBoardImage(void *buffer, HelpBoardImage image);
 void UpdateHelpBoard(void);
 void DrawHelpBoard(Gfx **displayListHead);
 

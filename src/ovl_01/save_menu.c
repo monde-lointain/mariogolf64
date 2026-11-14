@@ -284,7 +284,7 @@ static u8 f_UnusedBufferAfterModeIconSize[0x88] UNUSED;
 u8 g_MenuCharacterPalettes[CHARACTER_COUNT][MENU_PALETTE_FILE_SIZE];
 u8 g_ReplayFacePalettes[SAVE_MENU_SLOT_COUNT][MENU_PALETTE_FILE_SIZE];
 
-void LoadRingShotRecordBuffer(void *buffer, s16 bufferKind) {
+void LoadRingShotRecordBuffer(void *buffer, RingShotRecordBuffer bufferKind) {
     EncodedAsset asset;
 
     switch (bufferKind) {
@@ -1199,7 +1199,7 @@ s32 GetOpenRingShotCourseCount(void) {
     return 1;
 }
 
-void LoadSaveGameBuffer(void *buffer, u8 bufferKind) {
+void LoadSaveGameBuffer(void *buffer, SaveGameBuffer bufferKind) {
     EncodedAsset asset;
     AssetFile file;
     SaveData *save = GetSaveData();
@@ -1391,7 +1391,7 @@ void ResetSavedGameControllers(void) {
     }
 }
 
-void LoadSaveMenuBuffers(ImageAsset **buffers, u8 bufferKind) {
+void LoadSaveMenuBuffers(ImageAsset **buffers, SaveMenuBuffer bufferKind) {
     EncodedAsset asset;
     MenuMemory *memory = GetMenuMemory();
     s32 imageIndex;
@@ -1429,7 +1429,7 @@ void LoadSaveMenuBuffers(ImageAsset **buffers, u8 bufferKind) {
     }
 }
 
-void LoadGameModeLabelBuffer(void *buffer, u8 bufferKind) {
+void LoadGameModeLabelBuffer(void *buffer, GameModeLabelBuffer bufferKind) {
     EncodedAsset asset;
 
     switch (bufferKind) {

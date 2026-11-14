@@ -382,7 +382,7 @@ static s16 f_BestShotRecords[STATS_GRID_ROW_COUNT][STATS_GRID_COLUMN_COUNT];
 
 s16 g_ChosenHandicaps[PLAYER_COUNT_MAX];
 
-void LoadPlayerStatsBuffer(void *buffer, s16 bufferKind) {
+void LoadPlayerStatsBuffer(void *buffer, PlayerStatsBuffer bufferKind) {
     EncodedAsset asset;
     MenuMemory *memory = GetMenuMemory();
     s16 iconIndex;
@@ -2162,7 +2162,7 @@ void LoadBestShotsCourseIcons(ImageAsset **buffers) {
     }
 }
 
-void LoadScoreLabelBuffer(void *buffer, s16 bufferKind) {
+void LoadScoreLabelBuffer(void *buffer, ScoreLabelBuffer bufferKind) {
     EncodedAsset asset;
 
     switch (bufferKind) {

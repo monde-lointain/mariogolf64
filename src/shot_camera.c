@@ -834,7 +834,7 @@ s32 GetEndReaction(void) {
 #define LONG_PUTT_SOUND_DISTANCE_MIN 0x4B000
 #define LONG_LANDING_DISTANCE_MIN (60.0f * UNITS_PER_YARD)
 
-static inline void QueueOnlookerSounds(s32 kind) {
+static inline void QueueOnlookerSounds(CharacterSoundKind kind) {
     s32 playerIndex;
 
     for (playerIndex = 0; playerIndex != g_GameState.playerCount; playerIndex++) {
