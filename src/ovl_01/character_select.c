@@ -201,6 +201,7 @@ void HideGameBoyCharacters(void) {
     f_SavedGameBoySlots[3] = fourthSlot;
 }
 
+// Returns -TRUE when the cursor cannot move, and FALSE when it moves.
 Boolean MoveGridCursor(s32 playerIndex, GridMove direction, UBoolean8 canChooseMarked) {
     EncodedAsset asset;
     AssetFile file;
@@ -292,7 +293,8 @@ Boolean MoveGridCursor(s32 playerIndex, GridMove direction, UBoolean8 canChooseM
     return -(column == oldColumn && row == oldRow);
 }
 
-s32 MoveGridCursorDiagonal(s32 playerIndex, u8 diagonal, UBoolean8 canChooseMarked) {
+// Returns -TRUE when the cursor cannot move, and FALSE when it moves.
+Boolean MoveGridCursorDiagonal(s32 playerIndex, u8 diagonal, UBoolean8 canChooseMarked) {
     EncodedAsset asset;
     AssetFile file;
     MenuMemory *memory = GetMenuMemory();
@@ -403,10 +405,10 @@ s32 MoveGridCursorDiagonal(s32 playerIndex, u8 diagonal, UBoolean8 canChooseMark
     }
 
     if (column == oldColumn && row == oldRow) {
-        return -1;
+        return -TRUE;
     }
 
-    return 0;
+    return FALSE;
 }
 
 s32 GetStickDiagonal(void) {
@@ -530,7 +532,7 @@ s32 UpdateCharacterSelect(s32 firstPlayerIndex, s32 playerCount, Boolean canChoo
     playerIndex = g_ChoosingPlayerIndex;
     if (g_MenuRepeatButtons == (U_JPAD | L_JPAD)) {
         PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
-        if (MoveGridCursorDiagonal(playerIndex, STICK_DIAGONAL_UP_LEFT, (u8)canChooseMarked) != 0) {
+        if (MoveGridCursorDiagonal(playerIndex, STICK_DIAGONAL_UP_LEFT, (u8)canChooseMarked)) {
             return 0;
         }
 
@@ -554,8 +556,7 @@ s32 UpdateCharacterSelect(s32 firstPlayerIndex, s32 playerCount, Boolean canChoo
 
     if (g_MenuRepeatButtons == (U_JPAD | R_JPAD)) {
         PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
-        if (MoveGridCursorDiagonal(playerIndex, STICK_DIAGONAL_UP_RIGHT, (u8)canChooseMarked) !=
-            0) {
+        if (MoveGridCursorDiagonal(playerIndex, STICK_DIAGONAL_UP_RIGHT, (u8)canChooseMarked)) {
             return 0;
         }
 
@@ -579,8 +580,7 @@ s32 UpdateCharacterSelect(s32 firstPlayerIndex, s32 playerCount, Boolean canChoo
 
     if (g_MenuRepeatButtons == (D_JPAD | L_JPAD)) {
         PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
-        if (MoveGridCursorDiagonal(playerIndex, STICK_DIAGONAL_DOWN_LEFT, (u8)canChooseMarked) !=
-            0) {
+        if (MoveGridCursorDiagonal(playerIndex, STICK_DIAGONAL_DOWN_LEFT, (u8)canChooseMarked)) {
             return 0;
         }
 
@@ -604,8 +604,7 @@ s32 UpdateCharacterSelect(s32 firstPlayerIndex, s32 playerCount, Boolean canChoo
 
     if (g_MenuRepeatButtons == (D_JPAD | R_JPAD)) {
         PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
-        if (MoveGridCursorDiagonal(playerIndex, STICK_DIAGONAL_DOWN_RIGHT, (u8)canChooseMarked) !=
-            0) {
+        if (MoveGridCursorDiagonal(playerIndex, STICK_DIAGONAL_DOWN_RIGHT, (u8)canChooseMarked)) {
             return 0;
         }
 
@@ -630,7 +629,7 @@ s32 UpdateCharacterSelect(s32 firstPlayerIndex, s32 playerCount, Boolean canChoo
     if (g_MenuRepeatButtons & U_JPAD) {
         PrintDebugText("          ", BLANKED_DEBUG_TEXT_COLUMN, BLANKED_DEBUG_TEXT_ROW);
         PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
-        if (MoveGridCursor(playerIndex, GRID_MOVE_UP, (u8)canChooseMarked) != 0) {
+        if (MoveGridCursor(playerIndex, GRID_MOVE_UP, (u8)canChooseMarked)) {
             return 0;
         }
 
@@ -654,7 +653,7 @@ s32 UpdateCharacterSelect(s32 firstPlayerIndex, s32 playerCount, Boolean canChoo
 
     if (g_MenuRepeatButtons & D_JPAD) {
         PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
-        if (MoveGridCursor(playerIndex, GRID_MOVE_DOWN, (u8)canChooseMarked) != 0) {
+        if (MoveGridCursor(playerIndex, GRID_MOVE_DOWN, (u8)canChooseMarked)) {
             return 0;
         }
 
@@ -678,7 +677,7 @@ s32 UpdateCharacterSelect(s32 firstPlayerIndex, s32 playerCount, Boolean canChoo
 
     if (g_MenuRepeatButtons & L_JPAD) {
         PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
-        if (MoveGridCursor(playerIndex, GRID_MOVE_LEFT, (u8)canChooseMarked) != 0) {
+        if (MoveGridCursor(playerIndex, GRID_MOVE_LEFT, (u8)canChooseMarked)) {
             return 0;
         }
 
@@ -702,7 +701,7 @@ s32 UpdateCharacterSelect(s32 firstPlayerIndex, s32 playerCount, Boolean canChoo
 
     if (g_MenuRepeatButtons & R_JPAD) {
         PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
-        if (MoveGridCursor(playerIndex, GRID_MOVE_RIGHT, (u8)canChooseMarked) != 0) {
+        if (MoveGridCursor(playerIndex, GRID_MOVE_RIGHT, (u8)canChooseMarked)) {
             return 0;
         }
 
