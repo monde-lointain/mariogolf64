@@ -336,7 +336,7 @@ static Radians f_PauseGlowAngle = 0.0f;
 static Radians f_PauseCursorAngle = 0.0f;
 static ChoiceBoxState f_ChoiceBoxState = CHOICE_BOX_CLOSED;
 static s32 f_UnusedWordAfterChoiceBoxState UNUSED = 0;
-static ChoiceBoxState f_ChoiceBoxIndex = CHOICE_BOX_CLOSED;
+static ChoiceBoxId f_ChoiceBoxId = CHOICE_BOX_ID_NONE;
 static s32 f_ChoiceBoxSelection = 0;
 static Radians f_ChoiceGlowAngle = 0.0f;
 static Radians f_ChoiceCursorAngle = 0.0f;
@@ -1224,10 +1224,10 @@ void FreeChoiceBoxImages(void) {
     FreeMemory(&f_MenuCloudImage);
 }
 
-void OpenChoiceBox(ChoiceBoxState choiceBoxIndex) {
-    f_ChoiceBoxIndex = choiceBoxIndex;
-    if (choiceBoxIndex == CHOICE_BOX_CLOSED) {
-        f_ChoiceBoxState = choiceBoxIndex;
+void OpenChoiceBox(ChoiceBoxId choiceBoxId) {
+    f_ChoiceBoxId = choiceBoxId;
+    if (choiceBoxId == CHOICE_BOX_ID_NONE) {
+        f_ChoiceBoxState = CHOICE_BOX_CLOSED;
         FreeChoiceBoxImages();
         PlaySound(SOUND_PROMPT_CLOSE, g_NextSoundChannel, MENU_SOUND_VOLUME);
     }
@@ -1240,9 +1240,9 @@ void OpenChoiceBox(ChoiceBoxState choiceBoxIndex) {
 }
 
 s32 UpdateChoiceBox(ControllerState *controller) {
-    ChoiceBox *box = &f_ChoiceBoxes[f_ChoiceBoxIndex];
+    ChoiceBox *box = &f_ChoiceBoxes[f_ChoiceBoxId];
 
-    if (f_ChoiceBoxIndex == CHOICE_BOX_CLOSED) {
+    if (f_ChoiceBoxId == CHOICE_BOX_ID_NONE) {
         return CHOICE_RESULT_NONE;
     }
 
@@ -1251,7 +1251,7 @@ s32 UpdateChoiceBox(ControllerState *controller) {
             f_ChoiceBoxState = CHOICE_BOX_CLOSING;
             return CHOICE_RESULT_NONE;
         case CHOICE_BOX_CLOSING:
-            OpenChoiceBox(CHOICE_BOX_CLOSED);
+            OpenChoiceBox(CHOICE_BOX_ID_NONE);
             return box->results[f_ChoiceBoxSelection];
         case CHOICE_BOX_CHOOSING:
             if (controller->pressedButtons == A_BUTTON) {
@@ -1299,7 +1299,7 @@ s32 UpdateChoiceBox(ControllerState *controller) {
 
 void DrawChoiceBox(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
-    ChoiceBox *box = &f_ChoiceBoxes[f_ChoiceBoxIndex];
+    ChoiceBox *box = &f_ChoiceBoxes[f_ChoiceBoxId];
     s32 halfWidth;
     s32 red;
     s32 green;
@@ -1318,7 +1318,7 @@ void DrawChoiceBox(Gfx **displayListHead) {
     blue = (s32)(sinf(f_ChoiceGlowAngle + (M_PI / 2)) * COLOR_WAVE_AMPLITUDE) + COLOR_WAVE_MIDDLE;
     green = (s32)(sinf(f_ChoiceGlowAngle + M_PI) * COLOR_WAVE_AMPLITUDE) + COLOR_WAVE_MIDDLE;
     textWidth = 0;
-    if (f_ChoiceBoxIndex != CHOICE_BOX_CLOSED) {
+    if (f_ChoiceBoxId != CHOICE_BOX_ID_NONE) {
         gDPPipeSync(gfx++);
         gDPSetPrimColor(gfx++, 0, 0, 0x1F, 0x1F, 0x1F, 0xBF);
         gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, 0xBF);

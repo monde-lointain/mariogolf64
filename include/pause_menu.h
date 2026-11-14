@@ -42,8 +42,11 @@ enum ChoiceBoxId {
     CHOICE_BOX_ID_TRAINING_SHOT,
     CHOICE_BOX_ID_TRAINING_HOLE_END,
     CHOICE_BOX_ID_RING_SHOT,
-    CHOICE_BOX_ID_DRIVING_RANGE
+    CHOICE_BOX_ID_DRIVING_RANGE,
+    CHOICE_BOX_ID_NONE = -1
 };
+
+typedef s32 ChoiceBoxId;
 
 enum ChoiceResult {
     CHOICE_RESULT_NONE = -1,
@@ -65,7 +68,7 @@ void DrawPauseArrows(Gfx **displayListHead, s32 x, s32 y, s32 gap);
 
 void RequestPauseMenu(Boolean canGiveUp, Boolean isClosing);
 PauseAction UpdatePauseMenu(ControllerState *controller);
-void OpenChoiceBox(s32 choiceBoxIndex);
+void OpenChoiceBox(ChoiceBoxId choiceBoxId);
 s32 UpdateChoiceBox(ControllerState *controller);
 void CloseSaveMenu(void);
 void HideRoundHud(void);
