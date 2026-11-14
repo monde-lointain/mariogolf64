@@ -1947,9 +1947,9 @@ static inline s32 GetPackedCodeOffset(s32 block, u32 column, u32 row) {
     return GetBlockCodeOffset(column, row) + (block * TERRAIN_CODE_BLOCK_SIZE);
 }
 
-static inline s32 GetCellCodeOffset(s32 cell, u32 column, u32 row) {
+static inline s32 GetCellCodeOffset(s32 cellEntry, u32 column, u32 row) {
     return GetBlockCodeOffset(column, row) +
-        ((cell & (TERRAIN_CODE_CELL_BLOCK - 1)) * TERRAIN_CODE_BLOCK_SIZE);
+        ((cellEntry & (TERRAIN_CODE_CELL_BLOCK - 1)) * TERRAIN_CODE_BLOCK_SIZE);
 }
 
 static inline void SetPackedTerrainCode(s32 block, u32 column, u32 row, s32 code) {
@@ -1973,22 +1973,22 @@ static inline void SetPackedTerrainCode(s32 block, u32 column, u32 row, s32 code
 
 static inline void SetCellTerrainCode(u32 column, u32 row, s32 code) {
     s32 cellOffset = GetCellOffset(column, row);
-    s32 cell = CellAt(cellOffset);
+    s32 cellEntry = CellAt(cellOffset);
     s32 block;
     u32 fill;
     s32 wordIndex;
     u32 *word;
 
-    if (cell == code) {
+    if (cellEntry == code) {
         return;
     }
 
-    if (cell == NO_CELL_TERRAIN_CODE) {
+    if (cellEntry == NO_CELL_TERRAIN_CODE) {
         CellAt(cellOffset) = code;
     }
-    else if (cell >= 0) {
+    else if (cellEntry >= 0) {
         if (g_TerrainCodeBlockCount < TERRAIN_CODE_BLOCK_COUNT) {
-            fill = (cell << TERRAIN_CODE_BITS) | cell;
+            fill = (cellEntry << TERRAIN_CODE_BITS) | cellEntry;
             block = g_TerrainCodeBlockCount++;
             fill |= fill << BITS_PER_BYTE;
             fill |= fill << (BITS_PER_BYTE * 2);
@@ -2003,16 +2003,16 @@ static inline void SetCellTerrainCode(u32 column, u32 row, s32 code) {
     }
     else {
         if (column & 1) {
-            g_WorkArea.hole.terrainCodes[GetCellCodeOffset(cell, column, row)] =
-                (g_WorkArea.hole.terrainCodes[GetCellCodeOffset(cell, column, row)] &
+            g_WorkArea.hole.terrainCodes[GetCellCodeOffset(cellEntry, column, row)] =
+                (g_WorkArea.hole.terrainCodes[GetCellCodeOffset(cellEntry, column, row)] &
                     EVEN_COLUMN_CODE_MASK) |
                 code;
         }
         else {
             s32 high = code << TERRAIN_CODE_BITS;
 
-            g_WorkArea.hole.terrainCodes[GetCellCodeOffset(cell, column, row)] =
-                (g_WorkArea.hole.terrainCodes[GetCellCodeOffset(cell, column, row)] &
+            g_WorkArea.hole.terrainCodes[GetCellCodeOffset(cellEntry, column, row)] =
+                (g_WorkArea.hole.terrainCodes[GetCellCodeOffset(cellEntry, column, row)] &
                     TERRAIN_CODE_MASK) |
                 high;
         }

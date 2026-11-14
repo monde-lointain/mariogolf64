@@ -233,14 +233,14 @@ static s32 f_SceneMenuSelection;
 
 s32 GetTerrainHeight(s32 x, s32 z);
 
-static inline s32 GetPackedCodeOffset(s32 column, s32 row, s32 block) {
+static inline s32 GetCellCodeOffset(s32 cellEntry, s32 column, s32 row) {
     return ((column & (TERRAIN_CODE_CELL_SPAN - 1)) >> 1) +
         ((row & (TERRAIN_CODE_CELL_SPAN - 1)) * (TERRAIN_CODE_CELL_SPAN / 2)) +
-        ((block & (TERRAIN_CODE_CELL_BLOCK - 1)) * TERRAIN_CODE_BLOCK_SIZE);
+        ((cellEntry & (TERRAIN_CODE_CELL_BLOCK - 1)) * TERRAIN_CODE_BLOCK_SIZE);
 }
 
 s32 GetTerrainCode(s32 column, s32 row) {
-    s32 block;
+    s32 cellEntry;
     s32 cellOffset;
 
     if (column < 0) {
@@ -259,21 +259,21 @@ s32 GetTerrainCode(s32 column, s32 row) {
 
     cellOffset = ((column / TERRAIN_CODE_CELL_SPAN) * TERRAIN_CODE_CELL_SIZE) +
         ((row / TERRAIN_CODE_CELL_SPAN) * TERRAIN_CODE_CELL_ROW_SIZE);
-    block = *(s16 *)AddressPast(g_TerrainCodeCells, cellOffset);
-    if (block == NO_CELL_TERRAIN_CODE) {
+    cellEntry = *(s16 *)AddressPast(g_TerrainCodeCells, cellOffset);
+    if (cellEntry == NO_CELL_TERRAIN_CODE) {
         return NO_CELL_TERRAIN_CODE;
     }
 
-    if (block >= 0) {
-        return block;
+    if (cellEntry >= 0) {
+        return cellEntry;
     }
 
     if (!(column & 1)) {
-        return g_WorkArea.hole.terrainCodes[GetPackedCodeOffset(column, row, block)] >>
+        return g_WorkArea.hole.terrainCodes[GetCellCodeOffset(cellEntry, column, row)] >>
             TERRAIN_CODE_BITS;
     }
 
-    return g_WorkArea.hole.terrainCodes[GetPackedCodeOffset(column, row, block)] &
+    return g_WorkArea.hole.terrainCodes[GetCellCodeOffset(cellEntry, column, row)] &
         TERRAIN_CODE_MASK;
 }
 
