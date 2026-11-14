@@ -61,6 +61,9 @@ typedef s16 ClubCategory16;
 #define CLUB_SLOT_COUNT 16
 #define NO_CLUB (-1)
 
+// A set of CLUB_SURFACE_ bits naming the surfaces a club can be used on.
+typedef s32 ClubSurfaceMask;
+
 #define CLUB_SURFACE_GREEN 0x1
 #define CLUB_SURFACE_ROUGH 0x2
 #define CLUB_SURFACE_BUNKER 0x4
@@ -85,7 +88,7 @@ typedef struct ClubParameters {
 typedef struct Club {
     u8 mishitScale;
     char name[4] NONSTRING;
-    s32 surfaceMask;
+    ClubSurfaceMask surfaceMask;
     s16 distance;
     s16 pitch;
     s16 offsetPitch;
@@ -127,8 +130,8 @@ Club *GetClub(u32 clubIndex);
 Club *GetSelectedClub(void);
 s32 GetSelectedShotDistance(void);
 s32 GetSelectedShotWorldDistance(void);
-s32 GetSurfaceClubMask(s32 distinguishesKinds, SurfaceTraits *surfaceTraits);
-s32 GetCurrentSurfaceClubMask(s32 distinguishesKinds);
+ClubSurfaceMask GetSurfaceClubMask(Boolean distinguishesKinds, SurfaceTraits *surfaceTraits);
+ClubSurfaceMask GetCurrentSurfaceClubMask(Boolean distinguishesKinds);
 s32 GetLieRating(Club *club, Surface surface, ShotMode shotMode);
 void GetSurfacePercentRange(SurfaceTraits *surfaceTraits, Club *club, s32 *range);
 void GetLieSpan(Club *club, Surface surface, s32 *lieSpan, ShotMode shotMode);

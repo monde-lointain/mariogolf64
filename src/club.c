@@ -4170,9 +4170,9 @@ s32 GetSelectedShotWorldDistance(void) {
     return GetShotWorldDistance(GetSelectedClub(), g_CurrentShot.shotMode);
 }
 
-s32 GetSurfaceClubMask(s32 distinguishesKinds, SurfaceTraits *surfaceTraits) {
+ClubSurfaceMask GetSurfaceClubMask(Boolean distinguishesKinds, SurfaceTraits *surfaceTraits) {
     SurfaceKind surfaceKind = surfaceTraits->kind;
-    s32 mask;
+    ClubSurfaceMask mask;
 
     if (IsGameFlagSet(GAME_FLAG_ANY_CLUB_ANYWHERE)) {
         return CLUB_SURFACE_ALL;
@@ -4222,7 +4222,7 @@ s32 GetSurfaceClubMask(s32 distinguishesKinds, SurfaceTraits *surfaceTraits) {
     return mask;
 }
 
-s32 GetCurrentSurfaceClubMask(s32 distinguishesKinds) {
+ClubSurfaceMask GetCurrentSurfaceClubMask(Boolean distinguishesKinds) {
     return GetSurfaceClubMask(distinguishesKinds, GetSurfaceTraits(g_CurrentShot.surface));
 }
 
