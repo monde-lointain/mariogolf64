@@ -1317,7 +1317,6 @@ void DrawMovie(Gfx **displayListHead) {
 #define WINNER_FACE_OFFSET 0x2988
 #define WINNER_PLAQUE_OFFSET 0x2D88
 #define WINNER_FACE_SIZE 32
-#define WINNER_PLAQUE_SIZE 48
 #define WINNER_PLAQUE_MARGIN 8
 #define WINNER_CENTER_X 160
 #define WINNER_CENTER_Y 128
@@ -1574,8 +1573,8 @@ void DrawContestWinnerMovie(Gfx **displayListHead) {
             &gfx,
             ImageTexels(f_MovieBuffer + WINNER_PLAQUE_OFFSET),
             G_IM_FMT_CI,
-            WINNER_PLAQUE_SIZE,
-            WINNER_PLAQUE_SIZE,
+            WOODEN_PLAQUE_SIZE,
+            WOODEN_PLAQUE_SIZE,
             0,
             0,
             0,
@@ -1585,7 +1584,7 @@ void DrawContestWinnerMovie(Gfx **displayListHead) {
             G_TX_NOLOD
         );
         plaqueHalfSize = growth + WINNER_PLAQUE_MARGIN;
-        step = TexelRunStep((WINNER_PLAQUE_SIZE / 2), plaqueHalfSize);
+        step = TexelRunStep((WOODEN_PLAQUE_SIZE / 2), plaqueHalfSize);
         DrawTextureRect(
             &gfx,
             QuarterPixels(WINNER_CENTER_X - plaqueHalfSize),

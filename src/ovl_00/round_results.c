@@ -289,7 +289,7 @@ static u8 *f_ResultsLabelsImage;
 static u8 *f_ResultsLargeDigitsImage;
 static u8 *f_ResultsPlacesImage;
 static u8 *f_SecondBannerImage;
-static u8 *f_NamePlateImage;
+static u8 *f_PlaqueImage;
 static u8 *f_NoticeTitleImage;
 static u8 *f_ResultsShineImage;
 static u8 *f_UnusedResultsImage;
@@ -490,8 +490,8 @@ void LoadRoundResults(void) {
             ReadEncodedAsset(f_ResultsPlacesImage, &asset);
             f_SecondBannerImage = AllocMemory(OpenEncodedAsset(MATCH_LOSE_BANNER_ASSET, &asset));
             ReadEncodedAsset(f_SecondBannerImage, &asset);
-            f_NamePlateImage = AllocMemory(OpenEncodedAsset(ASSET_WOODEN_PLAQUE, &asset));
-            ReadEncodedAsset(f_NamePlateImage, &asset);
+            f_PlaqueImage = AllocMemory(OpenEncodedAsset(ASSET_WOODEN_PLAQUE, &asset));
+            ReadEncodedAsset(f_PlaqueImage, &asset);
             f_MatchStandingWordsImage =
                 AllocMemory(OpenEncodedAsset(MATCH_STANDING_WORDS_ASSET, &asset));
             ReadEncodedAsset(f_MatchStandingWordsImage, &asset);
@@ -749,8 +749,8 @@ void LoadUnlockNotice(s32 unlock) {
     if (f_UnlockNoticeKind == UNLOCK_NOTICE_KIND_CHARACTER) {
         f_NoticeTitleImage = AllocMemory(OpenEncodedAsset(CHARACTER_NOTICE_TITLE_ASSET, &asset));
         ReadEncodedAsset(f_NoticeTitleImage, &asset);
-        f_NamePlateImage = AllocMemory(OpenEncodedAsset(ASSET_WOODEN_PLAQUE, &asset));
-        ReadEncodedAsset(f_NamePlateImage, &asset);
+        f_PlaqueImage = AllocMemory(OpenEncodedAsset(ASSET_WOODEN_PLAQUE, &asset));
+        ReadEncodedAsset(f_PlaqueImage, &asset);
         f_FaceImage =
             AllocMemory(OpenEncodedAsset(g_CharacterFirstFaceAssets[f_FaceCharacterIndex], &asset));
         ReadEncodedAsset(f_FaceImage, &asset);
@@ -769,7 +769,7 @@ void FreeUnlockNotice(void) {
     }
 
     if (f_UnlockNoticeKind == UNLOCK_NOTICE_KIND_CHARACTER) {
-        FreeMemory(&f_NamePlateImage);
+        FreeMemory(&f_PlaqueImage);
         FreeMemory(&f_FaceImage);
         FreeMemory(&f_FacePalette);
     }
@@ -875,7 +875,7 @@ void FreeRoundResults(void) {
             if (IsOneOnOneMatchMode(g_GameState.gameMode)) {
                 FreeMemory(&f_ResultsPlacesImage);
                 FreeMemory(&f_SecondBannerImage);
-                FreeMemory(&f_NamePlateImage);
+                FreeMemory(&f_PlaqueImage);
                 FreeMemory(&f_MatchStandingWordsImage);
             }
             else {
@@ -1737,8 +1737,7 @@ void UpdateCharacterResultsNotice(void) {
 #define NOTICE_POP_SETTLE_ANGLE (3 * M_PI / 4)
 #define NOTICE_CENTER_X 160
 #define NOTICE_CENTER_Y 128
-#define NOTICE_NAMEPLATE_SIZE 48
-#define NOTICE_NAMEPLATE_POP_SIZE 36.0f
+#define NOTICE_PLAQUE_POP_SIZE 36.0f
 #define NOTICE_FACE_SIZE 32
 #define NOTICE_FACE_POP_SIZE 24.0f
 #define NOTICE_CHARACTER_TITLE_WIDTH 144
@@ -1784,18 +1783,18 @@ void DrawCharacterResultsNotice(Gfx **displayListHead) {
     gDPPipeSync(gfx++);
     gDPSetTextureFilter(gfx++, G_TF_BILERP);
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-    size = popScale * NOTICE_NAMEPLATE_POP_SIZE;
+    size = popScale * NOTICE_PLAQUE_POP_SIZE;
     if (size > 0) {
         s32 centerX;
         s32 centerY;
 
-        LoadSmallPalette(&gfx, 0, ImageBody(f_NamePlateImage));
+        LoadSmallPalette(&gfx, 0, ImageBody(f_PlaqueImage));
         LoadNibbleTextureBlock(
             &gfx,
-            ImageTexels(f_NamePlateImage),
+            ImageTexels(f_PlaqueImage),
             G_IM_FMT_CI,
-            NOTICE_NAMEPLATE_SIZE,
-            NOTICE_NAMEPLATE_SIZE,
+            WOODEN_PLAQUE_SIZE,
+            WOODEN_PLAQUE_SIZE,
             0,
             0,
             0,
@@ -1815,8 +1814,8 @@ void DrawCharacterResultsNotice(Gfx **displayListHead) {
             G_TX_RENDERTILE,
             0,
             0,
-            TexelRunStep(NOTICE_NAMEPLATE_SIZE / 2, size),
-            TexelRunStep(NOTICE_NAMEPLATE_SIZE / 2, size)
+            TexelRunStep(WOODEN_PLAQUE_SIZE / 2, size),
+            TexelRunStep(WOODEN_PLAQUE_SIZE / 2, size)
         );
     }
 
