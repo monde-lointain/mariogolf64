@@ -2335,7 +2335,7 @@ void DrawBestShots(Gfx **displayListHead) {
     SaveData *save = GetSaveData();
     MenuMemory *memory = GetMenuMemory();
     s16 column;
-    s16 characterIndex;
+    CharacterIndex16 characterIndex;
     s32 iconRow;
     s32 iconColumn;
     s32 nameRow;

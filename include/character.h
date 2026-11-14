@@ -29,10 +29,11 @@ enum CharacterIndex {
 };
 
 typedef s32 CharacterIndex;
-// A CharacterIndex kept in a signed or unsigned byte, as the original stores
-// it in player, menu, saved and Game Boy records.
+// A CharacterIndex kept in a byte or halfword, as the original stores it in
+// player, menu, saved, imported and Game Boy records and some menu locals.
 typedef s8 CharacterIndex8;
 typedef u8 UCharacterIndex8;
+typedef s16 CharacterIndex16;
 
 enum CharacterChoice {
     CHARACTER_CHOICE_PLUM,
@@ -75,7 +76,7 @@ extern SignedAssetId g_CharacterPaletteFiles[CHARACTER_COUNT][CHARACTER_PALETTE_
 #define FIRST_IMPORTED_CHARACTER 14
 
 typedef struct ImportedCharacter {
-    s16 characterIndex;
+    CharacterIndex16 characterIndex;
     s16 clubDistance;
     s16 clubSpin;
     s16 clubSideSpin;

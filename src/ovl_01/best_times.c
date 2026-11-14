@@ -233,7 +233,7 @@ void DrawBestTimes(Gfx **displayListHead) {
     s32 halfSize;
     s32 texelStep;
     s32 time;
-    s16 characterIndex;
+    CharacterIndex16 characterIndex;
     s16 dashIndex;
     s16 holderCourse;
 

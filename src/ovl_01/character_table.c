@@ -344,8 +344,8 @@ void DrawCharacterTable(Gfx **displayListHead) {
     s16 shownColumn;
     s16 row;
     s16 column;
-    s16 rowCharacter;
-    s16 columnCharacter;
+    CharacterIndex16 rowCharacter;
+    CharacterIndex16 columnCharacter;
     s32 columnWins;
     s32 rowWins;
     u8 drawMode;
