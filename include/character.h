@@ -29,6 +29,9 @@ enum CharacterIndex {
 };
 
 typedef s32 CharacterIndex;
+// A CharacterIndex kept in a byte, as the original stores it in player,
+// menu and saved records.
+typedef s8 CharacterIndex8;
 
 enum CharacterChoice {
     CHARACTER_CHOICE_PLUM,

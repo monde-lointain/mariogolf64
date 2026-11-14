@@ -2720,7 +2720,7 @@ Boolean IsContactEffectShown(void) {
 
 s32 GetContactStyle(Player *player) {
     GameBoyCharacter *gameBoyCharacter;
-    s8 characterIndex = player->characterIndex;
+    CharacterIndex8 characterIndex = player->characterIndex;
 
     if (characterIndex >= CHARACTER_KID) {
         gameBoyCharacter = &g_GameBoyCharacters[player->gameBoyCharacterIndex];

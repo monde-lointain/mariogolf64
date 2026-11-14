@@ -31,7 +31,7 @@ enum HolesChoice {
 typedef struct MenuMemory {
     s8 playerCountChoice;
     s8 titleChoice;
-    s8 viewerCharacter;
+    CharacterIndex8 viewerCharacter;
     s8 characterColumns[PLAYER_COUNT_MAX];
     s8 characterRows[PLAYER_COUNT_MAX];
     s8 modeChoice;

@@ -3,6 +3,7 @@
 
 #include <ultra64.h>
 
+#include "character.h"
 #include "course.h"
 #include "language.h"
 
@@ -12,7 +13,7 @@
 #define SCORE_PASSWORD_LENGTH 20
 
 typedef struct TournamentRules {
-    s8 characterIndex;
+    CharacterIndex8 characterIndex;
     Boolean8 isSpeedGolf;
     CourseIndex8 courseIndex;
 } TournamentRules;

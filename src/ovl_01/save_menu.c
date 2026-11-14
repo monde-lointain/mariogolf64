@@ -565,7 +565,7 @@ void DrawRingShotRecords(Gfx **displayListHead) {
     s16 listIndex;
     s16 drop;
     CharacterIndex characterIndex;
-    s8 replayCharacter;
+    CharacterIndex8 replayCharacter;
     s32 red;
     s32 green;
     s32 blue;

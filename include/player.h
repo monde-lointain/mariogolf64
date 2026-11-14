@@ -4,6 +4,7 @@
 #include <ultra64.h>
 
 #include "bets.h"
+#include "character.h"
 #include "club.h"
 #include "course.h"
 #include "course_space.h"
@@ -79,7 +80,7 @@ typedef struct Player {
     s32 state;
     CoursePoint ballPosition;
     s8 ballSurface;
-    s8 characterIndex;
+    CharacterIndex8 characterIndex;
     Boolean8 isComputer;
     s8 ignoredPlanMark;
     u8 unusedBeforeLefty[0x22 - 0x20];
