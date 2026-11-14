@@ -3,8 +3,8 @@ EntryPoint = 0x80025C00; // type:func
 mainproc = 0x80029C34; // type:func
 
 // Overlay manager
-OnLoadOverlay2 = 0x80025D30; // type:func
-OnLoadOverlay7 = 0x80025D54; // type:func
+LoadSceneryResources = 0x80025D30; // type:func
+LoadOpeningResources = 0x80025D54; // type:func
 GetOverlayOfModule = 0x80025D78; // type:func
 InitOverlayManager = 0x80025D8C; // type:func
 GetOverlayIndex = 0x80025EC8; // type:func

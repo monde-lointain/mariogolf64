@@ -76,12 +76,12 @@ static s8 f_ModuleIdsOfOverlay16[] = {MODULE_STAFF_ROLL, MODULE_ID_END};
 static Overlay f_Overlays[OVERLAY_COUNT] = {
     OVERLAY_ENTRY(ovl_00, f_ModuleIdsOfOverlays00To02, NULL, NULL),
     OVERLAY_ENTRY(ovl_00, f_ModuleIdsOfOverlays00To02, NULL, NULL),
-    OVERLAY_ENTRY(ovl_00, f_ModuleIdsOfOverlays00To02, OnLoadOverlay2, FreeScenery),
+    OVERLAY_ENTRY(ovl_00, f_ModuleIdsOfOverlays00To02, LoadSceneryResources, FreeScenery),
     OVERLAY_ENTRY(ovl_01, f_ModuleIdsOfOverlay03, LoadMenuResources, FreeMenuResources),
     OVERLAY_ENTRY(ovl_02, f_ModuleIdsOfOverlay04, NULL, NULL),
     OVERLAY_ENTRY(ovl_03, f_ModuleIdsOfOverlay05, NULL, NULL),
     OVERLAY_ENTRY(ovl_04, f_ModuleIdsOfOverlay06, NULL, NULL),
-    OVERLAY_ENTRY(ovl_05, f_ModuleIdsOfOverlay07, OnLoadOverlay7, FreeOpening),
+    OVERLAY_ENTRY(ovl_05, f_ModuleIdsOfOverlay07, LoadOpeningResources, FreeOpening),
     OVERLAY_ENTRY(ovl_06, f_ModuleIdsOfOverlay08, LoadTitleScreen, UnloadTitleScreen),
     OVERLAY_ENTRY(ovl_07, f_ModuleIdsOfOverlay09, LoadBootLogos, NULL),
     OVERLAY_ENTRY(ovl_08, f_ModuleIdsOfOverlay10, NULL, NULL),
@@ -95,12 +95,12 @@ static Overlay f_Overlays[OVERLAY_COUNT] = {
 
 static s8 f_OverlayIndexOfModule[MODULE_COUNT];
 
-void OnLoadOverlay2(void) {
+void LoadSceneryResources(void) {
     InitScenery();
     LoadGolfBallImages();
 }
 
-void OnLoadOverlay7(void) {
+void LoadOpeningResources(void) {
     ResetCameraEditor();
     LoadOpening();
 }

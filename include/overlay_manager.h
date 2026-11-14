@@ -58,8 +58,8 @@ typedef struct Overlay {
     void (*onUnload)(void);
 } Overlay;
 
-void OnLoadOverlay2(void);
-void OnLoadOverlay7(void);
+void LoadSceneryResources(void);
+void LoadOpeningResources(void);
 s32 GetOverlayOfModule(s32 moduleId);
 void InitOverlayManager(void);
 s32 GetOverlayIndex(s32 overlayId);
