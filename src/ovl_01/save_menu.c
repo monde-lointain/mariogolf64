@@ -1991,12 +1991,6 @@ const char f_SaveMenuNameFormat[] = "%s";
 #define SAVED_GAME_FEW_PLAYER_STRIP_SHOWN_WIDTH 180
 #define SAVED_GAME_ARROW_GAP 80
 #define SAVED_GAME_ARROW_Y 124
-#define GAME_MODE_LABEL_WIDTH 192
-#define GAME_MODE_LABEL_HEIGHT 20
-#define GAME_MODE_LABEL_IMAGE_SIZE ((GAME_MODE_LABEL_WIDTH * GAME_MODE_LABEL_HEIGHT) / 2)
-#define GAME_MODE_LABEL_X 160
-#define SINGLE_PLAYER_GAME_MODE_LABEL_X 170
-#define GAME_MODE_LABEL_TOP 156
 #define SAVED_GAME_COURSE_X 110
 #define SAVED_GAME_COURSE_Y 187
 #define MESSAGE_FIRST_TOURNAMENT_COURSE 0x6F
@@ -2333,18 +2327,18 @@ void DrawSavedGames(Gfx **displayListHead) {
     DrawCenteredPageArrows(&gfx, SAVED_GAME_ARROW_GAP, SAVED_GAME_ARROW_Y);
     index = memory->savedGameIndex;
     if (f_SavedGameModes[index] != NO_SAVE_MENU_MODE) {
-        labelX = (playerCount == 1) ? SINGLE_PLAYER_GAME_MODE_LABEL_X : GAME_MODE_LABEL_X;
+        labelX = (playerCount == 1) ? SINGLE_PLAYER_MODE_LABEL_X : MODE_LABEL_X;
         iconIndex = f_SaveMenuModeIcons[f_SavedGameModes[index]];
         gDPLoadTLUT_pal16(gfx++, 0, TextureAddress(ImageBody(f_GameModeLabels)));
         gDPLoadTextureBlock_4b(
             gfx++,
             TextureAddress(
                 ImageTexels(f_GameModeLabels) +
-                (f_SaveMenuModeIcons[f_SavedGameModes[index]] * GAME_MODE_LABEL_IMAGE_SIZE)
+                (f_SaveMenuModeIcons[f_SavedGameModes[index]] * MODE_LABEL_IMAGE_SIZE)
             ),
             G_IM_FMT_CI,
-            GAME_MODE_LABEL_WIDTH,
-            GAME_MODE_LABEL_HEIGHT,
+            MODE_LABEL_WIDTH,
+            MODE_LABEL_HEIGHT,
             0,
             G_TX_NOMIRROR | G_TX_WRAP,
             G_TX_NOMIRROR | G_TX_WRAP,
@@ -2357,9 +2351,9 @@ void DrawSavedGames(Gfx **displayListHead) {
         gSPScisTextureRectangle(
             gfx++,
             QuarterPixels(labelX - f_GameModeLabelOffsets[iconIndex]),
-            QuarterPixels(GAME_MODE_LABEL_TOP),
-            QuarterPixels(labelX - f_GameModeLabelOffsets[iconIndex] + GAME_MODE_LABEL_WIDTH),
-            QuarterPixels(GAME_MODE_LABEL_TOP + GAME_MODE_LABEL_HEIGHT),
+            QuarterPixels(MODE_LABEL_TOP),
+            QuarterPixels(labelX - f_GameModeLabelOffsets[iconIndex] + MODE_LABEL_WIDTH),
+            QuarterPixels(MODE_LABEL_TOP + MODE_LABEL_HEIGHT),
             G_TX_RENDERTILE,
             0,
             0,
