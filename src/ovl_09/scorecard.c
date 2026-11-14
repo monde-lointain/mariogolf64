@@ -115,7 +115,7 @@ static AssetId f_BetImageAssets[BET_COUNT][2] = {
     {ASSET_MATCH_POT_BET_IMAGE, ASSET_MATCH_POT_BET_IMAGE + 1},
     {ASSET_LAS_VEGAS_BET_IMAGE, ASSET_LAS_VEGAS_BET_IMAGE + 1},
 };
-ResultCharactersState f_ResultCharactersLoadStep = RESULT_CHARACTERS_IDLE;
+ResultCharactersState g_ResultCharactersLoadStep = RESULT_CHARACTERS_IDLE;
 
 void OpenScorecard(CourseIndex courseIndex, s32 holeIndex) {
     EncodedAsset asset;
@@ -1419,7 +1419,7 @@ void DrawScorecardTable(Gfx **displayListHead, s32 pageCount, s32 pageIndex) {
 void FreeResultCharacters(void) {
     FreeCharacterSlot(0);
     FreeCharacterSlot(1);
-    f_ResultCharactersLoadStep = RESULT_CHARACTERS_IDLE;
+    g_ResultCharactersLoadStep = RESULT_CHARACTERS_IDLE;
 }
 
 Boolean LoadResultCharacters(void) {

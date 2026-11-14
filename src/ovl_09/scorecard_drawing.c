@@ -358,15 +358,15 @@ void DrawMatchResult(Gfx **displayListHead) {
     gDPPipeSync(gfx++);
     gDPSetTextureFilter(gfx++, G_TF_BILERP);
     gDPPipeSync(gfx++);
-    if (f_ResultCharactersLoadStep == RESULT_CHARACTERS_LOADING && LoadResultCharacters() == TRUE) {
-        f_ResultCharactersLoadStep = RESULT_CHARACTERS_LOADED;
+    if (g_ResultCharactersLoadStep == RESULT_CHARACTERS_LOADING && LoadResultCharacters() == TRUE) {
+        g_ResultCharactersLoadStep = RESULT_CHARACTERS_LOADED;
     }
 
-    if (f_ResultCharactersLoadStep < RESULT_CHARACTERS_LOADING) {
-        f_ResultCharactersLoadStep++;
+    if (g_ResultCharactersLoadStep < RESULT_CHARACTERS_LOADING) {
+        g_ResultCharactersLoadStep++;
     }
 
-    if (f_ResultCharactersLoadStep == RESULT_CHARACTERS_LOADED) {
+    if (g_ResultCharactersLoadStep == RESULT_CHARACTERS_LOADED) {
         Vec3 translation;
         Vec3 rotation;
         Vec3 scale;

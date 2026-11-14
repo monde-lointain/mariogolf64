@@ -120,7 +120,7 @@ enum ResultCharactersState {
 
 typedef s32 ResultCharactersState;
 
-extern s32 f_ResultCharactersLoadStep;
+extern ResultCharactersState g_ResultCharactersLoadStep;
 Boolean LoadResultCharacters(void);
 
 void DrawMatchResult(Gfx **displayListHead);
