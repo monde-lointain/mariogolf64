@@ -62,7 +62,7 @@
 #define BEHIND_FACE_IMAGE_OFFSET 4
 #define THREE_PAGE_COUNT 3
 
-void DrawScorecardTable(Gfx **displayListHead, s32 pageCount, s32 page);
+void DrawScorecardTable(Gfx **displayListHead, s32 pageCount, s32 pageIndex);
 
 void SetScorecardState(s32 state);
 
@@ -1284,7 +1284,7 @@ void DrawScorecard(Gfx **displayListHead) {
 #define FIRST_OF_TWO_TAB_STRIP 3
 #define SECOND_OF_TWO_TAB_STRIP 4
 
-void DrawScorecardTable(Gfx **displayListHead, s32 pageCount, s32 page) {
+void DrawScorecardTable(Gfx **displayListHead, s32 pageCount, s32 pageIndex) {
     s32 tabStrips[THREE_PAGE_COUNT];
     Gfx *gfx = *displayListHead;
     s32 tabIndex;
@@ -1305,7 +1305,7 @@ void DrawScorecardTable(Gfx **displayListHead, s32 pageCount, s32 page) {
         tabStrips[0] = SECOND_OF_TWO_TAB_STRIP;
     }
     else if (pageCount == 2) {
-        if (page == 0) {
+        if (pageIndex == 0) {
             tabStrips[0] = FIRST_OF_TWO_TAB_STRIP;
             tabStrips[1] = SECOND_OF_TWO_TAB_STRIP;
         }
@@ -1314,12 +1314,12 @@ void DrawScorecardTable(Gfx **displayListHead, s32 pageCount, s32 page) {
             tabStrips[1] = FIRST_OF_TWO_TAB_STRIP;
         }
     }
-    else if (page == 0) {
+    else if (pageIndex == 0) {
         tabStrips[0] = FIRST_OF_THREE_TAB_STRIP;
         tabStrips[1] = SECOND_OF_THREE_TAB_STRIP;
         tabStrips[2] = THIRD_OF_THREE_TAB_STRIP;
     }
-    else if (page == 1) {
+    else if (pageIndex == 1) {
         tabStrips[0] = FIRST_OF_THREE_TAB_STRIP;
         tabStrips[1] = THIRD_OF_THREE_TAB_STRIP;
         tabStrips[2] = SECOND_OF_THREE_TAB_STRIP;
