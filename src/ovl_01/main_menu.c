@@ -8,7 +8,6 @@
 #define WIDENS_CHOSEN_OPTIONS
 #define WIDENS_CHOSEN_BEST_SHOT
 
-#include "address.h"
 #include "asset.h"
 #include "best_times.h"
 #include "bets.h"
@@ -36,6 +35,7 @@
 #include "hole_setup.h"
 #include "main.h"
 #include "math_util.h"
+#include "memory_address.h"
 #include "menu.h"
 #include "menu_arrows.h"
 #include "menu_memory.h"

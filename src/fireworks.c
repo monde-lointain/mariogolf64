@@ -2,7 +2,6 @@
 
 #include <ultra64.h>
 
-#include "address.h"
 #include "asset.h"
 #include "c_language.h"
 #include "compiler.h"
@@ -10,6 +9,7 @@
 #include "geometry.h"
 #include "heap.h"
 #include "math_util.h"
+#include "memory_address.h"
 #include "round_hud.h"
 #include "screen.h"
 #include "sound.h"

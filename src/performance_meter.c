@@ -3,12 +3,12 @@
 #include <nusys.h>
 #include <ultra64.h>
 
-#include "address.h"
 #include "c_language.h"
 #include "compiler.h"
 #include "gbi_helpers.h"
 #include "geometry.h"
 #include "heap.h"
+#include "memory_address.h"
 #include "screen.h"
 
 #define FRAME_WIDTH 280

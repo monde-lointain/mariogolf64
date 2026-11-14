@@ -6,7 +6,6 @@
 #include <string.h>
 #include <ultra64.h>
 
-#include "address.h"
 #include "asset.h"
 #include "awards.h"
 #include "ball_simulation.h"
@@ -38,6 +37,7 @@
 #include "hole_setup.h"
 #include "main.h"
 #include "math_util.h"
+#include "memory_address.h"
 #include "menu.h"
 #include "movie.h"
 #include "overlay_manager.h"

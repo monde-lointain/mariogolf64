@@ -4,12 +4,12 @@
 
 #define WIDENS_FACE_CHARACTER_INDEX
 
-#include "address.h"
 #include "asset.h"
 #include "character.h"
 #include "compiler.h"
 #include "gbi_helpers.h"
 #include "main_menu.h"
+#include "memory_address.h"
 #include "menu.h"
 #include "menu_arrows.h"
 #include "menu_memory.h"

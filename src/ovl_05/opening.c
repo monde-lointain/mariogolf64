@@ -4,7 +4,6 @@
 #include <stdlib.h>
 #include <ultra64.h>
 
-#include "address.h"
 #include "asset.h"
 #include "ball_simulation.h"
 #include "billboard.h"
@@ -26,6 +25,7 @@
 #include "hole_setup.h"
 #include "main.h"
 #include "math_util.h"
+#include "memory_address.h"
 #include "menu.h"
 #include "opening_ball.h"
 #include "opening_camera_editor.h"

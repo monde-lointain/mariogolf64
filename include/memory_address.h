@@ -1,5 +1,5 @@
-#ifndef ADDRESS_H
-#define ADDRESS_H
+#ifndef MEMORY_ADDRESS_H
+#define MEMORY_ADDRESS_H
 
 #include <ultra64.h>
 

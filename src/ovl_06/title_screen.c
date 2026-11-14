@@ -2,7 +2,6 @@
 
 #include <ultra64.h>
 
-#include "address.h"
 #include "asset.h"
 #include "c_language.h"
 #include "compiler.h"
@@ -11,6 +10,7 @@
 #include "gbi_helpers.h"
 #include "main.h"
 #include "math_util.h"
+#include "memory_address.h"
 #include "menu.h"
 #include "overlay_manager.h"
 #include "rcp_init.h"

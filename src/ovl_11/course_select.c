@@ -2,7 +2,6 @@
 
 #include <ultra64.h>
 
-#include "address.h"
 #include "asset.h"
 #include "c_language.h"
 #include "compiler.h"
@@ -11,6 +10,7 @@
 #include "game_state.h"
 #include "gbi_helpers.h"
 #include "heap.h"
+#include "memory_address.h"
 #include "menu.h"
 #include "menu_memory.h"
 #include "save.h"

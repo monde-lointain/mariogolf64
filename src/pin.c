@@ -3,7 +3,6 @@
 #include <math.h>
 #include <ultra64.h>
 
-#include "address.h"
 #include "asset.h"
 #include "c_language.h"
 #include "camera.h"
@@ -18,6 +17,7 @@
 #include "hole_conditions.h"
 #include "hole_setup.h"
 #include "math_util.h"
+#include "memory_address.h"
 #include "round_hud.h"
 #include "screen.h"
 #include "shot_camera.h"

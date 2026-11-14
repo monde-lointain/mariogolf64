@@ -2,7 +2,6 @@
 
 #include <ultra64.h>
 
-#include "address.h"
 #include "asset.h"
 #include "awards.h"
 #include "bets.h"
@@ -20,6 +19,7 @@
 #include "heap.h"
 #include "main.h"
 #include "math_util.h"
+#include "memory_address.h"
 #include "menu.h"
 #include "particle_effects.h"
 #include "password.h"

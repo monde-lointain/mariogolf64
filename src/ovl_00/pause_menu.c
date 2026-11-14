@@ -3,7 +3,6 @@
 #include <framebuffer_count.h>
 #include <ultra64.h>
 
-#include "address.h"
 #include "asset.h"
 #include "c_language.h"
 #include "compiler.h"
@@ -17,6 +16,7 @@
 #include "hole_setup.h"
 #include "main.h"
 #include "math_util.h"
+#include "memory_address.h"
 #include "overlay_manager.h"
 #include "particle_effects.h"
 #include "play.h"

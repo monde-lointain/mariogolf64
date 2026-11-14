@@ -1,6 +1,5 @@
 #include <ultra64.h>
 
-#include "address.h"
 #include "asset.h"
 #include "bets.h"
 #include "c_language.h"
@@ -15,6 +14,7 @@
 #include "geometry.h"
 #include "hole_loader.h"
 #include "math_util.h"
+#include "memory_address.h"
 #include "player.h"
 #include "round_hud.h"
 #include "round_stats.h"

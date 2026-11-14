@@ -2,7 +2,6 @@
 
 #include <ultra64.h>
 
-#include "address.h"
 #include "asset.h"
 #include "c_language.h"
 #include "camera.h"
@@ -12,6 +11,7 @@
 #include "gbi_helpers.h"
 #include "hole_loader.h"
 #include "main.h"
+#include "memory_address.h"
 #include "overlay_manager.h"
 #include "scene.h"
 #include "screen.h"

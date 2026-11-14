@@ -3,7 +3,6 @@
 #include <framebuffer_count.h>
 #include <ultra64.h>
 
-#include "address.h"
 #include "asset.h"
 #include "bets.h"
 #include "character.h"
@@ -17,6 +16,7 @@
 #include "heap.h"
 #include "hole_loader.h"
 #include "math_util.h"
+#include "memory_address.h"
 #include "play.h"
 #include "player.h"
 #include "reaction.h"

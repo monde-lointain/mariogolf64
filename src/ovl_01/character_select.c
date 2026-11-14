@@ -3,7 +3,6 @@
 #include <stdlib.h>
 #include <ultra64.h>
 
-#include "address.h"
 #include "asset.h"
 #include "c_language.h"
 #include "character.h"
@@ -17,6 +16,7 @@
 #include "game_state.h"
 #include "gbi_helpers.h"
 #include "main_menu.h"
+#include "memory_address.h"
 #include "menu.h"
 #include "menu_memory.h"
 #include "player.h"

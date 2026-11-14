@@ -5,7 +5,6 @@
 
 #define OMITS_MEASURE_TEXT_FLAGS
 
-#include "address.h"
 #include "asset.h"
 #include "c_language.h"
 #include "character.h"
@@ -16,6 +15,7 @@
 #include "gbi_helpers.h"
 #include "heap.h"
 #include "math_util.h"
+#include "memory_address.h"
 #include "menu.h"
 #include "pause_menu.h"
 #include "play.h"

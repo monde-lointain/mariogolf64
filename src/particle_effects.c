@@ -4,7 +4,6 @@
 #include <stdlib.h>
 #include <ultra64.h>
 
-#include "address.h"
 #include "asset.h"
 #include "ball_simulation.h"
 #include "c_language.h"
@@ -23,6 +22,7 @@
 #include "hole_conditions.h"
 #include "hole_setup.h"
 #include "math_util.h"
+#include "memory_address.h"
 #include "player.h"
 #include "screen.h"
 #include "screen_layers.h"

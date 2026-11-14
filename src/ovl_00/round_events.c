@@ -3,7 +3,6 @@
 #include <math.h>
 #include <ultra64.h>
 
-#include "address.h"
 #include "asset.h"
 #include "c_language.h"
 #include "camera.h"
@@ -19,6 +18,7 @@
 #include "geometry.h"
 #include "heap.h"
 #include "math_util.h"
+#include "memory_address.h"
 #include "movie.h"
 #include "pin.h"
 #include "play.h"

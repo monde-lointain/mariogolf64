@@ -5,13 +5,13 @@
 
 #define WIDENS_CHOSEN_OPTIONS
 
-#include "address.h"
 #include "asset.h"
 #include "character.h"
 #include "compiler.h"
 #include "controller.h"
 #include "debug_text.h"
 #include "game_flags.h"
+#include "memory_address.h"
 #include "music.h"
 #include "save.h"
 #include "text.h"

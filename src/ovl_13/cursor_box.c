@@ -2,13 +2,13 @@
 
 #include <ultra64.h>
 
-#include "address.h"
 #include "asset.h"
 #include "compiler.h"
 #include "game.h"
 #include "gbi_helpers.h"
 #include "geometry.h"
 #include "math_util.h"
+#include "memory_address.h"
 #include "screen.h"
 
 #define CURSOR_BOX_CORNER_COUNT 4

@@ -3,7 +3,6 @@
 #include <nusys.h>
 #include <ultra64.h>
 
-#include "address.h"
 #include "asset.h"
 #include "c_language.h"
 #include "character_model.h"
@@ -12,6 +11,7 @@
 #include "hole_loader.h"
 #include "main_menu.h"
 #include "math_util.h"
+#include "memory_address.h"
 #include "menu.h"
 #include "menu_memory.h"
 #include "screen.h"

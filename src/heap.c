@@ -2,9 +2,9 @@
 
 #include <ultra64.h>
 
-#include "address.h"
 #include "c_language.h"
 #include "math_util.h"
+#include "memory_address.h"
 
 #define HEAP_COUNT 3
 

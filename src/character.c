@@ -4,7 +4,6 @@
 #include <string.h>
 #include <ultra64.h>
 
-#include "address.h"
 #include "asset.h"
 #include "c_language.h"
 #include "camera.h"
@@ -26,6 +25,7 @@
 #include "host_file.h"
 #include "main.h"
 #include "math_util.h"
+#include "memory_address.h"
 #include "play.h"
 #include "player.h"
 #include "reaction.h"

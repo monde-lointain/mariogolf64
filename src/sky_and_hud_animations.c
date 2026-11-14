@@ -6,7 +6,6 @@
 #include <string.h>
 #include <ultra64.h>
 
-#include "address.h"
 #include "asset.h"
 #include "c_language.h"
 #include "camera.h"
@@ -25,6 +24,7 @@
 #include "hole_loader.h"
 #include "hole_setup.h"
 #include "math_util.h"
+#include "memory_address.h"
 #include "round_hud.h"
 #include "scene.h"
 #include "scene_colors.h"

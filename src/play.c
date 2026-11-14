@@ -5,7 +5,6 @@
 #include <string.h>
 #include <ultra64.h>
 
-#include "address.h"
 #include "awards.h"
 #include "ball_simulation.h"
 #include "c_language.h"
@@ -33,6 +32,7 @@
 #include "hole_triangles.h"
 #include "main.h"
 #include "math_util.h"
+#include "memory_address.h"
 #include "menu.h"
 #include "movie.h"
 #include "overlay_manager.h"

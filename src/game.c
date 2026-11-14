@@ -7,7 +7,6 @@
 #include <nusys.h>
 #include <ultra64.h>
 
-#include "address.h"
 #include "animated_box.h"
 #include "asset.h"
 #include "billboard.h"
@@ -35,6 +34,7 @@
 #include "main.h"
 #include "main_menu.h"
 #include "math_util.h"
+#include "memory_address.h"
 #include "movie.h"
 #include "opening.h"
 #include "overlay_manager.h"

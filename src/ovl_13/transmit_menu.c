@@ -3,7 +3,6 @@
 #include <string.h>
 #include <ultra64.h>
 
-#include "address.h"
 #include "asset.h"
 #include "c_language.h"
 #include "character.h"
@@ -21,6 +20,7 @@
 #include "heap.h"
 #include "host_file.h"
 #include "math_util.h"
+#include "memory_address.h"
 #include "menu.h"
 #include "overlay_manager.h"
 #include "save.h"

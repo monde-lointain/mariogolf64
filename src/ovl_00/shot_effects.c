@@ -2,7 +2,6 @@
 
 #include <ultra64.h>
 
-#include "address.h"
 #include "asset.h"
 #include "camera.h"
 #include "character_model.h"
@@ -17,6 +16,7 @@
 #include "heap.h"
 #include "hole_creatures.h"
 #include "math_util.h"
+#include "memory_address.h"
 #include "movie.h"
 #include "particle_effects.h"
 #include "round_events.h"

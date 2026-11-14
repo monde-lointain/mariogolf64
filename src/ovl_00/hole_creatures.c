@@ -3,7 +3,6 @@
 #include <math.h>
 #include <ultra64.h>
 
-#include "address.h"
 #include "asset.h"
 #include "c_language.h"
 #include "camera.h"
@@ -16,6 +15,7 @@
 #include "heap.h"
 #include "hole_setup.h"
 #include "math_util.h"
+#include "memory_address.h"
 #include "particle_effects.h"
 #include "round_hud.h"
 #include "screen_layers.h"

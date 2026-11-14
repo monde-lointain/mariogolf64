@@ -3,7 +3,6 @@
 #include <math.h>
 #include <ultra64.h>
 
-#include "address.h"
 #include "animated_box.h"
 #include "billboard.h"
 #include "c_language.h"
@@ -27,6 +26,7 @@
 #include "hole_triangles.h"
 #include "main.h"
 #include "math_util.h"
+#include "memory_address.h"
 #include "menu.h"
 #include "overlay_manager.h"
 #include "play.h"

@@ -2,7 +2,6 @@
 
 #include <ultra64.h>
 
-#include "address.h"
 #include "asset.h"
 #include "billboard.h"
 #include "c_language.h"
@@ -19,6 +18,7 @@
 #include "hole_triangles.h"
 #include "host_file.h"
 #include "math_util.h"
+#include "memory_address.h"
 #include "play.h"
 #include "player.h"
 #include "scene.h"

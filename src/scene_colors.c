@@ -2,13 +2,13 @@
 
 #include <ultra64.h>
 
-#include "address.h"
 #include "asset.h"
 #include "c_language.h"
 #include "compiler.h"
 #include "game.h"
 #include "gbi_helpers.h"
 #include "hole_setup.h"
+#include "memory_address.h"
 #include "play.h"
 #include "sky_and_hud_animations.h"
 

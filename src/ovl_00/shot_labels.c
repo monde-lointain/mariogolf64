@@ -4,7 +4,6 @@
 
 #define CALLS_CENTERED_SHADOWED_TEXT_UNPROTOTYPED
 
-#include "address.h"
 #include "asset.h"
 #include "camera.h"
 #include "club.h"
@@ -17,6 +16,7 @@
 #include "geometry.h"
 #include "hole_setup.h"
 #include "math_util.h"
+#include "memory_address.h"
 #include "overlay_manager.h"
 #include "play.h"
 #include "player.h"

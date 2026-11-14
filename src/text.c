@@ -2,7 +2,6 @@
 
 #define DEFINES_SET_TEXT_SLOT
 
-#include "address.h"
 #include "asset.h"
 #include "c_language.h"
 #include "compiler.h"
@@ -10,6 +9,7 @@
 #include "game_state.h"
 #include "gbi_helpers.h"
 #include "heap.h"
+#include "memory_address.h"
 #include "round_hud.h"
 #include "scene.h"
 #include "screen.h"

@@ -2,7 +2,6 @@
 
 #include <ultra64.h>
 
-#include "address.h"
 #include "asset.h"
 #include "c_language.h"
 #include "club.h"
@@ -15,6 +14,7 @@
 #include "gbi_helpers.h"
 #include "heap.h"
 #include "math_util.h"
+#include "memory_address.h"
 #include "menu.h"
 #include "play.h"
 #include "player.h"
