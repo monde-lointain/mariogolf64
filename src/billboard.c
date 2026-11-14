@@ -24,8 +24,6 @@
 
 #define TEXTURE_LOADED_ON_DEMAND 2
 
-#define TEXTURE_HEADER_SIZE 8
-
 #define SHAPE_VERTEX_COUNT 8
 
 #define NO_TEXTURE_LOADED (-1)
@@ -274,10 +272,10 @@ void DrawBillboard(
         texelSize = f_BillboardTextures[textureIndex].width *
             f_BillboardTextures[textureIndex].height * sizeof(u16);
         f_BillboardTextures[textureIndex].pixels =
-            AllocFromHeap(HEAP_BILLBOARD, texelSize + TEXTURE_HEADER_SIZE);
+            AllocFromHeap(HEAP_BILLBOARD, texelSize + IMAGE_HEADER_SIZE);
         if (f_BillboardTextures[textureIndex].pixels != NULL) {
             OpenAssetFile(f_BillboardTextures[textureIndex].assetId, &file);
-            ReadAssetFile(f_BillboardTextures[textureIndex].pixels, TEXTURE_HEADER_SIZE, &file);
+            ReadAssetFile(f_BillboardTextures[textureIndex].pixels, IMAGE_HEADER_SIZE, &file);
             ReadAssetFile(f_BillboardTextures[textureIndex].pixels, texelSize, &file);
         }
     }
