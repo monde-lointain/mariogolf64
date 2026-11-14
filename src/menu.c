@@ -2711,7 +2711,7 @@ void EnterMenuAtCourseSelect(void) {
         case GAME_MODE_STROKE:
             g_CourseSelectKind = COURSE_SELECT_KIND_COURSES;
             COURSE_SELECT_LAYOUT = COURSE_SELECT_LAYOUT_HOLES;
-            if (g_ChosenPlayerCount == 4) {
+            if (g_ChosenPlayerCount == PLAYER_COUNT_MAX) {
                 g_BetSet = BET_SET_STROKE_FOUR_PLAYER;
             }
             else {

@@ -1598,7 +1598,7 @@ s32 DrawGame(void) {
     TerrainStyle terrainStyle;
     DrawMode drawMode;
     s32 cameraIndex;
-    s32 playerIndex;
+    s32 slotIndex;
     s32 commandCount;
     f32 nearZ;
     f32 farClip;
@@ -1612,7 +1612,7 @@ s32 DrawGame(void) {
     f32 lookAtX;
     f32 lookAtY;
     f32 lookAtZ;
-    s32 cameraMode;
+    CameraMode cameraMode;
     CameraView *insetView;
     CameraView *courseView;
     f32 *lookAt;
@@ -2515,15 +2515,17 @@ s32 DrawGame(void) {
 
                         if (!IsHoleOverviewStep(g_GameState.step)) {
                             cameraMode = g_Cameras[cameraIndex].mode;
-                            if (cameraMode != 8 && cameraMode != 2) {
+                            if (cameraMode != CAMERA_MODE_HOLE_INTRO &&
+                                cameraMode != CAMERA_MODE_FREE_LOOK) {
                                 if (!IsGameFlagSet(GAME_FLAG_HIDE_GOLF_BALLS) &&
                                     g_IsModuleAlive[MODULE_GOLF_BALLS]) {
                                     DrawGolfBalls(matrices);
                                 }
 
                                 if (!IsGameFlagSet(GAME_FLAG_HIDE_CHARACTERS)) {
-                                    for (playerIndex = 0; playerIndex < 4; playerIndex++) {
-                                        DrawCharacterAndShadow(matrices, cameraIndex, playerIndex);
+                                    for (slotIndex = 0; slotIndex < CHARACTER_SLOT_COUNT;
+                                        slotIndex++) {
+                                        DrawCharacterAndShadow(matrices, cameraIndex, slotIndex);
                                         if (g_Scene != SCENE_STAFF_ROLL) {
                                             break;
                                         }

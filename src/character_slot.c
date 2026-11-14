@@ -7,6 +7,7 @@
 #include "compiler.h"
 #include "game.h"
 #include "game_state.h"
+#include "gbi_helpers.h"
 #include "geometry.h"
 #include "language.h"
 #include "main.h"
@@ -59,7 +60,7 @@ void SetCharacterAlpha(s32 alpha) {
     }
 
     gfx = g_CharacterRenderModeDisplayList;
-    if ((alpha & 0xFF) == 0xFF) {
+    if ((alpha & OPAQUE_ALPHA) == OPAQUE_ALPHA) {
         gDPPipeSync(gfx++);
         gDPSetRenderMode(gfx++, G_RM_PASS, G_RM_AA_ZB_OPA_SURF2);
     }

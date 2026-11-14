@@ -62,7 +62,17 @@
 #define SUN_GLARE_FLARE_STRENGTH 1.5f
 #define SUN_GLARE_FULL_STRENGTH 1.0f
 
-#define SKY_VERTEX_COUNT 10
+// The sky is drawn as a fan of five vertices: the top corners and center on
+// the screen's top edge, and the two horizon corners. A second fan follows
+// with the pitch mirrored.
+#define SKY_TOP_LEFT 0
+#define SKY_HORIZON_LEFT 1
+#define SKY_HORIZON_RIGHT 2
+#define SKY_TOP_RIGHT 3
+#define SKY_TOP_CENTER 4
+#define SKY_FAN_VERTEX_COUNT 5
+#define MIRRORED_SKY_FAN SKY_FAN_VERTEX_COUNT
+#define SKY_VERTEX_COUNT (SKY_FAN_VERTEX_COUNT * 2)
 #define SKY_BLEND_STEP_COUNT 1000
 
 #define SKY_PERCENT_TO_STEPS (SKY_BLEND_STEP_COUNT / PERCENT_PER_WHOLE)
@@ -1587,26 +1597,26 @@ void BlendSkyColors(void) {
     to = &g_SkyColors[GetCourseRecordIndex()]
                      [(g_HoleSetup.conditions.isRaining * SKY_TIME_COUNT) + f_SkyTimeIndex + 1];
     for (skyIndex = 0; skyIndex != SKY_VIEW_COUNT * MATRIX_BUFFER_COUNT; skyIndex++) {
-        for (channel = 0; channel != 3; channel++) {
-            f_SkyVertices[skyIndex][0].v.cn[channel] = from->topColor[channel] +
+        for (channel = 0; channel != RGB_CHANNEL_COUNT; channel++) {
+            f_SkyVertices[skyIndex][SKY_TOP_LEFT].v.cn[channel] = from->topColor[channel] +
                 ((to->topColor[channel] - from->topColor[channel]) * f_SkyBlendStep /
                     SKY_BLEND_STEP_COUNT);
-            f_SkyVertices[skyIndex][1].v.cn[channel] = from->horizonColor[channel] +
+            f_SkyVertices[skyIndex][SKY_HORIZON_LEFT].v.cn[channel] = from->horizonColor[channel] +
                 ((to->horizonColor[channel] - from->horizonColor[channel]) * f_SkyBlendStep /
                     SKY_BLEND_STEP_COUNT);
-            f_SkyVertices[skyIndex][2].v.cn[channel] = from->horizonColor[channel] +
+            f_SkyVertices[skyIndex][SKY_HORIZON_RIGHT].v.cn[channel] = from->horizonColor[channel] +
                 ((to->horizonColor[channel] - from->horizonColor[channel]) * f_SkyBlendStep /
                     SKY_BLEND_STEP_COUNT);
-            f_SkyVertices[skyIndex][3].v.cn[channel] = from->topColor[channel] +
+            f_SkyVertices[skyIndex][SKY_TOP_RIGHT].v.cn[channel] = from->topColor[channel] +
                 ((to->topColor[channel] - from->topColor[channel]) * f_SkyBlendStep /
                     SKY_BLEND_STEP_COUNT);
-            f_SkyVertices[skyIndex][4].v.cn[channel] = from->topColor[channel] +
+            f_SkyVertices[skyIndex][SKY_TOP_CENTER].v.cn[channel] = from->topColor[channel] +
                 ((to->topColor[channel] - from->topColor[channel]) * f_SkyBlendStep /
                     SKY_BLEND_STEP_COUNT);
         }
     }
 
-    for (channel = 0; channel != 3; channel++) {
+    for (channel = 0; channel != RGB_CHANNEL_COUNT; channel++) {
         g_SceneFog.color[channel] = from->fogColor[channel] +
             ((to->fogColor[channel] - from->fogColor[channel]) * f_SkyBlendStep /
                 SKY_BLEND_STEP_COUNT);
@@ -1664,19 +1674,19 @@ void InitSkyColors(void) {
     g_SkyState.scrollY = 0.0f;
     for (i = 0; i != SKY_VIEW_COUNT * MATRIX_BUFFER_COUNT; i++) {
         for (channel = 0; channel != RGB_CHANNEL_COUNT; channel++) {
-            f_SkyVertices[i][0].v.cn[channel] = colors->topColor[channel];
-            f_SkyVertices[i][1].v.cn[channel] = colors->horizonColor[channel];
-            f_SkyVertices[i][2].v.cn[channel] = colors->horizonColor[channel];
-            f_SkyVertices[i][3].v.cn[channel] = colors->topColor[channel];
-            f_SkyVertices[i][4].v.cn[channel] = colors->topColor[channel];
+            f_SkyVertices[i][SKY_TOP_LEFT].v.cn[channel] = colors->topColor[channel];
+            f_SkyVertices[i][SKY_HORIZON_LEFT].v.cn[channel] = colors->horizonColor[channel];
+            f_SkyVertices[i][SKY_HORIZON_RIGHT].v.cn[channel] = colors->horizonColor[channel];
+            f_SkyVertices[i][SKY_TOP_RIGHT].v.cn[channel] = colors->topColor[channel];
+            f_SkyVertices[i][SKY_TOP_CENTER].v.cn[channel] = colors->topColor[channel];
             outerMix = (colors->topColor[channel] + f_SkyHorizonColor[channel]) * 0.5f;
             innerMix = (colors->horizonColor[channel] + colors->topColor[channel]) * 0.5f;
             innerMix = (innerMix + f_SkyHorizonColor[channel]) * 0.5f;
-            f_SkyVertices[i][5].v.cn[channel] = outerMix;
-            f_SkyVertices[i][6].v.cn[channel] = innerMix;
-            f_SkyVertices[i][7].v.cn[channel] = innerMix;
-            f_SkyVertices[i][8].v.cn[channel] = outerMix;
-            f_SkyVertices[i][9].v.cn[channel] = outerMix;
+            f_SkyVertices[i][MIRRORED_SKY_FAN + SKY_TOP_LEFT].v.cn[channel] = outerMix;
+            f_SkyVertices[i][MIRRORED_SKY_FAN + SKY_HORIZON_LEFT].v.cn[channel] = innerMix;
+            f_SkyVertices[i][MIRRORED_SKY_FAN + SKY_HORIZON_RIGHT].v.cn[channel] = innerMix;
+            f_SkyVertices[i][MIRRORED_SKY_FAN + SKY_TOP_RIGHT].v.cn[channel] = outerMix;
+            f_SkyVertices[i][MIRRORED_SKY_FAN + SKY_TOP_CENTER].v.cn[channel] = outerMix;
         }
     }
 
@@ -1971,21 +1981,25 @@ Boolean UpdateSkyEditor(void) {
 
     for (index = 0; index != SKY_VIEW_COUNT * MATRIX_BUFFER_COUNT; index++) {
         for (channel = 0; channel != RGB_CHANNEL_COUNT; channel++) {
-            f_SkyVertices[index][0].v.cn[channel] = f_EditedSkyColors->topColor[channel];
-            f_SkyVertices[index][1].v.cn[channel] = f_EditedSkyColors->horizonColor[channel];
-            f_SkyVertices[index][2].v.cn[channel] = f_EditedSkyColors->horizonColor[channel];
-            f_SkyVertices[index][3].v.cn[channel] = f_EditedSkyColors->topColor[channel];
-            f_SkyVertices[index][4].v.cn[channel] = f_EditedSkyColors->topColor[channel];
+            f_SkyVertices[index][SKY_TOP_LEFT].v.cn[channel] = f_EditedSkyColors->topColor[channel];
+            f_SkyVertices[index][SKY_HORIZON_LEFT].v.cn[channel] =
+                f_EditedSkyColors->horizonColor[channel];
+            f_SkyVertices[index][SKY_HORIZON_RIGHT].v.cn[channel] =
+                f_EditedSkyColors->horizonColor[channel];
+            f_SkyVertices[index][SKY_TOP_RIGHT].v.cn[channel] =
+                f_EditedSkyColors->topColor[channel];
+            f_SkyVertices[index][SKY_TOP_CENTER].v.cn[channel] =
+                f_EditedSkyColors->topColor[channel];
             innerMix = (u16)(f_EditedSkyColors->topColor[channel] +
                            f_EditedSkyColors->horizonColor[channel]) *
                 0.5f;
             outerMix = (f_EditedSkyColors->topColor[channel] + SKY_HORIZON_LEVEL) * 0.5f;
             innerMix = (innerMix + SKY_HORIZON_LEVEL) * 0.5f;
-            f_SkyVertices[index][5].v.cn[channel] = outerMix;
-            f_SkyVertices[index][6].v.cn[channel] = innerMix;
-            f_SkyVertices[index][7].v.cn[channel] = innerMix;
-            f_SkyVertices[index][8].v.cn[channel] = outerMix;
-            f_SkyVertices[index][9].v.cn[channel] = outerMix;
+            f_SkyVertices[index][MIRRORED_SKY_FAN + SKY_TOP_LEFT].v.cn[channel] = outerMix;
+            f_SkyVertices[index][MIRRORED_SKY_FAN + SKY_HORIZON_LEFT].v.cn[channel] = innerMix;
+            f_SkyVertices[index][MIRRORED_SKY_FAN + SKY_HORIZON_RIGHT].v.cn[channel] = innerMix;
+            f_SkyVertices[index][MIRRORED_SKY_FAN + SKY_TOP_RIGHT].v.cn[channel] = outerMix;
+            f_SkyVertices[index][MIRRORED_SKY_FAN + SKY_TOP_CENTER].v.cn[channel] = outerMix;
         }
     }
 
@@ -2227,101 +2241,121 @@ void UpdateSky(CameraView *view, s32 viewIndex) {
     }
 
     if (g_SkyState.pitches[viewIndex] < 0.0f) {
-        vertices[0].v.ob[AXIS_Y] =
+        vertices[SKY_TOP_LEFT].v.ob[AXIS_Y] =
             (SCREEN_HEIGHT / 2) - (g_SkyState.pitches[viewIndex] * (SCREEN_HEIGHT / 2));
-        vertices[3].v.ob[AXIS_Y] =
+        vertices[SKY_TOP_RIGHT].v.ob[AXIS_Y] =
             (SCREEN_HEIGHT / 2) - (g_SkyState.pitches[viewIndex] * (SCREEN_HEIGHT / 2));
-        vertices[4].v.ob[AXIS_Y] =
+        vertices[SKY_TOP_CENTER].v.ob[AXIS_Y] =
             (SCREEN_HEIGHT / 2) - (g_SkyState.pitches[viewIndex] * (SCREEN_HEIGHT / 2));
     }
     else {
-        vertices[0].v.ob[AXIS_Y] = SCREEN_HEIGHT / 2;
-        vertices[3].v.ob[AXIS_Y] = SCREEN_HEIGHT / 2;
-        vertices[4].v.ob[AXIS_Y] = SCREEN_HEIGHT / 2;
+        vertices[SKY_TOP_LEFT].v.ob[AXIS_Y] = SCREEN_HEIGHT / 2;
+        vertices[SKY_TOP_RIGHT].v.ob[AXIS_Y] = SCREEN_HEIGHT / 2;
+        vertices[SKY_TOP_CENTER].v.ob[AXIS_Y] = SCREEN_HEIGHT / 2;
     }
 
-    vertices[1].v.ob[AXIS_Y] =
+    vertices[SKY_HORIZON_LEFT].v.ob[AXIS_Y] =
         (g_SkyState.horizonLevels[viewIndex] + SKY_HORIZON_BIAS) * SKY_HORIZON_TO_HEIGHT;
-    vertices[2].v.ob[AXIS_Y] =
+    vertices[SKY_HORIZON_RIGHT].v.ob[AXIS_Y] =
         (g_SkyState.horizonLevels[viewIndex] + SKY_HORIZON_BIAS) * SKY_HORIZON_TO_HEIGHT;
-    vertices[1].v.ob[AXIS_Z] = SKY_TOP_DEPTH - (g_SkyState.pitches[viewIndex] * SKY_PITCH_TO_DEPTH);
-    vertices[2].v.ob[AXIS_Z] = SKY_TOP_DEPTH - (g_SkyState.pitches[viewIndex] * SKY_PITCH_TO_DEPTH);
-    vertices[6].v.ob[AXIS_Z] =
+    vertices[SKY_HORIZON_LEFT].v.ob[AXIS_Z] =
+        SKY_TOP_DEPTH - (g_SkyState.pitches[viewIndex] * SKY_PITCH_TO_DEPTH);
+    vertices[SKY_HORIZON_RIGHT].v.ob[AXIS_Z] =
+        SKY_TOP_DEPTH - (g_SkyState.pitches[viewIndex] * SKY_PITCH_TO_DEPTH);
+    vertices[MIRRORED_SKY_FAN + SKY_HORIZON_LEFT].v.ob[AXIS_Z] =
         SKY_TOP_DEPTH - (-g_SkyState.pitches[viewIndex] * SKY_PITCH_TO_DEPTH);
-    vertices[7].v.ob[AXIS_Z] =
+    vertices[MIRRORED_SKY_FAN + SKY_HORIZON_RIGHT].v.ob[AXIS_Z] =
         SKY_TOP_DEPTH - (-g_SkyState.pitches[viewIndex] * SKY_PITCH_TO_DEPTH);
-    if (vertices[1].v.ob[AXIS_Y] < -SKY_HEIGHT_LIMIT) {
-        clippedHeight =
-            (vertices[1].v.ob[AXIS_Y] + SKY_HEIGHT_LIMIT) / (1 << SKY_CLIPPED_HEIGHT_SHIFT);
-        vertices[1].v.ob[AXIS_Y] = -SKY_HEIGHT_LIMIT;
+    if (vertices[SKY_HORIZON_LEFT].v.ob[AXIS_Y] < -SKY_HEIGHT_LIMIT) {
+        clippedHeight = (vertices[SKY_HORIZON_LEFT].v.ob[AXIS_Y] + SKY_HEIGHT_LIMIT) /
+            (1 << SKY_CLIPPED_HEIGHT_SHIFT);
+        vertices[SKY_HORIZON_LEFT].v.ob[AXIS_Y] = -SKY_HEIGHT_LIMIT;
     }
 
-    if (vertices[2].v.ob[AXIS_Y] < -SKY_HEIGHT_LIMIT) {
-        vertices[2].v.ob[AXIS_Y] = -SKY_HEIGHT_LIMIT;
+    if (vertices[SKY_HORIZON_RIGHT].v.ob[AXIS_Y] < -SKY_HEIGHT_LIMIT) {
+        vertices[SKY_HORIZON_RIGHT].v.ob[AXIS_Y] = -SKY_HEIGHT_LIMIT;
     }
 
-    if (vertices[1].v.ob[AXIS_Y] > SKY_HEIGHT_LIMIT) {
-        vertices[1].v.ob[AXIS_Y] = SKY_HEIGHT_LIMIT;
+    if (vertices[SKY_HORIZON_LEFT].v.ob[AXIS_Y] > SKY_HEIGHT_LIMIT) {
+        vertices[SKY_HORIZON_LEFT].v.ob[AXIS_Y] = SKY_HEIGHT_LIMIT;
     }
 
-    if (vertices[2].v.ob[AXIS_Y] > SKY_HEIGHT_LIMIT) {
-        vertices[2].v.ob[AXIS_Y] = SKY_HEIGHT_LIMIT;
+    if (vertices[SKY_HORIZON_RIGHT].v.ob[AXIS_Y] > SKY_HEIGHT_LIMIT) {
+        vertices[SKY_HORIZON_RIGHT].v.ob[AXIS_Y] = SKY_HEIGHT_LIMIT;
     }
 
-    vertices[6].v.ob[AXIS_Y] = vertices[1].v.ob[AXIS_Y];
-    vertices[7].v.ob[AXIS_Y] = vertices[2].v.ob[AXIS_Y];
+    vertices[MIRRORED_SKY_FAN + SKY_HORIZON_LEFT].v.ob[AXIS_Y] =
+        vertices[SKY_HORIZON_LEFT].v.ob[AXIS_Y];
+    vertices[MIRRORED_SKY_FAN + SKY_HORIZON_RIGHT].v.ob[AXIS_Y] =
+        vertices[SKY_HORIZON_RIGHT].v.ob[AXIS_Y];
 
     sine = sinf(g_SkyState.viewedWindAngles[viewIndex]);
     cosine = cosf(g_SkyState.viewedWindAngles[viewIndex]);
     distance = clippedHeight + SKY_TEXTURE_FAR_DISTANCE;
     coordinate = (sine * distance) - (cosine * SKY_TEXTURE_HALF_WIDTH);
-    vertices[1].v.tc[TEXTURE_AXIS_S] = ((s32)coordinate * SKY_TEXTURE_SCALE) + g_SkyState.scrollX;
+    vertices[SKY_HORIZON_LEFT].v.tc[TEXTURE_AXIS_S] =
+        ((s32)coordinate * SKY_TEXTURE_SCALE) + g_SkyState.scrollX;
     coordinate = (cosine * distance) + (sine * SKY_TEXTURE_HALF_WIDTH);
-    vertices[1].v.tc[TEXTURE_AXIS_T] = ((s32)coordinate * SKY_TEXTURE_SCALE) + g_SkyState.scrollY;
+    vertices[SKY_HORIZON_LEFT].v.tc[TEXTURE_AXIS_T] =
+        ((s32)coordinate * SKY_TEXTURE_SCALE) + g_SkyState.scrollY;
     coordinate = (sine * distance) + (cosine * SKY_TEXTURE_HALF_WIDTH);
-    vertices[2].v.tc[TEXTURE_AXIS_S] = ((s32)coordinate * SKY_TEXTURE_SCALE) + g_SkyState.scrollX;
+    vertices[SKY_HORIZON_RIGHT].v.tc[TEXTURE_AXIS_S] =
+        ((s32)coordinate * SKY_TEXTURE_SCALE) + g_SkyState.scrollX;
     coordinate = (cosine * distance) - (sine * SKY_TEXTURE_HALF_WIDTH);
     pitches = g_SkyState.pitches;
-    vertices[2].v.tc[TEXTURE_AXIS_T] = ((s32)coordinate * SKY_TEXTURE_SCALE) + g_SkyState.scrollY;
+    vertices[SKY_HORIZON_RIGHT].v.tc[TEXTURE_AXIS_T] =
+        ((s32)coordinate * SKY_TEXTURE_SCALE) + g_SkyState.scrollY;
     horizonHalfWidth = SCREEN_WIDTH;
     distance = SKY_TEXTURE_NEAR_DISTANCE - (pitches[viewIndex] * horizonHalfWidth * (2 / M_PI)) +
         clippedHeight;
     coordinate = (sine * distance) - (cosine * SKY_TEXTURE_HALF_WIDTH);
-    vertices[0].v.tc[TEXTURE_AXIS_S] = ((s32)coordinate * SKY_TEXTURE_SCALE) + g_SkyState.scrollX;
+    vertices[SKY_TOP_LEFT].v.tc[TEXTURE_AXIS_S] =
+        ((s32)coordinate * SKY_TEXTURE_SCALE) + g_SkyState.scrollX;
     coordinate = (cosine * distance) + (sine * SKY_TEXTURE_HALF_WIDTH);
-    vertices[0].v.tc[TEXTURE_AXIS_T] = ((s32)coordinate * SKY_TEXTURE_SCALE) + g_SkyState.scrollY;
+    vertices[SKY_TOP_LEFT].v.tc[TEXTURE_AXIS_T] =
+        ((s32)coordinate * SKY_TEXTURE_SCALE) + g_SkyState.scrollY;
     coordinate = (sine * distance) + (cosine * SKY_TEXTURE_HALF_WIDTH);
-    vertices[3].v.tc[TEXTURE_AXIS_S] = ((s32)coordinate * SKY_TEXTURE_SCALE) + g_SkyState.scrollX;
+    vertices[SKY_TOP_RIGHT].v.tc[TEXTURE_AXIS_S] =
+        ((s32)coordinate * SKY_TEXTURE_SCALE) + g_SkyState.scrollX;
     coordinate = (cosine * distance) - (sine * SKY_TEXTURE_HALF_WIDTH);
-    vertices[3].v.tc[TEXTURE_AXIS_T] = ((s32)coordinate * SKY_TEXTURE_SCALE) + g_SkyState.scrollY;
-    vertices[4].v.tc[TEXTURE_AXIS_S] =
+    vertices[SKY_TOP_RIGHT].v.tc[TEXTURE_AXIS_T] =
+        ((s32)coordinate * SKY_TEXTURE_SCALE) + g_SkyState.scrollY;
+    vertices[SKY_TOP_CENTER].v.tc[TEXTURE_AXIS_S] =
         ((s32)(sine * distance) * SKY_TEXTURE_SCALE) + g_SkyState.scrollX;
-    vertices[4].v.tc[TEXTURE_AXIS_T] =
+    vertices[SKY_TOP_CENTER].v.tc[TEXTURE_AXIS_T] =
         ((s32)(cosine * distance) * SKY_TEXTURE_SCALE) + g_SkyState.scrollY;
     distance =
         (SKY_TEXTURE_HORIZON_DISTANCE - (-pitches[viewIndex] * horizonHalfWidth * (2 / M_PI))) *
         horizonHalfWidth / SCREEN_WIDTH;
     coordinate = (sine * distance) - (cosine * horizonHalfWidth);
-    vertices[6].v.tc[TEXTURE_AXIS_S] = ((s32)coordinate * SKY_TEXTURE_SCALE) + g_SkyState.scrollX;
+    vertices[MIRRORED_SKY_FAN + SKY_HORIZON_LEFT].v.tc[TEXTURE_AXIS_S] =
+        ((s32)coordinate * SKY_TEXTURE_SCALE) + g_SkyState.scrollX;
     coordinate = (cosine * distance) + (sine * horizonHalfWidth);
-    vertices[6].v.tc[TEXTURE_AXIS_T] = ((s32)coordinate * SKY_TEXTURE_SCALE) + g_SkyState.scrollY;
+    vertices[MIRRORED_SKY_FAN + SKY_HORIZON_LEFT].v.tc[TEXTURE_AXIS_T] =
+        ((s32)coordinate * SKY_TEXTURE_SCALE) + g_SkyState.scrollY;
     coordinate = (sine * distance) + (cosine * horizonHalfWidth);
-    vertices[7].v.tc[TEXTURE_AXIS_S] = ((s32)coordinate * SKY_TEXTURE_SCALE) + g_SkyState.scrollX;
+    vertices[MIRRORED_SKY_FAN + SKY_HORIZON_RIGHT].v.tc[TEXTURE_AXIS_S] =
+        ((s32)coordinate * SKY_TEXTURE_SCALE) + g_SkyState.scrollX;
     coordinate = (cosine * distance) - (sine * horizonHalfWidth);
-    vertices[7].v.tc[TEXTURE_AXIS_T] = ((s32)coordinate * SKY_TEXTURE_SCALE) + g_SkyState.scrollY;
+    vertices[MIRRORED_SKY_FAN + SKY_HORIZON_RIGHT].v.tc[TEXTURE_AXIS_T] =
+        ((s32)coordinate * SKY_TEXTURE_SCALE) + g_SkyState.scrollY;
     distance = (SKY_TEXTURE_NEAR_DISTANCE - (-pitches[viewIndex] * horizonHalfWidth * (2 / M_PI))) *
         horizonHalfWidth / SCREEN_WIDTH;
     coordinate = (sine * distance) - (cosine * horizonHalfWidth);
-    vertices[5].v.tc[TEXTURE_AXIS_S] = ((s32)coordinate * SKY_TEXTURE_SCALE) + g_SkyState.scrollX;
+    vertices[MIRRORED_SKY_FAN + SKY_TOP_LEFT].v.tc[TEXTURE_AXIS_S] =
+        ((s32)coordinate * SKY_TEXTURE_SCALE) + g_SkyState.scrollX;
     coordinate = (cosine * distance) + (sine * horizonHalfWidth);
-    vertices[5].v.tc[TEXTURE_AXIS_T] = ((s32)coordinate * SKY_TEXTURE_SCALE) + g_SkyState.scrollY;
+    vertices[MIRRORED_SKY_FAN + SKY_TOP_LEFT].v.tc[TEXTURE_AXIS_T] =
+        ((s32)coordinate * SKY_TEXTURE_SCALE) + g_SkyState.scrollY;
     coordinate = (sine * distance) + (cosine * horizonHalfWidth);
-    vertices[8].v.tc[TEXTURE_AXIS_S] = ((s32)coordinate * SKY_TEXTURE_SCALE) + g_SkyState.scrollX;
+    vertices[MIRRORED_SKY_FAN + SKY_TOP_RIGHT].v.tc[TEXTURE_AXIS_S] =
+        ((s32)coordinate * SKY_TEXTURE_SCALE) + g_SkyState.scrollX;
     coordinate = (cosine * distance) - (sine * horizonHalfWidth);
-    vertices[8].v.tc[TEXTURE_AXIS_T] = ((s32)coordinate * SKY_TEXTURE_SCALE) + g_SkyState.scrollY;
-    vertices[9].v.tc[TEXTURE_AXIS_S] =
+    vertices[MIRRORED_SKY_FAN + SKY_TOP_RIGHT].v.tc[TEXTURE_AXIS_T] =
+        ((s32)coordinate * SKY_TEXTURE_SCALE) + g_SkyState.scrollY;
+    vertices[MIRRORED_SKY_FAN + SKY_TOP_CENTER].v.tc[TEXTURE_AXIS_S] =
         ((s32)(sine * distance) * SKY_TEXTURE_SCALE) + g_SkyState.scrollX;
-    vertices[9].v.tc[TEXTURE_AXIS_T] =
+    vertices[MIRRORED_SKY_FAN + SKY_TOP_CENTER].v.tc[TEXTURE_AXIS_T] =
         ((s32)(cosine * distance) * SKY_TEXTURE_SCALE) + g_SkyState.scrollY;
 }
 
@@ -2481,9 +2515,9 @@ void DrawSky(Gfx **displayListHead, f32 eyeY UNUSED, s32 unusedSetting UNUSED, s
         0
     );
     gDPPipeSync(gfx++);
-    gSP1Triangle(gfx++, 0, 1, 4, 0);
-    gSP1Triangle(gfx++, 1, 2, 4, 0);
-    gSP1Triangle(gfx++, 4, 2, 3, 0);
+    gSP1Triangle(gfx++, SKY_TOP_LEFT, SKY_HORIZON_LEFT, SKY_TOP_CENTER, 0);
+    gSP1Triangle(gfx++, SKY_HORIZON_LEFT, SKY_HORIZON_RIGHT, SKY_TOP_CENTER, 0);
+    gSP1Triangle(gfx++, SKY_TOP_CENTER, SKY_HORIZON_RIGHT, SKY_TOP_RIGHT, 0);
     gDPPipeSync(gfx++);
     if (colors->hasLensFlare == TRUE) {
         angle = -g_SkyState.yaws[cameraIndex] - SUN_YAW_OFFSET -
