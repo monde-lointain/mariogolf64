@@ -921,17 +921,17 @@ static const char f_NotDisposedFormat[] = "Polychara slot %d not disposed yet!!!
 static const char f_UnusedReadRomFormat[] = "nuPiReadRom(%x, %x, %x) [bufsiz %x]\n";
 static const char f_UnusedCompleteText[] = "complete\n";
 
-void LoadCharacter(u32 slotIndex, s32 characterIndex, s32 kind) {
+void LoadCharacter(u32 slotIndex, s32 characterIndex, s32 modelKind) {
     Boolean isPatched = FALSE;
     CharacterSlot *slot = &g_CharacterSlots[slotIndex];
     JointAnimation *joint;
     CharacterAnimation *animation;
     u32 frameDataSize;
-    s32 count;
+    s32 animationCount;
 
-    if (kind < CHARACTER_MODEL_KIND_COUNT) {
+    if (modelKind < CHARACTER_MODEL_KIND_COUNT) {
         g_CharacterModelIndex =
-            ((kind & (CHARACTER_MODEL_KIND_COUNT - 1)) * CHARACTER_MODELS_PER_KIND) +
+            ((modelKind & (CHARACTER_MODEL_KIND_COUNT - 1)) * CHARACTER_MODELS_PER_KIND) +
             (characterIndex % CHARACTER_MODELS_PER_KIND);
         slot->model = &g_CharacterModels[0][g_CharacterModelIndex];
     }
@@ -1059,12 +1059,12 @@ void LoadCharacter(u32 slotIndex, s32 characterIndex, s32 kind) {
         slot->portraitCamera[5] =
             *(f32 *)slot->model->segmentAddresses[CHARACTER_MODEL_PORTRAIT_CAMERA + 5];
         slot->shadowScale = slot->model->shadowScale;
-        count = 0;
+        animationCount = 0;
         for (animation = ModelAnimations(slot->model); animation->events != NULL; animation++) {
-            count++;
+            animationCount++;
         }
 
-        slot->animationCount = count;
+        slot->animationCount = animationCount;
         slot->animationSpeed = 1.0f;
         if (IsGameFlagSet(GAME_FLAG_LOG_CHARACTER_SETUP)) {
             osSyncPrintf("stage01 inited, char %d.\n", g_CharacterModelIndex);
