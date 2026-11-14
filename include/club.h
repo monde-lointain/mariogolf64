@@ -45,6 +45,7 @@ enum ClubType {
 };
 
 typedef s32 ClubType;
+typedef s16 ClubType16;
 
 enum ClubCategory {
     CLUB_CATEGORY_WOOD,
@@ -54,6 +55,7 @@ enum ClubCategory {
 };
 
 typedef s32 ClubCategory;
+typedef s16 ClubCategory16;
 
 #define CLUB_SLOT_COUNT 16
 #define NO_CLUB (-1)
@@ -88,9 +90,9 @@ typedef struct Club {
     s16 offsetPitch;
     s16 spin;
     s16 lieRatingPercent;
-    s16 type;
+    ClubType16 type;
     s32 power[SHOT_MODE_COUNT];
-    s16 category;
+    ClubCategory16 category;
     s16 sideSpin;
     s16 deflection[SHOT_MODE_COUNT];
     AssetId headImageAsset;

@@ -13,6 +13,8 @@ enum CameraMode {
     CAMERA_MODE_HOLE_INTRO = 8
 };
 
+typedef s32 CameraMode;
+
 #define IsCloseUpCameraMode(mode) \
     ((mode) == CAMERA_MODE_FREE_LOOK || (mode) == CAMERA_MODE_HOLE_INTRO)
 
@@ -40,7 +42,7 @@ typedef struct CameraView {
 typedef struct Camera {
     s32 unusedBeforeView;
     CameraView view;
-    s32 mode;
+    CameraMode mode;
 } Camera;
 
 #define CAMERA_COUNT 2

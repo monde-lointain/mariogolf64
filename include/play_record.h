@@ -41,7 +41,7 @@ typedef struct PlayRecord {
     u8 scoreKind;
     CharacterIndex8 characterIndex;
     UBoolean8 isLefty;
-    s8 paletteIndex;
+    CButtonPalette8 paletteIndex;
     u8 strokeCount;
     u8 unusedAfterStrokeCount;
     s32 noiseSeed;
@@ -56,7 +56,7 @@ typedef struct RingShotRecord {
     s8 scoreKind;
     CharacterIndex8 characterIndex;
     UBoolean8 isLefty;
-    s8 paletteIndex;
+    CButtonPalette8 paletteIndex;
     u8 strokeCount;
     u8 unusedAfterStrokeCount;
     s32 noiseSeed;

@@ -69,6 +69,8 @@ enum HoleStatus {
     HOLE_STATUS_OUT
 };
 
+typedef s8 HoleStatus;
+
 #define POWER_SHOTS_UNLIMITED (-1)
 
 enum CButtonPalette {
@@ -82,9 +84,16 @@ enum CButtonPalette {
 typedef s32 CButtonPalette;
 typedef s8 CButtonPalette8;
 
+enum GridColor {
+    GRID_COLOR_WHITE,
+    GRID_COLOR_BLACK
+};
+
+typedef s8 GridColor;
+
 typedef struct Player {
     char name[PLAYER_NAME_SIZE];
-    s32 state;
+    PlayerState state;
     CoursePoint ballPosition;
     Surface8 ballSurface;
     CharacterIndex8 characterIndex;
@@ -95,7 +104,7 @@ typedef struct Player {
     s8 strokeCount;
     s8 puttCount;
     s8 teeOrder;
-    s8 holeStatus;
+    HoleStatus holeStatus;
     s8 controllerIndex;
     s8 powerShotCount;
     s8 handicap;
@@ -106,13 +115,13 @@ typedef struct Player {
     u8 unusedAfterClubs[0x74 - 0x72];
     s32 stopwatchFrameCount;
     s8 ringStates[RING_COUNT];
-    s8 paletteIndex;
+    CButtonPalette8 paletteIndex;
     s8 gameBoyCharacterIndex;
     u8 unusedAfterGameBoyIndex[3];
     s32 driveDistance;
     s32 pinDistance;
     s32 noiseSeed;
-    s8 gridColor;
+    GridColor gridColor;
     u8 unusedAfterGridColor;
     s16 betTallies[BET_COUNT];
     Boolean8 hasBeenInBunker;

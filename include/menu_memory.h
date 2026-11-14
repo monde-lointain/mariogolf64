@@ -28,6 +28,8 @@ enum HolesChoice {
     HOLES_CHOICE_ALL
 };
 
+typedef s8 HolesChoice;
+
 typedef struct MenuMemory {
     s8 playerCountChoice;
     s8 titleChoice;
@@ -40,7 +42,7 @@ typedef struct MenuMemory {
     s8 betStakeLevels[BET_STAKE_SLOT_COUNT];
     s8 courseChoice;
     s8 courseSpin;
-    s8 holesChoice;
+    HolesChoice holesChoice;
     s8 caddyChoice;
     s8 unusedAfterCaddyChoice;
     s8 mainChoice;

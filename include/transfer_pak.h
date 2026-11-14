@@ -40,6 +40,8 @@ enum GameBoyBallType {
     GAME_BOY_BALL_TYPE_7
 };
 
+typedef s8 GameBoyBallType;
+
 typedef struct GameBoyCharacter {
     u8 status;
     char name[GAME_BOY_CHARACTER_NAME_LENGTH];
@@ -52,7 +54,7 @@ typedef struct GameBoyCharacter {
     s8 shotCurve;
     s8 lieRatingLevel;
     s8 mishitResistance;
-    s8 ballType;
+    GameBoyBallType ballType;
     s32 ignoredValue;
     s32 experience;
     s16 driveDistance;
@@ -83,6 +85,8 @@ enum TransmitScreen {
     TRANSMIT_SCREEN_RUMBLE_PAK_PROMPT
 };
 
+typedef s32 TransmitScreen;
+
 #define CARTRIDGE_SAVE_COUNT 3
 #define CARTRIDGE_CHARACTER_COUNT (MAXCONTROLLERS * CARTRIDGE_SAVE_COUNT)
 
@@ -106,8 +110,8 @@ typedef struct GameBoyTransfer {
     ImageAsset *accessingImage;
     ImageAsset *shotTypesImage;
     Boolean hasGameBoyPak;
-    s32 screen;
-    s32 transferMode;
+    TransmitScreen screen;
+    TransferMode transferMode;
     s32 optionIndex;
     s32 characterCount;
     NUContPakFile pakFile;

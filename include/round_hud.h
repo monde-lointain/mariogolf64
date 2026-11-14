@@ -32,6 +32,8 @@ enum HeightComparison {
     HEIGHT_LEVEL
 };
 
+typedef s8 HeightComparison;
+
 #define NO_SCORECARD_PAGE (-1)
 
 #define HUD_FLAG_AIMING 0x1
@@ -67,9 +69,9 @@ typedef struct RoundHud {
     u8 unusedBeforeHoleIntro[2];
     Boolean8 isHoleIntroTextShown;
     Boolean8 isBallTrailShown;
-    s8 ballHeightYardsDirection;
-    s8 ballHeightMetersDirection;
-    s8 ballHeightFeetDirection;
+    HeightComparison ballHeightYardsDirection;
+    HeightComparison ballHeightMetersDirection;
+    HeightComparison ballHeightFeetDirection;
     u8 unusedAfterBallHeights;
     s32 ballHeightYards;
     f32 ballHeightMeters;

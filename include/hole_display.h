@@ -73,6 +73,14 @@ typedef struct SkyColors {
 
 extern SkyColors g_SkyColors[][SKY_WEATHER_COUNT * SKY_TIME_COUNT];
 
+enum SkyImageKind {
+    SKY_IMAGE_KIND_0,
+    SKY_IMAGE_KIND_1,
+    SKY_IMAGE_KIND_TWO_TEXTURES
+};
+
+typedef u8 SkyImageKind;
+
 typedef struct Sun {
     u8 unusedBeforeHeight[4];
     s32 height;
@@ -82,7 +90,7 @@ typedef struct Sun {
     s16 unusedBeforeTexelStep;
     s16 texelStep;
     f32 glareMax;
-    u8 imageKind;
+    SkyImageKind imageKind;
 } Sun;
 
 extern MenuBackdropState g_MenuBackdropState;

@@ -40,12 +40,6 @@
 #define TITLE_LIGHT_PITCH 0x1000
 #define TITLE_LIGHT_YAW 0x6000
 
-enum SkyImageKind {
-    SKY_IMAGE_KIND_0,
-    SKY_IMAGE_KIND_1,
-    SKY_IMAGE_KIND_TWO_TEXTURES
-};
-
 #define SUN_DEPTH_MARGIN 16.0f
 #define SUN_GLARE_MARGIN 120.0f
 #define IsInsetOnScreen(x, y, inset) \

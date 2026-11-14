@@ -48,6 +48,14 @@ typedef struct ScorecardContent {
     Boolean isSuddenDeath;
 } ScorecardContent;
 
+enum PlaceChange {
+    PLACE_HELD = -1,
+    PLACE_ROSE,
+    PLACE_FELL
+};
+
+typedef s8 PlaceChange;
+
 typedef struct Scorecard {
     u8 unusedBeforeTableImage[0xC];
     u8 *tableImage;
@@ -75,7 +83,7 @@ typedef struct Scorecard {
     UBoolean8 isOddFaceStep;
     u8 faceFrameTime;
     u8 faceFrame;
-    s8 placeChange;
+    PlaceChange placeChange;
     s32 topRow;
     s32 x;
     s32 y;
@@ -93,12 +101,6 @@ typedef struct Scorecard {
 
 extern Scorecard g_Scorecard;
 extern ScorecardState g_ScorecardState;
-
-enum PlaceChange {
-    PLACE_HELD = -1,
-    PLACE_ROSE,
-    PLACE_FELL
-};
 
 #define TALLY_SOUND_CHANNEL 13
 #define SCORECARD_SOUND_VOLUME 100

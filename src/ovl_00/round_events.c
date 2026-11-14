@@ -80,13 +80,22 @@
 #define CAPTION_SOUND_CHANNEL 13
 #define CAPTION_SOUND_VOLUME 63
 
+enum BannerAnimation {
+    BANNER_ANIMATION_ZOOM,
+    BANNER_ANIMATION_SPIN,
+    BANNER_ANIMATION_SLIDE,
+    BANNER_ANIMATION_ZOOM_STAY
+};
+
+typedef s8 BannerAnimation;
+
 typedef struct Banner {
     s16 unusedBeforeImageAsset;
     AssetId imageAsset;
     s8 letterCount;
     u8 letterWidth;
     u8 letterHeight;
-    s8 animation;
+    BannerAnimation animation;
 } Banner;
 
 typedef struct BannerLetter {
@@ -100,13 +109,6 @@ typedef struct BannerLetter {
 enum BannerLayoutMode {
     BANNER_LAYOUT_LEFT,
     BANNER_LAYOUT_FIRST_LETTER
-};
-
-enum BannerAnimation {
-    BANNER_ANIMATION_ZOOM,
-    BANNER_ANIMATION_SPIN,
-    BANNER_ANIMATION_SLIDE,
-    BANNER_ANIMATION_ZOOM_STAY
 };
 
 typedef s16 BannerLayout[BANNER_LAYOUT_FIRST_LETTER + BANNER_LETTERS_MAX];

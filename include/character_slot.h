@@ -225,6 +225,16 @@ typedef struct TextureAnimationState {
 #define FRAME_DATA_COPY_COUNT 3
 #define TEXTURE_ANIMATION_PLAYING (FRAME_DATA_COPY_COUNT + 1)
 
+enum CharacterLighting {
+    CHARACTER_LIGHTING_FIXED,
+    CHARACTER_LIGHTING_SCENE,
+    CHARACTER_LIGHTING_SCENE_THIRD,
+    CHARACTER_LIGHTING_BLACK
+};
+
+typedef s32 CharacterLighting;
+typedef s8 CharacterLighting8;
+
 typedef struct CharacterSlot {
     const CharacterModel *model;
     void *modelBuffer;
@@ -247,7 +257,7 @@ typedef struct CharacterSlot {
     Gfx *displayList;
     f32 portraitCamera[PORTRAIT_CAMERA_VALUE_COUNT];
     s16 shadowScale;
-    s8 lighting;
+    CharacterLighting8 lighting;
     Boolean8 isLooping;
     s8 nextAnimationId;
     s8 playsRandomTextureAnimation;
@@ -264,15 +274,6 @@ typedef struct CharacterSlot {
 #define WEDGE_ANIMATIONS 6
 #define PUTTER_ANIMATIONS 9
 #define SWING_ANIMATION 1
-
-enum CharacterLighting {
-    CHARACTER_LIGHTING_FIXED,
-    CHARACTER_LIGHTING_SCENE,
-    CHARACTER_LIGHTING_SCENE_THIRD,
-    CHARACTER_LIGHTING_BLACK
-};
-
-typedef s32 CharacterLighting;
 
 extern CharacterSlot g_CharacterSlots[CHARACTER_SLOT_COUNT];
 

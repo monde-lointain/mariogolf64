@@ -42,11 +42,6 @@
 #define SAVE_OPTION_SIMPLE_CAMERA 3
 #define SAVE_OPTION_COUNT 4
 
-enum GridColor {
-    GRID_COLOR_WHITE,
-    GRID_COLOR_BLACK
-};
-
 #define OPTION_BIT_MUSIC_OFF (1 << 0)
 #define OPTION_BIT_MONO (1 << 1)
 #define OPTION_BIT_SIMPLE_CAMERA (1 << 2)

@@ -111,10 +111,12 @@ enum SpotState {
     SPOT_SHOWN
 };
 
+typedef s32 SpotState;
+
 typedef struct ScreenSpot {
     s32 x;
     s32 y;
-    s32 state;
+    SpotState state;
 } ScreenSpot;
 
 static u8 f_PlayerTagColors[PLAYER_COUNT_MAX][3] =

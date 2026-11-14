@@ -47,6 +47,8 @@ enum ReplayKind {
     REPLAY_KIND_RING_SHOT
 };
 
+typedef s8 ReplayKind;
+
 #define ROUND_CONTINUED 2
 
 typedef struct GameState {
@@ -63,7 +65,7 @@ typedef struct GameState {
     s32 stopwatchFrameCount;
     s32 roundSeed;
     Boolean8 isRoundContinued;
-    s8 replayKind;
+    ReplayKind replayKind;
     s8 betRates[BET_COUNT];
     u8 unusedAfterBetRates;
     Boolean8 isMiniGolf;

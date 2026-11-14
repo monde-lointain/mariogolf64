@@ -142,8 +142,8 @@ typedef struct BallSimulation {
     Mat4 liftRotation;
     f32 windVelocityX;
     f32 windVelocityZ;
-    s32 state;
-    s32 purpose;
+    BallState state;
+    LaunchPurpose purpose;
     s32 bounceCount;
     s32 stepCount;
     s32 lastBounceStep;
