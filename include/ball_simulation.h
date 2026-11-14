@@ -114,9 +114,13 @@ typedef struct ShotLaunch {
 #define BALL_SOUND_ROLL 1
 #define BALL_SOUND_COUNT 8
 
-#define CUP_IN_SOUND_NONE 0
-#define CUP_IN_SOUND_DUE 1
-#define CUP_IN_SOUND_PLAYED 2
+enum CupInSoundState {
+    CUP_IN_SOUND_NONE,
+    CUP_IN_SOUND_DUE,
+    CUP_IN_SOUND_PLAYED
+};
+
+typedef s32 CupInSoundState;
 
 #define PUTT_VELOCITY_Y_OFFSET 0x106
 

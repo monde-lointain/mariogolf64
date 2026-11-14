@@ -101,8 +101,22 @@ typedef struct ShotOffset {
 
 #define APPROACH_BAND_COUNT 4
 
-#define CLUB_CHANCE_SET_COUNT 2
-#define CLUB_CHANCE_CATEGORY_COUNT 3
+enum ClubChanceSet {
+    CLUB_CHANCE_SET_FOLLOWING_WIND,
+    CLUB_CHANCE_SET_HEAD_WIND,
+    CLUB_CHANCE_SET_COUNT
+};
+
+typedef s32 ClubChanceSet;
+
+enum ClubChanceCategory {
+    CLUB_CHANCE_WOOD,
+    CLUB_CHANCE_IRON,
+    CLUB_CHANCE_OTHER,
+    CLUB_CHANCE_CATEGORY_COUNT
+};
+
+typedef s32 ClubChanceCategory;
 
 typedef struct ClubName {
     char name[4];
@@ -2567,13 +2581,6 @@ s32 GetAngleDifference(s32 angle, s32 otherAngle) {
 #define IsWindSpeedInRange(lowest, limit) \
     (g_HoleSetup.conditions.windSpeed >= (lowest) && g_HoleSetup.conditions.windSpeed < (limit))
 
-enum ClubChanceSet {
-    CLUB_CHANCE_SET_FOLLOWING_WIND,
-    CLUB_CHANCE_SET_HEAD_WIND
-};
-
-typedef s32 ClubChanceSet;
-
 Boolean RollClubCategoryChance(ClubChanceSet chanceSet);
 
 s32 ChooseShotOffset(void) {
@@ -2693,9 +2700,6 @@ s32 ChooseShotOffset(void) {
 #define CLUB_TYPE_LAST_WOOD 2
 #define CLUB_TYPE_FIRST_IRON 3
 #define CLUB_TYPE_LAST_IRON 10
-#define CLUB_CHANCE_WOOD 0
-#define CLUB_CHANCE_IRON 1
-#define CLUB_CHANCE_OTHER 2
 
 #define IsShotClubOfTypes(firstType, lastType) \
     (f_Shot.clubSlot >= FindClubSlot(f_Shot.playerIndex, (firstType)) && \
