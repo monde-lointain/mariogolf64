@@ -72,7 +72,7 @@ void RenumberHoleHandicaps(void) {
     }
 }
 
-s32 GetMatchStanding(s32 playerIndex, s32 opponentIndex) {
+MatchStanding GetMatchStanding(s32 playerIndex, s32 opponentIndex) {
     s32 holesAfterCurrent;
     s32 lead;
     s32 holeIndex;
@@ -114,7 +114,7 @@ s32 GetMatchStanding(s32 playerIndex, s32 opponentIndex) {
     return MATCH_STANDING_OPEN;
 }
 
-s32 GetMatchWinner(s32 playerIndex, s32 opponentIndex) {
+MatchSide GetMatchWinner(s32 playerIndex, s32 opponentIndex) {
     s32 endHoleIndex;
     s32 holesAfterCurrent;
     s32 lead;
@@ -180,7 +180,7 @@ s32 GetMatchWinner(s32 playerIndex, s32 opponentIndex) {
         (g_Players[dormieIndex].holeStatus != HOLE_STATUS_PLAYING) && \
         !(GetNetScore(dormieIndex) > GetNetScore(otherIndex) + 1))
 
-s32 GetMatchHoleResult(s32 playerIndex, s32 opponentIndex) {
+MatchSide GetMatchHoleResult(s32 playerIndex, s32 opponentIndex) {
     s32 standing;
 
     if (g_Players[playerIndex].holeStatus != HOLE_STATUS_PLAYING ||
@@ -224,7 +224,7 @@ s32 GetMatchHoleResult(s32 playerIndex, s32 opponentIndex) {
     return MATCH_SIDE_NONE;
 }
 
-s32 GetGroupHoleResult(GroupPlayerMark *playerResults) {
+GroupHoleResult GetGroupHoleResult(GroupPlayerMark *playerResults) {
     s8 ignoredResults[PLAYER_COUNT_MAX];
     s32 bestScore;
     s32 bestPlayerIndex;

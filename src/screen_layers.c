@@ -716,7 +716,7 @@ void OpenPrompt(PromptId promptIndex) {
     }
 }
 
-s32 UpdatePrompt(ControllerState *controller) {
+PromptResult UpdatePrompt(ControllerState *controller) {
     Prompt *prompt = &f_Prompts[f_PromptIndex];
 
     if (f_PromptState == PROMPT_STATE_CHOOSING) {

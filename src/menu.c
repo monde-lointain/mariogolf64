@@ -132,7 +132,7 @@ typedef struct GridCell {
     s16 row;
 } GridCell;
 
-s32 ReadSaveCopies(SaveData *save, UBoolean8 isInSram);
+SaveReadResult ReadSaveCopies(SaveData *save, UBoolean8 isInSram);
 s32 WriteSaveCopies(SaveData *save, UBoolean8 isInSram);
 
 s8 g_LoadedMenuScreen = NO_MENU_SCREEN;
@@ -2202,7 +2202,7 @@ void PlaceImportedCharacters(void) {
     }
 }
 
-s32 FindCharacterOnGrid(CharacterIndex characterIndex) {
+GridSearchResult FindCharacterOnGrid(CharacterIndex characterIndex) {
     s32 slot;
     s32 row;
     s32 column;
@@ -2878,7 +2878,7 @@ void TransferSaveData(SaveData *save, UBoolean8 isWrite) {
     }
 }
 
-s32 ReadSaveCopies(SaveData *save, UBoolean8 isInSram) {
+SaveReadResult ReadSaveCopies(SaveData *save, UBoolean8 isInSram) {
     u8 unusedBuffer[0x90] UNUSED;
     u8 checkBuffer[0x40];
     SaveCheck *check;

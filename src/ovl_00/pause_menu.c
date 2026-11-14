@@ -1239,7 +1239,7 @@ void OpenChoiceBox(ChoiceBoxId choiceBoxId) {
     }
 }
 
-s32 UpdateChoiceBox(ControllerState *controller) {
+ChoiceResult UpdateChoiceBox(ControllerState *controller) {
     ChoiceBox *box = &f_ChoiceBoxes[f_ChoiceBoxId];
 
     if (f_ChoiceBoxId == CHOICE_BOX_ID_NONE) {

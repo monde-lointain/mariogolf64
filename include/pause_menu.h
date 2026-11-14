@@ -58,6 +58,8 @@ enum ChoiceResult {
     CHOICE_RESULT_RETURN_TO_MENU
 };
 
+typedef s32 ChoiceResult;
+
 extern f32 g_LiePanelPosition[2];
 extern f32 g_WindPanelPosition[2];
 
@@ -69,7 +71,7 @@ void DrawPauseArrows(Gfx **displayListHead, s32 x, s32 y, s32 gap);
 void RequestPauseMenu(Boolean canGiveUp, Boolean isClosing);
 PauseAction UpdatePauseMenu(ControllerState *controller);
 void OpenChoiceBox(ChoiceBoxId choiceBoxId);
-s32 UpdateChoiceBox(ControllerState *controller);
+ChoiceResult UpdateChoiceBox(ControllerState *controller);
 void CloseSaveMenu(void);
 void HideRoundHud(void);
 void LeaveGameSaveMenu(void);

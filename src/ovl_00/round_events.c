@@ -2718,7 +2718,7 @@ Boolean IsContactEffectShown(void) {
     return g_ContactEffect != CONTACT_EFFECT_NONE;
 }
 
-s32 GetContactStyle(Player *player) {
+ContactStyle GetContactStyle(Player *player) {
     GameBoyCharacter *gameBoyCharacter;
     CharacterIndex8 characterIndex = player->characterIndex;
 

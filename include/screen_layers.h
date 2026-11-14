@@ -57,6 +57,8 @@ enum PromptResult {
     PROMPT_RESULT_NO
 };
 
+typedef s32 PromptResult;
+
 enum FadeDirection {
     FADE_NONE = -1,
     FADE_OUT,
@@ -128,7 +130,7 @@ void StartScreenFadeIn(s32 red, s32 green, s32 blue, s32 frameCount);
 void DrawScreenFade(Gfx **displayListHead);
 Boolean IsPromptClosed(void);
 void OpenPrompt(s32 promptIndex);
-s32 UpdatePrompt(ControllerState *controller);
+PromptResult UpdatePrompt(ControllerState *controller);
 void DrawPrompt(Gfx **displayListHead);
 void ShowHalfTurn(void);
 void HideHalfTurn(void);

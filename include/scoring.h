@@ -72,10 +72,10 @@ Boolean IsOnDrivingRange(void);
 s32 GetHandicapOffset(CourseIndex courseIndex, s32 holeIndex, s32 handicap);
 s32 GetNetScore(s32 playerIndex);
 void RenumberHoleHandicaps(void);
-s32 GetMatchStanding(s32 playerIndex, s32 opponentIndex);
-s32 GetMatchWinner(s32 playerIndex, s32 opponentIndex);
-s32 GetMatchHoleResult(s32 playerIndex, s32 opponentIndex);
-s32 GetGroupHoleResult(GroupPlayerMark *playerResults);
+MatchStanding GetMatchStanding(s32 playerIndex, s32 opponentIndex);
+MatchSide GetMatchWinner(s32 playerIndex, s32 opponentIndex);
+MatchSide GetMatchHoleResult(s32 playerIndex, s32 opponentIndex);
+GroupHoleResult GetGroupHoleResult(GroupPlayerMark *playerResults);
 s32 GetHolingOutStakes(s32 playerIndex);
 
 #endif

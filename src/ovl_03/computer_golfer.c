@@ -1483,7 +1483,7 @@ enum LandingRating {
 
 typedef s32 LandingRating;
 
-s32 GetLandingRating(SurfaceKind surfaceKind) {
+LandingRating GetLandingRating(SurfaceKind surfaceKind) {
     LandingRating rating;
 
     if (g_GameState.courseIndex == COURSE_MARIOS_STAR) {

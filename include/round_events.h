@@ -71,7 +71,7 @@ extern ContactEffect g_ContactEffect;
 
 void StartBanner(s32 banner);
 void ShowWindFlyGuy(s32 show);
-s32 GetContactStyle(Player *player);
+ContactStyle GetContactStyle(Player *player);
 void LoadContactImages(Player *player);
 Boolean IsContactEffectShown(void);
 void StartContactEffect(s32 effect);

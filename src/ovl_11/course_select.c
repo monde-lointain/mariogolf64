@@ -28,14 +28,6 @@ enum CourseSelectState {
 
 typedef s32 CourseSelectState;
 
-enum SelectResult {
-    SELECT_IDLE,
-    SELECT_MOVED,
-    SELECT_BACK
-};
-
-typedef s32 SelectResult;
-
 #define DIRECTION_UP 1
 #define DIRECTION_DOWN 2
 #define DIRECTION_LEFT 4
@@ -447,7 +439,7 @@ s32 UpdateRingShotSelect(s32 pressedButtons, u32 repeatedButtons) {
     return result;
 }
 
-s32 UpdateHoleSelect(s32 pressedButtons, s32 repeatedButtons) {
+SelectResult UpdateHoleSelect(s32 pressedButtons, s32 repeatedButtons) {
     SelectResult result = SELECT_IDLE;
     s32 openCourseCount;
 

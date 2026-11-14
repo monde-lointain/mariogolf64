@@ -124,7 +124,9 @@ enum GridSearchResult {
     CHARACTER_ON_GRID
 };
 
-s32 FindCharacterOnGrid(CharacterIndex characterIndex);
+typedef s32 GridSearchResult;
+
+GridSearchResult FindCharacterOnGrid(CharacterIndex characterIndex);
 
 #define NO_CONTROLLER_INDEX 4
 #define UNCHOSEN_CONTROLLER (-1)

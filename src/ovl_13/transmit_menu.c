@@ -362,11 +362,15 @@ enum StatusCheck {
     STATUS_CHECK_READ_FAILED
 };
 
+typedef s32 StatusCheck;
+
 enum StatusWriteResult {
     STATUS_WRITE_DONE,
     STATUS_WRITE_PAK_ERROR,
     STATUS_WRITE_FAILED
 };
+
+typedef s32 StatusWriteResult;
 
 enum ExperienceWriteResult {
     EXPERIENCE_WRITE_DONE,
@@ -374,6 +378,8 @@ enum ExperienceWriteResult {
     EXPERIENCE_WRITE_FAILED,
     EXPERIENCE_WRITE_PAK_ERROR
 };
+
+typedef s32 ExperienceWriteResult;
 
 #define ASSET_WOOD_PANEL 0x8FD
 #define ASSET_TRANSFER_PAK_ICONS 0x900
@@ -392,9 +398,9 @@ void ClearCartridgeCharacters(void);
 void ResetSendStatus(void);
 void ResetSendExperience(void);
 s32 TagCartridges(void);
-s32 CheckStatusCartridge(s32 cartridgeIndex);
-s32 WriteStatusToCartridge(s32 cartridgeIndex);
-s32 WriteExperienceToCartridge(s32 gameBoyCharacterIndex);
+StatusCheck CheckStatusCartridge(s32 cartridgeIndex);
+StatusWriteResult WriteStatusToCartridge(s32 cartridgeIndex);
+ExperienceWriteResult WriteExperienceToCartridge(s32 gameBoyCharacterIndex);
 void SetNoticeState(s32 state, MessageId messageId);
 s32 GetNoticeState(void);
 
@@ -2718,7 +2724,7 @@ void ClearCartridgeCharacters(void) {
     }
 }
 
-s32 WriteExperienceToCartridge(s32 gameBoyCharacterIndex) {
+ExperienceWriteResult WriteExperienceToCartridge(s32 gameBoyCharacterIndex) {
     GameBoyTransfer *transfer = &g_GameBoyTransfer;
     u8 characterData[CHARACTER_DATA_SIZE];
     u8 save[CARTRIDGE_SAVE_SIZE];
@@ -2958,7 +2964,7 @@ s32 WriteExperienceToCartridge(s32 gameBoyCharacterIndex) {
     return EXPERIENCE_WRITE_FAILED;
 }
 
-s32 CheckStatusCartridge(s32 cartridgeIndex) {
+StatusCheck CheckStatusCartridge(s32 cartridgeIndex) {
     GameBoyTransfer *transfer = &g_GameBoyTransfer;
     u8 save[CARTRIDGE_SAVE_SIZE];
     Boolean isSignatureWrong;
@@ -3027,7 +3033,7 @@ s32 CheckStatusCartridge(s32 cartridgeIndex) {
 
 void BuildStatusData(StatusData *status);
 
-s32 WriteStatusToCartridge(s32 cartridgeIndex) {
+StatusWriteResult WriteStatusToCartridge(s32 cartridgeIndex) {
     GameBoyTransfer *transfer = &g_GameBoyTransfer;
     u8 save[CARTRIDGE_SAVE_SIZE];
     u8 statusData[STATUS_DATA_SIZE];

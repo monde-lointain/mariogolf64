@@ -355,7 +355,7 @@ s32 GetTerrainCodeColor(s32 code) {
         (f_TerrainColors[colorIndex].blue << RGBA16_BLUE_SHIFT) | f_TerrainColors[colorIndex].alpha;
 }
 
-s32 GetColorTerrainCode(s32 color) {
+TerrainCode GetColorTerrainCode(s32 color) {
     switch (FindNearestTerrainColor(color)) {
         case TERRAIN_COLOR_GREEN:
             return TERRAIN_CODE_GREEN;

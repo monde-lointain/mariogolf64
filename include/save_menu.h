@@ -5,10 +5,18 @@
 
 #include "controller.h"
 
+enum ReplayMenuState {
+    REPLAY_MENU_OPEN,
+    REPLAY_MENU_CLOSED,
+    REPLAY_MENU_PROMPTING
+};
+
+typedef s32 ReplayMenuState;
+
 void DrawControlsScreen(Gfx **displayListHead);
 void DrawGameSaveMenu(Gfx **displayListHead);
 void DrawReplaySaveMenu(Gfx **displayListHead);
 void LeaveReplaySaveMenu(void);
-s32 UpdateReplaySaveMenu(ControllerState *controller);
+ReplayMenuState UpdateReplaySaveMenu(ControllerState *controller);
 
 #endif

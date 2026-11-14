@@ -283,7 +283,7 @@ Boolean IsOverlayInExpansionMemory(void);
 void UpdateDebugScenes(void);
 s32 GetTerrainCodeColor(s32 code);
 s32 GetTriangleIntegerPlane(PlaneTriangle *triangle, IntegerPlane *plane);
-s32 GetColorTerrainCode(s32 color);
+TerrainCode GetColorTerrainCode(s32 color);
 s32 BlendSurfaceMapColor(s32 x, s32 z, Surface surface);
 Surface FindSurface(s32 x, s32 z, Boolean lowersWaterLevel);
 Surface GetSurface(s32 x, s32 z);

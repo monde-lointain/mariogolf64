@@ -320,7 +320,7 @@ void DrawCodeKeys(Gfx **displayListHead);
 void DrawEnteredCode(Gfx **displayListHead);
 void DrawCodePrompt(Gfx **displayListHead);
 void DrawCodeCursor(Gfx **displayListHead);
-s32 PressCodeKey(void);
+CodeKeyResult PressCodeKey(void);
 s32 DeleteCodeCharacter(void);
 
 static Mtx f_CodeCursorProjection;
@@ -2177,7 +2177,7 @@ void DrawEnteredCode(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
-s32 PressCodeKey(void) {
+CodeKeyResult PressCodeKey(void) {
     MenuMemory *memory = GetMenuMemory();
     s32 column = memory->codeKeyColumn;
     CodeKeyResult keyResult = CODE_KEY_RESULT_TYPING;

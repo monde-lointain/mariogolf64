@@ -73,12 +73,6 @@ typedef s32 SaveMenuState;
 #define MESSAGE_CENTER_Y 114
 #define NO_TEXT (-1)
 
-enum ReplayMenuState {
-    REPLAY_MENU_OPEN,
-    REPLAY_MENU_CLOSED,
-    REPLAY_MENU_PROMPTING
-};
-
 #define END_GAME_ROW SAVED_GAME_COUNT
 #define SKIP_REPLAY_ROW RING_SHOT_RECORD_COUNT
 #define SLIDE_ROW_COUNT 4
@@ -1475,7 +1469,7 @@ void UpdateGameSaveMenu(ControllerState *controller) {
     }
 }
 
-s32 UpdateReplaySaveMenu(ControllerState *controller) {
+ReplayMenuState UpdateReplaySaveMenu(ControllerState *controller) {
     SaveData *save;
     s32 row;
 
