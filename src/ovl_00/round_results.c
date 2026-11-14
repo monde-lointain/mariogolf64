@@ -319,7 +319,8 @@ static s32 f_ShownPrizePoints;
 static CoursePointsTally f_CoursePointsTally;
 static s32 f_FaceAnimations[PLAYER_COUNT_MAX];
 static s32 f_FaceFrames[PLAYER_COUNT_MAX];
-static s32 f_FaceTimers[PLAYER_COUNT_MAX];
+static s32 f_FaceFrameTimes[PLAYER_COUNT_MAX];
+#define NO_FACE_FRAME (-1)
 
 s32 SumCoursePointsNeeded(CourseIndex courseIndex) {
     s32 total = 0;
@@ -507,8 +508,8 @@ void LoadRoundResults(void) {
 
     for (i = 0; i != g_GameState.playerCount; i++) {
         f_FaceAnimations[i] = 0;
-        f_FaceFrames[i] = -1;
-        f_FaceTimers[i] = 0;
+        f_FaceFrames[i] = NO_FACE_FRAME;
+        f_FaceFrameTimes[i] = 0;
     }
 
     if (g_GameState.isClubTournament) {
@@ -909,7 +910,7 @@ void FreeRoundResults(void) {
 void StartFaceAnimation(s32 animationId, s32 playerIndex) {
     f_FaceAnimations[playerIndex] = animationId;
     f_FaceFrames[playerIndex] = 0;
-    f_FaceTimers[playerIndex] = 0;
+    f_FaceFrameTimes[playerIndex] = 0;
 }
 
 void PlayTallySound(void) {
@@ -4510,7 +4511,6 @@ void DrawClubTournamentResults(Gfx **displayListHead) {
 #define FACE_FRAME_DRAWS_MASK 3
 #define RESULTS_FACE_ANIMATION_FRAME_COUNT 5
 #define FACE_ANIMATION_REST 0
-#define NO_FACE_FRAME (-1)
 
 void DrawRoundResults(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
@@ -4734,7 +4734,7 @@ void DrawRoundResults(Gfx **displayListHead) {
         EncodedAsset asset;
 
         if (f_FaceFrames[i] != NO_FACE_FRAME) {
-            if (!(f_FaceTimers[i] & FACE_FRAME_DRAWS_MASK)) {
+            if (!(f_FaceFrameTimes[i] & FACE_FRAME_DRAWS_MASK)) {
                 switch (f_FaceAnimations[i]) {
                     case FACE_ANIMATION_REST:
                         OpenEncodedAsset(
@@ -4776,7 +4776,7 @@ void DrawRoundResults(Gfx **displayListHead) {
                 }
             }
 
-            f_FaceTimers[i]++;
+            f_FaceFrameTimes[i]++;
         }
     }
 
