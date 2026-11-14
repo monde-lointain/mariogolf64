@@ -67,11 +67,6 @@ typedef struct TableCell {
 
 #define TABLE_LINE_COUNT 12
 
-typedef struct TableCorner {
-    s32 x;
-    s32 y;
-} TableCorner;
-
 #define TABLE_PANEL_LEFT 24
 #define TABLE_PANEL_TOP 50
 #define TABLE_PANEL_RIGHT 302
@@ -156,7 +151,7 @@ static Vtx f_TableCursorVertices[MENU_CURSOR_VERTEX_COUNT] = {
 };
 static s32 f_UnreadTablePair[2] UNUSED = {0, 0};
 static f32 f_TableCursorPhases[MENU_CURSOR_VERTEX_COUNT] = {0.0f, 2.0f, 4.0f, 6.0f};
-static TableCorner f_TableLineCorners[TABLE_LINE_COUNT * 2] = {
+static ScreenCorner f_TableLineCorners[TABLE_LINE_COUNT * 2] = {
     {24, 80},
     {300, 81},
     {24, 110},

@@ -146,11 +146,6 @@ typedef struct ImageCorner {
     s16 y;
 } ImageCorner;
 
-typedef struct LabelCorner {
-    s32 x;
-    s32 y;
-} LabelCorner;
-
 #define CHOSEN_HOLE_WIND_SPEED_MASK 0x3F
 #define CHOSEN_HOLE_WIND_SPEED_STEP 6000
 #define CHOSEN_HOLE_LIGHT_PITCH 0x1000
@@ -1094,7 +1089,7 @@ static s32 f_MenuCharacterChoices[CHARACTER_COUNT] = {
     CHARACTER_CHOICE_JOE,
 };
 static s32 f_UnusedWordAfterCharacterChoices UNUSED = 0;
-static LabelCorner f_TitleLabelCorners[TITLE_LABEL_COUNT] =
+static ScreenCorner f_TitleLabelCorners[TITLE_LABEL_COUNT] =
     {{110, 86}, {40, 114}, {90, 114}, {147, 114}, {217, 114}, {96, 142}, {96, 170}};
 static f32 f_ModeBoardBobPhase = 0.0f;
 static s32 f_ModeSelectControllerIconPositions[PLAYER_COUNT_MAX][PLAYER_COUNT_MAX][2] = {
@@ -1211,11 +1206,11 @@ static const char *f_MiniGolfRecordNames[MINI_GOLF_RECORD_COUNT] = {
     f_LuigisGardenName,
     f_PeachsCastleName,
 };
-static LabelCorner f_MainChoiceLabelCorners[MAIN_CHOICE_COUNT] =
+static ScreenCorner f_MainChoiceLabelCorners[MAIN_CHOICE_COUNT] =
     {{96, 84}, {96, 114}, {96, 144}, {96, 174}};
-static LabelCorner f_ShortMainChoiceLabelCorners[MAIN_CHOICE_WITHOUT_TRANSMIT_COUNT] =
+static ScreenCorner f_ShortMainChoiceLabelCorners[MAIN_CHOICE_WITHOUT_TRANSMIT_COUNT] =
     {{96, 84}, {96, 124}, {96, 164}};
-static LabelCorner f_ClubhouseLabelCorners[CLUBHOUSE_ROW_PLACE_COUNT] =
+static ScreenCorner f_ClubhouseLabelCorners[CLUBHOUSE_ROW_PLACE_COUNT] =
     {{76, 80}, {76, 102}, {76, 124}, {76, 146}, {76, 168}, {76, 190}, {76, 212}, {76, 234}};
 static s32 f_UnusedLabelPositions[10][2] UNUSED = {
     {48, 76},

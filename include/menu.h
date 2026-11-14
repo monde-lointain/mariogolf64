@@ -67,6 +67,12 @@ extern void *g_MenuCourseSceneryAsset;
 #define PLAYER_COUNT_ASSET_ROW_LENGTH 12
 extern AssetId g_PlayerCountIconAssets[][PLAYER_COUNT_ASSET_ROW_LENGTH];
 
+// A rectangle corner in screen pixels.
+typedef struct ScreenCorner {
+    s32 x;
+    s32 y;
+} ScreenCorner;
+
 typedef struct TrophySize {
     s8 width;
     s8 height;
