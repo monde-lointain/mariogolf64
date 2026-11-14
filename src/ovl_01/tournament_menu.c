@@ -135,7 +135,7 @@ enum CodeKeyResult {
 #define CLUB_CHOICE_NO 1
 
 static void *f_WideCloudImage = NULL;
-static void *f_YesNoButtons = NULL;
+static void *f_YesNoImage = NULL;
 static void *f_NintendoBadge = NULL;
 static void *f_ClubCourseIcon = NULL;
 static void *f_MenuWindowImage = NULL;
@@ -383,9 +383,9 @@ void LoadTournamentBuffer(void *buffer, s16 bufferKind) {
             ReadEncodedAsset(f_WideCloudImage, &asset);
             break;
         case TOURNAMENT_BUFFER_YES_NO:
-            f_YesNoButtons = buffer;
+            f_YesNoImage = buffer;
             OpenEncodedAsset(ASSET_YES_NO, &asset);
-            ReadEncodedAsset(f_YesNoButtons, &asset);
+            ReadEncodedAsset(f_YesNoImage, &asset);
             break;
         case TOURNAMENT_BUFFER_NINTENDO_BADGE:
             f_NintendoBadge = buffer;
@@ -481,8 +481,6 @@ void GetSaveDataAndMenuMemory(void) {
 #define MENU_WINDOW_IMAGE_WIDTH 256
 #define MENU_WINDOW_STRIP_HEIGHT 32
 #define YES_NO_BUTTON_COUNT 2
-#define YES_NO_BUTTON_WIDTH 72
-#define YES_NO_BUTTON_HEIGHT 24
 #define YES_NO_BUTTON_SHOWN_WIDTH 48.0f
 #define YES_NO_BUTTON_SHOWN_HEIGHT 16.0f
 #define YES_NO_BUTTON_OFFSET 30.0f
@@ -638,11 +636,11 @@ void DrawYesNoWindow(
     gDPPipeSync(gfx++);
     gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-    LoadLargePalette(&gfx, ImageBody(f_YesNoButtons));
+    LoadLargePalette(&gfx, ImageBody(f_YesNoImage));
     for (index = 0; index != YES_NO_BUTTON_COUNT; index++) {
         LoadTextureBlock(
             &gfx,
-            LargeImageTexels(f_YesNoButtons) + (index * YES_NO_BUTTON_WIDTH * YES_NO_BUTTON_HEIGHT),
+            LargeImageTexels(f_YesNoImage) + (index * YES_NO_BUTTON_WIDTH * YES_NO_BUTTON_HEIGHT),
             G_IM_FMT_CI,
             G_IM_SIZ_8b,
             YES_NO_BUTTON_WIDTH,
@@ -922,11 +920,11 @@ void DrawClubWindow(
     gDPPipeSync(gfx++);
     gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-    LoadLargePalette(&gfx, ImageBody(f_YesNoButtons));
+    LoadLargePalette(&gfx, ImageBody(f_YesNoImage));
     for (index = 0; index != YES_NO_BUTTON_COUNT; index++) {
         LoadTextureBlock(
             &gfx,
-            LargeImageTexels(f_YesNoButtons) + (index * YES_NO_BUTTON_WIDTH * YES_NO_BUTTON_HEIGHT),
+            LargeImageTexels(f_YesNoImage) + (index * YES_NO_BUTTON_WIDTH * YES_NO_BUTTON_HEIGHT),
             G_IM_FMT_CI,
             G_IM_SIZ_8b,
             YES_NO_BUTTON_WIDTH,

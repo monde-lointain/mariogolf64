@@ -77,6 +77,8 @@ void ReadAssetFile(void *buffer, u32 size, AssetFile *file);
 #define ASSET_CURSOR_BOX 0x6EF
 #define ASSET_WIDE_CLOUD 0x70B
 #define ASSET_YES_NO 0x70C
+#define YES_NO_BUTTON_WIDTH 72
+#define YES_NO_BUTTON_HEIGHT 24
 #define ASSET_COURSE_NUMBERS 0x70E
 #define ASSET_POINTING_HAND 0x70F
 #define POINTING_HAND_SIZE 24

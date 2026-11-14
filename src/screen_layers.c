@@ -123,10 +123,8 @@ enum HalfTurnState {
 #define PROMPT_CLOUD_SMALLEST_HEIGHT 48
 #define PROMPT_CENTER_X (SCREEN_WIDTH / 2)
 #define PROMPT_CLOUD_MIDDLE_Y 116
-#define CHOICE_IMAGE_WIDTH 72
-#define CHOICE_IMAGE_HEIGHT 24
 #define YES_TEXELS_OFFSET LARGE_PALETTED_TEXELS_OFFSET
-#define NO_TEXELS_OFFSET (YES_TEXELS_OFFSET + (CHOICE_IMAGE_WIDTH * CHOICE_IMAGE_HEIGHT))
+#define NO_TEXELS_OFFSET (YES_TEXELS_OFFSET + (YES_NO_BUTTON_WIDTH * YES_NO_BUTTON_HEIGHT))
 #define YES_CENTER_X 128
 #define NO_CENTER_X 192
 #define CHOICES_MIDDLE_Y 134
@@ -900,8 +898,8 @@ void DrawPrompt(Gfx **displayListHead) {
             AddressPast(f_YesNoImage, YES_TEXELS_OFFSET),
             G_IM_FMT_CI,
             G_IM_SIZ_8b,
-            CHOICE_IMAGE_WIDTH,
-            CHOICE_IMAGE_HEIGHT,
+            YES_NO_BUTTON_WIDTH,
+            YES_NO_BUTTON_HEIGHT,
             0,
             G_TX_NOMIRROR | G_TX_WRAP,
             G_TX_NOMIRROR | G_TX_WRAP,
@@ -919,8 +917,8 @@ void DrawPrompt(Gfx **displayListHead) {
             G_TX_RENDERTILE,
             0,
             0,
-            CHOICE_IMAGE_WIDTH / 2 * TEXEL_STEP_ONE / halfWidth,
-            CHOICE_IMAGE_HEIGHT / 2 * TEXEL_STEP_ONE / halfHeight
+            YES_NO_BUTTON_WIDTH / 2 * TEXEL_STEP_ONE / halfWidth,
+            YES_NO_BUTTON_HEIGHT / 2 * TEXEL_STEP_ONE / halfHeight
         );
         if (f_PromptChoice == PROMPT_CHOICE_NO) {
             halfWidth = (sinf(f_ChoiceBobAngle) * CHOSEN_WIDTH_BOB) + CHOSEN_HALF_WIDTH;
@@ -937,8 +935,8 @@ void DrawPrompt(Gfx **displayListHead) {
             AddressPast(f_YesNoImage, NO_TEXELS_OFFSET),
             G_IM_FMT_CI,
             G_IM_SIZ_8b,
-            CHOICE_IMAGE_WIDTH,
-            CHOICE_IMAGE_HEIGHT,
+            YES_NO_BUTTON_WIDTH,
+            YES_NO_BUTTON_HEIGHT,
             0,
             G_TX_NOMIRROR | G_TX_WRAP,
             G_TX_NOMIRROR | G_TX_WRAP,
@@ -956,8 +954,8 @@ void DrawPrompt(Gfx **displayListHead) {
             G_TX_RENDERTILE,
             0,
             0,
-            CHOICE_IMAGE_WIDTH / 2 * TEXEL_STEP_ONE / halfWidth,
-            CHOICE_IMAGE_HEIGHT / 2 * TEXEL_STEP_ONE / halfHeight
+            YES_NO_BUTTON_WIDTH / 2 * TEXEL_STEP_ONE / halfWidth,
+            YES_NO_BUTTON_HEIGHT / 2 * TEXEL_STEP_ONE / halfHeight
         );
     }
 
