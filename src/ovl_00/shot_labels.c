@@ -2,6 +2,9 @@
 
 #include <ultra64.h>
 
+// The original calls DrawCenteredShadowedText here unprototyped; see text.h.
+#define CALLS_CENTERED_SHADOWED_TEXT_UNPROTOTYPED
+
 #include "address.h"
 #include "asset.h"
 #include "camera.h"
@@ -123,10 +126,6 @@ static Radians f_OutOfBoundsPulseAngle = 0.0f;
 static s32 f_PinFlagWaveFrame = 0;
 
 u8 g_UnusedBytesAfterFlagWaveFrame[4];
-
-// Redeclared without a prototype: the calls below must pass their
-// coordinates as plain ints for the build to match.
-void DrawCenteredShadowedText();
 
 void DrawShotLabels(Gfx **displayListHead) {
     ScreenPoint point;
