@@ -224,7 +224,7 @@ void DrawBestTimes(Gfx **displayListHead) {
     s16 index;
     s16 otherIndex;
     s32 key;
-    s32 bestTimesCourse;
+    CourseIndex bestTimesCourse;
     s32 spin;
     s32 angleStep;
     Radians angle;

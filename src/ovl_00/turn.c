@@ -332,7 +332,7 @@ static ShotLaunch f_ShotLaunch;
 static s32 f_StateFrameCounts[PLAYER_COUNT_MAX];
 static f32 f_PuttSwingSpeed;
 static f32 f_GreenSongTempo;
-static s32 f_UnusedDebugCourseIndex;
+static CourseIndex f_UnusedDebugCourseIndex;
 static s32 f_UnusedDebugHoleIndex;
 static s32 f_SkippedSwingFrames;
 static s32 f_ShotSource;

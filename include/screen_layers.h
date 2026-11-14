@@ -4,6 +4,7 @@
 #include <ultra64.h>
 
 #include "controller.h"
+#include "course.h"
 #include "gbi_helpers.h"
 #include "language.h"
 
@@ -107,7 +108,7 @@ void LoadTextureBlock(
     s32 shiftt
 );
 void InitScreenLayers(void);
-void LoadWipeShape(s32 courseIndex);
+void LoadWipeShape(CourseIndex courseIndex);
 void StopWipe(void);
 s32 GetWipeKind(void);
 s32 GetWipeProgress(void);

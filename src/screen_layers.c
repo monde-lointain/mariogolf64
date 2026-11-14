@@ -403,7 +403,7 @@ void InitScreenLayers(void) {
     StopScreenFade();
 }
 
-void LoadWipeShape(s32 courseIndex) {
+void LoadWipeShape(CourseIndex courseIndex) {
     EncodedAsset asset;
 
     OpenEncodedAsset(f_WipeShapeIds[courseIndex % WIPE_SHAPE_COUNT], &asset);

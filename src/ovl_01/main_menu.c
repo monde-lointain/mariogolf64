@@ -5474,7 +5474,7 @@ void DrawModeSelect(Gfx **displayListHead) {
     s32 labelX;
     void *image;
     s32 i;
-    s32 courseIndex;
+    CourseIndex courseIndex;
     s32 holeIndex;
 
     g_HoleSetup.conditions.lightYaw = MODE_SELECT_LIGHT_YAW;

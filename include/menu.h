@@ -244,7 +244,7 @@ s32 GetClubTournamentNumber(void);
 s32 GetRingShotCourseOpenedAtStarCount(void);
 Boolean HasEveryRingShotStar(void);
 void InsertBestTime(
-    s32 courseIndex,
+    CourseIndex courseIndex,
     s32 time,
     s32 scoreToPar,
     CharacterIndex characterIndex,

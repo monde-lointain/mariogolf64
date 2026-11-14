@@ -1792,7 +1792,7 @@ void RecordDisplayListLength(u32 commandCount) {
 }
 
 void InsertBestTime(
-    s32 courseIndex,
+    CourseIndex courseIndex,
     s32 time,
     s32 scoreToPar,
     CharacterIndex characterIndex,
@@ -2393,7 +2393,7 @@ MessageId GetClubTournamentNameMessage(void) {
 }
 
 MessageId GetClubTournamentCourseMessage(void) {
-    s32 courseIndex;
+    CourseIndex courseIndex;
 
     courseIndex = GetClubTournamentCourse();
     if (courseIndex < 0) {

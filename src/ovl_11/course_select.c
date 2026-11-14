@@ -248,7 +248,7 @@ s32 CountOpenRingShotCourses(void) {
 void LoadCourseSelect(Boolean isHoleSelect) {
     EncodedAsset asset;
     AssetFile file;
-    s32 courseIndex;
+    CourseIndex courseIndex;
     s32 size;
 
     if (f_LoadedScreen != COURSE_SELECT_UNLOADED) {
@@ -347,7 +347,7 @@ void TurnCourseImage(void) {
 }
 
 void FreeCourseSelect(void) {
-    s32 courseIndex;
+    CourseIndex courseIndex;
 
     if (f_LoadedScreen == COURSE_SELECT_UNLOADED) {
         osSyncPrintf("ring dest err");
@@ -1145,7 +1145,7 @@ void DrawRingShotStars(Gfx **displayListHead, s32 centerX UNUSED, s32 centerY UN
     s32 left;
     s32 top;
     s32 tile;
-    s32 courseIndex;
+    CourseIndex courseIndex;
     u8 *spinningImage = f_StarImages[f_StarBufferIndex];
 
     LoadSmallPalette(&gfx, TILE_SPINNING_STAR, ImageBody(spinningImage));

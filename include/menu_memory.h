@@ -56,11 +56,11 @@ typedef struct MenuMemory {
     s8 miniGolfCourseChoice;
     s8 miniGolfRecordSlide;
     s8 holeIndex;
-    s8 courseIndex;
+    CourseIndex8 courseIndex;
     s8 statsCourse;
     u8 unusedAfterStatsCourse;
     s8 statsSpin;
-    s8 bestTimesCourse;
+    CourseIndex8 bestTimesCourse;
     s8 bestTimesSpin;
     s8 tableColumn;
     s8 tableRow;

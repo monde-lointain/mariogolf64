@@ -33,6 +33,9 @@ typedef s32 CourseRecordIndex;
 #define COURSE_INDEX_COUNT (DRIVING_RANGE_COURSE_INDEX + 1)
 
 typedef s32 CourseIndex;
+// A CourseIndex kept in a byte, as the original stores it in saved and
+// menu records.
+typedef s8 CourseIndex8;
 
 enum Course {
     COURSE_TOAD_HIGHLANDS,

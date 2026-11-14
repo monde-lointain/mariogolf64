@@ -34,7 +34,7 @@ enum ScoreKind {
 typedef struct PlayRecord {
     HoleSetup hole;
     s32 gameMode;
-    s8 courseIndex;
+    CourseIndex8 courseIndex;
     s8 holeIndex;
     u8 scoreKind;
     s8 characterIndex;
@@ -49,7 +49,7 @@ typedef struct PlayRecord {
 
 typedef struct RingShotRecord {
     HoleSetup hole;
-    s8 courseIndex;
+    CourseIndex8 courseIndex;
     s8 holeIndex;
     s8 scoreKind;
     s8 characterIndex;

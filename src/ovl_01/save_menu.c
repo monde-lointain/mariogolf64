@@ -104,7 +104,7 @@ s16 GetChosenReplaySlot(void);
 s32 GetOpenRingShotCourseCount(void);
 void DrawCourseLabel(
     Gfx **displayListHead,
-    s32 courseIndex,
+    CourseIndex courseIndex,
     s32 left,
     s32 top,
     UBoolean8 showsCourseWord
@@ -1042,7 +1042,7 @@ s32 IsRingShotRecorded(RingShotRecord *record) {
 
 void DrawCourseLabel(
     Gfx **displayListHead,
-    s32 courseIndex,
+    CourseIndex courseIndex,
     s32 left,
     s32 top,
     UBoolean8 showsCourseWord

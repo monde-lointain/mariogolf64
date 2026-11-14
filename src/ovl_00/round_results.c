@@ -324,7 +324,7 @@ static s32 f_FaceFrameTimes[PLAYER_COUNT_MAX];
 
 s32 SumCoursePointsNeeded(CourseIndex courseIndex) {
     s32 total = 0;
-    s32 course;
+    CourseIndex course;
 
     for (course = 1; course < courseIndex + 1; course++) {
         total += GetCoursePointsNeeded(course);
@@ -2182,7 +2182,7 @@ void DrawResultsBanner(Gfx **displayListHead) {
     s32 i;
     s32 rank;
     s32 place;
-    s32 courseIndex;
+    CourseIndex courseIndex;
     s32 top;
     s32 trophyHeight;
 

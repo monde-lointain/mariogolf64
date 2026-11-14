@@ -3,6 +3,7 @@
 
 #include <ultra64.h>
 
+#include "course.h"
 #include "language.h"
 
 #define TOURNAMENT_CODE_SIZE 3
@@ -13,7 +14,7 @@
 typedef struct TournamentRules {
     s8 characterIndex;
     Boolean8 isSpeedGolf;
-    s8 courseIndex;
+    CourseIndex8 courseIndex;
 } TournamentRules;
 
 typedef struct ScoreReport {
