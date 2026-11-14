@@ -19,13 +19,15 @@ enum HoleTriangleKind {
     HOLE_TRIANGLE_KIND_FLAT,
     HOLE_TRIANGLE_KIND_RING,
     HOLE_TRIANGLE_KIND_UPRIGHT,
-    HOLE_TRIANGLE_KIND_SHADED
+    HOLE_TRIANGLE_KIND_SHADED,
+    HOLE_TRIANGLE_KIND_COUNT
 };
 
-typedef s8 HoleTriangleKind;
+typedef u32 HoleTriangleKind;
+typedef s8 HoleTriangleKind8;
 
 typedef struct HoleTriangle {
-    u32 kind;
+    HoleTriangleKind kind;
     Vtx vertices[TRIANGLE_VERTEX_COUNT];
     s16 bounds[AXIS_COUNT][BOUND_END_COUNT];
     f32 ignoredCenter[AXIS_COUNT];

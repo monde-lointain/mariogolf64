@@ -144,7 +144,6 @@ enum TriangleEdit {
 typedef s32 TriangleEdit;
 
 #define FIRST_RING_TRIANGLE (HOLE_TRIANGLE_COUNT - RING_COUNT)
-#define HOLE_TRIANGLE_KIND_COUNT 4
 #define CORNER_STEP_SCALE 10.0f
 #define SAVED_CORNER_COUNT 10
 #define TRIANGLE_TEXT_COLUMN 10
@@ -1501,7 +1500,7 @@ void UpdateTriangleEditor(void) {
         g_WorkArea.hole.triangles[f_EditedTriangleIndex].kind++;
         editKind = TRIANGLE_EDIT_KIND;
         if (g_WorkArea.hole.triangles[f_EditedTriangleIndex].kind >= HOLE_TRIANGLE_KIND_COUNT) {
-            g_WorkArea.hole.triangles[f_EditedTriangleIndex].kind = 0;
+            g_WorkArea.hole.triangles[f_EditedTriangleIndex].kind = HOLE_TRIANGLE_KIND_FLAT;
         }
 
         PrepareHoleTriangles();

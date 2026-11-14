@@ -2798,7 +2798,7 @@ void ReadBillboards(void) {
 void ReadHoleTriangles(void) {
     u8 unused[0x10] UNUSED;
     u8 triangleCount;
-    HoleTriangleKind kind;
+    HoleTriangleKind8 kind;
     u8 triangleIndex;
     HoleTriangle *triangle;
 
