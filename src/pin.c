@@ -318,7 +318,7 @@ Boolean IsPinInCup(void) {
 }
 
 void DrawPin(CameraMatrices *matrices UNUSED, CameraView *view, s32 cameraIndex) {
-    ScreenPoint top;
+    ScreenPoint stickTop;
     ScreenPoint cup;
     ScreenPoint stickFoot;
     Vec3 offset;
@@ -437,7 +437,7 @@ void DrawPin(CameraMatrices *matrices UNUSED, CameraView *view, s32 cameraIndex)
         g_HoleSetup.cupPosition[AXIS_X] * COURSE_TO_WORLD_SCALE,
         (g_HoleSetup.cupPosition[AXIS_Y] - FLAGSTICK_HEIGHT) * COURSE_TO_WORLD_SCALE,
         g_HoleSetup.cupPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE,
-        &top
+        &stickTop
     );
     cupDepth = ProjectPoint(
         g_HoleSetup.cupPosition[AXIS_X] * COURSE_TO_WORLD_SCALE,
@@ -699,8 +699,8 @@ void DrawPin(CameraMatrices *matrices UNUSED, CameraView *view, s32 cameraIndex)
                     11,
                     G_MWO_POINT_XYSCREEN,
                     ScreenPointWord(
-                        (top.x * QUARTER_PIXELS_PER_PIXEL) - SCREEN_FLAGSTICK_HALF_WIDTH,
-                        top.y * QUARTER_PIXELS_PER_PIXEL
+                        (stickTop.x * QUARTER_PIXELS_PER_PIXEL) - SCREEN_FLAGSTICK_HALF_WIDTH,
+                        stickTop.y * QUARTER_PIXELS_PER_PIXEL
                     )
                 );
                 gSPModifyVertex(
@@ -726,8 +726,8 @@ void DrawPin(CameraMatrices *matrices UNUSED, CameraView *view, s32 cameraIndex)
                     8,
                     G_MWO_POINT_XYSCREEN,
                     ScreenPointWord(
-                        (top.x * QUARTER_PIXELS_PER_PIXEL) + SCREEN_FLAGSTICK_HALF_WIDTH,
-                        top.y * QUARTER_PIXELS_PER_PIXEL
+                        (stickTop.x * QUARTER_PIXELS_PER_PIXEL) + SCREEN_FLAGSTICK_HALF_WIDTH,
+                        stickTop.y * QUARTER_PIXELS_PER_PIXEL
                     )
                 );
             }
