@@ -1623,7 +1623,7 @@ void CountNotableShot(s32 playerIndex, NotableShot notableShot) {
 #define HOLE_IN_ONE_POINTS 20
 #define MINI_GOLF_HOLE_IN_ONE_POINTS 10
 
-s32 GetNotableShotPoints(s32 playerIndex, s32 notableShot) {
+s32 GetNotableShotPoints(s32 playerIndex, NotableShot notableShot) {
     s32 count = (u8)g_Players[playerIndex].notableShotCounts[notableShot];
     s32 points;
 
@@ -1671,7 +1671,7 @@ s32 GetNotableShotPoints(s32 playerIndex, s32 notableShot) {
 
 s32 TallyCoursePoints(void) {
     s32 playerIndex;
-    s32 notableShot;
+    NotableShot notableShot;
     s32 points;
     s32 total = 0;
 
@@ -1692,7 +1692,7 @@ s32 TallyCoursePoints(void) {
 void PrintCoursePoints(void) {
     char text[DEBUG_TEXT_BUFFER_SIZE];
     s32 playerIndex;
-    s32 notableShot;
+    NotableShot notableShot;
     s32 points;
 
     for (playerIndex = 0; playerIndex < g_GameState.playerCount; playerIndex++) {

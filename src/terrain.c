@@ -280,13 +280,13 @@ TerrainCode GetTerrainCode(s32 column, s32 row) {
 
 #define BEYOND_ANY_COLOR_DISTANCE 1000000
 
-s32 FindNearestTerrainColor(s32 color) {
+TerrainColorIndex FindNearestTerrainColor(s32 color) {
     s32 nearestDistance = BEYOND_ANY_COLOR_DISTANCE;
-    s32 nearestIndex = 0;
+    TerrainColorIndex nearestIndex = TERRAIN_COLOR_FAIRWAY;
     s32 colorRed = (color >> RGBA16_RED_SHIFT) & RGBA16_CHANNEL_MASK;
     s32 colorGreen = (color >> RGBA16_GREEN_SHIFT) & RGBA16_CHANNEL_MASK;
     s32 colorBlue = (color >> RGBA16_BLUE_SHIFT) & RGBA16_CHANNEL_MASK;
-    s32 colorIndex;
+    TerrainColorIndex colorIndex;
     s32 red;
     s32 green;
     s32 blue;
