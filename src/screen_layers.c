@@ -789,7 +789,7 @@ void DrawPrompt(Gfx **displayListHead) {
     s32 cloudHeight;
     s32 halfHeight;
     s32 halfWidth;
-    s32 half;
+    s32 halfIndex;
     s32 bottom;
 
     if (f_PromptState == PROMPT_STATE_CLOSED) {
@@ -829,7 +829,7 @@ void DrawPrompt(Gfx **displayListHead) {
     gDPSetRenderMode(gfx++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
     gDPSetCombineMode(gfx++, G_CC_BLENDPEDECALA, G_CC_BLENDPEDECALA);
 
-    for (half = 0; half != 2; half++) {
+    for (halfIndex = 0; halfIndex != 2; halfIndex++) {
         if (f_PromptState == PROMPT_STATE_CHOOSING) {
             halfWidth = PROMPT_CLOUD_HALF_WIDTH;
             halfHeight = cloudHeight;
@@ -843,7 +843,8 @@ void DrawPrompt(Gfx **displayListHead) {
             &gfx,
             AddressPast(
                 f_PromptCloudImage,
-                IMAGE_HEADER_SIZE + (half * (PROMPT_CLOUD_WIDTH * PROMPT_CLOUD_HALF_TEXELS / 2))
+                IMAGE_HEADER_SIZE +
+                    (halfIndex * (PROMPT_CLOUD_WIDTH * PROMPT_CLOUD_HALF_TEXELS / 2))
             ),
             G_IM_FMT_I,
             PROMPT_CLOUD_WIDTH,
@@ -856,7 +857,7 @@ void DrawPrompt(Gfx **displayListHead) {
             G_TX_NOLOD,
             G_TX_NOLOD
         );
-        bottom = PROMPT_CLOUD_MIDDLE_Y + (half * halfHeight);
+        bottom = PROMPT_CLOUD_MIDDLE_Y + (halfIndex * halfHeight);
         DrawTextureRectangle(
             &gfx,
             QuarterPixels(PROMPT_CENTER_X - halfWidth),

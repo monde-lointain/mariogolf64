@@ -558,7 +558,7 @@ void DrawPlanks(Gfx **displayListHead) {
     s32 slide;
     s32 top;
     s32 bottom;
-    s32 group;
+    s32 plankGroup;
 
     gDPPipeSync(gfx++);
     gDPPipeSync(gfx++);
@@ -613,17 +613,17 @@ void DrawPlanks(Gfx **displayListHead) {
         }
         else {
             if (f_PlankMotion == PLANKS_OPENING) {
-                group = stripIndex / PLANK_GROUP_STRIP_COUNT;
+                plankGroup = stripIndex / PLANK_GROUP_STRIP_COUNT;
             }
             else {
-                group = stripIndex / PLANK_GROUP_STRIP_COUNT;
+                plankGroup = stripIndex / PLANK_GROUP_STRIP_COUNT;
             }
 
-            if (group > PLANK_LAST_GROUP) {
-                group = PLANK_LAST_GROUP;
+            if (plankGroup > PLANK_LAST_GROUP) {
+                plankGroup = PLANK_LAST_GROUP;
             }
 
-            slide = f_PlankSlide - (group * PLANK_GROUP_LAG);
+            slide = f_PlankSlide - (plankGroup * PLANK_GROUP_LAG);
             if (slide > PLANKS_MIDDLE) {
                 slide = PLANKS_MIDDLE;
             }
