@@ -3017,7 +3017,7 @@ void BuildStatusData(StatusData *status);
 s32 WriteStatusToCartridge(s32 cartridgeIndex) {
     GameBoyTransfer *transfer = &g_GameBoyTransfer;
     u8 save[CARTRIDGE_SAVE_SIZE];
-    u8 status[STATUS_DATA_SIZE];
+    u8 statusData[STATUS_DATA_SIZE];
     s32 result;
     s32 index;
     s32 statusAddress;
@@ -3076,11 +3076,11 @@ s32 WriteStatusToCartridge(s32 cartridgeIndex) {
             return STATUS_WRITE_PAK_ERROR;
         }
 
-        BuildStatusData((StatusData *)status);
+        BuildStatusData((StatusData *)statusData);
         result = nuContGBPakFwrite(
             &transfer->pakFile,
             statusAddress - STATUS_ADDRESS_BIAS,
-            status,
+            statusData,
             statusSize
         );
         if (result != 0) {
@@ -3091,7 +3091,7 @@ s32 WriteStatusToCartridge(s32 cartridgeIndex) {
 
         checksum = 0;
         for (index = 0; index != statusSize; index++) {
-            checksum += status[index];
+            checksum += statusData[index];
         }
 
         checksum &= 0xFFFF;
@@ -3414,7 +3414,7 @@ s32 OpenGameBoyPakWithRetries(s32 port, OSGbpakId *header, NUContPakFile *file) 
 s32 OpenGameBoyPak(s32 port, OSGbpakId *header, NUContPakFile *file) {
     Boolean isMarioGolf = TRUE;
     s32 index;
-    u8 status;
+    u8 pakStatus;
 
     switch (nuContGBPakOpen(file, port)) {
         case 0:
@@ -3431,10 +3431,10 @@ s32 OpenGameBoyPak(s32 port, OSGbpakId *header, NUContPakFile *file) {
             return -1;
     }
 
-    switch (nuContGBPakGetStatus(file, &status)) {
+    switch (nuContGBPakGetStatus(file, &pakStatus)) {
         case 0:
         case PFS_ERR_NEW_GBCART:
-            if (!(status & OS_GBPAK_POWER)) {
+            if (!(pakStatus & OS_GBPAK_POWER)) {
                 switch (nuContGBPakPower(file, NU_CONT_GBPAK_POWER_ON)) {
                     case 0:
                         osSyncPrintf("3rd 電源ＯＮ\n");
@@ -3448,16 +3448,16 @@ s32 OpenGameBoyPak(s32 port, OSGbpakId *header, NUContPakFile *file) {
                 }
             }
 
-            switch (nuContGBPakReadID(file, header, &status)) {
+            switch (nuContGBPakReadID(file, header, &pakStatus)) {
                 case PFS_ERR_NEW_GBCART:
                     osSyncPrintf("4th GBカートリッジの挿抜が行われました。\n");
                 case 0:
-                    if (!(status & OS_GBPAK_GBCART_ON)) {
+                    if (!(pakStatus & OS_GBPAK_GBCART_ON)) {
                         osSyncPrintf("5th ＧＢパックにカセットが刺さってません。\n");
                         return PAK_RESULT_CARTRIDGE_REMOVED;
                     }
 
-                    if (status & OS_GBPAK_GBCART_PULL) {
+                    if (pakStatus & OS_GBPAK_GBCART_PULL) {
                         osSyncPrintf("カセットの抜き差しが行われました。\n");
                         return PAK_RESULT_REMOVED_RETRYING;
                     }
@@ -3496,7 +3496,7 @@ s32 OpenGameBoyPak(s32 port, OSGbpakId *header, NUContPakFile *file) {
                     osSyncPrintf(
                         "64GBパックかコントローラコネクタに異常がある可\224\134性がありま"
                         "す。stat = %xH\n",
-                        status
+                        pakStatus
                     );
                     return PAK_RESULT_CONNECTOR_PROBLEM;
                 case PFS_ERR_NO_GBCART:
@@ -3527,7 +3527,7 @@ s32 TagCartridges(void) {
     OSGbpakId header;
     NUContPakFile file;
     u8 tag[CARTRIDGE_TAG_SIZE];
-    u8 status;
+    u8 pakStatus;
     Boolean isAnyTagged = FALSE;
     Boolean wasNoCartridge = FALSE;
     Boolean wasNoPak = FALSE;
@@ -3570,8 +3570,8 @@ s32 TagCartridges(void) {
             }
 
             if (nuContGBPakFwrite(&file, CARTRIDGE_RAM_ADDRESS, tag, CARTRIDGE_TAG_SIZE) == 0 &&
-                nuContGBPakGetStatus(&file, &status) == 0) {
-                if (status & OS_GBPAK_GBCART_PULL) {
+                nuContGBPakGetStatus(&file, &pakStatus) == 0) {
+                if (pakStatus & OS_GBPAK_GBCART_PULL) {
                     wasCartridgePulled = TRUE;
                 }
                 else {
