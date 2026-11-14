@@ -64,11 +64,15 @@ static Heap f_Heaps[HEAP_COUNT];
 // The main memory's heap is laid out as a Heap is, but the original keeps
 // its parts in separate variables, which changes the code that uses them.
 //
-// The sentinel is volatile, as InitHeapRegions needs it to match. The
-// allocating and freeing routines mask interrupts around their work on the
-// list, so the original took other threads to share it; the routines that
-// walk the list compile the same either way.
+// Under KMC the sentinel is volatile, as InitHeapRegions needs it to match.
+// The qualifier does no work: the allocating and freeing routines mask
+// interrupts around their work on the list, and the pointers that link the
+// list reach the sentinel without it. Other builds declare it plain.
+#ifdef __IS_KMC__
 static volatile MemoryBlock f_MemorySentinel;
+#else
+static MemoryBlock f_MemorySentinel;
+#endif
 static u32 f_FreeMemorySize;
 static u32 f_LargestFreeMemorySize; // As the last allocation measured
 
