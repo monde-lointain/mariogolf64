@@ -20,7 +20,7 @@
 
 #define Z_MARGIN 10.0f
 
-static f32 f_FramedSphereCenters[FRAMED_SPHERE_CAPACITY][3];
+static Vec3 f_FramedSphereCenters[FRAMED_SPHERE_CAPACITY];
 static f32 f_FramedSphereRadii[FRAMED_SPHERE_CAPACITY];
 static s32 f_FramedSphereCount;
 static Radians f_FramingPitch;

@@ -121,8 +121,8 @@ static CoursePoint f_SparkBurstPoints[SPARK_BURST_COUNT];
 static ImageAsset *f_SparkImage;
 static ImageAsset *f_SwingTrailImage;
 static Mtx f_SwingTrailMatrices[SWING_TRAIL_MATRIX_COUNT][2];
-static f32 f_SwingTrailOuterPath[SWING_TRAIL_PATH_LENGTH][3];
-static f32 f_SwingTrailInnerPath[SWING_TRAIL_PATH_LENGTH][3];
+static Vec3 f_SwingTrailOuterPath[SWING_TRAIL_PATH_LENGTH];
+static Vec3 f_SwingTrailInnerPath[SWING_TRAIL_PATH_LENGTH];
 
 u8 g_UnusedBytesAfterInnerTrailPath[0x18];
 
@@ -302,7 +302,7 @@ void DrawSparks(Gfx **displayListHead) {
     ScreenPoint point;
     f32 burstScales[SPARK_BURST_COUNT];
     s32 burstShown[SPARK_BURST_COUNT];
-    s32 burstPoints[SPARK_BURST_COUNT][3];
+    s32 burstPoints[SPARK_BURST_COUNT][AXIS_COUNT];
     s32 burstHalfSizes[SPARK_BURST_COUNT];
     s32 burstTextureSteps[SPARK_BURST_COUNT];
     Gfx *gfx = *displayListHead;

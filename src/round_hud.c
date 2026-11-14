@@ -686,7 +686,7 @@ static Vtx f_HoleFlagVertices[HOLE_FLAG_SIDE_COUNT][MATRIX_BUFFER_COUNT][HOLE_FL
 static s8 f_HoleFlagShades[HOLE_FLAG_VERTEX_COUNT];
 static s32 f_GreenGridHeights[GREEN_GRID_POINT_COUNT];
 static ScreenPosition f_BallTrailPoints[BALL_TRAIL_LENGTH];
-static f32 f_BallTrail[BALL_TRAIL_LENGTH][3];
+static Vec3 f_BallTrail[BALL_TRAIL_LENGTH];
 static ImageAsset *f_HoleContestImage;
 static ImageAsset *f_MatchStandingImage;
 
@@ -1612,7 +1612,7 @@ typedef struct GridScreenPoint {
     }
 
 void DrawGreenGrid(Gfx **displayListHead, CameraMatrices *matrices) {
-    f32 points[GREEN_GRID_POINT_COUNT][3];
+    Vec3 points[GREEN_GRID_POINT_COUNT];
     GridScreenPoint screenPoints[GREEN_GRID_POINT_COUNT];
     s32 slopes[GREEN_GRID_POINT_COUNT];
     f32 unusedPoints[GREEN_GRID_POINT_COUNT][3] UNUSED;

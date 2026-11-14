@@ -272,7 +272,7 @@ static s32 f_TrophyShineFrame = 0;
 static s32 f_TrophyFrame = 0;
 static CharacterIndex f_DebugUnlockCharacter = 0;
 static const char *f_UnusedModeNamesPointers[2] UNUSED = {NULL, f_UnusedModeNamesText};
-static u8 f_TextSlotColors[][3] = {
+static u8 f_TextSlotColors[][RGB_CHANNEL_COUNT] = {
     {0xFF, 0xFF, 0xFF},
     {0x7F, 0xBF, 0xFF},
     {0x7F, 0xBF, 0xFF},

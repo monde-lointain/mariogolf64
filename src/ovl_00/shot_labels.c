@@ -125,7 +125,7 @@ typedef struct ScreenSpot {
     SpotState state;
 } ScreenSpot;
 
-static u8 f_PlayerTagColors[PLAYER_COUNT_MAX][3] =
+static u8 f_PlayerTagColors[PLAYER_COUNT_MAX][RGB_CHANNEL_COUNT] =
     {{0xDC, 0x00, 0x00}, {0x00, 0x00, 0xDC}, {0xF0, 0x7F, 0x00}, {0x00, 0x7F, 0x00}};
 static ShotLabel f_ShotLabels[PLAYER_COUNT_MAX] =
     {{0, 0, 0, NO_CORNER}, {0, 0, 0, NO_CORNER}, {0, 0, 0, NO_CORNER}, {0, 0, 0, NO_CORNER}};

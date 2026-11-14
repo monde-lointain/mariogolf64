@@ -7,6 +7,7 @@
 #include "club.h"
 #include "compiler.h"
 #include "course_space.h"
+#include "gbi_helpers.h"
 #include "geometry.h"
 #include "language.h"
 #include "math_util.h"
@@ -290,7 +291,7 @@ extern Gfx g_CharacterRenderModeDisplayList[3];
 extern Gfx g_CharacterCombineDisplayList[2];
 extern Gfx g_CharacterHighlightDisplayList[3];
 #define ENV_COLOR_COUNT 10
-extern u8 g_CharacterEnvColors[ENV_COLOR_COUNT][3];
+extern u8 g_CharacterEnvColors[ENV_COLOR_COUNT][RGB_CHANNEL_COUNT];
 extern Gfx g_CharacterEnvColorDisplayLists[ENV_COLOR_COUNT][2];
 
 extern f32 g_CurrentAnimationFrame;

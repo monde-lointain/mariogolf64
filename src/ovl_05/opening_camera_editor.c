@@ -32,7 +32,7 @@ static EditorChoice f_EditorChoice = EDITOR_CHOICE_SLIDE;
 static s32 f_SnapshotIndex = 0;
 static Boolean f_IsSecondControllerOnEye = FALSE;
 
-f32 f_CameraSnapshots[SNAPSHOT_COUNT][SNAPSHOT_POINT_COUNT][3];
+Vec3 f_CameraSnapshots[SNAPSHOT_COUNT][SNAPSHOT_POINT_COUNT];
 
 void ResetCameraEditor(void) {
     s32 pointIndex;

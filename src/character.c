@@ -323,7 +323,7 @@ static Gfx f_UnusedDoubleEndDisplayList[] UNUSED = {
     gsSPEndDisplayList(),
     gsSPEndDisplayList(),
 };
-u8 g_CharacterEnvColors[ENV_COLOR_COUNT][3] = {
+u8 g_CharacterEnvColors[ENV_COLOR_COUNT][RGB_CHANNEL_COUNT] = {
     {0x80, 0x40, 0x1E},
     {0xFF, 0xFF, 0xFF},
     {0xFF, 0xFF, 0x7F},
@@ -2002,7 +2002,7 @@ static inline f32 GetImpactFlashYaw(f32 yaw, Boolean isLefty) {
 
 void DrawCharacterAndShadow(CameraMatrices *matrices, s32 cameraIndex, s32 slotIndex) {
     Vec3 shadowPoint;
-    f32 corners[TRIANGLE_CORNER_COUNT][3];
+    Vec3 corners[TRIANGLE_CORNER_COUNT];
     Vec3 viewDirection;
     s32 lightDirection[AXIS_COUNT];
     Mat4 transform;
