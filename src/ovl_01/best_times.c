@@ -34,9 +34,6 @@
 #define BEST_TIMES_TURN 90
 #define BEST_TIMES_SPIN_SPEED 18
 
-#define PLACE_LABEL_FRAME_SIZE 32
-#define PLACE_LABEL_FRAME_BYTES (PLACE_LABEL_FRAME_SIZE * PLACE_LABEL_FRAME_SIZE)
-#define PLACE_LABEL_DIGIT_COUNT 4
 #define PLACE_LABEL_SIZE 24
 #define PLACE_LABEL_SUFFIX_X 16
 #define PLACE_LABEL_LAST_PLACE 3
@@ -572,11 +569,11 @@ void DrawPlaceLabel(Gfx **displayListHead, s32 left, s32 top, s32 place) {
     gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_PlaceLabels)));
     gDPLoadTextureBlock(
         gfx++,
-        TextureAddress(LargeImageTexelsAt(f_PlaceLabels, (place - 1) * PLACE_LABEL_FRAME_BYTES)),
+        TextureAddress(LargeImageTexelsAt(f_PlaceLabels, (place - 1) * PLACE_PART_IMAGE_SIZE)),
         G_IM_FMT_CI,
         G_IM_SIZ_8b,
-        PLACE_LABEL_FRAME_SIZE,
-        PLACE_LABEL_FRAME_SIZE,
+        PLACE_PART_SIZE,
+        PLACE_PART_SIZE,
         0,
         G_TX_NOMIRROR | G_TX_WRAP,
         G_TX_NOMIRROR | G_TX_WRAP,
@@ -595,21 +592,21 @@ void DrawPlaceLabel(Gfx **displayListHead, s32 left, s32 top, s32 place) {
         G_TX_RENDERTILE,
         0,
         0,
-        TexelRunStep(PLACE_LABEL_FRAME_SIZE, PLACE_LABEL_SIZE),
-        TexelRunStep(PLACE_LABEL_FRAME_SIZE, PLACE_LABEL_SIZE)
+        TexelRunStep(PLACE_PART_SIZE, PLACE_LABEL_SIZE),
+        TexelRunStep(PLACE_PART_SIZE, PLACE_LABEL_SIZE)
     );
     gDPPipeSync(gfx++);
     gDPLoadTextureBlock(
         gfx++,
         TextureAddress(LargeImageTexelsAt(
             f_PlaceLabels,
-            ((place - 1) * PLACE_LABEL_FRAME_BYTES) +
-                (PLACE_LABEL_DIGIT_COUNT * PLACE_LABEL_FRAME_BYTES)
+            ((place - 1) * PLACE_PART_IMAGE_SIZE) +
+                (PLACE_NUMBER_PART_COUNT * PLACE_PART_IMAGE_SIZE)
         )),
         G_IM_FMT_CI,
         G_IM_SIZ_8b,
-        PLACE_LABEL_FRAME_SIZE,
-        PLACE_LABEL_FRAME_SIZE,
+        PLACE_PART_SIZE,
+        PLACE_PART_SIZE,
         0,
         G_TX_NOMIRROR | G_TX_WRAP,
         G_TX_NOMIRROR | G_TX_WRAP,
@@ -628,8 +625,8 @@ void DrawPlaceLabel(Gfx **displayListHead, s32 left, s32 top, s32 place) {
         G_TX_RENDERTILE,
         0,
         0,
-        TexelRunStep(PLACE_LABEL_FRAME_SIZE, PLACE_LABEL_SIZE),
-        TexelRunStep(PLACE_LABEL_FRAME_SIZE, PLACE_LABEL_SIZE)
+        TexelRunStep(PLACE_PART_SIZE, PLACE_LABEL_SIZE),
+        TexelRunStep(PLACE_PART_SIZE, PLACE_LABEL_SIZE)
     );
     gDPPipeSync(gfx++);
     *displayListHead = gfx;

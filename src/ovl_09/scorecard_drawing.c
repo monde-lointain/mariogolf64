@@ -29,13 +29,9 @@
 #include "text.h"
 #include "tournament.h"
 
-#define PLACE_IMAGE_COUNT 4
-#define PLACE_HALF_WIDTH 32
-#define PLACE_HEIGHT 32
-#define PLACE_HALF_SIZE (PLACE_HALF_WIDTH * PLACE_HEIGHT)
-#define PLACE_RIGHT_HALF_X 24
-#define PLACE_RIGHT_HALVES_OFFSET \
-    (LARGE_PALETTED_TEXELS_OFFSET + (PLACE_IMAGE_COUNT * PLACE_HALF_SIZE))
+#define PLACE_SUFFIX_X 24
+#define PLACE_SUFFIX_PARTS_OFFSET \
+    (LARGE_PALETTED_TEXELS_OFFSET + (PLACE_NUMBER_PART_COUNT * PLACE_PART_IMAGE_SIZE))
 
 #define LABEL_WIDTH 80
 #define LABEL_HEIGHT 18
@@ -233,11 +229,11 @@ void DrawPlace(Gfx **displayListHead, s32 left, s32 top, s32 place) {
     LoadLargePalette(&gfx, ImageBody(g_Scorecard.placesImage));
     LoadTextureBlock(
         &gfx,
-        g_Scorecard.placesImage + ((place * PLACE_HALF_SIZE) + PLACE_RIGHT_HALVES_OFFSET),
+        g_Scorecard.placesImage + ((place * PLACE_PART_IMAGE_SIZE) + PLACE_SUFFIX_PARTS_OFFSET),
         G_IM_FMT_CI,
         G_IM_SIZ_8b,
-        PLACE_HALF_WIDTH,
-        PLACE_HEIGHT,
+        PLACE_PART_SIZE,
+        PLACE_PART_SIZE,
         0,
         0,
         0,
@@ -248,10 +244,10 @@ void DrawPlace(Gfx **displayListHead, s32 left, s32 top, s32 place) {
     );
     DrawTextureRect(
         &gfx,
-        QuarterPixels(left + PLACE_RIGHT_HALF_X),
+        QuarterPixels(left + PLACE_SUFFIX_X),
         QuarterPixels(top),
-        QuarterPixels(left + PLACE_RIGHT_HALF_X + PLACE_HALF_WIDTH),
-        QuarterPixels(top + PLACE_HEIGHT),
+        QuarterPixels(left + PLACE_SUFFIX_X + PLACE_PART_SIZE),
+        QuarterPixels(top + PLACE_PART_SIZE),
         G_TX_RENDERTILE,
         0,
         0,
@@ -260,11 +256,11 @@ void DrawPlace(Gfx **displayListHead, s32 left, s32 top, s32 place) {
     );
     LoadTextureBlock(
         &gfx,
-        LargeImageTexelsAt(g_Scorecard.placesImage, place * PLACE_HALF_SIZE),
+        LargeImageTexelsAt(g_Scorecard.placesImage, place * PLACE_PART_IMAGE_SIZE),
         G_IM_FMT_CI,
         G_IM_SIZ_8b,
-        PLACE_HALF_WIDTH,
-        PLACE_HEIGHT,
+        PLACE_PART_SIZE,
+        PLACE_PART_SIZE,
         0,
         0,
         0,
@@ -277,8 +273,8 @@ void DrawPlace(Gfx **displayListHead, s32 left, s32 top, s32 place) {
         &gfx,
         QuarterPixels(left),
         QuarterPixels(top),
-        QuarterPixels(left + PLACE_HALF_WIDTH),
-        QuarterPixels(top + PLACE_HEIGHT),
+        QuarterPixels(left + PLACE_PART_SIZE),
+        QuarterPixels(top + PLACE_PART_SIZE),
         G_TX_RENDERTILE,
         0,
         0,

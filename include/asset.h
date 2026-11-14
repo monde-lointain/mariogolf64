@@ -74,6 +74,11 @@ void ReadAssetFile(void *buffer, u32 size, AssetFile *file);
 #define SPINNING_BADGE_FRAME_SIZE (SPINNING_BADGE_SIZE * SPINNING_BADGE_SIZE / 2)
 #define SPINNING_BADGE_FRAME_COUNT 6
 #define ASSET_PLACES 0x688
+// The places image is a column of 32x32 parts: the numbers of the first
+// four places, then their suffixes.
+#define PLACE_PART_SIZE 32
+#define PLACE_PART_IMAGE_SIZE (PLACE_PART_SIZE * PLACE_PART_SIZE)
+#define PLACE_NUMBER_PART_COUNT 4
 #define ASSET_LARGE_DIGITS 0x689
 #define ASSET_SCORE_LABELS 0x68A
 #define ASSET_STREAK_IMAGE 0x6AF

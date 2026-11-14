@@ -105,8 +105,6 @@ enum FaceAnimation {
 #define NOTICE_LIFT_GROWTH_DENOMINATOR 3
 #define NOTICE_LIFT_EXIT (-200)
 
-#define PLACE_ICON_SIZE 32
-
 #define RESULTS_LABEL_WIDTH 72
 #define RESULTS_LABEL_STORED_WIDTH 80
 #define RESULTS_LABEL_HEIGHT 18
@@ -1067,11 +1065,11 @@ void DrawPlaceIcon(Gfx **displayListHead, s32 x, s32 y, s32 place) {
     LoadTextureBlock(
         &gfx,
         f_ResultsPlacesImage +
-            ((place * PLACE_ICON_SIZE * PLACE_ICON_SIZE) + LARGE_PALETTED_TEXELS_OFFSET),
+            ((place * PLACE_PART_SIZE * PLACE_PART_SIZE) + LARGE_PALETTED_TEXELS_OFFSET),
         G_IM_FMT_CI,
         G_IM_SIZ_8b,
-        PLACE_ICON_SIZE,
-        PLACE_ICON_SIZE,
+        PLACE_PART_SIZE,
+        PLACE_PART_SIZE,
         0,
         0,
         0,
@@ -1084,8 +1082,8 @@ void DrawPlaceIcon(Gfx **displayListHead, s32 x, s32 y, s32 place) {
         &gfx,
         QuarterPixels(x),
         QuarterPixels(y),
-        QuarterPixels(x + PLACE_ICON_SIZE),
-        QuarterPixels(y + PLACE_ICON_SIZE),
+        QuarterPixels(x + PLACE_PART_SIZE),
+        QuarterPixels(y + PLACE_PART_SIZE),
         G_TX_RENDERTILE,
         0,
         0,
@@ -1108,7 +1106,6 @@ void DrawPlaceIcon(Gfx **displayListHead, s32 x, s32 y, s32 place) {
 #define PLACE_DIGIT_Y 10
 #define RANK_TENTH 9
 #define PLACE_TWO_DIGIT_SHIFT 16
-#define PLACE_SUFFIX_ICON_FIRST 4
 #define RANK_BANNER_X_OFFSET (-12)
 
 void DrawRank(Gfx **displayListHead, s32 x, s32 y, s32 rank) {
@@ -1140,12 +1137,12 @@ void DrawRank(Gfx **displayListHead, s32 x, s32 y, s32 rank) {
         LoadTextureBlock(
             &gfx,
             f_ResultsPlacesImage +
-                ((suffix * PLACE_ICON_SIZE * PLACE_ICON_SIZE) + LARGE_PALETTED_TEXELS_OFFSET +
-                    (PLACE_SUFFIX_ICON_FIRST * PLACE_ICON_SIZE * PLACE_ICON_SIZE)),
+                ((suffix * PLACE_PART_SIZE * PLACE_PART_SIZE) + LARGE_PALETTED_TEXELS_OFFSET +
+                    (PLACE_NUMBER_PART_COUNT * PLACE_PART_SIZE * PLACE_PART_SIZE)),
             G_IM_FMT_CI,
             G_IM_SIZ_8b,
-            PLACE_ICON_SIZE,
-            PLACE_ICON_SIZE,
+            PLACE_PART_SIZE,
+            PLACE_PART_SIZE,
             0,
             0,
             0,
@@ -1158,8 +1155,8 @@ void DrawRank(Gfx **displayListHead, s32 x, s32 y, s32 rank) {
             &gfx,
             QuarterPixels(x + PLACE_DIGIT_WIDTH),
             QuarterPixels(y),
-            QuarterPixels(x + PLACE_DIGIT_WIDTH + PLACE_ICON_SIZE),
-            QuarterPixels(y + PLACE_ICON_SIZE),
+            QuarterPixels(x + PLACE_DIGIT_WIDTH + PLACE_PART_SIZE),
+            QuarterPixels(y + PLACE_PART_SIZE),
             G_TX_RENDERTILE,
             0,
             0,
@@ -1259,12 +1256,12 @@ void DrawRank(Gfx **displayListHead, s32 x, s32 y, s32 rank) {
         LoadTextureBlock(
             &gfx,
             f_ResultsPlacesImage +
-                ((rank * PLACE_ICON_SIZE * PLACE_ICON_SIZE) + LARGE_PALETTED_TEXELS_OFFSET +
-                    (PLACE_SUFFIX_ICON_FIRST * PLACE_ICON_SIZE * PLACE_ICON_SIZE)),
+                ((rank * PLACE_PART_SIZE * PLACE_PART_SIZE) + LARGE_PALETTED_TEXELS_OFFSET +
+                    (PLACE_NUMBER_PART_COUNT * PLACE_PART_SIZE * PLACE_PART_SIZE)),
             G_IM_FMT_CI,
             G_IM_SIZ_8b,
-            PLACE_ICON_SIZE,
-            PLACE_ICON_SIZE,
+            PLACE_PART_SIZE,
+            PLACE_PART_SIZE,
             0,
             0,
             0,
@@ -1277,8 +1274,8 @@ void DrawRank(Gfx **displayListHead, s32 x, s32 y, s32 rank) {
             &gfx,
             QuarterPixels(x + PLACE_DIGIT_WIDTH),
             QuarterPixels(y),
-            QuarterPixels(x + PLACE_DIGIT_WIDTH + PLACE_ICON_SIZE),
-            QuarterPixels(y + PLACE_ICON_SIZE),
+            QuarterPixels(x + PLACE_DIGIT_WIDTH + PLACE_PART_SIZE),
+            QuarterPixels(y + PLACE_PART_SIZE),
             G_TX_RENDERTILE,
             0,
             0,
