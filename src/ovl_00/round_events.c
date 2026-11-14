@@ -1349,6 +1349,7 @@ void DrawMovie(Gfx **displayListHead) {
 #define WINNER_SOUND_VOLUME 63
 #define WINNER_SOUND_REVERB 30
 #define WINNER_BLINK_FRAME 8
+#define WINNER_FACE_FRAME_STEP 2
 
 #define LoadWinnerFace(asset, frameIndex) \
     { \
@@ -1529,13 +1530,13 @@ void DrawContestWinnerMovie(Gfx **displayListHead) {
         if (frame == WINNER_BLINK_FRAME) {
             LoadWinnerFace(&asset, 1);
         }
-        else if (frame == WINNER_BLINK_FRAME + 2) {
+        else if (frame == WINNER_BLINK_FRAME + WINNER_FACE_FRAME_STEP) {
             LoadWinnerFace(&asset, 2);
         }
-        else if (frame == WINNER_BLINK_FRAME + 4) {
+        else if (frame == WINNER_BLINK_FRAME + (2 * WINNER_FACE_FRAME_STEP)) {
             LoadWinnerFace(&asset, 3);
         }
-        else if (frame == WINNER_BLINK_FRAME + 6) {
+        else if (frame == WINNER_BLINK_FRAME + (3 * WINNER_FACE_FRAME_STEP)) {
             LoadWinnerFace(&asset, 4);
         }
 

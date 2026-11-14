@@ -818,6 +818,8 @@ typedef s32 BallSprite;
 #define CUP_VIEW_SHADOW_FADE_DEPTH 128
 #define CUP_VIEW_SHADOW_SHADE_MIN 0x3F
 #define SHADOW_DEPTH_GAP_MIN 8
+// Afterimages are at least two pixels across.
+#define AFTERIMAGE_HALF_SIZE_MIN QuarterPixels(1)
 // A ball this far below the ground counts as underground, and a ball in the
 // cup this far above it casts no shadow.
 #define UNDERGROUND_BALL_DEPTH 153.6f
@@ -1490,12 +1492,12 @@ void DrawGolfBalls(CameraMatrices *matrices UNUSED) {
                     (AbsFloat(ballPoint.scaleY) *
                         ((0.3 * COURSE_TO_WORLD_SCALE) * (g_PinVertexScale * BALL_RADIUS * 2))) -
                     1.0;
-                if (halfWidth < 4) {
-                    halfWidth = 4;
+                if (halfWidth < AFTERIMAGE_HALF_SIZE_MIN) {
+                    halfWidth = AFTERIMAGE_HALF_SIZE_MIN;
                 }
 
-                if (halfHeight < 4) {
-                    halfHeight = 4;
+                if (halfHeight < AFTERIMAGE_HALF_SIZE_MIN) {
+                    halfHeight = AFTERIMAGE_HALF_SIZE_MIN;
                 }
 
                 if (f_IsBallAfterimageFast == TRUE) {
@@ -1572,12 +1574,12 @@ void DrawGolfBalls(CameraMatrices *matrices UNUSED) {
                     (AbsFloat(shadowPoint.scaleY) *
                         ((0.3 * COURSE_TO_WORLD_SCALE) * (g_PinVertexScale * BALL_RADIUS * 2))) -
                     1.0;
-                if (halfWidth < 4) {
-                    halfWidth = 4;
+                if (halfWidth < AFTERIMAGE_HALF_SIZE_MIN) {
+                    halfWidth = AFTERIMAGE_HALF_SIZE_MIN;
                 }
 
-                if (halfHeight < 4) {
-                    halfHeight = 4;
+                if (halfHeight < AFTERIMAGE_HALF_SIZE_MIN) {
+                    halfHeight = AFTERIMAGE_HALF_SIZE_MIN;
                 }
 
                 if (f_IsBallAfterimageFast == TRUE) {
