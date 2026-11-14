@@ -1665,7 +1665,7 @@ void DrawDriveRecord(Gfx **displayListHead) {
             SOUND_SHRINKING_IMAGE,
             CAPTION_SOUND_CHANNEL,
             CAPTION_SOUND_VOLUME,
-            0,
+            NO_REVERB,
             SOUND_FULL_SCALE
         );
     }
@@ -1852,7 +1852,7 @@ void DrawPuttCaption(Gfx **displayListHead) {
             SOUND_CAPTION_MEET,
             CAPTION_SOUND_CHANNEL,
             CAPTION_SOUND_VOLUME,
-            0,
+            NO_REVERB,
             SOUND_FULL_SCALE
         );
     }
@@ -2245,7 +2245,7 @@ void DrawShrinkingMovieImage(Gfx **displayListHead) {
             SOUND_SHRINKING_IMAGE,
             SHRINKING_IMAGE_SOUND_CHANNEL,
             SHRINKING_IMAGE_SOUND_VOLUME,
-            0,
+            NO_REVERB,
             SOUND_FULL_SCALE
         );
     }

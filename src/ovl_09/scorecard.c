@@ -48,7 +48,6 @@
 #define SCORECARD_SLIDE_SOUND_REVERB 20
 #define SCORECARD_OPEN_SOUND_PAN 0xDF
 #define SCORECARD_CLOSE_SOUND_PAN 0x20
-#define SOUND_PAN_FULL_RIGHT 0xFF
 
 #define UNSPLIT_IMAGE_WIDTH_MAX 96
 
@@ -960,8 +959,8 @@ void TurnScorecardPage(u16 buttons) {
             SOUND_MENU_MOVE,
             *channel,
             SCORECARD_SOUND_VOLUME,
-            0,
-            (hud->scorecardPage + 1) * (SOUND_PAN_FULL_RIGHT / (pageCount + 1))
+            NO_REVERB,
+            (hud->scorecardPage + 1) * (SOUND_PAN_RIGHT / (pageCount + 1))
         );
     }
 }

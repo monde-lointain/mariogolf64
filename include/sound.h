@@ -9,6 +9,9 @@
 #define SOUND_CHANNEL_COUNT 16
 
 #define SOUND_FULL_SCALE 0x7F
+#define NO_REVERB 0
+#define SOUND_PAN_LEFT 0
+#define SOUND_PAN_RIGHT 0xFF
 
 typedef s32 SoundId;
 typedef s32 SongId;

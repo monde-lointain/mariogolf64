@@ -1456,10 +1456,8 @@ void UpdateCourseResultsNotice(void) {
 #define NOTICE_SHINE_DSDX TexelRunStep(SHINE_SIZE, NOTICE_TITLE_STRIP_WIDTH)
 #define NOTICE_PAN_START 3
 #define NOTICE_PAN_END 60
-#define NOTICE_PAN_MAX 255
 #define NOTICE_PAN_RANGE 126
 #define NOTICE_CHEER_SOUND_CHANNEL 3
-#define NOTICE_SOUND_PAN_RIGHT 255
 
 void DrawCourseResultsNotice(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
@@ -1655,7 +1653,7 @@ void DrawCourseResultsNotice(Gfx **displayListHead) {
             SOUND_SHRINKING_IMAGE,
             NOTICE_SHINE_SOUND_CHANNEL,
             NOTICE_SHINE_SOUND_VOLUME,
-            0,
+            NO_REVERB,
             SOUND_FULL_SCALE
         );
     }
@@ -1665,20 +1663,20 @@ void DrawCourseResultsNotice(Gfx **displayListHead) {
             SOUND_UNLOCK_EVERYTHING,
             NOTICE_SWING_SOUND_CHANNEL,
             NOTICE_SWING_SOUND_VOLUME,
-            0,
-            NOTICE_SOUND_PAN_RIGHT
+            NO_REVERB,
+            SOUND_PAN_RIGHT
         );
         PlaySound(SOUND_COURSE_NOTICE_CHEER, NOTICE_CHEER_SOUND_CHANNEL, SOUND_FULL_SCALE);
     }
 
     if (f_NoticeFrameCount >= NOTICE_PAN_START && f_NoticeFrameCount < NOTICE_PAN_END) {
         pan = (f_NoticeSwing + NOTICE_COURSE_CENTER_X) * NOTICE_PAN_RANGE / NOTICE_COURSE_CENTER_X;
-        if (pan < 0) {
-            pan = 0;
+        if (pan < SOUND_PAN_LEFT) {
+            pan = SOUND_PAN_LEFT;
         }
 
-        if (pan > NOTICE_PAN_MAX) {
-            pan = NOTICE_PAN_MAX;
+        if (pan > SOUND_PAN_RIGHT) {
+            pan = SOUND_PAN_RIGHT;
         }
 
         SetSoundPan(NOTICE_SWING_SOUND_CHANNEL, pan);
@@ -2031,7 +2029,7 @@ void DrawCharacterResultsNotice(Gfx **displayListHead) {
                 SOUND_SHRINKING_IMAGE,
                 NOTICE_SHINE_SOUND_CHANNEL,
                 NOTICE_SHINE_SOUND_VOLUME,
-                0,
+                NO_REVERB,
                 SOUND_FULL_SCALE
             );
         }
@@ -2041,7 +2039,7 @@ void DrawCharacterResultsNotice(Gfx **displayListHead) {
                 SOUND_UNLOCK_EVERYTHING,
                 NOTICE_SWING_SOUND_CHANNEL,
                 NOTICE_SWING_SOUND_VOLUME,
-                0,
+                NO_REVERB,
                 SOUND_FULL_SCALE
             );
         }

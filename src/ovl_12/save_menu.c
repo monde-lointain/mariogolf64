@@ -66,7 +66,6 @@ typedef s32 SaveMenuState;
 #define REPLAY_LABEL_COUNT 6
 
 #define SAVE_MENU_SONG_VOLUME 0x60
-#define SAVE_MENU_SOUND_PAN 0xFF
 
 #define ASSET_SAVE_MENU_TITLE_IMAGE 0x6A5
 #define MESSAGE_CENTER_X (SCREEN_WIDTH / 2)
@@ -305,7 +304,7 @@ void OpenSaveMenu(SaveMenuList kind) {
         g_NextSoundChannel,
         MENU_VOLUME_MEDIUM,
         MENU_SOUND_REVERB,
-        SAVE_MENU_SOUND_PAN
+        SOUND_PAN_RIGHT
     );
     for (slot = 0; slot != FACE_IMAGE_COUNT; slot++) {
         ReadEncodedAsset(
@@ -1336,7 +1335,7 @@ void UpdateGameSaveMenu(ControllerState *controller) {
                     g_NextSoundChannel,
                     MENU_VOLUME_MEDIUM,
                     MENU_SOUND_REVERB,
-                    0
+                    SOUND_PAN_LEFT
                 );
                 AnimateModeIcons(TRUE);
                 f_StateFrameCount = 0;
@@ -1402,7 +1401,7 @@ void UpdateGameSaveMenu(ControllerState *controller) {
                     g_NextSoundChannel,
                     MENU_VOLUME_MEDIUM,
                     MENU_SOUND_REVERB,
-                    0
+                    SOUND_PAN_LEFT
                 );
             }
 
@@ -1452,7 +1451,7 @@ void UpdateGameSaveMenu(ControllerState *controller) {
                     g_NextSoundChannel,
                     MENU_VOLUME_MEDIUM,
                     MENU_SOUND_REVERB,
-                    0
+                    SOUND_PAN_LEFT
                 );
             }
 

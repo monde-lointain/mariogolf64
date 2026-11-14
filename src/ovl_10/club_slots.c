@@ -456,7 +456,7 @@ s32 UpdateClubSlots(void) {
                         SOUND_REEL_STOP,
                         g_NextSoundChannel,
                         SOUND_FULL_SCALE,
-                        0,
+                        NO_REVERB,
                         f_Slots->pressCount++ * REEL_STOP_PAN_STEP
                     );
                 }

@@ -683,7 +683,7 @@ void DrawMatchPage(Gfx **displayListHead) {
             SOUND_LOOK_BACK,
             TALLY_SOUND_CHANNEL,
             SCORECARD_SOUND_VOLUME,
-            0,
+            NO_REVERB,
             SOUND_FULL_SCALE
         );
     }
