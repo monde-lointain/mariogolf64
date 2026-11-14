@@ -2469,7 +2469,7 @@ void ClearImportedCharacters(void) {
             g_ImportedCharacters[index].name[byteIndex] = 0;
         }
 
-        g_ImportedCharacters[index].isChosen = 0;
+        g_ImportedCharacters[index].isChosen = FALSE;
     }
 }
 
@@ -2746,10 +2746,10 @@ void EnterMenuAtTitle(void) {
     g_IsMenuWipeOpening = TRUE;
     g_IsChosenHoleLoadStarted = FALSE;
     f_UnreadMenuEntryByte = 0;
-    g_ImportedCharacters[0].isChosen = 0;
-    g_ImportedCharacters[1].isChosen = 0;
-    g_ImportedCharacters[2].isChosen = 0;
-    g_ImportedCharacters[3].isChosen = 0;
+    g_ImportedCharacters[0].isChosen = FALSE;
+    g_ImportedCharacters[1].isChosen = FALSE;
+    g_ImportedCharacters[2].isChosen = FALSE;
+    g_ImportedCharacters[3].isChosen = FALSE;
     g_PlayerControllerIndices[0] = UNCHOSEN_CONTROLLER;
     g_PlayerControllerIndices[1] = UNCHOSEN_CONTROLLER;
     g_PlayerControllerIndices[2] = UNCHOSEN_CONTROLLER;

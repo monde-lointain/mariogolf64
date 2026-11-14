@@ -377,7 +377,7 @@ s32 StepBallSimulation(BallSimulation *simulation) {
                         startY = groundHeight;
                     }
 
-                    simulation->isOverCup = 0;
+                    simulation->isOverCup = FALSE;
                 }
 
                 if (g_GameState.isMiniGolf) {
@@ -888,7 +888,7 @@ s32 StepBallSimulation(BallSimulation *simulation) {
                 velocity[AXIS_X] = velocity[AXIS_Z] = 0.0f;
                 velocity[AXIS_Y] = (-fallSpeed * CUP_FLOOR_BOUNCE) + CUP_GRAVITY;
                 if (velocity[AXIS_Y] > 0.0f) {
-                    simulation->isHoledOut = 1;
+                    simulation->isHoledOut = TRUE;
                     simulation->state = BALL_STATE_STOPPED;
                 }
 
@@ -2065,7 +2065,7 @@ SETTLE:
 
                             if (cupDistance < CUP_DROP_RADIUS) {
                                 floorHeight += CUP_DEPTH;
-                                simulation->isOverCup = 1;
+                                simulation->isOverCup = TRUE;
                             }
                             else if (cupDistance < CUP_RIM_OUTER_RADIUS) {
                                 f32 rimDistance = CUP_RIM_OUTER_RADIUS - cupDistance;
@@ -2073,7 +2073,7 @@ SETTLE:
                                     (rimDistance * rimDistance);
 
                                 if (remainingShare > 0.0f) {
-                                    simulation->isOverCup = 1;
+                                    simulation->isOverCup = TRUE;
                                     floorHeight = floorHeight +
                                         ((CUP_RIM_CURVE_RADIUS - sqrtf(remainingShare)) *
                                             CUP_RIM_SINK_SCALE);
@@ -2249,9 +2249,9 @@ s32 LaunchBallSimulation(BallSimulation *simulation, LaunchPurpose purpose, Shot
     simulation->startPosition[AXIS_Z] = simulation->dropPosition[AXIS_Z];
     simulation->launchSurface = surface;
     simulation->firstBounceSurface = surface;
-    simulation->hasEnteredWater = 0;
+    simulation->hasEnteredWater = FALSE;
     simulation->stepFlags = 0;
-    simulation->isOverCup = 0;
+    simulation->isOverCup = FALSE;
 
     if (simulation->purpose != LAUNCH_PURPOSE_CLUB_TEST) {
         simulation->playerIndex = shot->playerIndex;
@@ -2460,7 +2460,7 @@ s32 LaunchBallSimulation(BallSimulation *simulation, LaunchPurpose purpose, Shot
     simulation->bounceCount = 0;
     simulation->stepCount = 0;
     simulation->lastBounceStep = NO_BOUNCE_STEP;
-    simulation->isHoledOut = 0;
+    simulation->isHoledOut = FALSE;
     simulation->hasHitFlag = FALSE;
     simulation->rollFrameCount = 0;
     for (index = 0; index < BALL_SOUND_COUNT; index++) {

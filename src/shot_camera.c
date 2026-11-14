@@ -1357,8 +1357,8 @@ void StartHoleCamerasAndSong(void) {
     SetMenuBackdrop(MENU_BACKDROP_NONE);
     g_RoundHud.isHoleIntroTextShown = TRUE;
     g_RoundHud.scorecardPage = NO_SCORECARD_PAGE;
-    g_RoundHud.isHoleInfoShown = 1;
-    g_RoundHud.isUnreadItemShown = 1;
+    g_RoundHud.isHoleInfoShown = TRUE;
+    g_RoundHud.isUnreadItemShown = TRUE;
     g_InsetView.animation = INSET_VIEW_STILL;
     g_InsetView.step = 0;
     g_HoleFlyoverFrame = 0;
@@ -1400,8 +1400,8 @@ void StartHoleCamerasAndSong(void) {
             break;
         case GAME_MODE_RING_SHOT:
             PlaySong(SONG_ROUND_RING_SHOT, SONG_FLAG_UNREAD);
-            g_RoundHud.isHoleInfoShown = 0;
-            g_RoundHud.isUnreadItemShown = 0;
+            g_RoundHud.isHoleInfoShown = FALSE;
+            g_RoundHud.isUnreadItemShown = FALSE;
             break;
         case GAME_MODE_CLUB_SLOTS:
             if (GetLastHoleIndex() == g_GameState.holeIndex) {
@@ -2664,21 +2664,21 @@ s32 UpdateFlightCamera(Boolean isAdvancing, s32 buttons) {
     s32 *flightStep;
 
     if (!isAdvancing) {
-        g_RoundHud.isShotLengthShown = 0;
+        g_RoundHud.isShotLengthShown = FALSE;
     }
     else {
-        g_RoundHud.isShotLengthShown = 1;
+        g_RoundHud.isShotLengthShown = TRUE;
     }
 
     if (buttons & START_BUTTON) {
-        g_RoundHud.isClubPanelShown = 0;
+        g_RoundHud.isClubPanelShown = FALSE;
         g_RoundHud.isWindIndicatorShown = FALSE;
-        g_RoundHud.isHoleInfoShown = 0;
+        g_RoundHud.isHoleInfoShown = FALSE;
         g_RoundHud.isLieIconShown = FALSE;
         g_RoundHud.isClubHeadIconShown = FALSE;
-        g_RoundHud.isUnreadItemShown = 0;
-        g_RoundHud.isProgressShown = 0;
-        g_RoundHud.isShotLengthShown = 0;
+        g_RoundHud.isUnreadItemShown = FALSE;
+        g_RoundHud.isProgressShown = FALSE;
+        g_RoundHud.isShotLengthShown = FALSE;
     }
     else {
         g_RoundHud.isClubPanelShown = f_IsFlightHudShown;

@@ -348,7 +348,7 @@ void SetUpPlayers(void) {
         for (playerIndex = 0; playerIndex < PLAYER_COUNT_MAX; playerIndex++) {
             FormatDefaultPlayerName(playerIndex, g_Players[playerIndex].name);
             g_Players[playerIndex].characterIndex = playerIndex;
-            g_Players[playerIndex].isLefty = 0;
+            g_Players[playerIndex].isLefty = FALSE;
             g_Players[playerIndex].isComputer = FALSE;
             g_Players[playerIndex].teeOrder = 0;
             g_Players[playerIndex].gridColor = GetSaveData()->options[SAVE_OPTION_GRID_COLOR];
@@ -1382,13 +1382,13 @@ DIM_BACKDROP:
 
                         if (clearHud) {
                             g_RoundHud.isWindIndicatorShown = FALSE;
-                            g_RoundHud.isHoleInfoShown = 0;
+                            g_RoundHud.isHoleInfoShown = FALSE;
                             g_RoundHud.isLieIconShown = FALSE;
                             g_RoundHud.isClubHeadIconShown = FALSE;
-                            g_RoundHud.isUnreadItemShown = 0;
-                            g_RoundHud.isClubPanelShown = 0;
-                            g_RoundHud.isShotLengthShown = 0;
-                            g_RoundHud.isProgressShown = 0;
+                            g_RoundHud.isUnreadItemShown = FALSE;
+                            g_RoundHud.isClubPanelShown = FALSE;
+                            g_RoundHud.isShotLengthShown = FALSE;
+                            g_RoundHud.isProgressShown = FALSE;
                         }
 
                         g_PauseScreen = PAUSE_SCREEN_SCORECARD;

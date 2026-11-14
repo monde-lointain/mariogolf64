@@ -729,7 +729,7 @@ void StartFreeLook(void) {
     SetMenuBackdrop(MENU_BACKDROP_PATTERN);
     g_PauseScreen = PAUSE_SCREEN_FREE_LOOK;
     g_RoundHud.isLetterboxShown = FALSE;
-    g_RoundHud.isClubPanelShown = 0;
+    g_RoundHud.isClubPanelShown = FALSE;
     if (g_ScreenEffect == SCREEN_EFFECT_SAVED_FRAME) {
         SetFramebufferCount(TRIPLE_BUFFERING);
         SetScreenEffect(SCREEN_EFFECT_NONE, 0);
@@ -1572,7 +1572,7 @@ void PlaceBallAtRest(s32 playerIndex, BallSimulation *simulation) {
     simulation->position[AXIS_Y] = player->ballPosition[AXIS_Y];
     simulation->position[AXIS_Z] = player->ballPosition[AXIS_Z];
     simulation->playerIndex = playerIndex;
-    simulation->isHoledOut = 0;
+    simulation->isHoledOut = FALSE;
     simulation->state = BALL_STATE_STOPPED;
     groundHeight = GetGroundHeight(simulation->position[AXIS_X], simulation->position[AXIS_Z]);
     if (groundHeight < simulation->position[AXIS_Y]) {
@@ -1581,7 +1581,7 @@ void PlaceBallAtRest(s32 playerIndex, BallSimulation *simulation) {
 
     simulation->surface = player->ballSurface;
     simulation->purpose = LAUNCH_PURPOSE_PLACED_AT_REST;
-    simulation->hasEnteredWater = 0;
+    simulation->hasEnteredWater = FALSE;
     PrepareShotEffects(simulation);
     if (g_IsModuleAlive[MODULE_GOLF_BALLS] || ReportModuleNotAlive(MODULE_GOLF_BALLS)) {
         ResetBallAfterimage();
@@ -3008,7 +3008,7 @@ void UpdateTurns(void) {
                 UpdateContest(FALSE);
                 ResetShotSetup();
                 g_RoundHud.flags = 0;
-                g_RoundHud.isBallTrailShown = 0;
+                g_RoundHud.isBallTrailShown = FALSE;
                 g_RoundHud.shooterIndex = playerIndex;
                 ResetShotOffsetMarker();
                 if (IsCharacterSlotBusy(0)) {
@@ -3039,8 +3039,8 @@ void UpdateTurns(void) {
                     g_TurnBallSimulation.position[AXIS_Z] - g_HoleSetup.cupPosition[AXIS_Z]
                 );
                 g_RoundHud.greenGridState = 1;
-                g_RoundHud.isDistanceSignShown = 1;
-                g_RoundHud.isPinFlagShown = 1;
+                g_RoundHud.isDistanceSignShown = TRUE;
+                g_RoundHud.isPinFlagShown = TRUE;
                 f_ShotLaunch.clubSlot = g_CurrentShot.clubSlot;
                 f_ShotLaunch.shotMode = g_CurrentShot.shotMode;
                 g_ShotSetupFrameCount = 0;
@@ -3475,7 +3475,7 @@ void UpdateTurns(void) {
                         PlaySound(SOUND_LOOK_BACK, g_NextSoundChannel, LOOK_SOUND_VOLUME);
                         ResetAimCamera();
                         ResetShotSetup();
-                        g_RoundHud.isClubPanelShown = 1;
+                        g_RoundHud.isClubPanelShown = TRUE;
                         g_RoundHud.isLetterboxShown = TRUE;
                         SetRoundHudPartsShown(1);
                     }
@@ -3781,8 +3781,8 @@ void UpdateTurns(void) {
                     g_RoundHud.greenGridState = 2;
                 }
 
-                g_RoundHud.isDistanceSignShown = 0;
-                g_RoundHud.isPinFlagShown = 0;
+                g_RoundHud.isDistanceSignShown = FALSE;
+                g_RoundHud.isPinFlagShown = FALSE;
                 if (g_ShotFlags & SHOT_FLAG_NO_IMPACT_POINT) {
                     g_RoundHud.flags = HUD_FLAG_SETTING_POWER;
                 }
@@ -3858,8 +3858,8 @@ void UpdateTurns(void) {
                         g_RoundHud.greenGridState = 1;
                     }
 
-                    g_RoundHud.isDistanceSignShown = 1;
-                    g_RoundHud.isPinFlagShown = 1;
+                    g_RoundHud.isDistanceSignShown = TRUE;
+                    g_RoundHud.isPinFlagShown = TRUE;
                 }
 
                 g_CurrentShot.gaugeFrame++;

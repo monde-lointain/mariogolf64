@@ -1074,7 +1074,7 @@ s32 UpdateCharacterSelect(s32 firstPlayerIndex, s32 playerCount, Boolean canChoo
             }
         }
         else {
-            g_Players[playerIndex].isLefty = 0;
+            g_Players[playerIndex].isLefty = FALSE;
             playerIndex--;
             f_FaceFrame = 0;
             f_FaceFrameTime = 0;

@@ -894,7 +894,7 @@ s32 StepOpeningBallSimulation(BallSimulation *simulation) {
                 simulation->velocity[AXIS_Z] = 0;
                 simulation->velocity[AXIS_X] = 0;
                 if (simulation->velocity[AXIS_Y] > 0) {
-                    simulation->isHoledOut = 1;
+                    simulation->isHoledOut = TRUE;
                     simulation->state = BALL_STATE_STOPPED;
                 }
 
@@ -1859,7 +1859,7 @@ s32 LaunchOpeningBallSimulation(
     simulation->startPosition[AXIS_Z] = simulation->dropPosition[AXIS_Z];
     simulation->launchSurface = simulation->surface;
     simulation->firstBounceSurface = simulation->launchSurface;
-    simulation->hasEnteredWater = 0;
+    simulation->hasEnteredWater = FALSE;
     if (simulation->purpose != LAUNCH_PURPOSE_CLUB_TEST) {
         simulation->playerIndex = shot->playerIndex;
     }
@@ -1956,7 +1956,7 @@ s32 LaunchOpeningBallSimulation(
     simulation->bounceCount = 0;
     simulation->stepCount = 0;
     simulation->lastBounceStep = NO_BOUNCE_STEP;
-    simulation->isHoledOut = 0;
+    simulation->isHoledOut = FALSE;
     simulation->hasHitFlag = FALSE;
     for (index = 0; index < BALL_SOUND_COUNT; index++) {
         simulation->soundStates[index] = 0;

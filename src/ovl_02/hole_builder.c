@@ -2611,7 +2611,7 @@ void ClearBillboards(void) {
         g_Billboards[billboardIndex].y = 0;
         g_Billboards[billboardIndex].z = 0;
         g_Billboards[billboardIndex].textureIndex = -1;
-        g_Billboards[billboardIndex].isIgnoredEditorMark = 0;
+        g_Billboards[billboardIndex].isIgnoredEditorMark = FALSE;
         g_Billboards[billboardIndex].isNearCourseEdge = TRUE;
         g_Billboards[billboardIndex].width = CLEARED_BILLBOARD_WIDTH;
         g_Billboards[billboardIndex].height = CLEARED_BILLBOARD_HEIGHT;

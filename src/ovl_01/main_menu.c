@@ -2359,7 +2359,7 @@ void UpdateMenuTitleScreen(void) {
 
             g_ChoosingPlayerIndex = 0;
             for (index = 0; index != f_MenuCharacterCount; index++) {
-                g_TakenCharacters.isCharacterTaken[index] = 0;
+                g_TakenCharacters.isCharacterTaken[index] = FALSE;
             }
         }
         else if (titleChoice == TITLE_CHOICE_SAVED_GAMES) {
@@ -2897,12 +2897,12 @@ void UpdateModeSelect(void) {
         characterIndex = g_ChosenCharacters[g_ChoosingPlayerIndex];
         g_ChosenLefties[g_ChoosingPlayerIndex] = 0;
         g_PlayerControllerIndices[g_ChoosingPlayerIndex] = 0;
-        g_TakenCharacters.isCharacterTaken[characterIndex] = 0;
+        g_TakenCharacters.isCharacterTaken[characterIndex] = FALSE;
         column = g_MenuMemory.characterColumns[g_ChoosingPlayerIndex];
         row = g_MenuMemory.characterRows[g_ChoosingPlayerIndex];
         gridMark = g_CharacterGrid[row][column];
         if (gridMark >= FIRST_IMPORTED_CHARACTER) {
-            g_ImportedCharacters[gridMark - FIRST_IMPORTED_CHARACTER].isChosen = 0;
+            g_ImportedCharacters[gridMark - FIRST_IMPORTED_CHARACTER].isChosen = FALSE;
             g_ImportedCharacterColumns[g_ChoosingPlayerIndex] = NO_IMPORTED_COLUMN;
         }
 

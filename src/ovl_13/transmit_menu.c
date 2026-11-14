@@ -1373,7 +1373,7 @@ void DecodeCartridgeCharacter(
     }
 
     if (IsGameFlagSet(GAME_FLAG_GAME_BOY_LEFTIES)) {
-        gameBoyCharacter->isLefty = 1;
+        gameBoyCharacter->isLefty = TRUE;
     }
     else {
         gameBoyCharacter->isLefty = characterData[DATA_IS_LEFTY_OFFSET];
