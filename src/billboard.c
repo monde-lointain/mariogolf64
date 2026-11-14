@@ -8,7 +8,6 @@
 #include "camera.h"
 #include "compiler.h"
 #include "course_space.h"
-#include "cpu_projection.h"
 #include "current_shot.h"
 #include "game.h"
 #include "game_flags.h"
@@ -22,6 +21,7 @@
 #include "math_util.h"
 #include "shot_camera.h"
 #include "terrain.h"
+#include "view_projection.h"
 
 #define TEXTURE_LOADED_ON_DEMAND 2
 

@@ -10,7 +10,6 @@
 #include "compiler.h"
 #include "controller.h"
 #include "course.h"
-#include "cpu_projection.h"
 #include "game.h"
 #include "game_flags.h"
 #include "game_state.h"
@@ -38,6 +37,7 @@
 #include "sound.h"
 #include "sram.h"
 #include "text.h"
+#include "view_projection.h"
 
 #define COURSE_THUMBNAIL_WIDTH 64
 #define COURSE_THUMBNAIL_STRIP_HEIGHT 32

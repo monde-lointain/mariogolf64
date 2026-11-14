@@ -5,7 +5,6 @@
 #include "address.h"
 #include "asset.h"
 #include "compiler.h"
-#include "cpu_projection.h"
 #include "gbi_helpers.h"
 #include "geometry.h"
 #include "heap.h"
@@ -14,6 +13,7 @@
 #include "round_hud.h"
 #include "screen.h"
 #include "sound.h"
+#include "view_projection.h"
 
 #define FIREWORK_COUNT 1
 

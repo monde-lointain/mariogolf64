@@ -19,7 +19,6 @@
 #include "course.h"
 #include "course_select.h"
 #include "course_space.h"
-#include "cpu_projection.h"
 #include "current_shot.h"
 #include "curve.h"
 #include "debug_text.h"
@@ -60,6 +59,7 @@
 #include "terrain.h"
 #include "text.h"
 #include "turn.h"
+#include "view_projection.h"
 
 enum SceneryState {
     SCENERY_UNLOADED,

@@ -6,7 +6,6 @@
 #include "character_model.h"
 #include "compiler.h"
 #include "course.h"
-#include "cpu_projection.h"
 #include "fireworks.h"
 #include "frame_time.h"
 #include "game.h"
@@ -28,6 +27,7 @@
 #include "sound.h"
 #include "text.h"
 #include "tournament.h"
+#include "view_projection.h"
 
 #define PLACE_SUFFIX_X 24
 #define PLACE_SUFFIX_PARTS_OFFSET \

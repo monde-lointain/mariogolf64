@@ -4,10 +4,10 @@
 #include <ultra64.h>
 
 #include "address.h"
-#include "cpu_projection.h"
 #include "game.h"
 #include "gbi_helpers.h"
 #include "screen.h"
+#include "view_projection.h"
 
 #define DEPTH_MAX 0x3FFF
 

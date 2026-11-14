@@ -12,7 +12,6 @@
 #include "club.h"
 #include "compiler.h"
 #include "course_space.h"
-#include "cpu_projection.h"
 #include "current_shot.h"
 #include "debug_text.h"
 #include "game.h"
@@ -34,6 +33,7 @@
 #include "shot_camera.h"
 #include "shot_effects.h"
 #include "terrain.h"
+#include "view_projection.h"
 
 #define CHARACTER_BUFFER_SIZE 0x23680
 #define FRAME_DATA_OFFSET 0x20000

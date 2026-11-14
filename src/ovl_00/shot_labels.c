@@ -10,7 +10,6 @@
 #include "club.h"
 #include "compiler.h"
 #include "course_space.h"
-#include "cpu_projection.h"
 #include "current_shot.h"
 #include "game.h"
 #include "game_state.h"
@@ -27,6 +26,7 @@
 #include "surface.h"
 #include "text.h"
 #include "turn.h"
+#include "view_projection.h"
 
 enum ShotLabelMode {
     SHOT_LABELS_NONE = -1,

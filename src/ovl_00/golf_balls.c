@@ -8,7 +8,6 @@
 #include "camera.h"
 #include "compiler.h"
 #include "course_space.h"
-#include "cpu_projection.h"
 #include "debug_text.h"
 #include "game.h"
 #include "game_flags.h"
@@ -28,6 +27,7 @@
 #include "shot_camera.h"
 #include "surface.h"
 #include "terrain.h"
+#include "view_projection.h"
 
 #define GOLF_BALL_COUNT 32
 #define AFTERIMAGE_LENGTH_MAX 60

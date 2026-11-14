@@ -1,5 +1,5 @@
-#ifndef CPU_PROJECTION_H
-#define CPU_PROJECTION_H
+#ifndef VIEW_PROJECTION_H
+#define VIEW_PROJECTION_H
 
 #include <ultra64.h>
 

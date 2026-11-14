@@ -14,7 +14,6 @@
 #include "controller.h"
 #include "course.h"
 #include "course_space.h"
-#include "cpu_projection.h"
 #include "debug_text.h"
 #include "game.h"
 #include "game_flags.h"
@@ -37,6 +36,7 @@
 #include "surface.h"
 #include "terrain.h"
 #include "text.h"
+#include "view_projection.h"
 #include "work_area.h"
 
 #define EDGE_POINT_COUNT (GROUND_TILE_POINT_SPAN + 1)

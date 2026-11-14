@@ -8,7 +8,6 @@
 #include "compiler.h"
 #include "course.h"
 #include "course_menu.h"
-#include "cpu_projection.h"
 #include "frame_time.h"
 #include "game.h"
 #include "gbi_helpers.h"
@@ -26,6 +25,7 @@
 #include "sky_and_hud_animations.h"
 #include "sound.h"
 #include "text.h"
+#include "view_projection.h"
 #include "work_area.h"
 
 #define ASSET_CHARACTER_FACE_STRIP 0x8E9

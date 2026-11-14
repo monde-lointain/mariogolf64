@@ -8,7 +8,6 @@
 #include "camera.h"
 #include "compiler.h"
 #include "course_space.h"
-#include "cpu_projection.h"
 #include "current_shot.h"
 #include "game.h"
 #include "game_state.h"
@@ -24,6 +23,7 @@
 #include "shot_camera.h"
 #include "surface.h"
 #include "terrain.h"
+#include "view_projection.h"
 
 #define CUP_DISTANCE_OFFSET 0x699
 

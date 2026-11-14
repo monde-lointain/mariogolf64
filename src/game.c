@@ -17,7 +17,6 @@
 #include "compiler.h"
 #include "confirm_wait.h"
 #include "controller.h"
-#include "cpu_projection.h"
 #include "current_shot.h"
 #include "debug_text.h"
 #include "effects.h"
@@ -64,6 +63,7 @@
 #include "text.h"
 #include "title_screen.h"
 #include "transmit_menu.h"
+#include "view_projection.h"
 #include "work_area.h"
 
 #define INSET_VIEW_SOUND_VOLUME 0x3F

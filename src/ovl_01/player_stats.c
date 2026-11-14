@@ -9,7 +9,6 @@
 #include "character_model.h"
 #include "compiler.h"
 #include "course.h"
-#include "cpu_projection.h"
 #include "game.h"
 #include "game_flags.h"
 #include "game_state.h"
@@ -32,6 +31,7 @@
 #include "sound.h"
 #include "sram.h"
 #include "text.h"
+#include "view_projection.h"
 
 #define ASSET_JAPANESE_BIRDIE_LABEL 0x82D
 #define ASSET_JAPANESE_ALBATROSS_LABEL 0x82E

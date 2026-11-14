@@ -18,7 +18,6 @@
 #include "course.h"
 #include "course_select.h"
 #include "course_space.h"
-#include "cpu_projection.h"
 #include "current_shot.h"
 #include "debug_text.h"
 #include "game.h"
@@ -61,6 +60,7 @@
 #include "tournament.h"
 #include "transfer_pak.h"
 #include "turn.h"
+#include "view_projection.h"
 #include "work_area.h"
 
 #define GROUND_NOISE_SIZE 32

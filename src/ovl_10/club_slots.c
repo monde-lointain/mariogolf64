@@ -9,7 +9,6 @@
 #include "club.h"
 #include "compiler.h"
 #include "controller.h"
-#include "cpu_projection.h"
 #include "game.h"
 #include "game_flags.h"
 #include "game_state.h"
@@ -25,6 +24,7 @@
 #include "screen_layers.h"
 #include "sky_and_hud_animations.h"
 #include "sound.h"
+#include "view_projection.h"
 #define CLUB_SLOTS_DONE 0
 #define CLUB_SLOTS_STARTING 1
 #define CLUB_SLOTS_SPEEDING 2

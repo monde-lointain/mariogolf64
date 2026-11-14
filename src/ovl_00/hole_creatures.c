@@ -8,7 +8,6 @@
 #include "camera.h"
 #include "compiler.h"
 #include "course_space.h"
-#include "cpu_projection.h"
 #include "effects.h"
 #include "game.h"
 #include "game_flags.h"
@@ -24,6 +23,7 @@
 #include "sound.h"
 #include "terrain.h"
 #include "turn.h"
+#include "view_projection.h"
 
 #define HOLE_CREATURE_COUNT 10
 

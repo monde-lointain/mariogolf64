@@ -1,4 +1,4 @@
-#include "cpu_projection.h"
+#include "view_projection.h"
 
 #include <ultra64.h>
 

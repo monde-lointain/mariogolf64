@@ -21,7 +21,6 @@
 #include "controller.h"
 #include "course.h"
 #include "course_space.h"
-#include "cpu_projection.h"
 #include "current_shot.h"
 #include "debug_text.h"
 #include "effects.h"
@@ -68,6 +67,7 @@
 #include "text.h"
 #include "transfer_pak.h"
 #include "turn.h"
+#include "view_projection.h"
 
 #define IMPACT_POINT_SOUND_CHANNEL 8
 #define IMPACT_POINT_SOUND_VOLUME 60

@@ -8,7 +8,6 @@
 #include "character_model.h"
 #include "compiler.h"
 #include "course_space.h"
-#include "cpu_projection.h"
 #include "current_shot.h"
 #include "curve.h"
 #include "effects.h"
@@ -24,6 +23,7 @@
 #include "round_hud.h"
 #include "screen.h"
 #include "sound.h"
+#include "view_projection.h"
 
 #define SPARK_COUNT 30
 #define SPARK_BURST_COUNT 5

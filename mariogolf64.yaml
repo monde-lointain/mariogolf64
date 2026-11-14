@@ -106,7 +106,7 @@ segments:
       - [0x396C0, c, fault]
       - [0x3A010, c, music]
       - [0x3A580, c, play]
-      - [0x40180, c, cpu_projection]
+      - [0x40180, c, view_projection]
       - [0x414A0, c, hole_triangles]
       - [0x42E60, c, character_sound]
       - [0x42F00, c, matrix_conversion]
@@ -531,7 +531,7 @@ segments:
       - { type: .bss, vram: 0x800DF0B0, name: fault }
       - { type: .bss, vram: 0x800E1290, name: music }
       - { type: .bss, vram: 0x800E12B0, name: play }
-      - { type: .bss, vram: 0x800E16B0, name: cpu_projection }
+      - { type: .bss, vram: 0x800E16B0, name: view_projection }
       - { type: .bss, vram: 0x800E17D0, name: hole_triangles }
       - { type: .bss, vram: 0x800E1A50, name: hole_loader }
       - { type: .bss, vram: 0x800E1C00, name: screen_layers }

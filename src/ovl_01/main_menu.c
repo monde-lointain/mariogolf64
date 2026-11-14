@@ -24,7 +24,6 @@
 #include "course_menu.h"
 #include "course_space.h"
 #include "course_stats.h"
-#include "cpu_projection.h"
 #include "game.h"
 #include "game_flags.h"
 #include "game_state.h"
@@ -61,6 +60,7 @@
 #include "text.h"
 #include "tournament_menu.h"
 #include "transfer_pak.h"
+#include "view_projection.h"
 
 #define MODE_CHOICE_LIMIT 12
 

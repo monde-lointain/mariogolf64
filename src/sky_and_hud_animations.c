@@ -12,7 +12,6 @@
 #include "compiler.h"
 #include "controller.h"
 #include "course.h"
-#include "cpu_projection.h"
 #include "debug_text.h"
 #include "fireworks.h"
 #include "game.h"
@@ -33,6 +32,7 @@
 #include "shot_camera.h"
 #include "sound.h"
 #include "text.h"
+#include "view_projection.h"
 
 #define TITLE_HOLE_INDEX 9
 #define TITLE_COURSE_INDEX 0

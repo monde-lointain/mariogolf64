@@ -10,7 +10,6 @@
 #include "compiler.h"
 #include "controller.h"
 #include "course_space.h"
-#include "cpu_projection.h"
 #include "current_shot.h"
 #include "curve.h"
 #include "game.h"
@@ -34,6 +33,7 @@
 #include "text.h"
 #include "transfer_pak.h"
 #include "turn.h"
+#include "view_projection.h"
 
 #define MOVIE_BUFFER_SIZE 0x6270
 #define MOVIE_CUE_FRAME 12

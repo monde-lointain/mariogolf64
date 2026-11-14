@@ -7,7 +7,6 @@
 #include "compiler.h"
 #include "course.h"
 #include "course_stats.h"
-#include "cpu_projection.h"
 #include "game.h"
 #include "gbi_helpers.h"
 #include "geometry.h"
@@ -23,6 +22,7 @@
 #include "sky_and_hud_animations.h"
 #include "sound.h"
 #include "text.h"
+#include "view_projection.h"
 
 #define ASSET_HOLE_IN_ONE_BADGE 0x8EA
 #define ASSET_DIGITS_AND_ARROWS 0x5A5

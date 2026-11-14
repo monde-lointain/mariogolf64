@@ -15,7 +15,6 @@
 #include "compiler.h"
 #include "controller.h"
 #include "course_space.h"
-#include "cpu_projection.h"
 #include "current_shot.h"
 #include "debug_text.h"
 #include "effects.h"
@@ -42,6 +41,7 @@
 #include "surface.h"
 #include "terrain.h"
 #include "text.h"
+#include "view_projection.h"
 
 #define OPENING_BILLBOARD_HEAP_SIZE 0x7038
 

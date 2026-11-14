@@ -13,7 +13,6 @@
 #include "compiler.h"
 #include "controller.h"
 #include "course_space.h"
-#include "cpu_projection.h"
 #include "current_shot.h"
 #include "game.h"
 #include "game_state.h"
@@ -33,6 +32,7 @@
 #include "terrain.h"
 #include "text.h"
 #include "turn.h"
+#include "view_projection.h"
 
 #define POINT_SPREAD 3072
 #define SPARKLE_FALL_SPEED (2.62f * COURSE_TO_WORLD_SCALE)
