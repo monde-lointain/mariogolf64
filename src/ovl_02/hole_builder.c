@@ -2663,24 +2663,24 @@ void InitTileMidpoints(void) {
 #define UnpackAttribute(packed) ((((packed) & 0xF0) << 4) | ((packed) & 0xF))
 
 void ReadAttributeRuns(void) {
-    s16 count;
+    s16 runLength;
     u8 packed;
     u16 *attribute;
-    u16 *end;
+    u16 *bufferEnd;
     u16 *runEnd;
     s32 unpacked;
 
     attribute = (u16 *)f_BuildCursor;
-    end = (u16 *)(f_BuildCursor + ATTRIBUTE_BUFFER_SIZE);
+    bufferEnd = (u16 *)(f_BuildCursor + ATTRIBUTE_BUFFER_SIZE);
     while (TRUE) {
-        ReadFileBytes(&count, sizeof(count));
-        if (count == 0) {
+        ReadFileBytes(&runLength, sizeof(runLength));
+        if (runLength == 0) {
             break;
         }
 
         ReadFileBytes(&packed, sizeof(packed));
-        runEnd = attribute + count;
-        if (runEnd > end) {
+        runEnd = attribute + runLength;
+        if (runEnd > bufferEnd) {
             osSyncPrintf("ER1\n");
             break;
         }
@@ -2691,10 +2691,10 @@ void ReadAttributeRuns(void) {
         }
     }
 
-    if (attribute != end) {
+    if (attribute != bufferEnd) {
         osSyncPrintf("Whats?\n");
     }
-    while (attribute < end) {
+    while (attribute < bufferEnd) {
         *attribute++ = 0;
     }
 
@@ -2702,11 +2702,11 @@ void ReadAttributeRuns(void) {
 }
 
 void ReadBillboards(void) {
-    u8 count;
+    u8 billboardCount;
     u8 billboardIndex;
 
-    ReadFileBytes(&count, sizeof(count));
-    for (billboardIndex = 0; billboardIndex < count; billboardIndex++) {
+    ReadFileBytes(&billboardCount, sizeof(billboardCount));
+    for (billboardIndex = 0; billboardIndex < billboardCount; billboardIndex++) {
         if (billboardIndex >= BILLBOARD_COUNT) {
             osSyncPrintf("ER2\n");
             return;
