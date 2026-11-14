@@ -2720,9 +2720,9 @@ Boolean IsContactEffectShown(void) {
 
 s32 GetContactStyle(Player *player) {
     GameBoyCharacter *gameBoyCharacter;
-    s8 character = player->characterIndex;
+    s8 characterIndex = player->characterIndex;
 
-    if (character >= CHARACTER_KID) {
+    if (characterIndex >= CHARACTER_KID) {
         gameBoyCharacter = &g_GameBoyCharacters[player->gameBoyCharacterIndex];
         if (gameBoyCharacter->status != GAME_BOY_CHARACTER_STATUS_PRESENT) {
             return CONTACT_STYLE_PLAIN;
@@ -2750,21 +2750,21 @@ s32 GetContactStyle(Player *player) {
         }
     }
 
-    if (character == CHARACTER_WARIO) {
+    if (characterIndex == CHARACTER_WARIO) {
         return CONTACT_STYLE_WARIO;
     }
 
-    if (character == CHARACTER_YOSHI || character == CHARACTER_DONKEY_KONG) {
+    if (characterIndex == CHARACTER_YOSHI || characterIndex == CHARACTER_DONKEY_KONG) {
         return CONTACT_STYLE_RAINBOW;
     }
 
-    if (character == CHARACTER_BOWSER) {
+    if (characterIndex == CHARACTER_BOWSER) {
         return CONTACT_STYLE_BOWSER;
     }
 
-    if (character == CHARACTER_BABY_MARIO ||
-        character == CHARACTER_MARIO ||
-        character == CHARACTER_METAL_MARIO) {
+    if (characterIndex == CHARACTER_BABY_MARIO ||
+        characterIndex == CHARACTER_MARIO ||
+        characterIndex == CHARACTER_METAL_MARIO) {
         return CONTACT_STYLE_MARIO;
     }
 

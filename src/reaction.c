@@ -231,8 +231,8 @@ s32 AddReactionLight(Gfx **displayListHead, Lights2 *lights) {
     return FALSE;
 }
 
-void StartReaction(u32 slotIndex, CharacterId character, s32 animation) {
-    f_ReactionCharacter = character;
+void StartReaction(u32 slotIndex, CharacterId characterIndex, s32 animation) {
+    f_ReactionCharacter = characterIndex;
     f_HasReactionLight = FALSE;
     f_ReactionFrame = 0;
     f_EasedView.isEyeEased = FALSE;

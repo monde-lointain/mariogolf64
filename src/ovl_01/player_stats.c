@@ -152,7 +152,7 @@ void DrawCharacterFace(
     void *palette,
     s32 left,
     s32 top,
-    s16 character,
+    s16 characterIndex,
     u8 drawMode
 );
 void DrawBetIcon(Gfx **displayListHead, s32 left, s32 top, s32 size, s32 textureStep);
@@ -2339,7 +2339,7 @@ void DrawBestShots(Gfx **displayListHead) {
     SaveData *save = GetSaveData();
     MenuMemory *memory = GetMenuMemory();
     s16 column;
-    s16 character;
+    s16 characterIndex;
     s32 iconRow;
     s32 iconColumn;
     s32 nameRow;
@@ -2414,14 +2414,15 @@ void DrawBestShots(Gfx **displayListHead) {
     for (index = 0; index != STATS_GRID_ROW_COUNT; index++) {
         for (column = 0; column != STATS_GRID_COLUMN_COUNT; column++) {
             if (f_BestShotRecords[index][column] != STATS_CELL_EMPTY) {
-                character = save->rankedRecords[f_BestShotRecords[index][column]].characterIndex;
+                characterIndex =
+                    save->rankedRecords[f_BestShotRecords[index][column]].characterIndex;
                 DrawCharacterFace(
                     &gfx,
-                    g_CharacterFaceImages[character],
+                    g_CharacterFaceImages[characterIndex],
                     f_BestShotFaces[index][column],
                     RECORD_FACE_X + (column * STATS_CURSOR_COLUMN_WIDTH),
                     RECORD_FACE_Y + (index * STATS_CURSOR_ROW_HEIGHT),
-                    character,
+                    characterIndex,
                     FACE_PLAIN
                 );
             }
@@ -2932,7 +2933,7 @@ void LoadBestShotFaces(void) {
     s32 row;
     s32 column;
     s32 paletteIndex;
-    CharacterId character;
+    CharacterId characterIndex;
 
     for (index = 0; index != CHARACTER_COUNT; index++) {
         OpenEncodedAsset(g_CharacterFaceAssets[index], &asset);
@@ -2942,15 +2943,15 @@ void LoadBestShotFaces(void) {
     for (row = 0; row != STATS_GRID_ROW_COUNT; row++) {
         for (column = 0; column != STATS_GRID_COLUMN_COUNT; column++) {
             if (f_BestShotRecords[row][column] != STATS_CELL_EMPTY) {
-                character = save->rankedRecords[f_BestShotRecords[row][column]].characterIndex;
+                characterIndex = save->rankedRecords[f_BestShotRecords[row][column]].characterIndex;
                 paletteIndex = save->rankedRecords[f_BestShotRecords[row][column]].paletteIndex;
 
-                if (character < 0) {
-                    character = 0;
+                if (characterIndex < 0) {
+                    characterIndex = 0;
                 }
 
-                if (character >= CHARACTER_COUNT) {
-                    character = CHARACTER_COUNT - 1;
+                if (characterIndex >= CHARACTER_COUNT) {
+                    characterIndex = CHARACTER_COUNT - 1;
                 }
 
                 if (paletteIndex < 0) {
@@ -2965,13 +2966,13 @@ void LoadBestShotFaces(void) {
                     g_MenuCharacterPalettes[(row * STATS_GRID_COLUMN_COUNT) + column];
             }
             else {
-                character = 0;
+                characterIndex = 0;
                 paletteIndex = 0;
                 f_BestShotFaces[row][column] =
                     g_MenuCharacterPalettes[(row * STATS_GRID_COLUMN_COUNT) + column];
             }
 
-            OpenAssetFile(g_CharacterPaletteFiles[character][paletteIndex], &file);
+            OpenAssetFile(g_CharacterPaletteFiles[characterIndex][paletteIndex], &file);
             ReadAssetFile(f_BestShotFaces[row][column], GetAssetFileSize(&file), &file);
         }
     }
@@ -2983,17 +2984,17 @@ void DrawCharacterFace(
     void *palette,
     s32 left,
     s32 top,
-    s16 character,
+    s16 characterIndex,
     u8 drawMode
 ) {
     Gfx *gfx = *displayListHead;
 
-    if (character < 0) {
-        character = 0;
+    if (characterIndex < 0) {
+        characterIndex = 0;
     }
 
-    if (character >= CHARACTER_COUNT) {
-        character = CHARACTER_COUNT - 1;
+    if (characterIndex >= CHARACTER_COUNT) {
+        characterIndex = CHARACTER_COUNT - 1;
     }
 
     gDPPipeSync(gfx++);
@@ -3050,10 +3051,14 @@ void DrawCharacterFace(
     );
     gDPPipeSync(gfx++);
     if (drawMode == FACE_WITH_NAME) {
-        if (character < NAMED_CHARACTER_COUNT) {
+        if (characterIndex < NAMED_CHARACTER_COUNT) {
             SetUpTextDrawing(&gfx);
             SetTextColor(&gfx, 255, 255, 255);
-            sprintf(g_PrintBuffer, "%s", g_MenuCharacterNames[f_StatsCharacterChoices[character]]);
+            sprintf(
+                g_PrintBuffer,
+                "%s",
+                g_MenuCharacterNames[f_StatsCharacterChoices[characterIndex]]
+            );
             DrawLargeText(&gfx, left + FACE_NAME_OFFSET_X, top + FACE_NAME_OFFSET_Y, g_PrintBuffer);
             gDPPipeSync(gfx++);
         }

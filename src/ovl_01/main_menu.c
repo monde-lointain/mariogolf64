@@ -2891,7 +2891,7 @@ void UpdateModeSelect(void) {
     }
 
     if (g_MenuPressedButtons & B_BUTTON) {
-        s32 character;
+        s32 characterIndex;
         s32 row;
         s32 column;
 
@@ -2917,10 +2917,10 @@ void UpdateModeSelect(void) {
         PlaySound(SOUND_MENU_CANCEL, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
         g_MenuScreen = MENU_SCREEN_CHARACTER_SELECT;
         g_ChoosingPlayerIndex--;
-        character = g_ChosenCharacters[g_ChoosingPlayerIndex];
+        characterIndex = g_ChosenCharacters[g_ChoosingPlayerIndex];
         g_ChosenLefties[g_ChoosingPlayerIndex] = 0;
         g_PlayerControllerIndices[g_ChoosingPlayerIndex] = 0;
-        g_TakenCharacters.isCharacterTaken[character] = 0;
+        g_TakenCharacters.isCharacterTaken[characterIndex] = 0;
         column = g_MenuMemory.characterColumns[g_ChoosingPlayerIndex];
         row = g_MenuMemory.characterRows[g_ChoosingPlayerIndex];
         slot = g_CharacterGrid[row][column];
@@ -6163,7 +6163,7 @@ void DrawMenuCharacters(Gfx **displayListHead) {
     s32 row;
     s32 column;
     s32 layout;
-    CharacterId character;
+    CharacterId characterIndex;
     s32 paletteIndex;
     s32 raise;
     u16 slot;
@@ -6244,11 +6244,11 @@ void DrawMenuCharacters(Gfx **displayListHead) {
         }
 
         if (IsRivalSlot(characterCount, rival, slot)) {
-            character = rival;
+            characterIndex = rival;
             paletteIndex = 1;
         }
         else {
-            character = g_Players[slot].characterIndex;
+            characterIndex = g_Players[slot].characterIndex;
             paletteIndex = g_Players[slot].paletteIndex;
         }
 
@@ -6257,7 +6257,7 @@ void DrawMenuCharacters(Gfx **displayListHead) {
                 FreeCharacterSlot(slot);
             }
             else {
-                LoadCharacter(slot, character + CHARACTER_COUNT, paletteIndex);
+                LoadCharacter(slot, characterIndex + CHARACTER_COUNT, paletteIndex);
                 g_IsMenuCharacterLoaded[slot] = TRUE;
                 SetCharacterAnimation(slot, MENU_ANIMATION_STANDING);
                 SetAnimationSpeed(slot, 1.0f);
@@ -6286,7 +6286,7 @@ void DrawMenuCharacters(Gfx **displayListHead) {
         rotation[AXIS_Y] = DegreesToRadians(f_CharacterYaw);
         rotation[AXIS_Z] = 0.0f;
         translation[AXIS_X] = f_MenuCharacterPositions[layout][slot][0];
-        raise = (character == CHARACTER_BABY_MARIO) ? BABY_MARIO_RAISE : 0;
+        raise = (characterIndex == CHARACTER_BABY_MARIO) ? BABY_MARIO_RAISE : 0;
         translation[AXIS_Y] = f_MenuCharacterPositions[layout][slot][1] + raise;
         translation[AXIS_Z] = f_MenuCharacterPositions[layout][slot][2];
         scale[AXIS_X] = f_MenuCharacterScales[slot];
@@ -6358,7 +6358,7 @@ void DrawAnimationViewer(Gfx **displayListHead) {
     s32 index;
     s32 stickX;
     s32 stickY;
-    s32 character;
+    s32 characterIndex;
 
     gfx = *displayListHead;
 
@@ -6556,19 +6556,19 @@ void DrawAnimationViewer(Gfx **displayListHead) {
             FreeCharacterSlot(f_ViewerCharacterSlot);
         }
         else {
-            character = g_MenuMemory.viewerCharacter;
+            characterIndex = g_MenuMemory.viewerCharacter;
             f_IsViewerModelKindChanged = FALSE;
             f_IsViewerAnimationChanged = FALSE;
-            f_ViewerLoadedCharacter = character;
+            f_ViewerLoadedCharacter = characterIndex;
             if (f_ViewerAnimation >= VIEWER_FIRST_SECOND_MODEL_ANIMATION) {
                 LoadCharacter(
                     f_ViewerCharacterSlot,
-                    character + VIEWER_SECOND_MODEL_OFFSET,
+                    characterIndex + VIEWER_SECOND_MODEL_OFFSET,
                     f_ViewerModelKind
                 );
             }
             else {
-                LoadCharacter(f_ViewerCharacterSlot, character, f_ViewerModelKind);
+                LoadCharacter(f_ViewerCharacterSlot, characterIndex, f_ViewerModelKind);
             }
 
             SetCharacterAnimation(f_ViewerCharacterSlot, f_ViewerAnimation);

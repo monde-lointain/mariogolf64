@@ -58,7 +58,7 @@ void DrawCharacterFace(
     void *palette,
     s32 left,
     s32 top,
-    s16 character,
+    s16 characterIndex,
     u8 drawMode
 );
 void DrawPlaceLabel(Gfx **displayListHead, s32 left, s32 top, s32 place);
@@ -244,7 +244,7 @@ void DrawBestTimes(Gfx **displayListHead) {
     s32 halfSize;
     s32 step;
     s32 time;
-    s16 character;
+    s16 characterIndex;
     s16 dashIndex;
     s16 holderCourse;
 
@@ -435,14 +435,14 @@ void DrawBestTimes(Gfx **displayListHead) {
             gDPPipeSync(gfx++);
             gDPSetTextureFilter(gfx++, G_TF_BILERP);
             holderCourse = memory->bestTimesCourse;
-            character = save->records.bestTimeCharacters[holderCourse][otherIndex];
+            characterIndex = save->records.bestTimeCharacters[holderCourse][otherIndex];
             DrawCharacterFace(
                 &gfx,
-                g_CharacterFaceImages[character],
+                g_CharacterFaceImages[characterIndex],
                 g_MenuCharacterPalettes[(memory->bestTimesCourse * BEST_TIME_COUNT) + otherIndex],
                 BEST_TIME_FACE_X,
                 BEST_TIME_FIRST_FACE_Y + (otherIndex * BEST_TIME_SPACING),
-                character,
+                characterIndex,
                 FACE_PLAIN
             );
         }
@@ -466,17 +466,17 @@ void DrawBestTimeFace(
     Gfx **displayListHead,
     s32 left,
     s32 top,
-    CharacterId character,
+    CharacterId characterIndex,
     u8 drawMode
 ) {
     Gfx *gfx = *displayListHead;
 
-    if (character < 0) {
-        character = 0;
+    if (characterIndex < 0) {
+        characterIndex = 0;
     }
 
-    if (character >= CHARACTER_COUNT) {
-        character = CHARACTER_COUNT - 1;
+    if (characterIndex >= CHARACTER_COUNT) {
+        characterIndex = CHARACTER_COUNT - 1;
     }
 
     gDPPipeSync(gfx++);
@@ -507,7 +507,7 @@ void DrawBestTimeFace(
         gfx++,
         TextureAddress(
             LargeImageTexels(f_CharacterFaceStrip) +
-            (f_BestTimesCharacterChoices[character] * FACE_WIDTH * FACE_HEIGHT)
+            (f_BestTimesCharacterChoices[characterIndex] * FACE_WIDTH * FACE_HEIGHT)
         ),
         G_IM_FMT_CI,
         G_IM_SIZ_8b,
@@ -538,7 +538,11 @@ void DrawBestTimeFace(
     if (drawMode == FACE_WITH_NAME) {
         SetUpTextDrawing(&gfx);
         SetTextColor(&gfx, 255, 255, 255);
-        sprintf(g_PrintBuffer, "%s", g_MenuCharacterNames[f_BestTimesCharacterChoices[character]]);
+        sprintf(
+            g_PrintBuffer,
+            "%s",
+            g_MenuCharacterNames[f_BestTimesCharacterChoices[characterIndex]]
+        );
         DrawLargeText(&gfx, left + FACE_NAME_OFFSET_X, top + FACE_NAME_OFFSET_Y, g_PrintBuffer);
         gDPPipeSync(gfx++);
     }
@@ -758,7 +762,7 @@ void LoadBestTimesFaces(void) {
     CharacterId characterIndex;
     CourseIndex courseIndex;
     s32 rank;
-    CharacterId character;
+    CharacterId holderCharacterIndex;
     s32 paletteIndex;
 
     for (characterIndex = 0; characterIndex != CHARACTER_COUNT; characterIndex++) {
@@ -768,24 +772,24 @@ void LoadBestTimesFaces(void) {
 
     for (courseIndex = 0; courseIndex != COURSE_COUNT; courseIndex++) {
         for (rank = 0; rank != BEST_TIME_COUNT; rank++) {
-            character = save->records.bestTimeCharacters[courseIndex][rank];
-            if (character != -1) {
-                if (character < 0) {
-                    character = 0;
+            holderCharacterIndex = save->records.bestTimeCharacters[courseIndex][rank];
+            if (holderCharacterIndex != -1) {
+                if (holderCharacterIndex < 0) {
+                    holderCharacterIndex = 0;
                 }
 
-                if (character >= CHARACTER_COUNT) {
-                    character = CHARACTER_COUNT - 1;
+                if (holderCharacterIndex >= CHARACTER_COUNT) {
+                    holderCharacterIndex = CHARACTER_COUNT - 1;
                 }
 
                 paletteIndex = save->records.bestTimePalettes[courseIndex][rank];
             }
             else {
-                character = 0;
+                holderCharacterIndex = 0;
                 paletteIndex = 0;
             }
 
-            OpenAssetFile(g_CharacterPaletteFiles[character][paletteIndex], &file);
+            OpenAssetFile(g_CharacterPaletteFiles[holderCharacterIndex][paletteIndex], &file);
             ReadAssetFile(
                 g_MenuCharacterPalettes[(courseIndex * BEST_TIME_COUNT) + rank],
                 GetAssetFileSize(&file),

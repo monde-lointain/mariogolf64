@@ -1799,7 +1799,7 @@ void InsertBestTime(
     s32 courseIndex,
     s32 time,
     s32 scoreToPar,
-    CharacterId character,
+    CharacterId characterIndex,
     s32 paletteIndex
 ) {
     SaveData *save;
@@ -1902,14 +1902,14 @@ void InsertBestTime(
                     }
 
                     save->records.bestTimes[courseIndex][index] = time;
-                    save->records.bestTimeCharacters[courseIndex][index] = character;
+                    save->records.bestTimeCharacters[courseIndex][index] = characterIndex;
                     save->records.bestTimeScoresToPar[courseIndex][index] = scoreToPar;
                     save->records.bestTimePalettes[courseIndex][index] = paletteIndex;
                 }
             }
             else {
                 save->records.bestTimes[courseIndex][0] = time;
-                save->records.bestTimeCharacters[courseIndex][0] = character;
+                save->records.bestTimeCharacters[courseIndex][0] = characterIndex;
                 save->records.bestTimeScoresToPar[courseIndex][0] = scoreToPar;
                 save->records.bestTimePalettes[courseIndex][0] = paletteIndex;
             }
@@ -2206,21 +2206,21 @@ void PlaceImportedCharacters(void) {
     }
 }
 
-s32 FindCharacterOnGrid(CharacterId character) {
+s32 FindCharacterOnGrid(CharacterId characterIndex) {
     s32 slot;
     s32 row;
     s32 column;
 
-    if (character < 0) {
+    if (characterIndex < 0) {
         return CHARACTER_OFF_GRID;
     }
 
-    if (character >= ARRAY_COUNT(f_CharacterSlots)) {
+    if (characterIndex >= ARRAY_COUNT(f_CharacterSlots)) {
         return CHARACTER_OFF_GRID;
     }
 
     BuildCharacterGrid(1, TRUE);
-    slot = f_CharacterSlots[character];
+    slot = f_CharacterSlots[characterIndex];
     row = f_SlotCells[slot].row;
     column = f_SlotCells[slot].column;
     return g_CharacterGrid[row][column] < 0 ? CHARACTER_OFF_GRID : CHARACTER_ON_GRID;

@@ -4477,7 +4477,7 @@ void UpdateTurns(void) {
                 break;
             }
             case PLAYER_STATE_STARTING_REACTION: {
-                CharacterId character;
+                CharacterId characterIndex;
                 s32 paletteIndex;
                 s32 reaction;
 
@@ -4501,9 +4501,9 @@ void UpdateTurns(void) {
                     LoadCharacter(0, f_GutsTestCharacter + CHARACTER_COUNT, paletteIndex);
                 }
                 else {
-                    character = g_Players[playerIndex].characterIndex;
+                    characterIndex = g_Players[playerIndex].characterIndex;
                     paletteIndex = g_Players[playerIndex].paletteIndex;
-                    LoadCharacter(0, character + CHARACTER_COUNT, paletteIndex);
+                    LoadCharacter(0, characterIndex + CHARACTER_COUNT, paletteIndex);
                 }
 
                 SetCharacterLighting(0, 1);

@@ -434,21 +434,21 @@ void SetSoundTempo(SoundChannel channel, s32 tempo) {
 }
 
 void QueueCharacterSound(
-    CharacterId character,
+    CharacterId characterIndex,
     s32 slot,
     s32 kind,
     SoundVolume volume,
     SoundPan pan
 ) {
-    f_QueuedCharacterSounds[slot].delay = f_CharacterSoundDelays[kind][character];
-    f_QueuedCharacterSounds[slot].character = character;
+    f_QueuedCharacterSounds[slot].delay = f_CharacterSoundDelays[kind][characterIndex];
+    f_QueuedCharacterSounds[slot].character = characterIndex;
     f_QueuedCharacterSounds[slot].kind = kind;
     f_QueuedCharacterSounds[slot].volume = volume;
     f_QueuedCharacterSounds[slot].pan = pan;
 }
 
-static void PreviewCharacterSound(CharacterId character, s32 kind) {
-    f_PreviewSoundDelays[character] = f_CharacterSoundDelays[kind][character];
+static void PreviewCharacterSound(CharacterId characterIndex, s32 kind) {
+    f_PreviewSoundDelays[characterIndex] = f_CharacterSoundDelays[kind][characterIndex];
 }
 
 static void UpdateCharacterSounds(void) {

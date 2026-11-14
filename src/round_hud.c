@@ -807,13 +807,13 @@ void InitRoundHud(void) {
     g_InsetView.step = 0;
 }
 
-void LoadPlayerFace(s32 playerIndex, CharacterId character, s32 paletteIndex) {
+void LoadPlayerFace(s32 playerIndex, CharacterId characterIndex, s32 paletteIndex) {
     EncodedAsset asset;
     AssetFile file;
 
-    OpenEncodedAsset(g_CharacterImageAssets[character] + CHARACTER_FACE_IMAGE_OFFSET, &asset);
+    OpenEncodedAsset(g_CharacterImageAssets[characterIndex] + CHARACTER_FACE_IMAGE_OFFSET, &asset);
     ReadEncodedAsset(g_PlayerFaceImages[playerIndex], &asset);
-    OpenAssetFile(g_CharacterPaletteAssets[character] + paletteIndex, &file);
+    OpenAssetFile(g_CharacterPaletteAssets[characterIndex] + paletteIndex, &file);
     ReadAssetFile(g_PlayerFacePalettes[playerIndex], GetAssetFileSize(&file), &file);
 }
 

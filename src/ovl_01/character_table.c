@@ -103,7 +103,7 @@ void DrawCharacterFace(
     void *palette,
     s32 left,
     s32 top,
-    s16 character,
+    s16 characterIndex,
     u8 drawMode
 );
 #else
@@ -113,7 +113,7 @@ void DrawCharacterFace(
     void *palette,
     s32 left,
     s32 top,
-    CharacterId character,
+    CharacterId characterIndex,
     u8 drawMode
 );
 #endif

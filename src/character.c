@@ -922,7 +922,7 @@ static const char f_NotDisposedFormat[] = "Polychara slot %d not disposed yet!!!
 static const char f_UnusedReadRomFormat[] = "nuPiReadRom(%x, %x, %x) [bufsiz %x]\n";
 static const char f_UnusedCompleteText[] = "complete\n";
 
-void LoadCharacter(u32 slotIndex, s32 character, s32 kind) {
+void LoadCharacter(u32 slotIndex, s32 characterIndex, s32 kind) {
     Boolean isPatched = FALSE;
     CharacterSlot *slot = &g_CharacterSlots[slotIndex];
     JointAnimation *joint;
@@ -933,11 +933,11 @@ void LoadCharacter(u32 slotIndex, s32 character, s32 kind) {
     if (kind < CHARACTER_MODEL_KIND_COUNT) {
         g_CharacterModelIndex =
             ((kind & (CHARACTER_MODEL_KIND_COUNT - 1)) * CHARACTER_MODELS_PER_KIND) +
-            (character % CHARACTER_MODELS_PER_KIND);
+            (characterIndex % CHARACTER_MODELS_PER_KIND);
         slot->model = &g_CharacterModels[0][g_CharacterModelIndex];
     }
     else {
-        g_CharacterModelIndex = (u32)character % OTHER_CHARACTER_MODEL_COUNT;
+        g_CharacterModelIndex = (u32)characterIndex % OTHER_CHARACTER_MODEL_COUNT;
         slot->model = &g_OtherCharacterModels[g_CharacterModelIndex];
     }
 

@@ -111,7 +111,7 @@ void DrawCharacterFace(
     void *palette,
     s32 left,
     s32 top,
-    s16 character,
+    s16 characterIndex,
     u8 drawMode
 );
 #else
@@ -121,7 +121,7 @@ void DrawCharacterFace(
     void *palette,
     s32 left,
     s32 top,
-    s16 character,
+    s16 characterIndex,
     s32 drawMode
 );
 #endif
@@ -581,7 +581,7 @@ void DrawRingShotRecords(Gfx **displayListHead) {
     s16 itemIndex;
     s16 listIndex;
     s16 drop;
-    s32 character;
+    s32 characterIndex;
     s8 replayCharacter;
     s32 red;
     s32 green;
@@ -752,19 +752,19 @@ void DrawRingShotRecords(Gfx **displayListHead) {
             listIndex = memory->ringShotFirstCharacters[row];
             for (itemIndex = 0; itemIndex != RING_SHOT_SHOWN_CHARACTER_COUNT; itemIndex++) {
                 IN_OWN_BLOCK({
-                    character = f_RingShotCharacterOrder[listIndex];
+                    characterIndex = f_RingShotCharacterOrder[listIndex];
                     index = FACE_PLAIN;
-                    if (save->ringShotClearCounts[row][column][character] == 0) {
+                    if (save->ringShotClearCounts[row][column][characterIndex] == 0) {
                         index = FACE_DARKENED;
                     }
 
                     DrawCharacterFace(
                         &gfx,
-                        g_CharacterFaceImages[character],
-                        g_MenuCharacterPalettes[character],
+                        g_CharacterFaceImages[characterIndex],
+                        g_MenuCharacterPalettes[characterIndex],
                         RING_SHOT_FACE_X + (column * RING_SHOT_COLUMN_SPACING),
                         RING_SHOT_FACE_Y + (itemIndex * RING_SHOT_FACE_SPACING),
-                        character,
+                        characterIndex,
                         index
                     );
                     if (index == FACE_DARKENED) {
@@ -971,7 +971,7 @@ void LoadRingShotRecordFaces(void) {
     AssetFile file;
     SaveData *save = GetSaveData();
     s32 index;
-    CharacterId character;
+    CharacterId characterIndex;
     s32 paletteIndex;
 
     for (index = 0; index != CHARACTER_COUNT; index++) {
@@ -983,14 +983,14 @@ void LoadRingShotRecordFaces(void) {
 
     for (index = 0; index != SAVE_MENU_SLOT_COUNT; index++) {
         if (f_RecordedReplaySlots[index] != -1) {
-            character = save->ringShotRecords[f_RecordedReplaySlots[index]].characterIndex;
+            characterIndex = save->ringShotRecords[f_RecordedReplaySlots[index]].characterIndex;
             paletteIndex = save->ringShotRecords[f_RecordedReplaySlots[index]].paletteIndex;
-            if (character < 0) {
-                character = 0;
+            if (characterIndex < 0) {
+                characterIndex = 0;
             }
 
-            if (character >= CHARACTER_COUNT) {
-                character = CHARACTER_COUNT - 1;
+            if (characterIndex >= CHARACTER_COUNT) {
+                characterIndex = CHARACTER_COUNT - 1;
             }
 
             if (paletteIndex < 0) {
@@ -1003,10 +1003,10 @@ void LoadRingShotRecordFaces(void) {
         }
         else {
             paletteIndex = 0;
-            character = 0;
+            characterIndex = 0;
         }
 
-        OpenAssetFile(g_CharacterPaletteFiles[character][paletteIndex], &file);
+        OpenAssetFile(g_CharacterPaletteFiles[characterIndex][paletteIndex], &file);
         ReadAssetFile(g_ReplayFacePalettes[index], GetAssetFileSize(&file), &file);
     }
 }
@@ -1932,7 +1932,7 @@ s32 ContinueSavedGame(void) {
     MenuMemory *memory = GetMenuMemory();
     Player *savedPlayer;
     s32 playerIndex;
-    CharacterId character;
+    CharacterId characterIndex;
     u16 controller;
 
     if (f_SavedGameModes[memory->savedGameIndex] == NO_SAVE_MENU_MODE) {
@@ -1949,10 +1949,10 @@ s32 ContinueSavedGame(void) {
         g_PlayerControllerIndices[playerIndex] = controller;
         g_Players[playerIndex].controllerIndex = controller;
         sprintf(g_Players[playerIndex].name, f_SaveMenuNameFormat, savedPlayer->name);
-        character = savedPlayer->characterIndex;
-        g_ChosenCharacters[playerIndex] = character;
-        g_Players[playerIndex].characterIndex = character;
-        LoadPlayerFace(playerIndex, character, g_Players[playerIndex].paletteIndex);
+        characterIndex = savedPlayer->characterIndex;
+        g_ChosenCharacters[playerIndex] = characterIndex;
+        g_Players[playerIndex].characterIndex = characterIndex;
+        LoadPlayerFace(playerIndex, characterIndex, g_Players[playerIndex].paletteIndex);
         savedPlayer++;
     }
 

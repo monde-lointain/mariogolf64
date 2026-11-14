@@ -16,7 +16,7 @@ enum ReactionAnimation {
 };
 
 s32 AddReactionLight(Gfx **displayListHead, Lights2 *lights);
-void StartReaction(u32 slotIndex, CharacterId character, s32 animation);
+void StartReaction(u32 slotIndex, CharacterId characterIndex, s32 animation);
 void TurnOffReactionLight(void);
 NO_RESULT UpdateReaction(u32 slotIndex);
 void ClearReactionSpot(void);

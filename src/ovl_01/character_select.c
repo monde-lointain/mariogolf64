@@ -1662,13 +1662,13 @@ s32 GetUnusedPalette(s32 choiceIndex) {
     s32 freePalette = 0;
     s32 playerIndex = 0;
     s32 sameCount = 0;
-    CharacterId character = f_ChoiceCharacters[choiceIndex];
+    CharacterId characterIndex = f_ChoiceCharacters[choiceIndex];
     s32 unused[4] UNUSED;
     s32 samePlayers[PLAYER_COUNT_MAX];
     s32 sameIndex;
 
     for (; playerIndex != g_ChoosingPlayerIndex; playerIndex++) {
-        if (g_Players[playerIndex].characterIndex == character) {
+        if (g_Players[playerIndex].characterIndex == characterIndex) {
             samePlayers[sameCount++] = playerIndex;
         }
     }

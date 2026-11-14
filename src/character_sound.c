@@ -359,26 +359,26 @@ static s16 f_CharacterSounds[CHARACTER_COUNT][CHARACTER_SOUND_VALUE_COUNT] = {
 static s32 f_UnusedWordsAfterCharacterSounds[2] UNUSED = {0};
 
 void PlayCharacterSound(
-    CharacterId character,
+    CharacterId characterIndex,
     s32 slot,
     s32 soundIndex,
     SoundVolume volume,
     SoundPan pan
 ) {
-    SoundReverb reverb = (character != DRY_CHARACTER) ? CHARACTER_SOUND_REVERB : 0;
+    SoundReverb reverb = (characterIndex != DRY_CHARACTER) ? CHARACTER_SOUND_REVERB : 0;
 
     if (volume == CHARACTER_SOUND_VOLUME) {
         PlaySoundWithEffects(
-            f_CharacterSounds[character][soundIndex],
+            f_CharacterSounds[characterIndex][soundIndex],
             slot + FIRST_CHARACTER_SOUND_CHANNEL,
-            f_CharacterSounds[character][soundIndex + 1],
+            f_CharacterSounds[characterIndex][soundIndex + 1],
             reverb,
             pan
         );
     }
     else {
         PlaySoundWithEffects(
-            f_CharacterSounds[character][soundIndex],
+            f_CharacterSounds[characterIndex][soundIndex],
             slot + FIRST_CHARACTER_SOUND_CHANNEL,
             volume,
             reverb,
