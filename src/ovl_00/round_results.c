@@ -3030,14 +3030,13 @@ s32 UpdateCoursePointsResults(ControllerState *controller) {
                         f_ResultsStep = POINTS_STEP_WAITING;
                     }
 
-                    do {
+                    IN_OWN_BLOCK({
                         if (g_GameState.gameMode == GAME_MODE_SKINS_MATCH) {
                             otherIndex = 1;
                         }
 
                         otherIndex = 0;
-                    }
-                    while (FALSE);
+                    });
                     for (playerIndex = 0; playerIndex != g_GameState.playerCount; playerIndex++) {
                         StartPortraitAnimation(PORTRAIT_ANIMATION_PLEASED, playerIndex);
                         for (otherIndex = 0; otherIndex != g_GameState.playerCount; otherIndex++) {

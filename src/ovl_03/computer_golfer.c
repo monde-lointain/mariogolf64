@@ -2199,7 +2199,7 @@ EVALUATE:
                 GetSurfaceInfoAt(f_PlanTarget[AXIS_X], f_PlanTarget[AXIS_Z])->kind
             );
             if (GetLandingRating(surfaceInfo->kind) < targetRating) {
-                do {
+                IN_OWN_BLOCK({
                     f_TrialEvaluation += POOR_LANDING_EVALUATION;
                     if (IsOutOfBoundsKind(surfaceInfo->kind)) {
                         f_TrialEvaluation = LOST_BALL_EVALUATION;
@@ -2211,8 +2211,7 @@ EVALUATE:
                         f_TrialEvaluation = LOST_BALL_EVALUATION;
                         f_IsTrialLost = TRUE;
                     }
-                }
-                while (FALSE);
+                });
             }
 
             heightMiss = f_PlanTarget[AXIS_Y] - f_TrialSimulation.position[AXIS_Y];

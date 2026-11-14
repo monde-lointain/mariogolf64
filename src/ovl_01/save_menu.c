@@ -670,37 +670,34 @@ void DrawRingShotRecords(Gfx **displayListHead) {
         drop = (row == memory->ringShotRow) * RING_SHOT_CHOSEN_ICON_DROP;
         if ((row < openCourseCount) || (row == RING_SHOT_REPLAY_ROW)) {
             if (f_RingShotIconPositions[openCourseCount - 1][row] != 0) {
-                do {
-                    for (index = 0; index != RING_SHOT_ICON_DRAW_COUNT; index++) {
-                        if (row == 0) {
-                            DrawRingShotRowIcon(
-                                &gfx,
-                                0,
-                                RING_SHOT_FIRST_ICON_X,
-                                RING_SHOT_ICON_TOP + drop
-                            );
-                        }
-                        else if (row == RING_SHOT_REPLAY_ROW) {
-                            DrawRingShotRowIcon(
-                                &gfx,
-                                RING_SHOT_REPLAY_ROW,
-                                RING_SHOT_REPLAY_ICON_X,
-                                RING_SHOT_ICON_TOP + drop
-                            );
-                        }
-                        else {
-                            DrawRingShotRowIcon(
-                                &gfx,
-                                row,
-                                (row * RING_SHOT_ICON_SPACING) + RING_SHOT_ICON_OFFSET_X,
-                                RING_SHOT_ICON_TOP + drop
-                            );
-                        }
-
-                        gDPPipeSync(gfx++);
+                IN_OWN_BLOCK(for (index = 0; index != RING_SHOT_ICON_DRAW_COUNT; index++) {
+                    if (row == 0) {
+                        DrawRingShotRowIcon(
+                            &gfx,
+                            0,
+                            RING_SHOT_FIRST_ICON_X,
+                            RING_SHOT_ICON_TOP + drop
+                        );
                     }
-                }
-                while (FALSE);
+                    else if (row == RING_SHOT_REPLAY_ROW) {
+                        DrawRingShotRowIcon(
+                            &gfx,
+                            RING_SHOT_REPLAY_ROW,
+                            RING_SHOT_REPLAY_ICON_X,
+                            RING_SHOT_ICON_TOP + drop
+                        );
+                    }
+                    else {
+                        DrawRingShotRowIcon(
+                            &gfx,
+                            row,
+                            (row * RING_SHOT_ICON_SPACING) + RING_SHOT_ICON_OFFSET_X,
+                            RING_SHOT_ICON_TOP + drop
+                        );
+                    }
+
+                    gDPPipeSync(gfx++);
+                });
             }
         }
 
@@ -754,7 +751,7 @@ void DrawRingShotRecords(Gfx **displayListHead) {
             row = memory->ringShotRow;
             listIndex = memory->ringShotFirstCharacters[row];
             for (itemIndex = 0; itemIndex != RING_SHOT_SHOWN_CHARACTER_COUNT; itemIndex++) {
-                do {
+                IN_OWN_BLOCK({
                     character = f_RingShotCharacterOrder[listIndex];
                     index = FACE_PLAIN;
                     if (save->ringShotClearCounts[row][column][character] == 0) {
@@ -780,8 +777,7 @@ void DrawRingShotRecords(Gfx **displayListHead) {
                     }
 
                     listIndex++;
-                }
-                while (FALSE);
+                });
             }
         }
 

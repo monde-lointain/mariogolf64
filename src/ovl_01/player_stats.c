@@ -1432,16 +1432,12 @@ void DrawHandicaps(Gfx **displayListHead, s32 slide, u8 reverseVerticalSlide, u8
             gDPPipeSync(gfx++);
         }
 
-        do {
-            do {
-                labelIndex = columnIndex;
-                if (g_PlayerControllerIndices[columnIndex] == NO_CONTROLLER_INDEX) {
-                    labelIndex = columnIndex + PLAYER_LABEL_COMPUTER_FIRST;
-                }
+        IN_OWN_BLOCK(IN_OWN_BLOCK({
+            labelIndex = columnIndex;
+            if (g_PlayerControllerIndices[columnIndex] == NO_CONTROLLER_INDEX) {
+                labelIndex = columnIndex + PLAYER_LABEL_COMPUTER_FIRST;
             }
-            while (FALSE);
-        }
-        while (FALSE);
+        }));
 
         gDPLoadMultiBlock_4b(
             gfx++,
