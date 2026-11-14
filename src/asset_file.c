@@ -150,7 +150,7 @@ typedef struct LargeChunkReader {
 void DecodeByteRuns(u8 *buffer, EncodedAsset *asset) {
     ChunkReader reader;
     u8 *chunk;
-    s32 count;
+    s32 runLength;
     s32 index;
 
     reader.remaining = asset->encodedSize - sizeof(u32);
@@ -158,22 +158,22 @@ void DecodeByteRuns(u8 *buffer, EncodedAsset *asset) {
     ReadNextChunk(chunk, reader.remaining, asset);
     reader.position = 0;
     while (TRUE) {
-        count = (s8)chunk[reader.position];
+        runLength = (s8)chunk[reader.position];
         AdvanceChunkPosition(chunk, reader.position, reader.remaining, asset);
-        if (count == 0) {
+        if (runLength == 0) {
             break;
         }
 
-        if (count > 0) {
-            for (index = 0; index != count; index++) {
+        if (runLength > 0) {
+            for (index = 0; index != runLength; index++) {
                 *buffer++ = chunk[reader.position];
             }
 
             AdvanceChunkPosition(chunk, reader.position, reader.remaining, asset);
         }
         else {
-            count = -count;
-            for (index = 0; index != count; index++) {
+            runLength = -runLength;
+            for (index = 0; index != runLength; index++) {
                 *buffer++ = chunk[reader.position];
                 AdvanceChunkPosition(chunk, reader.position, reader.remaining, asset);
             }
@@ -184,7 +184,7 @@ void DecodeByteRuns(u8 *buffer, EncodedAsset *asset) {
 void DecodeHalfwordRuns(u8 *buffer, EncodedAsset *asset) {
     LargeChunkReader reader;
     u8 *chunk;
-    s32 count;
+    s32 runLength;
     s32 index;
     s32 repeatCount;
     u8 highByte;
@@ -195,17 +195,17 @@ void DecodeHalfwordRuns(u8 *buffer, EncodedAsset *asset) {
     ReadNextChunk(chunk, reader.remaining, asset);
     reader.position = 0;
     while (TRUE) {
-        count = (s8)chunk[reader.position];
+        runLength = (s8)chunk[reader.position];
         AdvanceChunkPosition(chunk, reader.position, reader.remaining, asset);
-        if (count == 0) {
+        if (runLength == 0) {
             break;
         }
 
-        if (count > 0) {
+        if (runLength > 0) {
             highByte = chunk[reader.position];
             AdvanceChunkPosition(chunk, reader.position, reader.remaining, asset);
             lowByte = chunk[reader.position];
-            repeatCount = count;
+            repeatCount = runLength;
             AdvanceChunkPosition(chunk, reader.position, reader.remaining, asset);
             for (index = 0; index != repeatCount; index++) {
                 *buffer++ = highByte;
@@ -213,8 +213,8 @@ void DecodeHalfwordRuns(u8 *buffer, EncodedAsset *asset) {
             }
         }
         else {
-            count = -count;
-            for (index = 0; index != count; index++) {
+            runLength = -runLength;
+            for (index = 0; index != runLength; index++) {
                 highByte = chunk[reader.position];
                 AdvanceChunkPosition(chunk, reader.position, reader.remaining, asset);
                 lowByte = chunk[reader.position];
