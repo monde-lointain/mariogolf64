@@ -3,7 +3,7 @@
 #include <ultra64.h>
 
 #include "audio/sound.h"
-#include "character.h"
+#include "characters/character.h"
 #include "controllers/controller.h"
 #include "debug_text.h"
 #include "game_flags.h"

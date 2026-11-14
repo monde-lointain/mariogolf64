@@ -4,8 +4,8 @@
 #include <ultra64.h>
 
 #include "audio/sound.h"
-#include "character.h"
-#include "character_model.h"
+#include "characters/character.h"
+#include "characters/character_model.h"
 #include "club.h"
 #include "controllers/controller.h"
 #include "controllers/transfer_pak.h"

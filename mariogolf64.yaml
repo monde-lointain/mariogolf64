@@ -99,8 +99,8 @@ segments:
       - [0x2BFF0, c, audio/sound]
       - [0x2D290, c, course]
       - [0x2D5C0, c, scoring]
-      - [0x2E3E0, c, character_model]
-      - [0x2FD00, c, character]
+      - [0x2E3E0, c, characters/character_model]
+      - [0x2FD00, c, characters/character]
       - [0x34FA0, c, math/math_library]
       - [0x35980, c, menu]
       - [0x396C0, c, system/crash_screen]
@@ -108,7 +108,7 @@ segments:
       - [0x3A580, c, play]
       - [0x40180, c, camera/view_projection]
       - [0x414A0, c, hole_triangles]
-      - [0x42E60, c, character_sound]
+      - [0x42E60, c, characters/character_sound]
       - [0x42F00, c, math/matrix_conversion]
       - [0x43140, c, tournament]
       - [0x43810, c, hole_loader]
@@ -126,7 +126,7 @@ segments:
       - [0x53D10, c, particle_effects]
       - [0x5B620, c, round_hud]
       - [0x68500, c, screen/sky_and_hud_animations]
-      - [0x70E10, c, reaction]
+      - [0x70E10, c, characters/reaction]
       - [0x740A0, c, password]
       - [0x74890, c, sram]
       - [0x748B0, c, ../lib/libnusys/src/nuboot]
@@ -373,13 +373,13 @@ segments:
       - [0x9C250, .data, screen/animated_box]
       - [0x9C260, .data, audio/sound]
       - [0x9C770, .data, course]
-      - [0x9CF70, .data, character]
+      - [0x9CF70, .data, characters/character]
       - [0x9D3F0, .data, menu]
       - [0x9E010, .data, system/crash_screen]
       - [0x9E3F0, .data, audio/music]
       - [0x9E460, .data, play]
       - [0x9E500, .data, hole_triangles]
-      - [0x9E530, .data, character_sound]
+      - [0x9E530, .data, characters/character_sound]
       - [0x9EA00, .data, tournament]
       - [0x9F3A0, .data, hole_loader]
       - [0x9F3B0, .data, math/math_util]
@@ -394,7 +394,7 @@ segments:
       - [0xA06B0, .data, particle_effects]
       - [0xA0870, .data, round_hud]
       - [0xA12E0, .data, screen/sky_and_hud_animations]
-      - [0xA27A0, .data, reaction]
+      - [0xA27A0, .data, characters/reaction]
       - [0xA27F0, .data, password]
       - [0xA2AB0, .data, ../lib/libmus/src/player]
       - [0xA2B80, .data, ../lib/libmus/src/player_fx]
@@ -461,8 +461,8 @@ segments:
       - [0xA7F70, .rodata, system/asset]
       - [0xA7FB8, .rodata, audio/sound]
       - [0xA8030, .rodata, course]
-      - [0xA8050, .rodata, character_model]
-      - [0xAB8A0, .rodata, character]
+      - [0xA8050, .rodata, characters/character_model]
+      - [0xAB8A0, .rodata, characters/character]
       - [0xABC50, .rodata, math/math_library]
       - [0xABCF0, .rodata, menu]
       - [0xABEC0, .rodata, system/crash_screen]
@@ -484,7 +484,7 @@ segments:
       - [0xACD10, .rodata, particle_effects]
       - [0xACEA0, .rodata, round_hud]
       - [0xAD0E0, .rodata, screen/sky_and_hud_animations]
-      - [0xAD280, .rodata, reaction]
+      - [0xAD280, .rodata, characters/reaction]
       - [0xAD340, .rodata, password]
       - [0xAD3B0, .rodata, ../lib/libmus/src/player]
       - [0xAD490, .rodata, ../lib/libmus/src/player_fx]
@@ -526,8 +526,8 @@ segments:
       - { type: .bss, vram: 0x800DC740, name: performance_meter }
       - { type: .bss, vram: 0x800DE8A0, name: system/asset }
       - { type: .bss, vram: 0x800DE900, name: audio/sound }
-      - { type: .bss, vram: 0x800DE910, name: character_model }
-      - { type: .bss, vram: 0x800DE970, name: character }
+      - { type: .bss, vram: 0x800DE910, name: characters/character_model }
+      - { type: .bss, vram: 0x800DE970, name: characters/character }
       - { type: .bss, vram: 0x800DF0B0, name: system/crash_screen }
       - { type: .bss, vram: 0x800E1290, name: audio/music }
       - { type: .bss, vram: 0x800E12B0, name: play }
@@ -543,7 +543,7 @@ segments:
       - { type: .bss, vram: 0x800E1D60, name: particle_effects }
       - { type: .bss, vram: 0x800E1DD0, name: round_hud }
       - { type: .bss, vram: 0x800E3980, name: screen/sky_and_hud_animations }
-      - { type: .bss, vram: 0x800E4C50, name: reaction }
+      - { type: .bss, vram: 0x800E4C50, name: characters/reaction }
       - { type: .bss, vram: 0x800E4CD0, name: ../lib/libnusys/src/nuboot }
       - { type: .bss, vram: 0x800E7030, name: ../lib/libmus/src/player }
       - { type: .bss, vram: 0x800E70A0, name: ../lib/libmus/src/aud_dma }

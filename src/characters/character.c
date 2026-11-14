@@ -1,4 +1,4 @@
-#include "character.h"
+#include "characters/character.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -7,8 +7,9 @@
 #include "camera/camera.h"
 #include "camera/shot_camera.h"
 #include "camera/view_projection.h"
-#include "character.h"
-#include "character_model.h"
+#include "characters/character.h"
+#include "characters/character_model.h"
+#include "characters/reaction.h"
 #include "club.h"
 #include "course_space.h"
 #include "current_shot.h"
@@ -22,7 +23,6 @@
 #include "math/math_util.h"
 #include "play.h"
 #include "player.h"
-#include "reaction.h"
 #include "screen/display_list.h"
 #include "screen/screen.h"
 #include "shot_effects.h"

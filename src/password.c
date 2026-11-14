@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <ultra64.h>
 
-#include "character.h"
+#include "characters/character.h"
 #include "system/c_language.h"
 #include "system/compiler.h"
 

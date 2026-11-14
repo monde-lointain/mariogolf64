@@ -6,7 +6,7 @@
 #include "audio/sound.h"
 #include "billboard.h"
 #include "camera/camera.h"
-#include "character_model.h"
+#include "characters/character_model.h"
 #include "club.h"
 #include "collision.h"
 #include "controllers/controller.h"

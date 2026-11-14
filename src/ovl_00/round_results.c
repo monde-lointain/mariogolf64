@@ -5,7 +5,7 @@
 #include "audio/sound.h"
 #include "awards.h"
 #include "bets.h"
-#include "character.h"
+#include "characters/character.h"
 #include "controllers/controller.h"
 #include "controllers/transfer_pak.h"
 #include "course.h"

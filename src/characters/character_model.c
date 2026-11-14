@@ -1,4 +1,4 @@
-#include "character_model.h"
+#include "characters/character_model.h"
 
 #include <ultra64.h>
 

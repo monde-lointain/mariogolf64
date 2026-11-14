@@ -11,7 +11,7 @@
 #include "camera/camera.h"
 #include "camera/shot_camera.h"
 #include "camera/view_projection.h"
-#include "character.h"
+#include "characters/character.h"
 #include "club.h"
 #include "club_panel.h"
 #include "club_slots.h"

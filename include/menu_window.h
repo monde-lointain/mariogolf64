@@ -3,7 +3,7 @@
 
 #include <ultra64.h>
 
-#include "character.h"
+#include "characters/character.h"
 
 enum MenuWindowState {
     MENU_WINDOW_OPENING,

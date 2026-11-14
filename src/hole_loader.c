@@ -7,7 +7,7 @@
 #include "ball_simulation.h"
 #include "billboard.h"
 #include "camera/shot_camera.h"
-#include "character_model.h"
+#include "characters/character_model.h"
 #include "course.h"
 #include "current_shot.h"
 #include "game_flags.h"

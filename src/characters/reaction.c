@@ -1,4 +1,4 @@
-#include "reaction.h"
+#include "characters/reaction.h"
 
 #include <math.h>
 #include <ultra64.h>
@@ -6,8 +6,8 @@
 #include "audio/sound.h"
 #include "billboard.h"
 #include "camera/camera.h"
-#include "character.h"
-#include "character_model.h"
+#include "characters/character.h"
+#include "characters/character_model.h"
 #include "course_space.h"
 #include "current_shot.h"
 #include "debug_text.h"

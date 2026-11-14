@@ -3,7 +3,7 @@
 
 #include <ultra64.h>
 
-#include "character.h"
+#include "characters/character.h"
 #include "system/asset.h"
 
 extern PaletteColor g_MenuCharacterPalettes[CHARACTER_COUNT][LARGE_PALETTE_COLOR_COUNT];

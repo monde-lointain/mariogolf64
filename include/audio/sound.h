@@ -3,7 +3,7 @@
 
 #include <ultra64.h>
 
-#include "character.h"
+#include "characters/character.h"
 #include "system/compiler.h"
 
 #define SOUND_CHANNEL_COUNT 16

@@ -7,7 +7,7 @@
 #include "camera/camera.h"
 #include "camera/shot_camera.h"
 #include "camera/view_projection.h"
-#include "character.h"
+#include "characters/character.h"
 #include "controllers/controller.h"
 #include "controllers/transfer_pak.h"
 #include "course_space.h"

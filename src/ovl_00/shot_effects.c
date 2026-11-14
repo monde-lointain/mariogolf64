@@ -5,7 +5,7 @@
 #include "audio/sound.h"
 #include "camera/camera.h"
 #include "camera/view_projection.h"
-#include "character_model.h"
+#include "characters/character_model.h"
 #include "course_space.h"
 #include "current_shot.h"
 #include "game.h"

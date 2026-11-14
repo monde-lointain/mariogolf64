@@ -6,7 +6,7 @@
 #define OMITS_MEASURE_TEXT_FLAGS
 
 #include "audio/sound.h"
-#include "character.h"
+#include "characters/character.h"
 #include "controllers/controller.h"
 #include "course.h"
 #include "game_state.h"

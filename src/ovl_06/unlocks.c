@@ -3,7 +3,7 @@
 #include <ultra64.h>
 
 #include "audio/sound.h"
-#include "character.h"
+#include "characters/character.h"
 #include "course.h"
 #include "course_stats.h"
 #include "menu.h"

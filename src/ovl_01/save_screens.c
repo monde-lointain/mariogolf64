@@ -5,8 +5,8 @@
 
 #include "audio/sound.h"
 #include "camera/view_projection.h"
-#include "character.h"
-#include "character_model.h"
+#include "characters/character.h"
+#include "characters/character_model.h"
 #include "controllers/controller.h"
 #include "course.h"
 #include "game.h"

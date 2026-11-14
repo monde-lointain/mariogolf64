@@ -4,7 +4,7 @@
 #include <ultra64.h>
 
 #include "camera/camera.h"
-#include "character.h"
+#include "characters/character.h"
 #include "menu.h"
 #include "player.h"
 #include "system/asset.h"

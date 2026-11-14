@@ -10,7 +10,7 @@
 #include "ball_simulation.h"
 #include "camera/camera.h"
 #include "camera/camera_framing.h"
-#include "character_model.h"
+#include "characters/character_model.h"
 #include "club.h"
 #include "controllers/controller.h"
 #include "course.h"

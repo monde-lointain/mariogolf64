@@ -5,7 +5,7 @@
 #define WIDENS_FACE_CHARACTER_INDEX
 
 #include "audio/sound.h"
-#include "character.h"
+#include "characters/character.h"
 #include "main_menu.h"
 #include "menu.h"
 #include "menu_arrows.h"

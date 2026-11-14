@@ -4,7 +4,7 @@
 
 #include "audio/sound.h"
 #include "camera/camera.h"
-#include "character_model.h"
+#include "characters/character_model.h"
 #include "controllers/controller.h"
 #include "controllers/transfer_pak.h"
 #include "hole_loader.h"

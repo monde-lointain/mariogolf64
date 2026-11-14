@@ -3,7 +3,7 @@
 
 #include <ultra64.h>
 
-#include "character.h"
+#include "characters/character.h"
 #include "club.h"
 #include "course.h"
 #include "hole_setup.h"

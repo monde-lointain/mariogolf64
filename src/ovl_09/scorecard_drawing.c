@@ -3,7 +3,7 @@
 #include "audio/sound.h"
 #include "bets.h"
 #include "camera/view_projection.h"
-#include "character_model.h"
+#include "characters/character_model.h"
 #include "course.h"
 #include "fireworks.h"
 #include "game.h"

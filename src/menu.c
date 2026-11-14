@@ -7,7 +7,7 @@
 #include <ultra64.h>
 
 #include "audio/sound.h"
-#include "character.h"
+#include "characters/character.h"
 #include "club.h"
 #include "controllers/transfer_pak.h"
 #include "course.h"

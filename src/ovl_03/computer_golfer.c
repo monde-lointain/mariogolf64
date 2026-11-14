@@ -6,7 +6,7 @@
 
 #include "ball_simulation.h"
 #include "bets.h"
-#include "character.h"
+#include "characters/character.h"
 #include "club.h"
 #include "collision.h"
 #include "course.h"

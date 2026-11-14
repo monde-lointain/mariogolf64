@@ -4,7 +4,7 @@
 #include <ultra64.h>
 
 #include "audio/sound.h"
-#include "character_model.h"
+#include "characters/character_model.h"
 #include "hole_loader.h"
 #include "main_menu.h"
 #include "math/math_util.h"

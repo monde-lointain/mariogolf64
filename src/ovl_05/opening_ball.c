@@ -6,7 +6,8 @@
 
 #include "ball_physics.h"
 #include "ball_simulation.h"
-#include "character_model.h"
+#include "characters/character_model.h"
+#include "characters/reaction.h"
 #include "club.h"
 #include "collision.h"
 #include "course_space.h"
@@ -19,7 +20,6 @@
 #include "math/math_util.h"
 #include "particle_effects.h"
 #include "player.h"
-#include "reaction.h"
 #include "shot_effects.h"
 #include "surface.h"
 #include "system/asset.h"

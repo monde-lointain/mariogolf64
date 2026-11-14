@@ -3,7 +3,7 @@
 
 #include <ultra64.h>
 
-#include "character.h"
+#include "characters/character.h"
 #include "course_space.h"
 #include "math/geometry.h"
 #include "system/c_language.h"

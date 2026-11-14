@@ -4,7 +4,7 @@
 #include <ultra64.h>
 
 #include "bets.h"
-#include "character.h"
+#include "characters/character.h"
 #include "club.h"
 #include "course.h"
 #include "course_space.h"

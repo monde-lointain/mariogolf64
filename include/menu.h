@@ -3,7 +3,7 @@
 
 #include <ultra64.h>
 
-#include "character.h"
+#include "characters/character.h"
 #include "course.h"
 #include "password.h"
 #include "play_record.h"
