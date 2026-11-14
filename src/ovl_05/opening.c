@@ -814,14 +814,12 @@ void DrawOpeningCharacters(
     Gfx **displayListHead,
     s32 frameParity UNUSED
 ) {
-    s32 slotIndex = 0;
+    s32 slotIndex;
 
     g_DisplayListHead = *displayListHead;
-    do {
+    for (slotIndex = 0; slotIndex < CHARACTER_SLOT_COUNT; slotIndex++) {
         DrawCharacterAndShadow(matrices, OPENING_CAMERA, slotIndex);
-        slotIndex++;
     }
-    while (slotIndex < CHARACTER_SLOT_COUNT);
     *displayListHead = g_DisplayListHead;
 }
 

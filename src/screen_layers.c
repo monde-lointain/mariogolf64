@@ -833,8 +833,7 @@ void DrawPrompt(Gfx **displayListHead) {
     gDPSetRenderMode(gfx++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
     gDPSetCombineMode(gfx++, G_CC_BLENDPEDECALA, G_CC_BLENDPEDECALA);
 
-    half = 0;
-    do {
+    for (half = 0; half != 2; half++) {
         if (f_PromptState == PROMPT_STATE_CHOOSING) {
             halfWidth = PROMPT_CLOUD_HALF_WIDTH;
             halfHeight = cloudHeight;
@@ -874,9 +873,7 @@ void DrawPrompt(Gfx **displayListHead) {
             PROMPT_CLOUD_WIDTH / 2 * TEXEL_STEP_ONE / halfWidth,
             PROMPT_CLOUD_HALF_TEXELS * TEXEL_STEP_ONE / halfHeight
         );
-        half++;
     }
-    while (half != 2);
 
     if (f_PromptState == PROMPT_STATE_CHOOSING) {
         s32 unused[2] UNUSED;

@@ -2339,7 +2339,7 @@ void UpdateBestShots(void) {
 
 void DrawBestShots(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
-    s16 index = 0;
+    s16 index;
     SaveData *save = GetSaveData();
     MenuMemory *memory = GetMenuMemory();
     s16 column;
@@ -2378,7 +2378,7 @@ void DrawBestShots(Gfx **displayListHead) {
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
     gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_BestShotsNamePlate)));
-    do {
+    for (index = 0; index != RECORDS_STRIP_COUNT; index++) {
         gDPLoadTextureBlock(
             gfx++,
             TextureAddress(
@@ -2413,9 +2413,7 @@ void DrawBestShots(Gfx **displayListHead) {
             TexelRunStep(RECORDS_STRIP_HEIGHT, RECORDS_STRIP_SPACING)
         );
         gDPPipeSync(gfx++);
-        index++;
     }
-    while (index != RECORDS_STRIP_COUNT);
 
     for (index = 0; index != STATS_GRID_ROW_COUNT; index++) {
         for (column = 0; column != STATS_GRID_COLUMN_COUNT; column++) {

@@ -2964,10 +2964,9 @@ s32 HasDeadTriangleNearPoint(s32 column, s32 row) {
     s32 rowOffset;
     s32 columnOffset;
 
-    rowOffset = -1;
-    do {
+    for (rowOffset = -1; rowOffset <= 0; rowOffset++) {
         columnOffset = -1;
-        do {
+        while (columnOffset <= 0) {
             corners[0] = GetGroundPoint(column + columnOffset, row + rowOffset);
             corners[1] = GetGroundPoint(column + columnOffset + 1, row + rowOffset);
             corners[2] = GetGroundPoint(column + columnOffset, row + rowOffset + 1);
@@ -2993,10 +2992,7 @@ s32 HasDeadTriangleNearPoint(s32 column, s32 row) {
 
             columnOffset++;
         }
-        while (columnOffset <= 0);
-        rowOffset++;
     }
-    while (rowOffset <= 0);
     return 0;
 }
 

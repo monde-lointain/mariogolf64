@@ -3305,45 +3305,30 @@ void DisplaceNoiseSquare(s32 level, s32 column, s32 row) {
     topRight = f_NoiseGrid[row][(column + size) & NOISE_GRID_MASK];
     bottomLeft = f_NoiseGrid[(row + size) & NOISE_GRID_MASK][column];
     bottomRight = f_NoiseGrid[(row + size) & NOISE_GRID_MASK][(column + size) & NOISE_GRID_MASK];
-    if (f_NoiseGrid[row + half][column + half] == 0) {
-        do {
-            f_NoiseGrid[row + half][column + half] =
-                ((topLeft + topRight + bottomLeft + bottomRight) >> 2) +
-                (RandomNoiseDisplacement() * roughness);
-        }
-        while (f_NoiseGrid[row + half][column + half] == 0);
+    while (f_NoiseGrid[row + half][column + half] == 0) {
+        f_NoiseGrid[row + half][column + half] =
+            ((topLeft + topRight + bottomLeft + bottomRight) >> 2) +
+            (RandomNoiseDisplacement() * roughness);
     }
 
-    if (f_NoiseGrid[row][column + half] == 0) {
-        do {
-            f_NoiseGrid[row][column + half] =
-                ((topLeft + topRight) >> 1) + (RandomNoiseDisplacement() * roughness);
-        }
-        while (f_NoiseGrid[row][column + half] == 0);
+    while (f_NoiseGrid[row][column + half] == 0) {
+        f_NoiseGrid[row][column + half] =
+            ((topLeft + topRight) >> 1) + (RandomNoiseDisplacement() * roughness);
     }
 
-    if (f_NoiseGrid[row + half][column] == 0) {
-        do {
-            f_NoiseGrid[row + half][column] =
-                ((topLeft + bottomLeft) >> 1) + (RandomNoiseDisplacement() * roughness);
-        }
-        while (f_NoiseGrid[row + half][column] == 0);
+    while (f_NoiseGrid[row + half][column] == 0) {
+        f_NoiseGrid[row + half][column] =
+            ((topLeft + bottomLeft) >> 1) + (RandomNoiseDisplacement() * roughness);
     }
 
-    if (f_NoiseGrid[row + half][(column + size) & NOISE_GRID_MASK] == 0) {
-        do {
-            f_NoiseGrid[row + half][(column + size) & NOISE_GRID_MASK] =
-                ((topRight + bottomRight) >> 1) + (RandomNoiseDisplacement() * roughness);
-        }
-        while (f_NoiseGrid[row + half][(column + size) & NOISE_GRID_MASK] == 0);
+    while (f_NoiseGrid[row + half][(column + size) & NOISE_GRID_MASK] == 0) {
+        f_NoiseGrid[row + half][(column + size) & NOISE_GRID_MASK] =
+            ((topRight + bottomRight) >> 1) + (RandomNoiseDisplacement() * roughness);
     }
 
-    if (f_NoiseGrid[(row + size) & NOISE_GRID_MASK][column + half] == 0) {
-        do {
-            f_NoiseGrid[(row + size) & NOISE_GRID_MASK][column + half] =
-                ((bottomLeft + bottomRight) >> 1) + (RandomNoiseDisplacement() * roughness);
-        }
-        while (f_NoiseGrid[(row + size) & NOISE_GRID_MASK][column + half] == 0);
+    while (f_NoiseGrid[(row + size) & NOISE_GRID_MASK][column + half] == 0) {
+        f_NoiseGrid[(row + size) & NOISE_GRID_MASK][column + half] =
+            ((bottomLeft + bottomRight) >> 1) + (RandomNoiseDisplacement() * roughness);
     }
 
     if (size > MIN_UNDIVIDED_NOISE_SIZE) {

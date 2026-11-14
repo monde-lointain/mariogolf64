@@ -572,7 +572,7 @@ void UpdateRingShotRecords(void) {
 
 void DrawRingShotRecords(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
-    s16 index = 0;
+    s16 index;
     SaveData *save = GetSaveData();
     MenuMemory *memory = GetMenuMemory();
     s32 openCourseCount = GetOpenRingShotCourseCount();
@@ -621,7 +621,7 @@ void DrawRingShotRecords(Gfx **displayListHead) {
 
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
     gDPLoadTLUT_pal256(gfx++, TextureAddress(ImageBody(f_RingShotNamePlate)));
-    do {
+    for (index = 0; index != RING_SHOT_STRIP_COUNT; index++) {
         gDPLoadTextureBlock(
             gfx++,
             TextureAddress(
@@ -656,9 +656,7 @@ void DrawRingShotRecords(Gfx **displayListHead) {
             TexelRunStep(RING_SHOT_STRIP_HEIGHT, RING_SHOT_STRIP_SPACING)
         );
         gDPPipeSync(gfx++);
-        index++;
     }
-    while (index != RING_SHOT_STRIP_COUNT);
 
     if (openCourseCount <= 0) {
         openCourseCount = 1;

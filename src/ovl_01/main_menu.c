@@ -1274,16 +1274,13 @@ void StartLoadingChosenHole(void) {
     u32 slotIndex;
 
     GetSaveData();
-    slotIndex = 0;
     GetMenuMemory();
-    do {
+    for (slotIndex = 0; slotIndex != CHARACTER_SLOT_COUNT; slotIndex++) {
         if (IsCharacterSlotBusy(slotIndex)) {
             FreeCharacterSlot(slotIndex);
         }
-
-        slotIndex++;
     }
-    while (slotIndex != CHARACTER_SLOT_COUNT);
+
     g_IsChosenHoleLoadStarted = TRUE;
     if (g_MenuScreen == MENU_SCREEN_RING_SHOT_EXIT ||
         g_MenuScreen == MENU_SCREEN_RING_SHOT_RECORDS) {
@@ -2489,14 +2486,11 @@ void UpdateMenuTitleScreen(void) {
 
 void ResetViewerCharacter(void) {
     g_MenuMemory.viewerCharacter = 0;
-    if (g_TakenCharacters.isCharacterTaken[0] == 1) {
-        do {
-            g_MenuMemory.viewerCharacter++;
-            if (g_MenuMemory.viewerCharacter > f_MenuCharacterCount - 1) {
-                g_MenuMemory.viewerCharacter = 0;
-            }
+    while (g_TakenCharacters.isCharacterTaken[g_MenuMemory.viewerCharacter] == 1) {
+        g_MenuMemory.viewerCharacter++;
+        if (g_MenuMemory.viewerCharacter > f_MenuCharacterCount - 1) {
+            g_MenuMemory.viewerCharacter = 0;
         }
-        while (g_TakenCharacters.isCharacterTaken[g_MenuMemory.viewerCharacter] == 1);
     }
 }
 

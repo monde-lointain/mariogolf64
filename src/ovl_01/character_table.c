@@ -403,9 +403,8 @@ void DrawCharacterTable(Gfx **displayListHead) {
     gDPPipeSync(gfx++);
     gDPSetRenderMode(gfx++, G_RM_AA_TEX_EDGE, G_RM_AA_TEX_EDGE2);
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-    shownRow = 0;
     row = memory->tableFirstRow;
-    do {
+    for (shownRow = 0; shownRow != TABLE_SHOWN_ROW_COUNT; shownRow++) {
         rowCharacter = f_TableCharacters[row];
         drawMode = FACE_DARKENED;
         if (f_TableCharacterVisibility[row] == TABLE_CHARACTER_SHOWN) {
@@ -421,9 +420,8 @@ void DrawCharacterTable(Gfx **displayListHead) {
             rowCharacter,
             drawMode
         );
-        shownColumn = 0;
         column = memory->tableFirstColumn;
-        do {
+        for (shownColumn = 0; shownColumn != TABLE_SHOWN_COLUMN_COUNT; shownColumn++) {
             columnCharacter = f_TableCharacters[column];
             drawMode = FACE_DARKENED;
             if (f_TableCharacterVisibility[column] != TABLE_CHARACTER_HIDDEN) {
@@ -479,14 +477,10 @@ void DrawCharacterTable(Gfx **displayListHead) {
                 );
             }
 
-            shownColumn++;
             column++;
         }
-        while (shownColumn != TABLE_SHOWN_COLUMN_COUNT);
         row++;
-        shownRow++;
     }
-    while (shownRow != TABLE_SHOWN_ROW_COUNT);
     if (memory->tableFirstRow > 0) {
         DrawGreenArrow(
             &gfx,

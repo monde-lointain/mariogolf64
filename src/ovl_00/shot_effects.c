@@ -694,7 +694,7 @@ void DrawSwingTrail(Gfx **displayListHead, CameraMatrices *matrices) {
     }
 
     step = 0;
-    do {
+    while (TRUE) {
         f_SwingTrailPathIndex++;
         if (f_SwingTrailPathIndex > f_SwingTrailPathLength - 1) {
             f_SwingTrailPathIndex = f_SwingTrailPathLength - 1;
@@ -746,7 +746,6 @@ void DrawSwingTrail(Gfx **displayListHead, CameraMatrices *matrices) {
 
         step++;
     }
-    while (TRUE);
 
     gDPPipeSync(gfx++);
     gDPPipeSync(gfx++);

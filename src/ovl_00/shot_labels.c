@@ -316,9 +316,8 @@ void DrawShotLabels(Gfx **displayListHead) {
             f_ShotLabels[i].x = point.x + f_TagOffsetsX[f_ShotLabels[i].corner];
             f_ShotLabels[i].y = point.y + f_TagOffsetsY[f_ShotLabels[i].corner];
             f_ShotLabels[i].depth = point.depth;
-            tries = 0;
             if (players == SHOT_LABELS_OVERHEAD) {
-                do {
+                for (tries = 0; tries != CORNER_COUNT; tries++) {
                     s32 overlaps = FALSE;
 
                     corner = (f_ShotLabels[i].corner + tries) % CORNER_COUNT;
@@ -333,18 +332,16 @@ void DrawShotLabels(Gfx **displayListHead) {
                         }
                     }
 
-                    tries++;
                     if (!overlaps) {
                         f_ShotLabels[i].x = point.x + f_TagOffsetsX[corner];
                         f_ShotLabels[i].y = point.y + f_TagOffsetsY[corner];
                         goto PLACED;
                     }
                 }
-                while (tries != CORNER_COUNT);
                 continue;
             }
             else {
-                do {
+                for (tries = 0; tries != UPPER_CORNER_COUNT; tries++) {
                     s32 overlaps = FALSE;
 
                     corner =
@@ -378,14 +375,12 @@ void DrawShotLabels(Gfx **displayListHead) {
                         }
                     }
 
-                    tries++;
                     if (!overlaps) {
                         f_ShotLabels[i].x = point.x + f_TagOffsetsX[corner];
                         f_ShotLabels[i].y = point.y + f_TagOffsetsY[corner];
                         goto PLACED;
                     }
                 }
-                while (tries != UPPER_CORNER_COUNT);
                 continue;
             }
 
