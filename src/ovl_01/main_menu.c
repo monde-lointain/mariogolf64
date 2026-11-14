@@ -8038,7 +8038,7 @@ const char f_LuigisGardenName[] = "Luigi's Garden";
 void DrawOptionsScreen(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     MenuMemory *memory = GetMenuMemory();
-    u8 *mario = GetMenuImageBuffer();
+    u8 *marioImage = GetMenuImageBuffer();
     u8 *arrows = AddressPast(GetMenuImageBuffer(), OPTIONS_ARROWS_OFFSET);
     u8 *shadow = GetMenuImageBuffer();
     s32 loopIndex;
@@ -8110,11 +8110,11 @@ void DrawOptionsScreen(Gfx **displayListHead) {
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-    LoadLargePalette(&gfx, ImageBody(mario));
+    LoadLargePalette(&gfx, ImageBody(marioImage));
     for (loopIndex = 0; loopIndex != MARIO_STRIP_COUNT; loopIndex++) {
         gDPLoadTextureTile(
             gfx++,
-            TextureAddress(LargeImageTexels(mario)),
+            TextureAddress(LargeImageTexels(marioImage)),
             G_IM_FMT_CI,
             G_IM_SIZ_8b,
             MARIO_WIDTH,
