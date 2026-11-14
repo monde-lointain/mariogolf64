@@ -15,6 +15,7 @@
 #include "language.h"
 #include "main.h"
 #include "math_util.h"
+#include "pin.h"
 #include "terrain.h"
 #include "work_area.h"
 
@@ -32,7 +33,6 @@
 #define FLAGSTICK_RADIUS 614.4f
 #define FLAGSTICK_RADIUS_SQUARED 377487.38f
 #define FLAG_REACH 1228.8f
-#define FLAGSTICK_HEIGHT 46080.0f
 #define FLAG_BOTTOM_HEIGHT 39936.0f
 #define FLAG_HIT_SPEED_Y (-524)
 #define FLAGSTICK_MOST_BOUNCE 0.8f
