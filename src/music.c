@@ -1,6 +1,7 @@
 #include "music.h"
 
 #include <PR/libmus.h>
+#include <PR/n_libaudio_sc.h>
 #include <nusys.h>
 #include <ultra64.h>
 
@@ -26,7 +27,6 @@ typedef void (*AudioEventCallback)(NUScMsg message, s32 resetFrame);
 static OSMesg f_RetraceMessages[RETRACE_QUEUE_SIZE];
 static OSMesg f_TaskDoneMessages[TASK_DONE_QUEUE_SIZE];
 static NUScClient f_AudioClient;
-extern long long int n_aspMainTextStart[];
 
 void *__MusIntMemMalloc(int length);
 void InstallAudioScheduler(void);

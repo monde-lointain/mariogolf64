@@ -1,5 +1,6 @@
 #include "hole_loader.h"
 
+#include <nusys.h>
 #include <stdlib.h>
 #include <ultra64.h>
 
@@ -115,7 +116,6 @@ typedef struct LzStream {
     u16 *history;
 } LzStream;
 
-extern OSPiHandle *nuPiCartHandle;
 static s32 f_HoleSeed = 0;
 static s32 f_CycledCupIndex = 0;
 volatile Boolean g_HasLoaderFinished = TRUE;
