@@ -94,7 +94,7 @@ enum SkyImageKind {
     ((FRAME_SLICE_BOTTOM - FRAME_SLICE_TOP) * (FRAME_SLICE_RIGHT_WORD - FRAME_SLICE_LEFT_WORD))
 
 #define SLICE_ANIMATION_FRAME_COUNT 64
-#define SLICE_FRAME_COUNT 8
+#define FRAMES_PER_SLICE 8
 #define SLICE_WIDTH ((FRAME_SLICE_RIGHT_WORD - FRAME_SLICE_LEFT_WORD) * 2)
 #define SLICE_HEIGHT (FRAME_SLICE_BOTTOM - FRAME_SLICE_TOP)
 #define SLICE_COLUMN_COUNT (SCREEN_WIDTH / SLICE_WIDTH)
@@ -4252,8 +4252,8 @@ void DrawSliceAnimation(void) {
     row = 0;
     wordIndex = 0;
     frame = SLICE_ANIMATION_FRAME_COUNT - f_HudAnimationFramesLeft;
-    sliceCount = (frame / SLICE_FRAME_COUNT) + 1;
-    if (frame % SLICE_FRAME_COUNT == 0) {
+    sliceCount = (frame / FRAMES_PER_SLICE) + 1;
+    if (frame % FRAMES_PER_SLICE == 0) {
         PlaySound(SOUND_SLICE, SLICE_SOUND_CHANNEL, SOUND_FULL_SCALE);
     }
 
