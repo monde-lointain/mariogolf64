@@ -37,6 +37,8 @@ enum Surface {
 };
 
 typedef s32 Surface;
+// A Surface in a byte, as the ball and player structs keep it.
+typedef s8 Surface8;
 
 enum SurfaceKind {
     SURFACE_KIND_FAIRWAY,

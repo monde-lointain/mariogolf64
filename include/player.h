@@ -10,6 +10,7 @@
 #include "course.h"
 #include "course_space.h"
 #include "language.h"
+#include "surface.h"
 #include "turn.h"
 
 #define PLAYER_COUNT_MAX 4
@@ -80,7 +81,7 @@ typedef struct Player {
     char name[PLAYER_NAME_SIZE];
     s32 state;
     CoursePoint ballPosition;
-    s8 ballSurface;
+    Surface8 ballSurface;
     CharacterIndex8 characterIndex;
     Boolean8 isComputer;
     s8 ignoredPlanMark;

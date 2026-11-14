@@ -570,7 +570,7 @@ s32 StepOpeningBallSimulation(BallSimulation *simulation) {
         if (simulation->purpose != LAUNCH_PURPOSE_CLUB_TEST) {
             CoursePoint pinVelocity;
             f32 pinFraction;
-            s32 pinHit;
+            PinHit pinHit;
 
             if (g_GameState.isMiniGolf ? g_Players[simulation->playerIndex].strokeCount == 1 :
                                          GetOpeningSurfaceTraits(simulation->launchSurface)->kind !=

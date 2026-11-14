@@ -26,10 +26,10 @@ typedef struct SimulatedShot {
     Boolean usesPutter;
     Boolean endsInCup;
     Boolean isPerfectSwing;
-    s32 firstBounceSurface;
+    Surface firstBounceSurface;
     ShotLaunch shot;
     s32 flagHitStep;
-    s8 endSurface;
+    Surface8 endSurface;
     Boolean8 isWaterCut;
     s8 impactRumbles;
 } SimulatedShot;

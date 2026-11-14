@@ -184,7 +184,7 @@ static Vtx f_RainStreakVertices[] = {
     {{{48, -1, -100}, 0, {0, 0}, {0x90, 0xA0, 0xA0, 0x5F}}},
     {{{48, 0, -100}, 0, {0, 0}, {0x90, 0xA0, 0xA0, 0x5F}}},
 };
-static s32 f_Weather = WEATHER_NONE;
+static Weather f_Weather = WEATHER_NONE;
 static Vec3 f_LastRainEye = {0.0f, 0.0f, 0.0f};
 static s32 f_ShownBadgeCount = 0;
 static Boolean f_IsBadgeCountShown = FALSE;
@@ -2216,7 +2216,7 @@ void StartRingPassRumble(Player *player) {
 
 #define ASSET_RAIN_SPLASH_IMAGE 0x6BC
 
-void StartWeather(s32 weather) {
+void StartWeather(Weather weather) {
     EncodedAsset asset;
 
     if (weather == WEATHER_RAIN) {

@@ -17,6 +17,8 @@ enum Weather {
     WEATHER_RAIN = 2
 };
 
+typedef s32 Weather;
+
 #define RAIN_SOUND_CHANNEL 9
 #define RAIN_SOUND 0
 #define RAIN_SOUND_START_VOLUME 100
@@ -60,7 +62,7 @@ void StartRingPassRumble(Player *player);
 void LoadEffectImages(void);
 void FreeEffectImages(void);
 void ClearEffects(void);
-void StartWeather(s32 weather);
+void StartWeather(Weather weather);
 void StopWeather(void);
 void DrawBirdieBadgeCount(Gfx **displayListHead);
 void SpawnRisingClumps(CoursePoint unusedPoint UNUSED);

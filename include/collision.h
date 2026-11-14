@@ -14,6 +14,8 @@ enum PinHit {
     PIN_HIT_FLAG
 };
 
+typedef s32 PinHit;
+
 enum BillboardCell {
     BILLBOARD_CELL_EMPTY,
     BILLBOARD_CELL_TRUNK,
@@ -89,7 +91,7 @@ typedef s32 (*BillboardHitFinder)(
 #endif
 
 void MoveBallToCupEdge(BallSimulation *simulation);
-s32 FindPinHit(
+PinHit FindPinHit(
     s32 startX,
     s32 startY,
     s32 startZ,

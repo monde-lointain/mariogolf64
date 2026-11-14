@@ -1597,7 +1597,7 @@ void MoveBallToCupEdge(BallSimulation *simulation) {
     }
 }
 
-s32 FindPinHit(
+PinHit FindPinHit(
     s32 startX,
     s32 startY,
     s32 startZ,
@@ -1620,7 +1620,7 @@ s32 FindPinHit(
     s32 deltaY = toY - fromY;
     s32 deltaZ = toZ - fromZ;
     f32 nearestFraction = NO_HIT_FRACTION;
-    s32 hitKind = PIN_HIT_NONE;
+    PinHit hitKind = PIN_HIT_NONE;
     s32 startSide;
     s32 endSide;
     s32 endToCupX;

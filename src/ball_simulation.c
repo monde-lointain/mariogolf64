@@ -516,7 +516,7 @@ s32 StepBallSimulation(BallSimulation *simulation) {
         if (simulation->purpose != LAUNCH_PURPOSE_CLUB_TEST) {
             CoursePoint pinVelocity;
             f32 pinFraction;
-            s32 pinHit;
+            PinHit pinHit;
 
             if (g_GameState.isMiniGolf ||
                 GetSurfaceTraits(simulation->launchSurface)->kind != SURFACE_KIND_GREEN) {
@@ -2213,7 +2213,7 @@ s32 LaunchBallSimulation(BallSimulation *simulation, s32 purpose, ShotLaunch *sh
     f32 windScale;
     f32 along;
     s32 index;
-    s8 surface;
+    Surface8 surface;
 
     f32 ChooseLieBlend(void) {
         return (u32)((simulation->position[AXIS_X] + simulation->position[AXIS_Z] +

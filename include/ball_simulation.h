@@ -144,12 +144,12 @@ typedef struct BallSimulation {
     s32 lastBounceStep;
     Boolean8 isHoledOut;
     Boolean8 hasEnteredWater;
-    s8 launchSurface;
-    s8 surface;
-    s8 surfaceBelow;
+    Surface8 launchSurface;
+    Surface8 surface;
+    Surface8 surfaceBelow;
     s8 playerIndex;
     s8 stepFlags;
-    s8 firstBounceSurface;
+    Surface8 firstBounceSurface;
     s8 soundStates[BALL_SOUND_COUNT];
     Boolean8 hasHitFlag;
     u8 previousStepFlags;
