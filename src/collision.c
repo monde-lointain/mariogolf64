@@ -2909,7 +2909,7 @@ s32 FindRingHit(
 ) {
     PlaneTriangle ring;
     TrianglePlane plane;
-    s32 hitNumber;
+    s32 hitRingNumber;
     s32 ringNumber;
     s32 triangleIndex;
     HoleTriangle *triangle;
@@ -2924,7 +2924,7 @@ s32 FindRingHit(
     s32 hitZ;
     Boolean isDebug = IsGameFlagSet(GAME_FLAG_PRINT_HIT_PATHS);
 
-    hitNumber = NO_RING_NUMBER;
+    hitRingNumber = NO_RING_NUMBER;
     if (isDebug) {
         PrintDebugPaddedHex(startX, PATH_DEBUG_COLUMN, PATH_DEBUG_ROW);
         PrintDebugPaddedHex(startY, PATH_DEBUG_COLUMN, PATH_DEBUG_ROW + 1);
@@ -2998,15 +2998,15 @@ s32 FindRingHit(
                         (hitZ * COURSE_TO_WORLD_SCALE) - ring.corners[AXIS_Z][RING_CENTER]
                     ) < ring.corners[AXIS_X][RING_SCALE] * RING_HIT_RADIUS_PER_SCALE) {
                     nearestFraction = hitFraction;
-                    hitNumber = ringNumber;
+                    hitRingNumber = ringNumber;
                 }
             }
         }
     }
 
-    if (hitNumber >= 0) {
+    if (hitRingNumber >= 0) {
         *hitRing = ring;
-        hitRing->tag = hitNumber - 1;
+        hitRing->tag = hitRingNumber - 1;
         *fraction = nearestFraction;
         return 1;
     }
