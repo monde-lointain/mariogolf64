@@ -854,6 +854,7 @@ void ShowTransferError(PakResult result) {
 
 void UpdateSendStatus(void) {
     GameBoyTransfer *transfer = &g_GameBoyTransfer;
+    // A PakResult from tagging, then a StatusWriteResult from writing.
     s32 result;
 
     switch (transfer->screenStep) {
