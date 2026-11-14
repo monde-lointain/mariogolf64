@@ -135,15 +135,15 @@ Player g_SavedPlayers[PLAYER_COUNT_MAX];
 ShotLaunch g_LastShotLaunch;
 // DrawGround's included assembly names it, as splat calls g_WorkArea's
 // address less a row of tiles after the nearest symbol
-FILE_STATIC u8 g_UnreadPlayBuffer[0xDEC] UNUSED;
+FILE_STATIC u8 f_UnreadPlayBuffer[0xDEC] UNUSED;
 
-FILE_STATIC UBoolean8 g_IsGroundTileNearby[GROUND_TILE_COUNT];
+FILE_STATIC UBoolean8 f_IsGroundTileNearby[GROUND_TILE_COUNT];
 FILE_STATIC PlayRecord f_BestShotReplayRecord;
-FILE_STATIC Boolean8 g_WasDonkeyKongUnlocked;
-FILE_STATIC Boolean8 g_WasMapleUnlocked;
-FILE_STATIC Boolean8 g_WasMetalMarioUnlocked;
-FILE_STATIC Boolean8 g_HadEveryRingShotStar;
-FILE_STATIC s8 g_RingShotCourseOpenedAtStart;
+FILE_STATIC Boolean8 f_WasDonkeyKongUnlocked;
+FILE_STATIC Boolean8 f_WasMapleUnlocked;
+FILE_STATIC Boolean8 f_WasMetalMarioUnlocked;
+FILE_STATIC Boolean8 f_HadEveryRingShotStar;
+FILE_STATIC s8 f_RingShotCourseOpenedAtStart;
 
 static s32 f_UnusedWordsBeforeTrainingHeading[2] UNUSED = {0};
 Boolean8 g_IsTrainingHeadingKept = FALSE;
@@ -851,7 +851,7 @@ Boolean HasWonFinalChallenge(void) {
 // Whether the Ring Shot hole has just earned the last star, which rolls the
 // staff
 #define IsStaffRollDueAfterRingShot() \
-    ((HasEveryRingShotStar() && !g_HadEveryRingShotStar) || \
+    ((HasEveryRingShotStar() && !f_HadEveryRingShotStar) || \
         IsGameFlagSet(GAME_FLAG_SHOW_STAFF_ROLL))
 
 // The debug cup picker's text position
@@ -1245,11 +1245,11 @@ void UpdatePlay(void) {
                     ClearContestWinner();
                     f_IsPlayStateBackedUp = TRUE;
                     BackUpPlayState();
-                    g_WasDonkeyKongUnlocked = IsDonkeyKongUnlocked();
-                    g_WasMapleUnlocked = IsMapleUnlocked();
-                    g_WasMetalMarioUnlocked = IsMetalMarioUnlocked();
-                    g_HadEveryRingShotStar = HasEveryRingShotStar();
-                    g_RingShotCourseOpenedAtStart = GetRingShotCourseOpenedAtStarCount();
+                    f_WasDonkeyKongUnlocked = IsDonkeyKongUnlocked();
+                    f_WasMapleUnlocked = IsMapleUnlocked();
+                    f_WasMetalMarioUnlocked = IsMetalMarioUnlocked();
+                    f_HadEveryRingShotStar = HasEveryRingShotStar();
+                    f_RingShotCourseOpenedAtStart = GetRingShotCourseOpenedAtStarCount();
                 }
 
                 g_GameState.isRoundContinued = FALSE;
@@ -1361,12 +1361,12 @@ void UpdatePlay(void) {
                                 if (!f_IsRingShotCleared) {
                                     nextStep = HOLE_END_STEP_RING_SHOT_FREE_SLOT;
                                 }
-                                else if ((IsDonkeyKongUnlocked() && !g_WasDonkeyKongUnlocked) ||
+                                else if ((IsDonkeyKongUnlocked() && !f_WasDonkeyKongUnlocked) ||
                                     IsGameFlagSet(GAME_FLAG_CHOOSE_UNLOCK_NOTICE)) {
                                     LoadUnlockNotice(UNLOCK_NOTICE_DONKEY_KONG);
                                     nextStep = HOLE_END_STEP_DONKEY_KONG_NOTICE;
                                 }
-                                else if (!g_RingShotCourseOpenedAtStart &&
+                                else if (!f_RingShotCourseOpenedAtStart &&
                                     GetRingShotCourseOpenedAtStarCount()) {
                                     LoadUnlockNotice(
                                         GetRingShotCourseOpenedAtStarCount() +
@@ -1407,11 +1407,11 @@ DIM_BACKDROP:
                             f_HoleEndStep = HOLE_END_STEP_LOAD_SCORECARD;
                             SetMenuBackdrop(MENU_BACKDROP_DIMMING);
                             f_HoleResultsKind = HOLE_RESULTS_TOURNAMENT;
-                            if (IsMapleUnlocked() && !g_WasMapleUnlocked) {
+                            if (IsMapleUnlocked() && !f_WasMapleUnlocked) {
                                 LoadUnlockNotice(UNLOCK_NOTICE_MAPLE);
                                 f_HoleEndStep = HOLE_END_STEP_UNLOCK_NOTICE;
                             }
-                            else if (IsMetalMarioUnlocked() && !g_WasMetalMarioUnlocked) {
+                            else if (IsMetalMarioUnlocked() && !f_WasMetalMarioUnlocked) {
                                 LoadUnlockNotice(UNLOCK_NOTICE_METAL_MARIO);
                                 f_HoleEndStep = HOLE_END_STEP_UNLOCK_NOTICE;
                             }
@@ -1508,7 +1508,7 @@ DIM_BACKDROP:
                     case HOLE_END_STEP_DONKEY_KONG_NOTICE:
                         if (UpdateUnlockNotice()) {
                             FreeUnlockNotice();
-                            if (!g_RingShotCourseOpenedAtStart &&
+                            if (!f_RingShotCourseOpenedAtStart &&
                                 GetRingShotCourseOpenedAtStarCount()) {
                                 LoadUnlockNotice(
                                     GetRingShotCourseOpenedAtStarCount() +
@@ -1904,7 +1904,7 @@ void CopyDoublePair(f64 *from, f64 *to) {
 }
 
 // Unless on a mini-golf course, marks the ground tile holding a point
-// and the tiles around it in g_IsGroundTileNearby
+// and the tiles around it in f_IsGroundTileNearby
 void MarkNearbyGroundTiles(u32 x, u32 z) {
     u32 column;
     u32 row;
@@ -1920,7 +1920,7 @@ void MarkNearbyGroundTiles(u32 x, u32 z) {
                     for (columnOffset = -1; columnOffset < 2; columnOffset++) {
                         if (column + columnOffset < GROUND_TILE_COLUMN_COUNT &&
                             row + rowOffset < GROUND_TILE_ROW_COUNT) {
-                            g_IsGroundTileNearby
+                            f_IsGroundTileNearby
                                 [((row + rowOffset) * GROUND_TILE_COLUMN_COUNT) +
                                     (column + columnOffset)] = TRUE;
                         }
@@ -1932,7 +1932,7 @@ void MarkNearbyGroundTiles(u32 x, u32 z) {
 }
 
 void ClearNearbyGroundTiles(void) {
-    bzero(g_IsGroundTileNearby, sizeof(g_IsGroundTileNearby));
+    bzero(f_IsGroundTileNearby, sizeof(f_IsGroundTileNearby));
 }
 
 // The test ground texture repeats, mirrored, every this many units
@@ -2353,7 +2353,7 @@ void DrawGround(CameraMatrices *matrices, TerrainStyle terrainStyle) {
         );
         if (visibility < 0) {
             if (tile->midpointBlockIndex >= 0 &&
-                (g_IsGroundTileNearby[culledTileIndex] ||
+                (f_IsGroundTileNearby[culledTileIndex] ||
                     visibility * fineScale < g_GroundTileHeightRanges[culledTileIndex])) {
                 detail = GROUND_DETAIL_FINE;
             }

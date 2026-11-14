@@ -89,7 +89,7 @@ enum MessageCode {
     // The current player's score, as the game mode counts it
     MESSAGE_CODE_SCORE = 0x8018,
     MESSAGE_CODE_LINE_BREAK,
-    // Then one for each of g_TextPalette's colors
+    // Then one for each of f_TextPalette's colors
     MESSAGE_CODE_PALETTE_COLOR = 0x8022,
     MESSAGE_CODE_SLOT_COLOR = 0x8026
 };
@@ -268,13 +268,13 @@ char g_PrintBuffer[PRINT_BUFFER_SIZE];
 ImageAsset *g_ShadowedFontImage;
 
 // The index of the first character code in the message table, in halfwords
-FILE_STATIC s32 g_MessageCodesStart;
-FILE_STATIC TextSlot g_TextSlots[TEXT_SLOT_COUNT];
-FILE_STATIC u8 g_TextPalette[TEXT_PALETTE_COLOR_COUNT][ALPHA_CHANNEL];
-FILE_STATIC char g_TextName[TEXT_NAME_SIZE];
-FILE_STATIC GlyphSprite g_GlyphSprites[GLYPH_SPRITE_COUNT];
+FILE_STATIC s32 f_MessageCodesStart;
+FILE_STATIC TextSlot f_TextSlots[TEXT_SLOT_COUNT];
+FILE_STATIC u8 f_TextPalette[TEXT_PALETTE_COLOR_COUNT][ALPHA_CHANNEL];
+FILE_STATIC char f_TextName[TEXT_NAME_SIZE];
+FILE_STATIC GlyphSprite f_GlyphSprites[GLYPH_SPRITE_COUNT];
 // How many glyphs each group has
-FILE_STATIC u8 g_GlyphGroupSizes[GLYPH_GROUP_COUNT];
+FILE_STATIC u8 f_GlyphGroupSizes[GLYPH_GROUP_COUNT];
 
 // Where a character's glyph is in the shadowed font's image, in pixels
 static inline s16 GetShadowedGlyphLeft(s32 code) {
@@ -320,7 +320,7 @@ void LoadTextAssets(void) {
     nuPiReadRom((u32)g_MessageFileRomStart, f_Messages, size);
 
     // The halfwords of the table's header and its entries come first
-    g_MessageCodesStart = (f_Messages->messageCount * 2) + 2;
+    f_MessageCodesStart = (f_Messages->messageCount * 2) + 2;
     ClearTextSlots();
     ClearGlyphSprites();
 }
@@ -390,18 +390,18 @@ void ClearTextSlots(void) {
     s32 slot;
 
     for (slot = 0; slot != TEXT_SLOT_COUNT; slot++) {
-        g_TextSlots[slot].messageId = NO_MESSAGE;
+        f_TextSlots[slot].messageId = NO_MESSAGE;
     }
 }
 
 void SetTextPaletteColor(s32 red, s32 green, s32 blue, s32 colorIndex) {
-    g_TextPalette[colorIndex][RED_CHANNEL] = red;
-    g_TextPalette[colorIndex][GREEN_CHANNEL] = green;
-    g_TextPalette[colorIndex][BLUE_CHANNEL] = blue;
+    f_TextPalette[colorIndex][RED_CHANNEL] = red;
+    f_TextPalette[colorIndex][GREEN_CHANNEL] = green;
+    f_TextPalette[colorIndex][BLUE_CHANNEL] = blue;
 }
 
 void SetTextSlotValue(s32 value, s32 slot, s32 valueIndex) {
-    g_TextSlots[slot].values[valueIndex] = value;
+    f_TextSlots[slot].values[valueIndex] = value;
 }
 
 // Sets the name that MESSAGE_CODE_NAME shows, as character codes
@@ -411,9 +411,9 @@ void SetTextName(char *name) {
 
     for (letterIndex = 0; letterIndex != TEXT_NAME_SIZE - 1; letterIndex++) {
         character = name[letterIndex];
-        g_TextName[letterIndex] = character;
+        f_TextName[letterIndex] = character;
         if (character >= 'a' && character <= 'z') {
-            g_TextName[letterIndex] = character + LOWERCASE_CODE_OFFSET;
+            f_TextName[letterIndex] = character + LOWERCASE_CODE_OFFSET;
         }
 
         if (name[letterIndex] == '\0') {
@@ -421,7 +421,7 @@ void SetTextName(char *name) {
         }
     }
 
-    g_TextName[TEXT_NAME_SIZE - 1] = '\0';
+    f_TextName[TEXT_NAME_SIZE - 1] = '\0';
 }
 
 // Shows a message in a slot at x and y, or around them when it is
@@ -452,25 +452,25 @@ void SetTextSlot(
         }
 
         // The pointer, used only for the message comparison, is there to match:
-        // comparing through g_TextSlots[slot] gives 6 words differing (4 in
+        // comparing through f_TextSlots[slot] gives 6 words differing (4 in
         // shape), and writing every field through the pointer 75 (33)
-        textSlot = &g_TextSlots[slot];
+        textSlot = &f_TextSlots[slot];
         halfWidth = width / 2;
         halfHeight = height / 2;
-        g_TextSlots[slot].red = red;
-        g_TextSlots[slot].green = green;
-        g_TextSlots[slot].blue = blue;
-        g_TextSlots[slot].alpha = alpha;
-        g_TextSlots[slot].fontSize = fontSize;
-        g_TextSlots[slot].flags = flags;
-        g_TextSlots[slot].x = x - halfWidth;
-        g_TextSlots[slot].y = y - halfHeight;
+        f_TextSlots[slot].red = red;
+        f_TextSlots[slot].green = green;
+        f_TextSlots[slot].blue = blue;
+        f_TextSlots[slot].alpha = alpha;
+        f_TextSlots[slot].fontSize = fontSize;
+        f_TextSlots[slot].flags = flags;
+        f_TextSlots[slot].x = x - halfWidth;
+        f_TextSlots[slot].y = y - halfHeight;
         if (textSlot->messageId != messageId) {
-            g_TextSlots[slot].shownCount = 0;
+            f_TextSlots[slot].shownCount = 0;
         }
     }
 
-    g_TextSlots[slot].messageId = messageId;
+    f_TextSlots[slot].messageId = messageId;
 }
 
 // Draws the message of every text slot that has one, in the slot's color,
@@ -481,18 +481,18 @@ void DrawTextSlots(Gfx **displayListHead) {
 
     SetUpTextDrawing(&gfx);
     for (slot = 0; slot != TEXT_SLOT_COUNT; slot++) {
-        if (g_TextSlots[slot].messageId != NO_MESSAGE &&
-            !(g_TextSlots[slot].flags & TEXT_FLAG_DRAWN_BY_OWNER)) {
+        if (f_TextSlots[slot].messageId != NO_MESSAGE &&
+            !(f_TextSlots[slot].flags & TEXT_FLAG_DRAWN_BY_OWNER)) {
             gDPSetPrimColor(
                 gfx++,
                 0,
                 0,
-                g_TextSlots[slot].red,
-                g_TextSlots[slot].green,
-                g_TextSlots[slot].blue,
-                g_TextSlots[slot].alpha
+                f_TextSlots[slot].red,
+                f_TextSlots[slot].green,
+                f_TextSlots[slot].blue,
+                f_TextSlots[slot].alpha
             );
-            if (g_TextSlots[slot].fontSize == FONT_SIZE_MEDIUM) {
+            if (f_TextSlots[slot].fontSize == FONT_SIZE_MEDIUM) {
                 DrawMediumTextSlot(&gfx, slot);
             }
             else {
@@ -506,11 +506,11 @@ void DrawTextSlots(Gfx **displayListHead) {
 
 // Shows the whole of a slot's message at once
 void RevealTextSlot(s32 slot) {
-    g_TextSlots[slot].shownCount = 0xFF;
+    f_TextSlots[slot].shownCount = 0xFF;
 }
 
 Boolean IsTextSlotRevealed(s32 slot) {
-    TextSlot *textSlot = &g_TextSlots[slot];
+    TextSlot *textSlot = &f_TextSlots[slot];
 
     return !(textSlot->shownCount < MessageSpanAt(textSlot->messageId)->length);
 }
@@ -519,7 +519,7 @@ Boolean IsTextSlotRevealed(s32 slot) {
 // colors, the name, the slot's values and the player's score
 void DrawLargeTextSlot(Gfx **displayListHead, s32 slot) {
     Gfx *gfx = *displayListHead;
-    TextSlot *textSlot = &g_TextSlots[slot];
+    TextSlot *textSlot = &f_TextSlots[slot];
     s32 codeIndex;
     s32 messageStart;
     s32 length;
@@ -559,7 +559,7 @@ void DrawLargeTextSlot(Gfx **displayListHead, s32 slot) {
         (textSlot->flags & TEXT_FLAG_WIDE_SPACING) ? WIDE_LARGE_FONT_ADVANCE : FONT_SIZE_LARGE;
     gDPPipeSync(gfx++);
     for (codeIndex = 0; codeIndex != length; codeIndex++) {
-        code = ((u16 *)f_Messages)[messageStart + codeIndex + g_MessageCodesStart];
+        code = ((u16 *)f_Messages)[messageStart + codeIndex + f_MessageCodesStart];
         if (isIconLoaded == TRUE) {
             gDPSetCombineLERP(
                 gfx++,
@@ -756,7 +756,7 @@ void DrawLargeTextSlot(Gfx **displayListHead, s32 slot) {
                     break;
                 case MESSAGE_CODE_NAME:
                     isPrinted = TRUE;
-                    sprintf(g_PrintBuffer, "%s", g_TextName);
+                    sprintf(g_PrintBuffer, "%s", f_TextName);
                     break;
                 case MESSAGE_CODE_SLOT_COLOR:
                     gDPSetPrimColor(
@@ -774,9 +774,9 @@ void DrawLargeTextSlot(Gfx **displayListHead, s32 slot) {
                         gfx++,
                         0,
                         0,
-                        g_TextPalette[0][RED_CHANNEL],
-                        g_TextPalette[0][GREEN_CHANNEL],
-                        g_TextPalette[0][BLUE_CHANNEL],
+                        f_TextPalette[0][RED_CHANNEL],
+                        f_TextPalette[0][GREEN_CHANNEL],
+                        f_TextPalette[0][BLUE_CHANNEL],
                         OPAQUE_ALPHA
                     );
                     break;
@@ -785,9 +785,9 @@ void DrawLargeTextSlot(Gfx **displayListHead, s32 slot) {
                         gfx++,
                         0,
                         0,
-                        g_TextPalette[1][RED_CHANNEL],
-                        g_TextPalette[1][GREEN_CHANNEL],
-                        g_TextPalette[1][BLUE_CHANNEL],
+                        f_TextPalette[1][RED_CHANNEL],
+                        f_TextPalette[1][GREEN_CHANNEL],
+                        f_TextPalette[1][BLUE_CHANNEL],
                         OPAQUE_ALPHA
                     );
                     break;
@@ -796,9 +796,9 @@ void DrawLargeTextSlot(Gfx **displayListHead, s32 slot) {
                         gfx++,
                         0,
                         0,
-                        g_TextPalette[2][RED_CHANNEL],
-                        g_TextPalette[2][GREEN_CHANNEL],
-                        g_TextPalette[2][BLUE_CHANNEL],
+                        f_TextPalette[2][RED_CHANNEL],
+                        f_TextPalette[2][GREEN_CHANNEL],
+                        f_TextPalette[2][BLUE_CHANNEL],
                         OPAQUE_ALPHA
                     );
                     break;
@@ -807,9 +807,9 @@ void DrawLargeTextSlot(Gfx **displayListHead, s32 slot) {
                         gfx++,
                         0,
                         0,
-                        g_TextPalette[3][RED_CHANNEL],
-                        g_TextPalette[3][GREEN_CHANNEL],
-                        g_TextPalette[3][BLUE_CHANNEL],
+                        f_TextPalette[3][RED_CHANNEL],
+                        f_TextPalette[3][GREEN_CHANNEL],
+                        f_TextPalette[3][BLUE_CHANNEL],
                         OPAQUE_ALPHA
                     );
                     break;
@@ -1042,7 +1042,7 @@ void DrawLargeTextSlot(Gfx **displayListHead, s32 slot) {
 // slot's values and the player's score written into it
 void DrawMediumTextSlot(Gfx **displayListHead, s32 slot) {
     Gfx *gfx = *displayListHead;
-    TextSlot *textSlot = &g_TextSlots[slot];
+    TextSlot *textSlot = &f_TextSlots[slot];
     s32 codeIndex;
     s32 messageStart;
     s32 length;
@@ -1080,7 +1080,7 @@ void DrawMediumTextSlot(Gfx **displayListHead, s32 slot) {
 
     gDPPipeSync(gfx++);
     for (codeIndex = 0; codeIndex != length; codeIndex++) {
-        code = ((u16 *)f_Messages)[messageStart + codeIndex + g_MessageCodesStart];
+        code = ((u16 *)f_Messages)[messageStart + codeIndex + f_MessageCodesStart];
         if (isIconLoaded == TRUE) {
             gDPSetCombineLERP(
                 gfx++,
@@ -1246,7 +1246,7 @@ void DrawMediumTextSlot(Gfx **displayListHead, s32 slot) {
                     break;
                 case MESSAGE_CODE_NAME:
                     isPrinted = TRUE;
-                    sprintf(g_PrintBuffer, "%s", g_TextName);
+                    sprintf(g_PrintBuffer, "%s", f_TextName);
                     break;
                 case MESSAGE_CODE_VALUE:
                     isPrinted = TRUE;
@@ -1622,7 +1622,7 @@ void MeasureMessage(MessageId messageId, s32 fontSize, s32 *width, s32 *height, 
     messageStart = MessageSpanAt(messageId)->start;
     line = 0;
     for (codeIndex = 0; codeIndex != length; codeIndex++) {
-        code = ((u16 *)f_Messages)[g_MessageCodesStart + messageStart + codeIndex];
+        code = ((u16 *)f_Messages)[f_MessageCodesStart + messageStart + codeIndex];
         if (code < MESSAGE_CODE_GLYPH) {
             if (code < CHARACTER_CODE_MARK_FIRST ||
                 code >= CHARACTER_CODE_MARK_FIRST + CHARACTER_CODE_MARK_COUNT) {
@@ -1641,7 +1641,7 @@ void MeasureMessage(MessageId messageId, s32 fontSize, s32 *width, s32 *height, 
                     lineCount += LINE_SPACING + fontSize;
                     break;
                 case MESSAGE_CODE_NAME:
-                    sprintf(g_PrintBuffer, "%s", g_TextName);
+                    sprintf(g_PrintBuffer, "%s", f_TextName);
                     lineWidths[line] +=
                         MeasureText(g_PrintBuffer, fontSize, MEASURE_TEXT_PROPORTIONAL);
                     break;
@@ -1652,7 +1652,7 @@ void MeasureMessage(MessageId messageId, s32 fontSize, s32 *width, s32 *height, 
                     sprintf(
                         g_PrintBuffer,
                         "%d",
-                        g_TextSlots[slot].values[code - MESSAGE_CODE_VALUE]
+                        f_TextSlots[slot].values[code - MESSAGE_CODE_VALUE]
                     );
                     lineWidths[line] += GetTextLength(g_PrintBuffer) * fontSize;
                     break;
@@ -2435,7 +2435,7 @@ void ClearGlyphSprites(void) {
     s32 spriteIndex;
 
     for (spriteIndex = 0; spriteIndex != GLYPH_SPRITE_COUNT; spriteIndex++) {
-        g_GlyphSprites[spriteIndex].group = NO_GLYPH_GROUP;
+        f_GlyphSprites[spriteIndex].group = NO_GLYPH_GROUP;
     }
 }
 
@@ -2451,8 +2451,8 @@ void PlaceGlyphGroup(s32 group, s32 fontSize, TextFlags flags, s32 x, s32 y, REA
 
     if (fontSize == NO_FONT_SIZE) {
         for (spriteIndex = 0; spriteIndex != GLYPH_SPRITE_COUNT; spriteIndex++) {
-            if (g_GlyphSprites[spriteIndex].group == group) {
-                g_GlyphSprites[spriteIndex].group = NO_GLYPH_GROUP;
+            if (f_GlyphSprites[spriteIndex].group == group) {
+                f_GlyphSprites[spriteIndex].group = NO_GLYPH_GROUP;
             }
         }
 
@@ -2469,17 +2469,17 @@ void PlaceGlyphGroup(s32 group, s32 fontSize, TextFlags flags, s32 x, s32 y, REA
         }
     }
 
-    g_GlyphGroupSizes[group] = GetTextLength(text);
+    f_GlyphGroupSizes[group] = GetTextLength(text);
     for (spriteIndex = 0; spriteIndex != GLYPH_SPRITE_COUNT; spriteIndex++) {
-        if (g_GlyphSprites[spriteIndex].group == group) {
-            g_GlyphSprites[spriteIndex].group = NO_GLYPH_GROUP;
+        if (f_GlyphSprites[spriteIndex].group == group) {
+            f_GlyphSprites[spriteIndex].group = NO_GLYPH_GROUP;
         }
     }
 
     for (spriteIndex = 0, placedCount = 0, advance = 0;
-        placedCount != g_GlyphGroupSizes[group] && spriteIndex != GLYPH_SPRITE_COUNT;
+        placedCount != f_GlyphGroupSizes[group] && spriteIndex != GLYPH_SPRITE_COUNT;
         spriteIndex++) {
-        if (g_GlyphSprites[spriteIndex].group == NO_GLYPH_GROUP) {
+        if (f_GlyphSprites[spriteIndex].group == NO_GLYPH_GROUP) {
             switch (text[placedCount]) {
                 case CHARACTER_CODE_OTHER_MARK_FIRST:
                 case CHARACTER_CODE_OTHER_MARK_FIRST + 1:
@@ -2487,7 +2487,7 @@ void PlaceGlyphGroup(s32 group, s32 fontSize, TextFlags flags, s32 x, s32 y, REA
                 case CHARACTER_CODE_MARK_FIRST + 1:
                     if (fontSize == FONT_SIZE_LARGE) {
                         guTranslate(
-                            &g_GlyphSprites[spriteIndex].matrix,
+                            &f_GlyphSprites[spriteIndex].matrix,
                             advance - halfWidth + x - LARGE_MARK_BACKSPACE,
                             y + LARGE_MARK_RISE,
                             0
@@ -2495,7 +2495,7 @@ void PlaceGlyphGroup(s32 group, s32 fontSize, TextFlags flags, s32 x, s32 y, REA
                     }
                     else if (fontSize == FONT_SIZE_MEDIUM) {
                         guTranslate(
-                            &g_GlyphSprites[spriteIndex].matrix,
+                            &f_GlyphSprites[spriteIndex].matrix,
                             advance - halfWidth + x - MEDIUM_MARK_BACKSPACE,
                             y + MEDIUM_MARK_RISE,
                             0
@@ -2503,7 +2503,7 @@ void PlaceGlyphGroup(s32 group, s32 fontSize, TextFlags flags, s32 x, s32 y, REA
                     }
                     else {
                         guTranslate(
-                            &g_GlyphSprites[spriteIndex].matrix,
+                            &f_GlyphSprites[spriteIndex].matrix,
                             advance - halfWidth + x,
                             y + SMALL_MARK_RISE,
                             0
@@ -2512,7 +2512,7 @@ void PlaceGlyphGroup(s32 group, s32 fontSize, TextFlags flags, s32 x, s32 y, REA
 
                     break;
                 default:
-                    guTranslate(&g_GlyphSprites[spriteIndex].matrix, advance - halfWidth + x, y, 0);
+                    guTranslate(&f_GlyphSprites[spriteIndex].matrix, advance - halfWidth + x, y, 0);
                     if (fontSize == FONT_SIZE_LARGE) {
                         if (flags & TEXT_FLAG_FIXED_WIDTH) {
                             advance += FONT_SIZE_LARGE;
@@ -2528,10 +2528,10 @@ void PlaceGlyphGroup(s32 group, s32 fontSize, TextFlags flags, s32 x, s32 y, REA
                     break;
             }
 
-            g_GlyphSprites[spriteIndex].code = text[placedCount];
-            g_GlyphSprites[spriteIndex].fontSize = fontSize;
-            g_GlyphSprites[spriteIndex].flags = flags;
-            g_GlyphSprites[spriteIndex].group = group;
+            f_GlyphSprites[spriteIndex].code = text[placedCount];
+            f_GlyphSprites[spriteIndex].fontSize = fontSize;
+            f_GlyphSprites[spriteIndex].flags = flags;
+            f_GlyphSprites[spriteIndex].group = group;
             placedCount++;
         }
     }
@@ -2553,8 +2553,8 @@ s32 PlaceMessageGlyphGroup(s32 group, s32 fontSize, s32 x, s32 y, MessageId mess
 
     if (fontSize == NO_FONT_SIZE) {
         for (spriteIndex = 0; spriteIndex != GLYPH_SPRITE_COUNT; spriteIndex++) {
-            if (g_GlyphSprites[spriteIndex].group == group) {
-                g_GlyphSprites[spriteIndex].group = NO_GLYPH_GROUP;
+            if (f_GlyphSprites[spriteIndex].group == group) {
+                f_GlyphSprites[spriteIndex].group = NO_GLYPH_GROUP;
             }
         }
 
@@ -2567,36 +2567,36 @@ s32 PlaceMessageGlyphGroup(s32 group, s32 fontSize, s32 x, s32 y, MessageId mess
     width /= 2;
     height /= 2;
     y += height;
-    g_GlyphGroupSizes[group] = length;
+    f_GlyphGroupSizes[group] = length;
     for (spriteIndex = 0; spriteIndex != GLYPH_SPRITE_COUNT; spriteIndex++) {
-        if (g_GlyphSprites[spriteIndex].group == group) {
-            g_GlyphSprites[spriteIndex].group = NO_GLYPH_GROUP;
+        if (f_GlyphSprites[spriteIndex].group == group) {
+            f_GlyphSprites[spriteIndex].group = NO_GLYPH_GROUP;
         }
     }
 
     codeIndex = 0;
     advance = 0;
     for (spriteIndex = 0; codeIndex != length; spriteIndex++) {
-        if (g_GlyphSprites[spriteIndex].group == NO_GLYPH_GROUP) {
-            code = ((u16 *)f_Messages)[g_MessageCodesStart + messageStart + codeIndex];
+        if (f_GlyphSprites[spriteIndex].group == NO_GLYPH_GROUP) {
+            code = ((u16 *)f_Messages)[f_MessageCodesStart + messageStart + codeIndex];
             if (code < MESSAGE_CODE_GLYPH) {
                 if (code >= CHARACTER_CODE_MARK_FIRST &&
                     code < CHARACTER_CODE_MARK_FIRST + CHARACTER_CODE_MARK_COUNT) {
                     guTranslate(
-                        &g_GlyphSprites[spriteIndex].matrix,
+                        &f_GlyphSprites[spriteIndex].matrix,
                         advance - width + x - LARGE_MARK_BACKSPACE,
                         y + MESSAGE_MARK_RISE,
                         0
                     );
                 }
                 else {
-                    guTranslate(&g_GlyphSprites[spriteIndex].matrix, advance - width + x, y, 0);
+                    guTranslate(&f_GlyphSprites[spriteIndex].matrix, advance - width + x, y, 0);
                     advance += f_LargeFontWidths[code];
                 }
 
-                g_GlyphSprites[spriteIndex].code = code;
-                g_GlyphSprites[spriteIndex].fontSize = fontSize;
-                g_GlyphSprites[spriteIndex].group = group;
+                f_GlyphSprites[spriteIndex].code = code;
+                f_GlyphSprites[spriteIndex].fontSize = fontSize;
+                f_GlyphSprites[spriteIndex].group = group;
             }
             else if (code >= MESSAGE_CODE_CONTROL) {
                 switch (code) {
@@ -2618,11 +2618,11 @@ s32 PlaceMessageGlyphGroup(s32 group, s32 fontSize, s32 x, s32 y, MessageId mess
                     case MESSAGE_CODE_START_BUTTON:
                     case MESSAGE_CODE_L_BUTTON:
                     case MESSAGE_CODE_R_BUTTON:
-                        guTranslate(&g_GlyphSprites[spriteIndex].matrix, advance - width + x, y, 0);
+                        guTranslate(&f_GlyphSprites[spriteIndex].matrix, advance - width + x, y, 0);
                         advance += fontSize;
-                        g_GlyphSprites[spriteIndex].code = code;
-                        g_GlyphSprites[spriteIndex].fontSize = fontSize;
-                        g_GlyphSprites[spriteIndex].group = group;
+                        f_GlyphSprites[spriteIndex].code = code;
+                        f_GlyphSprites[spriteIndex].fontSize = fontSize;
+                        f_GlyphSprites[spriteIndex].group = group;
                         break;
                 }
             }
@@ -2665,7 +2665,7 @@ void DrawGlyphGroup(Gfx **displayListHead, s32 group) {
     isIconLoaded = FALSE;
     gDPPipeSync(gfx++);
     for (spriteIndex = 0; spriteIndex != GLYPH_SPRITE_COUNT; spriteIndex++) {
-        if (g_GlyphSprites[spriteIndex].group == group) {
+        if (f_GlyphSprites[spriteIndex].group == group) {
             iconOffset = NO_ICON;
             if (isIconLoaded == TRUE) {
                 gDPSetCombineLERP(
@@ -2692,12 +2692,12 @@ void DrawGlyphGroup(Gfx **displayListHead, s32 group) {
                 isIconLoaded = FALSE;
             }
 
-            code = g_GlyphSprites[spriteIndex].code;
+            code = f_GlyphSprites[spriteIndex].code;
             if (code < MESSAGE_CODE_GLYPH) {
-                s = (code % FONT_GLYPHS_PER_ROW) * g_GlyphSprites[spriteIndex].fontSize;
-                t = (code / FONT_GLYPHS_PER_ROW) * g_GlyphSprites[spriteIndex].fontSize;
+                s = (code % FONT_GLYPHS_PER_ROW) * f_GlyphSprites[spriteIndex].fontSize;
+                t = (code / FONT_GLYPHS_PER_ROW) * f_GlyphSprites[spriteIndex].fontSize;
                 gDPPipeSync(gfx++);
-                if (g_GlyphSprites[spriteIndex].fontSize == FONT_SIZE_LARGE) {
+                if (f_GlyphSprites[spriteIndex].fontSize == FONT_SIZE_LARGE) {
                     gDPSetTextureImage(
                         gfx++,
                         G_IM_FMT_I,
@@ -2706,7 +2706,7 @@ void DrawGlyphGroup(Gfx **displayListHead, s32 group) {
                         TextureAddress(ImageBody(f_LargeFontImage))
                     );
                 }
-                else if (g_GlyphSprites[spriteIndex].fontSize == FONT_SIZE_MEDIUM) {
+                else if (f_GlyphSprites[spriteIndex].fontSize == FONT_SIZE_MEDIUM) {
                     gDPSetTextureImage(
                         gfx++,
                         G_IM_FMT_I,
@@ -2882,21 +2882,21 @@ void DrawGlyphGroup(Gfx **displayListHead, s32 group) {
             gDPPipeSync(gfx++);
             gSPMatrix(
                 gfx++,
-                PhysicalAddress(&g_GlyphSprites[spriteIndex].matrix),
+                PhysicalAddress(&f_GlyphSprites[spriteIndex].matrix),
                 G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW
             );
-            fontSize = g_GlyphSprites[spriteIndex].fontSize;
+            fontSize = f_GlyphSprites[spriteIndex].fontSize;
             top = 0;
             left = 0;
             bottom = fontSize;
             if (fontSize == FONT_SIZE_LARGE) {
-                if (g_GlyphSprites[spriteIndex].flags & GLYPH_FLAG_TOP_PART) {
+                if (f_GlyphSprites[spriteIndex].flags & GLYPH_FLAG_TOP_PART) {
                     gSPVertex(gfx++, f_LargeGlyphTopVertices, QUAD_VERTEX_COUNT, 0);
                     bottom = LARGE_GLYPH_PART_ROW;
                 }
-                else if (g_GlyphSprites[spriteIndex].flags & GLYPH_FLAG_BOTTOM_PART) {
+                else if (f_GlyphSprites[spriteIndex].flags & GLYPH_FLAG_BOTTOM_PART) {
                     gSPVertex(gfx++, f_LargeGlyphBottomVertices, QUAD_VERTEX_COUNT, 0);
-                    bottom = g_GlyphSprites[spriteIndex].fontSize;
+                    bottom = f_GlyphSprites[spriteIndex].fontSize;
                     top = LARGE_GLYPH_PART_ROW;
                 }
                 else {

@@ -355,12 +355,12 @@ u16 g_ScreenEffectPerspectiveNormalization;
 Mtx g_ScreenEffectProjection;
 Mtx g_ScreenOrthoMatrix;
 
-FILE_STATIC s32 g_PerspectiveNormalization;
+FILE_STATIC s32 f_PerspectiveNormalization;
 // Set up by StartGame; no code in the main segment draws with it. A view
 // alone rather than a Camera: nothing reaches the four bytes before it, and
 // libc's errno follows it where a Camera's mode would be.
-FILE_STATIC CameraView g_SpareCameraView;
-FILE_STATIC Gfx g_DisplayLists[2][DISPLAY_LIST_LENGTH];
+FILE_STATIC CameraView f_SpareCameraView;
+FILE_STATIC Gfx f_DisplayLists[2][DISPLAY_LIST_LENGTH];
 
 // Where StartGame places the spare view and the inset camera's view
 #define SPARE_VIEW_LEFT 128
@@ -389,22 +389,22 @@ void StartGame(void) {
     g_MapCamera.view.viewportCenterX = SCREEN_WIDTH;
     g_MapCamera.view.viewportCenterY = SCREEN_HEIGHT;
     g_MapCamera.view.zoom = 1.0f;
-    g_SpareCameraView.eye[AXIS_X] = 0.0f;
-    g_SpareCameraView.eye[AXIS_Y] = 0.0f;
-    g_SpareCameraView.eye[AXIS_Z] = 0.0f;
-    g_SpareCameraView.lookAt[AXIS_X] = 0.0f;
-    g_SpareCameraView.lookAt[AXIS_Y] = 0.0f;
-    g_SpareCameraView.lookAt[AXIS_Z] = 1.0f;
-    g_SpareCameraView.heading = 0.0f;
-    g_SpareCameraView.scissorX = SPARE_VIEW_LEFT;
-    g_SpareCameraView.scissorY = SPARE_VIEW_TOP;
-    g_SpareCameraView.scissorWidth = SPARE_VIEW_WIDTH;
-    g_SpareCameraView.scissorHeight = SPARE_VIEW_HEIGHT;
-    g_SpareCameraView.unreadSettings[0] = 0;
-    g_SpareCameraView.unreadSettings[1] = 30;
-    g_SpareCameraView.viewportCenterX = ViewportCenter(SPARE_VIEW_LEFT, SPARE_VIEW_WIDTH);
-    g_SpareCameraView.viewportCenterY = ViewportCenter(SPARE_VIEW_TOP, SPARE_VIEW_HEIGHT);
-    g_SpareCameraView.zoom = 0.5f;
+    f_SpareCameraView.eye[AXIS_X] = 0.0f;
+    f_SpareCameraView.eye[AXIS_Y] = 0.0f;
+    f_SpareCameraView.eye[AXIS_Z] = 0.0f;
+    f_SpareCameraView.lookAt[AXIS_X] = 0.0f;
+    f_SpareCameraView.lookAt[AXIS_Y] = 0.0f;
+    f_SpareCameraView.lookAt[AXIS_Z] = 1.0f;
+    f_SpareCameraView.heading = 0.0f;
+    f_SpareCameraView.scissorX = SPARE_VIEW_LEFT;
+    f_SpareCameraView.scissorY = SPARE_VIEW_TOP;
+    f_SpareCameraView.scissorWidth = SPARE_VIEW_WIDTH;
+    f_SpareCameraView.scissorHeight = SPARE_VIEW_HEIGHT;
+    f_SpareCameraView.unreadSettings[0] = 0;
+    f_SpareCameraView.unreadSettings[1] = 30;
+    f_SpareCameraView.viewportCenterX = ViewportCenter(SPARE_VIEW_LEFT, SPARE_VIEW_WIDTH);
+    f_SpareCameraView.viewportCenterY = ViewportCenter(SPARE_VIEW_TOP, SPARE_VIEW_HEIGHT);
+    f_SpareCameraView.zoom = 0.5f;
     g_Cameras[MAIN_CAMERA].mode = CAMERA_MODE_BEHIND_GOLFER;
     g_Cameras[MAIN_CAMERA].view.eye[AXIS_X] = 0.0f;
     g_Cameras[MAIN_CAMERA].view.eye[AXIS_Y] = 0.0f;
@@ -1912,7 +1912,7 @@ s32 DrawGame(void) {
             break;
     }
 
-    g_DisplayListHead = g_DisplayLists[g_DrawBufferIndex];
+    g_DisplayListHead = f_DisplayLists[g_DrawBufferIndex];
     gDPPipeSync(g_DisplayListHead++);
     gDPPipelineMode(g_DisplayListHead++, G_PM_1PRIMITIVE);
     if (g_HasExpansionPak) {
@@ -2335,7 +2335,7 @@ s32 DrawGame(void) {
                             1.0f
                         );
                         ConvertMatrixToFixed(matrices->perspectiveF, &matrices->perspective);
-                        g_PerspectiveNormalization = perspectiveNormalization;
+                        f_PerspectiveNormalization = perspectiveNormalization;
                         gSPPerspNormalize(g_DisplayListHead++, perspectiveNormalization);
                         guTranslate(&matrices->placement, 0.0f, 0.0f, 0.0f);
                         courseView = &g_Cameras[cameraIndex].view;
@@ -3084,7 +3084,7 @@ s32 DrawGame(void) {
 
     gDPFullSync(g_DisplayListHead++);
     gSPEndDisplayList(g_DisplayListHead++);
-    commandCount = g_DisplayListHead - g_DisplayLists[g_DrawBufferIndex];
+    commandCount = g_DisplayListHead - f_DisplayLists[g_DrawBufferIndex];
     if ((u32)commandCount >= DISPLAY_LIST_LENGTH) {
         ReportFailedAssertion("EX", "c:/usgolf64/stage00.c", 2636);
     }
@@ -3116,16 +3116,16 @@ s32 DrawGame(void) {
     f_GfxTaskStartTime = OS_CYCLES_TO_USEC(osGetTime());
     if (g_FramePacingMode == PACING_MODE_NORMAL) {
         nuGfxTaskStart(
-            g_DisplayLists[g_DrawBufferIndex],
-            (s32)(g_DisplayListHead - g_DisplayLists[g_DrawBufferIndex]) * sizeof(Gfx),
+            f_DisplayLists[g_DrawBufferIndex],
+            (s32)(g_DisplayListHead - f_DisplayLists[g_DrawBufferIndex]) * sizeof(Gfx),
             NU_GFX_UCODE_F3DEX,
             GFX_TASK_FLAGS
         );
     }
     else if (g_FramePacingMode == PACING_MODE_PERFORMANCE_METER) {
         nuGfxTaskStart(
-            g_DisplayLists[g_DrawBufferIndex],
-            (s32)(g_DisplayListHead - g_DisplayLists[g_DrawBufferIndex]) * sizeof(Gfx),
+            f_DisplayLists[g_DrawBufferIndex],
+            (s32)(g_DisplayListHead - f_DisplayLists[g_DrawBufferIndex]) * sizeof(Gfx),
             NU_GFX_UCODE_F3DEX,
             NU_SC_TASK_DP_WAIT | NU_SC_NOSWAPBUFFER
         );
@@ -3140,8 +3140,8 @@ s32 DrawGame(void) {
     }
     else {
         nuGfxTaskStart(
-            g_DisplayLists[g_DrawBufferIndex],
-            (s32)(g_DisplayListHead - g_DisplayLists[g_DrawBufferIndex]) * sizeof(Gfx),
+            f_DisplayLists[g_DrawBufferIndex],
+            (s32)(g_DisplayListHead - f_DisplayLists[g_DrawBufferIndex]) * sizeof(Gfx),
             NU_GFX_UCODE_F3DEX,
             NU_SC_TASK_DP_WAIT | NU_SC_NOSWAPBUFFER
         );
@@ -3247,7 +3247,7 @@ void DrawResetFade(void) {
     Gfx *displayList;
     s32 passIndex;
 
-    gfx = g_DisplayLists[g_DrawBufferIndex];
+    gfx = f_DisplayLists[g_DrawBufferIndex];
     displayList = gfx;
 
     // The original builds the frame in a loop that runs once

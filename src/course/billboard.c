@@ -60,7 +60,7 @@ typedef struct BillboardTexture {
 
 Billboard g_Billboards[BILLBOARD_COUNT];
 
-FILE_STATIC BillboardTransform g_BillboardTransforms[BILLBOARD_COUNT];
+FILE_STATIC BillboardTransform f_BillboardTransforms[BILLBOARD_COUNT];
 
 static Vtx f_BillboardVertices[][SHAPE_VERTEX_COUNT] = {
     {
@@ -233,9 +233,9 @@ void PlaceBillboards(void) {
             y = GetGroundHeight(x * GROUND_HEIGHT_SCALE, z * GROUND_HEIGHT_SCALE) /
                 GROUND_HEIGHT_SCALE;
             g_Billboards[billboardIndex].y = y;
-            guTranslate(&g_BillboardTransforms[billboardIndex].translation, x, y, z);
+            guTranslate(&f_BillboardTransforms[billboardIndex].translation, x, y, z);
             guScale(
-                &g_BillboardTransforms[billboardIndex].scale,
+                &f_BillboardTransforms[billboardIndex].scale,
                 g_Billboards[billboardIndex].width,
                 g_Billboards[billboardIndex].height,
                 1.0f
@@ -251,10 +251,10 @@ void SortBillboardsByDepth(void) {
 
     for (orderIndex = 0; orderIndex != BILLBOARD_COUNT; orderIndex++) {
         if (g_Billboards[orderIndex].textureIndex < 0) {
-            g_BillboardTransforms[orderIndex].viewDepth = VIEW_DEPTH_FAR;
+            f_BillboardTransforms[orderIndex].viewDepth = VIEW_DEPTH_FAR;
         }
         else {
-            g_BillboardTransforms[orderIndex].viewDepth = GetViewDepth(
+            f_BillboardTransforms[orderIndex].viewDepth = GetViewDepth(
                 g_Billboards[orderIndex].x,
                 g_Billboards[orderIndex].y,
                 g_Billboards[orderIndex].z
@@ -266,8 +266,8 @@ void SortBillboardsByDepth(void) {
     for (orderIndex = 1; orderIndex != BILLBOARD_COUNT; orderIndex++) {
         insertedIndex = f_DrawOrder[orderIndex];
         for (sortedIndex = orderIndex - 1; sortedIndex >= 0 &&
-            g_BillboardTransforms[f_DrawOrder[sortedIndex]].viewDepth <
-                g_BillboardTransforms[insertedIndex].viewDepth;
+            f_BillboardTransforms[f_DrawOrder[sortedIndex]].viewDepth <
+                f_BillboardTransforms[insertedIndex].viewDepth;
             sortedIndex--) {
             f_DrawOrder[sortedIndex + 1] = f_DrawOrder[sortedIndex];
         }
@@ -505,11 +505,11 @@ void DrawBillboards(CameraMatrices *matrices, s32 cameraIndex) {
             continue;
         }
 
-        if (g_BillboardTransforms[billboardIndex].viewDepth < VIEW_DEPTH_NEAR) {
+        if (f_BillboardTransforms[billboardIndex].viewDepth < VIEW_DEPTH_NEAR) {
             DrawBillboard(
                 &gfx,
                 &g_Billboards[billboardIndex],
-                &g_BillboardTransforms[billboardIndex],
+                &f_BillboardTransforms[billboardIndex],
                 textureIndex,
                 matrices
             );
@@ -537,7 +537,7 @@ void DrawBillboards(CameraMatrices *matrices, s32 cameraIndex) {
             continue;
         }
 
-        viewDepth = g_BillboardTransforms[billboardIndex].viewDepth;
+        viewDepth = f_BillboardTransforms[billboardIndex].viewDepth;
         if (viewDepth < VIEW_DEPTH_NEAR) {
             continue;
         }
@@ -560,7 +560,7 @@ void DrawBillboards(CameraMatrices *matrices, s32 cameraIndex) {
         }
 
         if (IsDebugBButtonView() &&
-            g_BillboardTransforms[billboardIndex].viewDepth > ballDepth - BALL_CLEARANCE_DEPTH) {
+            f_BillboardTransforms[billboardIndex].viewDepth > ballDepth - BALL_CLEARANCE_DEPTH) {
             continue;
         }
 
@@ -582,7 +582,7 @@ void DrawBillboards(CameraMatrices *matrices, s32 cameraIndex) {
         DrawBillboard(
             &gfx,
             &g_Billboards[billboardIndex],
-            &g_BillboardTransforms[billboardIndex],
+            &f_BillboardTransforms[billboardIndex],
             textureIndex,
             matrices
         );
@@ -685,7 +685,7 @@ void DrawFadingBillboards(CameraMatrices *matrices, s32 cameraIndex) {
             continue;
         }
 
-        viewDepth = g_BillboardTransforms[billboardIndex].viewDepth;
+        viewDepth = f_BillboardTransforms[billboardIndex].viewDepth;
         if (viewDepth < VIEW_DEPTH_NEAR) {
             continue;
         }
@@ -724,7 +724,7 @@ void DrawFadingBillboards(CameraMatrices *matrices, s32 cameraIndex) {
         DrawBillboard(
             &gfx,
             &g_Billboards[billboardIndex],
-            &g_BillboardTransforms[billboardIndex],
+            &f_BillboardTransforms[billboardIndex],
             textureIndex,
             matrices
         );

@@ -157,7 +157,7 @@ typedef s32 FlightCameraKind;
 
 // It is a macro, as an inline function compiles differently from the original
 #define IsBallLanding() \
-    (g_SimulatedShot.stepCount < g_BallFlightStep + LANDING_STEP_COUNT && \
+    (g_SimulatedShot.stepCount < f_BallFlightStep + LANDING_STEP_COUNT && \
         (f32)f_ShotEndPosition[AXIS_X] < (f32)(f_FlightBallPosition[AXIS_X] + LANDING_RADIUS) && \
         (f32)(f_FlightBallPosition[AXIS_X] - LANDING_RADIUS) < (f32)f_ShotEndPosition[AXIS_X] && \
         (f32)f_ShotEndPosition[AXIS_Z] < (f32)(f_FlightBallPosition[AXIS_Z] + LANDING_RADIUS) && \
@@ -168,7 +168,7 @@ u8 *g_NoiseTexels;
 // The grid that DisplaceNoiseSquare builds
 FILE_STATIC s16 (*f_NoiseGrid)[NOISE_GRID_SIZE];
 // The step of the simulated path that the ball's flight has reached
-FILE_STATIC s32 g_BallFlightStep;
+FILE_STATIC s32 f_BallFlightStep;
 // Two grids of NOISE_GRID_SIZE x NOISE_GRID_SIZE heights, which the noise
 // texture blends
 FILE_STATIC s16 f_NoiseGrids[NOISE_GRID_COUNT][NOISE_GRID_SIZE][NOISE_GRID_SIZE];
@@ -592,7 +592,7 @@ void StopFlightCamera(void) {
     FadeOutSound(FLIGHT_SOUND_CHANNEL_CUP_IN, SOUND_FADE_FRAME_COUNT);
     ClearShotEffects(CLEAR_KIND_EFFECTS);
     f_FlightCameraKind = FLIGHT_CAMERA_NONE;
-    if (g_BallFlightStep == g_SimulatedShot.stepCount) {
+    if (f_BallFlightStep == g_SimulatedShot.stepCount) {
         osSyncPrintf("\nCheckWater1\n");
         if (g_SimulatedShot.isWaterCut) {
             osSyncPrintf("\nCheckWater2\n");
@@ -675,7 +675,7 @@ void StartFlightCamera(s32 earlierFlightCount) {
         g_RoundHud.isBallTrailShown = FALSE;
     }
 
-    g_BallFlightStep = 0;
+    f_BallFlightStep = 0;
     f_LandingWaitFrame = 0;
     f_IsCameraKindNew = FALSE;
     f_CupViewHoldCount = 0;
@@ -1040,7 +1040,7 @@ static inline void QueueOnlookerSounds(CharacterSoundKind kind) {
 // Plays the sounds and the other players' reactions that go with the ball's
 // flight: after a full shot, on landing in trouble and, at the end of the
 // flight, by the shooter's stroke count against par. step is
-// g_BallFlightStep, which the caller clamps to the recorded path.
+// f_BallFlightStep, which the caller clamps to the recorded path.
 void PlayFlightSounds(s32 step) {
     s32 shownRingCount;
     ScoreToPar scoreToPar;
@@ -1144,7 +1144,7 @@ void PlayFlightSounds(s32 step) {
     }
 
     if (shownRingCount == 0 &&
-        g_BallFlightStep == g_SimulatedShot.stepCount - 1 &&
+        f_BallFlightStep == g_SimulatedShot.stepCount - 1 &&
         !g_SimulatedShot.endsInCup) {
         if (g_SimulatedShot.startsOnGreen) {
             if (IsNiceTouchPutt()) {
@@ -1212,7 +1212,7 @@ void PlayFlightSounds(s32 step) {
     }
 
     if (g_SimulatedShot.endsInCup) {
-        if (g_BallFlightStep >= g_SimulatedShot.stepCount - FLAG_SHOT_CALL_STEP_COUNT &&
+        if (f_BallFlightStep >= g_SimulatedShot.stepCount - FLAG_SHOT_CALL_STEP_COUNT &&
             f_EndReaction == END_REACTION_NONE &&
             g_SimulatedShot.flagHitStep != NO_STEP) {
             StartBanner(BANNER_FLAG_SHOT);
@@ -1223,7 +1223,7 @@ void PlayFlightSounds(s32 step) {
             f_PendingResultSound = RESULT_SOUND_SUPERB_SHOT;
         }
 
-        if (g_BallFlightStep >= g_SimulatedShot.stepCount - CHIP_IN_CALL_STEP_COUNT &&
+        if (f_BallFlightStep >= g_SimulatedShot.stepCount - CHIP_IN_CALL_STEP_COUNT &&
             f_EndReaction == END_REACTION_NONE &&
             IsChipIn()) {
             StartBanner(BANNER_CHIP_IN);
@@ -1235,7 +1235,7 @@ void PlayFlightSounds(s32 step) {
 
     isPlayed = &f_IsLandingSoundPlayed;
     if (!*isPlayed) {
-        if (g_BallFlightStep == g_SimulatedShot.stepCount &&
+        if (f_BallFlightStep == g_SimulatedShot.stepCount &&
             !shownRingCount &&
             g_SimulatedShot.endsInCup) {
             *isPlayed = TRUE;
@@ -1295,7 +1295,7 @@ void PlayFlightSounds(s32 step) {
 
         isStillPlayed = &f_IsLandingSoundPlayed;
         if (!*isStillPlayed &&
-            g_BallFlightStep > EARLY_STEP_COUNT &&
+            f_BallFlightStep > EARLY_STEP_COUNT &&
             HasHitGroundBefore(step, EARLY_STEP_COUNT) &&
             IsShotBeyond(FULL_SHOT_FRACTION)) {
             surfaceTraits = GetSurfaceTraits(g_TurnBallSimulation.surface);
@@ -1313,8 +1313,8 @@ void PlayFlightSounds(s32 step) {
         }
     }
 
-    if (g_BallFlightStep > EARLY_STEP_COUNT &&
-        g_BallFlightStep == g_SimulatedShot.stepCount - LANDING_SOUND_STEP_COUNT) {
+    if (f_BallFlightStep > EARLY_STEP_COUNT &&
+        f_BallFlightStep == g_SimulatedShot.stepCount - LANDING_SOUND_STEP_COUNT) {
         if (IsBunkerKind(f_EndSurfaceTraits->kind)) {
             f_IsLandingSoundPlayed = TRUE;
             PlaySound(SOUND_TROUBLE_LANDING, FLIGHT_SOUND_CHANNEL_LANDING, SOUND_FULL_SCALE);
@@ -2951,7 +2951,7 @@ void ChooseFlightCameraKind(void) {
      ) > END_VIEW_DISTANCE_MIN)
 // Whether a new camera kind would be seen long enough, or the end is shown
 #define HasTimeForNewCamera() \
-    (g_BallFlightStep + CAMERA_CHOICE_STEP_COUNT_MIN < g_SimulatedShot.stepCount || \
+    (f_BallFlightStep + CAMERA_CHOICE_STEP_COUNT_MIN < g_SimulatedShot.stepCount || \
         f_FlightPhase == FLIGHT_PHASE_END)
 // Whether neither the cup view nor a coming event holds the camera
 #define IsFlightCameraFree() (!g_IsCupViewShown && f_ComingFlightEvents == 0)
@@ -2988,7 +2988,7 @@ void ChooseFlightCameraKind(void) {
 #define SECOND_BLANKED_TEXT_ROW 2
 
 // Updates the flight camera, the inset view and the ball's sounds for one frame
-// of the ball's flight, and advances g_BallFlightStep when isAdvancing is 1.
+// of the ball's flight, and advances f_BallFlightStep when isAdvancing is 1.
 // Once the flight has ended, it counts the landing wait and returns TRUE when
 // it is over. The START button clears g_RoundHud.isWindIndicatorShown through
 // g_RoundHud.isProgressShown and g_RoundHud.isShotLengthShown.
@@ -3027,11 +3027,11 @@ Boolean UpdateFlightCamera(Boolean isAdvancing, s32 buttons) {
         g_RoundHud.isProgressShown = f_IsFlightHudShown;
     }
 
-    if (g_BallFlightStep >= PATH_STEP_COUNT) {
+    if (f_BallFlightStep >= PATH_STEP_COUNT) {
         step = PATH_STEP_COUNT - 1;
     }
     else {
-        step = g_BallFlightStep;
+        step = f_BallFlightStep;
     }
 
     if (step >= g_SimulatedShot.stepCount - 1) {
@@ -3043,7 +3043,7 @@ Boolean UpdateFlightCamera(Boolean isAdvancing, s32 buttons) {
         f_FlightBallPosition[AXIS_Y] = f_ShotStartPosition[AXIS_Y];
         f_FlightBallPosition[AXIS_Z] = f_ShotStartPosition[AXIS_Z];
     }
-    else if (g_BallFlightStep == g_SimulatedShot.stepCount) {
+    else if (f_BallFlightStep == g_SimulatedShot.stepCount) {
         f_FlightBallPosition[AXIS_X] = g_SimulatedShot.endPosition[AXIS_X];
         f_FlightBallPosition[AXIS_Y] = g_SimulatedShot.endPosition[AXIS_Y];
         f_FlightBallPosition[AXIS_Z] = g_SimulatedShot.endPosition[AXIS_Z];
@@ -3068,7 +3068,7 @@ Boolean UpdateFlightCamera(Boolean isAdvancing, s32 buttons) {
             case FLIGHT_PHASE_LAUNCH:
                 if (isAdvancing == TRUE &&
                     step == LAUNCH_END_STEP &&
-                    g_BallFlightStep < g_SimulatedShot.stepCount - END_PHASE_STEP_COUNT) {
+                    f_BallFlightStep < g_SimulatedShot.stepCount - END_PHASE_STEP_COUNT) {
                     f_FlightPhase = FLIGHT_PHASE_CLIMB;
                     f_HasFlightPhaseChanged = TRUE;
                 }
@@ -3076,14 +3076,14 @@ Boolean UpdateFlightCamera(Boolean isAdvancing, s32 buttons) {
                 break;
             case FLIGHT_PHASE_CLIMB:
                 if (step == GREEN_CLIMB_END_STEP &&
-                    g_BallFlightStep < g_SimulatedShot.stepCount - END_PHASE_STEP_COUNT) {
+                    f_BallFlightStep < g_SimulatedShot.stepCount - END_PHASE_STEP_COUNT) {
                     f_FlightPhase = FLIGHT_PHASE_CONTACT;
                     f_HasFlightPhaseChanged = TRUE;
                 }
 
                 break;
             case FLIGHT_PHASE_CONTACT:
-                if (g_SimulatedShot.stepCount - END_PHASE_STEP_COUNT < g_BallFlightStep) {
+                if (g_SimulatedShot.stepCount - END_PHASE_STEP_COUNT < f_BallFlightStep) {
                     f_FlightPhase = FLIGHT_PHASE_END;
                     f_HasFlightPhaseChanged = TRUE;
                 }
@@ -3112,7 +3112,7 @@ Boolean UpdateFlightCamera(Boolean isAdvancing, s32 buttons) {
 
                 break;
             case FLIGHT_PHASE_CLIMB:
-                if (g_BallFlightStep > g_SimulatedShot.positionStepMin[AXIS_Y]) {
+                if (f_BallFlightStep > g_SimulatedShot.positionStepMin[AXIS_Y]) {
                     f_FlightPhase = FLIGHT_PHASE_FALL;
                     f_HasFlightPhaseChanged = TRUE;
                 }
@@ -3133,7 +3133,7 @@ Boolean UpdateFlightCamera(Boolean isAdvancing, s32 buttons) {
 
                 break;
             case FLIGHT_PHASE_CONTACT:
-                if (g_SimulatedShot.stepCount - END_PHASE_STEP_COUNT < g_BallFlightStep) {
+                if (g_SimulatedShot.stepCount - END_PHASE_STEP_COUNT < f_BallFlightStep) {
                     f_FlightPhase = FLIGHT_PHASE_END;
                     f_HasFlightPhaseChanged = TRUE;
                 }
@@ -3147,7 +3147,7 @@ Boolean UpdateFlightCamera(Boolean isAdvancing, s32 buttons) {
                 f_FlightPhase = FLIGHT_PHASE_CLIMB;
                 break;
             case FLIGHT_PHASE_CLIMB:
-                if (g_BallFlightStep > g_SimulatedShot.positionStepMin[AXIS_Y]) {
+                if (f_BallFlightStep > g_SimulatedShot.positionStepMin[AXIS_Y]) {
                     f_FlightPhase = FLIGHT_PHASE_NEARING_CONTACT;
                     f_HasFlightPhaseChanged = TRUE;
                 }
@@ -3217,7 +3217,7 @@ Boolean UpdateFlightCamera(Boolean isAdvancing, s32 buttons) {
             (int)f_HasFlightPhaseChanged,
             (int)f_CameraChangeHoldCount,
             (int)step,
-            (int)g_BallFlightStep
+            (int)f_BallFlightStep
         );
         PrintDebugText(g_PrintBuffer, FLIGHT_STEP_TEXT_COLUMN, FLIGHT_STEP_TEXT_ROW);
         sprintf(g_PrintBuffer, "TYPE:%2d TIME:%2d", (int)f_FlightCameraKind, (int)f_FlightPhase);
@@ -3225,7 +3225,7 @@ Boolean UpdateFlightCamera(Boolean isAdvancing, s32 buttons) {
     }
 
     if (f_ShotLength > VERY_LONG_SHOT_LENGTH_MIN &&
-        g_BallFlightStep == LONG_SHOT_EFFECT_STEP &&
+        f_BallFlightStep == LONG_SHOT_EFFECT_STEP &&
         g_SimulatedShot.stepCount > LONG_SHOT_EFFECT_FLIGHT_STEP_COUNT) {
         StartShotEffect(SHOT_EFFECT_LONG_SHOT);
     }
@@ -3424,20 +3424,20 @@ Boolean UpdateFlightCamera(Boolean isAdvancing, s32 buttons) {
         g_Cameras[INSET_CAMERA].view.lookAt[AXIS_Z] += LOOK_AT_NUDGE;
     }
 
-    if (g_SimulatedShot.stepCount < g_BallFlightStep + HUD_CLEAR_STEPS_LEFT &&
+    if (g_SimulatedShot.stepCount < f_BallFlightStep + HUD_CLEAR_STEPS_LEFT &&
         IsHudAnimationDone() == TRUE) {
         StartHudAnimation(HUD_ANIMATION_NONE);
     }
 
-    if (isAdvancing == TRUE && g_BallFlightStep == 0) {
+    if (isAdvancing == TRUE && f_BallFlightStep == 0) {
         PlayContactSound();
     }
 
-    // Reading f_LandingWaitFrame and g_BallFlightStep through locals is there to
+    // Reading f_LandingWaitFrame and f_BallFlightStep through locals is there to
     // match
     waitFrame = f_LandingWaitFrame;
     if (isAdvancing == TRUE) {
-        flightStep = &g_BallFlightStep;
+        flightStep = &f_BallFlightStep;
         if (*flightStep == g_SimulatedShot.stepCount) {
             if (waitFrame == 0 && !g_TurnBallSimulation.isHoledOut) {
                 StartLandingReaction(LANDING_REACTION_REST);

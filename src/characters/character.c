@@ -226,7 +226,7 @@ static Mtx f_ShadowProjections[CHARACTER_SLOT_COUNT][DRAW_BUFFER_COUNT];
 u8 *g_ShadowTexture;
 ImportedCharacter g_ImportedCharacters[IMPORTED_CHARACTER_COUNT];
 
-FILE_STATIC s32 g_CurrentAnimationStartFrame;
+FILE_STATIC s32 f_CurrentAnimationStartFrame;
 
 // Half a side of the shadow's square, in model units
 #define SHADOW_QUAD_HALF_SIZE 1500
@@ -1154,13 +1154,13 @@ void LoadCharacter(u32 slotIndex, CharacterIndex characterIndex, s32 modelKind) 
         slot->animationEndFrame = slot->animationStartFrame +
             ModelAnimations(slot->model)[f_StartedAnimationIndex].frameCount;
         g_CurrentAnimationFrame = slot->animationFrame;
-        g_CurrentAnimationStartFrame = slot->animationStartFrame;
+        f_CurrentAnimationStartFrame = slot->animationStartFrame;
         g_CurrentAnimationEndFrame = slot->animationEndFrame;
         if (IsGameFlagSet(GAME_FLAG_LOG_CHARACTER_SETUP)) {
             osSyncPrintf(
                 "loop %d, loop_min = %d, loop_max = %d\n",
                 f_StartedAnimationIndex,
-                g_CurrentAnimationStartFrame,
+                f_CurrentAnimationStartFrame,
                 g_CurrentAnimationEndFrame
             );
         }
@@ -1491,7 +1491,7 @@ void AnimateCharacter(u32 slotIndex) {
         g_CharacterModelIndex = slot->modelIndex;
         g_CurrentAnimationFrame = slot->animationFrame;
         g_CurrentAnimationEndFrame = slot->animationEndFrame;
-        g_CurrentAnimationStartFrame = slot->animationStartFrame;
+        f_CurrentAnimationStartFrame = slot->animationStartFrame;
         if (IsGameFlagSet(GAME_FLAG_SHOW_ANIMATION_FRAMES)) {
             sprintf(
                 text,
@@ -1840,7 +1840,7 @@ void AnimateCharacterInSameCopy(u32 slotIndex) {
         g_CharacterModelIndex = slot->modelIndex;
         g_CurrentAnimationFrame = slot->animationFrame;
         g_CurrentAnimationEndFrame = slot->animationEndFrame;
-        g_CurrentAnimationStartFrame = slot->animationStartFrame;
+        f_CurrentAnimationStartFrame = slot->animationStartFrame;
         if (slot->playsRandomTextureAnimation) {
             if (slot->randomTextureAnimationDelay == 0) {
                 PlayTextureAnimation(slotIndex, RANDOM_TEXTURE_ANIMATION);

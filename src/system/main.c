@@ -66,7 +66,7 @@ enum CharacterSlotRole {
 // Iterations of the busy loop between two reports of RunHeartbeatLoop
 #define HEARTBEAT_LOOP_COUNT 100000000
 
-// Values of g_MainLoopState
+// Values of f_MainLoopState
 enum MainLoopState {
     MAIN_LOOP_START,
     MAIN_LOOP_RUNNING = -1
@@ -152,12 +152,12 @@ char g_RomBuildDate[BUILD_DATE_LENGTH_MAX + 1];
 char g_SaveBuildDate[SAVE_BUILD_DATE_SIZE];
 ControllerState g_TurnController;
 
-FILE_STATIC volatile MainLoopState g_MainLoopState;
+FILE_STATIC volatile MainLoopState f_MainLoopState;
 FILE_STATIC u8 f_GameFlagBits[GAME_FLAG_BYTE_COUNT];
 // The menus' readings from the last frame
-FILE_STATIC NUContData g_PreviousMenuControllerData[MAXCONTROLLERS];
+FILE_STATIC NUContData f_PreviousMenuControllerData[MAXCONTROLLERS];
 // One bit for each port with a controller plugged in, from bit 0
-FILE_STATIC u8 g_ConnectedControllerBits;
+FILE_STATIC u8 f_ConnectedControllerBits;
 
 // Reports a failed assertion to the host, and carries on
 void ReportFailedAssertion(const char *expression UNUSED, const char *fileName, s32 lineNumber) {
@@ -320,10 +320,10 @@ void mainproc(void *arg UNUSED) {
     InitFramebuffers();
 
     // Give the connected controllers to the players in port order
-    g_ConnectedControllerBits = nuContInit();
+    f_ConnectedControllerBits = nuContInit();
     g_ControllerCount = 0;
     for (portIndex = 0; portIndex < MAXCONTROLLERS; portIndex++) {
-        if ((g_ConnectedControllerBits >> portIndex) & 1) {
+        if ((f_ConnectedControllerBits >> portIndex) & 1) {
             g_PlayerControllerPorts[g_ControllerCount++] = portIndex;
         }
 
@@ -349,16 +349,16 @@ void mainproc(void *arg UNUSED) {
     AssignCharacterBuffers();
     InitClubs();
 
-    g_MainLoopState = MAIN_LOOP_START;
+    f_MainLoopState = MAIN_LOOP_START;
     while (TRUE) {
-        if (g_MainLoopState == MAIN_LOOP_START) {
-            g_MainLoopState = MAIN_LOOP_RUNNING;
+        if (f_MainLoopState == MAIN_LOOP_START) {
+            f_MainLoopState = MAIN_LOOP_RUNNING;
             StartGame();
             nuGfxFuncSet((NUGfxFunc)HandleGfxRetrace);
             nuPreNMIFuncSet(PrepareForReset);
         }
 
-        while (g_MainLoopState == MAIN_LOOP_RUNNING) {
+        while (f_MainLoopState == MAIN_LOOP_RUNNING) {
             if (g_MessageFramebuffer != NULL) {
                 osViSwapBuffer(g_MessageFramebuffer);
             }
@@ -589,13 +589,13 @@ void ReadControllers(void) {
     s32 playerIndex = 0;
     s32 portIndex = 0;
     ControllerState *controller = g_ControllerStates;
-    NUContData *previousMenuControllerData = g_PreviousMenuControllerData;
+    NUContData *previousMenuControllerData = f_PreviousMenuControllerData;
     NUContData *menuControllerData = g_MenuControllerData;
     NUContData *previousControllerData = g_PreviousControllerData;
     NUContData *controllerData = g_ControllerData;
 
     for (; portIndex < MAXCONTROLLERS; portIndex++) {
-        if ((g_ConnectedControllerBits >> portIndex) & 1) {
+        if ((f_ConnectedControllerBits >> portIndex) & 1) {
             *previousControllerData = *controllerData;
             *previousMenuControllerData = *menuControllerData;
             nuContDataGetEx(controllerData, portIndex);

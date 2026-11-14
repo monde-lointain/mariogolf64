@@ -76,7 +76,7 @@ void StartHoleCamerasAndSong(void);
 void StartHoleFlyover(void);
 Boolean StepHoleFlyover(void);
 // Updates the flight camera, the inset view and the ball's sounds for one frame of the ball's
-// flight, and advances g_BallFlightStep when isAdvancing is 1. Once the flight has ended, it counts
+// flight, and advances f_BallFlightStep when isAdvancing is 1. Once the flight has ended, it counts
 // the landing wait and returns TRUE when it is over. The START button clears
 // g_RoundHud.isWindIndicatorShown through g_RoundHud.isProgressShown and
 // g_RoundHud.isShotLengthShown.

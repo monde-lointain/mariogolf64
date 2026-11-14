@@ -96,7 +96,7 @@ ImageAsset *g_SpinningBadgeImage;
 ImageAsset *g_MenuWideSpareImage;
 PlayRecord g_PlayRecords[PLAYER_COUNT_MAX];
 RingShotRecord g_RingShotRecords[PLAYER_COUNT_MAX];
-FILE_STATIC u8 g_UnreadMenuBuffer[0x1218] UNUSED;
+FILE_STATIC u8 f_UnreadMenuBuffer[0x1218] UNUSED;
 UBoolean8 g_IsMenuCharacterLoaded[MAXCONTROLLERS];
 ImageAsset *g_AnimatedIconImages[ANIMATED_ICON_BUFFER_COUNT];
 BetSet g_BetSet;
@@ -128,7 +128,7 @@ TakenCharacters g_TakenCharacters;
 ImageAsset *g_TrophyFrameBuffers[TROPHY_FRAME_BUFFER_COUNT];
 PaletteColor *g_TrophyPalettes[TROPHY_PALETTE_COUNT];
 
-FILE_STATIC SaveData g_SaveData;
+FILE_STATIC SaveData f_SaveData;
 
 // f_SlotCells lists slots in id order up to this count
 #define MARKABLE_CHARACTER_COUNT 10
@@ -1413,7 +1413,7 @@ void FreeMenuResources(void) {
 
 SaveData *GetSaveData(void) {
     GetMenuMemory();
-    return &g_SaveData;
+    return &f_SaveData;
 }
 
 // Returns what the menus keep between visits, for its callers to share
@@ -1569,7 +1569,7 @@ void SortIndicesDescending(s32 *values, s32 *order, s32 count) {
 
 // Keeps a Ring Shot hole's record in a save slot, writing the save at once
 void SaveRingShotRecord(s32 recordIndex, RingShotRecord *record) {
-    g_SaveData.ringShotRecords[recordIndex] = *record;
+    f_SaveData.ringShotRecords[recordIndex] = *record;
     TransferSaveData(GetSaveData(), TRUE);
 }
 
@@ -1590,7 +1590,7 @@ void InsertRankedRecord(PlayRecord *record) {
 
     osSyncPrintf("Checking SuperShot");
     if ((s8)record->scoreKind & SCORE_KIND_RECORDED) {
-        records = g_SaveData.rankedRecords;
+        records = f_SaveData.rankedRecords;
         newPriority = GetRecordPriority(record);
         lowestPriority = 0x40000000; // Above any priority
         lowestIndex = 0;
@@ -1678,22 +1678,22 @@ Outcome SaveOrContinueGameByMode(Boolean isContinuing) {
         case GAME_MODE_STROKE:
         case GAME_MODE_UNRECORDED_STROKE:
         case GAME_MODE_SKINS_MATCH:
-            players = &g_SaveData.modePlayers[MODE0_PLAYER_INDEX];
-            records = &g_SaveData.modeRecords[MODE0_RECORD_INDEX];
-            game = &g_SaveData.modeGames[MODE0_GAME_INDEX];
+            players = &f_SaveData.modePlayers[MODE0_PLAYER_INDEX];
+            records = &f_SaveData.modeRecords[MODE0_RECORD_INDEX];
+            game = &f_SaveData.modeGames[MODE0_GAME_INDEX];
             playerCount = MODE0_PLAYER_COUNT;
             break;
         case GAME_MODE_TOURNAMENT:
-            players = &g_SaveData.modePlayers[MODE5_PLAYER_INDEX];
-            records = &g_SaveData.modeRecords[MODE5_RECORD_INDEX];
-            game = &g_SaveData.modeGames[MODE5_GAME_INDEX];
+            players = &f_SaveData.modePlayers[MODE5_PLAYER_INDEX];
+            records = &f_SaveData.modeRecords[MODE5_RECORD_INDEX];
+            game = &f_SaveData.modeGames[MODE5_GAME_INDEX];
             osSyncPrintf("Record/Play -Tour-/\n");
             playerCount = MODE5_PLAYER_COUNT;
             break;
         case GAME_MODE_GET_CHARACTER:
-            players = &g_SaveData.modePlayers[MODE4_PLAYER_INDEX];
-            records = &g_SaveData.modeRecords[MODE4_RECORD_INDEX];
-            game = &g_SaveData.modeGames[MODE4_GAME_INDEX];
+            players = &f_SaveData.modePlayers[MODE4_PLAYER_INDEX];
+            records = &f_SaveData.modeRecords[MODE4_RECORD_INDEX];
+            game = &f_SaveData.modeGames[MODE4_GAME_INDEX];
             playerCount = MODE4_PLAYER_COUNT;
             break;
 #ifdef AVOID_UB
@@ -1775,8 +1775,8 @@ Outcome SaveOrContinueGame(s32 slotIndex, Boolean isContinuing) {
     s32 index;
 
     playerCount = PLAYER_COUNT_MAX; // The limit, until the count is known
-    players = g_SaveData.savedPlayers[slotIndex];
-    game = &g_SaveData.savedGames[slotIndex];
+    players = f_SaveData.savedPlayers[slotIndex];
+    game = &f_SaveData.savedGames[slotIndex];
     if (!isContinuing) {
         hasIllegalState = FALSE;
         if (g_GameState.playerCount > playerCount) {
@@ -1849,8 +1849,8 @@ Outcome SaveOrContinueGame(s32 slotIndex, Boolean isContinuing) {
 }
 
 void RecordDisplayListLength(u32 commandCount) {
-    if (g_SaveData.longestDisplayListLength < commandCount) {
-        g_SaveData.longestDisplayListLength = commandCount;
+    if (f_SaveData.longestDisplayListLength < commandCount) {
+        f_SaveData.longestDisplayListLength = commandCount;
     }
 }
 
