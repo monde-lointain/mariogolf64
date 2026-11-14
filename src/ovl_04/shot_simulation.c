@@ -49,10 +49,10 @@ void SimulateShot(ShotLaunch *shot) {
     simulation->surface = g_CurrentShot.surface;
     hasGroundHit = FALSE;
     hasHoleTriangleBounce = FALSE;
-    g_SimulatedShot.usesPutter = GetClub(shot->clubIndex)->surfaceMask & CLUB_SURFACE_GREEN;
+    g_SimulatedShot.usesPutter = GetClub(shot->clubSlot)->surfaceMask & CLUB_SURFACE_GREEN;
     g_SimulatedShot.isPerfectSwing = shot->impactTiming == 0 &&
         shot->power >= LAUNCH_POWER_MAX &&
-        !(GetClub(shot->clubIndex)->surfaceMask & CLUB_SURFACE_GREEN);
+        !(GetClub(shot->clubSlot)->surfaceMask & CLUB_SURFACE_GREEN);
     g_SimulatedShot.impactRumbles = GetImpactTimingEntry(
         GetClub(g_Players[g_CurrentShot.playerIndex].clubs[g_CurrentShot.clubSlot]),
         g_CurrentShot.surface,

@@ -1858,7 +1858,7 @@ s32 LaunchOpeningBallSimulation(BallSimulation *simulation, s32 purpose, ShotLau
         simulation->playerIndex = 0;
     }
 
-    club = &f_OpeningClubs[shot->clubIndex];
+    club = &f_OpeningClubs[shot->clubSlot];
     entry = &f_OpeningImpactEffects[0][IMPACT_TIMING_ENTRY_LIMIT];
     rumbles = f_OpeningImpactEffects[0][IMPACT_TIMING_ENTRY_LIMIT].rumbles;
     if ((club->surfaceMask & CLUB_SURFACE_GREEN) &&

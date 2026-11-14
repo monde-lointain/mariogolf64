@@ -89,7 +89,9 @@ typedef struct ImpactEffect {
 
 typedef struct ShotLaunch {
     SignedBinaryAngle heading;
-    s32 clubIndex;
+    // A slot in the player's bag, except in club tests, which store the
+    // CLUB_TYPE_* to test.
+    s32 clubSlot;
     s32 power;
     s32 impactTiming;
     s32 offsetX;

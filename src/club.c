@@ -3808,7 +3808,7 @@ void GenerateClub(s32 clubIndex) {
     }
 
     club = &g_Clubs[clubIndex];
-    f_ClubTestShot.clubIndex = clubIndex;
+    f_ClubTestShot.clubSlot = clubIndex;
     for (shotMode = 0; shotMode < SHOT_MODE_COUNT; shotMode++) {
         f_ClubTestShot.shotMode = shotMode;
 
@@ -4056,7 +4056,7 @@ s32 GetPuttPower(s32 fraction, ShotMode shotMode) {
     }
 
     testShotMode = shotMode;
-    f_PutterTestShot.clubIndex = CLUB_TYPE_PUTTER;
+    f_PutterTestShot.clubSlot = CLUB_TYPE_PUTTER;
     f_PutterTestShot.shotMode = testShotMode;
     putter = &g_Clubs[CLUB_TYPE_PUTTER];
     reach = GetShotDistance(putter, testShotMode);

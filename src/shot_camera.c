@@ -697,7 +697,7 @@ void PlayContactSound(void) {
     SurfaceInfo *surfaceInfo;
 
     club =
-        GetClub(g_Players[g_SimulatedShot.shot.playerIndex].clubs[g_SimulatedShot.shot.clubIndex]);
+        GetClub(g_Players[g_SimulatedShot.shot.playerIndex].clubs[g_SimulatedShot.shot.clubSlot]);
     surfaceInfo = GetSurfaceInfo(g_CurrentShot.surface);
     if (club->kind == CLUB_KIND_WOOD) {
         if (IsPerfectPowerShot()) {

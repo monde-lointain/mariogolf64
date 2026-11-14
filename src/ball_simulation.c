@@ -2258,10 +2258,10 @@ s32 LaunchBallSimulation(BallSimulation *simulation, s32 purpose, ShotLaunch *sh
     if (simulation->purpose != LAUNCH_PURPOSE_CLUB_TEST) {
         s16 *clubs = g_Players[shot->playerIndex].clubs;
 
-        club = GetClub(clubs[shot->clubIndex]);
+        club = GetClub(clubs[shot->clubSlot]);
     }
     else {
-        club = GetClub(shot->clubIndex);
+        club = GetClub(shot->clubSlot);
     }
 
     if (simulation->purpose == LAUNCH_PURPOSE_CLUB_TEST) {

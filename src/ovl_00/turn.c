@@ -1729,7 +1729,7 @@ void BuildShotPreview(ShotLaunch *swing, s32 playerState) {
 
     f_IsShotPreviewBuilt = TRUE;
     shot.heading = g_CurrentShot.heading;
-    shot.clubIndex = g_CurrentShot.clubSlot;
+    shot.clubSlot = g_CurrentShot.clubSlot;
     if (IsGameFlagSet(GAME_FLAG_TUNE_SHOT_PREVIEW)) {
         PrintDebugText("               ", 10, 10);
         if ((g_ControllerStates[0].pressedButtons & U_JPAD) &&
@@ -2819,7 +2819,7 @@ void UpdateTurns(void) {
     }
 
     void PoseGolferForShot(void) {
-        s32 *lastClubSlot = &f_ShotLaunch.clubIndex;
+        s32 *lastClubSlot = &f_ShotLaunch.clubSlot;
 
         if (*lastClubSlot != g_CurrentShot.clubSlot ||
             f_ShotLaunch.shotMode != g_CurrentShot.shotMode) {
@@ -3035,7 +3035,7 @@ void UpdateTurns(void) {
                 g_RoundHud.greenGridState = 1;
                 g_RoundHud.isDistanceSignShown = 1;
                 g_RoundHud.isPinFlagShown = 1;
-                f_ShotLaunch.clubIndex = g_CurrentShot.clubSlot;
+                f_ShotLaunch.clubSlot = g_CurrentShot.clubSlot;
                 f_ShotLaunch.shotMode = g_CurrentShot.shotMode;
                 g_ShotSetupFrameCount = 0;
                 SetCharacterClub(0, g_Players[playerIndex].clubs[g_CurrentShot.clubSlot]);
@@ -3279,7 +3279,7 @@ void UpdateTurns(void) {
                 break;
             case PLAYER_STATE_PREPARING_AIM:
                 nextState = PLAYER_STATE_AIMING;
-                f_ShotLaunch.clubIndex = g_CurrentShot.clubSlot;
+                f_ShotLaunch.clubSlot = g_CurrentShot.clubSlot;
                 f_ShotLaunch.shotMode = g_CurrentShot.shotMode;
                 f_ShotLaunch.heading = g_CurrentShot.heading;
                 if (f_ShotSource == SHOT_SOURCE_PLANNING) {
@@ -3692,7 +3692,7 @@ void UpdateTurns(void) {
                     g_RoundHud.clubHeadTilt =
                         GetAimSlopeAngle(&g_Players[playerIndex], &f_ShotLaunch);
                     g_RoundHud.lieTilt = GetCrossSlopeAngle(&g_Players[playerIndex], &f_ShotLaunch);
-                    if (GetClub(f_ShotLaunch.clubIndex)->surfaceMask & CLUB_SURFACE_GREEN) {
+                    if (GetClub(f_ShotLaunch.clubSlot)->surfaceMask & CLUB_SURFACE_GREEN) {
                         g_RoundHud.isPuttingClubChosen = TRUE;
                     }
                     else {
@@ -4113,7 +4113,7 @@ void UpdateTurns(void) {
                     nextState = PLAYER_STATE_BALL_IN_FLIGHT;
                     if (f_ShotLaunch.impactTiming == 0 &&
                         f_ShotLaunch.power >= LAUNCH_POWER_MAX &&
-                        !(GetClub(f_ShotLaunch.clubIndex)->surfaceMask & CLUB_SURFACE_GREEN) &&
+                        !(GetClub(f_ShotLaunch.clubSlot)->surfaceMask & CLUB_SURFACE_GREEN) &&
                         RateShotLength() == 1) {
                         StartBanner(0);
                     }

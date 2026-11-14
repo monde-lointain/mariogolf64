@@ -2030,7 +2030,7 @@ s32 StepTrialShot(void) {
         f_Shot.offsetX = f_ShotOffsets[f_ShotOffset].offsetX + (rand() & 7) - 3;
         f_Shot.offsetY = f_ShotOffsets[f_ShotOffset].offsetY + (rand() & 7) - 3;
         f_TrialLaunch->heading = f_Shot.heading;
-        f_TrialLaunch->clubIndex = f_Shot.clubSlot;
+        f_TrialLaunch->clubSlot = f_Shot.clubSlot;
         f_ClosestTargetDistance = FAR_FROM_TARGET;
         f_TrialLaunch->power = GetGaugeFramePower(f_Shot.powerGaugeFrame);
         f_TrialLaunch->impactTiming = 0;
@@ -2722,7 +2722,7 @@ Boolean IsTrialShotSafe(void) {
     s32 velocityY UNUSED;
 
     f_TrialLaunch->heading = f_TrialShot.heading;
-    f_TrialLaunch->clubIndex = f_TrialShot.clubSlot;
+    f_TrialLaunch->clubSlot = f_TrialShot.clubSlot;
     f_TrialLaunch->power = GetGaugeFramePower(f_TrialShot.powerGaugeFrame);
     f_TrialLaunch->impactTiming = f_TrialShot.impactGaugeFrame - 60;
     f_TrialLaunch->offsetX = f_TrialShot.offsetX;
