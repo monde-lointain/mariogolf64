@@ -69,7 +69,7 @@ s32 GetNetScore(s32 playerIndex) {
 void RenumberHoleHandicaps(void) {
     s32 handicaps[COURSE_HOLE_COUNT];
     s32 order[COURSE_HOLE_COUNT];
-    s32 recordIndex;
+    CourseRecordIndex recordIndex;
     s32 holeIndex;
 
     for (recordIndex = 0; recordIndex < COURSE_RECORD_DRIVING_RANGE; recordIndex++) {
