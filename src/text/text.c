@@ -910,7 +910,7 @@ void DrawLargeTextSlot(Gfx **displayListHead, s32 slot) {
                             TEXEL_STEP_ONE,
                             TEXEL_STEP_ONE
                         );
-                        x += f_LargeFontWidths[g_PrintBuffer[index]];
+                        x += f_LargeFontWidths[(u8)g_PrintBuffer[index]];
                     }
                 }
             }
@@ -2482,7 +2482,7 @@ void PlaceGlyphGroup(s32 group, s32 fontSize, TextFlags flags, s32 x, s32 y, REA
                             advance += FONT_SIZE_LARGE;
                         }
                         else {
-                            advance += f_LargeFontWidths[text[placedCount]];
+                            advance += f_LargeFontWidths[(u8)text[placedCount]];
                         }
                     }
                     else {
