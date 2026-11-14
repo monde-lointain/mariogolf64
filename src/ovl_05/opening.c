@@ -1392,7 +1392,6 @@ void MoveLakitu(void);
 #define OPENING_DEBUG_SKIP_CONTROLLER 0
 #define OPENING_SCENE_CONTROLLER 1
 #define OPENING_EDITOR_CONTROLLER 2
-#define OPENING_MENU_SOUND_CHANNEL 15
 #define SCRIPT_SOUND_CHANNEL_COUNT ALTERNATING_SOUND_CHANNEL
 #define FRAME_COUNT_TEXT_COLUMN 30
 #define FRAME_COUNT_TEXT_ROW 26
@@ -1413,7 +1412,7 @@ void UpdateOpening(void) {
     if (IsGameFlagSet(GAME_FLAG_EDIT_OPENING_CAMERA)) {
         EditOpeningCamera();
         if (g_ControllerStates[OPENING_EDITOR_CONTROLLER].pressedButtons & B_BUTTON) {
-            PlaySound(SOUND_MENU_BLOCKED, OPENING_MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
+            PlaySound(SOUND_MENU_BLOCKED, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
             ClearGameFlag(GAME_FLAG_EDIT_OPENING_CAMERA);
             f_IsLookAtMarkerShown = FALSE;
             ClearDebugText();
@@ -3038,7 +3037,7 @@ void UpdateOpening(void) {
                     }
 
                     if (!f_HasLogoStarted) {
-                        PlaySound(SOUND_MENU_CONFIRM, OPENING_MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
+                        PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
                     }
 
                     SetTextSlot(
@@ -3116,7 +3115,7 @@ void UpdateOpening(void) {
 
         if (g_IsDebugEnabled) {
             if (g_ControllerStates[OPENING_EDITOR_CONTROLLER].pressedButtons & A_BUTTON) {
-                PlaySound(SOUND_MENU_CONFIRM, OPENING_MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
+                PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
                 SetGameFlag(GAME_FLAG_EDIT_OPENING_CAMERA);
                 f_IsLookAtMarkerShown = TRUE;
                 f_LookAtEaseMode = 0;

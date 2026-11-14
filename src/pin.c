@@ -15,6 +15,7 @@
 #include "gbi_helpers.h"
 #include "geometry.h"
 #include "heap.h"
+#include "hole_conditions.h"
 #include "language.h"
 #include "math_util.h"
 #include "round_hud.h"
@@ -75,7 +76,6 @@
 
 #define FLAG_SCALE 0.01f
 #define FLAG_WAVE_STEP_DEGREES 5
-#define FLAG_WIND_SPEED_UNIT 0x10000
 #define FLAG_WAVE_PER_WIND 0.02f
 #define FLAG_WAVE_MIN 0.05f
 
@@ -809,9 +809,8 @@ void DrawPin(CameraMatrices *matrices UNUSED, CameraView *view, s32 cameraIndex)
                 f_FlagWavePhase += FULL_TURN_RADIANS;
             }
 
-            wave =
-                (((g_HoleSetup.conditions.windSpeed / FLAG_WIND_SPEED_UNIT) * FLAG_WAVE_PER_WIND) +
-                    FLAG_WAVE_MIN) *
+            wave = (((g_HoleSetup.conditions.windSpeed / WIND_SPEED_UNIT) * FLAG_WAVE_PER_WIND) +
+                       FLAG_WAVE_MIN) *
                 sinf(f_FlagWavePhase);
         }
         else {
