@@ -51,6 +51,7 @@ typedef s32 ClubPanelState;
 #define ASSET_PANEL_PUTT_MIDDLE 0x571
 #define ASSET_PANEL_PUTT_SHORT 0x572
 
+// Neither a shot mode nor TRUE or FALSE, so that the first check differs
 #define PANEL_NOT_SHOWN 0xFF
 #define INITIAL_CLUB_PANEL_DEBUG_VALUE (-2)
 
@@ -65,9 +66,9 @@ typedef s32 ClubPanelState;
 #define ASSET_SHOT_MODE_NORMAL 0x52D
 #define ASSET_SHOT_MODE_APPROACH 0x52E
 
-static u8 f_ShownShotMode = PANEL_NOT_SHOWN;
-static u8 f_PanelShotMode = PANEL_NOT_SHOWN;
-static u8 f_PanelIsPutter = PANEL_NOT_SHOWN;
+static UShotMode8 f_ShownShotMode = PANEL_NOT_SHOWN;
+static UShotMode8 f_PanelShotMode = PANEL_NOT_SHOWN;
+static UBoolean8 f_PanelIsPutter = PANEL_NOT_SHOWN;
 static u8 f_ShotModeChangeFrame = 0;
 static s32 f_ChosenPowerFill = 0;
 static s32 f_PanelBufferIndex = 0;

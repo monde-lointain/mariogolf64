@@ -16,6 +16,7 @@ enum ShotMode {
 
 typedef s32 ShotMode;
 typedef s8 ShotMode8;
+typedef u8 UShotMode8;
 
 #define SHOT_MODE_COUNT 3
 
