@@ -92,7 +92,7 @@ typedef struct SaveRecords {
     s32 bestTimePalettes[COURSE_COUNT][BEST_TIME_COUNT];
     CourseStats courseStats[COURSE_COUNT];
     u8 unusedAfterCourseStats[0x990 - 0x7C0];
-    s8 hasRingShotStar[RING_SHOT_COURSE_COUNT][RING_SHOT_HOLE_COUNT];
+    Boolean8 hasRingShotStar[RING_SHOT_COURSE_COUNT][RING_SHOT_HOLE_COUNT];
 } SaveRecords;
 
 typedef struct SaveData {

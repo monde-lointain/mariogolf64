@@ -45,7 +45,7 @@ typedef struct GameBoyCharacter {
     u8 saveName[SAVE_NAME_SIZE];
     u8 unusedAfterSaveName;
     u8 golferIndex;
-    u8 isLefty;
+    UBoolean8 isLefty;
     u8 level;
     s8 clubPitch;
     s8 shotCurve;

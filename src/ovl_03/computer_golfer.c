@@ -1385,7 +1385,7 @@ s32 ChooseHoleStrokeTarget(void) {
 #define FARTHEST_DISTANCE 0x0FFFFFFF
 
 s32 PlanRoute(s8 *route) {
-    s8 isVisited[ROUTE_POINT_COUNT + 1];
+    Boolean8 isVisited[ROUTE_POINT_COUNT + 1];
     s8 order[ROUTE_POINT_COUNT];
     s32 index;
     s32 pointCount;

@@ -343,7 +343,7 @@ u8 RankTournament(s32 holeCount, s32 lastAheadIndex, s32 playerScore, s32 seed) 
     s32 index;
     s32 otherIndex;
     s32 place;
-    u8 tieFlag;
+    u8 tieBit;
     u8 playerPlace;
 
     playerPlace = 1;
@@ -374,20 +374,20 @@ u8 RankTournament(s32 holeCount, s32 lastAheadIndex, s32 playerScore, s32 seed) 
 
     for (index = 0; index < TOURNAMENT_CONTESTANT_COUNT; index++) {
         place = 1;
-        tieFlag = 0;
+        tieBit = 0;
         for (otherIndex = 0; otherIndex < index; otherIndex++) {
             if (g_TournamentStandings[index].score > g_TournamentStandings[otherIndex].score) {
                 place++;
             }
             else {
-                tieFlag = PLACE_TIED;
+                tieBit = PLACE_TIED;
                 g_TournamentStandings[otherIndex].place |= PLACE_TIED;
             }
         }
 
-        g_TournamentStandings[index].place = tieFlag | place;
+        g_TournamentStandings[index].place = tieBit | place;
         if (g_TournamentStandings[index].contestantId == PLAYER_CONTESTANT) {
-            playerPlace = tieFlag | place;
+            playerPlace = tieBit | place;
         }
     }
 

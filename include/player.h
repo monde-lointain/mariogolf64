@@ -7,6 +7,7 @@
 #include "club.h"
 #include "course.h"
 #include "course_space.h"
+#include "language.h"
 #include "turn.h"
 
 #define PLAYER_COUNT_MAX 4
@@ -79,10 +80,10 @@ typedef struct Player {
     CoursePoint ballPosition;
     s8 ballSurface;
     s8 characterIndex;
-    s8 isComputer;
+    Boolean8 isComputer;
     s8 ignoredPlanMark;
     u8 unusedBeforeLefty[0x22 - 0x20];
-    s8 isLefty;
+    Boolean8 isLefty;
     s8 strokeCount;
     s8 puttCount;
     s8 teeOrder;
@@ -106,7 +107,7 @@ typedef struct Player {
     s8 gridColor;
     u8 unusedAfterGridColor;
     s16 betTallies[BET_COUNT];
-    s8 hasBeenInBunker;
+    Boolean8 hasBeenInBunker;
     u8 unusedAfterBunkerVisit[3];
     s32 lastDriveDistance;
     s32 points;

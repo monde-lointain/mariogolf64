@@ -109,7 +109,7 @@ static BillboardTexture f_BillboardTextures[BILLBOARD_TEXTURE_COUNT] = {
     BILLBOARD_TEXTURE(0x912),
     BILLBOARD_TEXTURE(0x913),
 };
-static s8 f_IsHeapReady = FALSE;
+static Boolean8 f_IsHeapReady = FALSE;
 static u8 *f_HeapStart = NULL;
 static u8 *f_HeapEnd = NULL;
 static u16 f_DrawOrder[BILLBOARD_COUNT] = {0};

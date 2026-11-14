@@ -24,7 +24,7 @@ void SimulateShot(ShotLaunch *shot) {
     Boolean hasHoleTriangleBounce;
     s32 stepFlags;
     s32 firstBounceKind;
-    u8 isWaterCut;
+    UBoolean8 isWaterCut;
 
     simulation = &simulationState;
     g_SimulatedShot.shot = *shot;

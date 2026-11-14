@@ -902,7 +902,7 @@ s32 FindMiniGolfGroundHit(
     f32 *fraction
 ) {
     Vtx *points[GROUND_TILE_POINT_SPAN + 1][GROUND_TILE_POINT_SPAN + 1];
-    s8 isBelowPath[GROUND_TILE_POINT_SPAN + 1][GROUND_TILE_POINT_SPAN + 1];
+    Boolean8 isBelowPath[GROUND_TILE_POINT_SPAN + 1][GROUND_TILE_POINT_SPAN + 1];
     PlaneTriangle triangles[GROUND_TILE_TRIANGLE_COUNT];
     TrianglePlane plane;
     s32 tileX;
@@ -1157,7 +1157,7 @@ s32 FindGroundHit(
     f32 *fraction
 ) {
     Vtx *points[GROUND_TILE_POINT_SPAN + 1][GROUND_TILE_POINT_SPAN + 1];
-    s8 isBelowPath[GROUND_TILE_POINT_SPAN + 1][GROUND_TILE_POINT_SPAN + 1];
+    Boolean8 isBelowPath[GROUND_TILE_POINT_SPAN + 1][GROUND_TILE_POINT_SPAN + 1];
     PlaneTriangle triangles[GROUND_TILE_TRIANGLE_COUNT];
     TrianglePlane plane;
     s32 tileX;

@@ -224,13 +224,13 @@ typedef struct CharacterSlot {
     f32 rotation[3];
     f32 scale[3];
     f32 animationSpeed;
-    s8 isTranslucent;
+    Boolean8 isTranslucent;
     u8 alpha;
     Gfx *displayList;
     f32 portraitCamera[PORTRAIT_CAMERA_VALUE_COUNT];
     s16 shadowScale;
     s8 lighting;
-    s8 isLooping;
+    Boolean8 isLooping;
     s8 nextAnimationId;
     s8 playsRandomTextureAnimation;
     s8 randomTextureAnimationDelay;

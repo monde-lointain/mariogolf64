@@ -7,6 +7,7 @@
 #include "course_space.h"
 #include "frame_time.h"
 #include "geometry.h"
+#include "language.h"
 #include "math_util.h"
 #include "surface.h"
 
@@ -141,8 +142,8 @@ typedef struct BallSimulation {
     s32 bounceCount;
     s32 stepCount;
     s32 lastBounceStep;
-    s8 isHoledOut;
-    s8 hasEnteredWater;
+    Boolean8 isHoledOut;
+    Boolean8 hasEnteredWater;
     s8 launchSurface;
     s8 surface;
     s8 surfaceBelow;
@@ -150,10 +151,10 @@ typedef struct BallSimulation {
     s8 stepFlags;
     s8 firstBounceSurface;
     s8 soundStates[BALL_SOUND_COUNT];
-    s8 hasHitFlag;
+    Boolean8 hasHitFlag;
     u8 previousStepFlags;
     u16 rollFrameCount;
-    s8 isOverCup;
+    Boolean8 isOverCup;
 } BallSimulation;
 
 #define SHOT_PREVIEW_DASH_LENGTH_MAX 0x4AFFF

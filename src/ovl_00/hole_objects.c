@@ -66,8 +66,8 @@ typedef struct HoleCreature {
     Radians yaw;
     Radians pitch;
     u8 frameCount;
-    u8 isFacingBack;
-    u8 isGold;
+    UBoolean8 isFacingBack;
+    UBoolean8 isGold;
     u8 state;
 } HoleCreature;
 

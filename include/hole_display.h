@@ -54,7 +54,7 @@ typedef struct SkyColors {
     u8 horizonColor[3];
     u8 noiseColor[3];
     u8 backgroundColor[SKY_BACKGROUND_CHANNEL_COUNT];
-    u8 hasLensFlare;
+    UBoolean8 hasLensFlare;
     struct Sun *sun;
     u8 fogColor[3];
     s16 fogNear;

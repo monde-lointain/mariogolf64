@@ -147,8 +147,8 @@ void DrawBestShotsCursor(Gfx **displayListHead);
 void DrawBetIcon(Gfx **displayListHead, s32 left, s32 top, s32 size, s32 textureStep);
 void DrawBetLabel(Gfx **displayListHead, s32 centerX, s32 top, u8 labelIndex);
 
-static u8 f_IsBetHelpShown = FALSE;
-static u8 f_IsHandicapPromptShown = FALSE;
+static UBoolean8 f_IsBetHelpShown = FALSE;
+static UBoolean8 f_IsHandicapPromptShown = FALSE;
 static s16 f_GreenArrowFrame = 0;
 static s16 f_GreenArrowTimer = 0;
 static s16 f_PageArrowFrame = 0;

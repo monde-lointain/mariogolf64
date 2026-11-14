@@ -46,7 +46,7 @@ enum ModuleId {
 };
 
 typedef struct Overlay {
-    s8 isLoaded;
+    Boolean8 isLoaded;
     s8 *moduleIds;
     u32 romStart;
     u32 romEnd;

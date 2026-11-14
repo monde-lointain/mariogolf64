@@ -71,11 +71,11 @@ typedef struct GolfBall {
     SurfaceTraits *surface;
     f32 position[3];
     s32 alpha;
-    u8 isInCup;
+    UBoolean8 isInCup;
     s32 state;
     s8 markerPlayerIndex;
     s8 purpose;
-    s8 hasEnteredWater;
+    Boolean8 hasEnteredWater;
 } GolfBall;
 
 typedef struct BallAfterimage {

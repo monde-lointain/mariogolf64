@@ -4,6 +4,7 @@
 #include <ultra64.h>
 
 #include "game_state.h"
+#include "language.h"
 #include "math_util.h"
 #include "player.h"
 
@@ -37,7 +38,7 @@ typedef struct PlayRecord {
     s8 holeIndex;
     u8 scoreKind;
     s8 characterIndex;
-    u8 isLefty;
+    UBoolean8 isLefty;
     s8 paletteIndex;
     u8 strokeCount;
     u8 unusedAfterStrokeCount;
@@ -52,7 +53,7 @@ typedef struct RingShotRecord {
     s8 holeIndex;
     s8 scoreKind;
     s8 characterIndex;
-    u8 isLefty;
+    UBoolean8 isLefty;
     s8 paletteIndex;
     u8 strokeCount;
     u8 unusedAfterStrokeCount;

@@ -104,15 +104,15 @@ void DrawComputerIcon(Gfx **displayListHead, s32 unused);
 void DrawLeftyIcon(Gfx **displayListHead, s32 unused);
 void DrawCurveMeter(Gfx **displayListHead, s32 clubSet);
 
-static u8 f_IsPromptShown = FALSE;
-static u8 f_UnreadBufferFlag = FALSE;
+static UBoolean8 f_IsPromptShown = FALSE;
+static UBoolean8 f_UnreadBufferFlag = FALSE;
 static u8 f_UnreadSelectByte UNUSED = 0;
 static u8 f_UnreadSelectDoneByte = 0;
 static s8 f_FaceFrame = 0;
 static u8 f_UnreadFaceToggle = 0;
 static s8 f_FaceFrameTime = 0;
-static s8 f_IsComputerButtonHeld = FALSE;
-static s8 f_IsLeftyButtonHeld = FALSE;
+static Boolean8 f_IsComputerButtonHeld = FALSE;
+static Boolean8 f_IsLeftyButtonHeld = FALSE;
 static s8 f_PreviewedPalette = NO_PALETTE;
 static s32 f_UnreadSelectWords[4] UNUSED = {-1, -1, -1, -1};
 static s32 f_SavedGameBoySlots[GAME_BOY_CHARACTER_COUNT] =

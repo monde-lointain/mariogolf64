@@ -4,6 +4,7 @@
 #include <ultra64.h>
 
 #include "geometry.h"
+#include "language.h"
 #include "math_util.h"
 
 enum CameraMode {
@@ -64,8 +65,8 @@ typedef struct CameraMatrices {
 typedef struct EasedView {
     f32 eye[AXIS_COUNT];
     f32 lookAt[AXIS_COUNT];
-    s8 isEyeEased;
-    s8 isLookAtEased;
+    Boolean8 isEyeEased;
+    Boolean8 isLookAtEased;
 } EasedView;
 
 // Parts of an EasedView to ease, combined.

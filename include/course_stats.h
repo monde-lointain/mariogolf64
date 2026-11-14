@@ -27,7 +27,7 @@ typedef struct CourseStats {
     s32 missedSandSaveCount;
     Boolean hasPlace[TOURNAMENT_PLACE_COUNT];
     s16 characterBestScores[CHARACTER_COUNT];
-    u8 hasCharacterBestScore[CHARACTER_COUNT];
+    UBoolean8 hasCharacterBestScore[CHARACTER_COUNT];
     u8 unusedAfterBestScores[0x74 - 0x72];
 } CourseStats;
 

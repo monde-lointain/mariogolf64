@@ -254,7 +254,7 @@ extern u8 g_StaffTextRomStart[];
 void DrawStaffLine(Gfx **displayListHead, s32 left, s32 top, s32 lineIndex);
 void DrawStaffRollPainting(Gfx **displayListHead);
 
-static u8 f_IsPaintingShown = TRUE;
+static UBoolean8 f_IsPaintingShown = TRUE;
 static s32 f_StaffRollFrame = 0;
 static Boolean f_IsLeavingStaffRoll = FALSE;
 static s32 f_TextScrollOffset = 0;

@@ -4,6 +4,7 @@
 #include <ultra64.h>
 
 #include "camera.h"
+#include "language.h"
 
 #define BILLBOARD_COUNT 128
 #define BILLBOARD_TEXTURE_COUNT 46
@@ -15,7 +16,7 @@ typedef struct Billboard {
     s16 z;
     s8 textureIndex;
     u8 shapeIndex;
-    u8 isIgnoredEditorMark;
+    UBoolean8 isIgnoredEditorMark;
     u16 isNearCourseEdge;
     u16 width;
     u16 height;

@@ -3334,9 +3334,9 @@ void ShadeGroundTiles(void) {
         u16 alpha;
     } shaded;
 
-    s8 isHighGroundFaded;
-    s8 isFadeUnlimited;
-    s8 isFadeDisabled;
+    Boolean8 isHighGroundFaded;
+    Boolean8 isFadeUnlimited;
+    Boolean8 isFadeDisabled;
     s16(*heightRows)[MAP_COLUMN_COUNT];
     Radians pitch;
     s32 lightColumnOffset;

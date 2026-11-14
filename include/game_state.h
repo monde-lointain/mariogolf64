@@ -61,13 +61,13 @@ typedef struct GameState {
     s32 holeSelection;
     s32 stopwatchFrameCount;
     s32 roundSeed;
-    s8 isRoundContinued;
+    Boolean8 isRoundContinued;
     s8 replayKind;
     s8 betRates[BET_COUNT];
     u8 unusedAfterBetRates;
-    s8 isMiniGolf;
-    s8 isClubTournament;
-    u8 isImportedCharacterChosen;
+    Boolean8 isMiniGolf;
+    Boolean8 isClubTournament;
+    UBoolean8 isImportedCharacterChosen;
     s8 saveCount;
     s16 carriedPots[CARRIED_POT_COUNT];
 } GameState;

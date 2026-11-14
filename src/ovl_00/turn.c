@@ -1405,7 +1405,7 @@ s32 UpdateAimControls(void) {
 
 void UpdateShotFlags(void) {
     s32 surfaceMask = GetSelectedClub()->surfaceMask;
-    s8 *isMiniGolf;
+    Boolean8 *isMiniGolf;
 
     g_ShotFlags = 0;
     if (surfaceMask & CLUB_SURFACE_GREEN) {
@@ -1444,7 +1444,7 @@ Boolean HasPlanTime(s32 timeBudget UNUSED) {
 }
 
 void ChooseStartingClub(HoleSetup *hole) {
-    s8 isUsable[CLUB_SLOT_COUNT];
+    Boolean8 isUsable[CLUB_SLOT_COUNT];
     s32 clubCount;
     s32 cupDistance;
     s32 clubSlot;
@@ -1720,7 +1720,7 @@ void BuildShotPreview(ShotLaunch *shot, s32 playerState) {
     f32 align[4][4];
     s32 step;
     s32 length;
-    s8 *isMiniGolf;
+    Boolean8 *isMiniGolf;
 
     if ((GetSelectedClub()->surfaceMask & CLUB_SURFACE_GREEN) ||
         IsGameFlagSet(GAME_FLAG_HIDE_SHOT_PREVIEW)) {

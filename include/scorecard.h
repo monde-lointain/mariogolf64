@@ -35,7 +35,7 @@ enum ScorecardState {
 
 typedef struct ScorecardContent {
     Radians rowFlipAngles[LEADERBOARD_ROW_COUNT];
-    s8 isRowFlipping[LEADERBOARD_ROW_COUNT];
+    Boolean8 isRowFlipping[LEADERBOARD_ROW_COUNT];
     s32 flipTime;
     s32 faceImageOffsets[PLAYER_COUNT_MAX];
     CourseIndex courseIndex;
@@ -67,7 +67,7 @@ typedef struct Scorecard {
     u8 *faceImages[PLAYER_COUNT_MAX];
     u16 *facePalettes[PLAYER_COUNT_MAX];
     u8 *betSubtitlesImage;
-    u8 isOddFaceStep;
+    UBoolean8 isOddFaceStep;
     u8 faceFrameTime;
     u8 faceFrame;
     s8 placeChange;

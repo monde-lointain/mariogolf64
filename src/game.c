@@ -476,7 +476,7 @@ void DrawSpinMesh(Gfx **displayListHead) {
     s32 batchIndex;
     s32 stripIndex;
     s32 stripHeight;
-    u8 isLastStrip;
+    UBoolean8 isLastStrip;
 
     gSPMatrix(gfx++, &g_ScreenEffectProjection, G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
     gSPMatrix(gfx++, &f_SpinMatrices[g_DrawBufferIndex], G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_PUSH);

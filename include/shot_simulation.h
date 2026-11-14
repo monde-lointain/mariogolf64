@@ -30,7 +30,7 @@ typedef struct SimulatedShot {
     ShotLaunch shot;
     s32 flagHitStep;
     s8 endSurface;
-    s8 isWaterCut;
+    Boolean8 isWaterCut;
     s8 impactRumbles;
 } SimulatedShot;
 

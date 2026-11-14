@@ -77,7 +77,7 @@ enum HaltState {
 
 #define STATE_STICK_DIRECTION_MIN 30
 
-s8 g_IsDebugEnabled = FALSE;
+Boolean8 g_IsDebugEnabled = FALSE;
 Boolean g_HasExpansionPak = FALSE;
 static volatile u8 f_DebugHaltState = HALT_STATE_DISALLOWED;
 Boolean g_HasThreeFrameBuffers = FALSE;

@@ -43,7 +43,7 @@ FILE_STATIC OSMesgQueue f_RetraceQueue;
 static u8 *f_SongBuffer = NULL;
 static u8 *f_SoundEffectBuffer = NULL;
 static u8 *f_PointerBank = NULL;
-static u8 f_IsAudioTaskEnabled = TRUE;
+static UBoolean8 f_IsAudioTaskEnabled = TRUE;
 static u8 f_ResetFrame = 0;
 static AudioEventCallback f_AudioEventCallback = NULL;
 static musSched f_AudioScheduler = {InstallAudioScheduler, WaitForAudioFrame, RunAudioTask};

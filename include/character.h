@@ -5,6 +5,7 @@
 
 #include "asset.h"
 #include "compiler.h"
+#include "language.h"
 
 enum CharacterIndex {
     CHARACTER_PLUM,
@@ -75,7 +76,7 @@ typedef struct ImportedCharacter {
     s16 clubSpin;
     s16 clubSideSpin;
     s8 name[IMPORTED_CHARACTER_NAME_LENGTH];
-    u8 isChosen;
+    UBoolean8 isChosen;
 } ImportedCharacter;
 
 extern ImportedCharacter g_ImportedCharacters[IMPORTED_CHARACTER_COUNT];

@@ -74,7 +74,7 @@ typedef struct MenuMemory {
     s8 savedGameIndex;
     s8 savedGameTurn;
     u8 optionBits;
-    u8 isTransmitShown;
+    UBoolean8 isTransmitShown;
     s8 codeKeyColumn;
     s8 codeKeyRow;
 } MenuMemory;
