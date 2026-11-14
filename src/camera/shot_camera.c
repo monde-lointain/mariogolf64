@@ -1,4 +1,4 @@
-#include "shot_camera.h"
+#include "camera/shot_camera.h"
 
 #include <math.h>
 #include <stdlib.h>
@@ -7,8 +7,8 @@
 #define WIDENS_CHOSEN_OPTIONS
 
 #include "ball_simulation.h"
-#include "camera.h"
-#include "camera_framing.h"
+#include "camera/camera.h"
+#include "camera/camera_framing.h"
 #include "character_model.h"
 #include "club.h"
 #include "controllers/controller.h"

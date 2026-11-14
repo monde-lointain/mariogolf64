@@ -90,7 +90,7 @@ segments:
       - [0x193D0, c, pin]
       - [0x1B4A0, c, terrain]
       - [0x1EEF0, c, club]
-      - [0x207E0, c, shot_camera]
+      - [0x207E0, c, camera/shot_camera]
       - [0x28590, c, debug_text]
       - [0x29170, c, system/heap]
       - [0x299A0, c, performance_meter]
@@ -106,7 +106,7 @@ segments:
       - [0x396C0, c, system/crash_screen]
       - [0x3A010, c, music]
       - [0x3A580, c, play]
-      - [0x40180, c, view_projection]
+      - [0x40180, c, camera/view_projection]
       - [0x414A0, c, hole_triangles]
       - [0x42E60, c, character_sound]
       - [0x42F00, c, math/matrix_conversion]
@@ -120,7 +120,7 @@ segments:
       - [0x4A9E0, c, help_board]
       - [0x4C3D0, c, awards]
       - [0x4C770, c, text]
-      - [0x51900, c, camera_framing]
+      - [0x51900, c, camera/camera_framing]
       - [0x526B0, c, math/curve]
       - [0x52FF0, c, fireworks]
       - [0x53D10, c, particle_effects]
@@ -367,7 +367,7 @@ segments:
       - [0x95B00, .data, pin]
       - [0x95DB0, .data, terrain]
       - [0x964F0, .data, club]
-      - [0x99A20, .data, shot_camera]
+      - [0x99A20, .data, camera/shot_camera]
       - [0x99AE0, .data, debug_text]
       - [0x9B2F0, .data, performance_meter]
       - [0x9C250, .data, screen/animated_box]
@@ -455,7 +455,7 @@ segments:
       - [0xA5CE0, .rodata, pin]
       - [0xA5D30, .rodata, terrain]
       - [0xA5FD0, .rodata, club]
-      - [0xA7B60, .rodata, shot_camera]
+      - [0xA7B60, .rodata, camera/shot_camera]
       - [0xA7E90, .rodata, system/heap]
       - [0xA7F08, .rodata, performance_meter]
       - [0xA7F70, .rodata, system/asset]
@@ -479,7 +479,7 @@ segments:
       - [0xAC950, .rodata, help_board]
       - [0xAC970, .rodata, awards]
       - [0xAC988, .rodata, text]
-      - [0xACC50, .rodata, camera_framing]
+      - [0xACC50, .rodata, camera/camera_framing]
       - [0xACD00, .rodata, fireworks]
       - [0xACD10, .rodata, particle_effects]
       - [0xACEA0, .rodata, round_hud]
@@ -520,7 +520,7 @@ segments:
       - { type: .bss, vram: 0x800DAB60, name: game }
       - { type: .bss, vram: 0x800DAC40, name: pin }
       - { type: .bss, vram: 0x800DAED0, name: terrain }
-      - { type: .bss, vram: 0x800DAEE0, name: shot_camera }
+      - { type: .bss, vram: 0x800DAEE0, name: camera/shot_camera }
       - { type: .bss, vram: 0x800DAF60, name: debug_text }
       - { type: .bss, vram: 0x800DC6E0, name: system/heap }
       - { type: .bss, vram: 0x800DC740, name: performance_meter }
@@ -531,14 +531,14 @@ segments:
       - { type: .bss, vram: 0x800DF0B0, name: system/crash_screen }
       - { type: .bss, vram: 0x800E1290, name: music }
       - { type: .bss, vram: 0x800E12B0, name: play }
-      - { type: .bss, vram: 0x800E16B0, name: view_projection }
+      - { type: .bss, vram: 0x800E16B0, name: camera/view_projection }
       - { type: .bss, vram: 0x800E17D0, name: hole_triangles }
       - { type: .bss, vram: 0x800E1A50, name: hole_loader }
       - { type: .bss, vram: 0x800E1C00, name: screen/screen_layers }
       - { type: .bss, vram: 0x800E1C10, name: screen/scene_colors }
       - { type: .bss, vram: 0x800E1C20, name: help_board }
       - { type: .bss, vram: 0x800E1C30, name: text }
-      - { type: .bss, vram: 0x800E1C50, name: camera_framing }
+      - { type: .bss, vram: 0x800E1C50, name: camera/camera_framing }
       - { type: .bss, vram: 0x800E1D20, name: math/curve }
       - { type: .bss, vram: 0x800E1D60, name: particle_effects }
       - { type: .bss, vram: 0x800E1DD0, name: round_hud }

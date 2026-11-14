@@ -3,7 +3,7 @@
 
 #include <ultra64.h>
 
-#include "camera.h"
+#include "camera/camera.h"
 #include "character.h"
 #include "menu.h"
 #include "player.h"

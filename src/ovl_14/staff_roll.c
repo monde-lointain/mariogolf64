@@ -6,8 +6,9 @@
 #include <ultra64.h>
 
 #include "billboard.h"
-#include "camera.h"
-#include "camera_framing.h"
+#include "camera/camera.h"
+#include "camera/camera_framing.h"
+#include "camera/shot_camera.h"
 #include "character.h"
 #include "character_model.h"
 #include "club.h"
@@ -33,7 +34,6 @@
 #include "screen/rcp_init.h"
 #include "screen/screen.h"
 #include "screen/sky_and_hud_animations.h"
-#include "shot_camera.h"
 #include "sound.h"
 #include "system/asset.h"
 #include "system/c_language.h"

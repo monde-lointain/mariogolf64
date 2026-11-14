@@ -3,7 +3,8 @@
 #include <math.h>
 #include <ultra64.h>
 
-#include "camera.h"
+#include "camera/camera.h"
+#include "camera/view_projection.h"
 #include "course_space.h"
 #include "game.h"
 #include "game_flags.h"
@@ -23,7 +24,6 @@
 #include "system/memory_address.h"
 #include "terrain.h"
 #include "turn.h"
-#include "view_projection.h"
 
 #define HOLE_CREATURE_COUNT 10
 

@@ -3,7 +3,9 @@
 #include <math.h>
 #include <ultra64.h>
 
-#include "camera.h"
+#include "camera/camera.h"
+#include "camera/shot_camera.h"
+#include "camera/view_projection.h"
 #include "course_space.h"
 #include "current_shot.h"
 #include "game.h"
@@ -15,7 +17,6 @@
 #include "round_hud.h"
 #include "screen/display_list.h"
 #include "screen/screen.h"
-#include "shot_camera.h"
 #include "surface.h"
 #include "system/asset.h"
 #include "system/c_language.h"
@@ -23,7 +24,6 @@
 #include "system/heap.h"
 #include "system/memory_address.h"
 #include "terrain.h"
-#include "view_projection.h"
 
 #define CUP_DISTANCE_OFFSET 0x699
 

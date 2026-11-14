@@ -1,4 +1,4 @@
-#include "view_projection.h"
+#include "camera/view_projection.h"
 
 #include <ultra64.h>
 

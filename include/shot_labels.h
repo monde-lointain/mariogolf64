@@ -3,7 +3,7 @@
 
 #include <ultra64.h>
 
-#include "camera.h"
+#include "camera/camera.h"
 
 void DrawAimGuides(CameraMatrices *matrices);
 

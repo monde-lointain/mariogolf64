@@ -2,6 +2,7 @@
 
 #include <ultra64.h>
 
+#include "camera/view_projection.h"
 #include "character.h"
 #include "course.h"
 #include "course_stats_screen.h"
@@ -25,7 +26,6 @@
 #include "system/frame_time.h"
 #include "system/memory_address.h"
 #include "text.h"
-#include "view_projection.h"
 #include "work_area.h"
 
 #define ASSET_CHARACTER_FACE_STRIP 0x8E9

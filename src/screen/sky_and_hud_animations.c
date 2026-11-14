@@ -6,7 +6,9 @@
 #include <string.h>
 #include <ultra64.h>
 
-#include "camera.h"
+#include "camera/camera.h"
+#include "camera/shot_camera.h"
+#include "camera/view_projection.h"
 #include "controllers/controller.h"
 #include "course.h"
 #include "debug_text.h"
@@ -24,7 +26,6 @@
 #include "screen/display_list.h"
 #include "screen/scene_colors.h"
 #include "screen/screen.h"
-#include "shot_camera.h"
 #include "sound.h"
 #include "system/asset.h"
 #include "system/c_language.h"
@@ -32,7 +33,6 @@
 #include "system/heap.h"
 #include "system/memory_address.h"
 #include "text.h"
-#include "view_projection.h"
 
 #define TITLE_HOLE_INDEX 9
 #define TITLE_COURSE_INDEX 0

@@ -2,7 +2,7 @@
 
 #include <ultra64.h>
 
-#include "camera.h"
+#include "camera/camera.h"
 #include "course_space.h"
 #include "current_shot.h"
 #include "debug_text.h"

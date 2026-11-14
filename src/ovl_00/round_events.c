@@ -3,7 +3,9 @@
 #include <math.h>
 #include <ultra64.h>
 
-#include "camera.h"
+#include "camera/camera.h"
+#include "camera/shot_camera.h"
+#include "camera/view_projection.h"
 #include "character.h"
 #include "controllers/controller.h"
 #include "controllers/transfer_pak.h"
@@ -23,7 +25,6 @@
 #include "screen/display_list.h"
 #include "screen/screen.h"
 #include "screen/screen_layers.h"
-#include "shot_camera.h"
 #include "shot_effects.h"
 #include "sound.h"
 #include "system/asset.h"
@@ -33,7 +34,6 @@
 #include "system/memory_address.h"
 #include "text.h"
 #include "turn.h"
-#include "view_projection.h"
 
 #define MOVIE_BUFFER_SIZE 0x6270
 #define MOVIE_CUE_FRAME 12

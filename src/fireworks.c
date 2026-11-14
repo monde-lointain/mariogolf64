@@ -2,6 +2,7 @@
 
 #include <ultra64.h>
 
+#include "camera/view_projection.h"
 #include "math/geometry.h"
 #include "math/math_util.h"
 #include "round_hud.h"
@@ -13,7 +14,6 @@
 #include "system/compiler.h"
 #include "system/heap.h"
 #include "system/memory_address.h"
-#include "view_projection.h"
 
 #define FIREWORK_COUNT 1
 

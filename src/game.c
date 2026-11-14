@@ -9,7 +9,9 @@
 
 #include "billboard.h"
 #include "boot_logos.h"
-#include "camera.h"
+#include "camera/camera.h"
+#include "camera/shot_camera.h"
+#include "camera/view_projection.h"
 #include "character_model.h"
 #include "confirm_wait.h"
 #include "controllers/controller.h"
@@ -47,7 +49,6 @@
 #include "screen/screen.h"
 #include "screen/screen_layers.h"
 #include "screen/sky_and_hud_animations.h"
-#include "shot_camera.h"
 #include "shot_effects.h"
 #include "shot_labels.h"
 #include "sound.h"
@@ -63,7 +64,6 @@
 #include "text.h"
 #include "title_screen.h"
 #include "transmit_menu.h"
-#include "view_projection.h"
 #include "work_area.h"
 
 #define INSET_VIEW_SOUND_VOLUME 0x3F

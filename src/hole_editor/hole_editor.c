@@ -8,7 +8,8 @@
 #include <ultra64.h>
 
 #include "billboard.h"
-#include "camera.h"
+#include "camera/camera.h"
+#include "camera/view_projection.h"
 #include "controllers/controller.h"
 #include "course.h"
 #include "course_space.h"
@@ -36,7 +37,6 @@
 #include "system/memory_address.h"
 #include "terrain.h"
 #include "text.h"
-#include "view_projection.h"
 #include "work_area.h"
 
 #define EDGE_POINT_COUNT (GROUND_TILE_POINT_SPAN + 1)

@@ -3,7 +3,7 @@
 
 #include <ultra64.h>
 
-#include "camera.h"
+#include "camera/camera.h"
 #include "character.h"
 #include "club.h"
 #include "course_space.h"

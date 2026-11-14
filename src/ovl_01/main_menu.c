@@ -10,7 +10,8 @@
 
 #include "best_times.h"
 #include "bets.h"
-#include "camera.h"
+#include "camera/camera.h"
+#include "camera/view_projection.h"
 #include "character.h"
 #include "character_model.h"
 #include "character_select.h"
@@ -60,7 +61,6 @@
 #include "system/overlay_manager.h"
 #include "text.h"
 #include "tournament_menu.h"
-#include "view_projection.h"
 
 #define MODE_CHOICE_LIMIT 12
 

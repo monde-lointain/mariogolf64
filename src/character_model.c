@@ -2,7 +2,7 @@
 
 #include <ultra64.h>
 
-#include "camera.h"
+#include "camera/camera.h"
 #include "club.h"
 #include "game.h"
 #include "hole_setup.h"

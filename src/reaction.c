@@ -4,7 +4,7 @@
 #include <ultra64.h>
 
 #include "billboard.h"
-#include "camera.h"
+#include "camera/camera.h"
 #include "character.h"
 #include "character_model.h"
 #include "course_space.h"

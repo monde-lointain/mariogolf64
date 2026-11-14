@@ -1,6 +1,7 @@
 #include <ultra64.h>
 
 #include "bets.h"
+#include "camera/view_projection.h"
 #include "character_model.h"
 #include "course.h"
 #include "fireworks.h"
@@ -27,7 +28,6 @@
 #include "system/memory_address.h"
 #include "text.h"
 #include "tournament.h"
-#include "view_projection.h"
 
 #define PLACE_SUFFIX_X 24
 #define PLACE_SUFFIX_PARTS_OFFSET \

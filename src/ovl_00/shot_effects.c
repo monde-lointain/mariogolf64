@@ -2,7 +2,8 @@
 
 #include <ultra64.h>
 
-#include "camera.h"
+#include "camera/camera.h"
+#include "camera/view_projection.h"
 #include "character_model.h"
 #include "course_space.h"
 #include "current_shot.h"
@@ -23,7 +24,6 @@
 #include "system/compiler.h"
 #include "system/heap.h"
 #include "system/memory_address.h"
-#include "view_projection.h"
 
 #define SPARK_COUNT 30
 #define SPARK_BURST_COUNT 5

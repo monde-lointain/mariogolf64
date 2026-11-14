@@ -2,7 +2,7 @@
 
 #include <ultra64.h>
 
-#include "camera.h"
+#include "camera/camera.h"
 #include "character_model.h"
 #include "controllers/controller.h"
 #include "controllers/transfer_pak.h"

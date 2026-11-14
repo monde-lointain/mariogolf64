@@ -5,7 +5,8 @@
 #include <ultra64.h>
 
 #include "ball_simulation.h"
-#include "camera.h"
+#include "camera/camera.h"
+#include "camera/view_projection.h"
 #include "character_model.h"
 #include "club.h"
 #include "controllers/controller.h"
@@ -32,7 +33,6 @@
 #include "terrain.h"
 #include "text.h"
 #include "turn.h"
-#include "view_projection.h"
 
 #define POINT_SPREAD 3072
 #define SPARKLE_FALL_SPEED (2.62f * COURSE_TO_WORLD_SCALE)

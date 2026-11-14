@@ -3,11 +3,11 @@
 #include <nusys.h>
 #include <ultra64.h>
 
+#include "camera/view_projection.h"
 #include "game.h"
 #include "screen/display_list.h"
 #include "screen/screen.h"
 #include "system/memory_address.h"
-#include "view_projection.h"
 
 #define DEPTH_MAX 0x3FFF
 

@@ -1,9 +1,9 @@
-#include "camera_framing.h"
+#include "camera/camera_framing.h"
 
 #include <math.h>
 #include <ultra64.h>
 
-#include "camera.h"
+#include "camera/camera.h"
 #include "controllers/controller.h"
 #include "math/geometry.h"
 #include "math/math_util.h"

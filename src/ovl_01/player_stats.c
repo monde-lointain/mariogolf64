@@ -3,6 +3,7 @@
 #include <ultra64.h>
 
 #include "bets.h"
+#include "camera/view_projection.h"
 #include "character.h"
 #include "character_model.h"
 #include "course.h"
@@ -31,7 +32,6 @@
 #include "system/compiler.h"
 #include "system/memory_address.h"
 #include "text.h"
-#include "view_projection.h"
 
 #define ASSET_JAPANESE_BIRDIE_LABEL 0x82D
 #define ASSET_JAPANESE_ALBATROSS_LABEL 0x82E

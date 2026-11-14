@@ -3,6 +3,7 @@
 #include <framebuffer_count.h>
 #include <ultra64.h>
 
+#include "camera/view_projection.h"
 #include "character.h"
 #include "club.h"
 #include "controllers/controller.h"
@@ -24,7 +25,6 @@
 #include "system/compiler.h"
 #include "system/heap.h"
 #include "system/memory_address.h"
-#include "view_projection.h"
 #define CLUB_SLOTS_DONE 0
 #define CLUB_SLOTS_STARTING 1
 #define CLUB_SLOTS_SPEEDING 2

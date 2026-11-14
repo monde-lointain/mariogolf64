@@ -2,7 +2,8 @@
 
 #include <ultra64.h>
 
-#include "camera.h"
+#include "camera/camera.h"
+#include "camera/shot_camera.h"
 #include "course_space.h"
 #include "game.h"
 #include "game_flags.h"
@@ -14,7 +15,6 @@
 #include "player.h"
 #include "screen/display_list.h"
 #include "screen/screen.h"
-#include "shot_camera.h"
 #include "system/asset.h"
 #include "system/c_language.h"
 #include "system/compiler.h"

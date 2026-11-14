@@ -4,7 +4,9 @@
 #include <string.h>
 #include <ultra64.h>
 
-#include "camera.h"
+#include "camera/camera.h"
+#include "camera/shot_camera.h"
+#include "camera/view_projection.h"
 #include "character.h"
 #include "character_model.h"
 #include "club.h"
@@ -23,7 +25,6 @@
 #include "reaction.h"
 #include "screen/display_list.h"
 #include "screen/screen.h"
-#include "shot_camera.h"
 #include "shot_effects.h"
 #include "system/asset.h"
 #include "system/c_language.h"
@@ -33,7 +34,6 @@
 #include "system/main.h"
 #include "system/memory_address.h"
 #include "terrain.h"
-#include "view_projection.h"
 
 #define CHARACTER_BUFFER_SIZE 0x23680
 #define FRAME_DATA_OFFSET 0x20000

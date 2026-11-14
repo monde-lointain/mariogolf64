@@ -7,7 +7,9 @@
 
 #include "awards.h"
 #include "ball_simulation.h"
-#include "camera.h"
+#include "camera/camera.h"
+#include "camera/shot_camera.h"
+#include "camera/view_projection.h"
 #include "character.h"
 #include "character_model.h"
 #include "club.h"
@@ -47,7 +49,6 @@
 #include "screen/screen.h"
 #include "screen/screen_layers.h"
 #include "screen/sky_and_hud_animations.h"
-#include "shot_camera.h"
 #include "shot_effects.h"
 #include "sound.h"
 #include "surface.h"
@@ -60,7 +61,6 @@
 #include "text.h"
 #include "tournament.h"
 #include "turn.h"
-#include "view_projection.h"
 #include "work_area.h"
 
 #define GROUND_NOISE_SIZE 32

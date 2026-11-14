@@ -3,7 +3,9 @@
 #include <string.h>
 #include <ultra64.h>
 
-#include "camera.h"
+#include "camera/camera.h"
+#include "camera/shot_camera.h"
+#include "camera/view_projection.h"
 #include "course_space.h"
 #include "current_shot.h"
 #include "game.h"
@@ -13,7 +15,6 @@
 #include "math/geometry.h"
 #include "math/math_util.h"
 #include "screen/display_list.h"
-#include "shot_camera.h"
 #include "system/asset.h"
 #include "system/c_language.h"
 #include "system/compiler.h"
@@ -21,7 +22,6 @@
 #include "system/host_file.h"
 #include "system/memory_address.h"
 #include "terrain.h"
-#include "view_projection.h"
 
 #define TEXTURE_LOADED_ON_DEMAND 2
 

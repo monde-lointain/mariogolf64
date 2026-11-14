@@ -7,7 +7,9 @@
 
 #include "bets.h"
 #include "billboard.h"
-#include "camera.h"
+#include "camera/camera.h"
+#include "camera/shot_camera.h"
+#include "camera/view_projection.h"
 #include "character.h"
 #include "club.h"
 #include "club_panel.h"
@@ -44,7 +46,6 @@
 #include "screen/screen.h"
 #include "screen/screen_layers.h"
 #include "screen/sky_and_hud_animations.h"
-#include "shot_camera.h"
 #include "shot_effects.h"
 #include "sound.h"
 #include "surface.h"
@@ -59,7 +60,6 @@
 #include "terrain.h"
 #include "text.h"
 #include "turn.h"
-#include "view_projection.h"
 
 enum SceneryState {
     SCENERY_UNLOADED,

@@ -3,7 +3,9 @@
 #include <ultra64.h>
 
 #include "ball_simulation.h"
-#include "camera.h"
+#include "camera/camera.h"
+#include "camera/shot_camera.h"
+#include "camera/view_projection.h"
 #include "course_space.h"
 #include "debug_text.h"
 #include "game.h"
@@ -17,7 +19,6 @@
 #include "player.h"
 #include "screen/display_list.h"
 #include "screen/screen.h"
-#include "shot_camera.h"
 #include "surface.h"
 #include "system/asset.h"
 #include "system/c_language.h"
@@ -27,7 +28,6 @@
 #include "system/memory_address.h"
 #include "system/overlay_manager.h"
 #include "terrain.h"
-#include "view_projection.h"
 
 #define GOLF_BALL_COUNT 32
 #define AFTERIMAGE_LENGTH_MAX 60

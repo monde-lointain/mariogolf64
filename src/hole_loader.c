@@ -6,6 +6,7 @@
 
 #include "ball_simulation.h"
 #include "billboard.h"
+#include "camera/shot_camera.h"
 #include "character_model.h"
 #include "course.h"
 #include "current_shot.h"
@@ -22,7 +23,6 @@
 #include "round_hud.h"
 #include "scene.h"
 #include "scoring.h"
-#include "shot_camera.h"
 #include "system/c_language.h"
 #include "system/compiler.h"
 #include "system/main.h"

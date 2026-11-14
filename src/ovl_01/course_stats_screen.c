@@ -2,6 +2,7 @@
 
 #include <ultra64.h>
 
+#include "camera/view_projection.h"
 #include "course.h"
 #include "course_stats.h"
 #include "game.h"
@@ -22,7 +23,6 @@
 #include "system/compiler.h"
 #include "system/memory_address.h"
 #include "text.h"
-#include "view_projection.h"
 
 #define ASSET_HOLE_IN_ONE_BADGE 0x8EA
 #define ASSET_DIGITS_AND_ARROWS 0x5A5

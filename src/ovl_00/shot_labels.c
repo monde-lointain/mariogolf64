@@ -4,7 +4,9 @@
 
 #define CALLS_CENTERED_SHADOWED_TEXT_UNPROTOTYPED
 
-#include "camera.h"
+#include "camera/camera.h"
+#include "camera/shot_camera.h"
+#include "camera/view_projection.h"
 #include "club.h"
 #include "course_space.h"
 #include "current_shot.h"
@@ -18,7 +20,6 @@
 #include "round_hud.h"
 #include "screen/display_list.h"
 #include "screen/screen.h"
-#include "shot_camera.h"
 #include "surface.h"
 #include "system/asset.h"
 #include "system/compiler.h"
@@ -26,7 +27,6 @@
 #include "system/overlay_manager.h"
 #include "text.h"
 #include "turn.h"
-#include "view_projection.h"
 
 enum ShotLabelMode {
     SHOT_LABELS_NONE = -1,

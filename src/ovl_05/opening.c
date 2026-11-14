@@ -6,7 +6,8 @@
 
 #include "ball_simulation.h"
 #include "billboard.h"
-#include "camera.h"
+#include "camera/camera.h"
+#include "camera/view_projection.h"
 #include "character.h"
 #include "character_model.h"
 #include "club.h"
@@ -41,7 +42,6 @@
 #include "system/overlay_manager.h"
 #include "terrain.h"
 #include "text.h"
-#include "view_projection.h"
 
 #define OPENING_BILLBOARD_HEAP_SIZE 0x7038
 

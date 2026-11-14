@@ -3,6 +3,7 @@
 
 #define WIDENS_FACE_DRAW_MODE
 
+#include "camera/view_projection.h"
 #include "character.h"
 #include "character_model.h"
 #include "controllers/controller.h"
@@ -37,7 +38,6 @@
 #include "system/compiler.h"
 #include "system/memory_address.h"
 #include "text.h"
-#include "view_projection.h"
 
 #define COURSE_THUMBNAIL_WIDTH 64
 #define COURSE_THUMBNAIL_STRIP_HEIGHT 32
