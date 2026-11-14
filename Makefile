@@ -240,7 +240,7 @@ endif
 $(BUILD_DIR)/$(LIBNUSYS_DIR)/src/nusched.c.o: LIBNUSYS_DEFINES += -DNU_DEBUG
 
 .PHONY: all extract clean distclean setup tools format lint typecheck pycheck check-shiftable \
-        progress
+        progress equivalence
 
 all: $(ROM)
 ifneq ($(COMPARE),0)
@@ -294,6 +294,15 @@ progress: $(ROM)
 # addresses. The shiftable builds link that way already.
 check-shiftable: $(O_FILES) $(SHIFTABLE_LD) $(SHIFTABLE_SYMBOLS)
 	$(LD) $(addprefix -T ,$(SHIFTABLE_LD) $(SHIFTABLE_SYMBOLS)) $(LAYOUT_FLAGS) -o $(BUILD_DIR)/shiftable.elf
+
+# Runs the matching ROM and the modern build's side by side in ares's
+# n64-harness, which N64_HARNESS names, and compares the game's state at
+# each of EQUIVALENCE_FRAMES frames (see tools/equivalence.py)
+EQUIVALENCE_FRAMES ?= 3000
+
+equivalence: all
+	$(MAKE) MODERN=1
+	$(PYTHON) tools/equivalence.py --frames $(EQUIVALENCE_FRAMES)
 
 CLANG_TIDY ?= run-clang-tidy-23
 # libkmc is KMC's C library, which keeps the C library's names
