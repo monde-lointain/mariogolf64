@@ -260,7 +260,7 @@ static s32 f_IconImageIndex = 0;
 static s32 f_UnusedSaveMenuWord UNUSED = 0;
 static SongId f_ResumedSongId = NO_SONG;
 static s16 f_ReplayLabelIds[REPLAY_LABEL_COUNT] = {0x697, 0x698, 0x699, 0x69A, 0x69B, 0x69C};
-static s32 f_IconFrameTimer = 0;
+static s32 f_IconFrameTime = 0;
 static Radians f_PanelWaveAngle = 0.0f;
 static Radians f_TitleSwayAngle = 0.0f;
 static Radians f_CursorPulseAngle = 0.0f;
@@ -592,8 +592,8 @@ void AnimateModeIcons(Boolean isImmediate) {
     s32 slot;
 
     save = GetSaveData();
-    if ((++f_IconFrameTimer >= ICON_FRAME_PERIOD) | (isImmediate == TRUE)) {
-        f_IconFrameTimer = 0;
+    if ((++f_IconFrameTime >= ICON_FRAME_PERIOD) | (isImmediate == TRUE)) {
+        f_IconFrameTime = 0;
         for (slot = 0; slot != SAVED_GAME_COUNT; slot++) {
             if (!save->savedGames[slot].isValid) {
                 continue;

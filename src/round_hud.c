@@ -610,7 +610,7 @@ static s32 f_ShotEffect = SHOT_EFFECT_LONG_SHOT;
 static s32 f_SparkTrailFrameAssets[SPARK_TRAIL_FRAME_COUNT] =
     {0x6A7, 0x6A8, 0x6A9, 0x6AA, 0x6AB, 0x6AC};
 static s32 f_SparkTrailFrame = 1;
-static s32 f_SparkTrailFrameTimer = 0;
+static s32 f_SparkTrailFrameTime = 0;
 static s32 f_SparkTrailBufferIndex = 0;
 static s32 f_UnusedWordAfterSparkTrailIndex UNUSED = 0;
 static f32 f_HoleFlagWavePhase = 0.0f;
@@ -3252,8 +3252,8 @@ void DrawShotEffect(Gfx **displayListHead) {
         }
     }
     else {
-        if (++f_SparkTrailFrameTimer == SPARK_TRAIL_FRAME_TICKS) {
-            f_SparkTrailFrameTimer = 0;
+        if (++f_SparkTrailFrameTime == SPARK_TRAIL_FRAME_TICKS) {
+            f_SparkTrailFrameTime = 0;
             f_SparkTrailFrame = (f_SparkTrailFrame + 1) % SPARK_TRAIL_FRAME_COUNT;
             OpenEncodedAsset(f_SparkTrailFrameAssets[f_SparkTrailFrame], &asset);
             ReadEncodedAsset(

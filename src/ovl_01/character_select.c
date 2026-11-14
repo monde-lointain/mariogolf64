@@ -112,7 +112,7 @@ static u8 f_UnreadSelectByte UNUSED = 0;
 static u8 f_UnreadSelectDoneByte = 0;
 static s8 f_FaceFrame = 0;
 static u8 f_UnreadFaceToggle = 0;
-static s8 f_FaceFrameTimer = 0;
+static s8 f_FaceFrameTime = 0;
 static s8 f_IsComButtonHeld = FALSE;
 static s8 f_IsLeftyButtonHeld = FALSE;
 static s8 f_PreviewedPalette = NO_PALETTE;
@@ -258,7 +258,7 @@ s32 MoveGridCursor(s32 playerIndex, u8 direction, u8 canChooseMarked) {
     if (column != oldColumn || row != oldRow) {
         characterIndex = g_CharacterGrid[oldRow][oldColumn];
         f_FaceFrame = 0;
-        f_FaceFrameTimer = 0;
+        f_FaceFrameTime = 0;
         f_UnreadFaceToggle ^= 1;
         if (g_CharacterGrid[oldRow][oldColumn] < CHOOSABLE_MARK_LIMIT) {
             characterIndex += MARKED_CHARACTER_OFFSET;
@@ -371,7 +371,7 @@ s32 MoveGridCursorDiagonal(s32 playerIndex, u8 diagonal, u8 canChooseMarked) {
     if (column != oldColumn || row != oldRow) {
         characterIndex = g_CharacterGrid[oldRow][oldColumn];
         f_FaceFrame = 0;
-        f_FaceFrameTimer = 0;
+        f_FaceFrameTime = 0;
         f_UnreadFaceToggle ^= 1;
         if (g_CharacterGrid[oldRow][oldColumn] < CHOOSABLE_MARK_LIMIT) {
             characterIndex += MARKED_CHARACTER_OFFSET;
@@ -888,7 +888,7 @@ s32 UpdateCharacterSelect(s32 firstPlayerIndex, s32 playerCount, Boolean canChoo
         row = memory->characterRows[playerIndex];
         playerIndex++;
         f_FaceFrame = 0;
-        f_FaceFrameTimer = 0;
+        f_FaceFrameTime = 0;
         f_UnreadFaceToggle ^= 1;
         if (playerIndex != playerCount) {
             gridMark = g_CharacterGrid[(s16)row][(s16)column];
@@ -958,7 +958,7 @@ s32 UpdateCharacterSelect(s32 firstPlayerIndex, s32 playerCount, Boolean canChoo
             f_UnreadSelectDoneByte = 0;
             f_FaceFrame = 0;
             f_UnreadFaceToggle = 0;
-            f_FaceFrameTimer = 0;
+            f_FaceFrameTime = 0;
         }
 
         f_PreviewedPalette = NO_PALETTE;
@@ -1065,7 +1065,7 @@ s32 UpdateCharacterSelect(s32 firstPlayerIndex, s32 playerCount, Boolean canChoo
             f_IsPromptShown = FALSE;
             f_FaceFrame = 0;
             f_UnreadFaceToggle = 0;
-            f_FaceFrameTimer = 0;
+            f_FaceFrameTime = 0;
             if ((u8)canChooseMarked == TRUE) {
                 g_CharacterGrid[GAME_BOY_CHARACTER_ROW][0] = f_SavedGameBoySlots[0];
                 g_CharacterGrid[GAME_BOY_CHARACTER_ROW][1] = f_SavedGameBoySlots[1];
@@ -1077,7 +1077,7 @@ s32 UpdateCharacterSelect(s32 firstPlayerIndex, s32 playerCount, Boolean canChoo
             g_Players[playerIndex].isLefty = 0;
             playerIndex--;
             f_FaceFrame = 0;
-            f_FaceFrameTimer = 0;
+            f_FaceFrameTime = 0;
             f_UnreadFaceToggle ^= 1;
             g_ChoosingControllerIndices[playerIndex] = UNCHOSEN_CONTROLLER;
             g_PlayerControllerIndices[playerIndex] = UNCHOSEN_CONTROLLER;
@@ -1610,9 +1610,9 @@ void DrawGridFaces(Gfx **displayListHead, u8 isSinglePlayer) {
         IN_OWN_BLOCK(row++);
     }
 
-    f_FaceFrameTimer++;
-    if (f_FaceFrameTimer == FACE_FRAME_DURATION) {
-        f_FaceFrameTimer = 0;
+    f_FaceFrameTime++;
+    if (f_FaceFrameTime == FACE_FRAME_DURATION) {
+        f_FaceFrameTime = 0;
         f_FaceFrame++;
         if (f_FaceFrame >= FACE_ANIMATION_FRAME_COUNT) {
             f_FaceFrame = 0;

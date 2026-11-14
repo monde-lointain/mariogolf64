@@ -127,7 +127,7 @@ void DrawMenuNumber(Gfx **displayListHead, s32 x, s32 y, s32 number, u8 mark, u8
 static s16 f_FirstShownStat = 0;
 static s16 f_StatsTrophyFrame = 0;
 static s16 f_ShownStatsTrophyBufferIndex = 0;
-static s16 f_StatsTrophyFrameTimer = 0;
+static s16 f_StatsTrophyFrameTime = 0;
 static s32 f_StatsArrowFrame = 0;
 static s32 f_StatsArrowTimer = 0;
 static s32 f_UnreadStatsWord UNUSED = 0;
@@ -318,7 +318,7 @@ void UpdateCourseStats(void) {
 
                 memory->statsSpin = -STATS_TURN / (courseCount + 1);
                 if (memory->statsCourse != courseCount) {
-                    f_StatsTrophyFrameTimer = 0;
+                    f_StatsTrophyFrameTime = 0;
                     f_StatsTrophyFrame = 0;
                     f_ShownStatsTrophyBufferIndex ^= 1;
                     OpenEncodedAsset(g_TrophyFrameAssets[memory->statsCourse][0], &asset);
@@ -350,7 +350,7 @@ void UpdateCourseStats(void) {
 
                 memory->statsSpin = STATS_TURN / (courseCount + 1);
                 if (memory->statsCourse != courseCount) {
-                    f_StatsTrophyFrameTimer = 0;
+                    f_StatsTrophyFrameTime = 0;
                     f_StatsTrophyFrame = 0;
                     f_ShownStatsTrophyBufferIndex ^= 1;
                     OpenEncodedAsset(g_TrophyFrameAssets[memory->statsCourse][0], &asset);
@@ -1137,9 +1137,9 @@ void DrawCourseTrophies(Gfx **displayListHead) {
             }
         }
 
-        f_StatsTrophyFrameTimer++;
-        if (f_StatsTrophyFrameTimer >= TROPHY_FRAME_DELAY) {
-            f_StatsTrophyFrameTimer = 0;
+        f_StatsTrophyFrameTime++;
+        if (f_StatsTrophyFrameTime >= TROPHY_FRAME_DELAY) {
+            f_StatsTrophyFrameTime = 0;
             f_StatsTrophyFrame++;
             if ((s16)g_TrophyFrameAssets[memory->statsCourse][f_StatsTrophyFrame] ==
                 TROPHY_FRAME_END) {
