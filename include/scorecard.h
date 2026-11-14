@@ -4,7 +4,7 @@
 #include <ultra64.h>
 
 #include "bets.h"
-#include "course.h"
+#include "course/course.h"
 #include "math/math_util.h"
 #include "player.h"
 #include "round_stats.h"

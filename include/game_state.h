@@ -4,7 +4,7 @@
 #include <ultra64.h>
 
 #include "bets.h"
-#include "course.h"
+#include "course/course.h"
 #include "player.h"
 #include "scene.h"
 #include "system/c_language.h"

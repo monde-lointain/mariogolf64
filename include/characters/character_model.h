@@ -6,7 +6,7 @@
 #include "camera/camera.h"
 #include "characters/character.h"
 #include "club.h"
-#include "course_space.h"
+#include "course/course_space.h"
 #include "math/geometry.h"
 #include "math/math_util.h"
 #include "screen/display_list.h"

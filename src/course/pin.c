@@ -1,4 +1,4 @@
-#include "pin.h"
+#include "course/pin.h"
 
 #include <math.h>
 #include <ultra64.h>
@@ -6,24 +6,24 @@
 #include "camera/camera.h"
 #include "camera/shot_camera.h"
 #include "camera/view_projection.h"
-#include "course_space.h"
+#include "course/course_space.h"
+#include "course/hole_conditions.h"
+#include "course/hole_setup.h"
+#include "course/surface.h"
+#include "course/terrain.h"
 #include "current_shot.h"
 #include "game.h"
 #include "game_state.h"
-#include "hole_conditions.h"
-#include "hole_setup.h"
 #include "math/geometry.h"
 #include "math/math_util.h"
 #include "round_hud.h"
 #include "screen/display_list.h"
 #include "screen/screen.h"
-#include "surface.h"
 #include "system/asset.h"
 #include "system/c_language.h"
 #include "system/compiler.h"
 #include "system/heap.h"
 #include "system/memory_address.h"
-#include "terrain.h"
 
 #define CUP_DISTANCE_OFFSET 0x699
 

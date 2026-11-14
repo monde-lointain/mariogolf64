@@ -1,4 +1,4 @@
-#include "hole_creatures.h"
+#include "course/hole_creatures.h"
 
 #include <math.h>
 #include <ultra64.h>
@@ -6,10 +6,11 @@
 #include "audio/sound.h"
 #include "camera/camera.h"
 #include "camera/view_projection.h"
-#include "course_space.h"
+#include "course/course_space.h"
+#include "course/hole_setup.h"
+#include "course/terrain.h"
 #include "game.h"
 #include "game_flags.h"
-#include "hole_setup.h"
 #include "math/geometry.h"
 #include "math/math_util.h"
 #include "particle_effects.h"
@@ -22,7 +23,6 @@
 #include "system/compiler.h"
 #include "system/heap.h"
 #include "system/memory_address.h"
-#include "terrain.h"
 #include "turn.h"
 
 #define HOLE_CREATURE_COUNT 10

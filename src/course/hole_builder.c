@@ -1,16 +1,18 @@
-#include "hole_builder.h"
+#include "course/hole_builder.h"
 
 #include <ultra64.h>
 
-#include "billboard.h"
-#include "course.h"
+#include "course/billboard.h"
+#include "course/course.h"
+#include "course/hole_conditions.h"
+#include "course/hole_loader.h"
+#include "course/hole_setup.h"
+#include "course/hole_triangles.h"
+#include "course/terrain.h"
+#include "course/work_area.h"
 #include "debug_text.h"
 #include "game_flags.h"
 #include "game_state.h"
-#include "hole_conditions.h"
-#include "hole_loader.h"
-#include "hole_setup.h"
-#include "hole_triangles.h"
 #include "math/geometry.h"
 #include "math/math_util.h"
 #include "play.h"
@@ -23,9 +25,7 @@
 #include "system/compiler.h"
 #include "system/host_file.h"
 #include "system/memory_address.h"
-#include "terrain.h"
 #include "text/text.h"
-#include "work_area.h"
 
 #define TILE_ORIGIN_SHIFT 9
 #define TILE_TEXTURE_ORIGIN 0x100

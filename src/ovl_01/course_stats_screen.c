@@ -4,7 +4,7 @@
 
 #include "audio/sound.h"
 #include "camera/view_projection.h"
-#include "course.h"
+#include "course/course.h"
 #include "course_stats.h"
 #include "game.h"
 #include "main_menu.h"

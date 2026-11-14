@@ -5,8 +5,8 @@
 
 #include "characters/character.h"
 #include "club.h"
-#include "course.h"
-#include "hole_setup.h"
+#include "course/course.h"
+#include "course/hole_setup.h"
 #include "math/math_util.h"
 #include "player.h"
 #include "scene.h"

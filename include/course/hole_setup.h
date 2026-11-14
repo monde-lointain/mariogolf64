@@ -3,8 +3,8 @@
 
 #include <ultra64.h>
 
-#include "course_space.h"
-#include "hole_conditions.h"
+#include "course/course_space.h"
+#include "course/hole_conditions.h"
 
 typedef struct HoleSetup {
     CoursePoint cupPosition;

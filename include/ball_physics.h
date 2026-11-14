@@ -5,7 +5,7 @@
 
 #include "audio/sound.h"
 #include "ball_simulation.h"
-#include "course_space.h"
+#include "course/course_space.h"
 
 #define ROLL_SOUND_CHANNEL 8
 #define RING_SOUND_CHANNEL 14

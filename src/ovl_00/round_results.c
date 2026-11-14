@@ -8,7 +8,7 @@
 #include "characters/character.h"
 #include "controllers/controller.h"
 #include "controllers/transfer_pak.h"
-#include "course.h"
+#include "course/course.h"
 #include "course_stats.h"
 #include "debug_text.h"
 #include "game_flags.h"

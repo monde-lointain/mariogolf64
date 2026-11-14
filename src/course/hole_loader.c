@@ -1,21 +1,23 @@
-#include "hole_loader.h"
+#include "course/hole_loader.h"
 
 #include <nusys.h>
 #include <stdlib.h>
 #include <ultra64.h>
 
 #include "ball_simulation.h"
-#include "billboard.h"
 #include "camera/shot_camera.h"
 #include "characters/character_model.h"
-#include "course.h"
+#include "course/billboard.h"
+#include "course/course.h"
+#include "course/hole_builder.h"
+#include "course/hole_conditions.h"
+#include "course/hole_setup.h"
+#include "course/hole_triangles.h"
+#include "course/terrain.h"
+#include "course/work_area.h"
 #include "current_shot.h"
 #include "game_flags.h"
 #include "game_state.h"
-#include "hole_builder.h"
-#include "hole_conditions.h"
-#include "hole_setup.h"
-#include "hole_triangles.h"
 #include "math/geometry.h"
 #include "math/math_util.h"
 #include "play.h"
@@ -28,9 +30,7 @@
 #include "system/main.h"
 #include "system/memory_address.h"
 #include "system/overlay_manager.h"
-#include "terrain.h"
 #include "turn.h"
-#include "work_area.h"
 
 #define CUP_ATTEMPT_COUNT_MAX 120
 #define AreCupAndTeeSet() \

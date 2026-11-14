@@ -5,7 +5,8 @@
 #include "audio/sound.h"
 #include "camera/view_projection.h"
 #include "characters/character.h"
-#include "course.h"
+#include "course/course.h"
+#include "course/work_area.h"
 #include "course_stats_screen.h"
 #include "game.h"
 #include "main_menu.h"
@@ -26,7 +27,6 @@
 #include "system/frame_time.h"
 #include "system/memory_address.h"
 #include "text/text.h"
-#include "work_area.h"
 
 #define ASSET_CHARACTER_FACE_STRIP 0x8E9
 

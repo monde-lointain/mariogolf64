@@ -1,4 +1,4 @@
-#include "course.h"
+#include "course/course.h"
 
 #include <ultra64.h>
 

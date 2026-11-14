@@ -3,7 +3,7 @@
 
 #include <ultra64.h>
 
-#include "course.h"
+#include "course/course.h"
 
 #define TOURNAMENT_CONTESTANT_COUNT 30
 

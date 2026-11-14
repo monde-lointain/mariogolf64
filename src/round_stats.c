@@ -4,11 +4,11 @@
 
 #include "bets.h"
 #include "club.h"
-#include "course.h"
+#include "course/course.h"
+#include "course/hole_setup.h"
 #include "course_stats.h"
 #include "debug_text.h"
 #include "game_state.h"
-#include "hole_setup.h"
 #include "player.h"
 #include "round_hud.h"
 #include "round_stats.h"

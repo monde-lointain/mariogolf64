@@ -3,7 +3,7 @@
 
 #include <ultra64.h>
 
-#include "surface.h"
+#include "course/surface.h"
 #include "system/asset.h"
 #include "system/c_language.h"
 #include "system/compiler.h"

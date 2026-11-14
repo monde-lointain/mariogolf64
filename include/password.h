@@ -4,7 +4,7 @@
 #include <ultra64.h>
 
 #include "characters/character.h"
-#include "course.h"
+#include "course/course.h"
 #include "system/c_language.h"
 
 #define TOURNAMENT_CODE_SIZE 3

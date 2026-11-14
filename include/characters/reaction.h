@@ -4,7 +4,7 @@
 #include <ultra64.h>
 
 #include "characters/character.h"
-#include "course_space.h"
+#include "course/course_space.h"
 #include "math/geometry.h"
 #include "system/c_language.h"
 #include "system/compiler.h"

@@ -3,8 +3,8 @@
 
 #include <ultra64.h>
 
-#include "hole_triangles.h"
-#include "terrain.h"
+#include "course/hole_triangles.h"
+#include "course/terrain.h"
 
 #define WORK_AREA_SIZE 0x827E0
 #define TERRAIN_CODE_OFFSET 0x5E920

@@ -4,9 +4,9 @@
 #include <ultra64.h>
 
 #include "club.h"
-#include "course_space.h"
+#include "course/course_space.h"
+#include "course/surface.h"
 #include "math/math_util.h"
-#include "surface.h"
 
 typedef struct CurrentShot {
     SignedBinaryAngle heading;

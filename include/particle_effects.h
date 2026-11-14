@@ -6,7 +6,7 @@
 #include "ball_simulation.h"
 #include "camera/camera.h"
 #include "club.h"
-#include "course_space.h"
+#include "course/course_space.h"
 #include "math/geometry.h"
 #include "math/math_util.h"
 #include "player.h"

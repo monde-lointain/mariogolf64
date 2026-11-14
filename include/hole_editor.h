@@ -4,7 +4,7 @@
 #include <ultra64.h>
 
 #include "camera/camera.h"
-#include "terrain.h"
+#include "course/terrain.h"
 
 void CaptureFrame(void);
 void CaptureMapImage(void);

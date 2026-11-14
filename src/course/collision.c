@@ -1,23 +1,23 @@
-#include "collision.h"
+#include "course/collision.h"
 
 #include <math.h>
 #include <ultra64.h>
 
 #include "ball_simulation.h"
-#include "billboard.h"
-#include "course_space.h"
+#include "course/billboard.h"
+#include "course/course_space.h"
+#include "course/hole_setup.h"
+#include "course/hole_triangles.h"
+#include "course/pin.h"
+#include "course/terrain.h"
+#include "course/work_area.h"
 #include "debug_text.h"
 #include "game_flags.h"
-#include "hole_setup.h"
-#include "hole_triangles.h"
 #include "math/geometry.h"
 #include "math/math_util.h"
-#include "pin.h"
 #include "system/c_language.h"
 #include "system/compiler.h"
 #include "system/main.h"
-#include "terrain.h"
-#include "work_area.h"
 
 #define BILLBOARD_MASK_COUNT 41
 #define BILLBOARD_MASK_CELL_COUNT (BILLBOARD_MASK_SIZE * BILLBOARD_MASK_SIZE)

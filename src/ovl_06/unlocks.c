@@ -4,7 +4,7 @@
 
 #include "audio/sound.h"
 #include "characters/character.h"
-#include "course.h"
+#include "course/course.h"
 #include "course_stats.h"
 #include "menu.h"
 #include "save.h"

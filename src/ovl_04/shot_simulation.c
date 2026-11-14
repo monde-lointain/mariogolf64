@@ -4,12 +4,12 @@
 
 #include "ball_simulation.h"
 #include "club.h"
+#include "course/surface.h"
 #include "current_shot.h"
 #include "debug_text.h"
 #include "game_state.h"
 #include "math/geometry.h"
 #include "player.h"
-#include "surface.h"
 #include "system/c_language.h"
 #include "system/compiler.h"
 

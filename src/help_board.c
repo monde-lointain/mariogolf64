@@ -5,7 +5,7 @@
 
 #include "audio/sound.h"
 #include "characters/character_model.h"
-#include "hole_loader.h"
+#include "course/hole_loader.h"
 #include "main_menu.h"
 #include "math/math_util.h"
 #include "menu.h"

@@ -11,10 +11,12 @@
 #include "club.h"
 #include "controllers/controller.h"
 #include "controllers/transfer_pak.h"
+#include "course/hole_loader.h"
+#include "course/terrain.h"
+#include "course/work_area.h"
 #include "debug_text.h"
 #include "game.h"
 #include "game_flags.h"
-#include "hole_loader.h"
 #include "math/math_util.h"
 #include "play.h"
 #include "save.h"
@@ -28,8 +30,6 @@
 #include "system/memory_address.h"
 #include "system/overlay_manager.h"
 #include "system/segment_symbols.h"
-#include "terrain.h"
-#include "work_area.h"
 
 #define AUDIO_FREQUENCY 32000
 

@@ -3,7 +3,7 @@
 
 #include <ultra64.h>
 
-#include "course.h"
+#include "course/course.h"
 #include "system/c_language.h"
 
 enum MatchStanding {

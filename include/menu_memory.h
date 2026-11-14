@@ -5,7 +5,7 @@
 
 #include "bets.h"
 #include "characters/character.h"
-#include "course.h"
+#include "course/course.h"
 #include "player.h"
 #include "system/c_language.h"
 

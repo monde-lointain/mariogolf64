@@ -2,7 +2,7 @@
 
 #include <ultra64.h>
 
-#include "course.h"
+#include "course/course.h"
 #include "course_stats.h"
 #include "game_state.h"
 #include "particle_effects.h"

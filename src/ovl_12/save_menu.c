@@ -8,7 +8,7 @@
 #include "audio/sound.h"
 #include "characters/character.h"
 #include "controllers/controller.h"
-#include "course.h"
+#include "course/course.h"
 #include "game_state.h"
 #include "math/math_util.h"
 #include "menu.h"

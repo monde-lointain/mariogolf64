@@ -7,7 +7,7 @@
 #include "characters/character_model.h"
 #include "controllers/controller.h"
 #include "controllers/transfer_pak.h"
-#include "hole_loader.h"
+#include "course/hole_loader.h"
 #include "scene.h"
 #include "screen/display_list.h"
 #include "screen/screen.h"

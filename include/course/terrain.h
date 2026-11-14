@@ -3,8 +3,8 @@
 
 #include <ultra64.h>
 
+#include "course/surface.h"
 #include "math/geometry.h"
-#include "surface.h"
 #include "system/c_language.h"
 #include "system/compiler.h"
 

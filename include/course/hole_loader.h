@@ -3,8 +3,8 @@
 
 #include <ultra64.h>
 
-#include "course.h"
-#include "course_space.h"
+#include "course/course.h"
+#include "course/course_space.h"
 #include "system/c_language.h"
 
 #define CUP_POSITION_COUNT 4

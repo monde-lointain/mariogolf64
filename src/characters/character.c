@@ -11,14 +11,15 @@
 #include "characters/character_model.h"
 #include "characters/reaction.h"
 #include "club.h"
-#include "course_space.h"
+#include "course/course_space.h"
+#include "course/hole_conditions.h"
+#include "course/hole_loader.h"
+#include "course/hole_setup.h"
+#include "course/terrain.h"
 #include "current_shot.h"
 #include "debug_text.h"
 #include "game.h"
 #include "game_flags.h"
-#include "hole_conditions.h"
-#include "hole_loader.h"
-#include "hole_setup.h"
 #include "math/geometry.h"
 #include "math/math_util.h"
 #include "play.h"
@@ -33,7 +34,6 @@
 #include "system/host_file.h"
 #include "system/main.h"
 #include "system/memory_address.h"
-#include "terrain.h"
 
 #define CHARACTER_BUFFER_SIZE 0x23680
 #define FRAME_DATA_OFFSET 0x20000

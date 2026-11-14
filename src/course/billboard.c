@@ -1,4 +1,4 @@
-#include "billboard.h"
+#include "course/billboard.h"
 
 #include <string.h>
 #include <ultra64.h>
@@ -6,12 +6,13 @@
 #include "camera/camera.h"
 #include "camera/shot_camera.h"
 #include "camera/view_projection.h"
-#include "course_space.h"
+#include "course/course_space.h"
+#include "course/hole_setup.h"
+#include "course/terrain.h"
 #include "current_shot.h"
 #include "game.h"
 #include "game_flags.h"
 #include "game_state.h"
-#include "hole_setup.h"
 #include "math/geometry.h"
 #include "math/math_util.h"
 #include "screen/display_list.h"
@@ -21,7 +22,6 @@
 #include "system/heap.h"
 #include "system/host_file.h"
 #include "system/memory_address.h"
-#include "terrain.h"
 
 #define TEXTURE_LOADED_ON_DEMAND 2
 

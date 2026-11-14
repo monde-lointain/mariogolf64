@@ -4,10 +4,10 @@
 #include <ultra64.h>
 
 #include "characters/character.h"
-#include "course.h"
+#include "course/course.h"
+#include "course/hole_setup.h"
 #include "course_stats.h"
 #include "game_state.h"
-#include "hole_setup.h"
 #include "play_record.h"
 #include "player.h"
 #include "round_stats.h"

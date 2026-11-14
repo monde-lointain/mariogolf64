@@ -4,7 +4,7 @@
 
 #include "audio/sound.h"
 #include "camera/camera.h"
-#include "course_space.h"
+#include "course/course_space.h"
 #include "current_shot.h"
 #include "debug_text.h"
 #include "game_state.h"

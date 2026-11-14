@@ -4,7 +4,7 @@
 #include <ultra64.h>
 
 #include "camera/camera.h"
-#include "course_space.h"
+#include "course/course_space.h"
 #include "system/asset.h"
 
 enum ImpactFlashState {

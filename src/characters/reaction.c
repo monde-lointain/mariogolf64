@@ -4,25 +4,25 @@
 #include <ultra64.h>
 
 #include "audio/sound.h"
-#include "billboard.h"
 #include "camera/camera.h"
 #include "characters/character.h"
 #include "characters/character_model.h"
-#include "course_space.h"
+#include "course/billboard.h"
+#include "course/course_space.h"
+#include "course/hole_triangles.h"
+#include "course/pin.h"
+#include "course/terrain.h"
 #include "current_shot.h"
 #include "debug_text.h"
 #include "game_flags.h"
 #include "game_state.h"
-#include "hole_triangles.h"
 #include "math/geometry.h"
 #include "math/math_util.h"
 #include "particle_effects.h"
-#include "pin.h"
 #include "scene.h"
 #include "screen/display_list.h"
 #include "system/c_language.h"
 #include "system/compiler.h"
-#include "terrain.h"
 
 #define FIRST_REACTION_CHANNEL 4
 #define LAST_REACTION_CHANNEL 7

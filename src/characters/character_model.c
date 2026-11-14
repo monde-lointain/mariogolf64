@@ -4,8 +4,8 @@
 
 #include "camera/camera.h"
 #include "club.h"
+#include "course/hole_setup.h"
 #include "game.h"
-#include "hole_setup.h"
 #include "math/geometry.h"
 #include "math/math_util.h"
 #include "screen/display_list.h"

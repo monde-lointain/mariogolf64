@@ -1,10 +1,11 @@
-#include "hole_triangles.h"
+#include "course/hole_triangles.h"
 
 #include <ultra64.h>
 
 #include "camera/camera.h"
 #include "camera/shot_camera.h"
-#include "course_space.h"
+#include "course/course_space.h"
+#include "course/work_area.h"
 #include "game.h"
 #include "game_flags.h"
 #include "game_state.h"
@@ -19,7 +20,6 @@
 #include "system/c_language.h"
 #include "system/compiler.h"
 #include "system/memory_address.h"
-#include "work_area.h"
 
 #define f_HoleTriangles (g_WorkArea.hole.triangles)
 

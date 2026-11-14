@@ -4,7 +4,7 @@
 #include <ultra64.h>
 
 #include "controllers/controller.h"
-#include "course.h"
+#include "course/course.h"
 #include "screen/display_list.h"
 #include "system/asset.h"
 #include "system/c_language.h"
