@@ -3874,7 +3874,7 @@ void BuildStatusData(StatusData *status) {
     s32 roundedDrive;
     CourseIndex courseIndex;
     s32 index;
-    s32 bits[2];
+    s32 matchupBits[2];
     s32 row;
     s32 openCourseCount;
 
@@ -4085,22 +4085,22 @@ void BuildStatusData(StatusData *status) {
     // characterIndex variable changes register allocation and breaks the match.
     for (courseIndex = 0; courseIndex != CHARACTER_COUNT; courseIndex++) {
         row = f_StatusCharacterOrder[courseIndex];
-        bits[1] = 0;
-        bits[0] = 0;
+        matchupBits[1] = 0;
+        matchupBits[0] = 0;
         for (index = 0; index != STATUS_MATCHUP_COLUMN_COUNT; index++) {
             if (records->awards.matchups[row][index].winBits != 0) {
-                bits[0] |= 1 << index;
+                matchupBits[0] |= 1 << index;
             }
 
             if (records->awards.matchups[row][index].winBits & WON_UNSAVED_FLAG) {
-                bits[1] |= 1 << index;
+                matchupBits[1] |= 1 << index;
             }
         }
 
-        progress->matchupBits[courseIndex].wonBits[0] = bits[0];
-        progress->matchupBits[courseIndex].wonBits[1] = bits[0] >> BITS_PER_BYTE;
-        progress->matchupBits[courseIndex].wonUnsavedBits[0] = bits[1];
-        progress->matchupBits[courseIndex].wonUnsavedBits[1] = bits[1] >> BITS_PER_BYTE;
+        progress->matchupBits[courseIndex].wonBits[0] = matchupBits[0];
+        progress->matchupBits[courseIndex].wonBits[1] = matchupBits[0] >> BITS_PER_BYTE;
+        progress->matchupBits[courseIndex].wonUnsavedBits[0] = matchupBits[1];
+        progress->matchupBits[courseIndex].wonUnsavedBits[1] = matchupBits[1] >> BITS_PER_BYTE;
     }
 }
 
