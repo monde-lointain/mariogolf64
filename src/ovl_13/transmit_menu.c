@@ -38,7 +38,7 @@
 #define SECOND_OPTION_ROW 1
 #define MAIN_MENU_OPTION_ROW 2
 
-#define TRANSMIT_OPTION_MESSAGES 0x13F
+#define MESSAGE_FIRST_TRANSMIT_OPTION 0x13F
 
 enum TransmitOption {
     TRANSMIT_OPTION_NONE = -1,
@@ -48,7 +48,7 @@ enum TransmitOption {
     TRANSMIT_OPTION_MAIN_MENU
 };
 
-#define TRANSMIT_OPTION_HINTS 0x143
+#define MESSAGE_FIRST_TRANSMIT_OPTION_HINT 0x143
 
 #define BRING_READING 0
 #define BRING_CHOOSING 2
@@ -94,32 +94,32 @@ enum SendExperienceStep {
 #define NOTICE_OPENING 1
 #define NOTICE_CLOSING 2
 #define NOTICE_SHOWN 3
-#define INSERT_TRANSFER_PAK_MESSAGE 0x149
-#define SWAP_FOR_TRANSFER_PAK_MESSAGE 0x148
-#define LOOSE_TRANSFER_PAK_MESSAGE 0x14A
-#define NO_CARTRIDGE_MESSAGE 0x14C
-#define WRONG_CARTRIDGE_MESSAGE 0x14D
-#define CARTRIDGE_REMOVED_MESSAGE 0x14E
-#define RETRYING_AFTER_REMOVAL_MESSAGE 0x14F
-#define CONNECTOR_PROBLEM_MESSAGE 0x151
-#define INSERT_RUMBLE_PAK_MESSAGE 0x155
-#define CORRUPTED_SAVE_MESSAGE 0x152
-#define UNINITIALIZED_SAVE_MESSAGE 0x153
-#define SWAP_GAME_BOY_PAKS_MESSAGE 0x154
-#define CARTRIDGE_REPLACED_MESSAGE 0x156
-#define PAK_CHECK_MESSAGE 0x147
-#define NO_EXPERIENCE_MESSAGE 0x157
-#define CHOOSE_EXPERIENCE_MESSAGE 0x158
-#define EXPERIENCE_SENT_MESSAGE 0x159
-#define NOT_FROM_CARTRIDGE_MESSAGE 0x15A
-#define CHOOSE_CHARACTER_MESSAGE 0x15C
-#define CHARACTER_BROUGHT_MESSAGE 0x15D
-#define CHOOSE_SWAPPED_CHARACTER_MESSAGE 0x15E
-#define NO_CHARACTERS_MESSAGE 0x15F
+#define MESSAGE_INSERT_TRANSFER_PAK 0x149
+#define MESSAGE_SWAP_FOR_TRANSFER_PAK 0x148
+#define MESSAGE_LOOSE_TRANSFER_PAK 0x14A
+#define MESSAGE_NO_CARTRIDGE 0x14C
+#define MESSAGE_WRONG_CARTRIDGE 0x14D
+#define MESSAGE_CARTRIDGE_REMOVED 0x14E
+#define MESSAGE_RETRYING_AFTER_REMOVAL 0x14F
+#define MESSAGE_CONNECTOR_PROBLEM 0x151
+#define MESSAGE_INSERT_RUMBLE_PAK 0x155
+#define MESSAGE_CORRUPTED_SAVE 0x152
+#define MESSAGE_UNINITIALIZED_SAVE 0x153
+#define MESSAGE_SWAP_GAME_BOY_PAKS 0x154
+#define MESSAGE_CARTRIDGE_REPLACED 0x156
+#define MESSAGE_PAK_CHECK 0x147
+#define MESSAGE_NO_EXPERIENCE 0x157
+#define MESSAGE_CHOOSE_EXPERIENCE 0x158
+#define MESSAGE_EXPERIENCE_SENT 0x159
+#define MESSAGE_NOT_FROM_CARTRIDGE 0x15A
+#define MESSAGE_CHOOSE_BROUGHT_CHARACTER 0x15C
+#define MESSAGE_CHARACTER_BROUGHT 0x15D
+#define MESSAGE_CHOOSE_SWAPPED_CHARACTER 0x15E
+#define MESSAGE_NO_CHARACTERS 0x15F
 
-#define CHOOSE_CARTRIDGE_MESSAGE 0x160
-#define KEEP_POWER_ON_MESSAGE 0x161
-#define SEND_STATUS_MESSAGE 0x162
+#define MESSAGE_CHOOSE_CARTRIDGE 0x160
+#define MESSAGE_KEEP_POWER_ON 0x161
+#define MESSAGE_SEND_STATUS 0x162
 #define HINT_LEFT 28
 #define HINT_TOP 186
 #define HINT_TEXT_SLOT 3
@@ -578,7 +578,7 @@ void UpdateBringCharacters(void) {
                     transfer->pressingHandPosition = PRESSING_HAND_FOR_NOTICE;
                     if (f_TransmitController.pressedButtons & A_BUTTON) {
                         transfer->pressingHandPosition = PRESSING_HAND_HIDDEN;
-                        SetNoticeState(NOTICE_CLOSING, PAK_CHECK_MESSAGE);
+                        SetNoticeState(NOTICE_CLOSING, MESSAGE_PAK_CHECK);
                         PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, SOUND_FULL_SCALE);
                     }
 
@@ -587,12 +587,12 @@ void UpdateBringCharacters(void) {
 
             break;
         case BRING_NEXT_CARTRIDGE:
-            SetNoticeState(NOTICE_OPENING, SWAP_GAME_BOY_PAKS_MESSAGE);
+            SetNoticeState(NOTICE_OPENING, MESSAGE_SWAP_GAME_BOY_PAKS);
             ClearCartridgeCharacters();
             transfer->screenStep = BRING_CONFIRMING;
             break;
         case BRING_STARTING:
-            SetNoticeState(NOTICE_OPENING, PAK_CHECK_MESSAGE);
+            SetNoticeState(NOTICE_OPENING, MESSAGE_PAK_CHECK);
             ClearCartridgeCharacters();
             transfer->screenStep = BRING_CONFIRMING;
             break;
@@ -616,13 +616,13 @@ void UpdateBringCharacters(void) {
                     if (f_TransmitController.pressedButtons & A_BUTTON) {
                         transfer->pressingHandPosition = PRESSING_HAND_HIDDEN;
                         transfer->isCanceled = FALSE;
-                        SetNoticeState(NOTICE_CLOSING, PAK_CHECK_MESSAGE);
+                        SetNoticeState(NOTICE_CLOSING, MESSAGE_PAK_CHECK);
                         PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, SOUND_FULL_SCALE);
                     }
                     else if (f_TransmitController.pressedButtons & B_BUTTON) {
                         transfer->pressingHandPosition = PRESSING_HAND_HIDDEN;
                         transfer->isCanceled = TRUE;
-                        SetNoticeState(NOTICE_CLOSING, PAK_CHECK_MESSAGE);
+                        SetNoticeState(NOTICE_CLOSING, MESSAGE_PAK_CHECK);
                         PlaySound(SOUND_MENU_CANCEL, g_NextSoundChannel, SOUND_FULL_SCALE);
                     }
 
@@ -640,7 +640,7 @@ void UpdateBringCharacters(void) {
                 case PAK_RESULT_STILL_READING:
                     break;
                 case PAK_RESULT_NO_CHARACTERS:
-                    SetNoticeState(NOTICE_OPENING, NO_CHARACTERS_MESSAGE);
+                    SetNoticeState(NOTICE_OPENING, MESSAGE_NO_CHARACTERS);
                     transfer->screenStep = BRING_NO_CHARACTERS;
                     transfer->isAccessing = FALSE;
                     break;
@@ -772,19 +772,19 @@ void UpdateBringCharacters(void) {
 void ShowPakError(s32 pfsError) {
     switch (pfsError) {
         case PFS_ERR_NOPACK:
-            SetNoticeState(NOTICE_OPENING, INSERT_TRANSFER_PAK_MESSAGE);
+            SetNoticeState(NOTICE_OPENING, MESSAGE_INSERT_TRANSFER_PAK);
             break;
         case PFS_ERR_DEVICE:
-            SetNoticeState(NOTICE_OPENING, SWAP_FOR_TRANSFER_PAK_MESSAGE);
+            SetNoticeState(NOTICE_OPENING, MESSAGE_SWAP_FOR_TRANSFER_PAK);
             break;
         case PFS_ERR_CONTRFAIL:
-            SetNoticeState(NOTICE_OPENING, CONNECTOR_PROBLEM_MESSAGE);
+            SetNoticeState(NOTICE_OPENING, MESSAGE_CONNECTOR_PROBLEM);
             break;
         case PFS_ERR_NO_GBCART:
-            SetNoticeState(NOTICE_OPENING, NO_CARTRIDGE_MESSAGE);
+            SetNoticeState(NOTICE_OPENING, MESSAGE_NO_CARTRIDGE);
             break;
         case PFS_ERR_NEW_GBCART:
-            SetNoticeState(NOTICE_OPENING, RETRYING_AFTER_REMOVAL_MESSAGE);
+            SetNoticeState(NOTICE_OPENING, MESSAGE_RETRYING_AFTER_REMOVAL);
             break;
     }
 }
@@ -793,40 +793,40 @@ void ShowTransferError(u32 result) {
     g_GameBoyTransfer.pressingHandPosition = PRESSING_HAND_FOR_NOTICE;
     switch (result) {
         case PAK_RESULT_NO_CHARACTERS:
-            SetNoticeState(NOTICE_OPENING, NO_CHARACTERS_MESSAGE);
+            SetNoticeState(NOTICE_OPENING, MESSAGE_NO_CHARACTERS);
             break;
         case PAK_RESULT_NO_PAK:
-            SetNoticeState(NOTICE_OPENING, INSERT_TRANSFER_PAK_MESSAGE);
+            SetNoticeState(NOTICE_OPENING, MESSAGE_INSERT_TRANSFER_PAK);
             break;
         case PAK_RESULT_NO_CARTRIDGE:
-            SetNoticeState(NOTICE_OPENING, NO_CARTRIDGE_MESSAGE);
+            SetNoticeState(NOTICE_OPENING, MESSAGE_NO_CARTRIDGE);
             break;
         case PAK_RESULT_WRONG_CARTRIDGE:
-            SetNoticeState(NOTICE_OPENING, WRONG_CARTRIDGE_MESSAGE);
+            SetNoticeState(NOTICE_OPENING, MESSAGE_WRONG_CARTRIDGE);
             break;
         case PAK_RESULT_OTHER_PAK:
-            SetNoticeState(NOTICE_OPENING, SWAP_FOR_TRANSFER_PAK_MESSAGE);
+            SetNoticeState(NOTICE_OPENING, MESSAGE_SWAP_FOR_TRANSFER_PAK);
             break;
         case PAK_RESULT_LOOSE_PAK:
-            SetNoticeState(NOTICE_OPENING, LOOSE_TRANSFER_PAK_MESSAGE);
+            SetNoticeState(NOTICE_OPENING, MESSAGE_LOOSE_TRANSFER_PAK);
             break;
         case PAK_RESULT_REMOVED_RETRYING:
-            SetNoticeState(NOTICE_OPENING, RETRYING_AFTER_REMOVAL_MESSAGE);
+            SetNoticeState(NOTICE_OPENING, MESSAGE_RETRYING_AFTER_REMOVAL);
             break;
         case PAK_RESULT_CARTRIDGE_REMOVED:
-            SetNoticeState(NOTICE_OPENING, CARTRIDGE_REMOVED_MESSAGE);
+            SetNoticeState(NOTICE_OPENING, MESSAGE_CARTRIDGE_REMOVED);
             break;
         case PAK_RESULT_CONNECTOR_PROBLEM:
-            SetNoticeState(NOTICE_OPENING, CONNECTOR_PROBLEM_MESSAGE);
+            SetNoticeState(NOTICE_OPENING, MESSAGE_CONNECTOR_PROBLEM);
             break;
         case PAK_RESULT_CORRUPTED:
-            SetNoticeState(NOTICE_OPENING, CORRUPTED_SAVE_MESSAGE);
+            SetNoticeState(NOTICE_OPENING, MESSAGE_CORRUPTED_SAVE);
             break;
         case PAK_RESULT_CARTRIDGE_REPLACED:
-            SetNoticeState(NOTICE_OPENING, CARTRIDGE_REPLACED_MESSAGE);
+            SetNoticeState(NOTICE_OPENING, MESSAGE_CARTRIDGE_REPLACED);
             break;
         case PAK_RESULT_UNINITIALIZED:
-            SetNoticeState(NOTICE_OPENING, UNINITIALIZED_SAVE_MESSAGE);
+            SetNoticeState(NOTICE_OPENING, MESSAGE_UNINITIALIZED_SAVE);
             break;
     }
 }
@@ -843,7 +843,7 @@ void UpdateSendStatus(void) {
                     transfer->pressingHandPosition = PRESSING_HAND_FOR_NOTICE;
                     if (f_TransmitController.pressedButtons & A_BUTTON) {
                         transfer->pressingHandPosition = PRESSING_HAND_HIDDEN;
-                        SetNoticeState(NOTICE_CLOSING, PAK_CHECK_MESSAGE);
+                        SetNoticeState(NOTICE_CLOSING, MESSAGE_PAK_CHECK);
                         PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, SOUND_FULL_SCALE);
                     }
 
@@ -859,7 +859,7 @@ void UpdateSendStatus(void) {
         case SEND_STATUS_STARTING:
             transfer->screenStep = SEND_STATUS_CONFIRMING;
             ResetSendStatus();
-            SetNoticeState(NOTICE_OPENING, PAK_CHECK_MESSAGE);
+            SetNoticeState(NOTICE_OPENING, MESSAGE_PAK_CHECK);
             break;
         case SEND_STATUS_CONFIRMING:
             switch (GetNoticeState()) {
@@ -882,13 +882,13 @@ void UpdateSendStatus(void) {
                     if (f_TransmitController.pressedButtons & A_BUTTON) {
                         transfer->pressingHandPosition = PRESSING_HAND_HIDDEN;
                         transfer->isCanceled = FALSE;
-                        SetNoticeState(NOTICE_CLOSING, PAK_CHECK_MESSAGE);
+                        SetNoticeState(NOTICE_CLOSING, MESSAGE_PAK_CHECK);
                         PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, SOUND_FULL_SCALE);
                     }
                     else if (f_TransmitController.pressedButtons & B_BUTTON) {
                         transfer->pressingHandPosition = PRESSING_HAND_HIDDEN;
                         transfer->isCanceled = TRUE;
-                        SetNoticeState(NOTICE_CLOSING, PAK_CHECK_MESSAGE);
+                        SetNoticeState(NOTICE_CLOSING, MESSAGE_PAK_CHECK);
                         PlaySound(SOUND_MENU_CANCEL, g_NextSoundChannel, SOUND_FULL_SCALE);
                     }
 
@@ -1029,7 +1029,7 @@ void UpdateSendExperience(void) {
                     transfer->pressingHandPosition = PRESSING_HAND_FOR_NOTICE;
                     if (f_TransmitController.pressedButtons & A_BUTTON) {
                         transfer->pressingHandPosition = PRESSING_HAND_HIDDEN;
-                        SetNoticeState(NOTICE_CLOSING, PAK_CHECK_MESSAGE);
+                        SetNoticeState(NOTICE_CLOSING, MESSAGE_PAK_CHECK);
                         PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, SOUND_FULL_SCALE);
                     }
 
@@ -1041,12 +1041,12 @@ void UpdateSendExperience(void) {
             if (f_TransmitController.pressedButtons & A_BUTTON) {
                 if (g_GameBoyCharacters[transfer->gameBoyCharacterIndex].experience == 0) {
                     transfer->screenStep = SEND_EXPERIENCE_NOTHING_TO_SEND;
-                    SetNoticeState(NOTICE_OPENING, NO_EXPERIENCE_MESSAGE);
+                    SetNoticeState(NOTICE_OPENING, MESSAGE_NO_EXPERIENCE);
                     PlaySound(SOUND_MENU_BLOCKED, g_NextSoundChannel, SOUND_FULL_SCALE);
                 }
                 else {
                     transfer->screenStep = SEND_EXPERIENCE_CONFIRMING;
-                    SetNoticeState(NOTICE_OPENING, PAK_CHECK_MESSAGE);
+                    SetNoticeState(NOTICE_OPENING, MESSAGE_PAK_CHECK);
                     PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, SOUND_FULL_SCALE);
                 }
             }
@@ -1087,13 +1087,13 @@ void UpdateSendExperience(void) {
                     if (f_TransmitController.pressedButtons & A_BUTTON) {
                         transfer->pressingHandPosition = PRESSING_HAND_HIDDEN;
                         transfer->isCanceled = FALSE;
-                        SetNoticeState(NOTICE_CLOSING, PAK_CHECK_MESSAGE);
+                        SetNoticeState(NOTICE_CLOSING, MESSAGE_PAK_CHECK);
                         PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, SOUND_FULL_SCALE);
                     }
                     else if (f_TransmitController.pressedButtons & B_BUTTON) {
                         transfer->pressingHandPosition = PRESSING_HAND_HIDDEN;
                         transfer->isCanceled = TRUE;
-                        SetNoticeState(NOTICE_CLOSING, PAK_CHECK_MESSAGE);
+                        SetNoticeState(NOTICE_CLOSING, MESSAGE_PAK_CHECK);
                         PlaySound(SOUND_MENU_CANCEL, g_NextSoundChannel, SOUND_FULL_SCALE);
                     }
 
@@ -1108,7 +1108,7 @@ void UpdateSendExperience(void) {
                     transfer->screenStep = SEND_EXPERIENCE_SENT;
                     break;
                 case EXPERIENCE_WRITE_NOT_FROM_CARTRIDGE:
-                    SetNoticeState(NOTICE_OPENING, NOT_FROM_CARTRIDGE_MESSAGE);
+                    SetNoticeState(NOTICE_OPENING, MESSAGE_NOT_FROM_CARTRIDGE);
                     transfer->screenStep = SEND_EXPERIENCE_FAILED;
                     break;
                 case EXPERIENCE_WRITE_FAILED:
@@ -1147,7 +1147,7 @@ void UpdateSendExperience(void) {
                     transfer->pressingHandPosition = PRESSING_HAND_FOR_NOTICE;
                     if (f_TransmitController.pressedButtons & A_BUTTON) {
                         transfer->pressingHandPosition = PRESSING_HAND_HIDDEN;
-                        SetNoticeState(NOTICE_CLOSING, PAK_CHECK_MESSAGE);
+                        SetNoticeState(NOTICE_CLOSING, MESSAGE_PAK_CHECK);
                         PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, SOUND_FULL_SCALE);
                     }
 
@@ -1224,7 +1224,7 @@ void UpdateTransmitMenu(void) {
                     if (!HaveAllRumblePaks()) {
                         transfer->isCanceled = FALSE;
                         transfer->screen = TRANSMIT_SCREEN_RUMBLE_PAK_PROMPT;
-                        SetNoticeState(NOTICE_OPENING, INSERT_RUMBLE_PAK_MESSAGE);
+                        SetNoticeState(NOTICE_OPENING, MESSAGE_INSERT_RUMBLE_PAK);
                     }
                     else {
                         transfer->screen = TRANSMIT_SCREEN_LEAVING_FOR_TITLE;
@@ -1237,7 +1237,7 @@ void UpdateTransmitMenu(void) {
                     if (!HaveAllRumblePaks()) {
                         transfer->isCanceled = TRUE;
                         transfer->screen = TRANSMIT_SCREEN_RUMBLE_PAK_PROMPT;
-                        SetNoticeState(NOTICE_OPENING, INSERT_RUMBLE_PAK_MESSAGE);
+                        SetNoticeState(NOTICE_OPENING, MESSAGE_INSERT_RUMBLE_PAK);
                     }
                     else {
                         transfer->screen = TRANSMIT_SCREEN_LEAVING_FOR_TITLE;
@@ -1297,7 +1297,7 @@ void UpdateTransmitMenu(void) {
                     transfer->pressingHandPosition = PRESSING_HAND_FOR_NOTICE;
                     if (f_TransmitController.pressedButtons & A_BUTTON) {
                         transfer->pressingHandPosition = PRESSING_HAND_HIDDEN;
-                        SetNoticeState(NOTICE_CLOSING, PAK_CHECK_MESSAGE);
+                        SetNoticeState(NOTICE_CLOSING, MESSAGE_PAK_CHECK);
                         PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, SOUND_FULL_SCALE);
                     }
 
@@ -1557,13 +1557,13 @@ void DrawSendStatusHint(Gfx **displayListHead, GameBoyTransfer *transfer) {
 
     switch (transfer->screenStep) {
         case SEND_STATUS_CHOOSING:
-            messageId = CHOOSE_CARTRIDGE_MESSAGE;
+            messageId = MESSAGE_CHOOSE_CARTRIDGE;
             break;
         case SEND_STATUS_SENT:
-            messageId = SEND_STATUS_MESSAGE;
+            messageId = MESSAGE_SEND_STATUS;
             break;
         case SEND_STATUS_READY:
-            messageId = KEEP_POWER_ON_MESSAGE;
+            messageId = MESSAGE_KEEP_POWER_ON;
             break;
     }
 
@@ -1619,7 +1619,7 @@ void DrawCharacterStats(
     SetTextSlot(
         HINT_LEFT,
         HINT_TOP,
-        CHOOSE_CHARACTER_MESSAGE,
+        MESSAGE_CHOOSE_BROUGHT_CHARACTER,
         TEXT_SLOT_LARGE_FONT,
         HINT_TEXT_SLOT,
         TEXT_FLAG_DRAWN_BY_OWNER,
@@ -1814,13 +1814,13 @@ void DrawBringCharactersText(Gfx **displayListHead, GameBoyTransfer *transfer) {
         messageId = NO_MESSAGE;
         switch (transfer->screenStep) {
             case BRING_CHOOSING:
-                messageId = CHOOSE_CHARACTER_MESSAGE;
+                messageId = MESSAGE_CHOOSE_BROUGHT_CHARACTER;
                 break;
             case BRING_CHOOSING_SLOT:
-                messageId = CHOOSE_SWAPPED_CHARACTER_MESSAGE;
+                messageId = MESSAGE_CHOOSE_SWAPPED_CHARACTER;
                 break;
             case BRING_BROUGHT:
-                messageId = CHARACTER_BROUGHT_MESSAGE;
+                messageId = MESSAGE_CHARACTER_BROUGHT;
                 break;
         }
 
@@ -1869,10 +1869,10 @@ void DrawSendExperienceText(Gfx **displayListHead, GameBoyTransfer *transfer) {
     messageId = NO_MESSAGE;
     switch (transfer->screenStep) {
         case SEND_EXPERIENCE_CHOOSING:
-            messageId = CHOOSE_EXPERIENCE_MESSAGE;
+            messageId = MESSAGE_CHOOSE_EXPERIENCE;
             break;
         case SEND_EXPERIENCE_SENT:
-            messageId = EXPERIENCE_SENT_MESSAGE;
+            messageId = MESSAGE_EXPERIENCE_SENT;
             break;
     }
 
@@ -2570,7 +2570,8 @@ void DrawTransmitMenu(Gfx **displayListHead) {
 
     if (transfer->screen == TRANSMIT_SCREEN_OPTIONS) {
         MeasureMessage(
-            f_ModeOptions[transfer->transferMode][transfer->optionIndex] + TRANSMIT_OPTION_MESSAGES,
+            f_ModeOptions[transfer->transferMode][transfer->optionIndex] +
+                MESSAGE_FIRST_TRANSMIT_OPTION,
             FONT_SIZE_LARGE,
             &width,
             &height,
@@ -2630,7 +2631,7 @@ void DrawTransmitMenu(Gfx **displayListHead) {
                 SetTextSlot(
                     OPTIONS_CENTER_X,
                     OPTIONS_TOP + (index * OPTION_SPACING),
-                    option + TRANSMIT_OPTION_MESSAGES,
+                    option + MESSAGE_FIRST_TRANSMIT_OPTION,
                     TEXT_SLOT_LARGE_FONT,
                     index,
                     TEXT_FLAG_CENTERED | TEXT_FLAG_DRAWN_BY_OWNER,
@@ -2646,7 +2647,8 @@ void DrawTransmitMenu(Gfx **displayListHead) {
         SetTextSlot(
             HINT_LEFT,
             HINT_TOP,
-            f_ModeOptions[transfer->transferMode][transfer->optionIndex] + TRANSMIT_OPTION_HINTS,
+            f_ModeOptions[transfer->transferMode][transfer->optionIndex] +
+                MESSAGE_FIRST_TRANSMIT_OPTION_HINT,
             TEXT_SLOT_LARGE_FONT,
             HINT_TEXT_SLOT,
             TEXT_FLAG_DRAWN_BY_OWNER,

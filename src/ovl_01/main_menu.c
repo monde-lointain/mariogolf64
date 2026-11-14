@@ -7437,7 +7437,7 @@ void DrawCourseSelect(Gfx **displayListHead) {
 #define HOLES_BANNER_STRIP_HEIGHT 11
 #define COURSE_NAME_Y 176
 #define HOLES_CHOICE_Y 202
-#define HOLES_CHOICE_MESSAGE_BASE 0xC3
+#define MESSAGE_HOLES_CHOICE_BASE 0xC3
 #define HOLES_CHOICE_TEXT_SLOT 1
 
 void DrawCourseSelectBanners(Gfx **displayListHead) {
@@ -7597,7 +7597,7 @@ void DrawCourseSelectBanners(Gfx **displayListHead) {
         SetTextSlot(
             SCREEN_WIDTH / 2,
             slide + HOLES_CHOICE_Y,
-            g_MenuMemory.holesChoice + HOLES_CHOICE_MESSAGE_BASE,
+            g_MenuMemory.holesChoice + MESSAGE_HOLES_CHOICE_BASE,
             TEXT_SLOT_LARGE_FONT,
             HOLES_CHOICE_TEXT_SLOT,
             TEXT_FLAG_CENTERED | TEXT_FLAG_DRAWN_BY_OWNER,
@@ -8019,7 +8019,7 @@ const char f_LuigisGardenName[] = "Luigi's Garden";
 #define ERASE_WINDOW_HEIGHT 160
 #define ERASE_WINDOW_CENTER_X (SCREEN_WIDTH / 2)
 #define ERASE_WINDOW_CENTER_Y (SCREEN_HEIGHT / 2)
-#define ERASE_MESSAGE 0xC9
+#define MESSAGE_ERASE 0xC9
 #define ERASE_MESSAGE_X (SCREEN_WIDTH / 2)
 #define ERASE_MESSAGE_Y 106
 #define ERASE_MESSAGE_SLOT 10
@@ -8636,7 +8636,7 @@ void DrawOptionsScreen(Gfx **displayListHead) {
             SetTextSlot(
                 ERASE_MESSAGE_X,
                 ERASE_MESSAGE_Y,
-                ERASE_MESSAGE,
+                MESSAGE_ERASE,
                 TEXT_SLOT_LARGE_FONT,
                 ERASE_MESSAGE_SLOT,
                 TEXT_FLAG_CENTERED,

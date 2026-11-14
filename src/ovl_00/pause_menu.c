@@ -83,7 +83,7 @@ enum PauseValueText {
 #define PAUSE_OPTION_GIVE_UP 2
 
 #define PAUSE_LAYOUT_OPTIONS_MAX 9
-#define PAUSE_OPTION_MESSAGE_BASE 0x77
+#define MESSAGE_FIRST_PAUSE_OPTION 0x77
 
 enum PauseMessage {
     PAUSE_MESSAGE_COURSE_VIEW,
@@ -1055,7 +1055,7 @@ void DrawPauseMenu(Gfx **displayListHead) {
         SetTextSlot(
             PAUSE_LABEL_X,
             PauseLabelY(optionIndex),
-            message + PAUSE_OPTION_MESSAGE_BASE,
+            message + MESSAGE_FIRST_PAUSE_OPTION,
             TEXT_SLOT_LARGE_FONT,
             optionIndex,
             PAUSE_LABEL_FLAGS,

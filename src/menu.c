@@ -48,7 +48,6 @@
 #define DONKEY_KONG_STAR_COUNT 30
 #define MAPLE_BADGE_COUNT 50
 
-
 typedef struct ImportedCharacterCell {
     s16 unusedBeforeColumn;
     s16 column;
@@ -2373,11 +2372,11 @@ Boolean IsNintendoClubTournament(void) {
     return g_IsNintendoClubTournament != 0;
 }
 
-#define FIRST_COURSE_NAME_MESSAGE 0x1EB
-#define STROKE_PLAY_MESSAGE 0x9E
-#define SPEED_GOLF_MESSAGE 0x9D
-#define FIRST_MINI_GOLF_TITLE_MESSAGE 0xC7
-#define SECOND_MINI_GOLF_TITLE_MESSAGE 0xC8
+#define MESSAGE_FIRST_COURSE_NAME 0x1EB
+#define MESSAGE_STROKE_PLAY 0x9E
+#define MESSAGE_SPEED_GOLF 0x9D
+#define MESSAGE_FIRST_MINI_GOLF_TITLE 0xC7
+#define MESSAGE_SECOND_MINI_GOLF_TITLE 0xC8
 
 MessageId GetClubTournamentNameMessage(void) {
     s32 nameIndex;
@@ -2398,7 +2397,7 @@ MessageId GetClubTournamentCourseMessage(void) {
         courseIndex = 0;
     }
 
-    return courseIndex + FIRST_COURSE_NAME_MESSAGE;
+    return courseIndex + MESSAGE_FIRST_COURSE_NAME;
 }
 
 s32 GetClubTournamentNumber(void) {
@@ -2426,10 +2425,10 @@ MessageId GetClubTournamentModeMessage(void) {
     switch (g_ClubTournamentRules.isSpeedGolf) {
         case 0:
         default:
-            messageId = STROKE_PLAY_MESSAGE;
+            messageId = MESSAGE_STROKE_PLAY;
             break;
         case 1:
-            messageId = SPEED_GOLF_MESSAGE;
+            messageId = MESSAGE_SPEED_GOLF;
             break;
     }
 
@@ -2440,14 +2439,14 @@ MessageId GetClubTournamentCourseTitleMessage(void) {
     MessageId messageId;
 
     if (g_ClubTournamentRules.courseIndex >= MINI_GOLF_COURSE_INDEX) {
-        messageId = FIRST_MINI_GOLF_TITLE_MESSAGE;
+        messageId = MESSAGE_FIRST_MINI_GOLF_TITLE;
         if (g_ClubTournamentRules.courseIndex >=
             MINI_GOLF_COURSE_INDEX + MINI_GOLF_COURSES_PER_RECORD) {
-            messageId = SECOND_MINI_GOLF_TITLE_MESSAGE;
+            messageId = MESSAGE_SECOND_MINI_GOLF_TITLE;
         }
     }
     else {
-        messageId = g_ClubTournamentRules.courseIndex + FIRST_COURSE_NAME_MESSAGE;
+        messageId = g_ClubTournamentRules.courseIndex + MESSAGE_FIRST_COURSE_NAME;
     }
 
     return messageId;

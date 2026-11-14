@@ -572,8 +572,8 @@ const char f_WideTotalFormat[] = "%5d";
 const char f_TotalFormat[] = "%4d";
 const char f_CompactHoleFormat[] = "Hole%d";
 
-#define WINS_NEEDED_MESSAGE 1
-#define LAST_WIN_NEEDED_MESSAGE 2
+#define MESSAGE_WINS_NEEDED 1
+#define MESSAGE_LAST_WIN_NEEDED 2
 #define SUDDEN_DEATH_ENV_COLOR 0x00FFFF00
 #define SUDDEN_DEATH_PRIM_COLOR 0xCF48FF00
 #define MATCH_TITLE_LEFT 128
@@ -767,7 +767,7 @@ void DrawMatchPage(Gfx **displayListHead) {
             SetTextSlot(
                 g_Scorecard.x + WINS_NEEDED_LEFT,
                 (i * MATCH_ROW_SPACING) + WINS_NEEDED_TOP + g_Scorecard.y,
-                LAST_WIN_NEEDED_MESSAGE,
+                MESSAGE_LAST_WIN_NEEDED,
                 TEXT_SLOT_LARGE_FONT,
                 i,
                 0,
@@ -782,7 +782,7 @@ void DrawMatchPage(Gfx **displayListHead) {
             SetTextSlot(
                 g_Scorecard.x + WINS_NEEDED_LEFT,
                 (i * MATCH_ROW_SPACING) + WINS_NEEDED_TOP + g_Scorecard.y,
-                WINS_NEEDED_MESSAGE,
+                MESSAGE_WINS_NEEDED,
                 TEXT_SLOT_LARGE_FONT,
                 i,
                 0,

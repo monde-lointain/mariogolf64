@@ -131,7 +131,7 @@ enum StatsDirection {
 #define NO_BET (-1)
 #define BET_HELP_X 36
 #define BET_HELP_Y 186
-#define BET_HELP_MESSAGE 0x15
+#define MESSAGE_BET_HELP 0x15
 
 #define HANDICAP_CHOICE_COUNT 37
 #define HANDICAP_SLIDE_START (-512)
@@ -630,7 +630,7 @@ void UpdateBetSettings(void) {
         SetTextSlot(
             BET_HELP_X,
             BET_HELP_Y,
-            f_BetSetBets[g_BetSet - 1][memory->betColumn] + BET_HELP_MESSAGE,
+            f_BetSetBets[g_BetSet - 1][memory->betColumn] + MESSAGE_BET_HELP,
             TEXT_SLOT_LARGE_FONT,
             0,
             TEXT_FLAG_TYPED,
@@ -653,7 +653,7 @@ void UpdateBetSettings(void) {
         SetTextSlot(
             BET_HELP_X,
             BET_HELP_Y,
-            f_BetSetBets[g_BetSet - 1][memory->betColumn] + BET_HELP_MESSAGE,
+            f_BetSetBets[g_BetSet - 1][memory->betColumn] + MESSAGE_BET_HELP,
             TEXT_SLOT_LARGE_FONT,
             0,
             TEXT_FLAG_TYPED,
@@ -961,7 +961,7 @@ void DrawBetSettings(Gfx **displayListHead, s32 slide, u8 isSlideReversed, u8 is
         SetTextSlot(
             BET_HELP_X,
             BET_HELP_Y,
-            betIndex + BET_HELP_MESSAGE,
+            betIndex + MESSAGE_BET_HELP,
             TEXT_SLOT_LARGE_FONT,
             0,
             TEXT_FLAG_TYPED,
@@ -1164,7 +1164,7 @@ NO_RESULT UpdateHandicaps(s32 firstPlayerIndex UNUSED, s32 playerCount UNUSED) {
 
 #define HANDICAP_PROMPT_X 36
 #define HANDICAP_PROMPT_Y 200
-#define HANDICAP_PROMPT_MESSAGE 0x1D
+#define MESSAGE_HANDICAP_PROMPT 0x1D
 
 void DrawHandicaps(Gfx **displayListHead, s32 slide, u8 reverseVerticalSlide, u8 canShowPrompt) {
     Gfx *gfx = *displayListHead;
@@ -1605,7 +1605,7 @@ void DrawHandicaps(Gfx **displayListHead, s32 slide, u8 reverseVerticalSlide, u8
         SetTextSlot(
             HANDICAP_PROMPT_X,
             HANDICAP_PROMPT_Y,
-            HANDICAP_PROMPT_MESSAGE,
+            MESSAGE_HANDICAP_PROMPT,
             TEXT_SLOT_LARGE_FONT,
             0,
             TEXT_FLAG_TYPED,
