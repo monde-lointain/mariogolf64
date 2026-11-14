@@ -259,7 +259,7 @@ typedef struct StatusTime {
     u8 minutes;
     u8 seconds;
     u8 hundredths;
-    u8 characterIndex;
+    UCharacterIndex8 characterIndex;
     u8 scoreToPar;
 } StatusTime;
 

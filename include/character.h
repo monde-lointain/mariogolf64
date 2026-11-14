@@ -29,9 +29,10 @@ enum CharacterIndex {
 };
 
 typedef s32 CharacterIndex;
-// A CharacterIndex kept in a byte, as the original stores it in player,
-// menu and saved records.
+// A CharacterIndex kept in a signed or unsigned byte, as the original stores
+// it in player, menu, saved and Game Boy records.
 typedef s8 CharacterIndex8;
+typedef u8 UCharacterIndex8;
 
 enum CharacterChoice {
     CHARACTER_CHOICE_PLUM,

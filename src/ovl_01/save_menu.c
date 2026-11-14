@@ -132,8 +132,26 @@ static s32 f_RingShotArrowFrame = 0;
 static s32 f_RingShotArrowTimer = 0;
 static s32 f_UnusedRingShotArrowWord = 0;
 static s32 f_UnusedWordAfterArrowTimer UNUSED = 0;
-static u8 f_RingShotCharacterOrder[CHARACTER_COUNT] =
-    {0, 1, 5, 3, 4, 10, 6, 7, 8, 9, 2, 11, 12, 13, 14, 15, 16, 17};
+static UCharacterIndex8 f_RingShotCharacterOrder[CHARACTER_COUNT] = {
+    CHARACTER_PLUM,
+    CHARACTER_CHARLIE,
+    CHARACTER_PEACH,
+    CHARACTER_BABY_MARIO,
+    CHARACTER_LUIGI,
+    CHARACTER_YOSHI,
+    CHARACTER_SONNY,
+    CHARACTER_WARIO,
+    CHARACTER_HARRY,
+    CHARACTER_MARIO,
+    CHARACTER_MAPLE,
+    CHARACTER_DONKEY_KONG,
+    CHARACTER_BOWSER,
+    CHARACTER_METAL_MARIO,
+    CHARACTER_KID,
+    CHARACTER_SHERRY,
+    CHARACTER_AZALEA,
+    CHARACTER_JOE,
+};
 static s32 f_UnusedColorWords[11] UNUSED = {
     0x000000FF,
     0x00FF00FF,

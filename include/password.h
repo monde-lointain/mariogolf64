@@ -23,7 +23,7 @@ typedef struct TournamentRules {
 
 typedef struct ScoreReport {
     u8 tournamentCode[TOURNAMENT_CODE_SIZE];
-    u8 characterIndex;
+    UCharacterIndex8 characterIndex;
     u16 score;
     u32 time;
     u8 gameBoyLevel;
