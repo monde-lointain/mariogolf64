@@ -506,7 +506,7 @@ void UpdateGolfBalls(void) {
     Player *player;
     GolfBall *ball;
     BallSimulation *simulation;
-    BallAfterimage *head;
+    BallAfterimage *newestAfterimage;
     BallAfterimage *afterimage;
     BallAfterimage *pulledAfterimage;
     BallAfterimage *previous;
@@ -667,7 +667,7 @@ void UpdateGolfBalls(void) {
             }
         }
 
-        head = &f_BallAfterimages[f_BallAfterimageHead];
+        newestAfterimage = &f_BallAfterimages[f_BallAfterimageHead];
         ball = &f_GolfBalls[currentIndex];
         if (f_BallAfterimageHead == 0) {
             previous = &f_BallAfterimages[f_BallAfterimageLength - 1];
@@ -688,15 +688,15 @@ void UpdateGolfBalls(void) {
         if (f_IsBallAfterimageFast == TRUE) {
             if ((f32)(g_PinVertexScale * BALL_RADIUS) * FAST_AFTERIMAGE_SPACING < distance &&
                 g_BallSimulations[0].state == BALL_STATE_ROLLING) {
-                head->alpha = AFTERIMAGE_FAST_ALPHA;
-                head->position[AXIS_X] = ball->position[AXIS_X];
-                head->position[AXIS_Y] = ball->position[AXIS_Y];
-                head->position[AXIS_Z] = ball->position[AXIS_Z];
+                newestAfterimage->alpha = AFTERIMAGE_FAST_ALPHA;
+                newestAfterimage->position[AXIS_X] = ball->position[AXIS_X];
+                newestAfterimage->position[AXIS_Y] = ball->position[AXIS_Y];
+                newestAfterimage->position[AXIS_Z] = ball->position[AXIS_Z];
                 if (ball->isInCup == TRUE) {
-                    head->isInCup = TRUE;
+                    newestAfterimage->isInCup = TRUE;
                 }
                 else {
-                    head->isInCup = FALSE;
+                    newestAfterimage->isInCup = FALSE;
                 }
 
                 f_BallAfterimageHead++;
@@ -713,15 +713,15 @@ void UpdateGolfBalls(void) {
         }
         else {
             if ((f32)(g_PinVertexScale * BALL_RADIUS) * AFTERIMAGE_SPACING < distance) {
-                head->alpha = AFTERIMAGE_ALPHA;
-                head->position[AXIS_X] = ball->position[AXIS_X];
-                head->position[AXIS_Y] = ball->position[AXIS_Y];
-                head->position[AXIS_Z] = ball->position[AXIS_Z];
+                newestAfterimage->alpha = AFTERIMAGE_ALPHA;
+                newestAfterimage->position[AXIS_X] = ball->position[AXIS_X];
+                newestAfterimage->position[AXIS_Y] = ball->position[AXIS_Y];
+                newestAfterimage->position[AXIS_Z] = ball->position[AXIS_Z];
                 if (ball->isInCup == TRUE) {
-                    head->isInCup = ball->isInCup;
+                    newestAfterimage->isInCup = ball->isInCup;
                 }
                 else {
-                    head->isInCup = FALSE;
+                    newestAfterimage->isInCup = FALSE;
                 }
 
                 f_BallAfterimageHead++;
