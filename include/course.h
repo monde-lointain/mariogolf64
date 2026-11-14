@@ -27,24 +27,33 @@ enum CourseRecordIndex {
 
 typedef s32 CourseRecordIndex;
 
-#define MINI_GOLF_COURSE_INDEX 6
-#define MINI_GOLF_COURSES_PER_RECORD 3
-#define DRIVING_RANGE_COURSE_INDEX 12
-#define COURSE_INDEX_COUNT (DRIVING_RANGE_COURSE_INDEX + 1)
-
-typedef s32 CourseIndex;
-// A CourseIndex kept in a byte, as the original stores it in saved and
-// menu records.
-typedef s8 CourseIndex8;
-
+// A CourseIndex: the six main courses, then each mini golf course's
+// three layouts, then the driving range.
 enum Course {
     COURSE_TOAD_HIGHLANDS,
     COURSE_KOOPA_PARK,
     COURSE_SHY_GUY_DESERT,
     COURSE_YOSHIS_ISLAND,
     COURSE_BOO_VALLEY,
-    COURSE_MARIOS_STAR
+    COURSE_MARIOS_STAR,
+    COURSE_LUIGIS_GARDEN_FIRST,
+    COURSE_LUIGIS_GARDEN_SECOND,
+    COURSE_LUIGIS_GARDEN_THIRD,
+    COURSE_PEACHS_CASTLE_FIRST,
+    COURSE_PEACHS_CASTLE_SECOND,
+    COURSE_PEACHS_CASTLE_THIRD,
+    COURSE_DRIVING_RANGE
 };
+
+#define MINI_GOLF_COURSE_INDEX COURSE_LUIGIS_GARDEN_FIRST
+#define MINI_GOLF_COURSES_PER_RECORD 3
+#define DRIVING_RANGE_COURSE_INDEX COURSE_DRIVING_RANGE
+#define COURSE_INDEX_COUNT (DRIVING_RANGE_COURSE_INDEX + 1)
+
+typedef s32 CourseIndex;
+// A CourseIndex kept in a byte, as the original stores it in saved and
+// menu records.
+typedef s8 CourseIndex8;
 
 extern s32 g_CourseNameEnvColors[];
 extern s32 g_CourseNamePrimColors[];

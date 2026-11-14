@@ -73,7 +73,7 @@ enum VertexEncoding {
 #define ASSET_TITLE_HOLE_POINTS 0x3F4
 #define ASSET_TITLE_HOLE_TRIANGLES 0x3F5
 #define ASSET_TITLE_HOLE_ATTRIBUTES 0x3F6
-#define LAST_MINI_GOLF_PAINT_LOGIC PAINT_LOGIC_PEACHS_CASTLE_THIRD
+#define LAST_MINI_GOLF_PAINT_LOGIC COURSE_PEACHS_CASTLE_THIRD
 
 #define TERRAIN_CODE_BLOCK_WORD_COUNT (TERRAIN_CODE_BLOCK_SIZE / 4)
 #define HOST_PATH_SIZE 0x80
@@ -101,22 +101,6 @@ enum VertexEncoding {
     ((code) == TERRAIN_CODE_GREEN && \
         (code) != (nearestCode) && \
         (nearestDistance) < TERRAIN_BORDER_DISTANCE)
-
-enum PaintLogicIndex {
-    PAINT_LOGIC_TOAD_HIGHLANDS,
-    PAINT_LOGIC_KOOPA_PARK,
-    PAINT_LOGIC_SHY_GUY_DESERT,
-    PAINT_LOGIC_YOSHIS_ISLAND,
-    PAINT_LOGIC_BOO_VALLEY,
-    PAINT_LOGIC_MARIOS_STAR,
-    PAINT_LOGIC_LUIGIS_GARDEN_FIRST,
-    PAINT_LOGIC_LUIGIS_GARDEN_SECOND,
-    PAINT_LOGIC_LUIGIS_GARDEN_THIRD,
-    PAINT_LOGIC_PEACHS_CASTLE_FIRST,
-    PAINT_LOGIC_PEACHS_CASTLE_SECOND,
-    PAINT_LOGIC_PEACHS_CASTLE_THIRD,
-    PAINT_LOGIC_DRIVING_RANGE
-};
 
 typedef s32 (*PaintRoutine)(s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32 z);
 
@@ -521,7 +505,7 @@ void ShadeGroundTiles(void);
 void CastBillboardShadows(void);
 void MoveRingsToEnd(void);
 
-static s32 f_PaintLogic ORDERED_BSS = 0;
+static CourseIndex f_PaintLogic ORDERED_BSS = 0;
 
 static u8 f_UnusedBytesBeforeReadCursor[12] ORDERED_BSS UNUSED = {0};
 
@@ -2221,29 +2205,31 @@ void ScaleMiniGolfHole(void) {
     g_HoleSetup.cupPosition[AXIS_Z] *= g_MiniGolfScale[AXIS_Z];
 }
 
-s32 GetCoursePaintLogic(CourseRecordIndex courseRecordIndex) {
+CourseIndex GetCoursePaintLogic(CourseRecordIndex courseRecordIndex) {
     switch (courseRecordIndex) {
         case COURSE_RECORD_TOAD_HIGHLANDS:
-            return PAINT_LOGIC_TOAD_HIGHLANDS;
+            return COURSE_TOAD_HIGHLANDS;
         case COURSE_RECORD_KOOPA_PARK:
-            return PAINT_LOGIC_KOOPA_PARK;
+            return COURSE_KOOPA_PARK;
         case COURSE_RECORD_SHY_GUY_DESERT:
-            return PAINT_LOGIC_SHY_GUY_DESERT;
+            return COURSE_SHY_GUY_DESERT;
         case COURSE_RECORD_YOSHIS_ISLAND:
-            return PAINT_LOGIC_YOSHIS_ISLAND;
+            return COURSE_YOSHIS_ISLAND;
         case COURSE_RECORD_BOO_VALLEY:
-            return PAINT_LOGIC_BOO_VALLEY;
+            return COURSE_BOO_VALLEY;
         case COURSE_RECORD_MARIOS_STAR:
-            return PAINT_LOGIC_MARIOS_STAR;
+            return COURSE_MARIOS_STAR;
         case COURSE_RECORD_LUIGIS_GARDEN:
-            return PAINT_LOGIC_LUIGIS_GARDEN_FIRST;
+            return COURSE_LUIGIS_GARDEN_FIRST;
+        // Not COURSE_PEACHS_CASTLE_FIRST: the original paints Peach's
+        // Castle with the second Luigi's Garden layout's logic here.
         case COURSE_RECORD_PEACHS_CASTLE:
-            return PAINT_LOGIC_LUIGIS_GARDEN_SECOND;
+            return COURSE_LUIGIS_GARDEN_SECOND;
         case COURSE_RECORD_DRIVING_RANGE:
-            return PAINT_LOGIC_DRIVING_RANGE;
+            return COURSE_DRIVING_RANGE;
     }
 
-    return PAINT_LOGIC_TOAD_HIGHLANDS;
+    return COURSE_TOAD_HIGHLANDS;
 }
 
 void ClearHoleBuild(void);
