@@ -416,7 +416,7 @@ s32 PlanShot(CurrentShot *plannedShot) {
     s32 savedPowerGaugeFrame;
     s32 savedImpactGaugeFrame;
     s32 par;
-    s32 strokes;
+    s32 strokeCount;
     s32 mishit;
     s32 mishitMax;
     s32 mishitDivisor;
@@ -763,18 +763,18 @@ s32 PlanShot(CurrentShot *plannedShot) {
             g_HoleSetup.cupPosition[AXIS_X] - f_PlanTarget[AXIS_X],
             g_HoleSetup.cupPosition[AXIS_Z] - f_PlanTarget[AXIS_Z]
         )) {
-        strokes = g_Players[f_Shot.playerIndex].strokeCount;
+        strokeCount = g_Players[f_Shot.playerIndex].strokeCount;
         par = g_HoleSetup.par;
         mishit = 0;
         if (GetSurfaceInfo(f_TrialShot.surface)->kind != SURFACE_KIND_GREEN &&
-            strokes < par + f_HoleTargetToPar - 1) {
+            strokeCount < par + f_HoleTargetToPar - 1) {
             mishitMax = GetLieRating(
                 GetClub(g_Players[f_TrialShot.playerIndex].clubs[f_TrialShot.clubSlot]),
                 f_TrialShot.surface,
                 f_TrialShot.shotMode
             );
             mishitMax -= mishitMax != 0;
-            if (strokes < par + f_HoleTargetToPar - 2) {
+            if (strokeCount < par + f_HoleTargetToPar - 2) {
                 switch (
                     f_GolferTraits[g_Players[f_TrialShot.playerIndex].characterIndex].consistency) {
                     case CONSISTENCY_LOW:
@@ -795,7 +795,7 @@ s32 PlanShot(CurrentShot *plannedShot) {
 
             mishit = rand() % MISHIT_ROLL_RANGE / mishitDivisor;
             if (mishitMax < Abs(mishit) &&
-                (f_HoleTargetToPar < 0 || strokes >= par + f_HoleTargetToPar - 3)) {
+                (f_HoleTargetToPar < 0 || strokeCount >= par + f_HoleTargetToPar - 3)) {
                 mishit = mishitMax;
             }
 
@@ -1023,21 +1023,21 @@ s32 GetScoreToParSoFar(s32 playerIndex) {
     s32 parTotal = 0;
     s32 hole;
     s32 par;
-    s32 strokes;
+    s32 strokeCount;
 
     if (g_GameState.holeIndex == 0) {
         return 0;
     }
 
     for (hole = 0; hole < g_GameState.holeIndex; hole++) {
-        strokes = g_Players[playerIndex].holes[hole].strokeCount;
+        strokeCount = g_Players[playerIndex].holes[hole].strokeCount;
         par = g_CourseRecords[g_GameState.courseIndex].holes[hole].par;
-        if ((par * 2) + 1 < strokes) {
-            strokes = par - 1;
+        if ((par * 2) + 1 < strokeCount) {
+            strokeCount = par - 1;
         }
 
-        if (strokes > 0) {
-            strokeTotal += strokes;
+        if (strokeCount > 0) {
+            strokeTotal += strokeCount;
             parTotal += par;
         }
     }
@@ -2010,7 +2010,7 @@ s32 StepTrialShot(void) {
     s32 heightMiss;
     SurfaceInfo *surfaceInfo;
     s32 targetRating;
-    s32 strokes;
+    s32 strokeCount;
     s32 par;
     s32 strokesOver;
     s32 approachDistance;
@@ -2227,11 +2227,11 @@ EVALUATE:
         }
 
         if (f_TrialIndex != 0) {
-            strokes = g_Players[f_Shot.playerIndex].strokeCount;
+            strokeCount = g_Players[f_Shot.playerIndex].strokeCount;
             par = g_HoleSetup.par;
             if (GetSurfaceInfoAt(f_PlanTarget[AXIS_X], f_PlanTarget[AXIS_Z])->kind ==
                 SURFACE_KIND_GREEN) {
-                s32 shotStroke = strokes + 1;
+                s32 shotStroke = strokeCount + 1;
 
                 strokesOver = shotStroke - (par + f_HoleTargetToPar);
                 if (strokesOver >= 0) {
