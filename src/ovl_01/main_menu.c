@@ -4170,6 +4170,8 @@ void UpdateCaddySelect(void) {
 
     if (g_MenuPressedButtons & B_BUTTON) {
         PlaySound(SOUND_MENU_CANCEL, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
+        // The original compares the mode choice, an index into the mode icons,
+        // with a menu screen, and returns to the screen of that number.
         if (g_MenuMemory.modeChoice == MENU_SCREEN_MODE_SELECT) {
             g_MenuScreen = g_MenuMemory.modeChoice;
         }
