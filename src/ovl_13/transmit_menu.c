@@ -175,9 +175,6 @@ enum ListingState {
 #define CONTROLLER_ICONS_TOP 72
 #define CONTROLLER_ICON_SPACING 56
 #define CONTROLLER_CURSOR_MARGIN 8
-#define POINTER_WIDTH 24
-#define POINTER_HEIGHT 24
-#define POINTER_IMAGE_HEIGHT 76
 #define POINTER_TOP 76
 #define POINTER_SWING_STEP DegreesToRadians(10)
 #define POINTER_SWING_DISTANCE 8.0f
@@ -232,8 +229,6 @@ enum ListingState {
 #define NOTICE_PRESSING_HAND_TOP 128
 #define PRESSING_HAND_FRAMES_PER_IMAGE 3
 #define PRESSING_HAND_FRAME_COUNT (3 * PRESSING_HAND_FRAMES_PER_IMAGE)
-#define PRESSING_HAND_SIZE 24
-#define PRESSING_HAND_IMAGE_SIZE (PRESSING_HAND_SIZE * PRESSING_HAND_SIZE)
 
 #define CARTRIDGE_RAM_ADDRESS 0xA000
 #define CARTRIDGE_RAM_SIZE 0x2000
@@ -1991,12 +1986,12 @@ void DrawSendStatusScreen(Gfx **displayListHead, GameBoyTransfer *transfer) {
                 gfx++,
                 TextureAddress(ImageTexels(transfer->pointerImage)),
                 G_IM_FMT_CI,
-                POINTER_WIDTH,
+                POINTING_HAND_SIZE,
                 0,
                 0,
                 0,
-                POINTER_WIDTH - 1,
-                POINTER_IMAGE_HEIGHT - 1,
+                POINTING_HAND_SIZE - 1,
+                POINTING_HAND_LOAD_HEIGHT - 1,
                 0,
                 0,
                 0,
@@ -2006,14 +2001,14 @@ void DrawSendStatusScreen(Gfx **displayListHead, GameBoyTransfer *transfer) {
                 G_TX_NOLOD
             );
             pointerRestLeft = (transfer->chosenCartridgeIndex * CONTROLLER_ICON_SPACING) +
-                (CONTROLLER_ICONS_LEFT - POINTER_WIDTH);
+                (CONTROLLER_ICONS_LEFT - POINTING_HAND_SIZE);
             pointerLeft = pointerRestLeft - pointerSwing;
             DrawTextureRect(
                 &gfx,
                 QuarterPixels(pointerLeft),
                 QuarterPixels(POINTER_TOP),
-                QuarterPixels(pointerLeft + POINTER_WIDTH),
-                QuarterPixels(POINTER_TOP + POINTER_HEIGHT),
+                QuarterPixels(pointerLeft + POINTING_HAND_SIZE),
+                QuarterPixels(POINTER_TOP + POINTING_HAND_SIZE),
                 G_TX_RENDERTILE,
                 0,
                 0,
@@ -2592,12 +2587,12 @@ void DrawTransmitMenu(Gfx **displayListHead) {
             gfx++,
             TextureAddress(ImageTexels(transfer->pointerImage)),
             G_IM_FMT_CI,
-            POINTER_WIDTH,
+            POINTING_HAND_SIZE,
             0,
             0,
             0,
-            POINTER_WIDTH - 1,
-            POINTER_IMAGE_HEIGHT - 1,
+            POINTING_HAND_SIZE - 1,
+            POINTING_HAND_LOAD_HEIGHT - 1,
             0,
             0,
             0,
@@ -2607,14 +2602,14 @@ void DrawTransmitMenu(Gfx **displayListHead) {
             G_TX_NOLOD
         );
         pointerLeft =
-            OPTIONS_CENTER_X - OPTION_POINTER_GAP - POINTER_WIDTH - (width / 2) - pointerSwing;
+            OPTIONS_CENTER_X - OPTION_POINTER_GAP - POINTING_HAND_SIZE - (width / 2) - pointerSwing;
         DrawTextureRect(
             &gfx,
             QuarterPixels(pointerLeft),
             QuarterPixels(OPTION_POINTER_TOP + (transfer->optionIndex * OPTION_SPACING)),
-            QuarterPixels(pointerLeft + POINTER_WIDTH),
+            QuarterPixels(pointerLeft + POINTING_HAND_SIZE),
             QuarterPixels(
-                OPTION_POINTER_TOP + (transfer->optionIndex * OPTION_SPACING) + POINTER_HEIGHT
+                OPTION_POINTER_TOP + (transfer->optionIndex * OPTION_SPACING) + POINTING_HAND_SIZE
             ),
             G_TX_RENDERTILE,
             0,

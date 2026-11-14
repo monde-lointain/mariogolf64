@@ -23,7 +23,6 @@
 
 #define HELP_TOPIC_COUNT 17
 
-#define HAND_SIZE 24
 #define HAND_LEFT 70
 #define HAND_SWING 8
 #define UNUSED_SWING 8
@@ -375,12 +374,12 @@ void DrawHelpBoard(Gfx **displayListHead) {
             gfx++,
             TextureAddress(ImageTexels(f_HandImages)),
             G_IM_FMT_CI,
-            HAND_SIZE,
+            POINTING_HAND_SIZE,
             0,
             0,
             0,
-            HAND_SIZE - 1,
-            HAND_SIZE - 1,
+            POINTING_HAND_SIZE - 1,
+            POINTING_HAND_SIZE - 1,
             0,
             G_TX_NOMIRROR | G_TX_WRAP,
             G_TX_NOMIRROR | G_TX_WRAP,
@@ -414,8 +413,8 @@ void DrawHelpBoard(Gfx **displayListHead) {
             gfx++,
             QuarterPixels(handLeft),
             QuarterPixels(handTop),
-            QuarterPixels(handLeft + HAND_SIZE),
-            QuarterPixels(handTop + HAND_SIZE),
+            QuarterPixels(handLeft + POINTING_HAND_SIZE),
+            QuarterPixels(handTop + POINTING_HAND_SIZE),
             G_TX_RENDERTILE,
             0,
             0,

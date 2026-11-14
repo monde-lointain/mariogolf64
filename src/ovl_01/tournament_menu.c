@@ -50,7 +50,6 @@
 #define CODE_ENTRY_BAR_STRIP_COUNT 4
 #define CODE_ENTRY_BAR_LEFT 32
 #define CODE_ENTRY_BAR_TOP 140
-#define CODE_HAND_SIZE 24
 #define CODE_HAND_FIRST_X 16
 #define CODE_HAND_FIRST_Y 56
 #define CODE_KEY_SPACING_X 25
@@ -2014,12 +2013,12 @@ void DrawCodeHand(Gfx **displayListHead) {
         gfx++,
         TextureAddress(ImageTexels(f_PointingHandImage)),
         G_IM_FMT_CI,
-        CODE_HAND_SIZE,
-        CODE_HAND_SIZE,
+        POINTING_HAND_SIZE,
+        POINTING_HAND_SIZE,
         0,
         0,
-        CODE_HAND_SIZE - 1,
-        CODE_HAND_SIZE - 1,
+        POINTING_HAND_SIZE - 1,
+        POINTING_HAND_SIZE - 1,
         0,
         G_TX_NOMIRROR | G_TX_WRAP,
         G_TX_NOMIRROR | G_TX_WRAP,
@@ -2060,8 +2059,8 @@ void DrawCodeHand(Gfx **displayListHead) {
         gfx++,
         QuarterPixels(left),
         QuarterPixels(top),
-        QuarterPixels(left + CODE_HAND_SIZE),
-        QuarterPixels(top + CODE_HAND_SIZE),
+        QuarterPixels(left + POINTING_HAND_SIZE),
+        QuarterPixels(top + POINTING_HAND_SIZE),
         G_TX_RENDERTILE,
         0,
         0,

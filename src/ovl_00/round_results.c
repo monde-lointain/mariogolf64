@@ -273,7 +273,7 @@ static u8 f_TextSlotColors[][3] = {
     {0x7F, 0xFF, 0x4B},
     {0xFF, 0x7F, 0x9F},
 };
-static s32 f_HandFrame = 0;
+static s32 f_PressingHandFrame = 0;
 static Radians f_TitleBobAngle = 0.0f;
 
 static u8 f_UnusedBufferBeforeBackdrop[0x10] UNUSED;
@@ -4504,11 +4504,9 @@ void DrawClubTournamentResults(Gfx **displayListHead) {
 #define CLUB_TOURNAMENT_BACKDROP_Y 8
 #define CLUB_TOURNAMENT_BACKDROP_STRIP_HEIGHT 7
 #define CLUB_TOURNAMENT_BACKDROP_STRIP_COUNT 32
-#define HAND_X 272
-#define HAND_Y 192
-#define HAND_SIZE 24
-#define HAND_FRAME_DRAWS 3
-#define HAND_FRAME_COUNT 3
+#define PRESSING_HAND_LEFT 272
+#define PRESSING_HAND_TOP 192
+#define PRESSING_HAND_FRAMES_PER_IMAGE 3
 #define FINAL_RESULTS_TITLE_WIDTH 200
 #define FINAL_RESULTS_TITLE_STRIP_HEIGHT 8
 #define FINAL_RESULTS_TITLE_LOADED_HEIGHT 10
@@ -4624,16 +4622,17 @@ void DrawRoundResults(Gfx **displayListHead) {
     }
 
     if (f_IsAwaitingConfirm == TRUE) {
-        f_HandFrame = (f_HandFrame + 1) % (HAND_FRAME_COUNT * HAND_FRAME_DRAWS);
+        f_PressingHandFrame = (f_PressingHandFrame + 1) %
+            (PRESSING_HAND_IMAGE_COUNT * PRESSING_HAND_FRAMES_PER_IMAGE);
         LoadLargePalette(&gfx, ImageBody(f_ResultsHandImage));
         LoadTextureBlock(
             &gfx,
             LargeImageTexels(f_ResultsHandImage) +
-                (f_HandFrame / HAND_FRAME_DRAWS * HAND_SIZE * HAND_SIZE),
+                (f_PressingHandFrame / PRESSING_HAND_FRAMES_PER_IMAGE * PRESSING_HAND_IMAGE_SIZE),
             G_IM_FMT_CI,
             G_IM_SIZ_8b,
-            HAND_SIZE,
-            HAND_SIZE,
+            PRESSING_HAND_SIZE,
+            PRESSING_HAND_SIZE,
             0,
             0,
             0,
@@ -4644,10 +4643,10 @@ void DrawRoundResults(Gfx **displayListHead) {
         );
         DrawTextureRect(
             &gfx,
-            QuarterPixels(f_ResultsSlide + HAND_X),
-            QuarterPixels(f_ResultsTop + HAND_Y),
-            QuarterPixels(f_ResultsSlide + HAND_X + HAND_SIZE),
-            QuarterPixels(f_ResultsTop + HAND_Y + HAND_SIZE),
+            QuarterPixels(f_ResultsSlide + PRESSING_HAND_LEFT),
+            QuarterPixels(f_ResultsTop + PRESSING_HAND_TOP),
+            QuarterPixels(f_ResultsSlide + PRESSING_HAND_LEFT + PRESSING_HAND_SIZE),
+            QuarterPixels(f_ResultsTop + PRESSING_HAND_TOP + PRESSING_HAND_SIZE),
             G_TX_RENDERTILE,
             0,
             0,

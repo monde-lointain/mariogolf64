@@ -150,8 +150,6 @@ typedef struct ChoiceBox {
 #define CHOICE_BOX_CLOUD_DTDY 0x2C8
 #define CHOICE_LABELS_MIDDLE_Y 113
 #define CHOICE_LABEL_SPACING 16
-#define CHOICE_CURSOR_SIZE 24
-#define CHOICE_CURSOR_LOADED_HEIGHT 76
 #define CHOICE_CURSOR_X 124
 #define CHOICE_CURSOR_SWAY 8.0f
 #define COLOR_WAVE_MIDDLE 127
@@ -905,13 +903,11 @@ void DrawPauseArrows(Gfx **displayListHead, s32 x, s32 y, s32 gap) {
 #define PAUSE_LABEL_RED 0x5F
 #define PAUSE_LABEL_GREEN 0x3F
 #define PAUSE_LABEL_BLUE 0xFF
-#define PAUSE_CURSOR_SIZE 24
-#define PAUSE_CURSOR_LOADED_HEIGHT 76
 #define PAUSE_CURSOR_RIGHT 80
 #define PAUSE_CURSOR_SWAY 8.0f
 #define PAUSE_TEE_X 56
 #define PAUSE_TEE_LEAN_SWAY 5
-#define PAUSE_TEES_T TexelCoordinate(PAUSE_CURSOR_SIZE)
+#define PAUSE_TEES_T TexelCoordinate(POINTING_HAND_SIZE)
 
 void DrawPauseMenu(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
@@ -1129,12 +1125,12 @@ void DrawPauseMenu(Gfx **displayListHead) {
         gfx++,
         TextureAddress(ImageTexels(f_PauseCursorImage)),
         G_IM_FMT_CI,
-        PAUSE_CURSOR_SIZE,
+        POINTING_HAND_SIZE,
         0,
         0,
         0,
-        PAUSE_CURSOR_SIZE - 1,
-        PAUSE_CURSOR_LOADED_HEIGHT - 1,
+        POINTING_HAND_SIZE - 1,
+        POINTING_HAND_LOAD_HEIGHT - 1,
         0,
         0,
         0,
@@ -1176,11 +1172,11 @@ void DrawPauseMenu(Gfx **displayListHead) {
             QuarterPixels((f_PauseSelection * PAUSE_LABEL_SPACING) + PAUSE_LABELS_TOP - 8),
             QuarterPixels(PAUSE_CURSOR_RIGHT),
             QuarterPixels(
-                (f_PauseSelection * PAUSE_LABEL_SPACING) + PAUSE_LABELS_TOP - 8 + PAUSE_CURSOR_SIZE
+                (f_PauseSelection * PAUSE_LABEL_SPACING) + PAUSE_LABELS_TOP - 8 + POINTING_HAND_SIZE
             ),
             G_TX_RENDERTILE,
             0,
-            PAUSE_TEES_T + (teeFrame * TexelCoordinate(PAUSE_CURSOR_SIZE)),
+            PAUSE_TEES_T + (teeFrame * TexelCoordinate(POINTING_HAND_SIZE)),
             TEXEL_STEP_ONE,
             TEXEL_STEP_ONE
         );
@@ -1192,7 +1188,7 @@ void DrawPauseMenu(Gfx **displayListHead) {
             QuarterPixels((f_PauseSelection * PAUSE_LABEL_SPACING) + PAUSE_LABELS_TOP - 4),
             QuarterPixels(PAUSE_CURSOR_RIGHT - sway),
             QuarterPixels(
-                (f_PauseSelection * PAUSE_LABEL_SPACING) + PAUSE_LABELS_TOP - 4 + PAUSE_CURSOR_SIZE
+                (f_PauseSelection * PAUSE_LABEL_SPACING) + PAUSE_LABELS_TOP - 4 + POINTING_HAND_SIZE
             ),
             G_TX_RENDERTILE,
             0,
@@ -1430,12 +1426,12 @@ void DrawChoiceBox(Gfx **displayListHead) {
                 gfx++,
                 TextureAddress(ImageTexels(f_ChoiceBoxCursorImage)),
                 G_IM_FMT_CI,
-                CHOICE_CURSOR_SIZE,
+                POINTING_HAND_SIZE,
                 0,
                 0,
                 0,
-                CHOICE_CURSOR_SIZE - 1,
-                CHOICE_CURSOR_LOADED_HEIGHT - 1,
+                POINTING_HAND_SIZE - 1,
+                POINTING_HAND_LOAD_HEIGHT - 1,
                 0,
                 0,
                 0,
@@ -1449,8 +1445,8 @@ void DrawChoiceBox(Gfx **displayListHead) {
                 &gfx,
                 QuarterPixels(cursorX),
                 QuarterPixels(cursorY - 2),
-                QuarterPixels(cursorX + CHOICE_CURSOR_SIZE),
-                QuarterPixels(cursorY + CHOICE_CURSOR_SIZE - 2),
+                QuarterPixels(cursorX + POINTING_HAND_SIZE),
+                QuarterPixels(cursorY + POINTING_HAND_SIZE - 2),
                 G_TX_RENDERTILE,
                 0,
                 0,

@@ -79,6 +79,9 @@ void ReadAssetFile(void *buffer, u32 size, AssetFile *file);
 #define ASSET_YES_NO 0x70C
 #define ASSET_COURSE_NUMBERS 0x70E
 #define ASSET_POINTING_HAND 0x70F
+#define POINTING_HAND_SIZE 24
+// The menus load 76 rows of the pointing hand image, a few more than its 72.
+#define POINTING_HAND_LOAD_HEIGHT 76
 #define ASSET_GREEN_ARROWS_COPY 0x71E
 #define ASSET_GREEN_ARROWS 0x720
 
@@ -102,6 +105,9 @@ enum MenuArrow {
 #define DISTANCE_DIGIT_WIDTH 8
 #define ASSET_WOODEN_PLAQUE 0x832
 #define ASSET_PRESSING_HAND 0x8EB
+#define PRESSING_HAND_SIZE 24
+#define PRESSING_HAND_IMAGE_SIZE (PRESSING_HAND_SIZE * PRESSING_HAND_SIZE)
+#define PRESSING_HAND_IMAGE_COUNT 3
 #define ASSET_NINTENDO_BADGE 0x949
 #define ASSET_PLACE_DIGITS 0x98E
 #define ASSET_SHINE_IMAGE 0x6A4
