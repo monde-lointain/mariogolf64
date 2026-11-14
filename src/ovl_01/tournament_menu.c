@@ -361,7 +361,7 @@ void CloseMenuWindow(void) {
     f_MenuWindowState = MENU_WINDOW_CLOSING;
 }
 
-s32 IsMenuWindowOpen(void) {
+MenuWindowCheck IsMenuWindowOpen(void) {
     MenuWindowCheck check;
 
     if (f_MenuWindowState == MENU_WINDOW_OPENING) {
@@ -374,7 +374,7 @@ s32 IsMenuWindowOpen(void) {
     return check;
 }
 
-s32 IsMenuWindowClosed(void) {
+MenuWindowCheck IsMenuWindowClosed(void) {
     MenuWindowCheck check;
 
     if (f_MenuWindowState == MENU_WINDOW_CLOSING) {

@@ -953,7 +953,7 @@ void DrawRingShotRecords(Gfx **displayListHead) {
 
 static const char f_UnreferencedRodata[8] = {0};
 
-s32 IsRingShotRecorded(RingShotRecord *record);
+Boolean IsRingShotRecorded(RingShotRecord *record);
 
 void ReadRingShotReplays(void) {
     SaveData *save = GetSaveData();
@@ -1071,7 +1071,7 @@ s16 GetChosenReplaySlot(void) {
     return f_RecordedReplaySlots[GetMenuMemory()->ringShotReplaySlot];
 }
 
-s32 IsRingShotRecorded(RingShotRecord *record) {
+Boolean IsRingShotRecorded(RingShotRecord *record) {
     return (record->scoreKind & SCORE_KIND_RECORDED) != 0;
 }
 
@@ -1880,7 +1880,7 @@ void UpdateSavedGames(void) {
     }
 }
 
-s32 IsChosenGameEmpty(void) {
+Boolean IsChosenGameEmpty(void) {
     SaveData *save = GetSaveData();
     MenuMemory *memory = GetMenuMemory();
     SavedGame *game = &save->savedGames[memory->savedGameIndex];

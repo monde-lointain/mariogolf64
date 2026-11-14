@@ -25,8 +25,8 @@ typedef s32 MenuWindowCheck;
 void ResetMenuWindow(void);
 void ShowMenuWindow(void);
 void CloseMenuWindow(void);
-s32 IsMenuWindowOpen(void);
-s32 IsMenuWindowClosed(void);
+MenuWindowCheck IsMenuWindowOpen(void);
+MenuWindowCheck IsMenuWindowClosed(void);
 void LoadMenuWindowImage(CharacterIndex characterIndex);
 
 #endif

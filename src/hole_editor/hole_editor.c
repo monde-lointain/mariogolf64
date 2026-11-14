@@ -741,7 +741,7 @@ void UpdateCellEditor(void) {
     g_MapCamera.view.eye[2] = (corner->v.ob[AXIS_Z] + oppositeCorner->v.ob[AXIS_Z]) / 2;
 }
 
-s32 HasDeadTriangleNearPoint(s32 column, s32 row);
+Boolean HasDeadTriangleNearPoint(s32 column, s32 row);
 
 void UpdateGroundPointEditor(void) {
     Vtx_t points[POINT_MOVE_COUNT + 1];
@@ -2563,7 +2563,7 @@ void UpdateHeightEditor(void) {
 static const char f_EditorAssertionText[] = "EX";
 static const char f_EditorFileName[] = "c:/usgolf64/hiedit.c";
 
-s32 ShouldMirrorCell(s32 column, s32 row, s32 endColumn, s32 endRow) {
+Boolean ShouldMirrorCell(s32 column, s32 row, s32 endColumn, s32 endRow) {
     TerrainCode sideCodes[DIAGONAL_SIDE_COUNT][SIDE_CODE_COUNT];
     s32 width;
     s32 height;
@@ -2974,7 +2974,7 @@ void ChooseMirroredCells(void) {
     }
 }
 
-s32 HasDeadTriangleNearPoint(s32 column, s32 row) {
+Boolean HasDeadTriangleNearPoint(s32 column, s32 row) {
     Vtx *corners[4];
     s32 rowOffset;
     s32 columnOffset;
@@ -3002,7 +3002,7 @@ s32 HasDeadTriangleNearPoint(s32 column, s32 row) {
                     corners[2]->v.ob[AXIS_X],
                     corners[2]->v.ob[AXIS_Z]
                 ) < CELL_CROSS_PRODUCT_MIN) {
-                return -1;
+                return -TRUE;
             }
 
             columnOffset++;

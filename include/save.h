@@ -131,13 +131,13 @@ void WriteSaveData(void);
 // menu.c returns the options as s8, but the original's callers elsewhere
 // read a full s32; a file that defines WIDENS_CHOSEN_OPTIONS gets that form.
 #if defined(AVOID_UB) || !defined(WIDENS_CHOSEN_OPTIONS)
-s8 IsMusicOffChosen(void);
-s8 IsMonoChosen(void);
-s8 IsSimpleCameraChosen(void);
+Boolean8 IsMusicOffChosen(void);
+Boolean8 IsMonoChosen(void);
+Boolean8 IsSimpleCameraChosen(void);
 #else
-s32 IsMusicOffChosen(void);
-s32 IsMonoChosen(void);
-s32 IsSimpleCameraChosen(void);
+Boolean IsMusicOffChosen(void);
+Boolean IsMonoChosen(void);
+Boolean IsSimpleCameraChosen(void);
 #endif
 s32 CountOpenCourses(s32 coursePoints);
 s32 GetCoursePointsNeeded(CourseIndex courseIndex);

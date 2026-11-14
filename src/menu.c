@@ -2799,15 +2799,15 @@ void EnterMenuAtBestShots(void) {
     g_MenuScreen = MENU_SCREEN_BEST_SHOTS;
 }
 
-s8 IsMusicOffChosen(void) {
+Boolean8 IsMusicOffChosen(void) {
     return GetSaveData()->options[SAVE_OPTION_MUSIC_OFF];
 }
 
-s8 IsMonoChosen(void) {
+Boolean8 IsMonoChosen(void) {
     return GetSaveData()->options[SAVE_OPTION_MONO];
 }
 
-s8 IsSimpleCameraChosen(void) {
+Boolean8 IsSimpleCameraChosen(void) {
     return GetSaveData()->options[SAVE_OPTION_SIMPLE_CAMERA];
 }
 

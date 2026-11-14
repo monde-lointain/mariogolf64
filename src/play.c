@@ -164,7 +164,7 @@ static s32 f_GroundTimingRow = 0;
 
 static u8 f_GroundNoiseTexels[GROUND_NOISE_SIZE * GROUND_NOISE_SIZE];
 
-s32 IsPlayAdvancingItself(void) {
+Boolean IsPlayAdvancingItself(void) {
     return IsGameFlagSet(GAME_FLAG_FAST_AUTOPLAY) || IsGameFlagSet(GAME_FLAG_AUTOPLAY);
 }
 
@@ -496,7 +496,7 @@ void PlayContestMovies(void) {
     }
 }
 
-s32 IsHoleOver(void) {
+Boolean IsHoleOver(void) {
     Boolean isDone = FALSE;
     s32 playerIndex;
 
