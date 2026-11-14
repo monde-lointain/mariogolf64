@@ -392,7 +392,7 @@ enum ExperienceWriteResult {
 #define FIRST_GAME_BOY_GOLFER CHARACTER_KID
 
 s32 ReadCartridgeCharacters(void);
-void BringOverCharacter(s32 listedIndex, s32 slot);
+void BringOverCharacter(s32 listedIndex, s32 gameBoyCharacterIndex);
 void ListPresentCharacters(void);
 void ClearCartridgeCharacters(void);
 void ResetSendStatus(void);
@@ -400,7 +400,7 @@ void ResetSendExperience(void);
 s32 TagCartridges(void);
 s32 CheckStatusCartridge(s32 cartridgeIndex);
 s32 WriteStatusToCartridge(s32 cartridgeIndex);
-s32 WriteExperienceToCartridge(s32 characterIndex);
+s32 WriteExperienceToCartridge(s32 gameBoyCharacterIndex);
 void SetNoticeState(s32 state, MessageId messageId);
 s32 GetNoticeState(void);
 
@@ -669,15 +669,15 @@ void UpdateBringCharacters(void) {
         case BRING_BRINGING:
             g_HasBroughtOverCharacter = TRUE;
             if (++transfer->bringingFrame == BRINGING_FRAME_COUNT) {
-                BringOverCharacter(transfer->listedCharacterIndex, transfer->characterIndex);
+                BringOverCharacter(transfer->listedCharacterIndex, transfer->gameBoyCharacterIndex);
                 transfer
                     ->listingStates[transfer->listedCharacters[transfer->listedCharacterIndex]] =
                     LISTING_NONE;
                 GenerateClubSet(
-                    FIRST_GAME_BOY_GOLFER + transfer->characterIndex,
-                    &g_GameBoyCharacters[transfer->characterIndex]
+                    FIRST_GAME_BOY_GOLFER + transfer->gameBoyCharacterIndex,
+                    &g_GameBoyCharacters[transfer->gameBoyCharacterIndex]
                 );
-                SetTextName(g_GameBoyCharacters[transfer->characterIndex].name);
+                SetTextName(g_GameBoyCharacters[transfer->gameBoyCharacterIndex].name);
                 SetTextPaletteColor(255, 255, 0, 0);
                 if (transfer->characterCount < GAME_BOY_GOLFER_COUNT) {
                     transfer->characterCount++;
@@ -702,13 +702,13 @@ void UpdateBringCharacters(void) {
                 transfer->screenStep = BRING_CHOOSING;
             }
             else if ((f_TransmitController.repeatedButtons & L_JPAD) &&
-                transfer->characterIndex > 0) {
-                transfer->characterIndex--;
+                transfer->gameBoyCharacterIndex > 0) {
+                transfer->gameBoyCharacterIndex--;
                 PlaySound(SOUND_MENU_MOVE, g_NextSoundChannel, SOUND_FULL_SCALE);
             }
             else if ((f_TransmitController.repeatedButtons & R_JPAD) &&
-                transfer->characterIndex < GAME_BOY_GOLFER_COUNT - 1) {
-                transfer->characterIndex++;
+                transfer->gameBoyCharacterIndex < GAME_BOY_GOLFER_COUNT - 1) {
+                transfer->gameBoyCharacterIndex++;
                 PlaySound(SOUND_MENU_MOVE, g_NextSoundChannel, SOUND_FULL_SCALE);
             }
 
@@ -721,7 +721,7 @@ void UpdateBringCharacters(void) {
                 }
                 else {
                     transfer->screenStep = BRING_BRINGING;
-                    transfer->characterIndex = transfer->characterCount;
+                    transfer->gameBoyCharacterIndex = transfer->characterCount;
                     transfer->listingStates[transfer
                             ->listedCharacters[transfer->listedCharacterIndex]] = LISTING_BRINGING;
                     transfer->bringingFrame = 0;
@@ -1053,7 +1053,7 @@ void UpdateSendExperience(void) {
             break;
         case SEND_EXPERIENCE_CHOOSING:
             if (f_TransmitController.pressedButtons & A_BUTTON) {
-                if (g_GameBoyCharacters[transfer->characterIndex].experience == 0) {
+                if (g_GameBoyCharacters[transfer->gameBoyCharacterIndex].experience == 0) {
                     transfer->screenStep = SEND_EXPERIENCE_NOTHING_TO_SEND;
                     SetNoticeState(NOTICE_OPENING, NO_EXPERIENCE_MESSAGE);
                     PlaySound(SOUND_MENU_BLOCKED, g_NextSoundChannel, SOUND_FULL_SCALE);
@@ -1069,13 +1069,13 @@ void UpdateSendExperience(void) {
                 transfer->screen = TRANSMIT_SCREEN_OPTIONS;
             }
             else if ((f_TransmitController.repeatedButtons & L_JPAD) &&
-                transfer->characterIndex > 0) {
-                transfer->characterIndex--;
+                transfer->gameBoyCharacterIndex > 0) {
+                transfer->gameBoyCharacterIndex--;
                 PlaySound(SOUND_MENU_MOVE, g_NextSoundChannel, SOUND_FULL_SCALE);
             }
             else if ((f_TransmitController.repeatedButtons & R_JPAD) &&
-                transfer->characterIndex < transfer->characterCount - 1) {
-                transfer->characterIndex++;
+                transfer->gameBoyCharacterIndex < transfer->characterCount - 1) {
+                transfer->gameBoyCharacterIndex++;
                 PlaySound(SOUND_MENU_MOVE, g_NextSoundChannel, SOUND_FULL_SCALE);
             }
 
@@ -1117,7 +1117,7 @@ void UpdateSendExperience(void) {
             break;
         case SEND_EXPERIENCE_WRITING:
             transfer->isAccessing = FALSE;
-            switch (WriteExperienceToCartridge(transfer->characterIndex)) {
+            switch (WriteExperienceToCartridge(transfer->gameBoyCharacterIndex)) {
                 case EXPERIENCE_WRITE_DONE:
                     transfer->screenStep = SEND_EXPERIENCE_SENT;
                     break;
@@ -1498,20 +1498,20 @@ static s32 f_UnusedZeros[2] UNUSED = {0, 0};
 static s32 f_StatusCharacterOrder[CHARACTER_COUNT] =
     {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17};
 
-void BringOverCharacter(s32 listedIndex, s32 slot) {
+void BringOverCharacter(s32 listedIndex, s32 gameBoyCharacterIndex) {
     GameBoyTransfer *transfer = &g_GameBoyTransfer;
 
-    g_GameBoyCharacters[slot] =
+    g_GameBoyCharacters[gameBoyCharacterIndex] =
         transfer->cartridgeCharacters[transfer->listedCharacters[listedIndex]];
-    g_GameBoyCharacters[slot].status = GAME_BOY_CHARACTER_STATUS_PRESENT;
+    g_GameBoyCharacters[gameBoyCharacterIndex].status = GAME_BOY_CHARACTER_STATUS_PRESENT;
     transfer->cartridgeCharacters[transfer->listedCharacters[listedIndex]].status =
         GAME_BOY_CHARACTER_STATUS_BROUGHT_OVER;
-    transfer->sourceIndices[slot] = transfer->listedCharacters[listedIndex];
+    transfer->sourceIndices[gameBoyCharacterIndex] = transfer->listedCharacters[listedIndex];
 }
 
 void ResetBringCharacters(void) {
     g_GameBoyTransfer.listedCharacterIndex = 0;
-    g_GameBoyTransfer.characterIndex = 0;
+    g_GameBoyTransfer.gameBoyCharacterIndex = 0;
     g_GameBoyTransfer.firstShownListedIndex = 0;
     g_GameBoyTransfer.isCanceled = FALSE;
 }
@@ -1524,7 +1524,7 @@ void ResetSendStatus(void) {
 
 void ResetSendExperience(void) {
     g_GameBoyTransfer.chosenCartridgeIndex = 0;
-    g_GameBoyTransfer.characterIndex = 0;
+    g_GameBoyTransfer.gameBoyCharacterIndex = 0;
     g_GameBoyTransfer.taggedCartridgeCount = 0;
     g_GameBoyTransfer.isCanceled = FALSE;
 }
@@ -1798,7 +1798,7 @@ void DrawBringCharactersText(Gfx **displayListHead, GameBoyTransfer *transfer) {
     PrintDebugText(g_PrintBuffer, STEP_DEBUG_COLUMN, STEP_DEBUG_ROW);
     if (transfer->screenStep == BRING_CHOOSING_SLOT) {
         isCharacterShown = TRUE;
-        character = &g_GameBoyCharacters[transfer->characterIndex];
+        character = &g_GameBoyCharacters[transfer->gameBoyCharacterIndex];
     }
 
     if ((transfer->screenStep == BRING_CHOOSING || transfer->screenStep == BRING_BRINGING) &&
@@ -1850,19 +1850,25 @@ void DrawBringCharactersText(Gfx **displayListHead, GameBoyTransfer *transfer) {
 
 void DrawSendExperienceText(Gfx **displayListHead, GameBoyTransfer *transfer) {
     Gfx *gfx = *displayListHead;
-    s32 slot;
+    s32 gameBoyCharacterIndex;
     MessageId messageId;
 
     gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, OPAQUE_ALPHA);
     BeginShadowedText(&gfx);
-    for (slot = 0; slot != g_GameBoyTransfer.characterCount; slot++) {
-        GameBoyCharacter *character = &g_GameBoyCharacters[slot];
+    for (gameBoyCharacterIndex = 0; gameBoyCharacterIndex != g_GameBoyTransfer.characterCount;
+        gameBoyCharacterIndex++) {
+        GameBoyCharacter *character = &g_GameBoyCharacters[gameBoyCharacterIndex];
 
         sprintf(g_PrintBuffer, "%4d", (int)character->experience);
-        DrawSmallText(&gfx, EXPERIENCE_LEFT + (slot * FACE_SPACING), EXPERIENCE_TOP, g_PrintBuffer);
+        DrawSmallText(
+            &gfx,
+            EXPERIENCE_LEFT + (gameBoyCharacterIndex * FACE_SPACING),
+            EXPERIENCE_TOP,
+            g_PrintBuffer
+        );
     }
 
-    DrawCharacterStats(&gfx, &g_GameBoyCharacters[transfer->characterIndex], transfer);
+    DrawCharacterStats(&gfx, &g_GameBoyCharacters[transfer->gameBoyCharacterIndex], transfer);
     SetUpTextDrawing(&gfx);
     messageId = NO_MESSAGE;
     switch (transfer->screenStep) {
@@ -2022,14 +2028,16 @@ void DrawSendStatusScreen(Gfx **displayListHead, GameBoyTransfer *transfer) {
 
 void DrawImportedFaces(Gfx **displayListHead, GameBoyTransfer *transfer) {
     Gfx *gfx = *displayListHead;
-    s32 slot;
+    s32 gameBoyCharacterIndex;
     s32 golferIndex;
 
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-    for (slot = 0; slot != GAME_BOY_CHARACTER_COUNT; slot++) {
-        if (g_GameBoyCharacters[slot].status == GAME_BOY_CHARACTER_STATUS_PRESENT) {
-            golferIndex = g_GameBoyCharacters[slot].golferIndex;
+    for (gameBoyCharacterIndex = 0; gameBoyCharacterIndex != GAME_BOY_CHARACTER_COUNT;
+        gameBoyCharacterIndex++) {
+        if (g_GameBoyCharacters[gameBoyCharacterIndex].status ==
+            GAME_BOY_CHARACTER_STATUS_PRESENT) {
+            golferIndex = g_GameBoyCharacters[gameBoyCharacterIndex].golferIndex;
             LoadLargePalette(&gfx, transfer->facePalettes[golferIndex]);
             LoadTextureBlock(
                 &gfx,
@@ -2048,9 +2056,9 @@ void DrawImportedFaces(Gfx **displayListHead, GameBoyTransfer *transfer) {
             );
             DrawTextureRect(
                 &gfx,
-                QuarterPixels(FACES_LEFT + (slot * FACE_SPACING)),
+                QuarterPixels(FACES_LEFT + (gameBoyCharacterIndex * FACE_SPACING)),
                 QuarterPixels(FACES_TOP),
-                QuarterPixels(FACES_LEFT + (slot * FACE_SPACING) + FACE_SIZE),
+                QuarterPixels(FACES_LEFT + (gameBoyCharacterIndex * FACE_SPACING) + FACE_SIZE),
                 QuarterPixels(FACES_TOP + FACE_SIZE),
                 G_TX_RENDERTILE,
                 0,
@@ -2171,7 +2179,7 @@ void DrawBringCharactersScreen(Gfx **displayListHead, GameBoyTransfer *transfer)
             left = LISTED_FACES_LEFT + (shownCount * LISTED_FACE_SPACING);
             top = LISTED_FACES_TOP;
             if (transfer->listingStates[listed] == LISTING_BRINGING) {
-                slotLeft = FACES_LEFT + (transfer->characterIndex * FACE_SPACING);
+                slotLeft = FACES_LEFT + (transfer->gameBoyCharacterIndex * FACE_SPACING);
                 left += (slotLeft - left) * transfer->bringingFrame / (BRINGING_FRAME_COUNT - 1);
                 top += (FACES_TOP - top) * transfer->bringingFrame / (BRINGING_FRAME_COUNT - 1);
             }
@@ -2224,7 +2232,7 @@ void DrawBringCharactersScreen(Gfx **displayListHead, GameBoyTransfer *transfer)
         else if (transfer->screenStep == BRING_CHOOSING_SLOT) {
             DrawCursorBox(
                 &gfx,
-                FACES_LEFT - BRING_CURSOR_MARGIN + (transfer->characterIndex * FACE_SPACING),
+                FACES_LEFT - BRING_CURSOR_MARGIN + (transfer->gameBoyCharacterIndex * FACE_SPACING),
                 FACES_TOP - BRING_CURSOR_MARGIN
             );
         }
@@ -2300,7 +2308,7 @@ void DrawSendExperienceScreen(Gfx **displayListHead, GameBoyTransfer *transfer) 
     if (transfer->screenStep == SEND_EXPERIENCE_CHOOSING) {
         DrawCursorBox(
             &gfx,
-            FACES_LEFT - FACE_CURSOR_MARGIN + (transfer->characterIndex * FACE_SPACING),
+            FACES_LEFT - FACE_CURSOR_MARGIN + (transfer->gameBoyCharacterIndex * FACE_SPACING),
             FACES_TOP - FACE_CURSOR_MARGIN
         );
         gDPPipeSync(gfx++);
@@ -2693,7 +2701,7 @@ void ClearCartridgeCharacters(void) {
     }
 }
 
-s32 WriteExperienceToCartridge(s32 characterIndex) {
+s32 WriteExperienceToCartridge(s32 gameBoyCharacterIndex) {
     GameBoyTransfer *transfer = &g_GameBoyTransfer;
     u8 characterData[CHARACTER_DATA_SIZE];
     u8 save[CARTRIDGE_SAVE_SIZE];
@@ -2742,7 +2750,7 @@ s32 WriteExperienceToCartridge(s32 characterIndex) {
         if (transfer->transferResult == PAK_RESULT_OK) {
             recordOffset = SAVE_RECORDS_OFFSET;
             isSignatureWrong = FALSE;
-            character = &g_GameBoyCharacters[characterIndex];
+            character = &g_GameBoyCharacters[gameBoyCharacterIndex];
             saveIndex = character->saveIndex;
             transfer->openedCartridgeCount++;
             osSyncPrintf("PHASE 1\n");
@@ -3140,7 +3148,7 @@ s32 ReadCartridgeCharacters(void) {
     s32 dataSize;
     s32 sum;
     Boolean isAlreadyBrought;
-    s32 slot;
+    s32 gameBoyCharacterIndex;
 
     if (transfer->readStep == 0) {
         nuContGBPakMgrInit();
@@ -3264,9 +3272,15 @@ s32 ReadCartridgeCharacters(void) {
                     isAlreadyBrought = FALSE;
 
                     osSyncPrintf("スロット%d 読み込み成功しました  \n", saveIndex);
-                    for (slot = 0; slot != GAME_BOY_CHARACTER_COUNT; slot++) {
-                        if (g_GameBoyCharacters[slot].status == GAME_BOY_CHARACTER_STATUS_PRESENT &&
-                            IsCharacterFromSave(&g_GameBoyCharacters[slot], characterData)) {
+                    for (gameBoyCharacterIndex = 0;
+                        gameBoyCharacterIndex != GAME_BOY_CHARACTER_COUNT;
+                        gameBoyCharacterIndex++) {
+                        if (g_GameBoyCharacters[gameBoyCharacterIndex].status ==
+                                GAME_BOY_CHARACTER_STATUS_PRESENT &&
+                            IsCharacterFromSave(
+                                &g_GameBoyCharacters[gameBoyCharacterIndex],
+                                characterData
+                            )) {
                             isAlreadyBrought = TRUE;
                             transfer
                                 ->cartridgeCharacters

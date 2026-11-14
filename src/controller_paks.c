@@ -15,10 +15,10 @@ GameBoyTransfer g_GameBoyTransfer;
 
 FILE_STATIC Boolean f_HasRumblePak[MAXCONTROLLERS];
 
-void AddGameBoyExperience(s32 characterIndex, s32 experience) {
-    g_GameBoyCharacters[characterIndex].experience += experience;
-    if (g_GameBoyCharacters[characterIndex].experience > GAME_BOY_EXPERIENCE_MAX) {
-        g_GameBoyCharacters[characterIndex].experience = GAME_BOY_EXPERIENCE_MAX;
+void AddGameBoyExperience(s32 gameBoyCharacterIndex, s32 experience) {
+    g_GameBoyCharacters[gameBoyCharacterIndex].experience += experience;
+    if (g_GameBoyCharacters[gameBoyCharacterIndex].experience > GAME_BOY_EXPERIENCE_MAX) {
+        g_GameBoyCharacters[gameBoyCharacterIndex].experience = GAME_BOY_EXPERIENCE_MAX;
     }
 }
 
@@ -26,12 +26,12 @@ Boolean HasGameBoyPak(void) {
     return g_GameBoyTransfer.hasGameBoyPak;
 }
 
-Boolean IsGameBoyCharacterPresent(s32 characterIndex) {
-    return g_GameBoyCharacters[characterIndex].status == GAME_BOY_CHARACTER_STATUS_PRESENT;
+Boolean IsGameBoyCharacterPresent(s32 gameBoyCharacterIndex) {
+    return g_GameBoyCharacters[gameBoyCharacterIndex].status == GAME_BOY_CHARACTER_STATUS_PRESENT;
 }
 
-char *GetGameBoyCharacterName(s32 characterIndex) {
-    return g_GameBoyCharacters[characterIndex].name;
+char *GetGameBoyCharacterName(s32 gameBoyCharacterIndex) {
+    return g_GameBoyCharacters[gameBoyCharacterIndex].name;
 }
 
 void ResetGameBoyTransfer(s32 transferMode) {

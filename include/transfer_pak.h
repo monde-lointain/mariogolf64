@@ -118,7 +118,7 @@ typedef struct GameBoyTransfer {
     s32 screenStep;
     s32 bringingFrame;
     s32 listedCharacterIndex;
-    s32 characterIndex;
+    s32 gameBoyCharacterIndex;
     s32 firstShownListedIndex;
     s32 openedCartridgeCount;
     Boolean hasMissingCartridge;
@@ -139,10 +139,10 @@ typedef struct GameBoyTransfer {
 
 extern GameBoyTransfer g_GameBoyTransfer;
 
-void AddGameBoyExperience(s32 characterIndex, s32 experience);
+void AddGameBoyExperience(s32 gameBoyCharacterIndex, s32 experience);
 Boolean HasGameBoyPak(void);
-Boolean IsGameBoyCharacterPresent(s32 characterIndex);
-char *GetGameBoyCharacterName(s32 characterIndex);
+Boolean IsGameBoyCharacterPresent(s32 gameBoyCharacterIndex);
+char *GetGameBoyCharacterName(s32 gameBoyCharacterIndex);
 void ClearBootTransmitPending(void);
 Boolean IsBootTransmitPending(void);
 void ResetGameBoyTransfer(s32 transferMode);
