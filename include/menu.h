@@ -253,7 +253,7 @@ void InsertBestTime(
     s32 time,
     s32 scoreToPar,
     CharacterIndex characterIndex,
-    s32 paletteIndex
+    CButtonPalette paletteIndex
 );
 void InsertRankedRecord(PlayRecord *record);
 Boolean IsDonkeyKongUnlocked(void);

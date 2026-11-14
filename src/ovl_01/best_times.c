@@ -750,7 +750,7 @@ void LoadBestTimesFaces(void) {
     CourseIndex courseIndex;
     s32 rank;
     CharacterIndex holderCharacterIndex;
-    s32 paletteIndex;
+    CButtonPalette paletteIndex;
 
     for (characterIndex = 0; characterIndex != CHARACTER_COUNT; characterIndex++) {
         OpenEncodedAsset(g_CharacterFaceAssets[characterIndex], &asset);
@@ -760,7 +760,7 @@ void LoadBestTimesFaces(void) {
     for (courseIndex = 0; courseIndex != COURSE_COUNT; courseIndex++) {
         for (rank = 0; rank != BEST_TIME_COUNT; rank++) {
             holderCharacterIndex = save->records.bestTimeCharacters[courseIndex][rank];
-            if (holderCharacterIndex != -1) {
+            if (holderCharacterIndex != NO_BEST_TIME_HOLDER) {
                 if (holderCharacterIndex < 0) {
                     holderCharacterIndex = 0;
                 }

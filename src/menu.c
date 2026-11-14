@@ -1390,7 +1390,7 @@ void ResetSaveData(void) {
     save->magic = SAVE_MAGIC;
     for (row = 0; row != ARRAY_COUNT(save->records.bestTimes); row++) {
         for (column = 0; column != ARRAY_COUNT(save->records.bestTimes[0]); column++) {
-            save->records.bestTimes[row][column] = -1;
+            save->records.bestTimes[row][column] = NO_BEST_TIME;
         }
     }
 
@@ -1796,7 +1796,7 @@ void InsertBestTime(
     s32 time,
     s32 scoreToPar,
     CharacterIndex characterIndex,
-    s32 paletteIndex
+    CButtonPalette paletteIndex
 ) {
     SaveData *save;
     s32 count;

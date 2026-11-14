@@ -66,6 +66,8 @@ typedef struct SavedGame {
 } SavedGame;
 
 #define BEST_TIME_COUNT 3
+#define NO_BEST_TIME (-1)
+#define NO_BEST_TIME_HOLDER (-1)
 
 #define WIN_COUNT_MASK 0x7F
 #define WON_UNSAVED_FLAG 0x80
@@ -85,8 +87,8 @@ typedef struct SaveRecords {
     Awards awards;
     s32 bestTimeScoresToPar[COURSE_COUNT][BEST_TIME_COUNT];
     s32 bestTimes[COURSE_COUNT][BEST_TIME_COUNT];
-    s32 bestTimeCharacters[COURSE_COUNT][BEST_TIME_COUNT];
-    s32 bestTimePalettes[COURSE_COUNT][BEST_TIME_COUNT];
+    CharacterIndex bestTimeCharacters[COURSE_COUNT][BEST_TIME_COUNT];
+    CButtonPalette bestTimePalettes[COURSE_COUNT][BEST_TIME_COUNT];
     CourseStats courseStats[COURSE_COUNT];
     u8 unusedAfterCourseStats[0x990 - 0x7C0];
     Boolean8 hasRingShotStar[RING_SHOT_COURSE_COUNT][RING_SHOT_HOLE_COUNT];
