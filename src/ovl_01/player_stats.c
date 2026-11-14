@@ -2326,7 +2326,6 @@ void UpdateBestShots(void) {
 #define RECORD_COURSE_NAME_Y 180
 #define RECORD_HOLE_X 200
 #define RECORD_HOLE_Y 204
-#define MESSAGE_HOLE_NUMBER 0x76
 #define NO_RECORDS_X 160
 #define NO_RECORDS_Y 192
 #define MESSAGE_NO_RECORDS 0x16E

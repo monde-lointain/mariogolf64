@@ -111,8 +111,6 @@ enum PlanksState {
 #define PLANK_SLIDE_MAX 480
 #define PLANK_SLIDE_STEP 24
 
-#define MESSAGE_FIRST_RING_SHOT_HOLE 0x4B
-
 void DrawNamePlate(Gfx **displayListHead, s32 centerX, s32 centerY);
 void DrawRingShotStars(Gfx **displayListHead, s32 centerX, s32 centerY);
 void DrawPlanks(Gfx **displayListHead);

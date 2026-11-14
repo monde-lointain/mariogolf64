@@ -19,4 +19,8 @@ typedef s32 TextFlags;
 #define FONT_SIZE_SMALL 8
 #define TEXT_SLOT_LARGE_FONT 1
 
+// Messages that more than one file shows.
+#define MESSAGE_FIRST_RING_SHOT_HOLE 0x4B
+#define MESSAGE_HOLE_NUMBER 0x76
+
 #endif
