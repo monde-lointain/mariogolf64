@@ -330,7 +330,7 @@ void DrawRings(Gfx **displayListHead, CameraMatrices *matrices UNUSED, Camera *c
     s32 green;
     s32 blue;
     s32 ringIndex;
-    s32 state;
+    s32 ringState;
     s32 section;
     s32 sparkleSection;
     s32 side;
@@ -339,7 +339,7 @@ void DrawRings(Gfx **displayListHead, CameraMatrices *matrices UNUSED, Camera *c
     s32 nextSectionFirst;
     s32 alpha;
     Radians angle;
-    f32 turn;
+    f32 sparkleTurn;
 
     gDPPipeSync(gfx++);
     gSPSetLights1(gfx++, f_RingLights);
@@ -434,16 +434,16 @@ void DrawRings(Gfx **displayListHead, CameraMatrices *matrices UNUSED, Camera *c
         }
 
         if (f_HoleTriangles[triangleIndex].kind == HOLE_TRIANGLE_KIND_RING) {
-            state = g_Players[g_GameState.currentPlayerIndex].ringStates[ringIndex];
-            if (state > RING_STATE_NONE) {
-                if (state != RING_STATE_SHOWN) {
-                    if (state < RING_STATE_FADED) {
-                        turn = state * RING_SPARKLE_TURN;
+            ringState = g_Players[g_GameState.currentPlayerIndex].ringStates[ringIndex];
+            if (ringState > RING_STATE_NONE) {
+                if (ringState != RING_STATE_SHOWN) {
+                    if (ringState < RING_STATE_FADED) {
+                        sparkleTurn = ringState * RING_SPARKLE_TURN;
                         guMtxL2F(transform, &f_RingMatrices[ringIndex]);
-                        for (sparkleSection = state & (RING_SPARKLE_SPACING - 1);
+                        for (sparkleSection = ringState & (RING_SPARKLE_SPACING - 1);
                             sparkleSection < RING_SECTION_COUNT;
                             sparkleSection += RING_SPARKLE_SPACING) {
-                            angle = turn + (sparkleSection * RING_SECTION_ANGLE);
+                            angle = sparkleTurn + (sparkleSection * RING_SECTION_ANGLE);
                             ringPoint[0] = cosf(angle) * RING_RADIUS;
                             ringPoint[1] = sinf(angle) * RING_RADIUS;
                             ringPoint[2] = 0;
@@ -463,17 +463,17 @@ void DrawRings(Gfx **displayListHead, CameraMatrices *matrices UNUSED, Camera *c
                         }
                     }
 
-                    state++;
-                    if (state > RING_STATE_FADED) {
-                        state = RING_STATE_FADED;
+                    ringState++;
+                    if (ringState > RING_STATE_FADED) {
+                        ringState = RING_STATE_FADED;
                     }
 
-                    alpha = OPAQUE_ALPHA - (state * RING_FADE_STEP);
+                    alpha = OPAQUE_ALPHA - (ringState * RING_FADE_STEP);
                     if (alpha < 0) {
                         alpha = 0;
                     }
 
-                    g_Players[g_GameState.currentPlayerIndex].ringStates[ringIndex] = state;
+                    g_Players[g_GameState.currentPlayerIndex].ringStates[ringIndex] = ringState;
                     AppendSyncedRdpState(
                         gfx,
                         gDPSetRenderMode,
