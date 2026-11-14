@@ -2020,6 +2020,9 @@ Boolean IsMetalMarioUnlocked(void) {
     return badgeCount == COURSE_COUNT * COURSE_HOLE_COUNT;
 }
 
+// playerCount is reused to count a character's wins and then to hold an
+// imported character's ID; giving each use its own variable breaks the
+// match.
 void BuildCharacterGrid(s32 playerCount, Boolean skipsImportedFaces) {
     EncodedAsset asset;
     AssetFile file;
@@ -2027,7 +2030,7 @@ void BuildCharacterGrid(s32 playerCount, Boolean skipsImportedFaces) {
     s32 row;
     s32 column;
     s32 index;
-    s32 recordIndex;
+    s32 characterIndex;
 
     save = GetSaveData();
     for (row = 0; row != CHARACTER_GRID_ROW_COUNT; row++) {
@@ -2056,8 +2059,9 @@ void BuildCharacterGrid(s32 playerCount, Boolean skipsImportedFaces) {
     }
 
     for (index = 0; index != RECORD_CHARACTER_COUNT; index++) {
-        for (recordIndex = 0, playerCount = 0; recordIndex != CHARACTER_COUNT; recordIndex++) {
-            if (save->records.awards.matchups[recordIndex][index].winBits & WIN_COUNT_MASK) {
+        for (characterIndex = 0, playerCount = 0; characterIndex != CHARACTER_COUNT;
+            characterIndex++) {
+            if (save->records.awards.matchups[characterIndex][index].winBits & WIN_COUNT_MASK) {
                 playerCount++;
                 break;
             }
@@ -2104,8 +2108,8 @@ void BuildCharacterGrid(s32 playerCount, Boolean skipsImportedFaces) {
 
     if ((u8)skipsImportedFaces != TRUE) {
         for (index = 0; index != ARRAY_COUNT(g_ImportedCharacters); index++) {
-            recordIndex = g_CharacterGrid[2][index];
-            if (recordIndex >= 0) {
+            characterIndex = g_CharacterGrid[2][index];
+            if (characterIndex >= 0) {
                 playerCount = g_ImportedCharacters[index].character;
                 OpenEncodedAsset(g_FaceAnimationAssets[playerCount][0], &asset);
                 ReadEncodedAsset(g_CharacterFaceImages[FIRST_IMPORTED_CHARACTER + index], &asset);
