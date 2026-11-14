@@ -2255,6 +2255,8 @@ void PlaceRainCenter(void) {
     scale = sqrtf((viewX * viewX) + (viewZ * viewZ));
     f_RainCenter[0] = viewX;
     f_RainCenter[1] = viewZ;
+    // Skips views shorter than one unit. Comparing the truncated length
+    // with 0 as an int instead of a float breaks the match.
     if ((s32)scale != 0.0f) {
         scale = RAIN_CENTER_DISTANCE / scale;
     }
