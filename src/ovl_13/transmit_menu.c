@@ -37,6 +37,8 @@
 #define STATUS_OPTION_ROW 0
 #define SECOND_OPTION_ROW 1
 #define MAIN_MENU_OPTION_ROW 2
+// Swaps the status and second rows, the only rows outside the boot menu.
+#define OPTION_ROW_FLIP 1
 
 #define MESSAGE_FIRST_TRANSMIT_OPTION 0x13F
 
@@ -1270,7 +1272,7 @@ void UpdateTransmitMenu(void) {
                         (transfer->optionIndex + MODE_OPTION_COUNT - 1) % MODE_OPTION_COUNT;
                 }
                 else {
-                    transfer->optionIndex ^= 1;
+                    transfer->optionIndex ^= OPTION_ROW_FLIP;
                 }
 
                 PlaySound(SOUND_MENU_MOVE, g_NextSoundChannel, SOUND_FULL_SCALE);
@@ -1281,7 +1283,7 @@ void UpdateTransmitMenu(void) {
                         (transfer->optionIndex + MODE_OPTION_COUNT + 1) % MODE_OPTION_COUNT;
                 }
                 else {
-                    transfer->optionIndex ^= 1;
+                    transfer->optionIndex ^= OPTION_ROW_FLIP;
                 }
 
                 PlaySound(SOUND_MENU_MOVE, g_NextSoundChannel, SOUND_FULL_SCALE);
