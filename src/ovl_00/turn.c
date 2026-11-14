@@ -309,9 +309,9 @@ static s8 f_ShouldReplaySavedShot = FALSE;
 static s8 f_UnusedFirstByteAfterReplayFlag UNUSED = 0;
 static s8 f_UnusedSecondByteAfterReplayFlag UNUSED = 0;
 static s8 f_UnusedThirdByteAfterReplayFlag UNUSED = 0;
-static s8 f_HasGutsTestRun = FALSE;
-static s8 f_GutsTestCharacter = 0;
-static s8 f_GutsTestMotion = 0;
+static s8 f_HasReactionTestRun = FALSE;
+static s8 f_ReactionTestCharacter = 0;
+static s8 f_ReactionTestAnimation = 0;
 static s8 f_ShouldUpdateReaction = FALSE;
 static s32 f_SwingCount = 0;
 static Boolean f_IsReplayRequested = FALSE;
@@ -4496,9 +4496,9 @@ void UpdateTurns(void) {
                 ConsiderReactionSpot(g_HoleSetup.teePosition);
                 ClearShotEffects(CLEAR_KIND_EFFECTS);
                 EndFlightCamera();
-                if (IsGameFlagSet(GAME_FLAG_SHOW_REACTION_FRAME) && f_HasGutsTestRun) {
+                if (IsGameFlagSet(GAME_FLAG_SHOW_REACTION_FRAME) && f_HasReactionTestRun) {
                     paletteIndex = 0;
-                    LoadCharacter(0, f_GutsTestCharacter + CHARACTER_COUNT, paletteIndex);
+                    LoadCharacter(0, f_ReactionTestCharacter + CHARACTER_COUNT, paletteIndex);
                 }
                 else {
                     characterIndex = g_Players[playerIndex].characterIndex;
@@ -4549,9 +4549,9 @@ void UpdateTurns(void) {
 
                 StartReaction(0, g_Players[playerIndex].characterIndex, reaction);
                 SetCharacterAnimation(0, reaction);
-                if (IsGameFlagSet(GAME_FLAG_SHOW_REACTION_FRAME) && f_HasGutsTestRun) {
-                    SetCharacterAnimation(0, f_GutsTestMotion);
-                    StartReaction(0, f_GutsTestCharacter, f_GutsTestMotion);
+                if (IsGameFlagSet(GAME_FLAG_SHOW_REACTION_FRAME) && f_HasReactionTestRun) {
+                    SetCharacterAnimation(0, f_ReactionTestAnimation);
+                    StartReaction(0, f_ReactionTestCharacter, f_ReactionTestAnimation);
                 }
 
                 f_StateEventFrame =
@@ -4635,7 +4635,7 @@ void UpdateTurns(void) {
                         char *motionName;
                         char text[DEBUG_TEXT_BUFFER_SIZE];
 
-                        switch (f_GutsTestMotion) {
+                        switch (f_ReactionTestAnimation) {
                             case REACTION_ANIMATION_EAGLE:
                                 motionName = "EAGLE ";
                                 break;
@@ -4653,48 +4653,48 @@ void UpdateTurns(void) {
                                 break;
                         }
 
-                        f_HasGutsTestRun = TRUE;
+                        f_HasReactionTestRun = TRUE;
                         if (g_TurnController.repeatedButtons & L_JPAD) {
-                            f_GutsTestCharacter--;
+                            f_ReactionTestCharacter--;
                         }
 
                         if (g_TurnController.repeatedButtons & R_JPAD) {
-                            f_GutsTestCharacter++;
+                            f_ReactionTestCharacter++;
                         }
 
                         if (g_TurnController.repeatedButtons & U_JPAD) {
-                            f_GutsTestMotion--;
+                            f_ReactionTestAnimation--;
                         }
 
                         if (g_TurnController.repeatedButtons & D_JPAD) {
-                            f_GutsTestMotion++;
+                            f_ReactionTestAnimation++;
                         }
 
-                        if (f_GutsTestCharacter < 0) {
-                            f_GutsTestCharacter = CHARACTER_COUNT - 1;
+                        if (f_ReactionTestCharacter < 0) {
+                            f_ReactionTestCharacter = CHARACTER_COUNT - 1;
                         }
 
-                        if (f_GutsTestCharacter >= CHARACTER_COUNT) {
-                            f_GutsTestCharacter = 0;
+                        if (f_ReactionTestCharacter >= CHARACTER_COUNT) {
+                            f_ReactionTestCharacter = 0;
                         }
 
-                        if (f_GutsTestMotion < REACTION_ANIMATION_EAGLE) {
-                            f_GutsTestMotion = REACTION_ANIMATION_BOGEY;
+                        if (f_ReactionTestAnimation < REACTION_ANIMATION_EAGLE) {
+                            f_ReactionTestAnimation = REACTION_ANIMATION_BOGEY;
                         }
 
-                        if (f_GutsTestMotion > REACTION_ANIMATION_BOGEY) {
-                            f_GutsTestMotion = REACTION_ANIMATION_EAGLE;
+                        if (f_ReactionTestAnimation > REACTION_ANIMATION_BOGEY) {
+                            f_ReactionTestAnimation = REACTION_ANIMATION_EAGLE;
                         }
 
                         sprintf(
                             text,
                             "GUTS TEST CH[%2.2d] MOTION %s",
-                            f_GutsTestCharacter,
+                            f_ReactionTestCharacter,
                             motionName
                         );
                         PrintDebugText(text, 3, 3);
                         if (!IsCharacterSlotBusy(0)) {
-                            LoadCharacter(0, f_GutsTestCharacter + CHARACTER_COUNT, 0);
+                            LoadCharacter(0, f_ReactionTestCharacter + CHARACTER_COUNT, 0);
                         }
 
                         if (g_TurnController.buttons != 0) {
