@@ -38,34 +38,39 @@ Unk800CABD0 *func_80043AF0(s32 arg0) {
 void func_80043B0C(void) {
 }
 
-s32 func_80043B14(Unk800BB258 *arg0, s32 arg1) {
-    u32 flags = *(u32 *)((u8 *)arg0 + 0x8);
-    s32 v1 = 0;
+s32 func_80043B14(Unk800BB258 *arg0, u32 arg1) {
+    s32 ret = 0;
 
-    if (flags & 0x1) {
-        if (arg1 == 1) {
-            v1 = 0x64;
-        } else if (arg1 == 0) {
-            v1 = 0xC8;
-        } else if (arg1 == 2) {
-            v1 = 0x1E;
+    if (*(u32 *)((u8 *)arg0 + 0x8) & 1) {
+        switch (arg1) {
+            case 0:
+                ret = 200;
+                break;
+            case 1:
+                ret = 100;
+                break;
+            case 2:
+                ret = 30;
+                break;
         }
     } else {
-        if (arg1 == 1) {
-            v1 = *(s16 *)((u8 *)arg0 + 0xC);
-        } else if (arg1 == 0) {
-            s16 field = *(s16 *)((u8 *)arg0 + 0xC);
-            v1 = (s32)(1.1f * (f32)field);
-        } else if (arg1 == 2) {
-            v1 = 0x3C;
+        switch (arg1) {
+            case 0:
+                ret = *(s16 *)((u8 *)arg0 + 0xC) * 1.1f;
+                break;
+            case 1:
+                ret = *(s16 *)((u8 *)arg0 + 0xC);
+                break;
+            case 2:
+                ret = 60;
+                break;
         }
     }
-
-    return v1;
+    return ret;
 }
 
-
 INCLUDE_ASM("asm/nonmatchings/1EEF0", func_80043BB0);
+
 INCLUDE_ASM("asm/nonmatchings/1EEF0", func_80043C20);
 
 INCLUDE_ASM("asm/nonmatchings/1EEF0", func_80043C64);
