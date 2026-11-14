@@ -1192,15 +1192,15 @@ s32 HaveAllRumblePaks(void) {
 
 void UpdateTransmitMenu(void) {
     GameBoyTransfer *transfer = &g_GameBoyTransfer;
-    s32 controller;
+    s32 controllerIndex;
 
     f_TransmitController.repeatedButtons = 0;
     f_TransmitController.buttons = 0;
     f_TransmitController.pressedButtons = 0;
-    for (controller = 0; controller != g_ControllerCount; controller++) {
-        f_TransmitController.repeatedButtons |= g_ControllerStates[controller].repeatedButtons;
-        f_TransmitController.buttons |= g_ControllerStates[controller].buttons;
-        f_TransmitController.pressedButtons |= g_ControllerStates[controller].pressedButtons;
+    for (controllerIndex = 0; controllerIndex != g_ControllerCount; controllerIndex++) {
+        f_TransmitController.repeatedButtons |= g_ControllerStates[controllerIndex].repeatedButtons;
+        f_TransmitController.buttons |= g_ControllerStates[controllerIndex].buttons;
+        f_TransmitController.pressedButtons |= g_ControllerStates[controllerIndex].pressedButtons;
     }
 
     if (IsGameFlagSet(GAME_FLAG_ALLOW_CARTRIDGE_DUMP) &&
@@ -2674,17 +2674,18 @@ void DrawTransmitMenu(Gfx **displayListHead) {
 
 void ClearCartridgeCharacters(void) {
     GameBoyTransfer *transfer = &g_GameBoyTransfer;
-    s32 controller;
+    s32 controllerIndex;
     s32 save;
 
     if (transfer->screen == TRANSMIT_SCREEN_BRING_CHARACTERS) {
         transfer->readStep = 0;
         ResetBringCharacters();
-        for (controller = 0; controller != MAXCONTROLLERS; controller++) {
+        for (controllerIndex = 0; controllerIndex != MAXCONTROLLERS; controllerIndex++) {
             for (save = 0; save != CARTRIDGE_SAVE_COUNT; save++) {
-                transfer->listingStates[(controller * CARTRIDGE_SAVE_COUNT) + save] = LISTING_NONE;
-                transfer->cartridgeCharacters[(controller * CARTRIDGE_SAVE_COUNT) + save].status =
-                    0;
+                transfer->listingStates[(controllerIndex * CARTRIDGE_SAVE_COUNT) + save] =
+                    LISTING_NONE;
+                transfer->cartridgeCharacters[(controllerIndex * CARTRIDGE_SAVE_COUNT) + save]
+                    .status = 0;
             }
         }
 
@@ -2698,7 +2699,7 @@ s32 WriteExperienceToCartridge(s32 characterIndex) {
     u8 save[CARTRIDGE_SAVE_SIZE];
     GameBoyCharacter *character;
     s32 fault = CARTRIDGE_FAULT_NONE;
-    s32 controller;
+    s32 controllerIndex;
     s32 result;
     Boolean isSignatureWrong;
     s32 index;
@@ -2716,9 +2717,9 @@ s32 WriteExperienceToCartridge(s32 characterIndex) {
     transfer->hasWrongCartridge = FALSE;
     transfer->openedCartridgeCount = 0;
     result = 0;
-    for (controller = 0; controller != g_ControllerCount; controller++) {
+    for (controllerIndex = 0; controllerIndex != g_ControllerCount; controllerIndex++) {
         transfer->transferResult = OpenGameBoyPakWithRetries(
-            g_PlayerControllerPorts[controller],
+            g_PlayerControllerPorts[controllerIndex],
             &transfer->cartridgeHeader,
             &transfer->pakFile
         );
@@ -3515,18 +3516,19 @@ s32 TagCartridges(void) {
     Boolean wasOtherPak = FALSE;
     Boolean wasWrongCartridge = FALSE;
     Boolean wasCartridgePulled = FALSE;
-    s32 controller;
+    s32 controllerIndex;
     s32 index;
     s32 result;
 
     transfer->taggedCartridgeCount = 0;
-    for (controller = 0; controller != MAXCONTROLLERS; controller++) {
-        transfer->taggedControllers[controller] = 0;
+    for (controllerIndex = 0; controllerIndex != MAXCONTROLLERS; controllerIndex++) {
+        transfer->taggedControllers[controllerIndex] = 0;
     }
 
     nuContGBPakMgrInit();
-    for (controller = 0; controller < g_ControllerCount; controller++) {
-        result = OpenGameBoyPakWithRetries(g_PlayerControllerPorts[controller], &header, &file);
+    for (controllerIndex = 0; controllerIndex < g_ControllerCount; controllerIndex++) {
+        result =
+            OpenGameBoyPakWithRetries(g_PlayerControllerPorts[controllerIndex], &header, &file);
         if (result == PAK_RESULT_NO_PAK) {
             wasNoPak = TRUE;
         }
@@ -3546,7 +3548,7 @@ s32 TagCartridges(void) {
         if (result == PAK_RESULT_OK) {
             for (index = 0; index != CARTRIDGE_TAG_SIZE; index++) {
                 tag[index] = guRandom() % 256;
-                transfer->cartridgeTags[controller][index] = tag[index];
+                transfer->cartridgeTags[controllerIndex][index] = tag[index];
             }
 
             if (nuContGBPakFwrite(&file, CARTRIDGE_RAM_ADDRESS, tag, CARTRIDGE_TAG_SIZE) == 0 &&
@@ -3555,7 +3557,7 @@ s32 TagCartridges(void) {
                     wasCartridgePulled = TRUE;
                 }
                 else {
-                    transfer->taggedControllers[transfer->taggedCartridgeCount] = controller;
+                    transfer->taggedControllers[transfer->taggedCartridgeCount] = controllerIndex;
                     isAnyTagged = TRUE;
                     transfer->taggedCartridgeCount++;
                 }

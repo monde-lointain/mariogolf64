@@ -1933,7 +1933,7 @@ s32 ContinueSavedGame(void) {
     Player *savedPlayer;
     s32 playerIndex;
     CharacterId characterIndex;
-    u16 controller;
+    u16 controllerIndex;
 
     if (f_SavedGameModes[memory->savedGameIndex] == NO_SAVE_MENU_MODE) {
         return -1;
@@ -1945,9 +1945,9 @@ s32 ContinueSavedGame(void) {
 
     savedPlayer = save->savedPlayers[memory->savedGameIndex];
     for (playerIndex = 0; playerIndex != PLAYER_COUNT_MAX; playerIndex++) {
-        controller = f_SavedPlayerControllers[playerIndex];
-        g_PlayerControllerIndices[playerIndex] = controller;
-        g_Players[playerIndex].controllerIndex = controller;
+        controllerIndex = f_SavedPlayerControllers[playerIndex];
+        g_PlayerControllerIndices[playerIndex] = controllerIndex;
+        g_Players[playerIndex].controllerIndex = controllerIndex;
         sprintf(g_Players[playerIndex].name, f_SaveMenuNameFormat, savedPlayer->name);
         characterIndex = savedPlayer->characterIndex;
         g_ChosenCharacters[playerIndex] = characterIndex;
@@ -2776,7 +2776,7 @@ void DrawPlayerControllers(Gfx **displayListHead) {
     s32 position[2];
     s32 playerIndex;
     s32 labelIndex;
-    s16 controller;
+    s16 controllerIndex;
     void *image;
 
     gDPPipeSync(gfx++);
@@ -2795,12 +2795,12 @@ void DrawPlayerControllers(Gfx **displayListHead) {
         if (f_SavedPlayerControllers[playerIndex] != NO_CONTROLLER) {
             position[AXIS_X] = f_ControllerIconPositions[playerCount - 1][playerIndex][0];
             position[AXIS_Y] = f_ControllerIconPositions[playerCount - 1][playerIndex][1];
-            controller = f_SavedPlayerControllers[playerIndex];
-            if (controller != COMPUTER_CONTROLLER) {
+            controllerIndex = f_SavedPlayerControllers[playerIndex];
+            if (controllerIndex != COMPUTER_CONTROLLER) {
                 gDPLoadTextureBlock(
                     gfx++,
                     TextureAddress(
-                        LargeImageTexels(image) + (controller * CONTROLLER_ICON_IMAGE_SIZE)
+                        LargeImageTexels(image) + (controllerIndex * CONTROLLER_ICON_IMAGE_SIZE)
                     ),
                     G_IM_FMT_CI,
                     G_IM_SIZ_8b,
