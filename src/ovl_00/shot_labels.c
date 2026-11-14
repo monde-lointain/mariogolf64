@@ -204,11 +204,11 @@ void DrawShotLabels(Gfx **displayListHead) {
         gDPPipeSync(gfx++);
     }
 
-    void DrawPlayerTag(s32 x, s32 y, s32 corner UNUSED, s32 tag) {
+    void DrawPlayerTag(s32 x, s32 y, s32 corner UNUSED, s32 tagIndex) {
         gDPPipeSync(gfx++);
         gDPLoadTextureBlock_4b(
             gfx++,
-            TextureAddress(ImageTexels(g_PlayerTagImages) + tag * TAG_IMAGE_SIZE),
+            TextureAddress(ImageTexels(g_PlayerTagImages) + tagIndex * TAG_IMAGE_SIZE),
             G_IM_FMT_CI,
             TAG_WIDTH,
             TAG_HEIGHT,
