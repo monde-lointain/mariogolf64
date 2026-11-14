@@ -140,9 +140,14 @@ typedef s32 SideArrow;
 
 typedef struct TrophyPosition {
     s32 x;
+#ifdef __IS_KMC__
     // Unsigned: the original drops the rectangle's clamp of a negative top
-    // edge where it works out the texture's t coordinate
+    // edge where it works out the texture's t coordinate. Every position is
+    // below the top of the screen, so the clamp never applies either way.
     u32 y;
+#else
+    s32 y;
+#endif
 } TrophyPosition;
 
 // DrawMenuNumber's sixth argument: the field it right-aligns the number in
