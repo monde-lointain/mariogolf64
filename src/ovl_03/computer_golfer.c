@@ -896,7 +896,7 @@ void PlanClubAndTarget(CoursePoint target) {
     ClubType clubType;
     ShotMode shotMode;
     u32 surfaceKind;
-    s32 rest;
+    s32 cupDistance;
     s32 clubSlot;
     Club *club;
 
@@ -907,10 +907,10 @@ void PlanClubAndTarget(CoursePoint target) {
     switch (surfaceKind) {
         case SURFACE_KIND_GREEN:
         case SURFACE_KIND_GREEN_EDGE:
-            rest = GetBallCupDistance();
-            osSyncPrintf("rest = %d\n", rest);
+            cupDistance = GetBallCupDistance();
+            osSyncPrintf("rest = %d\n", cupDistance);
             if (g_HoleSetup.conditions.isRaining == TRUE) {
-                rest = rest * RAINY_PUTT_DISTANCE_SCALE;
+                cupDistance = cupDistance * RAINY_PUTT_DISTANCE_SCALE;
             }
 
             for (clubSlot = 0; clubSlot < f_ClubCount; clubSlot++) {
@@ -923,10 +923,10 @@ void PlanClubAndTarget(CoursePoint target) {
                     continue;
                 }
 
-                if (GetShotWorldDistance(club, SHOT_MODE_APPROACH) >= rest) {
+                if (GetShotWorldDistance(club, SHOT_MODE_APPROACH) >= cupDistance) {
                     f_Shot.shotMode = SHOT_MODE_APPROACH;
                 }
-                else if (GetShotWorldDistance(club, SHOT_MODE_NORMAL) >= rest) {
+                else if (GetShotWorldDistance(club, SHOT_MODE_NORMAL) >= cupDistance) {
                     f_Shot.shotMode = SHOT_MODE_NORMAL;
                 }
                 else {
