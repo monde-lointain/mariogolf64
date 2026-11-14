@@ -265,8 +265,12 @@ void StartShotPlan(void) {
 }
 
 void RunShotPlan(void *arg UNUSED) {
-    while (PlanShot(&f_PlannedShot) == PLAN_UNFINISHED) {
+    s32 planResult;
+
+    do {
+        planResult = PlanShot(&f_PlannedShot);
     }
+    while (planResult == PLAN_UNFINISHED);
 
     f_PlanThreadState = PLAN_THREAD_FINISHED;
     while (TRUE) {
