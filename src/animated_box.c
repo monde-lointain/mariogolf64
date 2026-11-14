@@ -27,9 +27,9 @@ static void DrawAnimatedBox(Gfx **displayListHead, AnimatedBox *box) {
         return;
     }
 
-    box->frameIndex++;
-    if (box->frameIndex == BOX_ANIMATION_FRAME_COUNT) {
-        box->frameIndex = 0;
+    box->frame++;
+    if (box->frame == BOX_ANIMATION_FRAME_COUNT) {
+        box->frame = 0;
         if (box->state == BOX_CLOSING) {
             box->state = BOX_CLOSED;
             return;
@@ -43,7 +43,7 @@ static void DrawAnimatedBox(Gfx **displayListHead, AnimatedBox *box) {
     boxRight = box->right;
     boxLeft = box->left;
     halfWidth = (boxRight - boxLeft) / 2;
-    step = ((s16)halfWidth / BOX_ANIMATION_FRAME_COUNT) * box->frameIndex;
+    step = ((s16)halfWidth / BOX_ANIMATION_FRAME_COUNT) * box->frame;
     if (box->state == BOX_CLOSING) {
         left = boxLeft + step;
         right = boxRight - step;

@@ -20,7 +20,7 @@ typedef struct AnimatedBox {
     u8 blue;
     u8 alpha;
     s32 state;
-    s32 frameIndex;
+    s32 frame;
 } AnimatedBox;
 
 #define QUEUED_BOX_CAPACITY 10

@@ -1325,7 +1325,7 @@ NO_RESULT UpdateDebugSceneMenu(void) {
         ClearDebugText();
         f_IsSceneMenuOpen = FALSE;
         f_SceneMenuBox.state = BOX_CLOSING;
-        f_SceneMenuBox.frameIndex = 0;
+        f_SceneMenuBox.frame = 0;
         PlaySound(SOUND_MENU_CANCEL, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
         return;
     }
@@ -1369,7 +1369,7 @@ NO_RESULT UpdateDebugSceneMenu(void) {
         ClearDebugText();
         f_IsSceneMenuOpen = FALSE;
         f_SceneMenuBox.state = BOX_CLOSING;
-        f_SceneMenuBox.frameIndex = 0;
+        f_SceneMenuBox.frame = 0;
         g_Scene = f_SceneMenuSelection;
         PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
         if (f_SceneMenuSelection == SCENE_MENU) {
@@ -1517,7 +1517,7 @@ void UpdateDebugScenes(void) {
             ClearGameFlag(GAME_FLAG_HIDE_DEBUG_TEXT);
             FreeAllCharacterSlots();
             f_SceneMenuBox.state = BOX_OPENING;
-            f_SceneMenuBox.frameIndex = 0;
+            f_SceneMenuBox.frame = 0;
             QueueAnimatedBox(&f_SceneMenuBox);
             PlaySound(SOUND_PAUSE, MENU_SOUND_CHANNEL, SOUND_FULL_SCALE);
             MarkBillboardsOnMap();
