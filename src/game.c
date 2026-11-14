@@ -3,6 +3,7 @@
 #define READS_LOADER_FLAG_VOLATILE
 #define READS_CURRENT_SHOT_VOLATILE
 
+#include <PR/libmus.h>
 #include <nusys.h>
 #include <ultra64.h>
 
@@ -1561,11 +1562,10 @@ typedef u32 DrawMode;
 #define GFX_TASK_FLAGS (NU_SC_TASK_DP_WAIT | NU_SC_SWAPBUFFER)
 
 extern Vtx g_ExpansionVertexBuffers[2][EXPANSION_VERTEX_BUFFER_LENGTH];
-extern s32 _mus_cpu_last;
-extern s32 _mus_cpu_worst;
+extern unsigned long _mus_cpu_last;
+extern unsigned long _mus_cpu_worst;
 
-void MusPrintDmaUsage(void);
-s32 __MusIntMemRemaining(void);
+int __MusIntMemRemaining(void);
 
 #define SetCameraScissor(view) \
     gDPSetScissor( \
