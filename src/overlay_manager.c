@@ -222,6 +222,7 @@ s32 LoadOverlay(s32 overlayId) {
 
     if (CanLoadOverlay(overlayId)) {
         overlayId = GetOverlayIndex(overlayId);
+        // overlayId now holds the overlay's index; a separate local breaks the match.
         if (!IsGameFlagSet(GAME_FLAG_QUIET_OVERLAY_LOG)) {
             osSyncPrintf("Load ModuleSet %x (absolute No.)\n", overlayId);
         }
@@ -264,6 +265,7 @@ void UnloadOverlay(s32 overlayId) {
     s8 *moduleIds;
 
     overlayId = GetOverlayIndex(overlayId);
+    // overlayId now holds the overlay's index; a separate local breaks the match.
     overlay = &f_Overlays[overlayId];
     if (overlay->isLoaded) {
         if (overlay->onUnload != NULL) {
