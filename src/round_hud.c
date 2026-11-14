@@ -229,7 +229,6 @@ enum LandingGlyphGroup {
 #define LANDING_DISTANCE_GLYPH_Y (-8)
 #define LANDING_NAME_Y 96
 #define LANDING_DISTANCE_Y 112
-#define HUNDREDTHS_PER_UNIT 100
 #define SHOWS_METERS FALSE
 #define LANDING_PANEL_ALPHA 159
 #define LANDING_PANEL_START_DEGREES 180.0f
@@ -1415,24 +1414,24 @@ void DrawLandingReaction(Gfx **displayListHead) {
                 g_TurnBallSimulation.position[AXIS_Z] - g_HoleSetup.cupPosition[AXIS_Z]
             );
             if (g_GameState.isMiniGolf || surfaceTraits->kind == SURFACE_KIND_GREEN) {
-                s32 hundredths = distance * (FEET_PER_YARD * HUNDREDTHS_PER_UNIT) * YARDS_PER_UNIT;
+                s32 hundredths = distance * (FEET_PER_YARD * HUNDREDTHS_PER_WHOLE) * YARDS_PER_UNIT;
 
                 sprintf(
                     g_PrintBuffer,
                     "%2d.%02d%c REST",
-                    hundredths / HUNDREDTHS_PER_UNIT,
-                    hundredths % HUNDREDTHS_PER_UNIT,
+                    hundredths / HUNDREDTHS_PER_WHOLE,
+                    hundredths % HUNDREDTHS_PER_WHOLE,
                     FEET_GLYPH
                 );
             }
             else {
-                s32 hundredths = distance * HUNDREDTHS_PER_UNIT * YARDS_PER_UNIT;
+                s32 hundredths = distance * HUNDREDTHS_PER_WHOLE * YARDS_PER_UNIT;
 
                 sprintf(
                     g_PrintBuffer,
                     "%3d.%02d%c REST",
-                    hundredths / HUNDREDTHS_PER_UNIT,
-                    hundredths % HUNDREDTHS_PER_UNIT,
+                    hundredths / HUNDREDTHS_PER_WHOLE,
+                    hundredths % HUNDREDTHS_PER_WHOLE,
                     YARDS_GLYPH
                 );
             }
@@ -4362,13 +4361,13 @@ void DrawRoundHud(CameraView *view) {
 
         if (club->surfaceMask & CLUB_SURFACE_GREEN) {
             s32 restHundredths =
-                g_RoundHud.cupDistance * (FEET_PER_YARD * HUNDREDTHS_PER_UNIT) * YARDS_PER_UNIT;
+                g_RoundHud.cupDistance * (FEET_PER_YARD * HUNDREDTHS_PER_WHOLE) * YARDS_PER_UNIT;
 
             sprintf(
                 g_PrintBuffer,
                 "%3d.%02df",
-                restHundredths / HUNDREDTHS_PER_UNIT,
-                restHundredths % HUNDREDTHS_PER_UNIT
+                restHundredths / HUNDREDTHS_PER_WHOLE,
+                restHundredths % HUNDREDTHS_PER_WHOLE
             );
             DrawDistanceText(
                 &g_DisplayListHead,
@@ -4387,13 +4386,13 @@ void DrawRoundHud(CameraView *view) {
             }
         }
         else if (SHOWS_METERS) {
-            s32 restHundredths = g_RoundHud.cupDistance * HUNDREDTHS_PER_UNIT * METERS_PER_UNIT;
+            s32 restHundredths = g_RoundHud.cupDistance * HUNDREDTHS_PER_WHOLE * METERS_PER_UNIT;
 
             sprintf(
                 g_PrintBuffer,
                 "%2d.%02dm",
-                restHundredths / HUNDREDTHS_PER_UNIT,
-                restHundredths % HUNDREDTHS_PER_UNIT
+                restHundredths / HUNDREDTHS_PER_WHOLE,
+                restHundredths % HUNDREDTHS_PER_WHOLE
             );
             DrawDistanceText(
                 &g_DisplayListHead,
@@ -4747,13 +4746,13 @@ void DrawRoundHud(CameraView *view) {
                     }
                     else {
                         s32 pinHundredths = contestDistance *
-                            (FEET_PER_YARD * HUNDREDTHS_PER_UNIT) * YARDS_PER_UNIT;
+                            (FEET_PER_YARD * HUNDREDTHS_PER_WHOLE) * YARDS_PER_UNIT;
 
                         sprintf(
                             g_PrintBuffer,
                             "%2d.%02d%c",
-                            pinHundredths / HUNDREDTHS_PER_UNIT,
-                            pinHundredths % HUNDREDTHS_PER_UNIT,
+                            pinHundredths / HUNDREDTHS_PER_WHOLE,
+                            pinHundredths % HUNDREDTHS_PER_WHOLE,
                             SHADOWED_FEET_GLYPH
                         );
                     }

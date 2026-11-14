@@ -1543,7 +1543,6 @@ void DrawMenuNumber(
 
 #define DECIMAL_WHOLE_LIMIT 999
 #define DECIMAL_DIGIT_LIMIT 6
-#define HUNDREDTHS_PER_UNIT 100.0f
 #define DECIMAL_POINT_OFFSET (DIGIT_GLYPH_SIZE / 2)
 
 const char f_DecimalWholeFormat[] = "%d";
@@ -1565,7 +1564,7 @@ void DrawDecimalMenuNumber(Gfx **displayListHead, s32 x, s32 y, f32 number) {
         whole = 0;
     }
 
-    fraction = (number - whole) * HUNDREDTHS_PER_UNIT;
+    fraction = (number - whole) * (f32)HUNDREDTHS_PER_WHOLE;
 
     if (fraction % DECIMAL_BASE >= DECIMAL_BASE / 2) {
         fraction += DECIMAL_BASE;

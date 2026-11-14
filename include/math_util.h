@@ -13,6 +13,8 @@
 #define QUARTER_TURN_RADIANS 1.5707964f
 #define FULL_TURN_RADIANS (2 * M_PI)
 
+#define HUNDREDTHS_PER_WHOLE 100
+
 #define RANDOM_MULTIPLIER 0x5D588B65
 #define NextRandomSeed(seed) (((seed) * RANDOM_MULTIPLIER) + 1)
 
