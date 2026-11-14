@@ -56,7 +56,7 @@ enum SaveMenuState {
 #define SLIDE_OUT_START_OFFSET (-1)
 #define SLIDE_OUT_START_STEP 4
 
-#define CHARACTER_IMAGE_COUNT (SAVED_GAME_COUNT * PLAYER_COUNT_MAX)
+#define FACE_IMAGE_COUNT (SAVED_GAME_COUNT * PLAYER_COUNT_MAX)
 #define REPLAY_LABEL_COUNT 6
 
 #define SAVE_MENU_SONG_VOLUME 0x60
@@ -172,8 +172,8 @@ enum ModeName {
 #define COURSE_TOP 36
 #define LABEL_LEFT 128
 #define LABEL_TOP 38
-#define CHARACTER_IMAGE_WIDTH 32
-#define CHARACTER_IMAGE_HEIGHT 24
+#define FACE_IMAGE_WIDTH 32
+#define FACE_IMAGE_HEIGHT 24
 #define CHARACTER_LEFT 32
 #define CHARACTER_TOP 40
 #define HOLE_TEXT_LEFT 64
@@ -268,8 +268,8 @@ static Radians f_ReplayTitleBobAngle = 0.0f;
 
 static s32 f_SlideOffsets[4];
 static u8 f_UnusedBytesAfterSlideOffsets[8] UNUSED;
-static void *f_CharacterFiles[CHARACTER_IMAGE_COUNT];
-static void *f_CharacterImages[CHARACTER_IMAGE_COUNT];
+static void *f_FacePalettes[FACE_IMAGE_COUNT];
+static void *f_FaceImages[FACE_IMAGE_COUNT];
 static void *f_ModeIconImages[SAVED_GAME_COUNT][2];
 static void *f_PanelImage;
 static void *f_ReplayLabelImages[REPLAY_LABEL_COUNT];
@@ -351,9 +351,9 @@ void OpenSaveMenu(s32 kind) {
         MENU_SOUND_REVERB,
         SAVE_MENU_SOUND_PAN
     );
-    for (slot = 0; slot != CHARACTER_IMAGE_COUNT; slot++) {
+    for (slot = 0; slot != FACE_IMAGE_COUNT; slot++) {
         ReadEncodedAsset(
-            f_CharacterImages[slot] = AllocMemory(OpenEncodedAsset(
+            f_FaceImages[slot] = AllocMemory(OpenEncodedAsset(
                 g_CharacterImageAssets[CHARACTER_PLUM] + CHARACTER_FACE_IMAGE_OFFSET,
                 &encodedAsset
             )),
@@ -361,7 +361,7 @@ void OpenSaveMenu(s32 kind) {
         );
         OpenAssetFile(g_CharacterPaletteAssets[CHARACTER_PLUM], &file);
         fileSize = GetAssetFileSize(&file);
-        ReadAssetFile(f_CharacterFiles[slot] = AllocMemory(fileSize), fileSize, &file);
+        ReadAssetFile(f_FacePalettes[slot] = AllocMemory(fileSize), fileSize, &file);
     }
 
     if (kind == SAVE_MENU_GAMES) {
@@ -427,7 +427,7 @@ void OpenSaveMenu(s32 kind) {
                         &encodedAsset
                     );
                     ReadEncodedAsset(
-                        f_CharacterImages[(slot * PLAYER_COUNT_MAX) + playerIndex],
+                        f_FaceImages[(slot * PLAYER_COUNT_MAX) + playerIndex],
                         &encodedAsset
                     );
                     OpenAssetFile(
@@ -435,7 +435,7 @@ void OpenSaveMenu(s32 kind) {
                         &file
                     );
                     ReadAssetFile(
-                        f_CharacterFiles[(slot * PLAYER_COUNT_MAX) + playerIndex],
+                        f_FacePalettes[(slot * PLAYER_COUNT_MAX) + playerIndex],
                         GetAssetFileSize(&file),
                         &file
                     );
@@ -451,12 +451,12 @@ void OpenSaveMenu(s32 kind) {
                     g_CharacterImageAssets[record->characterIndex] + CHARACTER_FACE_IMAGE_OFFSET,
                     &encodedAsset
                 );
-                ReadEncodedAsset(f_CharacterImages[slot], &encodedAsset);
+                ReadEncodedAsset(f_FaceImages[slot], &encodedAsset);
                 OpenAssetFile(
                     g_CharacterPaletteAssets[record->characterIndex] + record->paletteIndex,
                     &file
                 );
-                ReadAssetFile(f_CharacterFiles[slot], GetAssetFileSize(&file), &file);
+                ReadAssetFile(f_FacePalettes[slot], GetAssetFileSize(&file), &file);
             }
         }
     }
@@ -513,9 +513,9 @@ void CloseSaveMenu(void) {
         FreeMemory(&f_CourseNumbersImage);
     }
 
-    for (index = 0; index != CHARACTER_IMAGE_COUNT; index++) {
-        FreeMemory(&f_CharacterImages[index]);
-        FreeMemory(&f_CharacterFiles[index]);
+    for (index = 0; index != FACE_IMAGE_COUNT; index++) {
+        FreeMemory(&f_FaceImages[index]);
+        FreeMemory(&f_FacePalettes[index]);
     }
 
     f_MenuKind = SAVE_MENU_CLOSED;
@@ -928,7 +928,7 @@ void DrawGameSaveMenu(Gfx **displayListHead) {
 
                 gDPPipeSync(gfx++);
                 golfersLeft = GOLFERS_LEFT;
-                golfersRight = GOLFERS_LEFT + CHARACTER_IMAGE_WIDTH;
+                golfersRight = GOLFERS_LEFT + FACE_IMAGE_WIDTH;
                 state = &save->savedGames[row].state;
                 if (row == f_CursorIndex) {
                     gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, OPAQUE_ALPHA);
@@ -947,14 +947,14 @@ void DrawGameSaveMenu(Gfx **displayListHead) {
 
                 gDPPipeSync(gfx++);
                 for (index = 0; index != state->playerCount; index++) {
-                    LoadLargePalette(&gfx, f_CharacterFiles[(row * PLAYER_COUNT_MAX) + index]);
+                    LoadLargePalette(&gfx, f_FacePalettes[(row * PLAYER_COUNT_MAX) + index]);
                     LoadTextureBlock(
                         &gfx,
-                        f_CharacterImages[(row * PLAYER_COUNT_MAX) + index],
+                        f_FaceImages[(row * PLAYER_COUNT_MAX) + index],
                         G_IM_FMT_CI,
                         G_IM_SIZ_8b,
-                        CHARACTER_IMAGE_WIDTH,
-                        CHARACTER_IMAGE_HEIGHT,
+                        FACE_IMAGE_WIDTH,
+                        FACE_IMAGE_HEIGHT,
                         0,
                         0,
                         0,
@@ -974,9 +974,7 @@ void DrawGameSaveMenu(Gfx **displayListHead) {
                             (index * GOLFER_SPACING) + (f_SlideOffsets[row] + golfersRight) -
                             (state->playerCount * (GOLFER_SPACING / 2))
                         ),
-                        QuarterPixels(
-                            GOLFER_TOP + (row * GAME_ROW_SPACING) + CHARACTER_IMAGE_HEIGHT
-                        ),
+                        QuarterPixels(GOLFER_TOP + (row * GAME_ROW_SPACING) + FACE_IMAGE_HEIGHT),
                         G_TX_RENDERTILE,
                         0,
                         0,
@@ -1288,7 +1286,7 @@ void SaveGameToSlot(void) {
                 &encodedAsset
             );
             ReadEncodedAsset(
-                f_CharacterImages[(f_CursorIndex * PLAYER_COUNT_MAX) + playerIndex],
+                f_FaceImages[(f_CursorIndex * PLAYER_COUNT_MAX) + playerIndex],
                 &encodedAsset
             );
             OpenAssetFile(
@@ -1296,7 +1294,7 @@ void SaveGameToSlot(void) {
                 &file
             );
             ReadAssetFile(
-                f_CharacterFiles[(f_CursorIndex * PLAYER_COUNT_MAX) + playerIndex],
+                f_FacePalettes[(f_CursorIndex * PLAYER_COUNT_MAX) + playerIndex],
                 GetAssetFileSize(&file),
                 &file
             );
@@ -1328,12 +1326,12 @@ void SaveReplayToSlot(void) {
             g_CharacterImageAssets[record->characterIndex] + CHARACTER_FACE_IMAGE_OFFSET,
             &encodedAsset
         );
-        ReadEncodedAsset(f_CharacterImages[f_CursorIndex], &encodedAsset);
+        ReadEncodedAsset(f_FaceImages[f_CursorIndex], &encodedAsset);
         OpenAssetFile(
             g_CharacterPaletteAssets[record->characterIndex] + record->paletteIndex,
             &file
         );
-        ReadAssetFile(f_CharacterFiles[f_CursorIndex], GetAssetFileSize(&file), &file);
+        ReadAssetFile(f_FacePalettes[f_CursorIndex], GetAssetFileSize(&file), &file);
         f_MenuState = SAVE_MENU_STATE_SAVED;
     }
     else {
@@ -1932,14 +1930,14 @@ void DrawReplaySaveMenu(Gfx **displayListHead) {
                 gDPPipeSync(gfx++);
                 gDPPipeSync(gfx++);
                 gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-                LoadLargePalette(&gfx, f_CharacterFiles[index]);
+                LoadLargePalette(&gfx, f_FacePalettes[index]);
                 LoadTextureBlock(
                     &gfx,
-                    f_CharacterImages[index],
+                    f_FaceImages[index],
                     G_IM_FMT_CI,
                     G_IM_SIZ_8b,
-                    CHARACTER_IMAGE_WIDTH,
-                    CHARACTER_IMAGE_HEIGHT,
+                    FACE_IMAGE_WIDTH,
+                    FACE_IMAGE_HEIGHT,
                     0,
                     0,
                     0,
@@ -1952,10 +1950,8 @@ void DrawReplaySaveMenu(Gfx **displayListHead) {
                     &gfx,
                     QuarterPixels(rowOffsets[index] + CHARACTER_LEFT),
                     QuarterPixels(CHARACTER_TOP + (index * REPLAY_ROW_SPACING)),
-                    QuarterPixels(rowOffsets[index] + CHARACTER_LEFT + CHARACTER_IMAGE_WIDTH),
-                    QuarterPixels(
-                        CHARACTER_TOP + (index * REPLAY_ROW_SPACING) + CHARACTER_IMAGE_HEIGHT
-                    ),
+                    QuarterPixels(rowOffsets[index] + CHARACTER_LEFT + FACE_IMAGE_WIDTH),
+                    QuarterPixels(CHARACTER_TOP + (index * REPLAY_ROW_SPACING) + FACE_IMAGE_HEIGHT),
                     G_TX_RENDERTILE,
                     0,
                     0,
