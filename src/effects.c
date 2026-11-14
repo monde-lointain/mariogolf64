@@ -2733,9 +2733,6 @@ void ShowBirdieBadgeCount(s32 badgeCount) {
     ReadEncodedAsset(f_ClumpImage, &asset);
 }
 
-#define BADGE_SIZE 24
-#define BADGE_FRAME_SIZE (BADGE_SIZE * BADGE_SIZE / 2)
-#define BADGE_SPIN_FRAME_COUNT 6
 #define BADGE_LEFT 216
 #define BADGE_RESTING_TOP 20
 #define BADGE_COUNT_LEFT 258
@@ -2762,7 +2759,7 @@ void DrawBirdieBadgeCount(Gfx **displayListHead) {
         gDPSetTextureLUT(gfx++, G_TT_RGBA16);
         gDPPipeSync(gfx++);
         gDPSetTextureFilter(gfx++, G_TF_POINT);
-        spinFrame = f_BadgeCountFrame / 2 % BADGE_SPIN_FRAME_COUNT;
+        spinFrame = f_BadgeCountFrame / 2 % SPINNING_BADGE_FRAME_COUNT;
         if (f_BadgeCountFrame < BADGE_COUNT_RISE_FRAME) {
             offsetY = (f_BadgeCountFrame * BADGE_SLIDE_PER_FRAME) + BADGE_DROP_START_OFFSET;
             if (offsetY > 0) {
@@ -2780,14 +2777,14 @@ void DrawBirdieBadgeCount(Gfx **displayListHead) {
 
         gDPLoadTextureTile_4b(
             gfx++,
-            TextureAddress(ImageTexelsAt(f_CloudImage, spinFrame * BADGE_FRAME_SIZE)),
+            TextureAddress(ImageTexelsAt(f_CloudImage, spinFrame * SPINNING_BADGE_FRAME_SIZE)),
             G_IM_FMT_CI,
-            BADGE_SIZE,
-            BADGE_SIZE,
+            SPINNING_BADGE_SIZE,
+            SPINNING_BADGE_SIZE,
             0,
             0,
-            BADGE_SIZE - 1,
-            BADGE_SIZE - 1,
+            SPINNING_BADGE_SIZE - 1,
+            SPINNING_BADGE_SIZE - 1,
             0,
             0,
             0,
@@ -2800,8 +2797,8 @@ void DrawBirdieBadgeCount(Gfx **displayListHead) {
             &gfx,
             QuarterPixels(BADGE_LEFT),
             QuarterPixels(offsetY + BADGE_RESTING_TOP),
-            QuarterPixels(BADGE_LEFT + BADGE_SIZE),
-            QuarterPixels(offsetY + BADGE_RESTING_TOP + BADGE_SIZE),
+            QuarterPixels(BADGE_LEFT + SPINNING_BADGE_SIZE),
+            QuarterPixels(offsetY + BADGE_RESTING_TOP + SPINNING_BADGE_SIZE),
             G_TX_RENDERTILE,
             0,
             0,
@@ -2823,7 +2820,7 @@ void DrawBirdieBadgeCount(Gfx **displayListHead) {
             G_TX_NOLOD,
             G_TX_NOLOD
         );
-        DrawDigitText(&gfx, BADGE_LEFT + BADGE_SIZE, offsetY + BADGE_COUNT_TOP, "*");
+        DrawDigitText(&gfx, BADGE_LEFT + SPINNING_BADGE_SIZE, offsetY + BADGE_COUNT_TOP, "*");
         sprintf(g_PrintBuffer, "%d", (int)f_ShownBadgeCount);
         DrawDigitText(&gfx, BADGE_COUNT_LEFT, offsetY + BADGE_COUNT_TOP, g_PrintBuffer);
         f_BadgeCountFrame++;

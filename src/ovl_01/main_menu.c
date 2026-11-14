@@ -5358,8 +5358,6 @@ const char f_UnusedEmptyString[] = "";
 #define MAIN_CHOICE_LABEL_HEIGHT 20
 #define MAIN_CHOICE_LABEL_IMAGE_SIZE (MAIN_CHOICE_LABEL_WIDTH * MAIN_CHOICE_LABEL_HEIGHT / 2)
 
-#define ANIMATED_ICON_SIZE 24
-#define ANIMATED_ICON_IMAGE_SIZE (ANIMATED_ICON_SIZE * ANIMATED_ICON_SIZE / 2)
 #define ANIMATED_ICON_FRAME_COUNT 6
 #define ANIMATED_ICON_FRAME_DURATION 2
 #define MODE_ICON_LEFT 168
@@ -8716,14 +8714,14 @@ void DrawSpinningBadge(Gfx **displayListHead, void *image, s32 x, s32 y) {
     gDPPipeSync(gfx++);
     gDPLoadTextureTile_4b(
         gfx++,
-        TextureAddress(ImageTexels(image) + (f_SpinningStarFrameIndex * ANIMATED_ICON_IMAGE_SIZE)),
+        TextureAddress(ImageTexels(image) + (f_SpinningStarFrameIndex * SPINNING_BADGE_FRAME_SIZE)),
         G_IM_FMT_CI,
-        ANIMATED_ICON_SIZE,
-        ANIMATED_ICON_SIZE,
+        SPINNING_BADGE_SIZE,
+        SPINNING_BADGE_SIZE,
         0,
         0,
-        ANIMATED_ICON_SIZE - 1,
-        ANIMATED_ICON_SIZE - 1,
+        SPINNING_BADGE_SIZE - 1,
+        SPINNING_BADGE_SIZE - 1,
         0,
         G_TX_NOMIRROR | G_TX_WRAP,
         G_TX_NOMIRROR | G_TX_WRAP,
@@ -8737,8 +8735,8 @@ void DrawSpinningBadge(Gfx **displayListHead, void *image, s32 x, s32 y) {
         gfx++,
         QuarterPixels(x),
         QuarterPixels(y),
-        QuarterPixels(x + ANIMATED_ICON_SIZE),
-        QuarterPixels(y + ANIMATED_ICON_SIZE),
+        QuarterPixels(x + SPINNING_BADGE_SIZE),
+        QuarterPixels(y + SPINNING_BADGE_SIZE),
         G_TX_RENDERTILE,
         0,
         0,
