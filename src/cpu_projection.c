@@ -353,7 +353,13 @@ void ConvertMatrixToFixed(Mat4 matrix, Mtx *fixedMatrix) {
     }
 }
 
-void SetTriangleNormal(Vtx *vertices, s32 firstIndex, s32 secondIndex, s32 thirdIndex, s32 target) {
+void SetTriangleNormal(
+    Vtx *vertices,
+    s32 firstIndex,
+    s32 secondIndex,
+    s32 thirdIndex,
+    s32 placement
+) {
     Vtx_tn *first = (Vtx_tn *)((firstIndex * sizeof(Vtx)) + (u32)vertices);
     Vtx_tn *second = (Vtx_tn *)((secondIndex * sizeof(Vtx)) + (u32)vertices);
     Vtx_tn *third = (Vtx_tn *)((thirdIndex * sizeof(Vtx)) + (u32)vertices);
@@ -372,7 +378,7 @@ void SetTriangleNormal(Vtx *vertices, s32 firstIndex, s32 secondIndex, s32 third
     s8 scaledY;
     s8 scaledZ;
 
-    switch (target) {
+    switch (placement) {
         case NORMAL_ON_FIRST:
             first->n[0] = normalX * scale;
             first->n[1] = normalY * scale;

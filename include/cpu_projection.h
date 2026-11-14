@@ -48,6 +48,12 @@ void BuildRotationMatrix(Mat4 matrix, Vec3 rotation, Vec3 translation);
 void BuildTransformMatrix(Mat4 matrix, Vec3 rotation, Vec3 translation, Vec3 scale);
 void MultiplyMatrices(Mat4 a, Mat4 b, Mat4 product);
 void ConvertMatrixToFixed(Mat4 matrix, Mtx *fixedMatrix);
-void SetTriangleNormal(Vtx *vertices, s32 firstIndex, s32 secondIndex, s32 thirdIndex, s32 target);
+void SetTriangleNormal(
+    Vtx *vertices,
+    s32 firstIndex,
+    s32 secondIndex,
+    s32 thirdIndex,
+    s32 placement
+);
 
 #endif
