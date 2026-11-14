@@ -20,7 +20,10 @@ LEAF(__osDisableInt)
     beq     t0, t3, No_Change_Global_Int
     # @bug this la should be lw, it may never come up in practice as to reach this code
     # the CPU bits of __OSGlobalIntMask must have changed while this function is running.
-     la     t2, __osRunningThread # this is intentionally a macro in the branch delay slot
+    # The original la expands across the branch delay slot: only its lui
+    # is in the slot. It is spelled out so that assemblers do not warn.
+     lui    t2, %hi(__osRunningThread)
+    addiu   t2, t2, %lo(__osRunningThread)
     lw      t1, THREAD_SR(t2)
     andi    t2, t1, SR_IMASK
     and     t2, t0
